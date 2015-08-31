@@ -1,69 +1,58 @@
-From: Jialing Fu <jlfu@marvell.com>
-Subject: ~RE: [RESEND PATCH] mmc: core: fix race condition in
- mmc_wait_data_done
-Date: Mon, 31 Aug 2015 02:03:34 +0000
-Message-ID: <2a549537680d46b8a8b7b413be3cd05a@SC-EXCH04.marvell.com>
-References: <1440731589-22241-1-git-send-email-shawn.lin@rock-chips.com>
- <55DFD4B7.3070601@rock-chips.com>
- <CAPDyKFqZXx11qsnPH_uTDptfkUFfDykNKPgVcH6AW5CbH6Fi8g@mail.gmail.com>
- <55E02F7C.1020204@rock-chips.com>
- <CAPDyKFqYDdwvTCw3oKhkxqu9zmTAC8osLgd6eC4zDY7JOMGGPQ@mail.gmail.com>
- <1243788837884e859a8959cf8265125c@SC-EXCH04.marvell.com>
- <55E06760.8020308@rock-chips.com>
+From: Kishon Vijay Abraham I <kishon@ti.com>
+Subject: Re: [PATCH v3 02/15] mmc: host: omap_hsmmc: return on fatal errors
+ from omap_hsmmc_reg_get
+Date: Mon, 31 Aug 2015 11:14:17 +0530
+Message-ID: <55E3E9B1.8070908@ti.com>
+References: <1440666847-12594-1-git-send-email-kishon@ti.com> <1440666847-12594-3-git-send-email-kishon@ti.com> <CAOesGMjW=3qqBfqdxGwEqk1uVj_08rnvP095V-9+O=rsmjLOxQ@mail.gmail.com> <20150828190354.GZ4215@atomide.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset="windows-1252"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mx0b-0016f401.pphosted.com ([67.231.156.173]:25114 "EHLO
-	mx0b-0016f401.pphosted.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751814AbbHaCDl (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 30 Aug 2015 22:03:41 -0400
-In-Reply-To: <55E06760.8020308@rock-chips.com>
-Content-Language: en-US
+Received: from bear.ext.ti.com ([192.94.94.41]:36110 "EHLO bear.ext.ti.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751256AbbHaFo3 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 31 Aug 2015 01:44:29 -0400
+In-Reply-To: <20150828190354.GZ4215@atomide.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Shawn Lin <shawn.lin@rock-chips.com>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+To: Tony Lindgren <tony@atomide.com>, Olof Johansson <olof@lixom.net>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, afenkart@gmail.com, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-omap <linux-omap@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Sekhar Nori <nsekhar@ti.com>, Neil Brown <neilb@suse.de>
 
-PiBbLi4uXQ0KPg0KPj4+PiBIaSwgdWxmDQo+Pj4+DQo+Pj4+IFdlIGZpbmQgdGhpcyBidWcgb24g
-SW50ZWwtQzMyMzBSSyBwbGF0Zm9ybSBmb3IgdmVyeSBzbWFsbCBwcm9iYWJpbGl0eS4NCj4+Pj4N
-Cj4+Pj4gV2hlcmVhcyBJIGNhbiBlYXNpbHkgcmVwcm9kdWNlIHRoaXMgY2FzZSBpZiBJIGFkZCBh
-IG1kZWxheSgxKSBvciANCj4+Pj4gbG9uZ2VyIGRlbGF5IGFzIEppYWxpbmcgZGlkLg0KPj4+Pg0K
-Pj4+PiBUaGlzIHBhdGNoIHNlZW1zIHVzZWZ1bCB0byBtZS4gU2hvdWxkIHdlIHB1c2ggaXQgZm9y
-d2FyZD8gOikNCj4+Pg0KPj4+DQo+Pj4gSXQgc2VlbXMgbGlrZSBhIHZlcnkgZ29vZCBpZGVhIQ0K
-Pj4+DQo+Pj4gU2hvdWxkIHdlIGFkZCBhIGZpeGVzIHRhZyB0byBpdD8NCj4+DQo+Pg0KPj4gVGhh
-dCdzIGNvb2wsIGJ1dCBob3cgdG8gYWRkIGEgZml4ZXMgdGFnPw0KPj4NCj4+IFtGaXhlc10gbW1j
-OiBjb3JlOiBmaXggcmFjZSBjb25kaXRpb24gaW4gbW1jX3dhaXRfZGF0YV9kb25lID8gICA6KQ0K
-Pj4NCj4NCj4gQSBmaXhlcyB0YWcgcG9pbnRzIHRvIGFuIG9sZCBjb21taXQgd2hpY2ggaW50cm9k
-dWNlZCB0aGUgYnVnLiBJZiB3ZSBjYW4ndCBmaW5kIG9uZSwgd2UgY2FuIGFkZCBhIENjIHRhZyB0
-byAic3RhYmxlIi4gSnVzdCBzZWFyY2ggdGhlIGdpdCBsb2cgYW5kIHlvdSB3aWxsIGZpbmQgZXhh
-bXBsZXMuDQo+DQo+IExpa2UgYWRkIG9uZSBsaW5lIGFzIGJlbG93Pw0KPiBGaXhlczogMjIyMGVl
-ZGZkN2FlICgibW1jOiBmaXggYXN5bmMgcmVxdWVzdCBtZWNoYW5pc20gZm9yIHNlcXVlbnRpYWwg
-DQo+IHJlYWQgc2NlbmFyaW9zIikNCj4NCg0KVGhhdCdzIGl0LCBKaWFsaW5nLiBGcm9tIG15IGdp
-dCBibGFtZSwgc2VlbXMgdGhpcyBidWcgaGFzIGJlZW4gaW50cm9kdWNlZCBmb3IgYSBsb25nIHRp
-bWUsIGJ1dCBJIGZlZWwgc3RyYW5nZSB0aGF0IG5vIG9uZSBoYWQgY2FwdHVyZWQgaXQgYmVmb3Jl
-IHlvdSBkaWQuDQpbSmlhbGluZyBGdV0gU2hhd24sDQpZZXMsIHRoaXMgYnVnIGlzIHZlcnkgaGFy
-ZCB0byBkdXBsaWNhdGUgaW4gbXkgZXhwZXJpbWVudC4NCkJ1dCBpdCBoYXBwZW5zIGluZGVlZCwg
-SSBoYWQgc3VmZmVyZWQgdGhpcyBidWcgYWJvdXQgMiB5ZWFycyBiZWZvcmUgSSBmaXhlZCBpdC4N
-ClRvdGFsbHkgSSBnb3QgYnVnIHJlcG9ydHMgMyB0aW1lcyBhbmQgYWJvdXQgM340IFJhbWR1bXAg
-ZmlsZXMuDQpBdCBmaXJzdCwgSSBmYWlsZWQgdG8gZ2V0IHVzZWZ1bCBjbHVlIGFuZCBldmVuIHRo
-cm91Z2ggaXQgd2FzIEREUiBzdGFiaWxpdHkgaXNzdWUuDQoNCkJlbG93IGlmIG15IGFuYWx5c2lz
-Og0KQXMgd2hhdCBJIGhhZCBjb21tZW50ZWQgaW4gdGhlIGZpeCBwYXRjaCwgIG9ubHkgdGhlIGJl
-bG93ICJMaW5lQiIgc3RpbGwgZ2V0cyAid2FpdCIgZnJvbSAibXJxIiBhcyB0aGUgY29tcGlsZXIn
-cyByZXN1bHQsIHRoZW4gdGhpcyBidWcgbWF5IGJlIHRyaWdnZXJlZC4NCklmIHRoZSBjb21waWxl
-ciBoYXMgc29tZSBvcHRpbWlzbSB3aGljaCBsaW5lQiBkb2Vzbid0IG5lZWQgdG8gZmV0Y2ggIndh
-aXQiIGZyb20gIm1ycSIgYWdhaW4sIHRoZSBpc3N1ZSBjYW4ndCBoYXBwZW4uDQogIHN0YXRpYyB2
-b2lkIG1tY193YWl0X2RhdGFfZG9uZShzdHJ1Y3QgbW1jX3JlcXVlc3QgKm1ycSkNCiAgew0KICAg
-ICBtcnEtPmhvc3QtPmNvbnRleHRfaW5mby5pc19kb25lX3JjdiA9IHRydWU7CS8vTGluZUENCiAg
-ICAgLy8gSWYgYmVsb3cgbGluZSBzdGlsbCBnZXRzIGhvc3QgZnJvbSAibXJxIiBhcyB0aGUgcmVz
-dWx0IG9mDQogICAgIC8vIGNvbXBpbGVyLCB0aGUgcGFuaWMgaGFwcGVucyBhcyB3ZSB0cmFjZWQu
-DQogICAgIHdha2VfdXBfaW50ZXJydXB0aWJsZSgmbXJxLT5ob3N0LT5jb250ZXh0X2luZm8ud2Fp
-dCk7IC8vTGluZUINCiAgfQ0KQWxzbywgSSBzdXNwZWN0IHRoZSBidWcgbWF5IGJlIHRyaWdnZXJl
-ZCBpZiAiSVJRIiBvciAiSUNhY2hlIGxpbmUgbWlzc2luZyIganVzdCBoYXBwZW4gYmV0d2VlbiBM
-aW5lQSBhbmQgTGluZUIuIA0KRXNwZWNpYWwgdGhlICJJY2FjaGUgbWlzc2luZyIgY2FzZSwgaXQg
-aXMgZWFzaWVyIHRvIGhhcHBlbnMgdGhhbiBJUlEuDQpJIGRpc2Fzc2VtYmxlIG15IGNvZGUsIGFu
-ZCBmaW5kIExpbmVBIGFuZCBMaW5lQidzIGFzc2VtYmxlIGNvZGVzIGFyZSBsb2NhdGVkIGluIHR3
-byBkaWZmZXJlbnQgY2FjaGUgbGluZSBpbiBteSBmYWlsIGNhc2UuIElmIHlvdSBhcmUgaW50ZXJl
-c3RpbmcsIHlvdSBjYW4gY2hlY2sgeW91ciBhc3NlbWJsZSBjb2RlIHRvby4gDQoNCg0KQW55d2F5
-LCBJIHdpbGwgYWRkIGEgZml4ZXMgdGFnIGFuZCBzZW5kIHYyIEFTQVAuIDopDQoNCj4NCj4gS2lu
-ZCByZWdhcmRzDQo+IFVmZmUNCj4NCg0KDQotLQ0KQmVzdCBSZWdhcmRzDQpTaGF3biBMaW4NCg0K
+Hi,
+
+On Saturday 29 August 2015 12:33 AM, Tony Lindgren wrote:
+> * Olof Johansson <olof@lixom.net> [150828 11:11]:
+>> Hi,
+>>
+>> On Thu, Aug 27, 2015 at 2:13 AM, Kishon Vijay Abraham I <kishon@ti.com> wrote:
+>>> Now return error only if the return value of
+>>> devm_regulator_get_optional() is not the same as -ENODEV, since with
+>>> -EPROBE_DEFER, the regulator can be obtained later and all other
+>>> errors are fatal.
+>>>
+>>> Signed-off-by: Kishon Vijay Abraham I <kishon@ti.com>
+>>> Tested-by: Tony Lindgren <tony@atomide.com>
+>>
+>> I bisected boot failures on Panda ES with multi_v7_defconfig down to
+>> this commit on last night's -next build:
+>>
+>> http://arm-soc.lixom.net/bootlogs/next/next-20150828/pandaes-arm-multi_v7_defconfig.html
+> 
+> MMC is working for me at least on Duovero. Interesting that you also
+> have all kind of errors there, I guess this is some older revision
+> of the board.
+> 
+> Anyways, Kishon, care to look into what might be causing this?
+
+I think this might be because my pbias fix [1] patch wasn't merged yet.
+I'll try to get that resolved asap.
+
+Thanks
+Kishon
+
+[1] -> http://lkml.iu.edu/hypermail/linux/kernel/1507.3/01594.html
+> 
+> Regards,
+> 
+> Tony
+> 
