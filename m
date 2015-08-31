@@ -1,7 +1,8 @@
 From: Heiko Stuebner <heiko-4mtYJXux2i+zQB+pC5nmwQ@public.gmane.org>
-Subject: [PATCH 5/8] mmc: dw_mmc: dt-binding: Add tuning related things
-Date: Mon, 31 Aug 2015 20:24:03 +0200
-Message-ID: <1441045446-30858-6-git-send-email-heiko@sntech.de>
+Subject: [PATCH 8/8] ARM: dts: rockchip: add tuning related settings to veyron
+ devices
+Date: Mon, 31 Aug 2015 20:24:06 +0200
+Message-ID: <1441045446-30858-9-git-send-email-heiko@sntech.de>
 References: <1441045446-30858-1-git-send-email-heiko@sntech.de>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
@@ -18,60 +19,67 @@ List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-rockchip>,
 Sender: "Linux-rockchip" <linux-rockchip-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
 Errors-To: linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
 To: ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, mturquette-rdvid1DuHRBWk0Htik3J/w@public.gmane.org, sboyd-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, tgih.jun-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org, jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org
-Cc: Alexandru M Stan <amstan-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-clk-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, Heiko Stuebner <heiko-4mtYJXux2i+zQB+pC5nmwQ@public.gmane.org>
+Cc: Heiko Stuebner <heiko-4mtYJXux2i+zQB+pC5nmwQ@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-clk-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
 
-From: Alexandru M Stan <amstan-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
+This allows the tuning code to run and use higher speeds on capable cards.
 
-Add ciu_drv, ciu_sample clocks and default-sample-phase. This will later
-be used by tuning code.
-
-We do not touch ciu_drive (and by extension define default-drive-phase).
-Drive phase is mostly used to define minimum hold times, while one could
-write some code to determine what phase meets the minimum hold time
-(ex 10 degrees) this will not work with the current clock phase framework
-(which floors angles, so we'll get 0 deg, and there's no way to know what
-resolution the floors happen at). We assume that the default drive angles
-set by the hardware are good enough.
-
-Signed-off-by: Alexandru M Stan <amstan-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
 Signed-off-by: Heiko Stuebner <heiko-4mtYJXux2i+zQB+pC5nmwQ@public.gmane.org>
 ---
- Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.txt | 14 ++++++++++----
- 1 file changed, 10 insertions(+), 4 deletions(-)
+ arch/arm/boot/dts/rk3288-veyron-sdmmc.dtsi | 7 ++++++-
+ arch/arm/boot/dts/rk3288-veyron.dtsi       | 6 ++++++
+ 2 files changed, 12 insertions(+), 1 deletion(-)
 
-diff --git a/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.txt b/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.txt
-index 346c609..5edadc2 100644
---- a/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.txt
-+++ b/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.txt
-@@ -42,11 +42,13 @@ Optional properties:
- * clocks: from common clock binding: handle to biu and ciu clocks for the
-   bus interface unit clock and the card interface unit clock.
- 
--* clock-names: from common clock binding: Shall be "biu" and "ciu".
--  If the biu clock is missing we'll simply skip enabling it.  If the
--  ciu clock is missing we'll just assume that the clock is running at
-+* clock-names: from common clock binding: Shall be "biu", "ciu", "ciu_drv" and
-+  "ciu_sample".  If the biu clock is missing we'll simply skip enabling it.
-+  If the ciu clock is missing we'll just assume that the clock is running at
-   clock-frequency.  It is an error to omit both the ciu clock and the
--  clock-frequency.
-+  clock-frequency.  "ciu_drv" and "ciu_sample" are used to control the clock
-+  phases, "ciu_sample" is required for tuning high speed modes (if no other
-+  custom tuning method is defined).
- 
- * clock-frequency: should be the frequency (in Hz) of the ciu clock.  If this
-   is specified and the ciu clock is specified then we'll try to set the ciu
-@@ -75,6 +77,10 @@ Optional properties:
- * vmmc-supply: The phandle to the regulator to use for vmmc.  If this is
-   specified we'll defer probe until we can find this regulator.
- 
-+* default-sample-phase: The default phase to set ciu_sample at probing, low
-+  speeds or in case where all phases work at tuning time. If not specified
-+  0 deg will be used.
-+
- Aliases:
- 
- - All the MSHC controller nodes should be represented in the aliases node using
+diff --git a/arch/arm/boot/dts/rk3288-veyron-sdmmc.dtsi b/arch/arm/boot/dts/rk3288-veyron-sdmmc.dtsi
+index b5334ec..24a7a11 100644
+--- a/arch/arm/boot/dts/rk3288-veyron-sdmmc.dtsi
++++ b/arch/arm/boot/dts/rk3288-veyron-sdmmc.dtsi
+@@ -90,7 +90,7 @@
+ 	regulators {
+ 		vccio_sd: LDO_REG4 {
+ 			regulator-name = "vccio_sd";
+-			regulator-min-microvolt = <3300000>;
++			regulator-min-microvolt = <1800000>;
+ 			regulator-max-microvolt = <3300000>;
+ 			regulator-state-mem {
+ 				regulator-off-in-suspend;
+@@ -116,7 +116,12 @@
+ 	cap-sd-highspeed;
+ 	card-detect-delay = <200>;
+ 	cd-gpios = <&gpio7 5 GPIO_ACTIVE_LOW>;
++	default-sample-phase = <90>;
+ 	num-slots = <1>;
++	sd-uhs-sdr12;
++	sd-uhs-sdr25;
++	sd-uhs-sdr50;
++	sd-uhs-sdr104;
+ 	vmmc-supply = <&vcc33_sd>;
+ 	vqmmc-supply = <&vccio_sd>;
+ };
+diff --git a/arch/arm/boot/dts/rk3288-veyron.dtsi b/arch/arm/boot/dts/rk3288-veyron.dtsi
+index df7d70d..394aa80 100644
+--- a/arch/arm/boot/dts/rk3288-veyron.dtsi
++++ b/arch/arm/boot/dts/rk3288-veyron.dtsi
+@@ -194,7 +194,9 @@
+ 	broken-cd;
+ 	bus-width = <8>;
+ 	cap-mmc-highspeed;
++	default-sample-phase = <158>;
+ 	disable-wp;
++	mmc-hs200-1_8v;
+ 	mmc-pwrseq = <&emmc_pwrseq>;
+ 	non-removable;
+ 	num-slots = <1>;
+@@ -409,6 +411,10 @@
+ 	num-slots = <1>;
+ 	pinctrl-names = "default";
+ 	pinctrl-0 = <&sdio0_clk &sdio0_cmd &sdio0_bus4>;
++	sd-uhs-sdr12;
++	sd-uhs-sdr25;
++	sd-uhs-sdr50;
++	sd-uhs-sdr104;
+ 	vmmc-supply = <&vcc33_sys>;
+ 	vqmmc-supply = <&vcc18_wl>;
+ };
 -- 
 2.1.4
