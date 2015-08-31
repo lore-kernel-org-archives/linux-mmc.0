@@ -1,106 +1,77 @@
-From: Heiko Stuebner <heiko@sntech.de>
-Subject: [PATCH 1/8] clk: rockchip: Allow more precision for some mmc clock phases
-Date: Mon, 31 Aug 2015 20:23:59 +0200
-Message-ID: <1441045446-30858-2-git-send-email-heiko@sntech.de>
+From: Heiko Stuebner <heiko-4mtYJXux2i+zQB+pC5nmwQ@public.gmane.org>
+Subject: [PATCH 5/8] mmc: dw_mmc: dt-binding: Add tuning related things
+Date: Mon, 31 Aug 2015 20:24:03 +0200
+Message-ID: <1441045446-30858-6-git-send-email-heiko@sntech.de>
 References: <1441045446-30858-1-git-send-email-heiko@sntech.de>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1441045446-30858-1-git-send-email-heiko@sntech.de>
-Sender: linux-kernel-owner@vger.kernel.org
-To: ulf.hansson@linaro.org, mturquette@baylibre.com, sboyd@codeaurora.org, tgih.jun@samsung.com, jh80.chung@samsung.com
-Cc: linux-mmc@vger.kernel.org, linux-clk@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-rockchip@lists.infradead.org, linux-kernel@vger.kernel.org, Douglas Anderson <dianders@chromium.org>, Heiko Stuebner <heiko@sntech.de>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+In-Reply-To: <1441045446-30858-1-git-send-email-heiko-4mtYJXux2i+zQB+pC5nmwQ@public.gmane.org>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-rockchip>,
+ <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-rockchip/>
+List-Post: <mailto:linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+List-Help: <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-rockchip>,
+ <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
+Sender: "Linux-rockchip" <linux-rockchip-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+Errors-To: linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+To: ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, mturquette-rdvid1DuHRBWk0Htik3J/w@public.gmane.org, sboyd-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, tgih.jun-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org, jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org
+Cc: Alexandru M Stan <amstan-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-clk-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, Heiko Stuebner <heiko-4mtYJXux2i+zQB+pC5nmwQ@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-From: Douglas Anderson <dianders@chromium.org>
+From: Alexandru M Stan <amstan-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
 
-Because of the inexact nature of the extra MMC delay elements (it's
-not possible to keep the phase monotonic and to also make phases (mod
-90) > 70), we previously only allowed phases (mod 90) of 22.5, 45,
-and 67.5.
+Add ciu_drv, ciu_sample clocks and default-sample-phase. This will later
+be used by tuning code.
 
-But it's not the end of the world if the MMC clock phase goes
-non-monotonic.  At most we'll be 25 degrees off.  It's way better to
-test more phases to look for bad ones than to be 25 degrees off, because
-in the case of MMC really the point is to find bad phases and get as far
-asway from the as possible.  If we get to test extra phases by going
-slightly non-monotonic then that might be fine.  Worst case we would
-end up at a phases that's slight differnt than the one we wanted, but
-at least we'd still be quite far away from the a bad phase.
+We do not touch ciu_drive (and by extension define default-drive-phase).
+Drive phase is mostly used to define minimum hold times, while one could
+write some code to determine what phase meets the minimum hold time
+(ex 10 degrees) this will not work with the current clock phase framework
+(which floors angles, so we'll get 0 deg, and there's no way to know what
+resolution the floors happen at). We assume that the default drive angles
+set by the hardware are good enough.
 
-Signed-off-by: Douglas Anderson <dianders@chromium.org>
-
-Fold in more precise variance-values of 44-77 instead of 40-80.
-Fold in the actual removal of the monotonic requirement and adapt
-patch message accordingly.
-Signed-off-by: Heiko Stuebner <heiko@sntech.de>
+Signed-off-by: Alexandru M Stan <amstan-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
+Signed-off-by: Heiko Stuebner <heiko-4mtYJXux2i+zQB+pC5nmwQ@public.gmane.org>
 ---
- drivers/clk/rockchip/clk-mmc-phase.c | 45 ++++++++++++++++++++++++------------
- 1 file changed, 30 insertions(+), 15 deletions(-)
+ Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.txt | 14 ++++++++++----
+ 1 file changed, 10 insertions(+), 4 deletions(-)
 
-diff --git a/drivers/clk/rockchip/clk-mmc-phase.c b/drivers/clk/rockchip/clk-mmc-phase.c
-index 9b61342..a797d86 100644
---- a/drivers/clk/rockchip/clk-mmc-phase.c
-+++ b/drivers/clk/rockchip/clk-mmc-phase.c
-@@ -45,8 +45,8 @@ static unsigned long rockchip_mmc_recalc(struct clk_hw *hw,
- #define PSECS_PER_SEC 1000000000000LL
+diff --git a/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.txt b/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.txt
+index 346c609..5edadc2 100644
+--- a/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.txt
++++ b/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.txt
+@@ -42,11 +42,13 @@ Optional properties:
+ * clocks: from common clock binding: handle to biu and ciu clocks for the
+   bus interface unit clock and the card interface unit clock.
  
- /*
-- * Each fine delay is between 40ps-80ps. Assume each fine delay is 60ps to
-- * simplify calculations. So 45degs could be anywhere between 33deg and 66deg.
-+ * Each fine delay is between 44ps-77ps. Assume each fine delay is 60ps to
-+ * simplify calculations. So 45degs could be anywhere between 33deg and 57.8deg.
-  */
- #define ROCKCHIP_MMC_DELAY_ELEMENT_PSEC 60
+-* clock-names: from common clock binding: Shall be "biu" and "ciu".
+-  If the biu clock is missing we'll simply skip enabling it.  If the
+-  ciu clock is missing we'll just assume that the clock is running at
++* clock-names: from common clock binding: Shall be "biu", "ciu", "ciu_drv" and
++  "ciu_sample".  If the biu clock is missing we'll simply skip enabling it.
++  If the ciu clock is missing we'll just assume that the clock is running at
+   clock-frequency.  It is an error to omit both the ciu clock and the
+-  clock-frequency.
++  clock-frequency.  "ciu_drv" and "ciu_sample" are used to control the clock
++  phases, "ciu_sample" is required for tuning high speed modes (if no other
++  custom tuning method is defined).
  
-@@ -84,22 +84,37 @@ static int rockchip_mmc_set_phase(struct clk_hw *hw, int degrees)
- 	u32 raw_value;
- 	u64 delay;
+ * clock-frequency: should be the frequency (in Hz) of the ciu clock.  If this
+   is specified and the ciu clock is specified then we'll try to set the ciu
+@@ -75,6 +77,10 @@ Optional properties:
+ * vmmc-supply: The phandle to the regulator to use for vmmc.  If this is
+   specified we'll defer probe until we can find this regulator.
  
--	/* allow 22 to be 22.5 */
--	degrees++;
--	/* floor to 22.5 increment */
--	degrees -= ((degrees) * 10 % 225) / 10;
--
- 	nineties = degrees / 90;
--	/* 22.5 multiples */
--	remainder = (degrees % 90) / 22;
--
-+	remainder = (degrees % 90);
++* default-sample-phase: The default phase to set ciu_sample at probing, low
++  speeds or in case where all phases work at tuning time. If not specified
++  0 deg will be used.
 +
-+	/*
-+	 * Due to the inexact nature of the "fine" delay, we might
-+	 * actually go non-monotonic.  We don't go _too_ monotonic
-+	 * though, so we should be OK.  Here are options of how we may
-+	 * work:
-+	 *
-+	 * Ideally we end up with:
-+	 *   1.0, 2.0, ..., 69.0, 70.0, ...,  89.0, 90.0
-+	 *
-+	 * On one extreme (if delay is actually 44ps):
-+	 *   .73, 1.5, ..., 50.6, 51.3, ...,  65.3, 90.0
-+	 * The other (if delay is actually 77ps):
-+	 *   1.3, 2.6, ..., 88.6. 89.8, ..., 114.0, 90
-+	 *
-+	 * It's possible we might make a delay that is up to 25
-+	 * degrees off from what we think we're making.  That's OK
-+	 * though because we should be REALLY far from any bad range.
-+	 */
-+
-+	/*
-+	 * Convert to delay; do a little extra work to make sure we
-+	 * don't overflow 32-bit / 64-bit numbers.
-+	 */
- 	delay = PSECS_PER_SEC;
--	do_div(delay, rate);
--	/* / 360 / 22.5 */
--	do_div(delay, 16);
--	do_div(delay, ROCKCHIP_MMC_DELAY_ELEMENT_PSEC);
--
- 	delay *= remainder;
-+	do_div(delay, 10000);
-+	do_div(delay, (rate / 1000) * 36 * ROCKCHIP_MMC_DELAY_ELEMENT_PSEC);
-+
- 	delay_num = (u8) min(delay, 255ULL);
+ Aliases:
  
- 	raw_value = delay_num ? ROCKCHIP_MMC_DELAY_SEL : 0;
+ - All the MSHC controller nodes should be represented in the aliases node using
 -- 
 2.1.4
