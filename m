@@ -1,42 +1,50 @@
 From: Vaibhav Hiremath <vaibhav.hiremath@linaro.org>
-Subject: [PATCH 2/2] mmc: sdhci-pxav3: Print ret value on error from sdhci_add_host() fn
-Date: Wed,  2 Sep 2015 00:54:14 +0530
-Message-ID: <1441135454-6902-3-git-send-email-vaibhav.hiremath@linaro.org>
-References: <1441135454-6902-1-git-send-email-vaibhav.hiremath@linaro.org>
+Subject: [RFC 0/3] mmc: sdhci: pass signal voltage as an argument to ->voltage_switch()
+Date: Wed,  2 Sep 2015 01:02:15 +0530
+Message-ID: <1441135938-8056-1-git-send-email-vaibhav.hiremath@linaro.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pa0-f45.google.com ([209.85.220.45]:34292 "EHLO
-	mail-pa0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754311AbbIAT1B (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 1 Sep 2015 15:27:01 -0400
-Received: by padhy1 with SMTP id hy1so5223696pad.1
-        for <linux-mmc@vger.kernel.org>; Tue, 01 Sep 2015 12:27:00 -0700 (PDT)
-In-Reply-To: <1441135454-6902-1-git-send-email-vaibhav.hiremath@linaro.org>
+Received: from mail-pa0-f47.google.com ([209.85.220.47]:35099 "EHLO
+	mail-pa0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750778AbbIATfV (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 1 Sep 2015 15:35:21 -0400
+Received: by pacfv12 with SMTP id fv12so5375862pac.2
+        for <linux-mmc@vger.kernel.org>; Tue, 01 Sep 2015 12:35:20 -0700 (PDT)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org
 Cc: ulf.hansson@linaro.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Vaibhav Hiremath <vaibhav.hiremath@linaro.org>
 
-Return value would give clear information about the actual root-cause
-of the failure.
+In order to do particular voltage specific configuration in
+sdhci_ops->voltage_switch() callback function, we need to
+pass respective voltage value as well.
 
-Signed-off-by: Vaibhav Hiremath <vaibhav.hiremath@linaro.org>
----
- drivers/mmc/host/sdhci-pxav3.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+So this patch series pass signal voltage to the controller
+specific ->voltage_switch() callback.
+Adds controller specific configuration for other voltages as well,
+and add implementation for ->voltage_switch to pxav3 driver.
 
-diff --git a/drivers/mmc/host/sdhci-pxav3.c b/drivers/mmc/host/sdhci-pxav3.c
-index d02bc37..5d26fe0 100644
---- a/drivers/mmc/host/sdhci-pxav3.c
-+++ b/drivers/mmc/host/sdhci-pxav3.c
-@@ -455,7 +455,7 @@ static int sdhci_pxav3_probe(struct platform_device *pdev)
- 
- 	ret = sdhci_add_host(host);
- 	if (ret) {
--		dev_err(&pdev->dev, "failed to add host\n");
-+		dev_err(&pdev->dev, "failed to add host ret - %d\n", ret);
- 		goto err_add_host;
- 	}
- 
+
+Note:
+Currently ->voltage_switch() callback is only supported
+in f_sdh30 driver. And I am not sure on the dependency of execution
+sequence for that device. I could have moved ->voltage_switch() call
+at one common place (above/below), but was not quite sure about it.
+So, replicated/duplicated the call for other voltages.
+
+
+Vaibhav Hiremath (3):
+  mmc: sdhci: pass signal_voltage as an argument to voltage_switch
+    callback
+  mmc: sdhci: add host_ops->voltage_switch callback for all other
+    voltages
+  mmc: sdhci-pxav3: Add ->voltage_switch callback support
+
+ drivers/mmc/host/sdhci-pxav3.c   | 59 ++++++++++++++++++++++++++++++++++++++++
+ drivers/mmc/host/sdhci.c         | 10 ++++++-
+ drivers/mmc/host/sdhci.h         |  2 +-
+ drivers/mmc/host/sdhci_f_sdh30.c |  3 +-
+ 4 files changed, 71 insertions(+), 3 deletions(-)
+
 -- 
 1.9.1
 
