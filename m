@@ -1,7 +1,7 @@
 From: Vaibhav Hiremath <vaibhav.hiremath@linaro.org>
-Subject: [RFC 2/3] mmc: sdhci: add host_ops->voltage_switch callback for all other voltages
-Date: Wed,  2 Sep 2015 01:02:17 +0530
-Message-ID: <1441135938-8056-3-git-send-email-vaibhav.hiremath@linaro.org>
+Subject: [RFC 3/3] mmc: sdhci-pxav3: Add ->voltage_switch callback support
+Date: Wed,  2 Sep 2015 01:02:18 +0530
+Message-ID: <1441135938-8056-4-git-send-email-vaibhav.hiremath@linaro.org>
 References: <1441135938-8056-1-git-send-email-vaibhav.hiremath@linaro.org>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1441135938-8056-1-git-send-email-vaibhav.hiremath@linaro.org>
@@ -10,51 +10,132 @@ To: linux-mmc@vger.kernel.org
 Cc: ulf.hansson@linaro.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Vaibhav Hiremath <vaibhav.hiremath@linaro.org>
 List-Id: linux-mmc@vger.kernel.org
 
-Currently, the sdhci_do_start_signal_voltage_switch() function invokes
-controller specific voltage switch configuration only for 1.8v usecase;
-but it is required for others as well.
+In case PXA1928 family of devices, there is device/controller specific
+configuration to control voltage/power on the IO pins.
 
-For example, in case of PXA1928 SDH controller, we need to set different
-configuration for 3.3, 1.8 and 1.2 volt support (I/O domain power
-control register).
+This patch implements and enables the sdhci_ops->voltage_switch()
+callback api.
+Note that IO pad register addresses are fetched as a memory resource.
+
+For example, in case of PXA1928 and family of devices, the DT property
+would look something like,
+
+sdh1: sdh@d4280000 {
+	compatible = "mrvl,pxav3-mmc";
+	reg-names = "sdhci", "io-pwr", "io-pwr-lock-unlock";
+	reg = <0xd4280000 0x120>,
+		<0xd401e81c 4>,
+		<0xd4015068 8>;
+	...
+};
 
 Signed-off-by: Vaibhav Hiremath <vaibhav.hiremath@linaro.org>
 ---
-Note:
-Currently ->voltage_switch() callback is only supported
-in f_sdh30 driver. And I am not sure on the dependency of execution
-sequence for that device. I could have moved ->voltage_switch() call
-at one common place (above/below), but was not quite sure about it.
-So, replicated/duplicated the call for other voltages.
+ drivers/mmc/host/sdhci-pxav3.c | 59 ++++++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 59 insertions(+)
 
- drivers/mmc/host/sdhci.c | 8 ++++++++
- 1 file changed, 8 insertions(+)
-
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 3dd295f..b59b76d 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -1753,6 +1753,10 @@ static int sdhci_do_start_signal_voltage_switch(struct sdhci_host *host,
- 		/* Wait for 5ms */
- 		usleep_range(5000, 5500);
+diff --git a/drivers/mmc/host/sdhci-pxav3.c b/drivers/mmc/host/sdhci-pxav3.c
+index 5d26fe0..cebb2f9 100644
+--- a/drivers/mmc/host/sdhci-pxav3.c
++++ b/drivers/mmc/host/sdhci-pxav3.c
+@@ -63,11 +63,18 @@
+ #define IO_PWR_AKEY_ASSAR		0xeb10
+ #define IO_PWR_MMC1_PAD_1V8		BIT(2)
  
-+		/* Some controller need to do more when switching */
-+		if (host->ops->voltage_switch)
-+			host->ops->voltage_switch(host, MMC_SIGNAL_VOLTAGE_330);
++/* IO Power control */
++#define IO_PWR_AKEY_ASFAR		0xbaba
++#define IO_PWR_AKEY_ASSAR		0xeb10
++#define IO_PWR_MMC1_PAD_1V8		BIT(2)
 +
- 		/* 3.3V regulator output should be stable within 5 ms */
- 		ctrl = sdhci_readw(host, SDHCI_HOST_CONTROL2);
- 		if (!(ctrl & SDHCI_CTRL_VDD_180))
-@@ -1803,6 +1807,10 @@ static int sdhci_do_start_signal_voltage_switch(struct sdhci_host *host,
- 				return -EIO;
- 			}
- 		}
-+		/* Some controller need to do more when switching */
-+		if (host->ops->voltage_switch)
-+			host->ops->voltage_switch(host, MMC_SIGNAL_VOLTAGE_120);
+ struct sdhci_pxa {
+ 	struct clk *clk_core;
+ 	struct clk *clk_io;
+ 	u8	power_mode;
+ 	void __iomem *sdio3_conf_reg;
++	void __iomem *io_pwr_reg;
++	void __iomem *io_pwr_lock_reg;
+ };
+ 
+ /*
+@@ -307,6 +314,38 @@ static void pxav3_set_uhs_signaling(struct sdhci_host *host, unsigned int uhs)
+ 		__func__, uhs, ctrl_2);
+ }
+ 
++static void pxav3_voltage_switch(struct sdhci_host *host,
++						u8 signal_voltage)
++{
++	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
++	struct sdhci_pxa *pxa = pltfm_host->priv;
++	unsigned int val;
 +
- 		return 0;
- 	default:
- 		/* No signal voltage switch required */
++	if (!pxa->io_pwr_reg || !pxa->io_pwr_lock_reg)
++		return;
++
++	/* Lock register is 64 bit: First & Second access register */
++	writel(IO_PWR_AKEY_ASFAR, pxa->io_pwr_lock_reg);
++	writel(IO_PWR_AKEY_ASSAR, pxa->io_pwr_lock_reg + 4);
++	val = readl(pxa->io_pwr_reg);
++
++	switch (signal_voltage) {
++	case MMC_SIGNAL_VOLTAGE_180:
++	case MMC_SIGNAL_VOLTAGE_120:
++		val |= IO_PWR_MMC1_PAD_1V8;
++		break;
++	case MMC_SIGNAL_VOLTAGE_330:
++	default:
++		val &= ~IO_PWR_MMC1_PAD_1V8;
++		break;
++	}
++
++	writel(IO_PWR_AKEY_ASFAR, pxa->io_pwr_lock_reg);
++	writel(IO_PWR_AKEY_ASSAR, pxa->io_pwr_lock_reg + 4);
++
++	writel(val, pxa->io_pwr_reg);
++}
++
+ static const struct sdhci_ops pxav3_sdhci_ops = {
+ 	.set_clock			= sdhci_set_clock,
+ 	.platform_send_init_74_clocks	= pxav3_gen_init_74_clocks,
+@@ -314,6 +353,7 @@ static const struct sdhci_ops pxav3_sdhci_ops = {
+ 	.set_bus_width			= sdhci_set_bus_width,
+ 	.reset				= pxav3_reset,
+ 	.set_uhs_signaling		= pxav3_set_uhs_signaling,
++	.voltage_switch			= pxav3_voltage_switch,
+ };
+ 
+ static struct sdhci_pltfm_data sdhci_pxav3_pdata = {
+@@ -368,6 +408,7 @@ static int sdhci_pxav3_probe(struct platform_device *pdev)
+ 	struct sdhci_host *host = NULL;
+ 	struct sdhci_pxa *pxa = NULL;
+ 	const struct of_device_id *match;
++	struct resource *res;
+ 	int ret;
+ 
+ 	pxa = devm_kzalloc(&pdev->dev, sizeof(struct sdhci_pxa), GFP_KERNEL);
+@@ -408,6 +449,24 @@ static int sdhci_pxav3_probe(struct platform_device *pdev)
+ 			goto err_mbus_win;
+ 	}
+ 
++	res = platform_get_resource_byname(pdev, IORESOURCE_MEM, "io-pwr-conf");
++	if (res) {
++		pxa->io_pwr_reg = devm_ioremap_resource(&pdev->dev, res);
++		if (IS_ERR(pxa->io_pwr_reg)) {
++			ret = PTR_ERR(pxa->io_pwr_reg);
++			goto err_mbus_win;
++		}
++	}
++
++	res = platform_get_resource_byname(pdev, IORESOURCE_MEM, "io-pwr-lock-unlock");
++	if (res) {
++		pxa->io_pwr_lock_reg = devm_ioremap_resource(&pdev->dev, res);
++		if (IS_ERR(pxa->io_pwr_lock_reg)) {
++			ret = PTR_ERR(pxa->io_pwr_lock_reg);
++			goto err_mbus_win;
++		}
++	}
++
+ 	match = of_match_device(of_match_ptr(sdhci_pxav3_of_match), &pdev->dev);
+ 	if (match) {
+ 		ret = mmc_of_parse(host->mmc);
 -- 
 1.9.1
