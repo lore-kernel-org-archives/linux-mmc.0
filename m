@@ -1,141 +1,87 @@
-From: Vaibhav Hiremath <vaibhav.hiremath@linaro.org>
-Subject: [RFC 3/3] mmc: sdhci-pxav3: Add ->voltage_switch callback support
-Date: Wed,  2 Sep 2015 01:02:18 +0530
-Message-ID: <1441135938-8056-4-git-send-email-vaibhav.hiremath@linaro.org>
-References: <1441135938-8056-1-git-send-email-vaibhav.hiremath@linaro.org>
+From: Joe Perches <joe@perches.com>
+Subject: Re: [PATCH 1/2] mmc: sdhci-pxav3: Fix tabbing issue
+Date: Tue, 01 Sep 2015 13:31:26 -0700
+Message-ID: <1441139486.12163.3.camel@perches.com>
+References: <1441135454-6902-1-git-send-email-vaibhav.hiremath@linaro.org>
+	 <1441135454-6902-2-git-send-email-vaibhav.hiremath@linaro.org>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="ISO-8859-1"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1441135938-8056-1-git-send-email-vaibhav.hiremath@linaro.org>
+In-Reply-To: <1441135454-6902-2-git-send-email-vaibhav.hiremath@linaro.org>
 Sender: linux-kernel-owner@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: ulf.hansson@linaro.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Vaibhav Hiremath <vaibhav.hiremath@linaro.org>
+To: Vaibhav Hiremath <vaibhav.hiremath@linaro.org>
+Cc: linux-mmc@vger.kernel.org, ulf.hansson@linaro.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
-In case PXA1928 family of devices, there is device/controller specific
-configuration to control voltage/power on the IO pins.
+On Wed, 2015-09-02 at 00:54 +0530, Vaibhav Hiremath wrote:
+> There were some coding style issues where spaces have been used instead
+> of tabs, for example, in macro definitions, alignment of function
+> declarations/definitions, etc...
+> 
+> This patch fixes all such occurrences in the code.
+> And also use BIT for bit definitions.
 
-This patch implements and enables the sdhci_ops->voltage_switch()
-callback api.
-Note that IO pad register addresses are fetched as a memory resource.
+Please send 2 patches instead.
 
-For example, in case of PXA1928 and family of devices, the DT property
-would look something like,
+> diff --git a/drivers/mmc/host/sdhci-pxav3.c b/drivers/mmc/host/sdhci-pxav3.c
+[]
+> @@ -128,7 +133,7 @@ static int mv_conf_mbus_windows(struct platform_device *pdev,
+>  }
+>  
+>  static int armada_38x_quirks(struct platform_device *pdev,
+> -			     struct sdhci_host *host)
+> +			struct sdhci_host *host)
 
-sdh1: sdh@d4280000 {
-	compatible = "mrvl,pxav3-mmc";
-	reg-names = "sdhci", "io-pwr", "io-pwr-lock-unlock";
-	reg = <0xd4280000 0x120>,
-		<0xd401e81c 4>,
-		<0xd4015068 8>;
-	...
-};
+This is not an improvement.
 
-Signed-off-by: Vaibhav Hiremath <vaibhav.hiremath@linaro.org>
----
- drivers/mmc/host/sdhci-pxav3.c | 59 ++++++++++++++++++++++++++++++++++++++++++
- 1 file changed, 59 insertions(+)
+The old code is aligned to the open parenthesis
+and is fine.
 
-diff --git a/drivers/mmc/host/sdhci-pxav3.c b/drivers/mmc/host/sdhci-pxav3.c
-index 5d26fe0..cebb2f9 100644
---- a/drivers/mmc/host/sdhci-pxav3.c
-+++ b/drivers/mmc/host/sdhci-pxav3.c
-@@ -63,11 +63,18 @@
- #define IO_PWR_AKEY_ASSAR		0xeb10
- #define IO_PWR_MMC1_PAD_1V8		BIT(2)
- 
-+/* IO Power control */
-+#define IO_PWR_AKEY_ASFAR		0xbaba
-+#define IO_PWR_AKEY_ASSAR		0xeb10
-+#define IO_PWR_MMC1_PAD_1V8		BIT(2)
-+
- struct sdhci_pxa {
- 	struct clk *clk_core;
- 	struct clk *clk_io;
- 	u8	power_mode;
- 	void __iomem *sdio3_conf_reg;
-+	void __iomem *io_pwr_reg;
-+	void __iomem *io_pwr_lock_reg;
- };
- 
- /*
-@@ -307,6 +314,38 @@ static void pxav3_set_uhs_signaling(struct sdhci_host *host, unsigned int uhs)
- 		__func__, uhs, ctrl_2);
- }
- 
-+static void pxav3_voltage_switch(struct sdhci_host *host,
-+						u8 signal_voltage)
-+{
-+	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-+	struct sdhci_pxa *pxa = pltfm_host->priv;
-+	unsigned int val;
-+
-+	if (!pxa->io_pwr_reg || !pxa->io_pwr_lock_reg)
-+		return;
-+
-+	/* Lock register is 64 bit: First & Second access register */
-+	writel(IO_PWR_AKEY_ASFAR, pxa->io_pwr_lock_reg);
-+	writel(IO_PWR_AKEY_ASSAR, pxa->io_pwr_lock_reg + 4);
-+	val = readl(pxa->io_pwr_reg);
-+
-+	switch (signal_voltage) {
-+	case MMC_SIGNAL_VOLTAGE_180:
-+	case MMC_SIGNAL_VOLTAGE_120:
-+		val |= IO_PWR_MMC1_PAD_1V8;
-+		break;
-+	case MMC_SIGNAL_VOLTAGE_330:
-+	default:
-+		val &= ~IO_PWR_MMC1_PAD_1V8;
-+		break;
-+	}
-+
-+	writel(IO_PWR_AKEY_ASFAR, pxa->io_pwr_lock_reg);
-+	writel(IO_PWR_AKEY_ASSAR, pxa->io_pwr_lock_reg + 4);
-+
-+	writel(val, pxa->io_pwr_reg);
-+}
-+
- static const struct sdhci_ops pxav3_sdhci_ops = {
- 	.set_clock			= sdhci_set_clock,
- 	.platform_send_init_74_clocks	= pxav3_gen_init_74_clocks,
-@@ -314,6 +353,7 @@ static const struct sdhci_ops pxav3_sdhci_ops = {
- 	.set_bus_width			= sdhci_set_bus_width,
- 	.reset				= pxav3_reset,
- 	.set_uhs_signaling		= pxav3_set_uhs_signaling,
-+	.voltage_switch			= pxav3_voltage_switch,
- };
- 
- static struct sdhci_pltfm_data sdhci_pxav3_pdata = {
-@@ -368,6 +408,7 @@ static int sdhci_pxav3_probe(struct platform_device *pdev)
- 	struct sdhci_host *host = NULL;
- 	struct sdhci_pxa *pxa = NULL;
- 	const struct of_device_id *match;
-+	struct resource *res;
- 	int ret;
- 
- 	pxa = devm_kzalloc(&pdev->dev, sizeof(struct sdhci_pxa), GFP_KERNEL);
-@@ -408,6 +449,24 @@ static int sdhci_pxav3_probe(struct platform_device *pdev)
- 			goto err_mbus_win;
- 	}
- 
-+	res = platform_get_resource_byname(pdev, IORESOURCE_MEM, "io-pwr-conf");
-+	if (res) {
-+		pxa->io_pwr_reg = devm_ioremap_resource(&pdev->dev, res);
-+		if (IS_ERR(pxa->io_pwr_reg)) {
-+			ret = PTR_ERR(pxa->io_pwr_reg);
-+			goto err_mbus_win;
-+		}
-+	}
-+
-+	res = platform_get_resource_byname(pdev, IORESOURCE_MEM, "io-pwr-lock-unlock");
-+	if (res) {
-+		pxa->io_pwr_lock_reg = devm_ioremap_resource(&pdev->dev, res);
-+		if (IS_ERR(pxa->io_pwr_lock_reg)) {
-+			ret = PTR_ERR(pxa->io_pwr_lock_reg);
-+			goto err_mbus_win;
-+		}
-+	}
-+
- 	match = of_match_device(of_match_ptr(sdhci_pxav3_of_match), &pdev->dev);
- 	if (match) {
- 		ret = mmc_of_parse(host->mmc);
--- 
-1.9.1
+> @@ -284,10 +288,10 @@ static void pxav3_set_uhs_signaling(struct sdhci_host *host, unsigned int uhs)
+>  	 * FE-2946959
+>  	 */
+>  	if (pxa->sdio3_conf_reg) {
+> -		u8 reg_val  = readb(pxa->sdio3_conf_reg);
+> +		u8 reg_val = readb(pxa->sdio3_conf_reg);
+>  
+>  		if (uhs == MMC_TIMING_UHS_SDR50 ||
+> -		    uhs == MMC_TIMING_UHS_DDR50) {
+> +				uhs == MMC_TIMING_UHS_DDR50) {
+
+Also not an improvement.
+
+> @@ -304,20 +308,20 @@ static void pxav3_set_uhs_signaling(struct sdhci_host *host, unsigned int uhs)
+>  }
+>  
+>  static const struct sdhci_ops pxav3_sdhci_ops = {
+> -	.set_clock = sdhci_set_clock,
+> -	.platform_send_init_74_clocks = pxav3_gen_init_74_clocks,
+> -	.get_max_clock = sdhci_pltfm_clk_get_max_clock,
+> -	.set_bus_width = sdhci_set_bus_width,
+> -	.reset = pxav3_reset,
+> -	.set_uhs_signaling = pxav3_set_uhs_signaling,
+> +	.set_clock			= sdhci_set_clock,
+> +	.platform_send_init_74_clocks	= pxav3_gen_init_74_clocks,
+> +	.get_max_clock			= sdhci_pltfm_clk_get_max_clock,
+> +	.set_bus_width			= sdhci_set_bus_width,
+> +	.reset				= pxav3_reset,
+> +	.set_uhs_signaling		= pxav3_set_uhs_signaling,
+
+<shrug>  If you want.
+>  };
+>  
+>  static struct sdhci_pltfm_data sdhci_pxav3_pdata = {
+> -	.quirks = SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK
+> +	.quirks	= SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK
+
+Also not an improvement.  Why change the space to a tab here?
+
+> @@ -343,7 +347,7 @@ static struct sdhci_pxa_platdata *pxav3_get_mmc_pdata(struct device *dev)
+>  		return NULL;
+>  
+>  	if (!of_property_read_u32(np, "mrvl,clk-delay-cycles",
+> -				  &clk_delay_cycles))
+> +				&clk_delay_cycles))
+
+Not an improvement, etc...
