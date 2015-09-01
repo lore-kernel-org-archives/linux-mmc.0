@@ -1,43 +1,33 @@
-From: Tony Lindgren <tony@atomide.com>
-Subject: Re: [PATCH v3 02/15] mmc: host: omap_hsmmc: return on fatal errors
- from omap_hsmmc_reg_get
-Date: Tue, 1 Sep 2015 08:03:36 -0700
-Message-ID: <20150901150336.GF4215@atomide.com>
-References: <1440666847-12594-1-git-send-email-kishon@ti.com>
- <1440666847-12594-3-git-send-email-kishon@ti.com>
- <CAOesGMjW=3qqBfqdxGwEqk1uVj_08rnvP095V-9+O=rsmjLOxQ@mail.gmail.com>
- <20150828190354.GZ4215@atomide.com>
- <55E3E9B1.8070908@ti.com>
- <20150831205829.GB4215@atomide.com>
- <20150831211450.GC4215@atomide.com>
- <55E5B730.9020409@ti.com>
- <20150901145002.GE4215@atomide.com>
- <55E5BC11.8090002@ti.com>
+From: Alan Cooper <alcooperx@gmail.com>
+Subject: Re: [PATCH V3 0/8 RESEND] Add password protected lock/unlock support
+ for SD/MMC
+Date: Tue, 1 Sep 2015 13:51:42 -0400
+Message-ID: <CAOGqxeUBX3DR-eRQfX-yYw6DGWw-EriJVRPS10F3vqFDOFX=Fg@mail.gmail.com>
+References: <1433526147-25941-1-git-send-email-alcooperx@gmail.com>
+	<CAPDyKFrhHLykG5xSfo204Yh-z4-8RAhkh5S40Gb--4HkQ6KS9A@mail.gmail.com>
+	<CAOGqxeVAUHYzgZmax4vq-VovufZ5EKvpA+PWFa=-C87Xn1hK4A@mail.gmail.com>
+	<CAPDyKFqMKJaY_=QMx_jmb=fiFv+Xwqiqj8XMvmOf3e8_J_Lf5Q@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <55E5BC11.8090002@ti.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Grygorii Strashko <grygorii.strashko@ti.com>
-Cc: Kishon Vijay Abraham I <kishon@ti.com>, Olof Johansson <olof@lixom.net>, Ulf Hansson <ulf.hansson@linaro.org>, afenkart@gmail.com, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-omap <linux-omap@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Sekhar Nori <nsekhar@ti.com>, Neil Brown <neilb@suse.de>
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-qg0-f47.google.com ([209.85.192.47]:34012 "EHLO
+	mail-qg0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754379AbbIARvn (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 1 Sep 2015 13:51:43 -0400
+Received: by qgez77 with SMTP id z77so2150491qge.1
+        for <linux-mmc@vger.kernel.org>; Tue, 01 Sep 2015 10:51:43 -0700 (PDT)
+In-Reply-To: <CAPDyKFqMKJaY_=QMx_jmb=fiFv+Xwqiqj8XMvmOf3e8_J_Lf5Q@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Petri Gynther <pgynther@google.com>
 
-* Grygorii Strashko <grygorii.strashko@ti.com> [150901 07:57]:
-> On 09/01/2015 05:50 PM, Tony Lindgren wrote:
-> >>
-> >>On -next, Above crash signature could be related to race
-> >>"ARM: OMAP2+: omap-device: fix race deferred probe of omap_hsmmc vs omap_device_late_init"
-> >>http://www.spinics.net/lists/linux-omap/msg121622.html
-> >
-> >Good point thanks, yes that's the case. MMC probing fails and then we hit this
-> >separate issue while MMC is trying to probe. Applying your fix makes the
-> >abort disappear, but naturally does not get MMC working again.
-> 
-> you may need CONFIG_GPIO_PCF857X=y for dra7-evm
+On Tue, Aug 25, 2015 at 8:04 AM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+> Thanks for the info. I am okay going forward with this patchset,
+> though I think it's a bit late (my fault) for 4.3. Could you perhaps
+> repost once 4.3 rc1 is out!?
 
-This is a regression at least on omap4 as pointed out by Olof.
+Thanks!
+I'll re-post after 4.3 rc1.
 
-Regards,
-
-Tony
+Al
