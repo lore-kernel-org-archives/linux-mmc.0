@@ -1,92 +1,59 @@
 From: Vaibhav Hiremath <vaibhav.hiremath@linaro.org>
-Subject: Re: [PATCH 1/2] mmc: sdhci-pxav3: Fix tabbing issue
-Date: Wed, 2 Sep 2015 11:59:14 +0530
-Message-ID: <55E6973A.20305@linaro.org>
+Subject: Re: [PATCH 2/2] mmc: sdhci-pxav3: Print ret value on error from
+ sdhci_add_host() fn
+Date: Wed, 2 Sep 2015 12:07:01 +0530
+Message-ID: <55E6990D.3000407@linaro.org>
 References: <1441135454-6902-1-git-send-email-vaibhav.hiremath@linaro.org>
- <1441135454-6902-2-git-send-email-vaibhav.hiremath@linaro.org>
- <1441139486.12163.3.camel@perches.com>
+ <1441135454-6902-3-git-send-email-vaibhav.hiremath@linaro.org>
+ <1441139838.12163.5.camel@perches.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=windows-1252; format=flowed
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1441139486.12163.3.camel@perches.com>
-Sender: linux-kernel-owner@vger.kernel.org
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-pa0-f47.google.com ([209.85.220.47]:34617 "EHLO
+	mail-pa0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750971AbbIBGhH (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 2 Sep 2015 02:37:07 -0400
+Received: by padhy1 with SMTP id hy1so873434pad.1
+        for <linux-mmc@vger.kernel.org>; Tue, 01 Sep 2015 23:37:06 -0700 (PDT)
+In-Reply-To: <1441139838.12163.5.camel@perches.com>
+Sender: linux-mmc-owner@vger.kernel.org
+List-Id: linux-mmc@vger.kernel.org
 To: Joe Perches <joe@perches.com>
 Cc: linux-mmc@vger.kernel.org, ulf.hansson@linaro.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org
-List-Id: linux-mmc@vger.kernel.org
 
 
 
-On Wednesday 02 September 2015 02:01 AM, Joe Perches wrote:
+On Wednesday 02 September 2015 02:07 AM, Joe Perches wrote:
 > On Wed, 2015-09-02 at 00:54 +0530, Vaibhav Hiremath wrote:
->> There were some coding style issues where spaces have been used instead
->> of tabs, for example, in macro definitions, alignment of function
->> declarations/definitions, etc...
->>
->> This patch fixes all such occurrences in the code.
->> And also use BIT for bit definitions.
+>> Return value would give clear information about the actual root-cause
+>> of the failure.
 >
-> Please send 2 patches instead.
+> I'm not sure why that is as nearly every error path in
+> sdhci_add_host emits a message.
 >
 
-Really?
-
-I had two separate patches earlier, but after looking at the changes
-squahsed them. Anyway, I do not have any strong opinion on this, so
-will separate it in next version.
-
+Not for everything.
+No error message for -EPROBE_DEFER.
 
 >> diff --git a/drivers/mmc/host/sdhci-pxav3.c b/drivers/mmc/host/sdhci-pxav3.c
 > []
->> @@ -128,7 +133,7 @@ static int mv_conf_mbus_windows(struct platform_device *pdev,
->>   }
+>> @@ -455,7 +455,7 @@ static int sdhci_pxav3_probe(struct platform_device *pdev)
 >>
->>   static int armada_38x_quirks(struct platform_device *pdev,
->> -			     struct sdhci_host *host)
->> +			struct sdhci_host *host)
+>>   	ret = sdhci_add_host(host);
+>>   	if (ret) {
+>> -		dev_err(&pdev->dev, "failed to add host\n");
+>> +		dev_err(&pdev->dev, "failed to add host ret - %d\n", ret);
+>>   		goto err_add_host;
+>>   	}
+>>
 >
-> This is not an improvement.
->
-> The old code is aligned to the open parenthesis
-> and is fine.
+> If this is really desirable, there are many other callers of
+> sdhci_add_host with error messages just like this one.
 >
 
-Ok,
-Same here, I always use tabs. No strong opinion, so will remove it.
-
->> @@ -284,10 +288,10 @@ static void pxav3_set_uhs_signaling(struct sdhci_host *host, unsigned int uhs)
->>   	 * FE-2946959
->>   	 */
->>   	if (pxa->sdio3_conf_reg) {
->> -		u8 reg_val  = readb(pxa->sdio3_conf_reg);
->> +		u8 reg_val = readb(pxa->sdio3_conf_reg);
->>
->>   		if (uhs == MMC_TIMING_UHS_SDR50 ||
->> -		    uhs == MMC_TIMING_UHS_DDR50) {
->> +				uhs == MMC_TIMING_UHS_DDR50) {
->
-> Also not an improvement.
->
->> @@ -304,20 +308,20 @@ static void pxav3_set_uhs_signaling(struct sdhci_host *host, unsigned int uhs)
->>   }
->>
->>   static const struct sdhci_ops pxav3_sdhci_ops = {
->> -	.set_clock = sdhci_set_clock,
->> -	.platform_send_init_74_clocks = pxav3_gen_init_74_clocks,
->> -	.get_max_clock = sdhci_pltfm_clk_get_max_clock,
->> -	.set_bus_width = sdhci_set_bus_width,
->> -	.reset = pxav3_reset,
->> -	.set_uhs_signaling = pxav3_set_uhs_signaling,
->> +	.set_clock			= sdhci_set_clock,
->> +	.platform_send_init_74_clocks	= pxav3_gen_init_74_clocks,
->> +	.get_max_clock			= sdhci_pltfm_clk_get_max_clock,
->> +	.set_bus_width			= sdhci_set_bus_width,
->> +	.reset				= pxav3_reset,
->> +	.set_uhs_signaling		= pxav3_set_uhs_signaling,
->
-> <shrug>  If you want.
-
-Please clarify.
+Yes, true.
+Ho about, adding pr_err into sdhci_add_host for -EPROBE_DEFER.
 
 Thanks,
 Vaibhav
