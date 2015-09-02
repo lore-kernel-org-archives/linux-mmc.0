@@ -1,79 +1,159 @@
-From: Jisheng Zhang <jszhang@marvell.com>
-Subject: Re: [RFC 2/3] mmc: sdhci: add host_ops->voltage_switch callback for
- all other voltages
-Date: Wed, 2 Sep 2015 15:04:42 +0800
-Message-ID: <20150902150442.118d3305@xhacker>
-References: <1441135938-8056-1-git-send-email-vaibhav.hiremath@linaro.org>
-	<1441135938-8056-3-git-send-email-vaibhav.hiremath@linaro.org>
+From: Vaibhav Hiremath <vaibhav.hiremath@linaro.org>
+Subject: Re: [PATCH 1/2] mmc: sdhci-pxav3: Fix tabbing issue
+Date: Wed, 2 Sep 2015 13:09:21 +0530
+Message-ID: <55E6A7A9.3070309@linaro.org>
+References: <1441135454-6902-1-git-send-email-vaibhav.hiremath@linaro.org>
+ <1441135454-6902-2-git-send-email-vaibhav.hiremath@linaro.org>
+ <20150902145408.69a44f71@xhacker>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="US-ASCII"
+Content-Type: text/plain; charset=windows-1252; format=flowed
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mx0a-0016f401.pphosted.com ([67.231.148.174]:16850 "EHLO
-	mx0a-0016f401.pphosted.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751624AbbIBHIk (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 2 Sep 2015 03:08:40 -0400
-In-Reply-To: <1441135938-8056-3-git-send-email-vaibhav.hiremath@linaro.org>
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
-To: Vaibhav Hiremath <vaibhav.hiremath@linaro.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20150902145408.69a44f71@xhacker>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Jisheng Zhang <jszhang@marvell.com>
 Cc: linux-mmc@vger.kernel.org, ulf.hansson@linaro.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+List-Id: linux-mmc@vger.kernel.org
 
-On Wed, 2 Sep 2015 01:02:17 +0530
-Vaibhav Hiremath <vaibhav.hiremath@linaro.org> wrote:
 
-> Currently, the sdhci_do_start_signal_voltage_switch() function invokes
-> controller specific voltage switch configuration only for 1.8v usecase;
-> but it is required for others as well.
-> 
-> For example, in case of PXA1928 SDH controller, we need to set different
-> configuration for 3.3, 1.8 and 1.2 volt support (I/O domain power
-> control register).
-> 
-> Signed-off-by: Vaibhav Hiremath <vaibhav.hiremath@linaro.org>
-> ---
-> Note:
-> Currently ->voltage_switch() callback is only supported
-> in f_sdh30 driver. And I am not sure on the dependency of execution
-> sequence for that device. I could have moved ->voltage_switch() call
-> at one common place (above/below), but was not quite sure about it.
-> So, replicated/duplicated the call for other voltages.
-> 
->  drivers/mmc/host/sdhci.c | 8 ++++++++
->  1 file changed, 8 insertions(+)
-> 
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index 3dd295f..b59b76d 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -1753,6 +1753,10 @@ static int sdhci_do_start_signal_voltage_switch(struct sdhci_host *host,
->  		/* Wait for 5ms */
->  		usleep_range(5000, 5500);
->  
-> +		/* Some controller need to do more when switching */
-> +		if (host->ops->voltage_switch)
-> +			host->ops->voltage_switch(host, MMC_SIGNAL_VOLTAGE_330);
 
-Could this be implemented by regulator API? From patch set 3/3, the pxa1928
-voltage_switch hook is to operate the IO pad registers, this seems not belong
-to the SDHC IP core.
+On Wednesday 02 September 2015 12:24 PM, Jisheng Zhang wrote:
+> On Wed, 2 Sep 2015 00:54:13 +0530
+> Vaibhav Hiremath <vaibhav.hiremath@linaro.org> wrote:
+>
+>> There were some coding style issues where spaces have been used instead
+>> of tabs, for example, in macro definitions, alignment of function
+>> declarations/definitions, etc...
+>>
+>> This patch fixes all such occurrences in the code.
+>> And also use BIT for bit definitions.
+>>
+>> Signed-off-by: Vaibhav Hiremath <vaibhav.hiremath@linaro.org>
+>> ---
+>>   drivers/mmc/host/sdhci-pxav3.c | 63 ++++++++++++++++++++++--------------------
+>>   1 file changed, 33 insertions(+), 30 deletions(-)
+>>
+>> diff --git a/drivers/mmc/host/sdhci-pxav3.c b/drivers/mmc/host/sdhci-pxav3.c
+>> index 946d37f..d02bc37 100644
+>> --- a/drivers/mmc/host/sdhci-pxav3.c
+>> +++ b/drivers/mmc/host/sdhci-pxav3.c
+>> @@ -39,24 +39,29 @@
+>>   #include "sdhci.h"
+>>   #include "sdhci-pltfm.h"
+>>
+>> -#define PXAV3_RPM_DELAY_MS     50
+>> +#define PXAV3_RPM_DELAY_MS		50
+>>
+>> -#define SD_CLOCK_BURST_SIZE_SETUP		0x10A
+>> -#define SDCLK_SEL	0x100
+>> -#define SDCLK_DELAY_SHIFT	9
+>> -#define SDCLK_DELAY_MASK	0x1f
+>> +#define SD_CLOCK_BURST_SIZE_SETUP	0x10A
+>> +#define SDCLK_SEL			0x100
+>> +#define  SDCLK_DELAY_SHIFT		9
+>> +#define  SDCLK_DELAY_MASK		0x1f
+>>
+>> -#define SD_CFG_FIFO_PARAM       0x100
+>> -#define SDCFG_GEN_PAD_CLK_ON	(1<<6)
+>> -#define SDCFG_GEN_PAD_CLK_CNT_MASK	0xFF
+>> -#define SDCFG_GEN_PAD_CLK_CNT_SHIFT	24
+>> +#define SD_CFG_FIFO_PARAM		0x100
+>> +#define  SDCFG_GEN_PAD_CLK_ON		BIT(6)
+>> +#define  SDCFG_GEN_PAD_CLK_CNT_MASK	0xFF
+>> +#define  SDCFG_GEN_PAD_CLK_CNT_SHIFT	24
+>>
+>> -#define SD_SPI_MODE          0x108
+>> -#define SD_CE_ATA_1          0x10C
+>> +#define SD_SPI_MODE			0x108
+>> +#define SD_CE_ATA_1			0x10C
+>>
+>> -#define SD_CE_ATA_2          0x10E
+>> -#define SDCE_MISC_INT		(1<<2)
+>> -#define SDCE_MISC_INT_EN	(1<<1)
+>> +#define SD_CE_ATA_2			0x10E
+>> +#define  SDCE_MISC_INT			BIT(2)
+>> +#define  SDCE_MISC_INT_EN		BIT(1)
+>
+> BIT or (1 << y) are both fine, is there any reason to change to BIT?
+> If so, there will be lots of source code need such changes.
+>
+
+I have received comments for my other patches (PMIC/Regulator/mfd),
+so applying same here as well before doing any real
+functionality/coding changes to the driver.
+
+
+>> +
+>> +/* IO Power control */
+>> +#define IO_PWR_AKEY_ASFAR		0xbaba
+>> +#define IO_PWR_AKEY_ASSAR		0xeb10
+>> +#define IO_PWR_MMC1_PAD_1V8		BIT(2)
+>>
+>>   struct sdhci_pxa {
+>>   	struct clk *clk_core;
+>> @@ -128,7 +133,7 @@ static int mv_conf_mbus_windows(struct platform_device *pdev,
+>>   }
+>>
+>>   static int armada_38x_quirks(struct platform_device *pdev,
+>> -			     struct sdhci_host *host)
+>> +			struct sdhci_host *host)
+>>   {
+>>   	struct device_node *np = pdev->dev.of_node;
+>>   	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+>> @@ -136,8 +141,7 @@ static int armada_38x_quirks(struct platform_device *pdev,
+>>   	struct resource *res;
+>>
+>>   	host->quirks |= SDHCI_QUIRK_MISSING_CAPS;
+>> -	res = platform_get_resource_byname(pdev, IORESOURCE_MEM,
+>> -					   "conf-sdio3");
+>> +	res = platform_get_resource_byname(pdev, IORESOURCE_MEM, "conf-sdio3");
+>>   	if (res) {
+>>   		pxa->sdio3_conf_reg = devm_ioremap_resource(&pdev->dev, res);
+>>   		if (IS_ERR(pxa->sdio3_conf_reg))
+>> @@ -284,10 +288,10 @@ static void pxav3_set_uhs_signaling(struct sdhci_host *host, unsigned int uhs)
+>>   	 * FE-2946959
+>>   	 */
+>>   	if (pxa->sdio3_conf_reg) {
+>> -		u8 reg_val  = readb(pxa->sdio3_conf_reg);
+>> +		u8 reg_val = readb(pxa->sdio3_conf_reg);
+>>
+>>   		if (uhs == MMC_TIMING_UHS_SDR50 ||
+>> -		    uhs == MMC_TIMING_UHS_DDR50) {
+>> +				uhs == MMC_TIMING_UHS_DDR50) {
+>>   			reg_val &= ~SDIO3_CONF_CLK_INV;
+>>   			reg_val |= SDIO3_CONF_SD_FB_CLK;
+>>   		} else {
+>> @@ -304,20 +308,20 @@ static void pxav3_set_uhs_signaling(struct sdhci_host *host, unsigned int uhs)
+>>   }
+>>
+>>   static const struct sdhci_ops pxav3_sdhci_ops = {
+>> -	.set_clock = sdhci_set_clock,
+>> -	.platform_send_init_74_clocks = pxav3_gen_init_74_clocks,
+>> -	.get_max_clock = sdhci_pltfm_clk_get_max_clock,
+>> -	.set_bus_width = sdhci_set_bus_width,
+>> -	.reset = pxav3_reset,
+>> -	.set_uhs_signaling = pxav3_set_uhs_signaling,
+>> +	.set_clock			= sdhci_set_clock,
+>> +	.platform_send_init_74_clocks	= pxav3_gen_init_74_clocks,
+>> +	.get_max_clock			= sdhci_pltfm_clk_get_max_clock,
+>> +	.set_bus_width			= sdhci_set_bus_width,
+>> +	.reset				= pxav3_reset,
+>> +	.set_uhs_signaling		= pxav3_set_uhs_signaling,
+>>   };
+>
+> IMHO these two styles are both fine. For example, the mmc_sd_ops structure in
+> drivers/mmc/core/sd.c also follows the sdhci-pxav3's original coding style
+>
+>>
+
+Ditto here.
+
+I did similar changes to mfd driver, so applied same changes here as
+well.
+
+Trying to avoid another spin of actual patches due to such trivial 
+comments :)
+
 
 Thanks,
-Jisheng
-
-> +
->  		/* 3.3V regulator output should be stable within 5 ms */
->  		ctrl = sdhci_readw(host, SDHCI_HOST_CONTROL2);
->  		if (!(ctrl & SDHCI_CTRL_VDD_180))
-> @@ -1803,6 +1807,10 @@ static int sdhci_do_start_signal_voltage_switch(struct sdhci_host *host,
->  				return -EIO;
->  			}
->  		}
-> +		/* Some controller need to do more when switching */
-> +		if (host->ops->voltage_switch)
-> +			host->ops->voltage_switch(host, MMC_SIGNAL_VOLTAGE_120);
-> +
->  		return 0;
->  	default:
->  		/* No signal voltage switch required */
-
+Vaibhav
