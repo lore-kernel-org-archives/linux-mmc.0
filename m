@@ -1,65 +1,66 @@
 From: Vaibhav Hiremath <vaibhav.hiremath@linaro.org>
-Subject: Re: [PATCH 1/2] mmc: sdhci-pxav3: Fix tabbing issue
-Date: Wed, 2 Sep 2015 17:55:09 +0530
-Message-ID: <55E6EAA5.4030808@linaro.org>
+Subject: Re: [PATCH 2/2] mmc: sdhci-pxav3: Print ret value on error from
+ sdhci_add_host() fn
+Date: Wed, 2 Sep 2015 18:37:35 +0530
+Message-ID: <55E6F497.8080300@linaro.org>
 References: <1441135454-6902-1-git-send-email-vaibhav.hiremath@linaro.org>
- <1441135454-6902-2-git-send-email-vaibhav.hiremath@linaro.org>
- <1441139486.12163.3.camel@perches.com>
+ <1441135454-6902-3-git-send-email-vaibhav.hiremath@linaro.org>
+ <1441139838.12163.5.camel@perches.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=windows-1252; format=flowed
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pa0-f52.google.com ([209.85.220.52]:35685 "EHLO
-	mail-pa0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754188AbbIBMZO (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 2 Sep 2015 08:25:14 -0400
-Received: by pacfv12 with SMTP id fv12so10445358pac.2
-        for <linux-mmc@vger.kernel.org>; Wed, 02 Sep 2015 05:25:14 -0700 (PDT)
-In-Reply-To: <1441139486.12163.3.camel@perches.com>
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1441139838.12163.5.camel@perches.com>
+Sender: linux-kernel-owner@vger.kernel.org
 To: Joe Perches <joe@perches.com>
 Cc: linux-mmc@vger.kernel.org, ulf.hansson@linaro.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+List-Id: linux-mmc@vger.kernel.org
 
 
 
-On Wednesday 02 September 2015 02:01 AM, Joe Perches wrote:
+On Wednesday 02 September 2015 02:07 AM, Joe Perches wrote:
 > On Wed, 2015-09-02 at 00:54 +0530, Vaibhav Hiremath wrote:
->> There were some coding style issues where spaces have been used instead
->> of tabs, for example, in macro definitions, alignment of function
->> declarations/definitions, etc...
->>
->> This patch fixes all such occurrences in the code.
->> And also use BIT for bit definitions.
->
-> Please send 2 patches instead.
->
+>> Return value would give clear information about the actual root-cause
+>> of the failure.
 >> diff --git a/drivers/mmc/host/sdhci-pxav3.c b/drivers/mmc/host/sdhci-pxav3.c
-> []
->> @@ -128,7 +133,7 @@ static int mv_conf_mbus_windows(struct platform_device *pdev,
->>   }
+>> @@ -455,7 +455,7 @@ static int sdhci_pxav3_probe(struct platform_device *pdev)
 >>
->>   static int armada_38x_quirks(struct platform_device *pdev,
->> -			     struct sdhci_host *host)
->> +			struct sdhci_host *host)
+>>   	ret = sdhci_add_host(host);
+>>   	if (ret) {
+>> -		dev_err(&pdev->dev, "failed to add host\n");
+>> +		dev_err(&pdev->dev, "failed to add host ret - %d\n", ret);
+>>   		goto err_add_host;
+>>   	}
+>>
 >
-> This is not an improvement.
+> If this is really desirable, there are many other callers of
+> sdhci_add_host with error messages just like this one.
 >
 
-Missed to highlight one more point here,
+How about this? If you are ok, I can change it and submit the patch
+again.
 
-The kernel CodingStyle talks about indentation, pasting it below -
 
--------
-Outside of comments, documentation and except in Kconfig, spaces are
-never used for indentation.
--------
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index d2caa60..3a4902c 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -3176,8 +3176,11 @@ int sdhci_add_host(struct sdhci_host *host)
+                 mmc->caps |= MMC_CAP_NEEDS_POLL;
 
-But I see spaces are being used at lot of places :)
+         /* If there are external regulators, get them */
+-       if (mmc_regulator_get_supply(mmc) == -EPROBE_DEFER)
++       if (mmc_regulator_get_supply(mmc) == -EPROBE_DEFER) {
++               pr_err("%s: regulator supply unavailable, deferring 
+probe. \n",
++                               mmc_hostname(mmc));
+                 return -EPROBE_DEFER;
++       }
 
-Till now all the patches or drivers which I submitted, I never used
-spaces. :)
-Anyway, just wanted to highlight CodingStyle document here.
+         /* If vqmmc regulator and no 1.8V signalling, then there's no 
+UHS */
+         if (!IS_ERR(mmc->supply.vqmmc)) {
+
 
 Thanks,
 Vaibhav
