@@ -1,43 +1,36 @@
-From: Joe Perches <joe@perches.com>
-Subject: Re: [PATCH 2/2] mmc: sdhci-pxav3: Print ret value on error from
- sdhci_add_host() fn
-Date: Tue, 01 Sep 2015 13:37:18 -0700
-Message-ID: <1441139838.12163.5.camel@perches.com>
-References: <1441135454-6902-1-git-send-email-vaibhav.hiremath@linaro.org>
-	 <1441135454-6902-3-git-send-email-vaibhav.hiremath@linaro.org>
+From: Scott Wood <scottwood@freescale.com>
+Subject: Re: [v2, 2/3] mmc: sdhci-of-esdhc: get SOC version and revision
+ from GUTS_SVR
+Date: Tue, 1 Sep 2015 19:23:42 -0500
+Message-ID: <1441153422.4966.105.camel@freescale.com>
+References: <1440667742-25424-1-git-send-email-yangbo.lu@freescale.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="ISO-8859-1"
+Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtprelay0098.hostedemail.com ([216.40.44.98]:55731 "EHLO
-	smtprelay.hostedemail.com" rhost-flags-OK-OK-OK-FAIL)
-	by vger.kernel.org with ESMTP id S1752023AbbIAUhX (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 1 Sep 2015 16:37:23 -0400
-In-Reply-To: <1441135454-6902-3-git-send-email-vaibhav.hiremath@linaro.org>
+Received: from mail-bn1on0138.outbound.protection.outlook.com ([157.56.110.138]:39781
+	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1750889AbbIBAXw (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 1 Sep 2015 20:23:52 -0400
+In-Reply-To: <1440667742-25424-1-git-send-email-yangbo.lu@freescale.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Vaibhav Hiremath <vaibhav.hiremath@linaro.org>
-Cc: linux-mmc@vger.kernel.org, ulf.hansson@linaro.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+To: Yangbo Lu <yangbo.lu@freescale.com>
+Cc: linux-mmc@vger.kernel.org, ulf.hansson@linaro.org
 
-On Wed, 2015-09-02 at 00:54 +0530, Vaibhav Hiremath wrote:
-> Return value would give clear information about the actual root-cause
-> of the failure.
-
-I'm not sure why that is as nearly every error path in
-sdhci_add_host emits a message.
-
-> diff --git a/drivers/mmc/host/sdhci-pxav3.c b/drivers/mmc/host/sdhci-pxav3.c
-[]
-> @@ -455,7 +455,7 @@ static int sdhci_pxav3_probe(struct platform_device *pdev)
+On Thu, 2015-08-27 at 17:29 +0800, Yangbo Lu wrote:
+> @@ -24,6 +25,16 @@
 >  
->  	ret = sdhci_add_host(host);
->  	if (ret) {
-> -		dev_err(&pdev->dev, "failed to add host\n");
-> +		dev_err(&pdev->dev, "failed to add host ret - %d\n", ret);
->  		goto err_add_host;
->  	}
->  
+>  #define VENDOR_V_22  0x12
+>  #define VENDOR_V_23  0x13
+> +
+> +/* Global Utility Registers */
+> +#define GUTS_SVR             0xa4    /* System Version Register */
+> +/* SOC version definition */
+> +#define SVR_T4240            0x824000
 
-If this is really desirable, there are many other callers of
-sdhci_add_host with error messages just like this one.
+Please do not redefine this stuff in each driver that needs to reference it.
+
+-Scott
 
