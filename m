@@ -1,90 +1,121 @@
-From: Vaibhav Hiremath <vaibhav.hiremath@linaro.org>
-Subject: Re: [RFC 2/3] mmc: sdhci: add host_ops->voltage_switch callback for
- all other voltages
-Date: Wed, 2 Sep 2015 17:13:57 +0530
-Message-ID: <55E6E0FD.7000806@linaro.org>
-References: <1441135938-8056-1-git-send-email-vaibhav.hiremath@linaro.org>
- <1441135938-8056-3-git-send-email-vaibhav.hiremath@linaro.org>
- <20150902150442.118d3305@xhacker> <55E6B129.1030002@linaro.org>
- <20150902162627.682cdedf@xhacker>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [v2, 2/3] mmc: sdhci-of-esdhc: get SOC version and revision from GUTS_SVR
+Date: Wed, 2 Sep 2015 14:04:23 +0200
+Message-ID: <CAPDyKFoMT9wRQdQXj-Gv6rYXVRTJcm=Jv0EGdcFPM-4R2eR_qw@mail.gmail.com>
+References: <1440667742-25424-1-git-send-email-yangbo.lu@freescale.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pa0-f47.google.com ([209.85.220.47]:36299 "EHLO
-	mail-pa0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750776AbbIBLoD (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 2 Sep 2015 07:44:03 -0400
-Received: by pacwi10 with SMTP id wi10so9194999pac.3
-        for <linux-mmc@vger.kernel.org>; Wed, 02 Sep 2015 04:44:02 -0700 (PDT)
-In-Reply-To: <20150902162627.682cdedf@xhacker>
+Received: from mail-wi0-f180.google.com ([209.85.212.180]:33256 "EHLO
+	mail-wi0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753997AbbIBMEY (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 2 Sep 2015 08:04:24 -0400
+Received: by wicmc4 with SMTP id mc4so63713365wic.0
+        for <linux-mmc@vger.kernel.org>; Wed, 02 Sep 2015 05:04:23 -0700 (PDT)
+In-Reply-To: <1440667742-25424-1-git-send-email-yangbo.lu@freescale.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Jisheng Zhang <jszhang@marvell.com>
-Cc: linux-mmc@vger.kernel.org, ulf.hansson@linaro.org, linus.walleij@linaro.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+To: Yangbo Lu <yangbo.lu@freescale.com>
+Cc: Scott Wood <scottwood@freescale.com>, linux-mmc <linux-mmc@vger.kernel.org>
 
-
-
-On Wednesday 02 September 2015 01:56 PM, Jisheng Zhang wrote:
-> On Wed, 2 Sep 2015 13:49:53 +0530
-> Vaibhav Hiremath <vaibhav.hiremath@linaro.org> wrote:
+On 27 August 2015 at 11:29, Yangbo Lu <yangbo.lu@freescale.com> wrote:
+> Freescale QorIQ SOCs have the SVR(System version register) containing
+> the system version number for the device. Sometimes the eSDHC driver
+> needs to know this information for some errata workaround. So, we read
+> SVR from the global utilities block of the chip.
 >
->>
->>
->> On Wednesday 02 September 2015 12:34 PM, Jisheng Zhang wrote:
->>> On Wed, 2 Sep 2015 01:02:17 +0530
->>> Vaibhav Hiremath <vaibhav.hiremath@linaro.org> wrote:
->>>
->>>> Currently, the sdhci_do_start_signal_voltage_switch() function invokes
->>>> controller specific voltage switch configuration only for 1.8v usecase;
->>>> but it is required for others as well.
->>>>
->>>> For example, in case of PXA1928 SDH controller, we need to set different
->>>> configuration for 3.3, 1.8 and 1.2 volt support (I/O domain power
->>>> control register).
->>>>
->>>> Signed-off-by: Vaibhav Hiremath <vaibhav.hiremath@linaro.org>
->>>> ---
->>>> Note:
->>>> Currently ->voltage_switch() callback is only supported
->>>> in f_sdh30 driver. And I am not sure on the dependency of execution
->>>> sequence for that device. I could have moved ->voltage_switch() call
->>>> at one common place (above/below), but was not quite sure about it.
->>>> So, replicated/duplicated the call for other voltages.
->>>>
->>>>    drivers/mmc/host/sdhci.c | 8 ++++++++
->>>>    1 file changed, 8 insertions(+)
->>>>
->>>> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
->>>> index 3dd295f..b59b76d 100644
->>>> --- a/drivers/mmc/host/sdhci.c
->>>> +++ b/drivers/mmc/host/sdhci.c
->>>> @@ -1753,6 +1753,10 @@ static int sdhci_do_start_signal_voltage_switch(struct sdhci_host *host,
->>>>    		/* Wait for 5ms */
->>>>    		usleep_range(5000, 5500);
->>>>
->>>> +		/* Some controller need to do more when switching */
->>>> +		if (host->ops->voltage_switch)
->>>> +			host->ops->voltage_switch(host, MMC_SIGNAL_VOLTAGE_330);
->>>
->>> Could this be implemented by regulator API? From patch set 3/3, the pxa1928
->>> voltage_switch hook is to operate the IO pad registers, this seems not belong
->>> to the SDHC IP core.
->>>
->>
->> Not quite sure whether regulator would be right fit for this.
+> Signed-off-by: Yangbo Lu <yangbo.lu@freescale.com>
+> ---
+>  drivers/mmc/host/sdhci-of-esdhc.c | 42 ++++++++++++++++++++++++++++++++++++++-
+>  1 file changed, 41 insertions(+), 1 deletion(-)
 >
->  From the patche[3/3], this can be achieved by abstracting the IO PAD as regulators
-> then, we may not need to touch the core sdhci.c. But I'm not sure whether this
-> is the good solution or not.
+> diff --git a/drivers/mmc/host/sdhci-of-esdhc.c b/drivers/mmc/host/sdhci-of-esdhc.c
+> index e26e7b3..20e0b9a 100644
+> --- a/drivers/mmc/host/sdhci-of-esdhc.c
+> +++ b/drivers/mmc/host/sdhci-of-esdhc.c
+> @@ -16,6 +16,7 @@
+>  #include <linux/err.h>
+>  #include <linux/io.h>
+>  #include <linux/of.h>
+> +#include <linux/of_address.h>
+>  #include <linux/delay.h>
+>  #include <linux/module.h>
+>  #include <linux/mmc/host.h>
+> @@ -24,6 +25,16 @@
+>
+>  #define VENDOR_V_22    0x12
+>  #define VENDOR_V_23    0x13
+> +
+> +/* Global Utility Registers */
+> +#define GUTS_SVR               0xa4    /* System Version Register */
+> +/* SOC version definition */
+> +#define SVR_T4240              0x824000
+> +/* SOC version */
+> +static u32 soc_ver;
+> +/* SOC revision */
+> +static u8 soc_rev;
+> +
+>  static u32 esdhc_readl(struct sdhci_host *host, int reg)
+>  {
+>         u32 ret;
+> @@ -354,10 +365,26 @@ static const struct sdhci_pltfm_data sdhci_esdhc_pdata = {
+>         .ops = &sdhci_esdhc_ops,
+>  };
+>
+> +/*
+> + * Table for matching compatible strings, for device tree
+> + * guts node, for Freescale QorIQ SOCs.
+> + * "fsl,qoriq-device-config-2.0" corresponds to T4 & B4
+> + * SOCs. For the older SOCs "fsl,qoriq-device-config-1.0"
+> + * string would be used.
+> + */
+> +static const struct of_device_id guts_device_ids[] = {
+> +       { .compatible = "fsl,qoriq-device-config-1.0", },
+> +       { .compatible = "fsl,qoriq-device-config-2.0", },
+> +       {}
+> +};
+> +
+>  static void esdhc_get_property(struct platform_device *pdev)
+>  {
+> -       struct device_node *np = pdev->dev.of_node;
+>         struct sdhci_host *host = platform_get_drvdata(pdev);
+> +       struct device_node *np = pdev->dev.of_node;
+> +       struct device_node *guts_node;
+> +       void __iomem *guts_base;
+> +       u32 svr;
+>
+>         sdhci_get_of_property(pdev);
+>
+> @@ -365,6 +392,19 @@ static void esdhc_get_property(struct platform_device *pdev)
+>         mmc_of_parse(host->mmc);
+>         mmc_of_parse_voltage(np, &host->ocr_mask);
+>
+> +       /* Get SVR */
+> +       guts_node = of_find_matching_node(NULL, guts_device_ids);
+> +       if (guts_node) {
+> +               guts_base = of_iomap(guts_node, 0);
 
-Exactly...
+The SVR registers etc, should be managed through a syscon driver
+(drivers/mfd/syscon.c).
+Each client that needs to read the SVR register shall then go via the
+syscon driver to fetch a "regmap" and perform the relevant actions on
+it.
 
-> sdhci Maintainers and experts may have better
-> suggestions.
+> +               of_node_put(guts_node);
+> +               if (guts_base) {
+> +                       svr = in_be32(guts_base + GUTS_SVR);
+> +                       soc_ver = (svr >> 8) & 0xfff7ff;
+> +                       soc_rev = svr & 0xff;
+> +                       iounmap(guts_base);
+> +               }
+> +       }
+> +
+>         if (of_device_is_compatible(np, "fsl,p5040-esdhc") ||
+>             of_device_is_compatible(np, "fsl,p5020-esdhc") ||
+>             of_device_is_compatible(np, "fsl,p4080-esdhc") ||
+> --
+> 2.1.0.27.g96db324
 >
 
-Thats is the reason I stamped it as a RFC :)
-
-Thanks,
-Vaibhav
+Kind regards
+Uffe
