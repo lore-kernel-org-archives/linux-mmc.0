@@ -1,51 +1,47 @@
-From: Jon Hunter <jonathanh@nvidia.com>
-Subject: Re: [RFC PATCH] mmc: block: Add new ioctl to send combo commands
-Date: Thu, 3 Sep 2015 16:10:18 +0100
-Message-ID: <55E862DA.1080509@nvidia.com>
-References: <1441203711-19538-1-git-send-email-jonathanh@nvidia.com>
- <CAOesGMh9d6yX-dS6jg2eu2hvN5S=87rr7L-+ZUreX=GGHDxRaA@mail.gmail.com>
- <CANEJEGsb=bSyqYW6K5eXr8PwUrJxokOHz894ofk4F-SRohGeQQ@mail.gmail.com>
- <CANEJEGvRSDFjrVPMN=3d2yEK=d1eQYQgvAynw75Qj2fcPdrq7Q@mail.gmail.com>
+From: Tony Lindgren <tony@atomide.com>
+Subject: Re: [PATCH] ARM: multi_v7_defconfig: Enable PBIAS regulator
+Date: Thu, 3 Sep 2015 08:23:25 -0700
+Message-ID: <20150903152325.GW4215@atomide.com>
+References: <1441274111-18049-1-git-send-email-kishon@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CANEJEGvRSDFjrVPMN=3d2yEK=d1eQYQgvAynw75Qj2fcPdrq7Q@mail.gmail.com>
+Content-Disposition: inline
+In-Reply-To: <1441274111-18049-1-git-send-email-kishon@ti.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Grant Grundler <grundler@google.com>, Olof Johansson <olof@lixom.net>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Olof Johansson <olofj@chromium.org>, Seshagiri Holi <sholi@nvidia.com>
+To: Kishon Vijay Abraham I <kishon@ti.com>
+Cc: ulf.hansson@linaro.org, broonie@kernel.org, linux@arm.linux.org.uk, olof@lixom.net, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, nsekhar@ti.com
 List-Id: linux-mmc@vger.kernel.org
 
-
-On 02/09/15 23:08, Grant Grundler wrote:
-> [resending text-only]
+* Kishon Vijay Abraham I <kishon@ti.com> [150903 02:58]:
+> PBIAS regulator is required for MMC module in OMAP2, OMAP3, OMAP4,
+> OMAP5 and DRA7 SoCs. Enable it here.
 > 
-> On Wed, Sep 2, 2015 at 3:07 PM, Grant Grundler <grundler@google.com> wrote:
->>
->>
->> On Wed, Sep 2, 2015 at 11:28 AM, Olof Johansson <olof@lixom.net> wrote:
->> ...
->>>> +/**
->>>> + * struct mmc_ioc_combo_cmd - combo command information
->>>> + * @num_of_cmds: number of commands to send
->>>> + * @mmc_ioc_cmd_list: pointer to list of commands
->>>> + */
->>>> +struct mmc_ioc_combo_cmd {
->>>> +       uint8_t num_of_cmds;
->>>> +       struct mmc_ioc_cmd *mmc_ioc_cmd_list;
->>>> +};
->>>
->>> The size of this struct will depend on the pointer size of userspace.
->>>
->>> It might be better to use a u64 for the pointer instead. Otherwise
->>> you'd need a compat ioctl wrapper to copy a 32-bit pointer over on a
->>> 64-bit kernel.
->>
->> If alignment matters, then maybe swap the fields?
->> Or declare num_of_cmds as u64 as well?
+> Signed-off-by: Kishon Vijay Abraham I <kishon@ti.com>
 
-Thanks. I did swap them in the updated version as this seems to make
-sense. However, I left num_of_cmds as an 8-bit value unless someone has
-a need for more than 256 commands ;-)
+For the multi_v7_defconfig changes you need to resend this
+to arm@kernel.org. This is to avoid conflicts with other
+patches.
 
-Jon
+Regards,
+
+Tony
+
+>  arch/arm/configs/multi_v7_defconfig |    1 +
+>  1 file changed, 1 insertion(+)
+> 
+> diff --git a/arch/arm/configs/multi_v7_defconfig b/arch/arm/configs/multi_v7_defconfig
+> index 5fd8df6..f497c96 100644
+> --- a/arch/arm/configs/multi_v7_defconfig
+> +++ b/arch/arm/configs/multi_v7_defconfig
+> @@ -403,6 +403,7 @@ CONFIG_REGULATOR_MAX8973=y
+>  CONFIG_REGULATOR_MAX77686=y
+>  CONFIG_REGULATOR_MAX77693=m
+>  CONFIG_REGULATOR_PALMAS=y
+> +CONFIG_REGULATOR_PBIAS=y
+>  CONFIG_REGULATOR_S2MPS11=y
+>  CONFIG_REGULATOR_S5M8767=y
+>  CONFIG_REGULATOR_TPS51632=y
+> -- 
+> 1.7.9.5
+> 
