@@ -1,39 +1,43 @@
-From: Kishon Vijay Abraham I <kishon@ti.com>
-Subject: [PATCH] ARM: multi_v7_defconfig: Enable PBIAS regulator
-Date: Thu, 3 Sep 2015 15:25:11 +0530
-Message-ID: <1441274111-18049-1-git-send-email-kishon@ti.com>
+From: Tony Lindgren <tony@atomide.com>
+Subject: Re: [PATCH v2 0/6] regulator: Fix pbias regulator enable
+Date: Thu, 3 Sep 2015 08:04:53 -0700
+Message-ID: <20150903150452.GT4215@atomide.com>
+References: <1441263042-12942-1-git-send-email-kishon@ti.com>
+ <CAPDyKFrVR+vvmxm43hGimjqo4pcFa1pfDuNNENXU-tk_qXo2=w@mail.gmail.com>
+ <55E81117.2040900@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from bear.ext.ti.com ([192.94.94.41]:42906 "EHLO bear.ext.ti.com"
+Received: from muru.com ([72.249.23.125]:48399 "EHLO muru.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753325AbbICJzw (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 3 Sep 2015 05:55:52 -0400
+	id S1754586AbbICPE5 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 3 Sep 2015 11:04:57 -0400
+Content-Disposition: inline
+In-Reply-To: <55E81117.2040900@ti.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: ulf.hansson@linaro.org, tony@atomide.com, broonie@kernel.org, linux@arm.linux.org.uk, olof@lixom.net, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org
-Cc: nsekhar@ti.com, kishon@ti.com
+To: Kishon Vijay Abraham I <kishon@ti.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Olof Johansson <olof@lixom.net>, Mark Brown <broonie@kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Rob Herring <robh+dt@kernel.org>, =?utf-8?B?UGF3ZcWC?= Moll <pawel.moll@arm.com>, Mark Rutland <mark.rutland@arm.com>, Ian Campbell <ijc+devicetree@hellion.org.uk>, Kumar Gala <galak@codeaurora.org>, Benoit Cousson <bcousson@baylibre.com>, Russell King - ARM Linux <linux@arm.linux.org.uk>, Liam Girdwood <lgirdwood@gmail.com>, linux-omap <linux-omap@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Sekhar Nori <nsekhar@ti.com>
 
-PBIAS regulator is required for MMC module in OMAP2, OMAP3, OMAP4,
-OMAP5 and DRA7 SoCs. Enable it here.
+* Kishon Vijay Abraham I <kishon@ti.com> [150903 02:25]:
+> On Thursday 03 September 2015 01:09 PM, Ulf Hansson wrote:
+> > 
+> > Finally, perhaps it's better if we queue this through my mmc tree
+> > since we would then be able to avoid the regression - if I put
+> > $subject patchset before [1], right? Then I need an ack from Mark for
+> > the regulator patch.
+> > Please tell me if you guys prefer another way.
 
-Signed-off-by: Kishon Vijay Abraham I <kishon@ti.com>
----
- arch/arm/configs/multi_v7_defconfig |    1 +
- 1 file changed, 1 insertion(+)
+That works for me too. Or Mark can set up an immutable signed
+branch that you can merge in, up to you guys.
 
-diff --git a/arch/arm/configs/multi_v7_defconfig b/arch/arm/configs/multi_v7_defconfig
-index 5fd8df6..f497c96 100644
---- a/arch/arm/configs/multi_v7_defconfig
-+++ b/arch/arm/configs/multi_v7_defconfig
-@@ -403,6 +403,7 @@ CONFIG_REGULATOR_MAX8973=y
- CONFIG_REGULATOR_MAX77686=y
- CONFIG_REGULATOR_MAX77693=m
- CONFIG_REGULATOR_PALMAS=y
-+CONFIG_REGULATOR_PBIAS=y
- CONFIG_REGULATOR_S2MPS11=y
- CONFIG_REGULATOR_S5M8767=y
- CONFIG_REGULATOR_TPS51632=y
--- 
-1.7.9.5
+It's still going to break git bisect for booting but
+removes the regression when mergeing to mainline.
 
+I'd squash all the one liner dts changes into a single
+patch though when applying to cut down on the commit
+noise.
+
+Regards,
+
+Tony
