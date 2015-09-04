@@ -1,57 +1,74 @@
-From: Kishon Vijay Abraham I <kishon@ti.com>
-Subject: Re: [PATCH] ARM: multi_v7_defconfig: Enable PBIAS regulator
-Date: Fri, 4 Sep 2015 19:20:28 +0530
-Message-ID: <55E9A1A4.30506@ti.com>
-References: <1441274111-18049-1-git-send-email-kishon@ti.com> <20150903152325.GW4215@atomide.com>
+From: Mark Brown <broonie@kernel.org>
+Subject: Re: [PATCH v3 1/2] regulator: pbias: program pbias register offset
+ in pbias driver
+Date: Fri, 4 Sep 2015 16:17:32 +0100
+Message-ID: <20150904151732.GN5313@sirena.org.uk>
+References: <1441368025-21182-1-git-send-email-kishon@ti.com>
+ <1441368025-21182-2-git-send-email-kishon@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="windows-1252"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20150903152325.GW4215@atomide.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Tony Lindgren <tony@atomide.com>
-Cc: ulf.hansson@linaro.org, broonie@kernel.org, linux@arm.linux.org.uk, olof@lixom.net, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, nsekhar@ti.com
+Content-Type: multipart/mixed; boundary="===============5505380206831694397=="
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <1441368025-21182-2-git-send-email-kishon@ti.com>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Kishon Vijay Abraham I <kishon@ti.com>
+Cc: mark.rutland@arm.com, devicetree@vger.kernel.org, ulf.hansson@linaro.org, linux@arm.linux.org.uk, pawel.moll@arm.com, ijc+devicetree@hellion.org.uk, tony@atomide.com, nsekhar@ti.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, lgirdwood@gmail.com, robh+dt@kernel.org, bcousson@baylibre.com, galak@codeaurora.org, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
-Hi,
 
-On Thursday 03 September 2015 08:53 PM, Tony Lindgren wrote:
-> * Kishon Vijay Abraham I <kishon@ti.com> [150903 02:58]:
->> PBIAS regulator is required for MMC module in OMAP2, OMAP3, OMAP4,
->> OMAP5 and DRA7 SoCs. Enable it here.
->>
->> Signed-off-by: Kishon Vijay Abraham I <kishon@ti.com>
-> 
-> For the multi_v7_defconfig changes you need to resend this
-> to arm@kernel.org. This is to avoid conflicts with other
-> patches.
+--===============5505380206831694397==
+Content-Type: multipart/signed; micalg=pgp-sha256;
+	protocol="application/pgp-signature"; boundary="nWqF9Q8pq9VTXuIf"
+Content-Disposition: inline
 
-for some reason mail to arm@kernel.org bounced :-( Should I subscribe to
-it before sending patches?
 
-Thanks
-Kishon
+--nWqF9Q8pq9VTXuIf
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 
-> 
-> Regards,
-> 
-> Tony
-> 
->>  arch/arm/configs/multi_v7_defconfig |    1 +
->>  1 file changed, 1 insertion(+)
->>
->> diff --git a/arch/arm/configs/multi_v7_defconfig b/arch/arm/configs/multi_v7_defconfig
->> index 5fd8df6..f497c96 100644
->> --- a/arch/arm/configs/multi_v7_defconfig
->> +++ b/arch/arm/configs/multi_v7_defconfig
->> @@ -403,6 +403,7 @@ CONFIG_REGULATOR_MAX8973=y
->>  CONFIG_REGULATOR_MAX77686=y
->>  CONFIG_REGULATOR_MAX77693=m
->>  CONFIG_REGULATOR_PALMAS=y
->> +CONFIG_REGULATOR_PBIAS=y
->>  CONFIG_REGULATOR_S2MPS11=y
->>  CONFIG_REGULATOR_S5M8767=y
->>  CONFIG_REGULATOR_TPS51632=y
->> -- 
->> 1.7.9.5
->>
+On Fri, Sep 04, 2015 at 05:30:24PM +0530, Kishon Vijay Abraham I wrote:
+> Add separate compatible strings for every platform and populate the
+> pbias register offset in the driver data.
+> This helps avoid depending on the dt for pbias register offset.
+
+If there are any changes from the already applied patch for this please
+send an incremental patch.  Please don't resend already applied patches.
+
+--nWqF9Q8pq9VTXuIf
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: Digital signature
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2
+
+iQEcBAEBCAAGBQJV6bYLAAoJECTWi3JdVIfQS0oH/iTGdObqUdleqiDezsMsoH3U
+gJCee9Nlztwh1YLi36qn95IIP/KquitAsZiytRTxaHklezaWuokMwkX5yvGCJdOU
+T9UloT5Ky8UbwZ3LtYlnEJNiAzS4yRx7vP1/BRe+PrC+6ux+zEwv4EDDIWO+tvCb
+IY9RRrmctRBcsSoXD8Fd8WtW1PwF5KiF18L1tkmnnDNMA16/cwxszVXuxXWeYQ+o
+CGGtbH9EGqKuIg3FrUg57FuzVlAgh4SQcbyTMlv7TPuwsGanj9uO63N1hanXWPJV
+mmGgmOV9MaedRnVZrjZu/+gssS1DLFultjGn+HBoAua3qCJjOmRTENiO1G1kZno=
+=NprE
+-----END PGP SIGNATURE-----
+
+--nWqF9Q8pq9VTXuIf--
+
+
+--===============5505380206831694397==
+Content-Type: text/plain; charset="us-ascii"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Content-Disposition: inline
+
+_______________________________________________
+linux-arm-kernel mailing list
+linux-arm-kernel@lists.infradead.org
+http://lists.infradead.org/mailman/listinfo/linux-arm-kernel
+
+--===============5505380206831694397==--
