@@ -1,74 +1,69 @@
-From: Mark Brown <broonie@kernel.org>
-Subject: Re: [PATCH v3 1/2] regulator: pbias: program pbias register offset
- in pbias driver
-Date: Fri, 4 Sep 2015 16:17:32 +0100
-Message-ID: <20150904151732.GN5313@sirena.org.uk>
-References: <1441368025-21182-1-git-send-email-kishon@ti.com>
- <1441368025-21182-2-git-send-email-kishon@ti.com>
-Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="===============5505380206831694397=="
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <1441368025-21182-2-git-send-email-kishon@ti.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Kishon Vijay Abraham I <kishon@ti.com>
-Cc: mark.rutland@arm.com, devicetree@vger.kernel.org, ulf.hansson@linaro.org, linux@arm.linux.org.uk, pawel.moll@arm.com, ijc+devicetree@hellion.org.uk, tony@atomide.com, nsekhar@ti.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, lgirdwood@gmail.com, robh+dt@kernel.org, bcousson@baylibre.com, galak@codeaurora.org, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+From: Vaibhav Hiremath <vaibhav.hiremath@linaro.org>
+Subject: [PATCH 0/5] mmc: sdhci-pxav3: Enable support for PXA1928 SDCHI controller
+Date: Fri,  4 Sep 2015 21:02:16 +0530
+Message-ID: <1441380741-13115-1-git-send-email-vaibhav.hiremath@linaro.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-pa0-f42.google.com ([209.85.220.42]:33438 "EHLO
+	mail-pa0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1759024AbbIDPeo (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 4 Sep 2015 11:34:44 -0400
+Received: by pacex6 with SMTP id ex6so27546740pac.0
+        for <linux-mmc@vger.kernel.org>; Fri, 04 Sep 2015 08:34:43 -0700 (PDT)
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, kliu5@marvell.com, ulf.hansson@linaro.org, Vaibhav Hiremath <vaibhav.hiremath@linaro.org>
+
+PXA1928 SDHCI controller has few differences, for example,
+
+                           PXAxxx                    PXA1928
+                           ======                    =======
+   SDCLK_DELAY field       0x10A                     0x114
+   SDCLK_DELAY mask        0x1F                      0x3FF
+   SDCLK_DELAY shift        9                          8
+   SDCLK_SEL shift          8                          2 (SEL1)
+
+So this patch series introduces new compatible device_id
+(marvell,pxav3-1928-sdhci), and makes use of .data for handling
+such differences.
+
+The series also adds support like,
+
+ - independent ->set_clock() api, as we need to enable internal clock gate
+    and TX clock
+ - pinctrl configuration based on bus speed.
+ - introduce new quirk SDHCI_QUIRK2_MUST_SET_SDHCI_BUS_POWER
+   SD_BUS_POWER & SD_BUS_VLT bit-fields are used internally to gate the
+   clocks, so it is important to configure them as part of ->set_power()
+   More detailed description is written into commit log.
+ - Enable SDHCI_QUIRK_BROKEN_TIMEOUT_VAL for PXA1928 device_id
 
 
---===============5505380206831694397==
-Content-Type: multipart/signed; micalg=pgp-sha256;
-	protocol="application/pgp-signature"; boundary="nWqF9Q8pq9VTXuIf"
-Content-Disposition: inline
+Testing:
+I have done basic testing on both eMMC and SD card on PXA1928 based
+platform.
 
+Note: I tried to made sure that I do not break any other platform, which
+used sdhci, except HS200 configuration. 
+Unfortunately I do not have access to any other datasheets, where I can
+cross check the details on HS200 bit-fields. Probably someone who has
+access can confirm [PATCH 4/5], whether it impacts other platforms.
 
---nWqF9Q8pq9VTXuIf
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+Kevin Liu (1):
+  mmc: sdhci-pxav3: Fix HS200 mode support
 
-On Fri, Sep 04, 2015 at 05:30:24PM +0530, Kishon Vijay Abraham I wrote:
-> Add separate compatible strings for every platform and populate the
-> pbias register offset in the driver data.
-> This helps avoid depending on the dt for pbias register offset.
+Vaibhav Hiremath (4):
+  mmc: sdhci-pxav3: Enable pxa1928 device support
+  mmc: sdhci-pxav3: Add platform specific set_clock ops
+  mmc: sdhci-pxav3: Add pinctl setting according to bus clock
+  mmc: sdhci: add new quirk for setting BUS_POWER & BUS_VLT fields
 
-If there are any changes from the already applied patch for this please
-send an incremental patch.  Please don't resend already applied patches.
+ drivers/mmc/host/sdhci-pltfm.c |   3 +
+ drivers/mmc/host/sdhci-pxav3.c | 168 ++++++++++++++++++++++++++++++++++++++---
+ drivers/mmc/host/sdhci.c       |   3 +-
+ drivers/mmc/host/sdhci.h       |   2 +
+ 4 files changed, 163 insertions(+), 13 deletions(-)
 
---nWqF9Q8pq9VTXuIf
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: Digital signature
+-- 
+1.9.1
 
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2
-
-iQEcBAEBCAAGBQJV6bYLAAoJECTWi3JdVIfQS0oH/iTGdObqUdleqiDezsMsoH3U
-gJCee9Nlztwh1YLi36qn95IIP/KquitAsZiytRTxaHklezaWuokMwkX5yvGCJdOU
-T9UloT5Ky8UbwZ3LtYlnEJNiAzS4yRx7vP1/BRe+PrC+6ux+zEwv4EDDIWO+tvCb
-IY9RRrmctRBcsSoXD8Fd8WtW1PwF5KiF18L1tkmnnDNMA16/cwxszVXuxXWeYQ+o
-CGGtbH9EGqKuIg3FrUg57FuzVlAgh4SQcbyTMlv7TPuwsGanj9uO63N1hanXWPJV
-mmGgmOV9MaedRnVZrjZu/+gssS1DLFultjGn+HBoAua3qCJjOmRTENiO1G1kZno=
-=NprE
------END PGP SIGNATURE-----
-
---nWqF9Q8pq9VTXuIf--
-
-
---===============5505380206831694397==
-Content-Type: text/plain; charset="us-ascii"
-MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Content-Disposition: inline
-
-_______________________________________________
-linux-arm-kernel mailing list
-linux-arm-kernel@lists.infradead.org
-http://lists.infradead.org/mailman/listinfo/linux-arm-kernel
-
---===============5505380206831694397==--
