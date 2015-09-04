@@ -1,94 +1,57 @@
-From: Kishon Vijay Abraham I <kishon@ti.com>
-Subject: [PATCH v3 2/2] ARM: dts: <omap2/3/4/5/dra7>: use "ti,pbias-<platform>" compatible string for pbias
-Date: Fri, 4 Sep 2015 17:30:25 +0530
-Message-ID: <1441368025-21182-3-git-send-email-kishon@ti.com>
-References: <1441368025-21182-1-git-send-email-kishon@ti.com>
+From: Kishon Vijay Abraham I <kishon-l0cyMroinI0@public.gmane.org>
+Subject: [PATCH v3 0/2] regulator: Fix pbias regulator enable
+Date: Fri, 4 Sep 2015 17:30:23 +0530
+Message-ID: <1441368025-21182-1-git-send-email-kishon@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1441368025-21182-1-git-send-email-kishon@ti.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: tony@atomide.com, broonie@kernel.org, devicetree@vger.kernel.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
-Cc: ulf.hansson@linaro.org, robh+dt@kernel.org, pawel.moll@arm.com, mark.rutland@arm.com, ijc+devicetree@hellion.org.uk, galak@codeaurora.org, bcousson@baylibre.com, linux@arm.linux.org.uk, lgirdwood@gmail.com, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org, nsekhar@ti.com, kishon@ti.com
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org, broonie-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, pawel.moll-5wv7dgnIgG8@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, ijc+devicetree-KcIKpvwj1kUDXYZnReoRVg@public.gmane.org, galak-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, bcousson-rdvid1DuHRBWk0Htik3J/w@public.gmane.org, linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org, lgirdwood-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org, linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, nsekhar-l0cyMroinI0@public.gmane.org, kishon-l0cyMroinI0@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
 
-Use platform specific compatible strings instead of the common
-"ti,pbias-omap" compatible string.
+vsel_reg and enable_reg of the pbias regulator descriptor should actually
+have the offset from syscon.
 
-Signed-off-by: Kishon Vijay Abraham I <kishon@ti.com>
-Acked-by: Tony Lindgren <tony@atomide.com>
----
- arch/arm/boot/dts/dra7.dtsi     |    2 +-
- arch/arm/boot/dts/omap2430.dtsi |    2 +-
- arch/arm/boot/dts/omap3.dtsi    |    2 +-
- arch/arm/boot/dts/omap4.dtsi    |    2 +-
- arch/arm/boot/dts/omap5.dtsi    |    2 +-
- 5 files changed, 5 insertions(+), 5 deletions(-)
+However after
+"ARM: dts: <platform>: add minimal l4 bus layout with control module
+support"
+vsel_reg and enable_reg started to have the absolute address because
+of address translation that happens due to pbias node made as the
+child node of syscon. This breaks the pbias regulator enable.
 
-diff --git a/arch/arm/boot/dts/dra7.dtsi b/arch/arm/boot/dts/dra7.dtsi
-index 1e29ccf..d6bc6db 100644
---- a/arch/arm/boot/dts/dra7.dtsi
-+++ b/arch/arm/boot/dts/dra7.dtsi
-@@ -122,7 +122,7 @@
- 					#size-cells = <1>;
- 
- 					pbias_regulator: pbias_regulator {
--						compatible = "ti,pbias-omap";
-+						compatible = "ti,pbias-dra7", "ti,pbias-omap";
- 						reg = <0xe00 0x4>;
- 						syscon = <&scm_conf>;
- 						pbias_mmc_reg: pbias_mmc_omap5 {
-diff --git a/arch/arm/boot/dts/omap2430.dtsi b/arch/arm/boot/dts/omap2430.dtsi
-index 2390f38..3961a6f 100644
---- a/arch/arm/boot/dts/omap2430.dtsi
-+++ b/arch/arm/boot/dts/omap2430.dtsi
-@@ -63,7 +63,7 @@
- 					};
- 
- 					pbias_regulator: pbias_regulator {
--						compatible = "ti,pbias-omap";
-+						compatible = "ti,pbias-omap2", "ti,pbias-omap";
- 						reg = <0x230 0x4>;
- 						syscon = <&scm_conf>;
- 						pbias_mmc_reg: pbias_mmc_omap2430 {
-diff --git a/arch/arm/boot/dts/omap3.dtsi b/arch/arm/boot/dts/omap3.dtsi
-index 69a40cf..9af9ae1 100644
---- a/arch/arm/boot/dts/omap3.dtsi
-+++ b/arch/arm/boot/dts/omap3.dtsi
-@@ -203,7 +203,7 @@
- 		};
- 
- 		pbias_regulator: pbias_regulator {
--			compatible = "ti,pbias-omap";
-+			compatible = "ti,pbias-omap3", "ti,pbias-omap";
- 			reg = <0x2b0 0x4>;
- 			syscon = <&scm_conf>;
- 			pbias_mmc_reg: pbias_mmc_omap2430 {
-diff --git a/arch/arm/boot/dts/omap4.dtsi b/arch/arm/boot/dts/omap4.dtsi
-index abc4473..5aad7f3 100644
---- a/arch/arm/boot/dts/omap4.dtsi
-+++ b/arch/arm/boot/dts/omap4.dtsi
-@@ -198,7 +198,7 @@
- 					#size-cells = <1>;
- 
- 					pbias_regulator: pbias_regulator {
--						compatible = "ti,pbias-omap";
-+						compatible = "ti,pbias-omap4", "ti,pbias-omap";
- 						reg = <0x60 0x4>;
- 						syscon = <&omap4_padconf_global>;
- 						pbias_mmc_reg: pbias_mmc_omap4 {
-diff --git a/arch/arm/boot/dts/omap5.dtsi b/arch/arm/boot/dts/omap5.dtsi
-index b1a1263..76ef595 100644
---- a/arch/arm/boot/dts/omap5.dtsi
-+++ b/arch/arm/boot/dts/omap5.dtsi
-@@ -187,7 +187,7 @@
- 					#size-cells = <1>;
- 
- 					pbias_regulator: pbias_regulator {
--						compatible = "ti,pbias-omap";
-+						compatible = "ti,pbias-omap5", "ti,pbias-omap";
- 						reg = <0x60 0x4>;
- 						syscon = <&omap5_padconf_global>;
- 						pbias_mmc_reg: pbias_mmc_omap5 {
+This series adds the 'offset' to be populated in vsel_reg and enable_reg
+in the pbias driver itself.
+
+Changes from v2:
+*) Squashed all the dt patches into a single patch
+
+Changes from v1:
+*) Fixed Tony's review comments on adding a 'comment' for adding offset in
+   the driver and adding a warning for using platform_get_resource.
+*) Added Tony's Acked-by.
+
+Tested these patches against mmc -next in omap4 panda, omap3 beagle xm,
+dra72 and omap5 uevm
+
+Kishon Vijay Abraham I (2):
+  regulator: pbias: program pbias register offset in pbias driver
+  ARM: dts: <omap2/3/4/5/dra7>: use "ti,pbias-<platform>" compatible
+    string for pbias
+
+ .../bindings/regulator/pbias-regulator.txt         |    7 ++-
+ arch/arm/boot/dts/dra7.dtsi                        |    2 +-
+ arch/arm/boot/dts/omap2430.dtsi                    |    2 +-
+ arch/arm/boot/dts/omap3.dtsi                       |    2 +-
+ arch/arm/boot/dts/omap4.dtsi                       |    2 +-
+ arch/arm/boot/dts/omap5.dtsi                       |    2 +-
+ drivers/regulator/pbias-regulator.c                |   56 +++++++++++++++++---
+ 7 files changed, 61 insertions(+), 12 deletions(-)
+
 -- 
 1.7.9.5
+
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
