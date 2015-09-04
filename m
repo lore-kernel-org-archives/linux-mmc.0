@@ -1,7 +1,7 @@
 From: Vaibhav Hiremath <vaibhav.hiremath@linaro.org>
-Subject: [PATCH 2/5] mmc: sdhci-pxav3: Add platform specific set_clock ops
-Date: Fri,  4 Sep 2015 21:02:18 +0530
-Message-ID: <1441380741-13115-3-git-send-email-vaibhav.hiremath@linaro.org>
+Subject: [PATCH 3/5] mmc: sdhci-pxav3: Add pinctl setting according to bus clock
+Date: Fri,  4 Sep 2015 21:02:19 +0530
+Message-ID: <1441380741-13115-4-git-send-email-vaibhav.hiremath@linaro.org>
 References: <1441380741-13115-1-git-send-email-vaibhav.hiremath@linaro.org>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1441380741-13115-1-git-send-email-vaibhav.hiremath@linaro.org>
@@ -10,111 +10,113 @@ To: linux-mmc@vger.kernel.org
 Cc: linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, kliu5@marvell.com, ulf.hansson@linaro.org, Vaibhav Hiremath <vaibhav.hiremath@linaro.org>
 List-Id: linux-mmc@vger.kernel.org
 
-In case of PXA1928 & family of devices, the TX BUS and internal clock
-need to be set as part of ->set_clock() ops, so this patch adds
-platform specific ->set_clock() operation.
+Different bus clock may need different pin setting.
+For example, fast bus clock like 208Mhz need pin drive fast
+while slow bus clock prefer pin drive slow to guarantee
+signal quality.
 
-Note that, in order to not break other platforms, this patch
-introduced the flag, which controls whether controller/platform
-specific clock configuration needs to be executed.
+So this patch creates two states,
+  - Default (slow/normal) pin state
+  - And fast pin state for higher freq bus speed.
+
+And selection of pin state is done based on timing mode.
 
 Signed-off-by: Vaibhav Hiremath <vaibhav.hiremath@linaro.org>
+Signed-off-by: Kevin Liu <kliu5@marvell.com>
 ---
- drivers/mmc/host/sdhci-pxav3.c | 46 +++++++++++++++++++++++++++++++++++++++++-
- 1 file changed, 45 insertions(+), 1 deletion(-)
+ drivers/mmc/host/sdhci-pxav3.c | 45 +++++++++++++++++++++++++++++++++++++++++-
+ 1 file changed, 44 insertions(+), 1 deletion(-)
 
 diff --git a/drivers/mmc/host/sdhci-pxav3.c b/drivers/mmc/host/sdhci-pxav3.c
-index aecae04..c2b2b78 100644
+index c2b2b78..d933f75 100644
 --- a/drivers/mmc/host/sdhci-pxav3.c
 +++ b/drivers/mmc/host/sdhci-pxav3.c
-@@ -48,6 +48,10 @@
- #define  SDCFG_GEN_PAD_CLK_CNT_MASK	0xFF
- #define  SDCFG_GEN_PAD_CLK_CNT_SHIFT	24
+@@ -35,6 +35,7 @@
+ #include <linux/pm.h>
+ #include <linux/pm_runtime.h>
+ #include <linux/mbus.h>
++#include <linux/pinctrl/consumer.h>
  
-+#define SD_FIFO_PARAM			0x104
-+#define  INTERNAL_CLK_GATE_CTRL		BIT(8)
-+#define  INTERNAL_CLK_GATE_ON		BIT(9)
+ #include "sdhci.h"
+ #include "sdhci-pltfm.h"
+@@ -92,6 +93,10 @@ struct sdhci_pxa {
+ 	void __iomem *io_pwr_reg;
+ 	void __iomem *io_pwr_lock_reg;
+ 	struct sdhci_pxa_data *data;
 +
- #define SD_SPI_MODE			0x108
- #define SD_CE_ATA_1			0x10C
- 
-@@ -57,6 +61,9 @@
- 
- #define SD_RX_CFG_REG			0x114
- 
-+#define TX_CFG_REG			0x118
-+#define  TX_INTERNAL_SEL_BUS_CLK	BIT(30)
-+
- /* IO Power control */
- #define IO_PWR_AKEY_ASFAR		0xbaba
- #define IO_PWR_AKEY_ASSAR		0xeb10
-@@ -68,6 +75,9 @@ struct sdhci_pxa_data {
- 	u8 sdclk_delay_shift;
- 	u8 sdclk_sel_mask;
- 	u8 sdclk_sel_shift;
-+
-+	/* set this if platform needs separate clock configuration */
-+	bool set_pltfrm_clk;
- 	/*
- 	 * We have few more differences, add them along with their
- 	 * respective feature support
-@@ -90,6 +100,7 @@ static struct sdhci_pxa_data pxav3_data_v1 = {
- 	.sdclk_delay_shift	= 9,
- 	.sdclk_sel_mask		= 0x1,
- 	.sdclk_sel_shift	= 8,
-+	.set_pltfrm_clk		= false,
++	struct pinctrl *pinctrl;
++	struct pinctrl_state *pins_default;
++	struct pinctrl_state *pins_fast;
  };
  
- static struct sdhci_pxa_data pxav3_data_v2 = {
-@@ -99,6 +110,7 @@ static struct sdhci_pxa_data pxav3_data_v2 = {
- 	/* Only set SDCLK_SEL1, as driver uses default value of SDCLK_SEL0 */
- 	.sdclk_sel_mask		= 0x3,
- 	.sdclk_sel_shift	= 2,	/* SDCLK_SEL1 */
-+	.set_pltfrm_clk		= true,
- };
- 
- /*
-@@ -375,8 +387,40 @@ static void pxav3_voltage_switch(struct sdhci_host *host,
- 	writel(val, pxa->io_pwr_reg);
+ static struct sdhci_pxa_data pxav3_data_v1 = {
+@@ -298,6 +303,33 @@ static void pxav3_gen_init_74_clocks(struct sdhci_host *host, u8 power_mode)
+ 	pxa->power_mode = power_mode;
  }
  
-+static void pxav3_set_tx_clock(struct sdhci_host *host)
-+{
-+	u32 val;
-+
-+	val = sdhci_readl(host, TX_CFG_REG);
-+	val |= TX_INTERNAL_SEL_BUS_CLK;
-+	sdhci_writel(host, val, TX_CFG_REG);
-+}
-+
-+static void pxav3_set_clock(struct sdhci_host *host, unsigned int clock)
++static int pxav3_select_pinstate(struct sdhci_host *host, unsigned int uhs)
 +{
 +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
 +	struct sdhci_pxa *pxa = pltfm_host->priv;
++	struct pinctrl_state *pinctrl;
 +
-+	/* We still use common sdhci_set_clock() */
-+	sdhci_set_clock(host, clock);
++	if (IS_ERR(pxa->pinctrl) ||
++		IS_ERR(pxa->pins_default) ||
++		IS_ERR(pxa->pins_fast))
++		return -EINVAL;
 +
-+	/* platform/controller specific clock configuration */
-+	if (pxa->data->set_pltfrm_clk && clock != 0) {
-+		u32 val;
-+
-+		val = sdhci_readw(host, SD_FIFO_PARAM);
-+		/* Internal clock gate ON and CTRL = 0b11 */
-+		val |= INTERNAL_CLK_GATE_CTRL | INTERNAL_CLK_GATE_ON;
-+		sdhci_writew(host, val, SD_FIFO_PARAM);
-+
-+		/* TX internal clock selection */
-+		pxav3_set_tx_clock(host);
++	switch (uhs) {
++	case MMC_TIMING_UHS_SDR50:
++	case MMC_TIMING_UHS_SDR104:
++	case MMC_TIMING_MMC_HS200:
++	case MMC_TIMING_MMC_HS400:
++		pinctrl = pxa->pins_fast;
++		break;
++	default:
++		/* back to default state for other legacy timing */
++		pinctrl = pxa->pins_default;
++		break;
 +	}
 +
++	return pinctrl_select_state(pxa->pinctrl, pinctrl);
 +}
 +
+ static void pxav3_set_uhs_signaling(struct sdhci_host *host, unsigned int uhs)
+ {
+ 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+@@ -353,6 +385,8 @@ static void pxav3_set_uhs_signaling(struct sdhci_host *host, unsigned int uhs)
+ 	dev_dbg(mmc_dev(host->mmc),
+ 		"%s uhs = %d, ctrl_2 = %04X\n",
+ 		__func__, uhs, ctrl_2);
++
++	pxav3_select_pinstate(host, uhs);
+ }
+ 
+ static void pxav3_voltage_switch(struct sdhci_host *host,
+@@ -416,7 +450,6 @@ static void pxav3_set_clock(struct sdhci_host *host, unsigned int clock)
+ 		/* TX internal clock selection */
+ 		pxav3_set_tx_clock(host);
+ 	}
+-
+ }
+ 
  static const struct sdhci_ops pxav3_sdhci_ops = {
--	.set_clock			= sdhci_set_clock,
-+	.set_clock			= pxav3_set_clock,
- 	.platform_send_init_74_clocks	= pxav3_gen_init_74_clocks,
- 	.get_max_clock			= sdhci_pltfm_clk_get_max_clock,
- 	.set_bus_width			= sdhci_set_bus_width,
+@@ -586,6 +619,16 @@ static int sdhci_pxav3_probe(struct platform_device *pdev)
+ 		}
+ 	}
+ 
++	pxa->pinctrl = devm_pinctrl_get(dev);
++	if (!IS_ERR(pxa->pinctrl)) {
++		pxa->pins_default = pinctrl_lookup_state(pxa->pinctrl, "default");
++		if (IS_ERR(pxa->pins_default))
++			dev_err(dev, "could not get default pinstate\n");
++		pxa->pins_fast = pinctrl_lookup_state(pxa->pinctrl, "fast");
++		if (IS_ERR(pxa->pins_fast))
++			dev_info(dev, "could not get fast pinstate\n");
++	}
++
+ 	pm_runtime_get_noresume(&pdev->dev);
+ 	pm_runtime_set_active(&pdev->dev);
+ 	pm_runtime_set_autosuspend_delay(&pdev->dev, PXAV3_RPM_DELAY_MS);
 -- 
 1.9.1
