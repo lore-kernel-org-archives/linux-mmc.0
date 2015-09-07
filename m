@@ -1,76 +1,48 @@
 From: Vaibhav Hiremath <vaibhav.hiremath@linaro.org>
-Subject: [PATCH-v2 5/7] mmc: sdhci-pxav3: Fix HS200 mode support
-Date: Mon,  7 Sep 2015 16:48:39 +0530
-Message-ID: <1441624721-15612-6-git-send-email-vaibhav.hiremath@linaro.org>
+Subject: [PATCH-v2 2/7] mmc: sdhci-pxav3: binding: Add pxa1928 compatible
+ support
+Date: Mon,  7 Sep 2015 16:48:36 +0530
+Message-ID: <1441624721-15612-3-git-send-email-vaibhav.hiremath@linaro.org>
 References: <1441624721-15612-1-git-send-email-vaibhav.hiremath@linaro.org>
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
 In-Reply-To: <1441624721-15612-1-git-send-email-vaibhav.hiremath@linaro.org>
-Sender: linux-kernel-owner@vger.kernel.org
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
 To: linux-mmc@vger.kernel.org
-Cc: linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, devicetree@vger.kernel.org, robh+dt@kernel.org, ulf.hansson@linaro.org, Kevin Liu <kliu5@marvell.com>, Tim Wang <wangtt@marvell.com>, Vaibhav Hiremath <vaibhav.hiremath@linaro.org>
+Cc: devicetree@vger.kernel.org, ulf.hansson@linaro.org, linux-kernel@vger.kernel.org, Vaibhav Hiremath <vaibhav.hiremath@linaro.org>, robh+dt@kernel.org, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
-From: Kevin Liu <kliu5@marvell.com>
+With support for pxa1928 family of devices , this patch
+updates the binding document with compatible property
+of "marvell,pxav3-1928-sdhci".
 
-IN case of MMC HS200 mode, current code does not enable
-SD_CE_ATA_2.MMC_HS200 & SD_CE_ATA_2.MMC_CARD bit configurations.
-
-So this patch updates the above bit fields correctly.
-
-Signed-off-by: Tim Wang <wangtt@marvell.com>
-Signed-off-by: Kevin Liu <kliu5@marvell.com>
 Signed-off-by: Vaibhav Hiremath <vaibhav.hiremath@linaro.org>
 ---
-Note: Unfortunately I do not have access to any other datasheets
-which uses sdhci-pxav3 driver, so quite not sure whether this would
-break any existing platform, probably NOT, as I do not see any
-references for this change.
-If anyone can confirm that would be really great.
+ Documentation/devicetree/bindings/mmc/sdhci-pxa.txt | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
- drivers/mmc/host/sdhci-pxav3.c | 17 +++++++++++++++++
- 1 file changed, 17 insertions(+)
-
-diff --git a/drivers/mmc/host/sdhci-pxav3.c b/drivers/mmc/host/sdhci-pxav3.c
-index d933f75..6978810 100644
---- a/drivers/mmc/host/sdhci-pxav3.c
-+++ b/drivers/mmc/host/sdhci-pxav3.c
-@@ -57,6 +57,8 @@
- #define SD_CE_ATA_1			0x10C
+diff --git a/Documentation/devicetree/bindings/mmc/sdhci-pxa.txt b/Documentation/devicetree/bindings/mmc/sdhci-pxa.txt
+index 3d1b449..29edcf5 100644
+--- a/Documentation/devicetree/bindings/mmc/sdhci-pxa.txt
++++ b/Documentation/devicetree/bindings/mmc/sdhci-pxa.txt
+@@ -5,7 +5,7 @@ and the properties used by the sdhci-pxav2 and sdhci-pxav3 drivers.
  
- #define SD_CE_ATA_2			0x10E
-+#define  SD_CE_ATA2_HS200_EN		BIT(10)
-+#define  SD_CE_ATA2_MMC_MODE		BIT(12)
- #define  SDCE_MISC_INT			BIT(2)
- #define  SDCE_MISC_INT_EN		BIT(1)
- 
-@@ -330,6 +332,17 @@ static int pxav3_select_pinstate(struct sdhci_host *host, unsigned int uhs)
- 	return pinctrl_select_state(pxa->pinctrl, pinctrl);
- }
- 
-+static int pxav3_select_hs200(struct sdhci_host *host)
-+{
-+	u16 reg = 0;
-+
-+	reg = sdhci_readw(host, SD_CE_ATA_2);
-+	reg |= SD_CE_ATA2_HS200_EN | SD_CE_ATA2_MMC_MODE;
-+	sdhci_writew(host, reg, SD_CE_ATA_2);
-+
-+	return 0;
-+}
-+
- static void pxav3_set_uhs_signaling(struct sdhci_host *host, unsigned int uhs)
- {
- 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-@@ -361,6 +374,10 @@ static void pxav3_set_uhs_signaling(struct sdhci_host *host, unsigned int uhs)
- 	case MMC_TIMING_UHS_DDR50:
- 		ctrl_2 |= SDHCI_CTRL_UHS_DDR50 | SDHCI_CTRL_VDD_180;
- 		break;
-+	case MMC_TIMING_MMC_HS200:
-+		ctrl_2 |= SDHCI_CTRL_UHS_SDR104 | SDHCI_CTRL_VDD_180;
-+		pxav3_select_hs200(host);
-+		break;
- 	}
- 
- 	/*
+ Required properties:
+ - compatible: Should be "mrvl,pxav2-mmc", "mrvl,pxav3-mmc" or
+-  "marvell,armada-380-sdhci".
++  "marvell,armada-380-sdhci" or "marvell,pxav3-1928-sdhci".
+ - reg:
+   * for "mrvl,pxav2-mmc" and "mrvl,pxav3-mmc", one register area for
+     the SDHCI registers.
 -- 
 1.9.1
