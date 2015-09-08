@@ -1,66 +1,52 @@
-From: Guenter Roeck <linux@roeck-us.net>
-Subject: Re: [PATCH] ARM: multi_v7_defconfig: Enable PBIAS regulator
-Date: Tue, 8 Sep 2015 21:03:27 -0700
-Message-ID: <20150909040327.GA14905@roeck-us.net>
-References: <1441274111-18049-1-git-send-email-kishon@ti.com>
- <20150906234110.GA2228@roeck-us.net>
+From: Rob Herring <robh-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+Subject: Re: [PATCH-v2 2/7] mmc: sdhci-pxav3: binding: Add pxa1928 compatible
+ support
+Date: Tue, 8 Sep 2015 18:49:30 -0500
+Message-ID: <55EF740A.1020204@kernel.org>
+References: <1441624721-15612-1-git-send-email-vaibhav.hiremath@linaro.org>
+ <1441624721-15612-3-git-send-email-vaibhav.hiremath@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20150906234110.GA2228@roeck-us.net>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Kishon Vijay Abraham I <kishon@ti.com>
-Cc: ulf.hansson@linaro.org, tony@atomide.com, broonie@kernel.org, linux@arm.linux.org.uk, olof@lixom.net, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, nsekhar@ti.com
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 7bit
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1441624721-15612-3-git-send-email-vaibhav.hiremath-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Vaibhav Hiremath <vaibhav.hiremath-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
 
-On Sun, Sep 06, 2015 at 04:41:10PM -0700, Guenter Roeck wrote:
-> On Thu, Sep 03, 2015 at 03:25:11PM +0530, Kishon Vijay Abraham I wrote:
-> > PBIAS regulator is required for MMC module in OMAP2, OMAP3, OMAP4,
-> > OMAP5 and DRA7 SoCs. Enable it here.
-> > 
-> > Signed-off-by: Kishon Vijay Abraham I <kishon@ti.com>
+On 09/07/2015 06:18 AM, Vaibhav Hiremath wrote:
+> With support for pxa1928 family of devices , this patch
+> updates the binding document with compatible property
+> of "marvell,pxav3-1928-sdhci".
 > 
-> Tested-by: Guenter Roeck <linux@roeck-us.net>
+> Signed-off-by: Vaibhav Hiremath <vaibhav.hiremath-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+> ---
+>  Documentation/devicetree/bindings/mmc/sdhci-pxa.txt | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
 > 
-This problem is now causing various runtime failures in mainline.
-I see the following qemu test failures:
+> diff --git a/Documentation/devicetree/bindings/mmc/sdhci-pxa.txt b/Documentation/devicetree/bindings/mmc/sdhci-pxa.txt
+> index 3d1b449..29edcf5 100644
+> --- a/Documentation/devicetree/bindings/mmc/sdhci-pxa.txt
+> +++ b/Documentation/devicetree/bindings/mmc/sdhci-pxa.txt
+> @@ -5,7 +5,7 @@ and the properties used by the sdhci-pxav2 and sdhci-pxav3 drivers.
+>  
+>  Required properties:
+>  - compatible: Should be "mrvl,pxav2-mmc", "mrvl,pxav3-mmc" or
+> -  "marvell,armada-380-sdhci".
+> +  "marvell,armada-380-sdhci" or "marvell,pxav3-1928-sdhci".
 
-arm:beagle:multi_v7_defconfig:omap3-beagle
-arm:beaglexm:multi_v7_defconfig:omap3-beagle-xm
-arm:overo:multi_v7_defconfig:omap3-overo-tobi
+v3 is implied by pxa1928. So I'd just do "marvell,pxa1928-sdhci" to
+better match the chip name.
 
-I would expect all omap2/3/4/5 runtime tests with multi_v7_defconfig to fail.
+Rob
 
-Also, FWIW,
+>  - reg:
+>    * for "mrvl,pxav2-mmc" and "mrvl,pxav3-mmc", one register area for
+>      the SDHCI registers.
+> 
 
-Fixes: 6a9b2ff07d04 ("mmc: host: omap_hsmmc: return on fatal errors from omap_hsmmc_reg_get")
-
-Guenter
-
-> > ---
-> >  arch/arm/configs/multi_v7_defconfig |    1 +
-> >  1 file changed, 1 insertion(+)
-> > 
-> > diff --git a/arch/arm/configs/multi_v7_defconfig b/arch/arm/configs/multi_v7_defconfig
-> > index 5fd8df6..f497c96 100644
-> > --- a/arch/arm/configs/multi_v7_defconfig
-> > +++ b/arch/arm/configs/multi_v7_defconfig
-> > @@ -403,6 +403,7 @@ CONFIG_REGULATOR_MAX8973=y
-> >  CONFIG_REGULATOR_MAX77686=y
-> >  CONFIG_REGULATOR_MAX77693=m
-> >  CONFIG_REGULATOR_PALMAS=y
-> > +CONFIG_REGULATOR_PBIAS=y
-> >  CONFIG_REGULATOR_S2MPS11=y
-> >  CONFIG_REGULATOR_S5M8767=y
-> >  CONFIG_REGULATOR_TPS51632=y
-> > -- 
-> > 1.7.9.5
-> > 
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe linux-kernel" in
-> > the body of a message to majordomo@vger.kernel.org
-> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> > Please read the FAQ at  http://www.tux.org/lkml/
-> > 
-> > 
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
