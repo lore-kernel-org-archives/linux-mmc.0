@@ -1,130 +1,59 @@
-From: Vaibhav Hiremath <vaibhav.hiremath@linaro.org>
+From: Linus Walleij <linus.walleij-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 Subject: Re: [PATCH-v2 4/7] mmc: sdhci-pxav3: Add pinctl setting according to
  bus clock
-Date: Tue, 8 Sep 2015 17:47:40 +0530
-Message-ID: <55EED1E4.9030904@linaro.org>
+Date: Tue, 8 Sep 2015 16:42:38 +0200
+Message-ID: <CACRpkdY59roEBgUd9TR39yNgfhw393+WmHQQAeLkOEZLChOcWQ@mail.gmail.com>
 References: <1441624721-15612-1-git-send-email-vaibhav.hiremath@linaro.org>
- <1441624721-15612-5-git-send-email-vaibhav.hiremath@linaro.org>
- <20150908145254.6807dffc@xhacker> <55EEABB1.8010806@linaro.org>
- <20150908175220.6b81efda@xhacker> <55EEB23A.50805@linaro.org>
- <20150908180451.4c8bd26c@xhacker>
+	<1441624721-15612-5-git-send-email-vaibhav.hiremath@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20150908180451.4c8bd26c@xhacker>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Jisheng Zhang <jszhang@marvell.com>
-Cc: linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, ulf.hansson@linaro.org, linux-kernel@vger.kernel.org, robh+dt@kernel.org, linux-arm-kernel@lists.infradead.org, Linus Walleij <linus.walleij@linaro.org>, Kevin Liu <kliu5@marvell.com>
+Content-Type: text/plain; charset=UTF-8
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1441624721-15612-5-git-send-email-vaibhav.hiremath-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Vaibhav Hiremath <vaibhav.hiremath-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Kevin Liu <kliu5-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
+On Mon, Sep 7, 2015 at 1:18 PM, Vaibhav Hiremath
+<vaibhav.hiremath-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
 
-
-On Tuesday 08 September 2015 03:34 PM, Jisheng Zhang wrote:
-> On Tue, 8 Sep 2015 15:32:34 +0530
-> Vaibhav Hiremath <vaibhav.hiremath@linaro.org> wrote:
+> Different bus clock may need different pin setting.
+> For example, fast bus clock like 208Mhz need pin drive fast
+> while slow bus clock prefer pin drive slow to guarantee
+> signal quality.
 >
->>
->>
->> On Tuesday 08 September 2015 03:22 PM, Jisheng Zhang wrote:
->>> On Tue, 8 Sep 2015 15:04:41 +0530
->>> Vaibhav Hiremath <vaibhav.hiremath@linaro.org> wrote:
->>>
-
-<snip>
-
->>>>>>     static const struct sdhci_ops pxav3_sdhci_ops = {
->>>>>> @@ -586,6 +619,16 @@ static int sdhci_pxav3_probe(struct platform_device *pdev)
->>>>>>     		}
->>>>>>     	}
->>>>>>
->>>>>> +	pxa->pinctrl = devm_pinctrl_get(dev);
->>>>>
->>>>> could we ignore this for those SDHCI hosts that don't need it?
->>>>>
->>>>
->>>> Again, no need to introduce flags here. This is standard call and
->>>> handled properly. So for the platforms not using this, it really should
->>>> not matter.
->>>> Also, lookup is getting executed only when pinctrl is populated.
->>>>
->>>> So I do not see any need here.
->>>>
->>>>>> +	if (!IS_ERR(pxa->pinctrl)) {
->>>>>> +		pxa->pins_default = pinctrl_lookup_state(pxa->pinctrl, "default");
->>>>>> +		if (IS_ERR(pxa->pins_default))
->>>>>> +			dev_err(dev, "could not get default pinstate\n");
->>>>>
->>>>> Why those SDHCI hosts that don't need pinctl setting should got this error?
->>>>>
->>>>
->>>> It won't.
->>>
->>> It does. On Marvell Berlin SoCs, I got
->>>
->>> [    1.070000] sdhci-pxav3 f7ab0800.sdhci: could not get default pinstate
->>> [    1.080000] sdhci-pxav3 f7ab0800.sdhci: could not get fast pinstate
->>>
->>>
->>>
->>>>
->>>> If Host does not need pinctrl, the execution would never reach this
->>>> point.
->>>> The if condition check would handle it, isn't it?
->>>>
->>>> 	pxa->pinctrl = devm_pinctrl_get(dev);
->>>
->>> It seems this function always succeed...
->>>
->>
->> Not always.
->> I would succeed only if you have pinctrl defined in DT for this device.
+> So this patch creates two states,
+>   - Default (slow/normal) pin state
+>   - And fast pin state for higher freq bus speed.
 >
-> Yes, that's what I thought, but I got
+> And selection of pin state is done based on timing mode.
 >
-> [    1.070000] sdhci-pxav3 f7ab0800.sdhci: could not get default pinstate
-> [    1.080000] sdhci-pxav3 f7ab0800.sdhci: could not get fast pinstate
->
-> there's no pinctrl for f7ab0800.sdhci. Am I missing somthing?
->
-> Thanks,
-> Jisheng
->
->>
->> And if you have pinctrl defined, isn't it is expected to have "default"
->> pin state to be always present?
->> And if answer is yes here, then it is fair to be prompting error for it.
->>
->>>   From another side, we may have default pin in dts, for example: pin muxed between
->>> emmc and nandflash. But we don't have fast pinstate, so we at least need the
->>> flag to fast pinstate. Otherwise, in such platforms, we could get something like
->>>
->>
->> That is exactly the reason behind keeping it as dev_info.
->>
->>> [    1.000000] sdhci-pxav3 f7ab0000.sdhci: get default pinstate
->>> [    1.000000] sdhci-pxav3 f7ab0000.sdhci: could not get fast pinstate
->>>
->>>
+> Signed-off-by: Vaibhav Hiremath <vaibhav.hiremath-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+> Signed-off-by: Kevin Liu <kliu5-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>
+(...)
+> +       pxa->pinctrl = devm_pinctrl_get(dev);
+> +       if (!IS_ERR(pxa->pinctrl)) {
+> +               pxa->pins_default = pinctrl_lookup_state(pxa->pinctrl, "default");
+> +               if (IS_ERR(pxa->pins_default))
+> +                       dev_err(dev, "could not get default pinstate\n");
+> +               pxa->pins_fast = pinctrl_lookup_state(pxa->pinctrl, "fast");
+> +               if (IS_ERR(pxa->pins_fast))
+> +                       dev_info(dev, "could not get fast pinstate\n");
+> +       }
 
-I did some invastigation here on the execution flow,
-and you know what, you are right here.
+This is exactly how I think it should be used from a pin control
+point of view.
 
-It seems, devm_pinctrl_get() always returns valid pinctrl pointer, even
-though the DT property is not populated.
+If you depended on CONFIG_PM you could use
+pinctrl_pm_select_default_state() but for this simple scenario
+this is fine.
 
-The return value from I did some invastigation () should have been 
-treated differently, but it is not. Instead it creates the
-"struct pinctrl" and return back to the driver.
+Reviewed-by: Linus Walleij <linus.walleij-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+>From a pinctrl point of view.
 
-I am looping Linus Walleji here, probably he can comment/confirm on
-this.
-
-
-Thanks,
-Vaibhav
-
-
->> Thanks,
->> Vaibhav
->
+Yours,
+Linus Walleij
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
