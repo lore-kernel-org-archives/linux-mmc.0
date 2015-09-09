@@ -1,82 +1,70 @@
-From: Linus Walleij <linus.walleij@linaro.org>
-Subject: Re: [PATCH-v2 4/7] mmc: sdhci-pxav3: Add pinctl setting according to
- bus clock
-Date: Wed, 9 Sep 2015 10:39:46 +0200
-Message-ID: <CACRpkdaQc8bH923D1bvoj2+2Puq8sSaLLf5Y8cHKbAKziOwJMg@mail.gmail.com>
-References: <1441624721-15612-1-git-send-email-vaibhav.hiremath@linaro.org>
-	<1441624721-15612-5-git-send-email-vaibhav.hiremath@linaro.org>
-	<CACRpkdY59roEBgUd9TR39yNgfhw393+WmHQQAeLkOEZLChOcWQ@mail.gmail.com>
-	<55EEF99F.1020904@linaro.org>
+From: Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: Re: Re: [RFC] mmc: core: Set clock before switching to
+ highspeed mode.
+Date: Wed, 9 Sep 2015 10:47:27 +0200
+Message-ID: <55EFF21F.1010908@redhat.com>
+References: <1441448358-13129-1-git-send-email-yszhou4tech@gmail.com>
+ <55EAF712.8090203@rock-chips.com> <55EB02FD.5040403@redhat.com>
+ <55EB8508.9030009@rock-chips.com>
+ <CAECwjAhe3g0T2icEExE_tBbZ2D1z+BpVNCd0dGZVNU=7zH-LHw@mail.gmail.com>
+ <55EC4A31.4060605@rock-chips.com>
+ <CAECwjAgLuskgyHv50GOVN8fGOmQz+jo9PLCAr-POpYH6AszWSg@mail.gmail.com>
+ <55ED3695.2030101@redhat.com>
+ <CAECwjAjsi28gQ-iMZbEgFdoDoTcf0khnS0KRrzO1wnL1j0o0vQ@mail.gmail.com>
+Reply-To: hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-oi0-f46.google.com ([209.85.218.46]:35634 "EHLO
-	mail-oi0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754643AbbIIIjr (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 9 Sep 2015 04:39:47 -0400
-Received: by oiww128 with SMTP id w128so1582787oiw.2
-        for <linux-mmc@vger.kernel.org>; Wed, 09 Sep 2015 01:39:46 -0700 (PDT)
-In-Reply-To: <55EEF99F.1020904@linaro.org>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Return-path: <linux-sunxi+bncBDRZXY4CYYORBJXEX6XQKGQEKQZ2NPI-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+In-Reply-To: <CAECwjAjsi28gQ-iMZbEgFdoDoTcf0khnS0KRrzO1wnL1j0o0vQ-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+List-Post: <http://groups.google.com/group/linux-sunxi/post>, <mailto:linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Help: <http://groups.google.com/support/>, <mailto:linux-sunxi+help-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Archive: <http://groups.google.com/group/linux-sunxi
+Sender: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
+List-Subscribe: <http://groups.google.com/group/linux-sunxi/subscribe>, <mailto:linux-sunxi+subscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Unsubscribe: <mailto:googlegroups-manage+1076902468213+unsubscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>,
+ <http://groups.google.com/group/linux-sunxi/subscribe>
+To: Yousong Zhou <yszhou4tech-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Cc: shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, dev-3kdeTeqwOZ9EV1b7eY7vFQ@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
-To: Vaibhav Hiremath <vaibhav.hiremath@linaro.org>, Stephen Warren <swarren@wwwdotorg.org>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, Rob Herring <robh+dt@kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, Kevin Liu <kliu5@marvell.com>
 
-On Tue, Sep 8, 2015 at 5:07 PM, Vaibhav Hiremath
-<vaibhav.hiremath@linaro.org> wrote:
+Hi,
 
-> But I still have one small doubt on expectation from
-> devm_pinctrl_get() function.
+On 08-09-15 17:38, Yousong Zhou wrote:
+> I just tried a method from allwinner's u-boot sources: retry the mode switch in
+> case of an error [1].  It was accompanied with a comment quoted below:
 >
-> If pinctrl properties are not populated in Devicetree node,
-> then, shouldn't devm_pinctrl_get() return error ?
-> I followed the code flow, and it seems even if pinctrl properties are
-> not populated in DT node, the devm_pinctrl_get() returns valid
-> pointer to "struct pinctrl", isn't this against the expectation of the
-> call?
+> //retry for Toshiba emmc;for the first time Toshiba emmc change to HS
+> //it will return response crc err,so retry
 >
+> Well, that 1GB card of mine is labeled as "pqi" made in Korea.  This workaround
+> really worked and it succeeded on the second try, though I am not sure how
+> anti-spec this can be (the spec says a power reset SHOULD be done in the case
+> of crc error in the status data).
 >
-> Code flow -
->
-> devm_pinctrl_get()
-> ...
-> --> creat_pinctrl()
+> The above change alone can make the card work.  I also noticed that allwinner's
+> uboot will disable the clock first before setting it and re-enable it
+> thereafter [2].  I can only guess that this is possibly some bugfix made
+> by engineers of allwinner.  So I mimicked this approach and attached a patch
+> here.
 
-That is the spelling mistake Dennis Ritchie and Ken Thompson
-wish they had avoided in the first syscall interface :D
+Thanks for this. So if I understand you correctly then just the:
 
-> --> pinctrl_dt_to_map()
-> ...
->
-> pinctrl_dt_to_map() iterates for pinctrl-x (x = 0,1,...) and if it
-> founds the entry then it parses the node. If it doesn't find any
-> pinctrl property then also it returns 0. and subsequently rreturns
-> handle to "struct pinctrl" for the device. Why is so?
+"mmc: retry in the case of failing to switch to HS mode"
 
-So pinctrl_dt_to_map() returns 0 if there are no maps in the
-device tree.
+Patch is enough to make things work, right ?
 
-This is correct: there may be systems that have a mixture
-of device tree and platform data, and in that case the code
-needs to continue after calling pinctrl_dt_to_map() because
-else it bails out before coming to the loop in
-create_pinctrl() where we iterate over the static maps.
+That makes sense because the clock dance you are subscribing is something which
+allwinner does in many places and it really is not necessary.
 
-So after the loop in create_pinctrl() it should be possible
-to return something like -ENOENT if we didn't find
-anything. The device core pinctrl handling in
-drivers/base/pinctrl.c seems to cope with it.
+Can you do a similar patch for the kernel and test that too ?
 
-It's a semantic change so we would need to test to toss
-it in and see what happens on some different systems
-but in principe I think you're right. What we get if there is
-no state is basically a dummy pinctrl that does nothing.
+And once you've a working kernel patch submit that to Ulf, with the mmc
+list in the Cc?
 
-Do you wanna make a patch for this?
+If Ulf is willing to take this fix on the kernel side (I'm the sunxi-mmc maintainer
+in the kernel, and the fix will get my ack), then I'm willing to take the u-boot
+version of this fix.
 
-(Looping in Stephen Warren so he can tell if I miss something
-obviously evident in the design that require stubs to
-be present.)
+Regards,
 
-Yours,
-Linus Walleij
+Hans
