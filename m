@@ -1,64 +1,79 @@
-From: Yousong Zhou <yszhou4tech@gmail.com>
-Subject: [PATCH 3/3] mmc: sd: Retry switching to highspeed mode in case of error
-Date: Thu, 10 Sep 2015 00:33:18 +0800
-Message-ID: <1441816398-4330-3-git-send-email-yszhou4tech@gmail.com>
-References: <1441816398-4330-1-git-send-email-yszhou4tech@gmail.com>
+From: Jon Hunter <jonathanh@nvidia.com>
+Subject: Re: [PATCH] mmc: block: Add new ioctl to send multi commands
+Date: Wed, 9 Sep 2015 17:44:54 +0100
+Message-ID: <55F06206.9040001@nvidia.com>
+References: <1441811161-18513-1-git-send-email-jonathanh@nvidia.com>
+ <1481090.IIYrKtDeR0@wuerfel>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="windows-1252"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pa0-f53.google.com ([209.85.220.53]:36470 "EHLO
-	mail-pa0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754508AbbIIQhv (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 9 Sep 2015 12:37:51 -0400
-Received: by padhk3 with SMTP id hk3so14880463pad.3
-        for <linux-mmc@vger.kernel.org>; Wed, 09 Sep 2015 09:37:50 -0700 (PDT)
-In-Reply-To: <1441816398-4330-1-git-send-email-yszhou4tech@gmail.com>
+Received: from hqemgate14.nvidia.com ([216.228.121.143]:4474 "EHLO
+	hqemgate14.nvidia.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752438AbbIIQpB (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 9 Sep 2015 12:45:01 -0400
+In-Reply-To: <1481090.IIYrKtDeR0@wuerfel>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Hans de Goede <hdegoede@redhat.com>, Shawn Lin <shawn.lin@rock-chips.com>, linux-mmc@vger.kernel.org, Yousong Zhou <yszhou4tech@gmail.com>
+To: Arnd Bergmann <arnd@arndb.de>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, grundler@google.com, olofj@chromium.org, Seshagiri Holi <sholi@nvidia.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 
-A SD card with sunxi-mmc can fail with the following error message (RCE for
-response CRC error) when trying to switch to highspeed mode.  But the mode
-switch can almost always succeed on the second try.
 
-Dmesg before this commit.
+On 09/09/15 16:56, Arnd Bergmann wrote:
+> On Wednesday 09 September 2015 16:06:01 Jon Hunter wrote:
+>> +
+>> +       idata = kcalloc(mcci.num_of_cmds, sizeof(*idata), GFP_KERNEL);
+>> +       if (!idata) {
+>> +               err = -ENOMEM;
+>> +               goto cmd_err;
+>> +       }
+>> +
+>> +       cmds = (struct mmc_ioc_cmd __user *)(unsigned long)mcci.cmds_ptr;
+>> +       for (n_cmds = 0; n_cmds < mcci.num_of_cmds; n_cmds++) {
+>> +               idata[n_cmds] = mmc_blk_ioctl_copy_from_user(&cmds[n_cmds]);
+>> +               if (IS_ERR(idata[n_cmds])) {
+>> +                       err = PTR_ERR(idata[n_cmds]);
+>> +                       goto cmd_err;
+>> +               }
+>> +       }
+>> +
+> 
+> You have no upper bound on the number of commands, which means you end
+> up catching overly large arguments only through -ENOMEM. Can you come
+> up with an upper bound that is guaranteed to succeed with the allocation?
 
-    [    1.112060] mmc0: host does not support reading read-only switch, assuming write-enable
-    [    1.126527] sunxi-mmc 1c0f000.mmc: smc 0 err, cmd 6, RD RCE !!
-    [    1.132388] sunxi-mmc 1c0f000.mmc: data error, sending stop command
-    [    1.139451] sunxi-mmc 1c0f000.mmc: send stop command failed
-    [    1.145056] mmc0: error -110 whilst initialising SD card
-    [    1.150424] ehci-platform 1c1c000.usb: USB 2.0 started, EHCI 1.00
-    [    1.156533] sunxi-mmc 1c0f000.mmc: smc 0 err, cmd 1, RTO !!
-
-Dmesg after this commit.
-
-    [    1.062306] mmc0: host does not support reading read-only switch, assuming write-enable
-    [    1.070635] sunxi-mmc 1c0f000.mmc: smc 0 err, cmd 6, RD RCE !!
-    [    1.295939] sunxi-mmc 1c0f000.mmc: data error, sending stop command
-    [    1.322635] Waiting for root device /dev/mmcblk0p2...
-    [    1.322691] sunxi-mmc 1c0f000.mmc: send stop command failed
-    [    1.335686] mmc0: new high speed SD card at address 0002
-    [    1.341557] mmcblk0: mmc0:0002 00000 974 MiB
-    [    1.347021]  mmcblk0: p1 p2
-
-Signed-off-by: Yousong Zhou <yszhou4tech@gmail.com>
----
- drivers/mmc/core/sd.c |    2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
-
-diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
-index e28ebf3..7465b16 100644
---- a/drivers/mmc/core/sd.c
-+++ b/drivers/mmc/core/sd.c
-@@ -364,7 +364,7 @@ int mmc_sd_switch_hs(struct mmc_card *card)
- 		return -ENOMEM;
- 	}
+The uint8 type would limit you to 256 commands (if you have the memory),
+although admittedly that is probably overkill.
  
--	err = mmc_sd_switch(card, 1, 0, 1, status);
-+	err = __mmc_sd_switch(card, 1, 0, 1, status, MMC_CMD_RETRIES);
- 	if (err)
- 		goto out;
- 
--- 
-1.7.10.4
+> Or would it be possible to process the user data one at a time while
+> going through the commands?
 
+Yes, I think that could be a good option, I will take a look.
+ 
+>> +struct mmc_ioc_multi_cmd {
+>> +       __u64 cmds_ptr;
+>> +       uint8_t num_of_cmds;
+>> +};
+>  
+> complex commands are always nasty in one way or another. Can you describe
+> in the patch description why you picked an indirect pointer over something
+> like
+> 
+> struct mmc_ioc_multi_cmd {
+> 	__u64 num_of_cmds;
+> 	struct mmc_ioc_cmd cmds[0];
+> };
+> 
+> as I said, both are ugly. My first choice would have been the other one,
+> but I'm sure you have some reasons yourself.
+
+It was a suggestion from Olof to ensure the structure size is constant for
+both 32-bit and 64-bit userspaces. I am not sure if it is worth adding a
+macro similar to the below for this?
+
+#define mmc_ioc_cmd_set_data(ic, ptr) ic.data_ptr = (__u64)(unsigned long) ptr
+
+However, yes can update the changelog.
+
+Cheers
+Jon
