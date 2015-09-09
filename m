@@ -1,76 +1,82 @@
-From: Kishon Vijay Abraham I <kishon@ti.com>
-Subject: Re: [PATCH] ARM: multi_v7_defconfig: Enable PBIAS regulator
-Date: Wed, 9 Sep 2015 11:38:53 +0530
-Message-ID: <55EFCCF5.50407@ti.com>
-References: <1441274111-18049-1-git-send-email-kishon@ti.com> <20150906234110.GA2228@roeck-us.net> <20150909040327.GA14905@roeck-us.net>
+From: Linus Walleij <linus.walleij@linaro.org>
+Subject: Re: [PATCH-v2 4/7] mmc: sdhci-pxav3: Add pinctl setting according to
+ bus clock
+Date: Wed, 9 Sep 2015 10:39:46 +0200
+Message-ID: <CACRpkdaQc8bH923D1bvoj2+2Puq8sSaLLf5Y8cHKbAKziOwJMg@mail.gmail.com>
+References: <1441624721-15612-1-git-send-email-vaibhav.hiremath@linaro.org>
+	<1441624721-15612-5-git-send-email-vaibhav.hiremath@linaro.org>
+	<CACRpkdY59roEBgUd9TR39yNgfhw393+WmHQQAeLkOEZLChOcWQ@mail.gmail.com>
+	<55EEF99F.1020904@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="windows-1252"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20150909040327.GA14905@roeck-us.net>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Guenter Roeck <linux@roeck-us.net>
-Cc: ulf.hansson@linaro.org, tony@atomide.com, broonie@kernel.org, linux@arm.linux.org.uk, olof@lixom.net, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, nsekhar@ti.com
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-oi0-f46.google.com ([209.85.218.46]:35634 "EHLO
+	mail-oi0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754643AbbIIIjr (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 9 Sep 2015 04:39:47 -0400
+Received: by oiww128 with SMTP id w128so1582787oiw.2
+        for <linux-mmc@vger.kernel.org>; Wed, 09 Sep 2015 01:39:46 -0700 (PDT)
+In-Reply-To: <55EEF99F.1020904@linaro.org>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Vaibhav Hiremath <vaibhav.hiremath@linaro.org>, Stephen Warren <swarren@wwwdotorg.org>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, Rob Herring <robh+dt@kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, Kevin Liu <kliu5@marvell.com>
 
-hi,
+On Tue, Sep 8, 2015 at 5:07 PM, Vaibhav Hiremath
+<vaibhav.hiremath@linaro.org> wrote:
 
-On Wednesday 09 September 2015 09:33 AM, Guenter Roeck wrote:
-> On Sun, Sep 06, 2015 at 04:41:10PM -0700, Guenter Roeck wrote:
->> On Thu, Sep 03, 2015 at 03:25:11PM +0530, Kishon Vijay Abraham I wrote:
->>> PBIAS regulator is required for MMC module in OMAP2, OMAP3, OMAP4,
->>> OMAP5 and DRA7 SoCs. Enable it here.
->>>
->>> Signed-off-by: Kishon Vijay Abraham I <kishon@ti.com>
->>
->> Tested-by: Guenter Roeck <linux@roeck-us.net>
->>
-> This problem is now causing various runtime failures in mainline.
-> I see the following qemu test failures:
-> 
-> arm:beagle:multi_v7_defconfig:omap3-beagle
-> arm:beaglexm:multi_v7_defconfig:omap3-beagle-xm
-> arm:overo:multi_v7_defconfig:omap3-overo-tobi
-> 
-> I would expect all omap2/3/4/5 runtime tests with multi_v7_defconfig to fail.
-> 
-> Also, FWIW,
-> 
-> Fixes: 6a9b2ff07d04 ("mmc: host: omap_hsmmc: return on fatal errors from omap_hsmmc_reg_get")
+> But I still have one small doubt on expectation from
+> devm_pinctrl_get() function.
+>
+> If pinctrl properties are not populated in Devicetree node,
+> then, shouldn't devm_pinctrl_get() return error ?
+> I followed the code flow, and it seems even if pinctrl properties are
+> not populated in DT node, the devm_pinctrl_get() returns valid
+> pointer to "struct pinctrl", isn't this against the expectation of the
+> call?
+>
+>
+> Code flow -
+>
+> devm_pinctrl_get()
+> ...
+> --> creat_pinctrl()
 
-I've resend the patch to arm@kernel.org and it bounced back from Nicolas
-Pitre. However others like Arnd, Thomas, Olof would have received and I
-think they'll be applying this soonish.
+That is the spelling mistake Dennis Ritchie and Ken Thompson
+wish they had avoided in the first syscall interface :D
 
-Thanks
-Kishon
+> --> pinctrl_dt_to_map()
+> ...
+>
+> pinctrl_dt_to_map() iterates for pinctrl-x (x = 0,1,...) and if it
+> founds the entry then it parses the node. If it doesn't find any
+> pinctrl property then also it returns 0. and subsequently rreturns
+> handle to "struct pinctrl" for the device. Why is so?
 
-> 
-> Guenter
-> 
->>> ---
->>>  arch/arm/configs/multi_v7_defconfig |    1 +
->>>  1 file changed, 1 insertion(+)
->>>
->>> diff --git a/arch/arm/configs/multi_v7_defconfig b/arch/arm/configs/multi_v7_defconfig
->>> index 5fd8df6..f497c96 100644
->>> --- a/arch/arm/configs/multi_v7_defconfig
->>> +++ b/arch/arm/configs/multi_v7_defconfig
->>> @@ -403,6 +403,7 @@ CONFIG_REGULATOR_MAX8973=y
->>>  CONFIG_REGULATOR_MAX77686=y
->>>  CONFIG_REGULATOR_MAX77693=m
->>>  CONFIG_REGULATOR_PALMAS=y
->>> +CONFIG_REGULATOR_PBIAS=y
->>>  CONFIG_REGULATOR_S2MPS11=y
->>>  CONFIG_REGULATOR_S5M8767=y
->>>  CONFIG_REGULATOR_TPS51632=y
->>> -- 
->>> 1.7.9.5
->>>
->>> --
->>> To unsubscribe from this list: send the line "unsubscribe linux-kernel" in
->>> the body of a message to majordomo@vger.kernel.org
->>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>> Please read the FAQ at  http://www.tux.org/lkml/
->>>
->>>
+So pinctrl_dt_to_map() returns 0 if there are no maps in the
+device tree.
+
+This is correct: there may be systems that have a mixture
+of device tree and platform data, and in that case the code
+needs to continue after calling pinctrl_dt_to_map() because
+else it bails out before coming to the loop in
+create_pinctrl() where we iterate over the static maps.
+
+So after the loop in create_pinctrl() it should be possible
+to return something like -ENOENT if we didn't find
+anything. The device core pinctrl handling in
+drivers/base/pinctrl.c seems to cope with it.
+
+It's a semantic change so we would need to test to toss
+it in and see what happens on some different systems
+but in principe I think you're right. What we get if there is
+no state is basically a dummy pinctrl that does nothing.
+
+Do you wanna make a patch for this?
+
+(Looping in Stephen Warren so he can tell if I miss something
+obviously evident in the design that require stubs to
+be present.)
+
+Yours,
+Linus Walleij
