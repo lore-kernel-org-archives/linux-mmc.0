@@ -1,47 +1,56 @@
-From: Grant Grundler <grundler@google.com>
-Subject: Re: [PATCH] mmc: block: Add new ioctl to send multi commands
-Date: Thu, 10 Sep 2015 13:26:20 -0700
-Message-ID: <CANEJEGuPm_PdBb39iCOdCcSKVMUi3jpiPb_Jgp951xyJvp_3rg@mail.gmail.com>
-References: <1441811161-18513-1-git-send-email-jonathanh@nvidia.com>
-	<1481090.IIYrKtDeR0@wuerfel>
-	<55F06206.9040001@nvidia.com>
-	<3546402.HsxrhMD6nc@wuerfel>
-	<55F13E33.9000703@nvidia.com>
-	<CANEJEGsMM8c4fmSaZDzL59re99aNJk_qjo-10_UoD7josA6MDg@mail.gmail.com>
-	<55F1CA06.3020904@nvidia.com>
+From: Tony Lindgren <tony@atomide.com>
+Subject: Re: [PATCH v3 02/15] mmc: host: omap_hsmmc: return on fatal errors
+ from omap_hsmmc_reg_get
+Date: Thu, 10 Sep 2015 13:45:13 -0700
+Message-ID: <20150910204512.GJ4215@atomide.com>
+References: <CAOesGMjW=3qqBfqdxGwEqk1uVj_08rnvP095V-9+O=rsmjLOxQ@mail.gmail.com>
+ <20150828190354.GZ4215@atomide.com>
+ <55E3E9B1.8070908@ti.com>
+ <20150831205829.GB4215@atomide.com>
+ <20150831211450.GC4215@atomide.com>
+ <55E5B730.9020409@ti.com>
+ <20150901145002.GE4215@atomide.com>
+ <55E5BC11.8090002@ti.com>
+ <20150901150336.GF4215@atomide.com>
+ <CAMAWPa-uf80P8026UH7kJsmzVO2K76HpuzRgpn9TadZS+12f5A@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <55F1CA06.3020904@nvidia.com>
+Content-Disposition: inline
+In-Reply-To: <CAMAWPa-uf80P8026UH7kJsmzVO2K76HpuzRgpn9TadZS+12f5A@mail.gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Jon Hunter <jonathanh@nvidia.com>
-Cc: Arnd Bergmann <arnd@arndb.de>, Ulf Hansson <ulf.hansson@linaro.org>, Olof Johansson <olofj@chromium.org>, Seshagiri Holi <sholi@nvidia.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, LKML <linux-kernel@vger.kernel.org>
+To: Kevin Hilman <khilman@kernel.org>
+Cc: Grygorii Strashko <grygorii.strashko@ti.com>, Kishon Vijay Abraham I <kishon@ti.com>, Olof Johansson <olof@lixom.net>, Ulf Hansson <ulf.hansson@linaro.org>, afenkart@gmail.com, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-omap <linux-omap@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Sekhar Nori <nsekhar@ti.com>, Neil Brown <neilb@suse.de>, Tyler Baker <tyler.baker@linaro.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Thu, Sep 10, 2015 at 11:20 AM, Jon Hunter <jonathanh@nvidia.com> wrote:
->
-> On 10/09/15 18:10, Grant Grundler wrote:
-...
->>>>>> struct mmc_ioc_multi_cmd {
->>>>>>     __u64 num_of_cmds;
->>>>>>     struct mmc_ioc_cmd cmds[0];
->>>>>> };
->>
->> I think this would work just as well. But doesn't "pointer to an
->> array" require 32-bit ioctl compat handling?
->> We were trying to avoid a 32-bit user space compatibility handler.
->
-> I think that this is fine as it is a zero length array [0] and not a
-> pointer.
+* Kevin Hilman <khilman@kernel.org> [150910 10:03]:
+> On Tue, Sep 1, 2015 at 8:03 AM, Tony Lindgren <tony@atomide.com> wrote:
+> > * Grygorii Strashko <grygorii.strashko@ti.com> [150901 07:57]:
+> >> On 09/01/2015 05:50 PM, Tony Lindgren wrote:
+> >> >>
+> >> >>On -next, Above crash signature could be related to race
+> >> >>"ARM: OMAP2+: omap-device: fix race deferred probe of omap_hsmmc vs omap_device_late_init"
+> >> >>http://www.spinics.net/lists/linux-omap/msg121622.html
+> >> >
+> >> >Good point thanks, yes that's the case. MMC probing fails and then we hit this
+> >> >separate issue while MMC is trying to probe. Applying your fix makes the
+> >> >abort disappear, but naturally does not get MMC working again.
+> >>
+> >> you may need CONFIG_GPIO_PCF857X=y for dra7-evm
+> >
+> > This is a regression at least on omap4 as pointed out by Olof.
+> 
+> FWIW, this problem still exists in mainline[1], and note that it fails
+> for omap2plus_defconfig which already has CONFIG_REGULATOR_PBIAS=y, so
+> that is not the fix for this issue.
 
-Doh, yes. Thanks for correcting. I knew this was a gcc special but
-forgot it's not actually allocating any space.
+There are also the pbias regulator fixes pending.. And the .dts
+fixes pending.. So looks like it's going to be few more days.
 
-cheers,
-grant
+AFAIK, also the multi_v7_defconfig change is needed..
 
->
-> Cheers
-> Jon
->
-> [0] https://gcc.gnu.org/onlinedocs/gcc/Zero-Length.html
+Regards,
+
+Tony
+ 
+> [1] http://kernelci.org/boot/omap4-panda-es/?mainline&omap2plus_defconfig&lab-khilman
