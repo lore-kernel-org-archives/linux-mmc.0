@@ -1,86 +1,118 @@
-From: Jisheng Zhang <jszhang@marvell.com>
-Subject: Re: sdhci: runtime suspend/resume on card insert/removal
-Date: Thu, 10 Sep 2015 16:04:02 +0800
-Message-ID: <20150910160402.3b78b5c6@xhacker>
-References: <55F12CF8.50003@linaro.org>	<20150910153129.07adbe68@xhacker>
-	<20150910080233.GH21084@n2100.arm.linux.org.uk>
+From: Jon Hunter <jonathanh@nvidia.com>
+Subject: Re: [PATCH] mmc: block: Add new ioctl to send multi commands
+Date: Thu, 10 Sep 2015 09:24:19 +0100
+Message-ID: <55F13E33.9000703@nvidia.com>
+References: <1441811161-18513-1-git-send-email-jonathanh@nvidia.com>
+ <1481090.IIYrKtDeR0@wuerfel> <55F06206.9040001@nvidia.com>
+ <3546402.HsxrhMD6nc@wuerfel>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="US-ASCII"
+Content-Type: text/plain; charset="windows-1252"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mx0b-0016f401.pphosted.com ([67.231.156.173]:13911 "EHLO
-	mx0b-0016f401.pphosted.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751242AbbIJIIN (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 10 Sep 2015 04:08:13 -0400
-In-Reply-To: <20150910080233.GH21084@n2100.arm.linux.org.uk>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <3546402.HsxrhMD6nc@wuerfel>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Arnd Bergmann <arnd@arndb.de>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, grundler@google.com, olofj@chromium.org, Seshagiri Holi <sholi@nvidia.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Russell King - ARM Linux <linux@arm.linux.org.uk>
-Cc: Vaibhav Hiremath <vaibhav.hiremath@linaro.org>, ulf.hansson@linaro.org, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, nico@fluxnic.net
 
-Hi Russell,
+Hi Arnd,
 
-On Thu, 10 Sep 2015 09:02:33 +0100
-Russell King - ARM Linux <linux@arm.linux.org.uk> wrote:
-
-> On Thu, Sep 10, 2015 at 03:31:29PM +0800, Jisheng Zhang wrote:
-> > Hi Vaibhav,
-> > 
-> > On Thu, 10 Sep 2015 12:40:48 +0530
-> > Vaibhav Hiremath <vaibhav.hiremath@linaro.org> wrote:
-> > 
-> > > Hi,
-> > > 
-> > > During my testing of SDHCI-PXAV3 driver on Marvell's pxa1928
-> > > based platform, I observed that runtime PM suspend/resume is having
-> > > issues with card insertion and removal.
-> > > 
-> > > Let me try to explain it using execution sequence -
-> > > 
-> > > During boot:
-> > > 
-> > > MMC SD card gets detected as expected.
-> > > 
-> > > [    2.431012] mmc1: new high speed SDHC card at address 1234
-> > > [    2.437235] mmcblk1: mmc1:1234 SA04G 3.63 GiB
-> > > [    2.444841]  mmcblk1: p1
-> > > 
-> > > 
-> > > Now after coming to the linux prompt, if card removal event occurs
-> > > then the call sequence is -
-> > > 
-> > >   sdhci_irq() -->
-> > >    -> sdhci_thread_irq(): host->thread_isr - 0x80
-> > >       -> sdhci_card_event()
-> > >       -> mmc_detect_change()
-> > >          --> _mmc_detect_change()
-> > >              --->  mmc_sd_detect()
-> > >                    mmc_sd_remove()
-> > >                    mmc_remove_card()
-> > >                    mmc_bus_remove()
-> > >                    mmc_power_off()
-> > >                    mmc_set_initial_state()
-> > >                    sdhci_set_ios()
-> > >                    ...
-> > >         sdhci_pxav3_runtime_suspend()
-> > >         sdhci_runtime_suspend_host()
-> > > 
-> > > 
-> > > Till here everything looks perfect :) (if I got it right)
-> > > 
-> > > Now on card insertion again, the expectation is, runtime resume should
-> > > get called as part of interrupt trigger from the SDHCI controller on
-> > > card insertion.
-> > 
-> > AFAIK, card insertion => wakeup irq, this irq doesn't come from SDHCI
+On 09/09/15 21:22, Arnd Bergmann wrote:
+> On Wednesday 09 September 2015 17:44:54 Jon Hunter wrote:
+>>
+>> On 09/09/15 16:56, Arnd Bergmann wrote:
+>>> On Wednesday 09 September 2015 16:06:01 Jon Hunter wrote:
+>>>> +
+>>>> +       idata = kcalloc(mcci.num_of_cmds, sizeof(*idata), GFP_KERNEL);
+>>>> +       if (!idata) {
+>>>> +               err = -ENOMEM;
+>>>> +               goto cmd_err;
+>>>> +       }
+>>>> +
+>>>> +       cmds = (struct mmc_ioc_cmd __user *)(unsigned long)mcci.cmds_ptr;
+>>>> +       for (n_cmds = 0; n_cmds < mcci.num_of_cmds; n_cmds++) {
+>>>> +               idata[n_cmds] = mmc_blk_ioctl_copy_from_user(&cmds[n_cmds]);
+>>>> +               if (IS_ERR(idata[n_cmds])) {
+>>>> +                       err = PTR_ERR(idata[n_cmds]);
+>>>> +                       goto cmd_err;
+>>>> +               }
+>>>> +       }
+>>>> +
+>>>
+>>> You have no upper bound on the number of commands, which means you end
+>>> up catching overly large arguments only through -ENOMEM. Can you come
+>>> up with an upper bound that is guaranteed to succeed with the allocation?
+>>
+>> The uint8 type would limit you to 256 commands (if you have the memory),
+>> although admittedly that is probably overkill.
 > 
-> Wakeup IRQs are what happens when the _system_ is in suspend, not
-> when the device is runtime suspended.
+> Good point.
+> 
+> Please note a few details here:
+> 
+> - in uabi headers, we need to use __u8 instead of uint8, because we cannot
+>   rely on libc header file inclusion for kernel headers.
 
-Oh, yes. Sorry for misleading, I didn't express myself clearly. What
-I really means is that the card insertion/remove irq which could finally
-cause sdhci host resumed.
+Ok.
 
-Thanks for clarification,
-Jisheng
+> - you have some implicit padding after the structure and should replace that
+>   with explictit pad bytes to extend the structure to a multiple of its
+>   alignment (8 bytes).
 
+Would padding with __u32 at the end be sufficient here? I assume the
+__u32 would be 32-bit aligned. However, was not sure if this would
+always be the case.
+
+>>>> +struct mmc_ioc_multi_cmd {
+>>>> +       __u64 cmds_ptr;
+>>>> +       uint8_t num_of_cmds;
+>>>> +};
+>>>  
+>>> complex commands are always nasty in one way or another. Can you describe
+>>> in the patch description why you picked an indirect pointer over something
+>>> like
+>>>
+>>> struct mmc_ioc_multi_cmd {
+>>> 	__u64 num_of_cmds;
+>>> 	struct mmc_ioc_cmd cmds[0];
+>>> };
+>>>
+>>> as I said, both are ugly. My first choice would have been the other one,
+>>> but I'm sure you have some reasons yourself.
+>>
+>> It was a suggestion from Olof to ensure the structure size is constant for
+>> both 32-bit and 64-bit userspaces. I am not sure if it is worth adding a
+>> macro similar to the below for this?
+>>
+>> #define mmc_ioc_cmd_set_data(ic, ptr) ic.data_ptr = (__u64)(unsigned long) ptr
+>>
+>> However, yes can update the changelog.
+> 
+> I was not referring to the use of an __u64 variable to pass a pointer, that
+> is expected (and the macro would make it harder to understand).
+> 
+> What I meant instead was the use of a pointer to an array as opposed to
+> passing the array itself. With the definition I gave above, the size would
+> still be the same on all architectures (you can replace the __u64 with
+> an __u8 plus padding if you like), as sizeof(struct mmc_ioc_multi_cmd)
+> is just '8' here.
+
+Do you have any strong preference here? I guess I don't and agree
+neither are ideal.
+
+> Alternatively, you could just use an array of struct mmc_ioc_cmd by
+> itself and encode the length in the ioctl command:
+> 
+> #define MMC_COMBO_IOC_CMD(n) _IOC(_IOC_READ|_IOC_WRITE, 1, sizeof(struct mmc_ioc_cmd) * (n))
+> 
+> This is of course also ugly because the ioctl command number is not
+> fixed, and because the limit for the number of mmc command blocks
+> is architecture dependent, depending on the definition of the _IOC
+> macro that can have either 13 or 14 bits to encode the argument length
+> in bytes.
+
+Interesting idea. However, given your comments above, I think that I
+would rather place the size in the structure.
+
+Cheers
+Jon
