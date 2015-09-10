@@ -1,84 +1,80 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [RFC PATCH v3 0/3] Add MMC host driver for Spreadtrum SoC
-Date: Thu, 10 Sep 2015 13:23:24 +0200
-Message-ID: <CAPDyKFoVx7Zfj9pBqcnKpVXCWYurOXtYcsJuxX0+tk4Bai+t_Q@mail.gmail.com>
-References: <1439571353-30165-1-git-send-email-wuht06@gmail.com>
+Subject: Re: [PATCH 3/8] mmc: core: Add mmc_regulator_set_vqmmc()
+Date: Thu, 10 Sep 2015 14:40:26 +0200
+Message-ID: <CAPDyKFqR-+GzV0SGiA_cnoNftcZ0Y_fwe5vW2NvDxd6HbO__UQ@mail.gmail.com>
+References: <1441045446-30858-1-git-send-email-heiko@sntech.de>
+	<1441045446-30858-4-git-send-email-heiko@sntech.de>
+	<CAPDyKFqJp3VuOeTh4Abkn2X6gQxNHDXwJj8N51OxxSo+Agespw@mail.gmail.com>
+	<CAD=FV=Wy7foROYkmR+cX+NS5-=BaB36WsW1sc1XjmmdUnPCxsA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wi0-f174.google.com ([209.85.212.174]:36940 "EHLO
-	mail-wi0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750895AbbIJLXZ (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 10 Sep 2015 07:23:25 -0400
-Received: by wicfx3 with SMTP id fx3so19131101wic.0
-        for <linux-mmc@vger.kernel.org>; Thu, 10 Sep 2015 04:23:24 -0700 (PDT)
-In-Reply-To: <1439571353-30165-1-git-send-email-wuht06@gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-clk-owner@vger.kernel.org>
+In-Reply-To: <CAD=FV=Wy7foROYkmR+cX+NS5-=BaB36WsW1sc1XjmmdUnPCxsA@mail.gmail.com>
+Sender: linux-clk-owner@vger.kernel.org
+To: Doug Anderson <dianders@chromium.org>
+Cc: Heiko Stuebner <heiko@sntech.de>, Michael Turquette <mturquette@baylibre.com>, Stephen Boyd <sboyd@codeaurora.org>, "tgih.jun@samsung.com" <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, linux-mmc <linux-mmc@vger.kernel.org>, linux-clk@vger.kernel.org, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "open list:ARM/Rockchip SoC..." <linux-rockchip@lists.infradead.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Hongtao Wu <wuht06@gmail.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Rob Herring <robh+dt@kernel.org>, =?UTF-8?Q?Pawe=C5=82_Moll?= <pawel.moll@arm.com>, Mark Rutland <mark.rutland@arm.com>, Ian Campbell <ijc+devicetree@hellion.org.uk>, Kumar Gala <galak@codeaurora.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will.deacon@arm.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Shawn Lin <shawn.lin@rock-chips.com>, Orson.Zhai@spreadtrum.com, Chunyan.Zhang@spreadtrum.com, Jason.Wu@spreadtrum.com
 
-Hi Hongtao,
+On 2 September 2015 at 18:20, Doug Anderson <dianders@chromium.org> wrote:
+> Ulf,
+>
+> On Wed, Sep 2, 2015 at 4:38 AM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+>>> +/**
+>>> + * mmc_regulator_set_vqmmc - Set VQMMC as per the ios
+>>> + *
+>>> + * For 3.3V signaling, we try to match VQMMC to VMMC as closely as possible.
+>>
+>> Looking at the code, I don't think this statement is entirely true.
+>> Isn't it so that we will be trying with a maximum tolerance of 0.3 V
+>> towards the VMMC voltage level (then fall-back to the complete range)?
+>> Perhaps you can find a better way to describe that in the change log.
+>
+> If regulator_set_voltage_triplet() is ever implemented more correctly
+> then the description here is correct.  ...the problem is that
+> regulator_set_voltage_triplet() is still using the same shortcut that
+> regulator_set_voltage_tol() was using.
 
-On 14 August 2015 at 18:55, Hongtao Wu <wuht06@gmail.com> wrote:
-> This patch adds MMC host driver for Spreadtrum SoC.
-> The following coding style may be not meet kernel coding style.
+Okay, let's mention that somehow.
 
-I don't think you have any reason to why you shouldn't follow the
-kernel coding style. Please change!
+>
+>
+>>> +int mmc_regulator_set_vqmmc(struct mmc_host *mmc, struct mmc_ios *ios)
+>>> +{
+>>> +       int volt, min_uV, max_uV;
+>>> +
+>>> +       /* If no vqmmc supply then we can't change the voltage */
+>>> +       if (IS_ERR(mmc->supply.vqmmc))
+>>> +               return -EINVAL;
+>>
+>> In general vqmmc is considered as an optional regulator and that's
+>> also how host drivers treat it. So perhaps it would make sense to
+>> return 0 here instead of an error code or what do you think?
+>
+> The idea is that since this is intended to be called by
+> start_signal_voltage_switch() and having no vqmmc should be considered
+> an error for start_signal_voltage_switch() then it should be an error
+> here.  What do you think?
 
-> I am not sure this kind of coding style is better or worse.
-> 1) A macro that represent some bits of a register is added a prefix "__",
->     for example:
->     #define SDHOST_16_HOST_CTRL_2   0x3E
->     #define __TIMING_MODE_SDR12     0x0000
->     #define __TIMING_MODE_SDR25     0x0001
->     #define __TIMING_MODE_SDR50     0x0002
->     I think it is more useful to distinguish a register from a bit of this
->     register.
-> 2) A function in order to operate a register is also added a prefix "_".
->     If the functions(A) call other function(B), we added a prefix "__" before B,
->     for example:
->     static inline void _sdhost_enable_int(struct sdhost_host *host, u32 mask)
->     {
->         __local_writel(mask, host, SDHOST_32_INT_ST_EN);
->         __local_writel(mask, host, SDHOST_32_INT_SIG_EN);
->     }
->     I think this make the relationship of the function call more explicit.
+Okay!
+
 >
-> Changes in v3:
-> - add Spreadtrum MMC DT bindings.
-> - add MMC nodes in Spreadtrum DT files
-> - release resources when there is an error or removing MMC host driver.
 >
-> Changes in v2:
-> - delete some redundant mdelay()
-> - add error handling in some functions.
+>>> +
+>>> +               /* try to stay close to vmmc at first */
+>>> +               if (!mmc_regulator_set_voltage_if_supported(mmc->supply.vqmmc,
+>>> +                                               min_uV, volt, max_uV))
+>>> +                       return 0;
+>>> +
+>>> +               return mmc_regulator_set_voltage_if_supported(mmc->supply.vqmmc,
+>>> +                                               2700000, volt, 3600000);
 >
-> Billows Wu(HongtaoWu) (3):
->   mmc: sprd: add MMC host driver for Spreadtrum SoC
->   Documentation: add Spreadtrum MMC DT bindings.
->   DT: add MMC nodes in Spreadtrum DT files.
->
->  Documentation/devicetree/bindings/mmc/sprd-mmc.txt |   46 +
->  arch/arm64/boot/dts/sprd/sc9836-openphone.dts      |   24 +
->  arch/arm64/boot/dts/sprd/sharkl64.dtsi             |   44 +
->  drivers/mmc/host/Kconfig                           |    6 +
->  drivers/mmc/host/Makefile                          |    1 +
->  drivers/mmc/host/sprd_sdhost.c                     | 1202 ++++++++++++++++++++
->  drivers/mmc/host/sprd_sdhost.h                     |  615 ++++++++++
->  drivers/mmc/host/sprd_sdhost_debugfs.c             |  212 ++++
->  drivers/mmc/host/sprd_sdhost_debugfs.h             |   27 +
->  9 files changed, 2177 insertions(+)
->  create mode 100644 Documentation/devicetree/bindings/mmc/sprd-mmc.txt
->  create mode 100644 drivers/mmc/host/sprd_sdhost.c
->  create mode 100644 drivers/mmc/host/sprd_sdhost.h
->  create mode 100644 drivers/mmc/host/sprd_sdhost_debugfs.c
->  create mode 100644 drivers/mmc/host/sprd_sdhost_debugfs.h
->
-> --
-> 1.7.9.5
->
+> The whole fact that there are two calls here is really just because of
+> the limitations of the current implementation of
+> regulator_set_voltage_triplet().  If that implementation is ever fixed
+> then we'd just need a single call.  Probably worth a comment saying
+> that?
+
+Yes, please!
 
 Kind regards
 Uffe
