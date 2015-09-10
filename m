@@ -1,77 +1,70 @@
-From: Arnd Bergmann <arnd@arndb.de>
-Subject: Re: [PATCH] mmc: block: Add new ioctl to send multi commands
-Date: Thu, 10 Sep 2015 10:38:27 +0200
-Message-ID: <1992614.qXMDtKgeKR@wuerfel>
-References: <1441811161-18513-1-git-send-email-jonathanh@nvidia.com> <3546402.HsxrhMD6nc@wuerfel> <55F13E33.9000703@nvidia.com>
+From: Jon Hunter <jonathanh@nvidia.com>
+Subject: Re: [RFC PATCH] mmc: block: Add new ioctl to send combo commands
+Date: Thu, 10 Sep 2015 09:43:42 +0100
+Message-ID: <55F142BE.5020403@nvidia.com>
+References: <1441203711-19538-1-git-send-email-jonathanh@nvidia.com>
+ <CAOesGMh9d6yX-dS6jg2eu2hvN5S=87rr7L-+ZUreX=GGHDxRaA@mail.gmail.com>
+ <55E86260.3010203@nvidia.com>
+ <CAPDyKFqFd+Dki6rbhEah_10z4eyfT1WaDmAUpagqQJc56-9B1A@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7Bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mout.kundenserver.de ([212.227.126.131]:55496 "EHLO
-	mout.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751484AbbIJIib (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 10 Sep 2015 04:38:31 -0400
-In-Reply-To: <55F13E33.9000703@nvidia.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <CAPDyKFqFd+Dki6rbhEah_10z4eyfT1WaDmAUpagqQJc56-9B1A@mail.gmail.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Olof Johansson <olof@lixom.net>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Grant Grundler <grundler@google.com>, Olof Johansson <olofj@chromium.org>, Seshagiri Holi <sholi@nvidia.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Jon Hunter <jonathanh@nvidia.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, grundler@google.com, olofj@chromium.org, Seshagiri Holi <sholi@nvidia.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 
-On Thursday 10 September 2015 09:24:19 Jon Hunter wrote:
-> On 09/09/15 21:22, Arnd Bergmann wrote:
-> > On Wednesday 09 September 2015 17:44:54 Jon Hunter wrote:
-> >> On 09/09/15 16:56, Arnd Bergmann wrote:
-> >>> On Wednesday 09 September 2015 16:06:01 Jon Hunter wrote:
+Hi Ulf,
+
+On 09/09/15 13:42, Ulf Hansson wrote:
+
+[snip]
+
+>> +static int mmc_blk_ioctl_cmd(struct block_device *bdev,
+>> +                       struct mmc_ioc_cmd __user *ic_ptr)
+>> +{
+>> +       struct mmc_blk_ioc_data *idata;
+>> +       struct mmc_blk_data *md;
+>> +       struct mmc_card *card;
+>> +       int err;
+>> +
+>> +       /*
+>> +        * The caller must have CAP_SYS_RAWIO, and must be calling this on the
+>> +        * whole block device, not on a partition.  This prevents overspray
+>> +        * between sibling partitions.
+>> +        */
+>> +       if ((!capable(CAP_SYS_RAWIO)) || (bdev != bdev->bd_contains))
+>> +               return -EPERM;
+>> +
+>> +       idata = mmc_blk_ioctl_copy_from_user(ic_ptr);
+>> +       if (IS_ERR(idata))
+>> +               return PTR_ERR(idata);
+>> +
+>> +       md = mmc_blk_get(bdev->bd_disk);
+>> +       if (!md) {
+>> +               err = -EINVAL;
+>> +               goto cmd_err;
+>> +       }
+>> +
+>> +       card = md->queue.card;
+>> +       if (IS_ERR(card)) {
+>> +               err = PTR_ERR(card);
+>> +               goto cmd_done;
+>> +       }
+>> +
+>> +       mmc_claim_host(card->host);
 > 
-> > - you have some implicit padding after the structure and should replace that
-> >   with explictit pad bytes to extend the structure to a multiple of its
-> >   alignment (8 bytes).
-> 
-> Would padding with __u32 at the end be sufficient here? I assume the
-> __u32 would be 32-bit aligned. However, was not sure if this would
-> always be the case.
+> As __mmc_blk_ioctl_cmd() already does mmc_get_card(), you don't need
+> mmc_claim_host() here.
 
-If you have a layout of 
+Thinking about this some more, does it make sense to have a
+mmc_get_card() above and then remove the one from __mmc_blk_ioctl_cmd()?
+The mmc_blk_ioctl_multi_cmd() needs to call mmc_get_card() before
+calling __mmc_blk_ioctl_cmd() and so currently we are calling
+mmc_get_card() twice in the case of mmc_blk_ioctl_multi_cmd() which
+seems unnecessary.
 
-	__u64 pointer; 
-	__u8 size;
-	__u32 pad;
-
-you still get three bytes of implied padding between size and pad. It's
-better to just have '__u8 __pad[7]' in that case.
-
-> > I was not referring to the use of an __u64 variable to pass a pointer, that
-> > is expected (and the macro would make it harder to understand).
-> > 
-> > What I meant instead was the use of a pointer to an array as opposed to
-> > passing the array itself. With the definition I gave above, the size would
-> > still be the same on all architectures (you can replace the __u64 with
-> > an __u8 plus padding if you like), as sizeof(struct mmc_ioc_multi_cmd)
-> > is just '8' here.
-> 
-> Do you have any strong preference here? I guess I don't and agree
-> neither are ideal.
-> 
-> > Alternatively, you could just use an array of struct mmc_ioc_cmd by
-> > itself and encode the length in the ioctl command:
-> > 
-> > #define MMC_COMBO_IOC_CMD(n) _IOC(_IOC_READ|_IOC_WRITE, 1, sizeof(struct mmc_ioc_cmd) * (n))
-> > 
-> > This is of course also ugly because the ioctl command number is not
-> > fixed, and because the limit for the number of mmc command blocks
-> > is architecture dependent, depending on the definition of the _IOC
-> > macro that can have either 13 or 14 bits to encode the argument length
-> > in bytes.
-> 
-> Interesting idea. However, given your comments above, I think that I
-> would rather place the size in the structure.
-
-I don't have a strong preference here. If there is a slight chance that
-you might need more than ((1<<13) / sizeof(struct mmc_ioc_cmd)) mmc commands
-in one ioctl, you can rule out that last solution.
-
-If you can prove that this length would always be sufficient, I'd probably
-pick that approach. Otherwise, I'd pick the one the size followed by
-an an open array.
-
-	Arnd
+Cheers
+Jon
