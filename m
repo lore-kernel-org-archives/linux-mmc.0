@@ -1,56 +1,59 @@
-From: Tony Lindgren <tony@atomide.com>
-Subject: Re: [PATCH v3 02/15] mmc: host: omap_hsmmc: return on fatal errors
- from omap_hsmmc_reg_get
-Date: Thu, 10 Sep 2015 13:45:13 -0700
-Message-ID: <20150910204512.GJ4215@atomide.com>
-References: <CAOesGMjW=3qqBfqdxGwEqk1uVj_08rnvP095V-9+O=rsmjLOxQ@mail.gmail.com>
- <20150828190354.GZ4215@atomide.com>
- <55E3E9B1.8070908@ti.com>
- <20150831205829.GB4215@atomide.com>
- <20150831211450.GC4215@atomide.com>
- <55E5B730.9020409@ti.com>
- <20150901145002.GE4215@atomide.com>
- <55E5BC11.8090002@ti.com>
- <20150901150336.GF4215@atomide.com>
- <CAMAWPa-uf80P8026UH7kJsmzVO2K76HpuzRgpn9TadZS+12f5A@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+From: Shawn Lin <shawn.lin@rock-chips.com>
+Subject: [PATCH 2/2] Documentation: bindings: add description of phy for sdhci-of-arasan
+Date: Fri, 11 Sep 2015 16:55:29 +0800
+Message-ID: <1441961729-10594-1-git-send-email-shawn.lin@rock-chips.com>
+References: <1441961698-10516-1-git-send-email-shawn.lin@rock-chips.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <CAMAWPa-uf80P8026UH7kJsmzVO2K76HpuzRgpn9TadZS+12f5A@mail.gmail.com>
+In-Reply-To: <1441961698-10516-1-git-send-email-shawn.lin@rock-chips.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Kevin Hilman <khilman@kernel.org>
-Cc: Grygorii Strashko <grygorii.strashko@ti.com>, Kishon Vijay Abraham I <kishon@ti.com>, Olof Johansson <olof@lixom.net>, Ulf Hansson <ulf.hansson@linaro.org>, afenkart@gmail.com, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-omap <linux-omap@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Sekhar Nori <nsekhar@ti.com>, Neil Brown <neilb@suse.de>, Tyler Baker <tyler.baker@linaro.org>
+To: Michal Simek <michal.simek@xilinx.com>, S?ren Brinkmann <soren.brinkmann@xilinx.com>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-rockchip@lists.infradead.org, devicetree@vger.kernel.org, Shawn Lin <shawn.lin@rock-chips.com>
 List-Id: linux-mmc@vger.kernel.org
 
-* Kevin Hilman <khilman@kernel.org> [150910 10:03]:
-> On Tue, Sep 1, 2015 at 8:03 AM, Tony Lindgren <tony@atomide.com> wrote:
-> > * Grygorii Strashko <grygorii.strashko@ti.com> [150901 07:57]:
-> >> On 09/01/2015 05:50 PM, Tony Lindgren wrote:
-> >> >>
-> >> >>On -next, Above crash signature could be related to race
-> >> >>"ARM: OMAP2+: omap-device: fix race deferred probe of omap_hsmmc vs omap_device_late_init"
-> >> >>http://www.spinics.net/lists/linux-omap/msg121622.html
-> >> >
-> >> >Good point thanks, yes that's the case. MMC probing fails and then we hit this
-> >> >separate issue while MMC is trying to probe. Applying your fix makes the
-> >> >abort disappear, but naturally does not get MMC working again.
-> >>
-> >> you may need CONFIG_GPIO_PCF857X=y for dra7-evm
-> >
-> > This is a regression at least on omap4 as pointed out by Olof.
-> 
-> FWIW, this problem still exists in mainline[1], and note that it fails
-> for omap2plus_defconfig which already has CONFIG_REGULATOR_PBIAS=y, so
-> that is not the fix for this issue.
+This patch adds phys and phy-names for sdhci-of-arasan as optional
+properties, and details the example as well.
 
-There are also the pbias regulator fixes pending.. And the .dts
-fixes pending.. So looks like it's going to be few more days.
+Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
+---
 
-AFAIK, also the multi_v7_defconfig change is needed..
+ Documentation/devicetree/bindings/mmc/arasan,sdhci.txt | 10 ++++++++--
+ 1 file changed, 8 insertions(+), 2 deletions(-)
 
-Regards,
-
-Tony
+diff --git a/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt b/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
+index da541c3..0264d5f 100644
+--- a/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
++++ b/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
+@@ -1,11 +1,12 @@
+ Device Tree Bindings for the Arasan SDHCI Controller
  
-> [1] http://kernelci.org/boot/omap4-panda-es/?mainline&omap2plus_defconfig&lab-khilman
+-  The bindings follow the mmc[1], clock[2] and interrupt[3] bindings. Only
+-  deviations are documented here.
++  The bindings follow the mmc[1], clock[2], interrupt[3] and phy[4] bindings.
++  Only deviations are documented here.
+ 
+   [1] Documentation/devicetree/bindings/mmc/mmc.txt
+   [2] Documentation/devicetree/bindings/clock/clock-bindings.txt
+   [3] Documentation/devicetree/bindings/interrupt-controller/interrupts.txt
++  [4] Documentation/devicetree/bindings/phy/phy-bindings.txt
+ 
+ Required Properties:
+   - compatible: Compatibility string. Must be 'arasan,sdhci-8.9a' or
+@@ -16,6 +17,9 @@ Required Properties:
+   - interrupts: Interrupt specifier
+   - interrupt-parent: Phandle for the interrupt controller that services
+ 		      interrupts for this device.
++Optional Properties:
++  - phys: From PHY bindings: Phandle for the Generic PHY for arasan.
++  - phy-names:  MUST be "phy_arasan".
+ 
+ Example:
+ 	sdhci@e0100000 {
+@@ -25,4 +29,6 @@ Example:
+ 		clocks = <&clkc 21>, <&clkc 32>;
+ 		interrupt-parent = <&gic>;
+ 		interrupts = <0 24 4>;
++		phys = <&emmc_phy>;
++		phy-names = "phy_arasan";
+ 	} ;
+-- 
+2.3.7
