@@ -1,51 +1,92 @@
-From: Yangbo Lu <yangbo.lu@freescale.com>
-Subject: [PATCH 3/6] mmc: dt: add DT bindings for Freescale eSDHC
-Date: Mon, 14 Sep 2015 19:43:44 +0800
-Message-ID: <1442231024-10660-1-git-send-email-yangbo.lu@freescale.com>
+From: Vaibhav Hiremath <vaibhav.hiremath@linaro.org>
+Subject: Re: sdhci: runtime suspend/resume on card insert/removal
+Date: Mon, 14 Sep 2015 18:03:40 +0530
+Message-ID: <55F6BEA4.1070803@linaro.org>
+References: <55F12CF8.50003@linaro.org> <20150910153129.07adbe68@xhacker>
+ <20150910080233.GH21084@n2100.arm.linux.org.uk>
+ <20150910160402.3b78b5c6@xhacker> <55F66874.2000609@linaro.org>
+ <20150914142838.07ec6a07@xhacker> <55F681AC.2010605@linaro.org>
+ <20150914161804.101dfc55@xhacker> <55F69121.3030700@linaro.org>
+ <55F69E4F.8010608@linaro.org> <20150914105014.GJ21084@n2100.arm.linux.org.uk>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=windows-1252; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-by2on0139.outbound.protection.outlook.com ([207.46.100.139]:46603
-	"EHLO na01-by2-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1752483AbbINMEh (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 14 Sep 2015 08:04:37 -0400
+Received: from mail-pa0-f52.google.com ([209.85.220.52]:36532 "EHLO
+	mail-pa0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751285AbbINMdq (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 14 Sep 2015 08:33:46 -0400
+Received: by padhk3 with SMTP id hk3so143304492pad.3
+        for <linux-mmc@vger.kernel.org>; Mon, 14 Sep 2015 05:33:45 -0700 (PDT)
+In-Reply-To: <20150914105014.GJ21084@n2100.arm.linux.org.uk>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org, ulf.hansson@linaro.org
-Cc: Yangbo Lu <yangbo.lu@freescale.com>
+To: Russell King - ARM Linux <linux@arm.linux.org.uk>
+Cc: Jisheng Zhang <jszhang@marvell.com>, ulf.hansson@linaro.org, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, nico@fluxnic.net
 
-Document Freescale eSDHC 'adapter-type' and 'peripheral-frequency'
-properties.
 
-Signed-off-by: Yangbo Lu <yangbo.lu@freescale.com>
----
- Documentation/devicetree/bindings/mmc/fsl-esdhc.txt | 12 ++++++++++++
- 1 file changed, 12 insertions(+)
 
-diff --git a/Documentation/devicetree/bindings/mmc/fsl-esdhc.txt b/Documentation/devicetree/bindings/mmc/fsl-esdhc.txt
-index b7943f3..2006408 100644
---- a/Documentation/devicetree/bindings/mmc/fsl-esdhc.txt
-+++ b/Documentation/devicetree/bindings/mmc/fsl-esdhc.txt
-@@ -22,6 +22,18 @@ Optional properties:
-   - voltage-ranges : two cells are required, first cell specifies minimum
-     slot voltage (mV), second cell specifies maximum slot voltage (mV).
-     Several ranges could be specified.
-+  - adapter-tye: specifies SDHC Adapter card type. The Adapter card types are
-+    as below.
-+	TYPE_1      0x1   /* eMMC Card Rev4.5 */
-+	TYPE_2      0x2   /* SD/MMC Legacy Card */
-+	TYPE_3      0x3   /* eMMC Card Rev4.4 */
-+	TYPE_4      0x4   /* Reserved */
-+	TYPE_5      0x5   /* MMC Card */
-+	TYPE_6      0x6   /* SD Card Rev2.0 Rev3.0 */
-+	NO_ADAPTER  0x7   /* No Card is Present*/
-+  - peripheral-frequency: specifies peripheral clock frequency value.
-+
-+
- 
- Example:
- 
--- 
-2.1.0.27.g96db324
+On Monday 14 September 2015 04:20 PM, Russell King - ARM Linux wrote:
+> On Mon, Sep 14, 2015 at 03:45:43PM +0530, Vaibhav Hiremath wrote:
+>> Came across below lines in the datasheet,
+>>
+>> ========= Copy-n-paste from datasheet============
+>>
+>> All SDH interfaces share the same clock which is enabled when any of the SDH
+>> clock enables are
+>> set (from PMUA_SDH1_CLK_RES_CTRL, PMUA_SDH2_CLK_RES_CTRL,
+>> PMUA_SDH3_CLK_RES_CTRL, PMUA_SDH4_CLK_RES_CTRL,
+>> PMUA_SDH5_CLK_RES_CTRL), with clock source select and divider ratio
+>> controlled by
+>> PMUA_SDH1_CLK_RES_CTRL.
+>>
+>> ==================================================
+>>
+>>
+>> And I can confirm that after disabling AXI interface clock for all the
+>> SDH modules (1-5) I see I get an abort.
+>>
+>> This clearly explains/justifies/proves that the existing code is
+>> working as expected. I have eMMC mounted on the board, which makes
+>> clock to always stay ON on SDH3.
+>>
+>> So there is an OR gate implemented inside which takes input from
+>> SDHx_AXI_EN and feeds back to all SDHx instances. Don't ask me why it
+>> has been designed that way :)
+>>
+>> And I did some experiment as well, so what I have observed is,
+>> SDH_AXI_CLOCK is required to generate card detection, without that I do
+>> not see card detection working.
+>
+> What that means is that if DT configures the interface to use its
+> internal card detection, the AXI clock must never shut off when entering
+> runtime-PM.
+>
 
+Yes, exactly.
+Its clock driver which is doing this.
+
+static struct mmp_param_gate_clk apmu_gate_clks[] = {
+         /* The gate clocks has mux parent. */
+         {PXA1928_CLK_SDH0, "sdh0_clk", "sdh_div", CLK_SET_RATE_PARENT, 
+PXA1928_CLK_SDH0 * 4, 0x1b, 0x1b, 0x0, 0, &sdh0_lock},
+};
+
+Here the mask and enable_val both are set to 0x1b, which means it
+shuts off both peripheral and AXI clock both.
+
+> Yes, it means you don't get the same savings as you would by turning
+> off that clock, but that's the choice between using the internal card
+> detection and a GPIO for this.  The code shouldn't force you to use a
+> GPIO just because the Linux driver implementation dumbly disables the
+> AXI clock.
+>
+
+Exactly,
+
+In my case, luckily I have eMMC on board, which keeps AXI clock ON all
+the time. Not sure why somebody would keep dependency like this,
+inspite having individual control for AXI clock.
+
+Thanks,
+Vaibhav
