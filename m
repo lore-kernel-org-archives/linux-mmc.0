@@ -1,55 +1,52 @@
 From: Yangbo Lu <yangbo.lu@freescale.com>
-Subject: [PATCH 1/6] mmc: sdhci: add a callback of signal voltage switching
-Date: Mon, 14 Sep 2015 19:43:25 +0800
-Message-ID: <1442231005-10570-1-git-send-email-yangbo.lu@freescale.com>
+Subject: [PATCH 2/6] mmc: sdhci: add a callback of tuning block setting
+Date: Mon, 14 Sep 2015 19:43:35 +0800
+Message-ID: <1442231015-10617-1-git-send-email-yangbo.lu@freescale.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-by2on0142.outbound.protection.outlook.com ([207.46.100.142]:33712
-	"EHLO na01-by2-obe.outbound.protection.outlook.com"
+Received: from mail-bn1on0112.outbound.protection.outlook.com ([157.56.110.112]:43243
+	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
 	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1754213AbbINLtT (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 14 Sep 2015 07:49:19 -0400
+	id S1752161AbbINLt3 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 14 Sep 2015 07:49:29 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org, ulf.hansson@linaro.org
 Cc: Yangbo Lu <yangbo.lu@freescale.com>
 
-Add a signal voltage switching callback to let host use its own
-switching process.
+Add a tuning block setting callback to let host set its
+tuning block before executing tuning procedure.
 
 Signed-off-by: Yangbo Lu <yangbo.lu@freescale.com>
 ---
- drivers/mmc/host/sdhci.c | 5 +++++
- drivers/mmc/host/sdhci.h | 2 ++
- 2 files changed, 7 insertions(+)
+ drivers/mmc/host/sdhci.c | 3 +++
+ drivers/mmc/host/sdhci.h | 1 +
+ 2 files changed, 4 insertions(+)
 
 diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 64b7fdb..9b3d4c2 100644
+index 9b3d4c2..9da4644 100644
 --- a/drivers/mmc/host/sdhci.c
 +++ b/drivers/mmc/host/sdhci.c
-@@ -1757,6 +1757,11 @@ static int sdhci_do_start_signal_voltage_switch(struct sdhci_host *host,
- 	if (host->version < SDHCI_SPEC_300)
- 		return 0;
+@@ -1939,6 +1939,9 @@ static int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode)
+ 		return err;
+ 	}
  
-+	if (host->ops->signal_voltage_switch) {
-+		host->ops->signal_voltage_switch(host, ios->signal_voltage);
-+		return 0;
-+	}
++	if (host->ops->set_tuning_block)
++		host->ops->set_tuning_block(host);
 +
  	ctrl = sdhci_readw(host, SDHCI_HOST_CONTROL2);
- 
- 	switch (ios->signal_voltage) {
+ 	ctrl |= SDHCI_CTRL_EXEC_TUNING;
+ 	if (host->quirks2 & SDHCI_QUIRK2_TUNING_WORK_AROUND)
 diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-index 7c02ff4..723f034 100644
+index 723f034..98f239b 100644
 --- a/drivers/mmc/host/sdhci.h
 +++ b/drivers/mmc/host/sdhci.h
-@@ -544,6 +544,8 @@ struct sdhci_ops {
- 					 struct mmc_card *card,
- 					 unsigned int max_dtr, int host_drv,
+@@ -546,6 +546,7 @@ struct sdhci_ops {
  					 int card_drv, int *drv_type);
-+	void	(*signal_voltage_switch)(struct sdhci_host *host,
-+					 unsigned char signal_voltage);
+ 	void	(*signal_voltage_switch)(struct sdhci_host *host,
+ 					 unsigned char signal_voltage);
++	void	(*set_tuning_block)(struct sdhci_host *host);
  };
  
  #ifdef CONFIG_MMC_SDHCI_IO_ACCESSORS
