@@ -1,76 +1,58 @@
-From: Russell King - ARM Linux <linux@arm.linux.org.uk>
-Subject: Re: sdhci: runtime suspend/resume on card insert/removal
-Date: Mon, 14 Sep 2015 12:00:23 +0100
-Message-ID: <20150914110023.GK21084@n2100.arm.linux.org.uk>
-References: <20150910153129.07adbe68@xhacker>
- <20150910080233.GH21084@n2100.arm.linux.org.uk>
- <20150910160402.3b78b5c6@xhacker>
- <55F66874.2000609@linaro.org>
- <20150914142838.07ec6a07@xhacker>
- <55F681AC.2010605@linaro.org>
- <20150914161804.101dfc55@xhacker>
- <55F69121.3030700@linaro.org>
- <55F69E4F.8010608@linaro.org>
- <20150914105014.GJ21084@n2100.arm.linux.org.uk>
+From: Yangbo Lu <yangbo.lu@freescale.com>
+Subject: [PATCH 1/6] mmc: sdhci: add a callback of signal voltage switching
+Date: Mon, 14 Sep 2015 19:43:25 +0800
+Message-ID: <1442231005-10570-1-git-send-email-yangbo.lu@freescale.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from pandora.arm.linux.org.uk ([78.32.30.218]:47316 "EHLO
-	pandora.arm.linux.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752161AbbINLAb (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 14 Sep 2015 07:00:31 -0400
-Content-Disposition: inline
-In-Reply-To: <20150914105014.GJ21084@n2100.arm.linux.org.uk>
+Received: from mail-by2on0142.outbound.protection.outlook.com ([207.46.100.142]:33712
+	"EHLO na01-by2-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1754213AbbINLtT (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 14 Sep 2015 07:49:19 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Vaibhav Hiremath <vaibhav.hiremath@linaro.org>
-Cc: Jisheng Zhang <jszhang@marvell.com>, ulf.hansson@linaro.org, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, nico@fluxnic.net
+To: linux-mmc@vger.kernel.org, ulf.hansson@linaro.org
+Cc: Yangbo Lu <yangbo.lu@freescale.com>
 
-On Mon, Sep 14, 2015 at 11:50:14AM +0100, Russell King - ARM Linux wrote:
-> On Mon, Sep 14, 2015 at 03:45:43PM +0530, Vaibhav Hiremath wrote:
-> > Came across below lines in the datasheet,
-> > 
-> > ========= Copy-n-paste from datasheet============
-> > 
-> > All SDH interfaces share the same clock which is enabled when any of the SDH
-> > clock enables are
-> > set (from PMUA_SDH1_CLK_RES_CTRL, PMUA_SDH2_CLK_RES_CTRL,
-> > PMUA_SDH3_CLK_RES_CTRL, PMUA_SDH4_CLK_RES_CTRL,
-> > PMUA_SDH5_CLK_RES_CTRL), with clock source select and divider ratio
-> > controlled by
-> > PMUA_SDH1_CLK_RES_CTRL.
-> > 
-> > ==================================================
-> > 
-> > 
-> > And I can confirm that after disabling AXI interface clock for all the
-> > SDH modules (1-5) I see I get an abort.
-> > 
-> > This clearly explains/justifies/proves that the existing code is
-> > working as expected. I have eMMC mounted on the board, which makes
-> > clock to always stay ON on SDH3.
-> > 
-> > So there is an OR gate implemented inside which takes input from
-> > SDHx_AXI_EN and feeds back to all SDHx instances. Don't ask me why it
-> > has been designed that way :)
-> > 
-> > And I did some experiment as well, so what I have observed is,
-> > SDH_AXI_CLOCK is required to generate card detection, without that I do
-> > not see card detection working.
-> 
-> What that means is that if DT configures the interface to use its
-> internal card detection, the AXI clock must never shut off when entering
-> runtime-PM.
-> 
-> Yes, it means you don't get the same savings as you would by turning
-> off that clock, but that's the choice between using the internal card
-> detection and a GPIO for this.  The code shouldn't force you to use a
-> GPIO just because the Linux driver implementation dumbly disables the
-> AXI clock.
+Add a signal voltage switching callback to let host use its own
+switching process.
 
-Note that should also happen if a SDIO card is inserted, and the SDIO IRQ
-is enabled - so the SDIO card can signal an interrupt back to the host.
+Signed-off-by: Yangbo Lu <yangbo.lu@freescale.com>
+---
+ drivers/mmc/host/sdhci.c | 5 +++++
+ drivers/mmc/host/sdhci.h | 2 ++
+ 2 files changed, 7 insertions(+)
 
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 64b7fdb..9b3d4c2 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -1757,6 +1757,11 @@ static int sdhci_do_start_signal_voltage_switch(struct sdhci_host *host,
+ 	if (host->version < SDHCI_SPEC_300)
+ 		return 0;
+ 
++	if (host->ops->signal_voltage_switch) {
++		host->ops->signal_voltage_switch(host, ios->signal_voltage);
++		return 0;
++	}
++
+ 	ctrl = sdhci_readw(host, SDHCI_HOST_CONTROL2);
+ 
+ 	switch (ios->signal_voltage) {
+diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+index 7c02ff4..723f034 100644
+--- a/drivers/mmc/host/sdhci.h
++++ b/drivers/mmc/host/sdhci.h
+@@ -544,6 +544,8 @@ struct sdhci_ops {
+ 					 struct mmc_card *card,
+ 					 unsigned int max_dtr, int host_drv,
+ 					 int card_drv, int *drv_type);
++	void	(*signal_voltage_switch)(struct sdhci_host *host,
++					 unsigned char signal_voltage);
+ };
+ 
+ #ifdef CONFIG_MMC_SDHCI_IO_ACCESSORS
 -- 
-FTTC broadband for 0.8mile line: currently at 9.6Mbps down 400kbps up
-according to speedtest.net.
+2.1.0.27.g96db324
+
