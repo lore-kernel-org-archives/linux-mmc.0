@@ -1,100 +1,72 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [RFC 2/3] mmc: sdhci: add host_ops->voltage_switch callback for
- all other voltages
-Date: Mon, 14 Sep 2015 12:34:32 +0200
-Message-ID: <CAPDyKFrpDPaCLNEdwP7vYM4CJfxyz-zwC8+9AJMcUG+O=GCBOA@mail.gmail.com>
-References: <1441135938-8056-1-git-send-email-vaibhav.hiremath@linaro.org>
-	<1441135938-8056-3-git-send-email-vaibhav.hiremath@linaro.org>
-	<20150902150442.118d3305@xhacker>
-	<55E6B129.1030002@linaro.org>
-	<20150902162627.682cdedf@xhacker>
-	<55E6E0FD.7000806@linaro.org>
-	<CAPDyKFqOGsKXTCOG89Kq=F6VsDpyfnpwo+jNb+6otgPUFE_bzw@mail.gmail.com>
-	<55F6969D.7090004@linaro.org>
+From: Russell King - ARM Linux <linux@arm.linux.org.uk>
+Subject: Re: sdhci: runtime suspend/resume on card insert/removal
+Date: Mon, 14 Sep 2015 11:50:14 +0100
+Message-ID: <20150914105014.GJ21084@n2100.arm.linux.org.uk>
+References: <55F12CF8.50003@linaro.org>
+ <20150910153129.07adbe68@xhacker>
+ <20150910080233.GH21084@n2100.arm.linux.org.uk>
+ <20150910160402.3b78b5c6@xhacker>
+ <55F66874.2000609@linaro.org>
+ <20150914142838.07ec6a07@xhacker>
+ <55F681AC.2010605@linaro.org>
+ <20150914161804.101dfc55@xhacker>
+ <55F69121.3030700@linaro.org>
+ <55F69E4F.8010608@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wi0-f180.google.com ([209.85.212.180]:37434 "EHLO
-	mail-wi0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755127AbbINKed (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 14 Sep 2015 06:34:33 -0400
-Received: by wicfx3 with SMTP id fx3so126538116wic.0
-        for <linux-mmc@vger.kernel.org>; Mon, 14 Sep 2015 03:34:32 -0700 (PDT)
-In-Reply-To: <55F6969D.7090004@linaro.org>
+Received: from pandora.arm.linux.org.uk ([78.32.30.218]:47300 "EHLO
+	pandora.arm.linux.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752666AbbINKuY (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 14 Sep 2015 06:50:24 -0400
+Content-Disposition: inline
+In-Reply-To: <55F69E4F.8010608@linaro.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Vaibhav Hiremath <vaibhav.hiremath@linaro.org>
-Cc: Jisheng Zhang <jszhang@marvell.com>, linux-mmc <linux-mmc@vger.kernel.org>, Linus Walleij <linus.walleij@linaro.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
+Cc: Jisheng Zhang <jszhang@marvell.com>, ulf.hansson@linaro.org, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, nico@fluxnic.net
 
-On 14 September 2015 at 11:42, Vaibhav Hiremath
-<vaibhav.hiremath@linaro.org> wrote:
->
->
-> On Monday 14 September 2015 03:00 PM, Ulf Hansson wrote:
->>
->> [...]
->>
->>>>>>
->>>>>> Could this be implemented by regulator API? From patch set 3/3, the
->>>>>> pxa1928
->>>>>> voltage_switch hook is to operate the IO pad registers, this seems not
->>>>>> belong
->>>>>> to the SDHC IP core.
->>>>>>
->>>>>
->>>>> Not quite sure whether regulator would be right fit for this.
->>>>
->>>>
->>>>
->>>>   From the patche[3/3], this can be achieved by abstracting the IO PAD
->>>> as
->>>> regulators
->>>> then, we may not need to touch the core sdhci.c. But I'm not sure
->>>> whether
->>>> this
->>>> is the good solution or not.
->>>
->>>
->>>
->>> Exactly...
->>>
->>>> sdhci Maintainers and experts may have better
->>>> suggestions.
->>>>
->>>
->>> Thats is the reason I stamped it as a RFC :)
->>>
->>
->> [...]
->>
->>  From an mmc core perspective it would be preferred if you implement
->> this as a regulator (vqmmc).
->>
->> Especially since we will soon have an API for how to set the I/O
->> voltages - and the intelligence within that API is not something we
->> would like to implement for each and every host driver.
->> https://lkml.org/lkml/2015/8/31/367
->>
->
->
-> I would still consider this as a regulator specific and may not address
-> the IO configuration within the SoC which are module specific.
-> The API regulator_set_voltage_triplet() will not have intelligence to
-> differentiate whether the call is coming from MMC or somewhere else.
->
-> Note that, the IO pad voltage configuration which I am referring to is
-> MMC specific and applicable only when pad is configured in MMC mode. So
-> technically it is not simply common pad voltage configuration.
->
->
-> And I am still not sure regulator framework would be right fit for
-> this. Pinctrl would have been right fit, but...since I saw f_sdh30
-> driver is already doing this, which is easy fit; so adopted the same.
+On Mon, Sep 14, 2015 at 03:45:43PM +0530, Vaibhav Hiremath wrote:
+> Came across below lines in the datasheet,
+> 
+> ========= Copy-n-paste from datasheet============
+> 
+> All SDH interfaces share the same clock which is enabled when any of the SDH
+> clock enables are
+> set (from PMUA_SDH1_CLK_RES_CTRL, PMUA_SDH2_CLK_RES_CTRL,
+> PMUA_SDH3_CLK_RES_CTRL, PMUA_SDH4_CLK_RES_CTRL,
+> PMUA_SDH5_CLK_RES_CTRL), with clock source select and divider ratio
+> controlled by
+> PMUA_SDH1_CLK_RES_CTRL.
+> 
+> ==================================================
+> 
+> 
+> And I can confirm that after disabling AXI interface clock for all the
+> SDH modules (1-5) I see I get an abort.
+> 
+> This clearly explains/justifies/proves that the existing code is
+> working as expected. I have eMMC mounted on the board, which makes
+> clock to always stay ON on SDH3.
+> 
+> So there is an OR gate implemented inside which takes input from
+> SDHx_AXI_EN and feeds back to all SDHx instances. Don't ask me why it
+> has been designed that way :)
+> 
+> And I did some experiment as well, so what I have observed is,
+> SDH_AXI_CLOCK is required to generate card detection, without that I do
+> not see card detection working.
 
-Pinctrl would work as well, or perhaps a combination of both pinctrl
-and a regulator.
+What that means is that if DT configures the interface to use its
+internal card detection, the AXI clock must never shut off when entering
+runtime-PM.
 
-What I don't like is the solution you have suggested in patch3.
+Yes, it means you don't get the same savings as you would by turning
+off that clock, but that's the choice between using the internal card
+detection and a GPIO for this.  The code shouldn't force you to use a
+GPIO just because the Linux driver implementation dumbly disables the
+AXI clock.
 
-Kind regards
-Uffe
+-- 
+FTTC broadband for 0.8mile line: currently at 9.6Mbps down 400kbps up
+according to speedtest.net.
