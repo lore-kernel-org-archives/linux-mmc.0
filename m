@@ -1,72 +1,96 @@
-From: Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
-Subject: Re: [PATCH 2/2] Documentation: bindings: add description of phy for
- sdhci-of-arasan
-Date: Mon, 14 Sep 2015 11:02:01 +0800
-Message-ID: <55F638A9.1090100@rock-chips.com>
-References: <1441961698-10516-1-git-send-email-shawn.lin@rock-chips.com>
- <1441961729-10594-1-git-send-email-shawn.lin@rock-chips.com>
- <20150914024702.GA19678@xsjsorenbubuntu>
+From: Vaibhav Hiremath <vaibhav.hiremath@linaro.org>
+Subject: Re: sdhci: runtime suspend/resume on card insert/removal
+Date: Mon, 14 Sep 2015 11:55:56 +0530
+Message-ID: <55F66874.2000609@linaro.org>
+References: <55F12CF8.50003@linaro.org> <20150910153129.07adbe68@xhacker>
+ <20150910080233.GH21084@n2100.arm.linux.org.uk>
+ <20150910160402.3b78b5c6@xhacker>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"; Format="flowed"
-Content-Transfer-Encoding: base64
-Return-path: <linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-In-Reply-To: <20150914024702.GA19678@xsjsorenbubuntu>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-rockchip>,
- <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-rockchip/>
-List-Post: <mailto:linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-List-Help: <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-rockchip>,
- <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
-Sender: "Linux-rockchip" <linux-rockchip-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-Errors-To: linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
-To: =?UTF-8?Q?S=c3=b6ren_Brinkmann?= <soren.brinkmann-gjFFaj9aHVfQT0dZR+AlfA@public.gmane.org>
-Cc: devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Michal Simek <michal.simek-gjFFaj9aHVfQT0dZR+AlfA@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+Content-Type: text/plain; charset=windows-1252; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-pa0-f43.google.com ([209.85.220.43]:34807 "EHLO
+	mail-pa0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752141AbbING0B (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 14 Sep 2015 02:26:01 -0400
+Received: by padhy16 with SMTP id hy16so134498751pad.1
+        for <linux-mmc@vger.kernel.org>; Sun, 13 Sep 2015 23:26:01 -0700 (PDT)
+In-Reply-To: <20150910160402.3b78b5c6@xhacker>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Jisheng Zhang <jszhang@marvell.com>, Russell King - ARM Linux <linux@arm.linux.org.uk>
+Cc: ulf.hansson@linaro.org, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, nico@fluxnic.net
 
-5ZyoIDIwMTUvOS8xNCAxMDo0NywgU8O2cmVuIEJyaW5rbWFubiDlhpnpgZM6Cj4gSGkgU2hhd24s
-Cj4KPiBPbiBGcmksIDIwMTUtMDktMTEgYXQgMDQ6NTVQTSArMDgwMCwgU2hhd24gTGluIHdyb3Rl
-Ogo+PiBUaGlzIHBhdGNoIGFkZHMgcGh5cyBhbmQgcGh5LW5hbWVzIGZvciBzZGhjaS1vZi1hcmFz
-YW4gYXMgb3B0aW9uYWwKPj4gcHJvcGVydGllcywgYW5kIGRldGFpbHMgdGhlIGV4YW1wbGUgYXMg
-d2VsbC4KPj4KPj4gU2lnbmVkLW9mZi1ieTogU2hhd24gTGluIDxzaGF3bi5saW5Acm9jay1jaGlw
-cy5jb20+Cj4+IC0tLQo+Pgo+PiAgIERvY3VtZW50YXRpb24vZGV2aWNldHJlZS9iaW5kaW5ncy9t
-bWMvYXJhc2FuLHNkaGNpLnR4dCB8IDEwICsrKysrKysrLS0KPj4gICAxIGZpbGUgY2hhbmdlZCwg
-OCBpbnNlcnRpb25zKCspLCAyIGRlbGV0aW9ucygtKQo+Pgo+PiBkaWZmIC0tZ2l0IGEvRG9jdW1l
-bnRhdGlvbi9kZXZpY2V0cmVlL2JpbmRpbmdzL21tYy9hcmFzYW4sc2RoY2kudHh0IGIvRG9jdW1l
-bnRhdGlvbi9kZXZpY2V0cmVlL2JpbmRpbmdzL21tYy9hcmFzYW4sc2RoY2kudHh0Cj4+IGluZGV4
-IGRhNTQxYzMuLjAyNjRkNWYgMTAwNjQ0Cj4+IC0tLSBhL0RvY3VtZW50YXRpb24vZGV2aWNldHJl
-ZS9iaW5kaW5ncy9tbWMvYXJhc2FuLHNkaGNpLnR4dAo+PiArKysgYi9Eb2N1bWVudGF0aW9uL2Rl
-dmljZXRyZWUvYmluZGluZ3MvbW1jL2FyYXNhbixzZGhjaS50eHQKPj4gQEAgLTEsMTEgKzEsMTIg
-QEAKPj4gICBEZXZpY2UgVHJlZSBCaW5kaW5ncyBmb3IgdGhlIEFyYXNhbiBTREhDSSBDb250cm9s
-bGVyCj4+Cj4+IC0gIFRoZSBiaW5kaW5ncyBmb2xsb3cgdGhlIG1tY1sxXSwgY2xvY2tbMl0gYW5k
-IGludGVycnVwdFszXSBiaW5kaW5ncy4gT25seQo+PiAtICBkZXZpYXRpb25zIGFyZSBkb2N1bWVu
-dGVkIGhlcmUuCj4+ICsgIFRoZSBiaW5kaW5ncyBmb2xsb3cgdGhlIG1tY1sxXSwgY2xvY2tbMl0s
-IGludGVycnVwdFszXSBhbmQgcGh5WzRdIGJpbmRpbmdzLgo+PiArICBPbmx5IGRldmlhdGlvbnMg
-YXJlIGRvY3VtZW50ZWQgaGVyZS4KPj4KPj4gICAgIFsxXSBEb2N1bWVudGF0aW9uL2RldmljZXRy
-ZWUvYmluZGluZ3MvbW1jL21tYy50eHQKPj4gICAgIFsyXSBEb2N1bWVudGF0aW9uL2RldmljZXRy
-ZWUvYmluZGluZ3MvY2xvY2svY2xvY2stYmluZGluZ3MudHh0Cj4+ICAgICBbM10gRG9jdW1lbnRh
-dGlvbi9kZXZpY2V0cmVlL2JpbmRpbmdzL2ludGVycnVwdC1jb250cm9sbGVyL2ludGVycnVwdHMu
-dHh0Cj4+ICsgIFs0XSBEb2N1bWVudGF0aW9uL2RldmljZXRyZWUvYmluZGluZ3MvcGh5L3BoeS1i
-aW5kaW5ncy50eHQKPj4KPj4gICBSZXF1aXJlZCBQcm9wZXJ0aWVzOgo+PiAgICAgLSBjb21wYXRp
-YmxlOiBDb21wYXRpYmlsaXR5IHN0cmluZy4gTXVzdCBiZSAnYXJhc2FuLHNkaGNpLTguOWEnIG9y
-Cj4+IEBAIC0xNiw2ICsxNyw5IEBAIFJlcXVpcmVkIFByb3BlcnRpZXM6Cj4+ICAgICAtIGludGVy
-cnVwdHM6IEludGVycnVwdCBzcGVjaWZpZXIKPj4gICAgIC0gaW50ZXJydXB0LXBhcmVudDogUGhh
-bmRsZSBmb3IgdGhlIGludGVycnVwdCBjb250cm9sbGVyIHRoYXQgc2VydmljZXMKPj4gICAJCSAg
-ICAgIGludGVycnVwdHMgZm9yIHRoaXMgZGV2aWNlLgo+PiArT3B0aW9uYWwgUHJvcGVydGllczoK
-Pj4gKyAgLSBwaHlzOiBGcm9tIFBIWSBiaW5kaW5nczogUGhhbmRsZSBmb3IgdGhlIEdlbmVyaWMg
-UEhZIGZvciBhcmFzYW4uCj4+ICsgIC0gcGh5LW5hbWVzOiAgTVVTVCBiZSAicGh5X2FyYXNhbiIu
-Cj4KPiBUaGlzIG1pZ2h0IGJlIGEgZHVtYiBxdWVzdGlvbiwgYnV0LCBpcyB0aGUgZXh0ZXJuYWwg
-cGh5IGFjdHVhbGx5Cj4gb3B0aW9uYWw/IE9yIGlzIGl0IG1hbmRhdG9yeSBmb3IgY2VydGFpbiBp
-bXBsZW1lbnRhdGlvbnMgb2YgdGhlIElQLgo+IEluIHRoZSBsYXR0ZXIgY2FzZSwgaXQgc2hvdWxk
-IHByb2JhYmx5IGJlIGEgbWFuZGF0b3J5IHByb3BlcnR5IGRlcGVuZGluZwo+IG9uIHRoZSBjb21w
-YXRpYmxlIHN0cmluZyBtYXRjaGluZyBhbiBpbXBsZW1lbnRhdGlvbiB0aGF0IHJlcXVpcmVzIGFu
-Cj4gZXh0ZXJuYWwgcGh5IChhY2NvcmRpbmdseSwgdGhlIGltcGxlbWVudGF0aW9uIG1pZ2h0IGhh
-dmUgdG8gdHJlYXQgaXQKCiBGcm9tIG15IHNvYyB0ZWFtJ3MgcmVwb25zZSwgdGhlcmUgaXMgbm8g
-d2F5IHRvIGJ5cGFzcyBjb250cm9sbGVyIHRvIElPIAppZiBubyBwaHkgc3VwcG9ydGVkLiBTbyBp
-dCBzaG91bGQgYmUgdGhlIGxhdHRlciBjYXNlIHlvdSBtZW50aW9uZWQgZm9yIAphcmFzYW4uc2Ro
-Y2ktNS4xLgoKVGhhbmtzIGZvciBwb2ludCBvdXQgaXQsIHJlYWxseSBoZWxwZnVsLgoKSSB3aWxs
-IGZpeCBpdCBpbiB2Mi4KCj4gdGhhdCB3YXkgdG9vKS4KPgo+IAlTw7ZyZW4KPgo+Cj4KCgotLSAK
-QmVzdCBSZWdhcmRzClNoYXduIExpbgoKCl9fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
-X19fX19fX19fX19fX19fCkxpbnV4LXJvY2tjaGlwIG1haWxpbmcgbGlzdApMaW51eC1yb2NrY2hp
-cEBsaXN0cy5pbmZyYWRlYWQub3JnCmh0dHA6Ly9saXN0cy5pbmZyYWRlYWQub3JnL21haWxtYW4v
-bGlzdGluZm8vbGludXgtcm9ja2NoaXAK
+
+
+On Thursday 10 September 2015 01:34 PM, Jisheng Zhang wrote:
+> Hi Russell,
+>
+> On Thu, 10 Sep 2015 09:02:33 +0100
+> Russell King - ARM Linux <linux@arm.linux.org.uk> wrote:
+>
+>> On Thu, Sep 10, 2015 at 03:31:29PM +0800, Jisheng Zhang wrote:
+>>> Hi Vaibhav,
+>>>
+>>> On Thu, 10 Sep 2015 12:40:48 +0530
+>>> Vaibhav Hiremath <vaibhav.hiremath@linaro.org> wrote:
+>>>
+>>>> Hi,
+>>>>
+>>>> During my testing of SDHCI-PXAV3 driver on Marvell's pxa1928
+>>>> based platform, I observed that runtime PM suspend/resume is having
+>>>> issues with card insertion and removal.
+>>>>
+>>>> Let me try to explain it using execution sequence -
+>>>>
+>>>> During boot:
+>>>>
+>>>> MMC SD card gets detected as expected.
+>>>>
+>>>> [    2.431012] mmc1: new high speed SDHC card at address 1234
+>>>> [    2.437235] mmcblk1: mmc1:1234 SA04G 3.63 GiB
+>>>> [    2.444841]  mmcblk1: p1
+>>>>
+>>>>
+>>>> Now after coming to the linux prompt, if card removal event occurs
+>>>> then the call sequence is -
+>>>>
+>>>>    sdhci_irq() -->
+>>>>     -> sdhci_thread_irq(): host->thread_isr - 0x80
+>>>>        -> sdhci_card_event()
+>>>>        -> mmc_detect_change()
+>>>>           --> _mmc_detect_change()
+>>>>               --->  mmc_sd_detect()
+>>>>                     mmc_sd_remove()
+>>>>                     mmc_remove_card()
+>>>>                     mmc_bus_remove()
+>>>>                     mmc_power_off()
+>>>>                     mmc_set_initial_state()
+>>>>                     sdhci_set_ios()
+>>>>                     ...
+>>>>          sdhci_pxav3_runtime_suspend()
+>>>>          sdhci_runtime_suspend_host()
+>>>>
+>>>>
+>>>> Till here everything looks perfect :) (if I got it right)
+>>>>
+>>>> Now on card insertion again, the expectation is, runtime resume should
+>>>> get called as part of interrupt trigger from the SDHCI controller on
+>>>> card insertion.
+>>>
+>>> AFAIK, card insertion => wakeup irq, this irq doesn't come from SDHCI
+>>
+>> Wakeup IRQs are what happens when the _system_ is in suspend, not
+>> when the device is runtime suspended.
+>
+> Oh, yes. Sorry for misleading, I didn't express myself clearly. What
+> I really means is that the card insertion/remove irq which could finally
+> cause sdhci host resumed.
+>
+
+So Jisheng,
+
+You are ok with above change, right?
+
+Thanks,
+Vaibhav
