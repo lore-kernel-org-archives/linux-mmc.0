@@ -1,74 +1,61 @@
-From: Haibo Chen <haibo.chen@freescale.com>
-Subject: [PATCH] mmc: sdhci: call sdhci_init() before request irq
-Date: Tue, 15 Sep 2015 18:32:58 +0800
-Message-ID: <1442313178-31705-1-git-send-email-haibo.chen@freescale.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH] mmc: sdhci-acpi: detect sd card reader on asus x205ta
+Date: Tue, 15 Sep 2015 13:33:45 +0200
+Message-ID: <CAPDyKFoXWKAHitneifG_sFFynwH1mQBXib0vFJkb=B2Fb5R-cw@mail.gmail.com>
+References: <1441435792-446-1-git-send-email-michele.curti@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: ulf.hansson@linaro.org, adrian.hunter@intel.com
-Cc: ivan.ivanov@linaro.org, sbranden@broadcom.com, vincent.yang.fujitsu@gmail.com, haibo.chen@freescale.com, andrew_gabbasov@mentor.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-wi0-f171.google.com ([209.85.212.171]:33543 "EHLO
+	mail-wi0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751630AbbIOLdr (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 15 Sep 2015 07:33:47 -0400
+Received: by wiclk2 with SMTP id lk2so24256065wic.0
+        for <linux-mmc@vger.kernel.org>; Tue, 15 Sep 2015 04:33:46 -0700 (PDT)
+In-Reply-To: <1441435792-446-1-git-send-email-michele.curti@gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Michele Curti <michele.curti@gmail.com>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, Andy Shevchenko <andriy.shevchenko@linux.intel.com>, Yunpeng Gao <yunpeng.gao@intel.com>, Peter Griffin <peter.griffin@linaro.org>, "Rafael J. Wysocki" <rafael.j.wysocki@intel.com>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 
-sdhci_init() will clear all irqs and set the needed irqs. So
-logically sdhci_init() should be called before request irq.
+On 5 September 2015 at 08:49, Michele Curti <michele.curti@gmail.com> wrote:
+> Add an entry to the sdhci_acpi_uids list to detect the SD card
+> reader on the Asus X205Ta laptop.
+>
+> dstd table:
+>
+> Device (SDHC)
+> {
+>     Name (_ADR, Zero)  // _ADR: Address
+>     Name (_HID, "PNP0FFF")  // _HID: Hardware ID
+>     Name (_CID, "PNP0D40" /* SDA Standard Compliant SD Host Controller */)
+>     Name (_DDN, "Intel(R) SD Card Controller - 80860F16")  // _DDN: DOS Dev
+>     Name (_UID, 0x03)  // _UID: Unique ID
+>     Name (RDEP, Package (0x02)
+>
+> Signed-off-by: Michele Curti <michele.curti@gmail.com>
 
-If not, some irqs may be triggled and handled wrongly. Take
-the following into consideration, after request irq, if
-SDIO card interrupt enabled, a sd card in the sd slot will
-trigger a mass of interrupt(SDHCI_INT_CARD_INT), because at
-this time, the vmmc-regulator still not restore, no voltage
-supply for the sd card, so the pin of data0~data3 change and
-keep low, interrupt(SDHCI_INT_CARD_INT) will rise up ceaselessly.
-Due to we already reguest irq, system will be busy in handling
-this endless irq, can't response to other event.
+Thanks, applied for next!
 
-So we should call sdhci_init() before request irq in sd resume.
+Kind regards
+Uffe
 
-Signed-off-by: Haibo Chen <haibo.chen@freescale.com>
----
- drivers/mmc/host/sdhci.c | 22 +++++++++++-----------
- 1 file changed, 11 insertions(+), 11 deletions(-)
-
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 64b7fdb..6861573 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -2714,17 +2714,6 @@ int sdhci_resume_host(struct sdhci_host *host)
- 			host->ops->enable_dma(host);
- 	}
- 
--	if (!device_may_wakeup(mmc_dev(host->mmc))) {
--		ret = request_threaded_irq(host->irq, sdhci_irq,
--					   sdhci_thread_irq, IRQF_SHARED,
--					   mmc_hostname(host->mmc), host);
--		if (ret)
--			return ret;
--	} else {
--		sdhci_disable_irq_wakeups(host);
--		disable_irq_wake(host->irq);
--	}
--
- 	if ((host->mmc->pm_flags & MMC_PM_KEEP_POWER) &&
- 	    (host->quirks2 & SDHCI_QUIRK2_HOST_OFF_CARD_ON)) {
- 		/* Card keeps power but host controller does not */
-@@ -2737,6 +2726,17 @@ int sdhci_resume_host(struct sdhci_host *host)
- 		mmiowb();
- 	}
- 
-+	if (!device_may_wakeup(mmc_dev(host->mmc))) {
-+		ret = request_threaded_irq(host->irq, sdhci_irq,
-+					   sdhci_thread_irq, IRQF_SHARED,
-+					   mmc_hostname(host->mmc), host);
-+		if (ret)
-+			return ret;
-+	} else {
-+		sdhci_disable_irq_wakeups(host);
-+		disable_irq_wake(host->irq);
-+	}
-+
- 	sdhci_enable_card_detection(host);
- 
- 	return ret;
--- 
-1.9.1
+> ---
+>  drivers/mmc/host/sdhci-acpi.c | 1 +
+>  1 file changed, 1 insertion(+)
+>
+> diff --git a/drivers/mmc/host/sdhci-acpi.c b/drivers/mmc/host/sdhci-acpi.c
+> index 22d929f..78aa16a 100644
+> --- a/drivers/mmc/host/sdhci-acpi.c
+> +++ b/drivers/mmc/host/sdhci-acpi.c
+> @@ -247,6 +247,7 @@ static const struct sdhci_acpi_uid_slot sdhci_acpi_uids[] = {
+>         { "INT33C6"  , NULL, &sdhci_acpi_slot_int_sdio },
+>         { "INT3436"  , NULL, &sdhci_acpi_slot_int_sdio },
+>         { "INT344D"  , NULL, &sdhci_acpi_slot_int_sdio },
+> +       { "PNP0FFF"  , "3" , &sdhci_acpi_slot_int_sd   },
+>         { "PNP0D40"  },
+>         { },
+>  };
+> --
+> 2.5.1
+>
