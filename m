@@ -1,35 +1,57 @@
-From: Fabio Estevam <festevam@gmail.com>
-Subject: Re: Initial signal voltage ?
-Date: Tue, 15 Sep 2015 14:43:36 -0300
-Message-ID: <CAOMZO5Aa+gUkYaMShF9e=sp44jxrHX8zUq_efWXbqCfg6T_nrg@mail.gmail.com>
-References: <1439225438.3120.94.camel@transmode.se>
-	<CAPDyKFpDzBV9zXAZH_KddZVdUQ_t2W3Qb3yG70ceagv4+oy7cQ@mail.gmail.com>
-	<1440505201.3349.59.camel@transmode.se>
-	<CAPDyKFpv3HyZSvGXWb-dzD1nec0173TyzegxRiWuhTdm9GdXAg@mail.gmail.com>
-	<1440686001.3349.115.camel@transmode.se>
-	<CAPDyKFrVNoyeHdcBbTJ3AFhU2EeWZsXqBkCqHNswWzCKxUOs=A@mail.gmail.com>
-	<1440695797.3349.121.camel@transmode.se>
+From: Heiko =?ISO-8859-1?Q?St=FCbner?= <heiko@sntech.de>
+Subject: Re: [PATCH 6/8] mmc: dw_mmc: Generic MMC tuning with the clock phase framework
+Date: Wed, 16 Sep 2015 00:09 +0200
+Message-ID: <8878355.D5Q8mk4qcM@diego>
+References: <1441045446-30858-1-git-send-email-heiko@sntech.de> <1441045446-30858-7-git-send-email-heiko@sntech.de> <55F7D602.70003@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ob0-f182.google.com ([209.85.214.182]:32822 "EHLO
-	mail-ob0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751272AbbIORnh (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 15 Sep 2015 13:43:37 -0400
-Received: by obbbh8 with SMTP id bh8so141447767obb.0
-        for <linux-mmc@vger.kernel.org>; Tue, 15 Sep 2015 10:43:36 -0700 (PDT)
-In-Reply-To: <1440695797.3349.121.camel@transmode.se>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7Bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <55F7D602.70003@samsung.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Jaehoon Chung <jh80.chung@samsung.com>
+Cc: ulf.hansson@linaro.org, mturquette@baylibre.com, sboyd@codeaurora.org, linux-mmc@vger.kernel.org, linux-clk@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-rockchip@lists.infradead.org, linux-kernel@vger.kernel.org, Alexandru M Stan <amstan@chromium.org>, CPGS <cpgs@samsung.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Joakim Tjernlund <joakim.tjernlund@transmode.se>
-Cc: "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-On Thu, Aug 27, 2015 at 2:16 PM, Joakim Tjernlund
-<joakim.tjernlund@transmode.se> wrote:
+Hi,
 
->
-> None the less, the info is there in the host caps so why not use it?
-> If caps say 1.8V only why insist on trying 3/3.3 Volt?
+Am Dienstag, 15. September 2015, 17:25:38 schrieb Jaehoon Chung:
+> On 09/01/2015 03:24 AM, Heiko Stuebner wrote:
+> > From: Alexandru M Stan <amstan@chromium.org>
+> > 
+> > This algorithm will try 1 degree increments, since there's no way to tell
+> > what resolution the underlying phase code uses. As an added bonus, doing
+> > many tunings yields better results since some tests are run more than once
+> > (ex: if the underlying driver uses 45 degree increments, the tuning code
+> > will try the same angle more than once).
+> > 
+> > It will then construct a list of good phase ranges (even ranges that cross
+> > 360/0), will pick the biggest range then it will set the sample_clk to the
+> > middle of that range.
+> > 
+> > We do not touch ciu_drive (and by extension define default-drive-phase).
+> > Drive phase is mostly used to define minimum hold times, while one could
+> > write some code to determine what phase meets the minimum hold time (ex 10
+> > degrees) this will not work with the current clock phase framework (which
+> > floors angles, so we'll get 0 deg, and there's no way to know what
+> > resolution the floors happen at). We assume that the default drive angles
+> > set by the hardware are good enough.
+> > 
+> > If a device has device specific code (like exynos) then that will still
+> > take precedence, otherwise this new code will execute. If the device wants
+> > to tune, but has no sample_clk defined we'll return EIO with an error
+> > message.
+> 
+> Which point is "_generic_"? I don't find the code that control the register
+> relevant to CLK_DRV/SMPL PHASE. It seems that posted the similar patches at
+> u-boot mailing list..
 
-Yes, it seems this is similar to the issue I tried to solve before:
-http://www.spinics.net/lists/linux-mmc/msg32285.html
+The "generic" part is that it uses the clk phase API for dw_mmc 
+implementations where the clkgen controlling interface is outside the dw_mmc 
+IP itself. So it's open for other implementations as well.
+
+But if you are more comfortable with it, I can also move it into the dw_mmc-
+rockchip variant for the time being, until another user comes along.
+
+
+Heiko
