@@ -1,15 +1,15 @@
 From: Yangbo Lu <yangbo.lu@freescale.com>
-Subject: [PATCH] mmc: sdhci-pltfm: enable interrupt mode to detect card
-Date: Wed, 16 Sep 2015 14:31:00 +0800
-Message-ID: <1442385060-26364-1-git-send-email-yangbo.lu@freescale.com>
+Subject: [v2] mmc: sdhci-pltfm: enable interrupt mode to detect card for ls1021a
+Date: Wed, 16 Sep 2015 14:36:10 +0800
+Message-ID: <1442385370-26961-1-git-send-email-yangbo.lu@freescale.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-bl2on0131.outbound.protection.outlook.com ([65.55.169.131]:35756
-	"EHLO na01-bl2-obe.outbound.protection.outlook.com"
+Received: from mail-bn1bon0140.outbound.protection.outlook.com ([157.56.111.140]:6119
+	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
 	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1751742AbbIPGg6 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 16 Sep 2015 02:36:58 -0400
+	id S1751742AbbIPGmK (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 16 Sep 2015 02:42:10 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org, ulf.hansson@linaro.org
@@ -21,6 +21,9 @@ This could improve data transferring performance and avoid the call
 trace caused by polling card status sometime.
 
 Signed-off-by: Yangbo Lu <yangbo.lu@freescale.com>
+---
+Changes for v2:
+	- Modified commit message
 ---
  drivers/mmc/host/sdhci-of-esdhc.c | 3 ++-
  1 file changed, 2 insertions(+), 1 deletion(-)
