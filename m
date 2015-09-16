@@ -1,107 +1,108 @@
-From: Heiko =?ISO-8859-1?Q?St=FCbner?= <heiko@sntech.de>
-Subject: Re: [PATCH 6/8] mmc: dw_mmc: Generic MMC tuning with the clock phase framework
-Date: Wed, 16 Sep 2015 16:52:26 +0200
-Message-ID: <2272810.k4vHSW5D0y@diego>
-References: <1441045446-30858-1-git-send-email-heiko@sntech.de> <8878355.D5Q8mk4qcM@diego> <55F8D442.5020004@samsung.com>
+From: Jon Hunter <jonathanh@nvidia.com>
+Subject: Re: [PATCH V3] mmc: block: Add new ioctl to send multi commands
+Date: Wed, 16 Sep 2015 17:01:37 +0100
+Message-ID: <55F99261.60003@nvidia.com>
+References: <1442242844-6859-1-git-send-email-jonathanh@nvidia.com>
+ <CAPDyKFqg5Ld+9LE5wHTZWy2M6gJSYqJVqBZ5vFjVkjyTRW_q+g@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-clk-owner@vger.kernel.org>
-In-Reply-To: <55F8D442.5020004@samsung.com>
-Sender: linux-clk-owner@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>
-Cc: ulf.hansson@linaro.org, mturquette@baylibre.com, sboyd@codeaurora.org, linux-mmc@vger.kernel.org, linux-clk@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-rockchip@lists.infradead.org, linux-kernel@vger.kernel.org, Alexandru M Stan <amstan@chromium.org>, CPGS <cpgs@samsung.com>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from hqemgate14.nvidia.com ([216.228.121.143]:12749 "EHLO
+	hqemgate14.nvidia.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752335AbbIPQBp (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 16 Sep 2015 12:01:45 -0400
+In-Reply-To: <CAPDyKFqg5Ld+9LE5wHTZWy2M6gJSYqJVqBZ5vFjVkjyTRW_q+g@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-
-Hi,
-
-Am Mittwoch, 16. September 2015, 11:30:26 schrieb Jaehoon Chung:
-> On 09/16/2015 07:09 AM, Heiko St=FCbner wrote:
-> > Am Dienstag, 15. September 2015, 17:25:38 schrieb Jaehoon Chung:
-> >> On 09/01/2015 03:24 AM, Heiko Stuebner wrote:
-> >>> From: Alexandru M Stan <amstan@chromium.org>
-> >>>=20
-> >>> This algorithm will try 1 degree increments, since there's no way=
- to
-> >>> tell
-> >>> what resolution the underlying phase code uses. As an added bonus=
-, doing
-> >>> many tunings yields better results since some tests are run more =
-than
-> >>> once
-> >>> (ex: if the underlying driver uses 45 degree increments, the tuni=
-ng code
-> >>> will try the same angle more than once).
-> >>>=20
-> >>> It will then construct a list of good phase ranges (even ranges t=
-hat
-> >>> cross
-> >>> 360/0), will pick the biggest range then it will set the sample_c=
-lk to
-> >>> the
-> >>> middle of that range.
-> >>>=20
-> >>> We do not touch ciu_drive (and by extension define default-drive-=
-phase).
-> >>> Drive phase is mostly used to define minimum hold times, while on=
-e could
-> >>> write some code to determine what phase meets the minimum hold ti=
-me (ex
-> >>> 10
-> >>> degrees) this will not work with the current clock phase framewor=
-k
-> >>> (which
-> >>> floors angles, so we'll get 0 deg, and there's no way to know wha=
-t
-> >>> resolution the floors happen at). We assume that the default driv=
-e
-> >>> angles
-> >>> set by the hardware are good enough.
-> >>>=20
-> >>> If a device has device specific code (like exynos) then that will=
- still
-> >>> take precedence, otherwise this new code will execute. If the dev=
-ice
-> >>> wants
-> >>> to tune, but has no sample_clk defined we'll return EIO with an e=
-rror
-> >>> message.
-> >>=20
-> >> Which point is "_generic_"? I don't find the code that control the
-> >> register
-> >> relevant to CLK_DRV/SMPL PHASE. It seems that posted the similar p=
-atches
-> >> at
-> >> u-boot mailing list..
-> >=20
-> > The "generic" part is that it uses the clk phase API for dw_mmc
-> > implementations where the clkgen controlling interface is outside t=
-he
-> > dw_mmc IP itself. So it's open for other implementations as well.
->=20
-> Designware IP also has the CLK phase register(UHS_REG_EXT register)..=
-=2E
-> if this code is related with it, it should be located into dw-mmc.c.
-
-UHS_REG_EXT is acutally "reserved" on both the rk3288 as well as the rk=
-3368.=20
-rk3036/rk3128 (Cortex-A7) provide a bit description, but the tuning=20
-documentation still uses the controls located in the clock controller.
-
-So I guess UHS_REG_EXT is the real "generic" solution.
-
-> > But if you are more comfortable with it, I can also move it into th=
-e
-> > dw_mmc- rockchip variant for the time being, until another user com=
-es
-> > along.
-> I think more better that this code is located into dw_mmc-rockchip. h=
-ow
-> about?
-
-As described above, moving that to the rockchip part sounds sensible. A=
-nd I=20
-guess we can think more about it, once a second user appears.
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Seshagiri Holi <sholi@nvidia.com>, Arnd Bergmann <arnd@arndb.de>, Grant Grundler <grundler@google.com>, Olof Johansson <olofj@chromium.org>
 
 
-Heiko
+On 16/09/15 12:08, Ulf Hansson wrote:
+> On 14 September 2015 at 17:00, Jon Hunter <jonathanh@nvidia.com> wrote:
+>> From: Seshagiri Holi <sholi@nvidia.com>
+>>
+>> Certain eMMC devices allow vendor specific device information to be read
+>> via a sequence of vendor commands. These vendor commands must be issued
+>> in sequence and an atomic fashion. One way to support this would be to
+>> add an ioctl function for sending a sequence of commands to the device
+>> atomically as proposed here. These multi commands are simple array of
+>> the existing mmc_ioc_cmd structure.
+>>
+>> The structure passed via the ioctl uses a __u64 type to specify the number
+>> of commands (so that the structure is aligned on a 64-bit boundary) and a
+>> zero length array as a header for list of commands to be issued. The
+>> maximum number of commands that can be sent is determined by
+>> MMC_IOC_MAX_CMDS (which defaults to 255 and should be more than
+>> sufficient).
+>>
+>> Signed-off-by: Seshagiri Holi <sholi@nvidia.com>
+>> Cc: Arnd Bergmann <arnd@arndb.de>
+>> Cc: Grant Grundler <grundler@google.com>
+>> Cc: Olof Johansson <olofj@chromium.org>
+>> [ jonathanh@nvidia.com: Rebased on linux-next from v3.18. Changed
+>>   userspace pointer type for multi command to be a u64. Renamed
+>>   from combo commands to multi commands. Updated patch based upon
+>>   feedback review comments received. Updated commit message ]
+>> Signed-off-by: Jon Hunter <jonathanh@nvidia.com>
+> 
+> Overall this looks good to me, only some minor nits.
+> 
+> Also, it does seem like you have invested quite some work here.
+> Perhaps you should claim the authorship and instead give Seshagiri
+> some cred in the commit message + his signed-off by?
+
+Yes that's fine with me, plus everyone will know who to blame ;-)
+
+> Anyway, I am fine with whatever!
+> 
+>> ---
+>> V3 changes:
+>> - Updated mmc_ioc_multi_cmd structure per Grant's feedback
+>> V2 changes:
+>> - Updated changelog per Arnd's feedback
+>> - Moved mmc_put/get_card() outside of __mmc_blk_ioctl_cmd()
+>>
+>>  drivers/mmc/card/block.c       | 214 ++++++++++++++++++++++++++++++-----------
+>>  include/uapi/linux/mmc/ioctl.h |  19 +++-
+>>  2 files changed, 177 insertions(+), 56 deletions(-)
+>>
+>> diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+>> index c742cfd7674e..2007023815cb 100644
+>> --- a/drivers/mmc/card/block.c
+>> +++ b/drivers/mmc/card/block.c
+>> @@ -387,6 +387,24 @@ out:
+>>         return ERR_PTR(err);
+>>  }
+
+[snip]
+
+>> +static int mmc_blk_ioctl_cmd(struct block_device *bdev,
+>> +                            struct mmc_ioc_cmd __user *ic_ptr)
+>> +{
+>> +       struct mmc_blk_ioc_data *idata;
+>> +       struct mmc_blk_data *md;
+>> +       struct mmc_card *card;
+>> +       int err;
+>> +
+>> +       /*
+>> +        * The caller must have CAP_SYS_RAWIO, and must be calling this on the
+>> +        * whole block device, not on a partition.  This prevents overspray
+>> +        * between sibling partitions.
+>> +        */
+>> +       if ((!capable(CAP_SYS_RAWIO)) || (bdev != bdev->bd_contains))
+>> +               return -EPERM;
+> 
+> This check is common for multi and non-multi. Please move it to the
+> mmc_blk_ioctl() to avoid some code duplication.
+
+Yes that's true. I can move but it means also passing bdev to
+__mmc_blk_ioctl_cmd() as another argument. It is not a big deal, but it
+was more convenient to test here. If your preference is to consolidate
+the tests to one place then I will move this test.
+
+Cheers
+Jon
+
+
