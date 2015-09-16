@@ -1,19 +1,11 @@
 From: Shawn Lin <shawn.lin@rock-chips.com>
-Subject: [RFC PATCH v8 05/10] arc: axs10x_defconfig: remove CONFIG_MMC_DW_IDMAC
-Date: Wed, 16 Sep 2015 14:42:20 +0800
-Message-ID: <1442385740-32198-1-git-send-email-shawn.lin@rock-chips.com>
+Subject: [RFC PATCH v8 08/10] arm: lpc18xx_defconfig: remove CONFIG_MMC_DW_IDMAC
+Date: Wed, 16 Sep 2015 14:43:01 +0800
+Message-ID: <1442385781-1253-1-git-send-email-shawn.lin@rock-chips.com>
 References: <1442385625-26775-1-git-send-email-shawn.lin@rock-chips.com>
-Return-path: <linux-mips-bounce@linux-mips.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1442385625-26775-1-git-send-email-shawn.lin@rock-chips.com>
-Sender: linux-mips-bounce@linux-mips.org
-Errors-to: linux-mips-bounce@linux-mips.org
-List-help: <mailto:ecartis@linux-mips.org?Subject=help>
-List-unsubscribe: <mailto:ecartis@linux-mips.org?subject=unsubscribe%20linux-mips>
-List-software: Ecartis version 1.0.0
-List-subscribe: <mailto:ecartis@linux-mips.org?subject=subscribe%20linux-mips>
-List-owner: <mailto:ralf@linux-mips.org>
-List-post: <mailto:linux-mips@linux-mips.org>
-List-archive: <http://www.linux-mips.org/archives/linux-mips/>
+Sender: linux-kernel-owner@vger.kernel.org
 To: jh80.chung@samsung.com, ulf.hansson@linaro.org
 Cc: Vineet.Gupta1@synopsys.com, Wei Xu <xuwei5@hisilicon.com>, Joachim Eastwood <manabian@gmail.com>, Alexey Brodkin <abrodkin@synopsys.com>, Kukjin Kim <kgene@kernel.org>, Krzysztof Kozlowski <k.kozlowski@samsung.com>, Russell King <linux@arm.linux.org.uk>, Jun Nie <jun.nie@linaro.org>, Ralf Baechle <ralf@linux-mips.org>, Govindraj Raja <govindraj.raja@imgtec.com>, Arnd Bergmann <arnd@arndb.de>, heiko@sntech.de, dianders@chromium.org, linux-samsung-soc@vger.kernel.org, linux-mips@linux-mips.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-rockchip@lists.infradead.org, devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Shawn Lin <shawn.lin@rock-chips.com>
 List-Id: linux-mmc@vger.kernel.org
@@ -23,7 +15,7 @@ at runtime instead of compile-time. So we remove this config
 option and read dw_mmc's register to select DMA master.
 
 Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
-Acked-by: Vineet Gupta <vgupta@synopsys.com>
+Acked-by: Joachim Eastwood <manabian@gmail.com>
 ---
 
 Changes in v8: None
@@ -34,46 +26,20 @@ Changes in v4: None
 Changes in v3: None
 Changes in v2: None
 
- arch/arc/configs/axs101_defconfig     | 1 -
- arch/arc/configs/axs103_defconfig     | 1 -
- arch/arc/configs/axs103_smp_defconfig | 1 -
- 3 files changed, 3 deletions(-)
+ arch/arm/configs/lpc18xx_defconfig | 1 -
+ 1 file changed, 1 deletion(-)
 
-diff --git a/arch/arc/configs/axs101_defconfig b/arch/arc/configs/axs101_defconfig
-index 562dac6..c92c0ef 100644
---- a/arch/arc/configs/axs101_defconfig
-+++ b/arch/arc/configs/axs101_defconfig
-@@ -89,7 +89,6 @@ CONFIG_MMC=y
- CONFIG_MMC_SDHCI=y
- CONFIG_MMC_SDHCI_PLTFM=y
+diff --git a/arch/arm/configs/lpc18xx_defconfig b/arch/arm/configs/lpc18xx_defconfig
+index 1c47f86..b7e8cda 100644
+--- a/arch/arm/configs/lpc18xx_defconfig
++++ b/arch/arm/configs/lpc18xx_defconfig
+@@ -119,7 +119,6 @@ CONFIG_USB_EHCI_HCD=y
+ CONFIG_USB_EHCI_ROOT_HUB_TT=y
+ CONFIG_MMC=y
  CONFIG_MMC_DW=y
 -CONFIG_MMC_DW_IDMAC=y
- # CONFIG_IOMMU_SUPPORT is not set
- CONFIG_EXT3_FS=y
- CONFIG_EXT4_FS=y
-diff --git a/arch/arc/configs/axs103_defconfig b/arch/arc/configs/axs103_defconfig
-index 83a6d8d..cfac24e 100644
---- a/arch/arc/configs/axs103_defconfig
-+++ b/arch/arc/configs/axs103_defconfig
-@@ -95,7 +95,6 @@ CONFIG_MMC=y
- CONFIG_MMC_SDHCI=y
- CONFIG_MMC_SDHCI_PLTFM=y
- CONFIG_MMC_DW=y
--CONFIG_MMC_DW_IDMAC=y
- # CONFIG_IOMMU_SUPPORT is not set
- CONFIG_EXT3_FS=y
- CONFIG_EXT4_FS=y
-diff --git a/arch/arc/configs/axs103_smp_defconfig b/arch/arc/configs/axs103_smp_defconfig
-index f1e1c84..9922a11 100644
---- a/arch/arc/configs/axs103_smp_defconfig
-+++ b/arch/arc/configs/axs103_smp_defconfig
-@@ -96,7 +96,6 @@ CONFIG_MMC=y
- CONFIG_MMC_SDHCI=y
- CONFIG_MMC_SDHCI_PLTFM=y
- CONFIG_MMC_DW=y
--CONFIG_MMC_DW_IDMAC=y
- # CONFIG_IOMMU_SUPPORT is not set
- CONFIG_EXT3_FS=y
- CONFIG_EXT4_FS=y
+ CONFIG_NEW_LEDS=y
+ CONFIG_LEDS_CLASS=y
+ CONFIG_LEDS_PCA9532=y
 -- 
 2.3.7
