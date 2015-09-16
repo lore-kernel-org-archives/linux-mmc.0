@@ -1,54 +1,36 @@
 From: Javier Martinez Canillas <javier@osg.samsung.com>
-Subject: [PATCH 2/2] mmc: vub300: Remove unneded semicolons
-Date: Wed, 16 Sep 2015 11:30:04 +0200
-Message-ID: <1442395804-17736-2-git-send-email-javier@osg.samsung.com>
-References: <1442395804-17736-1-git-send-email-javier@osg.samsung.com>
+Subject: [PATCH] mmc: sdhci-bcm-kona: fix logic to check for 8-bit data width
+Date: Wed, 16 Sep 2015 11:53:20 +0200
+Message-ID: <1442397200-29731-1-git-send-email-javier@osg.samsung.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1442395804-17736-1-git-send-email-javier@osg.samsung.com>
 Sender: linux-kernel-owner@vger.kernel.org
 To: linux-kernel@vger.kernel.org
-Cc: Javier Martinez Canillas <javier@osg.samsung.com>, Tony Olech <tony.olech@elandigitalsystems.com>, linux-usb@vger.kernel.org, linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Javier Martinez Canillas <javier@osg.samsung.com>, linux-mmc@vger.kernel.org, Scott Branden <sbranden@broadcom.com>, bcm-kernel-feedback-list@broadcom.com, Florian Fainelli <f.fainelli@gmail.com>, Ray Jui <rjui@broadcom.com>, Ulf Hansson <ulf.hansson@linaro.org>
 List-Id: linux-mmc@vger.kernel.org
 
-They aren't needed and are just creating null statements so remove it.
+The driver prints if the data width is 8-bit but it's using a
+binary OR instead of a binary AND so it will always report as
+"is_8bit=Y" regardless of the flags in host->mmc->caps.
 
 Signed-off-by: Javier Martinez Canillas <javier@osg.samsung.com>
 
 ---
 
- drivers/mmc/host/vub300.c | 6 +++---
- 1 file changed, 3 insertions(+), 3 deletions(-)
+ drivers/mmc/host/sdhci-bcm-kona.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/drivers/mmc/host/vub300.c b/drivers/mmc/host/vub300.c
-index fbabbb82b354..1e819f98b94f 100644
---- a/drivers/mmc/host/vub300.c
-+++ b/drivers/mmc/host/vub300.c
-@@ -563,7 +563,7 @@ static void add_offloaded_reg(struct vub300_mmc_host *vub300,
- 			i += 1;
- 			continue;
- 		}
--	};
-+	}
- 	__add_offloaded_reg_to_fifo(vub300, register_access, func);
- }
+diff --git a/drivers/mmc/host/sdhci-bcm-kona.c b/drivers/mmc/host/sdhci-bcm-kona.c
+index 2bd90fb35c75..00a8a40a3729 100644
+--- a/drivers/mmc/host/sdhci-bcm-kona.c
++++ b/drivers/mmc/host/sdhci-bcm-kona.c
+@@ -273,7 +273,7 @@ static int sdhci_bcm_kona_probe(struct platform_device *pdev)
+ 		host->quirks |= SDHCI_QUIRK_BROKEN_CARD_DETECTION;
  
-@@ -1372,7 +1372,7 @@ static void download_offload_pseudocode(struct vub300_mmc_host *vub300)
- 		l += snprintf(vub300->vub_name + l,
- 			      sizeof(vub300->vub_name) - l, "_%04X%04X",
- 			      sf->vendor, sf->device);
--	};
-+	}
- 	snprintf(vub300->vub_name + l, sizeof(vub300->vub_name) - l, ".bin");
- 	dev_info(&vub300->udev->dev, "requesting offload firmware %s\n",
- 		 vub300->vub_name);
-@@ -1893,7 +1893,7 @@ static int satisfy_request_from_offloaded_data(struct vub300_mmc_host *vub300,
- 			i += 1;
- 			continue;
- 		}
--	};
-+	}
- 	if (vub300->total_offload_count == 0)
- 		return 0;
- 	else if (vub300->fn[func].offload_count == 0)
+ 	dev_dbg(dev, "is_8bit=%c\n",
+-		(host->mmc->caps | MMC_CAP_8_BIT_DATA) ? 'Y' : 'N');
++		(host->mmc->caps & MMC_CAP_8_BIT_DATA) ? 'Y' : 'N');
+ 
+ 	ret = sdhci_bcm_kona_sd_reset(host);
+ 	if (ret)
 -- 
 2.4.3
