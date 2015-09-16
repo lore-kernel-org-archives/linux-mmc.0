@@ -1,108 +1,47 @@
-From: Jon Hunter <jonathanh@nvidia.com>
-Subject: Re: [PATCH V3] mmc: block: Add new ioctl to send multi commands
-Date: Wed, 16 Sep 2015 17:01:37 +0100
-Message-ID: <55F99261.60003@nvidia.com>
-References: <1442242844-6859-1-git-send-email-jonathanh@nvidia.com>
- <CAPDyKFqg5Ld+9LE5wHTZWy2M6gJSYqJVqBZ5vFjVkjyTRW_q+g@mail.gmail.com>
+From: Ray Jui <rjui@broadcom.com>
+Subject: Re: [PATCH] mmc: sdhci-bcm-kona: fix logic to check for 8-bit data
+ width
+Date: Wed, 16 Sep 2015 10:20:11 -0700
+Message-ID: <55F9A4CB.7070302@broadcom.com>
+References: <1442397200-29731-1-git-send-email-javier@osg.samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
+Content-Type: text/plain; charset="windows-1252"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from hqemgate14.nvidia.com ([216.228.121.143]:12749 "EHLO
-	hqemgate14.nvidia.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752335AbbIPQBp (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 16 Sep 2015 12:01:45 -0400
-In-Reply-To: <CAPDyKFqg5Ld+9LE5wHTZWy2M6gJSYqJVqBZ5vFjVkjyTRW_q+g@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1442397200-29731-1-git-send-email-javier@osg.samsung.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Javier Martinez Canillas <javier@osg.samsung.com>, linux-kernel@vger.kernel.org
+Cc: linux-mmc@vger.kernel.org, Scott Branden <sbranden@broadcom.com>, bcm-kernel-feedback-list@broadcom.com, Florian Fainelli <f.fainelli@gmail.com>, Ulf Hansson <ulf.hansson@linaro.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Seshagiri Holi <sholi@nvidia.com>, Arnd Bergmann <arnd@arndb.de>, Grant Grundler <grundler@google.com>, Olof Johansson <olofj@chromium.org>
 
 
-On 16/09/15 12:08, Ulf Hansson wrote:
-> On 14 September 2015 at 17:00, Jon Hunter <jonathanh@nvidia.com> wrote:
->> From: Seshagiri Holi <sholi@nvidia.com>
->>
->> Certain eMMC devices allow vendor specific device information to be read
->> via a sequence of vendor commands. These vendor commands must be issued
->> in sequence and an atomic fashion. One way to support this would be to
->> add an ioctl function for sending a sequence of commands to the device
->> atomically as proposed here. These multi commands are simple array of
->> the existing mmc_ioc_cmd structure.
->>
->> The structure passed via the ioctl uses a __u64 type to specify the number
->> of commands (so that the structure is aligned on a 64-bit boundary) and a
->> zero length array as a header for list of commands to be issued. The
->> maximum number of commands that can be sent is determined by
->> MMC_IOC_MAX_CMDS (which defaults to 255 and should be more than
->> sufficient).
->>
->> Signed-off-by: Seshagiri Holi <sholi@nvidia.com>
->> Cc: Arnd Bergmann <arnd@arndb.de>
->> Cc: Grant Grundler <grundler@google.com>
->> Cc: Olof Johansson <olofj@chromium.org>
->> [ jonathanh@nvidia.com: Rebased on linux-next from v3.18. Changed
->>   userspace pointer type for multi command to be a u64. Renamed
->>   from combo commands to multi commands. Updated patch based upon
->>   feedback review comments received. Updated commit message ]
->> Signed-off-by: Jon Hunter <jonathanh@nvidia.com>
+
+On 9/16/2015 2:53 AM, Javier Martinez Canillas wrote:
+> The driver prints if the data width is 8-bit but it's using a
+> binary OR instead of a binary AND so it will always report as
+> "is_8bit=Y" regardless of the flags in host->mmc->caps.
 > 
-> Overall this looks good to me, only some minor nits.
+> Signed-off-by: Javier Martinez Canillas <javier@osg.samsung.com>
 > 
-> Also, it does seem like you have invested quite some work here.
-> Perhaps you should claim the authorship and instead give Seshagiri
-> some cred in the commit message + his signed-off by?
-
-Yes that's fine with me, plus everyone will know who to blame ;-)
-
-> Anyway, I am fine with whatever!
+> ---
 > 
->> ---
->> V3 changes:
->> - Updated mmc_ioc_multi_cmd structure per Grant's feedback
->> V2 changes:
->> - Updated changelog per Arnd's feedback
->> - Moved mmc_put/get_card() outside of __mmc_blk_ioctl_cmd()
->>
->>  drivers/mmc/card/block.c       | 214 ++++++++++++++++++++++++++++++-----------
->>  include/uapi/linux/mmc/ioctl.h |  19 +++-
->>  2 files changed, 177 insertions(+), 56 deletions(-)
->>
->> diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
->> index c742cfd7674e..2007023815cb 100644
->> --- a/drivers/mmc/card/block.c
->> +++ b/drivers/mmc/card/block.c
->> @@ -387,6 +387,24 @@ out:
->>         return ERR_PTR(err);
->>  }
-
-[snip]
-
->> +static int mmc_blk_ioctl_cmd(struct block_device *bdev,
->> +                            struct mmc_ioc_cmd __user *ic_ptr)
->> +{
->> +       struct mmc_blk_ioc_data *idata;
->> +       struct mmc_blk_data *md;
->> +       struct mmc_card *card;
->> +       int err;
->> +
->> +       /*
->> +        * The caller must have CAP_SYS_RAWIO, and must be calling this on the
->> +        * whole block device, not on a partition.  This prevents overspray
->> +        * between sibling partitions.
->> +        */
->> +       if ((!capable(CAP_SYS_RAWIO)) || (bdev != bdev->bd_contains))
->> +               return -EPERM;
+>  drivers/mmc/host/sdhci-bcm-kona.c | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
 > 
-> This check is common for multi and non-multi. Please move it to the
-> mmc_blk_ioctl() to avoid some code duplication.
+> diff --git a/drivers/mmc/host/sdhci-bcm-kona.c b/drivers/mmc/host/sdhci-bcm-kona.c
+> index 2bd90fb35c75..00a8a40a3729 100644
+> --- a/drivers/mmc/host/sdhci-bcm-kona.c
+> +++ b/drivers/mmc/host/sdhci-bcm-kona.c
+> @@ -273,7 +273,7 @@ static int sdhci_bcm_kona_probe(struct platform_device *pdev)
+>  		host->quirks |= SDHCI_QUIRK_BROKEN_CARD_DETECTION;
+>  
+>  	dev_dbg(dev, "is_8bit=%c\n",
+> -		(host->mmc->caps | MMC_CAP_8_BIT_DATA) ? 'Y' : 'N');
+> +		(host->mmc->caps & MMC_CAP_8_BIT_DATA) ? 'Y' : 'N');
+>  
 
-Yes that's true. I can move but it means also passing bdev to
-__mmc_blk_ioctl_cmd() as another argument. It is not a big deal, but it
-was more convenient to test here. If your preference is to consolidate
-the tests to one place then I will move this test.
+The fix looks good to me. Thanks.
 
-Cheers
-Jon
+Reviewed-by: Ray Jui <rjui@broadcom.com>
 
-
+Ray
