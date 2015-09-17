@@ -1,22 +1,22 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [patch] mmc: sdhci-of-at91: remove a line of dead code
-Date: Thu, 17 Sep 2015 10:49:19 +0200
-Message-ID: <CAPDyKFoR1gq+xEBZRqaPZ9WPKLN_KAkcbNCF_pnR+VJ9RXJCFg@mail.gmail.com>
-References: <20150916061949.GA21542@mwanda>
+Subject: Re: [PATCH 1/2] mmc: wbsd: Remove unneded semicolon
+Date: Thu, 17 Sep 2015 10:49:05 +0200
+Message-ID: <CAPDyKFpO-hU=hYQU+czB=Buo2Z1OnUTB-mG=KtbxTY0D22kqKQ@mail.gmail.com>
+References: <1442395804-17736-1-git-send-email-javier@osg.samsung.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <kernel-janitors-owner@vger.kernel.org>
-In-Reply-To: <20150916061949.GA21542@mwanda>
-Sender: kernel-janitors-owner@vger.kernel.org
-To: Dan Carpenter <dan.carpenter@oracle.com>
-Cc: Ludovic Desroches <ludovic.desroches@atmel.com>, linux-mmc <linux-mmc@vger.kernel.org>, kernel-janitors@vger.kernel.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1442395804-17736-1-git-send-email-javier@osg.samsung.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Javier Martinez Canillas <javier@osg.samsung.com>
+Cc: "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Pierre Ossman <pierre@ossman.eu>, linux-mmc <linux-mmc@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On 16 September 2015 at 08:19, Dan Carpenter <dan.carpenter@oracle.com> wrote:
-> The goto is correct and the unreachable "return -EINVAL" should be
-> removed.
+On 16 September 2015 at 11:30, Javier Martinez Canillas
+<javier@osg.samsung.com> wrote:
+> It's not needed an is just creating a null statement, so remove it.
 >
-> Signed-off-by: Dan Carpenter <dan.carpenter@oracle.com>
+> Signed-off-by: Javier Martinez Canillas <javier@osg.samsung.com>
 
 Thanks, applied for next!
 
@@ -24,16 +24,24 @@ Kind regards
 Uffe
 
 
+> ---
 >
-> diff --git a/drivers/mmc/host/sdhci-of-at91.c b/drivers/mmc/host/sdhci-of-at91.c
-> index d155664..d3df786 100644
-> --- a/drivers/mmc/host/sdhci-of-at91.c
-> +++ b/drivers/mmc/host/sdhci-of-at91.c
-> @@ -110,7 +110,6 @@ static int sdhci_at91_probe(struct platform_device *pdev)
->         if (ret < 0) {
->                 dev_err(&pdev->dev, "failed to set gck");
->                 goto hclock_disable_unprepare;
-> -               return -EINVAL;
+>  drivers/mmc/host/wbsd.c | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+>
+> diff --git a/drivers/mmc/host/wbsd.c b/drivers/mmc/host/wbsd.c
+> index ca183ea767b3..c3fd16d997ca 100644
+> --- a/drivers/mmc/host/wbsd.c
+> +++ b/drivers/mmc/host/wbsd.c
+> @@ -809,7 +809,7 @@ static void wbsd_request(struct mmc_host *mmc, struct mmc_request *mrq)
+>                         cmd->error = -EINVAL;
+>
+>                         goto done;
+> -               };
+> +               }
 >         }
+>
 >         /*
->          * We need to check if we have the requested rate for gck because in
+> --
+> 2.4.3
+>
