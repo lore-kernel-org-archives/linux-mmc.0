@@ -1,140 +1,128 @@
-From: Robert Jarzmik <robert.jarzmik@free.fr>
-Subject: [PATCH v2] mmc: pxamci: fix card detect with slot-gpio API
-Date: Wed, 16 Sep 2015 21:16:01 +0200
-Message-ID: <1442430961-32269-1-git-send-email-robert.jarzmik@free.fr>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp05.smtpout.orange.fr ([80.12.242.127]:25682 "EHLO
-	smtp.smtpout.orange.fr" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752845AbbIPTVH (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 16 Sep 2015 15:21:07 -0400
-Sender: linux-mmc-owner@vger.kernel.org
+From: Jaehoon Chung <jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>
+Subject: Re: [PATCH 6/8] mmc: dw_mmc: Generic MMC tuning with the clock phase
+ framework
+Date: Thu, 17 Sep 2015 11:03:52 +0900
+Message-ID: <55FA1F88.3090108@samsung.com>
+References: <1441045446-30858-1-git-send-email-heiko@sntech.de>
+ <8878355.D5Q8mk4qcM@diego> <55F8D442.5020004@samsung.com>
+ <2272810.k4vHSW5D0y@diego>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="windows-1252"
+Content-Transfer-Encoding: quoted-printable
+Return-path: <linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+In-reply-to: <2272810.k4vHSW5D0y@diego>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-rockchip>,
+ <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-rockchip/>
+List-Post: <mailto:linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+List-Help: <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-rockchip>,
+ <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
+Sender: "Linux-rockchip" <linux-rockchip-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+Errors-To: linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+To: =?windows-1252?Q?Heiko_St=FCbner?= <heiko-4mtYJXux2i+zQB+pC5nmwQ@public.gmane.org>
+Cc: ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, Alexandru M Stan <amstan-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, sboyd-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, mturquette-rdvid1DuHRBWk0Htik3J/w@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, CPGS <cpgs-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, linux-clk-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Robert Jarzmik <robert.jarzmik@free.fr>, Petr Cvek <petr.cvek@tul.cz>
 
-Move pxamci to mmc slot-gpio API to fix interrupt request.
+Hi,
 
-It fixes the case where the card detection is on a gpio expander, on I2C
-for example on zylonite board. In this case, the card detect netsted
-interrupt is called from a threaded interrupt. The request_irq() fails,
-because a hard irq cannot be a nested interrupt from a threaded
-interrupt (set __setup_irq()).
+On 09/16/2015 11:52 PM, Heiko St=FCbner wrote:
+> Hi,
+> =
 
-This was tested on zylonite and mioa701 boards.
+> Am Mittwoch, 16. September 2015, 11:30:26 schrieb Jaehoon Chung:
+>> On 09/16/2015 07:09 AM, Heiko St=FCbner wrote:
+>>> Am Dienstag, 15. September 2015, 17:25:38 schrieb Jaehoon Chung:
+>>>> On 09/01/2015 03:24 AM, Heiko Stuebner wrote:
+>>>>> From: Alexandru M Stan <amstan-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
+>>>>>
+>>>>> This algorithm will try 1 degree increments, since there's no way to
+>>>>> tell
+>>>>> what resolution the underlying phase code uses. As an added bonus, do=
+ing
+>>>>> many tunings yields better results since some tests are run more than
+>>>>> once
+>>>>> (ex: if the underlying driver uses 45 degree increments, the tuning c=
+ode
+>>>>> will try the same angle more than once).
+>>>>>
+>>>>> It will then construct a list of good phase ranges (even ranges that
+>>>>> cross
+>>>>> 360/0), will pick the biggest range then it will set the sample_clk to
+>>>>> the
+>>>>> middle of that range.
+>>>>>
+>>>>> We do not touch ciu_drive (and by extension define default-drive-phas=
+e).
+>>>>> Drive phase is mostly used to define minimum hold times, while one co=
+uld
+>>>>> write some code to determine what phase meets the minimum hold time (=
+ex
+>>>>> 10
+>>>>> degrees) this will not work with the current clock phase framework
+>>>>> (which
+>>>>> floors angles, so we'll get 0 deg, and there's no way to know what
+>>>>> resolution the floors happen at). We assume that the default drive
+>>>>> angles
+>>>>> set by the hardware are good enough.
+>>>>>
+>>>>> If a device has device specific code (like exynos) then that will sti=
+ll
+>>>>> take precedence, otherwise this new code will execute. If the device
+>>>>> wants
+>>>>> to tune, but has no sample_clk defined we'll return EIO with an error
+>>>>> message.
+>>>>
+>>>> Which point is "_generic_"? I don't find the code that control the
+>>>> register
+>>>> relevant to CLK_DRV/SMPL PHASE. It seems that posted the similar patch=
+es
+>>>> at
+>>>> u-boot mailing list..
+>>>
+>>> The "generic" part is that it uses the clk phase API for dw_mmc
+>>> implementations where the clkgen controlling interface is outside the
+>>> dw_mmc IP itself. So it's open for other implementations as well.
+>>
+>> Designware IP also has the CLK phase register(UHS_REG_EXT register)...
+>> if this code is related with it, it should be located into dw-mmc.c.
+> =
 
-Signed-off-by: Robert Jarzmik <robert.jarzmik@free.fr>
-Cc: Petr Cvek <petr.cvek@tul.cz>
----
-Since v1: trade threaded interrupt for slot-gpio API
----
- drivers/mmc/host/pxamci.c | 58 ++++++++++++++++++-----------------------------
- 1 file changed, 22 insertions(+), 36 deletions(-)
+> UHS_REG_EXT is acutally "reserved" on both the rk3288 as well as the rk33=
+68. =
 
-diff --git a/drivers/mmc/host/pxamci.c b/drivers/mmc/host/pxamci.c
-index 1420f29628c7..5b8869bc5629 100644
---- a/drivers/mmc/host/pxamci.c
-+++ b/drivers/mmc/host/pxamci.c
-@@ -28,6 +28,7 @@
- #include <linux/clk.h>
- #include <linux/err.h>
- #include <linux/mmc/host.h>
-+#include <linux/mmc/slot-gpio.h>
- #include <linux/io.h>
- #include <linux/regulator/consumer.h>
- #include <linux/gpio.h>
-@@ -454,12 +455,8 @@ static int pxamci_get_ro(struct mmc_host *mmc)
- {
- 	struct pxamci_host *host = mmc_priv(mmc);
- 
--	if (host->pdata && gpio_is_valid(host->pdata->gpio_card_ro)) {
--		if (host->pdata->gpio_card_ro_invert)
--			return !gpio_get_value(host->pdata->gpio_card_ro);
--		else
--			return gpio_get_value(host->pdata->gpio_card_ro);
--	}
-+	if (host->pdata && gpio_is_valid(host->pdata->gpio_card_ro))
-+		return mmc_gpio_get_ro(mmc);
- 	if (host->pdata && host->pdata->get_ro)
- 		return !!host->pdata->get_ro(mmc_dev(mmc));
- 	/*
-@@ -551,6 +548,7 @@ static void pxamci_enable_sdio_irq(struct mmc_host *host, int enable)
- 
- static const struct mmc_host_ops pxamci_ops = {
- 	.request		= pxamci_request,
-+	.get_cd			= mmc_gpio_get_cd,
- 	.get_ro			= pxamci_get_ro,
- 	.set_ios		= pxamci_set_ios,
- 	.enable_sdio_irq	= pxamci_enable_sdio_irq,
-@@ -790,37 +788,31 @@ static int pxamci_probe(struct platform_device *pdev)
- 		gpio_power = host->pdata->gpio_power;
- 	}
- 	if (gpio_is_valid(gpio_power)) {
--		ret = gpio_request(gpio_power, "mmc card power");
-+		ret = devm_gpio_request(&pdev->dev, gpio_power,
-+					"mmc card power");
- 		if (ret) {
--			dev_err(&pdev->dev, "Failed requesting gpio_power %d\n", gpio_power);
-+			dev_err(&pdev->dev, "Failed requesting gpio_power %d\n",
-+				gpio_power);
- 			goto out;
- 		}
- 		gpio_direction_output(gpio_power,
- 				      host->pdata->gpio_power_invert);
- 	}
--	if (gpio_is_valid(gpio_ro)) {
--		ret = gpio_request(gpio_ro, "mmc card read only");
--		if (ret) {
--			dev_err(&pdev->dev, "Failed requesting gpio_ro %d\n", gpio_ro);
--			goto err_gpio_ro;
--		}
--		gpio_direction_input(gpio_ro);
-+	if (gpio_is_valid(gpio_ro))
-+		ret = mmc_gpio_request_ro(mmc, gpio_ro);
-+	if (ret) {
-+		dev_err(&pdev->dev, "Failed requesting gpio_ro %d\n", gpio_ro);
-+		goto out;
-+	} else {
-+		mmc->caps |= host->pdata->gpio_card_ro_invert ?
-+			MMC_CAP2_RO_ACTIVE_HIGH : 0;
- 	}
--	if (gpio_is_valid(gpio_cd)) {
--		ret = gpio_request(gpio_cd, "mmc card detect");
--		if (ret) {
--			dev_err(&pdev->dev, "Failed requesting gpio_cd %d\n", gpio_cd);
--			goto err_gpio_cd;
--		}
--		gpio_direction_input(gpio_cd);
- 
--		ret = request_irq(gpio_to_irq(gpio_cd), pxamci_detect_irq,
--				  IRQF_TRIGGER_RISING | IRQF_TRIGGER_FALLING,
--				  "mmc card detect", mmc);
--		if (ret) {
--			dev_err(&pdev->dev, "failed to request card detect IRQ\n");
--			goto err_request_irq;
--		}
-+	if (gpio_is_valid(gpio_cd))
-+		ret = mmc_gpio_request_cd(mmc, gpio_cd, 0);
-+	if (ret) {
-+		dev_err(&pdev->dev, "Failed requesting gpio_cd %d\n", gpio_cd);
-+		goto out;
- 	}
- 
- 	if (host->pdata && host->pdata->init)
-@@ -835,13 +827,7 @@ static int pxamci_probe(struct platform_device *pdev)
- 
- 	return 0;
- 
--err_request_irq:
--	gpio_free(gpio_cd);
--err_gpio_cd:
--	gpio_free(gpio_ro);
--err_gpio_ro:
--	gpio_free(gpio_power);
-- out:
-+out:
- 	if (host) {
- 		if (host->dma_chan_rx)
- 			dma_release_channel(host->dma_chan_rx);
--- 
-2.1.4
+> rk3036/rk3128 (Cortex-A7) provide a bit description, but the tuning =
 
+> documentation still uses the controls located in the clock controller.
+> =
+
+> So I guess UHS_REG_EXT is the real "generic" solution.
+> =
+
+>>> But if you are more comfortable with it, I can also move it into the
+>>> dw_mmc- rockchip variant for the time being, until another user comes
+>>> along.
+>> I think more better that this code is located into dw_mmc-rockchip. how
+>> about?
+> =
+
+> As described above, moving that to the rockchip part sounds sensible. And=
+ I =
+
+> guess we can think more about it, once a second user appears.
+
+Sure, we can think more about this.
+As you knew, clock phase is closely related to the timing issue.
+So clock phase scheme needs to control however.
+In future, if somebody introduce the similar control as rockchip, we can di=
+scuss about it.
+
+Best Regards,
+Jaehoon Chung
+
+> =
+
+> =
+
+> Heiko
+> =
