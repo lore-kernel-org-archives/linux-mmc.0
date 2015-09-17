@@ -1,53 +1,101 @@
-From: Tobias Klauser <tklauser@distanz.ch>
-Subject: [PATCH] mmc: sdhci-pltfm: Use of_property_read_u32 instead of open-coding it
-Date: Thu, 17 Sep 2015 14:07:26 +0200
-Message-ID: <1442491646-9421-1-git-send-email-tklauser@distanz.ch>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH 1/2] mmc: core: enable CMD19 tuning for DDR50 mode
+Date: Thu, 17 Sep 2015 14:27:53 +0200
+Message-ID: <CAPDyKFpWfY9G4WG_GfCutJ2NkRbcAYZToYJXp3RvX=_25sgnWA@mail.gmail.com>
+References: <1439282492-6274-1-git-send-email-21cnbao@gmail.com>
+	<CAPDyKFpXZD28NwNAhKQyxmWasVhk_7AeyOW6oXaBPHKuSTmGUA@mail.gmail.com>
+	<CAGsJ_4wvvQdyjFi=JmWfASm-LbJMybrhC=Wxxn7jHZEP5dUfEw@mail.gmail.com>
+	<CAPDyKFpEwWvu3tnbMT9ZvM0TUvEHp0Qa8PADohyJoTaNZ9HS9g@mail.gmail.com>
+	<CAGsJ_4x5Nd3Cts1BHsUyB_mCejxbHPPjznUVWUcFoZhxKy+Tcg@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail.zhinst.com ([212.126.164.98]:58610 "EHLO mail.zhinst.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751600AbbIQMMb (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 17 Sep 2015 08:12:31 -0400
+Received: from mail-wi0-f178.google.com ([209.85.212.178]:33300 "EHLO
+	mail-wi0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751375AbbIQM1y (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 17 Sep 2015 08:27:54 -0400
+Received: by wiclk2 with SMTP id lk2so21576691wic.0
+        for <linux-mmc@vger.kernel.org>; Thu, 17 Sep 2015 05:27:53 -0700 (PDT)
+In-Reply-To: <CAGsJ_4x5Nd3Cts1BHsUyB_mCejxbHPPjznUVWUcFoZhxKy+Tcg@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc@vger.kernel.org
+To: Barry Song <21cnbao@gmail.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, DL-SHA-WorkGroupLinux <workgroup.linux@csr.com>, Weijun Yang <york.yang@csr.com>, Barry Song <Baohua.Song@csr.com>
 
-Use of_property_read_u32 instead of of_get_property with return value
-checks and endianness conversion.
+On 15 September 2015 at 09:13, Barry Song <21cnbao@gmail.com> wrote:
+> 2015-08-25 20:05 GMT+08:00 Ulf Hansson <ulf.hansson@linaro.org>:
+>> On 20 August 2015 at 02:16, Barry Song <21cnbao@gmail.com> wrote:
+>>> 2015-08-18 1:11 GMT+08:00 Ulf Hansson <ulf.hansson@linaro.org>:
+>>>> On 11 August 2015 at 10:41, Barry Song <21cnbao@gmail.com> wrote:
+>>>>> From: Weijun Yang <york.yang@csr.com>
+>>>>>
+>>>>> As SD Specifications Part1 Physical Layer Specification Version
+>>>>> 3.01 says, CMD19 tuning is available for unlocked cards in transfer
+>>>>> state of 1.8V signaling mode. The small difference between v3.00
+>>>>> and 3.01 spec means that CMD19 tuning is also available for DDR50
+>>>>> mode.
+>>>>
+>>>> So what happens with cards following the 3.0 spec version, those
+>>>> doesn't need to support the tuning CMD right? Perhaps that needs to be
+>>>> addressed in this patch well!?
+>>>
+>>> from HW registers of the card, we cann't know whether the HW needs
+>>> tuning. it is said 3.0.x need tuning, but 3.0 doesn't need.  @weijun,
+>>> pls fix me if i am wrong.
+>>> if so, it seems we need a static flag somewhere to indicate whether
+>>> the tuning is needed. we can't detect to find the tuning requirement.
+>>
+>> Another way is to always try doing the tuning for DDR50, but in case
+>> of errors just ignore them and print a debug/info message!?
+>
+> Uffe, do you mean something like below:
+>
+> diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
+> index 4e7366a..d4df9f0 100644
+> --- a/drivers/mmc/core/sd.c
+> +++ b/drivers/mmc/core/sd.c
+> @@ -629,8 +629,23 @@ static int mmc_sd_init_uhs_card(struct mmc_card *card)
+>       */
+>      if (!mmc_host_is_spi(card->host) &&
+>          (card->sd_bus_speed == UHS_SDR50_BUS_SPEED ||
+> -         card->sd_bus_speed == UHS_SDR104_BUS_SPEED))
+> +         card->sd_bus_speed == UHS_DDR50_BUS_SPEED ||
+> +         card->sd_bus_speed == UHS_SDR104_BUS_SPEED)) {
+>          err = mmc_execute_tuning(card);
+> +
+> +        /*
+> +         * As SD Specifications Part1 Physical Layer Specification Version
+> +         * 3.01 says, CMD19 tuning is available for unlocked cards in transfer
+> +         * state of 1.8V signaling mode. The small difference between v3.00
+> +         * and 3.01 spec means that CMD19 tuning is also available for DDR50
+> +         * mode.
+> +         */
+> +        if (err && (card->sd_bus_speed == UHS_DDR50_BUS_SPEED))
+> +            pr_err("%s: ddr50 tuning failed\n", mmc_hostname(card->host));
 
-Signed-off-by: Tobias Klauser <tklauser@distanz.ch>
----
- drivers/mmc/host/sdhci-pltfm.c | 8 +++-----
- 1 file changed, 3 insertions(+), 5 deletions(-)
+Perhaps pr_warn() instead.
 
-diff --git a/drivers/mmc/host/sdhci-pltfm.c b/drivers/mmc/host/sdhci-pltfm.c
-index a207f5a..58721fb 100644
---- a/drivers/mmc/host/sdhci-pltfm.c
-+++ b/drivers/mmc/host/sdhci-pltfm.c
-@@ -71,9 +71,8 @@ void sdhci_get_of_property(struct platform_device *pdev)
- 	struct device_node *np = pdev->dev.of_node;
- 	struct sdhci_host *host = platform_get_drvdata(pdev);
- 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
--	const __be32 *clk;
-+	u32 clk;
- 	u32 bus_width;
--	int size;
- 
- 	if (of_get_property(np, "sdhci,auto-cmd12", NULL))
- 		host->quirks |= SDHCI_QUIRK_MULTIBLOCK_READ_ACMD12;
-@@ -101,9 +100,8 @@ void sdhci_get_of_property(struct platform_device *pdev)
- 	    of_device_is_compatible(np, "fsl,mpc8536-esdhc"))
- 		host->quirks |= SDHCI_QUIRK_BROKEN_TIMEOUT_VAL;
- 
--	clk = of_get_property(np, "clock-frequency", &size);
--	if (clk && size == sizeof(*clk) && *clk)
--		pltfm_host->clock = be32_to_cpup(clk);
-+	if (of_property_read_u32(np, "clock-frequency", &clk) == 0)
-+		pltfm_host->clock = clk;
- 
- 	if (of_find_property(np, "keep-power-in-suspend", NULL))
- 		host->mmc->pm_caps |= MMC_PM_KEEP_POWER;
--- 
-2.5.0
+Moreover, you may just assign err = 0 and leave the return/kfree to
+the "out" label.
 
+> +            kfree(status);
+> +            return 0;
+> +        }
+> +    }
+>  out:
+>      kfree(status);
+>
 
+[...]
+
+Also, I was giving this a second thought...
+
+What happens with the SD 3.0 card when it *doesn't* support CMD19.
+Will it still be functional afterwards or will it move from "transfer
+state" to another not known state?
+
+So maybe we should just do the tuning and return the error if it
+fails, as you suggested in the original patch. :-)
+
+Kind regards
+Uffe
