@@ -1,128 +1,57 @@
-From: Jaehoon Chung <jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>
-Subject: Re: [PATCH 6/8] mmc: dw_mmc: Generic MMC tuning with the clock phase
- framework
-Date: Thu, 17 Sep 2015 11:03:52 +0900
-Message-ID: <55FA1F88.3090108@samsung.com>
-References: <1441045446-30858-1-git-send-email-heiko@sntech.de>
- <8878355.D5Q8mk4qcM@diego> <55F8D442.5020004@samsung.com>
- <2272810.k4vHSW5D0y@diego>
+From: Yangbo Lu <yangbo.lu@freescale.com>
+Subject: [v2, 2/8] mmc: sdhci: add a callback of tuning block setting
+Date: Thu, 17 Sep 2015 13:50:48 +0800
+Message-ID: <1442469054-23644-2-git-send-email-yangbo.lu@freescale.com>
+References: <1442469054-23644-1-git-send-email-yangbo.lu@freescale.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="windows-1252"
-Content-Transfer-Encoding: quoted-printable
-Return-path: <linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-In-reply-to: <2272810.k4vHSW5D0y@diego>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-rockchip>,
- <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-rockchip/>
-List-Post: <mailto:linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-List-Help: <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-rockchip>,
- <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
-Sender: "Linux-rockchip" <linux-rockchip-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-Errors-To: linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
-To: =?windows-1252?Q?Heiko_St=FCbner?= <heiko-4mtYJXux2i+zQB+pC5nmwQ@public.gmane.org>
-Cc: ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, Alexandru M Stan <amstan-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, sboyd-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, mturquette-rdvid1DuHRBWk0Htik3J/w@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, CPGS <cpgs-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, linux-clk-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+Content-Type: text/plain
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-bl2on0128.outbound.protection.outlook.com ([65.55.169.128]:47772
+	"EHLO na01-bl2-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1752827AbbIQF5P (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 17 Sep 2015 01:57:15 -0400
+In-Reply-To: <1442469054-23644-1-git-send-email-yangbo.lu@freescale.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org, ulf.hansson@linaro.org
+Cc: Yangbo Lu <yangbo.lu@freescale.com>
 
-Hi,
+Add a tuning block setting callback to let host set its
+tuning block before executing tuning procedure.
 
-On 09/16/2015 11:52 PM, Heiko St=FCbner wrote:
-> Hi,
-> =
+Signed-off-by: Yangbo Lu <yangbo.lu@freescale.com>
+---
+ drivers/mmc/host/sdhci.c | 3 +++
+ drivers/mmc/host/sdhci.h | 1 +
+ 2 files changed, 4 insertions(+)
 
-> Am Mittwoch, 16. September 2015, 11:30:26 schrieb Jaehoon Chung:
->> On 09/16/2015 07:09 AM, Heiko St=FCbner wrote:
->>> Am Dienstag, 15. September 2015, 17:25:38 schrieb Jaehoon Chung:
->>>> On 09/01/2015 03:24 AM, Heiko Stuebner wrote:
->>>>> From: Alexandru M Stan <amstan-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
->>>>>
->>>>> This algorithm will try 1 degree increments, since there's no way to
->>>>> tell
->>>>> what resolution the underlying phase code uses. As an added bonus, do=
-ing
->>>>> many tunings yields better results since some tests are run more than
->>>>> once
->>>>> (ex: if the underlying driver uses 45 degree increments, the tuning c=
-ode
->>>>> will try the same angle more than once).
->>>>>
->>>>> It will then construct a list of good phase ranges (even ranges that
->>>>> cross
->>>>> 360/0), will pick the biggest range then it will set the sample_clk to
->>>>> the
->>>>> middle of that range.
->>>>>
->>>>> We do not touch ciu_drive (and by extension define default-drive-phas=
-e).
->>>>> Drive phase is mostly used to define minimum hold times, while one co=
-uld
->>>>> write some code to determine what phase meets the minimum hold time (=
-ex
->>>>> 10
->>>>> degrees) this will not work with the current clock phase framework
->>>>> (which
->>>>> floors angles, so we'll get 0 deg, and there's no way to know what
->>>>> resolution the floors happen at). We assume that the default drive
->>>>> angles
->>>>> set by the hardware are good enough.
->>>>>
->>>>> If a device has device specific code (like exynos) then that will sti=
-ll
->>>>> take precedence, otherwise this new code will execute. If the device
->>>>> wants
->>>>> to tune, but has no sample_clk defined we'll return EIO with an error
->>>>> message.
->>>>
->>>> Which point is "_generic_"? I don't find the code that control the
->>>> register
->>>> relevant to CLK_DRV/SMPL PHASE. It seems that posted the similar patch=
-es
->>>> at
->>>> u-boot mailing list..
->>>
->>> The "generic" part is that it uses the clk phase API for dw_mmc
->>> implementations where the clkgen controlling interface is outside the
->>> dw_mmc IP itself. So it's open for other implementations as well.
->>
->> Designware IP also has the CLK phase register(UHS_REG_EXT register)...
->> if this code is related with it, it should be located into dw-mmc.c.
-> =
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 9b3d4c2..9da4644 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -1939,6 +1939,9 @@ static int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode)
+ 		return err;
+ 	}
+ 
++	if (host->ops->set_tuning_block)
++		host->ops->set_tuning_block(host);
++
+ 	ctrl = sdhci_readw(host, SDHCI_HOST_CONTROL2);
+ 	ctrl |= SDHCI_CTRL_EXEC_TUNING;
+ 	if (host->quirks2 & SDHCI_QUIRK2_TUNING_WORK_AROUND)
+diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+index 723f034..98f239b 100644
+--- a/drivers/mmc/host/sdhci.h
++++ b/drivers/mmc/host/sdhci.h
+@@ -546,6 +546,7 @@ struct sdhci_ops {
+ 					 int card_drv, int *drv_type);
+ 	void	(*signal_voltage_switch)(struct sdhci_host *host,
+ 					 unsigned char signal_voltage);
++	void	(*set_tuning_block)(struct sdhci_host *host);
+ };
+ 
+ #ifdef CONFIG_MMC_SDHCI_IO_ACCESSORS
+-- 
+2.1.0.27.g96db324
 
-> UHS_REG_EXT is acutally "reserved" on both the rk3288 as well as the rk33=
-68. =
-
-> rk3036/rk3128 (Cortex-A7) provide a bit description, but the tuning =
-
-> documentation still uses the controls located in the clock controller.
-> =
-
-> So I guess UHS_REG_EXT is the real "generic" solution.
-> =
-
->>> But if you are more comfortable with it, I can also move it into the
->>> dw_mmc- rockchip variant for the time being, until another user comes
->>> along.
->> I think more better that this code is located into dw_mmc-rockchip. how
->> about?
-> =
-
-> As described above, moving that to the rockchip part sounds sensible. And=
- I =
-
-> guess we can think more about it, once a second user appears.
-
-Sure, we can think more about this.
-As you knew, clock phase is closely related to the timing issue.
-So clock phase scheme needs to control however.
-In future, if somebody introduce the similar control as rockchip, we can di=
-scuss about it.
-
-Best Regards,
-Jaehoon Chung
-
-> =
-
-> =
-
-> Heiko
-> =
