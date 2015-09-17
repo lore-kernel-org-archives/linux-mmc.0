@@ -1,53 +1,37 @@
-From: Robert Jarzmik <robert.jarzmik@free.fr>
-Subject: Re: [PATCH v2] mmc: pxamci: fix card detect with slot-gpio API
-Date: Thu, 17 Sep 2015 19:05:32 +0200
-Message-ID: <871tdxrn6r.fsf@belgarion.home>
-References: <1442430961-32269-1-git-send-email-robert.jarzmik@free.fr>
-	<CAPDyKFrWxabCY4639qzg0vzpAcARTdnr+D9511ZjYd=_0ZaqpQ@mail.gmail.com>
+From: Luis de Bethencourt <luis@debethencourt.com>
+Subject: [PATCH 0/3] mmc: Fix module autoload for OF platform drivers
+Date: Thu, 17 Sep 2015 23:48:59 +0200
+Message-ID: <20150917214859.GA7926@goodgumbo.baconseed.org>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAPDyKFrWxabCY4639qzg0vzpAcARTdnr+D9511ZjYd=_0ZaqpQ@mail.gmail.com>
-	(Ulf Hansson's message of "Thu, 17 Sep 2015 10:20:10 +0200")
+Content-Disposition: inline
 Sender: linux-kernel-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Petr Cvek <petr.cvek@tul.cz>
+To: linux-kernel@vger.kernel.org
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, Fabian Frederick <fabf@skynet.be>, Stephen Warren <swarren@nvidia.com>, Jonas Jensen <jonas.jensen@gmail.com>, Arnd Bergmann <arnd@arndb.de>, Jarkko Lavinen <jarkko.lavinen@nokia.com>, linux-mmc@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-Ulf Hansson <ulf.hansson@linaro.org> writes:
+Hi,
 
->> +       if (gpio_is_valid(gpio_ro))
->> +               ret = mmc_gpio_request_ro(mmc, gpio_ro);
->
-> Would it be possible for you to use the mmc_gpiod_request_ro() instead?
-I don't think so.
-Most of pxamci users are old platform data based machine code, which passes an
-integer for the gpio. A full conversion to gpio_desc is another work.
+These patches add the missing MODULE_DEVICE_TABLE() for OF to export
+the information so modules have the correct aliases built-in and
+autoloading works correctly.
 
->> -               gpio_direction_input(gpio_cd);
->>
->> -               ret = request_irq(gpio_to_irq(gpio_cd), pxamci_detect_irq,
->
-> I guess the pxamci_detect_irq() function can be removed within this
-> patch as well!?
-Euh no. The reason is on this line :
-		host->pdata->init(&pdev->dev, pxamci_detect_irq, mmc);
-Machine code is passed this callback to signal a card detection change for
-esoteric cases, using this function as a IRQ handler. For example we have
-trizeps4_mci_init() in arch/arm/mach-pxa/trizeps4.c.
+A longer explanation by Javier Canillas can be found here:
+https://lkml.org/lkml/2015/7/30/519
 
->> +       if (gpio_is_valid(gpio_cd))
->> +               ret = mmc_gpio_request_cd(mmc, gpio_cd, 0);
->
-> Would it be possible for you to use the mmc_gpiod_request_cd() instead?
-Same reason as before I'm afraid.
+Thanks,
+Luis
 
-> I believe you have some additional code to remove in pxamci_remove().
-> Some gpio_free() and free_irq() shouldn't be needed there after this
-> change.
-Yes, good catch. This will be for v3.
+Luis de Bethencourt (3):
+  mmc: mmc_spi: Fix module autoload for OF platform driver
+  mmc: moxart: Fix module autoload for OF platform driver
+  mmc: omap: Fix module autoload for OF platform driver
 
-Cheers.
+ drivers/mmc/host/mmc_spi.c    | 1 +
+ drivers/mmc/host/moxart-mmc.c | 1 +
+ drivers/mmc/host/omap.c       | 1 +
+ 3 files changed, 3 insertions(+)
 
 -- 
-Robert
+2.4.6
