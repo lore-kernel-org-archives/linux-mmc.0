@@ -1,38 +1,55 @@
-From: Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: [PATCH RFC 0/3] mmc: Wait for card_busy before starting
- sdio requests
-Date: Sun, 20 Sep 2015 15:45:55 -0400
-Message-ID: <1442778358-7491-1-git-send-email-hdegoede@redhat.com>
-Reply-To: hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-sunxi+bncBDRZXY4CYYORBAE27SXQKGQENKIKXYY-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Post: <http://groups.google.com/group/linux-sunxi/post>, <mailto:linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Help: <http://groups.google.com/support/>, <mailto:linux-sunxi+help-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Archive: <http://groups.google.com/group/linux-sunxi
-Sender: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
-List-Subscribe: <http://groups.google.com/group/linux-sunxi/subscribe>, <mailto:linux-sunxi+subscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Unsubscribe: <mailto:googlegroups-manage+1076902468213+unsubscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>,
- <http://groups.google.com/group/linux-sunxi/subscribe>
-To: Chris Ball <chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
+From: Hans de Goede <hdegoede@redhat.com>
+Subject: [PATCH RFC 2/3] mmc: Wait for card_busy before starting sdio requests
+Date: Sun, 20 Sep 2015 15:45:57 -0400
+Message-ID: <1442778358-7491-3-git-send-email-hdegoede@redhat.com>
+References: <1442778358-7491-1-git-send-email-hdegoede@redhat.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mx1.redhat.com ([209.132.183.28]:35121 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1755096AbbITTqO (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Sun, 20 Sep 2015 15:46:14 -0400
+In-Reply-To: <1442778358-7491-1-git-send-email-hdegoede@redhat.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Maxime Ripard <maxime.ripard@free-electrons.com>, linux-mmc@vger.kernel.org, linux-sunxi@googlegroups.com, Hans de Goede <hdegoede@redhat.com>
 
-Hi Ulf,
+Some sdio wifi chips will not work properly if we try to start new
+sdio-rw requests while the device is signalling that it is busy.
 
-As discussed before here is a series to make the mmc core check the
-card_busy op before submitting sdio-rw commands to the host driver.
+Signed-off-by: Hans de Goede <hdegoede@redhat.com>
+---
+ drivers/mmc/core/core.c | 17 +++++++++++++++++
+ 1 file changed, 17 insertions(+)
 
-Not sure if this is what you've in mind, but it is a start :)
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index 0520064..ced66b8 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -204,6 +204,23 @@ static void __mmc_start_request(struct mmc_host *host, struct mmc_request *mrq)
+ 		return;
+ 	}
+ 
++	/*
++	 * For sdio rw commands we must wait for card busy otherwise some
++	 * sdio devices won't work properly.
++	 */
++	if (mmc_is_io_op(mrq->cmd->opcode) && host->ops->card_busy) {
++		int tries = 500; /* Wait aprox 500ms at maximum */
++
++		while (host->ops->card_busy(host) && --tries)
++			mmc_delay(1);
++
++		if (tries == 0) {
++			mrq->cmd->error = -EBUSY;
++			mmc_request_done(host, mrq);
++			return;
++		}
++	}
++
+ 	host->ops->request(host, mrq);
+ }
+ 
+-- 
+2.4.3
 
-This series is RFC because currently I'm travelling, and I do not
-have any sunxi hardware with the sdio wifi which needs this with
-me, so I have not been able to test that this set actually fixes
-things. Given previous tests it is likely that it will though.
-
-A review would be appreciated then I can address any remarks
-you've before sending a non RFC version.
-
-Regards,
-
-Hans
