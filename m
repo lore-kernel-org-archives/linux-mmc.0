@@ -1,50 +1,69 @@
 From: Hans de Goede <hdegoede@redhat.com>
-Subject: [PATCH RFC 1/3] mmc: Add mmc_is_io_op helper function
-Date: Sun, 20 Sep 2015 15:45:56 -0400
-Message-ID: <1442778358-7491-2-git-send-email-hdegoede@redhat.com>
+Subject: [PATCH RFC 3/3] mmc: sunxi: Add card busy detection
+Date: Sun, 20 Sep 2015 15:45:58 -0400
+Message-ID: <1442778358-7491-4-git-send-email-hdegoede@redhat.com>
 References: <1442778358-7491-1-git-send-email-hdegoede@redhat.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:39218 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:44728 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1755243AbbITTqL (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Sun, 20 Sep 2015 15:46:11 -0400
+	id S1755096AbbITTqT (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Sun, 20 Sep 2015 15:46:19 -0400
 In-Reply-To: <1442778358-7491-1-git-send-email-hdegoede@redhat.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Maxime Ripard <maxime.ripard@free-electrons.com>, linux-mmc@vger.kernel.org, linux-sunxi@googlegroups.com, Hans de Goede <hdegoede@redhat.com>
+Cc: Maxime Ripard <maxime.ripard@free-electrons.com>, linux-mmc@vger.kernel.org, linux-sunxi@googlegroups.com, Hans de Goede <hdegoede@redhat.com>, Eugene K <sigintmailru@gmail.com>, Arend van Spriel <arend@broadcom.com>
 
-Add a helper function to check if an opcode is a sd-io-rw-* opcode.
+Some sdio wifi modules have not been working reliable with the sunxi-mmc
+host code. This turns out to be caused by starting new io-rw commands while
+the card signals that it is still busy processing a previous command.
 
+This commit adds card-busy detection to the sunxi-mmc driver which together
+with recent core changes to check card-busy before starting io-rw commands
+fixes the wifi reliability issues on the Cubietruck and other sunxi boards
+using sdio wifi.
+
+Reported-by: Eugene K <sigintmailru@gmail.com>
+Suggested-by: Eugene K <sigintmailru@gmail.com>
+Cc: Eugene K <sigintmailru@gmail.com>
+Cc: Arend van Spriel <arend@broadcom.com>
 Signed-off-by: Hans de Goede <hdegoede@redhat.com>
 ---
- drivers/mmc/core/sdio_ops.h | 7 +++++++
- 1 file changed, 7 insertions(+)
+Changes in v2:
+-Properly accredit Eugene K for coming up with the fix for this
+Changes in v3:
+-Add card-busy detection and let the core decide when to actually use
+ card-busy the added detection
+---
+ drivers/mmc/host/sunxi-mmc.c | 8 ++++++++
+ 1 file changed, 8 insertions(+)
 
-diff --git a/drivers/mmc/core/sdio_ops.h b/drivers/mmc/core/sdio_ops.h
-index 12a4d3a..5660c7f 100644
---- a/drivers/mmc/core/sdio_ops.h
-+++ b/drivers/mmc/core/sdio_ops.h
-@@ -12,6 +12,8 @@
- #ifndef _MMC_SDIO_OPS_H
- #define _MMC_SDIO_OPS_H
+diff --git a/drivers/mmc/host/sunxi-mmc.c b/drivers/mmc/host/sunxi-mmc.c
+index a7b7a67..e6226cd 100644
+--- a/drivers/mmc/host/sunxi-mmc.c
++++ b/drivers/mmc/host/sunxi-mmc.c
+@@ -868,6 +868,13 @@ static void sunxi_mmc_request(struct mmc_host *mmc, struct mmc_request *mrq)
+ 	spin_unlock_irqrestore(&host->lock, iflags);
+ }
  
-+#include <linux/mmc/sdio.h>
-+
- int mmc_send_io_op_cond(struct mmc_host *host, u32 ocr, u32 *rocr);
- int mmc_io_rw_direct(struct mmc_card *card, int write, unsigned fn,
- 	unsigned addr, u8 in, u8* out);
-@@ -19,5 +21,10 @@ int mmc_io_rw_extended(struct mmc_card *card, int write, unsigned fn,
- 	unsigned addr, int incr_addr, u8 *buf, unsigned blocks, unsigned blksz);
- int sdio_reset(struct mmc_host *host);
- 
-+static inline bool mmc_is_io_op(u32 opcode)
++static int sunxi_mmc_card_busy(struct mmc_host *mmc)
 +{
-+	return opcode == SD_IO_RW_DIRECT || opcode == SD_IO_RW_EXTENDED;
++	struct sunxi_mmc_host *host = mmc_priv(mmc);
++
++	return !!(mmc_readl(host, REG_STAS) & SDXC_CARD_DATA_BUSY);
 +}
 +
- #endif
+ static const struct of_device_id sunxi_mmc_of_match[] = {
+ 	{ .compatible = "allwinner,sun4i-a10-mmc", },
+ 	{ .compatible = "allwinner,sun5i-a13-mmc", },
+@@ -882,6 +889,7 @@ static struct mmc_host_ops sunxi_mmc_ops = {
+ 	.get_cd		 = mmc_gpio_get_cd,
+ 	.enable_sdio_irq = sunxi_mmc_enable_sdio_irq,
+ 	.hw_reset	 = sunxi_mmc_hw_reset,
++	.card_busy	 = sunxi_mmc_card_busy,
+ };
  
+ static int sunxi_mmc_resource_request(struct sunxi_mmc_host *host,
 -- 
 2.4.3
 
