@@ -1,50 +1,38 @@
-From: Jon Hunter <jonathanh@nvidia.com>
-Subject: Re: [PATCH V3] mmc: block: Add new ioctl to send multi commands
-Date: Fri, 18 Sep 2015 11:24:05 +0100
-Message-ID: <55FBE645.8030001@nvidia.com>
-References: <1442242844-6859-1-git-send-email-jonathanh@nvidia.com>
- <CAPDyKFqg5Ld+9LE5wHTZWy2M6gJSYqJVqBZ5vFjVkjyTRW_q+g@mail.gmail.com>
- <55F99261.60003@nvidia.com>
- <CAPDyKFpPkDYj6-3x0pdKOCZrhr+f4CduX+p9DO=GHuUO9kZBag@mail.gmail.com>
+From: Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: [PATCH RFC 0/3] mmc: Wait for card_busy before starting
+ sdio requests
+Date: Sun, 20 Sep 2015 15:45:55 -0400
+Message-ID: <1442778358-7491-1-git-send-email-hdegoede@redhat.com>
+Reply-To: hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from hqemgate16.nvidia.com ([216.228.121.65]:19038 "EHLO
-	hqemgate16.nvidia.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752450AbbIRKYV (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 18 Sep 2015 06:24:21 -0400
-In-Reply-To: <CAPDyKFpPkDYj6-3x0pdKOCZrhr+f4CduX+p9DO=GHuUO9kZBag@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-sunxi+bncBDRZXY4CYYORBAE27SXQKGQENKIKXYY-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Post: <http://groups.google.com/group/linux-sunxi/post>, <mailto:linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Help: <http://groups.google.com/support/>, <mailto:linux-sunxi+help-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Archive: <http://groups.google.com/group/linux-sunxi
+Sender: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
+List-Subscribe: <http://groups.google.com/group/linux-sunxi/subscribe>, <mailto:linux-sunxi+subscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Unsubscribe: <mailto:googlegroups-manage+1076902468213+unsubscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>,
+ <http://groups.google.com/group/linux-sunxi/subscribe>
+To: Chris Ball <chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Seshagiri Holi <sholi@nvidia.com>, Arnd Bergmann <arnd@arndb.de>, Grant Grundler <grundler@google.com>, Olof Johansson <olofj@chromium.org>
 
+Hi Ulf,
 
-On 17/09/15 07:59, Ulf Hansson wrote:
-> [...]
-> 
->>>> +       /*
->>>> +        * The caller must have CAP_SYS_RAWIO, and must be calling this on the
->>>> +        * whole block device, not on a partition.  This prevents overspray
->>>> +        * between sibling partitions.
->>>> +        */
->>>> +       if ((!capable(CAP_SYS_RAWIO)) || (bdev != bdev->bd_contains))
->>>> +               return -EPERM;
->>>
->>> This check is common for multi and non-multi. Please move it to the
->>> mmc_blk_ioctl() to avoid some code duplication.
->>
->> Yes that's true. I can move but it means also passing bdev to
->> __mmc_blk_ioctl_cmd() as another argument. It is not a big deal, but it
->> was more convenient to test here. If your preference is to consolidate
->> the tests to one place then I will move this test.
-> 
-> I was suggesting to move it to mmc_blk_ioctl() and not to
-> __mmc_blk_ioctl_cmd(). That shouldn't cause any changes to any
-> function-definitions, right!?
+As discussed before here is a series to make the mmc core check the
+card_busy op before submitting sdio-rw commands to the host driver.
 
-Sorry, completely mis-read. Yes that makes sense, will update.
+Not sure if this is what you've in mind, but it is a start :)
 
-Cheers
-Jon
+This series is RFC because currently I'm travelling, and I do not
+have any sunxi hardware with the sdio wifi which needs this with
+me, so I have not been able to test that this set actually fixes
+things. Given previous tests it is likely that it will though.
+
+A review would be appreciated then I can address any remarks
+you've before sending a non RFC version.
+
+Regards,
+
+Hans
