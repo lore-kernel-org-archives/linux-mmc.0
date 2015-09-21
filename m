@@ -1,69 +1,57 @@
-From: Hans de Goede <hdegoede@redhat.com>
-Subject: [PATCH RFC 3/3] mmc: sunxi: Add card busy detection
-Date: Sun, 20 Sep 2015 15:45:58 -0400
-Message-ID: <1442778358-7491-4-git-send-email-hdegoede@redhat.com>
-References: <1442778358-7491-1-git-send-email-hdegoede@redhat.com>
+From: "Fu, Zhonghui" <zhonghui.fu@linux.intel.com>
+Subject: [PATCH v2] MMC/SDIO: enable SDIO device to suspend/resume asynchronously
+Date: Mon, 21 Sep 2015 12:30:41 +0800
+Message-ID: <55FF87F1.1000209@linux.intel.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:44728 "EHLO mx1.redhat.com"
+Received: from mga03.intel.com ([134.134.136.65]:26461 "EHLO mga03.intel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1755096AbbITTqT (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Sun, 20 Sep 2015 15:46:19 -0400
-In-Reply-To: <1442778358-7491-1-git-send-email-hdegoede@redhat.com>
+	id S1751401AbbIUEar (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 21 Sep 2015 00:30:47 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Maxime Ripard <maxime.ripard@free-electrons.com>, linux-mmc@vger.kernel.org, linux-sunxi@googlegroups.com, Hans de Goede <hdegoede@redhat.com>, Eugene K <sigintmailru@gmail.com>, Arend van Spriel <arend@broadcom.com>
+To: Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, neilb@suse.de, Jaehoon Chung <jh80.chung@samsung.com>, afenkart@gmail.com, joe@perches.com
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 
-Some sdio wifi modules have not been working reliable with the sunxi-mmc
-host code. This turns out to be caused by starting new io-rw commands while
-the card signals that it is still busy processing a previous command.
+Now, PM core supports asynchronous suspend/resume mode for devices
+during system suspend/resume, and the power state transition of one
+device may be completed in separate kernel thread. PM core ensures
+all power state transition timing dependency between devices. This
+patch enables SDIO card and function devices to suspend/resume
+asynchronously. This will take advantage of multicore and improve
+system suspend/resume speed.
 
-This commit adds card-busy detection to the sunxi-mmc driver which together
-with recent core changes to check card-busy before starting io-rw commands
-fixes the wifi reliability issues on the Cubietruck and other sunxi boards
-using sdio wifi.
-
-Reported-by: Eugene K <sigintmailru@gmail.com>
-Suggested-by: Eugene K <sigintmailru@gmail.com>
-Cc: Eugene K <sigintmailru@gmail.com>
-Cc: Arend van Spriel <arend@broadcom.com>
-Signed-off-by: Hans de Goede <hdegoede@redhat.com>
+Signed-off-by: Zhonghui Fu <zhonghui.fu@linux.intel.com>
 ---
 Changes in v2:
--Properly accredit Eugene K for coming up with the fix for this
-Changes in v3:
--Add card-busy detection and let the core decide when to actually use
- card-busy the added detection
----
- drivers/mmc/host/sunxi-mmc.c | 8 ++++++++
- 1 file changed, 8 insertions(+)
+- Amend commit message.
 
-diff --git a/drivers/mmc/host/sunxi-mmc.c b/drivers/mmc/host/sunxi-mmc.c
-index a7b7a67..e6226cd 100644
---- a/drivers/mmc/host/sunxi-mmc.c
-+++ b/drivers/mmc/host/sunxi-mmc.c
-@@ -868,6 +868,13 @@ static void sunxi_mmc_request(struct mmc_host *mmc, struct mmc_request *mrq)
- 	spin_unlock_irqrestore(&host->lock, iflags);
- }
+ drivers/mmc/core/sdio.c |    4 ++++
+ 1 files changed, 4 insertions(+), 0 deletions(-)
+
+diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
+index b91abed..6719b77 100644
+--- a/drivers/mmc/core/sdio.c
++++ b/drivers/mmc/core/sdio.c
+@@ -1106,6 +1106,8 @@ int mmc_attach_sdio(struct mmc_host *host)
+ 		pm_runtime_enable(&card->dev);
+ 	}
  
-+static int sunxi_mmc_card_busy(struct mmc_host *mmc)
-+{
-+	struct sunxi_mmc_host *host = mmc_priv(mmc);
++	device_enable_async_suspend(&card->dev);
 +
-+	return !!(mmc_readl(host, REG_STAS) & SDXC_CARD_DATA_BUSY);
-+}
+ 	/*
+ 	 * The number of functions on the card is encoded inside
+ 	 * the ocr.
+@@ -1126,6 +1128,8 @@ int mmc_attach_sdio(struct mmc_host *host)
+ 		 */
+ 		if (host->caps & MMC_CAP_POWER_OFF_CARD)
+ 			pm_runtime_enable(&card->sdio_func[i]->dev);
 +
- static const struct of_device_id sunxi_mmc_of_match[] = {
- 	{ .compatible = "allwinner,sun4i-a10-mmc", },
- 	{ .compatible = "allwinner,sun5i-a13-mmc", },
-@@ -882,6 +889,7 @@ static struct mmc_host_ops sunxi_mmc_ops = {
- 	.get_cd		 = mmc_gpio_get_cd,
- 	.enable_sdio_irq = sunxi_mmc_enable_sdio_irq,
- 	.hw_reset	 = sunxi_mmc_hw_reset,
-+	.card_busy	 = sunxi_mmc_card_busy,
- };
++		device_enable_async_suspend(&card->sdio_func[i]->dev);
+ 	}
  
- static int sunxi_mmc_resource_request(struct sunxi_mmc_host *host,
--- 
-2.4.3
+ 	/*
+-- 1.7.1
 
