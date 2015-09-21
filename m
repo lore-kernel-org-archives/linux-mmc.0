@@ -1,58 +1,91 @@
-From: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
-Subject: Re: [PATCH v2] mmc/sdhci-acpi: enable sdhci-acpi device to
- suspend/resume asynchronously
-Date: Mon, 21 Sep 2015 12:32:09 +0300
-Message-ID: <1442827929.8361.119.camel@linux.intel.com>
-References: <55FFA8DD.5020109@linux.intel.com>
+From: Jon Hunter <jonathanh@nvidia.com>
+Subject: Re: [PATCH V3] mmc: block: Add new ioctl to send multi commands
+Date: Mon, 21 Sep 2015 10:56:55 +0100
+Message-ID: <55FFD467.9020801@nvidia.com>
+References: <1442242844-6859-1-git-send-email-jonathanh@nvidia.com>
+ <CAMHSBOUKYLfrYe+xBYY=ZVsqdXStPdmsJQRBTYsf4Pk=jNMrBg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <55FFA8DD.5020109@linux.intel.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: "Fu, Zhonghui" <zhonghui.fu@linux.intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, yunpeng.gao@intel.com, peter.griffin@linaro.org
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from hqemgate16.nvidia.com ([216.228.121.65]:19924 "EHLO
+	hqemgate16.nvidia.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753352AbbIUJ5C (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 21 Sep 2015 05:57:02 -0400
+In-Reply-To: <CAMHSBOUKYLfrYe+xBYY=ZVsqdXStPdmsJQRBTYsf4Pk=jNMrBg@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-
-On Mon, 2015-09-21 at 14:51 +0800, Fu, Zhonghui wrote:
-> Now, PM core supports asynchronous suspend/resume mode for devices
-> during system suspend/resume, and the power state transition of one
-> device may be completed in separate kernel thread. PM core ensures
-> all power state transition timing dependency between devices. This
-> patch enables sdhci-acpi device to suspend/resume asynchronously.
-> This will take advantage of multicore and improve system
-> suspend/resume speed.
-> 
-
-It would be nice I think to put here statistics you collected as well.
+To: Gwendal Grignou <gwendal@chromium.org>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux Kernel <linux-kernel@vger.kernel.org>, Seshagiri Holi <sholi@nvidia.com>, Arnd Bergmann <arnd@arndb.de>, Grant Grundler <grundler@google.com>, Olof Johansson <olofj@chromium.org>
 
 
-> Signed-off-by: Zhonghui Fu <zhonghui.fu@linux.intel.com>
-> ---
-> Changes in v2:
-> - Amend commit message.
-> 
->  drivers/mmc/host/sdhci-acpi.c |    2 ++
->  1 files changed, 2 insertions(+), 0 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/sdhci-acpi.c b/drivers/mmc/host/sdhci
-> -acpi.c
-> index 22d929f..67e6263 100644
-> --- a/drivers/mmc/host/sdhci-acpi.c
-> +++ b/drivers/mmc/host/sdhci-acpi.c
-> @@ -379,6 +379,8 @@ static int sdhci_acpi_probe(struct 
-> platform_device *pdev)
->  		pm_runtime_enable(dev);
->  	}
->  
-> +	device_enable_async_suspend(dev);
-> +
->  	return 0;
->  
->  err_free:
-> -- 1.7.1
-> 
+On 16/09/15 18:54, Gwendal Grignou wrote:
 
--- 
-Andy Shevchenko <andriy.shevchenko@linux.intel.com>
-Intel Finland Oy
+[snip]
+
+>> +static int mmc_blk_ioctl_multi_cmd(struct block_device *bdev,
+>> +                                  struct mmc_ioc_multi_cmd __user *user)
+>> +{
+>> +       struct mmc_blk_ioc_data **idata = NULL;
+>> +       struct mmc_ioc_cmd __user *cmds = user->cmds;
+>> +       struct mmc_card *card;
+>> +       struct mmc_blk_data *md;
+>> +       int i, err = -EFAULT;
+>> +       __u64 num_of_cmds;
+>> +
+>> +       /*
+>> +        * The caller must have CAP_SYS_RAWIO, and must be calling this on the
+>> +        * whole block device, not on a partition.  This prevents overspray
+>> +        * between sibling partitions.
+>> +        */
+>> +       if ((!capable(CAP_SYS_RAWIO)) || (bdev != bdev->bd_contains))
+>> +               return -EPERM;
+>> +
+>> +       if (copy_from_user(&num_of_cmds, &user->num_of_cmds,
+>> +                          sizeof(num_of_cmds)))
+>> +               return -EFAULT;
+>> +
+>> +       if (num_of_cmds > MMC_IOC_MAX_CMDS)
+>> +               return -EINVAL;
+>> +
+>> +       idata = kcalloc(num_of_cmds, sizeof(*idata), GFP_KERNEL);
+>> +       if (!idata)
+>> +               return -ENOMEM;
+>> +
+>> +       for (i = 0; i < num_of_cmds; i++) {
+>> +               idata[i] = mmc_blk_ioctl_copy_from_user(&cmds[i]);
+>> +               if (IS_ERR(idata[i])) {
+>> +                       err = PTR_ERR(idata[i]);
+>> +                       num_of_cmds = i;
+>> +                       goto cmd_err;
+>> +               }
+>> +       }
+>> +
+>> +       md = mmc_blk_get(bdev->bd_disk);
+>> +       if (!md)
+>> +               goto cmd_err;
+>> +
+>> +       card = md->queue.card;
+>> +       if (IS_ERR(card)) {
+>> +               err = PTR_ERR(card);
+>> +               goto cmd_done;
+>> +       }
+>> +
+>> +       mmc_get_card(card);
+>> +
+>> +       for (i = 0; i < num_of_cmds; i++) {
+>> +               err = __mmc_blk_ioctl_cmd(card, md, idata[i]);
+>> +               if (err) {
+>> +                       mmc_put_card(card);
+>> +                       goto cmd_done;
+> Instead of exiting here, you should first copy to the user the data
+> and response of successful commands, mark the failed command as failed
+> and the remaining ones as "not executed".
+> This way, it will be easier for the user space application to find out
+> where the sequence failed. This especially true if some reverts are
+> needed.
+
+Yes that sounds like a sensible thing to do. I will incorporate that change.
+
+Cheers
+Jon
