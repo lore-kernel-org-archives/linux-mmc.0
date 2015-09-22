@@ -1,54 +1,49 @@
 From: Hans de Goede <hdegoede@redhat.com>
-Subject: [PATCH 2/3] mmc: Wait for card_busy before starting sdio requests
-Date: Tue, 22 Sep 2015 17:30:25 +0200
-Message-ID: <1442935826-16758-3-git-send-email-hdegoede@redhat.com>
+Subject: [PATCH 1/3] mmc: Add mmc_is_io_op helper function
+Date: Tue, 22 Sep 2015 17:30:24 +0200
+Message-ID: <1442935826-16758-2-git-send-email-hdegoede@redhat.com>
 References: <1442935826-16758-1-git-send-email-hdegoede@redhat.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:39428 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:60790 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752339AbbIVPad (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 22 Sep 2015 11:30:33 -0400
+	id S1752339AbbIVPab (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 22 Sep 2015 11:30:31 -0400
 In-Reply-To: <1442935826-16758-1-git-send-email-hdegoede@redhat.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>
 Cc: Arend van Spriel <arend@broadcom.com>, Maxime Ripard <maxime.ripard@free-electrons.com>, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Hans de Goede <hdegoede@redhat.com>
 
-Some sdio wifi chips will not work properly if we try to start new
-sdio-rw requests while the device is signalling that it is busy.
+Add a helper function to check if an opcode is a sd-io-rw-* opcode.
 
 Signed-off-by: Hans de Goede <hdegoede@redhat.com>
 ---
- drivers/mmc/core/core.c | 17 +++++++++++++++++
- 1 file changed, 17 insertions(+)
+ drivers/mmc/core/sdio_ops.h | 7 +++++++
+ 1 file changed, 7 insertions(+)
 
-diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index 0520064..ced66b8 100644
---- a/drivers/mmc/core/core.c
-+++ b/drivers/mmc/core/core.c
-@@ -204,6 +204,23 @@ static void __mmc_start_request(struct mmc_host *host, struct mmc_request *mrq)
- 		return;
- 	}
+diff --git a/drivers/mmc/core/sdio_ops.h b/drivers/mmc/core/sdio_ops.h
+index 12a4d3a..5660c7f 100644
+--- a/drivers/mmc/core/sdio_ops.h
++++ b/drivers/mmc/core/sdio_ops.h
+@@ -12,6 +12,8 @@
+ #ifndef _MMC_SDIO_OPS_H
+ #define _MMC_SDIO_OPS_H
  
-+	/*
-+	 * For sdio rw commands we must wait for card busy otherwise some
-+	 * sdio devices won't work properly.
-+	 */
-+	if (mmc_is_io_op(mrq->cmd->opcode) && host->ops->card_busy) {
-+		int tries = 500; /* Wait aprox 500ms at maximum */
++#include <linux/mmc/sdio.h>
 +
-+		while (host->ops->card_busy(host) && --tries)
-+			mmc_delay(1);
+ int mmc_send_io_op_cond(struct mmc_host *host, u32 ocr, u32 *rocr);
+ int mmc_io_rw_direct(struct mmc_card *card, int write, unsigned fn,
+ 	unsigned addr, u8 in, u8* out);
+@@ -19,5 +21,10 @@ int mmc_io_rw_extended(struct mmc_card *card, int write, unsigned fn,
+ 	unsigned addr, int incr_addr, u8 *buf, unsigned blocks, unsigned blksz);
+ int sdio_reset(struct mmc_host *host);
+ 
++static inline bool mmc_is_io_op(u32 opcode)
++{
++	return opcode == SD_IO_RW_DIRECT || opcode == SD_IO_RW_EXTENDED;
++}
 +
-+		if (tries == 0) {
-+			mrq->cmd->error = -EBUSY;
-+			mmc_request_done(host, mrq);
-+			return;
-+		}
-+	}
-+
- 	host->ops->request(host, mrq);
- }
+ #endif
  
 -- 
 2.4.3
