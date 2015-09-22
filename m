@@ -1,59 +1,70 @@
 From: Shawn Lin <shawn.lin@rock-chips.com>
-Subject: [PATCH 3/3] mmc: debugfs: implement ios show for driver type
-Date: Tue, 22 Sep 2015 09:20:08 +0800
-Message-ID: <1442884808-11652-1-git-send-email-shawn.lin@rock-chips.com>
+Subject: Re: [PATCH 1/3] mmc: debugfs: fix memory leak for mmc_ext_csd_open
+Date: Tue, 22 Sep 2015 09:37:01 +0800
+Message-ID: <5600B0BD.704@rock-chips.com>
 References: <1442884713-11193-1-git-send-email-shawn.lin@rock-chips.com>
+ <CAK7Sx+gO2=jhQ-DpNqm4o+JUqKv+38a1C9CtZ4sZrUQ5XGJqHQ@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from lucky1.263xmail.com ([211.157.147.130]:39245 "EHLO
+Received: from lucky1.263xmail.com ([211.157.147.132]:52689 "EHLO
 	lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757537AbbIVBcV (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 21 Sep 2015 21:32:21 -0400
-In-Reply-To: <1442884713-11193-1-git-send-email-shawn.lin@rock-chips.com>
+	with ESMTP id S1757437AbbIVBhN (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 21 Sep 2015 21:37:13 -0400
+In-Reply-To: <CAK7Sx+gO2=jhQ-DpNqm4o+JUqKv+38a1C9CtZ4sZrUQ5XGJqHQ@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Shawn Lin <shawn.lin@rock-chips.com>
+To: trick wong <trickwong@gmail.com>
+Cc: shawn.lin@rock-chips.com, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 
-This patch add ios->drv_type for mmc_ios_show to show the
-card's driver type.
+On 2015/9/22 9:29, trick wong wrote:
+> In the correct path,this buf will used later.why freed?
+>
 
-Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
----
+right.
+sorry for this noise, withdraw this patch[1/3].
 
- drivers/mmc/core/debugfs.c | 19 +++++++++++++++++++
- 1 file changed, 19 insertions(+)
+> 2015-09-22 9:18 GMT+08:00 Shawn Lin <shawn.lin@rock-chips.com
+> <mailto:shawn.lin@rock-chips.com>>:
+>
+>     buf allocated isn't been freed before return, so we fix it.
+>
+>     Fixes: 736bb6bb01a ("mmc: Add Extended CSD register to debugfs")
+>     Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com
+>     <mailto:shawn.lin@rock-chips.com>>
+>     ---
+>
+>       drivers/mmc/core/debugfs.c | 1 +
+>       1 file changed, 1 insertion(+)
+>
+>     diff --git a/drivers/mmc/core/debugfs.c b/drivers/mmc/core/debugfs.c
+>     index e914210..b2ab936 100644
+>     --- a/drivers/mmc/core/debugfs.c
+>     +++ b/drivers/mmc/core/debugfs.c
+>     @@ -304,6 +304,7 @@ static int mmc_ext_csd_open(struct inode *inode,
+>     struct file *filp)
+>
+>              filp->private_data = buf;
+>              kfree(ext_csd);
+>     +       kfree(buf);
+>              return 0;
+>
+>       out_free:
+>     --
+>     2.3.7
+>
+>
+>     --
+>     To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+>     the body of a message to majordomo@vger.kernel.org
+>     <mailto:majordomo@vger.kernel.org>
+>     More majordomo info at http://vger.kernel.org/majordomo-info.html
+>
+>
 
-diff --git a/drivers/mmc/core/debugfs.c b/drivers/mmc/core/debugfs.c
-index 31155e8..5243e5f 100644
---- a/drivers/mmc/core/debugfs.c
-+++ b/drivers/mmc/core/debugfs.c
-@@ -172,6 +172,25 @@ static int mmc_ios_show(struct seq_file *s, void *data)
- 	}
- 	seq_printf(s, "signal voltage:\t%u (%s)\n", ios->chip_select, str);
- 
-+	switch (ios->drv_type) {
-+	case MMC_SET_DRIVER_TYPE_A:
-+		str = "driver type A";
-+		break;
-+	case MMC_SET_DRIVER_TYPE_B:
-+		str = "driver type B";
-+		break;
-+	case MMC_SET_DRIVER_TYPE_C:
-+		str = "driver type C";
-+		break;
-+	case MMC_SET_DRIVER_TYPE_D:
-+		str = "driver type D";
-+		break;
-+	default:
-+		str = "invalid";
-+		break;
-+	}
-+	seq_printf(s, "driver type:\t%u (%s)\n", ios->drv_type, str);
-+
- 	return 0;
- }
- 
+
 -- 
-2.3.7
-
+Best Regards
+Shawn Lin
 
