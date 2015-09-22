@@ -1,69 +1,62 @@
-From: Hans de Goede <hdegoede@redhat.com>
-Subject: [PATCH 3/3] mmc: sunxi: Add card busy detection
-Date: Tue, 22 Sep 2015 17:30:26 +0200
-Message-ID: <1442935826-16758-4-git-send-email-hdegoede@redhat.com>
-References: <1442935826-16758-1-git-send-email-hdegoede@redhat.com>
+From: Scott Wood <scottwood@freescale.com>
+Subject: Re: [v2, 2/3] mmc: sdhci-of-esdhc: get SOC version and revision
+ from GUTS_SVR
+Date: Tue, 22 Sep 2015 10:35:01 -0500
+Message-ID: <1442936101.19102.240.camel@freescale.com>
+References: <1440667742-25424-1-git-send-email-yangbo.lu@freescale.com>
+	 <1441153422.4966.105.camel@freescale.com>
+	 <BY1PR0301MB119212B35DBACE0D88F274D6F2450@BY1PR0301MB1192.namprd03.prod.outlook.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:46380 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752339AbbIVPag (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 22 Sep 2015 11:30:36 -0400
-In-Reply-To: <1442935826-16758-1-git-send-email-hdegoede@redhat.com>
+Received: from mail-bl2on0111.outbound.protection.outlook.com ([65.55.169.111]:46387
+	"EHLO na01-bl2-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1758012AbbIVPt5 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 22 Sep 2015 11:49:57 -0400
+In-Reply-To: <BY1PR0301MB119212B35DBACE0D88F274D6F2450@BY1PR0301MB1192.namprd03.prod.outlook.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Arend van Spriel <arend@broadcom.com>, Maxime Ripard <maxime.ripard@free-electrons.com>, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Hans de Goede <hdegoede@redhat.com>, Eugene K <sigintmailru@gmail.com>
+To: Lu Yangbo-B47093 <yangbo.lu@freescale.com>
+Cc: "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-Some sdio wifi modules have not been working reliable with the sunxi-mmc
-host code. This turns out to be caused by starting new io-rw commands while
-the card signals that it is still busy processing a previous command.
+On Tue, 2015-09-22 at 03:56 -0500, Lu Yangbo-B47093 wrote:
+> > -----Original Message-----
+> > From: Wood Scott-B07421
+> > Sent: Wednesday, September 02, 2015 8:24 AM
+> > To: Lu Yangbo-B47093
+> > Cc: linux-mmc@vger.kernel.org; ulf.hansson@linaro.org
+> > Subject: Re: [v2, 2/3] mmc: sdhci-of-esdhc: get SOC version and revision
+> > from GUTS_SVR
+> > 
+> > On Thu, 2015-08-27 at 17:29 +0800, Yangbo Lu wrote:
+> > > @@ -24,6 +25,16 @@
+> > > 
+> > >  #define VENDOR_V_22  0x12
+> > >  #define VENDOR_V_23  0x13
+> > > +
+> > > +/* Global Utility Registers */
+> > > +#define GUTS_SVR             0xa4    /* System Version Register */
+> > > +/* SOC version definition */
+> > > +#define SVR_T4240            0x824000
+> > 
+> > Please do not redefine this stuff in each driver that needs to reference
+> > it.
+> > 
+> > -Scott
+> 
+> [Lu Yangbo-B47093] SOC version definition like SVR_T4240 is in 
+> arch/powerpc/include/asm/mpc85xx.h
+> It's only for PPC and Uffe thought it's not good to introduce non generic 
+> header file.
+> Is there any suggestion about this? 
 
-This commit adds card-busy detection to the sunxi-mmc driver which together
-with recent core changes to check card-busy before starting io-rw commands
-fixes the wifi reliability issues on the Cubietruck and other sunxi boards
-using sdio wifi.
+Either use ifdefs or move it to include/linux/fsl-svr.h.
 
-Reported-by: Eugene K <sigintmailru@gmail.com>
-Suggested-by: Eugene K <sigintmailru@gmail.com>
-Cc: Eugene K <sigintmailru@gmail.com>
-Cc: Arend van Spriel <arend@broadcom.com>
-Signed-off-by: Hans de Goede <hdegoede@redhat.com>
----
-Changes in v2:
--Properly accredit Eugene K for coming up with the fix for this
-Changes in v3:
--Add card-busy detection and let the core decide when to actually use
- card-busy the added detection
----
- drivers/mmc/host/sunxi-mmc.c | 8 ++++++++
- 1 file changed, 8 insertions(+)
+It's not only for PPC.  Our ARM QorIQ chips also have SVR (accessible only 
+through MMIO).
 
-diff --git a/drivers/mmc/host/sunxi-mmc.c b/drivers/mmc/host/sunxi-mmc.c
-index a7b7a67..e6226cd 100644
---- a/drivers/mmc/host/sunxi-mmc.c
-+++ b/drivers/mmc/host/sunxi-mmc.c
-@@ -868,6 +868,13 @@ static void sunxi_mmc_request(struct mmc_host *mmc, struct mmc_request *mrq)
- 	spin_unlock_irqrestore(&host->lock, iflags);
- }
- 
-+static int sunxi_mmc_card_busy(struct mmc_host *mmc)
-+{
-+	struct sunxi_mmc_host *host = mmc_priv(mmc);
-+
-+	return !!(mmc_readl(host, REG_STAS) & SDXC_CARD_DATA_BUSY);
-+}
-+
- static const struct of_device_id sunxi_mmc_of_match[] = {
- 	{ .compatible = "allwinner,sun4i-a10-mmc", },
- 	{ .compatible = "allwinner,sun5i-a13-mmc", },
-@@ -882,6 +889,7 @@ static struct mmc_host_ops sunxi_mmc_ops = {
- 	.get_cd		 = mmc_gpio_get_cd,
- 	.enable_sdio_irq = sunxi_mmc_enable_sdio_irq,
- 	.hw_reset	 = sunxi_mmc_hw_reset,
-+	.card_busy	 = sunxi_mmc_card_busy,
- };
- 
- static int sunxi_mmc_resource_request(struct sunxi_mmc_host *host,
--- 
-2.4.3
+-Scott
+
 
