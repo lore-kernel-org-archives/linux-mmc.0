@@ -1,41 +1,47 @@
-From: Shawn Lin <shawn.lin@rock-chips.com>
-Subject: [PATCH 2/3] mmc: debugfs: implement ios show for SDR12 and SDR25
-Date: Tue, 22 Sep 2015 09:19:55 +0800
-Message-ID: <1442884795-11493-1-git-send-email-shawn.lin@rock-chips.com>
-References: <1442884713-11193-1-git-send-email-shawn.lin@rock-chips.com>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1442884713-11193-1-git-send-email-shawn.lin@rock-chips.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Shawn Lin <shawn.lin@rock-chips.com>
+From: Chaotian Jing <chaotian.jing@mediatek.com>
+Subject: [PATCH] mmc: mediatek: Add MMC_CAP_RUNTIME_RESUME support
+Date: Tue, 22 Sep 2015 14:00:44 +0800
+Message-ID: <1442901644-7587-1-git-send-email-chaotian.jing@mediatek.com>
+Mime-Version: 1.0
+Content-Type: text/plain
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mailgw02.mediatek.com ([210.61.82.184]:38484 "EHLO
+	mailgw02.mediatek.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1753196AbbIVGBL (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 22 Sep 2015 02:01:11 -0400
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Matthias Brugger <matthias.bgg@gmail.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mediatek@lists.infradead.org, linux-kernel@vger.kernel.org, Daniel Kurtz <djkurtz@chromium.org>, srv_heupstream@mediatek.com, Chaotian Jing <chaotian.jing@mediatek.com>
 
-This patch add MMC_TIMING_UHS_SDR12 and MMC_TIMING_UHS_SDR25
-for mmc_ios_show to show the ios->timing if mmc card runs under
-these two mode.
+Add MMC_CAP_RUNTIME_RESUME support to save resume time
+Drop unnecessary SDC_ARG write
 
-Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
+Signed-off-by: Chaotian Jing <chaotian.jing@mediatek.com>
 ---
+ drivers/mmc/host/mtk-sd.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
- drivers/mmc/core/debugfs.c | 6 ++++++
- 1 file changed, 6 insertions(+)
-
-diff --git a/drivers/mmc/core/debugfs.c b/drivers/mmc/core/debugfs.c
-index b2ab936..31155e8 100644
---- a/drivers/mmc/core/debugfs.c
-+++ b/drivers/mmc/core/debugfs.c
-@@ -126,6 +126,12 @@ static int mmc_ios_show(struct seq_file *s, void *data)
- 	case MMC_TIMING_SD_HS:
- 		str = "sd high-speed";
- 		break;
-+	case MMC_TIMING_UHS_SDR12:
-+		str = "mmc uhs SDR12";
-+		break;
-+	case MMC_TIMING_UHS_SDR25:
-+		str = "mmc uhs SDR25";
-+		break;
- 	case MMC_TIMING_UHS_SDR50:
- 		str = "sd uhs SDR50";
- 		break;
+diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
+index 7153500..b2e89d3 100644
+--- a/drivers/mmc/host/mtk-sd.c
++++ b/drivers/mmc/host/mtk-sd.c
+@@ -729,7 +729,6 @@ static bool msdc_cmd_done(struct msdc_host *host, int events,
+ 			MSDC_INTEN_RSPCRCERR | MSDC_INTEN_CMDTMO |
+ 			MSDC_INTEN_ACMDRDY | MSDC_INTEN_ACMDCRCERR |
+ 			MSDC_INTEN_ACMDTMO);
+-	writel(cmd->arg, host->base + SDC_ARG);
+ 
+ 	if (cmd->flags & MMC_RSP_PRESENT) {
+ 		if (cmd->flags & MMC_RSP_136) {
+@@ -1302,6 +1301,7 @@ static int msdc_drv_probe(struct platform_device *pdev)
+ 	mmc->f_min = host->src_clk_freq / (4 * 255);
+ 
+ 	mmc->caps |= MMC_CAP_ERASE | MMC_CAP_CMD23;
++	mmc->caps |= MMC_CAP_RUNTIME_RESUME;
+ 	/* MMC core transfer sizes tunable parameters */
+ 	mmc->max_segs = MAX_BD_NUM;
+ 	mmc->max_seg_size = BDMA_DESC_BUFLEN;
 -- 
-2.3.7
+1.8.1.1.dirty
+
