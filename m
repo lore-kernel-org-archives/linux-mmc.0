@@ -1,47 +1,54 @@
-From: Chaotian Jing <chaotian.jing@mediatek.com>
-Subject: [PATCH] mmc: mediatek: Add MMC_CAP_RUNTIME_RESUME support
-Date: Tue, 22 Sep 2015 14:00:44 +0800
-Message-ID: <1442901644-7587-1-git-send-email-chaotian.jing@mediatek.com>
+From: Amitkumar Karwar <akarwar@marvell.com>
+Subject: RE: [PATCH] mmc: new API for data write using scatter gather DMA
+Date: Tue, 22 Sep 2015 07:20:15 +0000
+Message-ID: <45f6a18040ce4439a73272f5aeb5f4c1@SC-EXCH04.marvell.com>
+References: <1417000056-16920-1-git-send-email-patila@marvell.com>
+	<CAPDyKFr-iaPWKWWgk-5_XcJm9sag=y=uZjfJvo-DQiJFM8BVLw@mail.gmail.com>
+	<54761785.2070803@broadcom.com>
+ <CAEhWJFmxxFyh5oF33NiTQn70RhoP_z-vkRBEdVb-XcMfDDnHfg@mail.gmail.com>
+ <e5ce420ddc0f4ceca8cac83f5350ded3@SC-EXCH04.marvell.com>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailgw02.mediatek.com ([210.61.82.184]:38484 "EHLO
-	mailgw02.mediatek.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1753196AbbIVGBL (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 22 Sep 2015 02:01:11 -0400
+Received: from mx0b-0016f401.pphosted.com ([67.231.156.173]:35166 "EHLO
+	mx0b-0016f401.pphosted.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1757527AbbIVHUU (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 22 Sep 2015 03:20:20 -0400
+In-Reply-To: <e5ce420ddc0f4ceca8cac83f5350ded3@SC-EXCH04.marvell.com>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Matthias Brugger <matthias.bgg@gmail.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mediatek@lists.infradead.org, linux-kernel@vger.kernel.org, Daniel Kurtz <djkurtz@chromium.org>, srv_heupstream@mediatek.com, Chaotian Jing <chaotian.jing@mediatek.com>
+To: "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-wireless@vger.kernel.org" <linux-wireless@vger.kernel.org>, Cathy Luo <cluo@marvell.com>, Xinming Hu <huxm@marvell.com>, "bin9zha0@gmail.com" <bin9zha0@gmail.com>
 
-Add MMC_CAP_RUNTIME_RESUME support to save resume time
-Drop unnecessary SDC_ARG write
-
-Signed-off-by: Chaotian Jing <chaotian.jing@mediatek.com>
----
- drivers/mmc/host/mtk-sd.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
-
-diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
-index 7153500..b2e89d3 100644
---- a/drivers/mmc/host/mtk-sd.c
-+++ b/drivers/mmc/host/mtk-sd.c
-@@ -729,7 +729,6 @@ static bool msdc_cmd_done(struct msdc_host *host, int events,
- 			MSDC_INTEN_RSPCRCERR | MSDC_INTEN_CMDTMO |
- 			MSDC_INTEN_ACMDRDY | MSDC_INTEN_ACMDCRCERR |
- 			MSDC_INTEN_ACMDTMO);
--	writel(cmd->arg, host->base + SDC_ARG);
- 
- 	if (cmd->flags & MMC_RSP_PRESENT) {
- 		if (cmd->flags & MMC_RSP_136) {
-@@ -1302,6 +1301,7 @@ static int msdc_drv_probe(struct platform_device *pdev)
- 	mmc->f_min = host->src_clk_freq / (4 * 255);
- 
- 	mmc->caps |= MMC_CAP_ERASE | MMC_CAP_CMD23;
-+	mmc->caps |= MMC_CAP_RUNTIME_RESUME;
- 	/* MMC core transfer sizes tunable parameters */
- 	mmc->max_segs = MAX_BD_NUM;
- 	mmc->max_seg_size = BDMA_DESC_BUFLEN;
--- 
-1.8.1.1.dirty
-
+SGkgVWxmL0FyZW5kLA0KDQo+IA0KPiA+IE9uIFdlZCwgTm92IDI2LCAyMDE0IGF0IDExOjQwIFBN
+LCBBcmVuZCB2YW4gU3ByaWVsIDxhcmVuZEBicm9hZGNvbS5jb20+DQo+ID4gd3JvdGU6DQo+ID4g
+T24gMTEvMjYvMTQgMTQ6NDMsIFVsZiBIYW5zc29uIHdyb3RlOg0KPiA+ID4gT24gMjYgTm92ZW1i
+ZXIgMjAxNCBhdCAxMjowNywgQXZpbmFzaCBQYXRpbDxwYXRpbGFAbWFydmVsbC5jb20+wqAgd3Jv
+dGU6DQo+ID4gPiBGcm9tOiBCaW5nIFpoYW88YnpoYW9AbWFydmVsbC5jb20+DQo+IA0KPiA+ID4g
+VGhpcyBwYXRjaCBhZGRzIG5ldyBBUEkgdG8gaGFuZGxlIHNjYXR0ZXIgZ2F0aGVyIGFnZ3JlZ2F0
+aW9uLg0KPiANCj4gPiBXaHkgaXMgdGhpcyBuZWVkZWQ/DQo+IA0KPiBPbmUgdGhpbmcgSSBjYW4g
+aW1hZ2luZSBpcyB0aGF0IHRoZSByZWNlaXZpbmcgZGV2aWNlIGhhcyBzcGVjaWZpYw0KPiBzY2F0
+dGVyLWdhdGhlciBhbGlnbm1lbnQgcmVxdWlyZW1lbnRzIHRoYXQgYXJlIG5vdCBjb3ZlcmVkIGlu
+DQo+IG1tY19pb19yd19leHRlbmRlZCgpLiBTbyB0aGUgbmV3IEFQSSBkb2VzIG5vdCBzbyBtdWNo
+IGhhbmRsZSBzY2F0dGVyLQ0KPiBnYXRoZXIsIGJ1dCBsZWF2ZXMgdGhhdCB1cCB0byB0aGUgY2Fs
+bGVyLiBRdWVzdGlvbiBpcyB3aGV0aGVyDQo+IG1tY19pb19yd19leHRlbmRlZCgpIGNvdWxkIGJl
+IGNoYW5nZWQgdG8gYWNjb21tb2RhdGUgdGhvc2UgcmVxdWlyZW1lbnRzDQo+IGluc3RlYWQgb2Yg
+ZHVwbGljYXRpbmcgYmlnIHBhcnQgb2YgaXQuIFdpdGhvdXQga25vd2luZyB0aGUgZXhhY3QNCj4g
+cmVxdWlyZW1lbnRzIHRoYXQgaXMgZGlmZmljdWx0IHRvIGFuc3dlci4NCj4gDQo+IFJlZ2FyZHMs
+DQo+IEFyZW5kDQoNCk15IGFwb2xvZ2llcyBmb3Igb3BlbmluZyBkaXNjdXNzaW9uIG9uIHRoaXMg
+dG9waWMgYWZ0ZXIgbG9uZyB0aW1lLg0KDQpFYXJsaWVyIHdlIGhhZCBkcm9wcGVkIHRoaXMgcGF0
+Y2gsIGJlY2F1c2Ugd2UgZGlkbid0IHNlZSBzaWduaWZpY2FudCBwZXJmb3JtYW5jZSBpbXByb3Zl
+bWVudCB3aXRoIGl0LiBOb3cgd2UgaGF2ZSBvcHRpbWl6ZWQgY29kZSBpbiBvdXIgV0xBTiBkcml2
+ZXIgYW5kIGFyZSBwbGFubmluZyB0byBoYXZlIHRoaXMgcGF0Y2guDQoNCkV4aXN0aW5nIG1tY19p
+b19yd19leHRlbmRlZCgpIEFQSSBleHBlY3RzIGNhbGxlciB0byBwYXNzIHNpbmdsZSBjb250aWd1
+b3VzIGJ1ZmZlci4gSXQgd2lsbCBiZSBzcGxpdCBpZiBpdCBleGNlZWRzIHNlZ21lbnQgc2l6ZSwg
+U0cgdGFibGUgaXMgcHJlcGFyZWQgYW5kIHVzZWQgaXQgZm9yIHJlYWRpbmcvd3JpdGluZyB0aGUg
+ZGF0YS4gT3VyIGludGVudGlvbiBmb3IgZGVmaW5pbmcgbmV3IEFQSSBoZXJlIGlzIHRvIGZhY2ls
+aXRhdGUgY2FsbGVyIHRvIHByb3ZpZGUgcmVhZHkgU0cgdGFibGUoc2NhdHRlcmVkIGJ1ZmZlciBs
+aXN0KS4gT24gb25lIG9mIG91ciBwbGF0Zm9ybXMgbWF4aW11bSBzZWdtZW50cyBhcmUgMjU2IHdp
+dGggZWFjaCBzZWdtZW50IG9mIDRrIHNpemUuIFNvIHRoaXMgbmV3IEFQSSB3b3VsZCBiZSByZWFs
+bHkgYmVuZWZpY2lhbCB0aGVyZSBmb3IgcGVyZm9ybWFuY2UgaW1wcm92ZW1lbnQuDQoNCkxldCBt
+ZSBrbm93IHlvdXIgc3VnZ2VzdGlvbnMvdGhvdWdodHMuDQoNClJlZ2FyZHMsDQpBbWl0a3VtYXIN
+Cg==
