@@ -1,54 +1,386 @@
-From: Amitkumar Karwar <akarwar@marvell.com>
-Subject: RE: [PATCH] mmc: new API for data write using scatter gather DMA
-Date: Tue, 22 Sep 2015 07:20:15 +0000
-Message-ID: <45f6a18040ce4439a73272f5aeb5f4c1@SC-EXCH04.marvell.com>
-References: <1417000056-16920-1-git-send-email-patila@marvell.com>
-	<CAPDyKFr-iaPWKWWgk-5_XcJm9sag=y=uZjfJvo-DQiJFM8BVLw@mail.gmail.com>
-	<54761785.2070803@broadcom.com>
- <CAEhWJFmxxFyh5oF33NiTQn70RhoP_z-vkRBEdVb-XcMfDDnHfg@mail.gmail.com>
- <e5ce420ddc0f4ceca8cac83f5350ded3@SC-EXCH04.marvell.com>
+From: Jon Hunter <jonathanh@nvidia.com>
+Subject: [PATCH V4] mmc: block: Add new ioctl to send multi commands
+Date: Tue, 22 Sep 2015 10:27:53 +0100
+Message-ID: <1442914073-11230-1-git-send-email-jonathanh@nvidia.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mx0b-0016f401.pphosted.com ([67.231.156.173]:35166 "EHLO
-	mx0b-0016f401.pphosted.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1757527AbbIVHUU (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 22 Sep 2015 03:20:20 -0400
-In-Reply-To: <e5ce420ddc0f4ceca8cac83f5350ded3@SC-EXCH04.marvell.com>
-Content-Language: en-US
+Received: from hqemgate15.nvidia.com ([216.228.121.64]:10052 "EHLO
+	hqemgate15.nvidia.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752926AbbIVJ2G (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 22 Sep 2015 05:28:06 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-wireless@vger.kernel.org" <linux-wireless@vger.kernel.org>, Cathy Luo <cluo@marvell.com>, Xinming Hu <huxm@marvell.com>, "bin9zha0@gmail.com" <bin9zha0@gmail.com>
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Arnd Bergmann <arnd@arndb.de>, Grant Grundler <grundler@google.com>, Olof Johansson <olofj@chromium.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Jon Hunter <jonathanh@nvidia.com>, Seshagiri Holi <sholi@nvidia.com>
 
-SGkgVWxmL0FyZW5kLA0KDQo+IA0KPiA+IE9uIFdlZCwgTm92IDI2LCAyMDE0IGF0IDExOjQwIFBN
-LCBBcmVuZCB2YW4gU3ByaWVsIDxhcmVuZEBicm9hZGNvbS5jb20+DQo+ID4gd3JvdGU6DQo+ID4g
-T24gMTEvMjYvMTQgMTQ6NDMsIFVsZiBIYW5zc29uIHdyb3RlOg0KPiA+ID4gT24gMjYgTm92ZW1i
-ZXIgMjAxNCBhdCAxMjowNywgQXZpbmFzaCBQYXRpbDxwYXRpbGFAbWFydmVsbC5jb20+wqAgd3Jv
-dGU6DQo+ID4gPiBGcm9tOiBCaW5nIFpoYW88YnpoYW9AbWFydmVsbC5jb20+DQo+IA0KPiA+ID4g
-VGhpcyBwYXRjaCBhZGRzIG5ldyBBUEkgdG8gaGFuZGxlIHNjYXR0ZXIgZ2F0aGVyIGFnZ3JlZ2F0
-aW9uLg0KPiANCj4gPiBXaHkgaXMgdGhpcyBuZWVkZWQ/DQo+IA0KPiBPbmUgdGhpbmcgSSBjYW4g
-aW1hZ2luZSBpcyB0aGF0IHRoZSByZWNlaXZpbmcgZGV2aWNlIGhhcyBzcGVjaWZpYw0KPiBzY2F0
-dGVyLWdhdGhlciBhbGlnbm1lbnQgcmVxdWlyZW1lbnRzIHRoYXQgYXJlIG5vdCBjb3ZlcmVkIGlu
-DQo+IG1tY19pb19yd19leHRlbmRlZCgpLiBTbyB0aGUgbmV3IEFQSSBkb2VzIG5vdCBzbyBtdWNo
-IGhhbmRsZSBzY2F0dGVyLQ0KPiBnYXRoZXIsIGJ1dCBsZWF2ZXMgdGhhdCB1cCB0byB0aGUgY2Fs
-bGVyLiBRdWVzdGlvbiBpcyB3aGV0aGVyDQo+IG1tY19pb19yd19leHRlbmRlZCgpIGNvdWxkIGJl
-IGNoYW5nZWQgdG8gYWNjb21tb2RhdGUgdGhvc2UgcmVxdWlyZW1lbnRzDQo+IGluc3RlYWQgb2Yg
-ZHVwbGljYXRpbmcgYmlnIHBhcnQgb2YgaXQuIFdpdGhvdXQga25vd2luZyB0aGUgZXhhY3QNCj4g
-cmVxdWlyZW1lbnRzIHRoYXQgaXMgZGlmZmljdWx0IHRvIGFuc3dlci4NCj4gDQo+IFJlZ2FyZHMs
-DQo+IEFyZW5kDQoNCk15IGFwb2xvZ2llcyBmb3Igb3BlbmluZyBkaXNjdXNzaW9uIG9uIHRoaXMg
-dG9waWMgYWZ0ZXIgbG9uZyB0aW1lLg0KDQpFYXJsaWVyIHdlIGhhZCBkcm9wcGVkIHRoaXMgcGF0
-Y2gsIGJlY2F1c2Ugd2UgZGlkbid0IHNlZSBzaWduaWZpY2FudCBwZXJmb3JtYW5jZSBpbXByb3Zl
-bWVudCB3aXRoIGl0LiBOb3cgd2UgaGF2ZSBvcHRpbWl6ZWQgY29kZSBpbiBvdXIgV0xBTiBkcml2
-ZXIgYW5kIGFyZSBwbGFubmluZyB0byBoYXZlIHRoaXMgcGF0Y2guDQoNCkV4aXN0aW5nIG1tY19p
-b19yd19leHRlbmRlZCgpIEFQSSBleHBlY3RzIGNhbGxlciB0byBwYXNzIHNpbmdsZSBjb250aWd1
-b3VzIGJ1ZmZlci4gSXQgd2lsbCBiZSBzcGxpdCBpZiBpdCBleGNlZWRzIHNlZ21lbnQgc2l6ZSwg
-U0cgdGFibGUgaXMgcHJlcGFyZWQgYW5kIHVzZWQgaXQgZm9yIHJlYWRpbmcvd3JpdGluZyB0aGUg
-ZGF0YS4gT3VyIGludGVudGlvbiBmb3IgZGVmaW5pbmcgbmV3IEFQSSBoZXJlIGlzIHRvIGZhY2ls
-aXRhdGUgY2FsbGVyIHRvIHByb3ZpZGUgcmVhZHkgU0cgdGFibGUoc2NhdHRlcmVkIGJ1ZmZlciBs
-aXN0KS4gT24gb25lIG9mIG91ciBwbGF0Zm9ybXMgbWF4aW11bSBzZWdtZW50cyBhcmUgMjU2IHdp
-dGggZWFjaCBzZWdtZW50IG9mIDRrIHNpemUuIFNvIHRoaXMgbmV3IEFQSSB3b3VsZCBiZSByZWFs
-bHkgYmVuZWZpY2lhbCB0aGVyZSBmb3IgcGVyZm9ybWFuY2UgaW1wcm92ZW1lbnQuDQoNCkxldCBt
-ZSBrbm93IHlvdXIgc3VnZ2VzdGlvbnMvdGhvdWdodHMuDQoNClJlZ2FyZHMsDQpBbWl0a3VtYXIN
-Cg==
+Certain eMMC devices allow vendor specific device information to be read
+via a sequence of vendor commands. These vendor commands must be issued
+in sequence and an atomic fashion. One way to support this would be to
+add an ioctl function for sending a sequence of commands to the device
+atomically as proposed here. These multi commands are simple array of
+the existing mmc_ioc_cmd structure.
+
+The structure passed via the ioctl uses a __u64 type to specify the number
+of commands (so that the structure is aligned on a 64-bit boundary) and a
+zero length array as a header for list of commands to be issued. The
+maximum number of commands that can be sent is determined by
+MMC_IOC_MAX_CMDS (which defaults to 255 and should be more than
+sufficient).
+
+This based upon work by Seshagiri Holi <sholi@nvidia.com>.
+
+Signed-off-by: Seshagiri Holi <sholi@nvidia.com>
+Signed-off-by: Jon Hunter <jonathanh@nvidia.com>
+---
+V4 changes:
+- Moved duplicated test in mmc_blk_ioc_cmd() and mmc_blk_ioc_multi_cmd()
+  to mmc_blk_ioctl(). Changed author.
+V3 changes:
+- Updated mmc_ioc_multi_cmd structure per Grant's preference
+V2 changes:
+- Updated changelog and patch per Arnd's feedback
+- Moved mmc_put/get_card() outside of __mmc_blk_ioctl_cmd()
+
+ drivers/mmc/card/block.c       | 206 ++++++++++++++++++++++++++++++-----------
+ include/uapi/linux/mmc/ioctl.h |  19 +++-
+ 2 files changed, 169 insertions(+), 56 deletions(-)
+
+diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+index c742cfd7674e..f6acf0f6c410 100644
+--- a/drivers/mmc/card/block.c
++++ b/drivers/mmc/card/block.c
+@@ -387,6 +387,24 @@ out:
+ 	return ERR_PTR(err);
+ }
+ 
++static int mmc_blk_ioctl_copy_to_user(struct mmc_ioc_cmd __user *ic_ptr,
++				      struct mmc_blk_ioc_data *idata)
++{
++	struct mmc_ioc_cmd *ic = &idata->ic;
++
++	if (copy_to_user(&(ic_ptr->response), ic->response,
++			 sizeof(ic->response)))
++		return -EFAULT;
++
++	if (!idata->ic.write_flag) {
++		if (copy_to_user((void __user *)(unsigned long)ic->data_ptr,
++				 idata->buf, idata->buf_bytes))
++			return -EFAULT;
++	}
++
++	return 0;
++}
++
+ static int ioctl_rpmb_card_status_poll(struct mmc_card *card, u32 *status,
+ 				       u32 retries_max)
+ {
+@@ -447,12 +465,9 @@ out:
+ 	return err;
+ }
+ 
+-static int mmc_blk_ioctl_cmd(struct block_device *bdev,
+-	struct mmc_ioc_cmd __user *ic_ptr)
++static int __mmc_blk_ioctl_cmd(struct mmc_card *card, struct mmc_blk_data *md,
++			       struct mmc_blk_ioc_data *idata)
+ {
+-	struct mmc_blk_ioc_data *idata;
+-	struct mmc_blk_data *md;
+-	struct mmc_card *card;
+ 	struct mmc_command cmd = {0};
+ 	struct mmc_data data = {0};
+ 	struct mmc_request mrq = {NULL};
+@@ -461,33 +476,12 @@ static int mmc_blk_ioctl_cmd(struct block_device *bdev,
+ 	int is_rpmb = false;
+ 	u32 status = 0;
+ 
+-	/*
+-	 * The caller must have CAP_SYS_RAWIO, and must be calling this on the
+-	 * whole block device, not on a partition.  This prevents overspray
+-	 * between sibling partitions.
+-	 */
+-	if ((!capable(CAP_SYS_RAWIO)) || (bdev != bdev->bd_contains))
+-		return -EPERM;
+-
+-	idata = mmc_blk_ioctl_copy_from_user(ic_ptr);
+-	if (IS_ERR(idata))
+-		return PTR_ERR(idata);
+-
+-	md = mmc_blk_get(bdev->bd_disk);
+-	if (!md) {
+-		err = -EINVAL;
+-		goto cmd_err;
+-	}
++	if (!card || !md || !idata)
++		return -EINVAL;
+ 
+ 	if (md->area_type & MMC_BLK_DATA_AREA_RPMB)
+ 		is_rpmb = true;
+ 
+-	card = md->queue.card;
+-	if (IS_ERR(card)) {
+-		err = PTR_ERR(card);
+-		goto cmd_done;
+-	}
+-
+ 	cmd.opcode = idata->ic.opcode;
+ 	cmd.arg = idata->ic.arg;
+ 	cmd.flags = idata->ic.flags;
+@@ -530,23 +524,21 @@ static int mmc_blk_ioctl_cmd(struct block_device *bdev,
+ 
+ 	mrq.cmd = &cmd;
+ 
+-	mmc_get_card(card);
+-
+ 	err = mmc_blk_part_switch(card, md);
+ 	if (err)
+-		goto cmd_rel_host;
++		return err;
+ 
+ 	if (idata->ic.is_acmd) {
+ 		err = mmc_app_cmd(card->host, card);
+ 		if (err)
+-			goto cmd_rel_host;
++			return err;
+ 	}
+ 
+ 	if (is_rpmb) {
+ 		err = mmc_set_blockcount(card, data.blocks,
+ 			idata->ic.write_flag & (1 << 31));
+ 		if (err)
+-			goto cmd_rel_host;
++			return err;
+ 	}
+ 
+ 	if ((MMC_EXTRACT_INDEX_FROM_ARG(cmd.arg) == EXT_CSD_SANITIZE_START) &&
+@@ -557,7 +549,7 @@ static int mmc_blk_ioctl_cmd(struct block_device *bdev,
+ 			pr_err("%s: ioctl_do_sanitize() failed. err = %d",
+ 			       __func__, err);
+ 
+-		goto cmd_rel_host;
++		return err;
+ 	}
+ 
+ 	mmc_wait_for_req(card->host, &mrq);
+@@ -565,14 +557,12 @@ static int mmc_blk_ioctl_cmd(struct block_device *bdev,
+ 	if (cmd.error) {
+ 		dev_err(mmc_dev(card->host), "%s: cmd error %d\n",
+ 						__func__, cmd.error);
+-		err = cmd.error;
+-		goto cmd_rel_host;
++		return cmd.error;
+ 	}
+ 	if (data.error) {
+ 		dev_err(mmc_dev(card->host), "%s: data error %d\n",
+ 						__func__, data.error);
+-		err = data.error;
+-		goto cmd_rel_host;
++		return data.error;
+ 	}
+ 
+ 	/*
+@@ -582,18 +572,7 @@ static int mmc_blk_ioctl_cmd(struct block_device *bdev,
+ 	if (idata->ic.postsleep_min_us)
+ 		usleep_range(idata->ic.postsleep_min_us, idata->ic.postsleep_max_us);
+ 
+-	if (copy_to_user(&(ic_ptr->response), cmd.resp, sizeof(cmd.resp))) {
+-		err = -EFAULT;
+-		goto cmd_rel_host;
+-	}
+-
+-	if (!idata->ic.write_flag) {
+-		if (copy_to_user((void __user *)(unsigned long) idata->ic.data_ptr,
+-						idata->buf, idata->buf_bytes)) {
+-			err = -EFAULT;
+-			goto cmd_rel_host;
+-		}
+-	}
++	memcpy(&(idata->ic.response), cmd.resp, sizeof(cmd.resp));
+ 
+ 	if (is_rpmb) {
+ 		/*
+@@ -607,9 +586,42 @@ static int mmc_blk_ioctl_cmd(struct block_device *bdev,
+ 					__func__, status, err);
+ 	}
+ 
+-cmd_rel_host:
++	return err;
++}
++
++static int mmc_blk_ioctl_cmd(struct block_device *bdev,
++			     struct mmc_ioc_cmd __user *ic_ptr)
++{
++	struct mmc_blk_ioc_data *idata;
++	struct mmc_blk_data *md;
++	struct mmc_card *card;
++	int err;
++
++	idata = mmc_blk_ioctl_copy_from_user(ic_ptr);
++	if (IS_ERR(idata))
++		return PTR_ERR(idata);
++
++	md = mmc_blk_get(bdev->bd_disk);
++	if (!md) {
++		err = -EINVAL;
++		goto cmd_err;
++	}
++
++	card = md->queue.card;
++	if (IS_ERR(card)) {
++		err = PTR_ERR(card);
++		goto cmd_done;
++	}
++
++	mmc_get_card(card);
++
++	err = __mmc_blk_ioctl_cmd(card, md, idata);
++
+ 	mmc_put_card(card);
+ 
++	if (!err)
++		err = mmc_blk_ioctl_copy_to_user(ic_ptr, idata);
++
+ cmd_done:
+ 	mmc_blk_put(md);
+ cmd_err:
+@@ -618,13 +630,97 @@ cmd_err:
+ 	return err;
+ }
+ 
++static int mmc_blk_ioctl_multi_cmd(struct block_device *bdev,
++				   struct mmc_ioc_multi_cmd __user *user)
++{
++	struct mmc_blk_ioc_data **idata = NULL;
++	struct mmc_ioc_cmd __user *cmds = user->cmds;
++	struct mmc_card *card;
++	struct mmc_blk_data *md;
++	int i, err = -EFAULT;
++	__u64 num_of_cmds;
++
++	if (copy_from_user(&num_of_cmds, &user->num_of_cmds,
++			   sizeof(num_of_cmds)))
++		return -EFAULT;
++
++	if (num_of_cmds > MMC_IOC_MAX_CMDS)
++		return -EINVAL;
++
++	idata = kcalloc(num_of_cmds, sizeof(*idata), GFP_KERNEL);
++	if (!idata)
++		return -ENOMEM;
++
++	for (i = 0; i < num_of_cmds; i++) {
++		idata[i] = mmc_blk_ioctl_copy_from_user(&cmds[i]);
++		if (IS_ERR(idata[i])) {
++			err = PTR_ERR(idata[i]);
++			num_of_cmds = i;
++			goto cmd_err;
++		}
++	}
++
++	md = mmc_blk_get(bdev->bd_disk);
++	if (!md)
++		goto cmd_err;
++
++	card = md->queue.card;
++	if (IS_ERR(card)) {
++		err = PTR_ERR(card);
++		goto cmd_done;
++	}
++
++	mmc_get_card(card);
++
++	for (i = 0; i < num_of_cmds; i++) {
++		err = __mmc_blk_ioctl_cmd(card, md, idata[i]);
++		if (err) {
++			mmc_put_card(card);
++			goto cmd_done;
++		}
++	}
++
++	mmc_put_card(card);
++
++	/* copy to user if data and response */
++	for (i = 0; i < num_of_cmds; i++) {
++		err = mmc_blk_ioctl_copy_to_user(&cmds[i], idata[i]);
++		if (err)
++			break;
++	}
++
++cmd_done:
++	mmc_blk_put(md);
++cmd_err:
++	for (i = 0; i < num_of_cmds; i++) {
++		kfree(idata[i]->buf);
++		kfree(idata[i]);
++	}
++	kfree(idata);
++	return err;
++}
++
+ static int mmc_blk_ioctl(struct block_device *bdev, fmode_t mode,
+ 	unsigned int cmd, unsigned long arg)
+ {
+-	int ret = -EINVAL;
+-	if (cmd == MMC_IOC_CMD)
+-		ret = mmc_blk_ioctl_cmd(bdev, (struct mmc_ioc_cmd __user *)arg);
+-	return ret;
++	/*
++	 * The caller must have CAP_SYS_RAWIO, and must be calling this on the
++	 * whole block device, not on a partition.  This prevents overspray
++	 * between sibling partitions.
++	 */
++	if ((!capable(CAP_SYS_RAWIO)) || (bdev != bdev->bd_contains))
++		return -EPERM;
++
++	switch (cmd) {
++	case MMC_IOC_CMD:
++		return mmc_blk_ioctl_cmd(bdev,
++				(struct mmc_ioc_cmd __user *)arg);
++	case MMC_IOC_MULTI_CMD:
++		return mmc_blk_ioctl_multi_cmd(bdev,
++				(struct mmc_ioc_multi_cmd __user *)arg);
++	default:
++		return -EINVAL;
++	}
+ }
+ 
+ #ifdef CONFIG_COMPAT
+diff --git a/include/uapi/linux/mmc/ioctl.h b/include/uapi/linux/mmc/ioctl.h
+index 1f5e68923929..7e385b83b9d8 100644
+--- a/include/uapi/linux/mmc/ioctl.h
++++ b/include/uapi/linux/mmc/ioctl.h
+@@ -45,8 +45,24 @@ struct mmc_ioc_cmd {
+ };
+ #define mmc_ioc_cmd_set_data(ic, ptr) ic.data_ptr = (__u64)(unsigned long) ptr
+ 
+-#define MMC_IOC_CMD _IOWR(MMC_BLOCK_MAJOR, 0, struct mmc_ioc_cmd)
++/**
++ * struct mmc_ioc_multi_cmd - multi command information
++ * @num_of_cmds: Number of commands to send. Must be equal to or less than
++ *	MMC_IOC_MAX_CMDS.
++ * @cmds: Array of commands with length equal to 'num_of_cmds'
++ */
++struct mmc_ioc_multi_cmd {
++	__u64 num_of_cmds;
++	struct mmc_ioc_cmd cmds[0];
++};
+ 
++#define MMC_IOC_CMD _IOWR(MMC_BLOCK_MAJOR, 0, struct mmc_ioc_cmd)
++/*
++ * MMC_IOC_MULTI_CMD: Used to send an array of MMC commands described by
++ *	the structure mmc_ioc_multi_cmd. The MMC driver will issue all
++ *	commands in array in sequence to card.
++ */
++#define MMC_IOC_MULTI_CMD _IOWR(MMC_BLOCK_MAJOR, 1, struct mmc_ioc_multi_cmd)
+ /*
+  * Since this ioctl is only meant to enhance (and not replace) normal access
+  * to the mmc bus device, an upper data transfer limit of MMC_IOC_MAX_BYTES
+@@ -54,4 +70,5 @@ struct mmc_ioc_cmd {
+  * block device operations.
+  */
+ #define MMC_IOC_MAX_BYTES  (512L * 256)
++#define MMC_IOC_MAX_CMDS    255
+ #endif /* LINUX_MMC_IOCTL_H */
+-- 
+2.1.4
+
