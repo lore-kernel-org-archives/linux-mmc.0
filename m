@@ -1,72 +1,39 @@
-From: Grant Grundler <grundler@google.com>
-Subject: Re: [PATCH V3] mmc: block: Add new ioctl to send multi commands
-Date: Mon, 21 Sep 2015 11:40:32 -0700
-Message-ID: <CANEJEGtxy=d0mQCJJGg=DFKhAC+cWMe48JL_8U_K+g=_kQ1K3A@mail.gmail.com>
-References: <1442242844-6859-1-git-send-email-jonathanh@nvidia.com>
-	<CAMHSBOUKYLfrYe+xBYY=ZVsqdXStPdmsJQRBTYsf4Pk=jNMrBg@mail.gmail.com>
-	<55FFD467.9020801@nvidia.com>
-	<55FFE7D6.7050603@nvidia.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+From: Shawn Lin <shawn.lin@rock-chips.com>
+Subject: [PATCH 1/3] mmc: debugfs: fix memory leak for mmc_ext_csd_open
+Date: Tue, 22 Sep 2015 09:18:33 +0800
+Message-ID: <1442884713-11193-1-git-send-email-shawn.lin@rock-chips.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-yk0-f181.google.com ([209.85.160.181]:33608 "EHLO
-	mail-yk0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753818AbbIUSkd (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 21 Sep 2015 14:40:33 -0400
-Received: by ykft14 with SMTP id t14so111629855ykf.0
-        for <linux-mmc@vger.kernel.org>; Mon, 21 Sep 2015 11:40:32 -0700 (PDT)
-In-Reply-To: <55FFE7D6.7050603@nvidia.com>
+Received: from lucky1.263xmail.com ([211.157.147.133]:43300 "EHLO
+	lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1757437AbbIVBU1 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 21 Sep 2015 21:20:27 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Jon Hunter <jonathanh@nvidia.com>
-Cc: Gwendal Grignou <gwendal@chromium.org>, Ulf Hansson <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Linux Kernel <linux-kernel@vger.kernel.org>, Seshagiri Holi <sholi@nvidia.com>, Arnd Bergmann <arnd@arndb.de>, Olof Johansson <olofj@chromium.org>
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Shawn Lin <shawn.lin@rock-chips.com>
 
-Jon, Ulf,
-Can we first get the current implementation upstream and _then_ add
-more patches to it?
+buf allocated isn't been freed before return, so we fix it.
 
-On Mon, Sep 21, 2015 at 4:19 AM, Jon Hunter <jonathanh@nvidia.com> wrote:
-...
->>>> +       for (i = 0; i < num_of_cmds; i++) {
->>>> +               err = __mmc_blk_ioctl_cmd(card, md, idata[i]);
->>>> +               if (err) {
->>>> +                       mmc_put_card(card);
->>>> +                       goto cmd_done;
->>> Instead of exiting here, you should first copy to the user the data
->>> and response of successful commands, mark the failed command as failed
->>> and the remaining ones as "not executed".
->>> This way, it will be easier for the user space application to find out
->>> where the sequence failed. This especially true if some reverts are
->>> needed.
->>
->> Yes that sounds like a sensible thing to do. I will incorporate that change.
+Fixes: 736bb6bb01a ("mmc: Add Extended CSD register to debugfs")
+Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
+---
 
-I also liked Gwendal's idea and incorporated that into our 3.18 kernel
-tree here:
-    https://chromium-review.googlesource.com/#/c/299956
+ drivers/mmc/core/debugfs.c | 1 +
+ 1 file changed, 1 insertion(+)
 
-(this is on top of Jon's most recently proposed patch - we'll align
-with what lands shortly)
+diff --git a/drivers/mmc/core/debugfs.c b/drivers/mmc/core/debugfs.c
+index e914210..b2ab936 100644
+--- a/drivers/mmc/core/debugfs.c
++++ b/drivers/mmc/core/debugfs.c
+@@ -304,6 +304,7 @@ static int mmc_ext_csd_open(struct inode *inode, struct file *filp)
+ 
+ 	filp->private_data = buf;
+ 	kfree(ext_csd);
++	kfree(buf);
+ 	return 0;
+ 
+ out_free:
+-- 
+2.3.7
 
-But as I've demonstrated, this can be a separate patch.
 
-cheers,
-grant
-
->
-> At first, I thought that may be the response field of the command could
-> be used to indicate the failed command. However, thinking about this
-> some more, I am not sure that it seems correct to use this field as this
-> is really used to carry the MMC response as defined by the MMC
-> specification.
->
-> Should the response field always be non-zero for a successful command?
-> If this is guaranteed, then may be the best thing to do would be to have
-> user-space clear the response field to field before submitting the
-> commands. It would then be easy to detect which command failed and which
-> were not attempted.
->
-> Ulf, what are your thoughts?
->
-> Cheers
-> Jon
