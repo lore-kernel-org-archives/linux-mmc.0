@@ -1,91 +1,63 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v2 1/2] mmc: sdhci-of-arasan: add phy support for sdhci-of-arasan
-Date: Thu, 24 Sep 2015 00:12:27 +0200
-Message-ID: <CAPDyKFpwaqE59k0L_vL9soxsHbadT-taUY0=akiu=6BRM1aW5w@mail.gmail.com>
-References: <1442212161-23234-1-git-send-email-shawn.lin@rock-chips.com>
-	<CAPDyKFqgHwb7a+wbO_mB6NLGrYtQvTqeeHWhfaz_LX_DoMdmpA@mail.gmail.com>
-	<55FADA29.4000005@rock-chips.com>
+Subject: Re: [PATCH V4] mmc: block: Add new ioctl to send multi commands
+Date: Thu, 24 Sep 2015 00:26:24 +0200
+Message-ID: <CAPDyKFoQRKKvvdscjiGvH6XnD=QJ64K73VVYKMrxJj5jmONVmA@mail.gmail.com>
+References: <1442914073-11230-1-git-send-email-jonathanh@nvidia.com>
+	<CAPDyKFrH7SXJd0ib9uJvZpaSu7=dTmeS6WuCwsSxxLtDpzbp9Q@mail.gmail.com>
+	<CANEJEGtyv7oZh9oxa=muqtCnwXJy5FQ702O0rLq3GSaF8SRLjA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wi0-f169.google.com ([209.85.212.169]:37212 "EHLO
-	mail-wi0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755035AbbIWWM2 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 23 Sep 2015 18:12:28 -0400
-Received: by wicfx3 with SMTP id fx3so88926208wic.0
-        for <linux-mmc@vger.kernel.org>; Wed, 23 Sep 2015 15:12:27 -0700 (PDT)
-In-Reply-To: <55FADA29.4000005@rock-chips.com>
+Received: from mail-wi0-f173.google.com ([209.85.212.173]:35454 "EHLO
+	mail-wi0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754777AbbIWW0Z (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 23 Sep 2015 18:26:25 -0400
+Received: by wicge5 with SMTP id ge5so227757539wic.0
+        for <linux-mmc@vger.kernel.org>; Wed, 23 Sep 2015 15:26:24 -0700 (PDT)
+In-Reply-To: <CANEJEGtyv7oZh9oxa=muqtCnwXJy5FQ702O0rLq3GSaF8SRLjA@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Shawn Lin <shawn.lin@rock-chips.com>
-Cc: =Michal Simek <michal.simek@xilinx.com>, Soren Brinkmann <soren.brinkmann@xilinx.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>
+To: Grant Grundler <grundler@google.com>
+Cc: Jon Hunter <jonathanh@nvidia.com>, Arnd Bergmann <arnd@arndb.de>, Olof Johansson <olofj@chromium.org>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Seshagiri Holi <sholi@nvidia.com>
 
-On 17 September 2015 at 17:20, Shawn Lin <shawn.lin@rock-chips.com> wrote:
-> On 2015/9/17 19:44, Ulf Hansson wrote:
->>
->> On 14 September 2015 at 08:29, Shawn Lin <shawn.lin@rock-chips.com> wrote:
+On 24 September 2015 at 00:06, Grant Grundler <grundler@google.com> wrote:
+> On Wed, Sep 23, 2015 at 2:42 PM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+>> On 22 September 2015 at 11:27, Jon Hunter <jonathanh@nvidia.com> wrote:
+>>> Certain eMMC devices allow vendor specific device information to be read
+>>> via a sequence of vendor commands. These vendor commands must be issued
+>>> in sequence and an atomic fashion. One way to support this would be to
+>>> add an ioctl function for sending a sequence of commands to the device
+>>> atomically as proposed here. These multi commands are simple array of
+>>> the existing mmc_ioc_cmd structure.
 >>>
->>> This patch adds Generic PHY access for sdhci-of-arasan. Driver
->>> can get PHY handler from dt-binding, and power-on/init the PHY.
->>> Also we add pm ops for PHY here if CONFIG_PM_SLEEP is enabled.
->>> Currently, it's just mandatory for arasan,sdhci-5.1.
+>>> The structure passed via the ioctl uses a __u64 type to specify the number
+>>> of commands (so that the structure is aligned on a 64-bit boundary) and a
+>>> zero length array as a header for list of commands to be issued. The
+>>> maximum number of commands that can be sent is determined by
+>>> MMC_IOC_MAX_CMDS (which defaults to 255 and should be more than
+>>> sufficient).
+>>>
+>>> This based upon work by Seshagiri Holi <sholi@nvidia.com>.
+>>>
+>>> Signed-off-by: Seshagiri Holi <sholi@nvidia.com>
+>>> Signed-off-by: Jon Hunter <jonathanh@nvidia.com>
 >>
->>
->> I am trying to understand how a PHY can be used together with a
->> MMC/SD/SDIO controller. Normally the card connector doesn't hold any
->> intelligence, so I wonder if PHY is correctly used here.
->>
->> Could you try to explain, HW-wise, what role the PHY has for you?
->>
+>> Thanks, applied for next!
 >
-> Thanks for comment, Ulf.
->
-> It's the first time we introduce phy into mmc subsystem,also it's my first
-> time to use phy for emmc in real Soc.
-> so definitely we need to discuss it deliberately.
->
-> From my view, phy is an active-power, differential sampling and more
-> well-designed analog *IO component* for ultra-highspeed device to guarantee
-> its signal integrity, like USB, UFS, DDR-RAM,MIPI and so on.
->
-> (1)Firstly it contains DLL to generate delayline and phase for sampling data
-> from mmc devices. When sdhci controller executes tuning and sends out tuning
-> sequence, and PHY can auto change its delayline and phase
-> in order to test if this "sample timing" is okay. If not, CRC err is
-> generate back to the controller. Then after SDHCI tune timing for 40 times,
-> also PHY have scanned all the "sample windows" by trying different delayline
-> and phase combination, and finally auto-select the best sample timing for
-> the "sample windows". And sdhci HOST CONTROL
-> 2 Register[6:7] is controlled by PHY in my case.
->
-> (2)Then phy can programming source/sink impedance to avoid signal reflex.
-> Given that JEDEC has come to HS533(highspeed 533MHz), this function is
-> imperative to be implemented just like the role of ODT for DDR-RAM's PHY.
->
-> (3)Phy is integrated with diff pull-up/down resistance value and open-drain
-> type for HW design.
->
-> (4)Phy can also have some enable-bit to decide whether all mmc
-> signal(clk/data/cmd/strobe) can output to the devices or not.
+> Ulf,
+> is the git repo visible publicly?
 
-Thanks for elaborating. It seems like using phy is justified in your case.
+git://git.linaro.org/people/ulf.hansson/mmc.git
 
 >
->
-> For the card, even for host controller itself, phy can just be regarded as a
-> need-to-do-something-before-used GPIO.
-> So, before we start initializing card, we need to power up PHY, enable clk
-> for it and configure all the stuffs. Also we need to power down it for
-> power-saving when into suspend. That's all we need to do and that's all the
-> generic phy framework had provided by four interface:
-> phy_init/phy_exit/phy_power_on/phy_power_off.
->
->
-> Sincerely welcome any comments here to make things better. :)
->
->
+> Your linaro.org mmc.git seems to be stale and Chris Ball's tree on
+> kernel.org is the only other mention of mmc I'm finding.
 
-I will get back to your patch and review it in detail as soon as can.
+Chris' tree hasn't been used for a long time.
+
+>
+> cheers
+> grant
 
 Kind regards
 Uffe
