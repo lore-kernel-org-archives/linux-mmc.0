@@ -1,142 +1,57 @@
-From: Hans de Goede <hdegoede@redhat.com>
-Subject: [PATCH] mmc: sunxi: Fix clk-delay settings
-Date: Wed, 23 Sep 2015 22:06:48 +0200
-Message-ID: <1443038808-10965-1-git-send-email-hdegoede@redhat.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [v2] mmc: sdhci-pltfm: enable interrupt mode to detect card for ls1021a
+Date: Wed, 23 Sep 2015 23:42:15 +0200
+Message-ID: <CAPDyKFoVj0z_vHK_s0_7s1d_VKz8FqWUpHx1YATd5-Tw8-SyiA@mail.gmail.com>
+References: <1442385370-26961-1-git-send-email-yangbo.lu@freescale.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:51433 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751869AbbIWUGx (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 23 Sep 2015 16:06:53 -0400
+Received: from mail-wi0-f175.google.com ([209.85.212.175]:35291 "EHLO
+	mail-wi0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755595AbbIWVmQ (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 23 Sep 2015 17:42:16 -0400
+Received: by wicge5 with SMTP id ge5so226655509wic.0
+        for <linux-mmc@vger.kernel.org>; Wed, 23 Sep 2015 14:42:15 -0700 (PDT)
+In-Reply-To: <1442385370-26961-1-git-send-email-yangbo.lu@freescale.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, Mike Turquette <mturquette@linaro.org>
-Cc: Jelle van der Waa <jelle@vdwaa.nl>, Maxime Ripard <maxime.ripard@free-electrons.com>, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-sunxi@googlegroups.com, Hans de Goede <hdegoede@redhat.com>
+To: Yangbo Lu <yangbo.lu@freescale.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>
 
-In recent allwinner kernel sources the mmc clk-delay settings have been
-slightly tweaked, and for sun9i they are completely different then what
-we are using.
+On 16 September 2015 at 08:36, Yangbo Lu <yangbo.lu@freescale.com> wrote:
+> Enable interrupt mode to detect card instead of polling mode for
+> ls1021a by removing the quirk SDHCI_QUIRK_BROKEN_CARD_DETECTION.
+> This could improve data transferring performance and avoid the call
+> trace caused by polling card status sometime.
+>
+> Signed-off-by: Yangbo Lu <yangbo.lu@freescale.com>
 
-This commit brings us in sync with what allwinner does, fixing problems
-accessing sdcards on some A33 devices (and likely others).
+Thanks, applied for next!
 
-For pre sun9i hardware this makes the following changes:
--At 400Khz change the sample delay from 7 to 0 (introduced in A31 sdk)
--At 50 Mhz change the sample delay from 5 to 4 (introduced in A23 sdk)
+Kind regards
+Uffe
 
-This also drops the clk-delay calculation for clocks > 50 MHz, we do
-not need this as we've: mmc->f_max = 50000000, and the delays in the
-old code were not correct (at 100 MHz the delay must be a multiple of 60,
-at 200 MHz a multiple of 120).
-
-Signed-off-by: Hans de Goede <hdegoede@redhat.com>
----
- drivers/mmc/host/sunxi-mmc.c | 53 ++++++++++++++++++++++++++++++++------------
- 1 file changed, 39 insertions(+), 14 deletions(-)
-
-diff --git a/drivers/mmc/host/sunxi-mmc.c b/drivers/mmc/host/sunxi-mmc.c
-index e6226cd..83de82b 100644
---- a/drivers/mmc/host/sunxi-mmc.c
-+++ b/drivers/mmc/host/sunxi-mmc.c
-@@ -210,6 +210,16 @@
- #define SDXC_IDMAC_DES0_CES	BIT(30) /* card error summary */
- #define SDXC_IDMAC_DES0_OWN	BIT(31) /* 1-idma owns it, 0-host owns it */
- 
-+#define SDXC_CLK_400K		0
-+#define SDXC_CLK_25M		1
-+#define SDXC_CLK_50M		2
-+#define SDXC_CLK_50M_DDR	3
-+
-+struct sunxi_mmc_clk_delay {
-+	u32 output;
-+	u32 sample;
-+};
-+
- struct sunxi_idma_des {
- 	u32	config;
- 	u32	buf_size;
-@@ -229,6 +239,7 @@ struct sunxi_mmc_host {
- 	struct clk	*clk_mmc;
- 	struct clk	*clk_sample;
- 	struct clk	*clk_output;
-+	const struct sunxi_mmc_clk_delay *clk_delays;
- 
- 	/* irq */
- 	spinlock_t	lock;
-@@ -654,25 +665,19 @@ static int sunxi_mmc_clk_set_rate(struct sunxi_mmc_host *host,
- 
- 	/* determine delays */
- 	if (rate <= 400000) {
--		oclk_dly = 180;
--		sclk_dly = 42;
-+		oclk_dly = host->clk_delays[SDXC_CLK_400K].output;
-+		sclk_dly = host->clk_delays[SDXC_CLK_400K].sample;
- 	} else if (rate <= 25000000) {
--		oclk_dly = 180;
--		sclk_dly = 75;
-+		oclk_dly = host->clk_delays[SDXC_CLK_25M].output;
-+		sclk_dly = host->clk_delays[SDXC_CLK_25M].sample;
- 	} else if (rate <= 50000000) {
- 		if (ios->timing == MMC_TIMING_UHS_DDR50) {
--			oclk_dly = 60;
--			sclk_dly = 120;
-+			oclk_dly = host->clk_delays[SDXC_CLK_50M_DDR].output;
-+			sclk_dly = host->clk_delays[SDXC_CLK_50M_DDR].sample;
- 		} else {
--			oclk_dly = 90;
--			sclk_dly = 150;
-+			oclk_dly = host->clk_delays[SDXC_CLK_50M].output;
-+			sclk_dly = host->clk_delays[SDXC_CLK_50M].sample;
- 		}
--	} else if (rate <= 100000000) {
--		oclk_dly = 6;
--		sclk_dly = 24;
--	} else if (rate <= 200000000) {
--		oclk_dly = 3;
--		sclk_dly = 12;
- 	} else {
- 		return -EINVAL;
- 	}
-@@ -878,6 +883,7 @@ static int sunxi_mmc_card_busy(struct mmc_host *mmc)
- static const struct of_device_id sunxi_mmc_of_match[] = {
- 	{ .compatible = "allwinner,sun4i-a10-mmc", },
- 	{ .compatible = "allwinner,sun5i-a13-mmc", },
-+	{ .compatible = "allwinner,sun9i-a80-mmc", },
- 	{ /* sentinel */ }
- };
- MODULE_DEVICE_TABLE(of, sunxi_mmc_of_match);
-@@ -892,6 +898,20 @@ static struct mmc_host_ops sunxi_mmc_ops = {
- 	.card_busy	 = sunxi_mmc_card_busy,
- };
- 
-+static const struct sunxi_mmc_clk_delay sunxi_mmc_clk_delays[] = {
-+	[SDXC_CLK_400K]		= { .output = 180, .sample = 180 },
-+	[SDXC_CLK_25M]		= { .output = 180, .sample =  75 },
-+	[SDXC_CLK_50M]		= { .output =  90, .sample = 120 },
-+	[SDXC_CLK_50M_DDR]	= { .output =  60, .sample = 120 },
-+};
-+
-+static const struct sunxi_mmc_clk_delay sun9i_mmc_clk_delays[] = {
-+	[SDXC_CLK_400K]		= { .output = 180, .sample = 180 },
-+	[SDXC_CLK_25M]		= { .output = 180, .sample =  75 },
-+	[SDXC_CLK_50M]		= { .output = 150, .sample = 120 },
-+	[SDXC_CLK_50M_DDR]	= { .output =  90, .sample = 120 },
-+};
-+
- static int sunxi_mmc_resource_request(struct sunxi_mmc_host *host,
- 				      struct platform_device *pdev)
- {
-@@ -903,6 +923,11 @@ static int sunxi_mmc_resource_request(struct sunxi_mmc_host *host,
- 	else
- 		host->idma_des_size_bits = 16;
- 
-+	if (of_device_is_compatible(np, "allwinner,sun9i-a80-mmc"))
-+		host->clk_delays = sun9i_mmc_clk_delays;
-+	else
-+		host->clk_delays = sunxi_mmc_clk_delays;
-+
- 	ret = mmc_regulator_get_supply(host->mmc);
- 	if (ret) {
- 		if (ret != -EPROBE_DEFER)
--- 
-2.5.0
-
+> ---
+> Changes for v2:
+>         - Modified commit message
+> ---
+>  drivers/mmc/host/sdhci-of-esdhc.c | 3 ++-
+>  1 file changed, 2 insertions(+), 1 deletion(-)
+>
+> diff --git a/drivers/mmc/host/sdhci-of-esdhc.c b/drivers/mmc/host/sdhci-of-esdhc.c
+> index 653f335..2a54dbe 100644
+> --- a/drivers/mmc/host/sdhci-of-esdhc.c
+> +++ b/drivers/mmc/host/sdhci-of-esdhc.c
+> @@ -371,7 +371,8 @@ static int sdhci_esdhc_probe(struct platform_device *pdev)
+>             of_device_is_compatible(np, "fsl,p5020-esdhc") ||
+>             of_device_is_compatible(np, "fsl,p4080-esdhc") ||
+>             of_device_is_compatible(np, "fsl,p1020-esdhc") ||
+> -           of_device_is_compatible(np, "fsl,t1040-esdhc"))
+> +           of_device_is_compatible(np, "fsl,t1040-esdhc") ||
+> +           of_device_is_compatible(np, "fsl,ls1021a-esdhc"))
+>                 host->quirks &= ~SDHCI_QUIRK_BROKEN_CARD_DETECTION;
+>
+>         if (of_device_is_compatible(np, "fsl,p2020-esdhc")) {
+> --
+> 2.1.0.27.g96db324
+>
