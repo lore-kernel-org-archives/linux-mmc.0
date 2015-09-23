@@ -1,65 +1,142 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 2/3] mmc: debugfs: implement ios show for SDR12 and SDR25
-Date: Wed, 23 Sep 2015 21:33:45 +0200
-Message-ID: <CAPDyKFqe=QyN1J4oLjDHLyn_xpCUWQC0RxP56pmA6xGih_qBTw@mail.gmail.com>
-References: <1442884713-11193-1-git-send-email-shawn.lin@rock-chips.com>
-	<1442884795-11493-1-git-send-email-shawn.lin@rock-chips.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+From: Hans de Goede <hdegoede@redhat.com>
+Subject: [PATCH] mmc: sunxi: Fix clk-delay settings
+Date: Wed, 23 Sep 2015 22:06:48 +0200
+Message-ID: <1443038808-10965-1-git-send-email-hdegoede@redhat.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wi0-f177.google.com ([209.85.212.177]:37698 "EHLO
-	mail-wi0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754838AbbIWTdq (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 23 Sep 2015 15:33:46 -0400
-Received: by wicfx3 with SMTP id fx3so84245860wic.0
-        for <linux-mmc@vger.kernel.org>; Wed, 23 Sep 2015 12:33:45 -0700 (PDT)
-In-Reply-To: <1442884795-11493-1-git-send-email-shawn.lin@rock-chips.com>
+Received: from mx1.redhat.com ([209.132.183.28]:51433 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751869AbbIWUGx (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 23 Sep 2015 16:06:53 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Shawn Lin <shawn.lin@rock-chips.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+To: Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, Mike Turquette <mturquette@linaro.org>
+Cc: Jelle van der Waa <jelle@vdwaa.nl>, Maxime Ripard <maxime.ripard@free-electrons.com>, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-sunxi@googlegroups.com, Hans de Goede <hdegoede@redhat.com>
 
-On 22 September 2015 at 03:19, Shawn Lin <shawn.lin@rock-chips.com> wrote:
-> This patch add MMC_TIMING_UHS_SDR12 and MMC_TIMING_UHS_SDR25
-> for mmc_ios_show to show the ios->timing if mmc card runs under
-> these two mode.
->
-> Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
-> ---
->
->  drivers/mmc/core/debugfs.c | 6 ++++++
->  1 file changed, 6 insertions(+)
->
-> diff --git a/drivers/mmc/core/debugfs.c b/drivers/mmc/core/debugfs.c
-> index b2ab936..31155e8 100644
-> --- a/drivers/mmc/core/debugfs.c
-> +++ b/drivers/mmc/core/debugfs.c
-> @@ -126,6 +126,12 @@ static int mmc_ios_show(struct seq_file *s, void *data)
->         case MMC_TIMING_SD_HS:
->                 str = "sd high-speed";
->                 break;
-> +       case MMC_TIMING_UHS_SDR12:
-> +               str = "mmc uhs SDR12";
+In recent allwinner kernel sources the mmc clk-delay settings have been
+slightly tweaked, and for sun9i they are completely different then what
+we are using.
 
-/s/mmc/sd
+This commit brings us in sync with what allwinner does, fixing problems
+accessing sdcards on some A33 devices (and likely others).
 
-> +               break;
-> +       case MMC_TIMING_UHS_SDR25:
-> +               str = "mmc uhs SDR25";
+For pre sun9i hardware this makes the following changes:
+-At 400Khz change the sample delay from 7 to 0 (introduced in A31 sdk)
+-At 50 Mhz change the sample delay from 5 to 4 (introduced in A23 sdk)
 
-/s/mmc/sd
+This also drops the clk-delay calculation for clocks > 50 MHz, we do
+not need this as we've: mmc->f_max = 50000000, and the delays in the
+old code were not correct (at 100 MHz the delay must be a multiple of 60,
+at 200 MHz a multiple of 120).
 
+Signed-off-by: Hans de Goede <hdegoede@redhat.com>
+---
+ drivers/mmc/host/sunxi-mmc.c | 53 ++++++++++++++++++++++++++++++++------------
+ 1 file changed, 39 insertions(+), 14 deletions(-)
 
-> +               break;
->         case MMC_TIMING_UHS_SDR50:
->                 str = "sd uhs SDR50";
->                 break;
-> --
-> 2.3.7
->
->
+diff --git a/drivers/mmc/host/sunxi-mmc.c b/drivers/mmc/host/sunxi-mmc.c
+index e6226cd..83de82b 100644
+--- a/drivers/mmc/host/sunxi-mmc.c
++++ b/drivers/mmc/host/sunxi-mmc.c
+@@ -210,6 +210,16 @@
+ #define SDXC_IDMAC_DES0_CES	BIT(30) /* card error summary */
+ #define SDXC_IDMAC_DES0_OWN	BIT(31) /* 1-idma owns it, 0-host owns it */
+ 
++#define SDXC_CLK_400K		0
++#define SDXC_CLK_25M		1
++#define SDXC_CLK_50M		2
++#define SDXC_CLK_50M_DDR	3
++
++struct sunxi_mmc_clk_delay {
++	u32 output;
++	u32 sample;
++};
++
+ struct sunxi_idma_des {
+ 	u32	config;
+ 	u32	buf_size;
+@@ -229,6 +239,7 @@ struct sunxi_mmc_host {
+ 	struct clk	*clk_mmc;
+ 	struct clk	*clk_sample;
+ 	struct clk	*clk_output;
++	const struct sunxi_mmc_clk_delay *clk_delays;
+ 
+ 	/* irq */
+ 	spinlock_t	lock;
+@@ -654,25 +665,19 @@ static int sunxi_mmc_clk_set_rate(struct sunxi_mmc_host *host,
+ 
+ 	/* determine delays */
+ 	if (rate <= 400000) {
+-		oclk_dly = 180;
+-		sclk_dly = 42;
++		oclk_dly = host->clk_delays[SDXC_CLK_400K].output;
++		sclk_dly = host->clk_delays[SDXC_CLK_400K].sample;
+ 	} else if (rate <= 25000000) {
+-		oclk_dly = 180;
+-		sclk_dly = 75;
++		oclk_dly = host->clk_delays[SDXC_CLK_25M].output;
++		sclk_dly = host->clk_delays[SDXC_CLK_25M].sample;
+ 	} else if (rate <= 50000000) {
+ 		if (ios->timing == MMC_TIMING_UHS_DDR50) {
+-			oclk_dly = 60;
+-			sclk_dly = 120;
++			oclk_dly = host->clk_delays[SDXC_CLK_50M_DDR].output;
++			sclk_dly = host->clk_delays[SDXC_CLK_50M_DDR].sample;
+ 		} else {
+-			oclk_dly = 90;
+-			sclk_dly = 150;
++			oclk_dly = host->clk_delays[SDXC_CLK_50M].output;
++			sclk_dly = host->clk_delays[SDXC_CLK_50M].sample;
+ 		}
+-	} else if (rate <= 100000000) {
+-		oclk_dly = 6;
+-		sclk_dly = 24;
+-	} else if (rate <= 200000000) {
+-		oclk_dly = 3;
+-		sclk_dly = 12;
+ 	} else {
+ 		return -EINVAL;
+ 	}
+@@ -878,6 +883,7 @@ static int sunxi_mmc_card_busy(struct mmc_host *mmc)
+ static const struct of_device_id sunxi_mmc_of_match[] = {
+ 	{ .compatible = "allwinner,sun4i-a10-mmc", },
+ 	{ .compatible = "allwinner,sun5i-a13-mmc", },
++	{ .compatible = "allwinner,sun9i-a80-mmc", },
+ 	{ /* sentinel */ }
+ };
+ MODULE_DEVICE_TABLE(of, sunxi_mmc_of_match);
+@@ -892,6 +898,20 @@ static struct mmc_host_ops sunxi_mmc_ops = {
+ 	.card_busy	 = sunxi_mmc_card_busy,
+ };
+ 
++static const struct sunxi_mmc_clk_delay sunxi_mmc_clk_delays[] = {
++	[SDXC_CLK_400K]		= { .output = 180, .sample = 180 },
++	[SDXC_CLK_25M]		= { .output = 180, .sample =  75 },
++	[SDXC_CLK_50M]		= { .output =  90, .sample = 120 },
++	[SDXC_CLK_50M_DDR]	= { .output =  60, .sample = 120 },
++};
++
++static const struct sunxi_mmc_clk_delay sun9i_mmc_clk_delays[] = {
++	[SDXC_CLK_400K]		= { .output = 180, .sample = 180 },
++	[SDXC_CLK_25M]		= { .output = 180, .sample =  75 },
++	[SDXC_CLK_50M]		= { .output = 150, .sample = 120 },
++	[SDXC_CLK_50M_DDR]	= { .output =  90, .sample = 120 },
++};
++
+ static int sunxi_mmc_resource_request(struct sunxi_mmc_host *host,
+ 				      struct platform_device *pdev)
+ {
+@@ -903,6 +923,11 @@ static int sunxi_mmc_resource_request(struct sunxi_mmc_host *host,
+ 	else
+ 		host->idma_des_size_bits = 16;
+ 
++	if (of_device_is_compatible(np, "allwinner,sun9i-a80-mmc"))
++		host->clk_delays = sun9i_mmc_clk_delays;
++	else
++		host->clk_delays = sunxi_mmc_clk_delays;
++
+ 	ret = mmc_regulator_get_supply(host->mmc);
+ 	if (ret) {
+ 		if (ret != -EPROBE_DEFER)
+-- 
+2.5.0
 
-Otherwise it looks good.
-
-Kind regards
-Uffe
