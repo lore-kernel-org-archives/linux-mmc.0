@@ -1,47 +1,41 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 0/3] mmc: Fix module autoload for OF platform drivers
-Date: Wed, 23 Sep 2015 23:43:05 +0200
-Message-ID: <CAPDyKFoKa=MPqFY_ASrNo96Ks8chOQULkRptLrbAr0UNda=YVA@mail.gmail.com>
-References: <20150917214859.GA7926@goodgumbo.baconseed.org>
+Subject: Re: [PATCH 0/3] mmc: Wait for card_busy before starting sdio requests
+Date: Wed, 23 Sep 2015 23:43:24 +0200
+Message-ID: <CAPDyKFqvnVTL0pDLc8S1Ssqmy5WXR9+=uCWq8ONmgrYU=Zzoow@mail.gmail.com>
+References: <1442935826-16758-1-git-send-email-hdegoede@redhat.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20150917214859.GA7926@goodgumbo.baconseed.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Luis de Bethencourt <luis@debethencourt.com>
-Cc: "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, Fabian Frederick <fabf@skynet.be>, Stephen Warren <swarren@nvidia.com>, Jonas Jensen <jonas.jensen@gmail.com>, Arnd Bergmann <arnd@arndb.de>, Jarkko Lavinen <jarkko.lavinen@nokia.com>, linux-mmc <linux-mmc@vger.kernel.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-wi0-f176.google.com ([209.85.212.176]:33663 "EHLO
+	mail-wi0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932144AbbIWVnZ (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 23 Sep 2015 17:43:25 -0400
+Received: by wiclk2 with SMTP id lk2so3248268wic.0
+        for <linux-mmc@vger.kernel.org>; Wed, 23 Sep 2015 14:43:25 -0700 (PDT)
+In-Reply-To: <1442935826-16758-1-git-send-email-hdegoede@redhat.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Hans de Goede <hdegoede@redhat.com>
+Cc: Chris Ball <chris@printf.net>, Arend van Spriel <arend@broadcom.com>, Maxime Ripard <maxime.ripard@free-electrons.com>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
 
-On 17 September 2015 at 23:48, Luis de Bethencourt
-<luis@debethencourt.com> wrote:
-> Hi,
+On 22 September 2015 at 17:30, Hans de Goede <hdegoede@redhat.com> wrote:
+> Hi Ulf,
 >
-> These patches add the missing MODULE_DEVICE_TABLE() for OF to export
-> the information so modules have the correct aliases built-in and
-> autoloading works correctly.
->
-> A longer explanation by Javier Canillas can be found here:
-> https://lkml.org/lkml/2015/7/30/519
->
-> Thanks,
-> Luis
->
-> Luis de Bethencourt (3):
->   mmc: mmc_spi: Fix module autoload for OF platform driver
->   mmc: moxart: Fix module autoload for OF platform driver
->   mmc: omap: Fix module autoload for OF platform driver
->
->  drivers/mmc/host/mmc_spi.c    | 1 +
->  drivers/mmc/host/moxart-mmc.c | 1 +
->  drivers/mmc/host/omap.c       | 1 +
->  3 files changed, 3 insertions(+)
->
-> --
-> 2.4.6
->
+> Here is a non RFC version of my patch-set to wait for card_busy before
+> starting sdio requests. It is the same as the RFC version of the set,
+> but this time it has been tested no hardware which actually needs this
+> and I can confirm now that this fixes wifi on that hardware.
 
-Thanks, applied all but the first one, since I already queued a patch
-from Javier for that!
+Great! Thanks, applied for next!
+
+>
+> This patch-set should also allow removing this dw_mmc specific fix:
+>
+> https://git.kernel.org/cgit/linux/kernel/git/torvalds/linux.git/commit/drivers/mmc/host/dw_mmc.c?id=0bdbd0e88cf6b603a2196418672715b0890fb040
+>
+> As this patch-set fixes this problem in a generic manner.
+
+Care to send a patch to remove the above hack/fix?
 
 Kind regards
 Uffe
