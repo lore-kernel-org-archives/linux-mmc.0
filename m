@@ -1,50 +1,123 @@
-From: Shawn Lin <shawn.lin@rock-chips.com>
-Subject: [PATCH v2] mmc: debugfs: implement ios show for SDR12 and SDR25
-Date: Thu, 24 Sep 2015 08:13:43 +0800
-Message-ID: <1443053623-13759-1-git-send-email-shawn.lin@rock-chips.com>
+From: Grant Grundler <grundler@chromium.org>
+Subject: [PATCH] mmc: block: copy resp[] data on err for MMC_IOC_MULTI_CMD
+Date: Wed, 23 Sep 2015 18:30:33 -0700
+Message-ID: <1443058233-2370-1-git-send-email-grundler@chromium.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from lucky1.263xmail.com ([211.157.147.131]:39886 "EHLO
-	lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754981AbbIXAP7 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 23 Sep 2015 20:15:59 -0400
+Received: from mail-pa0-f44.google.com ([209.85.220.44]:36562 "EHLO
+	mail-pa0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751310AbbIXBal (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 23 Sep 2015 21:30:41 -0400
+Received: by pacgz1 with SMTP id gz1so6725340pac.3
+        for <linux-mmc@vger.kernel.org>; Wed, 23 Sep 2015 18:30:41 -0700 (PDT)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Shawn Lin <shawn.lin@rock-chips.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, linux-kernel@vger.kernel.org, Jon Hunter <jonathanh@nvidia.com>, Hyung Taek Ryoo <hryoo@nvidia.com>, Gwendal Grignou <gwendal@chromium.org>, Grant Grundler <grundler@chromium.org>
 
-This patch add MMC_TIMING_UHS_SDR12 and MMC_TIMING_UHS_SDR25
-for mmc_ios_show to show the ios->timing if mmc card runs under
-these two modes.
+MMC_IOC_CMD and MMC_IOC_MULTI_CMD ioctl() code currently bails on
+any eMMC errors. However, in case there is any resp[] data, we
+should attempt to copy resp[] back to user space. The user app
+can then determine which command(s) failed in the MMC_IOC_MULTI_CMD
+case AND/OR report better diagnostics in both cases.
 
-Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
+Gwendal Grignou provided the idea and it was previously implemented
+and tested on v3.18 ChromeOS kernel:
+    https://chromium-review.googlesource.com/#/c/299956
 
+Signed-off-by: Grant Grundler <grundler@chromium.org>
+Reviewed-by: Hyung Taek Ryoo <hryoo@nvidia.com>
+Reviewed-by: Gwendal Grignou <gwendal@chromium.org>
+Tested-by: David Riley <davidriley@chromium.org>
 ---
+I believe the patch applied correctly to Ulf's mmc.git on linaro.org.
+I would have warm fuzzies if Jon or Hyung (Nvidia) could review/test this.
 
-Changes in v2:
-- replace "mmc uhs sdr12" with "sd uhs sdr12"
-  replace "mmc uhs sdr25" with "sd uhs sdr25"
+I made one change from the chromium.org version:
+  initialize err and ioc_err to zero in mmc_blk_ioctl_cmd()
 
- drivers/mmc/core/debugfs.c | 6 ++++++
- 1 file changed, 6 insertions(+)
+ drivers/mmc/card/block.c | 27 +++++++++------------------
+ 1 file changed, 9 insertions(+), 18 deletions(-)
 
-diff --git a/drivers/mmc/core/debugfs.c b/drivers/mmc/core/debugfs.c
-index 9adba8d..f4db93e 100644
---- a/drivers/mmc/core/debugfs.c
-+++ b/drivers/mmc/core/debugfs.c
-@@ -126,6 +126,12 @@ static int mmc_ios_show(struct seq_file *s, void *data)
- 	case MMC_TIMING_SD_HS:
- 		str = "sd high-speed";
- 		break;
-+	case MMC_TIMING_UHS_SDR12:
-+		str = "sd uhs SDR12";
-+		break;
-+	case MMC_TIMING_UHS_SDR25:
-+		str = "sd uhs SDR25";
-+		break;
- 	case MMC_TIMING_UHS_SDR50:
- 		str = "sd uhs SDR50";
- 		break;
+diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+index f6acf0f..23b6c8e 100644
+--- a/drivers/mmc/card/block.c
++++ b/drivers/mmc/card/block.c
+@@ -595,7 +595,7 @@ static int mmc_blk_ioctl_cmd(struct block_device *bdev,
+ 	struct mmc_blk_ioc_data *idata;
+ 	struct mmc_blk_data *md;
+ 	struct mmc_card *card;
+-	int err;
++	int err = 0, ioc_err = 0;
+ 
+ 	idata = mmc_blk_ioctl_copy_from_user(ic_ptr);
+ 	if (IS_ERR(idata))
+@@ -615,19 +615,18 @@ static int mmc_blk_ioctl_cmd(struct block_device *bdev,
+ 
+ 	mmc_get_card(card);
+ 
+-	err = __mmc_blk_ioctl_cmd(card, md, idata);
++	ioc_err = __mmc_blk_ioctl_cmd(card, md, idata);
+ 
+ 	mmc_put_card(card);
+ 
+-	if (!err)
+-		err = mmc_blk_ioctl_copy_to_user(ic_ptr, idata);
++	err = mmc_blk_ioctl_copy_to_user(ic_ptr, idata);
+ 
+ cmd_done:
+ 	mmc_blk_put(md);
+ cmd_err:
+ 	kfree(idata->buf);
+ 	kfree(idata);
+-	return err;
++	return ioc_err ? ioc_err : err;
+ }
+ 
+ static int mmc_blk_ioctl_multi_cmd(struct block_device *bdev,
+@@ -637,7 +636,7 @@ static int mmc_blk_ioctl_multi_cmd(struct block_device *bdev,
+ 	struct mmc_ioc_cmd __user *cmds = user->cmds;
+ 	struct mmc_card *card;
+ 	struct mmc_blk_data *md;
+-	int i, err = -EFAULT;
++	int i, err = 0, ioc_err = 0;
+ 	__u64 num_of_cmds;
+ 
+ 	if (copy_from_user(&num_of_cmds, &user->num_of_cmds,
+@@ -672,22 +671,14 @@ static int mmc_blk_ioctl_multi_cmd(struct block_device *bdev,
+ 
+ 	mmc_get_card(card);
+ 
+-	for (i = 0; i < num_of_cmds; i++) {
+-		err = __mmc_blk_ioctl_cmd(card, md, idata[i]);
+-		if (err) {
+-			mmc_put_card(card);
+-			goto cmd_done;
+-		}
+-	}
++	for (i = 0; i < num_of_cmds && !ioc_err; i++)
++		ioc_err = __mmc_blk_ioctl_cmd(card, md, idata[i]);
+ 
+ 	mmc_put_card(card);
+ 
+ 	/* copy to user if data and response */
+-	for (i = 0; i < num_of_cmds; i++) {
++	for (i = 0; i < num_of_cmds && !err; i++)
+ 		err = mmc_blk_ioctl_copy_to_user(&cmds[i], idata[i]);
+-		if (err)
+-			break;
+-	}
+ 
+ cmd_done:
+ 	mmc_blk_put(md);
+@@ -697,7 +688,7 @@ cmd_err:
+ 		kfree(idata[i]);
+ 	}
+ 	kfree(idata);
+-	return err;
++	return ioc_err ? ioc_err : err;
+ }
+ 
+ static int mmc_blk_ioctl(struct block_device *bdev, fmode_t mode,
 -- 
-2.3.7
-
+2.6.0.rc2.230.g3dd15c0
 
