@@ -1,123 +1,36 @@
-From: Grant Grundler <grundler@chromium.org>
-Subject: [PATCH] mmc: block: copy resp[] data on err for MMC_IOC_MULTI_CMD
-Date: Wed, 23 Sep 2015 18:30:33 -0700
-Message-ID: <1443058233-2370-1-git-send-email-grundler@chromium.org>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pa0-f44.google.com ([209.85.220.44]:36562 "EHLO
-	mail-pa0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751310AbbIXBal (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 23 Sep 2015 21:30:41 -0400
-Received: by pacgz1 with SMTP id gz1so6725340pac.3
-        for <linux-mmc@vger.kernel.org>; Wed, 23 Sep 2015 18:30:41 -0700 (PDT)
-Sender: linux-mmc-owner@vger.kernel.org
+From: Geert Uytterhoeven <geert@linux-m68k.org>
+Subject: Re: [PATCH] tmio_mmc_pio: test TMIO_MMC_WRPROTECT_DISABLE earlier
+Date: Thu, 24 Sep 2015 09:04:20 +0200
+Message-ID: <CAMuHMdUicoDv-MROEVGqsM-o7hiCqBdkjK3Tn45zE0r5Z1hofQ@mail.gmail.com>
+References: <1513691.2yatcrs42i@wasted.cogentembedded.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-sh-owner@vger.kernel.org>
+In-Reply-To: <1513691.2yatcrs42i@wasted.cogentembedded.com>
+Sender: linux-sh-owner@vger.kernel.org
+To: Sergei Shtylyov <sergei.shtylyov@cogentembedded.com>
+Cc: Linux MMC List <linux-mmc@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, Ian Molton <ian@mnementh.co.uk>, Linux-sh list <linux-sh@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, linux-kernel@vger.kernel.org, Jon Hunter <jonathanh@nvidia.com>, Hyung Taek Ryoo <hryoo@nvidia.com>, Gwendal Grignou <gwendal@chromium.org>, Grant Grundler <grundler@chromium.org>
 
-MMC_IOC_CMD and MMC_IOC_MULTI_CMD ioctl() code currently bails on
-any eMMC errors. However, in case there is any resp[] data, we
-should attempt to copy resp[] back to user space. The user app
-can then determine which command(s) failed in the MMC_IOC_MULTI_CMD
-case AND/OR report better diagnostics in both cases.
+On Thu, Sep 24, 2015 at 1:58 AM, Sergei Shtylyov
+<sergei.shtylyov@cogentembedded.com> wrote:
+> There seems  to be no sense in the runtime PM calls when the actual register
+> read is suppressed by the TMIO_MMC_WRPROTECT_DISABLE flag.  Check that flag
+> before trying to read the register and  thus doing the runtime PM dance...
+>
+> While at it, kill useless local variable and add empty line after declarations.
+>
+> Signed-off-by: Sergei Shtylyov <sergei.shtylyov@cogentembedded.com>
 
-Gwendal Grignou provided the idea and it was previously implemented
-and tested on v3.18 ChromeOS kernel:
-    https://chromium-review.googlesource.com/#/c/299956
+Acked-by: Geert Uytterhoeven <geert+renesas@glider.be>
 
-Signed-off-by: Grant Grundler <grundler@chromium.org>
-Reviewed-by: Hyung Taek Ryoo <hryoo@nvidia.com>
-Reviewed-by: Gwendal Grignou <gwendal@chromium.org>
-Tested-by: David Riley <davidriley@chromium.org>
----
-I believe the patch applied correctly to Ulf's mmc.git on linaro.org.
-I would have warm fuzzies if Jon or Hyung (Nvidia) could review/test this.
+Gr{oetje,eeting}s,
 
-I made one change from the chromium.org version:
-  initialize err and ioc_err to zero in mmc_blk_ioctl_cmd()
+                        Geert
 
- drivers/mmc/card/block.c | 27 +++++++++------------------
- 1 file changed, 9 insertions(+), 18 deletions(-)
+--
+Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
 
-diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
-index f6acf0f..23b6c8e 100644
---- a/drivers/mmc/card/block.c
-+++ b/drivers/mmc/card/block.c
-@@ -595,7 +595,7 @@ static int mmc_blk_ioctl_cmd(struct block_device *bdev,
- 	struct mmc_blk_ioc_data *idata;
- 	struct mmc_blk_data *md;
- 	struct mmc_card *card;
--	int err;
-+	int err = 0, ioc_err = 0;
- 
- 	idata = mmc_blk_ioctl_copy_from_user(ic_ptr);
- 	if (IS_ERR(idata))
-@@ -615,19 +615,18 @@ static int mmc_blk_ioctl_cmd(struct block_device *bdev,
- 
- 	mmc_get_card(card);
- 
--	err = __mmc_blk_ioctl_cmd(card, md, idata);
-+	ioc_err = __mmc_blk_ioctl_cmd(card, md, idata);
- 
- 	mmc_put_card(card);
- 
--	if (!err)
--		err = mmc_blk_ioctl_copy_to_user(ic_ptr, idata);
-+	err = mmc_blk_ioctl_copy_to_user(ic_ptr, idata);
- 
- cmd_done:
- 	mmc_blk_put(md);
- cmd_err:
- 	kfree(idata->buf);
- 	kfree(idata);
--	return err;
-+	return ioc_err ? ioc_err : err;
- }
- 
- static int mmc_blk_ioctl_multi_cmd(struct block_device *bdev,
-@@ -637,7 +636,7 @@ static int mmc_blk_ioctl_multi_cmd(struct block_device *bdev,
- 	struct mmc_ioc_cmd __user *cmds = user->cmds;
- 	struct mmc_card *card;
- 	struct mmc_blk_data *md;
--	int i, err = -EFAULT;
-+	int i, err = 0, ioc_err = 0;
- 	__u64 num_of_cmds;
- 
- 	if (copy_from_user(&num_of_cmds, &user->num_of_cmds,
-@@ -672,22 +671,14 @@ static int mmc_blk_ioctl_multi_cmd(struct block_device *bdev,
- 
- 	mmc_get_card(card);
- 
--	for (i = 0; i < num_of_cmds; i++) {
--		err = __mmc_blk_ioctl_cmd(card, md, idata[i]);
--		if (err) {
--			mmc_put_card(card);
--			goto cmd_done;
--		}
--	}
-+	for (i = 0; i < num_of_cmds && !ioc_err; i++)
-+		ioc_err = __mmc_blk_ioctl_cmd(card, md, idata[i]);
- 
- 	mmc_put_card(card);
- 
- 	/* copy to user if data and response */
--	for (i = 0; i < num_of_cmds; i++) {
-+	for (i = 0; i < num_of_cmds && !err; i++)
- 		err = mmc_blk_ioctl_copy_to_user(&cmds[i], idata[i]);
--		if (err)
--			break;
--	}
- 
- cmd_done:
- 	mmc_blk_put(md);
-@@ -697,7 +688,7 @@ cmd_err:
- 		kfree(idata[i]);
- 	}
- 	kfree(idata);
--	return err;
-+	return ioc_err ? ioc_err : err;
- }
- 
- static int mmc_blk_ioctl(struct block_device *bdev, fmode_t mode,
--- 
-2.6.0.rc2.230.g3dd15c0
-
+In personal conversations with technical people, I call myself a hacker. But
+when I'm talking to journalists I just say "programmer" or something like that.
+                                -- Linus Torvalds
