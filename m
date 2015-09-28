@@ -1,77 +1,45 @@
-From: Barry Song <21cnbao@gmail.com>
-Subject: [PATCH v2 1/2] mmc: core: enable CMD19 tuning for DDR50 mode
-Date: Mon, 28 Sep 2015 03:23:37 +0000
-Message-ID: <1443410618-14763-1-git-send-email-21cnbao@gmail.com>
+From: Yangbo Lu <yangbo.lu@freescale.com>
+Subject: [v5, 1/4] mmc: dt: add DT binding for little-endian eSDHC host controller
+Date: Mon, 28 Sep 2015 14:35:01 +0800
+Message-ID: <1443422101-12964-1-git-send-email-yangbo.lu@freescale.com>
+Mime-Version: 1.0
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pa0-f46.google.com ([209.85.220.46]:33434 "EHLO
-	mail-pa0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755562AbbI1DPX (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 27 Sep 2015 23:15:23 -0400
-Received: by pacex6 with SMTP id ex6so160483768pac.0
-        for <linux-mmc@vger.kernel.org>; Sun, 27 Sep 2015 20:15:23 -0700 (PDT)
+Received: from mail-bn1bon0116.outbound.protection.outlook.com ([157.56.111.116]:23373
+	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1750843AbbI1GlL (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 28 Sep 2015 02:41:11 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: ulf.hansson@linaro.org
-Cc: linux-mmc@vger.kernel.org, workgroup.linux@csr.com, Weijun Yang <york.yang@csr.com>, Barry Song <Baohua.Song@csr.com>
+To: linux-mmc@vger.kernel.org, ulf.hansson@linaro.org, LeoLi@freescale.com
+Cc: Yangbo Lu <yangbo.lu@freescale.com>
 
-From: Weijun Yang <york.yang@csr.com>
-
-As SD Specifications Part1 Physical Layer Specification Version
-3.01 says, CMD19 tuning is available for unlocked cards in transfer
-state of 1.8V signaling mode. The small difference between v3.00
-and 3.01 spec means that CMD19 tuning is also available for DDR50
-mode.
-
-Signed-off-by: Weijun Yang <york.yang@csr.com>
-Signed-off-by: Barry Song <Baohua.Song@csr.com>
+Signed-off-by: Yangbo Lu <yangbo.lu@freescale.com>
 ---
- drivers/mmc/core/sd.c    | 19 +++++++++++++++++--
- drivers/mmc/host/sdhci.c |  1 +
- 2 files changed, 18 insertions(+), 2 deletions(-)
+Changes for v5:
+	- Redefined io accessors for both BE and LE eSDHC
+Changes for v4:
+	- Moved endian mode checking back to sdhci-pltfm driver
+Changes for v3:
+	- Moved endian mode checking to generic mmc host driver
+---
+ Documentation/devicetree/bindings/mmc/fsl-esdhc.txt | 2 ++
+ 1 file changed, 2 insertions(+)
 
-diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
-index 4e7366a..eaf8cb3 100644
---- a/drivers/mmc/core/sd.c
-+++ b/drivers/mmc/core/sd.c
-@@ -628,9 +628,24 @@ static int mmc_sd_init_uhs_card(struct mmc_card *card)
- 	 * SDR104 mode SD-cards. Note that tuning is mandatory for SDR104.
- 	 */
- 	if (!mmc_host_is_spi(card->host) &&
--	    (card->sd_bus_speed == UHS_SDR50_BUS_SPEED ||
--	     card->sd_bus_speed == UHS_SDR104_BUS_SPEED))
-+		(card->sd_bus_speed == UHS_SDR50_BUS_SPEED ||
-+		 card->sd_bus_speed == UHS_DDR50_BUS_SPEED ||
-+		 card->sd_bus_speed == UHS_SDR104_BUS_SPEED)) {
- 		err = mmc_execute_tuning(card);
-+
-+		/*
-+		 * As SD Specifications Part1 Physical Layer Specification Version
-+		 * 3.01 says, CMD19 tuning is available for unlocked cards in transfer
-+		 * state of 1.8V signaling mode. The small difference between v3.00
-+		 * and 3.01 spec means that CMD19 tuning is also available for DDR50
-+		 * mode.
-+		 */
-+		if (err && (card->sd_bus_speed == UHS_DDR50_BUS_SPEED)) {
-+			pr_warn("%s: ddr50 tuning failed\n", mmc_hostname(card->host));
-+			err = 0;
-+		}
-+	}
-+
- out:
- 	kfree(status);
+diff --git a/Documentation/devicetree/bindings/mmc/fsl-esdhc.txt b/Documentation/devicetree/bindings/mmc/fsl-esdhc.txt
+index b7943f3..dedfb02 100644
+--- a/Documentation/devicetree/bindings/mmc/fsl-esdhc.txt
++++ b/Documentation/devicetree/bindings/mmc/fsl-esdhc.txt
+@@ -22,6 +22,8 @@ Optional properties:
+   - voltage-ranges : two cells are required, first cell specifies minimum
+     slot voltage (mV), second cell specifies maximum slot voltage (mV).
+     Several ranges could be specified.
++  - little-endian : If the host controller is little-endian mode, specify
++    this property. The default endian mode is big-endian.
  
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 64b7fdb..382810d 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -1915,6 +1915,7 @@ static int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode)
- 		break;
+ Example:
  
- 	case MMC_TIMING_UHS_SDR104:
-+	case MMC_TIMING_UHS_DDR50:
- 		break;
- 
- 	case MMC_TIMING_UHS_SDR50:
 -- 
-1.9.1
+2.1.0.27.g96db324
 
