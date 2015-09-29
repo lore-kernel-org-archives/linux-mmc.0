@@ -1,69 +1,67 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] tmio_mmc_pio: test TMIO_MMC_WRPROTECT_DISABLE earlier
-Date: Tue, 29 Sep 2015 12:22:48 +0200
-Message-ID: <CAPDyKFrFfN9ty25=rGrQ_TuaSDG-qtM8Dd_HxhB4oW+mhNM4vQ@mail.gmail.com>
-References: <1513691.2yatcrs42i@wasted.cogentembedded.com>
-	<CAPDyKFqt3AygyfXG5M-jTVqdvLi0CxWuyUmPFjg+A0dmz+o7qA@mail.gmail.com>
-	<5605C712.3060400@cogentembedded.com>
+Subject: Re: [PATCH v2] mmc: debugfs: implement ios show for SDR12 and SDR25
+Date: Tue, 29 Sep 2015 12:30:51 +0200
+Message-ID: <CAPDyKFrhM+jjnJuJXN03wGmH8pk_UpmC6sNMM4OXhKag8ToDhg@mail.gmail.com>
+References: <1443053623-13759-1-git-send-email-shawn.lin@rock-chips.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-sh-owner@vger.kernel.org>
-In-Reply-To: <5605C712.3060400@cogentembedded.com>
-Sender: linux-sh-owner@vger.kernel.org
-To: Sergei Shtylyov <sergei.shtylyov@cogentembedded.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Ian Molton <ian@mnementh.co.uk>, Linux-sh list <linux-sh@vger.kernel.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-wi0-f170.google.com ([209.85.212.170]:36962 "EHLO
+	mail-wi0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S934494AbbI2Kaw (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 29 Sep 2015 06:30:52 -0400
+Received: by wicfx3 with SMTP id fx3so8919479wic.0
+        for <linux-mmc@vger.kernel.org>; Tue, 29 Sep 2015 03:30:51 -0700 (PDT)
+In-Reply-To: <1443053623-13759-1-git-send-email-shawn.lin@rock-chips.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Shawn Lin <shawn.lin@rock-chips.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 
-[...]
+On 24 September 2015 at 02:13, Shawn Lin <shawn.lin@rock-chips.com> wrote:
+> This patch add MMC_TIMING_UHS_SDR12 and MMC_TIMING_UHS_SDR25
+> for mmc_ios_show to show the ios->timing if mmc card runs under
+> these two modes.
+>
+> Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
 
->>
->> Actually this change won't have the desired effect, as the mmc core
->> already done a pm_runtime_get_sync() since it has claimed the mmc
->> host[1].
->
->
->> I do realize that most drivers are still maintaining the
->> pm_runtime_get|put() calls, but in most cases that's not needed any
->> more.
->
->
->    Hm, OK. Should be OK to remove the RPM dances from at least this
-> particular driver, right?
-
-In most cases, yes.
-
-There may be corner cases where the host is accessed without having
-the mmc core involved (and thus the host hasn't been claimed).
-
->
->> [1]
->> commit 9250aea76bfc ("mmc: core: Enable runtime PM management of host
->> devices")
->
->
->    Looking at the code, the following fragment of mmc_attach_sd() doesn't
-> make much sense to me:
->
->         mmc_release_host(host);
->         err = mmc_add_card(host->card);
->         mmc_claim_host(host);
->         if (err)
->                 goto remove_card;
->
->         return 0;
->
-> remove_card:
->         mmc_release_host(host);
->         mmc_remove_card(host->card);
->         host->card = NULL;
->         mmc_claim_host(host);
->
->    Why claim the host and immediately release it on mmc_add_card() error?
-> Can we only claim on success and save a call here?
-
-You are right, we can simplify the sequence!
-
-Do you want to send a patch? Actually, it's similar for mmc_attach_mmc()...
+Thanks, applied for next.
 
 Kind regards
 Uffe
+
+>
+> ---
+>
+> Changes in v2:
+> - replace "mmc uhs sdr12" with "sd uhs sdr12"
+>   replace "mmc uhs sdr25" with "sd uhs sdr25"
+>
+>  drivers/mmc/core/debugfs.c | 6 ++++++
+>  1 file changed, 6 insertions(+)
+>
+> diff --git a/drivers/mmc/core/debugfs.c b/drivers/mmc/core/debugfs.c
+> index 9adba8d..f4db93e 100644
+> --- a/drivers/mmc/core/debugfs.c
+> +++ b/drivers/mmc/core/debugfs.c
+> @@ -126,6 +126,12 @@ static int mmc_ios_show(struct seq_file *s, void *data)
+>         case MMC_TIMING_SD_HS:
+>                 str = "sd high-speed";
+>                 break;
+> +       case MMC_TIMING_UHS_SDR12:
+> +               str = "sd uhs SDR12";
+> +               break;
+> +       case MMC_TIMING_UHS_SDR25:
+> +               str = "sd uhs SDR25";
+> +               break;
+>         case MMC_TIMING_UHS_SDR50:
+>                 str = "sd uhs SDR50";
+>                 break;
+> --
+> 2.3.7
+>
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
