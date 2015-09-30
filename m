@@ -1,48 +1,53 @@
-From: Chaotian Jing <chaotian.jing@mediatek.com>
-Subject: [PATCH] mmc: core: fix dead loop of mmc_retune
-Date: Wed, 30 Sep 2015 17:37:18 +0800
-Message-ID: <1443605838-5948-1-git-send-email-chaotian.jing@mediatek.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH] tmio_mmc_pio: test TMIO_MMC_WRPROTECT_DISABLE earlier
+Date: Wed, 30 Sep 2015 12:07:08 +0200
+Message-ID: <CAPDyKFp7JZNfw7BCGSZ07LzJ6iXG_DFZwemZRrGBPo_QPybi6Q@mail.gmail.com>
+References: <1513691.2yatcrs42i@wasted.cogentembedded.com>
+	<CAPDyKFqt3AygyfXG5M-jTVqdvLi0CxWuyUmPFjg+A0dmz+o7qA@mail.gmail.com>
+	<5605C712.3060400@cogentembedded.com>
+	<CAPDyKFrFfN9ty25=rGrQ_TuaSDG-qtM8Dd_HxhB4oW+mhNM4vQ@mail.gmail.com>
+	<560A9A8D.1080808@cogentembedded.com>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailgw01.mediatek.com ([210.61.82.183]:46659 "EHLO
-	mailgw01.mediatek.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1753378AbbI3Jkb (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 30 Sep 2015 05:40:31 -0400
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-sh-owner@vger.kernel.org>
+In-Reply-To: <560A9A8D.1080808@cogentembedded.com>
+Sender: linux-sh-owner@vger.kernel.org
+To: Sergei Shtylyov <sergei.shtylyov@cogentembedded.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Ian Molton <ian@mnementh.co.uk>, Linux-sh list <linux-sh@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Matthias Brugger <matthias.bgg@gmail.com>, Adrian Hunter <adrian.hunter@intel.com>, Johan Rudholm <johan.rudholm@axis.com>, Javier Martinez Canillas <javier.martinez@collabora.co.uk>, Shawn Lin <shawn.lin@rock-chips.com>, Andrew Gabbasov <andrew_gabbasov@mentor.com>, David Jander <david@protonic.nl>, Sascha Hauer <s.hauer@pengutronix.de>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mediatek@lists.infradead.org, srv_heupstream@mediatek.com, Sascha Hauer <kernel@pengutronix.de>, Chaotian Jing <chaotian.jing@mediatek.com>
 
-When get a CRC error, start the mmc_retune, it will issue CMD19/CMD21
-to do tune, assume there were 10 clock phase need to try, phase 0 to
-phase 6 is ok, phase 7 to phase 9 is NG, we try it from 0 to 9, so
-the last CMD19/CMD21 will get CRC error, host->need_retune was set and
-cause mmc_retune was called, then dead loop of mmc_retune
+[...]
 
-Signed-off-by: Chaotian Jing <chaotian.jing@mediatek.com>
----
- drivers/mmc/core/core.c | 6 ++++--
- 1 file changed, 4 insertions(+), 2 deletions(-)
+>>>     Looking at the code, the following fragment of mmc_attach_sd()
+>>> doesn't
+>>> make much sense to me:
+>>>
+>>>          mmc_release_host(host);
+>>>          err = mmc_add_card(host->card);
+>>>          mmc_claim_host(host);
+>>>          if (err)
+>>>                  goto remove_card;
+>>>
+>>>          return 0;
+>>>
+>>> remove_card:
+>>>          mmc_release_host(host);
+>>>          mmc_remove_card(host->card);
+>>>          host->card = NULL;
+>>>          mmc_claim_host(host);
+>>>
+>>>     Why claim the host and immediately release it on mmc_add_card()
+>>> error?
+>>> Can we only claim on success and save a call here?
+>
+>
+>> You are right, we can simplify the sequence!
+>
+>
+>    OK, what about calling mmc_remove_card() on mmc_add_card() failure?
+> Isn't it also superfluous?
 
-diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index 0520064..a3eb20b 100644
---- a/drivers/mmc/core/core.c
-+++ b/drivers/mmc/core/core.c
-@@ -134,9 +134,11 @@ void mmc_request_done(struct mmc_host *host, struct mmc_request *mrq)
- 	int err = cmd->error;
- 
- 	/* Flag re-tuning needed on CRC errors */
--	if (err == -EILSEQ || (mrq->sbc && mrq->sbc->error == -EILSEQ) ||
-+	if ((cmd->opcode != MMC_SEND_TUNING_BLOCK &&
-+	    cmd->opcode != MMC_SEND_TUNING_BLOCK_HS200) &&
-+	    (err == -EILSEQ || (mrq->sbc && mrq->sbc->error == -EILSEQ) ||
- 	    (mrq->data && mrq->data->error == -EILSEQ) ||
--	    (mrq->stop && mrq->stop->error == -EILSEQ))
-+	    (mrq->stop && mrq->stop->error == -EILSEQ)))
- 		mmc_retune_needed(host);
- 
- 	if (err && cmd->retries && mmc_host_is_spi(host)) {
--- 
-1.8.1.1.dirty
+Nope.
 
+Kind regards
+Uffe
