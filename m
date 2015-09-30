@@ -1,222 +1,64 @@
-From: Heiko =?ISO-8859-1?Q?St=FCbner?= <heiko@sntech.de>
-Subject: Re: [PATCH v2 3/8] mmc: core: Add mmc_regulator_set_vqmmc()
-Date: Wed, 30 Sep 2015 16:55:21 +0200
-Message-ID: <17200614.QxCe8zAb7I@diego>
-References: <1443622064-14362-1-git-send-email-heiko@sntech.de> <1443622064-14362-4-git-send-email-heiko@sntech.de> <CAPDyKFrTNF6RUWs6UdBGoyrp+zzrLf8qAHgBL4xV6fjK_HM_yw@mail.gmail.com>
+From: Mirza Krak <mirza.krak@hostmobility.com>
+Subject: Re: MMC card removal during suspend
+Date: Wed, 30 Sep 2015 18:10:29 +0200
+Message-ID: <CAJ=nTsuy2aD66DSc5kmEi79OjzPsXdOC2bx5-GxS=xy8LMCA=Q@mail.gmail.com>
+References: <CAJ=nTsuXgR4Fmjriy32LvbO49Yk_q0RYBV1S2FwHG+hZgG3aRw@mail.gmail.com>
+	<CAPDyKFraSBSeRebD7VXbo8TTquSK4qUnqO6GvfRa-ye--7JXuA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7Bit
-Return-path: <linux-clk-owner@vger.kernel.org>
-In-Reply-To: <CAPDyKFrTNF6RUWs6UdBGoyrp+zzrLf8qAHgBL4xV6fjK_HM_yw@mail.gmail.com>
-Sender: linux-clk-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Michael Turquette <mturquette@baylibre.com>, Stephen Boyd <sboyd@codeaurora.org>, "tgih.jun@samsung.com" <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, linux-mmc <linux-mmc@vger.kernel.org>, linux-clk@vger.kernel.org, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "open list:ARM/Rockchip SoC..." <linux-rockchip@lists.infradead.org>, Doug Anderson <dianders@chromium.org>, Alexandru Stan <amstan@chromium.org>
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-la0-f45.google.com ([209.85.215.45]:33706 "EHLO
+	mail-la0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754399AbbI3QKb (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 30 Sep 2015 12:10:31 -0400
+Received: by lahh2 with SMTP id h2so52436093lah.0
+        for <linux-mmc@vger.kernel.org>; Wed, 30 Sep 2015 09:10:29 -0700 (PDT)
+In-Reply-To: <CAPDyKFraSBSeRebD7VXbo8TTquSK4qUnqO6GvfRa-ye--7JXuA@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>
 
-Am Mittwoch, 30. September 2015, 16:42:05 schrieb Ulf Hansson:
-> On 30 September 2015 at 16:07, Heiko Stuebner <heiko@sntech.de> wrote:
-> > From: Douglas Anderson <dianders@chromium.org>
-> > 
-> > This adds logic to the MMC core to set VQMMC.  This is expected to be
-> > called by MMC drivers like dw_mmc as part of (or instead of) their
-> > start_signal_voltage_switch() callback.
-> > 
-> > A few notes:
-> > 
-> > * When setting the signal voltage to 3.3V we do our best to make VQMMC
-> > 
-> >   and VMMC match.  It's been reported that this makes some old cards
-> >   happy since they were tested back in the day before UHS when VQMMC
-> >   and VMMC were provided by the same regulator.  A nice side effect of
-> >   this is that we don't end up on the hairy edge of VQMMC (2.7V),
-> >   which some EEs claim is a little too close to the minimum for
-> >   comfort.
-> >   This is done in two steps. At first we try to find a VQMMC within
-> >   a 0.3V tolerance of VMMC and if this is not supported by the
-> >   supplying regulator we try to find a suitable voltage within the
-> >   whole 2.7V-3.6V area of the spec.
-> > 
-> > * The two step approach is currently necessary, as the used
-> > 
-> >   regulator_set_voltage_triplet(min, target, max) uses a simple
-> >   
-> >   implementation that just tries two basic steps:
-> >         regulator_set_voltage(target, max);
-> >         regulator_set_voltage(min, target);
-> >   
-> >   So with only one step with 2.7-3.6V borders, if a suitable voltage
-> >   is a bit below VMMC, we would directly get the lowest 2.7V
-> >   which some boards (like Rockchips) don't like at all.
-> > 
-> > * When setting the signal voltage to 1.8V or 1.2V we aim for that
-> > 
-> >   specific voltage instead of picking the lowest one in the range.
-> > 
-> > * We very purposely don't print errors in mmc_regulator_set_vqmmc().
-> > 
-> >   There are cases where the MMC core will try several different
-> >   voltages and we don't want to pollute the logs.
-> > 
-> > Signed-off-by: Douglas Anderson <dianders@chromium.org>
-> > Signed-off-by: Heiko Stuebner <heiko@sntech.de>
-> 
-> This looks good to me!
+Hi again.
 
-very cool :-)
+Thank you for your response Ulf.
 
+I am going to start over though since I did not get everything right
+the first time.
 
-> Once all are happy with the patches, can we take the mmc patches via
-> my mmc tree or does it all have to go together?
+As stated I am running the 4.1.5 Linux kernel and what I am actually
+using is a SD card. The host driver is sdhci-esdhc-imx.c.
 
-The clock changes of course only touch internals of the phase-clocks, so 
-should have no problem going through another tree.
+And my initial issue was that on resume I get the following:
+[   31.848397] mmc0: card never left busy state
+[   31.848412] mmc0: error -110 during resume (card was removed?)
+[   31.848550] PM: resume of devices complete after 2062.936 msecs
+[   31.931086] PM: Finishing wakeup.
+[   31.931102] Restarting tasks ... done.
+[   31.954336] mmc0: card dade removed
+[   32.358711] mmc0: host does not support reading read-only switch,
+assuming write-enable
+[   32.391857] mmc0: new SD card at address aaaa
+[   32.418228] mmcblk0: mmc0:aaaa SU02G 1.84 GiB
+[   32.446402]  mmcblk0: p1
+[   32.835907] EXT4-fs (mmcblk0p1): recovery complete
+[   32.840873] EXT4-fs (mmcblk0p1): mounted filesystem with ordered
+data mode. Opts: (null)
 
-For the devicetree part I'm unsure. If the boards enable the tuning-related 
-settings without the new voltage handling, 2.7V gets set on all Rockchip 
-boards which doesn't work on those at all.
+And that was the reason of my initial questions on what is supposed to
+happen when suspending.
 
-So either the dts patches would need to go into your tree, I would need a 
-stable branch or we could simply postpone dts changes for the next cycle.
+The card IS actually "removed" when in suspended state since we cut
+the power-rail completely to the SD card.
 
+I assume that this is a sdhci-esdhc-imx issue, but then I wonder what
+would be a proper fix for this.
 
-Heiko
+As stated before I get around this problem by adding a HACK to force
+removal of the SD card before suspending in mmc_pm_notify.
 
-> > ---
-> > 
-> >  drivers/mmc/core/core.c  | 74
-> >  ++++++++++++++++++++++++++++++++++++++++++++++++
-> >  include/linux/mmc/host.h |  7 +++++
-> >  2 files changed, 81 insertions(+)
-> > 
-> > diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-> > index 0520064..363cc98 100644
-> > --- a/drivers/mmc/core/core.c
-> > +++ b/drivers/mmc/core/core.c
-> > @@ -1437,6 +1437,80 @@ int mmc_regulator_set_ocr(struct mmc_host *mmc,
-> > 
-> >  }
-> >  EXPORT_SYMBOL_GPL(mmc_regulator_set_ocr);
-> > 
-> > +static int mmc_regulator_set_voltage_if_supported(struct regulator
-> > *regulator, +                                                 int min_uV,
-> > int target_uV, +                                                 int
-> > max_uV)
-> > +{
-> > +       /*
-> > +        * Check if supported first to avoid errors since we may try
-> > several +        * signal levels during power up and don't want to show
-> > errors. +        */
-> > +       if (!regulator_is_supported_voltage(regulator, min_uV, max_uV))
-> > +               return -EINVAL;
-> > +
-> > +       return regulator_set_voltage_triplet(regulator, min_uV, target_uV,
-> > +                                            max_uV);
-> > +}
-> > +
-> > +/**
-> > + * mmc_regulator_set_vqmmc - Set VQMMC as per the ios
-> > + *
-> > + * For 3.3V signaling, we try to match VQMMC to VMMC as closely as
-> > possible. + * That will match the behavior of old boards where VQMMC and
-> > VMMC were supplied + * by the same supply.  The Bus Operating conditions
-> > for 3.3V signaling in the + * SD card spec also define VQMMC in terms of
-> > VMMC.
-> > + * If this is not possible we'll try the full 2.7-3.6V of the spec.
-> > + *
-> > + * For 1.2V and 1.8V signaling we'll try to get as close as possible to
-> > the + * requested voltage.  This is definitely a good idea for UHS where
-> > there's a + * separate regulator on the card that's trying to make 1.8V
-> > and it's best if + * we match.
-> > + *
-> > + * This function is expected to be used by a controller's
-> > + * start_signal_voltage_switch() function.
-> > + */
-> > +int mmc_regulator_set_vqmmc(struct mmc_host *mmc, struct mmc_ios *ios)
-> > +{
-> > +       int volt, min_uV, max_uV;
-> > +
-> > +       /* If no vqmmc supply then we can't change the voltage */
-> > +       if (IS_ERR(mmc->supply.vqmmc))
-> > +               return -EINVAL;
-> > +
-> > +       switch (ios->signal_voltage) {
-> > +       case MMC_SIGNAL_VOLTAGE_120:
-> > +               return
-> > mmc_regulator_set_voltage_if_supported(mmc->supply.vqmmc, +              
-> >                                 1100000, 1200000, 1300000); +       case
-> > MMC_SIGNAL_VOLTAGE_180:
-> > +               return
-> > mmc_regulator_set_voltage_if_supported(mmc->supply.vqmmc, +              
-> >                                 1700000, 1800000, 1950000); +       case
-> > MMC_SIGNAL_VOLTAGE_330:
-> > +               volt = regulator_get_voltage(mmc->supply.vmmc);
-> > +               if (volt < 0)
-> > +                       return volt;
-> > +
-> > +               min_uV = max(volt - 300000, 2700000);
-> > +               max_uV = min(volt + 300000, 3600000);
-> > +
-> > +               /*
-> > +                * Due to a limitation in the current implementation of
-> > +                * regulator_set_voltage_triplet() which is taking the
-> > lowest +                * voltage possible if below the target, search
-> > for a suitable +                * voltage in two steps and try to stay
-> > close to vmmc +                * with a 0.3V tolerance at first.
-> > +                */
-> > +               if
-> > (!mmc_regulator_set_voltage_if_supported(mmc->supply.vqmmc, +            
-> >                                   min_uV, volt, max_uV)) +               
-> >        return 0;
-> > +
-> > +               return
-> > mmc_regulator_set_voltage_if_supported(mmc->supply.vqmmc, +              
-> >                                 2700000, volt, 3600000); +       default:
-> > +               return -EINVAL;
-> > +       }
-> > +}
-> > +EXPORT_SYMBOL_GPL(mmc_regulator_set_vqmmc);
-> > +
-> > 
-> >  #endif /* CONFIG_REGULATOR */
-> >  
-> >  int mmc_regulator_get_supply(struct mmc_host *mmc)
-> > 
-> > diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-> > index 83b81fd..a2a78eb 100644
-> > --- a/include/linux/mmc/host.h
-> > +++ b/include/linux/mmc/host.h
-> > @@ -423,6 +423,7 @@ int mmc_regulator_get_ocrmask(struct regulator
-> > *supply);> 
-> >  int mmc_regulator_set_ocr(struct mmc_host *mmc,
-> >  
-> >                         struct regulator *supply,
-> >                         unsigned short vdd_bit);
-> > 
-> > +int mmc_regulator_set_vqmmc(struct mmc_host *mmc, struct mmc_ios *ios);
-> > 
-> >  #else
-> >  static inline int mmc_regulator_get_ocrmask(struct regulator *supply)
-> >  {
-> > 
-> > @@ -435,6 +436,12 @@ static inline int mmc_regulator_set_ocr(struct
-> > mmc_host *mmc,> 
-> >  {
-> >  
-> >         return 0;
-> >  
-> >  }
-> > 
-> > +
-> > +static inline int mmc_regulator_set_vqmmc(struct mmc_host *mmc,
-> > +                                         struct mmc_ios *ios)
-> > +{
-> > +       return -EINVAL;
-> > +}
-> > 
-> >  #endif
-> >  
-> >  int mmc_regulator_get_supply(struct mmc_host *mmc);
-> > 
-> > --
-> > 2.5.1
+Sorry if I am spamming but I am trying to learn :).
 
+Best Regards
+
+Mirza Krak
