@@ -1,79 +1,78 @@
 From: Heiko Stuebner <heiko@sntech.de>
-Subject: [PATCH v2 7/8] ARM: dts: rockchip: Add drive/sample clocks for rk3288 dw_mmc devices
-Date: Wed, 30 Sep 2015 16:07:43 +0200
-Message-ID: <1443622064-14362-8-git-send-email-heiko@sntech.de>
+Subject: [PATCH v2 2/8] clk: rockchip: Make calculations use rounding
+Date: Wed, 30 Sep 2015 16:07:38 +0200
+Message-ID: <1443622064-14362-3-git-send-email-heiko@sntech.de>
 References: <1443622064-14362-1-git-send-email-heiko@sntech.de>
-Return-path: <linux-clk-owner@vger.kernel.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from gloria.sntech.de ([95.129.55.99]:51070 "EHLO gloria.sntech.de"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1754012AbbI3OH4 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 30 Sep 2015 10:07:56 -0400
 In-Reply-To: <1443622064-14362-1-git-send-email-heiko@sntech.de>
-Sender: linux-clk-owner@vger.kernel.org
+Sender: linux-mmc-owner@vger.kernel.org
+List-Id: linux-mmc@vger.kernel.org
 To: ulf.hansson@linaro.org, mturquette@baylibre.com, sboyd@codeaurora.org, tgih.jun@samsung.com, jh80.chung@samsung.com
 Cc: linux-mmc@vger.kernel.org, linux-clk@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-rockchip@lists.infradead.org, dianders@chromium.org, amstan@chromium.org, Heiko Stuebner <heiko@sntech.de>
-List-Id: linux-mmc@vger.kernel.org
 
-From: Alexandru M Stan <amstan@chromium.org>
+From: Douglas Anderson <dianders@chromium.org>
 
-The drive/sample clocks can be phase shifted.  The drive clock
-could be used in a future patch to adjust hold times.  The sample
-clock is used for tuning.
+Let's use DIV_ROUND_CLOSEST for rounding, not just truncating
+division.  This lets us get closer to the right rate.
 
-Signed-off-by: Alexandru M Stan <amstan@chromium.org>
+Before this:
+  set_phase(86) delay_nums=26 reg[0xf000420c]=0x468 actual_degrees=83
+  set_phase(89) delay_nums=27 reg[0xf000420c]=0x46c actual_degrees=86
+
+After this:
+  set_phase(86) delay_nums=27 reg[0xf000420c]=0x46c actual_degrees=86
+  set_phase(89) delay_nums=28 reg[0xf000420c]=0x470 actual_degrees=90
+
+Signed-off-by: Douglas Anderson <dianders@chromium.org>
 Signed-off-by: Heiko Stuebner <heiko@sntech.de>
 ---
- arch/arm/boot/dts/rk3288.dtsi | 20 ++++++++++++--------
- 1 file changed, 12 insertions(+), 8 deletions(-)
+ drivers/clk/rockchip/clk-mmc-phase.c | 13 +++++++------
+ 1 file changed, 7 insertions(+), 6 deletions(-)
 
-diff --git a/arch/arm/boot/dts/rk3288.dtsi b/arch/arm/boot/dts/rk3288.dtsi
-index 27a397f6..37c5a02 100644
---- a/arch/arm/boot/dts/rk3288.dtsi
-+++ b/arch/arm/boot/dts/rk3288.dtsi
-@@ -225,8 +225,9 @@
- 	sdmmc: dwmmc@ff0c0000 {
- 		compatible = "rockchip,rk3288-dw-mshc";
- 		clock-freq-min-max = <400000 150000000>;
--		clocks = <&cru HCLK_SDMMC>, <&cru SCLK_SDMMC>;
--		clock-names = "biu", "ciu";
-+		clocks = <&cru HCLK_SDMMC>, <&cru SCLK_SDMMC>,
-+			 <&cru SCLK_SDMMC_DRV>, <&cru SCLK_SDMMC_SAMPLE>;
-+		clock-names = "biu", "ciu", "ciu-drive", "ciu-sample";
- 		fifo-depth = <0x100>;
- 		interrupts = <GIC_SPI 32 IRQ_TYPE_LEVEL_HIGH>;
- 		reg = <0xff0c0000 0x4000>;
-@@ -236,8 +237,9 @@
- 	sdio0: dwmmc@ff0d0000 {
- 		compatible = "rockchip,rk3288-dw-mshc";
- 		clock-freq-min-max = <400000 150000000>;
--		clocks = <&cru HCLK_SDIO0>, <&cru SCLK_SDIO0>;
--		clock-names = "biu", "ciu";
-+		clocks = <&cru HCLK_SDIO0>, <&cru SCLK_SDIO0>,
-+			 <&cru SCLK_SDIO0_DRV>, <&cru SCLK_SDIO0_SAMPLE>;
-+		clock-names = "biu", "ciu", "ciu-drive", "ciu-sample";
- 		fifo-depth = <0x100>;
- 		interrupts = <GIC_SPI 33 IRQ_TYPE_LEVEL_HIGH>;
- 		reg = <0xff0d0000 0x4000>;
-@@ -247,8 +249,9 @@
- 	sdio1: dwmmc@ff0e0000 {
- 		compatible = "rockchip,rk3288-dw-mshc";
- 		clock-freq-min-max = <400000 150000000>;
--		clocks = <&cru HCLK_SDIO1>, <&cru SCLK_SDIO1>;
--		clock-names = "biu", "ciu";
-+		clocks = <&cru HCLK_SDIO1>, <&cru SCLK_SDIO1>,
-+			 <&cru SCLK_SDIO1_DRV>, <&cru SCLK_SDIO1_SAMPLE>;
-+		clock-names = "biu", "ciu", "ciu-drive", "ciu-sample";
- 		fifo-depth = <0x100>;
- 		interrupts = <GIC_SPI 34 IRQ_TYPE_LEVEL_HIGH>;
- 		reg = <0xff0e0000 0x4000>;
-@@ -258,8 +261,9 @@
- 	emmc: dwmmc@ff0f0000 {
- 		compatible = "rockchip,rk3288-dw-mshc";
- 		clock-freq-min-max = <400000 150000000>;
--		clocks = <&cru HCLK_EMMC>, <&cru SCLK_EMMC>;
--		clock-names = "biu", "ciu";
-+		clocks = <&cru HCLK_EMMC>, <&cru SCLK_EMMC>,
-+			 <&cru SCLK_EMMC_DRV>, <&cru SCLK_EMMC_SAMPLE>;
-+		clock-names = "biu", "ciu", "ciu-drive", "ciu-sample";
- 		fifo-depth = <0x100>;
- 		interrupts = <GIC_SPI 35 IRQ_TYPE_LEVEL_HIGH>;
- 		reg = <0xff0f0000 0x4000>;
+diff --git a/drivers/clk/rockchip/clk-mmc-phase.c b/drivers/clk/rockchip/clk-mmc-phase.c
+index a797d86..bc24e5a 100644
+--- a/drivers/clk/rockchip/clk-mmc-phase.c
++++ b/drivers/clk/rockchip/clk-mmc-phase.c
+@@ -69,7 +69,7 @@ static int rockchip_mmc_get_phase(struct clk_hw *hw)
+ 
+ 		delay_num = (raw_value & ROCKCHIP_MMC_DELAYNUM_MASK);
+ 		delay_num >>= ROCKCHIP_MMC_DELAYNUM_OFFSET;
+-		degrees += delay_num * factor / 10000;
++		degrees += DIV_ROUND_CLOSEST(delay_num * factor, 10000);
+ 	}
+ 
+ 	return degrees % 360;
+@@ -82,7 +82,7 @@ static int rockchip_mmc_set_phase(struct clk_hw *hw, int degrees)
+ 	u8 nineties, remainder;
+ 	u8 delay_num;
+ 	u32 raw_value;
+-	u64 delay;
++	u32 delay;
+ 
+ 	nineties = degrees / 90;
+ 	remainder = (degrees % 90);
+@@ -110,12 +110,13 @@ static int rockchip_mmc_set_phase(struct clk_hw *hw, int degrees)
+ 	 * Convert to delay; do a little extra work to make sure we
+ 	 * don't overflow 32-bit / 64-bit numbers.
+ 	 */
+-	delay = PSECS_PER_SEC;
++	delay = 10000000; /* PSECS_PER_SEC / 10000 / 10 */
+ 	delay *= remainder;
+-	do_div(delay, 10000);
+-	do_div(delay, (rate / 1000) * 36 * ROCKCHIP_MMC_DELAY_ELEMENT_PSEC);
++	delay = DIV_ROUND_CLOSEST(delay,
++			(rate / 1000) * 36 *
++				(ROCKCHIP_MMC_DELAY_ELEMENT_PSEC / 10));
+ 
+-	delay_num = (u8) min(delay, 255ULL);
++	delay_num = (u8) min_t(u32, delay, 255);
+ 
+ 	raw_value = delay_num ? ROCKCHIP_MMC_DELAY_SEL : 0;
+ 	raw_value |= delay_num << ROCKCHIP_MMC_DELAYNUM_OFFSET;
 -- 
 2.5.1
 
