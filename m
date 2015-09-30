@@ -1,31 +1,43 @@
-From: Robert Jarzmik <robert.jarzmik@free.fr>
-Subject: Re: [PATCH v3] mmc: pxamci: fix card detect with slot-gpio API
-Date: Tue, 29 Sep 2015 20:52:21 +0200
-Message-ID: <87oagldpne.fsf@belgarion.home>
-References: <1443296461-20100-1-git-send-email-robert.jarzmik@free.fr>
-	<CAPDyKFqQ7heMVnXpe2pWZ=TzP1GWqJ-UzZb_nBoB_Ph7xZiCyA@mail.gmail.com>
+From: Chaotian Jing <chaotian.jing@mediatek.com>
+Subject: [PATCH] mmc: core: Fix init_card in 52Mhz
+Date: Wed, 30 Sep 2015 11:28:08 +0800
+Message-ID: <1443583688-1952-1-git-send-email-chaotian.jing@mediatek.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp01.smtpout.orange.fr ([80.12.242.123]:57234 "EHLO
-	smtp.smtpout.orange.fr" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S935363AbbI2S5b (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 29 Sep 2015 14:57:31 -0400
-In-Reply-To: <CAPDyKFqQ7heMVnXpe2pWZ=TzP1GWqJ-UzZb_nBoB_Ph7xZiCyA@mail.gmail.com>
-	(Ulf Hansson's message of "Tue, 29 Sep 2015 12:30:57 +0200")
+Received: from mailgw02.mediatek.com ([210.61.82.184]:56603 "EHLO
+	mailgw02.mediatek.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1752320AbbI3D2Y (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 29 Sep 2015 23:28:24 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Petr Cvek <petr.cvek@tul.cz>
+Cc: Matthias Brugger <matthias.bgg@gmail.com>, Adrian Hunter <adrian.hunter@intel.com>, Johan Rudholm <johan.rudholm@axis.com>, Gwendal Grignou <gwendal@chromium.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mediatek@lists.infradead.org, srv_heupstream@mediatek.com, Sascha Hauer <kernel@pengutronix.de>, Chaotian Jing <chaotian.jing@mediatek.com>
 
-Ulf Hansson <ulf.hansson@linaro.org> writes:
+Suppose that we got a data crc error, and it triggers the mmc_reset.
+mmc_reset will call mmc_send_status to see if HW reset was supported.
+before issue CMD13, it will do retune, and if EMMC was in HS400 mode,
+it will reduce frequency to 52Mhz firstly, that results in card init
+was doing at 52Mhz, So need ensure frequency is lower than 400Khz when
+re-init card.
 
-> On 26 September 2015 at 21:41, Robert Jarzmik <robert.jarzmik@free.fr> wrote:
-> Thanks, applied for fixes!
->
-> Kind regards
-> Uffe
-Thanks.
+Signed-off-by: Chaotian Jing <chaotian.jing@mediatek.com>
+---
+ drivers/mmc/core/mmc.c | 1 +
+ 1 file changed, 1 insertion(+)
 
---
-Robert
+diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+index e726903..f2d0c2a 100644
+--- a/drivers/mmc/core/mmc.c
++++ b/drivers/mmc/core/mmc.c
+@@ -1945,6 +1945,7 @@ static int mmc_reset(struct mmc_host *host)
+ 
+ 	/* Set initial state and call mmc_set_ios */
+ 	mmc_set_initial_state(host);
++	mmc_set_clock(host, host->f_init);
+ 	mmc_host_clk_release(host);
+ 
+ 	return mmc_init_card(host, card->ocr, card);
+-- 
+1.8.1.1.dirty
+
