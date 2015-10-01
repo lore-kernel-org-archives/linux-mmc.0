@@ -1,61 +1,48 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [GIT PULL] Update dw-mmc controller
-Date: Thu, 01 Oct 2015 18:17:15 +0900
-Message-ID: <560CFA1B.9050008@samsung.com>
-References: <55C8D73D.10709@gmail.com>
- <CAPDyKFqN9FxQNbwoiCj1A+BUUWHm_H8RXNhKVzUkV0xOUUdCFA@mail.gmail.com>
- <1439806320.3667.39.camel@synopsys.com>
- <CAPDyKFowfusQa+geBxjZZ1KCffVu5BnGM4jD52k3Ztf3wSt7og@mail.gmail.com>
- <1442402874.31048.8.camel@synopsys.com>
+From: Russell King - ARM Linux <linux@arm.linux.org.uk>
+Subject: Re: All OMAP platforms: MMC is broken
+Date: Thu, 1 Oct 2015 10:33:25 +0100
+Message-ID: <20151001093325.GU21513@n2100.arm.linux.org.uk>
+References: <20150924090048.GA21626@n2100.arm.linux.org.uk>
+ <20150924233756.GN23801@atomide.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
-Return-path: <stable-owner@vger.kernel.org>
-In-reply-to: <1442402874.31048.8.camel@synopsys.com>
-Sender: stable-owner@vger.kernel.org
-To: Alexey Brodkin <Alexey.Brodkin@synopsys.com>, "stable@vger.kernel.org" <stable@vger.kernel.org>
-Cc: "jh80.chung@gmail.com" <jh80.chung@gmail.com>, "heiko@sntech.de" <heiko@sntech.de>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "shawn.lin@rock-chips.com" <shawn.lin@rock-chips.com>, "addy.ke@rock-chips.com" <addy.ke@rock-chips.com>, Vineet Gupta <Vineet.Gupta1@synopsys.com>, "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, CPGS <cpgs@samsung.com>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from pandora.arm.linux.org.uk ([78.32.30.218]:59635 "EHLO
+	pandora.arm.linux.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S933033AbbJAJdm (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 1 Oct 2015 05:33:42 -0400
+Content-Disposition: inline
+In-Reply-To: <20150924233756.GN23801@atomide.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Tony Lindgren <tony@atomide.com>, arm@kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 
-CC'd Greg.
+On Thu, Sep 24, 2015 at 04:37:56PM -0700, Tony Lindgren wrote:
+> * Russell King - ARM Linux <linux@arm.linux.org.uk> [150924 02:04]:
+> > Nightly testing has revealed that both the OMAP3430 LDP and the OMAP4430
+> > SDP fail to boot due to lack of working MMC.  Both platforms fail to
+> > find their rootfs, which is on a SD card.
+> > 
+> > The breakage occurred somewhere between trees of September 9th (commit
+> > 4e4adb2f4628) and September 12th (commit b0a1ea51bda4), so during the
+> > merge window.
+> 
+> Yes sorry things got messed up in multiple ways :( I've summarized
+> the mess here earlier:
+> 
+> http://article.gmane.org/gmane.linux.kernel.mmc/33911
+> 
+> And today commit b9c93646fd5c ("regulator: pbias: program pbias register
+> offset in pbias driver") hit mainline so I'll send a pull request for
+> the related dts change.
 
-On 09/16/2015 08:27 PM, Alexey Brodkin wrote:
-> Hello,
-> 
-> On Mon, 2015-08-17 at 12:32 +0200, Ulf Hansson wrote:
->> On 17 August 2015 at 12:12, Alexey Brodkin <Alexey.Brodkin@synopsys.com> wrote:
->>> Hi Ulf,
->>>
->>> On Mon, 2015-08-17 at 11:47 +0200, Ulf Hansson wrote:
->>>> On 10 August 2015 at 18:54, Jaehoon Chung <jh80.chung@gmail.com> wrote:
->>>>> Dear, Ulf.
->>>>>
->>>>> Could you pull these patches into your repository?
->>>>>
->>>>> Best Regards,
->>>>> Jaehoon Chung
->>>>
->>>> Thanks! Pulled into my next branch.
->>>>
->>>> Kind regards
->>>> Uffe
->>>
->>> I'm wondering if mentioned fixes only hit 4.3 (you mentioned your
->>> "next" branch) or there's a chance for them to be pulled in the next 4.2-rcX?
->>>
->>> The thing is we need at least "mmc: dw_mmc: handle data blocks > than 4kB if IDMAC is used"
->>> to get our AXS board upstreamed in full in that 4.2, see:
->>> http://git.kernel.org/cgit/linux/kernel/git/torvalds/linux.git/commit/?id=0890a264794f33df540fbaf274699146903b4e6b)
->>> functional with SD/MMC.
->>
->> Is the above mentioned patch a fix for a regression? If not, it's too
->> late for 4.2.
-> 
-> Please consider following patch to be picked-up for stable branches because
-> it fixes real problem on systems with 4Kb MMU page.
-> 
-> That commit is already in Linux 4.3-rc1 here:
-> http://git.kernel.org/cgit/linux/kernel/git/torvalds/linux.git/commit/?id=5959b32e3636f9bfe3f869d1e440bc4a4d660965
-> 
-> -Alexey
-> 
+It's still broken and untestable.  We're 8 days off it being a full
+month worth of failed testing for OMAP3 and OMAP4 platforms.
+
+I think OMAP and MMC people need to do a post-mortem and work out why
+this happened, and how to stop it happening again in the future.
+
+-- 
+FTTC broadband for 0.8mile line: currently at 9.6Mbps down 400kbps up
+according to speedtest.net.
