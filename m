@@ -1,89 +1,62 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: MMC card removal during suspend
-Date: Thu, 01 Oct 2015 18:43:14 +0900
-Message-ID: <560D0032.4030505@samsung.com>
-References: <CAJ=nTsuXgR4Fmjriy32LvbO49Yk_q0RYBV1S2FwHG+hZgG3aRw@mail.gmail.com>
- <CAPDyKFraSBSeRebD7VXbo8TTquSK4qUnqO6GvfRa-ye--7JXuA@mail.gmail.com>
- <CAJ=nTsuy2aD66DSc5kmEi79OjzPsXdOC2bx5-GxS=xy8LMCA=Q@mail.gmail.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: All OMAP platforms: MMC is broken
+Date: Thu, 1 Oct 2015 11:50:00 +0200
+Message-ID: <CAPDyKFpnqJBrtiBekikrNHAf-agZm12KnF9n+=+72HH=jti-KA@mail.gmail.com>
+References: <20150924090048.GA21626@n2100.arm.linux.org.uk>
+	<20150924233756.GN23801@atomide.com>
+	<20151001093325.GU21513@n2100.arm.linux.org.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout4.samsung.com ([203.254.224.34]:60553 "EHLO
-	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755430AbbJAJnR (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 1 Oct 2015 05:43:17 -0400
-Received: from epcpsbgr4.samsung.com
- (u144.gpu120.samsung.co.kr [203.254.230.144])
- by mailout4.samsung.com (Oracle Communications Messaging Server 7.0.5.31.0
- 64bit (built May  5 2014))
- with ESMTP id <0NVJ00FBFCC3XZ10@mailout4.samsung.com> for
- linux-mmc@vger.kernel.org; Thu, 01 Oct 2015 18:43:15 +0900 (KST)
-In-reply-to: <CAJ=nTsuy2aD66DSc5kmEi79OjzPsXdOC2bx5-GxS=xy8LMCA=Q@mail.gmail.com>
+Received: from mail-wi0-f179.google.com ([209.85.212.179]:35697 "EHLO
+	mail-wi0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751654AbbJAJuC (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 1 Oct 2015 05:50:02 -0400
+Received: by wicge5 with SMTP id ge5so21211422wic.0
+        for <linux-mmc@vger.kernel.org>; Thu, 01 Oct 2015 02:50:00 -0700 (PDT)
+In-Reply-To: <20151001093325.GU21513@n2100.arm.linux.org.uk>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Mirza Krak <mirza.krak@hostmobility.com>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>
+To: Russell King - ARM Linux <linux@arm.linux.org.uk>
+Cc: Tony Lindgren <tony@atomide.com>, "arm@kernel.org" <arm@kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
 
-On 10/01/2015 01:10 AM, Mirza Krak wrote:
-> Hi again.
-> 
-> Thank you for your response Ulf.
-> 
-> I am going to start over though since I did not get everything right
-> the first time.
-> 
-> As stated I am running the 4.1.5 Linux kernel and what I am actually
-> using is a SD card. The host driver is sdhci-esdhc-imx.c.
-> 
-> And my initial issue was that on resume I get the following:
-> [   31.848397] mmc0: card never left busy state
-> [   31.848412] mmc0: error -110 during resume (card was removed?)
-> [   31.848550] PM: resume of devices complete after 2062.936 msecs
-> [   31.931086] PM: Finishing wakeup.
-> [   31.931102] Restarting tasks ... done.
-> [   31.954336] mmc0: card dade removed
-> [   32.358711] mmc0: host does not support reading read-only switch,
-> assuming write-enable
-> [   32.391857] mmc0: new SD card at address aaaa
-> [   32.418228] mmcblk0: mmc0:aaaa SU02G 1.84 GiB
-> [   32.446402]  mmcblk0: p1
-> [   32.835907] EXT4-fs (mmcblk0p1): recovery complete
-> [   32.840873] EXT4-fs (mmcblk0p1): mounted filesystem with ordered
-> data mode. Opts: (null)
-> 
-> And that was the reason of my initial questions on what is supposed to
-> happen when suspending.
+On 1 October 2015 at 11:33, Russell King - ARM Linux
+<linux@arm.linux.org.uk> wrote:
+> On Thu, Sep 24, 2015 at 04:37:56PM -0700, Tony Lindgren wrote:
+>> * Russell King - ARM Linux <linux@arm.linux.org.uk> [150924 02:04]:
+>> > Nightly testing has revealed that both the OMAP3430 LDP and the OMAP4430
+>> > SDP fail to boot due to lack of working MMC.  Both platforms fail to
+>> > find their rootfs, which is on a SD card.
+>> >
+>> > The breakage occurred somewhere between trees of September 9th (commit
+>> > 4e4adb2f4628) and September 12th (commit b0a1ea51bda4), so during the
+>> > merge window.
+>>
+>> Yes sorry things got messed up in multiple ways :( I've summarized
+>> the mess here earlier:
+>>
+>> http://article.gmane.org/gmane.linux.kernel.mmc/33911
+>>
+>> And today commit b9c93646fd5c ("regulator: pbias: program pbias register
+>> offset in pbias driver") hit mainline so I'll send a pull request for
+>> the related dts change.
+>
+> It's still broken and untestable.  We're 8 days off it being a full
+> month worth of failed testing for OMAP3 and OMAP4 platforms.
+>
+> I think OMAP and MMC people need to do a post-mortem and work out why
+> this happened, and how to stop it happening again in the future.
 
-Almost MMC cards supposed that should be removed. So we are using "non-removable" property in dt-file.
-By default, assume that card can be removed.
-Since sd-card can be changed during suspend.
-(we don't know whether card is changed or not if it doesn't register to wakeup source,)
+You are probably right!
 
-> 
-> The card IS actually "removed" when in suspended state since we cut
-> the power-rail completely to the SD card.
-> 
-> I assume that this is a sdhci-esdhc-imx issue, but then I wonder what
-> would be a proper fix for this.
+I think I should have been more persistent when asking on how to deal
+with these patches. Typically they should all have gone together via
+one tree, or we needed a slower way forward keeping changes more
+standalone.
 
-Sorry, i don't fully understand what problem you want to fix. :)
+Anyway, according to kernelci.org, which builds and boot my next
+branch omap3/4 seems to boot now...
+http://kernelci.org/boot/all/job/ulfh/kernel/v4.3-rc3-27-gf7734d097520/
 
-Best Regards,
-Jaehoon Chung
-
-> 
-> As stated before I get around this problem by adding a HACK to force
-> removal of the SD card before suspending in mmc_pm_notify.
-> 
-> Sorry if I am spamming but I am trying to learn :).
-> 
-> Best Regards
-> 
-> Mirza Krak
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-
+Kind regards
+Uffe
