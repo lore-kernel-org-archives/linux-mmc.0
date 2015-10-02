@@ -1,42 +1,65 @@
-From: Linus Walleij <linus.walleij@linaro.org>
-Subject: Re: [PATCH] mmc: core: Remove MMC_CLKGATE
-Date: Fri, 2 Oct 2015 02:23:56 -0700
-Message-ID: <CACRpkdbKO7qs20BXd2jp7yKcnqe6aa-QUhqY25VXj0XhtsHA2g@mail.gmail.com>
-References: <1443776171-7127-1-git-send-email-ulf.hansson@linaro.org>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: [GIT PULL] MMC fixes for v.4.3 rc4
+Date: Fri, 2 Oct 2015 11:24:03 +0200
+Message-ID: <CAPDyKFp6mOkmeMNFoveqTvj4i2ojOwjh=+ruFsxhLVQT5Ubr_w@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-oi0-f52.google.com ([209.85.218.52]:36815 "EHLO
-	mail-oi0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751410AbbJBJX5 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 2 Oct 2015 05:23:57 -0400
-Received: by oibi136 with SMTP id i136so54999896oib.3
-        for <linux-mmc@vger.kernel.org>; Fri, 02 Oct 2015 02:23:56 -0700 (PDT)
-In-Reply-To: <1443776171-7127-1-git-send-email-ulf.hansson@linaro.org>
+Received: from mail-wi0-f170.google.com ([209.85.212.170]:35170 "EHLO
+	mail-wi0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751712AbbJBJYF (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 2 Oct 2015 05:24:05 -0400
+Received: by wicge5 with SMTP id ge5so24464426wic.0
+        for <linux-mmc@vger.kernel.org>; Fri, 02 Oct 2015 02:24:03 -0700 (PDT)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+To: Linus Torvalds <torvalds@linux-foundation.org>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 
-On Fri, Oct 2, 2015 at 1:56 AM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+Hi Linus,
 
-> MMC_CLKGATE was once invented to save power by gating the bus clock at
-> request inactivity. At that time it served its purpose. The modern way to
-> deal with power saving for these scenarios, is by using runtime PM.
->
-> Nowadays, several host drivers have deployed runtime PM, but for those
-> that haven't and which still cares power saving at request inactivity,
-> it's certainly time to deploy runtime PM as it has been around for several
-> years now.
->
-> To simplify code to mmc core and thus decrease maintenance efforts, this
-> patch removes all code related to MMC_CLKGATE.
->
-> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+Here are some mmc fixes intended for v4.3 rc4 and it's based on v4.3-rc3.
+Details are as usual found in the signed tag. Please pull this in!
 
-Runtime PM is the generic solution to the specific problem, good feat.
+Kind regards
+Ulf Hansson
 
-Reviewed-by: Linus Walleij <linus.walleij@linaro.org>
 
-Yours,
-Linus Walleij
+The following changes since commit 9ffecb10283508260936b96022d4ee43a7798b4c:
+
+  Linux 4.3-rc3 (2015-09-27 07:50:08 -0400)
+
+are available in the git repository at:
+
+  git://git.linaro.org/people/ulf.hansson/mmc.git tags/mmc-v4.3-rc3
+
+for you to fetch changes up to 031277d4d33d33f0174fbb569ca8f68238175617:
+
+  mmc: core: fix dead loop of mmc_retune (2015-09-30 14:54:22 +0200)
+
+----------------------------------------------------------------
+MMC core:
+ - Allow users of mmc_of_parse() to succeed when CONFIG_GPIOLIB is unset
+ - Prevent infinite loop of re-tuning for CRC-errors for CMD19 and CMD21
+
+MMC host:
+ - pxamci: Fix issues with card detect
+ - sunxi: Fix clk-delay settings
+
+----------------------------------------------------------------
+Chaotian Jing (1):
+      mmc: core: fix dead loop of mmc_retune
+
+Hans de Goede (1):
+      mmc: sunxi: Fix clk-delay settings
+
+Robert Jarzmik (1):
+      mmc: pxamci: fix card detect with slot-gpio API
+
+Ulf Hansson (1):
+      mmc: core: Don't return an error for CD/WP GPIOs when GPIOLIB is unset
+
+ drivers/mmc/core/core.c      |  6 ++--
+ drivers/mmc/core/host.c      |  4 +--
+ drivers/mmc/host/pxamci.c    | 66 +++++++++++++++-----------------------------
+ drivers/mmc/host/sunxi-mmc.c | 53 +++++++++++++++++++++++++----------
+ 4 files changed, 67 insertions(+), 62 deletions(-)
