@@ -1,50 +1,42 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v2 3/8] mmc: core: Add mmc_regulator_set_vqmmc()
-Date: Fri, 2 Oct 2015 10:57:33 +0200
-Message-ID: <CAPDyKFrpoCkDpjo1-T4mf7hQxzbWxm7wD9RZiNhZofz=Vd=nhQ@mail.gmail.com>
-References: <1443622064-14362-1-git-send-email-heiko@sntech.de>
-	<CAPDyKFqrkYXsbBJ61yYo0G8za1szARvA=as-5nLTiwGH5pCrEQ@mail.gmail.com>
-	<560DF150.3000906@samsung.com>
-	<3312969.jJ2hfB2JkV@diego>
-	<560E3800.1060603@samsung.com>
-	<CAPDyKFro3Uk3+Jzz3Y0WBKZvTs5LjahT7KgRbh_nWWVBG7V3=w@mail.gmail.com>
-	<560E44D2.9060101@samsung.com>
+From: Linus Walleij <linus.walleij@linaro.org>
+Subject: Re: [PATCH] mmc: core: Remove MMC_CLKGATE
+Date: Fri, 2 Oct 2015 02:23:56 -0700
+Message-ID: <CACRpkdbKO7qs20BXd2jp7yKcnqe6aa-QUhqY25VXj0XhtsHA2g@mail.gmail.com>
+References: <1443776171-7127-1-git-send-email-ulf.hansson@linaro.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wi0-f170.google.com ([209.85.212.170]:33583 "EHLO
-	mail-wi0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750925AbbJBI5e (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 2 Oct 2015 04:57:34 -0400
-Received: by wiclk2 with SMTP id lk2so24312611wic.0
-        for <linux-mmc@vger.kernel.org>; Fri, 02 Oct 2015 01:57:33 -0700 (PDT)
-In-Reply-To: <560E44D2.9060101@samsung.com>
+Received: from mail-oi0-f52.google.com ([209.85.218.52]:36815 "EHLO
+	mail-oi0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751410AbbJBJX5 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 2 Oct 2015 05:23:57 -0400
+Received: by oibi136 with SMTP id i136so54999896oib.3
+        for <linux-mmc@vger.kernel.org>; Fri, 02 Oct 2015 02:23:56 -0700 (PDT)
+In-Reply-To: <1443776171-7127-1-git-send-email-ulf.hansson@linaro.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>
-Cc: =?UTF-8?Q?Heiko_St=C3=BCbner?= <heiko@sntech.de>, Stephen Boyd <sboyd@codeaurora.org>, Michael Turquette <mturquette@baylibre.com>, linux-mmc <linux-mmc@vger.kernel.org>, linux-clk@vger.kernel.org, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "open list:ARM/Rockchip SoC..." <linux-rockchip@lists.infradead.org>, Doug Anderson <dianders@chromium.org>, Alexandru Stan <amstan@chromium.org>
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-[...]
+On Fri, Oct 2, 2015 at 1:56 AM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
 
->>>>>> Now, let's give Jaehoon some time to review the dw_mmc parts.
->>>>>
->>>>> I will check other patches on today, if it's ok, i will apply at my
->>>>> repository. Thanks for giving time! :)
->>>>
->>>> I think Ulf wanted to apply the whole series via the mmc tree directly, but I
->>>> guess that is between you two to decide ;-)
->>>
->>> If it will get Stephen's acked-by, i will pick up all after checked the dwmmc patches. how about?
->>
->> Stephen already acked the clock patches from this thread.
->>
->> Perhaps this time, it's easier if you ack the dw_mmc patches and I can
->> pick up the hole series? Does that work for you?
+> MMC_CLKGATE was once invented to save power by gating the bus clock at
+> request inactivity. At that time it served its purpose. The modern way to
+> deal with power saving for these scenarios, is by using runtime PM.
 >
-> I doesn't review dwmmc patches (Sorry), could you give me more time?
-> If you're ok, i will notice to you...then you can pick up all. :)
+> Nowadays, several host drivers have deployed runtime PM, but for those
+> that haven't and which still cares power saving at request inactivity,
+> it's certainly time to deploy runtime PM as it has been around for several
+> years now.
+>
+> To simplify code to mmc core and thus decrease maintenance efforts, this
+> patch removes all code related to MMC_CLKGATE.
+>
+> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
 
-Sure, no worries. Take your time!
+Runtime PM is the generic solution to the specific problem, good feat.
 
-Kind regards
-Uffe
+Reviewed-by: Linus Walleij <linus.walleij@linaro.org>
+
+Yours,
+Linus Walleij
