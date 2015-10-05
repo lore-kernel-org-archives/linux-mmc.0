@@ -1,227 +1,134 @@
-From: Shawn Lin <shawn.lin@rock-chips.com>
-Subject: Re: [RFC PATCH v8 0/10] Add external dma support for Synopsys MSHC
-Date: Mon, 5 Oct 2015 17:56:00 +0800
-Message-ID: <56124930.7020604@rock-chips.com>
-References: <1442385625-26775-1-git-send-email-shawn.lin@rock-chips.com>
- <560CF98B.7010609@samsung.com> <560E5320.6050003@rock-chips.com>
- <5611D420.5080708@samsung.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH] mmc: block: copy resp[] data on err for MMC_IOC_MULTI_CMD
+Date: Mon, 5 Oct 2015 12:55:47 +0200
+Message-ID: <CAPDyKFqNx6ADXAONS_p2FzHXLCO5fwa=1zioS_9-7E1w5FQZwg@mail.gmail.com>
+References: <1443058233-2370-1-git-send-email-grundler@chromium.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8;
-	format=flowed
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from lucky1.263xmail.com ([211.157.147.132]:53498 "EHLO
-	lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752106AbbJEJ4O (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 5 Oct 2015 05:56:14 -0400
-In-Reply-To: <5611D420.5080708@samsung.com>
+Received: from mail-wi0-f174.google.com ([209.85.212.174]:34479 "EHLO
+	mail-wi0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750879AbbJEKzs (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 5 Oct 2015 06:55:48 -0400
+Received: by wicfx3 with SMTP id fx3so113669064wic.1
+        for <linux-mmc@vger.kernel.org>; Mon, 05 Oct 2015 03:55:47 -0700 (PDT)
+In-Reply-To: <1443058233-2370-1-git-send-email-grundler@chromium.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>, ulf.hansson@linaro.org
-Cc: shawn.lin@rock-chips.com, Vineet.Gupta1@synopsys.com, Wei Xu <xuwei5@hisilicon.com>, Joachim Eastwood <manabian@gmail.com>, Alexey Brodkin <abrodkin@synopsys.com>, Kukjin Kim <kgene@kernel.org>, Krzysztof Kozlowski <k.kozlowski@samsung.com>, Russell King <linux@arm.linux.org.uk>, Jun Nie <jun.nie@linaro.org>, Ralf Baechle <ralf@linux-mips.org>, Govindraj Raja <govindraj.raja@imgtec.com>, Arnd Bergmann <arnd@arndb.de>, heiko@sntech.de, dianders@chromium.org, linux-samsung-soc@vger.kernel.org, linux-mips@linux-mips.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-rockchip@lists.infradead.org, devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, CPGS <cpgs@samsung.com>
+To: Grant Grundler <grundler@chromium.org>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Jon Hunter <jonathanh@nvidia.com>, Hyung Taek Ryoo <hryoo@nvidia.com>, Gwendal Grignou <gwendal@chromium.org>
 
-On 2015/10/5 9:36, Jaehoon Chung wrote:
-> Hi, Shawn.
+On 24 September 2015 at 03:30, Grant Grundler <grundler@chromium.org> wrote:
+> MMC_IOC_CMD and MMC_IOC_MULTI_CMD ioctl() code currently bails on
+> any eMMC errors. However, in case there is any resp[] data, we
+> should attempt to copy resp[] back to user space. The user app
+> can then determine which command(s) failed in the MMC_IOC_MULTI_CMD
+> case AND/OR report better diagnostics in both cases.
 >
-> On 10/02/2015 06:49 PM, Shawn Lin wrote:
->> On 2015/10/1 17:14, Jaehoon Chung wrote:
->>> Dear, All.
->>>
->>> I will apply patch 01-03 at my repository on today.
->>> But i don't know better how i do about other patches relevant to co=
-nfig file.
->>>
->>
->> Thanks, Jaehoon. :)
->>
->> I guess it would be acceptable to pick the config changes, already t=
-hey were acked by the soc maintainers, via dw_mmc tree when ulf merge d=
-w_mmc tree into his mmc-tree.
+> Gwendal Grignou provided the idea and it was previously implemented
+> and tested on v3.18 ChromeOS kernel:
+>     https://chromium-review.googlesource.com/#/c/299956
 >
-> Some patches didn't get the maintainer's acked-by.
-> I will wait for that..until this week. How about?
->
+> Signed-off-by: Grant Grundler <grundler@chromium.org>
+> Reviewed-by: Hyung Taek Ryoo <hryoo@nvidia.com>
+> Reviewed-by: Gwendal Grignou <gwendal@chromium.org>
+> Tested-by: David Riley <davidriley@chromium.org>
 
-No problem, take your time. =EF=BC=9A=EF=BC=89
+Thanks, applied for next!
 
-> Best Regards,
-> Jaehoon Chung
->
->>
->>
->>> Best Regards,
->>> Jaehoon Chung
->>>
->>> On 09/16/2015 03:40 PM, Shawn Lin wrote:
->>>> Synopsys DesignWare mobile storage host controller supports three
->>>> types of transfer mode: pio, internal dma and external dma. Howeve=
-r,
->>>> dw_mmc can only supports pio and internal dma now. Thus some platf=
-orms
->>>> using dw-mshc integrated with generic dma can't work in dma mode. =
-So we
->>>> submit this patch to achieve it.
->>>>
->>>> And the config option, CONFIG_MMC_DW_IDMAC, was added by Will Newt=
-on
->>>> (commit:f95f3850) for the first version of dw_mmc and never be tou=
-ched since
->>>> then. At that time dt-bindings hadn't been introduced into dw_mmc =
-yet means
->>>> we should select CONFIG_MMC_DW_IDMAC to enable internal dma mode a=
-t compile
->>>> time. Nowadays, device-tree helps us to support a variety of board=
-s with one
->>>> kernel. That's why we need to remove it and decide the transfer mo=
-de by reading
->>>> dw_mmc's HCON reg at runtime.
->>>>
->>>> This RFC patch needs lots of ACKs. I know it's hard, but it does n=
-eed someone
->>>> to make the running.
->>>>
->>>> Patch does the following things:
->>>> - remove CONFIG_MMC_DW_IDMAC config option
->>>> - add bindings for edmac used by synopsys-dw-mshc
->>>>     at runtime
->>>> - add edmac support for synopsys-dw-mshc
->>>>
->>>> Patch is based on next of git://git.linaro.org/people/ulf.hansson/=
-mmc
->>>>
->>>> Test emmc throughput on my platform with edmac support and without=
- edmac support(pio only)
->>>> iozone -L64 -S32 -azecwI -+n -r4k -r64k -r128k -s1g -i0 -i1 -i2 -f=
- datafile -Rb out.xls > /mnt/result.txt
->>>> (light cpu loading, Direct IO, fixed line size, all pattern recycl=
-e, 1GB data in total)
->>>>    ___________________________________________________________
->>>> |                   external dma mode                       |
->>>> |-----------------------------------------------------------|
->>>> |blksz | Random Read | Random Write | Seq Read   | Seq Write|
->>>> |-----------------------------------------------------------|
->>>> |4kB   |  13953kB/s  |    8602kB/s  | 13672kB/s  |  9785kB/s|
->>>> |-----------------------------------------------------------|
->>>> |64kB  |  46058kB/s  |   24794kB/s  | 48058kB/s  | 25418kB/s|
->>>> |-----------------------------------------------------------|
->>>> |128kB |  57026kB/s  |   35117kB/s  | 57375kB/s  | 35183kB/s|
->>>> |-----------------------------------------------------------|
->>>>                              VS
->>>>    ___________________________________________________________
->>>> |                          pio mode                         |
->>>> |-----------------------------------------------------------|
->>>> |blksz | Random Read  | Random Write | Seq Read  | Seq Write|
->>>> |-----------------------------------------------------------|
->>>> |4kB   |  11720kB/s   |    8644kB/s  | 11549kB/s |  9624kB/s|
->>>> |-----------------------------------------------------------|
->>>> |64kB  |  21869kB/s   |   24414kB/s  | 22031kB/s | 27986kB/s|
->>>> |-----------------------------------------------------------|
->>>> |128kB |  23718kB/s   |   34495kB/s  | 24698kB/s | 34637kB/s|
->>>> |-----------------------------------------------------------|
->>>>
->>>>
->>>> Changes in v8:
->>>> - remove trans_mode variable
->>>> - remove unnecessary dma_ops check
->>>> - remove unnecessary comment
->>>> - fix coding style based on latest ulf's next
->>>> - add Acked-by: Jaehoon Chung <jh80.chung@samsung.com>
->>>>     for HCON's changes
->>>>
->>>> Changes in v7:
->>>> - rebased on Ulf's next
->>>> - combine condition state
->>>> - elaborate more about DMA_INTERFACE
->>>> - define some macro for DMA_INERFACE value
->>>> - spilt HCON ops' changes into another patch
->>>>
->>>> Changes in v6:
->>>> - add trans_mode condition for IDMAC initialization
->>>>     suggested by Heiko
->>>> - re-test my patch on rk3188 platform and update commit msg
->>>> - update performance of pio vs edmac in cover letter
->>>>
->>>> Changes in v5:
->>>> - add the title of cover letter
->>>> - fix typo of comment
->>>> - add macro for reading HCON register
->>>> - add "Acked-by: Krzysztof Kozlowski <k.kozlowski@samsung.com>" fo=
-r exynos_defconfig patch
->>>> - add "Acked-by: Vineet Gupta <vgupta@synopsys.com>" for axs10x_de=
-fconfig patch
->>>> - add "Acked-by: Govindraj Raja <govindraj.raja@imgtec.com>" and
->>>>     "Acked-by: Ralf Baechle <ralf@linux-mips.org>" for pistachio_d=
-efconfig patch
->>>> - add "Acked-by: Joachim Eastwood <manabian@gmail.com>" for lpc18x=
-x_defconfig patch
->>>> - add "Acked-by: Wei Xu <xuwei5@hisilicon.com>" for hisi_defconfig=
- patch
->>>> - rebase on "https://github.com/jh80chung/dw-mmc.git tags/dw-mmc-f=
-or-ulf-v4.2" for merging easily
->>>>
->>>> Changes in v4:
->>>> - remove "host->trans_mode" and use "host->use_dma" to indicate
->>>>     transfer mode.
->>>> - remove all bt-bindings' changes since we don't need new properit=
-ies.
->>>> - check transfer mode at runtime by reading HCON reg
->>>> - spilt defconfig changes for each sub-architecture
->>>> - fix the title of cover letter
->>>> - reuse some code for reducing code size
->>>>
->>>> Changes in v3:
->>>> - choose transfer mode at runtime
->>>> - remove all CONFIG_MMC_DW_IDMAC config option
->>>> - add supports-idmac property for some platforms
->>>>
->>>> Changes in v2:
->>>> - Fix typo of dev_info msg
->>>> - remove unused dmach from declaration of dw_mci_dma_slave
->>>>
->>>> Shawn Lin (10):
->>>>     mmc: dw_mmc: Add external dma interface support
->>>>     mmc: dw_mmc: use macro for HCON register operations
->>>>     Documentation: synopsys-dw-mshc: add bindings for idmac and ed=
-mac
->>>>     mips: pistachio_defconfig: remove CONFIG_MMC_DW_IDMAC
->>>>     arc: axs10x_defconfig: remove CONFIG_MMC_DW_IDMAC
->>>>     arm: exynos_defconfig: remove CONFIG_MMC_DW_IDMAC
->>>>     arm: hisi_defconfig: remove CONFIG_MMC_DW_IDMAC
->>>>     arm: lpc18xx_defconfig: remove CONFIG_MMC_DW_IDMAC
->>>>     arm: multi_v7_defconfig: remove CONFIG_MMC_DW_IDMAC
->>>>     arm: zx_defconfig: remove CONFIG_MMC_DW_IDMAC
->>>>
->>>>    .../devicetree/bindings/mmc/synopsys-dw-mshc.txt   |  25 ++
->>>>    arch/arc/configs/axs101_defconfig                  |   1 -
->>>>    arch/arc/configs/axs103_defconfig                  |   1 -
->>>>    arch/arc/configs/axs103_smp_defconfig              |   1 -
->>>>    arch/arm/configs/exynos_defconfig                  |   1 -
->>>>    arch/arm/configs/hisi_defconfig                    |   1 -
->>>>    arch/arm/configs/lpc18xx_defconfig                 |   1 -
->>>>    arch/arm/configs/multi_v7_defconfig                |   1 -
->>>>    arch/arm/configs/zx_defconfig                      |   1 -
->>>>    arch/mips/configs/pistachio_defconfig              |   1 -
->>>>    drivers/mmc/host/Kconfig                           |  11 +-
->>>>    drivers/mmc/host/dw_mmc-pltfm.c                    |   2 +
->>>>    drivers/mmc/host/dw_mmc.c                          | 272 ++++++=
-+++++++++++----
->>>>    drivers/mmc/host/dw_mmc.h                          |   9 +
->>>>    include/linux/mmc/dw_mmc.h                         |  23 +-
->>>>    15 files changed, 276 insertions(+), 75 deletions(-)
->>>>
->>>
->>>
->>>
->>>
->>
->>
->
->
->
->
+Kind regards
+Uffe
 
-
---=20
-Best Regards
-Shawn Lin
-
+> ---
+> I believe the patch applied correctly to Ulf's mmc.git on linaro.org.
+> I would have warm fuzzies if Jon or Hyung (Nvidia) could review/test this.
+>
+> I made one change from the chromium.org version:
+>   initialize err and ioc_err to zero in mmc_blk_ioctl_cmd()
+>
+>  drivers/mmc/card/block.c | 27 +++++++++------------------
+>  1 file changed, 9 insertions(+), 18 deletions(-)
+>
+> diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+> index f6acf0f..23b6c8e 100644
+> --- a/drivers/mmc/card/block.c
+> +++ b/drivers/mmc/card/block.c
+> @@ -595,7 +595,7 @@ static int mmc_blk_ioctl_cmd(struct block_device *bdev,
+>         struct mmc_blk_ioc_data *idata;
+>         struct mmc_blk_data *md;
+>         struct mmc_card *card;
+> -       int err;
+> +       int err = 0, ioc_err = 0;
+>
+>         idata = mmc_blk_ioctl_copy_from_user(ic_ptr);
+>         if (IS_ERR(idata))
+> @@ -615,19 +615,18 @@ static int mmc_blk_ioctl_cmd(struct block_device *bdev,
+>
+>         mmc_get_card(card);
+>
+> -       err = __mmc_blk_ioctl_cmd(card, md, idata);
+> +       ioc_err = __mmc_blk_ioctl_cmd(card, md, idata);
+>
+>         mmc_put_card(card);
+>
+> -       if (!err)
+> -               err = mmc_blk_ioctl_copy_to_user(ic_ptr, idata);
+> +       err = mmc_blk_ioctl_copy_to_user(ic_ptr, idata);
+>
+>  cmd_done:
+>         mmc_blk_put(md);
+>  cmd_err:
+>         kfree(idata->buf);
+>         kfree(idata);
+> -       return err;
+> +       return ioc_err ? ioc_err : err;
+>  }
+>
+>  static int mmc_blk_ioctl_multi_cmd(struct block_device *bdev,
+> @@ -637,7 +636,7 @@ static int mmc_blk_ioctl_multi_cmd(struct block_device *bdev,
+>         struct mmc_ioc_cmd __user *cmds = user->cmds;
+>         struct mmc_card *card;
+>         struct mmc_blk_data *md;
+> -       int i, err = -EFAULT;
+> +       int i, err = 0, ioc_err = 0;
+>         __u64 num_of_cmds;
+>
+>         if (copy_from_user(&num_of_cmds, &user->num_of_cmds,
+> @@ -672,22 +671,14 @@ static int mmc_blk_ioctl_multi_cmd(struct block_device *bdev,
+>
+>         mmc_get_card(card);
+>
+> -       for (i = 0; i < num_of_cmds; i++) {
+> -               err = __mmc_blk_ioctl_cmd(card, md, idata[i]);
+> -               if (err) {
+> -                       mmc_put_card(card);
+> -                       goto cmd_done;
+> -               }
+> -       }
+> +       for (i = 0; i < num_of_cmds && !ioc_err; i++)
+> +               ioc_err = __mmc_blk_ioctl_cmd(card, md, idata[i]);
+>
+>         mmc_put_card(card);
+>
+>         /* copy to user if data and response */
+> -       for (i = 0; i < num_of_cmds; i++) {
+> +       for (i = 0; i < num_of_cmds && !err; i++)
+>                 err = mmc_blk_ioctl_copy_to_user(&cmds[i], idata[i]);
+> -               if (err)
+> -                       break;
+> -       }
+>
+>  cmd_done:
+>         mmc_blk_put(md);
+> @@ -697,7 +688,7 @@ cmd_err:
+>                 kfree(idata[i]);
+>         }
+>         kfree(idata);
+> -       return err;
+> +       return ioc_err ? ioc_err : err;
+>  }
+>
+>  static int mmc_blk_ioctl(struct block_device *bdev, fmode_t mode,
+> --
+> 2.6.0.rc2.230.g3dd15c0
+>
