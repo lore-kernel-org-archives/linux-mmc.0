@@ -1,34 +1,24 @@
-From: kbuild test robot <lkp@intel.com>
-Subject: Re: [PATCH 1/2] mmc: sdhci-pci: Build o2micro support in the same
- module
-Date: Tue, 6 Oct 2015 04:01:04 +0800
-Message-ID: <201510060335.Yp1RsHmL%fengguang.wu@intel.com>
-References: <1444073478.2730.308.camel@decadent.org.uk>
+From: "Liliane H Bettencourt" <ideguchi@yamaguchi-u.ac.jp>
+Subject: GREETINGS
+Date: Tue, 6 Oct 2015 02:47:43 +0900 (JST)
+Message-ID: <49735.41.138.186.142.1444067263.risu__47743.3393979028$1444083049$gmane$org@webmail2p.cc.yamaguchi-u.ac.jp>
+Reply-To: lil_bettencourt_1@yahoo.fr
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga09.intel.com ([134.134.136.24]:6365 "EHLO mga09.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751253AbbJEUCi (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 5 Oct 2015 16:02:38 -0400
-Content-Disposition: inline
-In-Reply-To: <1444073478.2730.308.camel@decadent.org.uk>
+Received: from smtp3p.cc.yamaguchi-u.ac.jp ([133.62.137.22]:55974 "EHLO
+	smtp3p.cc.yamaguchi-u.ac.jp" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751722AbbJEWKf (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 5 Oct 2015 18:10:35 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ben Hutchings <ben@decadent.org.uk>
-Cc: kbuild-all@01.org, Ulf Hansson <ulf.hansson@linaro.org>, Peter Guo <peter.guo@bayhubtech.com>, linux-mmc@vger.kernel.org
 
-Hi Ben,
+I, Liliane authenticate this email, you can read about me on:
+http://en.wikipedia.org/wiki/Liliane_Bettencourt  I write to you because I
+intend to give you a portion of my Net-worth which I have been banking. I
+want to cede it out as gift hoping it would be of help to you and others
+too. Respond for confirmation.
 
-[auto build test WARNING on v4.3-rc4 -- if it's inappropriate base, please ignore]
+My Private Email: lil_bettencourt12@yahoo.fr
 
-
-coccinelle warnings: (new ones prefixed by >>)
-
->> drivers/mmc/host/sdhci-pci-core.c:447:1-4: WARNING: end returns can be simpified
-
-Please review and possibly fold the followup patch.
-
----
-0-DAY kernel test infrastructure                Open Source Technology Center
-https://lists.01.org/pipermail/kbuild-all                   Intel Corporation
