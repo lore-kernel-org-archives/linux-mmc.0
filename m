@@ -1,43 +1,70 @@
 From: Marcin Wojtas <mw@semihalf.com>
-Subject: [PATCH 3/8] mmc: sdhci-pxav3: fix error handling of armada_38x_quirks
-Date: Tue,  6 Oct 2015 03:22:37 +0200
-Message-ID: <1444094562-31165-4-git-send-email-mw@semihalf.com>
+Subject: [PATCH 8/8] mmc: sdhci-pxav3: enable modifying MMC_CARD bit during card initialization
+Date: Tue,  6 Oct 2015 03:22:42 +0200
+Message-ID: <1444094562-31165-9-git-send-email-mw@semihalf.com>
 References: <1444094562-31165-1-git-send-email-mw@semihalf.com>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-la0-f43.google.com ([209.85.215.43]:36382 "EHLO
-	mail-la0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751487AbbJFBQA (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 5 Oct 2015 21:16:00 -0400
-Received: by laddr2 with SMTP id dr2so17882672lad.3
-        for <linux-mmc@vger.kernel.org>; Mon, 05 Oct 2015 18:15:58 -0700 (PDT)
+Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1444094562-31165-1-git-send-email-mw@semihalf.com>
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Sender: linux-kernel-owner@vger.kernel.org
 To: linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org
-Cc: ulf.hansson@linaro.org, sebastian.hesselbarth@gmail.com, andrew@lunn.ch, jason@lakedaemon.net, thomas.petazzoni@free-electrons.com, gregory.clement@free-electrons.com, nadavh@marvell.com, alior@marvell.com, tawfik@marvell.com, mw@semihalf.com, jaz@semihalf.com, stable@vger.kernel.org
+Cc: ulf.hansson@linaro.org, sebastian.hesselbarth@gmail.com, andrew@lunn.ch, jason@lakedaemon.net, thomas.petazzoni@free-electrons.com, gregory.clement@free-electrons.com, nadavh@marvell.com, alior@marvell.com, tawfik@marvell.com, mw@semihalf.com, jaz@semihalf.com
+List-Id: linux-mmc@vger.kernel.org
 
-In case of armada_38x_quirks error, all clocks should be cleaned-up, same
-as after mv_conf_mbus_windows failure.
+On Marvell Armada 38x SoC's the MMC_CARD bit in SD_CE_ATA_1 register must
+be set to 0x1 when a MMC card is supposed to work in DDR mode, or when
+commands CMD11, CMD14 and CMD20 are used.
+
+This commit enables the above for all MMC cards by modifying the host
+registers during card initialization. It is done by using init_card()
+callback.
 
 Signed-off-by: Marcin Wojtas <mw@semihalf.com>
-Cc: <stable@vger.kernel.org> # v4.2
 ---
- drivers/mmc/host/sdhci-pxav3.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+ drivers/mmc/host/sdhci-pxav3.c | 18 ++++++++++++++++++
+ 1 file changed, 18 insertions(+)
 
 diff --git a/drivers/mmc/host/sdhci-pxav3.c b/drivers/mmc/host/sdhci-pxav3.c
-index 89a9e49..f5edf9d 100644
+index ce96640..315dc4e 100644
 --- a/drivers/mmc/host/sdhci-pxav3.c
 +++ b/drivers/mmc/host/sdhci-pxav3.c
-@@ -402,7 +402,7 @@ static int sdhci_pxav3_probe(struct platform_device *pdev)
- 	if (of_device_is_compatible(np, "marvell,armada-380-sdhci")) {
- 		ret = armada_38x_quirks(pdev, host);
- 		if (ret < 0)
--			goto err_clk_get;
-+			goto err_mbus_win;
- 		ret = mv_conf_mbus_windows(pdev, mv_mbus_dram_info());
- 		if (ret < 0)
- 			goto err_mbus_win;
+@@ -57,6 +57,7 @@
+ 
+ #define SD_SPI_MODE          0x108
+ #define SD_CE_ATA_1          0x10C
++#define SDCE_MMC_CARD		BIT(28)
+ 
+ #define SD_CE_ATA_2          0x10E
+ #define SDCE_MISC_INT		(1<<2)
+@@ -221,6 +222,22 @@ static void pxav3_reset(struct sdhci_host *host, u8 mask)
+ 	}
+ }
+ 
++static void pxav3_init_card(struct sdhci_host *host, struct mmc_card *card)
++{
++	struct platform_device *pdev = to_platform_device(mmc_dev(host->mmc));
++	struct device_node *np = pdev->dev.of_node;
++	u32 reg_val;
++
++	if (of_device_is_compatible(np, "marvell,armada-380-sdhci")) {
++		reg_val = sdhci_readl(host, SD_CE_ATA_1);
++		if (mmc_card_mmc(card))
++			reg_val |= SDCE_MMC_CARD;
++		else
++			reg_val &= ~SDCE_MMC_CARD;
++		sdhci_writel(host, reg_val, SD_CE_ATA_1);
++	}
++}
++
+ #define MAX_WAIT_COUNT 5
+ static void pxav3_gen_init_74_clocks(struct sdhci_host *host, u8 power_mode)
+ {
+@@ -338,6 +355,7 @@ static const struct sdhci_ops pxav3_sdhci_ops = {
+ 	.set_bus_width = sdhci_set_bus_width,
+ 	.reset = pxav3_reset,
+ 	.set_uhs_signaling = pxav3_set_uhs_signaling,
++	.init_card = pxav3_init_card,
+ };
+ 
+ static struct sdhci_pltfm_data sdhci_pxav3_pdata = {
 -- 
 1.8.3.1
-
