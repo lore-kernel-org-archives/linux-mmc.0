@@ -1,63 +1,132 @@
 From: Marcin Wojtas <mw@semihalf.com>
-Subject: [PATCH 7/8] mmc: sdhci: add init_card callback to sdhci
-Date: Tue,  6 Oct 2015 03:22:41 +0200
-Message-ID: <1444094562-31165-8-git-send-email-mw@semihalf.com>
+Subject: [PATCH 4/8] mmc: sdhci-pxav3: enable proper resuming on Armada 38x SoC
+Date: Tue,  6 Oct 2015 03:22:38 +0200
+Message-ID: <1444094562-31165-5-git-send-email-mw@semihalf.com>
 References: <1444094562-31165-1-git-send-email-mw@semihalf.com>
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
 In-Reply-To: <1444094562-31165-1-git-send-email-mw@semihalf.com>
-Sender: linux-kernel-owner@vger.kernel.org
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
 To: linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org
-Cc: ulf.hansson@linaro.org, sebastian.hesselbarth@gmail.com, andrew@lunn.ch, jason@lakedaemon.net, thomas.petazzoni@free-electrons.com, gregory.clement@free-electrons.com, nadavh@marvell.com, alior@marvell.com, tawfik@marvell.com, mw@semihalf.com, jaz@semihalf.com
+Cc: thomas.petazzoni@free-electrons.com, andrew@lunn.ch, ulf.hansson@linaro.org, jason@lakedaemon.net, tawfik@marvell.com, jaz@semihalf.com, nadavh@marvell.com, alior@marvell.com, gregory.clement@free-electrons.com, mw@semihalf.com, sebastian.hesselbarth@gmail.com
 List-Id: linux-mmc@vger.kernel.org
 
-Some sdhci hosts may require handling quirks during card initialization at
-the time when its type is already known. Hence a new callback (init_card)
-is added in sdhci_ops.
+When resuming from suspend on Armada 38x SoC MBus windows have to be
+re-configured and for that purpose mv_conf_mbus_windows function needed
+rework. MBus windows register base address obtaining was moved to
+armada_38x_quirks function in order to be kept in pxa global structure,
+because it is used during a resume.
+
+This commit fixes resuming from suspend by calling MBus windows
+configuration routine and therefore enabling proper DMA operation.
 
 Signed-off-by: Marcin Wojtas <mw@semihalf.com>
 ---
- drivers/mmc/host/sdhci.c | 9 +++++++++
- drivers/mmc/host/sdhci.h | 1 +
- 2 files changed, 10 insertions(+)
+ drivers/mmc/host/sdhci-pxav3.c | 39 ++++++++++++++++++++-------------------
+ 1 file changed, 20 insertions(+), 19 deletions(-)
 
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index cfed695..a1c308d 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -2200,6 +2200,14 @@ static void sdhci_card_event(struct mmc_host *mmc)
- 	spin_unlock_irqrestore(&host->lock, flags);
+diff --git a/drivers/mmc/host/sdhci-pxav3.c b/drivers/mmc/host/sdhci-pxav3.c
+index f5edf9d..3f71894 100644
+--- a/drivers/mmc/host/sdhci-pxav3.c
++++ b/drivers/mmc/host/sdhci-pxav3.c
+@@ -63,6 +63,7 @@ struct sdhci_pxa {
+ 	struct clk *clk_io;
+ 	u8	power_mode;
+ 	void __iomem *sdio3_conf_reg;
++	void __iomem *mbus_win_regs;
+ };
+ 
+ /*
+@@ -81,30 +82,16 @@ struct sdhci_pxa {
+ #define SDIO3_CONF_CLK_INV	BIT(0)
+ #define SDIO3_CONF_SD_FB_CLK	BIT(2)
+ 
+-static int mv_conf_mbus_windows(struct platform_device *pdev,
++static int mv_conf_mbus_windows(struct device *dev, void __iomem *regs,
+ 				const struct mbus_dram_target_info *dram)
+ {
+ 	int i;
+-	void __iomem *regs;
+-	struct resource *res;
+ 
+ 	if (!dram) {
+-		dev_err(&pdev->dev, "no mbus dram info\n");
+-		return -EINVAL;
+-	}
+-
+-	res = platform_get_resource(pdev, IORESOURCE_MEM, 1);
+-	if (!res) {
+-		dev_err(&pdev->dev, "cannot get mbus registers\n");
++		dev_err(dev, "no mbus dram info\n");
+ 		return -EINVAL;
+ 	}
+ 
+-	regs = ioremap(res->start, resource_size(res));
+-	if (!regs) {
+-		dev_err(&pdev->dev, "cannot map mbus registers\n");
+-		return -ENOMEM;
+-	}
+-
+ 	for (i = 0; i < SDHCI_MAX_WIN_NUM; i++) {
+ 		writel(0, regs + SDHCI_WINDOW_CTRL(i));
+ 		writel(0, regs + SDHCI_WINDOW_BASE(i));
+@@ -122,8 +109,6 @@ static int mv_conf_mbus_windows(struct platform_device *pdev,
+ 		writel(cs->base, regs + SDHCI_WINDOW_BASE(i));
+ 	}
+ 
+-	iounmap(regs);
+-
+ 	return 0;
  }
  
-+static void sdhci_init_card(struct mmc_host *mmc, struct mmc_card *card)
-+{
-+	struct sdhci_host *host = mmc_priv(mmc);
-+
-+	if (host->ops->init_card)
-+		host->ops->init_card(host, card);
-+}
-+
- static const struct mmc_host_ops sdhci_ops = {
- 	.request	= sdhci_request,
- 	.post_req	= sdhci_post_req,
-@@ -2215,6 +2223,7 @@ static const struct mmc_host_ops sdhci_ops = {
- 	.select_drive_strength		= sdhci_select_drive_strength,
- 	.card_event			= sdhci_card_event,
- 	.card_busy	= sdhci_card_busy,
-+	.init_card	= sdhci_init_card,
- };
+@@ -135,6 +120,14 @@ static int armada_38x_quirks(struct platform_device *pdev,
+ 	struct sdhci_pxa *pxa = pltfm_host->priv;
+ 	struct resource *res;
  
- /*****************************************************************************\
-diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-index c751b78..365c860 100644
---- a/drivers/mmc/host/sdhci.h
-+++ b/drivers/mmc/host/sdhci.h
-@@ -547,6 +547,7 @@ struct sdhci_ops {
- 					 struct mmc_card *card,
- 					 unsigned int max_dtr, int host_drv,
- 					 int card_drv, int *drv_type);
-+	void	(*init_card)(struct sdhci_host *host, struct mmc_card *card);
- };
++	res = platform_get_resource_byname(pdev, IORESOURCE_MEM, "mbus");
++	pxa->mbus_win_regs = devm_ioremap_resource(&pdev->dev, res);
++	if (IS_ERR(pxa->mbus_win_regs)) {
++		dev_err(mmc_dev(host->mmc),
++			"failed to obtain MBus windows register base\n");
++		return PTR_ERR(pxa->mbus_win_regs);
++	}
++
+ 	host->quirks &= ~SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN;
+ 	host->quirks |= SDHCI_QUIRK_MISSING_CAPS;
+ 	res = platform_get_resource_byname(pdev, IORESOURCE_MEM,
+@@ -403,7 +396,8 @@ static int sdhci_pxav3_probe(struct platform_device *pdev)
+ 		ret = armada_38x_quirks(pdev, host);
+ 		if (ret < 0)
+ 			goto err_mbus_win;
+-		ret = mv_conf_mbus_windows(pdev, mv_mbus_dram_info());
++		ret = mv_conf_mbus_windows(&pdev->dev, pxa->mbus_win_regs,
++					   mv_mbus_dram_info());
+ 		if (ret < 0)
+ 			goto err_mbus_win;
+ 	}
+@@ -520,6 +514,13 @@ static int sdhci_pxav3_resume(struct device *dev)
+ {
+ 	int ret;
+ 	struct sdhci_host *host = dev_get_drvdata(dev);
++	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
++	struct sdhci_pxa *pxa = pltfm_host->priv;
++	struct device_node *np = dev->of_node;
++
++	if (of_device_is_compatible(np, "marvell,armada-380-sdhci"))
++		ret = mv_conf_mbus_windows(dev, pxa->mbus_win_regs,
++					   mv_mbus_dram_info());
  
- #ifdef CONFIG_MMC_SDHCI_IO_ACCESSORS
+ 	pm_runtime_get_sync(dev);
+ 	ret = sdhci_resume_host(host);
 -- 
 1.8.3.1
