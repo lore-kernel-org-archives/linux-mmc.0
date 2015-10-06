@@ -1,50 +1,62 @@
-From: Tony Lindgren <tony@atomide.com>
-Subject: Re: [PATCH 3/3] mmc: omap: Fix module autoload for OF platform driver
-Date: Tue, 6 Oct 2015 01:09:36 -0700
-Message-ID: <20151006080935.GK23801@atomide.com>
-References: <20150917215025.GA8079@goodgumbo.baconseed.org>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH v2] MMC/SDIO: enable SDIO device to suspend/resume asynchronously
+Date: Tue, 6 Oct 2015 10:21:29 +0200
+Message-ID: <CAPDyKFrys_LxOVqPQsXQ=_x3LWyywzLEM1h4tAAOgV6aaNyRTA@mail.gmail.com>
+References: <55FF87F1.1000209@linux.intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20150917215025.GA8079@goodgumbo.baconseed.org>
+In-Reply-To: <55FF87F1.1000209@linux.intel.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Luis de Bethencourt <luis@debethencourt.com>
-Cc: linux-kernel@vger.kernel.org, Jarkko Lavinen <jarkko.lavinen@nokia.com>, Ulf Hansson <ulf.hansson@linaro.org>, linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org
+To: "Fu, Zhonghui" <zhonghui.fu@linux.intel.com>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, Neil Brown <neilb@suse.de>, Jaehoon Chung <jh80.chung@samsung.com>, Andreas Fenkart <afenkart@gmail.com>, Joe Perches <joe@perches.com>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-* Luis de Bethencourt <luis@debethencourt.com> [150917 14:54]:
-> This platform driver has a OF device ID table but the OF module
-> alias information is not created so module autoloading won't work.
-> 
-> Signed-off-by: Luis de Bethencourt <luisbg@osg.samsung.com>
-
-Looks OK to me, this would be mostly for n8x0:
-
-Acked-by: Tony Lindgren <tony@atomide.com>
-
+On 21 September 2015 at 06:30, Fu, Zhonghui <zhonghui.fu@linux.intel.com> wrote:
+> Now, PM core supports asynchronous suspend/resume mode for devices
+> during system suspend/resume, and the power state transition of one
+> device may be completed in separate kernel thread. PM core ensures
+> all power state transition timing dependency between devices. This
+> patch enables SDIO card and function devices to suspend/resume
+> asynchronously. This will take advantage of multicore and improve
+> system suspend/resume speed.
+>
+> Signed-off-by: Zhonghui Fu <zhonghui.fu@linux.intel.com>
 > ---
->  drivers/mmc/host/omap.c | 1 +
->  1 file changed, 1 insertion(+)
-> 
-> diff --git a/drivers/mmc/host/omap.c b/drivers/mmc/host/omap.c
-> index b763b11..b9958a1 100644
-> --- a/drivers/mmc/host/omap.c
-> +++ b/drivers/mmc/host/omap.c
-> @@ -1490,6 +1490,7 @@ static const struct of_device_id mmc_omap_match[] = {
->  	{ .compatible = "ti,omap2420-mmc", },
->  	{ },
->  };
-> +MODULE_DEVICE_TABLE(of, mmc_omap_match);
->  #endif
->  
->  static struct platform_driver mmc_omap_driver = {
-> -- 
-> 2.4.6
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-kernel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> Please read the FAQ at  http://www.tux.org/lkml/
-> 
+> Changes in v2:
+> - Amend commit message.
+>
+>  drivers/mmc/core/sdio.c |    4 ++++
+>  1 files changed, 4 insertions(+), 0 deletions(-)
+>
+> diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
+> index b91abed..6719b77 100644
+> --- a/drivers/mmc/core/sdio.c
+> +++ b/drivers/mmc/core/sdio.c
+> @@ -1106,6 +1106,8 @@ int mmc_attach_sdio(struct mmc_host *host)
+>                 pm_runtime_enable(&card->dev);
+>         }
+>
+> +       device_enable_async_suspend(&card->dev);
+> +
+>         /*
+>          * The number of functions on the card is encoded inside
+>          * the ocr.
+> @@ -1126,6 +1128,8 @@ int mmc_attach_sdio(struct mmc_host *host)
+>                  */
+>                 if (host->caps & MMC_CAP_POWER_OFF_CARD)
+>                         pm_runtime_enable(&card->sdio_func[i]->dev);
+> +
+> +               device_enable_async_suspend(&card->sdio_func[i]->dev);
+>         }
+>
+>         /*
+> -- 1.7.1
+
+I wonder how you guarantee that the mmc host device will be suspended
+*after* the SDIO card device and the SDIO func device? Currently that
+is controlled via device registration/probe order, without any device
+hierarchy configured.
+
+Kind regards
+Uffe
