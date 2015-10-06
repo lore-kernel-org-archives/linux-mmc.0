@@ -1,47 +1,41 @@
 From: Marcin Wojtas <mw@semihalf.com>
-Subject: [PATCH 6/8] ARM: mvebu: enable SDHCI card detection using DAT3 pin on A388-GP
-Date: Tue,  6 Oct 2015 03:22:40 +0200
-Message-ID: <1444094562-31165-7-git-send-email-mw@semihalf.com>
+Subject: [PATCH 2/8] mmc: sdhci-pxav3: disable clock inversion for HS MMC cards
+Date: Tue,  6 Oct 2015 03:22:36 +0200
+Message-ID: <1444094562-31165-3-git-send-email-mw@semihalf.com>
 References: <1444094562-31165-1-git-send-email-mw@semihalf.com>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-la0-f42.google.com ([209.85.215.42]:33368 "EHLO
-	mail-la0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751616AbbJFBQI (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 5 Oct 2015 21:16:08 -0400
-Received: by lafb9 with SMTP id b9so46820897laf.0
-        for <linux-mmc@vger.kernel.org>; Mon, 05 Oct 2015 18:16:06 -0700 (PDT)
+Return-path: <stable-owner@vger.kernel.org>
 In-Reply-To: <1444094562-31165-1-git-send-email-mw@semihalf.com>
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Sender: stable-owner@vger.kernel.org
 To: linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org
-Cc: ulf.hansson@linaro.org, sebastian.hesselbarth@gmail.com, andrew@lunn.ch, jason@lakedaemon.net, thomas.petazzoni@free-electrons.com, gregory.clement@free-electrons.com, nadavh@marvell.com, alior@marvell.com, tawfik@marvell.com, mw@semihalf.com, jaz@semihalf.com
+Cc: ulf.hansson@linaro.org, sebastian.hesselbarth@gmail.com, andrew@lunn.ch, jason@lakedaemon.net, thomas.petazzoni@free-electrons.com, gregory.clement@free-electrons.com, nadavh@marvell.com, alior@marvell.com, tawfik@marvell.com, mw@semihalf.com, jaz@semihalf.com, stable@vger.kernel.org
+List-Id: linux-mmc@vger.kernel.org
 
-The newest revisions of A388-GP (v1.5 and higher) support only
-DAT3-based card detection, which is enabled by this commit. Hitherto
-revisions, without such modification, will be impacted with a broken
-card detection - in order to operate the cards have to be present
-during kernel boot.
+From: Nadav Haklai <nadavh@marvell.com>
 
-Signed-off-by: Marcin Wojtas <mw@semihalf.com>
+According to 'FE-2946959' erratum the clock inversion option is
+needed to support slow frequencies when the card input hold time
+requirement is high. This setting is not required for high speed
+MMC and might cause timing violation.
+
+Signed-off-by: Nadav Haklai <nadavh@marvell.com>
+Cc: <stable@vger.kernel.org> # v4.2
 ---
- arch/arm/boot/dts/armada-388-gp.dts | 3 ++-
- 1 file changed, 2 insertions(+), 1 deletion(-)
+ drivers/mmc/host/sdhci-pxav3.c | 3 +++
+ 1 file changed, 3 insertions(+)
 
-diff --git a/arch/arm/boot/dts/armada-388-gp.dts b/arch/arm/boot/dts/armada-388-gp.dts
-index 391dea9..4855963 100644
---- a/arch/arm/boot/dts/armada-388-gp.dts
-+++ b/arch/arm/boot/dts/armada-388-gp.dts
-@@ -213,8 +213,9 @@
- 			sdhci@d8000 {
- 				pinctrl-names = "default";
- 				pinctrl-0 = <&sdhci_pins>;
--				cd-gpios = <&expander0 5 GPIO_ACTIVE_LOW>;
- 				no-1-8-v;
-+				dat3-cd;
-+				cd-inverted;
- 				wp-inverted;
- 				bus-width = <8>;
- 				status = "okay";
+diff --git a/drivers/mmc/host/sdhci-pxav3.c b/drivers/mmc/host/sdhci-pxav3.c
+index 976cddd..89a9e49 100644
+--- a/drivers/mmc/host/sdhci-pxav3.c
++++ b/drivers/mmc/host/sdhci-pxav3.c
+@@ -291,6 +291,9 @@ static void pxav3_set_uhs_signaling(struct sdhci_host *host, unsigned int uhs)
+ 		    uhs == MMC_TIMING_UHS_DDR50) {
+ 			reg_val &= ~SDIO3_CONF_CLK_INV;
+ 			reg_val |= SDIO3_CONF_SD_FB_CLK;
++		} else if (uhs == MMC_TIMING_MMC_HS) {
++			reg_val &= ~SDIO3_CONF_CLK_INV;
++			reg_val &= ~SDIO3_CONF_SD_FB_CLK;
+ 		} else {
+ 			reg_val |= SDIO3_CONF_CLK_INV;
+ 			reg_val &= ~SDIO3_CONF_SD_FB_CLK;
 -- 
 1.8.3.1
-
