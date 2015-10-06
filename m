@@ -1,45 +1,56 @@
-From: Marcin Wojtas <mw@semihalf.com>
-Subject: Re: [PATCH 6/8] ARM: mvebu: enable SDHCI card detection using DAT3
- pin on A388-GP
-Date: Tue, 6 Oct 2015 09:02:25 +0200
-Message-ID: <CAPv3WKeUQ6rsYWJ3C+aX8eHTAdS4SmQ3oCjA9feFf+d-n1RvhA@mail.gmail.com>
-References: <1444094562-31165-1-git-send-email-mw@semihalf.com>
-	<1444094562-31165-7-git-send-email-mw@semihalf.com>
-	<20151006033131.GA24230@lunn.ch>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20151006033131.GA24230@lunn.ch>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Andrew Lunn <andrew@lunn.ch>
-Cc: linux-kernel@vger.kernel.org, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, Sebastian Hesselbarth <sebastian.hesselbarth@gmail.com>, Jason Cooper <jason@lakedaemon.net>, Thomas Petazzoni <thomas.petazzoni@free-electrons.com>, =?UTF-8?Q?Gregory_Cl=C3=A9ment?= <gregory.clement@free-electrons.com>, nadavh@marvell.com, Lior Amsalem <alior@marvell.com>, Tawfik Bayouk <tawfik@marvell.com>, Grzegorz Jaszczyk <jaz@semihalf.com>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: [PATCH] mmc: sdhci-pci: Add another PCI ID for an Intel eMMC host controller
+Date: Tue,  6 Oct 2015 10:26:21 +0300
+Message-ID: <1444116381-31726-1-git-send-email-adrian.hunter@intel.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mga01.intel.com ([192.55.52.88]:38827 "EHLO mga01.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751797AbbJFH3U (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 6 Oct 2015 03:29:20 -0400
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>
 
-Hi Andrew,
+Add another PCI ID for an Intel eMMC host controller.
 
-2015-10-06 5:31 GMT+02:00 Andrew Lunn <andrew@lunn.ch>:
-> On Tue, Oct 06, 2015 at 03:22:40AM +0200, Marcin Wojtas wrote:
->> The newest revisions of A388-GP (v1.5 and higher) support only
->> DAT3-based card detection, which is enabled by this commit. Hitherto
->> revisions, without such modification, will be impacted with a broken
->> card detection - in order to operate the cards have to be present
->> during kernel boot.
->
-> Humm. Is this acceptable, breaking old boards?
->
-> I would say at minimum, there should be a big fat comment at the top
-> of armada-388-gp.dts explaining that this DTS file is broken on
-> v0.0-v1.4.
->
-> Or we have two .dts files for the 388-gp file, and a dtsi file.
->
+Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
+---
+ drivers/mmc/host/sdhci-pci.c | 8 ++++++++
+ drivers/mmc/host/sdhci-pci.h | 1 +
+ 2 files changed, 9 insertions(+)
 
-I expected this patch would be controversial, hence I propose a
-compromise: set A388-GP SDHCI to 'broken-cd' by defeault. However
-Marvell insisted on HW card detection, because software polling spoils
-the SD/MMC benchmarks, but this way the user would decide whether to
-stay with broken-cd or switch to GPIO/DAT3 detection. What do you
-think?
+diff --git a/drivers/mmc/host/sdhci-pci.c b/drivers/mmc/host/sdhci-pci.c
+index b3b0a3e4fca1..7ccd4220076c 100644
+--- a/drivers/mmc/host/sdhci-pci.c
++++ b/drivers/mmc/host/sdhci-pci.c
+@@ -1113,6 +1113,14 @@ static const struct pci_device_id pci_ids[] = {
+ 	},
+ 
+ 	{
++		.vendor		= PCI_VENDOR_ID_INTEL,
++		.device		= PCI_DEVICE_ID_INTEL_DNV_EMMC,
++		.subvendor	= PCI_ANY_ID,
++		.subdevice	= PCI_ANY_ID,
++		.driver_data	= (kernel_ulong_t)&sdhci_intel_byt_emmc,
++	},
++
++	{
+ 		.vendor		= PCI_VENDOR_ID_O2,
+ 		.device		= PCI_DEVICE_ID_O2_8120,
+ 		.subvendor	= PCI_ANY_ID,
+diff --git a/drivers/mmc/host/sdhci-pci.h b/drivers/mmc/host/sdhci-pci.h
+index 541f1cad5247..cd4f4d74377e 100644
+--- a/drivers/mmc/host/sdhci-pci.h
++++ b/drivers/mmc/host/sdhci-pci.h
+@@ -24,6 +24,7 @@
+ #define PCI_DEVICE_ID_INTEL_SPT_EMMC	0x9d2b
+ #define PCI_DEVICE_ID_INTEL_SPT_SDIO	0x9d2c
+ #define PCI_DEVICE_ID_INTEL_SPT_SD	0x9d2d
++#define PCI_DEVICE_ID_INTEL_DNV_EMMC	0x19db
+ 
+ /*
+  * PCI registers
+-- 
+1.9.1
 
-Best regards,
-Marcin
