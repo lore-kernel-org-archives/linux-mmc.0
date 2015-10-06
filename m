@@ -1,56 +1,36 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: [PATCH] mmc: sdhci-pci: Add another PCI ID for an Intel eMMC host controller
-Date: Tue,  6 Oct 2015 10:26:21 +0300
-Message-ID: <1444116381-31726-1-git-send-email-adrian.hunter@intel.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: mmc : sdhci_do_start_signal_voltage_switch
+Date: Tue, 6 Oct 2015 09:39:06 +0200
+Message-ID: <CAPDyKFrzx6ZLKSNnFe1LOsw4VU2sWBc6bm75y+OQtjjafwhchw@mail.gmail.com>
+References: <CAHhAz+jUKPwVFQgkrdkX2gM1fFecZWJJofV49jE+Z3gYEpQimQ@mail.gmail.com>
+	<CAPDyKFp4BUcvew887_pFit8RsQRqmM1V2zEpZrxT0w9BsOhfMQ@mail.gmail.com>
+	<CAHhAz+i8923qvxi8pT3MLr2wHb8PgapbV9RCA_L-rWzxq4HcCA@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga01.intel.com ([192.55.52.88]:38827 "EHLO mga01.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751797AbbJFH3U (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 6 Oct 2015 03:29:20 -0400
+Received: from mail-wi0-f182.google.com ([209.85.212.182]:37318 "EHLO
+	mail-wi0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752285AbbJFHjH (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 6 Oct 2015 03:39:07 -0400
+Received: by wicfx3 with SMTP id fx3so145916922wic.0
+        for <linux-mmc@vger.kernel.org>; Tue, 06 Oct 2015 00:39:06 -0700 (PDT)
+In-Reply-To: <CAHhAz+i8923qvxi8pT3MLr2wHb8PgapbV9RCA_L-rWzxq4HcCA@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
+To: Muni Sekhar <munisekharrms@gmail.com>
 Cc: linux-mmc <linux-mmc@vger.kernel.org>
 
-Add another PCI ID for an Intel eMMC host controller.
+On 6 October 2015 at 08:32, Muni Sekhar <munisekharrms@gmail.com> wrote:
+> Hi Uffe,
+> Could you please explain about the way to add a time suitable for my case?
+>
 
-Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
----
- drivers/mmc/host/sdhci-pci.c | 8 ++++++++
- drivers/mmc/host/sdhci-pci.h | 1 +
- 2 files changed, 9 insertions(+)
+Please, don't top-post!
 
-diff --git a/drivers/mmc/host/sdhci-pci.c b/drivers/mmc/host/sdhci-pci.c
-index b3b0a3e4fca1..7ccd4220076c 100644
---- a/drivers/mmc/host/sdhci-pci.c
-+++ b/drivers/mmc/host/sdhci-pci.c
-@@ -1113,6 +1113,14 @@ static const struct pci_device_id pci_ids[] = {
- 	},
- 
- 	{
-+		.vendor		= PCI_VENDOR_ID_INTEL,
-+		.device		= PCI_DEVICE_ID_INTEL_DNV_EMMC,
-+		.subvendor	= PCI_ANY_ID,
-+		.subdevice	= PCI_ANY_ID,
-+		.driver_data	= (kernel_ulong_t)&sdhci_intel_byt_emmc,
-+	},
-+
-+	{
- 		.vendor		= PCI_VENDOR_ID_O2,
- 		.device		= PCI_DEVICE_ID_O2_8120,
- 		.subvendor	= PCI_ANY_ID,
-diff --git a/drivers/mmc/host/sdhci-pci.h b/drivers/mmc/host/sdhci-pci.h
-index 541f1cad5247..cd4f4d74377e 100644
---- a/drivers/mmc/host/sdhci-pci.h
-+++ b/drivers/mmc/host/sdhci-pci.h
-@@ -24,6 +24,7 @@
- #define PCI_DEVICE_ID_INTEL_SPT_EMMC	0x9d2b
- #define PCI_DEVICE_ID_INTEL_SPT_SDIO	0x9d2c
- #define PCI_DEVICE_ID_INTEL_SPT_SD	0x9d2d
-+#define PCI_DEVICE_ID_INTEL_DNV_EMMC	0x19db
- 
- /*
-  * PCI registers
--- 
-1.9.1
+Did you consider the regulator option?
 
+Regarding how to add a suitable time, I haven't yet figured out how to
+easiest solve do that, but there are a few options.
+
+Kind regards
+Uffe
