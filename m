@@ -1,36 +1,50 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: mmc : sdhci_do_start_signal_voltage_switch
-Date: Tue, 6 Oct 2015 09:39:06 +0200
-Message-ID: <CAPDyKFrzx6ZLKSNnFe1LOsw4VU2sWBc6bm75y+OQtjjafwhchw@mail.gmail.com>
-References: <CAHhAz+jUKPwVFQgkrdkX2gM1fFecZWJJofV49jE+Z3gYEpQimQ@mail.gmail.com>
-	<CAPDyKFp4BUcvew887_pFit8RsQRqmM1V2zEpZrxT0w9BsOhfMQ@mail.gmail.com>
-	<CAHhAz+i8923qvxi8pT3MLr2wHb8PgapbV9RCA_L-rWzxq4HcCA@mail.gmail.com>
+From: Tony Lindgren <tony@atomide.com>
+Subject: Re: [PATCH 3/3] mmc: omap: Fix module autoload for OF platform driver
+Date: Tue, 6 Oct 2015 01:09:36 -0700
+Message-ID: <20151006080935.GK23801@atomide.com>
+References: <20150917215025.GA8079@goodgumbo.baconseed.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wi0-f182.google.com ([209.85.212.182]:37318 "EHLO
-	mail-wi0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752285AbbJFHjH (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 6 Oct 2015 03:39:07 -0400
-Received: by wicfx3 with SMTP id fx3so145916922wic.0
-        for <linux-mmc@vger.kernel.org>; Tue, 06 Oct 2015 00:39:06 -0700 (PDT)
-In-Reply-To: <CAHhAz+i8923qvxi8pT3MLr2wHb8PgapbV9RCA_L-rWzxq4HcCA@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <20150917215025.GA8079@goodgumbo.baconseed.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Luis de Bethencourt <luis@debethencourt.com>
+Cc: linux-kernel@vger.kernel.org, Jarkko Lavinen <jarkko.lavinen@nokia.com>, Ulf Hansson <ulf.hansson@linaro.org>, linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Muni Sekhar <munisekharrms@gmail.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>
 
-On 6 October 2015 at 08:32, Muni Sekhar <munisekharrms@gmail.com> wrote:
-> Hi Uffe,
-> Could you please explain about the way to add a time suitable for my case?
->
+* Luis de Bethencourt <luis@debethencourt.com> [150917 14:54]:
+> This platform driver has a OF device ID table but the OF module
+> alias information is not created so module autoloading won't work.
+> 
+> Signed-off-by: Luis de Bethencourt <luisbg@osg.samsung.com>
 
-Please, don't top-post!
+Looks OK to me, this would be mostly for n8x0:
 
-Did you consider the regulator option?
+Acked-by: Tony Lindgren <tony@atomide.com>
 
-Regarding how to add a suitable time, I haven't yet figured out how to
-easiest solve do that, but there are a few options.
-
-Kind regards
-Uffe
+> ---
+>  drivers/mmc/host/omap.c | 1 +
+>  1 file changed, 1 insertion(+)
+> 
+> diff --git a/drivers/mmc/host/omap.c b/drivers/mmc/host/omap.c
+> index b763b11..b9958a1 100644
+> --- a/drivers/mmc/host/omap.c
+> +++ b/drivers/mmc/host/omap.c
+> @@ -1490,6 +1490,7 @@ static const struct of_device_id mmc_omap_match[] = {
+>  	{ .compatible = "ti,omap2420-mmc", },
+>  	{ },
+>  };
+> +MODULE_DEVICE_TABLE(of, mmc_omap_match);
+>  #endif
+>  
+>  static struct platform_driver mmc_omap_driver = {
+> -- 
+> 2.4.6
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-kernel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> Please read the FAQ at  http://www.tux.org/lkml/
+> 
