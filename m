@@ -1,79 +1,77 @@
-From: Marcin Wojtas <mw@semihalf.com>
-Subject: Re: [PATCH 6/8] ARM: mvebu: enable SDHCI card detection using DAT3
- pin on A388-GP
-Date: Tue, 6 Oct 2015 17:35:18 +0200
-Message-ID: <CAPv3WKebE9SHd25mDbn+y4f0awseo_KXA9-aFgUNHTty4KxGFQ@mail.gmail.com>
-References: <1444094562-31165-1-git-send-email-mw@semihalf.com>
-	<1444094562-31165-7-git-send-email-mw@semihalf.com>
-	<20151006033131.GA24230@lunn.ch>
-	<CAPv3WKeUQ6rsYWJ3C+aX8eHTAdS4SmQ3oCjA9feFf+d-n1RvhA@mail.gmail.com>
-	<8737xo9gvx.fsf@free-electrons.com>
+From: Tony Lindgren <tony@atomide.com>
+Subject: Re: All OMAP platforms: MMC is broken
+Date: Tue, 6 Oct 2015 08:37:11 -0700
+Message-ID: <20151006153710.GS23801@atomide.com>
+References: <CAPDyKFpnqJBrtiBekikrNHAf-agZm12KnF9n+=+72HH=jti-KA@mail.gmail.com>
+ <20151001100326.GV21513@n2100.arm.linux.org.uk>
+ <20151005112304.GZ23801@atomide.com>
+ <20151005143532.GA23801@atomide.com>
+ <20151005145127.GB23801@atomide.com>
+ <20151005171155.GF23801@atomide.com>
+ <20151005183813.GD21626@n2100.arm.linux.org.uk>
+ <20151006090015.GE21626@n2100.arm.linux.org.uk>
+ <20151006094425.GM23801@atomide.com>
+ <20151006150009.GF21626@n2100.arm.linux.org.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <8737xo9gvx.fsf@free-electrons.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Gregory CLEMENT <gregory.clement@free-electrons.com>
-Cc: Andrew Lunn <andrew@lunn.ch>, linux-kernel@vger.kernel.org, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, Sebastian Hesselbarth <sebastian.hesselbarth@gmail.com>, Jason Cooper <jason@lakedaemon.net>, Thomas Petazzoni <thomas.petazzoni@free-electrons.com>, nadavh@marvell.com, Lior Amsalem <alior@marvell.com>, Tawfik Bayouk <tawfik@marvell.com>, Grzegorz Jaszczyk <jaz@semihalf.com>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from muru.com ([72.249.23.125]:56304 "EHLO muru.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753436AbbJFPhQ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 6 Oct 2015 11:37:16 -0400
+Content-Disposition: inline
+In-Reply-To: <20151006150009.GF21626@n2100.arm.linux.org.uk>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Russell King - ARM Linux <linux@arm.linux.org.uk>
+Cc: Nishanth Menon <nm@ti.com>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, Felipe Balbi <balbi@ti.com>, Kishon Vijay Abraham I <kishon@ti.com>, "arm@kernel.org" <arm@kernel.org>, linux-omap@vger.kernel.org, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
 
-Gregory,
+* Russell King - ARM Linux <linux@arm.linux.org.uk> [151006 08:04]:
+> On Tue, Oct 06, 2015 at 02:44:25AM -0700, Tony Lindgren wrote:
+> > 
+> > Hmm DT-based boot finds the MMC card for LDP, dmesg below from DT boot [1].
+> > Looks like you're on on -rc4 and not -rc3. My guess is that MMC is not
+> > working for you with DT-based booting because you don't seem to have
+> > CONFIG_REGULATOR_PBIAS in your seed config for. Care to try enabling that
+> > for both your omap3 and omap4 seed config files?
+> 
+> This is precisely the kind of crap I'm objecting to.  New kernel versions
+> come along, and things break because people add extra Kconfig symbols that
+> previous versions did not rely upon - and there's no communication of
+> what's required for new kernel versions.
+> 
+> This stuff needs documenting, so that people are aware what changes they
+> need to make - please put something in Documentation/arm/OMAP which
+> tracks what new additions are required to the Kconfig to keep things
+> working.
 
-2015-10-06 17:05 GMT+02:00 Gregory CLEMENT <gregory.clement@free-electrons.com>:
-> Hi,
->
->  On mar., oct. 06 2015, Marcin Wojtas <mw@semihalf.com> wrote:
->
->> Hi Andrew,
->>
->> 2015-10-06 5:31 GMT+02:00 Andrew Lunn <andrew@lunn.ch>:
->>> On Tue, Oct 06, 2015 at 03:22:40AM +0200, Marcin Wojtas wrote:
->>>> The newest revisions of A388-GP (v1.5 and higher) support only
->>>> DAT3-based card detection, which is enabled by this commit. Hitherto
->>>> revisions, without such modification, will be impacted with a broken
->>>> card detection - in order to operate the cards have to be present
->>>> during kernel boot.
->>>
->>> Humm. Is this acceptable, breaking old boards?
->>>
->>> I would say at minimum, there should be a big fat comment at the top
->>> of armada-388-gp.dts explaining that this DTS file is broken on
->>> v0.0-v1.4.
->>>
->>> Or we have two .dts files for the 388-gp file, and a dtsi file.
->>>
->>
->> I expected this patch would be controversial, hence I propose a
->> compromise: set A388-GP SDHCI to 'broken-cd' by defeault. However
->> Marvell insisted on HW card detection, because software polling spoils
->> the SD/MMC benchmarks, but this way the user would decide whether to
->> stay with broken-cd or switch to GPIO/DAT3 detection. What do you
->> think?
->
-> I don't know hwo to correctly handle this case.
->
-> From my point of view in a ideal work it is typically something that
-> sould be updated by the bootloader. However in the real world, we can't
-> rely on the bootloader :(
->
-> I also don't like having a dts for each new version of the board but as
-> the end you can see them as different boards. Also now it seems that the
-> distribution are moving to link the dtb and the kernel: for eaxh new
-> version of the kernel they also provide a new version of the dtb. That
-> means, that if we modify the dts, then the old board won't work with the
-> new kernel. So maybe creating a armada-388-gp-v1.5.dts could be the best
-> option.
->
-> What do you think of it?
->
+Good idea, how about something like the following? AFAIK that's the
+only .config option needed as MFD_SYSCON is selected by Kconfig
+already.
 
-My first feeling is that creating brand new dts just for sdhci
-detection (afaik there are no other bigger modifications of the PCB)
-is not the best idea. However maybe changing armada-388-gp.dts to dtsi
-and then add two single-entries' dts files on top is an option? Of
-course we can satisfy each type of boards with 'broken-cd' polling
-detection. I think it's rather a question of a taste and maintanance
-point of view.
+Regrds,
 
-Best regards,
-Marcin
+Tony
+
+8< ----------
+From: Tony Lindgren <tony@atomide.com>
+Date: Tue, 6 Oct 2015 08:33:16 -0700
+Subject: [PATCH] Documentation: ARM: List new omap MMC requirements
+
+Earlier the PBIAS regulator was optional, not so with recent
+omap_hsmmc changes. To make things easier for people with
+custom .config files, let's add minimal documentation for it
+as suggested by Russell King <rmk+kernel@arm.linux.org.uk>.
+
+Signed-off-by: Tony Lindgren <tony@atomide.com>
+
+--- /dev/null
++++ b/Documentation/arm/OMAP/README
+@@ -0,0 +1,7 @@
++This file contains documentation for running mainline
++kernel on omaps.
++
++KERNEL		NEW DEPENDENCIES
++v4.3+		Update is needed for custom .config files to make sure
++		CONFIG_REGULATOR_PBIAS is enabled for MMC1 to work
++		properly.
