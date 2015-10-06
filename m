@@ -1,138 +1,39 @@
-From: Russell King - ARM Linux <linux@arm.linux.org.uk>
-Subject: Re: All OMAP platforms: MMC is broken
-Date: Tue, 6 Oct 2015 16:07:51 +0100
-Message-ID: <20151006150751.GG21626@n2100.arm.linux.org.uk>
-References: <20151001100326.GV21513@n2100.arm.linux.org.uk>
- <20151005112304.GZ23801@atomide.com>
- <20151005143532.GA23801@atomide.com>
- <20151005145127.GB23801@atomide.com>
- <20151005171155.GF23801@atomide.com>
- <20151005183813.GD21626@n2100.arm.linux.org.uk>
- <20151006090015.GE21626@n2100.arm.linux.org.uk>
- <20151006094425.GM23801@atomide.com>
- <CAPDyKFowuHHoYq3pRa11rg8KThQA5=Pzg5CpKfzMgz1to9+XLA@mail.gmail.com>
- <5613A419.5070006@ti.com>
+From: Marcin Wojtas <mw@semihalf.com>
+Subject: Re: [PATCH 4/8] mmc: sdhci-pxav3: enable proper resuming on Armada
+ 38x SoC
+Date: Tue, 6 Oct 2015 17:08:29 +0200
+Message-ID: <CAPv3WKcPMk4pZPaUR9GG0-nFKtb1gB-G3DS2NY257dsPp4ZFQQ@mail.gmail.com>
+References: <1444094562-31165-1-git-send-email-mw@semihalf.com>
+	<1444094562-31165-5-git-send-email-mw@semihalf.com>
+	<877fn09hjw.fsf@free-electrons.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from pandora.arm.linux.org.uk ([78.32.30.218]:42879 "EHLO
-	pandora.arm.linux.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751460AbbJFPIA (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 6 Oct 2015 11:08:00 -0400
-Content-Disposition: inline
-In-Reply-To: <5613A419.5070006@ti.com>
+Received: from mail-ob0-f175.google.com ([209.85.214.175]:35555 "EHLO
+	mail-ob0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753021AbbJFPIa (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 6 Oct 2015 11:08:30 -0400
+Received: by obbzf10 with SMTP id zf10so156271592obb.2
+        for <linux-mmc@vger.kernel.org>; Tue, 06 Oct 2015 08:08:29 -0700 (PDT)
+In-Reply-To: <877fn09hjw.fsf@free-electrons.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Kishon Vijay Abraham I <kishon@ti.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Tony Lindgren <tony@atomide.com>, Nishanth Menon <nm@ti.com>, linux-mmc <linux-mmc@vger.kernel.org>, Felipe Balbi <balbi@ti.com>, "arm@kernel.org" <arm@kernel.org>, linux-omap <linux-omap@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
+To: Gregory CLEMENT <gregory.clement@free-electrons.com>
+Cc: linux-kernel@vger.kernel.org, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, Sebastian Hesselbarth <sebastian.hesselbarth@gmail.com>, Andrew Lunn <andrew@lunn.ch>, Jason Cooper <jason@lakedaemon.net>, Thomas Petazzoni <thomas.petazzoni@free-electrons.com>, nadavh@marvell.com, Lior Amsalem <alior@marvell.com>, Tawfik Bayouk <tawfik@marvell.com>, Grzegorz Jaszczyk <jaz@semihalf.com>
 
-On Tue, Oct 06, 2015 at 04:06:09PM +0530, Kishon Vijay Abraham I wrote:
-> Hi,
-> 
-> On Tuesday 06 October 2015 03:41 PM, Ulf Hansson wrote:
-> > On 6 October 2015 at 11:44, Tony Lindgren <tony@atomide.com> wrote:
-> >> * Russell King - ARM Linux <linux@arm.linux.org.uk> [151006 02:04]:
-> >>> On Mon, Oct 05, 2015 at 07:38:13PM +0100, Russell King - ARM Linux wrote:
-> >>>> On Mon, Oct 05, 2015 at 10:11:56AM -0700, Tony Lindgren wrote:
-> >>>>> * Tony Lindgren <tony@atomide.com> [151005 07:57]:
-> >>>>>> * Tony Lindgren <tony@atomide.com> [151005 07:44]:
-> >>>>>>> * Tony Lindgren <tony@atomide.com> [151005 04:28]:
-> >>>>>>>
-> >>>>>>> Based on some tests it seems that the duovero unpaired regulator usage
-> >>>>>>> is fixed by reverting:
-> >>>>>>>
-> >>>>>>> c55d7a055364 ("mmc: host: omap_hsmmc: use regulator_is_enabled to
-> >>>>>>> find pbias status")
-> >>>>>>
-> >>>>>> With commit c55d7a055364 my guess is that the PBIAS regulator is
-> >>>>>> already on from an earlier MMC probe and getting re-enabled when
-> >>>>>> a deferred probe happens?
-> >>>>>
-> >>>>> Unless somebody has a better fix in mind for the above, I suggest
-> >>>>> we revert it for the -rc kernel.
-> >>>>
-> >>>> Let me try reverting that in my build tree, and...
-> >>>>
-> >>>>>>> And it seems that omap3 legacy MMC is broken earlier in the
-> >>>>>>> series with:
-> >>>>>>>
-> >>>>>>> 7d607f917008 ("mmc: host: omap_hsmmc: use
-> >>>>>>> devm_regulator_get_optional() for vmmc")
-> >>>>>>>
-> >>>>>>> This one does not cleanly revert so have not yet tried reverting
-> >>>>>>> it.
-> >>>>>>
-> >>>>>> And with commit 7d607f917008 I'm guessing we can't return anHi,
-> >>>>>> error if the PBIAS regulator does not exist as that's not there
-> >>>>>> for the legacy booting.
-> >>>>>
-> >>>>> For omap3 legacy booting, we keep getting -EPROBE_DEFER for
-> >>>>> all the optional regulators.
-> >>>>>
-> >>>>> Something like the following might be the minimal fix for the -rc
-> >>>>> cycle?
-> >>>>
-> >>>> applying this patch.  If that gets things going again, then we
-> >>>> _definitely_ should get both of these to Linus ASAP.  The breakage
-> >>>> has been around far too long already.
-> >>>
-> >>> Last night's build shows that this fixes the non-DT LDP3430 booting, but
-> >>> DT-based LDP3430 and SDP4430 both remain broken for the same reason -
-> >>> neither can find their SD cards.
-> >>
-> >> Hmm DT-based boot finds the MMC card for LDP, dmesg below from DT boot [1].
-> >> Looks like you're on on -rc4 and not -rc3. My guess is that MMC is not
-> >> working for you with DT-based booting because you don't seem to have
-> >> CONFIG_REGULATOR_PBIAS in your seed config for. Care to try enabling that
-> >> for both your omap3 and omap4 seed config files?
-> >>
-> >>> We're at -rc4.  That means we're could be only three weeks away from 4.3
-> >>> being released, and DT OMAP has yet to boot _once_ here.
-> >>>
-> >>> What I find *totally* unacceptable is the lack of reaction from the MMC
-> >>> and TI people: it's just like "we'll break your crap, and we'll ignore
-> >>> reports of regressions."  That is *not* acceptable in any shape or form,
-> >>> and people who do this _should_ have their future patches ignored until
-> >>> they demonstrate that they understand the need to not break stuff.
-> >>>
-> >>> I'm at the point of suggesting that there should be a moritorium on all
-> >>> OMAP related development for 4.4: delay all development to 4.5, and have
-> >>> 4.4 as a pure bug-fixing _only_ cycle for OMAP.  If 4.3 is released and
-> >>> OMAP is still broken, then I don't think there's an option on that.
-> >>>
-> >>> Maybe the idea that development work won't hit mainline for another 4
-> >>> months will help focus the minds on not breaking stuff and then ignoring
-> >>> regression reports.
-> >>
-> >> I'm thinking along the same lines. In general, I do not and will not
-> >> apply any patches that are not fixes until all critical regressions are
-> >> out of the way. So not applying anything new for v4.4 until these MMC
-> >> regressions are fixed for v4.3.
-> >>
-> > 
-> > Tony, Russell - just wanted to say thanks for putting a big effort in
-> > fixing this. I was expecting support from Kishon, but I guess he's
-> > busy.
-> > 
-> > Unfortunate, I don't have any of the hardware that fails, otherwise I
-> > would of course be helping out more. The only thing I can think of is
-> > to revert the entire patchset I picked up for 4.3 from Kishon for the
-> > omap_hsmmc driver, but then I am not sure if that would cause other
-> > issues...
-> 
-> Please don't do that as that will just mask lot of bugs in the
-> devicetree and might get MMC working. Indeed I was busy but I'll try to
-> get this resolved asap. The 2 pending issues as far as I know
+Gregory,
 
-Sorry, but no.  None of this "mask bugs ... might" crap.  Either they're
-bug fixes, or they aren't bug fixes.  This should be a definite decision,
-not some vague crap.
+2015-10-06 16:51 GMT+02:00 Gregory CLEMENT <gregory.clement
+>> +     if (of_device_is_compatible(np, "marvell,armada-380-sdhci"))
+>> +             ret = mv_conf_mbus_windows(dev, pxa->mbus_win_regs,
+>> +                                        mv_mbus_dram_info());
+>
+> I would find it cleaner to not rely on the device tree outise the probe
+> function. What about just testing pxa->mbus_win_regs ? As it is set only
+> if we need it, it should be a good test.
+>
 
-If they're bug fixes, why the _hell_ aren't they queued for -rc kernels?
+Sure, it will ease calling the function.
 
-This sounds really screwed up to me, and it's no wonder that OMAP MMC got
-broken if this is the kind of thing that's going on.
-
--- 
-FTTC broadband for 0.8mile line: currently at 9.6Mbps down 400kbps up
-according to speedtest.net.
+Thanks,
+Marcin
