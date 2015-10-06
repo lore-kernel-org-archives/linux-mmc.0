@@ -1,156 +1,80 @@
-From: Russell King - ARM Linux <linux@arm.linux.org.uk>
-Subject: Re: All OMAP platforms: MMC is broken
-Date: Tue, 6 Oct 2015 20:57:42 +0100
-Message-ID: <20151006195742.GH21626@n2100.arm.linux.org.uk>
-References: <20151005143532.GA23801@atomide.com>
- <20151005145127.GB23801@atomide.com>
- <20151005171155.GF23801@atomide.com>
- <20151005183813.GD21626@n2100.arm.linux.org.uk>
- <20151006090015.GE21626@n2100.arm.linux.org.uk>
- <20151006094425.GM23801@atomide.com>
- <CAPDyKFowuHHoYq3pRa11rg8KThQA5=Pzg5CpKfzMgz1to9+XLA@mail.gmail.com>
- <5613A419.5070006@ti.com>
- <20151006150751.GG21626@n2100.arm.linux.org.uk>
- <56142119.6050603@ti.com>
+From: Stefan Agner <stefan@agner.ch>
+Subject: Re: [PATCH V2 06/11] mmc: sdhci-esdhc-imx: fix cd regression for dt
+ platform
+Date: Tue, 06 Oct 2015 15:15:42 -0700
+Message-ID: <2333b5f060a8e45bd8adcdab55365fab@agner.ch>
+References: <1437569590-5228-1-git-send-email-aisheng.dong@freescale.com>
+ <1437569590-5228-7-git-send-email-aisheng.dong@freescale.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from pandora.arm.linux.org.uk ([78.32.30.218]:43627 "EHLO
-	pandora.arm.linux.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753237AbbJFT5w (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 6 Oct 2015 15:57:52 -0400
-Content-Disposition: inline
-In-Reply-To: <56142119.6050603@ti.com>
+Received: from mail.kmu-office.ch ([178.209.48.109]:41015 "EHLO
+	mail.kmu-office.ch" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753206AbbJFWQn (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 6 Oct 2015 18:16:43 -0400
+In-Reply-To: <1437569590-5228-7-git-send-email-aisheng.dong@freescale.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Kishon Vijay Abraham I <kishon@ti.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Tony Lindgren <tony@atomide.com>, Nishanth Menon <nm@ti.com>, linux-mmc <linux-mmc@vger.kernel.org>, Felipe Balbi <balbi@ti.com>, "arm@kernel.org" <arm@kernel.org>, linux-omap <linux-omap@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
+To: Dong Aisheng <aisheng.dong@freescale.com>
+Cc: linux-mmc@vger.kernel.org, fabio.estevam@freescale.com, marex@denx.de, ulf.hansson@linaro.org, s.trumtrar@pengutronix.de, smoch@web.de, linux-arm-kernel@lists.infradead.org, robertcnelson@gmail.com, s.hauer@pengutronix.de, chris@printf.net, rabeeh@solid-run.com, troy.kisky@boundarydevices.com, lisovy@gmail.com, hs@denx.de, gwenhael.goavec-merou@armadeus.com, p.zabel@pengutronix.de, rmk+kernel@arm.linux.org.uk, shawn.guo@linaro.org, b29396@freescale.com, tharvey@gateworks.com, LW@karo-electronics.de, ipaton0@gmail.com, linux-mmc-owner@vger.kernel.org
 
-On Wed, Oct 07, 2015 at 12:59:29AM +0530, Kishon Vijay Abraham I wrote:
-> Hi,
+Hi Dong,
+
+Just hit that issue in 4.1, could we add that patch also to stable?
+
+--
+Stefan
+
+On 2015-07-22 05:53, Dong Aisheng wrote:
+> Current card detect probe process is that when driver finds a valid
+> ESDHC_CD_GPIO, it will clear the quirk SDHCI_QUIRK_BROKEN_CARD_DETECTION
+> which is set by default for all esdhc/usdhc controllers.
+> Then host driver will know there's a valid card detect function.
 > 
-> On Tuesday 06 October 2015 08:37 PM, Russell King - ARM Linux wrote:
-> > On Tue, Oct 06, 2015 at 04:06:09PM +0530, Kishon Vijay Abraham I wrote:
-> >> Hi,
-> >>
-> >> On Tuesday 06 October 2015 03:41 PM, Ulf Hansson wrote:
-> >>> On 6 October 2015 at 11:44, Tony Lindgren <tony@atomide.com> wrote:
-> >>>> * Russell King - ARM Linux <linux@arm.linux.org.uk> [151006 02:04]:
-> >>>>> On Mon, Oct 05, 2015 at 07:38:13PM +0100, Russell King - ARM Linux wrote:
-> >>>>>> On Mon, Oct 05, 2015 at 10:11:56AM -0700, Tony Lindgren wrote:
-> >>>>>>> * Tony Lindgren <tony@atomide.com> [151005 07:57]:
-> >>>>>>>> * Tony Lindgren <tony@atomide.com> [151005 07:44]:
-> >>>>>>>>> * Tony Lindgren <tony@atomide.com> [151005 04:28]:
-> >>>>>>>>>
-> >>>>>>>>> Based on some tests it seems that the duovero unpaired regulator usage
-> >>>>>>>>> is fixed by reverting:
-> >>>>>>>>>
-> >>>>>>>>> c55d7a055364 ("mmc: host: omap_hsmmc: use regulator_is_enabled to
-> >>>>>>>>> find pbias status")
-> >>>>>>>>
-> >>>>>>>> With commit c55d7a055364 my guess is that the PBIAS regulator is
-> >>>>>>>> already on from an earlier MMC probe and getting re-enabled when
-> >>>>>>>> a deferred probe happens?
-> >>>>>>>
-> >>>>>>> Unless somebody has a better fix in mind for the above, I suggest
-> >>>>>>> we revert it for the -rc kernel.
-> >>>>>>
-> >>>>>> Let me try reverting that in my build tree, and...
-> >>>>>>
-> >>>>>>>>> And it seems that omap3 legacy MMC is broken earlier in the
-> >>>>>>>>> series with:
-> >>>>>>>>>
-> >>>>>>>>> 7d607f917008 ("mmc: host: omap_hsmmc: use
-> >>>>>>>>> devm_regulator_get_optional() for vmmc")
-> >>>>>>>>>
-> >>>>>>>>> This one does not cleanly revert so have not yet tried reverting
-> >>>>>>>>> it.
-> >>>>>>>>
-> >>>>>>>> And with commit 7d607f917008 I'm guessing we can't return anHi,
-> >>>>>>>> error if the PBIAS regulator does not exist as that's not there
-> >>>>>>>> for the legacy booting.
-> >>>>>>>
-> >>>>>>> For omap3 legacy booting, we keep getting -EPROBE_DEFER for
-> >>>>>>> all the optional regulators.
-> >>>>>>>
-> >>>>>>> Something like the following might be the minimal fix for the -rc
-> >>>>>>> cycle?
-> >>>>>>
-> >>>>>> applying this patch.  If that gets things going again, then we
-> >>>>>> _definitely_ should get both of these to Linus ASAP.  The breakage
-> >>>>>> has been around far too long already.
-> >>>>>
-> >>>>> Last night's build shows that this fixes the non-DT LDP3430 booting, but
-> >>>>> DT-based LDP3430 and SDP4430 both remain broken for the same reason -
-> >>>>> neither can find their SD cards.
-> >>>>
-> >>>> Hmm DT-based boot finds the MMC card for LDP, dmesg below from DT boot [1].
-> >>>> Looks like you're on on -rc4 and not -rc3. My guess is that MMC is not
-> >>>> working for you with DT-based booting because you don't seem to have
-> >>>> CONFIG_REGULATOR_PBIAS in your seed config for. Care to try enabling that
-> >>>> for both your omap3 and omap4 seed config files?
-> >>>>
-> >>>>> We're at -rc4.  That means we're could be only three weeks away from 4.3
-> >>>>> being released, and DT OMAP has yet to boot _once_ here.
-> >>>>>
-> >>>>> What I find *totally* unacceptable is the lack of reaction from the MMC
-> >>>>> and TI people: it's just like "we'll break your crap, and we'll ignore
-> >>>>> reports of regressions."  That is *not* acceptable in any shape or form,
-> >>>>> and people who do this _should_ have their future patches ignored until
-> >>>>> they demonstrate that they understand the need to not break stuff.
-> >>>>>
-> >>>>> I'm at the point of suggesting that there should be a moritorium on all
-> >>>>> OMAP related development for 4.4: delay all development to 4.5, and have
-> >>>>> 4.4 as a pure bug-fixing _only_ cycle for OMAP.  If 4.3 is released and
-> >>>>> OMAP is still broken, then I don't think there's an option on that.
-> >>>>>
-> >>>>> Maybe the idea that development work won't hit mainline for another 4
-> >>>>> months will help focus the minds on not breaking stuff and then ignoring
-> >>>>> regression reports.
-> >>>>
-> >>>> I'm thinking along the same lines. In general, I do not and will not
-> >>>> apply any patches that are not fixes until all critical regressions are
-> >>>> out of the way. So not applying anything new for v4.4 until these MMC
-> >>>> regressions are fixed for v4.3.
-> >>>>
-> >>>
-> >>> Tony, Russell - just wanted to say thanks for putting a big effort in
-> >>> fixing this. I was expecting support from Kishon, but I guess he's
-> >>> busy.
-> >>>
-> >>> Unfortunate, I don't have any of the hardware that fails, otherwise I
-> >>> would of course be helping out more. The only thing I can think of is
-> >>> to revert the entire patchset I picked up for 4.3 from Kishon for the
-> >>> omap_hsmmc driver, but then I am not sure if that would cause other
-> >>> issues...
-> >>
-> >> Please don't do that as that will just mask lot of bugs in the
-> >> devicetree and might get MMC working. Indeed I was busy but I'll try to
-> >> get this resolved asap. The 2 pending issues as far as I know
-> > 
-> > Sorry, but no.  None of this "mask bugs ... might" crap.  Either they're
-> > bug fixes, or they aren't bug fixes.  This should be a definite decision,
-> > not some vague crap.
+> Commit 8d86e4fcccf6 ("mmc: sdhci-esdhc-imx: Call mmc_of_parse()")
+> breaks GPIO CD function for dt platform that it will return directly
+> when find ESDHC_CD_GPIO for dt platform which result in the later wrongly
+> to keep SDHCI_QUIRK_BROKEN_CARD_DETECTION for all dt platforms.
+> Then MMC_CAP_NEEDS_POLL will be used instead even there's a valid
+> GPIO card detect.
 > 
-> What I meant is the patches merged by Ulf *did* exposed bugs in device
-> tree (for instance a dt patch caused PBIAS regulator from not being
-> registered) and if those patches are reverted then a future dt breakage
-> might again be not caught.
+> This patch adds back this function and follows the original approach to
+> clear the quirk if find an valid CD GPIO for dt platforms.
+> 
+> Fixes: 8d86e4fcccf6 ("mmc: sdhci-esdhc-imx: Call mmc_of_parse()")
+> Signed-off-by: Dong Aisheng <aisheng.dong@freescale.com>
+> ---
+>  drivers/mmc/host/sdhci-esdhc-imx.c | 10 +++++++++-
+>  1 file changed, 9 insertions(+), 1 deletion(-)
+> 
+> diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c
+> b/drivers/mmc/host/sdhci-esdhc-imx.c
+> index faf0cb9..4815391 100644
+> --- a/drivers/mmc/host/sdhci-esdhc-imx.c
+> +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
+> @@ -881,6 +881,7 @@ sdhci_esdhc_imx_probe_dt(struct platform_device *pdev,
+>  			 struct esdhc_platform_data *boarddata)
+>  {
+>  	struct device_node *np = pdev->dev.of_node;
+> +	int ret;
+>  
+>  	if (!np)
+>  		return -ENODEV;
+> @@ -917,7 +918,14 @@ sdhci_esdhc_imx_probe_dt(struct platform_device *pdev,
+>  	mmc_of_parse_voltage(np, &host->ocr_mask);
+>  
+>  	/* call to generic mmc_of_parse to support additional capabilities */
+> -	return mmc_of_parse(host->mmc);
+> +	ret = mmc_of_parse(host->mmc);
+> +	if (ret)
+> +		return ret;
+> +
+> +	if (!IS_ERR_VALUE(mmc_gpio_get_cd(host->mmc)))
+> +		host->quirks &= ~SDHCI_QUIRK_BROKEN_CARD_DETECTION;
+> +
+> +	return 0;
+>  }
+>  #else
+>  static inline int
 
-That makes it even worse then.
-
-What you seem to be saying now is that the old DT files were wrong, and
-you've fixed the DT files up in the latest kernel.  You've also changed
-the kernel in a way to make the old DT files fail.
-
-That's totally unacceptable.  Users have the right to expect that old DT
-files work with later kernels.
-
-It's fine to detect the broken DT files and print a warning, and have
-the kernel fix up the breakage, but it is unacceptable to decide that
-old DT files are broken and to then change stuff to prevent them working
-with later kernels.
-
--- 
-FTTC broadband for 0.8mile line: currently at 9.6Mbps down 400kbps up
-according to speedtest.net.
