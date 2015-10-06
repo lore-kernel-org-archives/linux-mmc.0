@@ -1,97 +1,82 @@
-From: Russell King - ARM Linux <linux@arm.linux.org.uk>
-Subject: Re: All OMAP platforms: MMC is broken
-Date: Tue, 6 Oct 2015 10:00:15 +0100
-Message-ID: <20151006090015.GE21626@n2100.arm.linux.org.uk>
-References: <20150924090048.GA21626@n2100.arm.linux.org.uk>
- <20150924233756.GN23801@atomide.com>
- <20151001093325.GU21513@n2100.arm.linux.org.uk>
- <CAPDyKFpnqJBrtiBekikrNHAf-agZm12KnF9n+=+72HH=jti-KA@mail.gmail.com>
- <20151001100326.GV21513@n2100.arm.linux.org.uk>
- <20151005112304.GZ23801@atomide.com>
- <20151005143532.GA23801@atomide.com>
- <20151005145127.GB23801@atomide.com>
- <20151005171155.GF23801@atomide.com>
- <20151005183813.GD21626@n2100.arm.linux.org.uk>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [RFC PATCH v3 1/3] mmc: sprd: Add MMC host driver for Spreadtrum SoC
+Date: Tue, 6 Oct 2015 11:18:13 +0200
+Message-ID: <CAPDyKFo3xp3wU3XW3kMV7Xz7DFgkxts3CArthYY7-CyWk8cjXw@mail.gmail.com>
+References: <1439571353-30165-1-git-send-email-wuht06@gmail.com>
+	<1439571353-30165-2-git-send-email-wuht06@gmail.com>
+	<CAPDyKFp=XH+Vo_diRyhrMuB+v1rmTmxo3Lid3Wc-u1ohqNisKw@mail.gmail.com>
+	<CAG_R4_VTXCV4NVMOwv-9F56-_pVsK0hU4go79ZhV3OFxwcF0mA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from pandora.arm.linux.org.uk ([78.32.30.218]:42132 "EHLO
-	pandora.arm.linux.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750936AbbJFJA3 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 6 Oct 2015 05:00:29 -0400
-Content-Disposition: inline
-In-Reply-To: <20151005183813.GD21626@n2100.arm.linux.org.uk>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <CAG_R4_VTXCV4NVMOwv-9F56-_pVsK0hU4go79ZhV3OFxwcF0mA@mail.gmail.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Hongtao Wu <wuht06@gmail.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Rob Herring <robh+dt@kernel.org>, =?UTF-8?Q?Pawe=C5=82_Moll?= <pawel.moll@arm.com>, Mark Rutland <mark.rutland@arm.com>, Ian Campbell <ijc+devicetree@hellion.org.uk>, Kumar Gala <galak@codeaurora.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will.deacon@arm.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Shawn Lin <shawn.lin@rock-chips.com>, "Orson.Zhai@spreadtrum.com" <Orson.Zhai@spreadtrum.com>, "Chunyan.Zhang@spreadtrum.com" <Chunyan.Zhang@spreadtrum.com>, "Jason.Wu@spreadtrum.com" <Jason.Wu@spreadtrum.com>, Russell King <rmk+kernel@arm.linux.org.uk>
 List-Id: linux-mmc@vger.kernel.org
-To: Tony Lindgren <tony@atomide.com>
-Cc: Nishanth Menon <nm@ti.com>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, Felipe Balbi <balbi@ti.com>, Kishon Vijay Abraham I <kishon@ti.com>, "arm@kernel.org" <arm@kernel.org>, linux-omap@vger.kernel.org, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
 
-On Mon, Oct 05, 2015 at 07:38:13PM +0100, Russell King - ARM Linux wrote:
-> On Mon, Oct 05, 2015 at 10:11:56AM -0700, Tony Lindgren wrote:
-> > * Tony Lindgren <tony@atomide.com> [151005 07:57]:
-> > > * Tony Lindgren <tony@atomide.com> [151005 07:44]:
-> > > > * Tony Lindgren <tony@atomide.com> [151005 04:28]:
-> > > > 
-> > > > Based on some tests it seems that the duovero unpaired regulator usage
-> > > > is fixed by reverting:
-> > > > 
-> > > > c55d7a055364 ("mmc: host: omap_hsmmc: use regulator_is_enabled to
-> > > > find pbias status")
-> > > 
-> > > With commit c55d7a055364 my guess is that the PBIAS regulator is
-> > > already on from an earlier MMC probe and getting re-enabled when
-> > > a deferred probe happens?
-> > 
-> > Unless somebody has a better fix in mind for the above, I suggest
-> > we revert it for the -rc kernel.
-> 
-> Let me try reverting that in my build tree, and...
-> 
-> > > > And it seems that omap3 legacy MMC is broken earlier in the
-> > > > series with:
-> > > > 
-> > > > 7d607f917008 ("mmc: host: omap_hsmmc: use
-> > > > devm_regulator_get_optional() for vmmc")
-> > > > 
-> > > > This one does not cleanly revert so have not yet tried reverting
-> > > > it.
-> > > 
-> > > And with commit 7d607f917008 I'm guessing we can't return an
-> > > error if the PBIAS regulator does not exist as that's not there
-> > > for the legacy booting.
-> > 
-> > For omap3 legacy booting, we keep getting -EPROBE_DEFER for
-> > all the optional regulators.
-> > 
-> > Something like the following might be the minimal fix for the -rc
-> > cycle?
-> 
-> applying this patch.  If that gets things going again, then we
-> _definitely_ should get both of these to Linus ASAP.  The breakage
-> has been around far too long already.
++Russell
 
-Last night's build shows that this fixes the non-DT LDP3430 booting, but
-DT-based LDP3430 and SDP4430 both remain broken for the same reason -
-neither can find their SD cards.
+On 28 September 2015 at 09:18, Hongtao Wu <wuht06@gmail.com> wrote:
+>>>
+>
+> On Thu, Sep 10, 2015 at 9:28 PM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+>>
+>> On 14 August 2015 at 18:55, Hongtao Wu <wuht06@gmail.com> wrote:
+>> > the Spreadtrum MMC host driver is used to supply EMMC, SD, and
+>> > SDIO types of memory cards
+>>
+>> Perhaps some more information about the controller. Are there any
+>> specific features it support or doesn't support!?
+>
+> Thanks for kindly reply.
+> Yes, spreadtrum MMC host controllers have some specific features as follows:
+> (1) We don't have controls for sampling clock tuning and re-tuning, we take
+>       place of them with three registers as follows:
+>        (a) CLK_WR_DL(Offset 080h): Data write clock delay line.
+>        (b) CLK_RD_POS_DL(Offset 0x84h): Posedge data read clock delay line.
+>        (c) CLK_RD_NEG_DL(Offset 088h): Negedge data read clock delay line.
+>
+> (2) We don't have Power Control Register(Offset 029h), all our controller's
+> power
+>       come from PMIC, rather than directly from CPU.
+>
+> (3) We don't have bit[6](Card Insertion), bit[7] (Card Removal), bit[8]
+> (Card Interrupt)
+> and bit[12:9] in Normal Interrupt Status Register(Offset 030h). Because the
+> detect
+> gpio pin doesn't connect to the register of our host controller. So we can't
+> operate bit[18:16](Card Detect Pin Level, Card State stable and Card
+> Inserted)
+> in Present State Register(Offset 024h).
 
-We're at -rc4.  That means we're could be only three weeks away from 4.3
-being released, and DT OMAP has yet to boot _once_ here.
+Thanks for clarifying!
 
-What I find *totally* unacceptable is the lack of reaction from the MMC
-and TI people: it's just like "we'll break your crap, and we'll ignore
-reports of regressions."  That is *not* acceptable in any shape or form,
-and people who do this _should_ have their future patches ignored until
-they demonstrate that they understand the need to not break stuff.
+You have some differences towards the "standard" sdhci variant, but
+that doesn't mean you should go off and implement a new driver from
+scratch, instead you should create a new sdhci variant and re-use code
+from the generic sdhci driver.
 
-I'm at the point of suggesting that there should be a moritorium on all
-OMAP related development for 4.4: delay all development to 4.5, and have
-4.4 as a pure bug-fixing _only_ cycle for OMAP.  If 4.3 is released and
-OMAP is still broken, then I don't think there's an option on that.
+The current problem with such approach, is that the sdhci driver isn't
+designed as a library but instead a driver consisting of too many
+quirks and callbacks. While you start to adopt your driver towards
+sdhci, you will need to add yet another bunch of new quirks and
+callbacks to suite your hw.
 
-Maybe the idea that development work won't hit mainline for another 4
-months will help focus the minds on not breaking stuff and then ignoring
-regression reports.
+Now, as the number of callbacks and quirks continues to increase I
+will sooner or later give up maintaining it, as each line of code will
+depend on a quirk. So, we need to start turning sdhci into a library
+*right now*! Russell King, has pointed out this several times as well,
+but unfortunate I haven't yet seen anyone willing to help out in this
+field.
 
--- 
-FTTC broadband for 0.8mile line: currently at 9.6Mbps down 400kbps up
-according to speedtest.net.
+I would of course be very happy if you would like to have a look at
+that, but I realize it's a difficult task, So, unless you are happy
+with taking on such a challenge, I suggest you go for an intermediate
+step, which thus means convert your driver to a sdhci variant driver
+and add the quirks/callbacks you need to suite your hw.
+
+[...]
+
+Kind regards
+Uffe
