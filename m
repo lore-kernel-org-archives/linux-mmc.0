@@ -1,7 +1,7 @@
 From: Marcin Wojtas <mw@semihalf.com>
-Subject: [PATCH 8/8] mmc: sdhci-pxav3: enable modifying MMC_CARD bit during card initialization
-Date: Tue,  6 Oct 2015 03:22:42 +0200
-Message-ID: <1444094562-31165-9-git-send-email-mw@semihalf.com>
+Subject: [PATCH 7/8] mmc: sdhci: add init_card callback to sdhci
+Date: Tue,  6 Oct 2015 03:22:41 +0200
+Message-ID: <1444094562-31165-8-git-send-email-mw@semihalf.com>
 References: <1444094562-31165-1-git-send-email-mw@semihalf.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1444094562-31165-1-git-send-email-mw@semihalf.com>
@@ -10,61 +10,54 @@ To: linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mm
 Cc: ulf.hansson@linaro.org, sebastian.hesselbarth@gmail.com, andrew@lunn.ch, jason@lakedaemon.net, thomas.petazzoni@free-electrons.com, gregory.clement@free-electrons.com, nadavh@marvell.com, alior@marvell.com, tawfik@marvell.com, mw@semihalf.com, jaz@semihalf.com
 List-Id: linux-mmc@vger.kernel.org
 
-On Marvell Armada 38x SoC's the MMC_CARD bit in SD_CE_ATA_1 register must
-be set to 0x1 when a MMC card is supposed to work in DDR mode, or when
-commands CMD11, CMD14 and CMD20 are used.
-
-This commit enables the above for all MMC cards by modifying the host
-registers during card initialization. It is done by using init_card()
-callback.
+Some sdhci hosts may require handling quirks during card initialization at
+the time when its type is already known. Hence a new callback (init_card)
+is added in sdhci_ops.
 
 Signed-off-by: Marcin Wojtas <mw@semihalf.com>
 ---
- drivers/mmc/host/sdhci-pxav3.c | 18 ++++++++++++++++++
- 1 file changed, 18 insertions(+)
+ drivers/mmc/host/sdhci.c | 9 +++++++++
+ drivers/mmc/host/sdhci.h | 1 +
+ 2 files changed, 10 insertions(+)
 
-diff --git a/drivers/mmc/host/sdhci-pxav3.c b/drivers/mmc/host/sdhci-pxav3.c
-index ce96640..315dc4e 100644
---- a/drivers/mmc/host/sdhci-pxav3.c
-+++ b/drivers/mmc/host/sdhci-pxav3.c
-@@ -57,6 +57,7 @@
- 
- #define SD_SPI_MODE          0x108
- #define SD_CE_ATA_1          0x10C
-+#define SDCE_MMC_CARD		BIT(28)
- 
- #define SD_CE_ATA_2          0x10E
- #define SDCE_MISC_INT		(1<<2)
-@@ -221,6 +222,22 @@ static void pxav3_reset(struct sdhci_host *host, u8 mask)
- 	}
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index cfed695..a1c308d 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -2200,6 +2200,14 @@ static void sdhci_card_event(struct mmc_host *mmc)
+ 	spin_unlock_irqrestore(&host->lock, flags);
  }
  
-+static void pxav3_init_card(struct sdhci_host *host, struct mmc_card *card)
++static void sdhci_init_card(struct mmc_host *mmc, struct mmc_card *card)
 +{
-+	struct platform_device *pdev = to_platform_device(mmc_dev(host->mmc));
-+	struct device_node *np = pdev->dev.of_node;
-+	u32 reg_val;
++	struct sdhci_host *host = mmc_priv(mmc);
 +
-+	if (of_device_is_compatible(np, "marvell,armada-380-sdhci")) {
-+		reg_val = sdhci_readl(host, SD_CE_ATA_1);
-+		if (mmc_card_mmc(card))
-+			reg_val |= SDCE_MMC_CARD;
-+		else
-+			reg_val &= ~SDCE_MMC_CARD;
-+		sdhci_writel(host, reg_val, SD_CE_ATA_1);
-+	}
++	if (host->ops->init_card)
++		host->ops->init_card(host, card);
 +}
 +
- #define MAX_WAIT_COUNT 5
- static void pxav3_gen_init_74_clocks(struct sdhci_host *host, u8 power_mode)
- {
-@@ -338,6 +355,7 @@ static const struct sdhci_ops pxav3_sdhci_ops = {
- 	.set_bus_width = sdhci_set_bus_width,
- 	.reset = pxav3_reset,
- 	.set_uhs_signaling = pxav3_set_uhs_signaling,
-+	.init_card = pxav3_init_card,
+ static const struct mmc_host_ops sdhci_ops = {
+ 	.request	= sdhci_request,
+ 	.post_req	= sdhci_post_req,
+@@ -2215,6 +2223,7 @@ static const struct mmc_host_ops sdhci_ops = {
+ 	.select_drive_strength		= sdhci_select_drive_strength,
+ 	.card_event			= sdhci_card_event,
+ 	.card_busy	= sdhci_card_busy,
++	.init_card	= sdhci_init_card,
  };
  
- static struct sdhci_pltfm_data sdhci_pxav3_pdata = {
+ /*****************************************************************************\
+diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+index c751b78..365c860 100644
+--- a/drivers/mmc/host/sdhci.h
++++ b/drivers/mmc/host/sdhci.h
+@@ -547,6 +547,7 @@ struct sdhci_ops {
+ 					 struct mmc_card *card,
+ 					 unsigned int max_dtr, int host_drv,
+ 					 int card_drv, int *drv_type);
++	void	(*init_card)(struct sdhci_host *host, struct mmc_card *card);
+ };
+ 
+ #ifdef CONFIG_MMC_SDHCI_IO_ACCESSORS
 -- 
 1.8.3.1
