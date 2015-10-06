@@ -1,75 +1,57 @@
 From: Gregory CLEMENT <gregory.clement@free-electrons.com>
-Subject: Re: [PATCH 0/8] Armada 38x SDHCI driver improvements
-Date: Tue, 06 Oct 2015 16:43:16 +0200
-Message-ID: <87lhbg9hx7.fsf@free-electrons.com>
+Subject: Re: [PATCH 1/8] mmc: sdhci-pxav3: remove broken clock base quirk for Armada 38x sdhci driver
+Date: Tue, 06 Oct 2015 16:43:48 +0200
+Message-ID: <87k2r09hwb.fsf@free-electrons.com>
 References: <1444094562-31165-1-git-send-email-mw@semihalf.com>
+	<1444094562-31165-2-git-send-email-mw@semihalf.com>
 Mime-Version: 1.0
 Content-Type: text/plain
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from down.free-electrons.com ([37.187.137.238]:52658 "EHLO
-	mail.free-electrons.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1750810AbbJFOnn (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 6 Oct 2015 10:43:43 -0400
-In-Reply-To: <1444094562-31165-1-git-send-email-mw@semihalf.com> (Marcin
-	Wojtas's message of "Tue, 6 Oct 2015 03:22:34 +0200")
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1444094562-31165-2-git-send-email-mw@semihalf.com> (Marcin
+	Wojtas's message of "Tue, 6 Oct 2015 03:22:35 +0200")
+Sender: linux-kernel-owner@vger.kernel.org
 To: Marcin Wojtas <mw@semihalf.com>
-Cc: linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, ulf.hansson@linaro.org, sebastian.hesselbarth@gmail.com, andrew@lunn.ch, jason@lakedaemon.net, thomas.petazzoni@free-electrons.com, nadavh@marvell.com, alior@marvell.com, tawfik@marvell.com, jaz@semihalf.com
+Cc: linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, ulf.hansson@linaro.org, sebastian.hesselbarth@gmail.com, andrew@lunn.ch, jason@lakedaemon.net, thomas.petazzoni@free-electrons.com, nadavh@marvell.com, alior@marvell.com, tawfik@marvell.com, jaz@semihalf.com, stable@vger.kernel.org
+List-Id: linux-mmc@vger.kernel.org
 
 Hi Marcin,
  
  On mar., oct. 06 2015, Marcin Wojtas <mw@semihalf.com> wrote:
 
-> Hi,
+> From: Nadav Haklai <nadavh@marvell.com>
 >
-> This series brings a couple of fixes and improvements to Armada 38x SDHCI
-> controller driver. First four patches are fixes, of which three are stable
-> CC'ed.
+> shci-pxav3 driver is enabling by default the
+> SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN quirk. However this quirk is not
+> required for Armada 38x and leads to wrong clock setting in the divider.
 >
-> Another two add DAT3-pin based hardware card detection in the driver, what
-> should be used by the newest revisions of A388-GP boards.
->
-> The last patches enable MMC_CARD bit, using init_card() callback added to
-> SDHCI hosts.
->
-> Any remarks and comments are welcome.
+> Signed-off-by: Nadav Haklai <nadavh@marvell.com>
+> Signed-off-by: Marcin Wojtas <mw@semihalf.com>
+> Cc: <stable@vger.kernel.org> # v4.2
 
-Thanks for this series, it looks good I have only one or two comments.
+Seems OK.
 
-I also want to test it, how do you test the resume?
-using standby or suspend to ram (by hacking the kernel as currently we
-disbaled it) ?
+Reviewed-by: Gregory CLEMENT <gregory.clement@free-electrons.com>
 
 Thanks,
 
 Gregory
 
+> ---
+>  drivers/mmc/host/sdhci-pxav3.c | 1 +
+>  1 file changed, 1 insertion(+)
 >
-> Best regards,
-> Marcin
->
-> Marcin Wojtas (6):
->   mmc: sdhci-pxav3: fix error handling of armada_38x_quirks
->   mmc: sdhci-pxav3: enable proper resuming on Armada 38x SoC
->   mmc: sdhci-pxav3: enable usage of DAT3 pin as HW card detect
->   ARM: mvebu: enable SDHCI card detection using DAT3 pin on A388-GP
->   mmc: sdhci: add init_card callback to sdhci
->   mmc: sdhci-pxav3: enable modifying MMC_CARD bit during card
->     initialization
->
-> Nadav Haklai (2):
->   mmc: sdhci-pxav3: remove broken clock base quirk for Armada 38x sdhci
->     driver
->   mmc: sdhci-pxav3: disable clock inversion for HS MMC cards
->
->  .../devicetree/bindings/mmc/sdhci-pxa.txt          |   5 +
->  arch/arm/boot/dts/armada-388-gp.dts                |   3 +-
->  drivers/mmc/host/sdhci-pxav3.c                     | 101 ++++++++++++++++-----
->  drivers/mmc/host/sdhci.c                           |  14 ++-
->  drivers/mmc/host/sdhci.h                           |   4 +
->  5 files changed, 102 insertions(+), 25 deletions(-)
->
+> diff --git a/drivers/mmc/host/sdhci-pxav3.c b/drivers/mmc/host/sdhci-pxav3.c
+> index 946d37f..976cddd 100644
+> --- a/drivers/mmc/host/sdhci-pxav3.c
+> +++ b/drivers/mmc/host/sdhci-pxav3.c
+> @@ -135,6 +135,7 @@ static int armada_38x_quirks(struct platform_device *pdev,
+>  	struct sdhci_pxa *pxa = pltfm_host->priv;
+>  	struct resource *res;
+>  
+> +	host->quirks &= ~SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN;
+>  	host->quirks |= SDHCI_QUIRK_MISSING_CAPS;
+>  	res = platform_get_resource_byname(pdev, IORESOURCE_MEM,
+>  					   "conf-sdio3");
 > -- 
 > 1.8.3.1
 >
