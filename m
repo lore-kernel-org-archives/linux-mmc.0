@@ -1,24 +1,50 @@
-From: "Liliane H Bettencourt" <ideguchi@yamaguchi-u.ac.jp>
-Subject: GREETINGS
-Date: Tue, 6 Oct 2015 02:47:43 +0900 (JST)
-Message-ID: <49735.41.138.186.142.1444067263.risu__47743.3393979028$1444083049$gmane$org@webmail2p.cc.yamaguchi-u.ac.jp>
-Reply-To: lil_bettencourt_1@yahoo.fr
-Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7BIT
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp3p.cc.yamaguchi-u.ac.jp ([133.62.137.22]:55974 "EHLO
-	smtp3p.cc.yamaguchi-u.ac.jp" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751722AbbJEWKf (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 5 Oct 2015 18:10:35 -0400
-Sender: linux-mmc-owner@vger.kernel.org
+From: Marcin Wojtas <mw@semihalf.com>
+Subject: [PATCH 0/8] Armada 38x SDHCI driver improvements
+Date: Tue,  6 Oct 2015 03:22:34 +0200
+Message-ID: <1444094562-31165-1-git-send-email-mw@semihalf.com>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org
+Cc: ulf.hansson@linaro.org, sebastian.hesselbarth@gmail.com, andrew@lunn.ch, jason@lakedaemon.net, thomas.petazzoni@free-electrons.com, gregory.clement@free-electrons.com, nadavh@marvell.com, alior@marvell.com, tawfik@marvell.com, mw@semihalf.com, jaz@semihalf.com
 List-Id: linux-mmc@vger.kernel.org
 
-I, Liliane authenticate this email, you can read about me on:
-http://en.wikipedia.org/wiki/Liliane_Bettencourt  I write to you because I
-intend to give you a portion of my Net-worth which I have been banking. I
-want to cede it out as gift hoping it would be of help to you and others
-too. Respond for confirmation.
+Hi,
 
-My Private Email: lil_bettencourt12@yahoo.fr
+This series brings a couple of fixes and improvements to Armada 38x SDHCI
+controller driver. First four patches are fixes, of which three are stable
+CC'ed.
 
+Another two add DAT3-pin based hardware card detection in the driver, what
+should be used by the newest revisions of A388-GP boards.
+
+The last patches enable MMC_CARD bit, using init_card() callback added to
+SDHCI hosts.
+
+Any remarks and comments are welcome.
+
+Best regards,
+Marcin
+
+Marcin Wojtas (6):
+  mmc: sdhci-pxav3: fix error handling of armada_38x_quirks
+  mmc: sdhci-pxav3: enable proper resuming on Armada 38x SoC
+  mmc: sdhci-pxav3: enable usage of DAT3 pin as HW card detect
+  ARM: mvebu: enable SDHCI card detection using DAT3 pin on A388-GP
+  mmc: sdhci: add init_card callback to sdhci
+  mmc: sdhci-pxav3: enable modifying MMC_CARD bit during card
+    initialization
+
+Nadav Haklai (2):
+  mmc: sdhci-pxav3: remove broken clock base quirk for Armada 38x sdhci
+    driver
+  mmc: sdhci-pxav3: disable clock inversion for HS MMC cards
+
+ .../devicetree/bindings/mmc/sdhci-pxa.txt          |   5 +
+ arch/arm/boot/dts/armada-388-gp.dts                |   3 +-
+ drivers/mmc/host/sdhci-pxav3.c                     | 101 ++++++++++++++++-----
+ drivers/mmc/host/sdhci.c                           |  14 ++-
+ drivers/mmc/host/sdhci.h                           |   4 +
+ 5 files changed, 102 insertions(+), 25 deletions(-)
+
+-- 
+1.8.3.1
