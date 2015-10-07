@@ -1,58 +1,73 @@
-From: Russell King - ARM Linux <linux@arm.linux.org.uk>
-Subject: Re: All OMAP platforms: MMC is broken
-Date: Wed, 7 Oct 2015 13:45:51 +0100
-Message-ID: <20151007124551.GI21626@n2100.arm.linux.org.uk>
-References: <20151001100326.GV21513@n2100.arm.linux.org.uk>
- <20151005112304.GZ23801@atomide.com>
- <20151005143532.GA23801@atomide.com>
- <20151005145127.GB23801@atomide.com>
- <20151005171155.GF23801@atomide.com>
- <20151005183813.GD21626@n2100.arm.linux.org.uk>
- <20151006090015.GE21626@n2100.arm.linux.org.uk>
- <20151006094425.GM23801@atomide.com>
- <20151006150009.GF21626@n2100.arm.linux.org.uk>
- <20151006153710.GS23801@atomide.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+From: Tony Lindgren <tony@atomide.com>
+Subject: [PATCH 2/2] mmc: host: omap_hsmmc: Fix MMC for omap3 legacy booting
+Date: Wed,  7 Oct 2015 06:22:25 -0700
+Message-ID: <1444224145-24333-2-git-send-email-tony@atomide.com>
+References: <1444224145-24333-1-git-send-email-tony@atomide.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from pandora.arm.linux.org.uk ([78.32.30.218]:45306 "EHLO
-	pandora.arm.linux.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751302AbbJGMqD (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 7 Oct 2015 08:46:03 -0400
-Content-Disposition: inline
-In-Reply-To: <20151006153710.GS23801@atomide.com>
+Received: from muru.com ([72.249.23.125]:56472 "EHLO muru.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753978AbbJGNWo (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 7 Oct 2015 09:22:44 -0400
+In-Reply-To: <1444224145-24333-1-git-send-email-tony@atomide.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Tony Lindgren <tony@atomide.com>
-Cc: Nishanth Menon <nm@ti.com>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, Felipe Balbi <balbi@ti.com>, Kishon Vijay Abraham I <kishon@ti.com>, "arm@kernel.org" <arm@kernel.org>, linux-omap@vger.kernel.org, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-omap@vger.kernel.org, Felipe Balbi <balbi@ti.com>, Kishon Vijay Abraham I <kishon@ti.com>, Nishanth Menon <nm@ti.com>, Russell King <rmk+kernel@arm.linux.org.uk>
 
-On Tue, Oct 06, 2015 at 08:37:11AM -0700, Tony Lindgren wrote:
-> * Russell King - ARM Linux <linux@arm.linux.org.uk> [151006 08:04]:
-> > On Tue, Oct 06, 2015 at 02:44:25AM -0700, Tony Lindgren wrote:
-> > > 
-> > > Hmm DT-based boot finds the MMC card for LDP, dmesg below from DT boot [1].
-> > > Looks like you're on on -rc4 and not -rc3. My guess is that MMC is not
-> > > working for you with DT-based booting because you don't seem to have
-> > > CONFIG_REGULATOR_PBIAS in your seed config for. Care to try enabling that
-> > > for both your omap3 and omap4 seed config files?
-> > 
-> > This is precisely the kind of crap I'm objecting to.  New kernel versions
-> > come along, and things break because people add extra Kconfig symbols that
-> > previous versions did not rely upon - and there's no communication of
-> > what's required for new kernel versions.
-> > 
-> > This stuff needs documenting, so that people are aware what changes they
-> > need to make - please put something in Documentation/arm/OMAP which
-> > tracks what new additions are required to the Kconfig to keep things
-> > working.
-> 
-> Good idea, how about something like the following? AFAIK that's the
-> only .config option needed as MFD_SYSCON is selected by Kconfig
-> already.
+Starting with commit 7d607f917008 ("mmc: host: omap_hsmmc: use
+devm_regulator_get_optional() for vmmc") MMC on omap3 stopped working
+for legacy booting.
 
-Right, that resolves the issue.  Now, what's the story on the revert
-and the other patch - have they already been taken for -rc kernels?
+This is because legacy booting sets up some of the resource in the
+platform init code, and for optional regulators always seem to
+return -EPROBE_DEFER for the legacy booting.
 
+Let's fix the issue by checking for device tree based booting for
+now. Then when omap3 boots in device tree only mode, this patch
+can be just reverted.
+
+Fixes: 7d607f917008 ("mmc: host: omap_hsmmc: use
+devm_regulator_get_optional() for vmmc")
+Cc: Felipe Balbi <balbi@ti.com>
+Cc: Kishon Vijay Abraham I <kishon@ti.com>
+Cc: Nishanth Menon <nm@ti.com>
+Cc: Russell King <rmk+kernel@arm.linux.org.uk>
+Signed-off-by: Tony Lindgren <tony@atomide.com>
+---
+ drivers/mmc/host/omap_hsmmc.c | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
+index ae3a2b9..7fb0753 100644
+--- a/drivers/mmc/host/omap_hsmmc.c
++++ b/drivers/mmc/host/omap_hsmmc.c
+@@ -478,7 +478,7 @@ static int omap_hsmmc_reg_get(struct omap_hsmmc_host *host)
+ 	mmc->supply.vmmc = devm_regulator_get_optional(host->dev, "vmmc");
+ 	if (IS_ERR(mmc->supply.vmmc)) {
+ 		ret = PTR_ERR(mmc->supply.vmmc);
+-		if (ret != -ENODEV)
++		if ((ret != -ENODEV) && host->dev->of_node)
+ 			return ret;
+ 		dev_dbg(host->dev, "unable to get vmmc regulator %ld\n",
+ 			PTR_ERR(mmc->supply.vmmc));
+@@ -493,7 +493,7 @@ static int omap_hsmmc_reg_get(struct omap_hsmmc_host *host)
+ 	mmc->supply.vqmmc = devm_regulator_get_optional(host->dev, "vmmc_aux");
+ 	if (IS_ERR(mmc->supply.vqmmc)) {
+ 		ret = PTR_ERR(mmc->supply.vqmmc);
+-		if (ret != -ENODEV)
++		if ((ret != -ENODEV) && host->dev->of_node)
+ 			return ret;
+ 		dev_dbg(host->dev, "unable to get vmmc_aux regulator %ld\n",
+ 			PTR_ERR(mmc->supply.vqmmc));
+@@ -503,7 +503,7 @@ static int omap_hsmmc_reg_get(struct omap_hsmmc_host *host)
+ 	host->pbias = devm_regulator_get_optional(host->dev, "pbias");
+ 	if (IS_ERR(host->pbias)) {
+ 		ret = PTR_ERR(host->pbias);
+-		if (ret != -ENODEV)
++		if ((ret != -ENODEV) && host->dev->of_node)
+ 			return ret;
+ 		dev_dbg(host->dev, "unable to get pbias regulator %ld\n",
+ 			PTR_ERR(host->pbias));
 -- 
-FTTC broadband for 0.8mile line: currently at 9.6Mbps down 400kbps up
-according to speedtest.net.
+2.1.4
+
