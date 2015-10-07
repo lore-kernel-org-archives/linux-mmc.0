@@ -1,7 +1,7 @@
-From: Tony Lindgren <tony@atomide.com>
+From: Russell King - ARM Linux <linux@arm.linux.org.uk>
 Subject: Re: All OMAP platforms: MMC is broken
-Date: Wed, 7 Oct 2015 08:52:06 -0700
-Message-ID: <20151007155206.GX23801@atomide.com>
+Date: Wed, 7 Oct 2015 18:53:25 +0100
+Message-ID: <20151007175325.GJ21626@n2100.arm.linux.org.uk>
 References: <20151005145127.GB23801@atomide.com>
  <20151005171155.GF23801@atomide.com>
  <20151005183813.GD21626@n2100.arm.linux.org.uk>
@@ -15,35 +15,29 @@ References: <20151005145127.GB23801@atomide.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from muru.com ([72.249.23.125]:56521 "EHLO muru.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751009AbbJGPwK (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 7 Oct 2015 11:52:10 -0400
+Received: from pandora.arm.linux.org.uk ([78.32.30.218]:45956 "EHLO
+	pandora.arm.linux.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755124AbbJGRxg (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 7 Oct 2015 13:53:36 -0400
 Content-Disposition: inline
 In-Reply-To: <CAPDyKFoBPEnHuNR_bsrPU6X=q5pHa8cDR7_Ng9xLnLsudymvOg@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Russell King - ARM Linux <linux@arm.linux.org.uk>, Nishanth Menon <nm@ti.com>, linux-mmc <linux-mmc@vger.kernel.org>, Felipe Balbi <balbi@ti.com>, Kishon Vijay Abraham I <kishon@ti.com>, "arm@kernel.org" <arm@kernel.org>, linux-omap <linux-omap@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
+Cc: Tony Lindgren <tony@atomide.com>, Nishanth Menon <nm@ti.com>, linux-mmc <linux-mmc@vger.kernel.org>, Felipe Balbi <balbi@ti.com>, Kishon Vijay Abraham I <kishon@ti.com>, "arm@kernel.org" <arm@kernel.org>, linux-omap <linux-omap@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
 
-* Ulf Hansson <ulf.hansson@linaro.org> [151007 06:46]:
-> On 7 October 2015 at 15:26, Tony Lindgren <tony@atomide.com> wrote:
-> >> > Good idea, how about something like the following? AFAIK that's the
-> >> > only .config option needed as MFD_SYSCON is selected by Kconfig
-> >> > already.
+On Wed, Oct 07, 2015 at 03:41:46PM +0200, Ulf Hansson wrote:
+> > http://marc.info/?l=linux-omap&m=144422416621373&w=2
+> > http://marc.info/?l=linux-omap&m=144422416921375&w=2
 > 
-> Similar to MFD_SYSCON, why don't we have REGULATOR_PBIAS to be
-> selected when omap_hsmmc is being used?
-> 
-> It seems like that should also be a patch for the rc, right!?
+> Russell, may I add your tested by tag for these?
 
-Well selecting CONFIG_REGULATOR is still optional and force selecting
-drivers usually leads into randconfig build issues sooner or later.
-And we'd like to make everything into loadable modules eventually.
+You may -
 
-We could print a warning during MMC1 probe if REGULATOR_PBIAS
-is not selected and attempt to continue probing?
+Tested-by: Russell King <rmk+kernel@arm.linux.org.uk>
 
-Regards,
+Thanks.
 
-Tony
+-- 
+FTTC broadband for 0.8mile line: currently at 9.6Mbps down 400kbps up
+according to speedtest.net.
