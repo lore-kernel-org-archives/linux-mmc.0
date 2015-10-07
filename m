@@ -1,31 +1,36 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 1/2] Revert "mmc: host: omap_hsmmc: use
- regulator_is_enabled to find pbias status"
-Date: Wed, 7 Oct 2015 16:06:21 +0200
-Message-ID: <CAPDyKFqK7hF2j60NfhL1EtwBrK43ZfK1t8=puGgNJVARfFUntA@mail.gmail.com>
+Subject: Re: [PATCH 2/2] mmc: host: omap_hsmmc: Fix MMC for omap3 legacy booting
+Date: Wed, 7 Oct 2015 16:06:40 +0200
+Message-ID: <CAPDyKFrT=E59OypujZNaXj+wELhdcyzK7pcdtNrT_=cEubMXtQ@mail.gmail.com>
 References: <1444224145-24333-1-git-send-email-tony@atomide.com>
+	<1444224145-24333-2-git-send-email-tony@atomide.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wi0-f178.google.com ([209.85.212.178]:38405 "EHLO
-	mail-wi0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751864AbbJGOGW (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 7 Oct 2015 10:06:22 -0400
-Received: by wiclk2 with SMTP id lk2so30329761wic.1
-        for <linux-mmc@vger.kernel.org>; Wed, 07 Oct 2015 07:06:21 -0700 (PDT)
-In-Reply-To: <1444224145-24333-1-git-send-email-tony@atomide.com>
+Received: from mail-wi0-f175.google.com ([209.85.212.175]:33219 "EHLO
+	mail-wi0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754026AbbJGOGm (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 7 Oct 2015 10:06:42 -0400
+Received: by wiclk2 with SMTP id lk2so215288704wic.0
+        for <linux-mmc@vger.kernel.org>; Wed, 07 Oct 2015 07:06:41 -0700 (PDT)
+In-Reply-To: <1444224145-24333-2-git-send-email-tony@atomide.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Tony Lindgren <tony@atomide.com>
 Cc: linux-mmc <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, linux-omap <linux-omap@vger.kernel.org>, Felipe Balbi <balbi@ti.com>, Kishon Vijay Abraham I <kishon@ti.com>, Nishanth Menon <nm@ti.com>, Russell King <rmk+kernel@arm.linux.org.uk>
 
 On 7 October 2015 at 15:22, Tony Lindgren <tony@atomide.com> wrote:
-> This reverts commit c55d7a0553643a7e8f120688b82b594471084d3c.
+> Starting with commit 7d607f917008 ("mmc: host: omap_hsmmc: use
+> devm_regulator_get_optional() for vmmc") MMC on omap3 stopped working
+> for legacy booting.
 >
-> Without reverting this commit we get "unbalanced disables for pbias_mmc_omap4"
-> errors on omap4430. It seems that 4430 and 4460 behave in a different way for
-> the PBIAS regulator registers and until that has been debugged further we
-> cannot rely on the regulator status registers in hardare on 4430.
+> This is because legacy booting sets up some of the resource in the
+> platform init code, and for optional regulators always seem to
+> return -EPROBE_DEFER for the legacy booting.
+>
+> Let's fix the issue by checking for device tree based booting for
+> now. Then when omap3 boots in device tree only mode, this patch
+> can be just reverted.
 >
 > Fixes: 7d607f917008 ("mmc: host: omap_hsmmc: use
 > devm_regulator_get_optional() for vmmc")
@@ -41,54 +46,40 @@ Kind regards
 Uffe
 
 > ---
->  drivers/mmc/host/omap_hsmmc.c | 8 ++++++--
->  1 file changed, 6 insertions(+), 2 deletions(-)
+>  drivers/mmc/host/omap_hsmmc.c | 6 +++---
+>  1 file changed, 3 insertions(+), 3 deletions(-)
 >
 > diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-> index 781e4db3..ae3a2b9 100644
+> index ae3a2b9..7fb0753 100644
 > --- a/drivers/mmc/host/omap_hsmmc.c
 > +++ b/drivers/mmc/host/omap_hsmmc.c
-> @@ -182,6 +182,7 @@ struct omap_hsmmc_host {
->         struct  clk             *fclk;
->         struct  clk             *dbclk;
->         struct  regulator       *pbias;
-> +       bool                    pbias_enabled;
->         void    __iomem         *base;
->         int                     vqmmc_enabled;
->         resource_size_t         mapbase;
-> @@ -328,20 +329,22 @@ static int omap_hsmmc_set_pbias(struct omap_hsmmc_host *host, bool power_on,
+> @@ -478,7 +478,7 @@ static int omap_hsmmc_reg_get(struct omap_hsmmc_host *host)
+>         mmc->supply.vmmc = devm_regulator_get_optional(host->dev, "vmmc");
+>         if (IS_ERR(mmc->supply.vmmc)) {
+>                 ret = PTR_ERR(mmc->supply.vmmc);
+> -               if (ret != -ENODEV)
+> +               if ((ret != -ENODEV) && host->dev->of_node)
 >                         return ret;
->                 }
->
-> -               if (!regulator_is_enabled(host->pbias)) {
-> +               if (host->pbias_enabled == 0) {
->                         ret = regulator_enable(host->pbias);
->                         if (ret) {
->                                 dev_err(host->dev, "pbias reg enable fail\n");
->                                 return ret;
->                         }
-> +                       host->pbias_enabled = 1;
->                 }
->         } else {
-> -               if (regulator_is_enabled(host->pbias)) {
-> +               if (host->pbias_enabled == 1) {
->                         ret = regulator_disable(host->pbias);
->                         if (ret) {
->                                 dev_err(host->dev, "pbias reg disable fail\n");
->                                 return ret;
->                         }
-> +                       host->pbias_enabled = 0;
->                 }
->         }
->
-> @@ -2053,6 +2056,7 @@ static int omap_hsmmc_probe(struct platform_device *pdev)
->         host->base      = base + pdata->reg_offset;
->         host->power_mode = MMC_POWER_OFF;
->         host->next_data.cookie = 1;
-> +       host->pbias_enabled = 0;
->         host->vqmmc_enabled = 0;
->
->         ret = omap_hsmmc_gpio_init(mmc, host, pdata);
+>                 dev_dbg(host->dev, "unable to get vmmc regulator %ld\n",
+>                         PTR_ERR(mmc->supply.vmmc));
+> @@ -493,7 +493,7 @@ static int omap_hsmmc_reg_get(struct omap_hsmmc_host *host)
+>         mmc->supply.vqmmc = devm_regulator_get_optional(host->dev, "vmmc_aux");
+>         if (IS_ERR(mmc->supply.vqmmc)) {
+>                 ret = PTR_ERR(mmc->supply.vqmmc);
+> -               if (ret != -ENODEV)
+> +               if ((ret != -ENODEV) && host->dev->of_node)
+>                         return ret;
+>                 dev_dbg(host->dev, "unable to get vmmc_aux regulator %ld\n",
+>                         PTR_ERR(mmc->supply.vqmmc));
+> @@ -503,7 +503,7 @@ static int omap_hsmmc_reg_get(struct omap_hsmmc_host *host)
+>         host->pbias = devm_regulator_get_optional(host->dev, "pbias");
+>         if (IS_ERR(host->pbias)) {
+>                 ret = PTR_ERR(host->pbias);
+> -               if (ret != -ENODEV)
+> +               if ((ret != -ENODEV) && host->dev->of_node)
+>                         return ret;
+>                 dev_dbg(host->dev, "unable to get pbias regulator %ld\n",
+>                         PTR_ERR(host->pbias));
 > --
 > 2.1.4
 >
