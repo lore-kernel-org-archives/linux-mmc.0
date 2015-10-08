@@ -1,89 +1,111 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v2] mmc: core: Fix init_card in 52Mhz
-Date: Thu, 8 Oct 2015 15:35:44 +0200
-Message-ID: <CAPDyKFoWWMXC-DECqhw=EXerid5toWKxr4uLq0WevPo8LrrDqw@mail.gmail.com>
-References: <1444288147-24013-1-git-send-email-chaotian.jing@mediatek.com>
-	<CAPDyKFqrjP3-y+ucm5ybwXefsDLOYcPF9XqMciwhRkjD5NXLBg@mail.gmail.com>
-	<56166988.20900@intel.com>
+From: Hongtao Wu <wuht06@gmail.com>
+Subject: Re: [RFC PATCH v3 1/3] mmc: sprd: Add MMC host driver for Spreadtrum SoC
+Date: Thu, 8 Oct 2015 21:37:04 +0800
+Message-ID: <CAG_R4_X3kQj5xSA5KLyu75aqusPNXj0H4Xqx+m+5Sg5cZ15bBg@mail.gmail.com>
+References: <1439571353-30165-1-git-send-email-wuht06@gmail.com>
+	<1439571353-30165-2-git-send-email-wuht06@gmail.com>
+	<CAPDyKFp=XH+Vo_diRyhrMuB+v1rmTmxo3Lid3Wc-u1ohqNisKw@mail.gmail.com>
+	<CAG_R4_VTXCV4NVMOwv-9F56-_pVsK0hU4go79ZhV3OFxwcF0mA@mail.gmail.com>
+	<CAPDyKFo3xp3wU3XW3kMV7Xz7DFgkxts3CArthYY7-CyWk8cjXw@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <56166988.20900@intel.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: Chaotian Jing <chaotian.jing@mediatek.com>, Matthias Brugger <matthias.bgg@gmail.com>, Jaehoon Chung <jh80.chung@samsung.com>, Fabio Estevam <fabio.estevam@freescale.com>, Johan Rudholm <johan.rudholm@axis.com>, Gwendal Grignou <gwendal@chromium.org>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, linux-mediatek@lists.infradead.org, srv_heupstream <srv_heupstream@mediatek.com>, Sascha Hauer <kernel@pengutronix.de>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-ig0-f194.google.com ([209.85.213.194]:35490 "EHLO
+	mail-ig0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1757559AbbJHNhF (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 8 Oct 2015 09:37:05 -0400
+In-Reply-To: <CAPDyKFo3xp3wU3XW3kMV7Xz7DFgkxts3CArthYY7-CyWk8cjXw@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Rob Herring <robh+dt@kernel.org>, =?UTF-8?Q?Pawe=C5=82_Moll?= <pawel.moll@arm.com>, Mark Rutland <mark.rutland@arm.com>, Ian Campbell <ijc+devicetree@hellion.org.uk>, Kumar Gala <galak@codeaurora.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will.deacon@arm.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Shawn Lin <shawn.lin@rock-chips.com>, "Orson.Zhai@spreadtrum.com" <Orson.Zhai@spreadtrum.com>, "Chunyan.Zhang@spreadtrum.com" <Chunyan.Zhang@spreadtrum.com>, "Jason.Wu@spreadtrum.com" <Jason.Wu@spreadtrum.com>, Russell King <rmk+kernel@arm.linux.org.uk>
 
-On 8 October 2015 at 15:03, Adrian Hunter <adrian.hunter@intel.com> wrote:
-> On 08/10/15 13:59, Ulf Hansson wrote:
->> On 8 October 2015 at 09:09, Chaotian Jing <chaotian.jing@mediatek.com> wrote:
->>> Suppose that we got a data crc error, and it triggers the mmc_reset.
->>> mmc_reset will call mmc_send_status to see if HW reset was supported.
->>> before issue CMD13, it will do retune, and if EMMC was in HS400 mode,
->>> it will reduce frequency to 52Mhz firstly, then results in card init
->>> was doing at 52Mhz.
->>> The mmc_send_status was originally only done for mmc_test, so if retune
->>> needed, do not call mmc_send_status.
->>>
->>> Signed-off-by: Chaotian Jing <chaotian.jing@mediatek.com>
->>> Suggested-by: Adrian Hunter <adrian.hunter@intel.com>
->>> ---
->>>  drivers/mmc/card/mmc_test.c | 6 ++++++
->>>  drivers/mmc/core/mmc.c      | 2 +-
->>>  2 files changed, 7 insertions(+), 1 deletion(-)
->>>
->>> diff --git a/drivers/mmc/card/mmc_test.c b/drivers/mmc/card/mmc_test.c
->>> index b78cf5d..2f78bfb 100644
->>> --- a/drivers/mmc/card/mmc_test.c
->>> +++ b/drivers/mmc/card/mmc_test.c
->>> @@ -2272,6 +2272,12 @@ static int mmc_test_hw_reset(struct mmc_test_card *test)
->>>         if (!mmc_card_mmc(card) || !mmc_can_reset(card))
->>>                 return RESULT_UNSUP_CARD;
->>>
->>> +       if (host->need_retune) {
->>> +               pr_info("%s: cannot test hw reset because retune needed\n",
->>> +                       mmc_hostname(test->card->host));
->>> +               return RESULT_FAIL;
->>> +       }
->>> +
->>>         err = mmc_hw_reset(host);
->>>         if (!err)
->>>                 return RESULT_OK;
->>> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
->>> index e726903..647c96d 100644
->>> --- a/drivers/mmc/core/mmc.c
->>> +++ b/drivers/mmc/core/mmc.c
->>> @@ -1938,7 +1938,7 @@ static int mmc_reset(struct mmc_host *host)
->>>         host->ops->hw_reset(host);
->>>
->>>         /* If the reset has happened, then a status command will fail */
->>> -       if (!mmc_send_status(card, &status)) {
->>> +       if (!host->need_retune && !mmc_send_status(card, &status)) {
->>
->> No, this seem like the wrong solution! The main purpose of mmc_reset()
->> is to try to reset and re-initiate the card, to make it operational
->> again.
->>
->> I can't find a good reason to why we want to do a mmc_send_status() at
->> this point, as even if it succeeds it will only tell us that the card
->> has not been "hw-reset". No matter what, we should still try to make
->> it fully operational again and thus give mmc_init_card() a try.
->>
->>>From this reasoning, I suggest we remove the call to mmc_send_status()
->> from this path, as that will also address your issue with CRC errors
->> in combination with re-tune.
+On Tue, Oct 6, 2015 at 5:18 PM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+> +Russell
 >
-> Then you need to remove the hw_reset test from mmc_test.  Refer:
+> On 28 September 2015 at 09:18, Hongtao Wu <wuht06@gmail.com> wrote:
+>>>>
+>>
+>> On Thu, Sep 10, 2015 at 9:28 PM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+>>>
+>>> On 14 August 2015 at 18:55, Hongtao Wu <wuht06@gmail.com> wrote:
+>>> > the Spreadtrum MMC host driver is used to supply EMMC, SD, and
+>>> > SDIO types of memory cards
+>>>
+>>> Perhaps some more information about the controller. Are there any
+>>> specific features it support or doesn't support!?
+>>
+>> Thanks for kindly reply.
+>> Yes, spreadtrum MMC host controllers have some specific features as follows:
+>> (1) We don't have controls for sampling clock tuning and re-tuning, we take
+>>       place of them with three registers as follows:
+>>        (a) CLK_WR_DL(Offset 080h): Data write clock delay line.
+>>        (b) CLK_RD_POS_DL(Offset 0x84h): Posedge data read clock delay line.
+>>        (c) CLK_RD_NEG_DL(Offset 088h): Negedge data read clock delay line.
+>>
+>> (2) We don't have Power Control Register(Offset 029h), all our controller's
+>> power
+>>       come from PMIC, rather than directly from CPU.
+>>
+>> (3) We don't have bit[6](Card Insertion), bit[7] (Card Removal), bit[8]
+>> (Card Interrupt)
+>> and bit[12:9] in Normal Interrupt Status Register(Offset 030h). Because the
+>> detect
+>> gpio pin doesn't connect to the register of our host controller. So we can't
+>> operate bit[18:16](Card Detect Pin Level, Card State stable and Card
+>> Inserted)
+>> in Present State Register(Offset 024h).
 >
->         http://marc.info/?l=linux-mmc&m=144360165906544&w=2
+> Thanks for clarifying!
 >
+> You have some differences towards the "standard" sdhci variant, but
+> that doesn't mean you should go off and implement a new driver from
+> scratch, instead you should create a new sdhci variant and re-use code
+> from the generic sdhci driver.
+>
+> The current problem with such approach, is that the sdhci driver isn't
+> designed as a library but instead a driver consisting of too many
+> quirks and callbacks. While you start to adopt your driver towards
+> sdhci, you will need to add yet another bunch of new quirks and
+> callbacks to suite your hw.
+>
+> Now, as the number of callbacks and quirks continues to increase I
+> will sooner or later give up maintaining it, as each line of code will
+> depend on a quirk. So, we need to start turning sdhci into a library
+> *right now*! Russell King, has pointed out this several times as well,
+> but unfortunate I haven't yet seen anyone willing to help out in this
+> field.
+>
+> I would of course be very happy if you would like to have a look at
+> that, but I realize it's a difficult task, So, unless you are happy
+> with taking on such a challenge, I suggest you go for an intermediate
+> step, which thus means convert your driver to a sdhci variant driver
+> and add the quirks/callbacks you need to suite your hw.
+>
+> [...]
+>
+> Kind regards
+> Uffe
 
-I realize that the test becomes a bit different, but I don't think it's useless.
+Thanks for kindly suggestion!
+I think it's a good idea to turn sdhci into a library. But for me it's
+too difficult to
+take on such a challenge. However, I will try my best to support you to do
+it.
 
-If we add a check for MMC_CAP_HW_RESET and verify that the
-host->ops->hw_reset exists, then we can assume that the "hw_reset"
-sequence has executed. And if mmc_init_card() fails, that would
-probably mean that the reset also failed, right?
+As you suggested, I will consider converting our eMMC host driver to a
+sdhci variant driver. However, our controller has some features, which
+differentiate it from standard sd host controller. For example, our controller
+doesn't have such functions as follows: tuning or re-tuning, Power Control
+Register, PIO or ADMA transfer mode, UHS-II and so on. So, if we use sdchi
+variant driver right now, I think it has a litter redundancy.
 
-Kind regards
-Uffe
+Now our sdio team are discussing improving  our eMMC host controller, we are
+making it more standardized. But you know, changing a IP block is a long
+process. Maybe it will take us about one or two years. So what do you think
+if we use ourself eMMC host driver right now, and convert it when our new host
+controller is ready.
+
+thanks.
+
+Hongtao.
