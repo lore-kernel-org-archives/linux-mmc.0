@@ -1,66 +1,54 @@
-From: Russell King - ARM Linux <linux@arm.linux.org.uk>
-Subject: Re: [PATCH 1/2] mmc: sdhci: add quirk
- SDHCI_QUIRK2_NEED_DELAY_AFTER_INT_CLK_RST
-Date: Thu, 8 Oct 2015 19:32:34 +0100
-Message-ID: <20151008183234.GK32532@n2100.arm.linux.org.uk>
-References: <1442477780-30994-1-git-send-email-ludovic.desroches@atmel.com>
- <CAPDyKFp1+d1ouaq-ftheDn+fT1ssHDwde2orAndUrMW0iyqqww@mail.gmail.com>
+From: Marcin Wojtas <mw@semihalf.com>
+Subject: Re: [PATCH 3/8] mmc: sdhci-pxav3: fix error handling of armada_38x_quirks
+Date: Fri, 9 Oct 2015 02:49:07 +0200
+Message-ID: <CAPv3WKen1yb7QZfiLaeiDOHvdXZy3WivAL2qjgacFY=GPCEAcQ@mail.gmail.com>
+References: <1444094562-31165-1-git-send-email-mw@semihalf.com>
+	<1444094562-31165-4-git-send-email-mw@semihalf.com>
+	<CAPDyKFrA1NKDY=z=MMSXeW_naVCAAJnMa_ZfDqo1-tnpbNCoRg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from pandora.arm.linux.org.uk ([78.32.30.218]:48630 "EHLO
-	pandora.arm.linux.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754662AbbJHScn (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 8 Oct 2015 14:32:43 -0400
-Content-Disposition: inline
-In-Reply-To: <CAPDyKFp1+d1ouaq-ftheDn+fT1ssHDwde2orAndUrMW0iyqqww@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <CAPDyKFrA1NKDY=z=MMSXeW_naVCAAJnMa_ZfDqo1-tnpbNCoRg@mail.gmail.com>
+Sender: linux-kernel-owner@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Ludovic Desroches <ludovic.desroches@atmel.com>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Nicolas Ferre <nicolas.ferre@atmel.com>, Alexandre Belloni <alexandre.belloni@free-electrons.com>
+Cc: "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, linux-mmc <linux-mmc@vger.kernel.org>, Sebastian Hesselbarth <sebastian.hesselbarth@gmail.com>, Andrew Lunn <andrew@lunn.ch>, Jason Cooper <jason@lakedaemon.net>, Thomas Petazzoni <thomas.petazzoni@free-electrons.com>, Gregory Clement <gregory.clement@free-electrons.com>, Nadav Haklai <nadavh@marvell.com>, Lior Amsalem <alior@marvell.com>, Tawfik Bayouk <tawfik@marvell.com>, Grzegorz Jaszczyk <jaz@semihalf.com>, "# 4.0+" <stable@vger.kernel.org>
+List-Id: linux-mmc@vger.kernel.org
 
-On Thu, Oct 08, 2015 at 08:01:23PM +0200, Ulf Hansson wrote:
-> +Russell
-> 
-> On 17 September 2015 at 10:16, Ludovic Desroches
-> <ludovic.desroches@atmel.com> wrote:
-> > The Atmel sdhci device needs a new quirk. sdhci_set_clock set the Clock
-> > Control Register to 0 before computing the new value and writing it.
-> > It disables the internal clock which causes a reset mecanism. If we
-> > write the new value before this reset mecanism is done, it will prevent
-> > the stabilisation of the internal clock, so a delay is needed. This
-> > delay is about 2-3 cycles of the base clock. To be safe, a 1 ms delay is
-> > used.
-> >
-> > Signed-off-by: Ludovic Desroches <ludovic.desroches@atmel.com>
-> > ---
-> > Hi Ulf,
-> >
-> > Can you take these patches as fixes? I thought it was better to introduce a
-> > quirk instead of duplicating a part of the sdhci_set_clock function to
-> > implement my own set_clock function.
-> 
-> Hi Ludovic,
-> 
-> Sorry for the delay!
-> 
-> I have been thinking of how to address patches for sdhci that adds
-> more quirks/callbacks. To be honest, I am fed up with such patches as
-> I think it keeps the development of sdhci going in the wrong
-> direction.
-> 
-> Instead, I have been hoping for someone to have stab into turning
-> sdhci into a library as Russell King pointed out several times as
-> well.
-> 
-> Now, as my response too you had a big delay for these patches and
-> because it's a fix intended for the rc, I am going to apply patch1 and
-> patch2 anyway. Although, you and everybody else that contributes to
-> the sdhci development, please consider this as the *last* time for
-> adding quirks/callbacks, unless you have *very good* reasons.
+Thanks for grabbing the three patches!
 
-+1 on all of that.
+Best regards,
+Marcin
 
--- 
-FTTC broadband for 0.8mile line: currently at 9.6Mbps down 400kbps up
-according to speedtest.net.
+2015-10-08 19:35 GMT+02:00 Ulf Hansson <ulf.hansson@linaro.org>:
+> On 6 October 2015 at 03:22, Marcin Wojtas <mw@semihalf.com> wrote:
+>> In case of armada_38x_quirks error, all clocks should be cleaned-up, same
+>> as after mv_conf_mbus_windows failure.
+>>
+>> Signed-off-by: Marcin Wojtas <mw@semihalf.com>
+>> Cc: <stable@vger.kernel.org> # v4.2
+>
+> Thanks, applied for fixes!
+>
+> Kind regards
+> Uffe
+>
+>> ---
+>>  drivers/mmc/host/sdhci-pxav3.c | 2 +-
+>>  1 file changed, 1 insertion(+), 1 deletion(-)
+>>
+>> diff --git a/drivers/mmc/host/sdhci-pxav3.c b/drivers/mmc/host/sdhci-pxav3.c
+>> index 89a9e49..f5edf9d 100644
+>> --- a/drivers/mmc/host/sdhci-pxav3.c
+>> +++ b/drivers/mmc/host/sdhci-pxav3.c
+>> @@ -402,7 +402,7 @@ static int sdhci_pxav3_probe(struct platform_device *pdev)
+>>         if (of_device_is_compatible(np, "marvell,armada-380-sdhci")) {
+>>                 ret = armada_38x_quirks(pdev, host);
+>>                 if (ret < 0)
+>> -                       goto err_clk_get;
+>> +                       goto err_mbus_win;
+>>                 ret = mv_conf_mbus_windows(pdev, mv_mbus_dram_info());
+>>                 if (ret < 0)
+>>                         goto err_mbus_win;
+>> --
+>> 1.8.3.1
+>>
