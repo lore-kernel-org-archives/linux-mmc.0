@@ -1,135 +1,55 @@
-From: Grant Grundler <grundler@chromium.org>
-Subject: Re: [PATCH] mmc: block: copy resp[] data on err for MMC_IOC_MULTI_CMD
-Date: Fri, 9 Oct 2015 09:33:51 -0700
-Message-ID: <CANEJEGtpCvDYd8=mUOn5NbyR=fofz3yb9FkTN0qC8vxiLkK9Tw@mail.gmail.com>
-References: <1443058233-2370-1-git-send-email-grundler@chromium.org>
-	<CAPDyKFqNx6ADXAONS_p2FzHXLCO5fwa=1zioS_9-7E1w5FQZwg@mail.gmail.com>
+From: Doug Anderson <dianders@chromium.org>
+Subject: Re: [PATCH v2 0/8] mmc: dw_mmc-rockchip: allow tuning using the
+ clk-phase api
+Date: Fri, 9 Oct 2015 10:19:58 -0700
+Message-ID: <CAD=FV=XdVt5Uop5WAUv6vY3=qPksnc9HzR4C9CBWpXJKuteTEQ@mail.gmail.com>
+References: <1443622064-14362-1-git-send-email-heiko@sntech.de>
+	<CAPDyKFqeo--AiW_zHHrSqoOdFNZ3J_FgJpz2L7Z8gZnNmQZSig@mail.gmail.com>
+	<CAPDyKFr6WV-o8Td9eJVkuCgaeNjdLr2GpaC32c3026bFmOJiYQ@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAPDyKFqNx6ADXAONS_p2FzHXLCO5fwa=1zioS_9-7E1w5FQZwg@mail.gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Grant Grundler <grundler@chromium.org>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Jon Hunter <jonathanh@nvidia.com>, Hyung Taek Ryoo <hryoo@nvidia.com>, Gwendal Grignou <gwendal@chromium.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-yk0-f173.google.com ([209.85.160.173]:36638 "EHLO
+	mail-yk0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754609AbbJIRT7 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 9 Oct 2015 13:19:59 -0400
+Received: by ykba192 with SMTP id a192so80606958ykb.3
+        for <linux-mmc@vger.kernel.org>; Fri, 09 Oct 2015 10:19:58 -0700 (PDT)
+In-Reply-To: <CAPDyKFr6WV-o8Td9eJVkuCgaeNjdLr2GpaC32c3026bFmOJiYQ@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Heiko Stuebner <heiko@sntech.de>, Michael Turquette <mturquette@baylibre.com>, Stephen Boyd <sboyd@codeaurora.org>, "tgih.jun@samsung.com" <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, linux-mmc <linux-mmc@vger.kernel.org>, linux-clk@vger.kernel.org, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "open list:ARM/Rockchip SoC..." <linux-rockchip@lists.infradead.org>, Alexandru Stan <amstan@chromium.org>
 
-Awesome! Thanks Ulf! :)
+Hi,
 
-cheers
-grant
+On Fri, Oct 9, 2015 at 1:10 AM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+> Dough, Heiko,
+>
+> This patchset seems to be causing a boot regression for exynos5800-peach-pi [1].
+>
+> Apparently, the vmmc regulator doesn't exist for one of the controller
+> but vqmmc is. This leads to the following NULL pointer exception.
 
-On Mon, Oct 5, 2015 at 3:55 AM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
-> On 24 September 2015 at 03:30, Grant Grundler <grundler@chromium.org> wrote:
->> MMC_IOC_CMD and MMC_IOC_MULTI_CMD ioctl() code currently bails on
->> any eMMC errors. However, in case there is any resp[] data, we
->> should attempt to copy resp[] back to user space. The user app
->> can then determine which command(s) failed in the MMC_IOC_MULTI_CMD
->> case AND/OR report better diagnostics in both cases.
->>
->> Gwendal Grignou provided the idea and it was previously implemented
->> and tested on v3.18 ChromeOS kernel:
->>     https://chromium-review.googlesource.com/#/c/299956
->>
->> Signed-off-by: Grant Grundler <grundler@chromium.org>
->> Reviewed-by: Hyung Taek Ryoo <hryoo@nvidia.com>
->> Reviewed-by: Gwendal Grignou <gwendal@chromium.org>
->> Tested-by: David Riley <davidriley@chromium.org>
->
-> Thanks, applied for next!
->
-> Kind regards
-> Uffe
->
->> ---
->> I believe the patch applied correctly to Ulf's mmc.git on linaro.org.
->> I would have warm fuzzies if Jon or Hyung (Nvidia) could review/test this.
->>
->> I made one change from the chromium.org version:
->>   initialize err and ioc_err to zero in mmc_blk_ioctl_cmd()
->>
->>  drivers/mmc/card/block.c | 27 +++++++++------------------
->>  1 file changed, 9 insertions(+), 18 deletions(-)
->>
->> diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
->> index f6acf0f..23b6c8e 100644
->> --- a/drivers/mmc/card/block.c
->> +++ b/drivers/mmc/card/block.c
->> @@ -595,7 +595,7 @@ static int mmc_blk_ioctl_cmd(struct block_device *bdev,
->>         struct mmc_blk_ioc_data *idata;
->>         struct mmc_blk_data *md;
->>         struct mmc_card *card;
->> -       int err;
->> +       int err = 0, ioc_err = 0;
->>
->>         idata = mmc_blk_ioctl_copy_from_user(ic_ptr);
->>         if (IS_ERR(idata))
->> @@ -615,19 +615,18 @@ static int mmc_blk_ioctl_cmd(struct block_device *bdev,
->>
->>         mmc_get_card(card);
->>
->> -       err = __mmc_blk_ioctl_cmd(card, md, idata);
->> +       ioc_err = __mmc_blk_ioctl_cmd(card, md, idata);
->>
->>         mmc_put_card(card);
->>
->> -       if (!err)
->> -               err = mmc_blk_ioctl_copy_to_user(ic_ptr, idata);
->> +       err = mmc_blk_ioctl_copy_to_user(ic_ptr, idata);
->>
->>  cmd_done:
->>         mmc_blk_put(md);
->>  cmd_err:
->>         kfree(idata->buf);
->>         kfree(idata);
->> -       return err;
->> +       return ioc_err ? ioc_err : err;
->>  }
->>
->>  static int mmc_blk_ioctl_multi_cmd(struct block_device *bdev,
->> @@ -637,7 +636,7 @@ static int mmc_blk_ioctl_multi_cmd(struct block_device *bdev,
->>         struct mmc_ioc_cmd __user *cmds = user->cmds;
->>         struct mmc_card *card;
->>         struct mmc_blk_data *md;
->> -       int i, err = -EFAULT;
->> +       int i, err = 0, ioc_err = 0;
->>         __u64 num_of_cmds;
->>
->>         if (copy_from_user(&num_of_cmds, &user->num_of_cmds,
->> @@ -672,22 +671,14 @@ static int mmc_blk_ioctl_multi_cmd(struct block_device *bdev,
->>
->>         mmc_get_card(card);
->>
->> -       for (i = 0; i < num_of_cmds; i++) {
->> -               err = __mmc_blk_ioctl_cmd(card, md, idata[i]);
->> -               if (err) {
->> -                       mmc_put_card(card);
->> -                       goto cmd_done;
->> -               }
->> -       }
->> +       for (i = 0; i < num_of_cmds && !ioc_err; i++)
->> +               ioc_err = __mmc_blk_ioctl_cmd(card, md, idata[i]);
->>
->>         mmc_put_card(card);
->>
->>         /* copy to user if data and response */
->> -       for (i = 0; i < num_of_cmds; i++) {
->> +       for (i = 0; i < num_of_cmds && !err; i++)
->>                 err = mmc_blk_ioctl_copy_to_user(&cmds[i], idata[i]);
->> -               if (err)
->> -                       break;
->> -       }
->>
->>  cmd_done:
->>         mmc_blk_put(md);
->> @@ -697,7 +688,7 @@ cmd_err:
->>                 kfree(idata[i]);
->>         }
->>         kfree(idata);
->> -       return err;
->> +       return ioc_err ? ioc_err : err;
->>  }
->>
->>  static int mmc_blk_ioctl(struct block_device *bdev, fmode_t mode,
->> --
->> 2.6.0.rc2.230.g3dd15c0
->>
+Ugh.  Hrm, it didn't used to be possible for vmmc to be NULL.  :-/  It
+changed in v3.16:
+
+  4d1f52f mmc: core: Improve support for deferred regulators
+
+...and I didn't notice it (most of my development is done on 3.14).  :(
+
+
+Is it sensible to have vqmmc without vmmc.  One option would be to
+change mmc_regulator_get_supply() to not even bother trying to get
+vqmmc if vmmc is not there.
+
+Another option would be to just totally fail mmc_regulator_set_vqmmc()
+always if vmmc is an error.  ...or assume that any bogus vmmc (either
+vmmc is an error or regulator_get_voltage(vmmc) returns an error) is
+3.3V?
+
+
+I guess the safest is to assume that bogus vmmc means 3.3V...
+
+
+-Doug
