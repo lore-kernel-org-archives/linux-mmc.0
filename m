@@ -1,58 +1,56 @@
-From: Andrew Lunn <andrew@lunn.ch>
-Subject: Re: [PATCH v2 3/5] ARM: mvebu: set SW polling as SDHCI card
- detection on A388-GP
-Date: Fri, 9 Oct 2015 15:46:41 +0200
-Message-ID: <20151009134641.GD14688@lunn.ch>
+From: Russell King - ARM Linux <linux@arm.linux.org.uk>
+Subject: Re: [PATCH v2 2/5] mmc: sdhci-pxav3: enable usage of DAT3 pin as HW
+ card detect
+Date: Fri, 9 Oct 2015 14:46:19 +0100
+Message-ID: <20151009134619.GS32532@n2100.arm.linux.org.uk>
 References: <1444352635-21965-1-git-send-email-mw@semihalf.com>
- <1444352635-21965-4-git-send-email-mw@semihalf.com>
+ <1444352635-21965-3-git-send-email-mw@semihalf.com>
+ <20151009201356.78488116@xhacker>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-kernel-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <1444352635-21965-4-git-send-email-mw@semihalf.com>
+In-Reply-To: <20151009201356.78488116@xhacker>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Marcin Wojtas <mw@semihalf.com>
-Cc: linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, ulf.hansson@linaro.org, sebastian.hesselbarth@gmail.com, jason@lakedaemon.net, thomas.petazzoni@free-electrons.com, gregory.clement@free-electrons.com, nadavh@marvell.com, alior@marvell.com, tawfik@marvell.com, jaz@semihalf.com
+To: Jisheng Zhang <jszhang@marvell.com>
+Cc: Marcin Wojtas <mw@semihalf.com>, thomas.petazzoni@free-electrons.com, andrew@lunn.ch, ulf.hansson@linaro.org, jason@lakedaemon.net, tawfik@marvell.com, jaz@semihalf.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, nadavh@marvell.com, alior@marvell.com, gregory.clement@free-electrons.com, linux-arm-kernel@lists.infradead.org, sebastian.hesselbarth@gmail.com
 List-Id: linux-mmc@vger.kernel.org
 
-On Fri, Oct 09, 2015 at 03:03:53AM +0200, Marcin Wojtas wrote:
-> The newest revisions of A388-GP (v1.5 and higher) support only
-> DAT3-based card detection. Revisions < v1.5 based on GPIO detection
-> via I2C expander, but this solution is supposed to be deprecated on
-> new boards. In order to satisfy all type of hardware this commit
-> changes card detection to use software polling mechanism.
-
-Hi Marcin
-
-Thanks for going with broken-cd and not introducing a regression for
-older boards. As others have said, a comment would be good, but
-otherwise:
-
-Acked-by: Andrew Lunn <andrew@lunn.ch>
-
-Thanks
-	Andrew
-
+On Fri, Oct 09, 2015 at 08:13:56PM +0800, Jisheng Zhang wrote:
+> On Fri, 9 Oct 2015 03:03:52 +0200
+> Marcin Wojtas <mw@semihalf.com> wrote:
 > 
-> Signed-off-by: Marcin Wojtas <mw@semihalf.com>
-> ---
->  arch/arm/boot/dts/armada-388-gp.dts | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
+> > Marvell Armada 38x SDHCI controller enable using DAT3 pin as a hardware
+> > card detection. According to the SD sdandard this signal can be used for
+> > this purpose combined with a pull-up resistor, implying inverted (active
+> > low) polarization of a card detect. MMC standard does not support this
+> > feature and does not operate with such connectivity of DAT3.
+> > 
+> > When using DAT3-based detection Armada 38x SDIO IP expects its internal
+> > clock to be always on, which had to be ensured twofold:
 > 
-> diff --git a/arch/arm/boot/dts/armada-388-gp.dts b/arch/arm/boot/dts/armada-388-gp.dts
-> index 391dea9..403a86b 100644
-> --- a/arch/arm/boot/dts/armada-388-gp.dts
-> +++ b/arch/arm/boot/dts/armada-388-gp.dts
-> @@ -213,8 +213,8 @@
->  			sdhci@d8000 {
->  				pinctrl-names = "default";
->  				pinctrl-0 = <&sdhci_pins>;
-> -				cd-gpios = <&expander0 5 GPIO_ACTIVE_LOW>;
->  				no-1-8-v;
-> +				broken-cd;
->  				wp-inverted;
->  				bus-width = <8>;
->  				status = "okay";
-> -- 
-> 1.8.3.1
+> What happen if runtime suspend disables its core clk and axi clk? I guess
+> dat3-based detection isn't compatible with runtime pm. If so, do we also
+> need to disable runtime pm in probe function?
 > 
+> > - Each time controller is reset by updating appropriate registers. On the
+> >   occasion of adding new register @0x104, register @0x100 name is modified
+> >   in order to the be aligned with Armada 38x documentation.
+> > - Leaving the clock enabled despite power-down. For this purpose a new
+> >   quirk had to be added to SDHCI subsystem - SDHCI_QUIRK2_KEEP_INT_CLK_ON.
+> 
+> As seen from other mails, Ulf calls for no more quirks...
+
+Absolutely.
+
+You have host->ops->set_clock, which you currently have set to
+sdhci_set_clock().  If you need to do something different, please replace
+that method with your own version - its fine to either wrap sdhci_set_clock()
+or replace it entirely.
+
+sdhci_set_clock() may benefit from being factored a little, so that it's
+easier to replace parts of it.
+
+-- 
+FTTC broadband for 0.8mile line: currently at 9.6Mbps down 400kbps up
+according to speedtest.net.
