@@ -1,63 +1,46 @@
 From: Marcin Wojtas <mw@semihalf.com>
-Subject: [PATCH v2 4/5] mmc: sdhci: add init_card callback to sdhci
-Date: Fri,  9 Oct 2015 03:03:54 +0200
-Message-ID: <1444352635-21965-5-git-send-email-mw@semihalf.com>
+Subject: [PATCH v2 3/5] ARM: mvebu: set SW polling as SDHCI card detection on A388-GP
+Date: Fri,  9 Oct 2015 03:03:53 +0200
+Message-ID: <1444352635-21965-4-git-send-email-mw@semihalf.com>
 References: <1444352635-21965-1-git-send-email-mw@semihalf.com>
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-lb0-f170.google.com ([209.85.217.170]:36336 "EHLO
+	mail-lb0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754996AbbJIA4q (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 8 Oct 2015 20:56:46 -0400
+Received: by lbcao8 with SMTP id ao8so65579229lbc.3
+        for <linux-mmc@vger.kernel.org>; Thu, 08 Oct 2015 17:56:44 -0700 (PDT)
 In-Reply-To: <1444352635-21965-1-git-send-email-mw@semihalf.com>
-Sender: linux-kernel-owner@vger.kernel.org
+Sender: linux-mmc-owner@vger.kernel.org
+List-Id: linux-mmc@vger.kernel.org
 To: linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org
 Cc: ulf.hansson@linaro.org, sebastian.hesselbarth@gmail.com, andrew@lunn.ch, jason@lakedaemon.net, thomas.petazzoni@free-electrons.com, gregory.clement@free-electrons.com, nadavh@marvell.com, alior@marvell.com, tawfik@marvell.com, mw@semihalf.com, jaz@semihalf.com
-List-Id: linux-mmc@vger.kernel.org
 
-Some sdhci hosts may require handling quirks during card initialization at
-the time when its type is already known. Hence a new callback (init_card)
-is added in sdhci_ops.
+The newest revisions of A388-GP (v1.5 and higher) support only
+DAT3-based card detection. Revisions < v1.5 based on GPIO detection
+via I2C expander, but this solution is supposed to be deprecated on
+new boards. In order to satisfy all type of hardware this commit
+changes card detection to use software polling mechanism.
 
 Signed-off-by: Marcin Wojtas <mw@semihalf.com>
 ---
- drivers/mmc/host/sdhci.c | 9 +++++++++
- drivers/mmc/host/sdhci.h | 1 +
- 2 files changed, 10 insertions(+)
+ arch/arm/boot/dts/armada-388-gp.dts | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index cfed695..a1c308d 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -2200,6 +2200,14 @@ static void sdhci_card_event(struct mmc_host *mmc)
- 	spin_unlock_irqrestore(&host->lock, flags);
- }
- 
-+static void sdhci_init_card(struct mmc_host *mmc, struct mmc_card *card)
-+{
-+	struct sdhci_host *host = mmc_priv(mmc);
-+
-+	if (host->ops->init_card)
-+		host->ops->init_card(host, card);
-+}
-+
- static const struct mmc_host_ops sdhci_ops = {
- 	.request	= sdhci_request,
- 	.post_req	= sdhci_post_req,
-@@ -2215,6 +2223,7 @@ static const struct mmc_host_ops sdhci_ops = {
- 	.select_drive_strength		= sdhci_select_drive_strength,
- 	.card_event			= sdhci_card_event,
- 	.card_busy	= sdhci_card_busy,
-+	.init_card	= sdhci_init_card,
- };
- 
- /*****************************************************************************\
-diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-index c751b78..365c860 100644
---- a/drivers/mmc/host/sdhci.h
-+++ b/drivers/mmc/host/sdhci.h
-@@ -547,6 +547,7 @@ struct sdhci_ops {
- 					 struct mmc_card *card,
- 					 unsigned int max_dtr, int host_drv,
- 					 int card_drv, int *drv_type);
-+	void	(*init_card)(struct sdhci_host *host, struct mmc_card *card);
- };
- 
- #ifdef CONFIG_MMC_SDHCI_IO_ACCESSORS
+diff --git a/arch/arm/boot/dts/armada-388-gp.dts b/arch/arm/boot/dts/armada-388-gp.dts
+index 391dea9..403a86b 100644
+--- a/arch/arm/boot/dts/armada-388-gp.dts
++++ b/arch/arm/boot/dts/armada-388-gp.dts
+@@ -213,8 +213,8 @@
+ 			sdhci@d8000 {
+ 				pinctrl-names = "default";
+ 				pinctrl-0 = <&sdhci_pins>;
+-				cd-gpios = <&expander0 5 GPIO_ACTIVE_LOW>;
+ 				no-1-8-v;
++				broken-cd;
+ 				wp-inverted;
+ 				bus-width = <8>;
+ 				status = "okay";
 -- 
 1.8.3.1
+
