@@ -1,72 +1,53 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: [GIT PULL] MMC fixes for v.4.3 rc5
-Date: Fri, 9 Oct 2015 10:53:49 +0200
-Message-ID: <CAPDyKFp2D2twO03ncFtOePzCmdx3jYfJ8hr317VAiUDWgbDrZQ@mail.gmail.com>
+From: Marcin Wojtas <mw@semihalf.com>
+Subject: Re: [PATCH 4/8] mmc: sdhci-pxav3: enable proper resuming on Armada
+ 38x SoC
+Date: Fri, 9 Oct 2015 11:48:34 +0200
+Message-ID: <CAPv3WKfB=5Xz+f=BMiPTD1EYZifX41g0BK0kwX5rNFjG3PQ3ig@mail.gmail.com>
+References: <1444094562-31165-1-git-send-email-mw@semihalf.com>
+	<1444094562-31165-5-git-send-email-mw@semihalf.com>
+	<20151009090902.3b5b9bc8@xhacker>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wi0-f169.google.com ([209.85.212.169]:34052 "EHLO
-	mail-wi0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S934498AbbJIIxu (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 9 Oct 2015 04:53:50 -0400
-Received: by wicfx3 with SMTP id fx3so60827278wic.1
-        for <linux-mmc@vger.kernel.org>; Fri, 09 Oct 2015 01:53:49 -0700 (PDT)
+Received: from mail-oi0-f43.google.com ([209.85.218.43]:32786 "EHLO
+	mail-oi0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756990AbbJIJsf (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 9 Oct 2015 05:48:35 -0400
+Received: by oiar126 with SMTP id r126so1822117oia.0
+        for <linux-mmc@vger.kernel.org>; Fri, 09 Oct 2015 02:48:35 -0700 (PDT)
+In-Reply-To: <20151009090902.3b5b9bc8@xhacker>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Linus Torvalds <torvalds@linux-foundation.org>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
-Cc: "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
+To: Jisheng Zhang <jszhang@marvell.com>
+Cc: linux-kernel@vger.kernel.org, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Thomas Petazzoni <thomas.petazzoni@free-electrons.com>, Andrew Lunn <andrew@lunn.ch>, Ulf Hansson <ulf.hansson@linaro.org>, Jason Cooper <jason@lakedaemon.net>, Tawfik Bayouk <tawfik@marvell.com>, Grzegorz Jaszczyk <jaz@semihalf.com>, nadavh@marvell.com, Lior Amsalem <alior@marvell.com>, =?UTF-8?Q?Gregory_Cl=C3=A9ment?= <gregory.clement@free-electrons.com>, Sebastian Hesselbarth <sebastian.hesselbarth@gmail.com>
 
-Hi Linus,
-
-Here are some mmc fixes intended for v4.3 rc5 and it's based on v4.3-rc4.
-Details are as usual found in the signed tag. Please pull this in!
-
-Kind regards
-Ulf Hansson
+Hi Jisheng,
 
 
-The following changes since commit 049e6dde7e57f0054fdc49102e7ef4830c698b46:
+>> +     res = platform_get_resource_byname(pdev, IORESOURCE_MEM, "mbus");
+>> +     pxa->mbus_win_regs = devm_ioremap_resource(&pdev->dev, res);
+>> +     if (IS_ERR(pxa->mbus_win_regs)) {
+>> +             dev_err(mmc_dev(host->mmc),
+>> +                     "failed to obtain MBus windows register base\n");
+>
+> devm_ioremap_resource() has warned us if it fails, so is it better to remove
+> this dev_err() here?
+>
 
-  Linux 4.3-rc4 (2015-10-04 16:57:17 +0100)
+Indeed, I'll remove this excessive verbosity.
 
-are available in the git repository at:
+>>       struct sdhci_host *host = dev_get_drvdata(dev);
+>> +     struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+>> +     struct sdhci_pxa *pxa = pltfm_host->priv;
+>> +     struct device_node *np = dev->of_node;
+>> +
+>> +     if (of_device_is_compatible(np, "marvell,armada-380-sdhci"))
+>
+> this would increase resume time especially those non armada-380-sdhci host
+> although it's trivial. Is it better to check "if (pxa->mbus_win_regs)"?
+>
 
-  git://git.linaro.org/people/ulf.hansson/mmc.git tags/mmc-v4.3-rc4
+Already implemented in v2.
 
-for you to fetch changes up to 88c6eb0e3b81a30514d21679735fa25d028c2299:
-
-  mmc: sdhci-of-at91: use SDHCI_QUIRK2_NEED_DELAY_AFTER_INT_CLK_RST
-quirk (2015-10-08 19:55:05 +0200)
-
-----------------------------------------------------------------
-MMC host:
- - omap_hsmmc: Fix boot regressions for omap4430
- - omap_hsmmc: Fix legacy boot regression for omap3
- - sdhci-pxav3: Fix some clock issues for Armada 38x
- - sdhci-pxav3: Fix error handling at probe
- - sdhci-of-at91: Fix clock stabilization problem
-
-----------------------------------------------------------------
-Marcin Wojtas (1):
-      mmc: sdhci-pxav3: fix error handling of armada_38x_quirks
-
-Nadav Haklai (2):
-      mmc: sdhci-pxav3: remove broken clock base quirk for Armada 38x
-sdhci driver
-      mmc: sdhci-pxav3: disable clock inversion for HS MMC cards
-
-Tony Lindgren (2):
-      Revert "mmc: host: omap_hsmmc: use regulator_is_enabled to find
-pbias status"
-      mmc: host: omap_hsmmc: Fix MMC for omap3 legacy booting
-
-ludovic.desroches@atmel.com (2):
-      mmc: sdhci: add quirk SDHCI_QUIRK2_NEED_DELAY_AFTER_INT_CLK_RST
-      mmc: sdhci-of-at91: use SDHCI_QUIRK2_NEED_DELAY_AFTER_INT_CLK_RST quirk
-
- drivers/mmc/host/omap_hsmmc.c    | 14 +++++++++-----
- drivers/mmc/host/sdhci-of-at91.c |  1 +
- drivers/mmc/host/sdhci-pxav3.c   |  6 +++++-
- drivers/mmc/host/sdhci.c         |  2 ++
- drivers/mmc/host/sdhci.h         |  5 +++++
- 5 files changed, 22 insertions(+), 6 deletions(-)
+Thanks for the comments,
+Marcin
