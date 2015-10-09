@@ -1,190 +1,102 @@
-From: Jisheng Zhang <jszhang@marvell.com>
-Subject: Re: [PATCH v2 2/5] mmc: sdhci-pxav3: enable usage of DAT3 pin as HW
- card detect
-Date: Fri, 9 Oct 2015 20:13:56 +0800
-Message-ID: <20151009201356.78488116@xhacker>
-References: <1444352635-21965-1-git-send-email-mw@semihalf.com>
-	<1444352635-21965-3-git-send-email-mw@semihalf.com>
+From: Hongtao Wu <wuht06@gmail.com>
+Subject: Re: [RFC PATCH v3 1/3] mmc: sprd: Add MMC host driver for Spreadtrum SoC
+Date: Fri, 9 Oct 2015 21:23:16 +0800
+Message-ID: <CAG_R4_VRht=7VQYNCBDmYt31zSBp-=_wKJM+pTQZUZV8hdTuGQ@mail.gmail.com>
+References: <1439571353-30165-1-git-send-email-wuht06@gmail.com>
+	<1439571353-30165-2-git-send-email-wuht06@gmail.com>
+	<CAPDyKFp=XH+Vo_diRyhrMuB+v1rmTmxo3Lid3Wc-u1ohqNisKw@mail.gmail.com>
+	<CAG_R4_VTXCV4NVMOwv-9F56-_pVsK0hU4go79ZhV3OFxwcF0mA@mail.gmail.com>
+	<CAPDyKFo3xp3wU3XW3kMV7Xz7DFgkxts3CArthYY7-CyWk8cjXw@mail.gmail.com>
+	<CAG_R4_X3kQj5xSA5KLyu75aqusPNXj0H4Xqx+m+5Sg5cZ15bBg@mail.gmail.com>
+	<CAPDyKFp2o=RAnizGrWgt080kYqWkBabh6NsCR11q3SPVCfaBAw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="US-ASCII"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1444352635-21965-3-git-send-email-mw@semihalf.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Marcin Wojtas <mw@semihalf.com>
-Cc: linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, thomas.petazzoni@free-electrons.com, andrew@lunn.ch, ulf.hansson@linaro.org, jason@lakedaemon.net, tawfik@marvell.com, jaz@semihalf.com, nadavh@marvell.com, alior@marvell.com, gregory.clement@free-electrons.com, sebastian.hesselbarth@gmail.com
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-ig0-f194.google.com ([209.85.213.194]:34562 "EHLO
+	mail-ig0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752249AbbJINXR (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 9 Oct 2015 09:23:17 -0400
+In-Reply-To: <CAPDyKFp2o=RAnizGrWgt080kYqWkBabh6NsCR11q3SPVCfaBAw@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Rob Herring <robh+dt@kernel.org>, =?UTF-8?Q?Pawe=C5=82_Moll?= <pawel.moll@arm.com>, Mark Rutland <mark.rutland@arm.com>, Ian Campbell <ijc+devicetree@hellion.org.uk>, Kumar Gala <galak@codeaurora.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will.deacon@arm.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Shawn Lin <shawn.lin@rock-chips.com>, "Orson.Zhai@spreadtrum.com" <Orson.Zhai@spreadtrum.com>, "Chunyan.Zhang@spreadtrum.com" <Chunyan.Zhang@spreadtrum.com>, "Jason.Wu@spreadtrum.com" <Jason.Wu@spreadtrum.com>, Russell King <rmk+kernel@arm.linux.org.uk>
 
-On Fri, 9 Oct 2015 03:03:52 +0200
-Marcin Wojtas <mw@semihalf.com> wrote:
+On Thu, Oct 8, 2015 at 9:54 PM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+> [...]
+>
+>>> Thanks for clarifying!
+>>>
+>>> You have some differences towards the "standard" sdhci variant, but
+>>> that doesn't mean you should go off and implement a new driver from
+>>> scratch, instead you should create a new sdhci variant and re-use code
+>>> from the generic sdhci driver.
+>>>
+>>> The current problem with such approach, is that the sdhci driver isn't
+>>> designed as a library but instead a driver consisting of too many
+>>> quirks and callbacks. While you start to adopt your driver towards
+>>> sdhci, you will need to add yet another bunch of new quirks and
+>>> callbacks to suite your hw.
+>>>
+>>> Now, as the number of callbacks and quirks continues to increase I
+>>> will sooner or later give up maintaining it, as each line of code will
+>>> depend on a quirk. So, we need to start turning sdhci into a library
+>>> *right now*! Russell King, has pointed out this several times as well,
+>>> but unfortunate I haven't yet seen anyone willing to help out in this
+>>> field.
+>>>
+>>> I would of course be very happy if you would like to have a look at
+>>> that, but I realize it's a difficult task, So, unless you are happy
+>>> with taking on such a challenge, I suggest you go for an intermediate
+>>> step, which thus means convert your driver to a sdhci variant driver
+>>> and add the quirks/callbacks you need to suite your hw.
+>>>
+>>> [...]
+>>>
+>>> Kind regards
+>>> Uffe
+>>
+>> Thanks for kindly suggestion!
+>> I think it's a good idea to turn sdhci into a library. But for me it's
+>> too difficult to
+>> take on such a challenge. However, I will try my best to support you to do
+>> it.
+>
+> Yes, I totally understand and thanks for your support.
+>
+>>
+>> As you suggested, I will consider converting our eMMC host driver to a
+>> sdhci variant driver. However, our controller has some features, which
+>> differentiate it from standard sd host controller. For example, our controller
+>> doesn't have such functions as follows: tuning or re-tuning, Power Control
+>> Register, PIO or ADMA transfer mode, UHS-II and so on. So, if we use sdchi
+>> variant driver right now, I think it has a litter redundancy.
+>
+> I realize that, but I would very much appreciate if you give it try -
+> I think it should be doable.
+>
+> Of course, you will need to change the "sdhci core" to suite your
+> needs and normally people do that via adding callbacks and quirks.
+> Perhaps you can keep my request in mind of turning sdhci into a
+> library and thus limit the number of added quirks and callbacks...
+>
+>>
+>> Now our sdio team are discussing improving  our eMMC host controller, we are
+>> making it more standardized. But you know, changing a IP block is a long
+>> process. Maybe it will take us about one or two years. So what do you think
+>> if we use ourself eMMC host driver right now, and convert it when our new host
+>> controller is ready.
+>>
+>
+> Well, that won't help the current HW so I would encourage you to do
+> the "sdhci variant" work anyway. Likely it will also benefit you when
+> you try to upstream the next variant of the driver to cope with your
+> new HW.
+>
+> Kind regards
+> Uffe
 
-> Marvell Armada 38x SDHCI controller enable using DAT3 pin as a hardware
-> card detection. According to the SD sdandard this signal can be used for
-> this purpose combined with a pull-up resistor, implying inverted (active
-> low) polarization of a card detect. MMC standard does not support this
-> feature and does not operate with such connectivity of DAT3.
-> 
-> When using DAT3-based detection Armada 38x SDIO IP expects its internal
-> clock to be always on, which had to be ensured twofold:
 
-What happen if runtime suspend disables its core clk and axi clk? I guess
-dat3-based detection isn't compatible with runtime pm. If so, do we also
-need to disable runtime pm in probe function?
-
-> - Each time controller is reset by updating appropriate registers. On the
->   occasion of adding new register @0x104, register @0x100 name is modified
->   in order to the be aligned with Armada 38x documentation.
-> - Leaving the clock enabled despite power-down. For this purpose a new
->   quirk had to be added to SDHCI subsystem - SDHCI_QUIRK2_KEEP_INT_CLK_ON.
-
-As seen from other mails, Ulf calls for no more quirks...
-
-Thanks,
-Jisheng
-
-> 
-> In addition to the changes above this commit adds a new property to Armada
-> 38x SDHCI node ('dat3-cd') with an according binding documentation update.
-> 
-> Signed-off-by: Marcin Wojtas <mw@semihalf.com>
-> ---
->  .../devicetree/bindings/mmc/sdhci-pxa.txt          |  5 +++
->  drivers/mmc/host/sdhci-pxav3.c                     | 38 ++++++++++++++++++++--
->  drivers/mmc/host/sdhci.c                           |  5 ++-
->  drivers/mmc/host/sdhci.h                           |  3 ++
->  4 files changed, 47 insertions(+), 4 deletions(-)
-> 
-> diff --git a/Documentation/devicetree/bindings/mmc/sdhci-pxa.txt b/Documentation/devicetree/bindings/mmc/sdhci-pxa.txt
-> index 3d1b449..ffd6b14 100644
-> --- a/Documentation/devicetree/bindings/mmc/sdhci-pxa.txt
-> +++ b/Documentation/devicetree/bindings/mmc/sdhci-pxa.txt
-> @@ -23,6 +23,11 @@ Required properties:
->  
->  Optional properties:
->  - mrvl,clk-delay-cycles: Specify a number of cycles to delay for tuning.
-> +- dat3-cd: use DAT3 pin as hardware card detect - option available for
-> +  "marvell,armada-380-sdhci" only. The detection is supposed to work with
-> +  active high polarity, which implies usage of "cd-inverted" property.
-> +  Note that according to the specifications DAT3-based card detection can be
-> +  used with SD cards only. MMC standard doesn't support this feature.
->  
->  Example:
->  
-> diff --git a/drivers/mmc/host/sdhci-pxav3.c b/drivers/mmc/host/sdhci-pxav3.c
-> index 76b9a70..352c5eb 100644
-> --- a/drivers/mmc/host/sdhci-pxav3.c
-> +++ b/drivers/mmc/host/sdhci-pxav3.c
-> @@ -46,10 +46,14 @@
->  #define SDCLK_DELAY_SHIFT	9
->  #define SDCLK_DELAY_MASK	0x1f
->  
-> -#define SD_CFG_FIFO_PARAM       0x100
-> +#define SD_EXTRA_PARAM_REG	0x100
->  #define SDCFG_GEN_PAD_CLK_ON	(1<<6)
->  #define SDCFG_GEN_PAD_CLK_CNT_MASK	0xFF
->  #define SDCFG_GEN_PAD_CLK_CNT_SHIFT	24
-> +#define SD_FIFO_PARAM_REG	0x104
-> +#define SD_USE_DAT3		BIT(7)
-> +#define SD_OVRRD_CLK_OEN	BIT(11)
-> +#define SD_FORCE_CLK_ON		BIT(12)
->  
->  #define SD_SPI_MODE          0x108
->  #define SD_CE_ATA_1          0x10C
-> @@ -163,6 +167,15 @@ static int armada_38x_quirks(struct platform_device *pdev,
->  	}
->  	host->caps1 &= ~(SDHCI_SUPPORT_SDR104 | SDHCI_USE_SDR50_TUNING);
->  
-> +	/*
-> +	 * The interface clock enable is also used as control
-> +	 * for the A38x SDIO IP, so it can't be powered down
-> +	 * when using HW-based card detection.
-> +	 */
-> +	if (of_property_read_bool(np, "dat3-cd") &&
-> +	    !of_property_read_bool(np, "broken-cd"))
-> +		host->quirks2 |= SDHCI_QUIRK2_KEEP_INT_CLK_ON;
-> +
->  	return 0;
->  }
->  
-> @@ -170,6 +183,8 @@ static void pxav3_reset(struct sdhci_host *host, u8 mask)
->  {
->  	struct platform_device *pdev = to_platform_device(mmc_dev(host->mmc));
->  	struct sdhci_pxa_platdata *pdata = pdev->dev.platform_data;
-> +	struct device_node *np = pdev->dev.of_node;
-> +	u32 reg_val;
->  
->  	sdhci_reset(host, mask);
->  
-> @@ -187,6 +202,22 @@ static void pxav3_reset(struct sdhci_host *host, u8 mask)
->  			tmp |= SDCLK_SEL;
->  			writew(tmp, host->ioaddr + SD_CLOCK_BURST_SIZE_SETUP);
->  		}
-> +
-> +		if (of_device_is_compatible(np, "marvell,armada-380-sdhci") &&
-> +		    host->quirks2 & SDHCI_QUIRK2_KEEP_INT_CLK_ON) {
-> +			reg_val = sdhci_readl(host, SD_FIFO_PARAM_REG);
-> +			reg_val |= SD_USE_DAT3 | SD_OVRRD_CLK_OEN |
-> +				   SD_FORCE_CLK_ON;
-> +			sdhci_writel(host, reg_val, SD_FIFO_PARAM_REG);
-> +
-> +			/*
-> +			 * For HW detection based on DAT3 pin keep internal
-> +			 * clk switched on after controller reset.
-> +			 */
-> +			reg_val = sdhci_readl(host, SDHCI_CLOCK_CONTROL);
-> +			reg_val |= SDHCI_CLOCK_INT_EN;
-> +			sdhci_writel(host, reg_val, SDHCI_CLOCK_CONTROL);
-> +		}
->  	}
->  }
->  
-> @@ -214,9 +245,9 @@ static void pxav3_gen_init_74_clocks(struct sdhci_host *host, u8 power_mode)
->  		writew(tmp, host->ioaddr + SD_CE_ATA_2);
->  
->  		/* start sending the 74 clocks */
-> -		tmp = readw(host->ioaddr + SD_CFG_FIFO_PARAM);
-> +		tmp = readw(host->ioaddr + SD_EXTRA_PARAM_REG);
->  		tmp |= SDCFG_GEN_PAD_CLK_ON;
-> -		writew(tmp, host->ioaddr + SD_CFG_FIFO_PARAM);
-> +		writew(tmp, host->ioaddr + SD_EXTRA_PARAM_REG);
->  
->  		/* slowest speed is about 100KHz or 10usec per clock */
->  		udelay(740);
-> @@ -410,6 +441,7 @@ static int sdhci_pxav3_probe(struct platform_device *pdev)
->  		sdhci_get_of_property(pdev);
->  		pdata = pxav3_get_mmc_pdata(dev);
->  		pdev->dev.platform_data = pdata;
-> +
->  	} else if (pdata) {
->  		/* on-chip device */
->  		if (pdata->flags & PXA_FLAG_CARD_PERMANENT)
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index 64b7fdb..cfed695 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -1159,7 +1159,10 @@ void sdhci_set_clock(struct sdhci_host *host, unsigned int clock)
->  
->  	host->mmc->actual_clock = 0;
->  
-> -	sdhci_writew(host, 0, SDHCI_CLOCK_CONTROL);
-> +	/* Some controllers need to keep internal clk always enabled */
-> +	if (host->quirks2 & SDHCI_QUIRK2_KEEP_INT_CLK_ON)
-> +		clk = SDHCI_CLOCK_INT_EN;
-> +	sdhci_writew(host, clk, SDHCI_CLOCK_CONTROL);
->  
->  	if (clock == 0)
->  		return;
-> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-> index 7c02ff4..c751b78 100644
-> --- a/drivers/mmc/host/sdhci.h
-> +++ b/drivers/mmc/host/sdhci.h
-> @@ -412,6 +412,9 @@ struct sdhci_host {
->  #define SDHCI_QUIRK2_ACMD23_BROKEN			(1<<14)
->  /* Broken Clock divider zero in controller */
->  #define SDHCI_QUIRK2_CLOCK_DIV_ZERO_BROKEN		(1<<15)
-> +/* Do not disable internal clk on power-off */
-> +#define SDHCI_QUIRK2_KEEP_INT_CLK_ON			(1<<16)
-> +
->  
->  	int irq;		/* Device IRQ */
->  	void __iomem *ioaddr;	/* Mapped address */
+Thanks for your quick reply.
+We will use the "standard" sdhci variant to cope with our new HW as you
+suggest. Maybe it will take us a long time, but we will try to do it.
