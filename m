@@ -1,92 +1,86 @@
-From: Chaotian Jing <chaotian.jing@mediatek.com>
-Subject: [PATCH v3] mmc: core: Fix init_card in 52Mhz
-Date: Mon, 12 Oct 2015 17:22:23 +0800
-Message-ID: <1444641743-15614-1-git-send-email-chaotian.jing@mediatek.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH] mmc: core: Remove MMC_CLKGATE
+Date: Mon, 12 Oct 2015 13:01:27 +0200
+Message-ID: <CAPDyKFpzT_GARg5_uK5POCWxbgcjThCmB5E09MTWOHnRRbAZ-g@mail.gmail.com>
+References: <1443776171-7127-1-git-send-email-ulf.hansson@linaro.org>
+	<CAPDyKFooaDekXEf9uEkU6Wgd2dhS409RK8i_qi3eB5-GVUHVQw@mail.gmail.com>
+	<CALk7dXpj=LdLb3pYbVV1e3Qt1KWAvtfaoEu2eQVdSdPmGLyrTQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailgw01.mediatek.com ([210.61.82.183]:60014 "EHLO
-	mailgw01.mediatek.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1750858AbbJLJWe (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 12 Oct 2015 05:22:34 -0400
+Received: from mail-wi0-f182.google.com ([209.85.212.182]:36659 "EHLO
+	mail-wi0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750890AbbJLLB2 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 12 Oct 2015 07:01:28 -0400
+Received: by wicgb1 with SMTP id gb1so144195279wic.1
+        for <linux-mmc@vger.kernel.org>; Mon, 12 Oct 2015 04:01:27 -0700 (PDT)
+In-Reply-To: <CALk7dXpj=LdLb3pYbVV1e3Qt1KWAvtfaoEu2eQVdSdPmGLyrTQ@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Matthias Brugger <matthias.bgg@gmail.com>, Jaehoon Chung <jh80.chung@samsung.com>, Chaotian Jing <chaotian.jing@mediatek.com>, Adrian Hunter <adrian.hunter@intel.com>, Fabio Estevam <fabio.estevam@freescale.com>, Johan Rudholm <johan.rudholm@axis.com>, Gwendal Grignou <gwendal@chromium.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mediatek@lists.infradead.org, srv_heupstream@mediatek.com, Sascha Hauer <kernel@pengutronix.de>
+To: Ritesh Harjani <ritesh.list@gmail.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Linus Walleij <linus.walleij@linaro.org>
 
-Suppose that we got a data crc error, and it triggers the mmc_reset.
-mmc_reset will call mmc_send_status to see if HW reset was supported.
-before issue CMD13, it will do retune, and if EMMC was in HS400 mode,
-it will reduce frequency to 52Mhz firstly, then results in card init
-was doing at 52Mhz.
-The mmc_send_status was originally only done for mmc_test, should drop
-it. And, rename the "eMMC hardware reset" to "Reset test", as we would
-also be able to use the test for SD-cards.
+On 12 October 2015 at 09:53, Ritesh Harjani <ritesh.list@gmail.com> wrote:
+> Hi Ulf,
+>
+> Wanted to understand this better, related to clk-gating and runtime-PM
+> before we completely remove clk-gating functionality.
+> Inline queries -
+>
+>
+> On Thu, Oct 8, 2015 at 11:05 PM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+>> On 2 October 2015 at 10:56, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+>>> MMC_CLKGATE was once invented to save power by gating the bus clock at
+>>> request inactivity. At that time it served its purpose. The modern way to
+>>> deal with power saving for these scenarios, is by using runtime PM.
+>
+> Inactivity duration of clk-gating and runtime PM can actually vary largely.
+> clk-gating can be used to turn the clks-off after a very short
+> duration of request inactivity say 200ms - (which can be used to save
+> the power of some voltage rail or something)
+> While runtime-PM would need ~10sec since it involves chain of devices
+> to be suspended.
 
-Signed-off-by: Chaotian Jing <chaotian.jing@mediatek.com>
-Suggested-by: Adrian Hunter <adrian.hunter@intel.com>
----
- drivers/mmc/card/mmc_test.c | 9 +++------
- drivers/mmc/core/mmc.c      | 7 -------
- 2 files changed, 3 insertions(+), 13 deletions(-)
+What do you mean by "chain of devices"?
 
-diff --git a/drivers/mmc/card/mmc_test.c b/drivers/mmc/card/mmc_test.c
-index b78cf5d..7fc9174 100644
---- a/drivers/mmc/card/mmc_test.c
-+++ b/drivers/mmc/card/mmc_test.c
-@@ -2263,15 +2263,12 @@ static int mmc_test_profile_sglen_r_nonblock_perf(struct mmc_test_card *test)
- /*
-  * eMMC hardware reset.
-  */
--static int mmc_test_hw_reset(struct mmc_test_card *test)
-+static int mmc_test_reset(struct mmc_test_card *test)
- {
- 	struct mmc_card *card = test->card;
- 	struct mmc_host *host = card->host;
- 	int err;
- 
--	if (!mmc_card_mmc(card) || !mmc_can_reset(card))
--		return RESULT_UNSUP_CARD;
--
- 	err = mmc_hw_reset(host);
- 	if (!err)
- 		return RESULT_OK;
-@@ -2605,8 +2602,8 @@ static const struct mmc_test_case mmc_test_cases[] = {
- 	},
- 
- 	{
--		.name = "eMMC hardware reset",
--		.run = mmc_test_hw_reset,
-+		.name = "Reset test",
-+		.run = mmc_test_reset,
- 	},
- };
- 
-diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-index e726903..f6cd995 100644
---- a/drivers/mmc/core/mmc.c
-+++ b/drivers/mmc/core/mmc.c
-@@ -1924,7 +1924,6 @@ EXPORT_SYMBOL(mmc_can_reset);
- static int mmc_reset(struct mmc_host *host)
- {
- 	struct mmc_card *card = host->card;
--	u32 status;
- 
- 	if (!(host->caps & MMC_CAP_HW_RESET) || !host->ops->hw_reset)
- 		return -EOPNOTSUPP;
-@@ -1937,12 +1936,6 @@ static int mmc_reset(struct mmc_host *host)
- 
- 	host->ops->hw_reset(host);
- 
--	/* If the reset has happened, then a status command will fail */
--	if (!mmc_send_status(card, &status)) {
--		mmc_host_clk_release(host);
--		return -ENOSYS;
--	}
--
- 	/* Set initial state and call mmc_set_ios */
- 	mmc_set_initial_state(host);
- 	mmc_host_clk_release(host);
--- 
-1.8.1.1.dirty
+You may refer to that runtime PM respect parent/child relations, but
+even so, each device can be runtime PM managed on its own.
 
+Regarding the inactivity duration, currently most mmc host drivers
+which have enabled the runtime PM autosuspend feature, uses 50 ms as
+the *default* timeout value.
+I haven't heard of anyone considering a ~10s or in that range, but if
+that's the case I guess power saving is just less important for these
+cases.
+
+>
+> For that to happen, we would need a longer duration of request
+> inactivity otherwise we would end up loosing power
+> if suspend keeps failing and often resumes are done to serve the request.
+
+Why would suspend fail?
+
+>
+>
+> So, do you suggest to use runtime-PM in a way that can be used to gate
+> the clks-off in shorter duration and
+> then schedule the work for suspending of devices after longer duration
+> of request inactivity.
+
+Well, what I suggested was to remove MMC_CLKGATE and use runtime PM instead. :-)
+
+It seem like you think you need an intermediate phase, where clock
+gating make sense in the first phase and the actual runtime_suspend of
+the device in second phase. I have yet understood why, but if I assume
+that's the case one could potentially use the ->runtime_idle()
+callback and friends, to deal with this.
+
+>
+> Sorry, if I am sounding foolish at any place, but I would like to
+> understand how are we handling the above problem if we remove
+> clk-gating?
+
+No, worries - thanks for you comments!
+
+Kind regards
+Uffe
