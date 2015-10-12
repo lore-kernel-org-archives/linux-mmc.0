@@ -1,39 +1,45 @@
 From: Jisheng Zhang <jszhang@marvell.com>
-Subject: [PATCH 5/5] clk: berlin: bg2: remove CLK_IGNORE_UNUSED flag for sdio clk
-Date: Mon, 12 Oct 2015 13:46:36 +0800
-Message-ID: <1444628796-5484-6-git-send-email-jszhang@marvell.com>
+Subject: [PATCH 2/5] ARM: dts: berlin: correct BG2Q's sdhci2 axi clock
+Date: Mon, 12 Oct 2015 13:46:33 +0800
+Message-ID: <1444628796-5484-3-git-send-email-jszhang@marvell.com>
 References: <1444628796-5484-1-git-send-email-jszhang@marvell.com>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
 In-Reply-To: <1444628796-5484-1-git-send-email-jszhang@marvell.com>
-Sender: linux-kernel-owner@vger.kernel.org
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
 To: ulf.hansson@linaro.org, sebastian.hesselbarth@gmail.com, robh+dt@kernel.org, pawel.moll@arm.com, mark.rutland@arm.com, ijc+devicetree@hellion.org.uk, galak@codeaurora.org, mturquette@baylibre.com, sboyd@codeaurora.org
-Cc: linux-clk@vger.kernel.org, linux-kernel@vger.kernel.org, devicetree@vger.kernel.org, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Jisheng Zhang <jszhang@marvell.com>
+Cc: Jisheng Zhang <jszhang@marvell.com>, devicetree@vger.kernel.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-clk@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
-The axi clock properties already exists, so there's no need to set this
-flag for sdio0 and sdio1 clk any more.
+The optional axi clock is CLKID_SDIO.
 
 Signed-off-by: Jisheng Zhang <jszhang@marvell.com>
 ---
- drivers/clk/berlin/bg2.c | 4 ++--
- 1 file changed, 2 insertions(+), 2 deletions(-)
+ arch/arm/boot/dts/berlin2q.dtsi | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/drivers/clk/berlin/bg2.c b/drivers/clk/berlin/bg2.c
-index 73153fc..23e0e3b 100644
---- a/drivers/clk/berlin/bg2.c
-+++ b/drivers/clk/berlin/bg2.c
-@@ -490,8 +490,8 @@ static const struct berlin2_gate_data bg2_gates[] __initconst = {
- 	{ "usb0",	"perif",	11 },
- 	{ "usb1",	"perif",	12 },
- 	{ "pbridge",	"perif",	13, CLK_IGNORE_UNUSED },
--	{ "sdio0",	"perif",	14, CLK_IGNORE_UNUSED },
--	{ "sdio1",	"perif",	15, CLK_IGNORE_UNUSED },
-+	{ "sdio0",	"perif",	14 },
-+	{ "sdio1",	"perif",	15 },
- 	{ "nfc",	"perif",	17 },
- 	{ "smemc",	"perif",	19 },
- 	{ "audiohd",	"audiohd_pll",	26 },
+diff --git a/arch/arm/boot/dts/berlin2q.dtsi b/arch/arm/boot/dts/berlin2q.dtsi
+index 4ad585c..2f12048 100644
+--- a/arch/arm/boot/dts/berlin2q.dtsi
++++ b/arch/arm/boot/dts/berlin2q.dtsi
+@@ -119,7 +119,7 @@
+ 			compatible = "mrvl,pxav3-mmc";
+ 			reg = <0xab1000 0x200>;
+ 			interrupts = <GIC_SPI 28 IRQ_TYPE_LEVEL_HIGH>;
+-			clocks = <&chip_clk CLKID_NFC_ECC>, <&chip_clk CLKID_NFC>;
++			clocks = <&chip_clk CLKID_NFC_ECC>, <&chip_clk CLKID_SDIO>;
+ 			clock-names = "core", "axi";
+ 			status = "disabled";
+ 		};
 -- 
 2.6.1
