@@ -1,7 +1,8 @@
 From: Jisheng Zhang <jszhang@marvell.com>
-Subject: [PATCH 2/5] ARM: dts: berlin: correct BG2Q's sdhci2 axi clock
-Date: Mon, 12 Oct 2015 13:46:33 +0800
-Message-ID: <1444628796-5484-3-git-send-email-jszhang@marvell.com>
+Subject: [PATCH 4/5] clk: berlin: bg2q: remove CLK_IGNORE_UNUSED flag for sdio
+ clk
+Date: Mon, 12 Oct 2015 13:46:35 +0800
+Message-ID: <1444628796-5484-5-git-send-email-jszhang@marvell.com>
 References: <1444628796-5484-1-git-send-email-jszhang@marvell.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
@@ -21,25 +22,26 @@ To: ulf.hansson@linaro.org, sebastian.hesselbarth@gmail.com, robh+dt@kernel.org,
 Cc: Jisheng Zhang <jszhang@marvell.com>, devicetree@vger.kernel.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-clk@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
-The optional axi clock is CLKID_SDIO.
+Since we have added the necessary axi clk properties in dts, we can
+remove the "sdio" clk's CLK_IGNORE_UNUSED flag now.
 
 Signed-off-by: Jisheng Zhang <jszhang@marvell.com>
 ---
- arch/arm/boot/dts/berlin2q.dtsi | 2 +-
+ drivers/clk/berlin/bg2q.c | 2 +-
  1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/arch/arm/boot/dts/berlin2q.dtsi b/arch/arm/boot/dts/berlin2q.dtsi
-index 4ad585c..2f12048 100644
---- a/arch/arm/boot/dts/berlin2q.dtsi
-+++ b/arch/arm/boot/dts/berlin2q.dtsi
-@@ -119,7 +119,7 @@
- 			compatible = "mrvl,pxav3-mmc";
- 			reg = <0xab1000 0x200>;
- 			interrupts = <GIC_SPI 28 IRQ_TYPE_LEVEL_HIGH>;
--			clocks = <&chip_clk CLKID_NFC_ECC>, <&chip_clk CLKID_NFC>;
-+			clocks = <&chip_clk CLKID_NFC_ECC>, <&chip_clk CLKID_SDIO>;
- 			clock-names = "core", "axi";
- 			status = "disabled";
- 		};
+diff --git a/drivers/clk/berlin/bg2q.c b/drivers/clk/berlin/bg2q.c
+index 221f40c..243f421 100644
+--- a/drivers/clk/berlin/bg2q.c
++++ b/drivers/clk/berlin/bg2q.c
+@@ -283,7 +283,7 @@ static const struct berlin2_gate_data bg2q_gates[] __initconst = {
+ 	{ "usb2",	"perif",	13 },
+ 	{ "usb3",	"perif",	14 },
+ 	{ "pbridge",	"perif",	15, CLK_IGNORE_UNUSED },
+-	{ "sdio",	"perif",	16, CLK_IGNORE_UNUSED },
++	{ "sdio",	"perif",	16 },
+ 	{ "nfc",	"perif",	18 },
+ 	{ "pcie",	"perif",	22 },
+ };
 -- 
 2.6.1
