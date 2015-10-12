@@ -1,63 +1,176 @@
 From: Heiko Stuebner <heiko@sntech.de>
-Subject: [PATCH v3 4/7] mmc: dw_mmc-rockchip: dt-binding: Add tuning related things
-Date: Mon, 12 Oct 2015 14:48:27 +0200
-Message-ID: <1444654110-32293-5-git-send-email-heiko@sntech.de>
+Subject: [PATCH v3 2/7] mmc: core: Add mmc_regulator_set_vqmmc()
+Date: Mon, 12 Oct 2015 14:48:25 +0200
+Message-ID: <1444654110-32293-3-git-send-email-heiko@sntech.de>
 References: <1444654110-32293-1-git-send-email-heiko@sntech.de>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from gloria.sntech.de ([95.129.55.99]:52063 "EHLO gloria.sntech.de"
+Received: from gloria.sntech.de ([95.129.55.99]:52066 "EHLO gloria.sntech.de"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751729AbbJLMsg (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 12 Oct 2015 08:48:36 -0400
+	id S1751734AbbJLMsh (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 12 Oct 2015 08:48:37 -0400
 In-Reply-To: <1444654110-32293-1-git-send-email-heiko@sntech.de>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: ulf.hansson@linaro.org
 Cc: jh80.chung@samsung.com, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-rockchip@lists.infradead.org, dianders@chromium.org, amstan@chromium.org, Heiko Stuebner <heiko@sntech.de>
 
-From: Alexandru M Stan <amstan@chromium.org>
+From: Douglas Anderson <dianders@chromium.org>
 
-Add ciu_drive, ciu_sample clocks and default-sample-phase. This will later
-be used by tuning code.
+This adds logic to the MMC core to set VQMMC.  This is expected to be
+called by MMC drivers like dw_mmc as part of (or instead of) their
+start_signal_voltage_switch() callback.
 
-We do not touch ciu_drive (and by extension define default-drive-phase).
-Drive phase is mostly used to define minimum hold times, while one could
-write some code to determine what phase meets the minimum hold time
-(ex 10 degrees) this will not work with the current clock phase framework
-(which floors angles, so we'll get 0 deg, and there's no way to know what
-resolution the floors happen at). We assume that the default drive angles
-set by the hardware are good enough.
+A few notes:
 
-Signed-off-by: Alexandru M Stan <amstan@chromium.org>
+* When setting the signal voltage to 3.3V we do our best to make VQMMC
+  and VMMC match.  It's been reported that this makes some old cards
+  happy since they were tested back in the day before UHS when VQMMC
+  and VMMC were provided by the same regulator.  A nice side effect of
+  this is that we don't end up on the hairy edge of VQMMC (2.7V),
+  which some EEs claim is a little too close to the minimum for
+  comfort.
+  This is done in two steps. At first we try to find a VQMMC within
+  a 0.3V tolerance of VMMC and if this is not supported by the
+  supplying regulator we try to find a suitable voltage within the
+  whole 2.7V-3.6V area of the spec.
+
+* The two step approach is currently necessary, as the used
+  regulator_set_voltage_triplet(min, target, max) uses a simple
+  implementation that just tries two basic steps:
+	regulator_set_voltage(target, max);
+	regulator_set_voltage(min, target);
+  So with only one step with 2.7-3.6V borders, if a suitable voltage
+  is a bit below VMMC, we would directly get the lowest 2.7V
+  which some boards (like Rockchips) don't like at all.
+
+* When setting the signal voltage to 1.8V or 1.2V we aim for that
+  specific voltage instead of picking the lowest one in the range.
+
+* We very purposely don't print errors in mmc_regulator_set_vqmmc().
+  There are cases where the MMC core will try several different
+  voltages and we don't want to pollute the logs.
+
+Signed-off-by: Douglas Anderson <dianders@chromium.org>
 Signed-off-by: Heiko Stuebner <heiko@sntech.de>
-Acked-by: Jaehoon Chung <jh80.chung@samsung.com>
 ---
- Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.txt | 13 +++++++++++++
- 1 file changed, 13 insertions(+)
+ drivers/mmc/core/core.c  | 78 ++++++++++++++++++++++++++++++++++++++++++++++++
+ include/linux/mmc/host.h |  7 +++++
+ 2 files changed, 85 insertions(+)
 
-diff --git a/Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.txt b/Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.txt
-index c327c2d..3dc13b6 100644
---- a/Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.txt
-+++ b/Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.txt
-@@ -14,6 +14,19 @@ Required Properties:
- 							before RK3288
- 	- "rockchip,rk3288-dw-mshc": for Rockchip RK3288
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index 548b5e1..da0a243 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -1456,6 +1456,84 @@ int mmc_regulator_set_ocr(struct mmc_host *mmc,
+ }
+ EXPORT_SYMBOL_GPL(mmc_regulator_set_ocr);
  
-+Optional Properties:
-+* clocks: from common clock binding: if ciu_drive and ciu_sample are
-+  specified in clock-names, should contain handles to these clocks.
++static int mmc_regulator_set_voltage_if_supported(struct regulator *regulator,
++						  int min_uV, int target_uV,
++						  int max_uV)
++{
++	/*
++	 * Check if supported first to avoid errors since we may try several
++	 * signal levels during power up and don't want to show errors.
++	 */
++	if (!regulator_is_supported_voltage(regulator, min_uV, max_uV))
++		return -EINVAL;
 +
-+* clock-names: Apart from the clock-names described in synopsys-dw-mshc.txt
-+  two more clocks "ciu-drive" and "ciu-sample" are supported. They are used
-+  to control the clock phases, "ciu-sample" is required for tuning high-
-+  speed modes.
++	return regulator_set_voltage_triplet(regulator, min_uV, target_uV,
++					     max_uV);
++}
 +
-+* rockchip,default-sample-phase: The default phase to set ciu_sample at
-+  probing, low speeds or in case where all phases work at tuning time.
-+  If not specified 0 deg will be used.
++/**
++ * mmc_regulator_set_vqmmc - Set VQMMC as per the ios
++ *
++ * For 3.3V signaling, we try to match VQMMC to VMMC as closely as possible.
++ * That will match the behavior of old boards where VQMMC and VMMC were supplied
++ * by the same supply.  The Bus Operating conditions for 3.3V signaling in the
++ * SD card spec also define VQMMC in terms of VMMC.
++ * If this is not possible we'll try the full 2.7-3.6V of the spec.
++ *
++ * For 1.2V and 1.8V signaling we'll try to get as close as possible to the
++ * requested voltage.  This is definitely a good idea for UHS where there's a
++ * separate regulator on the card that's trying to make 1.8V and it's best if
++ * we match.
++ *
++ * This function is expected to be used by a controller's
++ * start_signal_voltage_switch() function.
++ */
++int mmc_regulator_set_vqmmc(struct mmc_host *mmc, struct mmc_ios *ios)
++{
++	struct device *dev = mmc_dev(mmc);
++	int ret, volt, min_uV, max_uV;
 +
- Example:
++	/* If no vqmmc supply then we can't change the voltage */
++	if (IS_ERR(mmc->supply.vqmmc))
++		return -EINVAL;
++
++	switch (ios->signal_voltage) {
++	case MMC_SIGNAL_VOLTAGE_120:
++		return mmc_regulator_set_voltage_if_supported(mmc->supply.vqmmc,
++						1100000, 1200000, 1300000);
++	case MMC_SIGNAL_VOLTAGE_180:
++		return mmc_regulator_set_voltage_if_supported(mmc->supply.vqmmc,
++						1700000, 1800000, 1950000);
++	case MMC_SIGNAL_VOLTAGE_330:
++		ret = mmc_ocrbitnum_to_vdd(mmc->ios.vdd, &volt, &max_uV);
++		if (ret < 0)
++			return ret;
++
++		dev_dbg(dev, "%s: found vmmc voltage range of %d-%duV\n",
++			__func__, volt, max_uV);
++
++		min_uV = max(volt - 300000, 2700000);
++		max_uV = min(max_uV + 200000, 3600000);
++
++		/*
++		 * Due to a limitation in the current implementation of
++		 * regulator_set_voltage_triplet() which is taking the lowest
++		 * voltage possible if below the target, search for a suitable
++		 * voltage in two steps and try to stay close to vmmc
++		 * with a 0.3V tolerance at first.
++		 */
++		if (!mmc_regulator_set_voltage_if_supported(mmc->supply.vqmmc,
++						min_uV, volt, max_uV))
++			return 0;
++
++		return mmc_regulator_set_voltage_if_supported(mmc->supply.vqmmc,
++						2700000, volt, 3600000);
++	default:
++		return -EINVAL;
++	}
++}
++EXPORT_SYMBOL_GPL(mmc_regulator_set_vqmmc);
++
+ #endif /* CONFIG_REGULATOR */
  
- 	rkdwmmc0@12200000 {
+ int mmc_regulator_get_supply(struct mmc_host *mmc)
+diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+index 83b81fd..a2a78eb 100644
+--- a/include/linux/mmc/host.h
++++ b/include/linux/mmc/host.h
+@@ -423,6 +423,7 @@ int mmc_regulator_get_ocrmask(struct regulator *supply);
+ int mmc_regulator_set_ocr(struct mmc_host *mmc,
+ 			struct regulator *supply,
+ 			unsigned short vdd_bit);
++int mmc_regulator_set_vqmmc(struct mmc_host *mmc, struct mmc_ios *ios);
+ #else
+ static inline int mmc_regulator_get_ocrmask(struct regulator *supply)
+ {
+@@ -435,6 +436,12 @@ static inline int mmc_regulator_set_ocr(struct mmc_host *mmc,
+ {
+ 	return 0;
+ }
++
++static inline int mmc_regulator_set_vqmmc(struct mmc_host *mmc,
++					  struct mmc_ios *ios)
++{
++	return -EINVAL;
++}
+ #endif
+ 
+ int mmc_regulator_get_supply(struct mmc_host *mmc);
 -- 
 2.6.1
 
