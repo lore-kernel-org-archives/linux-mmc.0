@@ -1,85 +1,121 @@
-From: Nishanth Menon <nm@ti.com>
-Subject: Re: [PATCH] mmc: omap_hsmmc: fix initialization order of mmc block devices
-Date: Tue, 13 Oct 2015 08:24:08 -0500
-Message-ID: <CAGo_u6oDMH+Aj41fCsqEuTK1TXocUe=zU9No4=_QmZWg3FXb0w@mail.gmail.com>
+From: Dirk Behme <dirk.behme@gmail.com>
+Subject: Re: [PATCH] mmc: omap_hsmmc: fix initialization order of mmc block
+ devices
+Date: Tue, 13 Oct 2015 15:59:20 +0200
+Message-ID: <561D0E38.6030006@gmail.com>
 References: <1444714193-24816-1-git-send-email-hs@denx.de>
-	<561CA8D3.2090507@ti.com>
-	<561CB653.5020707@denx.de>
-	<561CBAE3.3020707@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=windows-1252; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <561CBAE3.3020707@ti.com>
+In-Reply-To: <1444714193-24816-1-git-send-email-hs@denx.de>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Lokesh Vutla <a0131933@ti.com>
-Cc: hs@denx.de, lkml <linux-kernel@vger.kernel.org>, Arnd Bergmann <arnd@arndb.de>, linux-mmc@vger.kernel.org, Dirk Behme <dirk.behme@bosch.com>, Georg.Soffel@bosch-si.com, linux-omap <linux-omap@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, u-boot <u-boot@lists.denx.de>, Tom Rini <trini@konsulko.com>
+To: Heiko Schocher <hs@denx.de>, linux-kernel@vger.kernel.org
+Cc: Arnd Bergmann <arnd@arndb.de>, linux-mmc@vger.kernel.org, Dirk Behme <dirk.behme@bosch.com>, Georg.Soffel@bosch-si.com, linux-omap@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Tue, Oct 13, 2015 at 3:03 AM, Lokesh Vutla <a0131933@ti.com> wrote:
+On 13.10.2015 07:29, Heiko Schocher wrote:
+> On embedded devices, often there is a combination of
+> removable mmc devices (e.g. MMC/SD cards) and hard
+> wired ones (e.g. eMMC). Depending on the hardware
+> configuration, the 'mmcblkN' node might change if
+> the removable device is available or not at boot time.
 >
+> E.g. if the removable device is attached at boot time,
+> it might become mmxblk0. And the hard wired one mmcblk1.
+> But if the removable device isn't there at boot time,
+> the hard wired one will become mmcblk0. This makes it
+> somehow difficult to hard code the root device to the
+> non-removable device and boot fast.
 >
-> On Tuesday 13 October 2015 01:14 PM, Heiko Schocher wrote:
->> Hello Lokesh,
->>
->> Am 13.10.2015 um 08:46 schrieb Lokesh Vutla:
->>> +Nishanth,
->>>
->>> On Tuesday 13 October 2015 10:59 AM, Heiko Schocher wrote:
->>>> On embedded devices, often there is a combination of
->>>> removable mmc devices (e.g. MMC/SD cards) and hard
->>>> wired ones (e.g. eMMC). Depending on the hardware
->>>> configuration, the 'mmcblkN' node might change if
->>>> the removable device is available or not at boot time.
->>>>
->>>> E.g. if the removable device is attached at boot time,
->>>> it might become mmxblk0. And the hard wired one mmcblk1.
->>>> But if the removable device isn't there at boot time,
->>>> the hard wired one will become mmcblk0. This makes it
->>>> somehow difficult to hard code the root device to the
->>>> non-removable device and boot fast.
->>>
->>> Why not use "root=PARTUUID=${uuid}" option instead of relying on
->>> mmcblk no?
->>> U-Boot can easily detect your partuuid. Refer to [1] on how TI platforms
->>> does this in u-boot.
->>
->> Good tip ... I do not know, if it is possible to update U-Boot
->> on this boards...
->>
->> Current U-Boot says:
->> U-Boot 2013.01.01_heads/master-gc7900a0 (2015-05-06 - 20:37:15)
->>
->> I2C:   ready
->> DRAM:  512 MiB
->> [...]
->> U-Boot# mmc rescan
->> U-Boot# mmc part
->>
->> Partition Map for MMC device 0  --   Partition Type: DOS
->>
->> Part    Start Sector    Num Sectors     UUID            Type
->>   1     63              144522          000ce343-01     0e Boot
->>   2     144585          659861          000ce343-02     83
->> U-Boot# part uuid mmc 0:2 uuid
->> Unknown command 'part' - try 'help'
->> U-Boot#
->>
->> So, if this patch has no chance for mainline, please let me
->> know it, thanks!
->>
->
-> IIRC, Nishanth had posted a patch something similar but got rejected for
-> some reason. Probably Nishanth can comment more here.
->
+> Signed-off-by: Heiko Schocher <hs@denx.de>
+> ---
+> Dirk Behme tried to bring this in, last mail I found:
+> http://lists.infradead.org/pipermail/linux-arm-kernel/2012-July/111022.html
+> where Dirk worked in Arnds suggestion to use the
+> "/aliases" device node"
 
-overall the feedback I received was for block devices, there is
-already an unique method(PARTUUID/uuid) of referencing required device
-and mmcxblky aliasing was not really needed - hence dropped my patch
-and switched over to partuuid.
 
-CC Tom and u-boot list as well.
-for reference the current thread: http://marc.info/?t=144471421700002&r=1&w=2
--- 
----
-Regards,
-Nishanth Menon
+The last attempt I remember is from last year
+
+
+http://www.spinics.net/lists/linux-mmc/msg26586.html
+
+http://www.spinics.net/lists/linux-mmc/msg26588.html
+
+
+I can't remember why this wasn't accepted, too. But maybe searching 
+the archives will help answering that.
+
+
+Best regards
+
+Dirk
+
+
+> I adapt this to the omap_hsmmc driver.
+>
+> Is there another solution for this problem?
+> Or why was this patch not accepted to mainline?
+>
+>   drivers/mmc/card/block.c      | 6 ++++--
+>   drivers/mmc/host/omap_hsmmc.c | 6 ++++++
+>   include/linux/mmc/host.h      | 3 +++
+>   3 files changed, 13 insertions(+), 2 deletions(-)
+>
+> diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+> index c742cfd..62250d8 100644
+> --- a/drivers/mmc/card/block.c
+> +++ b/drivers/mmc/card/block.c
+> @@ -2106,7 +2106,8 @@ static struct mmc_blk_data *mmc_blk_alloc_req(struct mmc_card *card,
+>   	struct mmc_blk_data *md;
+>   	int devidx, ret;
+>
+> -	devidx = find_first_zero_bit(dev_use, max_devices);
+> +	devidx = find_next_zero_bit(dev_use, max_devices,
+> +				    card->host->devidx);
+>   	if (devidx >= max_devices)
+>   		return ERR_PTR(-ENOSPC);
+>   	__set_bit(devidx, dev_use);
+> @@ -2124,7 +2125,8 @@ static struct mmc_blk_data *mmc_blk_alloc_req(struct mmc_card *card,
+>   	 * index anymore so we keep track of a name index.
+>   	 */
+>   	if (!subname) {
+> -		md->name_idx = find_first_zero_bit(name_use, max_devices);
+> +		md->name_idx = find_next_zero_bit(name_use, max_devices,
+> +						  card->host->devidx);
+>   		__set_bit(md->name_idx, name_use);
+>   	} else
+>   		md->name_idx = ((struct mmc_blk_data *)
+> diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
+> index 7fb0753..0b45b48 100644
+> --- a/drivers/mmc/host/omap_hsmmc.c
+> +++ b/drivers/mmc/host/omap_hsmmc.c
+> @@ -2059,6 +2059,12 @@ static int omap_hsmmc_probe(struct platform_device *pdev)
+>   	host->pbias_enabled = 0;
+>   	host->vqmmc_enabled = 0;
+>
+> +	if (pdev->dev.of_node) {
+> +		ret = of_alias_get_id(pdev->dev.of_node, "mmcblk");
+> +		if (ret >= 0)
+> +			host->mmc->devidx = ret;
+> +	}
+> +
+>   	ret = omap_hsmmc_gpio_init(mmc, host, pdata);
+>   	if (ret)
+>   		goto err_gpio;
+> diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+> index 83b81fd..4f071681 100644
+> --- a/include/linux/mmc/host.h
+> +++ b/include/linux/mmc/host.h
+> @@ -382,6 +382,9 @@ struct mmc_host {
+>   	int			dsr_req;	/* DSR value is valid */
+>   	u32			dsr;	/* optional driver stage (DSR) value */
+>
+> +	/* preferred mmc block device index (mmcblkX) */
+> +	unsigned int		devidx;
+> +
+>   	unsigned long		private[0] ____cacheline_aligned;
+>   };
+>
+>
