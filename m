@@ -1,105 +1,97 @@
-From: Bjorn Andersson <bjorn.andersson@sonymobile.com>
-Subject: [PATCH v2] mmc: core: Allow specifying current consumption
-Date: Mon, 12 Oct 2015 18:00:32 -0700
-Message-ID: <1444698032-9051-1-git-send-email-bjorn.andersson@sonymobile.com>
-References: <1435725525-4367-1-git-send-email-bjorn.andersson@sonymobile.com>
-Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from seldrel01.sonyericsson.com ([37.139.156.2]:11675 "EHLO
-	seldrel01.sonyericsson.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1752735AbbJMBAh (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 12 Oct 2015 21:00:37 -0400
-In-Reply-To: <1435725525-4367-1-git-send-email-bjorn.andersson@sonymobile.com>
-Sender: linux-mmc-owner@vger.kernel.org
+From: Heiko Schocher <hs@denx.de>
+Subject: [PATCH] mmc: omap_hsmmc: fix initialization order of mmc block devices
+Date: Tue, 13 Oct 2015 07:29:53 +0200
+Message-ID: <1444714193-24816-1-git-send-email-hs@denx.de>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: linux-kernel@vger.kernel.org
+Cc: Heiko Schocher <hs@denx.de>, Arnd Bergmann <arnd@arndb.de>, linux-mmc@vger.kernel.org, Dirk Behme <dirk.behme@bosch.com>, Georg.Soffel@bosch-si.com, linux-omap@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Rob Herring <robh+dt@kernel.org>, Pawel Moll <pawel.moll@arm.com>, Mark Rutland <mark.rutland@arm.com>, Ian Campbell <ijc+devicetree@hellion.org.uk>, Kumar Gala <galak@codeaurora.org>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
 
-This allows us to specify expected current consumption of the vmmc and
-vqmmc regulators. This is needed to bring the supplying regulators out
-of their low-power-mode while accessing the mmc.
+On embedded devices, often there is a combination of
+removable mmc devices (e.g. MMC/SD cards) and hard
+wired ones (e.g. eMMC). Depending on the hardware
+configuration, the 'mmcblkN' node might change if
+the removable device is available or not at boot time.
 
-Signed-off-by: Bjorn Andersson <bjorn.andersson@sonymobile.com>
+E.g. if the removable device is attached at boot time,
+it might become mmxblk0. And the hard wired one mmcblk1.
+But if the removable device isn't there at boot time,
+the hard wired one will become mmcblk0. This makes it
+somehow difficult to hard code the root device to the
+non-removable device and boot fast.
+
+Signed-off-by: Heiko Schocher <hs@denx.de>
 ---
+Dirk Behme tried to bring this in, last mail I found:
+http://lists.infradead.org/pipermail/linux-arm-kernel/2012-July/111022.html
+where Dirk worked in Arnds suggestion to use the
+"/aliases" device node"
 
-The sd specification states that if the host can provide more than 150mA this
-should be indicated in the "XPC value in the argument of ACMD41" for SDXC
-cards. Should this be tied in with the added property as well?
+I adapt this to the omap_hsmmc driver.
 
-Changes since v1:
-- Property name and description updated to clarify intention
+Is there another solution for this problem?
+Or why was this patch not accepted to mainline?
 
- Documentation/devicetree/bindings/mmc/mmc.txt | 2 ++
- drivers/mmc/core/core.c                       | 6 ++++++
- drivers/mmc/core/host.c                       | 4 ++++
- include/linux/mmc/host.h                      | 2 ++
- 4 files changed, 14 insertions(+)
+ drivers/mmc/card/block.c      | 6 ++++--
+ drivers/mmc/host/omap_hsmmc.c | 6 ++++++
+ include/linux/mmc/host.h      | 3 +++
+ 3 files changed, 13 insertions(+), 2 deletions(-)
 
-diff --git a/Documentation/devicetree/bindings/mmc/mmc.txt b/Documentation/devicetree/bindings/mmc/mmc.txt
-index 0384fc3f64e8..7514083a9f55 100644
---- a/Documentation/devicetree/bindings/mmc/mmc.txt
-+++ b/Documentation/devicetree/bindings/mmc/mmc.txt
-@@ -47,6 +47,8 @@ Optional properties:
- - mmc-hs400-1_2v: eMMC HS400 mode(1.2V I/O) is supported
- - dsr: Value the card's (optional) Driver Stage Register (DSR) should be
-   programmed with. Valid range: [0 .. 0xffff].
-+- vmmc-active-current: current required from the vmmc regulator, in uA
-+- vqmmc-active-current: current required from the vqmmc regulator, in uA
+diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+index c742cfd..62250d8 100644
+--- a/drivers/mmc/card/block.c
++++ b/drivers/mmc/card/block.c
+@@ -2106,7 +2106,8 @@ static struct mmc_blk_data *mmc_blk_alloc_req(struct mmc_card *card,
+ 	struct mmc_blk_data *md;
+ 	int devidx, ret;
  
- *NOTE* on CD and WP polarity. To use common for all SD/MMC host controllers line
- polarity properties, we have to fix the meaning of the "normal" and "inverted"
-diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index 23fa221ce803..603f40136306 100644
---- a/drivers/mmc/core/core.c
-+++ b/drivers/mmc/core/core.c
-@@ -1469,12 +1469,18 @@ int mmc_regulator_get_supply(struct mmc_host *mmc)
- 			mmc->ocr_avail = ret;
- 		else
- 			dev_warn(dev, "Failed getting OCR mask: %d\n", ret);
+-	devidx = find_first_zero_bit(dev_use, max_devices);
++	devidx = find_next_zero_bit(dev_use, max_devices,
++				    card->host->devidx);
+ 	if (devidx >= max_devices)
+ 		return ERR_PTR(-ENOSPC);
+ 	__set_bit(devidx, dev_use);
+@@ -2124,7 +2125,8 @@ static struct mmc_blk_data *mmc_blk_alloc_req(struct mmc_card *card,
+ 	 * index anymore so we keep track of a name index.
+ 	 */
+ 	if (!subname) {
+-		md->name_idx = find_first_zero_bit(name_use, max_devices);
++		md->name_idx = find_next_zero_bit(name_use, max_devices,
++						  card->host->devidx);
+ 		__set_bit(md->name_idx, name_use);
+ 	} else
+ 		md->name_idx = ((struct mmc_blk_data *)
+diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
+index 7fb0753..0b45b48 100644
+--- a/drivers/mmc/host/omap_hsmmc.c
++++ b/drivers/mmc/host/omap_hsmmc.c
+@@ -2059,6 +2059,12 @@ static int omap_hsmmc_probe(struct platform_device *pdev)
+ 	host->pbias_enabled = 0;
+ 	host->vqmmc_enabled = 0;
+ 
++	if (pdev->dev.of_node) {
++		ret = of_alias_get_id(pdev->dev.of_node, "mmcblk");
++		if (ret >= 0)
++			host->mmc->devidx = ret;
++	}
 +
-+		if (mmc->supply.vmmc_current)
-+			regulator_set_load(mmc->supply.vmmc, mmc->supply.vmmc_current);
- 	}
- 
- 	if (IS_ERR(mmc->supply.vqmmc)) {
- 		if (PTR_ERR(mmc->supply.vqmmc) == -EPROBE_DEFER)
- 			return -EPROBE_DEFER;
- 		dev_info(dev, "No vqmmc regulator found\n");
-+	} else {
-+		if (mmc->supply.vqmmc_current)
-+			regulator_set_load(mmc->supply.vqmmc, mmc->supply.vqmmc_current);
- 	}
- 
- 	return 0;
-diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
-index 970e6906930b..ede508d63fb5 100644
---- a/drivers/mmc/core/host.c
-+++ b/drivers/mmc/core/host.c
-@@ -235,6 +235,10 @@ int mmc_of_parse(struct mmc_host *host)
- 			host->caps2 |= MMC_CAP2_CD_ACTIVE_HIGH;
- 	}
- 
-+	/* Parse regulator load requests */
-+	of_property_read_u32(np, "vmmc-active-current", &host->supply.vmmc_current);
-+	of_property_read_u32(np, "vqmmc-active-current", &host->supply.vqmmc_current);
-+
- 	/* Parse Write Protection */
- 	ro_cap_invert = of_property_read_bool(np, "wp-inverted");
- 
+ 	ret = omap_hsmmc_gpio_init(mmc, host, pdata);
+ 	if (ret)
+ 		goto err_gpio;
 diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-index 8673ffe3d86e..640d8dbb8559 100644
+index 83b81fd..4f071681 100644
 --- a/include/linux/mmc/host.h
 +++ b/include/linux/mmc/host.h
-@@ -197,6 +197,8 @@ struct mmc_pwrseq;
- struct mmc_supply {
- 	struct regulator *vmmc;		/* Card power supply */
- 	struct regulator *vqmmc;	/* Optional Vccq supply */
-+	u32 vmmc_current;		/* Requested current for vmmc */
-+	u32 vqmmc_current;		/* Requested current for vqmmc */
+@@ -382,6 +382,9 @@ struct mmc_host {
+ 	int			dsr_req;	/* DSR value is valid */
+ 	u32			dsr;	/* optional driver stage (DSR) value */
+ 
++	/* preferred mmc block device index (mmcblkX) */
++	unsigned int		devidx;
++
+ 	unsigned long		private[0] ____cacheline_aligned;
  };
  
- struct mmc_host {
 -- 
-2.4.2
-
+2.1.0
