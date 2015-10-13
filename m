@@ -1,112 +1,105 @@
-From: Heiko =?ISO-8859-1?Q?St=FCbner?= <heiko-4mtYJXux2i+zQB+pC5nmwQ@public.gmane.org>
-Subject: [PATCH v3.1 1/7] mmc: core: move ocr-bit to voltage translation into
- separate function
-Date: Mon, 12 Oct 2015 18:00:54 +0200
-Message-ID: <3818140.syp6fUkzM7@diego>
-References: <1444654110-32293-1-git-send-email-heiko@sntech.de>
- <1444654110-32293-2-git-send-email-heiko@sntech.de>
+From: Bjorn Andersson <bjorn.andersson@sonymobile.com>
+Subject: [PATCH v2] mmc: core: Allow specifying current consumption
+Date: Mon, 12 Oct 2015 18:00:32 -0700
+Message-ID: <1444698032-9051-1-git-send-email-bjorn.andersson@sonymobile.com>
+References: <1435725525-4367-1-git-send-email-bjorn.andersson@sonymobile.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-In-Reply-To: <1444654110-32293-2-git-send-email-heiko-4mtYJXux2i+zQB+pC5nmwQ@public.gmane.org>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-rockchip>,
- <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-rockchip/>
-List-Post: <mailto:linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-List-Help: <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-rockchip>,
- <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
-Sender: "Linux-rockchip" <linux-rockchip-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-Errors-To: linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
-To: ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org
-Cc: amstan-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org, jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org, linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+Content-Type: text/plain
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from seldrel01.sonyericsson.com ([37.139.156.2]:11675 "EHLO
+	seldrel01.sonyericsson.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1752735AbbJMBAh (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 12 Oct 2015 21:00:37 -0400
+In-Reply-To: <1435725525-4367-1-git-send-email-bjorn.andersson@sonymobile.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Rob Herring <robh+dt@kernel.org>, Pawel Moll <pawel.moll@arm.com>, Mark Rutland <mark.rutland@arm.com>, Ian Campbell <ijc+devicetree@hellion.org.uk>, Kumar Gala <galak@codeaurora.org>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
 
-We will shortly need the calculation of an ocr-bit to the actual
-voltage in a second place too, so move it from mmc_regulator_set_ocr
-to a common function mmc_ocrbitnum_to_vdd to make that possible.
+This allows us to specify expected current consumption of the vmmc and
+vqmmc regulators. This is needed to bring the supplying regulators out
+of their low-power-mode while accessing the mmc.
 
-Signed-off-by: Heiko Stuebner <heiko-4mtYJXux2i+zQB+pC5nmwQ@public.gmane.org>
+Signed-off-by: Bjorn Andersson <bjorn.andersson@sonymobile.com>
 ---
-changes since v3:
-- move mmc_ocrbitnum_to_vdd under the CONFIG_REGULATOR ifdef
-  Both the current as well as the new user in the followup patch are
-  limited to CONFIG_REGULATOR, so limit this new function as well.
 
-I saw the mistake after Doug thankfully pointed out the CONFIG_REGULATOR issue.
+The sd specification states that if the host can provide more than 150mA this
+should be indicated in the "XPC value in the argument of ACMD41" for SDXC
+cards. Should this be tied in with the added property as well?
 
- drivers/mmc/core/core.c | 51 +++++++++++++++++++++++++++++++++----------------
- 1 file changed, 35 insertions(+), 16 deletions(-)
+Changes since v1:
+- Property name and description updated to clarify intention
 
+ Documentation/devicetree/bindings/mmc/mmc.txt | 2 ++
+ drivers/mmc/core/core.c                       | 6 ++++++
+ drivers/mmc/core/host.c                       | 4 ++++
+ include/linux/mmc/host.h                      | 2 ++
+ 4 files changed, 14 insertions(+)
+
+diff --git a/Documentation/devicetree/bindings/mmc/mmc.txt b/Documentation/devicetree/bindings/mmc/mmc.txt
+index 0384fc3f64e8..7514083a9f55 100644
+--- a/Documentation/devicetree/bindings/mmc/mmc.txt
++++ b/Documentation/devicetree/bindings/mmc/mmc.txt
+@@ -47,6 +47,8 @@ Optional properties:
+ - mmc-hs400-1_2v: eMMC HS400 mode(1.2V I/O) is supported
+ - dsr: Value the card's (optional) Driver Stage Register (DSR) should be
+   programmed with. Valid range: [0 .. 0xffff].
++- vmmc-active-current: current required from the vmmc regulator, in uA
++- vqmmc-active-current: current required from the vqmmc regulator, in uA
+ 
+ *NOTE* on CD and WP polarity. To use common for all SD/MMC host controllers line
+ polarity properties, we have to fix the meaning of the "normal" and "inverted"
 diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index 0520064..d3ffc49 100644
+index 23fa221ce803..603f40136306 100644
 --- a/drivers/mmc/core/core.c
 +++ b/drivers/mmc/core/core.c
-@@ -1339,6 +1339,40 @@ struct device_node *mmc_of_find_child_device(struct mmc_host *host,
- #ifdef CONFIG_REGULATOR
+@@ -1469,12 +1469,18 @@ int mmc_regulator_get_supply(struct mmc_host *mmc)
+ 			mmc->ocr_avail = ret;
+ 		else
+ 			dev_warn(dev, "Failed getting OCR mask: %d\n", ret);
++
++		if (mmc->supply.vmmc_current)
++			regulator_set_load(mmc->supply.vmmc, mmc->supply.vmmc_current);
+ 	}
  
- /**
-+ * mmc_ocrbitnum_to_vdd - Convert a OCR bit number to its voltage
-+ * @vdd_bit:	OCR bit number
-+ * @min_uV:	minimum voltage value (mV)
-+ * @max_uV:	maximum voltage value (mV)
-+ *
-+ * This function returns the voltage range according to the provided OCR
-+ * bit number. If conversion is not possible a negative errno value returned.
-+ */
-+static int mmc_ocrbitnum_to_vdd(int vdd_bit, int *min_uV, int *max_uV)
-+{
-+	int		tmp;
-+
-+	if (!vdd_bit)
-+		return -EINVAL;
-+
-+	/*
-+	 * REVISIT mmc_vddrange_to_ocrmask() may have set some
-+	 * bits this regulator doesn't quite support ... don't
-+	 * be too picky, most cards and regulators are OK with
-+	 * a 0.1V range goof (it's a small error percentage).
-+	 */
-+	tmp = vdd_bit - ilog2(MMC_VDD_165_195);
-+	if (tmp == 0) {
-+		*min_uV = 1650 * 1000;
-+		*max_uV = 1950 * 1000;
+ 	if (IS_ERR(mmc->supply.vqmmc)) {
+ 		if (PTR_ERR(mmc->supply.vqmmc) == -EPROBE_DEFER)
+ 			return -EPROBE_DEFER;
+ 		dev_info(dev, "No vqmmc regulator found\n");
 +	} else {
-+		*min_uV = 1900 * 1000 + tmp * 100 * 1000;
-+		*max_uV = *min_uV + 100 * 1000;
-+	}
-+
-+	return 0;
-+}
-+
-+/**
-  * mmc_regulator_get_ocrmask - return mask of supported voltages
-  * @supply: regulator to use
-  *
-@@ -1401,22 +1435,7 @@ int mmc_regulator_set_ocr(struct mmc_host *mmc,
- 	int			min_uV, max_uV;
++		if (mmc->supply.vqmmc_current)
++			regulator_set_load(mmc->supply.vqmmc, mmc->supply.vqmmc_current);
+ 	}
  
- 	if (vdd_bit) {
--		int		tmp;
--
--		/*
--		 * REVISIT mmc_vddrange_to_ocrmask() may have set some
--		 * bits this regulator doesn't quite support ... don't
--		 * be too picky, most cards and regulators are OK with
--		 * a 0.1V range goof (it's a small error percentage).
--		 */
--		tmp = vdd_bit - ilog2(MMC_VDD_165_195);
--		if (tmp == 0) {
--			min_uV = 1650 * 1000;
--			max_uV = 1950 * 1000;
--		} else {
--			min_uV = 1900 * 1000 + tmp * 100 * 1000;
--			max_uV = min_uV + 100 * 1000;
--		}
-+		mmc_ocrbitnum_to_vdd(vdd_bit, &min_uV, &max_uV);
+ 	return 0;
+diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
+index 970e6906930b..ede508d63fb5 100644
+--- a/drivers/mmc/core/host.c
++++ b/drivers/mmc/core/host.c
+@@ -235,6 +235,10 @@ int mmc_of_parse(struct mmc_host *host)
+ 			host->caps2 |= MMC_CAP2_CD_ACTIVE_HIGH;
+ 	}
  
- 		result = regulator_set_voltage(supply, min_uV, max_uV);
- 		if (result == 0 && !mmc->regulator_enabled) {
++	/* Parse regulator load requests */
++	of_property_read_u32(np, "vmmc-active-current", &host->supply.vmmc_current);
++	of_property_read_u32(np, "vqmmc-active-current", &host->supply.vqmmc_current);
++
+ 	/* Parse Write Protection */
+ 	ro_cap_invert = of_property_read_bool(np, "wp-inverted");
+ 
+diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+index 8673ffe3d86e..640d8dbb8559 100644
+--- a/include/linux/mmc/host.h
++++ b/include/linux/mmc/host.h
+@@ -197,6 +197,8 @@ struct mmc_pwrseq;
+ struct mmc_supply {
+ 	struct regulator *vmmc;		/* Card power supply */
+ 	struct regulator *vqmmc;	/* Optional Vccq supply */
++	u32 vmmc_current;		/* Requested current for vmmc */
++	u32 vqmmc_current;		/* Requested current for vqmmc */
+ };
+ 
+ struct mmc_host {
 -- 
-2.6.1
+2.4.2
+
