@@ -1,68 +1,87 @@
-From: Ludovic Desroches <ludovic.desroches@atmel.com>
-Subject: Re: [PATCH 1/2] mmc: sdhci: add quirk
- SDHCI_QUIRK2_NEED_DELAY_AFTER_INT_CLK_RST
-Date: Tue, 13 Oct 2015 16:09:46 +0200
-Message-ID: <20151013140946.GE11227@odux.rfo.atmel.com>
-References: <1442477780-30994-1-git-send-email-ludovic.desroches@atmel.com>
- <CAPDyKFp1+d1ouaq-ftheDn+fT1ssHDwde2orAndUrMW0iyqqww@mail.gmail.com>
+From: Chaotian Jing <chaotian.jing@mediatek.com>
+Subject: Re: [PATCH 2/4] mmc: dt-bindings: update Mediatek MMC bindings
+Date: Wed, 14 Oct 2015 09:26:59 +0800
+Message-ID: <1444786019.29605.6.camel@mhfsdcap03>
+References: <1444729078-26585-1-git-send-email-chaotian.jing@mediatek.com>
+	 <1444729078-26585-3-git-send-email-chaotian.jing@mediatek.com>
+	 <20151013103845.GA4189@leverpostej>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from eusmtp01.atmel.com ([212.144.249.243]:25680 "EHLO
-	eusmtp01.atmel.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752295AbbJMOJs (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 13 Oct 2015 10:09:48 -0400
-Content-Disposition: inline
-In-Reply-To: <CAPDyKFp1+d1ouaq-ftheDn+fT1ssHDwde2orAndUrMW0iyqqww@mail.gmail.com>
+Received: from mailgw01.mediatek.com ([218.249.47.110]:35596 "EHLO
+	mailgw01.mediatek.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1752810AbbJNB1M (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 13 Oct 2015 21:27:12 -0400
+In-Reply-To: <20151013103845.GA4189@leverpostej>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Ludovic Desroches <ludovic.desroches@atmel.com>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Nicolas Ferre <nicolas.ferre@atmel.com>, Alexandre Belloni <alexandre.belloni@free-electrons.com>, Russell King <rmk+kernel@arm.linux.org.uk>
+To: Mark Rutland <mark.rutland@arm.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will.deacon@arm.com>, Daniel Kurtz <djkurtz@chromium.org>, linux-kernel@vger.kernel.org, Lars-Peter Clausen <lars@metafoo.de>, Howard Chen <ibanezchen@gmail.com>, devicetree@vger.kernel.org, Pawel Moll <pawel.moll@arm.com>, Ian Campbell <ijc+devicetree@hellion.org.uk>, Sascha Hauer <s.hauer@pengutronix.de>, Hans de Goede <hdegoede@redhat.com>, Rob Herring <robh+dt@kernel.org>, linux-mediatek@lists.infradead.org, Matthias Brugger <matthias.bgg@gmail.com>, linux-arm-kernel@lists.infradead.org, srv_heupstream@mediatek.com, Sergei Shtylyov <sergei.shtylyov@cogentembedded.com>, linux-mmc@vger.kernel.org, Adrian Hunter <adrian.hunter@intel.com>, Kumar Gala <galak@codeaurora.org>, Javier Martinez Canillas <javier.martinez@collabora.co.uk>
 
-On Thu, Oct 08, 2015 at 08:01:23PM +0200, Ulf Hansson wrote:
-> +Russell
-> 
-> On 17 September 2015 at 10:16, Ludovic Desroches
-> <ludovic.desroches@atmel.com> wrote:
-> > The Atmel sdhci device needs a new quirk. sdhci_set_clock set the Clock
-> > Control Register to 0 before computing the new value and writing it.
-> > It disables the internal clock which causes a reset mecanism. If we
-> > write the new value before this reset mecanism is done, it will prevent
-> > the stabilisation of the internal clock, so a delay is needed. This
-> > delay is about 2-3 cycles of the base clock. To be safe, a 1 ms delay is
-> > used.
-> >
-> > Signed-off-by: Ludovic Desroches <ludovic.desroches@atmel.com>
+On Tue, 2015-10-13 at 11:38 +0100, Mark Rutland wrote:
+> On Tue, Oct 13, 2015 at 05:37:56PM +0800, Chaotian Jing wrote:
+> > Add 400Mhz clock source for HS400 mode
+> > 
+> > Signed-off-by: Chaotian Jing <chaotian.jing@mediatek.com>
 > > ---
-> > Hi Ulf,
-> >
-> > Can you take these patches as fixes? I thought it was better to introduce a
-> > quirk instead of duplicating a part of the sdhci_set_clock function to
-> > implement my own set_clock function.
+> >  Documentation/devicetree/bindings/mmc/mtk-sd.txt | 12 ++++++++++--
+> >  1 file changed, 10 insertions(+), 2 deletions(-)
+> > 
+> > diff --git a/Documentation/devicetree/bindings/mmc/mtk-sd.txt b/Documentation/devicetree/bindings/mmc/mtk-sd.txt
+> > index a1adfa4..745bee2 100644
+> > --- a/Documentation/devicetree/bindings/mmc/mtk-sd.txt
+> > +++ b/Documentation/devicetree/bindings/mmc/mtk-sd.txt
+> > @@ -17,6 +17,11 @@ Required properties:
+> >  - vmmc-supply: power to the Core
+> >  - vqmmc-supply: power to the IO
+> >  
+> > +Optional properties:
+> > +- clocks: 400mhz clock source for HS400
+> > +- clock-names: "400mhz"
 > 
-> Hi Ludovic,
+> Is that really what the input line is called?
 > 
-> Sorry for the delay!
+> > +- hs400-ds-delay: HS400 DS delay setting
 > 
-> I have been thinking of how to address patches for sdhci that adds
-> more quirks/callbacks. To be honest, I am fed up with such patches as
-> I think it keeps the development of sdhci going in the wrong
-> direction.
+> What is the format of this? Where can I derive the correct value?
 > 
-> Instead, I have been hoping for someone to have stab into turning
-> sdhci into a library as Russell King pointed out several times as
-> well.
+> Mark.
 > 
-> Now, as my response too you had a big delay for these patches and
-> because it's a fix intended for the rc, I am going to apply patch1 and
-> patch2 anyway. Although, you and everybody else that contributes to
-> the sdhci development, please consider this as the *last* time for
-> adding quirks/callbacks, unless you have *very good* reasons.
+This is the value of register PAD_DS_TUNE(0x188), in general, this value
+is the default value of register PAD_DS_TUNE(different platform has
+different value, 0x14015 is the default value of MT8173). And, this
+register is used to tune data in HS400 mode, but as you know, HS400 mode
+do not support CMD21, so we need find a "best" value to cover HS400
+mode, if default value does not work, we have an off-line calibration
+program to find the best value.
+> > +
+> >  Examples:
+> >  mmc0: mmc@11230000 {
+> >  	compatible = "mediatek,mt8173-mmc", "mediatek,mt8135-mmc";
+> > @@ -24,9 +29,12 @@ mmc0: mmc@11230000 {
+> >  	interrupts = <GIC_SPI 39 IRQ_TYPE_LEVEL_LOW>;
+> >  	vmmc-supply = <&mt6397_vemc_3v3_reg>;
+> >  	vqmmc-supply = <&mt6397_vio18_reg>;
+> > -	clocks = <&pericfg CLK_PERI_MSDC30_0>, <&topckgen CLK_TOP_MSDC50_0_H_SEL>;
+> > -	clock-names = "source", "hclk";
+> > +	clocks = <&pericfg CLK_PERI_MSDC30_0>,
+> > +	         <&topckgen CLK_TOP_MSDC50_0_H_SEL>,
+> > +		 <&topckgen CLK_TOP_MSDCPLL_D2> ;
+> > +	clock-names = "source", "hclk", "400mhz";
+> >  	pinctrl-names = "default", "state_uhs";
+> >  	pinctrl-0 = <&mmc0_pins_default>;
+> >  	pinctrl-1 = <&mmc0_pins_uhs>;
+> > +	hs400-ds-delay = <0x14015>;
+> >  };
+> > -- 
+> > 1.8.1.1.dirty
+> > 
+> > 
+> > _______________________________________________
+> > linux-arm-kernel mailing list
+> > linux-arm-kernel@lists.infradead.org
+> > http://lists.infradead.org/mailman/listinfo/linux-arm-kernel
+> > 
 
-Thanks Ulf, it seems it is my lucky day! I understand and share your
-point of view about quirks but it was so easy to manage controller
-issues with them...
 
-Regards
-
-Ludovic
