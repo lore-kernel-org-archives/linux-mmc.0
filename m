@@ -1,7 +1,7 @@
 From: Sergei Shtylyov <sergei.shtylyov@cogentembedded.com>
-Subject: [PATCH 1/2] mmc: skip reclaiming host on mmc_add_card() error
-Date: Wed, 14 Oct 2015 23:53:03 +0300
-Message-ID: <4835546.qgzOJFlmY8@wasted.cogentembedded.com>
+Subject: [PATCH 2/2] sd: skip reclaiming host on mmc_add_card() error
+Date: Wed, 14 Oct 2015 23:54:05 +0300
+Message-ID: <1596257.vaoCtQJA8a@wasted.cogentembedded.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7Bit
@@ -20,14 +20,14 @@ Signed-off-by: Sergei Shtylyov <sergei.shtylyov@cogentembedded.com>
 ---
 The patch is against Ulf Hansson's 'mmc.git' repo's 'next' branch.
 
- drivers/mmc/core/mmc.c |    3 +--
+ drivers/mmc/core/sd.c |    3 +--
  1 file changed, 1 insertion(+), 2 deletions(-)
 
-Index: mmc/drivers/mmc/core/mmc.c
+Index: mmc/drivers/mmc/core/sd.c
 ===================================================================
---- mmc.orig/drivers/mmc/core/mmc.c
-+++ mmc/drivers/mmc/core/mmc.c
-@@ -2009,14 +2009,13 @@ int mmc_attach_mmc(struct mmc_host *host
+--- mmc.orig/drivers/mmc/core/sd.c
++++ mmc/drivers/mmc/core/sd.c
+@@ -1243,14 +1243,13 @@ int mmc_attach_sd(struct mmc_host *host)
  
  	mmc_release_host(host);
  	err = mmc_add_card(host->card);
@@ -41,5 +41,5 @@ Index: mmc/drivers/mmc/core/mmc.c
  remove_card:
 -	mmc_release_host(host);
  	mmc_remove_card(host->card);
- 	mmc_claim_host(host);
  	host->card = NULL;
+ 	mmc_claim_host(host);
