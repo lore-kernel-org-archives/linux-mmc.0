@@ -1,129 +1,186 @@
-From: Marcin Wojtas <mw@semihalf.com>
-Subject: [PATCH v3 1/5] mmc: sdhci-pxav3: enable proper resuming on Armada 38x
- SoC
-Date: Thu, 15 Oct 2015 18:25:42 +0200
-Message-ID: <1444926346-29763-2-git-send-email-mw@semihalf.com>
-References: <1444926346-29763-1-git-send-email-mw@semihalf.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+From: Sebastian Hesselbarth <sebastian.hesselbarth@gmail.com>
+Subject: Re: [PATCH 1/5] mmc: sdhci-pxav3: fix optional clock name
+Date: Thu, 15 Oct 2015 23:41:22 +0200
+Message-ID: <56201D82.6080106@gmail.com>
+References: <1444628796-5484-1-git-send-email-jszhang@marvell.com> <1444628796-5484-2-git-send-email-jszhang@marvell.com>
+Content-Type: text/plain; charset=windows-1252; format=flowed
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <1444926346-29763-1-git-send-email-mw@semihalf.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org
-Cc: thomas.petazzoni@free-electrons.com, andrew@lunn.ch, ulf.hansson@linaro.org, jason@lakedaemon.net, tawfik@marvell.com, jaz@semihalf.com, nadavh@marvell.com, alior@marvell.com, jszhang@marvell.com, gregory.clement@free-electrons.com, mw@semihalf.com, sebastian.hesselbarth@gmail.com
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-lf0-f42.google.com ([209.85.215.42]:34844 "EHLO
+	mail-lf0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751401AbbJOVl1 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 15 Oct 2015 17:41:27 -0400
+In-Reply-To: <1444628796-5484-2-git-send-email-jszhang@marvell.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Jisheng Zhang <jszhang@marvell.com>, ulf.hansson@linaro.org, robh+dt@kernel.org, pawel.moll@arm.com, mark.rutland@arm.com, ijc+devicetree@hellion.org.uk, galak@codeaurora.org, mturquette@baylibre.com, sboyd@codeaurora.org
+Cc: linux-clk@vger.kernel.org, linux-kernel@vger.kernel.org, devicetree@vger.kernel.org, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 
-When resuming from suspend on Armada 38x SoC MBus windows have to be
-re-configured and for that purpose mv_conf_mbus_windows function needed
-rework. MBus windows register base address obtaining was moved to
-armada_38x_quirks function in order to be kept in pxa global structure,
-because it is used during a resume.
+On 12.10.2015 07:46, Jisheng Zhang wrote:
+> Commit 8afdc9cca27f ("mmc: sdhci-pxav3: Get optional core clock") adds
+> additional optional clock support, but the clock names  isn't correct.
+> The current "io" clock is really the PXAv3 SDHCI IP's "core" clock
+> which is manadatory. The current "core" clock is really the IP's "axi"
+> clock which is optional.
+>
+> Signed-off-by: Jisheng Zhang <jszhang@marvell.com>
+> ---
+>   .../devicetree/bindings/mmc/sdhci-pxa.txt          |  8 ++---
+>   arch/arm/boot/dts/berlin2.dtsi                     |  6 ++--
+>   arch/arm/boot/dts/berlin2cd.dtsi                   |  2 +-
+>   arch/arm/boot/dts/berlin2q.dtsi                    |  2 +-
+>   drivers/mmc/host/sdhci-pxav3.c                     | 40 +++++++++++-----------
+>   5 files changed, 29 insertions(+), 29 deletions(-)
 
-This commit fixes resuming from suspend by calling MBus windows
-configuration routine and therefore enabling proper DMA operation.
 
-Signed-off-by: Marcin Wojtas <mw@semihalf.com>
----
- drivers/mmc/host/sdhci-pxav3.c | 35 ++++++++++++++++-------------------
- 1 file changed, 16 insertions(+), 19 deletions(-)
+Jisheng,
 
-diff --git a/drivers/mmc/host/sdhci-pxav3.c b/drivers/mmc/host/sdhci-pxav3.c
-index f5edf9d..54a253c0 100644
---- a/drivers/mmc/host/sdhci-pxav3.c
-+++ b/drivers/mmc/host/sdhci-pxav3.c
-@@ -63,6 +63,7 @@ struct sdhci_pxa {
- 	struct clk *clk_io;
- 	u8	power_mode;
- 	void __iomem *sdio3_conf_reg;
-+	void __iomem *mbus_win_regs;
- };
- 
- /*
-@@ -81,30 +82,16 @@ struct sdhci_pxa {
- #define SDIO3_CONF_CLK_INV	BIT(0)
- #define SDIO3_CONF_SD_FB_CLK	BIT(2)
- 
--static int mv_conf_mbus_windows(struct platform_device *pdev,
-+static int mv_conf_mbus_windows(struct device *dev, void __iomem *regs,
- 				const struct mbus_dram_target_info *dram)
- {
- 	int i;
--	void __iomem *regs;
--	struct resource *res;
- 
- 	if (!dram) {
--		dev_err(&pdev->dev, "no mbus dram info\n");
--		return -EINVAL;
--	}
--
--	res = platform_get_resource(pdev, IORESOURCE_MEM, 1);
--	if (!res) {
--		dev_err(&pdev->dev, "cannot get mbus registers\n");
-+		dev_err(dev, "no mbus dram info\n");
- 		return -EINVAL;
- 	}
- 
--	regs = ioremap(res->start, resource_size(res));
--	if (!regs) {
--		dev_err(&pdev->dev, "cannot map mbus registers\n");
--		return -ENOMEM;
--	}
--
- 	for (i = 0; i < SDHCI_MAX_WIN_NUM; i++) {
- 		writel(0, regs + SDHCI_WINDOW_CTRL(i));
- 		writel(0, regs + SDHCI_WINDOW_BASE(i));
-@@ -122,8 +109,6 @@ static int mv_conf_mbus_windows(struct platform_device *pdev,
- 		writel(cs->base, regs + SDHCI_WINDOW_BASE(i));
- 	}
- 
--	iounmap(regs);
--
- 	return 0;
- }
- 
-@@ -135,6 +120,11 @@ static int armada_38x_quirks(struct platform_device *pdev,
- 	struct sdhci_pxa *pxa = pltfm_host->priv;
- 	struct resource *res;
- 
-+	res = platform_get_resource_byname(pdev, IORESOURCE_MEM, "mbus");
-+	pxa->mbus_win_regs = devm_ioremap_resource(&pdev->dev, res);
-+	if (IS_ERR(pxa->mbus_win_regs))
-+		return PTR_ERR(pxa->mbus_win_regs);
-+
- 	host->quirks &= ~SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN;
- 	host->quirks |= SDHCI_QUIRK_MISSING_CAPS;
- 	res = platform_get_resource_byname(pdev, IORESOURCE_MEM,
-@@ -403,7 +393,8 @@ static int sdhci_pxav3_probe(struct platform_device *pdev)
- 		ret = armada_38x_quirks(pdev, host);
- 		if (ret < 0)
- 			goto err_mbus_win;
--		ret = mv_conf_mbus_windows(pdev, mv_mbus_dram_info());
-+		ret = mv_conf_mbus_windows(&pdev->dev, pxa->mbus_win_regs,
-+					   mv_mbus_dram_info());
- 		if (ret < 0)
- 			goto err_mbus_win;
- 	}
-@@ -520,6 +511,12 @@ static int sdhci_pxav3_resume(struct device *dev)
- {
- 	int ret;
- 	struct sdhci_host *host = dev_get_drvdata(dev);
-+	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-+	struct sdhci_pxa *pxa = pltfm_host->priv;
-+
-+	if (pxa->mbus_win_regs)
-+		ret = mv_conf_mbus_windows(dev, pxa->mbus_win_regs,
-+					   mv_mbus_dram_info());
- 
- 	pm_runtime_get_sync(dev);
- 	ret = sdhci_resume_host(host);
--- 
-1.8.3.1
+Please split the DT changes from the driver changes.
+
+> diff --git a/Documentation/devicetree/bindings/mmc/sdhci-pxa.txt b/Documentation/devicetree/bindings/mmc/sdhci-pxa.txt
+> index 3d1b449..25d5ba8 100644
+> --- a/Documentation/devicetree/bindings/mmc/sdhci-pxa.txt
+> +++ b/Documentation/devicetree/bindings/mmc/sdhci-pxa.txt
+> @@ -17,9 +17,9 @@ Required properties:
+>   - reg names: should be "sdhci", "mbus", "conf-sdio3". only mandatory
+>     for "marvell,armada-380-sdhci"
+>   - clocks: Array of clocks required for SDHCI; requires at least one for
+> -    I/O clock.
+> +    core clock.
+>   - clock-names: Array of names corresponding to clocks property; shall be
+> -    "io" for I/O clock and "core" for optional core clock.
+> +    "core" for core clock and "axi" for optional axi clock.
+
+s/axi/bus/ ?
+
+>   Optional properties:
+>   - mrvl,clk-delay-cycles: Specify a number of cycles to delay for tuning.
+> @@ -32,7 +32,7 @@ sdhci@d4280800 {
+>   	bus-width = <8>;
+>   	interrupts = <27>;
+>   	clocks = <&chip CLKID_SDIO1XIN>, <&chip CLKID_SDIO1>;
+> -	clock-names = "io", "core";
+> +	clock-names = "core", "axi";
+
+This will break backward compatibility, right?
+
+>   	non-removable;
+>   	mrvl,clk-delay-cycles = <31>;
+>   };
+> @@ -45,6 +45,6 @@ sdhci@d8000 {
+>   		<0x18454 0x4>;
+>   	interrupts = <0 25 0x4>;
+>   	clocks = <&gateclk 17>;
+> -	clock-names = "io";
+> +	clock-names = "core";
+>   	mrvl,clk-delay-cycles = <0x1F>;
+>   };
+[...]
+> diff --git a/drivers/mmc/host/sdhci-pxav3.c b/drivers/mmc/host/sdhci-pxav3.c
+> index f5edf9d..cec95f1 100644
+> --- a/drivers/mmc/host/sdhci-pxav3.c
+> +++ b/drivers/mmc/host/sdhci-pxav3.c
+> @@ -59,8 +59,8 @@
+>   #define SDCE_MISC_INT_EN	(1<<1)
+>
+>   struct sdhci_pxa {
+> +	struct clk *clk_axi;
+
+s/clk_axi/clk_bus/g
+
+>   	struct clk *clk_core;
+> -	struct clk *clk_io;
+>   	u8	power_mode;
+>   	void __iomem *sdio3_conf_reg;
+>   };
+> @@ -381,20 +381,20 @@ static int sdhci_pxav3_probe(struct platform_device *pdev)
+>   	pltfm_host = sdhci_priv(host);
+>   	pltfm_host->priv = pxa;
+>
+> -	pxa->clk_io = devm_clk_get(dev, "io");
+> -	if (IS_ERR(pxa->clk_io))
+> -		pxa->clk_io = devm_clk_get(dev, NULL);
+> -	if (IS_ERR(pxa->clk_io)) {
+> -		dev_err(dev, "failed to get io clock\n");
+> -		ret = PTR_ERR(pxa->clk_io);
+> +	pxa->clk_core = devm_clk_get(dev, "core");
+
+To maintain backward compatibility, we should still
+devm_clk_get(dev, "io") here - or even better, first
+probe for "io" to catch old binding semantics including
+old "core"/"bus" misnaming.
+
+If we detected old semantics, print a warning that
+firmware should be updated.
+
+Sebastian
+
+> +	if (IS_ERR(pxa->clk_core))
+> +		pxa->clk_core = devm_clk_get(dev, NULL);
+> +	if (IS_ERR(pxa->clk_core)) {
+> +		dev_err(dev, "failed to get core clock\n");
+> +		ret = PTR_ERR(pxa->clk_core);
+>   		goto err_clk_get;
+>   	}
+> -	pltfm_host->clk = pxa->clk_io;
+> -	clk_prepare_enable(pxa->clk_io);
+> +	pltfm_host->clk = pxa->clk_core;
+> +	clk_prepare_enable(pxa->clk_core);
+>
+> -	pxa->clk_core = devm_clk_get(dev, "core");
+> -	if (!IS_ERR(pxa->clk_core))
+> -		clk_prepare_enable(pxa->clk_core);
+> +	pxa->clk_axi = devm_clk_get(dev, "axi");
+> +	if (!IS_ERR(pxa->clk_axi))
+> +		clk_prepare_enable(pxa->clk_axi);
+>
+>   	/* enable 1/8V DDR capable */
+>   	host->mmc->caps |= MMC_CAP_1_8V_DDR;
+> @@ -475,8 +475,8 @@ err_add_host:
+>   err_of_parse:
+>   err_cd_req:
+>   err_mbus_win:
+> -	clk_disable_unprepare(pxa->clk_io);
+>   	clk_disable_unprepare(pxa->clk_core);
+> +	clk_disable_unprepare(pxa->clk_axi);
+>   err_clk_get:
+>   	sdhci_pltfm_free(pdev);
+>   	return ret;
+> @@ -494,8 +494,8 @@ static int sdhci_pxav3_remove(struct platform_device *pdev)
+>
+>   	sdhci_remove_host(host, 1);
+>
+> -	clk_disable_unprepare(pxa->clk_io);
+>   	clk_disable_unprepare(pxa->clk_core);
+> +	clk_disable_unprepare(pxa->clk_axi);
+>
+>   	sdhci_pltfm_free(pdev);
+>
+> @@ -542,9 +542,9 @@ static int sdhci_pxav3_runtime_suspend(struct device *dev)
+>   	if (ret)
+>   		return ret;
+>
+> -	clk_disable_unprepare(pxa->clk_io);
+> -	if (!IS_ERR(pxa->clk_core))
+> -		clk_disable_unprepare(pxa->clk_core);
+> +	clk_disable_unprepare(pxa->clk_core);
+> +	if (!IS_ERR(pxa->clk_axi))
+> +		clk_disable_unprepare(pxa->clk_axi);
+>
+>   	return 0;
+>   }
+> @@ -555,9 +555,9 @@ static int sdhci_pxav3_runtime_resume(struct device *dev)
+>   	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+>   	struct sdhci_pxa *pxa = pltfm_host->priv;
+>
+> -	clk_prepare_enable(pxa->clk_io);
+> -	if (!IS_ERR(pxa->clk_core))
+> -		clk_prepare_enable(pxa->clk_core);
+> +	clk_prepare_enable(pxa->clk_core);
+> +	if (!IS_ERR(pxa->clk_axi))
+> +		clk_prepare_enable(pxa->clk_axi);
+>
+>   	return sdhci_runtime_resume_host(host);
+>   }
+>
+
