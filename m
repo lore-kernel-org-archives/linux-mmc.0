@@ -1,81 +1,76 @@
-From: Gregory CLEMENT <gregory.clement@free-electrons.com>
-Subject: Re: [PATCH v3 3/5] ARM: mvebu: set SW polling as SDHCI card detection on A388-GP
-Date: Fri, 16 Oct 2015 19:19:30 +0200
-Message-ID: <878u72hgt9.fsf@free-electrons.com>
-References: <1444926346-29763-1-git-send-email-mw@semihalf.com>
-	<1444926346-29763-4-git-send-email-mw@semihalf.com>
-Mime-Version: 1.0
-Content-Type: text/plain
+From: John Stultz <john.stultz@linaro.org>
+Subject: [RFC][PATCH] mmc_block: Allow more than 8 partitions per card
+Date: Fri, 16 Oct 2015 11:40:46 -0700
+Message-ID: <1445020846-529-1-git-send-email-john.stultz@linaro.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from down.free-electrons.com ([37.187.137.238]:41144 "EHLO
-	mail.free-electrons.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1751510AbbJPRTe (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 16 Oct 2015 13:19:34 -0400
-In-Reply-To: <1444926346-29763-4-git-send-email-mw@semihalf.com> (Marcin
-	Wojtas's message of "Thu, 15 Oct 2015 18:25:44 +0200")
+Received: from mail-pa0-f47.google.com ([209.85.220.47]:34519 "EHLO
+	mail-pa0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932551AbbJPSk7 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 16 Oct 2015 14:40:59 -0400
+Received: by pacez2 with SMTP id ez2so11670440pac.1
+        for <linux-mmc@vger.kernel.org>; Fri, 16 Oct 2015 11:40:59 -0700 (PDT)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Marcin Wojtas <mw@semihalf.com>
-Cc: linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, ulf.hansson@linaro.org, sebastian.hesselbarth@gmail.com, andrew@lunn.ch, jason@lakedaemon.net, thomas.petazzoni@free-electrons.com, nadavh@marvell.com, alior@marvell.com, tawfik@marvell.com, jaz@semihalf.com, jszhang@marvell.com
+To: linux-kernel@vger.kernel.org
+Cc: Colin Cross <ccross@android.com>, Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, Ben Hutchings <ben@decadent.org.uk>, Chuanxiao Dong <chuanxiao.dong@intel.com>, Shawn Lin <shawn.lin@rock-chips.com>, Android Kernel Team <kernel-team@android.com>, linux-mmc@vger.kernel.org, John Stultz <john.stultz@linaro.org>
 
-Hi Marcin,
+From: Colin Cross <ccross@android.com>
+
+It is quite common for Android devices to utilize more
+then 8 partitions on internal eMMC storage. This patch,
+which has been carried for quite awhile in the AOSP common
+tree is necessary in order to support such configurations,
+so I wanted to submit it for consideration upstream.
+
+This patch sets the GENHD_FL_EXT_DEVT flag, which will
+allocate minor number in major 259 for partitions past
+disk->minors.
+
+It also removes the use of disk_devt to determine devidx
+from md->disk. md->disk->first_minor is always initialized
+from devidx and can always be used to recover it.
+
+Thoughts or feedback would be greatly appreciated.
+
+Cc: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Adrian Hunter <adrian.hunter@intel.com>
+Cc: Ben Hutchings <ben@decadent.org.uk>
+Cc: Chuanxiao Dong <chuanxiao.dong@intel.com>
+Cc: Shawn Lin <shawn.lin@rock-chips.com>
+Cc: Android Kernel Team <kernel-team@android.com>
+Cc: linux-mmc@vger.kernel.org
+Signed-off-by: Colin Cross <ccross@android.com>
+[jstultz: Added context to commit message]
+Signed-off-by: John Stultz <john.stultz@linaro.org>
+---
+ drivers/mmc/card/block.c | 7 ++-----
+ 1 file changed, 2 insertions(+), 5 deletions(-)
+
+diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+index c742cfd..564436e 100644
+--- a/drivers/mmc/card/block.c
++++ b/drivers/mmc/card/block.c
+@@ -172,11 +172,7 @@ static struct mmc_blk_data *mmc_blk_get(struct gendisk *disk)
  
- On jeu., oct. 15 2015, Marcin Wojtas <mw@semihalf.com> wrote:
-
-> The newest revisions of A388-GP (v1.5 and higher) support only
-> DAT3-based card detection. Revisions < v1.5 based on GPIO detection
-> via I2C expander, but this solution is supposed to be deprecated on
-> new boards. In order to satisfy all type of hardware this commit
-> changes card detection to use software polling mechanism. Also a
-> comment is added on possible card detection options in A388-GP
-> DT board file.
->
-> Signed-off-by: Marcin Wojtas <mw@semihalf.com>
-> Acked-by: Andrew Lunn <andrew@lunn.ch>
-
-Applied on mvebu/dt
-
-Thanks,
-
-Gregory
-
-> ---
->  arch/arm/boot/dts/armada-388-gp.dts | 15 ++++++++++++++-
->  1 file changed, 14 insertions(+), 1 deletion(-)
->
-> diff --git a/arch/arm/boot/dts/armada-388-gp.dts b/arch/arm/boot/dts/armada-388-gp.dts
-> index 391dea9..3deba13 100644
-> --- a/arch/arm/boot/dts/armada-388-gp.dts
-> +++ b/arch/arm/boot/dts/armada-388-gp.dts
-> @@ -213,8 +213,21 @@
->  			sdhci@d8000 {
->  				pinctrl-names = "default";
->  				pinctrl-0 = <&sdhci_pins>;
-> -				cd-gpios = <&expander0 5 GPIO_ACTIVE_LOW>;
->  				no-1-8-v;
-> +				/*
-> +				 * A388-GP board v1.5 and higher replace
-> +				 * hitherto card detection method based on GPIO
-> +				 * with the one using DAT3 pin. As they are
-> +				 * incompatible, software-based polling is
-> +				 * enabled with 'broken-cd' property. For boards
-> +				 * older than v1.5 it can be replaced with:
-> +				 * 'cd-gpios = <&expander0 5 GPIO_ACTIVE_LOW>;',
-> +				 * whereas for the newer ones following can be
-> +				 * used instead:
-> +				 * 'dat3-cd;'
-> +				 * 'cd-inverted;'
-> +				 */
-> +				broken-cd;
->  				wp-inverted;
->  				bus-width = <8>;
->  				status = "okay";
-> -- 
-> 1.8.3.1
->
-
+ static inline int mmc_get_devidx(struct gendisk *disk)
+ {
+-	int devmaj = MAJOR(disk_devt(disk));
+-	int devidx = MINOR(disk_devt(disk)) / perdev_minors;
+-
+-	if (!devmaj)
+-		devidx = disk->first_minor / perdev_minors;
++	int devidx = disk->first_minor / perdev_minors;
+ 	return devidx;
+ }
+ 
+@@ -2162,6 +2158,7 @@ static struct mmc_blk_data *mmc_blk_alloc_req(struct mmc_card *card,
+ 	md->disk->queue = md->queue.queue;
+ 	md->disk->driverfs_dev = parent;
+ 	set_disk_ro(md->disk, md->read_only || default_ro);
++	md->disk->flags = GENHD_FL_EXT_DEVT;
+ 	if (area_type & (MMC_BLK_DATA_AREA_RPMB | MMC_BLK_DATA_AREA_BOOT))
+ 		md->disk->flags |= GENHD_FL_NO_PART_SCAN;
+ 
 -- 
-Gregory Clement, Free Electrons
-Kernel, drivers, real-time and embedded Linux
-development, consulting, training and support.
-http://free-electrons.com
+1.9.1
+
