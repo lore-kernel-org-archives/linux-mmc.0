@@ -1,82 +1,61 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [v2, 1/8] mmc: sdhci: add a callback of signal voltage switching
-Date: Fri, 16 Oct 2015 15:18:57 +0200
-Message-ID: <CAPDyKFrKYUr5yqYYHQ+KJBG8Wnn4k+JJgRo+kWwznbU4Ts4pBA@mail.gmail.com>
-References: <1442469054-23644-1-git-send-email-yangbo.lu@freescale.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wi0-f170.google.com ([209.85.212.170]:37805 "EHLO
-	mail-wi0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753817AbbJPNS6 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 16 Oct 2015 09:18:58 -0400
-Received: by wijq8 with SMTP id q8so10503719wij.0
-        for <linux-mmc@vger.kernel.org>; Fri, 16 Oct 2015 06:18:57 -0700 (PDT)
-In-Reply-To: <1442469054-23644-1-git-send-email-yangbo.lu@freescale.com>
-Sender: linux-mmc-owner@vger.kernel.org
+From: Sebastian Hesselbarth <sebastian.hesselbarth-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Subject: Re: [PATCH 4/5] clk: berlin: bg2q: remove CLK_IGNORE_UNUSED flag for
+ sdio clk
+Date: Fri, 16 Oct 2015 15:27:14 +0200
+Message-ID: <5620FB32.8030705@gmail.com>
+References: <1444628796-5484-1-git-send-email-jszhang@marvell.com>
+ <1444628796-5484-5-git-send-email-jszhang@marvell.com>
+ <20151016124705.20687.51712@quantum>
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <20151016124705.20687.51712@quantum>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Michael Turquette <mturquette-rdvid1DuHRBWk0Htik3J/w@public.gmane.org>, Jisheng Zhang <jszhang-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, pawel.moll-5wv7dgnIgG8@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, ijc+devicetree-KcIKpvwj1kUDXYZnReoRVg@public.gmane.org, galak-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, sboyd-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org
+Cc: linux-clk-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
-To: Yangbo Lu <yangbo.lu@freescale.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>
 
-On 17 September 2015 at 07:50, Yangbo Lu <yangbo.lu@freescale.com> wrote:
-> Add a signal voltage switching callback to let host use its own
-> switching process.
+On 16.10.2015 14:47, Michael Turquette wrote:
+> Quoting Jisheng Zhang (2015-10-11 22:46:35)
+>> Since we have added the necessary axi clk properties in dts, we can
+>> remove the "sdio" clk's CLK_IGNORE_UNUSED flag now.
+>>
+>> Signed-off-by: Jisheng Zhang <jszhang-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>
 >
-> Signed-off-by: Yangbo Lu <yangbo.lu@freescale.com>
+> Applied to clk-next.
 
-Sorry for the delay!
+Mike,
 
-Unless you haven't noticed my recent statement around sdhci's
-callbacks and quirks, please read these.
-https://lkml.org/lkml/2015/10/8/734
-https://lkml.org/lkml/2015/10/6/158
+these two patches will break Berlin SoCs if not applied
+after the sdhci and DT changes went in. Please hold them
+back until the discussion has been settled.
 
-That said, I won't pick any of the patches from these patchset.
+Thanks,
+   Sebastian
 
-I would also encourage you and other people to help turning shdci into
-a bunch of library functions.
-
-Kind regards
-Uffe
-
-> ---
-> Changes for v2:
->         - Modified commit message
->         - Added SDR50 support patches
-> ---
->  drivers/mmc/host/sdhci.c | 5 +++++
->  drivers/mmc/host/sdhci.h | 2 ++
->  2 files changed, 7 insertions(+)
 >
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index 64b7fdb..9b3d4c2 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -1757,6 +1757,11 @@ static int sdhci_do_start_signal_voltage_switch(struct sdhci_host *host,
->         if (host->version < SDHCI_SPEC_300)
->                 return 0;
->
-> +       if (host->ops->signal_voltage_switch) {
-> +               host->ops->signal_voltage_switch(host, ios->signal_voltage);
-> +               return 0;
-> +       }
-> +
->         ctrl = sdhci_readw(host, SDHCI_HOST_CONTROL2);
->
->         switch (ios->signal_voltage) {
-> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-> index 7c02ff4..723f034 100644
-> --- a/drivers/mmc/host/sdhci.h
-> +++ b/drivers/mmc/host/sdhci.h
-> @@ -544,6 +544,8 @@ struct sdhci_ops {
->                                          struct mmc_card *card,
->                                          unsigned int max_dtr, int host_drv,
->                                          int card_drv, int *drv_type);
-> +       void    (*signal_voltage_switch)(struct sdhci_host *host,
-> +                                        unsigned char signal_voltage);
->  };
->
->  #ifdef CONFIG_MMC_SDHCI_IO_ACCESSORS
-> --
-> 2.1.0.27.g96db324
->
+>> ---
+>>   drivers/clk/berlin/bg2q.c | 2 +-
+>>   1 file changed, 1 insertion(+), 1 deletion(-)
+>>
+>> diff --git a/drivers/clk/berlin/bg2q.c b/drivers/clk/berlin/bg2q.c
+>> index 221f40c..243f421 100644
+>> --- a/drivers/clk/berlin/bg2q.c
+>> +++ b/drivers/clk/berlin/bg2q.c
+>> @@ -283,7 +283,7 @@ static const struct berlin2_gate_data bg2q_gates[] __initconst = {
+>>          { "usb2",       "perif",        13 },
+>>          { "usb3",       "perif",        14 },
+>>          { "pbridge",    "perif",        15, CLK_IGNORE_UNUSED },
+>> -       { "sdio",       "perif",        16, CLK_IGNORE_UNUSED },
+>> +       { "sdio",       "perif",        16 },
+>>          { "nfc",        "perif",        18 },
+>>          { "pcie",       "perif",        22 },
+>>   };
+>> --
+>> 2.6.1
+>>
+
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
