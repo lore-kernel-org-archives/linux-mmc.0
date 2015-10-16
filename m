@@ -1,46 +1,37 @@
-From: Sergei Shtylyov <sergei.shtylyov@cogentembedded.com>
-Subject: [PATCH v3] DT: mmc: sh_mmcif: document R8A779[34] support
-Date: Fri, 16 Oct 2015 01:40:16 +0300
-Message-ID: <2657565.2y8qYzu3eL@wasted.cogentembedded.com>
+From: Geert Uytterhoeven <geert@linux-m68k.org>
+Subject: Re: [PATCH v3] DT: mmc: sh_mmcif: fix "compatible" property text
+Date: Fri, 16 Oct 2015 08:42:14 +0200
+Message-ID: <CAMuHMdXoXQKFS4Z6k4n6dfhgLbMzzVhURyZ=HxVoQFZRaeZu5w@mail.gmail.com>
 References: <201404250239.39150.sergei.shtylyov@cogentembedded.com>
+	<2188985.g7lrY44qCa@wasted.cogentembedded.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7Bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-sh-owner@vger.kernel.org>
-In-Reply-To: <201404250239.39150.sergei.shtylyov@cogentembedded.com>
+In-Reply-To: <2188985.g7lrY44qCa@wasted.cogentembedded.com>
 Sender: linux-sh-owner@vger.kernel.org
-To: robh+dt@kernel.org, pawel.moll@arm.com, mark.rutland@arm.com, ijc+devicetree@hellion.org.uk, galak@codeaurora.org, devicetree@vger.kernel.org, ulf.hansson@linaro.org, linux-mmc@vger.kernel.org
-Cc: linux-sh@vger.kernel.org
+To: Sergei Shtylyov <sergei.shtylyov@cogentembedded.com>
+Cc: Rob Herring <robh+dt@kernel.org>, Pawel Moll <pawel.moll@arm.com>, Mark Rutland <mark.rutland@arm.com>, Ian Campbell <ijc+devicetree@hellion.org.uk>, Kumar Gala <galak@codeaurora.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, Linux MMC List <linux-mmc@vger.kernel.org>, Linux-sh list <linux-sh@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-Renesas R8A7794 SoC also has the MMCIF controller...
+On Fri, Oct 16, 2015 at 12:39 AM, Sergei Shtylyov
+<sergei.shtylyov@cogentembedded.com> wrote:
+> The "compatible" property text contradicts even the example given in the MMCIF
+> binding document itself;  moreover, the Renesas MMCIF driver only matches  on
+> the generic "compatible" string and doesn't look for the SoC specific strings
+> at all. Thus describe "renesas,sh-mmcif" as a fallback value.
+>
+> Fixes: b4c27763d749 ("mmc: sh_mmcif: Document DT bindings")
+> Signed-off-by: Sergei Shtylyov <sergei.shtylyov@cogentembedded.com>
 
-Signed-off-by: Sergei Shtylyov <sergei.shtylyov@cogentembedded.com>
+Acked-by: Geert Uytterhoeven <geert+renesas@glider.be>
 
----
-The patch is against Ulf Hansson's 'mmc.git' repo's 'next' branches plus the
-patch I posted earlier today...
+Gr{oetje,eeting}s,
 
-Changes in version 3:
-- resolved reject.
+                        Geert
 
-Changes in version 2:
-- deferred R8A7793 support to the patch posted earlier by Ulrich Hecht;
-- fixed typo in the changelog.
+--
+Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
 
- Documentation/devicetree/bindings/mmc/renesas,mmcif.txt |    1 +
- 1 file changed, 1 insertion(+)
-
-Index: mmc/Documentation/devicetree/bindings/mmc/renesas,mmcif.txt
-===================================================================
---- mmc.orig/Documentation/devicetree/bindings/mmc/renesas,mmcif.txt
-+++ mmc/Documentation/devicetree/bindings/mmc/renesas,mmcif.txt
-@@ -11,6 +11,7 @@ Required properties:
- 	- "renesas,mmcif-r8a7740" for the MMCIF found in r8a7740 SoCs
- 	- "renesas,mmcif-r8a7790" for the MMCIF found in r8a7790 SoCs
- 	- "renesas,mmcif-r8a7791" for the MMCIF found in r8a7791 SoCs
-+	- "renesas,mmcif-r8a7794" for the MMCIF found in r8a7794 SoCs
- 
- - clocks: reference to the functional clock
- 
-
+In personal conversations with technical people, I call myself a hacker. But
+when I'm talking to journalists I just say "programmer" or something like that.
+                                -- Linus Torvalds
