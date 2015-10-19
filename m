@@ -1,98 +1,125 @@
-From: Shawn Lin <shawn.lin@rock-chips.com>
-Subject: Re: [PATCH 1/2] mmc: sdhci-of-arasan: add phy support for
- sdhci-of-arasan
-Date: Mon, 19 Oct 2015 16:39:45 +0800
-Message-ID: <5624AC51.9060907@rock-chips.com>
-References: <1441961698-10516-1-git-send-email-shawn.lin@rock-chips.com>
- <CAPDyKFpwgZSkE+TNehZ1Un=5CfjoEtfvELfrS6t-ZHZPscy3Yg@mail.gmail.com>
- <56243E85.2040202@rock-chips.com>
- <CAPDyKFpkH00roc=Nn067PufmQL59wqsi1c58tdv_UyP-7Gs-vg@mail.gmail.com>
+From: Ludovic Desroches <ludovic.desroches@atmel.com>
+Subject: Re: [PATCH] mmc: sdhci at91: add suspend/resume
+Date: Mon, 19 Oct 2015 10:58:41 +0200
+Message-ID: <20151019085841.GL26893@odux.rfo.atmel.com>
+References: <1445007687-1530-1-git-send-email-ludovic.desroches@atmel.com>
+ <CAPDyKFqxUUF8vDDBVLDEfzuAbej8Vy1HEhHJpkjedihoSGu3Nw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAPDyKFpkH00roc=Nn067PufmQL59wqsi1c58tdv_UyP-7Gs-vg@mail.gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: shawn.lin@rock-chips.com, Michal Simek <michal.simek@xilinx.com>, S?ren Brinkmann <soren.brinkmann@xilinx.com>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "open list:ARM/Rockchip SoC..." <linux-rockchip@lists.infradead.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from eusmtp01.atmel.com ([212.144.249.243]:36138 "EHLO
+	eusmtp01.atmel.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753368AbbJSI6i (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 19 Oct 2015 04:58:38 -0400
+Content-Disposition: inline
+In-Reply-To: <CAPDyKFqxUUF8vDDBVLDEfzuAbej8Vy1HEhHJpkjedihoSGu3Nw@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Ludovic Desroches <ludovic.desroches@atmel.com>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Nicolas Ferre <nicolas.ferre@atmel.com>
 
-On 2015/10/19 15:50, Ulf Hansson wrote:
-> [...]
->
->>> I understand the phy is optional, but you still need to handle the
->>> EPROBE_DEFER case.
->>>
->>> Perhaps you should also use devm_phy_optional_get() instead!?
->>
->>
->> I already changed it in version-2 [1]. :)
->> phy is mandatory for sdhci-arasan,5.1.
->>
->> [1]: https://patchwork.kernel.org/patch/7173251/
->
-> Oh, apologize for reviewing the old version!
->
->>
->>>
->>>> +               ret = phy_power_on(sdhci_arasan->phy);
->>>
->>>
->>> This looks a bit weird. Shouldn't you do phy_init() prior phy_power_on()?
->>>
->>> Similar comment applies to phy_exit() and phy_power_off().
->>
->>
->> Both are okay. It depends how the phy-driver implement the four interfaces.
->>  From my case, power_on for arasan's phy driver firstly enable phy's clk and
->> open power-domain, then programme phy internal registers to activate phy.
->> Without enabling phy's clk and power-domain, we cannot do phy_init since phy
->> can't be accessed by CPU.
->>
->> But here, I think you are right. It does look a bit weird.
->> I think the better way is to remove phy_power_on here, and let phy-driver do
->> power_on in phy_init internally. Similarly in the remove call.
->
-> That makes sense to me! I think it would also follow other phy clients
-> use of the phy API.
->
-> What makes me wonder though is from a power management point of view.
-> *When* do you need to have phy initialized and powered?
->
+On Fri, Oct 16, 2015 at 06:33:44PM +0200, Ulf Hansson wrote:
+> On 16 October 2015 at 17:01, Ludovic Desroches
+> <ludovic.desroches@atmel.com> wrote:
+> > Add suspend and resume PM ops.
+> >
+> > Signed-off-by: Ludovic Desroches <ludovic.desroches@atmel.com>
+> 
+> I have no problem with this patch, nice and easy.
+> 
+> Although it would be interesting to see how runtime PM would be
+> supported for this driver and device. What I have in mind is whether
+> we can take a runtime PM centric approach and thus more or less get
+> system PM for "free" via the pm_runtime_force_suspend|resume()
+> helpers. Care to have a look?
+> 
 
-Whenever controller need to communicate with card, must init/power_on 
-phy firstly.
+Ok, I'll send a new patch.
 
-> 1) For a removable card can leave the phy uninitialised or powered
-> off, but still detect card insertion/removal via GPIO? Is that a valid
-> scenario for you?
->
+Regards
 
-Theoretically, it is.  Although my soc don't use phy for removable card, 
-I also consider how to handle this case. Should we add a hook
-for sdhci_get_cd, and initialize phy if it's non-removeable device or 
-removeable card in slot ? Doesn't seem like a good idea.
+Ludovic
 
-Also seems not always work if we just use SDHCI_PRESENT_STATE to detect 
-card insertion/removal without phy in active state.
-
-> 2) Considering the runtime PM case for the sdhci device. Typically you
-> can gate clocks etc at runtime suspend to save power, but what about
-> the phy? Can you power off it in runtime suspend?
-
-yes, we can power off it in runtime suspend. So we can append some 
-patches later to introduce runtime pm for sdhci-of-arasan?
-
->
-> [...]
->
 > Kind regards
 > Uffe
->
->
->
-
-
--- 
-Best Regards
-Shawn Lin
+> 
+> > ---
+> >  drivers/mmc/host/sdhci-of-at91.c | 55 +++++++++++++++++++++++++++++++++++++++-
+> >  1 file changed, 54 insertions(+), 1 deletion(-)
+> >
+> > diff --git a/drivers/mmc/host/sdhci-of-at91.c b/drivers/mmc/host/sdhci-of-at91.c
+> > index 06d0b50..b9751f2 100644
+> > --- a/drivers/mmc/host/sdhci-of-at91.c
+> > +++ b/drivers/mmc/host/sdhci-of-at91.c
+> > @@ -51,6 +51,59 @@ static const struct of_device_id sdhci_at91_dt_match[] = {
+> >         {}
+> >  };
+> >
+> > +#ifdef CONFIG_PM_SLEEP
+> > +static int sdhci_at91_suspend(struct device *dev)
+> > +{
+> > +       struct platform_device *pdev = to_platform_device(dev);
+> > +       struct sdhci_host *host = platform_get_drvdata(pdev);
+> > +       struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+> > +       struct sdhci_at91_priv *priv = pltfm_host->priv;
+> > +       int ret;
+> > +
+> > +       ret = sdhci_suspend_host(host);
+> > +       if (ret)
+> > +               return ret;
+> > +
+> > +       clk_disable_unprepare(priv->gck);
+> > +       clk_disable_unprepare(priv->hclock);
+> > +       clk_disable_unprepare(priv->mainck);
+> > +
+> > +       return 0;
+> > +}
+> > +
+> > +static int sdhci_at91_resume(struct device *dev)
+> > +{
+> > +       struct platform_device *pdev = to_platform_device(dev);
+> > +       struct sdhci_host *host = platform_get_drvdata(pdev);
+> > +       struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+> > +       struct sdhci_at91_priv *priv = pltfm_host->priv;
+> > +       int ret;
+> > +
+> > +       ret = clk_prepare_enable(priv->mainck);
+> > +       if (ret) {
+> > +               dev_err(dev, "can't enable mainck\n");
+> > +               return ret;
+> > +       }
+> > +
+> > +       ret = clk_prepare_enable(priv->hclock);
+> > +       if (ret) {
+> > +               dev_err(dev, "can't enable hclock\n");
+> > +               return ret;
+> > +       }
+> > +
+> > +       ret = clk_prepare_enable(priv->gck);
+> > +       if (ret) {
+> > +               dev_err(dev, "can't enable gck\n");
+> > +               return ret;
+> > +       }
+> > +
+> > +       return sdhci_resume_host(host);
+> > +}
+> > +#endif /* CONFIG_PM_SLEEP */
+> > +
+> > +static SIMPLE_DEV_PM_OPS(sdhci_at91_dev_pm_ops, sdhci_at91_suspend,
+> > +                        sdhci_at91_resume);
+> > +
+> >  static int sdhci_at91_probe(struct platform_device *pdev)
+> >  {
+> >         const struct of_device_id       *match;
+> > @@ -178,7 +231,7 @@ static struct platform_driver sdhci_at91_driver = {
+> >         .driver         = {
+> >                 .name   = "sdhci-at91",
+> >                 .of_match_table = sdhci_at91_dt_match,
+> > -               .pm     = SDHCI_PLTFM_PMOPS,
+> > +               .pm     = &sdhci_at91_dev_pm_ops,
+> >         },
+> >         .probe          = sdhci_at91_probe,
+> >         .remove         = sdhci_at91_remove,
+> > --
+> > 2.5.0
+> >
