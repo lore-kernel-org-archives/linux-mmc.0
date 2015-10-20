@@ -1,38 +1,37 @@
-From: Sergei Shtylyov <sergei.shtylyov@cogentembedded.com>
-Subject: Re: [PATCH v3] DT: mmc: sh_mmcif: document R8A779[34] support
-Date: Tue, 20 Oct 2015 23:19:27 +0300
-Message-ID: <5626A1CF.9050309@cogentembedded.com>
-References: <201404250239.39150.sergei.shtylyov@cogentembedded.com>
- <2657565.2y8qYzu3eL@wasted.cogentembedded.com>
- <CAPDyKFqLuH9u2n1EKSc-89E6iDR8JH0A+5c=wn8g3THPKvDX7A@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-sh-owner@vger.kernel.org>
-In-Reply-To: <CAPDyKFqLuH9u2n1EKSc-89E6iDR8JH0A+5c=wn8g3THPKvDX7A@mail.gmail.com>
-Sender: linux-sh-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Rob Herring <robh+dt@kernel.org>, =?UTF-8?Q?Pawe=c5=82_Moll?= <pawel.moll@arm.com>, Mark Rutland <mark.rutland@arm.com>, Ian Campbell <ijc+devicetree@hellion.org.uk>, Kumar Gala <galak@codeaurora.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>, Linux-sh list <linux-sh@vger.kernel.org>
+From: Franklin S Cooper Jr <fcooper@ti.com>
+Subject: [PATCH 2/5] mmc: omap_hsmmc: Enable omap_hsmmc for Keystone 2
+Date: Tue, 20 Oct 2015 16:50:06 -0500
+Message-ID: <1445377809-12516-2-git-send-email-fcooper@ti.com>
+References: <1445377809-12516-1-git-send-email-fcooper@ti.com>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1445377809-12516-1-git-send-email-fcooper@ti.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: linux@arm.linux.org.uk, ssantosh@kernel.org, ulf.hansson@linaro.org, m-karicheri2@ti.com, grygorii.strashko@ti.com, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
+Cc: Lokesh Vutla <lokeshvutla@ti.com>, Franklin S Cooper Jr <fcooper@ti.com>
 List-Id: linux-mmc@vger.kernel.org
 
-Hello.
+From: Lokesh Vutla <lokeshvutla@ti.com>
 
-On 10/16/2015 04:07 PM, Ulf Hansson wrote:
+Enable omap_hsmmc for Keystone 2 architecture which reuses the HSMMC
+IP found on OMAP platforms.
 
->> Renesas R8A7794 SoC also has the MMCIF controller...
->>
->> Signed-off-by: Sergei Shtylyov <sergei.shtylyov@cogentembedded.com>
+Signed-off-by: Franklin S Cooper Jr <fcooper@ti.com>
+---
+ drivers/mmc/host/Kconfig | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-> Thanks, applied for next.
-
-    Oops, just noticed the subject was stale. I wasn't adding R8A7793 support 
-in that version. Is it possible to fix?
-
-> Kind regards
-> Uffe
-
-[...]
-
-MBR, Sergei
-
-
+diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+index 8a1e349..2ccec71 100644
+--- a/drivers/mmc/host/Kconfig
++++ b/drivers/mmc/host/Kconfig
+@@ -366,7 +366,7 @@ config MMC_OMAP
+ config MMC_OMAP_HS
+ 	tristate "TI OMAP High Speed Multimedia Card Interface support"
+ 	depends on HAS_DMA
+-	depends on ARCH_OMAP2PLUS || COMPILE_TEST
++	depends on ARCH_OMAP2PLUS || ARCH_KEYSTONE || COMPILE_TEST
+ 	help
+ 	  This selects the TI OMAP High Speed Multimedia card Interface.
+ 	  If you have an omap2plus board with a Multimedia Card slot,
+-- 
+2.6.1
