@@ -1,150 +1,39 @@
-From: Shawn Lin <shawn.lin@rock-chips.com>
-Subject: [PATCH v3 3/3] mmc: sdhci-of-arasan: add runtime pm support
-Date: Tue, 20 Oct 2015 15:05:27 +0800
-Message-ID: <1445324727-31448-1-git-send-email-shawn.lin@rock-chips.com>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>, Michal Simek <michal.simek@xilinx.com>, soren.brinkmann@xilinx.com
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Shawn Lin <shawn.lin@rock-chips.com>
+From: sheffield Credit Union <info@outlook.com>
+Subject: Guten Tag,
+Date: Tue, 20 Oct 2015 08:11:58 +0100
+Message-ID: <e6ab7aa050d94fd98427cb770dce4591__26208.971560891$1445325819$gmane$org@multivision.com.ve>
+Reply-To: <s-creditunion@outlook.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8;
+	format=flowed
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mvx1.ifxnw.com.ve ([200.62.27.83]:62647 "EHLO mvx1.ifxnw.com.ve"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752303AbbJTHVw (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 20 Oct 2015 03:21:52 -0400
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-This patch add runtime_suspend and runtime_resume for
-sdhci-of-arasan. Currently we also suspend phy at
-runtime_suspend for power-saving.
 
-Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
----
 
-Changes in v2: None
+--=20
+Guten Tag,
 
- drivers/mmc/host/sdhci-of-arasan.c | 80 ++++++++++++++++++++++++++++++++++++--
- 1 file changed, 77 insertions(+), 3 deletions(-)
+    Ich bin Frau Alicia Raymond, die vollziehende Mittel aus einem gut=20
+erkannt legitimen Darlehensgeberin als Sheffield Credit Union bekannt.=20
+Haben Sie schlechte Kredit haben, oder Sie brauchen Geld, um Ihre=20
+Rechnungen zu bezahlen sind? Zinssatz betr=C3=A4gt 3%.
 
-diff --git a/drivers/mmc/host/sdhci-of-arasan.c b/drivers/mmc/host/sdhci-of-arasan.c
-index 85bd0f9d..579f7bb 100644
---- a/drivers/mmc/host/sdhci-of-arasan.c
-+++ b/drivers/mmc/host/sdhci-of-arasan.c
-@@ -30,6 +30,8 @@
- #define CLK_CTRL_TIMEOUT_MASK		(0xf << CLK_CTRL_TIMEOUT_SHIFT)
- #define CLK_CTRL_TIMEOUT_MIN_EXP	13
- 
-+#define ARASAN_RPM_DELAY_MS		50
-+
- /**
-  * struct sdhci_arasan_data
-  * @clk_ahb:	Pointer to the AHB clock
-@@ -183,8 +185,70 @@ static int sdhci_arasan_resume(struct device *dev)
- }
- #endif /* ! CONFIG_PM_SLEEP */
- 
--static SIMPLE_DEV_PM_OPS(sdhci_arasan_dev_pm_ops, sdhci_arasan_suspend,
--			 sdhci_arasan_resume);
-+
-+#ifdef CONFIG_PM
-+static int sdhci_arasan_runtime_suspend(struct device *dev)
-+{
-+	struct sdhci_host *host = dev_get_drvdata(dev);
-+	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-+	struct sdhci_arasan_data *sdhci_arasan = pltfm_host->priv;
-+	int ret;
-+
-+	ret = sdhci_runtime_suspend_host(host);
-+	if (ret)
-+		return ret;
-+
-+	if (!IS_ERR(sdhci_arasan->phy)) {
-+		ret = sdhci_arasan_suspend_phy(sdhci_arasan->phy);
-+		if (ret) {
-+			dev_err(dev, "Cannot suspend phy at runtime.\n");
-+			sdhci_runtime_resume_host(host);
-+			return ret;
-+		}
-+	}
-+
-+	clk_disable_unprepare(sdhci_arasan->clk_ahb);
-+	clk_disable_unprepare(pltfm_host->clk);
-+
-+	return 0;
-+}
-+
-+static int sdhci_arasan_runtime_resume(struct device *dev)
-+{
-+	struct sdhci_host *host = dev_get_drvdata(dev);
-+	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-+	struct sdhci_arasan_data *sdhci_arasan = pltfm_host->priv;
-+	int ret;
-+
-+	clk_prepare_enable(pltfm_host->clk);
-+	clk_prepare_enable(sdhci_arasan->clk_ahb);
-+
-+	if (!IS_ERR(sdhci_arasan->phy)) {
-+		ret = sdhci_arasan_resume_phy(sdhci_arasan->phy);
-+		if (ret) {
-+			dev_err(dev, "Cannot resume phy at runtime.\n");
-+			clk_disable_unprepare(sdhci_arasan->clk_ahb);
-+			clk_disable_unprepare(pltfm_host->clk);
-+			return ret;
-+		}
-+	}
-+
-+	return sdhci_runtime_resume_host(host);
-+}
-+#endif
-+
-+#ifdef CONFIG_PM
-+static const struct dev_pm_ops sdhci_arasan_pmops = {
-+	SET_SYSTEM_SLEEP_PM_OPS(sdhci_arasan_suspend, sdhci_arasan_resume)
-+	SET_RUNTIME_PM_OPS(sdhci_arasan_runtime_suspend,
-+				sdhci_arasan_runtime_resume, NULL)
-+};
-+
-+#define SDHCI_ARASAN_PMOPS (&sdhci_arasan_pmops)
-+
-+#else
-+#define SDHCI_ARASAN_PMOPS NULL
-+#endif
- 
- static int sdhci_arasan_probe(struct platform_device *pdev)
- {
-@@ -272,6 +336,11 @@ static int sdhci_arasan_probe(struct platform_device *pdev)
- 		goto clk_disable_all;
- 	}
- 
-+	pm_runtime_set_autosuspend_delay(&pdev->dev, ARASAN_RPM_DELAY_MS);
-+	pm_runtime_use_autosuspend(&pdev->dev);
-+	pm_runtime_enable(&pdev->dev);
-+	pm_suspend_ignore_children(&pdev->dev, 1);
-+
- 	ret = sdhci_add_host(host);
- 	if (ret)
- 		goto err_pltfm_free;
-@@ -279,6 +348,7 @@ static int sdhci_arasan_probe(struct platform_device *pdev)
- 	return 0;
- 
- err_pltfm_free:
-+	pm_runtime_disable(&pdev->dev);
- 	sdhci_pltfm_free(pdev);
- clk_disable_all:
- 	clk_disable_unprepare(clk_xin);
-@@ -297,6 +367,10 @@ static int sdhci_arasan_remove(struct platform_device *pdev)
- 	if (!IS_ERR(sdhci_arasan->phy))
- 		phy_exit(sdhci_arasan->phy);
- 
-+	pm_runtime_get_sync(&pdev->dev);
-+	pm_runtime_dont_use_autosuspend(&pdev->dev);
-+	pm_runtime_disable(&pdev->dev);
-+
- 	clk_disable_unprepare(sdhci_arasan->clk_ahb);
- 
- 	return sdhci_pltfm_unregister(pdev);
-@@ -314,7 +388,7 @@ static struct platform_driver sdhci_arasan_driver = {
- 	.driver = {
- 		.name = "sdhci-arasan",
- 		.of_match_table = sdhci_arasan_of_match,
--		.pm = &sdhci_arasan_dev_pm_ops,
-+		.pm = SDHCI_ARASAN_PMOPS,
- 	},
- 	.probe = sdhci_arasan_probe,
- 	.remove = sdhci_arasan_remove,
--- 
-2.3.7
+   f=C3=BCllen Sie das folgende Formular aus, wenn interessiert.
+
+Voller Name:
+Geschlecht:
+Ben=C3=B6tigte Menge:
+Dauer:
+
+Sie k=C3=B6nnen uns per Telefon kontaktieren: +447045734550,=20
+s-creditunion@outlook.com
+
+   Mit freundlichen Gr=C3=BC=C3=9Fen,
+=46rau Alicia Raymond
