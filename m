@@ -1,76 +1,93 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v2 0/9] Add tune support of Mediatek MMC driver
-Date: Tue, 20 Oct 2015 18:41:02 +0200
-Message-ID: <CAPDyKFrTrR5U7QoXpiWj29bUD5SEp4ccbx8qNs9HF0cYxuqdBw@mail.gmail.com>
-References: <1445332391-30530-1-git-send-email-chaotian.jing@mediatek.com>
+From: Grant Grundler <grundler@chromium.org>
+Subject: Re: RFC: 32-bit __data_len and REQ_DISCARD+REQ_SECURE
+Date: Tue, 20 Oct 2015 10:53:45 -0700
+Message-ID: <CANEJEGuwymF-v7rdep4h2eGcvCAzEVvaYtwHCim9UR5NLZPkbg@mail.gmail.com>
+References: <CANEJEGvXfg4O6KWBcQe4=o0ZxjehgGTBMBxNddanprBXQbr-Qg@mail.gmail.com>
+	<CANEJEGtDr+BdP1s=EUpUSqcvWpQfkt+o_3zoXWHk7DdjH4j0Ow@mail.gmail.com>
+	<CANEJEGukOKUgRJNPVaeEXpx-REzj8ooSfWdrnRMMCQr6EVaNqQ@mail.gmail.com>
+	<CANEJEGvktCkVEbLaQoZqOFZY3F8o=Z41HwQxL=X4jh=-PdV3Fg@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-In-Reply-To: <1445332391-30530-1-git-send-email-chaotian.jing@mediatek.com>
-Sender: linux-samsung-soc-owner@vger.kernel.org
-To: Chaotian Jing <chaotian.jing@mediatek.com>
-Cc: Rob Herring <robh+dt@kernel.org>, Pawel Moll <pawel.moll@arm.com>, Mark Rutland <mark.rutland@arm.com>, Ian Campbell <ijc+devicetree@hellion.org.uk>, Kumar Gala <galak@codeaurora.org>, Matthias Brugger <matthias.bgg@gmail.com>, Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will.deacon@arm.com>, Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, Kukjin Kim <kgene@kernel.org>, Krzysztof Kozlowski <k.kozlowski@samsung.com>, Barry Song <baohua@kernel.org>, Hans de Goede <hdegoede@redhat.com>, Lars-Peter Clausen <lars@metafoo.de>, Javier Martinez Canillas <javier.martinez@collabora.co.uk>, Sascha Hauer <s.hauer@pengutronix.de>, Howard Chen <ibanezchen@gmail.com>, Adrian Hunter <adrian.hunter@intel.com>, Kristina Martsenko <kristina.martsenko@gmail.com>, Sergei Shtylyov <sergei.shtylyov@cogentembedded.com>, Stephen Boyd <sboyd@codeau>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-wi0-f172.google.com ([209.85.212.172]:35913 "EHLO
+	mail-wi0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750996AbbJTRxq (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 20 Oct 2015 13:53:46 -0400
+Received: by wicfx6 with SMTP id fx6so57331469wic.1
+        for <linux-mmc@vger.kernel.org>; Tue, 20 Oct 2015 10:53:45 -0700 (PDT)
+In-Reply-To: <CANEJEGvktCkVEbLaQoZqOFZY3F8o=Z41HwQxL=X4jh=-PdV3Fg@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>, Jens Axboe <axboe@kernel.dk>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+Cc: LKML <linux-kernel@vger.kernel.org>, Gwendal Grignou <gwendal@chromium.org>
 
-On 20 October 2015 at 11:13, Chaotian Jing <chaotian.jing@mediatek.com> wrote:
-> Change in v2:
-> Drop the 400mhz and use assigned-clock-parents to instead
-> Split the original tune patch to several independent patches
-> Re-write the mmc_send_tuning()
-> Fix GPD checksum error
-> Move the HS400 setting to ops->prepare_hs400_tuning()
-> Modify SD driving settings
+Ping? Does no one care how long BLK_SECDISCARD takes?
+
+ChromeOS has landed this change as a compromise between "fast" (<10
+seconds) and "minimize risk" (~90 seconds) for a 23GB partition on
+eMMC:
+    https://chromium-review.googlesource.com/#/c/302413/
+
+This is a generic problem if we care about data privacy since
+consumers won't expect a "secure erase" operation to take 1/2h or more
+and think the device is hung.
+
+cheers,
+grant
+
+On Mon, Sep 28, 2015 at 2:45 PM, Grant Grundler <grundler@chromium.org> wrote:
+> [resending...I forgot to switch gmail back to text-only mode. grrrh..]
 >
-> Change in v1:
-> Add DT bindings for eMMC hardware reset
-> Add pinctrl of data strobe pin for HS400 mode
-> Modify eMMC driving settings
-> Add 400mhz source clock for HS400 mode
-> Add eMMC HS200/HS400 mode support
-> Add SD SDR50/SDR104 mode support
-> Add implement of tune function with CMD19/CMD21
+> ---------- Forwarded message ----------
+> From: Grant Grundler <grundler@chromium.org>
+> Date: Mon, Sep 28, 2015 at 2:42 PM
+> Subject: Re: RFC: 32-bit __data_len and REQ_DISCARD+REQ_SECURE
+> To: Grant Grundler <grundler@chromium.org>
+> Cc: Jens Axboe <axboe@kernel.dk>, Ulf Hansson
+> <ulf.hansson@linaro.org>, LKML <linux-kernel@vger.kernel.org>,
+> "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 >
-> Chaotian Jing (9):
->   mmc: core: Add DT bindings for eMMC hardware reset support
->   mmc: dt-bindings: update Mediatek MMC bindings
->   mmc: mediatek: make cmd_ints_mask to const
->   mmc: mediatek: change the argument "ddr" to "timing"
->   mmc: mediatek: fix got GPD checksum error interrupt when data transfer
->   mmc: mediatek: add implement of ops->hw_reset()
->   mmc: mmc: extend the mmc_send_tuning()
->   mmc: mediatek: add HS400 support
->   arm64: dts: mediatek: add HS200/HS400/SDR50/SDR104 support
 >
->  Documentation/devicetree/bindings/mmc/mmc.txt    |   1 +
->  Documentation/devicetree/bindings/mmc/mtk-sd.txt |  11 +-
->  arch/arm64/boot/dts/mediatek/mt8173-evb.dts      |  27 ++-
->  drivers/mmc/core/host.c                          |   2 +
->  drivers/mmc/core/mmc_ops.c                       |   8 +-
->  drivers/mmc/host/dw_mmc-exynos.c                 |   4 +-
->  drivers/mmc/host/dw_mmc.c                        |   2 +-
->  drivers/mmc/host/dw_mmc.h                        |   2 +-
->  drivers/mmc/host/mtk-sd.c                        | 296 ++++++++++++++++++++---
->  drivers/mmc/host/sdhci-esdhc-imx.c               |   6 +-
->  drivers/mmc/host/sdhci-msm.c                     |   2 +-
->  drivers/mmc/host/sdhci-sirf.c                    |   2 +-
->  include/linux/mmc/core.h                         |   2 +-
->  13 files changed, 314 insertions(+), 51 deletions(-)
+> On Thu, Sep 24, 2015 at 10:39 AM, Grant Grundler <grundler@chromium.org> wrote:
+>>
+>> Some followup.
+> ...
+>>
+>> 2) I've been able to test this hack on an eMMC device:
+>> [   13.147747] mmc..._secdiscard_rq(mmc1) ERASE from 14116864 cnt
+>> 0x2c00000 (size 22528 MiB)
+>> [   13.155964] sdhci cmd: 35/0x1a arg 0xd76800
+>> [   13.160266] sdhci cmd: 36/0x1a arg 0x39767ff
+>> [   13.164593] sdhci cmd: 38/0x1b arg 0x80000000
+>> [   13.803360] random: nonblocking pool is initialized
+>> [   14.567735] sdhci cmd: 13/0x1a arg 0x10000
+>> [   14.573324] mmc..._secdiscard_rq(mmc1) err 0
+>>
+>> This was with ~15K files and about 5GB written to the device. 1.4
+>> seconds compared to about 20 minutes to secure erase the same region
+>> with original v3.18 code.
 >
-> --
-> 1.8.1.1.dirty
-
-I have reviewed the patches, I think they overall looks good! Some
-comments though.
-
-You need to split patch 9, the DT parts enabling hw reset shall go in
-separately.
-
-Regarding the hw-reset changes in patch1, patch6 and patch9, I believe
-I requested you to separate the HW reset changes from $subject
-patchset as they are unrelated, please do this.
-
-Running checkpatch, it gave me warnings and errors for patch 8.
-Patch7 didn't apply to my next branch.
-
-Kind regards
-Uffe
+>
+> To put a few more numbers on the "chunk size vs perf":
+>  1EG (512KB) -> 44K commands -> ~20 minutes
+> 32EG (16MB) -> 1375 commands -> ~1 minute
+> 128EG (64MB) -> 344 commands -> ~30 seconds
+> 8191EG (~4GB) -> 6 commands -> 2 seconds + ~8 seconds mkfs
+> (I'm assuming times above include about 6-10 seconds of mkfs as part
+> of writing a new file system)
+>
+> This is with only ~300MB of data written to the partition. I'm fully
+> aware that times will vary depending on how much data needs to be
+> migrated (and in this case very little or none). I'm certain the
+> difference will only get worse for the smaller the "chunk size" used
+> to Secure Erase due to repeated data migration.
+>
+> Given the different use model for secure erase (legal/contractually
+> required behavior), is using 4GB chunk size acceptable?
+>
+> Would anyone be terribly offended if I used the recently added
+> "MMC_IOC_MULTI_CMD" to send the cmd 35/36/38 sequence to the eMMC
+> device to securely erase the offending partition?
+>
+> thanks,
+> grant
