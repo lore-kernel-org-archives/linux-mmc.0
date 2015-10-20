@@ -1,37 +1,40 @@
 From: Franklin S Cooper Jr <fcooper@ti.com>
-Subject: [PATCH 2/5] mmc: omap_hsmmc: Enable omap_hsmmc for Keystone 2
-Date: Tue, 20 Oct 2015 16:50:06 -0500
-Message-ID: <1445377809-12516-2-git-send-email-fcooper@ti.com>
-References: <1445377809-12516-1-git-send-email-fcooper@ti.com>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1445377809-12516-1-git-send-email-fcooper@ti.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: linux@arm.linux.org.uk, ssantosh@kernel.org, ulf.hansson@linaro.org, m-karicheri2@ti.com, grygorii.strashko@ti.com, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
-Cc: Lokesh Vutla <lokeshvutla@ti.com>, Franklin S Cooper Jr <fcooper@ti.com>
+Subject: [PATCH 1/5] ARM: Keystone: Enable PINCTRL for Keystone ARCH
+Date: Tue, 20 Oct 2015 16:50:05 -0500
+Message-ID: <1445377809-12516-1-git-send-email-fcooper@ti.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-pa0-f50.google.com ([209.85.220.50]:35981 "EHLO
+	mail-pa0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753557AbbJTVuR (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 20 Oct 2015 17:50:17 -0400
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux@arm.linux.org.uk, ssantosh@kernel.org, ulf.hansson@linaro.org, m-karicheri2@ti.com, grygorii.strashko@ti.com, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
+Cc: Franklin Cooper <fcooper@ti.com>
 
-From: Lokesh Vutla <lokeshvutla@ti.com>
+From: Franklin Cooper <fcooper@ti.com>
 
-Enable omap_hsmmc for Keystone 2 architecture which reuses the HSMMC
-IP found on OMAP platforms.
+Unlike other Keystone 2 devices, newer Keystone 2 SOCs may utilize
+pinmuxing which requires PINCTRL to be enabled. Therefore, enable
+PINCTRL for all Keystone 2 devices.
 
 Signed-off-by: Franklin S Cooper Jr <fcooper@ti.com>
 ---
- drivers/mmc/host/Kconfig | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+ arch/arm/mach-keystone/Kconfig | 1 +
+ 1 file changed, 1 insertion(+)
 
-diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
-index 8a1e349..2ccec71 100644
---- a/drivers/mmc/host/Kconfig
-+++ b/drivers/mmc/host/Kconfig
-@@ -366,7 +366,7 @@ config MMC_OMAP
- config MMC_OMAP_HS
- 	tristate "TI OMAP High Speed Multimedia Card Interface support"
- 	depends on HAS_DMA
--	depends on ARCH_OMAP2PLUS || COMPILE_TEST
-+	depends on ARCH_OMAP2PLUS || ARCH_KEYSTONE || COMPILE_TEST
+diff --git a/arch/arm/mach-keystone/Kconfig b/arch/arm/mach-keystone/Kconfig
+index ea955f6db..7a432ee 100644
+--- a/arch/arm/mach-keystone/Kconfig
++++ b/arch/arm/mach-keystone/Kconfig
+@@ -11,6 +11,7 @@ config ARCH_KEYSTONE
+ 	select ZONE_DMA if ARM_LPAE
+ 	select MIGHT_HAVE_PCI
+ 	select PCI_DOMAINS if PCI
++	select PINCTRL
  	help
- 	  This selects the TI OMAP High Speed Multimedia card Interface.
- 	  If you have an omap2plus board with a Multimedia Card slot,
+ 	  Support for boards based on the Texas Instruments Keystone family of
+ 	  SoCs.
 -- 
 2.6.1
+
