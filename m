@@ -1,70 +1,47 @@
-From: Sudeep Holla <sudeep.holla@arm.com>
-Subject: [PATCH 05/19] mmc: core/host: enable support for the standard
- "wakeup-source" property
-Date: Wed, 21 Oct 2015 11:10:02 +0100
-Message-ID: <1445422216-29375-6-git-send-email-sudeep.holla@arm.com>
-References: <1445422216-29375-1-git-send-email-sudeep.holla@arm.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <1445422216-29375-1-git-send-email-sudeep.holla@arm.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, devicetree@vger.kernel.org
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, Adrian Hunter <adrian.hunter@intel.com>, Sudeep Holla <sudeep.holla@arm.com>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: [PATCH 2/2] mmc: dw_mmc: fix the wrong setting for UHS-DDR50 mode
+Date: Wed, 21 Oct 2015 19:49:42 +0900
+Message-ID: <1445424582-7940-2-git-send-email-jh80.chung@samsung.com>
+References: <1445424582-7940-1-git-send-email-jh80.chung@samsung.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mailout3.samsung.com ([203.254.224.33]:41319 "EHLO
+	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752382AbbJUKtq (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 21 Oct 2015 06:49:46 -0400
+Received: from epcpsbgr4.samsung.com
+ (u144.gpu120.samsung.co.kr [203.254.230.144])
+ by mailout3.samsung.com (Oracle Communications Messaging Server 7.0.5.31.0
+ 64bit (built May  5 2014))
+ with ESMTP id <0NWK0027RGQW3JC0@mailout3.samsung.com> for
+ linux-mmc@vger.kernel.org; Wed, 21 Oct 2015 19:49:44 +0900 (KST)
+In-reply-to: <1445424582-7940-1-git-send-email-jh80.chung@samsung.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: ulf.hansson@linaro.org, k.kozlowski@samsung.com, linux.amoon@gmail.com, jh80.chung@gmail.com, Jaehoon Chung <jh80.chung@samsung.com>
 
-Though the mmc core driver should/will continue to support the legacy
-"enable-sdio-wakeup" property to enable SDIO as the wakeup source, we
-need to add support for the new standard property "wakeup-source".
+When card is running with DDR mode, dwmmc needs to set DDR_REG bit at
+UHS_REG register.
+Before this patch, dwmmc controller doesn't consider this.
+If this patch is not applied, CRC or other error shoulds be occurred.
 
-This patch adds support for "wakeup-source" property in addition to the
-existing "enable-sdio-wakeup" property.
-
-Cc: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Adrian Hunter <adrian.hunter@intel.com>
-Cc: linux-mmc@vger.kernel.org
-Signed-off-by: Sudeep Holla <sudeep.holla@arm.com>
+Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
 ---
- drivers/mmc/core/host.c        | 3 ++-
- drivers/mmc/host/sdhci-pltfm.c | 3 ++-
- 2 files changed, 4 insertions(+), 2 deletions(-)
+ drivers/mmc/host/dw_mmc.c | 1 +
+ 1 file changed, 1 insertion(+)
 
-diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
-index 5466f25f0281..85222bb56c73 100644
---- a/drivers/mmc/core/host.c
-+++ b/drivers/mmc/core/host.c
-@@ -513,7 +513,8 @@ int mmc_of_parse(struct mmc_host *host)
- 		host->caps2 |= MMC_CAP2_FULL_PWR_CYCLE;
- 	if (of_property_read_bool(np, "keep-power-in-suspend"))
- 		host->pm_caps |= MMC_PM_KEEP_POWER;
--	if (of_property_read_bool(np, "enable-sdio-wakeup"))
-+	if (of_property_read_bool(np, "wakeup-source") ||
-+	    of_property_read_bool(np, "enable-sdio-wakeup")) /* legacy */
- 		host->pm_caps |= MMC_PM_WAKE_SDIO_IRQ;
- 	if (of_property_read_bool(np, "mmc-ddr-1_8v"))
- 		host->caps |= MMC_CAP_1_8V_DDR;
-diff --git a/drivers/mmc/host/sdhci-pltfm.c b/drivers/mmc/host/sdhci-pltfm.c
-index a207f5aaf62f..f00374bdafc9 100644
---- a/drivers/mmc/host/sdhci-pltfm.c
-+++ b/drivers/mmc/host/sdhci-pltfm.c
-@@ -108,7 +108,8 @@ void sdhci_get_of_property(struct platform_device *pdev)
- 	if (of_find_property(np, "keep-power-in-suspend", NULL))
- 		host->mmc->pm_caps |= MMC_PM_KEEP_POWER;
+diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+index 6e600e8..cb31e8e 100644
+--- a/drivers/mmc/host/dw_mmc.c
++++ b/drivers/mmc/host/dw_mmc.c
+@@ -1295,6 +1295,7 @@ static void dw_mci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
  
--	if (of_find_property(np, "enable-sdio-wakeup", NULL))
-+	if (of_property_read_bool(np, "wakeup-source") ||
-+	    of_property_read_bool(np, "enable-sdio-wakeup")) /* legacy */
- 		host->mmc->pm_caps |= MMC_PM_WAKE_SDIO_IRQ;
- }
- #else
+ 	/* DDR mode set */
+ 	if (ios->timing == MMC_TIMING_MMC_DDR52 ||
++	    ios->timing == MMC_TIMING_UHS_DDR50 ||
+ 	    ios->timing == MMC_TIMING_MMC_HS400)
+ 		regs |= ((0x1 << slot->id) << 16);
+ 	else
 -- 
 1.9.1
+
