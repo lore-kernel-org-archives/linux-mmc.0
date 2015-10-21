@@ -1,46 +1,49 @@
-From: Franklin S Cooper Jr <fcooper@ti.com>
-Subject: [PATCH 4/5] ARM: keystone: defconfig: Enable MMC support
-Date: Tue, 20 Oct 2015 16:50:08 -0500
-Message-ID: <1445377809-12516-4-git-send-email-fcooper@ti.com>
+From: santosh shilimkar <santosh.shilimkar@oracle.com>
+Subject: Re: [PATCH 2/5] mmc: omap_hsmmc: Enable omap_hsmmc for Keystone 2
+Date: Tue, 20 Oct 2015 18:25:00 -0700
+Message-ID: <5626E96C.2090002@oracle.com>
 References: <1445377809-12516-1-git-send-email-fcooper@ti.com>
+ <1445377809-12516-2-git-send-email-fcooper@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset=utf-8; format=flowed
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <1445377809-12516-1-git-send-email-fcooper@ti.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: linux@arm.linux.org.uk, ssantosh@kernel.org, ulf.hansson@linaro.org, m-karicheri2@ti.com, grygorii.strashko@ti.com, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
-Cc: Franklin S Cooper Jr <fcooper@ti.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from aserp1040.oracle.com ([141.146.126.69]:36209 "EHLO
+	aserp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751621AbbJUBZv (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 20 Oct 2015 21:25:51 -0400
+In-Reply-To: <1445377809-12516-2-git-send-email-fcooper@ti.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Franklin S Cooper Jr <fcooper@ti.com>, linux@arm.linux.org.uk, ssantosh@kernel.org, ulf.hansson@linaro.org, m-karicheri2@ti.com, grygorii.strashko@ti.com, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
+Cc: Lokesh Vutla <lokeshvutla@ti.com>
 
-Newer Keystone 2 devices support MMC and can boot from MMC. Therefore,
-enable MMC support along with MMC OMAP HS whose driver is reused.
+On 10/20/2015 2:50 PM, Franklin S Cooper Jr wrote:
+> From: Lokesh Vutla <lokeshvutla@ti.com>
+>
+> Enable omap_hsmmc for Keystone 2 architecture which reuses the HSMMC
+> IP found on OMAP platforms.
+>
+> Signed-off-by: Franklin S Cooper Jr <fcooper@ti.com>
+> ---
+>   drivers/mmc/host/Kconfig | 2 +-
+>   1 file changed, 1 insertion(+), 1 deletion(-)
+>
+> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+> index 8a1e349..2ccec71 100644
+> --- a/drivers/mmc/host/Kconfig
+> +++ b/drivers/mmc/host/Kconfig
+> @@ -366,7 +366,7 @@ config MMC_OMAP
+>   config MMC_OMAP_HS
+>   	tristate "TI OMAP High Speed Multimedia Card Interface support"
+>   	depends on HAS_DMA
+> -	depends on ARCH_OMAP2PLUS || COMPILE_TEST
+> +	depends on ARCH_OMAP2PLUS || ARCH_KEYSTONE || COMPILE_TEST
+>   	help
+>   	  This selects the TI OMAP High Speed Multimedia card Interface.
+>   	  If you have an omap2plus board with a Multimedia Card slot,
+>
+Please send this to MMC tree.
 
-Signed-off-by: Franklin S Cooper Jr <fcooper@ti.com>
----
- arch/arm/configs/keystone_defconfig | 2 ++
- 1 file changed, 2 insertions(+)
-
-diff --git a/arch/arm/configs/keystone_defconfig b/arch/arm/configs/keystone_defconfig
-index e0e0365..ed3e83e 100644
---- a/arch/arm/configs/keystone_defconfig
-+++ b/arch/arm/configs/keystone_defconfig
-@@ -137,6 +137,8 @@ CONFIG_I2C_DAVINCI=y
- CONFIG_SPI=y
- CONFIG_SPI_DAVINCI=y
- CONFIG_SPI_SPIDEV=y
-+CONFIG_MMC=y
-+CONFIG_MMC_OMAP_HS=y
- # CONFIG_HWMON is not set
- CONFIG_POWER_SUPPLY=y
- CONFIG_POWER_RESET=y
--- 
-2.6.1
+Regards,
+Santosh
