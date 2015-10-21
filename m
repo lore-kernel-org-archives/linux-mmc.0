@@ -1,65 +1,65 @@
-From: Javier Martinez Canillas <javier@osg.samsung.com>
-Subject: [PATCH] mmc: pwrseq: Use highest priority for eMMC restart handler
-Date: Wed, 21 Oct 2015 17:15:40 +0200
-Message-ID: <1445440540-21525-1-git-send-email-javier@osg.samsung.com>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: linux-kernel@vger.kernel.org
-Cc: Markus Reichl <m.reichl@fivetechno.de>, Anand Moon <linux.amoon@gmail.com>, linux-samsung-soc@vger.kernel.org, Krzysztof Kozlowski <k.kozlowski@samsung.com>, Alim Akhtar <alim.akhtar@samsung.com>, Javier Martinez Canillas <javier@osg.samsung.com>, Marek Szyprowski <m.szyprowski@samsung.com>, linux-mmc@vger.kernel.org, Alexandre Courbot <acourbot@nvidia.com>, Ulf Hansson <ulf.hansson@linaro.org>
+From: Grant Grundler <grundler@chromium.org>
+Subject: Re: RFC: 32-bit __data_len and REQ_DISCARD+REQ_SECURE
+Date: Wed, 21 Oct 2015 10:06:40 -0700
+Message-ID: <CANEJEGtkus69nYum=NFqrZq3tbhLumiygsq-SK3KkJrVm6npJQ@mail.gmail.com>
+References: <CANEJEGvXfg4O6KWBcQe4=o0ZxjehgGTBMBxNddanprBXQbr-Qg@mail.gmail.com>
+	<CANEJEGtDr+BdP1s=EUpUSqcvWpQfkt+o_3zoXWHk7DdjH4j0Ow@mail.gmail.com>
+	<CANEJEGukOKUgRJNPVaeEXpx-REzj8ooSfWdrnRMMCQr6EVaNqQ@mail.gmail.com>
+	<CANEJEGvktCkVEbLaQoZqOFZY3F8o=Z41HwQxL=X4jh=-PdV3Fg@mail.gmail.com>
+	<CANEJEGuwymF-v7rdep4h2eGcvCAzEVvaYtwHCim9UR5NLZPkbg@mail.gmail.com>
+	<x49si55v04n.fsf@segfault.boston.devel.redhat.com>
+	<CAPDyKFpXtio5m6V1M5QQcB1RNt4JtoDZ2qL2FqLDDNV4aODVAg@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-yk0-f182.google.com ([209.85.160.182]:34486 "EHLO
+	mail-yk0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751843AbbJURGm (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 21 Oct 2015 13:06:42 -0400
+Received: by ykdr3 with SMTP id r3so55991855ykd.1
+        for <linux-mmc@vger.kernel.org>; Wed, 21 Oct 2015 10:06:41 -0700 (PDT)
+In-Reply-To: <CAPDyKFpXtio5m6V1M5QQcB1RNt4JtoDZ2qL2FqLDDNV4aODVAg@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Jeff Moyer <jmoyer@redhat.com>, Grant Grundler <grundler@chromium.org>, Jens Axboe <axboe@kernel.dk>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, LKML <linux-kernel@vger.kernel.org>, Gwendal Grignou <gwendal@chromium.org>
 
-The pwrseq_emmc driver does a eMMC card reset before a system reboot to
-allow broken or limited ROM boot-loaders (that don't have an eMMC reset
-logic) to be able to read the second stage from the eMMC.
+On Wed, Oct 21, 2015 at 2:00 AM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+....
+>>>> To put a few more numbers on the "chunk size vs perf":
+>>>>  1EG (512KB) -> 44K commands -> ~20 minutes
+>>>> 32EG (16MB) -> 1375 commands -> ~1 minute
+>>>> 128EG (64MB) -> 344 commands -> ~30 seconds
+>>>> 8191EG (~4GB) -> 6 commands -> 2 seconds + ~8 seconds mkfs
+>>>> (I'm assuming times above include about 6-10 seconds of mkfs as part
+>>>> of writing a new file system)
+>>>>
+>>>> This is with only ~300MB of data written to the partition. I'm fully
+>>>> aware that times will vary depending on how much data needs to be
+>>>> migrated (and in this case very little or none). I'm certain the
+>>>> difference will only get worse for the smaller the "chunk size" used
+>>>> to Secure Erase due to repeated data migration.
+....
+> I am not sure if this issue is the same as been discussed earlier on
+> the mmc list regarding "discard/erase".
+>
+> Anyway, there have been several attempts to fix bugs related to this.
+> One of these discussion kind of pointed out a viable solution, but
+> unfortunate no patches that adopts that solution have been posted yet.
+>
+> You might want to read up on this.
+> https://www.mail-archive.com/linux-mmc@vger.kernel.org/msg23643.html
+> http://linux-mmc.vger.kernel.narkive.com/Wp31G953/patch-mmc-core-don-t-return-1-for-max-discard
+>
+> So this is an old issue, which should have been fixed long long long time ago...
 
-But this has to be called before a system reboot handler and while most
-of them use the priority 128, there are other restart handlers (such as
-the syscon-reboot one) that use a higher priority. So, use the highest
-priority to make sure that the eMMC hw is reset before a system reboot.
+Agreed. :)  I'll read the references but hope that Gwendal (or someone
+on Android Team?) can follow up on this shorter term. I've moved to a
+different team (Google Onhub) and currently have a whole new set of
+(wireless) issues to deal with. :(
 
-Signed-off-by: Javier Martinez Canillas <javier@osg.samsung.com>
-Tested-by: Markus Reichl <m.reichl@fivetechno.de>
-Tested-by: Anand Moon <linux.amoon@gmail.com>
-Reviewed-by: Alim Akhtar <alim.akhtar@samsung.com>
+At some point I expect I'll be circling back to mmc issues - storage
+keeps following me like a hungry puppy where ever I go. /o\
 
----
-Hello,
-
-This patch was needed since a recent series from Alim [0] added
-syscon reboot and poweroff support to Exynos SoCs and removed
-the reset handler in the Exynos Power Management Unit (PMU) code.
-
-But the PMU and syscon-reboot restart handler have a different
-priority so [0] breaks restart when eMMC is used on these boards.
-
-[0]: http://www.spinics.net/lists/arm-kernel/msg454396.html
-
-So this patch must be merged before [0] to avoid regressions.
-
-Best regards,
-Javier
-
- drivers/mmc/core/pwrseq_emmc.c | 6 +++---
- 1 file changed, 3 insertions(+), 3 deletions(-)
-
-diff --git a/drivers/mmc/core/pwrseq_emmc.c b/drivers/mmc/core/pwrseq_emmc.c
-index 137c97fb7aa8..ad4f94ec7e8d 100644
---- a/drivers/mmc/core/pwrseq_emmc.c
-+++ b/drivers/mmc/core/pwrseq_emmc.c
-@@ -84,11 +84,11 @@ struct mmc_pwrseq *mmc_pwrseq_emmc_alloc(struct mmc_host *host,
- 
- 	/*
- 	 * register reset handler to ensure emmc reset also from
--	 * emergency_reboot(), priority 129 schedules it just before
--	 * system reboot
-+	 * emergency_reboot(), priority 255 is the highest priority
-+	 * so it will be executed before any system reboot handler.
- 	 */
- 	pwrseq->reset_nb.notifier_call = mmc_pwrseq_emmc_reset_nb;
--	pwrseq->reset_nb.priority = 129;
-+	pwrseq->reset_nb.priority = 255;
- 	register_restart_handler(&pwrseq->reset_nb);
- 
- 	pwrseq->pwrseq.ops = &mmc_pwrseq_emmc_ops;
--- 
-2.4.3
+thank you!
+grant
