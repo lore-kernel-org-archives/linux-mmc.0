@@ -1,62 +1,51 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: [PATCH 2/2] mmc: sdhci-acpi: Add more ACPI HIDs for Intel controllers
-Date: Wed, 21 Oct 2015 11:15:46 +0300
-Message-ID: <1445415346-12929-2-git-send-email-adrian.hunter@intel.com>
-References: <1445415346-12929-1-git-send-email-adrian.hunter@intel.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: [GIT PULL] MMC fixes for v.4.3 rc7
+Date: Wed, 21 Oct 2015 10:35:00 +0200
+Message-ID: <CAPDyKFoGwU8r4yq+my5xohBbKexzpczRNRP2xk3fAEcHbpUxkw@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga14.intel.com ([192.55.52.115]:26896 "EHLO mga14.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753759AbbJUISt (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 21 Oct 2015 04:18:49 -0400
-In-Reply-To: <1445415346-12929-1-git-send-email-adrian.hunter@intel.com>
+Received: from mail-wi0-f173.google.com ([209.85.212.173]:38841 "EHLO
+	mail-wi0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752740AbbJUIfC (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 21 Oct 2015 04:35:02 -0400
+Received: by wicll6 with SMTP id ll6so63123493wic.1
+        for <linux-mmc@vger.kernel.org>; Wed, 21 Oct 2015 01:35:00 -0700 (PDT)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>
+To: Linus Torvalds <torvalds@linux-foundation.org>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 
-Add ACPI HIDs for Intel host controllers including one
-supporting HS400.
+Hi Linus,
 
-Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
----
- drivers/mmc/host/sdhci-acpi.c | 10 +++++++++-
- 1 file changed, 9 insertions(+), 1 deletion(-)
+Here's yet another MMC fix intended for v4.3 rc7. It's based on v4.3-rc5.
+I don't expect to send any further PR for 4.3 rc[n].
 
-diff --git a/drivers/mmc/host/sdhci-acpi.c b/drivers/mmc/host/sdhci-acpi.c
-index 78aa16aed07b..f6047fc94062 100644
---- a/drivers/mmc/host/sdhci-acpi.c
-+++ b/drivers/mmc/host/sdhci-acpi.c
-@@ -207,7 +207,9 @@ static const struct sdhci_acpi_slot sdhci_acpi_slot_int_emmc = {
- 	.caps2   = MMC_CAP2_HC_ERASE_SZ,
- 	.flags   = SDHCI_ACPI_RUNTIME_PM,
- 	.quirks  = SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC,
--	.quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN | SDHCI_QUIRK2_STOP_WITH_TC,
-+	.quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN |
-+		   SDHCI_QUIRK2_STOP_WITH_TC |
-+		   SDHCI_QUIRK2_CAPS_BIT63_FOR_HS400,
- 	.probe_slot	= sdhci_acpi_emmc_probe_slot,
- };
- 
-@@ -239,6 +241,9 @@ struct sdhci_acpi_uid_slot {
- };
- 
- static const struct sdhci_acpi_uid_slot sdhci_acpi_uids[] = {
-+	{ "80865ACA", NULL, &sdhci_acpi_slot_int_sd },
-+	{ "80865ACC", NULL, &sdhci_acpi_slot_int_emmc },
-+	{ "80865AD0", NULL, &sdhci_acpi_slot_int_sdio },
- 	{ "80860F14" , "1" , &sdhci_acpi_slot_int_emmc },
- 	{ "80860F14" , "3" , &sdhci_acpi_slot_int_sd   },
- 	{ "80860F16" , NULL, &sdhci_acpi_slot_int_sd   },
-@@ -253,6 +258,9 @@ static const struct sdhci_acpi_uid_slot sdhci_acpi_uids[] = {
- };
- 
- static const struct acpi_device_id sdhci_acpi_ids[] = {
-+	{ "80865ACA" },
-+	{ "80865ACC" },
-+	{ "80865AD0" },
- 	{ "80860F14" },
- 	{ "80860F16" },
- 	{ "INT33BB"  },
--- 
-1.9.1
+Details are as usual found in the signed tag. Please pull this in!
 
+Kind regards
+Ulf Hansson
+
+
+The following changes since commit 25cb62b76430a91cc6195f902e61c2cb84ade622:
+
+  Linux 4.3-rc5 (2015-10-11 11:09:45 -0700)
+
+are available in the git repository at:
+
+  git://git.linaro.org/people/ulf.hansson/mmc.git tags/mmc-v4.3-rc5
+
+for you to fetch changes up to 08b137d90eec51b0e90c42e123ca8ceb118d233f:
+
+  mmc: core: Fix init_card in 52Mhz (2015-10-21 10:18:11 +0200)
+
+----------------------------------------------------------------
+MMC core:
+ - Don't re-tune in the reset sequence to allow re-init of the card
+
+----------------------------------------------------------------
+Chaotian Jing (1):
+      mmc: core: Fix init_card in 52Mhz
+
+ drivers/mmc/card/mmc_test.c | 9 +++------
+ drivers/mmc/core/mmc.c      | 7 -------
+ 2 files changed, 3 insertions(+), 13 deletions(-)
