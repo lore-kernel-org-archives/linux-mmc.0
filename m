@@ -1,51 +1,42 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: [GIT PULL] MMC fixes for v.4.3 rc7
-Date: Wed, 21 Oct 2015 10:35:00 +0200
-Message-ID: <CAPDyKFoGwU8r4yq+my5xohBbKexzpczRNRP2xk3fAEcHbpUxkw@mail.gmail.com>
+From: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: Re: [PATCH v3] DT: mmc: sh_mmcif: document R8A779[34] support
+Date: Wed, 21 Oct 2015 10:38:48 +0200
+Message-ID: <CAPDyKFqyJo47A+kPnCK27QYgS7-4jqrG0zR92yqD9wfq-s3AxA@mail.gmail.com>
+References: <201404250239.39150.sergei.shtylyov@cogentembedded.com>
+	<2657565.2y8qYzu3eL@wasted.cogentembedded.com>
+	<CAPDyKFqLuH9u2n1EKSc-89E6iDR8JH0A+5c=wn8g3THPKvDX7A@mail.gmail.com>
+	<5626A1CF.9050309@cogentembedded.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wi0-f173.google.com ([209.85.212.173]:38841 "EHLO
-	mail-wi0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752740AbbJUIfC (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 21 Oct 2015 04:35:02 -0400
-Received: by wicll6 with SMTP id ll6so63123493wic.1
-        for <linux-mmc@vger.kernel.org>; Wed, 21 Oct 2015 01:35:00 -0700 (PDT)
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <5626A1CF.9050309-M4DtvfQ/ZS1MRgGoP+s0PdBPR1lH4CV8@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Sergei Shtylyov <sergei.shtylyov-M4DtvfQ/ZS1MRgGoP+s0PdBPR1lH4CV8@public.gmane.org>
+Cc: Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, =?UTF-8?Q?Pawe=C5=82_Moll?= <pawel.moll-5wv7dgnIgG8@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Ian Campbell <ijc+devicetree-KcIKpvwj1kUDXYZnReoRVg@public.gmane.org>, Kumar Gala <galak-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-mmc <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux-sh list <linux-sh-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Linus Torvalds <torvalds@linux-foundation.org>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 
-Hi Linus,
+On 20 October 2015 at 22:19, Sergei Shtylyov
+<sergei.shtylyov-M4DtvfQ/ZS1MRgGoP+s0PdBPR1lH4CV8@public.gmane.org> wrote:
+> Hello.
+>
+> On 10/16/2015 04:07 PM, Ulf Hansson wrote:
+>
+>>> Renesas R8A7794 SoC also has the MMCIF controller...
+>>>
+>>> Signed-off-by: Sergei Shtylyov <sergei.shtylyov-M4DtvfQ/ZS1MRgGoP+s0PdBPR1lH4CV8@public.gmane.org>
+>
+>
+>> Thanks, applied for next.
+>
+>
+>    Oops, just noticed the subject was stale. I wasn't adding R8A7793 support
+> in that version. Is it possible to fix?
 
-Here's yet another MMC fix intended for v4.3 rc7. It's based on v4.3-rc5.
-I don't expect to send any further PR for 4.3 rc[n].
-
-Details are as usual found in the signed tag. Please pull this in!
+I have updated the subject, no worries!
 
 Kind regards
-Ulf Hansson
-
-
-The following changes since commit 25cb62b76430a91cc6195f902e61c2cb84ade622:
-
-  Linux 4.3-rc5 (2015-10-11 11:09:45 -0700)
-
-are available in the git repository at:
-
-  git://git.linaro.org/people/ulf.hansson/mmc.git tags/mmc-v4.3-rc5
-
-for you to fetch changes up to 08b137d90eec51b0e90c42e123ca8ceb118d233f:
-
-  mmc: core: Fix init_card in 52Mhz (2015-10-21 10:18:11 +0200)
-
-----------------------------------------------------------------
-MMC core:
- - Don't re-tune in the reset sequence to allow re-init of the card
-
-----------------------------------------------------------------
-Chaotian Jing (1):
-      mmc: core: Fix init_card in 52Mhz
-
- drivers/mmc/card/mmc_test.c | 9 +++------
- drivers/mmc/core/mmc.c      | 7 -------
- 2 files changed, 3 insertions(+), 13 deletions(-)
+Uffe
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
