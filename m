@@ -1,42 +1,85 @@
-From: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH v3] DT: mmc: sh_mmcif: document R8A779[34] support
-Date: Wed, 21 Oct 2015 10:38:48 +0200
-Message-ID: <CAPDyKFqyJo47A+kPnCK27QYgS7-4jqrG0zR92yqD9wfq-s3AxA@mail.gmail.com>
-References: <201404250239.39150.sergei.shtylyov@cogentembedded.com>
-	<2657565.2y8qYzu3eL@wasted.cogentembedded.com>
-	<CAPDyKFqLuH9u2n1EKSc-89E6iDR8JH0A+5c=wn8g3THPKvDX7A@mail.gmail.com>
-	<5626A1CF.9050309@cogentembedded.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [GIT PULL] Update dw-mmc controller
+Date: Wed, 21 Oct 2015 10:38:35 +0200
+Message-ID: <CAPDyKFoGxEL_8KWbN-50EGMJB7MyiHxcvBCDJKcOW_ObLNcyHg@mail.gmail.com>
+References: <5626FCB0.5040708@samsung.com>
+	<562712E1.3020107@samsung.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <5626A1CF.9050309-M4DtvfQ/ZS1MRgGoP+s0PdBPR1lH4CV8@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Sergei Shtylyov <sergei.shtylyov-M4DtvfQ/ZS1MRgGoP+s0PdBPR1lH4CV8@public.gmane.org>
-Cc: Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, =?UTF-8?Q?Pawe=C5=82_Moll?= <pawel.moll-5wv7dgnIgG8@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Ian Campbell <ijc+devicetree-KcIKpvwj1kUDXYZnReoRVg@public.gmane.org>, Kumar Gala <galak-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-mmc <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux-sh list <linux-sh-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-wi0-f169.google.com ([209.85.212.169]:38243 "EHLO
+	mail-wi0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753053AbbJUIih (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 21 Oct 2015 04:38:37 -0400
+Received: by wicll6 with SMTP id ll6so63258255wic.1
+        for <linux-mmc@vger.kernel.org>; Wed, 21 Oct 2015 01:38:36 -0700 (PDT)
+In-Reply-To: <562712E1.3020107@samsung.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Jaehoon Chung <jh80.chung@samsung.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Shawn Lin <shawn.lin@rock-chips.com>, Krzysztof Kozlowski <k.kozlowski@samsung.com>, Govindraj Raja <govindraj.raja@imgtec.com>, Ralf Baechle <ralf@linux-mips.org>, Vineet Gupta <vgupta@synopsys.com>, Wei Xu <xuwei5@hisilicon.com>, Joachim Eastwood <manabian@gmail.com>
 
-On 20 October 2015 at 22:19, Sergei Shtylyov
-<sergei.shtylyov-M4DtvfQ/ZS1MRgGoP+s0PdBPR1lH4CV8@public.gmane.org> wrote:
-> Hello.
+On 21 October 2015 at 06:21, Jaehoon Chung <jh80.chung@samsung.com> wrote:
+> Dear Ulf.
 >
-> On 10/16/2015 04:07 PM, Ulf Hansson wrote:
+> Sorry..previously request-pull is wrong.
+> Could you pull the below..?
 >
->>> Renesas R8A7794 SoC also has the MMCIF controller...
->>>
->>> Signed-off-by: Sergei Shtylyov <sergei.shtylyov-M4DtvfQ/ZS1MRgGoP+s0PdBPR1lH4CV8@public.gmane.org>
+> The following changes since commit 10e2cf053bbbaa76fcd919c0f59ae5bf8463a19c:
 >
+>   mmc: sdhci-of-esdhc: avoid writing power control register (2015-10-16 15:04:58 +0200)
 >
->> Thanks, applied for next.
+> are available in the git repository at:
 >
+>   https://github.com/jh80chung/dw-mmc.git for-ulf
 >
->    Oops, just noticed the subject was stale. I wasn't adding R8A7793 support
-> in that version. Is it possible to fix?
+> for you to fetch changes up to 13ae9dff2fe12409197fbd3620d2308888badbac:
+>
+>   arm: zx_defconfig: remove CONFIG_MMC_DW_IDMAC (2015-10-20 23:59:31 +0900)
+>
+> ----------------------------------------------------------------
+> Shawn Lin (10):
+>       mmc: dw_mmc: Add external dma interface support
+>       mmc: dw_mmc: use macro for HCON register operations
+>       Documentation: synopsys-dw-mshc: add bindings for idmac and edmac
+>       mips: pistachio_defconfig: remove CONFIG_MMC_DW_IDMAC
+>       arc: axs10x_defconfig: remove CONFIG_MMC_DW_IDMAC
+>       arm: exynos_defconfig: remove CONFIG_MMC_DW_IDMAC
+>       arm: hisi_defconfig: remove CONFIG_MMC_DW_IDMAC
+>       arm: lpc18xx_defconfig: remove CONFIG_MMC_DW_IDMAC
+>       arm: multi_v7_defconfig: remove CONFIG_MMC_DW_IDMAC
+>       arm: zx_defconfig: remove CONFIG_MMC_DW_IDMAC
 
-I have updated the subject, no worries!
+Jaehoon,
+
+The last two arm patches doesn't have acks. I realize that these
+changes are trivial, but I can't pull these in without acks. All the
+other patches I have picked up.
+
+>
+>  Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.txt |  25 +++++++++++++
+>  arch/arc/configs/axs101_defconfig                          |   1 -
+>  arch/arc/configs/axs103_defconfig                          |   1 -
+>  arch/arc/configs/axs103_smp_defconfig                      |   1 -
+>  arch/arm/configs/exynos_defconfig                          |   1 -
+>  arch/arm/configs/hisi_defconfig                            |   1 -
+>  arch/arm/configs/lpc18xx_defconfig                         |   1 -
+>  arch/arm/configs/multi_v7_defconfig                        |   1 -
+>  arch/arm/configs/zx_defconfig                              |   1 -
+>  arch/mips/configs/pistachio_defconfig                      |   1 -
+>  drivers/mmc/host/Kconfig                                   |  11 +-----
+>  drivers/mmc/host/dw_mmc-pltfm.c                            |   2 +
+>  drivers/mmc/host/dw_mmc.c                                  | 272 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++---------------------------
+>  drivers/mmc/host/dw_mmc.h                                  |   9 +++++
+>  include/linux/mmc/dw_mmc.h                                 |  23 +++++++++++-
+>  15 files changed, 276 insertions(+), 75 deletions(-)
+>
+> Best Regards,
+> Jaehoon Chung
+
+[...]
+
+Thanks!
 
 Kind regards
 Uffe
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
