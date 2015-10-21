@@ -1,50 +1,101 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: [PATCH 2/2] ARM: dts: change the compatible from exynos5250 to
- exynos3250
-Date: Wed, 21 Oct 2015 15:39:15 +0900
-Message-ID: <1445409555-1684-2-git-send-email-jh80.chung@samsung.com>
-References: <1445409555-1684-1-git-send-email-jh80.chung@samsung.com>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: [PATCH 1/2] mmc: sdhci-pci: Add more PCI IDs for Intel controllers
+Date: Wed, 21 Oct 2015 11:15:45 +0300
+Message-ID: <1445415346-12929-1-git-send-email-adrian.hunter@intel.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout3.samsung.com ([203.254.224.33]:36646 "EHLO
-	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753506AbbJUGjX (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 21 Oct 2015 02:39:23 -0400
-In-reply-to: <1445409555-1684-1-git-send-email-jh80.chung@samsung.com>
+Received: from mga14.intel.com ([192.55.52.115]:26896 "EHLO mga14.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753745AbbJUISs (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 21 Oct 2015 04:18:48 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org, linux-samsung-soc@vger.kernel.org
-Cc: ulf.hansson@linaro.org, kgene@kernel.org, k.kozlowski@samsung.com, linux-arm-kernel@lists.infradead.org, Jaehoon Chung <jh80.chung@samsung.com>
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>
 
-To use more excatly, change compatible from exynos5250 to exynos3250.
-Exynos3250 and exnos5250 are some difference.
+Add PCI IDs for Intel host controllers
 
-Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
 ---
- arch/arm/boot/dts/exynos3250.dtsi | 4 ++--
- 1 file changed, 2 insertions(+), 2 deletions(-)
+ drivers/mmc/host/sdhci-pci-core.c | 48 +++++++++++++++++++++++++++++++++++++++
+ drivers/mmc/host/sdhci-pci.h      |  6 +++++
+ 2 files changed, 54 insertions(+)
 
-diff --git a/arch/arm/boot/dts/exynos3250.dtsi b/arch/arm/boot/dts/exynos3250.dtsi
-index 033def4..05ed242 100644
---- a/arch/arm/boot/dts/exynos3250.dtsi
-+++ b/arch/arm/boot/dts/exynos3250.dtsi
-@@ -333,7 +333,7 @@
- 		};
+diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-pci-core.c
+index b6f6117cb233..cf7ad458b4f4 100644
+--- a/drivers/mmc/host/sdhci-pci-core.c
++++ b/drivers/mmc/host/sdhci-pci-core.c
+@@ -1117,6 +1117,54 @@ static const struct pci_device_id pci_ids[] = {
+ 	},
  
- 		mshc_0: mshc@12510000 {
--			compatible = "samsung,exynos5250-dw-mshc";
-+			compatible = "samsung,exynos3250-dw-mshc";
- 			reg = <0x12510000 0x1000>;
- 			interrupts = <0 142 0>;
- 			clocks = <&cmu CLK_SDMMC0>, <&cmu CLK_SCLK_MMC0>;
-@@ -345,7 +345,7 @@
- 		};
+ 	{
++		.vendor		= PCI_VENDOR_ID_INTEL,
++		.device		= PCI_DEVICE_ID_INTEL_BXT_EMMC,
++		.subvendor	= PCI_ANY_ID,
++		.subdevice	= PCI_ANY_ID,
++		.driver_data	= (kernel_ulong_t)&sdhci_intel_byt_emmc,
++	},
++
++	{
++		.vendor		= PCI_VENDOR_ID_INTEL,
++		.device		= PCI_DEVICE_ID_INTEL_BXT_SDIO,
++		.subvendor	= PCI_ANY_ID,
++		.subdevice	= PCI_ANY_ID,
++		.driver_data	= (kernel_ulong_t)&sdhci_intel_byt_sdio,
++	},
++
++	{
++		.vendor		= PCI_VENDOR_ID_INTEL,
++		.device		= PCI_DEVICE_ID_INTEL_BXT_SD,
++		.subvendor	= PCI_ANY_ID,
++		.subdevice	= PCI_ANY_ID,
++		.driver_data	= (kernel_ulong_t)&sdhci_intel_byt_sd,
++	},
++
++	{
++		.vendor		= PCI_VENDOR_ID_INTEL,
++		.device		= PCI_DEVICE_ID_INTEL_APL_EMMC,
++		.subvendor	= PCI_ANY_ID,
++		.subdevice	= PCI_ANY_ID,
++		.driver_data	= (kernel_ulong_t)&sdhci_intel_byt_emmc,
++	},
++
++	{
++		.vendor		= PCI_VENDOR_ID_INTEL,
++		.device		= PCI_DEVICE_ID_INTEL_APL_SDIO,
++		.subvendor	= PCI_ANY_ID,
++		.subdevice	= PCI_ANY_ID,
++		.driver_data	= (kernel_ulong_t)&sdhci_intel_byt_sdio,
++	},
++
++	{
++		.vendor		= PCI_VENDOR_ID_INTEL,
++		.device		= PCI_DEVICE_ID_INTEL_APL_SD,
++		.subvendor	= PCI_ANY_ID,
++		.subdevice	= PCI_ANY_ID,
++		.driver_data	= (kernel_ulong_t)&sdhci_intel_byt_sd,
++	},
++
++	{
+ 		.vendor		= PCI_VENDOR_ID_O2,
+ 		.device		= PCI_DEVICE_ID_O2_8120,
+ 		.subvendor	= PCI_ANY_ID,
+diff --git a/drivers/mmc/host/sdhci-pci.h b/drivers/mmc/host/sdhci-pci.h
+index cd4f4d74377e..d1a0b4db60db 100644
+--- a/drivers/mmc/host/sdhci-pci.h
++++ b/drivers/mmc/host/sdhci-pci.h
+@@ -25,6 +25,12 @@
+ #define PCI_DEVICE_ID_INTEL_SPT_SDIO	0x9d2c
+ #define PCI_DEVICE_ID_INTEL_SPT_SD	0x9d2d
+ #define PCI_DEVICE_ID_INTEL_DNV_EMMC	0x19db
++#define PCI_DEVICE_ID_INTEL_BXT_SD	0x0aca
++#define PCI_DEVICE_ID_INTEL_BXT_EMMC	0x0acc
++#define PCI_DEVICE_ID_INTEL_BXT_SDIO	0x0ad0
++#define PCI_DEVICE_ID_INTEL_APL_SD	0x5aca
++#define PCI_DEVICE_ID_INTEL_APL_EMMC	0x5acc
++#define PCI_DEVICE_ID_INTEL_APL_SDIO	0x5ad0
  
- 		mshc_1: mshc@12520000 {
--			compatible = "samsung,exynos5250-dw-mshc";
-+			compatible = "samsung,exynos3250-dw-mshc";
- 			reg = <0x12520000 0x1000>;
- 			interrupts = <0 143 0>;
- 			clocks = <&cmu CLK_SDMMC1>, <&cmu CLK_SCLK_MMC1>;
+ /*
+  * PCI registers
 -- 
 1.9.1
 
