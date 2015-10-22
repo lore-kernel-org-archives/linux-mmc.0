@@ -1,24 +1,23 @@
-From: Alim Akhtar <alim.akhtar@samsung.com>
+From: Anand Moon <linux.amoon@gmail.com>
 Subject: Re: [PATCH] mmc: pwrseq: Use highest priority for eMMC restart handler
-Date: Thu, 22 Oct 2015 09:44:12 +0530
-Message-ID: <56286294.7060907@samsung.com>
+Date: Thu, 22 Oct 2015 10:33:05 +0530
+Message-ID: <CANAwSgToHJt2yYcnUL66Boa32XjAQpF8hYYeuGhqjrzoP2d25g@mail.gmail.com>
 References: <1445440540-21525-1-git-send-email-javier@osg.samsung.com>
  <56282F71.2070408@samsung.com> <562839F7.3040005@osg.samsung.com>
  <56283F27.9060804@samsung.com> <56284F60.4070802@osg.samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-reply-to: <56284F60.4070802@osg.samsung.com>
+In-Reply-To: <56284F60.4070802@osg.samsung.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Javier Martinez Canillas <javier@osg.samsung.com>, Krzysztof Kozlowski <k.kozlowski@samsung.com>, linux-kernel@vger.kernel.org
-Cc: Markus Reichl <m.reichl@fivetechno.de>, Anand Moon <linux.amoon@gmail.com>, linux-samsung-soc@vger.kernel.org, Marek Szyprowski <m.szyprowski@samsung.com>, linux-mmc@vger.kernel.org, Alexandre Courbot <acourbot@nvidia.com>, Ulf Hansson <ulf.hansson@linaro.org>, Douglas Anderson <dianders@chromium.org>, heiko@sntech.de, enric.balletbo@collabora.com
+To: Javier Martinez Canillas <javier@osg.samsung.com>
+Cc: Krzysztof Kozlowski <k.kozlowski@samsung.com>, Linux Kernel <linux-kernel@vger.kernel.org>, Markus Reichl <m.reichl@fivetechno.de>, "linux-samsung-soc@vger.kernel.org" <linux-samsung-soc@vger.kernel.org>, Alim Akhtar <alim.akhtar@samsung.com>, Marek Szyprowski <m.szyprowski@samsung.com>, linux-mmc@vger.kernel.org, Alexandre Courbot <acourbot@nvidia.com>, Ulf Hansson <ulf.hansson@linaro.org>
 List-Id: linux-mmc@vger.kernel.org
 
-CCing Doug, Heiko and Enric Balletbo
-To help us by testing on rk3288-veyron and am335x-sl50 boards.
+Hi Javier,
 
-On 10/22/2015 08:22 AM, Javier Martinez Canillas wrote:
+On 22 October 2015 at 08:22, Javier Martinez Canillas
+<javier@osg.samsung.com> wrote:
 > Hello Krzysztof,
 >
 > On 10/22/2015 03:43 AM, Krzysztof Kozlowski wrote:
@@ -59,8 +58,8 @@ On 10/22/2015 08:22 AM, Javier Martinez Canillas wrote:
 >>>>> Best regards,
 >>>>> Javier
 >>>>>
->>>>>   drivers/mmc/core/pwrseq_emmc.c | 6 +++---
->>>>>   1 file changed, 3 insertions(+), 3 deletions(-)
+>>>>>  drivers/mmc/core/pwrseq_emmc.c | 6 +++---
+>>>>>  1 file changed, 3 insertions(+), 3 deletions(-)
 >>>>>
 >>>>> diff --git a/drivers/mmc/core/pwrseq_emmc.c b/drivers/mmc/core/pwrseq_emmc.c
 >>>>> index 137c97fb7aa8..ad4f94ec7e8d 100644
@@ -68,16 +67,16 @@ On 10/22/2015 08:22 AM, Javier Martinez Canillas wrote:
 >>>>> +++ b/drivers/mmc/core/pwrseq_emmc.c
 >>>>> @@ -84,11 +84,11 @@ struct mmc_pwrseq *mmc_pwrseq_emmc_alloc(struct mmc_host *host,
 >>>>>
->>>>>   	/*
->>>>>   	 * register reset handler to ensure emmc reset also from
->>>>> -	 * emergency_reboot(), priority 129 schedules it just before
->>>>> -	 * system reboot
->>>>> +	 * emergency_reboot(), priority 255 is the highest priority
->>>>> +	 * so it will be executed before any system reboot handler.
->>>>>   	 */
->>>>>   	pwrseq->reset_nb.notifier_call = mmc_pwrseq_emmc_reset_nb;
->>>>> -	pwrseq->reset_nb.priority = 129;
->>>>> +	pwrseq->reset_nb.priority = 255;
+>>>>>    /*
+>>>>>     * register reset handler to ensure emmc reset also from
+>>>>> -   * emergency_reboot(), priority 129 schedules it just before
+>>>>> -   * system reboot
+>>>>> +   * emergency_reboot(), priority 255 is the highest priority
+>>>>> +   * so it will be executed before any system reboot handler.
+>>>>>     */
+>>>>>    pwrseq->reset_nb.notifier_call = mmc_pwrseq_emmc_reset_nb;
+>>>>> -  pwrseq->reset_nb.priority = 129;
+>>>>> +  pwrseq->reset_nb.priority = 255;
 >>>>
 >>>> I see the problem which you are trying to solve but this may be tricker
 >>>> then just kicking the number. Some of restart handlers are registered
@@ -98,19 +97,19 @@ On 10/22/2015 08:22 AM, Javier Martinez Canillas wrote:
 >>> kernel-doc [0]:
 >>>
 >>> /**
->>>   *	register_restart_handler - Register function to be called to reset
->>>   *				   the system
->>>   *	@nb: Info about handler function to be called
->>>   *	@nb->priority:	Handler priority. Handlers should follow the
->>>   *			following guidelines for setting priorities.
->>>   *			0:	Restart handler of last resort,
->>>   *				with limited restart capabilities
->>>   *			128:	Default restart handler; use if no other
->>>   *				restart handler is expected to be available,
->>>   *				and/or if restart functionality is
->>>   *				sufficient to restart the entire system
->>>   *			255:	Highest priority restart handler, will
->>>   *				preempt all other restart handlers
+>>>  *   register_restart_handler - Register function to be called to reset
+>>>  *                              the system
+>>>  *   @nb: Info about handler function to be called
+>>>  *   @nb->priority:  Handler priority. Handlers should follow the
+>>>  *                   following guidelines for setting priorities.
+>>>  *                   0:      Restart handler of last resort,
+>>>  *                           with limited restart capabilities
+>>>  *                   128:    Default restart handler; use if no other
+>>>  *                           restart handler is expected to be available,
+>>>  *                           and/or if restart functionality is
+>>>  *                           sufficient to restart the entire system
+>>>  *                   255:    Highest priority restart handler, will
+>>>  *                           preempt all other restart handlers
 >>>
 >>> So, reading that is not clear to me if only the values 0, 128 and 255
 >>> should be used or any value from 0-255.
@@ -213,32 +212,23 @@ On 10/22/2015 08:22 AM, Javier Martinez Canillas wrote:
 > I can't think how doing a eMMC card reset before reboot could affect a
 > board but you are right that we don't know without testing.
 >
-git grep result shows:
-======
-  git grep mmc-pwrseq-emmc
-Documentation/devicetree/bindings/mmc/mmc-pwrseq-emmc.txt:- compatible : 
-contains "mmc-pwrseq-emmc".
-Documentation/devicetree/bindings/mmc/mmc-pwrseq-emmc.txt: 
-compatible = "mmc-pwrseq-emmc";
-arch/arm/boot/dts/am335x-sl50.dts:              compatible = 
-"mmc-pwrseq-emmc";
-arch/arm/boot/dts/exynos4412-odroid-common.dtsi: 
-compatible = "mmc-pwrseq-emmc";
-arch/arm/boot/dts/exynos5422-odroidxu3-common.dtsi: 
-compatible = "mmc-pwrseq-emmc";
-arch/arm/boot/dts/rk3288-veyron.dtsi:           compatible = 
-"mmc-pwrseq-emmc";
-arch/arm64/boot/dts/rockchip/rk3368-r88.dts:            compatible = 
-"mmc-pwrseq-emmc";
-drivers/mmc/core/pwrseq.c:              .compatible = "mmc-pwrseq-emmc",
-=====
-So apart from exynos, there are rk3xxx and am335x which used 
-pwrseq-emmc-restart. So lets wait for the feedback from these guys as well.
-Thanks.
-
 >> Best regards,
 >> Krzysztof
 >>
 >
+
+Well I have tested with
+
+pwrseq->reset_nb.priority = 192;
+
+But it did not resolve the issue of reboot.
+
+will early rest of emmc will that not affect the sync of data before reboot.
+
+-Anand Moon
+
 > Best regards,
->
+> --
+> Javier Martinez Canillas
+> Open Source Group
+> Samsung Research America
