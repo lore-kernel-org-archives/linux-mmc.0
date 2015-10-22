@@ -1,180 +1,141 @@
-From: Shawn Lin <shawn.lin@rock-chips.com>
-Subject: [PATCH v4 4/4] mmc: sdhci-of-arasan: add runtime pm support
-Date: Thu, 22 Oct 2015 11:37:14 +0800
-Message-ID: <1445485034-12024-1-git-send-email-shawn.lin@rock-chips.com>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>, Michal Simek <michal.simek@xilinx.com>, Soren Brinkmann <soren.brinkmann@xilinx.com>
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Shawn Lin <shawn.lin@rock-chips.com>
+From: Krzysztof Kozlowski <k.kozlowski@samsung.com>
+Subject: Re: [PATCH 1/2] mmc: dw_mmc: exynos: Add the exynos3250 compatible
+Date: Thu, 22 Oct 2015 12:51:05 +0900
+Message-ID: <56285D29.7030502@samsung.com>
+References: <1445409555-1684-1-git-send-email-jh80.chung@samsung.com>
+ <5628289C.90800@samsung.com> <56284FCE.3000108@samsung.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+In-reply-to: <56284FCE.3000108@samsung.com>
+Sender: linux-samsung-soc-owner@vger.kernel.org
+To: Jaehoon Chung <jh80.chung@samsung.com>, linux-mmc@vger.kernel.org, linux-samsung-soc@vger.kernel.org
+Cc: ulf.hansson@linaro.org, kgene@kernel.org, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
-This patch add runtime_suspend and runtime_resume for
-sdhci-of-arasan. Currently we also power-off phy at
-runtime_suspend for power-saving.
+On 22.10.2015 11:54, Jaehoon Chung wrote:
+> Hi, Krzysztof.
+> 
+> On 10/22/2015 09:06 AM, Krzysztof Kozlowski wrote:
+>> On 21.10.2015 15:39, Jaehoon Chung wrote:
+>>> To check more exactly, add the exynos3250 compatible.
+>>> Not use exynos5250 compatibility.
+>>
+>> Hi,
+>>
+>> I can't find any difference between old and new compatible. Maybe I am
+>> missing something? Maybe there is a difference for these devices?
+> 
+> Sorry, I needs to add more explanation about changing compatible.
+> Exynos3250 has more registers than exynos5250 in dwmmc IP.
+> Now, we used dwmmc controller with exynos5250 compatible.
+> Then some codes can't run in dw-mmc.c, if SoC is exynos3250.
+> For example, there is the checking point in dw_mci_exynos_config_hs400().
+> 
+> static void dw_mci_exynos_config_hs400(struct dw_mci *host, u32 timing)
+> {
+>         struct dw_mci_exynos_priv_data *priv = host->priv;
+>         u32 dqs, strobe;
+> 
+>         /*
+>          * Not supported to configure register
+>          * related to HS400
+>          */
+>         if (priv->ctrl_type < DW_MCI_TYPE_EXYNOS5420)
+>                 return;
+> 
+>         dqs = priv->saved_dqs_en;
+>         strobe = priv->saved_strobe_ctrl;
+> 
+> It can't use this feature with exynos5250 compatible.
 
-Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
+Ahh, I see it now. I missed that context and commit message wasn't
+explaining this real reason. This real reason - supporting HS400 or
+other features not present on Exynos5250 - was not mentioned.
 
-Serise-changes: 4
-- remove ifdef for PM callback statement
-- fix missing pm_runtime_set_active
-- remove pm_runtime_dont_use_autosuspend from remove hook
-- add pm_runtime_force_suspend|resume for PM callback to
-  deal with suspend invoked from rpm
-- remove wrappers of phy ops
+The new compatible make sense now... but I am wondering if instead just
+"samsung,exynos5420-dw-mshc" should be used? I think it would give the
+same result as your change and if new compatible is not required then it
+will be better not to add it.
 
----
+Best regards,
+Krzysztof
 
-Changes in v2: None
-
- drivers/mmc/host/sdhci-of-arasan.c | 85 ++++++++++++++++++++++++++++++++++++--
- 1 file changed, 82 insertions(+), 3 deletions(-)
-
-diff --git a/drivers/mmc/host/sdhci-of-arasan.c b/drivers/mmc/host/sdhci-of-arasan.c
-index 2d327d4..b044df7 100644
---- a/drivers/mmc/host/sdhci-of-arasan.c
-+++ b/drivers/mmc/host/sdhci-of-arasan.c
-@@ -30,6 +30,8 @@
- #define CLK_CTRL_TIMEOUT_MASK		(0xf << CLK_CTRL_TIMEOUT_SHIFT)
- #define CLK_CTRL_TIMEOUT_MIN_EXP	13
- 
-+#define ARASAN_RPM_DELAY_MS		50
-+
- /**
-  * struct sdhci_arasan_data
-  * @clk_ahb:	Pointer to the AHB clock
-@@ -71,6 +73,46 @@ static struct sdhci_pltfm_data sdhci_arasan_pdata = {
- 			SDHCI_QUIRK2_CLOCK_DIV_ZERO_BROKEN,
- };
- 
-+#ifdef CONFIG_PM
-+static int sdhci_arasan_runtime_suspend(struct device *dev)
-+{
-+	struct sdhci_host *host = dev_get_drvdata(dev);
-+	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-+	struct sdhci_arasan_data *sdhci_arasan = pltfm_host->priv;
-+	int ret;
-+
-+	ret = sdhci_runtime_suspend_host(host);
-+	if (ret)
-+		return ret;
-+
-+	if (!IS_ERR(sdhci_arasan->phy))
-+		phy_power_off(sdhci_arasan->phy);
-+
-+	clk_disable_unprepare(sdhci_arasan->clk_ahb);
-+	clk_disable_unprepare(pltfm_host->clk);
-+
-+	return 0;
-+}
-+
-+static int sdhci_arasan_runtime_resume(struct device *dev)
-+{
-+	struct sdhci_host *host = dev_get_drvdata(dev);
-+	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-+	struct sdhci_arasan_data *sdhci_arasan = pltfm_host->priv;
-+
-+	clk_prepare_enable(pltfm_host->clk);
-+	clk_prepare_enable(sdhci_arasan->clk_ahb);
-+
-+	if (!IS_ERR(sdhci_arasan->phy))
-+		phy_power_on(sdhci_arasan->phy);
-+
-+	return sdhci_runtime_resume_host(host);
-+}
-+#else
-+#define sdhci_arasan_runtime_suspend NULL
-+#define sdhci_arasan_runtime_resume NULL
-+#endif
-+
- #ifdef CONFIG_PM_SLEEP
- /**
-  * sdhci_arasan_suspend - Suspend method for the driver
-@@ -87,6 +129,12 @@ static int sdhci_arasan_suspend(struct device *dev)
- 	struct sdhci_arasan_data *sdhci_arasan = pltfm_host->priv;
- 	int ret;
- 
-+	ret = pm_runtime_force_suspend(dev);
-+	if (ret) {
-+		dev_err(dev, "problem force suspending\n");
-+		return ret;
-+	}
-+
- 	ret = sdhci_suspend_host(host);
- 	if (ret)
- 		return ret;
-@@ -140,18 +188,39 @@ static int sdhci_arasan_resume(struct device *dev)
- 		}
- 	}
- 
--	return sdhci_resume_host(host);
-+	ret = sdhci_resume_host(host);
-+	if (ret)
-+		goto err_resume_host;
-+
-+	ret = pm_runtime_force_resume(dev);
-+	if (ret) {
-+		dev_err(dev, "problem force resuming\n");
-+		goto err_force_resume;
-+	}
-+
-+	return 0;
- 
-+err_force_resume:
-+	sdhci_suspend_host(host);
-+err_resume_host:
-+	if (!IS_ERR(sdhci_arasan->phy))
-+		phy_power_off(sdhci_arasan->phy);
- err_phy_power:
- 	clk_disable_unprepare(pltfm_host->clk);
- err_clk_en:
- 	clk_disable_unprepare(sdhci_arasan->clk_ahb);
- 	return ret;
- }
-+#else
-+#define sdhci_arasan_suspend NULL
-+#define sdhci_arasan_resume NULL
- #endif /* ! CONFIG_PM_SLEEP */
- 
--static SIMPLE_DEV_PM_OPS(sdhci_arasan_dev_pm_ops, sdhci_arasan_suspend,
--			 sdhci_arasan_resume);
-+static const struct dev_pm_ops sdhci_arasan_dev_pm_ops = {
-+	SET_SYSTEM_SLEEP_PM_OPS(sdhci_arasan_suspend, sdhci_arasan_resume)
-+	SET_RUNTIME_PM_OPS(sdhci_arasan_runtime_suspend,
-+				sdhci_arasan_runtime_resume, NULL)
-+};
- 
- static int sdhci_arasan_probe(struct platform_device *pdev)
- {
-@@ -237,6 +306,12 @@ static int sdhci_arasan_probe(struct platform_device *pdev)
- 		}
- 	}
- 
-+	pm_runtime_set_active(&pdev->dev);
-+	pm_runtime_set_autosuspend_delay(&pdev->dev, ARASAN_RPM_DELAY_MS);
-+	pm_runtime_use_autosuspend(&pdev->dev);
-+	pm_runtime_enable(&pdev->dev);
-+	pm_suspend_ignore_children(&pdev->dev, 1);
-+
- 	ret = sdhci_add_host(host);
- 	if (ret)
- 		goto err_pltfm_free;
-@@ -244,6 +319,7 @@ static int sdhci_arasan_probe(struct platform_device *pdev)
- 	return 0;
- 
- err_pltfm_free:
-+	pm_runtime_disable(&pdev->dev);
- 	sdhci_pltfm_free(pdev);
- err_phy_power:
- 	if (!IS_ERR(sdhci_arasan->phy))
-@@ -265,6 +341,9 @@ static int sdhci_arasan_remove(struct platform_device *pdev)
- 	if (!IS_ERR(sdhci_arasan->phy))
- 		phy_exit(sdhci_arasan->phy);
- 
-+	pm_runtime_get_sync(&pdev->dev);
-+	pm_runtime_disable(&pdev->dev);
-+
- 	clk_disable_unprepare(sdhci_arasan->clk_ahb);
- 
- 	return sdhci_pltfm_unregister(pdev);
--- 
-2.3.7
+> 
+> Does it need to change the compatible from exynos5250 to exynos3250?
+> 
+> Beset Regards,
+> Jaehoon Chung
+> 
+>>
+>> Anyway if the code is the same then it should use exactly the same
+>> compatible.
+>>
+>> Best regards,
+>> Krzysztof
+>>
+>>>
+>>> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+>>> ---
+>>>  Documentation/devicetree/bindings/mmc/exynos-dw-mshc.txt | 2 ++
+>>>  drivers/mmc/host/dw_mmc-exynos.c                         | 7 +++++++
+>>>  2 files changed, 9 insertions(+)
+>>>
+>>> diff --git a/Documentation/devicetree/bindings/mmc/exynos-dw-mshc.txt b/Documentation/devicetree/bindings/mmc/exynos-dw-mshc.txt
+>>> index aad9844..cd22ac9 100644
+>>> --- a/Documentation/devicetree/bindings/mmc/exynos-dw-mshc.txt
+>>> +++ b/Documentation/devicetree/bindings/mmc/exynos-dw-mshc.txt
+>>> @@ -22,6 +22,8 @@ Required Properties:
+>>>  	  specific extensions.
+>>>  	- "samsung,exynos7-dw-mshc-smu": for controllers with Samsung Exynos7
+>>>  	  specific extensions having an SMU.
+>>> +	- "samsung,exynos3250-dw-mshc": for controllers with Samsung Exynos3250
+>>> +	  specific extensions.
+>>>  
+>>>  * samsung,dw-mshc-ciu-div: Specifies the divider value for the card interface
+>>>    unit (ciu) clock. This property is applicable only for Exynos5 SoC's and
+>>> diff --git a/drivers/mmc/host/dw_mmc-exynos.c b/drivers/mmc/host/dw_mmc-exynos.c
+>>> index 1e75309..1c96218 100644
+>>> --- a/drivers/mmc/host/dw_mmc-exynos.c
+>>> +++ b/drivers/mmc/host/dw_mmc-exynos.c
+>>> @@ -32,6 +32,7 @@ enum dw_mci_exynos_type {
+>>>  	DW_MCI_TYPE_EXYNOS5420_SMU,
+>>>  	DW_MCI_TYPE_EXYNOS7,
+>>>  	DW_MCI_TYPE_EXYNOS7_SMU,
+>>> +	DW_MCI_TYPE_EXYNOS3250,
+>>>  };
+>>>  
+>>>  /* Exynos implementation specific driver private data */
+>>> @@ -73,6 +74,9 @@ static struct dw_mci_exynos_compatible {
+>>>  	}, {
+>>>  		.compatible	= "samsung,exynos7-dw-mshc-smu",
+>>>  		.ctrl_type	= DW_MCI_TYPE_EXYNOS7_SMU,
+>>> +	}, {
+>>> +		.compatible	= "samsung,exynos3250-dw-mshc",
+>>> +		.ctrl_type	= DW_MCI_TYPE_EXYNOS3250,
+>>>  	},
+>>>  };
+>>>  
+>>> @@ -467,6 +471,7 @@ static int dw_mci_exynos_execute_tuning(struct dw_mci_slot *slot)
+>>>  	} while (start_smpl != smpl);
+>>>  
+>>>  	found = dw_mci_exynos_get_best_clksmpl(candiates);
+>>> +
+>>>  	if (found >= 0) {
+>>>  		dw_mci_exynos_set_clksmpl(host, found);
+>>>  		priv->tuned_sample = found;
+>>> @@ -520,6 +525,8 @@ static const struct of_device_id dw_mci_exynos_match[] = {
+>>>  			.data = &exynos_drv_data, },
+>>>  	{ .compatible = "samsung,exynos7-dw-mshc-smu",
+>>>  			.data = &exynos_drv_data, },
+>>> +	{ .compatible = "samsung,exynos3250-dw-mshc",
+>>> +			.data = &exynos_drv_data, },
+>>>  	{},
+>>>  };
+>>>  MODULE_DEVICE_TABLE(of, dw_mci_exynos_match);
+>>>
+>>
+>>
+> 
+> 
