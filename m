@@ -1,94 +1,198 @@
-From: Shawn Lin <shawn.lin@rock-chips.com>
-Subject: Re: [PATCH 2/2] mmc: dw_mmc: add hw_reset extension hook
-Date: Thu, 22 Oct 2015 19:25:00 +0800
-Message-ID: <5628C78C.809@rock-chips.com>
-References: <1445494740-16778-1-git-send-email-shawn.lin@rock-chips.com>
- <1445494793-16905-1-git-send-email-shawn.lin@rock-chips.com>
- <CAPDyKFr6vmx4F6OShYmPvxYu=_vb70ijL-twFqBcotXTX9eEaQ@mail.gmail.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [RESEND PATCH v4 2/3] mmc: sdhci-of-arasan: add phy support for sdhci-of-arasan
+Date: Thu, 22 Oct 2015 13:36:56 +0200
+Message-ID: <CAPDyKFpVPEi_En=+-8h-=hA6msU3ogrqOPy43K8sa1MKrY1aRg@mail.gmail.com>
+References: <1445504800-5507-1-git-send-email-shawn.lin@rock-chips.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAPDyKFr6vmx4F6OShYmPvxYu=_vb70ijL-twFqBcotXTX9eEaQ@mail.gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: shawn.lin@rock-chips.com, Jaehoon Chung <jh80.chung@samsung.com>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-wi0-f182.google.com ([209.85.212.182]:32941 "EHLO
+	mail-wi0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752694AbbJVLg5 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 22 Oct 2015 07:36:57 -0400
+Received: by wijp11 with SMTP id p11so27439482wij.0
+        for <linux-mmc@vger.kernel.org>; Thu, 22 Oct 2015 04:36:56 -0700 (PDT)
+In-Reply-To: <1445504800-5507-1-git-send-email-shawn.lin@rock-chips.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Shawn Lin <shawn.lin@rock-chips.com>
+Cc: Michal Simek <michal.simek@xilinx.com>, Soren Brinkmann <soren.brinkmann@xilinx.com>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 
-On 2015/10/22 17:48, Ulf Hansson wrote:
-> On 22 October 2015 at 08:19, Shawn Lin <shawn.lin@rock-chips.com> wrote:
->> This patch add hw_reset for dw_mmc to implement hw reset
->> procedure. It's useful for mmc core to recover emmc devices
->> if emmc runs into unexpected state. Add MMC_CAP_HW_RESET
->> capability to dw_mmc extension driver directly if it needs hw_reset.
->>
->> Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
->> ---
->>
->>   drivers/mmc/host/dw_mmc.c | 4 ++++
->>   drivers/mmc/host/dw_mmc.h | 2 ++
->>   2 files changed, 6 insertions(+)
->>
->> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
->> index 8a0f2995..46b12de 100644
->> --- a/drivers/mmc/host/dw_mmc.c
->> +++ b/drivers/mmc/host/dw_mmc.c
->> @@ -1482,6 +1482,10 @@ static void dw_mci_hw_reset(struct mmc_host *mmc)
->>   {
->>          struct dw_mci_slot *slot = mmc_priv(mmc);
->>          struct dw_mci *host = slot->host;
->> +       const struct dw_mci_drv_data *drv_data = host->drv_data;
->> +
->> +       if (drv_data && drv_data->hw_reset)
->> +               return drv_data->hw_reset(host);
+On 22 October 2015 at 11:06, Shawn Lin <shawn.lin@rock-chips.com> wrote:
+> This patch adds Generic PHY access for sdhci-of-arasan. Driver
+> can get PHY handler from dt-binding, and power-on/init the PHY.
+> Also we add pm ops for PHY here if CONFIG_PM_SLEEP is enabled.
+> Currently, it's just mandatory for arasan,sdhci-5.1.
 >
-> dw_mmc is starting to walk the same bad path as sdhci has done.
+> Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
 >
-> Please, try to avoid adding non-needed callbacks and start to turn
-> dw_mmc into a library instead.
+> Serise-changes: 4
+> - remove suspend/resume_phy
+> - add err handle label for system PM callback
+> - fix comments of struct sdhci_arasan_data and system PM
+>   callback suggested by Michal
 >
+> Serise-changes: 3
+> - remove phy_init/exit for suspend/resume
+> - adjust phy_int/power_on seq to make code more reasonable
+> - simplify suspend/resume_phy
+>
+> Serise-changes: 2
+> - Keep phy as a mandatory requirement for arasan,sdhci-5.1
+>
+> ---
+>
+> Changes in v2: None
+>
+>  drivers/mmc/host/sdhci-of-arasan.c | 63 +++++++++++++++++++++++++++++++++++---
+>  1 file changed, 59 insertions(+), 4 deletions(-)
+>
+> diff --git a/drivers/mmc/host/sdhci-of-arasan.c b/drivers/mmc/host/sdhci-of-arasan.c
+> index 75379cb..4f30716 100644
+> --- a/drivers/mmc/host/sdhci-of-arasan.c
+> +++ b/drivers/mmc/host/sdhci-of-arasan.c
+> @@ -21,6 +21,7 @@
+>
+>  #include <linux/module.h>
+>  #include <linux/of_device.h>
+> +#include <linux/phy/phy.h>
+>  #include "sdhci-pltfm.h"
+>
+>  #define SDHCI_ARASAN_CLK_CTRL_OFFSET   0x2c
+> @@ -32,9 +33,11 @@
+>  /**
+>   * struct sdhci_arasan_data
+>   * @clk_ahb:   Pointer to the AHB clock
+> + * @phy: Pointer to the generic phy
+>   */
+>  struct sdhci_arasan_data {
+>         struct clk      *clk_ahb;
+> +       struct phy      *phy;
+>  };
+>
+>  static unsigned int sdhci_arasan_get_timeout_clock(struct sdhci_host *host)
+> @@ -72,7 +75,7 @@ static struct sdhci_pltfm_data sdhci_arasan_pdata = {
+>  /**
+>   * sdhci_arasan_suspend - Suspend method for the driver
+>   * @dev:       Address of the device structure
+> - * Returns 0 on success and error value on error
+> + * Return: 0 on success and error value on error
+>   *
+>   * Put the device in a low power state.
+>   */
+> @@ -88,6 +91,14 @@ static int sdhci_arasan_suspend(struct device *dev)
+>         if (ret)
+>                 return ret;
+>
+> +       if (!IS_ERR(sdhci_arasan->phy)) {
+> +               ret = phy_power_off(sdhci_arasan->phy);
+> +               if (ret) {
+> +                       dev_err(dev, "Cannot suspend phy.\n");
+> +                       return ret;
+> +               }
+> +       }
+> +
+>         clk_disable(pltfm_host->clk);
+>         clk_disable(sdhci_arasan->clk_ahb);
+>
+> @@ -97,7 +108,7 @@ static int sdhci_arasan_suspend(struct device *dev)
+>  /**
+>   * sdhci_arasan_resume - Resume method for the driver
+>   * @dev:       Address of the device structure
+> - * Returns 0 on success and error value on error
+> + * Return: 0 on success and error value on error
+>   *
+>   * Resume operation after suspend
+>   */
+> @@ -118,11 +129,24 @@ static int sdhci_arasan_resume(struct device *dev)
+>         ret = clk_enable(pltfm_host->clk);
+>         if (ret) {
+>                 dev_err(dev, "Cannot enable SD clock.\n");
+> -               clk_disable(sdhci_arasan->clk_ahb);
+> -               return ret;
+> +               goto err_clk_en;
+> +       }
+> +
+> +       if (!IS_ERR(sdhci_arasan->phy)) {
+> +               ret = phy_power_on(sdhci_arasan->phy);
+> +               if (ret) {
+> +                       dev_err(dev, "Cannot resume phy.\n");
+> +                       goto err_phy_power;
+> +               }
+>         }
+>
+>         return sdhci_resume_host(host);
+> +
+> +err_phy_power:
+> +       clk_disable(pltfm_host->clk);
+> +err_clk_en:
+> +       clk_disable(sdhci_arasan->clk_ahb);
+> +       return ret;
+>  }
+>  #endif /* ! CONFIG_PM_SLEEP */
+>
+> @@ -188,6 +212,31 @@ static int sdhci_arasan_probe(struct platform_device *pdev)
+>                 goto clk_disable_all;
+>         }
+>
+> +       sdhci_arasan->phy = ERR_PTR(-ENODEV);
+> +       if (of_device_is_compatible(pdev->dev.of_node,
+> +                                   "arasan,sdhci-5.1")) {
+> +               sdhci_arasan->phy = devm_phy_get(&pdev->dev,
+> +                                                "phy_arasan");
+> +               if (IS_ERR(sdhci_arasan->phy)) {
+> +                       ret = PTR_ERR(sdhci_arasan->phy);
+> +                       dev_err(&pdev->dev, "No phy for arasan,sdhci-5.1.\n");
+> +                       goto clk_disable_all;
+> +               }
+> +
+> +               ret = phy_init(sdhci_arasan->phy);
+> +               if (ret < 0) {
+> +                       dev_err(&pdev->dev, "phy_init err.\n");
+> +                       goto clk_disable_all;
+> +               }
+> +
+> +               ret = phy_power_on(sdhci_arasan->phy);
+> +               if (ret < 0) {
+> +                       dev_err(&pdev->dev, "phy_power_on err.\n");
+> +                       phy_exit(sdhci_arasan->phy);
 
-sorry for posting this, but then a I am just now reading your comments 
-about overstaffed quirks and callback of sdhci. Obviously dw_mmc is a 
-little easier to be turned into a lib before it going to be the 
-equivalent weight of sdhci.
+Remove phy_exit() here, as it's taken care of from the below goto.
 
-I'm glad to try it. :)
+> +                       goto err_phy_power;
+> +               }
+> +       }
+> +
+>         ret = sdhci_add_host(host);
+>         if (ret)
+>                 goto err_pltfm_free;
+> @@ -196,6 +245,9 @@ static int sdhci_arasan_probe(struct platform_device *pdev)
+>
+>  err_pltfm_free:
+>         sdhci_pltfm_free(pdev);
 
-> Kind regards
-> Uffe
->
->>
->>          if (host->use_dma == TRANS_MODE_IDMAC)
->>                  dw_mci_idmac_reset(host);
->> diff --git a/drivers/mmc/host/dw_mmc.h b/drivers/mmc/host/dw_mmc.h
->> index 9df18c1..21b9df4 100644
->> --- a/drivers/mmc/host/dw_mmc.h
->> +++ b/drivers/mmc/host/dw_mmc.h
->> @@ -282,6 +282,7 @@ struct dw_mci_slot {
->>    * @set_ios: handle bus specific extensions.
->>    * @parse_dt: parse implementation specific device tree properties.
->>    * @execute_tuning: implementation specific tuning procedure.
->> + * @hw_reset: implementation specific hw reset procedure.
->>    *
->>    * Provide controller implementation specific extensions. The usage of this
->>    * data structure is fully optional and usage of each member in this structure
->> @@ -299,5 +300,6 @@ struct dw_mci_drv_data {
->>                                                  struct mmc_ios *ios);
->>          int             (*switch_voltage)(struct mmc_host *mmc,
->>                                            struct mmc_ios *ios);
->> +       void            (*hw_reset)(struct dw_mci *host);
->>   };
->>   #endif /* _DW_MMC_H_ */
->> --
->> 2.3.7
->>
->>
->
->
->
+There is a missing call to phy_power_off() in some error cases.
 
+> +err_phy_power:
+> +       if (!IS_ERR(sdhci_arasan->phy))
+> +               phy_exit(sdhci_arasan->phy);
+>  clk_disable_all:
+>         clk_disable_unprepare(clk_xin);
+>  clk_dis_ahb:
+> @@ -210,6 +262,9 @@ static int sdhci_arasan_remove(struct platform_device *pdev)
+>         struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+>         struct sdhci_arasan_data *sdhci_arasan = pltfm_host->priv;
+>
+> +       if (!IS_ERR(sdhci_arasan->phy))
 
--- 
-Best Regards
-Shawn Lin
+phy_power_off() is needed here as well.
+
+> +               phy_exit(sdhci_arasan->phy);
+> +
+>         clk_disable_unprepare(sdhci_arasan->clk_ahb);
+>
+>         return sdhci_pltfm_unregister(pdev);
+> --
+
+Kind regards
+Uffe
