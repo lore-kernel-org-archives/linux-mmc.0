@@ -1,130 +1,182 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH 1/2] mmc: dw_mmc: exynos: Add the exynos3250 compatible
-Date: Thu, 22 Oct 2015 11:54:06 +0900
-Message-ID: <56284FCE.3000108@samsung.com>
-References: <1445409555-1684-1-git-send-email-jh80.chung@samsung.com>
- <5628289C.90800@samsung.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 7bit
+From: Shawn Lin <shawn.lin@rock-chips.com>
+Subject: [PATCH v4 2/4] mmc: sdhci-of-arasan: add phy support for sdhci-of-arasan
+Date: Thu, 22 Oct 2015 11:36:58 +0800
+Message-ID: <1445485018-11942-1-git-send-email-shawn.lin@rock-chips.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout3.samsung.com ([203.254.224.33]:54410 "EHLO
-	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932473AbbJVCyJ (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 21 Oct 2015 22:54:09 -0400
-In-reply-to: <5628289C.90800@samsung.com>
+Received: from lucky1.263xmail.com ([211.157.147.133]:53781 "EHLO
+	lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751843AbbJVDia (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 21 Oct 2015 23:38:30 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Krzysztof Kozlowski <k.kozlowski@samsung.com>, linux-mmc@vger.kernel.org, linux-samsung-soc@vger.kernel.org
-Cc: ulf.hansson@linaro.org, kgene@kernel.org, linux-arm-kernel@lists.infradead.org
+To: Ulf Hansson <ulf.hansson@linaro.org>, Michal Simek <michal.simek@xilinx.com>, Soren Brinkmann <soren.brinkmann@xilinx.com>
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Shawn Lin <shawn.lin@rock-chips.com>
 
-Hi, Krzysztof.
+This patch adds Generic PHY access for sdhci-of-arasan. Driver
+can get PHY handler from dt-binding, and power-on/init the PHY.
+Also we add pm ops for PHY here if CONFIG_PM_SLEEP is enabled.
+Currently, it's just mandatory for arasan,sdhci-5.1.
 
-On 10/22/2015 09:06 AM, Krzysztof Kozlowski wrote:
-> On 21.10.2015 15:39, Jaehoon Chung wrote:
->> To check more exactly, add the exynos3250 compatible.
->> Not use exynos5250 compatibility.
-> 
-> Hi,
-> 
-> I can't find any difference between old and new compatible. Maybe I am
-> missing something? Maybe there is a difference for these devices?
+Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
 
-Sorry, I needs to add more explanation about changing compatible.
-Exynos3250 has more registers than exynos5250 in dwmmc IP.
-Now, we used dwmmc controller with exynos5250 compatible.
-Then some codes can't run in dw-mmc.c, if SoC is exynos3250.
-For example, there is the checking point in dw_mci_exynos_config_hs400().
+Serise-changes: 4
+- remove suspend/resume_phy
+- add err handle label for system PM callback
+- fix comments of struct sdhci_arasan_data and system PM
+  callback suggested by Michal
 
-static void dw_mci_exynos_config_hs400(struct dw_mci *host, u32 timing)
-{
-        struct dw_mci_exynos_priv_data *priv = host->priv;
-        u32 dqs, strobe;
+Serise-changes: 3
+- remove phy_init/exit for suspend/resume
+- adjust phy_int/power_on seq to make code more reasonable
+- simplify suspend/resume_phy
 
-        /*
-         * Not supported to configure register
-         * related to HS400
-         */
-        if (priv->ctrl_type < DW_MCI_TYPE_EXYNOS5420)
-                return;
+Serise-changes: 2
+- Keep phy as a mandatory requirement for arasan,sdhci-5.1
 
-        dqs = priv->saved_dqs_en;
-        strobe = priv->saved_strobe_ctrl;
+---
 
-It can't use this feature with exynos5250 compatible.
+Changes in v2: None
 
-Does it need to change the compatible from exynos5250 to exynos3250?
+ drivers/mmc/host/sdhci-of-arasan.c | 63 +++++++++++++++++++++++++++++++++++---
+ 1 file changed, 59 insertions(+), 4 deletions(-)
 
-Beset Regards,
-Jaehoon Chung
+diff --git a/drivers/mmc/host/sdhci-of-arasan.c b/drivers/mmc/host/sdhci-of-arasan.c
+index 75379cb..4f30716 100644
+--- a/drivers/mmc/host/sdhci-of-arasan.c
++++ b/drivers/mmc/host/sdhci-of-arasan.c
+@@ -21,6 +21,7 @@
+ 
+ #include <linux/module.h>
+ #include <linux/of_device.h>
++#include <linux/phy/phy.h>
+ #include "sdhci-pltfm.h"
+ 
+ #define SDHCI_ARASAN_CLK_CTRL_OFFSET	0x2c
+@@ -32,9 +33,11 @@
+ /**
+  * struct sdhci_arasan_data
+  * @clk_ahb:	Pointer to the AHB clock
++ * @phy: Pointer to the generic phy
+  */
+ struct sdhci_arasan_data {
+ 	struct clk	*clk_ahb;
++	struct phy	*phy;
+ };
+ 
+ static unsigned int sdhci_arasan_get_timeout_clock(struct sdhci_host *host)
+@@ -72,7 +75,7 @@ static struct sdhci_pltfm_data sdhci_arasan_pdata = {
+ /**
+  * sdhci_arasan_suspend - Suspend method for the driver
+  * @dev:	Address of the device structure
+- * Returns 0 on success and error value on error
++ * Return: 0 on success and error value on error
+  *
+  * Put the device in a low power state.
+  */
+@@ -88,6 +91,14 @@ static int sdhci_arasan_suspend(struct device *dev)
+ 	if (ret)
+ 		return ret;
+ 
++	if (!IS_ERR(sdhci_arasan->phy)) {
++		ret = phy_power_off(sdhci_arasan->phy);
++		if (ret) {
++			dev_err(dev, "Cannot suspend phy.\n");
++			return ret;
++		}
++	}
++
+ 	clk_disable(pltfm_host->clk);
+ 	clk_disable(sdhci_arasan->clk_ahb);
+ 
+@@ -97,7 +108,7 @@ static int sdhci_arasan_suspend(struct device *dev)
+ /**
+  * sdhci_arasan_resume - Resume method for the driver
+  * @dev:	Address of the device structure
+- * Returns 0 on success and error value on error
++ * Return: 0 on success and error value on error
+  *
+  * Resume operation after suspend
+  */
+@@ -118,11 +129,24 @@ static int sdhci_arasan_resume(struct device *dev)
+ 	ret = clk_enable(pltfm_host->clk);
+ 	if (ret) {
+ 		dev_err(dev, "Cannot enable SD clock.\n");
+-		clk_disable(sdhci_arasan->clk_ahb);
+-		return ret;
++		goto err_clk_en;
++	}
++
++	if (!IS_ERR(sdhci_arasan->phy)) {
++		ret = phy_power_on(sdhci_arasan->phy);
++		if (ret) {
++			dev_err(dev, "Cannot resume phy.\n");
++			goto err_phy_power;
++		}
+ 	}
+ 
+ 	return sdhci_resume_host(host);
++
++err_phy_power:
++	clk_disable(pltfm_host->clk);
++err_clk_en:
++	clk_disable(sdhci_arasan->clk_ahb);
++	return ret;
+ }
+ #endif /* ! CONFIG_PM_SLEEP */
+ 
+@@ -188,6 +212,31 @@ static int sdhci_arasan_probe(struct platform_device *pdev)
+ 		goto clk_disable_all;
+ 	}
+ 
++	sdhci_arasan->phy = ERR_PTR(-ENODEV);
++	if (of_device_is_compatible(pdev->dev.of_node,
++				    "arasan,sdhci-5.1")) {
++		sdhci_arasan->phy = devm_phy_get(&pdev->dev,
++						 "phy_arasan");
++		if (IS_ERR(sdhci_arasan->phy)) {
++			ret = PTR_ERR(sdhci_arasan->phy);
++			dev_err(&pdev->dev, "No phy for arasan,sdhci-5.1.\n");
++			goto clk_disable_all;
++		}
++
++		ret = phy_init(sdhci_arasan->phy);
++		if (ret < 0) {
++			dev_err(&pdev->dev, "phy_init err.\n");
++			goto clk_disable_all;
++		}
++
++		ret = phy_power_on(sdhci_arasan->phy);
++		if (ret < 0) {
++			dev_err(&pdev->dev, "phy_power_on err.\n");
++			phy_exit(sdhci_arasan->phy);
++			goto err_phy_power;
++		}
++	}
++
+ 	ret = sdhci_add_host(host);
+ 	if (ret)
+ 		goto err_pltfm_free;
+@@ -196,6 +245,9 @@ static int sdhci_arasan_probe(struct platform_device *pdev)
+ 
+ err_pltfm_free:
+ 	sdhci_pltfm_free(pdev);
++err_phy_power:
++	if (!IS_ERR(sdhci_arasan->phy))
++		phy_exit(sdhci_arasan->phy);
+ clk_disable_all:
+ 	clk_disable_unprepare(clk_xin);
+ clk_dis_ahb:
+@@ -210,6 +262,9 @@ static int sdhci_arasan_remove(struct platform_device *pdev)
+ 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+ 	struct sdhci_arasan_data *sdhci_arasan = pltfm_host->priv;
+ 
++	if (!IS_ERR(sdhci_arasan->phy))
++		phy_exit(sdhci_arasan->phy);
++
+ 	clk_disable_unprepare(sdhci_arasan->clk_ahb);
+ 
+ 	return sdhci_pltfm_unregister(pdev);
+-- 
+2.3.7
 
-> 
-> Anyway if the code is the same then it should use exactly the same
-> compatible.
-> 
-> Best regards,
-> Krzysztof
-> 
->>
->> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
->> ---
->>  Documentation/devicetree/bindings/mmc/exynos-dw-mshc.txt | 2 ++
->>  drivers/mmc/host/dw_mmc-exynos.c                         | 7 +++++++
->>  2 files changed, 9 insertions(+)
->>
->> diff --git a/Documentation/devicetree/bindings/mmc/exynos-dw-mshc.txt b/Documentation/devicetree/bindings/mmc/exynos-dw-mshc.txt
->> index aad9844..cd22ac9 100644
->> --- a/Documentation/devicetree/bindings/mmc/exynos-dw-mshc.txt
->> +++ b/Documentation/devicetree/bindings/mmc/exynos-dw-mshc.txt
->> @@ -22,6 +22,8 @@ Required Properties:
->>  	  specific extensions.
->>  	- "samsung,exynos7-dw-mshc-smu": for controllers with Samsung Exynos7
->>  	  specific extensions having an SMU.
->> +	- "samsung,exynos3250-dw-mshc": for controllers with Samsung Exynos3250
->> +	  specific extensions.
->>  
->>  * samsung,dw-mshc-ciu-div: Specifies the divider value for the card interface
->>    unit (ciu) clock. This property is applicable only for Exynos5 SoC's and
->> diff --git a/drivers/mmc/host/dw_mmc-exynos.c b/drivers/mmc/host/dw_mmc-exynos.c
->> index 1e75309..1c96218 100644
->> --- a/drivers/mmc/host/dw_mmc-exynos.c
->> +++ b/drivers/mmc/host/dw_mmc-exynos.c
->> @@ -32,6 +32,7 @@ enum dw_mci_exynos_type {
->>  	DW_MCI_TYPE_EXYNOS5420_SMU,
->>  	DW_MCI_TYPE_EXYNOS7,
->>  	DW_MCI_TYPE_EXYNOS7_SMU,
->> +	DW_MCI_TYPE_EXYNOS3250,
->>  };
->>  
->>  /* Exynos implementation specific driver private data */
->> @@ -73,6 +74,9 @@ static struct dw_mci_exynos_compatible {
->>  	}, {
->>  		.compatible	= "samsung,exynos7-dw-mshc-smu",
->>  		.ctrl_type	= DW_MCI_TYPE_EXYNOS7_SMU,
->> +	}, {
->> +		.compatible	= "samsung,exynos3250-dw-mshc",
->> +		.ctrl_type	= DW_MCI_TYPE_EXYNOS3250,
->>  	},
->>  };
->>  
->> @@ -467,6 +471,7 @@ static int dw_mci_exynos_execute_tuning(struct dw_mci_slot *slot)
->>  	} while (start_smpl != smpl);
->>  
->>  	found = dw_mci_exynos_get_best_clksmpl(candiates);
->> +
->>  	if (found >= 0) {
->>  		dw_mci_exynos_set_clksmpl(host, found);
->>  		priv->tuned_sample = found;
->> @@ -520,6 +525,8 @@ static const struct of_device_id dw_mci_exynos_match[] = {
->>  			.data = &exynos_drv_data, },
->>  	{ .compatible = "samsung,exynos7-dw-mshc-smu",
->>  			.data = &exynos_drv_data, },
->> +	{ .compatible = "samsung,exynos3250-dw-mshc",
->> +			.data = &exynos_drv_data, },
->>  	{},
->>  };
->>  MODULE_DEVICE_TABLE(of, dw_mci_exynos_match);
->>
-> 
-> 
 
