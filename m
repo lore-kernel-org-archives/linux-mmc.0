@@ -1,294 +1,115 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v3 2/5] mmc: sdhci-pxav3: enable usage of DAT3 pin as HW
- card detect
-Date: Thu, 22 Oct 2015 15:29:51 +0200
-Message-ID: <CAPDyKFqT6tGOKYM_tjnf7k70_1Uu70Vew8PpQW6g9KKzRKBX1g@mail.gmail.com>
-References: <1444926346-29763-1-git-send-email-mw@semihalf.com>
-	<1444926346-29763-3-git-send-email-mw@semihalf.com>
+Subject: Re: [PATCH 1/2] mmc: sdhci-pci: Add more PCI IDs for Intel controllers
+Date: Thu, 22 Oct 2015 15:32:53 +0200
+Message-ID: <CAPDyKFrQ7bjJiyHkMGfcuZU4vycHWoV0yVGfZgh_O3KPCGy0Tw@mail.gmail.com>
+References: <1445415346-12929-1-git-send-email-adrian.hunter@intel.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1444926346-29763-3-git-send-email-mw@semihalf.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Marcin Wojtas <mw@semihalf.com>
-Cc: "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, linux-mmc <linux-mmc@vger.kernel.org>, Sebastian Hesselbarth <sebastian.hesselbarth@gmail.com>, Andrew Lunn <andrew@lunn.ch>, Jason Cooper <jason@lakedaemon.net>, Thomas Petazzoni <thomas.petazzoni@free-electrons.com>, Gregory Clement <gregory.clement@free-electrons.com>, Nadav Haklai <nadavh@marvell.com>, Lior Amsalem <alior@marvell.com>, Tawfik Bayouk <tawfik@marvell.com>, jaz@semihalf.com, Jisheng Zhang <jszhang@marvell.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-wi0-f176.google.com ([209.85.212.176]:33842 "EHLO
+	mail-wi0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1757674AbbJVNcz (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 22 Oct 2015 09:32:55 -0400
+Received: by wikq8 with SMTP id q8so32243184wik.1
+        for <linux-mmc@vger.kernel.org>; Thu, 22 Oct 2015 06:32:54 -0700 (PDT)
+In-Reply-To: <1445415346-12929-1-git-send-email-adrian.hunter@intel.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Adrian Hunter <adrian.hunter@intel.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>
 
-On 15 October 2015 at 18:25, Marcin Wojtas <mw@semihalf.com> wrote:
-> Marvell Armada 38x SDHCI controller enable using DAT3 pin as a hardware
-> card detection. According to the SD sdandard this signal can be used for
-> this purpose combined with a pull-down resistor, implying inverted (active
-> high) polarization of a card detect. MMC standard does not support this
-> feature and does not operate with such connectivity of DAT3.
+On 21 October 2015 at 10:15, Adrian Hunter <adrian.hunter@intel.com> wrote:
+> Add PCI IDs for Intel host controllers
 >
-> When using DAT3-based detection Armada 38x SDIO IP expects its internal
-> clock to be always on, which had to be ensured by:
-> - Udating appropriate registers, each time controller is reset. On the
+> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
 
-Isn't the reset sequence going to enable the clock again? I though
-reset was used to recover from failures.
-
-To me, it seems odd that you need to deal with this, but of course
-there are lots of odd things with sdhci. :-)
-
->   occasion of adding new register @0x104, register @0x100 name is modified
->   in order to the be aligned with Armada 38x documentation.
-> - Leaving the clock enabled despite power-down. For this purpose a wrapper
->   for sdhci_set_clock function is added.
-> - Disabling pm_runtime - during suspend both io_clock and controller's
->   bus power is switched off, hence it would prevent proper card detection.
->
-> In addition to the changes above this commit adds a new property to Armada
-> 38x SDHCI node ('dat3-cd') with an according binding documentation update.
-> 'sdhci_pxa' structure is also extended with dedicated flag for checking if
-> DAT3-based detection is in use.
-
-There is an easier way. Just check the new DT binding and if it set,
-execute pm_runtime_forbid() during ->probe(). No more runtime PM
-changes should be needed.
-
-Actually, I wonder if we should make this a new mmc core feature. We
-could via mmc_add_host() check if this DT property is set and then
-invoke the pm_runtime_forbid(). What do you think?
-
-One question, for clarity, you don't expect card detect IRQs to be
-treated as wakeups while being system PM suspended, right?
-
->
-> Signed-off-by: Marcin Wojtas <mw@semihalf.com>
-> ---
->  .../devicetree/bindings/mmc/sdhci-pxa.txt          |   5 ++
->  drivers/mmc/host/sdhci-pxav3.c                     | 100 +++++++++++++++++----
->  2 files changed, 87 insertions(+), 18 deletions(-)
->
-> diff --git a/Documentation/devicetree/bindings/mmc/sdhci-pxa.txt b/Documentation/devicetree/bindings/mmc/sdhci-pxa.txt
-> index 3d1b449..ffd6b14 100644
-> --- a/Documentation/devicetree/bindings/mmc/sdhci-pxa.txt
-> +++ b/Documentation/devicetree/bindings/mmc/sdhci-pxa.txt
-> @@ -23,6 +23,11 @@ Required properties:
->
->  Optional properties:
->  - mrvl,clk-delay-cycles: Specify a number of cycles to delay for tuning.
-> +- dat3-cd: use DAT3 pin as hardware card detect - option available for
-> +  "marvell,armada-380-sdhci" only. The detection is supposed to work with
-> +  active high polarity, which implies usage of "cd-inverted" property.
-> +  Note that according to the specifications DAT3-based card detection can be
-> +  used with SD cards only. MMC standard doesn't support this feature.
->
->  Example:
->
-> diff --git a/drivers/mmc/host/sdhci-pxav3.c b/drivers/mmc/host/sdhci-pxav3.c
-> index 54a253c0..d813233 100644
-> --- a/drivers/mmc/host/sdhci-pxav3.c
-> +++ b/drivers/mmc/host/sdhci-pxav3.c
-> @@ -46,10 +46,14 @@
->  #define SDCLK_DELAY_SHIFT      9
->  #define SDCLK_DELAY_MASK       0x1f
->
-> -#define SD_CFG_FIFO_PARAM       0x100
-> +#define SD_EXTRA_PARAM_REG     0x100
->  #define SDCFG_GEN_PAD_CLK_ON   (1<<6)
->  #define SDCFG_GEN_PAD_CLK_CNT_MASK     0xFF
->  #define SDCFG_GEN_PAD_CLK_CNT_SHIFT    24
-> +#define SD_FIFO_PARAM_REG      0x104
-> +#define SD_USE_DAT3            BIT(7)
-> +#define SD_OVRRD_CLK_OEN       BIT(11)
-> +#define SD_FORCE_CLK_ON                BIT(12)
->
->  #define SD_SPI_MODE          0x108
->  #define SD_CE_ATA_1          0x10C
-> @@ -64,6 +68,7 @@ struct sdhci_pxa {
->         u8      power_mode;
->         void __iomem *sdio3_conf_reg;
->         void __iomem *mbus_win_regs;
-> +       bool dat3_cd_enabled;
->  };
->
->  /*
-> @@ -160,13 +165,36 @@ static int armada_38x_quirks(struct platform_device *pdev,
->         }
->         host->caps1 &= ~(SDHCI_SUPPORT_SDR104 | SDHCI_USE_SDR50_TUNING);
->
-> +       if (of_property_read_bool(np, "dat3-cd") &&
-> +           !of_property_read_bool(np, "broken-cd"))
-
-Please, don't involve "broken-cd" as that has its own rules and purpose.
-
-> +               pxa->dat3_cd_enabled = true;
-> +
->         return 0;
->  }
->
-> +static void pxav3_set_clock(struct sdhci_host *host, unsigned int clock)
-> +{
-> +       struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> +       struct sdhci_pxa *pxa = pltfm_host->priv;
-> +
-> +       sdhci_set_clock(host, clock);
-> +
-> +       /*
-> +        * The interface clock enable is also used as control
-> +        * for the A38x SDIO IP, so it can't be powered down
-> +        * when using HW-based card detection.
-> +        */
-> +       if (clock == 0 && pxa->dat3_cd_enabled)
-> +               sdhci_writew(host, SDHCI_CLOCK_INT_EN, SDHCI_CLOCK_CONTROL);
-> +}
-> +
->  static void pxav3_reset(struct sdhci_host *host, u8 mask)
->  {
->         struct platform_device *pdev = to_platform_device(mmc_dev(host->mmc));
->         struct sdhci_pxa_platdata *pdata = pdev->dev.platform_data;
-> +       struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> +       struct sdhci_pxa *pxa = pltfm_host->priv;
-> +       u32 reg_val;
->
->         sdhci_reset(host, mask);
->
-> @@ -184,6 +212,21 @@ static void pxav3_reset(struct sdhci_host *host, u8 mask)
->                         tmp |= SDCLK_SEL;
->                         writew(tmp, host->ioaddr + SD_CLOCK_BURST_SIZE_SETUP);
->                 }
-> +
-> +               if (pxa->dat3_cd_enabled) {
-> +                       reg_val = sdhci_readl(host, SD_FIFO_PARAM_REG);
-> +                       reg_val |= SD_USE_DAT3 | SD_OVRRD_CLK_OEN |
-> +                                  SD_FORCE_CLK_ON;
-> +                       sdhci_writel(host, reg_val, SD_FIFO_PARAM_REG);
-> +
-> +                       /*
-> +                        * For HW detection based on DAT3 pin keep internal
-> +                        * clk switched on after controller reset.
-> +                        */
-> +                       reg_val = sdhci_readl(host, SDHCI_CLOCK_CONTROL);
-> +                       reg_val |= SDHCI_CLOCK_INT_EN;
-> +                       sdhci_writel(host, reg_val, SDHCI_CLOCK_CONTROL);
-> +               }
->         }
->  }
->
-> @@ -211,9 +254,9 @@ static void pxav3_gen_init_74_clocks(struct sdhci_host *host, u8 power_mode)
->                 writew(tmp, host->ioaddr + SD_CE_ATA_2);
->
->                 /* start sending the 74 clocks */
-> -               tmp = readw(host->ioaddr + SD_CFG_FIFO_PARAM);
-> +               tmp = readw(host->ioaddr + SD_EXTRA_PARAM_REG);
->                 tmp |= SDCFG_GEN_PAD_CLK_ON;
-> -               writew(tmp, host->ioaddr + SD_CFG_FIFO_PARAM);
-> +               writew(tmp, host->ioaddr + SD_EXTRA_PARAM_REG);
->
->                 /* slowest speed is about 100KHz or 10usec per clock */
->                 udelay(740);
-> @@ -298,7 +341,7 @@ static void pxav3_set_uhs_signaling(struct sdhci_host *host, unsigned int uhs)
->  }
->
->  static const struct sdhci_ops pxav3_sdhci_ops = {
-> -       .set_clock = sdhci_set_clock,
-> +       .set_clock = pxav3_set_clock,
->         .platform_send_init_74_clocks = pxav3_gen_init_74_clocks,
->         .get_max_clock = sdhci_pltfm_clk_get_max_clock,
->         .set_bus_width = sdhci_set_bus_width,
-> @@ -407,6 +450,7 @@ static int sdhci_pxav3_probe(struct platform_device *pdev)
->                 sdhci_get_of_property(pdev);
->                 pdata = pxav3_get_mmc_pdata(dev);
->                 pdev->dev.platform_data = pdata;
-> +
->         } else if (pdata) {
->                 /* on-chip device */
->                 if (pdata->flags & PXA_FLAG_CARD_PERMANENT)
-> @@ -438,12 +482,15 @@ static int sdhci_pxav3_probe(struct platform_device *pdev)
->                 }
->         }
->
-> -       pm_runtime_get_noresume(&pdev->dev);
-> -       pm_runtime_set_active(&pdev->dev);
-> -       pm_runtime_set_autosuspend_delay(&pdev->dev, PXAV3_RPM_DELAY_MS);
-> -       pm_runtime_use_autosuspend(&pdev->dev);
-> -       pm_runtime_enable(&pdev->dev);
-> -       pm_suspend_ignore_children(&pdev->dev, 1);
-> +       if (!pxa->dat3_cd_enabled) {
-> +               pm_runtime_get_noresume(&pdev->dev);
-> +               pm_runtime_set_active(&pdev->dev);
-> +               pm_runtime_set_autosuspend_delay(&pdev->dev,
-> +                                                PXAV3_RPM_DELAY_MS);
-> +               pm_runtime_use_autosuspend(&pdev->dev);
-> +               pm_runtime_enable(&pdev->dev);
-> +               pm_suspend_ignore_children(&pdev->dev, 1);
-> +       }
->
->         ret = sdhci_add_host(host);
->         if (ret) {
-> @@ -456,13 +503,16 @@ static int sdhci_pxav3_probe(struct platform_device *pdev)
->         if (host->mmc->pm_caps & MMC_PM_WAKE_SDIO_IRQ)
->                 device_init_wakeup(&pdev->dev, 1);
->
-> -       pm_runtime_put_autosuspend(&pdev->dev);
-> +       if (!pxa->dat3_cd_enabled)
-> +               pm_runtime_put_autosuspend(&pdev->dev);
->
->         return 0;
->
->  err_add_host:
-> -       pm_runtime_disable(&pdev->dev);
-> -       pm_runtime_put_noidle(&pdev->dev);
-> +       if (!pxa->dat3_cd_enabled) {
-> +               pm_runtime_disable(&pdev->dev);
-> +               pm_runtime_put_noidle(&pdev->dev);
-> +       }
->  err_of_parse:
->  err_cd_req:
->  err_mbus_win:
-> @@ -479,9 +529,11 @@ static int sdhci_pxav3_remove(struct platform_device *pdev)
->         struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
->         struct sdhci_pxa *pxa = pltfm_host->priv;
->
-> -       pm_runtime_get_sync(&pdev->dev);
-> -       pm_runtime_disable(&pdev->dev);
-> -       pm_runtime_put_noidle(&pdev->dev);
-> +       if (!pxa->dat3_cd_enabled) {
-> +               pm_runtime_get_sync(&pdev->dev);
-> +               pm_runtime_disable(&pdev->dev);
-> +               pm_runtime_put_noidle(&pdev->dev);
-> +       }
->
->         sdhci_remove_host(host, 1);
->
-> @@ -498,9 +550,16 @@ static int sdhci_pxav3_suspend(struct device *dev)
->  {
->         int ret;
->         struct sdhci_host *host = dev_get_drvdata(dev);
-> +       struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> +       struct sdhci_pxa *pxa = pltfm_host->priv;
-> +
-> +       if (!pxa->dat3_cd_enabled)
-> +               pm_runtime_get_sync(dev);
->
-> -       pm_runtime_get_sync(dev);
->         ret = sdhci_suspend_host(host);
-> +       if (pxa->dat3_cd_enabled)
-> +               return ret;
-> +
->         pm_runtime_mark_last_busy(dev);
->         pm_runtime_put_autosuspend(dev);
->
-> @@ -518,8 +577,13 @@ static int sdhci_pxav3_resume(struct device *dev)
->                 ret = mv_conf_mbus_windows(dev, pxa->mbus_win_regs,
->                                            mv_mbus_dram_info());
->
-> -       pm_runtime_get_sync(dev);
-> +       if (!pxa->dat3_cd_enabled)
-> +               pm_runtime_get_sync(dev);
-> +
->         ret = sdhci_resume_host(host);
-> +       if (pxa->dat3_cd_enabled)
-> +               return ret;
-> +
->         pm_runtime_mark_last_busy(dev);
->         pm_runtime_put_autosuspend(dev);
->
-> --
-> 1.8.3.1
->
+Thanks, applied for next!
 
 Kind regards
 Uffe
+
+
+> ---
+>  drivers/mmc/host/sdhci-pci-core.c | 48 +++++++++++++++++++++++++++++++++++++++
+>  drivers/mmc/host/sdhci-pci.h      |  6 +++++
+>  2 files changed, 54 insertions(+)
+>
+> diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-pci-core.c
+> index b6f6117cb233..cf7ad458b4f4 100644
+> --- a/drivers/mmc/host/sdhci-pci-core.c
+> +++ b/drivers/mmc/host/sdhci-pci-core.c
+> @@ -1117,6 +1117,54 @@ static const struct pci_device_id pci_ids[] = {
+>         },
+>
+>         {
+> +               .vendor         = PCI_VENDOR_ID_INTEL,
+> +               .device         = PCI_DEVICE_ID_INTEL_BXT_EMMC,
+> +               .subvendor      = PCI_ANY_ID,
+> +               .subdevice      = PCI_ANY_ID,
+> +               .driver_data    = (kernel_ulong_t)&sdhci_intel_byt_emmc,
+> +       },
+> +
+> +       {
+> +               .vendor         = PCI_VENDOR_ID_INTEL,
+> +               .device         = PCI_DEVICE_ID_INTEL_BXT_SDIO,
+> +               .subvendor      = PCI_ANY_ID,
+> +               .subdevice      = PCI_ANY_ID,
+> +               .driver_data    = (kernel_ulong_t)&sdhci_intel_byt_sdio,
+> +       },
+> +
+> +       {
+> +               .vendor         = PCI_VENDOR_ID_INTEL,
+> +               .device         = PCI_DEVICE_ID_INTEL_BXT_SD,
+> +               .subvendor      = PCI_ANY_ID,
+> +               .subdevice      = PCI_ANY_ID,
+> +               .driver_data    = (kernel_ulong_t)&sdhci_intel_byt_sd,
+> +       },
+> +
+> +       {
+> +               .vendor         = PCI_VENDOR_ID_INTEL,
+> +               .device         = PCI_DEVICE_ID_INTEL_APL_EMMC,
+> +               .subvendor      = PCI_ANY_ID,
+> +               .subdevice      = PCI_ANY_ID,
+> +               .driver_data    = (kernel_ulong_t)&sdhci_intel_byt_emmc,
+> +       },
+> +
+> +       {
+> +               .vendor         = PCI_VENDOR_ID_INTEL,
+> +               .device         = PCI_DEVICE_ID_INTEL_APL_SDIO,
+> +               .subvendor      = PCI_ANY_ID,
+> +               .subdevice      = PCI_ANY_ID,
+> +               .driver_data    = (kernel_ulong_t)&sdhci_intel_byt_sdio,
+> +       },
+> +
+> +       {
+> +               .vendor         = PCI_VENDOR_ID_INTEL,
+> +               .device         = PCI_DEVICE_ID_INTEL_APL_SD,
+> +               .subvendor      = PCI_ANY_ID,
+> +               .subdevice      = PCI_ANY_ID,
+> +               .driver_data    = (kernel_ulong_t)&sdhci_intel_byt_sd,
+> +       },
+> +
+> +       {
+>                 .vendor         = PCI_VENDOR_ID_O2,
+>                 .device         = PCI_DEVICE_ID_O2_8120,
+>                 .subvendor      = PCI_ANY_ID,
+> diff --git a/drivers/mmc/host/sdhci-pci.h b/drivers/mmc/host/sdhci-pci.h
+> index cd4f4d74377e..d1a0b4db60db 100644
+> --- a/drivers/mmc/host/sdhci-pci.h
+> +++ b/drivers/mmc/host/sdhci-pci.h
+> @@ -25,6 +25,12 @@
+>  #define PCI_DEVICE_ID_INTEL_SPT_SDIO   0x9d2c
+>  #define PCI_DEVICE_ID_INTEL_SPT_SD     0x9d2d
+>  #define PCI_DEVICE_ID_INTEL_DNV_EMMC   0x19db
+> +#define PCI_DEVICE_ID_INTEL_BXT_SD     0x0aca
+> +#define PCI_DEVICE_ID_INTEL_BXT_EMMC   0x0acc
+> +#define PCI_DEVICE_ID_INTEL_BXT_SDIO   0x0ad0
+> +#define PCI_DEVICE_ID_INTEL_APL_SD     0x5aca
+> +#define PCI_DEVICE_ID_INTEL_APL_EMMC   0x5acc
+> +#define PCI_DEVICE_ID_INTEL_APL_SDIO   0x5ad0
+>
+>  /*
+>   * PCI registers
+> --
+> 1.9.1
+>
