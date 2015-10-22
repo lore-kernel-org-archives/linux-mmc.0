@@ -1,75 +1,168 @@
-From: Javier Martinez Canillas <javier@osg.samsung.com>
-Subject: Re: [PATCH] mmc: pwrseq: Use highest priority for eMMC restart
- handler
-Date: Thu, 22 Oct 2015 13:02:12 +0200
-Message-ID: <5628C234.40606@osg.samsung.com>
-References: <1445440540-21525-1-git-send-email-javier@osg.samsung.com>
- <56282F71.2070408@samsung.com> <562839F7.3040005@osg.samsung.com>
- <56283F27.9060804@samsung.com> <56284F60.4070802@osg.samsung.com>
- <56286294.7060907@samsung.com> <5628B552.8030701@samsung.com>
+From: Shawn Lin <shawn.lin@rock-chips.com>
+Subject: Re: [RESEND PATCH v4 3/3] mmc: sdhci-of-arasan: add runtime pm
+ support
+Date: Thu, 22 Oct 2015 19:15:01 +0800
+Message-ID: <5628C535.4060800@rock-chips.com>
+References: <1445504810-5642-1-git-send-email-shawn.lin@rock-chips.com>
+ <5628AFFA.5040206@xilinx.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=windows-1252; format=flowed
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <5628B552.8030701@samsung.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Marek Szyprowski <m.szyprowski@samsung.com>, Alim Akhtar <alim.akhtar@samsung.com>, Krzysztof Kozlowski <k.kozlowski@samsung.com>, linux-kernel@vger.kernel.org
-Cc: Markus Reichl <m.reichl@fivetechno.de>, Anand Moon <linux.amoon@gmail.com>, linux-samsung-soc@vger.kernel.org, linux-mmc@vger.kernel.org, Alexandre Courbot <acourbot@nvidia.com>, Ulf Hansson <ulf.hansson@linaro.org>, Douglas Anderson <dianders@chromium.org>, heiko@sntech.de, enric.balletbo@collabora.com
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from lucky1.263xmail.com ([211.157.147.131]:35880 "EHLO
+	lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751453AbbJVLPQ (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 22 Oct 2015 07:15:16 -0400
+In-Reply-To: <5628AFFA.5040206@xilinx.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Michal Simek <michal.simek@xilinx.com>, Soren Brinkmann <soren.brinkmann@xilinx.com>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: shawn.lin@rock-chips.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 
-Hello Marek,
-
-On 10/22/2015 12:07 PM, Marek Szyprowski wrote:
-> On 2015-10-22 06:14, Alim Akhtar wrote:
->> On 10/22/2015 08:22 AM, Javier Martinez Canillas wrote:
->>> On 10/22/2015 03:43 AM, Krzysztof Kozlowski wrote:
->>>> On 22.10.2015 10:20, Javier Martinez Canillas wrote:> Hello Krzysztof,
-
-[snip]
-
->>>>> And $SUBJECT should not cause any regressions for the platforms that
->>>>> are currently using the pwrseq_emmc, since the restart handler was
->>>>> already being called before the system restart handler so bumping
->>>>> the priority should not cause any effect.
->>>>
->>>> I found at least one platform where the sequence *might* change. There
->>>> could be more of them.
->>>>
->>>
->>> Agreed, I missed that rk3288-veyron is using a restart handler with higher
->>> priority and could be other boards too as you said.
->>>
->>> Let's see what is Marek's opinion since he added the pwrseq_emmc support
->>> and also what Ulf thinks about always doing a eMMC reset before reboot.
->>>
->>> I can't think how doing a eMMC card reset before reboot could affect a
->>> board but you are right that we don't know without testing.
->>>
->> git grep result shows:
->> ======
->>  git grep mmc-pwrseq-emmc
->> Documentation/devicetree/bindings/mmc/mmc-pwrseq-emmc.txt:- compatible : contains "mmc-pwrseq-emmc".
->> Documentation/devicetree/bindings/mmc/mmc-pwrseq-emmc.txt: compatible = "mmc-pwrseq-emmc";
->> arch/arm/boot/dts/am335x-sl50.dts:              compatible = "mmc-pwrseq-emmc";
->> arch/arm/boot/dts/exynos4412-odroid-common.dtsi: compatible = "mmc-pwrseq-emmc";
->> arch/arm/boot/dts/exynos5422-odroidxu3-common.dtsi: compatible = "mmc-pwrseq-emmc";
->> arch/arm/boot/dts/rk3288-veyron.dtsi:           compatible = "mmc-pwrseq-emmc";
->> arch/arm64/boot/dts/rockchip/rk3368-r88.dts:            compatible = "mmc-pwrseq-emmc";
->> drivers/mmc/core/pwrseq.c:              .compatible = "mmc-pwrseq-emmc",
->> =====
->> So apart from exynos, there are rk3xxx and am335x which used pwrseq-emmc-restart. So lets wait for the feedback from these guys as well.
->> Thanks.
+On 2015/10/22 17:44, Michal Simek wrote:
+> On 10/22/2015 11:06 AM, Shawn Lin wrote:
+>> This patch add runtime_suspend and runtime_resume for
+>> sdhci-of-arasan. Currently we also power-off phy at
+>> runtime_suspend for power-saving.
 >>
-> 
-> The priority was initially chosen in such a way to do the emmc reset just before performing system reboot. I wanted let other possible handlers potentially use mmc if needed (although there is no such case atm). Now it turns that this approach was not the best idea, because there are other board-specific restart handlers with higher priority than the default I was using. IMHO the change proposed by Javier seems to be the best solution for now. The other possibility would be to entirely get rid of restart handler usage and wire this logic to mmc_shutdown(). This makes sense from the logical point of view, but the drawback of this solution is the lack of proper reset sequence in case of emergency reboot (shutdown callbacks are not called on emergency reboot).
+>> Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
+>>
+>> Serise-changes: 4
+>> - remove ifdef for PM callback statement
+>> - fix missing pm_runtime_set_active
+>> - remove pm_runtime_dont_use_autosuspend from remove hook
+>> - add pm_runtime_force_suspend|resume for PM callback to
+>>    deal with suspend invoked from rpm
+>> - remove wrappers of phy ops
+>>
+>> ---
+>>
+>> Changes in v2: None
+>>
+>>   drivers/mmc/host/sdhci-of-arasan.c | 85 ++++++++++++++++++++++++++++++++++++--
+>>   1 file changed, 82 insertions(+), 3 deletions(-)
+>>
+>> diff --git a/drivers/mmc/host/sdhci-of-arasan.c b/drivers/mmc/host/sdhci-of-arasan.c
+>> index 4f30716..fb1915c 100644
+>> --- a/drivers/mmc/host/sdhci-of-arasan.c
+>> +++ b/drivers/mmc/host/sdhci-of-arasan.c
+>> @@ -30,6 +30,8 @@
+>>   #define CLK_CTRL_TIMEOUT_MASK		(0xf << CLK_CTRL_TIMEOUT_SHIFT)
+>>   #define CLK_CTRL_TIMEOUT_MIN_EXP	13
+>>
+>> +#define ARASAN_RPM_DELAY_MS		50
+>> +
+>>   /**
+>>    * struct sdhci_arasan_data
+>>    * @clk_ahb:	Pointer to the AHB clock
+>> @@ -71,6 +73,46 @@ static struct sdhci_pltfm_data sdhci_arasan_pdata = {
+>>   			SDHCI_QUIRK2_CLOCK_DIV_ZERO_BROKEN,
+>>   };
+>>
+>> +#ifdef CONFIG_PM
+>> +static int sdhci_arasan_runtime_suspend(struct device *dev)
+>> +{
+>> +	struct sdhci_host *host = dev_get_drvdata(dev);
+>> +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+>> +	struct sdhci_arasan_data *sdhci_arasan = pltfm_host->priv;
+>> +	int ret;
+>> +
+>> +	ret = sdhci_runtime_suspend_host(host);
+>> +	if (ret)
+>> +		return ret;
+>> +
+>> +	if (!IS_ERR(sdhci_arasan->phy))
+>> +		phy_power_off(sdhci_arasan->phy);
+>> +
+>> +	clk_disable(sdhci_arasan->clk_ahb);
+>> +	clk_disable(pltfm_host->clk);
+>> +
+>> +	return 0;
+>> +}
+>> +
+>> +static int sdhci_arasan_runtime_resume(struct device *dev)
+>> +{
+>> +	struct sdhci_host *host = dev_get_drvdata(dev);
+>> +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+>> +	struct sdhci_arasan_data *sdhci_arasan = pltfm_host->priv;
+>> +
+>> +	clk_enable(pltfm_host->clk);
+>> +	clk_enable(sdhci_arasan->clk_ahb);
+>> +
+>> +	if (!IS_ERR(sdhci_arasan->phy))
+>> +		phy_power_on(sdhci_arasan->phy);
+>> +
+>> +	return sdhci_runtime_resume_host(host);
+>> +}
+>> +#else
+>> +#define sdhci_arasan_runtime_suspend NULL
+>> +#define sdhci_arasan_runtime_resume NULL
+>
+> Remove these 3 lines - they are not needed.
+
+Ah, Got it. Thanks.
+
+>
+>> +#endif
+>> +
+>>   #ifdef CONFIG_PM_SLEEP
+>>   /**
+>>    * sdhci_arasan_suspend - Suspend method for the driver
+>> @@ -87,6 +129,12 @@ static int sdhci_arasan_suspend(struct device *dev)
+>>   	struct sdhci_arasan_data *sdhci_arasan = pltfm_host->priv;
+>>   	int ret;
+>>
+>> +	ret = pm_runtime_force_suspend(dev);
+>> +	if (ret) {
+>> +		dev_err(dev, "problem force suspending\n");
+>> +		return ret;
+>> +	}
+>> +
+>>   	ret = sdhci_suspend_host(host);
+>>   	if (ret)
+>>   		return ret;
+>> @@ -140,18 +188,39 @@ static int sdhci_arasan_resume(struct device *dev)
+>>   		}
+>>   	}
+>>
+>> -	return sdhci_resume_host(host);
+>> +	ret = sdhci_resume_host(host);
+>> +	if (ret)
+>> +		goto err_resume_host;
+>> +
+>> +	ret = pm_runtime_force_resume(dev);
+>> +	if (ret) {
+>> +		dev_err(dev, "problem force resuming\n");
+>> +		goto err_force_resume;
+>> +	}
+>> +
+>> +	return 0;
+>>
+>> +err_force_resume:
+>> +	sdhci_suspend_host(host);
+>> +err_resume_host:
+>> +	if (!IS_ERR(sdhci_arasan->phy))
+>> +		phy_power_off(sdhci_arasan->phy);
+>>   err_phy_power:
+>>   	clk_disable(pltfm_host->clk);
+>>   err_clk_en:
+>>   	clk_disable(sdhci_arasan->clk_ahb);
+>>   	return ret;
+>>   }
+>> +#else
+>> +#define sdhci_arasan_suspend NULL
+>> +#define sdhci_arasan_resume NULL
+>
+> Remove these 3 lines - they are not needed.
+>
+> Thanks,
+> Michal
+>
+>
 >
 
-Thanks a lot for your feedback, I'm glad that you agree with the change then.
- 
-> Best regards
 
-Best regards,
 -- 
-Javier Martinez Canillas
-Open Source Group
-Samsung Research America
+Best Regards
+Shawn Lin
+
