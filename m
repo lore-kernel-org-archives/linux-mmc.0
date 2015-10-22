@@ -1,86 +1,87 @@
-From: Krzysztof Kozlowski <k.kozlowski@samsung.com>
-Subject: Re: [PATCH 1/2] mmc: dw_mmc: exynos: Add the exynos3250 compatible
-Date: Thu, 22 Oct 2015 14:57:27 +0900
-Message-ID: <56287AC7.9020906@samsung.com>
-References: <1445409555-1684-1-git-send-email-jh80.chung@samsung.com>
- <5628289C.90800@samsung.com> <56284FCE.3000108@samsung.com>
- <56285D29.7030502@samsung.com> <562870B4.2070109@samsung.com>
+From: Shawn Lin <shawn.lin@rock-chips.com>
+Subject: [PATCH 0/2] Add hw reset support for DesignWare MMC controller.
+Date: Thu, 22 Oct 2015 14:19:00 +0800
+Message-ID: <1445494740-16778-1-git-send-email-shawn.lin@rock-chips.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-In-reply-to: <562870B4.2070109@samsung.com>
-Sender: linux-samsung-soc-owner@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>, linux-mmc@vger.kernel.org, linux-samsung-soc@vger.kernel.org
-Cc: ulf.hansson@linaro.org, kgene@kernel.org, linux-arm-kernel@lists.infradead.org
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from lucky1.263xmail.com ([211.157.147.130]:55041 "EHLO
+	lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751295AbbJVGUw (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 22 Oct 2015 02:20:52 -0400
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Jaehoon Chung <jh80.chung@samsung.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Shawn Lin <shawn.lin@rock-chips.com>
 
-On 22.10.2015 14:14, Jaehoon Chung wrote:
-> On 10/22/2015 12:51 PM, Krzysztof Kozlowski wrote:
->> On 22.10.2015 11:54, Jaehoon Chung wrote:
->>> Hi, Krzysztof.
->>>
->>> On 10/22/2015 09:06 AM, Krzysztof Kozlowski wrote:
->>>> On 21.10.2015 15:39, Jaehoon Chung wrote:
->>>>> To check more exactly, add the exynos3250 compatible.
->>>>> Not use exynos5250 compatibility.
->>>>
->>>> Hi,
->>>>
->>>> I can't find any difference between old and new compatible. Maybe I am
->>>> missing something? Maybe there is a difference for these devices?
->>>
->>> Sorry, I needs to add more explanation about changing compatible.
->>> Exynos3250 has more registers than exynos5250 in dwmmc IP.
->>> Now, we used dwmmc controller with exynos5250 compatible.
->>> Then some codes can't run in dw-mmc.c, if SoC is exynos3250.
->>> For example, there is the checking point in dw_mci_exynos_config_hs400().
->>>
->>> static void dw_mci_exynos_config_hs400(struct dw_mci *host, u32 timing)
->>> {
->>>         struct dw_mci_exynos_priv_data *priv = host->priv;
->>>         u32 dqs, strobe;
->>>
->>>         /*
->>>          * Not supported to configure register
->>>          * related to HS400
->>>          */
->>>         if (priv->ctrl_type < DW_MCI_TYPE_EXYNOS5420)
->>>                 return;
->>>
->>>         dqs = priv->saved_dqs_en;
->>>         strobe = priv->saved_strobe_ctrl;
->>>
->>> It can't use this feature with exynos5250 compatible.
->>
->> Ahh, I see it now. I missed that context and commit message wasn't
->> explaining this real reason. This real reason - supporting HS400 or
->> other features not present on Exynos5250 - was not mentioned.
-> 
-> Right, it's not enough to explain why needs this patch.
-> 
->>
->> The new compatible make sense now... but I am wondering if instead just
->> "samsung,exynos5420-dw-mshc" should be used? I think it would give the
->> same result as your change and if new compatible is not required then it
->> will be better not to add it.
-> 
-> I need to check whether it can be used with "samsung,exynos5420-dw-mshc".
-> If you don't want to add new compatible, then i will check Exynos5420 TRM.
-> Maybe, i think it can be used with it.
-> 
-> Is it good that use more exact compatible?
->
 
-Actually one thing is the real compatibility of devices and second is
-the source code.
+MMC core stack and blk layer can do some recovery if mmc
+device runs into broken state for any reasons. So we implement it
+for DesignWare MMC host controller.
 
-Looking at the source code, the behaviour for new exynos3250 compatible
-and "samsung,exynos5420-dw-mshc" would be the same, right? This would be
-a indication for reusing existing compatible. No need to create new one.
+=46rom Synopsys DesignWare Cores Mobile Storage Host Databook
+(Section 7.4.4), we get the details:
+1. Program CMD12 to end any transfer in process.
+2. Wait for DTO, even if no response is sent back by the card.
+3. Set the following resets:
+	Software reset =E2=80=93 BMOD[0] for IDMAC only
+	DMA reset=E2=80=93 CTRL[2]
+	FIFO reset =E2=80=93 CTRL[1] bits
+4. Program the CARD_RESET register with a value of 0 for the bit
+corresponding to the card number; This can be done at any time when
+the card is connected to the controller. This programming asserts the
+RST_n signal and resets the card.
+5. Wait for minimum of 1 =CE=BCs or cclk_in period, which ever is great=
+er
+6. After a minimum of 1 =CE=BCs, the application should program a value=
+ of
+0 into the CARD_RESET register for the bit corresponding to the card
+number. This de-asserts the RST_n signal and takes the card out of rese=
+t.
+7. The application can program a new CMD only after a minimum of 200 us
+after the de-assertion of the RST_n signal, as per the MMC 4.41 standar=
+d.
 
-However maybe the devices aren't really compatible and using the same
-compatible would prevent adding new features to Exynos5420?
+HW reset producer will be call in mmc_init_card before mmc_go_idle. At =
+that
+time=EF=BC=8Cdw mmc hasn't update clk for itself, so CMD12 is inappropr=
+iate and
+unnecessary. Moreover, if mmc device runs into broken states, DRTO or R=
+TO
+generated by previous cmd w/ data will make mmc core issue stop already=
+=2E Then
+it will retry again and again, issue stop and card status again until t=
+he
+cmd's retry number decrease to zero. That will finally trigger HW reset=
+ producer
+if we declare MMC_CAP_HW_RESET. So there's no need to do step 1 and 2 f=
+or the
+reasons we mentioned above.
 
-Best regards,
-Krzysztof
+This implementation can be easily tested by cutting off->On vmmc while =
+doing data
+accessing in background to simulate that case. And dw_mmc can generate =
+timeout
+interrupt and make mmc core trigger hw reset producer before re-init mm=
+c card
+to recover itself.
+
+This patchset do following things:
+- add hw reset for dw_mmc
+- implement specific hw_reset extention
+
+
+
+Shawn Lin (2):
+  mmc: dw_mmc: add hw_reset support
+  mmc: dw_mmc: add hw_reset extension hook
+
+ drivers/mmc/host/dw_mmc.c | 33 +++++++++++++++++++++++++++++++++
+ drivers/mmc/host/dw_mmc.h |  6 ++++++
+ 2 files changed, 39 insertions(+)
+
+--=20
+2.3.7
+
+
