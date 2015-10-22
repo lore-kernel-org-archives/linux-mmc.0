@@ -1,180 +1,97 @@
-From: Krzysztof Kozlowski <k.kozlowski@samsung.com>
-Subject: Re: [PATCH] mmc: pwrseq: Use highest priority for eMMC restart handler
-Date: Thu, 22 Oct 2015 10:43:03 +0900
-Message-ID: <56283F27.9060804@samsung.com>
-References: <1445440540-21525-1-git-send-email-javier@osg.samsung.com>
- <56282F71.2070408@samsung.com> <562839F7.3040005@osg.samsung.com>
+From: Chaotian Jing <chaotian.jing-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>
+Subject: Re: [PATCH v2 0/9] Add tune support of Mediatek MMC driver
+Date: Thu, 22 Oct 2015 10:18:49 +0800
+Message-ID: <1445480329.1593.4.camel@mhfsdcap03>
+References: <1445332391-30530-1-git-send-email-chaotian.jing@mediatek.com>
+	 <CAPDyKFrTrR5U7QoXpiWj29bUD5SEp4ccbx8qNs9HF0cYxuqdBw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
+Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-reply-to: <562839F7.3040005@osg.samsung.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Javier Martinez Canillas <javier@osg.samsung.com>, linux-kernel@vger.kernel.org
-Cc: Markus Reichl <m.reichl@fivetechno.de>, Anand Moon <linux.amoon@gmail.com>, linux-samsung-soc@vger.kernel.org, Alim Akhtar <alim.akhtar@samsung.com>, Marek Szyprowski <m.szyprowski@samsung.com>, linux-mmc@vger.kernel.org, Alexandre Courbot <acourbot@nvidia.com>, Ulf Hansson <ulf.hansson@linaro.org>
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <CAPDyKFrTrR5U7QoXpiWj29bUD5SEp4ccbx8qNs9HF0cYxuqdBw-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Pawel Moll <pawel.moll-5wv7dgnIgG8@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Ian Campbell <ijc+devicetree-KcIKpvwj1kUDXYZnReoRVg@public.gmane.org>, Kumar Gala <galak-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, Matthias Brugger <matthias.bgg-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>, Seungwon Jeon <tgih.jun-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, Jaehoon Chung <jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, Kukjin Kim <kgene-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Krzysztof Kozlowski <k.kozlowski-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, Barry Song <baohua-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Lars-Peter Clausen <lars-Qo5EllUWu/uELgA04lAiVw@public.gmane.org>, Javier Martinez Canillas <javier.martinez-ZGY8ohtN/8pPYcu2f3hruQ@public.gmane.org>, Sascha Hauer <s.hauer-bIcnvbaLZ9MEGnE8C9+IrQ@public.gmane.org>, Howard Chen <ibanezchen-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Kristina Martsenko <kristina.martsenko-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Sergei Shtylyov <sergei.shtylyov-M4DtvfQ/ZS1MRgGoP+s0PdBPR1lH4CV8@public.gmane.org>, Stephen Boyd <sboyd@>
 List-Id: linux-mmc@vger.kernel.org
 
-On 22.10.2015 10:20, Javier Martinez Canillas wrote:> Hello Krzysztof,
+On Tue, 2015-10-20 at 18:41 +0200, Ulf Hansson wrote:
+> On 20 October 2015 at 11:13, Chaotian Jing <chaotian.jing-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org> wrote:
+> > Change in v2:
+> > Drop the 400mhz and use assigned-clock-parents to instead
+> > Split the original tune patch to several independent patches
+> > Re-write the mmc_send_tuning()
+> > Fix GPD checksum error
+> > Move the HS400 setting to ops->prepare_hs400_tuning()
+> > Modify SD driving settings
+> >
+> > Change in v1:
+> > Add DT bindings for eMMC hardware reset
+> > Add pinctrl of data strobe pin for HS400 mode
+> > Modify eMMC driving settings
+> > Add 400mhz source clock for HS400 mode
+> > Add eMMC HS200/HS400 mode support
+> > Add SD SDR50/SDR104 mode support
+> > Add implement of tune function with CMD19/CMD21
+> >
+> > Chaotian Jing (9):
+> >   mmc: core: Add DT bindings for eMMC hardware reset support
+> >   mmc: dt-bindings: update Mediatek MMC bindings
+> >   mmc: mediatek: make cmd_ints_mask to const
+> >   mmc: mediatek: change the argument "ddr" to "timing"
+> >   mmc: mediatek: fix got GPD checksum error interrupt when data transfer
+> >   mmc: mediatek: add implement of ops->hw_reset()
+> >   mmc: mmc: extend the mmc_send_tuning()
+> >   mmc: mediatek: add HS400 support
+> >   arm64: dts: mediatek: add HS200/HS400/SDR50/SDR104 support
+> >
+> >  Documentation/devicetree/bindings/mmc/mmc.txt    |   1 +
+> >  Documentation/devicetree/bindings/mmc/mtk-sd.txt |  11 +-
+> >  arch/arm64/boot/dts/mediatek/mt8173-evb.dts      |  27 ++-
+> >  drivers/mmc/core/host.c                          |   2 +
+> >  drivers/mmc/core/mmc_ops.c                       |   8 +-
+> >  drivers/mmc/host/dw_mmc-exynos.c                 |   4 +-
+> >  drivers/mmc/host/dw_mmc.c                        |   2 +-
+> >  drivers/mmc/host/dw_mmc.h                        |   2 +-
+> >  drivers/mmc/host/mtk-sd.c                        | 296 ++++++++++++++++++++---
+> >  drivers/mmc/host/sdhci-esdhc-imx.c               |   6 +-
+> >  drivers/mmc/host/sdhci-msm.c                     |   2 +-
+> >  drivers/mmc/host/sdhci-sirf.c                    |   2 +-
+> >  include/linux/mmc/core.h                         |   2 +-
+> >  13 files changed, 314 insertions(+), 51 deletions(-)
+> >
+> > --
+> > 1.8.1.1.dirty
 > 
-> Thanks for your feedback.
+> I have reviewed the patches, I think they overall looks good! Some
+> comments though.
 > 
-> On 10/22/2015 02:36 AM, Krzysztof Kozlowski wrote:
->> On 22.10.2015 00:15, Javier Martinez Canillas wrote:
->>> The pwrseq_emmc driver does a eMMC card reset before a system reboot to
->>> allow broken or limited ROM boot-loaders (that don't have an eMMC reset
->>> logic) to be able to read the second stage from the eMMC.
->>>
->>> But this has to be called before a system reboot handler and while most
->>> of them use the priority 128, there are other restart handlers (such as
->>> the syscon-reboot one) that use a higher priority. So, use the highest
->>> priority to make sure that the eMMC hw is reset before a system reboot.
->>>
->>> Signed-off-by: Javier Martinez Canillas <javier@osg.samsung.com>
->>> Tested-by: Markus Reichl <m.reichl@fivetechno.de>
->>> Tested-by: Anand Moon <linux.amoon@gmail.com>
->>> Reviewed-by: Alim Akhtar <alim.akhtar@samsung.com>
->>>
->>> ---
->>> Hello,
->>>
->>> This patch was needed since a recent series from Alim [0] added
->>> syscon reboot and poweroff support to Exynos SoCs and removed
->>> the reset handler in the Exynos Power Management Unit (PMU) code.
->>>
->>> But the PMU and syscon-reboot restart handler have a different
->>> priority so [0] breaks restart when eMMC is used on these boards.
->>>
->>> [0]: http://www.spinics.net/lists/arm-kernel/msg454396.html
->>>
->>> So this patch must be merged before [0] to avoid regressions.
->>>
->>> Best regards,
->>> Javier
->>>
->>>  drivers/mmc/core/pwrseq_emmc.c | 6 +++---
->>>  1 file changed, 3 insertions(+), 3 deletions(-)
->>>
->>> diff --git a/drivers/mmc/core/pwrseq_emmc.c b/drivers/mmc/core/pwrseq_emmc.c
->>> index 137c97fb7aa8..ad4f94ec7e8d 100644
->>> --- a/drivers/mmc/core/pwrseq_emmc.c
->>> +++ b/drivers/mmc/core/pwrseq_emmc.c
->>> @@ -84,11 +84,11 @@ struct mmc_pwrseq *mmc_pwrseq_emmc_alloc(struct mmc_host *host,
->>>  
->>>  	/*
->>>  	 * register reset handler to ensure emmc reset also from
->>> -	 * emergency_reboot(), priority 129 schedules it just before
->>> -	 * system reboot
->>> +	 * emergency_reboot(), priority 255 is the highest priority
->>> +	 * so it will be executed before any system reboot handler.
->>>  	 */
->>>  	pwrseq->reset_nb.notifier_call = mmc_pwrseq_emmc_reset_nb;
->>> -	pwrseq->reset_nb.priority = 129;
->>> +	pwrseq->reset_nb.priority = 255;
->>
->> I see the problem which you are trying to solve but this may be tricker
->> then just kicking the number. Some of restart handlers are registered
->> with priority 192. I found few of such, like: at91_restart_nb,
->> zynq_slcr_restart_nb, rmobile_reset_nb (maybe more, I did not grep too
->> much).
->>
+> You need to split patch 9, the DT parts enabling hw reset shall go in
+> separately.
 > 
-> Yes, the syscon-reboot restart handler also uses a priority 192 and that
-> is why reboot with eMMC broke with Alim's patches since the PMU restart
-> handler priority is 128.
-> 
->> I guess they chose the "192" priority on purpose.
->>
-> 
-> I tried to understand what's the policy w.r.t priority numbering for
-> restart handlers but only found this in the register_restart_handler
-> kernel-doc [0]:
-> 
-> /**
->  *	register_restart_handler - Register function to be called to reset
->  *				   the system
->  *	@nb: Info about handler function to be called
->  *	@nb->priority:	Handler priority. Handlers should follow the
->  *			following guidelines for setting priorities.
->  *			0:	Restart handler of last resort,
->  *				with limited restart capabilities
->  *			128:	Default restart handler; use if no other
->  *				restart handler is expected to be available,
->  *				and/or if restart functionality is
->  *				sufficient to restart the entire system
->  *			255:	Highest priority restart handler, will
->  *				preempt all other restart handlers
-> 
-> So, reading that is not clear to me if only the values 0, 128 and 255
-> should be used or any value from 0-255.
-> 
-> What's clear to me is that restart handlers to reset a specific hw block
-> should be called before the restart handler that resets the whole system.
-> 
-> The 192 seems to be used because there are other default restart handlers
-> that are using a prio of 128. See for example the commit that changed the
-> syscon-reboot prio from 128 to 192:
-> 
-> b81180b3fd48 power: reset: adjust priority of simple syscon reboot driver
+Ok, will separate it at next revision.
 
-But were are here not talking about syscon handler but the others. Now
-you will be ahead of them.
-
+> Regarding the hw-reset changes in patch1, patch6 and patch9, I believe
+> I requested you to separate the HW reset changes from $subject
+> patchset as they are unrelated, please do this.
 > 
-> So probably the 192 value was chosen because is in the middle of 128 and
-> 255 but it seems to me a rather arbitrary value and I would prefer it to
-> be documented in some place.
+As you know, the hw-reset is a part of mmc retune.
+so that I add it to this series.
+
+> Running checkpatch, it gave me warnings and errors for patch 8.
+> Patch7 didn't apply to my next branch.
 > 
->> Effectively, now the emmc handler will be executed before their
->> handlers... is it an issue? Maybe some testing on these platforms is
->> necessary?
->>
-> 
-> I don't think is an issue, the reason why I chose 255 is that it is
-> a documented value in the kernel-doc and since is the highest prio,
-> it makes sure the eMMC will be reset before any system restart handler.
-> 
-> Also, the pwrseq_emmc driver is only used in platforms whose SoC ROM
-> can either leave the eMMC in an unknown state so the kernel needs to
-> hw reset the eMMC or does not have a reset logic so it can only read
-> from an eMMC if is in a known state (i.e: after a reset from kernel).
 
-I think at least one platform may be affected because it used
-mmc-pwrseq-emmc and gpio-restart.
+I will fix the checkpatch warnings and errors at next revision.
+by the way, I tried to use "git am
+0007-mmc-mmc-extend-the-mmc_send_tuning.patch" in your branch,
+there was no conflict, so why couldn't apply it ?
+Thx!
 
-Look at rk3288-veyron.dtsi.
-
-Both of restart handlers had the priority of 129 which means that the
-order of execution depends on probing sequence. Now you will make the
-sequence strict - first mmc then gpio.
-
-You seems convinced that this is not a problem... I don't know. I would
-prefer test this on affected platforms before risking to break them.
-It's annoying if fix for one SoC breaks another.
-
-> 
-> Since the current mmc_pwrseq_emmc_reset_nb notifier priority is 129,
-> eMMC reset will not work if one of the platforms you mentioned needs
-> this since the system restart handler with prio 192 will be executed
-> before the eMMC one, leaving the eMMC in an unknown state on reboot.
-
-And now you will "fix this" by making eMMC working correctly. So let's
-make it straight:
-1. Previously the eMMC could be left on these platforms in an unknown
-state (because emmc handler was not executed).
-2. No one complained! Which could mean that in fact this was working fine...
-3. Now you will change it.
-4. Maybe someone will complain?
-
-Just test it (or get an ack/tested tag). That's all what is needed.
+> Kind regards
+> Uffe
 
 
-> And $SUBJECT should not cause any regressions for the platforms that
-> are currently using the pwrseq_emmc, since the restart handler was
-> already being called before the system restart handler so bumping
-> the priority should not cause any effect.
-
-I found at least one platform where the sequence *might* change. There
-could be more of them.
-
-Best regards,
-Krzysztof
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
