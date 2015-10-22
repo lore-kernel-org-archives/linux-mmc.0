@@ -1,180 +1,51 @@
-From: Shawn Lin <shawn.lin@rock-chips.com>
-Subject: [RESEND PATCH v4 3/3] mmc: sdhci-of-arasan: add runtime pm support
-Date: Thu, 22 Oct 2015 17:06:50 +0800
-Message-ID: <1445504810-5642-1-git-send-email-shawn.lin@rock-chips.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH 2/5] mmc: omap_hsmmc: Enable omap_hsmmc for Keystone 2
+Date: Thu, 22 Oct 2015 11:28:55 +0200
+Message-ID: <CAPDyKFr6qt60gECs5y=Qq6XbFhiqWGrOcMozB4vNwaR8PHnu4A@mail.gmail.com>
+References: <1445377809-12516-1-git-send-email-fcooper@ti.com>
+	<1445377809-12516-2-git-send-email-fcooper@ti.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1445377809-12516-2-git-send-email-fcooper@ti.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Michal Simek <michal.simek@xilinx.com>, Soren Brinkmann <soren.brinkmann@xilinx.com>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Shawn Lin <shawn.lin@rock-chips.com>
+To: Franklin S Cooper Jr <fcooper@ti.com>
+Cc: Russell King - ARM Linux <linux@arm.linux.org.uk>, Santosh Shilimkar <ssantosh@kernel.org>, Muralidharan Karicheri <m-karicheri2@ti.com>, Grygorii Strashko <grygorii.strashko@ti.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>, Lokesh Vutla <lokeshvutla@ti.com>
 List-Id: linux-mmc@vger.kernel.org
 
-This patch add runtime_suspend and runtime_resume for
-sdhci-of-arasan. Currently we also power-off phy at
-runtime_suspend for power-saving.
+On 20 October 2015 at 23:50, Franklin S Cooper Jr <fcooper@ti.com> wrote:
+>
+> From: Lokesh Vutla <lokeshvutla@ti.com>
+>
+> Enable omap_hsmmc for Keystone 2 architecture which reuses the HSMMC
+> IP found on OMAP platforms.
+>
+> Signed-off-by: Franklin S Cooper Jr <fcooper@ti.com>
+> ---
+>  drivers/mmc/host/Kconfig | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+>
+> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+> index 8a1e349..2ccec71 100644
+> --- a/drivers/mmc/host/Kconfig
+> +++ b/drivers/mmc/host/Kconfig
+> @@ -366,7 +366,7 @@ config MMC_OMAP
+>  config MMC_OMAP_HS
+>         tristate "TI OMAP High Speed Multimedia Card Interface support"
+>         depends on HAS_DMA
+> -       depends on ARCH_OMAP2PLUS || COMPILE_TEST
+> +       depends on ARCH_OMAP2PLUS || ARCH_KEYSTONE || COMPILE_TEST
 
-Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
+How about:
+"depends on ARM || COMPILE_TEST"
 
-Serise-changes: 4
-- remove ifdef for PM callback statement
-- fix missing pm_runtime_set_active
-- remove pm_runtime_dont_use_autosuspend from remove hook
-- add pm_runtime_force_suspend|resume for PM callback to
-  deal with suspend invoked from rpm
-- remove wrappers of phy ops
+>
+>         help
+>           This selects the TI OMAP High Speed Multimedia card Interface.
+>           If you have an omap2plus board with a Multimedia Card slot,
+> --
+> 2.6.1
+>
 
----
-
-Changes in v2: None
-
- drivers/mmc/host/sdhci-of-arasan.c | 85 ++++++++++++++++++++++++++++++++++++--
- 1 file changed, 82 insertions(+), 3 deletions(-)
-
-diff --git a/drivers/mmc/host/sdhci-of-arasan.c b/drivers/mmc/host/sdhci-of-arasan.c
-index 4f30716..fb1915c 100644
---- a/drivers/mmc/host/sdhci-of-arasan.c
-+++ b/drivers/mmc/host/sdhci-of-arasan.c
-@@ -30,6 +30,8 @@
- #define CLK_CTRL_TIMEOUT_MASK		(0xf << CLK_CTRL_TIMEOUT_SHIFT)
- #define CLK_CTRL_TIMEOUT_MIN_EXP	13
- 
-+#define ARASAN_RPM_DELAY_MS		50
-+
- /**
-  * struct sdhci_arasan_data
-  * @clk_ahb:	Pointer to the AHB clock
-@@ -71,6 +73,46 @@ static struct sdhci_pltfm_data sdhci_arasan_pdata = {
- 			SDHCI_QUIRK2_CLOCK_DIV_ZERO_BROKEN,
- };
- 
-+#ifdef CONFIG_PM
-+static int sdhci_arasan_runtime_suspend(struct device *dev)
-+{
-+	struct sdhci_host *host = dev_get_drvdata(dev);
-+	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-+	struct sdhci_arasan_data *sdhci_arasan = pltfm_host->priv;
-+	int ret;
-+
-+	ret = sdhci_runtime_suspend_host(host);
-+	if (ret)
-+		return ret;
-+
-+	if (!IS_ERR(sdhci_arasan->phy))
-+		phy_power_off(sdhci_arasan->phy);
-+
-+	clk_disable(sdhci_arasan->clk_ahb);
-+	clk_disable(pltfm_host->clk);
-+
-+	return 0;
-+}
-+
-+static int sdhci_arasan_runtime_resume(struct device *dev)
-+{
-+	struct sdhci_host *host = dev_get_drvdata(dev);
-+	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-+	struct sdhci_arasan_data *sdhci_arasan = pltfm_host->priv;
-+
-+	clk_enable(pltfm_host->clk);
-+	clk_enable(sdhci_arasan->clk_ahb);
-+
-+	if (!IS_ERR(sdhci_arasan->phy))
-+		phy_power_on(sdhci_arasan->phy);
-+
-+	return sdhci_runtime_resume_host(host);
-+}
-+#else
-+#define sdhci_arasan_runtime_suspend NULL
-+#define sdhci_arasan_runtime_resume NULL
-+#endif
-+
- #ifdef CONFIG_PM_SLEEP
- /**
-  * sdhci_arasan_suspend - Suspend method for the driver
-@@ -87,6 +129,12 @@ static int sdhci_arasan_suspend(struct device *dev)
- 	struct sdhci_arasan_data *sdhci_arasan = pltfm_host->priv;
- 	int ret;
- 
-+	ret = pm_runtime_force_suspend(dev);
-+	if (ret) {
-+		dev_err(dev, "problem force suspending\n");
-+		return ret;
-+	}
-+
- 	ret = sdhci_suspend_host(host);
- 	if (ret)
- 		return ret;
-@@ -140,18 +188,39 @@ static int sdhci_arasan_resume(struct device *dev)
- 		}
- 	}
- 
--	return sdhci_resume_host(host);
-+	ret = sdhci_resume_host(host);
-+	if (ret)
-+		goto err_resume_host;
-+
-+	ret = pm_runtime_force_resume(dev);
-+	if (ret) {
-+		dev_err(dev, "problem force resuming\n");
-+		goto err_force_resume;
-+	}
-+
-+	return 0;
- 
-+err_force_resume:
-+	sdhci_suspend_host(host);
-+err_resume_host:
-+	if (!IS_ERR(sdhci_arasan->phy))
-+		phy_power_off(sdhci_arasan->phy);
- err_phy_power:
- 	clk_disable(pltfm_host->clk);
- err_clk_en:
- 	clk_disable(sdhci_arasan->clk_ahb);
- 	return ret;
- }
-+#else
-+#define sdhci_arasan_suspend NULL
-+#define sdhci_arasan_resume NULL
- #endif /* ! CONFIG_PM_SLEEP */
- 
--static SIMPLE_DEV_PM_OPS(sdhci_arasan_dev_pm_ops, sdhci_arasan_suspend,
--			 sdhci_arasan_resume);
-+static const struct dev_pm_ops sdhci_arasan_dev_pm_ops = {
-+	SET_SYSTEM_SLEEP_PM_OPS(sdhci_arasan_suspend, sdhci_arasan_resume)
-+	SET_RUNTIME_PM_OPS(sdhci_arasan_runtime_suspend,
-+				sdhci_arasan_runtime_resume, NULL)
-+};
- 
- static int sdhci_arasan_probe(struct platform_device *pdev)
- {
-@@ -237,6 +306,12 @@ static int sdhci_arasan_probe(struct platform_device *pdev)
- 		}
- 	}
- 
-+	pm_runtime_set_active(&pdev->dev);
-+	pm_runtime_set_autosuspend_delay(&pdev->dev, ARASAN_RPM_DELAY_MS);
-+	pm_runtime_use_autosuspend(&pdev->dev);
-+	pm_runtime_enable(&pdev->dev);
-+	pm_suspend_ignore_children(&pdev->dev, 1);
-+
- 	ret = sdhci_add_host(host);
- 	if (ret)
- 		goto err_pltfm_free;
-@@ -244,6 +319,7 @@ static int sdhci_arasan_probe(struct platform_device *pdev)
- 	return 0;
- 
- err_pltfm_free:
-+	pm_runtime_disable(&pdev->dev);
- 	sdhci_pltfm_free(pdev);
- err_phy_power:
- 	if (!IS_ERR(sdhci_arasan->phy))
-@@ -265,6 +341,9 @@ static int sdhci_arasan_remove(struct platform_device *pdev)
- 	if (!IS_ERR(sdhci_arasan->phy))
- 		phy_exit(sdhci_arasan->phy);
- 
-+	pm_runtime_get_sync(&pdev->dev);
-+	pm_runtime_disable(&pdev->dev);
-+
- 	clk_disable_unprepare(sdhci_arasan->clk_ahb);
- 
- 	return sdhci_pltfm_unregister(pdev);
--- 
-2.3.7
+Kind regards
+Uffe
