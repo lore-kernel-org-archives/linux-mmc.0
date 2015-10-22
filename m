@@ -1,91 +1,229 @@
-From: Michael Turquette <mturquette@baylibre.com>
-Subject: Re: [PATCH v2 2/8] clk: rockchip: Make calculations use rounding
-Date: Thu, 22 Oct 2015 05:04:00 -0700
-Message-ID: <20151022120400.20687.61566@quantum>
-References: <1443622064-14362-1-git-send-email-heiko@sntech.de>
- <1443622064-14362-3-git-send-email-heiko@sntech.de>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [RESEND PATCH v4 3/3] mmc: sdhci-of-arasan: add runtime pm support
+Date: Thu, 22 Oct 2015 14:08:40 +0200
+Message-ID: <CAPDyKFqzA31PVdqw0mLi=ZOezcXH1hECHgzpMDzt_th4zdY_dw@mail.gmail.com>
+References: <1445504810-5642-1-git-send-email-shawn.lin@rock-chips.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pa0-f49.google.com ([209.85.220.49]:34577 "EHLO
-	mail-pa0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756803AbbJVMEG convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 22 Oct 2015 08:04:06 -0400
-Received: by padhk11 with SMTP id hk11so85610139pad.1
-        for <linux-mmc@vger.kernel.org>; Thu, 22 Oct 2015 05:04:05 -0700 (PDT)
-In-Reply-To: <1443622064-14362-3-git-send-email-heiko@sntech.de>
+Received: from mail-wi0-f180.google.com ([209.85.212.180]:37069 "EHLO
+	mail-wi0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756505AbbJVMIm (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 22 Oct 2015 08:08:42 -0400
+Received: by wicfv8 with SMTP id fv8so116912276wic.0
+        for <linux-mmc@vger.kernel.org>; Thu, 22 Oct 2015 05:08:40 -0700 (PDT)
+In-Reply-To: <1445504810-5642-1-git-send-email-shawn.lin@rock-chips.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: ulf.hansson@linaro.org, sboyd@codeaurora.org, tgih.jun@samsung.com, jh80.chung@samsung.com
-Cc: linux-mmc@vger.kernel.org, linux-clk@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-rockchip@lists.infradead.org, dianders@chromium.org, amstan@chromium.org, Heiko Stuebner <heiko@sntech.de>
+To: Shawn Lin <shawn.lin@rock-chips.com>
+Cc: Michal Simek <michal.simek@xilinx.com>, Soren Brinkmann <soren.brinkmann@xilinx.com>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 
-Quoting Heiko Stuebner (2015-09-30 07:07:38)
-> From: Douglas Anderson <dianders@chromium.org>
-> 
-> Let's use DIV_ROUND_CLOSEST for rounding, not just truncating
-> division.  This lets us get closer to the right rate.
-> 
-> Before this:
->   set_phase(86) delay_nums=26 reg[0xf000420c]=0x468 actual_degrees=83
->   set_phase(89) delay_nums=27 reg[0xf000420c]=0x46c actual_degrees=86
-> 
-> After this:
->   set_phase(86) delay_nums=27 reg[0xf000420c]=0x46c actual_degrees=86
->   set_phase(89) delay_nums=28 reg[0xf000420c]=0x470 actual_degrees=90
-> 
-> Signed-off-by: Douglas Anderson <dianders@chromium.org>
-> Signed-off-by: Heiko Stuebner <heiko@sntech.de>
-
-Looks good to me. What tree do you want this to go through?
-
-Regards,
-Mike
-
+On 22 October 2015 at 11:06, Shawn Lin <shawn.lin@rock-chips.com> wrote:
+> This patch add runtime_suspend and runtime_resume for
+> sdhci-of-arasan. Currently we also power-off phy at
+> runtime_suspend for power-saving.
+>
+> Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
+>
+> Serise-changes: 4
+> - remove ifdef for PM callback statement
+> - fix missing pm_runtime_set_active
+> - remove pm_runtime_dont_use_autosuspend from remove hook
+> - add pm_runtime_force_suspend|resume for PM callback to
+>   deal with suspend invoked from rpm
+> - remove wrappers of phy ops
+>
 > ---
->  drivers/clk/rockchip/clk-mmc-phase.c | 13 +++++++------
->  1 file changed, 7 insertions(+), 6 deletions(-)
-> 
-> diff --git a/drivers/clk/rockchip/clk-mmc-phase.c b/drivers/clk/rockchip/clk-mmc-phase.c
-> index a797d86..bc24e5a 100644
-> --- a/drivers/clk/rockchip/clk-mmc-phase.c
-> +++ b/drivers/clk/rockchip/clk-mmc-phase.c
-> @@ -69,7 +69,7 @@ static int rockchip_mmc_get_phase(struct clk_hw *hw)
->  
->                 delay_num = (raw_value & ROCKCHIP_MMC_DELAYNUM_MASK);
->                 delay_num >>= ROCKCHIP_MMC_DELAYNUM_OFFSET;
-> -               degrees += delay_num * factor / 10000;
-> +               degrees += DIV_ROUND_CLOSEST(delay_num * factor, 10000);
+>
+> Changes in v2: None
+>
+>  drivers/mmc/host/sdhci-of-arasan.c | 85 ++++++++++++++++++++++++++++++++++++--
+>  1 file changed, 82 insertions(+), 3 deletions(-)
+>
+> diff --git a/drivers/mmc/host/sdhci-of-arasan.c b/drivers/mmc/host/sdhci-of-arasan.c
+> index 4f30716..fb1915c 100644
+> --- a/drivers/mmc/host/sdhci-of-arasan.c
+> +++ b/drivers/mmc/host/sdhci-of-arasan.c
+> @@ -30,6 +30,8 @@
+>  #define CLK_CTRL_TIMEOUT_MASK          (0xf << CLK_CTRL_TIMEOUT_SHIFT)
+>  #define CLK_CTRL_TIMEOUT_MIN_EXP       13
+>
+> +#define ARASAN_RPM_DELAY_MS            50
+> +
+>  /**
+>   * struct sdhci_arasan_data
+>   * @clk_ahb:   Pointer to the AHB clock
+> @@ -71,6 +73,46 @@ static struct sdhci_pltfm_data sdhci_arasan_pdata = {
+>                         SDHCI_QUIRK2_CLOCK_DIV_ZERO_BROKEN,
+>  };
+>
+> +#ifdef CONFIG_PM
+> +static int sdhci_arasan_runtime_suspend(struct device *dev)
+> +{
+> +       struct sdhci_host *host = dev_get_drvdata(dev);
+> +       struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+> +       struct sdhci_arasan_data *sdhci_arasan = pltfm_host->priv;
+> +       int ret;
+> +
+> +       ret = sdhci_runtime_suspend_host(host);
+> +       if (ret)
+> +               return ret;
+> +
+> +       if (!IS_ERR(sdhci_arasan->phy))
+> +               phy_power_off(sdhci_arasan->phy);
+> +
+> +       clk_disable(sdhci_arasan->clk_ahb);
+> +       clk_disable(pltfm_host->clk);
+
+The above calls can be changed to clk_disable_unprepare(). Vice verse
+in sdhci_arasan_runtime_resume() below.
+
+> +
+> +       return 0;
+> +}
+> +
+> +static int sdhci_arasan_runtime_resume(struct device *dev)
+> +{
+> +       struct sdhci_host *host = dev_get_drvdata(dev);
+> +       struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+> +       struct sdhci_arasan_data *sdhci_arasan = pltfm_host->priv;
+> +
+> +       clk_enable(pltfm_host->clk);
+> +       clk_enable(sdhci_arasan->clk_ahb);
+> +
+> +       if (!IS_ERR(sdhci_arasan->phy))
+> +               phy_power_on(sdhci_arasan->phy);
+> +
+> +       return sdhci_runtime_resume_host(host);
+> +}
+> +#else
+> +#define sdhci_arasan_runtime_suspend NULL
+> +#define sdhci_arasan_runtime_resume NULL
+> +#endif
+> +
+>  #ifdef CONFIG_PM_SLEEP
+>  /**
+>   * sdhci_arasan_suspend - Suspend method for the driver
+> @@ -87,6 +129,12 @@ static int sdhci_arasan_suspend(struct device *dev)
+>         struct sdhci_arasan_data *sdhci_arasan = pltfm_host->priv;
+>         int ret;
+>
+> +       ret = pm_runtime_force_suspend(dev);
+> +       if (ret) {
+> +               dev_err(dev, "problem force suspending\n");
+> +               return ret;
+> +       }
+> +
+
+I think your are in right track, but unfortunate you still have some
+work to do. :-)
+
+You can't call sdhci_suspend_host() with a runtime suspended host. You
+will for example access sdhci internal registers, even-though the
+clock to the SDHCI controller is gated, which is not a good idea.
+
+Now, this leads me to the following questions/ideas, which I am really
+glad we can bring up within this context.
+
+So, sdhci_suspend_host() and sdhci_runtime_suspend_host() performs
+very similar actions, but not completely the same.
+
+I have a feeling that we might be able to merge the above functions
+into one function. The only thing that may differ between system PM
+and runtime PM, is probably the wakeup settings and since that is
+possible to control before the sdhci variant host driver decide to
+call these functions, merging them might work.
+
+>From a wakeup point of view, does your case have different settings
+between system PM and runtime PM?
+
+What do you think?
+
+>         ret = sdhci_suspend_host(host);
+>         if (ret)
+>                 return ret;
+> @@ -140,18 +188,39 @@ static int sdhci_arasan_resume(struct device *dev)
+>                 }
 >         }
->  
->         return degrees % 360;
-> @@ -82,7 +82,7 @@ static int rockchip_mmc_set_phase(struct clk_hw *hw, int degrees)
->         u8 nineties, remainder;
->         u8 delay_num;
->         u32 raw_value;
-> -       u64 delay;
-> +       u32 delay;
->  
->         nineties = degrees / 90;
->         remainder = (degrees % 90);
-> @@ -110,12 +110,13 @@ static int rockchip_mmc_set_phase(struct clk_hw *hw, int degrees)
->          * Convert to delay; do a little extra work to make sure we
->          * don't overflow 32-bit / 64-bit numbers.
->          */
-> -       delay = PSECS_PER_SEC;
-> +       delay = 10000000; /* PSECS_PER_SEC / 10000 / 10 */
->         delay *= remainder;
-> -       do_div(delay, 10000);
-> -       do_div(delay, (rate / 1000) * 36 * ROCKCHIP_MMC_DELAY_ELEMENT_PSEC);
-> +       delay = DIV_ROUND_CLOSEST(delay,
-> +                       (rate / 1000) * 36 *
-> +                               (ROCKCHIP_MMC_DELAY_ELEMENT_PSEC / 10));
->  
-> -       delay_num = (u8) min(delay, 255ULL);
-> +       delay_num = (u8) min_t(u32, delay, 255);
->  
->         raw_value = delay_num ? ROCKCHIP_MMC_DELAY_SEL : 0;
->         raw_value |= delay_num << ROCKCHIP_MMC_DELAYNUM_OFFSET;
-> -- 
-> 2.5.1
-> 
+>
+> -       return sdhci_resume_host(host);
+> +       ret = sdhci_resume_host(host);
+> +       if (ret)
+> +               goto err_resume_host;
+> +
+> +       ret = pm_runtime_force_resume(dev);
+> +       if (ret) {
+> +               dev_err(dev, "problem force resuming\n");
+> +               goto err_force_resume;
+> +       }
+> +
+> +       return 0;
+>
+> +err_force_resume:
+> +       sdhci_suspend_host(host);
+> +err_resume_host:
+> +       if (!IS_ERR(sdhci_arasan->phy))
+> +               phy_power_off(sdhci_arasan->phy);
+>  err_phy_power:
+>         clk_disable(pltfm_host->clk);
+>  err_clk_en:
+>         clk_disable(sdhci_arasan->clk_ahb);
+>         return ret;
+>  }
+> +#else
+> +#define sdhci_arasan_suspend NULL
+> +#define sdhci_arasan_resume NULL
+>  #endif /* ! CONFIG_PM_SLEEP */
+>
+> -static SIMPLE_DEV_PM_OPS(sdhci_arasan_dev_pm_ops, sdhci_arasan_suspend,
+> -                        sdhci_arasan_resume);
+> +static const struct dev_pm_ops sdhci_arasan_dev_pm_ops = {
+> +       SET_SYSTEM_SLEEP_PM_OPS(sdhci_arasan_suspend, sdhci_arasan_resume)
+> +       SET_RUNTIME_PM_OPS(sdhci_arasan_runtime_suspend,
+> +                               sdhci_arasan_runtime_resume, NULL)
+> +};
+>
+>  static int sdhci_arasan_probe(struct platform_device *pdev)
+>  {
+> @@ -237,6 +306,12 @@ static int sdhci_arasan_probe(struct platform_device *pdev)
+>                 }
+>         }
+>
+> +       pm_runtime_set_active(&pdev->dev);
+> +       pm_runtime_set_autosuspend_delay(&pdev->dev, ARASAN_RPM_DELAY_MS);
+> +       pm_runtime_use_autosuspend(&pdev->dev);
+> +       pm_runtime_enable(&pdev->dev);
+> +       pm_suspend_ignore_children(&pdev->dev, 1);
+> +
+>         ret = sdhci_add_host(host);
+>         if (ret)
+>                 goto err_pltfm_free;
+> @@ -244,6 +319,7 @@ static int sdhci_arasan_probe(struct platform_device *pdev)
+>         return 0;
+>
+>  err_pltfm_free:
+> +       pm_runtime_disable(&pdev->dev);
+>         sdhci_pltfm_free(pdev);
+>  err_phy_power:
+>         if (!IS_ERR(sdhci_arasan->phy))
+> @@ -265,6 +341,9 @@ static int sdhci_arasan_remove(struct platform_device *pdev)
+>         if (!IS_ERR(sdhci_arasan->phy))
+>                 phy_exit(sdhci_arasan->phy);
+>
+> +       pm_runtime_get_sync(&pdev->dev);
+> +       pm_runtime_disable(&pdev->dev);
+> +
+
+I think a pm_runtime_put_noidle() would be good as well, since it
+restores the usage counter.
+
+>         clk_disable_unprepare(sdhci_arasan->clk_ahb);
+>
+>         return sdhci_pltfm_unregister(pdev);
+> --
+> 2.3.7
+>
+>
+
+Kind regards
+Uffe
