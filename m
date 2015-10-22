@@ -1,78 +1,81 @@
-From: Javier Martinez Canillas <javier@osg.samsung.com>
-Subject: Re: [PATCH] mmc: pwrseq: Use highest priority for eMMC restart
- handler
-Date: Thu, 22 Oct 2015 19:53:01 +0200
-Message-ID: <5629227D.6060806@osg.samsung.com>
-References: <1445440540-21525-1-git-send-email-javier@osg.samsung.com>
- <56282F71.2070408@samsung.com> <562839F7.3040005@osg.samsung.com>
- <56283F27.9060804@samsung.com>
- <CAD=FV=VZJ9Tc4G-Xiw60DmfC4izU_6dVwwa0N0ePM0eaJfcqkg@mail.gmail.com>
- <562909DE.1000202@osg.samsung.com>
- <CAD=FV=UBY1wB0wCV_v2H2thT6015Lr0=r4+uDZ5GxFZRqGoVWw@mail.gmail.com>
+From: Ben Hutchings <ben@decadent.org.uk>
+Subject: Re: [RFC][PATCH v2] mmc_block: Allow more than 8 partitions per card
+Date: Thu, 22 Oct 2015 19:07:41 +0100
+Message-ID: <1445537261.10397.70.camel@decadent.org.uk>
+References: <1445533241-10292-1-git-send-email-john.stultz@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: multipart/signed; micalg="pgp-sha512";
+	protocol="application/pgp-signature"; boundary="=-xWNe0AdmqiIIQIp6950C"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from lists.s-osg.org ([54.187.51.154]:46786 "EHLO lists.s-osg.org"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752982AbbJVRxM (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 22 Oct 2015 13:53:12 -0400
-In-Reply-To: <CAD=FV=UBY1wB0wCV_v2H2thT6015Lr0=r4+uDZ5GxFZRqGoVWw@mail.gmail.com>
+Received: from shadbolt.e.decadent.org.uk ([88.96.1.126]:51168 "EHLO
+	shadbolt.e.decadent.org.uk" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S965425AbbJVSIA (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 22 Oct 2015 14:08:00 -0400
+In-Reply-To: <1445533241-10292-1-git-send-email-john.stultz@linaro.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Doug Anderson <dianders@chromium.org>
-Cc: Krzysztof Kozlowski <k.kozlowski@samsung.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Markus Reichl <m.reichl@fivetechno.de>, Anand Moon <linux.amoon@gmail.com>, linux-samsung-soc <linux-samsung-soc@vger.kernel.org>, Alim Akhtar <alim.akhtar@samsung.com>, Marek Szyprowski <m.szyprowski@samsung.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Alexandre Courbot <acourbot@nvidia.com>, Ulf Hansson <ulf.hansson@linaro.org>, =?UTF-8?Q?Heiko_St=c3=bcbner?= <heiko@sntech.de>
+To: John Stultz <john.stultz@linaro.org>, Colin Cross <ccross@android.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, Chuanxiao Dong <chuanxiao.dong@intel.com>, Shawn Lin <shawn.lin@rock-chips.com>, Austin S Hemmelgarn <ahferroin7@gmail.com>, Arnd Bergmann <arnd@arndb.de>, Android Kernel Team <kernel-team@android.com>, linux-mmc@vger.kernel.org, LKML <linux-kernel@vger.kernel.org>
 
-Hello Doug,
 
-On 10/22/2015 07:33 PM, Doug Anderson wrote:
-> On Thu, Oct 22, 2015 at 9:07 AM, Javier Martinez Canillas
+--=-xWNe0AdmqiIIQIp6950C
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-[snip]
+On Thu, 2015-10-22 at 10:00 -0700, John Stultz wrote:
+> From: Colin Cross <ccross@android.com>
+>=20
+> It is quite common for Android devices to utilize more
+> then 8 partitions on internal eMMC storage.
+>=20
+> The vanilla kernel can support this via
+> CONFIG_MMC_BLOCK_MINORS, however that solution caps the
+> system to 256 minors total, which limits the number of
+> mmc cards the system can support.
+[...]
 
->>
->> Do you know why the priority 200 was chosen for veyron gpi-restart ooi?
-> 
-> In David Riley's original patch the example had 200:
->     https://patchwork.kernel.org/patch/4784611/
-> 
-> In the ChromeOS 3.14 kernel tree I believe we're still using the old
-> patch (we still have /bits/ 8).  ...it looks like I'm the one who
-> originally added it to the veyron dts file and I set it to 200, so I'd
-> presume that I just copied the example and called it "good enough".
->
+This commit was intended to allow support for 256 cards with any number
+of partitions:
 
-I see, thanks for the explanation. I asked because I noticed that the
-gpio-restart handler default priority was 129 and I didn't find other
-restart handler used for this board with a prio > 129 so at least in
-mainline, the priority 200 should not be necessary.
+commit a26eba614afff0e39594101bcb73014a9a22fb33
+Author: Ben Hutchings <ben@decadent.org.uk>
+Date:=C2=A0=C2=A0=C2=A0Thu Nov 6 03:35:09 2014 +0000
 
-But now I see that it was indeed 128 but was bumped to 129 in commit:
+=C2=A0=C2=A0=C2=A0=C2=A0mmc: block: Increase max_devices
 
-bcd56fe1aa97 ("power: reset: gpio-restart: increase priority slightly")
+I don't think the new patch is sufficient or necessary to increase the
+limit further.
 
-which explains why the priority 200 was in the veyron DTS even when is
-not needed anymore after that commit.
- 
-> I'm sure the upstream dts just used the number from the ChromeOS 3.14 tree...
-> 
-> Note that the GPIO-restart definitely need to be higher priorities
-> than others in the system.  The two I know of off the top of my head
-> are the "dw watchdog" and the one in the CRU.  The "dw watchdog" has a
-> priority of 128 and so does the one in "rockchip/clk.c".  Hrm,
-> actually, the Rockchip-specific one should probably have its priority
-> bumped up since it seems better not to just randomly pick between
-> these two...
+Do you have a compatibility requirement to retain the numbering of the
+first 7 partitions?
 
-Agreed about bumping the prio for the rockchip specific restart handler.
+Ben.
 
-> 
-> 
-> -Doug
-> --
+--=20
+Ben Hutchings
+Q.  Which is the greater problem in the world today, ignorance or apathy?
+A.  I don't know and I couldn't care less.
 
-Best regards,
--- 
-Javier Martinez Canillas
-Open Source Group
-Samsung Research America
+--=-xWNe0AdmqiIIQIp6950C
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: This is a digitally signed message part
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1
+
+iQIVAwUAVikl7ee/yOyVhhEJAQrmEA//cVc4bOu0NoUolSx4TSN/XouTiZC2gZt1
+4anSiNOvGHUIdW8vf3N9ofTbiN1Wd1yp5EngR89cpxRSkbaSX2LCtdQWEebBu0Hd
+efvRQ0Pqn7unTXZ+MmfUKMb6xJ8fH1Vc74VNClVnGmwS+e2qtqhYlltN8YG9YUG9
+ntlunPXupops453YYQV94QkfpyTk9rheGPUwRROC4+3+Xe822HBakoKrKReR5DFB
+EVPQmjNQo5t4SyuDYjieFtMVOTlRMDe/KJDj+8Ieqgjz7r2+VUaItoHPiJUVcDb0
+2pJJmVlqMxSGXOE08WD+4Lou3gdF/c1+fBYVT+5EGgreFU/Jf1oM26ZDD/fquhZk
+yxC/PJOpL55iLqB0fzKu10728MB5OkZaVrMLI8NreIKO9qtCl/7gOuT7IhV7vbZH
+g9X3id2lOobDSTtXJi+byKNHn1BJRdPTLdfwjGProblBrORoxAQq4SMnTXPmQ0rx
+H+mCNfl6PqGRmuvwRvTsLuA3Amn1Dv81mo68NPab4Kqp8i8nbIYjJtUdV5xLq0MH
+Uwha7RIbmFKoQ+S8xL3FEPVQxcBkqWgcqPVyH7AzQJzWQ5R3/9cBrc0o/tKKIc42
+RfazZ+yYibfsEu/5DpGcrcv99jFB2km6qkT6fkG+50jguxC86X56tfv9TGKtHYbS
+I4/oCuv+a+s=
+=f28p
+-----END PGP SIGNATURE-----
+
+--=-xWNe0AdmqiIIQIp6950C--
