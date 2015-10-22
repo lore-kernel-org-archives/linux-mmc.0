@@ -1,198 +1,119 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [RESEND PATCH v4 2/3] mmc: sdhci-of-arasan: add phy support for sdhci-of-arasan
-Date: Thu, 22 Oct 2015 13:36:56 +0200
-Message-ID: <CAPDyKFpVPEi_En=+-8h-=hA6msU3ogrqOPy43K8sa1MKrY1aRg@mail.gmail.com>
-References: <1445504800-5507-1-git-send-email-shawn.lin@rock-chips.com>
+From: Michael Turquette <mturquette@baylibre.com>
+Subject: Re: [PATCH v2 1/8] clk: rockchip: Allow more precision for some mmc clock
+ phases
+Date: Thu, 22 Oct 2015 05:03:26 -0700
+Message-ID: <20151022120326.20687.80247@quantum>
+References: <1443622064-14362-1-git-send-email-heiko@sntech.de>
+ <1443622064-14362-2-git-send-email-heiko@sntech.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wi0-f182.google.com ([209.85.212.182]:32941 "EHLO
-	mail-wi0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752694AbbJVLg5 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 22 Oct 2015 07:36:57 -0400
-Received: by wijp11 with SMTP id p11so27439482wij.0
-        for <linux-mmc@vger.kernel.org>; Thu, 22 Oct 2015 04:36:56 -0700 (PDT)
-In-Reply-To: <1445504800-5507-1-git-send-email-shawn.lin@rock-chips.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 8BIT
+Return-path: <linux-clk-owner@vger.kernel.org>
+In-Reply-To: <1443622064-14362-2-git-send-email-heiko@sntech.de>
+Sender: linux-clk-owner@vger.kernel.org
+To: ulf.hansson@linaro.org, sboyd@codeaurora.org, tgih.jun@samsung.com, jh80.chung@samsung.com
+Cc: linux-mmc@vger.kernel.org, linux-clk@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-rockchip@lists.infradead.org, dianders@chromium.org, amstan@chromium.org, Heiko Stuebner <heiko@sntech.de>
 List-Id: linux-mmc@vger.kernel.org
-To: Shawn Lin <shawn.lin@rock-chips.com>
-Cc: Michal Simek <michal.simek@xilinx.com>, Soren Brinkmann <soren.brinkmann@xilinx.com>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 
-On 22 October 2015 at 11:06, Shawn Lin <shawn.lin@rock-chips.com> wrote:
-> This patch adds Generic PHY access for sdhci-of-arasan. Driver
-> can get PHY handler from dt-binding, and power-on/init the PHY.
-> Also we add pm ops for PHY here if CONFIG_PM_SLEEP is enabled.
-> Currently, it's just mandatory for arasan,sdhci-5.1.
->
-> Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
->
-> Serise-changes: 4
-> - remove suspend/resume_phy
-> - add err handle label for system PM callback
-> - fix comments of struct sdhci_arasan_data and system PM
->   callback suggested by Michal
->
-> Serise-changes: 3
-> - remove phy_init/exit for suspend/resume
-> - adjust phy_int/power_on seq to make code more reasonable
-> - simplify suspend/resume_phy
->
-> Serise-changes: 2
-> - Keep phy as a mandatory requirement for arasan,sdhci-5.1
->
+Quoting Heiko Stuebner (2015-09-30 07:07:37)
+> From: Douglas Anderson <dianders@chromium.org>
+> 
+> Because of the inexact nature of the extra MMC delay elements (it's
+> not possible to keep the phase monotonic and to also make phases (mod
+> 90) > 70), we previously only allowed phases (mod 90) of 22.5, 45,
+> and 67.5.
+> 
+> But it's not the end of the world if the MMC clock phase goes
+> non-monotonic.  At most we'll be 25 degrees off.  It's way better to
+> test more phases to look for bad ones than to be 25 degrees off, because
+> in the case of MMC really the point is to find bad phases and get as far
+> asway from the as possible.  If we get to test extra phases by going
+> slightly non-monotonic then that might be fine.  Worst case we would
+> end up at a phases that's slight differnt than the one we wanted, but
+> at least we'd still be quite far away from the a bad phase.
+> 
+> Signed-off-by: Douglas Anderson <dianders@chromium.org>
+> 
+> Fold in more precise variance-values of 44-77 instead of 40-80.
+> Fold in the actual removal of the monotonic requirement and adapt
+> patch message accordingly.
+> Signed-off-by: Heiko Stuebner <heiko@sntech.de>
+
+Looks good to me. What tree do you want this to go through?
+
+Regards,
+Mike
+
 > ---
->
-> Changes in v2: None
->
->  drivers/mmc/host/sdhci-of-arasan.c | 63 +++++++++++++++++++++++++++++++++++---
->  1 file changed, 59 insertions(+), 4 deletions(-)
->
-> diff --git a/drivers/mmc/host/sdhci-of-arasan.c b/drivers/mmc/host/sdhci-of-arasan.c
-> index 75379cb..4f30716 100644
-> --- a/drivers/mmc/host/sdhci-of-arasan.c
-> +++ b/drivers/mmc/host/sdhci-of-arasan.c
-> @@ -21,6 +21,7 @@
->
->  #include <linux/module.h>
->  #include <linux/of_device.h>
-> +#include <linux/phy/phy.h>
->  #include "sdhci-pltfm.h"
->
->  #define SDHCI_ARASAN_CLK_CTRL_OFFSET   0x2c
-> @@ -32,9 +33,11 @@
->  /**
->   * struct sdhci_arasan_data
->   * @clk_ahb:   Pointer to the AHB clock
-> + * @phy: Pointer to the generic phy
+>  drivers/clk/rockchip/clk-mmc-phase.c | 45 ++++++++++++++++++++++++------------
+>  1 file changed, 30 insertions(+), 15 deletions(-)
+> 
+> diff --git a/drivers/clk/rockchip/clk-mmc-phase.c b/drivers/clk/rockchip/clk-mmc-phase.c
+> index 9b61342..a797d86 100644
+> --- a/drivers/clk/rockchip/clk-mmc-phase.c
+> +++ b/drivers/clk/rockchip/clk-mmc-phase.c
+> @@ -45,8 +45,8 @@ static unsigned long rockchip_mmc_recalc(struct clk_hw *hw,
+>  #define PSECS_PER_SEC 1000000000000LL
+>  
+>  /*
+> - * Each fine delay is between 40ps-80ps. Assume each fine delay is 60ps to
+> - * simplify calculations. So 45degs could be anywhere between 33deg and 66deg.
+> + * Each fine delay is between 44ps-77ps. Assume each fine delay is 60ps to
+> + * simplify calculations. So 45degs could be anywhere between 33deg and 57.8deg.
 >   */
->  struct sdhci_arasan_data {
->         struct clk      *clk_ahb;
-> +       struct phy      *phy;
->  };
->
->  static unsigned int sdhci_arasan_get_timeout_clock(struct sdhci_host *host)
-> @@ -72,7 +75,7 @@ static struct sdhci_pltfm_data sdhci_arasan_pdata = {
->  /**
->   * sdhci_arasan_suspend - Suspend method for the driver
->   * @dev:       Address of the device structure
-> - * Returns 0 on success and error value on error
-> + * Return: 0 on success and error value on error
->   *
->   * Put the device in a low power state.
->   */
-> @@ -88,6 +91,14 @@ static int sdhci_arasan_suspend(struct device *dev)
->         if (ret)
->                 return ret;
->
-> +       if (!IS_ERR(sdhci_arasan->phy)) {
-> +               ret = phy_power_off(sdhci_arasan->phy);
-> +               if (ret) {
-> +                       dev_err(dev, "Cannot suspend phy.\n");
-> +                       return ret;
-> +               }
-> +       }
+>  #define ROCKCHIP_MMC_DELAY_ELEMENT_PSEC 60
+>  
+> @@ -84,22 +84,37 @@ static int rockchip_mmc_set_phase(struct clk_hw *hw, int degrees)
+>         u32 raw_value;
+>         u64 delay;
+>  
+> -       /* allow 22 to be 22.5 */
+> -       degrees++;
+> -       /* floor to 22.5 increment */
+> -       degrees -= ((degrees) * 10 % 225) / 10;
+> -
+>         nineties = degrees / 90;
+> -       /* 22.5 multiples */
+> -       remainder = (degrees % 90) / 22;
+> -
+> +       remainder = (degrees % 90);
 > +
->         clk_disable(pltfm_host->clk);
->         clk_disable(sdhci_arasan->clk_ahb);
->
-> @@ -97,7 +108,7 @@ static int sdhci_arasan_suspend(struct device *dev)
->  /**
->   * sdhci_arasan_resume - Resume method for the driver
->   * @dev:       Address of the device structure
-> - * Returns 0 on success and error value on error
-> + * Return: 0 on success and error value on error
->   *
->   * Resume operation after suspend
->   */
-> @@ -118,11 +129,24 @@ static int sdhci_arasan_resume(struct device *dev)
->         ret = clk_enable(pltfm_host->clk);
->         if (ret) {
->                 dev_err(dev, "Cannot enable SD clock.\n");
-> -               clk_disable(sdhci_arasan->clk_ahb);
-> -               return ret;
-> +               goto err_clk_en;
-> +       }
+> +       /*
+> +        * Due to the inexact nature of the "fine" delay, we might
+> +        * actually go non-monotonic.  We don't go _too_ monotonic
+> +        * though, so we should be OK.  Here are options of how we may
+> +        * work:
+> +        *
+> +        * Ideally we end up with:
+> +        *   1.0, 2.0, ..., 69.0, 70.0, ...,  89.0, 90.0
+> +        *
+> +        * On one extreme (if delay is actually 44ps):
+> +        *   .73, 1.5, ..., 50.6, 51.3, ...,  65.3, 90.0
+> +        * The other (if delay is actually 77ps):
+> +        *   1.3, 2.6, ..., 88.6. 89.8, ..., 114.0, 90
+> +        *
+> +        * It's possible we might make a delay that is up to 25
+> +        * degrees off from what we think we're making.  That's OK
+> +        * though because we should be REALLY far from any bad range.
+> +        */
 > +
-> +       if (!IS_ERR(sdhci_arasan->phy)) {
-> +               ret = phy_power_on(sdhci_arasan->phy);
-> +               if (ret) {
-> +                       dev_err(dev, "Cannot resume phy.\n");
-> +                       goto err_phy_power;
-> +               }
->         }
->
->         return sdhci_resume_host(host);
+> +       /*
+> +        * Convert to delay; do a little extra work to make sure we
+> +        * don't overflow 32-bit / 64-bit numbers.
+> +        */
+>         delay = PSECS_PER_SEC;
+> -       do_div(delay, rate);
+> -       /* / 360 / 22.5 */
+> -       do_div(delay, 16);
+> -       do_div(delay, ROCKCHIP_MMC_DELAY_ELEMENT_PSEC);
+> -
+>         delay *= remainder;
+> +       do_div(delay, 10000);
+> +       do_div(delay, (rate / 1000) * 36 * ROCKCHIP_MMC_DELAY_ELEMENT_PSEC);
 > +
-> +err_phy_power:
-> +       clk_disable(pltfm_host->clk);
-> +err_clk_en:
-> +       clk_disable(sdhci_arasan->clk_ahb);
-> +       return ret;
->  }
->  #endif /* ! CONFIG_PM_SLEEP */
->
-> @@ -188,6 +212,31 @@ static int sdhci_arasan_probe(struct platform_device *pdev)
->                 goto clk_disable_all;
->         }
->
-> +       sdhci_arasan->phy = ERR_PTR(-ENODEV);
-> +       if (of_device_is_compatible(pdev->dev.of_node,
-> +                                   "arasan,sdhci-5.1")) {
-> +               sdhci_arasan->phy = devm_phy_get(&pdev->dev,
-> +                                                "phy_arasan");
-> +               if (IS_ERR(sdhci_arasan->phy)) {
-> +                       ret = PTR_ERR(sdhci_arasan->phy);
-> +                       dev_err(&pdev->dev, "No phy for arasan,sdhci-5.1.\n");
-> +                       goto clk_disable_all;
-> +               }
-> +
-> +               ret = phy_init(sdhci_arasan->phy);
-> +               if (ret < 0) {
-> +                       dev_err(&pdev->dev, "phy_init err.\n");
-> +                       goto clk_disable_all;
-> +               }
-> +
-> +               ret = phy_power_on(sdhci_arasan->phy);
-> +               if (ret < 0) {
-> +                       dev_err(&pdev->dev, "phy_power_on err.\n");
-> +                       phy_exit(sdhci_arasan->phy);
-
-Remove phy_exit() here, as it's taken care of from the below goto.
-
-> +                       goto err_phy_power;
-> +               }
-> +       }
-> +
->         ret = sdhci_add_host(host);
->         if (ret)
->                 goto err_pltfm_free;
-> @@ -196,6 +245,9 @@ static int sdhci_arasan_probe(struct platform_device *pdev)
->
->  err_pltfm_free:
->         sdhci_pltfm_free(pdev);
-
-There is a missing call to phy_power_off() in some error cases.
-
-> +err_phy_power:
-> +       if (!IS_ERR(sdhci_arasan->phy))
-> +               phy_exit(sdhci_arasan->phy);
->  clk_disable_all:
->         clk_disable_unprepare(clk_xin);
->  clk_dis_ahb:
-> @@ -210,6 +262,9 @@ static int sdhci_arasan_remove(struct platform_device *pdev)
->         struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
->         struct sdhci_arasan_data *sdhci_arasan = pltfm_host->priv;
->
-> +       if (!IS_ERR(sdhci_arasan->phy))
-
-phy_power_off() is needed here as well.
-
-> +               phy_exit(sdhci_arasan->phy);
-> +
->         clk_disable_unprepare(sdhci_arasan->clk_ahb);
->
->         return sdhci_pltfm_unregister(pdev);
-> --
-
-Kind regards
-Uffe
+>         delay_num = (u8) min(delay, 255ULL);
+>  
+>         raw_value = delay_num ? ROCKCHIP_MMC_DELAY_SEL : 0;
+> -- 
+> 2.5.1
+> 
