@@ -1,33 +1,95 @@
-From: Marcus Overhagen <marcus.overhagen@gmail.com>
-Subject: Re: [BUG] mfd: rtsx_usb data corruption with SDCX microsd
-Date: Wed, 21 Oct 2015 22:23:50 +0200
-Message-ID: <CAJBHPojukOEtQDzT4MS_a62hxPMarNTRJf4OjpSATUx1ismZRQ@mail.gmail.com>
-References: <CAJBHPohRA7T573AaZa2sMbyQspaV3KnUWNHcmVM5HzDh+xszYw@mail.gmail.com>
-	<CAPDyKFomPVogHwHe7pBTUptW=Ge8nrUeE_DXP4Na8k1UsXxcLQ@mail.gmail.com>
+From: Krzysztof Kozlowski <k.kozlowski@samsung.com>
+Subject: Re: [PATCH 1/2] mmc: dw_mmc: exynos: Add the exynos3250 compatible
+Date: Thu, 22 Oct 2015 09:06:52 +0900
+Message-ID: <5628289C.90800@samsung.com>
+References: <1445409555-1684-1-git-send-email-jh80.chung@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAPDyKFomPVogHwHe7pBTUptW=Ge8nrUeE_DXP4Na8k1UsXxcLQ@mail.gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Roger Tseng <rogerable@realtek.com>, linux-mmc <linux-mmc@vger.kernel.org>, linux-usb@vger.kernel.org, kernel list <linux-kernel@vger.kernel.org>, Lee Jones <lee.jones@linaro.org>, Samuel Ortiz <sameo@linux.intel.com>
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mailout1.w1.samsung.com ([210.118.77.11]:62718 "EHLO
+	mailout1.w1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752975AbbJVAGy (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 21 Oct 2015 20:06:54 -0400
+In-reply-to: <1445409555-1684-1-git-send-email-jh80.chung@samsung.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Jaehoon Chung <jh80.chung@samsung.com>, linux-mmc@vger.kernel.org, linux-samsung-soc@vger.kernel.org
+Cc: ulf.hansson@linaro.org, kgene@kernel.org, linux-arm-kernel@lists.infradead.org
 
-On Wed, Oct 21, 2015 at 2:02 PM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+On 21.10.2015 15:39, Jaehoon Chung wrote:
+> To check more exactly, add the exynos3250 compatible.
+> Not use exynos5250 compatibility.
 
-> were added in Linux 3.16. Perhaps you can verify if this is a regression or not!?
-I will try this.
+Hi,
 
-> Have you tried other SDXC cards which supports the "ultra high speed SDR50" mode?
-I think only have a single large card that supports this mode.
-Although I have some older 32 and 8 GB cards that I will test, I don't
-expect them to support that mode.
+I can't find any difference between old and new compatible. Maybe I am
+missing something? Maybe there is a difference for these devices?
 
-> If you re-build the kernel and make changes around which MMC_CAPS the
-I will try that during the weekend
+Anyway if the code is the same then it should use exactly the same
+compatible.
 
-> Sorry, not being able to help you more - but at least this is a start!
-Thank you for your response, I'll report my findings back next week.
+Best regards,
+Krzysztof
 
-regards
-Marcus
+> 
+> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+> ---
+>  Documentation/devicetree/bindings/mmc/exynos-dw-mshc.txt | 2 ++
+>  drivers/mmc/host/dw_mmc-exynos.c                         | 7 +++++++
+>  2 files changed, 9 insertions(+)
+> 
+> diff --git a/Documentation/devicetree/bindings/mmc/exynos-dw-mshc.txt b/Documentation/devicetree/bindings/mmc/exynos-dw-mshc.txt
+> index aad9844..cd22ac9 100644
+> --- a/Documentation/devicetree/bindings/mmc/exynos-dw-mshc.txt
+> +++ b/Documentation/devicetree/bindings/mmc/exynos-dw-mshc.txt
+> @@ -22,6 +22,8 @@ Required Properties:
+>  	  specific extensions.
+>  	- "samsung,exynos7-dw-mshc-smu": for controllers with Samsung Exynos7
+>  	  specific extensions having an SMU.
+> +	- "samsung,exynos3250-dw-mshc": for controllers with Samsung Exynos3250
+> +	  specific extensions.
+>  
+>  * samsung,dw-mshc-ciu-div: Specifies the divider value for the card interface
+>    unit (ciu) clock. This property is applicable only for Exynos5 SoC's and
+> diff --git a/drivers/mmc/host/dw_mmc-exynos.c b/drivers/mmc/host/dw_mmc-exynos.c
+> index 1e75309..1c96218 100644
+> --- a/drivers/mmc/host/dw_mmc-exynos.c
+> +++ b/drivers/mmc/host/dw_mmc-exynos.c
+> @@ -32,6 +32,7 @@ enum dw_mci_exynos_type {
+>  	DW_MCI_TYPE_EXYNOS5420_SMU,
+>  	DW_MCI_TYPE_EXYNOS7,
+>  	DW_MCI_TYPE_EXYNOS7_SMU,
+> +	DW_MCI_TYPE_EXYNOS3250,
+>  };
+>  
+>  /* Exynos implementation specific driver private data */
+> @@ -73,6 +74,9 @@ static struct dw_mci_exynos_compatible {
+>  	}, {
+>  		.compatible	= "samsung,exynos7-dw-mshc-smu",
+>  		.ctrl_type	= DW_MCI_TYPE_EXYNOS7_SMU,
+> +	}, {
+> +		.compatible	= "samsung,exynos3250-dw-mshc",
+> +		.ctrl_type	= DW_MCI_TYPE_EXYNOS3250,
+>  	},
+>  };
+>  
+> @@ -467,6 +471,7 @@ static int dw_mci_exynos_execute_tuning(struct dw_mci_slot *slot)
+>  	} while (start_smpl != smpl);
+>  
+>  	found = dw_mci_exynos_get_best_clksmpl(candiates);
+> +
+>  	if (found >= 0) {
+>  		dw_mci_exynos_set_clksmpl(host, found);
+>  		priv->tuned_sample = found;
+> @@ -520,6 +525,8 @@ static const struct of_device_id dw_mci_exynos_match[] = {
+>  			.data = &exynos_drv_data, },
+>  	{ .compatible = "samsung,exynos7-dw-mshc-smu",
+>  			.data = &exynos_drv_data, },
+> +	{ .compatible = "samsung,exynos3250-dw-mshc",
+> +			.data = &exynos_drv_data, },
+>  	{},
+>  };
+>  MODULE_DEVICE_TABLE(of, dw_mci_exynos_match);
+> 
+
