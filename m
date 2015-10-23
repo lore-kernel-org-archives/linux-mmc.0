@@ -1,125 +1,90 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH 1/2] mmc: dw_mmc: add hw_reset support
-Date: Fri, 23 Oct 2015 21:07:38 +0900
-Message-ID: <562A230A.80409@samsung.com>
-References: <1445494740-16778-1-git-send-email-shawn.lin@rock-chips.com>
- <1445494785-16864-1-git-send-email-shawn.lin@rock-chips.com>
+From: Marcin Wojtas <mw@semihalf.com>
+Subject: Re: [PATCH v3 2/5] mmc: sdhci-pxav3: enable usage of DAT3 pin as HW
+ card detect
+Date: Fri, 23 Oct 2015 15:43:31 +0200
+Message-ID: <CAPv3WKcSohi5b0r_js50T1OPHRq608r9NFjscuXbXDzWQkwOgg@mail.gmail.com>
+References: <1444926346-29763-1-git-send-email-mw@semihalf.com>
+	<1444926346-29763-3-git-send-email-mw@semihalf.com>
+	<CAPDyKFqT6tGOKYM_tjnf7k70_1Uu70Vew8PpQW6g9KKzRKBX1g@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout4.samsung.com ([203.254.224.34]:57880 "EHLO
-	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751768AbbJWMHl (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 23 Oct 2015 08:07:41 -0400
-In-reply-to: <1445494785-16864-1-git-send-email-shawn.lin@rock-chips.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <CAPDyKFqT6tGOKYM_tjnf7k70_1Uu70Vew8PpQW6g9KKzRKBX1g@mail.gmail.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, linux-mmc <linux-mmc@vger.kernel.org>, Sebastian Hesselbarth <sebastian.hesselbarth@gmail.com>, Andrew Lunn <andrew@lunn.ch>, Jason Cooper <jason@lakedaemon.net>, Thomas Petazzoni <thomas.petazzoni@free-electrons.com>, Gregory Clement <gregory.clement@free-electrons.com>, Nadav Haklai <nadavh@marvell.com>, Lior Amsalem <alior@marvell.com>, Tawfik Bayouk <tawfik@marvell.com>, Grzegorz Jaszczyk <jaz@semihalf.com>, Jisheng Zhang <jszhang@marvell.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Shawn Lin <shawn.lin@rock-chips.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 
-Hi, Shawn.
+Hi Ulf,
 
-On 10/22/2015 03:19 PM, Shawn Lin wrote:
-> This patch implement hw_reset function for DesignWare
-> MMC controller. By adding this feature, mmc blk can
-> do some basic recovery if emmc device cannot work any
-> more for unknown reasons.
+2015-10-22 15:29 GMT+02:00 Ulf Hansson <ulf.hansson@linaro.org>:
+> On 15 October 2015 at 18:25, Marcin Wojtas <mw@semihalf.com> wrote:
+>> Marvell Armada 38x SDHCI controller enable using DAT3 pin as a hardware
+>> card detection. According to the SD sdandard this signal can be used for
+>> this purpose combined with a pull-down resistor, implying inverted (active
+>> high) polarization of a card detect. MMC standard does not support this
+>> feature and does not operate with such connectivity of DAT3.
+>>
+>> When using DAT3-based detection Armada 38x SDIO IP expects its internal
+>> clock to be always on, which had to be ensured by:
+>> - Udating appropriate registers, each time controller is reset. On the
+>
+> Isn't the reset sequence going to enable the clock again? I though
+> reset was used to recover from failures.
+>
+> To me, it seems odd that you need to deal with this, but of course
+> there are lots of odd things with sdhci. :-)
+>
 
-Are there any other issue before applied this patch?
+Setting clock enable in sdhci_control register is one thing, but this
+IP requires also setting other register, which is set to default after
+reset and does not get updated automatically.
 
-> 
-> Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
-> 
-> ---
-> 
->  drivers/mmc/host/dw_mmc.c | 29 +++++++++++++++++++++++++++++
->  drivers/mmc/host/dw_mmc.h |  4 ++++
->  2 files changed, 33 insertions(+)
-> 
-> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-> index 6e600e8..8a0f2995 100644
-> --- a/drivers/mmc/host/dw_mmc.c
-> +++ b/drivers/mmc/host/dw_mmc.c
-> @@ -1478,6 +1478,34 @@ static int dw_mci_get_cd(struct mmc_host *mmc)
->  	return present;
->  }
->  
-> +static void dw_mci_hw_reset(struct mmc_host *mmc)
-> +{
-> +	struct dw_mci_slot *slot = mmc_priv(mmc);
-> +	struct dw_mci *host = slot->host;
-> +
-> +	if (host->use_dma == TRANS_MODE_IDMAC)
-> +		dw_mci_idmac_reset(host);
-> +
-> +	if (!dw_mci_ctrl_reset(host, SDMMC_CTRL_DMA_RESET) ||
-> +	    (!dw_mci_ctrl_reset(host, SDMMC_CTRL_FIFO_RESET)))
+>>   occasion of adding new register @0x104, register @0x100 name is modified
+>>   in order to the be aligned with Armada 38x documentation.
+>> - Leaving the clock enabled despite power-down. For this purpose a wrapper
+>>   for sdhci_set_clock function is added.
+>> - Disabling pm_runtime - during suspend both io_clock and controller's
+>>   bus power is switched off, hence it would prevent proper card detection.
+>>
+>> In addition to the changes above this commit adds a new property to Armada
+>> 38x SDHCI node ('dat3-cd') with an according binding documentation update.
+>> 'sdhci_pxa' structure is also extended with dedicated flag for checking if
+>> DAT3-based detection is in use.
+>
+> There is an easier way. Just check the new DT binding and if it set,
+> execute pm_runtime_forbid() during ->probe(). No more runtime PM
+> changes should be needed.
+>
 
-Why does it reset twice? Can't reset together with DMA and FIFO?
-dw_mci_ctrl_reset(host, SDMMC_CTRL_DMA_RESET | SDMMC_CTRL_FIFO_RESET)?
+I will check it.
 
-> +		return;
-> +
-> +	/* CARD_RESET
-> +	 * According to eMMC spec
-> +	 * tRstW >= 1us:   RST_n pulse width
-> +	 * tRSCA >= 200us: RST_n to Command time
-> +	 * tRSTH >= 1us:   RST_n high period
-> +	 * Note: add some margin to make rst timing not too
-> +	 * "spec" for some bad qulity eMMC devices.
+> Actually, I wonder if we should make this a new mmc core feature. We
+> could via mmc_add_host() check if this DT property is set and then
+> invoke the pm_runtime_forbid(). What do you think?
+>
 
-some bad quality? Which devices are bad quality devices?
+I thought about it. dat3 detect is defined by SDIO standard
+(https://www.sdcard.org/developers/overview/sdio/sdio_spec/Simplified_SDIO_Card_Spec.pdf,
+section 4.6), so it can be enabled as a global feature. Each IP
+however would have to handle its own quirks related to it in the
+drivers. I don't know if clock_enable should be always set only for
+sdhci-pxav3 or for all hosts willing to use dat3 detection -
+intuitively it should be a common feature, but I cannot confirm it...
 
-> +	 */
-> +	 mci_writel(slot->host, RST_N, SDMMC_RST_HWRESET);
-> +	 wmb(); /* drain writebuffer */
-> +	 usleep_range(5, 10);
-> +	 mci_writel(slot->host, RST_N, SDMMC_RST_HWACTIVE);
-> +	 wmb(); /* drain writebuffer */
-> +	 usleep_range(500, 1000);
+On the other hand I will play with MMC_PM_KEEP_POWER capability, maybe
+with this flag mmc subsystem is already able to support dat3 cd and
+what has to be done is rather to satisfy sdhci-pxav3 quirks. Anyway, I
+cannot find any explicit reference to it.
 
-Need to drain writebuffer at here?
-I don't know why you choose those values..Just some margin?
-And if you want to apply this, i recommend to use the shift with card number.
+> One question, for clarity, you don't expect card detect IRQs to be
+> treated as wakeups while being system PM suspended, right?
 
-Best Regards,
-Jaehoon Chung
+I'll check if enabling MMC_PM_KEEP_POWER is sufficient.
 
-> +}
-> +
->  static void dw_mci_init_card(struct mmc_host *mmc, struct mmc_card *card)
->  {
->  	struct dw_mci_slot *slot = mmc_priv(mmc);
-> @@ -1564,6 +1592,7 @@ static const struct mmc_host_ops dw_mci_ops = {
->  	.set_ios		= dw_mci_set_ios,
->  	.get_ro			= dw_mci_get_ro,
->  	.get_cd			= dw_mci_get_cd,
-> +	.hw_reset               = dw_mci_hw_reset,
->  	.enable_sdio_irq	= dw_mci_enable_sdio_irq,
->  	.execute_tuning		= dw_mci_execute_tuning,
->  	.card_busy		= dw_mci_card_busy,
-> diff --git a/drivers/mmc/host/dw_mmc.h b/drivers/mmc/host/dw_mmc.h
-> index f2a88d4..9df18c1 100644
-> --- a/drivers/mmc/host/dw_mmc.h
-> +++ b/drivers/mmc/host/dw_mmc.h
-> @@ -46,6 +46,7 @@
->  #define SDMMC_VERID		0x06c
->  #define SDMMC_HCON		0x070
->  #define SDMMC_UHS_REG		0x074
-> +#define SDMMC_RST_N		0x078
->  #define SDMMC_BMOD		0x080
->  #define SDMMC_PLDMND		0x084
->  #define SDMMC_DBADDR		0x088
-> @@ -169,6 +170,9 @@
->  #define SDMMC_IDMAC_ENABLE		BIT(7)
->  #define SDMMC_IDMAC_FB			BIT(1)
->  #define SDMMC_IDMAC_SWRESET		BIT(0)
-> +/* H/W reset*/
-> +#define SDMMC_RST_HWACTIVE		0x1
-> +#define SDMMC_RST_HWRESET		0x0
->  /* Version ID register define */
->  #define SDMMC_GET_VERID(x)		((x) & 0xFFFF)
->  /* Card read threshold */
-> 
+> Please, don't involve "broken-cd" as that has its own rules and purpose.
 
+Indeed, this check is redundant.
+
+Best regards,
+Marcin
