@@ -1,32 +1,57 @@
-From: Fabio Estevam <festevam@gmail.com>
-Subject: Re: [PATCH V2 06/11] mmc: sdhci-esdhc-imx: fix cd regression for dt platform
-Date: Sat, 24 Oct 2015 11:06:19 -0200
-Message-ID: <CAOMZO5Dz0KijjryoPihoXsP4b5Wy_5rock++oY=i-9gESThUbg@mail.gmail.com>
-References: <1437569590-5228-1-git-send-email-aisheng.dong@freescale.com>
-	<1437569590-5228-7-git-send-email-aisheng.dong@freescale.com>
-	<2333b5f060a8e45bd8adcdab55365fab@agner.ch>
-	<CAOMZO5BUKmqczyVgz_WgYmBMeuGugDS4uVjw+LXebxf-nPDTyw@mail.gmail.com>
+From: Geert Uytterhoeven <geert@linux-m68k.org>
+Subject: CONFIG_CGROUP_WRITEBACK=y/n complexity (was: Re: Build
+ regressions/improvements in v4.3-rc7)
+Date: Sun, 25 Oct 2015 11:54:38 +0100
+Message-ID: <CAMuHMdUcbE20kH7-gZ4i8978Smf7K3QYDwzRVRQoL3nOMYpurw@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-io0-f196.google.com ([209.85.223.196]:33873 "EHLO
-	mail-io0-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750762AbbJXNGU (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sat, 24 Oct 2015 09:06:20 -0400
-In-Reply-To: <CAOMZO5BUKmqczyVgz_WgYmBMeuGugDS4uVjw+LXebxf-nPDTyw@mail.gmail.com>
+Received: from mail-ob0-f173.google.com ([209.85.214.173]:34745 "EHLO
+	mail-ob0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750802AbbJYKyj (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 25 Oct 2015 06:54:39 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Stefan Agner <stefan@agner.ch>
-Cc: Dong Aisheng <aisheng.dong@freescale.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Fabio Estevam <fabio.estevam@freescale.com>, =?UTF-8?B?TWFyZWsgVmHFoXV0?= <marex@denx.de>, Ulf Hansson <ulf.hansson@linaro.org>, Steffen Trumtrar <s.trumtrar@pengutronix.de>, Soeren Moch <smoch@web.de>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Robert Nelson <robertcnelson@gmail.com>, Sascha Hauer <s.hauer@pengutronix.de>, Chris Ball <chris@printf.net>, Rabeeh Khoury <rabeeh@solid-run.com>, Troy Kisky <troy.kisky@boundarydevices.com>, =?UTF-8?Q?Rostislav_Lisov=C3=BD?= <lisovy@gmail.com>, Heiko Schocher <hs@denx.de>, Gwenhael Goavec-Merou <gwenhael.goavec-merou@armadeus.com>, Philipp Zabel <p.zabel@pengutronix.de>, Russell King <rmk+kernel@arm.linux.org.uk>, Shawn Guo <shawn.guo@linaro.org>, Dong Aisheng <b29396@freescale.com>
+To: Tejun Heo <tj@kernel.org>, Jens Axboe <axboe@fb.com>, Jan Kara <jack@suse.cz>, Andrew Morton <akpm@linux-foundation.org>
+Cc: Linux MMC List <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 
-On Tue, Oct 6, 2015 at 7:21 PM, Fabio Estevam <festevam@gmail.com> wrote:
-> Hi Stefan,
+On Sun, Oct 25, 2015 at 11:12 AM, Geert Uytterhoeven
+<geert@linux-m68k.org> wrote:
+> Below is the list of build error/warning regressions/improvements in
+> v4.3-rc7[1] compared to v4.2[2].
 >
-> On Tue, Oct 6, 2015 at 7:15 PM, Stefan Agner <stefan@agner.ch> wrote:
->> Hi Dong,
->>
->> Just hit that issue in 4.1, could we add that patch also to stable?
+> Summarized:
+>   - build errors: +13/-8
+>   - build warnings: +160/-100
 >
-> I sent the series to stable, but Greg has not applied it yet.
+> JFYI, when comparing v4.3-rc7[1] to v4.3-rc6[3], the summaries are:
+>   - build errors: +12/-4
+>   - build warnings: +42/-40
 
-Greg applied the series and it appears now in 4.1.11.
+> [1] http://kisskb.ellerman.id.au/kisskb/head/9511/ (256 out of 254 configs)
+> [2] http://kisskb.ellerman.id.au/kisskb/head/9309/ (all 254 configs)
+> [3] http://kisskb.ellerman.id.au/kisskb/head/9487/ (255 out of 254 configs)
+
+> *** WARNINGS ***
+>
+> 160 regressions:
+
+>   + /home/kisskb/slave/src/mm/page-writeback.c: warning: 'filepages' is used uninitialized in this function:  => 1582, 1908
+>   + /home/kisskb/slave/src/mm/page-writeback.c: warning: 'headroom' is used uninitialized in this function:  => 1582, 1908
+
+Please refactor this code. It falls under the "so complicated that there are
+no obvious deficiencies " category
+(https://en.wikiquote.org/wiki/C._A._R._Hoare).
+
+Thanks a lot!
+
+Gr{oetje,eeting}s,
+
+                        Geert
+
+--
+Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
+
+In personal conversations with technical people, I call myself a hacker. But
+when I'm talking to journalists I just say "programmer" or something like that.
+                                -- Linus Torvalds
