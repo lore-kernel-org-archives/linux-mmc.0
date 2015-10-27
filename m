@@ -1,97 +1,74 @@
 From: Chaotian Jing <chaotian.jing@mediatek.com>
-Subject: [PATCH v3 10/10] arm64: dts: mediatek: add HS200/HS400/SDR50/SDR104 support
-Date: Tue, 27 Oct 2015 14:24:30 +0800
-Message-ID: <1445927070-5102-11-git-send-email-chaotian.jing@mediatek.com>
+Subject: [PATCH v3 05/10] mmc: mediatek: fix got GPD checksum error interrupt
+ when data transfer
+Date: Tue, 27 Oct 2015 14:24:25 +0800
+Message-ID: <1445927070-5102-6-git-send-email-chaotian.jing@mediatek.com>
 References: <1445927070-5102-1-git-send-email-chaotian.jing@mediatek.com>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
 In-Reply-To: <1445927070-5102-1-git-send-email-chaotian.jing@mediatek.com>
-Sender: linux-kernel-owner@vger.kernel.org
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
 To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mediatek@lists.infradead.org, Rob Herring <robh+dt@kernel.org>, Pawel Moll <pawel.moll@arm.com>, Mark Rutland <mark.rutland@arm.com>, Ian Campbell <ijc+devicetree@hellion.org.uk>, Kumar Gala <galak@codeaurora.org>, Matthias Brugger <matthias.bgg@gmail.com>, Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will.deacon@arm.com>, Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, Kukjin Kim <kgene@kernel.org>, Krzysztof Kozlowski <k.kozlowski@samsung.com>, Barry Song <baohua@kernel.org>, Hans de Goede <hdegoede@redhat.com>, Chaotian Jing <chaotian.jing@mediatek.com>, Lars-Peter Clausen <lars@metafoo.de>, Javier Martinez Canillas <javier.martinez@collabora.co.uk>, Sascha Hauer <s.hauer@pengutronix.de>, Howard Chen <ibanezchen@gmail.com>, Adrian Hunter <adrian.hunter@intel.com>, Kristina Martsenko <kristina.martsenko@gmail.com>
+Cc: Mark Rutland <mark.rutland@arm.com>, Krzysztof Kozlowski <k.kozlowski@samsung.com>, Seungwon Jeon <tgih.jun@samsung.com>, Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will.deacon@arm.com>, linux-kernel@vger.kernel.org, Minda Chen <Minda.Chen@csr.com>, Dong Aisheng <b29396@freescale.com>, Lars-Peter Clausen <lars@metafoo.de>, Weijun Yang <Weijun.Yang@csr.com>, Jaehoon Chung <jh80.chung@samsung.com>, linux-samsung-soc@vger.kernel.org, Howard Chen <ibanezchen@gmail.com>, Kukjin Kim <kgene@kernel.org>, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, ivan.ivanov@linaro.org, devicetree@vger.kernel.org, Pawel Moll <pawel.moll@arm.com>, Ian Campbell <ijc+devicetree@hellion.org.uk>, Sascha Hauer <s.hauer@pengutronix.de>, Hans de Goede <hdegoede@redhat.com>, Rob Herring <robh+dt@kernel.org>, linux-mediatek@lists.infradead.org, Matthias Brugger <matthias>
 List-Id: linux-mmc@vger.kernel.org
 
-add HS200/HS400 support for eMMC
-add SDR50/SDR104 support for SD
+Even if we only use one gpd, we need alloc 2 gpd and make
+the gpd->next pointer to the second gpd, or may get gpd checksum
+error, this was checked by hardware
 
 Signed-off-by: Chaotian Jing <chaotian.jing@mediatek.com>
 ---
- arch/arm64/boot/dts/mediatek/mt8173-evb.dts | 26 +++++++++++++++++++-------
- 1 file changed, 19 insertions(+), 7 deletions(-)
+ drivers/mmc/host/mtk-sd.c | 11 +++++++----
+ 1 file changed, 7 insertions(+), 4 deletions(-)
 
-diff --git a/arch/arm64/boot/dts/mediatek/mt8173-evb.dts b/arch/arm64/boot/dts/mediatek/mt8173-evb.dts
-index 6d79ffc..a061221 100644
---- a/arch/arm64/boot/dts/mediatek/mt8173-evb.dts
-+++ b/arch/arm64/boot/dts/mediatek/mt8173-evb.dts
-@@ -70,11 +70,16 @@
- 	pinctrl-0 = <&mmc0_pins_default>;
- 	pinctrl-1 = <&mmc0_pins_uhs>;
- 	bus-width = <8>;
--	max-frequency = <50000000>;
-+	max-frequency = <200000000>;
- 	cap-mmc-highspeed;
-+	mmc-hs200-1_8v;
-+	mmc-hs400-1_8v;
- 	cap-mmc-hw-reset;
-+	hs400-ds-delay = <0x14015>;
- 	vmmc-supply = <&mt6397_vemc_3v3_reg>;
- 	vqmmc-supply = <&mt6397_vio18_reg>;
-+	assigned-clocks = <&topckgen CLK_TOP_MSDC50_0_SEL>;
-+	assigned-clock-parents = <&topckgen CLK_TOP_MSDCPLL_D2>;
- 	non-removable;
- };
+diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
+index c877ded..3858163 100644
+--- a/drivers/mmc/host/mtk-sd.c
++++ b/drivers/mmc/host/mtk-sd.c
+@@ -1145,11 +1145,14 @@ static void msdc_init_gpd_bd(struct msdc_host *host, struct msdc_dma *dma)
+ 	struct mt_bdma_desc *bd = dma->bd;
+ 	int i;
  
-@@ -84,9 +89,10 @@
- 	pinctrl-0 = <&mmc1_pins_default>;
- 	pinctrl-1 = <&mmc1_pins_uhs>;
- 	bus-width = <4>;
--	max-frequency = <50000000>;
-+	max-frequency = <200000000>;
- 	cap-sd-highspeed;
--	sd-uhs-sdr25;
-+	sd-uhs-sdr50;
-+	sd-uhs-sdr104;
- 	cd-gpios = <&pio 132 0>;
- 	vmmc-supply = <&mt6397_vmch_reg>;
- 	vqmmc-supply = <&mt6397_vmc_reg>;
-@@ -155,13 +161,19 @@
- 				 <MT8173_PIN_64_MSDC0_DAT7__FUNC_MSDC0_DAT7>,
- 				 <MT8173_PIN_66_MSDC0_CMD__FUNC_MSDC0_CMD>;
- 			input-enable;
--			drive-strength = <MTK_DRIVE_2mA>;
-+			drive-strength = <MTK_DRIVE_4mA>;
- 			bias-pull-up = <MTK_PUPD_SET_R1R0_01>;
- 		};
+-	memset(gpd, 0, sizeof(struct mt_gpdma_desc));
++	memset(gpd, 0, sizeof(struct mt_gpdma_desc) * 2);
  
- 		pins_clk {
- 			pinmux = <MT8173_PIN_65_MSDC0_CLK__FUNC_MSDC0_CLK>;
--			drive-strength = <MTK_DRIVE_2mA>;
-+			drive-strength = <MTK_DRIVE_4mA>;
-+			bias-pull-down = <MTK_PUPD_SET_R1R0_01>;
-+		};
-+
-+		pins_ds {
-+			pinmux = <MT8173_PIN_67_MSDC0_DSL__FUNC_MSDC0_DSL>;
-+			drive-strength = <MTK_DRIVE_6mA>;
- 			bias-pull-down = <MTK_PUPD_SET_R1R0_01>;
- 		};
+ 	gpd->gpd_info = GPDMA_DESC_BDP; /* hwo, cs, bd pointer */
+ 	gpd->ptr = (u32)dma->bd_addr; /* physical address */
+-
++	/* gpd->next is must set for desc DMA
++	 * That's why must alloc 2 gpd structure.
++	 */
++	gpd->next = (u32)dma->gpd_addr + sizeof(struct mt_gpdma_desc);
+ 	memset(bd, 0, sizeof(struct mt_bdma_desc) * MAX_BD_NUM);
+ 	for (i = 0; i < (MAX_BD_NUM - 1); i++)
+ 		bd[i].next = (u32)dma->bd_addr + sizeof(*bd) * (i + 1);
+@@ -1306,7 +1309,7 @@ static int msdc_drv_probe(struct platform_device *pdev)
  
-@@ -179,13 +191,13 @@
- 				 <MT8173_PIN_76_MSDC1_DAT3__FUNC_MSDC1_DAT3>,
- 				 <MT8173_PIN_78_MSDC1_CMD__FUNC_MSDC1_CMD>;
- 			input-enable;
--			drive-strength = <MTK_DRIVE_4mA>;
-+			drive-strength = <MTK_DRIVE_6mA>;
- 			bias-pull-up = <MTK_PUPD_SET_R1R0_10>;
- 		};
- 
- 		pins_clk {
- 			pinmux = <MT8173_PIN_77_MSDC1_CLK__FUNC_MSDC1_CLK>;
--			drive-strength = <MTK_DRIVE_4mA>;
-+			drive-strength = <MTK_DRIVE_8mA>;
- 			bias-pull-down = <MTK_PUPD_SET_R1R0_10>;
- 		};
- 	};
+ 	host->timeout_clks = 3 * 1048576;
+ 	host->dma.gpd = dma_alloc_coherent(&pdev->dev,
+-				sizeof(struct mt_gpdma_desc),
++				2 * sizeof(struct mt_gpdma_desc),
+ 				&host->dma.gpd_addr, GFP_KERNEL);
+ 	host->dma.bd = dma_alloc_coherent(&pdev->dev,
+ 				MAX_BD_NUM * sizeof(struct mt_bdma_desc),
+@@ -1347,7 +1350,7 @@ release:
+ release_mem:
+ 	if (host->dma.gpd)
+ 		dma_free_coherent(&pdev->dev,
+-			sizeof(struct mt_gpdma_desc),
++			2 * sizeof(struct mt_gpdma_desc),
+ 			host->dma.gpd, host->dma.gpd_addr);
+ 	if (host->dma.bd)
+ 		dma_free_coherent(&pdev->dev,
 -- 
 1.8.1.1.dirty
