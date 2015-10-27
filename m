@@ -1,67 +1,54 @@
-From: Chaotian Jing <chaotian.jing-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>
-Subject: [PATCH v3 00/10] Add tune support of Mediatek MMC driver
-Date: Tue, 27 Oct 2015 14:24:20 +0800
-Message-ID: <1445927070-5102-1-git-send-email-chaotian.jing@mediatek.com>
+From: Chaotian Jing <chaotian.jing@mediatek.com>
+Subject: [PATCH v3 02/10] mmc: dt-bindings: update Mediatek MMC bindings
+Date: Tue, 27 Oct 2015 14:24:22 +0800
+Message-ID: <1445927070-5102-3-git-send-email-chaotian.jing@mediatek.com>
+References: <1445927070-5102-1-git-send-email-chaotian.jing@mediatek.com>
 Mime-Version: 1.0
 Content-Type: text/plain
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: linux-mediatek-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Pawel Moll <pawel.moll-5wv7dgnIgG8@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Ian Campbell <ijc+devicetree-KcIKpvwj1kUDXYZnReoRVg@public.gmane.org>, Kumar Gala <galak-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, Matthias Brugger <matthias.bgg-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>, Seungwon Jeon <tgih.jun-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, Jaehoon Chung <jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, Kukjin Kim <kgene-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Krzysztof Kozlowski <k.kozlowski-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, Barry Song <baohua-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Chaotian Jing <chaotian.jing-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>, Lars-Peter Clausen <lars-Qo5EllUWu/uELgA04lAiVw@public.gmane.org>, Javier Martinez Canillas <javier.martinez-ZGY8ohtN/8pPYcu2f3hruQ@public.gmane.org>, Sascha Hauer <s.hauer-bIcnvbaLZ9MEGnE8C9+IrQ@public.gmane.org>, Howard Chen <ibanezchen-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Kristina Martsenko <kristina.martsenko-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1445927070-5102-1-git-send-email-chaotian.jing@mediatek.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mediatek@lists.infradead.org, Rob Herring <robh+dt@kernel.org>, Pawel Moll <pawel.moll@arm.com>, Mark Rutland <mark.rutland@arm.com>, Ian Campbell <ijc+devicetree@hellion.org.uk>, Kumar Gala <galak@codeaurora.org>, Matthias Brugger <matthias.bgg@gmail.com>, Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will.deacon@arm.com>, Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, Kukjin Kim <kgene@kernel.org>, Krzysztof Kozlowski <k.kozlowski@samsung.com>, Barry Song <baohua@kernel.org>, Hans de Goede <hdegoede@redhat.com>, Chaotian Jing <chaotian.jing@mediatek.com>, Lars-Peter Clausen <lars@metafoo.de>, Javier Martinez Canillas <javier.martinez@collabora.co.uk>, Sascha Hauer <s.hauer@pengutronix.de>, Howard Chen <ibanezchen@gmail.com>, Adrian Hunter <adrian.hunter@intel.com>, Kristina Martsenko <kristina.martsenko@gmail.com>
 List-Id: linux-mmc@vger.kernel.org
 
-Change in v3:
-Fix checkpatch errors and warnings for patch 8
-Split patch 9, make DT parts enabling hw reset separately
+Add 400Mhz clock source for HS400 mode
 
-Change in v2:
-Drop the 400mhz and use assigned-clock-parents to instead
-Split the original tune patch to several independent patches
-Re-write the mmc_send_tuning()
-Fix GPD checksum error
-Move the HS400 setting to ops->prepare_hs400_tuning()	
-Modify SD driving settings
+Signed-off-by: Chaotian Jing <chaotian.jing@mediatek.com>
+---
+ Documentation/devicetree/bindings/mmc/mtk-sd.txt | 11 ++++++++++-
+ 1 file changed, 10 insertions(+), 1 deletion(-)
 
-Change in v1:
-Add DT bindings for eMMC hardware reset
-Add pinctrl of data strobe pin for HS400 mode
-Modify eMMC driving settings
-Add 400mhz source clock for HS400 mode
-Add eMMC HS200/HS400 mode support
-Add SD SDR50/SDR104 mode support
-Add implement of tune function with CMD19/CMD21
-
-Chaotian Jing (10):
-  mmc: core: Add DT bindings for eMMC hardware reset support
-  mmc: dt-bindings: update Mediatek MMC bindings
-  mmc: mediatek: make cmd_ints_mask to const
-  mmc: mediatek: change the argument "ddr" to "timing"
-  mmc: mediatek: fix got GPD checksum error interrupt when data transfer
-  mmc: mediatek: add implement of ops->hw_reset()
-  arm64: dts: mediatek: add eMMC hw reset support
-  mmc: mmc: extend the mmc_send_tuning()
-  mmc: mediatek: add HS400 support
-  arm64: dts: mediatek: add HS200/HS400/SDR50/SDR104 support
-
- Documentation/devicetree/bindings/mmc/mmc.txt    |   1 +
- Documentation/devicetree/bindings/mmc/mtk-sd.txt |  11 +-
- arch/arm64/boot/dts/mediatek/mt8173-evb.dts      |  27 +-
- drivers/mmc/core/host.c                          |   2 +
- drivers/mmc/core/mmc_ops.c                       |   8 +-
- drivers/mmc/host/dw_mmc-exynos.c                 |   4 +-
- drivers/mmc/host/dw_mmc.c                        |   2 +-
- drivers/mmc/host/dw_mmc.h                        |   2 +-
- drivers/mmc/host/mtk-sd.c                        | 304 ++++++++++++++++++++---
- drivers/mmc/host/sdhci-esdhc-imx.c               |   6 +-
- drivers/mmc/host/sdhci-msm.c                     |   2 +-
- drivers/mmc/host/sdhci-sirf.c                    |   2 +-
- include/linux/mmc/core.h                         |   2 +-
- 13 files changed, 322 insertions(+), 51 deletions(-)
-
+diff --git a/Documentation/devicetree/bindings/mmc/mtk-sd.txt b/Documentation/devicetree/bindings/mmc/mtk-sd.txt
+index a1adfa4..0120c7f 100644
+--- a/Documentation/devicetree/bindings/mmc/mtk-sd.txt
++++ b/Documentation/devicetree/bindings/mmc/mtk-sd.txt
+@@ -17,6 +17,11 @@ Required properties:
+ - vmmc-supply: power to the Core
+ - vqmmc-supply: power to the IO
+ 
++Optional properties:
++- assigned-clocks: PLL of the source clock
++- assigned-clock-parents: parent of source clock, used for HS400 mode to get 400Mhz source clock
++- hs400-ds-delay: HS400 DS delay setting
++
+ Examples:
+ mmc0: mmc@11230000 {
+ 	compatible = "mediatek,mt8173-mmc", "mediatek,mt8135-mmc";
+@@ -24,9 +29,13 @@ mmc0: mmc@11230000 {
+ 	interrupts = <GIC_SPI 39 IRQ_TYPE_LEVEL_LOW>;
+ 	vmmc-supply = <&mt6397_vemc_3v3_reg>;
+ 	vqmmc-supply = <&mt6397_vio18_reg>;
+-	clocks = <&pericfg CLK_PERI_MSDC30_0>, <&topckgen CLK_TOP_MSDC50_0_H_SEL>;
++	clocks = <&pericfg CLK_PERI_MSDC30_0>,
++	         <&topckgen CLK_TOP_MSDC50_0_H_SEL>;
+ 	clock-names = "source", "hclk";
+ 	pinctrl-names = "default", "state_uhs";
+ 	pinctrl-0 = <&mmc0_pins_default>;
+ 	pinctrl-1 = <&mmc0_pins_uhs>;
++	assigned-clocks = <&topckgen CLK_TOP_MSDC50_0_SEL>;
++	assigned-clock-parents = <&topckgen CLK_TOP_MSDCPLL_D2>;
++	hs400-ds-delay = <0x14015>;
+ };
 -- 
 1.8.1.1.dirty
-
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
