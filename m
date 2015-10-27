@@ -1,87 +1,83 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v3 00/10] Add tune support of Mediatek MMC driver
-Date: Tue, 27 Oct 2015 10:54:04 +0100
-Message-ID: <CAPDyKFprx7UcZ6OypGZfEC_nLOd02bAFMdmxrOcig0ANVKGRwA@mail.gmail.com>
-References: <1445927070-5102-1-git-send-email-chaotian.jing@mediatek.com>
+Subject: Re: [PATCH] mmc: pwrseq: Use highest priority for eMMC restart handler
+Date: Tue, 27 Oct 2015 11:10:01 +0100
+Message-ID: <CAPDyKFoMQcC5sdCEKHWqNOdw1Yw8e8yRpdx7mtq7sMxg6sAi+A@mail.gmail.com>
+References: <1445440540-21525-1-git-send-email-javier@osg.samsung.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-yk0-f181.google.com ([209.85.160.181]:36247 "EHLO
-	mail-yk0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752751AbbJ0JyG (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 27 Oct 2015 05:54:06 -0400
-Received: by ykba4 with SMTP id a4so206039673ykb.3
-        for <linux-mmc@vger.kernel.org>; Tue, 27 Oct 2015 02:54:05 -0700 (PDT)
-In-Reply-To: <1445927070-5102-1-git-send-email-chaotian.jing@mediatek.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+In-Reply-To: <1445440540-21525-1-git-send-email-javier@osg.samsung.com>
+Sender: linux-samsung-soc-owner@vger.kernel.org
+To: Javier Martinez Canillas <javier@osg.samsung.com>
+Cc: "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Markus Reichl <m.reichl@fivetechno.de>, Anand Moon <linux.amoon@gmail.com>, linux-samsung-soc <linux-samsung-soc@vger.kernel.org>, Krzysztof Kozlowski <k.kozlowski@samsung.com>, Alim Akhtar <alim.akhtar@samsung.com>, Marek Szyprowski <m.szyprowski@samsung.com>, linux-mmc <linux-mmc@vger.kernel.org>, Alexandre Courbot <acourbot@nvidia.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Chaotian Jing <chaotian.jing@mediatek.com>
-Cc: linux-mediatek@lists.infradead.org, Rob Herring <robh+dt@kernel.org>, Pawel Moll <pawel.moll@arm.com>, Mark Rutland <mark.rutland@arm.com>, Ian Campbell <ijc+devicetree@hellion.org.uk>, Kumar Gala <galak@codeaurora.org>, Matthias Brugger <matthias.bgg@gmail.com>, Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will.deacon@arm.com>, Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, Kukjin Kim <kgene@kernel.org>, Krzysztof Kozlowski <k.kozlowski@samsung.com>, Barry Song <baohua@kernel.org>, Hans de Goede <hdegoede@redhat.com>, Lars-Peter Clausen <lars@metafoo.de>, Javier Martinez Canillas <javier.martinez@collabora.co.uk>, Sascha Hauer <s.hauer@pengutronix.de>, Howard Chen <ibanezchen@gmail.com>, Adrian Hunter <adrian.hunter@intel.com>, Kristina Martsenko <kristina.martsenko@gmail.com>, Sergei Shtylyov <sergei.shtylyov@cogentembe>
 
-On 27 October 2015 at 07:24, Chaotian Jing <chaotian.jing@mediatek.com> wrote:
-> Change in v3:
-> Fix checkpatch errors and warnings for patch 8
-> Split patch 9, make DT parts enabling hw reset separately
+On 21 October 2015 at 17:15, Javier Martinez Canillas
+<javier@osg.samsung.com> wrote:
+> The pwrseq_emmc driver does a eMMC card reset before a system reboot to
+> allow broken or limited ROM boot-loaders (that don't have an eMMC reset
+> logic) to be able to read the second stage from the eMMC.
 >
-> Change in v2:
-> Drop the 400mhz and use assigned-clock-parents to instead
-> Split the original tune patch to several independent patches
-> Re-write the mmc_send_tuning()
-> Fix GPD checksum error
-> Move the HS400 setting to ops->prepare_hs400_tuning()
-> Modify SD driving settings
+> But this has to be called before a system reboot handler and while most
+> of them use the priority 128, there are other restart handlers (such as
+> the syscon-reboot one) that use a higher priority. So, use the highest
+> priority to make sure that the eMMC hw is reset before a system reboot.
 >
-> Change in v1:
-> Add DT bindings for eMMC hardware reset
-> Add pinctrl of data strobe pin for HS400 mode
-> Modify eMMC driving settings
-> Add 400mhz source clock for HS400 mode
-> Add eMMC HS200/HS400 mode support
-> Add SD SDR50/SDR104 mode support
-> Add implement of tune function with CMD19/CMD21
+> Signed-off-by: Javier Martinez Canillas <javier@osg.samsung.com>
+> Tested-by: Markus Reichl <m.reichl@fivetechno.de>
+> Tested-by: Anand Moon <linux.amoon@gmail.com>
+> Reviewed-by: Alim Akhtar <alim.akhtar@samsung.com>
 >
-> Chaotian Jing (10):
->   mmc: core: Add DT bindings for eMMC hardware reset support
->   mmc: dt-bindings: update Mediatek MMC bindings
->   mmc: mediatek: make cmd_ints_mask to const
->   mmc: mediatek: change the argument "ddr" to "timing"
->   mmc: mediatek: fix got GPD checksum error interrupt when data transfer
->   mmc: mediatek: add implement of ops->hw_reset()
->   arm64: dts: mediatek: add eMMC hw reset support
->   mmc: mmc: extend the mmc_send_tuning()
->   mmc: mediatek: add HS400 support
->   arm64: dts: mediatek: add HS200/HS400/SDR50/SDR104 support
+> ---
+> Hello,
 >
->  Documentation/devicetree/bindings/mmc/mmc.txt    |   1 +
->  Documentation/devicetree/bindings/mmc/mtk-sd.txt |  11 +-
->  arch/arm64/boot/dts/mediatek/mt8173-evb.dts      |  27 +-
->  drivers/mmc/core/host.c                          |   2 +
->  drivers/mmc/core/mmc_ops.c                       |   8 +-
->  drivers/mmc/host/dw_mmc-exynos.c                 |   4 +-
->  drivers/mmc/host/dw_mmc.c                        |   2 +-
->  drivers/mmc/host/dw_mmc.h                        |   2 +-
->  drivers/mmc/host/mtk-sd.c                        | 304 ++++++++++++++++++++---
->  drivers/mmc/host/sdhci-esdhc-imx.c               |   6 +-
->  drivers/mmc/host/sdhci-msm.c                     |   2 +-
->  drivers/mmc/host/sdhci-sirf.c                    |   2 +-
->  include/linux/mmc/core.h                         |   2 +-
->  13 files changed, 322 insertions(+), 51 deletions(-)
+> This patch was needed since a recent series from Alim [0] added
+> syscon reboot and poweroff support to Exynos SoCs and removed
+> the reset handler in the Exynos Power Management Unit (PMU) code.
 >
-> --
-> 1.8.1.1.dirty
+> But the PMU and syscon-reboot restart handler have a different
+> priority so [0] breaks restart when eMMC is used on these boards.
 >
+> [0]: http://www.spinics.net/lists/arm-kernel/msg454396.html
+>
+> So this patch must be merged before [0] to avoid regressions.
+>
+> Best regards,
+> Javier
 
-Chaotian,
+So it seems like there have been a good discussion around this. I
+don't have any objections, but is more concerned about potential
+regressions.
 
-I have applied this except the ARM patches (patch7 and patch10) as I
-think those should go via ARM SoC (unless I get acks for them).
+I have queued it up for next (4.4) so we get some testing in
+linux-next. If anyone have issues, please report them.
 
-Regarding patch8, it didn't apply since it needed a re-base. This time
-it was trivial to fix, so I decided to pick it up anyway.
-
-Future wise I also advise you to significantly trim the cc/to list
-when posting patches. Likely what happens when that many people are
-requested for input, is that *none* cares. :-)
-
-Thanks and kind regards!
+Kind regards
 Uffe
+
+>
+>  drivers/mmc/core/pwrseq_emmc.c | 6 +++---
+>  1 file changed, 3 insertions(+), 3 deletions(-)
+>
+> diff --git a/drivers/mmc/core/pwrseq_emmc.c b/drivers/mmc/core/pwrseq_emmc.c
+> index 137c97fb7aa8..ad4f94ec7e8d 100644
+> --- a/drivers/mmc/core/pwrseq_emmc.c
+> +++ b/drivers/mmc/core/pwrseq_emmc.c
+> @@ -84,11 +84,11 @@ struct mmc_pwrseq *mmc_pwrseq_emmc_alloc(struct mmc_host *host,
+>
+>         /*
+>          * register reset handler to ensure emmc reset also from
+> -        * emergency_reboot(), priority 129 schedules it just before
+> -        * system reboot
+> +        * emergency_reboot(), priority 255 is the highest priority
+> +        * so it will be executed before any system reboot handler.
+>          */
+>         pwrseq->reset_nb.notifier_call = mmc_pwrseq_emmc_reset_nb;
+> -       pwrseq->reset_nb.priority = 129;
+> +       pwrseq->reset_nb.priority = 255;
+>         register_restart_handler(&pwrseq->reset_nb);
+>
+>         pwrseq->pwrseq.ops = &mmc_pwrseq_emmc_ops;
+> --
+> 2.4.3
+>
