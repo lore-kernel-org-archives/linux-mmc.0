@@ -1,78 +1,122 @@
-From: Javier Martinez Canillas <javier@osg.samsung.com>
-Subject: Re: [PATCH] mmc: pwrseq: Use highest priority for eMMC restart
- handler
-Date: Wed, 28 Oct 2015 12:02:47 +0100
-Message-ID: <5630AB57.4030405@osg.samsung.com>
-References: <1445440540-21525-1-git-send-email-javier@osg.samsung.com>
- <CAPDyKFoMQcC5sdCEKHWqNOdw1Yw8e8yRpdx7mtq7sMxg6sAi+A@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-In-Reply-To: <CAPDyKFoMQcC5sdCEKHWqNOdw1Yw8e8yRpdx7mtq7sMxg6sAi+A@mail.gmail.com>
-Sender: linux-samsung-soc-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Markus Reichl <m.reichl@fivetechno.de>, Anand Moon <linux.amoon@gmail.com>, linux-samsung-soc <linux-samsung-soc@vger.kernel.org>, Krzysztof Kozlowski <k.kozlowski@samsung.com>, Alim Akhtar <alim.akhtar@samsung.com>, Marek Szyprowski <m.szyprowski@samsung.com>, linux-mmc <linux-mmc@vger.kernel.org>, Alexandre Courbot <acourbot@nvidia.com>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: [PATCH 4/4] mmc: mmc: Improve reliability of mmc_select_hs400()
+Date: Wed, 28 Oct 2015 14:25:43 +0200
+Message-ID: <1446035143-4949-5-git-send-email-adrian.hunter@intel.com>
+References: <1446035143-4949-1-git-send-email-adrian.hunter@intel.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mga01.intel.com ([192.55.52.88]:8119 "EHLO mga01.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S932454AbbJ1M3N (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 28 Oct 2015 08:29:13 -0400
+In-Reply-To: <1446035143-4949-1-git-send-email-adrian.hunter@intel.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, Chaotian Jing <chaotian.jing@mediatek.com>
 
-Hello Ulf,
+mmc_select_hs400() calls __mmc_switch() which checks the switch is
+successful using CMD13 (SEND_STATUS).  The problem is that it does that
+using the timing settings of the previous mode.  That is prone to error,
+especially when switching from HS to HS400 because the timing parameters
+for HS mode are tighter than the timing parameters for HS400 mode.
 
-On 10/27/2015 11:10 AM, Ulf Hansson wrote:
-> On 21 October 2015 at 17:15, Javier Martinez Canillas
-> <javier@osg.samsung.com> wrote:
->> The pwrseq_emmc driver does a eMMC card reset before a system reboot to
->> allow broken or limited ROM boot-loaders (that don't have an eMMC reset
->> logic) to be able to read the second stage from the eMMC.
->>
->> But this has to be called before a system reboot handler and while most
->> of them use the priority 128, there are other restart handlers (such as
->> the syscon-reboot one) that use a higher priority. So, use the highest
->> priority to make sure that the eMMC hw is reset before a system reboot.
->>
->> Signed-off-by: Javier Martinez Canillas <javier@osg.samsung.com>
->> Tested-by: Markus Reichl <m.reichl@fivetechno.de>
->> Tested-by: Anand Moon <linux.amoon@gmail.com>
->> Reviewed-by: Alim Akhtar <alim.akhtar@samsung.com>
->>
->> ---
->> Hello,
->>
->> This patch was needed since a recent series from Alim [0] added
->> syscon reboot and poweroff support to Exynos SoCs and removed
->> the reset handler in the Exynos Power Management Unit (PMU) code.
->>
->> But the PMU and syscon-reboot restart handler have a different
->> priority so [0] breaks restart when eMMC is used on these boards.
->>
->> [0]: http://www.spinics.net/lists/arm-kernel/msg454396.html
->>
->> So this patch must be merged before [0] to avoid regressions.
->>
->> Best regards,
->> Javier
-> 
-> So it seems like there have been a good discussion around this. I
-> don't have any objections, but is more concerned about potential
-> regressions.
->
+In the case when CMD13 polling is used (i.e. not MMC_CAP_WAIT_WHILE_BUSY)
+with the switch command, it must be assumed that using different modes on
+the card and host must work.
 
-Yes, there was a lot of discussion indeed but it seems we all agree
-on the approach and that the patch should not land before having a
-lot of testing.
+However in the case when CMD13 polling is not used
+(i.e. MMC_CAP_WAIT_WHILE_BUSY) mmc_select_hs400() can be made more
+reliable by setting the host to the correct timing before sending CMD13.
+
+This patch does that.
+
+Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
+---
+ drivers/mmc/core/mmc.c | 28 ++++++++++++++++++++++++++--
+ 1 file changed, 26 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+index 5884c79346da..3a9a79ec4343 100644
+--- a/drivers/mmc/core/mmc.c
++++ b/drivers/mmc/core/mmc.c
+@@ -1056,6 +1056,7 @@ static int mmc_switch_status(struct mmc_card *card)
+ static int mmc_select_hs400(struct mmc_card *card)
+ {
+ 	struct mmc_host *host = card->host;
++	bool send_status = true;
+ 	unsigned int max_dtr;
+ 	int err = 0;
+ 	u8 val;
+@@ -1067,6 +1068,9 @@ static int mmc_select_hs400(struct mmc_card *card)
+ 	      host->ios.bus_width == MMC_BUS_WIDTH_8))
+ 		return 0;
  
-> I have queued it up for next (4.4) so we get some testing in
-> linux-next. If anyone have issues, please report them.
->
-
-great, some weeks sitting in -next to let the CI infrastructure to
-play with it seems reasonable to me. Thanks a lot!
++	if (host->caps & MMC_CAP_WAIT_WHILE_BUSY)
++		send_status = false;
++
+ 	/* Reduce frequency to HS frequency */
+ 	max_dtr = card->ext_csd.hs_max_dtr;
+ 	mmc_set_clock(host, max_dtr);
+@@ -1077,7 +1081,7 @@ static int mmc_select_hs400(struct mmc_card *card)
+ 	err = __mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
+ 			   EXT_CSD_HS_TIMING, val,
+ 			   card->ext_csd.generic_cmd6_time,
+-			   true, true, true);
++			   true, send_status, true);
+ 	if (err) {
+ 		pr_err("%s: switch to high-speed from hs200 failed, err:%d\n",
+ 			mmc_hostname(host), err);
+@@ -1087,6 +1091,13 @@ static int mmc_select_hs400(struct mmc_card *card)
+ 	/* Set host controller to HS timing */
+ 	mmc_set_timing(card->host, MMC_TIMING_MMC_HS);
  
-> Kind regards
-> Uffe
->
-
-Best regards,
++	if (!send_status) {
++		err = mmc_switch_status(card);
++		if (err)
++			goto out_err;
++	}
++
++	/* Switch card to DDR */
+ 	err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
+ 			 EXT_CSD_BUS_WIDTH,
+ 			 EXT_CSD_DDR_BUS_WIDTH_8,
+@@ -1097,22 +1108,35 @@ static int mmc_select_hs400(struct mmc_card *card)
+ 		return err;
+ 	}
+ 
++	/* Switch card to HS400 */
+ 	val = EXT_CSD_TIMING_HS400 |
+ 	      card->drive_strength << EXT_CSD_DRV_STR_SHIFT;
+ 	err = __mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
+ 			   EXT_CSD_HS_TIMING, val,
+ 			   card->ext_csd.generic_cmd6_time,
+-			   true, true, true);
++			   true, send_status, true);
+ 	if (err) {
+ 		pr_err("%s: switch to hs400 failed, err:%d\n",
+ 			 mmc_hostname(host), err);
+ 		return err;
+ 	}
+ 
++	/* Set host controller to HS400 timing and frequency */
+ 	mmc_set_timing(host, MMC_TIMING_MMC_HS400);
+ 	mmc_set_bus_speed(card);
+ 
++	if (!send_status) {
++		err = mmc_switch_status(card);
++		if (err)
++			goto out_err;
++	}
++
+ 	return 0;
++
++out_err:
++	pr_err("%s: %s failed, error %d\n", mmc_hostname(card->host),
++	       __func__, err);
++	return err;
+ }
+ 
+ int mmc_hs200_to_hs400(struct mmc_card *card)
 -- 
-Javier Martinez Canillas
-Open Source Group
-Samsung Research America
+1.9.1
+
