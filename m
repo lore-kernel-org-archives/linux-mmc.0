@@ -1,71 +1,46 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: [PATCH 3/4] mmc: mmc: Move mmc_switch_status()
-Date: Wed, 28 Oct 2015 14:25:42 +0200
-Message-ID: <1446035143-4949-4-git-send-email-adrian.hunter@intel.com>
-References: <1446035143-4949-1-git-send-email-adrian.hunter@intel.com>
+From: Jeff Moyer <jmoyer@redhat.com>
+Subject: Re: RFC: 32-bit __data_len and REQ_DISCARD+REQ_SECURE
+Date: Wed, 28 Oct 2015 18:15:51 -0400
+Message-ID: <x49pozyljvs.fsf@segfault.boston.devel.redhat.com>
+References: <CANEJEGvXfg4O6KWBcQe4=o0ZxjehgGTBMBxNddanprBXQbr-Qg@mail.gmail.com>
+	<CANEJEGtDr+BdP1s=EUpUSqcvWpQfkt+o_3zoXWHk7DdjH4j0Ow@mail.gmail.com>
+	<CANEJEGukOKUgRJNPVaeEXpx-REzj8ooSfWdrnRMMCQr6EVaNqQ@mail.gmail.com>
+	<CANEJEGvktCkVEbLaQoZqOFZY3F8o=Z41HwQxL=X4jh=-PdV3Fg@mail.gmail.com>
+	<CANEJEGuwymF-v7rdep4h2eGcvCAzEVvaYtwHCim9UR5NLZPkbg@mail.gmail.com>
+	<x49si55v04n.fsf@segfault.boston.devel.redhat.com>
+	<CAPDyKFpXtio5m6V1M5QQcB1RNt4JtoDZ2qL2FqLDDNV4aODVAg@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga01.intel.com ([192.55.52.88]:8119 "EHLO mga01.intel.com"
+Received: from mx1.redhat.com ([209.132.183.28]:57962 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S932178AbbJ1M3N (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 28 Oct 2015 08:29:13 -0400
-In-Reply-To: <1446035143-4949-1-git-send-email-adrian.hunter@intel.com>
+	id S1752902AbbJ1WPx (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 28 Oct 2015 18:15:53 -0400
+In-Reply-To: <CAPDyKFpXtio5m6V1M5QQcB1RNt4JtoDZ2qL2FqLDDNV4aODVAg@mail.gmail.com>
+	(Ulf Hansson's message of "Wed, 21 Oct 2015 11:00:57 +0200")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, Chaotian Jing <chaotian.jing@mediatek.com>
+Cc: Grant Grundler <grundler@chromium.org>, Jens Axboe <axboe@kernel.dk>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, LKML <linux-kernel@vger.kernel.org>, Gwendal Grignou <gwendal@chromium.org>
 
-Move the mmc_switch_status() function in preparation for calling it
-in mmc_select_hs400().
+Ulf Hansson <ulf.hansson@linaro.org> writes:
 
-Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
----
- drivers/mmc/core/mmc.c | 26 +++++++++++++-------------
- 1 file changed, 13 insertions(+), 13 deletions(-)
+> I am not sure if this issue is the same as been discussed earlier on
+> the mmc list regarding "discard/erase".
+>
+> Anyway, there have been several attempts to fix bugs related to this.
+> One of these discussion kind of pointed out a viable solution, but
+> unfortunate no patches that adopts that solution have been posted yet.
+>
+> You might want to read up on this.
+> https://www.mail-archive.com/linux-mmc@vger.kernel.org/msg23643.html
+> http://linux-mmc.vger.kernel.narkive.com/Wp31G953/patch-mmc-core-don-t-return-1-for-max-discard
+>
+> So this is an old issue, which should have been fixed long long long time ago...
 
-diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-index 14fb767ee8dd..5884c79346da 100644
---- a/drivers/mmc/core/mmc.c
-+++ b/drivers/mmc/core/mmc.c
-@@ -1040,6 +1040,19 @@ static int mmc_select_hs_ddr(struct mmc_card *card)
- 	return err;
- }
- 
-+/* Caller must hold re-tuning */
-+static int mmc_switch_status(struct mmc_card *card)
-+{
-+	u32 status;
-+	int err;
-+
-+	err = mmc_send_status(card, &status);
-+	if (err)
-+		return err;
-+
-+	return mmc_switch_status_error(card->host, status);
-+}
-+
- static int mmc_select_hs400(struct mmc_card *card)
- {
- 	struct mmc_host *host = card->host;
-@@ -1107,19 +1120,6 @@ int mmc_hs200_to_hs400(struct mmc_card *card)
- 	return mmc_select_hs400(card);
- }
- 
--/* Caller must hold re-tuning */
--static int mmc_switch_status(struct mmc_card *card)
--{
--	u32 status;
--	int err;
--
--	err = mmc_send_status(card, &status);
--	if (err)
--		return err;
--
--	return mmc_switch_status_error(card->host, status);
--}
--
- int mmc_hs400_to_hs200(struct mmc_card *card)
- {
- 	struct mmc_host *host = card->host;
--- 
-1.9.1
+Thanks Ulf.  After reading all of the linked discussions, it's my
+understanding that this is an emmc-specific issue that doesn't require
+any block layer changes.  If that's wrong, please let me know.
 
+Cheers,
+Jeff
