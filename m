@@ -1,61 +1,58 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [RFC PATCH v8 10/10] arm: zx_defconfig: remove CONFIG_MMC_DW_IDMAC
-Date: Thu, 29 Oct 2015 11:32:35 +0900
-Message-ID: <56318543.3090900@samsung.com>
-References: <1442385625-26775-1-git-send-email-shawn.lin@rock-chips.com>
- <1442385808-1433-1-git-send-email-shawn.lin@rock-chips.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [GIT PULL] Update dw-mmc controller
+Date: Thu, 29 Oct 2015 11:03:29 +0100
+Message-ID: <CAPDyKFr19Az9L0rgKZo4uX-cQXw=S0sYTkOu2=M2z_uJy1Yf8A@mail.gmail.com>
+References: <56317A61.9050709@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout2.samsung.com ([203.254.224.25]:47398 "EHLO
-	mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932491AbbJ2Ccj (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 28 Oct 2015 22:32:39 -0400
-In-reply-to: <1442385808-1433-1-git-send-email-shawn.lin@rock-chips.com>
+Received: from mail-yk0-f173.google.com ([209.85.160.173]:35320 "EHLO
+	mail-yk0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751845AbbJ2KDa (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 29 Oct 2015 06:03:30 -0400
+Received: by ykek133 with SMTP id k133so36924683yke.2
+        for <linux-mmc@vger.kernel.org>; Thu, 29 Oct 2015 03:03:29 -0700 (PDT)
+In-Reply-To: <56317A61.9050709@samsung.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Shawn Lin <shawn.lin@rock-chips.com>, ulf.hansson@linaro.org
-Cc: Vineet.Gupta1@synopsys.com, Wei Xu <xuwei5@hisilicon.com>, Joachim Eastwood <manabian@gmail.com>, Alexey Brodkin <abrodkin@synopsys.com>, Kukjin Kim <kgene@kernel.org>, Krzysztof Kozlowski <k.kozlowski@samsung.com>, Russell King <linux@arm.linux.org.uk>, Jun Nie <jun.nie@linaro.org>, Ralf Baechle <ralf@linux-mips.org>, Govindraj Raja <govindraj.raja@imgtec.com>, Arnd Bergmann <arnd@arndb.de>, heiko@sntech.de, dianders@chromium.org, linux-samsung-soc@vger.kernel.org, linux-mips@linux-mips.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-rockchip@lists.infradead.org, devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+To: Jaehoon Chung <jh80.chung@samsung.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Dan Carpenter <dan.carpenter@oracle.com>
 
-Hi, All.
+On 29 October 2015 at 02:46, Jaehoon Chung <jh80.chung@samsung.com> wrote:
+> Dear, Ulf.
+>
+> Here are dw-mmc patches.
+> Could you pull these patches into your repository?
+> If there is any problem, let me know, plz. Thanks!
+>
+> Best Regards,
+> Jaehoon Chung
+>
+> The following changes since commit 1c6e58d83615678875bf52747f8841c49291dfcf:
+>
+>   mmc: pwrseq: Use highest priority for eMMC restart handler (2015-10-27 11:11:06 +0100)
+>
+> are available in the git repository at:
+>
+>   https://github.com/jh80chung/dw-mmc.git for-ulf
+>
+> for you to fetch changes up to 1505969f5972b0c2827a6ab83e5424ff3a465c08:
+>
+>   mmc: dw_mmc: fix the wrong setting for UHS-DDR50 mode (2015-10-28 22:51:13 +0900)
+>
+> ----------------------------------------------------------------
+> Dan Carpenter (1):
+>       mmc: dw_mmc: NULL dereference in error message
+>
+> Jaehoon Chung (2):
+>       mmc: dw_mmc: fix the CardThreshold boundary at CardThrCtl register
+>       mmc: dw_mmc: fix the wrong setting for UHS-DDR50 mode
+>
+>  drivers/mmc/host/dw_mmc.c | 5 ++---
+>  drivers/mmc/host/dw_mmc.h | 2 +-
+>  2 files changed, 3 insertions(+), 4 deletions(-)
 
-Is there any other opinion about this patch?
+Thanks Jaehoon, pulled into my next branch!
 
-
-Best Regards,
-Jaehoon Chung
-
-On 09/16/2015 03:43 PM, Shawn Lin wrote:
-> DesignWare MMC Controller's transfer mode should be decided
-> at runtime instead of compile-time. So we remove this config
-> option and read dw_mmc's register to select DMA master.
-> 
-> Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
-> ---
-> 
-> Changes in v8: None
-> Changes in v7: None
-> Changes in v6: None
-> Changes in v5: None
-> Changes in v4: None
-> Changes in v3: None
-> Changes in v2: None
-> 
->  arch/arm/configs/zx_defconfig | 1 -
->  1 file changed, 1 deletion(-)
-> 
-> diff --git a/arch/arm/configs/zx_defconfig b/arch/arm/configs/zx_defconfig
-> index b200bb0..ab683fb 100644
-> --- a/arch/arm/configs/zx_defconfig
-> +++ b/arch/arm/configs/zx_defconfig
-> @@ -83,7 +83,6 @@ CONFIG_MMC=y
->  CONFIG_MMC_UNSAFE_RESUME=y
->  CONFIG_MMC_BLOCK_MINORS=16
->  CONFIG_MMC_DW=y
-> -CONFIG_MMC_DW_IDMAC=y
->  CONFIG_EXT2_FS=y
->  CONFIG_EXT4_FS=y
->  CONFIG_EXT4_FS_POSIX_ACL=y
-> 
-
+Kind regards
+Uffe
