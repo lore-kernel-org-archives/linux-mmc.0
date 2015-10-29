@@ -1,46 +1,55 @@
-From: Jeff Moyer <jmoyer@redhat.com>
-Subject: Re: RFC: 32-bit __data_len and REQ_DISCARD+REQ_SECURE
-Date: Wed, 28 Oct 2015 18:15:51 -0400
-Message-ID: <x49pozyljvs.fsf@segfault.boston.devel.redhat.com>
-References: <CANEJEGvXfg4O6KWBcQe4=o0ZxjehgGTBMBxNddanprBXQbr-Qg@mail.gmail.com>
-	<CANEJEGtDr+BdP1s=EUpUSqcvWpQfkt+o_3zoXWHk7DdjH4j0Ow@mail.gmail.com>
-	<CANEJEGukOKUgRJNPVaeEXpx-REzj8ooSfWdrnRMMCQr6EVaNqQ@mail.gmail.com>
-	<CANEJEGvktCkVEbLaQoZqOFZY3F8o=Z41HwQxL=X4jh=-PdV3Fg@mail.gmail.com>
-	<CANEJEGuwymF-v7rdep4h2eGcvCAzEVvaYtwHCim9UR5NLZPkbg@mail.gmail.com>
-	<x49si55v04n.fsf@segfault.boston.devel.redhat.com>
-	<CAPDyKFpXtio5m6V1M5QQcB1RNt4JtoDZ2qL2FqLDDNV4aODVAg@mail.gmail.com>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: [GIT PULL] Update dw-mmc controller
+Date: Thu, 29 Oct 2015 10:46:09 +0900
+Message-ID: <56317A61.9050709@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:57962 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752902AbbJ1WPx (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 28 Oct 2015 18:15:53 -0400
-In-Reply-To: <CAPDyKFpXtio5m6V1M5QQcB1RNt4JtoDZ2qL2FqLDDNV4aODVAg@mail.gmail.com>
-	(Ulf Hansson's message of "Wed, 21 Oct 2015 11:00:57 +0200")
+Received: from mailout2.samsung.com ([203.254.224.25]:38829 "EHLO
+	mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751237AbbJ2BqL (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 28 Oct 2015 21:46:11 -0400
+Received: from epcpsbgr5.samsung.com
+ (u145.gpu120.samsung.co.kr [203.254.230.145])
+ by mailout2.samsung.com (Oracle Communications Messaging Server 7.0.5.31.0
+ 64bit (built May  5 2014))
+ with ESMTP id <0NWY02BADKWXZ910@mailout2.samsung.com> for
+ linux-mmc@vger.kernel.org; Thu, 29 Oct 2015 10:46:09 +0900 (KST)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Grant Grundler <grundler@chromium.org>, Jens Axboe <axboe@kernel.dk>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, LKML <linux-kernel@vger.kernel.org>, Gwendal Grignou <gwendal@chromium.org>
+To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Dan Carpenter <dan.carpenter@oracle.com>, Jaehoon Chung <jh80.chung@samsung.com>
 
-Ulf Hansson <ulf.hansson@linaro.org> writes:
+Dear, Ulf.
 
-> I am not sure if this issue is the same as been discussed earlier on
-> the mmc list regarding "discard/erase".
->
-> Anyway, there have been several attempts to fix bugs related to this.
-> One of these discussion kind of pointed out a viable solution, but
-> unfortunate no patches that adopts that solution have been posted yet.
->
-> You might want to read up on this.
-> https://www.mail-archive.com/linux-mmc@vger.kernel.org/msg23643.html
-> http://linux-mmc.vger.kernel.narkive.com/Wp31G953/patch-mmc-core-don-t-return-1-for-max-discard
->
-> So this is an old issue, which should have been fixed long long long time ago...
+Here are dw-mmc patches.
+Could you pull these patches into your repository?
+If there is any problem, let me know, plz. Thanks!
 
-Thanks Ulf.  After reading all of the linked discussions, it's my
-understanding that this is an emmc-specific issue that doesn't require
-any block layer changes.  If that's wrong, please let me know.
+Best Regards,
+Jaehoon Chung
 
-Cheers,
-Jeff
+The following changes since commit 1c6e58d83615678875bf52747f8841c49291dfcf:
+
+  mmc: pwrseq: Use highest priority for eMMC restart handler (2015-10-27 11:11:06 +0100)
+
+are available in the git repository at:
+
+  https://github.com/jh80chung/dw-mmc.git for-ulf
+
+for you to fetch changes up to 1505969f5972b0c2827a6ab83e5424ff3a465c08:
+
+  mmc: dw_mmc: fix the wrong setting for UHS-DDR50 mode (2015-10-28 22:51:13 +0900)
+
+----------------------------------------------------------------
+Dan Carpenter (1):
+      mmc: dw_mmc: NULL dereference in error message
+
+Jaehoon Chung (2):
+      mmc: dw_mmc: fix the CardThreshold boundary at CardThrCtl register
+      mmc: dw_mmc: fix the wrong setting for UHS-DDR50 mode
+
+ drivers/mmc/host/dw_mmc.c | 5 ++---
+ drivers/mmc/host/dw_mmc.h | 2 +-
+ 2 files changed, 3 insertions(+), 4 deletions(-)
