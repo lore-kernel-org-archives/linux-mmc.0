@@ -1,58 +1,27 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [GIT PULL] Update dw-mmc controller
-Date: Thu, 29 Oct 2015 11:03:29 +0100
-Message-ID: <CAPDyKFr19Az9L0rgKZo4uX-cQXw=S0sYTkOu2=M2z_uJy1Yf8A@mail.gmail.com>
-References: <56317A61.9050709@samsung.com>
+From: "hi" <lilmoneymoney230@aol.com>
+Subject: hi
+Date: Sat, 31 Oct 2015 19:08:08 +0800
+Message-ID: <17E815B79EEA19F0117AED4758C4E5A3@zubghhsub>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain;
+	charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-yk0-f173.google.com ([209.85.160.173]:35320 "EHLO
-	mail-yk0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751845AbbJ2KDa (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 29 Oct 2015 06:03:30 -0400
-Received: by ykek133 with SMTP id k133so36924683yke.2
-        for <linux-mmc@vger.kernel.org>; Thu, 29 Oct 2015 03:03:29 -0700 (PDT)
-In-Reply-To: <56317A61.9050709@samsung.com>
+Received: from oms-a001e.mx.aol.com ([204.29.186.148]:42668 "EHLO
+	oms-a001e.mx.aol.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752784AbbJaLIu (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sat, 31 Oct 2015 07:08:50 -0400
+Received: from omr-a015e.mx.aol.com (omr-a015.mx.aol.com [10.72.105.232])
+	(using TLSv1 with cipher ADH-AES256-SHA (256/256 bits))
+	(No client certificate requested)
+	by oms-a001e.mx.aol.com (AOL Outbound OMS Interface) with ESMTPS id 47C1D380009E
+	for <linux-mmc@vger.kernel.org>; Sat, 31 Oct 2015 07:08:49 -0400 (EDT)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Dan Carpenter <dan.carpenter@oracle.com>
+To: gcsva_sousa@hotmail.com
 
-On 29 October 2015 at 02:46, Jaehoon Chung <jh80.chung@samsung.com> wrote:
-> Dear, Ulf.
->
-> Here are dw-mmc patches.
-> Could you pull these patches into your repository?
-> If there is any problem, let me know, plz. Thanks!
->
-> Best Regards,
-> Jaehoon Chung
->
-> The following changes since commit 1c6e58d83615678875bf52747f8841c49291dfcf:
->
->   mmc: pwrseq: Use highest priority for eMMC restart handler (2015-10-27 11:11:06 +0100)
->
-> are available in the git repository at:
->
->   https://github.com/jh80chung/dw-mmc.git for-ulf
->
-> for you to fetch changes up to 1505969f5972b0c2827a6ab83e5424ff3a465c08:
->
->   mmc: dw_mmc: fix the wrong setting for UHS-DDR50 mode (2015-10-28 22:51:13 +0900)
->
-> ----------------------------------------------------------------
-> Dan Carpenter (1):
->       mmc: dw_mmc: NULL dereference in error message
->
-> Jaehoon Chung (2):
->       mmc: dw_mmc: fix the CardThreshold boundary at CardThrCtl register
->       mmc: dw_mmc: fix the wrong setting for UHS-DDR50 mode
->
->  drivers/mmc/host/dw_mmc.c | 5 ++---
->  drivers/mmc/host/dw_mmc.h | 2 +-
->  2 files changed, 3 insertions(+), 4 deletions(-)
+aGkNCnRoaXMgaXMgYW4gZWxlY3Ryb25pYyBzaG9wDQpsYXB0b3AscGhvbmUsaXBob25lLHdhdGNo
+LHR2Li4udGhlIHNoaXBwaW5nIGlzIGZyZWUNCnZlcnkgYW1hemluZw0Kc2l0ZSA6ICBwb2F6emxv
+IC5jb20NCg==
 
-Thanks Jaehoon, pulled into my next branch!
 
-Kind regards
-Uffe
