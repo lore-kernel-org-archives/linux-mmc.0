@@ -1,24 +1,40 @@
-From: Muni Sekhar <munisekharrms@gmail.com>
-Subject: utility to read/write SDIO registers with CMD52s
-Date: Tue, 3 Nov 2015 15:05:11 +0530
-Message-ID: <CAHhAz+hBnhX9qvKU6hJWMumZtD=ZzXVGfJ+zU8jEirOcevegMA@mail.gmail.com>
+From: Peter Ujfalusi <peter.ujfalusi@ti.com>
+Subject: [PATCH] mmc: omap_hsmmc: No need to check DMA channel validity at module remove
+Date: Tue, 3 Nov 2015 13:37:31 +0200
+Message-ID: <1446550651-7977-1-git-send-email-peter.ujfalusi@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ig0-f171.google.com ([209.85.213.171]:37506 "EHLO
-	mail-ig0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751016AbbKCJfM (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 3 Nov 2015 04:35:12 -0500
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: ulf.hansson@linaro.org, tony@atomide.com, kishon@ti.com
+Cc: linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc <linux-mmc@vger.kernel.org>
-Cc: linux-kernel@vger.kernel.org
 
-Hi,
+The driver will not probe without valid DMA channels so no need to check
+if they are valid when the module is removed.
 
-Is there any Linux MMC stack utility to read/write SDIO registers with CMD52s?
+Signed-off-by: Peter Ujfalusi <peter.ujfalusi@ti.com>
+CC: Ulf Hansson <ulf.hansson@linaro.org>
+---
+ drivers/mmc/host/omap_hsmmc.c | 6 ++----
+ 1 file changed, 2 insertions(+), 4 deletions(-)
 
-
+diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
+index f70e52b05648..712c74fd0401 100644
+--- a/drivers/mmc/host/omap_hsmmc.c
++++ b/drivers/mmc/host/omap_hsmmc.c
+@@ -2262,10 +2262,8 @@ static int omap_hsmmc_remove(struct platform_device *pdev)
+ 	pm_runtime_get_sync(host->dev);
+ 	mmc_remove_host(host->mmc);
+ 
+-	if (host->tx_chan)
+-		dma_release_channel(host->tx_chan);
+-	if (host->rx_chan)
+-		dma_release_channel(host->rx_chan);
++	dma_release_channel(host->tx_chan);
++	dma_release_channel(host->rx_chan);
+ 
+ 	pm_runtime_put_sync(host->dev);
+ 	pm_runtime_disable(host->dev);
 -- 
-Thanks,
-Sekhar
+2.6.2
