@@ -1,71 +1,63 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: [PATCH 2/2] mmc: core: Remove MMC_CAP_RUNTIME_RESUME as it's redundant
-Date: Thu,  5 Nov 2015 16:01:33 +0100
-Message-ID: <1446735693-11542-2-git-send-email-ulf.hansson@linaro.org>
-References: <1446735693-11542-1-git-send-email-ulf.hansson@linaro.org>
-Return-path: <linux-pm-owner@vger.kernel.org>
-In-Reply-To: <1446735693-11542-1-git-send-email-ulf.hansson@linaro.org>
-Sender: linux-pm-owner@vger.kernel.org
-To: linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Chaotian Jing <chaotian.jing@mediatek.com>, addy ke <addy.ke@rock-chips.com>, Jaehoon Chung <jh80.chung@samsung.com>, linux-pm@vger.kernel.org, Android Kernel Team <kernel-team@android.com>
+Subject: [PATCH 2/2] mmc: core: Keep host claimed in mmc_rescan() while calling host ops
+Date: Thu,  5 Nov 2015 16:08:08 +0100
+Message-ID: <1446736088-11715-2-git-send-email-ulf.hansson@linaro.org>
+References: <1446736088-11715-1-git-send-email-ulf.hansson@linaro.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-lb0-f172.google.com ([209.85.217.172]:35880 "EHLO
+	mail-lb0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1161579AbbKEPIO (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 5 Nov 2015 10:08:14 -0500
+Received: by lbblt2 with SMTP id lt2so18461414lbb.3
+        for <linux-mmc@vger.kernel.org>; Thu, 05 Nov 2015 07:08:12 -0800 (PST)
+In-Reply-To: <1446736088-11715-1-git-send-email-ulf.hansson@linaro.org>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
+
+As mmc_claim_host() invokes pm_runtime_get_sync() for the mmc host device,
+it's important that the host is kept claimed for *all* accesses to it via
+the host_ops callbacks.
+
+In mmc_rescan(), the ->card_event() and the ->get_cd() callback are being
+invoked without claiming the host, let's fix this.
 
 Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
 ---
- drivers/mmc/host/dw_mmc-rockchip.c | 8 --------
- drivers/mmc/host/mtk-sd.c          | 1 -
- include/linux/mmc/host.h           | 1 -
- 3 files changed, 10 deletions(-)
+ drivers/mmc/core/core.c | 5 +++--
+ 1 file changed, 3 insertions(+), 2 deletions(-)
 
-diff --git a/drivers/mmc/host/dw_mmc-rockchip.c b/drivers/mmc/host/dw_mmc-rockchip.c
-index 9becebe..d9c92f3 100644
---- a/drivers/mmc/host/dw_mmc-rockchip.c
-+++ b/drivers/mmc/host/dw_mmc-rockchip.c
-@@ -239,20 +239,12 @@ static int dw_mci_rockchip_init(struct dw_mci *host)
- 	return 0;
- }
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index c1027a4..394963d 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -2576,7 +2576,9 @@ void mmc_rescan(struct work_struct *work)
+ 	host->rescan_entered = 1;
  
--/* Common capabilities of RK3288 SoC */
--static unsigned long dw_mci_rk3288_dwmmc_caps[4] = {
--	MMC_CAP_RUNTIME_RESUME, /* emmc */
--	MMC_CAP_RUNTIME_RESUME, /* sdmmc */
--	MMC_CAP_RUNTIME_RESUME, /* sdio0 */
--	MMC_CAP_RUNTIME_RESUME, /* sdio1 */
--};
- static const struct dw_mci_drv_data rk2928_drv_data = {
- 	.prepare_command        = dw_mci_rockchip_prepare_command,
- 	.init			= dw_mci_rockchip_init,
- };
+ 	if (host->trigger_card_event && host->ops->card_event) {
++		mmc_claim_host(host);
+ 		host->ops->card_event(host);
++		mmc_release_host(host);
+ 		host->trigger_card_event = false;
+ 	}
  
- static const struct dw_mci_drv_data rk3288_drv_data = {
--	.caps			= dw_mci_rk3288_dwmmc_caps,
- 	.prepare_command        = dw_mci_rockchip_prepare_command,
- 	.set_ios		= dw_mci_rk3288_set_ios,
- 	.execute_tuning		= dw_mci_rk3288_execute_tuning,
-diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
-index 39568cc..15fcf2d 100644
---- a/drivers/mmc/host/mtk-sd.c
-+++ b/drivers/mmc/host/mtk-sd.c
-@@ -1543,7 +1543,6 @@ static int msdc_drv_probe(struct platform_device *pdev)
- 	mmc->f_min = host->src_clk_freq / (4 * 255);
+@@ -2611,15 +2613,14 @@ void mmc_rescan(struct work_struct *work)
+ 	 */
+ 	mmc_bus_put(host);
  
- 	mmc->caps |= MMC_CAP_ERASE | MMC_CAP_CMD23;
--	mmc->caps |= MMC_CAP_RUNTIME_RESUME;
- 	/* MMC core transfer sizes tunable parameters */
- 	mmc->max_segs = MAX_BD_NUM;
- 	mmc->max_seg_size = BDMA_DESC_BUFLEN;
-diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-index 8673ffe..9b04e71 100644
---- a/include/linux/mmc/host.h
-+++ b/include/linux/mmc/host.h
-@@ -259,7 +259,6 @@ struct mmc_host {
- #define MMC_CAP_UHS_SDR50	(1 << 17)	/* Host supports UHS SDR50 mode */
- #define MMC_CAP_UHS_SDR104	(1 << 18)	/* Host supports UHS SDR104 mode */
- #define MMC_CAP_UHS_DDR50	(1 << 19)	/* Host supports UHS DDR50 mode */
--#define MMC_CAP_RUNTIME_RESUME	(1 << 20)	/* Resume at runtime_resume. */
- #define MMC_CAP_DRIVER_TYPE_A	(1 << 23)	/* Host supports Driver Type A */
- #define MMC_CAP_DRIVER_TYPE_C	(1 << 24)	/* Host supports Driver Type C */
- #define MMC_CAP_DRIVER_TYPE_D	(1 << 25)	/* Host supports Driver Type D */
++	mmc_claim_host(host);
+ 	if (!(host->caps & MMC_CAP_NONREMOVABLE) && host->ops->get_cd &&
+ 			host->ops->get_cd(host) == 0) {
+-		mmc_claim_host(host);
+ 		mmc_power_off(host);
+ 		mmc_release_host(host);
+ 		goto out;
+ 	}
+ 
+-	mmc_claim_host(host);
+ 	for (i = 0; i < ARRAY_SIZE(freqs); i++) {
+ 		if (!mmc_rescan_try_freq(host, max(freqs[i], host->f_min)))
+ 			break;
 -- 
 1.9.1
 
