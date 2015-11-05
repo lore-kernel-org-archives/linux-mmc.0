@@ -1,63 +1,57 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: [PATCH 2/2] mmc: core: Keep host claimed in mmc_rescan() while calling host ops
-Date: Thu,  5 Nov 2015 16:08:08 +0100
-Message-ID: <1446736088-11715-2-git-send-email-ulf.hansson@linaro.org>
-References: <1446736088-11715-1-git-send-email-ulf.hansson@linaro.org>
+Subject: [PATCH 1/2] mmc: core: Invoke ->card_event() callback only when needed
+Date: Thu,  5 Nov 2015 16:08:07 +0100
+Message-ID: <1446736088-11715-1-git-send-email-ulf.hansson@linaro.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-lb0-f172.google.com ([209.85.217.172]:35880 "EHLO
-	mail-lb0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1161579AbbKEPIO (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 5 Nov 2015 10:08:14 -0500
-Received: by lbblt2 with SMTP id lt2so18461414lbb.3
-        for <linux-mmc@vger.kernel.org>; Thu, 05 Nov 2015 07:08:12 -0800 (PST)
-In-Reply-To: <1446736088-11715-1-git-send-email-ulf.hansson@linaro.org>
+Received: from mail-lf0-f44.google.com ([209.85.215.44]:36338 "EHLO
+	mail-lf0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1161578AbbKEPIN (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 5 Nov 2015 10:08:13 -0500
+Received: by lfs39 with SMTP id 39so28967795lfs.3
+        for <linux-mmc@vger.kernel.org>; Thu, 05 Nov 2015 07:08:11 -0800 (PST)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
 
-As mmc_claim_host() invokes pm_runtime_get_sync() for the mmc host device,
-it's important that the host is kept claimed for *all* accesses to it via
-the host_ops callbacks.
+The ->card_event() callback may be called when re-scan is disabled and for
+non-removable cards, which both cases are unnecessary.
 
-In mmc_rescan(), the ->card_event() and the ->get_cd() callback are being
-invoked without claiming the host, let's fix this.
+Instead let's move the call later in mmc_rescan() where these constraints
+have been validated.
 
 Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
 ---
- drivers/mmc/core/core.c | 5 +++--
- 1 file changed, 3 insertions(+), 2 deletions(-)
+ drivers/mmc/core/core.c | 10 +++++-----
+ 1 file changed, 5 insertions(+), 5 deletions(-)
 
 diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index c1027a4..394963d 100644
+index 5ae89e4..c1027a4 100644
 --- a/drivers/mmc/core/core.c
 +++ b/drivers/mmc/core/core.c
-@@ -2576,7 +2576,9 @@ void mmc_rescan(struct work_struct *work)
+@@ -2567,11 +2567,6 @@ void mmc_rescan(struct work_struct *work)
+ 		container_of(work, struct mmc_host, detect.work);
+ 	int i;
+ 
+-	if (host->trigger_card_event && host->ops->card_event) {
+-		host->ops->card_event(host);
+-		host->trigger_card_event = false;
+-	}
+-
+ 	if (host->rescan_disable)
+ 		return;
+ 
+@@ -2580,6 +2575,11 @@ void mmc_rescan(struct work_struct *work)
+ 		return;
  	host->rescan_entered = 1;
  
- 	if (host->trigger_card_event && host->ops->card_event) {
-+		mmc_claim_host(host);
- 		host->ops->card_event(host);
-+		mmc_release_host(host);
- 		host->trigger_card_event = false;
- 	}
++	if (host->trigger_card_event && host->ops->card_event) {
++		host->ops->card_event(host);
++		host->trigger_card_event = false;
++	}
++
+ 	mmc_bus_get(host);
  
-@@ -2611,15 +2613,14 @@ void mmc_rescan(struct work_struct *work)
- 	 */
- 	mmc_bus_put(host);
- 
-+	mmc_claim_host(host);
- 	if (!(host->caps & MMC_CAP_NONREMOVABLE) && host->ops->get_cd &&
- 			host->ops->get_cd(host) == 0) {
--		mmc_claim_host(host);
- 		mmc_power_off(host);
- 		mmc_release_host(host);
- 		goto out;
- 	}
- 
--	mmc_claim_host(host);
- 	for (i = 0; i < ARRAY_SIZE(freqs); i++) {
- 		if (!mmc_rescan_try_freq(host, max(freqs[i], host->f_min)))
- 			break;
+ 	/*
 -- 
 1.9.1
 
