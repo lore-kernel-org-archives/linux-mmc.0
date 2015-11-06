@@ -1,41 +1,49 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: [PATCH] MAINTAINERS: mmc: Remove Seungwon Jeon from dw_mmc
-Date: Fri,  6 Nov 2015 12:21:33 +0100
-Message-ID: <1446808893-7638-1-git-send-email-ulf.hansson@linaro.org>
+From: Geert Uytterhoeven <geert@linux-m68k.org>
+Subject: [PATCH] mmc: mediatek: Preinitialize delay_phase in get_best_delay()
+Date: Fri,  6 Nov 2015 12:22:08 +0100
+Message-ID: <1446808928-25648-1-git-send-email-geert@linux-m68k.org>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-lf0-f41.google.com ([209.85.215.41]:34834 "EHLO
-	mail-lf0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1031997AbbKFLVi (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 6 Nov 2015 06:21:38 -0500
-Received: by lfbn126 with SMTP id n126so70892868lfb.2
-        for <linux-mmc@vger.kernel.org>; Fri, 06 Nov 2015 03:21:37 -0800 (PST)
+Received: from xavier.telenet-ops.be ([195.130.132.52]:34005 "EHLO
+	xavier.telenet-ops.be" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1031997AbbKFLWE (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 6 Nov 2015 06:22:04 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Jaehoon Chung <jh80.chung@samsung.com>
+To: Ulf Hansson <ulf.hansson@linaro.org>, Matthias Brugger <matthias.bgg@gmail.com>, linux-mmc@vger.kernel.org, linux-mediatek@lists.infradead.org
+Cc: Geert Uytterhoeven <geert@linux-m68k.org>
 
-Unfortunate, Seungwon's email has been bouncing for some time and it seems
-like he has moved on to other duties. So, I would like to thank him for
-his efforts, but it's now time to remove him as the co-maintainer for the
-dw_mmc driver.
+drivers/mmc/host/mtk-sd.c: In function =E2=80=98get_best_delay=E2=80=99=
+:
+drivers/mmc/host/mtk-sd.c:1284: warning: =E2=80=98delay_phase.start=E2=80=
+=99 is used uninitialized in this function
+drivers/mmc/host/mtk-sd.c:1284: warning: =E2=80=98delay_phase.maxlen=E2=
+=80=99 is used uninitialized in this function
 
-Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+If delay is zero, these fields are indeed not initialized.
+Let the compiler preinitialize the whole struct to fix this.
+
+Signed-off-by: Geert Uytterhoeven <geert@linux-m68k.org>
 ---
- MAINTAINERS | 1 -
- 1 file changed, 1 deletion(-)
+ drivers/mmc/host/mtk-sd.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/MAINTAINERS b/MAINTAINERS
-index 15c3896..08471e3 100644
---- a/MAINTAINERS
-+++ b/MAINTAINERS
-@@ -9262,7 +9262,6 @@ F:	drivers/i2c/busses/i2c-designware-*
- F:	include/linux/platform_data/i2c-designware.h
- 
- SYNOPSYS DESIGNWARE MMC/SD/SDIO DRIVER
--M:	Seungwon Jeon <tgih.jun@samsung.com>
- M:	Jaehoon Chung <jh80.chung@samsung.com>
- L:	linux-mmc@vger.kernel.org
- S:	Maintained
--- 
+diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
+index 39568cc29a2a18cf..33dfd7e72516c392 100644
+--- a/drivers/mmc/host/mtk-sd.c
++++ b/drivers/mmc/host/mtk-sd.c
+@@ -1276,7 +1276,7 @@ static struct msdc_delay_phase get_best_delay(str=
+uct msdc_host *host, u32 delay)
+ 	int start =3D 0, len =3D 0;
+ 	int start_final =3D 0, len_final =3D 0;
+ 	u8 final_phase =3D 0xff;
+-	struct msdc_delay_phase delay_phase;
++	struct msdc_delay_phase delay_phase =3D { 0, };
+=20
+ 	if (delay =3D=3D 0) {
+ 		dev_err(host->dev, "phase error: [map:%x]\n", delay);
+--=20
 1.9.1
 
