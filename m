@@ -1,73 +1,62 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 2/8] mmc: handle add_disk() return value
-Date: Fri, 6 Nov 2015 17:03:25 +0100
-Message-ID: <CAPDyKFrAvodcmUL8V+84gFGMdLJjGonpEXU2FnaO6FAw=5x-dQ@mail.gmail.com>
-References: <437969438-9181-1-git-send-email-vishnu.ps@samsung.com>
-	<1446812535-10567-1-git-send-email-vishnu.ps@samsung.com>
-	<1446812535-10567-2-git-send-email-vishnu.ps@samsung.com>
+From: Alim Akhtar <alim.akhtar@gmail.com>
+Subject: Re: [PATCH 0/4] mmc: mmc: Improve reliability of HS200/HS400 selection
+Date: Fri, 6 Nov 2015 22:02:53 +0530
+Message-ID: <CAGOxZ53XOdRJz6eXAjKLh_YMGvRovYXbBUYkbbmNw+cuHkSx6w@mail.gmail.com>
+References: <1446035143-4949-1-git-send-email-adrian.hunter@intel.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-ide-owner@vger.kernel.org>
-In-Reply-To: <1446812535-10567-2-git-send-email-vishnu.ps@samsung.com>
-Sender: linux-ide-owner@vger.kernel.org
-To: Vishnu Pratap Singh <vishnu.ps@samsung.com>
-Cc: Jens Axboe <axboe@kernel.dk>, Andrew Morton <akpm@linux-foundation.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Jeff Moyer <jmoyer@redhat.com>, minchan@kernel.org, ngupta@vflare.org, sergey.senozhatsky.work@gmail.com, "David S. Miller" <davem@davemloft.net>, neilb@suse.com, Takashi Iwai <tiwai@suse.de>, hare@suse.de, ming.lei@canonical.com, jarod@redhat.com, viro@zeniv.linux.org.uk, Tejun Heo <tj@kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, Jon Hunter <jonathanh@nvidia.com>, Grant Grundler <grundler@chromium.org>, linux-ide@vger.kernel.org, linux-raid@vger.kernel.org, linux-mmc <linux-mmc@vger.kernel.org>, "cpgs ." <cpgs@samsung.com>, vishu13285@gmail.com, pintu.k@samsung.com, rohit.kr@samsung.com
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-ig0-f175.google.com ([209.85.213.175]:35287 "EHLO
+	mail-ig0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755585AbbKFQdd (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 6 Nov 2015 11:33:33 -0500
+Received: by igpw7 with SMTP id w7so41016226igp.0
+        for <linux-mmc@vger.kernel.org>; Fri, 06 Nov 2015 08:33:33 -0800 (PST)
+In-Reply-To: <1446035143-4949-1-git-send-email-adrian.hunter@intel.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Adrian Hunter <adrian.hunter@intel.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, Chaotian Jing <chaotian.jing@mediatek.com>
 
-On 6 November 2015 at 13:22, Vishnu Pratap Singh <vishnu.ps@samsung.com> wrote:
-> This patch handles  add_disk() return value.
-> Earlier add_disk() function doesn't handle error
-> cases, now it is added, so the callers of this function
-> should also handle it.
+Hello Adrian
+
+On Wed, Oct 28, 2015 at 5:55 PM, Adrian Hunter <adrian.hunter@intel.com> wrote:
+> Hi
 >
-> Verfied on X86 based ubuntu machine.
-> This patch depends on [PATCH 1/8] block/genhd.c: Add error handling
+> Here are some patches that improve the reliability of selecting
+> eMMC HS200 or HS400 mode.
+>
+> Generally the improvement is to match the host controller timing
+> setting with the card mode before sending commands.
+>
+>
+> Adrian Hunter (4):
+>       mmc: mmc: Improve reliability of mmc_select_hs200()
+>       mmc: mmc: Fix HS setting in mmc_select_hs400()
+>       mmc: mmc: Move mmc_switch_status()
+>       mmc: mmc: Improve reliability of mmc_select_hs400()
+>
+>  drivers/mmc/core/mmc.c | 93 +++++++++++++++++++++++++++++++++++++-------------
+>  1 file changed, 69 insertions(+), 24 deletions(-)
+>
+Have tested this series on dw_mmc host controller on exynos5800-peach board.
+HS400 and HS200 still works with these patches. Have not done a stress
+testing, but looks like across cold/warm reboot and across
+suspend/resume cycles, eMMC card still works in hs200/hs400 mode.
+Feel free to add:
+Tested-by: Alim Akhtar <alim.akhtar@samsung.com>
 
-Please remove these two lines from the change log.
-
-Still it's great that you provide this information while posting the
-patches, but you can do that by adding text between the sign-off-by
-and "---". Just add a new line consisting of "---" and then add you
-text below it.
 
 >
-> Signed-off-by: Vishnu Pratap Singh <vishnu.ps@samsung.com>
-> ---
->  drivers/mmc/card/block.c | 7 +++++--
->  1 file changed, 5 insertions(+), 2 deletions(-)
->
-> diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
-> index 23b6c8e..543c670 100644
-> --- a/drivers/mmc/card/block.c
-> +++ b/drivers/mmc/card/block.c
-> @@ -2432,7 +2432,10 @@ static int mmc_add_disk(struct mmc_blk_data *md)
->         int ret;
->         struct mmc_card *card = md->queue.card;
->
-> -       add_disk(md->disk);
-> +       ret = add_disk(md->disk);
-> +       if (ret)
-> +               goto add_disk_fail;
-
-You don't need a goto here. Please just do "return ret;" as I think it
-makes code easier.
-
-> +
->         md->force_ro.show = force_ro_show;
->         md->force_ro.store = force_ro_store;
->         sysfs_attr_init(&md->force_ro.attr);
-> @@ -2468,7 +2471,7 @@ power_ro_lock_fail:
->         device_remove_file(disk_to_dev(md->disk), &md->force_ro);
->  force_ro_fail:
->         del_gendisk(md->disk);
-> -
-> +add_disk_fail:
->         return ret;
->  }
->
+> Regards
+> Adrian
 > --
-> 1.9.1
->
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
-Kind regards
-Uffe
+
+
+-- 
+Regards,
+Alim
