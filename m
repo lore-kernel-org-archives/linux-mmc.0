@@ -1,80 +1,92 @@
-From: "Luca Porzio (lporzio)" <lporzio@micron.com>
-Subject: [RFC PATCH v2] mmc: remove bondage between REQ_META and reliable
- write
-Date: Fri, 6 Nov 2015 15:12:26 +0000
-Message-ID: <02bfbc87a60a46a9a5bc68b96c71ad03@BOWEX36-D.micron.com>
+From: Ludovic Desroches <ludovic.desroches@atmel.com>
+Subject: [PATCH 0/2] mmc: sdhci: potentially bad behavior when using vmmc supply
+Date: Fri, 6 Nov 2015 16:59:28 +0100
+Message-ID: <1446825570-30029-1-git-send-email-ludovic.desroches@atmel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout.micron.com ([137.201.242.129]:40028 "EHLO
-	mailout.micron.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752343AbbKFPMi convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 6 Nov 2015 10:12:38 -0500
-Content-Language: en-US
+Received: from eusmtp01.atmel.com ([212.144.249.243]:18088 "EHLO
+	eusmtp01.atmel.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752343AbbKFP7g (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 6 Nov 2015 10:59:36 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "Ulf Hansson (ulf.hansson@linaro.org)" <ulf.hansson@linaro.org>
-Cc: "Bruce Ford (bford)" <bford@micron.com>, Alex Lemberg <alex.lemberg@sandisk.com>, "jaegeuk@kernel.org" <jaegeuk@kernel.org>, "anton@tuxera.com" <anton@tuxera.com>
+To: ulf.hansson@linaro.org, nicolas.ferre@atmel.com, alexandre.belloni@free-electrons.com
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, plagnioj@jcrosoft.com, linux-arm-kernel@lists.infradead.org, devicetree@vger.kernel.org, pierre.samat@atmel.com, Ludovic Desroches <ludovic.desroches@atmel.com>
 
-mmc: remove bondage between REQ_META and reliable write
+Hi,
 
-Anytime a write operation is performed with Reliable Write flag enabled, 
-the eMMC device is enforced to bypass the cache and do a write to the 
-underling NVM device by Jedec specification; this causes a performance 
-penalty since write operations cannot be optimized by the device cache.
+I would like to have some feedback for these two patches. I have two questions.
 
-In our tests, we replayed a typical mobile daily trace pattern and 
-found ~9% overall time reduction in trace replay by using this patch.
-Also the write ops within 4KB~64KB chunk size range get a 40~60% 
-performance improvement by using the patch (as this range of write 
-chunks are the one affected by REQ_META).
+1.
 
-This patch has been discussed in the Mobile & Embedded Linux Storage 
-Forum and it is the results of feedbacks from many people.
-We also checked with fsdevl and f2fs mailing list developers that this change 
-in the usage of REQ_META is not affecting FS behavior and we got 
-positive feedbacks on applying this patch.
-Reporting here the feedbacks:
-- http://comments.gmane.org/gmane.linux.file-systems/97219
-- http://thread.gmane.org/gmane.linux.file-systems.f2fs/3178/focus=3183
+To suppress the warnings telling me I have no vmmc and vqmmc supplies, I have
+added them and discovered that adding a vmmc supply involve only writing 1 in
+the Power Control Register involves enabling the SD Bus Power with a non valid
+value for the SD Bus Voltage. If the host controllers strictly follows the
+specification, it shall not enable SD Bus Power. So enough if it seems useless
+to configure SD Bus Voltage because we have an external regulator, do it.
 
-Signed-off-by: Bruce Ford <bford@micron.com>
-Signed-off-by: Luca Porzio <lporzio@micron.com>
----
- drivers/mmc/card/block.c | 11 +++--------
- 1 file changed, 3 insertions(+), 8 deletions(-)
+By the way, I am curious to understand what is really the SD Bus Voltage. I
+mean talking about bus voltage makes me thinking more about vqmmc than vmmc.
+Is it only bad naming or do I miss something?
 
-diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
-index 4409d79..cba6d5e 100644
---- a/drivers/mmc/card/block.c
-+++ b/drivers/mmc/card/block.c
-@@ -62,8 +62,7 @@ MODULE_ALIAS("mmc:block");
- #define MMC_SANITIZE_REQ_TIMEOUT 240000
- #define MMC_EXTRACT_INDEX_FROM_ARG(x) ((x & 0x00FF0000) >> 16)
- 
--#define mmc_req_rel_wr(req)	(((req->cmd_flags & REQ_FUA) || \
--				  (req->cmd_flags & REQ_META)) && \
-+#define mmc_req_rel_wr(req)	((req->cmd_flags & REQ_FUA) && \
- 				  (rq_data_dir(req) == WRITE))
- #define PACKED_CMD_VER	0x01
- #define PACKED_CMD_WR	0x02
-@@ -1353,13 +1352,9 @@ static void mmc_blk_rw_rq_prep(struct mmc_queue_req *mqrq,
- 
- 	/*
- 	 * Reliable writes are used to implement Forced Unit Access and
--	 * REQ_META accesses, and are supported only on MMCs.
--	 *
--	 * XXX: this really needs a good explanation of why REQ_META
--	 * is treated special.
-+	 * are supported only on MMCs.
- 	 */
--	bool do_rel_wr = ((req->cmd_flags & REQ_FUA) ||
--			  (req->cmd_flags & REQ_META)) &&
-+	bool do_rel_wr = (req->cmd_flags & REQ_FUA) &&
- 		(rq_data_dir(req) == WRITE) &&
- 		(md->flags & MMC_BLK_REL_WR);
- 
+>From the specification, there is this figure:
+
+                    HOST
+---------------------------------------------------
+| ------------        3.3V                        |       VDD
+| | Power SW |------------------------------------|----------
+| ------------   |              |                 |
+|       ---------|              |                 |
+|       |                       |                 |
+| --------------     ----------------------       |
+| | Ref. Volt. |-----| Regulator/Selector |       |
+| --------------     ----------------------       |
+|                    3.3V/1.8V  |                 |
+|                               |                 |
+|                               |---------------  |
+|                               |       |  |   |  |
+|                               |       R  R   _  |
+|                               |       |  |   _  |
+|                               |       |  |   |  |
+|                               |       |  |  /// |
+|                            -------    |  |      |       CLK
+|                            |     |----)--)------|----------
+|  -----------------------   |Multi|    |  |      |       CMD
+|  |Random Logic Circuits|---|Drive|----)---------|----------
+|  -----------------------   |I/O  |    |         |       DAT
+|                            |     |--------------|----------
+|                            -------              |
+---------------------------------------------------
+
+In my mind vmmc is the 3.3V signal and vqmmc is the 3.3V/1.8V signal, so why
+talking about bus voltage?
+
+
+2.
+
+Is the regulator-gpio usage the right thing to do for vqmmc? In my case it is
+not really driven by a gpio but by a pio from the sdhci device. In the binding,
+declaring the gpio is an option so I thought using this regulator fits my need.
+
+
+P.S. patch 2 is based on another patch not yet in next:
+http://www.spinics.net/lists/arm-kernel/msg453447.html
+
+Thanks
+
+Ludovic
+
+
+Ludovic Desroches (2):
+  mmc: sdhci: set bus voltage before enabling bus power
+  ARM: at91/dt: sama5d2 Xplained: add regulators for sdhci devices
+
+ arch/arm/boot/dts/at91-sama5d2_xplained.dts | 14 ++++++++++++++
+ drivers/mmc/host/sdhci.c                    |  7 -------
+ 2 files changed, 14 insertions(+), 7 deletions(-)
+
 -- 
-2.1.1
+2.5.0
 
