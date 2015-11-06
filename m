@@ -1,58 +1,29 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH 0/4] mmc: mmc: Improve reliability of HS200/HS400
- selection
-Date: Fri, 6 Nov 2015 14:55:58 +0200
-Message-ID: <563CA35E.20200@intel.com>
-References: <1446035143-4949-1-git-send-email-adrian.hunter@intel.com>
- <CAPDyKFoXaKdBzQnZNiqf-39+zECtGPY5M8S7_BL8eUkaoqKN9Q@mail.gmail.com>
+From: Alan Cooper <alcooperx@gmail.com>
+Subject: Re: [PATCH 1/4] mmc: Add quirk to disable SDR50 mode
+Date: Fri, 6 Nov 2015 09:07:49 -0500
+Message-ID: <CAOGqxeU8QN6ntmyFbOFPN8jAYLThQeyD6mxLBb_JgshfTwvJMg@mail.gmail.com>
+References: <1446763200-10234-1-git-send-email-alcooperx@gmail.com>
+	<CAPDyKFrhtoDwe82Zg4YP4eU=xO6zE1pZTcRSnzSeHGRCzgu+5w@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga14.intel.com ([192.55.52.115]:58469 "EHLO mga14.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S932824AbbKFM7C (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 6 Nov 2015 07:59:02 -0500
-In-Reply-To: <CAPDyKFoXaKdBzQnZNiqf-39+zECtGPY5M8S7_BL8eUkaoqKN9Q@mail.gmail.com>
+Received: from mail-qk0-f195.google.com ([209.85.220.195]:34632 "EHLO
+	mail-qk0-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1161339AbbKFOHu (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 6 Nov 2015 09:07:50 -0500
+Received: by qkdg3 with SMTP id g3so399977qkd.1
+        for <linux-mmc@vger.kernel.org>; Fri, 06 Nov 2015 06:07:49 -0800 (PST)
+In-Reply-To: <CAPDyKFrhtoDwe82Zg4YP4eU=xO6zE1pZTcRSnzSeHGRCzgu+5w@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Jaehoon Chung <jh80.chung@samsung.com>, Chaotian Jing <chaotian.jing@mediatek.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, bcm-kernel-feedback-list@broadcom.com
 
-On 06/11/15 13:03, Ulf Hansson wrote:
-> On 28 October 2015 at 13:25, Adrian Hunter <adrian.hunter@intel.com> wrote:
->> Hi
->>
->> Here are some patches that improve the reliability of selecting
->> eMMC HS200 or HS400 mode.
->>
->> Generally the improvement is to match the host controller timing
->> setting with the card mode before sending commands.
->>
->>
->> Adrian Hunter (4):
->>       mmc: mmc: Improve reliability of mmc_select_hs200()
->>       mmc: mmc: Fix HS setting in mmc_select_hs400()
->>       mmc: mmc: Move mmc_switch_status()
->>       mmc: mmc: Improve reliability of mmc_select_hs400()
->>
->>  drivers/mmc/core/mmc.c | 93 +++++++++++++++++++++++++++++++++++++-------------
->>  1 file changed, 69 insertions(+), 24 deletions(-)
->>
-> 
+On Fri, Nov 6, 2015 at 3:14 AM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+> No thanks! No more quirks please!
 
-Thanks for looking at the patches.
+OK, I'll move this functionality into the sdhci-brcmstb driver and
+re-submit the patch set.
 
-> Adrian, these patches looks good to me. I plan to queue them for 4.5
-> but perhaps those should even go as fixes!?
-
-4.5 is fine for me.  A quick check seemed to show the patches apply
-cleanly back to 4.2, so I guess you could cc stable and then the patches
-get exposure in next before going to stable.
-
-> 
-> Additionally, it would be great if someone could help testing this on
-> a few platforms.
-
-Yes, indeed.
-
+Thanks
+Al
