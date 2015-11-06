@@ -1,68 +1,73 @@
-From: Ludovic Desroches <ludovic.desroches@atmel.com>
-Subject: [PATCH 2/2] ARM: at91/dt: sama5d2 Xplained: add regulators for sdhci devices
-Date: Fri, 6 Nov 2015 16:59:30 +0100
-Message-ID: <1446825570-30029-3-git-send-email-ludovic.desroches@atmel.com>
-References: <1446825570-30029-1-git-send-email-ludovic.desroches@atmel.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH 2/8] mmc: handle add_disk() return value
+Date: Fri, 6 Nov 2015 17:03:25 +0100
+Message-ID: <CAPDyKFrAvodcmUL8V+84gFGMdLJjGonpEXU2FnaO6FAw=5x-dQ@mail.gmail.com>
+References: <437969438-9181-1-git-send-email-vishnu.ps@samsung.com>
+	<1446812535-10567-1-git-send-email-vishnu.ps@samsung.com>
+	<1446812535-10567-2-git-send-email-vishnu.ps@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from eusmtp01.atmel.com ([212.144.249.243]:18276 "EHLO
-	eusmtp01.atmel.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751644AbbKFQAI (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 6 Nov 2015 11:00:08 -0500
-In-Reply-To: <1446825570-30029-1-git-send-email-ludovic.desroches@atmel.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-ide-owner@vger.kernel.org>
+In-Reply-To: <1446812535-10567-2-git-send-email-vishnu.ps@samsung.com>
+Sender: linux-ide-owner@vger.kernel.org
+To: Vishnu Pratap Singh <vishnu.ps@samsung.com>
+Cc: Jens Axboe <axboe@kernel.dk>, Andrew Morton <akpm@linux-foundation.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Jeff Moyer <jmoyer@redhat.com>, minchan@kernel.org, ngupta@vflare.org, sergey.senozhatsky.work@gmail.com, "David S. Miller" <davem@davemloft.net>, neilb@suse.com, Takashi Iwai <tiwai@suse.de>, hare@suse.de, ming.lei@canonical.com, jarod@redhat.com, viro@zeniv.linux.org.uk, Tejun Heo <tj@kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, Jon Hunter <jonathanh@nvidia.com>, Grant Grundler <grundler@chromium.org>, linux-ide@vger.kernel.org, linux-raid@vger.kernel.org, linux-mmc <linux-mmc@vger.kernel.org>, "cpgs ." <cpgs@samsung.com>, vishu13285@gmail.com, pintu.k@samsung.com, rohit.kr@samsung.com
 List-Id: linux-mmc@vger.kernel.org
-To: ulf.hansson@linaro.org, nicolas.ferre@atmel.com, alexandre.belloni@free-electrons.com
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, plagnioj@jcrosoft.com, linux-arm-kernel@lists.infradead.org, devicetree@vger.kernel.org, pierre.samat@atmel.com, Ludovic Desroches <ludovic.desroches@atmel.com>
 
-Add vmmc and vqmmc regulators for sdhci devices.
+On 6 November 2015 at 13:22, Vishnu Pratap Singh <vishnu.ps@samsung.com> wrote:
+> This patch handles  add_disk() return value.
+> Earlier add_disk() function doesn't handle error
+> cases, now it is added, so the callers of this function
+> should also handle it.
+>
+> Verfied on X86 based ubuntu machine.
+> This patch depends on [PATCH 1/8] block/genhd.c: Add error handling
 
-The voltage for sdmmc0 vqmmc is selected by a signal from coming from
-the sdhci device.
+Please remove these two lines from the change log.
 
-Signed-off-by: Ludovic Desroches <ludovic.desroches@atmel.com>
----
- arch/arm/boot/dts/at91-sama5d2_xplained.dts | 14 ++++++++++++++
- 1 file changed, 14 insertions(+)
+Still it's great that you provide this information while posting the
+patches, but you can do that by adding text between the sign-off-by
+and "---". Just add a new line consisting of "---" and then add you
+text below it.
 
-diff --git a/arch/arm/boot/dts/at91-sama5d2_xplained.dts b/arch/arm/boot/dts/at91-sama5d2_xplained.dts
-index 361cbf8..1ca4942 100644
---- a/arch/arm/boot/dts/at91-sama5d2_xplained.dts
-+++ b/arch/arm/boot/dts/at91-sama5d2_xplained.dts
-@@ -96,6 +96,8 @@
- 			bus-width = <8>;
- 			pinctrl-names = "default";
- 			pinctrl-0 = <&pinctrl_sdmmc0_default>;
-+			vmmc-supply = <&vdd_3v3_reg>;
-+			vqmmc-supply = <&vdd_sdhc_reg>;
- 			non-removable;
- 			mmc-ddr-1_8v;
- 			status = "okay";
-@@ -105,6 +107,8 @@
- 			bus-width = <4>;
- 			pinctrl-names = "default";
- 			pinctrl-0 = <&pinctrl_sdmmc1_default>;
-+			vmmc-supply = <&vdd_3v3_reg>;
-+			vqmmc-supply = <&vdd_3v3_reg>;
- 			status = "okay"; /* conflict with qspi0 */
- 		};
- 
-@@ -355,4 +359,14 @@
- 			};
- 		};
- 	};
-+
-+	vdd_sdhc_reg: regulator@0 {
-+		regulator-name = "VDD_SDHC";
-+		vin_1v8-supply = <&vdd_sdhc_1v8_reg>;
-+		vin_3v3-supply = <&vdd_3v3_reg>;
-+		regulator-min-microvolt = <1800000>;
-+		regulator-max-microvolt = <3300000>;
-+		states = <1800000 0x1
-+			  3300000 0x0>;
-+	};
- };
--- 
-2.5.0
+>
+> Signed-off-by: Vishnu Pratap Singh <vishnu.ps@samsung.com>
+> ---
+>  drivers/mmc/card/block.c | 7 +++++--
+>  1 file changed, 5 insertions(+), 2 deletions(-)
+>
+> diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+> index 23b6c8e..543c670 100644
+> --- a/drivers/mmc/card/block.c
+> +++ b/drivers/mmc/card/block.c
+> @@ -2432,7 +2432,10 @@ static int mmc_add_disk(struct mmc_blk_data *md)
+>         int ret;
+>         struct mmc_card *card = md->queue.card;
+>
+> -       add_disk(md->disk);
+> +       ret = add_disk(md->disk);
+> +       if (ret)
+> +               goto add_disk_fail;
 
+You don't need a goto here. Please just do "return ret;" as I think it
+makes code easier.
+
+> +
+>         md->force_ro.show = force_ro_show;
+>         md->force_ro.store = force_ro_store;
+>         sysfs_attr_init(&md->force_ro.attr);
+> @@ -2468,7 +2471,7 @@ power_ro_lock_fail:
+>         device_remove_file(disk_to_dev(md->disk), &md->force_ro);
+>  force_ro_fail:
+>         del_gendisk(md->disk);
+> -
+> +add_disk_fail:
+>         return ret;
+>  }
+>
+> --
+> 1.9.1
+>
+
+Kind regards
+Uffe
