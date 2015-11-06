@@ -1,29 +1,27 @@
-From: Alan Cooper <alcooperx@gmail.com>
-Subject: Re: [PATCH 1/4] mmc: Add quirk to disable SDR50 mode
-Date: Fri, 6 Nov 2015 09:07:49 -0500
-Message-ID: <CAOGqxeU8QN6ntmyFbOFPN8jAYLThQeyD6mxLBb_JgshfTwvJMg@mail.gmail.com>
-References: <1446763200-10234-1-git-send-email-alcooperx@gmail.com>
-	<CAPDyKFrhtoDwe82Zg4YP4eU=xO6zE1pZTcRSnzSeHGRCzgu+5w@mail.gmail.com>
+From: "Luca Porzio (lporzio)" <lporzio@micron.com>
+Subject: RE: [RFC] mmc: remove bondage between REQ_META and reliable write
+Date: Fri, 6 Nov 2015 15:04:11 +0000
+Message-ID: <768c350f69b54c72a801584143ad1e70@BOWEX36-D.micron.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qk0-f195.google.com ([209.85.220.195]:34632 "EHLO
-	mail-qk0-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1161339AbbKFOHu (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 6 Nov 2015 09:07:50 -0500
-Received: by qkdg3 with SMTP id g3so399977qkd.1
-        for <linux-mmc@vger.kernel.org>; Fri, 06 Nov 2015 06:07:49 -0800 (PST)
-In-Reply-To: <CAPDyKFrhtoDwe82Zg4YP4eU=xO6zE1pZTcRSnzSeHGRCzgu+5w@mail.gmail.com>
+Received: from mailout.micron.com ([137.201.242.129]:20338 "EHLO
+	mailout.micron.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751154AbbKFPEa convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 6 Nov 2015 10:04:30 -0500
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, bcm-kernel-feedback-list@broadcom.com
+To: "Ulf Hansson (ulf.hansson@linaro.org)" <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+Cc: "Bruce Ford (bford)" <bford@micron.com>, Alex Lemberg <alex.lemberg@sandisk.com>, "jaegeuk@kernel.org" <jaegeuk@kernel.org>, "anton@tuxera.com" <anton@tuxera.com>
 
-On Fri, Nov 6, 2015 at 3:14 AM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
-> No thanks! No more quirks please!
+Sorry I used a wrong email/patch format.
+Reposting the patch using the correct format.
 
-OK, I'll move this functionality into the sdhci-brcmstb driver and
-re-submit the patch set.
+>From: Luca Porzio (lporzio) 
+>Sent: Friday, 06 November, 2015 12:23
+>To: Ulf Hansson (ulf.hansson@linaro.org); 'linux-mmc@vger.kernel.org'
+>Cc: Bruce Ford (bford); Alex Lemberg; 'jaegeuk@kernel.org'; 'anton@tuxera.com'
+>Subject: [RFC] mmc: remove bondage between REQ_META and reliable write
 
-Thanks
-Al
