@@ -1,78 +1,151 @@
-From: "Interfax Service" <incoming@interfax.net>
-Subject: You have 1 new fax, document 00557773
-Date: Sat, 7 Nov 2015 20:04:59 -0200
-Message-ID: <c05322a230414fbb39dd183abc25cc77@grupoava.com.br>
-Reply-To: "Interfax Service" <incoming@interfax.net>
+From: Denis Bychkov <manover@gmail.com>
+Subject: 4.3 kernel panics when MMC/SDHC card is inserted on thinkpad
+Date: Sun, 8 Nov 2015 17:05:33 -0500
+Message-ID: <CAO2mnozX6QXbBqqRfr3pr-FXscGvrQRdxGjuJyYMq5BYWhiSFw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/mixed;
-	boundary="b1_583c3a9f4bf22b9f63a82ecdd2867f85"
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from br152.hostgator.com.br ([192.185.176.121]:26627 "EHLO
-	br152.hostgator.com.br" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932193AbbKGWrq (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sat, 7 Nov 2015 17:47:46 -0500
-Received: from grupo641 by br152.hostgator.com.br with local (Exim 4.85)
-	(envelope-from <grupo641@br152.hostgator.com.br>)
-	id 1ZvBbX-0006hD-6d
-	for linux-mmc@vger.kernel.org; Sat, 07 Nov 2015 20:04:59 -0200
+Received: from mail-lf0-f51.google.com ([209.85.215.51]:33909 "EHLO
+	mail-lf0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750997AbbKHWFf (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 8 Nov 2015 17:05:35 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
+To: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
 
---b1_583c3a9f4bf22b9f63a82ecdd2867f85
-Content-Type: text/plain; charset=us-ascii
+The only started in 4.3 kernel (at least RC-5), 4.2.x does not have
+this problem. The kernel panic happens immediately after the SDHC card
+is inserted, reproducibility is 100%. If the system boots up with the
+card already inserted, it will crash as soon as sdhci_pci module is
+loaded. If the module is unloaded/blacklisted, obviously, nothing
+happens as the system does not see the MMC card reader.
+The machine is Lenovo thinkpad T-510 laptop with Intel Westmere
+CPU/3400 series chipset running 64-bit kernel 4.3.0.
 
-A new fax document for you.
+(somewhat) relevant kernel configuration bits:
+# CONFIG_CALGARY_IOMMU is not set
+CONFIG_IOMMU_HELPER=y
+CONFIG_VFIO_IOMMU_TYPE1=m
+CONFIG_IOMMU_API=y
+CONFIG_IOMMU_SUPPORT=y
+# Generic IOMMU Pagetable Support
+CONFIG_IOMMU_IOVA=y
+# CONFIG_AMD_IOMMU is not set
+CONFIG_INTEL_IOMMU=y
+CONFIG_INTEL_IOMMU_DEFAULT_ON=y
+CONFIG_INTEL_IOMMU_FLOPPY_WA=y
+# CONFIG_IOMMU_STRESS is not set
+CONFIG_KVM_INTEL=m
+CONFIG_PCI_MMCONFIG=y
+# Supported MMC/SDIO adapters
+CONFIG_MMC=m
+# CONFIG_MMC_DEBUG is not set
+# CONFIG_MMC_CLKGATE is not set
+# MMC/SD/SDIO Card Drivers
+CONFIG_MMC_BLOCK=m
+CONFIG_MMC_BLOCK_MINORS=8
+CONFIG_MMC_BLOCK_BOUNCE=y
+CONFIG_MMC_TEST=m
+# MMC/SD/SDIO Host Controller Drivers
+CONFIG_MMC_SDHCI=m
+CONFIG_MMC_SDHCI_PCI=m
+CONFIG_MMC_RICOH_MMC=y
+CONFIG_MMC_SDHCI_ACPI=m
 
-Scanned fax document is attached to this email.
+Card reader device:
+0d:00.0 SD Host controller: Ricoh Co Ltd MMC/SD Host Controller (rev 01)
+        Subsystem: Lenovo MMC/SD Host Controller
+        Flags: bus master, fast devsel, latency 0, IRQ 16
+        Memory at f2100000 (32-bit, non-prefetchable) [size=256]
+        Capabilities: [50] MSI: Enable- Count=1/1 Maskable- 64bit+
+        Capabilities: [78] Power Management version 3
+        Capabilities: [80] Express Endpoint, MSI 00
+        Capabilities: [100] Virtual Channel
+        Capabilities: [800] Advanced Error Reporting
+        Kernel driver in use: sdhci-pci
+        Kernel modules: sdhci_pci
 
-Fax name:            scanned00557773.doc
-Number of pages:     5
-Scanned by:          Ruben Blackburn
-Scan quality:        500 DPI
-File size:           296 Kb
-Date of scan:        Sat, 7 Nov 2015 07:37:19 +0300
-Scan duration:       25 seconds
+The panic report caught via netconsole:
 
-Thanks for choosing Interfax!
+[22946.904308] ------------[ cut here ]------------
+[22946.906564] kernel BUG at drivers/iommu/intel-iommu.c:3485!
+[22946.908801] invalid opcode: 0000 [#1] PREEMPT SMP
+[22946.911113] Modules linked in: netconsole dm_mod bnep
+cpufreq_powersave cpufreq_stats cpufreq_conservative cpufreq_userspace
+coretemp intel_powerclamp kvm_intel kvm crct10dif_pclmul crc32_pclmul
+jitterentropy_rng hmac sha256_ssse3 sha256_generic drbg
+snd_hda_codec_hdmi ansi_cprng gpio_ich iTCO_wdt iTCO_vendor_support
+aesni_intel arc4 aes_x86_64 nouveau mxm_wmi lrw gf128mul glue_helper
+ablk_helper iwldvm cryptd psmouse mac80211 uvcvideo serio_raw pcspkr
+nd_e820 videobuf2_vmalloc ttm evdev videobuf2_memops i2c_algo_bit
+mousedev btusb videobuf2_core btrtl drm_kms_helper v4l2_common mac_hid
+btbcm videodev btintel drm snd_hda_codec_conexant bluetooth
+snd_hda_codec_generic iwlwifi syscopyarea sysfillrect sysimgblt
+fb_sys_fops snd_hda_intel snd_hda_codec cfg80211 snd_hda_core
+snd_hwdep i2c_i801 thinkpad_acpi lpc_ich snd_pcm sg mfd_core nvram
+i2c_core snd_timer intel_ips rfkill hwmon snd mei_me soundcore
+intel_agp mei tpm_tis intel_gtt shpchp tpm agpgart battery rtc_cmos ac
+video thermal wmi acpi_cpufreq button processor tp_smapi(O)
+thinkpad_ec(O) autofs4 ext4 crc16 mbcache jbd2 btrfs xor hid_generic
+usbhid hid raid6_pq sr_mod cdrom sd_mod uas usb_storage firewire_ohci
+ahci libahci crc32c_intel libata atkbd sdhci_pci scsi_mod ehci_pci
+sdhci ehci_hcd e1000e firewire_core mmc_core crc_itu_t ptp usbcore
+usb_common pps_core
+[22946.929431] CPU: 3 PID: 0 Comm: swapper/3 Tainted: G           O
+4.3.0-westmere #1
+[22946.932551] Hardware name: LENOVO 4313CTO/4313CTO, BIOS 6MET92WW
+(1.52 ) 09/26/2012
+[22946.935701] task: ffff88023231a580 ti: ffff88023232c000 task.ti:
+ffff88023232c000
+[22946.938878] RIP: 0010:[<ffffffff813cacd0>]  [<ffffffff813cacd0>]
+intel_unmap+0x1d0/0x210
+[22946.942117] RSP: 0018:ffff88023bd83da8  EFLAGS: 00010046
+[22946.945341] RAX: 0000000000000000 RBX: ffff880231ea5580 RCX: 0000000000000002
+[22946.948592] RDX: 0000000000000000 RSI: 00000000fffebda0 RDI: ffff880231e7d098
+[22946.951855] RBP: ffff88023bd83de0 R08: 0000000000000000 R09: 0000000000000000
+[22946.955131] R10: 00000000563f08fc R11: 000000001849050d R12: ffff880231e7d098
+[22946.958423] R13: ffff8800bacbbc20 R14: 00000000fffebda0 R15: 0000000000000000
+[22946.961723] FS:  0000000000000000(0000) GS:ffff88023bd80000(0000)
+knlGS:0000000000000000
+[22946.965051] CS:  0010 DS: 0000 ES: 0000 CR0: 000000008005003b
+[22946.968387] CR2: 00000000e4d9c0e0 CR3: 0000000001a0c000 CR4: 00000000000006e0
+[22946.971760] Stack:
+[22946.975131]  ffff8800bacbbc60 0000000000000000 ffff880231ea5580
+ffff880231ea5580
+[22946.978598]  ffff8800bacbbc20 0000000000000010 0000000000000000
+ffff88023bd83df0
+[22946.982064]  ffffffff813cad22 ffff88023bd83e48 ffffffffc01090c2
+0000000000000282
+[22946.985546] Call Trace:
+[22946.988984]  <IRQ>
+[22946.989016]  [<ffffffff813cad22>] intel_unmap_sg+0x12/0x20
+[22946.995844]  [<ffffffffc01090c2>] sdhci_finish_data+0x142/0x340 [sdhci]
+[22946.999296]  [<ffffffffc0109f54>] sdhci_irq+0x484/0x9b5 [sdhci]
+[22947.002759]  [<ffffffff81078dea>] ? notifier_call_chain+0x4a/0x70
+[22947.006222]  [<ffffffff810affa9>] handle_irq_event_percpu+0x39/0x1b0
+[22947.009694]  [<ffffffff810b0160>] handle_irq_event+0x40/0x60
+[22947.013160]  [<ffffffff810b2e82>] handle_fasteoi_irq+0xc2/0x180
+[22947.016633]  [<ffffffff810070aa>] handle_irq+0x1a/0x30
+[22947.020095]  [<ffffffff81563ed7>] do_IRQ+0x57/0xf0
+[22947.023553]  [<ffffffff81562001>] common_interrupt+0x81/0x81
+[22947.026992]  <EOI>
+[22947.027023]  [<ffffffff8142736e>] ? cpuidle_enter_state+0x13e/0x2b0
+[22947.033852]  [<ffffffff81427363>] ? cpuidle_enter_state+0x133/0x2b0
+[22947.037286]  [<ffffffff81427517>] cpuidle_enter+0x17/0x20
+[22947.040717]  [<ffffffff81099382>] call_cpuidle+0x32/0x60
+[22947.044131]  [<ffffffff814274f3>] ? cpuidle_select+0x13/0x20
+[22947.047554]  [<ffffffff8109964e>] cpu_startup_entry+0x29e/0x360
+[22947.050969]  [<ffffffff8103539b>] start_secondary+0x15b/0x190
+[22947.054379] Code: 01 44 29 f1 e8 12 c6 ff ff 4c 89 ee 4c 89 ff e8
+b7 8d ff ff 4c 89 e7 e8 0f c7 ff ff 48 83 c4 10 5b 41 5c 41 5d 41 5e
+41 5f 5d c3 <0f> 0b 49 8b 54 24 50 48 85 d2 74 29 4c 8b 45 d0 4c 89 f1
+48 c7
+[22947.058834] RIP  [<ffffffff813cacd0>] intel_unmap+0x1d0/0x210
+[22947.062568]  RSP <ffff88023bd83da8>
+[22947.066285] ---[ end trace 12b22e7424e94db4 ]---
+[22947.069999] Kernel panic - not syncing: Fatal exception in interrupt
+[22947.073803] Kernel Offset: disabled
+[22947.077240] ---[ end Kernel panic - not syncing: Fatal exception in interrupt
 
-
---b1_583c3a9f4bf22b9f63a82ecdd2867f85
-Content-Type: application/zip; name="scanned00557773.zip"
-Content-Transfer-Encoding: base64
-Content-Disposition: attachment; filename=scanned00557773.zip
-
-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
-AAEAAQBEAAAA8QUAAAAA
-
-
---b1_583c3a9f4bf22b9f63a82ecdd2867f85--
-
+-- 
+Denis
