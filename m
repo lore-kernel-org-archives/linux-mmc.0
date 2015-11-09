@@ -1,61 +1,54 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: mediatek: Preinitialize delay_phase in get_best_delay()
-Date: Mon, 9 Nov 2015 13:44:24 +0100
-Message-ID: <CAPDyKFrcFMOZia1oJf=cK739ueJKGUs1wDF_tzZb7hNCM10GyA@mail.gmail.com>
-References: <1446808928-25648-1-git-send-email-geert@linux-m68k.org>
+From: Ludovic Desroches <ludovic.desroches@atmel.com>
+Subject: Re: [PATCH 0/2] mmc: sdhci: potentially bad behavior when using vmmc
+ supply
+Date: Mon, 9 Nov 2015 14:14:37 +0100
+Message-ID: <20151109131437.GB15706@odux.rfo.atmel.com>
+References: <1446825570-30029-1-git-send-email-ludovic.desroches@atmel.com>
+ <CAPDyKFrNNyUrJemgA2OHL35EqpG74_1i9bCqkVkZZZMxNGrHgw@mail.gmail.com>
+ <20151109074104.GB27482@odux.rfo.atmel.com>
+ <CAPDyKFpC_mKXei14mdD=AYd6YBU0R4D1R=XWpf7BTgX4JDw24w@mail.gmail.com>
+ <20151109102555.GA15706@odux.rfo.atmel.com>
+ <CAPDyKFqrPNPrJN=9G7MfA0hVhJMecN0DqbOxqk1J57L819Zm3g@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-yk0-f173.google.com ([209.85.160.173]:33930 "EHLO
-	mail-yk0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751487AbbKIMoZ convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 9 Nov 2015 07:44:25 -0500
-Received: by ykfs79 with SMTP id s79so32562478ykf.1
-        for <linux-mmc@vger.kernel.org>; Mon, 09 Nov 2015 04:44:24 -0800 (PST)
-In-Reply-To: <1446808928-25648-1-git-send-email-geert@linux-m68k.org>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <CAPDyKFqrPNPrJN=9G7MfA0hVhJMecN0DqbOxqk1J57L819Zm3g@mail.gmail.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Nicolas Ferre <nicolas.ferre@atmel.com>, Alexandre Belloni <alexandre.belloni@free-electrons.com>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Jean-Christophe Plagniol-Villard <plagnioj@jcrosoft.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, pierre.samat@atmel.com, Ludovic Desroches <ludovic.desroches@atmel.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Geert Uytterhoeven <geert@linux-m68k.org>
-Cc: Matthias Brugger <matthias.bgg@gmail.com>, linux-mmc <linux-mmc@vger.kernel.org>, linux-mediatek@lists.infradead.org
 
-On 6 November 2015 at 12:22, Geert Uytterhoeven <geert@linux-m68k.org> =
-wrote:
-> drivers/mmc/host/mtk-sd.c: In function =E2=80=98get_best_delay=E2=80=99=
-:
-> drivers/mmc/host/mtk-sd.c:1284: warning: =E2=80=98delay_phase.start=E2=
-=80=99 is used uninitialized in this function
-> drivers/mmc/host/mtk-sd.c:1284: warning: =E2=80=98delay_phase.maxlen=E2=
-=80=99 is used uninitialized in this function
->
-> If delay is zero, these fields are indeed not initialized.
-> Let the compiler preinitialize the whole struct to fix this.
->
-> Signed-off-by: Geert Uytterhoeven <geert@linux-m68k.org>
+On Mon, Nov 09, 2015 at 11:50:50AM +0100, Ulf Hansson wrote:
+> [...]
+> 
+> >>
+> >> This doesn't seems like a case where a gpio regulator should be used
+> >> and I am not sure what problem it would solve. Beside to suppress the
+> >> log warnings (actually those aren't warnings but informations).
+> >>
+> >> Isn't sdhci_do_start_signal_voltage_switch() doing what you need here?
+> >>
+> >
+> > It is. I am only wondering the best way to describe the hardware:
+> > - No regulator but I have the 'no vqmmc regulator not found' message which
+> >   is a bit annoying and which can be interpreted as an issue for someone
+> >   who has no knowledge about this stuff.
+> 
+> Hmm, should we turn them into debug messages? Both regulators are optional.
+> 
 
-Thanks, applied for fixes!
+I think so. From my point of view, it is useless to indicate that
+something optionnal is missing.
 
-Kind regards
-Uffe
+> > - Describe the regulator since there is one on my board. But it is not a
+> >   fixed regulator and even if it's close to a gpio one it is not.
+> 
+> If it's driven by SDHCI internal logic, I would leave it to that.
+> There are no need to describe it at all.
 
-> ---
->  drivers/mmc/host/mtk-sd.c | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
->
-> diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
-> index 39568cc29a2a18cf..33dfd7e72516c392 100644
-> --- a/drivers/mmc/host/mtk-sd.c
-> +++ b/drivers/mmc/host/mtk-sd.c
-> @@ -1276,7 +1276,7 @@ static struct msdc_delay_phase get_best_delay(s=
-truct msdc_host *host, u32 delay)
->         int start =3D 0, len =3D 0;
->         int start_final =3D 0, len_final =3D 0;
->         u8 final_phase =3D 0xff;
-> -       struct msdc_delay_phase delay_phase;
-> +       struct msdc_delay_phase delay_phase =3D { 0, };
->
->         if (delay =3D=3D 0) {
->                 dev_err(host->dev, "phase error: [map:%x]\n", delay);
-> --
-> 1.9.1
->
+Ok thanks for your help.
+
+> 
+> Kind regards
+> Uffe
