@@ -1,151 +1,147 @@
-From: Denis Bychkov <manover@gmail.com>
-Subject: 4.3 kernel panics when MMC/SDHC card is inserted on thinkpad
-Date: Sun, 8 Nov 2015 17:05:33 -0500
-Message-ID: <CAO2mnozX6QXbBqqRfr3pr-FXscGvrQRdxGjuJyYMq5BYWhiSFw@mail.gmail.com>
+From: Sergey Senozhatsky <sergey.senozhatsky.work@gmail.com>
+Subject: Re: [PATCH 5/8] zram: handle add_disk() & blk_register_region()
+ return value
+Date: Mon, 9 Nov 2015 10:07:05 +0900
+Message-ID: <20151109010705.GC471@swordfish>
+References: <437969438-9181-1-git-send-email-vishnu.ps@samsung.com>
+ <1446812535-10567-1-git-send-email-vishnu.ps@samsung.com>
+ <1446812535-10567-5-git-send-email-vishnu.ps@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-lf0-f51.google.com ([209.85.215.51]:33909 "EHLO
-	mail-lf0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750997AbbKHWFf (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 8 Nov 2015 17:05:35 -0500
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-ide-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <1446812535-10567-5-git-send-email-vishnu.ps@samsung.com>
+Sender: linux-ide-owner@vger.kernel.org
+To: Vishnu Pratap Singh <vishnu.ps@samsung.com>
+Cc: axboe@kernel.dk, akpm@linux-foundation.org, linux-kernel@vger.kernel.org, jmoyer@redhat.com, minchan@kernel.org, ngupta@vflare.org, sergey.senozhatsky.work@gmail.com, davem@davemloft.net, neilb@suse.com, ulf.hansson@linaro.org, tiwai@suse.de, hare@suse.de, ming.lei@canonical.com, jarod@redhat.com, viro@zeniv.linux.org.uk, tj@kernel.org, adrian.hunter@intel.com, jonathanh@nvidia.com, grundler@chromium.org, linux-ide@vger.kernel.org, linux-raid@vger.kernel.org, linux-mmc@vger.kernel.org, cpgs@samsung.com, vishu13285@gmail.com, pintu.k@samsung.com, rohit.kr@samsung.com
 List-Id: linux-mmc@vger.kernel.org
-To: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
 
-The only started in 4.3 kernel (at least RC-5), 4.2.x does not have
-this problem. The kernel panic happens immediately after the SDHC card
-is inserted, reproducibility is 100%. If the system boots up with the
-card already inserted, it will crash as soon as sdhci_pci module is
-loaded. If the module is unloaded/blacklisted, obviously, nothing
-happens as the system does not see the MMC card reader.
-The machine is Lenovo thinkpad T-510 laptop with Intel Westmere
-CPU/3400 series chipset running 64-bit kernel 4.3.0.
+On (11/06/15 17:52), Vishnu Pratap Singh wrote:
+> This patch adds error handling for blk_register_region(),
+> register_disk(), add_disk(), disk_alloc_events() & disk_add_events().
+> add_disk() & register_disk() functions  error handling is very much
+> needed as this is used mainly by many modules like mmc, zram, mtd, scsi etc.
+> But there is no error handling and it may cause stability issues also.
 
-(somewhat) relevant kernel configuration bits:
-# CONFIG_CALGARY_IOMMU is not set
-CONFIG_IOMMU_HELPER=y
-CONFIG_VFIO_IOMMU_TYPE1=m
-CONFIG_IOMMU_API=y
-CONFIG_IOMMU_SUPPORT=y
-# Generic IOMMU Pagetable Support
-CONFIG_IOMMU_IOVA=y
-# CONFIG_AMD_IOMMU is not set
-CONFIG_INTEL_IOMMU=y
-CONFIG_INTEL_IOMMU_DEFAULT_ON=y
-CONFIG_INTEL_IOMMU_FLOPPY_WA=y
-# CONFIG_IOMMU_STRESS is not set
-CONFIG_KVM_INTEL=m
-CONFIG_PCI_MMCONFIG=y
-# Supported MMC/SDIO adapters
-CONFIG_MMC=m
-# CONFIG_MMC_DEBUG is not set
-# CONFIG_MMC_CLKGATE is not set
-# MMC/SD/SDIO Card Drivers
-CONFIG_MMC_BLOCK=m
-CONFIG_MMC_BLOCK_MINORS=8
-CONFIG_MMC_BLOCK_BOUNCE=y
-CONFIG_MMC_TEST=m
-# MMC/SD/SDIO Host Controller Drivers
-CONFIG_MMC_SDHCI=m
-CONFIG_MMC_SDHCI_PCI=m
-CONFIG_MMC_RICOH_MMC=y
-CONFIG_MMC_SDHCI_ACPI=m
+hm... I came across "FIXME: error handling" comment in add_disk() some
+time ago and after a quick google search I found this:
+https://lkml.org/lkml/2007/7/24/207
 
-Card reader device:
-0d:00.0 SD Host controller: Ricoh Co Ltd MMC/SD Host Controller (rev 01)
-        Subsystem: Lenovo MMC/SD Host Controller
-        Flags: bus master, fast devsel, latency 0, IRQ 16
-        Memory at f2100000 (32-bit, non-prefetchable) [size=256]
-        Capabilities: [50] MSI: Enable- Count=1/1 Maskable- 64bit+
-        Capabilities: [78] Power Management version 3
-        Capabilities: [80] Express Endpoint, MSI 00
-        Capabilities: [100] Virtual Channel
-        Capabilities: [800] Advanced Error Reporting
-        Kernel driver in use: sdhci-pci
-        Kernel modules: sdhci_pci
+>> The attached patch fixes the problem by changing the prototype of
+>> add_disk() and register_disk() to return errors.
 
-The panic report caught via netconsole:
+Al Viro wrote:
 
-[22946.904308] ------------[ cut here ]------------
-[22946.906564] kernel BUG at drivers/iommu/intel-iommu.c:3485!
-[22946.908801] invalid opcode: 0000 [#1] PREEMPT SMP
-[22946.911113] Modules linked in: netconsole dm_mod bnep
-cpufreq_powersave cpufreq_stats cpufreq_conservative cpufreq_userspace
-coretemp intel_powerclamp kvm_intel kvm crct10dif_pclmul crc32_pclmul
-jitterentropy_rng hmac sha256_ssse3 sha256_generic drbg
-snd_hda_codec_hdmi ansi_cprng gpio_ich iTCO_wdt iTCO_vendor_support
-aesni_intel arc4 aes_x86_64 nouveau mxm_wmi lrw gf128mul glue_helper
-ablk_helper iwldvm cryptd psmouse mac80211 uvcvideo serio_raw pcspkr
-nd_e820 videobuf2_vmalloc ttm evdev videobuf2_memops i2c_algo_bit
-mousedev btusb videobuf2_core btrtl drm_kms_helper v4l2_common mac_hid
-btbcm videodev btintel drm snd_hda_codec_conexant bluetooth
-snd_hda_codec_generic iwlwifi syscopyarea sysfillrect sysimgblt
-fb_sys_fops snd_hda_intel snd_hda_codec cfg80211 snd_hda_core
-snd_hwdep i2c_i801 thinkpad_acpi lpc_ich snd_pcm sg mfd_core nvram
-i2c_core snd_timer intel_ips rfkill hwmon snd mei_me soundcore
-intel_agp mei tpm_tis intel_gtt shpchp tpm agpgart battery rtc_cmos ac
-video thermal wmi acpi_cpufreq button processor tp_smapi(O)
-thinkpad_ec(O) autofs4 ext4 crc16 mbcache jbd2 btrfs xor hid_generic
-usbhid hid raid6_pq sr_mod cdrom sd_mod uas usb_storage firewire_ohci
-ahci libahci crc32c_intel libata atkbd sdhci_pci scsi_mod ehci_pci
-sdhci ehci_hcd e1000e firewire_core mmc_core crc_itu_t ptp usbcore
-usb_common pps_core
-[22946.929431] CPU: 3 PID: 0 Comm: swapper/3 Tainted: G           O
-4.3.0-westmere #1
-[22946.932551] Hardware name: LENOVO 4313CTO/4313CTO, BIOS 6MET92WW
-(1.52 ) 09/26/2012
-[22946.935701] task: ffff88023231a580 ti: ffff88023232c000 task.ti:
-ffff88023232c000
-[22946.938878] RIP: 0010:[<ffffffff813cacd0>]  [<ffffffff813cacd0>]
-intel_unmap+0x1d0/0x210
-[22946.942117] RSP: 0018:ffff88023bd83da8  EFLAGS: 00010046
-[22946.945341] RAX: 0000000000000000 RBX: ffff880231ea5580 RCX: 0000000000000002
-[22946.948592] RDX: 0000000000000000 RSI: 00000000fffebda0 RDI: ffff880231e7d098
-[22946.951855] RBP: ffff88023bd83de0 R08: 0000000000000000 R09: 0000000000000000
-[22946.955131] R10: 00000000563f08fc R11: 000000001849050d R12: ffff880231e7d098
-[22946.958423] R13: ffff8800bacbbc20 R14: 00000000fffebda0 R15: 0000000000000000
-[22946.961723] FS:  0000000000000000(0000) GS:ffff88023bd80000(0000)
-knlGS:0000000000000000
-[22946.965051] CS:  0010 DS: 0000 ES: 0000 CR0: 000000008005003b
-[22946.968387] CR2: 00000000e4d9c0e0 CR3: 0000000001a0c000 CR4: 00000000000006e0
-[22946.971760] Stack:
-[22946.975131]  ffff8800bacbbc60 0000000000000000 ffff880231ea5580
-ffff880231ea5580
-[22946.978598]  ffff8800bacbbc20 0000000000000010 0000000000000000
-ffff88023bd83df0
-[22946.982064]  ffffffff813cad22 ffff88023bd83e48 ffffffffc01090c2
-0000000000000282
-[22946.985546] Call Trace:
-[22946.988984]  <IRQ>
-[22946.989016]  [<ffffffff813cad22>] intel_unmap_sg+0x12/0x20
-[22946.995844]  [<ffffffffc01090c2>] sdhci_finish_data+0x142/0x340 [sdhci]
-[22946.999296]  [<ffffffffc0109f54>] sdhci_irq+0x484/0x9b5 [sdhci]
-[22947.002759]  [<ffffffff81078dea>] ? notifier_call_chain+0x4a/0x70
-[22947.006222]  [<ffffffff810affa9>] handle_irq_event_percpu+0x39/0x1b0
-[22947.009694]  [<ffffffff810b0160>] handle_irq_event+0x40/0x60
-[22947.013160]  [<ffffffff810b2e82>] handle_fasteoi_irq+0xc2/0x180
-[22947.016633]  [<ffffffff810070aa>] handle_irq+0x1a/0x30
-[22947.020095]  [<ffffffff81563ed7>] do_IRQ+0x57/0xf0
-[22947.023553]  [<ffffffff81562001>] common_interrupt+0x81/0x81
-[22947.026992]  <EOI>
-[22947.027023]  [<ffffffff8142736e>] ? cpuidle_enter_state+0x13e/0x2b0
-[22947.033852]  [<ffffffff81427363>] ? cpuidle_enter_state+0x133/0x2b0
-[22947.037286]  [<ffffffff81427517>] cpuidle_enter+0x17/0x20
-[22947.040717]  [<ffffffff81099382>] call_cpuidle+0x32/0x60
-[22947.044131]  [<ffffffff814274f3>] ? cpuidle_select+0x13/0x20
-[22947.047554]  [<ffffffff8109964e>] cpu_startup_entry+0x29e/0x360
-[22947.050969]  [<ffffffff8103539b>] start_secondary+0x15b/0x190
-[22947.054379] Code: 01 44 29 f1 e8 12 c6 ff ff 4c 89 ee 4c 89 ff e8
-b7 8d ff ff 4c 89 e7 e8 0f c7 ff ff 48 83 c4 10 5b 41 5c 41 5d 41 5e
-41 5f 5d c3 <0f> 0b 49 8b 54 24 50 48 85 d2 74 29 4c 8b 45 d0 4c 89 f1
-48 c7
-[22947.058834] RIP  [<ffffffff813cacd0>] intel_unmap+0x1d0/0x210
-[22947.062568]  RSP <ffff88023bd83da8>
-[22947.066285] ---[ end trace 12b22e7424e94db4 ]---
-[22947.069999] Kernel panic - not syncing: Fatal exception in interrupt
-[22947.073803] Kernel Offset: disabled
-[22947.077240] ---[ end Kernel panic - not syncing: Fatal exception in interrupt
+> This is bogus.  Just what would callers do with these error values?
+> Ignore them silently?  Bail out?  Can't do - at that point disk just
+> might have been opened already.  add_disk() is the point of no return;
+> we are already past the last point where we could bail out.
 
--- 
-Denis
+
+
+
+>  drivers/block/z2ram.c         | 12 ++++++++++--
+>  drivers/block/zram/zram_drv.c |  9 ++++++---
+
+those are different drivers, split the patches (well, if add_disk()
+change actually makes sense).
+
+
+>  2 files changed, 16 insertions(+), 5 deletions(-)
+> 
+> diff --git a/drivers/block/z2ram.c b/drivers/block/z2ram.c
+> index 968f9e5..85e841f 100644
+> --- a/drivers/block/z2ram.c
+> +++ b/drivers/block/z2ram.c
+> @@ -364,12 +364,20 @@ z2_init(void)
+>      sprintf(z2ram_gendisk->disk_name, "z2ram");
+>  
+>      z2ram_gendisk->queue = z2_queue;
+> -    add_disk(z2ram_gendisk);
+> -    blk_register_region(MKDEV(Z2RAM_MAJOR, 0), Z2MINOR_COUNT, THIS_MODULE,
+> +    ret = add_disk(z2ram_gendisk);
+> +    if (ret)
+> +	goto out_add_disk;
+> +
+> +    ret = blk_register_region(MKDEV(Z2RAM_MAJOR, 0), Z2MINOR_COUNT, THIS_MODULE,
+>  				z2_find, NULL, NULL);
+> +    if (ret)
+> +	goto out_blk_reg;
+
+A separate nitpick. z2_init() coding styles need to be 'fixed'. So the
+patch will not violate the kernel coding styles.
+
+ ./scripts/checkpatch.pl
+ WARNING: please, no spaces at the start of a line
+ #113: FILE: drivers/block/z2ram.c:367:
+ +    ret = add_disk(z2ram_gendisk);$
+
+ WARNING: please, no spaces at the start of a line
+ #114: FILE: drivers/block/z2ram.c:368:
+ +    if (ret)$
+
+ WARNING: please, no spaces at the start of a line
+ #117: FILE: drivers/block/z2ram.c:371:
+ +    ret = blk_register_region(MKDEV(Z2RAM_MAJOR, 0), Z2MINOR_COUNT,
+ THIS_MODULE,$
+
+ WARNING: please, no spaces at the start of a line
+ #119: FILE: drivers/block/z2ram.c:373:
+ +    if (ret)$
+
+ total: 0 errors, 4 warnings, 50 lines checked
+
+
+>  
+>      return 0;
+>  
+> +out_blk_reg:
+> +	del_gendisk(z2ram_gendisk);
+> +out_add_disk:
+>  out_queue:
+
+Hm... a fall-through empty `out_add_disk' label?
+
+
+	-ss
+
+>      put_disk(z2ram_gendisk);
+>  out_disk:
+> diff --git a/drivers/block/zram/zram_drv.c b/drivers/block/zram/zram_drv.c
+> index 81a557c..f3d7a49 100644
+> --- a/drivers/block/zram/zram_drv.c
+> +++ b/drivers/block/zram/zram_drv.c
+> @@ -1261,14 +1261,16 @@ static int zram_add(void)
+>  		zram->disk->queue->limits.discard_zeroes_data = 0;
+>  	queue_flag_set_unlocked(QUEUE_FLAG_DISCARD, zram->disk->queue);
+>  
+> -	add_disk(zram->disk);
+> +	ret = add_disk(zram->disk);
+> +	if (ret)
+> +		goto out_free_disk;
+>  
+>  	ret = sysfs_create_group(&disk_to_dev(zram->disk)->kobj,
+>  				&zram_disk_attr_group);
+>  	if (ret < 0) {
+>  		pr_err("Error creating sysfs group for device %d\n",
+>  				device_id);
+> -		goto out_free_disk;
+> +		goto out_del_disk;
+>  	}
+>  	strlcpy(zram->compressor, default_compressor, sizeof(zram->compressor));
+>  	zram->meta = NULL;
+> @@ -1277,8 +1279,9 @@ static int zram_add(void)
+>  	pr_info("Added device: %s\n", zram->disk->disk_name);
+>  	return device_id;
+>  
+> -out_free_disk:
+> +out_del_disk:
+>  	del_gendisk(zram->disk);
+> +out_free_disk:
+>  	put_disk(zram->disk);
+
+>  out_free_queue:
+>  	blk_cleanup_queue(queue);
+> -- 
+> 1.9.1
+> 
