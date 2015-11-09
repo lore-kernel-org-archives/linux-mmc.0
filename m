@@ -1,135 +1,88 @@
-From: Ludovic Desroches <ludovic.desroches@atmel.com>
-Subject: Re: [PATCH 1/2] mmc: sdhci: set bus voltage before enabling bus power
-Date: Mon, 9 Nov 2015 17:30:26 +0100
-Message-ID: <20151109163026.GE15706@odux.rfo.atmel.com>
-References: <1446825570-30029-1-git-send-email-ludovic.desroches@atmel.com>
- <1446825570-30029-2-git-send-email-ludovic.desroches@atmel.com>
- <20151109132305.GC15706@odux.rfo.atmel.com>
- <CAPDyKFrTTEnSFNvmx3e__Ap9gOGpA2-bz+yrq7ibz0wXGSWCXA@mail.gmail.com>
- <20151109144030.GD15706@odux.rfo.atmel.com>
- <CAPDyKFquZ+_Rf07gX+i-=_bzSa7KJ5+xQ8N21kK2mvfMGdVQMw@mail.gmail.com>
+From: Georgi Djakov <georgi.djakov@linaro.org>
+Subject: Re: [PATCH v2] mmc: sdhci-msm: Boost controller core clock
+Date: Mon, 9 Nov 2015 19:09:02 +0200
+Message-ID: <5640D32E.5050307@linaro.org>
+References: <1436183618-15330-1-git-send-email-ivan.ivanov@linaro.org>
+ <CAJAp7OjdiD_x0aU89HNq8PCiGqs+fvATHuVARxU4gE4yVusRNg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from eusmtp01.atmel.com ([212.144.249.243]:3053 "EHLO
-	eusmtp01.atmel.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751903AbbKIQax (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 9 Nov 2015 11:30:53 -0500
-Content-Disposition: inline
-In-Reply-To: <CAPDyKFquZ+_Rf07gX+i-=_bzSa7KJ5+xQ8N21kK2mvfMGdVQMw@mail.gmail.com>
+Received: from mail-wm0-f51.google.com ([74.125.82.51]:34043 "EHLO
+	mail-wm0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752580AbbKIRJI (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 9 Nov 2015 12:09:08 -0500
+Received: by wmnn186 with SMTP id n186so115685869wmn.1
+        for <linux-mmc@vger.kernel.org>; Mon, 09 Nov 2015 09:09:06 -0800 (PST)
+In-Reply-To: <CAJAp7OjdiD_x0aU89HNq8PCiGqs+fvATHuVARxU4gE4yVusRNg@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Nicolas Ferre <nicolas.ferre@atmel.com>, Alexandre Belloni <alexandre.belloni@free-electrons.com>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Jean-Christophe Plagniol-Villard <plagnioj@jcrosoft.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, pierre.samat@atmel.com, Ludovic Desroches <ludovic.desroches@atmel.com>
+To: Bjorn Andersson <bjorn@kryo.se>, "Ivan T. Ivanov" <ivan.ivanov@linaro.org>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Stephen Boyd <sboyd@codeaurora.org>, Peter Griffin <peter.griffin@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-arm-msm <linux-arm-msm@vger.kernel.org>
 
-On Mon, Nov 09, 2015 at 05:00:46PM +0100, Ulf Hansson wrote:
-> On 9 November 2015 at 15:40, Ludovic Desroches
-> <ludovic.desroches@atmel.com> wrote:
-> > On Mon, Nov 09, 2015 at 03:12:46PM +0100, Ulf Hansson wrote:
-> >> On 9 November 2015 at 14:23, Ludovic Desroches
-> >> <ludovic.desroches@atmel.com> wrote:
-> >> > On Fri, Nov 06, 2015 at 04:59:29PM +0100, Ludovic Desroches wrote:
-> >> >> When there is a vmmc regulator, only SD Bus Power is set to 1 in the
-> >> >> Power Control Register. It means SD Bus Voltage Select field is set to 0
-> >> >> that is a reserved value. The SD Host Controller specification says:
-> >> >> 'SD Bus Power: Before setting this bit, the SD Host Driver shall set SD
-> >> >> Bus Voltage Select.' and 'If the Host Driver selects an unsupported
-> >> >> voltage in the SD B?us Voltage Select field, the Host Controller may
-> >> >> ignore writes to SD Bus Power and keep its value at zero."
-> >> >>
-> >> >> Having an external regulator means the SD Bus Voltage Select is useless
-> >> >> but if the Host Controller strictly follows the specification then we
-> >> >> need to set a valid value.
-> >> >
-> >> > Ulf,
-> >> >
-> >> > What is your opinion about this patch?
-> >> >
-> >> > If the 'no regulator found' message is turned in debug message, I can get
-> >> > rid of my vmmc regulator but I really think that writing only
-> >>
-> >> I expect you mean vqmmc?
-> >
-> > I don't mean vmmc. In the sdhci_set_power function, we are using vmmc.
-> > I feel not confortable with it because the power control register
-> > contains 'SD Bus' fields so it should depend on vqmmc not vmmc.
-> >
-> >>
-> >> > SDHCI_POWER_ON is opposite to the sdhci spec. I would say that not
-> >> > setting the bus voltage is a quirk!
-> >>
-> >> I don't really follow.
-> >>
-> >> I read the SDHCI spec and the section for the Power Control Register.
-> >> Bit 0 needs to be set when communicating with the card as it will for
-> >> example enables the clock. Before setting bit0 you must decide what
-> >> signal level to use, which is done by writing to bit 1->3.
-> >>
-> >
-> > Right. But when having vmmc supply we do:
-> > sdhci_writeb(host, SDHCI_POWER_ON, SDHCI_POWER_CONTROL) or
-> > sdhci_writeb(host, 0, SDHCI_POWER_CONTROL) so we loose the signal level,
-> > isn't it?
-> >
-> >> If SDHCI monitors the power state (MMC_POWER_UP|ON|OFF) when its
-> >> ->set_ios() callback are invoked and in combination of using the
-> >> ->start_signal_voltage_switch() callback to change the signal voltage
-> >> level, this *should* work out nicely.
-> >>
-> >
-> > It is my turn to not follow! We write into the Power Control Register
-> > only in sdhci_set_power(). May I miss a callback or something else?
-> > sdhci_do_start_signal_voltage_switch doesn't modify the Power Control
-> > Register.
-> >
-> >> Now, looking at the related code in sdhci, I am kind of surprised that
-> >> it works. :-) Though, again I don't have the in-depth knowledge about
-> >> sdhci.
-> >>
-> >
-> > Me too, I am starting to dig into the sdhci spec and some points are
-> > not crystal clear.
-> >
+On 11/06/2015 03:42 AM, Bjorn Andersson wrote:
+> On Mon, Jul 6, 2015 at 4:53 AM, Ivan T. Ivanov <ivan.ivanov@linaro.org> wrote:
+>> Ensure SDCC is working with maximum clock otherwise card
+>> detection could be extremely slow, up to 7 seconds.
+>>
+>> Signed-off-by: Ivan T. Ivanov <ivan.ivanov@linaro.org>
+>> Reviewed-by: Georgi Djakov <georgi.djakov@linaro.org>
+>> Acked-by: Stephen Boyd <sboyd@codeaurora.org>
+>> ---
+>>
+>> Changes since v0:
+>> - s/falied/failed in warning message.
+>>
+>>  drivers/mmc/host/sdhci-msm.c | 5 +++++
+>>  1 file changed, 5 insertions(+)
+>>
+>> diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
+>> index 4a09f76..4bcee03 100644
+>> --- a/drivers/mmc/host/sdhci-msm.c
+>> +++ b/drivers/mmc/host/sdhci-msm.c
+>> @@ -489,6 +489,11 @@ static int sdhci_msm_probe(struct platform_device *pdev)
+>>                 goto pclk_disable;
+>>         }
+>>
+>> +       /* Vote for maximum clock rate for maximum performance */
+>> +       ret = clk_set_rate(msm_host->clk, INT_MAX);
+>> +       if (ret)
+>> +               dev_warn(&pdev->dev, "core clock boost failed\n");
+>> +
 > 
-> Okay, I am finally starting to understand some of your concern.
+> On my 8974AC devices this results in GCC_SDCC1_APPS_CLK changing from
+> 100MHz to 200MHz for my eMMC. Unfortunately this results in the
+> following error:
 > 
-> According to the spec, the Power Control Register should control the
-> signal voltage/bus voltage. As UHS mode was added to the spec, it
-> seems like the Power Control Register couldn't cover all new cases, as
-> why Host Control 2 register needed to be added. The Host Control 2
-> register, is what sdhci_do_start_signal_voltage_switch() uses to
-> change the signal voltage level, which all makes sense to me.
+> [    5.103241] mmcblk0: retrying because a re-tune was needed
+> [    5.109270] mmcblk0: error -84 transferring data, sector 5816322,
+> nr 2, cmd response 0x900, card status 0xc00
 > 
-> For sdhci_set_power(); it seems to use the Power Control Register to
-> control the power to the card (VDD/VMMC). Indeed this looks *really*
-> weird/wrong. I wonder if it's working because of luck, intentional
-> violation of the SDHCI spec or because of special variants.
+> Looking at the board specification it's stated that these card should
+> run in DDR50, so I've tried specifying "max-frequency" in the dt. I
+> verified in sdhci_set_clock() that we get a divisor of 4, but the
+> result is a repetition of:
+> 
+> [    1.702312] mmc1: Switching to 3.3V signalling voltage failed
+> [    1.837987] mmc1: power class selection to bus width 8 ddr 0 failed
+> [    1.846227] mmc1: error -110 whilst initialising MMC card
+> [    1.946303] mmc1: Reset 0x1 never completed.
+> 
+> I tried to disable HS200 by specifying SDHCI_QUIRK2_BROKEN_HS200. This
+> makes the card come up nicely again.
+> 
+> 
+> Is there any other way to force the link to DDR50? Is it acceptable to
+> expose the broken-hs200 quirk in dt so I can use that for now?
+> 
+> (The downstream fix used for this was apparently to just remove all
+> other caps...)
 > 
 
-Yes but I don't know if we are doing something weird/wrong or if it
-is the naming of the 'SD Bus Voltage Select' which is weird/wrong.
+Hi Bjorn,
+There are two dev_dbg lines in the driver. What do they print for
+major and minor versions?
 
-> Especially when looking into the case when you *don't* have a VMMC
-> regulator several strange quirks exists in sdhci_set_power().
-> 
-> In the case when you *have* a VMMC, I think just setting/clearing bit
-> 0 (SDHCI_POWER_ON) and then bail out, is probably working with modern
-> HW because it's likely the only thing needed.
-> 
-> Now, this discussion was interesting, but I forgot what problem you
-> actually where trying to solve? :-)
+Thanks,
+Georgi
 
-There is this discussion because of two things:
-- Fixing something I consider as a bug: when I have a VMMC, only
-  setting/clearing bit 0. Our controller strictly obeys to the spec and
-  check the 'SD Bus Voltage Select' field. Since we put a reserved value
-  (000), the Power On is not performed.
-- I was trying to get help to understand what is this 'SD Bus Voltage'.
-  For our controller and sdhci_set_power(), it seems to stand for VMMC.
-  For me, everything concerning bus voltage is related to VQMMC, so I was
-  disappointed.
-
-
-Regards
-
-Ludovic
