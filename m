@@ -1,64 +1,46 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: add ifdef around fault_create_debugfs_attr()
-Date: Mon, 9 Nov 2015 14:33:11 +0100
-Message-ID: <CAPDyKFrs4VCJgVXpF405HrXZ2oJ+L=3e7hWtYAxYx4=qMHsRYQ@mail.gmail.com>
-References: <1446812136-31526-1-git-send-email-adrien+dev@schischi.me>
+From: Ludovic Desroches <ludovic.desroches@atmel.com>
+Subject: [PATCH] mmc: core: set regulator not found message as debug
+Date: Mon, 9 Nov 2015 15:03:59 +0100
+Message-ID: <1447077839-446-1-git-send-email-ludovic.desroches@atmel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-yk0-f178.google.com ([209.85.160.178]:34891 "EHLO
-	mail-yk0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751109AbbKINdM (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 9 Nov 2015 08:33:12 -0500
-Received: by ykek133 with SMTP id k133so263761917yke.2
-        for <linux-mmc@vger.kernel.org>; Mon, 09 Nov 2015 05:33:12 -0800 (PST)
-In-Reply-To: <1446812136-31526-1-git-send-email-adrien+dev@schischi.me>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: ulf.hansson@linaro.org
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, nicolas.ferre@atmel.com, Ludovic Desroches <ludovic.desroches@atmel.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Adrien Schildknecht <adrien+dev@schischi.me>
-Cc: Shawn Lin <shawn.lin@rock-chips.com>, Linus Walleij <linus.walleij@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 
-On 6 November 2015 at 13:15, Adrien Schildknecht <adrien+dev@schischi.me> wrote:
-> FAIL_MMC_REQUEST can be used without FAULT_INJECTION_DEBUG_FS.
-> In this case fault_create_debugfs_attr() will always return an error and
-> lead to the deletion of the whole debugfs directory.
->
-> This patch makes sure that FAULT_INJECTION_DEBUG_FS is enabled before
-> attempting to create the debugfs atttribute.
->
-> Signed-off-by: Adrien Schildknecht <adrien+dev@schischi.me>
-> ---
->  drivers/mmc/core/debugfs.c | 2 ++
->  1 file changed, 2 insertions(+)
->
-> diff --git a/drivers/mmc/core/debugfs.c b/drivers/mmc/core/debugfs.c
-> index 154aced..13e842c 100644
-> --- a/drivers/mmc/core/debugfs.c
-> +++ b/drivers/mmc/core/debugfs.c
-> @@ -259,11 +259,13 @@ void mmc_add_host_debugfs(struct mmc_host *host)
->         if (fail_request)
->                 setup_fault_attr(&fail_default_attr, fail_request);
->         host->fail_mmc_request = fail_default_attr;
-> +#ifdef CONFIG_FAULT_INJECTION_DEBUG_FS
->         if (IS_ERR(fault_create_debugfs_attr("fail_mmc_request",
->                                              root,
->                                              &host->fail_mmc_request)))
->                 goto err_node;
->  #endif
-> +#endif
->         return;
->
->  err_node:
-> --
-> 2.6.2
->
+Turn the informative message about no vmmc/vqmmc regulator found in
+debug one. There is no need to indicate that something optional is
+missing. Moreover, it can bring confusion, people who doesn't know
+it is optional may consider these messages as warnings or errors.
 
-I think you are solving this in the wrong way. Will it really makes
-sense to use FAIL_MMC_REQUEST unless FAULT_INJECTION_DEBUG_FS is set,
-I don't think so.
+Signed-off-by: Ludovic Desroches <ludovic.desroches@atmel.com>
+---
+ drivers/mmc/core/core.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
 
-I suggest you to change FAIL_MMC_REQUEST from depending on
-FAULT_INJECTION to FAULT_INJECTION_DEBUG_FS in /lib/Kconfig.debug.
-
-Kind regards
-Uffe
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index 5ae89e4..5b294dd 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -1485,7 +1485,7 @@ int mmc_regulator_get_supply(struct mmc_host *mmc)
+ 	if (IS_ERR(mmc->supply.vmmc)) {
+ 		if (PTR_ERR(mmc->supply.vmmc) == -EPROBE_DEFER)
+ 			return -EPROBE_DEFER;
+-		dev_info(dev, "No vmmc regulator found\n");
++		dev_dbg(dev, "No vmmc regulator found\n");
+ 	} else {
+ 		ret = mmc_regulator_get_ocrmask(mmc->supply.vmmc);
+ 		if (ret > 0)
+@@ -1497,7 +1497,7 @@ int mmc_regulator_get_supply(struct mmc_host *mmc)
+ 	if (IS_ERR(mmc->supply.vqmmc)) {
+ 		if (PTR_ERR(mmc->supply.vqmmc) == -EPROBE_DEFER)
+ 			return -EPROBE_DEFER;
+-		dev_info(dev, "No vqmmc regulator found\n");
++		dev_dbg(dev, "No vqmmc regulator found\n");
+ 	}
+ 
+ 	return 0;
+-- 
+2.5.0
