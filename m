@@ -1,105 +1,43 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 1/4] mmc: Add quirk to disable SDR50 mode
-Date: Mon, 9 Nov 2015 11:45:02 +0100
-Message-ID: <CAPDyKFqpFu3aEs5vLc9dhpj4YmCAXKdhj4k2qKgd2Zaw8OACow@mail.gmail.com>
-References: <1446763200-10234-1-git-send-email-alcooperx@gmail.com>
-	<CAPDyKFrhtoDwe82Zg4YP4eU=xO6zE1pZTcRSnzSeHGRCzgu+5w@mail.gmail.com>
-	<563D3E0F.70906@broadcom.com>
+Subject: Re: [PATCH 0/2] mmc: sdhci: potentially bad behavior when using vmmc supply
+Date: Mon, 9 Nov 2015 11:50:50 +0100
+Message-ID: <CAPDyKFqrPNPrJN=9G7MfA0hVhJMecN0DqbOxqk1J57L819Zm3g@mail.gmail.com>
+References: <1446825570-30029-1-git-send-email-ludovic.desroches@atmel.com>
+	<CAPDyKFrNNyUrJemgA2OHL35EqpG74_1i9bCqkVkZZZMxNGrHgw@mail.gmail.com>
+	<20151109074104.GB27482@odux.rfo.atmel.com>
+	<CAPDyKFpC_mKXei14mdD=AYd6YBU0R4D1R=XWpf7BTgX4JDw24w@mail.gmail.com>
+	<20151109102555.GA15706@odux.rfo.atmel.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-yk0-f180.google.com ([209.85.160.180]:33081 "EHLO
-	mail-yk0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750806AbbKIKpE (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 9 Nov 2015 05:45:04 -0500
-Received: by ykdv3 with SMTP id v3so167462291ykd.0
-        for <linux-mmc@vger.kernel.org>; Mon, 09 Nov 2015 02:45:03 -0800 (PST)
-In-Reply-To: <563D3E0F.70906@broadcom.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20151109102555.GA15706@odux.rfo.atmel.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>, Nicolas Ferre <nicolas.ferre@atmel.com>, Alexandre Belloni <alexandre.belloni@free-electrons.com>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Jean-Christophe Plagniol-Villard <plagnioj@jcrosoft.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, pierre.samat@atmel.com
+Cc: Ludovic Desroches <ludovic.desroches@atmel.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Scott Branden <sbranden@broadcom.com>
-Cc: Al Cooper <alcooperx@gmail.com>, linux-mmc <linux-mmc@vger.kernel.org>, bcm-kernel-feedback-list@broadcom.com
 
-On 7 November 2015 at 00:55, Scott Branden <sbranden@broadcom.com> wrote:
-> Hi Ulf,
->
-> On 15-11-06 12:14 AM, Ulf Hansson wrote:
+[...]
+
 >>
->> On 5 November 2015 at 23:39, Al Cooper <alcooperx@gmail.com> wrote:
->>>
->>> Add quirk to disable SDR50 mode for controllers/boards that have
->>> problems with this mode.
+>> This doesn't seems like a case where a gpio regulator should be used
+>> and I am not sure what problem it would solve. Beside to suppress the
+>> log warnings (actually those aren't warnings but informations).
 >>
->>
->> No thanks! No more quirks please!
+>> Isn't sdhci_do_start_signal_voltage_switch() doing what you need here?
 >>
 >
-> I'm fine with not having this quirk added (I don't need this one but use
-> multiple of the other quirks in the driver)  But, what if I also needed it
-> in my driver?  When do we determine when a quirk should be added to sdhci.c
-> or not.  What about existing quirks - should the current ones be moved to
-> multiple existing drivers?
+> It is. I am only wondering the best way to describe the hardware:
+> - No regulator but I have the 'no vqmmc regulator not found' message which
+>   is a bit annoying and which can be interpreted as an issue for someone
+>   who has no knowledge about this stuff.
 
-The sdhci driver should turn into a library providing generic helper
-functions. Each host can then pick which functions to use and also
-deal with its own "quirks", instead of managing those in generic code.
+Hmm, should we turn them into debug messages? Both regulators are optional.
 
-I guess we might end up getting a bit more code in total, but on the
-other hand the code would be better optimized and also maintainable.
+> - Describe the regulator since there is one on my board. But it is not a
+>   fixed regulator and even if it's close to a gpio one it is not.
 
->>
->> Kind regards
->> Uffe
->>
->>>
->>> Signed-off-by: Al Cooper <alcooperx@gmail.com>
->>> ---
->>>   drivers/mmc/host/sdhci.c | 3 +++
->>>   drivers/mmc/host/sdhci.h | 2 ++
->>>   2 files changed, 5 insertions(+)
->>>
->>> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
->>> index b48565e..71067c7 100644
->>> --- a/drivers/mmc/host/sdhci.c
->>> +++ b/drivers/mmc/host/sdhci.c
->>> @@ -3176,6 +3176,9 @@ int sdhci_add_host(struct sdhci_host *host)
->>>          } else if (caps[1] & SDHCI_SUPPORT_SDR50)
->>>                  mmc->caps |= MMC_CAP_UHS_SDR50;
->>>
->>> +       if (host->quirks2 & SDHCI_QUIRK2_BROKEN_SDR50)
->>> +               mmc->caps &= ~MMC_CAP_UHS_SDR50;
->>> +
->
-> Perhaps a lot of these quirks can be solved by having a generic mechanism to
-> override any of the values in the caps registers rather than adding all
-> these quirks?
-
-Sure, it makes sense if it can decreases the number of quirks!
-
->
->>>          if (host->quirks2 & SDHCI_QUIRK2_CAPS_BIT63_FOR_HS400 &&
->>>              (caps[1] & SDHCI_SUPPORT_HS400))
->>>                  mmc->caps2 |= MMC_CAP2_HS400;
->>> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
->>> index 9d4aa31..0941c94 100644
->>> --- a/drivers/mmc/host/sdhci.h
->>> +++ b/drivers/mmc/host/sdhci.h
->>> @@ -412,6 +412,8 @@ struct sdhci_host {
->>>   #define SDHCI_QUIRK2_ACMD23_BROKEN                     (1<<14)
->>>   /* Broken Clock divider zero in controller */
->>>   #define SDHCI_QUIRK2_CLOCK_DIV_ZERO_BROKEN             (1<<15)
->>> +/* Controller does not support SDR50 */
->>> +#define SDHCI_QUIRK2_BROKEN_SDR50                      (1<<16)
->>>   /*
->>>    * When internal clock is disabled, a delay is needed before modifying
->>> the
->>>    * SD clock frequency or enabling back the internal clock.
->>> --
->>> 1.9.0.138.g2de3478
->>>
->
-> Regards,
->  Scott
+If it's driven by SDHCI internal logic, I would leave it to that.
+There are no need to describe it at all.
 
 Kind regards
 Uffe
