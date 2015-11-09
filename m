@@ -1,88 +1,120 @@
-From: Georgi Djakov <georgi.djakov@linaro.org>
-Subject: Re: [PATCH v2] mmc: sdhci-msm: Boost controller core clock
-Date: Mon, 9 Nov 2015 19:09:02 +0200
-Message-ID: <5640D32E.5050307@linaro.org>
-References: <1436183618-15330-1-git-send-email-ivan.ivanov@linaro.org>
- <CAJAp7OjdiD_x0aU89HNq8PCiGqs+fvATHuVARxU4gE4yVusRNg@mail.gmail.com>
+From: Scott Branden <sbranden@broadcom.com>
+Subject: Re: [PATCH 1/4] mmc: Add quirk to disable SDR50 mode
+Date: Mon, 9 Nov 2015 10:15:57 -0800
+Message-ID: <5640E2DD.7080505@broadcom.com>
+References: <1446763200-10234-1-git-send-email-alcooperx@gmail.com>
+ <CAPDyKFrhtoDwe82Zg4YP4eU=xO6zE1pZTcRSnzSeHGRCzgu+5w@mail.gmail.com>
+ <563D3E0F.70906@broadcom.com>
+ <CAPDyKFqpFu3aEs5vLc9dhpj4YmCAXKdhj4k2qKgd2Zaw8OACow@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset="utf-8"; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wm0-f51.google.com ([74.125.82.51]:34043 "EHLO
-	mail-wm0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752580AbbKIRJI (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 9 Nov 2015 12:09:08 -0500
-Received: by wmnn186 with SMTP id n186so115685869wmn.1
-        for <linux-mmc@vger.kernel.org>; Mon, 09 Nov 2015 09:09:06 -0800 (PST)
-In-Reply-To: <CAJAp7OjdiD_x0aU89HNq8PCiGqs+fvATHuVARxU4gE4yVusRNg@mail.gmail.com>
+Received: from mail-gw1-out.broadcom.com ([216.31.210.62]:37272 "EHLO
+	mail-gw1-out.broadcom.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751975AbbKISQM (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 9 Nov 2015 13:16:12 -0500
+In-Reply-To: <CAPDyKFqpFu3aEs5vLc9dhpj4YmCAXKdhj4k2qKgd2Zaw8OACow@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Bjorn Andersson <bjorn@kryo.se>, "Ivan T. Ivanov" <ivan.ivanov@linaro.org>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Stephen Boyd <sboyd@codeaurora.org>, Peter Griffin <peter.griffin@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-arm-msm <linux-arm-msm@vger.kernel.org>
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Al Cooper <alcooperx@gmail.com>, linux-mmc <linux-mmc@vger.kernel.org>, bcm-kernel-feedback-list@broadcom.com
 
-On 11/06/2015 03:42 AM, Bjorn Andersson wrote:
-> On Mon, Jul 6, 2015 at 4:53 AM, Ivan T. Ivanov <ivan.ivanov@linaro.org> wrote:
->> Ensure SDCC is working with maximum clock otherwise card
->> detection could be extremely slow, up to 7 seconds.
+On 15-11-09 02:45 AM, Ulf Hansson wrote:
+> On 7 November 2015 at 00:55, Scott Branden <sbranden@broadcom.com> wrote:
+>> Hi Ulf,
 >>
->> Signed-off-by: Ivan T. Ivanov <ivan.ivanov@linaro.org>
->> Reviewed-by: Georgi Djakov <georgi.djakov@linaro.org>
->> Acked-by: Stephen Boyd <sboyd@codeaurora.org>
->> ---
+>> On 15-11-06 12:14 AM, Ulf Hansson wrote:
+>>>
+>>> On 5 November 2015 at 23:39, Al Cooper <alcooperx@gmail.com> wrote:
+>>>>
+>>>> Add quirk to disable SDR50 mode for controllers/boards that have
+>>>> problems with this mode.
+>>>
+>>>
+>>> No thanks! No more quirks please!
+>>>
 >>
->> Changes since v0:
->> - s/falied/failed in warning message.
->>
->>  drivers/mmc/host/sdhci-msm.c | 5 +++++
->>  1 file changed, 5 insertions(+)
->>
->> diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
->> index 4a09f76..4bcee03 100644
->> --- a/drivers/mmc/host/sdhci-msm.c
->> +++ b/drivers/mmc/host/sdhci-msm.c
->> @@ -489,6 +489,11 @@ static int sdhci_msm_probe(struct platform_device *pdev)
->>                 goto pclk_disable;
->>         }
->>
->> +       /* Vote for maximum clock rate for maximum performance */
->> +       ret = clk_set_rate(msm_host->clk, INT_MAX);
->> +       if (ret)
->> +               dev_warn(&pdev->dev, "core clock boost failed\n");
->> +
-> 
-> On my 8974AC devices this results in GCC_SDCC1_APPS_CLK changing from
-> 100MHz to 200MHz for my eMMC. Unfortunately this results in the
-> following error:
-> 
-> [    5.103241] mmcblk0: retrying because a re-tune was needed
-> [    5.109270] mmcblk0: error -84 transferring data, sector 5816322,
-> nr 2, cmd response 0x900, card status 0xc00
-> 
-> Looking at the board specification it's stated that these card should
-> run in DDR50, so I've tried specifying "max-frequency" in the dt. I
-> verified in sdhci_set_clock() that we get a divisor of 4, but the
-> result is a repetition of:
-> 
-> [    1.702312] mmc1: Switching to 3.3V signalling voltage failed
-> [    1.837987] mmc1: power class selection to bus width 8 ddr 0 failed
-> [    1.846227] mmc1: error -110 whilst initialising MMC card
-> [    1.946303] mmc1: Reset 0x1 never completed.
-> 
-> I tried to disable HS200 by specifying SDHCI_QUIRK2_BROKEN_HS200. This
-> makes the card come up nicely again.
-> 
-> 
-> Is there any other way to force the link to DDR50? Is it acceptable to
-> expose the broken-hs200 quirk in dt so I can use that for now?
-> 
-> (The downstream fix used for this was apparently to just remove all
-> other caps...)
-> 
+>> I'm fine with not having this quirk added (I don't need this one but use
+>> multiple of the other quirks in the driver)  But, what if I also needed it
+>> in my driver?  When do we determine when a quirk should be added to sdhci.c
+>> or not.  What about existing quirks - should the current ones be moved to
+>> multiple existing drivers?
+>
+> The sdhci driver should turn into a library providing generic helper
+> functions. Each host can then pick which functions to use and also
+> deal with its own "quirks", instead of managing those in generic code.
+>
+> I guess we might end up getting a bit more code in total, but on the
+> other hand the code would be better optimized and also maintainable.
+>
 
-Hi Bjorn,
-There are two dev_dbg lines in the driver. What do they print for
-major and minor versions?
+OK, if I need to add any new quirks I will look into this a bit more and 
+see if it can be done.  I don't have a need to do this right now so if 
+anyone else wants to have a look feel free to.
 
+>>>
+>>> Kind regards
+>>> Uffe
+>>>
+>>>>
+>>>> Signed-off-by: Al Cooper <alcooperx@gmail.com>
+>>>> ---
+>>>>    drivers/mmc/host/sdhci.c | 3 +++
+>>>>    drivers/mmc/host/sdhci.h | 2 ++
+>>>>    2 files changed, 5 insertions(+)
+>>>>
+>>>> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+>>>> index b48565e..71067c7 100644
+>>>> --- a/drivers/mmc/host/sdhci.c
+>>>> +++ b/drivers/mmc/host/sdhci.c
+>>>> @@ -3176,6 +3176,9 @@ int sdhci_add_host(struct sdhci_host *host)
+>>>>           } else if (caps[1] & SDHCI_SUPPORT_SDR50)
+>>>>                   mmc->caps |= MMC_CAP_UHS_SDR50;
+>>>>
+>>>> +       if (host->quirks2 & SDHCI_QUIRK2_BROKEN_SDR50)
+>>>> +               mmc->caps &= ~MMC_CAP_UHS_SDR50;
+>>>> +
+>>
+>> Perhaps a lot of these quirks can be solved by having a generic mechanism to
+>> override any of the values in the caps registers rather than adding all
+>> these quirks?
+>
+> Sure, it makes sense if it can decreases the number of quirks!
+>
+I think it can in some cases.  In fact - the hardware designers do not 
+even set the correct settings in the caps register on some of the SoCs. 
+  The caps register does not appear to be used in the hardware other 
+than for "info" purposes to read by the driver - and when the info is 
+wrong this may lead to many of the quirks that have been added by others 
+over the years.
+>>
+>>>>           if (host->quirks2 & SDHCI_QUIRK2_CAPS_BIT63_FOR_HS400 &&
+>>>>               (caps[1] & SDHCI_SUPPORT_HS400))
+>>>>                   mmc->caps2 |= MMC_CAP2_HS400;
+>>>> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+>>>> index 9d4aa31..0941c94 100644
+>>>> --- a/drivers/mmc/host/sdhci.h
+>>>> +++ b/drivers/mmc/host/sdhci.h
+>>>> @@ -412,6 +412,8 @@ struct sdhci_host {
+>>>>    #define SDHCI_QUIRK2_ACMD23_BROKEN                     (1<<14)
+>>>>    /* Broken Clock divider zero in controller */
+>>>>    #define SDHCI_QUIRK2_CLOCK_DIV_ZERO_BROKEN             (1<<15)
+>>>> +/* Controller does not support SDR50 */
+>>>> +#define SDHCI_QUIRK2_BROKEN_SDR50                      (1<<16)
+>>>>    /*
+>>>>     * When internal clock is disabled, a delay is needed before modifying
+>>>> the
+>>>>     * SD clock frequency or enabling back the internal clock.
+>>>> --
+>>>> 1.9.0.138.g2de3478
+>>>>
+>>
+>> Regards,
+>>   Scott
+>
+> Kind regards
+> Uffe
+>
 Thanks,
-Georgi
-
+  Scott
