@@ -1,161 +1,77 @@
-From: Ludovic Desroches <ludovic.desroches@atmel.com>
-Subject: Re: [PATCH v3] mmc: sdhci at91: add PM support
-Date: Tue, 10 Nov 2015 15:40:24 +0100
-Message-ID: <20151110144024.GG15706@odux.rfo.atmel.com>
-References: <1447161830-27205-1-git-send-email-ludovic.desroches@atmel.com>
- <CAPDyKFrcKRn3ht-+EoNU64RyG+vfNjygLfbEFv1kd4-XtUn+OA@mail.gmail.com>
+From: Adrien Schildknecht <adrien+dev@schischi.me>
+Subject: Re: [PATCH] mmc: add ifdef around fault_create_debugfs_attr()
+Date: Tue, 10 Nov 2015 16:04:20 +0100
+Message-ID: <20151110160420.2ec59606.adrien+dev@schischi.me>
+References: <1446812136-31526-1-git-send-email-adrien+dev@schischi.me>
+	<CAPDyKFrs4VCJgVXpF405HrXZ2oJ+L=3e7hWtYAxYx4=qMHsRYQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <CAPDyKFrcKRn3ht-+EoNU64RyG+vfNjygLfbEFv1kd4-XtUn+OA@mail.gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Ludovic Desroches <ludovic.desroches@atmel.com>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Nicolas Ferre <nicolas.ferre@atmel.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-wm0-f46.google.com ([74.125.82.46]:36662 "EHLO
+	mail-wm0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752533AbbKJPEZ (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 10 Nov 2015 10:04:25 -0500
+Received: by wmww144 with SMTP id w144so121567310wmw.1
+        for <linux-mmc@vger.kernel.org>; Tue, 10 Nov 2015 07:04:24 -0800 (PST)
+In-Reply-To: <CAPDyKFrs4VCJgVXpF405HrXZ2oJ+L=3e7hWtYAxYx4=qMHsRYQ@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Shawn Lin <shawn.lin@rock-chips.com>, Linus Walleij <linus.walleij@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 
-On Tue, Nov 10, 2015 at 03:03:57PM +0100, Ulf Hansson wrote:
-> On 10 November 2015 at 14:23, Ludovic Desroches
-> <ludovic.desroches@atmel.com> wrote:
-> > Add runtime PM support and use runtime_force_suspend|resume() for system
-> > PM.
+On Mon, 9 Nov 2015 14:33:11 +0100
+Ulf Hansson <ulf.hansson@linaro.org> wrote:
+> On 6 November 2015 at 13:15, Adrien Schildknecht
+> <adrien+dev@schischi.me> wrote:  
+> > FAIL_MMC_REQUEST can be used without FAULT_INJECTION_DEBUG_FS.
+> > In this case fault_create_debugfs_attr() will always return an
+> > error and lead to the deletion of the whole debugfs directory.
 > >
-> > Signed-off-by: Ludovic Desroches <ludovic.desroches@atmel.com>
+> > This patch makes sure that FAULT_INJECTION_DEBUG_FS is enabled
+> > before attempting to create the debugfs atttribute.
+> >
+> > Signed-off-by: Adrien Schildknecht <adrien+dev@schischi.me>
 > > ---
+> >  drivers/mmc/core/debugfs.c | 2 ++
+> >  1 file changed, 2 insertions(+)
 > >
-> > Changes:
-> > - from v2: cleanup thanks to Ulf feedback
-> > - from v1: take a runtime PM centric approach
+> > diff --git a/drivers/mmc/core/debugfs.c b/drivers/mmc/core/debugfs.c
+> > index 154aced..13e842c 100644
+> > --- a/drivers/mmc/core/debugfs.c
+> > +++ b/drivers/mmc/core/debugfs.c
+> > @@ -259,11 +259,13 @@ void mmc_add_host_debugfs(struct mmc_host
+> > *host) if (fail_request)
+> >                 setup_fault_attr(&fail_default_attr, fail_request);
+> >         host->fail_mmc_request = fail_default_attr;
+> > +#ifdef CONFIG_FAULT_INJECTION_DEBUG_FS
+> >         if (IS_ERR(fault_create_debugfs_attr("fail_mmc_request",
+> >                                              root,
+> >                                              &host->fail_mmc_request)))
+> >                 goto err_node;
+> >  #endif
+> > +#endif
+> >         return;
 > >
-> >  drivers/mmc/host/sdhci-of-at91.c | 67 +++++++++++++++++++++++++++++++++++++++-
-> >  1 file changed, 66 insertions(+), 1 deletion(-)
-> >
-> > diff --git a/drivers/mmc/host/sdhci-of-at91.c b/drivers/mmc/host/sdhci-of-at91.c
-> > index 06d0b50..bbac18e 100644
-> > --- a/drivers/mmc/host/sdhci-of-at91.c
-> > +++ b/drivers/mmc/host/sdhci-of-at91.c
-> > @@ -21,6 +21,8 @@
-> >  #include <linux/module.h>
-> >  #include <linux/of.h>
-> >  #include <linux/of_device.h>
-> > +#include <linux/pm.h>
-> > +#include <linux/pm_runtime.h>
-> >
-> >  #include "sdhci-pltfm.h"
-> >
-> > @@ -51,6 +53,60 @@ static const struct of_device_id sdhci_at91_dt_match[] = {
-> >         {}
-> >  };
-> >
-> > +#ifdef CONFIG_PM
-> > +static int sdhci_at91_runtime_suspend(struct device *dev)
-> > +{
-> > +       struct sdhci_host *host = dev_get_drvdata(dev);
-> > +       struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> > +       struct sdhci_at91_priv *priv = pltfm_host->priv;
-> > +       int ret;
-> > +
-> > +       ret = sdhci_runtime_suspend_host(host);
-> > +
-> > +       clk_disable_unprepare(priv->gck);
-> > +       clk_disable_unprepare(priv->hclock);
-> > +       clk_disable_unprepare(priv->mainck);
-> > +
-> > +       return ret;
-> > +}
-> > +
-> > +static int sdhci_at91_runtime_resume(struct device *dev)
-> > +{
-> > +       struct sdhci_host *host = dev_get_drvdata(dev);
-> > +       struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> > +       struct sdhci_at91_priv *priv = pltfm_host->priv;
-> > +       int ret;
-> > +
-> > +       ret = clk_prepare_enable(priv->mainck);
-> > +       if (ret) {
-> > +               dev_err(dev, "can't enable mainck\n");
-> > +               return ret;
-> > +       }
-> > +
-> > +       ret = clk_prepare_enable(priv->hclock);
-> > +       if (ret) {
-> > +               dev_err(dev, "can't enable hclock\n");
-> > +               return ret;
-> > +       }
-> > +
-> > +       ret = clk_prepare_enable(priv->gck);
-> > +       if (ret) {
-> > +               dev_err(dev, "can't enable gck\n");
-> > +               return ret;
-> > +       }
-> > +
-> > +       return sdhci_runtime_resume_host(host);
-> > +}
-> > +#endif /* CONFIG_PM */
-> > +
-> > +static const struct dev_pm_ops sdhci_at91_dev_pm_ops = {
-> > +       SET_SYSTEM_SLEEP_PM_OPS(pm_runtime_force_suspend,
-> > +                               pm_runtime_force_resume)
-> > +       SET_RUNTIME_PM_OPS(sdhci_at91_runtime_suspend,
-> > +                          sdhci_at91_runtime_resume,
-> > +                          NULL)
-> > +};
-> > +
-> >  static int sdhci_at91_probe(struct platform_device *pdev)
-> >  {
-> >         const struct of_device_id       *match;
-> > @@ -144,6 +200,11 @@ static int sdhci_at91_probe(struct platform_device *pdev)
-> >
-> >         sdhci_get_of_property(pdev);
-> >
-> > +       pm_runtime_set_active(&pdev->dev);
-> > +       pm_runtime_enable(&pdev->dev);
-> > +       pm_runtime_set_autosuspend_delay(&pdev->dev, 50);
-> > +       pm_runtime_use_autosuspend(&pdev->dev);
-> > +
-> >         ret = sdhci_add_host(host);
-> >         if (ret)
-> >                 goto clocks_disable_unprepare;
-> 
-> You need to add error handling of runtime PM after this point.
-> 
-> Typically:
-> pm_runtime_disable() and pm_runtime_set_suspended() needs to be done.
-
-I am not confortable with pm_runtime helpers, having a look to several
-drivers, I see different ways to manage a probe failing and the device
-removing.
-
-I'll trust you and I'll dig later into this subject.
-
-Regards
-
-Ludovic
-
-> 
-> > @@ -165,6 +226,10 @@ static int sdhci_at91_remove(struct platform_device *pdev)
-> >         struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> >         struct sdhci_at91_priv  *priv = pltfm_host->priv;
-> >
-> > +       pm_runtime_get_sync(&pdev->dev);
-> > +       pm_runtime_disable(&pdev->dev);
-> > +       pm_runtime_put_noidle(&pdev->dev);
-> > +
-> >         sdhci_pltfm_unregister(pdev);
-> >
-> >         clk_disable_unprepare(priv->gck);
-> > @@ -178,7 +243,7 @@ static struct platform_driver sdhci_at91_driver = {
-> >         .driver         = {
-> >                 .name   = "sdhci-at91",
-> >                 .of_match_table = sdhci_at91_dt_match,
-> > -               .pm     = SDHCI_PLTFM_PMOPS,
-> > +               .pm     = &sdhci_at91_dev_pm_ops,
-> >         },
-> >         .probe          = sdhci_at91_probe,
-> >         .remove         = sdhci_at91_remove,
+> >  err_node:
 > > --
-> > 2.5.0
-> >
+> > 2.6.2
+> >    
 > 
-> Kind regards
-> Uffe
+> I think you are solving this in the wrong way. Will it really makes
+> sense to use FAIL_MMC_REQUEST unless FAULT_INJECTION_DEBUG_FS is set,
+> I don't think so.  
+The fault attribute can be configured using either the debugfs or the
+module parameter "fail_request". It is thus possible to use
+FAIL_MMC_REQUEST without FAULT_INJECTION_DEBUG_FS (even if it is less
+convenient).
+
+> I suggest you to change FAIL_MMC_REQUEST from depending on
+> FAULT_INJECTION to FAULT_INJECTION_DEBUG_FS in /lib/Kconfig.debug.  
+The other systems that use the fault injection infrastructure (futex,
+alloc_pages, slab...) can be used without the dependency on
+FAULT_INJECTION_DEBUG_FS. They also use nested #ifdef to handle this
+configuration. I chose the #ifdef approach for the sake of coherence.
+
+-- 
+Adrien Schildknecht
