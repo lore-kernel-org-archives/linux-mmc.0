@@ -1,50 +1,63 @@
 From: Haibo Chen <haibo.chen@freescale.com>
-Subject: [PATCH 2/2] mmc: sdhci-esdhc-imx: correct the tuning-step setting
-Date: Tue, 10 Nov 2015 17:43:30 +0800
-Message-ID: <1447148610-2770-2-git-send-email-haibo.chen@freescale.com>
-References: <1447148610-2770-1-git-send-email-haibo.chen@freescale.com>
+Subject: [PATCH 1/2] mmc: sdhci-esdhc-imx: move the setting of watermark level out of probe
+Date: Tue, 10 Nov 2015 17:43:29 +0800
+Message-ID: <1447148610-2770-1-git-send-email-haibo.chen@freescale.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1447148610-2770-1-git-send-email-haibo.chen@freescale.com>
 Sender: linux-kernel-owner@vger.kernel.org
 To: ulf.hansson@linaro.org, aisheng.dong@freescale.com
 Cc: haibo.chen@freescale.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-Here we use '|=' to set the tuning-step, but before that, we should
-clear the tuning-step, otherwise we could got the wrong setting.
+Currently, we config the watermark_level register only in probe.
+This will cause the mmc write operation timeout issue after system
+resume back in LPSR mode. Because in LPSR mode, after system resume
+back, the watermark_level register(0x44) changes to 0x08000880, which
+set the write watermark level as 0, and set the read watermark level
+as 128. This value is incorrect.
+
+This patch move the setting of watermark level register out of probe,
+so after system resume back, mmc driver can set this watermark level
+register back to 0x10401040.
 
 Signed-off-by: Haibo Chen <haibo.chen@freescale.com>
 ---
- drivers/mmc/host/sdhci-esdhc-imx.c | 7 +++++--
- 1 file changed, 5 insertions(+), 2 deletions(-)
+ drivers/mmc/host/sdhci-esdhc-imx.c | 14 ++++++++------
+ 1 file changed, 8 insertions(+), 6 deletions(-)
 
 diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
-index 1508949..64275c7 100644
+index 1f1582f..1508949 100644
 --- a/drivers/mmc/host/sdhci-esdhc-imx.c
 +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
-@@ -76,6 +76,7 @@
- #define ESDHC_STD_TUNING_EN		(1 << 24)
- /* NOTE: the minimum valid tuning start tap for mx6sl is 1 */
- #define ESDHC_TUNING_START_TAP		0x1
-+#define ESDHC_TUNING_STEP_MASK		0x00070000
- #define ESDHC_TUNING_STEP_SHIFT		16
+@@ -584,6 +584,14 @@ static void esdhc_writeb_le(struct sdhci_host *host, u8 val, int reg)
+ 		mask = 0xffff & ~(ESDHC_CTRL_BUSWIDTH_MASK | ESDHC_CTRL_D3CD);
  
- /* pinctrl state */
-@@ -489,9 +490,11 @@ static void esdhc_writew_le(struct sdhci_host *host, u16 val, int reg)
- 				m |= ESDHC_MIX_CTRL_FBCLK_SEL;
- 				tuning_ctrl = readl(host->ioaddr + ESDHC_TUNING_CTRL);
- 				tuning_ctrl |= ESDHC_STD_TUNING_EN | ESDHC_TUNING_START_TAP;
--				if (imx_data->boarddata.tuning_step)
-+				if (imx_data->boarddata.tuning_step) {
-+					tuning_ctrl &= ~ESDHC_TUNING_STEP_MASK;
- 					tuning_ctrl |= imx_data->boarddata.tuning_step << ESDHC_TUNING_STEP_SHIFT;
--					writel(tuning_ctrl, host->ioaddr + ESDHC_TUNING_CTRL);
-+				}
-+				writel(tuning_ctrl, host->ioaddr + ESDHC_TUNING_CTRL);
- 			} else {
- 				v &= ~ESDHC_MIX_CTRL_EXE_TUNE;
- 			}
+ 		esdhc_clrset_le(host, mask, new_val, reg);
++
++		/*
++		 * The imx6q/imx7d ROM code will change the default watermark
++		 * level setting to something insane.  Change it back here.
++		 */
++		 if (esdhc_is_usdhc(imx_data))
++			 writel(0x10401040, host->ioaddr + ESDHC_WTMK_LVL);
++
+ 		return;
+ 	}
+ 	esdhc_clrset_le(host, 0xff, val, reg);
+@@ -1155,13 +1163,7 @@ static int sdhci_esdhc_imx_probe(struct platform_device *pdev)
+ 		host->quirks |= SDHCI_QUIRK_NO_MULTIBLOCK
+ 			| SDHCI_QUIRK_BROKEN_ADMA;
+ 
+-	/*
+-	 * The imx6q ROM code will change the default watermark level setting
+-	 * to something insane.  Change it back here.
+-	 */
+ 	if (esdhc_is_usdhc(imx_data)) {
+-		writel(0x10401040, host->ioaddr + ESDHC_WTMK_LVL);
+-
+ 		host->quirks2 |= SDHCI_QUIRK2_PRESET_VALUE_BROKEN;
+ 		host->mmc->caps |= MMC_CAP_1_8V_DDR;
+ 
 -- 
 1.9.1
