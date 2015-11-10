@@ -1,63 +1,131 @@
-From: Haibo Chen <haibo.chen@freescale.com>
-Subject: [PATCH 1/2] mmc: sdhci-esdhc-imx: move the setting of watermark level out of probe
-Date: Tue, 10 Nov 2015 17:43:29 +0800
-Message-ID: <1447148610-2770-1-git-send-email-haibo.chen@freescale.com>
+From: Ludovic Desroches <ludovic.desroches@atmel.com>
+Subject: [PATCH v2] mmc: sdhci at91: add PM support
+Date: Tue, 10 Nov 2015 11:36:50 +0100
+Message-ID: <1447151810-21864-1-git-send-email-ludovic.desroches@atmel.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-kernel-owner@vger.kernel.org>
 Sender: linux-kernel-owner@vger.kernel.org
-To: ulf.hansson@linaro.org, aisheng.dong@freescale.com
-Cc: haibo.chen@freescale.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+To: ulf.hansson@linaro.org
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, nicolas.ferre@atmel.com, linux-arm-kernel@lists.infradead.org, Ludovic Desroches <ludovic.desroches@atmel.com>
 List-Id: linux-mmc@vger.kernel.org
 
-Currently, we config the watermark_level register only in probe.
-This will cause the mmc write operation timeout issue after system
-resume back in LPSR mode. Because in LPSR mode, after system resume
-back, the watermark_level register(0x44) changes to 0x08000880, which
-set the write watermark level as 0, and set the read watermark level
-as 128. This value is incorrect.
+Add runtime PM support and use runtime_force_suspend|resume() for system
+PM.
 
-This patch move the setting of watermark level register out of probe,
-so after system resume back, mmc driver can set this watermark level
-register back to 0x10401040.
-
-Signed-off-by: Haibo Chen <haibo.chen@freescale.com>
+Signed-off-by: Ludovic Desroches <ludovic.desroches@atmel.com>
 ---
- drivers/mmc/host/sdhci-esdhc-imx.c | 14 ++++++++------
- 1 file changed, 8 insertions(+), 6 deletions(-)
 
-diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
-index 1f1582f..1508949 100644
---- a/drivers/mmc/host/sdhci-esdhc-imx.c
-+++ b/drivers/mmc/host/sdhci-esdhc-imx.c
-@@ -584,6 +584,14 @@ static void esdhc_writeb_le(struct sdhci_host *host, u8 val, int reg)
- 		mask = 0xffff & ~(ESDHC_CTRL_BUSWIDTH_MASK | ESDHC_CTRL_D3CD);
+Changes:
+- from v1: take a runtime PM centric approach
+
+ drivers/mmc/host/sdhci-of-at91.c | 66 +++++++++++++++++++++++++++++++++++++++-
+ 1 file changed, 65 insertions(+), 1 deletion(-)
+
+diff --git a/drivers/mmc/host/sdhci-of-at91.c b/drivers/mmc/host/sdhci-of-at91.c
+index 06d0b50..5dbe0ce 100644
+--- a/drivers/mmc/host/sdhci-of-at91.c
++++ b/drivers/mmc/host/sdhci-of-at91.c
+@@ -21,6 +21,8 @@
+ #include <linux/module.h>
+ #include <linux/of.h>
+ #include <linux/of_device.h>
++#include <linux/pm.h>
++#include <linux/pm_runtime.h>
  
- 		esdhc_clrset_le(host, mask, new_val, reg);
+ #include "sdhci-pltfm.h"
+ 
+@@ -51,6 +53,62 @@ static const struct of_device_id sdhci_at91_dt_match[] = {
+ 	{}
+ };
+ 
++#ifdef CONFIG_PM
++static int sdhci_at91_runtime_suspend(struct device *dev)
++{
++	struct platform_device *pdev = to_platform_device(dev);
++	struct sdhci_host *host = platform_get_drvdata(pdev);
++	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
++	struct sdhci_at91_priv *priv = pltfm_host->priv;
++	int ret;
 +
-+		/*
-+		 * The imx6q/imx7d ROM code will change the default watermark
-+		 * level setting to something insane.  Change it back here.
-+		 */
-+		 if (esdhc_is_usdhc(imx_data))
-+			 writel(0x10401040, host->ioaddr + ESDHC_WTMK_LVL);
++	ret = sdhci_runtime_suspend_host(host);
 +
- 		return;
- 	}
- 	esdhc_clrset_le(host, 0xff, val, reg);
-@@ -1155,13 +1163,7 @@ static int sdhci_esdhc_imx_probe(struct platform_device *pdev)
- 		host->quirks |= SDHCI_QUIRK_NO_MULTIBLOCK
- 			| SDHCI_QUIRK_BROKEN_ADMA;
++	clk_disable_unprepare(priv->gck);
++	clk_disable_unprepare(priv->hclock);
++	clk_disable_unprepare(priv->mainck);
++
++	return ret;
++}
++
++static int sdhci_at91_runtime_resume(struct device *dev)
++{
++	struct platform_device *pdev = to_platform_device(dev);
++	struct sdhci_host *host = platform_get_drvdata(pdev);
++	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
++	struct sdhci_at91_priv *priv = pltfm_host->priv;
++	int ret;
++
++	ret = clk_prepare_enable(priv->mainck);
++	if (ret) {
++		dev_err(dev, "can't enable mainck\n");
++		return ret;
++	}
++
++	ret = clk_prepare_enable(priv->hclock);
++	if (ret) {
++		dev_err(dev, "can't enable hclock\n");
++		return ret;
++	}
++
++	ret = clk_prepare_enable(priv->gck);
++	if (ret) {
++		dev_err(dev, "can't enable gck\n");
++		return ret;
++	}
++
++	return sdhci_runtime_resume_host(host);
++}
++#endif /* CONFIG_PM_RUNTIME */
++
++static const struct dev_pm_ops sdhci_at91_dev_pm_ops = {
++	SET_SYSTEM_SLEEP_PM_OPS(pm_runtime_force_suspend,
++				pm_runtime_force_resume)
++	SET_RUNTIME_PM_OPS(sdhci_at91_runtime_suspend,
++			   sdhci_at91_runtime_resume,
++			   NULL)
++};
++
+ static int sdhci_at91_probe(struct platform_device *pdev)
+ {
+ 	const struct of_device_id	*match;
+@@ -148,6 +206,11 @@ static int sdhci_at91_probe(struct platform_device *pdev)
+ 	if (ret)
+ 		goto clocks_disable_unprepare;
  
--	/*
--	 * The imx6q ROM code will change the default watermark level setting
--	 * to something insane.  Change it back here.
--	 */
- 	if (esdhc_is_usdhc(imx_data)) {
--		writel(0x10401040, host->ioaddr + ESDHC_WTMK_LVL);
--
- 		host->quirks2 |= SDHCI_QUIRK2_PRESET_VALUE_BROKEN;
- 		host->mmc->caps |= MMC_CAP_1_8V_DDR;
++	pm_runtime_set_active(&pdev->dev);
++	pm_runtime_enable(&pdev->dev);
++	pm_runtime_set_autosuspend_delay(&pdev->dev, 50);
++	pm_runtime_use_autosuspend(&pdev->dev);
++
+ 	return 0;
  
+ clocks_disable_unprepare:
+@@ -165,6 +228,7 @@ static int sdhci_at91_remove(struct platform_device *pdev)
+ 	struct sdhci_pltfm_host	*pltfm_host = sdhci_priv(host);
+ 	struct sdhci_at91_priv	*priv = pltfm_host->priv;
+ 
++	pm_runtime_disable(&pdev->dev);
+ 	sdhci_pltfm_unregister(pdev);
+ 
+ 	clk_disable_unprepare(priv->gck);
+@@ -178,7 +242,7 @@ static struct platform_driver sdhci_at91_driver = {
+ 	.driver		= {
+ 		.name	= "sdhci-at91",
+ 		.of_match_table = sdhci_at91_dt_match,
+-		.pm	= SDHCI_PLTFM_PMOPS,
++		.pm	= &sdhci_at91_dev_pm_ops,
+ 	},
+ 	.probe		= sdhci_at91_probe,
+ 	.remove		= sdhci_at91_remove,
 -- 
-1.9.1
+2.5.0
