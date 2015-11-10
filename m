@@ -1,153 +1,59 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v3] mmc: sdhci at91: add PM support
-Date: Tue, 10 Nov 2015 15:03:57 +0100
-Message-ID: <CAPDyKFrcKRn3ht-+EoNU64RyG+vfNjygLfbEFv1kd4-XtUn+OA@mail.gmail.com>
-References: <1447161830-27205-1-git-send-email-ludovic.desroches@atmel.com>
+From: Jeff Moyer <jmoyer@redhat.com>
+Subject: Re: [PATCH 1/8] block/genhd.c: Add error handling
+Date: Tue, 10 Nov 2015 09:11:27 -0500
+Message-ID: <x49mvumlzao.fsf@segfault.boston.devel.redhat.com>
+References: <437969438-9181-1-git-send-email-vishnu.ps@samsung.com>
+	<1446812535-10567-1-git-send-email-vishnu.ps@samsung.com>
+	<20151110033322.GB22011@ZenIV.linux.org.uk>
+	<5641674A.6080707@kernel.dk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-yk0-f171.google.com ([209.85.160.171]:36101 "EHLO
-	mail-yk0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752100AbbKJOD6 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 10 Nov 2015 09:03:58 -0500
-Received: by ykdr82 with SMTP id r82so36234943ykd.3
-        for <linux-mmc@vger.kernel.org>; Tue, 10 Nov 2015 06:03:58 -0800 (PST)
-In-Reply-To: <1447161830-27205-1-git-send-email-ludovic.desroches@atmel.com>
+Received: from mx1.redhat.com ([209.132.183.28]:53223 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753002AbbKJOLc (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 10 Nov 2015 09:11:32 -0500
+In-Reply-To: <5641674A.6080707@kernel.dk> (Jens Axboe's message of "Mon, 9 Nov
+	2015 20:40:58 -0700")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ludovic Desroches <ludovic.desroches@atmel.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Nicolas Ferre <nicolas.ferre@atmel.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
+To: Jens Axboe <axboe@kernel.dk>
+Cc: Al Viro <viro@ZenIV.linux.org.uk>, Vishnu Pratap Singh <vishnu.ps@samsung.com>, akpm@linux-foundation.org, linux-kernel@vger.kernel.org, minchan@kernel.org, ngupta@vflare.org, sergey.senozhatsky.work@gmail.com, davem@davemloft.net, neilb@suse.com, ulf.hansson@linaro.org, tiwai@suse.de, hare@suse.de, ming.lei@canonical.com, jarod@redhat.com, tj@kernel.org, adrian.hunter@intel.com, jonathanh@nvidia.com, grundler@chromium.org, linux-ide@vger.kernel.org, linux-raid@vger.kernel.org, linux-mmc@vger.kernel.org, cpgs@samsung.com, vishu13285@gmail.com, pintu.k@samsung.com, rohit.kr@samsung.com
 
-On 10 November 2015 at 14:23, Ludovic Desroches
-<ludovic.desroches@atmel.com> wrote:
-> Add runtime PM support and use runtime_force_suspend|resume() for system
-> PM.
->
-> Signed-off-by: Ludovic Desroches <ludovic.desroches@atmel.com>
-> ---
->
-> Changes:
-> - from v2: cleanup thanks to Ulf feedback
-> - from v1: take a runtime PM centric approach
->
->  drivers/mmc/host/sdhci-of-at91.c | 67 +++++++++++++++++++++++++++++++++++++++-
->  1 file changed, 66 insertions(+), 1 deletion(-)
->
-> diff --git a/drivers/mmc/host/sdhci-of-at91.c b/drivers/mmc/host/sdhci-of-at91.c
-> index 06d0b50..bbac18e 100644
-> --- a/drivers/mmc/host/sdhci-of-at91.c
-> +++ b/drivers/mmc/host/sdhci-of-at91.c
-> @@ -21,6 +21,8 @@
->  #include <linux/module.h>
->  #include <linux/of.h>
->  #include <linux/of_device.h>
-> +#include <linux/pm.h>
-> +#include <linux/pm_runtime.h>
->
->  #include "sdhci-pltfm.h"
->
-> @@ -51,6 +53,60 @@ static const struct of_device_id sdhci_at91_dt_match[] = {
->         {}
->  };
->
-> +#ifdef CONFIG_PM
-> +static int sdhci_at91_runtime_suspend(struct device *dev)
-> +{
-> +       struct sdhci_host *host = dev_get_drvdata(dev);
-> +       struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> +       struct sdhci_at91_priv *priv = pltfm_host->priv;
-> +       int ret;
-> +
-> +       ret = sdhci_runtime_suspend_host(host);
-> +
-> +       clk_disable_unprepare(priv->gck);
-> +       clk_disable_unprepare(priv->hclock);
-> +       clk_disable_unprepare(priv->mainck);
-> +
-> +       return ret;
-> +}
-> +
-> +static int sdhci_at91_runtime_resume(struct device *dev)
-> +{
-> +       struct sdhci_host *host = dev_get_drvdata(dev);
-> +       struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> +       struct sdhci_at91_priv *priv = pltfm_host->priv;
-> +       int ret;
-> +
-> +       ret = clk_prepare_enable(priv->mainck);
-> +       if (ret) {
-> +               dev_err(dev, "can't enable mainck\n");
-> +               return ret;
-> +       }
-> +
-> +       ret = clk_prepare_enable(priv->hclock);
-> +       if (ret) {
-> +               dev_err(dev, "can't enable hclock\n");
-> +               return ret;
-> +       }
-> +
-> +       ret = clk_prepare_enable(priv->gck);
-> +       if (ret) {
-> +               dev_err(dev, "can't enable gck\n");
-> +               return ret;
-> +       }
-> +
-> +       return sdhci_runtime_resume_host(host);
-> +}
-> +#endif /* CONFIG_PM */
-> +
-> +static const struct dev_pm_ops sdhci_at91_dev_pm_ops = {
-> +       SET_SYSTEM_SLEEP_PM_OPS(pm_runtime_force_suspend,
-> +                               pm_runtime_force_resume)
-> +       SET_RUNTIME_PM_OPS(sdhci_at91_runtime_suspend,
-> +                          sdhci_at91_runtime_resume,
-> +                          NULL)
-> +};
-> +
->  static int sdhci_at91_probe(struct platform_device *pdev)
->  {
->         const struct of_device_id       *match;
-> @@ -144,6 +200,11 @@ static int sdhci_at91_probe(struct platform_device *pdev)
->
->         sdhci_get_of_property(pdev);
->
-> +       pm_runtime_set_active(&pdev->dev);
-> +       pm_runtime_enable(&pdev->dev);
-> +       pm_runtime_set_autosuspend_delay(&pdev->dev, 50);
-> +       pm_runtime_use_autosuspend(&pdev->dev);
-> +
->         ret = sdhci_add_host(host);
->         if (ret)
->                 goto clocks_disable_unprepare;
+Jens Axboe <axboe@kernel.dk> writes:
 
-You need to add error handling of runtime PM after this point.
-
-Typically:
-pm_runtime_disable() and pm_runtime_set_suspended() needs to be done.
-
-> @@ -165,6 +226,10 @@ static int sdhci_at91_remove(struct platform_device *pdev)
->         struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
->         struct sdhci_at91_priv  *priv = pltfm_host->priv;
+> On 11/09/2015 08:33 PM, Al Viro wrote:
+>> On Fri, Nov 06, 2015 at 05:52:08PM +0530, Vishnu Pratap Singh wrote:
+>>
+>> Have you even tried to trigger the failure exits you've added?  The
+>> more you've successfully set up, the _less_ your cleanup code ends
+>> up undoing; that simply can't be right.
+>>
+>> That aside, as soon as we'd done register_disk(), the damn thing is
+>> available for open(), so bailing out is _really_ not something for
+>> faint-hearted - it's essentially equivalent to removal of device under
+>> somebody who'd opened it and might've started IO, etc.  Going there
+>> simply because some sysfs shite didn't get created doesn't look sane
+>> as far as I'm concerned...
+>>
+>> Especially since these failure exits are not going to be tested on
+>> a regular basis, so the amount of bitrot will be pretty high ;-/
 >
-> +       pm_runtime_get_sync(&pdev->dev);
-> +       pm_runtime_disable(&pdev->dev);
-> +       pm_runtime_put_noidle(&pdev->dev);
-> +
->         sdhci_pltfm_unregister(pdev);
+> I'd greatly prefer it we just leave it alone. Much better to have a
+> disk that does actually work and with some sysfs spew in the logs,
+> than bail out for fairly vague reasons.
 >
->         clk_disable_unprepare(priv->gck);
-> @@ -178,7 +243,7 @@ static struct platform_driver sdhci_at91_driver = {
->         .driver         = {
->                 .name   = "sdhci-at91",
->                 .of_match_table = sdhci_at91_dt_match,
-> -               .pm     = SDHCI_PLTFM_PMOPS,
-> +               .pm     = &sdhci_at91_dev_pm_ops,
->         },
->         .probe          = sdhci_at91_probe,
->         .remove         = sdhci_at91_remove,
-> --
-> 2.5.0
->
+> The road to hell is paved with good intentions. It's a noble thought
+> to want to clean this up, but I think it does more harm than good.
 
-Kind regards
-Uffe
+That's my fault, I asked Vishnu to repost.  I had also asked whether he
+had seen this in the real world, and this was the response:
+
+  Actually while working with zram I found that during zram
+  initialization it uses the add_disk function and during that time i
+  have seen sometimes under low mem condition when we enable swap (zram)
+  there was kzalloc fail to allocate he memory, since there is no error
+  handling it took good amount of time to debug.
+
+Cheers,
+Jeff
