@@ -1,149 +1,57 @@
-From: Ludovic Desroches <ludovic.desroches@atmel.com>
-Subject: [PATCH v4] mmc: sdhci at91: add PM support
-Date: Wed, 11 Nov 2015 19:11:48 +0100
-Message-ID: <1447265508-8583-1-git-send-email-ludovic.desroches@atmel.com>
+From: Peter Hurley <peter@hurleysoftware.com>
+Subject: Re: [PATCH] mmc: change to use kmalloc
+Date: Wed, 11 Nov 2015 16:17:46 -0500
+Message-ID: <5643B07A.3090208@hurleysoftware.com>
+References: <1447215791-19429-1-git-send-email-yalin.wang2010@gmail.com>
+ <CAGOxZ53m0Fiudgt-gUBH2QhOW291tVmx1pFyeX5qmO_3kHQvSQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from eusmtp01.atmel.com ([212.144.249.243]:55369 "EHLO
-	eusmtp01.atmel.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751152AbbKKSLb (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 11 Nov 2015 13:11:31 -0500
+Received: from mail-io0-f171.google.com ([209.85.223.171]:35750 "EHLO
+	mail-io0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751522AbbKKVRt (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 11 Nov 2015 16:17:49 -0500
+Received: by ioc74 with SMTP id 74so46154115ioc.2
+        for <linux-mmc@vger.kernel.org>; Wed, 11 Nov 2015 13:17:48 -0800 (PST)
+In-Reply-To: <CAGOxZ53m0Fiudgt-gUBH2QhOW291tVmx1pFyeX5qmO_3kHQvSQ@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: ulf.hansson@linaro.org
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, nicolas.ferre@atmel.com, linux-arm-kernel@lists.infradead.org, Ludovic Desroches <ludovic.desroches@atmel.com>
+To: Alim Akhtar <alim.akhtar@gmail.com>, yalin wang <yalin.wang2010@gmail.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, ben@decadent.org.uk, Jaehoon Chung <jh80.chung@samsung.com>, asaf.vertz@tandemg.com, tklauser@distanz.ch, jonathanh@nvidia.com, "James E.J. Bottomley" <JBottomley@odin.com>, Grant Grundler <grundler@chromium.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 
-Add runtime PM support and use runtime_force_suspend|resume() for system
-PM.
+On 11/11/2015 12:02 PM, Alim Akhtar wrote:
+> Hi Yalin,
+> 
+> On Wed, Nov 11, 2015 at 9:53 AM, yalin wang <yalin.wang2010@gmail.com> wrote:
+>> Use kmalloc instead of kzalloc, zero the memory is not needed.
+>>
+> why you want to do this? what problem you faces, and how this resolves the same?
 
-Signed-off-by: Ludovic Desroches <ludovic.desroches@atmel.com>
----
+The patch fixes an inefficiency: explicitly zeroing memory that is then
+immediately overwritten 6 lines below is wasteful.
 
-Changes:
-- from v3: add error handling of runtime PM
-- from v2: cleanup thanks to Ulf feedback
-- from v1: take a runtime PM centric approach
+Regards,
+Peter Hurley
 
- drivers/mmc/host/sdhci-of-at91.c | 72 ++++++++++++++++++++++++++++++++++++++--
- 1 file changed, 70 insertions(+), 2 deletions(-)
-
-diff --git a/drivers/mmc/host/sdhci-of-at91.c b/drivers/mmc/host/sdhci-of-at91.c
-index 06d0b50..81ab9db 100644
---- a/drivers/mmc/host/sdhci-of-at91.c
-+++ b/drivers/mmc/host/sdhci-of-at91.c
-@@ -21,6 +21,8 @@
- #include <linux/module.h>
- #include <linux/of.h>
- #include <linux/of_device.h>
-+#include <linux/pm.h>
-+#include <linux/pm_runtime.h>
- 
- #include "sdhci-pltfm.h"
- 
-@@ -51,6 +53,60 @@ static const struct of_device_id sdhci_at91_dt_match[] = {
- 	{}
- };
- 
-+#ifdef CONFIG_PM
-+static int sdhci_at91_runtime_suspend(struct device *dev)
-+{
-+	struct sdhci_host *host = dev_get_drvdata(dev);
-+	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-+	struct sdhci_at91_priv *priv = pltfm_host->priv;
-+	int ret;
-+
-+	ret = sdhci_runtime_suspend_host(host);
-+
-+	clk_disable_unprepare(priv->gck);
-+	clk_disable_unprepare(priv->hclock);
-+	clk_disable_unprepare(priv->mainck);
-+
-+	return ret;
-+}
-+
-+static int sdhci_at91_runtime_resume(struct device *dev)
-+{
-+	struct sdhci_host *host = dev_get_drvdata(dev);
-+	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-+	struct sdhci_at91_priv *priv = pltfm_host->priv;
-+	int ret;
-+
-+	ret = clk_prepare_enable(priv->mainck);
-+	if (ret) {
-+		dev_err(dev, "can't enable mainck\n");
-+		return ret;
-+	}
-+
-+	ret = clk_prepare_enable(priv->hclock);
-+	if (ret) {
-+		dev_err(dev, "can't enable hclock\n");
-+		return ret;
-+	}
-+
-+	ret = clk_prepare_enable(priv->gck);
-+	if (ret) {
-+		dev_err(dev, "can't enable gck\n");
-+		return ret;
-+	}
-+
-+	return sdhci_runtime_resume_host(host);
-+}
-+#endif /* CONFIG_PM */
-+
-+static const struct dev_pm_ops sdhci_at91_dev_pm_ops = {
-+	SET_SYSTEM_SLEEP_PM_OPS(pm_runtime_force_suspend,
-+				pm_runtime_force_resume)
-+	SET_RUNTIME_PM_OPS(sdhci_at91_runtime_suspend,
-+			   sdhci_at91_runtime_resume,
-+			   NULL)
-+};
-+
- static int sdhci_at91_probe(struct platform_device *pdev)
- {
- 	const struct of_device_id	*match;
-@@ -144,12 +200,20 @@ static int sdhci_at91_probe(struct platform_device *pdev)
- 
- 	sdhci_get_of_property(pdev);
- 
-+	pm_runtime_set_active(&pdev->dev);
-+	pm_runtime_enable(&pdev->dev);
-+	pm_runtime_set_autosuspend_delay(&pdev->dev, 50);
-+	pm_runtime_use_autosuspend(&pdev->dev);
-+
- 	ret = sdhci_add_host(host);
- 	if (ret)
--		goto clocks_disable_unprepare;
-+		goto pm_runtime_disable;
- 
- 	return 0;
- 
-+pm_runtime_disable:
-+	pm_runtime_disable(&pdev->dev);
-+	pm_runtime_set_suspended(&pdev->dev);
- clocks_disable_unprepare:
- 	clk_disable_unprepare(priv->gck);
- 	clk_disable_unprepare(priv->mainck);
-@@ -165,6 +229,10 @@ static int sdhci_at91_remove(struct platform_device *pdev)
- 	struct sdhci_pltfm_host	*pltfm_host = sdhci_priv(host);
- 	struct sdhci_at91_priv	*priv = pltfm_host->priv;
- 
-+	pm_runtime_get_sync(&pdev->dev);
-+	pm_runtime_disable(&pdev->dev);
-+	pm_runtime_put_noidle(&pdev->dev);
-+
- 	sdhci_pltfm_unregister(pdev);
- 
- 	clk_disable_unprepare(priv->gck);
-@@ -178,7 +246,7 @@ static struct platform_driver sdhci_at91_driver = {
- 	.driver		= {
- 		.name	= "sdhci-at91",
- 		.of_match_table = sdhci_at91_dt_match,
--		.pm	= SDHCI_PLTFM_PMOPS,
-+		.pm	= &sdhci_at91_dev_pm_ops,
- 	},
- 	.probe		= sdhci_at91_probe,
- 	.remove		= sdhci_at91_remove,
--- 
-2.5.0
+>> Signed-off-by: yalin wang <yalin.wang2010@gmail.com>
+>> ---
+>>  drivers/mmc/card/block.c | 2 +-
+>>  1 file changed, 1 insertion(+), 1 deletion(-)
+>>
+>> diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+>> index 23b6c8e..975cd3e 100644
+>> --- a/drivers/mmc/card/block.c
+>> +++ b/drivers/mmc/card/block.c
+>> @@ -365,7 +365,7 @@ static struct mmc_blk_ioc_data *mmc_blk_ioctl_copy_from_user(
+>>         if (!idata->buf_bytes)
+>>                 return idata;
+>>
+>> -       idata->buf = kzalloc(idata->buf_bytes, GFP_KERNEL);
+>> +       idata->buf = kmalloc(idata->buf_bytes, GFP_KERNEL);
+>>         if (!idata->buf) {
+>>                 err = -ENOMEM;
+>>                 goto idata_err;
+>> --
+>> 1.9.1
 
