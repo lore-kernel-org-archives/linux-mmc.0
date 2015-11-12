@@ -1,78 +1,81 @@
-From: yalin wang <yalin.wang2010@gmail.com>
-Subject: Re: [PATCH] mmc: change to use kmalloc
-Date: Thu, 12 Nov 2015 19:27:42 +0800
-Message-ID: <F779CDF6-6F14-4E92-A8A8-F0ACBB2AF3C8@gmail.com>
-References: <1447215791-19429-1-git-send-email-yalin.wang2010@gmail.com> <CAGOxZ53m0Fiudgt-gUBH2QhOW291tVmx1pFyeX5qmO_3kHQvSQ@mail.gmail.com> <5643B07A.3090208@hurleysoftware.com> <CAHp75VdKODX13UUiUs6i2A2phraAEC5Ok5arN3jNSYPta2-qiA@mail.gmail.com>
-Mime-Version: 1.0 (Mac OS X Mail 9.0 \(3094\))
-Content-Type: text/plain; charset=us-ascii
-Content-Transfer-Encoding: 8BIT
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pa0-f43.google.com ([209.85.220.43]:34140 "EHLO
-	mail-pa0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753876AbbKLL1w convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 12 Nov 2015 06:27:52 -0500
-In-Reply-To: <CAHp75VdKODX13UUiUs6i2A2phraAEC5Ok5arN3jNSYPta2-qiA@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+From: Arnd Bergmann <arnd@arndb.de>
+Subject: [PATCH] mmc: dw_mmc: use resource_size_t to store physical address
+Date: Thu, 12 Nov 2015 15:14:23 +0100
+Message-ID: <28102387.ALpaBHpim0@wuerfel>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Jaehoon Chung <jh80.chung@samsung.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
-To: Andy Shevchenko <andy.shevchenko@gmail.com>
-Cc: Peter Hurley <peter@hurleysoftware.com>, Alim Akhtar <alim.akhtar@gmail.com>, Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, Ben Hutchings <ben@decadent.org.uk>, Jaehoon Chung <jh80.chung@samsung.com>, asaf.vertz@tandemg.com, Tobias Klauser <tklauser@distanz.ch>, Jon Hunter <jonathanh@nvidia.com>, "James E.J. Bottomley" <JBottomley@odin.com>, Grant Grundler <grundler@chromium.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 
+The dw_mmc driver stores the physical address of the MMIO registers
+in a pointer, which requires the use of type casts, and is actually
+broken if anyone ever has this device on a 32-bit SoC in registers
+above 4GB. Gcc warns about this possibility when the driver is built
+with ARM LPAE enabled:
 
-> On Nov 12, 2015, at 05:57, Andy Shevchenko <andy.shevchenko@gmail.com> wrote:
-> 
-> On Wed, Nov 11, 2015 at 11:17 PM, Peter Hurley <peter@hurleysoftware.com> wrote:
->> On 11/11/2015 12:02 PM, Alim Akhtar wrote:
->>> Hi Yalin,
->>> 
->>> On Wed, Nov 11, 2015 at 9:53 AM, yalin wang <yalin.wang2010@gmail.com> wrote:
->>>> Use kmalloc instead of kzalloc, zero the memory is not needed.
->>>> 
->>> why you want to do this? what problem you faces, and how this resolves the same?
->> 
->> The patch fixes an inefficiency: explicitly zeroing memory that is then
->> immediately overwritten 6 lines below is wasteful.
-> 
-> It might fix previous kzalloc as well, though better not to do since
-> it's error prone.
-> 
-yeah,  i will send a new patch ,
+mmc/host/dw_mmc.c: In function 'dw_mci_edmac_start_dma':
+mmc/host/dw_mmc.c:702:17: warning: cast from pointer to integer of different size
+  cfg.dst_addr = (dma_addr_t)(host->phy_regs + fifo_offset);
+                 ^
+mmc/host/dw_mmc-pltfm.c: In function 'dw_mci_pltfm_register':
+mmc/host/dw_mmc-pltfm.c:63:19: warning: cast to pointer from integer of different size
+  host->phy_regs = (void *)(regs->start);
 
+This changes the code to use resource_size_t, which gets rid of the
+warning, the bug and the useless casts.
 
+Signed-off-by: Arnd Bergmann <arnd@arndb.de>
+---
+>From the arm64 allmodconfig build reports
 
->> 
->> Regards,
->> Peter Hurley
->> 
->>>> Signed-off-by: yalin wang <yalin.wang2010@gmail.com>
->>>> ---
->>>> drivers/mmc/card/block.c | 2 +-
->>>> 1 file changed, 1 insertion(+), 1 deletion(-)
->>>> 
->>>> diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
->>>> index 23b6c8e..975cd3e 100644
->>>> --- a/drivers/mmc/card/block.c
->>>> +++ b/drivers/mmc/card/block.c
->>>> @@ -365,7 +365,7 @@ static struct mmc_blk_ioc_data *mmc_blk_ioctl_copy_from_user(
->>>>        if (!idata->buf_bytes)
->>>>                return idata;
->>>> 
->>>> -       idata->buf = kzalloc(idata->buf_bytes, GFP_KERNEL);
->>>> +       idata->buf = kmalloc(idata->buf_bytes, GFP_KERNEL);
->>>>        if (!idata->buf) {
->>>>                err = -ENOMEM;
->>>>                goto idata_err;
->>>> --
->>>> 1.9.1
->> 
->> --
->> To unsubscribe from this list: send the line "unsubscribe linux-kernel" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->> Please read the FAQ at  http://www.tux.org/lkml/
-> 
-> 
-> 
-> -- 
-> With Best Regards,
-> Andy Shevchenko
-
+diff --git a/drivers/mmc/host/dw_mmc-pltfm.c b/drivers/mmc/host/dw_mmc-pltfm.c
+index 7e1d13b68b06..81bdeeb05a4d 100644
+--- a/drivers/mmc/host/dw_mmc-pltfm.c
++++ b/drivers/mmc/host/dw_mmc-pltfm.c
+@@ -60,7 +60,7 @@ int dw_mci_pltfm_register(struct platform_device *pdev,
+ 
+ 	regs = platform_get_resource(pdev, IORESOURCE_MEM, 0);
+ 	/* Get registers' physical base address */
+-	host->phy_regs = (void *)(regs->start);
++	host->phy_regs = regs->start;
+ 	host->regs = devm_ioremap_resource(&pdev->dev, regs);
+ 	if (IS_ERR(host->regs))
+ 		return PTR_ERR(host->regs);
+diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+index 7a6cedbe48a8..fb204ee6ff89 100644
+--- a/drivers/mmc/host/dw_mmc.c
++++ b/drivers/mmc/host/dw_mmc.c
+@@ -699,7 +699,7 @@ static int dw_mci_edmac_start_dma(struct dw_mci *host,
+ 	int ret = 0;
+ 
+ 	/* Set external dma config: burst size, burst width */
+-	cfg.dst_addr = (dma_addr_t)(host->phy_regs + fifo_offset);
++	cfg.dst_addr = host->phy_regs + fifo_offset;
+ 	cfg.src_addr = cfg.dst_addr;
+ 	cfg.dst_addr_width = DMA_SLAVE_BUSWIDTH_4_BYTES;
+ 	cfg.src_addr_width = DMA_SLAVE_BUSWIDTH_4_BYTES;
+diff --git a/include/linux/mmc/dw_mmc.h b/include/linux/mmc/dw_mmc.h
+index f67b2ec18e6d..7776afb0ffa5 100644
+--- a/include/linux/mmc/dw_mmc.h
++++ b/include/linux/mmc/dw_mmc.h
+@@ -172,7 +172,7 @@ struct dw_mci {
+ 	/* For edmac */
+ 	struct dw_mci_dma_slave *dms;
+ 	/* Registers's physical base address */
+-	void                    *phy_regs;
++	resource_size_t		phy_regs;
+ 
+ 	u32			cmd_status;
+ 	u32			data_status;
