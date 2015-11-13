@@ -1,119 +1,46 @@
-From: Alan Cooper <alcooperx@gmail.com>
-Subject: Re: [PATCH V2 1/3] mmc: sdhci-pltfm: Add DT properties to set various QUIRKS
-Date: Thu, 12 Nov 2015 14:44:53 -0500
-Message-ID: <CAOGqxeU73rkktbooAQeKXG6XZcOR3RqYG_gjr1PuE5E6k6bVNw@mail.gmail.com>
-References: <1446836164-16259-1-git-send-email-alcooperx@gmail.com>
-	<1446836164-16259-2-git-send-email-alcooperx@gmail.com>
-	<CAPDyKFoFgohMb2dqGQQM_pRFH96EP58ff=N69=oRYEzoj71r0g@mail.gmail.com>
+From: Andy Shevchenko <andy.shevchenko@gmail.com>
+Subject: Re: [PATCH] mmc: dw_mmc: use resource_size_t to store physical address
+Date: Fri, 13 Nov 2015 03:10:13 +0200
+Message-ID: <CAHp75VfyOWrihHC4nhpKQrjH9SjP0NnaN1WU8se3PL4biWtz4g@mail.gmail.com>
+References: <28102387.ALpaBHpim0@wuerfel>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qk0-f175.google.com ([209.85.220.175]:36342 "EHLO
-	mail-qk0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752375AbbKLToy (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 12 Nov 2015 14:44:54 -0500
-Received: by qkcl124 with SMTP id l124so27299094qkc.3
-        for <linux-mmc@vger.kernel.org>; Thu, 12 Nov 2015 11:44:53 -0800 (PST)
-In-Reply-To: <CAPDyKFoFgohMb2dqGQQM_pRFH96EP58ff=N69=oRYEzoj71r0g@mail.gmail.com>
+Received: from mail-yk0-f180.google.com ([209.85.160.180]:33516 "EHLO
+	mail-yk0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754270AbbKMBKO (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 12 Nov 2015 20:10:14 -0500
+In-Reply-To: <28102387.ALpaBHpim0@wuerfel>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, bcm-kernel-feedback-list@broadcom.com
+To: Arnd Bergmann <arnd@arndb.de>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Jaehoon Chung <jh80.chung@samsung.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-arm Mailing List <linux-arm-kernel@lists.infradead.org>
 
-On Thu, Nov 12, 2015 at 4:35 AM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
-> On 6 November 2015 at 19:56, Al Cooper <alcooperx@gmail.com> wrote:
->> Add support for "broken-ddr50", "broken-64-bit-dma"
->> and "broken-timeout-value" device tree properties.
->> The properties will cause the corresponding quirks bits to be set.
->> This allows some of the platform specific QUIRKS setting to be
->> moved out of the driver and into the Device Tree node.
->>
->> Signed-off-by: Al Cooper <alcooperx@gmail.com>
->> ---
->>  drivers/mmc/host/sdhci-pltfm.c | 8 +++++++-
->>  1 file changed, 7 insertions(+), 1 deletion(-)
->>
->> diff --git a/drivers/mmc/host/sdhci-pltfm.c b/drivers/mmc/host/sdhci-pltfm.c
->> index 87fb5ea..cc0730c 100644
->> --- a/drivers/mmc/host/sdhci-pltfm.c
->> +++ b/drivers/mmc/host/sdhci-pltfm.c
->> @@ -90,10 +90,14 @@ void sdhci_get_of_property(struct platform_device *pdev)
->>         if (of_get_property(np, "no-1-8-v", NULL))
->>                 host->quirks2 |= SDHCI_QUIRK2_NO_1_8_V;
->>
->> +       if (of_get_property(np, "broken-64-bit-dma", NULL))
->> +               host->quirks2 |= SDHCI_QUIRK2_BROKEN_64_BIT_DMA;
->> +
->
-> To me this is yet another step in the wrong direction of sdhci.
->
-> Not only have we added a quirk which we likely could avoided, but now
-> you also suggest to add a DT binding for it.
->
-> Please try to avoid this, we shouldn't need to add one DT binding per
-> quirk, right?
+On Thu, Nov 12, 2015 at 4:14 PM, Arnd Bergmann <arnd@arndb.de> wrote:
+> The dw_mmc driver stores the physical address of the MMIO registers
+> in a pointer, which requires the use of type casts, and is actually
+> broken if anyone ever has this device on a 32-bit SoC in registers
+> above 4GB. Gcc warns about this possibility when the driver is built
+> with ARM LPAE enabled:
 
-The BRCMSTB SDHCI driver needs to support a mix of existing and future
-ARM and MIPS SoC's on a variety of boards, and many of the
-combinations have issues. In older separate MIPS/ARM internal versions
-of the driver, issues were handled by a combination of QUIRKS and the
-use of custom SDHCI registers that allowed the Host CAPS registers to
-be changed on a per chip basis. While working on a unified driver for
-4.1, I realized that almost all the issues solved by overriding the
-CAPs registers could also be done using an existing QUIRK and if I had
-device tree properties that set the QUIRKs, that all the chip/board
-specific knowledge would end up in the device tree node instead of in
-the driver. This also allowed me to stop using the non-standard CAPS
-override registers that tended to change per chip. This approach also
-allows the driver to work, without change, on future chips/boards as
-long as they don't have any new issues and they have the proper device
-tree node.
+> -       host->phy_regs = (void *)(regs->start);
+> +       host->phy_regs = regs->start;
 
-Would there be any objection to me continuing this approach if I moved
-all the functionality into the sdhci-brcm.c driver and left sdhci.c
-and sdhci-pltfm.c untouched?
+>         /* Set external dma config: burst size, burst width */
+> -       cfg.dst_addr = (dma_addr_t)(host->phy_regs + fifo_offset);
+> +       cfg.dst_addr = host->phy_regs + fifo_offset;
 
->
->>         if (of_device_is_compatible(np, "fsl,p2020-rev1-esdhc"))
->>                 host->quirks |= SDHCI_QUIRK_BROKEN_DMA;
->>
->> -       if (of_device_is_compatible(np, "fsl,p2020-esdhc") ||
->> +       if (of_get_property(np, "broken-timeout-value", NULL) ||
->> +           of_device_is_compatible(np, "fsl,p2020-esdhc") ||
->>             of_device_is_compatible(np, "fsl,p1010-esdhc") ||
->>             of_device_is_compatible(np, "fsl,t4240-esdhc") ||
->>             of_device_is_compatible(np, "fsl,mpc8536-esdhc"))
->> @@ -106,6 +110,8 @@ void sdhci_get_of_property(struct platform_device *pdev)
->>
->>         if (of_find_property(np, "enable-sdio-wakeup", NULL))
->>                 host->mmc->pm_caps |= MMC_PM_WAKE_SDIO_IRQ;
->> +       if (of_find_property(np, "broken-ddr50", NULL))
->> +               host->quirks2 |= SDHCI_QUIRK2_BROKEN_DDR50;
->
-> Same comment as above.
->
-> Let me also refer to the response from Scott Branden to the earlier
-> version of this patchset.
-> http://permalink.gmane.org/gmane.linux.kernel.mmc/34614
->
-> Perhaps we should invent a sdhci library function, which each sdhci
-> variant can use to set capabilities through. Typically useful for
-> those variants that have a non-reliable capabilities register.
->
+dst_addr is dma_addr_t?
 
-Do you mean something more than using SDHCI_QUIRK_MISSING_CAPS which
-allows the driver to supply the 2 CAPS registers instead of having
-sdhci.c get them by reading the Host CAPS registers?
+>         /* Registers's physical base address */
+> -       void                    *phy_regs;
+> +       resource_size_t         phy_regs;
 
->>  }
->>  #else
->>  void sdhci_get_of_property(struct platform_device *pdev) {}
->> --
->> 1.9.0.138.g2de3478
->>
->
-> Kind regards
-> Uffe
+If dst_addr is dma_addr_t wouldn't be a problem when
+resource_size_t is defined as 64-bit address, and dma_addr_t as 32-bit?
 
-Thanks
-Al
+Btw, for me casting to dma_addr_t looks sane.
+
+-- 
+With Best Regards,
+Andy Shevchenko
