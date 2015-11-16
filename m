@@ -1,50 +1,81 @@
-From: Thierry Reding <thierry.reding-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: [PATCH 2/2] mmc: tegra: Add Tegra210 support
-Date: Mon, 16 Nov 2015 10:27:15 +0100
-Message-ID: <1447666035-10044-2-git-send-email-thierry.reding@gmail.com>
-References: <1447666035-10044-1-git-send-email-thierry.reding@gmail.com>
-Return-path: <linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1447666035-10044-1-git-send-email-thierry.reding-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Sender: linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: Stephen Warren <swarren-3lzwWm7+Weoh9ZMKESR00Q@public.gmane.org>, Alexandre Courbot <gnurou-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH v3] MMC/SDIO: enable SDIO device to suspend/resume asynchronously
+Date: Mon, 16 Nov 2015 12:30:02 +0100
+Message-ID: <CAPDyKFoFqG27xfYT2Dw_E5vavQKSxNMqkNj=Yv4LqZ68y2Z0Kw@mail.gmail.com>
+References: <56488E6F.3090109@linux.intel.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <56488E6F.3090109@linux.intel.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: "Fu, Zhonghui" <zhonghui.fu@linux.intel.com>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, Neil Brown <neilb@suse.de>, Jaehoon Chung <jh80.chung@samsung.com>, Andreas Fenkart <afenkart@gmail.com>, Joe Perches <joe@perches.com>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-From: Thierry Reding <treding-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
+On 15 November 2015 at 14:53, Fu, Zhonghui <zhonghui.fu@linux.intel.com> wrote:
+> Now, PM core supports asynchronous suspend/resume mode for devices
+> during system suspend/resume, and the power state transition of one
+> device may be completed in separate kernel thread. PM core ensures
+> all power state transition timing dependency between devices. This
+> patch enables SDIO card and function devices to suspend/resume
+> asynchronously. This will take advantage of multicore and improve
+> system suspend/resume speed. After enabling the SDIO devices and all
+> their child devices to suspend/resume asynchronously on ASUS T100TA,
+> the system suspend-to-idle time is reduced from 1645ms to 1119ms, and
+> the system resume time is reduced from 940ms to 918ms.
+>
+> Signed-off-by: Zhonghui Fu <zhonghui.fu@linux.intel.com>
 
-Signed-off-by: Thierry Reding <treding-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
----
- drivers/mmc/host/sdhci-tegra.c | 17 +++++++++++++++++
- 1 file changed, 17 insertions(+)
+I think this is an interesting change, but I wonder if you really
+understand how this affects the order of how devices may be
+suspended/resumed?
 
-diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
-index 8d49d9af6f54..368f1b74a525 100644
---- a/drivers/mmc/host/sdhci-tegra.c
-+++ b/drivers/mmc/host/sdhci-tegra.c
-@@ -236,7 +236,24 @@ static const struct sdhci_tegra_soc_data soc_data_tegra114 = {
- 		    NVQUIRK_DISABLE_SDR104,
- };
- 
-+static const struct sdhci_pltfm_data sdhci_tegra210_pdata = {
-+	.quirks = SDHCI_QUIRK_BROKEN_TIMEOUT_VAL |
-+		  SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK |
-+		  SDHCI_QUIRK_SINGLE_POWER_WRITE |
-+		  SDHCI_QUIRK_NO_HISPD_BIT |
-+		  SDHCI_QUIRK_BROKEN_ADMA_ZEROLEN_DESC,
-+	.ops  = &tegra114_sdhci_ops,
-+};
-+
-+static const struct sdhci_tegra_soc_data soc_data_tegra210 = {
-+	.pdata = &sdhci_tegra210_pdata,
-+	.nvquirks = NVQUIRK_DISABLE_SDR50 |
-+		    NVQUIRK_DISABLE_DDR50 |
-+		    NVQUIRK_DISABLE_SDR104,
-+};
-+
- static const struct of_device_id sdhci_tegra_dt_match[] = {
-+	{ .compatible = "nvidia,tegra210-sdhci", .data = &soc_data_tegra210 },
- 	{ .compatible = "nvidia,tegra124-sdhci", .data = &soc_data_tegra114 },
- 	{ .compatible = "nvidia,tegra114-sdhci", .data = &soc_data_tegra114 },
- 	{ .compatible = "nvidia,tegra30-sdhci", .data = &soc_data_tegra30 },
--- 
-2.5.0
+Also, I believe you didn't answer my question for the earlier version
+of the patch, so let me try again.
+
+There are a strict dependency chain when suspending/resuming devices
+that must be maintained. Currently this is controlled via device
+registration/probe order.
+
+An SDIO func driver/device must always be suspended *before* the SDIO
+card device. Additionally the corresponding MMC host, must be
+suspended after the SDIO card device. Vice verse applies to the resume
+sequence.
+
+As this patch enables asynchronous suspend, I am worried that it will
+break this dependency chain. What do you think?
+
+Kind regards
+Ulf Hansson
+
+> ---
+> Changes in v3:
+> - Add test result in commit message
+>
+>  drivers/mmc/core/sdio.c |    4 ++++
+>  1 files changed, 4 insertions(+), 0 deletions(-)
+>
+> diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
+> index 16d838e..530ce88 100644
+> --- a/drivers/mmc/core/sdio.c
+> +++ b/drivers/mmc/core/sdio.c
+> @@ -1113,6 +1113,8 @@ int mmc_attach_sdio(struct mmc_host *host)
+>                 pm_runtime_enable(&card->dev);
+>         }
+>
+> +       device_enable_async_suspend(&card->dev);
+> +
+>         /*
+>          * The number of functions on the card is encoded inside
+>          * the ocr.
+> @@ -1133,6 +1135,8 @@ int mmc_attach_sdio(struct mmc_host *host)
+>                  */
+>                 if (host->caps & MMC_CAP_POWER_OFF_CARD)
+>                         pm_runtime_enable(&card->sdio_func[i]->dev);
+> +
+> +               device_enable_async_suspend(&card->sdio_func[i]->dev);
+>         }
+>
+>         /*
+> -- 1.7.1
+>
