@@ -1,76 +1,166 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v2] mmc: sdhci-msm: Boost controller core clock
-Date: Mon, 16 Nov 2015 12:50:05 +0100
-Message-ID: <CAPDyKFr2OyUPKjhN2=Yif=TzWoaHoKeBxYfBExxJhNCwnuhQdg@mail.gmail.com>
-References: <1436183618-15330-1-git-send-email-ivan.ivanov@linaro.org>
-	<CAJAp7OjdiD_x0aU89HNq8PCiGqs+fvATHuVARxU4gE4yVusRNg@mail.gmail.com>
-	<CAPDyKFpQ2oK49ZwaBuk9bUPDEpzSyic2d1L9Qj2t8D1+wmDYtA@mail.gmail.com>
-	<20151106233913.GB30882@usrtlx11787.corpusers.net>
-	<CAPDyKFqZ+1Ax9e58b0K5B+tYoNtsC0uQS3zcQR7tu5TM+51nbw@mail.gmail.com>
-	<20151110201841.GB24116@codeaurora.org>
+From: Arnd Bergmann <arnd@arndb.de>
+Subject: [PATCH] mmc: sh_mmcif: rework dma channel handling
+Date: Mon, 16 Nov 2015 17:08:41 +0100
+Message-ID: <5324212.8m5CM0vuVo@wuerfel>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-yk0-f171.google.com ([209.85.160.171]:34002 "EHLO
-	mail-yk0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751628AbbKPLuG (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 16 Nov 2015 06:50:06 -0500
-Received: by ykfs79 with SMTP id s79so234376177ykf.1
-        for <linux-mmc@vger.kernel.org>; Mon, 16 Nov 2015 03:50:05 -0800 (PST)
-In-Reply-To: <20151110201841.GB24116@codeaurora.org>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7Bit
+Return-path: <linux-sh-owner@vger.kernel.org>
+Sender: linux-sh-owner@vger.kernel.org
+To: linux-arm-kernel@lists.infradead.org
+Cc: linux-sh@vger.kernel.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>, Geert Uytterhoeven <geert+renesas@glider.be>, Yoshihiro Kaneko <ykaneko0929@gmail.com>, Laurent Pinchart <laurent.pinchart@ideasonboard.com>, Kouichi Tomita <kouichi.tomita.yn@renesas.com>, Simon Horman <horms@verge.net.au>, Magnus Damm <magnus.damm@gmail.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Stephen Boyd <sboyd@codeaurora.org>
-Cc: Bjorn Andersson <bjorn.andersson@sonymobile.com>, Bjorn Andersson <bjorn@kryo.se>, "Ivan T. Ivanov" <ivan.ivanov@linaro.org>, Georgi Djakov <georgi.djakov@linaro.org>, Peter Griffin <peter.griffin@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-arm-msm <linux-arm-msm@vger.kernel.org>
 
-[...]
+When compiling the sh_mmcif driver for ARM64, we currently
+get a harmless build warning:
 
->> Ahh, I see.
->>
->> It seems like a reasonable assumption that the controller can't cope
->> with a higher clock rate than 100 MHz as "input" clock. That would
->> then mean that there are different versions of the controller, as it
->> seems like for some version it's fine with 200MHz and for some 100MHz.
->>
->> According to the DT compatible strings, *one* version is currently
->> supported, "qcom,sdhci-msm-v4"...
->
-> The same version of hardware is there 4 times. The difference is
-> the maximum clock frequency supported by them is different. In
-> downstream kernels we've handled this by trimming the frequency
-> tables for the different controllers in the clock driver.
-> Setting the clock to INT_MAX will make it run at 400MHz, which
-> doesn't look to be supported by anything besides sdc1 on 8974ac.
->
->>
->> I see two viable solutions. One would be to limit the clock rate
->> depending on the version of the controller (new compatible strings
->> needs to be added). Another one would be to limit the clock rate by
->> using the existing DT binding for max-frequency, and thus do a
->> clk_set_rate(mmc->f_max) during probe.
->>
->
-> I'd rather see that done via OPP tables in DT, but I suppose
-> max-frequency is fine too. We'll need to use OPPs soon enough
-> because there's a voltage associated with that frequency.
+../drivers/mmc/host/sh_mmcif.c: In function 'sh_mmcif_request_dma_one':
+../drivers/mmc/host/sh_mmcif.c:417:4: warning: cast to pointer from integer of different size [-Wint-to-pointer-cast]
+    (void *)pdata->slave_id_tx :
+    ^
+../drivers/mmc/host/sh_mmcif.c:418:4: warning: cast to pointer from integer of different size [-Wint-to-pointer-cast]
+    (void *)pdata->slave_id_rx;
 
-Okay, thanks for sharing the details.
+This could be worked around by adding another cast to uintptr_t, but
+I decided to simplify the code a little more to avoid that. This
+splits out the platform data using code into a separate function
+and builds that only for CONFIG_SUPERH. This part still has a typecast
+but does not need a second one. The SH platform code could be further
+modified to pass a pointer directly as we do on other architectures
+when we have a filter function.
 
->
-> In case you're wondering, the max frequency for sdc1 on 8974ac is
-> 400MHz. If it's just a plain 8974pro then the max frequency is
-> 200MHz. Otherwise, sdc2 maxes out at 200Mhz and sdc3 and sdc4 max
-> out at 100MHz.
+The normal case is simplified further and now just calls
+dma_request_slave_channel() directly without going through the
+compat handling.
 
-When you say that sdc1 supports 400MHz, what does that mean? That it
-actually can cope with that clock rate when communicating with the MMC
-card?
+Signed-off-by: Arnd Bergmann <arnd@arndb.de>
+---
+ drivers/mmc/host/sh_mmcif.c | 80 +++++++++++++++++---------------------------------
+ 1 file changed, 34 insertions(+), 46 deletions(-)
 
-This makes me wonder how you deal with power management (DVFS).
 
-For example when you have the possibility to gate this clock (at
-request inactivity) when the rate is set to 400 MHz and OPP is
-increased, how will then that clock gating affect the OPP?
+diff --git a/drivers/mmc/host/sh_mmcif.c b/drivers/mmc/host/sh_mmcif.c
+index ad9ffea7d659..d964c99f3a30 100644
+--- a/drivers/mmc/host/sh_mmcif.c
++++ b/drivers/mmc/host/sh_mmcif.c
+@@ -397,38 +397,26 @@ static void sh_mmcif_start_dma_tx(struct sh_mmcif_host *host)
+ }
+ 
+ static struct dma_chan *
+-sh_mmcif_request_dma_one(struct sh_mmcif_host *host,
+-			 struct sh_mmcif_plat_data *pdata,
+-			 enum dma_transfer_direction direction)
++sh_mmcif_request_dma_pdata(struct sh_mmcif_host *host, uintptr_t slave_id)
+ {
+-	struct dma_slave_config cfg = { 0, };
+-	struct dma_chan *chan;
+-	void *slave_data = NULL;
+-	struct resource *res;
+-	struct device *dev = sh_mmcif_host_to_dev(host);
+ 	dma_cap_mask_t mask;
+-	int ret;
+ 
+ 	dma_cap_zero(mask);
+ 	dma_cap_set(DMA_SLAVE, mask);
++	if (slave_id <= 0)
++		return NULL;
+ 
+-	if (pdata)
+-		slave_data = direction == DMA_MEM_TO_DEV ?
+-			(void *)pdata->slave_id_tx :
+-			(void *)pdata->slave_id_rx;
+-
+-	chan = dma_request_slave_channel_compat(mask, shdma_chan_filter,
+-				slave_data, dev,
+-				direction == DMA_MEM_TO_DEV ? "tx" : "rx");
+-
+-	dev_dbg(dev, "%s: %s: got channel %p\n", __func__,
+-		direction == DMA_MEM_TO_DEV ? "TX" : "RX", chan);
++	return dma_request_channel(mask, shdma_chan_filter, (void *)slave_id);
++}
+ 
+-	if (!chan)
+-		return NULL;
++static int sh_mmcif_dma_slave_config(struct sh_mmcif_host *host,
++				     struct dma_chan *chan,
++				     enum dma_transfer_direction direction)
++{
++	struct resource *res;
++	struct dma_slave_config cfg = { 0, };
+ 
+ 	res = platform_get_resource(host->pd, IORESOURCE_MEM, 0);
+-
+ 	cfg.direction = direction;
+ 
+ 	if (direction == DMA_DEV_TO_MEM) {
+@@ -439,38 +427,38 @@ sh_mmcif_request_dma_one(struct sh_mmcif_host *host,
+ 		cfg.dst_addr_width = DMA_SLAVE_BUSWIDTH_4_BYTES;
+ 	}
+ 
+-	ret = dmaengine_slave_config(chan, &cfg);
+-	if (ret < 0) {
+-		dma_release_channel(chan);
+-		return NULL;
+-	}
+-
+-	return chan;
++	return dmaengine_slave_config(chan, &cfg);
+ }
+ 
+-static void sh_mmcif_request_dma(struct sh_mmcif_host *host,
+-				 struct sh_mmcif_plat_data *pdata)
++static void sh_mmcif_request_dma(struct sh_mmcif_host *host)
+ {
+ 	struct device *dev = sh_mmcif_host_to_dev(host);
+ 	host->dma_active = false;
+ 
+-	if (pdata) {
+-		if (pdata->slave_id_tx <= 0 || pdata->slave_id_rx <= 0)
+-			return;
+-	} else if (!dev->of_node) {
+-		return;
++	/* We can only either use DMA for both Tx and Rx or not use it at all */
++	if (IS_ENABLED(CONFIG_SUPERH) && dev->platform_data) {
++		struct sh_mmcif_plat_data *pdata = dev->platform_data;
++		host->chan_tx = sh_mmcif_request_dma_pdata(host, pdata->slave_id_tx);
++		host->chan_rx = sh_mmcif_request_dma_pdata(host, pdata->slave_id_rx);
++	} else {
++		host->chan_tx = dma_request_slave_channel(dev, "tx");
++		host->chan_tx = dma_request_slave_channel(dev, "rx");
+ 	}
++	dev_dbg(dev, "%s: got channel TX %p RX %p\n", __func__, host->chan_tx, host->chan_rx);
+ 
+-	/* We can only either use DMA for both Tx and Rx or not use it at all */
+-	host->chan_tx = sh_mmcif_request_dma_one(host, pdata, DMA_MEM_TO_DEV);
+-	if (!host->chan_tx)
+-		return;
++	if (!host->chan_tx || !host->chan_rx ||
++	    sh_mmcif_dma_slave_config(host, host->chan_tx, DMA_MEM_TO_DEV) ||
++	    sh_mmcif_dma_slave_config(host, host->chan_rx, DMA_DEV_TO_MEM))
++		goto error;
+ 
+-	host->chan_rx = sh_mmcif_request_dma_one(host, pdata, DMA_DEV_TO_MEM);
+-	if (!host->chan_rx) {
++	return;
++
++error:
++	if (host->chan_tx)
+ 		dma_release_channel(host->chan_tx);
+-		host->chan_tx = NULL;
+-	}
++	if (host->chan_rx)
++		dma_release_channel(host->chan_rx);
++	host->chan_tx = host->chan_rx = NULL;
+ }
+ 
+ static void sh_mmcif_release_dma(struct sh_mmcif_host *host)
+@@ -1102,7 +1090,7 @@ static void sh_mmcif_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+ 	if (ios->power_mode == MMC_POWER_UP) {
+ 		if (!host->card_present) {
+ 			/* See if we also get DMA */
+-			sh_mmcif_request_dma(host, dev->platform_data);
++			sh_mmcif_request_dma(host);
+ 			host->card_present = true;
+ 		}
+ 		sh_mmcif_set_power(host, ios);
 
-Kind regards
-Uffe
