@@ -1,81 +1,76 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v3] MMC/SDIO: enable SDIO device to suspend/resume asynchronously
-Date: Mon, 16 Nov 2015 12:30:02 +0100
-Message-ID: <CAPDyKFoFqG27xfYT2Dw_E5vavQKSxNMqkNj=Yv4LqZ68y2Z0Kw@mail.gmail.com>
-References: <56488E6F.3090109@linux.intel.com>
+Subject: Re: [PATCH v2] mmc: sdhci-msm: Boost controller core clock
+Date: Mon, 16 Nov 2015 12:50:05 +0100
+Message-ID: <CAPDyKFr2OyUPKjhN2=Yif=TzWoaHoKeBxYfBExxJhNCwnuhQdg@mail.gmail.com>
+References: <1436183618-15330-1-git-send-email-ivan.ivanov@linaro.org>
+	<CAJAp7OjdiD_x0aU89HNq8PCiGqs+fvATHuVARxU4gE4yVusRNg@mail.gmail.com>
+	<CAPDyKFpQ2oK49ZwaBuk9bUPDEpzSyic2d1L9Qj2t8D1+wmDYtA@mail.gmail.com>
+	<20151106233913.GB30882@usrtlx11787.corpusers.net>
+	<CAPDyKFqZ+1Ax9e58b0K5B+tYoNtsC0uQS3zcQR7tu5TM+51nbw@mail.gmail.com>
+	<20151110201841.GB24116@codeaurora.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <56488E6F.3090109@linux.intel.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: "Fu, Zhonghui" <zhonghui.fu@linux.intel.com>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, Neil Brown <neilb@suse.de>, Jaehoon Chung <jh80.chung@samsung.com>, Andreas Fenkart <afenkart@gmail.com>, Joe Perches <joe@perches.com>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-yk0-f171.google.com ([209.85.160.171]:34002 "EHLO
+	mail-yk0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751628AbbKPLuG (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 16 Nov 2015 06:50:06 -0500
+Received: by ykfs79 with SMTP id s79so234376177ykf.1
+        for <linux-mmc@vger.kernel.org>; Mon, 16 Nov 2015 03:50:05 -0800 (PST)
+In-Reply-To: <20151110201841.GB24116@codeaurora.org>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Stephen Boyd <sboyd@codeaurora.org>
+Cc: Bjorn Andersson <bjorn.andersson@sonymobile.com>, Bjorn Andersson <bjorn@kryo.se>, "Ivan T. Ivanov" <ivan.ivanov@linaro.org>, Georgi Djakov <georgi.djakov@linaro.org>, Peter Griffin <peter.griffin@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-arm-msm <linux-arm-msm@vger.kernel.org>
 
-On 15 November 2015 at 14:53, Fu, Zhonghui <zhonghui.fu@linux.intel.com> wrote:
-> Now, PM core supports asynchronous suspend/resume mode for devices
-> during system suspend/resume, and the power state transition of one
-> device may be completed in separate kernel thread. PM core ensures
-> all power state transition timing dependency between devices. This
-> patch enables SDIO card and function devices to suspend/resume
-> asynchronously. This will take advantage of multicore and improve
-> system suspend/resume speed. After enabling the SDIO devices and all
-> their child devices to suspend/resume asynchronously on ASUS T100TA,
-> the system suspend-to-idle time is reduced from 1645ms to 1119ms, and
-> the system resume time is reduced from 940ms to 918ms.
+[...]
+
+>> Ahh, I see.
+>>
+>> It seems like a reasonable assumption that the controller can't cope
+>> with a higher clock rate than 100 MHz as "input" clock. That would
+>> then mean that there are different versions of the controller, as it
+>> seems like for some version it's fine with 200MHz and for some 100MHz.
+>>
+>> According to the DT compatible strings, *one* version is currently
+>> supported, "qcom,sdhci-msm-v4"...
 >
-> Signed-off-by: Zhonghui Fu <zhonghui.fu@linux.intel.com>
+> The same version of hardware is there 4 times. The difference is
+> the maximum clock frequency supported by them is different. In
+> downstream kernels we've handled this by trimming the frequency
+> tables for the different controllers in the clock driver.
+> Setting the clock to INT_MAX will make it run at 400MHz, which
+> doesn't look to be supported by anything besides sdc1 on 8974ac.
+>
+>>
+>> I see two viable solutions. One would be to limit the clock rate
+>> depending on the version of the controller (new compatible strings
+>> needs to be added). Another one would be to limit the clock rate by
+>> using the existing DT binding for max-frequency, and thus do a
+>> clk_set_rate(mmc->f_max) during probe.
+>>
+>
+> I'd rather see that done via OPP tables in DT, but I suppose
+> max-frequency is fine too. We'll need to use OPPs soon enough
+> because there's a voltage associated with that frequency.
 
-I think this is an interesting change, but I wonder if you really
-understand how this affects the order of how devices may be
-suspended/resumed?
+Okay, thanks for sharing the details.
 
-Also, I believe you didn't answer my question for the earlier version
-of the patch, so let me try again.
+>
+> In case you're wondering, the max frequency for sdc1 on 8974ac is
+> 400MHz. If it's just a plain 8974pro then the max frequency is
+> 200MHz. Otherwise, sdc2 maxes out at 200Mhz and sdc3 and sdc4 max
+> out at 100MHz.
 
-There are a strict dependency chain when suspending/resuming devices
-that must be maintained. Currently this is controlled via device
-registration/probe order.
+When you say that sdc1 supports 400MHz, what does that mean? That it
+actually can cope with that clock rate when communicating with the MMC
+card?
 
-An SDIO func driver/device must always be suspended *before* the SDIO
-card device. Additionally the corresponding MMC host, must be
-suspended after the SDIO card device. Vice verse applies to the resume
-sequence.
+This makes me wonder how you deal with power management (DVFS).
 
-As this patch enables asynchronous suspend, I am worried that it will
-break this dependency chain. What do you think?
+For example when you have the possibility to gate this clock (at
+request inactivity) when the rate is set to 400 MHz and OPP is
+increased, how will then that clock gating affect the OPP?
 
 Kind regards
-Ulf Hansson
-
-> ---
-> Changes in v3:
-> - Add test result in commit message
->
->  drivers/mmc/core/sdio.c |    4 ++++
->  1 files changed, 4 insertions(+), 0 deletions(-)
->
-> diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
-> index 16d838e..530ce88 100644
-> --- a/drivers/mmc/core/sdio.c
-> +++ b/drivers/mmc/core/sdio.c
-> @@ -1113,6 +1113,8 @@ int mmc_attach_sdio(struct mmc_host *host)
->                 pm_runtime_enable(&card->dev);
->         }
->
-> +       device_enable_async_suspend(&card->dev);
-> +
->         /*
->          * The number of functions on the card is encoded inside
->          * the ocr.
-> @@ -1133,6 +1135,8 @@ int mmc_attach_sdio(struct mmc_host *host)
->                  */
->                 if (host->caps & MMC_CAP_POWER_OFF_CARD)
->                         pm_runtime_enable(&card->sdio_func[i]->dev);
-> +
-> +               device_enable_async_suspend(&card->sdio_func[i]->dev);
->         }
->
->         /*
-> -- 1.7.1
->
+Uffe
