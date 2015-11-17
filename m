@@ -1,48 +1,40 @@
-From: Mark Brown <broonie-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+From: Anton Bondarenko <anton.bondarenko.sama@gmail.com>
 Subject: Re: [PATCH] [media] move media platform data to
  linux/platform_data/media
-Date: Tue, 17 Nov 2015 10:37:08 +0000
-Message-ID: <20151117103708.GL31303@sirena.org.uk>
+Date: Tue, 17 Nov 2015 11:43:27 +0100
+Message-ID: <564B04CF.1090507@gmail.com>
 References: <4d99e49726942dc4d6a6ee1debf6665b2b47908b.1447751746.git.mchehab@osg.samsung.com>
+ <7319142.Cp8MurgLWk@wuerfel>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha256;
-	protocol="application/pgp-signature"; boundary="AQNmCumFClRcGgHG"
-Return-path: <linux-spi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <4d99e49726942dc4d6a6ee1debf6665b2b47908b.1447751746.git.mchehab-JPH+aEBZ4P+UEJcrhfAQsw@public.gmane.org>
-Sender: linux-spi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Mauro Carvalho Chehab <mchehab-JPH+aEBZ4P+UEJcrhfAQsw@public.gmane.org>
-Cc: Linux Media Mailing List <linux-media-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Mauro Carvalho Chehab <mchehab-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org>, "Acked-by: Arnd Bergmann" <arnd-r2nGTMty4D4@public.gmane.org>, Shawn Guo <shawnguo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Sascha Hauer <kernel-bIcnvbaLZ9MEGnE8C9+IrQ@public.gmane.org>, Russell King <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, Daniel Mack <daniel-cYrQPVfZoowdnm+yROfE0A@public.gmane.org>, Haojian Zhuang <haojian.zhuang-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Robert Jarzmik <robert.jarzmik-GANU6spQydw@public.gmane.org>, Daniel Ribeiro <drwyrm-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Stefan Schmidt <stefan-WB6LKoYH/xlAfugRpC6u6w@public.gmane.org>, Harald Welte <laforge-WB6LKoYH/xlAfugRpC6u6w@public.gmane.org>, Tomas Cech <sleep_walker-IBi9RG/b67k@public.gmane.org>, Sergey Lapin <slapin-9cOl001CZnBAfugRpC6u6w@public.gmane.org>, Vinod Koul <vinod.koul-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Dan Williams <dan.j.williams-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Philipp Zabel <p.zabel-bIcnvbaLZ9MEGnE8C9+IrQ@public.gmane.org>, Guennadi Liakhovetski <g.liakhovetski-Mmb7MZpHnFY@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Greg Kroah-Hartman <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>, Jiri Slaby <jslaby-IBi9RG/b67k@public.gmane.org>, Jean-Christophe Plagniol-Villard <plagnioj@>
+Content-Type: text/plain; charset=windows-1252; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-lf0-f65.google.com ([209.85.215.65]:35602 "EHLO
+	mail-lf0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750913AbbKQKnc (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 17 Nov 2015 05:43:32 -0500
+In-Reply-To: <7319142.Cp8MurgLWk@wuerfel>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Arnd Bergmann <arnd@arndb.de>, linux-arm-kernel@lists.infradead.org
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Xiubo Li <Xiubo.Lee@gmail.com>, Benjamin Herrenschmidt <benh@kernel.crashing.org>, Sergey Lapin <slapin@ossfans.org>, Timur Tabi <timur@tabi.org>, Jaroslav Kysela <perex@perex.cz>, Tomas Cech <sleep_walker@suse.com>, Shawn Guo <shawnguo@kernel.org>, Robert Jarzmik <robert.jarzmik@free.fr>, Markus Elfring <elfring@users.sourceforge.net>, Harald Welte <laforge@openezx.org>, openezx-devel@lists.openezx.org, Russell King <linux@arm.linux.org.uk>, Vinod Koul <vinod.koul@intel.com>, Tomi Valkeinen <tomi.valkeinen@ti.com>, linux-serial@vger.kernel.org, Jiri Slaby <jslaby@suse.com>, Jean-Christophe Plagniol-Villard <plagnioj@jcrosoft.com>, Daniel Ribeiro <drwyrm@gmail.com>, Linux Media Mailing List <linux-media@vger.kernel.org>, Stefan Schmidt <stefan@openezx.org>, Sascha Hauer <kernel@pengutronix.de>, alsa-devel@alsa-project.orgMa
 
 
---AQNmCumFClRcGgHG
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+On 17.11.2015 10:23, Arnd Bergmann wrote:
+> On Tuesday 17 November 2015 07:15:59 Mauro Carvalho Chehab wrote:
+>> Now that media has its own subdirectory inside platform_data,
+>> let's move the headers that are already there to such subdir.
+>>
+>>
+>
+> Acked-by: Arnd Bergmann <arnd@arndb.de>
+>
+> _______________________________________________
+> linux-arm-kernel mailing list
+> linux-arm-kernel@lists.infradead.org
+> http://lists.infradead.org/mailman/listinfo/linux-arm-kernel
+>
 
-On Tue, Nov 17, 2015 at 07:15:59AM -0200, Mauro Carvalho Chehab wrote:
-> Now that media has its own subdirectory inside platform_data,
-> let's move the headers that are already there to such subdir.
+Why does dma-imx.h also moved? It's the generic file, not a media specific.
 
-Acked-by: Mark Brown <broonie-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-
---AQNmCumFClRcGgHG
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2
-
-iQEcBAEBCAAGBQJWSwNTAAoJECTWi3JdVIfQ4KQH/jRi+u9vkGEn+1iMaGVdyCee
-J9U0tvtwOAlMOWV4MZJ6mINHE6nw6FQwEly8DLanBOkj9MtPKoiHejzPT9KPG5zl
-8895O9NAhgLh4DFi8rsoMsBx1lwK3YM0mXgdmRQxlkOkMcJd/7AsApobMen5IbwN
-q/7pMetyDSg9nRAcUQgRu2uJJLJpWmkDP/LgRCfYQDJtqQPDE/x9mEf1fAZ1QJ44
-gFxTJqlb6VUKa0K7puMfcNLmSaedJYx7DanpbiRGobzT+Zdi6dv+99nOcJsPqp3b
-kRRC2FU6gIrzJIO7kyUssJSxzPehZGP/LP8SSU0lHL3BZ5+VIsNemzMAJv+hsiA=
-=fW+n
------END PGP SIGNATURE-----
-
---AQNmCumFClRcGgHG--
---
-To unsubscribe from this list: send the line "unsubscribe linux-spi" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+BR, Anton
