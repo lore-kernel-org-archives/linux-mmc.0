@@ -1,194 +1,431 @@
-From: Alan Cooper <alcooperx@gmail.com>
-Subject: Re: [PATCH V2 1/3] mmc: sdhci-pltfm: Add DT properties to set various QUIRKS
-Date: Mon, 16 Nov 2015 18:43:53 -0500
-Message-ID: <CAOGqxeXQH1UcZqu5PiC3Sr7BUOHcLodR8Od5JoSrvzBALsp7Qg@mail.gmail.com>
-References: <1446836164-16259-1-git-send-email-alcooperx@gmail.com>
-	<1446836164-16259-2-git-send-email-alcooperx@gmail.com>
-	<CAPDyKFoFgohMb2dqGQQM_pRFH96EP58ff=N69=oRYEzoj71r0g@mail.gmail.com>
-	<CAOGqxeU73rkktbooAQeKXG6XZcOR3RqYG_gjr1PuE5E6k6bVNw@mail.gmail.com>
-	<CAPDyKFo2CLA3LpiNDqHK1WOajjCXoBWVRzTkYCYwJh9z2gcx-Q@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qg0-f46.google.com ([209.85.192.46]:34820 "EHLO
-	mail-qg0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751469AbbKPXny (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 16 Nov 2015 18:43:54 -0500
-Received: by qgec40 with SMTP id c40so61633656qge.2
-        for <linux-mmc@vger.kernel.org>; Mon, 16 Nov 2015 15:43:54 -0800 (PST)
-In-Reply-To: <CAPDyKFo2CLA3LpiNDqHK1WOajjCXoBWVRzTkYCYwJh9z2gcx-Q@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+From: Mauro Carvalho Chehab <mchehab-JPH+aEBZ4P+UEJcrhfAQsw@public.gmane.org>
+Subject: [PATCH] [media] move media platform data to linux/platform_data/media
+Date: Tue, 17 Nov 2015 07:15:59 -0200
+Message-ID: <4d99e49726942dc4d6a6ee1debf6665b2b47908b.1447751746.git.mchehab@osg.samsung.com>
+Return-path: <linux-spi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Sender: linux-spi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: Mauro Carvalho Chehab <mchehab-JPH+aEBZ4P+UEJcrhfAQsw@public.gmane.org>, Linux Media Mailing List <linux-media-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Mauro Carvalho Chehab <mchehab-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org>, "Acked-by: Arnd Bergmann" <arnd-r2nGTMty4D4@public.gmane.org>, Shawn Guo <shawnguo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Sascha Hauer <kernel-bIcnvbaLZ9MEGnE8C9+IrQ@public.gmane.org>, Russell King <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, Daniel Mack <daniel-cYrQPVfZoowdnm+yROfE0A@public.gmane.org>, Haojian Zhuang <haojian.zhuang-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Robert Jarzmik <robert.jarzmik-GANU6spQydw@public.gmane.org>, Daniel Ribeiro <drwyrm-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Stefan Schmidt <stefan-WB6LKoYH/xlAfugRpC6u6w@public.gmane.org>, Harald Welte <laforge-WB6LKoYH/xlAfugRpC6u6w@public.gmane.org>, Tomas Cech <sleep_walker-IBi9RG/b67k@public.gmane.org>, Sergey Lapin <slapin-9cOl001CZnBAfugRpC6u6w@public.gmane.org>, Vinod Koul <vinod.koul-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Dan Williams <dan.j.williams-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Philipp Zabel <p.zabel-bIcnvbaLZ9MEGnE8C9+IrQ@public.gmane.org>, Guennadi Liakhovetski <g.liakhovetski-Mmb7MZpHnFY@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Mark Brown <broonie-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Greg Kroah-Hartman <gregkh@linuxfoundati>
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, bcm-kernel-feedback-list@broadcom.com
 
-On Fri, Nov 13, 2015 at 4:31 AM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
-> On 12 November 2015 at 20:44, Alan Cooper <alcooperx@gmail.com> wrote:
->> On Thu, Nov 12, 2015 at 4:35 AM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
->>> On 6 November 2015 at 19:56, Al Cooper <alcooperx@gmail.com> wrote:
->>>> Add support for "broken-ddr50", "broken-64-bit-dma"
->>>> and "broken-timeout-value" device tree properties.
->>>> The properties will cause the corresponding quirks bits to be set.
->>>> This allows some of the platform specific QUIRKS setting to be
->>>> moved out of the driver and into the Device Tree node.
->>>>
->>>> Signed-off-by: Al Cooper <alcooperx@gmail.com>
->>>> ---
->>>>  drivers/mmc/host/sdhci-pltfm.c | 8 +++++++-
->>>>  1 file changed, 7 insertions(+), 1 deletion(-)
->>>>
->>>> diff --git a/drivers/mmc/host/sdhci-pltfm.c b/drivers/mmc/host/sdhci-pltfm.c
->>>> index 87fb5ea..cc0730c 100644
->>>> --- a/drivers/mmc/host/sdhci-pltfm.c
->>>> +++ b/drivers/mmc/host/sdhci-pltfm.c
->>>> @@ -90,10 +90,14 @@ void sdhci_get_of_property(struct platform_device *pdev)
->>>>         if (of_get_property(np, "no-1-8-v", NULL))
->>>>                 host->quirks2 |= SDHCI_QUIRK2_NO_1_8_V;
->>>>
->>>> +       if (of_get_property(np, "broken-64-bit-dma", NULL))
->>>> +               host->quirks2 |= SDHCI_QUIRK2_BROKEN_64_BIT_DMA;
->>>> +
->>>
->>> To me this is yet another step in the wrong direction of sdhci.
->>>
->>> Not only have we added a quirk which we likely could avoided, but now
->>> you also suggest to add a DT binding for it.
->>>
->>> Please try to avoid this, we shouldn't need to add one DT binding per
->>> quirk, right?
->>
->> The BRCMSTB SDHCI driver needs to support a mix of existing and future
->> ARM and MIPS SoC's on a variety of boards, and many of the
->> combinations have issues. In older separate MIPS/ARM internal versions
->> of the driver, issues were handled by a combination of QUIRKS and the
->> use of custom SDHCI registers that allowed the Host CAPS registers to
->> be changed on a per chip basis. While working on a unified driver for
->> 4.1, I realized that almost all the issues solved by overriding the
->> CAPs registers could also be done using an existing QUIRK and if I had
->> device tree properties that set the QUIRKs, that all the chip/board
->> specific knowledge would end up in the device tree node instead of in
->> the driver. This also allowed me to stop using the non-standard CAPS
->> override registers that tended to change per chip. This approach also
->> allows the driver to work, without change, on future chips/boards as
->> long as they don't have any new issues and they have the proper device
->> tree node.
->>
->> Would there be any objection to me continuing this approach if I moved
->> all the functionality into the sdhci-brcm.c driver and left sdhci.c
->> and sdhci-pltfm.c untouched?
->
-> Let me elaborate a bit on what I think you/we need to do.
->
-> The problem with the quirks is that these exists because of how the
-> sdhci code is designed.
->
-> Sdhci core should have been implemented as a pure library providing a
-> set of common functions. Today it's more of a driver than a library.
-> All, or at least most of the variant specific code, should have been
-> dealt from each of the sdhci variant drivers, instead of via quirks
-> and sdhci callbacks.
->
-> If you didn't notice my recent statement regarding the above on
-> linux-mmc, let's me say it again. I have a reached a point where I
-> think sdhci has become unmaintainable (and non-optimized coding wise)
-> and I am therefore encouraging people to stop adding new quirks or
-> sdhci callbacks, but instead "libraryfy" sdhci. I would really
-> appreciate if you could help moving sdhci in that direction!
->
-> That said, you won't be able to leave the sdhci core code untouched,
-> because that would in principle mean that you will need to duplicate
-> much of the sdhci code into your sdhci-brcm driver. Instead, try to
-> split-up/re-factor common sdhci code into library functions, which
-> your sdhci-brcm driver can use.
->
-> I guess one of the hardest part in this effort will be to not break
-> existing sdhci variant drivers. Let's do our best in that effort, but
-> we will rely on more people to participate in testing/coding.
->
->>
->>>
->>>>         if (of_device_is_compatible(np, "fsl,p2020-rev1-esdhc"))
->>>>                 host->quirks |= SDHCI_QUIRK_BROKEN_DMA;
->>>>
->>>> -       if (of_device_is_compatible(np, "fsl,p2020-esdhc") ||
->>>> +       if (of_get_property(np, "broken-timeout-value", NULL) ||
->>>> +           of_device_is_compatible(np, "fsl,p2020-esdhc") ||
->>>>             of_device_is_compatible(np, "fsl,p1010-esdhc") ||
->>>>             of_device_is_compatible(np, "fsl,t4240-esdhc") ||
->>>>             of_device_is_compatible(np, "fsl,mpc8536-esdhc"))
->>>> @@ -106,6 +110,8 @@ void sdhci_get_of_property(struct platform_device *pdev)
->>>>
->>>>         if (of_find_property(np, "enable-sdio-wakeup", NULL))
->>>>                 host->mmc->pm_caps |= MMC_PM_WAKE_SDIO_IRQ;
->>>> +       if (of_find_property(np, "broken-ddr50", NULL))
->>>> +               host->quirks2 |= SDHCI_QUIRK2_BROKEN_DDR50;
->>>
->>> Same comment as above.
->>>
->>> Let me also refer to the response from Scott Branden to the earlier
->>> version of this patchset.
->>> http://permalink.gmane.org/gmane.linux.kernel.mmc/34614
->>>
->>> Perhaps we should invent a sdhci library function, which each sdhci
->>> variant can use to set capabilities through. Typically useful for
->>> those variants that have a non-reliable capabilities register.
->>>
->>
->> Do you mean something more than using SDHCI_QUIRK_MISSING_CAPS which
->> allows the driver to supply the 2 CAPS registers instead of having
->> sdhci.c get them by reading the Host CAPS registers?
->
-> Yes, something like that, but preferably without needing to use *any* quirk.
->
-> From an sdhci core perspective there could be a library function which
-> parses the Host CAPS register. Some sdhci variants could use that
-> function and some couldn't since the informations in the CAPS register
-> isn't reliable.
+Now that media has its own subdirectory inside platform_data,
+let's move the headers that are already there to such subdir.
 
-As a possible first step, what about the following:
-Change sdhci_add_host() to take an additional parameter that, if not
-NULL, is a pointer to a data structure that contains overrides for
-CAPS and CAPS1 in the form of a mask/value pair. These pairs would be
-used by sdhci_add_host() to modify any field after reading the CAPS
-and CAPS1 registers. With this in place it looks like the following
-QUIRKS would no longer be needed because they could be handled in the
-variant drivers using overrides:
-SDHCI_QUIRK_FORCE_DMA
-SDHCI_QUIRK_BROKEN_DMA
-SDHCI_QUIRK_BROKEN_ADMA
-SDHCI_QUIRK_FORCE_BLK_SZ_2048
-SDHCI_QUIRK_MISSING_CAPS
-SDHCI_QUIRK2_NO_1_8_V
-SDHCI_QUIRK2_BROKEN_DDR50
-SDHCI_QUIRK2_BROKEN_64_BIT_DMA
+After moving those files, the references were adjusted using this
+script:
 
-I would add device tree properties for the overrides to my variant
-driver. I could also add the overrides as module params. There are
-also many drivers that hook the sdhci_readl() routine to modify the
-CAPS fields that could be changed to use the overrides.
+    MAIN_DIR="linux/platform_data/"
+    PREV_DIR="linux/platform_data/"
+    DIRS="media/"
 
-With this change, my variant driver that supports more than 10
-different MIPS/ARM SoC's would be very small with all the SoC
-differences handled using overrides in the device tree and without the
-use of any QUIRKS.
+    echo "Checking affected files" >&2
+    for i in $DIRS; do
+	for j in $(find include/$MAIN_DIR/$i -type f -name '*.h'); do
+		 n=`basename $j`
+		git grep -l $n
+	done
+    done|sort|uniq >files && (
+	echo "Handling files..." >&2;
+	echo "for i in \$(cat files|grep -v Documentation); do cat \$i | \\";
+	(
+		cd include/$MAIN_DIR;
+		for j in $DIRS; do
+			for i in $(ls $j); do
+				echo "perl -ne 's,(include [\\\"\\<])$PREV_DIR($i)([\\\"\\>]),\1$MAIN_DIR$j\2\3,; print \$_' |\\";
+			done;
+		done;
+		echo "cat > a && mv a \$i; done";
+	);
+	echo "Handling documentation..." >&2;
+	echo "for i in MAINTAINERS \$(cat files); do cat \$i | \\";
+	(
+		cd include/$MAIN_DIR;
+		for j in $DIRS; do
+			for i in $(ls $j); do
+				echo "  perl -ne 's,include/$PREV_DIR($i)\b,include/$MAIN_DIR$j\1,; print \$_' |\\";
+			done;
+		done;
+		echo "cat > a && mv a \$i; done"
+	);
+    ) >script && . ./script
 
->
->>
->>>>  }
->>>>  #else
->>>>  void sdhci_get_of_property(struct platform_device *pdev) {}
->>>> --
->>>> 1.9.0.138.g2de3478
->>>>
->>>
->>> Kind regards
->>> Uffe
->>
->> Thanks
->> Al
->
-> Kind regards
-> Uffe
+Suggested-by: Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>
+Signed-off-by: Mauro Carvalho Chehab <mchehab-JPH+aEBZ4P+UEJcrhfAQsw@public.gmane.org>
+---
+ arch/arm/mach-imx/devices/devices-common.h            | 4 ++--
+ arch/arm/mach-pxa/devices.c                           | 2 +-
+ arch/arm/mach-pxa/em-x270.c                           | 2 +-
+ arch/arm/mach-pxa/ezx.c                               | 2 +-
+ arch/arm/mach-pxa/mioa701.c                           | 2 +-
+ arch/arm/mach-pxa/palmtreo.c                          | 2 +-
+ arch/arm/mach-pxa/palmz72.c                           | 2 +-
+ arch/arm/mach-pxa/pcm990-baseboard.c                  | 2 +-
+ drivers/dma/imx-dma.c                                 | 2 +-
+ drivers/dma/imx-sdma.c                                | 2 +-
+ drivers/media/platform/coda/coda-common.c             | 2 +-
+ drivers/media/platform/soc_camera/mx2_camera.c        | 2 +-
+ drivers/media/platform/soc_camera/mx3_camera.c        | 4 ++--
+ drivers/media/platform/soc_camera/pxa_camera.c        | 2 +-
+ drivers/media/platform/soc_camera/rcar_vin.c          | 2 +-
+ drivers/mmc/host/mxcmmc.c                             | 2 +-
+ drivers/spi/spi-imx.c                                 | 2 +-
+ drivers/tty/serial/imx.c                              | 2 +-
+ drivers/video/fbdev/mx3fb.c                           | 2 +-
+ include/linux/platform_data/{ => media}/camera-mx2.h  | 0
+ include/linux/platform_data/{ => media}/camera-mx3.h  | 0
+ include/linux/platform_data/{ => media}/camera-pxa.h  | 0
+ include/linux/platform_data/{ => media}/camera-rcar.h | 0
+ include/linux/platform_data/{ => media}/coda.h        | 0
+ include/linux/platform_data/{ => media}/dma-imx.h     | 0
+ sound/soc/fsl/fsl_asrc.c                              | 2 +-
+ sound/soc/fsl/fsl_asrc_dma.c                          | 2 +-
+ sound/soc/fsl/imx-pcm.h                               | 2 +-
+ sound/soc/fsl/imx-ssi.h                               | 2 +-
+ 29 files changed, 25 insertions(+), 25 deletions(-)
+ rename include/linux/platform_data/{ => media}/camera-mx2.h (100%)
+ rename include/linux/platform_data/{ => media}/camera-mx3.h (100%)
+ rename include/linux/platform_data/{ => media}/camera-pxa.h (100%)
+ rename include/linux/platform_data/{ => media}/camera-rcar.h (100%)
+ rename include/linux/platform_data/{ => media}/coda.h (100%)
+ rename include/linux/platform_data/{ => media}/dma-imx.h (100%)
 
-Thanks
-Al
+diff --git a/arch/arm/mach-imx/devices/devices-common.h b/arch/arm/mach-imx/devices/devices-common.h
+index 67f7fb13050d..09cebd8cef2b 100644
+--- a/arch/arm/mach-imx/devices/devices-common.h
++++ b/arch/arm/mach-imx/devices/devices-common.h
+@@ -177,7 +177,7 @@ struct platform_device *__init imx_add_imx_uart_1irq(
+ 		const struct imxuart_platform_data *pdata);
+ 
+ #include <linux/platform_data/video-mx3fb.h>
+-#include <linux/platform_data/camera-mx3.h>
++#include <linux/platform_data/media/camera-mx3.h>
+ struct imx_ipu_core_data {
+ 	resource_size_t iobase;
+ 	resource_size_t synirq;
+@@ -192,7 +192,7 @@ struct platform_device *__init imx_add_mx3_sdc_fb(
+ 		const struct imx_ipu_core_data *data,
+ 		struct mx3fb_platform_data *pdata);
+ 
+-#include <linux/platform_data/camera-mx2.h>
++#include <linux/platform_data/media/camera-mx2.h>
+ struct imx_mx2_camera_data {
+ 	const char *devid;
+ 	resource_size_t iobasecsi;
+diff --git a/arch/arm/mach-pxa/devices.c b/arch/arm/mach-pxa/devices.c
+index 2a6e0ae2b920..d1211a40f400 100644
+--- a/arch/arm/mach-pxa/devices.c
++++ b/arch/arm/mach-pxa/devices.c
+@@ -14,7 +14,7 @@
+ #include <mach/irqs.h>
+ #include <linux/platform_data/usb-ohci-pxa27x.h>
+ #include <linux/platform_data/keypad-pxa27x.h>
+-#include <linux/platform_data/camera-pxa.h>
++#include <linux/platform_data/media/camera-pxa.h>
+ #include <mach/audio.h>
+ #include <mach/hardware.h>
+ #include <linux/platform_data/mmp_dma.h>
+diff --git a/arch/arm/mach-pxa/em-x270.c b/arch/arm/mach-pxa/em-x270.c
+index 9d7072b04045..8b1f89e096c6 100644
+--- a/arch/arm/mach-pxa/em-x270.c
++++ b/arch/arm/mach-pxa/em-x270.c
+@@ -46,7 +46,7 @@
+ #include <linux/platform_data/usb-ohci-pxa27x.h>
+ #include <linux/platform_data/mmc-pxamci.h>
+ #include <linux/platform_data/keypad-pxa27x.h>
+-#include <linux/platform_data/camera-pxa.h>
++#include <linux/platform_data/media/camera-pxa.h>
+ 
+ #include "generic.h"
+ #include "devices.h"
+diff --git a/arch/arm/mach-pxa/ezx.c b/arch/arm/mach-pxa/ezx.c
+index 9a9c15bfcd34..12af6e2d597c 100644
+--- a/arch/arm/mach-pxa/ezx.c
++++ b/arch/arm/mach-pxa/ezx.c
+@@ -34,7 +34,7 @@
+ #include <linux/platform_data/usb-ohci-pxa27x.h>
+ #include <mach/hardware.h>
+ #include <linux/platform_data/keypad-pxa27x.h>
+-#include <linux/platform_data/camera-pxa.h>
++#include <linux/platform_data/media/camera-pxa.h>
+ 
+ #include "devices.h"
+ #include "generic.h"
+diff --git a/arch/arm/mach-pxa/mioa701.c b/arch/arm/mach-pxa/mioa701.c
+index 3b52b1aa0659..ccfd2b63c6a4 100644
+--- a/arch/arm/mach-pxa/mioa701.c
++++ b/arch/arm/mach-pxa/mioa701.c
+@@ -54,7 +54,7 @@
+ #include <linux/platform_data/mmc-pxamci.h>
+ #include <mach/udc.h>
+ #include <mach/pxa27x-udc.h>
+-#include <linux/platform_data/camera-pxa.h>
++#include <linux/platform_data/media/camera-pxa.h>
+ #include <mach/audio.h>
+ #include <mach/smemc.h>
+ #include <media/soc_camera.h>
+diff --git a/arch/arm/mach-pxa/palmtreo.c b/arch/arm/mach-pxa/palmtreo.c
+index d8b937c870de..2dc56062fb7e 100644
+--- a/arch/arm/mach-pxa/palmtreo.c
++++ b/arch/arm/mach-pxa/palmtreo.c
+@@ -43,7 +43,7 @@
+ #include <linux/platform_data/usb-ohci-pxa27x.h>
+ #include <mach/pxa2xx-regs.h>
+ #include <linux/platform_data/asoc-palm27x.h>
+-#include <linux/platform_data/camera-pxa.h>
++#include <linux/platform_data/media/camera-pxa.h>
+ #include <mach/palm27x.h>
+ 
+ #include <sound/pxa2xx-lib.h>
+diff --git a/arch/arm/mach-pxa/palmz72.c b/arch/arm/mach-pxa/palmz72.c
+index 1a35ddf218da..e3df17a7e8d4 100644
+--- a/arch/arm/mach-pxa/palmz72.c
++++ b/arch/arm/mach-pxa/palmz72.c
+@@ -49,7 +49,7 @@
+ #include <mach/palm27x.h>
+ 
+ #include <mach/pm.h>
+-#include <linux/platform_data/camera-pxa.h>
++#include <linux/platform_data/media/camera-pxa.h>
+ 
+ #include <media/soc_camera.h>
+ 
+diff --git a/arch/arm/mach-pxa/pcm990-baseboard.c b/arch/arm/mach-pxa/pcm990-baseboard.c
+index e3b58cb84c06..8459239a093c 100644
+--- a/arch/arm/mach-pxa/pcm990-baseboard.c
++++ b/arch/arm/mach-pxa/pcm990-baseboard.c
+@@ -30,7 +30,7 @@
+ #include <media/i2c/mt9v022.h>
+ #include <media/soc_camera.h>
+ 
+-#include <linux/platform_data/camera-pxa.h>
++#include <linux/platform_data/media/camera-pxa.h>
+ #include <asm/mach/map.h>
+ #include <mach/pxa27x.h>
+ #include <mach/audio.h>
+diff --git a/drivers/dma/imx-dma.c b/drivers/dma/imx-dma.c
+index 48d85f8b95fe..8d1856369af4 100644
+--- a/drivers/dma/imx-dma.c
++++ b/drivers/dma/imx-dma.c
+@@ -31,7 +31,7 @@
+ #include <linux/of_dma.h>
+ 
+ #include <asm/irq.h>
+-#include <linux/platform_data/dma-imx.h>
++#include <linux/platform_data/media/dma-imx.h>
+ 
+ #include "dmaengine.h"
+ #define IMXDMA_MAX_CHAN_DESCRIPTORS	16
+diff --git a/drivers/dma/imx-sdma.c b/drivers/dma/imx-sdma.c
+index 7058d58ba588..fde0537b55ed 100644
+--- a/drivers/dma/imx-sdma.c
++++ b/drivers/dma/imx-sdma.c
+@@ -41,7 +41,7 @@
+ 
+ #include <asm/irq.h>
+ #include <linux/platform_data/dma-imx-sdma.h>
+-#include <linux/platform_data/dma-imx.h>
++#include <linux/platform_data/media/dma-imx.h>
+ #include <linux/regmap.h>
+ #include <linux/mfd/syscon.h>
+ #include <linux/mfd/syscon/imx6q-iomuxc-gpr.h>
+diff --git a/drivers/media/platform/coda/coda-common.c b/drivers/media/platform/coda/coda-common.c
+index 15516a6e3a39..f821627d015b 100644
+--- a/drivers/media/platform/coda/coda-common.c
++++ b/drivers/media/platform/coda/coda-common.c
+@@ -28,7 +28,7 @@
+ #include <linux/slab.h>
+ #include <linux/videodev2.h>
+ #include <linux/of.h>
+-#include <linux/platform_data/coda.h>
++#include <linux/platform_data/media/coda.h>
+ #include <linux/reset.h>
+ 
+ #include <media/v4l2-ctrls.h>
+diff --git a/drivers/media/platform/soc_camera/mx2_camera.c b/drivers/media/platform/soc_camera/mx2_camera.c
+index 55437ec3a3e2..276beaefca7c 100644
+--- a/drivers/media/platform/soc_camera/mx2_camera.c
++++ b/drivers/media/platform/soc_camera/mx2_camera.c
+@@ -39,7 +39,7 @@
+ 
+ #include <linux/videodev2.h>
+ 
+-#include <linux/platform_data/camera-mx2.h>
++#include <linux/platform_data/media/camera-mx2.h>
+ 
+ #include <asm/dma.h>
+ 
+diff --git a/drivers/media/platform/soc_camera/mx3_camera.c b/drivers/media/platform/soc_camera/mx3_camera.c
+index 3e67b9517a5a..a7d449dd84f9 100644
+--- a/drivers/media/platform/soc_camera/mx3_camera.c
++++ b/drivers/media/platform/soc_camera/mx3_camera.c
+@@ -25,8 +25,8 @@
+ #include <media/soc_camera.h>
+ #include <media/drv-intf/soc_mediabus.h>
+ 
+-#include <linux/platform_data/camera-mx3.h>
+-#include <linux/platform_data/dma-imx.h>
++#include <linux/platform_data/media/camera-mx3.h>
++#include <linux/platform_data/media/dma-imx.h>
+ 
+ #define MX3_CAM_DRV_NAME "mx3-camera"
+ 
+diff --git a/drivers/media/platform/soc_camera/pxa_camera.c b/drivers/media/platform/soc_camera/pxa_camera.c
+index 34762a82ebd2..415f3bda60bf 100644
+--- a/drivers/media/platform/soc_camera/pxa_camera.c
++++ b/drivers/media/platform/soc_camera/pxa_camera.c
+@@ -39,7 +39,7 @@
+ #include <linux/videodev2.h>
+ 
+ #include <mach/dma.h>
+-#include <linux/platform_data/camera-pxa.h>
++#include <linux/platform_data/media/camera-pxa.h>
+ 
+ #define PXA_CAM_VERSION "0.0.6"
+ #define PXA_CAM_DRV_NAME "pxa27x-camera"
+diff --git a/drivers/media/platform/soc_camera/rcar_vin.c b/drivers/media/platform/soc_camera/rcar_vin.c
+index 32aa64c3fc7e..defee08f073c 100644
+--- a/drivers/media/platform/soc_camera/rcar_vin.c
++++ b/drivers/media/platform/soc_camera/rcar_vin.c
+@@ -21,7 +21,7 @@
+ #include <linux/module.h>
+ #include <linux/of.h>
+ #include <linux/of_device.h>
+-#include <linux/platform_data/camera-rcar.h>
++#include <linux/platform_data/media/camera-rcar.h>
+ #include <linux/platform_device.h>
+ #include <linux/pm_runtime.h>
+ #include <linux/slab.h>
+diff --git a/drivers/mmc/host/mxcmmc.c b/drivers/mmc/host/mxcmmc.c
+index d110f9e98c4b..9b8aba09a56d 100644
+--- a/drivers/mmc/host/mxcmmc.c
++++ b/drivers/mmc/host/mxcmmc.c
+@@ -44,7 +44,7 @@
+ #include <asm/irq.h>
+ #include <linux/platform_data/mmc-mxcmmc.h>
+ 
+-#include <linux/platform_data/dma-imx.h>
++#include <linux/platform_data/media/dma-imx.h>
+ 
+ #define DRIVER_NAME "mxc-mmc"
+ #define MXCMCI_TIMEOUT_MS 10000
+diff --git a/drivers/spi/spi-imx.c b/drivers/spi/spi-imx.c
+index 0e5723ab47f0..0a84ab47c8c9 100644
+--- a/drivers/spi/spi-imx.c
++++ b/drivers/spi/spi-imx.c
+@@ -39,7 +39,7 @@
+ #include <linux/of_device.h>
+ #include <linux/of_gpio.h>
+ 
+-#include <linux/platform_data/dma-imx.h>
++#include <linux/platform_data/media/dma-imx.h>
+ #include <linux/platform_data/spi-imx.h>
+ 
+ #define DRIVER_NAME "spi_imx"
+diff --git a/drivers/tty/serial/imx.c b/drivers/tty/serial/imx.c
+index 016e4be05cec..cfc622fd02ab 100644
+--- a/drivers/tty/serial/imx.c
++++ b/drivers/tty/serial/imx.c
+@@ -42,7 +42,7 @@
+ 
+ #include <asm/irq.h>
+ #include <linux/platform_data/serial-imx.h>
+-#include <linux/platform_data/dma-imx.h>
++#include <linux/platform_data/media/dma-imx.h>
+ 
+ /* Register definitions */
+ #define URXD0 0x0  /* Receiver Register */
+diff --git a/drivers/video/fbdev/mx3fb.c b/drivers/video/fbdev/mx3fb.c
+index 7947634ee6b0..702b6ff23370 100644
+--- a/drivers/video/fbdev/mx3fb.c
++++ b/drivers/video/fbdev/mx3fb.c
+@@ -29,7 +29,7 @@
+ #include <linux/dma/ipu-dma.h>
+ #include <linux/backlight.h>
+ 
+-#include <linux/platform_data/dma-imx.h>
++#include <linux/platform_data/media/dma-imx.h>
+ #include <linux/platform_data/video-mx3fb.h>
+ 
+ #include <asm/io.h>
+diff --git a/include/linux/platform_data/camera-mx2.h b/include/linux/platform_data/media/camera-mx2.h
+similarity index 100%
+rename from include/linux/platform_data/camera-mx2.h
+rename to include/linux/platform_data/media/camera-mx2.h
+diff --git a/include/linux/platform_data/camera-mx3.h b/include/linux/platform_data/media/camera-mx3.h
+similarity index 100%
+rename from include/linux/platform_data/camera-mx3.h
+rename to include/linux/platform_data/media/camera-mx3.h
+diff --git a/include/linux/platform_data/camera-pxa.h b/include/linux/platform_data/media/camera-pxa.h
+similarity index 100%
+rename from include/linux/platform_data/camera-pxa.h
+rename to include/linux/platform_data/media/camera-pxa.h
+diff --git a/include/linux/platform_data/camera-rcar.h b/include/linux/platform_data/media/camera-rcar.h
+similarity index 100%
+rename from include/linux/platform_data/camera-rcar.h
+rename to include/linux/platform_data/media/camera-rcar.h
+diff --git a/include/linux/platform_data/coda.h b/include/linux/platform_data/media/coda.h
+similarity index 100%
+rename from include/linux/platform_data/coda.h
+rename to include/linux/platform_data/media/coda.h
+diff --git a/include/linux/platform_data/dma-imx.h b/include/linux/platform_data/media/dma-imx.h
+similarity index 100%
+rename from include/linux/platform_data/dma-imx.h
+rename to include/linux/platform_data/media/dma-imx.h
+diff --git a/sound/soc/fsl/fsl_asrc.c b/sound/soc/fsl/fsl_asrc.c
+index 9f087d4f73ed..0ca75915ff12 100644
+--- a/sound/soc/fsl/fsl_asrc.c
++++ b/sound/soc/fsl/fsl_asrc.c
+@@ -15,7 +15,7 @@
+ #include <linux/dma-mapping.h>
+ #include <linux/module.h>
+ #include <linux/of_platform.h>
+-#include <linux/platform_data/dma-imx.h>
++#include <linux/platform_data/media/dma-imx.h>
+ #include <linux/pm_runtime.h>
+ #include <sound/dmaengine_pcm.h>
+ #include <sound/pcm_params.h>
+diff --git a/sound/soc/fsl/fsl_asrc_dma.c b/sound/soc/fsl/fsl_asrc_dma.c
+index ffc000bc1f15..96e3fb0db535 100644
+--- a/sound/soc/fsl/fsl_asrc_dma.c
++++ b/sound/soc/fsl/fsl_asrc_dma.c
+@@ -12,7 +12,7 @@
+ 
+ #include <linux/dma-mapping.h>
+ #include <linux/module.h>
+-#include <linux/platform_data/dma-imx.h>
++#include <linux/platform_data/media/dma-imx.h>
+ #include <sound/dmaengine_pcm.h>
+ #include <sound/pcm_params.h>
+ 
+diff --git a/sound/soc/fsl/imx-pcm.h b/sound/soc/fsl/imx-pcm.h
+index 133c4470acad..367e1a768d42 100644
+--- a/sound/soc/fsl/imx-pcm.h
++++ b/sound/soc/fsl/imx-pcm.h
+@@ -13,7 +13,7 @@
+ #ifndef _IMX_PCM_H
+ #define _IMX_PCM_H
+ 
+-#include <linux/platform_data/dma-imx.h>
++#include <linux/platform_data/media/dma-imx.h>
+ 
+ /*
+  * Do not change this as the FIQ handler depends on this size
+diff --git a/sound/soc/fsl/imx-ssi.h b/sound/soc/fsl/imx-ssi.h
+index be6562365b6a..7a7d55b54cf5 100644
+--- a/sound/soc/fsl/imx-ssi.h
++++ b/sound/soc/fsl/imx-ssi.h
+@@ -186,7 +186,7 @@
+ #define DRV_NAME "imx-ssi"
+ 
+ #include <linux/dmaengine.h>
+-#include <linux/platform_data/dma-imx.h>
++#include <linux/platform_data/media/dma-imx.h>
+ #include <sound/dmaengine_pcm.h>
+ #include "imx-pcm.h"
+ 
+-- 
+2.5.0
+
+--
+To unsubscribe from this list: send the line "unsubscribe linux-spi" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
