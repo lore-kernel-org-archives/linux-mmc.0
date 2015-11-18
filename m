@@ -1,80 +1,51 @@
-From: Andy Shevchenko <andy.shevchenko@gmail.com>
-Subject: Re: [PATCH] mmc: dw_mmc: use resource_size_t to store physical address
-Date: Wed, 18 Nov 2015 17:29:19 +0200
-Message-ID: <CAHp75VfE2DWYB5GwSe1WLPb+gTnhNpYz5qo7jNfMK4tXbEWioQ@mail.gmail.com>
-References: <28102387.ALpaBHpim0@wuerfel>
-	<6288847.N1QBIiXedG@wuerfel>
-	<CAHp75Vf4oaLZE27bC+aH9HD6W4E8Gditoz=HF0Z1WwcLWJnSKA@mail.gmail.com>
-	<5141236.CHnzdS7Lto@wuerfel>
+From: Andy Shevchenko <andy.shevchenko-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Subject: Re: [PATCH 02/13] dmaengine: Introduce dma_request_slave_channel_compat_reason()
+Date: Wed, 18 Nov 2015 17:43:04 +0200
+Message-ID: <CAHp75VeZFXp9i_zz7CBkVQVPGQxuzYk9AbWbbbn33r8YX3LCdw@mail.gmail.com>
+References: <1432646768-12532-1-git-send-email-peter.ujfalusi@ti.com>
+	<6347063.Gd6coh6hX8@wuerfel>
+	<564C8E1F.8010501@ti.com>
+	<6358656.jIv3GGCCXu@wuerfel>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-yk0-f194.google.com ([209.85.160.194]:35890 "EHLO
-	mail-yk0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756003AbbKRP3U (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 18 Nov 2015 10:29:20 -0500
-In-Reply-To: <5141236.CHnzdS7Lto@wuerfel>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-spi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <6358656.jIv3GGCCXu@wuerfel>
+Sender: linux-spi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>
+Cc: Peter Ujfalusi <peter.ujfalusi-l0cyMroinI0@public.gmane.org>, Vinod Koul <vinod.koul-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Geert Uytterhoeven <geert-Td1EMuHUCqxL1ZNQvxDV9g@public.gmane.org>, Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Dan Williams <dan.j.williams-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, dmaengine <dmaengine-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-serial-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-serial-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux MMC List <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-crypto <linux-crypto-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-spi <linux-spi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux Media Mailing List <linux-media-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ALSA Development Mailing List <alsa-devel-K7yf7f+aM1XWsZ/bQMPhNw@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Arnd Bergmann <arnd@arndb.de>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Jaehoon Chung <jh80.chung@samsung.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-arm Mailing List <linux-arm-kernel@lists.infradead.org>
 
-On Wed, Nov 18, 2015 at 2:38 PM, Arnd Bergmann <arnd@arndb.de> wrote:
-> On Wednesday 18 November 2015 11:35:27 Andy Shevchenko wrote:
->> On Fri, Nov 13, 2015 at 11:35 AM, Arnd Bergmann <arnd@arndb.de> wrote:
->> > On Friday 13 November 2015 03:10:13 Andy Shevchenko wrote:
->> >> On Thu, Nov 12, 2015 at 4:14 PM, Arnd Bergmann <arnd@arndb.de> wrote:
-
-[]
-
->> >> If dst_addr is dma_addr_t wouldn't be a problem when
->> >> resource_size_t is defined as 64-bit address, and dma_addr_t as 32-bit?
+On Wed, Nov 18, 2015 at 5:07 PM, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org> wrote:
+> On Wednesday 18 November 2015 16:41:35 Peter Ujfalusi wrote:
+>> On 11/18/2015 04:29 PM, Arnd Bergmann wrote:
+>> > On Wednesday 18 November 2015 16:21:26 Peter Ujfalusi wrote:
+>> >> 2. non slave channel requests, where only the functionality matters, like
+>> >> memcpy, interleaved, memset, etc.
+>> >> We could have a simple:
+>> >> dma_request_channel(mask);
 >> >>
->> >> Btw, for me casting to dma_addr_t looks sane.
->> >
->> > The background here is that the address comes from a resource_size_t
->> > that describes the MMIO register area as seen from the CPU, and that
->> > is normally a phys_addr_t (resource_size_t is defined as being long
->> > enough to store a phys_addr_t or various other things depending on
->> > resource->flags).
->> >
->> > dma_addr_t strictly speaking refers to a RAM location as seen by a
->> > DMA master, and that only comes out of dma_map_*() or
->> > dma_alloc_coherent().
->> >
->> > The DMA engine wants something else here, which is an MMIO register
->> > address as seen by a DMA master, and we don't have a separate typedef
->> > for that. Almost universally all of resource_size_t, phys_addr_t and
->> > dma_addr_t are the same type, and if we ever get a platform that
->> > wants something other than a phys_addr_t to put into cfg.dst_addr,
->> > we are in deep trouble.
->>
->> DMA operates with address space covered by dma_addr_t, if you use
->> phys_addr_t you may get address out of DMA boundaries. This is should
->> be done in hardware / firmware / platform representation.
->> So, I don't see any reason not to use dma_addr_t here.
+>> >> But looking at the drivers using dmaengine legacy dma_request_channel() API:
+>> >> Some sets DMA_INTERRUPT or DMA_PRIVATE or DMA_SG along with DMA_SLAVE:
+>> >> drivers/misc/carma/carma-fpga.c                 DMA_INTERRUPT|DMA_SLAVE|DMA_SG
+>> >> drivers/misc/carma/carma-fpga-program.c         DMA_MEMCPY|DMA_SLAVE|DMA_SG
+>> >> drivers/media/platform/soc_camera/mx3_camera.c  DMA_SLAVE|DMA_PRIVATE
+>> >> sound/soc/intel/common/sst-firmware.c           DMA_SLAVE|DMA_MEMCPY
+>> >>
+>> >> as examples.
+>> >> Not sure how valid are these...
 >
-> As I said above, this isn't really the same as DMA: all normal
-> dma_addr_t are returned from dma_alloc_* or dma_map_*, point
-> to RAM and might go trhough an IOMMU, all of which is not true
-> here, hence the patch to change the type to phys_addr_t.
+> I just had a look myself. carma has been removed fortunately in linux-next,
+> so we don't have to worry about that any more.
 >
-> You really can't get out of bounds because the data comes from a
-> phys_addr_t and refers to a fixed location in hardware. If a
-> platform has registers higher than a 32-bit address, its phys_addr_t
-> must be 64-bit, but its dma_addr_t not necessarily so (even though
-> the two are the same almost always in practice).
+> I assume that the sst-firmware.c case is a mistake, it should just use a
+> plain DMA_SLAVE and not DMA_MEMCPY.
 
-I understand most of the things here, what I don't is how a platform
-is supposed to work if you have the following:
-a) HW, that uses register space let's say higher than 32-bit;
-b) DMA engine, which should provide a DMA capability for above HW block;
-c) dma_addr_t which does not cover the HW register space.
-
-For me it clearly looks like a platform (HW / SW) configuration issue.
-
-In case of bounce buffers I can't understand how it helps there.
+Other way around.
 
 -- 
 With Best Regards,
 Andy Shevchenko
+--
+To unsubscribe from this list: send the line "unsubscribe linux-spi" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
