@@ -1,75 +1,60 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH] mmc: dw_mmc: use resource_size_t to store physical address
-Date: Wed, 18 Nov 2015 09:13:14 +0900
-Message-ID: <564BC29A.9010306@samsung.com>
-References: <28102387.ALpaBHpim0@wuerfel>
- <CAHp75VfyOWrihHC4nhpKQrjH9SjP0NnaN1WU8se3PL4biWtz4g@mail.gmail.com>
- <6288847.N1QBIiXedG@wuerfel>
+From: Stephen Boyd <sboyd@codeaurora.org>
+Subject: Re: [PATCH v2] mmc: sdhci-msm: Boost controller core clock
+Date: Tue, 17 Nov 2015 17:38:27 -0800
+Message-ID: <20151118013827.GC32672@codeaurora.org>
+References: <1436183618-15330-1-git-send-email-ivan.ivanov@linaro.org>
+ <CAJAp7OjdiD_x0aU89HNq8PCiGqs+fvATHuVARxU4gE4yVusRNg@mail.gmail.com>
+ <CAPDyKFpQ2oK49ZwaBuk9bUPDEpzSyic2d1L9Qj2t8D1+wmDYtA@mail.gmail.com>
+ <20151106233913.GB30882@usrtlx11787.corpusers.net>
+ <CAPDyKFqZ+1Ax9e58b0K5B+tYoNtsC0uQS3zcQR7tu5TM+51nbw@mail.gmail.com>
+ <20151110201841.GB24116@codeaurora.org>
+ <CAPDyKFr2OyUPKjhN2=Yif=TzWoaHoKeBxYfBExxJhNCwnuhQdg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-reply-to: <6288847.N1QBIiXedG@wuerfel>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Arnd Bergmann <arnd@arndb.de>, Andy Shevchenko <andy.shevchenko@gmail.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-arm Mailing List <linux-arm-kernel@lists.infradead.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-arm-msm-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <CAPDyKFr2OyUPKjhN2=Yif=TzWoaHoKeBxYfBExxJhNCwnuhQdg@mail.gmail.com>
+Sender: linux-arm-msm-owner@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Bjorn Andersson <bjorn.andersson@sonymobile.com>, Bjorn Andersson <bjorn@kryo.se>, "Ivan T. Ivanov" <ivan.ivanov@linaro.org>, Georgi Djakov <georgi.djakov@linaro.org>, Peter Griffin <peter.griffin@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-arm-msm <linux-arm-msm@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-Dear, Arnd.
-
-On 11/13/2015 06:35 PM, Arnd Bergmann wrote:
-> On Friday 13 November 2015 03:10:13 Andy Shevchenko wrote:
->> On Thu, Nov 12, 2015 at 4:14 PM, Arnd Bergmann <arnd@arndb.de> wrote:
->>> The dw_mmc driver stores the physical address of the MMIO registers
->>> in a pointer, which requires the use of type casts, and is actually
->>> broken if anyone ever has this device on a 32-bit SoC in registers
->>> above 4GB. Gcc warns about this possibility when the driver is built
->>> with ARM LPAE enabled:
->>
->>> -       host->phy_regs = (void *)(regs->start);
->>> +       host->phy_regs = regs->start;
->>
->>>         /* Set external dma config: burst size, burst width */
->>> -       cfg.dst_addr = (dma_addr_t)(host->phy_regs + fifo_offset);
->>> +       cfg.dst_addr = host->phy_regs + fifo_offset;
->>
->> dst_addr is dma_addr_t?
+On 11/16, Ulf Hansson wrote:
+> [...]
 > 
-> Sort of. It doesn't really fit into any of the categories, and we actually
-> had a patch to change the type in the past, see
-> https://lkml.org/lkml/2015/7/10/167. Not sure what is going on there.
+> 
+> >
+> > In case you're wondering, the max frequency for sdc1 on 8974ac is
+> > 400MHz. If it's just a plain 8974pro then the max frequency is
+> > 200MHz. Otherwise, sdc2 maxes out at 200Mhz and sdc3 and sdc4 max
+> > out at 100MHz.
+> 
+> When you say that sdc1 supports 400MHz, what does that mean? That it
+> actually can cope with that clock rate when communicating with the MMC
+> card?
 
-why isn't the patch applied on mainline yet? :)
-
-Best Regards,
-Jaehoon Chung
+I suspect there must be some internal divider in the sdc IP
+itself so that it doesn't put out 400MHz on the bus, but I really
+don't know. What I mean is that the clock going into the IP from
+the clock controller is running at 400MHz, after it goes into the
+IP it could be divided, etc. before exiting the SoC on some pin.
 
 > 
->>>         /* Registers's physical base address */
->>> -       void                    *phy_regs;
->>> +       resource_size_t         phy_regs;
->>
->> If dst_addr is dma_addr_t wouldn't be a problem when
->> resource_size_t is defined as 64-bit address, and dma_addr_t as 32-bit?
->>
->> Btw, for me casting to dma_addr_t looks sane.
+> This makes me wonder how you deal with power management (DVFS).
 > 
-> The background here is that the address comes from a resource_size_t
-> that describes the MMIO register area as seen from the CPU, and that
-> is normally a phys_addr_t (resource_size_t is defined as being long
-> enough to store a phys_addr_t or various other things depending on
-> resource->flags).
-> 
-> dma_addr_t strictly speaking refers to a RAM location as seen by a
-> DMA master, and that only comes out of dma_map_*() or
-> dma_alloc_coherent().
-> 
-> The DMA engine wants something else here, which is an MMIO register
-> address as seen by a DMA master, and we don't have a separate typedef
-> for that. Almost universally all of resource_size_t, phys_addr_t and
-> dma_addr_t are the same type, and if we ever get a platform that
-> wants something other than a phys_addr_t to put into cfg.dst_addr,
-> we are in deep trouble.
-> 
-> 	Arnd
-> 
+> For example when you have the possibility to gate this clock (at
+> request inactivity) when the rate is set to 400 MHz and OPP is
+> increased, how will then that clock gating affect the OPP?
+
+Sorry I'm not really following the question here. The gate will
+disable the clock in the clock controller, cutting the signal off
+upstream of the sdc IP. When we do DVFS we'll stop considering
+this clock as part of the overall power level for the voltage
+associated with the frequency. When all other clocks that are
+using the same voltage and are on and running at frequencies that
+don't need that high of voltage we can reduce the voltage and
+drop down to something lower.
+
+-- 
+Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum,
+a Linux Foundation Collaborative Project
