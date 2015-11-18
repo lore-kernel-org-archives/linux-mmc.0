@@ -1,51 +1,56 @@
-From: Andy Shevchenko <andy.shevchenko-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: Re: [PATCH 02/13] dmaengine: Introduce dma_request_slave_channel_compat_reason()
-Date: Wed, 18 Nov 2015 17:43:04 +0200
-Message-ID: <CAHp75VeZFXp9i_zz7CBkVQVPGQxuzYk9AbWbbbn33r8YX3LCdw@mail.gmail.com>
-References: <1432646768-12532-1-git-send-email-peter.ujfalusi@ti.com>
-	<6347063.Gd6coh6hX8@wuerfel>
-	<564C8E1F.8010501@ti.com>
-	<6358656.jIv3GGCCXu@wuerfel>
+From: Arnd Bergmann <arnd@arndb.de>
+Subject: Re: [PATCH] mmc: dw_mmc: use resource_size_t to store physical address
+Date: Wed, 18 Nov 2015 16:45:23 +0100
+Message-ID: <7083277.bjzG62aVmx@wuerfel>
+References: <28102387.ALpaBHpim0@wuerfel> <5141236.CHnzdS7Lto@wuerfel> <CAHp75VfE2DWYB5GwSe1WLPb+gTnhNpYz5qo7jNfMK4tXbEWioQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-spi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <6358656.jIv3GGCCXu@wuerfel>
-Sender: linux-spi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>
-Cc: Peter Ujfalusi <peter.ujfalusi-l0cyMroinI0@public.gmane.org>, Vinod Koul <vinod.koul-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Geert Uytterhoeven <geert-Td1EMuHUCqxL1ZNQvxDV9g@public.gmane.org>, Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Dan Williams <dan.j.williams-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, dmaengine <dmaengine-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-serial-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-serial-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux MMC List <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-crypto <linux-crypto-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-spi <linux-spi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux Media Mailing List <linux-media-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ALSA Development Mailing List <alsa-devel-K7yf7f+aM1XWsZ/bQMPhNw@public.gmane.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7Bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mout.kundenserver.de ([217.72.192.75]:63128 "EHLO
+	mout.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754017AbbKRPp7 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 18 Nov 2015 10:45:59 -0500
+In-Reply-To: <CAHp75VfE2DWYB5GwSe1WLPb+gTnhNpYz5qo7jNfMK4tXbEWioQ@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Andy Shevchenko <andy.shevchenko@gmail.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Jaehoon Chung <jh80.chung@samsung.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-arm Mailing List <linux-arm-kernel@lists.infradead.org>
 
-On Wed, Nov 18, 2015 at 5:07 PM, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org> wrote:
-> On Wednesday 18 November 2015 16:41:35 Peter Ujfalusi wrote:
->> On 11/18/2015 04:29 PM, Arnd Bergmann wrote:
->> > On Wednesday 18 November 2015 16:21:26 Peter Ujfalusi wrote:
->> >> 2. non slave channel requests, where only the functionality matters, like
->> >> memcpy, interleaved, memset, etc.
->> >> We could have a simple:
->> >> dma_request_channel(mask);
->> >>
->> >> But looking at the drivers using dmaengine legacy dma_request_channel() API:
->> >> Some sets DMA_INTERRUPT or DMA_PRIVATE or DMA_SG along with DMA_SLAVE:
->> >> drivers/misc/carma/carma-fpga.c                 DMA_INTERRUPT|DMA_SLAVE|DMA_SG
->> >> drivers/misc/carma/carma-fpga-program.c         DMA_MEMCPY|DMA_SLAVE|DMA_SG
->> >> drivers/media/platform/soc_camera/mx3_camera.c  DMA_SLAVE|DMA_PRIVATE
->> >> sound/soc/intel/common/sst-firmware.c           DMA_SLAVE|DMA_MEMCPY
->> >>
->> >> as examples.
->> >> Not sure how valid are these...
->
-> I just had a look myself. carma has been removed fortunately in linux-next,
-> so we don't have to worry about that any more.
->
-> I assume that the sst-firmware.c case is a mistake, it should just use a
-> plain DMA_SLAVE and not DMA_MEMCPY.
+On Wednesday 18 November 2015 17:29:19 Andy Shevchenko wrote:
+> 
+> I understand most of the things here, what I don't is how a platform
+> is supposed to work if you have the following:
+> a) HW, that uses register space let's say higher than 32-bit;
+> b) DMA engine, which should provide a DMA capability for above HW block;
+> c) dma_addr_t which does not cover the HW register space.
 
-Other way around.
+On this platform, the current code is obviously broken, because the pointer
+is 32-bit wide and cannot reach the registers. I assume you agree on that
+part.
 
--- 
-With Best Regards,
-Andy Shevchenko
---
-To unsubscribe from this list: send the line "unsubscribe linux-spi" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+With my patch, the 64-bit resource_size_t in dw_mci helps get the
+correct FIFO address to this line:
+
+	cfg.dst_addr = host->phy_regs + fifo_offset;
+
+There, it remains broken because of the dma_addr_t being too short, and
+we also need Linus' patch from https://lkml.org/lkml/2013/4/26/120 in
+addition to mine.
+
+
+> For me it clearly looks like a platform (HW / SW) configuration issue.
+
+I think some people have argued in the past that we should always use
+the same type for dma_addr_t, resource_size_t and phys_addr_t. That
+would certainly fix the problem you describe as well. In practice,
+everyone has that already, and my patch by itself fixes all the
+cases where the FIFO is at a high address and dma_addr_t is already
+64-bit wide.
+
+> In case of bounce buffers I can't understand how it helps there.
+
+Right, bounce buffers are irrelevant here, because the FIFO address
+is never translated and never bounced.
+
+	Arnd
