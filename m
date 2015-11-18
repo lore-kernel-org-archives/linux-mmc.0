@@ -1,56 +1,47 @@
-From: Arnd Bergmann <arnd@arndb.de>
-Subject: Re: [PATCH] mmc: dw_mmc: use resource_size_t to store physical address
-Date: Wed, 18 Nov 2015 16:45:23 +0100
-Message-ID: <7083277.bjzG62aVmx@wuerfel>
-References: <28102387.ALpaBHpim0@wuerfel> <5141236.CHnzdS7Lto@wuerfel> <CAHp75VfE2DWYB5GwSe1WLPb+gTnhNpYz5qo7jNfMK4tXbEWioQ@mail.gmail.com>
+From: Andy Shevchenko <andy.shevchenko@gmail.com>
+Subject: Re: [PATCH 02/13] dmaengine: Introduce dma_request_slave_channel_compat_reason()
+Date: Wed, 18 Nov 2015 17:46:47 +0200
+Message-ID: <CAHp75VdhKmTVjRQp9q_4CXBuqjKvkBjDvgXYRDGmhdHzCW9ADA@mail.gmail.com>
+References: <1432646768-12532-1-git-send-email-peter.ujfalusi@ti.com>
+	<1432646768-12532-3-git-send-email-peter.ujfalusi@ti.com>
+	<20150529093317.GF3140@localhost>
+	<CAMuHMdVJ0h9qXxBWH9L2y4O2KLkEq12KW_6k8rTgi+Lux=C0gw@mail.gmail.com>
+	<20150529101846.GG3140@localhost>
+	<55687892.7050606@ti.com>
+	<20150602125535.GS3140@localhost>
+	<5570758E.6030302@ti.com>
+	<20150612125837.GJ28601@localhost>
+	<5587F1F4.1060905@ti.com>
+	<20150624162401.GP19530@localhost>
+	<564C8966.9080406@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7Bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mout.kundenserver.de ([217.72.192.75]:63128 "EHLO
-	mout.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754017AbbKRPp7 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 18 Nov 2015 10:45:59 -0500
-In-Reply-To: <CAHp75VfE2DWYB5GwSe1WLPb+gTnhNpYz5qo7jNfMK4tXbEWioQ@mail.gmail.com>
+Received: from mail-yk0-f193.google.com ([209.85.160.193]:33965 "EHLO
+	mail-yk0-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755207AbbKRPqs (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 18 Nov 2015 10:46:48 -0500
+In-Reply-To: <564C8966.9080406@ti.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Andy Shevchenko <andy.shevchenko@gmail.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Jaehoon Chung <jh80.chung@samsung.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-arm Mailing List <linux-arm-kernel@lists.infradead.org>
+To: Peter Ujfalusi <peter.ujfalusi@ti.com>
+Cc: Vinod Koul <vinod.koul@intel.com>, Geert Uytterhoeven <geert@linux-m68k.org>, Tony Lindgren <tony@atomide.com>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Dan Williams <dan.j.williams@intel.com>, dmaengine <dmaengine@vger.kernel.org>, "linux-serial@vger.kernel.org" <linux-serial@vger.kernel.org>, "linux-omap@vger.kernel.org" <linux-omap@vger.kernel.org>, Linux MMC List <linux-mmc@vger.kernel.org>, linux-crypto <linux-crypto@vger.kernel.org>, linux-spi <linux-spi@vger.kernel.org>, Linux Media Mailing List <linux-media@vger.kernel.org>, ALSA Development Mailing List <alsa-devel@alsa-project.org>
 
-On Wednesday 18 November 2015 17:29:19 Andy Shevchenko wrote:
-> 
-> I understand most of the things here, what I don't is how a platform
-> is supposed to work if you have the following:
-> a) HW, that uses register space let's say higher than 32-bit;
-> b) DMA engine, which should provide a DMA capability for above HW block;
-> c) dma_addr_t which does not cover the HW register space.
+On Wed, Nov 18, 2015 at 4:21 PM, Peter Ujfalusi <peter.ujfalusi@ti.com> wrote:
+> Hi Vinod,
+>
+> bringing this old thread back to life as I just started to work on this.
 
-On this platform, the current code is obviously broken, because the pointer
-is 32-bit wide and cannot reach the registers. I assume you agree on that
-part.
+What I remember we need to convert drivers to use new API meanwhile it
+is good to keep old one to avoid patch storm which does nothing useful
+(IIRC Russel's opinion).
 
-With my patch, the 64-bit resource_size_t in dw_mci helps get the
-correct FIFO address to this line:
+On the other hand there are a lot of drivers that are used on the set
+of platforms starting from legacy and abandoned ones (like AVR32) to
+relatively new and newest.
 
-	cfg.dst_addr = host->phy_regs + fifo_offset;
+And I'm not a fan of those thousands of API calls either.
 
-There, it remains broken because of the dma_addr_t being too short, and
-we also need Linus' patch from https://lkml.org/lkml/2013/4/26/120 in
-addition to mine.
-
-
-> For me it clearly looks like a platform (HW / SW) configuration issue.
-
-I think some people have argued in the past that we should always use
-the same type for dma_addr_t, resource_size_t and phys_addr_t. That
-would certainly fix the problem you describe as well. In practice,
-everyone has that already, and my patch by itself fixes all the
-cases where the FIFO is at a high address and dma_addr_t is already
-64-bit wide.
-
-> In case of bounce buffers I can't understand how it helps there.
-
-Right, bounce buffers are irrelevant here, because the FIFO address
-is never translated and never bounced.
-
-	Arnd
+-- 
+With Best Regards,
+Andy Shevchenko
