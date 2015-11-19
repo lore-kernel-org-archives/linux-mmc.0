@@ -1,84 +1,65 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 1/2] mmc: sdhci-esdhc-imx: move the setting of watermark
- level out of probe
-Date: Thu, 19 Nov 2015 12:17:08 +0100
-Message-ID: <CAPDyKFpoH4ZKW4x+biB+5O5fFhYNsOFvPWzqVmQdbmhOkux2NA@mail.gmail.com>
+Subject: Re: [PATCH 2/2] mmc: sdhci-esdhc-imx: correct the tuning-step setting
+Date: Thu, 19 Nov 2015 12:20:19 +0100
+Message-ID: <CAPDyKFp=DJP0t5Q90E4byuGypcHsK0wU629M=rK-WA20=AGKhA@mail.gmail.com>
 References: <1447148610-2770-1-git-send-email-haibo.chen@freescale.com>
+	<1447148610-2770-2-git-send-email-haibo.chen@freescale.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-yk0-f174.google.com ([209.85.160.174]:32810 "EHLO
-	mail-yk0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1758056AbbKSLRJ (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 19 Nov 2015 06:17:09 -0500
-Received: by ykdv3 with SMTP id v3so103764573ykd.0
-        for <linux-mmc@vger.kernel.org>; Thu, 19 Nov 2015 03:17:08 -0800 (PST)
-In-Reply-To: <1447148610-2770-1-git-send-email-haibo.chen@freescale.com>
+Received: from mail-yk0-f175.google.com ([209.85.160.175]:35380 "EHLO
+	mail-yk0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756659AbbKSLUU (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 19 Nov 2015 06:20:20 -0500
+Received: by ykba77 with SMTP id a77so103542422ykb.2
+        for <linux-mmc@vger.kernel.org>; Thu, 19 Nov 2015 03:20:19 -0800 (PST)
+In-Reply-To: <1447148610-2770-2-git-send-email-haibo.chen@freescale.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Haibo Chen <haibo.chen@freescale.com>
 Cc: Dong Aisheng <aisheng.dong@freescale.com>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 
 On 10 November 2015 at 10:43, Haibo Chen <haibo.chen@freescale.com> wrote:
-> Currently, we config the watermark_level register only in probe.
-> This will cause the mmc write operation timeout issue after system
-> resume back in LPSR mode. Because in LPSR mode, after system resume
-> back, the watermark_level register(0x44) changes to 0x08000880, which
-> set the write watermark level as 0, and set the read watermark level
-> as 128. This value is incorrect.
->
-> This patch move the setting of watermark level register out of probe,
-> so after system resume back, mmc driver can set this watermark level
-> register back to 0x10401040.
-
-This seems all reasonable! But...
-
+> Here we use '|=' to set the tuning-step, but before that, we should
+> clear the tuning-step, otherwise we could got the wrong setting.
 >
 > Signed-off-by: Haibo Chen <haibo.chen@freescale.com>
 > ---
->  drivers/mmc/host/sdhci-esdhc-imx.c | 14 ++++++++------
->  1 file changed, 8 insertions(+), 6 deletions(-)
+>  drivers/mmc/host/sdhci-esdhc-imx.c | 7 +++++--
+>  1 file changed, 5 insertions(+), 2 deletions(-)
 >
 > diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
-> index 1f1582f..1508949 100644
+> index 1508949..64275c7 100644
 > --- a/drivers/mmc/host/sdhci-esdhc-imx.c
 > +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
-> @@ -584,6 +584,14 @@ static void esdhc_writeb_le(struct sdhci_host *host, u8 val, int reg)
->                 mask = 0xffff & ~(ESDHC_CTRL_BUSWIDTH_MASK | ESDHC_CTRL_D3CD);
+> @@ -76,6 +76,7 @@
+>  #define ESDHC_STD_TUNING_EN            (1 << 24)
+>  /* NOTE: the minimum valid tuning start tap for mx6sl is 1 */
+>  #define ESDHC_TUNING_START_TAP         0x1
+> +#define ESDHC_TUNING_STEP_MASK         0x00070000
+>  #define ESDHC_TUNING_STEP_SHIFT                16
 >
->                 esdhc_clrset_le(host, mask, new_val, reg);
-> +
-> +               /*
-> +                * The imx6q/imx7d ROM code will change the default watermark
-> +                * level setting to something insane.  Change it back here.
-> +                */
-> +                if (esdhc_is_usdhc(imx_data))
-> +                        writel(0x10401040, host->ioaddr + ESDHC_WTMK_LVL);
-> +
-
-... why don't keep setting the watermark in ->probe() and instead just
-add it at as additional task to do at system PM resume?
-
->                 return;
->         }
->         esdhc_clrset_le(host, 0xff, val, reg);
-> @@ -1155,13 +1163,7 @@ static int sdhci_esdhc_imx_probe(struct platform_device *pdev)
->                 host->quirks |= SDHCI_QUIRK_NO_MULTIBLOCK
->                         | SDHCI_QUIRK_BROKEN_ADMA;
->
-> -       /*
-> -        * The imx6q ROM code will change the default watermark level setting
-> -        * to something insane.  Change it back here.
-> -        */
->         if (esdhc_is_usdhc(imx_data)) {
-> -               writel(0x10401040, host->ioaddr + ESDHC_WTMK_LVL);
-> -
->                 host->quirks2 |= SDHCI_QUIRK2_PRESET_VALUE_BROKEN;
->                 host->mmc->caps |= MMC_CAP_1_8V_DDR;
->
+>  /* pinctrl state */
+> @@ -489,9 +490,11 @@ static void esdhc_writew_le(struct sdhci_host *host, u16 val, int reg)
+>                                 m |= ESDHC_MIX_CTRL_FBCLK_SEL;
+>                                 tuning_ctrl = readl(host->ioaddr + ESDHC_TUNING_CTRL);
+>                                 tuning_ctrl |= ESDHC_STD_TUNING_EN | ESDHC_TUNING_START_TAP;
+> -                               if (imx_data->boarddata.tuning_step)
+> +                               if (imx_data->boarddata.tuning_step) {
+> +                                       tuning_ctrl &= ~ESDHC_TUNING_STEP_MASK;
+>                                         tuning_ctrl |= imx_data->boarddata.tuning_step << ESDHC_TUNING_STEP_SHIFT;
+> -                                       writel(tuning_ctrl, host->ioaddr + ESDHC_TUNING_CTRL);
+> +                               }
+> +                               writel(tuning_ctrl, host->ioaddr + ESDHC_TUNING_CTRL);
+>                         } else {
+>                                 v &= ~ESDHC_MIX_CTRL_EXE_TUNE;
+>                         }
 > --
 > 1.9.1
 >
+
+Looks good to me, but is there a dependency to patch 1/2 that should
+prevent me from applying this one?
 
 Kind regards
 Uffe
