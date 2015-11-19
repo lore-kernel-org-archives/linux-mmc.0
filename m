@@ -1,65 +1,73 @@
-From: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH 1/2] mmc: tegra: Constify SoC data
-Date: Thu, 19 Nov 2015 12:51:36 +0100
-Message-ID: <CAPDyKFrk76fvf17i2V47tRJiFoT-ADgyU_9D+X=XNUrztcudeg@mail.gmail.com>
-References: <1447666035-10044-1-git-send-email-thierry.reding@gmail.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH] mmc: pwrseq: constify mmc_pwrseq_ops structures
+Date: Thu, 19 Nov 2015 12:51:30 +0100
+Message-ID: <CAPDyKFpav2M+XyPmhKdGX33OemxJo-w9AenEcWk1uw_L8-zu2Q@mail.gmail.com>
+References: <1447520720-11564-1-git-send-email-Julia.Lawall@lip6.fr>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1447666035-10044-1-git-send-email-thierry.reding-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Sender: linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Thierry Reding <thierry.reding-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Cc: Stephen Warren <swarren-3lzwWm7+Weoh9ZMKESR00Q@public.gmane.org>, Alexandre Courbot <gnurou-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, linux-mmc <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1447520720-11564-1-git-send-email-Julia.Lawall@lip6.fr>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Julia Lawall <Julia.Lawall@lip6.fr>
+Cc: kernel-janitors@vger.kernel.org, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On 16 November 2015 at 10:27, Thierry Reding <thierry.reding-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org> wrote:
-> From: Thierry Reding <treding-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
+On 14 November 2015 at 18:05, Julia Lawall <Julia.Lawall@lip6.fr> wrote:
+> The mmc_pwrseq_ops structures are never modified, so declare them as const.
 >
-> The data in the SoC description structures is static and can therefore
-> reside in read-only memory.
+> Done with the help of Coccinelle.
 >
-> Signed-off-by: Thierry Reding <treding-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
+> Signed-off-by: Julia Lawall <Julia.Lawall@lip6.fr>
 
 Thanks, applied for next!
 
 Kind regards
 Uffe
 
+>
 > ---
->  drivers/mmc/host/sdhci-tegra.c | 6 +++---
->  1 file changed, 3 insertions(+), 3 deletions(-)
+>  drivers/mmc/core/pwrseq.h        |    2 +-
+>  drivers/mmc/core/pwrseq_emmc.c   |    2 +-
+>  drivers/mmc/core/pwrseq_simple.c |    2 +-
+>  3 files changed, 3 insertions(+), 3 deletions(-)
 >
-> diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
-> index ad28b49f0203..8d49d9af6f54 100644
-> --- a/drivers/mmc/host/sdhci-tegra.c
-> +++ b/drivers/mmc/host/sdhci-tegra.c
-> @@ -184,7 +184,7 @@ static const struct sdhci_pltfm_data sdhci_tegra20_pdata = {
->         .ops  = &tegra_sdhci_ops,
+> diff --git a/drivers/mmc/core/pwrseq.h b/drivers/mmc/core/pwrseq.h
+> index 096da48..133de04 100644
+> --- a/drivers/mmc/core/pwrseq.h
+> +++ b/drivers/mmc/core/pwrseq.h
+> @@ -16,7 +16,7 @@ struct mmc_pwrseq_ops {
 >  };
 >
-> -static struct sdhci_tegra_soc_data soc_data_tegra20 = {
-> +static const struct sdhci_tegra_soc_data soc_data_tegra20 = {
->         .pdata = &sdhci_tegra20_pdata,
->         .nvquirks = NVQUIRK_FORCE_SDHCI_SPEC_200 |
->                     NVQUIRK_ENABLE_BLOCK_GAP_DET,
-> @@ -200,7 +200,7 @@ static const struct sdhci_pltfm_data sdhci_tegra30_pdata = {
->         .ops  = &tegra_sdhci_ops,
+>  struct mmc_pwrseq {
+> -       struct mmc_pwrseq_ops *ops;
+> +       const struct mmc_pwrseq_ops *ops;
 >  };
 >
-> -static struct sdhci_tegra_soc_data soc_data_tegra30 = {
-> +static const struct sdhci_tegra_soc_data soc_data_tegra30 = {
->         .pdata = &sdhci_tegra30_pdata,
->         .nvquirks = NVQUIRK_ENABLE_SDHCI_SPEC_300 |
->                     NVQUIRK_DISABLE_SDR50 |
-> @@ -229,7 +229,7 @@ static const struct sdhci_pltfm_data sdhci_tegra114_pdata = {
->         .ops  = &tegra114_sdhci_ops,
->  };
+>  #ifdef CONFIG_OF
+> diff --git a/drivers/mmc/core/pwrseq_emmc.c b/drivers/mmc/core/pwrseq_emmc.c
+> index ad4f94e..4a82bc7 100644
+> --- a/drivers/mmc/core/pwrseq_emmc.c
+> +++ b/drivers/mmc/core/pwrseq_emmc.c
+> @@ -51,7 +51,7 @@ static void mmc_pwrseq_emmc_free(struct mmc_host *host)
+>         kfree(pwrseq);
+>  }
 >
-> -static struct sdhci_tegra_soc_data soc_data_tegra114 = {
-> +static const struct sdhci_tegra_soc_data soc_data_tegra114 = {
->         .pdata = &sdhci_tegra114_pdata,
->         .nvquirks = NVQUIRK_DISABLE_SDR50 |
->                     NVQUIRK_DISABLE_DDR50 |
-> --
-> 2.5.0
+> -static struct mmc_pwrseq_ops mmc_pwrseq_emmc_ops = {
+> +static const struct mmc_pwrseq_ops mmc_pwrseq_emmc_ops = {
+>         .post_power_on = mmc_pwrseq_emmc_reset,
+>         .free = mmc_pwrseq_emmc_free,
+>  };
+> diff --git a/drivers/mmc/core/pwrseq_simple.c b/drivers/mmc/core/pwrseq_simple.c
+> index d10538b..2b16263 100644
+> --- a/drivers/mmc/core/pwrseq_simple.c
+> +++ b/drivers/mmc/core/pwrseq_simple.c
+> @@ -87,7 +87,7 @@ static void mmc_pwrseq_simple_free(struct mmc_host *host)
+>         kfree(pwrseq);
+>  }
+>
+> -static struct mmc_pwrseq_ops mmc_pwrseq_simple_ops = {
+> +static const struct mmc_pwrseq_ops mmc_pwrseq_simple_ops = {
+>         .pre_power_on = mmc_pwrseq_simple_pre_power_on,
+>         .post_power_on = mmc_pwrseq_simple_post_power_on,
+>         .power_off = mmc_pwrseq_simple_power_off,
 >
