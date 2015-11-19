@@ -1,54 +1,57 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v2] mmc: kconfig: replace FAULT_INJECTION with FAULT_INJECTION_DEBUG_FS
-Date: Thu, 19 Nov 2015 12:29:55 +0100
-Message-ID: <CAPDyKFoP2rqm_bWStOBLoNK7kYdD=9Jwdq2=G3X3X1+ZQhpEgA@mail.gmail.com>
-References: <CAPDyKFq39uWPTBou+CUDqbWj8_RENeZMmokV3LRA5LBpG7fAVw@mail.gmail.com>
-	<1447182739-8996-1-git-send-email-adrien+dev@schischi.me>
+Subject: Re: [PATCH] mmc: core: set regulator not found message as debug
+Date: Thu, 19 Nov 2015 12:30:04 +0100
+Message-ID: <CAPDyKFrnDZ2JufGbPX=AkTtSGpDPUq+U_T0qg5jsFHKZuUT3jw@mail.gmail.com>
+References: <1447077839-446-1-git-send-email-ludovic.desroches@atmel.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1447182739-8996-1-git-send-email-adrien+dev@schischi.me>
+In-Reply-To: <1447077839-446-1-git-send-email-ludovic.desroches@atmel.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Adrien Schildknecht <adrien+dev@schischi.me>
-Cc: Shawn Lin <shawn.lin@rock-chips.com>, Linus Walleij <linus.walleij@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+To: Ludovic Desroches <ludovic.desroches@atmel.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Nicolas Ferre <nicolas.ferre@atmel.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On 10 November 2015 at 20:12, Adrien Schildknecht
-<adrien+dev@schischi.me> wrote:
-> Fault-injection capability for MMC IO uses debugfs entries to configure
-> the attributes.
-> FAULT_INJECTION_DEBUG_FS must be enabled to use FAIL_MMC_REQUEST.
+On 9 November 2015 at 15:03, Ludovic Desroches
+<ludovic.desroches@atmel.com> wrote:
+> Turn the informative message about no vmmc/vqmmc regulator found in
+> debug one. There is no need to indicate that something optional is
+> missing. Moreover, it can bring confusion, people who doesn't know
+> it is optional may consider these messages as warnings or errors.
 >
-> Replace FAULT_INJECTION with FAULT_INJECTION_DEBUG_FS.
-> Also remove 'select DEBUG_FS' since FAULT_INJECTION_DEBUG_FS depends on
-> it.
->
-> Signed-off-by: Adrien Schildknecht <adrien+dev@schischi.me>
+> Signed-off-by: Ludovic Desroches <ludovic.desroches@atmel.com>
 
 Thanks, applied for next!
 
 Kind regards
 Uffe
 
-
 > ---
->  lib/Kconfig.debug | 3 +--
->  1 file changed, 1 insertion(+), 2 deletions(-)
+>  drivers/mmc/core/core.c | 4 ++--
+>  1 file changed, 2 insertions(+), 2 deletions(-)
 >
-> diff --git a/lib/Kconfig.debug b/lib/Kconfig.debug
-> index 749e886..5c038d2 100644
-> --- a/lib/Kconfig.debug
-> +++ b/lib/Kconfig.debug
-> @@ -1523,8 +1523,7 @@ config FAIL_IO_TIMEOUT
+> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+> index 5ae89e4..5b294dd 100644
+> --- a/drivers/mmc/core/core.c
+> +++ b/drivers/mmc/core/core.c
+> @@ -1485,7 +1485,7 @@ int mmc_regulator_get_supply(struct mmc_host *mmc)
+>         if (IS_ERR(mmc->supply.vmmc)) {
+>                 if (PTR_ERR(mmc->supply.vmmc) == -EPROBE_DEFER)
+>                         return -EPROBE_DEFER;
+> -               dev_info(dev, "No vmmc regulator found\n");
+> +               dev_dbg(dev, "No vmmc regulator found\n");
+>         } else {
+>                 ret = mmc_regulator_get_ocrmask(mmc->supply.vmmc);
+>                 if (ret > 0)
+> @@ -1497,7 +1497,7 @@ int mmc_regulator_get_supply(struct mmc_host *mmc)
+>         if (IS_ERR(mmc->supply.vqmmc)) {
+>                 if (PTR_ERR(mmc->supply.vqmmc) == -EPROBE_DEFER)
+>                         return -EPROBE_DEFER;
+> -               dev_info(dev, "No vqmmc regulator found\n");
+> +               dev_dbg(dev, "No vqmmc regulator found\n");
+>         }
 >
->  config FAIL_MMC_REQUEST
->         bool "Fault-injection capability for MMC IO"
-> -       select DEBUG_FS
-> -       depends on FAULT_INJECTION && MMC
-> +       depends on FAULT_INJECTION_DEBUG_FS && MMC
->         help
->           Provide fault-injection capability for MMC IO.
->           This will make the mmc core return data errors. This is
+>         return 0;
 > --
-> 2.6.2
+> 2.5.0
 >
