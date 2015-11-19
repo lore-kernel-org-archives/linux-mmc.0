@@ -1,61 +1,74 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH V2] mmc: change to use kmalloc
-Date: Thu, 19 Nov 2015 12:31:06 +0100
-Message-ID: <CAPDyKFppbyDHFMiYfaG_Eo9KLjg2tyA-ZV0d511a9ZV3u=OM9g@mail.gmail.com>
-References: <1447327631-26947-1-git-send-email-yalin.wang2010@gmail.com>
+From: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: Re: [PATCH 05/19] mmc: core/host: enable support for the standard
+ "wakeup-source" property
+Date: Thu, 19 Nov 2015 12:32:45 +0100
+Message-ID: <CAPDyKFrB7-SsBt_C9hvgwY-NHL-S8pvXmKc70f2Z_G2RoEpk9Q@mail.gmail.com>
+References: <1445422216-29375-1-git-send-email-sudeep.holla@arm.com>
+	<1445422216-29375-6-git-send-email-sudeep.holla@arm.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-yk0-f172.google.com ([209.85.160.172]:35476 "EHLO
-	mail-yk0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S933030AbbKSLbH (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 19 Nov 2015 06:31:07 -0500
-Received: by ykba77 with SMTP id a77so103797807ykb.2
-        for <linux-mmc@vger.kernel.org>; Thu, 19 Nov 2015 03:31:06 -0800 (PST)
-In-Reply-To: <1447327631-26947-1-git-send-email-yalin.wang2010@gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1445422216-29375-6-git-send-email-sudeep.holla-5wv7dgnIgG8@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Sudeep Holla <sudeep.holla-5wv7dgnIgG8@public.gmane.org>
+Cc: "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, linux-mmc <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: yalin wang <yalin.wang2010@gmail.com>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, Andrew Morton <akpm@linux-foundation.org>, Tobias Klauser <tklauser@distanz.ch>, "JBottomley@Odin.com" <JBottomley@odin.com>, Ben Hutchings <ben@decadent.org.uk>, "Dong, Chuanxiao" <chuanxiao.dong@intel.com>, Shawn Lin <shawn.lin@rock-chips.com>, =?UTF-8?B?SnVzdGluIFdhbmcgKOeOi+S4gSk=?= <justin.wang@spreadtrum.com>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 
-On 12 November 2015 at 12:27, yalin wang <yalin.wang2010@gmail.com> wrote:
-> Use kmalloc instead of kzalloc, zero the memory is not needed.
+On 21 October 2015 at 12:10, Sudeep Holla <sudeep.holla-5wv7dgnIgG8@public.gmane.org> wrote:
+> Though the mmc core driver should/will continue to support the legacy
+> "enable-sdio-wakeup" property to enable SDIO as the wakeup source, we
+> need to add support for the new standard property "wakeup-source".
 >
-> Signed-off-by: yalin wang <yalin.wang2010@gmail.com>
+> This patch adds support for "wakeup-source" property in addition to the
+> existing "enable-sdio-wakeup" property.
+>
+> Cc: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+> Cc: Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+> Cc: linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+> Signed-off-by: Sudeep Holla <sudeep.holla-5wv7dgnIgG8@public.gmane.org>
 
-Thanks, applied for next! I took liberty to update the change log and
-the commit message header to make it more descriptive.
+Thanks, applied for next!
 
 Kind regards
 Uffe
 
-
 > ---
->  drivers/mmc/card/block.c | 4 ++--
->  1 file changed, 2 insertions(+), 2 deletions(-)
+>  drivers/mmc/core/host.c        | 3 ++-
+>  drivers/mmc/host/sdhci-pltfm.c | 3 ++-
+>  2 files changed, 4 insertions(+), 2 deletions(-)
 >
-> diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
-> index c742cfd..c3fd4c8 100644
-> --- a/drivers/mmc/card/block.c
-> +++ b/drivers/mmc/card/block.c
-> @@ -345,7 +345,7 @@ static struct mmc_blk_ioc_data *mmc_blk_ioctl_copy_from_user(
->         struct mmc_blk_ioc_data *idata;
->         int err;
+> diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
+> index 5466f25f0281..85222bb56c73 100644
+> --- a/drivers/mmc/core/host.c
+> +++ b/drivers/mmc/core/host.c
+> @@ -513,7 +513,8 @@ int mmc_of_parse(struct mmc_host *host)
+>                 host->caps2 |= MMC_CAP2_FULL_PWR_CYCLE;
+>         if (of_property_read_bool(np, "keep-power-in-suspend"))
+>                 host->pm_caps |= MMC_PM_KEEP_POWER;
+> -       if (of_property_read_bool(np, "enable-sdio-wakeup"))
+> +       if (of_property_read_bool(np, "wakeup-source") ||
+> +           of_property_read_bool(np, "enable-sdio-wakeup")) /* legacy */
+>                 host->pm_caps |= MMC_PM_WAKE_SDIO_IRQ;
+>         if (of_property_read_bool(np, "mmc-ddr-1_8v"))
+>                 host->caps |= MMC_CAP_1_8V_DDR;
+> diff --git a/drivers/mmc/host/sdhci-pltfm.c b/drivers/mmc/host/sdhci-pltfm.c
+> index a207f5aaf62f..f00374bdafc9 100644
+> --- a/drivers/mmc/host/sdhci-pltfm.c
+> +++ b/drivers/mmc/host/sdhci-pltfm.c
+> @@ -108,7 +108,8 @@ void sdhci_get_of_property(struct platform_device *pdev)
+>         if (of_find_property(np, "keep-power-in-suspend", NULL))
+>                 host->mmc->pm_caps |= MMC_PM_KEEP_POWER;
 >
-> -       idata = kzalloc(sizeof(*idata), GFP_KERNEL);
-> +       idata = kmalloc(sizeof(*idata), GFP_KERNEL);
->         if (!idata) {
->                 err = -ENOMEM;
->                 goto out;
-> @@ -365,7 +365,7 @@ static struct mmc_blk_ioc_data *mmc_blk_ioctl_copy_from_user(
->         if (!idata->buf_bytes)
->                 return idata;
->
-> -       idata->buf = kzalloc(idata->buf_bytes, GFP_KERNEL);
-> +       idata->buf = kmalloc(idata->buf_bytes, GFP_KERNEL);
->         if (!idata->buf) {
->                 err = -ENOMEM;
->                 goto idata_err;
+> -       if (of_find_property(np, "enable-sdio-wakeup", NULL))
+> +       if (of_property_read_bool(np, "wakeup-source") ||
+> +           of_property_read_bool(np, "enable-sdio-wakeup")) /* legacy */
+>                 host->mmc->pm_caps |= MMC_PM_WAKE_SDIO_IRQ;
+>  }
+>  #else
 > --
 > 1.9.1
 >
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
