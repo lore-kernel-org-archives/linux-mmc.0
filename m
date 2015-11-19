@@ -1,30 +1,24 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: omap_hsmmc: No need to check DMA channel validity at
- module remove
-Date: Thu, 19 Nov 2015 12:33:59 +0100
-Message-ID: <CAPDyKFrbMrJSnTFDrkJt-oFa88CgVmUMNva-C4LUnf96QTiugQ@mail.gmail.com>
-References: <1446550651-7977-1-git-send-email-peter.ujfalusi@ti.com>
+From: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: Re: [PATCH 1/2] mmc: tegra: Constify SoC data
+Date: Thu, 19 Nov 2015 12:51:36 +0100
+Message-ID: <CAPDyKFrk76fvf17i2V47tRJiFoT-ADgyU_9D+X=XNUrztcudeg@mail.gmail.com>
+References: <1447666035-10044-1-git-send-email-thierry.reding@gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-yk0-f174.google.com ([209.85.160.174]:35988 "EHLO
-	mail-yk0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750845AbbKSLeA (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 19 Nov 2015 06:34:00 -0500
-Received: by ykdr82 with SMTP id r82so103523269ykd.3
-        for <linux-mmc@vger.kernel.org>; Thu, 19 Nov 2015 03:34:00 -0800 (PST)
-In-Reply-To: <1446550651-7977-1-git-send-email-peter.ujfalusi@ti.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1447666035-10044-1-git-send-email-thierry.reding-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Sender: linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Thierry Reding <thierry.reding-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Cc: Stephen Warren <swarren-3lzwWm7+Weoh9ZMKESR00Q@public.gmane.org>, Alexandre Courbot <gnurou-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, linux-mmc <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Peter Ujfalusi <peter.ujfalusi@ti.com>
-Cc: Tony Lindgren <tony@atomide.com>, Kishon <kishon@ti.com>, linux-mmc <linux-mmc@vger.kernel.org>, linux-omap <linux-omap@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 
-On 3 November 2015 at 12:37, Peter Ujfalusi <peter.ujfalusi@ti.com> wrote:
-> The driver will not probe without valid DMA channels so no need to check
-> if they are valid when the module is removed.
+On 16 November 2015 at 10:27, Thierry Reding <thierry.reding-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org> wrote:
+> From: Thierry Reding <treding-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
 >
-> Signed-off-by: Peter Ujfalusi <peter.ujfalusi@ti.com>
-> CC: Ulf Hansson <ulf.hansson@linaro.org>
+> The data in the SoC description structures is static and can therefore
+> reside in read-only memory.
+>
+> Signed-off-by: Thierry Reding <treding-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
 
 Thanks, applied for next!
 
@@ -32,26 +26,40 @@ Kind regards
 Uffe
 
 > ---
->  drivers/mmc/host/omap_hsmmc.c | 6 ++----
->  1 file changed, 2 insertions(+), 4 deletions(-)
+>  drivers/mmc/host/sdhci-tegra.c | 6 +++---
+>  1 file changed, 3 insertions(+), 3 deletions(-)
 >
-> diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-> index f70e52b05648..712c74fd0401 100644
-> --- a/drivers/mmc/host/omap_hsmmc.c
-> +++ b/drivers/mmc/host/omap_hsmmc.c
-> @@ -2262,10 +2262,8 @@ static int omap_hsmmc_remove(struct platform_device *pdev)
->         pm_runtime_get_sync(host->dev);
->         mmc_remove_host(host->mmc);
+> diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
+> index ad28b49f0203..8d49d9af6f54 100644
+> --- a/drivers/mmc/host/sdhci-tegra.c
+> +++ b/drivers/mmc/host/sdhci-tegra.c
+> @@ -184,7 +184,7 @@ static const struct sdhci_pltfm_data sdhci_tegra20_pdata = {
+>         .ops  = &tegra_sdhci_ops,
+>  };
 >
-> -       if (host->tx_chan)
-> -               dma_release_channel(host->tx_chan);
-> -       if (host->rx_chan)
-> -               dma_release_channel(host->rx_chan);
-> +       dma_release_channel(host->tx_chan);
-> +       dma_release_channel(host->rx_chan);
+> -static struct sdhci_tegra_soc_data soc_data_tegra20 = {
+> +static const struct sdhci_tegra_soc_data soc_data_tegra20 = {
+>         .pdata = &sdhci_tegra20_pdata,
+>         .nvquirks = NVQUIRK_FORCE_SDHCI_SPEC_200 |
+>                     NVQUIRK_ENABLE_BLOCK_GAP_DET,
+> @@ -200,7 +200,7 @@ static const struct sdhci_pltfm_data sdhci_tegra30_pdata = {
+>         .ops  = &tegra_sdhci_ops,
+>  };
 >
->         pm_runtime_put_sync(host->dev);
->         pm_runtime_disable(host->dev);
+> -static struct sdhci_tegra_soc_data soc_data_tegra30 = {
+> +static const struct sdhci_tegra_soc_data soc_data_tegra30 = {
+>         .pdata = &sdhci_tegra30_pdata,
+>         .nvquirks = NVQUIRK_ENABLE_SDHCI_SPEC_300 |
+>                     NVQUIRK_DISABLE_SDR50 |
+> @@ -229,7 +229,7 @@ static const struct sdhci_pltfm_data sdhci_tegra114_pdata = {
+>         .ops  = &tegra114_sdhci_ops,
+>  };
+>
+> -static struct sdhci_tegra_soc_data soc_data_tegra114 = {
+> +static const struct sdhci_tegra_soc_data soc_data_tegra114 = {
+>         .pdata = &sdhci_tegra114_pdata,
+>         .nvquirks = NVQUIRK_DISABLE_SDR50 |
+>                     NVQUIRK_DISABLE_DDR50 |
 > --
-> 2.6.2
+> 2.5.0
 >
