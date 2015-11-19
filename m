@@ -1,50 +1,84 @@
-From: Peter Ujfalusi <peter.ujfalusi@ti.com>
-Subject: Re: [PATCH 02/13] dmaengine: Introduce
- dma_request_slave_channel_compat_reason()
-Date: Thu, 19 Nov 2015 12:36:14 +0200
-Message-ID: <564DA61E.2070004@ti.com>
-References: <1432646768-12532-1-git-send-email-peter.ujfalusi@ti.com>
- <1432646768-12532-3-git-send-email-peter.ujfalusi@ti.com>
- <20150529093317.GF3140@localhost>
- <CAMuHMdVJ0h9qXxBWH9L2y4O2KLkEq12KW_6k8rTgi+Lux=C0gw@mail.gmail.com>
- <20150529101846.GG3140@localhost> <55687892.7050606@ti.com>
- <20150602125535.GS3140@localhost> <5570758E.6030302@ti.com>
- <20150612125837.GJ28601@localhost> <5587F1F4.1060905@ti.com>
- <20150624162401.GP19530@localhost> <564C8966.9080406@ti.com>
- <CAHp75VdhKmTVjRQp9q_4CXBuqjKvkBjDvgXYRDGmhdHzCW9ADA@mail.gmail.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH 1/2] mmc: sdhci-esdhc-imx: move the setting of watermark
+ level out of probe
+Date: Thu, 19 Nov 2015 12:17:08 +0100
+Message-ID: <CAPDyKFpoH4ZKW4x+biB+5O5fFhYNsOFvPWzqVmQdbmhOkux2NA@mail.gmail.com>
+References: <1447148610-2770-1-git-send-email-haibo.chen@freescale.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <alsa-devel-bounces@alsa-project.org>
-In-Reply-To: <CAHp75VdhKmTVjRQp9q_4CXBuqjKvkBjDvgXYRDGmhdHzCW9ADA@mail.gmail.com>
-List-Unsubscribe: <http://mailman.alsa-project.org/mailman/options/alsa-devel>,
- <mailto:alsa-devel-request@alsa-project.org?subject=unsubscribe>
-List-Archive: <http://mailman.alsa-project.org/pipermail/alsa-devel/>
-List-Post: <mailto:alsa-devel@alsa-project.org>
-List-Help: <mailto:alsa-devel-request@alsa-project.org?subject=help>
-List-Subscribe: <http://mailman.alsa-project.org/mailman/listinfo/alsa-devel>,
- <mailto:alsa-devel-request@alsa-project.org?subject=subscribe>
-Errors-To: alsa-devel-bounces@alsa-project.org
-Sender: alsa-devel-bounces@alsa-project.org
-To: Andy Shevchenko <andy.shevchenko@gmail.com>
-Cc: "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, ALSA Development Mailing List <alsa-devel@alsa-project.org>, Vinod Koul <vinod.koul@intel.com>, Linux MMC List <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-spi <linux-spi@vger.kernel.org>, Tony Lindgren <tony@atomide.com>, Geert Uytterhoeven <geert@linux-m68k.org>, linux-crypto <linux-crypto@vger.kernel.org>, "linux-serial@vger.kernel.org" <linux-serial@vger.kernel.org>, dmaengine <dmaengine@vger.kernel.org>, Dan Williams <dan.j.williams@intel.com>, "linux-omap@vger.kernel.org" <linux-omap@vger.kernel.org>, Linux Media Mailing List <linux-media@vger.kernel.org>
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-yk0-f174.google.com ([209.85.160.174]:32810 "EHLO
+	mail-yk0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1758056AbbKSLRJ (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 19 Nov 2015 06:17:09 -0500
+Received: by ykdv3 with SMTP id v3so103764573ykd.0
+        for <linux-mmc@vger.kernel.org>; Thu, 19 Nov 2015 03:17:08 -0800 (PST)
+In-Reply-To: <1447148610-2770-1-git-send-email-haibo.chen@freescale.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Haibo Chen <haibo.chen@freescale.com>
+Cc: Dong Aisheng <aisheng.dong@freescale.com>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 
-T24gMTEvMTgvMjAxNSAwNTo0NiBQTSwgQW5keSBTaGV2Y2hlbmtvIHdyb3RlOgo+IE9uIFdlZCwg
-Tm92IDE4LCAyMDE1IGF0IDQ6MjEgUE0sIFBldGVyIFVqZmFsdXNpIDxwZXRlci51amZhbHVzaUB0
-aS5jb20+IHdyb3RlOgo+PiBIaSBWaW5vZCwKPj4KPj4gYnJpbmdpbmcgdGhpcyBvbGQgdGhyZWFk
-IGJhY2sgdG8gbGlmZSBhcyBJIGp1c3Qgc3RhcnRlZCB0byB3b3JrIG9uIHRoaXMuCj4gCj4gV2hh
-dCBJIHJlbWVtYmVyIHdlIG5lZWQgdG8gY29udmVydCBkcml2ZXJzIHRvIHVzZSBuZXcgQVBJIG1l
-YW53aGlsZSBpdAo+IGlzIGdvb2QgdG8ga2VlcCBvbGQgb25lIHRvIGF2b2lkIHBhdGNoIHN0b3Jt
-IHdoaWNoIGRvZXMgbm90aGluZyB1c2VmdWwKPiAoSUlSQyBSdXNzZWwncyBvcGluaW9uKS4KCkkg
-dGVuZCB0byBhZ3JlZS4gQnV0IHdlIG5lZWQgdG8gc3RhcnQgY29udmVydGluZyB0aGUgdXNlcnMg
-YXQgc29tZSBwb2ludAplaXRoZXIgd2F5LgpBbm90aGVyIGlzc3VlIGlzIHRoZSBmYWN0IHRoYXQg
-dGhlIGN1cnJlbnQgZG1hZW5naW5lIEFQSSBpcyB1c2luZyBhbGwgdGhlIGdvb2QKbmFtZXMgSSBj
-YW4gdGhpbmsgb2YgOykKCj4gT24gdGhlIG90aGVyIGhhbmQgdGhlcmUgYXJlIGEgbG90IG9mIGRy
-aXZlcnMgdGhhdCBhcmUgdXNlZCBvbiB0aGUgc2V0Cj4gb2YgcGxhdGZvcm1zIHN0YXJ0aW5nIGZy
-b20gbGVnYWN5IGFuZCBhYmFuZG9uZWQgb25lcyAobGlrZSBBVlIzMikgdG8KPiByZWxhdGl2ZWx5
-IG5ldyBhbmQgbmV3ZXN0Lgo+IAo+IEFuZCBJJ20gbm90IGEgZmFuIG9mIHRob3NlIHRob3VzYW5k
-cyBvZiBBUEkgY2FsbHMgZWl0aGVyLgo+IAoKLS0gClDDqXRlcgpfX19fX19fX19fX19fX19fX19f
-X19fX19fX19fX19fX19fX19fX19fX19fX19fXwpBbHNhLWRldmVsIG1haWxpbmcgbGlzdApBbHNh
-LWRldmVsQGFsc2EtcHJvamVjdC5vcmcKaHR0cDovL21haWxtYW4uYWxzYS1wcm9qZWN0Lm9yZy9t
-YWlsbWFuL2xpc3RpbmZvL2Fsc2EtZGV2ZWwK
+On 10 November 2015 at 10:43, Haibo Chen <haibo.chen@freescale.com> wrote:
+> Currently, we config the watermark_level register only in probe.
+> This will cause the mmc write operation timeout issue after system
+> resume back in LPSR mode. Because in LPSR mode, after system resume
+> back, the watermark_level register(0x44) changes to 0x08000880, which
+> set the write watermark level as 0, and set the read watermark level
+> as 128. This value is incorrect.
+>
+> This patch move the setting of watermark level register out of probe,
+> so after system resume back, mmc driver can set this watermark level
+> register back to 0x10401040.
+
+This seems all reasonable! But...
+
+>
+> Signed-off-by: Haibo Chen <haibo.chen@freescale.com>
+> ---
+>  drivers/mmc/host/sdhci-esdhc-imx.c | 14 ++++++++------
+>  1 file changed, 8 insertions(+), 6 deletions(-)
+>
+> diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
+> index 1f1582f..1508949 100644
+> --- a/drivers/mmc/host/sdhci-esdhc-imx.c
+> +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
+> @@ -584,6 +584,14 @@ static void esdhc_writeb_le(struct sdhci_host *host, u8 val, int reg)
+>                 mask = 0xffff & ~(ESDHC_CTRL_BUSWIDTH_MASK | ESDHC_CTRL_D3CD);
+>
+>                 esdhc_clrset_le(host, mask, new_val, reg);
+> +
+> +               /*
+> +                * The imx6q/imx7d ROM code will change the default watermark
+> +                * level setting to something insane.  Change it back here.
+> +                */
+> +                if (esdhc_is_usdhc(imx_data))
+> +                        writel(0x10401040, host->ioaddr + ESDHC_WTMK_LVL);
+> +
+
+... why don't keep setting the watermark in ->probe() and instead just
+add it at as additional task to do at system PM resume?
+
+>                 return;
+>         }
+>         esdhc_clrset_le(host, 0xff, val, reg);
+> @@ -1155,13 +1163,7 @@ static int sdhci_esdhc_imx_probe(struct platform_device *pdev)
+>                 host->quirks |= SDHCI_QUIRK_NO_MULTIBLOCK
+>                         | SDHCI_QUIRK_BROKEN_ADMA;
+>
+> -       /*
+> -        * The imx6q ROM code will change the default watermark level setting
+> -        * to something insane.  Change it back here.
+> -        */
+>         if (esdhc_is_usdhc(imx_data)) {
+> -               writel(0x10401040, host->ioaddr + ESDHC_WTMK_LVL);
+> -
+>                 host->quirks2 |= SDHCI_QUIRK2_PRESET_VALUE_BROKEN;
+>                 host->mmc->caps |= MMC_CAP_1_8V_DDR;
+>
+> --
+> 1.9.1
+>
+
+Kind regards
+Uffe
