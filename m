@@ -1,58 +1,177 @@
-From: Marek Vasut <marex@denx.de>
-Subject: Re: [PATCH] mmc: sdhci: Fix strings broken across multiple lines
-Date: Thu, 19 Nov 2015 12:58:45 +0100
-Message-ID: <201511191258.45847.marex@denx.de>
-References: <1447840022-8262-1-git-send-email-marex@denx.de> <CAPDyKFq6XcKczr+QrJ_-XodxLZZxLiyG+EMpGBzDyR3pe5=oBw@mail.gmail.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH] mmc: sh_mmcif: rework dma channel handling
+Date: Thu, 19 Nov 2015 13:00:48 +0100
+Message-ID: <CAPDyKFqRbD7qS=sgapw50uTNpvErEshwtLn2Ve3LeN__RqQ_Sg@mail.gmail.com>
+References: <5324212.8m5CM0vuVo@wuerfel>
 Mime-Version: 1.0
-Content-Type: Text/Plain;
-  charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-out.m-online.net ([212.18.0.10]:48066 "EHLO
-	mail-out.m-online.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756164AbbKSL6r (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 19 Nov 2015 06:58:47 -0500
-In-Reply-To: <CAPDyKFq6XcKczr+QrJ_-XodxLZZxLiyG+EMpGBzDyR3pe5=oBw@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <5324212.8m5CM0vuVo@wuerfel>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Arnd Bergmann <arnd@arndb.de>
+Cc: "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Linux-sh list <linux-sh@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>, Geert Uytterhoeven <geert+renesas@glider.be>, Yoshihiro Kaneko <ykaneko0929@gmail.com>, Laurent Pinchart <laurent.pinchart@ideasonboard.com>, Kouichi Tomita <kouichi.tomita.yn@renesas.com>, Simon Horman <horms@verge.net.au>, Magnus Damm <magnus.damm@gmail.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>
 
-On Thursday, November 19, 2015 at 12:52:06 PM, Ulf Hansson wrote:
-> On 18 November 2015 at 10:47, Marek Vasut <marex@denx.de> wrote:
-> > This is a trivial patch which fixes printed strings split across two
-> > or more lines in the source. I tried to grep for some error output*,
-> > but I couldn't find it easily because it was broken across multiple
-> > lines. This patch makes my life easier.
-> > 
-> > * in particular "Timeout waiting for hardware interrupt."
-> > 
-> > Signed-off-by: Marek Vasut <marex@denx.de>
-> > Cc: Ulf Hansson <ulf.hansson@linaro.org>
+On 16 November 2015 at 17:08, Arnd Bergmann <arnd@arndb.de> wrote:
+> When compiling the sh_mmcif driver for ARM64, we currently
+> get a harmless build warning:
+>
+> ../drivers/mmc/host/sh_mmcif.c: In function 'sh_mmcif_request_dma_one':
+> ../drivers/mmc/host/sh_mmcif.c:417:4: warning: cast to pointer from integer of different size [-Wint-to-pointer-cast]
+>     (void *)pdata->slave_id_tx :
+>     ^
+> ../drivers/mmc/host/sh_mmcif.c:418:4: warning: cast to pointer from integer of different size [-Wint-to-pointer-cast]
+>     (void *)pdata->slave_id_rx;
+>
+> This could be worked around by adding another cast to uintptr_t, but
+> I decided to simplify the code a little more to avoid that. This
+> splits out the platform data using code into a separate function
+> and builds that only for CONFIG_SUPERH. This part still has a typecast
+> but does not need a second one. The SH platform code could be further
+> modified to pass a pointer directly as we do on other architectures
+> when we have a filter function.
+>
+> The normal case is simplified further and now just calls
+> dma_request_slave_channel() directly without going through the
+> compat handling.
+>
+> Signed-off-by: Arnd Bergmann <arnd@arndb.de>
 
-Hi!
+Thanks, applied for next!
 
-> Future wise, no need to add a Cc tag here. You should send the patch
-> to me anyway.
+FYI: There were some check patch warnings, I decided to fix them
+myself before applying.
 
-Are CC tags now frowned upon? In case I have multiple distinct patches
-(which go to distinct lists/recipients) in a queue, I use these CC tags
-to track who to keep in a loop. Is there some better way to do this?
+Kind regards
+Uffe
 
-> Thanks, applied for next!
-
-Thanks.
-
-> FYI: There were some check patch warnings, but I decided to ignore
-> them as those are related to the use of the DBG macro.
-
-Oh yeah, the DBG() macro struck me as slightly odd. We should probably
-use dev_err() or pr_err() where applicable.
-
-> Kind regards
-> Uffe
-
-[..]
-
-Best regards,
-Marek Vasut
+> ---
+>  drivers/mmc/host/sh_mmcif.c | 80 +++++++++++++++++---------------------------------
+>  1 file changed, 34 insertions(+), 46 deletions(-)
+>
+>
+> diff --git a/drivers/mmc/host/sh_mmcif.c b/drivers/mmc/host/sh_mmcif.c
+> index ad9ffea7d659..d964c99f3a30 100644
+> --- a/drivers/mmc/host/sh_mmcif.c
+> +++ b/drivers/mmc/host/sh_mmcif.c
+> @@ -397,38 +397,26 @@ static void sh_mmcif_start_dma_tx(struct sh_mmcif_host *host)
+>  }
+>
+>  static struct dma_chan *
+> -sh_mmcif_request_dma_one(struct sh_mmcif_host *host,
+> -                        struct sh_mmcif_plat_data *pdata,
+> -                        enum dma_transfer_direction direction)
+> +sh_mmcif_request_dma_pdata(struct sh_mmcif_host *host, uintptr_t slave_id)
+>  {
+> -       struct dma_slave_config cfg = { 0, };
+> -       struct dma_chan *chan;
+> -       void *slave_data = NULL;
+> -       struct resource *res;
+> -       struct device *dev = sh_mmcif_host_to_dev(host);
+>         dma_cap_mask_t mask;
+> -       int ret;
+>
+>         dma_cap_zero(mask);
+>         dma_cap_set(DMA_SLAVE, mask);
+> +       if (slave_id <= 0)
+> +               return NULL;
+>
+> -       if (pdata)
+> -               slave_data = direction == DMA_MEM_TO_DEV ?
+> -                       (void *)pdata->slave_id_tx :
+> -                       (void *)pdata->slave_id_rx;
+> -
+> -       chan = dma_request_slave_channel_compat(mask, shdma_chan_filter,
+> -                               slave_data, dev,
+> -                               direction == DMA_MEM_TO_DEV ? "tx" : "rx");
+> -
+> -       dev_dbg(dev, "%s: %s: got channel %p\n", __func__,
+> -               direction == DMA_MEM_TO_DEV ? "TX" : "RX", chan);
+> +       return dma_request_channel(mask, shdma_chan_filter, (void *)slave_id);
+> +}
+>
+> -       if (!chan)
+> -               return NULL;
+> +static int sh_mmcif_dma_slave_config(struct sh_mmcif_host *host,
+> +                                    struct dma_chan *chan,
+> +                                    enum dma_transfer_direction direction)
+> +{
+> +       struct resource *res;
+> +       struct dma_slave_config cfg = { 0, };
+>
+>         res = platform_get_resource(host->pd, IORESOURCE_MEM, 0);
+> -
+>         cfg.direction = direction;
+>
+>         if (direction == DMA_DEV_TO_MEM) {
+> @@ -439,38 +427,38 @@ sh_mmcif_request_dma_one(struct sh_mmcif_host *host,
+>                 cfg.dst_addr_width = DMA_SLAVE_BUSWIDTH_4_BYTES;
+>         }
+>
+> -       ret = dmaengine_slave_config(chan, &cfg);
+> -       if (ret < 0) {
+> -               dma_release_channel(chan);
+> -               return NULL;
+> -       }
+> -
+> -       return chan;
+> +       return dmaengine_slave_config(chan, &cfg);
+>  }
+>
+> -static void sh_mmcif_request_dma(struct sh_mmcif_host *host,
+> -                                struct sh_mmcif_plat_data *pdata)
+> +static void sh_mmcif_request_dma(struct sh_mmcif_host *host)
+>  {
+>         struct device *dev = sh_mmcif_host_to_dev(host);
+>         host->dma_active = false;
+>
+> -       if (pdata) {
+> -               if (pdata->slave_id_tx <= 0 || pdata->slave_id_rx <= 0)
+> -                       return;
+> -       } else if (!dev->of_node) {
+> -               return;
+> +       /* We can only either use DMA for both Tx and Rx or not use it at all */
+> +       if (IS_ENABLED(CONFIG_SUPERH) && dev->platform_data) {
+> +               struct sh_mmcif_plat_data *pdata = dev->platform_data;
+> +               host->chan_tx = sh_mmcif_request_dma_pdata(host, pdata->slave_id_tx);
+> +               host->chan_rx = sh_mmcif_request_dma_pdata(host, pdata->slave_id_rx);
+> +       } else {
+> +               host->chan_tx = dma_request_slave_channel(dev, "tx");
+> +               host->chan_tx = dma_request_slave_channel(dev, "rx");
+>         }
+> +       dev_dbg(dev, "%s: got channel TX %p RX %p\n", __func__, host->chan_tx, host->chan_rx);
+>
+> -       /* We can only either use DMA for both Tx and Rx or not use it at all */
+> -       host->chan_tx = sh_mmcif_request_dma_one(host, pdata, DMA_MEM_TO_DEV);
+> -       if (!host->chan_tx)
+> -               return;
+> +       if (!host->chan_tx || !host->chan_rx ||
+> +           sh_mmcif_dma_slave_config(host, host->chan_tx, DMA_MEM_TO_DEV) ||
+> +           sh_mmcif_dma_slave_config(host, host->chan_rx, DMA_DEV_TO_MEM))
+> +               goto error;
+>
+> -       host->chan_rx = sh_mmcif_request_dma_one(host, pdata, DMA_DEV_TO_MEM);
+> -       if (!host->chan_rx) {
+> +       return;
+> +
+> +error:
+> +       if (host->chan_tx)
+>                 dma_release_channel(host->chan_tx);
+> -               host->chan_tx = NULL;
+> -       }
+> +       if (host->chan_rx)
+> +               dma_release_channel(host->chan_rx);
+> +       host->chan_tx = host->chan_rx = NULL;
+>  }
+>
+>  static void sh_mmcif_release_dma(struct sh_mmcif_host *host)
+> @@ -1102,7 +1090,7 @@ static void sh_mmcif_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+>         if (ios->power_mode == MMC_POWER_UP) {
+>                 if (!host->card_present) {
+>                         /* See if we also get DMA */
+> -                       sh_mmcif_request_dma(host, dev->platform_data);
+> +                       sh_mmcif_request_dma(host);
+>                         host->card_present = true;
+>                 }
+>                 sh_mmcif_set_power(host, ios);
+>
