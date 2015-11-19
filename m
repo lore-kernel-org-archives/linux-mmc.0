@@ -1,161 +1,54 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v4] mmc: sdhci at91: add PM support
-Date: Thu, 19 Nov 2015 12:29:47 +0100
-Message-ID: <CAPDyKFoFhQg1sFRbPgtCGEc0dPeyVSHVSZhWztSnBAxpeSn7uQ@mail.gmail.com>
-References: <1447265508-8583-1-git-send-email-ludovic.desroches@atmel.com>
+Subject: Re: [PATCH v2] mmc: kconfig: replace FAULT_INJECTION with FAULT_INJECTION_DEBUG_FS
+Date: Thu, 19 Nov 2015 12:29:55 +0100
+Message-ID: <CAPDyKFoP2rqm_bWStOBLoNK7kYdD=9Jwdq2=G3X3X1+ZQhpEgA@mail.gmail.com>
+References: <CAPDyKFq39uWPTBou+CUDqbWj8_RENeZMmokV3LRA5LBpG7fAVw@mail.gmail.com>
+	<1447182739-8996-1-git-send-email-adrien+dev@schischi.me>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-yk0-f180.google.com ([209.85.160.180]:34208 "EHLO
-	mail-yk0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932087AbbKSL3r (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 19 Nov 2015 06:29:47 -0500
-Received: by ykfs79 with SMTP id s79so104786459ykf.1
-        for <linux-mmc@vger.kernel.org>; Thu, 19 Nov 2015 03:29:47 -0800 (PST)
-In-Reply-To: <1447265508-8583-1-git-send-email-ludovic.desroches@atmel.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1447182739-8996-1-git-send-email-adrien+dev@schischi.me>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Adrien Schildknecht <adrien+dev@schischi.me>
+Cc: Shawn Lin <shawn.lin@rock-chips.com>, Linus Walleij <linus.walleij@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Ludovic Desroches <ludovic.desroches@atmel.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Nicolas Ferre <nicolas.ferre@atmel.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
 
-On 11 November 2015 at 19:11, Ludovic Desroches
-<ludovic.desroches@atmel.com> wrote:
-> Add runtime PM support and use runtime_force_suspend|resume() for system
-> PM.
+On 10 November 2015 at 20:12, Adrien Schildknecht
+<adrien+dev@schischi.me> wrote:
+> Fault-injection capability for MMC IO uses debugfs entries to configure
+> the attributes.
+> FAULT_INJECTION_DEBUG_FS must be enabled to use FAIL_MMC_REQUEST.
 >
-> Signed-off-by: Ludovic Desroches <ludovic.desroches@atmel.com>
+> Replace FAULT_INJECTION with FAULT_INJECTION_DEBUG_FS.
+> Also remove 'select DEBUG_FS' since FAULT_INJECTION_DEBUG_FS depends on
+> it.
+>
+> Signed-off-by: Adrien Schildknecht <adrien+dev@schischi.me>
 
 Thanks, applied for next!
 
 Kind regards
 Uffe
 
+
 > ---
+>  lib/Kconfig.debug | 3 +--
+>  1 file changed, 1 insertion(+), 2 deletions(-)
 >
-> Changes:
-> - from v3: add error handling of runtime PM
-> - from v2: cleanup thanks to Ulf feedback
-> - from v1: take a runtime PM centric approach
+> diff --git a/lib/Kconfig.debug b/lib/Kconfig.debug
+> index 749e886..5c038d2 100644
+> --- a/lib/Kconfig.debug
+> +++ b/lib/Kconfig.debug
+> @@ -1523,8 +1523,7 @@ config FAIL_IO_TIMEOUT
 >
->  drivers/mmc/host/sdhci-of-at91.c | 72 ++++++++++++++++++++++++++++++++++++++--
->  1 file changed, 70 insertions(+), 2 deletions(-)
->
-> diff --git a/drivers/mmc/host/sdhci-of-at91.c b/drivers/mmc/host/sdhci-of-at91.c
-> index 06d0b50..81ab9db 100644
-> --- a/drivers/mmc/host/sdhci-of-at91.c
-> +++ b/drivers/mmc/host/sdhci-of-at91.c
-> @@ -21,6 +21,8 @@
->  #include <linux/module.h>
->  #include <linux/of.h>
->  #include <linux/of_device.h>
-> +#include <linux/pm.h>
-> +#include <linux/pm_runtime.h>
->
->  #include "sdhci-pltfm.h"
->
-> @@ -51,6 +53,60 @@ static const struct of_device_id sdhci_at91_dt_match[] = {
->         {}
->  };
->
-> +#ifdef CONFIG_PM
-> +static int sdhci_at91_runtime_suspend(struct device *dev)
-> +{
-> +       struct sdhci_host *host = dev_get_drvdata(dev);
-> +       struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> +       struct sdhci_at91_priv *priv = pltfm_host->priv;
-> +       int ret;
-> +
-> +       ret = sdhci_runtime_suspend_host(host);
-> +
-> +       clk_disable_unprepare(priv->gck);
-> +       clk_disable_unprepare(priv->hclock);
-> +       clk_disable_unprepare(priv->mainck);
-> +
-> +       return ret;
-> +}
-> +
-> +static int sdhci_at91_runtime_resume(struct device *dev)
-> +{
-> +       struct sdhci_host *host = dev_get_drvdata(dev);
-> +       struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> +       struct sdhci_at91_priv *priv = pltfm_host->priv;
-> +       int ret;
-> +
-> +       ret = clk_prepare_enable(priv->mainck);
-> +       if (ret) {
-> +               dev_err(dev, "can't enable mainck\n");
-> +               return ret;
-> +       }
-> +
-> +       ret = clk_prepare_enable(priv->hclock);
-> +       if (ret) {
-> +               dev_err(dev, "can't enable hclock\n");
-> +               return ret;
-> +       }
-> +
-> +       ret = clk_prepare_enable(priv->gck);
-> +       if (ret) {
-> +               dev_err(dev, "can't enable gck\n");
-> +               return ret;
-> +       }
-> +
-> +       return sdhci_runtime_resume_host(host);
-> +}
-> +#endif /* CONFIG_PM */
-> +
-> +static const struct dev_pm_ops sdhci_at91_dev_pm_ops = {
-> +       SET_SYSTEM_SLEEP_PM_OPS(pm_runtime_force_suspend,
-> +                               pm_runtime_force_resume)
-> +       SET_RUNTIME_PM_OPS(sdhci_at91_runtime_suspend,
-> +                          sdhci_at91_runtime_resume,
-> +                          NULL)
-> +};
-> +
->  static int sdhci_at91_probe(struct platform_device *pdev)
->  {
->         const struct of_device_id       *match;
-> @@ -144,12 +200,20 @@ static int sdhci_at91_probe(struct platform_device *pdev)
->
->         sdhci_get_of_property(pdev);
->
-> +       pm_runtime_set_active(&pdev->dev);
-> +       pm_runtime_enable(&pdev->dev);
-> +       pm_runtime_set_autosuspend_delay(&pdev->dev, 50);
-> +       pm_runtime_use_autosuspend(&pdev->dev);
-> +
->         ret = sdhci_add_host(host);
->         if (ret)
-> -               goto clocks_disable_unprepare;
-> +               goto pm_runtime_disable;
->
->         return 0;
->
-> +pm_runtime_disable:
-> +       pm_runtime_disable(&pdev->dev);
-> +       pm_runtime_set_suspended(&pdev->dev);
->  clocks_disable_unprepare:
->         clk_disable_unprepare(priv->gck);
->         clk_disable_unprepare(priv->mainck);
-> @@ -165,6 +229,10 @@ static int sdhci_at91_remove(struct platform_device *pdev)
->         struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
->         struct sdhci_at91_priv  *priv = pltfm_host->priv;
->
-> +       pm_runtime_get_sync(&pdev->dev);
-> +       pm_runtime_disable(&pdev->dev);
-> +       pm_runtime_put_noidle(&pdev->dev);
-> +
->         sdhci_pltfm_unregister(pdev);
->
->         clk_disable_unprepare(priv->gck);
-> @@ -178,7 +246,7 @@ static struct platform_driver sdhci_at91_driver = {
->         .driver         = {
->                 .name   = "sdhci-at91",
->                 .of_match_table = sdhci_at91_dt_match,
-> -               .pm     = SDHCI_PLTFM_PMOPS,
-> +               .pm     = &sdhci_at91_dev_pm_ops,
->         },
->         .probe          = sdhci_at91_probe,
->         .remove         = sdhci_at91_remove,
+>  config FAIL_MMC_REQUEST
+>         bool "Fault-injection capability for MMC IO"
+> -       select DEBUG_FS
+> -       depends on FAULT_INJECTION && MMC
+> +       depends on FAULT_INJECTION_DEBUG_FS && MMC
+>         help
+>           Provide fault-injection capability for MMC IO.
+>           This will make the mmc core return data errors. This is
 > --
-> 2.5.0
+> 2.6.2
 >
