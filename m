@@ -1,58 +1,76 @@
-From: Andy Shevchenko <andy.shevchenko@gmail.com>
-Subject: Re: [PATCH] mmc: dw_mmc: use resource_size_t to store physical address
-Date: Wed, 18 Nov 2015 20:10:25 +0200
-Message-ID: <CAHp75VdFun5aLxLxau9SN_V+_aF+z2M7pvL9Cjui-i+jN-CUCg@mail.gmail.com>
-References: <28102387.ALpaBHpim0@wuerfel>
-	<7083277.bjzG62aVmx@wuerfel>
-	<CAHp75VfnD=MPigeTdo8YKPTs4zZN+XcSiMBZkma3ibaT4DEZiQ@mail.gmail.com>
-	<6347082.461jehYssD@wuerfel>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: [GIT PULL] MMC fixes for v.4.4 rc2
+Date: Thu, 19 Nov 2015 11:03:45 +0100
+Message-ID: <CAPDyKFqu9O5UT+jXjBcMWvMjCA+t-yLSCcsdWuhSYKFKLW=vMA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <6347082.461jehYssD@wuerfel>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Arnd Bergmann <arnd@arndb.de>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Jaehoon Chung <jh80.chung@samsung.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-arm Mailing List <linux-arm-kernel@lists.infradead.org>
+To: Linus Torvalds <torvalds@linux-foundation.org>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+Cc: Jaehoon Chung <jh80.chung@samsung.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On Wed, Nov 18, 2015 at 6:22 PM, Arnd Bergmann <arnd@arndb.de> wrote:
-> On Wednesday 18 November 2015 18:17:32 Andy Shevchenko wrote:
->> On Wed, Nov 18, 2015 at 5:45 PM, Arnd Bergmann <arnd@arndb.de> wrote:
->> > On Wednesday 18 November 2015 17:29:19 Andy Shevchenko wrote:
->
->> >> For me it clearly looks like a platform (HW / SW) configuration issue.
->> >
->> > I think some people have argued in the past that we should always use
->> > the same type for dma_addr_t, resource_size_t and phys_addr_t. That
->> > would certainly fix the problem you describe as well. In practice,
->> > everyone has that already, and my patch by itself fixes all the
->> > cases where the FIFO is at a high address and dma_addr_t is already
->> > 64-bit wide.
->>
->> Let me summarize.
->>
->> We have to have classification by address space
->> 1) physical
->> 2) virtual
->
-> That classification is oversimplified, as the DMA address space
-> is often not the same as physical.
->
+Hi Linus,
 
->> dma_addr_t is a physical address wrt DMA mask.
->>
->> Correct?
->
-> dma_addr_t is how a device sees RAM, it is limited by the DMA mask
-> that is a subset of the capabilities of the device and the buses
-> through which it is connected, and is subject to IOMMU translation
-> and possible platform or bus specific offsets from the physical
-> memory. I still don't know where you're getting with this.
+Here are some mmc fixes intended for v4.4 rc2. It's based on a commit
+prior rc1 as I wanted to get them a bit more tested in next before
+sending you the pull request.
 
-This is off the review already. I'm just structuring knowledge in my head.
-In principle I agree with your patch.
+Details are as usual found in the signed tag. Please pull this in!
+
+Kind regards
+Ulf Hansson
 
 
--- 
-With Best Regards,
-Andy Shevchenko
+The following changes since commit ce5c2d2c256a4c8b523036537cd6be2d6af8f69d:
+
+  arm64: fixup for mm renames (2015-11-07 16:45:51 -0800)
+
+are available in the git repository at:
+
+  git://git.linaro.org/people/ulf.hansson/mmc.git tags/mmc-v4.4-rc1
+
+for you to fetch changes up to d3df0465db00cf4ed9f90d0bfc3b827d32b9c796:
+
+  mmc: remove bondage between REQ_META and reliable write (2015-11-09
+14:04:52 +0100)
+
+----------------------------------------------------------------
+MMC core:
+ - Improve reliability when selecting HS200 mode
+ - Improve reliability when selecting HS400 mode
+ - mmc: remove bondage between REQ_META and reliable write
+
+MMC host:
+ - pxamci: Fix read-only gpio detection polarity
+ - mtk-sd: Preinitialize delay_phase to fix the case when delay is zero
+ - android-goldfish: Fix build dependency by adding HAS_DMA
+ - dw_mmc: Remove Seungwon Jeon from MAINTAINERS
+
+----------------------------------------------------------------
+Adrian Hunter (4):
+      mmc: mmc: Improve reliability of mmc_select_hs200()
+      mmc: mmc: Fix HS setting in mmc_select_hs400()
+      mmc: mmc: Move mmc_switch_status()
+      mmc: mmc: Improve reliability of mmc_select_hs400()
+
+Geert Uytterhoeven (2):
+      mmc: mediatek: Preinitialize delay_phase in get_best_delay()
+      mmc: MMC_GOLDFISH should depend on HAS_DMA
+
+Luca Porzio (1):
+      mmc: remove bondage between REQ_META and reliable write
+
+Robert Jarzmik (1):
+      mmc: pxamci: fix read-only gpio detection polarity
+
+Ulf Hansson (1):
+      MAINTAINERS: mmc: Remove Seungwon Jeon from dw_mmc
+
+ MAINTAINERS               |  1 -
+ drivers/mmc/card/block.c  | 11 ++----
+ drivers/mmc/core/mmc.c    | 93 +++++++++++++++++++++++++++++++++++------------
+ drivers/mmc/host/Kconfig  |  1 +
+ drivers/mmc/host/mtk-sd.c |  2 +-
+ drivers/mmc/host/pxamci.c |  2 +-
+ 6 files changed, 75 insertions(+), 35 deletions(-)
