@@ -1,65 +1,123 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 2/2] mmc: sdhci-esdhc-imx: correct the tuning-step setting
-Date: Thu, 19 Nov 2015 12:20:19 +0100
-Message-ID: <CAPDyKFp=DJP0t5Q90E4byuGypcHsK0wU629M=rK-WA20=AGKhA@mail.gmail.com>
-References: <1447148610-2770-1-git-send-email-haibo.chen@freescale.com>
-	<1447148610-2770-2-git-send-email-haibo.chen@freescale.com>
+From: Arnd Bergmann <arnd@arndb.de>
+Subject: Re: [PATCH 02/13] dmaengine: Introduce dma_request_slave_channel_compat_reason()
+Date: Thu, 19 Nov 2015 12:25:13 +0100
+Message-ID: <4533695.7ZVFN1S94o@wuerfel>
+References: <1432646768-12532-1-git-send-email-peter.ujfalusi@ti.com> <6358656.jIv3GGCCXu@wuerfel> <564DA5AE.3060608@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7Bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-yk0-f175.google.com ([209.85.160.175]:35380 "EHLO
-	mail-yk0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756659AbbKSLUU (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 19 Nov 2015 06:20:20 -0500
-Received: by ykba77 with SMTP id a77so103542422ykb.2
-        for <linux-mmc@vger.kernel.org>; Thu, 19 Nov 2015 03:20:19 -0800 (PST)
-In-Reply-To: <1447148610-2770-2-git-send-email-haibo.chen@freescale.com>
+Received: from mout.kundenserver.de ([217.72.192.73]:57924 "EHLO
+	mout.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751165AbbKSLZ3 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 19 Nov 2015 06:25:29 -0500
+In-Reply-To: <564DA5AE.3060608@ti.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Haibo Chen <haibo.chen@freescale.com>
-Cc: Dong Aisheng <aisheng.dong@freescale.com>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+To: Peter Ujfalusi <peter.ujfalusi@ti.com>
+Cc: Vinod Koul <vinod.koul@intel.com>, Geert Uytterhoeven <geert@linux-m68k.org>, Tony Lindgren <tony@atomide.com>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Dan Williams <dan.j.williams@intel.com>, dmaengine@vger.kernel.org, "linux-serial@vger.kernel.org" <linux-serial@vger.kernel.org>, "linux-omap@vger.kernel.org" <linux-omap@vger.kernel.org>, Linux MMC List <linux-mmc@vger.kernel.org>, linux-crypto@vger.kernel.org, linux-spi <linux-spi@vger.kernel.org>, Linux Media Mailing List <linux-media@vger.kernel.org>, ALSA Development Mailing List <alsa-devel@alsa-project.org>
 
-On 10 November 2015 at 10:43, Haibo Chen <haibo.chen@freescale.com> wrote:
-> Here we use '|=' to set the tuning-step, but before that, we should
-> clear the tuning-step, otherwise we could got the wrong setting.
->
-> Signed-off-by: Haibo Chen <haibo.chen@freescale.com>
-> ---
->  drivers/mmc/host/sdhci-esdhc-imx.c | 7 +++++--
->  1 file changed, 5 insertions(+), 2 deletions(-)
->
-> diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
-> index 1508949..64275c7 100644
-> --- a/drivers/mmc/host/sdhci-esdhc-imx.c
-> +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
-> @@ -76,6 +76,7 @@
->  #define ESDHC_STD_TUNING_EN            (1 << 24)
->  /* NOTE: the minimum valid tuning start tap for mx6sl is 1 */
->  #define ESDHC_TUNING_START_TAP         0x1
-> +#define ESDHC_TUNING_STEP_MASK         0x00070000
->  #define ESDHC_TUNING_STEP_SHIFT                16
->
->  /* pinctrl state */
-> @@ -489,9 +490,11 @@ static void esdhc_writew_le(struct sdhci_host *host, u16 val, int reg)
->                                 m |= ESDHC_MIX_CTRL_FBCLK_SEL;
->                                 tuning_ctrl = readl(host->ioaddr + ESDHC_TUNING_CTRL);
->                                 tuning_ctrl |= ESDHC_STD_TUNING_EN | ESDHC_TUNING_START_TAP;
-> -                               if (imx_data->boarddata.tuning_step)
-> +                               if (imx_data->boarddata.tuning_step) {
-> +                                       tuning_ctrl &= ~ESDHC_TUNING_STEP_MASK;
->                                         tuning_ctrl |= imx_data->boarddata.tuning_step << ESDHC_TUNING_STEP_SHIFT;
-> -                                       writel(tuning_ctrl, host->ioaddr + ESDHC_TUNING_CTRL);
-> +                               }
-> +                               writel(tuning_ctrl, host->ioaddr + ESDHC_TUNING_CTRL);
->                         } else {
->                                 v &= ~ESDHC_MIX_CTRL_EXE_TUNE;
->                         }
-> --
-> 1.9.1
->
+On Thursday 19 November 2015 12:34:22 Peter Ujfalusi wrote:
+> 
+> I think we can go with a single API, but I don't really like that:
+> dma_request_channel(dev, name, *mask, fn, fn_param);
+> 
+> This would cover all current uses being legacy, DT/ACPI, compat, etc:
+> dma_request_channel(NULL, NULL, &mask, fn, fn_param); /* Legacy slave */
+> dma_request_channel(NULL, NULL, &mask, NULL, NULL); /* memcpy. etc */
+> dma_request_channel(dev, name, NULL, NULL, NULL); /* DT/ACPI, current slave */
+> dma_request_channel(dev, name, &mask, fn, fn_param); /* current compat */
+> 
+> Note, that we need "const dma_cap_mask_t *mask" to be able to make the mask
+> optional.
 
-Looks good to me, but is there a dependency to patch 1/2 that should
-prevent me from applying this one?
+Right, that would work, but I also don't really like it.
 
-Kind regards
-Uffe
+> If we have two main APIs, one to request slave channels and one to get any
+> channel with given capability
+> dma_request_slave_channel(NULL, NULL, &mask, fn, fn_param); /* Legacy slave */
+> dma_request_slave_channel(dev, name, NULL, NULL, NULL); /* DT/ACPI, current
+>                                                            slave */
+> dma_request_slave_channel(dev, name, &mask, fn, fn_param); /* current compat*/
+> 
+> This way we can omit the mask also in cases when the client only want to get
+> DMA_SLAVE, we can just build up the mask within the function. If the mask is
+> provided we would copy the bits from the provided mask, so for example if you
+> want to have DMA_SLAVE+DMA_CYCLIC, the driver only needs to pass DMA_CYCLIC,
+> the DMA_SLAVE is going to be set anyways.
+
+I think it's more logical here to have mask=NULL mean that we want DMA_SLAVE,
+but otherwise pass the full mask as DMA_SLAVE|DMA_CYCLIC etc.
+
+> dma_request_channel(mask); /* memcpy. etc, non slave mostly */
+> 
+> Not sure how to name this as reusing existing (good, descriptive) function
+> names would mean changes all over the kernel to start off this.
+> 
+> Not used and
+> request_dma_channel(); /* as _irq/_mem_region/_resource, etc */
+> request_dma();
+> dma_channel_request();
+
+dma_request_slavechan();
+dma_request_slave();
+dma_request_mask();
+
+> All in all, not sure which way would be better...
+
+I think I would prefer the simplest API to have only the dev+name
+arguments, as we tend to move that way for all platforms anyway, and it
+seems silly to have all drivers pass three NULL arguments all the time.
+At the moment, there are 139 references to dma_request_slave_channel_*
+in the kernel, and only 46 of them are dma_request_slave_channel_compat.
+Out of those 46, a couple can already be converted back to use
+dma_request_slave_channel() because the platform now only supports
+devicetree based boots and will not go back to platform data.
+
+How about something like
+
+extern struct dma_chan *
+__dma_request_chan(struct device *dev, const char *name,
+		    const dma_cap_mask_t *mask, dma_filter_fn fn, void *fn_param);
+
+static inline struct dma_chan *
+dma_request_slavechan(struct device *dev, const char *name)
+{
+	return __dma_request_chan(dev, name, NULL, NULL, NULL);
+}
+
+static inline struct dma_chan *
+dma_request_chan(const dma_cap_mask_t *mask)
+{
+	return __dma_request_chan(NULL, NULL, mask, NULL, NULL);
+}
+
+That way the vast majority of drivers can use one of the two nice interfaces
+and the rest can be converted to use __dma_request_chan().
+
+On a related topic, we had in the past considered providing a way for
+platform code to register a lookup table of some sort, to associate
+a device/name pair with a configuration. That would let us use the
+simplified dma_request_slavechan(dev, name) pair everywhere. We could
+use the same method that we have for clk_register_clkdevs() or
+pinctrl_register_map().
+
+Something like either
+
+static struct dma_chan_map myplatform_dma_map[] = {
+	{ .devname = "omap-aes0", .slave = "tx", .filter = omap_dma_filter_fn, .arg = (void *)65, },
+	{ .devname = "omap-aes0", .slave = "rx", .filter = omap_dma_filter_fn, .arg = (void *)66, },
+};
+
+or
+
+static struct dma_chan_map myplatform_dma_map[] = {
+	{ .devname = "omap-aes0", .slave = "tx", .master = "omap-dma-engine0", .req = 65, },
+	{ .devname = "omap-aes0", .slave = "rx", .master = "omap-dma-engine0", .req = 66, },
+};
+
+we could even allow a combination of the two, so the simple case just specifies
+master and req number, which requires changes to the dmaengine driver, but we could
+also do a mass-conversion to the .filter/.arg variant.
+
+	Arnd
