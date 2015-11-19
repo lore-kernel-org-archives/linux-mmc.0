@@ -1,30 +1,30 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: sh_mmcif: Document r8a7793 DT bindings
-Date: Thu, 19 Nov 2015 12:32:51 +0100
-Message-ID: <CAPDyKFqcxQtE=d=kGVgf5KLbCss7r9CuFv0d+GB-dR9Rgvm53Q@mail.gmail.com>
-References: <1445964991-7825-1-git-send-email-geert+renesas@glider.be>
+Subject: Re: [PATCH] mmc: omap_hsmmc: No need to check DMA channel validity at
+ module remove
+Date: Thu, 19 Nov 2015 12:33:59 +0100
+Message-ID: <CAPDyKFrbMrJSnTFDrkJt-oFa88CgVmUMNva-C4LUnf96QTiugQ@mail.gmail.com>
+References: <1446550651-7977-1-git-send-email-peter.ujfalusi@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-yk0-f181.google.com ([209.85.160.181]:35821 "EHLO
-	mail-yk0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S933769AbbKSLcw (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 19 Nov 2015 06:32:52 -0500
-Received: by ykba77 with SMTP id a77so103840120ykb.2
-        for <linux-mmc@vger.kernel.org>; Thu, 19 Nov 2015 03:32:51 -0800 (PST)
-In-Reply-To: <1445964991-7825-1-git-send-email-geert+renesas@glider.be>
+Received: from mail-yk0-f174.google.com ([209.85.160.174]:35988 "EHLO
+	mail-yk0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750845AbbKSLeA (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 19 Nov 2015 06:34:00 -0500
+Received: by ykdr82 with SMTP id r82so103523269ykd.3
+        for <linux-mmc@vger.kernel.org>; Thu, 19 Nov 2015 03:34:00 -0800 (PST)
+In-Reply-To: <1446550651-7977-1-git-send-email-peter.ujfalusi@ti.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Geert Uytterhoeven <geert+renesas@glider.be>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Linux-sh list <linux-sh@vger.kernel.org>, Ulrich Hecht <ulrich.hecht+renesas@gmail.com>
+To: Peter Ujfalusi <peter.ujfalusi@ti.com>
+Cc: Tony Lindgren <tony@atomide.com>, Kishon <kishon@ti.com>, linux-mmc <linux-mmc@vger.kernel.org>, linux-omap <linux-omap@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 
-On 27 October 2015 at 17:56, Geert Uytterhoeven <geert+renesas@glider.be> wrote:
-> From: Ulrich Hecht <ulrich.hecht+renesas@gmail.com>
+On 3 November 2015 at 12:37, Peter Ujfalusi <peter.ujfalusi@ti.com> wrote:
+> The driver will not probe without valid DMA channels so no need to check
+> if they are valid when the module is removed.
 >
-> Signed-off-by: Ulrich Hecht <ulrich.hecht+renesas@gmail.com>
-> Acked-by: Simon Horman <horms+renesas@verge.net.au>
-> [geert: Rebased]
-> Signed-off-by: Geert Uytterhoeven <geert+renesas@glider.be>
+> Signed-off-by: Peter Ujfalusi <peter.ujfalusi@ti.com>
+> CC: Ulf Hansson <ulf.hansson@linaro.org>
 
 Thanks, applied for next!
 
@@ -32,21 +32,26 @@ Kind regards
 Uffe
 
 > ---
->  Documentation/devicetree/bindings/mmc/renesas,mmcif.txt | 1 +
->  1 file changed, 1 insertion(+)
+>  drivers/mmc/host/omap_hsmmc.c | 6 ++----
+>  1 file changed, 2 insertions(+), 4 deletions(-)
 >
-> diff --git a/Documentation/devicetree/bindings/mmc/renesas,mmcif.txt b/Documentation/devicetree/bindings/mmc/renesas,mmcif.txt
-> index cae29eb5733d8a52..ff611fa66871dec9 100644
-> --- a/Documentation/devicetree/bindings/mmc/renesas,mmcif.txt
-> +++ b/Documentation/devicetree/bindings/mmc/renesas,mmcif.txt
-> @@ -11,6 +11,7 @@ Required properties:
->         - "renesas,mmcif-r8a7740" for the MMCIF found in r8a7740 SoCs
->         - "renesas,mmcif-r8a7790" for the MMCIF found in r8a7790 SoCs
->         - "renesas,mmcif-r8a7791" for the MMCIF found in r8a7791 SoCs
-> +       - "renesas,mmcif-r8a7793" for the MMCIF found in r8a7793 SoCs
->         - "renesas,mmcif-r8a7794" for the MMCIF found in r8a7794 SoCs
+> diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
+> index f70e52b05648..712c74fd0401 100644
+> --- a/drivers/mmc/host/omap_hsmmc.c
+> +++ b/drivers/mmc/host/omap_hsmmc.c
+> @@ -2262,10 +2262,8 @@ static int omap_hsmmc_remove(struct platform_device *pdev)
+>         pm_runtime_get_sync(host->dev);
+>         mmc_remove_host(host->mmc);
 >
->  - clocks: reference to the functional clock
+> -       if (host->tx_chan)
+> -               dma_release_channel(host->tx_chan);
+> -       if (host->rx_chan)
+> -               dma_release_channel(host->rx_chan);
+> +       dma_release_channel(host->tx_chan);
+> +       dma_release_channel(host->rx_chan);
+>
+>         pm_runtime_put_sync(host->dev);
+>         pm_runtime_disable(host->dev);
 > --
-> 1.9.1
+> 2.6.2
 >
