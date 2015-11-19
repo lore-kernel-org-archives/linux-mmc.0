@@ -1,45 +1,42 @@
-From: Alan Cooper <alcooperx@gmail.com>
-Subject: Re: Correct DT properties for Arasan controller
-Date: Thu, 19 Nov 2015 16:42:30 -0500
-Message-ID: <CAOGqxeUVJ_MFcKw3SMHMyg1PSLhhMOi4=HxuEZ7=L_PfFajEYA@mail.gmail.com>
-References: <564DFAB9.3000001@sigmadesigns.com>
-	<6057509.l0OJuA1sv4@wuerfel>
+From: Renju Liu <i.am.renju.liu@gmail.com>
+Subject: mmc card suspension problem
+Date: Thu, 19 Nov 2015 16:57:33 -0500
+Message-ID: <CA+pCbJ3C3+V3Rp2AmU9d2s_dOkHQE6=MpHrEpCeQZksezrTWOw@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qg0-f67.google.com ([209.85.192.67]:35112 "EHLO
-	mail-qg0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752780AbbKSVmb (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 19 Nov 2015 16:42:31 -0500
-Received: by qgea14 with SMTP id a14so6230046qge.2
-        for <linux-mmc@vger.kernel.org>; Thu, 19 Nov 2015 13:42:30 -0800 (PST)
-In-Reply-To: <6057509.l0OJuA1sv4@wuerfel>
+Received: from mail-ob0-f181.google.com ([209.85.214.181]:34192 "EHLO
+	mail-ob0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1759376AbbKSV5e (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 19 Nov 2015 16:57:34 -0500
+Received: by obbbj7 with SMTP id bj7so71839881obb.1
+        for <linux-mmc@vger.kernel.org>; Thu, 19 Nov 2015 13:57:34 -0800 (PST)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Arnd Bergmann <arnd@arndb.de>
-Cc: Marc Gonzalez <marc_gonzalez@sigmadesigns.com>, linux-mmc <linux-mmc@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, Soren Brinkmann <soren.brinkmann@xilinx.com>, Michal Simek <michal.simek@xilinx.com>, Russell King <linux@arm.linux.org.uk>, Suman Tripathi <stripathi@apm.com>
+To: linux-mmc@vger.kernel.org
 
-On Thu, Nov 19, 2015 at 3:56 PM, Arnd Bergmann <arnd@arndb.de> wrote:
->>                       cap-sd-highspeed;
->>                       sd-uhs-sdr12;
->>                       sd-uhs-sdr25;
->>                       sd-uhs-sdr50;
->>                       sd-uhs-ddr50;
->>                       sd-uhs-sdr104;
+Hi All,
 
-These values normally come from the Host Controllers CAPS registers
-and are only needed if the CAPS register setting are incorrect.
+I'm currently studying the suspension behavior of MMC. However, I
+don't quite understand the rationale why the kernel needs to wait
+until timeout in the following code:
 
->> - cap-mmc-hw-reset: eMMC hardware reset is supported
+/*
+ * If the host does not wait while the card signals busy, then we will
+ * will have to wait the sleep/awake timeout.  Note, we cannot use the
+ * SEND_STATUS command to poll the status because that command (and most
+ * others) is invalid while the card sleeps.
+ */
 
-This is only set if the driver supplies a hw_reset callback and the
-Arasan driver does not.
+if (!(host->caps & MMC_CAP_WAIT_WHILE_BUSY)){
+mmc_delay(DIV_ROUND_UP(card->ext_csd.sa_timeout, 10000));
+}
 
->> - cap-sdio-irq: enable SDIO IRQ signalling on this interface
-
-This is only set if the driver supplies a enable_sdio_irq and the
-Arasan driver does not.
+Can anyone explain this to me?
 
 
-
-Al
+Best,
+Renju Liu
+i.am.renju.liu@gmail.com
+--------------------------------------------
+"Renju is awesome!"
