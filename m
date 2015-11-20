@@ -1,58 +1,54 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: fix mmc_{un,}register_pm_notifier prototypes
-Date: Fri, 20 Nov 2015 16:25:29 +0100
-Message-ID: <CAPDyKFrakOWJy4_nxYHR40yR=yG=Z_E8_u=_fMp6uSOPjd72Kg@mail.gmail.com>
-References: <7826361.qqKATxLhCV@wuerfel>
+From: Aaro Koskinen <aaro.koskinen-X3B1VOXEql0@public.gmane.org>
+Subject: Re: [PATCH v4] mmc: OCTEON: Add host driver for OCTEON MMC controller
+Date: Fri, 20 Nov 2015 19:32:33 +0200
+Message-ID: <20151120173233.GH18138@blackmetal.musicnaut.iki.fi>
+References: <1426518362-24349-1-git-send-email-aleksey.makarov@auriga.com>
+ <20150518210514.GG609@fuloong-minipc.musicnaut.iki.fi>
+ <555A5C5C.9090903@auriga.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-yk0-f177.google.com ([209.85.160.177]:34756 "EHLO
-	mail-yk0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1759817AbbKTPZb (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 20 Nov 2015 10:25:31 -0500
-Received: by ykfs79 with SMTP id s79so168401166ykf.1
-        for <linux-mmc@vger.kernel.org>; Fri, 20 Nov 2015 07:25:30 -0800 (PST)
-In-Reply-To: <7826361.qqKATxLhCV@wuerfel>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <555A5C5C.9090903-tx70/tkNEWbQT0dZR+AlfA@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Aleksey Makarov <aleksey.makarov-tx70/tkNEWbQT0dZR+AlfA@public.gmane.org>
+Cc: linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mips-6z/3iImG2C8G8FEW9MqTrA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, David Daney <david.daney-YGCgFSpz5w/QT0dZR+AlfA@public.gmane.org>, Chandrakala Chavva <cchavva-M3mlKVOIwJVv6pq1l3V1OdBPR1lH4CV8@public.gmane.org>, Leonid Rosenboim <lrosenboim-M3mlKVOIwJVv6pq1l3V1OdBPR1lH4CV8@public.gmane.org>, Peter Swain <pswain-YGCgFSpz5w/QT0dZR+AlfA@public.gmane.org>, Aaron Williams <aaron.williams-YGCgFSpz5w/QT0dZR+AlfA@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Pawel Moll <pawel.moll-5wv7dgnIgG8@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Ian Campbell <ijc+devicetree-KcIKpvwj1kUDXYZnReoRVg@public.gmane.org>, Kumar Gala <galak-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, Chris Ball <chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
-To: Arnd Bergmann <arnd@arndb.de>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 
-On 20 November 2015 at 11:28, Arnd Bergmann <arnd@arndb.de> wrote:
-> The mmc pm notifiers were recently reworked, but the new
-> code produces a lot of warnings when CONFIG_PM_SLEEP is disabled:
->
-> In file included from ../drivers/mmc/core/sdio_bus.c:27:0:
-> drivers/mmc/core/core.h:97:13: warning: 'mmc_register_pm_notifier' defined but not used [-Wunused-function]
->
-> The obvious solution is to add the 'inline' keyword at the
-> function definition, as it should be for any function defined
-> in a header file.
->
-> Signed-off-by: Arnd Bergmann <arnd@arndb.de>
-> Fixes: 0e40be7c20e0 ("mmc: core: Refactor code to register the MMC PM notifier")
+Hi,
 
-My bad. How could I even *not* notice those warnings.
-
-Thanks for helping out Arnd, patch applied!
-
-Kind regards
-Uffe
-
+On Mon, May 18, 2015 at 02:40:44PM -0700, Aleksey Makarov wrote:
+> On 05/18/2015 02:05 PM, Aaro Koskinen wrote:
+> >On Mon, Mar 16, 2015 at 06:06:00PM +0300, Aleksey Makarov wrote:
+> >>The OCTEON MMC controller is currently found on cn61XX and cnf71XX
+> >>devices.  Device parameters are configured from device tree data.
+> >>
+> >>eMMC, MMC and SD devices are supported.
+> >>
+> >>Tested-by: Aaro Koskinen <aaro.koskinen-X3B1VOXEql0@public.gmane.org>
+> >>Signed-off-by: Chandrakala Chavva <cchavva-M3mlKVOIwJVv6pq1l3V1OdBPR1lH4CV8@public.gmane.org>
+> >>Signed-off-by: David Daney <david.daney-YGCgFSpz5w/QT0dZR+AlfA@public.gmane.org>
+> >>Signed-off-by: Aleksey Makarov <aleksey.makarov-tx70/tkNEWbQT0dZR+AlfA@public.gmane.org>
+> >>Signed-off-by: Leonid Rosenboim <lrosenboim-M3mlKVOIwJVv6pq1l3V1OdBPR1lH4CV8@public.gmane.org>
+> >>Signed-off-by: Peter Swain <pswain-YGCgFSpz5w/QT0dZR+AlfA@public.gmane.org>
+> >>Signed-off-by: Aaron Williams <aaron.williams-YGCgFSpz5w/QT0dZR+AlfA@public.gmane.org>
+> >>---
+> >
+> >Any updates on this patch? Are you still working on it for
+> >the mainline kernel inclusion?
 >
-> diff --git a/drivers/mmc/core/core.h b/drivers/mmc/core/core.h
-> index bd00ac2cdc1b..0fa86a2afc26 100644
-> --- a/drivers/mmc/core/core.h
-> +++ b/drivers/mmc/core/core.h
-> @@ -94,8 +94,8 @@ int mmc_hs400_to_hs200(struct mmc_card *card);
->  void mmc_register_pm_notifier(struct mmc_host *host);
->  void mmc_unregister_pm_notifier(struct mmc_host *host);
->  #else
-> -static void mmc_register_pm_notifier(struct mmc_host *host) { }
-> -static void mmc_unregister_pm_notifier(struct mmc_host *host) { }
-> +static inline void mmc_register_pm_notifier(struct mmc_host *host) { }
-> +static inline void mmc_unregister_pm_notifier(struct mmc_host *host) { }
->  #endif
->
->  #endif
->
+> We are working on it.  It will also be used in ARM ThunderX arch.  So we
+> will send a new version soon.
+
+Any updates?
+
+Also distros are waiting for this patch, MMC is the main medium on
+some boards:
+
+	https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=800594
+
+A.
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
