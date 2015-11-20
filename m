@@ -1,197 +1,125 @@
-From: Peter Ujfalusi <peter.ujfalusi-l0cyMroinI0@public.gmane.org>
-Subject: Re: [PATCH 02/13] dmaengine: Introduce
- dma_request_slave_channel_compat_reason()
-Date: Fri, 20 Nov 2015 14:52:03 +0200
-Message-ID: <564F1773.9030006@ti.com>
-References: <1432646768-12532-1-git-send-email-peter.ujfalusi@ti.com>
- <4533695.7ZVFN1S94o@wuerfel> <564EF502.6040708@ti.com>
- <6118451.vaLZWOZEF5@wuerfel>
+From: Marc Gonzalez <marc_gonzalez@sigmadesigns.com>
+Subject: Re: Correct DT properties for Arasan controller
+Date: Fri, 20 Nov 2015 13:53:33 +0100
+Message-ID: <564F17CD.2020803@sigmadesigns.com>
+References: <564DFAB9.3000001@sigmadesigns.com> <6057509.l0OJuA1sv4@wuerfel>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-spi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <6118451.vaLZWOZEF5@wuerfel>
-Sender: linux-spi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>
-Cc: Vinod Koul <vinod.koul-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Geert Uytterhoeven <geert-Td1EMuHUCqxL1ZNQvxDV9g@public.gmane.org>, Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Dan Williams <dan.j.williams-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, dmaengine-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, "linux-serial-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-serial-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux MMC List <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-crypto-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-spi <linux-spi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux Media Mailing List <linux-media-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ALSA Development Mailing List <alsa-devel-K7yf7f+aM1XWsZ/bQMPhNw@public.gmane.org>
+Content-Type: text/plain; charset="ISO-8859-1"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail1.bemta8.messagelabs.com ([216.82.243.203]:17927 "EHLO
+	mail1.bemta8.messagelabs.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1162723AbbKTMxi (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 20 Nov 2015 07:53:38 -0500
+In-Reply-To: <6057509.l0OJuA1sv4@wuerfel>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Arnd Bergmann <arnd@arndb.de>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, Soren Brinkmann <soren.brinkmann@xilinx.com>, Michal Simek <michal.simek@xilinx.com>, Russell King <linux@arm.linux.org.uk>, Suman Tripathi <stripathi@apm.com>
 
-On 11/20/2015 12:58 PM, Arnd Bergmann wrote:
->>> That way the vast majority of drivers can use one of the two nice i=
-nterfaces
->>> and the rest can be converted to use __dma_request_chan().
->>>
->>> On a related topic, we had in the past considered providing a way f=
-or
->>> platform code to register a lookup table of some sort, to associate
->>> a device/name pair with a configuration. That would let us use the
->>> simplified dma_request_slavechan(dev, name) pair everywhere. We cou=
-ld
->>> use the same method that we have for clk_register_clkdevs() or
->>> pinctrl_register_map().
->>>
->>> Something like either
->>>
->>> static struct dma_chan_map myplatform_dma_map[] =3D {
->>> 	{ .devname =3D "omap-aes0", .slave =3D "tx", .filter =3D omap_dma_=
-filter_fn, .arg =3D (void *)65, },
->>> 	{ .devname =3D "omap-aes0", .slave =3D "rx", .filter =3D omap_dma_=
-filter_fn, .arg =3D (void *)66, },
->>> };
->>>
->>> or
->>>
->>> static struct dma_chan_map myplatform_dma_map[] =3D {
->>> 	{ .devname =3D "omap-aes0", .slave =3D "tx", .master =3D "omap-dma=
--engine0", .req =3D 65, },
->>> 	{ .devname =3D "omap-aes0", .slave =3D "rx", .master =3D "omap-dma=
--engine0", .req =3D 66, },
+On 19/11/2015 21:56, Arnd Bergmann wrote:
+> On Thursday 19 November 2015 17:37:13 Marc Gonzalez wrote:
+>> Hello everyone,
 >>
->> sa11x0-dma expects the fn_param as string :o
->=20
-> Some of them do, but the new API requires changes in both the DMA mas=
-ter and
-> slave drivers, so that could be changed if we wanted to, or we just a=
-llow=20
-> both methods indefinitely and let sa11x0-dma pass the filterfn+data r=
-ather than
-> a number.
-
-Hrm, I would say that we need to push everyone to use the new API. sa11=
-x0
-should not be a big deal to fix IMHO and other users should be reasonab=
-ly
-simple to convert.
-
->>> };
+>> My SoC provides an "SD3.0 / SDIO3.0 / eMMC4.4 AHB Host Controller"
+>> from Arasan Chip Systems (data sheet says rev 6.0, dated Feb 2010).
 >>
->> Basically we are deprecating the use of IORESOURCE_DMA?
->=20
-> I thought we already had ;-)
-
-=46or DT boot, yes. Not for the legacy boot.
-
->> For legacy the filter function is pretty much needed to handle the d=
-ifferences
->> between the platforms as not all of them does the filtering in a sam=
-e way. So
->> the first type of map would be feasible IMHO.
->=20
-> It certainly makes the transition to a map table much easier.
-
-And the aim anyway is to convert everything to DT, right?
-
->>> we could even allow a combination of the two, so the simple case ju=
-st specifies
->>> master and req number, which requires changes to the dmaengine driv=
-er, but we could
->>> also do a mass-conversion to the .filter/.arg variant.
+>> There are two instances of the controller:
+>> mmc0 is wired to an SD card reader,
+>> mmc1 is wired to an eMMC chip.
 >>
->> This will get rid of the need for the fn and fn_param parameters whe=
-n
->> requesting dma channel, but it will not get rid of the exported func=
-tion from
->> the dma engine drivers since in arch code we need to have visibility=
- to the
->> filter_fn.
->=20
-> Correct. A lot of dmaengine drivers already need to be built-in so th=
-e platform
-> code can put a pointer to the filter function, so it would not be wor=
-se for them.
->=20
-> Another idea would be to remove the filter function from struct dma_c=
-han_map
-> and pass the map through platform data to the dmaengine driver, which=
- then
-> registers it to the core along with the mask. Something like:
->=20
-> /* platform code */
-> static struct dma_chan_map oma_dma_map[] =3D {
->  	{ .devname =3D "omap-aes0", .slave =3D "tx", .arg =3D (void *)65, }=
-,
->  	{ .devname =3D "omap-aes0", .slave =3D "rx", .arg =3D (void *)66, }=
-,
-> 	...
-> 	{},
-> };
->=20
-> static struct omap_system_dma_plat_info dma_plat_info __initdata =3D =
-{
-> 	.dma_map =3D &oma_dma_map,
-> 	...
-> };     =20
->=20
-> machine_init(void)
-> {
-> 	...
-> 	platform_device_register_data(NULL, "omap-dma-engine", 0, &dma_plat_=
-info, sizeof(dma_plat_info);
-> 	...
-> }
->=20
-> /* dmaengine driver */
->=20
-> static int omap_dma_probe(struct platform_device *pdev)
-> {
-> 	struct omap_system_dma_plat_info *pdata =3D dev_get_platdata(&pdev->=
-dev);
-> 	...
->=20
-> 	dmam_register_platform_map(&pdev->dev, omap_dma_filter_fn, pdata->dm=
-a_map);
-> }
->=20
-> /* dmaengine core */
->=20
-> struct dma_map_list {
-> 	struct list_head node;
-> 	struct device *master;
-> 	dma_filter_fn filter;
-> 	struct dma_chan_map *map;
-> };
->=20
-> static LIST_HEAD(dma_map_list);
-> static DEFINE_MUTEX(dma_map_mutex);
->=20
-> int dmam_register_platform_map(struct device *dev, dma_filter_fn filt=
-er, struct dma_chan_map *map)
-> {
-> 	struct dma_map_list *list =3D kmalloc(sizeof(*list), GFP_KERNEL);
->=20
-> 	if (!list)
-> 		return -ENOMEM;
->=20
-> 	list->dev =3D dev;
-> 	list->filter =3D filter;
-> 	list->map =3D map;
->=20
-> 	mutex_lock(&dma_map_mutex);
-> 	list_add(&dma_map_list, &list->node);
-> 	mutex_unlock(&dma_map_mutex);
-> }
->=20
-> Now we can completely remove the dependency on the filter function de=
-finition
-> from platform code and slave drivers.
+>> I'm trying to figure out how to write the DT.
+>> (Currently using Linux 4.2)
+>>
+>> This is what I have so far:
+>>
+>> 		mmc0: mmc@21000 {
+>> 			compatible = "arasan,sdhci-8.9a";
+> 
+> make this "arasan,sdhci-6.0", plus a chip specific string
+> in front of it.
 
-Sounds feasible for OMAP and daVinci and for others as well. I think ;)
-I would go with this if someone asks my opinion :D
+Sorry, I wasn't clear...
+6.0 is the revision of the documentation, not of the hardware block.
+(Actually, I don't know what 4.9a and 8.9a refer to.
+Does anyone know?)
 
-The core change to add the new API + the dma_map support should be pret=
-ty
-straight forward. It can live alongside with the old API and we can pha=
-se out
-the users of the old one.
-The legacy support would need more time since we need to modify the arc=
-h codes
-and the corresponding DMA drivers to get the map registered, but after =
-that
-the remaining drivers can be converted to use the new API.
+>> 			reg = <0x21000 0x200>;
+>> 			clock-names = "clk_xin", "clk_ahb";
+>> 			clocks = <&sdio_clk>, <&clkgen 1>;
+>> 			interrupts = <60 IRQ_TYPE_LEVEL_HIGH>;
+>> 			bus-width = <8>;
+>> 			cap-sd-highspeed;
+>> 			sd-uhs-sdr12;
+>> 			sd-uhs-sdr25;
+>> 			sd-uhs-sdr50;
+>> 			sd-uhs-ddr50;
+>> 			sd-uhs-sdr104;
+>> 		};
+>>
+>> 		mmc1: mmc@21200 {
+>> 			compatible = "arasan,sdhci-8.9a";
+>> 			reg = <0x21200 0x200>;
+>> 			clock-names = "clk_xin", "clk_ahb";
+>> 			clocks = <&sdio_clk>, <&clkgen 1>;
+>> 			interrupts = <8 IRQ_TYPE_LEVEL_HIGH>;
+>> 			bus-width = <8>;
+>> 			non-removable;
+>> 		};
+>>
+>> https://www.kernel.org/doc/Documentation/devicetree/bindings/mmc/mmc.txt
+>>
+>> (I don't know anything about MMC, SDHCI, SDIO, etc.)
+>>
+>> Are cap-sd-highspeed and sd-uhs-* limited to mmc0? (wired to SD card reader)
+>>
+>> Are cap-mmc-highspeed and mmc-* limited to mmc1? (wired to eMMC)
+> 
+> It depends: if the wiring is board specific, put them into the .dts file
+> and put the generic properties (interrupts, clocks, reg, compatible)
+> into the .dtsi file.
 
---=20
-P=E9ter
---
-To unsubscribe from this list: send the line "unsubscribe linux-spi" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Hmmm, sorry again. I was not asking where to put them. I was asking
+if I should only use sd-uhs-* properties for an SD card reader node?
+
+And should I only use mmc-* for an eMMC node?
+
+>> What about these?
+>> - bus-width: Number of data lines, can be <1>, <4>, or <8>.  The default
+>>   will be <1> if the property is absent.
+> 
+> board specific
+
+HW guy tells me the controller handles 8 bits. Do you mean that the
+board could actually use only 1 or 4 wires?
+
+>> - cap-power-off-card: powering off the card is safe
+>> - cap-mmc-hw-reset: eMMC hardware reset is supported
+>> - cap-sdio-irq: enable SDIO IRQ signalling on this interface
+>> - full-pwr-cycle: full power cycle of the card is supported
+>>
+>> Also, I set clk_xin to 48 MHz (and clk_ahb is set to 400 MHz).
+>> Does clk_xin need to be higher for the faster modes?
+> 
+> don't know. I think the clock gets set by the driver, so the
+> clock controller needs to be programmable.
+
+The input clock is definitely not programmable. I see a clock
+divider inside the controller (SDCLK Frequency Select)
+
+I also see "00h - base clock (10MHz-63MHz)"
+
+However, elsewhere the doc states:
+
+> clk_xin - Input SD Clock used to generate SD Clock based on the
+> divisor value programmed by the Host Driver. This SD clock input is
+> used to generate SD Clock. This clock is also used to derive Sleep
+> clock used to detect Card insertion / removal.
+> For maximum efficiency > this should be around 52 MHz (for MMC) /
+> 208Mhz (for SD3.0) / 50Mhz (for SD2.0)
+
+Since the controller supports SD3.0, I'm wondering if I should use
+a faster clock for that.
+
+Regards.
+
