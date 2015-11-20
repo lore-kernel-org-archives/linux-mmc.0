@@ -1,47 +1,72 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: mmc card suspension problem
-Date: Fri, 20 Nov 2015 16:08:27 +0100
-Message-ID: <CAPDyKFpYKE13uYH-TB=-s5Z3hqLtJGKW_H1MX39MNN4twfhNRQ@mail.gmail.com>
-References: <CA+pCbJ3C3+V3Rp2AmU9d2s_dOkHQE6=MpHrEpCeQZksezrTWOw@mail.gmail.com>
+Subject: Re: [PATCH 2/2] mmc: sdhci-esdhc-imx: correct the tuning-step setting
+Date: Fri, 20 Nov 2015 16:23:58 +0100
+Message-ID: <CAPDyKFpvye6Yjy+C2oPHV9Oh56CkygZ-+nQC7W9aPbOMs33Nng@mail.gmail.com>
+References: <1447148610-2770-1-git-send-email-haibo.chen@freescale.com>
+	<1447148610-2770-2-git-send-email-haibo.chen@freescale.com>
+	<CAPDyKFp=DJP0t5Q90E4byuGypcHsK0wU629M=rK-WA20=AGKhA@mail.gmail.com>
+	<CAA+hA=RPkQdj0jEPxm4EEQv2-yRN9OJtkBox6sU==OoRmbAraw@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-yk0-f176.google.com ([209.85.160.176]:33723 "EHLO
-	mail-yk0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1760317AbbKTPI2 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 20 Nov 2015 10:08:28 -0500
-Received: by ykdv3 with SMTP id v3so166185606ykd.0
-        for <linux-mmc@vger.kernel.org>; Fri, 20 Nov 2015 07:08:27 -0800 (PST)
-In-Reply-To: <CA+pCbJ3C3+V3Rp2AmU9d2s_dOkHQE6=MpHrEpCeQZksezrTWOw@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <CAA+hA=RPkQdj0jEPxm4EEQv2-yRN9OJtkBox6sU==OoRmbAraw@mail.gmail.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Dong Aisheng <dongas86@gmail.com>, Haibo Chen <haibo.chen@freescale.com>
+Cc: Dong Aisheng <aisheng.dong@freescale.com>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Renju Liu <i.am.renju.liu@gmail.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>
 
-On 19 November 2015 at 22:57, Renju Liu <i.am.renju.liu@gmail.com> wrote:
-> Hi All,
+On 19 November 2015 at 17:34, Dong Aisheng <dongas86@gmail.com> wrote:
+> Hi Ulf,
 >
-> I'm currently studying the suspension behavior of MMC. However, I
-> don't quite understand the rationale why the kernel needs to wait
-> until timeout in the following code:
+> On Thu, Nov 19, 2015 at 7:20 PM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+>> On 10 November 2015 at 10:43, Haibo Chen <haibo.chen@freescale.com> wrote:
+>>> Here we use '|=' to set the tuning-step, but before that, we should
+>>> clear the tuning-step, otherwise we could got the wrong setting.
+>>>
+>>> Signed-off-by: Haibo Chen <haibo.chen@freescale.com>
+>>> ---
+>>>  drivers/mmc/host/sdhci-esdhc-imx.c | 7 +++++--
+>>>  1 file changed, 5 insertions(+), 2 deletions(-)
+>>>
+>>> diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
+>>> index 1508949..64275c7 100644
+>>> --- a/drivers/mmc/host/sdhci-esdhc-imx.c
+>>> +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
+>>> @@ -76,6 +76,7 @@
+>>>  #define ESDHC_STD_TUNING_EN            (1 << 24)
+>>>  /* NOTE: the minimum valid tuning start tap for mx6sl is 1 */
+>>>  #define ESDHC_TUNING_START_TAP         0x1
+>>> +#define ESDHC_TUNING_STEP_MASK         0x00070000
+>>>  #define ESDHC_TUNING_STEP_SHIFT                16
+>>>
+>>>  /* pinctrl state */
+>>> @@ -489,9 +490,11 @@ static void esdhc_writew_le(struct sdhci_host *host, u16 val, int reg)
+>>>                                 m |= ESDHC_MIX_CTRL_FBCLK_SEL;
+>>>                                 tuning_ctrl = readl(host->ioaddr + ESDHC_TUNING_CTRL);
+>>>                                 tuning_ctrl |= ESDHC_STD_TUNING_EN | ESDHC_TUNING_START_TAP;
+>>> -                               if (imx_data->boarddata.tuning_step)
+>>> +                               if (imx_data->boarddata.tuning_step) {
+>>> +                                       tuning_ctrl &= ~ESDHC_TUNING_STEP_MASK;
+>>>                                         tuning_ctrl |= imx_data->boarddata.tuning_step << ESDHC_TUNING_STEP_SHIFT;
+>>> -                                       writel(tuning_ctrl, host->ioaddr + ESDHC_TUNING_CTRL);
+>>> +                               }
+>>> +                               writel(tuning_ctrl, host->ioaddr + ESDHC_TUNING_CTRL);
+>>>                         } else {
+>>>                                 v &= ~ESDHC_MIX_CTRL_EXE_TUNE;
+>>>                         }
+>>> --
+>>> 1.9.1
+>>>
+>>
+>> Looks good to me, but is there a dependency to patch 1/2 that should
+>> prevent me from applying this one?
+>>
+>
+> No dependency.
+> Acked-by: Dong Aisheng <aisheng.dong@freescale.com>
+>
 
-That's because the eMMC spec states that it's required.
-
->
-> /*
->  * If the host does not wait while the card signals busy, then we will
->  * will have to wait the sleep/awake timeout.  Note, we cannot use the
->  * SEND_STATUS command to poll the status because that command (and most
->  * others) is invalid while the card sleeps.
->  */
->
-> if (!(host->caps & MMC_CAP_WAIT_WHILE_BUSY)){
-> mmc_delay(DIV_ROUND_UP(card->ext_csd.sa_timeout, 10000));
-> }
->
-
-If the host controller HW supports busy detection, we allow that to be
-used instead of waiting a pre-defined timeout time.
+Okay. I have applied it for next, thanks!
 
 Kind regards
 Uffe
