@@ -1,429 +1,100 @@
-From: Joshua Henderson <joshua.henderson@microchip.com>
-Subject: [PATCH 11/14] mmc: sdhci-pic32: Add PIC32 SDHC host controller driver
-Date: Fri, 20 Nov 2015 17:17:23 -0700
-Message-ID: <1448065205-15762-12-git-send-email-joshua.henderson@microchip.com>
-References: <1448065205-15762-1-git-send-email-joshua.henderson@microchip.com>
+From: "Fu, Zhonghui" <zhonghui.fu@linux.intel.com>
+Subject: Re: [PATCH v3] MMC/SDIO: enable SDIO device to suspend/resume asynchronously
+Date: Mon, 23 Nov 2015 12:00:36 +0800
+Message-ID: <56528F63.2020801@linux.intel.com>
+References: <56488E6F.3090109@linux.intel.com> <CAPDyKFoFqG27xfYT2Dw_E5vavQKSxNMqkNj=Yv4LqZ68y2Z0Kw@mail.gmail.com> <564B3020.5060104@linux.intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-mips-bounce@linux-mips.org>
-In-Reply-To: <1448065205-15762-1-git-send-email-joshua.henderson@microchip.com>
-Sender: linux-mips-bounce@linux-mips.org
-Errors-to: linux-mips-bounce@linux-mips.org
-List-help: <mailto:ecartis@linux-mips.org?Subject=help>
-List-unsubscribe: <mailto:ecartis@linux-mips.org?subject=unsubscribe%20linux-mips>
-List-software: Ecartis version 1.0.0
-List-subscribe: <mailto:ecartis@linux-mips.org?subject=subscribe%20linux-mips>
-List-owner: <mailto:ralf@linux-mips.org>
-List-post: <mailto:linux-mips@linux-mips.org>
-List-archive: <http://www.linux-mips.org/archives/linux-mips/>
-To: linux-kernel@vger.kernel.org
-Cc: linux-mips@linux-mips.org, Andrei Pistirica <andrei.pistirica@microchip.com>, Joshua Henderson <joshua.henderson@microchip.com>, Ulf Hansson <ulf.hansson@linaro.org>, Jean Delvare <jdelvare@suse.de>, Corneliu Doban <cdoban@broadcom.com>, Haojian Zhuang <haojian.zhuang@gmail.com>, Alim Akhtar <alim.akhtar@samsung.com>, Luis de Bethencourt <luisbg@osg.samsung.com>, Weijun Yang <Weijun.Yang@csr.com>, Lokesh Vutla <lokeshvutla@ti.com>, Scott Branden <sbranden@broadcom.com>, Vincent Yang <vincent.yang.fujitsu@gmail.com>, Chaotian Jing <chaotian.jing@mediatek.com>, "ludovic.desroches@atmel.com" <ludovic.desroches@atmel.com>, Shawn Lin <shawn.lin@rock-chips.com>, Stephen Boyd <sboyd@codeaurora.org>, yangbo lu <yangbo.lu@freescale.com>
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mga09.intel.com ([134.134.136.24]:36934 "EHLO mga09.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753105AbbKWEAk (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Sun, 22 Nov 2015 23:00:40 -0500
+In-Reply-To: <564B3020.5060104@linux.intel.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, Neil Brown <neilb@suse.de>, Jaehoon Chung <jh80.chung@samsung.com>, Andreas Fenkart <afenkart@gmail.com>, Joe Perches <joe@perches.com>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 
-From: Andrei Pistirica <andrei.pistirica@microchip.com>
 
-This driver supports the SDHCI host controller found on the PIC32 in DMA
-or PIO mode.
 
-Signed-off-by: Andrei Pistirica <andrei.pistirica@microchip.com>
-Signed-off-by: Joshua Henderson <joshua.henderson@microchip.com>
----
- drivers/mmc/host/Kconfig       |   11 ++
- drivers/mmc/host/Makefile      |    1 +
- drivers/mmc/host/sdhci-pic32.c |  354 ++++++++++++++++++++++++++++++++++++++++
- 3 files changed, 366 insertions(+)
- create mode 100644 drivers/mmc/host/sdhci-pic32.c
+On 11/17/2015 9:48 PM, Fu, Zhonghui wrote:
+>
+> On 11/16/2015 7:30 PM, Ulf Hansson wrote:
+>> On 15 November 2015 at 14:53, Fu, Zhonghui <zhonghui.fu@linux.intel.com> wrote:
+>>> Now, PM core supports asynchronous suspend/resume mode for devices
+>>> during system suspend/resume, and the power state transition of one
+>>> device may be completed in separate kernel thread. PM core ensures
+>>> all power state transition timing dependency between devices. This
+>>> patch enables SDIO card and function devices to suspend/resume
+>>> asynchronously. This will take advantage of multicore and improve
+>>> system suspend/resume speed. After enabling the SDIO devices and all
+>>> their child devices to suspend/resume asynchronously on ASUS T100TA,
+>>> the system suspend-to-idle time is reduced from 1645ms to 1119ms, and
+>>> the system resume time is reduced from 940ms to 918ms.
+>>>
+>>> Signed-off-by: Zhonghui Fu <zhonghui.fu@linux.intel.com>
+>> I think this is an interesting change, but I wonder if you really
+>> understand how this affects the order of how devices may be
+>> suspended/resumed?
+>>
+>> Also, I believe you didn't answer my question for the earlier version
+>> of the patch, so let me try again.
+>>
+>> There are a strict dependency chain when suspending/resuming devices
+>> that must be maintained. Currently this is controlled via device
+>> registration/probe order.
+>>
+>> An SDIO func driver/device must always be suspended *before* the SDIO
+>> card device. Additionally the corresponding MMC host, must be
+>> suspended after the SDIO card device. Vice verse applies to the resume
+>> sequence.
+>>
+>> As this patch enables asynchronous suspend, I am worried that it will
+>> break this dependency chain. What do you think?
+> After enabling asynchronous suspend/resume, PM core still ensures the strict suspend/resume dependency between child and parent devices - child must be suspended before its parent, and parent must be resumed before its child. SDIO function is child of SDIO card, and SDIO card is child of MMC host, and MMC host is child of MMC controller. So the dependency chain is not broken. Actually,  many devices have been using asynchronous suspend/resume mode now.
 
-diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
-index af71de5..75aaed1 100644
---- a/drivers/mmc/host/Kconfig
-+++ b/drivers/mmc/host/Kconfig
-@@ -784,3 +784,14 @@ config MMC_MTK
- 	  If you have a machine with a integrated SD/MMC card reader, say Y or M here.
- 	  This is needed if support for any SD/SDIO/MMC devices is required.
- 	  If unsure, say N.
-+
-+config MMC_SDHCI_MICROCHIP_PIC32
-+        tristate "Microchip PIC32MZDA SDHCI support"
-+        depends on MMC_SDHCI && PIC32MZDA
-+        help
-+          This selects the Secure Digital Host Controller Interface (SDHCI)
-+          for PIC32MZDA platform.
-+
-+          If you have a controller with this interface, say Y or M here.
-+
-+          If unsure, say N.
-diff --git a/drivers/mmc/host/Makefile b/drivers/mmc/host/Makefile
-index 3595f83..af918d2 100644
---- a/drivers/mmc/host/Makefile
-+++ b/drivers/mmc/host/Makefile
-@@ -75,6 +75,7 @@ obj-$(CONFIG_MMC_SDHCI_BCM2835)		+= sdhci-bcm2835.o
- obj-$(CONFIG_MMC_SDHCI_IPROC)		+= sdhci-iproc.o
- obj-$(CONFIG_MMC_SDHCI_MSM)		+= sdhci-msm.o
- obj-$(CONFIG_MMC_SDHCI_ST)		+= sdhci-st.o
-+obj-$(CONFIG_MMC_SDHCI_MICROCHIP_PIC32)	+= sdhci-pic32.o
- 
- ifeq ($(CONFIG_CB710_DEBUG),y)
- 	CFLAGS-cb710-mmc	+= -DDEBUG
-diff --git a/drivers/mmc/host/sdhci-pic32.c b/drivers/mmc/host/sdhci-pic32.c
-new file mode 100644
-index 0000000..7ff23a9
---- /dev/null
-+++ b/drivers/mmc/host/sdhci-pic32.c
-@@ -0,0 +1,354 @@
-+/*
-+ * Support of SDHCI platform devices for Microchip PIC32.
-+ *
-+ * Copyright (C) 2015 Microchip
-+ * Andrei Pistirica, Paul Thacker
-+ *
-+ * Inspired by sdhci-pltfm.c
-+ *
-+ * This file is licensed under the terms of the GNU General Public
-+ * License version 2. This program is licensed "as is" without any
-+ * warranty of any kind, whether express or implied.
-+ */
-+
-+#include <linux/clk.h>
-+#include <linux/delay.h>
-+#include <linux/highmem.h>
-+#include <linux/module.h>
-+#include <linux/interrupt.h>
-+#include <linux/irq.h>
-+#include <linux/of.h>
-+#include <linux/platform_device.h>
-+#include <linux/pm.h>
-+#include <linux/slab.h>
-+#include <linux/mmc/host.h>
-+#include <linux/io.h>
-+#include "sdhci.h"
-+#include <linux/platform_data/sdhci-pic32.h>
-+
-+#define PIC32_MMC_OCR (MMC_VDD_32_33 | MMC_VDD_33_34)
-+
-+#define SDH_SHARED_BUS_CTRL		0x000000E0
-+#define SDH_SHARED_BUS_NR_CLK_PINS_MASK	0x7
-+#define SDH_SHARED_BUS_NR_IRQ_PINS_MASK	0x30
-+#define SDH_SHARED_BUS_CLK_PINS		0x10
-+#define SDH_SHARED_BUS_IRQ_PINS		0x14
-+#define SDH_CAPS_SDH_SLOT_TYPE_MASK	0xC0000000
-+#define SDH_SLOT_TYPE_REMOVABLE		0x0
-+#define SDH_SLOT_TYPE_EMBEDDED		0x1
-+#define SDH_SLOT_TYPE_SHARED_BUS	0x2
-+#define SDHCI_CTRL_CDSSEL		0x80
-+#define SDHCI_CTRL_CDTLVL		0x40
-+
-+#define ADMA_FIFO_RD_THSHLD	512
-+#define ADMA_FIFO_WR_THSHLD	512
-+
-+#define DEV_NAME "pic32-sdhci"
-+
-+struct pic32_sdhci_pdata {
-+	struct platform_device	*pdev;
-+	struct clk *sys_clk;
-+	struct clk *base_clk;
-+	bool support_vsel;
-+	bool piomode;
-+};
-+
-+unsigned int pic32_sdhci_get_max_clock(struct sdhci_host *host)
-+{
-+	struct pic32_sdhci_pdata *sdhci_pdata = sdhci_priv(host);
-+	unsigned int clk_rate = clk_get_rate(sdhci_pdata->base_clk);
-+	struct platform_device *pdev = sdhci_pdata->pdev;
-+
-+	dev_dbg(&pdev->dev, "Sdhc max clock rate: %u\n", clk_rate);
-+	return clk_rate;
-+}
-+
-+unsigned int pic32_sdhci_get_min_clock(struct sdhci_host *host)
-+{
-+	struct pic32_sdhci_pdata *sdhci_pdata = sdhci_priv(host);
-+	unsigned int clk_rate = clk_get_rate(sdhci_pdata->base_clk);
-+	struct platform_device *pdev = sdhci_pdata->pdev;
-+
-+	dev_dbg(&pdev->dev, "Sdhc min clock rate: %u\n", clk_rate);
-+	return clk_rate;
-+}
-+
-+void pic32_sdhci_set_bus_width(struct sdhci_host *host, int width)
-+{
-+	u8 ctrl;
-+
-+	ctrl = sdhci_readb(host, SDHCI_HOST_CONTROL);
-+	if (width == MMC_BUS_WIDTH_8) {
-+		ctrl &= ~SDHCI_CTRL_4BITBUS;
-+		if (host->version >= SDHCI_SPEC_300)
-+			ctrl |= SDHCI_CTRL_8BITBUS;
-+	} else {
-+		if (host->version >= SDHCI_SPEC_300)
-+			ctrl &= ~SDHCI_CTRL_8BITBUS;
-+		if (width == MMC_BUS_WIDTH_4)
-+			ctrl |= SDHCI_CTRL_4BITBUS;
-+		else
-+			ctrl &= ~SDHCI_CTRL_4BITBUS;
-+	}
-+	/*
-+	 * SDHC will not work if JTAG is not Connected.As a workaround fix,
-+	 * set Card Detect Signal Selection bit in SDHC Host Control
-+	 * register and clear Card Detect Test Level bit in SDHC Host
-+	 * Control register.
-+	 */
-+	ctrl &= ~SDHCI_CTRL_CDTLVL;
-+	ctrl |= SDHCI_CTRL_CDSSEL;
-+	sdhci_writeb(host, ctrl, SDHCI_HOST_CONTROL);
-+}
-+
-+static unsigned int pic32_sdhci_get_ro(struct sdhci_host *host)
-+{
-+	/*
-+	 * The SDHCI_WRITE_PROTECT bit is unstable on current hardware so we
-+	 * can't depend on its value in any way.
-+	 */
-+	return 0;
-+}
-+
-+static const struct sdhci_ops pic32_sdhci_ops = {
-+	.get_max_clock = pic32_sdhci_get_max_clock,
-+	.get_min_clock = pic32_sdhci_get_min_clock,
-+	.set_clock = sdhci_set_clock,
-+	.set_bus_width = pic32_sdhci_set_bus_width,
-+	.reset = sdhci_reset,
-+	.set_uhs_signaling = sdhci_set_uhs_signaling,
-+	.get_ro = pic32_sdhci_get_ro,
-+};
-+
-+void pic32_sdhci_shared_bus(struct platform_device *pdev)
-+{
-+	struct sdhci_host *host = platform_get_drvdata(pdev);
-+	u32 bus = readl(host->ioaddr + SDH_SHARED_BUS_CTRL);
-+	u32 clk_pins = (bus & SDH_SHARED_BUS_NR_CLK_PINS_MASK) >> 0;
-+	u32 irq_pins = (bus & SDH_SHARED_BUS_NR_IRQ_PINS_MASK) >> 4;
-+
-+	/* select first clock */
-+	if (clk_pins & 0x1)
-+		bus |= (0x1 << SDH_SHARED_BUS_CLK_PINS);
-+
-+	/* select first interrupt */
-+	if (irq_pins & 0x1)
-+		bus |= (0x1 << SDH_SHARED_BUS_IRQ_PINS);
-+
-+	writel(bus, host->ioaddr + SDH_SHARED_BUS_CTRL);
-+}
-+
-+static int pic32_sdhci_probe_platform(struct platform_device *pdev,
-+				      struct pic32_sdhci_pdata *pdata)
-+{
-+	int ret = 0;
-+	u32 caps_slot_type;
-+	struct sdhci_host *host = platform_get_drvdata(pdev);
-+
-+	/* Check card slot connected on shared bus. */
-+	host->caps = readl(host->ioaddr + SDHCI_CAPABILITIES);
-+	caps_slot_type = (host->caps & SDH_CAPS_SDH_SLOT_TYPE_MASK) >> 30;
-+	if (caps_slot_type == SDH_SLOT_TYPE_SHARED_BUS)
-+		pic32_sdhci_shared_bus(pdev);
-+
-+	return ret;
-+}
-+
-+#ifdef CONFIG_OF
-+static inline int
-+sdhci_pic32_probe_dts(struct platform_device *pdev,
-+		      struct pic32_sdhci_pdata *boarddata)
-+{
-+	struct device_node *np = pdev->dev.of_node;
-+
-+	if (!np)
-+		return -ENODEV;
-+
-+	if (of_find_property(np, "no-1-8-v", NULL))
-+		boarddata->support_vsel = true;
-+	else
-+		boarddata->support_vsel = false;
-+
-+	if (of_find_property(np, "piomode", NULL))
-+		boarddata->piomode = true;
-+	else
-+		boarddata->piomode = false;
-+
-+	return 0;
-+}
-+#else
-+static inline int
-+sdhci_pic32_probe_dts(struct platform_device *pdev,
-+		      struct pic32_sdhci_pdata *boarddata)
-+{
-+	return -ENODEV;
-+}
-+#endif
-+
-+int pic32_sdhci_probe(struct platform_device *pdev)
-+{
-+	struct device *dev = &pdev->dev;
-+	struct sdhci_host *host;
-+	struct resource *iomem;
-+	struct pic32_sdhci_pdata *sdhci_pdata;
-+	struct pic32_sdhci_platform_data *plat_data;
-+	unsigned int clk_rate = 0;
-+	int ret;
-+	struct pinctrl *pinctrl;
-+
-+	host = sdhci_alloc_host(dev, sizeof(*sdhci_pdata));
-+	if (IS_ERR(host)) {
-+		ret = PTR_ERR(host);
-+		dev_err(&pdev->dev, "cannot allocate memory for sdhci\n");
-+		goto err;
-+	}
-+
-+	sdhci_pdata = sdhci_priv(host);
-+	sdhci_pdata->pdev = pdev;
-+	platform_set_drvdata(pdev, host);
-+
-+	if (sdhci_pic32_probe_dts(pdev, sdhci_pdata) < 0) {
-+		ret = -EINVAL;
-+		dev_err(&pdev->dev, "no device tree information %d\n", ret);
-+		goto err_host1;
-+	}
-+
-+	iomem = platform_get_resource(pdev, IORESOURCE_MEM, 0);
-+	host->ioaddr = devm_ioremap_resource(&pdev->dev, iomem);
-+	if (IS_ERR(host->ioaddr)) {
-+		ret = PTR_ERR(host->ioaddr);
-+		dev_err(&pdev->dev, "unable to map iomem: %d\n", ret);
-+		goto err_host;
-+	}
-+
-+	if (!sdhci_pdata->piomode) {
-+		plat_data = pdev->dev.platform_data;
-+		if (plat_data && plat_data->setup_dma) {
-+			ret = plat_data->setup_dma(ADMA_FIFO_RD_THSHLD,
-+						   ADMA_FIFO_WR_THSHLD);
-+			if (ret)
-+				goto err_host;
-+		}
-+	}
-+
-+	pinctrl = devm_pinctrl_get_select_default(&pdev->dev);
-+	if (IS_ERR(pinctrl)) {
-+		ret = PTR_ERR(pinctrl);
-+		dev_warn(&pdev->dev, "No pinctrl provided %d\n", ret);
-+		if (ret == -EPROBE_DEFER)
-+			goto err_host;
-+	}
-+
-+	host->ops = &pic32_sdhci_ops;
-+	host->irq = platform_get_irq(pdev, 0);
-+
-+	sdhci_pdata->sys_clk = devm_clk_get(&pdev->dev, "sys_clk");
-+	if (IS_ERR(sdhci_pdata->sys_clk)) {
-+		ret = PTR_ERR(sdhci_pdata->sys_clk);
-+		dev_err(&pdev->dev, "Error getting clock\n");
-+		goto err_host;
-+	}
-+
-+	/* Enable clock when available! */
-+	ret = clk_prepare_enable(sdhci_pdata->sys_clk);
-+	if (ret) {
-+		dev_dbg(&pdev->dev, "Error enabling clock\n");
-+		goto err_host;
-+	}
-+
-+	/* SDH CLK enable */
-+	sdhci_pdata->base_clk = devm_clk_get(&pdev->dev, "base_clk");
-+	if (IS_ERR(sdhci_pdata->base_clk)) {
-+		ret = PTR_ERR(sdhci_pdata->base_clk);
-+		dev_err(&pdev->dev, "Error getting clock\n");
-+		goto err_host;
-+	}
-+
-+	/* Enable clock when available! */
-+	ret = clk_prepare_enable(sdhci_pdata->base_clk);
-+	if (ret) {
-+		dev_dbg(&pdev->dev, "Error enabling clock\n");
-+		goto err_host;
-+	}
-+
-+	clk_rate = clk_get_rate(sdhci_pdata->base_clk);
-+	dev_dbg(&pdev->dev, "base clock at: %u\n", clk_rate);
-+	clk_rate = clk_get_rate(sdhci_pdata->sys_clk);
-+	dev_dbg(&pdev->dev, "sys clock at: %u\n", clk_rate);
-+
-+	if (sdhci_pdata->support_vsel)
-+		host->quirks2 |= SDHCI_QUIRK2_NO_1_8_V;
-+
-+	if (sdhci_pdata->piomode)
-+		host->quirks |= SDHCI_QUIRK_BROKEN_ADMA |
-+			SDHCI_QUIRK_BROKEN_DMA;
-+
-+	host->quirks |= SDHCI_QUIRK_NO_HISPD_BIT;
-+
-+	host->mmc->ocr_avail = PIC32_MMC_OCR;
-+
-+	ret = pic32_sdhci_probe_platform(pdev, sdhci_pdata);
-+	if (ret) {
-+		dev_err(&pdev->dev, "failed to probe platform!\n");
-+		goto err_host;
-+	}
-+
-+	ret = sdhci_add_host(host);
-+	if (ret) {
-+		dev_dbg(&pdev->dev, "error adding host\n");
-+		goto err_host;
-+	}
-+
-+	dev_info(&pdev->dev, "Successfully added sdhci host\n");
-+	return 0;
-+
-+err_host:
-+	devm_iounmap(&pdev->dev, host->ioaddr);
-+err_host1:
-+	sdhci_free_host(host);
-+err:
-+	dev_err(&pdev->dev, "pic32-sdhci probe failed: %d\n", ret);
-+	return ret;
-+}
-+
-+static int pic32_sdhci_remove(struct platform_device *pdev)
-+{
-+	struct sdhci_host *host = platform_get_drvdata(pdev);
-+	struct pic32_sdhci_pdata *sdhci_pdata = sdhci_priv(host);
-+	int dead = 0;
-+	u32 scratch;
-+
-+	scratch = readl(host->ioaddr + SDHCI_INT_STATUS);
-+	if (scratch == (u32)-1)
-+		dead = 1;
-+
-+	sdhci_remove_host(host, dead);
-+	clk_disable_unprepare(sdhci_pdata->base_clk);
-+	clk_disable_unprepare(sdhci_pdata->sys_clk);
-+	devm_iounmap(&pdev->dev, host->ioaddr);
-+	sdhci_free_host(host);
-+
-+	return 0;
-+}
-+
-+static const struct of_device_id pic32_sdhci_id_table[] = {
-+	{ .compatible = "microchip,pic32-sdhci" },
-+	{}
-+};
-+MODULE_DEVICE_TABLE(of, pic32_sdhci_id_table);
-+
-+static struct platform_driver pic32_sdhci_driver = {
-+	.driver = {
-+		.name	= DEV_NAME,
-+		.owner	= THIS_MODULE,
-+		.of_match_table = of_match_ptr(pic32_sdhci_id_table),
-+	},
-+	.probe		= pic32_sdhci_probe,
-+	.remove		= pic32_sdhci_remove,
-+};
-+
-+module_platform_driver(pic32_sdhci_driver);
-+
-+MODULE_DESCRIPTION("Microchip PIC32 SDHCI driver");
-+MODULE_AUTHOR("Pistirica Sorin Andrei & Sandeep Sheriker");
-+MODULE_LICENSE("GPL v2");
--- 
-1.7.9.5
+Any comments are welcome.
+
+
+Thanks,
+Zhonghui
+>
+> Thanks,
+> Zhonghui
+>> Kind regards
+>> Ulf Hansson
+>>
+>>> ---
+>>> Changes in v3:
+>>> - Add test result in commit message
+>>>
+>>>  drivers/mmc/core/sdio.c |    4 ++++
+>>>  1 files changed, 4 insertions(+), 0 deletions(-)
+>>>
+>>> diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
+>>> index 16d838e..530ce88 100644
+>>> --- a/drivers/mmc/core/sdio.c
+>>> +++ b/drivers/mmc/core/sdio.c
+>>> @@ -1113,6 +1113,8 @@ int mmc_attach_sdio(struct mmc_host *host)
+>>>                 pm_runtime_enable(&card->dev);
+>>>         }
+>>>
+>>> +       device_enable_async_suspend(&card->dev);
+>>> +
+>>>         /*
+>>>          * The number of functions on the card is encoded inside
+>>>          * the ocr.
+>>> @@ -1133,6 +1135,8 @@ int mmc_attach_sdio(struct mmc_host *host)
+>>>                  */
+>>>                 if (host->caps & MMC_CAP_POWER_OFF_CARD)
+>>>                         pm_runtime_enable(&card->sdio_func[i]->dev);
+>>> +
+>>> +               device_enable_async_suspend(&card->sdio_func[i]->dev);
+>>>         }
+>>>
+>>>         /*
+>>> -- 1.7.1
+>>>
+
