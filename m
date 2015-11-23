@@ -1,63 +1,87 @@
-From: "Fu, Zhonghui" <zhonghui.fu@linux.intel.com>
-Subject: Re: [PATCH v3] mmc/sdhci-acpi: enable sdhci-acpi device to suspend/resume
- asynchronously
-Date: Mon, 23 Nov 2015 12:04:38 +0800
-Message-ID: <56529056.9030102@linux.intel.com>
-References: <56497644.9080903@linux.intel.com>
+From: Avi Shchislowski <Avi.Shchislowski@sandisk.com>
+Subject: RE: [RFC 0/6] mmc: Field Firmware Update
+Date: Mon, 23 Nov 2015 11:40:04 +0000
+Message-ID: <SN1PR02MB13891415516DE9FA4756140783070@SN1PR02MB1389.namprd02.prod.outlook.com>
+References: <1447426572-11756-1-git-send-email-holgerschurig@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga09.intel.com ([134.134.136.24]:48348 "EHLO mga09.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753063AbbKWEEl (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Sun, 22 Nov 2015 23:04:41 -0500
-In-Reply-To: <56497644.9080903@linux.intel.com>
+Received: from mail-bn1on0067.outbound.protection.outlook.com ([157.56.110.67]:42592
+	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1751485AbbKWMMc convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 23 Nov 2015 07:12:32 -0500
+In-Reply-To: <1447426572-11756-1-git-send-email-holgerschurig@gmail.com>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, yunpeng.gao@intel.com, andriy.shevchenko@linux.intel.com, peter.griffin@linaro.org
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+To: Holger Schurig <holgerschurig@gmail.com>, Ulf Hansson <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Alex Lemberg <Alex.Lemberg@sandisk.com>
 
+Hi Holger,
 
-Any comments are welcome.
-
+Thank you for resubmitting the FFU patches again.
+We did couple of fixes since our last submission (in [RFC 6/6]), so we will post them soon.
+Also, we would like to leave the original "signed-off-by" names in your FFU patch commits.
+Could you please add the original:
+Signed-off-by: Avi Shchislowski <avi.shchislowski@sandisk.com>
+Signed-off-by: Alex Lemberg <Alex.Lemberg@sandisk.com>
 
 Thanks,
-Zhonghui
+Avi & Alex
 
-On 11/16/2015 2:23 PM, Fu, Zhonghui wrote:
-> Now, PM core supports asynchronous suspend/resume mode for devices
-> during system suspend/resume, and the power state transition of one
-> device may be completed in separate kernel thread. PM core ensures
-> all power state transition timing dependency between devices. This
-> patch enables sdhci-acpi device to suspend/resume asynchronously.
-> This will take advantage of multicore and improve system
-> suspend/resume speed. After enabling the sdhci-acpi devices and all
-> their child devices to suspend/resume asynchronously on ASUS T100TA,
-> the system suspend-to-idle time is reduced from 1645ms to 1096ms, and
-> the system resume time is reduced from 940ms to 908ms.
->
-> Signed-off-by: Zhonghui Fu <zhonghui.fu@linux.intel.com>
-> ---
-> Changes in v3:
-> - Add test result in commit message
->
->  drivers/mmc/host/sdhci-acpi.c |    2 ++
->  1 files changed, 2 insertions(+), 0 deletions(-)
->
-> diff --git a/drivers/mmc/host/sdhci-acpi.c b/drivers/mmc/host/sdhci-acpi.c
-> index f6047fc..3d27f2d 100644
-> --- a/drivers/mmc/host/sdhci-acpi.c
-> +++ b/drivers/mmc/host/sdhci-acpi.c
-> @@ -388,6 +388,8 @@ static int sdhci_acpi_probe(struct platform_device *pdev)
->  		pm_runtime_enable(dev);
->  	}
->  
-> +	device_enable_async_suspend(dev);
-> +
->  	return 0;
->  
->  err_free:
-> -- 1.7.1
->
+> -----Original Message-----
+> From: Holger Schurig [mailto:holgerschurig@gmail.com]
+> Sent: Friday, November 13, 2015 4:56 PM
+> To: Ulf Hansson; linux-mmc@vger.kernel.org; linux-kernel@vger.kernel.org; Avi
+> Shchislowski; Alex Lemberg
+> Cc: Holger Schurig
+> Subject: [RFC 0/6] mmc: Field Firmware Update
+> 
+> There have been some attempts to add FFU (field firmware update).  The last
+> AFAIK in Nov 2014, http://www.spinics.net/lists/linux-mmc/msg29324.html
+> 
+> But it seems that the committers weren't persistent enought.
+> 
+> I took the liberty to take Avi's patch and make it hopefully maintainer-review
+> friendly.
+> 
+> The first 5 patches just move functions out of mmc_test.c into core.c. Those
+> functions will later be used by both mmc_test.c and mmc_ffu.c.  Contrary to
+> Avi's patch I didn't add static helper functions to mmc_test.c, e.g.
+> there's no mmc_test_prepare_mrq() that calls mmc_prepare_mrq().  It's
+> simpler to call mmc_prepare_mrq() directly.  It's just one more dereference
+> from *mmc_card to *mmc_test_card anyway.
+> 
+> The patch [6/6] is http://www.spinics.net/lists/linux-mmc/msg29326.html, but
+> with less checkpatch warnings.  And it doesn't use mmc_send_ext_csd()
+> anymore, which has been deleted since November.
+> 
+> I'm sending this patch as RFC now. It compiles (for me). But I get the firmware
+> update file from Kingston only next Tuesday.  That means that so far I haven't
+> been testing it. It won't do anything without the proper user-space command in
+> mmc-utils anyway :-)
+> 
+> Comments welcome (I intent to get this patch into the kernel)
+> 
+> The patch is against Linux GIT (v4.3-11748-g46d862b).
+> 
+> Holger
+> 
+>  drivers/mmc/card/Kconfig    |  11 +
+>  drivers/mmc/card/Makefile   |   1 +
+>  drivers/mmc/card/block.c    |   5 +
+>  drivers/mmc/card/mmc_ffu.c  | 489
+> ++++++++++++++++++++++++++++++++++++++++++++
+>  drivers/mmc/card/mmc_test.c | 235 +++++----------------
+>  drivers/mmc/core/core.c     | 134 ++++++++++++
+>  drivers/mmc/core/mmc_ops.c  |   4 +-
+>  include/linux/mmc/card.h    |   1 +
+>  include/linux/mmc/core.h    |  41 ++++
+>  include/linux/mmc/mmc.h     |   6 +
+>  10 files changed, 739 insertions(+), 188 deletions(-)  create mode 100644
+> drivers/mmc/card/mmc_ffu.c
+> 
+> --
+> 2.1.4
 
