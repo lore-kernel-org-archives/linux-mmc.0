@@ -1,161 +1,102 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 2/2] mmc: mvsdio: delete platform data code path
-Date: Wed, 25 Nov 2015 17:34:20 +0100
-Message-ID: <CAPDyKFo0LxjhEna+Koqgg1Ckpvi=reP8VDCPXnzUxy0UVL5dOA@mail.gmail.com>
-References: <1448459877-32626-1-git-send-email-linus.walleij@linaro.org>
+Subject: Re: [PATCH v2] mmc: core: Introduce MMC_CAP2_NO_SDIO cap
+Date: Wed, 25 Nov 2015 17:34:10 +0100
+Message-ID: <CAPDyKFrL8Wi7bFxjxZD1m=mkRa+C_tco5o6RX8H93meWt7bXmg@mail.gmail.com>
+References: <1448462391-22480-1-git-send-email-carlo@caione.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-yk0-f169.google.com ([209.85.160.169]:32955 "EHLO
-	mail-yk0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752794AbbKYQeU (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 25 Nov 2015 11:34:20 -0500
-Received: by ykdv3 with SMTP id v3so61569730ykd.0
-        for <linux-mmc@vger.kernel.org>; Wed, 25 Nov 2015 08:34:20 -0800 (PST)
-In-Reply-To: <1448459877-32626-1-git-send-email-linus.walleij@linaro.org>
+Received: from mail-yk0-f179.google.com ([209.85.160.179]:32796 "EHLO
+	mail-yk0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752632AbbKYQeL (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 25 Nov 2015 11:34:11 -0500
+Received: by ykdv3 with SMTP id v3so61564219ykd.0
+        for <linux-mmc@vger.kernel.org>; Wed, 25 Nov 2015 08:34:11 -0800 (PST)
+In-Reply-To: <1448462391-22480-1-git-send-email-carlo@caione.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Linus Walleij <linus.walleij@linaro.org>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <cjb@laptop.org>, Nicolas Pitre <nico@fluxnic.net>, Andrew Lunn <andrew@lunn.ch>, Sebastian Hesselbarth <sebastian.hesselbarth@gmail.com>
+To: Carlo Caione <carlo@caione.org>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Daniel Drake <drake@endlessm.com>, Carlo Caione <carlo@endlessm.com>
 
-On 25 November 2015 at 14:57, Linus Walleij <linus.walleij@linaro.org> wrote:
-> There are no in-kernel users of the MVSDIO platform data method
-> (instantiating from a board file) so just delete this code and
-> make this a DT-only driver. We depend on OF and check that we have
-> an OF node in probe().
+On 25 November 2015 at 15:39, Carlo Caione <carlo@caione.org> wrote:
+> From: Carlo Caione <carlo@endlessm.com>
 >
-> Cc: Nicolas Pitre <nico@fluxnic.net>
-> Cc: Andrew Lunn <andrew@lunn.ch>
-> Cc: Sebastian Hesselbarth <sebastian.hesselbarth@gmail.com>
-> Signed-off-by: Linus Walleij <linus.walleij@linaro.org>
+> This patch introduce a new MMC_CAP2_NO_SDIO cap used to tell the mmc
+> core to not send SDIO specific commands.
+
+I guess there are two reasons to why such capability is useful.
+1) The host controller/driver doesn't support SDIO.
+2) There is an embedded/non-removable eMMC/SD card.
+
+Within that context, we might also want to add MMC_CAP2_NO_MMC|SD, or
+what do you think?
+
+Because of 2), we might also want to add a new mmc DT binding or
+perhaps try interpret a combination of them to enable
+MMC_CAP2_NO_SDIO!?
+
+>
+> Signed-off-by: Carlo Caione <carlo@endlessm.com>
 
 Thanks, applied for next!
-
-I decided to keep the patches as is, because I think the split
-provided an easy way to review the changes.
 
 Kind regards
 Uffe
 
 > ---
->  drivers/mmc/host/Kconfig  |  1 +
->  drivers/mmc/host/mvsdio.c | 63 +++++++++++------------------------------------
->  2 files changed, 15 insertions(+), 49 deletions(-)
 >
-> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
-> index 1dee533634c9..1526b8a10b09 100644
-> --- a/drivers/mmc/host/Kconfig
-> +++ b/drivers/mmc/host/Kconfig
-> @@ -455,6 +455,7 @@ config MMC_TIFM_SD
->  config MMC_MVSDIO
->         tristate "Marvell MMC/SD/SDIO host driver"
->         depends on PLAT_ORION
-> +       depends on OF
->         ---help---
->           This selects the Marvell SDIO host driver.
->           SDIO may currently be found on the Kirkwood 88F6281 and 88F6192
-> diff --git a/drivers/mmc/host/mvsdio.c b/drivers/mmc/host/mvsdio.c
-> index 18c70380ea93..42296e55b9de 100644
-> --- a/drivers/mmc/host/mvsdio.c
-> +++ b/drivers/mmc/host/mvsdio.c
-> @@ -20,8 +20,6 @@
->  #include <linux/scatterlist.h>
->  #include <linux/irq.h>
->  #include <linux/clk.h>
-> -#include <linux/gpio.h>
-> -#include <linux/of_gpio.h>
->  #include <linux/of_irq.h>
->  #include <linux/mmc/host.h>
->  #include <linux/mmc/slot-gpio.h>
-> @@ -36,12 +34,6 @@
->  static int maxfreq;
->  static int nodma;
+> Drivers fix will follow.
 >
-> -struct mvsdio_platform_data {
-> -       unsigned int clock;
-> -       int gpio_card_detect;
-> -       int gpio_write_protect;
-> -};
-> -
->  struct mvsd_host {
->         void __iomem *base;
->         struct mmc_request *mrq;
-> @@ -709,6 +701,10 @@ static int mvsd_probe(struct platform_device *pdev)
->         struct resource *r;
->         int ret, irq;
+> Changelog:
 >
-> +       if (!np) {
-> +               dev_err(&pdev->dev, "no DT node\n");
-> +               return -ENODEV;
-> +       }
->         r = platform_get_resource(pdev, IORESOURCE_MEM, 0);
->         irq = platform_get_irq(pdev, 0);
->         if (!r || irq < 0)
-> @@ -732,8 +728,12 @@ static int mvsd_probe(struct platform_device *pdev)
->          * fixed rate clock).
+> * v2:
+>    - moved check from __mmc_start_request to mmc_rescan_try_freq
+>
+> ---
+>  drivers/mmc/core/core.c  | 11 ++++++++---
+>  include/linux/mmc/host.h |  1 +
+>  2 files changed, 9 insertions(+), 3 deletions(-)
+>
+> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+> index 5ae89e4..8a4e0d2 100644
+> --- a/drivers/mmc/core/core.c
+> +++ b/drivers/mmc/core/core.c
+> @@ -2476,15 +2476,20 @@ static int mmc_rescan_try_freq(struct mmc_host *host, unsigned freq)
+>          * sdio_reset sends CMD52 to reset card.  Since we do not know
+>          * if the card is being re-initialized, just send it.  CMD52
+>          * should be ignored by SD/eMMC cards.
+> +        * Skip it if we already know that we do not support SDIO commands
 >          */
->         host->clk = devm_clk_get(&pdev->dev, NULL);
-> -       if (!IS_ERR(host->clk))
-> -               clk_prepare_enable(host->clk);
-> +       if (IS_ERR(host->clk)) {
-> +               dev_err(&pdev->dev, "no clock associated\n");
-> +               ret = -EINVAL;
-> +               goto out;
-> +       }
-> +       clk_prepare_enable(host->clk);
+> -       sdio_reset(host);
+> +       if (!(host->caps2 & MMC_CAP2_NO_SDIO))
+> +               sdio_reset(host);
+> +
+>         mmc_go_idle(host);
 >
->         mmc->ops = &mvsd_ops;
+>         mmc_send_if_cond(host, host->ocr_avail);
 >
-> @@ -749,45 +749,10 @@ static int mvsd_probe(struct platform_device *pdev)
->         mmc->max_seg_size = mmc->max_blk_size * mmc->max_blk_count;
->         mmc->max_req_size = mmc->max_blk_size * mmc->max_blk_count;
+>         /* Order's important: probe SDIO, then SD, then MMC */
+> -       if (!mmc_attach_sdio(host))
+> -               return 0;
+> +       if (!(host->caps2 & MMC_CAP2_NO_SDIO))
+> +               if (!mmc_attach_sdio(host))
+> +                       return 0;
+> +
+>         if (!mmc_attach_sd(host))
+>                 return 0;
+>         if (!mmc_attach_mmc(host))
+> diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+> index 8673ffe..cf6d0bb 100644
+> --- a/include/linux/mmc/host.h
+> +++ b/include/linux/mmc/host.h
+> @@ -289,6 +289,7 @@ struct mmc_host {
+>  #define MMC_CAP2_HSX00_1_2V    (MMC_CAP2_HS200_1_2V_SDR | MMC_CAP2_HS400_1_2V)
+>  #define MMC_CAP2_SDIO_IRQ_NOTHREAD (1 << 17)
+>  #define MMC_CAP2_NO_WRITE_PROTECT (1 << 18)    /* No physical write protect pin, assume that card is always read-write */
+> +#define MMC_CAP2_NO_SDIO       (1 << 19)       /* Do not send SDIO commands during initialization */
 >
-> -       if (np) {
-> -               if (IS_ERR(host->clk)) {
-> -                       dev_err(&pdev->dev, "DT platforms must have a clock associated\n");
-> -                       ret = -EINVAL;
-> -                       goto out;
-> -               }
-> -
-> -               host->base_clock = clk_get_rate(host->clk) / 2;
-> -               ret = mmc_of_parse(mmc);
-> -               if (ret < 0)
-> -                       goto out;
-> -       } else {
-> -               const struct mvsdio_platform_data *mvsd_data;
-> -
-> -               mvsd_data = pdev->dev.platform_data;
-> -               if (!mvsd_data) {
-> -                       ret = -ENXIO;
-> -                       goto out;
-> -               }
-> -               mmc->caps = MMC_CAP_4_BIT_DATA | MMC_CAP_SDIO_IRQ |
-> -                           MMC_CAP_SD_HIGHSPEED | MMC_CAP_MMC_HIGHSPEED;
-> -               host->base_clock = mvsd_data->clock / 2;
-> -               /* GPIO 0 regarded as invalid for backward compatibility */
-> -               if (mvsd_data->gpio_card_detect &&
-> -                   gpio_is_valid(mvsd_data->gpio_card_detect)) {
-> -                       ret = mmc_gpio_request_cd(mmc,
-> -                                                 mvsd_data->gpio_card_detect,
-> -                                                 0);
-> -                       if (ret)
-> -                               goto out;
-> -               } else {
-> -                       mmc->caps |= MMC_CAP_NEEDS_POLL;
-> -               }
-> -
-> -               if (mvsd_data->gpio_write_protect &&
-> -                   gpio_is_valid(mvsd_data->gpio_write_protect))
-> -                       mmc_gpio_request_ro(mmc, mvsd_data->gpio_write_protect);
-> -       }
-> -
-> +       host->base_clock = clk_get_rate(host->clk) / 2;
-> +       ret = mmc_of_parse(mmc);
-> +       if (ret < 0)
-> +               goto out;
->         if (maxfreq)
->                 mmc->f_max = maxfreq;
+>         mmc_pm_flag_t           pm_caps;        /* supported pm features */
 >
 > --
-> 2.4.3
+> 2.5.0
 >
