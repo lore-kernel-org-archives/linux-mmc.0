@@ -1,71 +1,62 @@
-From: Yangbo Lu <yangbo.lu@freescale.com>
-Subject: [PATCH] mmc: sdhci-of-esdhc: add/remove some quirks according to vendor version
-Date: Wed, 25 Nov 2015 10:05:37 +0800
-Message-ID: <1448417137-6185-1-git-send-email-yangbo.lu@freescale.com>
-Mime-Version: 1.0
-Content-Type: text/plain
+From: Carlo Caione <carlo@caione.org>
+Subject: [PATCH 3/3] mmc: core: Introduce MMC_CAP2_NO_SDIO cap
+Date: Wed, 25 Nov 2015 12:28:47 +0100
+Message-ID: <1448450927-13682-4-git-send-email-carlo@caione.org>
+References: <1448450927-13682-1-git-send-email-carlo@caione.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-bn1bon0134.outbound.protection.outlook.com ([157.56.111.134]:46464
-	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1755147AbbKYCMu (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 24 Nov 2015 21:12:50 -0500
+Received: from mail-wm0-f49.google.com ([74.125.82.49]:36761 "EHLO
+	mail-wm0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752556AbbKYL3W (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 25 Nov 2015 06:29:22 -0500
+Received: by wmww144 with SMTP id w144so175952114wmw.1
+        for <linux-mmc@vger.kernel.org>; Wed, 25 Nov 2015 03:29:20 -0800 (PST)
+In-Reply-To: <1448450927-13682-1-git-send-email-carlo@caione.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org, ulf.hansson@linaro.org
-Cc: Yangbo Lu <yangbo.lu@freescale.com>
+To: ulf.hansson@linaro.org, hdegoede@redhat.com, linux-mmc@vger.kernel.org, drake@endlessm.com
+Cc: Carlo Caione <carlo@endlessm.com>
 
-A previous patch had removed esdhc_of_platform_init() by mistake.
-static void esdhc_of_platform_init(struct sdhci_host *host)
-{
-	u32 vvn;
+From: Carlo Caione <carlo@endlessm.com>
 
-	vvn = in_be32(host->ioaddr + SDHCI_SLOT_INT_STATUS);
-	vvn = (vvn & SDHCI_VENDOR_VER_MASK) >> SDHCI_VENDOR_VER_SHIFT;
-	if (vvn == VENDOR_V_22)
-		host->quirks2 |= SDHCI_QUIRK2_HOST_NO_CMD23;
+This patch introduce a new MMC_CAP2_NO_SDIO cap used to tell the mmc
+core to not send SDIO specific commands.
 
-	if (vvn > VENDOR_V_22)
-		host->quirks &= ~SDHCI_QUIRK_NO_BUSY_IRQ;
-}
-
-This patch is used to fix it by add/remove some quirks according to
-verdor version in probe.
-
-Signed-off-by: Yangbo Lu <yangbo.lu@freescale.com>
-Fixes: f4932cfd22f1 ("mmc: sdhci-of-esdhc: support both BE and LE host controller")
+Signed-off-by: Carlo Caione <carlo@endlessm.com>
 ---
- drivers/mmc/host/sdhci-of-esdhc.c | 10 ++++++++++
- 1 file changed, 10 insertions(+)
+ drivers/mmc/core/core.c  | 7 +++++++
+ include/linux/mmc/host.h | 1 +
+ 2 files changed, 8 insertions(+)
 
-diff --git a/drivers/mmc/host/sdhci-of-esdhc.c b/drivers/mmc/host/sdhci-of-esdhc.c
-index 90e94a0..83b1226 100644
---- a/drivers/mmc/host/sdhci-of-esdhc.c
-+++ b/drivers/mmc/host/sdhci-of-esdhc.c
-@@ -584,6 +584,8 @@ static int sdhci_esdhc_probe(struct platform_device *pdev)
- {
- 	struct sdhci_host *host;
- 	struct device_node *np;
-+	struct sdhci_pltfm_host *pltfm_host;
-+	struct sdhci_esdhc *esdhc;
- 	int ret;
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index 2e8b24d..90b028e 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -204,6 +204,13 @@ static void __mmc_start_request(struct mmc_host *host, struct mmc_request *mrq)
+ 		return;
+ 	}
  
- 	np = pdev->dev.of_node;
-@@ -600,6 +602,14 @@ static int sdhci_esdhc_probe(struct platform_device *pdev)
- 
- 	sdhci_get_of_property(pdev);
- 
-+	pltfm_host = sdhci_priv(host);
-+	esdhc = pltfm_host->priv;
-+	if (esdhc->vendor_ver == VENDOR_V_22)
-+		host->quirks2 |= SDHCI_QUIRK2_HOST_NO_CMD23;
++	/* We do not support SDIO commands */
++	if (mmc_is_io_op(mrq->cmd->opcode) && host->caps2 & MMC_CAP2_NO_SDIO) {
++		mrq->cmd->error = -EINVAL;
++		mmc_request_done(host, mrq);
++		return;
++	}
 +
-+	if (esdhc->vendor_ver > VENDOR_V_22)
-+		host->quirks &= ~SDHCI_QUIRK_NO_BUSY_IRQ;
-+
- 	if (of_device_is_compatible(np, "fsl,p5040-esdhc") ||
- 	    of_device_is_compatible(np, "fsl,p5020-esdhc") ||
- 	    of_device_is_compatible(np, "fsl,p4080-esdhc") ||
+ 	/*
+ 	 * For sdio rw commands we must wait for card busy otherwise some
+ 	 * sdio devices won't work properly.
+diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+index 8673ffe..cf6d0bb 100644
+--- a/include/linux/mmc/host.h
++++ b/include/linux/mmc/host.h
+@@ -289,6 +289,7 @@ struct mmc_host {
+ #define MMC_CAP2_HSX00_1_2V	(MMC_CAP2_HS200_1_2V_SDR | MMC_CAP2_HS400_1_2V)
+ #define MMC_CAP2_SDIO_IRQ_NOTHREAD (1 << 17)
+ #define MMC_CAP2_NO_WRITE_PROTECT (1 << 18)	/* No physical write protect pin, assume that card is always read-write */
++#define MMC_CAP2_NO_SDIO	(1 << 19)	/* Do not send SDIO commands during initialization */
+ 
+ 	mmc_pm_flag_t		pm_caps;	/* supported pm features */
+ 
 -- 
-2.1.0.27.g96db324
+2.5.0
 
