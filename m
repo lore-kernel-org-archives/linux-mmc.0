@@ -1,57 +1,71 @@
-From: David Daney <ddaney@caviumnetworks.com>
-Subject: Re: [PATCH v4] mmc: OCTEON: Add host driver for OCTEON MMC controller
-Date: Tue, 24 Nov 2015 10:13:26 -0800
-Message-ID: <5654A8C6.3070306@caviumnetworks.com>
-References: <1426518362-24349-1-git-send-email-aleksey.makarov@auriga.com> <20150518210514.GG609@fuloong-minipc.musicnaut.iki.fi> <555A5C5C.9090903@auriga.com> <20151120173233.GH18138@blackmetal.musicnaut.iki.fi>
+From: Yangbo Lu <yangbo.lu@freescale.com>
+Subject: [PATCH] mmc: sdhci-of-esdhc: add/remove some quirks according to vendor version
+Date: Wed, 25 Nov 2015 10:05:37 +0800
+Message-ID: <1448417137-6185-1-git-send-email-yangbo.lu@freescale.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="ISO-8859-1"; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20151120173233.GH18138@blackmetal.musicnaut.iki.fi>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Aaro Koskinen <aaro.koskinen@iki.fi>
-Cc: Aleksey Makarov <aleksey.makarov@auriga.com>, linux-mmc@vger.kernel.org, linux-mips@linux-mips.org, linux-kernel@vger.kernel.org, David Daney <david.daney@cavium.com>, Chandrakala Chavva <cchavva@caviumnetworks.com>, Leonid Rosenboim <lrosenboim@caviumnetworks.com>, Peter Swain <pswain@cavium.com>, Aaron Williams <aaron.williams@cavium.com>, Rob Herring <robh+dt@kernel.org>, Pawel Moll <pawel.moll@arm.com>, Mark Rutland <mark.rutland@arm.com>, Ian Campbell <ijc+devicetree@hellion.org.uk>, Kumar Gala <galak@codeaurora.org>, Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, devicetree@vger.kernel.org
+Content-Type: text/plain
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-bn1bon0134.outbound.protection.outlook.com ([157.56.111.134]:46464
+	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1755147AbbKYCMu (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 24 Nov 2015 21:12:50 -0500
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org, ulf.hansson@linaro.org
+Cc: Yangbo Lu <yangbo.lu@freescale.com>
 
-On 11/20/2015 09:32 AM, Aaro Koskinen wrote:
-> Hi,
->
-> On Mon, May 18, 2015 at 02:40:44PM -0700, Aleksey Makarov wrote:
->> On 05/18/2015 02:05 PM, Aaro Koskinen wrote:
->>> On Mon, Mar 16, 2015 at 06:06:00PM +0300, Aleksey Makarov wrote:
->>>> The OCTEON MMC controller is currently found on cn61XX and cnf71XX
->>>> devices.  Device parameters are configured from device tree data.
->>>>
->>>> eMMC, MMC and SD devices are supported.
->>>>
->>>> Tested-by: Aaro Koskinen <aaro.koskinen@iki.fi>
->>>> Signed-off-by: Chandrakala Chavva <cchavva@caviumnetworks.com>
->>>> Signed-off-by: David Daney <david.daney@cavium.com>
->>>> Signed-off-by: Aleksey Makarov <aleksey.makarov@auriga.com>
->>>> Signed-off-by: Leonid Rosenboim <lrosenboim@caviumnetworks.com>
->>>> Signed-off-by: Peter Swain <pswain@cavium.com>
->>>> Signed-off-by: Aaron Williams <aaron.williams@cavium.com>
->>>> ---
->>>
->>> Any updates on this patch? Are you still working on it for
->>> the mainline kernel inclusion?
->>
->> We are working on it.  It will also be used in ARM ThunderX arch.  So we
->> will send a new version soon.
->
-> Any updates?
->
-> Also distros are waiting for this patch, MMC is the main medium on
-> some boards:
->
-> 	https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=800594
+A previous patch had removed esdhc_of_platform_init() by mistake.
+static void esdhc_of_platform_init(struct sdhci_host *host)
+{
+	u32 vvn;
 
-I am aware of the need, but haven't been able to find the time to work 
-on the MMC patch.
+	vvn = in_be32(host->ioaddr + SDHCI_SLOT_INT_STATUS);
+	vvn = (vvn & SDHCI_VENDOR_VER_MASK) >> SDHCI_VENDOR_VER_SHIFT;
+	if (vvn == VENDOR_V_22)
+		host->quirks2 |= SDHCI_QUIRK2_HOST_NO_CMD23;
 
-David Daney
+	if (vvn > VENDOR_V_22)
+		host->quirks &= ~SDHCI_QUIRK_NO_BUSY_IRQ;
+}
 
+This patch is used to fix it by add/remove some quirks according to
+verdor version in probe.
 
->
-> A.
->
+Signed-off-by: Yangbo Lu <yangbo.lu@freescale.com>
+Fixes: f4932cfd22f1 ("mmc: sdhci-of-esdhc: support both BE and LE host controller")
+---
+ drivers/mmc/host/sdhci-of-esdhc.c | 10 ++++++++++
+ 1 file changed, 10 insertions(+)
+
+diff --git a/drivers/mmc/host/sdhci-of-esdhc.c b/drivers/mmc/host/sdhci-of-esdhc.c
+index 90e94a0..83b1226 100644
+--- a/drivers/mmc/host/sdhci-of-esdhc.c
++++ b/drivers/mmc/host/sdhci-of-esdhc.c
+@@ -584,6 +584,8 @@ static int sdhci_esdhc_probe(struct platform_device *pdev)
+ {
+ 	struct sdhci_host *host;
+ 	struct device_node *np;
++	struct sdhci_pltfm_host *pltfm_host;
++	struct sdhci_esdhc *esdhc;
+ 	int ret;
+ 
+ 	np = pdev->dev.of_node;
+@@ -600,6 +602,14 @@ static int sdhci_esdhc_probe(struct platform_device *pdev)
+ 
+ 	sdhci_get_of_property(pdev);
+ 
++	pltfm_host = sdhci_priv(host);
++	esdhc = pltfm_host->priv;
++	if (esdhc->vendor_ver == VENDOR_V_22)
++		host->quirks2 |= SDHCI_QUIRK2_HOST_NO_CMD23;
++
++	if (esdhc->vendor_ver > VENDOR_V_22)
++		host->quirks &= ~SDHCI_QUIRK_NO_BUSY_IRQ;
++
+ 	if (of_device_is_compatible(np, "fsl,p5040-esdhc") ||
+ 	    of_device_is_compatible(np, "fsl,p5020-esdhc") ||
+ 	    of_device_is_compatible(np, "fsl,p4080-esdhc") ||
+-- 
+2.1.0.27.g96db324
+
