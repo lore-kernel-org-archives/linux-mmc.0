@@ -1,53 +1,42 @@
-From: Carlo Caione <carlo@endlessm.com>
-Subject: Re: [PATCH v2] mmc: core: Introduce MMC_CAP2_NO_SDIO cap
-Date: Wed, 25 Nov 2015 18:16:37 +0100
-Message-ID: <CAL9uMOFmZtQeEwML8c01He2Q3mKmMk4o88X-GvXV6fOP28+5jA@mail.gmail.com>
-References: <1448462391-22480-1-git-send-email-carlo@caione.org>
-	<CAPDyKFrL8Wi7bFxjxZD1m=mkRa+C_tco5o6RX8H93meWt7bXmg@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+From: Saurabh Sengar <saurabh.truth@gmail.com>
+Subject: [PATCH] mmc: of_mmc_spi: Add IRQF_ONESHOT to interrupt flags
+Date: Wed, 25 Nov 2015 23:56:24 +0530
+Message-ID: <1448475984-11332-1-git-send-email-saurabh.truth@gmail.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-io0-f179.google.com ([209.85.223.179]:36793 "EHLO
-	mail-io0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750735AbbKYRQi (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 25 Nov 2015 12:16:38 -0500
-Received: by iofh3 with SMTP id h3so60168201iof.3
-        for <linux-mmc@vger.kernel.org>; Wed, 25 Nov 2015 09:16:37 -0800 (PST)
-In-Reply-To: <CAPDyKFrL8Wi7bFxjxZD1m=mkRa+C_tco5o6RX8H93meWt7bXmg@mail.gmail.com>
+Received: from mail-pa0-f52.google.com ([209.85.220.52]:36511 "EHLO
+	mail-pa0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750919AbbKYS0b (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 25 Nov 2015 13:26:31 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Carlo Caione <carlo@caione.org>, linux-mmc <linux-mmc@vger.kernel.org>, Daniel Drake <drake@endlessm.com>
+To: ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Cc: Saurabh Sengar <saurabh.truth@gmail.com>
 
-On Wed, Nov 25, 2015 at 5:34 PM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
-> On 25 November 2015 at 15:39, Carlo Caione <carlo@caione.org> wrote:
->> From: Carlo Caione <carlo@endlessm.com>
->>
->> This patch introduce a new MMC_CAP2_NO_SDIO cap used to tell the mmc
->> core to not send SDIO specific commands.
->
-> I guess there are two reasons to why such capability is useful.
-> 1) The host controller/driver doesn't support SDIO.
-> 2) There is an embedded/non-removable eMMC/SD card.
->
-> Within that context, we might also want to add MMC_CAP2_NO_MMC|SD, or
-> what do you think?
+If no primary handler is specified for threaded_irq then a
+default one is assigned which always returns IRQ_WAKE_THREAD.
+This handler requires the IRQF_ONESHOT, because the source of
+interrupt is not disabled
 
-Is there really any driver / controller not supporting MMC|SD commands?
+Signed-off-by: Saurabh Sengar <saurabh.truth@gmail.com>
+---
+ drivers/mmc/host/of_mmc_spi.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
 
-> Because of 2), we might also want to add a new mmc DT binding or
-> perhaps try interpret a combination of them to enable
-> MMC_CAP2_NO_SDIO!?
-
-Probably I'm missing something but what would be the difference with
-the 'non-removable' parameter we already have?
-
->>
->> Signed-off-by: Carlo Caione <carlo@endlessm.com>
->
-> Thanks, applied for next!
-
-Thanks,
-
+diff --git a/drivers/mmc/host/of_mmc_spi.c b/drivers/mmc/host/of_mmc_spi.c
+index 6e218fb..660170c 100644
+--- a/drivers/mmc/host/of_mmc_spi.c
++++ b/drivers/mmc/host/of_mmc_spi.c
+@@ -55,8 +55,8 @@ static int of_mmc_spi_init(struct device *dev,
+ {
+ 	struct of_mmc_spi *oms = to_of_mmc_spi(dev);
+ 
+-	return request_threaded_irq(oms->detect_irq, NULL, irqhandler, 0,
+-				    dev_name(dev), mmc);
++	return request_threaded_irq(oms->detect_irq, NULL, irqhandler,
++					IRQF_ONESHOT, dev_name(dev), mmc);
+ }
+ 
+ static void of_mmc_spi_exit(struct device *dev, void *mmc)
 -- 
-Carlo Caione  |  +39.340.80.30.096  |  Endless
+1.9.1
+
