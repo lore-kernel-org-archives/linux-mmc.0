@@ -1,95 +1,103 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v3] MMC/SDIO: enable SDIO device to suspend/resume asynchronously
-Date: Thu, 26 Nov 2015 18:52:32 +0100
-Message-ID: <CAPDyKFpnoFyPMp2Rbt9nPCQ6CUd3pRd6UFqXwVvhFcnGapjKKA@mail.gmail.com>
-References: <56488E6F.3090109@linux.intel.com>
-	<CAPDyKFoFqG27xfYT2Dw_E5vavQKSxNMqkNj=Yv4LqZ68y2Z0Kw@mail.gmail.com>
-	<564B3020.5060104@linux.intel.com>
-	<CAPDyKFrExmXndtwQCAoZMOa6HKojwZFgrgwq0DepbhO_zAyOmQ@mail.gmail.com>
-	<56571913.1010006@linux.intel.com>
+Subject: Re: [PATCH v2] mmc: core: fix __mmc_switch timeout caused by preempt
+Date: Thu, 26 Nov 2015 22:17:41 +0100
+Message-ID: <CAPDyKFoDARsM=oNp+HJYdxjLT06UsLePHQbjQ6FKbOWShgUoQA@mail.gmail.com>
+References: <1448541369-23086-1-git-send-email-chaotian.jing@mediatek.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8BIT
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <56571913.1010006@linux.intel.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: "Fu, Zhonghui" <zhonghui.fu@linux.intel.com>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, Neil Brown <neilb@suse.de>, Jaehoon Chung <jh80.chung@samsung.com>, Andreas Fenkart <afenkart@gmail.com>, Joe Perches <joe@perches.com>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-yk0-f175.google.com ([209.85.160.175]:32911 "EHLO
+	mail-yk0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752640AbbKZVRm (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 26 Nov 2015 16:17:42 -0500
+Received: by ykdv3 with SMTP id v3so100224777ykd.0
+        for <linux-mmc@vger.kernel.org>; Thu, 26 Nov 2015 13:17:41 -0800 (PST)
+In-Reply-To: <1448541369-23086-1-git-send-email-chaotian.jing@mediatek.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Chaotian Jing <chaotian.jing@mediatek.com>
+Cc: Matthias Brugger <matthias.bgg@gmail.com>, Stephen Boyd <sboyd@codeaurora.org>, Adrian Hunter <adrian.hunter@intel.com>, Minda Chen <Minda.Chen@csr.com>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, linux-mediatek@lists.infradead.org, srv_heupstream <srv_heupstream@mediatek.com>
 
-[...]
+On 26 November 2015 at 13:36, Chaotian Jing <chaotian.jing@mediatek.com> wrote:
+> there is a time window between __mmc_send_status() and time_afer(),
+> on some eMMC chip, the timeout_ms is only 10ms, if this thread was
+> scheduled out during this period, then, even card has already changes
+> to transfer state by the result of CMD13, this part of code also treat
+> it to timeout error.
+> So, need calculate timeout first, then call __mmc_send_status(), if
+> already timeout and card still in programing state, then treat it to
+> the real timeout error.
+>
+> Signed-off-by: Chaotian Jing <chaotian.jing@mediatek.com>
+> ---
+>  drivers/mmc/core/mmc_ops.c | 23 +++++++++++++++--------
+>  1 file changed, 15 insertions(+), 8 deletions(-)
+>
+> diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
+> index 1f44426..eba5295 100644
+> --- a/drivers/mmc/core/mmc_ops.c
+> +++ b/drivers/mmc/core/mmc_ops.c
+> @@ -489,6 +489,7 @@ int __mmc_switch(struct mmc_card *card, u8 set, u8 index, u8 value,
+>         unsigned long timeout;
+>         u32 status = 0;
+>         bool use_r1b_resp = use_busy_signal;
+> +       bool expired;
+>
+>         mmc_retune_hold(host);
+>
+> @@ -545,9 +546,23 @@ int __mmc_switch(struct mmc_card *card, u8 set, u8 index, u8 value,
+>         timeout = jiffies + msecs_to_jiffies(timeout_ms);
+>         do {
+>                 if (send_status) {
+> +                       /*
+> +                        * Timeout if the device never leaves the program state.
+> +                        * Due to the possibility of being preempted after
+> +                        * sending the status command, check the expiration
+> +                        * time first.
+> +                        */
+> +                       expired = time_after(jiffies, timeout);
+>                         err = __mmc_send_status(card, &status, ignore_crc);
+>                         if (err)
+>                                 goto out;
+> +                       if (expired &&
+> +                           R1_CURRENT_STATE(status) == R1_STATE_PRG) {
+> +                               pr_err("%s: Card stuck in programming state! %s\n",
+> +                                      mmc_hostname(host), __func__);
+> +                               err = -ETIMEDOUT;
+> +                               goto out;
+> +                       }
 
->>
->> Depending if you have SD/(e)MMC card slot(s), the below patch might
->> affect your results. So it might be a good idea to re-run your test to
->> get some fresh data.
->>
->> [PATCH 1/2] mmc: core: Make runtime resume default behavior for MMC/SD [3]
-> I didn't find this patch in mainline kernel, where is this patch?
+This "if" actually means we will start verifying the card state, even
+when "MMC_CAP_WAIT_WHILE_BUSY && use_r1b_resp". I don't think we need
+or should.
 
-It's queued for 4.5 on my next branch via my mmc git. Thus also
-available in linux-next.
+Instead let's move this code at its original place below. That also
+means you indeed need to assign an initial value for "expired" to
+"false" in the beginning of the function.
 
-One should know that it's affecting MMC/SD cards and not SDIO.
+Apologize for not spotting this change in behaviour in v1.
 
-Future wise I was hoping we could do something similar for SDIO, but I
-need to think that through a bit more.
-
->>
->>>>> Signed-off-by: Zhonghui Fu <zhonghui.fu@linux.intel.com>
->>>> I think this is an interesting change, but I wonder if you really
->>>> understand how this affects the order of how devices may be
->>>> suspended/resumed?
->>>>
->>>> Also, I believe you didn't answer my question for the earlier version
->>>> of the patch, so let me try again.
->>>>
->>>> There are a strict dependency chain when suspending/resuming devices
->>>> that must be maintained. Currently this is controlled via device
->>>> registration/probe order.
->>>>
->>>> An SDIO func driver/device must always be suspended *before* the SDIO
->>>> card device. Additionally the corresponding MMC host, must be
->>>> suspended after the SDIO card device. Vice verse applies to the resume
->>>> sequence.
->>>>
->>>> As this patch enables asynchronous suspend, I am worried that it will
->>>> break this dependency chain. What do you think?
->>> After enabling asynchronous suspend/resume, PM core still ensures the strict suspend/resume dependency between child and parent devices - child must be suspended before its parent, and parent must be resumed before its child. SDIO function is child of SDIO card, and SDIO card is child of MMC host, and MMC host is child of MMC controller. So the dependency chain is not broken. Actually,  many devices have been using asynchronous suspend/resume mode now.
->>
->> I believe your view of how the PM core works for devices that *don't*
->> use async suspend is wrong! The PM core doesn't respect parent/child
->> relations during the device system PM phase for these devices.
-> I agree with you for the following description. But, I never described how PM core works for devices that don't use async mode. Where did you get my view about this?  I just said that PM core still ensure the dependency between child and parent devices after using async mode, I never said that the method ensuring dependency is the same for sync devices and async devices.
-
-You said it again. "PM core *still* ensures the dependency... after
-using async mode". I guess it depends what you mean by "still". :-)
-
-Anyway, it doesn't matter as I think we have sorted it out now.
-
-[...]
-
->> This change will also affect SDIO combo cards. That means the when
->> there is a mmc blk device driver bound to the mmc card, its
->> ->suspend() methods will be called asynchronously.
->>
->> Have you considered that? Especially since there are nothing being
->> mentioned about it in the change-log?
-> I have considered this, this patch still work for SDIO combo cards.
->>
->> Also, within this context I am wondering why you *only* enable async
->> suspend for SDIO cards and not all cards (SD/MMC)? Is there a problem
->> with doing that?
-> I am optimizing suspend/resume speed for some Intel's tablet platforms and focusing only on the most time-consuming device path now. I will deliver similar patch for SD/MMC card.
-
-Okay, thanks for sharing you plans!
-
-I would prefer if we instead enables async suspend for all types of
-card devices and the sdio func devices within one patch. I suggest we
-use mmc_add_card() and sdio_add_func(), to where we enable async
-suspend for the devices.
-
-[...]
+>                 }
+>                 if ((host->caps & MMC_CAP_WAIT_WHILE_BUSY) && use_r1b_resp)
+>                         break;
+> @@ -563,14 +578,6 @@ int __mmc_switch(struct mmc_card *card, u8 set, u8 index, u8 value,
+>                         mmc_delay(timeout_ms);
+>                         goto out;
+>                 }
+> -
+> -               /* Timeout if the device never leaves the program state. */
+> -               if (time_after(jiffies, timeout)) {
+> -                       pr_err("%s: Card stuck in programming state! %s\n",
+> -                               mmc_hostname(host), __func__);
+> -                       err = -ETIMEDOUT;
+> -                       goto out;
+> -               }
+>         } while (R1_CURRENT_STATE(status) == R1_STATE_PRG);
+>
+>         err = mmc_switch_status_error(host, status);
+> --
+> 1.8.1.1.dirty
+>
 
 Kind regards
 Uffe
