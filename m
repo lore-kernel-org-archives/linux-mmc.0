@@ -1,42 +1,191 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: [PATCH 3/7] mmc: sdhci: Do not BUG on invalid vdd
-Date: Thu, 26 Nov 2015 14:00:46 +0200
-Message-ID: <1448539250-18769-4-git-send-email-adrian.hunter@intel.com>
+Subject: [PATCH 6/7] mmc: sdhci: 64-bit DMA actually has 4-byte alignment
+Date: Thu, 26 Nov 2015 14:00:49 +0200
+Message-ID: <1448539250-18769-7-git-send-email-adrian.hunter@intel.com>
 References: <1448539250-18769-1-git-send-email-adrian.hunter@intel.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
 Received: from mga09.intel.com ([134.134.136.24]:21455 "EHLO mga09.intel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751609AbbKZMEH (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 26 Nov 2015 07:04:07 -0500
+	id S1751609AbbKZMEQ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 26 Nov 2015 07:04:16 -0500
 In-Reply-To: <1448539250-18769-1-git-send-email-adrian.hunter@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>
 Cc: linux-mmc <linux-mmc@vger.kernel.org>, Jaehoon Chung <jh80.chung@samsung.com>, Chaotian Jing <chaotian.jing@mediatek.com>, Wenkai Du <wenkai.du@intel.com>
 
-The driver may not be able to set the power correctly but that
-is not a reason to BUG().
+The version 3.00 SDHCI spec. was a bit unclear about the
+required data alignment for 64-bit DMA, whereas the version
+4.10 spec. uses different language and indicates that only
+4-byte alignment is required rather than the 8-byte alignment
+currently implemented.  That make no difference to SD and EMMC
+which invariably transfer data in sector-aligned blocks.
+However with SDIO, it results in using more DMA descriptors
+than necessary.  Theoretically that slows DMA slightly although
+DMA is not the limiting factor for throughput, so there is no
+discernable impact on performance.  Nevertheless, the driver
+should follw the spec unless there is good reason not to, so
+this patch corrects the alignment criterion.
+
+There is a more complicated criterion for the DMA descriptor
+table itself.  However the table is allocated by dma_alloc_coherent()
+which allocates pages (i.e. aligned to a page boundary).
+For simplicity just check it is 8-byte aligned, but add a comment
+that some Intel controllers actually require 8-byte alignment
+even when using 32-bit DMA.
 
 Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
 ---
- drivers/mmc/host/sdhci.c | 5 ++++-
- 1 file changed, 4 insertions(+), 1 deletion(-)
+ drivers/mmc/host/sdhci.c | 31 ++++++++++++-------------------
+ drivers/mmc/host/sdhci.h | 21 ++++++++++++---------
+ 2 files changed, 24 insertions(+), 28 deletions(-)
 
 diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 2b17cc1246ca..5f8b0766428c 100644
+index 6ac5db8e86ab..7fe326f76fb7 100644
 --- a/drivers/mmc/host/sdhci.c
 +++ b/drivers/mmc/host/sdhci.c
-@@ -1299,7 +1299,10 @@ static void sdhci_set_power(struct sdhci_host *host, unsigned char mode,
- 			pwr = SDHCI_POWER_330;
+@@ -492,7 +492,7 @@ static int sdhci_adma_table_pre(struct sdhci_host *host,
+ 		host->align_buffer, host->align_buffer_sz, direction);
+ 	if (dma_mapping_error(mmc_dev(host->mmc), host->align_addr))
+ 		goto fail;
+-	BUG_ON(host->align_addr & host->align_mask);
++	BUG_ON(host->align_addr & SDHCI_ADMA2_MASK);
+ 
+ 	host->sg_count = sdhci_pre_dma_transfer(host, data);
+ 	if (host->sg_count < 0)
+@@ -514,8 +514,8 @@ static int sdhci_adma_table_pre(struct sdhci_host *host,
+ 		 * the (up to three) bytes that screw up the
+ 		 * alignment.
+ 		 */
+-		offset = (host->align_sz - (addr & host->align_mask)) &
+-			 host->align_mask;
++		offset = (SDHCI_ADMA2_ALIGN - (addr & SDHCI_ADMA2_MASK)) &
++			 SDHCI_ADMA2_MASK;
+ 		if (offset) {
+ 			if (data->flags & MMC_DATA_WRITE) {
+ 				buffer = sdhci_kmap_atomic(sg, &flags);
+@@ -529,8 +529,8 @@ static int sdhci_adma_table_pre(struct sdhci_host *host,
+ 
+ 			BUG_ON(offset > 65536);
+ 
+-			align += host->align_sz;
+-			align_addr += host->align_sz;
++			align += SDHCI_ADMA2_ALIGN;
++			align_addr += SDHCI_ADMA2_ALIGN;
+ 
+ 			desc += host->desc_sz;
+ 
+@@ -611,7 +611,7 @@ static void sdhci_adma_table_post(struct sdhci_host *host,
+ 	/* Do a quick scan of the SG list for any unaligned mappings */
+ 	has_unaligned = false;
+ 	for_each_sg(data->sg, sg, host->sg_count, i)
+-		if (sg_dma_address(sg) & host->align_mask) {
++		if (sg_dma_address(sg) & SDHCI_ADMA2_MASK) {
+ 			has_unaligned = true;
  			break;
- 		default:
--			BUG();
-+			WARN(1, "%s: Invalid vdd %#x\n",
-+			     mmc_hostname(host->mmc), vdd);
-+			pwr = 0;
-+			break;
+ 		}
+@@ -623,15 +623,15 @@ static void sdhci_adma_table_post(struct sdhci_host *host,
+ 		align = host->align_buffer;
+ 
+ 		for_each_sg(data->sg, sg, host->sg_count, i) {
+-			if (sg_dma_address(sg) & host->align_mask) {
+-				size = host->align_sz -
+-				       (sg_dma_address(sg) & host->align_mask);
++			if (sg_dma_address(sg) & SDHCI_ADMA2_MASK) {
++				size = SDHCI_ADMA2_ALIGN -
++				       (sg_dma_address(sg) & SDHCI_ADMA2_MASK);
+ 
+ 				buffer = sdhci_kmap_atomic(sg, &flags);
+ 				memcpy(buffer, align, size);
+ 				sdhci_kunmap_atomic(buffer, &flags);
+ 
+-				align += host->align_sz;
++				align += SDHCI_ADMA2_ALIGN;
+ 			}
  		}
  	}
+@@ -2962,24 +2962,17 @@ int sdhci_add_host(struct sdhci_host *host)
+ 		if (host->flags & SDHCI_USE_64_BIT_DMA) {
+ 			host->adma_table_sz = (SDHCI_MAX_SEGS * 2 + 1) *
+ 					      SDHCI_ADMA2_64_DESC_SZ;
+-			host->align_buffer_sz = SDHCI_MAX_SEGS *
+-						SDHCI_ADMA2_64_ALIGN;
+ 			host->desc_sz = SDHCI_ADMA2_64_DESC_SZ;
+-			host->align_sz = SDHCI_ADMA2_64_ALIGN;
+-			host->align_mask = SDHCI_ADMA2_64_ALIGN - 1;
+ 		} else {
+ 			host->adma_table_sz = (SDHCI_MAX_SEGS * 2 + 1) *
+ 					      SDHCI_ADMA2_32_DESC_SZ;
+-			host->align_buffer_sz = SDHCI_MAX_SEGS *
+-						SDHCI_ADMA2_32_ALIGN;
+ 			host->desc_sz = SDHCI_ADMA2_32_DESC_SZ;
+-			host->align_sz = SDHCI_ADMA2_32_ALIGN;
+-			host->align_mask = SDHCI_ADMA2_32_ALIGN - 1;
+ 		}
+ 		host->adma_table = dma_alloc_coherent(mmc_dev(mmc),
+ 						      host->adma_table_sz,
+ 						      &host->adma_addr,
+ 						      GFP_KERNEL);
++		host->align_buffer_sz = SDHCI_MAX_SEGS * SDHCI_ADMA2_ALIGN;
+ 		host->align_buffer = kmalloc(host->align_buffer_sz, GFP_KERNEL);
+ 		if (!host->adma_table || !host->align_buffer) {
+ 			if (host->adma_table)
+@@ -2993,7 +2986,7 @@ int sdhci_add_host(struct sdhci_host *host)
+ 			host->flags &= ~SDHCI_USE_ADMA;
+ 			host->adma_table = NULL;
+ 			host->align_buffer = NULL;
+-		} else if (host->adma_addr & host->align_mask) {
++		} else if (host->adma_addr & (SDHCI_ADMA2_DESC_ALIGN - 1)) {
+ 			pr_warn("%s: unable to allocate aligned ADMA descriptor\n",
+ 				mmc_hostname(mmc));
+ 			host->flags &= ~SDHCI_USE_ADMA;
+diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+index 9d4aa31b683a..7654ae5d2b4e 100644
+--- a/drivers/mmc/host/sdhci.h
++++ b/drivers/mmc/host/sdhci.h
+@@ -272,22 +272,27 @@
+ /* ADMA2 32-bit DMA descriptor size */
+ #define SDHCI_ADMA2_32_DESC_SZ	8
+ 
+-/* ADMA2 32-bit DMA alignment */
+-#define SDHCI_ADMA2_32_ALIGN	4
+-
+ /* ADMA2 32-bit descriptor */
+ struct sdhci_adma2_32_desc {
+ 	__le16	cmd;
+ 	__le16	len;
+ 	__le32	addr;
+-}  __packed __aligned(SDHCI_ADMA2_32_ALIGN);
++}  __packed __aligned(4);
++
++/* ADMA2 data alignment */
++#define SDHCI_ADMA2_ALIGN	4
++#define SDHCI_ADMA2_MASK	(SDHCI_ADMA2_ALIGN - 1)
++
++/*
++ * ADMA2 descriptor alignment.  Some controllers (e.g. Intel) require 8 byte
++ * alignment for the descriptor table even in 32-bit DMA mode.  Memory
++ * allocation is at least 8 byte aligned anyway, so just stipulate 8 always.
++ */
++#define SDHCI_ADMA2_DESC_ALIGN	8
+ 
+ /* ADMA2 64-bit DMA descriptor size */
+ #define SDHCI_ADMA2_64_DESC_SZ	12
+ 
+-/* ADMA2 64-bit DMA alignment */
+-#define SDHCI_ADMA2_64_ALIGN	8
+-
+ /*
+  * ADMA2 64-bit descriptor. Note 12-byte descriptor can't always be 8-byte
+  * aligned.
+@@ -482,8 +487,6 @@ struct sdhci_host {
+ 	dma_addr_t align_addr;	/* Mapped bounce buffer */
+ 
+ 	unsigned int desc_sz;	/* ADMA descriptor size */
+-	unsigned int align_sz;	/* ADMA alignment */
+-	unsigned int align_mask;	/* ADMA alignment mask */
+ 
+ 	struct tasklet_struct finish_tasklet;	/* Tasklet structures */
  
 -- 
 1.9.1
