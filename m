@@ -1,84 +1,50 @@
-From: Chaotian Jing <chaotian.jing@mediatek.com>
-Subject: [PATCH] mmc: core: fix __mmc_switch timeout caused by preempt
-Date: Thu, 26 Nov 2015 10:51:49 +0800
-Message-ID: <1448506309-18163-1-git-send-email-chaotian.jing@mediatek.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH v2] mmc: core: Introduce MMC_CAP2_NO_SDIO cap
+Date: Thu, 26 Nov 2015 12:04:47 +0100
+Message-ID: <CAPDyKFoHvvx5AEHA-c8ViTsNpdEhV2aahWh0+3Tq_hTOAVTtYw@mail.gmail.com>
+References: <1448462391-22480-1-git-send-email-carlo@caione.org>
+	<CAPDyKFrL8Wi7bFxjxZD1m=mkRa+C_tco5o6RX8H93meWt7bXmg@mail.gmail.com>
+	<CAL9uMOFmZtQeEwML8c01He2Q3mKmMk4o88X-GvXV6fOP28+5jA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailgw02.mediatek.com ([210.61.82.184]:33309 "EHLO
-	mailgw02.mediatek.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1750830AbbKZCwH (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 25 Nov 2015 21:52:07 -0500
+Received: from mail-yk0-f171.google.com ([209.85.160.171]:33955 "EHLO
+	mail-yk0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751723AbbKZLEs (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 26 Nov 2015 06:04:48 -0500
+Received: by ykfs79 with SMTP id s79so86932882ykf.1
+        for <linux-mmc@vger.kernel.org>; Thu, 26 Nov 2015 03:04:47 -0800 (PST)
+In-Reply-To: <CAL9uMOFmZtQeEwML8c01He2Q3mKmMk4o88X-GvXV6fOP28+5jA@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Matthias Brugger <matthias.bgg@gmail.com>, Stephen Boyd <sboyd@codeaurora.org>, Chaotian Jing <chaotian.jing@mediatek.com>, Adrian Hunter <adrian.hunter@intel.com>, Minda Chen <Minda.Chen@csr.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mediatek@lists.infradead.org, srv_heupstream@mediatek.com
+To: Carlo Caione <carlo@endlessm.com>
+Cc: Carlo Caione <carlo@caione.org>, linux-mmc <linux-mmc@vger.kernel.org>, Daniel Drake <drake@endlessm.com>
 
-there is a time window between __mmc_send_status() and time_afer(),
-on some eMMC chip, the timeout_ms is only 10ms, if this thread was
-scheduled out during this period, then, even card has already changes
-to transfer state by the result of CMD13, this part of code also treat
-it to timeout error.
-So, need calculate timeout first, then call __mmc_send_status(), if
-already timeout and card still in programing state, then treat it to
-the real timeout error.
+On 25 November 2015 at 18:16, Carlo Caione <carlo@endlessm.com> wrote:
+> On Wed, Nov 25, 2015 at 5:34 PM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+>> On 25 November 2015 at 15:39, Carlo Caione <carlo@caione.org> wrote:
+>>> From: Carlo Caione <carlo@endlessm.com>
+>>>
+>>> This patch introduce a new MMC_CAP2_NO_SDIO cap used to tell the mmc
+>>> core to not send SDIO specific commands.
+>>
+>> I guess there are two reasons to why such capability is useful.
+>> 1) The host controller/driver doesn't support SDIO.
+>> 2) There is an embedded/non-removable eMMC/SD card.
+>>
+>> Within that context, we might also want to add MMC_CAP2_NO_MMC|SD, or
+>> what do you think?
+>
+> Is there really any driver / controller not supporting MMC|SD commands?
 
-Signed-off-by: Chaotian Jing <chaotian.jing@mediatek.com>
----
- drivers/mmc/core/mmc_ops.c | 23 ++++++++++++++---------
- 1 file changed, 14 insertions(+), 9 deletions(-)
+Probably not.
 
-diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
-index 1f44426..0add634 100644
---- a/drivers/mmc/core/mmc_ops.c
-+++ b/drivers/mmc/core/mmc_ops.c
-@@ -489,6 +489,7 @@ int __mmc_switch(struct mmc_card *card, u8 set, u8 index, u8 value,
- 	unsigned long timeout;
- 	u32 status = 0;
- 	bool use_r1b_resp = use_busy_signal;
-+	bool expired = false;
- 
- 	mmc_retune_hold(host);
- 
-@@ -544,10 +545,22 @@ int __mmc_switch(struct mmc_card *card, u8 set, u8 index, u8 value,
- 	/* Must check status to be sure of no errors. */
- 	timeout = jiffies + msecs_to_jiffies(timeout_ms);
- 	do {
-+		/* Timeout if the device never leaves the program state.
-+		 * must check it firstly to avoid problem caused by preempt.
-+		 */
-+		expired = time_after(jiffies, timeout);
-+
- 		if (send_status) {
- 			err = __mmc_send_status(card, &status, ignore_crc);
--			if (err)
-+			if (err) {
- 				goto out;
-+			} else if (expired &&
-+				   R1_CURRENT_STATE(status) == R1_STATE_PRG) {
-+				pr_err("%s: Card stuck in programming state! %s\n",
-+				       mmc_hostname(host), __func__);
-+				err = -ETIMEDOUT;
-+				goto out;
-+			}
- 		}
- 		if ((host->caps & MMC_CAP_WAIT_WHILE_BUSY) && use_r1b_resp)
- 			break;
-@@ -563,14 +576,6 @@ int __mmc_switch(struct mmc_card *card, u8 set, u8 index, u8 value,
- 			mmc_delay(timeout_ms);
- 			goto out;
- 		}
--
--		/* Timeout if the device never leaves the program state. */
--		if (time_after(jiffies, timeout)) {
--			pr_err("%s: Card stuck in programming state! %s\n",
--				mmc_hostname(host), __func__);
--			err = -ETIMEDOUT;
--			goto out;
--		}
- 	} while (R1_CURRENT_STATE(status) == R1_STATE_PRG);
- 
- 	err = mmc_switch_status_error(host, status);
--- 
-1.8.1.1.dirty
+I was thinking of optimizing the time it takes to detect a card. For
+example, if we know it's a non-removable eMMC, we can skip the SDIO
+and SD part in the initialization sequence. Whether that's really
+worth to optimize I don't know without measuring the times.
 
+[...]
+
+Kind regards
+Uffe
