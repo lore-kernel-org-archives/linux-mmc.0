@@ -1,133 +1,157 @@
 From: Peter Ujfalusi <peter.ujfalusi@ti.com>
-Subject: [RFC 5/6] ARM: davinci: devices-da8xx: device -> dma instance mapping support
-Date: Fri, 27 Nov 2015 10:29:41 +0200
-Message-ID: <1448612982-28141-6-git-send-email-peter.ujfalusi@ti.com>
+Subject: [RFC 2/6] dmaengine: core: Move and merge the code paths using
+ private_candidate
+Date: Fri, 27 Nov 2015 10:29:38 +0200
+Message-ID: <1448612982-28141-3-git-send-email-peter.ujfalusi@ti.com>
 References: <1448612982-28141-1-git-send-email-peter.ujfalusi@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
 In-Reply-To: <1448612982-28141-1-git-send-email-peter.ujfalusi@ti.com>
-Sender: linux-kernel-owner@vger.kernel.org
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
 To: vinod.koul@intel.com, arnd@arndb.de, andy.shevchenko@gmail.com
-Cc: linux-kernel@vger.kernel.org, dmaengine@vger.kernel.org, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, nsekhar@ti.com
+Cc: linux-mmc@vger.kernel.org, nsekhar@ti.com, linux-kernel@vger.kernel.org, dmaengine@vger.kernel.org, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
-In order to switch the driver to use the new simpler dmaengine API the
-device mapping for the dma instances needs to be added and also the DMA
-resources should be named.
+Channel matching with private_candidate() is used in two paths, the error
+checking is slightly different in them and they are duplicating code also.
+Move the code under dma_get_channel() to provide consistent execution and
+going to allow us to reuse this mode of channel lookup later.
 
 Signed-off-by: Peter Ujfalusi <peter.ujfalusi@ti.com>
 ---
- arch/arm/mach-davinci/devices-da8xx.c | 31 +++++++++++++++++++++++++++++++
- 1 file changed, 31 insertions(+)
+ drivers/dma/dmaengine.c | 81 +++++++++++++++++++++++++------------------------
+ 1 file changed, 42 insertions(+), 39 deletions(-)
 
-diff --git a/arch/arm/mach-davinci/devices-da8xx.c b/arch/arm/mach-davinci/devices-da8xx.c
-index 28c90bc372bd..e7e042dd7603 100644
---- a/arch/arm/mach-davinci/devices-da8xx.c
-+++ b/arch/arm/mach-davinci/devices-da8xx.c
-@@ -233,12 +233,28 @@ static const struct platform_device_info da850_edma1_device __initconst = {
- 	.size_data	= sizeof(da850_edma1_pdata),
- };
+diff --git a/drivers/dma/dmaengine.c b/drivers/dma/dmaengine.c
+index 52c3eee48e2e..1249165fb4b2 100644
+--- a/drivers/dma/dmaengine.c
++++ b/drivers/dma/dmaengine.c
+@@ -549,6 +549,42 @@ static struct dma_chan *private_candidate(const dma_cap_mask_t *mask,
+ 	return NULL;
+ }
  
-+static char *da8xx_edma0_devices[] = {
-+	"davinci-mcasp.0",
-+	"davinci-mcasp.1",
-+	"davinci-mcasp.2",
-+	"da830-mmc.0",
-+	"spi_davinci.0",
-+	"spi_davinci.1",
-+};
++static struct dma_chan *dma_get_channel(struct dma_device *device,
++					const dma_cap_mask_t *mask,
++					dma_filter_fn fn, void *fn_param)
++{
++	struct dma_chan *chan = private_candidate(mask, device, fn, fn_param);
++	int err;
 +
-+static char *da850_edma1_devices[] = {
-+	"da830-mmc.1",
-+};
++	if (chan) {
++		/* Found a suitable channel, try to grab, prep, and return it.
++		 * We first set DMA_PRIVATE to disable balance_ref_count as this
++		 * channel will not be published in the general-purpose
++		 * allocator
++		 */
++		dma_cap_set(DMA_PRIVATE, device->cap_mask);
++		device->privatecnt++;
++		err = dma_chan_get(chan);
 +
- int __init da830_register_edma(struct edma_rsv_info *rsv)
++		if (err) {
++			if (err == -ENODEV) {
++				pr_debug("%s: %s module removed\n", __func__,
++					 dma_chan_name(chan));
++				list_del_rcu(&device->global_node);
++			} else
++				pr_debug("%s: failed to get %s: (%d)\n",
++					 __func__, dma_chan_name(chan), err);
++
++			if (--device->privatecnt == 0)
++				dma_cap_clear(DMA_PRIVATE, device->cap_mask);
++
++			chan = ERR_PTR(err);
++		}
++	}
++
++	return chan ? chan : ERR_PTR(-EPROBE_DEFER);
++}
++
+ /**
+  * dma_get_slave_channel - try to get specific channel exclusively
+  * @chan: target channel
+@@ -587,7 +623,6 @@ struct dma_chan *dma_get_any_slave_channel(struct dma_device *device)
  {
- 	struct platform_device *edma_pdev;
+ 	dma_cap_mask_t mask;
+ 	struct dma_chan *chan;
+-	int err;
  
- 	da8xx_edma0_pdata.rsv = rsv;
+ 	dma_cap_zero(mask);
+ 	dma_cap_set(DMA_SLAVE, mask);
+@@ -595,23 +630,11 @@ struct dma_chan *dma_get_any_slave_channel(struct dma_device *device)
+ 	/* lock against __dma_request_channel */
+ 	mutex_lock(&dma_list_mutex);
  
-+	da8xx_edma0_pdata.devnames = da8xx_edma0_devices;
-+	da8xx_edma0_pdata.devcnt = ARRAY_SIZE(da8xx_edma0_devices);
-+
- 	edma_pdev = platform_device_register_full(&da8xx_edma0_device);
- 	return IS_ERR(edma_pdev) ? PTR_ERR(edma_pdev) : 0;
+-	chan = private_candidate(&mask, device, NULL, NULL);
+-	if (chan) {
+-		dma_cap_set(DMA_PRIVATE, device->cap_mask);
+-		device->privatecnt++;
+-		err = dma_chan_get(chan);
+-		if (err) {
+-			pr_debug("%s: failed to get %s: (%d)\n",
+-				__func__, dma_chan_name(chan), err);
+-			chan = NULL;
+-			if (--device->privatecnt == 0)
+-				dma_cap_clear(DMA_PRIVATE, device->cap_mask);
+-		}
+-	}
++	chan = dma_get_channel(device, &mask, NULL, NULL);
+ 
+ 	mutex_unlock(&dma_list_mutex);
+ 
+-	return chan;
++	return IS_ERR(chan) ? NULL : chan;
  }
-@@ -252,11 +268,18 @@ int __init da850_register_edma(struct edma_rsv_info *rsv[2])
- 		da850_edma1_pdata.rsv = rsv[1];
- 	}
+ EXPORT_SYMBOL_GPL(dma_get_any_slave_channel);
  
-+	da8xx_edma0_pdata.devnames = da8xx_edma0_devices;
-+	da8xx_edma0_pdata.devcnt = ARRAY_SIZE(da8xx_edma0_devices);
-+
- 	edma_pdev = platform_device_register_full(&da8xx_edma0_device);
- 	if (IS_ERR(edma_pdev)) {
- 		pr_warn("%s: Failed to register eDMA0\n", __func__);
- 		return PTR_ERR(edma_pdev);
+@@ -628,35 +651,15 @@ struct dma_chan *__dma_request_channel(const dma_cap_mask_t *mask,
+ {
+ 	struct dma_device *device, *_d;
+ 	struct dma_chan *chan = NULL;
+-	int err;
+ 
+ 	/* Find a channel */
+ 	mutex_lock(&dma_list_mutex);
+ 	list_for_each_entry_safe(device, _d, &dma_device_list, global_node) {
+-		chan = private_candidate(mask, device, fn, fn_param);
+-		if (chan) {
+-			/* Found a suitable channel, try to grab, prep, and
+-			 * return it.  We first set DMA_PRIVATE to disable
+-			 * balance_ref_count as this channel will not be
+-			 * published in the general-purpose allocator
+-			 */
+-			dma_cap_set(DMA_PRIVATE, device->cap_mask);
+-			device->privatecnt++;
+-			err = dma_chan_get(chan);
++		chan = dma_get_channel(device, mask, fn, fn_param);
++		if (!IS_ERR(chan))
++			break;
+ 
+-			if (err == -ENODEV) {
+-				pr_debug("%s: %s module removed\n",
+-					 __func__, dma_chan_name(chan));
+-				list_del_rcu(&device->global_node);
+-			} else if (err)
+-				pr_debug("%s: failed to get %s: (%d)\n",
+-					 __func__, dma_chan_name(chan), err);
+-			else
+-				break;
+-			if (--device->privatecnt == 0)
+-				dma_cap_clear(DMA_PRIVATE, device->cap_mask);
+-			chan = NULL;
+-		}
++		chan = NULL;
  	}
-+
-+	da850_edma1_pdata.devnames = da850_edma1_devices;
-+	da850_edma1_pdata.devcnt = ARRAY_SIZE(da850_edma1_devices);
-+
- 	edma_pdev = platform_device_register_full(&da850_edma1_device);
- 	return IS_ERR(edma_pdev) ? PTR_ERR(edma_pdev) : 0;
- }
-@@ -706,11 +729,13 @@ static struct resource da8xx_mmcsd0_resources[] = {
- 		.flags	= IORESOURCE_IRQ,
- 	},
- 	{		/* DMA RX */
-+		.name	= "rx",
- 		.start	= DA8XX_DMA_MMCSD0_RX,
- 		.end	= DA8XX_DMA_MMCSD0_RX,
- 		.flags	= IORESOURCE_DMA,
- 	},
- 	{		/* DMA TX */
-+		.name	= "tx",
- 		.start	= DA8XX_DMA_MMCSD0_TX,
- 		.end	= DA8XX_DMA_MMCSD0_TX,
- 		.flags	= IORESOURCE_DMA,
-@@ -743,11 +768,13 @@ static struct resource da850_mmcsd1_resources[] = {
- 		.flags	= IORESOURCE_IRQ,
- 	},
- 	{		/* DMA RX */
-+		.name	= "rx",
- 		.start	= DA850_DMA_MMCSD1_RX,
- 		.end	= DA850_DMA_MMCSD1_RX,
- 		.flags	= IORESOURCE_DMA,
- 	},
- 	{		/* DMA TX */
-+		.name	= "tx",
- 		.start	= DA850_DMA_MMCSD1_TX,
- 		.end	= DA850_DMA_MMCSD1_TX,
- 		.flags	= IORESOURCE_DMA,
-@@ -939,11 +966,13 @@ static struct resource da8xx_spi0_resources[] = {
- 		.flags	= IORESOURCE_IRQ,
- 	},
- 	[2] = {
-+		.name	= "rx",
- 		.start	= DA8XX_DMA_SPI0_RX,
- 		.end	= DA8XX_DMA_SPI0_RX,
- 		.flags	= IORESOURCE_DMA,
- 	},
- 	[3] = {
-+		.name	= "tx",
- 		.start	= DA8XX_DMA_SPI0_TX,
- 		.end	= DA8XX_DMA_SPI0_TX,
- 		.flags	= IORESOURCE_DMA,
-@@ -962,11 +991,13 @@ static struct resource da8xx_spi1_resources[] = {
- 		.flags	= IORESOURCE_IRQ,
- 	},
- 	[2] = {
-+		.name	= "rx",
- 		.start	= DA8XX_DMA_SPI1_RX,
- 		.end	= DA8XX_DMA_SPI1_RX,
- 		.flags	= IORESOURCE_DMA,
- 	},
- 	[3] = {
-+		.name	= "tx",
- 		.start	= DA8XX_DMA_SPI1_TX,
- 		.end	= DA8XX_DMA_SPI1_TX,
- 		.flags	= IORESOURCE_DMA,
+ 	mutex_unlock(&dma_list_mutex);
+ 
 -- 
 2.6.3
