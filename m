@@ -1,91 +1,73 @@
-From: Yangbo Lu <yangbo.lu@freescale.com>
-Subject: [v3, 2/5] mmc: sdhci-of-esdhc: get SVR from global utilities registers
-Date: Fri, 27 Nov 2015 11:20:14 +0800
-Message-ID: <1448594417-22515-3-git-send-email-yangbo.lu@freescale.com>
-References: <1448594417-22515-1-git-send-email-yangbo.lu@freescale.com>
+From: Venu Byravarasu <vbyravarasu@nvidia.com>
+Subject: RE: [PATCH 3/7] mmc: sdhci: Do not BUG on invalid vdd
+Date: Fri, 27 Nov 2015 05:08:08 +0000
+Message-ID: <371b41d66a9240958bb337dc3937f9c9@bgmail103.nvidia.com>
+References: <1448539250-18769-1-git-send-email-adrian.hunter@intel.com>
+ <1448539250-18769-4-git-send-email-adrian.hunter@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-by2on0148.outbound.protection.outlook.com ([207.46.100.148]:36928
-	"EHLO na01-by2-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1753757AbbK0DnA (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 26 Nov 2015 22:43:00 -0500
-In-Reply-To: <1448594417-22515-1-git-send-email-yangbo.lu@freescale.com>
+Received: from hqemgate15.nvidia.com ([216.228.121.64]:11821 "EHLO
+	hqemgate15.nvidia.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750738AbbK0FIN convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 27 Nov 2015 00:08:13 -0500
+In-Reply-To: <1448539250-18769-4-git-send-email-adrian.hunter@intel.com>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org, ulf.hansson@linaro.org
-Cc: scottwood@freescale.com, X.Xie@freescale.com, LeoLi@freescale.com, Yangbo Lu <yangbo.lu@freescale.com>
+To: Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Jaehoon Chung <jh80.chung@samsung.com>, Chaotian Jing <chaotian.jing@mediatek.com>, Wenkai Du <wenkai.du@intel.com>, Venu Byravarasu <vbyravarasu@nvidia.com>
 
-Most of silicon errata about the eSDHC need to be identified through
-the SoC version/revision. This patch makes the driver get these
-information from SVR(system version register) of global utilities
-registers.
 
-Signed-off-by: Yangbo Lu <yangbo.lu@freescale.com>
----
-Changes for v2:
-	- Got SVR through iomap instead of dts
-Changes for v3:
-	- Managed GUTS through syscon instead of iomap in eSDHC driver
----
- drivers/mmc/host/sdhci-of-esdhc.c | 19 +++++++++++++++++--
- 1 file changed, 17 insertions(+), 2 deletions(-)
 
-diff --git a/drivers/mmc/host/sdhci-of-esdhc.c b/drivers/mmc/host/sdhci-of-esdhc.c
-index 83b1226..fce24b7 100644
---- a/drivers/mmc/host/sdhci-of-esdhc.c
-+++ b/drivers/mmc/host/sdhci-of-esdhc.c
-@@ -19,6 +19,9 @@
- #include <linux/delay.h>
- #include <linux/module.h>
- #include <linux/mmc/host.h>
-+#include <linux/mfd/syscon.h>
-+#include <linux/regmap.h>
-+#include <linux/fsl-svr.h>
- #include "sdhci-pltfm.h"
- #include "sdhci-esdhc.h"
- 
-@@ -28,6 +31,8 @@
- struct sdhci_esdhc {
- 	u8 vendor_ver;
- 	u8 spec_ver;
-+	u32 soc_ver;
-+	u8 soc_rev;
- };
- 
- /**
-@@ -566,18 +571,28 @@ static void esdhc_init(struct platform_device *pdev, struct sdhci_host *host)
- {
- 	struct sdhci_pltfm_host *pltfm_host;
- 	struct sdhci_esdhc *esdhc;
-+	struct regmap *guts_regmap;
-+	u32 svr;
- 	u16 host_ver;
- 
- 	pltfm_host = sdhci_priv(host);
- 	esdhc = devm_kzalloc(&pdev->dev, sizeof(struct sdhci_esdhc),
- 			     GFP_KERNEL);
-+	pltfm_host->priv = esdhc;
-+
-+	guts_regmap = syscon_regmap_lookup_by_compatible("syscon");
-+	if (IS_ERR(guts_regmap)) {
-+		dev_err(&pdev->dev, "unable to find global utilities registers\n");
-+	} else {
-+		regmap_read(guts_regmap, SVR_OFFSET, &svr);
-+		esdhc->soc_ver = SVR_SOC_VER(svr);
-+		esdhc->soc_rev = SVR_REV(svr);
-+	}
- 
- 	host_ver = sdhci_readw(host, SDHCI_HOST_VERSION);
- 	esdhc->vendor_ver = (host_ver & SDHCI_VENDOR_VER_MASK) >>
- 			     SDHCI_VENDOR_VER_SHIFT;
- 	esdhc->spec_ver = host_ver & SDHCI_SPEC_VER_MASK;
--
--	pltfm_host->priv = esdhc;
- }
- 
- static int sdhci_esdhc_probe(struct platform_device *pdev)
--- 
-2.1.0.27.g96db324
+> -----Original Message-----
+> From: linux-mmc-owner@vger.kernel.org [mailto:linux-mmc-
+> owner@vger.kernel.org] On Behalf Of Adrian Hunter
+> Sent: Thursday, November 26, 2015 5:31 PM
+> To: Ulf Hansson
+> Cc: linux-mmc; Jaehoon Chung; Chaotian Jing; Wenkai Du
+> Subject: [PATCH 3/7] mmc: sdhci: Do not BUG on invalid vdd
+> 
+> The driver may not be able to set the power correctly but that is not a reason
+> to BUG().
+> 
+> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
+> ---
+>  drivers/mmc/host/sdhci.c | 5 ++++-
+>  1 file changed, 4 insertions(+), 1 deletion(-)
+> 
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c index
+> 2b17cc1246ca..5f8b0766428c 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -1299,7 +1299,10 @@ static void sdhci_set_power(struct sdhci_host
+> *host, unsigned char mode,
+>  			pwr = SDHCI_POWER_330;
+>  			break;
+>  		default:
+> -			BUG();
+> +			WARN(1, "%s: Invalid vdd %#x\n",
+> +			     mmc_hostname(host->mmc), vdd);
+> +			pwr = 0;
 
+As pwr is initialized to 0 during declaration, don't see a need for above statement.
+However agree with your point that BUG can be replaced with a warn message.
+
+> +			break;
+>  		}
+>  	}
+> 
+> --
+> 1.9.1
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in the
+> body of a message to majordomo@vger.kernel.org More majordomo info at
+> http://vger.kernel.org/majordomo-info.html
+-----------------------------------------------------------------------------------
+This email message is for the sole use of the intended recipient(s) and may contain
+confidential information.  Any unauthorized review, use, disclosure or distribution
+is prohibited.  If you are not the intended recipient, please contact the sender by
+reply email and destroy all copies of the original message.
+-----------------------------------------------------------------------------------
