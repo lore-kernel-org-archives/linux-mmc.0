@@ -1,47 +1,51 @@
 From: Yangbo Lu <yangbo.lu@freescale.com>
-Subject: [v3, 0/5] eSDHC patches introduction
-Date: Fri, 27 Nov 2015 11:20:12 +0800
-Message-ID: <1448594417-22515-1-git-send-email-yangbo.lu@freescale.com>
+Subject: [v3, 4/5] powerpc: dts: t4240: add syscon support for DCFG node
+Date: Fri, 27 Nov 2015 11:20:16 +0800
+Message-ID: <1448594417-22515-5-git-send-email-yangbo.lu@freescale.com>
+References: <1448594417-22515-1-git-send-email-yangbo.lu@freescale.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-bl2on0122.outbound.protection.outlook.com ([65.55.169.122]:3660
-	"EHLO na01-bl2-obe.outbound.protection.outlook.com"
+Received: from mail-by2on0143.outbound.protection.outlook.com ([207.46.100.143]:60156
+	"EHLO na01-by2-obe.outbound.protection.outlook.com"
 	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1753748AbbK0DmF (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 26 Nov 2015 22:42:05 -0500
+	id S1753757AbbK0Dm4 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 26 Nov 2015 22:42:56 -0500
+In-Reply-To: <1448594417-22515-1-git-send-email-yangbo.lu@freescale.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org, ulf.hansson@linaro.org
 Cc: scottwood@freescale.com, X.Xie@freescale.com, LeoLi@freescale.com, Yangbo Lu <yangbo.lu@freescale.com>
 
-This patchset is used to fix host version in eSDHC_HOSTVER for T4240-R1.0-R2.0.
-To get the SoC version and revision, it's needed to add syscon support to access
-the SVR(system version register) of global utilities registers through regmap.
+Add syscon support for DCFG node, so that the driver could use
+syscon regmap interface to access the device config module registers.
+And the CONFIG_MFD_SYSCON should be enabled for this.
 
-So, the first three patches are to add syscon support to access SVR.
-The following two patches are to fix host version for T4240.
+Signed-off-by: Yangbo Lu <yangbo.lu@freescale.com>
+---
+Changes for v2:
+	- None
+Changes for v3:
+	- Added this patch
+---
+ arch/powerpc/boot/dts/fsl/t4240si-post.dtsi | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
 
-Yangbo Lu (5):
-  powerpc/fsl: move mpc85xx.h to include/linux
-  mmc: sdhci-of-esdhc: get SVR from global utilities registers
-  mmc: kconfig: select MFD_SYSCON for MMC_SDHCI_OF_ESDHC
-  powerpc: dts: t4240: add syscon support for DCFG node
-  mmc: sdhci-of-esdhc: fix host version for T4240-R1.0-R2.0
-
- arch/powerpc/boot/dts/fsl/t4240si-post.dtsi |  4 +-
- arch/powerpc/include/asm/mpc85xx.h          | 95 ----------------------------
- drivers/clk/clk-qoriq.c                     |  2 +-
- drivers/i2c/busses/i2c-mpc.c                |  2 +-
- drivers/iommu/fsl_pamu.c                    |  2 +-
- drivers/mmc/host/Kconfig                    |  1 +
- drivers/mmc/host/sdhci-of-esdhc.c           | 28 ++++++++-
- drivers/net/ethernet/freescale/gianfar.c    |  2 +-
- include/linux/fsl-svr.h                     | 97 +++++++++++++++++++++++++++++
- 9 files changed, 131 insertions(+), 102 deletions(-)
- delete mode 100644 arch/powerpc/include/asm/mpc85xx.h
- create mode 100644 include/linux/fsl-svr.h
-
+diff --git a/arch/powerpc/boot/dts/fsl/t4240si-post.dtsi b/arch/powerpc/boot/dts/fsl/t4240si-post.dtsi
+index 68c4ead..5f148b2 100644
+--- a/arch/powerpc/boot/dts/fsl/t4240si-post.dtsi
++++ b/arch/powerpc/boot/dts/fsl/t4240si-post.dtsi
+@@ -941,7 +941,9 @@
+ /include/ "qoriq-mpic4.3.dtsi"
+ 
+ 	guts: global-utilities@e0000 {
+-		compatible = "fsl,t4240-device-config", "fsl,qoriq-device-config-2.0";
++		compatible = "fsl,t4240-device-config",
++				"fsl,qoriq-device-config-2.0",
++				"syscon";
+ 		reg = <0xe0000 0xe00>;
+ 		fsl,has-rstcr;
+ 		fsl,liodn-bits = <12>;
 -- 
 2.1.0.27.g96db324
 
