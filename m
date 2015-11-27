@@ -1,53 +1,55 @@
-From: Rabin Vincent <rabin.vincent@axis.com>
-Subject: [PATCH] mmc: usdhi6rol0: handle NULL data in timeout
-Date: Fri, 27 Nov 2015 12:59:11 +0100
-Message-ID: <1448625551-32328-1-git-send-email-rabin.vincent@axis.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH 0/7] mmc: Some fixes
+Date: Fri, 27 Nov 2015 14:27:22 +0100
+Message-ID: <CAPDyKFrvUBNXx4QO06_Yfih4SP1pGzMdqd3Q_tMMWGC330A_-g@mail.gmail.com>
+References: <1448539250-18769-1-git-send-email-adrian.hunter@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from bes.se.axis.com ([195.60.68.10]:42909 "EHLO bes.se.axis.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752478AbbK0L7S (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 27 Nov 2015 06:59:18 -0500
+Received: from mail-yk0-f180.google.com ([209.85.160.180]:34724 "EHLO
+	mail-yk0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754665AbbK0N1X (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 27 Nov 2015 08:27:23 -0500
+Received: by ykfs79 with SMTP id s79so119009533ykf.1
+        for <linux-mmc@vger.kernel.org>; Fri, 27 Nov 2015 05:27:23 -0800 (PST)
+In-Reply-To: <1448539250-18769-1-git-send-email-adrian.hunter@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: ulf.hansson@linaro.org
-Cc: linux-mmc@vger.kernel.org, Rabin Vincent <rabinv@axis.com>
+To: Adrian Hunter <adrian.hunter@intel.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Jaehoon Chung <jh80.chung@samsung.com>, Chaotian Jing <chaotian.jing@mediatek.com>, Wenkai Du <wenkai.du@intel.com>
 
-bb08a7d489bd22 ("mmc: usdhi6rol0: fix NULL pointer deref in debug
-print") fixed one NULL pointer dereference but unfortunately introduced
-another.  "data" may be NULL if this is a command timeout for a command
-without any data, so we should only use it if we're actually waiting for
-data.
+On 26 November 2015 at 13:00, Adrian Hunter <adrian.hunter@intel.com> wrote:
+> Hi
+>
+> Here are some fixes.  The important ones have cc: stable.
+> It doesn't matter to me whether you queue them as fixes
+> or for v4.5.
+>
+>
+> Adrian Hunter (6):
+>       mmc: sdhci-pci: Do not default to 33 Ohm driver strength for Intel SPT
+>       mmc: sdhci: Do not BUG on invalid vdd
+>       mmc: sdio: Fix invalid vdd in voltage switch power cycle
+>       mmc: sdhc: Fix DMA descriptor with zero data length
+>       mmc: sdhci: 64-bit DMA actually has 4-byte alignment
+>       mmc: sdhci: Fix sdhci_runtime_pm_bus_on/off()
+>
+> Wenkai Du (1):
+>       mmc: mmc: Fix incorrect use of driver strength switching HS200 and HS400
+>
+>  drivers/mmc/core/mmc.c            |  6 ++---
+>  drivers/mmc/core/sdio.c           |  2 +-
+>  drivers/mmc/host/sdhci-pci-core.c |  2 +-
+>  drivers/mmc/host/sdhci.c          | 49 +++++++++++++++++++--------------------
+>  drivers/mmc/host/sdhci.h          | 21 ++++++++++-------
+>  5 files changed, 40 insertions(+), 40 deletions(-)
+>
+>
+> Regards
+> Adrian
 
-Fixes: bb08a7d("mmc: usdhi6rol0: fix NULL pointer deref in debug print")
-Cc: stable@vger.kernel.org # v4.3
-Signed-off-by: Rabin Vincent <rabin.vincent@axis.com>
----
- drivers/mmc/host/usdhi6rol0.c |    3 ++-
- 1 file changed, 2 insertions(+), 1 deletion(-)
 
-diff --git a/drivers/mmc/host/usdhi6rol0.c b/drivers/mmc/host/usdhi6rol0.c
-index 4498e92..b47122d 100644
---- a/drivers/mmc/host/usdhi6rol0.c
-+++ b/drivers/mmc/host/usdhi6rol0.c
-@@ -1634,7 +1634,7 @@ static void usdhi6_timeout_work(struct work_struct *work)
- 	struct usdhi6_host *host = container_of(d, struct usdhi6_host, timeout_work);
- 	struct mmc_request *mrq = host->mrq;
- 	struct mmc_data *data = mrq ? mrq->data : NULL;
--	struct scatterlist *sg = host->sg ?: data->sg;
-+	struct scatterlist *sg;
- 
- 	dev_warn(mmc_dev(host->mmc),
- 		 "%s timeout wait %u CMD%d: IRQ 0x%08x:0x%08x, last IRQ 0x%08x\n",
-@@ -1666,6 +1666,7 @@ static void usdhi6_timeout_work(struct work_struct *work)
- 	case USDHI6_WAIT_FOR_MWRITE:
- 	case USDHI6_WAIT_FOR_READ:
- 	case USDHI6_WAIT_FOR_WRITE:
-+		sg = host->sg ?: data->sg;
- 		dev_dbg(mmc_dev(host->mmc),
- 			"%c: page #%u @ +0x%zx %ux%u in SG%u. Current SG %u bytes @ %u\n",
- 			data->flags & MMC_DATA_READ ? 'R' : 'W', host->page_idx,
--- 
-1.7.10.4
+Thanks, applied for next!
 
+Kind regards
+Uffe
