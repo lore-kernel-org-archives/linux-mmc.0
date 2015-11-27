@@ -1,53 +1,66 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 0/2] sdio: Prevent re-tuning conflicting with custom sleep
-Date: Fri, 27 Nov 2015 15:06:02 +0100
-Message-ID: <CAPDyKFrxM25QmbVEqnfRi+gjT6Jg_uAFXuO2xdCw6H2ST7EDZw@mail.gmail.com>
-References: <1430232341-8307-1-git-send-email-adrian.hunter@intel.com>
-	<565701FE.9010403@intel.com>
+Subject: Re: [PATCH] mmc: sdhci-of-at91: controller is suspended too early
+Date: Fri, 27 Nov 2015 15:11:58 +0100
+Message-ID: <CAPDyKFpuemq05PZN6-p9gY6qvm23Fkxvr3u=4_xXPbBHeq4CRg@mail.gmail.com>
+References: <1448556091-502-1-git-send-email-ludovic.desroches@atmel.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-yk0-f173.google.com ([209.85.160.173]:34033 "EHLO
+Received: from mail-yk0-f173.google.com ([209.85.160.173]:33432 "EHLO
 	mail-yk0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751538AbbK0OGD (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 27 Nov 2015 09:06:03 -0500
-Received: by ykfs79 with SMTP id s79so119978627ykf.1
-        for <linux-mmc@vger.kernel.org>; Fri, 27 Nov 2015 06:06:02 -0800 (PST)
-In-Reply-To: <565701FE.9010403@intel.com>
+	with ESMTP id S1754661AbbK0OL7 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 27 Nov 2015 09:11:59 -0500
+Received: by ykdv3 with SMTP id v3so119136988ykd.0
+        for <linux-mmc@vger.kernel.org>; Fri, 27 Nov 2015 06:11:58 -0800 (PST)
+In-Reply-To: <1448556091-502-1-git-send-email-ludovic.desroches@atmel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: Arend van Spriel <arend@broadcom.com>, linux-mmc <linux-mmc@vger.kernel.org>
+To: Ludovic Desroches <ludovic.desroches@atmel.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Nicolas Ferre <nicolas.ferre@atmel.com>
 
-On 26 November 2015 at 13:58, Adrian Hunter <adrian.hunter@intel.com> wrote:
-> On 28/04/15 17:45, Adrian Hunter wrote:
->> Here are 2 patches that allow brcmfmac to awake from a
->> custom sleep state that conflicts with re-tuning.
->>
->> The first patch adds sdio_retune_hold_now() and
->> sdio_retune_release(). They are used in the 2nd patch
->> to prevent re-tuning for the 'wake-up' command.
->>
->>
->> Adrian Hunter (2):
->>       mmc: core: Add functions for SDIO to hold re-tuning
->>       brcmfmac: Prevent re-tuning conflicting with 'wake-up'
->>
->>  drivers/mmc/core/host.c                        |  6 ++++++
->>  drivers/mmc/core/host.h                        |  1 +
->>  drivers/mmc/core/sdio_io.c                     | 13 +++++++++++++
->>  drivers/net/wireless/brcm80211/brcmfmac/sdio.c |  6 ++++++
->>  include/linux/mmc/sdio_func.h                  |  3 +++
->>  5 files changed, 29 insertions(+)
+On 26 November 2015 at 17:41, Ludovic Desroches
+<ludovic.desroches@atmel.com> wrote:
+> When calling sdhci_add_host(), the controller is already suspended. It
+> causes to read 0 in registers.
+> Increment the device's usage counter before calling sdhci_add_host(),
+> decrement it after and put it in suspend if it is possible.
 >
-> Hi
->
-> These patches still apply and are still needed.
-> Can they be applied?
->
+> Signed-off-by: Ludovic Desroches <ludovic.desroches@atmel.com>
+> Fixes: "mmc: sdhci-of-at91: add PM support"
 
-I need to have yet another round of thinking about this, I will get
-back to as soon as I can.
+Thanks, applied for next!
+
+Actually I decided to squash this change into the "Fixes commit"
+itself, thus not breaking bisecting.
 
 Kind regards
 Uffe
+
+> ---
+>  drivers/mmc/host/sdhci-of-at91.c | 3 +++
+>  1 file changed, 3 insertions(+)
+>
+> diff --git a/drivers/mmc/host/sdhci-of-at91.c b/drivers/mmc/host/sdhci-of-at91.c
+> index 81ab9db..7e7d8f0 100644
+> --- a/drivers/mmc/host/sdhci-of-at91.c
+> +++ b/drivers/mmc/host/sdhci-of-at91.c
+> @@ -200,6 +200,7 @@ static int sdhci_at91_probe(struct platform_device *pdev)
+>
+>         sdhci_get_of_property(pdev);
+>
+> +       pm_runtime_get_noresume(&pdev->dev);
+>         pm_runtime_set_active(&pdev->dev);
+>         pm_runtime_enable(&pdev->dev);
+>         pm_runtime_set_autosuspend_delay(&pdev->dev, 50);
+> @@ -209,6 +210,8 @@ static int sdhci_at91_probe(struct platform_device *pdev)
+>         if (ret)
+>                 goto pm_runtime_disable;
+>
+> +       pm_runtime_put_autosuspend(&pdev->dev);
+> +
+>         return 0;
+>
+>  pm_runtime_disable:
+> --
+> 2.5.0
+>
