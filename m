@@ -1,8 +1,8 @@
 From: Peter Ujfalusi <peter.ujfalusi@ti.com>
-Subject: [RFC v02 04/15] dmaengine: edma: Add support for DMA filter mapping
- to slave devices
-Date: Mon, 30 Nov 2015 15:45:34 +0200
-Message-ID: <1448891145-10766-5-git-send-email-peter.ujfalusi@ti.com>
+Subject: [RFC v02 05/15] ARM: davinci: devices-da8xx: Add dma_filter_map to
+ edma
+Date: Mon, 30 Nov 2015 15:45:35 +0200
+Message-ID: <1448891145-10766-6-git-send-email-peter.ujfalusi@ti.com>
 References: <1448891145-10766-1-git-send-email-peter.ujfalusi@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
@@ -22,86 +22,100 @@ To: vinod.koul@intel.com, arnd@arndb.de, andy.shevchenko@gmail.com
 Cc: linux-mmc@vger.kernel.org, nsekhar@ti.com, linux-kernel@vger.kernel.org, linux-spi@vger.kernel.org, dmaengine@vger.kernel.org, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
-Add support for providing device to filter_fn mapping so client drivers
-can switch to use the dma_request_chan() API.
+Provide the dma_filter_map to edma which will allow us to move the drivers
+to the new, simpler dmaengine API and we can remove the DMA resources also
+for the devices.
 
 Signed-off-by: Peter Ujfalusi <peter.ujfalusi@ti.com>
 ---
- drivers/dma/edma.c                 | 24 ++++++++++++++++++++++++
- include/linux/platform_data/edma.h |  5 +++++
- 2 files changed, 29 insertions(+)
+ arch/arm/mach-davinci/devices-da8xx.c | 46 +++++++++++++++++++++++++++++++++++
+ 1 file changed, 46 insertions(+)
 
-diff --git a/drivers/dma/edma.c b/drivers/dma/edma.c
-index 0675e268d577..386f8c9bd606 100644
---- a/drivers/dma/edma.c
-+++ b/drivers/dma/edma.c
-@@ -2098,6 +2098,8 @@ static struct dma_chan *of_edma_xlate(struct of_phandle_args *dma_spec,
- }
- #endif
+diff --git a/arch/arm/mach-davinci/devices-da8xx.c b/arch/arm/mach-davinci/devices-da8xx.c
+index 28c90bc372bd..3327cb22e0b5 100644
+--- a/arch/arm/mach-davinci/devices-da8xx.c
++++ b/arch/arm/mach-davinci/devices-da8xx.c
+@@ -17,6 +17,7 @@
+ #include <linux/ahci_platform.h>
+ #include <linux/clk.h>
+ #include <linux/reboot.h>
++#include <linux/dmaengine.h>
  
-+static bool edma_filter_for_map(struct dma_chan *chan, void *param);
+ #include <mach/cputype.h>
+ #include <mach/common.h>
+@@ -233,16 +234,54 @@ static const struct platform_device_info da850_edma1_device __initconst = {
+ 	.size_data	= sizeof(da850_edma1_pdata),
+ };
+ 
++static struct dma_filter_map da830_edma_map[] = {
++	DMA_FILTER_ENTRY("davinci-mcasp.0", "rx", EDMA_CTLR_CHAN(0, 0)),
++	DMA_FILTER_ENTRY("davinci-mcasp.0", "tx", EDMA_CTLR_CHAN(0, 1)),
++	DMA_FILTER_ENTRY("davinci-mcasp.1", "rx", EDMA_CTLR_CHAN(0, 2)),
++	DMA_FILTER_ENTRY("davinci-mcasp.1", "tx", EDMA_CTLR_CHAN(0, 3)),
++	DMA_FILTER_ENTRY("davinci-mcasp.2", "rx", EDMA_CTLR_CHAN(0, 4)),
++	DMA_FILTER_ENTRY("davinci-mcasp.2", "tx", EDMA_CTLR_CHAN(0, 5)),
++	DMA_FILTER_ENTRY("spi_davinci.0", "rx", EDMA_CTLR_CHAN(0, 14)),
++	DMA_FILTER_ENTRY("spi_davinci.0", "tx", EDMA_CTLR_CHAN(0, 15)),
++	DMA_FILTER_ENTRY("da830-mmc.0", "rx", EDMA_CTLR_CHAN(0, 16)),
++	DMA_FILTER_ENTRY("da830-mmc.0", "tx", EDMA_CTLR_CHAN(0, 17)),
++	DMA_FILTER_ENTRY("spi_davinci.1", "rx", EDMA_CTLR_CHAN(0, 18)),
++	DMA_FILTER_ENTRY("spi_davinci.1", "tx", EDMA_CTLR_CHAN(0, 19)),
++};
 +
- static int edma_probe(struct platform_device *pdev)
+ int __init da830_register_edma(struct edma_rsv_info *rsv)
  {
- 	struct edma_soc_info	*info = pdev->dev.platform_data;
-@@ -2297,6 +2299,12 @@ static int edma_probe(struct platform_device *pdev)
- 		edma_set_chmap(&ecc->slave_chans[i], ecc->dummy_slot);
+ 	struct platform_device *edma_pdev;
+ 
+ 	da8xx_edma0_pdata.rsv = rsv;
+ 
++	da8xx_edma0_pdata.filter_map = da830_edma_map;
++	da8xx_edma0_pdata.filtercnt = ARRAY_SIZE(da830_edma_map);
++
+ 	edma_pdev = platform_device_register_full(&da8xx_edma0_device);
+ 	return IS_ERR(edma_pdev) ? PTR_ERR(edma_pdev) : 0;
+ }
+ 
++static struct dma_filter_map da850_edma0_map[] = {
++	DMA_FILTER_ENTRY("davinci-mcasp.0", "rx", EDMA_CTLR_CHAN(0, 0)),
++	DMA_FILTER_ENTRY("davinci-mcasp.0", "tx", EDMA_CTLR_CHAN(0, 1)),
++	DMA_FILTER_ENTRY("davinci-mcbsp.0", "rx", EDMA_CTLR_CHAN(0, 2)),
++	DMA_FILTER_ENTRY("davinci-mcbsp.0", "tx", EDMA_CTLR_CHAN(0, 3)),
++	DMA_FILTER_ENTRY("davinci-mcbsp.1", "rx", EDMA_CTLR_CHAN(0, 4)),
++	DMA_FILTER_ENTRY("davinci-mcbsp.1", "tx", EDMA_CTLR_CHAN(0, 5)),
++	DMA_FILTER_ENTRY("spi_davinci.0", "rx", EDMA_CTLR_CHAN(0, 14)),
++	DMA_FILTER_ENTRY("spi_davinci.0", "tx", EDMA_CTLR_CHAN(0, 15)),
++	DMA_FILTER_ENTRY("da830-mmc.0", "rx", EDMA_CTLR_CHAN(0, 16)),
++	DMA_FILTER_ENTRY("da830-mmc.0", "tx", EDMA_CTLR_CHAN(0, 17)),
++	DMA_FILTER_ENTRY("spi_davinci.1", "rx", EDMA_CTLR_CHAN(0, 18)),
++	DMA_FILTER_ENTRY("spi_davinci.1", "tx", EDMA_CTLR_CHAN(0, 19)),
++};
++
++static struct dma_filter_map da850_edma1_map[] = {
++	DMA_FILTER_ENTRY("da830-mmc.1", "tx", EDMA_CTLR_CHAN(0, 28)),
++	DMA_FILTER_ENTRY("da830-mmc.1", "rx", EDMA_CTLR_CHAN(0, 29)),
++};
++
+ int __init da850_register_edma(struct edma_rsv_info *rsv[2])
+ {
+ 	struct platform_device *edma_pdev;
+@@ -252,11 +291,18 @@ int __init da850_register_edma(struct edma_rsv_info *rsv[2])
+ 		da850_edma1_pdata.rsv = rsv[1];
  	}
  
-+	if (info->filter_map) {
-+		ecc->dma_slave.filter_map.map = info->filter_map;
-+		ecc->dma_slave.filter_map.mapcnt = info->filtercnt;
-+		ecc->dma_slave.filter_map.filter_fn = edma_filter_for_map;
-+	}
++	da8xx_edma0_pdata.filter_map = da850_edma0_map;
++	da8xx_edma0_pdata.filtercnt = ARRAY_SIZE(da850_edma0_map);
 +
- 	ret = dma_async_device_register(&ecc->dma_slave);
- 	if (ret) {
- 		dev_err(dev, "slave ddev registration failed (%d)\n", ret);
-@@ -2428,6 +2436,22 @@ bool edma_filter_fn(struct dma_chan *chan, void *param)
+ 	edma_pdev = platform_device_register_full(&da8xx_edma0_device);
+ 	if (IS_ERR(edma_pdev)) {
+ 		pr_warn("%s: Failed to register eDMA0\n", __func__);
+ 		return PTR_ERR(edma_pdev);
+ 	}
++
++	da850_edma1_pdata.filter_map = da850_edma1_map;
++	da850_edma1_pdata.filtercnt = ARRAY_SIZE(da850_edma1_map);
++
+ 	edma_pdev = platform_device_register_full(&da850_edma1_device);
+ 	return IS_ERR(edma_pdev) ? PTR_ERR(edma_pdev) : 0;
  }
- EXPORT_SYMBOL(edma_filter_fn);
- 
-+static bool edma_filter_for_map(struct dma_chan *chan, void *param)
-+{
-+	bool match = false;
-+
-+	if (chan->device->dev->driver == &edma_driver.driver) {
-+		struct edma_chan *echan = to_edma_chan(chan);
-+		unsigned ch_req = (unsigned)param;
-+		if (ch_req == echan->ch_num) {
-+			/* The channel is going to be used as HW synchronized */
-+			echan->hw_triggered = true;
-+			match = true;
-+		}
-+	}
-+	return match;
-+}
-+
- static int edma_init(void)
- {
- 	int ret;
-diff --git a/include/linux/platform_data/edma.h b/include/linux/platform_data/edma.h
-index e2878baeb90e..117a36d63840 100644
---- a/include/linux/platform_data/edma.h
-+++ b/include/linux/platform_data/edma.h
-@@ -59,6 +59,8 @@ struct edma_rsv_info {
- 	const s16	(*rsv_slots)[2];
- };
- 
-+struct dma_filter_map;
-+
- /* platform_data for EDMA driver */
- struct edma_soc_info {
- 	/*
-@@ -76,6 +78,9 @@ struct edma_soc_info {
- 
- 	s8	(*queue_priority_mapping)[2];
- 	const s16	(*xbar_chans)[2];
-+
-+	struct dma_filter_map *filter_map;
-+	int filtercnt;
- };
- 
- #endif
 -- 
 2.6.3
