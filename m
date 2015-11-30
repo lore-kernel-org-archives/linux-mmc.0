@@ -1,7 +1,7 @@
 From: Peter Ujfalusi <peter.ujfalusi@ti.com>
-Subject: [RFC v02 02/15] dmaengine: core: Move and merge the code paths using private_candidate
-Date: Mon, 30 Nov 2015 15:45:32 +0200
-Message-ID: <1448891145-10766-3-git-send-email-peter.ujfalusi@ti.com>
+Subject: [RFC v02 07/15] ARM: davinci: dm365: Add dma_filter_map to edma
+Date: Mon, 30 Nov 2015 15:45:37 +0200
+Message-ID: <1448891145-10766-8-git-send-email-peter.ujfalusi@ti.com>
 References: <1448891145-10766-1-git-send-email-peter.ujfalusi@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain
@@ -12,136 +12,57 @@ To: vinod.koul@intel.com, arnd@arndb.de, andy.shevchenko@gmail.com
 Cc: linux-kernel@vger.kernel.org, dmaengine@vger.kernel.org, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, nsekhar@ti.com, linux-spi@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-Channel matching with private_candidate() is used in two paths, the error
-checking is slightly different in them and they are duplicating code also.
-Move the code under dma_get_channel() to provide consistent execution and
-going to allow us to reuse this mode of channel lookup later.
+Provide the dma_filter_map to edma which will allow us to move the drivers
+to the new, simpler dmaengine API and we can remove the DMA resources also
+for the devices.
 
 Signed-off-by: Peter Ujfalusi <peter.ujfalusi@ti.com>
 ---
- drivers/dma/dmaengine.c | 81 +++++++++++++++++++++++++------------------------
- 1 file changed, 42 insertions(+), 39 deletions(-)
+ arch/arm/mach-davinci/dm365.c | 22 ++++++++++++++++++++++
+ 1 file changed, 22 insertions(+)
 
-diff --git a/drivers/dma/dmaengine.c b/drivers/dma/dmaengine.c
-index 52c3eee48e2e..1249165fb4b2 100644
---- a/drivers/dma/dmaengine.c
-+++ b/drivers/dma/dmaengine.c
-@@ -549,6 +549,42 @@ static struct dma_chan *private_candidate(const dma_cap_mask_t *mask,
- 	return NULL;
- }
+diff --git a/arch/arm/mach-davinci/dm365.c b/arch/arm/mach-davinci/dm365.c
+index 2068cbeaeb03..3dfcf7c9aa20 100644
+--- a/arch/arm/mach-davinci/dm365.c
++++ b/arch/arm/mach-davinci/dm365.c
+@@ -17,6 +17,7 @@
+ #include <linux/serial_8250.h>
+ #include <linux/platform_device.h>
+ #include <linux/dma-mapping.h>
++#include <linux/dmaengine.h>
+ #include <linux/spi/spi.h>
+ #include <linux/platform_data/edma.h>
+ #include <linux/platform_data/gpio-davinci.h>
+@@ -862,9 +863,30 @@ static s8 dm365_queue_priority_mapping[][2] = {
+ 	{-1, -1},
+ };
  
-+static struct dma_chan *dma_get_channel(struct dma_device *device,
-+					const dma_cap_mask_t *mask,
-+					dma_filter_fn fn, void *fn_param)
-+{
-+	struct dma_chan *chan = private_candidate(mask, device, fn, fn_param);
-+	int err;
++static struct dma_filter_map da365_edma_map[] = {
++	DMA_FILTER_ENTRY("davinci-mcbsp.0", "tx", EDMA_CTLR_CHAN(0, 2)),
++	DMA_FILTER_ENTRY("davinci-mcbsp.0", "rx", EDMA_CTLR_CHAN(0, 3)),
++	DMA_FILTER_ENTRY("davinci_voicecodec", "tx", EDMA_CTLR_CHAN(0, 2)),
++	DMA_FILTER_ENTRY("davinci_voicecodec", "rx", EDMA_CTLR_CHAN(0, 3)),
++	DMA_FILTER_ENTRY("spi_davinci.2", "tx", EDMA_CTLR_CHAN(0, 10)),
++	DMA_FILTER_ENTRY("spi_davinci.2", "rx", EDMA_CTLR_CHAN(0, 11)),
++	DMA_FILTER_ENTRY("spi_davinci.1", "tx", EDMA_CTLR_CHAN(0, 14)),
++	DMA_FILTER_ENTRY("spi_davinci.1", "rx", EDMA_CTLR_CHAN(0, 15)),
++	DMA_FILTER_ENTRY("spi_davinci.0", "tx", EDMA_CTLR_CHAN(0, 16)),
++	DMA_FILTER_ENTRY("spi_davinci.0", "rx", EDMA_CTLR_CHAN(0, 17)),
++	DMA_FILTER_ENTRY("spi_davinci.3", "tx", EDMA_CTLR_CHAN(0, 18)),
++	DMA_FILTER_ENTRY("spi_davinci.3", "rx", EDMA_CTLR_CHAN(0, 19)),
++	DMA_FILTER_ENTRY("dm6441-mmc.0", "rx", EDMA_CTLR_CHAN(0, 26)),
++	DMA_FILTER_ENTRY("dm6441-mmc.0", "tx", EDMA_CTLR_CHAN(0, 27)),
++	DMA_FILTER_ENTRY("dm6441-mmc.1", "rx", EDMA_CTLR_CHAN(0, 30)),
++	DMA_FILTER_ENTRY("dm6441-mmc.1", "tx", EDMA_CTLR_CHAN(0, 31)),
++};
 +
-+	if (chan) {
-+		/* Found a suitable channel, try to grab, prep, and return it.
-+		 * We first set DMA_PRIVATE to disable balance_ref_count as this
-+		 * channel will not be published in the general-purpose
-+		 * allocator
-+		 */
-+		dma_cap_set(DMA_PRIVATE, device->cap_mask);
-+		device->privatecnt++;
-+		err = dma_chan_get(chan);
-+
-+		if (err) {
-+			if (err == -ENODEV) {
-+				pr_debug("%s: %s module removed\n", __func__,
-+					 dma_chan_name(chan));
-+				list_del_rcu(&device->global_node);
-+			} else
-+				pr_debug("%s: failed to get %s: (%d)\n",
-+					 __func__, dma_chan_name(chan), err);
-+
-+			if (--device->privatecnt == 0)
-+				dma_cap_clear(DMA_PRIVATE, device->cap_mask);
-+
-+			chan = ERR_PTR(err);
-+		}
-+	}
-+
-+	return chan ? chan : ERR_PTR(-EPROBE_DEFER);
-+}
-+
- /**
-  * dma_get_slave_channel - try to get specific channel exclusively
-  * @chan: target channel
-@@ -587,7 +623,6 @@ struct dma_chan *dma_get_any_slave_channel(struct dma_device *device)
- {
- 	dma_cap_mask_t mask;
- 	struct dma_chan *chan;
--	int err;
+ static struct edma_soc_info dm365_edma_pdata = {
+ 	.queue_priority_mapping	= dm365_queue_priority_mapping,
+ 	.default_queue		= EVENTQ_3,
++	.filter_map		= da365_edma_map,
++	.filtercnt		= ARRAY_SIZE(da365_edma_map),
+ };
  
- 	dma_cap_zero(mask);
- 	dma_cap_set(DMA_SLAVE, mask);
-@@ -595,23 +630,11 @@ struct dma_chan *dma_get_any_slave_channel(struct dma_device *device)
- 	/* lock against __dma_request_channel */
- 	mutex_lock(&dma_list_mutex);
- 
--	chan = private_candidate(&mask, device, NULL, NULL);
--	if (chan) {
--		dma_cap_set(DMA_PRIVATE, device->cap_mask);
--		device->privatecnt++;
--		err = dma_chan_get(chan);
--		if (err) {
--			pr_debug("%s: failed to get %s: (%d)\n",
--				__func__, dma_chan_name(chan), err);
--			chan = NULL;
--			if (--device->privatecnt == 0)
--				dma_cap_clear(DMA_PRIVATE, device->cap_mask);
--		}
--	}
-+	chan = dma_get_channel(device, &mask, NULL, NULL);
- 
- 	mutex_unlock(&dma_list_mutex);
- 
--	return chan;
-+	return IS_ERR(chan) ? NULL : chan;
- }
- EXPORT_SYMBOL_GPL(dma_get_any_slave_channel);
- 
-@@ -628,35 +651,15 @@ struct dma_chan *__dma_request_channel(const dma_cap_mask_t *mask,
- {
- 	struct dma_device *device, *_d;
- 	struct dma_chan *chan = NULL;
--	int err;
- 
- 	/* Find a channel */
- 	mutex_lock(&dma_list_mutex);
- 	list_for_each_entry_safe(device, _d, &dma_device_list, global_node) {
--		chan = private_candidate(mask, device, fn, fn_param);
--		if (chan) {
--			/* Found a suitable channel, try to grab, prep, and
--			 * return it.  We first set DMA_PRIVATE to disable
--			 * balance_ref_count as this channel will not be
--			 * published in the general-purpose allocator
--			 */
--			dma_cap_set(DMA_PRIVATE, device->cap_mask);
--			device->privatecnt++;
--			err = dma_chan_get(chan);
-+		chan = dma_get_channel(device, mask, fn, fn_param);
-+		if (!IS_ERR(chan))
-+			break;
- 
--			if (err == -ENODEV) {
--				pr_debug("%s: %s module removed\n",
--					 __func__, dma_chan_name(chan));
--				list_del_rcu(&device->global_node);
--			} else if (err)
--				pr_debug("%s: failed to get %s: (%d)\n",
--					 __func__, dma_chan_name(chan), err);
--			else
--				break;
--			if (--device->privatecnt == 0)
--				dma_cap_clear(DMA_PRIVATE, device->cap_mask);
--			chan = NULL;
--		}
-+		chan = NULL;
- 	}
- 	mutex_unlock(&dma_list_mutex);
- 
+ static struct resource edma_resources[] = {
 -- 
 2.6.3
