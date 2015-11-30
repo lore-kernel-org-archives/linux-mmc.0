@@ -1,57 +1,42 @@
-From: Peter Ujfalusi <peter.ujfalusi@ti.com>
-Subject: [RFC v02 09/15] ARM: davinci: dm646x: Add dma_filter_map to edma
-Date: Mon, 30 Nov 2015 15:45:39 +0200
-Message-ID: <1448891145-10766-10-git-send-email-peter.ujfalusi@ti.com>
-References: <1448891145-10766-1-git-send-email-peter.ujfalusi@ti.com>
+From: Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>
+Subject: Re: [RFC v02 03/15] dmaengine: core: Introduce new, universal API to request a channel
+Date: Mon, 30 Nov 2015 15:09:33 +0100
+Message-ID: <2436417.uspUkNqtIA@wuerfel>
+References: <1448891145-10766-1-git-send-email-peter.ujfalusi@ti.com> <1448891145-10766-4-git-send-email-peter.ujfalusi@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1448891145-10766-1-git-send-email-peter.ujfalusi@ti.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: vinod.koul@intel.com, arnd@arndb.de, andy.shevchenko@gmail.com
-Cc: linux-kernel@vger.kernel.org, dmaengine@vger.kernel.org, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, nsekhar@ti.com, linux-spi@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7Bit
+Return-path: <linux-spi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1448891145-10766-4-git-send-email-peter.ujfalusi-l0cyMroinI0@public.gmane.org>
+Sender: linux-spi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Peter Ujfalusi <peter.ujfalusi-l0cyMroinI0@public.gmane.org>
+Cc: vinod.koul-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, andy.shevchenko-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, dmaengine-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, nsekhar-l0cyMroinI0@public.gmane.org, linux-spi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
 
-Provide the dma_filter_map to edma which will allow us to move the drivers
-to the new, simpler dmaengine API and we can remove the DMA resources also
-for the devices.
+On Monday 30 November 2015 15:45:33 Peter Ujfalusi wrote:
+>                                                   const char *name);
+>  struct dma_chan *dma_request_slave_channel(struct device *dev, const char *name);
+> +
+> +struct dma_chan *dma_request_chan(struct device *dev, const char *name);
+> +struct dma_chan *dma_request_chan_by_mask(const dma_cap_mask_t *mask);
+> +
+>  void dma_release_channel(struct dma_chan *chan);
+>  int dma_get_slave_caps(struct dma_chan *chan, struct dma_slave_caps *caps);
+>  #else
+> @@ -1268,6 +1291,14 @@ static inline struct dma_chan *dma_request_slave_channel(struct device *dev,
+>  {
+>         return NULL;
+>  }
+> +static inline struct dma_chan *dma_request_chan(struct device *dev)
+> +{
+> +       return ERR_PTR(-ENODEV);
+> +}
+> 
 
-Signed-off-by: Peter Ujfalusi <peter.ujfalusi@ti.com>
----
- arch/arm/mach-davinci/dm646x.c | 11 +++++++++++
- 1 file changed, 11 insertions(+)
+The prototypes for dma_request_chan() don't match, otherwise looks good.
 
-diff --git a/arch/arm/mach-davinci/dm646x.c b/arch/arm/mach-davinci/dm646x.c
-index 70eb42725eec..560841a0c4fa 100644
---- a/arch/arm/mach-davinci/dm646x.c
-+++ b/arch/arm/mach-davinci/dm646x.c
-@@ -9,6 +9,7 @@
-  * or implied.
-  */
- #include <linux/dma-mapping.h>
-+#include <linux/dmaengine.h>
- #include <linux/init.h>
- #include <linux/clk.h>
- #include <linux/serial_8250.h>
-@@ -540,9 +541,19 @@ static s8 dm646x_queue_priority_mapping[][2] = {
- 	{-1, -1},
- };
- 
-+static struct dma_filter_map da646x_edma_map[] = {
-+	DMA_FILTER_ENTRY("davinci-mcasp.0", "tx", EDMA_CTLR_CHAN(0, 6)),
-+	DMA_FILTER_ENTRY("davinci-mcasp.0", "rx", EDMA_CTLR_CHAN(0, 9)),
-+	DMA_FILTER_ENTRY("davinci-mcasp.1", "tx", EDMA_CTLR_CHAN(0, 12)),
-+	DMA_FILTER_ENTRY("spi_davinci", "tx", EDMA_CTLR_CHAN(0, 16)),
-+	DMA_FILTER_ENTRY("spi_davinci", "rx", EDMA_CTLR_CHAN(0, 17)),
-+};
-+
- static struct edma_soc_info dm646x_edma_pdata = {
- 	.queue_priority_mapping	= dm646x_queue_priority_mapping,
- 	.default_queue		= EVENTQ_1,
-+	.filter_map		= da646x_edma_map,
-+	.filtercnt		= ARRAY_SIZE(da646x_edma_map),
- };
- 
- static struct resource edma_resources[] = {
--- 
-2.6.3
+	Arnd
+--
+To unsubscribe from this list: send the line "unsubscribe linux-spi" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
