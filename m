@@ -1,11 +1,14 @@
 From: Peter Ujfalusi <peter.ujfalusi@ti.com>
-Subject: [RFC v02 00/15] dmaengine: New 'universal' API for requesting channel
-Date: Mon, 30 Nov 2015 15:45:30 +0200
-Message-ID: <1448891145-10766-1-git-send-email-peter.ujfalusi@ti.com>
+Subject: [RFC v02 03/15] dmaengine: core: Introduce new,
+ universal API to request a channel
+Date: Mon, 30 Nov 2015 15:45:33 +0200
+Message-ID: <1448891145-10766-4-git-send-email-peter.ujfalusi@ti.com>
+References: <1448891145-10766-1-git-send-email-peter.ujfalusi@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <1448891145-10766-1-git-send-email-peter.ujfalusi@ti.com>
 List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
  <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
 List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
@@ -19,46 +22,18 @@ To: vinod.koul@intel.com, arnd@arndb.de, andy.shevchenko@gmail.com
 Cc: linux-mmc@vger.kernel.org, nsekhar@ti.com, linux-kernel@vger.kernel.org, linux-spi@vger.kernel.org, dmaengine@vger.kernel.org, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
-Hi,
+The two API function can cover most, if not all current APIs used to
+request a channel. With minimal effort dmaengine drivers, platforms and
+dmaengine user drivers can be converted to use the two function.
 
-Changes since RFC v01:
-- dma_request_chan(); lost the mask parameter
-- The new API does not rely on RESOURCE_DMA, instead the dma_filter_map table
-  will be used to provide the needed information to the filter function in
-  legacy mode
-- Extended the example patches to convert most of daVinci to use the new API to
-  request the DMA channels.
-
-TODO: Documentation update ;)
-
-As it has been discussed in the following thread:
-http://www.gossamer-threads.com/lists/linux/kernel/2181487#2181487
-
-Andy: I did looked at the unified device properties, but I decided to not to use
-it as I don't see it to fit well and most of the legacy board files are using
-resources to specify at least their memory regions so adding the DMA resource
-to them would be more inline with the rest of the code.
-
-The ARM, mmc and spi patches are converting daVinci drivers board files to use
-the new method of requesting DMA channel.
-
-With this series I have taken a path which would result two new API, which can
-be used to convert most of the current users already and with some work all
-users might be able to move to this set.
-With this set the filter_fn used for legacy (non DT/ACPI) channel request is no
-longer needed to be exported to client drivers since the selection of the
-correct filter_fn will be done in the core.
-
-So, the first proposal is to have:
-
-struct dma_chan *dma_request_chan(struct device *dev, const char *name);
 struct dma_chan *dma_request_chan_by_mask(const dma_cap_mask_t *mask);
 
-The dma_request_chan_by_mask() is to request any channel matching with the
-requested capabilities, can be used to request channel for memcpy, memset, xor,
-etc where no hardware synchronization is needed.
+To request any channel matching with the requested capabilities, can be
+used to request channel for memcpy, memset, xor, etc where no hardware
+synchronization is needed.
 
-The dma_request_chan() is to request a slave channel. The dma_request_chan() will try to find the
+struct dma_chan *dma_request_chan(struct device *dev, const char *name);
+To request a slave channel. The dma_request_chan() will try to find the
 channel via DT, ACPI or in case if the kernel booted in non DT/ACPI mode
 it will use a filter lookup table and retrieves the needed information from
 the dma_filter_map provided by the DMA drivers.
@@ -105,40 +80,168 @@ device names, when a match found it will use the information from the
 dma_filter_map to get the channel with the dma_get_channel() internal
 function.
 
-Regards,
-Peter
+Signed-off-by: Peter Ujfalusi <peter.ujfalusi@ti.com>
 ---
-Peter Ujfalusi (15):
-  dmaengine: core: Allow NULL mask pointer in
-    __dma_device_satisfies_mask()
-  dmaengine: core: Move and merge the code paths using private_candidate
-  dmaengine: core: Introduce new, universal API to request a channel
-  dmaengine: edma: Add support for DMA filter mapping to slave devices
-  ARM: davinci: devices-da8xx: Add dma_filter_map to edma
-  ARM: davinci: dm355: Add dma_filter_map to edma
-  ARM: davinci: dm365: Add dma_filter_map to edma
-  ARM: davinci: dm644x: Add dma_filter_map to edma
-  ARM: davinci: dm646x: Add dma_filter_map to edma
-  mmc: davinci_mmc: Use dma_request_chan() to requesting DMA channel
-  spi: davinci: Use dma_request_chan() to requesting DMA channel
-  ARM: davinci: devices-da8xx: Remove DMA resources for MMC and SPI
-  ARM: davinci: devices: Remove DMA resources for MMC
-  ARM: davinci: dm355: Remove DMA resources for SPI
-  ARM: davinci: dm365: Remove DMA resources for SPI
+ drivers/dma/dmaengine.c   | 76 +++++++++++++++++++++++++++++++++++++++++++++++
+ include/linux/dmaengine.h | 31 +++++++++++++++++++
+ 2 files changed, 107 insertions(+)
 
- arch/arm/mach-davinci/devices-da8xx.c |  95 ++++++++++----------
- arch/arm/mach-davinci/devices.c       |  19 ----
- arch/arm/mach-davinci/dm355.c         |  28 ++++--
- arch/arm/mach-davinci/dm365.c         |  30 +++++--
- arch/arm/mach-davinci/dm644x.c        |  12 +++
- arch/arm/mach-davinci/dm646x.c        |  11 +++
- drivers/dma/dmaengine.c               | 160 +++++++++++++++++++++++++---------
- drivers/dma/edma.c                    |  24 +++++
- drivers/mmc/host/davinci_mmc.c        |  52 +++--------
- drivers/spi/spi-davinci.c             |  76 +++++-----------
- include/linux/dmaengine.h             |  31 +++++++
- include/linux/platform_data/edma.h    |   5 ++
- 12 files changed, 330 insertions(+), 213 deletions(-)
-
+diff --git a/drivers/dma/dmaengine.c b/drivers/dma/dmaengine.c
+index 1249165fb4b2..bd774adff697 100644
+--- a/drivers/dma/dmaengine.c
++++ b/drivers/dma/dmaengine.c
+@@ -43,6 +43,7 @@
+ 
+ #define pr_fmt(fmt) KBUILD_MODNAME ": " fmt
+ 
++#include <linux/platform_device.h>
+ #include <linux/dma-mapping.h>
+ #include <linux/init.h>
+ #include <linux/module.h>
+@@ -715,6 +716,81 @@ struct dma_chan *dma_request_slave_channel(struct device *dev,
+ }
+ EXPORT_SYMBOL_GPL(dma_request_slave_channel);
+ 
++static struct dma_filter_map *dma_filter_match(struct dma_device *device,
++					       const char *name,
++					       struct device *dev)
++{
++	struct dma_filter_map *map_found = NULL;
++	int i;
++
++	if (!device->filter_map.mapcnt)
++		return NULL;
++
++	for (i = 0; i < device->filter_map.mapcnt; i++) {
++		struct dma_filter_map *map = &device->filter_map.map[i];
++
++		if (!strcmp(map->devname, dev_name(dev)) &&
++		    !strcmp(map->slave, name)) {
++			map_found = map;
++			break;
++		}
++	}
++
++	return map_found;
++}
++
++struct dma_chan *dma_request_chan(struct device *dev, const char *name)
++{
++	struct dma_device *device, *_d;
++	struct dma_chan *chan = NULL;
++
++	/* If device-tree is present get slave info from here */
++	if (dev->of_node)
++		chan = of_dma_request_slave_channel(dev->of_node, name);
++
++	/* If device was enumerated by ACPI get slave info from here */
++	if (ACPI_HANDLE(dev) && !chan)
++		chan = acpi_dma_request_slave_chan_by_name(dev, name);
++
++	if (chan)
++		return chan;
++
++	/* Try to find the channel via the DMA filter map(s) */
++	mutex_lock(&dma_list_mutex);
++	list_for_each_entry_safe(device, _d, &dma_device_list, global_node) {
++		struct dma_filter_map *map = dma_filter_match(device, name,
++							      dev);
++
++		if (!map)
++			continue;
++
++		chan = dma_get_channel(device, NULL,
++				       device->filter_map.filter_fn,
++				       map->param);
++		if (!IS_ERR(chan))
++			break;
++	}
++	mutex_unlock(&dma_list_mutex);
++
++	return chan ? chan : ERR_PTR(-EPROBE_DEFER);
++}
++EXPORT_SYMBOL_GPL(dma_request_chan);
++
++struct dma_chan *dma_request_chan_by_mask(const dma_cap_mask_t *mask)
++{
++	struct dma_chan *chan;
++
++	if (!mask)
++		return ERR_PTR(-ENODEV);
++
++	chan = __dma_request_channel(mask, NULL, NULL);
++	if (!chan)
++		chan = ERR_PTR(-ENODEV);
++
++	return chan;
++}
++EXPORT_SYMBOL_GPL(dma_request_chan_by_mask);
++
+ void dma_release_channel(struct dma_chan *chan)
+ {
+ 	mutex_lock(&dma_list_mutex);
+diff --git a/include/linux/dmaengine.h b/include/linux/dmaengine.h
+index a2b7c2071cf4..f7b06ff982c8 100644
+--- a/include/linux/dmaengine.h
++++ b/include/linux/dmaengine.h
+@@ -606,6 +606,24 @@ enum dmaengine_alignment {
+ 	DMAENGINE_ALIGN_64_BYTES = 6,
+ };
+ 
++struct dma_filter_map {
++        char *devname;
++        char *slave;
++        void *param;
++};
++#define DMA_FILTER_ENTRY(_devname, _slave, _param)	\
++	{						\
++		.devname = _devname,			\
++		.slave = _slave,			\
++		.param = (void*)_param,			\
++	}
++
++struct dma_filter {
++        dma_filter_fn filter_fn;
++        int mapcnt;
++        struct dma_filter_map *map;
++};
++
+ /**
+  * struct dma_device - info on the entity supplying DMA services
+  * @chancnt: how many DMA channels are supported
+@@ -669,6 +687,7 @@ struct dma_device {
+ 	unsigned int privatecnt;
+ 	struct list_head channels;
+ 	struct list_head global_node;
++	struct dma_filter filter_map;
+ 	dma_cap_mask_t  cap_mask;
+ 	unsigned short max_xor;
+ 	unsigned short max_pq;
+@@ -1235,6 +1254,10 @@ struct dma_chan *__dma_request_channel(const dma_cap_mask_t *mask,
+ struct dma_chan *dma_request_slave_channel_reason(struct device *dev,
+ 						  const char *name);
+ struct dma_chan *dma_request_slave_channel(struct device *dev, const char *name);
++
++struct dma_chan *dma_request_chan(struct device *dev, const char *name);
++struct dma_chan *dma_request_chan_by_mask(const dma_cap_mask_t *mask);
++
+ void dma_release_channel(struct dma_chan *chan);
+ int dma_get_slave_caps(struct dma_chan *chan, struct dma_slave_caps *caps);
+ #else
+@@ -1268,6 +1291,14 @@ static inline struct dma_chan *dma_request_slave_channel(struct device *dev,
+ {
+ 	return NULL;
+ }
++static inline struct dma_chan *dma_request_chan(struct device *dev)
++{
++	return ERR_PTR(-ENODEV);
++}
++static inline struct dma_chan *dma_request_chan_by_mask(const dma_cap_mask_t *mask)
++{
++	return ERR_PTR(-ENODEV);
++}
+ static inline void dma_release_channel(struct dma_chan *chan)
+ {
+ }
 -- 
 2.6.3
