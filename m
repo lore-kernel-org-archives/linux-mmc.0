@@ -1,42 +1,43 @@
-From: Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>
-Subject: Re: [RFC v02 03/15] dmaengine: core: Introduce new, universal API to request a channel
-Date: Mon, 30 Nov 2015 15:09:33 +0100
-Message-ID: <2436417.uspUkNqtIA@wuerfel>
-References: <1448891145-10766-1-git-send-email-peter.ujfalusi@ti.com> <1448891145-10766-4-git-send-email-peter.ujfalusi@ti.com>
+From: Arnd Bergmann <arnd@arndb.de>
+Subject: Re: [RFC v02 04/15] dmaengine: edma: Add support for DMA filter mapping to slave devices
+Date: Mon, 30 Nov 2015 15:11:49 +0100
+Message-ID: <7490116.jHcmUxB3Rf@wuerfel>
+References: <1448891145-10766-1-git-send-email-peter.ujfalusi@ti.com> <1448891145-10766-5-git-send-email-peter.ujfalusi@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7Bit
-Return-path: <linux-spi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1448891145-10766-4-git-send-email-peter.ujfalusi-l0cyMroinI0@public.gmane.org>
-Sender: linux-spi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Peter Ujfalusi <peter.ujfalusi-l0cyMroinI0@public.gmane.org>
-Cc: vinod.koul-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, andy.shevchenko-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, dmaengine-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, nsekhar-l0cyMroinI0@public.gmane.org, linux-spi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1448891145-10766-5-git-send-email-peter.ujfalusi@ti.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Peter Ujfalusi <peter.ujfalusi@ti.com>
+Cc: vinod.koul@intel.com, andy.shevchenko@gmail.com, linux-kernel@vger.kernel.org, dmaengine@vger.kernel.org, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, nsekhar@ti.com, linux-spi@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-On Monday 30 November 2015 15:45:33 Peter Ujfalusi wrote:
->                                                   const char *name);
->  struct dma_chan *dma_request_slave_channel(struct device *dev, const char *name);
-> +
-> +struct dma_chan *dma_request_chan(struct device *dev, const char *name);
-> +struct dma_chan *dma_request_chan_by_mask(const dma_cap_mask_t *mask);
-> +
->  void dma_release_channel(struct dma_chan *chan);
->  int dma_get_slave_caps(struct dma_chan *chan, struct dma_slave_caps *caps);
->  #else
-> @@ -1268,6 +1291,14 @@ static inline struct dma_chan *dma_request_slave_channel(struct device *dev,
->  {
->         return NULL;
+On Monday 30 November 2015 15:45:34 Peter Ujfalusi wrote:
+> @@ -2428,6 +2436,22 @@ bool edma_filter_fn(struct dma_chan *chan, void *param)
 >  }
-> +static inline struct dma_chan *dma_request_chan(struct device *dev)
+>  EXPORT_SYMBOL(edma_filter_fn);
+>  
+> +static bool edma_filter_for_map(struct dma_chan *chan, void *param)
 > +{
-> +       return ERR_PTR(-ENODEV);
+> +       bool match = false;
+> +
+> +       if (chan->device->dev->driver == &edma_driver.driver) {
+> +               struct edma_chan *echan = to_edma_chan(chan);
+> +               unsigned ch_req = (unsigned)param;
+> +               if (ch_req == echan->ch_num) {
+> +                       /* The channel is going to be used as HW synchronized */
+> +                       echan->hw_triggered = true;
+> +                       match = true;
+> +               }
+> +       }
+> +       return match;
 > +}
+> +
+>  static int edma_init(void)
 > 
 
-The prototypes for dma_request_chan() don't match, otherwise looks good.
+I don't see the difference between edma_filter_fn and edma_filter_for_map.
+Why do you need both?
 
 	Arnd
---
-To unsubscribe from this list: send the line "unsubscribe linux-spi" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
