@@ -1,7 +1,7 @@
 From: Peter Ujfalusi <peter.ujfalusi@ti.com>
-Subject: [RFC v02 12/15] ARM: davinci: devices-da8xx: Remove DMA resources for MMC and SPI
-Date: Mon, 30 Nov 2015 15:45:42 +0200
-Message-ID: <1448891145-10766-13-git-send-email-peter.ujfalusi@ti.com>
+Subject: [RFC v02 13/15] ARM: davinci: devices: Remove DMA resources for MMC
+Date: Mon, 30 Nov 2015 15:45:43 +0200
+Message-ID: <1448891145-10766-14-git-send-email-peter.ujfalusi@ti.com>
 References: <1448891145-10766-1-git-send-email-peter.ujfalusi@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain
@@ -12,100 +12,56 @@ To: vinod.koul@intel.com, arnd@arndb.de, andy.shevchenko@gmail.com
 Cc: linux-kernel@vger.kernel.org, dmaengine@vger.kernel.org, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, nsekhar@ti.com, linux-spi@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-The drivers are now converted to not use the DMA resource.
+The driver is converted to not use the DMA resource.
 
 Signed-off-by: Peter Ujfalusi <peter.ujfalusi@ti.com>
 ---
- arch/arm/mach-davinci/devices-da8xx.c | 49 -----------------------------------
- 1 file changed, 49 deletions(-)
+ arch/arm/mach-davinci/devices.c | 19 -------------------
+ 1 file changed, 19 deletions(-)
 
-diff --git a/arch/arm/mach-davinci/devices-da8xx.c b/arch/arm/mach-davinci/devices-da8xx.c
-index 3327cb22e0b5..5d96d8728c58 100644
---- a/arch/arm/mach-davinci/devices-da8xx.c
-+++ b/arch/arm/mach-davinci/devices-da8xx.c
-@@ -57,15 +57,6 @@
- #define DA8XX_EMAC_RAM_OFFSET		0x0000
- #define DA8XX_EMAC_CTRL_RAM_SIZE	SZ_8K
+diff --git a/arch/arm/mach-davinci/devices.c b/arch/arm/mach-davinci/devices.c
+index 6257aa452568..3ae70f2909b0 100644
+--- a/arch/arm/mach-davinci/devices.c
++++ b/arch/arm/mach-davinci/devices.c
+@@ -36,9 +36,6 @@
+ #define DM365_MMCSD0_BASE	     0x01D11000
+ #define DM365_MMCSD1_BASE	     0x01D00000
  
--#define DA8XX_DMA_SPI0_RX	EDMA_CTLR_CHAN(0, 14)
--#define DA8XX_DMA_SPI0_TX	EDMA_CTLR_CHAN(0, 15)
--#define DA8XX_DMA_MMCSD0_RX	EDMA_CTLR_CHAN(0, 16)
--#define DA8XX_DMA_MMCSD0_TX	EDMA_CTLR_CHAN(0, 17)
--#define DA8XX_DMA_SPI1_RX	EDMA_CTLR_CHAN(0, 18)
--#define DA8XX_DMA_SPI1_TX	EDMA_CTLR_CHAN(0, 19)
--#define DA850_DMA_MMCSD1_RX	EDMA_CTLR_CHAN(1, 28)
--#define DA850_DMA_MMCSD1_TX	EDMA_CTLR_CHAN(1, 29)
+-#define DAVINCI_DMA_MMCRXEVT	26
+-#define DAVINCI_DMA_MMCTXEVT	27
 -
- void __iomem *da8xx_syscfg0_base;
- void __iomem *da8xx_syscfg1_base;
+ void __iomem  *davinci_sysmod_base;
  
-@@ -751,16 +742,6 @@ static struct resource da8xx_mmcsd0_resources[] = {
- 		.end	= IRQ_DA8XX_MMCSDINT0,
- 		.flags	= IORESOURCE_IRQ,
+ void davinci_map_sysmod(void)
+@@ -144,14 +141,6 @@ static struct resource mmcsd0_resources[] = {
+ 		.start = IRQ_SDIOINT,
+ 		.flags = IORESOURCE_IRQ,
  	},
--	{		/* DMA RX */
--		.start	= DA8XX_DMA_MMCSD0_RX,
--		.end	= DA8XX_DMA_MMCSD0_RX,
--		.flags	= IORESOURCE_DMA,
--	},
--	{		/* DMA TX */
--		.start	= DA8XX_DMA_MMCSD0_TX,
--		.end	= DA8XX_DMA_MMCSD0_TX,
--		.flags	= IORESOURCE_DMA,
+-	/* DMA channels: RX, then TX */
+-	{
+-		.start = EDMA_CTLR_CHAN(0, DAVINCI_DMA_MMCRXEVT),
+-		.flags = IORESOURCE_DMA,
+-	}, {
+-		.start = EDMA_CTLR_CHAN(0, DAVINCI_DMA_MMCTXEVT),
+-		.flags = IORESOURCE_DMA,
 -	},
  };
  
- static struct platform_device da8xx_mmcsd0_device = {
-@@ -788,16 +769,6 @@ static struct resource da850_mmcsd1_resources[] = {
- 		.end	= IRQ_DA850_MMCSDINT0_1,
- 		.flags	= IORESOURCE_IRQ,
+ static struct platform_device davinci_mmcsd0_device = {
+@@ -181,14 +170,6 @@ static struct resource mmcsd1_resources[] = {
+ 		.start = IRQ_DM355_SDIOINT1,
+ 		.flags = IORESOURCE_IRQ,
  	},
--	{		/* DMA RX */
--		.start	= DA850_DMA_MMCSD1_RX,
--		.end	= DA850_DMA_MMCSD1_RX,
--		.flags	= IORESOURCE_DMA,
--	},
--	{		/* DMA TX */
--		.start	= DA850_DMA_MMCSD1_TX,
--		.end	= DA850_DMA_MMCSD1_TX,
--		.flags	= IORESOURCE_DMA,
+-	/* DMA channels: RX, then TX */
+-	{
+-		.start = EDMA_CTLR_CHAN(0, 30),	/* rx */
+-		.flags = IORESOURCE_DMA,
+-	}, {
+-		.start = EDMA_CTLR_CHAN(0, 31),	/* tx */
+-		.flags = IORESOURCE_DMA,
 -	},
  };
  
- static struct platform_device da850_mmcsd1_device = {
-@@ -984,16 +955,6 @@ static struct resource da8xx_spi0_resources[] = {
- 		.end	= IRQ_DA8XX_SPINT0,
- 		.flags	= IORESOURCE_IRQ,
- 	},
--	[2] = {
--		.start	= DA8XX_DMA_SPI0_RX,
--		.end	= DA8XX_DMA_SPI0_RX,
--		.flags	= IORESOURCE_DMA,
--	},
--	[3] = {
--		.start	= DA8XX_DMA_SPI0_TX,
--		.end	= DA8XX_DMA_SPI0_TX,
--		.flags	= IORESOURCE_DMA,
--	},
- };
- 
- static struct resource da8xx_spi1_resources[] = {
-@@ -1007,16 +968,6 @@ static struct resource da8xx_spi1_resources[] = {
- 		.end	= IRQ_DA8XX_SPINT1,
- 		.flags	= IORESOURCE_IRQ,
- 	},
--	[2] = {
--		.start	= DA8XX_DMA_SPI1_RX,
--		.end	= DA8XX_DMA_SPI1_RX,
--		.flags	= IORESOURCE_DMA,
--	},
--	[3] = {
--		.start	= DA8XX_DMA_SPI1_TX,
--		.end	= DA8XX_DMA_SPI1_TX,
--		.flags	= IORESOURCE_DMA,
--	},
- };
- 
- static struct davinci_spi_platform_data da8xx_spi_pdata[] = {
+ static struct platform_device davinci_mmcsd1_device = {
 -- 
 2.6.3
