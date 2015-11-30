@@ -1,33 +1,72 @@
-From: Arnd Bergmann <arnd@arndb.de>
+From: Andy Shevchenko <andy.shevchenko@gmail.com>
 Subject: Re: [RFC v02 00/15] dmaengine: New 'universal' API for requesting channel
-Date: Mon, 30 Nov 2015 15:18:02 +0100
-Message-ID: <13562653.8QgTG33tZS@wuerfel>
+Date: Mon, 30 Nov 2015 16:32:35 +0200
+Message-ID: <CAHp75VcC5uwGTp_N13q5P8MPtkhy0DFytDaXGrnoiHfnoEo8ng@mail.gmail.com>
 References: <1448891145-10766-1-git-send-email-peter.ujfalusi@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7Bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mout.kundenserver.de ([212.227.17.24]:54199 "EHLO
-	mout.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754106AbbK3OSj (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 30 Nov 2015 09:18:39 -0500
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1448891145-10766-1-git-send-email-peter.ujfalusi@ti.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Sender: linux-kernel-owner@vger.kernel.org
+To: Peter Ujfalusi <peter.ujfalusi@ti.com>
+Cc: Vinod Koul <vinod.koul@intel.com>, Arnd Bergmann <arnd@arndb.de>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, dmaengine <dmaengine@vger.kernel.org>, Linux OMAP Mailing List <linux-omap@vger.kernel.org>, linux-arm Mailing List <linux-arm-kernel@lists.infradead.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Sekhar Nori <nsekhar@ti.com>, linux-spi <linux-spi@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
-To: linux-arm-kernel@lists.infradead.org
-Cc: Peter Ujfalusi <peter.ujfalusi@ti.com>, vinod.koul@intel.com, andy.shevchenko@gmail.com, linux-mmc@vger.kernel.org, nsekhar@ti.com, linux-kernel@vger.kernel.org, linux-spi@vger.kernel.org, dmaengine@vger.kernel.org, linux-omap@vger.kernel.org
 
-On Monday 30 November 2015 15:45:30 Peter Ujfalusi wrote:
+On Mon, Nov 30, 2015 at 3:45 PM, Peter Ujfalusi <peter.ujfalusi@ti.com> wrote:
+> Hi,
+>
 > Changes since RFC v01:
->- dma_request_chan(); lost the mask parameter
->- The new API does not rely on RESOURCE_DMA, instead the dma_filter_map table
->  will be used to provide the needed information to the filter function in
->  legacy mode
->- Extended the example patches to convert most of daVinci to use the new API to
->  request the DMA channels.
+> - dma_request_chan(); lost the mask parameter
+> - The new API does not rely on RESOURCE_DMA, instead the dma_filter_map table
+>   will be used to provide the needed information to the filter function in
+>   legacy mode
+> - Extended the example patches to convert most of daVinci to use the new API to
+>   request the DMA channels.
+>
+> TODO: Documentation update ;)
+>
+> As it has been discussed in the following thread:
+> http://www.gossamer-threads.com/lists/linux/kernel/2181487#2181487
+>
+> Andy: I did looked at the unified device properties, but I decided to not to use
+> it as I don't see it to fit well and most of the legacy board files are using
+> resources to specify at least their memory regions so adding the DMA resource
+> to them would be more inline with the rest of the code.
 
-Very nice overall. Just a few minor comments.
+We could return back to this in the future, still we have to amend
+built-in device properties (there is a patch series already in the
+wild).
 
+>
+> The ARM, mmc and spi patches are converting daVinci drivers board files to use
+> the new method of requesting DMA channel.
+>
+> With this series I have taken a path which would result two new API, which can
+> be used to convert most of the current users already and with some work all
+> users might be able to move to this set.
+> With this set the filter_fn used for legacy (non DT/ACPI) channel request is no
+> longer needed to be exported to client drivers since the selection of the
+> correct filter_fn will be done in the core.
+>
+> So, the first proposal is to have:
+>
+> struct dma_chan *dma_request_chan(struct device *dev, const char *name);
+> struct dma_chan *dma_request_chan_by_mask(const dma_cap_mask_t *mask);
+>
+> The dma_request_chan_by_mask() is to request any channel matching with the
+> requested capabilities, can be used to request channel for memcpy, memset, xor,
+> etc where no hardware synchronization is needed.
+>
+> The dma_request_chan() is to request a slave channel. The dma_request_chan() will try to find the
+> channel via DT, ACPI or in case if the kernel booted in non DT/ACPI mode
+> it will use a filter lookup table and retrieves the needed information from
+> the dma_filter_map provided by the DMA drivers.
+> This legacy mode needs changes in platform code, in dmaengine drivers and
+> finally the dmaengine user drivers can be converted:
+>
+> For each dmaengine driver an array of DMA device, slave and the parameter
+> for the filter function needs to be added:
+>
 > static struct dma_filter_map da830_edma_map[] = {
 >         DMA_FILTER_ENTRY("davinci-mcasp.0", "rx", EDMA_CTLR_CHAN(0, 0)),
 >         DMA_FILTER_ENTRY("davinci-mcasp.0", "tx", EDMA_CTLR_CHAN(0, 1)),
@@ -41,21 +80,74 @@ Very nice overall. Just a few minor comments.
 >         DMA_FILTER_ENTRY("da830-mmc.0", "tx", EDMA_CTLR_CHAN(0, 17)),
 >         DMA_FILTER_ENTRY("spi_davinci.1", "rx", EDMA_CTLR_CHAN(0, 18)),
 >         DMA_FILTER_ENTRY("spi_davinci.1", "tx", EDMA_CTLR_CHAN(0, 19)),
+
+Does this ".2" and so prevent driver to use auto ID for platform devices?
+
 > };
+>
+> This information is going to be needed by the dmaengine driver, so
+> modification to the platform_data is needed, and the driver map should be
+> added to the pdata of the DMA driver:
+>
+> da8xx_edma0_pdata.filter_map = da830_edma_map;
+> da8xx_edma0_pdata.filtercnt = ARRAY_SIZE(da830_edma_map);
+>
+> The DMA driver then needs to convigure the needed device -> filter_fn
+> mapping before it registers with dma_async_device_register() :
+>
+> if (info->filter_map) {
+>         ecc->dma_slave.filter_map.map = info->filter_map;
+>         ecc->dma_slave.filter_map.mapcnt = info->filtercnt;
+>         ecc->dma_slave.filter_map.filter_fn = edma_filter_for_map;
+> }
+>
+> When neither DT or ACPI lookup is available the dma_request_chan() will
+> try to match the requester's device name with the filter_map's list of
+> device names, when a match found it will use the information from the
+> dma_filter_map to get the channel with the dma_get_channel() internal
+> function.
+>
+> Regards,
+> Peter
+> ---
+> Peter Ujfalusi (15):
+>   dmaengine: core: Allow NULL mask pointer in
+>     __dma_device_satisfies_mask()
+>   dmaengine: core: Move and merge the code paths using private_candidate
+>   dmaengine: core: Introduce new, universal API to request a channel
+>   dmaengine: edma: Add support for DMA filter mapping to slave devices
+>   ARM: davinci: devices-da8xx: Add dma_filter_map to edma
+>   ARM: davinci: dm355: Add dma_filter_map to edma
+>   ARM: davinci: dm365: Add dma_filter_map to edma
+>   ARM: davinci: dm644x: Add dma_filter_map to edma
+>   ARM: davinci: dm646x: Add dma_filter_map to edma
+>   mmc: davinci_mmc: Use dma_request_chan() to requesting DMA channel
+>   spi: davinci: Use dma_request_chan() to requesting DMA channel
+>   ARM: davinci: devices-da8xx: Remove DMA resources for MMC and SPI
+>   ARM: davinci: devices: Remove DMA resources for MMC
+>   ARM: davinci: dm355: Remove DMA resources for SPI
+>   ARM: davinci: dm365: Remove DMA resources for SPI
+>
+>  arch/arm/mach-davinci/devices-da8xx.c |  95 ++++++++++----------
+>  arch/arm/mach-davinci/devices.c       |  19 ----
+>  arch/arm/mach-davinci/dm355.c         |  28 ++++--
+>  arch/arm/mach-davinci/dm365.c         |  30 +++++--
+>  arch/arm/mach-davinci/dm644x.c        |  12 +++
+>  arch/arm/mach-davinci/dm646x.c        |  11 +++
+>  drivers/dma/dmaengine.c               | 160 +++++++++++++++++++++++++---------
+>  drivers/dma/edma.c                    |  24 +++++
+>  drivers/mmc/host/davinci_mmc.c        |  52 +++--------
+>  drivers/spi/spi-davinci.c             |  76 +++++-----------
+>  include/linux/dmaengine.h             |  31 +++++++
+>  include/linux/platform_data/edma.h    |   5 ++
+>  12 files changed, 330 insertions(+), 213 deletions(-)
+>
+> --
+> 2.6.3
+>
 
-I wonder if we should mandate that the lookup table is 'const'.
 
-We could also drop the DMA_FILTER_ENTRY() macro above, and open-code the
-table like
 
-static struct dma_filter_map da830_edma_map[] = {
-         { "davinci-mcasp.0", "rx", EDMA_CTLR_CHAN(0, 0)},
-         { "davinci-mcasp.0", "tx", EDMA_CTLR_CHAN(0, 1)},
-         { "davinci-mcasp.1", "rx", EDMA_CTLR_CHAN(0, 2)},
-	 ...
-};
-
-which is a little more compact and more obvious, but loses the
-named initializers.
-
-	Arnd
+-- 
+With Best Regards,
+Andy Shevchenko
