@@ -1,147 +1,47 @@
-From: Andy Shevchenko <andy.shevchenko@gmail.com>
-Subject: Re: [RFC v02 00/15] dmaengine: New 'universal' API for requesting channel
-Date: Mon, 30 Nov 2015 16:32:35 +0200
-Message-ID: <CAHp75VcC5uwGTp_N13q5P8MPtkhy0DFytDaXGrnoiHfnoEo8ng@mail.gmail.com>
+From: Andy Shevchenko <andy.shevchenko-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Subject: Re: [RFC v02 01/15] dmaengine: core: Allow NULL mask pointer in __dma_device_satisfies_mask()
+Date: Mon, 30 Nov 2015 16:35:31 +0200
+Message-ID: <CAHp75VfY=NU4MG7q1w=oYdTiTr0dqtNTQU3UkEaL=tXPJADH5Q@mail.gmail.com>
 References: <1448891145-10766-1-git-send-email-peter.ujfalusi@ti.com>
+	<1448891145-10766-2-git-send-email-peter.ujfalusi@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1448891145-10766-1-git-send-email-peter.ujfalusi@ti.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Peter Ujfalusi <peter.ujfalusi@ti.com>
-Cc: Vinod Koul <vinod.koul@intel.com>, Arnd Bergmann <arnd@arndb.de>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, dmaengine <dmaengine@vger.kernel.org>, Linux OMAP Mailing List <linux-omap@vger.kernel.org>, linux-arm Mailing List <linux-arm-kernel@lists.infradead.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Sekhar Nori <nsekhar@ti.com>, linux-spi <linux-spi@vger.kernel.org>
+Return-path: <linux-spi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1448891145-10766-2-git-send-email-peter.ujfalusi-l0cyMroinI0@public.gmane.org>
+Sender: linux-spi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Peter Ujfalusi <peter.ujfalusi-l0cyMroinI0@public.gmane.org>
+Cc: Vinod Koul <vinod.koul-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, dmaengine <dmaengine-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux OMAP Mailing List <linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-arm Mailing List <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Sekhar Nori <nsekhar-l0cyMroinI0@public.gmane.org>, linux-spi <linux-spi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Mon, Nov 30, 2015 at 3:45 PM, Peter Ujfalusi <peter.ujfalusi@ti.com> wrote:
-> Hi,
->
-> Changes since RFC v01:
-> - dma_request_chan(); lost the mask parameter
-> - The new API does not rely on RESOURCE_DMA, instead the dma_filter_map table
->   will be used to provide the needed information to the filter function in
->   legacy mode
-> - Extended the example patches to convert most of daVinci to use the new API to
->   request the DMA channels.
->
-> TODO: Documentation update ;)
->
-> As it has been discussed in the following thread:
-> http://www.gossamer-threads.com/lists/linux/kernel/2181487#2181487
->
-> Andy: I did looked at the unified device properties, but I decided to not to use
-> it as I don't see it to fit well and most of the legacy board files are using
-> resources to specify at least their memory regions so adding the DMA resource
-> to them would be more inline with the rest of the code.
+On Mon, Nov 30, 2015 at 3:45 PM, Peter Ujfalusi <peter.ujfalusi-l0cyMroinI0@public.gmane.org> wrote:
+> Treat as true condition the case when the mask is NULL.
 
-We could return back to this in the future, still we have to amend
-built-in device properties (there is a patch series already in the
-wild).
+What do you think about setting some default (all "on") mask when mask
+is not supplied?
+
+I don't know for sure but there might be cases when you don't want
+literally *any* channel to satisfy.
 
 >
-> The ARM, mmc and spi patches are converting daVinci drivers board files to use
-> the new method of requesting DMA channel.
->
-> With this series I have taken a path which would result two new API, which can
-> be used to convert most of the current users already and with some work all
-> users might be able to move to this set.
-> With this set the filter_fn used for legacy (non DT/ACPI) channel request is no
-> longer needed to be exported to client drivers since the selection of the
-> correct filter_fn will be done in the core.
->
-> So, the first proposal is to have:
->
-> struct dma_chan *dma_request_chan(struct device *dev, const char *name);
-> struct dma_chan *dma_request_chan_by_mask(const dma_cap_mask_t *mask);
->
-> The dma_request_chan_by_mask() is to request any channel matching with the
-> requested capabilities, can be used to request channel for memcpy, memset, xor,
-> etc where no hardware synchronization is needed.
->
-> The dma_request_chan() is to request a slave channel. The dma_request_chan() will try to find the
-> channel via DT, ACPI or in case if the kernel booted in non DT/ACPI mode
-> it will use a filter lookup table and retrieves the needed information from
-> the dma_filter_map provided by the DMA drivers.
-> This legacy mode needs changes in platform code, in dmaengine drivers and
-> finally the dmaengine user drivers can be converted:
->
-> For each dmaengine driver an array of DMA device, slave and the parameter
-> for the filter function needs to be added:
->
-> static struct dma_filter_map da830_edma_map[] = {
->         DMA_FILTER_ENTRY("davinci-mcasp.0", "rx", EDMA_CTLR_CHAN(0, 0)),
->         DMA_FILTER_ENTRY("davinci-mcasp.0", "tx", EDMA_CTLR_CHAN(0, 1)),
->         DMA_FILTER_ENTRY("davinci-mcasp.1", "rx", EDMA_CTLR_CHAN(0, 2)),
->         DMA_FILTER_ENTRY("davinci-mcasp.1", "tx", EDMA_CTLR_CHAN(0, 3)),
->         DMA_FILTER_ENTRY("davinci-mcasp.2", "rx", EDMA_CTLR_CHAN(0, 4)),
->         DMA_FILTER_ENTRY("davinci-mcasp.2", "tx", EDMA_CTLR_CHAN(0, 5)),
->         DMA_FILTER_ENTRY("spi_davinci.0", "rx", EDMA_CTLR_CHAN(0, 14)),
->         DMA_FILTER_ENTRY("spi_davinci.0", "tx", EDMA_CTLR_CHAN(0, 15)),
->         DMA_FILTER_ENTRY("da830-mmc.0", "rx", EDMA_CTLR_CHAN(0, 16)),
->         DMA_FILTER_ENTRY("da830-mmc.0", "tx", EDMA_CTLR_CHAN(0, 17)),
->         DMA_FILTER_ENTRY("spi_davinci.1", "rx", EDMA_CTLR_CHAN(0, 18)),
->         DMA_FILTER_ENTRY("spi_davinci.1", "tx", EDMA_CTLR_CHAN(0, 19)),
-
-Does this ".2" and so prevent driver to use auto ID for platform devices?
-
-> };
->
-> This information is going to be needed by the dmaengine driver, so
-> modification to the platform_data is needed, and the driver map should be
-> added to the pdata of the DMA driver:
->
-> da8xx_edma0_pdata.filter_map = da830_edma_map;
-> da8xx_edma0_pdata.filtercnt = ARRAY_SIZE(da830_edma_map);
->
-> The DMA driver then needs to convigure the needed device -> filter_fn
-> mapping before it registers with dma_async_device_register() :
->
-> if (info->filter_map) {
->         ecc->dma_slave.filter_map.map = info->filter_map;
->         ecc->dma_slave.filter_map.mapcnt = info->filtercnt;
->         ecc->dma_slave.filter_map.filter_fn = edma_filter_for_map;
-> }
->
-> When neither DT or ACPI lookup is available the dma_request_chan() will
-> try to match the requester's device name with the filter_map's list of
-> device names, when a match found it will use the information from the
-> dma_filter_map to get the channel with the dma_get_channel() internal
-> function.
->
-> Regards,
-> Peter
+> Signed-off-by: Peter Ujfalusi <peter.ujfalusi-l0cyMroinI0@public.gmane.org>
 > ---
-> Peter Ujfalusi (15):
->   dmaengine: core: Allow NULL mask pointer in
->     __dma_device_satisfies_mask()
->   dmaengine: core: Move and merge the code paths using private_candidate
->   dmaengine: core: Introduce new, universal API to request a channel
->   dmaengine: edma: Add support for DMA filter mapping to slave devices
->   ARM: davinci: devices-da8xx: Add dma_filter_map to edma
->   ARM: davinci: dm355: Add dma_filter_map to edma
->   ARM: davinci: dm365: Add dma_filter_map to edma
->   ARM: davinci: dm644x: Add dma_filter_map to edma
->   ARM: davinci: dm646x: Add dma_filter_map to edma
->   mmc: davinci_mmc: Use dma_request_chan() to requesting DMA channel
->   spi: davinci: Use dma_request_chan() to requesting DMA channel
->   ARM: davinci: devices-da8xx: Remove DMA resources for MMC and SPI
->   ARM: davinci: devices: Remove DMA resources for MMC
->   ARM: davinci: dm355: Remove DMA resources for SPI
->   ARM: davinci: dm365: Remove DMA resources for SPI
+>  drivers/dma/dmaengine.c | 3 +++
+>  1 file changed, 3 insertions(+)
 >
->  arch/arm/mach-davinci/devices-da8xx.c |  95 ++++++++++----------
->  arch/arm/mach-davinci/devices.c       |  19 ----
->  arch/arm/mach-davinci/dm355.c         |  28 ++++--
->  arch/arm/mach-davinci/dm365.c         |  30 +++++--
->  arch/arm/mach-davinci/dm644x.c        |  12 +++
->  arch/arm/mach-davinci/dm646x.c        |  11 +++
->  drivers/dma/dmaengine.c               | 160 +++++++++++++++++++++++++---------
->  drivers/dma/edma.c                    |  24 +++++
->  drivers/mmc/host/davinci_mmc.c        |  52 +++--------
->  drivers/spi/spi-davinci.c             |  76 +++++-----------
->  include/linux/dmaengine.h             |  31 +++++++
->  include/linux/platform_data/edma.h    |   5 ++
->  12 files changed, 330 insertions(+), 213 deletions(-)
+> diff --git a/drivers/dma/dmaengine.c b/drivers/dma/dmaengine.c
+> index daf54a39bcc7..52c3eee48e2e 100644
+> --- a/drivers/dma/dmaengine.c
+> +++ b/drivers/dma/dmaengine.c
+> @@ -184,6 +184,9 @@ __dma_device_satisfies_mask(struct dma_device *device,
+>  {
+>         dma_cap_mask_t has;
 >
+> +       if (!want)
+> +               return true;
+> +
+>         bitmap_and(has.bits, want->bits, device->cap_mask.bits,
+>                 DMA_TX_TYPE_END);
+>         return bitmap_equal(want->bits, has.bits, DMA_TX_TYPE_END);
 > --
 > 2.6.3
 >
@@ -151,3 +51,7 @@ Does this ".2" and so prevent driver to use auto ID for platform devices?
 -- 
 With Best Regards,
 Andy Shevchenko
+--
+To unsubscribe from this list: send the line "unsubscribe linux-spi" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
