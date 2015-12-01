@@ -1,143 +1,653 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: [PATCH] mmc: core: Optimize boot time by detecting cards simultaneously
-Date: Tue,  1 Dec 2015 16:15:16 +0100
-Message-ID: <1448982916-21485-1-git-send-email-ulf.hansson@linaro.org>
+From: Carlo Caione <carlo@caione.org>
+Subject: [PATCH v4] mmc: meson: Add driver for the SD/MMC host found on Amlogic MesonX SoCs
+Date: Tue,  1 Dec 2015 17:41:49 +0100
+Message-ID: <1448988109-32630-1-git-send-email-carlo@caione.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-lf0-f53.google.com ([209.85.215.53]:36296 "EHLO
-	mail-lf0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753996AbbLAPP1 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 1 Dec 2015 10:15:27 -0500
-Received: by lfs39 with SMTP id 39so11288343lfs.3
-        for <linux-mmc@vger.kernel.org>; Tue, 01 Dec 2015 07:15:25 -0800 (PST)
+Received: from mail-lf0-f47.google.com ([209.85.215.47]:35014 "EHLO
+	mail-lf0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755174AbbLAQl5 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 1 Dec 2015 11:41:57 -0500
+Received: by lfdl133 with SMTP id l133so16102824lfd.2
+        for <linux-mmc@vger.kernel.org>; Tue, 01 Dec 2015 08:41:54 -0800 (PST)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Jaehoon Chung <jh80.chung@samsung.com>
+To: linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, drake@endlessm.com, jerry.cao@amlogic.com, victor.wan@amlogic.com, linux-meson@googlegroups.com, ulf.hansson@linaro.org
+Cc: Carlo Caione <carlo@endlessm.com>
 
-The mmc workqueue is an ordered workqueue, allowing only one work to
-execute per given time. As this workqueue is used for card detection, the
-conseqeunce is that cards will be detected one by one waiting for each
-other.
+From: Carlo Caione <carlo@endlessm.com>
 
-Moreover, most of the time spent during card initialization is waiting for
-the card's internal firmware to be ready. From a CPU perspective this
-typically means waiting for a completion variable to be kicked via an
-IRQ-handler or waiting for a sleep timer to finish.
+Add a driver for the SD/MMC host found on the Amlogic MesonX SoCs. This
+is an MMC controller which provides an interface between the application
+processor and various memory cards. It supports the SD specification
+v2.0 and the eMMC specification v4.41.
 
-This behaviour of detecting/initializing cards is sub-optimal, especially
-for SOCs having several controllers/cards.
+This patch adds also the binding documentation.
 
-Let's convert to use the system_freezable_wq for the mmc detect works.
-This enables several works to be executed simultaneously and thus also
-cards to be detected like so.
-
-Tests on UX500, which holds two eMMC cards and an SD-card (actually also
-an SDIO card, currently not detected), shows a significant improved
-behaviour due to this change.
-
-Before this change, both the eMMC cards waited for the SD card to be
-initialized as its detect work entered the workqueue first. In some cases,
-depending on the characteristic of the SD-card, they got delayed 1-1.5 s.
-
-Additionally for the second eMMC, it needed to wait for the first eMMC to
-be initialized which added another 120-190 ms.
-
-Converting to the system_freezable_wq, removed these delays and made both
-the eMMC cards available far earlier in the boot sequence.
-
-Selecting the system_freezable_wq, in favour of for example the system_wq,
-is because we need card detection mechanism to be disabled once userspace
-are frozen during system PM. Currently the mmc core deal with this via PM
-notifiers, but following patches may utilize the behaviour of the
-system_freezable_wq, to simplify the use of the PM notifiers.
-
-Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+Signed-off-by: Carlo Caione <carlo@endlessm.com>
 ---
- drivers/mmc/core/core.c | 31 ++++++++-----------------------
- 1 file changed, 8 insertions(+), 23 deletions(-)
+Changelog:
 
-diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index 910aa25..f95d41f 100644
---- a/drivers/mmc/core/core.c
-+++ b/drivers/mmc/core/core.c
-@@ -55,7 +55,6 @@
-  */
- #define MMC_BKOPS_MAX_TIMEOUT	(4 * 60 * 1000) /* max time to wait in ms */
+v2:
+   * fix typo in commit message
+   * avoid the bounce buffer (max_segs == 1)
+
+v3:
+   * simplify meson_mmc_map_dma() and fix memory leak
+
+v4:
+   * code and documentation cleanup
+   * removed redundant variables
+   * removed useless printing
+   * introduced MMC_CAP2_NO_SDIO
+   * removed state machine
+   * better spinlocks management and positioning
+---
+ .../devicetree/bindings/mmc/meson-mmc.txt          |  29 ++
+ drivers/mmc/host/Kconfig                           |   7 +
+ drivers/mmc/host/Makefile                          |   1 +
+ drivers/mmc/host/meson-mmc.c                       | 527 +++++++++++++++++++++
+ 4 files changed, 564 insertions(+)
+ create mode 100644 Documentation/devicetree/bindings/mmc/meson-mmc.txt
+ create mode 100644 drivers/mmc/host/meson-mmc.c
+
+diff --git a/Documentation/devicetree/bindings/mmc/meson-mmc.txt b/Documentation/devicetree/bindings/mmc/meson-mmc.txt
+new file mode 100644
+index 0000000..7ff9e9e
+--- /dev/null
++++ b/Documentation/devicetree/bindings/mmc/meson-mmc.txt
+@@ -0,0 +1,29 @@
++* Amlogic MesonX MMC controller
++
++The highspeed MMC host controller on Amlogic SoCs provides an interface
++for MMC, SD, SDIO and SDHC types of memory cards.
++
++Supported maximum speeds are the ones of the eMMC standard 4.41 as well
++as the speed of SD standard 2.0.
++
++Required properties:
++ - compatible : "amlogic,meson-mmc"
++ - reg : mmc controller base registers
++ - interrupts : mmc controller interrupt
++ - clocks : phandle to clock provider
++ - pinctrl-names : should contain "sdio_a" or "sdio_b"
++ - pinctrl-0: Should specify pin control groups used for this controller
++
++Optional properties:
++ - for cd, bus-width and additional generic mmc parameters
++   please refer to mmc.txt within this directory
++
++Examples:
++	mmc0: mmc@c1108c20 {
++		pinctrl-names = "sdio_b";
++		pinctrl-0 = <&mmc0_sd_b_pins>;
++		compatible = "amlogic,meson-mmc";
++		reg = <0xc1108c20 0x20>;
++		interrupts = <0 28 1>;
++		clocks = <&clkc CLKID_CLK81>;
++	};
+diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+index 1dee533..7f2c5ae 100644
+--- a/drivers/mmc/host/Kconfig
++++ b/drivers/mmc/host/Kconfig
+@@ -765,6 +765,13 @@ config MMC_REALTEK_USB
+ 	  Say Y here to include driver code to support SD/MMC card interface
+ 	  of Realtek RTS5129/39 series card reader
  
--static struct workqueue_struct *workqueue;
- static const unsigned freqs[] = { 400000, 300000, 200000, 100000 };
- 
- /*
-@@ -66,21 +65,16 @@ static const unsigned freqs[] = { 400000, 300000, 200000, 100000 };
- bool use_spi_crc = 1;
- module_param(use_spi_crc, bool, 0);
- 
--/*
-- * Internal function. Schedule delayed work in the MMC work queue.
-- */
- static int mmc_schedule_delayed_work(struct delayed_work *work,
- 				     unsigned long delay)
- {
--	return queue_delayed_work(workqueue, work, delay);
--}
--
--/*
-- * Internal function. Flush all scheduled work from the MMC work queue.
-- */
--static void mmc_flush_scheduled_work(void)
--{
--	flush_workqueue(workqueue);
-+	/*
-+	 * We use the system_freezable_wq, because of two reasons.
-+	 * First, it allows several works (not the same work item) to be
-+	 * executed simultaneously. Second, the queue becomes frozen when
-+	 * userspace becomes frozen during system PM.
-+	 */
-+	return queue_delayed_work(system_freezable_wq, work, delay);
- }
- 
- #ifdef CONFIG_FAIL_MMC_REQUEST
-@@ -2669,7 +2663,6 @@ void mmc_stop_host(struct mmc_host *host)
- 
- 	host->rescan_disable = 1;
- 	cancel_delayed_work_sync(&host->detect);
--	mmc_flush_scheduled_work();
- 
- 	/* clear pm flags now and let card drivers set them as needed */
- 	host->pm_flags = 0;
-@@ -2852,13 +2845,9 @@ static int __init mmc_init(void)
- {
- 	int ret;
- 
--	workqueue = alloc_ordered_workqueue("kmmcd", 0);
--	if (!workqueue)
--		return -ENOMEM;
--
- 	ret = mmc_register_bus();
- 	if (ret)
--		goto destroy_workqueue;
-+		return ret;
- 
- 	ret = mmc_register_host_class();
- 	if (ret)
-@@ -2874,9 +2863,6 @@ unregister_host_class:
- 	mmc_unregister_host_class();
- unregister_bus:
- 	mmc_unregister_bus();
--destroy_workqueue:
--	destroy_workqueue(workqueue);
--
- 	return ret;
- }
- 
-@@ -2885,7 +2871,6 @@ static void __exit mmc_exit(void)
- 	sdio_unregister_bus();
- 	mmc_unregister_host_class();
- 	mmc_unregister_bus();
--	destroy_workqueue(workqueue);
- }
- 
- subsys_initcall(mmc_init);
++config MMC_MESON
++	tristate "Amlogic MesonX SD/MMC Host Controller support"
++	depends on ARCH_MESON
++	help
++	  This selects support for the SD/MMC Host Controller on
++	  Amlogic MesonX SoCs.
++
+ config MMC_SUNXI
+ 	tristate "Allwinner sunxi SD/MMC Host Controller support"
+ 	depends on ARCH_SUNXI
+diff --git a/drivers/mmc/host/Makefile b/drivers/mmc/host/Makefile
+index 3595f83..26ddf76 100644
+--- a/drivers/mmc/host/Makefile
++++ b/drivers/mmc/host/Makefile
+@@ -54,6 +54,7 @@ obj-$(CONFIG_MMC_VUB300)	+= vub300.o
+ obj-$(CONFIG_MMC_USHC)		+= ushc.o
+ obj-$(CONFIG_MMC_WMT)		+= wmt-sdmmc.o
+ obj-$(CONFIG_MMC_MOXART)	+= moxart-mmc.o
++obj-$(CONFIG_MMC_MESON)		+= meson-mmc.o
+ obj-$(CONFIG_MMC_SUNXI)		+= sunxi-mmc.o
+ obj-$(CONFIG_MMC_USDHI6ROL0)	+= usdhi6rol0.o
+ obj-$(CONFIG_MMC_TOSHIBA_PCI)	+= toshsd.o
+diff --git a/drivers/mmc/host/meson-mmc.c b/drivers/mmc/host/meson-mmc.c
+new file mode 100644
+index 0000000..6382470
+--- /dev/null
++++ b/drivers/mmc/host/meson-mmc.c
+@@ -0,0 +1,527 @@
++/*
++ * meson-mmc.c - Meson SDH Controller
++ *
++ * Copyright (C) 2015 Endless Mobile, Inc.
++ * Author: Carlo Caione <carlo@endlessm.com>
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License as published by
++ * the Free Software Foundation; either version 2 of the License, or (at
++ * your option) any later version.
++ */
++
++#include <linux/clk.h>
++#include <linux/delay.h>
++#include <linux/dma-mapping.h>
++#include <linux/module.h>
++#include <linux/init.h>
++#include <linux/interrupt.h>
++#include <linux/ioport.h>
++#include <linux/platform_device.h>
++
++#include <linux/mmc/host.h>
++#include <linux/mmc/mmc.h>
++#include <linux/mmc/sdio.h>
++#include <linux/mmc/slot-gpio.h>
++
++#include <linux/of_address.h>
++#include <linux/of_gpio.h>
++#include <linux/of_platform.h>
++
++#define SDIO_ARGU		(0x00)
++#define SDIO_SEND		(0x04)
++#define SDIO_CONF		(0x08)
++#define SDIO_IRQS		(0x0c)
++#define SDIO_IRQC		(0x10)
++#define SDIO_MULT		(0x14)
++#define SDIO_ADDR		(0x18)
++#define SDIO_EXT		(0x1c)
++
++#define REG_IRQS_RESP_CRC7	BIT(5)
++#define REG_IRQS_RD_CRC16	BIT(6)
++#define REG_IRQS_WR_CRC16	BIT(7)
++#define REG_IRQS_CMD_INT	BIT(9)
++
++#define REG_IRQC_ARC_CMD_INT	BIT(4)
++
++#define REG_CONF_CLK_DIV_M	(0x3ff)
++#define REG_CONF_BUS_WIDTH	BIT(20)
++
++#define REG_MULT_PORT_SEL_M	(0x3)
++#define REG_MULT_RD_INDEX_M	(0x0f)
++#define REG_MULT_RD_INDEX_S	(12)
++#define REG_MULT_WR_RD_OUT_IND	BIT(8)
++
++#define REG_SEND_CMD_COMMAND_M	(0xff)
++#define REG_SEND_CMD_RESP_S	(8)
++#define REG_SEND_RESP_NO_CRC7	BIT(16)
++#define REG_SEND_RESP_HAVE_DATA	BIT(17)
++#define REG_SEND_RESP_CRC7_F_8	BIT(18)
++#define REG_SEND_CHECK_BUSY_D0	BIT(19)
++#define REG_SEND_CMD_SEND_DATA	BIT(20)
++#define REG_SEND_REP_PACK_N_M	(0xff)
++#define REG_SEND_REP_PACK_N_S	(24)
++
++#define REG_EXT_DAT_RW_NUM_M	(0x3fff)
++#define REG_EXT_DAT_RW_NUM_S	(16)
++
++#define SDIO_BOUNCE_REQ_SIZE	(128 * 1024)
++
++struct meson_mmc_host {
++	struct mmc_host		*mmc;
++	struct mmc_request	*mrq;
++	struct delayed_work     timeout_work;
++	struct clk		*clk;
++	spinlock_t		lock;
++	void __iomem		*base;
++	long			timeout;
++	int			irq;
++	int			error;
++	unsigned int		port;
++	bool			cmd_is_stop;
++	bool			dying;
++};
++
++static int meson_mmc_clk_set_rate(struct mmc_host *mmc, struct mmc_ios *ios)
++{
++	struct meson_mmc_host *host = mmc_priv(mmc);
++	unsigned long clk_rate;
++	unsigned int clk_ios = ios->clock;
++	unsigned int clk_div;
++	u32 conf_reg;
++
++	clk_rate = clk_get_rate(host->clk);
++	if (clk_rate < 0) {
++		dev_err(mmc_dev(mmc), "cannot get clock rate\n");
++		return -EINVAL;
++	}
++
++	clk_rate >>= 1;
++	clk_div = clk_rate / clk_ios - !(clk_rate % clk_ios);
++
++	conf_reg = readl(host->base + SDIO_CONF);
++	conf_reg &= ~REG_CONF_CLK_DIV_M;
++	conf_reg |= clk_div;
++	writel(conf_reg, host->base + SDIO_CONF);
++
++	dev_dbg(mmc_dev(mmc), "clk_ios: %d, clk_div: %d, clk_rate: %ld\n",
++		clk_ios, clk_div, clk_rate);
++
++	return 0;
++}
++
++static void meson_mmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
++{
++	struct meson_mmc_host *host = mmc_priv(mmc);
++	u32 reg;
++
++	reg = readl(host->base + SDIO_CONF);
++
++	switch (ios->bus_width) {
++	case MMC_BUS_WIDTH_1:
++		reg &= ~REG_CONF_BUS_WIDTH;
++		break;
++	case MMC_BUS_WIDTH_4:
++		reg |= REG_CONF_BUS_WIDTH;
++		break;
++	case MMC_BUS_WIDTH_8:
++	default:
++		dev_err(mmc_dev(mmc), "meson controller doesn't support 8bit data bus\n");
++		host->error = -EINVAL;
++		return;
++	}
++
++	writel(reg, host->base + SDIO_CONF);
++
++	if (ios->clock && ios->power_mode)
++		host->error = meson_mmc_clk_set_rate(mmc, ios);
++}
++
++static void meson_mmc_start_cmd(struct mmc_host *mmc,
++				struct mmc_command *cmd)
++{
++	struct meson_mmc_host *host = mmc_priv(mmc);
++	unsigned int pack_size;
++	u32 irqc, irqs, mult;
++	u32 send = 0;
++	u32 ext = 0;
++
++	switch (mmc_resp_type(cmd)) {
++	case MMC_RSP_R1:
++	case MMC_RSP_R1B:
++	case MMC_RSP_R3:
++		send |= (45 << REG_SEND_CMD_RESP_S);
++		break;
++	case MMC_RSP_R2:
++		send |= (133 << REG_SEND_CMD_RESP_S);
++		send |= REG_SEND_RESP_CRC7_F_8;
++		break;
++	default:
++		break;
++	}
++
++	if (!(cmd->flags & MMC_RSP_CRC))
++		send |= REG_SEND_RESP_NO_CRC7;
++
++	if (cmd->flags & MMC_RSP_BUSY)
++		send |= REG_SEND_CHECK_BUSY_D0;
++
++	if (cmd->data) {
++		send &= ~(REG_SEND_REP_PACK_N_M << REG_SEND_REP_PACK_N_S);
++		send |= ((cmd->data->blocks - 1) << REG_SEND_REP_PACK_N_S);
++
++		ext &= ~(REG_EXT_DAT_RW_NUM_M << REG_EXT_DAT_RW_NUM_S);
++		if (mmc->ios.bus_width)
++			pack_size = cmd->data->blksz * 8 + (16 - 1) * 4;
++		else
++			pack_size = cmd->data->blksz * 8 + (16 - 1);
++		ext |= (pack_size << REG_EXT_DAT_RW_NUM_S);
++
++		if (cmd->data->flags & MMC_DATA_WRITE)
++			send |= REG_SEND_CMD_SEND_DATA;
++		else
++			send |= REG_SEND_RESP_HAVE_DATA;
++	}
++
++	send &= ~REG_SEND_CMD_COMMAND_M;
++	send |= (0x40 | cmd->opcode);
++
++	irqc = readl(host->base + SDIO_IRQC);
++	irqc |= REG_IRQC_ARC_CMD_INT;
++
++	irqs = readl(host->base + SDIO_IRQS);
++	irqs |= REG_IRQS_CMD_INT;
++
++	mult = readl(host->base + SDIO_MULT);
++	mult &= ~REG_MULT_PORT_SEL_M;
++	mult |= host->port;
++	mult |= (1 << 31);
++	writel(mult, host->base + SDIO_MULT);
++	writel(irqs, host->base + SDIO_IRQS);
++	writel(irqc, host->base + SDIO_IRQC);
++
++	writel(cmd->arg, host->base + SDIO_ARGU);
++	writel(ext, host->base + SDIO_EXT);
++	writel(send, host->base + SDIO_SEND);
++}
++
++static int meson_mmc_map_dma(struct meson_mmc_host *host,
++			     struct mmc_data *data,
++			     unsigned int flags)
++{	u32 dma_len;
++	struct scatterlist *sg = data->sg;
++
++	if (sg->offset & 3 || sg->length & 3) {
++		dev_err(mmc_dev(host->mmc),
++			"unaligned scatterlist: os %x length %d\n",
++			sg->offset, sg->length);
++		return -EINVAL;
++	}
++
++	dma_len = dma_map_sg(mmc_dev(host->mmc), data->sg, data->sg_len,
++			     ((data->flags & MMC_DATA_READ) ?
++			     DMA_FROM_DEVICE : DMA_TO_DEVICE));
++	if (dma_len == 0) {
++		dev_err(mmc_dev(host->mmc), "dma_map_sg failed\n");
++		return -ENOMEM;
++	}
++
++	return 0;
++}
++
++static void meson_mmc_request(struct mmc_host *mmc, struct mmc_request *mrq)
++{
++	struct meson_mmc_host *host = mmc_priv(mmc);
++	struct mmc_command *cmd = mrq->cmd;
++	struct mmc_data *data = mrq->data;
++	unsigned long flags;
++	int ret;
++
++	spin_lock_irqsave(&host->lock, flags);
++
++	if (host->error) {
++		cmd->error = host->error;
++		spin_unlock_irqrestore(&host->lock, flags);
++		mmc_request_done(mmc, mrq);
++		return;
++	}
++
++	if (data) {
++		ret = meson_mmc_map_dma(host, data, data->flags);
++		if (ret < 0) {
++			dev_err(mmc_dev(mmc), "map DMA failed\n");
++			cmd->error = ret;
++			data->error = ret;
++			spin_unlock_irqrestore(&host->lock, flags);
++			mmc_request_done(mmc, mrq);
++			return;
++		}
++		writel(sg_dma_address(data->sg), host->base + SDIO_ADDR);
++	}
++
++	host->mrq = mrq;
++	meson_mmc_start_cmd(mmc, mrq->cmd);
++
++	spin_unlock_irqrestore(&host->lock, flags);
++
++	schedule_delayed_work(&host->timeout_work, host->timeout);
++}
++
++static irqreturn_t meson_mmc_irq(int irq, void *data)
++{
++	struct meson_mmc_host *host = (void *) data;
++	struct mmc_request *mrq = host->mrq;
++	u32 irqs;
++
++	irqs = readl(host->base + SDIO_IRQS);
++	if (mrq && (irqs & REG_IRQS_CMD_INT))
++		return IRQ_WAKE_THREAD;
++
++	return IRQ_HANDLED;
++}
++
++void meson_mmc_read_response(struct meson_mmc_host *host)
++{
++	struct mmc_command *cmd = host->mrq->cmd;
++	u32 mult;
++	int i, resp[4] = { 0 };
++
++	mult = readl(host->base + SDIO_MULT);
++	mult |= REG_MULT_WR_RD_OUT_IND;
++	mult &= ~(REG_MULT_RD_INDEX_M << REG_MULT_RD_INDEX_S);
++	writel(mult, host->base + SDIO_MULT);
++
++	if (cmd->flags & MMC_RSP_136) {
++		for (i = 0; i <= 3; i++)
++			resp[3 - i] = readl(host->base + SDIO_ARGU);
++		cmd->resp[0] = (resp[0] << 8) | ((resp[1] >> 24) & 0xff);
++		cmd->resp[1] = (resp[1] << 8) | ((resp[2] >> 24) & 0xff);
++		cmd->resp[2] = (resp[2] << 8) | ((resp[3] >> 24) & 0xff);
++		cmd->resp[3] = (resp[3] << 8);
++	} else if (cmd->flags & MMC_RSP_PRESENT) {
++		cmd->resp[0] = readl(host->base + SDIO_ARGU);
++	}
++}
++
++static irqreturn_t meson_mmc_irq_thread(int irq, void *irq_data)
++{
++	struct meson_mmc_host *host = (void *) irq_data;
++	struct mmc_data *data;
++	unsigned long flags;
++	struct mmc_request *mrq;
++	u32 irqs, send;
++
++	cancel_delayed_work_sync(&host->timeout_work);
++	spin_lock_irqsave(&host->lock, flags);
++
++	mrq = host->mrq;
++	data = mrq->data;
++
++	if (!mrq) {
++		spin_unlock_irqrestore(&host->lock, flags);
++		return IRQ_HANDLED;
++	}
++
++	if (host->cmd_is_stop)
++		goto out;
++
++	irqs = readl(host->base + SDIO_IRQS);
++	send = readl(host->base + SDIO_SEND);
++
++	mrq->cmd->error = 0;
++
++	if (!data) {
++		if (!((irqs & REG_IRQS_RESP_CRC7) ||
++		      (send & REG_SEND_RESP_NO_CRC7)))
++			mrq->cmd->error = -EILSEQ;
++		else
++			meson_mmc_read_response(host);
++	} else {
++		if (!((irqs & REG_IRQS_RD_CRC16) ||
++		      (irqs & REG_IRQS_WR_CRC16))) {
++			mrq->cmd->error = -EILSEQ;
++		} else {
++			data->bytes_xfered = data->blksz * data->blocks;
++			dma_unmap_sg(mmc_dev(host->mmc), data->sg, data->sg_len,
++				     ((data->flags & MMC_DATA_READ) ?
++				     DMA_FROM_DEVICE : DMA_TO_DEVICE));
++		}
++	}
++
++	if (mrq->stop) {
++		host->cmd_is_stop = true;
++		meson_mmc_start_cmd(host->mmc, mrq->stop);
++		spin_unlock_irqrestore(&host->lock, flags);
++		return IRQ_HANDLED;
++	}
++
++out:
++	host->cmd_is_stop = false;
++	host->mrq = NULL;
++	spin_unlock_irqrestore(&host->lock, flags);
++	mmc_request_done(host->mmc, mrq);
++
++	return IRQ_HANDLED;
++}
++
++static void meson_mmc_timeout(struct work_struct *work)
++{
++	struct meson_mmc_host *host = container_of(work,
++						   struct meson_mmc_host,
++						   timeout_work.work);
++	struct mmc_request *mrq = host->mrq;
++	unsigned long flags;
++	u32 irqc;
++
++	/* Do not run after meson_mmc_remove() */
++	if (host->dying)
++		return;
++
++	spin_lock_irqsave(&host->lock, flags);
++
++	dev_err(mmc_dev(host->mmc), "Timeout on CMD%u\n", mrq->cmd->opcode);
++
++	irqc = readl(host->base + SDIO_IRQC);
++	irqc &= ~REG_IRQC_ARC_CMD_INT;
++	writel(irqc, host->base + SDIO_IRQC);
++
++	mrq->cmd->error = -ETIMEDOUT;
++
++	host->mrq = NULL;
++	spin_unlock_irqrestore(&host->lock, flags);
++
++	mmc_request_done(host->mmc, mrq);
++}
++
++static struct mmc_host_ops meson_mmc_ops = {
++	.request	= meson_mmc_request,
++	.set_ios	= meson_mmc_set_ios,
++	.get_cd		= mmc_gpio_get_cd,
++};
++
++static int meson_mmc_probe(struct platform_device *pdev)
++{
++	struct mmc_host *mmc;
++	struct meson_mmc_host *host;
++	struct pinctrl *pinctrl;
++	struct pinctrl_state *pins;
++	struct resource *res;
++	int ret, irq;
++
++	mmc = mmc_alloc_host(sizeof(struct meson_mmc_host), &pdev->dev);
++	if (!mmc) {
++		dev_err(&pdev->dev, "mmc alloc host failed\n");
++		return -ENOMEM;
++	}
++
++	host = mmc_priv(mmc);
++	host->mmc = mmc;
++	host->timeout = msecs_to_jiffies(2000);
++
++	res = platform_get_resource(pdev, IORESOURCE_MEM, 0);
++	host->base = devm_ioremap_resource(&pdev->dev, res);
++	if (IS_ERR(host->base)) {
++		ret = PTR_ERR(host->base);
++		goto error_free_host;
++	}
++
++	irq = platform_get_irq(pdev, 0);
++	ret = devm_request_threaded_irq(&pdev->dev, irq, meson_mmc_irq,
++					meson_mmc_irq_thread, 0, "meson_mmc",
++					host);
++	if (ret)
++		goto error_free_host;
++
++	host->clk = devm_clk_get(&pdev->dev, NULL);
++	if (IS_ERR(host->clk)) {
++		ret = PTR_ERR(host->clk);
++		goto error_free_host;
++	}
++
++	/* we do not support scatter lists in hardware */
++	mmc->max_segs = 1;
++	mmc->max_req_size = SDIO_BOUNCE_REQ_SIZE;
++	mmc->max_seg_size = mmc->max_req_size;
++	mmc->max_blk_count = 256;
++	mmc->max_blk_size = mmc->max_req_size / mmc->max_blk_count;
++	mmc->f_min = 300000;
++	mmc->f_max = 50000000;
++	mmc->caps |= MMC_CAP_4_BIT_DATA;
++	mmc->caps |= MMC_CAP_MMC_HIGHSPEED | MMC_CAP_SD_HIGHSPEED;
++	mmc->caps2 |= MMC_CAP2_NO_SDIO;
++	mmc->ocr_avail = MMC_VDD_33_34;
++	mmc->ops = &meson_mmc_ops;
++
++	spin_lock_init(&host->lock);
++
++	INIT_DELAYED_WORK(&host->timeout_work, meson_mmc_timeout);
++
++	pinctrl = devm_pinctrl_get(&pdev->dev);
++	if (IS_ERR(pinctrl)) {
++		ret = PTR_ERR(pinctrl);
++		goto error_free_host;
++	}
++
++	/* We need to know at runtime which port we are using */
++	pins = pinctrl_lookup_state(pinctrl, "sdio_b");
++	if (!IS_ERR(pins))
++		host->port = 1; /* PORT_B */
++	else
++		host->port = 0; /* PORT_A */
++
++	ret = mmc_of_parse(mmc);
++	if (ret)
++		goto error_free_host;
++
++	platform_set_drvdata(pdev, mmc);
++
++	ret = mmc_add_host(mmc);
++	if (ret)
++		goto error_free_host;
++
++	dev_info(&pdev->dev, "base:0x%p irq:%u port:%u\n",
++		 host->base, irq, host->port);
++
++	return 0;
++
++error_free_host:
++	mmc_free_host(mmc);
++
++	return ret;
++}
++
++static int meson_mmc_remove(struct platform_device *pdev)
++{
++	struct mmc_host	*mmc = platform_get_drvdata(pdev);
++	struct meson_mmc_host *host = mmc_priv(mmc);
++
++	host->dying = true;
++
++	mmc_remove_host(mmc);
++	cancel_delayed_work_sync(&host->timeout_work);
++
++	mmc_free_host(mmc);
++
++	return 0;
++}
++
++static const struct of_device_id meson_mmc_of_match[] = {
++	{ .compatible = "amlogic,meson-mmc", },
++	{ /* sentinel */ }
++};
++MODULE_DEVICE_TABLE(of, meson_mmc_of_match);
++
++static struct platform_driver meson_mmc_driver = {
++	.probe   = meson_mmc_probe,
++	.remove  = meson_mmc_remove,
++	.driver  = {
++		.name = "meson-mmc",
++		.of_match_table = of_match_ptr(meson_mmc_of_match),
++	},
++};
++
++module_platform_driver(meson_mmc_driver);
++
++MODULE_DESCRIPTION("Meson Secure Digital Host Driver");
++MODULE_AUTHOR("Carlo Caione <carlo@endlessm.com>");
++MODULE_LICENSE("GPL");
 -- 
-1.9.1
+2.5.0
 
