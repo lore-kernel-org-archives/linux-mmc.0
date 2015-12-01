@@ -1,168 +1,127 @@
-From: Vinod Koul <vinod.koul-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Subject: Re: [RFC v02 00/15] dmaengine: New 'universal' API for requesting
- channel
-Date: Tue, 1 Dec 2015 22:29:54 +0530
-Message-ID: <20151201165954.GA1696@localhost>
+From: Tony Lindgren <tony@atomide.com>
+Subject: Re: [RFC v02 03/15] dmaengine: core: Introduce new, universal API to
+ request a channel
+Date: Tue, 1 Dec 2015 09:00:32 -0800
+Message-ID: <20151201170031.GT23396@atomide.com>
 References: <1448891145-10766-1-git-send-email-peter.ujfalusi@ti.com>
+ <1448891145-10766-4-git-send-email-peter.ujfalusi@ti.com>
+ <20151130155142.GZ2517@atomide.com>
+ <565D56A0.2090204@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-spi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from muru.com ([72.249.23.125]:49816 "EHLO muru.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751704AbbLARAk (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 1 Dec 2015 12:00:40 -0500
 Content-Disposition: inline
-In-Reply-To: <1448891145-10766-1-git-send-email-peter.ujfalusi-l0cyMroinI0@public.gmane.org>
-Sender: linux-spi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Peter Ujfalusi <peter.ujfalusi-l0cyMroinI0@public.gmane.org>
-Cc: arnd-r2nGTMty4D4@public.gmane.org, andy.shevchenko-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, dmaengine-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, nsekhar-l0cyMroinI0@public.gmane.org, linux-spi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+In-Reply-To: <565D56A0.2090204@ti.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Peter Ujfalusi <peter.ujfalusi@ti.com>
+Cc: vinod.koul@intel.com, arnd@arndb.de, andy.shevchenko@gmail.com, linux-mmc@vger.kernel.org, nsekhar@ti.com, linux-kernel@vger.kernel.org, linux-spi@vger.kernel.org, dmaengine@vger.kernel.org, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 
-On Mon, Nov 30, 2015 at 03:45:30PM +0200, Peter Ujfalusi wrote:
-> Hi,
+* Peter Ujfalusi <peter.ujfalusi@ti.com> [151201 00:14]:
+> On 11/30/2015 05:51 PM, Tony Lindgren wrote:
+> > Hi,
+> > 
+> > * Peter Ujfalusi <peter.ujfalusi@ti.com> [151130 05:49]:
+> >>
+> >> For each dmaengine driver an array of DMA device, slave and the parameter
+> >> for the filter function needs to be added:
+> >>
+> >> static struct dma_filter_map da830_edma_map[] = {
+> >> 	DMA_FILTER_ENTRY("davinci-mcasp.0", "rx", EDMA_CTLR_CHAN(0, 0)),
+> >> 	DMA_FILTER_ENTRY("davinci-mcasp.0", "tx", EDMA_CTLR_CHAN(0, 1)),
+> >> 	DMA_FILTER_ENTRY("davinci-mcasp.1", "rx", EDMA_CTLR_CHAN(0, 2)),
+> >> 	DMA_FILTER_ENTRY("davinci-mcasp.1", "tx", EDMA_CTLR_CHAN(0, 3)),
+> >> 	DMA_FILTER_ENTRY("davinci-mcasp.2", "rx", EDMA_CTLR_CHAN(0, 4)),
+> >> 	DMA_FILTER_ENTRY("davinci-mcasp.2", "tx", EDMA_CTLR_CHAN(0, 5)),
+> >> 	DMA_FILTER_ENTRY("spi_davinci.0", "rx", EDMA_CTLR_CHAN(0, 14)),
+> >> 	DMA_FILTER_ENTRY("spi_davinci.0", "tx", EDMA_CTLR_CHAN(0, 15)),
+> >> 	DMA_FILTER_ENTRY("da830-mmc.0", "rx", EDMA_CTLR_CHAN(0, 16)),
+> >> 	DMA_FILTER_ENTRY("da830-mmc.0", "tx", EDMA_CTLR_CHAN(0, 17)),
+> >> 	DMA_FILTER_ENTRY("spi_davinci.1", "rx", EDMA_CTLR_CHAN(0, 18)),
+> >> 	DMA_FILTER_ENTRY("spi_davinci.1", "tx", EDMA_CTLR_CHAN(0, 19)),
+> >> };
+> > 
+> > FYI, if the EDMA_CTRL_CHAN above is just the evtmux registers
 > 
-> Changes since RFC v01:
-> - dma_request_chan(); lost the mask parameter
-> - The new API does not rely on RESOURCE_DMA, instead the dma_filter_map table
->   will be used to provide the needed information to the filter function in
->   legacy mode
-> - Extended the example patches to convert most of daVinci to use the new API to
->   request the DMA channels.
+> No, they are not. They are the eDMA event numbers. I used the EDMA_CTRL_CHAN()
+> macro for all board files to have uniform look for the data. The first
+> parameter means the eDMA instance number while the second is the event number
+> on that eDMA. Since most devices have only one eDMA, we have 0 as eDMA id in
+> most cases.
+> The eventmux, or crossbar is different thing and we have several versions of
+> the event crossbar or mux used.
 
-Hi Peter,
+OK
 
-Thanks a bunch for fixing this up!
+> > those
+> > can be handled with the pinctrl framework. It seems that would allow
+> > leaving out some of the built-in look up data, and have the mux parts
+> > handled by a proper device driver. Below is a sample from the dm81xx
+> > platform for reference.
+> > 
+> > SoC dtsi file:
+> > 
+> > evtmux: pinmux@f90 {
+> > 	compatible = "pinctrl-single";
+> > 	reg = <0xf90 0x40>;
+> > 	#address-cells = <1>;
+> > 	#size-cells = <0>;
+> > 	pinctrl-single,register-width = <8>;
+> > 	pinctrl-single,function-mask = <0x1f>;
+> > };
+> > 
+> > Board specific dts file:
+> > 
+> > &evtmux {
+> > 	sd2_edma_pins: pinmux_sd2_edma_pins {
+> > 	pinctrl-single,pins = <
+> > 		8 1     /* use SDTXEVT1 for EDMA instead of MCASP0TX */
+> > 		9 2     /* use SDRXEVT1 for EDMA instead of MCASP0RX */
+> > 		>;
+> > 	};
+> > };
+> 
+> I see. The dm81xx basically am33xx/am43xx?
 
-I think overall I am happy with the proposal and aligning with 2 APIs really
-_helps_.
+Yeah similar to am33xx with different clocks and with a bunch of accelerators.
 
-> 
-> TODO: Documentation update ;)
->
-> 
-> As it has been discussed in the following thread:
-> http://www.gossamer-threads.com/lists/linux/kernel/2181487#2181487
-> 
-> Andy: I did looked at the unified device properties, but I decided to not to use
-> it as I don't see it to fit well and most of the legacy board files are using
-> resources to specify at least their memory regions so adding the DMA resource
-> to them would be more inline with the rest of the code.
+> Actually I would prefer to use the dmaengine's event router framework and we
+> do have support for the am33xx/am43xx type of crossbar already implemented.
+> I'm going to resend the DTS series for am33xx/am43xx to convert them to use
+> the new DT bindings along with the dma event router support:
+> https://www.mail-archive.com/linux-omap%40vger.kernel.org/msg120828.html
 
-I think that is okay for now, we can align on that eventually. I think this
-doesn't impact the API design though..
+OK yes a dmaengine event router works too when available. Good to see
+them as separate driver instances now :) Are only the dts changes missing
+now?
 
-> 
-> The ARM, mmc and spi patches are converting daVinci drivers board files to use
-> the new method of requesting DMA channel.
-> 
-> With this series I have taken a path which would result two new API, which can
-> be used to convert most of the current users already and with some work all
-> users might be able to move to this set.
-> With this set the filter_fn used for legacy (non DT/ACPI) channel request is no
-> longer needed to be exported to client drivers since the selection of the
-> correct filter_fn will be done in the core.
-> 
-> So, the first proposal is to have:
-> 
-> struct dma_chan *dma_request_chan(struct device *dev, const char *name);
-> struct dma_chan *dma_request_chan_by_mask(const dma_cap_mask_t *mask);
-> 
-> The dma_request_chan_by_mask() is to request any channel matching with the
-> requested capabilities, can be used to request channel for memcpy, memset, xor,
-> etc where no hardware synchronization is needed.
-> 
-> The dma_request_chan() is to request a slave channel. The dma_request_chan() will try to find the
-> channel via DT, ACPI or in case if the kernel booted in non DT/ACPI mode
-> it will use a filter lookup table and retrieves the needed information from
-> the dma_filter_map provided by the DMA drivers.
+FYI, when we have separate interconnect driver instances, we don't want to
+and cannot tweak registers outside the interconnect instance because of them
+being in separate clock and/or power domains :p
 
-That sounds right, for the third case would the arch, driver or someone else
-configure this?
+In any case, it seems there's no harm using pinctrl for evtmux on dm81xx
+until the event router is available. It's currently only needed on the
+t410 emmc that I'm aware of :)
 
-> This legacy mode needs changes in platform code, in dmaengine drivers and
-> finally the dmaengine user drivers can be converted:
+> > Dynamic muxing of these channels can be done too using the pinctrl
+> > framework named modes, but probably is not a good idea in the case of
+> > SD card and MaASP in case something goes wrong :)
+> 
+> In theory it can be done, but in practice it is not possible. It is up to the
+> board design decision to select which DMA event is not needed to be used in
+> default mode and that one can be used to route the crossbar hidden request to it.
+> Just imaging: playing audio from MMC (in the example you have), audio needs
+> constant DMA, so the MMC would never get DMA request, also the drivers tend to
+> request the DMA channel in their probe/init and hold to it as long as they are
+> loaded...
 
-Are you marking the current APIs as dericated in the end of this series
+Yes dynamic muxing of the dma channels sounds like file corruption waiting
+to happen :) Let's stay away from that.
 
-> 
-> For each dmaengine driver an array of DMA device, slave and the parameter
-> for the filter function needs to be added:
-> 
-> static struct dma_filter_map da830_edma_map[] = {
-> 	DMA_FILTER_ENTRY("davinci-mcasp.0", "rx", EDMA_CTLR_CHAN(0, 0)),
-> 	DMA_FILTER_ENTRY("davinci-mcasp.0", "tx", EDMA_CTLR_CHAN(0, 1)),
-> 	DMA_FILTER_ENTRY("davinci-mcasp.1", "rx", EDMA_CTLR_CHAN(0, 2)),
-> 	DMA_FILTER_ENTRY("davinci-mcasp.1", "tx", EDMA_CTLR_CHAN(0, 3)),
-> 	DMA_FILTER_ENTRY("davinci-mcasp.2", "rx", EDMA_CTLR_CHAN(0, 4)),
-> 	DMA_FILTER_ENTRY("davinci-mcasp.2", "tx", EDMA_CTLR_CHAN(0, 5)),
-> 	DMA_FILTER_ENTRY("spi_davinci.0", "rx", EDMA_CTLR_CHAN(0, 14)),
-> 	DMA_FILTER_ENTRY("spi_davinci.0", "tx", EDMA_CTLR_CHAN(0, 15)),
-> 	DMA_FILTER_ENTRY("da830-mmc.0", "rx", EDMA_CTLR_CHAN(0, 16)),
-> 	DMA_FILTER_ENTRY("da830-mmc.0", "tx", EDMA_CTLR_CHAN(0, 17)),
-> 	DMA_FILTER_ENTRY("spi_davinci.1", "rx", EDMA_CTLR_CHAN(0, 18)),
-> 	DMA_FILTER_ENTRY("spi_davinci.1", "tx", EDMA_CTLR_CHAN(0, 19)),
-> };
-> 
-> This information is going to be needed by the dmaengine driver, so
-> modification to the platform_data is needed, and the driver map should be
-> added to the pdata of the DMA driver:
-> 
-> da8xx_edma0_pdata.filter_map = da830_edma_map;
-> da8xx_edma0_pdata.filtercnt = ARRAY_SIZE(da830_edma_map);
-> 
-> The DMA driver then needs to convigure the needed device -> filter_fn
-> mapping before it registers with dma_async_device_register() :
-> 
-> if (info->filter_map) {
-> 	ecc->dma_slave.filter_map.map = info->filter_map;
-> 	ecc->dma_slave.filter_map.mapcnt = info->filtercnt;
-> 	ecc->dma_slave.filter_map.filter_fn = edma_filter_for_map;
-> }
-> 
-> When neither DT or ACPI lookup is available the dma_request_chan() will
-> try to match the requester's device name with the filter_map's list of
-> device names, when a match found it will use the information from the
-> dma_filter_map to get the channel with the dma_get_channel() internal
-> function.
-> 
-> Regards,
-> Peter
-> ---
-> Peter Ujfalusi (15):
->   dmaengine: core: Allow NULL mask pointer in
->     __dma_device_satisfies_mask()
->   dmaengine: core: Move and merge the code paths using private_candidate
->   dmaengine: core: Introduce new, universal API to request a channel
->   dmaengine: edma: Add support for DMA filter mapping to slave devices
->   ARM: davinci: devices-da8xx: Add dma_filter_map to edma
->   ARM: davinci: dm355: Add dma_filter_map to edma
->   ARM: davinci: dm365: Add dma_filter_map to edma
->   ARM: davinci: dm644x: Add dma_filter_map to edma
->   ARM: davinci: dm646x: Add dma_filter_map to edma
->   mmc: davinci_mmc: Use dma_request_chan() to requesting DMA channel
->   spi: davinci: Use dma_request_chan() to requesting DMA channel
->   ARM: davinci: devices-da8xx: Remove DMA resources for MMC and SPI
->   ARM: davinci: devices: Remove DMA resources for MMC
->   ARM: davinci: dm355: Remove DMA resources for SPI
->   ARM: davinci: dm365: Remove DMA resources for SPI
-> 
->  arch/arm/mach-davinci/devices-da8xx.c |  95 ++++++++++----------
->  arch/arm/mach-davinci/devices.c       |  19 ----
->  arch/arm/mach-davinci/dm355.c         |  28 ++++--
->  arch/arm/mach-davinci/dm365.c         |  30 +++++--
->  arch/arm/mach-davinci/dm644x.c        |  12 +++
->  arch/arm/mach-davinci/dm646x.c        |  11 +++
->  drivers/dma/dmaengine.c               | 160 +++++++++++++++++++++++++---------
->  drivers/dma/edma.c                    |  24 +++++
->  drivers/mmc/host/davinci_mmc.c        |  52 +++--------
->  drivers/spi/spi-davinci.c             |  76 +++++-----------
->  include/linux/dmaengine.h             |  31 +++++++
->  include/linux/platform_data/edma.h    |   5 ++
->  12 files changed, 330 insertions(+), 213 deletions(-)
-> 
-> -- 
-> 2.6.3
-> 
+Regards,
 
--- 
-~Vinod
---
-To unsubscribe from this list: send the line "unsubscribe linux-spi" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Tony
