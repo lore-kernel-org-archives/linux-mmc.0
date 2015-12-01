@@ -1,66 +1,112 @@
 From: Vinod Koul <vinod.koul@intel.com>
-Subject: Re: [RFC v02 01/15] dmaengine: core: Allow NULL mask pointer in
- __dma_device_satisfies_mask()
-Date: Tue, 1 Dec 2015 22:36:47 +0530
-Message-ID: <20151201170647.GB1696@localhost>
+Subject: Re: [RFC v02 04/15] dmaengine: edma: Add support for DMA filter
+ mapping to slave devices
+Date: Tue, 1 Dec 2015 22:52:12 +0530
+Message-ID: <20151201172212.GC1696@localhost>
 References: <1448891145-10766-1-git-send-email-peter.ujfalusi@ti.com>
- <1448891145-10766-2-git-send-email-peter.ujfalusi@ti.com>
- <CAHp75VfY=NU4MG7q1w=oYdTiTr0dqtNTQU3UkEaL=tXPJADH5Q@mail.gmail.com>
- <565D6CB1.8030808@ti.com>
- <CAHp75Vfk_GAANRYdbHNxtCy-Ni18FppsKhPPX1X84v1Zu6JXvw@mail.gmail.com>
+ <1448891145-10766-5-git-send-email-peter.ujfalusi@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga03.intel.com ([134.134.136.65]:34898 "EHLO mga03.intel.com"
+Received: from mga09.intel.com ([134.134.136.24]:60556 "EHLO mga09.intel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754713AbbLAREQ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 1 Dec 2015 12:04:16 -0500
+	id S1756073AbbLARUB (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 1 Dec 2015 12:20:01 -0500
 Content-Disposition: inline
-In-Reply-To: <CAHp75Vfk_GAANRYdbHNxtCy-Ni18FppsKhPPX1X84v1Zu6JXvw@mail.gmail.com>
+In-Reply-To: <1448891145-10766-5-git-send-email-peter.ujfalusi@ti.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Andy Shevchenko <andy.shevchenko@gmail.com>
-Cc: Peter Ujfalusi <peter.ujfalusi@ti.com>, Arnd Bergmann <arnd@arndb.de>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, dmaengine <dmaengine@vger.kernel.org>, Linux OMAP Mailing List <linux-omap@vger.kernel.org>, linux-arm Mailing List <linux-arm-kernel@lists.infradead.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Sekhar Nori <nsekhar@ti.com>, linux-spi <linux-spi@vger.kernel.org>
+To: Peter Ujfalusi <peter.ujfalusi@ti.com>
+Cc: arnd@arndb.de, andy.shevchenko@gmail.com, linux-kernel@vger.kernel.org, dmaengine@vger.kernel.org, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, nsekhar@ti.com, linux-spi@vger.kernel.org
 
-On Tue, Dec 01, 2015 at 02:58:35PM +0200, Andy Shevchenko wrote:
-> On Tue, Dec 1, 2015 at 11:47 AM, Peter Ujfalusi <peter.ujfalusi@ti.com> wrote:
-> > On 11/30/2015 04:35 PM, Andy Shevchenko wrote:
-> >> On Mon, Nov 30, 2015 at 3:45 PM, Peter Ujfalusi <peter.ujfalusi@ti.com> wrote:
-> >>> Treat as true condition the case when the mask is NULL.
-> >>
-> >> What do you think about setting some default (all "on") mask when mask
-> >> is not supplied?
-> >
-> > Probably rephrasing the commit message to say that when the mask is NULL it
-> > means that the caller does not care about the capabilities of the dma device
-> > thus return with true in such a case.
-> >
-> > We could also drop this patch and in private_candidate() :
-> >
-> > -       if (!__dma_device_satisfies_mask(dev, mask)) {
-> > +       if (mask && !__dma_device_satisfies_mask(dev, mask)) {
-> >                 pr_debug("%s: wrong capabilities\n", __func__);
-> >                 return NULL;
-> >         }
-> 
-> Between patch and above proposal I would choose the latter one.
+On Mon, Nov 30, 2015 at 03:45:34PM +0200, Peter Ujfalusi wrote:
+> Add support for providing device to filter_fn mapping so client drivers
+> can switch to use the dma_request_chan() API.
 
-Sounds better to me as well
+Any reason why we dont want to go with DT based only for edma here?
 
 > 
-> >> I don't know for sure but there might be cases when you don't want
-> >> literally *any* channel to satisfy.
-> >
-> > Or set DMA_SLAVE only in dma_request_chan()? What happens if we have cases
-> > when we are able to request channel for memcpy via dma_request_chan()
-> > (dedicated memcpy channel/DMA engine?) in that case we will have the SLAVE
-> > set, but not MEMCPY, or any other variation we do not know yet?
+> Signed-off-by: Peter Ujfalusi <peter.ujfalusi@ti.com>
+> ---
+>  drivers/dma/edma.c                 | 24 ++++++++++++++++++++++++
+>  include/linux/platform_data/edma.h |  5 +++++
+>  2 files changed, 29 insertions(+)
 > 
-> Frankly, have no idea.
-
-In slave cases I know that some controllers support memcpy but they are not
-generic memcpy as they cannot be used for system memcpy but for 'special'
-memcpy. So this can be used for memcpy as well
+> diff --git a/drivers/dma/edma.c b/drivers/dma/edma.c
+> index 0675e268d577..386f8c9bd606 100644
+> --- a/drivers/dma/edma.c
+> +++ b/drivers/dma/edma.c
+> @@ -2098,6 +2098,8 @@ static struct dma_chan *of_edma_xlate(struct of_phandle_args *dma_spec,
+>  }
+>  #endif
+>  
+> +static bool edma_filter_for_map(struct dma_chan *chan, void *param);
+> +
+>  static int edma_probe(struct platform_device *pdev)
+>  {
+>  	struct edma_soc_info	*info = pdev->dev.platform_data;
+> @@ -2297,6 +2299,12 @@ static int edma_probe(struct platform_device *pdev)
+>  		edma_set_chmap(&ecc->slave_chans[i], ecc->dummy_slot);
+>  	}
+>  
+> +	if (info->filter_map) {
+> +		ecc->dma_slave.filter_map.map = info->filter_map;
+> +		ecc->dma_slave.filter_map.mapcnt = info->filtercnt;
+> +		ecc->dma_slave.filter_map.filter_fn = edma_filter_for_map;
+> +	}
+> +
+>  	ret = dma_async_device_register(&ecc->dma_slave);
+>  	if (ret) {
+>  		dev_err(dev, "slave ddev registration failed (%d)\n", ret);
+> @@ -2428,6 +2436,22 @@ bool edma_filter_fn(struct dma_chan *chan, void *param)
+>  }
+>  EXPORT_SYMBOL(edma_filter_fn);
+>  
+> +static bool edma_filter_for_map(struct dma_chan *chan, void *param)
+> +{
+> +	bool match = false;
+> +
+> +	if (chan->device->dev->driver == &edma_driver.driver) {
+> +		struct edma_chan *echan = to_edma_chan(chan);
+> +		unsigned ch_req = (unsigned)param;
+> +		if (ch_req == echan->ch_num) {
+> +			/* The channel is going to be used as HW synchronized */
+> +			echan->hw_triggered = true;
+> +			match = true;
+> +		}
+> +	}
+> +	return match;
+> +}
+> +
+>  static int edma_init(void)
+>  {
+>  	int ret;
+> diff --git a/include/linux/platform_data/edma.h b/include/linux/platform_data/edma.h
+> index e2878baeb90e..117a36d63840 100644
+> --- a/include/linux/platform_data/edma.h
+> +++ b/include/linux/platform_data/edma.h
+> @@ -59,6 +59,8 @@ struct edma_rsv_info {
+>  	const s16	(*rsv_slots)[2];
+>  };
+>  
+> +struct dma_filter_map;
+> +
+>  /* platform_data for EDMA driver */
+>  struct edma_soc_info {
+>  	/*
+> @@ -76,6 +78,9 @@ struct edma_soc_info {
+>  
+>  	s8	(*queue_priority_mapping)[2];
+>  	const s16	(*xbar_chans)[2];
+> +
+> +	struct dma_filter_map *filter_map;
+> +	int filtercnt;
+>  };
+>  
+>  #endif
+> -- 
+> 2.6.3
+> 
 
 -- 
 ~Vinod
