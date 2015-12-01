@@ -1,55 +1,49 @@
-From: Chaotian Jing <chaotian.jing@mediatek.com>
-Subject: [PATCH] mmc: mediatek: change some dev_err to dev_dbg
-Date: Tue, 1 Dec 2015 20:12:34 +0800
-Message-ID: <1448971954-398-1-git-send-email-chaotian.jing@mediatek.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: eMMC tuning fail issue
+Date: Tue, 1 Dec 2015 13:44:34 +0100
+Message-ID: <CAPDyKFqWzc_HYU2Hd4=W-sfyj3D6j30s6-iC=PaosMzoagCkag@mail.gmail.com>
+References: <BY1PR03MB138867E7C24E60866C690C129A0F0@BY1PR03MB1388.namprd03.prod.outlook.com>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailgw02.mediatek.com ([210.61.82.184]:50945 "EHLO
-	mailgw02.mediatek.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1756089AbbLAMMm (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 1 Dec 2015 07:12:42 -0500
+Received: from mail-yk0-f181.google.com ([209.85.160.181]:36853 "EHLO
+	mail-yk0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751997AbbLAMof (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 1 Dec 2015 07:44:35 -0500
+Received: by ykdr82 with SMTP id r82so5026204ykd.3
+        for <linux-mmc@vger.kernel.org>; Tue, 01 Dec 2015 04:44:34 -0800 (PST)
+In-Reply-To: <BY1PR03MB138867E7C24E60866C690C129A0F0@BY1PR03MB1388.namprd03.prod.outlook.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Matthias Brugger <matthias.bgg@gmail.com>, Chaotian Jing <chaotian.jing@mediatek.com>, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mediatek@lists.infradead.org, linux-kernel@vger.kernel.org, srv_heupstream@mediatek.com, Daniel Kurtz <djkurtz@chromium.org>
+To: Chen Bough <Haibo.Chen@freescale.com>
+Cc: "nsanders@chromium.org" <nsanders@chromium.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-there are too many error logs shown when use CMD21/CMD19 to do tune,
-and it will appear at each resume time, print out so many logs to the
-uart console cost too mush time. so change it to dev_dbg.
+On 1 December 2015 at 09:41, Chen Bough <Haibo.Chen@freescale.com> wrote:
+> Hi,
+>
+> After
+> commit 197160d52e859575ff0ad1afd674ab2a825b9f83
+> Author: Nick Sanders <nsanders@chromium.org>
+> Date:   Tue May 6 18:52:38 2014 -0700
+>
+>     mmc: sdhci: remove mdelay in eMMC tuning
+>
+>
+> I find Micron eMMC HS200 and HS400 can't pass tuning on i.MX7D platform, here is the log:
+>
+> [    2.835581] sdhci: Tuning procedure failed, falling back to fixed sampling clock
+> [    2.843071] mmc1: tuning execution failed
+> [    2.847104] mmc1: error -5 whilst initialising MMC card
+>
+> When I revert this commit, issue gone.
 
-Signed-off-by: Chaotian Jing <chaotian.jing@mediatek.com>
----
- drivers/mmc/host/mtk-sd.c | 8 ++++----
- 1 file changed, 4 insertions(+), 4 deletions(-)
+Thanks for reporting the problem!
 
-diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
-index 39568cc..34d23b8 100644
---- a/drivers/mmc/host/mtk-sd.c
-+++ b/drivers/mmc/host/mtk-sd.c
-@@ -972,7 +972,7 @@ static bool msdc_data_xfer_done(struct msdc_host *host, u32 events,
- 		if ((events & MSDC_INT_XFER_COMPL) && (!stop || !stop->error)) {
- 			data->bytes_xfered = data->blocks * data->blksz;
- 		} else {
--			dev_err(host->dev, "interrupt events: %x\n", events);
-+			dev_dbg(host->dev, "interrupt events: %x\n", events);
- 			msdc_reset_hw(host);
- 			host->error |= REQ_DAT_ERR;
- 			data->bytes_xfered = 0;
-@@ -982,10 +982,10 @@ static bool msdc_data_xfer_done(struct msdc_host *host, u32 events,
- 			else if (events & MSDC_INT_DATCRCERR)
- 				data->error = -EILSEQ;
- 
--			dev_err(host->dev, "%s: cmd=%d; blocks=%d",
-+			dev_dbg(host->dev, "%s: cmd=%d; blocks=%d",
- 				__func__, mrq->cmd->opcode, data->blocks);
--			dev_err(host->dev, "data_error=%d xfer_size=%d\n",
--					(int)data->error, data->bytes_xfered);
-+			dev_dbg(host->dev, "data_error=%d xfer_size=%d\n",
-+				(int)data->error, data->bytes_xfered);
- 		}
- 
- 		msdc_data_xfer_next(host, mrq, data);
--- 
-1.8.1.1.dirty
+There's been a lot of changes regarding tuning since then, both to
+sdhci and the mmc core. So before I consider a revert for that patch,
+can you share on what baseline you are on!?
 
+[...]
+
+Kind regards
+Uffe
