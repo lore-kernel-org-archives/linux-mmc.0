@@ -1,33 +1,55 @@
-From: Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>
-Subject: Re: [RFC v02 00/15] dmaengine: New 'universal' API for requesting channel
-Date: Tue, 01 Dec 2015 11:15:38 +0100
-Message-ID: <2237139.FINhECNDsD@wuerfel>
-References: <1448891145-10766-1-git-send-email-peter.ujfalusi@ti.com> <13562653.8QgTG33tZS@wuerfel> <565D729F.2000104@ti.com>
+From: Chaotian Jing <chaotian.jing@mediatek.com>
+Subject: [PATCH] mmc: mediatek: change some dev_err to dev_dbg
+Date: Tue, 1 Dec 2015 20:12:34 +0800
+Message-ID: <1448971954-398-1-git-send-email-chaotian.jing@mediatek.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7Bit
-Return-path: <linux-spi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <565D729F.2000104-l0cyMroinI0@public.gmane.org>
-Sender: linux-spi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Peter Ujfalusi <peter.ujfalusi-l0cyMroinI0@public.gmane.org>
-Cc: linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, vinod.koul-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, andy.shevchenko-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, nsekhar-l0cyMroinI0@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-spi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, dmaengine-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Content-Type: text/plain
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mailgw02.mediatek.com ([210.61.82.184]:50945 "EHLO
+	mailgw02.mediatek.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1756089AbbLAMMm (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 1 Dec 2015 07:12:42 -0500
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Matthias Brugger <matthias.bgg@gmail.com>, Chaotian Jing <chaotian.jing@mediatek.com>, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mediatek@lists.infradead.org, linux-kernel@vger.kernel.org, srv_heupstream@mediatek.com, Daniel Kurtz <djkurtz@chromium.org>
 
-On Tuesday 01 December 2015 12:12:47 Peter Ujfalusi wrote:
-> 
-> We would need:
->         { "da830-mmc.0", "rx", (void*)EDMA_CTLR_CHAN(0, 16) },
->         { "da830-mmc.0", "tx", (void*)EDMA_CTLR_CHAN(0, 17) },
-> 
-> as we need to cast the param.
-> It is still compact, but having to add the (void*) casting makes it a bit ugly.
+there are too many error logs shown when use CMD21/CMD19 to do tune,
+and it will appear at each resume time, print out so many logs to the
+uart console cost too mush time. so change it to dev_dbg.
 
-Right, I forgot that, but the cast could also be part of EDMA_CTLR_CHAN(),
-and with the version I just posted in my other reply that part is solved
-as well.
+Signed-off-by: Chaotian Jing <chaotian.jing@mediatek.com>
+---
+ drivers/mmc/host/mtk-sd.c | 8 ++++----
+ 1 file changed, 4 insertions(+), 4 deletions(-)
 
-	Arnd
---
-To unsubscribe from this list: send the line "unsubscribe linux-spi" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
+index 39568cc..34d23b8 100644
+--- a/drivers/mmc/host/mtk-sd.c
++++ b/drivers/mmc/host/mtk-sd.c
+@@ -972,7 +972,7 @@ static bool msdc_data_xfer_done(struct msdc_host *host, u32 events,
+ 		if ((events & MSDC_INT_XFER_COMPL) && (!stop || !stop->error)) {
+ 			data->bytes_xfered = data->blocks * data->blksz;
+ 		} else {
+-			dev_err(host->dev, "interrupt events: %x\n", events);
++			dev_dbg(host->dev, "interrupt events: %x\n", events);
+ 			msdc_reset_hw(host);
+ 			host->error |= REQ_DAT_ERR;
+ 			data->bytes_xfered = 0;
+@@ -982,10 +982,10 @@ static bool msdc_data_xfer_done(struct msdc_host *host, u32 events,
+ 			else if (events & MSDC_INT_DATCRCERR)
+ 				data->error = -EILSEQ;
+ 
+-			dev_err(host->dev, "%s: cmd=%d; blocks=%d",
++			dev_dbg(host->dev, "%s: cmd=%d; blocks=%d",
+ 				__func__, mrq->cmd->opcode, data->blocks);
+-			dev_err(host->dev, "data_error=%d xfer_size=%d\n",
+-					(int)data->error, data->bytes_xfered);
++			dev_dbg(host->dev, "data_error=%d xfer_size=%d\n",
++				(int)data->error, data->bytes_xfered);
+ 		}
+ 
+ 		msdc_data_xfer_next(host, mrq, data);
+-- 
+1.8.1.1.dirty
+
