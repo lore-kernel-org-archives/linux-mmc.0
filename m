@@ -1,112 +1,97 @@
-From: Vinod Koul <vinod.koul@intel.com>
-Subject: Re: [RFC v02 04/15] dmaengine: edma: Add support for DMA filter
- mapping to slave devices
-Date: Tue, 1 Dec 2015 22:52:12 +0530
-Message-ID: <20151201172212.GC1696@localhost>
-References: <1448891145-10766-1-git-send-email-peter.ujfalusi@ti.com>
- <1448891145-10766-5-git-send-email-peter.ujfalusi@ti.com>
+From: Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>
+Subject: Re: [RFC v02 00/15] dmaengine: New 'universal' API for requesting channel
+Date: Tue, 01 Dec 2015 21:17:06 +0100
+Message-ID: <3124382.EhiMyQGKTA@wuerfel>
+References: <1448891145-10766-1-git-send-email-peter.ujfalusi@ti.com> <20151201165954.GA1696@localhost>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga09.intel.com ([134.134.136.24]:60556 "EHLO mga09.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1756073AbbLARUB (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 1 Dec 2015 12:20:01 -0500
-Content-Disposition: inline
-In-Reply-To: <1448891145-10766-5-git-send-email-peter.ujfalusi@ti.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7Bit
+Return-path: <linux-spi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <20151201165954.GA1696@localhost>
+Sender: linux-spi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Vinod Koul <vinod.koul-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Cc: Peter Ujfalusi <peter.ujfalusi-l0cyMroinI0@public.gmane.org>, andy.shevchenko-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, dmaengine-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, nsekhar-l0cyMroinI0@public.gmane.org, linux-spi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
-To: Peter Ujfalusi <peter.ujfalusi@ti.com>
-Cc: arnd@arndb.de, andy.shevchenko@gmail.com, linux-kernel@vger.kernel.org, dmaengine@vger.kernel.org, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, nsekhar@ti.com, linux-spi@vger.kernel.org
 
-On Mon, Nov 30, 2015 at 03:45:34PM +0200, Peter Ujfalusi wrote:
-> Add support for providing device to filter_fn mapping so client drivers
-> can switch to use the dma_request_chan() API.
-
-Any reason why we dont want to go with DT based only for edma here?
-
+On Tuesday 01 December 2015 22:29:54 Vinod Koul wrote:
+> On Mon, Nov 30, 2015 at 03:45:30PM +0200, Peter Ujfalusi wrote:
+> > channel via DT, ACPI or in case if the kernel booted in non DT/ACPI mode
+> > it will use a filter lookup table and retrieves the needed information from
+> > the dma_filter_map provided by the DMA drivers.
 > 
-> Signed-off-by: Peter Ujfalusi <peter.ujfalusi@ti.com>
-> ---
->  drivers/dma/edma.c                 | 24 ++++++++++++++++++++++++
->  include/linux/platform_data/edma.h |  5 +++++
->  2 files changed, 29 insertions(+)
-> 
-> diff --git a/drivers/dma/edma.c b/drivers/dma/edma.c
-> index 0675e268d577..386f8c9bd606 100644
-> --- a/drivers/dma/edma.c
-> +++ b/drivers/dma/edma.c
-> @@ -2098,6 +2098,8 @@ static struct dma_chan *of_edma_xlate(struct of_phandle_args *dma_spec,
->  }
->  #endif
->  
-> +static bool edma_filter_for_map(struct dma_chan *chan, void *param);
-> +
->  static int edma_probe(struct platform_device *pdev)
->  {
->  	struct edma_soc_info	*info = pdev->dev.platform_data;
-> @@ -2297,6 +2299,12 @@ static int edma_probe(struct platform_device *pdev)
->  		edma_set_chmap(&ecc->slave_chans[i], ecc->dummy_slot);
->  	}
->  
-> +	if (info->filter_map) {
-> +		ecc->dma_slave.filter_map.map = info->filter_map;
-> +		ecc->dma_slave.filter_map.mapcnt = info->filtercnt;
-> +		ecc->dma_slave.filter_map.filter_fn = edma_filter_for_map;
-> +	}
-> +
->  	ret = dma_async_device_register(&ecc->dma_slave);
->  	if (ret) {
->  		dev_err(dev, "slave ddev registration failed (%d)\n", ret);
-> @@ -2428,6 +2436,22 @@ bool edma_filter_fn(struct dma_chan *chan, void *param)
->  }
->  EXPORT_SYMBOL(edma_filter_fn);
->  
-> +static bool edma_filter_for_map(struct dma_chan *chan, void *param)
-> +{
-> +	bool match = false;
-> +
-> +	if (chan->device->dev->driver == &edma_driver.driver) {
-> +		struct edma_chan *echan = to_edma_chan(chan);
-> +		unsigned ch_req = (unsigned)param;
-> +		if (ch_req == echan->ch_num) {
-> +			/* The channel is going to be used as HW synchronized */
-> +			echan->hw_triggered = true;
-> +			match = true;
-> +		}
-> +	}
-> +	return match;
-> +}
-> +
->  static int edma_init(void)
->  {
->  	int ret;
-> diff --git a/include/linux/platform_data/edma.h b/include/linux/platform_data/edma.h
-> index e2878baeb90e..117a36d63840 100644
-> --- a/include/linux/platform_data/edma.h
-> +++ b/include/linux/platform_data/edma.h
-> @@ -59,6 +59,8 @@ struct edma_rsv_info {
->  	const s16	(*rsv_slots)[2];
->  };
->  
-> +struct dma_filter_map;
-> +
->  /* platform_data for EDMA driver */
->  struct edma_soc_info {
->  	/*
-> @@ -76,6 +78,9 @@ struct edma_soc_info {
->  
->  	s8	(*queue_priority_mapping)[2];
->  	const s16	(*xbar_chans)[2];
-> +
-> +	struct dma_filter_map *filter_map;
-> +	int filtercnt;
->  };
->  
->  #endif
-> -- 
-> 2.6.3
-> 
+> That sounds right, for the third case would the arch, driver or someone else
+> configure this?
 
--- 
-~Vinod
+The typical case is for the configuration to be defined in arch or platform
+code and passed down to the dmaengine driver.
+
+I just noticed that the text above (and probably the code too) should
+be changed so we always fall back to this. There are cases where the
+platform is booted with DT in principle, but the DMA engine does not
+(yet) use DT and still wants to be converted. I think we can easily
+handle that case by always trying this if the other methods fail.
+
+> > This legacy mode needs changes in platform code, in dmaengine drivers and
+> > finally the dmaengine user drivers can be converted:
+> 
+> Are you marking the current APIs as dericated in the end of this series
+
+I think we practically stopped marking things as deprecated in general.
+Per Linus decree, whenever we want to get rid of something, we should
+instead change all users in tree and then remove the API, expecting
+driver maintainers to do something just because you marked it as deprecated
+often doesn't work.
+
+I can help out converting a few platforms, maybe one interface at a time.
+This is what I see:
+
+arnd@wuerfel:~/arm-soc$ for i in dma_request_slave_channel_reason dma_request_slave_channel dma_request_slave_channel_compat dma_request_channel  ; do echo `git grep -wl $i drivers/  | grep -v drivers/dma | wc -l`\      $i ; done
+14      dma_request_slave_channel_reason
+27      dma_request_slave_channel
+25      dma_request_slave_channel_compat
+34      dma_request_channel
+
+I would probably leave the users of dma_request_channel() while converting
+the others, as that is still used by all the platforms that don't use any DT
+support.
+
+Changing dma_request_slave_channel_reason and dma_request_slave_channel is
+trivial, we can probably use coccinelle for that, as it does not require
+any platform changes. That brings us to the users of
+dma_request_slave_channel_compat, which currently includes these files:
+
+$ git grep -wl dma_request_slave_channel_compat drivers/ata/pata_pxa.c
+drivers/crypto/atmel-aes.c
+drivers/crypto/atmel-sha.c
+drivers/crypto/atmel-tdes.c
+drivers/crypto/omap-aes.c
+drivers/crypto/omap-des.c
+drivers/crypto/omap-sham.c
+drivers/media/platform/omap3isp/isphist.c
+drivers/mmc/host/davinci_mmc.c
+drivers/mmc/host/omap.c
+drivers/mmc/host/omap_hsmmc.c
+drivers/mmc/host/pxamci.c
+drivers/mmc/host/s3cmci.c
+drivers/mmc/host/tmio_mmc_dma.c
+drivers/mtd/nand/pxa3xx_nand.c
+drivers/net/ethernet/smsc/smc91x.c
+drivers/net/irda/pxaficp_ir.c
+drivers/spi/spi-omap2-mcspi.c
+drivers/spi/spi-pxa2xx-dma.c
+drivers/spi/spi-rspi.c
+drivers/spi/spi-s3c64xx.c
+drivers/spi/spi-sh-msiof.c
+drivers/tty/serial/8250/8250_dma.c
+drivers/tty/serial/samsung.c
+drivers/tty/serial/sh-sci.c
+include/linux/dmaengine.h
+
+In other words: arch/avr32 and arch/sh along with omap1, omap2, davinci, pxa, and s3c
+in terms of ARM platforms.
+
+	Arnd
+--
+To unsubscribe from this list: send the line "unsubscribe linux-spi" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
