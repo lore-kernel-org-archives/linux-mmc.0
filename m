@@ -1,49 +1,56 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: eMMC tuning fail issue
-Date: Tue, 1 Dec 2015 13:44:34 +0100
-Message-ID: <CAPDyKFqWzc_HYU2Hd4=W-sfyj3D6j30s6-iC=PaosMzoagCkag@mail.gmail.com>
-References: <BY1PR03MB138867E7C24E60866C690C129A0F0@BY1PR03MB1388.namprd03.prod.outlook.com>
+From: Andy Shevchenko <andy.shevchenko@gmail.com>
+Subject: Re: [RFC v02 01/15] dmaengine: core: Allow NULL mask pointer in __dma_device_satisfies_mask()
+Date: Tue, 1 Dec 2015 14:58:35 +0200
+Message-ID: <CAHp75Vfk_GAANRYdbHNxtCy-Ni18FppsKhPPX1X84v1Zu6JXvw@mail.gmail.com>
+References: <1448891145-10766-1-git-send-email-peter.ujfalusi@ti.com>
+	<1448891145-10766-2-git-send-email-peter.ujfalusi@ti.com>
+	<CAHp75VfY=NU4MG7q1w=oYdTiTr0dqtNTQU3UkEaL=tXPJADH5Q@mail.gmail.com>
+	<565D6CB1.8030808@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-yk0-f181.google.com ([209.85.160.181]:36853 "EHLO
-	mail-yk0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751997AbbLAMof (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 1 Dec 2015 07:44:35 -0500
-Received: by ykdr82 with SMTP id r82so5026204ykd.3
-        for <linux-mmc@vger.kernel.org>; Tue, 01 Dec 2015 04:44:34 -0800 (PST)
-In-Reply-To: <BY1PR03MB138867E7C24E60866C690C129A0F0@BY1PR03MB1388.namprd03.prod.outlook.com>
+Received: from mail-yk0-f170.google.com ([209.85.160.170]:36725 "EHLO
+	mail-yk0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754462AbbLAM6g (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 1 Dec 2015 07:58:36 -0500
+In-Reply-To: <565D6CB1.8030808@ti.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chen Bough <Haibo.Chen@freescale.com>
-Cc: "nsanders@chromium.org" <nsanders@chromium.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+To: Peter Ujfalusi <peter.ujfalusi@ti.com>
+Cc: Vinod Koul <vinod.koul@intel.com>, Arnd Bergmann <arnd@arndb.de>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, dmaengine <dmaengine@vger.kernel.org>, Linux OMAP Mailing List <linux-omap@vger.kernel.org>, linux-arm Mailing List <linux-arm-kernel@lists.infradead.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Sekhar Nori <nsekhar@ti.com>, linux-spi <linux-spi@vger.kernel.org>
 
-On 1 December 2015 at 09:41, Chen Bough <Haibo.Chen@freescale.com> wrote:
-> Hi,
+On Tue, Dec 1, 2015 at 11:47 AM, Peter Ujfalusi <peter.ujfalusi@ti.com> wrote:
+> On 11/30/2015 04:35 PM, Andy Shevchenko wrote:
+>> On Mon, Nov 30, 2015 at 3:45 PM, Peter Ujfalusi <peter.ujfalusi@ti.com> wrote:
+>>> Treat as true condition the case when the mask is NULL.
+>>
+>> What do you think about setting some default (all "on") mask when mask
+>> is not supplied?
 >
-> After
-> commit 197160d52e859575ff0ad1afd674ab2a825b9f83
-> Author: Nick Sanders <nsanders@chromium.org>
-> Date:   Tue May 6 18:52:38 2014 -0700
+> Probably rephrasing the commit message to say that when the mask is NULL it
+> means that the caller does not care about the capabilities of the dma device
+> thus return with true in such a case.
 >
->     mmc: sdhci: remove mdelay in eMMC tuning
+> We could also drop this patch and in private_candidate() :
 >
->
-> I find Micron eMMC HS200 and HS400 can't pass tuning on i.MX7D platform, here is the log:
->
-> [    2.835581] sdhci: Tuning procedure failed, falling back to fixed sampling clock
-> [    2.843071] mmc1: tuning execution failed
-> [    2.847104] mmc1: error -5 whilst initialising MMC card
->
-> When I revert this commit, issue gone.
+> -       if (!__dma_device_satisfies_mask(dev, mask)) {
+> +       if (mask && !__dma_device_satisfies_mask(dev, mask)) {
+>                 pr_debug("%s: wrong capabilities\n", __func__);
+>                 return NULL;
+>         }
 
-Thanks for reporting the problem!
+Between patch and above proposal I would choose the latter one.
 
-There's been a lot of changes regarding tuning since then, both to
-sdhci and the mmc core. So before I consider a revert for that patch,
-can you share on what baseline you are on!?
+>> I don't know for sure but there might be cases when you don't want
+>> literally *any* channel to satisfy.
+>
+> Or set DMA_SLAVE only in dma_request_chan()? What happens if we have cases
+> when we are able to request channel for memcpy via dma_request_chan()
+> (dedicated memcpy channel/DMA engine?) in that case we will have the SLAVE
+> set, but not MEMCPY, or any other variation we do not know yet?
 
-[...]
+Frankly, have no idea.
 
-Kind regards
-Uffe
+-- 
+With Best Regards,
+Andy Shevchenko
