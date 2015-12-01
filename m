@@ -1,75 +1,33 @@
-From: Arnd Bergmann <arnd@arndb.de>
-Subject: Re: [RFC v02 04/15] dmaengine: edma: Add support for DMA filter mapping to slave devices
-Date: Tue, 01 Dec 2015 11:14:29 +0100
-Message-ID: <4013235.sXCFUFy4j4@wuerfel>
-References: <1448891145-10766-1-git-send-email-peter.ujfalusi@ti.com> <7490116.jHcmUxB3Rf@wuerfel> <565D6F5D.3060603@ti.com>
+From: Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>
+Subject: Re: [RFC v02 00/15] dmaengine: New 'universal' API for requesting channel
+Date: Tue, 01 Dec 2015 11:15:38 +0100
+Message-ID: <2237139.FINhECNDsD@wuerfel>
+References: <1448891145-10766-1-git-send-email-peter.ujfalusi@ti.com> <13562653.8QgTG33tZS@wuerfel> <565D729F.2000104@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7Bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mout.kundenserver.de ([212.227.126.187]:56774 "EHLO
-	mout.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752314AbbLAKPC (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 1 Dec 2015 05:15:02 -0500
-In-Reply-To: <565D6F5D.3060603@ti.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-spi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <565D729F.2000104-l0cyMroinI0@public.gmane.org>
+Sender: linux-spi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Peter Ujfalusi <peter.ujfalusi-l0cyMroinI0@public.gmane.org>
+Cc: linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, vinod.koul-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, andy.shevchenko-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, nsekhar-l0cyMroinI0@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-spi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, dmaengine-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
-To: Peter Ujfalusi <peter.ujfalusi@ti.com>
-Cc: vinod.koul@intel.com, andy.shevchenko@gmail.com, linux-kernel@vger.kernel.org, dmaengine@vger.kernel.org, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, nsekhar@ti.com, linux-spi@vger.kernel.org
 
-On Tuesday 01 December 2015 11:58:53 Peter Ujfalusi wrote:
-> On 11/30/2015 04:11 PM, Arnd Bergmann wrote:
-> > On Monday 30 November 2015 15:45:34 Peter Ujfalusi wrote:
-> >> @@ -2428,6 +2436,22 @@ bool edma_filter_fn(struct dma_chan *chan, void *param)
-> >>  }
-> >>  EXPORT_SYMBOL(edma_filter_fn);
-> >>  
-> >> +static bool edma_filter_for_map(struct dma_chan *chan, void *param)
-> >> +{
-> >> +       bool match = false;
-> >> +
-> >> +       if (chan->device->dev->driver == &edma_driver.driver) {
-> >> +               struct edma_chan *echan = to_edma_chan(chan);
-> >> +               unsigned ch_req = (unsigned)param;
-> >> +               if (ch_req == echan->ch_num) {
-> >> +                       /* The channel is going to be used as HW synchronized */
-> >> +                       echan->hw_triggered = true;
-> >> +                       match = true;
-> >> +               }
-> >> +       }
-> >> +       return match;
-> >> +}
-> >> +
-> >>  static int edma_init(void)
-> >>
-> > 
-> > I don't see the difference between edma_filter_fn and edma_filter_for_map.
-> > Why do you need both?
+On Tuesday 01 December 2015 12:12:47 Peter Ujfalusi wrote:
 > 
-> edma_filter_fn:
->         unsigned ch_req = *(unsigned *)param;
+> We would need:
+>         { "da830-mmc.0", "rx", (void*)EDMA_CTLR_CHAN(0, 16) },
+>         { "da830-mmc.0", "tx", (void*)EDMA_CTLR_CHAN(0, 17) },
 > 
-> edma_filter_for_map:
->         unsigned ch_req = (unsigned)param;
+> as we need to cast the param.
+> It is still compact, but having to add the (void*) casting makes it a bit ugly.
 
-I see.
-
-> If I want to reuse the edma_filter_fn, I would need an unsigned array for the
-> eDMA event numbers in the board files to be able to provide the pointer to
-> each of them.
-
-How about this:
-
-#define EDMA_CTLR_CHANP(ctlr, chan)      ((const int[]){ [0] = ((ctlr) << 16) | (chan)})
-
-static struct dma_filter_map da830_edma_map[] = {
-         { "davinci-mcasp.0", "rx", EDMA_CTLR_CHANP(0, 0)},
-         { "davinci-mcasp.0", "tx", EDMA_CTLR_CHANP(0, 1)},
-         { "davinci-mcasp.1", "rx", EDMA_CTLR_CHANP(0, 2)},
-         ...
-};
-
-That way, you create an anonymous constant integer expression and the data
-points to that.
+Right, I forgot that, but the cast could also be part of EDMA_CTLR_CHAN(),
+and with the version I just posted in my other reply that part is solved
+as well.
 
 	Arnd
+--
+To unsubscribe from this list: send the line "unsubscribe linux-spi" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
