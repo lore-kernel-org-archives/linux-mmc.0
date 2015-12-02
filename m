@@ -1,37 +1,45 @@
-From: Arnd Bergmann <arnd@arndb.de>
-Subject: Re: [RFC v02 04/15] dmaengine: edma: Add support for DMA filter
- mapping to slave devices
-Date: Tue, 01 Dec 2015 21:20:28 +0100
-Message-ID: <1589780.JL62pLTh05@wuerfel>
-References: <1448891145-10766-1-git-send-email-peter.ujfalusi@ti.com>
- <1448891145-10766-5-git-send-email-peter.ujfalusi@ti.com>
- <20151201172212.GC1696@localhost>
+From: Chen Bough <Haibo.Chen@freescale.com>
+Subject: RE: eMMC tuning fail issue
+Date: Wed, 2 Dec 2015 01:32:12 +0000
+Message-ID: <BY1PR03MB1388B8651A016856752C99AA9A0E0@BY1PR03MB1388.namprd03.prod.outlook.com>
+References: <BY1PR03MB138867E7C24E60866C690C129A0F0@BY1PR03MB1388.namprd03.prod.outlook.com>
+ <CAPDyKFqWzc_HYU2Hd4=W-sfyj3D6j30s6-iC=PaosMzoagCkag@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <20151201172212.GC1696@localhost>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Vinod Koul <vinod.koul@intel.com>
-Cc: nsekhar@ti.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-spi@vger.kernel.org, andy.shevchenko@gmail.com, dmaengine@vger.kernel.org, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-bn1bn0101.outbound.protection.outlook.com ([157.56.110.101]:16832
+	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1755584AbbLBCGG (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 1 Dec 2015 21:06:06 -0500
+In-Reply-To: <CAPDyKFqWzc_HYU2Hd4=W-sfyj3D6j30s6-iC=PaosMzoagCkag@mail.gmail.com>
+Content-Language: en-US
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: "nsanders@chromium.org" <nsanders@chromium.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-On Tuesday 01 December 2015 22:52:12 Vinod Koul wrote:
-> On Mon, Nov 30, 2015 at 03:45:34PM +0200, Peter Ujfalusi wrote:
-> > Add support for providing device to filter_fn mapping so client drivers
-> > can switch to use the dma_request_chan() API.
-> 
-> Any reason why we dont want to go with DT based only for edma here?
-
-I think the OMAP2 based platforms using edma are all DT-only, but mach-davinci
-would need a lot of work for that.
-
-	Arnd
+DQo+IC0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQo+IEZyb206IFVsZiBIYW5zc29uIFttYWls
+dG86dWxmLmhhbnNzb25AbGluYXJvLm9yZ10NCj4gU2VudDogVHVlc2RheSwgRGVjZW1iZXIgMDEs
+IDIwMTUgODo0NSBQTQ0KPiBUbzogQ2hlbiBIYWliby1CNTE0MjENCj4gQ2M6IG5zYW5kZXJzQGNo
+cm9taXVtLm9yZzsgbGludXgtbW1jQHZnZXIua2VybmVsLm9yZw0KPiBTdWJqZWN0OiBSZTogZU1N
+QyB0dW5pbmcgZmFpbCBpc3N1ZQ0KPiANCj4gT24gMSBEZWNlbWJlciAyMDE1IGF0IDA5OjQxLCBD
+aGVuIEJvdWdoIDxIYWliby5DaGVuQGZyZWVzY2FsZS5jb20+IHdyb3RlOg0KPiA+IEhpLA0KPiA+
+DQo+ID4gQWZ0ZXINCj4gPiBjb21taXQgMTk3MTYwZDUyZTg1OTU3NWZmMGFkMWFmZDY3NGFiMmE4
+MjViOWY4Mw0KPiA+IEF1dGhvcjogTmljayBTYW5kZXJzIDxuc2FuZGVyc0BjaHJvbWl1bS5vcmc+
+DQo+ID4gRGF0ZTogICBUdWUgTWF5IDYgMTg6NTI6MzggMjAxNCAtMDcwMA0KPiA+DQo+ID4gICAg
+IG1tYzogc2RoY2k6IHJlbW92ZSBtZGVsYXkgaW4gZU1NQyB0dW5pbmcNCj4gPg0KPiA+DQo+ID4g
+SSBmaW5kIE1pY3JvbiBlTU1DIEhTMjAwIGFuZCBIUzQwMCBjYW4ndCBwYXNzIHR1bmluZyBvbiBp
+Lk1YN0QgcGxhdGZvcm0sDQo+IGhlcmUgaXMgdGhlIGxvZzoNCj4gPg0KPiA+IFsgICAgMi44MzU1
+ODFdIHNkaGNpOiBUdW5pbmcgcHJvY2VkdXJlIGZhaWxlZCwgZmFsbGluZyBiYWNrIHRvIGZpeGVk
+DQo+IHNhbXBsaW5nIGNsb2NrDQo+ID4gWyAgICAyLjg0MzA3MV0gbW1jMTogdHVuaW5nIGV4ZWN1
+dGlvbiBmYWlsZWQNCj4gPiBbICAgIDIuODQ3MTA0XSBtbWMxOiBlcnJvciAtNSB3aGlsc3QgaW5p
+dGlhbGlzaW5nIE1NQyBjYXJkDQo+ID4NCj4gPiBXaGVuIEkgcmV2ZXJ0IHRoaXMgY29tbWl0LCBp
+c3N1ZSBnb25lLg0KPiANCj4gVGhhbmtzIGZvciByZXBvcnRpbmcgdGhlIHByb2JsZW0hDQo+IA0K
+PiBUaGVyZSdzIGJlZW4gYSBsb3Qgb2YgY2hhbmdlcyByZWdhcmRpbmcgdHVuaW5nIHNpbmNlIHRo
+ZW4sIGJvdGggdG8gc2RoY2kNCj4gYW5kIHRoZSBtbWMgY29yZS4gU28gYmVmb3JlIEkgY29uc2lk
+ZXIgYSByZXZlcnQgZm9yIHRoYXQgcGF0Y2gsIGNhbiB5b3UNCj4gc2hhcmUgb24gd2hhdCBiYXNl
+bGluZSB5b3UgYXJlIG9uIT8NCg0KSSBiYXNlZCBvbiB0aGUgbGF0ZXN0IExpbnV4LW5leHQsIHY0
+LjQtcmMyLg0KDQoNCkJlc3QgcmVnYXJkcw0KSGFpYm8gQ2hlbg0KDQo+IA0KPiBbLi4uXQ0KPiAN
+Cj4gS2luZCByZWdhcmRzDQo+IFVmZmUNCg==
