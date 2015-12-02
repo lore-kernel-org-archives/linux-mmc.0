@@ -1,45 +1,81 @@
-From: Chen Bough <Haibo.Chen@freescale.com>
-Subject: RE: eMMC tuning fail issue
-Date: Wed, 2 Dec 2015 01:32:12 +0000
-Message-ID: <BY1PR03MB1388B8651A016856752C99AA9A0E0@BY1PR03MB1388.namprd03.prod.outlook.com>
+From: Nick Sanders <nsanders@chromium.org>
+Subject: Re: eMMC tuning fail issue
+Date: Tue, 1 Dec 2015 18:44:01 -0800
+Message-ID: <CANvYXzis+yK=vaDQ8WdiqJT=5ZxiUXE0jkCc3Q5MSMxUmdG80Q@mail.gmail.com>
 References: <BY1PR03MB138867E7C24E60866C690C129A0F0@BY1PR03MB1388.namprd03.prod.outlook.com>
- <CAPDyKFqWzc_HYU2Hd4=W-sfyj3D6j30s6-iC=PaosMzoagCkag@mail.gmail.com>
+ <CAPDyKFqWzc_HYU2Hd4=W-sfyj3D6j30s6-iC=PaosMzoagCkag@mail.gmail.com> <BY1PR03MB1388B8651A016856752C99AA9A0E0@BY1PR03MB1388.namprd03.prod.outlook.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-bn1bn0101.outbound.protection.outlook.com ([157.56.110.101]:16832
-	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1755584AbbLBCGG (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 1 Dec 2015 21:06:06 -0500
-In-Reply-To: <CAPDyKFqWzc_HYU2Hd4=W-sfyj3D6j30s6-iC=PaosMzoagCkag@mail.gmail.com>
-Content-Language: en-US
+Received: from mail-oi0-f45.google.com ([209.85.218.45]:34499 "EHLO
+	mail-oi0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1757244AbbLBCoV (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 1 Dec 2015 21:44:21 -0500
+Received: by oies6 with SMTP id s6so16889122oie.1
+        for <linux-mmc@vger.kernel.org>; Tue, 01 Dec 2015 18:44:21 -0800 (PST)
+In-Reply-To: <BY1PR03MB1388B8651A016856752C99AA9A0E0@BY1PR03MB1388.namprd03.prod.outlook.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: "nsanders@chromium.org" <nsanders@chromium.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+To: Chen Bough <Haibo.Chen@freescale.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-DQo+IC0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQo+IEZyb206IFVsZiBIYW5zc29uIFttYWls
-dG86dWxmLmhhbnNzb25AbGluYXJvLm9yZ10NCj4gU2VudDogVHVlc2RheSwgRGVjZW1iZXIgMDEs
-IDIwMTUgODo0NSBQTQ0KPiBUbzogQ2hlbiBIYWliby1CNTE0MjENCj4gQ2M6IG5zYW5kZXJzQGNo
-cm9taXVtLm9yZzsgbGludXgtbW1jQHZnZXIua2VybmVsLm9yZw0KPiBTdWJqZWN0OiBSZTogZU1N
-QyB0dW5pbmcgZmFpbCBpc3N1ZQ0KPiANCj4gT24gMSBEZWNlbWJlciAyMDE1IGF0IDA5OjQxLCBD
-aGVuIEJvdWdoIDxIYWliby5DaGVuQGZyZWVzY2FsZS5jb20+IHdyb3RlOg0KPiA+IEhpLA0KPiA+
-DQo+ID4gQWZ0ZXINCj4gPiBjb21taXQgMTk3MTYwZDUyZTg1OTU3NWZmMGFkMWFmZDY3NGFiMmE4
-MjViOWY4Mw0KPiA+IEF1dGhvcjogTmljayBTYW5kZXJzIDxuc2FuZGVyc0BjaHJvbWl1bS5vcmc+
-DQo+ID4gRGF0ZTogICBUdWUgTWF5IDYgMTg6NTI6MzggMjAxNCAtMDcwMA0KPiA+DQo+ID4gICAg
-IG1tYzogc2RoY2k6IHJlbW92ZSBtZGVsYXkgaW4gZU1NQyB0dW5pbmcNCj4gPg0KPiA+DQo+ID4g
-SSBmaW5kIE1pY3JvbiBlTU1DIEhTMjAwIGFuZCBIUzQwMCBjYW4ndCBwYXNzIHR1bmluZyBvbiBp
-Lk1YN0QgcGxhdGZvcm0sDQo+IGhlcmUgaXMgdGhlIGxvZzoNCj4gPg0KPiA+IFsgICAgMi44MzU1
-ODFdIHNkaGNpOiBUdW5pbmcgcHJvY2VkdXJlIGZhaWxlZCwgZmFsbGluZyBiYWNrIHRvIGZpeGVk
-DQo+IHNhbXBsaW5nIGNsb2NrDQo+ID4gWyAgICAyLjg0MzA3MV0gbW1jMTogdHVuaW5nIGV4ZWN1
-dGlvbiBmYWlsZWQNCj4gPiBbICAgIDIuODQ3MTA0XSBtbWMxOiBlcnJvciAtNSB3aGlsc3QgaW5p
-dGlhbGlzaW5nIE1NQyBjYXJkDQo+ID4NCj4gPiBXaGVuIEkgcmV2ZXJ0IHRoaXMgY29tbWl0LCBp
-c3N1ZSBnb25lLg0KPiANCj4gVGhhbmtzIGZvciByZXBvcnRpbmcgdGhlIHByb2JsZW0hDQo+IA0K
-PiBUaGVyZSdzIGJlZW4gYSBsb3Qgb2YgY2hhbmdlcyByZWdhcmRpbmcgdHVuaW5nIHNpbmNlIHRo
-ZW4sIGJvdGggdG8gc2RoY2kNCj4gYW5kIHRoZSBtbWMgY29yZS4gU28gYmVmb3JlIEkgY29uc2lk
-ZXIgYSByZXZlcnQgZm9yIHRoYXQgcGF0Y2gsIGNhbiB5b3UNCj4gc2hhcmUgb24gd2hhdCBiYXNl
-bGluZSB5b3UgYXJlIG9uIT8NCg0KSSBiYXNlZCBvbiB0aGUgbGF0ZXN0IExpbnV4LW5leHQsIHY0
-LjQtcmMyLg0KDQoNCkJlc3QgcmVnYXJkcw0KSGFpYm8gQ2hlbg0KDQo+IA0KPiBbLi4uXQ0KPiAN
-Cj4gS2luZCByZWdhcmRzDQo+IFVmZmUNCg==
+This code is active on all Chromebooks with eMMC without an issue, and
+the eMMC spec doesn't require a delay here. So I don't think it can be
+a common problem. What eMMC model are you using specifically?
+
+Also, this change fixes a problem with audio glitching on systems with
+runtime pm or active retuning due to very long read latency caused by
+40ms of mdelay in the kernel read path. Runtime pm sets the eMMC to
+sleep if it has not been used in a short time, so intermittent reads
+always go though the retuning path.
+
+Thanks,
+  Nick
+
+On Tue, Dec 1, 2015 at 5:32 PM, Chen Bough <Haibo.Chen@freescale.com> wrote:
+>
+>> -----Original Message-----
+>> From: Ulf Hansson [mailto:ulf.hansson@linaro.org]
+>> Sent: Tuesday, December 01, 2015 8:45 PM
+>> To: Chen Haibo-B51421
+>> Cc: nsanders@chromium.org; linux-mmc@vger.kernel.org
+>> Subject: Re: eMMC tuning fail issue
+>>
+>> On 1 December 2015 at 09:41, Chen Bough <Haibo.Chen@freescale.com> wrote:
+>> > Hi,
+>> >
+>> > After
+>> > commit 197160d52e859575ff0ad1afd674ab2a825b9f83
+>> > Author: Nick Sanders <nsanders@chromium.org>
+>> > Date:   Tue May 6 18:52:38 2014 -0700
+>> >
+>> >     mmc: sdhci: remove mdelay in eMMC tuning
+>> >
+>> >
+>> > I find Micron eMMC HS200 and HS400 can't pass tuning on i.MX7D platform,
+>> here is the log:
+>> >
+>> > [    2.835581] sdhci: Tuning procedure failed, falling back to fixed
+>> sampling clock
+>> > [    2.843071] mmc1: tuning execution failed
+>> > [    2.847104] mmc1: error -5 whilst initialising MMC card
+>> >
+>> > When I revert this commit, issue gone.
+>>
+>> Thanks for reporting the problem!
+>>
+>> There's been a lot of changes regarding tuning since then, both to sdhci
+>> and the mmc core. So before I consider a revert for that patch, can you
+>> share on what baseline you are on!?
+>
+> I based on the latest Linux-next, v4.4-rc2.
+>
+>
+> Best regards
+> Haibo Chen
+>
+>>
+>> [...]
+>>
+>> Kind regards
+>> Uffe
