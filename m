@@ -1,59 +1,66 @@
-From: Arnd Bergmann <arnd@arndb.de>
-Subject: Re: [RFC v02 00/15] dmaengine: New 'universal' API for requesting channel
-Date: Wed, 02 Dec 2015 09:23:59 +0100
-Message-ID: <2174709.hFEDv974P4@wuerfel>
-References: <1448891145-10766-1-git-send-email-peter.ujfalusi@ti.com> <3124382.EhiMyQGKTA@wuerfel> <20151202045209.GB1854@localhost>
+From: Peter Ujfalusi <peter.ujfalusi-l0cyMroinI0@public.gmane.org>
+Subject: Re: [RFC v02 03/15] dmaengine: core: Introduce new, universal API to
+ request a channel
+Date: Wed, 2 Dec 2015 12:00:42 +0200
+Message-ID: <565EC14A.6020502@ti.com>
+References: <1448891145-10766-1-git-send-email-peter.ujfalusi@ti.com>
+ <1448891145-10766-4-git-send-email-peter.ujfalusi@ti.com>
+ <20151130155142.GZ2517@atomide.com> <565D56A0.2090204@ti.com>
+ <20151201170031.GT23396@atomide.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7Bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mout.kundenserver.de ([212.227.126.133]:52451 "EHLO
-	mout.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756088AbbLBIYd (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 2 Dec 2015 03:24:33 -0500
-In-Reply-To: <20151202045209.GB1854@localhost>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-spi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <20151201170031.GT23396-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>
+Sender: linux-spi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>
+Cc: vinod.koul-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, arnd-r2nGTMty4D4@public.gmane.org, andy.shevchenko-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, nsekhar-l0cyMroinI0@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-spi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, dmaengine-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
-To: Vinod Koul <vinod.koul@intel.com>
-Cc: Peter Ujfalusi <peter.ujfalusi@ti.com>, andy.shevchenko@gmail.com, linux-kernel@vger.kernel.org, dmaengine@vger.kernel.org, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, nsekhar@ti.com, linux-spi@vger.kernel.org
 
-On Wednesday 02 December 2015 10:22:09 Vinod Koul wrote:
-> > 
-> > > > This legacy mode needs changes in platform code, in dmaengine drivers and
-> > > > finally the dmaengine user drivers can be converted:
-> > > 
-> > > Are you marking the current APIs as dericated in the end of this series
-> > 
-> > I think we practically stopped marking things as deprecated in general.
-> > Per Linus decree, whenever we want to get rid of something, we should
-> > instead change all users in tree and then remove the API, expecting
-> > driver maintainers to do something just because you marked it as deprecated
-> > often doesn't work.
-> 
-> Yes but while we do conversion we don't know if new users get added which use
-> old API..
+On 12/01/2015 07:00 PM, Tony Lindgren wrote:
+>> I see. The dm81xx basically am33xx/am43xx?
+>=20
+> Yeah similar to am33xx with different clocks and with a bunch of acce=
+lerators.
+>=20
+>> Actually I would prefer to use the dmaengine's event router framewor=
+k and we
+>> do have support for the am33xx/am43xx type of crossbar already imple=
+mented.
+>> I'm going to resend the DTS series for am33xx/am43xx to convert them=
+ to use
+>> the new DT bindings along with the dma event router support:
+>> https://www.mail-archive.com/linux-omap%40vger.kernel.org/msg120828.=
+html
+>=20
+> OK yes a dmaengine event router works too when available. Good to see
+> them as separate driver instances now :) Are only the dts changes mis=
+sing
+> now?
+>=20
+> FYI, when we have separate interconnect driver instances, we don't wa=
+nt to
+> and cannot tweak registers outside the interconnect instance because =
+of them
+> being in separate clock and/or power domains :p
 
-We probably don't need to worry about new users of dma_request_channel(),
-as we don't add new ARM platforms without DT, and other architectures
-don't add a lot of new platforms. Similarly, I don't expect a whole lot
-of dma_request_slave_channel_compat() users, because the conversion from
-board files to DT based booting has slowed down a lot after most of the
-actively maintained platforms are done with it.
+What does this mean in practice? We can not touch these registers? The =
+DMA
+crossbar is a separate driver from the eDMA driver.
 
-If you do a one-line patch to add dma_request_chan() as an alias for
-dma_request_slave_channel_reason() now, we can probably convert most
-users of dma_request_slave_channel() and dma_request_slave_channel_reason()
-to dma_request_chan() in the next merge window and do a patch to
-replace the few remaining ones and remove the API one merge window later.
+> In any case, it seems there's no harm using pinctrl for evtmux on dm8=
+1xx
+> until the event router is available. It's currently only needed on th=
+e
+> t410 emmc that I'm aware of :)
 
-If wewant to stage out the conversion of the
-dma_request_slave_channel_compat() and dma_request_channel() similarly,
-it would be good to have all the interface changes for the dmaengine
-core basically in place, so we can start to convert the platforms
-independently for the 4.5 merge window without having a dependency on
-dmaengine patches. It's probably best to not convert a slave driver
-away from dma_request_channel() until the dma map has been created
-for all platforms using that driver, again to avoid having too many
-dependencies.
+The AM33xx/AM43xx DMA crossbar support is in 4.4 already:
+42dbdcc6bf96 dmaengine: ti-dma-crossbar: Add support for crossbar on AM=
+33xx/AM43xx
 
-	Arnd
+--=20
+P=E9ter
+--
+To unsubscribe from this list: send the line "unsubscribe linux-spi" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
