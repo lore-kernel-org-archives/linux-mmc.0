@@ -1,65 +1,66 @@
-From: Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>
-Subject: Re: [RFC v02 00/15] dmaengine: New 'universal' API for requesting channel
-Date: Wed, 02 Dec 2015 14:38:39 +0100
-Message-ID: <15116008.0PghG2Imaa@wuerfel>
-References: <1448891145-10766-1-git-send-email-peter.ujfalusi@ti.com> <103520159.g0xhtFsXUi@wuerfel> <565ECD3F.3070500@ti.com>
+From: Peter Ujfalusi <peter.ujfalusi@ti.com>
+Subject: [RFC v03 06/15] ARM: davinci: dm355: Add dma_filter_map to edma
+Date: Wed, 2 Dec 2015 15:59:16 +0200
+Message-ID: <1449064765-27427-7-git-send-email-peter.ujfalusi@ti.com>
+References: <1449064765-27427-1-git-send-email-peter.ujfalusi@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7Bit
-Return-path: <linux-spi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <565ECD3F.3070500-l0cyMroinI0@public.gmane.org>
-Sender: linux-spi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Peter Ujfalusi <peter.ujfalusi-l0cyMroinI0@public.gmane.org>
-Cc: Andy Shevchenko <andy.shevchenko-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Vinod Koul <vinod.koul-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, dmaengine <dmaengine-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux OMAP Mailing List <linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-arm Mailing List <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Sekhar Nori <nsekhar-l0cyMroinI0@public.gmane.org>, linux-spi <linux-spi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Type: text/plain
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1449064765-27427-1-git-send-email-peter.ujfalusi@ti.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: vinod.koul@intel.com, arnd@arndb.de, andy.shevchenko@gmail.com
+Cc: linux-kernel@vger.kernel.org, dmaengine@vger.kernel.org, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, nsekhar@ti.com, linux-spi@vger.kernel.org, tony@atomide.com
 List-Id: linux-mmc@vger.kernel.org
 
-On Wednesday 02 December 2015 12:51:43 Peter Ujfalusi wrote:
-> On 12/01/2015 04:24 PM, Arnd Bergmann wrote:
-> > On Tuesday 01 December 2015 15:45:32 Peter Ujfalusi wrote:
-> >>>> static struct dma_filter_map da830_edma_map[] = {
-> >>>>         DMA_FILTER_ENTRY("davinci-mcasp.0", "rx", EDMA_CTLR_CHAN(0, 0)),
-> >>>>         DMA_FILTER_ENTRY("davinci-mcasp.0", "tx", EDMA_CTLR_CHAN(0, 1)),
-> >>>>         DMA_FILTER_ENTRY("davinci-mcasp.1", "rx", EDMA_CTLR_CHAN(0, 2)),
-> >>>>         DMA_FILTER_ENTRY("davinci-mcasp.1", "tx", EDMA_CTLR_CHAN(0, 3)),
-> >>>>         DMA_FILTER_ENTRY("davinci-mcasp.2", "rx", EDMA_CTLR_CHAN(0, 4)),
-> >>>>         DMA_FILTER_ENTRY("davinci-mcasp.2", "tx", EDMA_CTLR_CHAN(0, 5)),
-> >>>>         DMA_FILTER_ENTRY("spi_davinci.0", "rx", EDMA_CTLR_CHAN(0, 14)),
-> >>>>         DMA_FILTER_ENTRY("spi_davinci.0", "tx", EDMA_CTLR_CHAN(0, 15)),
-> >>>>         DMA_FILTER_ENTRY("da830-mmc.0", "rx", EDMA_CTLR_CHAN(0, 16)),
-> >>>>         DMA_FILTER_ENTRY("da830-mmc.0", "tx", EDMA_CTLR_CHAN(0, 17)),
-> >>>>         DMA_FILTER_ENTRY("spi_davinci.1", "rx", EDMA_CTLR_CHAN(0, 18)),
-> >>>>         DMA_FILTER_ENTRY("spi_davinci.1", "tx", EDMA_CTLR_CHAN(0, 19)),
-> >>>
-> >>> Does this ".2" and so prevent driver to use auto ID for platform devices?
-> >>
-> >> Yes, as all the infra around the traditional board files with platform_device
-> >> creation does. Ideally we could have 'phandle' pointing from this table to the
-> >> device in question (or other way around), but I'm not aware of anything we can
-> >> use.
-> > 
-> > I was thinking that we could use a pointer to the device structure, but
-> > if you have that, you can also just read the name from it.
-> 
-> Hrm to have pdev pointer instead of the devname string? In the core we could
-> get the pdev from the caller's device with to_platform_device(dev) and simply
-> compare the pointers...
-> 
-> One of the issue I see (in mach-davinci and mach-omap1/2) is that the pdevs
-> are scattered around in the c files so gathering the pointers to a place where
-> we can see them to be able to use it in the dma_filter_map is not going to be
-> light weight task.
-> Furthermore we have the omap_hwmod for OMAP2+ which creates the actual pdevs
-> and resources from the omap_hwmod data structures so getting out the DMA event
-> numbers there is not going to be easy either...
-> 
-> I'll hold back the RFC v3 to see if we should switch to pdev pointer or stay
-> with the devname strings here.
+Provide the dma_filter_map to edma which will allow us to move the drivers
+to the new, simpler dmaengine API and we can remove the DMA resources also
+for the devices.
 
-Sorry, what I meant to say above is that I had already concluded that using
-device pointers was a bad idea and we should stay with names.
+Signed-off-by: Peter Ujfalusi <peter.ujfalusi@ti.com>
+---
+ arch/arm/mach-davinci/dm355.c | 20 ++++++++++++++++++++
+ 1 file changed, 20 insertions(+)
 
-	Arnd
---
-To unsubscribe from this list: send the line "unsubscribe linux-spi" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+diff --git a/arch/arm/mach-davinci/dm355.c b/arch/arm/mach-davinci/dm355.c
+index 609950b8c191..ee7656fa0c52 100644
+--- a/arch/arm/mach-davinci/dm355.c
++++ b/arch/arm/mach-davinci/dm355.c
+@@ -13,6 +13,7 @@
+ #include <linux/serial_8250.h>
+ #include <linux/platform_device.h>
+ #include <linux/dma-mapping.h>
++#include <linux/dmaengine.h>
+ #include <linux/spi/spi.h>
+ #include <linux/platform_data/edma.h>
+ #include <linux/platform_data/gpio-davinci.h>
+@@ -576,9 +577,28 @@ static s8 queue_priority_mapping[][2] = {
+ 	{-1, -1},
+ };
+ 
++static const struct dma_filter_map da355_edma_map[] = {
++	{ "davinci-mcbsp.0", "tx", EDMA_FILTER_PARAM(0, 2) },
++	{ "davinci-mcbsp.0", "rx", EDMA_FILTER_PARAM(0, 3) },
++	{ "davinci-mcbsp.1", "tx", EDMA_FILTER_PARAM(0, 8) },
++	{ "davinci-mcbsp.1", "rx", EDMA_FILTER_PARAM(0, 9) },
++	{ "spi_davinci.2", "tx", EDMA_FILTER_PARAM(0, 10) },
++	{ "spi_davinci.2", "rx", EDMA_FILTER_PARAM(0, 11) },
++	{ "spi_davinci.1", "tx", EDMA_FILTER_PARAM(0, 14) },
++	{ "spi_davinci.1", "rx", EDMA_FILTER_PARAM(0, 15) },
++	{ "spi_davinci.0", "tx", EDMA_FILTER_PARAM(0, 16) },
++	{ "spi_davinci.0", "rx", EDMA_FILTER_PARAM(0, 17) },
++	{ "dm6441-mmc.0", "rx", EDMA_FILTER_PARAM(0, 26) },
++	{ "dm6441-mmc.0", "tx", EDMA_FILTER_PARAM(0, 27) },
++	{ "dm6441-mmc.1", "rx", EDMA_FILTER_PARAM(0, 30) },
++	{ "dm6441-mmc.1", "tx", EDMA_FILTER_PARAM(0, 31) },
++};
++
+ static struct edma_soc_info dm355_edma_pdata = {
+ 	.queue_priority_mapping	= queue_priority_mapping,
+ 	.default_queue		= EVENTQ_1,
++	.slave_map		= da355_edma_map,
++	.slavecnt		= ARRAY_SIZE(da355_edma_map),
+ };
+ 
+ static struct resource edma_resources[] = {
+-- 
+2.6.3
