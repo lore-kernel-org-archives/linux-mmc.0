@@ -1,71 +1,59 @@
-From: Chen Bough <Haibo.Chen@freescale.com>
-Subject: RE: eMMC tuning fail issue
-Date: Wed, 2 Dec 2015 07:55:18 +0000
-Message-ID: <BY1PR03MB1388C29B0CFF36387C9528679A0E0@BY1PR03MB1388.namprd03.prod.outlook.com>
-References: <BY1PR03MB138867E7C24E60866C690C129A0F0@BY1PR03MB1388.namprd03.prod.outlook.com>
- <CAPDyKFqWzc_HYU2Hd4=W-sfyj3D6j30s6-iC=PaosMzoagCkag@mail.gmail.com>
- <BY1PR03MB1388B8651A016856752C99AA9A0E0@BY1PR03MB1388.namprd03.prod.outlook.com>
- <CANvYXzis+yK=vaDQ8WdiqJT=5ZxiUXE0jkCc3Q5MSMxUmdG80Q@mail.gmail.com>
+From: Arnd Bergmann <arnd@arndb.de>
+Subject: Re: [RFC v02 00/15] dmaengine: New 'universal' API for requesting channel
+Date: Wed, 02 Dec 2015 09:23:59 +0100
+Message-ID: <2174709.hFEDv974P4@wuerfel>
+References: <1448891145-10766-1-git-send-email-peter.ujfalusi@ti.com> <3124382.EhiMyQGKTA@wuerfel> <20151202045209.GB1854@localhost>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7Bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-by2on0120.outbound.protection.outlook.com ([207.46.100.120]:47660
-	"EHLO na01-by2-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1752798AbbLBHzU (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 2 Dec 2015 02:55:20 -0500
-In-Reply-To: <CANvYXzis+yK=vaDQ8WdiqJT=5ZxiUXE0jkCc3Q5MSMxUmdG80Q@mail.gmail.com>
-Content-Language: en-US
+Received: from mout.kundenserver.de ([212.227.126.133]:52451 "EHLO
+	mout.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756088AbbLBIYd (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 2 Dec 2015 03:24:33 -0500
+In-Reply-To: <20151202045209.GB1854@localhost>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Nick Sanders <nsanders@chromium.org>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+To: Vinod Koul <vinod.koul@intel.com>
+Cc: Peter Ujfalusi <peter.ujfalusi@ti.com>, andy.shevchenko@gmail.com, linux-kernel@vger.kernel.org, dmaengine@vger.kernel.org, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, nsekhar@ti.com, linux-spi@vger.kernel.org
 
-SGkgTmljaywNCg0KVGhlIGVNTUMgSSB0ZXN0IGlzIE1pY3JvbiBNVEZDOEdBQ0FFQU0tMU0gV1Qs
-IEkgd2lsbCBhbHNvIHJlcG9ydCB0aGlzIGlzc3VlIHRvIE1pY3JvbiwgdG8gY29uZmlybSB3aGV0
-aGVyIGl0IGlzIHRoZWlyIGxpbWl0YXRpb24uDQpCeSB0aGUgd2F5LCAgd2hhdCBpcyB5b3VyIGVN
-TUMgYnJhbmQ/IA0KDQoNCkhpIFVsZiwNCg0KRG8geW91IHJlY2VpdmUgYW55IHNpbWlsYXIgaXNz
-dWUgcmVwb3J0IG9uIG90aGVyIGVNTUMgdmVuZG9yPw0KDQoNCkJlc3QgUmVnYXJkcw0KSGFpYm8g
-Q2hlbg0KDQoNCg0KPiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBuc2FuZGVy
-c0Bnb29nbGUuY29tIFttYWlsdG86bnNhbmRlcnNAZ29vZ2xlLmNvbV0gT24gQmVoYWxmIE9mIE5p
-Y2sNCj4gU2FuZGVycw0KPiBTZW50OiBXZWRuZXNkYXksIERlY2VtYmVyIDAyLCAyMDE1IDEwOjQ0
-IEFNDQo+IFRvOiBDaGVuIEhhaWJvLUI1MTQyMQ0KPiBDYzogVWxmIEhhbnNzb247IGxpbnV4LW1t
-Y0B2Z2VyLmtlcm5lbC5vcmcNCj4gU3ViamVjdDogUmU6IGVNTUMgdHVuaW5nIGZhaWwgaXNzdWUN
-Cj4gDQo+IFRoaXMgY29kZSBpcyBhY3RpdmUgb24gYWxsIENocm9tZWJvb2tzIHdpdGggZU1NQyB3
-aXRob3V0IGFuIGlzc3VlLCBhbmQNCj4gdGhlIGVNTUMgc3BlYyBkb2Vzbid0IHJlcXVpcmUgYSBk
-ZWxheSBoZXJlLiBTbyBJIGRvbid0IHRoaW5rIGl0IGNhbiBiZSBhDQo+IGNvbW1vbiBwcm9ibGVt
-LiBXaGF0IGVNTUMgbW9kZWwgYXJlIHlvdSB1c2luZyBzcGVjaWZpY2FsbHk/DQo+IA0KPiBBbHNv
-LCB0aGlzIGNoYW5nZSBmaXhlcyBhIHByb2JsZW0gd2l0aCBhdWRpbyBnbGl0Y2hpbmcgb24gc3lz
-dGVtcyB3aXRoDQo+IHJ1bnRpbWUgcG0gb3IgYWN0aXZlIHJldHVuaW5nIGR1ZSB0byB2ZXJ5IGxv
-bmcgcmVhZCBsYXRlbmN5IGNhdXNlZCBieQ0KPiA0MG1zIG9mIG1kZWxheSBpbiB0aGUga2VybmVs
-IHJlYWQgcGF0aC4gUnVudGltZSBwbSBzZXRzIHRoZSBlTU1DIHRvIHNsZWVwDQo+IGlmIGl0IGhh
-cyBub3QgYmVlbiB1c2VkIGluIGEgc2hvcnQgdGltZSwgc28gaW50ZXJtaXR0ZW50IHJlYWRzIGFs
-d2F5cyBnbw0KPiB0aG91Z2ggdGhlIHJldHVuaW5nIHBhdGguDQo+IA0KPiBUaGFua3MsDQo+ICAg
-Tmljaw0KPiANCj4gT24gVHVlLCBEZWMgMSwgMjAxNSBhdCA1OjMyIFBNLCBDaGVuIEJvdWdoIDxI
-YWliby5DaGVuQGZyZWVzY2FsZS5jb20+DQo+IHdyb3RlOg0KPiA+DQo+ID4+IC0tLS0tT3JpZ2lu
-YWwgTWVzc2FnZS0tLS0tDQo+ID4+IEZyb206IFVsZiBIYW5zc29uIFttYWlsdG86dWxmLmhhbnNz
-b25AbGluYXJvLm9yZ10NCj4gPj4gU2VudDogVHVlc2RheSwgRGVjZW1iZXIgMDEsIDIwMTUgODo0
-NSBQTQ0KPiA+PiBUbzogQ2hlbiBIYWliby1CNTE0MjENCj4gPj4gQ2M6IG5zYW5kZXJzQGNocm9t
-aXVtLm9yZzsgbGludXgtbW1jQHZnZXIua2VybmVsLm9yZw0KPiA+PiBTdWJqZWN0OiBSZTogZU1N
-QyB0dW5pbmcgZmFpbCBpc3N1ZQ0KPiA+Pg0KPiA+PiBPbiAxIERlY2VtYmVyIDIwMTUgYXQgMDk6
-NDEsIENoZW4gQm91Z2ggPEhhaWJvLkNoZW5AZnJlZXNjYWxlLmNvbT4NCj4gd3JvdGU6DQo+ID4+
-ID4gSGksDQo+ID4+ID4NCj4gPj4gPiBBZnRlcg0KPiA+PiA+IGNvbW1pdCAxOTcxNjBkNTJlODU5
-NTc1ZmYwYWQxYWZkNjc0YWIyYTgyNWI5ZjgzDQo+ID4+ID4gQXV0aG9yOiBOaWNrIFNhbmRlcnMg
-PG5zYW5kZXJzQGNocm9taXVtLm9yZz4NCj4gPj4gPiBEYXRlOiAgIFR1ZSBNYXkgNiAxODo1Mjoz
-OCAyMDE0IC0wNzAwDQo+ID4+ID4NCj4gPj4gPiAgICAgbW1jOiBzZGhjaTogcmVtb3ZlIG1kZWxh
-eSBpbiBlTU1DIHR1bmluZw0KPiA+PiA+DQo+ID4+ID4NCj4gPj4gPiBJIGZpbmQgTWljcm9uIGVN
-TUMgSFMyMDAgYW5kIEhTNDAwIGNhbid0IHBhc3MgdHVuaW5nIG9uIGkuTVg3RA0KPiA+PiA+IHBs
-YXRmb3JtLA0KPiA+PiBoZXJlIGlzIHRoZSBsb2c6DQo+ID4+ID4NCj4gPj4gPiBbICAgIDIuODM1
-NTgxXSBzZGhjaTogVHVuaW5nIHByb2NlZHVyZSBmYWlsZWQsIGZhbGxpbmcgYmFjayB0byBmaXhl
-ZA0KPiA+PiBzYW1wbGluZyBjbG9jaw0KPiA+PiA+IFsgICAgMi44NDMwNzFdIG1tYzE6IHR1bmlu
-ZyBleGVjdXRpb24gZmFpbGVkDQo+ID4+ID4gWyAgICAyLjg0NzEwNF0gbW1jMTogZXJyb3IgLTUg
-d2hpbHN0IGluaXRpYWxpc2luZyBNTUMgY2FyZA0KPiA+PiA+DQo+ID4+ID4gV2hlbiBJIHJldmVy
-dCB0aGlzIGNvbW1pdCwgaXNzdWUgZ29uZS4NCj4gPj4NCj4gPj4gVGhhbmtzIGZvciByZXBvcnRp
-bmcgdGhlIHByb2JsZW0hDQo+ID4+DQo+ID4+IFRoZXJlJ3MgYmVlbiBhIGxvdCBvZiBjaGFuZ2Vz
-IHJlZ2FyZGluZyB0dW5pbmcgc2luY2UgdGhlbiwgYm90aCB0bw0KPiA+PiBzZGhjaSBhbmQgdGhl
-IG1tYyBjb3JlLiBTbyBiZWZvcmUgSSBjb25zaWRlciBhIHJldmVydCBmb3IgdGhhdCBwYXRjaCwN
-Cj4gPj4gY2FuIHlvdSBzaGFyZSBvbiB3aGF0IGJhc2VsaW5lIHlvdSBhcmUgb24hPw0KPiA+DQo+
-ID4gSSBiYXNlZCBvbiB0aGUgbGF0ZXN0IExpbnV4LW5leHQsIHY0LjQtcmMyLg0KPiA+DQo+ID4N
-Cj4gPiBCZXN0IHJlZ2FyZHMNCj4gPiBIYWlibyBDaGVuDQo+ID4NCj4gPj4NCj4gPj4gWy4uLl0N
-Cj4gPj4NCj4gPj4gS2luZCByZWdhcmRzDQo+ID4+IFVmZmUNCg==
+On Wednesday 02 December 2015 10:22:09 Vinod Koul wrote:
+> > 
+> > > > This legacy mode needs changes in platform code, in dmaengine drivers and
+> > > > finally the dmaengine user drivers can be converted:
+> > > 
+> > > Are you marking the current APIs as dericated in the end of this series
+> > 
+> > I think we practically stopped marking things as deprecated in general.
+> > Per Linus decree, whenever we want to get rid of something, we should
+> > instead change all users in tree and then remove the API, expecting
+> > driver maintainers to do something just because you marked it as deprecated
+> > often doesn't work.
+> 
+> Yes but while we do conversion we don't know if new users get added which use
+> old API..
+
+We probably don't need to worry about new users of dma_request_channel(),
+as we don't add new ARM platforms without DT, and other architectures
+don't add a lot of new platforms. Similarly, I don't expect a whole lot
+of dma_request_slave_channel_compat() users, because the conversion from
+board files to DT based booting has slowed down a lot after most of the
+actively maintained platforms are done with it.
+
+If you do a one-line patch to add dma_request_chan() as an alias for
+dma_request_slave_channel_reason() now, we can probably convert most
+users of dma_request_slave_channel() and dma_request_slave_channel_reason()
+to dma_request_chan() in the next merge window and do a patch to
+replace the few remaining ones and remove the API one merge window later.
+
+If wewant to stage out the conversion of the
+dma_request_slave_channel_compat() and dma_request_channel() similarly,
+it would be good to have all the interface changes for the dmaengine
+core basically in place, so we can start to convert the platforms
+independently for the 4.5 merge window without having a dependency on
+dmaengine patches. It's probably best to not convert a slave driver
+away from dma_request_channel() until the dma map has been created
+for all platforms using that driver, again to avoid having too many
+dependencies.
+
+	Arnd
