@@ -1,64 +1,98 @@
-From: Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>
-Subject: Re: [RFC v02 03/15] dmaengine: core: Introduce new, universal API to
- request a channel
-Date: Wed, 2 Dec 2015 07:00:05 -0800
-Message-ID: <20151202150005.GB23396@atomide.com>
-References: <1448891145-10766-1-git-send-email-peter.ujfalusi@ti.com>
- <1448891145-10766-4-git-send-email-peter.ujfalusi@ti.com>
- <20151130155142.GZ2517@atomide.com>
- <565D56A0.2090204@ti.com>
- <20151201170031.GT23396@atomide.com>
- <565EC14A.6020502@ti.com>
+From: Dong Aisheng <dongas86@gmail.com>
+Subject: Re: [RFC PATCH 0/4] Command Queueing Support in eMMC
+Date: Thu, 3 Dec 2015 11:42:51 +0800
+Message-ID: <CAA+hA=Ts4nF4qMmTbEQr40FYgpxHmzrJxwPu4gRZ2dCcs+zOWA@mail.gmail.com>
+References: <cover.1417519249.git.asutoshd@codeaurora.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-spi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <565EC14A.6020502-l0cyMroinI0@public.gmane.org>
-Sender: linux-spi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Peter Ujfalusi <peter.ujfalusi-l0cyMroinI0@public.gmane.org>
-Cc: vinod.koul-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, arnd-r2nGTMty4D4@public.gmane.org, andy.shevchenko-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, nsekhar-l0cyMroinI0@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-spi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, dmaengine-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-arm-msm-owner@vger.kernel.org>
+In-Reply-To: <cover.1417519249.git.asutoshd@codeaurora.org>
+Sender: linux-arm-msm-owner@vger.kernel.org
+To: Asutosh Das <asutoshd@codeaurora.org>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-arm-msm@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-* Peter Ujfalusi <peter.ujfalusi-l0cyMroinI0@public.gmane.org> [151202 02:01]:
-> On 12/01/2015 07:00 PM, Tony Lindgren wrote:
-> >> I see. The dm81xx basically am33xx/am43xx?
-> > 
-> > Yeah similar to am33xx with different clocks and with a bunch of accelerators.
-> > 
-> >> Actually I would prefer to use the dmaengine's event router framework and we
-> >> do have support for the am33xx/am43xx type of crossbar already implemented.
-> >> I'm going to resend the DTS series for am33xx/am43xx to convert them to use
-> >> the new DT bindings along with the dma event router support:
-> >> https://www.mail-archive.com/linux-omap%40vger.kernel.org/msg120828.html
-> > 
-> > OK yes a dmaengine event router works too when available. Good to see
-> > them as separate driver instances now :) Are only the dts changes missing
-> > now?
-> > 
-> > FYI, when we have separate interconnect driver instances, we don't want to
-> > and cannot tweak registers outside the interconnect instance because of them
-> > being in separate clock and/or power domains :p
-> 
-> What does this mean in practice? We can not touch these registers? The DMA
-> crossbar is a separate driver from the eDMA driver.
+Hi Asutosh,
 
-Seem like it should not affect DMA crossbar as it's a separate driver.
+On Tue, Dec 2, 2014 at 7:53 PM, Asutosh Das <asutoshd@codeaurora.org> wrote:
+> In this patch series, we propose a method to add support for
+> Command Queueing(CQ) feature added to eMMC-5.1 specification.
+> This feature includes new commands for issuing tasks to the
+> device and orders the execution of tasks to the device. It
+> also has task management functions.
+>
+> The initialization of CQ is decided based on the underlying
+> driver capability and the capability advertised by the card
+> through ext_csd.
+>
+> We have selectively adopted the scsi design of pulling in
+> requests from kernel block layer.
+>
+> In order to support queueing of multiple requests, we have
+> added a new issue function to mmc-queue. This selectively
+> pulls the requests and prepares and issues it to the underlying
+> driver. We have used the inherent tagging mechanism of kernel
+> block layer to keep track and map tags to the slots of underlying
+> driver. The current design doesn't block for the request to
+> complete. We have separated the issuing and completion path
+> of the request and tracking is done using the tag assigned to
+> the request.
+>
+> We have introduced a number of APIs to mmc block layer to
+> facilitate servicing of requests.
+>
+> The completion of requests is handled in a softirq registered
+> with the kernel block layer during initialization. The error
+> handling however would be done using a workqueue and is under
+> development.
+>
+> We have separated the legacy eMMC code from CQ code, so as to
+> make it more manageable.
+>
+> A new layer has been introduced to serve the CQ compliant drivers.
+> This layer (cq_hci) has all the standard functionality implemented.
+> It also has necessary hooks for convenience of platform drivers.
+>
+> Asutosh Das (4):
+>   mmc: queue: initialization of command-queue support
+>   mmc: card: Add eMMC command queuing support in mmc block layer
+>   mmc: cmdq: support for command queue enabled host
+>   mmc: sdhci: add command queue support to sdhci
+>
+> Sujit Reddy Thumma (1):
+>   mmc: core: Add support to read command queue parameters
+>
+>  drivers/mmc/card/block.c   | 378 ++++++++++++++++++++++++++++++++++++++++++++-
+>  drivers/mmc/card/queue.c   | 160 ++++++++++++++++++-
+>  drivers/mmc/card/queue.h   |   9 +-
+>  drivers/mmc/core/core.c    |  87 +++++++++++
+>  drivers/mmc/core/mmc.c     |  19 +++
+>  drivers/mmc/core/mmc_ops.c |  45 ++++--
+>  drivers/mmc/host/Kconfig   |  12 ++
+>  drivers/mmc/host/Makefile  |   1 +
+>  drivers/mmc/host/sdhci.c   |  89 +++++++++++
+>  drivers/mmc/host/sdhci.h   |   2 +
+>  include/linux/mmc/card.h   |  10 +-
+>  include/linux/mmc/core.h   |  14 ++
+>  include/linux/mmc/host.h   |  72 +++++++++
+>  include/linux/mmc/mmc.h    |   9 ++
+>  include/linux/mmc/sdhci.h  |   1 +
+>  15 files changed, 887 insertions(+), 21 deletions(-)
+>
 
-What I meant is we need a separate driver for clocks, pinctrl, regulators,
-PHY, crossbar or syscon to use the SCM registers from drivers sitting on a
-L4 interonnect.
+Are you still working on this?
+Is there a updated version and any upstream plan?
+I'm going to verify it.
 
-> > In any case, it seems there's no harm using pinctrl for evtmux on dm81xx
-> > until the event router is available. It's currently only needed on the
-> > t410 emmc that I'm aware of :)
-> 
-> The AM33xx/AM43xx DMA crossbar support is in 4.4 already:
-> 42dbdcc6bf96 dmaengine: ti-dma-crossbar: Add support for crossbar on AM33xx/AM43xx
+Regards
+Dong Aisheng
 
-OK great.
-
-Tony
---
-To unsubscribe from this list: send the line "unsubscribe linux-spi" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> --
+> 1.8.2.1
+>
+> The Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum,
+> a Linux Foundation Collaborative Project
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
