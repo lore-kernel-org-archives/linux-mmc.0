@@ -1,66 +1,72 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: usdhi6rol0: handle NULL data in timeout
-Date: Fri, 4 Dec 2015 15:56:20 +0100
-Message-ID: <CAPDyKFpqn1iL1F5nE_FMGUkmXj4OrTQ8VdD_8_9eU5sdV9bt9w@mail.gmail.com>
-References: <1448625551-32328-1-git-send-email-rabin.vincent@axis.com>
+Subject: Re: [PATCH v4] mmc: core: fix __mmc_switch timeout caused by preempt
+Date: Fri, 4 Dec 2015 15:56:30 +0100
+Message-ID: <CAPDyKFqzekCOna5LUBNJRLQ-+7ryO57_B6=7ne3a9Vj6axF=yw@mail.gmail.com>
+References: <1448846850-14585-1-git-send-email-chaotian.jing@mediatek.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-yk0-f170.google.com ([209.85.160.170]:35184 "EHLO
-	mail-yk0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752384AbbLDO4V (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 4 Dec 2015 09:56:21 -0500
-Received: by ykba77 with SMTP id a77so126123905ykb.2
-        for <linux-mmc@vger.kernel.org>; Fri, 04 Dec 2015 06:56:20 -0800 (PST)
-In-Reply-To: <1448625551-32328-1-git-send-email-rabin.vincent@axis.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1448846850-14585-1-git-send-email-chaotian.jing@mediatek.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Chaotian Jing <chaotian.jing@mediatek.com>
+Cc: Matthias Brugger <matthias.bgg@gmail.com>, Stephen Boyd <sboyd@codeaurora.org>, Adrian Hunter <adrian.hunter@intel.com>, Minda Chen <Minda.Chen@csr.com>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, linux-mediatek@lists.infradead.org, srv_heupstream <srv_heupstream@mediatek.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Rabin Vincent <rabin.vincent@axis.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Rabin Vincent <rabinv@axis.com>
 
-On 27 November 2015 at 12:59, Rabin Vincent <rabin.vincent@axis.com> wrote:
-> bb08a7d489bd22 ("mmc: usdhi6rol0: fix NULL pointer deref in debug
-> print") fixed one NULL pointer dereference but unfortunately introduced
-> another.  "data" may be NULL if this is a command timeout for a command
-> without any data, so we should only use it if we're actually waiting for
-> data.
+On 30 November 2015 at 02:27, Chaotian Jing <chaotian.jing@mediatek.com> wrote:
+> there is a time window between __mmc_send_status() and time_afer(),
+> on some eMMC chip, the timeout_ms is only 10ms, if this thread was
+> scheduled out during this period, then, even card has already changes
+> to transfer state by the result of CMD13, this part of code also treat
+> it to timeout error.
+> So, need calculate timeout first, then call __mmc_send_status(), if
+> already timeout and card still in programing state, then treat it to
+> the real timeout error.
 >
-> Fixes: bb08a7d("mmc: usdhi6rol0: fix NULL pointer deref in debug print")
-> Cc: stable@vger.kernel.org # v4.3
-> Signed-off-by: Rabin Vincent <rabin.vincent@axis.com>
+> Signed-off-by: Chaotian Jing <chaotian.jing@mediatek.com>
 
-Thanks, applied for next! (The patch has a checkpatch error, I fixed
-it up this time).
+Thanks, applied for next!
 
 Kind regards
 Uffe
 
-
 > ---
->  drivers/mmc/host/usdhi6rol0.c |    3 ++-
->  1 file changed, 2 insertions(+), 1 deletion(-)
+>  drivers/mmc/core/mmc_ops.c | 9 ++++++++-
+>  1 file changed, 8 insertions(+), 1 deletion(-)
 >
-> diff --git a/drivers/mmc/host/usdhi6rol0.c b/drivers/mmc/host/usdhi6rol0.c
-> index 4498e92..b47122d 100644
-> --- a/drivers/mmc/host/usdhi6rol0.c
-> +++ b/drivers/mmc/host/usdhi6rol0.c
-> @@ -1634,7 +1634,7 @@ static void usdhi6_timeout_work(struct work_struct *work)
->         struct usdhi6_host *host = container_of(d, struct usdhi6_host, timeout_work);
->         struct mmc_request *mrq = host->mrq;
->         struct mmc_data *data = mrq ? mrq->data : NULL;
-> -       struct scatterlist *sg = host->sg ?: data->sg;
-> +       struct scatterlist *sg;
+> diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
+> index 1f44426..2c90635 100644
+> --- a/drivers/mmc/core/mmc_ops.c
+> +++ b/drivers/mmc/core/mmc_ops.c
+> @@ -489,6 +489,7 @@ int __mmc_switch(struct mmc_card *card, u8 set, u8 index, u8 value,
+>         unsigned long timeout;
+>         u32 status = 0;
+>         bool use_r1b_resp = use_busy_signal;
+> +       bool expired = false;
 >
->         dev_warn(mmc_dev(host->mmc),
->                  "%s timeout wait %u CMD%d: IRQ 0x%08x:0x%08x, last IRQ 0x%08x\n",
-> @@ -1666,6 +1666,7 @@ static void usdhi6_timeout_work(struct work_struct *work)
->         case USDHI6_WAIT_FOR_MWRITE:
->         case USDHI6_WAIT_FOR_READ:
->         case USDHI6_WAIT_FOR_WRITE:
-> +               sg = host->sg ?: data->sg;
->                 dev_dbg(mmc_dev(host->mmc),
->                         "%c: page #%u @ +0x%zx %ux%u in SG%u. Current SG %u bytes @ %u\n",
->                         data->flags & MMC_DATA_READ ? 'R' : 'W', host->page_idx,
+>         mmc_retune_hold(host);
+>
+> @@ -545,6 +546,12 @@ int __mmc_switch(struct mmc_card *card, u8 set, u8 index, u8 value,
+>         timeout = jiffies + msecs_to_jiffies(timeout_ms);
+>         do {
+>                 if (send_status) {
+> +                       /*
+> +                        * Due to the possibility of being preempted after
+> +                        * sending the status command, check the expiration
+> +                        * time first.
+> +                        */
+> +                       expired = time_after(jiffies, timeout);
+>                         err = __mmc_send_status(card, &status, ignore_crc);
+>                         if (err)
+>                                 goto out;
+> @@ -565,7 +572,7 @@ int __mmc_switch(struct mmc_card *card, u8 set, u8 index, u8 value,
+>                 }
+>
+>                 /* Timeout if the device never leaves the program state. */
+> -               if (time_after(jiffies, timeout)) {
+> +               if (expired && R1_CURRENT_STATE(status) == R1_STATE_PRG) {
+>                         pr_err("%s: Card stuck in programming state! %s\n",
+>                                 mmc_hostname(host), __func__);
+>                         err = -ETIMEDOUT;
 > --
-> 1.7.10.4
+> 1.8.1.1.dirty
 >
