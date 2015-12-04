@@ -1,55 +1,66 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: of_mmc_spi: Add IRQF_ONESHOT to interrupt flags
-Date: Fri, 4 Dec 2015 15:56:12 +0100
-Message-ID: <CAPDyKFrsa_+ygaaFV_BWLNLtCXc70-VXtZ7=9cSjFHHXFW1pQg@mail.gmail.com>
-References: <1448475984-11332-1-git-send-email-saurabh.truth@gmail.com>
+Subject: Re: [PATCH] mmc: usdhi6rol0: handle NULL data in timeout
+Date: Fri, 4 Dec 2015 15:56:20 +0100
+Message-ID: <CAPDyKFpqn1iL1F5nE_FMGUkmXj4OrTQ8VdD_8_9eU5sdV9bt9w@mail.gmail.com>
+References: <1448625551-32328-1-git-send-email-rabin.vincent@axis.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-yk0-f179.google.com ([209.85.160.179]:33040 "EHLO
-	mail-yk0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751214AbbLDO4N (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 4 Dec 2015 09:56:13 -0500
-Received: by ykdv3 with SMTP id v3so126331378ykd.0
-        for <linux-mmc@vger.kernel.org>; Fri, 04 Dec 2015 06:56:12 -0800 (PST)
-In-Reply-To: <1448475984-11332-1-git-send-email-saurabh.truth@gmail.com>
+Received: from mail-yk0-f170.google.com ([209.85.160.170]:35184 "EHLO
+	mail-yk0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752384AbbLDO4V (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 4 Dec 2015 09:56:21 -0500
+Received: by ykba77 with SMTP id a77so126123905ykb.2
+        for <linux-mmc@vger.kernel.org>; Fri, 04 Dec 2015 06:56:20 -0800 (PST)
+In-Reply-To: <1448625551-32328-1-git-send-email-rabin.vincent@axis.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Saurabh Sengar <saurabh.truth@gmail.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+To: Rabin Vincent <rabin.vincent@axis.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Rabin Vincent <rabinv@axis.com>
 
-On 25 November 2015 at 19:26, Saurabh Sengar <saurabh.truth@gmail.com> wrote:
-> If no primary handler is specified for threaded_irq then a
-> default one is assigned which always returns IRQ_WAKE_THREAD.
-> This handler requires the IRQF_ONESHOT, because the source of
-> interrupt is not disabled
+On 27 November 2015 at 12:59, Rabin Vincent <rabin.vincent@axis.com> wrote:
+> bb08a7d489bd22 ("mmc: usdhi6rol0: fix NULL pointer deref in debug
+> print") fixed one NULL pointer dereference but unfortunately introduced
+> another.  "data" may be NULL if this is a command timeout for a command
+> without any data, so we should only use it if we're actually waiting for
+> data.
 >
-> Signed-off-by: Saurabh Sengar <saurabh.truth@gmail.com>
+> Fixes: bb08a7d("mmc: usdhi6rol0: fix NULL pointer deref in debug print")
+> Cc: stable@vger.kernel.org # v4.3
+> Signed-off-by: Rabin Vincent <rabin.vincent@axis.com>
 
-Thanks, applied for next!
+Thanks, applied for next! (The patch has a checkpatch error, I fixed
+it up this time).
 
 Kind regards
 Uffe
 
+
 > ---
->  drivers/mmc/host/of_mmc_spi.c | 4 ++--
->  1 file changed, 2 insertions(+), 2 deletions(-)
+>  drivers/mmc/host/usdhi6rol0.c |    3 ++-
+>  1 file changed, 2 insertions(+), 1 deletion(-)
 >
-> diff --git a/drivers/mmc/host/of_mmc_spi.c b/drivers/mmc/host/of_mmc_spi.c
-> index 6e218fb..660170c 100644
-> --- a/drivers/mmc/host/of_mmc_spi.c
-> +++ b/drivers/mmc/host/of_mmc_spi.c
-> @@ -55,8 +55,8 @@ static int of_mmc_spi_init(struct device *dev,
->  {
->         struct of_mmc_spi *oms = to_of_mmc_spi(dev);
+> diff --git a/drivers/mmc/host/usdhi6rol0.c b/drivers/mmc/host/usdhi6rol0.c
+> index 4498e92..b47122d 100644
+> --- a/drivers/mmc/host/usdhi6rol0.c
+> +++ b/drivers/mmc/host/usdhi6rol0.c
+> @@ -1634,7 +1634,7 @@ static void usdhi6_timeout_work(struct work_struct *work)
+>         struct usdhi6_host *host = container_of(d, struct usdhi6_host, timeout_work);
+>         struct mmc_request *mrq = host->mrq;
+>         struct mmc_data *data = mrq ? mrq->data : NULL;
+> -       struct scatterlist *sg = host->sg ?: data->sg;
+> +       struct scatterlist *sg;
 >
-> -       return request_threaded_irq(oms->detect_irq, NULL, irqhandler, 0,
-> -                                   dev_name(dev), mmc);
-> +       return request_threaded_irq(oms->detect_irq, NULL, irqhandler,
-> +                                       IRQF_ONESHOT, dev_name(dev), mmc);
->  }
->
->  static void of_mmc_spi_exit(struct device *dev, void *mmc)
+>         dev_warn(mmc_dev(host->mmc),
+>                  "%s timeout wait %u CMD%d: IRQ 0x%08x:0x%08x, last IRQ 0x%08x\n",
+> @@ -1666,6 +1666,7 @@ static void usdhi6_timeout_work(struct work_struct *work)
+>         case USDHI6_WAIT_FOR_MWRITE:
+>         case USDHI6_WAIT_FOR_READ:
+>         case USDHI6_WAIT_FOR_WRITE:
+> +               sg = host->sg ?: data->sg;
+>                 dev_dbg(mmc_dev(host->mmc),
+>                         "%c: page #%u @ +0x%zx %ux%u in SG%u. Current SG %u bytes @ %u\n",
+>                         data->flags & MMC_DATA_READ ? 'R' : 'W', host->page_idx,
 > --
-> 1.9.1
+> 1.7.10.4
 >
