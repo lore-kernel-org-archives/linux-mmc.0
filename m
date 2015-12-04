@@ -1,63 +1,55 @@
-From: "Fu, Zhonghui" <zhonghui.fu@linux.intel.com>
-Subject: [PATCH] mmc: enable MMC/SD/SDIO device to suspend/resume
- asynchronously
-Date: Fri, 4 Dec 2015 21:05:56 +0800
-Message-ID: <56618FB4.3020100@linux.intel.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH] mmc: of_mmc_spi: Add IRQF_ONESHOT to interrupt flags
+Date: Fri, 4 Dec 2015 15:56:12 +0100
+Message-ID: <CAPDyKFrsa_+ygaaFV_BWLNLtCXc70-VXtZ7=9cSjFHHXFW1pQg@mail.gmail.com>
+References: <1448475984-11332-1-git-send-email-saurabh.truth@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga14.intel.com ([192.55.52.115]:13494 "EHLO mga14.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751441AbbLDNF7 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 4 Dec 2015 08:05:59 -0500
+Received: from mail-yk0-f179.google.com ([209.85.160.179]:33040 "EHLO
+	mail-yk0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751214AbbLDO4N (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 4 Dec 2015 09:56:13 -0500
+Received: by ykdv3 with SMTP id v3so126331378ykd.0
+        for <linux-mmc@vger.kernel.org>; Fri, 04 Dec 2015 06:56:12 -0800 (PST)
+In-Reply-To: <1448475984-11332-1-git-send-email-saurabh.truth@gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Jaehoon Chung <jh80.chung@samsung.com>, hdegoede@redhat.com, "Wysocki, Rafael J" <rafael.j.wysocki@intel.com>, s.hauer@pengutronix.de, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+To: Saurabh Sengar <saurabh.truth@gmail.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 
-Now, PM core supports asynchronous suspend/resume mode for devices
-during system suspend/resume, and the power state transition of one
-device may be completed in separate kernel thread. PM core ensures
-all power state transition dependency between devices. This patch
-enables MMC/SD/SDIO card and SDIO function devices to suspend/resume
-asynchronously. This will take advantage of multicore and improve
-system suspend/resume speed. After applying this patch and enabling
-all SDIO function's child devices to suspend/resume asynchronously
-on ASUS T100TA, the system suspend-to-idle time is reduced from
-1645ms to 1108ms, and the system resume time is reduced from 940ms
-to 918ms.
+On 25 November 2015 at 19:26, Saurabh Sengar <saurabh.truth@gmail.com> wrote:
+> If no primary handler is specified for threaded_irq then a
+> default one is assigned which always returns IRQ_WAKE_THREAD.
+> This handler requires the IRQF_ONESHOT, because the source of
+> interrupt is not disabled
+>
+> Signed-off-by: Saurabh Sengar <saurabh.truth@gmail.com>
 
-Signed-off-by: Zhonghui Fu <zhonghui.fu@linux.intel.com>
----
- drivers/mmc/core/bus.c      |    2 ++
- drivers/mmc/core/sdio_bus.c |    1 +
- 2 files changed, 3 insertions(+), 0 deletions(-)
+Thanks, applied for next!
 
-diff --git a/drivers/mmc/core/bus.c b/drivers/mmc/core/bus.c
-index 972ff84..4bc48f1 100644
---- a/drivers/mmc/core/bus.c
-+++ b/drivers/mmc/core/bus.c
-@@ -349,6 +349,8 @@ int mmc_add_card(struct mmc_card *card)
- 
- 	card->dev.of_node = mmc_of_find_child_device(card->host, 0);
- 
-+	device_enable_async_suspend(&card->dev);
-+
- 	ret = device_add(&card->dev);
- 	if (ret)
- 		return ret;
-diff --git a/drivers/mmc/core/sdio_bus.c b/drivers/mmc/core/sdio_bus.c
-index 7e327a6..86f5b32 100644
---- a/drivers/mmc/core/sdio_bus.c
-+++ b/drivers/mmc/core/sdio_bus.c
-@@ -322,6 +322,7 @@ int sdio_add_func(struct sdio_func *func)
- 
- 	sdio_set_of_node(func);
- 	sdio_acpi_set_handle(func);
-+	device_enable_async_suspend(&func->dev);
- 	ret = device_add(&func->dev);
- 	if (ret == 0)
- 		sdio_func_set_present(func);
--- 1.7.1
+Kind regards
+Uffe
 
+> ---
+>  drivers/mmc/host/of_mmc_spi.c | 4 ++--
+>  1 file changed, 2 insertions(+), 2 deletions(-)
+>
+> diff --git a/drivers/mmc/host/of_mmc_spi.c b/drivers/mmc/host/of_mmc_spi.c
+> index 6e218fb..660170c 100644
+> --- a/drivers/mmc/host/of_mmc_spi.c
+> +++ b/drivers/mmc/host/of_mmc_spi.c
+> @@ -55,8 +55,8 @@ static int of_mmc_spi_init(struct device *dev,
+>  {
+>         struct of_mmc_spi *oms = to_of_mmc_spi(dev);
+>
+> -       return request_threaded_irq(oms->detect_irq, NULL, irqhandler, 0,
+> -                                   dev_name(dev), mmc);
+> +       return request_threaded_irq(oms->detect_irq, NULL, irqhandler,
+> +                                       IRQF_ONESHOT, dev_name(dev), mmc);
+>  }
+>
+>  static void of_mmc_spi_exit(struct device *dev, void *mmc)
+> --
+> 1.9.1
+>
