@@ -1,79 +1,109 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH] mmc: sdhci-acpi: set non-removable in ACPI table
-Date: Thu, 3 Dec 2015 16:14:47 +0200
-Message-ID: <56604E57.9000201@intel.com>
-References: <1449150480-1173-1-git-send-email-pelcan@codeaurora.org>
+From: "Das, Asutosh (asd)" <asutoshd@codeaurora.org>
+Subject: Re: [RFC PATCH 0/4] Command Queueing Support in eMMC
+Date: Fri, 4 Dec 2015 10:10:36 +0530
+Message-ID: <56611944.5000004@codeaurora.org>
+References: <cover.1417519249.git.asutoshd@codeaurora.org>
+ <CAA+hA=Ts4nF4qMmTbEQr40FYgpxHmzrJxwPu4gRZ2dCcs+zOWA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
+Content-Type: text/plain; charset=utf-8; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-arm-msm-owner@vger.kernel.org>
-In-Reply-To: <1449150480-1173-1-git-send-email-pelcan@codeaurora.org>
+In-Reply-To: <CAA+hA=Ts4nF4qMmTbEQr40FYgpxHmzrJxwPu4gRZ2dCcs+zOWA@mail.gmail.com>
 Sender: linux-arm-msm-owner@vger.kernel.org
-To: Philip Elcan <pelcan@codeaurora.org>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
-Cc: linux-arm-msm@vger.kernel.org, Timur Tabi <timur@codeaurora.org>, Jon Masters <jcm@redhat.org>, Mark Langsdorf <mlangsdo@redhat.com>
+To: Dong Aisheng <dongas86@gmail.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-arm-msm@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-On 03/12/15 15:48, Philip Elcan wrote:
-> This allows setting an SDHC controller as non-removable
-> by using the _RMV method in the ACPI table. It doesn't
++ Kostya
+Hi Aisheng,
+Yes, a colleague of mine is working on upstreaming it. It should be done 
+within a week or so.
 
-Is that _RMV on the host controller?  Shouldn't it be on the card i.e. child
-device node?
-
-> mark it as non-removable if GPIO card detection is
-> already setup.
-> 
-> Signed-off-by: Philip Elcan <pelcan@codeaurora.org>
-> ---
->  drivers/mmc/host/sdhci-acpi.c | 20 ++++++++++++++++++++
->  1 file changed, 20 insertions(+)
-> 
-> diff --git a/drivers/mmc/host/sdhci-acpi.c b/drivers/mmc/host/sdhci-acpi.c
-> index f6047fc..8c06ba6 100644
-> --- a/drivers/mmc/host/sdhci-acpi.c
-> +++ b/drivers/mmc/host/sdhci-acpi.c
-> @@ -288,6 +288,20 @@ static const struct sdhci_acpi_slot *sdhci_acpi_get_slot(const char *hid,
->  	return NULL;
->  }
->  
-> +static bool sdhci_acpi_is_removable(acpi_handle handle)
-> +{
-> +	acpi_status status;
-> +	unsigned long long removable = 1; /* default to removable */
-> +
-> +	if (acpi_has_method(handle, "_EJ0"))
-> +		return true;
-> +	status = acpi_evaluate_integer(handle, "_RMV", NULL, &removable);
-> +	if (ACPI_SUCCESS(status) && !removable)
-> +		return false;
-> +
-> +	return true;
-> +}
-> +
->  static int sdhci_acpi_probe(struct platform_device *pdev)
->  {
->  	struct device *dev = &pdev->dev;
-> @@ -300,6 +314,7 @@ static int sdhci_acpi_probe(struct platform_device *pdev)
->  	const char *hid;
->  	const char *uid;
->  	int err;
-> +	bool gpio_cd = false;
->  
->  	if (acpi_bus_get_device(handle, &device))
->  		return -ENODEV;
-> @@ -373,9 +388,14 @@ static int sdhci_acpi_probe(struct platform_device *pdev)
->  		if (mmc_gpiod_request_cd(host->mmc, NULL, 0, v, 0, NULL)) {
->  			dev_warn(dev, "failed to setup card detect gpio\n");
->  			c->use_runtime_pm = false;
-> +		} else {
-> +			gpio_cd = true;
->  		}
->  	}
->  
-> +	if (!gpio_cd && !sdhci_acpi_is_removable(handle))
-> +		host->mmc->caps |= MMC_CAP_NONREMOVABLE;
-> +
->  	err = sdhci_add_host(host);
->  	if (err)
->  		goto err_free;
-> 
+On 12/3/2015 9:12 AM, Dong Aisheng wrote:
+> Hi Asutosh,
+>
+> On Tue, Dec 2, 2014 at 7:53 PM, Asutosh Das <asutoshd@codeaurora.org> wrote:
+>> In this patch series, we propose a method to add support for
+>> Command Queueing(CQ) feature added to eMMC-5.1 specification.
+>> This feature includes new commands for issuing tasks to the
+>> device and orders the execution of tasks to the device. It
+>> also has task management functions.
+>>
+>> The initialization of CQ is decided based on the underlying
+>> driver capability and the capability advertised by the card
+>> through ext_csd.
+>>
+>> We have selectively adopted the scsi design of pulling in
+>> requests from kernel block layer.
+>>
+>> In order to support queueing of multiple requests, we have
+>> added a new issue function to mmc-queue. This selectively
+>> pulls the requests and prepares and issues it to the underlying
+>> driver. We have used the inherent tagging mechanism of kernel
+>> block layer to keep track and map tags to the slots of underlying
+>> driver. The current design doesn't block for the request to
+>> complete. We have separated the issuing and completion path
+>> of the request and tracking is done using the tag assigned to
+>> the request.
+>>
+>> We have introduced a number of APIs to mmc block layer to
+>> facilitate servicing of requests.
+>>
+>> The completion of requests is handled in a softirq registered
+>> with the kernel block layer during initialization. The error
+>> handling however would be done using a workqueue and is under
+>> development.
+>>
+>> We have separated the legacy eMMC code from CQ code, so as to
+>> make it more manageable.
+>>
+>> A new layer has been introduced to serve the CQ compliant drivers.
+>> This layer (cq_hci) has all the standard functionality implemented.
+>> It also has necessary hooks for convenience of platform drivers.
+>>
+>> Asutosh Das (4):
+>>    mmc: queue: initialization of command-queue support
+>>    mmc: card: Add eMMC command queuing support in mmc block layer
+>>    mmc: cmdq: support for command queue enabled host
+>>    mmc: sdhci: add command queue support to sdhci
+>>
+>> Sujit Reddy Thumma (1):
+>>    mmc: core: Add support to read command queue parameters
+>>
+>>   drivers/mmc/card/block.c   | 378 ++++++++++++++++++++++++++++++++++++++++++++-
+>>   drivers/mmc/card/queue.c   | 160 ++++++++++++++++++-
+>>   drivers/mmc/card/queue.h   |   9 +-
+>>   drivers/mmc/core/core.c    |  87 +++++++++++
+>>   drivers/mmc/core/mmc.c     |  19 +++
+>>   drivers/mmc/core/mmc_ops.c |  45 ++++--
+>>   drivers/mmc/host/Kconfig   |  12 ++
+>>   drivers/mmc/host/Makefile  |   1 +
+>>   drivers/mmc/host/sdhci.c   |  89 +++++++++++
+>>   drivers/mmc/host/sdhci.h   |   2 +
+>>   include/linux/mmc/card.h   |  10 +-
+>>   include/linux/mmc/core.h   |  14 ++
+>>   include/linux/mmc/host.h   |  72 +++++++++
+>>   include/linux/mmc/mmc.h    |   9 ++
+>>   include/linux/mmc/sdhci.h  |   1 +
+>>   15 files changed, 887 insertions(+), 21 deletions(-)
+>>
+> Are you still working on this?
+> Is there a updated version and any upstream plan?
+> I'm going to verify it.
+>
+> Regards
+> Dong Aisheng
+>
+>> --
+>> 1.8.2.1
+>>
+>> The Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum,
+>> a Linux Foundation Collaborative Project
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
