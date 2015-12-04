@@ -1,130 +1,63 @@
-From: Dong Aisheng <dongas86@gmail.com>
-Subject: Re: [RFC PATCH 0/4] Command Queueing Support in eMMC
-Date: Fri, 4 Dec 2015 15:09:28 +0800
-Message-ID: <CAA+hA=QOcu_uxFMROYnwZdOfqsvCb+9bbfV6shz=5nA=KocPuQ@mail.gmail.com>
-References: <cover.1417519249.git.asutoshd@codeaurora.org>
-	<CAA+hA=Ts4nF4qMmTbEQr40FYgpxHmzrJxwPu4gRZ2dCcs+zOWA@mail.gmail.com>
-	<56611944.5000004@codeaurora.org>
+From: "Fu, Zhonghui" <zhonghui.fu@linux.intel.com>
+Subject: [PATCH] mmc: enable MMC/SD/SDIO device to suspend/resume
+ asynchronously
+Date: Fri, 4 Dec 2015 21:05:56 +0800
+Message-ID: <56618FB4.3020100@linux.intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qk0-f172.google.com ([209.85.220.172]:34165 "EHLO
-	mail-qk0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754753AbbLDHJ2 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 4 Dec 2015 02:09:28 -0500
-In-Reply-To: <56611944.5000004@codeaurora.org>
+Received: from mga14.intel.com ([192.55.52.115]:13494 "EHLO mga14.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751441AbbLDNF7 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 4 Dec 2015 08:05:59 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "Das, Asutosh (asd)" <asutoshd@codeaurora.org>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-arm-msm@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Jaehoon Chung <jh80.chung@samsung.com>, hdegoede@redhat.com, "Wysocki, Rafael J" <rafael.j.wysocki@intel.com>, s.hauer@pengutronix.de, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 
-On Fri, Dec 4, 2015 at 12:40 PM, Das, Asutosh (asd)
-<asutoshd@codeaurora.org> wrote:
-> + Kostya
-> Hi Aisheng,
-> Yes, a colleague of mine is working on upstreaming it. It should be done
-> within a week or so.
->
+Now, PM core supports asynchronous suspend/resume mode for devices
+during system suspend/resume, and the power state transition of one
+device may be completed in separate kernel thread. PM core ensures
+all power state transition dependency between devices. This patch
+enables MMC/SD/SDIO card and SDIO function devices to suspend/resume
+asynchronously. This will take advantage of multicore and improve
+system suspend/resume speed. After applying this patch and enabling
+all SDIO function's child devices to suspend/resume asynchronously
+on ASUS T100TA, the system suspend-to-idle time is reduced from
+1645ms to 1108ms, and the system resume time is reduced from 940ms
+to 918ms.
 
-Great! Thanks!
-Looking forward to it.
+Signed-off-by: Zhonghui Fu <zhonghui.fu@linux.intel.com>
+---
+ drivers/mmc/core/bus.c      |    2 ++
+ drivers/mmc/core/sdio_bus.c |    1 +
+ 2 files changed, 3 insertions(+), 0 deletions(-)
 
-Regards
-Dong Aisheng
+diff --git a/drivers/mmc/core/bus.c b/drivers/mmc/core/bus.c
+index 972ff84..4bc48f1 100644
+--- a/drivers/mmc/core/bus.c
++++ b/drivers/mmc/core/bus.c
+@@ -349,6 +349,8 @@ int mmc_add_card(struct mmc_card *card)
+ 
+ 	card->dev.of_node = mmc_of_find_child_device(card->host, 0);
+ 
++	device_enable_async_suspend(&card->dev);
++
+ 	ret = device_add(&card->dev);
+ 	if (ret)
+ 		return ret;
+diff --git a/drivers/mmc/core/sdio_bus.c b/drivers/mmc/core/sdio_bus.c
+index 7e327a6..86f5b32 100644
+--- a/drivers/mmc/core/sdio_bus.c
++++ b/drivers/mmc/core/sdio_bus.c
+@@ -322,6 +322,7 @@ int sdio_add_func(struct sdio_func *func)
+ 
+ 	sdio_set_of_node(func);
+ 	sdio_acpi_set_handle(func);
++	device_enable_async_suspend(&func->dev);
+ 	ret = device_add(&func->dev);
+ 	if (ret == 0)
+ 		sdio_func_set_present(func);
+-- 1.7.1
 
->
-> On 12/3/2015 9:12 AM, Dong Aisheng wrote:
->>
->> Hi Asutosh,
->>
->> On Tue, Dec 2, 2014 at 7:53 PM, Asutosh Das <asutoshd@codeaurora.org>
->> wrote:
->>>
->>> In this patch series, we propose a method to add support for
->>> Command Queueing(CQ) feature added to eMMC-5.1 specification.
->>> This feature includes new commands for issuing tasks to the
->>> device and orders the execution of tasks to the device. It
->>> also has task management functions.
->>>
->>> The initialization of CQ is decided based on the underlying
->>> driver capability and the capability advertised by the card
->>> through ext_csd.
->>>
->>> We have selectively adopted the scsi design of pulling in
->>> requests from kernel block layer.
->>>
->>> In order to support queueing of multiple requests, we have
->>> added a new issue function to mmc-queue. This selectively
->>> pulls the requests and prepares and issues it to the underlying
->>> driver. We have used the inherent tagging mechanism of kernel
->>> block layer to keep track and map tags to the slots of underlying
->>> driver. The current design doesn't block for the request to
->>> complete. We have separated the issuing and completion path
->>> of the request and tracking is done using the tag assigned to
->>> the request.
->>>
->>> We have introduced a number of APIs to mmc block layer to
->>> facilitate servicing of requests.
->>>
->>> The completion of requests is handled in a softirq registered
->>> with the kernel block layer during initialization. The error
->>> handling however would be done using a workqueue and is under
->>> development.
->>>
->>> We have separated the legacy eMMC code from CQ code, so as to
->>> make it more manageable.
->>>
->>> A new layer has been introduced to serve the CQ compliant drivers.
->>> This layer (cq_hci) has all the standard functionality implemented.
->>> It also has necessary hooks for convenience of platform drivers.
->>>
->>> Asutosh Das (4):
->>>    mmc: queue: initialization of command-queue support
->>>    mmc: card: Add eMMC command queuing support in mmc block layer
->>>    mmc: cmdq: support for command queue enabled host
->>>    mmc: sdhci: add command queue support to sdhci
->>>
->>> Sujit Reddy Thumma (1):
->>>    mmc: core: Add support to read command queue parameters
->>>
->>>   drivers/mmc/card/block.c   | 378
->>> ++++++++++++++++++++++++++++++++++++++++++++-
->>>   drivers/mmc/card/queue.c   | 160 ++++++++++++++++++-
->>>   drivers/mmc/card/queue.h   |   9 +-
->>>   drivers/mmc/core/core.c    |  87 +++++++++++
->>>   drivers/mmc/core/mmc.c     |  19 +++
->>>   drivers/mmc/core/mmc_ops.c |  45 ++++--
->>>   drivers/mmc/host/Kconfig   |  12 ++
->>>   drivers/mmc/host/Makefile  |   1 +
->>>   drivers/mmc/host/sdhci.c   |  89 +++++++++++
->>>   drivers/mmc/host/sdhci.h   |   2 +
->>>   include/linux/mmc/card.h   |  10 +-
->>>   include/linux/mmc/core.h   |  14 ++
->>>   include/linux/mmc/host.h   |  72 +++++++++
->>>   include/linux/mmc/mmc.h    |   9 ++
->>>   include/linux/mmc/sdhci.h  |   1 +
->>>   15 files changed, 887 insertions(+), 21 deletions(-)
->>>
->> Are you still working on this?
->> Is there a updated version and any upstream plan?
->> I'm going to verify it.
->>
->> Regards
->> Dong Aisheng
->>
->>> --
->>> 1.8.2.1
->>>
->>> The Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum,
->>> a Linux Foundation Collaborative Project
->>> --
->>> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
->>> the body of a message to majordomo@vger.kernel.org
->>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>
->> --
->> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
->
