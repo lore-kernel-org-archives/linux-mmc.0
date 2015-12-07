@@ -1,57 +1,54 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH] mmc: sdhci-acpi: set non-removable in ACPI table
-Date: Mon, 7 Dec 2015 10:30:03 +0200
-Message-ID: <5665438B.10104@intel.com>
-References: <1449150480-1173-1-git-send-email-pelcan@codeaurora.org>
- <56604E57.9000201@intel.com> <5661B3F0.2010000@codeaurora.org>
+From: Russell King <rmk+kernel@arm.linux.org.uk>
+Subject: [PATCH] mmc: fix racy probe cleanup
+Date: Mon, 07 Dec 2015 11:15:39 +0000
+Message-ID: <E1a5tlb-0000UY-81@rmk-PC.arm.linux.org.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <5661B3F0.2010000@codeaurora.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Philip Elcan <pelcan@codeaurora.org>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
-Cc: linux-arm-msm@vger.kernel.org, Timur Tabi <timur@codeaurora.org>, Jon Masters <jcm@redhat.org>, Mark Langsdorf <mlangsdo@redhat.com>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 8bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from pandora.arm.linux.org.uk ([78.32.30.218]:59322 "EHLO
+	pandora.arm.linux.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754931AbbLGLPn (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 7 Dec 2015 06:15:43 -0500
+Content-Disposition: inline
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc@vger.kernel.org
 
-On 04/12/15 17:40, Philip Elcan wrote:
-> 
-> On 12/03/2015 09:14 AM, Adrian Hunter wrote:
->> On 03/12/15 15:48, Philip Elcan wrote:
->>> This allows setting an SDHC controller as non-removable
->>> by using the _RMV method in the ACPI table. It doesn't
->> Is that _RMV on the host controller?  Shouldn't it be on the card i.e. child
->> device node?
-> 
-> Yes, this is on the host controller. The ACPI table only describes the
-> host controller, not the child nodes.
-> 
+MMC probe cleanup is racy: consider the following sequence:
 
-If you look at Intel devices, the _RMV is on the child e.g.
+- mmc_alloc_host()
+- mmc_gpio_request_cd()
+- some failure
+- mmc_free_host()
 
-        Device (SDHA)
-        {
-            Name (_HID, "80860F14")  // _HID: Hardware ID
-            Name (_CID, "PNP0D40")  // _CID: Compatible ID
-            Name (_DDN, "Intel(R) eMMC Controller - 80860F14")  // _DDN: DOS Device Name
-	    ...
-            Device (EMMD)
-            {
-		...
-                Method (_RMV, 0, NotSerialized)  // _RMV: Removal Status
-                {
-                    Return (Zero)
-                }
-            }
-        }
+mmc_gpio_request_cd() registers a handler for the card detect GPIO
+signal, and if this is triggered, it can queue the delayed work in
+struct mmc_host.  mmc_free_host() then frees the mmc_host structure
+with the still queued delayed work, which will then cause the timer
+subsystem to touch free'd memory, potentially oopsing the kernel.
 
-I am not an ACPI expert but that seems like the correct place for it.
+Fix this by ensuring that the delayed work is properly cancelled
+before freeing the underlying memory.
 
->>
->>> mark it as non-removable if GPIO card detection is
->>> already setup.
->>>
->>> Signed-off-by: Philip Elcan <pelcan@codeaurora.org>
->>> ---
->>>
-> 
+Signed-off-by: Russell King <rmk+kernel@arm.linux.org.uk>
+---
+ drivers/mmc/core/host.c | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
+index 5466f25f0281..b246803f2f1d 100644
+--- a/drivers/mmc/core/host.c
++++ b/drivers/mmc/core/host.c
+@@ -677,6 +677,7 @@ EXPORT_SYMBOL(mmc_remove_host);
+  */
+ void mmc_free_host(struct mmc_host *host)
+ {
++	cancel_delayed_work_sync(&host->detect);
+ 	mmc_pwrseq_free(host);
+ 	put_device(&host->class_dev);
+ }
+-- 
+2.1.0
+
