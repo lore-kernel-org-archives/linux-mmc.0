@@ -1,52 +1,44 @@
-From: Scott Wood <scottwood@freescale.com>
-Subject: Re: [v3, 1/5] powerpc/fsl: move mpc85xx.h to include/linux
-Date: Tue, 8 Dec 2015 11:44:49 -0600
-Message-ID: <1449596689.15946.124.camel@freescale.com>
-References: <1448594417-22515-1-git-send-email-yangbo.lu@freescale.com>
-	 <1448594417-22515-2-git-send-email-yangbo.lu@freescale.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH v4] mmc: meson: Add driver for the SD/MMC host found on
+ Amlogic MesonX SoCs
+Date: Tue, 8 Dec 2015 21:35:20 +0100
+Message-ID: <CAPDyKFpcsKihuOiF5=RwoWrF0Jf7hRsXVSU5uV8qZf1mUsa-iQ@mail.gmail.com>
+References: <1448988109-32630-1-git-send-email-carlo@caione.org>
+	<CAPDyKFp=buvJ8Li3XC8XSUAUO7BsE+U6vEQH2xTrgcHAkdG8bQ@mail.gmail.com>
+	<CAOQ7t2aJAPWd3Xmvu7n0EWL-KC8ZriM3KryfsYEh556uXhuR+g@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-bn1bon0115.outbound.protection.outlook.com ([157.56.111.115]:54240
-	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1751245AbbLHSSb (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 8 Dec 2015 13:18:31 -0500
-In-Reply-To: <1448594417-22515-2-git-send-email-yangbo.lu@freescale.com>
+Received: from mail-vk0-f48.google.com ([209.85.213.48]:32922 "EHLO
+	mail-vk0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752595AbbLHUfV (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 8 Dec 2015 15:35:21 -0500
+Received: by vkca188 with SMTP id a188so28717467vkc.0
+        for <linux-mmc@vger.kernel.org>; Tue, 08 Dec 2015 12:35:20 -0800 (PST)
+In-Reply-To: <CAOQ7t2aJAPWd3Xmvu7n0EWL-KC8ZriM3KryfsYEh556uXhuR+g@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Yangbo Lu <yangbo.lu@freescale.com>, linux-mmc@vger.kernel.org, ulf.hansson@linaro.org
-Cc: X.Xie@freescale.com, LeoLi@freescale.com
+To: Carlo Caione <carlo@caione.org>
+Cc: "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, linux-mmc <linux-mmc@vger.kernel.org>, Daniel Drake <drake@endlessm.com>, Jerry Cao <jerry.cao@amlogic.com>, Victor Wan <victor.wan@amlogic.com>, linux-meson@googlegroups.com, Carlo Caione <carlo@endlessm.com>
 
-On Fri, 2015-11-27 at 11:20 +0800, Yangbo Lu wrote:
-> Move mpc85xx.h to include/linux and rename it to fsl-svr.h as
-> a common header file. It has been used for mpc85xx and it will
-> be used for ARM-based SoC as well.
-> 
-> Signed-off-by: Yangbo Lu <yangbo.lu@freescale.com>
-> ---
-> Changes for v2:
-> 	- None
-> Changes for v3:
-> 	- Added this patch
-> ---
->  arch/powerpc/include/asm/mpc85xx.h       | 95 -----------------------------
-> --
->  drivers/clk/clk-qoriq.c                  |  2 +-
->  drivers/i2c/busses/i2c-mpc.c             |  2 +-
->  drivers/iommu/fsl_pamu.c                 |  2 +-
->  drivers/net/ethernet/freescale/gianfar.c |  2 +-
->  include/linux/fsl-svr.h                  | 97
-> ++++++++++++++++++++++++++++++++
->  6 files changed, 101 insertions(+), 99 deletions(-)
->  delete mode 100644 arch/powerpc/include/asm/mpc85xx.h
->  create mode 100644 include/linux/fsl-svr.h
+[...]
 
-Pass -M -C to git format-patch so it detects moves and copies, and shows what
-changed during the move/copy.
+>
+> I have actually a problem and a question related to this value. On the
+> boards I'm currently using to test this driver I have no CD GPIO. In
+> this case do I have to specify the MMC as "non-removable"? Also if I
 
-Could you make it include/linux/fsl/svr.h instead?
+"non-removable" is intended to be used for eMMC or other cards
+(SD/SDIO) that is not possible to remove/insert at runtime.
 
--Scott
+> try to change an SD card at runtime I have to wait 3 times the timeout
+> before being able to do it successfully.
 
+I guess you are using the "broken-cd" binding, which will enable
+MMC_CAP_NEEDS_POLL and thus the mmc core will poll to detect cards
+being inserted or removed.
+
+[...]
+
+Kind regards
+Uffe
