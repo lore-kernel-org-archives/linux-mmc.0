@@ -1,67 +1,64 @@
-From: Daniel Lenski <dlenski@gmail.com>
-Subject: Fwd: [BUG] mfd: rtsx_usb data corruption with SDCX microsd
-Date: Tue, 8 Dec 2015 09:28:32 -0800
-Message-ID: <CAOw_LSH+EKSSir7uh3-ksR9fcg4yd-kO_i5WNR7HXbdt1e0tRw@mail.gmail.com>
-References: <CAOw_LSFRskOLSPW31DUpbYv8wsrH68wkmW=F7s2jCLsRvSLfsg@mail.gmail.com>
- <CAOw_LSFCY6mTKykBNpjdVoFu5B33nD2hdf9-4NigOXz22UZK-w@mail.gmail.com>
- <CAPDyKFpJ_3zuiYnP=QcDvd-6CCOUU=jjUdXK0qbeDTQnv+Jrfg@mail.gmail.com> <CAOw_LSFhEuDLNfF4HCBhqx_-DmCgiV0oCYn61C7Ahr-x+LPLPw@mail.gmail.com>
+From: Scott Wood <scottwood@freescale.com>
+Subject: Re: [v3, 1/5] powerpc/fsl: move mpc85xx.h to include/linux
+Date: Tue, 8 Dec 2015 11:38:05 -0600
+Message-ID: <1449596285.15946.120.camel@freescale.com>
+References: <1448594417-22515-1-git-send-email-yangbo.lu@freescale.com>
+	 <1448594417-22515-2-git-send-email-yangbo.lu@freescale.com>
+	 <CAPDyKFpkiG=m1gKioJaWtu-EJk4sndEDH1X7w6eNvUDueiCdGw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wm0-f51.google.com ([74.125.82.51]:36383 "EHLO
-	mail-wm0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751096AbbLHR3N (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 8 Dec 2015 12:29:13 -0500
-Received: by wmww144 with SMTP id w144so190034363wmw.1
-        for <linux-mmc@vger.kernel.org>; Tue, 08 Dec 2015 09:29:12 -0800 (PST)
-In-Reply-To: <CAOw_LSFhEuDLNfF4HCBhqx_-DmCgiV0oCYn61C7Ahr-x+LPLPw@mail.gmail.com>
+Received: from mail-bn1bbn0101.outbound.protection.outlook.com ([157.56.111.101]:6717
+	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1751096AbbLHRiV (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 8 Dec 2015 12:38:21 -0500
+In-Reply-To: <CAPDyKFpkiG=m1gKioJaWtu-EJk4sndEDH1X7w6eNvUDueiCdGw@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: marcus.overhagen@gmail.com, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>
+To: Ulf Hansson <ulf.hansson@linaro.org>, Yangbo Lu <yangbo.lu@freescale.com>, Lee Jones <lee@kernel.org>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, X.Xie@freescale.com, Li Leo <LeoLi@freescale.com>
 
-On Dec 8, 2015 6:11 AM, "Ulf Hansson" <ulf.hansson@linaro.org> wrote:
->
-> On 4 December 2015 at 21:34, Daniel Lenski <dlenski@gmail.com> wrote:
-> > In conclusion... it seems that the kernel is attempting to drive this
-> > card faster than it can actually work. What I'm trying to figure out
-> > now:
-> > - How does the kernel attempt to figure out the capability of a given
-> > SD card? Where is that in the kernel source tree?
->
-> drivers/mmc/core/*
->
-> It's kind of complicated, but please go ahead and have a look.
+On Tue, 2015-12-08 at 14:49 +0100, Ulf Hansson wrote:
+> +Lee Jones
+> 
+> On 27 November 2015 at 04:20, Yangbo Lu <yangbo.lu@freescale.com> wrote:
+> > Move mpc85xx.h to include/linux and rename it to fsl-svr.h as
+> > a common header file. It has been used for mpc85xx and it will
+> > be used for ARM-based SoC as well.
+> > 
+> > Signed-off-by: Yangbo Lu <yangbo.lu@freescale.com>
+> > ---
+> > Changes for v2:
+> >         - None
+> > Changes for v3:
+> >         - Added this patch
+> > ---
+> >  arch/powerpc/include/asm/mpc85xx.h       | 95 ---------------------------
+> > ----
+> >  drivers/clk/clk-qoriq.c                  |  2 +-
+> >  drivers/i2c/busses/i2c-mpc.c             |  2 +-
+> >  drivers/iommu/fsl_pamu.c                 |  2 +-
+> >  drivers/net/ethernet/freescale/gianfar.c |  2 +-
+> >  include/linux/fsl-svr.h                  | 97
+> > ++++++++++++++++++++++++++++++++
+> >  6 files changed, 101 insertions(+), 99 deletions(-)
+> >  delete mode 100644 arch/powerpc/include/asm/mpc85xx.h
+> >  create mode 100644 include/linux/fsl-svr.h
+> 
+> I am not sure, but perhaps the more proper location is:
+> 
+> include/linux/mfd/fsl-svr.h
+> 
+> ...or maybe even better:
+> 
+> include/linux/mfd/syscon/fsl-svr.h
 
-Will do.
+There is nothing mfd or syscon specific about this data (and in fact I'm a bit
+skeptical about using syscon for this, especially since it seems to require a
+device tree modification); it's already used in other places that read the SVR
+via the PPC SPR.
 
-> > - Is it possible to make the list of supported caps a module
-> > parameter, to more easily throttle high-speed modes that don't work
-> > with a particular card?
->
-> Maybe a sysfs/debugfs interface would be better, but I like the idea!
->
-> Currently there is no way for userspace to disable some of these
-> "speed mode" caps, which would be very useful in cases like yours.
->
-> I don't know if I ever will get time to hack on such code, so feel
-> free to have a try yourself!
+-Scott
 
-Ideally, would it be better to have a userspace control at the level
-of the individual host control drivers, or for the entire mmc/SD
-subsystem?
-
-> Regarding how to fix this problem right now, I guess we should remove
-> the caps which the host driver wrongly claims to support. Do you want
-> to send a patch for that?
-
-I can do that, but am unsure whether it is truly an issue with the
-host driver, or the card itself, in my case.
-
-Is there any information which I can use to clearly rule one or the
-other case out?
-
-If I understood Marcus Overhagen's original post correctly, he was
-successful with a UHS SDHC card and this same controller.
-
-Thanks,
-Dan
