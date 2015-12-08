@@ -1,72 +1,320 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: pwrseq_simple: Fix regression with optional GPIOs
-Date: Tue, 8 Dec 2015 14:17:44 +0100
-Message-ID: <CAPDyKFrVQ_4u9rYN41w8y+uZwgxSCHZzpPRUTa5RswTkapOFTQ@mail.gmail.com>
-References: <1449528845-25189-1-git-send-email-tony@atomide.com>
-	<CAPDyKFpxiOJJdh-nLXjxv3DYJnW3RAf_9aqMfds46=-oqPd5ng@mail.gmail.com>
-	<20151208003213.GU23396@atomide.com>
+Subject: Re: [v3, 1/5] powerpc/fsl: move mpc85xx.h to include/linux
+Date: Tue, 8 Dec 2015 14:49:11 +0100
+Message-ID: <CAPDyKFpkiG=m1gKioJaWtu-EJk4sndEDH1X7w6eNvUDueiCdGw@mail.gmail.com>
+References: <1448594417-22515-1-git-send-email-yangbo.lu@freescale.com>
+	<1448594417-22515-2-git-send-email-yangbo.lu@freescale.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qk0-f181.google.com ([209.85.220.181]:33835 "EHLO
-	mail-qk0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756081AbbLHNRo (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 8 Dec 2015 08:17:44 -0500
-Received: by qkdp187 with SMTP id p187so27752091qkd.1
-        for <linux-mmc@vger.kernel.org>; Tue, 08 Dec 2015 05:17:44 -0800 (PST)
-In-Reply-To: <20151208003213.GU23396@atomide.com>
+Received: from mail-qg0-f53.google.com ([209.85.192.53]:34162 "EHLO
+	mail-qg0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756304AbbLHNtM (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 8 Dec 2015 08:49:12 -0500
+Received: by qgeb1 with SMTP id b1so16121669qge.1
+        for <linux-mmc@vger.kernel.org>; Tue, 08 Dec 2015 05:49:12 -0800 (PST)
+In-Reply-To: <1448594417-22515-2-git-send-email-yangbo.lu@freescale.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Tony Lindgren <tony@atomide.com>
-Cc: Linus Walleij <linus.walleij@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, linux-omap <linux-omap@vger.kernel.org>, Javier Martinez Canillas <javier@osg.samsung.com>
+To: Yangbo Lu <yangbo.lu@freescale.com>, Lee Jones <lee@kernel.org>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Scott Wood <scottwood@freescale.com>, X.Xie@freescale.com, Li Leo <LeoLi@freescale.com>
 
-On 8 December 2015 at 01:32, Tony Lindgren <tony@atomide.com> wrote:
-> * Ulf Hansson <ulf.hansson@linaro.org> [151207 16:20]:
->> +Linus
->>
->> On 7 December 2015 at 23:54, Tony Lindgren <tony@atomide.com> wrote:
->> > Commit ce037275861e ("mmc: pwrseq_simple: use GPIO descriptors array API")
->> > changed the handling MMC power sequence so GPIOs no longer are optional.
->> >
->> > This broke SDIO WLAN at least for omap5 that can't yet use the reset GPIOs
->> > with pwrseq_simple as a wait is needed after enabling the SDIO device.
->>
->> Can you elaborate on this. Did it break omap5 or not? :-)
++Lee Jones
+
+On 27 November 2015 at 04:20, Yangbo Lu <yangbo.lu@freescale.com> wrote:
+> Move mpc85xx.h to include/linux and rename it to fsl-svr.h as
+> a common header file. It has been used for mpc85xx and it will
+> be used for ARM-based SoC as well.
 >
-> Yes it broke WLAN for omap5 that I just got fixed.. It only uses the clocks
-> art of the pwrseq currently because of the delay needed.
->
->> Also, I am interested to know more about the waiting period you need.
->> I assume that's because of the HW's characteristic?
->
-> At least TI wl12xx and Marvell 8787 need a delay after enabling the the WLAN.
->
->> Why can't we have that being described in DT and then make
->> pwrseq_simple *wait* if needed?
->
-> We can, but I'm thinking that we might be better off adding support for
-> regulators to pwrseq. Both TI wl12xx and Marvell 8787 get power from the
-> battery, and probably have an integrated regulator.
+> Signed-off-by: Yangbo Lu <yangbo.lu@freescale.com>
+> ---
+> Changes for v2:
+>         - None
+> Changes for v3:
+>         - Added this patch
+> ---
+>  arch/powerpc/include/asm/mpc85xx.h       | 95 -------------------------------
+>  drivers/clk/clk-qoriq.c                  |  2 +-
+>  drivers/i2c/busses/i2c-mpc.c             |  2 +-
+>  drivers/iommu/fsl_pamu.c                 |  2 +-
+>  drivers/net/ethernet/freescale/gianfar.c |  2 +-
+>  include/linux/fsl-svr.h                  | 97 ++++++++++++++++++++++++++++++++
+>  6 files changed, 101 insertions(+), 99 deletions(-)
+>  delete mode 100644 arch/powerpc/include/asm/mpc85xx.h
+>  create mode 100644 include/linux/fsl-svr.h
 
-Sounds very reasonable! Perhaps some of the delays can be handled
-within the context of the regulator then!?
+I am not sure, but perhaps the more proper location is:
 
->
-> Also, the delay and the power up sequencey can be more complicated than what
-> we currently support. In the 8787 case, pdn pin needs to be asserted for 300ms
-> after power pins are stable and while reset is held high.
+include/linux/mfd/fsl-svr.h
 
-I am for sure open to extend pwrseq_simple, please go ahead!
+...or maybe even better:
 
-The initial version provided a proof of concept and the
-infrastructure. I expect and want people to extend it to suit their
-HWs.
+include/linux/mfd/syscon/fsl-svr.h
 
-If we at some point find that pwrseq_simple starts to become too
-complex, we may add another pwrseq type with a corresponding new
-compatible string.
-
-[...]
+I have added Lee (as the mfd maintainer) to see if he has any advise here.
 
 Kind regards
 Uffe
+
+>
+> diff --git a/arch/powerpc/include/asm/mpc85xx.h b/arch/powerpc/include/asm/mpc85xx.h
+> deleted file mode 100644
+> index 213f3a8..0000000
+> --- a/arch/powerpc/include/asm/mpc85xx.h
+> +++ /dev/null
+> @@ -1,95 +0,0 @@
+> -/*
+> - * MPC85xx cpu type detection
+> - *
+> - * Copyright 2011-2012 Freescale Semiconductor, Inc.
+> - *
+> - * This is free software; you can redistribute it and/or modify
+> - * it under the terms of the GNU General Public License as published by
+> - * the Free Software Foundation; either version 2 of the License, or
+> - * (at your option) any later version.
+> - */
+> -
+> -#ifndef __ASM_PPC_MPC85XX_H
+> -#define __ASM_PPC_MPC85XX_H
+> -
+> -#define SVR_REV(svr)   ((svr) & 0xFF)          /* SOC design resision */
+> -#define SVR_MAJ(svr)   (((svr) >>  4) & 0xF)   /* Major revision field*/
+> -#define SVR_MIN(svr)   (((svr) >>  0) & 0xF)   /* Minor revision field*/
+> -
+> -/* Some parts define SVR[0:23] as the SOC version */
+> -#define SVR_SOC_VER(svr) (((svr) >> 8) & 0xFFF7FF)     /* SOC Version fields */
+> -
+> -#define SVR_8533       0x803400
+> -#define SVR_8535       0x803701
+> -#define SVR_8536       0x803700
+> -#define SVR_8540       0x803000
+> -#define SVR_8541       0x807200
+> -#define SVR_8543       0x803200
+> -#define SVR_8544       0x803401
+> -#define SVR_8545       0x803102
+> -#define SVR_8547       0x803101
+> -#define SVR_8548       0x803100
+> -#define SVR_8555       0x807100
+> -#define SVR_8560       0x807000
+> -#define SVR_8567       0x807501
+> -#define SVR_8568       0x807500
+> -#define SVR_8569       0x808000
+> -#define SVR_8572       0x80E000
+> -#define SVR_P1010      0x80F100
+> -#define SVR_P1011      0x80E500
+> -#define SVR_P1012      0x80E501
+> -#define SVR_P1013      0x80E700
+> -#define SVR_P1014      0x80F101
+> -#define SVR_P1017      0x80F700
+> -#define SVR_P1020      0x80E400
+> -#define SVR_P1021      0x80E401
+> -#define SVR_P1022      0x80E600
+> -#define SVR_P1023      0x80F600
+> -#define SVR_P1024      0x80E402
+> -#define SVR_P1025      0x80E403
+> -#define SVR_P2010      0x80E300
+> -#define SVR_P2020      0x80E200
+> -#define SVR_P2040      0x821000
+> -#define SVR_P2041      0x821001
+> -#define SVR_P3041      0x821103
+> -#define SVR_P4040      0x820100
+> -#define SVR_P4080      0x820000
+> -#define SVR_P5010      0x822100
+> -#define SVR_P5020      0x822000
+> -#define SVR_P5021      0X820500
+> -#define SVR_P5040      0x820400
+> -#define SVR_T4240      0x824000
+> -#define SVR_T4120      0x824001
+> -#define SVR_T4160      0x824100
+> -#define SVR_T4080      0x824102
+> -#define SVR_C291       0x850000
+> -#define SVR_C292       0x850020
+> -#define SVR_C293       0x850030
+> -#define SVR_B4860      0X868000
+> -#define SVR_G4860      0x868001
+> -#define SVR_G4060      0x868003
+> -#define SVR_B4440      0x868100
+> -#define SVR_G4440      0x868101
+> -#define SVR_B4420      0x868102
+> -#define SVR_B4220      0x868103
+> -#define SVR_T1040      0x852000
+> -#define SVR_T1041      0x852001
+> -#define SVR_T1042      0x852002
+> -#define SVR_T1020      0x852100
+> -#define SVR_T1021      0x852101
+> -#define SVR_T1022      0x852102
+> -#define SVR_T2080      0x853000
+> -#define SVR_T2081      0x853100
+> -
+> -#define SVR_8610       0x80A000
+> -#define SVR_8641       0x809000
+> -#define SVR_8641D      0x809001
+> -
+> -#define SVR_9130       0x860001
+> -#define SVR_9131       0x860000
+> -#define SVR_9132       0x861000
+> -#define SVR_9232       0x861400
+> -
+> -#define SVR_Unknown    0xFFFFFF
+> -
+> -#endif
+> diff --git a/drivers/clk/clk-qoriq.c b/drivers/clk/clk-qoriq.c
+> index 1ab0fb8..f883ed0 100644
+> --- a/drivers/clk/clk-qoriq.c
+> +++ b/drivers/clk/clk-qoriq.c
+> @@ -1146,7 +1146,7 @@ bad_args:
+>  }
+>
+>  #ifdef CONFIG_PPC
+> -#include <asm/mpc85xx.h>
+> +#include <linux/fsl-svr.h>
+>
+>  static const u32 a4510_svrs[] __initconst = {
+>         (SVR_P2040 << 8) | 0x10,        /* P2040 1.0 */
+> diff --git a/drivers/i2c/busses/i2c-mpc.c b/drivers/i2c/busses/i2c-mpc.c
+> index 48ecffe..a8153dd 100644
+> --- a/drivers/i2c/busses/i2c-mpc.c
+> +++ b/drivers/i2c/busses/i2c-mpc.c
+> @@ -27,9 +27,9 @@
+>  #include <linux/i2c.h>
+>  #include <linux/interrupt.h>
+>  #include <linux/delay.h>
+> +#include <linux/fsl-svr.h>
+>
+>  #include <asm/mpc52xx.h>
+> -#include <asm/mpc85xx.h>
+>  #include <sysdev/fsl_soc.h>
+>
+>  #define DRV_NAME "mpc-i2c"
+> diff --git a/drivers/iommu/fsl_pamu.c b/drivers/iommu/fsl_pamu.c
+> index a34355f..abbfd9d 100644
+> --- a/drivers/iommu/fsl_pamu.c
+> +++ b/drivers/iommu/fsl_pamu.c
+> @@ -24,7 +24,7 @@
+>  #include <linux/interrupt.h>
+>  #include <linux/genalloc.h>
+>
+> -#include <asm/mpc85xx.h>
+> +#include <linux/fsl-svr.h>
+>
+>  /* define indexes for each operation mapping scenario */
+>  #define OMI_QMAN        0x00
+> diff --git a/drivers/net/ethernet/freescale/gianfar.c b/drivers/net/ethernet/freescale/gianfar.c
+> index 3e6b9b4..130cc90 100644
+> --- a/drivers/net/ethernet/freescale/gianfar.c
+> +++ b/drivers/net/ethernet/freescale/gianfar.c
+> @@ -90,7 +90,7 @@
+>  #include <asm/io.h>
+>  #ifdef CONFIG_PPC
+>  #include <asm/reg.h>
+> -#include <asm/mpc85xx.h>
+> +#include <linux/fsl-svr.h>
+>  #endif
+>  #include <asm/irq.h>
+>  #include <asm/uaccess.h>
+> diff --git a/include/linux/fsl-svr.h b/include/linux/fsl-svr.h
+> new file mode 100644
+> index 0000000..fc8fcc2
+> --- /dev/null
+> +++ b/include/linux/fsl-svr.h
+> @@ -0,0 +1,97 @@
+> +/*
+> + * MPC85xx cpu type detection
+> + *
+> + * Copyright 2011-2012 Freescale Semiconductor, Inc.
+> + *
+> + * This is free software; you can redistribute it and/or modify
+> + * it under the terms of the GNU General Public License as published by
+> + * the Free Software Foundation; either version 2 of the License, or
+> + * (at your option) any later version.
+> + */
+> +
+> +#ifndef __FSL_SVR_H__
+> +#define __FSL_SVR_H__
+> +
+> +#define SVR_OFFSET     0xA4
+> +
+> +#define SVR_REV(svr)   ((svr) & 0xFF)          /* SOC design resision */
+> +#define SVR_MAJ(svr)   (((svr) >>  4) & 0xF)   /* Major revision field*/
+> +#define SVR_MIN(svr)   (((svr) >>  0) & 0xF)   /* Minor revision field*/
+> +
+> +/* Some parts define SVR[0:23] as the SOC version */
+> +#define SVR_SOC_VER(svr) (((svr) >> 8) & 0xFFF7FF)     /* SOC Version fields */
+> +
+> +#define SVR_8533       0x803400
+> +#define SVR_8535       0x803701
+> +#define SVR_8536       0x803700
+> +#define SVR_8540       0x803000
+> +#define SVR_8541       0x807200
+> +#define SVR_8543       0x803200
+> +#define SVR_8544       0x803401
+> +#define SVR_8545       0x803102
+> +#define SVR_8547       0x803101
+> +#define SVR_8548       0x803100
+> +#define SVR_8555       0x807100
+> +#define SVR_8560       0x807000
+> +#define SVR_8567       0x807501
+> +#define SVR_8568       0x807500
+> +#define SVR_8569       0x808000
+> +#define SVR_8572       0x80E000
+> +#define SVR_P1010      0x80F100
+> +#define SVR_P1011      0x80E500
+> +#define SVR_P1012      0x80E501
+> +#define SVR_P1013      0x80E700
+> +#define SVR_P1014      0x80F101
+> +#define SVR_P1017      0x80F700
+> +#define SVR_P1020      0x80E400
+> +#define SVR_P1021      0x80E401
+> +#define SVR_P1022      0x80E600
+> +#define SVR_P1023      0x80F600
+> +#define SVR_P1024      0x80E402
+> +#define SVR_P1025      0x80E403
+> +#define SVR_P2010      0x80E300
+> +#define SVR_P2020      0x80E200
+> +#define SVR_P2040      0x821000
+> +#define SVR_P2041      0x821001
+> +#define SVR_P3041      0x821103
+> +#define SVR_P4040      0x820100
+> +#define SVR_P4080      0x820000
+> +#define SVR_P5010      0x822100
+> +#define SVR_P5020      0x822000
+> +#define SVR_P5021      0X820500
+> +#define SVR_P5040      0x820400
+> +#define SVR_T4240      0x824000
+> +#define SVR_T4120      0x824001
+> +#define SVR_T4160      0x824100
+> +#define SVR_T4080      0x824102
+> +#define SVR_C291       0x850000
+> +#define SVR_C292       0x850020
+> +#define SVR_C293       0x850030
+> +#define SVR_B4860      0X868000
+> +#define SVR_G4860      0x868001
+> +#define SVR_G4060      0x868003
+> +#define SVR_B4440      0x868100
+> +#define SVR_G4440      0x868101
+> +#define SVR_B4420      0x868102
+> +#define SVR_B4220      0x868103
+> +#define SVR_T1040      0x852000
+> +#define SVR_T1041      0x852001
+> +#define SVR_T1042      0x852002
+> +#define SVR_T1020      0x852100
+> +#define SVR_T1021      0x852101
+> +#define SVR_T1022      0x852102
+> +#define SVR_T2080      0x853000
+> +#define SVR_T2081      0x853100
+> +
+> +#define SVR_8610       0x80A000
+> +#define SVR_8641       0x809000
+> +#define SVR_8641D      0x809001
+> +
+> +#define SVR_9130       0x860001
+> +#define SVR_9131       0x860000
+> +#define SVR_9132       0x861000
+> +#define SVR_9232       0x861400
+> +
+> +#define SVR_Unknown    0xFFFFFF
+> +
+> +#endif
+> --
+> 2.1.0.27.g96db324
+>
