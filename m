@@ -1,64 +1,91 @@
 From: Scott Wood <scottwood@freescale.com>
-Subject: Re: [v3, 1/5] powerpc/fsl: move mpc85xx.h to include/linux
-Date: Tue, 8 Dec 2015 11:38:05 -0600
-Message-ID: <1449596285.15946.120.camel@freescale.com>
+Subject: Re: [v3, 2/5] mmc: sdhci-of-esdhc: get SVR from global utilities
+ registers
+Date: Tue, 8 Dec 2015 11:45:32 -0600
+Message-ID: <1449596732.15946.125.camel@freescale.com>
 References: <1448594417-22515-1-git-send-email-yangbo.lu@freescale.com>
-	 <1448594417-22515-2-git-send-email-yangbo.lu@freescale.com>
-	 <CAPDyKFpkiG=m1gKioJaWtu-EJk4sndEDH1X7w6eNvUDueiCdGw@mail.gmail.com>
+	 <1448594417-22515-3-git-send-email-yangbo.lu@freescale.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-bn1bbn0101.outbound.protection.outlook.com ([157.56.111.101]:6717
+Received: from mail-bn1on0119.outbound.protection.outlook.com ([157.56.110.119]:20112
 	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
 	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1751096AbbLHRiV (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 8 Dec 2015 12:38:21 -0500
-In-Reply-To: <CAPDyKFpkiG=m1gKioJaWtu-EJk4sndEDH1X7w6eNvUDueiCdGw@mail.gmail.com>
+	id S1751112AbbLHSAH (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 8 Dec 2015 13:00:07 -0500
+In-Reply-To: <1448594417-22515-3-git-send-email-yangbo.lu@freescale.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>, Yangbo Lu <yangbo.lu@freescale.com>, Lee Jones <lee@kernel.org>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, X.Xie@freescale.com, Li Leo <LeoLi@freescale.com>
+To: Yangbo Lu <yangbo.lu@freescale.com>, linux-mmc@vger.kernel.org, ulf.hansson@linaro.org
+Cc: X.Xie@freescale.com, LeoLi@freescale.com
 
-On Tue, 2015-12-08 at 14:49 +0100, Ulf Hansson wrote:
-> +Lee Jones
+On Fri, 2015-11-27 at 11:20 +0800, Yangbo Lu wrote:
+> Most of silicon errata about the eSDHC need to be identified through
+> the SoC version/revision. This patch makes the driver get these
+> information from SVR(system version register) of global utilities
+> registers.
 > 
-> On 27 November 2015 at 04:20, Yangbo Lu <yangbo.lu@freescale.com> wrote:
-> > Move mpc85xx.h to include/linux and rename it to fsl-svr.h as
-> > a common header file. It has been used for mpc85xx and it will
-> > be used for ARM-based SoC as well.
-> > 
-> > Signed-off-by: Yangbo Lu <yangbo.lu@freescale.com>
-> > ---
-> > Changes for v2:
-> >         - None
-> > Changes for v3:
-> >         - Added this patch
-> > ---
-> >  arch/powerpc/include/asm/mpc85xx.h       | 95 ---------------------------
-> > ----
-> >  drivers/clk/clk-qoriq.c                  |  2 +-
-> >  drivers/i2c/busses/i2c-mpc.c             |  2 +-
-> >  drivers/iommu/fsl_pamu.c                 |  2 +-
-> >  drivers/net/ethernet/freescale/gianfar.c |  2 +-
-> >  include/linux/fsl-svr.h                  | 97
-> > ++++++++++++++++++++++++++++++++
-> >  6 files changed, 101 insertions(+), 99 deletions(-)
-> >  delete mode 100644 arch/powerpc/include/asm/mpc85xx.h
-> >  create mode 100644 include/linux/fsl-svr.h
+> Signed-off-by: Yangbo Lu <yangbo.lu@freescale.com>
+> ---
+> Changes for v2:
+> 	- Got SVR through iomap instead of dts
+> Changes for v3:
+> 	- Managed GUTS through syscon instead of iomap in eSDHC driver
+> ---
+>  drivers/mmc/host/sdhci-of-esdhc.c | 19 +++++++++++++++++--
+>  1 file changed, 17 insertions(+), 2 deletions(-)
 > 
-> I am not sure, but perhaps the more proper location is:
-> 
-> include/linux/mfd/fsl-svr.h
-> 
-> ...or maybe even better:
-> 
-> include/linux/mfd/syscon/fsl-svr.h
+> diff --git a/drivers/mmc/host/sdhci-of-esdhc.c b/drivers/mmc/host/sdhci-of
+> -esdhc.c
+> index 83b1226..fce24b7 100644
+> --- a/drivers/mmc/host/sdhci-of-esdhc.c
+> +++ b/drivers/mmc/host/sdhci-of-esdhc.c
+> @@ -19,6 +19,9 @@
+>  #include <linux/delay.h>
+>  #include <linux/module.h>
+>  #include <linux/mmc/host.h>
+> +#include <linux/mfd/syscon.h>
+> +#include <linux/regmap.h>
+> +#include <linux/fsl-svr.h>
+>  #include "sdhci-pltfm.h"
+>  #include "sdhci-esdhc.h"
+>  
+> @@ -28,6 +31,8 @@
+>  struct sdhci_esdhc {
+>  	u8 vendor_ver;
+>  	u8 spec_ver;
+> +	u32 soc_ver;
+> +	u8 soc_rev;
+>  };
+>  
+>  /**
+> @@ -566,18 +571,28 @@ static void esdhc_init(struct platform_device *pdev,
+> struct sdhci_host *host)
+>  {
+>  	struct sdhci_pltfm_host *pltfm_host;
+>  	struct sdhci_esdhc *esdhc;
+> +	struct regmap *guts_regmap;
+> +	u32 svr;
+>  	u16 host_ver;
+>  
+>  	pltfm_host = sdhci_priv(host);
+>  	esdhc = devm_kzalloc(&pdev->dev, sizeof(struct sdhci_esdhc),
+>  			     GFP_KERNEL);
+> +	pltfm_host->priv = esdhc;
+> +
+> +	guts_regmap = syscon_regmap_lookup_by_compatible("syscon");
+> +	if (IS_ERR(guts_regmap)) {
+> +		dev_err(&pdev->dev, "unable to find global utilities
+> registers\n");
+> +	} else {
+> +		regmap_read(guts_regmap, SVR_OFFSET, &svr);
+> +		esdhc->soc_ver = SVR_SOC_VER(svr);
+> +		esdhc->soc_rev = SVR_REV(svr);
+> +	}
 
-There is nothing mfd or syscon specific about this data (and in fact I'm a bit
-skeptical about using syscon for this, especially since it seems to require a
-device tree modification); it's already used in other places that read the SVR
-via the PPC SPR.
+As this patchset stands you're going to be spitting out that error message on
+everything that isn't t4240...
 
 -Scott
 
