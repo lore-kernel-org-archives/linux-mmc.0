@@ -1,44 +1,117 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v4] mmc: meson: Add driver for the SD/MMC host found on
- Amlogic MesonX SoCs
-Date: Tue, 8 Dec 2015 21:35:20 +0100
-Message-ID: <CAPDyKFpcsKihuOiF5=RwoWrF0Jf7hRsXVSU5uV8qZf1mUsa-iQ@mail.gmail.com>
-References: <1448988109-32630-1-git-send-email-carlo@caione.org>
-	<CAPDyKFp=buvJ8Li3XC8XSUAUO7BsE+U6vEQH2xTrgcHAkdG8bQ@mail.gmail.com>
-	<CAOQ7t2aJAPWd3Xmvu7n0EWL-KC8ZriM3KryfsYEh556uXhuR+g@mail.gmail.com>
+From: Scott Wood <scottwood@freescale.com>
+Subject: Re: [v3, 4/5] powerpc: dts: t4240: add syscon support for DCFG node
+Date: Tue, 8 Dec 2015 22:33:27 -0600
+Message-ID: <1449635607.15946.165.camel@freescale.com>
+References: <1448594417-22515-1-git-send-email-yangbo.lu@freescale.com>
+	 <1448594417-22515-5-git-send-email-yangbo.lu@freescale.com>
+	 <1449596781.15946.126.camel@freescale.com>
+	 <BLUPR0301MB2065B5878A43F66982D6B30BF2E80@BLUPR0301MB2065.namprd03.prod.outlook.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-vk0-f48.google.com ([209.85.213.48]:32922 "EHLO
-	mail-vk0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752595AbbLHUfV (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 8 Dec 2015 15:35:21 -0500
-Received: by vkca188 with SMTP id a188so28717467vkc.0
-        for <linux-mmc@vger.kernel.org>; Tue, 08 Dec 2015 12:35:20 -0800 (PST)
-In-Reply-To: <CAOQ7t2aJAPWd3Xmvu7n0EWL-KC8ZriM3KryfsYEh556uXhuR+g@mail.gmail.com>
+Received: from mail-bn1bbn0107.outbound.protection.outlook.com ([157.56.111.107]:57184
+	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1751668AbbLIEdk (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 8 Dec 2015 23:33:40 -0500
+In-Reply-To: <BLUPR0301MB2065B5878A43F66982D6B30BF2E80@BLUPR0301MB2065.namprd03.prod.outlook.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Carlo Caione <carlo@caione.org>
-Cc: "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, linux-mmc <linux-mmc@vger.kernel.org>, Daniel Drake <drake@endlessm.com>, Jerry Cao <jerry.cao@amlogic.com>, Victor Wan <victor.wan@amlogic.com>, linux-meson@googlegroups.com, Carlo Caione <carlo@endlessm.com>
+To: Lu Yangbo-B47093 <yangbo.lu@freescale.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>
+Cc: Xie Xiaobo-R63061 <X.Xie@freescale.com>, Li Yang-Leo-R58472 <LeoLi@freescale.com>
 
-[...]
+On Tue, 2015-12-08 at 22:30 -0600, Lu Yangbo-B47093 wrote:
+> > -----Original Message-----
+> > From: Wood Scott-B07421
+> > Sent: Wednesday, December 09, 2015 1:46 AM
+> > To: Lu Yangbo-B47093; linux-mmc@vger.kernel.org; ulf.hansson@linaro=
+=2Eorg
+> > Cc: Xie Xiaobo-R63061; Li Yang-Leo-R58472
+> > Subject: Re: [v3, 4/5] powerpc: dts: t4240: add syscon support for =
+DCFG
+> > node
+> >=20
+> > On Fri, 2015-11-27 at 11:20 +0800, Yangbo Lu wrote:
+> > > Add syscon support for DCFG node, so that the driver could use sy=
+scon
+> > > regmap interface to access the device config module registers.
+> > > And the CONFIG_MFD_SYSCON should be enabled for this.
+> > >=20
+> > > Signed-off-by: Yangbo Lu <yangbo.lu@freescale.com>
+> > > ---
+> > > Changes for v2:
+> > > 	- None
+> > > Changes for v3:
+> > > 	- Added this patch
+> > > ---
+> > >  arch/powerpc/boot/dts/fsl/t4240si-post.dtsi | 4 +++-
+> > >  1 file changed, 3 insertions(+), 1 deletion(-)
+> > >=20
+> > > diff --git a/arch/powerpc/boot/dts/fsl/t4240si-post.dtsi
+> > > b/arch/powerpc/boot/dts/fsl/t4240si-post.dtsi
+> > > index 68c4ead..5f148b2 100644
+> > > --- a/arch/powerpc/boot/dts/fsl/t4240si-post.dtsi
+> > > +++ b/arch/powerpc/boot/dts/fsl/t4240si-post.dtsi
+> > > @@ -941,7 +941,9 @@
+> > >  /include/ "qoriq-mpic4.3.dtsi"
+> > >=20
+> > >  	guts: global-utilities@e0000 {
+> > > -		compatible =3D "fsl,t4240-device-config", "fsl,qoriq
+> > > -device
+> > > -config-2.0";
+> > > +		compatible =3D "fsl,t4240-device-config",
+> > > +				"fsl,qoriq-device-config-2.0",
+> > > +				"syscon";
+> >=20
+> >=20
+> > I really don't like changing the device tree based on Linux interna=
+ls.
+> > It also means that the workaround wouldn't work for users that don'=
+t
+> > upgrade their device tree.  I definitely don't like one QorIQ chip =
+having
+> > "syscon" on the dcfg node but others not having it.
+> >=20
+> > The guts driver should just maintain a list of compatibles to match=
+=2E  Why
+> > do we need to use syscon, rather than a guts driver that exports an
+> > fsl_get_svr() function?
+> >=20
+> > -Scott
+>=20
+> [Lu Yangbo-B47093] I think the only difference between fsl_get_svr() =
+and
+> syscon is that we don=E2=80=99t need to change dts with fsl_get_svr()=
+, right?
 
->
-> I have actually a problem and a question related to this value. On the
-> boards I'm currently using to test this driver I have no CD GPIO. In
-> this case do I have to specify the MMC as "non-removable"? Also if I
+That is one difference.  It also would simplify callers, and avoid the =
+need to
+depend on the overcomplicated and difficult-to-follow regmap code in or=
+der to
+accomplish something very simple.
 
-"non-removable" is intended to be used for eMMC or other cards
-(SD/SDIO) that is not possible to remove/insert at runtime.
+> The syscon has considered the endianess, and we don=E2=80=99t need to=
+ add more code
+> to use it and only add 'syscon' in the node.
 
-> try to change an SD card at runtime I have to wait 3 times the timeout
-> before being able to do it successfully.
+Dealing with the endianess in a common guts driver would be trivial.
 
-I guess you are using the "broken-cd" binding, which will enable
-MMC_CAP_NEEDS_POLL and thus the mmc core will poll to detect cards
-being inserted or removed.
+> This patchset only enables syscon in T4240 DFCG node since it has an =
+erratum
+> to use it.
 
-[...]
+The device tree describes the hardware, not what you want to use it for=
+=2E  The
+existence of an erratum in the esdhc block says nothing about what the =
+dcfg
+node is.
 
-Kind regards
-Uffe
+> The fsl_get_svr() you suggested is also an idea for this.
+> Then, may I know is there a guts driver in kernel?
+> Thanks a lot.=20
+
+There isn't, but there should be.
+
+-Scott
+
