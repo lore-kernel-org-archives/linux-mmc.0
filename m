@@ -1,166 +1,83 @@
-From: Scott Wood <scottwood@freescale.com>
-Subject: Re: [v3, 4/5] powerpc: dts: t4240: add syscon support for DCFG node
-Date: Wed, 9 Dec 2015 11:01:42 -0600
-Message-ID: <1449680502.15946.178.camel@freescale.com>
-References: <1448594417-22515-1-git-send-email-yangbo.lu@freescale.com>
-	 <1448594417-22515-5-git-send-email-yangbo.lu@freescale.com>
-	 <1449596781.15946.126.camel@freescale.com>
-	 <BLUPR0301MB2065B5878A43F66982D6B30BF2E80@BLUPR0301MB2065.namprd03.prod.outlook.com>
-	 <1449635607.15946.165.camel@freescale.com>
-	  <BLUPR0301MB2065A179DCAF428EB79785B7F2E80@BLUPR0301MB2065.namprd03.prod.outlook.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [BUG] mfd: rtsx_usb data corruption with SDCX microsd
+Date: Thu, 10 Dec 2015 15:32:06 +0100
+Message-ID: <CAPDyKFrUcKGHDbc84+LhtR-uG4+1WiMnU9dyhW4Lof8RhxUZEg@mail.gmail.com>
+References: <CAOw_LSFRskOLSPW31DUpbYv8wsrH68wkmW=F7s2jCLsRvSLfsg@mail.gmail.com>
+	<CAOw_LSFCY6mTKykBNpjdVoFu5B33nD2hdf9-4NigOXz22UZK-w@mail.gmail.com>
+	<CAPDyKFpJ_3zuiYnP=QcDvd-6CCOUU=jjUdXK0qbeDTQnv+Jrfg@mail.gmail.com>
+	<CAOw_LSFhEuDLNfF4HCBhqx_-DmCgiV0oCYn61C7Ahr-x+LPLPw@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-bl2on0120.outbound.protection.outlook.com ([65.55.169.120]:5536
-	"EHLO na01-bl2-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1752288AbbLIRBv (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 9 Dec 2015 12:01:51 -0500
-In-Reply-To: <BLUPR0301MB2065A179DCAF428EB79785B7F2E80@BLUPR0301MB2065.namprd03.prod.outlook.com>
+Received: from mail-vk0-f46.google.com ([209.85.213.46]:32789 "EHLO
+	mail-vk0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751039AbbLJOcI (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 10 Dec 2015 09:32:08 -0500
+Received: by vkca188 with SMTP id a188so84514408vkc.0
+        for <linux-mmc@vger.kernel.org>; Thu, 10 Dec 2015 06:32:06 -0800 (PST)
+In-Reply-To: <CAOw_LSFhEuDLNfF4HCBhqx_-DmCgiV0oCYn61C7Ahr-x+LPLPw@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Lu Yangbo-B47093 <yangbo.lu@freescale.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>
-Cc: Xie Xiaobo-R63061 <X.Xie@freescale.com>, Li Yang-Leo-R58472 <LeoLi@freescale.com>
+To: Daniel Lenski <dlenski@gmail.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Marcus Overhagen <marcus.overhagen@gmail.com>
 
-On Wed, 2015-12-09 at 03:29 -0600, Lu Yangbo-B47093 wrote:
-> > -----Original Message-----
-> > From: Lu Yangbo-B47093
-> > Sent: Wednesday, December 09, 2015 5:05 PM
-> > To: Wood Scott-B07421; linux-mmc@vger.kernel.org; ulf.hansson@linar=
-o.org
-> > Cc: Xie Xiaobo-R63061; Li Yang-Leo-R58472
-> > Subject: RE: [v3, 4/5] powerpc: dts: t4240: add syscon support for =
-DCFG
-> > node
-> >=20
-> > > -----Original Message-----
-> > > From: Wood Scott-B07421
-> > > Sent: Wednesday, December 09, 2015 12:33 PM
-> > > To: Lu Yangbo-B47093; linux-mmc@vger.kernel.org;
-> > > ulf.hansson@linaro.org
-> > > Cc: Xie Xiaobo-R63061; Li Yang-Leo-R58472
-> > > Subject: Re: [v3, 4/5] powerpc: dts: t4240: add syscon support fo=
-r
-> > > DCFG node
-> > >=20
-> > > On Tue, 2015-12-08 at 22:30 -0600, Lu Yangbo-B47093 wrote:
-> > > > > -----Original Message-----
-> > > > > From: Wood Scott-B07421
-> > > > > Sent: Wednesday, December 09, 2015 1:46 AM
-> > > > > To: Lu Yangbo-B47093; linux-mmc@vger.kernel.org;
-> > > > > ulf.hansson@linaro.org
-> > > > > Cc: Xie Xiaobo-R63061; Li Yang-Leo-R58472
-> > > > > Subject: Re: [v3, 4/5] powerpc: dts: t4240: add syscon suppor=
-t for
-> > > > > DCFG node
-> > > > >=20
-> > > > > On Fri, 2015-11-27 at 11:20 +0800, Yangbo Lu wrote:
-> > > > > > Add syscon support for DCFG node, so that the driver could =
-use
-> > > > > > syscon regmap interface to access the device config module
-> > > registers.
-> > > > > > And the CONFIG_MFD_SYSCON should be enabled for this.
-> > > > > >=20
-> > > > > > Signed-off-by: Yangbo Lu <yangbo.lu@freescale.com>
-> > > > > > ---
-> > > > > > Changes for v2:
-> > > > > > 	- None
-> > > > > > Changes for v3:
-> > > > > > 	- Added this patch
-> > > > > > ---
-> > > > > >  arch/powerpc/boot/dts/fsl/t4240si-post.dtsi | 4 +++-
-> > > > > >  1 file changed, 3 insertions(+), 1 deletion(-)
-> > > > > >=20
-> > > > > > diff --git a/arch/powerpc/boot/dts/fsl/t4240si-post.dtsi
-> > > > > > b/arch/powerpc/boot/dts/fsl/t4240si-post.dtsi
-> > > > > > index 68c4ead..5f148b2 100644
-> > > > > > --- a/arch/powerpc/boot/dts/fsl/t4240si-post.dtsi
-> > > > > > +++ b/arch/powerpc/boot/dts/fsl/t4240si-post.dtsi
-> > > > > > @@ -941,7 +941,9 @@
-> > > > > >  /include/ "qoriq-mpic4.3.dtsi"
-> > > > > >=20
-> > > > > >  	guts: global-utilities@e0000 {
-> > > > > > -		compatible =3D "fsl,t4240-device-config",
-> > > > > > "fsl,qoriq
-> > > > > > -device
-> > > > > > -config-2.0";
-> > > > > > +		compatible =3D "fsl,t4240-device-config",
-> > > > > > +				"fsl,qoriq-device-config-2.0",
-> > > > > > +				"syscon";
-> > > > >=20
-> > > > >=20
-> > > > > I really don't like changing the device tree based on Linux
-> > internals.
-> > > > > It also means that the workaround wouldn't work for users tha=
-t
-> > > > > don't upgrade their device tree.  I definitely don't like one
-> > > > > QorIQ chip having "syscon" on the dcfg node but others not ha=
-ving
-> > it.
-> > > > >=20
-> > > > > The guts driver should just maintain a list of compatibles to=
- match.
-> > > > > Why do we need to use syscon, rather than a guts driver that
-> > > > > exports an
-> > > > > fsl_get_svr() function?
-> > > > >=20
-> > > > > -Scott
-> > > >=20
-> > > > [Lu Yangbo-B47093] I think the only difference between fsl_get_=
-svr()
-> > > > and syscon is that we don=E2=80=99t need to change dts with fsl=
-_get_svr(),
-> > > right?
-> > >=20
-> > > That is one difference.  It also would simplify callers, and avoi=
-d the
-> > > need to depend on the overcomplicated and difficult-to-follow reg=
-map
-> > > code in order to accomplish something very simple.
-> > >=20
-> > > > The syscon has considered the endianess, and we don=E2=80=99t n=
-eed to add
-> > > > more code to use it and only add 'syscon' in the node.
-> > >=20
-> > > Dealing with the endianess in a common guts driver would be trivi=
-al.
-> > >=20
-> > > > This patchset only enables syscon in T4240 DFCG node since it h=
-as an
-> > > > erratum to use it.
-> > >=20
-> > > The device tree describes the hardware, not what you want to use =
-it for.
-> > > The existence of an erratum in the esdhc block says nothing about=
- what
-> > > the dcfg node is.
-> > >=20
-> > > > The fsl_get_svr() you suggested is also an idea for this.
-> > > > Then, may I know is there a guts driver in kernel?
-> > > > Thanks a lot.
-> > >=20
-> > > There isn't, but there should be.
-> > >=20
-> > > -Scott
-> >=20
-> > [Lu Yangbo-B47093] Ok, I'd like to try. But can you suggest where w=
-e
-> > should put the guts driver in kernel?
-> > Thanks.
-> >=20
-> [Lu Yangbo-B47093] Actually, most platforms would need to be added 's=
-yscon'
-> compatible in DFCG node later if we use SYSCON in eSDHC.
-> Because most of eSDHC errata only could be identified by SVR.
-> But for this patchset, for this T4240 eSDHC erratum, I only add 'sysc=
-on' for
-> T4240.
->=20
-> What about adding 'syscon' in all platforms although there is some wo=
-rkload?
+On 8 December 2015 at 17:34, Daniel Lenski <dlenski@gmail.com> wrote:
+> On Dec 8, 2015 6:11 AM, "Ulf Hansson" <ulf.hansson@linaro.org> wrote:
+>>
+>> On 4 December 2015 at 21:34, Daniel Lenski <dlenski@gmail.com> wrote:
+>> > In conclusion... it seems that the kernel is attempting to drive this
+>> > card faster than it can actually work. What I'm trying to figure out
+>> > now:
+>> > - How does the kernel attempt to figure out the capability of a given
+>> > SD card? Where is that in the kernel source tree?
+>>
+>> drivers/mmc/core/*
+>>
+>> It's kind of complicated, but please go ahead and have a look.
+>
+> Will do.
+>
+>> > - Is it possible to make the list of supported caps a module
+>> > parameter, to more easily throttle high-speed modes that don't work
+>> > with a particular card?
+>>
+>> Maybe a sysfs/debugfs interface would be better, but I like the idea!
+>>
+>> Currently there is no way for userspace to disable some of these
+>> "speed mode" caps, which would be very useful in cases like yours.
+>>
+>> I don't know if I ever will get time to hack on such code, so feel
+>> free to have a try yourself!
+>
+> Ideally, would it be better to have a userspace control at the level of the
+> individual host control drivers, or for the entire mmc/SD subsystem?
 
-Please just add a guts driver.
+I think per host controller would be the best.
 
--Scott
+>
+>> Regarding how to fix this problem right now, I guess we should remove
+>> the caps which the host driver wrongly claims to support. Do you want
+>> to send a patch for that?
+>
+> I can do that, but am unsure whether it is truly an issue with the host
+> driver, or the card itself, in my case.
+>
+> Is there any information which I can use to clearly rule one or the other
+> case out?
 
+Well, you can try other SDHC cards and you may also try the failing
+card to see if it works with another host controller.
+
+>
+> If I understood Marcus Overhagen's original post correctly, he was
+> successful with a UHS SDHC card and this same controller.
+
+Okay. It may be that this card need some special treatment or that the
+UHS support for rtsx is fragile.
+
+>
+> Thanks,
+> Dan
+
+Kind regards
+Uffe
