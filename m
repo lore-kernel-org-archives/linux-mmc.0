@@ -1,83 +1,59 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [BUG] mfd: rtsx_usb data corruption with SDCX microsd
-Date: Thu, 10 Dec 2015 15:32:06 +0100
-Message-ID: <CAPDyKFrUcKGHDbc84+LhtR-uG4+1WiMnU9dyhW4Lof8RhxUZEg@mail.gmail.com>
-References: <CAOw_LSFRskOLSPW31DUpbYv8wsrH68wkmW=F7s2jCLsRvSLfsg@mail.gmail.com>
-	<CAOw_LSFCY6mTKykBNpjdVoFu5B33nD2hdf9-4NigOXz22UZK-w@mail.gmail.com>
-	<CAPDyKFpJ_3zuiYnP=QcDvd-6CCOUU=jjUdXK0qbeDTQnv+Jrfg@mail.gmail.com>
-	<CAOw_LSFhEuDLNfF4HCBhqx_-DmCgiV0oCYn61C7Ahr-x+LPLPw@mail.gmail.com>
+From: Philip Elcan <pelcan@codeaurora.org>
+Subject: Re: [PATCH] mmc: sdhci-acpi: set non-removable in ACPI table
+Date: Thu, 10 Dec 2015 15:57:16 -0500
+Message-ID: <5669E72C.4090701@codeaurora.org>
+References: <1449150480-1173-1-git-send-email-pelcan@codeaurora.org> <56604E57.9000201@intel.com> <5661B3F0.2010000@codeaurora.org> <5665438B.10104@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-vk0-f46.google.com ([209.85.213.46]:32789 "EHLO
-	mail-vk0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751039AbbLJOcI (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 10 Dec 2015 09:32:08 -0500
-Received: by vkca188 with SMTP id a188so84514408vkc.0
-        for <linux-mmc@vger.kernel.org>; Thu, 10 Dec 2015 06:32:06 -0800 (PST)
-In-Reply-To: <CAOw_LSFhEuDLNfF4HCBhqx_-DmCgiV0oCYn61C7Ahr-x+LPLPw@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-msm-owner@vger.kernel.org>
+In-Reply-To: <5665438B.10104@intel.com>
+Sender: linux-arm-msm-owner@vger.kernel.org
+To: Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Cc: linux-arm-msm@vger.kernel.org, Timur Tabi <timur@codeaurora.org>, Jon Masters <jcm@redhat.org>, Mark Langsdorf <mlangsdo@redhat.com>, harba@codeaurora.org
 List-Id: linux-mmc@vger.kernel.org
-To: Daniel Lenski <dlenski@gmail.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Marcus Overhagen <marcus.overhagen@gmail.com>
 
-On 8 December 2015 at 17:34, Daniel Lenski <dlenski@gmail.com> wrote:
-> On Dec 8, 2015 6:11 AM, "Ulf Hansson" <ulf.hansson@linaro.org> wrote:
+
+On 12/07/2015 03:30 AM, Adrian Hunter wrote:
+> On 04/12/15 17:40, Philip Elcan wrote:
+>> On 12/03/2015 09:14 AM, Adrian Hunter wrote:
+>>> On 03/12/15 15:48, Philip Elcan wrote:
+>>>> This allows setting an SDHC controller as non-removable
+>>>> by using the _RMV method in the ACPI table. It doesn't
+>>> Is that _RMV on the host controller?  Shouldn't it be on the card i.e. child
+>>> device node?
+>> Yes, this is on the host controller. The ACPI table only describes the
+>> host controller, not the child nodes.
 >>
->> On 4 December 2015 at 21:34, Daniel Lenski <dlenski@gmail.com> wrote:
->> > In conclusion... it seems that the kernel is attempting to drive this
->> > card faster than it can actually work. What I'm trying to figure out
->> > now:
->> > - How does the kernel attempt to figure out the capability of a given
->> > SD card? Where is that in the kernel source tree?
->>
->> drivers/mmc/core/*
->>
->> It's kind of complicated, but please go ahead and have a look.
+> If you look at Intel devices, the _RMV is on the child e.g.
 >
-> Will do.
+>         Device (SDHA)
+>         {
+>             Name (_HID, "80860F14")  // _HID: Hardware ID
+>             Name (_CID, "PNP0D40")  // _CID: Compatible ID
+>             Name (_DDN, "Intel(R) eMMC Controller - 80860F14")  // _DDN: DOS Device Name
+> 	    ...
+>             Device (EMMD)
+>             {
+> 		...
+>                 Method (_RMV, 0, NotSerialized)  // _RMV: Removal Status
+>                 {
+>                     Return (Zero)
+>                 }
+>             }
+>         }
 >
->> > - Is it possible to make the list of supported caps a module
->> > parameter, to more easily throttle high-speed modes that don't work
->> > with a particular card?
->>
->> Maybe a sysfs/debugfs interface would be better, but I like the idea!
->>
->> Currently there is no way for userspace to disable some of these
->> "speed mode" caps, which would be very useful in cases like yours.
->>
->> I don't know if I ever will get time to hack on such code, so feel
->> free to have a try yourself!
+> I am not an ACPI expert but that seems like the correct place for it.
+My understanding is that in ACPI you don't generally create child devices on buses that are discoverable.
 >
-> Ideally, would it be better to have a userspace control at the level of the
-> individual host control drivers, or for the entire mmc/SD subsystem?
+>>>> mark it as non-removable if GPIO card detection is
+>>>> already setup.
+>>>>
+>>>> Signed-off-by: Philip Elcan <pelcan@codeaurora.org>
+>>>> ---
+>>>>
 
-I think per host controller would be the best.
-
->
->> Regarding how to fix this problem right now, I guess we should remove
->> the caps which the host driver wrongly claims to support. Do you want
->> to send a patch for that?
->
-> I can do that, but am unsure whether it is truly an issue with the host
-> driver, or the card itself, in my case.
->
-> Is there any information which I can use to clearly rule one or the other
-> case out?
-
-Well, you can try other SDHC cards and you may also try the failing
-card to see if it works with another host controller.
-
->
-> If I understood Marcus Overhagen's original post correctly, he was
-> successful with a UHS SDHC card and this same controller.
-
-Okay. It may be that this card need some special treatment or that the
-UHS support for rtsx is fragile.
-
->
-> Thanks,
-> Dan
-
-Kind regards
-Uffe
+-- 
+Qualcomm Innovation Center, Inc.
+The Qualcomm Innovation Center, Inc. is a member of the Code Aurora Forum,
+a Linux Foundation Collaborative Project
