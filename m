@@ -1,23 +1,43 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v2] mmc: sdhci: restore behavior when setting VDD via
+From: Jisheng Zhang <jszhang@marvell.com>
+Subject: RE: [PATCH v2] mmc: sdhci: restore behavior when setting VDD via
  external regulator
-Date: Fri, 11 Dec 2015 15:48:04 +0100
-Message-ID: <CAPDyKFpVqQREdiKm42cM7OxXHDpJffp3OMN6GqLAkn-gep6xOw@mail.gmail.com>
-References: <1449840989-563-1-git-send-email-jszhang@marvell.com>
+Date: Fri, 11 Dec 2015 16:30:07 +0000
+Message-ID: <939adb3a806c44e2a1f329d35cb3bd0b@SC-EXCH02.marvell.com>
+References: <1449840989-563-1-git-send-email-jszhang@marvell.com>,<CAPDyKFpVqQREdiKm42cM7OxXHDpJffp3OMN6GqLAkn-gep6xOw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qk0-f172.google.com ([209.85.220.172]:35054 "EHLO
-	mail-qk0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753603AbbLKOsG (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 11 Dec 2015 09:48:06 -0500
-Received: by qkfb125 with SMTP id b125so40983381qkf.2
-        for <linux-mmc@vger.kernel.org>; Fri, 11 Dec 2015 06:48:04 -0800 (PST)
-In-Reply-To: <1449840989-563-1-git-send-email-jszhang@marvell.com>
+Received: from mx0a-0016f401.pphosted.com ([67.231.148.174]:2567 "EHLO
+	mx0a-0016f401.pphosted.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751505AbbLKQaf convert rfc822-to-8bit
+	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 11 Dec 2015 11:30:35 -0500
+In-Reply-To: <CAPDyKFpVqQREdiKm42cM7OxXHDpJffp3OMN6GqLAkn-gep6xOw@mail.gmail.com>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Jisheng Zhang <jszhang@marvell.com>, Ludovic Desroches <ludovic.desroches@atmel.com>
+To: Ulf Hansson <ulf.hansson@linaro.org>, Ludovic Desroches <ludovic.desroches@atmel.com>
 Cc: linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
+
+Dear Ulf, Ludovic,
+
+Sorry for top post. I'm under webmail for I have no proper email client now.
+
+OOPS, I should ask mmc maintainers and experts for help early. I spent two
+days to debug the issue then found the two problematic commits.
+
+PS: It seems other sdhci-pxav3 users never complained, it's a bit strange ;)
+
+Thanks for reviewing this patch,
+Jisheng
+
+________________________________________
+From: Ulf Hansson
+Sent: Friday, December 11, 2015 22:48
+To: Jisheng Zhang; Ludovic Desroches
+Cc: linux-mmc; linux-kernel@vger.kernel.org; linux-arm-kernel@lists.infradead.org
+Subject: Re: [PATCH v2] mmc: sdhci: restore behavior when setting VDD via external regulator
 
 + Ludovic (We had some discussions around this code recently as well)
 
