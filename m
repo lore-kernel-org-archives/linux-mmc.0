@@ -1,56 +1,82 @@
-From: Scott Wood <scottwood@freescale.com>
-Subject: Re: [v3, 4/5] powerpc: dts: t4240: add syscon support for DCFG node
-Date: Fri, 11 Dec 2015 02:29:04 -0600
-Message-ID: <1449822544.15946.285.camel@freescale.com>
-References: <1448594417-22515-1-git-send-email-yangbo.lu@freescale.com>
-	 <1448594417-22515-5-git-send-email-yangbo.lu@freescale.com>
-	 <1449596781.15946.126.camel@freescale.com>
-	 <BLUPR0301MB2065B5878A43F66982D6B30BF2E80@BLUPR0301MB2065.namprd03.prod.outlook.com>
-	 <1449635607.15946.165.camel@freescale.com>
-	 <BLUPR0301MB206558CB317D48AC5CEF3642F2E80@BLUPR0301MB2065.namprd03.prod.outlook.com>
-	 <1449680419.15946.176.camel@freescale.com>
-	 <CAPDyKFpMruD0M+JB9jwuk1xTRcVRpJYNh7+DAT+22Tu2orS9wg@mail.gmail.com>
+From: Jisheng Zhang <jszhang@marvell.com>
+Subject: [PATCH] mmc: sdhci: restore behavior when setting VDD via external regulator
+Date: Fri, 11 Dec 2015 21:19:59 +0800
+Message-ID: <1449839999-439-1-git-send-email-jszhang@marvell.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-bn1bon0146.outbound.protection.outlook.com ([157.56.111.146]:47779
-	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1753901AbbLKI3U (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 11 Dec 2015 03:29:20 -0500
-In-Reply-To: <CAPDyKFpMruD0M+JB9jwuk1xTRcVRpJYNh7+DAT+22Tu2orS9wg@mail.gmail.com>
+Received: from mx0a-0016f401.pphosted.com ([67.231.148.174]:43123 "EHLO
+	mx0a-0016f401.pphosted.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751118AbbLKNYK (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 11 Dec 2015 08:24:10 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>, Lu Yangbo-B47093 <yangbo.lu@freescale.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Xie Xiaobo-R63061 <X.Xie@freescale.com>, Li Yang-Leo-R58472 <LeoLi@freescale.com>
+To: ulf.hansson@linaro.org
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Jisheng Zhang <jszhang@marvell.com>
 
-On Fri, 2015-12-11 at 09:26 +0100, Ulf Hansson wrote:
-> [...]
-> 
-> > > > > The fsl_get_svr() you suggested is also an idea for this.
-> > > > > Then, may I know is there a guts driver in kernel?
-> > > > > Thanks a lot.
-> > > > 
-> > > > There isn't, but there should be.
-> > > > 
-> > > > -Scott
-> > > 
-> > > [Lu Yangbo-B47093] Ok, I'd like to try. But can you suggest where we
-> > > should
-> > > put the guts driver in kernel?
-> > > Thanks.
-> > 
-> > drivers/soc/fsl/
-> > 
-> 
-> Okay, go ahead and have a try.
-> 
-> BTW, there is actually also a corresponding include directory to use
-> 
-> /include/linux/soc/..
+After commit 52221610dd84 ("mmc: sdhci: Improve external VDD regulator
+support"), for the VDD is supplied via external regulators, we ignore
+the code to convert a VDD voltage request into one of the standard
+SDHCI voltage levels, then program it in the SDHCI_POWER_CONTROL. This
+brings two issues:
 
-OK, but we already have an include/linux/fsl and not an include/linux/soc/fsl.
+1. SDHCI_QUIRK2_CARD_ON_NEEDS_BUS_ON quirk isn't handled properly any
+more.
 
--Scott
+2. What's more, some controllers such as the sdhci-pxav3 used in
+marvell berlin SoCs require the voltage levels programming in the
+SDHCI_POWER_CONTROL register, even the VDD is supplied by external
+regulator.
+
+This patch restores the behavior when setting VDD through external
+regulator by moving the call of mmc_regulator_set_ocr() to the end
+of sdhci_set_power() function.
+
+After this patch, the sdcard on Marvell Berlin SoCs work again.
+
+Signed-off-by: Jisheng Zhang <jszhang@marvell.com>
+Fixes: 52221610dd84 ("mmc: sdhci: Improve external VDD ...")
+---
+ drivers/mmc/host/sdhci.c | 19 ++++++-------------
+ 1 file changed, 6 insertions(+), 13 deletions(-)
+
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index b48565e..616aa90 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -1274,19 +1274,6 @@ static void sdhci_set_power(struct sdhci_host *host, unsigned char mode,
+ 	struct mmc_host *mmc = host->mmc;
+ 	u8 pwr = 0;
+ 
+-	if (!IS_ERR(mmc->supply.vmmc)) {
+-		spin_unlock_irq(&host->lock);
+-		mmc_regulator_set_ocr(mmc, mmc->supply.vmmc, vdd);
+-		spin_lock_irq(&host->lock);
+-
+-		if (mode != MMC_POWER_OFF)
+-			sdhci_writeb(host, SDHCI_POWER_ON, SDHCI_POWER_CONTROL);
+-		else
+-			sdhci_writeb(host, 0, SDHCI_POWER_CONTROL);
+-
+-		return;
+-	}
+-
+ 	if (mode != MMC_POWER_OFF) {
+ 		switch (1 << vdd) {
+ 		case MMC_VDD_165_195:
+@@ -1345,6 +1332,12 @@ static void sdhci_set_power(struct sdhci_host *host, unsigned char mode,
+ 		if (host->quirks & SDHCI_QUIRK_DELAY_AFTER_POWER)
+ 			mdelay(10);
+ 	}
++
++	if (!IS_ERR(mmc->supply.vmmc)) {
++		spin_unlock_irq(&host->lock);
++		mmc_regulator_set_ocr(mmc, mmc->supply.vmmc, vdd);
++		spin_lock_irq(&host->lock);
++	}
+ }
+ 
+ /*****************************************************************************\
+-- 
+2.6.3
 
