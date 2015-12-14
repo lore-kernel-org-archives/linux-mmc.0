@@ -1,91 +1,69 @@
-From: Yangbo Lu <yangbo.lu@freescale.com>
-Subject: [v4, 4/6] mmc: sdhci-of-esdhc: get SVR from global utilities registers
-Date: Mon, 14 Dec 2015 12:24:25 +0800
-Message-ID: <1450067067-44869-5-git-send-email-yangbo.lu@freescale.com>
-References: <1450067067-44869-1-git-send-email-yangbo.lu@freescale.com>
+From: "Yang, York" <weijuny@qti.qualcomm.com>
+Subject: RE: [PATCH 1/2] mmc: core: enable CMD19 tuning for DDR50 mode
+Date: Mon, 14 Dec 2015 08:46:36 +0000
+Message-ID: <edf24ca1a9614943b55b8d19745a3c45@aptaiexm02f.ap.qualcomm.com>
+References: <1439282492-6274-1-git-send-email-21cnbao@gmail.com>
+	<CAPDyKFpXZD28NwNAhKQyxmWasVhk_7AeyOW6oXaBPHKuSTmGUA@mail.gmail.com>
+	<CAGsJ_4wvvQdyjFi=JmWfASm-LbJMybrhC=Wxxn7jHZEP5dUfEw@mail.gmail.com>
+	<CAPDyKFpEwWvu3tnbMT9ZvM0TUvEHp0Qa8PADohyJoTaNZ9HS9g@mail.gmail.com>
+	<CAGsJ_4x5Nd3Cts1BHsUyB_mCejxbHPPjznUVWUcFoZhxKy+Tcg@mail.gmail.com>
+	<CAPDyKFpWfY9G4WG_GfCutJ2NkRbcAYZToYJXp3RvX=_25sgnWA@mail.gmail.com>
+	<CAGsJ_4zaWcmGsc82=LSohK0UHxJir2OJOBSgoU3sPRXYvLdOZQ@mail.gmail.com>
+	<CAPDyKFrj7mfxYPotHfpYPVf8M=Mvjcz+HfuB871EZNv9FWpPqw@mail.gmail.com>
+ <CAOQ7t2YuSDwtK0R3R4++3LUPyEqW+ENLju63QisX6tO=-cvt6w@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-by2on0125.outbound.protection.outlook.com ([207.46.100.125]:55967
-	"EHLO na01-by2-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1752093AbbLNErt (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Sun, 13 Dec 2015 23:47:49 -0500
-In-Reply-To: <1450067067-44869-1-git-send-email-yangbo.lu@freescale.com>
+Received: from sabertooth01.qualcomm.com ([65.197.215.72]:40055 "EHLO
+	sabertooth01.qualcomm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752310AbbLNIql (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 14 Dec 2015 03:46:41 -0500
+In-Reply-To: <CAOQ7t2YuSDwtK0R3R4++3LUPyEqW+ENLju63QisX6tO=-cvt6w@mail.gmail.com>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: scottwood@freescale.com, linux-mmc@vger.kernel.org, ulf.hansson@linaro.org
-Cc: X.Xie@freescale.com, LeoLi@freescale.com, Yangbo Lu <yangbo.lu@freescale.com>
+To: Carlo Caione <carlo@caione.org>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Barry Song <21cnbao@gmail.com>, linux-mmc <linux-mmc@vger.kernel.org>, DL-SHA-WorkGroupLinux <workgroup.linux@csr.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "Song, Barry" <baohuas@qti.qualcomm.com>
 
-Most of silicon errata about the eSDHC need to be identified through
-the SoC version/revision. This patch makes the driver get these
-information from SVR(system version register) of global utilities
-registers.
-
-Signed-off-by: Yangbo Lu <yangbo.lu@freescale.com>
----
-Changes for v2:
-	- Got SVR through iomap instead of dts
-Changes for v3:
-	- Managed GUTS through syscon instead of iomap in eSDHC driver
-Changes for v4:
-	- Got SVR by GUTS driver instead of SYSCON
----
- drivers/mmc/host/sdhci-of-esdhc.c | 17 +++++++++++++++--
- 1 file changed, 15 insertions(+), 2 deletions(-)
-
-diff --git a/drivers/mmc/host/sdhci-of-esdhc.c b/drivers/mmc/host/sdhci-of-esdhc.c
-index 83b1226..9105888 100644
---- a/drivers/mmc/host/sdhci-of-esdhc.c
-+++ b/drivers/mmc/host/sdhci-of-esdhc.c
-@@ -18,6 +18,8 @@
- #include <linux/of.h>
- #include <linux/delay.h>
- #include <linux/module.h>
-+#include <linux/svr.h>
-+#include <linux/fsl/guts.h>
- #include <linux/mmc/host.h>
- #include "sdhci-pltfm.h"
- #include "sdhci-esdhc.h"
-@@ -28,6 +30,8 @@
- struct sdhci_esdhc {
- 	u8 vendor_ver;
- 	u8 spec_ver;
-+	u32 soc_ver;
-+	u8 soc_rev;
- };
- 
- /**
-@@ -566,18 +570,27 @@ static void esdhc_init(struct platform_device *pdev, struct sdhci_host *host)
- {
- 	struct sdhci_pltfm_host *pltfm_host;
- 	struct sdhci_esdhc *esdhc;
-+	struct ccsr_guts __iomem *guts;
-+	u32 svr;
- 	u16 host_ver;
- 
- 	pltfm_host = sdhci_priv(host);
- 	esdhc = devm_kzalloc(&pdev->dev, sizeof(struct sdhci_esdhc),
- 			     GFP_KERNEL);
-+	pltfm_host->priv = esdhc;
-+
-+	guts = guts_regmap();
-+	if (guts) {
-+		svr = guts_get_reg32(&guts->svr);
-+		esdhc->soc_ver = SVR_SOC_VER(svr);
-+		esdhc->soc_rev = SVR_REV(svr);
-+	} else
-+		dev_err(&pdev->dev, "unable to get SVR value!\n");
- 
- 	host_ver = sdhci_readw(host, SDHCI_HOST_VERSION);
- 	esdhc->vendor_ver = (host_ver & SDHCI_VENDOR_VER_MASK) >>
- 			     SDHCI_VENDOR_VER_SHIFT;
- 	esdhc->spec_ver = host_ver & SDHCI_SPEC_VER_MASK;
--
--	pltfm_host->priv = esdhc;
- }
- 
- static int sdhci_esdhc_probe(struct platform_device *pdev)
--- 
-2.1.0.27.g96db324
-
+SGksIENhcmxvDQoJSW4gOWZhYWM3Yjk1LCB0dW5pbmcgZm9yIEREUjUwIGlzIGVuYWJsZWQgaW4g
+bW1jX3NkX2luaXRfdWhzX2NhcmQoKSwgc28gb25seSBTRCBjYXJkIGlzIGFmZmVjdGVkLg0KCVRo
+aXMgaXMgYmFzZWQgb24gdGhlIFNEIHNwZWMgdmVyc2lvbiAzLjAxLg0KCW1tY19zZGlvX2luaXRf
+dWhzX2NhcmQoKSBpcyB1bnRvdWNoZWQuIEkgZG9uJ3Qga25vdyB3aG8gYWRkIHRoZSBjb2RlIGlu
+dG8gbW1jX3NkaW9faW5pdF91aHNfY2FyZCgpIGFuZCB5b3UgbWF5IGhhdmUgYSBjaGVjayBvbiB5
+b3VyIHNpZGUuDQoNCi0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQpGcm9tOiBjYXJsby5jYWlv
+bmVAZ21haWwuY29tIFttYWlsdG86Y2FybG8uY2Fpb25lQGdtYWlsLmNvbV0gT24gQmVoYWxmIE9m
+IENhcmxvIENhaW9uZQ0KU2VudDogMjAxNeW5tDEy5pyIMTPml6UgNzo1Mg0KVG86IFVsZiBIYW5z
+c29uIDx1bGYuaGFuc3NvbkBsaW5hcm8ub3JnPg0KQ2M6IEJhcnJ5IFNvbmcgPDIxY25iYW9AZ21h
+aWwuY29tPjsgWWFuZywgWW9yayA8d2VpanVueUBxdGkucXVhbGNvbW0uY29tPjsgbGludXgtbW1j
+IDxsaW51eC1tbWNAdmdlci5rZXJuZWwub3JnPjsgREwtU0hBLVdvcmtHcm91cExpbnV4IDx3b3Jr
+Z3JvdXAubGludXhAY3NyLmNvbT47IGxpbnV4LWFybS1rZXJuZWxAbGlzdHMuaW5mcmFkZWFkLm9y
+ZzsgU29uZywgQmFycnkgPGJhb2h1YXNAcXRpLnF1YWxjb21tLmNvbT4NClN1YmplY3Q6IFJlOiBb
+UEFUQ0ggMS8yXSBtbWM6IGNvcmU6IGVuYWJsZSBDTUQxOSB0dW5pbmcgZm9yIEREUjUwIG1vZGUN
+Cg0KT24gV2VkLCBTZXAgMjMsIDIwMTUgYXQgOToyNSBQTSwgVWxmIEhhbnNzb24gPHVsZi5oYW5z
+c29uQGxpbmFyby5vcmc+IHdyb3RlOg0KPiBbLi4uXQ0KPg0KPj4+DQo+Pj4gQWxzbywgSSB3YXMg
+Z2l2aW5nIHRoaXMgYSBzZWNvbmQgdGhvdWdodC4uLg0KPj4+DQo+Pj4gV2hhdCBoYXBwZW5zIHdp
+dGggdGhlIFNEIDMuMCBjYXJkIHdoZW4gaXQgKmRvZXNuJ3QqIHN1cHBvcnQgQ01EMTkuDQo+Pj4g
+V2lsbCBpdCBzdGlsbCBiZSBmdW5jdGlvbmFsIGFmdGVyd2FyZHMgb3Igd2lsbCBpdCBtb3ZlIGZy
+b20gDQo+Pj4gInRyYW5zZmVyIHN0YXRlIiB0byBhbm90aGVyIG5vdCBrbm93biBzdGF0ZT8NCj4+
+DQo+PiB1ZmZlLCBpIGFtIG5vdCB0aGUgZXhwZXJ0IG9mIHRoaXMgaXNzdWUgYnV0IHdlaWp1biBp
+cy4gd2VpanVuIHRvbGQgDQo+PiB0aGF0IGZvciB0aGUgY2FyZHMgd2hvIGRvbid0IHN1cHBvcnQg
+Y21kMTksIGl0IHdpbGwgdGFrZSBpdCBhcyANCj4+IGlsbGVnYWwgY29tbWFuZCBhbmQgbm90IHJl
+c3BvbnNlIGl0LiBhbmQgaXQgYWxzbyBzZXRzIGlsbGVnYWwgY29tbWFuZCANCj4+IGVycm9yIGlu
+IHJlZ2lzdGVycy4NCj4+IGJ1dCB0aGUgY2FyZCBzdGF0dXMgaXMgc3RpbGwgZnVuY3Rpb25hbCBh
+bmQgZG9lc24ndCBjYXVzZSB1bmtub3duIHN0YXRlLg0KPj4NCj4+IHNvIG1heWJlIHdlIGNhbiBq
+dXN0IGlnbm9yZSB0aGUgZXJyIG9mIHR1bmluZywgYW5kIHVzZSB0aGUgc2Vjb25kIA0KPj4gcGF0
+Y2ggd2l0aCB0aGUgcmVmaW5lIHlvdSBtZW50aW9uZWQ/DQo+DQo+IFN1cmUsIGxldCdzIGRvIHRo
+YXQuIFBsZWFzZSBzZW5kIGEgdjIgb2YgdGhlIHBhdGNoc2V0IHRoZW4uDQoNClJlcGx5aW5nIGhl
+cmUgc2luY2UgSSdtIG5vdCBzdWJzY3JpYmVkIHRvIGxpbnV4LW1tYy4NCg0KQ29tbWl0IDlmYWFj
+N2I5NSAibW1jOiBzZGhjaTogZW5hYmxlIHR1bmluZyBmb3IgRERSNTAiIGFjdHVhbGx5IGJyZWFr
+cyBXaUZpIG9uIFNESU8gYXQgbGVhc3QgZm9yIHRoZSBBU1VTIFgyMDVUQS4NCg0KSSB0cmllZCB0
+byBpZ25vcmUgdGhlIGVycm9yIGZyb20gdGhlIHR1bmluZyBhbHNvIGZvciB0aGUgU0RJTyBjYXJk
+IHBhdGNoaW5nIG1tY19zZGlvX2luaXRfdWhzX2NhcmQoKSBpbiBkcml2ZXJzL21tYy9jb3JlL3Nk
+aW8uYyBidXQgSSBlbmQgdXAgd2l0aCB0aGUgZXJyb3IgIkNvbnRyb2xsZXIgbmV2ZXIgcmVsZWFz
+ZWQgaW5oaWJpdCBiaXQocykiLiBBdCBsZWFzdCBpbiBteSBjYXNlIENNRDE5IHNob3VsZG4ndCBi
+ZSBpc3N1ZWQgYXQgYWxsIHRvIGhhdmUgdGhlIFNESU8gY2FyZCB3b3JraW5nLg0KDQpBbnkgc3Vn
+Z2VzdGlvbiBob3cgdG8gYXBwcm9hY2ggdGhpcyBwcm9ibGVtPw0KDQotLQ0KQ2FybG8gQ2Fpb25l
+DQoNCg0KIFRvIHJlcG9ydCB0aGlzIGVtYWlsIGFzIHNwYW0gY2xpY2sgaHR0cHM6Ly93d3cubWFp
+bGNvbnRyb2wuY29tL3NyL3QhRU8wNU1xZlE3R1gyUFFQT212VWtXTTg1c0VLRDQralpRQ1FNV2NF
+RitLdHU3NUduSmpLSXVJTEMxM1lwRjZMZDkwcjBZWE1VYU5jIXJKaVZHYUpnPT0gLg0K
