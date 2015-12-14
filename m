@@ -1,7 +1,7 @@
-From: "Yang, York" <weijuny@qti.qualcomm.com>
-Subject: RE: [PATCH 1/2] mmc: core: enable CMD19 tuning for DDR50 mode
-Date: Mon, 14 Dec 2015 09:24:20 +0000
-Message-ID: <a2ffc219b04b483b87696ffc81a60787@aptaiexm02f.ap.qualcomm.com>
+From: Carlo Caione <carlo@caione.org>
+Subject: Re: [PATCH 1/2] mmc: core: enable CMD19 tuning for DDR50 mode
+Date: Mon, 14 Dec 2015 11:56:46 +0100
+Message-ID: <CAOQ7t2Z=4Mc9Ev9OBxXiLDtiXaTr5jQzc-gVwU_xJnHLrumd0g@mail.gmail.com>
 References: <1439282492-6274-1-git-send-email-21cnbao@gmail.com>
 	<CAPDyKFpXZD28NwNAhKQyxmWasVhk_7AeyOW6oXaBPHKuSTmGUA@mail.gmail.com>
 	<CAGsJ_4wvvQdyjFi=JmWfASm-LbJMybrhC=Wxxn7jHZEP5dUfEw@mail.gmail.com>
@@ -12,55 +12,41 @@ References: <1439282492-6274-1-git-send-email-21cnbao@gmail.com>
 	<CAPDyKFrj7mfxYPotHfpYPVf8M=Mvjcz+HfuB871EZNv9FWpPqw@mail.gmail.com>
 	<CAOQ7t2YuSDwtK0R3R4++3LUPyEqW+ENLju63QisX6tO=-cvt6w@mail.gmail.com>
 	<edf24ca1a9614943b55b8d19745a3c45@aptaiexm02f.ap.qualcomm.com>
- <CAOQ7t2YOd9TtAHHUBhF4n_POQURhfaqC_9Tg-b8d1Bf2QCyoYA@mail.gmail.com>
+	<CAOQ7t2YOd9TtAHHUBhF4n_POQURhfaqC_9Tg-b8d1Bf2QCyoYA@mail.gmail.com>
+	<a2ffc219b04b483b87696ffc81a60787@aptaiexm02f.ap.qualcomm.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from sabertooth01.qualcomm.com ([65.197.215.72]:9353 "EHLO
-	sabertooth01.qualcomm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932093AbbLNJYk (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 14 Dec 2015 04:24:40 -0500
-In-Reply-To: <CAOQ7t2YOd9TtAHHUBhF4n_POQURhfaqC_9Tg-b8d1Bf2QCyoYA@mail.gmail.com>
-Content-Language: en-US
+Received: from mail-wm0-f50.google.com ([74.125.82.50]:33140 "EHLO
+	mail-wm0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932121AbbLNK4r (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 14 Dec 2015 05:56:47 -0500
+Received: by mail-wm0-f50.google.com with SMTP id n186so39687957wmn.0
+        for <linux-mmc@vger.kernel.org>; Mon, 14 Dec 2015 02:56:47 -0800 (PST)
+In-Reply-To: <a2ffc219b04b483b87696ffc81a60787@aptaiexm02f.ap.qualcomm.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Carlo Caione <carlo@caione.org>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Barry Song <21cnbao@gmail.com>, linux-mmc <linux-mmc@vger.kernel.org>, DL-SHA-WorkGroupLinux <workgroup.linux@csr.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "Song, Barry" <baohuas@qti.qualcomm.com>
+To: "Yang, York" <weijuny@qti.qualcomm.com>
+Cc: Carlo Caione <carlo@caione.org>, Ulf Hansson <ulf.hansson@linaro.org>, Barry Song <21cnbao@gmail.com>, linux-mmc <linux-mmc@vger.kernel.org>, DL-SHA-WorkGroupLinux <workgroup.linux@csr.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "Song, Barry" <baohuas@qti.qualcomm.com>
 
-SGksIENhcmxvDQoNCglJIGRvbid0IHRoaW5rIHNvLiBZb3UgbWF5IGNoZWNrIHRoZSA5ZmFhYzdi
-OTUsIHRoZXJlIGFyZSB0d28gY2hhbmdlcyBpbiBzZC5jIGFuZCBzZGhjLmMuDQoJU3VyZWx5IHRo
-ZSBjaGFuZ2UgaW4gc2RoYy5jIHdpbGwgbm90IGFmZmVjdCBBU1VTIFgyMDVUQSAoYmNtNDMzNDEp
-IHNpbmNlIGl0IGlzIGEgU0RJTyBkZXZpY2UuDQoJQWN0dWFsbHkgdGhlIGNhbGxpbmcgc2VxdWVu
-Y2UgaXMgdGhpczogbW1jX3NkX2luaXRfdWhzX2NhcmQoKSBjYWxscyBzZGhjaV9leGVjdXRlX3R1
-bmluZygpLiBJbiA5ZmFhYzdiOTUsIEkgZW5hYmxlZCB0dW5pbmcgZm9yIEREUjUwIGluIHRoZXNl
-IHR3byBmdW5jdGlvbnMuDQoJSWYgeW91ciBmdW5jdGlvbiBjYWxsaW5nIHNlcXVlbmNlIGlzIG1t
-Y19zZGlvX2luaXRfdWhzX2NhcmQoKS0+c2RoY2lfZXhlY3V0ZV90dW5pbmcoKSwgdGhlIHR1bmlu
-ZyB3aWxsIG5vdCBjYXJyaWVkIG91dCwgc2luY2UgeW91IGRpZG4ndCBlbmFibGUgdHVuaW5nIGZv
-ciBERFI1MCBpbiBtbWNfc2Rpb19pbml0X3Voc19jYXJkKCkuDQoJVW5sZXNzIHlvdSBjYWxsIHNk
-aGNpX2V4ZWN1dGVfdHVuaW5nIGRpcmVjdGx5LCB0aGUgdHVuaW5nIGNvbW1hbmQgbWF5IGdvIHRo
-cm91Z2ggYmUgc2VudCBvdXQuDQoNCi0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQpGcm9tOiBj
-YXJsby5jYWlvbmVAZ21haWwuY29tIFttYWlsdG86Y2FybG8uY2Fpb25lQGdtYWlsLmNvbV0gT24g
-QmVoYWxmIE9mIENhcmxvIENhaW9uZQ0KU2VudDogMjAxNeW5tDEy5pyIMTTml6UgMTc6MTQNClRv
-OiBZYW5nLCBZb3JrIDx3ZWlqdW55QHF0aS5xdWFsY29tbS5jb20+DQpDYzogQ2FybG8gQ2Fpb25l
-IDxjYXJsb0BjYWlvbmUub3JnPjsgVWxmIEhhbnNzb24gPHVsZi5oYW5zc29uQGxpbmFyby5vcmc+
-OyBCYXJyeSBTb25nIDwyMWNuYmFvQGdtYWlsLmNvbT47IGxpbnV4LW1tYyA8bGludXgtbW1jQHZn
-ZXIua2VybmVsLm9yZz47IERMLVNIQS1Xb3JrR3JvdXBMaW51eCA8d29ya2dyb3VwLmxpbnV4QGNz
-ci5jb20+OyBsaW51eC1hcm0ta2VybmVsQGxpc3RzLmluZnJhZGVhZC5vcmc7IFNvbmcsIEJhcnJ5
-IDxiYW9odWFzQHF0aS5xdWFsY29tbS5jb20+DQpTdWJqZWN0OiBSZTogW1BBVENIIDEvMl0gbW1j
-OiBjb3JlOiBlbmFibGUgQ01EMTkgdHVuaW5nIGZvciBERFI1MCBtb2RlDQoNCk9uIE1vbiwgRGVj
-IDE0LCAyMDE1IGF0IDk6NDYgQU0sIFlhbmcsIFlvcmsgPHdlaWp1bnlAcXRpLnF1YWxjb21tLmNv
-bT4gd3JvdGU6DQo+IEhpLCBDYXJsbw0KPiAgICAgICAgIEluIDlmYWFjN2I5NSwgdHVuaW5nIGZv
-ciBERFI1MCBpcyBlbmFibGVkIGluIG1tY19zZF9pbml0X3Voc19jYXJkKCksIHNvIG9ubHkgU0Qg
-Y2FyZCBpcyBhZmZlY3RlZC4NCj4gICAgICAgICBUaGlzIGlzIGJhc2VkIG9uIHRoZSBTRCBzcGVj
-IHZlcnNpb24gMy4wMS4NCj4gICAgICAgICBtbWNfc2Rpb19pbml0X3Voc19jYXJkKCkgaXMgdW50
-b3VjaGVkLiBJIGRvbid0IGtub3cgd2hvIGFkZCB0aGUgY29kZSBpbnRvIG1tY19zZGlvX2luaXRf
-dWhzX2NhcmQoKSBhbmQgeW91IG1heSBoYXZlIGEgY2hlY2sgb24geW91ciBzaWRlLg0KDQpIaSBZ
-YW5nLA0Kc29ycnkgZm9yIG5vdCBiZWluZyBjbGVhci4gTW9kaWZ5aW5nIG1tY19zZGlvX2luaXRf
-dWhzX2NhcmQoKSB3YXMgb25seSBhIHRlc3QgSSBkaWQgdG8gY2hlY2sgd2hldGhlciB0aGF0IGNv
-dWxkIGZpeCB0aGUgaXNzdWUsIGJ1dCBpdCBkaWRuJ3QuDQoNClJpZ2h0IG5vdyB0aGUgc2l0dWF0
-aW9uIGlzOg0KLSBJbiB0aGUgbGF0ZXN0IG1hc3RlciB3aXRoIGNvbW1pdCA5ZmFhYzdiOTUgV2lG
-aSBpcyBicm9rZW4gb24gdGhlIEFTVVMgWDIwNVRBIChiY200MzM0MSkNCi0gUmV2ZXJ0aW5nIDlm
-YWFjN2I5NSBtYWtlcyBpdCB3b3JraW5nIGZpbmUgYWdhaW4NCg0KTXkgY29uY2x1c2lvbiBpcyB0
-aGF0IGlzc3VpbmcgdGhlIENNRDE5IGlzIGJhc2ljYWxseSBicmVha2luZyBXaUZpIG9uIHRoaXMg
-cGxhdGZvcm0uDQoNCi0tDQpDYXJsbyBDYWlvbmUNCg==
+On Mon, Dec 14, 2015 at 10:24 AM, Yang, York <weijuny@qti.qualcomm.com> wrote:
+> Hi, Carlo
+>
+>         I don't think so. You may check the 9faac7b95, there are two changes in sd.c and sdhc.c.
+>         Surely the change in sdhc.c will not affect ASUS X205TA (bcm43341) since it is a SDIO device.
+>         Actually the calling sequence is this: mmc_sd_init_uhs_card() calls sdhci_execute_tuning(). In 9faac7b95, I enabled tuning for DDR50 in these two functions.
+>         If your function calling sequence is mmc_sdio_init_uhs_card()->sdhci_execute_tuning(), the tuning will not carried out, since you didn't enable tuning for DDR50 in mmc_sdio_init_uhs_card().
+>         Unless you call sdhci_execute_tuning directly, the tuning command may go through be sent out.
+
+Hi Yang,
+
+On the unmodified master what I see is:
+
+- mmc_sdio_init_uhs_card() is called
+- card->sw_caps.sd3_bus_mode is 0x14
+- card->sw_caps.sd3_bus_mode & SD_MODE_UHS_SDR50 is actually verified
+(even though the tuning for DDR50 is not enabled)
+- mmc_execute_tuning() is actually called
+
+-- 
+Carlo Caione
