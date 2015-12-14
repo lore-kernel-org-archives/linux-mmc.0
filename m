@@ -1,70 +1,64 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [v4, 0/6] eSDHC patches introduction
-Date: Mon, 14 Dec 2015 13:22:11 +0100
-Message-ID: <CAPDyKFpykfkaELzOajQK5BQSZ9Hm4EZwkDwuL9MOoO0eVwPzrA@mail.gmail.com>
+Subject: Re: [v4, 5/6] mmc: kconfig: select FSL_GUTS for MMC_SDHCI_OF_ESDHC
+Date: Mon, 14 Dec 2015 14:08:29 +0100
+Message-ID: <CAPDyKFo1g5_4bpYnTO96tGfVGStysN0FnmbSx-Se4tOa7f3rZQ@mail.gmail.com>
 References: <1450067067-44869-1-git-send-email-yangbo.lu@freescale.com>
+	<1450067067-44869-6-git-send-email-yangbo.lu@freescale.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qk0-f182.google.com ([209.85.220.182]:33188 "EHLO
-	mail-qk0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752645AbbLNMWM (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 14 Dec 2015 07:22:12 -0500
-Received: by qkck189 with SMTP id k189so95699344qkc.0
-        for <linux-mmc@vger.kernel.org>; Mon, 14 Dec 2015 04:22:12 -0800 (PST)
-In-Reply-To: <1450067067-44869-1-git-send-email-yangbo.lu@freescale.com>
+Received: from mail-qk0-f173.google.com ([209.85.220.173]:36654 "EHLO
+	mail-qk0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932331AbbLNNIa (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 14 Dec 2015 08:08:30 -0500
+Received: by qkht125 with SMTP id t125so132620209qkh.3
+        for <linux-mmc@vger.kernel.org>; Mon, 14 Dec 2015 05:08:29 -0800 (PST)
+In-Reply-To: <1450067067-44869-6-git-send-email-yangbo.lu@freescale.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Yangbo Lu <yangbo.lu@freescale.com>
 Cc: Scott Wood <scottwood@freescale.com>, linux-mmc <linux-mmc@vger.kernel.org>, X.Xie@freescale.com, Li Leo <LeoLi@freescale.com>
 
 On 14 December 2015 at 05:24, Yangbo Lu <yangbo.lu@freescale.com> wrote:
-> This patchset is used to fix host version in eSDHC_HOSTVER for T4240-R1.0-R2.0.
-> To get the SoC version and revision, it's needed to add the GUTS driver to access
-> the global utilities registers.
+> The sdhci-of-esdhc driver needs the GUTS driver support
+> to access the global utilities registers for SVR value.
+> So we select FSL_GUTS for MMC_SDHCI_OF_ESDHC here.
 >
-> So, the first three patches are to add the GUTS driver.
-> The following two patches are to enable GUTS driver support
-> to get SVR in eSDHC driver.
-> The last patch is to fix host version for T4240.
+> Signed-off-by: Yangbo Lu <yangbo.lu@freescale.com>
+> ---
+> Changes for v2:
+>         - None
+> Changes for v3:
+>         - None
+> Changes for v4:
+>         - Added this patch
+> ---
+>  drivers/mmc/host/Kconfig | 2 ++
+>  1 file changed, 2 insertions(+)
 >
-> Yangbo Lu (6):
->   soc: fsl: add GUTS driver for QorIQ platforms
->   dt: move guts devicetree doc out of powerpc directory
->   powerpc/fsl: move mpc85xx.h to include/linux
->   mmc: sdhci-of-esdhc: get SVR from global utilities registers
->   mmc: kconfig: select FSL_GUTS for MMC_SDHCI_OF_ESDHC
->   mmc: sdhci-of-esdhc: fix host version for T4240-R1.0-R2.0
->
->  .../bindings/{powerpc/fsl => soc}/guts.txt         |   3 +
->  drivers/clk/clk-qoriq.c                            |   2 +-
->  drivers/i2c/busses/i2c-mpc.c                       |   2 +-
->  drivers/iommu/fsl_pamu.c                           |   2 +-
->  drivers/mmc/host/Kconfig                           |   2 +
->  drivers/mmc/host/sdhci-of-esdhc.c                  |  26 ++++-
->  drivers/net/ethernet/freescale/gianfar.c           |   2 +-
->  drivers/soc/Kconfig                                |   1 +
->  drivers/soc/Makefile                               |   1 +
->  drivers/soc/fsl/Kconfig                            |  19 ++++
->  drivers/soc/fsl/Makefile                           |   4 +
->  drivers/soc/fsl/guts.c                             | 112 +++++++++++++++++++++
->  include/linux/fsl/guts.h                           | 103 ++++++++++---------
->  .../include/asm/mpc85xx.h => include/linux/svr.h   |   4 +-
->  14 files changed, 227 insertions(+), 56 deletions(-)
->  rename Documentation/devicetree/bindings/{powerpc/fsl => soc}/guts.txt (90%)
->  create mode 100644 drivers/soc/fsl/Kconfig
->  create mode 100644 drivers/soc/fsl/Makefile
->  create mode 100644 drivers/soc/fsl/guts.c
->  rename arch/powerpc/include/asm/mpc85xx.h => include/linux/svr.h (97%)
->
-> --
-> 2.1.0.27.g96db324
->
+> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+> index 1526b8a..df57c14 100644
+> --- a/drivers/mmc/host/Kconfig
+> +++ b/drivers/mmc/host/Kconfig
+> @@ -142,6 +142,8 @@ config MMC_SDHCI_OF_ESDHC
+>         depends on MMC_SDHCI_PLTFM
+>         depends on PPC || ARCH_MXC || ARCH_LAYERSCAPE
+>         select MMC_SDHCI_IO_ACCESSORS
+> +       select SOC_FSL
+> +       select FSL_GUTS
 
-I think you need some additional maintainers to be involved here.
-There are more than mmc parts in this patchset.
+This is weird.
 
-Please re-post.
+First, perhaps it would make sense to have stub functions for those
+the FSL_GUTS driver provides via its API, thus the above wouldn't be
+required at all. Of course this makes only sense if you think there
+are/could be configurations for a cross SOC driver which don't need
+the GUTS driver.
+
+Second, even if you think the stubs above is a bad idea, I would from
+the top-level Kconfig for your platform, add the needed "selects" as I
+think it's where it belongs and then change this to "depends on"
+instead.
 
 Kind regards
 Uffe
