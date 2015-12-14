@@ -1,52 +1,70 @@
-From: Carlo Caione <carlo@caione.org>
-Subject: Re: [PATCH 1/2] mmc: core: enable CMD19 tuning for DDR50 mode
-Date: Mon, 14 Dec 2015 11:56:46 +0100
-Message-ID: <CAOQ7t2Z=4Mc9Ev9OBxXiLDtiXaTr5jQzc-gVwU_xJnHLrumd0g@mail.gmail.com>
-References: <1439282492-6274-1-git-send-email-21cnbao@gmail.com>
-	<CAPDyKFpXZD28NwNAhKQyxmWasVhk_7AeyOW6oXaBPHKuSTmGUA@mail.gmail.com>
-	<CAGsJ_4wvvQdyjFi=JmWfASm-LbJMybrhC=Wxxn7jHZEP5dUfEw@mail.gmail.com>
-	<CAPDyKFpEwWvu3tnbMT9ZvM0TUvEHp0Qa8PADohyJoTaNZ9HS9g@mail.gmail.com>
-	<CAGsJ_4x5Nd3Cts1BHsUyB_mCejxbHPPjznUVWUcFoZhxKy+Tcg@mail.gmail.com>
-	<CAPDyKFpWfY9G4WG_GfCutJ2NkRbcAYZToYJXp3RvX=_25sgnWA@mail.gmail.com>
-	<CAGsJ_4zaWcmGsc82=LSohK0UHxJir2OJOBSgoU3sPRXYvLdOZQ@mail.gmail.com>
-	<CAPDyKFrj7mfxYPotHfpYPVf8M=Mvjcz+HfuB871EZNv9FWpPqw@mail.gmail.com>
-	<CAOQ7t2YuSDwtK0R3R4++3LUPyEqW+ENLju63QisX6tO=-cvt6w@mail.gmail.com>
-	<edf24ca1a9614943b55b8d19745a3c45@aptaiexm02f.ap.qualcomm.com>
-	<CAOQ7t2YOd9TtAHHUBhF4n_POQURhfaqC_9Tg-b8d1Bf2QCyoYA@mail.gmail.com>
-	<a2ffc219b04b483b87696ffc81a60787@aptaiexm02f.ap.qualcomm.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [v4, 0/6] eSDHC patches introduction
+Date: Mon, 14 Dec 2015 13:22:11 +0100
+Message-ID: <CAPDyKFpykfkaELzOajQK5BQSZ9Hm4EZwkDwuL9MOoO0eVwPzrA@mail.gmail.com>
+References: <1450067067-44869-1-git-send-email-yangbo.lu@freescale.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wm0-f50.google.com ([74.125.82.50]:33140 "EHLO
-	mail-wm0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932121AbbLNK4r (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 14 Dec 2015 05:56:47 -0500
-Received: by mail-wm0-f50.google.com with SMTP id n186so39687957wmn.0
-        for <linux-mmc@vger.kernel.org>; Mon, 14 Dec 2015 02:56:47 -0800 (PST)
-In-Reply-To: <a2ffc219b04b483b87696ffc81a60787@aptaiexm02f.ap.qualcomm.com>
+Received: from mail-qk0-f182.google.com ([209.85.220.182]:33188 "EHLO
+	mail-qk0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752645AbbLNMWM (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 14 Dec 2015 07:22:12 -0500
+Received: by qkck189 with SMTP id k189so95699344qkc.0
+        for <linux-mmc@vger.kernel.org>; Mon, 14 Dec 2015 04:22:12 -0800 (PST)
+In-Reply-To: <1450067067-44869-1-git-send-email-yangbo.lu@freescale.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "Yang, York" <weijuny@qti.qualcomm.com>
-Cc: Carlo Caione <carlo@caione.org>, Ulf Hansson <ulf.hansson@linaro.org>, Barry Song <21cnbao@gmail.com>, linux-mmc <linux-mmc@vger.kernel.org>, DL-SHA-WorkGroupLinux <workgroup.linux@csr.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "Song, Barry" <baohuas@qti.qualcomm.com>
+To: Yangbo Lu <yangbo.lu@freescale.com>
+Cc: Scott Wood <scottwood@freescale.com>, linux-mmc <linux-mmc@vger.kernel.org>, X.Xie@freescale.com, Li Leo <LeoLi@freescale.com>
 
-On Mon, Dec 14, 2015 at 10:24 AM, Yang, York <weijuny@qti.qualcomm.com> wrote:
-> Hi, Carlo
+On 14 December 2015 at 05:24, Yangbo Lu <yangbo.lu@freescale.com> wrote:
+> This patchset is used to fix host version in eSDHC_HOSTVER for T4240-R1.0-R2.0.
+> To get the SoC version and revision, it's needed to add the GUTS driver to access
+> the global utilities registers.
 >
->         I don't think so. You may check the 9faac7b95, there are two changes in sd.c and sdhc.c.
->         Surely the change in sdhc.c will not affect ASUS X205TA (bcm43341) since it is a SDIO device.
->         Actually the calling sequence is this: mmc_sd_init_uhs_card() calls sdhci_execute_tuning(). In 9faac7b95, I enabled tuning for DDR50 in these two functions.
->         If your function calling sequence is mmc_sdio_init_uhs_card()->sdhci_execute_tuning(), the tuning will not carried out, since you didn't enable tuning for DDR50 in mmc_sdio_init_uhs_card().
->         Unless you call sdhci_execute_tuning directly, the tuning command may go through be sent out.
+> So, the first three patches are to add the GUTS driver.
+> The following two patches are to enable GUTS driver support
+> to get SVR in eSDHC driver.
+> The last patch is to fix host version for T4240.
+>
+> Yangbo Lu (6):
+>   soc: fsl: add GUTS driver for QorIQ platforms
+>   dt: move guts devicetree doc out of powerpc directory
+>   powerpc/fsl: move mpc85xx.h to include/linux
+>   mmc: sdhci-of-esdhc: get SVR from global utilities registers
+>   mmc: kconfig: select FSL_GUTS for MMC_SDHCI_OF_ESDHC
+>   mmc: sdhci-of-esdhc: fix host version for T4240-R1.0-R2.0
+>
+>  .../bindings/{powerpc/fsl => soc}/guts.txt         |   3 +
+>  drivers/clk/clk-qoriq.c                            |   2 +-
+>  drivers/i2c/busses/i2c-mpc.c                       |   2 +-
+>  drivers/iommu/fsl_pamu.c                           |   2 +-
+>  drivers/mmc/host/Kconfig                           |   2 +
+>  drivers/mmc/host/sdhci-of-esdhc.c                  |  26 ++++-
+>  drivers/net/ethernet/freescale/gianfar.c           |   2 +-
+>  drivers/soc/Kconfig                                |   1 +
+>  drivers/soc/Makefile                               |   1 +
+>  drivers/soc/fsl/Kconfig                            |  19 ++++
+>  drivers/soc/fsl/Makefile                           |   4 +
+>  drivers/soc/fsl/guts.c                             | 112 +++++++++++++++++++++
+>  include/linux/fsl/guts.h                           | 103 ++++++++++---------
+>  .../include/asm/mpc85xx.h => include/linux/svr.h   |   4 +-
+>  14 files changed, 227 insertions(+), 56 deletions(-)
+>  rename Documentation/devicetree/bindings/{powerpc/fsl => soc}/guts.txt (90%)
+>  create mode 100644 drivers/soc/fsl/Kconfig
+>  create mode 100644 drivers/soc/fsl/Makefile
+>  create mode 100644 drivers/soc/fsl/guts.c
+>  rename arch/powerpc/include/asm/mpc85xx.h => include/linux/svr.h (97%)
+>
+> --
+> 2.1.0.27.g96db324
+>
 
-Hi Yang,
+I think you need some additional maintainers to be involved here.
+There are more than mmc parts in this patchset.
 
-On the unmodified master what I see is:
+Please re-post.
 
-- mmc_sdio_init_uhs_card() is called
-- card->sw_caps.sd3_bus_mode is 0x14
-- card->sw_caps.sd3_bus_mode & SD_MODE_UHS_SDR50 is actually verified
-(even though the tuning for DDR50 is not enabled)
-- mmc_execute_tuning() is actually called
-
--- 
-Carlo Caione
+Kind regards
+Uffe
