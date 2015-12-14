@@ -1,115 +1,173 @@
-From: Scott Wood <scottwood@freescale.com>
-Subject: Re: [v4, 3/6] powerpc/fsl: move mpc85xx.h to include/linux
-Date: Mon, 14 Dec 2015 16:12:16 -0600
-Message-ID: <1450131136.15946.390.camel@freescale.com>
-References: <1450067067-44869-1-git-send-email-yangbo.lu@freescale.com>
-	 <1450067067-44869-4-git-send-email-yangbo.lu@freescale.com>
+From: Joshua Henderson <joshua.henderson@microchip.com>
+Subject: [PATCH v2 00/14] Initial Microchip PIC32MZDA Support
+Date: Mon, 14 Dec 2015 15:42:02 -0700
+Message-ID: <1450133093-7053-1-git-send-email-joshua.henderson@microchip.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-by2on0117.outbound.protection.outlook.com ([207.46.100.117]:10944
-	"EHLO na01-by2-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1753582AbbLNW2b (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 14 Dec 2015 17:28:31 -0500
-In-Reply-To: <1450067067-44869-4-git-send-email-yangbo.lu@freescale.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: linux-kernel@vger.kernel.org
+Cc: linux-mips@linux-mips.org, ralf@linux-mips.org, Joshua Henderson <joshua.henderson@microchip.com>, Andrei Pistirica <andrei.pistirica@microchip.com>, Andrew Bresticker <abrestic@chromium.org>, Andy Green <andy.green@linaro.org>, Ben Hutchings <ben@decadent.org.uk>, Chaotian Jing <chaotian.jing@mediatek.com>, Corneliu Doban <cdoban@broadcom.com>, Cristian Birsan <cristian.birsan@microchip.com>, devicetree@vger.kernel.org, Geert Uytterhoeven <geert@linux-m68k.org>, Haojian Zhuang <haojian.zhuang@gmail.com>, Jean Delvare <jdelvare@suse.de>, Kevin Hao <haokexin@gmail.com>, linux-api@vger.kernel.org, linux-clk@vger.kernel.org, linux-gpio@vger.kernel.org, linux-mmc@vger.kernel.org, linux-serial@vger.kernel.org, Lokesh Vutla <lokeshvutla@ti.com>, "ludovic.desroches@atmel.com" <ludovic.desroches@atmel.com>, Luis de Bethencourt <luisbg@osg.samsung.com>, Paul
 List-Id: linux-mmc@vger.kernel.org
-To: Yangbo Lu <yangbo.lu@freescale.com>, linux-mmc@vger.kernel.org, ulf.hansson@linaro.org
-Cc: X.Xie@freescale.com, LeoLi@freescale.com
 
-On Mon, 2015-12-14 at 12:24 +0800, Yangbo Lu wrote:
-> Move mpc85xx.h to include/linux and rename it to svr.h as
-> a common header file. It has been used for mpc85xx and it will
-> be used for ARM-based SoC as well.
-> 
-> Signed-off-by: Yangbo Lu <yangbo.lu@freescale.com>
-> ---
-> Changes for v2:
-> 	- None
-> Changes for v3:
-> 	- None
-> Changes for v4:
-> 	- None
-> ---
->  drivers/clk/clk-qoriq.c                                   | 2 +-
->  drivers/i2c/busses/i2c-mpc.c                              | 2 +-
->  drivers/iommu/fsl_pamu.c                                  | 2 +-
->  drivers/net/ethernet/freescale/gianfar.c                  | 2 +-
->  arch/powerpc/include/asm/mpc85xx.h => include/linux/svr.h | 4 ++--
->  5 files changed, 6 insertions(+), 6 deletions(-)
->  rename arch/powerpc/include/asm/mpc85xx.h => include/linux/svr.h (97%)
+This patch series adds support for the Microchip PIC32MZDA MIPS platform.
+All drivers required to boot from a MMC uSD card are included. Clock,
+external interrupt controller, serial, SDHCI, and pinctrl drivers are
+included. This has been tested on a PIC32MZDA Starter Kit. A tree with
+these changes is available at [0].
 
-include/linux/fsl/svr.h
+[0] https://github.com/joshua-henderson/linux/tree/pic32-upstream-v2
 
+Changes since v1 (https://lkml.org/lkml/2015/11/20/848):
 
-> diff --git a/drivers/clk/clk-qoriq.c b/drivers/clk/clk-qoriq.c
-> index 1ab0fb8..98c5ae0 100644
-> --- a/drivers/clk/clk-qoriq.c
-> +++ b/drivers/clk/clk-qoriq.c
-> @@ -1146,7 +1146,7 @@ bad_args:
->  }
->  
->  #ifdef CONFIG_PPC
-> -#include <asm/mpc85xx.h>
-> +#include <linux/svr.h>
+	+ Rename all DT compatible properties to be chip specific.
+	+ Remove hardware interrupt priorities from interrupt controller DT
+	  bindings.
+	+ Remove all dependencies on include headers used by PIC32 DTS
+	  files.
+	+ Remove arch/mips/include/asm/mach-pic32/gpio.h
+	+ Drop usage of the following, mostly non-standard, properties in
+	  DT bindings:
+		device_type
+		piomode
+		no-1-8-v
+		uart-has-rtscts
+		clock-frequency => assigned-clock-rate
+	+ Remove PIC32 memory PLL support from DT.
+	+ Replace empty 'ranges' with populated one for clock tree node.
+	+ Rename all instances of "USART" to "UART".
+	+ Remove 'interrupts' property from FSCM of PIC32 clock tree node.
+	+ Add default REFCLK rate initialization required for SDHCI in DTS.
+	+ Remove default frequency setup for REFOSC clocks in -clk DTS.
+	+ Address missing static on local functions and other sparse
+	  warnings in several drivers.
+	+ Update pinctrl driver to address major binding and architectural
+	  issues.
+	+ Remove redundant probing 'pb7_clk' to find CPU clock.
+	+ Remove unused PIC32 MPLL support.
+	+ Remove support for initializing default parent/rate for REFOSC
+	  clocks.
+	+ Be consistent and use only "SDHCI" when refering to SD host
+	  controller
+	+ Remove unecessary PIC32 sdhci_ops min clock function.
+	+ Make platform PIC32[_CLR|_SET|_INV] register macros safer.
 
-Now that it's not PPC-specific the #include can go to the top of the file with
-the rest of them.
+Andrei Pistirica (4):
+  DEVICETREE: Add bindings for PIC32 UART driver
+  serial: pic32_uart: Add PIC32 UART driver
+  DEVICETREE: Add bindings for PIC32 SDHCI host controller
+  mmc: sdhci-pic32: Add PIC32 SDHCI host controller driver
 
->  
->  static const u32 a4510_svrs[] __initconst = {
->  	(SVR_P2040 << 8) | 0x10,	/* P2040 1.0 */
-> diff --git a/drivers/i2c/busses/i2c-mpc.c b/drivers/i2c/busses/i2c-mpc.c
-> index 48ecffe..24b5bc7 100644
-> --- a/drivers/i2c/busses/i2c-mpc.c
-> +++ b/drivers/i2c/busses/i2c-mpc.c
-> @@ -27,9 +27,9 @@
->  #include <linux/i2c.h>
->  #include <linux/interrupt.h>
->  #include <linux/delay.h>
-> +#include <linux/svr.h>
->  
->  #include <asm/mpc52xx.h>
-> -#include <asm/mpc85xx.h>
->  #include <sysdev/fsl_soc.h>
->  
->  #define DRV_NAME "mpc-i2c"
-> diff --git a/drivers/iommu/fsl_pamu.c b/drivers/iommu/fsl_pamu.c
-> index a34355f..b014b63 100644
-> --- a/drivers/iommu/fsl_pamu.c
-> +++ b/drivers/iommu/fsl_pamu.c
-> @@ -24,7 +24,7 @@
->  #include <linux/interrupt.h>
->  #include <linux/genalloc.h>
->  
-> -#include <asm/mpc85xx.h>
-> +#include <linux/svr.h>
+Cristian Birsan (2):
+  DEVICETREE: Add bindings for PIC32 interrupt controller
+  irqchip: irq-pic32-evic: Add support for PIC32 interrupt controller
 
-Move it with the other linux/ includes (i.e. remove the blank line before
-this).
+Joshua Henderson (6):
+  DEVICETREE: Add bindings for PIC32/MZDA platforms
+  MIPS: Add support for PIC32MZDA platform
+  DEVICETREE: Add bindings for PIC32 pin control and GPIO
+  pinctrl: pinctrl-pic32: Add PIC32 pin control driver
+  MIPS: dts: Add initial DTS for the PIC32MZDA Starter Kit
+  MIPS: pic32mzda: Add initial PIC32MZDA Starter Kit defconfig
 
->  
->  /* define indexes for each operation mapping scenario */
->  #define OMI_QMAN        0x00
-> diff --git a/drivers/net/ethernet/freescale/gianfar.c
-> b/drivers/net/ethernet/freescale/gianfar.c
-> index 3e6b9b4..9b2d641 100644
-> --- a/drivers/net/ethernet/freescale/gianfar.c
-> +++ b/drivers/net/ethernet/freescale/gianfar.c
-> @@ -90,7 +90,7 @@
->  #include <asm/io.h>
->  #ifdef CONFIG_PPC
->  #include <asm/reg.h>
-> -#include <asm/mpc85xx.h>
-> +#include <linux/svr.h>
->  #endif
->  #include <asm/irq.h>
->  #include <asm/uaccess.h>
+Purna Chandra Mandal (2):
+  DEVICETREE: Add PIC32 clock binding documentation
+  clk: clk-pic32: Add PIC32 clock driver
 
-Same comment as clk-qoriq.c -- this can come out of the ifdef and go with the
-other linux/ includes.
+ .../devicetree/bindings/clock/microchip,pic32.txt  |  256 +++
+ .../bindings/gpio/microchip,pic32-gpio.txt         |   32 +
+ .../interrupt-controller/microchip,pic32-evic.txt  |   58 +
+ .../bindings/mips/pic32/microchip,pic32mzda.txt    |   33 +
+ .../bindings/mmc/microchip,sdhci-pic32.txt         |   29 +
+ .../bindings/pinctrl/microchip,pic32-pinctrl.txt   |   93 +
+ .../bindings/serial/microchip,pic32-uart.txt       |   29 +
+ arch/mips/Kbuild.platforms                         |    1 +
+ arch/mips/Kconfig                                  |    9 +
+ arch/mips/boot/dts/Makefile                        |    1 +
+ arch/mips/boot/dts/pic32/Makefile                  |   12 +
+ arch/mips/boot/dts/pic32/pic32mzda-clk.dtsi        |  235 ++
+ arch/mips/boot/dts/pic32/pic32mzda.dtsi            |  275 +++
+ arch/mips/boot/dts/pic32/pic32mzda_sk.dts          |  151 ++
+ arch/mips/configs/pic32mzda_defconfig              |   88 +
+ .../include/asm/mach-pic32/cpu-feature-overrides.h |   32 +
+ arch/mips/include/asm/mach-pic32/irq.h             |   22 +
+ arch/mips/include/asm/mach-pic32/pic32.h           |   44 +
+ arch/mips/include/asm/mach-pic32/spaces.h          |   24 +
+ arch/mips/pic32/Kconfig                            |   50 +
+ arch/mips/pic32/Makefile                           |    6 +
+ arch/mips/pic32/Platform                           |    7 +
+ arch/mips/pic32/common/Makefile                    |    5 +
+ arch/mips/pic32/common/irq.c                       |   21 +
+ arch/mips/pic32/common/reset.c                     |   62 +
+ arch/mips/pic32/pic32mzda/Makefile                 |    9 +
+ arch/mips/pic32/pic32mzda/config.c                 |  126 ++
+ arch/mips/pic32/pic32mzda/early_clk.c              |  106 +
+ arch/mips/pic32/pic32mzda/early_console.c          |  171 ++
+ arch/mips/pic32/pic32mzda/early_pin.c              |  275 +++
+ arch/mips/pic32/pic32mzda/early_pin.h              |  241 ++
+ arch/mips/pic32/pic32mzda/init.c                   |  156 ++
+ arch/mips/pic32/pic32mzda/pic32mzda.h              |   29 +
+ arch/mips/pic32/pic32mzda/time.c                   |   44 +
+ drivers/clk/Kconfig                                |    3 +
+ drivers/clk/Makefile                               |    1 +
+ drivers/clk/clk-pic32.c                            | 1804 +++++++++++++++
+ drivers/irqchip/Makefile                           |    1 +
+ drivers/irqchip/irq-pic32-evic.c                   |  321 +++
+ drivers/mmc/host/Kconfig                           |   11 +
+ drivers/mmc/host/Makefile                          |    1 +
+ drivers/mmc/host/sdhci-pic32.c                     |  291 +++
+ drivers/pinctrl/Kconfig                            |   17 +
+ drivers/pinctrl/Makefile                           |    1 +
+ drivers/pinctrl/pinctrl-pic32.c                    | 2339 ++++++++++++++++++++
+ drivers/pinctrl/pinctrl-pic32.h                    |  141 ++
+ drivers/tty/serial/Kconfig                         |   21 +
+ drivers/tty/serial/Makefile                        |    1 +
+ drivers/tty/serial/pic32_uart.c                    |  927 ++++++++
+ drivers/tty/serial/pic32_uart.h                    |  198 ++
+ include/linux/irqchip/pic32-evic.h                 |   19 +
+ include/linux/platform_data/sdhci-pic32.h          |   22 +
+ include/uapi/linux/serial_core.h                   |    3 +
+ 53 files changed, 8854 insertions(+)
+ create mode 100644 Documentation/devicetree/bindings/clock/microchip,pic32.txt
+ create mode 100644 Documentation/devicetree/bindings/gpio/microchip,pic32-gpio.txt
+ create mode 100644 Documentation/devicetree/bindings/interrupt-controller/microchip,pic32-evic.txt
+ create mode 100644 Documentation/devicetree/bindings/mips/pic32/microchip,pic32mzda.txt
+ create mode 100644 Documentation/devicetree/bindings/mmc/microchip,sdhci-pic32.txt
+ create mode 100644 Documentation/devicetree/bindings/pinctrl/microchip,pic32-pinctrl.txt
+ create mode 100644 Documentation/devicetree/bindings/serial/microchip,pic32-uart.txt
+ create mode 100644 arch/mips/boot/dts/pic32/Makefile
+ create mode 100644 arch/mips/boot/dts/pic32/pic32mzda-clk.dtsi
+ create mode 100644 arch/mips/boot/dts/pic32/pic32mzda.dtsi
+ create mode 100644 arch/mips/boot/dts/pic32/pic32mzda_sk.dts
+ create mode 100644 arch/mips/configs/pic32mzda_defconfig
+ create mode 100644 arch/mips/include/asm/mach-pic32/cpu-feature-overrides.h
+ create mode 100644 arch/mips/include/asm/mach-pic32/irq.h
+ create mode 100644 arch/mips/include/asm/mach-pic32/pic32.h
+ create mode 100644 arch/mips/include/asm/mach-pic32/spaces.h
+ create mode 100644 arch/mips/pic32/Kconfig
+ create mode 100644 arch/mips/pic32/Makefile
+ create mode 100644 arch/mips/pic32/Platform
+ create mode 100644 arch/mips/pic32/common/Makefile
+ create mode 100644 arch/mips/pic32/common/irq.c
+ create mode 100644 arch/mips/pic32/common/reset.c
+ create mode 100644 arch/mips/pic32/pic32mzda/Makefile
+ create mode 100644 arch/mips/pic32/pic32mzda/config.c
+ create mode 100644 arch/mips/pic32/pic32mzda/early_clk.c
+ create mode 100644 arch/mips/pic32/pic32mzda/early_console.c
+ create mode 100644 arch/mips/pic32/pic32mzda/early_pin.c
+ create mode 100644 arch/mips/pic32/pic32mzda/early_pin.h
+ create mode 100644 arch/mips/pic32/pic32mzda/init.c
+ create mode 100644 arch/mips/pic32/pic32mzda/pic32mzda.h
+ create mode 100644 arch/mips/pic32/pic32mzda/time.c
+ create mode 100644 drivers/clk/clk-pic32.c
+ create mode 100644 drivers/irqchip/irq-pic32-evic.c
+ create mode 100644 drivers/mmc/host/sdhci-pic32.c
+ create mode 100644 drivers/pinctrl/pinctrl-pic32.c
+ create mode 100644 drivers/pinctrl/pinctrl-pic32.h
+ create mode 100644 drivers/tty/serial/pic32_uart.c
+ create mode 100644 drivers/tty/serial/pic32_uart.h
+ create mode 100644 include/linux/irqchip/pic32-evic.h
+ create mode 100644 include/linux/platform_data/sdhci-pic32.h
 
--Scott
-
+--
+1.7.9.5
