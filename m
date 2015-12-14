@@ -1,7 +1,7 @@
-From: "Yang, York" <weijuny@qti.qualcomm.com>
-Subject: RE: [PATCH 1/2] mmc: core: enable CMD19 tuning for DDR50 mode
-Date: Mon, 14 Dec 2015 08:46:36 +0000
-Message-ID: <edf24ca1a9614943b55b8d19745a3c45@aptaiexm02f.ap.qualcomm.com>
+From: Carlo Caione <carlo@caione.org>
+Subject: Re: [PATCH 1/2] mmc: core: enable CMD19 tuning for DDR50 mode
+Date: Mon, 14 Dec 2015 10:13:55 +0100
+Message-ID: <CAOQ7t2YOd9TtAHHUBhF4n_POQURhfaqC_9Tg-b8d1Bf2QCyoYA@mail.gmail.com>
 References: <1439282492-6274-1-git-send-email-21cnbao@gmail.com>
 	<CAPDyKFpXZD28NwNAhKQyxmWasVhk_7AeyOW6oXaBPHKuSTmGUA@mail.gmail.com>
 	<CAGsJ_4wvvQdyjFi=JmWfASm-LbJMybrhC=Wxxn7jHZEP5dUfEw@mail.gmail.com>
@@ -10,60 +10,40 @@ References: <1439282492-6274-1-git-send-email-21cnbao@gmail.com>
 	<CAPDyKFpWfY9G4WG_GfCutJ2NkRbcAYZToYJXp3RvX=_25sgnWA@mail.gmail.com>
 	<CAGsJ_4zaWcmGsc82=LSohK0UHxJir2OJOBSgoU3sPRXYvLdOZQ@mail.gmail.com>
 	<CAPDyKFrj7mfxYPotHfpYPVf8M=Mvjcz+HfuB871EZNv9FWpPqw@mail.gmail.com>
- <CAOQ7t2YuSDwtK0R3R4++3LUPyEqW+ENLju63QisX6tO=-cvt6w@mail.gmail.com>
+	<CAOQ7t2YuSDwtK0R3R4++3LUPyEqW+ENLju63QisX6tO=-cvt6w@mail.gmail.com>
+	<edf24ca1a9614943b55b8d19745a3c45@aptaiexm02f.ap.qualcomm.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from sabertooth01.qualcomm.com ([65.197.215.72]:40055 "EHLO
-	sabertooth01.qualcomm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752310AbbLNIql (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 14 Dec 2015 03:46:41 -0500
-In-Reply-To: <CAOQ7t2YuSDwtK0R3R4++3LUPyEqW+ENLju63QisX6tO=-cvt6w@mail.gmail.com>
-Content-Language: en-US
+Received: from mail-wm0-f44.google.com ([74.125.82.44]:38747 "EHLO
+	mail-wm0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752645AbbLNJN4 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 14 Dec 2015 04:13:56 -0500
+Received: by wmpp66 with SMTP id p66so51584209wmp.1
+        for <linux-mmc@vger.kernel.org>; Mon, 14 Dec 2015 01:13:55 -0800 (PST)
+In-Reply-To: <edf24ca1a9614943b55b8d19745a3c45@aptaiexm02f.ap.qualcomm.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Carlo Caione <carlo@caione.org>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Barry Song <21cnbao@gmail.com>, linux-mmc <linux-mmc@vger.kernel.org>, DL-SHA-WorkGroupLinux <workgroup.linux@csr.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "Song, Barry" <baohuas@qti.qualcomm.com>
+To: "Yang, York" <weijuny@qti.qualcomm.com>
+Cc: Carlo Caione <carlo@caione.org>, Ulf Hansson <ulf.hansson@linaro.org>, Barry Song <21cnbao@gmail.com>, linux-mmc <linux-mmc@vger.kernel.org>, DL-SHA-WorkGroupLinux <workgroup.linux@csr.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "Song, Barry" <baohuas@qti.qualcomm.com>
 
-SGksIENhcmxvDQoJSW4gOWZhYWM3Yjk1LCB0dW5pbmcgZm9yIEREUjUwIGlzIGVuYWJsZWQgaW4g
-bW1jX3NkX2luaXRfdWhzX2NhcmQoKSwgc28gb25seSBTRCBjYXJkIGlzIGFmZmVjdGVkLg0KCVRo
-aXMgaXMgYmFzZWQgb24gdGhlIFNEIHNwZWMgdmVyc2lvbiAzLjAxLg0KCW1tY19zZGlvX2luaXRf
-dWhzX2NhcmQoKSBpcyB1bnRvdWNoZWQuIEkgZG9uJ3Qga25vdyB3aG8gYWRkIHRoZSBjb2RlIGlu
-dG8gbW1jX3NkaW9faW5pdF91aHNfY2FyZCgpIGFuZCB5b3UgbWF5IGhhdmUgYSBjaGVjayBvbiB5
-b3VyIHNpZGUuDQoNCi0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQpGcm9tOiBjYXJsby5jYWlv
-bmVAZ21haWwuY29tIFttYWlsdG86Y2FybG8uY2Fpb25lQGdtYWlsLmNvbV0gT24gQmVoYWxmIE9m
-IENhcmxvIENhaW9uZQ0KU2VudDogMjAxNeW5tDEy5pyIMTPml6UgNzo1Mg0KVG86IFVsZiBIYW5z
-c29uIDx1bGYuaGFuc3NvbkBsaW5hcm8ub3JnPg0KQ2M6IEJhcnJ5IFNvbmcgPDIxY25iYW9AZ21h
-aWwuY29tPjsgWWFuZywgWW9yayA8d2VpanVueUBxdGkucXVhbGNvbW0uY29tPjsgbGludXgtbW1j
-IDxsaW51eC1tbWNAdmdlci5rZXJuZWwub3JnPjsgREwtU0hBLVdvcmtHcm91cExpbnV4IDx3b3Jr
-Z3JvdXAubGludXhAY3NyLmNvbT47IGxpbnV4LWFybS1rZXJuZWxAbGlzdHMuaW5mcmFkZWFkLm9y
-ZzsgU29uZywgQmFycnkgPGJhb2h1YXNAcXRpLnF1YWxjb21tLmNvbT4NClN1YmplY3Q6IFJlOiBb
-UEFUQ0ggMS8yXSBtbWM6IGNvcmU6IGVuYWJsZSBDTUQxOSB0dW5pbmcgZm9yIEREUjUwIG1vZGUN
-Cg0KT24gV2VkLCBTZXAgMjMsIDIwMTUgYXQgOToyNSBQTSwgVWxmIEhhbnNzb24gPHVsZi5oYW5z
-c29uQGxpbmFyby5vcmc+IHdyb3RlOg0KPiBbLi4uXQ0KPg0KPj4+DQo+Pj4gQWxzbywgSSB3YXMg
-Z2l2aW5nIHRoaXMgYSBzZWNvbmQgdGhvdWdodC4uLg0KPj4+DQo+Pj4gV2hhdCBoYXBwZW5zIHdp
-dGggdGhlIFNEIDMuMCBjYXJkIHdoZW4gaXQgKmRvZXNuJ3QqIHN1cHBvcnQgQ01EMTkuDQo+Pj4g
-V2lsbCBpdCBzdGlsbCBiZSBmdW5jdGlvbmFsIGFmdGVyd2FyZHMgb3Igd2lsbCBpdCBtb3ZlIGZy
-b20gDQo+Pj4gInRyYW5zZmVyIHN0YXRlIiB0byBhbm90aGVyIG5vdCBrbm93biBzdGF0ZT8NCj4+
-DQo+PiB1ZmZlLCBpIGFtIG5vdCB0aGUgZXhwZXJ0IG9mIHRoaXMgaXNzdWUgYnV0IHdlaWp1biBp
-cy4gd2VpanVuIHRvbGQgDQo+PiB0aGF0IGZvciB0aGUgY2FyZHMgd2hvIGRvbid0IHN1cHBvcnQg
-Y21kMTksIGl0IHdpbGwgdGFrZSBpdCBhcyANCj4+IGlsbGVnYWwgY29tbWFuZCBhbmQgbm90IHJl
-c3BvbnNlIGl0LiBhbmQgaXQgYWxzbyBzZXRzIGlsbGVnYWwgY29tbWFuZCANCj4+IGVycm9yIGlu
-IHJlZ2lzdGVycy4NCj4+IGJ1dCB0aGUgY2FyZCBzdGF0dXMgaXMgc3RpbGwgZnVuY3Rpb25hbCBh
-bmQgZG9lc24ndCBjYXVzZSB1bmtub3duIHN0YXRlLg0KPj4NCj4+IHNvIG1heWJlIHdlIGNhbiBq
-dXN0IGlnbm9yZSB0aGUgZXJyIG9mIHR1bmluZywgYW5kIHVzZSB0aGUgc2Vjb25kIA0KPj4gcGF0
-Y2ggd2l0aCB0aGUgcmVmaW5lIHlvdSBtZW50aW9uZWQ/DQo+DQo+IFN1cmUsIGxldCdzIGRvIHRo
-YXQuIFBsZWFzZSBzZW5kIGEgdjIgb2YgdGhlIHBhdGNoc2V0IHRoZW4uDQoNClJlcGx5aW5nIGhl
-cmUgc2luY2UgSSdtIG5vdCBzdWJzY3JpYmVkIHRvIGxpbnV4LW1tYy4NCg0KQ29tbWl0IDlmYWFj
-N2I5NSAibW1jOiBzZGhjaTogZW5hYmxlIHR1bmluZyBmb3IgRERSNTAiIGFjdHVhbGx5IGJyZWFr
-cyBXaUZpIG9uIFNESU8gYXQgbGVhc3QgZm9yIHRoZSBBU1VTIFgyMDVUQS4NCg0KSSB0cmllZCB0
-byBpZ25vcmUgdGhlIGVycm9yIGZyb20gdGhlIHR1bmluZyBhbHNvIGZvciB0aGUgU0RJTyBjYXJk
-IHBhdGNoaW5nIG1tY19zZGlvX2luaXRfdWhzX2NhcmQoKSBpbiBkcml2ZXJzL21tYy9jb3JlL3Nk
-aW8uYyBidXQgSSBlbmQgdXAgd2l0aCB0aGUgZXJyb3IgIkNvbnRyb2xsZXIgbmV2ZXIgcmVsZWFz
-ZWQgaW5oaWJpdCBiaXQocykiLiBBdCBsZWFzdCBpbiBteSBjYXNlIENNRDE5IHNob3VsZG4ndCBi
-ZSBpc3N1ZWQgYXQgYWxsIHRvIGhhdmUgdGhlIFNESU8gY2FyZCB3b3JraW5nLg0KDQpBbnkgc3Vn
-Z2VzdGlvbiBob3cgdG8gYXBwcm9hY2ggdGhpcyBwcm9ibGVtPw0KDQotLQ0KQ2FybG8gQ2Fpb25l
-DQoNCg0KIFRvIHJlcG9ydCB0aGlzIGVtYWlsIGFzIHNwYW0gY2xpY2sgaHR0cHM6Ly93d3cubWFp
-bGNvbnRyb2wuY29tL3NyL3QhRU8wNU1xZlE3R1gyUFFQT212VWtXTTg1c0VLRDQralpRQ1FNV2NF
-RitLdHU3NUduSmpLSXVJTEMxM1lwRjZMZDkwcjBZWE1VYU5jIXJKaVZHYUpnPT0gLg0K
+On Mon, Dec 14, 2015 at 9:46 AM, Yang, York <weijuny@qti.qualcomm.com> wrote:
+> Hi, Carlo
+>         In 9faac7b95, tuning for DDR50 is enabled in mmc_sd_init_uhs_card(), so only SD card is affected.
+>         This is based on the SD spec version 3.01.
+>         mmc_sdio_init_uhs_card() is untouched. I don't know who add the code into mmc_sdio_init_uhs_card() and you may have a check on your side.
+
+Hi Yang,
+sorry for not being clear. Modifying mmc_sdio_init_uhs_card() was only
+a test I did to check whether that could fix the issue, but it didn't.
+
+Right now the situation is:
+- In the latest master with commit 9faac7b95 WiFi is broken on the
+ASUS X205TA (bcm43341)
+- Reverting 9faac7b95 makes it working fine again
+
+My conclusion is that issuing the CMD19 is basically breaking WiFi on
+this platform.
+
+-- 
+Carlo Caione
