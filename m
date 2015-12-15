@@ -1,23 +1,36 @@
-From: pavi1729 <pavitra1729@gmail.com>
-Subject: Does the Community use Coverity ?
-Date: Tue, 15 Dec 2015 12:32:57 +0530
-Message-ID: <CAMf7+LiLgPcNSMOGhV=i=6FV5VwrM0VNXpSmPci7xU9EBc0Sgg@mail.gmail.com>
+From: Saket Sinha <saket.sinha89@gmail.com>
+Subject: Re: Does the Community use Coverity ?
+Date: Tue, 15 Dec 2015 13:45:13 +0530
+Message-ID: <CAK25hWM7+u4tNgL7YoTWv-yCQj1kGwUeowS2_9zs6W=1xAVX+Q@mail.gmail.com>
+References: <CAMf7+LiLgPcNSMOGhV=i=6FV5VwrM0VNXpSmPci7xU9EBc0Sgg@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ig0-f180.google.com ([209.85.213.180]:38741 "EHLO
-	mail-ig0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753196AbbLOHC5 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 15 Dec 2015 02:02:57 -0500
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-fsdevel-owner@vger.kernel.org>
+In-Reply-To: <CAMf7+LiLgPcNSMOGhV=i=6FV5VwrM0VNXpSmPci7xU9EBc0Sgg@mail.gmail.com>
+Sender: linux-fsdevel-owner@vger.kernel.org
+To: pavi1729 <pavitra1729@gmail.com>
+Cc: kernelnewbies <kernelnewbies@kernelnewbies.org>, linux-fsdevel@vger.kernel.org, linux-mmc@vger.kernel.org, linux-netdev@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: kernelnewbies@kernelnewbies.org, linux-fsdevel@vger.kernel.org, linux-mmc@vger.kernel.org, linux-netdev@vger.kernel.org
 
-Hi,
-  May I know if the community uses the Coverity tool and, if yes where
-can I find a repo of
-Coverity scans of kernels and IGNORE LIST; cause there obviously would
-be false positives.
+Hi pavi,
 
-Cheers,
-Pavi
+Refer https://lwn.net/Articles/608992/
+
+Regards,
+Saket Sinha
+
+
+On Tue, Dec 15, 2015 at 12:32 PM, pavi1729 <pavitra1729@gmail.com> wrote:
+> Hi,
+>   May I know if the community uses the Coverity tool and, if yes where
+> can I find a repo of
+> Coverity scans of kernels and IGNORE LIST; cause there obviously would
+> be false positives.
+>
+> Cheers,
+> Pavi
+>
+> _______________________________________________
+> Kernelnewbies mailing list
+> Kernelnewbies@kernelnewbies.org
+> http://lists.kernelnewbies.org/mailman/listinfo/kernelnewbies
