@@ -1,74 +1,23 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH] mmc: It is not an error for the card to be removed while
- suspended
-Date: Tue, 15 Dec 2015 13:01:04 +0900
-Message-ID: <566F9080.6030903@samsung.com>
-References: <1450101087-24391-1-git-send-email-adrian.hunter@intel.com>
+From: pavi1729 <pavitra1729@gmail.com>
+Subject: Does the Community use Coverity ?
+Date: Tue, 15 Dec 2015 12:32:57 +0530
+Message-ID: <CAMf7+LiLgPcNSMOGhV=i=6FV5VwrM0VNXpSmPci7xU9EBc0Sgg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout3.samsung.com ([203.254.224.33]:38101 "EHLO
-	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753057AbbLOEBH (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 14 Dec 2015 23:01:07 -0500
-Received: from epcpsbgr4.samsung.com
- (u144.gpu120.samsung.co.kr [203.254.230.144])
- by mailout3.samsung.com (Oracle Communications Messaging Server 7.0.5.31.0
- 64bit (built May  5 2014))
- with ESMTP id <0NZD02EB4SHTRR40@mailout3.samsung.com> for
- linux-mmc@vger.kernel.org; Tue, 15 Dec 2015 13:01:05 +0900 (KST)
-In-reply-to: <1450101087-24391-1-git-send-email-adrian.hunter@intel.com>
+Received: from mail-ig0-f180.google.com ([209.85.213.180]:38741 "EHLO
+	mail-ig0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753196AbbLOHC5 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 15 Dec 2015 02:02:57 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>
+To: kernelnewbies@kernelnewbies.org, linux-fsdevel@vger.kernel.org, linux-mmc@vger.kernel.org, linux-netdev@vger.kernel.org
 
-Hi, Adrian.
+Hi,
+  May I know if the community uses the Coverity tool and, if yes where
+can I find a repo of
+Coverity scans of kernels and IGNORE LIST; cause there obviously would
+be false positives.
 
-On 12/14/2015 10:51 PM, Adrian Hunter wrote:
-> A card can be removed while it is runtime suspended.
-> Do not print an error message.
-
-Well, if card is non-removable (in case of eMMC, card can be non-removable),
- it needs to print the error message?
-I'm not sure what's correct..but just my opinion.
-
-Best Regards,
-Jaehoon Chung
-
-> 
-> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
-> ---
->  drivers/mmc/core/mmc.c | 2 +-
->  drivers/mmc/core/sd.c  | 2 +-
->  2 files changed, 2 insertions(+), 2 deletions(-)
-> 
-> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-> index 549c56e8cf6b..bf49e44571f2 100644
-> --- a/drivers/mmc/core/mmc.c
-> +++ b/drivers/mmc/core/mmc.c
-> @@ -1935,7 +1935,7 @@ static int mmc_runtime_resume(struct mmc_host *host)
->  	int err;
->  
->  	err = _mmc_resume(host);
-> -	if (err)
-> +	if (err && err != -ENOMEDIUM)
->  		pr_err("%s: error %d doing runtime resume\n",
->  			mmc_hostname(host), err);
->  
-> diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
-> index 8f3b46a56b3d..f2b164b214ae 100644
-> --- a/drivers/mmc/core/sd.c
-> +++ b/drivers/mmc/core/sd.c
-> @@ -1158,7 +1158,7 @@ static int mmc_sd_runtime_resume(struct mmc_host *host)
->  	int err;
->  
->  	err = _mmc_sd_resume(host);
-> -	if (err)
-> +	if (err && err != -ENOMEDIUM)
->  		pr_err("%s: error %d doing runtime resume\n",
->  			mmc_hostname(host), err);
->  
-> 
-
+Cheers,
+Pavi
