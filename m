@@ -1,422 +1,74 @@
-From: Andy Green <andy.green@linaro.org>
-Subject: Re: [PATCH v2 12/14] mmc: sdhci-pic32: Add PIC32 SDHCI host
- controller driver
-Date: Tue, 15 Dec 2015 08:32:25 +0800
-Message-ID: <CAAfg0W5PT7deAPe4BNcnm9hB8=xs7wAxYk4zGKBGDSHJE1cqdg@mail.gmail.com>
-References: <1450133093-7053-1-git-send-email-joshua.henderson@microchip.com>
-	<1450133093-7053-13-git-send-email-joshua.henderson@microchip.com>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: Re: [PATCH] mmc: It is not an error for the card to be removed while
+ suspended
+Date: Tue, 15 Dec 2015 13:01:04 +0900
+Message-ID: <566F9080.6030903@samsung.com>
+References: <1450101087-24391-1-git-send-email-adrian.hunter@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-oi0-f52.google.com ([209.85.218.52]:34230 "EHLO
-	mail-oi0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932984AbbLOAc0 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 14 Dec 2015 19:32:26 -0500
-Received: by oiao124 with SMTP id o124so11984595oia.1
-        for <linux-mmc@vger.kernel.org>; Mon, 14 Dec 2015 16:32:25 -0800 (PST)
-In-Reply-To: <1450133093-7053-13-git-send-email-joshua.henderson@microchip.com>
+Received: from mailout3.samsung.com ([203.254.224.33]:38101 "EHLO
+	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753057AbbLOEBH (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 14 Dec 2015 23:01:07 -0500
+Received: from epcpsbgr4.samsung.com
+ (u144.gpu120.samsung.co.kr [203.254.230.144])
+ by mailout3.samsung.com (Oracle Communications Messaging Server 7.0.5.31.0
+ 64bit (built May  5 2014))
+ with ESMTP id <0NZD02EB4SHTRR40@mailout3.samsung.com> for
+ linux-mmc@vger.kernel.org; Tue, 15 Dec 2015 13:01:05 +0900 (KST)
+In-reply-to: <1450101087-24391-1-git-send-email-adrian.hunter@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Joshua Henderson <joshua.henderson@microchip.com>
-Cc: linux-kernel@vger.kernel.org, linux-mips@linux-mips.org, ralf@linux-mips.org, Andrei Pistirica <andrei.pistirica@microchip.com>, Ulf Hansson <ulf.hansson@linaro.org>, Jean Delvare <jdelvare@suse.de>, Geert Uytterhoeven <geert@linux-m68k.org>, Corneliu Doban <cdoban@broadcom.com>, Haojian Zhuang <haojian.zhuang@gmail.com>, Luis de Bethencourt <luisbg@osg.samsung.com>, Weijun Yang <Weijun.Yang@csr.com>, Lokesh Vutla <lokeshvutla@ti.com>, Scott Branden <sbranden@broadcom.com>, Vincent Yang <vincent.yang.fujitsu@gmail.com>, Chaotian Jing <chaotian.jing@mediatek.com>, "ludovic.desroches@atmel.com" <ludovic.desroches@atmel.com>, Shawn Lin <shawn.lin@rock-chips.com>, Stephen Boyd <sboyd@codeaurora.org>, yangbo lu <yangbo.lu@freescale.com>, Kevin Hao <haokexin@gmail.com>, Ben Hutchings <ben@decadent.org.uk>, linux-mmc@vger.kernel.org
+To: Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>
 
-Hi... looks good, just some small general comments.
+Hi, Adrian.
 
-On 15 December 2015 at 06:42, Joshua Henderson
-<joshua.henderson@microchip.com> wrote:
-> From: Andrei Pistirica <andrei.pistirica@microchip.com>
->
-> This driver supports the SDHCI host controller found on a PIC32.
->
-> Signed-off-by: Andrei Pistirica <andrei.pistirica@microchip.com>
-> Signed-off-by: Joshua Henderson <joshua.henderson@microchip.com>
-> Cc: Ralf Baechle <ralf@linux-mips.org>
+On 12/14/2015 10:51 PM, Adrian Hunter wrote:
+> A card can be removed while it is runtime suspended.
+> Do not print an error message.
+
+Well, if card is non-removable (in case of eMMC, card can be non-removable),
+ it needs to print the error message?
+I'm not sure what's correct..but just my opinion.
+
+Best Regards,
+Jaehoon Chung
+
+> 
+> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
 > ---
->  drivers/mmc/host/Kconfig       |   11 ++
->  drivers/mmc/host/Makefile      |    1 +
->  drivers/mmc/host/sdhci-pic32.c |  291 ++++++++++++++++++++++++++++++++++++++++
->  3 files changed, 303 insertions(+)
->  create mode 100644 drivers/mmc/host/sdhci-pic32.c
->
-> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
-> index 1dee533..1a3a42b 100644
-> --- a/drivers/mmc/host/Kconfig
-> +++ b/drivers/mmc/host/Kconfig
-> @@ -785,3 +785,14 @@ config MMC_MTK
->           If you have a machine with a integrated SD/MMC card reader, say Y or M here.
->           This is needed if support for any SD/SDIO/MMC devices is required.
->           If unsure, say N.
-> +
-> +config MMC_SDHCI_MICROCHIP_PIC32
-> +        tristate "Microchip PIC32MZDA SDHCI support"
-> +        depends on MMC_SDHCI && PIC32MZDA
-> +        help
-> +          This selects the Secure Digital Host Controller Interface (SDHCI)
-> +          for PIC32MZDA platform.
-> +
-> +          If you have a controller with this interface, say Y or M here.
-> +
-> +          If unsure, say N.
-> diff --git a/drivers/mmc/host/Makefile b/drivers/mmc/host/Makefile
-> index 3595f83..af918d2 100644
-> --- a/drivers/mmc/host/Makefile
-> +++ b/drivers/mmc/host/Makefile
-> @@ -75,6 +75,7 @@ obj-$(CONFIG_MMC_SDHCI_BCM2835)               += sdhci-bcm2835.o
->  obj-$(CONFIG_MMC_SDHCI_IPROC)          += sdhci-iproc.o
->  obj-$(CONFIG_MMC_SDHCI_MSM)            += sdhci-msm.o
->  obj-$(CONFIG_MMC_SDHCI_ST)             += sdhci-st.o
-> +obj-$(CONFIG_MMC_SDHCI_MICROCHIP_PIC32)        += sdhci-pic32.o
->
->  ifeq ($(CONFIG_CB710_DEBUG),y)
->         CFLAGS-cb710-mmc        += -DDEBUG
-> diff --git a/drivers/mmc/host/sdhci-pic32.c b/drivers/mmc/host/sdhci-pic32.c
-> new file mode 100644
-> index 0000000..b7d7da2
-> --- /dev/null
-> +++ b/drivers/mmc/host/sdhci-pic32.c
-> @@ -0,0 +1,291 @@
-> +/*
-> + * Support of SDHCI platform devices for Microchip PIC32.
-> + *
-> + * Copyright (C) 2015 Microchip
-> + * Andrei Pistirica, Paul Thacker
-> + *
-> + * Inspired by sdhci-pltfm.c
-> + *
-> + * This file is licensed under the terms of the GNU General Public
-> + * License version 2. This program is licensed "as is" without any
-> + * warranty of any kind, whether express or implied.
-> + */
-> +
-> +#include <linux/clk.h>
-> +#include <linux/delay.h>
-> +#include <linux/highmem.h>
-> +#include <linux/module.h>
-> +#include <linux/interrupt.h>
-> +#include <linux/irq.h>
-> +#include <linux/of.h>
-> +#include <linux/platform_device.h>
-> +#include <linux/pm.h>
-> +#include <linux/slab.h>
-> +#include <linux/mmc/host.h>
-> +#include <linux/io.h>
-> +#include "sdhci.h"
-> +#include <linux/platform_data/sdhci-pic32.h>
-> +
-> +#define SDH_SHARED_BUS_CTRL            0x000000E0
-> +#define SDH_SHARED_BUS_NR_CLK_PINS_MASK        0x7
-> +#define SDH_SHARED_BUS_NR_IRQ_PINS_MASK        0x30
-> +#define SDH_SHARED_BUS_CLK_PINS                0x10
-> +#define SDH_SHARED_BUS_IRQ_PINS                0x14
-> +#define SDH_CAPS_SDH_SLOT_TYPE_MASK    0xC0000000
-> +#define SDH_SLOT_TYPE_REMOVABLE                0x0
-> +#define SDH_SLOT_TYPE_EMBEDDED         0x1
-> +#define SDH_SLOT_TYPE_SHARED_BUS       0x2
-> +#define SDHCI_CTRL_CDSSEL              0x80
-> +#define SDHCI_CTRL_CDTLVL              0x40
-> +
-> +#define ADMA_FIFO_RD_THSHLD    512
-> +#define ADMA_FIFO_WR_THSHLD    512
-> +
-> +#define DEV_NAME "pic32-sdhci"
+>  drivers/mmc/core/mmc.c | 2 +-
+>  drivers/mmc/core/sd.c  | 2 +-
+>  2 files changed, 2 insertions(+), 2 deletions(-)
+> 
+> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+> index 549c56e8cf6b..bf49e44571f2 100644
+> --- a/drivers/mmc/core/mmc.c
+> +++ b/drivers/mmc/core/mmc.c
+> @@ -1935,7 +1935,7 @@ static int mmc_runtime_resume(struct mmc_host *host)
+>  	int err;
+>  
+>  	err = _mmc_resume(host);
+> -	if (err)
+> +	if (err && err != -ENOMEDIUM)
+>  		pr_err("%s: error %d doing runtime resume\n",
+>  			mmc_hostname(host), err);
+>  
+> diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
+> index 8f3b46a56b3d..f2b164b214ae 100644
+> --- a/drivers/mmc/core/sd.c
+> +++ b/drivers/mmc/core/sd.c
+> @@ -1158,7 +1158,7 @@ static int mmc_sd_runtime_resume(struct mmc_host *host)
+>  	int err;
+>  
+>  	err = _mmc_sd_resume(host);
+> -	if (err)
+> +	if (err && err != -ENOMEDIUM)
+>  		pr_err("%s: error %d doing runtime resume\n",
+>  			mmc_hostname(host), err);
+>  
+> 
 
-Is there any point defining this when it only has one use in the driver?
-
-> +struct pic32_sdhci_pdata {
-> +       struct platform_device  *pdev;
-> +       struct clk *sys_clk;
-> +       struct clk *base_clk;
-> +};
-> +
-> +static unsigned int pic32_sdhci_get_max_clock(struct sdhci_host *host)
-> +{
-> +       struct pic32_sdhci_pdata *sdhci_pdata = sdhci_priv(host);
-> +
-> +       return clk_get_rate(sdhci_pdata->base_clk);
-> +}
-> +
-> +static void pic32_sdhci_set_bus_width(struct sdhci_host *host, int width)
-> +{
-> +       u8 ctrl;
-> +
-> +       ctrl = sdhci_readb(host, SDHCI_HOST_CONTROL);
-> +       if (width == MMC_BUS_WIDTH_8) {
-> +               ctrl &= ~SDHCI_CTRL_4BITBUS;
-> +               if (host->version >= SDHCI_SPEC_300)
-> +                       ctrl |= SDHCI_CTRL_8BITBUS;
-> +       } else {
-> +               if (host->version >= SDHCI_SPEC_300)
-> +                       ctrl &= ~SDHCI_CTRL_8BITBUS;
-> +               if (width == MMC_BUS_WIDTH_4)
-> +                       ctrl |= SDHCI_CTRL_4BITBUS;
-> +               else
-> +                       ctrl &= ~SDHCI_CTRL_4BITBUS;
-> +       }
-> +       /*
-> +        * SDHCI will not work if JTAG is not Connected.As a workaround fix,
-> +        * set Card Detect Signal Selection bit in SDHCI Host Control
-> +        * register and clear Card Detect Test Level bit in SDHCI Host
-> +        * Control register.
-> +        */
-
-Isn't this a clearer explanation, if I understood?
-
-"Without setting CD select and test bits now, SDHCI only works with
-JTAG connected."
-
-> +       ctrl &= ~SDHCI_CTRL_CDTLVL;
-> +       ctrl |= SDHCI_CTRL_CDSSEL;
-> +       sdhci_writeb(host, ctrl, SDHCI_HOST_CONTROL);
-
-Also... is that a feature of the SDHCI IP or this particular chip's
-implementation of it?  I guess if there is only one implementation
-right now that has that restriction worry about making it selectable
-later.  But if the implementation, it might make sense to also put the
-affected implementation name in the comment to make it clear.
-
-> +}
-> +
-> +static unsigned int pic32_sdhci_get_ro(struct sdhci_host *host)
-> +{
-> +       /*
-> +        * The SDHCI_WRITE_PROTECT bit is unstable on current hardware so we
-> +        * can't depend on its value in any way.
-> +        */
-> +       return 0;
-> +}
-> +
-> +static const struct sdhci_ops pic32_sdhci_ops = {
-> +       .get_max_clock = pic32_sdhci_get_max_clock,
-> +       .set_clock = sdhci_set_clock,
-> +       .set_bus_width = pic32_sdhci_set_bus_width,
-> +       .reset = sdhci_reset,
-> +       .set_uhs_signaling = sdhci_set_uhs_signaling,
-> +       .get_ro = pic32_sdhci_get_ro,
-> +};
-> +
-> +static void pic32_sdhci_shared_bus(struct platform_device *pdev)
-> +{
-> +       struct sdhci_host *host = platform_get_drvdata(pdev);
-> +       u32 bus = readl(host->ioaddr + SDH_SHARED_BUS_CTRL);
-> +       u32 clk_pins = (bus & SDH_SHARED_BUS_NR_CLK_PINS_MASK) >> 0;
-> +       u32 irq_pins = (bus & SDH_SHARED_BUS_NR_IRQ_PINS_MASK) >> 4;
-> +
-> +       /* select first clock */
-> +       if (clk_pins & 0x1)
-
-BIT(0)?  Also a couple of lines down.
-
-> +               bus |= (0x1 << SDH_SHARED_BUS_CLK_PINS);
-
-I know it's popular but there is no meaning or use in "0x1" where you
-could just say "1".
-
-> +       /* select first interrupt */
-> +       if (irq_pins & 0x1)
-> +               bus |= (0x1 << SDH_SHARED_BUS_IRQ_PINS);
-
-As above.
-
-> +       writel(bus, host->ioaddr + SDH_SHARED_BUS_CTRL);
-> +}
-> +
-> +static int pic32_sdhci_probe_platform(struct platform_device *pdev,
-> +                                     struct pic32_sdhci_pdata *pdata)
-> +{
-> +       int ret = 0;
-> +       u32 caps_slot_type;
-> +       struct sdhci_host *host = platform_get_drvdata(pdev);
-> +
-> +       /* Check card slot connected on shared bus. */
-> +       host->caps = readl(host->ioaddr + SDHCI_CAPABILITIES);
-> +       caps_slot_type = (host->caps & SDH_CAPS_SDH_SLOT_TYPE_MASK) >> 30;
-> +       if (caps_slot_type == SDH_SLOT_TYPE_SHARED_BUS)
-> +               pic32_sdhci_shared_bus(pdev);
-> +
-> +       return ret;
-> +}
-> +
-> +static int pic32_sdhci_probe(struct platform_device *pdev)
-> +{
-> +       struct device *dev = &pdev->dev;
-> +       struct sdhci_host *host;
-> +       struct resource *iomem;
-> +       struct pic32_sdhci_pdata *sdhci_pdata;
-> +       struct pic32_sdhci_platform_data *plat_data;
-> +       unsigned int clk_rate = 0;
-> +       int ret;
-> +       struct pinctrl *pinctrl;
-
-It's hardly critical but for extra gold star arranging local vars in
-length order (longest first) is nice.
-
-> +
-> +       host = sdhci_alloc_host(dev, sizeof(*sdhci_pdata));
-> +       if (IS_ERR(host)) {
-> +               ret = PTR_ERR(host);
-> +               dev_err(&pdev->dev, "cannot allocate memory for sdhci\n");
-> +               goto err;
-> +       }
-> +
-> +       sdhci_pdata = sdhci_priv(host);
-> +       sdhci_pdata->pdev = pdev;
-> +       platform_set_drvdata(pdev, host);
-> +
-> +       iomem = platform_get_resource(pdev, IORESOURCE_MEM, 0);
-> +       host->ioaddr = devm_ioremap_resource(&pdev->dev, iomem);
-> +       if (IS_ERR(host->ioaddr)) {
-> +               ret = PTR_ERR(host->ioaddr);
-> +               dev_err(&pdev->dev, "unable to map iomem: %d\n", ret);
-> +               goto err_host;
-> +       }
-> +
-> +       plat_data = pdev->dev.platform_data;
-> +       if (plat_data && plat_data->setup_dma) {
-> +               ret = plat_data->setup_dma(ADMA_FIFO_RD_THSHLD,
-> +                                          ADMA_FIFO_WR_THSHLD);
-> +               if (ret)
-> +                       goto err_host;
-> +       }
-> +
-> +       pinctrl = devm_pinctrl_get_select_default(&pdev->dev);
-> +       if (IS_ERR(pinctrl)) {
-> +               ret = PTR_ERR(pinctrl);
-> +               dev_warn(&pdev->dev, "No pinctrl provided %d\n", ret);
-> +               if (ret == -EPROBE_DEFER)
-> +                       goto err_host;
-> +       }
-> +
-> +       host->ops = &pic32_sdhci_ops;
-> +       host->irq = platform_get_irq(pdev, 0);
-> +
-> +       sdhci_pdata->sys_clk = devm_clk_get(&pdev->dev, "sys_clk");
-> +       if (IS_ERR(sdhci_pdata->sys_clk)) {
-> +               ret = PTR_ERR(sdhci_pdata->sys_clk);
-> +               dev_err(&pdev->dev, "Error getting clock\n");
-> +               goto err_host;
-> +       }
-> +
-> +       /* Enable clock when available! */
-> +       ret = clk_prepare_enable(sdhci_pdata->sys_clk);
-> +       if (ret) {
-> +               dev_dbg(&pdev->dev, "Error enabling clock\n");
-
-Shouldn't this be dev_err()?  You don't survive not having the clock
-in the stanza above.  So if you have the clock, you would want to know
-if it didn't deal with the clk_prepare_enable().
-
-The comment 4 lines above is also wrong if so.
-
-> +               goto err_host;
-> +       }
-> +
-> +       /* SDH CLK enable */
-> +       sdhci_pdata->base_clk = devm_clk_get(&pdev->dev, "base_clk");
-> +       if (IS_ERR(sdhci_pdata->base_clk)) {
-> +               ret = PTR_ERR(sdhci_pdata->base_clk);
-> +               dev_err(&pdev->dev, "Error getting clock\n");
-> +               goto err_host;
-> +       }
-> +
-> +       /* Enable clock when available! */
-> +       ret = clk_prepare_enable(sdhci_pdata->base_clk);
-
-Again the comment seems wrong.
-
-> +       if (ret) {
-> +               dev_dbg(&pdev->dev, "Error enabling clock\n");
-
-And if I understood it, dev_err() needed.
-
-> +               goto err_host;
-> +       }
-> +
-> +       clk_rate = clk_get_rate(sdhci_pdata->base_clk);
-> +       dev_dbg(&pdev->dev, "base clock at: %u\n", clk_rate);
-> +       clk_rate = clk_get_rate(sdhci_pdata->sys_clk);
-> +       dev_dbg(&pdev->dev, "sys clock at: %u\n", clk_rate);
-> +
-> +       host->quirks2 |= SDHCI_QUIRK2_NO_1_8_V;
-> +
-
-Probably can lose the blank line.
-
-> +       host->quirks |= SDHCI_QUIRK_NO_HISPD_BIT;
-> +
-> +       ret = mmc_of_parse(host->mmc);
-> +       if (ret)
-> +               goto err_host;
-> +
-> +       ret = pic32_sdhci_probe_platform(pdev, sdhci_pdata);
-> +       if (ret) {
-> +               dev_err(&pdev->dev, "failed to probe platform!\n");
-> +               goto err_host;
-> +       }
-> +
-> +       ret = sdhci_add_host(host);
-> +       if (ret) {
-> +               dev_dbg(&pdev->dev, "error adding host\n");
-> +               goto err_host;
-> +       }
-> +
-> +       dev_info(&pdev->dev, "Successfully added sdhci host\n");
-> +       return 0;
-> +
-> +err_host:
-> +       sdhci_free_host(host);
-> +err:
-> +       dev_err(&pdev->dev, "pic32-sdhci probe failed: %d\n", ret);
-> +       return ret;
-> +}
-> +
-> +static int pic32_sdhci_remove(struct platform_device *pdev)
-> +{
-> +       struct sdhci_host *host = platform_get_drvdata(pdev);
-> +       struct pic32_sdhci_pdata *sdhci_pdata = sdhci_priv(host);
-> +       int dead = 0;
-> +       u32 scratch;
-> +
-> +       scratch = readl(host->ioaddr + SDHCI_INT_STATUS);
-> +       if (scratch == (u32)-1)
-
-Since it's not actually related to signed, (u32)~0 might be clearer.
-
-> +               dead = 1;
-> +
-> +       sdhci_remove_host(host, dead);
-
-You could get rid of "dead" and have
-
-         sdhci_remove_host(host, scratch == (u32)~0);
-
-> +       clk_disable_unprepare(sdhci_pdata->base_clk);
-> +       clk_disable_unprepare(sdhci_pdata->sys_clk);
-> +       sdhci_free_host(host);
-> +
-> +       return 0;
-> +}
-> +
-> +static const struct of_device_id pic32_sdhci_id_table[] = {
-> +       { .compatible = "microchip,pic32mzda-sdhci" },
-> +       {}
-> +};
-> +MODULE_DEVICE_TABLE(of, pic32_sdhci_id_table);
-> +
-> +static struct platform_driver pic32_sdhci_driver = {
-> +       .driver = {
-> +               .name   = DEV_NAME,
-> +               .owner  = THIS_MODULE,
-> +               .of_match_table = of_match_ptr(pic32_sdhci_id_table),
-> +       },
-> +       .probe          = pic32_sdhci_probe,
-> +       .remove         = pic32_sdhci_remove,
-> +};
-> +
-> +module_platform_driver(pic32_sdhci_driver);
-> +
-> +MODULE_DESCRIPTION("Microchip PIC32 SDHCI driver");
-> +MODULE_AUTHOR("Pistirica Sorin Andrei & Sandeep Sheriker");
-> +MODULE_LICENSE("GPL v2");
-> --
-> 1.7.9.5
->
