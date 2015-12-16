@@ -1,100 +1,98 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: core: Optimize boot time by detecting cards simultaneously
-Date: Wed, 16 Dec 2015 10:07:35 +0100
-Message-ID: <CAPDyKFpF+rqv1WQ0Hu-YdAM1pdNwKyKjFsAg1BfeEj=kDfH0Ag@mail.gmail.com>
-References: <1448982916-21485-1-git-send-email-ulf.hansson@linaro.org>
-	<CAPDyKFq3iuDkJgUGFV7Y4jLB37T=6Nkzf56bJ-a2RxHjy4fE=A@mail.gmail.com>
-	<5670A0BA.8090402@samsung.com>
+From: Alex Ballas <alex@ballas.org>
+Subject: Re: 1217:8520 [Dell Latitude E7450] O2 Micro, SD/MMC Card Reader
+ doesn't work
+Date: Wed, 16 Dec 2015 11:48:40 +0200
+Message-ID: <CAONpWduF6iH4Rr5Y610KP1RE342nWAajR27KFbu1N2iet4R0ZA@mail.gmail.com>
+References: <CAONpWdsteBnqTcFbKpcOQFueyeJJWEmn9DJitD43f59xV8sDyg@mail.gmail.com>
+	<BY2PR04MB184372CAAC1FA0C5373D73238FEF0@BY2PR04MB1843.namprd04.prod.outlook.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qk0-f175.google.com ([209.85.220.175]:34832 "EHLO
-	mail-qk0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932819AbbLPJHg (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 16 Dec 2015 04:07:36 -0500
-Received: by mail-qk0-f175.google.com with SMTP id u65so34930121qkh.2
-        for <linux-mmc@vger.kernel.org>; Wed, 16 Dec 2015 01:07:35 -0800 (PST)
-In-Reply-To: <5670A0BA.8090402@samsung.com>
+Received: from mail-ob0-f172.google.com ([209.85.214.172]:35032 "EHLO
+	mail-ob0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S934117AbbLPJsk convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 16 Dec 2015 04:48:40 -0500
+Received: by mail-ob0-f172.google.com with SMTP id 18so28725194obc.2
+        for <linux-mmc@vger.kernel.org>; Wed, 16 Dec 2015 01:48:40 -0800 (PST)
+In-Reply-To: <BY2PR04MB184372CAAC1FA0C5373D73238FEF0@BY2PR04MB1843.namprd04.prod.outlook.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>
+To: Peter Guo <peter.guo@bayhubtech.com>, adam8157@gmail.com
+Cc: "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>, "linux-mmc@VGER.KERNEL.ORG" <linux-mmc@vger.kernel.org>
 
-On 16 December 2015 at 00:22, Jaehoon Chung <jh80.chung@samsung.com> wrote:
-> On 12/15/2015 12:50 AM, Ulf Hansson wrote:
->> On 1 December 2015 at 16:15, Ulf Hansson <ulf.hansson@linaro.org> wrote:
->>> The mmc workqueue is an ordered workqueue, allowing only one work to
->>> execute per given time. As this workqueue is used for card detection, the
->>> conseqeunce is that cards will be detected one by one waiting for each
->>> other.
->>>
->>> Moreover, most of the time spent during card initialization is waiting for
->>> the card's internal firmware to be ready. From a CPU perspective this
->>> typically means waiting for a completion variable to be kicked via an
->>> IRQ-handler or waiting for a sleep timer to finish.
->>>
->>> This behaviour of detecting/initializing cards is sub-optimal, especially
->>> for SOCs having several controllers/cards.
->>>
->>> Let's convert to use the system_freezable_wq for the mmc detect works.
->>> This enables several works to be executed simultaneously and thus also
->>> cards to be detected like so.
->>>
->>> Tests on UX500, which holds two eMMC cards and an SD-card (actually also
->>> an SDIO card, currently not detected), shows a significant improved
->>> behaviour due to this change.
->>>
->>> Before this change, both the eMMC cards waited for the SD card to be
->>> initialized as its detect work entered the workqueue first. In some cases,
->>> depending on the characteristic of the SD-card, they got delayed 1-1.5 s.
->>>
->>> Additionally for the second eMMC, it needed to wait for the first eMMC to
->>> be initialized which added another 120-190 ms.
+Re-adding Adam as the initial mail address is bouncing.
+
+Kind Regards,
+Alex
+
+
+On Wed, Dec 16, 2015 at 5:42 AM, Peter Guo <peter.guo@bayhubtech.com> wrote:
+> Hi Alex,
 >
-> how did you check this? I also want to test with similar environment. :)
-
-To find the improved card detection times, I just used the kernel boot
-log and checked the time stamps for when the cards get detected. I ran
-the tests ~10 times and picked up some average values.
-
-To notice the improvement you need at least two cards to be inserted
-during boot. Perhaps you have a platform with one eMMC and one SD card
-slot, you can test.
-
+> Thanks for your Test, According to your info.
+> I find the root cause of this issue is quirks SDHCI_QUIRK2_CLEAR_TRANSFERMODE_REG_BEFORE_CMD is not suitable for our host for
+> all cases.  Our host just want to clear SDHCI_TRANS_DMA bit only.
 >
->>>
->>> Converting to the system_freezable_wq, removed these delays and made both
->>> the eMMC cards available far earlier in the boot sequence.
->>>
->>> Selecting the system_freezable_wq, in favour of for example the system_wq,
->>> is because we need card detection mechanism to be disabled once userspace
->>> are frozen during system PM. Currently the mmc core deal with this via PM
->>> notifiers, but following patches may utilize the behaviour of the
->>> system_freezable_wq, to simplify the use of the PM notifiers.
->>>
->>> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+> to Adam,
+>
+> I will commit new patch this week, please check it.
+>
+>
+> BR
+> Peter.Guo
+>
+> -----Original Message-----
+> From: Alex Ballas [mailto:alex@ballas.org]
+> Sent: Saturday, December 12, 2015 10:04 PM
+> To: Peter Guo; adam.lee@canonical.com; ulf.hansson@linaro.org
+> Cc: linux-mmc@VGER.KERNEL.ORG
+> Subject: 1217:8520 [Dell Latitude E7450] O2 Micro, SD/MMC Card Reader doesn't work
+>
+> Hello,
+>
+> I have a Dell Latitude E7450 with a O2 Micro, SD/MMC Card Reader [1217:8520] card reader. When I insert my Sandisk ultra 64GB microSD (with a SD card adapter) I get the following errors.
+>
+> Dmesg output after I insert the SD card:
+>
+> [  306.054203] sdhci: Timeout waiting for Buffer Read Ready interrupt during tuning procedure, falling back to fixed sampling clock [  306.055982] mmc0: tuning execution failed [  306.055987] mmc0: error -5 whilst initialising SD card [  306.466185] sdhci: Timeout waiting for Buffer Read Ready interrupt during tuning procedure, falling back to fixed sampling clock [  306.467964] mmc0: tuning execution failed [  306.467970] mmc0: error -5 whilst initialising SD card [  306.890205] sdhci: Timeout waiting for Buffer Read Ready interrupt during tuning procedure, falling back to fixed sampling clock [  306.891993] mmc0: tuning execution failed [  306.892005] mmc0: error -5 whilst initialising SD card [  307.330197] sdhci: Timeout waiting for Buffer Read Ready interrupt during tuning procedure
+ , falling back to fixed sampling clock [  307.331980] mmc0: tuning execution failed [  307.331990] mmc0: error -5 whilst initialising SD card
+>
+> I used the latest mainline kernel available to me [1] $ uname -a Linux cosmo 4.4.0-040400rc4-generic #201512061930 SMP Mon Dec 7
+> 00:32:31 UTC 2015 x86_64 x86_64 x86_64 GNU/Linux
+>
+> It was working fine for kernel versions older than 4.1.8.
+>
+> I did a bisection and here is the first bad commit
+>
+>> e6c69099f63c84e1825c0f742a76ff4a8afeaa9b is the first bad commit
+>> commit e6c69099f63c84e1825c0f742a76ff4a8afeaa9b
+>> Author: Adam Lee <adam.lee@canonical.com>
+>> Date:   Mon Aug 3 14:33:28 2015 +0800
 >>
->> Even-though the lack of reviewers, I have decided to give this a try
->> and pushed it for my next branch.
+>>     mmc: sdhci-pci: set the clear transfer mode register quirk for
+>> O2Micro
 >>
->> If it isn't clear by the above change-log:
->> A side effect from this change is that mmc block partitions, may end
->> up being given other indexes than they had before. Whether that may
->> cause issues, depends on if the path to the rootfs have been
->> hard-coded or not.
+>>     commit 143b648ddf1583905fa15d32be27a31442fc7933 upstream.
+>>
+>>     This patch fixes MMC not working issue on O2Micro/BayHub Host, which
+>>     requires transfer mode register to be cleared when sending no DMA
+>>     command.
+>>
+>>     Signed-off-by: Peter Guo <peter.guo@bayhubtech.com>
+>>     Signed-off-by: Adam Lee <adam.lee@canonical.com>
+>>     Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+>>     Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
 >
-> What does "mmc block partitions, may end up being given other indexes than they had before." mean?
-> Is it possible to increase the index for partition number?
-> If my understanding is right...mmcblk's partition index is not fixed.
-> Sometime eMMC should be mmcblk0pX or mmcblk1px..right? hmm...
-
-You have understood correctly. The mmcblk[n], can get different values
-for n, depending in which order the cards gets detected.
-
+> I originally logged this issue to the Ubuntu bug tracker[2], but it appears to be an upstream issue and so I was instructed to report here.
+> Please note that I use the latest Bios version for the model.
 >
-> I need to check more...with other boards and SoC.
-
-Sounds great, thanks for helping out!
-
-Kind regards
-Uffe
+> $ sudo dmidecode -s bios-version;sudo dmidecode -s bios-release-date
+> A08
+> 10/28/2015
+>
+> [1] http://kernel.ubuntu.com/~kernel-ppa/mainline/v4.4-rc4-wily/
+> [2] https://bugs.launchpad.net/ubuntu/+source/linux/+bug/1523178
+>
+> Thanks,
+> Alex
