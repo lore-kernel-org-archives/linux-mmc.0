@@ -1,105 +1,81 @@
-From: "Rafael J. Wysocki" <rafael.j.wysocki@intel.com>
-Subject: Re: [PATCH] mmc: sdhci-acpi: set non-removable in ACPI table
-Date: Wed, 16 Dec 2015 02:17:28 +0100
-Message-ID: <5670BBA8.5040900@intel.com>
-References: <1449150480-1173-1-git-send-email-pelcan@codeaurora.org>
- <5669E72C.4090701@codeaurora.org> <566A868E.8080808@intel.com>
- <2610121.hCKXuUzvHo@vostro.rjw.lan> <567087F3.7030308@codeaurora.org>
+From: Peter Guo <peter.guo@bayhubtech.com>
+Subject: RE: 1217:8520 [Dell Latitude E7450] O2 Micro, SD/MMC Card Reader
+ doesn't work
+Date: Wed, 16 Dec 2015 03:42:59 +0000
+Message-ID: <BY2PR04MB184372CAAC1FA0C5373D73238FEF0@BY2PR04MB1843.namprd04.prod.outlook.com>
+References: <CAONpWdsteBnqTcFbKpcOQFueyeJJWEmn9DJitD43f59xV8sDyg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-acpi-owner@vger.kernel.org>
-In-Reply-To: <567087F3.7030308@codeaurora.org>
-Sender: linux-acpi-owner@vger.kernel.org
-To: Philip Elcan <pelcan@codeaurora.org>, "Rafael J. Wysocki" <rjw@rjwysocki.net>, Adrian Hunter <adrian.hunter@intel.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, "linux-acpi@vger.kernel.org" <linux-acpi@vger.kernel.org>, linux-arm-msm@vger.kernel.org, Timur Tabi <timur@codeaurora.org>, Jon Masters <jcm@redhat.org>, Mark Langsdorf <mlangsdo@redhat.com>, harba@codeaurora.org
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-bn1bon0131.outbound.protection.outlook.com ([157.56.111.131]:11581
+	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1754332AbbLPD6x (ORCPT <rfc822;linux-mmc@VGER.KERNEL.ORG>);
+	Tue, 15 Dec 2015 22:58:53 -0500
+In-Reply-To: <CAONpWdsteBnqTcFbKpcOQFueyeJJWEmn9DJitD43f59xV8sDyg@mail.gmail.com>
+Content-Language: en-US
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Alex Ballas <alex@ballas.org>, "adam.lee@canonical.com" <adam.lee@canonical.com>, "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>
+Cc: "linux-mmc@VGER.KERNEL.ORG" <linux-mmc@VGER.KERNEL.ORG>
 
-On 12/15/2015 10:36 PM, Philip Elcan wrote:
-> On 12/11/2015 05:53 PM, Rafael J. Wysocki wrote:
->> On Friday, December 11, 2015 10:17:18 AM Adrian Hunter wrote:
->>> On 10/12/15 22:57, Philip Elcan wrote:
->>>> On 12/07/2015 03:30 AM, Adrian Hunter wrote:
->>>>> On 04/12/15 17:40, Philip Elcan wrote:
->>>>>> On 12/03/2015 09:14 AM, Adrian Hunter wrote:
->>>>>>> On 03/12/15 15:48, Philip Elcan wrote:
->>>>>>>> This allows setting an SDHC controller as non-removable
->>>>>>>> by using the _RMV method in the ACPI table. It doesn't
->>>>>>> Is that _RMV on the host controller?  Shouldn't it be on the card i.e. child
->>>>>>> device node?
->>>>>> Yes, this is on the host controller. The ACPI table only describes the
->>>>>> host controller, not the child nodes.
->>>>>>
->>>>> If you look at Intel devices, the _RMV is on the child e.g.
->>>>>
->>>>>          Device (SDHA)
->>>>>          {
->>>>>              Name (_HID, "80860F14")  // _HID: Hardware ID
->>>>>              Name (_CID, "PNP0D40")  // _CID: Compatible ID
->>>>>              Name (_DDN, "Intel(R) eMMC Controller - 80860F14")  // _DDN: DOS Device Name
->>>>> 	    ...
->>>>>              Device (EMMD)
->>>>>              {
->>>>> 		...
->>>>>                  Method (_RMV, 0, NotSerialized)  // _RMV: Removal Status
->>>>>                  {
->>>>>                      Return (Zero)
->>>>>                  }
->>>>>              }
->>>>>          }
->>>>>
->>>>> I am not an ACPI expert but that seems like the correct place for it.
->>>> My understanding is that in ACPI you don't generally create child devices on buses that are discoverable.
->>> I've cc'ed Rafael and the linux-acpi mailing list.  Maybe someone there can
->>> comment.
->> The context here is a bit unclear to me.
->>
->> Quite frankly, I don't see now _RMV above is useful for anything.  As per the
->> spec, _RMV is only necessary for devices that *can* be removed from the system
->> and where there's no eject mechanism controlled by software.  For those
->> devices _RMV is intended to indicate that it is safe to remove the device
->> at the time _RMV is evaluated.  Devices that can never be removed don't
->> need _RMV at all.
->>
->> Thanks,
->> Rafael
->>
-> Maybe I'm misinterpreting something, but the spec says that "_RMV object indicates
-> to OSPM whether the device can be removed while the system is in the working state
-> and does not require any ACPI system firmware actions to be performed for the device
-> to be safely removed from the system." That sounds exactly like what I'm trying to
-> do. And from Adrian's example, it sounds like others are using this to indicate if
-> a devices is removeable.
-
-It also says "Any such removable device that does not have _LCK or _EJx 
-control methods must have and _RMV object."
-
-Which clearly implies that _RMV is not required for devices that cannot 
-be removed at all.  Indeed, it is redundant in those cases as stated above.
-
-> However, if I follow your paradigm, I can just test if the _RMV object exists, and if
-> it doesn't, I can assume the device is not removable?
-
-That's correct as far as I can say.
-
-> I'm concerned not all firmware will have this object implemented.
-
-That's correct too.
-
-It only is intended for devices that may be removed in a 
-surprise-removal fashion and it is rarely used in general.
-
-> Is there something else you suggest I use in the ACPI table to designate an SD/MMC
-> device is removable?
-
-If you want to say "this device is removable", then there should be 
-either _LCK/_EJx or _RMV object present for it.  The latter indicates 
-that the device can be removed at any time in principle, but it is only 
-safe to remove it if/when 1 is returned by _RMV. That is, the OS can't 
-prevent the user from removing the device, but it can indicate to the 
-user (this way or another) when it is safe to remove it.  The decision 
-whether or not to do that is still up to the user.
-
-Thanks,
-Rafael
-
+SGkgQWxleCwNCg0KVGhhbmtzIGZvciB5b3VyIFRlc3QsIEFjY29yZGluZyB0byB5b3VyIGluZm8u
+DQpJIGZpbmQgdGhlIHJvb3QgY2F1c2Ugb2YgdGhpcyBpc3N1ZSBpcyBxdWlya3MgU0RIQ0lfUVVJ
+UksyX0NMRUFSX1RSQU5TRkVSTU9ERV9SRUdfQkVGT1JFX0NNRCBpcyBub3Qgc3VpdGFibGUgZm9y
+IG91ciBob3N0IGZvciANCmFsbCBjYXNlcy4gIE91ciBob3N0IGp1c3Qgd2FudCB0byBjbGVhciBT
+REhDSV9UUkFOU19ETUEgYml0IG9ubHkuDQoNCnRvIEFkYW0sDQoNCkkgd2lsbCBjb21taXQgbmV3
+IHBhdGNoIHRoaXMgd2VlaywgcGxlYXNlIGNoZWNrIGl0Lg0KDQoNCkJSDQpQZXRlci5HdW8NCg0K
+LS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCkZyb206IEFsZXggQmFsbGFzIFttYWlsdG86YWxl
+eEBiYWxsYXMub3JnXSANClNlbnQ6IFNhdHVyZGF5LCBEZWNlbWJlciAxMiwgMjAxNSAxMDowNCBQ
+TQ0KVG86IFBldGVyIEd1bzsgYWRhbS5sZWVAY2Fub25pY2FsLmNvbTsgdWxmLmhhbnNzb25AbGlu
+YXJvLm9yZw0KQ2M6IGxpbnV4LW1tY0BWR0VSLktFUk5FTC5PUkcNClN1YmplY3Q6IDEyMTc6ODUy
+MCBbRGVsbCBMYXRpdHVkZSBFNzQ1MF0gTzIgTWljcm8sIFNEL01NQyBDYXJkIFJlYWRlciBkb2Vz
+bid0IHdvcmsNCg0KSGVsbG8sDQoNCkkgaGF2ZSBhIERlbGwgTGF0aXR1ZGUgRTc0NTAgd2l0aCBh
+IE8yIE1pY3JvLCBTRC9NTUMgQ2FyZCBSZWFkZXIgWzEyMTc6ODUyMF0gY2FyZCByZWFkZXIuIFdo
+ZW4gSSBpbnNlcnQgbXkgU2FuZGlzayB1bHRyYSA2NEdCIG1pY3JvU0QgKHdpdGggYSBTRCBjYXJk
+IGFkYXB0ZXIpIEkgZ2V0IHRoZSBmb2xsb3dpbmcgZXJyb3JzLg0KDQpEbWVzZyBvdXRwdXQgYWZ0
+ZXIgSSBpbnNlcnQgdGhlIFNEIGNhcmQ6DQoNClsgIDMwNi4wNTQyMDNdIHNkaGNpOiBUaW1lb3V0
+IHdhaXRpbmcgZm9yIEJ1ZmZlciBSZWFkIFJlYWR5IGludGVycnVwdCBkdXJpbmcgdHVuaW5nIHBy
+b2NlZHVyZSwgZmFsbGluZyBiYWNrIHRvIGZpeGVkIHNhbXBsaW5nIGNsb2NrIFsgIDMwNi4wNTU5
+ODJdIG1tYzA6IHR1bmluZyBleGVjdXRpb24gZmFpbGVkIFsgIDMwNi4wNTU5ODddIG1tYzA6IGVy
+cm9yIC01IHdoaWxzdCBpbml0aWFsaXNpbmcgU0QgY2FyZCBbICAzMDYuNDY2MTg1XSBzZGhjaTog
+VGltZW91dCB3YWl0aW5nIGZvciBCdWZmZXIgUmVhZCBSZWFkeSBpbnRlcnJ1cHQgZHVyaW5nIHR1
+bmluZyBwcm9jZWR1cmUsIGZhbGxpbmcgYmFjayB0byBmaXhlZCBzYW1wbGluZyBjbG9jayBbICAz
+MDYuNDY3OTY0XSBtbWMwOiB0dW5pbmcgZXhlY3V0aW9uIGZhaWxlZCBbICAzMDYuNDY3OTcwXSBt
+bWMwOiBlcnJvciAtNSB3aGlsc3QgaW5pdGlhbGlzaW5nIFNEIGNhcmQgWyAgMzA2Ljg5MDIwNV0g
+c2RoY2k6IFRpbWVvdXQgd2FpdGluZyBmb3IgQnVmZmVyIFJlYWQgUmVhZHkgaW50ZXJydXB0IGR1
+cmluZyB0dW5pbmcgcHJvY2VkdXJlLCBmYWxsaW5nIGJhY2sgdG8gZml4ZWQgc2FtcGxpbmcgY2xv
+Y2sgWyAgMzA2Ljg5MTk5M10gbW1jMDogdHVuaW5nIGV4ZWN1dGlvbiBmYWlsZWQgWyAgMzA2Ljg5
+MjAwNV0gbW1jMDogZXJyb3IgLTUgd2hpbHN0IGluaXRpYWxpc2luZyBTRCBjYXJkIFsgIDMwNy4z
+MzAxOTddIHNkaGNpOiBUaW1lb3V0IHdhaXRpbmcgZm9yIEJ1ZmZlciBSZWFkIFJlYWR5IGludGVy
+cnVwdCBkdXJpbmcgdHVuaW5nIHByb2NlZHVyZSwgZmFsbGluZyBiYWNrIHRvIGZpeGVkIHNhbXBs
+aW5nIGNsb2NrIFsgIDMwNy4zMzE5ODBdIG1tYzA6IHR1bmluZyBleGVjdXRpb24gZmFpbGVkIFsg
+IDMwNy4zMzE5OTBdIG1tYzA6IGVycm9yIC01IHdoaWxzdCBpbml0aWFsaXNpbmcgU0QgY2FyZA0K
+DQpJIHVzZWQgdGhlIGxhdGVzdCBtYWlubGluZSBrZXJuZWwgYXZhaWxhYmxlIHRvIG1lIFsxXSAk
+IHVuYW1lIC1hIExpbnV4IGNvc21vIDQuNC4wLTA0MDQwMHJjNC1nZW5lcmljICMyMDE1MTIwNjE5
+MzAgU01QIE1vbiBEZWMgNw0KMDA6MzI6MzEgVVRDIDIwMTUgeDg2XzY0IHg4Nl82NCB4ODZfNjQg
+R05VL0xpbnV4DQoNCkl0IHdhcyB3b3JraW5nIGZpbmUgZm9yIGtlcm5lbCB2ZXJzaW9ucyBvbGRl
+ciB0aGFuIDQuMS44Lg0KDQpJIGRpZCBhIGJpc2VjdGlvbiBhbmQgaGVyZSBpcyB0aGUgZmlyc3Qg
+YmFkIGNvbW1pdA0KDQo+IGU2YzY5MDk5ZjYzYzg0ZTE4MjVjMGY3NDJhNzZmZjRhOGFmZWFhOWIg
+aXMgdGhlIGZpcnN0IGJhZCBjb21taXQgDQo+IGNvbW1pdCBlNmM2OTA5OWY2M2M4NGUxODI1YzBm
+NzQyYTc2ZmY0YThhZmVhYTliDQo+IEF1dGhvcjogQWRhbSBMZWUgPGFkYW0ubGVlQGNhbm9uaWNh
+bC5jb20+DQo+IERhdGU6ICAgTW9uIEF1ZyAzIDE0OjMzOjI4IDIwMTUgKzA4MDANCj4NCj4gICAg
+IG1tYzogc2RoY2ktcGNpOiBzZXQgdGhlIGNsZWFyIHRyYW5zZmVyIG1vZGUgcmVnaXN0ZXIgcXVp
+cmsgZm9yIA0KPiBPMk1pY3JvDQo+DQo+ICAgICBjb21taXQgMTQzYjY0OGRkZjE1ODM5MDVmYTE1
+ZDMyYmUyN2EzMTQ0MmZjNzkzMyB1cHN0cmVhbS4NCj4NCj4gICAgIFRoaXMgcGF0Y2ggZml4ZXMg
+TU1DIG5vdCB3b3JraW5nIGlzc3VlIG9uIE8yTWljcm8vQmF5SHViIEhvc3QsIHdoaWNoDQo+ICAg
+ICByZXF1aXJlcyB0cmFuc2ZlciBtb2RlIHJlZ2lzdGVyIHRvIGJlIGNsZWFyZWQgd2hlbiBzZW5k
+aW5nIG5vIERNQQ0KPiAgICAgY29tbWFuZC4NCj4NCj4gICAgIFNpZ25lZC1vZmYtYnk6IFBldGVy
+IEd1byA8cGV0ZXIuZ3VvQGJheWh1YnRlY2guY29tPg0KPiAgICAgU2lnbmVkLW9mZi1ieTogQWRh
+bSBMZWUgPGFkYW0ubGVlQGNhbm9uaWNhbC5jb20+DQo+ICAgICBTaWduZWQtb2ZmLWJ5OiBVbGYg
+SGFuc3NvbiA8dWxmLmhhbnNzb25AbGluYXJvLm9yZz4NCj4gICAgIFNpZ25lZC1vZmYtYnk6IEdy
+ZWcgS3JvYWgtSGFydG1hbiA8Z3JlZ2toQGxpbnV4Zm91bmRhdGlvbi5vcmc+DQoNCkkgb3JpZ2lu
+YWxseSBsb2dnZWQgdGhpcyBpc3N1ZSB0byB0aGUgVWJ1bnR1IGJ1ZyB0cmFja2VyWzJdLCBidXQg
+aXQgYXBwZWFycyB0byBiZSBhbiB1cHN0cmVhbSBpc3N1ZSBhbmQgc28gSSB3YXMgaW5zdHJ1Y3Rl
+ZCB0byByZXBvcnQgaGVyZS4NClBsZWFzZSBub3RlIHRoYXQgSSB1c2UgdGhlIGxhdGVzdCBCaW9z
+IHZlcnNpb24gZm9yIHRoZSBtb2RlbC4NCg0KJCBzdWRvIGRtaWRlY29kZSAtcyBiaW9zLXZlcnNp
+b247c3VkbyBkbWlkZWNvZGUgLXMgYmlvcy1yZWxlYXNlLWRhdGUNCkEwOA0KMTAvMjgvMjAxNQ0K
+DQpbMV0gaHR0cDovL2tlcm5lbC51YnVudHUuY29tL35rZXJuZWwtcHBhL21haW5saW5lL3Y0LjQt
+cmM0LXdpbHkvDQpbMl0gaHR0cHM6Ly9idWdzLmxhdW5jaHBhZC5uZXQvdWJ1bnR1Lytzb3VyY2Uv
+bGludXgvK2J1Zy8xNTIzMTc4DQoNClRoYW5rcywNCkFsZXgNCg==
