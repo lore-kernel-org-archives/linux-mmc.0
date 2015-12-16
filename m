@@ -1,98 +1,61 @@
-From: Alex Ballas <alex@ballas.org>
-Subject: Re: 1217:8520 [Dell Latitude E7450] O2 Micro, SD/MMC Card Reader
- doesn't work
-Date: Wed, 16 Dec 2015 11:48:40 +0200
-Message-ID: <CAONpWduF6iH4Rr5Y610KP1RE342nWAajR27KFbu1N2iet4R0ZA@mail.gmail.com>
-References: <CAONpWdsteBnqTcFbKpcOQFueyeJJWEmn9DJitD43f59xV8sDyg@mail.gmail.com>
-	<BY2PR04MB184372CAAC1FA0C5373D73238FEF0@BY2PR04MB1843.namprd04.prod.outlook.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH v2] mmc: sdhci-msm: Boost controller core clock
+Date: Wed, 16 Dec 2015 11:18:42 +0100
+Message-ID: <CAPDyKFq-=dqJrDOLVeXN5P2aYC1v4Mwk+s=bKSDrobcBWnO+Lg@mail.gmail.com>
+References: <1436183618-15330-1-git-send-email-ivan.ivanov@linaro.org>
+	<CAJAp7OjdiD_x0aU89HNq8PCiGqs+fvATHuVARxU4gE4yVusRNg@mail.gmail.com>
+	<CAPDyKFpQ2oK49ZwaBuk9bUPDEpzSyic2d1L9Qj2t8D1+wmDYtA@mail.gmail.com>
+	<20151106233913.GB30882@usrtlx11787.corpusers.net>
+	<CAPDyKFqZ+1Ax9e58b0K5B+tYoNtsC0uQS3zcQR7tu5TM+51nbw@mail.gmail.com>
+	<20151110201841.GB24116@codeaurora.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8BIT
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ob0-f172.google.com ([209.85.214.172]:35032 "EHLO
-	mail-ob0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S934117AbbLPJsk convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 16 Dec 2015 04:48:40 -0500
-Received: by mail-ob0-f172.google.com with SMTP id 18so28725194obc.2
-        for <linux-mmc@vger.kernel.org>; Wed, 16 Dec 2015 01:48:40 -0800 (PST)
-In-Reply-To: <BY2PR04MB184372CAAC1FA0C5373D73238FEF0@BY2PR04MB1843.namprd04.prod.outlook.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20151110201841.GB24116@codeaurora.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Stephen Boyd <sboyd@codeaurora.org>, Bjorn Andersson <bjorn.andersson@sonymobile.com>, Georgi Djakov <georgi.djakov@linaro.org>, "Ivan T. Ivanov" <ivan.ivanov@linaro.org>
+Cc: Bjorn Andersson <bjorn@kryo.se>, Peter Griffin <peter.griffin@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-arm-msm <linux-arm-msm@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Peter Guo <peter.guo@bayhubtech.com>, adam8157@gmail.com
-Cc: "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>, "linux-mmc@VGER.KERNEL.ORG" <linux-mmc@vger.kernel.org>
 
-Re-adding Adam as the initial mail address is bouncing.
+[...]
 
-Kind Regards,
-Alex
+>> It seems like a reasonable assumption that the controller can't cope
+>> with a higher clock rate than 100 MHz as "input" clock. That would
+>> then mean that there are different versions of the controller, as it
+>> seems like for some version it's fine with 200MHz and for some 100MHz.
+>>
+>> According to the DT compatible strings, *one* version is currently
+>> supported, "qcom,sdhci-msm-v4"...
+>
+> The same version of hardware is there 4 times. The difference is
+> the maximum clock frequency supported by them is different. In
+> downstream kernels we've handled this by trimming the frequency
+> tables for the different controllers in the clock driver.
+> Setting the clock to INT_MAX will make it run at 400MHz, which
+> doesn't look to be supported by anything besides sdc1 on 8974ac.
+>
+>>
+>> I see two viable solutions. One would be to limit the clock rate
+>> depending on the version of the controller (new compatible strings
+>> needs to be added). Another one would be to limit the clock rate by
+>> using the existing DT binding for max-frequency, and thus do a
+>> clk_set_rate(mmc->f_max) during probe.
+>>
+>
+> I'd rather see that done via OPP tables in DT, but I suppose
+> max-frequency is fine too. We'll need to use OPPs soon enough
+> because there's a voltage associated with that frequency.
+>
+> In case you're wondering, the max frequency for sdc1 on 8974ac is
+> 400MHz. If it's just a plain 8974pro then the max frequency is
+> 200MHz. Otherwise, sdc2 maxes out at 200Mhz and sdc3 and sdc4 max
+> out at 100MHz.
+>
 
+I think we have reached a consensus on the viable options.
 
-On Wed, Dec 16, 2015 at 5:42 AM, Peter Guo <peter.guo@bayhubtech.com> wrote:
-> Hi Alex,
->
-> Thanks for your Test, According to your info.
-> I find the root cause of this issue is quirks SDHCI_QUIRK2_CLEAR_TRANSFERMODE_REG_BEFORE_CMD is not suitable for our host for
-> all cases.  Our host just want to clear SDHCI_TRANS_DMA bit only.
->
-> to Adam,
->
-> I will commit new patch this week, please check it.
->
->
-> BR
-> Peter.Guo
->
-> -----Original Message-----
-> From: Alex Ballas [mailto:alex@ballas.org]
-> Sent: Saturday, December 12, 2015 10:04 PM
-> To: Peter Guo; adam.lee@canonical.com; ulf.hansson@linaro.org
-> Cc: linux-mmc@VGER.KERNEL.ORG
-> Subject: 1217:8520 [Dell Latitude E7450] O2 Micro, SD/MMC Card Reader doesn't work
->
-> Hello,
->
-> I have a Dell Latitude E7450 with a O2 Micro, SD/MMC Card Reader [1217:8520] card reader. When I insert my Sandisk ultra 64GB microSD (with a SD card adapter) I get the following errors.
->
-> Dmesg output after I insert the SD card:
->
-> [  306.054203] sdhci: Timeout waiting for Buffer Read Ready interrupt during tuning procedure, falling back to fixed sampling clock [  306.055982] mmc0: tuning execution failed [  306.055987] mmc0: error -5 whilst initialising SD card [  306.466185] sdhci: Timeout waiting for Buffer Read Ready interrupt during tuning procedure, falling back to fixed sampling clock [  306.467964] mmc0: tuning execution failed [  306.467970] mmc0: error -5 whilst initialising SD card [  306.890205] sdhci: Timeout waiting for Buffer Read Ready interrupt during tuning procedure, falling back to fixed sampling clock [  306.891993] mmc0: tuning execution failed [  306.892005] mmc0: error -5 whilst initialising SD card [  307.330197] sdhci: Timeout waiting for Buffer Read Ready interrupt during tuning procedure
- , falling back to fixed sampling clock [  307.331980] mmc0: tuning execution failed [  307.331990] mmc0: error -5 whilst initialising SD card
->
-> I used the latest mainline kernel available to me [1] $ uname -a Linux cosmo 4.4.0-040400rc4-generic #201512061930 SMP Mon Dec 7
-> 00:32:31 UTC 2015 x86_64 x86_64 x86_64 GNU/Linux
->
-> It was working fine for kernel versions older than 4.1.8.
->
-> I did a bisection and here is the first bad commit
->
->> e6c69099f63c84e1825c0f742a76ff4a8afeaa9b is the first bad commit
->> commit e6c69099f63c84e1825c0f742a76ff4a8afeaa9b
->> Author: Adam Lee <adam.lee@canonical.com>
->> Date:   Mon Aug 3 14:33:28 2015 +0800
->>
->>     mmc: sdhci-pci: set the clear transfer mode register quirk for
->> O2Micro
->>
->>     commit 143b648ddf1583905fa15d32be27a31442fc7933 upstream.
->>
->>     This patch fixes MMC not working issue on O2Micro/BayHub Host, which
->>     requires transfer mode register to be cleared when sending no DMA
->>     command.
->>
->>     Signed-off-by: Peter Guo <peter.guo@bayhubtech.com>
->>     Signed-off-by: Adam Lee <adam.lee@canonical.com>
->>     Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
->>     Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
->
-> I originally logged this issue to the Ubuntu bug tracker[2], but it appears to be an upstream issue and so I was instructed to report here.
-> Please note that I use the latest Bios version for the model.
->
-> $ sudo dmidecode -s bios-version;sudo dmidecode -s bios-release-date
-> A08
-> 10/28/2015
->
-> [1] http://kernel.ubuntu.com/~kernel-ppa/mainline/v4.4-rc4-wily/
-> [2] https://bugs.launchpad.net/ubuntu/+source/linux/+bug/1523178
->
-> Thanks,
-> Alex
+As we haven't heard from Ivan, do someone want to send a patch for
+this or shall we just revert $subject patch (which I can deal with)?
+
+Kind regards
+Uffe
