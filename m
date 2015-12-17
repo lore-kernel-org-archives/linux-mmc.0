@@ -1,24 +1,50 @@
-From: Michael@mail.microamerica.com.pe,
-	"J.Tynan <f.digeronimo"@federconsumatori.abruzzo.it
-Subject: Review & Reply
-Date: Thu, 17 Dec 2015 07:55:35 +0700
-Message-ID: <20151217005626.8CD1589D5DDB@mail.microamerica.com.pe>
-Reply-To: michaeljtynan8@gmail.com
+From: pavi1729 <pavitra1729@gmail.com>
+Subject: Re: Does the Community use Coverity ?
+Date: Thu, 17 Dec 2015 15:34:19 +0530
+Message-ID: <CAMf7+Li74m2_nZru3kfwJZ5G9r7W69pwkarHbccs1xw-G8ZjnA@mail.gmail.com>
+References: <CAMf7+LiLgPcNSMOGhV=i=6FV5VwrM0VNXpSmPci7xU9EBc0Sgg@mail.gmail.com>
+	<4E5779AD88B2F040B8A7E83ECF544D1A64A4CF@SJCPEX01CL03.citrite.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7BIT
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail.microamerica.com.pe ([200.37.170.69]:46533 "EHLO
-	mail.microamerica.com.pe" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751256AbbLQIfV convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 17 Dec 2015 03:35:21 -0500
-Content-Description: Mail message body
+Received: from mail-io0-f169.google.com ([209.85.223.169]:33762 "EHLO
+	mail-io0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755534AbbLQKEU (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 17 Dec 2015 05:04:20 -0500
+In-Reply-To: <4E5779AD88B2F040B8A7E83ECF544D1A64A4CF@SJCPEX01CL03.citrite.net>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Recipients <f.digeronimo@federconsumatori.abruzzo.it>
+To: Jeff Haran <Jeff.Haran@citrix.com>
+Cc: "kernelnewbies@kernelnewbies.org" <kernelnewbies@kernelnewbies.org>, "linux-fsdevel@vger.kernel.org" <linux-fsdevel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, netdev@vger.kernel.org
 
-Greetings,
-My name is Mr.Michael J. Tynan, I am a banker with Bank Of America. It is true that we have not meet each other in person, but I strongly believe in trust and friendship in every business. I have a Lebanese deceased customer's abandoned fund, which I am his personal financial adviser before his accidental death, that being the main reason why I alone working in the bank here, know much about the existence of this fund and the secrets surrounding this money. But before I disclose the full details to you, I will like to know your interest and willingness to assist me. You can call me as soon you receive my message, so that i will send to you full details about the transaction.
-My best regards,
-Mr.Michael J. Tynan
-MOBILE: +1 347 269 3740
+Sanket, Jeff,
+    Thanks a ton, that was helpful.
+
+Cheers,
+Pavi
+
+On Wed, Dec 16, 2015 at 12:32 AM, Jeff Haran <Jeff.Haran@citrix.com> wrote:
+>>-----Original Message-----
+>>From: kernelnewbies-bounces+jharan=bytemobile.com@kernelnewbies.org
+>>[mailto:kernelnewbies-
+>>bounces+jharan=bytemobile.com@kernelnewbies.org] On Behalf Of
+>>pavi1729
+>>Sent: Monday, December 14, 2015 11:03 PM
+>>To: kernelnewbies@kernelnewbies.org; linux-fsdevel@vger.kernel.org; linux-
+>>mmc@vger.kernel.org; linux-netdev@vger.kernel.org
+>>Subject: Does the Community use Coverity ?
+>>
+>>Hi,
+>>  May I know if the community uses the Coverity tool and, if yes where can I
+>>find a repo of Coverity scans of kernels and IGNORE LIST; cause there
+>>obviously would be false positives.
+>>
+>>Cheers,
+>>Pavi
+>
+> https://scan.coverity.com/
+>
+> Sign up for an account and join the Linux project.
+>
+> Jeff Haran
+>
