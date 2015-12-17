@@ -1,67 +1,24 @@
-From: "Yang, York" <weijuny@qti.qualcomm.com>
-Subject: RE: [PATCH 1/2] mmc: core: enable CMD19 tuning for DDR50 mode
-Date: Thu, 17 Dec 2015 02:00:17 +0000
-Message-ID: <7a1072e99c8149a5b08d1bf260808ce7@aptaiexm02f.ap.qualcomm.com>
-References: <1439282492-6274-1-git-send-email-21cnbao@gmail.com>
-	<CAPDyKFpXZD28NwNAhKQyxmWasVhk_7AeyOW6oXaBPHKuSTmGUA@mail.gmail.com>
-	<CAGsJ_4wvvQdyjFi=JmWfASm-LbJMybrhC=Wxxn7jHZEP5dUfEw@mail.gmail.com>
-	<CAPDyKFpEwWvu3tnbMT9ZvM0TUvEHp0Qa8PADohyJoTaNZ9HS9g@mail.gmail.com>
-	<CAGsJ_4x5Nd3Cts1BHsUyB_mCejxbHPPjznUVWUcFoZhxKy+Tcg@mail.gmail.com>
-	<CAPDyKFpWfY9G4WG_GfCutJ2NkRbcAYZToYJXp3RvX=_25sgnWA@mail.gmail.com>
-	<CAGsJ_4zaWcmGsc82=LSohK0UHxJir2OJOBSgoU3sPRXYvLdOZQ@mail.gmail.com>
-	<CAPDyKFrj7mfxYPotHfpYPVf8M=Mvjcz+HfuB871EZNv9FWpPqw@mail.gmail.com>
-	<CAOQ7t2YuSDwtK0R3R4++3LUPyEqW+ENLju63QisX6tO=-cvt6w@mail.gmail.com>
-	<edf24ca1a9614943b55b8d19745a3c45@aptaiexm02f.ap.qualcomm.com>
-	<CAOQ7t2YOd9TtAHHUBhF4n_POQURhfaqC_9Tg-b8d1Bf2QCyoYA@mail.gmail.com>
-	<a2ffc219b04b483b87696ffc81a60787@aptaiexm02f.ap.qualcomm.com>
- <CAOQ7t2Z=4Mc9Ev9OBxXiLDtiXaTr5jQzc-gVwU_xJnHLrumd0g@mail.gmail.com>
+From: Michael@mail.microamerica.com.pe,
+	"J.Tynan <f.digeronimo"@federconsumatori.abruzzo.it
+Subject: Review & Reply
+Date: Thu, 17 Dec 2015 07:55:35 +0700
+Message-ID: <20151217005626.8CD1589D5DDB@mail.microamerica.com.pe>
+Reply-To: michaeljtynan8@gmail.com
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from sabertooth01.qualcomm.com ([65.197.215.72]:65470 "EHLO
-	sabertooth01.qualcomm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753607AbbLQCAY (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 16 Dec 2015 21:00:24 -0500
-In-Reply-To: <CAOQ7t2Z=4Mc9Ev9OBxXiLDtiXaTr5jQzc-gVwU_xJnHLrumd0g@mail.gmail.com>
-Content-Language: en-US
+Received: from mail.microamerica.com.pe ([200.37.170.69]:46533 "EHLO
+	mail.microamerica.com.pe" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751256AbbLQIfV convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 17 Dec 2015 03:35:21 -0500
+Content-Description: Mail message body
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Carlo Caione <carlo@caione.org>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Barry Song <21cnbao@gmail.com>, linux-mmc <linux-mmc@vger.kernel.org>, DL-SHA-WorkGroupLinux <workgroup.linux@csr.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "Song, Barry" <baohuas@qti.qualcomm.com>
+To: Recipients <f.digeronimo@federconsumatori.abruzzo.it>
 
-SGksIENhcmxvDQoNCglJIGRvbid0IHVuZGVyc3RhbmQuIFdlIGNhbiBzZWUgdGhhdCA5ZmFhYzdi
-OTUgaXMgYWxsIGFib3V0IEREUjUwLiBJdCBzaG91bGQgbm90IGFmZmVjdCB0aGUgYmVoYXZpb3Ig
-b2YgU0RSNTAuDQoJU2luY2UgdGhlIGNvbW1pdCBpcyB2ZXJ5IHNpbXBsZSwgeW91IG1heSByZW1v
-dmUgdGhlIGNoYW5nZSBvbmUgYnkgb25lIGJ5IHlvdXJzZWxmLiBBbmQgc2VlIGlmIGFueSBkaWZm
-ZXJlbmNlIG9jY3Vycy4NCglCZXNpZGVzLCBwbGVhc2UgY2hlY2sgaWYgdGhlIGNhcmQtPnN3X2Nh
-cHMuc2QzX2J1c19tb2RlIGNoYW5nZXMgd2l0aCBvciB3aXRob3V0IEREUjUwIHR1bmluZyBlbmFi
-bGVkLg0KDQotLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KRnJvbTogY2FybG8uY2Fpb25lQGdt
-YWlsLmNvbSBbbWFpbHRvOmNhcmxvLmNhaW9uZUBnbWFpbC5jb21dIE9uIEJlaGFsZiBPZiBDYXJs
-byBDYWlvbmUNClNlbnQ6IDIwMTXlubQxMuaciDE05pelIDE4OjU3DQpUbzogWWFuZywgWW9yayA8
-d2VpanVueUBxdGkucXVhbGNvbW0uY29tPg0KQ2M6IENhcmxvIENhaW9uZSA8Y2FybG9AY2Fpb25l
-Lm9yZz47IFVsZiBIYW5zc29uIDx1bGYuaGFuc3NvbkBsaW5hcm8ub3JnPjsgQmFycnkgU29uZyA8
-MjFjbmJhb0BnbWFpbC5jb20+OyBsaW51eC1tbWMgPGxpbnV4LW1tY0B2Z2VyLmtlcm5lbC5vcmc+
-OyBETC1TSEEtV29ya0dyb3VwTGludXggPHdvcmtncm91cC5saW51eEBjc3IuY29tPjsgbGludXgt
-YXJtLWtlcm5lbEBsaXN0cy5pbmZyYWRlYWQub3JnOyBTb25nLCBCYXJyeSA8YmFvaHVhc0BxdGku
-cXVhbGNvbW0uY29tPg0KU3ViamVjdDogUmU6IFtQQVRDSCAxLzJdIG1tYzogY29yZTogZW5hYmxl
-IENNRDE5IHR1bmluZyBmb3IgRERSNTAgbW9kZQ0KDQpPbiBNb24sIERlYyAxNCwgMjAxNSBhdCAx
-MDoyNCBBTSwgWWFuZywgWW9yayA8d2VpanVueUBxdGkucXVhbGNvbW0uY29tPiB3cm90ZToNCj4g
-SGksIENhcmxvDQo+DQo+ICAgICAgICAgSSBkb24ndCB0aGluayBzby4gWW91IG1heSBjaGVjayB0
-aGUgOWZhYWM3Yjk1LCB0aGVyZSBhcmUgdHdvIGNoYW5nZXMgaW4gc2QuYyBhbmQgc2RoYy5jLg0K
-PiAgICAgICAgIFN1cmVseSB0aGUgY2hhbmdlIGluIHNkaGMuYyB3aWxsIG5vdCBhZmZlY3QgQVNV
-UyBYMjA1VEEgKGJjbTQzMzQxKSBzaW5jZSBpdCBpcyBhIFNESU8gZGV2aWNlLg0KPiAgICAgICAg
-IEFjdHVhbGx5IHRoZSBjYWxsaW5nIHNlcXVlbmNlIGlzIHRoaXM6IG1tY19zZF9pbml0X3Voc19j
-YXJkKCkgY2FsbHMgc2RoY2lfZXhlY3V0ZV90dW5pbmcoKS4gSW4gOWZhYWM3Yjk1LCBJIGVuYWJs
-ZWQgdHVuaW5nIGZvciBERFI1MCBpbiB0aGVzZSB0d28gZnVuY3Rpb25zLg0KPiAgICAgICAgIElm
-IHlvdXIgZnVuY3Rpb24gY2FsbGluZyBzZXF1ZW5jZSBpcyBtbWNfc2Rpb19pbml0X3Voc19jYXJk
-KCktPnNkaGNpX2V4ZWN1dGVfdHVuaW5nKCksIHRoZSB0dW5pbmcgd2lsbCBub3QgY2FycmllZCBv
-dXQsIHNpbmNlIHlvdSBkaWRuJ3QgZW5hYmxlIHR1bmluZyBmb3IgRERSNTAgaW4gbW1jX3NkaW9f
-aW5pdF91aHNfY2FyZCgpLg0KPiAgICAgICAgIFVubGVzcyB5b3UgY2FsbCBzZGhjaV9leGVjdXRl
-X3R1bmluZyBkaXJlY3RseSwgdGhlIHR1bmluZyBjb21tYW5kIG1heSBnbyB0aHJvdWdoIGJlIHNl
-bnQgb3V0Lg0KDQpIaSBZYW5nLA0KDQpPbiB0aGUgdW5tb2RpZmllZCBtYXN0ZXIgd2hhdCBJIHNl
-ZSBpczoNCg0KLSBtbWNfc2Rpb19pbml0X3Voc19jYXJkKCkgaXMgY2FsbGVkDQotIGNhcmQtPnN3
-X2NhcHMuc2QzX2J1c19tb2RlIGlzIDB4MTQNCi0gY2FyZC0+c3dfY2Fwcy5zZDNfYnVzX21vZGUg
-JiBTRF9NT0RFX1VIU19TRFI1MCBpcyBhY3R1YWxseSB2ZXJpZmllZCAoZXZlbiB0aG91Z2ggdGhl
-IHR1bmluZyBmb3IgRERSNTAgaXMgbm90IGVuYWJsZWQpDQotIG1tY19leGVjdXRlX3R1bmluZygp
-IGlzIGFjdHVhbGx5IGNhbGxlZA0KDQotLQ0KQ2FybG8gQ2Fpb25lDQo=
+Greetings,
+My name is Mr.Michael J. Tynan, I am a banker with Bank Of America. It is true that we have not meet each other in person, but I strongly believe in trust and friendship in every business. I have a Lebanese deceased customer's abandoned fund, which I am his personal financial adviser before his accidental death, that being the main reason why I alone working in the bank here, know much about the existence of this fund and the secrets surrounding this money. But before I disclose the full details to you, I will like to know your interest and willingness to assist me. You can call me as soon you receive my message, so that i will send to you full details about the transaction.
+My best regards,
+Mr.Michael J. Tynan
+MOBILE: +1 347 269 3740
