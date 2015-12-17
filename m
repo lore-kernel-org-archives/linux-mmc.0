@@ -1,84 +1,75 @@
-From: David Jander <david@protonic.nl>
-Subject: Re: SDHCI long sleep with interrupts off
-Date: Thu, 17 Dec 2015 16:09:03 +0100
-Message-ID: <20151217160903.556af1af@archvile>
-References: <20151217112814.6250a3b9@archvile>
-	<1450350190.3163.93.camel@pengutronix.de>
-	<20151217122053.036daf37@archvile>
-	<1450351655.3163.97.camel@pengutronix.de>
-	<CAPDyKFosBeyP3YYXz-1uyiqoaLuMQj3+ojzpt1-QY7JU9epggw@mail.gmail.com>
-	<20151217132229.1c699f69@archvile>
-	<CAPDyKFpxx5oXM=MAYcdg1fBiodOo2HjoEvHmZk9nHBCW=qqBQQ@mail.gmail.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: BUG 4.4rc-4: wrong eMMC signaling voltage reported
+Date: Thu, 17 Dec 2015 17:10:14 +0100
+Message-ID: <CAPDyKFoQqQFmPwrnCeJBcz=mnzW8zbWb5i7bc64oo7bN_113zQ@mail.gmail.com>
+References: <87fuzbvfl9.fsf@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAPDyKFpxx5oXM=MAYcdg1fBiodOo2HjoEvHmZk9nHBCW=qqBQQ@mail.gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Lucas Stach <l.stach@pengutronix.de>, linux-mmc <linux-mmc@vger.kernel.org>, Pierre Ossman <pierre@ossman.eu>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-yk0-f170.google.com ([209.85.160.170]:36496 "EHLO
+	mail-yk0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756812AbbLQQKQ (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 17 Dec 2015 11:10:16 -0500
+Received: by mail-yk0-f170.google.com with SMTP id x184so24286951yka.3
+        for <linux-mmc@vger.kernel.org>; Thu, 17 Dec 2015 08:10:15 -0800 (PST)
+In-Reply-To: <87fuzbvfl9.fsf@gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Holger Schurig <holgerschurig@gmail.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>
 
+On 9 December 2015 at 15:53, Holger Schurig <holgerschurig@gmail.com> wrote:
+> Hi,
+>
+> I have an i.MX6Q based system that cannot provide 1.8V voltage towards
+> the eMMC. But Linux 4.4-rc4 reports 1.8V for the eMMC, but this is
+> impossible. Neither my hardware allows this, nor does the DT say it.
+>
+> root@imx6q:/sys/kernel/debug# cat mmc1/ios
+> clock:          52000000 Hz
+> actual clock:   49500000 Hz
+> vdd:            21 (3.3 ~ 3.4 V)
+> bus mode:       2 (push-pull)
+> chip select:    0 (don't care)
+> power mode:     2 (on)
+> bus width:      3 (8 bits)
+> timing spec:    8 (mmc DDR52)
+> signal voltage: 0 (1.80 V)
+> driver type:    0 (driver type B)
+>
+> My device tree however tells that I don't have 1.8V:
+>
+> /* this is the built in eMMC */
+> &usdhc4 {
+>         pinctrl-names = "default";
+>         pinctrl-0 = <&pinctrl_usdhc4>;
+>         bus-width = <8>;
+>         non-removable;
+>         vmmc-supply = <&reg_3p3v>;
+>         max-frequency = <198000000>;
+>         no-1-8-v;
 
-Dear Ulf,
+The no-1-8-v is a somewhat broken DT binding. I advise people to not
+use any more.
+Depending on the sdhci variant it have different meanings.
 
-On Thu, 17 Dec 2015 15:54:54 +0100
-Ulf Hansson <ulf.hansson@linaro.org> wrote:
+I guess you are using the sdhci-esdhc-imx variant, which means
+no-1-8-v will disable UHS modes for SD-cards (those requiring 1.8V
+signal voltage). It has no impact on (e)MMC.
 
-> [...]
-> 
-> >> If/when you decide to fix this issue. Please keep in mind the following
-> >> things.
-> >>
-> >> - Try to convert the SDHCI into a pure library. No more quirks or
-> >> callbacks.
-> >> - I assume we can simplify lots of code if we convert SDHCI into using
-> >> a threaded IRQ in favour of the tasklet.
-> >>
-> >> Any patches that moves SDHCI into this direction will be greatly
-> >> appreciated!
-> >
-> > Ok, this sounds like a good way to go. Unfortunately it also sounds like a
-> > major endeavor, for which good knowledge of the SDHCI standard is
-> > necessary. This knowledge is based on documentation that is not openly
-> > available without cost AFAIK. This probably also explains why there hasn't
-> > been a real fix ever. On top of that, the whole sdhci code is unmaintained
-> > currently as it seems. I was studying the code a bit more, and I now
-> > understand that I am not even close to having the experience and
-> > standards-knowledge it takes to pull this off reliably. I guess the one
-> > who takes on this task may as well become official maintainer afterwards...
-> 
-> You are right, a maintainer is needed for sdhci.
-> 
-> Also, I am a bit surprised that none have stepped up, especially since
-> it's indeed being *very* widely used.
+As the host driver announces support for MMC_CAP_1_8V_DDR, that's what
+the mmc core will try to use. Actually the mmc core will first try
+1.8V and if it fails, go for 3.3V.
 
-So, you probably understand my surprise as for the state of things. I am only
-casually walking by because I have a latency problem....
+Likely, sdhci_do_start_signal_voltage_switch() will success to write
+the corresponding registers to change the signal voltage to 1.8V,
+which makes the mmc core believe it was a success.
 
-> > OTOH, we pretty much depend on this driver now, since all of our new
-> > i.MX6/7 boards have eMMC flash. We also use the flexcan peripheral on all
-> > designs, which is specially sensible to these latency spikes, so we will
-> > have to do something on the long run.... we cannot live forever with
-> > disabled PM ;-)
-> >
-> 
-> Unfortunate, PM is only one of the problems.
+*If* your statement around that your HW don't support 1.8V signal
+voltage, we should perhaps add new mmc cap as currently we don't have
+a "MMC_CAP_3_3V_DDR". Although, you need to convince on that, because
+my experience tells that quite many has misunderstood the HW design in
+this regard.
 
-I already had that suspicion while looking at the code...
-
-> The code is in general fragile. We have have kind of reached the
-> point, when I apply changes that fixes one issue it may cause another.
-
-Oh, that is indeed bad.
-I wish I was in the position to do this... but this really goes beyond my time
-and my knowledge. I think most of the effort will be at cleaning up the mess
-and make sure that each one of the many users works well afterwards, and it
-definitely takes someone who knows the code (and it's users) very well to pull
-this off.
-
-Best regards,
-
--- 
-David Jander
-Protonic Holland.
+Kind regards
+Uffe
