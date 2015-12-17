@@ -1,127 +1,78 @@
-From: David Jander <david@protonic.nl>
-Subject: Re: SDHCI long sleep with interrupts off
-Date: Thu, 17 Dec 2015 12:20:53 +0100
-Message-ID: <20151217122053.036daf37@archvile>
-References: <20151217112814.6250a3b9@archvile>
-	<1450350190.3163.93.camel@pengutronix.de>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [v4, 5/6] mmc: kconfig: select FSL_GUTS for MMC_SDHCI_OF_ESDHC
+Date: Thu, 17 Dec 2015 12:25:06 +0100
+Message-ID: <CAPDyKFqbi+3sjkVM2RYijmQ17YTwgCAL0SQjo=CmZX1jMRP4mA@mail.gmail.com>
+References: <1450067067-44869-1-git-send-email-yangbo.lu@freescale.com>
+	<1450067067-44869-6-git-send-email-yangbo.lu@freescale.com>
+	<CAPDyKFo1g5_4bpYnTO96tGfVGStysN0FnmbSx-Se4tOa7f3rZQ@mail.gmail.com>
+	<1450116253.15946.353.camel@freescale.com>
+	<CAPDyKFrKSMC0uo8re3CxjNCUsVnEMau=GTKq=v_3ooNnQxw2Eg@mail.gmail.com>
+	<1450306099.15946.469.camel@freescale.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1450350190.3163.93.camel@pengutronix.de>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Lucas Stach <l.stach@pengutronix.de>
-Cc: linux-mmc@vger.kernel.org, Pierre Ossman <pierre@ossman.eu>, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-yk0-f175.google.com ([209.85.160.175]:33764 "EHLO
+	mail-yk0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752066AbbLQLZH (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 17 Dec 2015 06:25:07 -0500
+Received: by mail-yk0-f175.google.com with SMTP id 140so14660433ykp.0
+        for <linux-mmc@vger.kernel.org>; Thu, 17 Dec 2015 03:25:07 -0800 (PST)
+In-Reply-To: <1450306099.15946.469.camel@freescale.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Scott Wood <scottwood@freescale.com>
+Cc: Yangbo Lu <yangbo.lu@freescale.com>, linux-mmc <linux-mmc@vger.kernel.org>, X.Xie@freescale.com, Li Leo <LeoLi@freescale.com>
 
+On 16 December 2015 at 23:48, Scott Wood <scottwood@freescale.com> wrote:
+> On Tue, 2015-12-15 at 10:46 +0100, Ulf Hansson wrote:
+>> [...]
+>> > > > --- a/drivers/mmc/host/Kconfig
+>> > > > +++ b/drivers/mmc/host/Kconfig
+>> > > > @@ -142,6 +142,8 @@ config MMC_SDHCI_OF_ESDHC
+>> > > >         depends on MMC_SDHCI_PLTFM
+>> > > >         depends on PPC || ARCH_MXC || ARCH_LAYERSCAPE
+>> > > >         select MMC_SDHCI_IO_ACCESSORS
+>> > > > +       select SOC_FSL
+>> > > > +       select FSL_GUTS
+>> > >
+>> > > This is weird.
+>> > >
+>> > > First, perhaps it would make sense to have stub functions for those
+>> > > the FSL_GUTS driver provides via its API, thus the above wouldn't be
+>> > > required at all. Of course this makes only sense if you think there
+>> > > are/could be configurations for a cross SOC driver which don't need
+>> > > the GUTS driver.
+>> > >
+>> > > Second, even if you think the stubs above is a bad idea, I would from
+>> > > the top-level Kconfig for your platform, add the needed "selects" as I
+>> > > think it's where it belongs and then change this to "depends on"
+>> > > instead.
+>> >
+>> > Why is it weird for a driver to select another driver that it makes calls
+>> > to?
+>> >  Much easier to do it here than in all the platforms that use this driver.
+>>
+>> Because using "select" will not consider the dependencies for the new
+>> selected Kconfig option. I can imagine that it might become a problem,
+>> sooner or later.
+>
+> It's not a problem as long as the selected option's dependencies (if any) are
+> selected, or depended on by the selecting driver.  I wouldn't expect the
+> FSL_GUTS driver to depend on anything other than basic OF support.
+>
+>> So, "select" shall be used by care and in this case I think we can
+>> cope fine with using "depends on".
+>
+> What does select exist for if not situations like this?  What "care" is
+> missing?
+>
 
-Hi Lucas,
+The GUTS driver is SoC specific driver. If/when dependencies are added
+for that driver it will break the usage of the select for the MMC host
+driver. No, thanks it's fragile!
 
-Thanks for reacting.
+To me, the best way to use select is either from top-level platform
+Kconfig or where it's better isolated, perhaps within a subsystem.
 
-On Thu, 17 Dec 2015 12:03:10 +0100
-Lucas Stach <l.stach@pengutronix.de> wrote:
-
-> Am Donnerstag, den 17.12.2015, 11:28 +0100 schrieb David Jander:
-> > Hi all, 
-> > 
-> > I was investigating the source of abnormal irq-latency spikes on an i.MX6
-> > (ARM) board, and discovered this:
-> > 
-> > # tracer: preemptirqsoff
-> > #
-> > # preemptirqsoff latency trace v1.1.5 on 4.4.0-rc4+
-> > # --------------------------------------------------------------------
-> > # latency: 2068 us, #4/4, CPU#0 | (M:preempt VP:0, KP:0, SP:0 HP:0 #P:1)
-> > #    -----------------
-> > #    | task: mmcqd/0-92 (uid:0 nice:0 policy:0 rt_prio:0)
-> > #    -----------------
-> > #  => started at: _raw_spin_lock_irqsave
-> > #  => ended at:   _raw_spin_unlock_irqrestore
-> > #
-> > #
-> > #                  _------=> CPU#            
-> > #                 / _-----=> irqs-off        
-> > #                | / _----=> need-resched    
-> > #                || / _---=> hardirq/softirq 
-> > #                ||| / _--=> preempt-depth   
-> > #                |||| /     delay            
-> > #  cmd     pid   ||||| time  |   caller      
-> > #     \   /      |||||  \    |   /         
-> >  mmcqd/0-92      0d...    1us#: _raw_spin_lock_irqsave
-> >  mmcqd/0-92      0.n.1 2066us : _raw_spin_unlock_irqrestore
-> >  mmcqd/0-92      0.n.1 2070us+: trace_preempt_on
-> > <-_raw_spin_unlock_irqrestore mmcqd/0-92      0.n.1 2107us : <stack trace>
-> >  => sdhci_runtime_resume_host
-> >  => __rpm_callback
-> >  => rpm_callback
-> >  => rpm_resume
-> >  => __pm_runtime_resume
-> >  => __mmc_claim_host
-> >  => mmc_blk_issue_rq
-> >  => mmc_queue_thread
-> >  => kthread
-> >  => ret_from_fork
-> > 
-> > 2 ms with interrupts disabled!!! To much dismay, I later discovered that
-> > this isn't even the worst case scenario. I also discovered that this has
-> > been in the kernel for a long time without a fix (I have tested from 3.17
-> > to 4.4-rc4). There has been an attempt by someone to address this back in
-> > 2010, but apparently it never hit mainline.
-> > Going through the code in sdhci.c, I found this troublesome code-path:
-> > 
-> > sdhci_do_set_ios() {
-> > 	spin_lock_irqsave(&host->lock, flags);
-> > 	...
-> > 	sdhci_reinit() --> sdhci_init() --> sdhci_do_reset() -->
-> > 		host->ops->reset() --> sdhci_reset()	
-> > 	...
-> > 	spin_unlock_irqrestore(&host->lock, flags);
-> > }
-> > 
-> > And in sdhci_reset(), which may be called with held spinlock:
-> > 
-> > 	...
-> > 	/* Wait max 100 ms */
-> > 	timeout = 100;
-> > 
-> > 	/* hw clears the bit when it's done */
-> > 	while (sdhci_readb(host, SDHCI_SOFTWARE_RESET) & mask) {
-> > 		if (timeout == 0) {
-> > 			pr_err("%s: Reset 0x%x never completed.\n",
-> > 				mmc_hostname(host->mmc), (int)mask);
-> > 			sdhci_dumpregs(host);
-> > 			return;
-> > 		}
-> > 		timeout--;
-> > 		mdelay(1);
-> > 	}
-> > 
-> > I am wondering: There either must be a reason this hasn't been fixed in
-> > such a long time, or I am not understanding this correctly, so please
-> > enlighten me. Before trying a cowboy attempt at "fixing" this, I'd really
-> > like to know why am I seeing this?
-> > I mean... how can such a problem get unnoticed and unfixed for so long?
-> > Will an attempt at fixing this issue even be accepted?
-> > 
-> I would like to see the sdhci spinlock killed and replaced by a mutex
-> for exactly this reason.
-> 
-> That said, your problem is card polling, when no card is present in the
-> slot. This is most probably caused by CD gpios having the wrong
-> polarity.
-
-... or not having a CD pin at all.
-I am using an embedded eMMC chip and a uSD card inserted into a slot. The card
-is present and also detected as such. If I never access the card, I see no
-spikes (filesystem is mounted but not accessed). If I try to read a file or
-directory I get the above trace.
-OTOH, if I disable PM functionality in the kernel, the spike is gone, and
-worst-case latency is in the 300us range, so I don't think this is related to
-card polling.
-
-Best regards,
-
--- 
-David Jander
-Protonic Holland.
+Kind regards
+Uffe
