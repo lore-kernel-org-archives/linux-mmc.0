@@ -1,75 +1,138 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: BUG 4.4rc-4: wrong eMMC signaling voltage reported
-Date: Thu, 17 Dec 2015 17:10:14 +0100
-Message-ID: <CAPDyKFoQqQFmPwrnCeJBcz=mnzW8zbWb5i7bc64oo7bN_113zQ@mail.gmail.com>
-References: <87fuzbvfl9.fsf@gmail.com>
+From: <Paul.Thacker@microchip.com>
+Subject: RE: [PATCH v2 12/14] mmc: sdhci-pic32: Add PIC32 SDHCI host
+ controller driver
+Date: Thu, 17 Dec 2015 18:05:24 +0000
+Message-ID: <F2D704DDA6AE8B4A87FF87509480F4A449E07947@CHN-SV-EXMX01.mchp-main.com>
+References: <1450133093-7053-1-git-send-email-joshua.henderson@microchip.com>
+	<1450133093-7053-13-git-send-email-joshua.henderson@microchip.com>
+ <CAPDyKFpQeq-9G_=n62c8uE+Tkiz3o9jManiOuCZG2qNKwkZ5EQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-yk0-f170.google.com ([209.85.160.170]:36496 "EHLO
-	mail-yk0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756812AbbLQQKQ (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 17 Dec 2015 11:10:16 -0500
-Received: by mail-yk0-f170.google.com with SMTP id x184so24286951yka.3
-        for <linux-mmc@vger.kernel.org>; Thu, 17 Dec 2015 08:10:15 -0800 (PST)
-In-Reply-To: <87fuzbvfl9.fsf@gmail.com>
+Received: from exsmtp01.microchip.com ([198.175.253.37]:54335 "EHLO
+	email.microchip.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1750881AbbLQSF0 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 17 Dec 2015 13:05:26 -0500
+In-Reply-To: <CAPDyKFpQeq-9G_=n62c8uE+Tkiz3o9jManiOuCZG2qNKwkZ5EQ@mail.gmail.com>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Holger Schurig <holgerschurig@gmail.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>
+To: ulf.hansson@linaro.org, Joshua.Henderson@microchip.com
+Cc: linux-kernel@vger.kernel.org, linux-mips@linux-mips.org, ralf@linux-mips.org, Andrei.Pistirica@microchip.com, jdelvare@suse.de, geert@linux-m68k.org, cdoban@broadcom.com, haojian.zhuang@gmail.com, luisbg@osg.samsung.com, Weijun.Yang@csr.com, lokeshvutla@ti.com, sbranden@broadcom.com, vincent.yang.fujitsu@gmail.com, chaotian.jing@mediatek.com, ludovic.desroches@atmel.com, shawn.lin@rock-chips.com, sboyd@codeaurora.org, yangbo.lu@freescale.com, haokexin@gmail.com, ben@decadent.org.uk, andy.green@linaro.org, linux-mmc@vger.kernel.org
 
-On 9 December 2015 at 15:53, Holger Schurig <holgerschurig@gmail.com> wrote:
-> Hi,
->
-> I have an i.MX6Q based system that cannot provide 1.8V voltage towards
-> the eMMC. But Linux 4.4-rc4 reports 1.8V for the eMMC, but this is
-> impossible. Neither my hardware allows this, nor does the DT say it.
->
-> root@imx6q:/sys/kernel/debug# cat mmc1/ios
-> clock:          52000000 Hz
-> actual clock:   49500000 Hz
-> vdd:            21 (3.3 ~ 3.4 V)
-> bus mode:       2 (push-pull)
-> chip select:    0 (don't care)
-> power mode:     2 (on)
-> bus width:      3 (8 bits)
-> timing spec:    8 (mmc DDR52)
-> signal voltage: 0 (1.80 V)
-> driver type:    0 (driver type B)
->
-> My device tree however tells that I don't have 1.8V:
->
-> /* this is the built in eMMC */
-> &usdhc4 {
->         pinctrl-names = "default";
->         pinctrl-0 = <&pinctrl_usdhc4>;
->         bus-width = <8>;
->         non-removable;
->         vmmc-supply = <&reg_3p3v>;
->         max-frequency = <198000000>;
->         no-1-8-v;
-
-The no-1-8-v is a somewhat broken DT binding. I advise people to not
-use any more.
-Depending on the sdhci variant it have different meanings.
-
-I guess you are using the sdhci-esdhc-imx variant, which means
-no-1-8-v will disable UHS modes for SD-cards (those requiring 1.8V
-signal voltage). It has no impact on (e)MMC.
-
-As the host driver announces support for MMC_CAP_1_8V_DDR, that's what
-the mmc core will try to use. Actually the mmc core will first try
-1.8V and if it fails, go for 3.3V.
-
-Likely, sdhci_do_start_signal_voltage_switch() will success to write
-the corresponding registers to change the signal voltage to 1.8V,
-which makes the mmc core believe it was a success.
-
-*If* your statement around that your HW don't support 1.8V signal
-voltage, we should perhaps add new mmc cap as currently we don't have
-a "MMC_CAP_3_3V_DDR". Although, you need to convince on that, because
-my experience tells that quite many has misunderstood the HW design in
-this regard.
-
-Kind regards
-Uffe
+T24gMTIvMTYvMjAxNSAzOjQ4IEFNLCBVbGYgSGFuc3NvbiB3cm90ZToNCj4gDQo+IFsuLi5dDQo+
+IA0KPiA+ICtzdGF0aWMgaW50IHBpYzMyX3NkaGNpX3Byb2JlKHN0cnVjdCBwbGF0Zm9ybV9kZXZp
+Y2UgKnBkZXYpIHsNCj4gPiArICAgICAgIHN0cnVjdCBkZXZpY2UgKmRldiA9ICZwZGV2LT5kZXY7
+DQo+ID4gKyAgICAgICBzdHJ1Y3Qgc2RoY2lfaG9zdCAqaG9zdDsNCj4gPiArICAgICAgIHN0cnVj
+dCByZXNvdXJjZSAqaW9tZW07DQo+ID4gKyAgICAgICBzdHJ1Y3QgcGljMzJfc2RoY2lfcGRhdGEg
+KnNkaGNpX3BkYXRhOw0KPiA+ICsgICAgICAgc3RydWN0IHBpYzMyX3NkaGNpX3BsYXRmb3JtX2Rh
+dGEgKnBsYXRfZGF0YTsNCj4gPiArICAgICAgIHVuc2lnbmVkIGludCBjbGtfcmF0ZSA9IDA7DQo+
+ID4gKyAgICAgICBpbnQgcmV0Ow0KPiA+ICsgICAgICAgc3RydWN0IHBpbmN0cmwgKnBpbmN0cmw7
+DQo+ID4gKw0KPiA+ICsgICAgICAgaG9zdCA9IHNkaGNpX2FsbG9jX2hvc3QoZGV2LCBzaXplb2Yo
+KnNkaGNpX3BkYXRhKSk7DQo+ID4gKyAgICAgICBpZiAoSVNfRVJSKGhvc3QpKSB7DQo+ID4gKyAg
+ICAgICAgICAgICAgIHJldCA9IFBUUl9FUlIoaG9zdCk7DQo+ID4gKyAgICAgICAgICAgICAgIGRl
+dl9lcnIoJnBkZXYtPmRldiwgImNhbm5vdCBhbGxvY2F0ZSBtZW1vcnkgZm9yIHNkaGNpXG4iKTsN
+Cj4gPiArICAgICAgICAgICAgICAgZ290byBlcnI7DQo+ID4gKyAgICAgICB9DQo+ID4gKw0KPiA+
+ICsgICAgICAgc2RoY2lfcGRhdGEgPSBzZGhjaV9wcml2KGhvc3QpOw0KPiA+ICsgICAgICAgc2Ro
+Y2lfcGRhdGEtPnBkZXYgPSBwZGV2Ow0KPiA+ICsgICAgICAgcGxhdGZvcm1fc2V0X2RydmRhdGEo
+cGRldiwgaG9zdCk7DQo+ID4gKw0KPiA+ICsgICAgICAgaW9tZW0gPSBwbGF0Zm9ybV9nZXRfcmVz
+b3VyY2UocGRldiwgSU9SRVNPVVJDRV9NRU0sIDApOw0KPiA+ICsgICAgICAgaG9zdC0+aW9hZGRy
+ID0gZGV2bV9pb3JlbWFwX3Jlc291cmNlKCZwZGV2LT5kZXYsIGlvbWVtKTsNCj4gPiArICAgICAg
+IGlmIChJU19FUlIoaG9zdC0+aW9hZGRyKSkgew0KPiA+ICsgICAgICAgICAgICAgICByZXQgPSBQ
+VFJfRVJSKGhvc3QtPmlvYWRkcik7DQo+ID4gKyAgICAgICAgICAgICAgIGRldl9lcnIoJnBkZXYt
+PmRldiwgInVuYWJsZSB0byBtYXAgaW9tZW06ICVkXG4iLCByZXQpOw0KPiA+ICsgICAgICAgICAg
+ICAgICBnb3RvIGVycl9ob3N0Ow0KPiA+ICsgICAgICAgfQ0KPiA+ICsNCj4gPiArICAgICAgIHBs
+YXRfZGF0YSA9IHBkZXYtPmRldi5wbGF0Zm9ybV9kYXRhOw0KPiA+ICsgICAgICAgaWYgKHBsYXRf
+ZGF0YSAmJiBwbGF0X2RhdGEtPnNldHVwX2RtYSkgew0KPiA+ICsgICAgICAgICAgICAgICByZXQg
+PSBwbGF0X2RhdGEtPnNldHVwX2RtYShBRE1BX0ZJRk9fUkRfVEhTSExELA0KPiA+ICsgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBBRE1BX0ZJRk9fV1JfVEhTSExEKTsN
+Cj4gPiArICAgICAgICAgICAgICAgaWYgKHJldCkNCj4gPiArICAgICAgICAgICAgICAgICAgICAg
+ICBnb3RvIGVycl9ob3N0Ow0KPiA+ICsgICAgICAgfQ0KPiA+ICsNCj4gPiArICAgICAgIHBpbmN0
+cmwgPSBkZXZtX3BpbmN0cmxfZ2V0X3NlbGVjdF9kZWZhdWx0KCZwZGV2LT5kZXYpOw0KPiANCj4g
+VGhpcyBpc24ndCBuZWVkIGFzIGl0J3MgYWxyZWFkeSBoYW5kbGVkIGJ5IHRoZSBQTSBjb3JlLg0K
+DQpBY2suIFdpbGwgcmVtb3ZlLg0KDQo+IA0KPiA+ICsgICAgICAgaWYgKElTX0VSUihwaW5jdHJs
+KSkgew0KPiA+ICsgICAgICAgICAgICAgICByZXQgPSBQVFJfRVJSKHBpbmN0cmwpOw0KPiA+ICsg
+ICAgICAgICAgICAgICBkZXZfd2FybigmcGRldi0+ZGV2LCAiTm8gcGluY3RybCBwcm92aWRlZCAl
+ZFxuIiwgcmV0KTsNCj4gPiArICAgICAgICAgICAgICAgaWYgKHJldCA9PSAtRVBST0JFX0RFRkVS
+KQ0KPiA+ICsgICAgICAgICAgICAgICAgICAgICAgIGdvdG8gZXJyX2hvc3Q7DQo+ID4gKyAgICAg
+ICB9DQo+ID4gKw0KPiA+ICsgICAgICAgaG9zdC0+b3BzID0gJnBpYzMyX3NkaGNpX29wczsNCj4g
+PiArICAgICAgIGhvc3QtPmlycSA9IHBsYXRmb3JtX2dldF9pcnEocGRldiwgMCk7DQo+ID4gKw0K
+PiA+ICsgICAgICAgc2RoY2lfcGRhdGEtPnN5c19jbGsgPSBkZXZtX2Nsa19nZXQoJnBkZXYtPmRl
+diwgInN5c19jbGsiKTsNCj4gPiArICAgICAgIGlmIChJU19FUlIoc2RoY2lfcGRhdGEtPnN5c19j
+bGspKSB7DQo+ID4gKyAgICAgICAgICAgICAgIHJldCA9IFBUUl9FUlIoc2RoY2lfcGRhdGEtPnN5
+c19jbGspOw0KPiA+ICsgICAgICAgICAgICAgICBkZXZfZXJyKCZwZGV2LT5kZXYsICJFcnJvciBn
+ZXR0aW5nIGNsb2NrXG4iKTsNCj4gPiArICAgICAgICAgICAgICAgZ290byBlcnJfaG9zdDsNCj4g
+PiArICAgICAgIH0NCj4gPiArDQo+ID4gKyAgICAgICAvKiBFbmFibGUgY2xvY2sgd2hlbiBhdmFp
+bGFibGUhICovDQo+ID4gKyAgICAgICByZXQgPSBjbGtfcHJlcGFyZV9lbmFibGUoc2RoY2lfcGRh
+dGEtPnN5c19jbGspOw0KPiA+ICsgICAgICAgaWYgKHJldCkgew0KPiA+ICsgICAgICAgICAgICAg
+ICBkZXZfZGJnKCZwZGV2LT5kZXYsICJFcnJvciBlbmFibGluZyBjbG9ja1xuIik7DQo+ID4gKyAg
+ICAgICAgICAgICAgIGdvdG8gZXJyX2hvc3Q7DQo+ID4gKyAgICAgICB9DQo+ID4gKw0KPiA+ICsg
+ICAgICAgLyogU0RIIENMSyBlbmFibGUgKi8NCj4gPiArICAgICAgIHNkaGNpX3BkYXRhLT5iYXNl
+X2NsayA9IGRldm1fY2xrX2dldCgmcGRldi0+ZGV2LCAiYmFzZV9jbGsiKTsNCj4gPiArICAgICAg
+IGlmIChJU19FUlIoc2RoY2lfcGRhdGEtPmJhc2VfY2xrKSkgew0KPiA+ICsgICAgICAgICAgICAg
+ICByZXQgPSBQVFJfRVJSKHNkaGNpX3BkYXRhLT5iYXNlX2Nsayk7DQo+ID4gKyAgICAgICAgICAg
+ICAgIGRldl9lcnIoJnBkZXYtPmRldiwgIkVycm9yIGdldHRpbmcgY2xvY2tcbiIpOw0KPiA+ICsg
+ICAgICAgICAgICAgICBnb3RvIGVycl9ob3N0Ow0KPiA+ICsgICAgICAgfQ0KPiA+ICsNCj4gPiAr
+ICAgICAgIC8qIEVuYWJsZSBjbG9jayB3aGVuIGF2YWlsYWJsZSEgKi8NCj4gPiArICAgICAgIHJl
+dCA9IGNsa19wcmVwYXJlX2VuYWJsZShzZGhjaV9wZGF0YS0+YmFzZV9jbGspOw0KPiA+ICsgICAg
+ICAgaWYgKHJldCkgew0KPiA+ICsgICAgICAgICAgICAgICBkZXZfZGJnKCZwZGV2LT5kZXYsICJF
+cnJvciBlbmFibGluZyBjbG9ja1xuIik7DQo+ID4gKyAgICAgICAgICAgICAgIGdvdG8gZXJyX2hv
+c3Q7DQo+ID4gKyAgICAgICB9DQo+ID4gKw0KPiA+ICsgICAgICAgY2xrX3JhdGUgPSBjbGtfZ2V0
+X3JhdGUoc2RoY2lfcGRhdGEtPmJhc2VfY2xrKTsNCj4gPiArICAgICAgIGRldl9kYmcoJnBkZXYt
+PmRldiwgImJhc2UgY2xvY2sgYXQ6ICV1XG4iLCBjbGtfcmF0ZSk7DQo+ID4gKyAgICAgICBjbGtf
+cmF0ZSA9IGNsa19nZXRfcmF0ZShzZGhjaV9wZGF0YS0+c3lzX2Nsayk7DQo+ID4gKyAgICAgICBk
+ZXZfZGJnKCZwZGV2LT5kZXYsICJzeXMgY2xvY2sgYXQ6ICV1XG4iLCBjbGtfcmF0ZSk7DQo+IA0K
+PiBUaGlzIGxvb2tzIGxpa2Ugc29tZSBsZWZ0b3ZlciBmcm9tIGEgZGVidWdnaW5nIHRhc2suIENh
+biB5b3UgcmVtb3ZlIHRoZW0/DQo+IA0KDQpZZXMsIHRoZXNlIGFyZSBub3QgbmVlZGVkIGFuZCB3
+aWxsIGJlIHJlbW92ZWQuDQoNCj4gPiArDQo+ID4gKyAgICAgICBob3N0LT5xdWlya3MyIHw9IFNE
+SENJX1FVSVJLMl9OT18xXzhfVjsNCj4gPiArDQo+ID4gKyAgICAgICBob3N0LT5xdWlya3MgfD0g
+U0RIQ0lfUVVJUktfTk9fSElTUERfQklUOw0KPiA+ICsNCj4gPiArICAgICAgIHJldCA9IG1tY19v
+Zl9wYXJzZShob3N0LT5tbWMpOw0KPiA+ICsgICAgICAgaWYgKHJldCkNCj4gDQo+IEZyb20gdGhp
+cyBwb2ludCwgdGhlIGVycm9yIGhhbmRsaW5nIGRvZXNuJ3QgdW5kbyBjbGtfcHJlcGFyZV9lbmFi
+bGUoKS4NCj4gUGxlYXNlIGFkZCB0aGF0Lg0KDQpBY2suIFdpbGwgZG8uDQoNCj4gDQo+ID4gKyAg
+ICAgICAgICAgICAgIGdvdG8gZXJyX2hvc3Q7DQo+ID4gKw0KPiA+ICsgICAgICAgcmV0ID0gcGlj
+MzJfc2RoY2lfcHJvYmVfcGxhdGZvcm0ocGRldiwgc2RoY2lfcGRhdGEpOw0KPiA+ICsgICAgICAg
+aWYgKHJldCkgew0KPiA+ICsgICAgICAgICAgICAgICBkZXZfZXJyKCZwZGV2LT5kZXYsICJmYWls
+ZWQgdG8gcHJvYmUgcGxhdGZvcm0hXG4iKTsNCj4gPiArICAgICAgICAgICAgICAgZ290byBlcnJf
+aG9zdDsNCj4gPiArICAgICAgIH0NCj4gPiArDQo+ID4gKyAgICAgICByZXQgPSBzZGhjaV9hZGRf
+aG9zdChob3N0KTsNCj4gPiArICAgICAgIGlmIChyZXQpIHsNCj4gPiArICAgICAgICAgICAgICAg
+ZGV2X2RiZygmcGRldi0+ZGV2LCAiZXJyb3IgYWRkaW5nIGhvc3RcbiIpOw0KPiA+ICsgICAgICAg
+ICAgICAgICBnb3RvIGVycl9ob3N0Ow0KPiA+ICsgICAgICAgfQ0KPiA+ICsNCj4gPiArICAgICAg
+IGRldl9pbmZvKCZwZGV2LT5kZXYsICJTdWNjZXNzZnVsbHkgYWRkZWQgc2RoY2kgaG9zdFxuIik7
+DQo+ID4gKyAgICAgICByZXR1cm4gMDsNCj4gPiArDQo+ID4gK2Vycl9ob3N0Og0KPiA+ICsgICAg
+ICAgc2RoY2lfZnJlZV9ob3N0KGhvc3QpOw0KPiA+ICtlcnI6DQo+ID4gKyAgICAgICBkZXZfZXJy
+KCZwZGV2LT5kZXYsICJwaWMzMi1zZGhjaSBwcm9iZSBmYWlsZWQ6ICVkXG4iLCByZXQpOw0KPiA+
+ICsgICAgICAgcmV0dXJuIHJldDsNCj4gDQo+IEEgZ2VuZXJhbCBjb21tZW50IGZvciB0aGUgLT5w
+cm9iZSgpIGFuZCB0aGUgYmVsb3cgLT5yZW1vdmUoKSBjYWxsYmFjaywgaXMgdGhhdA0KPiB5b3Ug
+c2hvdWxkIHByb2JhYmx5IGJlIGFibGUgdG8gY29udmVydCB0byB1c2UNCj4gc2RoY2lfcGx0Zm1f
+aW5pdCgpIGFuZCBzZGhjaV9wbHRmbV9mcmVlKCkgaW4gZmF2b3Igb2YNCj4gc2RoY2lfYWxsb2Nf
+aG9zdCgpIGFuZCBzZGhjaV9mcmVlX2hvc3QoKS4NCj4gDQo+IEkgdGhpbmsgdGhhdCBjb3VsZCBz
+aW1wbGlmeSB0aGUgY29kZSBhIGJpdC4NCg0KT2suIFdpbGwgZG8uDQoNCj4gDQo+ID4gK30NCj4g
+PiArDQo+ID4gK3N0YXRpYyBpbnQgcGljMzJfc2RoY2lfcmVtb3ZlKHN0cnVjdCBwbGF0Zm9ybV9k
+ZXZpY2UgKnBkZXYpIHsNCj4gPiArICAgICAgIHN0cnVjdCBzZGhjaV9ob3N0ICpob3N0ID0gcGxh
+dGZvcm1fZ2V0X2RydmRhdGEocGRldik7DQo+ID4gKyAgICAgICBzdHJ1Y3QgcGljMzJfc2RoY2lf
+cGRhdGEgKnNkaGNpX3BkYXRhID0gc2RoY2lfcHJpdihob3N0KTsNCj4gPiArICAgICAgIGludCBk
+ZWFkID0gMDsNCj4gPiArICAgICAgIHUzMiBzY3JhdGNoOw0KPiA+ICsNCj4gPiArICAgICAgIHNj
+cmF0Y2ggPSByZWFkbChob3N0LT5pb2FkZHIgKyBTREhDSV9JTlRfU1RBVFVTKTsNCj4gPiArICAg
+ICAgIGlmIChzY3JhdGNoID09ICh1MzIpLTEpDQo+ID4gKyAgICAgICAgICAgICAgIGRlYWQgPSAx
+Ow0KPiA+ICsNCj4gPiArICAgICAgIHNkaGNpX3JlbW92ZV9ob3N0KGhvc3QsIGRlYWQpOw0KPiA+
+ICsgICAgICAgY2xrX2Rpc2FibGVfdW5wcmVwYXJlKHNkaGNpX3BkYXRhLT5iYXNlX2Nsayk7DQo+
+ID4gKyAgICAgICBjbGtfZGlzYWJsZV91bnByZXBhcmUoc2RoY2lfcGRhdGEtPnN5c19jbGspOw0K
+PiA+ICsgICAgICAgc2RoY2lfZnJlZV9ob3N0KGhvc3QpOw0KPiA+ICsNCj4gPiArICAgICAgIHJl
+dHVybiAwOw0KPiA+ICt9DQo+ID4gKw0KPiA+ICtzdGF0aWMgY29uc3Qgc3RydWN0IG9mX2Rldmlj
+ZV9pZCBwaWMzMl9zZGhjaV9pZF90YWJsZVtdID0gew0KPiA+ICsgICAgICAgeyAuY29tcGF0aWJs
+ZSA9ICJtaWNyb2NoaXAscGljMzJtemRhLXNkaGNpIiB9LA0KPiA+ICsgICAgICAge30NCj4gPiAr
+fTsNCj4gPiArTU9EVUxFX0RFVklDRV9UQUJMRShvZiwgcGljMzJfc2RoY2lfaWRfdGFibGUpOw0K
+PiA+ICsNCj4gPiArc3RhdGljIHN0cnVjdCBwbGF0Zm9ybV9kcml2ZXIgcGljMzJfc2RoY2lfZHJp
+dmVyID0gew0KPiA+ICsgICAgICAgLmRyaXZlciA9IHsNCj4gPiArICAgICAgICAgICAgICAgLm5h
+bWUgICA9IERFVl9OQU1FLA0KPiA+ICsgICAgICAgICAgICAgICAub3duZXIgID0gVEhJU19NT0RV
+TEUsDQo+ID4gKyAgICAgICAgICAgICAgIC5vZl9tYXRjaF90YWJsZSA9IG9mX21hdGNoX3B0cihw
+aWMzMl9zZGhjaV9pZF90YWJsZSksDQo+ID4gKyAgICAgICB9LA0KPiA+ICsgICAgICAgLnByb2Jl
+ICAgICAgICAgID0gcGljMzJfc2RoY2lfcHJvYmUsDQo+ID4gKyAgICAgICAucmVtb3ZlICAgICAg
+ICAgPSBwaWMzMl9zZGhjaV9yZW1vdmUsDQo+ID4gK307DQo+ID4gKw0KPiA+ICttb2R1bGVfcGxh
+dGZvcm1fZHJpdmVyKHBpYzMyX3NkaGNpX2RyaXZlcik7DQo+ID4gKw0KPiA+ICtNT0RVTEVfREVT
+Q1JJUFRJT04oIk1pY3JvY2hpcCBQSUMzMiBTREhDSSBkcml2ZXIiKTsNCj4gPiArTU9EVUxFX0FV
+VEhPUigiUGlzdGlyaWNhIFNvcmluIEFuZHJlaSAmIFNhbmRlZXAgU2hlcmlrZXIiKTsNCj4gPiAr
+TU9EVUxFX0xJQ0VOU0UoIkdQTCB2MiIpOw0KPiA+IC0tDQo+ID4gMS43LjkuNQ0KDQpUaGFua3Ms
+DQpQYXVsDQo=
