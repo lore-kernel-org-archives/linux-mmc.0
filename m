@@ -1,79 +1,46 @@
-From: Carlo Caione <carlo@caione.org>
-Subject: [PATCH] mmc: core: Enable tuning according to the actual timing
-Date: Fri, 18 Dec 2015 22:34:34 +0100
-Message-ID: <1450474474-2666-1-git-send-email-carlo@caione.org>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH] mmc: pwrseq_simple: Fix regression with optional GPIOs
+Date: Fri, 18 Dec 2015 23:19:58 +0100
+Message-ID: <CAPDyKFr8e6wDxkGwnOwijQiOgF7oq6gCoHmqbubv6oSbpYbwqg@mail.gmail.com>
+References: <1449528845-25189-1-git-send-email-tony@atomide.com>
+	<CAPDyKFpxiOJJdh-nLXjxv3DYJnW3RAf_9aqMfds46=-oqPd5ng@mail.gmail.com>
+	<20151218161406.GL23396@atomide.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wm0-f41.google.com ([74.125.82.41]:35089 "EHLO
-	mail-wm0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S965379AbbLRVfA (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 18 Dec 2015 16:35:00 -0500
-Received: by mail-wm0-f41.google.com with SMTP id l126so1372899wml.0
-        for <linux-mmc@vger.kernel.org>; Fri, 18 Dec 2015 13:34:59 -0800 (PST)
+Received: from mail-yk0-f172.google.com ([209.85.160.172]:35345 "EHLO
+	mail-yk0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S933153AbbLRWT7 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 18 Dec 2015 17:19:59 -0500
+Received: by mail-yk0-f172.google.com with SMTP id v6so74308042ykc.2
+        for <linux-mmc@vger.kernel.org>; Fri, 18 Dec 2015 14:19:59 -0800 (PST)
+In-Reply-To: <20151218161406.GL23396@atomide.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: ulf.hansson@linaro.org, weijuny@qti.qualcomm.com, 21cnbao@gmail.com, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, jh80.chung@samsung.com, baohuas@qti.qualcomm.com
-Cc: Carlo Caione <carlo@endlessm.com>
+To: Tony Lindgren <tony@atomide.com>
+Cc: Linus Walleij <linus.walleij@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, linux-omap <linux-omap@vger.kernel.org>, Javier Martinez Canillas <javier@osg.samsung.com>
 
-From: Carlo Caione <carlo@endlessm.com>
+On 18 December 2015 at 17:14, Tony Lindgren <tony@atomide.com> wrote:
+> * Ulf Hansson <ulf.hansson@linaro.org> [151207 16:20]:
+>> +Linus
+>>
+>> On 7 December 2015 at 23:54, Tony Lindgren <tony@atomide.com> wrote:
+>> > Commit ce037275861e ("mmc: pwrseq_simple: use GPIO descriptors array API")
+>> > changed the handling MMC power sequence so GPIOs no longer are optional.
+>> >
+>> > This broke SDIO WLAN at least for omap5 that can't yet use the reset GPIOs
+>> > with pwrseq_simple as a wait is needed after enabling the SDIO device.
+>>
+>> Can you elaborate on this. Did it break omap5 or not? :-)
+>
+> Ulf, is this patch queued for v4.4 as a regression fix? I don't see it
+> in Linux next or mainline trees?
 
-While in sdhci_execute_tuning() the choice whether or not to enable the
-tuning is done on the actual timing, in the mmc_sdio_init_uhs_card() the
-check is done on the capability of the card.
+Ohh, I guess there where some misunderstanding. I made a bunch of
+comments on your patch as well, so I have been expecting a new
+version.
 
-This difference is causing some issues with some SDIO cards in DDR50
-mode where the CDM19 is wrongly issued.
+Sorry if that was unclear!
 
-With this patch we modify the check in both
-mmc_(sd|sdio)_init_uhs_card() functions to take the proper decision
-only according to the actual timing specification.
-
-Signed-off-by: Carlo Caione <carlo@endlessm.com>
----
- drivers/mmc/core/sd.c   | 8 ++++----
- drivers/mmc/core/sdio.c | 4 ++--
- 2 files changed, 6 insertions(+), 6 deletions(-)
-
-diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
-index 141eaa9..967535d 100644
---- a/drivers/mmc/core/sd.c
-+++ b/drivers/mmc/core/sd.c
-@@ -626,9 +626,9 @@ static int mmc_sd_init_uhs_card(struct mmc_card *card)
- 	 * SDR104 mode SD-cards. Note that tuning is mandatory for SDR104.
- 	 */
- 	if (!mmc_host_is_spi(card->host) &&
--		(card->sd_bus_speed == UHS_SDR50_BUS_SPEED ||
--		 card->sd_bus_speed == UHS_DDR50_BUS_SPEED ||
--		 card->sd_bus_speed == UHS_SDR104_BUS_SPEED)) {
-+		(card->host->ios.timing == MMC_TIMING_UHS_SDR50 ||
-+		 card->host->ios.timing == MMC_TIMING_UHS_DDR50 ||
-+		 card->host->ios.timing == MMC_TIMING_UHS_SDR104)) {
- 		err = mmc_execute_tuning(card);
- 
- 		/*
-@@ -638,7 +638,7 @@ static int mmc_sd_init_uhs_card(struct mmc_card *card)
- 		 * difference between v3.00 and 3.01 spec means that CMD19
- 		 * tuning is also available for DDR50 mode.
- 		 */
--		if (err && card->sd_bus_speed == UHS_DDR50_BUS_SPEED) {
-+		if (err && card->host->ios.timing == MMC_TIMING_UHS_DDR50) {
- 			pr_warn("%s: ddr50 tuning failed\n",
- 				mmc_hostname(card->host));
- 			err = 0;
-diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
-index 16d838e..0444773 100644
---- a/drivers/mmc/core/sdio.c
-+++ b/drivers/mmc/core/sdio.c
-@@ -535,8 +535,8 @@ static int mmc_sdio_init_uhs_card(struct mmc_card *card)
- 	 * SDR104 mode SD-cards. Note that tuning is mandatory for SDR104.
- 	 */
- 	if (!mmc_host_is_spi(card->host) &&
--	    ((card->sw_caps.sd3_bus_mode & SD_MODE_UHS_SDR50) ||
--	     (card->sw_caps.sd3_bus_mode & SD_MODE_UHS_SDR104)))
-+	    ((card->host->ios.timing == MMC_TIMING_UHS_SDR50) ||
-+	      (card->host->ios.timing == MMC_TIMING_UHS_SDR104)))
- 		err = mmc_execute_tuning(card);
- out:
- 	return err;
--- 
-1.9.1
-
+Kind regards
+Uffe
