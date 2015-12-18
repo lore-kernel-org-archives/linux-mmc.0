@@ -1,103 +1,158 @@
-From: Shawn Lin <shawn.lin@rock-chips.com>
-Subject: Re: [PATCH] mmc: core: Optimize boot time by detecting cards
- simultaneously
-Date: Fri, 18 Dec 2015 11:05:23 +0800
-Message-ID: <567377F3.2060906@rock-chips.com>
-References: <1448982916-21485-1-git-send-email-ulf.hansson@linaro.org>
- <CAPDyKFq3iuDkJgUGFV7Y4jLB37T=6Nkzf56bJ-a2RxHjy4fE=A@mail.gmail.com>
- <5670A0BA.8090402@samsung.com>
- <CAPDyKFpF+rqv1WQ0Hu-YdAM1pdNwKyKjFsAg1BfeEj=kDfH0Ag@mail.gmail.com>
- <CAOGqxeWw-qcRNV=4GDbh6znvd6Wh4yOtFcZtua3QuX8ZExGCBw@mail.gmail.com>
- <CAPDyKFo6DFOynRpB2mJE5KhAm7SQKd8xK6Ki54Rf5OjGLwwQcA@mail.gmail.com>
- <5673612C.9050808@samsung.com>
+From: Peter Guo <peter.guo@bayhubtech.com>
+Subject: RE: 1217:8520 [Dell Latitude E7450] O2 Micro, SD/MMC Card Reader
+ doesn't work
+Date: Fri, 18 Dec 2015 03:14:07 +0000
+Message-ID: <BY2PR04MB18438CFFD181C72EFEF408908FE10@BY2PR04MB1843.namprd04.prod.outlook.com>
+References: <CAONpWdsteBnqTcFbKpcOQFueyeJJWEmn9DJitD43f59xV8sDyg@mail.gmail.com>
+	<BY2PR04MB184372CAAC1FA0C5373D73238FEF0@BY2PR04MB1843.namprd04.prod.outlook.com>
+ <CAONpWduF6iH4Rr5Y610KP1RE342nWAajR27KFbu1N2iet4R0ZA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: multipart/mixed;
+	boundary="_002_BY2PR04MB18438CFFD181C72EFEF408908FE10BY2PR04MB1843namp_"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from lucky1.263xmail.com ([211.157.147.132]:59500 "EHLO
-	lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932906AbbLRDFo (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 17 Dec 2015 22:05:44 -0500
-In-Reply-To: <5673612C.9050808@samsung.com>
+Received: from mail-bn1bon0139.outbound.protection.outlook.com ([157.56.111.139]:32449
+	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1753055AbbLRDOK (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 17 Dec 2015 22:14:10 -0500
+In-Reply-To: <CAONpWduF6iH4Rr5Y610KP1RE342nWAajR27KFbu1N2iet4R0ZA@mail.gmail.com>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>, Alan Cooper <alcooperx@gmail.com>
-Cc: shawn.lin@rock-chips.com, linux-mmc <linux-mmc@vger.kernel.org>
+To: Alex Ballas <alex@ballas.org>, "adam8157@gmail.com" <adam8157@gmail.com>
+Cc: "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>, "linux-mmc@VGER.KERNEL.ORG" <linux-mmc@vger.kernel.org>
 
-On 2015/12/18 9:28, Jaehoon Chung wrote:
-> Hi,
->
-> On 12/18/2015 06:49 AM, Ulf Hansson wrote:
->> On 17 December 2015 at 20:47, Alan Cooper <alcooperx@gmail.com> wrote:
->>> On Wed, Dec 16, 2015 at 4:07 AM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
->>>> To find the improved card detection times, I just used the kernel boot
->>>> log and checked the time stamps for when the cards get detected. I ran
->>>> the tests ~10 times and picked up some average values.
->>>>
->>>> To notice the improvement you need at least two cards to be inserted
->>>> during boot. Perhaps you have a platform with one eMMC and one SD card
->>>> slot, you can test.
->>>
->>> I tested the patch on one of our ARM bases SoC's. The SoC has an SD
->>> card slot on the first controller and an eMMC device on the second
->>> controller. I found ~100ms improvement on the time it took for the
->>> rootfs on the eMMC device to be ready for use. Interestingly, I did
->>> see the SD/eMMC order swap once in 20 tries. This is not an issue for
->>> us as we already have to use UUID for the eMMC rootfs in case an SD
->>> card is installed.
->>>
+--_002_BY2PR04MB18438CFFD181C72EFEF408908FE10BY2PR04MB1843namp_
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 
-hi Ulf,
-     I'm interested in this patch since I also spent a little time 
-optimzing the boot time and sequence for my local branch based on kernel 
-3.1x. With you patch, it seems, the tablet only achieves very small 
-improvement for the SD controller(less than 20ms).
+SGkgQWxleCAmIEFkYW0sDQoNCkkgaGF2ZSBzZW5kIHRoZSBwYXRjaC4gUGxlYXNlIGNoZWNrIGl0
+Lg0KQXR0YWNobWVudCBpcyB0aGUgcGF0Y2ggZmlsZS4NCg0KDQpCUg0KUGV0ZXIuR3VvDQoNCi0t
+LS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQpGcm9tOiBBbGV4IEJhbGxhcyBbbWFpbHRvOmFsZXhA
+YmFsbGFzLm9yZ10gDQpTZW50OiBXZWRuZXNkYXksIERlY2VtYmVyIDE2LCAyMDE1IDU6NDkgUE0N
+ClRvOiBQZXRlciBHdW87IGFkYW04MTU3QGdtYWlsLmNvbQ0KQ2M6IHVsZi5oYW5zc29uQGxpbmFy
+by5vcmc7IGxpbnV4LW1tY0BWR0VSLktFUk5FTC5PUkcNClN1YmplY3Q6IFJlOiAxMjE3Ojg1MjAg
+W0RlbGwgTGF0aXR1ZGUgRTc0NTBdIE8yIE1pY3JvLCBTRC9NTUMgQ2FyZCBSZWFkZXIgZG9lc24n
+dCB3b3JrDQoNClJlLWFkZGluZyBBZGFtIGFzIHRoZSBpbml0aWFsIG1haWwgYWRkcmVzcyBpcyBi
+b3VuY2luZy4NCg0KS2luZCBSZWdhcmRzLA0KQWxleA0KDQoNCk9uIFdlZCwgRGVjIDE2LCAyMDE1
+IGF0IDU6NDIgQU0sIFBldGVyIEd1byA8cGV0ZXIuZ3VvQGJheWh1YnRlY2guY29tPiB3cm90ZToN
+Cj4gSGkgQWxleCwNCj4NCj4gVGhhbmtzIGZvciB5b3VyIFRlc3QsIEFjY29yZGluZyB0byB5b3Vy
+IGluZm8uDQo+IEkgZmluZCB0aGUgcm9vdCBjYXVzZSBvZiB0aGlzIGlzc3VlIGlzIHF1aXJrcyAN
+Cj4gU0RIQ0lfUVVJUksyX0NMRUFSX1RSQU5TRkVSTU9ERV9SRUdfQkVGT1JFX0NNRCBpcyBub3Qg
+c3VpdGFibGUgZm9yIG91ciBob3N0IGZvciBhbGwgY2FzZXMuICBPdXIgaG9zdCBqdXN0IHdhbnQg
+dG8gY2xlYXIgU0RIQ0lfVFJBTlNfRE1BIGJpdCBvbmx5Lg0KPg0KPiB0byBBZGFtLA0KPg0KPiBJ
+IHdpbGwgY29tbWl0IG5ldyBwYXRjaCB0aGlzIHdlZWssIHBsZWFzZSBjaGVjayBpdC4NCj4NCj4N
+Cj4gQlINCj4gUGV0ZXIuR3VvDQo+DQo+IC0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQo+IEZy
+b206IEFsZXggQmFsbGFzIFttYWlsdG86YWxleEBiYWxsYXMub3JnXQ0KPiBTZW50OiBTYXR1cmRh
+eSwgRGVjZW1iZXIgMTIsIDIwMTUgMTA6MDQgUE0NCj4gVG86IFBldGVyIEd1bzsgYWRhbS5sZWVA
+Y2Fub25pY2FsLmNvbTsgdWxmLmhhbnNzb25AbGluYXJvLm9yZw0KPiBDYzogbGludXgtbW1jQFZH
+RVIuS0VSTkVMLk9SRw0KPiBTdWJqZWN0OiAxMjE3Ojg1MjAgW0RlbGwgTGF0aXR1ZGUgRTc0NTBd
+IE8yIE1pY3JvLCBTRC9NTUMgQ2FyZCBSZWFkZXIgDQo+IGRvZXNuJ3Qgd29yaw0KPg0KPiBIZWxs
+bywNCj4NCj4gSSBoYXZlIGEgRGVsbCBMYXRpdHVkZSBFNzQ1MCB3aXRoIGEgTzIgTWljcm8sIFNE
+L01NQyBDYXJkIFJlYWRlciBbMTIxNzo4NTIwXSBjYXJkIHJlYWRlci4gV2hlbiBJIGluc2VydCBt
+eSBTYW5kaXNrIHVsdHJhIDY0R0IgbWljcm9TRCAod2l0aCBhIFNEIGNhcmQgYWRhcHRlcikgSSBn
+ZXQgdGhlIGZvbGxvd2luZyBlcnJvcnMuDQo+DQo+IERtZXNnIG91dHB1dCBhZnRlciBJIGluc2Vy
+dCB0aGUgU0QgY2FyZDoNCj4NCj4gWyAgMzA2LjA1NDIwM10gc2RoY2k6IFRpbWVvdXQgd2FpdGlu
+ZyBmb3IgQnVmZmVyIFJlYWQgUmVhZHkgaW50ZXJydXB0IA0KPiBkdXJpbmcgdHVuaW5nIHByb2Nl
+ZHVyZSwgZmFsbGluZyBiYWNrIHRvIGZpeGVkIHNhbXBsaW5nIGNsb2NrIFsgIA0KPiAzMDYuMDU1
+OTgyXSBtbWMwOiB0dW5pbmcgZXhlY3V0aW9uIGZhaWxlZCBbICAzMDYuMDU1OTg3XSBtbWMwOiBl
+cnJvciANCj4gLTUgd2hpbHN0IGluaXRpYWxpc2luZyBTRCBjYXJkIFsgIDMwNi40NjYxODVdIHNk
+aGNpOiBUaW1lb3V0IHdhaXRpbmcgDQo+IGZvciBCdWZmZXIgUmVhZCBSZWFkeSBpbnRlcnJ1cHQg
+ZHVyaW5nIHR1bmluZyBwcm9jZWR1cmUsIGZhbGxpbmcgYmFjayANCj4gdG8gZml4ZWQgc2FtcGxp
+bmcgY2xvY2sgWyAgMzA2LjQ2Nzk2NF0gbW1jMDogdHVuaW5nIGV4ZWN1dGlvbiBmYWlsZWQgWyAg
+DQo+IDMwNi40Njc5NzBdIG1tYzA6IGVycm9yIC01IHdoaWxzdCBpbml0aWFsaXNpbmcgU0QgY2Fy
+ZCBbICAzMDYuODkwMjA1XSANCj4gc2RoY2k6IFRpbWVvdXQgd2FpdGluZyBmb3IgQnVmZmVyIFJl
+YWQgUmVhZHkgaW50ZXJydXB0IGR1cmluZyB0dW5pbmcgDQo+IHByb2NlZHVyZSwgZmFsbGluZyBi
+YWNrIHRvIGZpeGVkIHNhbXBsaW5nIGNsb2NrIFsgIDMwNi44OTE5OTNdIG1tYzA6IA0KPiB0dW5p
+bmcgZXhlY3V0aW9uIGZhaWxlZCBbICAzMDYuODkyMDA1XSBtbWMwOiBlcnJvciAtNSB3aGlsc3Qg
+DQo+IGluaXRpYWxpc2luZyBTRCBjYXJkIFsgIDMwNy4zMzAxOTddIHNkaGNpOiBUaW1lb3V0IHdh
+aXRpbmcgZm9yIEJ1ZmZlciANCj4gUmVhZCBSZWFkeSBpbnRlcnJ1cHQgZHVyaW5nIHR1bmluZyBw
+cm9jZWR1cmUsIGZhbGxpbmcgYmFjayB0byBmaXhlZCANCj4gc2FtcGxpbmcgY2xvY2sgWyAgMzA3
+LjMzMTk4MF0gbW1jMDogdHVuaW5nIGV4ZWN1dGlvbiBmYWlsZWQgWyAgDQo+IDMwNy4zMzE5OTBd
+IG1tYzA6IGVycm9yIC01IHdoaWxzdCBpbml0aWFsaXNpbmcgU0QgY2FyZA0KPg0KPiBJIHVzZWQg
+dGhlIGxhdGVzdCBtYWlubGluZSBrZXJuZWwgYXZhaWxhYmxlIHRvIG1lIFsxXSAkIHVuYW1lIC1h
+IExpbnV4IA0KPiBjb3NtbyA0LjQuMC0wNDA0MDByYzQtZ2VuZXJpYyAjMjAxNTEyMDYxOTMwIFNN
+UCBNb24gRGVjIDcNCj4gMDA6MzI6MzEgVVRDIDIwMTUgeDg2XzY0IHg4Nl82NCB4ODZfNjQgR05V
+L0xpbnV4DQo+DQo+IEl0IHdhcyB3b3JraW5nIGZpbmUgZm9yIGtlcm5lbCB2ZXJzaW9ucyBvbGRl
+ciB0aGFuIDQuMS44Lg0KPg0KPiBJIGRpZCBhIGJpc2VjdGlvbiBhbmQgaGVyZSBpcyB0aGUgZmly
+c3QgYmFkIGNvbW1pdA0KPg0KPj4gZTZjNjkwOTlmNjNjODRlMTgyNWMwZjc0MmE3NmZmNGE4YWZl
+YWE5YiBpcyB0aGUgZmlyc3QgYmFkIGNvbW1pdCANCj4+IGNvbW1pdCBlNmM2OTA5OWY2M2M4NGUx
+ODI1YzBmNzQyYTc2ZmY0YThhZmVhYTliDQo+PiBBdXRob3I6IEFkYW0gTGVlIDxhZGFtLmxlZUBj
+YW5vbmljYWwuY29tPg0KPj4gRGF0ZTogICBNb24gQXVnIDMgMTQ6MzM6MjggMjAxNSArMDgwMA0K
+Pj4NCj4+ICAgICBtbWM6IHNkaGNpLXBjaTogc2V0IHRoZSBjbGVhciB0cmFuc2ZlciBtb2RlIHJl
+Z2lzdGVyIHF1aXJrIGZvciANCj4+IE8yTWljcm8NCj4+DQo+PiAgICAgY29tbWl0IDE0M2I2NDhk
+ZGYxNTgzOTA1ZmExNWQzMmJlMjdhMzE0NDJmYzc5MzMgdXBzdHJlYW0uDQo+Pg0KPj4gICAgIFRo
+aXMgcGF0Y2ggZml4ZXMgTU1DIG5vdCB3b3JraW5nIGlzc3VlIG9uIE8yTWljcm8vQmF5SHViIEhv
+c3QsIHdoaWNoDQo+PiAgICAgcmVxdWlyZXMgdHJhbnNmZXIgbW9kZSByZWdpc3RlciB0byBiZSBj
+bGVhcmVkIHdoZW4gc2VuZGluZyBubyBETUENCj4+ICAgICBjb21tYW5kLg0KPj4NCj4+ICAgICBT
+aWduZWQtb2ZmLWJ5OiBQZXRlciBHdW8gPHBldGVyLmd1b0BiYXlodWJ0ZWNoLmNvbT4NCj4+ICAg
+ICBTaWduZWQtb2ZmLWJ5OiBBZGFtIExlZSA8YWRhbS5sZWVAY2Fub25pY2FsLmNvbT4NCj4+ICAg
+ICBTaWduZWQtb2ZmLWJ5OiBVbGYgSGFuc3NvbiA8dWxmLmhhbnNzb25AbGluYXJvLm9yZz4NCj4+
+ICAgICBTaWduZWQtb2ZmLWJ5OiBHcmVnIEtyb2FoLUhhcnRtYW4gPGdyZWdraEBsaW51eGZvdW5k
+YXRpb24ub3JnPg0KPg0KPiBJIG9yaWdpbmFsbHkgbG9nZ2VkIHRoaXMgaXNzdWUgdG8gdGhlIFVi
+dW50dSBidWcgdHJhY2tlclsyXSwgYnV0IGl0IGFwcGVhcnMgdG8gYmUgYW4gdXBzdHJlYW0gaXNz
+dWUgYW5kIHNvIEkgd2FzIGluc3RydWN0ZWQgdG8gcmVwb3J0IGhlcmUuDQo+IFBsZWFzZSBub3Rl
+IHRoYXQgSSB1c2UgdGhlIGxhdGVzdCBCaW9zIHZlcnNpb24gZm9yIHRoZSBtb2RlbC4NCj4NCj4g
+JCBzdWRvIGRtaWRlY29kZSAtcyBiaW9zLXZlcnNpb247c3VkbyBkbWlkZWNvZGUgLXMgYmlvcy1y
+ZWxlYXNlLWRhdGUNCj4gQTA4DQo+IDEwLzI4LzIwMTUNCj4NCj4gWzFdIGh0dHA6Ly9rZXJuZWwu
+dWJ1bnR1LmNvbS9+a2VybmVsLXBwYS9tYWlubGluZS92NC40LXJjNC13aWx5Lw0KPiBbMl0gaHR0
+cHM6Ly9idWdzLmxhdW5jaHBhZC5uZXQvdWJ1bnR1Lytzb3VyY2UvbGludXgvK2J1Zy8xNTIzMTc4
+DQo+DQo+IFRoYW5rcywNCj4gQWxleA0K
 
-My test environment:
-Kernel: 3.14
-Slot: 1 emmc(1st) + 1 SD card(2nd) + 1 sdio card(3rd)
+--_002_BY2PR04MB18438CFFD181C72EFEF408908FE10BY2PR04MB1843namp_
+Content-Type: application/octet-stream;
+	name="0001-mmc-sdhci-Add-QUIRK2_CLEAR_TRANSFERMODE_DMA_BEFORE_CMD.patch"
+Content-Description: 0001-mmc-sdhci-Add-QUIRK2_CLEAR_TRANSFERMODE_DMA_BEFORE_CMD.patch
+Content-Disposition: attachment;
+	filename="0001-mmc-sdhci-Add-QUIRK2_CLEAR_TRANSFERMODE_DMA_BEFORE_CMD.patch";
+	size=2534; creation-date="Fri, 18 Dec 2015 02:50:46 GMT";
+	modification-date="Fri, 18 Dec 2015 02:50:46 GMT"
+Content-Transfer-Encoding: base64
 
-I happen to run massive reboot test for my stable kernel branch this 
-weekend, so I will apply this patch to see if any problem occurs. :)
+RnJvbSBiMzg2MjU2MjkyOGRmYmMxZmE5NzFkMmQwOTJhNmYwNTgwMjk0ZDRiIE1vbiBTZXAgMTcg
+MDA6MDA6MDAgMjAwMQpGcm9tOiAicGV0ZXIuZ3VvIiA8cGV0ZXIuZ3VvQGJheWh1YnRlY2guY29t
+PgpEYXRlOiBGcmksIDE4IERlYyAyMDE1IDEwOjQ0OjE2ICswODAwClN1YmplY3Q6IFtQQVRDSCAx
+LzFdIG1tYzogc2RoY2k6IEFkZCBRVUlSSzJfQ0xFQVJfVFJBTlNGRVJNT0RFX0RNQV9CRUZPUkVf
+Q01EIGZvciBvMk1pY3JvIGNoaXAKCkFkZCBTREhDSV9RVUlSSzJfQ0xFQVJfVFJBTlNGRVJNT0RF
+X0RNQV9CRUZPUkVfQ01EIHF1aXJrczIgZm9yIHJlcXVpcmVzIHRyYW5zZmVyCm1vZGUgcmVnaXN0
+ZXIgU0RIQ0lfVFJOU19ETUEgYml0IHRvIGJlIGNsZWFyZWQgd2hlbiBzZW5kaW5nIG5vIERNQS4K
+QXBwbHkgdGhpcyBxdWlya3MgZm9yIE8yTWljcm8gY2hpcCBpbnN0ZWFkIG9mIFNESENJX1FVSVJL
+Ml9DTEVBUl9UUkFOU0ZFUk1PREVfUkVHX0JFRk9SRV9DTUQ6CiAgICAgICAgYS4gIE1NQyBjYXJk
+IG5vdCB3b3JraW5nIGlzc3VlCiAgICAgICAgYi4gIFNEIHR1bmluZyBmYWlsZWQgaXNzdWUuCgpT
+aWduZWQtb2ZmLWJ5OiBQZXRlciBHdW8gPHBldGVyLmd1b0BiYXlodWJ0ZWNoLmNvbT4KLS0tCiBk
+cml2ZXJzL21tYy9ob3N0L3NkaGNpLXBjaS1jb3JlLmMgfCAyICstCiBkcml2ZXJzL21tYy9ob3N0
+L3NkaGNpLmMgICAgICAgICAgfCA0ICsrKysKIGRyaXZlcnMvbW1jL2hvc3Qvc2RoY2kuaCAgICAg
+ICAgICB8IDMgKysrCiAzIGZpbGVzIGNoYW5nZWQsIDggaW5zZXJ0aW9ucygrKSwgMSBkZWxldGlv
+bigtKQoKZGlmZiAtLWdpdCBhL2RyaXZlcnMvbW1jL2hvc3Qvc2RoY2ktcGNpLWNvcmUuYyBiL2Ry
+aXZlcnMvbW1jL2hvc3Qvc2RoY2ktcGNpLWNvcmUuYwppbmRleCBjZjdhZDQ1Li4zYTZmMTc5IDEw
+MDY0NAotLS0gYS9kcml2ZXJzL21tYy9ob3N0L3NkaGNpLXBjaS1jb3JlLmMKKysrIGIvZHJpdmVy
+cy9tbWMvaG9zdC9zZGhjaS1wY2ktY29yZS5jCkBAIC02MTQsNyArNjE0LDcgQEAgc3RhdGljIGlu
+dCBqbWljcm9uX3Jlc3VtZShzdHJ1Y3Qgc2RoY2lfcGNpX2NoaXAgKmNoaXApCiBzdGF0aWMgY29u
+c3Qgc3RydWN0IHNkaGNpX3BjaV9maXhlcyBzZGhjaV9vMiA9IHsKIAkucHJvYmUgPSBzZGhjaV9w
+Y2lfbzJfcHJvYmUsCiAJLnF1aXJrcyA9IFNESENJX1FVSVJLX05PX0VOREFUVFJfSU5fTk9QREVT
+QywKLQkucXVpcmtzMiA9IFNESENJX1FVSVJLMl9DTEVBUl9UUkFOU0ZFUk1PREVfUkVHX0JFRk9S
+RV9DTUQsCisJLnF1aXJrczIgPSBTREhDSV9RVUlSSzJfQ0xFQVJfVFJBTlNGRVJNT0RFX0RNQV9C
+RUZPUkVfQ01ELAogCS5wcm9iZV9zbG90ID0gc2RoY2lfcGNpX28yX3Byb2JlX3Nsb3QsCiAJLnJl
+c3VtZSA9IHNkaGNpX3BjaV9vMl9yZXN1bWUsCiB9OwpkaWZmIC0tZ2l0IGEvZHJpdmVycy9tbWMv
+aG9zdC9zZGhjaS5jIGIvZHJpdmVycy9tbWMvaG9zdC9zZGhjaS5jCmluZGV4IGI0ODU2NWUuLmZi
+YTkyNjAgMTAwNjQ0Ci0tLSBhL2RyaXZlcnMvbW1jL2hvc3Qvc2RoY2kuYworKysgYi9kcml2ZXJz
+L21tYy9ob3N0L3NkaGNpLmMKQEAgLTkwMiw2ICs5MDIsMTAgQEAgc3RhdGljIHZvaWQgc2RoY2lf
+c2V0X3RyYW5zZmVyX21vZGUoc3RydWN0IHNkaGNpX2hvc3QgKmhvc3QsCiAJCX0gZWxzZSB7CiAJ
+CS8qIGNsZWFyIEF1dG8gQ01EIHNldHRpbmdzIGZvciBubyBkYXRhIENNRHMgKi8KIAkJCW1vZGUg
+PSBzZGhjaV9yZWFkdyhob3N0LCBTREhDSV9UUkFOU0ZFUl9NT0RFKTsKKwkJCWlmIChob3N0LT5x
+dWlya3MyICYKKwkJCSAgICBTREhDSV9RVUlSSzJfQ0xFQVJfVFJBTlNGRVJNT0RFX0RNQV9CRUZP
+UkVfQ01EKSB7CisJCQkJbW9kZSAmPSB+KFNESENJX1RSTlNfRE1BKTsKKwkJCX0KIAkJCXNkaGNp
+X3dyaXRldyhob3N0LCBtb2RlICYgfihTREhDSV9UUk5TX0FVVE9fQ01EMTIgfAogCQkJCVNESENJ
+X1RSTlNfQVVUT19DTUQyMyksIFNESENJX1RSQU5TRkVSX01PREUpOwogCQl9CmRpZmYgLS1naXQg
+YS9kcml2ZXJzL21tYy9ob3N0L3NkaGNpLmggYi9kcml2ZXJzL21tYy9ob3N0L3NkaGNpLmgKaW5k
+ZXggOWQ0YWEzMS4uOTdmZDEwNyAxMDA2NDQKLS0tIGEvZHJpdmVycy9tbWMvaG9zdC9zZGhjaS5o
+CisrKyBiL2RyaXZlcnMvbW1jL2hvc3Qvc2RoY2kuaApAQCAtNDE3LDYgKzQxNyw5IEBAIHN0cnVj
+dCBzZGhjaV9ob3N0IHsKICAqIFNEIGNsb2NrIGZyZXF1ZW5jeSBvciBlbmFibGluZyBiYWNrIHRo
+ZSBpbnRlcm5hbCBjbG9jay4KICAqLwogI2RlZmluZSBTREhDSV9RVUlSSzJfTkVFRF9ERUxBWV9B
+RlRFUl9JTlRfQ0xLX1JTVAkoMTw8MTYpCisvKiBuZWVkIGNsZWFyIHRyYW5zZmVyIG1vZGUgcmVn
+aXN0ZXIgU0RIQ0lfVFJOU19ETUEgQklUIGJlZm9yZSBzZW5kIGNtZCAqLworI2RlZmluZSBTREhD
+SV9RVUlSSzJfQ0xFQVJfVFJBTlNGRVJNT0RFX0RNQV9CRUZPUkVfQ01ECSgxPDwxNykKKwogCiAJ
+aW50IGlycTsJCS8qIERldmljZSBJUlEgKi8KIAl2b2lkIF9faW9tZW0gKmlvYWRkcjsJLyogTWFw
+cGVkIGFkZHJlc3MgKi8KLS0gCjEuOS4xCgo=
 
-
-
->>> Al
->>
->> Al, thanks for your effort in testing. I assume I can apply a
->> tested-by tag for that!
->>
->> BTW, if you want to see an even better improvement, just find a
->> crappier SD card as I guess you have a quite good one. :-)
->
-> I didn't test with this yet..actually, i have tested with only one board(Exynos4412).
-> There is no the changing index. (Not too much for testing)
-> but in my experiment, our platform(Tizen) should be produced the problem in SD-card case.
-> I need to check with SystemFW guys. I will check this..ASAP.
->
-> Best Regards,
-> Jaehoon Chung
->
->>
->> Kind regards
->> Uffe
->> --
->> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>
->>
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
->
->
-
-
--- 
-Best Regards
-Shawn Lin
-
+--_002_BY2PR04MB18438CFFD181C72EFEF408908FE10BY2PR04MB1843namp_--
