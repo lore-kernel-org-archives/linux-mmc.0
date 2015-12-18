@@ -1,85 +1,120 @@
-From: "Yang, York" <weijuny@qti.qualcomm.com>
-Subject: RE: [PATCH 1/2] mmc: core: enable CMD19 tuning for DDR50 mode
-Date: Fri, 18 Dec 2015 05:52:23 +0000
-Message-ID: <5b787eded9ab4c47ab5d05a31e627736@aptaiexm02f.ap.qualcomm.com>
-References: <1439282492-6274-1-git-send-email-21cnbao@gmail.com>
-	<CAPDyKFpXZD28NwNAhKQyxmWasVhk_7AeyOW6oXaBPHKuSTmGUA@mail.gmail.com>
-	<CAGsJ_4wvvQdyjFi=JmWfASm-LbJMybrhC=Wxxn7jHZEP5dUfEw@mail.gmail.com>
-	<CAPDyKFpEwWvu3tnbMT9ZvM0TUvEHp0Qa8PADohyJoTaNZ9HS9g@mail.gmail.com>
-	<CAGsJ_4x5Nd3Cts1BHsUyB_mCejxbHPPjznUVWUcFoZhxKy+Tcg@mail.gmail.com>
-	<CAPDyKFpWfY9G4WG_GfCutJ2NkRbcAYZToYJXp3RvX=_25sgnWA@mail.gmail.com>
-	<CAGsJ_4zaWcmGsc82=LSohK0UHxJir2OJOBSgoU3sPRXYvLdOZQ@mail.gmail.com>
-	<CAPDyKFrj7mfxYPotHfpYPVf8M=Mvjcz+HfuB871EZNv9FWpPqw@mail.gmail.com>
-	<CAOQ7t2YuSDwtK0R3R4++3LUPyEqW+ENLju63QisX6tO=-cvt6w@mail.gmail.com>
-	<edf24ca1a9614943b55b8d19745a3c45@aptaiexm02f.ap.qualcomm.com>
-	<CAOQ7t2YOd9TtAHHUBhF4n_POQURhfaqC_9Tg-b8d1Bf2QCyoYA@mail.gmail.com>
-	<a2ffc219b04b483b87696ffc81a60787@aptaiexm02f.ap.qualcomm.com>
-	<CAOQ7t2Z=4Mc9Ev9OBxXiLDtiXaTr5jQzc-gVwU_xJnHLrumd0g@mail.gmail.com>
-	<7a1072e99c8149a5b08d1bf260808ce7@aptaiexm02f.ap.qualcomm.com>
- <CAOQ7t2YB8VHw4+v=_5tMU5tAn4oE8KfCOPPAMbZx+2QyY7N5Zg@mail.gmail.com>
+From: Ludovic Desroches <ludovic.desroches@atmel.com>
+Subject: Re: [PATCH v2] mmc: sdhci: restore behavior when setting VDD via
+ external regulator
+Date: Fri, 18 Dec 2015 09:11:38 +0100
+Message-ID: <20151218081138.GB15968@odux.rfo.atmel.com>
+References: <1449840989-563-1-git-send-email-jszhang@marvell.com>
+ <CAPDyKFpVqQREdiKm42cM7OxXHDpJffp3OMN6GqLAkn-gep6xOw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from wolverine01.qualcomm.com ([199.106.114.254]:52216 "EHLO
-	wolverine01.qualcomm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751987AbbLRFw3 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 18 Dec 2015 00:52:29 -0500
-In-Reply-To: <CAOQ7t2YB8VHw4+v=_5tMU5tAn4oE8KfCOPPAMbZx+2QyY7N5Zg@mail.gmail.com>
-Content-Language: en-US
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <CAPDyKFpVqQREdiKm42cM7OxXHDpJffp3OMN6GqLAkn-gep6xOw@mail.gmail.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Jisheng Zhang <jszhang@marvell.com>, Ludovic Desroches <ludovic.desroches@atmel.com>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Carlo Caione <carlo@caione.org>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Barry Song <21cnbao@gmail.com>, linux-mmc <linux-mmc@vger.kernel.org>, DL-SHA-WorkGroupLinux <workgroup.linux@csr.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "Song, Barry" <baohuas@qti.qualcomm.com>
 
-SGksIENhcmxvDQoJSSB1bmRlcnN0YW5kIG5vdy4gU28gdGhlIHByb2JsZW0gY29tZXMgb3V0IGJl
-Y2F1c2UgdGhlIHN3X2NhcHMuc2QzX2J1c19tb2RlIG1hcmtzIHRoZSBjYXBhYmlsaXR5IG9mIGEg
-Y2FyZCwgd2hpbGUgdGhlIGhvc3QtPnRpbWluZyBpcyB0aGUgbW9kZSB3ZSBhY3R1YWxseSBkbyB3
-aXRoLg0KCUZvciB5b3VyIGNhc2UsIHlvdSBhcmUgcnVubmluZyBERFI1MCBtb2RlLCB3aGF0IGlm
-IHdlIGFkZCBtb3JlIGNvbmRpdGlvbiBmb3IgY29taW5nIGludG8gdGhlIHR1bmluZyBsb2dpYz8N
-CglzdHJ1Y3Qgc2RoY2lfaG9zdCAqaG9zdCA9IG1tY19wcml2KGNhcmQtPmhvc3QpOw0KCWlmICgh
-bW1jX2hvc3RfaXNfc3BpKGNhcmQtPmhvc3QpICYmIGNhcmQtPmhvc3QtPm9wcy0+ZXhlY3V0ZV90
-dW5pbmcgJiYNCgkJCSgoY2FyZC0+c3dfY2Fwcy5zZDNfYnVzX21vZGUgJiBTRF9NT0RFX1VIU19T
-RFI1MCkgfHwNCgkJCSAoY2FyZC0+c3dfY2Fwcy5zZDNfYnVzX21vZGUgJiBTRF9NT0RFX1VIU19T
-RFIxMDQpKSYmDQoJCQkoKGhvc3QtPnRpbWluZyAmIE1NQ19USU1JTkdfVUhTX1NEUjUwKSB8fA0K
-CQkJCShob3N0LT50aW1pbmcgJiBNTUNfVElNSU5HX1VIU19TRFIxMDQpKSkgew0KCQltbWNfaG9z
-dF9jbGtfaG9sZChjYXJkLT5ob3N0KTsNCgkJZXJyID0gY2FyZC0+aG9zdC0+b3BzLT5leGVjdXRl
-X3R1bmluZyhjYXJkLT5ob3N0LA0KCQkJCQkJICAgICAgTU1DX1NFTkRfVFVOSU5HX0JMT0NLKTsN
-CgkJbW1jX2hvc3RfY2xrX3JlbGVhc2UoY2FyZC0+aG9zdCk7DQoJfQ0KDQotLS0tLU9yaWdpbmFs
-IE1lc3NhZ2UtLS0tLQ0KRnJvbTogY2FybG8uY2Fpb25lQGdtYWlsLmNvbSBbbWFpbHRvOmNhcmxv
-LmNhaW9uZUBnbWFpbC5jb21dIE9uIEJlaGFsZiBPZiBDYXJsbyBDYWlvbmUNClNlbnQ6IDIwMTXl
-ubQxMuaciDE45pelIDM6NTQNClRvOiBZYW5nLCBZb3JrIDx3ZWlqdW55QHF0aS5xdWFsY29tbS5j
-b20+DQpDYzogVWxmIEhhbnNzb24gPHVsZi5oYW5zc29uQGxpbmFyby5vcmc+OyBCYXJyeSBTb25n
-IDwyMWNuYmFvQGdtYWlsLmNvbT47IGxpbnV4LW1tYyA8bGludXgtbW1jQHZnZXIua2VybmVsLm9y
-Zz47IERMLVNIQS1Xb3JrR3JvdXBMaW51eCA8d29ya2dyb3VwLmxpbnV4QGNzci5jb20+OyBsaW51
-eC1hcm0ta2VybmVsQGxpc3RzLmluZnJhZGVhZC5vcmc7IFNvbmcsIEJhcnJ5IDxiYW9odWFzQHF0
-aS5xdWFsY29tbS5jb20+DQpTdWJqZWN0OiBSZTogW1BBVENIIDEvMl0gbW1jOiBjb3JlOiBlbmFi
-bGUgQ01EMTkgdHVuaW5nIGZvciBERFI1MCBtb2RlDQoNCk9uIGdpbywgZGljIDE3LCAyMDE1IGF0
-IDAyOjAwOjE3ICswMDAwLCBZYW5nLCBZb3JrIHdyb3RlOg0KPiBIaSwgQ2FybG8NCg0KSGkgWWFu
-ZywNCg0KPiBJIGRvbid0IHVuZGVyc3RhbmQuIFdlIGNhbiBzZWUgdGhhdCA5ZmFhYzdiOTUgaXMg
-YWxsIGFib3V0IEREUjUwLiBJdCANCj4gc2hvdWxkIG5vdCBhZmZlY3QgdGhlIGJlaGF2aW9yIG9m
-IFNEUjUwLg0KDQpXaGF0IEknbSBzYXlpbmcgaXMgdGhhdCB0aGlzIGNvbW1pdCBpcyBuZWdhdGl2
-ZWx5IGFmZmVjdGluZyBzb21lIEREUjUwIFNESU8gY2FyZCBhcyBpbiBteSBjYXNlLg0KDQpPaywg
-bGV0J3MgdHJ5IHRvIGdvIHRocm91Z2ggdGhlIGNvZGUgd2l0aCBhbmQgd2l0aG91dCA5ZmFhYzdi
-OTUuDQoNCldpdGhvdXQgOWZhYWM3Yjk1Og0KLSBtbWNfc2Rpb19pbml0X3Voc19jYXJkKCkgaXMg
-Y2FsbGVkDQotIHN3X2NhcHMuc2QzX2J1c19tb2RlIGlzIDB4MTQgKFNEX01PREVfVUhTX1NEUjUw
-IHwgU0RfTU9ERV9VSFNfRERSNTApDQotIGNhcmQtPnN3X2NhcHMuc2QzX2J1c19tb2RlICYgU0Rf
-TU9ERV9VSFNfU0RSNTAgaXMgdmVyaWZpZWQgYW5kDQptbWNfZXhlY3V0ZV90dW5pbmcoKSBpcyBj
-YWxsZWQNCi0gc2RoY2lfZXhlY3V0ZV90dW5pbmcoKSBpcyBjYWxsZWQNCi0gaG9zdC0+dGltaW5n
-IGlzIE1NQ19USU1JTkdfVUhTX0REUjUwDQotIHNpbmNlIHRoZXJlIGlzIG5vIGNhc2UgZm9yIHRo
-YXQgd2UgZW5kIHVwIGluICdkZWZhdWx0JywgZ290byBvdXRfdW5sb2NrIGFuZCBDTUQxOSBpcyBu
-ZXZlciBpc3N1ZWQNCg0KV2l0aCA5ZmFhYzdiOTU6DQotIG1tY19zZGlvX2luaXRfdWhzX2NhcmQo
-KSBpcyBjYWxsZWQNCi0gc3dfY2Fwcy5zZDNfYnVzX21vZGUgaXMgMHgxNCAoU0RfTU9ERV9VSFNf
-U0RSNTAgfCBTRF9NT0RFX1VIU19ERFI1MCkNCi0gY2FyZC0+c3dfY2Fwcy5zZDNfYnVzX21vZGUg
-JiBTRF9NT0RFX1VIU19TRFI1MCBpcyB2ZXJpZmllZCBhbmQNCiAgbW1jX2V4ZWN1dGVfdHVuaW5n
-KCkgaXMgY2FsbGVkDQotIHNkaGNpX2V4ZWN1dGVfdHVuaW5nKCkgaXMgY2FsbGVkDQotIGhvc3Qt
-PnRpbWluZyBpcyBNTUNfVElNSU5HX1VIU19ERFI1MA0KLSB0aGlzIHRpbWUgd2UgaGF2ZSB0aGUg
-dGhlICdjYXNlIE1NQ19USU1JTkdfVUhTX0REUjUwJyBhbmQgd2UgYnJlYWsgb24gdGhhdA0KLSBD
-TUQxOSBpcyBpc3N1ZWQgYW5kIHRoZSBjYXJkIHN0b3BzIHdvcmtpbmcNCg0KPiBTaW5jZSB0aGUg
-Y29tbWl0IGlzIHZlcnkgc2ltcGxlLCB5b3UgbWF5IHJlbW92ZSB0aGUgY2hhbmdlIG9uZSBieSBv
-bmUgDQo+IGJ5IHlvdXJzZWxmLiBBbmQgc2VlIGlmIGFueSBkaWZmZXJlbmNlIG9jY3Vycy4NCg0K
-QXMgc3RhdGVkIGFib3ZlIHRoZSBwcm9ibGVtIGlzIGluIHRoZSBuZXcgJ2Nhc2UgTU1DX1RJTUlO
-R19VSFNfRERSNTAnDQp3ZSBoYXZlIGluIHNkaGNpX2V4ZWN1dGVfdHVuaW5nKCkNCg0KPiBCZXNp
-ZGVzLCBwbGVhc2UgY2hlY2sNCj4gaWYgdGhlIGNhcmQtPnN3X2NhcHMuc2QzX2J1c19tb2RlIGNo
-YW5nZXMgd2l0aCBvciB3aXRob3V0IEREUjUwIHR1bmluZyANCj4gZW5hYmxlZC4NCg0KSXQgZG9l
-c24ndC4NCg0KLS0NCkNhcmxvIENhaW9uZQ0K
+Hi Ulf, Jisheng,
+
+On Fri, Dec 11, 2015 at 03:48:04PM +0100, Ulf Hansson wrote:
+> + Ludovic (We had some discussions around this code recently as well)
+> 
+> On 11 December 2015 at 14:36, Jisheng Zhang <jszhang@marvell.com> wrote:
+> > After commit 52221610dd84 ("mmc: sdhci: Improve external VDD regulator
+> > support"), for the VDD is supplied via external regulators, we ignore
+> > the code to convert a VDD voltage request into one of the standard
+> > SDHCI voltage levels, then program it in the SDHCI_POWER_CONTROL. This
+> > brings two issues:
+> >
+> > 1. SDHCI_QUIRK2_CARD_ON_NEEDS_BUS_ON quirk isn't handled properly any
+> > more.
+> >
+> > 2. What's more, once SDHCI_POWER_ON bit is set, some controllers such
+> > as the sdhci-pxav3 used in marvell berlin SoCs require the voltage
+> > levels programming in the SDHCI_POWER_CONTROL register, even the VDD
+> > is supplied by external regulator. So the host in marvell berlin SoCs
+> > still works fine after the commit. However, commit 3cbc6123a93d ("mmc:
+> > sdhci: Set SDHCI_POWER_ON with external vmmc") sets the SDHCI_POWER_ON
+> > bit, this would make the host in marvell berlin SoCs won't work any
+> > more with external vmmc.
+> >
+> > This patch restores the behavior when setting VDD through external
+> > regulator by moving the call of mmc_regulator_set_ocr() to the end
+> > of sdhci_set_power() function.
+> >
+> > After this patch, the sdcard on Marvell Berlin SoC boards work again.
+> >
+> > Signed-off-by: Jisheng Zhang <jszhang@marvell.com>
+> > Fixes: 52221610dd84 ("mmc: sdhci: Improve external VDD ...")
+
+Reviewed-by: Ludovic Desroches <ludovic.desroches@atmel.com>
+Tested-by: Ludovic Desroches <ludovic.desroches@atmel.com>
+
+Even if the patch sounds good for me, I wanted to test it. As planned,
+with this patch, I can describe my vcc regulator without breaking the
+behavior of my sdhci controller.
+
+
+Regards
+
+Ludovic
+
+> > ---
+> > Since v1:
+> >  - add more details about why the sdhci-pxav3 used in marvell berlin
+> >    SoCs need this patch.
+> >
+> >  drivers/mmc/host/sdhci.c | 19 ++++++-------------
+> >  1 file changed, 6 insertions(+), 13 deletions(-)
+> >
+> > diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> > index b48565e..616aa90 100644
+> > --- a/drivers/mmc/host/sdhci.c
+> > +++ b/drivers/mmc/host/sdhci.c
+> > @@ -1274,19 +1274,6 @@ static void sdhci_set_power(struct sdhci_host *host, unsigned char mode,
+> >         struct mmc_host *mmc = host->mmc;
+> >         u8 pwr = 0;
+> >
+> > -       if (!IS_ERR(mmc->supply.vmmc)) {
+> > -               spin_unlock_irq(&host->lock);
+> > -               mmc_regulator_set_ocr(mmc, mmc->supply.vmmc, vdd);
+> > -               spin_lock_irq(&host->lock);
+> > -
+> > -               if (mode != MMC_POWER_OFF)
+> > -                       sdhci_writeb(host, SDHCI_POWER_ON, SDHCI_POWER_CONTROL);
+> > -               else
+> > -                       sdhci_writeb(host, 0, SDHCI_POWER_CONTROL);
+> > -
+> > -               return;
+> > -       }
+> > -
+> >         if (mode != MMC_POWER_OFF) {
+> >                 switch (1 << vdd) {
+> >                 case MMC_VDD_165_195:
+> > @@ -1345,6 +1332,12 @@ static void sdhci_set_power(struct sdhci_host *host, unsigned char mode,
+> >                 if (host->quirks & SDHCI_QUIRK_DELAY_AFTER_POWER)
+> >                         mdelay(10);
+> >         }
+> > +
+> > +       if (!IS_ERR(mmc->supply.vmmc)) {
+> > +               spin_unlock_irq(&host->lock);
+> > +               mmc_regulator_set_ocr(mmc, mmc->supply.vmmc, vdd);
+> > +               spin_lock_irq(&host->lock);
+> > +       }
+> >  }
+> >
+> >  /*****************************************************************************\
+> > --
+> > 2.6.3
+> >
+> 
+> My concern with this patch is that it might fix the problem for your
+> SDHCI variant, but will break it for others.
+> I guess we can give it try, unless or until someone reports a problem.
+> 
+> Although, I would like to get Ludovic's input on this change, before I
+> decide to do anything.
+> 
+> Kind regards
+> Uffe
