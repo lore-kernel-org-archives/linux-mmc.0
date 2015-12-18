@@ -1,62 +1,69 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [bug] kernel panic if writting data to mmc after suspendding
-Date: Fri, 18 Dec 2015 11:27:10 +0100
-Message-ID: <CAPDyKFomFTn7iX2kSXFVqstjEWpezNOB-B_DdFFRBWi9upUrpg@mail.gmail.com>
-References: <566A21D2.4080009@jinso.co.jp>
-	<566E2AC0.8060800@jinso.co.jp>
-	<CAMuHMdWU0WVBiWSsLti=KSidFk198k_3CAiNm=iGLtmw4wQOgw@mail.gmail.com>
+From: Alex Ballas <alex@ballas.org>
+Subject: Re: 1217:8520 [Dell Latitude E7450] O2 Micro, SD/MMC Card Reader
+ doesn't work
+Date: Fri, 18 Dec 2015 12:43:28 +0200
+Message-ID: <CAONpWdvo+b=Y26zsCYsHFHjJ+8yAnYfoJOsirdS-he2s1unDgg@mail.gmail.com>
+References: <CAONpWdsteBnqTcFbKpcOQFueyeJJWEmn9DJitD43f59xV8sDyg@mail.gmail.com>
+	<BY2PR04MB184372CAAC1FA0C5373D73238FEF0@BY2PR04MB1843.namprd04.prod.outlook.com>
+	<CAONpWduF6iH4Rr5Y610KP1RE342nWAajR27KFbu1N2iet4R0ZA@mail.gmail.com>
+	<BY2PR04MB18438CFFD181C72EFEF408908FE10@BY2PR04MB1843.namprd04.prod.outlook.com>
+	<CAPDyKFotgz3czCs8XaXwC4kT53Lp0h=n03OUMtO6BUTwTnDYzQ@mail.gmail.com>
+	<BY2PR04MB18432C804C263313D2349C848FE10@BY2PR04MB1843.namprd04.prod.outlook.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-sh-owner@vger.kernel.org>
-In-Reply-To: <CAMuHMdWU0WVBiWSsLti=KSidFk198k_3CAiNm=iGLtmw4wQOgw@mail.gmail.com>
-Sender: linux-sh-owner@vger.kernel.org
-To: Geert Uytterhoeven <geert@linux-m68k.org>, Nguyen Viet Dung <nv-dung@jinso.co.jp>
-Cc: Linux-sh list <linux-sh@vger.kernel.org>, Linux MMC List <linux-mmc@vger.kernel.org>, "ltsi-dev@lists.linuxfoundation.org" <ltsi-dev@lists.linuxfoundation.org>, =?UTF-8?B?U2ltb24g44GV44KT?= <simon@horms.net>, Geert Uytterhoeven <geert+renesas@glider.be>, =?UTF-8?B?U+mWizEyL+WdguaIuFND?= <ryusuke.sakato.bx@renesas.com>, "Shimoda, Yoshihiro" <yoshihiro.shimoda.uh@renesas.com>, =?UTF-8?B?TWFnbnVzIOOBleOCkw==?= <magnus.damm@gmail.com>, Hisao Munakata <hisao.munakata.vt@renesas.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-ob0-f182.google.com ([209.85.214.182]:36259 "EHLO
+	mail-ob0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750767AbbLRKn3 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 18 Dec 2015 05:43:29 -0500
+Received: by mail-ob0-f182.google.com with SMTP id no2so76859325obc.3
+        for <linux-mmc@vger.kernel.org>; Fri, 18 Dec 2015 02:43:29 -0800 (PST)
+In-Reply-To: <BY2PR04MB18432C804C263313D2349C848FE10@BY2PR04MB1843.namprd04.prod.outlook.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Peter Guo <peter.guo@bayhubtech.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, "adam8157@gmail.com" <adam8157@gmail.com>, "linux-mmc@VGER.KERNEL.ORG" <linux-mmc@vger.kernel.org>
 
-On 18 December 2015 at 10:33, Geert Uytterhoeven <geert@linux-m68k.org> wrote:
-> Hi Dung-san,
+Hello Uffe, Peter,
+
+Thank you both. I'll try out Peter's patch to see if it's addressing
+the issue and we can work through it based on Uffe's guidelines.
+
+Kind Regards,
+Alex
+
+On Fri, Dec 18, 2015 at 11:39 AM, Peter Guo <peter.guo@bayhubtech.com> wrote:
+> Hi Ulf,
 >
-> CC Ulf
+> Thanks for your reply.
 >
-> On Mon, Dec 14, 2015 at 3:34 AM, Nguyen Viet Dung <nv-dung@jinso.co.jp> wrote:
->> While is testting LTSI-v4.1.13-rc1, we have found the following the failure
->> of mmcif.
->> 1. mount mmc block
->> 2. write data to mmc block
->> 3. suspend/resume
->> 4. write data to mmc block one again => happen kernel panic
->> (Probability in this test procedure is 100%)
+> So currently the problem is SDHCI_TRANS_DMA bit need to be cleared before send Non DMA SD/MMC command for some of our host,
+> Could you please give me any suggestion on what kind of code modification you can accept?
+>
+>
+> BR
+> Peter.Guo
+>
+>
+> -----Original Message-----
+> From: Ulf Hansson [mailto:ulf.hansson@linaro.org]
+> Sent: Friday, December 18, 2015 4:52 PMT
+> To: Peter Guo
+> Cc: Alex Ballas; adam8157@gmail.com; linux-mmc@VGER.KERNEL.ORG
+> Subject: Re: 1217:8520 [Dell Latitude E7450] O2 Micro, SD/MMC Card Reader doesn't work
+>
+> On 18 December 2015 at 04:14, Peter Guo <peter.guo@bayhubtech.com> wrote:
+>> Hi Alex & Adam,
 >>
->> We have used git bisect to find cause of failure in LTS-v4.1.13 to
->> LTSI-v4.1.13-rc1
->> and have found commit which cause failure.
->> (On LTS-v4.1.13 has not this failure)
->>  drivers: sh: Disable PM runtime for multi-platform ARM with genpd
->>  commit :cbc41d0a761bffb3166a413a3c77100a737c0cd7
+>> I have send the patch. Please check it.
+>> Attachment is the patch file.
 >
-> That means there's a bug in Runtime PM handling of the sh_mmcif driver, or
-> in the MMC subsystem.
+> Thanks Peter for helping out!
 >
-> Usually such bugs cause a kernel hang on register access, not a NULL pointer
-> dereference, though.
-
-Agree!
-
-I doubt the bisected commit is where the *real* issue is. Looking into
-the details for how system PM and runtime PM is deployed in sh_mmcif,
-I believe some improvements are needed.
-
-Actually, I made an attempt to modernize the PM code for sh_mmcif a while ago.
-http://marc.info/?l=linux-mmc&m=138245085523815&w=2
-
-Whether that fixes the problem reported here, I have no idea. Although
-if not, it should move the code to a position where it becomes easier
-to properly fix this issue.
-
-I am willing to help and rebase that patchset, but I require help in
-testing since I haven't been able to get a hold of a HW. Can I count
-on that?
-
-Kind regards
-Uffe
+> Although I would appreciate if you don't send patches as attachments.
+>
+> Moreover, even if the patch can be used to check whether it solves the problem - I won't accept it as is.
+> The reason is simply that I don't allow any more quirks/callbacks to be added for SDHCI.
+>
+> Kind regards
+> Uffe
