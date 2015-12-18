@@ -1,101 +1,78 @@
-From: Russell King - ARM Linux <linux@arm.linux.org.uk>
-Subject: Re: BUG: SDHCI fails to DMA-unmap, and other warnings
-Date: Thu, 17 Dec 2015 22:37:10 +0000
-Message-ID: <20151217223709.GM8644@n2100.arm.linux.org.uk>
-References: <20151217215140.GK8644@n2100.arm.linux.org.uk>
- <20151217220045.GA27072@n2100.arm.linux.org.uk>
- <20151217221808.GL8644@n2100.arm.linux.org.uk>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: Re: [PATCH] mmc: core: Optimize boot time by detecting cards
+ simultaneously
+Date: Fri, 18 Dec 2015 10:28:12 +0900
+Message-ID: <5673612C.9050808@samsung.com>
+References: <1448982916-21485-1-git-send-email-ulf.hansson@linaro.org>
+ <CAPDyKFq3iuDkJgUGFV7Y4jLB37T=6Nkzf56bJ-a2RxHjy4fE=A@mail.gmail.com>
+ <5670A0BA.8090402@samsung.com>
+ <CAPDyKFpF+rqv1WQ0Hu-YdAM1pdNwKyKjFsAg1BfeEj=kDfH0Ag@mail.gmail.com>
+ <CAOGqxeWw-qcRNV=4GDbh6znvd6Wh4yOtFcZtua3QuX8ZExGCBw@mail.gmail.com>
+ <CAPDyKFo6DFOynRpB2mJE5KhAm7SQKd8xK6Ki54Rf5OjGLwwQcA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from pandora.arm.linux.org.uk ([78.32.30.218]:59374 "EHLO
-	pandora.arm.linux.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932946AbbLQWhS (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 17 Dec 2015 17:37:18 -0500
-Content-Disposition: inline
-In-Reply-To: <20151217221808.GL8644@n2100.arm.linux.org.uk>
+Received: from mailout2.samsung.com ([203.254.224.25]:51494 "EHLO
+	mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S965035AbbLRB2S (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 17 Dec 2015 20:28:18 -0500
+Received: from epcpsbgr4.samsung.com
+ (u144.gpu120.samsung.co.kr [203.254.230.144])
+ by mailout2.samsung.com (Oracle Communications Messaging Server 7.0.5.31.0
+ 64bit (built May  5 2014))
+ with ESMTP id <0NZJ00I895F4S480@mailout2.samsung.com> for
+ linux-mmc@vger.kernel.org; Fri, 18 Dec 2015 10:28:16 +0900 (KST)
+In-reply-to: <CAPDyKFo6DFOynRpB2mJE5KhAm7SQKd8xK6Ki54Rf5OjGLwwQcA@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, Shawn Guo <shawnguo@kernel.org>, Sascha Hauer <kernel@pengutronix.de>, linux-arm-kernel@lists.infradead.org
+To: Ulf Hansson <ulf.hansson@linaro.org>, Alan Cooper <alcooperx@gmail.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>
 
-On Thu, Dec 17, 2015 at 10:18:09PM +0000, Russell King - ARM Linux wrote:
-> On Thu, Dec 17, 2015 at 10:00:45PM +0000, Russell King - ARM Linux wrote:
-> > And another one:
-> > 
-> > "mmcblk0: retrying because a re-tune was needed"
-> > 
-> > static int mmc_blk_err_check(struct mmc_card *card,
-> >                              struct mmc_async_req *areq)
-> > {
-> > ...
-> >         if (brq->data.error) {
-> >                 if (need_retune && !brq->retune_retry_done) {
-> >                         pr_info("%s: retrying because a re-tune was needed\n",
-> >                                 req->rq_disk->disk_name);
-> >                         brq->retune_retry_done = 1;
-> >                         return MMC_BLK_RETRY;
-> > 
-> > This looks like it'll spam the kernel log regularly if MMC/SD is used
-> > heavily with a UHS card, which (iirc) requires regular retunes.  Why is
-> > this message at info level, and not debug level?
+Hi,
+
+On 12/18/2015 06:49 AM, Ulf Hansson wrote:
+> On 17 December 2015 at 20:47, Alan Cooper <alcooperx@gmail.com> wrote:
+>> On Wed, Dec 16, 2015 at 4:07 AM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+>>> To find the improved card detection times, I just used the kernel boot
+>>> log and checked the time stamps for when the cards get detected. I ran
+>>> the tests ~10 times and picked up some average values.
+>>>
+>>> To notice the improvement you need at least two cards to be inserted
+>>> during boot. Perhaps you have a platform with one eMMC and one SD card
+>>> slot, you can test.
+>>
+>> I tested the patch on one of our ARM bases SoC's. The SoC has an SD
+>> card slot on the first controller and an eMMC device on the second
+>> controller. I found ~100ms improvement on the time it took for the
+>> rootfs on the eMMC device to be ready for use. Interestingly, I did
+>> see the SD/eMMC order swap once in 20 tries. This is not an issue for
+>> us as we already have to use UUID for the eMMC rootfs in case an SD
+>> card is installed.
+>>
+>> Al
 > 
-> And... if three problems aren't enough, have another one... running:
+> Al, thanks for your effort in testing. I assume I can apply a
+> tested-by tag for that!
 > 
-> while :; do hdparm -t /dev/mmcblk0; done
+> BTW, if you want to see an even better improvement, just find a
+> crappier SD card as I guess you have a quite good one. :-)
+
+I didn't test with this yet..actually, i have tested with only one board(Exynos4412).
+There is no the changing index. (Not too much for testing)
+but in my experiment, our platform(Tizen) should be produced the problem in SD-card case.
+I need to check with SystemFW guys. I will check this..ASAP. 
+
+Best Regards,
+Jaehoon Chung
+
 > 
-> eventually causes:
+> Kind regards
+> Uffe
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 > 
-> [ 3465.671526] mmc0: tuning execution failed
-> [ 3465.675746] mmcblk0: response CRC error sending r/w cmd command, card status 0x900
-> [ 3622.758988] mmc0: tuning execution failed
-> [ 3622.763227] mmcblk0: response CRC error sending r/w cmd command, card status 0x900
-> [ 3858.363555] mmc0: tuning execution failed
-> [ 3858.368857] mmcblk0: response CRC error sending r/w cmd command, card status 0x900
-> [ 3880.388048] mmc0: tuning execution failed
-> [ 3880.392292] mmcblk0: response CRC error sending r/w cmd command, card status 0x900
+> 
 
-And finally, I get the bug that was reported to me by a SolidRun user:
-
-[ 4507.373536] mmc0: Got data interrupt 0x00000002 even though no data operation was in progress.
-
-So, that's a total of five MMC/SD bugs in 4.4-rc5 which need
-investigation.
-
-Another issue that I've spotted is this cruddy code - which I use
-the term "crud" with a certain amount of distaste, given that there
-was a big effort to "streamline" DMA-API mapping/unmapping events a
-few years back.  So why does sdhci-adma code now do this:
-
-        if (has_unaligned && data->flags & MMC_DATA_READ) {
-                dma_sync_sg_for_cpu(mmc_dev(host->mmc), data->sg,
-                        data->sg_len, direction);
-
-                align = host->align_buffer;
-...
-        if (data->host_cookie == COOKIE_MAPPED) {
-                dma_unmap_sg(mmc_dev(host->mmc), data->sg,
-                        data->sg_len, direction);
-                data->host_cookie = COOKIE_UNMAPPED;
-        }
-
-What this has the effect of doing is invalidating the caches over
-the range in dma_sync_sg_for_cpu(), and then doing it all over again
-in dma_unmap_sg() _or_ later when we come to do the "streamlined"
-unmap.  In either case, this is completely unnecessary to walk the
-entire scatterlist twice.
-
-If you're going to have to do that dma_sync_sg_for_cpu() there
-because you need to write the unaligned data into the buffer, you
-might as well unmap the buffer at that point and be done with it -
-whether or not you're using the "streamlined" DMA-API hack that
-MMC pulls.
-
-Doing otherwise is nothing but a pure unadulterated waste of CPU
-cycles.
-
-So make that six issues now. :)
-
--- 
-RMK's Patch system: http://www.arm.linux.org.uk/developer/patches/
-FTTC broadband for 0.8mile line: currently at 9.6Mbps down 400kbps up
-according to speedtest.net.
