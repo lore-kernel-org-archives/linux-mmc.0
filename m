@@ -1,69 +1,24 @@
-From: Alex Ballas <alex@ballas.org>
-Subject: Re: 1217:8520 [Dell Latitude E7450] O2 Micro, SD/MMC Card Reader
- doesn't work
-Date: Fri, 18 Dec 2015 12:43:28 +0200
-Message-ID: <CAONpWdvo+b=Y26zsCYsHFHjJ+8yAnYfoJOsirdS-he2s1unDgg@mail.gmail.com>
-References: <CAONpWdsteBnqTcFbKpcOQFueyeJJWEmn9DJitD43f59xV8sDyg@mail.gmail.com>
-	<BY2PR04MB184372CAAC1FA0C5373D73238FEF0@BY2PR04MB1843.namprd04.prod.outlook.com>
-	<CAONpWduF6iH4Rr5Y610KP1RE342nWAajR27KFbu1N2iet4R0ZA@mail.gmail.com>
-	<BY2PR04MB18438CFFD181C72EFEF408908FE10@BY2PR04MB1843.namprd04.prod.outlook.com>
-	<CAPDyKFotgz3czCs8XaXwC4kT53Lp0h=n03OUMtO6BUTwTnDYzQ@mail.gmail.com>
-	<BY2PR04MB18432C804C263313D2349C848FE10@BY2PR04MB1843.namprd04.prod.outlook.com>
+From: Michael@mail.microamerica.com.pe,
+	"J.Tynan <f.digeronimo"@federconsumatori.abruzzo.it
+Subject: Review & Reply
+Date: Fri, 18 Dec 2015 17:18:54 +0700
+Message-ID: <20151218101948.48F5D8E86297__26813.646630808$1450448577$gmane$org@mail.microamerica.com.pe>
+Reply-To: michaeljtynan8@gmail.com
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ob0-f182.google.com ([209.85.214.182]:36259 "EHLO
-	mail-ob0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750767AbbLRKn3 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 18 Dec 2015 05:43:29 -0500
-Received: by mail-ob0-f182.google.com with SMTP id no2so76859325obc.3
-        for <linux-mmc@vger.kernel.org>; Fri, 18 Dec 2015 02:43:29 -0800 (PST)
-In-Reply-To: <BY2PR04MB18432C804C263313D2349C848FE10@BY2PR04MB1843.namprd04.prod.outlook.com>
+Received: from mail.microamerica.com.pe ([200.37.170.69]:41181 "EHLO
+	mail.microamerica.com.pe" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754004AbbLROVk convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 18 Dec 2015 09:21:40 -0500
+Content-Description: Mail message body
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Peter Guo <peter.guo@bayhubtech.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, "adam8157@gmail.com" <adam8157@gmail.com>, "linux-mmc@VGER.KERNEL.ORG" <linux-mmc@vger.kernel.org>
+To: Recipients <f.digeronimo@federconsumatori.abruzzo.it>
 
-Hello Uffe, Peter,
-
-Thank you both. I'll try out Peter's patch to see if it's addressing
-the issue and we can work through it based on Uffe's guidelines.
-
-Kind Regards,
-Alex
-
-On Fri, Dec 18, 2015 at 11:39 AM, Peter Guo <peter.guo@bayhubtech.com> wrote:
-> Hi Ulf,
->
-> Thanks for your reply.
->
-> So currently the problem is SDHCI_TRANS_DMA bit need to be cleared before send Non DMA SD/MMC command for some of our host,
-> Could you please give me any suggestion on what kind of code modification you can accept?
->
->
-> BR
-> Peter.Guo
->
->
-> -----Original Message-----
-> From: Ulf Hansson [mailto:ulf.hansson@linaro.org]
-> Sent: Friday, December 18, 2015 4:52 PMT
-> To: Peter Guo
-> Cc: Alex Ballas; adam8157@gmail.com; linux-mmc@VGER.KERNEL.ORG
-> Subject: Re: 1217:8520 [Dell Latitude E7450] O2 Micro, SD/MMC Card Reader doesn't work
->
-> On 18 December 2015 at 04:14, Peter Guo <peter.guo@bayhubtech.com> wrote:
->> Hi Alex & Adam,
->>
->> I have send the patch. Please check it.
->> Attachment is the patch file.
->
-> Thanks Peter for helping out!
->
-> Although I would appreciate if you don't send patches as attachments.
->
-> Moreover, even if the patch can be used to check whether it solves the problem - I won't accept it as is.
-> The reason is simply that I don't allow any more quirks/callbacks to be added for SDHCI.
->
-> Kind regards
-> Uffe
+Greetings,
+My name is Mr.Michael J. Tynan, I am a banker with Bank Of America. It is true that we have not meet each other in person, but I strongly believe in trust and friendship in every business. I have a Lebanese deceased customer's abandoned fund, which I am his personal financial adviser before his accidental death, that being the main reason why I alone working in the bank here, know much about the existence of this fund and the secrets surrounding this money. But before I disclose the full details to you, I will like to know your interest and willingness to assist me. You can call me as soon you receive my message, so that i will send to you full details about the transaction.
+My best regards,
+Mr.Michael J. Tynan
+MOBILE: +1 347 269 3740
