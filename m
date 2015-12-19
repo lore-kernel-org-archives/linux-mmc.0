@@ -1,150 +1,153 @@
-From: Lucas Stach <dev-8ppwABl0HbeELgA04lAiVw@public.gmane.org>
-Subject: [PATCH 1/5] mmc: tegra: implement module external clock change
-Date: Sat, 19 Dec 2015 20:16:00 +0100
-Message-ID: <1450552564-32697-2-git-send-email-dev@lynxeye.de>
-References: <1450552564-32697-1-git-send-email-dev@lynxeye.de>
-Return-path: <linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1450552564-32697-1-git-send-email-dev-8ppwABl0HbeELgA04lAiVw@public.gmane.org>
-Sender: linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: Stephen Warren <swarren-3lzwWm7+Weoh9ZMKESR00Q@public.gmane.org>, Thierry Reding <thierry.reding-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Alexandre Courbot <gnurou-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+From: Russell King - ARM Linux <linux@arm.linux.org.uk>
+Subject: [PATCH 00/17] MMC/SDHCI fixes
+Date: Sat, 19 Dec 2015 20:28:51 +0000
+Message-ID: <20151219202851.GS8644@n2100.arm.linux.org.uk>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from pandora.arm.linux.org.uk ([78.32.30.218]:36086 "EHLO
+	pandora.arm.linux.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932727AbbLSU3B (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sat, 19 Dec 2015 15:29:01 -0500
+Content-Disposition: inline
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Gregory CLEMENT <gregory.clement@free-electrons.com>, linux-mmc@vger.kernel.org, Marcin Wojtas <mw@semihalf.com>, Shawn Guo <shawnguo@kernel.org>, Sascha Hauer <kernel@pengutronix.de>
 
-Allow the the driver to change the clock supplied from the CAR directly,
-minimizing the need to divide the clock inside the SDMMC module itself.
+This all started with a report from an iMX6 Hummingboard user that
+they were seeing regular "mmc0: Got data interrupt 0x00000002 even
+though no data operation was in progress." messages with 4.4-rc and
+additional patches to enable UHS support in DT for the platform.
 
-This allows for higher clock speeds than the default 48MHz supplied to
-the module and is a prerequisite to support DDR signaling modes, where
-the Tegra host needs to be run with a fixed internal divider of 2 for
-data to be sampled correctly. (Tegra K1 TRM v03p chapter 29.7.1.1)
+When I tested 4.4-rc on an iMX6 Hummingboard with UHS support enabled,
+I found several other issues.  This patch series addresses some of
+the issues.
 
-Also enable the broken preset value quirk as the preset values need to
-be adapted to the changed clocking. While Tegra114+ allows this through
-vendor registers, there is no such way for Tegra30. Takes the easy way
-out  and keep things consistent between the different SoC generations by
-flagging the preset registers as unusable.
+However, while testing on Armada 388, an issue was found there, and
+a fix is also included in this patch set, however it does not depend
+on the rest of the patch series.
 
-Signed-off-by: Lucas Stach <dev-8ppwABl0HbeELgA04lAiVw@public.gmane.org>
----
- drivers/mmc/host/sdhci-tegra.c | 56 +++++++++++++++++++++++++++++++++++++-----
- 1 file changed, 50 insertions(+), 6 deletions(-)
+We all know that the SDHCI driver is in poor state, and Ulf's desire
+to see it turned into a library (which actually comes from myself.)
+However, with the driver in such a poor state, it makes sense to fix
+a few of the issues first, especially if they result in the code
+shrinking - which they do.
 
-diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
-index ad28b49..877daf5 100644
---- a/drivers/mmc/host/sdhci-tegra.c
-+++ b/drivers/mmc/host/sdhci-tegra.c
-@@ -49,6 +49,7 @@ struct sdhci_tegra_soc_data {
- struct sdhci_tegra {
- 	const struct sdhci_tegra_soc_data *soc_data;
- 	struct gpio_desc *power_gpio;
-+	bool ddr_signaling;
- };
- 
- static u16 tegra_sdhci_readw(struct sdhci_host *host, int reg)
-@@ -143,6 +144,8 @@ static void tegra_sdhci_reset(struct sdhci_host *host, u8 mask)
- 	if (soc_data->nvquirks & NVQUIRK_DISABLE_SDR104)
- 		misc_ctrl &= ~SDHCI_MISC_CTRL_ENABLE_SDR104;
- 	sdhci_writew(host, misc_ctrl, SDHCI_TEGRA_VENDOR_MISC_CTRL);
-+
-+	tegra_host->ddr_signaling = false;
- }
- 
- static void tegra_sdhci_set_bus_width(struct sdhci_host *host, int bus_width)
-@@ -164,15 +167,53 @@ static void tegra_sdhci_set_bus_width(struct sdhci_host *host, int bus_width)
- 	sdhci_writeb(host, ctrl, SDHCI_HOST_CONTROL);
- }
- 
-+static void tegra_sdhci_set_clock(struct sdhci_host *host, unsigned int clock)
-+{
-+	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-+	struct sdhci_tegra *tegra_host = pltfm_host->priv;
-+	unsigned long host_clk;
-+
-+	if (!clock)
-+		return;
-+
-+	host_clk = tegra_host->ddr_signaling ? clock * 2 : clock;
-+	clk_set_rate(pltfm_host->clk, host_clk);
-+	host->max_clk = clk_get_rate(pltfm_host->clk);
-+
-+	return sdhci_set_clock(host, clock);
-+}
-+
-+static void tegra_sdhci_set_uhs_signaling(struct sdhci_host *host, unsigned timing)
-+{
-+	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-+	struct sdhci_tegra *tegra_host = pltfm_host->priv;
-+
-+	if (timing == MMC_TIMING_UHS_DDR50)
-+		tegra_host->ddr_signaling = true;
-+
-+	return sdhci_set_uhs_signaling(host, timing);
-+}
-+
-+static unsigned int tegra_sdhci_get_max_clock(struct sdhci_host *host)
-+{
-+	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-+
-+	/*
-+	 * DDR modes require the host to run at double the card frequency, so
-+	 * the maximum rate we can support is half of the module input clock.
-+	 */
-+	return clk_round_rate(pltfm_host->clk, UINT_MAX) / 2;
-+}
-+
- static const struct sdhci_ops tegra_sdhci_ops = {
- 	.get_ro     = tegra_sdhci_get_ro,
- 	.read_w     = tegra_sdhci_readw,
- 	.write_l    = tegra_sdhci_writel,
--	.set_clock  = sdhci_set_clock,
-+	.set_clock  = tegra_sdhci_set_clock,
- 	.set_bus_width = tegra_sdhci_set_bus_width,
- 	.reset      = tegra_sdhci_reset,
--	.set_uhs_signaling = sdhci_set_uhs_signaling,
--	.get_max_clock = sdhci_pltfm_clk_get_max_clock,
-+	.set_uhs_signaling = tegra_sdhci_set_uhs_signaling,
-+	.get_max_clock = tegra_sdhci_get_max_clock,
- };
- 
- static const struct sdhci_pltfm_data sdhci_tegra20_pdata = {
-@@ -197,6 +238,7 @@ static const struct sdhci_pltfm_data sdhci_tegra30_pdata = {
- 		  SDHCI_QUIRK_NO_HISPD_BIT |
- 		  SDHCI_QUIRK_BROKEN_ADMA_ZEROLEN_DESC |
- 		  SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN,
-+	.quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN,
- 	.ops  = &tegra_sdhci_ops,
- };
- 
-@@ -212,11 +254,11 @@ static const struct sdhci_ops tegra114_sdhci_ops = {
- 	.read_w     = tegra_sdhci_readw,
- 	.write_w    = tegra_sdhci_writew,
- 	.write_l    = tegra_sdhci_writel,
--	.set_clock  = sdhci_set_clock,
-+	.set_clock  = tegra_sdhci_set_clock,
- 	.set_bus_width = tegra_sdhci_set_bus_width,
- 	.reset      = tegra_sdhci_reset,
--	.set_uhs_signaling = sdhci_set_uhs_signaling,
--	.get_max_clock = sdhci_pltfm_clk_get_max_clock,
-+	.set_uhs_signaling = tegra_sdhci_set_uhs_signaling,
-+	.get_max_clock = tegra_sdhci_get_max_clock,
- };
- 
- static const struct sdhci_pltfm_data sdhci_tegra114_pdata = {
-@@ -226,6 +268,7 @@ static const struct sdhci_pltfm_data sdhci_tegra114_pdata = {
- 		  SDHCI_QUIRK_NO_HISPD_BIT |
- 		  SDHCI_QUIRK_BROKEN_ADMA_ZEROLEN_DESC |
- 		  SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN,
-+	.quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN,
- 	.ops  = &tegra114_sdhci_ops,
- };
- 
-@@ -271,6 +314,7 @@ static int sdhci_tegra_probe(struct platform_device *pdev)
- 		rc = -ENOMEM;
- 		goto err_alloc_tegra_host;
- 	}
-+	tegra_host->ddr_signaling = false;
- 	tegra_host->soc_data = soc_data;
- 	pltfm_host->priv = tegra_host;
- 
+However, given what I've found below, I have to wonder how many of the
+quirks that we have in this driver are down to the poor code rather than
+real hardware problems: how many of them are due to poorly investigated
+bugs.
+
+This series starts off by shutting up some kernel messages that should
+not be verbose:
+- the voltage-ranges DT property is optional, so we should not print
+  a message saying that it's missing from DT.  That suggests it isn't
+  optional.  As no ill effect comes from not specifying it, I've
+  dropped this message to debug level.
+
+- "retrying because a re-tune was needed" - a re-tune is something that
+  is part of the higher speed SD specs, and it's required to happen
+  periodically.  So it's expected and normal behaviour.  There's no need
+  to print this to the kernel log.
+
+- When tuning fails, rather than a bland "mmc0: tuning execution failed"
+  message, print the error code so that we can see what the reason for
+  the failure is.  MMC fails on this point in many places.
+
+- Move the initialisation of the command ->error member.  It looks to
+  me as if this is not required; mmc_start_request() does this already,
+  as it seems the rest of the MMC core does too.  Maybe this should be
+  removed altogether?
+
+- Testing error bits, then setting the error, then testing the error
+  value, and completing the command is a very lengthy way to deal with
+  errors here.  Test the error bits, and then decide what error occurred
+  before completing.  (This code is actually buggy, see the next change).
+
+- If a command _response_ CRC error occurs, we can't be certain whether
+  the card received the command successfully, and has started processing
+  it.  If it has, and it results in data being read from the card, the
+  card will enter data transfer state, and start sending data to the
+  host.  Therefore, it is completely wrong to blindly terminate the
+  command, especially when such termination fails to clean _anything_
+  up - eg, it leaves DMA in place so the host can continue DMAing to the
+  memory, and it leaves buffers DMA mapped - which eventually annoys the
+  DMA API debugging.  Fix this by assuming that a CRC error is a receive
+  side error.  If the card did not correctly receive the command, it
+  will not initiate a data transfer, and we should time out after the
+  card specified timeout.
+
+  With the unmodified mainline code, even if we reset the state machines
+  when finishing a request in error, the _card_ itself may well still be
+  in data transfer mode when this happens.  How can we be sure what state
+  the data side is actually in?  Could this be why (eg) sdhci-esdhc-imx.c
+  has this:
+
+        /* FIXME: delay a bit for card to be ready for next tuning due to errors */
+        mdelay(1);
+
+  And how many more such _hacks_ are working around similar problems?
+
+- The unaligned buffer handling is a total waste of resources in its
+  current form.  We DMA map, sync, and unmap it on every transfer,
+  whether the buffer is used or not.  For MMC/SD transfers, these will
+  be coming from the VFS/MM layers, which operate through the page
+  cache - hence the vast majority of buffers will be page aligned.
+  Performance measurements on iMX6 show that this additional DMA
+  maintanence is responsible for a 10% reduction in read transfer
+  performance.  Switch this to use a DMA coherent mapping instead, which
+  needs no DMA maintanence.
+
+- sdhci_adma_table_post() is badly coded: we walk the scatterlist
+  looking for any buffers which might not be aligned (which can be a
+  rare event, see above) and then we only do something if we find an
+  unaligned buffer _and_ it's a read transfer.  So for a write transfer,
+  this scatterlist walking is a total waste of CPU cycles.  Testing the
+  transfer direction is much cheaper than walking the scatterlist.
+  Re-organise the code to do the cheap test first.
+
+- There are two paths to identical DMA unmapping code (the code around
+  dma_unmap_sg()) in sdhci_finish_data() and its child function
+  sdhci_adma_table_post().  Trivially simplify this duplication.
+
+- Move sdhci_pre_dma_transfer() so we avoid needing to declare it.
+
+- Do the same thing with sdhci_prepare_data() and sdhci_pre_dma_transfer()
+  as with sdhci_finish_data() and sdhci_adma_table_post().
+
+- Fix the mess that is the data segment host_cookie handling.  The
+  existing code seems like a candidate for the obfuscated coding prize!
+  Four patches address this, turning it into something much easier to
+  understand, which then allows (finally)...
+
+- The DMA API leak which occurs when we have mapped the DMA buffers in
+  sdhci_prepare_data() and an error occurs early on in the processing
+  of a request.
+
+- A final change (mentioned above) which fixes a prior commit for
+  Armada 38x using sdhci-pxav3.c, found while trying to get the higher
+  speed modes working on these SoCs.  Clearly the existing code is
+  broken, this at least resolves some of the breakage by allowing the
+  correct high-order SDHCI capabilities through.
+
+All these patches are resulting from _only_ today; I'm sure more will
+be coming in the forthcoming weeks, as all I seem to have to do is
+give code a little shake and _lots_ of bugs appear.  Despite this being
+a series of 17 patches, it does not yet solve _all_ the problems I've
+found so far on iMX6 with SDHCI.
+
+I've tested these changes on iMX6 at UHS speeds, and Armada 388 SoCs
+at HS speeds so far.  Others should test them.
+
+ drivers/mmc/card/block.c       |   4 +-
+ drivers/mmc/core/core.c        |  10 +-
+ drivers/mmc/host/sdhci-pxav3.c |   6 +-
+ drivers/mmc/host/sdhci.c       | 318 ++++++++++++++++++-----------------------
+ drivers/mmc/host/sdhci.h       |   4 +-
+ 5 files changed, 157 insertions(+), 185 deletions(-)
+
 -- 
-2.5.0
+RMK's Patch system: http://www.arm.linux.org.uk/developer/patches/
+FTTC broadband for 0.8mile line: currently at 9.6Mbps down 400kbps up
+according to speedtest.net.
