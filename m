@@ -1,17 +1,17 @@
 From: Russell King <rmk+kernel@arm.linux.org.uk>
-Subject: [PATCH 01/17] mmc: core: shut up "voltage-ranges unspecified"
- pr_info()
-Date: Sat, 19 Dec 2015 20:29:44 +0000
-Message-ID: <E1aAO8O-0007xP-Do@rmk-PC.arm.linux.org.uk>
+Subject: [PATCH 03/17] mmc: core: report tuning command execution failure
+ reason
+Date: Sat, 19 Dec 2015 20:30:18 +0000
+Message-ID: <E1aAO8w-0007xn-C1@rmk-PC.arm.linux.org.uk>
 References: <20151219202851.GS8644@n2100.arm.linux.org.uk>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 8bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from pandora.arm.linux.org.uk ([78.32.30.218]:36096 "EHLO
+Received: from pandora.arm.linux.org.uk ([78.32.30.218]:36115 "EHLO
 	pandora.arm.linux.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752982AbbLSU3v (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sat, 19 Dec 2015 15:29:51 -0500
+	with ESMTP id S1752982AbbLSUa1 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sat, 19 Dec 2015 15:30:27 -0500
 In-Reply-To: <20151219202851.GS8644@n2100.arm.linux.org.uk>
 Content-Disposition: inline
 Sender: linux-mmc-owner@vger.kernel.org
@@ -19,40 +19,26 @@ List-Id: linux-mmc@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>
 Cc: Marcin Wojtas <mw@semihalf.com>, Gregory CLEMENT <gregory.clement@free-electrons.com>, Shawn Guo <shawnguo@kernel.org>, Sascha Hauer <kernel@pengutronix.de>, linux-mmc@vger.kernel.org
 
-Each time a driver such as sdhci-esdhc-imx is probed, we get a info
-printk complaining that the DT voltage-ranges property has not been
-specified.
-
-However, the DT binding specifically says that the voltage-ranges
-property is optional.  That means we should not be complaining that
-DT hasn't specified this property: by indicating that it's optional,
-it is valid not to have the property in DT.
-
-Silence the warning if the property is missing.
+Print the error code when the tuning command fails.  This allows the
+reason for the failure to be reported, which aids debugging.
 
 Signed-off-by: Russell King <rmk+kernel@arm.linux.org.uk>
 ---
- drivers/mmc/core/core.c | 8 ++++++--
- 1 file changed, 6 insertions(+), 2 deletions(-)
+ drivers/mmc/core/core.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index 5ae89e48fd85..b5e663b67cb5 100644
+index b5e663b67cb5..b74c1644c960 100644
 --- a/drivers/mmc/core/core.c
 +++ b/drivers/mmc/core/core.c
-@@ -1220,8 +1220,12 @@ int mmc_of_parse_voltage(struct device_node *np, u32 *mask)
+@@ -1085,7 +1085,7 @@ int mmc_execute_tuning(struct mmc_card *card)
+ 	err = host->ops->execute_tuning(host, opcode);
  
- 	voltage_ranges = of_get_property(np, "voltage-ranges", &num_ranges);
- 	num_ranges = num_ranges / sizeof(*voltage_ranges) / 2;
--	if (!voltage_ranges || !num_ranges) {
--		pr_info("%s: voltage-ranges unspecified\n", np->full_name);
-+	if (!voltage_ranges) {
-+		pr_debug("%s: voltage-ranges unspecified\n", np->full_name);
-+		return -EINVAL;
-+	}
-+	if (!num_ranges) {
-+		pr_err("%s: voltage-ranges empty\n", np->full_name);
- 		return -EINVAL;
- 	}
+ 	if (err)
+-		pr_err("%s: tuning execution failed\n", mmc_hostname(host));
++		pr_err("%s: tuning execution failed: %d\n", mmc_hostname(host), err);
+ 	else
+ 		mmc_retune_enable(host);
  
 -- 
 2.1.0
