@@ -1,7 +1,7 @@
 From: Russell King <rmk+kernel@arm.linux.org.uk>
-Subject: [PATCH 17/17] mmc: sdhci-pxav3: fix higher speed mode capabilities
-Date: Sat, 19 Dec 2015 20:31:31 +0000
-Message-ID: <E1aAOA7-0007zk-6l@rmk-PC.arm.linux.org.uk>
+Subject: [PATCH 15/17] mmc: sdhci: clean up host cookie handling
+Date: Sat, 19 Dec 2015 20:31:20 +0000
+Message-ID: <E1aAO9w-0007zX-Py@rmk-PC.arm.linux.org.uk>
 References: <20151219202851.GS8644@n2100.arm.linux.org.uk>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
@@ -9,8 +9,8 @@ Content-Transfer-Encoding: 8bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
 Received: from pandora.arm.linux.org.uk ([78.32.30.218]:36189 "EHLO
 	pandora.arm.linux.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752982AbbLSUcZ (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sat, 19 Dec 2015 15:32:25 -0500
+	with ESMTP id S1752982AbbLSUc1 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sat, 19 Dec 2015 15:32:27 -0500
 In-Reply-To: <20151219202851.GS8644@n2100.arm.linux.org.uk>
 Content-Disposition: inline
 Sender: linux-mmc-owner@vger.kernel.org
@@ -18,58 +18,85 @@ List-Id: linux-mmc@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>
 Cc: Marcin Wojtas <mw@semihalf.com>, Gregory CLEMENT <gregory.clement@free-electrons.com>, Shawn Guo <shawnguo@kernel.org>, Sascha Hauer <kernel@pengutronix.de>, linux-mmc@vger.kernel.org
 
-Commit 1140011ee9d9 ("mmc: sdhci-pxav3: Modify clock settings for the
-SDR50 and DDR50 modes") broke any chance of the SDR50 or DDR50 modes
-being used.
+Commit d31911b9374a ("mmc: sdhci: fix dma memory leak in sdhci_pre_req()")
+added a complicated method to manage the DMA map state for the data
+transfer, but this complexity is not required.
 
-The commit claims that SDR50 and DDR50 require clock adjustments in
-the SDIO3 Configuration register, which is located via the "conf-sdio3"
-resource.  However, when this resource is given, we fail to read the
-host capabilities 1 register, resulting in host->caps1 being zero.
-Hence, both SDHCI_SUPPORT_SDR50 and SDHCI_SUPPORT_DDR50 bits remain
-zero, disabling the SDR50 and DDR50 modes.
+There are three states:
+* Unmapped
+* Mapped by sdhci_pre_req()
+* Mapped by sdhci_prepare_data()
 
-The underlying idea in this function appears to be to read the device
-capabilities, modify them, and set SDHCI_QUIRK_MISSING_CAPS to cause
-our modified capabilities to be used.  Implement exactly that.
+sdhci_prepare_data() needs to know when the data buffers have been
+successfully mapped by sdhci_pre_req(), and if so, there is no need to
+map them a second time.
 
-Fixes: 1140011ee9d9 ("mmc: sdhci-pxav3: Modify clock settings for the SDR50 and DDR50 modes")
+When we come to tear down the mapping, we want to know whether
+sdhci_post_req() will be called (which is determined by sdhci_pre_req()
+having been previously called) so that we can postpone the unmap
+operation.
+
+Hence, it makes sense to simply record when the successful DMA map
+happened (via COOKIE_PRE_MAPPED vs COOKIE_MAPPED) rather than having
+the complex mechanics involving COOKIE_MAPPED vs COOKIE_GIVEN.
+
+If a mapping is created by sdhci_prepare_data(), we must tear it down
+ourselves, without waiting for sdhci_post_req() (hence, the new
+COOKIE_MAPPED case).  If the mapping is created by sdhci_pre_req()
+then sdhci_post_req() is responsible for tearing the mapping down.
+
 Signed-off-by: Russell King <rmk+kernel@arm.linux.org.uk>
 ---
- drivers/mmc/host/sdhci-pxav3.c | 6 ++++--
- 1 file changed, 4 insertions(+), 2 deletions(-)
+ drivers/mmc/host/sdhci.c | 12 ++++++------
+ drivers/mmc/host/sdhci.h |  4 ++--
+ 2 files changed, 8 insertions(+), 8 deletions(-)
 
-diff --git a/drivers/mmc/host/sdhci-pxav3.c b/drivers/mmc/host/sdhci-pxav3.c
-index f5edf9d3a18a..c7f27fe4805a 100644
---- a/drivers/mmc/host/sdhci-pxav3.c
-+++ b/drivers/mmc/host/sdhci-pxav3.c
-@@ -137,6 +137,10 @@ static int armada_38x_quirks(struct platform_device *pdev,
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 264248ac439e..6f23dba74cbc 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -431,12 +431,12 @@ static int sdhci_pre_dma_transfer(struct sdhci_host *host,
+ {
+ 	int sg_count;
  
- 	host->quirks &= ~SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN;
- 	host->quirks |= SDHCI_QUIRK_MISSING_CAPS;
-+
-+	host->caps = sdhci_readl(host, SDHCI_CAPABILITIES);
-+	host->caps1 = sdhci_readl(host, SDHCI_CAPABILITIES_1);
-+
- 	res = platform_get_resource_byname(pdev, IORESOURCE_MEM,
- 					   "conf-sdio3");
- 	if (res) {
-@@ -150,7 +154,6 @@ static int armada_38x_quirks(struct platform_device *pdev,
- 		 * Configuration register, if the adjustment is not done,
- 		 * remove them from the capabilities.
- 		 */
--		host->caps1 = sdhci_readl(host, SDHCI_CAPABILITIES_1);
- 		host->caps1 &= ~(SDHCI_SUPPORT_SDR50 | SDHCI_SUPPORT_DDR50);
+-	if (data->host_cookie == COOKIE_MAPPED) {
+-		data->host_cookie = COOKIE_GIVEN;
++	/*
++	 * If the data buffers are already mapped, return the previous
++	 * dma_map_sg() result.
++	 */
++	if (data->host_cookie == COOKIE_PRE_MAPPED)
+ 		return data->sg_count;
+-	}
+-
+-	WARN_ON(data->host_cookie == COOKIE_GIVEN);
  
- 		dev_warn(&pdev->dev, "conf-sdio3 register not found: disabling SDR50 and DDR50 modes.\nConsider updating your dtb\n");
-@@ -161,7 +164,6 @@ static int armada_38x_quirks(struct platform_device *pdev,
- 	 * controller has different capabilities than the ones shown
- 	 * in its registers
- 	 */
--	host->caps = sdhci_readl(host, SDHCI_CAPABILITIES);
- 	if (of_property_read_bool(np, "no-1-8-v")) {
- 		host->caps &= ~SDHCI_CAN_VDD_180;
- 		host->mmc->caps &= ~MMC_CAP_1_8V_DDR;
+ 	sg_count = dma_map_sg(mmc_dev(host->mmc), data->sg, data->sg_len,
+ 				data->flags & MMC_DATA_WRITE ?
+@@ -2093,7 +2093,7 @@ static void sdhci_pre_req(struct mmc_host *mmc, struct mmc_request *mrq,
+ 	mrq->data->host_cookie = COOKIE_UNMAPPED;
+ 
+ 	if (host->flags & SDHCI_REQ_USE_DMA)
+-		sdhci_pre_dma_transfer(host, mrq->data, COOKIE_MAPPED);
++		sdhci_pre_dma_transfer(host, mrq->data, COOKIE_PRE_MAPPED);
+ }
+ 
+ static void sdhci_card_event(struct mmc_host *mmc)
+diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+index 9d4aa31b683a..9dd2e1f688ea 100644
+--- a/drivers/mmc/host/sdhci.h
++++ b/drivers/mmc/host/sdhci.h
+@@ -311,8 +311,8 @@ struct sdhci_adma2_64_desc {
+ 
+ enum sdhci_cookie {
+ 	COOKIE_UNMAPPED,
+-	COOKIE_MAPPED,
+-	COOKIE_GIVEN,
++	COOKIE_PRE_MAPPED,	/* mapped by sdhci_pre_req() */
++	COOKIE_MAPPED,		/* mapped by sdhci_prepare_data() */
+ };
+ 
+ struct sdhci_host {
 -- 
 2.1.0
 
