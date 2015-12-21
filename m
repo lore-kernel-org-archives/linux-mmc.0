@@ -1,16 +1,17 @@
 From: Russell King <rmk+kernel@arm.linux.org.uk>
-Subject: [PATCH v2 12/24] mmc: sdhci: move sdhci_pre_dma_transfer()
-Date: Mon, 21 Dec 2015 11:41:23 +0000
-Message-ID: <E1aAyqB-000173-6l@rmk-PC.arm.linux.org.uk>
+Subject: [PATCH v2 22/24] mmc: sdhci: prepare DMA address/size quirk handling
+ consolidation
+Date: Mon, 21 Dec 2015 11:42:14 +0000
+Message-ID: <E1aAyr0-000186-Fg@rmk-PC.arm.linux.org.uk>
 References: <20151221113956.GA3712@n2100.arm.linux.org.uk>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 8bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from pandora.arm.linux.org.uk ([78.32.30.218]:39729 "EHLO
+Received: from pandora.arm.linux.org.uk ([78.32.30.218]:39736 "EHLO
 	pandora.arm.linux.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751681AbbLULlu (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 21 Dec 2015 06:41:50 -0500
+	with ESMTP id S1751681AbbLULmU (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 21 Dec 2015 06:42:20 -0500
 In-Reply-To: <20151221113956.GA3712@n2100.arm.linux.org.uk>
 Content-Disposition: inline
 Sender: linux-mmc-owner@vger.kernel.org
@@ -18,91 +19,81 @@ List-Id: linux-mmc@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>
 Cc: Marcin Wojtas <mw@semihalf.com>, Gregory CLEMENT <gregory.clement@free-electrons.com>, Shawn Guo <shawnguo@kernel.org>, Sascha Hauer <kernel@pengutronix.de>, linux-mmc@vger.kernel.org
 
-Move sdhci_pre_dma_transfer() to avoid needing to declare this function
-before use.
+Prepare to consolidate the DMA address/size quirk handling into one
+single loop.
 
 Signed-off-by: Russell King <rmk+kernel@arm.linux.org.uk>
 ---
- drivers/mmc/host/sdhci.c | 52 +++++++++++++++++++++++-------------------------
- 1 file changed, 25 insertions(+), 27 deletions(-)
+ drivers/mmc/host/sdhci.c | 26 ++++++++++++++------------
+ 1 file changed, 14 insertions(+), 12 deletions(-)
 
 diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index d315273d1184..239581ea6856 100644
+index 65b230ea179e..474d96943560 100644
 --- a/drivers/mmc/host/sdhci.c
 +++ b/drivers/mmc/host/sdhci.c
-@@ -53,8 +53,6 @@ static void sdhci_finish_data(struct sdhci_host *);
- static void sdhci_finish_command(struct sdhci_host *);
- static int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode);
- static void sdhci_enable_preset_value(struct sdhci_host *host, bool enable);
--static int sdhci_pre_dma_transfer(struct sdhci_host *host,
--					struct mmc_data *data);
- static int sdhci_do_get_cd(struct sdhci_host *host);
+@@ -730,21 +730,22 @@ static void sdhci_prepare_data(struct sdhci_host *host, struct mmc_command *cmd)
+ 	 * scatterlist.
+ 	 */
+ 	if (host->flags & SDHCI_REQ_USE_DMA) {
+-		int broken, i;
+ 		struct scatterlist *sg;
++		unsigned int length_mask;
++		int i;
  
- #ifdef CONFIG_PM
-@@ -428,6 +426,31 @@ static void sdhci_transfer_pio(struct sdhci_host *host)
- 	DBG("PIO transfer complete.\n");
- }
+-		broken = 0;
++		length_mask = 0;
+ 		if (host->flags & SDHCI_USE_ADMA) {
+ 			if (host->quirks & SDHCI_QUIRK_32BIT_ADMA_SIZE)
+-				broken = 1;
++				length_mask = 3;
+ 		} else {
+ 			if (host->quirks & SDHCI_QUIRK_32BIT_DMA_SIZE)
+-				broken = 1;
++				length_mask = 3;
+ 		}
  
-+static int sdhci_pre_dma_transfer(struct sdhci_host *host,
-+				  struct mmc_data *data)
-+{
-+	int sg_count;
-+
-+	if (data->host_cookie == COOKIE_MAPPED) {
-+		data->host_cookie = COOKIE_GIVEN;
-+		return data->sg_count;
-+	}
-+
-+	WARN_ON(data->host_cookie == COOKIE_GIVEN);
-+
-+	sg_count = dma_map_sg(mmc_dev(host->mmc), data->sg, data->sg_len,
-+				data->flags & MMC_DATA_WRITE ?
-+				DMA_TO_DEVICE : DMA_FROM_DEVICE);
-+
-+	if (sg_count == 0)
-+		return -ENOSPC;
-+
-+	data->sg_count = sg_count;
-+	data->host_cookie = COOKIE_MAPPED;
-+
-+	return sg_count;
-+}
-+
- static char *sdhci_kmap_atomic(struct scatterlist *sg, unsigned long *flags)
- {
- 	local_irq_save(*flags);
-@@ -2079,31 +2102,6 @@ static void sdhci_post_req(struct mmc_host *mmc, struct mmc_request *mrq,
- 	}
- }
+-		if (unlikely(broken)) {
++		if (unlikely(length_mask)) {
+ 			for_each_sg(data->sg, sg, data->sg_len, i) {
+-				if (sg->length & 0x3) {
++				if (sg->length & length_mask) {
+ 					DBG("Reverting to PIO because of "
+ 						"transfer size (%d)\n",
+ 						sg->length);
+@@ -760,10 +761,11 @@ static void sdhci_prepare_data(struct sdhci_host *host, struct mmc_command *cmd)
+ 	 * translation to device address space.
+ 	 */
+ 	if (host->flags & SDHCI_REQ_USE_DMA) {
+-		int broken, i;
+ 		struct scatterlist *sg;
++		unsigned int offset_mask;
++		int i;
  
--static int sdhci_pre_dma_transfer(struct sdhci_host *host,
--				       struct mmc_data *data)
--{
--	int sg_count;
--
--	if (data->host_cookie == COOKIE_MAPPED) {
--		data->host_cookie = COOKIE_GIVEN;
--		return data->sg_count;
--	}
--
--	WARN_ON(data->host_cookie == COOKIE_GIVEN);
--
--	sg_count = dma_map_sg(mmc_dev(host->mmc), data->sg, data->sg_len,
--				data->flags & MMC_DATA_WRITE ?
--				DMA_TO_DEVICE : DMA_FROM_DEVICE);
--
--	if (sg_count == 0)
--		return -ENOSPC;
--
--	data->sg_count = sg_count;
--	data->host_cookie = COOKIE_MAPPED;
--
--	return sg_count;
--}
--
- static void sdhci_pre_req(struct mmc_host *mmc, struct mmc_request *mrq,
- 			       bool is_first_req)
- {
+-		broken = 0;
++		offset_mask = 0;
+ 		if (host->flags & SDHCI_USE_ADMA) {
+ 			/*
+ 			 * As we use 3 byte chunks to work around
+@@ -771,15 +773,15 @@ static void sdhci_prepare_data(struct sdhci_host *host, struct mmc_command *cmd)
+ 			 * quirk.
+ 			 */
+ 			if (host->quirks & SDHCI_QUIRK_32BIT_ADMA_SIZE)
+-				broken = 1;
++				offset_mask = 3;
+ 		} else {
+ 			if (host->quirks & SDHCI_QUIRK_32BIT_DMA_ADDR)
+-				broken = 1;
++				offset_mask = 3;
+ 		}
+ 
+-		if (unlikely(broken)) {
++		if (unlikely(offset_mask)) {
+ 			for_each_sg(data->sg, sg, data->sg_len, i) {
+-				if (sg->offset & 0x3) {
++				if (sg->offset & offset_mask) {
+ 					DBG("Reverting to PIO because of "
+ 						"bad alignment\n");
+ 					host->flags &= ~SDHCI_REQ_USE_DMA;
 -- 
 2.1.0
 
