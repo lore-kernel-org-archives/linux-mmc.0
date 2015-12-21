@@ -1,66 +1,53 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v2 00/24] MMC/SDHCI fixes
-Date: Mon, 21 Dec 2015 14:59:57 +0100
-Message-ID: <CAPDyKFqwKKr5fDfMf5aQcdKOkO7GkLym8Yu3-pCMexCN_2M4=A@mail.gmail.com>
-References: <20151221113956.GA3712@n2100.arm.linux.org.uk>
-	<CAPDyKFogxmczEzXbXACrfn4F2wfM=ZKPVnpK8WSLJA3UT5SKiw@mail.gmail.com>
-	<20151221125120.GZ8644@n2100.arm.linux.org.uk>
-	<CAPDyKFrxJBAiic44VRWRW-53vz6GqosH+6_qbFSgQnJ5aew=BQ@mail.gmail.com>
-	<20151221134138.GB8644@n2100.arm.linux.org.uk>
+From: Jeff Haran <Jeff.Haran@citrix.com>
+Subject: RE: Does the Community use Coverity ?
+Date: Mon, 21 Dec 2015 18:22:03 +0000
+Message-ID: <4E5779AD88B2F040B8A7E83ECF544D1A64AADA@SJCPEX01CL03.citrite.net>
+References: <CAMf7+LiLgPcNSMOGhV=i=6FV5VwrM0VNXpSmPci7xU9EBc0Sgg@mail.gmail.com>
+	<4E5779AD88B2F040B8A7E83ECF544D1A64A4CF@SJCPEX01CL03.citrite.net>
+ <CAMf7+Li74m2_nZru3kfwJZ5G9r7W69pwkarHbccs1xw-G8ZjnA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-yk0-f178.google.com ([209.85.160.178]:36801 "EHLO
-	mail-yk0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750914AbbLUN76 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 21 Dec 2015 08:59:58 -0500
-Received: by mail-yk0-f178.google.com with SMTP id x184so131980735yka.3
-        for <linux-mmc@vger.kernel.org>; Mon, 21 Dec 2015 05:59:57 -0800 (PST)
-In-Reply-To: <20151221134138.GB8644@n2100.arm.linux.org.uk>
+Received: from smtp02.citrix.com ([66.165.176.63]:2169 "EHLO SMTP02.CITRIX.COM"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1750914AbbLUSWH (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 21 Dec 2015 13:22:07 -0500
+In-Reply-To: <CAMf7+Li74m2_nZru3kfwJZ5G9r7W69pwkarHbccs1xw-G8ZjnA@mail.gmail.com>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Russell King - ARM Linux <linux@arm.linux.org.uk>
-Cc: Gregory CLEMENT <gregory.clement@free-electrons.com>, linux-mmc <linux-mmc@vger.kernel.org>, Marcin Wojtas <mw@semihalf.com>, Shawn Guo <shawnguo@kernel.org>, Sascha Hauer <kernel@pengutronix.de>
+To: pavi1729 <pavitra1729@gmail.com>
+Cc: "kernelnewbies@kernelnewbies.org" <kernelnewbies@kernelnewbies.org>, "linux-fsdevel@vger.kernel.org" <linux-fsdevel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "netdev@vger.kernel.org" <netdev@vger.kernel.org>
 
-On 21 December 2015 at 14:41, Russell King - ARM Linux
-<linux@arm.linux.org.uk> wrote:
-> On Mon, Dec 21, 2015 at 02:23:17PM +0100, Ulf Hansson wrote:
->> On 21 December 2015 at 13:51, Russell King - ARM Linux
->> <linux@arm.linux.org.uk> wrote:
->> > On Mon, Dec 21, 2015 at 01:35:36PM +0100, Ulf Hansson wrote:
->> >> I decided to try to apply it for my next branch, to get some good test
->> >> coverage. Although, it failed when reaching patch 8. Would you mind
->> >> posting yet another new re-based version, please.
->> >
->> > Given that these are _fixes_ and need to be applied to -rc kernels, they
->> > are based on -rc6.  I don't see the point of rebasing them onto non-rc
->> > kernels to test, because then you're not testing against where they
->> > should be applied.
->>
->> I see your point, but I would rather not aim for rcs with these
->> changes, unless you insist.
->>
->> Not because they aren't fixes, but because it's old errors. Instead we
->> can "cc stable" or use the fixes tag as we are in quite late stage of
->> the rc. This approach will also allow us to get a bit better test
->> coverage.
->
-> Even if we do this, we still need to get _these_ tested because _these_
-> will be the ones which need to be applied to stable trees such as the
-> 4.4 stable series.
->
-> What I suggest is applying them against -rc6, and then merging them
-> into your -next branch, and fixing the resulting conflicts.  We then
-> have the patches ready for -rc, but which can still be tested in -next
-> (for what that's worth.)  If people find problems, they can always
-> re-test these patches without all the development stuff.
->
-> If I were to give you a set of patches suitable just for -next, then
-> people can only test with all the development stuff included, and we'll
-> have no idea whether any new problems are the result of development or
-> these patches.
-
-Okay! I will publish the branch as soon as I can.
-
-Kind regards
-Uffe
+PiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBwYXZpMTcyOSBbbWFpbHRvOnBh
+dml0cmExNzI5QGdtYWlsLmNvbV0NCj4gU2VudDogVGh1cnNkYXksIERlY2VtYmVyIDE3LCAyMDE1
+IDI6MDQgQU0NCj4gVG86IEplZmYgSGFyYW4NCj4gQ2M6IGtlcm5lbG5ld2JpZXNAa2VybmVsbmV3
+Ymllcy5vcmc7IGxpbnV4LWZzZGV2ZWxAdmdlci5rZXJuZWwub3JnOw0KPiBsaW51eC1tbWNAdmdl
+ci5rZXJuZWwub3JnOyBuZXRkZXZAdmdlci5rZXJuZWwub3JnDQo+IFN1YmplY3Q6IFJlOiBEb2Vz
+IHRoZSBDb21tdW5pdHkgdXNlIENvdmVyaXR5ID8NCj4gDQo+IFNhbmtldCwgSmVmZiwNCj4gICAg
+IFRoYW5rcyBhIHRvbiwgdGhhdCB3YXMgaGVscGZ1bC4NCj4gDQo+IENoZWVycywNCj4gUGF2aQ0K
+DQpQYXZpLA0KDQpJIHN1Z2dlc3QgdGhhdCBpZiB5b3UgZ2V0IHRoZSBjaGFuY2UsIGNoZWNrIG91
+dCB0aGVpciBjb2RlIGJyb3dzZXIuIENsaWNrIG9uIG9uZSBvZiB0aGUgYnVncyBpbiB0aGUgTGlu
+dXggcHJvamVjdCBhbmQgdGhlbiBjbGljayB0aGUgZm9sZGVyIGljb24gYXQgdGhlIHRvcCBvZiB0
+aGUgbG93ZXIgbGVmdCBwYW5lIHRvIGdldCB0byB0aGUgc291cmNlIGNvZGUuIEl0J3MgYWJpbGl0
+eSB0byBjcm9zcyByZWZlcmVuY2UgaXMgdGhlIGJlc3Qgb3V0IHRoZXJlLiBJdCBlbGltaW5hdGVz
+IGFsbCB0aGUgZmFsc2UgcG9zaXRpdmVzIGluIGNyb3NzIHJlZmVyZW5jZSByZXN1bHRzIHRoYXQg
+eW91IGdldCBmcm9tIG1vcmUgdHJhZGl0aW9uYWwgdG9rZW4gbWF0Y2hpbmcgYmFzZWQgYnJvd3Nl
+cnMgbGlrZSBjc2NvcGUsIGN0YWdzLCBldGMuDQoNCkplZmYgSGFyYW4NCiANCj4gT24gV2VkLCBE
+ZWMgMTYsIDIwMTUgYXQgMTI6MzIgQU0sIEplZmYgSGFyYW4gPEplZmYuSGFyYW5AY2l0cml4LmNv
+bT4NCj4gd3JvdGU6DQo+ID4+LS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4gPj5Gcm9tOiBr
+ZXJuZWxuZXdiaWVzLQ0KPiBib3VuY2VzK2poYXJhbj1ieXRlbW9iaWxlLmNvbUBrZXJuZWxuZXdi
+aWVzLm9yZw0KPiA+PlttYWlsdG86a2VybmVsbmV3Ymllcy0NCj4gPj5ib3VuY2VzK2poYXJhbj1i
+eXRlbW9iaWxlLmNvbUBrZXJuZWxuZXdiaWVzLm9yZ10gT24gQmVoYWxmIE9mDQo+ID4+cGF2aTE3
+MjkNCj4gPj5TZW50OiBNb25kYXksIERlY2VtYmVyIDE0LCAyMDE1IDExOjAzIFBNDQo+ID4+VG86
+IGtlcm5lbG5ld2JpZXNAa2VybmVsbmV3Ymllcy5vcmc7IGxpbnV4LWZzZGV2ZWxAdmdlci5rZXJu
+ZWwub3JnOw0KPiA+PmxpbnV4LSBtbWNAdmdlci5rZXJuZWwub3JnOyBsaW51eC1uZXRkZXZAdmdl
+ci5rZXJuZWwub3JnDQo+ID4+U3ViamVjdDogRG9lcyB0aGUgQ29tbXVuaXR5IHVzZSBDb3Zlcml0
+eSA/DQo+ID4+DQo+ID4+SGksDQo+ID4+ICBNYXkgSSBrbm93IGlmIHRoZSBjb21tdW5pdHkgdXNl
+cyB0aGUgQ292ZXJpdHkgdG9vbCBhbmQsIGlmIHllcyB3aGVyZQ0KPiA+PmNhbiBJIGZpbmQgYSBy
+ZXBvIG9mIENvdmVyaXR5IHNjYW5zIG9mIGtlcm5lbHMgYW5kIElHTk9SRSBMSVNUOyBjYXVzZQ0K
+PiA+PnRoZXJlIG9idmlvdXNseSB3b3VsZCBiZSBmYWxzZSBwb3NpdGl2ZXMuDQo+ID4+DQo+ID4+
+Q2hlZXJzLA0KPiA+PlBhdmkNCj4gPg0KPiA+IGh0dHBzOi8vc2Nhbi5jb3Zlcml0eS5jb20vDQo+
+ID4NCj4gPiBTaWduIHVwIGZvciBhbiBhY2NvdW50IGFuZCBqb2luIHRoZSBMaW51eCBwcm9qZWN0
+Lg0KPiA+DQo+ID4gSmVmZiBIYXJhbg0KPiA+DQo=
