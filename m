@@ -1,16 +1,16 @@
 From: Russell King <rmk+kernel@arm.linux.org.uk>
-Subject: [PATCH v2 20/24] mmc: sdhci: fix data timeout (part 1)
-Date: Mon, 21 Dec 2015 11:42:04 +0000
-Message-ID: <E1aAyqq-00017u-7Q@rmk-PC.arm.linux.org.uk>
+Subject: [PATCH v2 21/24] mmc: sdhci: fix data timeout (part 2)
+Date: Mon, 21 Dec 2015 11:42:09 +0000
+Message-ID: <E1aAyqv-000180-BU@rmk-PC.arm.linux.org.uk>
 References: <20151221113956.GA3712@n2100.arm.linux.org.uk>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 8bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from pandora.arm.linux.org.uk ([78.32.30.218]:39748 "EHLO
+Received: from pandora.arm.linux.org.uk ([78.32.30.218]:39754 "EHLO
 	pandora.arm.linux.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751811AbbLULmv (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 21 Dec 2015 06:42:51 -0500
+	with ESMTP id S1751818AbbLULmw (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 21 Dec 2015 06:42:52 -0500
 In-Reply-To: <20151221113956.GA3712@n2100.arm.linux.org.uk>
 Content-Disposition: inline
 Sender: linux-mmc-owner@vger.kernel.org
@@ -18,30 +18,50 @@ List-Id: linux-mmc@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>
 Cc: Marcin Wojtas <mw@semihalf.com>, Gregory CLEMENT <gregory.clement@free-electrons.com>, Shawn Guo <shawnguo@kernel.org>, Sascha Hauer <kernel@pengutronix.de>, linux-mmc@vger.kernel.org
 
-The data timeout gives the minimum amount of time that should be
-waited before timing out if no data is received from the card.
-Simply dividing the nanosecond part by 1000 does not give this
-required guarantee, since such a division rounds down.  Use
-DIV_ROUND_UP() to give the desired timeout.
+The calculation for the timeout based on the number of card clocks is
+incorrect.  The calculation assumed:
+
+	timeout in microseconds = clock cycles / clock in Hz
+
+which is clearly a several orders of magnitude wrong.  Fix this by
+multiplying the clock cycles by 1000000 prior to dividing by the Hz
+based clock.  Also, as per part 1, ensure that the division rounds
+up.
+
+As this needs 64-bit math via do_div(), avoid it if the clock cycles
+is zero.
 
 Signed-off-by: Russell King <rmk+kernel@arm.linux.org.uk>
 ---
- drivers/mmc/host/sdhci.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+ drivers/mmc/host/sdhci.c | 15 +++++++++++++--
+ 1 file changed, 13 insertions(+), 2 deletions(-)
 
 diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 9ecac99ae7e2..82e799fde113 100644
+index 82e799fde113..65b230ea179e 100644
 --- a/drivers/mmc/host/sdhci.c
 +++ b/drivers/mmc/host/sdhci.c
-@@ -630,7 +630,7 @@ static u8 sdhci_calc_timeout(struct sdhci_host *host, struct mmc_command *cmd)
- 	if (!data)
+@@ -631,8 +631,19 @@ static u8 sdhci_calc_timeout(struct sdhci_host *host, struct mmc_command *cmd)
  		target_timeout = cmd->busy_timeout * 1000;
  	else {
--		target_timeout = data->timeout_ns / 1000;
-+		target_timeout = DIV_ROUND_UP(data->timeout_ns, 1000);
- 		if (host->clock)
- 			target_timeout += data->timeout_clks / host->clock;
+ 		target_timeout = DIV_ROUND_UP(data->timeout_ns, 1000);
+-		if (host->clock)
+-			target_timeout += data->timeout_clks / host->clock;
++		if (host->clock && data->timeout_clks) {
++			unsigned long long val;
++
++			/*
++			 * data->timeout_clks is in units of clock cycles.
++			 * host->clock is in Hz.  target_timeout is in us.
++			 * Hence, us = 1000000 * cycles / Hz.  Round up.
++			 */
++			val = 1000000 * data->timeout_clks;
++			if (do_div(val, host->clock))
++				target_timeout++;
++			target_timeout += val;
++		}
  	}
+ 
+ 	/*
 -- 
 2.1.0
 
