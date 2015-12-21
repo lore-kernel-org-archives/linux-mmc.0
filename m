@@ -1,16 +1,16 @@
 From: Russell King <rmk+kernel@arm.linux.org.uk>
-Subject: [PATCH v2 06/24] mmc: sdhci: clean up command error handling
-Date: Mon, 21 Dec 2015 11:40:52 +0000
-Message-ID: <E1aAypg-00016L-EL@rmk-PC.arm.linux.org.uk>
+Subject: [PATCH v2 07/24] mmc: sdhci: command response CRC error handling
+Date: Mon, 21 Dec 2015 11:40:57 +0000
+Message-ID: <E1aAypl-00016T-IM@rmk-PC.arm.linux.org.uk>
 References: <20151221113956.GA3712@n2100.arm.linux.org.uk>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 8bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from pandora.arm.linux.org.uk ([78.32.30.218]:39692 "EHLO
+Received: from pandora.arm.linux.org.uk ([78.32.30.218]:39700 "EHLO
 	pandora.arm.linux.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751484AbbLULlG (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 21 Dec 2015 06:41:06 -0500
+	with ESMTP id S1751484AbbLULlO (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 21 Dec 2015 06:41:14 -0500
 In-Reply-To: <20151221113956.GA3712@n2100.arm.linux.org.uk>
 Content-Disposition: inline
 Sender: linux-mmc-owner@vger.kernel.org
@@ -18,34 +18,56 @@ List-Id: linux-mmc@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>
 Cc: Marcin Wojtas <mw@semihalf.com>, Gregory CLEMENT <gregory.clement@free-electrons.com>, Shawn Guo <shawnguo@kernel.org>, Sascha Hauer <kernel@pengutronix.de>, linux-mmc@vger.kernel.org
 
-Avoid multiple tests while handling a command error; simplify the code.
+When we get a response CRC error on a command, it means that the
+response we received back from the card was not correct.  It does not
+mean that the card did not receive the command correctly.  If the
+command is one which initiates a data transfer, the card can enter the
+data transfer state, and start sending data.
+
+Moreover, if the request contained a data phase, we do not clean this
+up, and this results in the driver triggering DMA API debug warnings,
+and also creates a race condition in the driver, between running the
+finish_tasklet and the data transfer interrupts, which can trigger a
+"Got data interrupt" state dump.
+
+Fix this by handing a response CRC error slightly differently: record
+the failure of the data initiating command, but allow the remainder of
+the request to be processed normally.  This is safe as core MMC checks
+the status of all commands and data transfer phases of the request.
+
+If the card does not initiate a data transfer, then we should time out
+according to the data transfer parameters.
 
 Signed-off-by: Russell King <rmk+kernel@arm.linux.org.uk>
 ---
- drivers/mmc/host/sdhci.c | 12 ++++++------
- 1 file changed, 6 insertions(+), 6 deletions(-)
+ drivers/mmc/host/sdhci.c | 17 +++++++++++++++++
+ 1 file changed, 17 insertions(+)
 
 diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 86e0e847fcc8..86310b162304 100644
+index 86310b162304..3e718e465a1b 100644
 --- a/drivers/mmc/host/sdhci.c
 +++ b/drivers/mmc/host/sdhci.c
-@@ -2333,13 +2333,13 @@ static void sdhci_cmd_irq(struct sdhci_host *host, u32 intmask, u32 *mask)
- 		return;
- 	}
+@@ -2340,6 +2340,23 @@ static void sdhci_cmd_irq(struct sdhci_host *host, u32 intmask, u32 *mask)
+ 		else
+ 			host->cmd->error = -EILSEQ;
  
--	if (intmask & SDHCI_INT_TIMEOUT)
--		host->cmd->error = -ETIMEDOUT;
--	else if (intmask & (SDHCI_INT_CRC | SDHCI_INT_END_BIT |
--			SDHCI_INT_INDEX))
--		host->cmd->error = -EILSEQ;
-+	if (intmask & (SDHCI_INT_TIMEOUT | SDHCI_INT_CRC |
-+		       SDHCI_INT_END_BIT | SDHCI_INT_INDEX)) {
-+		if (intmask & SDHCI_INT_TIMEOUT)
-+			host->cmd->error = -ETIMEDOUT;
-+		else
-+			host->cmd->error = -EILSEQ;
- 
--	if (host->cmd->error) {
++		/*
++		 * If this command initiates a data phase and a response
++		 * CRC error is signalled, the card can start transferring
++		 * data - the card may have received the command without
++		 * error.  We must not terminate the request early.
++		 *
++		 * If the card did not receive the command, the data phase
++		 * will time out.
++		 *
++		 * FIXME: we also need to clean up the data phase if any
++		 * command fails, not just the data initiating command.
++		 */
++		if (host->cmd->data && intmask & SDHCI_INT_CRC) {
++			host->cmd = NULL;
++			return;
++		}
++
  		tasklet_schedule(&host->finish_tasklet);
  		return;
  	}
