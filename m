@@ -1,44 +1,77 @@
-From: Carlo Caione <carlo@caione.org>
-Subject: Re: [PATCH] mmc: core: Enable tuning according to the actual timing
-Date: Sun, 20 Dec 2015 12:51:04 +0100
-Message-ID: <CAOQ7t2ZEQborWOvEbVSbqp227N_kAPfqD=YO8fN5k5hr7ybt5Q@mail.gmail.com>
-References: <1450474474-2666-1-git-send-email-carlo@caione.org>
+From: Ruben Safir <ruben@mrbrklyn.com>
+Subject: Re: Does the Community use Coverity ?
+Date: Mon, 21 Dec 2015 02:16:38 -0500
+Message-ID: <20151221071638.GA29909@www.mrbrklyn.com>
+References: <CAMf7+LiLgPcNSMOGhV=i=6FV5VwrM0VNXpSmPci7xU9EBc0Sgg@mail.gmail.com>
+	<4E5779AD88B2F040B8A7E83ECF544D1A64A4CF@SJCPEX01CL03.citrite.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wm0-f50.google.com ([74.125.82.50]:34764 "EHLO
-	mail-wm0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754262AbbLTLvF (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 20 Dec 2015 06:51:05 -0500
-Received: by mail-wm0-f50.google.com with SMTP id l126so37323035wml.1
-        for <linux-mmc@vger.kernel.org>; Sun, 20 Dec 2015 03:51:05 -0800 (PST)
-In-Reply-To: <1450474474-2666-1-git-send-email-carlo@caione.org>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <kernelnewbies-bounces@kernelnewbies.org>
+Content-Disposition: inline
+In-Reply-To: <4E5779AD88B2F040B8A7E83ECF544D1A64A4CF@SJCPEX01CL03.citrite.net>
+List-Unsubscribe: <http://lists.kernelnewbies.org/mailman/listinfo/kernelnewbies>,
+	<mailto:kernelnewbies-request@kernelnewbies.org?subject=unsubscribe>
+List-Archive: <http://lists.kernelnewbies.org/pipermail/kernelnewbies>
+List-Post: <mailto:kernelnewbies@kernelnewbies.org>
+List-Help: <mailto:kernelnewbies-request@kernelnewbies.org?subject=help>
+List-Subscribe: <http://lists.kernelnewbies.org/mailman/listinfo/kernelnewbies>,
+	<mailto:kernelnewbies-request@kernelnewbies.org?subject=subscribe>
+Sender: kernelnewbies-bounces@kernelnewbies.org
+Errors-To: kernelnewbies-bounces@kernelnewbies.org
+To: Jeff Haran <Jeff.Haran@citrix.com>
+Cc: "linux-fsdevel@vger.kernel.org" <linux-fsdevel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, pavi1729 <pavitra1729@gmail.com>, "linux-netdev@vger.kernel.org" <linux-netdev@vger.kernel.org>, "kernelnewbies@kernelnewbies.org" <kernelnewbies@kernelnewbies.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Carlo Caione <carlo@caione.org>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, "Yang, York" <weijuny@qti.qualcomm.com>, Barry Song <21cnbao@gmail.com>, linux-mmc <linux-mmc@vger.kernel.org>, linux-arm-kernel <linux-arm-kernel@lists.infradead.org>, jh80.chung@samsung.com, "Song, Barry" <baohuas@qti.qualcomm.com>, Carlo Caione <carlo@endlessm.com>
 
-On Fri, Dec 18, 2015 at 10:34 PM, Carlo Caione <carlo@caione.org> wrote:
-> From: Carlo Caione <carlo@endlessm.com>
->
-> While in sdhci_execute_tuning() the choice whether or not to enable the
-> tuning is done on the actual timing, in the mmc_sdio_init_uhs_card() the
-> check is done on the capability of the card.
->
-> This difference is causing some issues with some SDIO cards in DDR50
-> mode where the CDM19 is wrongly issued.
->
-> With this patch we modify the check in both
-> mmc_(sd|sdio)_init_uhs_card() functions to take the proper decision
-> only according to the actual timing specification.
->
-> Signed-off-by: Carlo Caione <carlo@endlessm.com>
+In 2006, the Coverity Scan service was initiated with the U.S. Department of Homeland Security 
 
-Uhm, apparently this is causing some issues with the eMMC on another
-laptop I'm testing this patch on.
-Please, disregard this patch. I'll post a v2 once I understand what's going on.
 
-Thanks,
+leaves a warm and fuzzy feeling
+
+
+
+On Tue, Dec 15, 2015 at 07:02:42PM +0000, Jeff Haran wrote:
+> >-----Original Message-----
+> >From: kernelnewbies-bounces+jharan=bytemobile.com@kernelnewbies.org
+> >[mailto:kernelnewbies-
+> >bounces+jharan=bytemobile.com@kernelnewbies.org] On Behalf Of
+> >pavi1729
+> >Sent: Monday, December 14, 2015 11:03 PM
+> >To: kernelnewbies@kernelnewbies.org; linux-fsdevel@vger.kernel.org; linux-
+> >mmc@vger.kernel.org; linux-netdev@vger.kernel.org
+> >Subject: Does the Community use Coverity ?
+> >
+> >Hi,
+> >  May I know if the community uses the Coverity tool and, if yes where can I
+> >find a repo of Coverity scans of kernels and IGNORE LIST; cause there
+> >obviously would be false positives.
+> >
+> >Cheers,
+> >Pavi
+> 
+> https://scan.coverity.com/
+> 
+> Sign up for an account and join the Linux project.
+> 
+> Jeff Haran
+> 
+> 
+> _______________________________________________
+> Kernelnewbies mailing list
+> Kernelnewbies@kernelnewbies.org
+> http://lists.kernelnewbies.org/mailman/listinfo/kernelnewbies
 
 -- 
-Carlo Caione
+So many immigrant groups have swept through our town
+that Brooklyn, like Atlantis, reaches mythological
+proportions in the mind of the world - RI Safir 1998
+http://www.mrbrklyn.com 
+
+DRM is THEFT - We are the STAKEHOLDERS - RI Safir 2002
+http://www.nylxs.com - Leadership Development in Free Software
+http://www2.mrbrklyn.com/resources - Unpublished Archive 
+http://www.coinhangout.com - coins!
+http://www.brooklyn-living.com 
+
+Being so tracked is for FARM ANIMALS and and extermination camps, 
+but incompatible with living as a free human being. -RI Safir 2013
