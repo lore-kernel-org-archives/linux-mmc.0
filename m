@@ -1,88 +1,190 @@
-From: Olof Johansson <olofj@chromium.org>
-Subject: Re: [RFC 0/6] mmc: Field Firmware Update
-Date: Tue, 22 Dec 2015 10:44:49 -0800
-Message-ID: <CALiw-2Eisj-WDB3hcsB22MTzHDS7y+V3gvTvq_+Jt8PKMa5GMg@mail.gmail.com>
-References: <1447426572-11756-1-git-send-email-holgerschurig@gmail.com>
-	<SN1PR02MB13891415516DE9FA4756140783070@SN1PR02MB1389.namprd02.prod.outlook.com>
-	<CAOpc7mHbM8EYYNRKR+pKnzc0wf1DR1ojX-iFuDWDYyquC3EVZg@mail.gmail.com>
-	<CAPDyKFp2WEVF4yi=Upzx+58SY15u=Fp4=tr3_hh7AS3T2yz4qQ@mail.gmail.com>
-	<87r3ierjae.fsf@gmail.com>
-	<CAPDyKFpgYLDRt8=mayqB8sqD0ArXnv31a+fTZAnT_4Vf7yuFwQ@mail.gmail.com>
-	<CAPDyKFq5wNARNpDMK0_TJ3P64UAsCr_L42sj+JA-k6DdoFBJsw@mail.gmail.com>
+From: Scott Branden <sbranden@broadcom.com>
+Subject: Re: [PATCHv2 4/5] mmc: shdci-bcm2835: add verify for 32-bit
+ back-to-back workaround
+Date: Tue, 22 Dec 2015 11:23:37 -0800
+Message-ID: <5679A339.9000302@broadcom.com>
+References: <Scott Branden <sbranden@broadcom.com>
+ <1414651017-3545-1-git-send-email-sbranden@broadcom.com>
+ <1414651017-3545-5-git-send-email-sbranden@broadcom.com>
+ <5459AECF.8000402@wwwdotorg.org> <5459CB17.3020303@broadcom.com>
+ <545B00B9.5090108@wwwdotorg.org> <545D1006.5040705@broadcom.com>
+ <5679726A.1070300@lategoodbye.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="windows-1252"; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ig0-f177.google.com ([209.85.213.177]:36999 "EHLO
-	mail-ig0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754983AbbLVSou (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 22 Dec 2015 13:44:50 -0500
-Received: by mail-ig0-f177.google.com with SMTP id to18so63401689igc.0
-        for <linux-mmc@vger.kernel.org>; Tue, 22 Dec 2015 10:44:50 -0800 (PST)
-In-Reply-To: <CAPDyKFq5wNARNpDMK0_TJ3P64UAsCr_L42sj+JA-k6DdoFBJsw@mail.gmail.com>
+Received: from mail-gw3-out.broadcom.com ([216.31.210.64]:63525 "EHLO
+	mail-gw3-out.broadcom.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932682AbbLVTYM (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 22 Dec 2015 14:24:12 -0500
+In-Reply-To: <5679726A.1070300@lategoodbye.de>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Holger Schurig <holgerschurig@gmail.com>, Avi Shchislowski <Avi.Shchislowski@sandisk.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Alex Lemberg <Alex.Lemberg@sandisk.com>, Chris Ball <chris@printf.net>, Baolin Wang <baolin.wang@linaro.org>, Gwendal Grignou <gwendal@chromium.org>, Grant Grundler <grundler@chromium.org>, Seshagiri Holi <sholi@nvidia.com>, Jon Hunter <jonathanh@nvidia.com>
+To: Stefan Wahren <info@lategoodbye.de>, Stephen Warren <swarren@wwwdotorg.org>, Ulf Hansson <ulf.hansson@linaro.org>, Russell King <rmk+kernel@arm.linux.org.uk>, Peter Griffin <peter.griffin@linaro.org>, Chris Ball <chris@printf.net>, Piotr Krol <pietrushnic@gmail.com>
+Cc: Ray Jui <rjui@broadcom.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, bcm-kernel-feedback-list@broadcom.com, linux-rpi-kernel@lists.infradead.org, Joe Perches <joe@perches.com>
 
-[sigh, in cleartext this time.]
+Hi Stefan,
 
-
-2015-12-22 0:57 GMT-08:00 Ulf Hansson <ulf.hansson@linaro.org>:
-> + Olof (forgot to add him last time)
+On 15-12-22 07:55 AM, Stefan Wahren wrote:
+> Hi Scott,
 >
-> On 22 December 2015 at 09:55, Ulf Hansson <ulf.hansson@linaro.org> wrote:
->> + Gwendal, Grant, Olof, Seshagiri, Jon
->>
->> On 22 December 2015 at 09:15, Holger Schurig <holgerschurig@gmail.com> wrote:
->>>
->>>> Sorry for the delay.
->>>
->>> No problem, I was busy with many other projects as well.
->>>
->>>> My advise right now is to try this out via the mmc ioctl in userspace,
->>>> yes. Although, if you encounter any issues with that approach that it
->>>> might not be reliable, I am open to look into the in-kernel solution
->>>> again.
->>>
->>> I managed to update my Kingston eMMCs with a slighly modified patch to
->>> what I submitted. I however didn't bother to submit this, as I saw no
->>> chance of getting it applied.
->>>
->>> Also I once asked in the mailing list if there is some user-space
->>> example of how to use the multi-block feature that is supposed to enable
->>> this, but I haven't gotten an answer.
->>>
->>>> Regarding mmc-utils as where I recommend you to implement this, I have
->>>> been thinking of moving this tool into the tools directory in the
->>>> kernel.
->>>
->>> Sounds good to me.
->>>
->>>
->>>
->>> Remotely related:
->>>
->>> Do you know that some google people made their own version of mmc-utils
->>> for ChromeOS?
+> Am 07.11.2014 um 19:31 schrieb Scott Branden:
+>> On 14-11-05 09:01 PM, Stephen Warren wrote:
+>>> On 11/05/2014 12:00 AM, Scott Branden wrote:
+>>>> On 14-11-04 08:59 PM, Stephen Warren wrote:
+>>>>> On 10/30/2014 12:36 AM, Scott Branden wrote:
+>>>>>> Add a verify option to driver to print out an error message if a
+>>>>>> potential back to back write could cause a clock domain issue.
+>>>>>
+>>>>>> index f8c450a..11af27f 100644
+>>>>>
+>>>>>> +#ifdef CONFIG_MMC_SDHCI_BCM2835_VERIFY_WORKAROUND
+>>>>>> +    struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+>>>>>> +    struct bcm2835_sdhci_host *bcm2835_host = pltfm_host->priv;
+>>>>>> +
+>>>>>> +    if (bcm2835_host->previous_reg == reg) {
+>>>>>> +        if ((reg != SDHCI_HOST_CONTROL)
+>>>>>> +            && (reg != SDHCI_CLOCK_CONTROL)) {
+>>>>>
+>>>>> The comment in patch 3 says the problem doesn't apply to the data
+>>>>> register. Why does this check for these two registers rather than data?
+>>>> This Verify workaround patch still a work in progress.  I'm still
+>>>> getting more info from the silicon designers on the back-to-back
+>>>> register writes that are affect.  The spew of 0x20 or 0x28 or 0x2c
+>>>> register writes are all ok locations that don't need to be worked
+>>>> around.  This patch needs to be corrected with the proper register rules
+>>>> still.
+>> Thanks for testing.  Yes, I have work to do on the verify patch above
+>> still.
+>
+> do you still have plans to submit a V3 of this patch series?
+No, I do not have plans to submit a V3 of this patch series.
 
-"Make their own version" makes it sound like we've rewritten it. We
-haven't. We've applied some patches locally over the last two years
-based on work we've done for our products. It's not a deep fork.
+I submitted this patch as RPI has a similar controller to the SoCs I am 
+familiar with as well as needing similar work arounds   You can take 
+over the patchset.  Or, try and get the sdhci-iproc.c driver going on 
+RPI.  The sdhci-iproc is the production driver we use on a variety of 
+SoCs and support and test this driver.
+>
+> I attached an improved version of this patch which avoids a possible
+> endless loop caused by the dev_err call. So only the first occurence
+> of a specific register will be logged.
+OK, but is this really necessary?  If veryify workaround ever prints 
+anything then the driver workarounds aren't doing what it is supposed to 
+anyway?
+>
+> Regards
+> Stefan
+>
+>
+> -------------------8<-------------------------------------------
+>
+> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+> index 1526b8a..7b0990f 100644
+> --- a/drivers/mmc/host/Kconfig
+> +++ b/drivers/mmc/host/Kconfig
+> @@ -306,6 +306,15 @@ config MMC_SDHCI_BCM2835
+>
+>   	  If unsure, say N.
+>
+> +config MMC_SDHCI_BCM2835_VERIFY_WORKAROUND
+> +	bool "Verify BCM2835 workaround does not do back to back writes"
+> +	depends on MMC_SDHCI_BCM2835
+> +	default y
+> +	help
+> +	  This enables code that verifies the bcm2835 workaround.
+> +	  The verification code checks that back to back writes to the same
+> +	  register do not occur.
+> +
+>   config MMC_SDHCI_F_SDH30
+>   	tristate "SDHCI support for Fujitsu Semiconductor F_SDH30"
+>   	depends on MMC_SDHCI_PLTFM
+> diff --git a/drivers/mmc/host/sdhci-bcm2835.c
+> b/drivers/mmc/host/sdhci-bcm2835.c
+> index 01ce193d..c1c70df 100644
+> --- a/drivers/mmc/host/sdhci-bcm2835.c
+> +++ b/drivers/mmc/host/sdhci-bcm2835.c
+> @@ -20,15 +20,27 @@
+>    */
+>
+>   #include <linux/delay.h>
+> +#include <linux/hashtable.h>
+>   #include <linux/module.h>
+>   #include <linux/mmc/host.h>
+> +#include <linux/slab.h>
+>   #include "sdhci-pltfm.h"
+>
+>   struct bcm2835_sdhci_host {
+>   	u32 shadow_cmd;
+>   	u32 shadow_blk;
+> +	int previous_reg;
+>   };
+>
+> +struct reg_hash {
+> +	struct hlist_node node;
+> +	int reg;
+> +};
+> +
+> +#define BCM2835_REG_HT_BITS 4
+> +
+> +static DEFINE_HASHTABLE(bcm2835_used_regs, BCM2835_REG_HT_BITS);
+> +
+>   #define REG_OFFSET_IN_BITS(reg) ((reg) << 3 & 0x18)
+>
+>   static inline u32 bcm2835_sdhci_readl(struct sdhci_host *host, int reg)
+> @@ -56,8 +68,37 @@ static u8 bcm2835_sdhci_readb(struct sdhci_host
+> *host, int reg)
+>   }
+>
+>   static inline void bcm2835_sdhci_writel(struct sdhci_host *host,
+> +					u32 val, int reg)
+> +{
+> +	writel(val, host->ioaddr + reg);
+> +}
+> +
+> +static inline void bcm2835_sdhci_writel_verify(struct sdhci_host *host,
+>   						u32 val, int reg)
+>   {
+> +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+> +	struct bcm2835_sdhci_host *bcm2835_host = pltfm_host->priv;
+> +	struct reg_hash *rh;
+> +	struct hlist_head *head;
+> +
+> +	head = &bcm2835_used_regs[hash_min(reg, BCM2835_REG_HT_BITS)];
+> +
+> +	if (bcm2835_host->previous_reg == reg) {
+> +		if ((reg != SDHCI_HOST_CONTROL) &&
+> +		    (reg != SDHCI_CLOCK_CONTROL) &&
+> +		    (hlist_empty(head))) {
+> +			rh = kzalloc(sizeof(*rh), GFP_KERNEL);
+> +			if (WARN_ON(!rh))
+> +				return;
+> +
+> +			rh->reg = reg;
+> +			hash_add(bcm2835_used_regs, &rh->node, rh->reg);
+> +			dev_err(mmc_dev(host->mmc), "back-to-back write to 0x%x\n",
+> +				reg);
+> +		}
+> +	}
+> +	bcm2835_host->previous_reg = reg;
+> +
+>   	writel(val, host->ioaddr + reg);
+>   }
+>
+> @@ -131,7 +172,11 @@ static const struct sdhci_ops bcm2835_sdhci_ops = {
+>   	.read_l = bcm2835_sdhci_readl,
+>   	.read_w = bcm2835_sdhci_readw,
+>   	.read_b = bcm2835_sdhci_readb,
+> +#ifdef CONFIG_MMC_SDHCI_BCM2835_VERIFY_WORKAROUND
+> +	.write_l = bcm2835_sdhci_writel_verify,
+> +#else
+>   	.write_l = bcm2835_sdhci_writel,
+> +#endif
+>   	.write_w = bcm2835_sdhci_writew,
+>   	.write_b = bcm2835_sdhci_writeb,
+>   	.set_clock = sdhci_set_clock,
+>
+>
+>
+>
 
-We'd be happy to upstream them if there's interest from other users
-and maintainers.
-
->> Perhaps by moving the code into the kernel tools dir and finding
->> someone who actively wants to maintain it, will enable improved
->> upstream activities!?
-
-
-Hmm. If there's a well-defined userspace interface there's little
-reason to bundle it directly, and I think that's the case here.
-
-Chris has been busy with other stuff the last couple of years, is
-there a lot of mmc-utils code that's out there that hasn't been picked
-up?
-
-
--Olof
