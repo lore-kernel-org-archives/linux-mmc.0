@@ -1,70 +1,82 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: BUG 4.4rc-4: wrong eMMC signaling voltage reported
-Date: Tue, 22 Dec 2015 11:28:46 +0100
-Message-ID: <CAPDyKFqQ-NEPh5hC=YpiqDzDAeoRmdTEFMumAosozuo=BVO-kw@mail.gmail.com>
-References: <87fuzbvfl9.fsf@gmail.com>
-	<CAPDyKFoQqQFmPwrnCeJBcz=mnzW8zbWb5i7bc64oo7bN_113zQ@mail.gmail.com>
-	<CAOMZO5B3WpJRYD7CRX54G0NeWj_BxNL5dB+KjG=YttDHQTx3vQ@mail.gmail.com>
+Subject: Re: [PATCH v2 00/24] MMC/SDHCI fixes
+Date: Tue, 22 Dec 2015 12:25:53 +0100
+Message-ID: <CAPDyKFqT=6JmN9+Jmn1_EFPkiaMYMiX3+YkTb2jBQgdOKaAi1w@mail.gmail.com>
+References: <20151221113956.GA3712@n2100.arm.linux.org.uk>
+	<CAPDyKFogxmczEzXbXACrfn4F2wfM=ZKPVnpK8WSLJA3UT5SKiw@mail.gmail.com>
+	<20151221125120.GZ8644@n2100.arm.linux.org.uk>
+	<CAPDyKFrxJBAiic44VRWRW-53vz6GqosH+6_qbFSgQnJ5aew=BQ@mail.gmail.com>
+	<20151221134138.GB8644@n2100.arm.linux.org.uk>
+	<CAPDyKFqwKKr5fDfMf5aQcdKOkO7GkLym8Yu3-pCMexCN_2M4=A@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-yk0-f176.google.com ([209.85.160.176]:34667 "EHLO
+Received: from mail-yk0-f176.google.com ([209.85.160.176]:36443 "EHLO
 	mail-yk0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751481AbbLVK2r (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 22 Dec 2015 05:28:47 -0500
-Received: by mail-yk0-f176.google.com with SMTP id p130so159192267yka.1
-        for <linux-mmc@vger.kernel.org>; Tue, 22 Dec 2015 02:28:47 -0800 (PST)
-In-Reply-To: <CAOMZO5B3WpJRYD7CRX54G0NeWj_BxNL5dB+KjG=YttDHQTx3vQ@mail.gmail.com>
+	with ESMTP id S1751108AbbLVLZy (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 22 Dec 2015 06:25:54 -0500
+Received: by mail-yk0-f176.google.com with SMTP id x184so161692833yka.3
+        for <linux-mmc@vger.kernel.org>; Tue, 22 Dec 2015 03:25:54 -0800 (PST)
+In-Reply-To: <CAPDyKFqwKKr5fDfMf5aQcdKOkO7GkLym8Yu3-pCMexCN_2M4=A@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Fabio Estevam <festevam@gmail.com>
-Cc: Holger Schurig <holgerschurig@gmail.com>, linux-mmc <linux-mmc@vger.kernel.org>
+To: Russell King - ARM Linux <linux@arm.linux.org.uk>
+Cc: Gregory CLEMENT <gregory.clement@free-electrons.com>, linux-mmc <linux-mmc@vger.kernel.org>, Marcin Wojtas <mw@semihalf.com>, Shawn Guo <shawnguo@kernel.org>, Sascha Hauer <kernel@pengutronix.de>
 
-On 22 December 2015 at 10:39, Fabio Estevam <festevam@gmail.com> wrote:
-> Hi Ulf and Holger,
->
-> On Thu, Dec 17, 2015 at 2:10 PM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
->
->> The no-1-8-v is a somewhat broken DT binding. I advise people to not
->> use any more.
->> Depending on the sdhci variant it have different meanings.
+On 21 December 2015 at 14:59, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+> On 21 December 2015 at 14:41, Russell King - ARM Linux
+> <linux@arm.linux.org.uk> wrote:
+>> On Mon, Dec 21, 2015 at 02:23:17PM +0100, Ulf Hansson wrote:
+>>> On 21 December 2015 at 13:51, Russell King - ARM Linux
+>>> <linux@arm.linux.org.uk> wrote:
+>>> > On Mon, Dec 21, 2015 at 01:35:36PM +0100, Ulf Hansson wrote:
+>>> >> I decided to try to apply it for my next branch, to get some good test
+>>> >> coverage. Although, it failed when reaching patch 8. Would you mind
+>>> >> posting yet another new re-based version, please.
+>>> >
+>>> > Given that these are _fixes_ and need to be applied to -rc kernels, they
+>>> > are based on -rc6.  I don't see the point of rebasing them onto non-rc
+>>> > kernels to test, because then you're not testing against where they
+>>> > should be applied.
+>>>
+>>> I see your point, but I would rather not aim for rcs with these
+>>> changes, unless you insist.
+>>>
+>>> Not because they aren't fixes, but because it's old errors. Instead we
+>>> can "cc stable" or use the fixes tag as we are in quite late stage of
+>>> the rc. This approach will also allow us to get a bit better test
+>>> coverage.
 >>
->> I guess you are using the sdhci-esdhc-imx variant, which means
->> no-1-8-v will disable UHS modes for SD-cards (those requiring 1.8V
->> signal voltage). It has no impact on (e)MMC.
+>> Even if we do this, we still need to get _these_ tested because _these_
+>> will be the ones which need to be applied to stable trees such as the
+>> 4.4 stable series.
 >>
->> As the host driver announces support for MMC_CAP_1_8V_DDR, that's what
->> the mmc core will try to use. Actually the mmc core will first try
->> 1.8V and if it fails, go for 3.3V.
+>> What I suggest is applying them against -rc6, and then merging them
+>> into your -next branch, and fixing the resulting conflicts.  We then
+>> have the patches ready for -rc, but which can still be tested in -next
+>> (for what that's worth.)  If people find problems, they can always
+>> re-test these patches without all the development stuff.
 >>
->> Likely, sdhci_do_start_signal_voltage_switch() will success to write
->> the corresponding registers to change the signal voltage to 1.8V,
->> which makes the mmc core believe it was a success.
->>
->> *If* your statement around that your HW don't support 1.8V signal
->> voltage, we should perhaps add new mmc cap as currently we don't have
->> a "MMC_CAP_3_3V_DDR". Although, you need to convince on that, because
->> my experience tells that quite many has misunderstood the HW design in
->> this regard.
+>> If I were to give you a set of patches suitable just for -next, then
+>> people can only test with all the development stuff included, and we'll
+>> have no idea whether any new problems are the result of development or
+>> these patches.
 >
-> Yes, I have added a 'MMC_CAP_3_3V_ONLY_DDR' in this proposal to fix
-> the same issue as Holger describes:
-> http://www.spinics.net/lists/linux-mmc/msg32285.html
->
-> ,but it seems you were not happy with such approach at that time.
-> Unfortunately, I was not able to rework it.
+> Okay! I will publish the branch as soon as I can.
 
-Yes, I had vague memory of this discussion. Thanks for pointing it out.
+Huh. The merge ends up in a quite complicated conflict to resolve for
+me. And I am running out of time.
 
-So, I think I am reaching the same consensus again. We need to move
-away from using the no-1.8-v, and thus not add any new interpretation
-of that binding.
+I have queued a quite limited amount of sdhci patches for this cycle,
+so indeed I think it's good opportunity to try out your changes right
+now.
 
-I think what I suggested as the solution here should work, right!?
+In particular, it's the following patch which I have queued for next
+that conflicts with your changes.
+"mmc: sdhci: 64-bit DMA actually has 4-byte alignment"
 
-I understand the problem with keeping DTB backwards compatible, don't
-you think sdhci-esdhc-imx can handle that internally via using a
-MMC_CAP_3_3V_DDR?
+Could you perhaps reconsider to rebase your patches on top of my next
+branch. I have also rebased my next branch on top of rc6.
 
 Kind regards
 Uffe
