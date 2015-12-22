@@ -1,10 +1,12 @@
 From: Wan Zongshun <vincent.wan@amd.com>
-Subject: [PATCH 1/3] mmc: sdhci-pci: Add AMD HS200 mode tuning function
-Date: Tue, 22 Dec 2015 11:40:06 -0500
-Message-ID: <1450802408-16354-1-git-send-email-vincent.wan@amd.com>
+Subject: [PATCH 2/3] mmc: sdhci-pci: Add platform tuning callback for amd hs200 mode
+Date: Tue, 22 Dec 2015 11:40:07 -0500
+Message-ID: <1450802408-16354-2-git-send-email-vincent.wan@amd.com>
+References: <1450802408-16354-1-git-send-email-vincent.wan@amd.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1450802408-16354-1-git-send-email-vincent.wan@amd.com>
 Sender: linux-kernel-owner@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org
 Cc: Wan Zongshun <mcuos.com@gmail.com>, Borislav Petkov <bp@suse.de>, linux-kernel@vger.kernel.org, Huang Rui <ray.huang@amd.com>, Wan Zongshun <Vincent.Wan@amd.com>
@@ -12,170 +14,115 @@ List-Id: linux-mmc@vger.kernel.org
 
 From: Wan Zongshun <Vincent.Wan@amd.com>
 
-This patch is to add software tuning functions for AMD hs200
-mode.
+AMD hs200 mode tuning mode is not compatible with standard tuning process,
+so we need .platform_execute_tuning callback support in sdhci-pci-core.c,
+this patch is to do:
+
+1. Add platform_execute_tuning callback in sdhci_pci_slot.
+2. Implement sdhci_pci_ops.platform_execute_tuning function.
 
 Signed-off-by: Wan Zongshun <Vincent.Wan@amd.com>
 ---
- drivers/mmc/host/sdhci-pci-core.c | 146 ++++++++++++++++++++++++++++++++++++++
- 1 file changed, 146 insertions(+)
+Hi Ulf,
+
+Though modifying sdhci_pci_ops to be not const that is easy to implement
+my requirement, I am not sure it is right to do this.
+
+So I just follow sdhci_pci_select_drive_strength style to add new callback:
+sdhci_pci_platform_execute_tuning.
+
+But I also met trouble in sdhci_execute_tuning of sdhci.c, I have to suppose
+only sdhci_pci_platform_execute_tuning is returning -EPERM(current code,
+my assumption is right), so that those vendor that has no
+slot->platform_execute_tuning could be skipped and go next standard
+tuning process.
+
+If you have better idea for my requirement, please correct me.
+
+Thanks!
+Wan Zongshun.
+
+---
+ drivers/mmc/host/sdhci-pci-core.c | 23 +++++++++++++++++++++++
+ drivers/mmc/host/sdhci-pci.h      |  1 +
+ drivers/mmc/host/sdhci.c          |  3 ++-
+ 3 files changed, 26 insertions(+), 1 deletion(-)
 
 diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-pci-core.c
-index 08f4a9f..01c5723 100644
+index 01c5723..e7b2bbe 100644
 --- a/drivers/mmc/host/sdhci-pci-core.c
 +++ b/drivers/mmc/host/sdhci-pci-core.c
-@@ -729,6 +729,152 @@ enum amd_chipset_gen {
- 	AMD_CHIPSET_UNKNOWN,
+@@ -905,8 +905,19 @@ static int amd_probe(struct sdhci_pci_chip *chip)
+ 	return 0;
+ }
+ 
++static int amd_probe_slot(struct sdhci_pci_slot *slot)
++{
++	struct sdhci_host *host = slot->host;
++
++	if (host->quirks2 & SDHCI_QUIRK2_CLEAR_TRANSFERMODE_REG_BEFORE_CMD)
++		slot->platform_execute_tuning = amd_execute_tuning;
++
++	return 0;
++}
++
+ static const struct sdhci_pci_fixes sdhci_amd = {
+ 	.probe		= amd_probe,
++	.probe_slot	= amd_probe_slot,
  };
  
-+struct tuning_descriptor {
-+	unsigned char tune_around;
-+	bool this_tune_ok;
-+	bool last_tune_ok;
-+	bool valid_front_end;
-+	unsigned char valid_front;
-+	unsigned char valid_window_max;
-+	unsigned char tune_low_max;
-+	unsigned char tune_low;
-+	unsigned char valid_window;
-+	unsigned char tune_result;
-+};
-+
-+#define AMD_EMMC_TUNE_REG 0xb8
-+static struct tuning_descriptor tdescriptor;
-+
-+static int tuning_reset(struct sdhci_host *host)
-+{
-+	unsigned int val;
-+	unsigned long flags;
-+
-+	spin_lock_irqsave(&host->lock, flags);
-+
-+	val = sdhci_readw(host, SDHCI_HOST_CONTROL2);
-+	val |= SDHCI_CTRL_PRESET_VAL_ENABLE | SDHCI_CTRL_EXEC_TUNING;
-+	sdhci_writew(host, val, SDHCI_HOST_CONTROL2);
-+
-+	val = sdhci_readw(host, SDHCI_HOST_CONTROL2);
-+	val &= ~SDHCI_CTRL_EXEC_TUNING;
-+	sdhci_writew(host, val, SDHCI_HOST_CONTROL2);
-+
-+	spin_unlock_irqrestore(&host->lock, flags);
-+
-+	return 0;
-+}
-+
-+static int config_tuning_phase(struct sdhci_host *host, unsigned char phase)
+ static const struct pci_device_id pci_ids[] = {
+@@ -1508,6 +1519,17 @@ static int sdhci_pci_select_drive_strength(struct sdhci_host *host,
+ 					   card_drv, drv_type);
+ }
+ 
++static int sdhci_pci_platform_execute_tuning(struct sdhci_host *host,
++					     u32 opcode)
 +{
 +	struct sdhci_pci_slot *slot = sdhci_priv(host);
-+	struct pci_dev *pdev = slot->chip->pdev;
-+	unsigned int val;
-+	unsigned long flags;
 +
-+	spin_lock_irqsave(&host->lock, flags);
++	if (!slot->platform_execute_tuning)
++		return -EPERM;
 +
-+	pci_read_config_dword(pdev, AMD_EMMC_TUNE_REG, &val);
-+	val &= ~0xf;
-+	val |= (0x10800 | phase);
-+	pci_write_config_dword(pdev, AMD_EMMC_TUNE_REG, val);
-+
-+	spin_unlock_irqrestore(&host->lock, flags);
-+
-+	return 0;
++	return slot->platform_execute_tuning(host, opcode);
 +}
 +
-+static int find_good_phase(struct sdhci_host *host)
-+{
-+	struct tuning_descriptor *td = &tdescriptor;
-+	struct sdhci_pci_slot *slot = sdhci_priv(host);
-+	struct pci_dev *pdev = slot->chip->pdev;
-+	unsigned int val;
-+	unsigned long flags;
-+
-+	spin_lock_irqsave(&host->lock, flags);
-+
-+	if (td->this_tune_ok == false)
-+		td->valid_front_end = 1;
-+
-+	if (td->valid_front_end)
-+		td->valid_front = td->valid_front;
-+	else if (td->this_tune_ok)
-+		td->valid_front = td->valid_front + 1;
-+
-+	if ((!td->this_tune_ok && td->last_tune_ok) ||
-+					(td->tune_around == 11)) {
-+		if (td->valid_window > td->valid_window_max) {
-+			td->valid_window_max = td->valid_window;
-+			td->tune_low_max = td->tune_low;
-+		}
-+	}
-+
-+	if (td->this_tune_ok) {
-+		if (!td->last_tune_ok)
-+			td->tune_low = td->tune_around;
-+		td->valid_window = td->valid_window + 1;
-+	} else {
-+		if (td->last_tune_ok)
-+			td->valid_window = 0x0;
-+	}
-+
-+	td->last_tune_ok = td->this_tune_ok;
-+
-+	if (td->tune_around == 11) {
-+		if ((td->valid_front + td->valid_window) >
-+						td->valid_window_max) {
-+			if (td->valid_front > td->valid_window)
-+				td->tune_result =
-+				((td->valid_front - td->valid_window) >> 1);
-+			else
-+				td->tune_result = td->tune_low +
-+				((td->valid_window + td->valid_front) >> 1);
-+		} else {
-+			td->tune_result =
-+				td->tune_low_max + (td->valid_window_max >> 1);
-+		}
-+
-+		if (td->tune_result > 0x0b)
-+			td->tune_result = 0x0b;
-+
-+		pci_read_config_dword(pdev, AMD_EMMC_TUNE_REG, &val);
-+		val &= ~0xf;
-+		val |= (0x10800 | td->tune_result);
-+		pci_write_config_dword(pdev, AMD_EMMC_TUNE_REG, val);
-+	}
-+
-+	spin_unlock_irqrestore(&host->lock, flags);
-+
-+	return 0;
-+}
-+
-+static int amd_execute_tuning(struct sdhci_host *host, u32 opcode)
-+{
-+	struct tuning_descriptor *td = &tdescriptor;
-+
-+	tuning_reset(host);
-+
-+	for (td->tune_around = 0; td->tune_around < 12; td->tune_around++) {
-+
-+		config_tuning_phase(host, td->tune_around);
-+
-+		if (mmc_send_tuning(host->mmc, opcode, NULL)) {
-+			td->this_tune_ok = false;
-+			host->mmc->need_retune = 0;
-+			mdelay(4);
-+		} else {
-+			td->this_tune_ok = true;
-+		}
-+
-+		find_good_phase(host);
-+	}
-+
-+	host->mmc->retune_period = 0;
-+
-+	return 0;
-+}
-+
- static int amd_probe(struct sdhci_pci_chip *chip)
- {
- 	struct pci_dev	*smbus_dev;
+ static const struct sdhci_ops sdhci_pci_ops = {
+ 	.set_clock	= sdhci_set_clock,
+ 	.enable_dma	= sdhci_pci_enable_dma,
+@@ -1516,6 +1538,7 @@ static const struct sdhci_ops sdhci_pci_ops = {
+ 	.set_uhs_signaling = sdhci_set_uhs_signaling,
+ 	.hw_reset		= sdhci_pci_hw_reset,
+ 	.select_drive_strength	= sdhci_pci_select_drive_strength,
++	.platform_execute_tuning = sdhci_pci_platform_execute_tuning,
+ };
+ 
+ /*****************************************************************************\
+diff --git a/drivers/mmc/host/sdhci-pci.h b/drivers/mmc/host/sdhci-pci.h
+index d1a0b4d..48d98f1 100644
+--- a/drivers/mmc/host/sdhci-pci.h
++++ b/drivers/mmc/host/sdhci-pci.h
+@@ -83,6 +83,7 @@ struct sdhci_pci_slot {
+ 				     struct mmc_card *card,
+ 				     unsigned int max_dtr, int host_drv,
+ 				     int card_drv, int *drv_type);
++	int (*platform_execute_tuning)(struct sdhci_host *host, u32 opcode);
+ };
+ 
+ struct sdhci_pci_chip {
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 2753b722d..2a5a6ce 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -1937,7 +1937,8 @@ static int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode)
+ 		spin_unlock_irqrestore(&host->lock, flags);
+ 		err = host->ops->platform_execute_tuning(host, opcode);
+ 		sdhci_runtime_pm_put(host);
+-		return err;
++		if (err != EPERM)
++			return err;
+ 	}
+ 
+ 	ctrl = sdhci_readw(host, SDHCI_HOST_CONTROL2);
 -- 
 1.9.1
