@@ -1,128 +1,99 @@
-From: Wan Zongshun <vincent.wan@amd.com>
-Subject: [PATCH 2/3] mmc: sdhci-pci: Add platform tuning callback for amd hs200 mode
-Date: Tue, 22 Dec 2015 11:40:07 -0500
-Message-ID: <1450802408-16354-2-git-send-email-vincent.wan@amd.com>
-References: <1450802408-16354-1-git-send-email-vincent.wan@amd.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: BUG 4.4rc-4: wrong eMMC signaling voltage reported
+Date: Tue, 22 Dec 2015 10:18:29 +0100
+Message-ID: <CAPDyKFr7kABv_Uo025FPodpzsgDEnWx1Gv8iQLJxHGD0_Z5rNw@mail.gmail.com>
+References: <87fuzbvfl9.fsf@gmail.com>
+	<CAPDyKFoQqQFmPwrnCeJBcz=mnzW8zbWb5i7bc64oo7bN_113zQ@mail.gmail.com>
+	<87poxyrige.fsf@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1450802408-16354-1-git-send-email-vincent.wan@amd.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org
-Cc: Wan Zongshun <mcuos.com@gmail.com>, Borislav Petkov <bp@suse.de>, linux-kernel@vger.kernel.org, Huang Rui <ray.huang@amd.com>, Wan Zongshun <Vincent.Wan@amd.com>
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-yk0-f171.google.com ([209.85.160.171]:33221 "EHLO
+	mail-yk0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751723AbbLVJS3 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 22 Dec 2015 04:18:29 -0500
+Received: by mail-yk0-f171.google.com with SMTP id 140so157731111ykp.0
+        for <linux-mmc@vger.kernel.org>; Tue, 22 Dec 2015 01:18:29 -0800 (PST)
+In-Reply-To: <87poxyrige.fsf@gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Holger Schurig <holgerschurig@gmail.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>
 
-From: Wan Zongshun <Vincent.Wan@amd.com>
+On 22 December 2015 at 09:33, Holger Schurig <holgerschurig@gmail.com> wrote:
+>
+>> The no-1-8-v is a somewhat broken DT binding. I advise people to not
+>> use any more.
+>> Depending on the sdhci variant it have different meanings.
+>>
+>> I guess you are using the sdhci-esdhc-imx variant, which means
+>> no-1-8-v will disable UHS modes for SD-cards (those requiring 1.8V
+>> signal voltage). It has no impact on (e)MMC.
+>
+> Correct, I'm on i.MX6 and using sdhci-esdhc-imx.
+>
+>
+>> As the host driver announces support for MMC_CAP_1_8V_DDR, that's what
+>> the mmc core will try to use. Actually the mmc core will first try
+>> 1.8V and if it fails, go for 3.3V.
+>>
+>> Likely, sdhci_do_start_signal_voltage_switch() will success to write
+>> the corresponding registers to change the signal voltage to 1.8V,
+>> which makes the mmc core believe it was a success.
+>>
+>> *If* your statement around that your HW don't support 1.8V signal
+>> voltage, we should perhaps add new mmc cap as currently we don't have
+>> a "MMC_CAP_3_3V_DDR". Although, you need to convince on that, because
+>> my experience tells that quite many has misunderstood the HW design in
+>> this regard.
+>
+> The hardware guys told me that the eMMC chip get's its power from the
+> i.MX6, there are connections NVCC_SD1...NVCC_SD3 which are directly
+> connected to 3V3, not to some PMIC. When I read the docs correctly, this
+> means that the SDHCI related I/O lines of the i.MX6 are therefore tied
+> to 3.3V only, because of this NVCC_SDx power domain.
+>
+> And on the eMMC schematic page, the signals VCC and VCCQ ("DQ Power") of
+> the eMMC are also tied directly to 3.3V.
 
-AMD hs200 mode tuning mode is not compatible with standard tuning process,
-so we need .platform_execute_tuning callback support in sdhci-pci-core.c,
-this patch is to do:
+Thanks, I am convinced! :-)
 
-1. Add platform_execute_tuning callback in sdhci_pci_slot.
-2. Implement sdhci_pci_ops.platform_execute_tuning function.
+>
+> Therefore I assume that the hardware itself cannot provide 1.8V and I
+> added this "knowledge" to the Device Tree.
 
-Signed-off-by: Wan Zongshun <Vincent.Wan@amd.com>
----
-Hi Ulf,
+The problem with the "no-1-8-v" binding is that it's describing what
+the hardware *can't* do. It thus becomes easy to abuse it.
 
-Though modifying sdhci_pci_ops to be not const that is easy to implement
-my requirement, I am not sure it is right to do this.
+I suggest we stop using it, we should mark it deprecated.
 
-So I just follow sdhci_pci_select_drive_strength style to add new callback:
-sdhci_pci_platform_execute_tuning.
+>
+>
+>
+>
+> Two questions:
+>
+> * should I propose a patch that reads theno-1-8-v setting from DT and
+> removes the announcement of MMC_CAP_1_8V_DDR ?
 
-But I also met trouble in sdhci_execute_tuning of sdhci.c, I have to suppose
-only sdhci_pci_platform_execute_tuning is returning -EPERM(current code,
-my assumption is right), so that those vendor that has no
-slot->platform_execute_tuning could be skipped and go next standard
-tuning process.
+No.
 
-If you have better idea for my requirement, please correct me.
+>
+> * isn't MMC_CAP_3_3V_DDR superfluous, because it must any implementation
+> must support 3.3V (I'm not too much into the standard ...).
 
-Thanks!
-Wan Zongshun.
+For eMMC it's acceptable to support any of the 3.3V or 1.8V as the
+only supported signal voltage.
 
----
- drivers/mmc/host/sdhci-pci-core.c | 23 +++++++++++++++++++++++
- drivers/mmc/host/sdhci-pci.h      |  1 +
- drivers/mmc/host/sdhci.c          |  3 ++-
- 3 files changed, 26 insertions(+), 1 deletion(-)
+However, for the old MMC standard this isn't the case and that also
+true for UHS SD cards.
 
-diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-pci-core.c
-index 01c5723..e7b2bbe 100644
---- a/drivers/mmc/host/sdhci-pci-core.c
-+++ b/drivers/mmc/host/sdhci-pci-core.c
-@@ -905,8 +905,19 @@ static int amd_probe(struct sdhci_pci_chip *chip)
- 	return 0;
- }
- 
-+static int amd_probe_slot(struct sdhci_pci_slot *slot)
-+{
-+	struct sdhci_host *host = slot->host;
-+
-+	if (host->quirks2 & SDHCI_QUIRK2_CLEAR_TRANSFERMODE_REG_BEFORE_CMD)
-+		slot->platform_execute_tuning = amd_execute_tuning;
-+
-+	return 0;
-+}
-+
- static const struct sdhci_pci_fixes sdhci_amd = {
- 	.probe		= amd_probe,
-+	.probe_slot	= amd_probe_slot,
- };
- 
- static const struct pci_device_id pci_ids[] = {
-@@ -1508,6 +1519,17 @@ static int sdhci_pci_select_drive_strength(struct sdhci_host *host,
- 					   card_drv, drv_type);
- }
- 
-+static int sdhci_pci_platform_execute_tuning(struct sdhci_host *host,
-+					     u32 opcode)
-+{
-+	struct sdhci_pci_slot *slot = sdhci_priv(host);
-+
-+	if (!slot->platform_execute_tuning)
-+		return -EPERM;
-+
-+	return slot->platform_execute_tuning(host, opcode);
-+}
-+
- static const struct sdhci_ops sdhci_pci_ops = {
- 	.set_clock	= sdhci_set_clock,
- 	.enable_dma	= sdhci_pci_enable_dma,
-@@ -1516,6 +1538,7 @@ static const struct sdhci_ops sdhci_pci_ops = {
- 	.set_uhs_signaling = sdhci_set_uhs_signaling,
- 	.hw_reset		= sdhci_pci_hw_reset,
- 	.select_drive_strength	= sdhci_pci_select_drive_strength,
-+	.platform_execute_tuning = sdhci_pci_platform_execute_tuning,
- };
- 
- /*****************************************************************************\
-diff --git a/drivers/mmc/host/sdhci-pci.h b/drivers/mmc/host/sdhci-pci.h
-index d1a0b4d..48d98f1 100644
---- a/drivers/mmc/host/sdhci-pci.h
-+++ b/drivers/mmc/host/sdhci-pci.h
-@@ -83,6 +83,7 @@ struct sdhci_pci_slot {
- 				     struct mmc_card *card,
- 				     unsigned int max_dtr, int host_drv,
- 				     int card_drv, int *drv_type);
-+	int (*platform_execute_tuning)(struct sdhci_host *host, u32 opcode);
- };
- 
- struct sdhci_pci_chip {
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 2753b722d..2a5a6ce 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -1937,7 +1937,8 @@ static int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode)
- 		spin_unlock_irqrestore(&host->lock, flags);
- 		err = host->ops->platform_execute_tuning(host, opcode);
- 		sdhci_runtime_pm_put(host);
--		return err;
-+		if (err != EPERM)
-+			return err;
- 	}
- 
- 	ctrl = sdhci_readw(host, SDHCI_HOST_CONTROL2);
--- 
-1.9.1
+So, I suggest we add this new cap and a corresponding DT binding that
+we parse in the mmc_of_parse() function.
+
+Whether you should drop the announcement of MMC_CAP_1_8V_DDR, I don't
+know as it seems like it would affect more than imx6. Something more
+clever is needed there I think.
+
+Kind regards
+Uffe
