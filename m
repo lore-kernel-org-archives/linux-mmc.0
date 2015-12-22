@@ -1,112 +1,61 @@
-From: Peter Guo <peter.guo@bayhubtech.com>
-Subject: RE: 1217:8520 [Dell Latitude E7450] O2 Micro, SD/MMC Card Reader
- doesn't work
-Date: Tue, 22 Dec 2015 03:24:13 +0000
-Message-ID: <CY1PR04MB184843666E915C564A1858CB8FE50@CY1PR04MB1848.namprd04.prod.outlook.com>
-References: <CAONpWdsteBnqTcFbKpcOQFueyeJJWEmn9DJitD43f59xV8sDyg@mail.gmail.com>
-	<BY2PR04MB184372CAAC1FA0C5373D73238FEF0@BY2PR04MB1843.namprd04.prod.outlook.com>
-	<CAONpWduF6iH4Rr5Y610KP1RE342nWAajR27KFbu1N2iet4R0ZA@mail.gmail.com>
-	<BY2PR04MB18438CFFD181C72EFEF408908FE10@BY2PR04MB1843.namprd04.prod.outlook.com>
-	<CAPDyKFotgz3czCs8XaXwC4kT53Lp0h=n03OUMtO6BUTwTnDYzQ@mail.gmail.com>
-	<BY2PR04MB18432C804C263313D2349C848FE10@BY2PR04MB1843.namprd04.prod.outlook.com>
-	<CAONpWdvo+b=Y26zsCYsHFHjJ+8yAnYfoJOsirdS-he2s1unDgg@mail.gmail.com>
- <CAONpWdsHJEHjedfQrjXru0fETRL3NfXG6cyoQAYtLYAKb5i-2Q@mail.gmail.com>
+From: Holger Schurig <holgerschurig@gmail.com>
+Subject: Re: [RFC 0/6] mmc: Field Firmware Update
+Date: Tue, 22 Dec 2015 09:15:21 +0100
+Message-ID: <87r3ierjae.fsf@gmail.com>
+References: <1447426572-11756-1-git-send-email-holgerschurig@gmail.com> <SN1PR02MB13891415516DE9FA4756140783070@SN1PR02MB1389.namprd02.prod.outlook.com> <CAOpc7mHbM8EYYNRKR+pKnzc0wf1DR1ojX-iFuDWDYyquC3EVZg@mail.gmail.com> <CAPDyKFp2WEVF4yi=Upzx+58SY15u=Fp4=tr3_hh7AS3T2yz4qQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-bn1bon0114.outbound.protection.outlook.com ([157.56.111.114]:62409
-	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1752595AbbLVDif (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 21 Dec 2015 22:38:35 -0500
-In-Reply-To: <CAONpWdsHJEHjedfQrjXru0fETRL3NfXG6cyoQAYtLYAKb5i-2Q@mail.gmail.com>
-Content-Language: en-US
+Received: from mail-wm0-f54.google.com ([74.125.82.54]:35156 "EHLO
+	mail-wm0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751166AbbLVIPZ (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 22 Dec 2015 03:15:25 -0500
+In-reply-to: <CAPDyKFp2WEVF4yi=Upzx+58SY15u=Fp4=tr3_hh7AS3T2yz4qQ@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Alex Ballas <alex@ballas.org>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, "adam8157@gmail.com" <adam8157@gmail.com>, "linux-mmc@VGER.KERNEL.ORG" <linux-mmc@vger.kernel.org>
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Avi Shchislowski <Avi.Shchislowski@sandisk.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Alex Lemberg <Alex.Lemberg@sandisk.com>, Chris Ball <chris@printf.net>, Baolin Wang <baolin.wang@linaro.org>
 
-SGkgVWxmICYgQWxleCwNCg0KQmVsb3cgaXMgdGhlIGNvbXBsZXRlIGFuYWx5c2lzIG9mIHRoaXMg
-aXNzdWUuDQoNClRoZSBiYXNpYyBmbG93IG9mIHNlbmQgY29tbWFuZCBpcyBhcyBiZWxvdzoNCigx
-KSBVcHBlciBsYXllciAgcHJlcGFyZSB0aGUgY29tbWFuZCBwYXJhbWV0ZXI7DQooMikgQ2FsbCBz
-ZGhjaV9zZW5kX2NvbW1hbmQsIGFuZCBzZGhjaV9zZW5kX2NvbW1hbmQgd2lsbCBjYWxsIHNkaGNp
-X3NldF90cmFuc2Zlcl9tb2RlICB0byBzZXQgSG9zdCBSZWdpc3RlciAweEM7DQooMykgQ2FsbCBz
-ZGhjaV93cml0ZXcoaG9zdCwgU0RIQ0lfTUFLRV9DTUQoY21kLT5vcGNvZGUsIGZsYWdzKSwgU0RI
-Q0lfQ09NTUFORCkgdG8gc2VuZCBjb21tYW5kOw0KDQpGb3IgTGludXgga2VybmVsIG1haW5zdHJl
-YW0gKHdpdGhvdXQgYW55IHF1aXJrKSwgTU1DIGNhc2U6IA0KKDEpIEl0IHdpbGwgY2FsbCAgbW1j
-X2dldF9leHRfY3NkIGFuZCB0aGlzIGlzIGFuIERNQSB0cmFuc2ZlciwgdGhlbiBETUEgZW5hYmxl
-IGJpdCB3aWxsIGJlIHNldCB0byAxICgweENbMF09MSdiMSkuDQooMikgVGhlbiBuZXh0IENvbW1h
-bmQgaXMgbW1jX3N3aXRjaChjbWQ2KSB3aGljaCBpcyBub25lLWRhdGEgY29tbWFuZCwgdGhlIGRy
-aXZlciB3aWxsIGtlZXAgRE1BIGVuYWJsZSBiaXQgdG8gMTsgdGhpcyB3aWxsIGxldCBvdXIgSG9z
-dCBmYWlsZWQgdG8gZXhlY3V0ZSB0aGUgQ01EMDYuDQoNCkFjY29yZGluZyB0byBTRCBIb3N0IFNw
-ZWMoU0QgSG9zdCBDb250cm9sbGVyIFNwZWNpZmljYXRpb24gdmVyc29uIDQuMSBwYWdlIDQxKToN
-CkJpdDAgb2YgIFRyYW5zZmVyIE1vZGUgUmVnaXN0ZXIoMHgwQykgaXMgRE1BIEVuYWJsZSBiaXQs
-IHRoaXMgYml0IHNldCB0byAxIG1lYW5zIGEgRE1BIG9wZXJhdGlvbiBzaGFsbCBiZWdpbiB3aGVu
-ICBIb3N0IERyaXZlciB3cml0ZXMgdG8gdGhlIHVwcGVyIGJ5dGUgb2YgQ29tbWFuZCBSZWdpc3Rl
-cigweDBGKS4gICANCg0KVGhlIERNQSBlbmFibGUgYml0IHNob3VsZCBiZSBzZXQgdG8gemVybyBm
-b3IgdGhpcyBub25lLWRhdGEgY29tbWFuZChDTUQ2KS4gDQpPdXIgaG9zdCBmb2xsb3cgdGhlIHNw
-ZWMuIHNvIEkgdGhpbmsgaXQgc2hvdWxkIGJlIHRoZSBzZGhjaSBkcml2ZXLigJlzIGlzc3VlIChz
-ZGhjaV9zZXRfdHJhbnNmZXJfbW9kZSkuDQoNCg0KU28gV2UgdHJpZWQgIFNESENJX1FVSVJLMl9D
-TEVBUl9UUkFOU0ZFUk1PREVfUkVHX0JFRk9SRV9DTUQgdG8gZml4IGFib3ZlIGlzc3VlLg0KDQpC
-dXQgaXQgZW5jb3VudGVyIG5ldyBwcm9ibGVtIGFzIEFsZXggcmVwb3J0ZWQgZm9yIHR1bmluZyBj
-b21tYW5kIGFzIHR1bmluZyBjb21tYW5kIGZsb3cgaW4gc2RoY2lfZXhlY3V0ZV90dW5pbmcgZnVu
-Y3Rpb24gaXM6DQooMSkuIGNtZC5kYXRhID0gTlVMTDsgDQooMikuIHNkaGNpX3dyaXRldyhob3N0
-LCBTREhDSV9UUk5TX1JFQUQsIFNESENJX1RSQU5TRkVSX01PREUpOw0KKDMpLiBzZGhjaV9zZW5k
-X2NvbW1hbmQoaG9zdCwgJmNtZCk7IA0KQXMgZGF0YSBpcyBudWxsLCB0aGlzIHF1aXJrIHdpbGwg
-IHNldCAweDBDWzA6MTVdIHRvIEFMTCB6ZXJvIGJlZm9yZSBzZW5kIHR1bmluZyBjb21tYW5kIGlu
-Y2x1ZGluZyBTREhDSV9UUk5TX1JFQUQsIGFuZCB0aGUgdHVuaW5nIGNvbW1hbmQgd2lsbCBmYWls
-ZWQuDQoNClNvLCBjYW4gd2UgY29tbWl0IG9uZSBwYXRjaCBhcyBiZWxvdyB0byBmaXggdGhpcyBE
-TUEgZW5hYmxlIGJpdCBmb3Igbm9uLWRhdGEgY29tbWFuZCBidWcgaWYgeW91IGNhbm5vdCBhY2Nl
-cHQgYWRkIG5ldyBRVUlSSz8NCkNvZGUgc2hvdWxkIGxpa2UgYmVsb3coc2RoY2lfc2V0X3RyYW5z
-ZmVyX21vZGUpOg0KICAgICAgICAgICAgICAgIGlmIChkYXRhID09IE5VTEwpIHsNCiAgICAgICAg
-ICAgICAgICAgICAgICAgICAgICAgICAgaWYgKGhvc3QtPnF1aXJrczIgJg0KICAgICAgICAgICAg
-ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgU0RIQ0lfUVVJUksyX0NMRUFSX1RS
-QU5TRkVSTU9ERV9SRUdfQkVGT1JFX0NNRCkgew0KICAgICAgICAgICAgICAgICAgICAgICAgICAg
-ICAgICAgICAgICAgICAgICAgICAgc2RoY2lfd3JpdGV3KGhvc3QsIDB4MCwgU0RIQ0lfVFJBTlNG
-RVJfTU9ERSk7DQogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIH0gZWxzZSB7DQogICAg
-ICAgICAgICAgICAgICAgICAgICAgICAgICAgIC8qIGNsZWFyIEF1dG8gQ01EIHNldHRpbmdzIGZv
-ciBubyBkYXRhIENNRHMgKi8NCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
-ICAgICAgICAgIG1vZGUgPSBzZGhjaV9yZWFkdyhob3N0LCBTREhDSV9UUkFOU0ZFUl9NT0RFKTsN
-CiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHNkaGNpX3dy
-aXRldyhob3N0LCBtb2RlICYgfihTREhDSV9UUk5TX0FVVE9fQ01EMTIgfCBTREhDSV9UUk5TX0RN
-QSAgICAvKkNsZWFyIERNQSBlbmFibGUgYml0IGFsc28gZm9yIG5vIGRhdGEgQ01EcyovDQogICAg
-ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
-ICAgU0RIQ0lfVFJOU19BVVRPX0NNRDIzKSwgU0RIQ0lfVFJBTlNGRVJfTU9ERSk7DQogICAgICAg
-ICAgICAgICAgICAgICAgICAgICAgICAgIH0NCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
-ICAgcmV0dXJuOw0KICAgICAgICAgICAgICAgIH0NCg0KDQpCUg0KUGV0ZXIuR3VvDQoNCi0tLS0t
-T3JpZ2luYWwgTWVzc2FnZS0tLS0tDQpGcm9tOiBBbGV4IEJhbGxhcyBbbWFpbHRvOmFsZXhAYmFs
-bGFzLm9yZ10gDQpTZW50OiBTYXR1cmRheSwgRGVjZW1iZXIgMTksIDIwMTUgNjo1NiBBTQ0KVG86
-IFBldGVyIEd1bw0KQ2M6IFVsZiBIYW5zc29uOyBhZGFtODE1N0BnbWFpbC5jb207IGxpbnV4LW1t
-Y0BWR0VSLktFUk5FTC5PUkcNClN1YmplY3Q6IFJlOiAxMjE3Ojg1MjAgW0RlbGwgTGF0aXR1ZGUg
-RTc0NTBdIE8yIE1pY3JvLCBTRC9NTUMgQ2FyZCBSZWFkZXIgZG9lc24ndCB3b3JrDQoNCkhlbGxv
-IFBldGVyICYgVWZmZSwNCg0KSSB0ZXN0ZWQgdGhlIHBhdGNoIHdpdGggdGhlIGxhdGVzdCBtYWlu
-bGluZSBrZXJuZWwgYW5kIGl0IHBsYXllZCBuaWNlbHkuDQpAVWZmZSBob3cgc2hvdWxkIHdlIG1v
-dmUgZm9yd2FyZCB3aXRoIHRoaXM/DQoNCktpbmQgUmVnYXJkcywNCkFsZXgNCg0KT24gRnJpLCBE
-ZWMgMTgsIDIwMTUgYXQgMTI6NDMgUE0sIEFsZXggQmFsbGFzIDxhbGV4QGJhbGxhcy5vcmc+IHdy
-b3RlOg0KPiBIZWxsbyBVZmZlLCBQZXRlciwNCj4NCj4gVGhhbmsgeW91IGJvdGguIEknbGwgdHJ5
-IG91dCBQZXRlcidzIHBhdGNoIHRvIHNlZSBpZiBpdCdzIGFkZHJlc3NpbmcgDQo+IHRoZSBpc3N1
-ZSBhbmQgd2UgY2FuIHdvcmsgdGhyb3VnaCBpdCBiYXNlZCBvbiBVZmZlJ3MgZ3VpZGVsaW5lcy4N
-Cj4NCj4gS2luZCBSZWdhcmRzLA0KPiBBbGV4DQo+DQo+IE9uIEZyaSwgRGVjIDE4LCAyMDE1IGF0
-IDExOjM5IEFNLCBQZXRlciBHdW8gPHBldGVyLmd1b0BiYXlodWJ0ZWNoLmNvbT4gd3JvdGU6DQo+
-PiBIaSBVbGYsDQo+Pg0KPj4gVGhhbmtzIGZvciB5b3VyIHJlcGx5Lg0KPj4NCj4+IFNvIGN1cnJl
-bnRseSB0aGUgcHJvYmxlbSBpcyBTREhDSV9UUkFOU19ETUEgYml0IG5lZWQgdG8gYmUgY2xlYXJl
-ZCANCj4+IGJlZm9yZSBzZW5kIE5vbiBETUEgU0QvTU1DIGNvbW1hbmQgZm9yIHNvbWUgb2Ygb3Vy
-IGhvc3QsIENvdWxkIHlvdSBwbGVhc2UgZ2l2ZSBtZSBhbnkgc3VnZ2VzdGlvbiBvbiB3aGF0IGtp
-bmQgb2YgY29kZSBtb2RpZmljYXRpb24geW91IGNhbiBhY2NlcHQ/DQo+Pg0KPj4NCj4+IEJSDQo+
-PiBQZXRlci5HdW8NCj4+DQo+Pg0KPj4gLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4+IEZy
-b206IFVsZiBIYW5zc29uIFttYWlsdG86dWxmLmhhbnNzb25AbGluYXJvLm9yZ10NCj4+IFNlbnQ6
-IEZyaWRheSwgRGVjZW1iZXIgMTgsIDIwMTUgNDo1MiBQTVQNCj4+IFRvOiBQZXRlciBHdW8NCj4+
-IENjOiBBbGV4IEJhbGxhczsgYWRhbTgxNTdAZ21haWwuY29tOyBsaW51eC1tbWNAVkdFUi5LRVJO
-RUwuT1JHDQo+PiBTdWJqZWN0OiBSZTogMTIxNzo4NTIwIFtEZWxsIExhdGl0dWRlIEU3NDUwXSBP
-MiBNaWNybywgU0QvTU1DIENhcmQgDQo+PiBSZWFkZXIgZG9lc24ndCB3b3JrDQo+Pg0KPj4gT24g
-MTggRGVjZW1iZXIgMjAxNSBhdCAwNDoxNCwgUGV0ZXIgR3VvIDxwZXRlci5ndW9AYmF5aHVidGVj
-aC5jb20+IHdyb3RlOg0KPj4+IEhpIEFsZXggJiBBZGFtLA0KPj4+DQo+Pj4gSSBoYXZlIHNlbmQg
-dGhlIHBhdGNoLiBQbGVhc2UgY2hlY2sgaXQuDQo+Pj4gQXR0YWNobWVudCBpcyB0aGUgcGF0Y2gg
-ZmlsZS4NCj4+DQo+PiBUaGFua3MgUGV0ZXIgZm9yIGhlbHBpbmcgb3V0IQ0KPj4NCj4+IEFsdGhv
-dWdoIEkgd291bGQgYXBwcmVjaWF0ZSBpZiB5b3UgZG9uJ3Qgc2VuZCBwYXRjaGVzIGFzIGF0dGFj
-aG1lbnRzLg0KPj4NCj4+IE1vcmVvdmVyLCBldmVuIGlmIHRoZSBwYXRjaCBjYW4gYmUgdXNlZCB0
-byBjaGVjayB3aGV0aGVyIGl0IHNvbHZlcyB0aGUgcHJvYmxlbSAtIEkgd29uJ3QgYWNjZXB0IGl0
-IGFzIGlzLg0KPj4gVGhlIHJlYXNvbiBpcyBzaW1wbHkgdGhhdCBJIGRvbid0IGFsbG93IGFueSBt
-b3JlIHF1aXJrcy9jYWxsYmFja3MgdG8gYmUgYWRkZWQgZm9yIFNESENJLg0KPj4NCj4+IEtpbmQg
-cmVnYXJkcw0KPj4gVWZmZQ0K
+
+> Sorry for the delay.
+
+No problem, I was busy with many other projects as well.
+
+> My advise right now is to try this out via the mmc ioctl in userspace,
+> yes. Although, if you encounter any issues with that approach that it
+> might not be reliable, I am open to look into the in-kernel solution
+> again.
+
+I managed to update my Kingston eMMCs with a slighly modified patch to
+what I submitted. I however didn't bother to submit this, as I saw no
+chance of getting it applied.
+
+Also I once asked in the mailing list if there is some user-space
+example of how to use the multi-block feature that is supposed to enable
+this, but I haven't gotten an answer.
+
+> Regarding mmc-utils as where I recommend you to implement this, I have
+> been thinking of moving this tool into the tools directory in the
+> kernel.
+
+Sounds good to me.
+
+
+
+Remotely related:
+
+Do you know that some google people made their own version of mmc-utils
+for ChromeOS? And the don't seem to give much effort in unification of
+them?  As if the world wouldn't know how hard it can be to re-unite
+things again, Google should know from their custom kernels they use on
+Android ...  Sigh.
+
+
+So you can
+
+* git clone git://git.kernel.org/pub/scm/linux/kernel/git/cjb/mmc-utils.git
+* git clone https://chromium.googlesource.com/chromiumos/third_party/mmc-utils
+
+currently.
+
+
