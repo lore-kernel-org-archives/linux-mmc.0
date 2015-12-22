@@ -1,118 +1,88 @@
-From: Lucas Stach <dev@lynxeye.de>
-Subject: [PATCH v2 4/5] mmc: tegra: enable UHS-I modes
-Date: Tue, 22 Dec 2015 19:41:03 +0100
-Message-ID: <1450809664-11360-5-git-send-email-dev@lynxeye.de>
-References: <1450809664-11360-1-git-send-email-dev@lynxeye.de>
+From: Olof Johansson <olofj@chromium.org>
+Subject: Re: [RFC 0/6] mmc: Field Firmware Update
+Date: Tue, 22 Dec 2015 10:44:49 -0800
+Message-ID: <CALiw-2Eisj-WDB3hcsB22MTzHDS7y+V3gvTvq_+Jt8PKMa5GMg@mail.gmail.com>
+References: <1447426572-11756-1-git-send-email-holgerschurig@gmail.com>
+	<SN1PR02MB13891415516DE9FA4756140783070@SN1PR02MB1389.namprd02.prod.outlook.com>
+	<CAOpc7mHbM8EYYNRKR+pKnzc0wf1DR1ojX-iFuDWDYyquC3EVZg@mail.gmail.com>
+	<CAPDyKFp2WEVF4yi=Upzx+58SY15u=Fp4=tr3_hh7AS3T2yz4qQ@mail.gmail.com>
+	<87r3ierjae.fsf@gmail.com>
+	<CAPDyKFpgYLDRt8=mayqB8sqD0ArXnv31a+fTZAnT_4Vf7yuFwQ@mail.gmail.com>
+	<CAPDyKFq5wNARNpDMK0_TJ3P64UAsCr_L42sj+JA-k6DdoFBJsw@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from ns.lynxeye.de ([87.118.118.114]:44234 "EHLO lynxeye.de"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1754610AbbLVSlR (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 22 Dec 2015 13:41:17 -0500
-In-Reply-To: <1450809664-11360-1-git-send-email-dev@lynxeye.de>
+Received: from mail-ig0-f177.google.com ([209.85.213.177]:36999 "EHLO
+	mail-ig0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754983AbbLVSou (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 22 Dec 2015 13:44:50 -0500
+Received: by mail-ig0-f177.google.com with SMTP id to18so63401689igc.0
+        for <linux-mmc@vger.kernel.org>; Tue, 22 Dec 2015 10:44:50 -0800 (PST)
+In-Reply-To: <CAPDyKFq5wNARNpDMK0_TJ3P64UAsCr_L42sj+JA-k6DdoFBJsw@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Stephen Warren <swarren@wwwdotorg.org>, Thierry Reding <thierry.reding@gmail.com>, Alexandre Courbot <gnurou@gmail.com>, linux-mmc@vger.kernel.org, linux-tegra@vger.kernel.org
+Cc: Holger Schurig <holgerschurig@gmail.com>, Avi Shchislowski <Avi.Shchislowski@sandisk.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Alex Lemberg <Alex.Lemberg@sandisk.com>, Chris Ball <chris@printf.net>, Baolin Wang <baolin.wang@linaro.org>, Gwendal Grignou <gwendal@chromium.org>, Grant Grundler <grundler@chromium.org>, Seshagiri Holi <sholi@nvidia.com>, Jon Hunter <jonathanh@nvidia.com>
 
-Keep the quirk bits, as Tegra30 and Tegra114 host have different levels
-of support for UHS-I modes and so need different spare bits to be set,
-but change the logic to be positive.
+[sigh, in cleartext this time.]
 
-Signed-off-by: Lucas Stach <dev@lynxeye.de>
----
- drivers/mmc/host/sdhci-tegra.c | 40 ++++++++++++++++++++--------------------
- 1 file changed, 20 insertions(+), 20 deletions(-)
 
-diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
-index 0201549..20084f8 100644
---- a/drivers/mmc/host/sdhci-tegra.c
-+++ b/drivers/mmc/host/sdhci-tegra.c
-@@ -45,9 +45,9 @@
- #define NVQUIRK_FORCE_SDHCI_SPEC_200	BIT(0)
- #define NVQUIRK_ENABLE_BLOCK_GAP_DET	BIT(1)
- #define NVQUIRK_ENABLE_SDHCI_SPEC_300	BIT(2)
--#define NVQUIRK_DISABLE_SDR50		BIT(3)
--#define NVQUIRK_DISABLE_SDR104		BIT(4)
--#define NVQUIRK_DISABLE_DDR50		BIT(5)
-+#define NVQUIRK_ENABLE_SDR50		BIT(3)
-+#define NVQUIRK_ENABLE_SDR104		BIT(4)
-+#define NVQUIRK_ENABLE_DDR50		BIT(5)
- 
- struct sdhci_tegra_soc_data {
- 	const struct sdhci_pltfm_data *pdata;
-@@ -144,18 +144,18 @@ static void tegra_sdhci_reset(struct sdhci_host *host, u8 mask)
- 	/* Erratum: Enable SDHCI spec v3.00 support */
- 	if (soc_data->nvquirks & NVQUIRK_ENABLE_SDHCI_SPEC_300)
- 		misc_ctrl |= SDHCI_MISC_CTRL_ENABLE_SDHCI_SPEC_300;
--	/* Don't advertise UHS modes which aren't supported yet */
--	if (soc_data->nvquirks & NVQUIRK_DISABLE_SDR50)
--		misc_ctrl &= ~SDHCI_MISC_CTRL_ENABLE_SDR50;
--	if (soc_data->nvquirks & NVQUIRK_DISABLE_DDR50)
--		misc_ctrl &= ~SDHCI_MISC_CTRL_ENABLE_DDR50;
--	if (soc_data->nvquirks & NVQUIRK_DISABLE_SDR104)
--		misc_ctrl &= ~SDHCI_MISC_CTRL_ENABLE_SDR104;
-+	/* Advertise UHS modes as supported by host */
-+	if (soc_data->nvquirks & NVQUIRK_ENABLE_SDR50)
-+		misc_ctrl |= SDHCI_MISC_CTRL_ENABLE_SDR50;
-+	if (soc_data->nvquirks & NVQUIRK_ENABLE_DDR50)
-+		misc_ctrl |= SDHCI_MISC_CTRL_ENABLE_DDR50;
-+	if (soc_data->nvquirks & NVQUIRK_ENABLE_SDR104)
-+		misc_ctrl |= SDHCI_MISC_CTRL_ENABLE_SDR104;
- 	sdhci_writew(host, misc_ctrl, SDHCI_TEGRA_VENDOR_MISC_CTRL);
- 
- 	clk_ctrl = sdhci_readl(host, SDHCI_TEGRA_VENDOR_CLOCK_CTRL);
- 	clk_ctrl &= ~SDHCI_CLOCK_CTRL_SPI_MODE_CLKEN_OVERRIDE;
--	if (!(soc_data->nvquirks & NVQUIRK_DISABLE_SDR50))
-+	if (soc_data->nvquirks & SDHCI_MISC_CTRL_ENABLE_SDR50)
- 		clk_ctrl |= SDHCI_CLOCK_CTRL_SDR50_TUNING_OVERRIDE;
- 	sdhci_writel(host, clk_ctrl, SDHCI_TEGRA_VENDOR_CLOCK_CTRL);
- 
-@@ -305,8 +305,8 @@ static const struct sdhci_pltfm_data sdhci_tegra30_pdata = {
- static const struct sdhci_tegra_soc_data soc_data_tegra30 = {
- 	.pdata = &sdhci_tegra30_pdata,
- 	.nvquirks = NVQUIRK_ENABLE_SDHCI_SPEC_300 |
--		    NVQUIRK_DISABLE_SDR50 |
--		    NVQUIRK_DISABLE_SDR104,
-+		    NVQUIRK_ENABLE_SDR50 |
-+		    NVQUIRK_ENABLE_SDR104,
- };
- 
- static const struct sdhci_ops tegra114_sdhci_ops = {
-@@ -335,9 +335,9 @@ static const struct sdhci_pltfm_data sdhci_tegra114_pdata = {
- 
- static const struct sdhci_tegra_soc_data soc_data_tegra114 = {
- 	.pdata = &sdhci_tegra114_pdata,
--	.nvquirks = NVQUIRK_DISABLE_SDR50 |
--		    NVQUIRK_DISABLE_DDR50 |
--		    NVQUIRK_DISABLE_SDR104,
-+	.nvquirks = NVQUIRK_ENABLE_SDR50 |
-+		    NVQUIRK_ENABLE_DDR50 |
-+		    NVQUIRK_ENABLE_SDR104,
- };
- 
- static const struct sdhci_pltfm_data sdhci_tegra210_pdata = {
-@@ -353,9 +353,9 @@ static const struct sdhci_pltfm_data sdhci_tegra210_pdata = {
- 
- static const struct sdhci_tegra_soc_data soc_data_tegra210 = {
- 	.pdata = &sdhci_tegra210_pdata,
--	.nvquirks = NVQUIRK_DISABLE_SDR50 |
--		    NVQUIRK_DISABLE_DDR50 |
--		    NVQUIRK_DISABLE_SDR104,
-+	.nvquirks = NVQUIRK_ENABLE_SDR50 |
-+		    NVQUIRK_ENABLE_DDR50 |
-+		    NVQUIRK_ENABLE_SDR104,
- };
- 
- static const struct of_device_id sdhci_tegra_dt_match[] = {
-@@ -402,7 +402,7 @@ static int sdhci_tegra_probe(struct platform_device *pdev)
- 	if (rc)
- 		goto err_parse_dt;
- 
--	if (!(tegra_host->soc_data->nvquirks & NVQUIRK_DISABLE_DDR50))
-+	if (tegra_host->soc_data->nvquirks & NVQUIRK_ENABLE_DDR50)
- 		host->mmc->caps |= MMC_CAP_1_8V_DDR;
- 
- 	tegra_host->power_gpio = devm_gpiod_get_optional(&pdev->dev, "power",
--- 
-2.5.0
+2015-12-22 0:57 GMT-08:00 Ulf Hansson <ulf.hansson@linaro.org>:
+> + Olof (forgot to add him last time)
+>
+> On 22 December 2015 at 09:55, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+>> + Gwendal, Grant, Olof, Seshagiri, Jon
+>>
+>> On 22 December 2015 at 09:15, Holger Schurig <holgerschurig@gmail.com> wrote:
+>>>
+>>>> Sorry for the delay.
+>>>
+>>> No problem, I was busy with many other projects as well.
+>>>
+>>>> My advise right now is to try this out via the mmc ioctl in userspace,
+>>>> yes. Although, if you encounter any issues with that approach that it
+>>>> might not be reliable, I am open to look into the in-kernel solution
+>>>> again.
+>>>
+>>> I managed to update my Kingston eMMCs with a slighly modified patch to
+>>> what I submitted. I however didn't bother to submit this, as I saw no
+>>> chance of getting it applied.
+>>>
+>>> Also I once asked in the mailing list if there is some user-space
+>>> example of how to use the multi-block feature that is supposed to enable
+>>> this, but I haven't gotten an answer.
+>>>
+>>>> Regarding mmc-utils as where I recommend you to implement this, I have
+>>>> been thinking of moving this tool into the tools directory in the
+>>>> kernel.
+>>>
+>>> Sounds good to me.
+>>>
+>>>
+>>>
+>>> Remotely related:
+>>>
+>>> Do you know that some google people made their own version of mmc-utils
+>>> for ChromeOS?
 
+"Make their own version" makes it sound like we've rewritten it. We
+haven't. We've applied some patches locally over the last two years
+based on work we've done for our products. It's not a deep fork.
+
+We'd be happy to upstream them if there's interest from other users
+and maintainers.
+
+>> Perhaps by moving the code into the kernel tools dir and finding
+>> someone who actively wants to maintain it, will enable improved
+>> upstream activities!?
+
+
+Hmm. If there's a well-defined userspace interface there's little
+reason to bundle it directly, and I think that's the case here.
+
+Chris has been busy with other stuff the last couple of years, is
+there a lot of mmc-utils code that's out there that hasn't been picked
+up?
+
+
+-Olof
