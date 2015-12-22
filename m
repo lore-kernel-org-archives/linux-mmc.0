@@ -1,69 +1,77 @@
-From: Holger Schurig <holgerschurig@gmail.com>
-Subject: Re: BUG 4.4rc-4: wrong eMMC signaling voltage reported
-Date: Tue, 22 Dec 2015 09:33:21 +0100
-Message-ID: <87poxyrige.fsf@gmail.com>
-References: <87fuzbvfl9.fsf@gmail.com> <CAPDyKFoQqQFmPwrnCeJBcz=mnzW8zbWb5i7bc64oo7bN_113zQ@mail.gmail.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [RFC 0/6] mmc: Field Firmware Update
+Date: Tue, 22 Dec 2015 09:55:49 +0100
+Message-ID: <CAPDyKFpgYLDRt8=mayqB8sqD0ArXnv31a+fTZAnT_4Vf7yuFwQ@mail.gmail.com>
+References: <1447426572-11756-1-git-send-email-holgerschurig@gmail.com>
+	<SN1PR02MB13891415516DE9FA4756140783070@SN1PR02MB1389.namprd02.prod.outlook.com>
+	<CAOpc7mHbM8EYYNRKR+pKnzc0wf1DR1ojX-iFuDWDYyquC3EVZg@mail.gmail.com>
+	<CAPDyKFp2WEVF4yi=Upzx+58SY15u=Fp4=tr3_hh7AS3T2yz4qQ@mail.gmail.com>
+	<87r3ierjae.fsf@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wm0-f43.google.com ([74.125.82.43]:33540 "EHLO
-	mail-wm0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751034AbbLVIdY (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 22 Dec 2015 03:33:24 -0500
-Received: by mail-wm0-f43.google.com with SMTP id p187so98303368wmp.0
-        for <linux-mmc@vger.kernel.org>; Tue, 22 Dec 2015 00:33:24 -0800 (PST)
-In-reply-to: <CAPDyKFoQqQFmPwrnCeJBcz=mnzW8zbWb5i7bc64oo7bN_113zQ@mail.gmail.com>
+Received: from mail-yk0-f170.google.com ([209.85.160.170]:35653 "EHLO
+	mail-yk0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751809AbbLVIzu (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 22 Dec 2015 03:55:50 -0500
+Received: by mail-yk0-f170.google.com with SMTP id v6so157010095ykc.2
+        for <linux-mmc@vger.kernel.org>; Tue, 22 Dec 2015 00:55:50 -0800 (PST)
+In-Reply-To: <87r3ierjae.fsf@gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>
+To: Holger Schurig <holgerschurig@gmail.com>
+Cc: Avi Shchislowski <Avi.Shchislowski@sandisk.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Alex Lemberg <Alex.Lemberg@sandisk.com>, Chris Ball <chris@printf.net>, Baolin Wang <baolin.wang@linaro.org>, Gwendal Grignou <gwendal@chromium.org>, Grant Grundler <grundler@chromium.org>, Seshagiri Holi <sholi@nvidia.com>, Jon Hunter <jonathanh@nvidia.com>
 
++ Gwendal, Grant, Olof, Seshagiri, Jon
 
-> The no-1-8-v is a somewhat broken DT binding. I advise people to not
-> use any more.
-> Depending on the sdhci variant it have different meanings.
+On 22 December 2015 at 09:15, Holger Schurig <holgerschurig@gmail.com> wrote:
 >
-> I guess you are using the sdhci-esdhc-imx variant, which means
-> no-1-8-v will disable UHS modes for SD-cards (those requiring 1.8V
-> signal voltage). It has no impact on (e)MMC.
-
-Correct, I'm on i.MX6 and using sdhci-esdhc-imx.
-
-
-> As the host driver announces support for MMC_CAP_1_8V_DDR, that's what
-> the mmc core will try to use. Actually the mmc core will first try
-> 1.8V and if it fails, go for 3.3V.
+>> Sorry for the delay.
 >
-> Likely, sdhci_do_start_signal_voltage_switch() will success to write
-> the corresponding registers to change the signal voltage to 1.8V,
-> which makes the mmc core believe it was a success.
+> No problem, I was busy with many other projects as well.
 >
-> *If* your statement around that your HW don't support 1.8V signal
-> voltage, we should perhaps add new mmc cap as currently we don't have
-> a "MMC_CAP_3_3V_DDR". Although, you need to convince on that, because
-> my experience tells that quite many has misunderstood the HW design in
-> this regard.
+>> My advise right now is to try this out via the mmc ioctl in userspace,
+>> yes. Although, if you encounter any issues with that approach that it
+>> might not be reliable, I am open to look into the in-kernel solution
+>> again.
+>
+> I managed to update my Kingston eMMCs with a slighly modified patch to
+> what I submitted. I however didn't bother to submit this, as I saw no
+> chance of getting it applied.
+>
+> Also I once asked in the mailing list if there is some user-space
+> example of how to use the multi-block feature that is supposed to enable
+> this, but I haven't gotten an answer.
+>
+>> Regarding mmc-utils as where I recommend you to implement this, I have
+>> been thinking of moving this tool into the tools directory in the
+>> kernel.
+>
+> Sounds good to me.
+>
+>
+>
+> Remotely related:
+>
+> Do you know that some google people made their own version of mmc-utils
+> for ChromeOS? And the don't seem to give much effort in unification of
+> them?  As if the world wouldn't know how hard it can be to re-unite
+> things again, Google should know from their custom kernels they use on
+> Android ...  Sigh.
+>
+>
+> So you can
+>
+> * git clone git://git.kernel.org/pub/scm/linux/kernel/git/cjb/mmc-utils.git
+> * git clone https://chromium.googlesource.com/chromiumos/third_party/mmc-utils
 
-The hardware guys told me that the eMMC chip get's its power from the
-i.MX6, there are connections NVCC_SD1...NVCC_SD3 which are directly
-connected to 3V3, not to some PMIC. When I read the docs correctly, this
-means that the SDHCI related I/O lines of the i.MX6 are therefore tied
-to 3.3V only, because of this NVCC_SDx power domain.
+Thanks for sharing the information. Some Chromium folkz has certainly
+been helpful in upstreaming activities, but you are right that there
+is more to be done for mmc utils.
 
-And on the eMMC schematic page, the signals VCC and VCCQ ("DQ Power") of
-the eMMC are also tied directly to 3.3V.
+Perhaps by moving the code into the kernel tools dir and finding
+someone who actively wants to maintain it, will enable improved
+upstream activities!?
 
-Therefore I assume that the hardware itself cannot provide 1.8V and I
-added this "knowledge" to the Device Tree.
-
-
-
-
-Two questions:
-
-* should I propose a patch that reads theno-1-8-v setting from DT and
-removes the announcement of MMC_CAP_1_8V_DDR ?
-
-* isn't MMC_CAP_3_3V_DDR superfluous, because it must any implementation
-must support 3.3V (I'm not too much into the standard ...).
-
+Kind regards
+Uffe
