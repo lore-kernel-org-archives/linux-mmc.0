@@ -1,53 +1,81 @@
-From: Jeff Haran <Jeff.Haran@citrix.com>
-Subject: RE: Does the Community use Coverity ?
-Date: Mon, 21 Dec 2015 18:22:03 +0000
-Message-ID: <4E5779AD88B2F040B8A7E83ECF544D1A64AADA@SJCPEX01CL03.citrite.net>
-References: <CAMf7+LiLgPcNSMOGhV=i=6FV5VwrM0VNXpSmPci7xU9EBc0Sgg@mail.gmail.com>
-	<4E5779AD88B2F040B8A7E83ECF544D1A64A4CF@SJCPEX01CL03.citrite.net>
- <CAMf7+Li74m2_nZru3kfwJZ5G9r7W69pwkarHbccs1xw-G8ZjnA@mail.gmail.com>
+From: Nguyen Viet Dung <nv-dung@jinso.co.jp>
+Subject: Re: [bug] kernel panic if writting data to mmc after suspendding
+Date: Tue, 22 Dec 2015 12:16:17 +0900
+Message-ID: <5678C081.5090001@jinso.co.jp>
+References: <566A21D2.4080009@jinso.co.jp> <566E2AC0.8060800@jinso.co.jp>
+ <CAMuHMdWU0WVBiWSsLti=KSidFk198k_3CAiNm=iGLtmw4wQOgw@mail.gmail.com>
+ <CAPDyKFomFTn7iX2kSXFVqstjEWpezNOB-B_DdFFRBWi9upUrpg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=utf-8;
+	format=flowed
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp02.citrix.com ([66.165.176.63]:2169 "EHLO SMTP02.CITRIX.COM"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750914AbbLUSWH (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 21 Dec 2015 13:22:07 -0500
-In-Reply-To: <CAMf7+Li74m2_nZru3kfwJZ5G9r7W69pwkarHbccs1xw-G8ZjnA@mail.gmail.com>
-Content-Language: en-US
+Received: from www1246.sakura.ne.jp ([219.94.162.56]:56005 "EHLO
+	www1246.sakura.ne.jp" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750985AbbLVDQU (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 21 Dec 2015 22:16:20 -0500
+In-Reply-To: <CAPDyKFomFTn7iX2kSXFVqstjEWpezNOB-B_DdFFRBWi9upUrpg@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: pavi1729 <pavitra1729@gmail.com>
-Cc: "kernelnewbies@kernelnewbies.org" <kernelnewbies@kernelnewbies.org>, "linux-fsdevel@vger.kernel.org" <linux-fsdevel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "netdev@vger.kernel.org" <netdev@vger.kernel.org>
+To: Ulf Hansson <ulf.hansson@linaro.org>, Geert Uytterhoeven <geert@linux-m68k.org>
+Cc: Linux-sh list <linux-sh@vger.kernel.org>, Linux MMC List <linux-mmc@vger.kernel.org>, "ltsi-dev@lists.linuxfoundation.org" <ltsi-dev@lists.linuxfoundation.org>, =?UTF-8?B?U2ltb24g44GV44KT?= <simon@horms.net>, Geert Uytterhoeven <geert+renesas@glider.be>, =?UTF-8?B?U+mWizEyL+WdguaIuFND?= <ryusuke.sakato.bx@renesas.com>, "Shimoda, Yoshihiro" <yoshihiro.shimoda.uh@renesas.com>, =?UTF-8?B?TWFnbnVzIOOBleOCkw==?= <magnus.damm@gmail.com>, Hisao Munakata <hisao.munakata.vt@renesas.com>
 
-PiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBwYXZpMTcyOSBbbWFpbHRvOnBh
-dml0cmExNzI5QGdtYWlsLmNvbV0NCj4gU2VudDogVGh1cnNkYXksIERlY2VtYmVyIDE3LCAyMDE1
-IDI6MDQgQU0NCj4gVG86IEplZmYgSGFyYW4NCj4gQ2M6IGtlcm5lbG5ld2JpZXNAa2VybmVsbmV3
-Ymllcy5vcmc7IGxpbnV4LWZzZGV2ZWxAdmdlci5rZXJuZWwub3JnOw0KPiBsaW51eC1tbWNAdmdl
-ci5rZXJuZWwub3JnOyBuZXRkZXZAdmdlci5rZXJuZWwub3JnDQo+IFN1YmplY3Q6IFJlOiBEb2Vz
-IHRoZSBDb21tdW5pdHkgdXNlIENvdmVyaXR5ID8NCj4gDQo+IFNhbmtldCwgSmVmZiwNCj4gICAg
-IFRoYW5rcyBhIHRvbiwgdGhhdCB3YXMgaGVscGZ1bC4NCj4gDQo+IENoZWVycywNCj4gUGF2aQ0K
-DQpQYXZpLA0KDQpJIHN1Z2dlc3QgdGhhdCBpZiB5b3UgZ2V0IHRoZSBjaGFuY2UsIGNoZWNrIG91
-dCB0aGVpciBjb2RlIGJyb3dzZXIuIENsaWNrIG9uIG9uZSBvZiB0aGUgYnVncyBpbiB0aGUgTGlu
-dXggcHJvamVjdCBhbmQgdGhlbiBjbGljayB0aGUgZm9sZGVyIGljb24gYXQgdGhlIHRvcCBvZiB0
-aGUgbG93ZXIgbGVmdCBwYW5lIHRvIGdldCB0byB0aGUgc291cmNlIGNvZGUuIEl0J3MgYWJpbGl0
-eSB0byBjcm9zcyByZWZlcmVuY2UgaXMgdGhlIGJlc3Qgb3V0IHRoZXJlLiBJdCBlbGltaW5hdGVz
-IGFsbCB0aGUgZmFsc2UgcG9zaXRpdmVzIGluIGNyb3NzIHJlZmVyZW5jZSByZXN1bHRzIHRoYXQg
-eW91IGdldCBmcm9tIG1vcmUgdHJhZGl0aW9uYWwgdG9rZW4gbWF0Y2hpbmcgYmFzZWQgYnJvd3Nl
-cnMgbGlrZSBjc2NvcGUsIGN0YWdzLCBldGMuDQoNCkplZmYgSGFyYW4NCiANCj4gT24gV2VkLCBE
-ZWMgMTYsIDIwMTUgYXQgMTI6MzIgQU0sIEplZmYgSGFyYW4gPEplZmYuSGFyYW5AY2l0cml4LmNv
-bT4NCj4gd3JvdGU6DQo+ID4+LS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4gPj5Gcm9tOiBr
-ZXJuZWxuZXdiaWVzLQ0KPiBib3VuY2VzK2poYXJhbj1ieXRlbW9iaWxlLmNvbUBrZXJuZWxuZXdi
-aWVzLm9yZw0KPiA+PlttYWlsdG86a2VybmVsbmV3Ymllcy0NCj4gPj5ib3VuY2VzK2poYXJhbj1i
-eXRlbW9iaWxlLmNvbUBrZXJuZWxuZXdiaWVzLm9yZ10gT24gQmVoYWxmIE9mDQo+ID4+cGF2aTE3
-MjkNCj4gPj5TZW50OiBNb25kYXksIERlY2VtYmVyIDE0LCAyMDE1IDExOjAzIFBNDQo+ID4+VG86
-IGtlcm5lbG5ld2JpZXNAa2VybmVsbmV3Ymllcy5vcmc7IGxpbnV4LWZzZGV2ZWxAdmdlci5rZXJu
-ZWwub3JnOw0KPiA+PmxpbnV4LSBtbWNAdmdlci5rZXJuZWwub3JnOyBsaW51eC1uZXRkZXZAdmdl
-ci5rZXJuZWwub3JnDQo+ID4+U3ViamVjdDogRG9lcyB0aGUgQ29tbXVuaXR5IHVzZSBDb3Zlcml0
-eSA/DQo+ID4+DQo+ID4+SGksDQo+ID4+ICBNYXkgSSBrbm93IGlmIHRoZSBjb21tdW5pdHkgdXNl
-cyB0aGUgQ292ZXJpdHkgdG9vbCBhbmQsIGlmIHllcyB3aGVyZQ0KPiA+PmNhbiBJIGZpbmQgYSBy
-ZXBvIG9mIENvdmVyaXR5IHNjYW5zIG9mIGtlcm5lbHMgYW5kIElHTk9SRSBMSVNUOyBjYXVzZQ0K
-PiA+PnRoZXJlIG9idmlvdXNseSB3b3VsZCBiZSBmYWxzZSBwb3NpdGl2ZXMuDQo+ID4+DQo+ID4+
-Q2hlZXJzLA0KPiA+PlBhdmkNCj4gPg0KPiA+IGh0dHBzOi8vc2Nhbi5jb3Zlcml0eS5jb20vDQo+
-ID4NCj4gPiBTaWduIHVwIGZvciBhbiBhY2NvdW50IGFuZCBqb2luIHRoZSBMaW51eCBwcm9qZWN0
-Lg0KPiA+DQo+ID4gSmVmZiBIYXJhbg0KPiA+DQo=
+Hi Geert
+
+Thank for your reply.
+
+On 2015=E5=B9=B412=E6=9C=8818=E6=97=A5 19:27, Ulf Hansson wrote:
+> On 18 December 2015 at 10:33, Geert Uytterhoeven <geert@linux-m68k.or=
+g> wrote:
+>> Hi Dung-san,
+>>
+>> CC Ulf
+>>
+>> On Mon, Dec 14, 2015 at 3:34 AM, Nguyen Viet Dung <nv-dung@jinso.co.=
+jp> wrote:
+>>> While is testting LTSI-v4.1.13-rc1, we have found the following the=
+ failure
+>>> of mmcif.
+>>> 1. mount mmc block
+>>> 2. write data to mmc block
+>>> 3. suspend/resume
+>>> 4. write data to mmc block one again =3D> happen kernel panic
+>>> (Probability in this test procedure is 100%)
+>>>
+>>> We have used git bisect to find cause of failure in LTS-v4.1.13 to
+>>> LTSI-v4.1.13-rc1
+>>> and have found commit which cause failure.
+>>> (On LTS-v4.1.13 has not this failure)
+>>>   drivers: sh: Disable PM runtime for multi-platform ARM with genpd
+>>>   commit :cbc41d0a761bffb3166a413a3c77100a737c0cd7
+>> That means there's a bug in Runtime PM handling of the sh_mmcif driv=
+er, or
+>> in the MMC subsystem.
+>>
+>> Usually such bugs cause a kernel hang on register access, not a NULL=
+ pointer
+>> dereference, though.
+> Agree!
+>
+> I doubt the bisected commit is where the *real* issue is. Looking int=
+o
+> the details for how system PM and runtime PM is deployed in sh_mmcif,
+> I believe some improvements are needed.
+>
+> Actually, I made an attempt to modernize the PM code for sh_mmcif a w=
+hile ago.
+> http://marc.info/?l=3Dlinux-mmc&m=3D138245085523815&w=3D2
+>
+> Whether that fixes the problem reported here, I have no idea. Althoug=
+h
+> if not, it should move the code to a position where it becomes easier
+> to properly fix this issue.
+>
+> I am willing to help and rebase that patchset, but I require help in
+> testing since I haven't been able to get a hold of a HW. Can I count
+> on that?
+Yes , I can help you test.
+If you have rebased patchset, phease tell me.
+
+Best regards,
+Nguyen Viet Dung
