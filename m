@@ -1,213 +1,70 @@
-From: Andy Shevchenko <andy.shevchenko@gmail.com>
-Subject: Re: [PATCH 1/3] mmc: sdhci-pci: Add AMD HS200 mode tuning function
-Date: Tue, 22 Dec 2015 11:52:33 +0200
-Message-ID: <CAHp75Vf2TJLXNcBfNkDHuZ9OjE9=EpQgz3pHJabPim2g63AfPQ@mail.gmail.com>
-References: <1450802408-16354-1-git-send-email-vincent.wan@amd.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: BUG 4.4rc-4: wrong eMMC signaling voltage reported
+Date: Tue, 22 Dec 2015 11:28:46 +0100
+Message-ID: <CAPDyKFqQ-NEPh5hC=YpiqDzDAeoRmdTEFMumAosozuo=BVO-kw@mail.gmail.com>
+References: <87fuzbvfl9.fsf@gmail.com>
+	<CAPDyKFoQqQFmPwrnCeJBcz=mnzW8zbWb5i7bc64oo7bN_113zQ@mail.gmail.com>
+	<CAOMZO5B3WpJRYD7CRX54G0NeWj_BxNL5dB+KjG=YttDHQTx3vQ@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-yk0-f169.google.com ([209.85.160.169]:34569 "EHLO
-	mail-yk0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753564AbbLVJwe (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 22 Dec 2015 04:52:34 -0500
-In-Reply-To: <1450802408-16354-1-git-send-email-vincent.wan@amd.com>
+Received: from mail-yk0-f176.google.com ([209.85.160.176]:34667 "EHLO
+	mail-yk0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751481AbbLVK2r (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 22 Dec 2015 05:28:47 -0500
+Received: by mail-yk0-f176.google.com with SMTP id p130so159192267yka.1
+        for <linux-mmc@vger.kernel.org>; Tue, 22 Dec 2015 02:28:47 -0800 (PST)
+In-Reply-To: <CAOMZO5B3WpJRYD7CRX54G0NeWj_BxNL5dB+KjG=YttDHQTx3vQ@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Wan Zongshun <vincent.wan@amd.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Wan Zongshun <mcuos.com@gmail.com>, Borislav Petkov <bp@suse.de>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Huang Rui <ray.huang@amd.com>
+To: Fabio Estevam <festevam@gmail.com>
+Cc: Holger Schurig <holgerschurig@gmail.com>, linux-mmc <linux-mmc@vger.kernel.org>
 
-On Tue, Dec 22, 2015 at 6:40 PM, Wan Zongshun <vincent.wan@amd.com> wrote:
-> From: Wan Zongshun <Vincent.Wan@amd.com>
+On 22 December 2015 at 10:39, Fabio Estevam <festevam@gmail.com> wrote:
+> Hi Ulf and Holger,
 >
-> This patch is to add software tuning functions for AMD hs200
-> mode.
+> On Thu, Dec 17, 2015 at 2:10 PM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
 >
-> Signed-off-by: Wan Zongshun <Vincent.Wan@amd.com>
-> ---
->  drivers/mmc/host/sdhci-pci-core.c | 146 ++++++++++++++++++++++++++++++++++++++
->  1 file changed, 146 insertions(+)
+>> The no-1-8-v is a somewhat broken DT binding. I advise people to not
+>> use any more.
+>> Depending on the sdhci variant it have different meanings.
+>>
+>> I guess you are using the sdhci-esdhc-imx variant, which means
+>> no-1-8-v will disable UHS modes for SD-cards (those requiring 1.8V
+>> signal voltage). It has no impact on (e)MMC.
+>>
+>> As the host driver announces support for MMC_CAP_1_8V_DDR, that's what
+>> the mmc core will try to use. Actually the mmc core will first try
+>> 1.8V and if it fails, go for 3.3V.
+>>
+>> Likely, sdhci_do_start_signal_voltage_switch() will success to write
+>> the corresponding registers to change the signal voltage to 1.8V,
+>> which makes the mmc core believe it was a success.
+>>
+>> *If* your statement around that your HW don't support 1.8V signal
+>> voltage, we should perhaps add new mmc cap as currently we don't have
+>> a "MMC_CAP_3_3V_DDR". Although, you need to convince on that, because
+>> my experience tells that quite many has misunderstood the HW design in
+>> this regard.
 >
-> diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-pci-core.c
-> index 08f4a9f..01c5723 100644
-> --- a/drivers/mmc/host/sdhci-pci-core.c
-> +++ b/drivers/mmc/host/sdhci-pci-core.c
-> @@ -729,6 +729,152 @@ enum amd_chipset_gen {
->         AMD_CHIPSET_UNKNOWN,
->  };
+> Yes, I have added a 'MMC_CAP_3_3V_ONLY_DDR' in this proposal to fix
+> the same issue as Holger describes:
+> http://www.spinics.net/lists/linux-mmc/msg32285.html
 >
-> +struct tuning_descriptor {
-> +       unsigned char tune_around;
-> +       bool this_tune_ok;
-> +       bool last_tune_ok;
-> +       bool valid_front_end;
-> +       unsigned char valid_front;
-> +       unsigned char valid_window_max;
-> +       unsigned char tune_low_max;
-> +       unsigned char tune_low;
-> +       unsigned char valid_window;
-> +       unsigned char tune_result;
-> +};
-> +
-> +#define AMD_EMMC_TUNE_REG 0xb8
-> +static struct tuning_descriptor tdescriptor;
+> ,but it seems you were not happy with such approach at that time.
+> Unfortunately, I was not able to rework it.
 
-Global variable?!
+Yes, I had vague memory of this discussion. Thanks for pointing it out.
 
-> +
-> +static int tuning_reset(struct sdhci_host *host)
+So, I think I am reaching the same consensus again. We need to move
+away from using the no-1.8-v, and thus not add any new interpretation
+of that binding.
 
-Better prefixes?
+I think what I suggested as the solution here should work, right!?
 
-> +{
-> +       unsigned int val;
-> +       unsigned long flags;
-> +
-> +       spin_lock_irqsave(&host->lock, flags);
-> +
-> +       val = sdhci_readw(host, SDHCI_HOST_CONTROL2);
-> +       val |= SDHCI_CTRL_PRESET_VAL_ENABLE | SDHCI_CTRL_EXEC_TUNING;
-> +       sdhci_writew(host, val, SDHCI_HOST_CONTROL2);
-> +
-> +       val = sdhci_readw(host, SDHCI_HOST_CONTROL2);
-> +       val &= ~SDHCI_CTRL_EXEC_TUNING;
-> +       sdhci_writew(host, val, SDHCI_HOST_CONTROL2);
-> +
-> +       spin_unlock_irqrestore(&host->lock, flags);
-> +
-> +       return 0;
-> +}
-> +
-> +static int config_tuning_phase(struct sdhci_host *host, unsigned char phase)
-> +{
-> +       struct sdhci_pci_slot *slot = sdhci_priv(host);
-> +       struct pci_dev *pdev = slot->chip->pdev;
-> +       unsigned int val;
-> +       unsigned long flags;
-> +
-> +       spin_lock_irqsave(&host->lock, flags);
-> +
-> +       pci_read_config_dword(pdev, AMD_EMMC_TUNE_REG, &val);
-> +       val &= ~0xf;
-> +       val |= (0x10800 | phase);
+I understand the problem with keeping DTB backwards compatible, don't
+you think sdhci-esdhc-imx can handle that internally via using a
+MMC_CAP_3_3V_DDR?
 
-Magic.
-
-> +       pci_write_config_dword(pdev, AMD_EMMC_TUNE_REG, val);
-> +
-> +       spin_unlock_irqrestore(&host->lock, flags);
-> +
-> +       return 0;
-> +}
-> +
-> +static int find_good_phase(struct sdhci_host *host)
-> +{
-> +       struct tuning_descriptor *td = &tdescriptor;
-> +       struct sdhci_pci_slot *slot = sdhci_priv(host);
-> +       struct pci_dev *pdev = slot->chip->pdev;
-> +       unsigned int val;
-> +       unsigned long flags;
-> +
-> +       spin_lock_irqsave(&host->lock, flags);
-> +
-> +       if (td->this_tune_ok == false)
-> +               td->valid_front_end = 1;
-> +
-> +       if (td->valid_front_end)
-> +               td->valid_front = td->valid_front;
-> +       else if (td->this_tune_ok)
-> +               td->valid_front = td->valid_front + 1;
-> +
-> +       if ((!td->this_tune_ok && td->last_tune_ok) ||
-> +                                       (td->tune_around == 11)) {
-
-Magic.
-
-> +               if (td->valid_window > td->valid_window_max) {
-> +                       td->valid_window_max = td->valid_window;
-> +                       td->tune_low_max = td->tune_low;
-> +               }
-> +       }
-> +
-> +       if (td->this_tune_ok) {
-> +               if (!td->last_tune_ok)
-> +                       td->tune_low = td->tune_around;
-> +               td->valid_window = td->valid_window + 1;
-> +       } else {
-> +               if (td->last_tune_ok)
-> +                       td->valid_window = 0x0;
-> +       }
-> +
-> +       td->last_tune_ok = td->this_tune_ok;
-> +
-> +       if (td->tune_around == 11) {
-> +               if ((td->valid_front + td->valid_window) >
-> +                                               td->valid_window_max) {
-> +                       if (td->valid_front > td->valid_window)
-> +                               td->tune_result =
-> +                               ((td->valid_front - td->valid_window) >> 1);
-> +                       else
-> +                               td->tune_result = td->tune_low +
-> +                               ((td->valid_window + td->valid_front) >> 1);
-> +               } else {
-> +                       td->tune_result =
-> +                               td->tune_low_max + (td->valid_window_max >> 1);
-> +               }
-> +
-> +               if (td->tune_result > 0x0b)
-> +                       td->tune_result = 0x0b;
-> +
-> +               pci_read_config_dword(pdev, AMD_EMMC_TUNE_REG, &val);
-> +               val &= ~0xf;
-> +               val |= (0x10800 | td->tune_result);
-
-Magic.
-
-> +               pci_write_config_dword(pdev, AMD_EMMC_TUNE_REG, val);
-> +       }
-> +
-> +       spin_unlock_irqrestore(&host->lock, flags);
-> +
-> +       return 0;
-> +}
-> +
-> +static int amd_execute_tuning(struct sdhci_host *host, u32 opcode)
-> +{
-> +       struct tuning_descriptor *td = &tdescriptor;
-> +
-> +       tuning_reset(host);
-> +
-> +       for (td->tune_around = 0; td->tune_around < 12; td->tune_around++) {
-
-Magic.
-
-Why loop is done with non-local variable?
-
-> +
-> +               config_tuning_phase(host, td->tune_around);
-> +
-> +               if (mmc_send_tuning(host->mmc, opcode, NULL)) {
-> +                       td->this_tune_ok = false;
-> +                       host->mmc->need_retune = 0;
-> +                       mdelay(4);
-> +               } else {
-> +                       td->this_tune_ok = true;
-> +               }
-> +
-> +               find_good_phase(host);
-> +       }
-> +
-> +       host->mmc->retune_period = 0;
-> +
-> +       return 0;
-> +}
-> +
->  static int amd_probe(struct sdhci_pci_chip *chip)
->  {
->         struct pci_dev  *smbus_dev;
-
-No users for such code. I don't think it makes sense to push it separately.
-
-
--- 
-With Best Regards,
-Andy Shevchenko
+Kind regards
+Uffe
