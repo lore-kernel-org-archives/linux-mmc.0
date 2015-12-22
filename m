@@ -1,81 +1,181 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [RFC 0/6] mmc: Field Firmware Update
-Date: Tue, 22 Dec 2015 09:57:11 +0100
-Message-ID: <CAPDyKFq5wNARNpDMK0_TJ3P64UAsCr_L42sj+JA-k6DdoFBJsw@mail.gmail.com>
-References: <1447426572-11756-1-git-send-email-holgerschurig@gmail.com>
-	<SN1PR02MB13891415516DE9FA4756140783070@SN1PR02MB1389.namprd02.prod.outlook.com>
-	<CAOpc7mHbM8EYYNRKR+pKnzc0wf1DR1ojX-iFuDWDYyquC3EVZg@mail.gmail.com>
-	<CAPDyKFp2WEVF4yi=Upzx+58SY15u=Fp4=tr3_hh7AS3T2yz4qQ@mail.gmail.com>
-	<87r3ierjae.fsf@gmail.com>
-	<CAPDyKFpgYLDRt8=mayqB8sqD0ArXnv31a+fTZAnT_4Vf7yuFwQ@mail.gmail.com>
+From: Wan Zongshun <vincent.wan@amd.com>
+Subject: [PATCH 1/3] mmc: sdhci-pci: Add AMD HS200 mode tuning function
+Date: Tue, 22 Dec 2015 11:40:06 -0500
+Message-ID: <1450802408-16354-1-git-send-email-vincent.wan@amd.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-yk0-f179.google.com ([209.85.160.179]:35535 "EHLO
-	mail-yk0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750795AbbLVI5M (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 22 Dec 2015 03:57:12 -0500
-Received: by mail-yk0-f179.google.com with SMTP id v6so157037372ykc.2
-        for <linux-mmc@vger.kernel.org>; Tue, 22 Dec 2015 00:57:11 -0800 (PST)
-In-Reply-To: <CAPDyKFpgYLDRt8=mayqB8sqD0ArXnv31a+fTZAnT_4Vf7yuFwQ@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org
+Cc: Wan Zongshun <mcuos.com@gmail.com>, Borislav Petkov <bp@suse.de>, linux-kernel@vger.kernel.org, Huang Rui <ray.huang@amd.com>, Wan Zongshun <Vincent.Wan@amd.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Holger Schurig <holgerschurig@gmail.com>
-Cc: Avi Shchislowski <Avi.Shchislowski@sandisk.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Alex Lemberg <Alex.Lemberg@sandisk.com>, Chris Ball <chris@printf.net>, Baolin Wang <baolin.wang@linaro.org>, Gwendal Grignou <gwendal@chromium.org>, Grant Grundler <grundler@chromium.org>, Seshagiri Holi <sholi@nvidia.com>, Jon Hunter <jonathanh@nvidia.com>, Olof Johansson <olofj@chromium.org>
 
-+ Olof (forgot to add him last time)
+From: Wan Zongshun <Vincent.Wan@amd.com>
 
-On 22 December 2015 at 09:55, Ulf Hansson <ulf.hansson@linaro.org> wrote:
-> + Gwendal, Grant, Olof, Seshagiri, Jon
->
-> On 22 December 2015 at 09:15, Holger Schurig <holgerschurig@gmail.com> wrote:
->>
->>> Sorry for the delay.
->>
->> No problem, I was busy with many other projects as well.
->>
->>> My advise right now is to try this out via the mmc ioctl in userspace,
->>> yes. Although, if you encounter any issues with that approach that it
->>> might not be reliable, I am open to look into the in-kernel solution
->>> again.
->>
->> I managed to update my Kingston eMMCs with a slighly modified patch to
->> what I submitted. I however didn't bother to submit this, as I saw no
->> chance of getting it applied.
->>
->> Also I once asked in the mailing list if there is some user-space
->> example of how to use the multi-block feature that is supposed to enable
->> this, but I haven't gotten an answer.
->>
->>> Regarding mmc-utils as where I recommend you to implement this, I have
->>> been thinking of moving this tool into the tools directory in the
->>> kernel.
->>
->> Sounds good to me.
->>
->>
->>
->> Remotely related:
->>
->> Do you know that some google people made their own version of mmc-utils
->> for ChromeOS? And the don't seem to give much effort in unification of
->> them?  As if the world wouldn't know how hard it can be to re-unite
->> things again, Google should know from their custom kernels they use on
->> Android ...  Sigh.
->>
->>
->> So you can
->>
->> * git clone git://git.kernel.org/pub/scm/linux/kernel/git/cjb/mmc-utils.git
->> * git clone https://chromium.googlesource.com/chromiumos/third_party/mmc-utils
->
-> Thanks for sharing the information. Some Chromium folkz has certainly
-> been helpful in upstreaming activities, but you are right that there
-> is more to be done for mmc utils.
->
-> Perhaps by moving the code into the kernel tools dir and finding
-> someone who actively wants to maintain it, will enable improved
-> upstream activities!?
->
-> Kind regards
-> Uffe
+This patch is to add software tuning functions for AMD hs200
+mode.
+
+Signed-off-by: Wan Zongshun <Vincent.Wan@amd.com>
+---
+ drivers/mmc/host/sdhci-pci-core.c | 146 ++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 146 insertions(+)
+
+diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-pci-core.c
+index 08f4a9f..01c5723 100644
+--- a/drivers/mmc/host/sdhci-pci-core.c
++++ b/drivers/mmc/host/sdhci-pci-core.c
+@@ -729,6 +729,152 @@ enum amd_chipset_gen {
+ 	AMD_CHIPSET_UNKNOWN,
+ };
+ 
++struct tuning_descriptor {
++	unsigned char tune_around;
++	bool this_tune_ok;
++	bool last_tune_ok;
++	bool valid_front_end;
++	unsigned char valid_front;
++	unsigned char valid_window_max;
++	unsigned char tune_low_max;
++	unsigned char tune_low;
++	unsigned char valid_window;
++	unsigned char tune_result;
++};
++
++#define AMD_EMMC_TUNE_REG 0xb8
++static struct tuning_descriptor tdescriptor;
++
++static int tuning_reset(struct sdhci_host *host)
++{
++	unsigned int val;
++	unsigned long flags;
++
++	spin_lock_irqsave(&host->lock, flags);
++
++	val = sdhci_readw(host, SDHCI_HOST_CONTROL2);
++	val |= SDHCI_CTRL_PRESET_VAL_ENABLE | SDHCI_CTRL_EXEC_TUNING;
++	sdhci_writew(host, val, SDHCI_HOST_CONTROL2);
++
++	val = sdhci_readw(host, SDHCI_HOST_CONTROL2);
++	val &= ~SDHCI_CTRL_EXEC_TUNING;
++	sdhci_writew(host, val, SDHCI_HOST_CONTROL2);
++
++	spin_unlock_irqrestore(&host->lock, flags);
++
++	return 0;
++}
++
++static int config_tuning_phase(struct sdhci_host *host, unsigned char phase)
++{
++	struct sdhci_pci_slot *slot = sdhci_priv(host);
++	struct pci_dev *pdev = slot->chip->pdev;
++	unsigned int val;
++	unsigned long flags;
++
++	spin_lock_irqsave(&host->lock, flags);
++
++	pci_read_config_dword(pdev, AMD_EMMC_TUNE_REG, &val);
++	val &= ~0xf;
++	val |= (0x10800 | phase);
++	pci_write_config_dword(pdev, AMD_EMMC_TUNE_REG, val);
++
++	spin_unlock_irqrestore(&host->lock, flags);
++
++	return 0;
++}
++
++static int find_good_phase(struct sdhci_host *host)
++{
++	struct tuning_descriptor *td = &tdescriptor;
++	struct sdhci_pci_slot *slot = sdhci_priv(host);
++	struct pci_dev *pdev = slot->chip->pdev;
++	unsigned int val;
++	unsigned long flags;
++
++	spin_lock_irqsave(&host->lock, flags);
++
++	if (td->this_tune_ok == false)
++		td->valid_front_end = 1;
++
++	if (td->valid_front_end)
++		td->valid_front = td->valid_front;
++	else if (td->this_tune_ok)
++		td->valid_front = td->valid_front + 1;
++
++	if ((!td->this_tune_ok && td->last_tune_ok) ||
++					(td->tune_around == 11)) {
++		if (td->valid_window > td->valid_window_max) {
++			td->valid_window_max = td->valid_window;
++			td->tune_low_max = td->tune_low;
++		}
++	}
++
++	if (td->this_tune_ok) {
++		if (!td->last_tune_ok)
++			td->tune_low = td->tune_around;
++		td->valid_window = td->valid_window + 1;
++	} else {
++		if (td->last_tune_ok)
++			td->valid_window = 0x0;
++	}
++
++	td->last_tune_ok = td->this_tune_ok;
++
++	if (td->tune_around == 11) {
++		if ((td->valid_front + td->valid_window) >
++						td->valid_window_max) {
++			if (td->valid_front > td->valid_window)
++				td->tune_result =
++				((td->valid_front - td->valid_window) >> 1);
++			else
++				td->tune_result = td->tune_low +
++				((td->valid_window + td->valid_front) >> 1);
++		} else {
++			td->tune_result =
++				td->tune_low_max + (td->valid_window_max >> 1);
++		}
++
++		if (td->tune_result > 0x0b)
++			td->tune_result = 0x0b;
++
++		pci_read_config_dword(pdev, AMD_EMMC_TUNE_REG, &val);
++		val &= ~0xf;
++		val |= (0x10800 | td->tune_result);
++		pci_write_config_dword(pdev, AMD_EMMC_TUNE_REG, val);
++	}
++
++	spin_unlock_irqrestore(&host->lock, flags);
++
++	return 0;
++}
++
++static int amd_execute_tuning(struct sdhci_host *host, u32 opcode)
++{
++	struct tuning_descriptor *td = &tdescriptor;
++
++	tuning_reset(host);
++
++	for (td->tune_around = 0; td->tune_around < 12; td->tune_around++) {
++
++		config_tuning_phase(host, td->tune_around);
++
++		if (mmc_send_tuning(host->mmc, opcode, NULL)) {
++			td->this_tune_ok = false;
++			host->mmc->need_retune = 0;
++			mdelay(4);
++		} else {
++			td->this_tune_ok = true;
++		}
++
++		find_good_phase(host);
++	}
++
++	host->mmc->retune_period = 0;
++
++	return 0;
++}
++
+ static int amd_probe(struct sdhci_pci_chip *chip)
+ {
+ 	struct pci_dev	*smbus_dev;
+-- 
+1.9.1
