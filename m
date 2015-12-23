@@ -1,64 +1,46 @@
-From: Russell King - ARM Linux <linux@arm.linux.org.uk>
-Subject: Re: 1217:8520 [Dell Latitude E7450] O2 Micro, SD/MMC Card Reader
- doesn't work
-Date: Wed, 23 Dec 2015 11:13:52 +0000
-Message-ID: <20151223111352.GR8644@n2100.arm.linux.org.uk>
-References: <CAONpWdsteBnqTcFbKpcOQFueyeJJWEmn9DJitD43f59xV8sDyg@mail.gmail.com>
- <BY2PR04MB184372CAAC1FA0C5373D73238FEF0@BY2PR04MB1843.namprd04.prod.outlook.com>
- <CAONpWduF6iH4Rr5Y610KP1RE342nWAajR27KFbu1N2iet4R0ZA@mail.gmail.com>
- <BY2PR04MB18438CFFD181C72EFEF408908FE10@BY2PR04MB1843.namprd04.prod.outlook.com>
- <CAPDyKFotgz3czCs8XaXwC4kT53Lp0h=n03OUMtO6BUTwTnDYzQ@mail.gmail.com>
- <BY2PR04MB18432C804C263313D2349C848FE10@BY2PR04MB1843.namprd04.prod.outlook.com>
- <CAONpWdvo+b=Y26zsCYsHFHjJ+8yAnYfoJOsirdS-he2s1unDgg@mail.gmail.com>
- <CAONpWdsHJEHjedfQrjXru0fETRL3NfXG6cyoQAYtLYAKb5i-2Q@mail.gmail.com>
- <CY1PR04MB184843666E915C564A1858CB8FE50@CY1PR04MB1848.namprd04.prod.outlook.com>
- <CAPDyKFqMPfrTdF4JNU-QUBN-va+Xk0EAqHysQ_HpKkmMfQzQNg@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from pandora.arm.linux.org.uk ([78.32.30.218]:45183 "EHLO
-	pandora.arm.linux.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751866AbbLWLOE (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 23 Dec 2015 06:14:04 -0500
-Content-Disposition: inline
-In-Reply-To: <CAPDyKFqMPfrTdF4JNU-QUBN-va+Xk0EAqHysQ_HpKkmMfQzQNg@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+From: Rameshswar Prasad Sahu <rsahu-qTEPVZfXA3Y@public.gmane.org>
+Subject: [PATCH] mmc: host: arasan: sdhci-of-arasan: Remove no-hispd and no-cmd23 quirks for sdhci-arasan4.9a
+Date: Wed, 23 Dec 2015 18:59:51 +0530
+Message-ID: <1450877391-3029-1-git-send-email-rsahu@apm.com>
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, michal.simek-gjFFaj9aHVfQT0dZR+AlfA@public.gmane.org, soren.brinkmann-gjFFaj9aHVfQT0dZR+AlfA@public.gmane.org
+Cc: linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, arnd-r2nGTMty4D4@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, jcm-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, patches-qTEPVZfXA3Y@public.gmane.org, kgondkar-qTEPVZfXA3Y@public.gmane.org, Rameshwar Prasad Sahu <rsahu-qTEPVZfXA3Y@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Peter Guo <peter.guo@bayhubtech.com>, Alex Ballas <alex@ballas.org>, "adam8157@gmail.com" <adam8157@gmail.com>, "linux-mmc@VGER.KERNEL.ORG" <linux-mmc@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>
 
-On Tue, Dec 22, 2015 at 09:30:00AM +0100, Ulf Hansson wrote:
-> This quirk seems a bit strange. It looks like a generic problem being
-> solved by the wrong approach. Although, my knowledge of sdhci HW is
-> limited so I might be wrong.
-> 
-> Why doesn't sdhci *always* reset the related registers when the
-> command or data transfer gets *completed*? Instead as currently,
-> delaying that until the *next* request is started and via using
-> SDHCI_QUIRK2_CLEAR_TRANSFERMODE_REG_BEFORE_CMD?
+From: Rameshwar Prasad Sahu <rsahu-qTEPVZfXA3Y@public.gmane.org>
 
-That would be additional overhead.  The real problem is that the tuning
-paths compete with the normal request paths over how to set the registers.
-This competition needs to be killed, and a saner structure for dealing
-with requests and tuning commands needs to be created.
+The Arason SD host controller supports set block count command (cmd23)
+and high speed mode. This patch re-enable both of these features that
+was disabled. For device that doesn't support high speed, it should
+configure its capability register accordingly instead disables it
+explicitly.
 
-This is something I'm working on as I get time: I'm restructuring
-sdhci_send_command() with the aim of getting to the point where the
-tuning code is _not_ writing to any registers at all, and that's all
-handled by code common to both paths.
+Signed-off-by: Rameshwar Prasad Sahu <rsahu-qTEPVZfXA3Y@public.gmane.org>
+---
+ drivers/mmc/host/sdhci-of-arasan.c |    5 -----
+ 1 files changed, 0 insertions(+), 5 deletions(-)
 
-> Sdhci's sdhci_execute_tuning() function must be converted to use
-> mmc_send_tuning().
+diff --git a/drivers/mmc/host/sdhci-of-arasan.c b/drivers/mmc/host/sdhci-of-arasan.c
+index 75379cb..5d9fdb3 100644
+--- a/drivers/mmc/host/sdhci-of-arasan.c
++++ b/drivers/mmc/host/sdhci-of-arasan.c
+@@ -172,11 +172,6 @@ static int sdhci_arasan_probe(struct platform_device *pdev)
+ 		goto clk_disable_all;
+ 	}
 
-That will make the request path more complex, because we then need to
-detect the tuning commands and have special handling for them.  With
-SDHCI, they are not a standard data transfer command, which is what
-mmc_send_tuning() wants.
+-	if (of_device_is_compatible(pdev->dev.of_node, "arasan,sdhci-4.9a")) {
+-		host->quirks |= SDHCI_QUIRK_NO_HISPD_BIT;
+-		host->quirks2 |= SDHCI_QUIRK2_HOST_NO_CMD23;
+-	}
+-
+ 	sdhci_get_of_property(pdev);
+ 	pltfm_host = sdhci_priv(host);
+ 	pltfm_host->priv = sdhci_arasan;
+--
+1.7.1
 
-This means we end up with more complexity in what is supposed to be a
-fast path, which means more room for bugs to creep in.
-
--- 
-RMK's Patch system: http://www.arm.linux.org.uk/developer/patches/
-FTTC broadband for 0.8mile line: currently at 9.6Mbps down 400kbps up
-according to speedtest.net.
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
