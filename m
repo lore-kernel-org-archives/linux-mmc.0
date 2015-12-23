@@ -1,241 +1,133 @@
-From: Wan ZongShun <mcuos.com@gmail.com>
-Subject: Re: [PATCH 1/3] mmc: sdhci-pci: Add AMD HS200 mode tuning function
-Date: Wed, 23 Dec 2015 08:40:23 +0800
-Message-ID: <CAKT61h-CK6egUGG=eKj5wHJ1GTkXFaqQpu2dLpJnBJF_vGfEpw@mail.gmail.com>
-References: <1450802408-16354-1-git-send-email-vincent.wan@amd.com> <CAHp75Vf2TJLXNcBfNkDHuZ9OjE9=EpQgz3pHJabPim2g63AfPQ@mail.gmail.com>
+From: Peter Guo <peter.guo@bayhubtech.com>
+Subject: RE: 1217:8520 [Dell Latitude E7450] O2 Micro, SD/MMC Card Reader
+ doesn't work
+Date: Wed, 23 Dec 2015 06:39:05 +0000
+Message-ID: <BY2PR04MB184390AF6009AF69FE9AA4268FE60@BY2PR04MB1843.namprd04.prod.outlook.com>
+References: <CAONpWdsteBnqTcFbKpcOQFueyeJJWEmn9DJitD43f59xV8sDyg@mail.gmail.com>
+	<BY2PR04MB184372CAAC1FA0C5373D73238FEF0@BY2PR04MB1843.namprd04.prod.outlook.com>
+	<CAONpWduF6iH4Rr5Y610KP1RE342nWAajR27KFbu1N2iet4R0ZA@mail.gmail.com>
+	<BY2PR04MB18438CFFD181C72EFEF408908FE10@BY2PR04MB1843.namprd04.prod.outlook.com>
+	<CAPDyKFotgz3czCs8XaXwC4kT53Lp0h=n03OUMtO6BUTwTnDYzQ@mail.gmail.com>
+	<BY2PR04MB18432C804C263313D2349C848FE10@BY2PR04MB1843.namprd04.prod.outlook.com>
+	<CAONpWdvo+b=Y26zsCYsHFHjJ+8yAnYfoJOsirdS-he2s1unDgg@mail.gmail.com>
+	<CAONpWdsHJEHjedfQrjXru0fETRL3NfXG6cyoQAYtLYAKb5i-2Q@mail.gmail.com>
+	<CY1PR04MB184843666E915C564A1858CB8FE50@CY1PR04MB1848.namprd04.prod.outlook.com>
+ <CAPDyKFqMPfrTdF4JNU-QUBN-va+Xk0EAqHysQ_HpKkmMfQzQNg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-yk0-f175.google.com ([209.85.160.175]:33636 "EHLO
-	mail-yk0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752527AbbLWAkn (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 22 Dec 2015 19:40:43 -0500
-In-Reply-To: <CAHp75Vf2TJLXNcBfNkDHuZ9OjE9=EpQgz3pHJabPim2g63AfPQ@mail.gmail.com>
+Received: from mail-bl2on0117.outbound.protection.outlook.com ([65.55.169.117]:54552
+	"EHLO na01-bl2-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S933064AbbLWGjK (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 23 Dec 2015 01:39:10 -0500
+In-Reply-To: <CAPDyKFqMPfrTdF4JNU-QUBN-va+Xk0EAqHysQ_HpKkmMfQzQNg@mail.gmail.com>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Andy Shevchenko <andy.shevchenko@gmail.com>
-Cc: Wan Zongshun <vincent.wan@amd.com>, Ulf Hansson <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Borislav Petkov <bp@suse.de>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Huang Rui <ray.huang@amd.com>
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Alex Ballas <alex@ballas.org>, "adam8157@gmail.com" <adam8157@gmail.com>, "linux-mmc@VGER.KERNEL.ORG" <linux-mmc@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, Russell King - ARM Linux <linux@arm.linux.org.uk>
 
-2015-12-22 17:52 GMT+08:00 Andy Shevchenko <andy.shevchenko@gmail.com>:
-> On Tue, Dec 22, 2015 at 6:40 PM, Wan Zongshun <vincent.wan@amd.com> wrote:
->> From: Wan Zongshun <Vincent.Wan@amd.com>
->>
->> This patch is to add software tuning functions for AMD hs200
->> mode.
->>
->> Signed-off-by: Wan Zongshun <Vincent.Wan@amd.com>
->> ---
->>  drivers/mmc/host/sdhci-pci-core.c | 146 ++++++++++++++++++++++++++++++++++++++
->>  1 file changed, 146 insertions(+)
->>
->> diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-pci-core.c
->> index 08f4a9f..01c5723 100644
->> --- a/drivers/mmc/host/sdhci-pci-core.c
->> +++ b/drivers/mmc/host/sdhci-pci-core.c
->> @@ -729,6 +729,152 @@ enum amd_chipset_gen {
->>         AMD_CHIPSET_UNKNOWN,
->>  };
->>
->> +struct tuning_descriptor {
->> +       unsigned char tune_around;
->> +       bool this_tune_ok;
->> +       bool last_tune_ok;
->> +       bool valid_front_end;
->> +       unsigned char valid_front;
->> +       unsigned char valid_window_max;
->> +       unsigned char tune_low_max;
->> +       unsigned char tune_low;
->> +       unsigned char valid_window;
->> +       unsigned char tune_result;
->> +};
->> +
->> +#define AMD_EMMC_TUNE_REG 0xb8
->> +static struct tuning_descriptor tdescriptor;
->
-> Global variable?!
-
-Okay, will change it to local.
-
->
->> +
->> +static int tuning_reset(struct sdhci_host *host)
->
-> Better prefixes?
-
-Do you mean I should not name this function to tuning reset?
-
->
->> +{
->> +       unsigned int val;
->> +       unsigned long flags;
->> +
->> +       spin_lock_irqsave(&host->lock, flags);
->> +
->> +       val = sdhci_readw(host, SDHCI_HOST_CONTROL2);
->> +       val |= SDHCI_CTRL_PRESET_VAL_ENABLE | SDHCI_CTRL_EXEC_TUNING;
->> +       sdhci_writew(host, val, SDHCI_HOST_CONTROL2);
->> +
->> +       val = sdhci_readw(host, SDHCI_HOST_CONTROL2);
->> +       val &= ~SDHCI_CTRL_EXEC_TUNING;
->> +       sdhci_writew(host, val, SDHCI_HOST_CONTROL2);
->> +
->> +       spin_unlock_irqrestore(&host->lock, flags);
->> +
->> +       return 0;
->> +}
->> +
->> +static int config_tuning_phase(struct sdhci_host *host, unsigned char phase)
->> +{
->> +       struct sdhci_pci_slot *slot = sdhci_priv(host);
->> +       struct pci_dev *pdev = slot->chip->pdev;
->> +       unsigned int val;
->> +       unsigned long flags;
->> +
->> +       spin_lock_irqsave(&host->lock, flags);
->> +
->> +       pci_read_config_dword(pdev, AMD_EMMC_TUNE_REG, &val);
->> +       val &= ~0xf;
->> +       val |= (0x10800 | phase);
->
-> Magic.
-
-Okay, I will make 0x10800 to be see more clearly, will define each bit
-Macro for it.
-
->
->> +       pci_write_config_dword(pdev, AMD_EMMC_TUNE_REG, val);
->> +
->> +       spin_unlock_irqrestore(&host->lock, flags);
->> +
->> +       return 0;
->> +}
->> +
->> +static int find_good_phase(struct sdhci_host *host)
->> +{
->> +       struct tuning_descriptor *td = &tdescriptor;
->> +       struct sdhci_pci_slot *slot = sdhci_priv(host);
->> +       struct pci_dev *pdev = slot->chip->pdev;
->> +       unsigned int val;
->> +       unsigned long flags;
->> +
->> +       spin_lock_irqsave(&host->lock, flags);
->> +
->> +       if (td->this_tune_ok == false)
->> +               td->valid_front_end = 1;
->> +
->> +       if (td->valid_front_end)
->> +               td->valid_front = td->valid_front;
->> +       else if (td->this_tune_ok)
->> +               td->valid_front = td->valid_front + 1;
->> +
->> +       if ((!td->this_tune_ok && td->last_tune_ok) ||
->> +                                       (td->tune_around == 11)) {
->
-> Magic.
->
->> +               if (td->valid_window > td->valid_window_max) {
->> +                       td->valid_window_max = td->valid_window;
->> +                       td->tune_low_max = td->tune_low;
->> +               }
->> +       }
->> +
->> +       if (td->this_tune_ok) {
->> +               if (!td->last_tune_ok)
->> +                       td->tune_low = td->tune_around;
->> +               td->valid_window = td->valid_window + 1;
->> +       } else {
->> +               if (td->last_tune_ok)
->> +                       td->valid_window = 0x0;
->> +       }
->> +
->> +       td->last_tune_ok = td->this_tune_ok;
->> +
->> +       if (td->tune_around == 11) {
->> +               if ((td->valid_front + td->valid_window) >
->> +                                               td->valid_window_max) {
->> +                       if (td->valid_front > td->valid_window)
->> +                               td->tune_result =
->> +                               ((td->valid_front - td->valid_window) >> 1);
->> +                       else
->> +                               td->tune_result = td->tune_low +
->> +                               ((td->valid_window + td->valid_front) >> 1);
->> +               } else {
->> +                       td->tune_result =
->> +                               td->tune_low_max + (td->valid_window_max >> 1);
->> +               }
->> +
->> +               if (td->tune_result > 0x0b)
->> +                       td->tune_result = 0x0b;
->> +
->> +               pci_read_config_dword(pdev, AMD_EMMC_TUNE_REG, &val);
->> +               val &= ~0xf;
->> +               val |= (0x10800 | td->tune_result);
->
-> Magic.
->
->> +               pci_write_config_dword(pdev, AMD_EMMC_TUNE_REG, val);
->> +       }
->> +
->> +       spin_unlock_irqrestore(&host->lock, flags);
->> +
->> +       return 0;
->> +}
->> +
->> +static int amd_execute_tuning(struct sdhci_host *host, u32 opcode)
->> +{
->> +       struct tuning_descriptor *td = &tdescriptor;
->> +
->> +       tuning_reset(host);
->> +
->> +       for (td->tune_around = 0; td->tune_around < 12; td->tune_around++) {
->
-> Magic.
->
-> Why loop is done with non-local variable?
-
-It will be changed at next version.
-thanks!
-
->
->> +
->> +               config_tuning_phase(host, td->tune_around);
->> +
->> +               if (mmc_send_tuning(host->mmc, opcode, NULL)) {
->> +                       td->this_tune_ok = false;
->> +                       host->mmc->need_retune = 0;
->> +                       mdelay(4);
->> +               } else {
->> +                       td->this_tune_ok = true;
->> +               }
->> +
->> +               find_good_phase(host);
->> +       }
->> +
->> +       host->mmc->retune_period = 0;
->> +
->> +       return 0;
->> +}
->> +
->>  static int amd_probe(struct sdhci_pci_chip *chip)
->>  {
->>         struct pci_dev  *smbus_dev;
->
-> No users for such code. I don't think it makes sense to push it separately.
-
-Since I am not sure the patch 2/3 is ok to every body, so it just is my try.
-If we can make decision for patch2/3, I can integrate them into one
-patch per your suggestion.
-
-Thanks Andy.
-
->
-> --
-> With Best Regards,
-> Andy Shevchenko
-
-
-
--- 
----
-Vincent Wan(Zongshun)
-www.mcuos.com
+SGkgVWxmLA0KDQpUaGFua3MgZm9yIHlvdXIgc3VnZ2VzdGlvbiwgUGxlYXNlIGNoZWNrIG15IGNv
+bW1lbnQuDQoNCkJSDQpQZXRlci5ndW8NCg0KLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCkZy
+b206IFVsZiBIYW5zc29uIFttYWlsdG86dWxmLmhhbnNzb25AbGluYXJvLm9yZ10NClNlbnQ6IFR1
+ZXNkYXksIERlY2VtYmVyIDIyLCAyMDE1IDQ6MzAgUE0NClRvOiBQZXRlciBHdW8NCkNjOiBBbGV4
+IEJhbGxhczsgYWRhbTgxNTdAZ21haWwuY29tOyBsaW51eC1tbWNAVkdFUi5LRVJORUwuT1JHOyBB
+ZHJpYW4gSHVudGVyOyBSdXNzZWxsIEtpbmcgLSBBUk0gTGludXgNClN1YmplY3Q6IFJlOiAxMjE3
+Ojg1MjAgW0RlbGwgTGF0aXR1ZGUgRTc0NTBdIE8yIE1pY3JvLCBTRC9NTUMgQ2FyZCBSZWFkZXIg
+ZG9lc24ndCB3b3JrDQoNCisgQWRyaWFuLCBSdXNzZWxsDQoNCk9uIDIyIERlY2VtYmVyIDIwMTUg
+YXQgMDQ6MjQsIFBldGVyIEd1byA8cGV0ZXIuZ3VvQGJheWh1YnRlY2guY29tPiB3cm90ZToNCj4+
+IEhpIFVsZiAmIEFsZXgsDQo+Pg0KPj4gQmVsb3cgaXMgdGhlIGNvbXBsZXRlIGFuYWx5c2lzIG9m
+IHRoaXMgaXNzdWUuDQo+Pg0KPj4gVGhlIGJhc2ljIGZsb3cgb2Ygc2VuZCBjb21tYW5kIGlzIGFz
+IGJlbG93Og0KPj4gKDEpIFVwcGVyIGxheWVyICBwcmVwYXJlIHRoZSBjb21tYW5kIHBhcmFtZXRl
+cjsNCj4+ICgyKSBDYWxsIHNkaGNpX3NlbmRfY29tbWFuZCwgYW5kIHNkaGNpX3NlbmRfY29tbWFu
+ZCB3aWxsIGNhbGwgDQo+PiBzZGhjaV9zZXRfdHJhbnNmZXJfbW9kZSAgdG8gc2V0IEhvc3QgUmVn
+aXN0ZXIgMHhDOw0KPj4gKDMpIENhbGwgc2RoY2lfd3JpdGV3KGhvc3QsIFNESENJX01BS0VfQ01E
+KGNtZC0+b3Bjb2RlLCBmbGFncyksDQo+PiBTREhDSV9DT01NQU5EKSB0byBzZW5kIGNvbW1hbmQ7
+DQo+Pg0KPj4gRm9yIExpbnV4IGtlcm5lbCBtYWluc3RyZWFtICh3aXRob3V0IGFueSBxdWlyayks
+IE1NQyBjYXNlOg0KPj4gKDEpIEl0IHdpbGwgY2FsbCAgbW1jX2dldF9leHRfY3NkIGFuZCB0aGlz
+IGlzIGFuIERNQSB0cmFuc2ZlciwgdGhlbiBETUEgZW5hYmxlIGJpdCB3aWxsIGJlIHNldCB0byAx
+ICgweENbMF09MSdiMSkuDQo+PiAoMikgVGhlbiBuZXh0IENvbW1hbmQgaXMgbW1jX3N3aXRjaChj
+bWQ2KSB3aGljaCBpcyBub25lLWRhdGEgY29tbWFuZCwgdGhlIGRyaXZlciB3aWxsIGtlZXAgRE1B
+IGVuYWJsZSBiaXQgdG8gMTsgdGhpcyB3aWxsIGxldCBvdXIgSG9zdCBmYWlsZWQgdG8gZXhlY3V0
+ZSB0aGUgQ01EMDYuDQo+Pg0KPj4gQWNjb3JkaW5nIHRvIFNEIEhvc3QgU3BlYyhTRCBIb3N0IENv
+bnRyb2xsZXIgU3BlY2lmaWNhdGlvbiB2ZXJzb24gNC4xIHBhZ2UgNDEpOg0KPj4gQml0MCBvZiAg
+VHJhbnNmZXIgTW9kZSBSZWdpc3RlcigweDBDKSBpcyBETUEgRW5hYmxlIGJpdCwgdGhpcyBiaXQg
+c2V0IHRvIDEgbWVhbnMgYSBETUEgb3BlcmF0aW9uIHNoYWxsIGJlZ2luIHdoZW4gIEhvc3QgRHJp
+dmVyIHdyaXRlcyB0byB0aGUgdXBwZXIgYnl0ZSBvZiBDb21tYW5kIFJlZ2lzdGVyKDB4MEYpLg0K
+Pj4NCj4+IFRoZSBETUEgZW5hYmxlIGJpdCBzaG91bGQgYmUgc2V0IHRvIHplcm8gZm9yIHRoaXMg
+bm9uZS1kYXRhIGNvbW1hbmQoQ01ENikuDQo+IE91ciBob3N0IGZvbGxvdyB0aGUgc3BlYy4gc28g
+SSB0aGluayBpdCBzaG91bGQgYmUgdGhlIHNkaGNpIGRyaXZlcuKAmXMgaXNzdWUgKHNkaGNpX3Nl
+dF90cmFuc2Zlcl9tb2RlKS4NCj4+DQo+Pg0KPj4gU28gV2UgdHJpZWQgIFNESENJX1FVSVJLMl9D
+TEVBUl9UUkFOU0ZFUk1PREVfUkVHX0JFRk9SRV9DTUQgdG8gZml4IGFib3ZlIGlzc3VlLg0KDQo+
+VGhpcyBxdWlyayBzZWVtcyBhIGJpdCBzdHJhbmdlLiBJdCBsb29rcyBsaWtlIGEgZ2VuZXJpYyBw
+cm9ibGVtIGJlaW5nIHNvbHZlZCBieSB0aGUgd3JvbmcgYXBwcm9hY2guIEFsdGhvdWdoLCBteSBr
+bm93bGVkZ2Ugb2Ygc2RoY2kgSFcgaXMgbGltaXRlZCBzbyBJIG1pZ2h0IGJlIHdyb25nLg0KDQo+
+V2h5IGRvZXNuJ3Qgc2RoY2kgKmFsd2F5cyogcmVzZXQgdGhlIHJlbGF0ZWQgcmVnaXN0ZXJzIHdo
+ZW4gdGhlIGNvbW1hbmQgb3IgZGF0YSB0cmFuc2ZlciBnZXRzICpjb21wbGV0ZWQqPyBJbnN0ZWFk
+IGFzIGN1cnJlbnRseSwgZGVsYXlpbmcgdGhhdCB1bnRpbCB0aGUgKm5leHQqIHJlcXVlc3QgaXMg
+c3RhcnRlZCBhbmQgdmlhIHVzaW5nIFNESENJX1FVSVJLMl9DTEVBUl9UUkFOU0ZFUk1PREVfUkVH
+X0JFRk9SRV9DTUQ/DQoNClllcywgdGhpcyBpcyBvbmUgc29sdXRpb24uIFdlIGNhbiBjbGVhciBU
+UkFOU01FUl9NT0RFIHJlZ2lzdGVyKDB4QykgYWZ0ZXIgU0QgY21kIGRvbmUgdG8gc29sdmUgY3Vy
+cmVudCBpc3N1ZSwgYmVsb3cgaXMgdGhlIGNoYW5nZSBtZXRob2Q6DQpzdGF0aWMgdm9pZCBzZGhj
+aV90YXNrbGV0X2ZpbmlzaCh1bnNpZ25lZCBsb25nIHBhcmFtKSB7DQoJLi4uLi4NCglob3N0LT5t
+cnEgPSBOVUxMOw0KCWhvc3QtPmNtZCA9IE5VTEw7DQoJaG9zdC0+ZGF0YSA9IE5VTEw7DQoJc2Ro
+Y2lfd3JpdGV3KGhvc3QsIDB4MCwgU0RIQ0lfVFJBTlNGRVJfTU9ERSk7Ly9BZGQgQ2xlYXIgVHJh
+bnNmZXIgTW9kZSBoZXJlDQoJLi4uLi4NCn0NCg0KQnV0IHRoZSBEaXNhZHZhbnRhZ2Ugb2YgdGhp
+cyBtZXRob2QgaXM6IERyaXZlciBuZWVkIGRvIGFkZGl0aW9uYWwgb25lIHJlZ2lzdGVyIHdyaXRl
+IG9wZXJhdGlvbiBhZnRlciBlYWNoIGNvbW1hbmQuIFBsZWFzZSBjaGVjayB3aGV0aGVyIHlvdSBj
+YW4gYWNjZXB0IHRoaXMgY2hhbmdlIG9yIG5vdC4gQWxzbyBpdCBpcyBsb29rcyB3ZWlyZCB0byB0
+b3VjaCBzZXR0aW5nIHJlZ2lzdGVycyBoZXJlLg0KDQo+Pg0KPj4gQnV0IGl0IGVuY291bnRlciBu
+ZXcgcHJvYmxlbSBhcyBBbGV4IHJlcG9ydGVkIGZvciB0dW5pbmcgY29tbWFuZCBhcyB0dW5pbmcg
+Y29tbWFuZCBmbG93IGluIHNkaGNpX2V4ZWN1dGVfdHVuaW5nIGZ1bmN0aW9uIGlzOg0KPj4gKDEp
+LiBjbWQuZGF0YSA9IE5VTEw7DQo+PiAoMikuIHNkaGNpX3dyaXRldyhob3N0LCBTREhDSV9UUk5T
+X1JFQUQsIFNESENJX1RSQU5TRkVSX01PREUpOyAoMykuIA0KPj4gc2RoY2lfc2VuZF9jb21tYW5k
+KGhvc3QsICZjbWQpOyBBcyBkYXRhIGlzIG51bGwsIHRoaXMgcXVpcmsgd2lsbCAgc2V0IA0KPj4g
+MHgwQ1swOjE1XSB0byBBTEwgemVybyBiZWZvcmUgc2VuZCB0dW5pbmcgY29tbWFuZCBpbmNsdWRp
+bmcgU0RIQ0lfVFJOU19SRUFELCBhbmQgdGhlIHR1bmluZyBjb21tYW5kIHdpbGwgZmFpbGVkLg0K
+DQo+SSBzZWUuDQoNCj5TZGhjaSdzIHNkaGNpX2V4ZWN1dGVfdHVuaW5nKCkgZnVuY3Rpb24gbXVz
+dCBiZSBjb252ZXJ0ZWQgdG8gdXNlIG1tY19zZW5kX3R1bmluZygpLg0KDQo+VGhpcyBtZWFucyB0
+aGUgcmVndWxhciByZXF1ZXN0IHBhdGggd2lsbCBiZSBtYWludGFpbmVkIGFuZCB0aHVzIG5vIHNw
+ZWNpYWwgdHJlYXRtZW50IHNob3VsZCBiZSBuZWVkZWQuDQoNCj5OZXZlcnRoZWxlc3MsIGlmIG15
+IHN1Z2dlc3Rpb25zIGFyb3VuZCBjaGFuZ2luZyBzZGhjaSdzIGRlZmF1bHQgYmVoYXZpb3VyIGlu
+c3RlYWQgb2YgdXNpbmcgU0RIQ0lfUVVJUksyX0NMRUFSX1RSQU5TRkVSTU9ERV9SRUdfQkVGT1JF
+X0NNRCwgPnBlcmhhcHMgeW91IGRvbid0IG5lZWQgdG8gZml4IHNkaGNpX2V4ZWN1dGVfdHVuaW5n
+KCkgdG8gc29sdmUgdGhlIGVycm9yIGhlcmUhPw0KDQpJIGhhdmUgY2hlY2tlZCB0aGUgbW1jX3Nl
+bmRfdHVuaW5nIGZsb3csIGFuZCBpdCBjYW4ndCByZXBsYWNlIHNkaGNpX2V4ZWN1dGVfdHVuaW5n
+IGJlY2F1c2UgdGhlIHR1bmluZyBjb21tYW5kIGZvciBzZGhjaS5jIGlzIHNwZWNpYWwgY29tbWFu
+ZCBjb21wYXJlIHdpdGggbm9ybWFsIGNvbW1hbmQgZm9yIDIgcG9pbnRzOiANCigxKSBJdCBkb24n
+dCBnZW5lcmF0ZSBDb21tYW5kIENvbXBsZXRlIEludGVycnVwdChyZWdpc3RlciAweDMwIGJpdDAp
+DQooMikgSXQgaGFzIG5vIGRhdGEgZm9yIGhvc3QgZHJpdmVyIHRvIHJlYWQgYnV0IFNESENJX1RS
+TlNfUkVBRCBmbGFnIG5lZWQgdG8gYmUgc2V0Lg0KDQo+Pg0KPj4gU28sIGNhbiB3ZSBjb21taXQg
+b25lIHBhdGNoIGFzIGJlbG93IHRvIGZpeCB0aGlzIERNQSBlbmFibGUgYml0IGZvciBub24tZGF0
+YSBjb21tYW5kIGJ1ZyBpZiB5b3UgY2Fubm90IGFjY2VwdCBhZGQgbmV3IFFVSVJLPw0KDQo+Tm9w
+ZSwgbm8gbmV3IHF1aXJrcy4NCg0KPj4gQ29kZSBzaG91bGQgbGlrZSBiZWxvdyhzZGhjaV9zZXRf
+dHJhbnNmZXJfbW9kZSk6DQo+PiAgICAgICAgICAgICAgICAgaWYgKGRhdGEgPT0gTlVMTCkgew0K
+Pj4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBpZiAoaG9zdC0+cXVpcmtzMiAmDQo+
+PiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBTREhDSV9R
+VUlSSzJfQ0xFQVJfVFJBTlNGRVJNT0RFX1JFR19CRUZPUkVfQ01EKSB7DQo+PiAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBzZGhjaV93cml0ZXcoaG9zdCwg
+MHgwLCBTREhDSV9UUkFOU0ZFUl9NT0RFKTsNCj4+ICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgfSBlbHNlIHsNCj4+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgLyogY2xl
+YXIgQXV0byBDTUQgc2V0dGluZ3MgZm9yIG5vIGRhdGEgQ01EcyAqLw0KPj4gICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgbW9kZSA9IHNkaGNpX3JlYWR3KGhv
+c3QsIFNESENJX1RSQU5TRkVSX01PREUpOw0KPj4gICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgc2RoY2lfd3JpdGV3KGhvc3QsIG1vZGUgJiB+KFNESENJX1RS
+TlNfQVVUT19DTUQxMiB8IFNESENJX1RSTlNfRE1BICAgIC8qQ2xlYXIgRE1BIGVuYWJsZSBiaXQg
+YWxzbyBmb3Igbm8gZGF0YSBDTURzKi8NCj4+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBTREhDSV9UUk5TX0FVVE9fQ01EMjMp
+LCBTREhDSV9UUkFOU0ZFUl9NT0RFKTsNCj4+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgfQ0KPj4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICByZXR1cm47DQo+PiAgICAg
+ICAgICAgICAgICAgfQ0KDQo+VGhhbmtzIGZvciB0aGUgc3VnZ2VzdGVkIHNvbHV0aW9uLCBhbHRo
+b3VnaCBJIHRoaW5rIHRoaXMgbG9va3MgbGlrZSB5ZXQgYW5vdGhlciBoYWNreSB3b3JrYXJvdW5k
+IGZvciBhIGdlbmVyaWMgcHJvYmxlbS4NCg0KPkJlZm9yZSBJIGZ1cnRoZXIgY29uc2lkZXIgdGhh
+dCBjaGFuZ2UsIGNhbiB5b3UgcGxlYXNlIGxvb2sgaW50byBteSBzdWdnZXN0aW9ucyBhYm92ZSBh
+bmQgc2VlIGlmIGFueSBvZiB0aG9zZSBjYW4gc2ltcGxpZnkgdGhlIHNvbHV0aW9uPw0KDQo+Wy4u
+Ll0NCg0KDQpTbyBteSBzdWdnZXN0aW9uIGlzOg0KKDEpIG1tY19zZW5kX3R1bmluZyBjYW4ndCBy
+ZXBsYWNlIHNkaGNpX2V4ZWN1dGVfdHVuaW5nIGFzIHR1bmluZyBjb21tYW5kIGlzIHNwZWNpYWwg
+b25lOw0KKDIpIG1vZGlmeSB0aGUgc2RoY2lfc2V0X3RyYW5zZmVyX21vZGUgdG8gY2xlYXIgU0RI
+Q0lfVFJOU19ETUEgd2l0aG91dCBxdWlyayBpcyBiZXR0ZXIgdGhhbiBjbGVhciB0cmFuc2ZlciBt
+b2RlIGFmdGVyIGNvbW1hbmQgZG9uZS4gRnJvbSBteSBwb2ludCBvZiB2aWV3LCBTREhDSV9UUk5T
+X0RNQSBzaG91bGQgYmUgY2xlYXJlZCBmb3Igbm8tZGF0YSBjb21tYW5kIGJlZm9yZSBpc3N1ZSBj
+b21tYW5kLiBJdCBmb2xsb3dzIHRoZSBzcGVjLg0KDQoNCkJSDQpQZXRlci5HdW8NCg0KDQo=
