@@ -1,98 +1,169 @@
 From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: [PATCH] mmc: dw_mmc: remove the unused quirks
-Date: Thu, 24 Dec 2015 18:41:03 +0900
-Message-ID: <1450950063-5359-1-git-send-email-jh80.chung@samsung.com>
+Subject: Re: [PATCH] Move the judgement of timeout into
+ mmc_switch_status_error()
+Date: Thu, 24 Dec 2015 19:15:20 +0900
+Message-ID: <567BC5B8.6080308@samsung.com>
+References: <008f01d13e2b$4a2a3150$de7e93f0$@samsung.com>
+ <567BB9CF.3090301@samsung.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=euc-kr
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout1.samsung.com ([203.254.224.24]:48110 "EHLO
+Received: from mailout1.samsung.com ([203.254.224.24]:40723 "EHLO
 	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750771AbbLXJlN (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 24 Dec 2015 04:41:13 -0500
-Received: from epcpsbgr4.samsung.com
- (u144.gpu120.samsung.co.kr [203.254.230.144])
- by mailout1.samsung.com (Oracle Communications Messaging Server 7.0.5.31.0
- 64bit (built May  5 2014))
- with ESMTP id <0NZU01MVWW8NFF60@mailout1.samsung.com> for
- linux-mmc@vger.kernel.org; Thu, 24 Dec 2015 18:41:11 +0900 (KST)
+	with ESMTP id S1754545AbbLXKP2 convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 24 Dec 2015 05:15:28 -0500
+In-reply-to: <567BB9CF.3090301@samsung.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: ulf.hansson@linaro.org, Jaehoon Chung <jh80.chung@samsung.com>
+To: =?EUC-KR?B?wOW/tcH4?= <yj84.jang@samsung.com>, ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Cc: js07.lee@samsung.com, =?EUC-KR?B?J8DMsaTIoyc=?= <demon.lee@samsung.com>
 
-Removed the unused quirks. These quirks don't used anywhere.
+Hi,
 
-Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
----
- drivers/mmc/host/dw_mmc.c  | 19 -------------------
- include/linux/mmc/dw_mmc.h | 10 ++--------
- 2 files changed, 2 insertions(+), 27 deletions(-)
+NAK.
 
-diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index fb204ee..7128351 100644
---- a/drivers/mmc/host/dw_mmc.c
-+++ b/drivers/mmc/host/dw_mmc.c
-@@ -1634,12 +1634,6 @@ static int dw_mci_command_complete(struct dw_mci *host, struct mmc_command *cmd)
- 	else
- 		cmd->error = 0;
- 
--	if (cmd->error) {
--		/* newer ip versions need a delay between retries */
--		if (host->quirks & DW_MCI_QUIRK_RETRY_DELAY)
--			mdelay(20);
--	}
--
- 	return cmd->error;
- }
- 
-@@ -2355,16 +2349,6 @@ static irqreturn_t dw_mci_interrupt(int irq, void *dev_id)
- 
- 	pending = mci_readl(host, MINTSTS); /* read-only mask reg */
- 
--	/*
--	 * DTO fix - version 2.10a and below, and only if internal DMA
--	 * is configured.
--	 */
--	if (host->quirks & DW_MCI_QUIRK_IDMAC_DTO) {
--		if (!pending &&
--		    ((mci_readl(host, STATUS) >> 17) & 0x1fff))
--			pending |= SDMMC_INT_DATA_OVER;
--	}
--
- 	if (pending) {
- 		/* Check volt switch first, since it can look like an error */
- 		if ((host->state == STATE_SENDING_CMD11) &&
-@@ -3165,9 +3149,6 @@ int dw_mci_probe(struct dw_mci *host)
- 	/* Now that slots are all setup, we can enable card detect */
- 	dw_mci_enable_cd(host);
- 
--	if (host->quirks & DW_MCI_QUIRK_IDMAC_DTO)
--		dev_info(host->dev, "Internal DMAC interrupt fix enabled.\n");
--
- 	return 0;
- 
- err_dmaunmap:
-diff --git a/include/linux/mmc/dw_mmc.h b/include/linux/mmc/dw_mmc.h
-index 7776afb..89df7ab 100644
---- a/include/linux/mmc/dw_mmc.h
-+++ b/include/linux/mmc/dw_mmc.h
-@@ -235,16 +235,10 @@ struct dw_mci_dma_ops {
- };
- 
- /* IP Quirks/flags. */
--/* DTO fix for command transmission with IDMAC configured */
--#define DW_MCI_QUIRK_IDMAC_DTO			BIT(0)
--/* delay needed between retries on some 2.11a implementations */
--#define DW_MCI_QUIRK_RETRY_DELAY		BIT(1)
--/* High Speed Capable - Supports HS cards (up to 50MHz) */
--#define DW_MCI_QUIRK_HIGHSPEED			BIT(2)
- /* Unreliable card detection */
--#define DW_MCI_QUIRK_BROKEN_CARD_DETECTION	BIT(3)
-+#define DW_MCI_QUIRK_BROKEN_CARD_DETECTION	BIT(0)
- /* Timer for broken data transfer over scheme */
--#define DW_MCI_QUIRK_BROKEN_DTO			BIT(4)
-+#define DW_MCI_QUIRK_BROKEN_DTO			BIT(1)
- 
- struct dma_pdata;
- 
--- 
-1.9.1
+Maybe..It seems that this is not the patch based on latest kernel..
+Which kernel version did you use? Plz, check the latest kernel.
+
+Best Regards,
+Jaehoon Chung
+
+On 12/24/2015 06:24 PM, Jaehoon Chung wrote:
+> Hi,
+>=20
+> Before send the patch at mailing list, you need to make the patch as =
+mainline style.
+> Maybe..maintainer should not review this patch.
+>=20
+> Refer to "Linux kernel coding style" and "submitting Patches".
+> Also set  your email environment. (Documentation/email-clients.txt)
+>=20
+> Best Regards,
+> Jaehoon Chung
+>=20
+> On 12/24/2015 06:13 PM, =C0=E5=BF=B5=C1=F8 wrote:
+>> >From bc1e491b29d9199f16c6e002a69f9377677b93af Mon Sep 17 00:00:00 2=
+001
+>>
+>> From: "yj84.jang" <yj84.jang@samsung.com>
+>>
+>> Date: Wed, 16 Dec 2015 08:52:47 +0900
+>>
+>> Subject: [PATCH] Move the judgement of timeout into
+>> mmc_switch_status_error()
+>>
+>> =20
+>>
+>> __mmc_switch() is possible to misjudge error.
+>>
+>> =20
+>>
+>> Although jiffies was overed timeout,=20
+>>
+>> the chance about "R1_CURRENT_STATE(status) !=3D R1_STATE_PRG" is exi=
+sts.=20
+>>
+>> In other words, Successful completion of CMD6 with timeout error.
+>>
+>> =20
+>>
+>> Kernel expects failure of __mmc_switch,
+>>
+>> but card is completed CMD6 in this case.
+>>
+>> It makes mismatch status between mmc subsystem and mmc card.
+>>
+>> =20
+>>
+>> Especially, in case of partition switch,
+>>
+>> If timeout occurs with normal status of CMD13 response unfortunatley=
+,=20
+>>
+>> "main_md->curr" will not be set, even card switched successfully.
+>>
+>> =20
+>>
+>> Checking state of mmc card is needed when judging an timeout error,=20
+>>
+>> if it is just timeout or timeout with error.
+>>
+>> =20
+>>
+>> Signed-off-by: yj84.jang <yj84.jang@samsung.com>
+>>
+>> ---
+>>
+>> drivers/mmc/core/mmc_ops.c |    5 +++--
+>>
+>> 1 file changed, 3 insertions(+), 2 deletions(-)
+>>
+>> =20
+>>
+>> diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
+>>
+>> index 1f44426..033f475 100644
+>>
+>> --- a/drivers/mmc/core/mmc_ops.c
+>>
+>> +++ b/drivers/mmc/core/mmc_ops.c
+>>
+>> @@ -456,6 +456,8 @@ int mmc_switch_status_error(struct mmc_host *hos=
+t, u32
+>> status)
+>>
+>>                     if (status & R1_SPI_ILLEGAL_COMMAND)
+>>
+>>                                return -EBADMSG;
+>>
+>>          } else {
+>>
+>> +                   if (R1_CURRENT_STATE(status) =3D=3D R1_STATE_PRG=
+)
+>>
+>> +                              return -ETIMEDOUT;
+>>
+>>                     if (status & 0xFDFFA000)
+>>
+>>                                pr_warn("%s: unexpected status %#x af=
+ter
+>> switch\n",
+>>
+>>                                          mmc_hostname(host), status)=
+;
+>>
+>> @@ -568,8 +570,7 @@ int __mmc_switch(struct mmc_card *card, u8 set, =
+u8
+>> index, u8 value,
+>>
+>>                     if (time_after(jiffies, timeout)) {
+>>
+>>                                pr_err("%s: Card stuck in programming=
+ state!
+>> %s\n",
+>>
+>>                                          mmc_hostname(host), __func_=
+_);
+>>
+>> -                               err =3D -ETIMEDOUT;
+>>
+>> -                               goto out;
+>>
+>> +                              break;
+>>
+>>                     }
+>>
+>>          } while (R1_CURRENT_STATE(status) =3D=3D R1_STATE_PRG);
+>>
+>> =20
+>>
+>=20
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" =
+in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>=20
+>=20
 
