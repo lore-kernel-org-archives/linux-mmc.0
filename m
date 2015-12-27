@@ -1,51 +1,37 @@
 From: Geliang Tang <geliangtang@163.com>
-Subject: [PATCH 4/9] mmc: sdhci-pci: use to_pci_dev()
-Date: Sun, 27 Dec 2015 18:46:00 +0800
-Message-ID: <7ec8850ded7ef24fa8e68d2482ac1046f1a9dc1b.1451211133.git.geliangtang@163.com>
-References: <baf4e17c993f197cc31f8a0e5736ee8a558ba44c.1451211133.git.geliangtang@163.com>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from m50-133.163.com ([123.125.50.133]:60126 "EHLO m50-133.163.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751986AbbL0KrJ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Sun, 27 Dec 2015 05:47:09 -0500
-In-Reply-To: <baf4e17c993f197cc31f8a0e5736ee8a558ba44c.1451211133.git.geliangtang@163.com>
-In-Reply-To: <baf4e17c993f197cc31f8a0e5736ee8a558ba44c.1451211133.git.geliangtang@163.com>
-References: <baf4e17c993f197cc31f8a0e5736ee8a558ba44c.1451211133.git.geliangtang@163.com>
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, Peter Guo <peter.guo@bayhubtech.com>
+Subject: [PATCH 05/10] mmc: cb710: use to_platform_device()
+Date: Sun, 27 Dec 2015 21:15:43 +0800
+Message-ID: <fc686afe2f3846425396bebe8cac7d3b76da42a2.1451221174.git.geliangtang@163.com>
+References: <a554e6af3a3528c2206c94dab62b7800f96caa4b.1451221174.git.geliangtang@163.com>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <a554e6af3a3528c2206c94dab62b7800f96caa4b.1451221174.git.geliangtang@163.com>
+In-Reply-To: <a554e6af3a3528c2206c94dab62b7800f96caa4b.1451221174.git.geliangtang@163.com>
+References: <a554e6af3a3528c2206c94dab62b7800f96caa4b.1451221174.git.geliangtang@163.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: =?UTF-8?q?Micha=C5=82=20Miros=C5=82aw?= <mirq-linux@rere.qmqm.pl>, Ulf Hansson <ulf.hansson@linaro.org>
 Cc: Geliang Tang <geliangtang@163.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+List-Id: linux-mmc@vger.kernel.org
 
-Use to_pci_dev() instead of open-coding it.
+Use to_platform_device() instead of open-coding it.
 
 Signed-off-by: Geliang Tang <geliangtang@163.com>
 ---
- drivers/mmc/host/sdhci-pci-core.c | 4 ++--
- 1 file changed, 2 insertions(+), 2 deletions(-)
+ drivers/mmc/host/cb710-mmc.h | 3 +--
+ 1 file changed, 1 insertion(+), 2 deletions(-)
 
-diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-pci-core.c
-index 08f4a9f..cc851b0 100644
---- a/drivers/mmc/host/sdhci-pci-core.c
-+++ b/drivers/mmc/host/sdhci-pci-core.c
-@@ -1464,7 +1464,7 @@ static int sdhci_pci_resume(struct device *dev)
+diff --git a/drivers/mmc/host/cb710-mmc.h b/drivers/mmc/host/cb710-mmc.h
+index 8984ec8..8ecd9e5 100644
+--- a/drivers/mmc/host/cb710-mmc.h
++++ b/drivers/mmc/host/cb710-mmc.h
+@@ -29,8 +29,7 @@ static inline struct mmc_host *cb710_slot_to_mmc(struct cb710_slot *slot)
  
- static int sdhci_pci_runtime_suspend(struct device *dev)
+ static inline struct cb710_slot *cb710_mmc_to_slot(struct mmc_host *mmc)
  {
--	struct pci_dev *pdev = container_of(dev, struct pci_dev, dev);
-+	struct pci_dev *pdev = to_pci_dev(dev);
- 	struct sdhci_pci_chip *chip;
- 	struct sdhci_pci_slot *slot;
- 	int i, ret;
-@@ -1500,7 +1500,7 @@ err_pci_runtime_suspend:
+-	struct platform_device *pdev = container_of(mmc_dev(mmc),
+-		struct platform_device, dev);
++	struct platform_device *pdev = to_platform_device(mmc_dev(mmc));
+ 	return cb710_pdev_to_slot(pdev);
+ }
  
- static int sdhci_pci_runtime_resume(struct device *dev)
- {
--	struct pci_dev *pdev = container_of(dev, struct pci_dev, dev);
-+	struct pci_dev *pdev = to_pci_dev(dev);
- 	struct sdhci_pci_chip *chip;
- 	struct sdhci_pci_slot *slot;
- 	int i, ret;
 -- 
 2.5.0
-
-
