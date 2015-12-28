@@ -1,22 +1,30 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 05/10] mmc: cb710: use to_platform_device()
-Date: Mon, 28 Dec 2015 14:29:48 +0100
-Message-ID: <CAPDyKFpE5+xHy9dBomRyFL=PAOnXoi2VSVQp7H+mAeTyWUjuWw@mail.gmail.com>
-References: <a554e6af3a3528c2206c94dab62b7800f96caa4b.1451221174.git.geliangtang@163.com>
-	<fc686afe2f3846425396bebe8cac7d3b76da42a2.1451221174.git.geliangtang@163.com>
+Subject: Re: [PATCH] mmc: dw_mmc: remove the unused quirks
+Date: Mon, 28 Dec 2015 14:30:15 +0100
+Message-ID: <CAPDyKFoPLtLfG0uOYMRXxNmAvW6310wvXpCHkr0_4rZ1J7zS2w@mail.gmail.com>
+References: <1450950063-5359-1-git-send-email-jh80.chung@samsung.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <fc686afe2f3846425396bebe8cac7d3b76da42a2.1451221174.git.geliangtang@163.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Geliang Tang <geliangtang@163.com>
-Cc: =?UTF-8?B?TWljaGHFgiBNaXJvc8WCYXc=?= <mirq-linux@rere.qmqm.pl>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-yk0-f178.google.com ([209.85.160.178]:34747 "EHLO
+	mail-yk0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752324AbbL1NaP (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 28 Dec 2015 08:30:15 -0500
+Received: by mail-yk0-f178.google.com with SMTP id a85so26165443ykb.1
+        for <linux-mmc@vger.kernel.org>; Mon, 28 Dec 2015 05:30:15 -0800 (PST)
+In-Reply-To: <1450950063-5359-1-git-send-email-jh80.chung@samsung.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Jaehoon Chung <jh80.chung@samsung.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>
 
-On 27 December 2015 at 14:15, Geliang Tang <geliangtang@163.com> wrote:
-> Use to_platform_device() instead of open-coding it.
+On 24 December 2015 at 10:41, Jaehoon Chung <jh80.chung@samsung.com> wrote:
+> Removed the unused quirks. These quirks don't used anywhere.
 >
-> Signed-off-by: Geliang Tang <geliangtang@163.com>
+> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+
+As I don't expect any additional PR for dw_mmc for 4.5, I decided to
+pick this one up myself.
 
 Thanks, applied for next!
 
@@ -24,24 +32,77 @@ Kind regards
 Uffe
 
 > ---
->  drivers/mmc/host/cb710-mmc.h | 3 +--
->  1 file changed, 1 insertion(+), 2 deletions(-)
+>  drivers/mmc/host/dw_mmc.c  | 19 -------------------
+>  include/linux/mmc/dw_mmc.h | 10 ++--------
+>  2 files changed, 2 insertions(+), 27 deletions(-)
 >
-> diff --git a/drivers/mmc/host/cb710-mmc.h b/drivers/mmc/host/cb710-mmc.h
-> index 8984ec8..8ecd9e5 100644
-> --- a/drivers/mmc/host/cb710-mmc.h
-> +++ b/drivers/mmc/host/cb710-mmc.h
-> @@ -29,8 +29,7 @@ static inline struct mmc_host *cb710_slot_to_mmc(struct cb710_slot *slot)
+> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+> index fb204ee..7128351 100644
+> --- a/drivers/mmc/host/dw_mmc.c
+> +++ b/drivers/mmc/host/dw_mmc.c
+> @@ -1634,12 +1634,6 @@ static int dw_mci_command_complete(struct dw_mci *host, struct mmc_command *cmd)
+>         else
+>                 cmd->error = 0;
 >
->  static inline struct cb710_slot *cb710_mmc_to_slot(struct mmc_host *mmc)
->  {
-> -       struct platform_device *pdev = container_of(mmc_dev(mmc),
-> -               struct platform_device, dev);
-> +       struct platform_device *pdev = to_platform_device(mmc_dev(mmc));
->         return cb710_pdev_to_slot(pdev);
+> -       if (cmd->error) {
+> -               /* newer ip versions need a delay between retries */
+> -               if (host->quirks & DW_MCI_QUIRK_RETRY_DELAY)
+> -                       mdelay(20);
+> -       }
+> -
+>         return cmd->error;
 >  }
 >
-> --
-> 2.5.0
+> @@ -2355,16 +2349,6 @@ static irqreturn_t dw_mci_interrupt(int irq, void *dev_id)
 >
+>         pending = mci_readl(host, MINTSTS); /* read-only mask reg */
+>
+> -       /*
+> -        * DTO fix - version 2.10a and below, and only if internal DMA
+> -        * is configured.
+> -        */
+> -       if (host->quirks & DW_MCI_QUIRK_IDMAC_DTO) {
+> -               if (!pending &&
+> -                   ((mci_readl(host, STATUS) >> 17) & 0x1fff))
+> -                       pending |= SDMMC_INT_DATA_OVER;
+> -       }
+> -
+>         if (pending) {
+>                 /* Check volt switch first, since it can look like an error */
+>                 if ((host->state == STATE_SENDING_CMD11) &&
+> @@ -3165,9 +3149,6 @@ int dw_mci_probe(struct dw_mci *host)
+>         /* Now that slots are all setup, we can enable card detect */
+>         dw_mci_enable_cd(host);
+>
+> -       if (host->quirks & DW_MCI_QUIRK_IDMAC_DTO)
+> -               dev_info(host->dev, "Internal DMAC interrupt fix enabled.\n");
+> -
+>         return 0;
+>
+>  err_dmaunmap:
+> diff --git a/include/linux/mmc/dw_mmc.h b/include/linux/mmc/dw_mmc.h
+> index 7776afb..89df7ab 100644
+> --- a/include/linux/mmc/dw_mmc.h
+> +++ b/include/linux/mmc/dw_mmc.h
+> @@ -235,16 +235,10 @@ struct dw_mci_dma_ops {
+>  };
+>
+>  /* IP Quirks/flags. */
+> -/* DTO fix for command transmission with IDMAC configured */
+> -#define DW_MCI_QUIRK_IDMAC_DTO                 BIT(0)
+> -/* delay needed between retries on some 2.11a implementations */
+> -#define DW_MCI_QUIRK_RETRY_DELAY               BIT(1)
+> -/* High Speed Capable - Supports HS cards (up to 50MHz) */
+> -#define DW_MCI_QUIRK_HIGHSPEED                 BIT(2)
+>  /* Unreliable card detection */
+> -#define DW_MCI_QUIRK_BROKEN_CARD_DETECTION     BIT(3)
+> +#define DW_MCI_QUIRK_BROKEN_CARD_DETECTION     BIT(0)
+>  /* Timer for broken data transfer over scheme */
+> -#define DW_MCI_QUIRK_BROKEN_DTO                        BIT(4)
+> +#define DW_MCI_QUIRK_BROKEN_DTO                        BIT(1)
+>
+>  struct dma_pdata;
+>
+> --
+> 1.9.1
 >
