@@ -1,108 +1,45 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: dw_mmc: remove the unused quirks
-Date: Mon, 28 Dec 2015 14:30:15 +0100
-Message-ID: <CAPDyKFoPLtLfG0uOYMRXxNmAvW6310wvXpCHkr0_4rZ1J7zS2w@mail.gmail.com>
-References: <1450950063-5359-1-git-send-email-jh80.chung@samsung.com>
+From: Arnd Bergmann <arnd@arndb.de>
+Subject: Re: [PATCH 1/2] mmc: omap_hsmmc: Add support for slot-name property in DT
+Date: Mon, 28 Dec 2015 15:14:50 +0100
+Message-ID: <1600826.3aUcPX7Ju6@wuerfel>
+References: <1431724489-32359-1-git-send-email-pali.rohar@gmail.com> <2362824.FKNGrYsB7j@wuerfel> <201512251353.11491@pali>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=iso-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-yk0-f178.google.com ([209.85.160.178]:34747 "EHLO
-	mail-yk0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752324AbbL1NaP (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 28 Dec 2015 08:30:15 -0500
-Received: by mail-yk0-f178.google.com with SMTP id a85so26165443ykb.1
-        for <linux-mmc@vger.kernel.org>; Mon, 28 Dec 2015 05:30:15 -0800 (PST)
-In-Reply-To: <1450950063-5359-1-git-send-email-jh80.chung@samsung.com>
+Received: from mout.kundenserver.de ([212.227.126.135]:65251 "EHLO
+	mout.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752246AbbL1OO4 convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 28 Dec 2015 09:14:56 -0500
+In-Reply-To: <201512251353.11491@pali>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>
+To: Pali =?ISO-8859-1?Q?Roh=E1r?= <pali.rohar@gmail.com>
+Cc: Tony Lindgren <tony@atomide.com>, =?ISO-8859-1?Q?Beno=EEt?= Cousson <bcousson@baylibre.com>, Ulf Hansson <ulf.hansson@linaro.org>, linux-omap@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
 
-On 24 December 2015 at 10:41, Jaehoon Chung <jh80.chung@samsung.com> wrote:
-> Removed the unused quirks. These quirks don't used anywhere.
->
-> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+On Friday 25 December 2015 13:53:11 Pali Roh=E1r wrote:
+> On Monday 18 May 2015 17:07:57 Arnd Bergmann wrote:
+> > On Monday 18 May 2015 08:06:07 Tony Lindgren wrote:
+> > > * Arnd Bergmann <arnd@arndb.de> [150515 14:26]:
+> > > > On Friday 15 May 2015 23:22:37 Pali Roh=E1r wrote:
+> > > If setting up the generic binding is expected to take a while,
+> > > you can naturally pass it in pdata while waiting for the generic
+> > > binding to get merged.
+> >=20
+> > Yes, good idea. So the n900 machine can use auxdata to pass this fo=
+r
+> > the time being, while the binding and generic implementation is
+> > being worked out.
+> >=20
+>=20
+> Ok, so what is needed to finish this patch series?
 
-As I don't expect any additional PR for dw_mmc for 4.5, I decided to
-pick this one up myself.
+I don't know where we are at this point. Has either the auxdata approac=
+h
+or the generic binding been worked on at all?
 
-Thanks, applied for next!
+If not, please try to get the auxdata variant to work, it should not be=
+ hard
+at all because there is no dependency on a generic binding.
 
-Kind regards
-Uffe
-
-> ---
->  drivers/mmc/host/dw_mmc.c  | 19 -------------------
->  include/linux/mmc/dw_mmc.h | 10 ++--------
->  2 files changed, 2 insertions(+), 27 deletions(-)
->
-> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-> index fb204ee..7128351 100644
-> --- a/drivers/mmc/host/dw_mmc.c
-> +++ b/drivers/mmc/host/dw_mmc.c
-> @@ -1634,12 +1634,6 @@ static int dw_mci_command_complete(struct dw_mci *host, struct mmc_command *cmd)
->         else
->                 cmd->error = 0;
->
-> -       if (cmd->error) {
-> -               /* newer ip versions need a delay between retries */
-> -               if (host->quirks & DW_MCI_QUIRK_RETRY_DELAY)
-> -                       mdelay(20);
-> -       }
-> -
->         return cmd->error;
->  }
->
-> @@ -2355,16 +2349,6 @@ static irqreturn_t dw_mci_interrupt(int irq, void *dev_id)
->
->         pending = mci_readl(host, MINTSTS); /* read-only mask reg */
->
-> -       /*
-> -        * DTO fix - version 2.10a and below, and only if internal DMA
-> -        * is configured.
-> -        */
-> -       if (host->quirks & DW_MCI_QUIRK_IDMAC_DTO) {
-> -               if (!pending &&
-> -                   ((mci_readl(host, STATUS) >> 17) & 0x1fff))
-> -                       pending |= SDMMC_INT_DATA_OVER;
-> -       }
-> -
->         if (pending) {
->                 /* Check volt switch first, since it can look like an error */
->                 if ((host->state == STATE_SENDING_CMD11) &&
-> @@ -3165,9 +3149,6 @@ int dw_mci_probe(struct dw_mci *host)
->         /* Now that slots are all setup, we can enable card detect */
->         dw_mci_enable_cd(host);
->
-> -       if (host->quirks & DW_MCI_QUIRK_IDMAC_DTO)
-> -               dev_info(host->dev, "Internal DMAC interrupt fix enabled.\n");
-> -
->         return 0;
->
->  err_dmaunmap:
-> diff --git a/include/linux/mmc/dw_mmc.h b/include/linux/mmc/dw_mmc.h
-> index 7776afb..89df7ab 100644
-> --- a/include/linux/mmc/dw_mmc.h
-> +++ b/include/linux/mmc/dw_mmc.h
-> @@ -235,16 +235,10 @@ struct dw_mci_dma_ops {
->  };
->
->  /* IP Quirks/flags. */
-> -/* DTO fix for command transmission with IDMAC configured */
-> -#define DW_MCI_QUIRK_IDMAC_DTO                 BIT(0)
-> -/* delay needed between retries on some 2.11a implementations */
-> -#define DW_MCI_QUIRK_RETRY_DELAY               BIT(1)
-> -/* High Speed Capable - Supports HS cards (up to 50MHz) */
-> -#define DW_MCI_QUIRK_HIGHSPEED                 BIT(2)
->  /* Unreliable card detection */
-> -#define DW_MCI_QUIRK_BROKEN_CARD_DETECTION     BIT(3)
-> +#define DW_MCI_QUIRK_BROKEN_CARD_DETECTION     BIT(0)
->  /* Timer for broken data transfer over scheme */
-> -#define DW_MCI_QUIRK_BROKEN_DTO                        BIT(4)
-> +#define DW_MCI_QUIRK_BROKEN_DTO                        BIT(1)
->
->  struct dma_pdata;
->
-> --
-> 1.9.1
->
+	Arnd
