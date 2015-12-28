@@ -1,58 +1,104 @@
-From: Youngjin Jang <yj84.jang@samsung.com>
-Subject: [PATCH] Move the judgement of timeout into mmc_switch_status_error()
-Date: Mon, 28 Dec 2015 02:07:26 +0000 (GMT)
-Message-ID: <1921572.349701451268445456.JavaMail.weblogic@ep2mlwas03b>
-Reply-To: yj84.jang@samsung.com
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: Re: [PATCH] Move the judgement of timeout into
+ mmc_switch_status_error()
+Date: Mon, 28 Dec 2015 11:30:16 +0900
+Message-ID: <56809EB8.3030706@samsung.com>
+References: <1921572.349701451268445456.JavaMail.weblogic@ep2mlwas03b>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: base64
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout1.samsung.com ([203.254.224.24]:51901 "EHLO
+Received: from mailout1.samsung.com ([203.254.224.24]:59790 "EHLO
 	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750781AbbL1CH2 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 27 Dec 2015 21:07:28 -0500
-Received: from epcpsbgr1.samsung.com
- (u141.gpu120.samsung.co.kr [203.254.230.141])
- by mailout1.samsung.com (Oracle Communications Messaging Server 7.0.5.31.0
- 64bit (built May  5 2014))
- with ESMTP id <0O0102PC5PWEZZ50@mailout1.samsung.com> for
- linux-mmc@vger.kernel.org; Mon, 28 Dec 2015 11:07:26 +0900 (KST)
-MIME-version: 1.0
+	with ESMTP id S1750833AbbL1CaZ (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 27 Dec 2015 21:30:25 -0500
+In-reply-to: <1921572.349701451268445456.JavaMail.weblogic@ep2mlwas03b>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+To: yj84.jang@samsung.com, ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 Cc: demon.lee@samsung.com, js07.lee@samsung.com
 
-X19tbWNfc3dpdGNoKCkgaXMgcG9zc2libGUgdG8gbWlzanVkZ2UgZXJyb3IuDQoNCkFsdGhvdWdo
-IGppZmZpZXMgd2FzIG92ZXJlZCB0aW1lb3V0LA0KdGhlIGNoYW5jZSBhYm91dCAiUjFfQ1VSUkVO
-VF9TVEFURShzdGF0dXMpICE9IFIxX1NUQVRFX1BSRyIgaXMgZXhpc3RzLg0KSW4gb3RoZXIgd29y
-ZHMsIFN1Y2Nlc3NmdWwgY29tcGxldGlvbiBvZiBDTUQ2IHdpdGggdGltZW91dCBlcnJvci4NCg0K
-S2VybmVsIGV4cGVjdHMgZmFpbHVyZSBvZiBfX21tY19zd2l0Y2gsDQpidXQgY2FyZCBpcyBjb21w
-bGV0ZWQgQ01ENiBpbiB0aGlzIGNhc2UuDQpJdCBtYWtlcyBtaXNtYXRjaCBzdGF0dXMgYmV0d2Vl
-biBtbWMgc3Vic3lzdGVtIGFuZCBtbWMgY2FyZC4NCg0KRXNwZWNpYWxseSwgaW4gY2FzZSBvZiBw
-YXJ0aXRpb24gc3dpdGNoLA0KSWYgdGltZW91dCBvY2N1cnMgd2l0aCBub3JtYWwgc3RhdHVzIG9m
-IENNRDEzIHJlc3BvbnNlIHVuZm9ydHVuYXRsZXksDQoibWFpbl9tZC0+Y3VyciIgd2lsbCBub3Qg
-YmUgc2V0LCBldmVuIGNhcmQgc3dpdGNoZWQgc3VjY2Vzc2Z1bGx5Lg0KDQpDaGVja2luZyBzdGF0
-ZSBvZiBtbWMgY2FyZCBpcyBuZWVkZWQgd2hlbiBqdWRnaW5nIGFuIHRpbWVvdXQgZXJyb3IsDQpp
-ZiBpdCBpcyBqdXN0IHRpbWVvdXQgb3IgdGltZW91dCB3aXRoIGVycm9yLg0KDQpSZXZpZXdlZC1i
-eTogSnVuZ3NldW5nIExlZSA8anMwNy5sZWVAc2Ftc3VuZy5jb20+DQpTaWduZWQtb2ZmLWJ5OiBZ
-b3VuZ2ppbiBKYW5nIDx5ajg0LmphbmdAc2Ftc3VuZy5jb20+DQotLS0NCiBkcml2ZXJzL21tYy9j
-b3JlL21tY19vcHMuYyB8ICAgIDUgKysrLS0NCiAxIGZpbGUgY2hhbmdlZCwgMyBpbnNlcnRpb25z
-KCspLCAyIGRlbGV0aW9ucygtKQ0KDQpkaWZmIC0tZ2l0IGEvZHJpdmVycy9tbWMvY29yZS9tbWNf
-b3BzLmMgYi9kcml2ZXJzL21tYy9jb3JlL21tY19vcHMuYw0KaW5kZXggMWY0NDQyNi4uMDMzZjQ3
-NSAxMDA2NDQNCi0tLSBhL2RyaXZlcnMvbW1jL2NvcmUvbW1jX29wcy5jDQorKysgYi9kcml2ZXJz
-L21tYy9jb3JlL21tY19vcHMuYw0KQEAgLTQ1Niw2ICs0NTYsOCBAQCBpbnQgbW1jX3N3aXRjaF9z
-dGF0dXNfZXJyb3Ioc3RydWN0IG1tY19ob3N0ICpob3N0LCB1MzIgc3RhdHVzKQ0KIAkJaWYgKHN0
-YXR1cyAmIFIxX1NQSV9JTExFR0FMX0NPTU1BTkQpDQogCQkJcmV0dXJuIC1FQkFETVNHOw0KIAl9
-IGVsc2Ugew0KKwkJaWYgKFIxX0NVUlJFTlRfU1RBVEUoc3RhdHVzKSA9PSBSMV9TVEFURV9QUkcp
-DQorCQkJcmV0dXJuIC1FVElNRURPVVQ7DQogCQlpZiAoc3RhdHVzICYgMHhGREZGQTAwMCkNCiAJ
-CQlwcl93YXJuKCIlczogdW5leHBlY3RlZCBzdGF0dXMgJSN4IGFmdGVyIHN3aXRjaFxuIiwNCiAJ
-CQkJbW1jX2hvc3RuYW1lKGhvc3QpLCBzdGF0dXMpOw0KQEAgLTU2OCw4ICs1NzAsNyBAQCBpbnQg
-X19tbWNfc3dpdGNoKHN0cnVjdCBtbWNfY2FyZCAqY2FyZCwgdTggc2V0LCB1OCBpbmRleCwgdTgg
-dmFsdWUsDQogCQlpZiAodGltZV9hZnRlcihqaWZmaWVzLCB0aW1lb3V0KSkgew0KIAkJCXByX2Vy
-cigiJXM6IENhcmQgc3R1Y2sgaW4gcHJvZ3JhbW1pbmcgc3RhdGUhICVzXG4iLA0KIAkJCQltbWNf
-aG9zdG5hbWUoaG9zdCksIF9fZnVuY19fKTsNCi0JCQllcnIgPSAtRVRJTUVET1VUOw0KLQkJCWdv
-dG8gb3V0Ow0KKwkJCWJyZWFrOw0KIAkJfQ0KIAl9IHdoaWxlIChSMV9DVVJSRU5UX1NUQVRFKHN0
-YXR1cykgPT0gUjFfU1RBVEVfUFJHKTsNCiANCi0tIA0KMS43LjkuNQ0KDQo=
+Hi,
 
+Did you read my comment? Which kernel version did you use?
+
+I think your patch doesn't need on mainline kernel.
+If you want to apply the patch, work on the latest kernel.
+
+https://patchwork.kernel.org/patch/7719811/
+
+Author:     Chaotian Jing <chaotian.jing@mediatek.com>
+AuthorDate: Mon Nov 30 09:27:30 2015 +0800
+Commit:     Ulf Hansson <ulf.hansson@linaro.org>
+CommitDate: Tue Dec 22 11:32:18 2015 +0100
+
+    mmc: core: fix __mmc_switch timeout caused by preempt
+
+    there is a time window between __mmc_send_status() and time_afer(),
+    on some eMMC chip, the timeout_ms is only 10ms, if this thread was
+    scheduled out during this period, then, even card has already changes
+    to transfer state by the result of CMD13, this part of code also treat
+    it to timeout error.
+    So, need calculate timeout first, then call __mmc_send_status(), if
+    already timeout and card still in programing state, then treat it to
+    the real timeout error.
+
+    Signed-off-by: Chaotian Jing <chaotian.jing@mediatek.com>
+    Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+
+
+Best Regards,
+Jaehoon Chung
+
+On 12/28/2015 11:07 AM, Youngjin Jang wrote:
+> __mmc_switch() is possible to misjudge error.
+> 
+> Although jiffies was overed timeout,
+> the chance about "R1_CURRENT_STATE(status) != R1_STATE_PRG" is exists.
+> In other words, Successful completion of CMD6 with timeout error.
+> 
+> Kernel expects failure of __mmc_switch,
+> but card is completed CMD6 in this case.
+> It makes mismatch status between mmc subsystem and mmc card.
+> 
+> Especially, in case of partition switch,
+> If timeout occurs with normal status of CMD13 response unfortunatley,
+> "main_md->curr" will not be set, even card switched successfully.
+
+main_md->curr is right? main_md->part_curr?
+
+> 
+> Checking state of mmc card is needed when judging an timeout error,
+> if it is just timeout or timeout with error.
+> 
+> Reviewed-by: Jungseung Lee <js07.lee@samsung.com>
+> Signed-off-by: Youngjin Jang <yj84.jang@samsung.com>
+> ---
+>  drivers/mmc/core/mmc_ops.c |    5 +++--
+>  1 file changed, 3 insertions(+), 2 deletions(-)
+> 
+> diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
+> index 1f44426..033f475 100644
+> --- a/drivers/mmc/core/mmc_ops.c
+> +++ b/drivers/mmc/core/mmc_ops.c
+> @@ -456,6 +456,8 @@ int mmc_switch_status_error(struct mmc_host *host, u32 status)
+>  		if (status & R1_SPI_ILLEGAL_COMMAND)
+>  			return -EBADMSG;
+>  	} else {
+> +		if (R1_CURRENT_STATE(status) == R1_STATE_PRG)
+> +			return -ETIMEDOUT;
+>  		if (status & 0xFDFFA000)
+>  			pr_warn("%s: unexpected status %#x after switch\n",
+>  				mmc_hostname(host), status);
+> @@ -568,8 +570,7 @@ int __mmc_switch(struct mmc_card *card, u8 set, u8 index, u8 value,
+>  		if (time_after(jiffies, timeout)) {
+>  			pr_err("%s: Card stuck in programming state! %s\n",
+>  				mmc_hostname(host), __func__);
+> -			err = -ETIMEDOUT;
+> -			goto out;
+> +			break;
+>  		}
+>  	} while (R1_CURRENT_STATE(status) == R1_STATE_PRG);
+>  
+> 
 
