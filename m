@@ -1,71 +1,95 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH RESEND] mmc:Fix error handling in the function
- mmc_blk_issue_rq
-Date: Mon, 28 Dec 2015 10:42:33 +0200
-Message-ID: <5680F5F9.9020207@intel.com>
-References: <1451160642-26585-1-git-send-email-xerofoify@gmail.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH] mmc: core: Optimize boot time by detecting cards simultaneously
+Date: Mon, 28 Dec 2015 10:31:28 +0100
+Message-ID: <CAPDyKFqKkGpT0uiGP5BkZt-Z=Lphiu2Xeiv0Lsosti_XH-SKNw@mail.gmail.com>
+References: <1448982916-21485-1-git-send-email-ulf.hansson@linaro.org>
+	<CAPDyKFq3iuDkJgUGFV7Y4jLB37T=6Nkzf56bJ-a2RxHjy4fE=A@mail.gmail.com>
+	<5670A0BA.8090402@samsung.com>
+	<CAPDyKFpF+rqv1WQ0Hu-YdAM1pdNwKyKjFsAg1BfeEj=kDfH0Ag@mail.gmail.com>
+	<CAOGqxeWw-qcRNV=4GDbh6znvd6Wh4yOtFcZtua3QuX8ZExGCBw@mail.gmail.com>
+	<CAPDyKFo6DFOynRpB2mJE5KhAm7SQKd8xK6Ki54Rf5OjGLwwQcA@mail.gmail.com>
+	<5673612C.9050808@samsung.com>
+	<567377F3.2060906@rock-chips.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga04.intel.com ([192.55.52.120]:42349 "EHLO mga04.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751522AbbL1Ip4 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 28 Dec 2015 03:45:56 -0500
-In-Reply-To: <1451160642-26585-1-git-send-email-xerofoify@gmail.com>
+Received: from mail-yk0-f176.google.com ([209.85.160.176]:36080 "EHLO
+	mail-yk0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750762AbbL1Jb3 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 28 Dec 2015 04:31:29 -0500
+Received: by mail-yk0-f176.google.com with SMTP id v14so6043609ykd.3
+        for <linux-mmc@vger.kernel.org>; Mon, 28 Dec 2015 01:31:28 -0800 (PST)
+In-Reply-To: <567377F3.2060906@rock-chips.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Nicholas Krause <xerofoify@gmail.com>, ulf.hansson@linaro.org
-Cc: tomas.winkler@intel.com, tklauser@distanz.ch, sholi@nvidia.com, kuninori.morimoto.gx@renesas.com, lporzio@micron.com, chuanxiao.dong@intel.com, jonathanh@nvidia.com, grundler@chromium.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+To: Shawn Lin <shawn.lin@rock-chips.com>
+Cc: Jaehoon Chung <jh80.chung@samsung.com>, Alan Cooper <alcooperx@gmail.com>, linux-mmc <linux-mmc@vger.kernel.org>
 
-On 26/12/15 22:10, Nicholas Krause wrote:
-> This fixes error handling in the function mmc_blk_issue_rq for
-> checking if the calls to the function mmc_blk_issue_rw_rq have
-> failed by returning zero as there return value and if so jump
-> immediately to the goto label out for cleanup of resources used
-> and allocated by the function mmc_blk_issue_rq before returning
-> this return value to the caller of this particular function to
-> indicate to the caller that it's call(s) have failed.
+On 18 December 2015 at 04:05, Shawn Lin <shawn.lin@rock-chips.com> wrote:
+> On 2015/12/18 9:28, Jaehoon Chung wrote:
+>>
+>> Hi,
+>>
+>> On 12/18/2015 06:49 AM, Ulf Hansson wrote:
+>>>
+>>> On 17 December 2015 at 20:47, Alan Cooper <alcooperx@gmail.com> wrote:
+>>>>
+>>>> On Wed, Dec 16, 2015 at 4:07 AM, Ulf Hansson <ulf.hansson@linaro.org>
+>>>> wrote:
+>>>>>
+>>>>> To find the improved card detection times, I just used the kernel boot
+>>>>> log and checked the time stamps for when the cards get detected. I ran
+>>>>> the tests ~10 times and picked up some average values.
+>>>>>
+>>>>> To notice the improvement you need at least two cards to be inserted
+>>>>> during boot. Perhaps you have a platform with one eMMC and one SD card
+>>>>> slot, you can test.
+>>>>
+>>>>
+>>>> I tested the patch on one of our ARM bases SoC's. The SoC has an SD
+>>>> card slot on the first controller and an eMMC device on the second
+>>>> controller. I found ~100ms improvement on the time it took for the
+>>>> rootfs on the eMMC device to be ready for use. Interestingly, I did
+>>>> see the SD/eMMC order swap once in 20 tries. This is not an issue for
+>>>> us as we already have to use UUID for the eMMC rootfs in case an SD
+>>>> card is installed.
+>>>>
+>
 
-Are you experiencing a problem with the existing code, because it looks more
-correct to me?
+Hi Shawn,
 
-There does seem to be a gap in the way MMC_QUEUE_NEW_REQUEST is handled,
-since the code is expecting that mmc_blk_issue_rw_rq() will have done
-waiting for any ongoing request, but it is not clear it will have if
-MMC_QUEUE_NEW_REQUEST is possible.  But that is a different issue.
+Thanks for helping out testing.
 
-> 
-> Signed-off-by: Nicholas Krause <xerofoify@gmail.com>
-> ---
->  drivers/mmc/card/block.c | 8 ++++++--
->  1 file changed, 6 insertions(+), 2 deletions(-)
-> 
-> diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
-> index a1b820f..354a151 100644
-> --- a/drivers/mmc/card/block.c
-> +++ b/drivers/mmc/card/block.c
-> @@ -2055,7 +2055,9 @@ static int mmc_blk_issue_rq(struct mmc_queue *mq, struct request *req)
->  	if (cmd_flags & REQ_DISCARD) {
->  		/* complete ongoing async transfer before issuing discard */
->  		if (card->host->areq)
-> -			mmc_blk_issue_rw_rq(mq, NULL);
-> +			ret = mmc_blk_issue_rw_rq(mq, NULL);
-> +		if (!ret)
-> +			goto out;
->  		if (req->cmd_flags & REQ_SECURE)
->  			ret = mmc_blk_issue_secdiscard_rq(mq, req);
->  		else
-> @@ -2063,7 +2065,9 @@ static int mmc_blk_issue_rq(struct mmc_queue *mq, struct request *req)
->  	} else if (cmd_flags & REQ_FLUSH) {
->  		/* complete ongoing async transfer before issuing flush */
->  		if (card->host->areq)
-> -			mmc_blk_issue_rw_rq(mq, NULL);
-> +			ret = mmc_blk_issue_rw_rq(mq, NULL);
-> +		if (!ret)
-> +			goto out;
->  		ret = mmc_blk_issue_flush(mq, req);
->  	} else {
->  		if (!req && host->areq) {
-> 
+> hi Ulf,
+>     I'm interested in this patch since I also spent a little time optimzing
+> the boot time and sequence for my local branch based on kernel 3.1x. With
+> you patch, it seems, the tablet only achieves very small improvement for the
+> SD controller(less than 20ms).
+>
+> My test environment:
+> Kernel: 3.14
+> Slot: 1 emmc(1st) + 1 SD card(2nd) + 1 sdio card(3rd)
 
+How much time you *gain* comparing to the original behaviour for each
+card, depends on the ->probe() order of your mmc hosts.
+
+I would guess that the host that holds the eMMC is the one being
+probed first, right?
+In general eMMC is quite fast to initialize, comparing to SD-cards and
+that's probably the reason to why you don't see that much
+improvements.
+
+Although, for your SDIO card you should see a greater improvement as
+this don't need to wait for your SD and eMMC to be initialized.
+
+>
+> I happen to run massive reboot test for my stable kernel branch this
+> weekend, so I will apply this patch to see if any problem occurs. :)
+>
+
+Great!
+
+As you haven't reported any problems, I suppose the tests went well!?
+
+Kind regards
+Uffe
