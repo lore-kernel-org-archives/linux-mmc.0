@@ -1,54 +1,99 @@
-From: Yangbo Lu <yangbo.lu@nxp.com>
-Subject: RE: [v4, 5/6] mmc: kconfig: select FSL_GUTS for MMC_SDHCI_OF_ESDHC
-Date: Mon, 28 Dec 2015 10:26:36 +0000
-Message-ID: <HE1PR04MB0889791AB9F06A5591D4CD5FF8FB0@HE1PR04MB0889.eurprd04.prod.outlook.com>
-References: <1450067067-44869-1-git-send-email-yangbo.lu@freescale.com>
-	<1450067067-44869-6-git-send-email-yangbo.lu@freescale.com>
-	<CAPDyKFo1g5_4bpYnTO96tGfVGStysN0FnmbSx-Se4tOa7f3rZQ@mail.gmail.com>
-	<1450116253.15946.353.camel@freescale.com>
-	<CAPDyKFrKSMC0uo8re3CxjNCUsVnEMau=GTKq=v_3ooNnQxw2Eg@mail.gmail.com>
- <CAPDyKFoYxM4Nv_pHCZbGzuswMCXTLyj6CYgLjYnRguscUs9LrQ@mail.gmail.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: 1217:8520 [Dell Latitude E7450] O2 Micro, SD/MMC Card Reader
+ doesn't work
+Date: Mon, 28 Dec 2015 12:47:26 +0100
+Message-ID: <CAPDyKFr6WE4PpJ8mwsVGEQ0EijySxSVXf5+TG1ZxF2bkh7eNjQ@mail.gmail.com>
+References: <CAONpWdsteBnqTcFbKpcOQFueyeJJWEmn9DJitD43f59xV8sDyg@mail.gmail.com>
+	<BY2PR04MB184372CAAC1FA0C5373D73238FEF0@BY2PR04MB1843.namprd04.prod.outlook.com>
+	<CAONpWduF6iH4Rr5Y610KP1RE342nWAajR27KFbu1N2iet4R0ZA@mail.gmail.com>
+	<BY2PR04MB18438CFFD181C72EFEF408908FE10@BY2PR04MB1843.namprd04.prod.outlook.com>
+	<CAPDyKFotgz3czCs8XaXwC4kT53Lp0h=n03OUMtO6BUTwTnDYzQ@mail.gmail.com>
+	<BY2PR04MB18432C804C263313D2349C848FE10@BY2PR04MB1843.namprd04.prod.outlook.com>
+	<CAONpWdvo+b=Y26zsCYsHFHjJ+8yAnYfoJOsirdS-he2s1unDgg@mail.gmail.com>
+	<CAONpWdsHJEHjedfQrjXru0fETRL3NfXG6cyoQAYtLYAKb5i-2Q@mail.gmail.com>
+	<CY1PR04MB184843666E915C564A1858CB8FE50@CY1PR04MB1848.namprd04.prod.outlook.com>
+	<CAPDyKFqMPfrTdF4JNU-QUBN-va+Xk0EAqHysQ_HpKkmMfQzQNg@mail.gmail.com>
+	<20151223111352.GR8644@n2100.arm.linux.org.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-db3on0094.outbound.protection.outlook.com ([157.55.234.94]:5119
-	"EHLO emea01-db3-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1751431AbbL1K7D (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 28 Dec 2015 05:59:03 -0500
-In-Reply-To: <CAPDyKFoYxM4Nv_pHCZbGzuswMCXTLyj6CYgLjYnRguscUs9LrQ@mail.gmail.com>
-Content-Language: en-US
+Received: from mail-yk0-f169.google.com ([209.85.160.169]:35932 "EHLO
+	mail-yk0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751381AbbL1Lr0 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 28 Dec 2015 06:47:26 -0500
+Received: by mail-yk0-f169.google.com with SMTP id v14so8224406ykd.3
+        for <linux-mmc@vger.kernel.org>; Mon, 28 Dec 2015 03:47:26 -0800 (PST)
+In-Reply-To: <20151223111352.GR8644@n2100.arm.linux.org.uk>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>, Scott Wood <scottwood@freescale.com>
-Cc: Lu Yangbo-B47093 <yangbo.lu@freescale.com>, linux-mmc <linux-mmc@vger.kernel.org>, Xie Xiaobo-R63061 <X.Xie@freescale.com>, Leo li <LeoLi@freescale.com>
+To: Russell King - ARM Linux <linux@arm.linux.org.uk>
+Cc: Peter Guo <peter.guo@bayhubtech.com>, Alex Ballas <alex@ballas.org>, "adam8157@gmail.com" <adam8157@gmail.com>, "linux-mmc@VGER.KERNEL.ORG" <linux-mmc@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>
 
-PiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBVbGYgSGFuc3NvbiBbbWFpbHRv
-OnVsZi5oYW5zc29uQGxpbmFyby5vcmddDQo+IFNlbnQ6IFRodXJzZGF5LCBEZWNlbWJlciAxNywg
-MjAxNSA3OjMxIFBNDQo+IFRvOiBTY290dCBXb29kDQo+IENjOiBMdSBZYW5nYm8tQjQ3MDkzOyBs
-aW51eC1tbWM7IFhpZSBYaWFvYm8tUjYzMDYxOyBMZW8gbGkNCj4gU3ViamVjdDogUmU6IFt2NCwg
-NS82XSBtbWM6IGtjb25maWc6IHNlbGVjdCBGU0xfR1VUUyBmb3INCj4gTU1DX1NESENJX09GX0VT
-REhDDQo+IA0KPiBbLi4uXQ0KPiANCj4gPj4NCj4gPj4gQW5kIEkgdGhpbmsgc3R1YnMgZm9yIHJl
-YWRpbmcgU1ZSIGlzIHF1aXRlIGEgYmFkIGlkZWEuICBJdCdsbCBtYWtlDQo+ID4+IHRoZSBkcml2
-ZXIgYnVpbGQgYnV0IGl0IHdpbGwgc2lsZW50bHkgbm90IGJlIGFibGUgdG8gYXBwbHkgU1ZSLWJh
-c2VkDQo+IHdvcmthcm91bmRzLg0KPiA+DQo+ID4gSXQgZG9lc24ndCBoYXZlIHRvIGJlICJzaWxl
-bnQiLCB0aGUgZHJpdmVyIGNhbiByZXR1cm4gYW4gZXJyb3IgKGFuZA0KPiA+IHByaW50IGVycm9y
-IG1lc3NhZ2VzKSBmcm9tIGl0cyAtPnByb2JlKCkgbWV0aG9kLCBpZiB0aGUgY2FsbHMgdG8gdGhl
-DQo+ID4gR1VUUyBkcml2ZXIgZmFpbHMuDQo+ID4NCj4gPiBBbnl3YXksIEkgbWVudGlvbmVkIHRo
-aXMgaWRlYSBvbmx5IHRvIHVuZGVyc3RhbmQgdGhlIG5lZWQgZm9yDQo+ID4gKm9wdGlvbmFsKiBH
-VVRTIHN1cHBvcnRzLiBQZXJoYXBzIHRoZXJlIGlzIGEgY3Jvc3MgU09DIGRyaXZlcnMgdGhhdA0K
-PiA+IGZvciBzb21lIHBsYXRmb3JtcyBkZXBlbmRzIG9uIEdVVFMgYnV0IG9uIG90aGVycyBpdCBk
-b2Vzbid0Lg0KPiA+DQo+ID4gTWF5YmUgdGhhdCBpc24ndCBjYXNlIHRoZW4hPw0KPiANCj4gQ2Fu
-IHlvdSBwbGVhc2UgYW5zd2VyIHRoaXMgcXVlc3Rpb24hPw0KPiANCj4gQWNjb3JkaW5nIHRvIHRo
-ZSBlYXJsaWVyIHZlcnNpb25zIG9mIHRoaXMgcGF0Y2hzZXQgYW5kIGZyb20geW91ciBjb21tZW50
-cw0KPiBbMV0sIGl0ICpkbyogc2VlbXMgbGlrZSB0aGUgR1VUUyBkcml2ZXIgbWF5IGJlIG9wdGlv
-bmFsIGFuZCB0aHVzIHN0dWJzDQo+IGNvdWxkIGFkZHJlc3MgdGhpcy4NCj4gDQo+IEtpbmQgcmVn
-YXJkcw0KPiBVZmZlDQo+IA0KPiBbMV0NCj4gaHR0cDovL3d3dy5zcGluaWNzLm5ldC9saXN0cy9s
-aW51eC1tbWMvbXNnMzQ0MTIuaHRtbA0KDQpbTHUgWWFuZ2JvLUI0NzA5M10gSGkgU2NvdHQgYW5k
-IFVmZmUsIA0KSW4gdGhlIGVhcmxpZXIgdmVyc2lvbiwgSSdkIGxpa2UgdG8gdXNlIHN5c2NvbiBz
-dXBwb3J0IGFuZCBvbmx5IGFkZCAnc3lzY29uJyBjb21wYXRpYmxlIGluIHRoZSBkdHMgd2hvc2Ug
-ZVNESEMgbmVlZHMgdG8gdXNlIGl0IHRvIGdldCBTVlIuDQpCdXQgSSBuZXZlciB0aG91Z2h0IHRo
-aXMgaGFkIGNhdXNlZCBzbyBtdWNoIGRpc2N1c3Npb24uLi4gOigNCkNvdWxkIHdlIHJlYWNoIGFu
-IGFncmVlbWVudCBhYm91dCB0aGUgJ29wdGlvbmFsJyBvciBub3QgJ29wdGlvbmFsJz8NCg0KVGhh
-bmsgeW91IHNvIG11Y2ghDQoNCiANCg0KDQoNCg0K
+On 23 December 2015 at 12:13, Russell King - ARM Linux
+<linux@arm.linux.org.uk> wrote:
+> On Tue, Dec 22, 2015 at 09:30:00AM +0100, Ulf Hansson wrote:
+>> This quirk seems a bit strange. It looks like a generic problem being
+>> solved by the wrong approach. Although, my knowledge of sdhci HW is
+>> limited so I might be wrong.
+>>
+>> Why doesn't sdhci *always* reset the related registers when the
+>> command or data transfer gets *completed*? Instead as currently,
+>> delaying that until the *next* request is started and via using
+>> SDHCI_QUIRK2_CLEAR_TRANSFERMODE_REG_BEFORE_CMD?
+>
+> That would be additional overhead.  The real problem is that the tuning
+
+Well, yes but I wonder if it isn't negligible.
+
+Of course, if it's more suitable to deal with clearing the register
+*before* starting a new request, that should work fine as well.
+
+Anyway, my point is that I find it odd to have a quirk for something
+that should be common.
+
+> paths compete with the normal request paths over how to set the registers.
+> This competition needs to be killed, and a saner structure for dealing
+> with requests and tuning commands needs to be created.
+>
+> This is something I'm working on as I get time: I'm restructuring
+> sdhci_send_command() with the aim of getting to the point where the
+> tuning code is _not_ writing to any registers at all, and that's all
+> handled by code common to both paths.
+
+Sounds great!
+
+>
+>> Sdhci's sdhci_execute_tuning() function must be converted to use
+>> mmc_send_tuning().
+>
+> That will make the request path more complex, because we then need to
+> detect the tuning commands and have special handling for them.  With
+> SDHCI, they are not a standard data transfer command, which is what
+> mmc_send_tuning() wants.
+
+If the regular request path isn't used, the core isn't in control of
+the request.
+
+I don't like that, as it becomes an exception of how requests are
+managed. It also means the host driver will not benefit from the
+common error handling paths in the core.
+
+>
+> This means we end up with more complexity in what is supposed to be a
+> fast path, which means more room for bugs to creep in.
+
+I assume you refer to that the sdhci's host_ops->request() callback
+would need to check for the tuning commands and thus treat these as
+special cases.
+
+I agree, we should avoid these kind of checks in host drivers.
+Typically we can address this by adding a new MMC_CAP* and/or a new
+host_ops callback.
+
+In this case I think a new optional host_ops callback, which
+mmc_send_tuning() would invoke, should to the trick for sdhci.
+
+What do you think?
+
+Kind regards
+Uffe
