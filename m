@@ -1,98 +1,61 @@
-From: Alex Lemberg <Alex.Lemberg@sandisk.com>
-Subject: RE: [RFC 0/6] mmc: Field Firmware Update
-Date: Mon, 28 Dec 2015 14:12:05 +0000
-Message-ID: <BLUPR02MB2773299A3F882A172DF0E3694FB0@BLUPR02MB277.namprd02.prod.outlook.com>
-References: <1447426572-11756-1-git-send-email-holgerschurig@gmail.com>
- <SN1PR02MB13891415516DE9FA4756140783070@SN1PR02MB1389.namprd02.prod.outlook.com>
- <CAOpc7mHbM8EYYNRKR+pKnzc0wf1DR1ojX-iFuDWDYyquC3EVZg@mail.gmail.com>
- <CAPDyKFp2WEVF4yi=Upzx+58SY15u=Fp4=tr3_hh7AS3T2yz4qQ@mail.gmail.com>
- <87r3ierjae.fsf@gmail.com>
+From: Scott Wood <scottwood@freescale.com>
+Subject: Re: [v4, 5/6] mmc: kconfig: select FSL_GUTS for MMC_SDHCI_OF_ESDHC
+Date: Mon, 28 Dec 2015 12:47:58 -0600
+Message-ID: <1451328478.18314.138.camel@freescale.com>
+References: <1450067067-44869-1-git-send-email-yangbo.lu@freescale.com>
+	 <1450067067-44869-6-git-send-email-yangbo.lu@freescale.com>
+	 <CAPDyKFo1g5_4bpYnTO96tGfVGStysN0FnmbSx-Se4tOa7f3rZQ@mail.gmail.com>
+	 <1450116253.15946.353.camel@freescale.com>
+	 <CAPDyKFrKSMC0uo8re3CxjNCUsVnEMau=GTKq=v_3ooNnQxw2Eg@mail.gmail.com>
+	 <CAPDyKFoYxM4Nv_pHCZbGzuswMCXTLyj6CYgLjYnRguscUs9LrQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-bl2on0065.outbound.protection.outlook.com ([65.55.169.65]:62496
-	"EHLO na01-bl2-obe.outbound.protection.outlook.com"
+Received: from mail-by2on0123.outbound.protection.outlook.com ([207.46.100.123]:52681
+	"EHLO na01-by2-obe.outbound.protection.outlook.com"
 	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1751288AbbL1PpS convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 28 Dec 2015 10:45:18 -0500
-In-Reply-To: <87r3ierjae.fsf@gmail.com>
-Content-Language: en-US
+	id S1752432AbbL1SsJ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 28 Dec 2015 13:48:09 -0500
+In-Reply-To: <CAPDyKFoYxM4Nv_pHCZbGzuswMCXTLyj6CYgLjYnRguscUs9LrQ@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Holger Schurig <holgerschurig@gmail.com>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Avi Shchislowski <Avi.Shchislowski@sandisk.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Chris Ball <chris@printf.net>, Baolin Wang <baolin.wang@linaro.org>
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Yangbo Lu <yangbo.lu@freescale.com>, linux-mmc <linux-mmc@vger.kernel.org>, X.Xie@freescale.com, Li Leo <LeoLi@freescale.com>
 
-Hi Ulf,
+On Thu, 2015-12-17 at 12:30 +0100, Ulf Hansson wrote:
+> [...]
+> 
+> > > 
+> > > And I think stubs for reading SVR is quite a bad idea.  It'll make the
+> > > driver
+> > > build but it will silently not be able to apply SVR-based workarounds.
+> > 
+> > It doesn't have to be "silent", the driver can return an error (and
+> > print error messages) from its ->probe() method, if the calls to the
+> > GUTS driver fails.
+> > 
+> > Anyway, I mentioned this idea only to understand the need for
+> > *optional* GUTS supports. Perhaps there is a cross SOC drivers that
+> > for some platforms depends on GUTS but on others it doesn't.
+> > 
+> > Maybe that isn't case then!?
+> 
+> Can you please answer this question!?
+> 
+> According to the earlier versions of this patchset and from your
+> comments [1], it *do* seems like the GUTS driver may be optional and
+> thus stubs could address this.
 
-We succeeded to run FFU via new mmc multi-command ioctl without any code modification, 
-but only by using Single Sector commands (CMD24).
+I'd rather it not be optional at build time for the reason I explained above. 
+ It would be too easy for users to accidentally not enable the guts driver and
+miss the workaround.  Even if an error is printed it's easy to miss among all
+the boot spam -- and if there's any legitimate reason to not have the driver
+enabled then why would that be an "error"?  If the guts driver fails to bind
+(e.g. running in a VM, or a platform the guts driver doesn't recognize) that's
+another matter, but that should be handled by an error check in the guts
+driver, not a build-time stub.
 
->From running the FFU and from code review, we see two minor issues in this way of running FFU:
-1. There is no support for Multiple Block write commands (CMD25) in existing IOCTL implementation - 
-seems like there is no polling for the card status on data transfer completion.
-(The kernel FFU implementation supports FFU using Multiple Block Write commands).
-2. As you probably remember, there are two ways to install the new FW in the end of FFU process - 
-In case MODE_OPERATION_CODES field is not supported by the device, the host sets to NORMAL state 
-and initiates a CMD0/HW_Reset/Power cycle to install the new firmware.
-This sequence cannot be done via multi-command ioctl, and requires manual reset of the device/platform.
-(The kernel FFU implementation supports both FW install methods).
+-Scott
 
-For running FFU via new mmc multi-command ioctl, we have modified mmc-utils and add new functionality for FFU.
-Please let us know if you want us to submit the patch for mmc-utils FFU functionality via multi-command ioctl.
-
-Best regards,
-Alex
-
-> -----Original Message-----
-> From: Holger Schurig [mailto:holgerschurig@gmail.com]
-> Sent: Tuesday, December 22, 2015 10:15 AM
-> To: Ulf Hansson
-> Cc: Avi Shchislowski; linux-mmc@vger.kernel.org; linux-
-> kernel@vger.kernel.org; Alex Lemberg; Chris Ball; Baolin Wang
-> Subject: Re: [RFC 0/6] mmc: Field Firmware Update
-> 
-> 
-> > Sorry for the delay.
-> 
-> No problem, I was busy with many other projects as well.
-> 
-> > My advise right now is to try this out via the mmc ioctl in userspace,
-> > yes. Although, if you encounter any issues with that approach that it
-> > might not be reliable, I am open to look into the in-kernel solution
-> > again.
-> 
-> I managed to update my Kingston eMMCs with a slighly modified patch to
-> what I submitted. I however didn't bother to submit this, as I saw no chance
-> of getting it applied.
-> 
-> Also I once asked in the mailing list if there is some user-space example of
-> how to use the multi-block feature that is supposed to enable this, but I
-> haven't gotten an answer.
-> 
-> > Regarding mmc-utils as where I recommend you to implement this, I have
-> > been thinking of moving this tool into the tools directory in the
-> > kernel.
-> 
-> Sounds good to me.
-> 
-> 
-> 
-> Remotely related:
-> 
-> Do you know that some google people made their own version of mmc-utils
-> for ChromeOS? And the don't seem to give much effort in unification of
-> them?  As if the world wouldn't know how hard it can be to re-unite things
-> again, Google should know from their custom kernels they use on Android ...
-> Sigh.
-> 
-> 
-> So you can
-> 
-> * git clone git://git.kernel.org/pub/scm/linux/kernel/git/cjb/mmc-utils.git
-> * git clone
-> https://chromium.googlesource.com/chromiumos/third_party/mmc-utils
-> 
-> currently.
-> 
 
