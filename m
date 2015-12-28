@@ -1,37 +1,58 @@
-From: Geliang Tang <geliangtang@163.com>
-Subject: [PATCH 05/10] mmc: cb710: use to_platform_device()
-Date: Sun, 27 Dec 2015 21:15:43 +0800
-Message-ID: <fc686afe2f3846425396bebe8cac7d3b76da42a2.1451221174.git.geliangtang@163.com>
-References: <a554e6af3a3528c2206c94dab62b7800f96caa4b.1451221174.git.geliangtang@163.com>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <a554e6af3a3528c2206c94dab62b7800f96caa4b.1451221174.git.geliangtang@163.com>
-In-Reply-To: <a554e6af3a3528c2206c94dab62b7800f96caa4b.1451221174.git.geliangtang@163.com>
-References: <a554e6af3a3528c2206c94dab62b7800f96caa4b.1451221174.git.geliangtang@163.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: =?UTF-8?q?Micha=C5=82=20Miros=C5=82aw?= <mirq-linux@rere.qmqm.pl>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Geliang Tang <geliangtang@163.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+From: Youngjin Jang <yj84.jang@samsung.com>
+Subject: [PATCH] Move the judgement of timeout into mmc_switch_status_error()
+Date: Mon, 28 Dec 2015 02:07:26 +0000 (GMT)
+Message-ID: <1921572.349701451268445456.JavaMail.weblogic@ep2mlwas03b>
+Reply-To: yj84.jang@samsung.com
+Mime-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: base64
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mailout1.samsung.com ([203.254.224.24]:51901 "EHLO
+	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750781AbbL1CH2 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 27 Dec 2015 21:07:28 -0500
+Received: from epcpsbgr1.samsung.com
+ (u141.gpu120.samsung.co.kr [203.254.230.141])
+ by mailout1.samsung.com (Oracle Communications Messaging Server 7.0.5.31.0
+ 64bit (built May  5 2014))
+ with ESMTP id <0O0102PC5PWEZZ50@mailout1.samsung.com> for
+ linux-mmc@vger.kernel.org; Mon, 28 Dec 2015 11:07:26 +0900 (KST)
+MIME-version: 1.0
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Cc: demon.lee@samsung.com, js07.lee@samsung.com
 
-Use to_platform_device() instead of open-coding it.
+X19tbWNfc3dpdGNoKCkgaXMgcG9zc2libGUgdG8gbWlzanVkZ2UgZXJyb3IuDQoNCkFsdGhvdWdo
+IGppZmZpZXMgd2FzIG92ZXJlZCB0aW1lb3V0LA0KdGhlIGNoYW5jZSBhYm91dCAiUjFfQ1VSUkVO
+VF9TVEFURShzdGF0dXMpICE9IFIxX1NUQVRFX1BSRyIgaXMgZXhpc3RzLg0KSW4gb3RoZXIgd29y
+ZHMsIFN1Y2Nlc3NmdWwgY29tcGxldGlvbiBvZiBDTUQ2IHdpdGggdGltZW91dCBlcnJvci4NCg0K
+S2VybmVsIGV4cGVjdHMgZmFpbHVyZSBvZiBfX21tY19zd2l0Y2gsDQpidXQgY2FyZCBpcyBjb21w
+bGV0ZWQgQ01ENiBpbiB0aGlzIGNhc2UuDQpJdCBtYWtlcyBtaXNtYXRjaCBzdGF0dXMgYmV0d2Vl
+biBtbWMgc3Vic3lzdGVtIGFuZCBtbWMgY2FyZC4NCg0KRXNwZWNpYWxseSwgaW4gY2FzZSBvZiBw
+YXJ0aXRpb24gc3dpdGNoLA0KSWYgdGltZW91dCBvY2N1cnMgd2l0aCBub3JtYWwgc3RhdHVzIG9m
+IENNRDEzIHJlc3BvbnNlIHVuZm9ydHVuYXRsZXksDQoibWFpbl9tZC0+Y3VyciIgd2lsbCBub3Qg
+YmUgc2V0LCBldmVuIGNhcmQgc3dpdGNoZWQgc3VjY2Vzc2Z1bGx5Lg0KDQpDaGVja2luZyBzdGF0
+ZSBvZiBtbWMgY2FyZCBpcyBuZWVkZWQgd2hlbiBqdWRnaW5nIGFuIHRpbWVvdXQgZXJyb3IsDQpp
+ZiBpdCBpcyBqdXN0IHRpbWVvdXQgb3IgdGltZW91dCB3aXRoIGVycm9yLg0KDQpSZXZpZXdlZC1i
+eTogSnVuZ3NldW5nIExlZSA8anMwNy5sZWVAc2Ftc3VuZy5jb20+DQpTaWduZWQtb2ZmLWJ5OiBZ
+b3VuZ2ppbiBKYW5nIDx5ajg0LmphbmdAc2Ftc3VuZy5jb20+DQotLS0NCiBkcml2ZXJzL21tYy9j
+b3JlL21tY19vcHMuYyB8ICAgIDUgKysrLS0NCiAxIGZpbGUgY2hhbmdlZCwgMyBpbnNlcnRpb25z
+KCspLCAyIGRlbGV0aW9ucygtKQ0KDQpkaWZmIC0tZ2l0IGEvZHJpdmVycy9tbWMvY29yZS9tbWNf
+b3BzLmMgYi9kcml2ZXJzL21tYy9jb3JlL21tY19vcHMuYw0KaW5kZXggMWY0NDQyNi4uMDMzZjQ3
+NSAxMDA2NDQNCi0tLSBhL2RyaXZlcnMvbW1jL2NvcmUvbW1jX29wcy5jDQorKysgYi9kcml2ZXJz
+L21tYy9jb3JlL21tY19vcHMuYw0KQEAgLTQ1Niw2ICs0NTYsOCBAQCBpbnQgbW1jX3N3aXRjaF9z
+dGF0dXNfZXJyb3Ioc3RydWN0IG1tY19ob3N0ICpob3N0LCB1MzIgc3RhdHVzKQ0KIAkJaWYgKHN0
+YXR1cyAmIFIxX1NQSV9JTExFR0FMX0NPTU1BTkQpDQogCQkJcmV0dXJuIC1FQkFETVNHOw0KIAl9
+IGVsc2Ugew0KKwkJaWYgKFIxX0NVUlJFTlRfU1RBVEUoc3RhdHVzKSA9PSBSMV9TVEFURV9QUkcp
+DQorCQkJcmV0dXJuIC1FVElNRURPVVQ7DQogCQlpZiAoc3RhdHVzICYgMHhGREZGQTAwMCkNCiAJ
+CQlwcl93YXJuKCIlczogdW5leHBlY3RlZCBzdGF0dXMgJSN4IGFmdGVyIHN3aXRjaFxuIiwNCiAJ
+CQkJbW1jX2hvc3RuYW1lKGhvc3QpLCBzdGF0dXMpOw0KQEAgLTU2OCw4ICs1NzAsNyBAQCBpbnQg
+X19tbWNfc3dpdGNoKHN0cnVjdCBtbWNfY2FyZCAqY2FyZCwgdTggc2V0LCB1OCBpbmRleCwgdTgg
+dmFsdWUsDQogCQlpZiAodGltZV9hZnRlcihqaWZmaWVzLCB0aW1lb3V0KSkgew0KIAkJCXByX2Vy
+cigiJXM6IENhcmQgc3R1Y2sgaW4gcHJvZ3JhbW1pbmcgc3RhdGUhICVzXG4iLA0KIAkJCQltbWNf
+aG9zdG5hbWUoaG9zdCksIF9fZnVuY19fKTsNCi0JCQllcnIgPSAtRVRJTUVET1VUOw0KLQkJCWdv
+dG8gb3V0Ow0KKwkJCWJyZWFrOw0KIAkJfQ0KIAl9IHdoaWxlIChSMV9DVVJSRU5UX1NUQVRFKHN0
+YXR1cykgPT0gUjFfU1RBVEVfUFJHKTsNCiANCi0tIA0KMS43LjkuNQ0KDQo=
 
-Signed-off-by: Geliang Tang <geliangtang@163.com>
----
- drivers/mmc/host/cb710-mmc.h | 3 +--
- 1 file changed, 1 insertion(+), 2 deletions(-)
 
-diff --git a/drivers/mmc/host/cb710-mmc.h b/drivers/mmc/host/cb710-mmc.h
-index 8984ec8..8ecd9e5 100644
---- a/drivers/mmc/host/cb710-mmc.h
-+++ b/drivers/mmc/host/cb710-mmc.h
-@@ -29,8 +29,7 @@ static inline struct mmc_host *cb710_slot_to_mmc(struct cb710_slot *slot)
- 
- static inline struct cb710_slot *cb710_mmc_to_slot(struct mmc_host *mmc)
- {
--	struct platform_device *pdev = container_of(mmc_dev(mmc),
--		struct platform_device, dev);
-+	struct platform_device *pdev = to_platform_device(mmc_dev(mmc));
- 	return cb710_pdev_to_slot(pdev);
- }
- 
--- 
-2.5.0
