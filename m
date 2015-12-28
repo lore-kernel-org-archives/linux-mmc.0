@@ -1,115 +1,54 @@
-From: Shawn Lin <shawn.lin@rock-chips.com>
-Subject: Re: [PATCH] mmc: core: Optimize boot time by detecting cards
- simultaneously
-Date: Mon, 28 Dec 2015 17:44:48 +0800
-Message-ID: <56810490.5020507@rock-chips.com>
-References: <1448982916-21485-1-git-send-email-ulf.hansson@linaro.org>
- <CAPDyKFq3iuDkJgUGFV7Y4jLB37T=6Nkzf56bJ-a2RxHjy4fE=A@mail.gmail.com>
- <5670A0BA.8090402@samsung.com>
- <CAPDyKFpF+rqv1WQ0Hu-YdAM1pdNwKyKjFsAg1BfeEj=kDfH0Ag@mail.gmail.com>
- <CAOGqxeWw-qcRNV=4GDbh6znvd6Wh4yOtFcZtua3QuX8ZExGCBw@mail.gmail.com>
- <CAPDyKFo6DFOynRpB2mJE5KhAm7SQKd8xK6Ki54Rf5OjGLwwQcA@mail.gmail.com>
- <5673612C.9050808@samsung.com> <567377F3.2060906@rock-chips.com>
- <CAPDyKFqKkGpT0uiGP5BkZt-Z=Lphiu2Xeiv0Lsosti_XH-SKNw@mail.gmail.com>
+From: Yangbo Lu <yangbo.lu@nxp.com>
+Subject: RE: [v4, 5/6] mmc: kconfig: select FSL_GUTS for MMC_SDHCI_OF_ESDHC
+Date: Mon, 28 Dec 2015 10:26:36 +0000
+Message-ID: <HE1PR04MB0889791AB9F06A5591D4CD5FF8FB0@HE1PR04MB0889.eurprd04.prod.outlook.com>
+References: <1450067067-44869-1-git-send-email-yangbo.lu@freescale.com>
+	<1450067067-44869-6-git-send-email-yangbo.lu@freescale.com>
+	<CAPDyKFo1g5_4bpYnTO96tGfVGStysN0FnmbSx-Se4tOa7f3rZQ@mail.gmail.com>
+	<1450116253.15946.353.camel@freescale.com>
+	<CAPDyKFrKSMC0uo8re3CxjNCUsVnEMau=GTKq=v_3ooNnQxw2Eg@mail.gmail.com>
+ <CAPDyKFoYxM4Nv_pHCZbGzuswMCXTLyj6CYgLjYnRguscUs9LrQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from lucky1.263xmail.com ([211.157.147.132]:37387 "EHLO
-	lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750763AbbL1JpR (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 28 Dec 2015 04:45:17 -0500
-In-Reply-To: <CAPDyKFqKkGpT0uiGP5BkZt-Z=Lphiu2Xeiv0Lsosti_XH-SKNw@mail.gmail.com>
+Received: from mail-db3on0094.outbound.protection.outlook.com ([157.55.234.94]:5119
+	"EHLO emea01-db3-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1751431AbbL1K7D (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 28 Dec 2015 05:59:03 -0500
+In-Reply-To: <CAPDyKFoYxM4Nv_pHCZbGzuswMCXTLyj6CYgLjYnRguscUs9LrQ@mail.gmail.com>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: shawn.lin@rock-chips.com, Jaehoon Chung <jh80.chung@samsung.com>, Alan Cooper <alcooperx@gmail.com>, linux-mmc <linux-mmc@vger.kernel.org>
+To: Ulf Hansson <ulf.hansson@linaro.org>, Scott Wood <scottwood@freescale.com>
+Cc: Lu Yangbo-B47093 <yangbo.lu@freescale.com>, linux-mmc <linux-mmc@vger.kernel.org>, Xie Xiaobo-R63061 <X.Xie@freescale.com>, Leo li <LeoLi@freescale.com>
 
-On 2015/12/28 17:31, Ulf Hansson wrote:
-> On 18 December 2015 at 04:05, Shawn Lin <shawn.lin@rock-chips.com> wrote:
->> On 2015/12/18 9:28, Jaehoon Chung wrote:
->>>
->>> Hi,
->>>
->>> On 12/18/2015 06:49 AM, Ulf Hansson wrote:
->>>>
->>>> On 17 December 2015 at 20:47, Alan Cooper <alcooperx@gmail.com> wrote:
->>>>>
->>>>> On Wed, Dec 16, 2015 at 4:07 AM, Ulf Hansson <ulf.hansson@linaro.org>
->>>>> wrote:
->>>>>>
->>>>>> To find the improved card detection times, I just used the kernel boot
->>>>>> log and checked the time stamps for when the cards get detected. I ran
->>>>>> the tests ~10 times and picked up some average values.
->>>>>>
->>>>>> To notice the improvement you need at least two cards to be inserted
->>>>>> during boot. Perhaps you have a platform with one eMMC and one SD card
->>>>>> slot, you can test.
->>>>>
->>>>>
->>>>> I tested the patch on one of our ARM bases SoC's. The SoC has an SD
->>>>> card slot on the first controller and an eMMC device on the second
->>>>> controller. I found ~100ms improvement on the time it took for the
->>>>> rootfs on the eMMC device to be ready for use. Interestingly, I did
->>>>> see the SD/eMMC order swap once in 20 tries. This is not an issue for
->>>>> us as we already have to use UUID for the eMMC rootfs in case an SD
->>>>> card is installed.
->>>>>
->>
->
-> Hi Shawn,
->
-> Thanks for helping out testing.
->
->> hi Ulf,
->>      I'm interested in this patch since I also spent a little time optimzing
->> the boot time and sequence for my local branch based on kernel 3.1x. With
->> you patch, it seems, the tablet only achieves very small improvement for the
->> SD controller(less than 20ms).
->>
->> My test environment:
->> Kernel: 3.14
->> Slot: 1 emmc(1st) + 1 SD card(2nd) + 1 sdio card(3rd)
->
-> How much time you *gain* comparing to the original behaviour for each
-> card, depends on the ->probe() order of your mmc hosts.
->
-> I would guess that the host that holds the eMMC is the one being
-> probed first, right?
-> In general eMMC is quite fast to initialize, comparing to SD-cards and
-> that's probably the reason to why you don't see that much
-> improvements.
->
-
-yes, my emmc is the first order to be probed. And sdio gain nearly 80ms 
-with your patch.
-
-No any problems found yet. So I think this patch is good :)
-
-> Although, for your SDIO card you should see a greater improvement as
-> this don't need to wait for your SD and eMMC to be initialized.
->
->>
->> I happen to run massive reboot test for my stable kernel branch this
->> weekend, so I will apply this patch to see if any problem occurs. :)
->>
->
-> Great!
->
-> As you haven't reported any problems, I suppose the tests went well!?
->
-> Kind regards
-> Uffe
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
->
->
-
-
--- 
-Best Regards
-Shawn Lin
-
+PiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBVbGYgSGFuc3NvbiBbbWFpbHRv
+OnVsZi5oYW5zc29uQGxpbmFyby5vcmddDQo+IFNlbnQ6IFRodXJzZGF5LCBEZWNlbWJlciAxNywg
+MjAxNSA3OjMxIFBNDQo+IFRvOiBTY290dCBXb29kDQo+IENjOiBMdSBZYW5nYm8tQjQ3MDkzOyBs
+aW51eC1tbWM7IFhpZSBYaWFvYm8tUjYzMDYxOyBMZW8gbGkNCj4gU3ViamVjdDogUmU6IFt2NCwg
+NS82XSBtbWM6IGtjb25maWc6IHNlbGVjdCBGU0xfR1VUUyBmb3INCj4gTU1DX1NESENJX09GX0VT
+REhDDQo+IA0KPiBbLi4uXQ0KPiANCj4gPj4NCj4gPj4gQW5kIEkgdGhpbmsgc3R1YnMgZm9yIHJl
+YWRpbmcgU1ZSIGlzIHF1aXRlIGEgYmFkIGlkZWEuICBJdCdsbCBtYWtlDQo+ID4+IHRoZSBkcml2
+ZXIgYnVpbGQgYnV0IGl0IHdpbGwgc2lsZW50bHkgbm90IGJlIGFibGUgdG8gYXBwbHkgU1ZSLWJh
+c2VkDQo+IHdvcmthcm91bmRzLg0KPiA+DQo+ID4gSXQgZG9lc24ndCBoYXZlIHRvIGJlICJzaWxl
+bnQiLCB0aGUgZHJpdmVyIGNhbiByZXR1cm4gYW4gZXJyb3IgKGFuZA0KPiA+IHByaW50IGVycm9y
+IG1lc3NhZ2VzKSBmcm9tIGl0cyAtPnByb2JlKCkgbWV0aG9kLCBpZiB0aGUgY2FsbHMgdG8gdGhl
+DQo+ID4gR1VUUyBkcml2ZXIgZmFpbHMuDQo+ID4NCj4gPiBBbnl3YXksIEkgbWVudGlvbmVkIHRo
+aXMgaWRlYSBvbmx5IHRvIHVuZGVyc3RhbmQgdGhlIG5lZWQgZm9yDQo+ID4gKm9wdGlvbmFsKiBH
+VVRTIHN1cHBvcnRzLiBQZXJoYXBzIHRoZXJlIGlzIGEgY3Jvc3MgU09DIGRyaXZlcnMgdGhhdA0K
+PiA+IGZvciBzb21lIHBsYXRmb3JtcyBkZXBlbmRzIG9uIEdVVFMgYnV0IG9uIG90aGVycyBpdCBk
+b2Vzbid0Lg0KPiA+DQo+ID4gTWF5YmUgdGhhdCBpc24ndCBjYXNlIHRoZW4hPw0KPiANCj4gQ2Fu
+IHlvdSBwbGVhc2UgYW5zd2VyIHRoaXMgcXVlc3Rpb24hPw0KPiANCj4gQWNjb3JkaW5nIHRvIHRo
+ZSBlYXJsaWVyIHZlcnNpb25zIG9mIHRoaXMgcGF0Y2hzZXQgYW5kIGZyb20geW91ciBjb21tZW50
+cw0KPiBbMV0sIGl0ICpkbyogc2VlbXMgbGlrZSB0aGUgR1VUUyBkcml2ZXIgbWF5IGJlIG9wdGlv
+bmFsIGFuZCB0aHVzIHN0dWJzDQo+IGNvdWxkIGFkZHJlc3MgdGhpcy4NCj4gDQo+IEtpbmQgcmVn
+YXJkcw0KPiBVZmZlDQo+IA0KPiBbMV0NCj4gaHR0cDovL3d3dy5zcGluaWNzLm5ldC9saXN0cy9s
+aW51eC1tbWMvbXNnMzQ0MTIuaHRtbA0KDQpbTHUgWWFuZ2JvLUI0NzA5M10gSGkgU2NvdHQgYW5k
+IFVmZmUsIA0KSW4gdGhlIGVhcmxpZXIgdmVyc2lvbiwgSSdkIGxpa2UgdG8gdXNlIHN5c2NvbiBz
+dXBwb3J0IGFuZCBvbmx5IGFkZCAnc3lzY29uJyBjb21wYXRpYmxlIGluIHRoZSBkdHMgd2hvc2Ug
+ZVNESEMgbmVlZHMgdG8gdXNlIGl0IHRvIGdldCBTVlIuDQpCdXQgSSBuZXZlciB0aG91Z2h0IHRo
+aXMgaGFkIGNhdXNlZCBzbyBtdWNoIGRpc2N1c3Npb24uLi4gOigNCkNvdWxkIHdlIHJlYWNoIGFu
+IGFncmVlbWVudCBhYm91dCB0aGUgJ29wdGlvbmFsJyBvciBub3QgJ29wdGlvbmFsJz8NCg0KVGhh
+bmsgeW91IHNvIG11Y2ghDQoNCiANCg0KDQoNCg0K
