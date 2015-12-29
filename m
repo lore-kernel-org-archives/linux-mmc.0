@@ -1,169 +1,75 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH v2 08/24] mmc: sdhci: avoid unnecessary mapping/unmapping
- of align buffer
-Date: Tue, 29 Dec 2015 15:44:38 +0200
-Message-ID: <56828E46.5090600@intel.com>
-References: <20151221113956.GA3712@n2100.arm.linux.org.uk>
- <E1aAypq-00016e-Lv@rmk-PC.arm.linux.org.uk>
+From: SF Markus Elfring <elfring@users.sourceforge.net>
+Subject: [PATCH] mmc-core: One check less in mmc_select_hs200() after error
+ detection
+Date: Tue, 29 Dec 2015 20:50:17 +0100
+Message-ID: <5682E3F9.4040006@users.sourceforge.net>
+References: <566ABCD9.1060404@users.sourceforge.net>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga03.intel.com ([134.134.136.65]:52749 "EHLO mga03.intel.com"
+Received: from mout.web.de ([212.227.15.3]:59650 "EHLO mout.web.de"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753412AbbL2Nr7 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 29 Dec 2015 08:47:59 -0500
-In-Reply-To: <E1aAypq-00016e-Lv@rmk-PC.arm.linux.org.uk>
+	id S1753613AbbL2TuV (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 29 Dec 2015 14:50:21 -0500
+In-Reply-To: <566ABCD9.1060404@users.sourceforge.net>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Russell King <rmk+kernel@arm.linux.org.uk>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Marcin Wojtas <mw@semihalf.com>, Gregory CLEMENT <gregory.clement@free-electrons.com>, Shawn Guo <shawnguo@kernel.org>, Sascha Hauer <kernel@pengutronix.de>, linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: LKML <linux-kernel@vger.kernel.org>, kernel-janitors@vger.kernel.org, Julia Lawall <julia.lawall@lip6.fr>
 
-On 21/12/15 13:41, Russell King wrote:
-> Unnecessarily mapping and unmapping the align buffer for SD cards is
-> expensive: performance measurements on iMX6 show that this gives a hit
-> of 10% on hdparm buffered disk reads.
-> 
-> MMC/SD card IO comes from the mm/vfs which gives us page based IO, so
-> for this case, the align buffer is not going to be used.  However, we
-> still map and unmap this buffer.
-> 
-> Eliminate this by switching the align buffer to be a DMA coherent
-> buffer, which needs no DMA maintenance to access the buffer.
+From: Markus Elfring <elfring@users.sourceforge.net>
+Date: Tue, 29 Dec 2015 20:28:46 +0100
 
-Did you consider putting the align buffer in the same allocation
-as the adma_table?
+This issue was detected by using the Coccinelle software.
 
-> 
-> Signed-off-by: Russell King <rmk+kernel@arm.linux.org.uk>
-> ---
->  drivers/mmc/host/sdhci.c | 53 ++++++++++++++++--------------------------------
->  1 file changed, 18 insertions(+), 35 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index 3e718e465a1b..8a4eb1c41f3e 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -465,8 +465,6 @@ static void sdhci_adma_mark_end(void *desc)
->  static int sdhci_adma_table_pre(struct sdhci_host *host,
->  	struct mmc_data *data)
->  {
-> -	int direction;
-> -
->  	void *desc;
->  	void *align;
->  	dma_addr_t addr;
-> @@ -483,20 +481,9 @@ static int sdhci_adma_table_pre(struct sdhci_host *host,
->  	 * We currently guess that it is LE.
->  	 */
->  
-> -	if (data->flags & MMC_DATA_READ)
-> -		direction = DMA_FROM_DEVICE;
-> -	else
-> -		direction = DMA_TO_DEVICE;
-> -
-> -	host->align_addr = dma_map_single(mmc_dev(host->mmc),
-> -		host->align_buffer, host->align_buffer_sz, direction);
-> -	if (dma_mapping_error(mmc_dev(host->mmc), host->align_addr))
-> -		goto fail;
-> -	BUG_ON(host->align_addr & host->align_mask);
-> -
->  	host->sg_count = sdhci_pre_dma_transfer(host, data);
->  	if (host->sg_count < 0)
-> -		goto unmap_align;
-> +		return -EINVAL;
->  
->  	desc = host->adma_table;
->  	align = host->align_buffer;
-> @@ -567,22 +554,7 @@ static int sdhci_adma_table_pre(struct sdhci_host *host,
->  		/* nop, end, valid */
->  		sdhci_adma_write_desc(host, desc, 0, 0, ADMA2_NOP_END_VALID);
->  	}
-> -
-> -	/*
-> -	 * Resync align buffer as we might have changed it.
-> -	 */
-> -	if (data->flags & MMC_DATA_WRITE) {
-> -		dma_sync_single_for_device(mmc_dev(host->mmc),
-> -			host->align_addr, host->align_buffer_sz, direction);
-> -	}
-> -
->  	return 0;
-> -
-> -unmap_align:
-> -	dma_unmap_single(mmc_dev(host->mmc), host->align_addr,
-> -		host->align_buffer_sz, direction);
-> -fail:
-> -	return -EINVAL;
->  }
->  
->  static void sdhci_adma_table_post(struct sdhci_host *host,
-> @@ -602,9 +574,6 @@ static void sdhci_adma_table_post(struct sdhci_host *host,
->  	else
->  		direction = DMA_TO_DEVICE;
->  
-> -	dma_unmap_single(mmc_dev(host->mmc), host->align_addr,
-> -		host->align_buffer_sz, direction);
-> -
->  	/* Do a quick scan of the SG list for any unaligned mappings */
->  	has_unaligned = false;
->  	for_each_sg(data->sg, sg, host->sg_count, i)
-> @@ -3003,6 +2972,10 @@ int sdhci_add_host(struct sdhci_host *host)
->  						      host->adma_table_sz,
->  						      &host->adma_addr,
->  						      GFP_KERNEL);
-> +		host->align_buffer = dma_alloc_coherent(mmc_dev(mmc),
-> +							host->align_buffer_sz,
-> +							&host->align_addr,
-> +							GFP_KERNEL);
->  		host->align_buffer = kmalloc(host->align_buffer_sz, GFP_KERNEL);
+Move the jump label directly before the desired log statement
+so that the variable "err" will not be checked once more
+after it was determined that a call of the function
+"__mmc_set_signal_voltage" or "__mmc_switch" failed.
+Use the identifier "report_failure" instead of the label "err".
 
-kmalloc line is still there
+Signed-off-by: Markus Elfring <elfring@users.sourceforge.net>
+---
+ drivers/mmc/core/mmc.c | 9 +++++----
+ 1 file changed, 5 insertions(+), 4 deletions(-)
 
->  		if (!host->adma_table || !host->align_buffer) {
->  			if (host->adma_table)
-> @@ -3010,7 +2983,11 @@ int sdhci_add_host(struct sdhci_host *host)
->  						  host->adma_table_sz,
->  						  host->adma_table,
->  						  host->adma_addr);
-> -			kfree(host->align_buffer);
-> +			if (host->align_buffer)
-> +				dma_free_coherent(mmc_dev(mmc),
-> +						  host->align_buffer_sz,
-> +						  host->align_buffer,
-> +						  host->align_addr);
->  			pr_warn("%s: Unable to allocate ADMA buffers - falling back to standard DMA\n",
->  				mmc_hostname(mmc));
->  			host->flags &= ~SDHCI_USE_ADMA;
-> @@ -3022,10 +2999,14 @@ int sdhci_add_host(struct sdhci_host *host)
->  			host->flags &= ~SDHCI_USE_ADMA;
->  			dma_free_coherent(mmc_dev(mmc), host->adma_table_sz,
->  					  host->adma_table, host->adma_addr);
-> -			kfree(host->align_buffer);
-> +			dma_free_coherent(mmc_dev(mmc), host->align_buffer_sz,
-> +					  host->align_buffer, host->align_addr);
->  			host->adma_table = NULL;
->  			host->align_buffer = NULL;
->  		}
-> +
-> +		/* dma_alloc_coherent returns page aligned and sized buffers */
-> +		BUG_ON(host->align_addr & host->align_mask);
-
-It would be nicer not to have any BUG_ON()
-
->  	}
->  
->  	/*
-> @@ -3489,7 +3470,9 @@ void sdhci_remove_host(struct sdhci_host *host, int dead)
->  	if (host->adma_table)
->  		dma_free_coherent(mmc_dev(mmc), host->adma_table_sz,
->  				  host->adma_table, host->adma_addr);
-> -	kfree(host->align_buffer);
-> +	if (host->align_buffer)
-> +		dma_free_coherent(mmc_dev(mmc), host->align_buffer_sz,
-> +				  host->align_buffer, host->align_addr);
->  
->  	host->adma_table = NULL;
->  	host->align_buffer = NULL;
-> 
+diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+index 549c56e..866f72b 100644
+--- a/drivers/mmc/core/mmc.c
++++ b/drivers/mmc/core/mmc.c
+@@ -1256,7 +1256,7 @@ static int mmc_select_hs200(struct mmc_card *card)
+ 
+ 	/* If fails try again during next card power cycle */
+ 	if (err)
+-		goto err;
++		goto report_failure;
+ 
+ 	mmc_select_driver_type(card);
+ 
+@@ -1276,7 +1276,7 @@ static int mmc_select_hs200(struct mmc_card *card)
+ 				   card->ext_csd.generic_cmd6_time,
+ 				   true, send_status, true);
+ 		if (err)
+-			goto err;
++			goto report_failure;
+ 		old_timing = host->ios.timing;
+ 		mmc_set_timing(host, MMC_TIMING_MMC_HS200);
+ 		if (!send_status) {
+@@ -1289,10 +1289,11 @@ static int mmc_select_hs200(struct mmc_card *card)
+ 				mmc_set_timing(host, old_timing);
+ 		}
+ 	}
+-err:
+-	if (err)
++	if (err) {
++report_failure:
+ 		pr_err("%s: %s failed, error %d\n", mmc_hostname(card->host),
+ 		       __func__, err);
++	}
+ 	return err;
+ }
+ 
+-- 
+2.6.3
 
