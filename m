@@ -1,52 +1,101 @@
-From: Venu Byravarasu <vbyravarasu@nvidia.com>
-Subject: RE: [PATCH 1/2] mmc: enable mmc host device to suspend/resume
- asynchronously
-Date: Tue, 29 Dec 2015 09:38:47 +0000
-Message-ID: <f2d0578732ad47f6835cbdfafd6b688e@bgmail103.nvidia.com>
-References: <568157A7.8030607@linux.intel.com>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH v2 07/24] mmc: sdhci: command response CRC error handling
+Date: Tue, 29 Dec 2015 15:08:20 +0200
+Message-ID: <568285C4.9070909@intel.com>
+References: <20151221113956.GA3712@n2100.arm.linux.org.uk>
+ <E1aAypl-00016T-IM@rmk-PC.arm.linux.org.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from hqemgate14.nvidia.com ([216.228.121.143]:3562 "EHLO
-	hqemgate14.nvidia.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751198AbbL2Jiw (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 29 Dec 2015 04:38:52 -0500
-In-Reply-To: <568157A7.8030607@linux.intel.com>
-Content-Language: en-US
+Received: from mga01.intel.com ([192.55.52.88]:12908 "EHLO mga01.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752074AbbL2NLl (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 29 Dec 2015 08:11:41 -0500
+In-Reply-To: <E1aAypl-00016T-IM@rmk-PC.arm.linux.org.uk>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "Fu, Zhonghui" <zhonghui.fu@linux.intel.com>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, "chaotian.jing@mediatek.com" <chaotian.jing@mediatek.com>, "lars@metafoo.de" <lars@metafoo.de>, "sergei.shtylyov@cogentembedded.com" <sergei.shtylyov@cogentembedded.com>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+To: Russell King <rmk+kernel@arm.linux.org.uk>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Marcin Wojtas <mw@semihalf.com>, Gregory CLEMENT <gregory.clement@free-electrons.com>, Shawn Guo <shawnguo@kernel.org>, Sascha Hauer <kernel@pengutronix.de>, linux-mmc@vger.kernel.org
 
-TG9va3MgZ29vZCB0byBtZS4NCg0KQWNrZWQtYnk6IFZlbnUgQnlyYXZhcmFzdSA8dmJ5cmF2YXJh
-c3VAbnZpZGlhLmNvbT4NCg0KQlIsDQpWZW51DQoNCg0KLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0t
-LS0NCkZyb206IEZ1LCBaaG9uZ2h1aSBbbWFpbHRvOnpob25naHVpLmZ1QGxpbnV4LmludGVsLmNv
-bV0gDQpTZW50OiBNb25kYXksIERlY2VtYmVyIDI4LCAyMDE1IDk6MDkgUE0NClRvOiBVbGYgSGFu
-c3Nvbg0KQ2M6IEFkcmlhbiBIdW50ZXI7IGNoYW90aWFuLmppbmdAbWVkaWF0ZWsuY29tOyBsYXJz
-QG1ldGFmb28uZGU7IFZlbnUgQnlyYXZhcmFzdTsgc2VyZ2VpLnNodHlseW92QGNvZ2VudGVtYmVk
-ZGVkLmNvbTsgbGludXgtbW1jOyBsaW51eC1rZXJuZWxAdmdlci5rZXJuZWwub3JnDQpTdWJqZWN0
-OiBbUEFUQ0ggMS8yXSBtbWM6IGVuYWJsZSBtbWMgaG9zdCBkZXZpY2UgdG8gc3VzcGVuZC9yZXN1
-bWUgYXN5bmNocm9ub3VzbHkNCg0KTm93LCBQTSBjb3JlIHN1cHBvcnRzIGFzeW5jaHJvbm91cyBz
-dXNwZW5kL3Jlc3VtZSBtb2RlIGZvciBkZXZpY2VzIGR1cmluZyBzeXN0ZW0gc3VzcGVuZC9yZXN1
-bWUsIGFuZCB0aGUgcG93ZXIgc3RhdGUgdHJhbnNpdGlvbiBvZiBvbmUgZGV2aWNlIG1heSBiZSBj
-b21wbGV0ZWQgaW4gc2VwYXJhdGUga2VybmVsIHRocmVhZC4gUE0gY29yZSBlbnN1cmVzIGFsbCBw
-b3dlciBzdGF0ZSB0cmFuc2l0aW9uIGRlcGVuZGVuY3kgYmV0d2VlbiBkZXZpY2VzLiBUaGlzIHBh
-dGNoIGVuYWJsZXMgbW1jIGhvc3RzIHRvIHN1c3BlbmQvcmVzdW1lIGFzeW5jaHJvbm91c2x5LiBU
-aGlzIHdpbGwgdGFrZSBhZHZhbnRhZ2Ugb2YgbXVsdGljb3JlIGFuZCBpbXByb3ZlIHN5c3RlbSBz
-dXNwZW5kL3Jlc3VtZSBzcGVlZC4NCkFmdGVyIGFwcGx5aW5nIHRoaXMgcGF0Y2ggYW5kIGVuYWJs
-aW5nIGFsbCBtbWMgaG9zdHMnIGNoaWxkIGRldmljZXMgdG8gc3VzcGVuZC9yZXN1bWUgYXN5bmNo
-cm9ub3VzbHkgb24gQVNVUyBUMTAwVEEsIHRoZSBzeXN0ZW0gc3VzcGVuZC10by1pZGxlIHRpbWUg
-aXMgcmVkdWNlZCBmcm9tIDE2NDVtcyB0byAxMTA3bXMsIGFuZCB0aGUgc3lzdGVtIHJlc3VtZSB0
-aW1lIGlzIHJlZHVjZWQgZnJvbSA5NDBtcyB0byA5MTRtcy4NCg0KU2lnbmVkLW9mZi1ieTogWmhv
-bmdodWkgRnUgPHpob25naHVpLmZ1QGxpbnV4LmludGVsLmNvbT4NCi0tLQ0KIGRyaXZlcnMvbW1j
-L2NvcmUvaG9zdC5jIHwgICAgMSArDQogMSBmaWxlcyBjaGFuZ2VkLCAxIGluc2VydGlvbnMoKyks
-IDAgZGVsZXRpb25zKC0pDQoNCmRpZmYgLS1naXQgYS9kcml2ZXJzL21tYy9jb3JlL2hvc3QuYyBi
-L2RyaXZlcnMvbW1jL2NvcmUvaG9zdC5jIGluZGV4IGRhOTUwYzQuLjcyMjJmZDcgMTAwNjQ0DQot
-LS0gYS9kcml2ZXJzL21tYy9jb3JlL2hvc3QuYw0KKysrIGIvZHJpdmVycy9tbWMvY29yZS9ob3N0
-LmMNCkBAIC0zMzksNiArMzM5LDcgQEAgc3RydWN0IG1tY19ob3N0ICptbWNfYWxsb2NfaG9zdChp
-bnQgZXh0cmEsIHN0cnVjdCBkZXZpY2UgKmRldikNCiAJaG9zdC0+Y2xhc3NfZGV2LnBhcmVudCA9
-IGRldjsNCiAJaG9zdC0+Y2xhc3NfZGV2LmNsYXNzID0gJm1tY19ob3N0X2NsYXNzOw0KIAlkZXZp
-Y2VfaW5pdGlhbGl6ZSgmaG9zdC0+Y2xhc3NfZGV2KTsNCisJZGV2aWNlX2VuYWJsZV9hc3luY19z
-dXNwZW5kKCZob3N0LT5jbGFzc19kZXYpOw0KIA0KIAlpZiAobW1jX2dwaW9fYWxsb2MoaG9zdCkp
-IHsNCiAJCXB1dF9kZXZpY2UoJmhvc3QtPmNsYXNzX2Rldik7DQotLSAxLjcuMQ0KDQo=
+On 21/12/15 13:40, Russell King wrote:
+> When we get a response CRC error on a command, it means that the
+> response we received back from the card was not correct.  It does not
+> mean that the card did not receive the command correctly.  If the
+
+Pedantically, if the timeout bit is set as well (CMD line conflict),
+it does mean the card did not receive the command, so it should be coded
+that way.
+
+> command is one which initiates a data transfer, the card can enter the
+> data transfer state, and start sending data.
+> 
+> Moreover, if the request contained a data phase, we do not clean this
+> up, and this results in the driver triggering DMA API debug warnings,
+> and also creates a race condition in the driver, between running the
+> finish_tasklet and the data transfer interrupts, which can trigger a
+> "Got data interrupt" state dump.
+> 
+> Fix this by handing a response CRC error slightly differently: record
+> the failure of the data initiating command, but allow the remainder of
+> the request to be processed normally.  This is safe as core MMC checks
+
+"processed normally" confused me at first because it sounded like you are
+ignoring the error.  Not sure why you have a much better explanation in the
+cover email than here.
+
+> the status of all commands and data transfer phases of the request.
+
+MMC core is not the only initiator of requests, but it is safe because the
+command error takes precedence by design.
+
+Also you don't explain why it is better to continue rather than attempt to
+send a stop command and clean up the request properly.  It looks simpler and
+less racy, but if that is the reason then it seems worth saying so.
+
+> 
+> If the card does not initiate a data transfer, then we should time out
+> according to the data transfer parameters.
+> 
+> Signed-off-by: Russell King <rmk+kernel@arm.linux.org.uk>
+> ---
+>  drivers/mmc/host/sdhci.c | 17 +++++++++++++++++
+>  1 file changed, 17 insertions(+)
+> 
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index 86310b162304..3e718e465a1b 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -2340,6 +2340,23 @@ static void sdhci_cmd_irq(struct sdhci_host *host, u32 intmask, u32 *mask)
+>  		else
+>  			host->cmd->error = -EILSEQ;
+>  
+> +		/*
+> +		 * If this command initiates a data phase and a response
+> +		 * CRC error is signalled, the card can start transferring
+> +		 * data - the card may have received the command without
+> +		 * error.  We must not terminate the request early.
+
+This is misleading.  We could terminate the request early if we cleaned it
+up.  You should say here why it is better to continue.
+
+> +		 *
+> +		 * If the card did not receive the command, the data phase
+> +		 * will time out.
+> +		 *
+> +		 * FIXME: we also need to clean up the data phase if any
+> +		 * command fails, not just the data initiating command.
+
+This FIXME is too vague.  Please give at least one example of what needs fixing.
+
+> +		 */
+> +		if (host->cmd->data && intmask & SDHCI_INT_CRC) {
+> +			host->cmd = NULL;
+> +			return;
+> +		}
+> +
+>  		tasklet_schedule(&host->finish_tasklet);
+>  		return;
+>  	}
+> 
+
