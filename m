@@ -1,102 +1,127 @@
-From: Russell King <rmk+kernel@arm.linux.org.uk>
-Subject: [PATCH] mmc: sd: limit SD card power limit according to cards
- capabilities
-Date: Sat, 02 Jan 2016 10:06:29 +0000
-Message-ID: <E1aFJ4v-00087o-NH@rmk-PC.arm.linux.org.uk>
+From: Russell King - ARM Linux <linux@arm.linux.org.uk>
+Subject: Re: [PATCH v2 07/24] mmc: sdhci: command response CRC error handling
+Date: Sat, 2 Jan 2016 12:25:09 +0000
+Message-ID: <20160102122508.GW8644@n2100.arm.linux.org.uk>
+References: <20151221113956.GA3712@n2100.arm.linux.org.uk>
+ <E1aAypl-00016T-IM@rmk-PC.arm.linux.org.uk>
+ <568285C4.9070909@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from pandora.arm.linux.org.uk ([78.32.30.218]:35471 "EHLO
+Received: from pandora.arm.linux.org.uk ([78.32.30.218]:35774 "EHLO
 	pandora.arm.linux.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750749AbcABKGd (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sat, 2 Jan 2016 05:06:33 -0500
+	with ESMTP id S1751348AbcABMZY (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sat, 2 Jan 2016 07:25:24 -0500
 Content-Disposition: inline
+In-Reply-To: <568285C4.9070909@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+To: Adrian Hunter <adrian.hunter@intel.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Marcin Wojtas <mw@semihalf.com>, Gregory CLEMENT <gregory.clement@free-electrons.com>, Shawn Guo <shawnguo@kernel.org>, Sascha Hauer <kernel@pengutronix.de>, linux-mmc@vger.kernel.org
 
-The SD card specification allows cards to error out a SWITCH command
-where the requested function in a group is not supported.  The spec
-provides for a set of capabilities which indicate which functions are
-supported.
+On Tue, Dec 29, 2015 at 03:08:20PM +0200, Adrian Hunter wrote:
+> On 21/12/15 13:40, Russell King wrote:
+> > When we get a response CRC error on a command, it means that the
+> > response we received back from the card was not correct.  It does not
+> > mean that the card did not receive the command correctly.  If the
+> 
+> Pedantically, if the timeout bit is set as well (CMD line conflict),
+> it does mean the card did not receive the command, so it should be coded
+> that way.
 
-In the case of the power limit, requesting an unsupported power level
-via the SWITCH command fails, resulting in the power level remaining at
-the power-on default of 0.72W, even though the host and card may support
-higher powers levels.
+Good catch, the SDHCI spec contains a table which describes the CRC and
+timeout bit states, though it's not quite as you describe above...
+CRC and timeout indicates a command line conflict at some point.
 
-This has been seen with SanDisk 8GB cards, which support the default
-0.72W and 1.44W (200mA and 400mA) in combination with an iMX6 host,
-supporting up to 2.88W (800mA).  This currently causes us to try to set
-a power limit function value of '3' (2.88W) which the card errors out
-on, and thereby causes the power level to remain at 0.72W rather than
-the desired 1.44W.
+> > Fix this by handing a response CRC error slightly differently: record
+> > the failure of the data initiating command, but allow the remainder of
+> > the request to be processed normally.  This is safe as core MMC checks
+> 
+> "processed normally" confused me at first because it sounded like you are
+> ignoring the error.  Not sure why you have a much better explanation in the
+> cover email than here.
 
-Arrange to limit the selected current limit by the capabilities reported
-by the card to avoid the SWITCH command failing.  Select the highest
-current limit that the host and card combination support.
+They're written at different times?  I don't accept your comment though -
+"record the failure" _clearly_ does not mean that we're ignoring the error.
 
-Signed-off-by: Russell King <rmk+kernel@arm.linux.org.uk>
----
-This is a bug fix, and as such needs merging into v4.4-rc and stable
-kernels.  There is probably more to come on this, as the SD simplified
-spec says that the power limit should be set _after_ switching to UHS
-mode:
+> > the status of all commands and data transfer phases of the request.
+> 
+> MMC core is not the only initiator of requests, but it is safe because the
+> command error takes precedence by design.
+> 
+> Also you don't explain why it is better to continue rather than attempt to
+> send a stop command and clean up the request properly.  It looks simpler and
+> less racy, but if that is the reason then it seems worth saying so.
 
-"In UHS-I mode, *after* selecting one of SDR50, SDR104 or DDR50 mode
- by Function Group 1, host needs to change the Power Limit to enable
- the card to operate in higher performance."
+This patch results from the analysis of failures seen on iMX6 hardware,
+where the card has entered data mode, and started to send its data.
+Right now, this screws up the next command.
 
-However, unlike this patch, I have not (yet) seen any detrimental
-effects from setting this before.
+> > If the card does not initiate a data transfer, then we should time out
+> > according to the data transfer parameters.
+> > 
+> > Signed-off-by: Russell King <rmk+kernel@arm.linux.org.uk>
+> > ---
+> >  drivers/mmc/host/sdhci.c | 17 +++++++++++++++++
+> >  1 file changed, 17 insertions(+)
+> > 
+> > diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> > index 86310b162304..3e718e465a1b 100644
+> > --- a/drivers/mmc/host/sdhci.c
+> > +++ b/drivers/mmc/host/sdhci.c
+> > @@ -2340,6 +2340,23 @@ static void sdhci_cmd_irq(struct sdhci_host *host, u32 intmask, u32 *mask)
+> >  		else
+> >  			host->cmd->error = -EILSEQ;
+> >  
+> > +		/*
+> > +		 * If this command initiates a data phase and a response
+> > +		 * CRC error is signalled, the card can start transferring
+> > +		 * data - the card may have received the command without
+> > +		 * error.  We must not terminate the request early.
+> 
+> This is misleading.  We could terminate the request early if we cleaned it
+> up.  You should say here why it is better to continue.
 
- drivers/mmc/core/sd.c | 20 ++++++++++++++++----
- 1 file changed, 16 insertions(+), 4 deletions(-)
+That is _not_ misleading, it is entirely accurate.  What the code
+currently does when it encounters a CRC error is it terminates the
+_request_ early.  The _request_ being "struct mmc_request" - and
+it terminates it _without_ sending a STOP command.
 
-diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
-index 141eaa923e18..c4c6e4200d18 100644
---- a/drivers/mmc/core/sd.c
-+++ b/drivers/mmc/core/sd.c
-@@ -329,6 +329,7 @@ static int mmc_read_switch(struct mmc_card *card)
- 		card->sw_caps.sd3_bus_mode = status[13];
- 		/* Driver Strengths supported by the card */
- 		card->sw_caps.sd3_drv_type = status[9];
-+		card->sw_caps.sd3_curr_limit = status[7] | status[6] << 8;
- 	}
- 
- out:
-@@ -545,14 +546,25 @@ static int sd_set_current_limit(struct mmc_card *card, u8 *status)
- 	 * when we set current limit to 200ma, the card will draw 200ma, and
- 	 * when we set current limit to 400/600/800ma, the card will draw its
- 	 * maximum 300ma from the host.
-+	 *
-+	 * The above is incorrect: if we try to set a current limit that is
-+	 * not supported by the card, the card can rightfully error out the
-+	 * attempt, and remain at the default current limit.  This results
-+	 * in a 300mA card being limited to 200mA even though the host
-+	 * supports 800mA. Failures seen with SanDisk 8GB UHS cards with
-+	 * an iMX6 host. --rmk
- 	 */
--	if (max_current >= 800)
-+	if (max_current >= 800 &&
-+	    card->sw_caps.sd3_curr_limit & SD_MAX_CURRENT_800)
- 		current_limit = SD_SET_CURRENT_LIMIT_800;
--	else if (max_current >= 600)
-+	else if (max_current >= 600 &&
-+		 card->sw_caps.sd3_curr_limit & SD_MAX_CURRENT_600)
- 		current_limit = SD_SET_CURRENT_LIMIT_600;
--	else if (max_current >= 400)
-+	else if (max_current >= 400 &&
-+		 card->sw_caps.sd3_curr_limit & SD_MAX_CURRENT_400)
- 		current_limit = SD_SET_CURRENT_LIMIT_400;
--	else if (max_current >= 200)
-+	else if (max_current >= 200 &&
-+		 card->sw_caps.sd3_curr_limit & SD_MAX_CURRENT_200)
- 		current_limit = SD_SET_CURRENT_LIMIT_200;
- 
- 	if (current_limit != SD_SET_CURRENT_NO_CHANGE) {
+Resetting the host controller does not influence what state the card
+is in.
+
+So what happens at the moment is that we send a command which initiates
+a data phase from the card.  The card responds with a valid response,
+and starts sending data to the host.  The host incorrectly receives
+the card response with a CRC error.
+
+At this point, the code decides that it had a failure, queues the
+finish tasklet, which resets the SDHCI controller, leaving the card
+transmitting data to the host, potentially endlessly.  The driver
+reports to the MMC layer that the mmc_request is complete, and we
+get the next request to process.
+
+We try sending the next request to the card, but the card is still
+sending data to the host...  That's the problem here.
+
+Yes, sending a STOP command is one solution, but that's a far bigger
+change, one which is likely to be far more buggy based on the fact
+that the driver can send the STOP automatically.
+
+> 
+> > +		 *
+> > +		 * If the card did not receive the command, the data phase
+> > +		 * will time out.
+> > +		 *
+> > +		 * FIXME: we also need to clean up the data phase if any
+> > +		 * command fails, not just the data initiating command.
+> 
+> This FIXME is too vague.  Please give at least one example of what
+> needs fixing.
+
+I don't remember anymore, sorry.  I'll delete the fixme. :)
+
 -- 
-2.1.0
-
+RMK's Patch system: http://www.arm.linux.org.uk/developer/patches/
+FTTC broadband for 0.8mile line: currently at 9.6Mbps down 400kbps up
+according to speedtest.net.
