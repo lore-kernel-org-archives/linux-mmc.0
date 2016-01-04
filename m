@@ -1,64 +1,136 @@
-From: Thierry Reding <thierry.reding-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: Re: [PATCH] mmc: tegra: don't enable UHS modes on Tegra210
-Date: Mon, 4 Jan 2016 08:51:58 +0100
-Message-ID: <20160104075158.GA23057@ulmo>
-References: <1451490549-21430-1-git-send-email-dev@lynxeye.de>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH v2 07/24] mmc: sdhci: command response CRC error handling
+Date: Mon, 4 Jan 2016 13:24:34 +0200
+Message-ID: <568A5672.4080402@intel.com>
+References: <20151221113956.GA3712@n2100.arm.linux.org.uk>
+ <E1aAypl-00016T-IM@rmk-PC.arm.linux.org.uk> <568285C4.9070909@intel.com>
+ <20160102122508.GW8644@n2100.arm.linux.org.uk>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha256;
-	protocol="application/pgp-signature"; boundary="YiEDa0DAkWCtVeE4"
-Return-path: <linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <1451490549-21430-1-git-send-email-dev-8ppwABl0HbeELgA04lAiVw@public.gmane.org>
-Sender: linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Lucas Stach <dev-8ppwABl0HbeELgA04lAiVw@public.gmane.org>
-Cc: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Stephen Warren <swarren-3lzwWm7+Weoh9ZMKESR00Q@public.gmane.org>, Alexandre Courbot <gnurou-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mga04.intel.com ([192.55.52.120]:4505 "EHLO mga04.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752520AbcADL14 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 4 Jan 2016 06:27:56 -0500
+In-Reply-To: <20160102122508.GW8644@n2100.arm.linux.org.uk>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Russell King - ARM Linux <linux@arm.linux.org.uk>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Marcin Wojtas <mw@semihalf.com>, Gregory CLEMENT <gregory.clement@free-electrons.com>, Shawn Guo <shawnguo@kernel.org>, Sascha Hauer <kernel@pengutronix.de>, linux-mmc@vger.kernel.org
 
+On 02/01/16 14:25, Russell King - ARM Linux wrote:
+> On Tue, Dec 29, 2015 at 03:08:20PM +0200, Adrian Hunter wrote:
+>> On 21/12/15 13:40, Russell King wrote:
+>>> When we get a response CRC error on a command, it means that the
+>>> response we received back from the card was not correct.  It does not
+>>> mean that the card did not receive the command correctly.  If the
+>>
+>> Pedantically, if the timeout bit is set as well (CMD line conflict),
+>> it does mean the card did not receive the command, so it should be coded
+>> that way.
+> 
+> Good catch, the SDHCI spec contains a table which describes the CRC and
+> timeout bit states, though it's not quite as you describe above...
+> CRC and timeout indicates a command line conflict at some point.
 
---YiEDa0DAkWCtVeE4
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+In the case of CMD line conflict, the host controller aborts the command, so
+presumably there will not be any data timeout.  Will you change it?
 
-On Wed, Dec 30, 2015 at 04:49:09PM +0100, Lucas Stach wrote:
-> Tegra210 needs a different tuning sequence than Tegra30+. Disable
-> UHS modes until support for this is properly added.
->=20
-> Signed-off-by: Lucas Stach <dev-8ppwABl0HbeELgA04lAiVw@public.gmane.org>
-> ---
-> Ulf,
-> this is a follow on patch to my Tegra UHS-I series. After reading the
-> Tegra210 TRM I realized that the currently implemented tuning sequence wi=
-ll
-> only work on Tegra30..Tegra124.  If you don't keep your tree stable you
-> might want to squash this into [PATCH v2 4/5] mmc: tegra: enable UHS-I mo=
-des,
-> otherwise please pick this up as a fix on top.
-> ---
->  drivers/mmc/host/sdhci-tegra.c | 3 ---
->  1 file changed, 3 deletions(-)
+> 
+>>> Fix this by handing a response CRC error slightly differently: record
+>>> the failure of the data initiating command, but allow the remainder of
+>>> the request to be processed normally.  This is safe as core MMC checks
+>>
+>> "processed normally" confused me at first because it sounded like you are
+>> ignoring the error.  Not sure why you have a much better explanation in the
+>> cover email than here.
+> 
+> They're written at different times?  I don't accept your comment though -
+> "record the failure" _clearly_ does not mean that we're ignoring the error.
+> 
+>>> the status of all commands and data transfer phases of the request.
+>>
+>> MMC core is not the only initiator of requests, but it is safe because the
+>> command error takes precedence by design.
+>>
+>> Also you don't explain why it is better to continue rather than attempt to
+>> send a stop command and clean up the request properly.  It looks simpler and
+>> less racy, but if that is the reason then it seems worth saying so.
+> 
+> This patch results from the analysis of failures seen on iMX6 hardware,
+> where the card has entered data mode, and started to send its data.
+> Right now, this screws up the next command.
+> 
+>>> If the card does not initiate a data transfer, then we should time out
+>>> according to the data transfer parameters.
+>>>
+>>> Signed-off-by: Russell King <rmk+kernel@arm.linux.org.uk>
+>>> ---
+>>>  drivers/mmc/host/sdhci.c | 17 +++++++++++++++++
+>>>  1 file changed, 17 insertions(+)
+>>>
+>>> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+>>> index 86310b162304..3e718e465a1b 100644
+>>> --- a/drivers/mmc/host/sdhci.c
+>>> +++ b/drivers/mmc/host/sdhci.c
+>>> @@ -2340,6 +2340,23 @@ static void sdhci_cmd_irq(struct sdhci_host *host, u32 intmask, u32 *mask)
+>>>  		else
+>>>  			host->cmd->error = -EILSEQ;
+>>>  
+>>> +		/*
+>>> +		 * If this command initiates a data phase and a response
+>>> +		 * CRC error is signalled, the card can start transferring
+>>> +		 * data - the card may have received the command without
+>>> +		 * error.  We must not terminate the request early.
+>>
+>> This is misleading.  We could terminate the request early if we cleaned it
+>> up.  You should say here why it is better to continue.
+> 
+> That is _not_ misleading, it is entirely accurate.  What the code
+> currently does when it encounters a CRC error is it terminates the
+> _request_ early.  The _request_ being "struct mmc_request" - and
+> it terminates it _without_ sending a STOP command.
 
-Acked-by: Thierry Reding <treding-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
+Sure, but the person reading the comment not should have to know the history
+of the code to interpret it.  But it is not a big thing - the comment could
+just be:
 
---YiEDa0DAkWCtVeE4
-Content-Type: application/pgp-signature; name="signature.asc"
+	We must not terminate early because we don't bother to clean up.
 
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2
+> 
+> Resetting the host controller does not influence what state the card
+> is in.
+> 
+> So what happens at the moment is that we send a command which initiates
+> a data phase from the card.  The card responds with a valid response,
+> and starts sending data to the host.  The host incorrectly receives
+> the card response with a CRC error.
+> 
+> At this point, the code decides that it had a failure, queues the
+> finish tasklet, which resets the SDHCI controller, leaving the card
+> transmitting data to the host, potentially endlessly.  The driver
+> reports to the MMC layer that the mmc_request is complete, and we
+> get the next request to process.
+> 
+> We try sending the next request to the card, but the card is still
+> sending data to the host...  That's the problem here.
+> 
+> Yes, sending a STOP command is one solution, but that's a far bigger
+> change, one which is likely to be far more buggy based on the fact
+> that the driver can send the STOP automatically.
+> 
+>>
+>>> +		 *
+>>> +		 * If the card did not receive the command, the data phase
+>>> +		 * will time out.
+>>> +		 *
+>>> +		 * FIXME: we also need to clean up the data phase if any
+>>> +		 * command fails, not just the data initiating command.
+>>
+>> This FIXME is too vague.  Please give at least one example of what
+>> needs fixing.
+> 
+> I don't remember anymore, sorry.  I'll delete the fixme. :)
+> 
 
-iQIcBAABCAAGBQJWiiSaAAoJEN0jrNd/PrOh0vgP/RcSRPg1eOMqpQsIzwykiOWV
-Jw3TfJHAOWPO2JPSP+Zj3Pv5CHoqeWa3SVSYp4xHaTdcDp1fTrJtDPA1VdQgwfE7
-7Jv83JB9w7VR3ouhQU1VTq74aUn//EfpcTwos1DKmqG2ms7lKKRYZAvlMeq7tmgN
-25sj/+q3b3XDHpMuXZ61nBItmWbtKfuikk6dD2v0kR/9ddtqeBdCaUgX0jBvyYRe
-dciq6uDQdZcLSjeyAb20e7DQdWIgI62Eb6YAUW0h/Y05UnckG2TNJDCIYnNd9q/v
-q0FkixRdIOmqVRGdFAnihHjxKgfPNBy6UYlbRM/O5M5wTVc8aIgRPFXmegM4OjNg
-uwoxSyTF7YjIgFsnj3R/zrCUsz8AOoyWbGWLuNA7eNZo0Zo0Z6onrt7hkIeRdRS+
-e8lUcNsB5Rr1WzpQo8zsEHRlUGcrWxrz2qpsiJpnl9wVM4HUlQaba2yuLqTfgbTP
-J8+D9sU9cfER5d2vEwfAb/qjPXRsZirLoDRvHB0DjU5j+WGx635QFeODRXvpKki6
-oZfsVzoV2nBRKi45/Q/In8SSRgduijUsSiqfuO7QrHqA8MBWdRELYL29GQjQ9e+R
-xAWZqJdmyaE3nyZ6Q7XoWEWf68ih+Q4oz/U5s1HK0I9ocmQo01mTd1je8R9Q7C5T
-E/BtkQx5XfsJ0Ubs9fDS
-=I7Gw
------END PGP SIGNATURE-----
-
---YiEDa0DAkWCtVeE4--
