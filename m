@@ -1,136 +1,76 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH v2 07/24] mmc: sdhci: command response CRC error handling
-Date: Mon, 4 Jan 2016 13:24:34 +0200
-Message-ID: <568A5672.4080402@intel.com>
+Subject: Re: [PATCH v2 08/24] mmc: sdhci: avoid unnecessary mapping/unmapping
+ of align buffer
+Date: Mon, 4 Jan 2016 13:41:27 +0200
+Message-ID: <568A5A67.3090908@intel.com>
 References: <20151221113956.GA3712@n2100.arm.linux.org.uk>
- <E1aAypl-00016T-IM@rmk-PC.arm.linux.org.uk> <568285C4.9070909@intel.com>
- <20160102122508.GW8644@n2100.arm.linux.org.uk>
+ <E1aAypq-00016e-Lv@rmk-PC.arm.linux.org.uk> <56828E46.5090600@intel.com>
+ <20160102122919.GX8644@n2100.arm.linux.org.uk>
+ <20160102143123.GA5396@n2100.arm.linux.org.uk>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=windows-1252
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga04.intel.com ([192.55.52.120]:4505 "EHLO mga04.intel.com"
+Received: from mga09.intel.com ([134.134.136.24]:48484 "EHLO mga09.intel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752520AbcADL14 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 4 Jan 2016 06:27:56 -0500
-In-Reply-To: <20160102122508.GW8644@n2100.arm.linux.org.uk>
+	id S1751512AbcADLou (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 4 Jan 2016 06:44:50 -0500
+In-Reply-To: <20160102143123.GA5396@n2100.arm.linux.org.uk>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Russell King - ARM Linux <linux@arm.linux.org.uk>
 Cc: Ulf Hansson <ulf.hansson@linaro.org>, Marcin Wojtas <mw@semihalf.com>, Gregory CLEMENT <gregory.clement@free-electrons.com>, Shawn Guo <shawnguo@kernel.org>, Sascha Hauer <kernel@pengutronix.de>, linux-mmc@vger.kernel.org
 
-On 02/01/16 14:25, Russell King - ARM Linux wrote:
-> On Tue, Dec 29, 2015 at 03:08:20PM +0200, Adrian Hunter wrote:
->> On 21/12/15 13:40, Russell King wrote:
->>> When we get a response CRC error on a command, it means that the
->>> response we received back from the card was not correct.  It does not
->>> mean that the card did not receive the command correctly.  If the
->>
->> Pedantically, if the timeout bit is set as well (CMD line conflict),
->> it does mean the card did not receive the command, so it should be coded
->> that way.
-> 
-> Good catch, the SDHCI spec contains a table which describes the CRC and
-> timeout bit states, though it's not quite as you describe above...
-> CRC and timeout indicates a command line conflict at some point.
-
-In the case of CMD line conflict, the host controller aborts the command, so
-presumably there will not be any data timeout.  Will you change it?
-
-> 
->>> Fix this by handing a response CRC error slightly differently: record
->>> the failure of the data initiating command, but allow the remainder of
->>> the request to be processed normally.  This is safe as core MMC checks
->>
->> "processed normally" confused me at first because it sounded like you are
->> ignoring the error.  Not sure why you have a much better explanation in the
->> cover email than here.
-> 
-> They're written at different times?  I don't accept your comment though -
-> "record the failure" _clearly_ does not mean that we're ignoring the error.
-> 
->>> the status of all commands and data transfer phases of the request.
->>
->> MMC core is not the only initiator of requests, but it is safe because the
->> command error takes precedence by design.
->>
->> Also you don't explain why it is better to continue rather than attempt to
->> send a stop command and clean up the request properly.  It looks simpler and
->> less racy, but if that is the reason then it seems worth saying so.
-> 
-> This patch results from the analysis of failures seen on iMX6 hardware,
-> where the card has entered data mode, and started to send its data.
-> Right now, this screws up the next command.
-> 
->>> If the card does not initiate a data transfer, then we should time out
->>> according to the data transfer parameters.
+On 02/01/16 16:31, Russell King - ARM Linux wrote:
+> On Sat, Jan 02, 2016 at 12:29:19PM +0000, Russell King - ARM Linux wrote:
+>> On Tue, Dec 29, 2015 at 03:44:38PM +0200, Adrian Hunter wrote:
+>>> On 21/12/15 13:41, Russell King wrote:
+>>>> Unnecessarily mapping and unmapping the align buffer for SD cards is
+>>>> expensive: performance measurements on iMX6 show that this gives a hit
+>>>> of 10% on hdparm buffered disk reads.
+>>>>
+>>>> MMC/SD card IO comes from the mm/vfs which gives us page based IO, so
+>>>> for this case, the align buffer is not going to be used.  However, we
+>>>> still map and unmap this buffer.
+>>>>
+>>>> Eliminate this by switching the align buffer to be a DMA coherent
+>>>> buffer, which needs no DMA maintenance to access the buffer.
 >>>
->>> Signed-off-by: Russell King <rmk+kernel@arm.linux.org.uk>
->>> ---
->>>  drivers/mmc/host/sdhci.c | 17 +++++++++++++++++
->>>  1 file changed, 17 insertions(+)
->>>
->>> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
->>> index 86310b162304..3e718e465a1b 100644
->>> --- a/drivers/mmc/host/sdhci.c
->>> +++ b/drivers/mmc/host/sdhci.c
->>> @@ -2340,6 +2340,23 @@ static void sdhci_cmd_irq(struct sdhci_host *host, u32 intmask, u32 *mask)
->>>  		else
->>>  			host->cmd->error = -EILSEQ;
->>>  
->>> +		/*
->>> +		 * If this command initiates a data phase and a response
->>> +		 * CRC error is signalled, the card can start transferring
->>> +		 * data - the card may have received the command without
->>> +		 * error.  We must not terminate the request early.
+>>> Did you consider putting the align buffer in the same allocation
+>>> as the adma_table?
 >>
->> This is misleading.  We could terminate the request early if we cleaned it
->> up.  You should say here why it is better to continue.
+>> It's not clear whether host->adma_table_sz would be appropriately
+>> aligned.
 > 
-> That is _not_ misleading, it is entirely accurate.  What the code
-> currently does when it encounters a CRC error is it terminates the
-> _request_ early.  The _request_ being "struct mmc_request" - and
-> it terminates it _without_ sending a STOP command.
+> Looking at this closer, it would not be appropriately aligned to place
+> the alignment buffer after the adma table, but placing the alignment
+> buffer in the allocation first would give appropriate alignment.
+> 
+> The buffer sizes are:
+> 
+> Table		32-bit	64-bit
+> alignment	512	1024		(entry sz * 128)
+> adma		2056	3084		(desc sz * (128 * 2 + 1))
+> 
+> Allocating the two together gives advantages and disadvantages:
+> 
+> * for 32-bit address sizes, instead of allocating two order-0 pages,
+>   we end up allocating one order-0 page, so halve the coherent DMA
+>   allocation of the driver.
+> 
+> * for 64-bit address sizes, we allocate one order-1 page instead,
+>   which may be more prone to failure with a 4k page size, and it
+>   also means the ADMA table will overlap a page boundary.  I've no
+>   idea whether that is an issue for any SDHCI controllers or not.
+> 
+> I could add additional complexity to do different allocations in the
+> 32-bit and 64-bit paths, but that results in a _far_ more complicated
+> cleanup path, and much more prone to errors.
+> 
+> In any case, such a patch should be entirely separate from _this_
+> patch given that such a change may cause breakage and could need
+> to be reworked as a result.  Indeed, it's a _separate_ change in
+> itself, for a different purpose from _this_ patch.
 
-Sure, but the person reading the comment not should have to know the history
-of the code to interpret it.  But it is not a big thing - the comment could
-just be:
-
-	We must not terminate early because we don't bother to clean up.
-
-> 
-> Resetting the host controller does not influence what state the card
-> is in.
-> 
-> So what happens at the moment is that we send a command which initiates
-> a data phase from the card.  The card responds with a valid response,
-> and starts sending data to the host.  The host incorrectly receives
-> the card response with a CRC error.
-> 
-> At this point, the code decides that it had a failure, queues the
-> finish tasklet, which resets the SDHCI controller, leaving the card
-> transmitting data to the host, potentially endlessly.  The driver
-> reports to the MMC layer that the mmc_request is complete, and we
-> get the next request to process.
-> 
-> We try sending the next request to the card, but the card is still
-> sending data to the host...  That's the problem here.
-> 
-> Yes, sending a STOP command is one solution, but that's a far bigger
-> change, one which is likely to be far more buggy based on the fact
-> that the driver can send the STOP automatically.
-> 
->>
->>> +		 *
->>> +		 * If the card did not receive the command, the data phase
->>> +		 * will time out.
->>> +		 *
->>> +		 * FIXME: we also need to clean up the data phase if any
->>> +		 * command fails, not just the data initiating command.
->>
->> This FIXME is too vague.  Please give at least one example of what
->> needs fixing.
-> 
-> I don't remember anymore, sorry.  I'll delete the fixme. :)
-> 
+Agreed.
 
