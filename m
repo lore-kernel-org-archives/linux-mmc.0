@@ -1,34 +1,43 @@
-From: "Jeff Skoll" <s_w9gc9x@uni-kassel.de>
-Subject: Charity Donation
-Date: Sun, 03 Jan 2016 05:35:04 -0500
-Message-ID: <auto-000000775065@mailadmin.uni-kassel.de>
-Reply-To: jeff.skoll@skollcharity.org
-Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mx4.its.uni-kassel.de ([141.51.12.63]:37822 "EHLO
-	mx4.its.uni-kassel.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751516AbcACKj0 convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 3 Jan 2016 05:39:26 -0500
-Content-Description: Mail message body
-Sender: linux-mmc-owner@vger.kernel.org
+From: Linus Walleij <linus.walleij@linaro.org>
+Subject: [PATCH 1/2] mmc: mmci: fix an ages old detection error
+Date: Mon,  4 Jan 2016 02:21:55 +0100
+Message-ID: <1451870515-21049-1-git-send-email-linus.walleij@linaro.org>
+Return-path: <stable-owner@vger.kernel.org>
+Sender: stable-owner@vger.kernel.org
+To: linux-mmc@vger.kernel.org, Chris Ball <cjb@laptop.org>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-arm-kernel@lists.infradead.org, Linus Walleij <linus.walleij@linaro.org>, stable@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Me <s_w9gc9x@uni-kassel.de>
 
-Hi,
-My name is Jeffrey Skoll, a philanthropist and the founder of one of th=
-e largest private foundations in the world. I believe strongly in =E2=80=
-=98giving while living.=E2=80=99 I had one idea that never changed in m=
-y mind =E2=80=94 that you should use your wealth to help people and I h=
-ave decided to secretly give USD2.498 Million to a randomly selected in=
-dividual. On receipt of this email, you should count yourself as the in=
-dividual. Kindly get back to me at your earliest convenience, so I know=
- your email address is valid.
+commit 4956e10903fd3459306dd9438c1e714ba3068a2a
+"ARM: 6244/1: mmci: add variant data and default MCICLOCK support"
+added variant data for ARM, U300 and Ux500 variants. The
+Nomadik NHK8815/8820 variant was erroneously labeled as a
+U300 variant, and when the proper Nomadik variant was
+later introduced in commit
+34fd421349ffc6a4280b71276bf7c6d48f92156f
+"ARM: 7378/1: mmci: add support for the Nomadik MMCI variant"
+this was not fixes. Let's say this fixes the latter commit
+as there was no proper Nomadik support until then.
 
-Visit the web page to know more about me: http://www.theglobeandmail.co=
-m/news/national/meet-the-canadian-billionaire-whos-giving-it-all-away/a=
-rticle4209888/ or you can read an article of me on Wikipedia.
+Cc: stable@vger.kernel.org
+Fixes: 34fd421349ff "ARM: 7378/1: mmci: add support for the Nomadik MMCI variant"
+Signed-off-by: Linus Walleij <linus.walleij@linaro.org>
+---
+ drivers/mmc/host/mmci.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-Regards,
-Jeffrey Skoll.
+diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
+index fb266745f824..acece3299756 100644
+--- a/drivers/mmc/host/mmci.c
++++ b/drivers/mmc/host/mmci.c
+@@ -1886,7 +1886,7 @@ static struct amba_id mmci_ids[] = {
+ 	{
+ 		.id     = 0x00280180,
+ 		.mask   = 0x00ffffff,
+-		.data	= &variant_u300,
++		.data	= &variant_nomadik,
+ 	},
+ 	{
+ 		.id     = 0x00480180,
+-- 
+2.4.3
