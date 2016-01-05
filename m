@@ -1,88 +1,106 @@
-From: Jisheng Zhang <jszhang-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>
-Subject: [PATCH 09/11] mmc: sdhci-tegra: use sdhci_pltfm_init for private allocation
-Date: Tue, 5 Jan 2016 18:51:37 +0800
-Message-ID: <1451991099-4946-10-git-send-email-jszhang@marvell.com>
+From: Jisheng Zhang <jszhang@marvell.com>
+Subject: [PATCH 04/11] mmc: sdhci-of-arasan: use sdhci_pltfm_init for private
+ allocation
+Date: Tue, 5 Jan 2016 18:51:32 +0800
+Message-ID: <1451991099-4946-5-git-send-email-jszhang@marvell.com>
 References: <1451991099-4946-1-git-send-email-jszhang@marvell.com>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1451991099-4946-1-git-send-email-jszhang-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>
-Sender: linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, swarren-3lzwWm7+Weoh9ZMKESR00Q@public.gmane.org, lee-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, eric-WhKQ6XTQaPysTnJN9+BGXg@public.gmane.org, michal.simek-gjFFaj9aHVfQT0dZR+AlfA@public.gmane.org, soren.brinkmann-gjFFaj9aHVfQT0dZR+AlfA@public.gmane.org, ludovic.desroches-AIFe0yeh4nAAvxtiuMwx3w@public.gmane.org, srinivas.kandagatla-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org, maxime.coquelin-qxv4g6HH51o@public.gmane.org, patrice.chotard-qxv4g6HH51o@public.gmane.org, thierry.reding-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org, sebastian.hesselbarth-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org
-Cc: linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-rpi-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kernel-F5mvAk5X5gdBDgjK7y7TUQ@public.gmane.org, linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Jisheng Zhang <jszhang-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <1451991099-4946-1-git-send-email-jszhang@marvell.com>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: ulf.hansson@linaro.org, swarren@wwwdotorg.org, lee@kernel.org, eric@anholt.net, michal.simek@xilinx.com, soren.brinkmann@xilinx.com, ludovic.desroches@atmel.com, srinivas.kandagatla@gmail.com, maxime.coquelin@st.com, patrice.chotard@st.com, thierry.reding@gmail.com, sebastian.hesselbarth@gmail.com
+Cc: Jisheng Zhang <jszhang@marvell.com>, kernel@stlinux.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-rpi-kernel@lists.infradead.org, linux-tegra@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
 Commit 0e748234293f ("mmc: sdhci: Add size for caller in init+register")
 allows users of sdhci_pltfm to allocate private space in calls to
-sdhci_pltfm_init+sdhci_pltfm_register. This patch migrates sdhci-tegra
-to this allocation.
+sdhci_pltfm_init+sdhci_pltfm_register. This patch migrates the
+sdhci-of-arasan driver to this allocation.
 
-Signed-off-by: Jisheng Zhang <jszhang-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>
+Signed-off-by: Jisheng Zhang <jszhang@marvell.com>
 ---
- drivers/mmc/host/sdhci-tegra.c | 19 ++++++-------------
- 1 file changed, 6 insertions(+), 13 deletions(-)
+ drivers/mmc/host/sdhci-of-arasan.c | 25 ++++++++++---------------
+ 1 file changed, 10 insertions(+), 15 deletions(-)
 
-diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
-index ad28b49..25d0c08 100644
---- a/drivers/mmc/host/sdhci-tegra.c
-+++ b/drivers/mmc/host/sdhci-tegra.c
-@@ -54,7 +54,7 @@ struct sdhci_tegra {
- static u16 tegra_sdhci_readw(struct sdhci_host *host, int reg)
- {
+diff --git a/drivers/mmc/host/sdhci-of-arasan.c b/drivers/mmc/host/sdhci-of-arasan.c
+index 75379cb..53c8d36 100644
+--- a/drivers/mmc/host/sdhci-of-arasan.c
++++ b/drivers/mmc/host/sdhci-of-arasan.c
+@@ -81,7 +81,7 @@ static int sdhci_arasan_suspend(struct device *dev)
+ 	struct platform_device *pdev = to_platform_device(dev);
+ 	struct sdhci_host *host = platform_get_drvdata(pdev);
  	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
--	struct sdhci_tegra *tegra_host = pltfm_host->priv;
-+	struct sdhci_tegra *tegra_host = sdhci_pltfm_priv(pltfm_host);
- 	const struct sdhci_tegra_soc_data *soc_data = tegra_host->soc_data;
+-	struct sdhci_arasan_data *sdhci_arasan = pltfm_host->priv;
++	struct sdhci_arasan_data *sdhci_arasan = sdhci_pltfm_priv(pltfm_host);
+ 	int ret;
  
- 	if (unlikely((soc_data->nvquirks & NVQUIRK_FORCE_SDHCI_SPEC_200) &&
-@@ -90,7 +90,7 @@ static void tegra_sdhci_writew(struct sdhci_host *host, u16 val, int reg)
- static void tegra_sdhci_writel(struct sdhci_host *host, u32 val, int reg)
- {
+ 	ret = sdhci_suspend_host(host);
+@@ -106,7 +106,7 @@ static int sdhci_arasan_resume(struct device *dev)
+ 	struct platform_device *pdev = to_platform_device(dev);
+ 	struct sdhci_host *host = platform_get_drvdata(pdev);
  	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
--	struct sdhci_tegra *tegra_host = pltfm_host->priv;
-+	struct sdhci_tegra *tegra_host = sdhci_pltfm_priv(pltfm_host);
- 	const struct sdhci_tegra_soc_data *soc_data = tegra_host->soc_data;
+-	struct sdhci_arasan_data *sdhci_arasan = pltfm_host->priv;
++	struct sdhci_arasan_data *sdhci_arasan = sdhci_pltfm_priv(pltfm_host);
+ 	int ret;
  
- 	/* Seems like we're getting spurious timeout and crc errors, so
-@@ -122,7 +122,7 @@ static unsigned int tegra_sdhci_get_ro(struct sdhci_host *host)
- static void tegra_sdhci_reset(struct sdhci_host *host, u8 mask)
- {
- 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
--	struct sdhci_tegra *tegra_host = pltfm_host->priv;
-+	struct sdhci_tegra *tegra_host = sdhci_pltfm_priv(pltfm_host);
- 	const struct sdhci_tegra_soc_data *soc_data = tegra_host->soc_data;
- 	u32 misc_ctrl;
+ 	ret = clk_enable(sdhci_arasan->clk_ahb);
+@@ -137,10 +137,13 @@ static int sdhci_arasan_probe(struct platform_device *pdev)
+ 	struct sdhci_pltfm_host *pltfm_host;
+ 	struct sdhci_arasan_data *sdhci_arasan;
  
-@@ -260,19 +260,13 @@ static int sdhci_tegra_probe(struct platform_device *pdev)
- 		return -EINVAL;
- 	soc_data = match->data;
+-	sdhci_arasan = devm_kzalloc(&pdev->dev, sizeof(*sdhci_arasan),
+-			GFP_KERNEL);
+-	if (!sdhci_arasan)
+-		return -ENOMEM;
++	host = sdhci_pltfm_init(pdev, &sdhci_arasan_pdata,
++				sizeof(*sdhci_arasan));
++	if (IS_ERR(host))
++		return PTR_ERR(host);
++
++	pltfm_host = sdhci_priv(host);
++	sdhci_arasan = sdhci_pltfm_priv(pltfm_host);
  
--	host = sdhci_pltfm_init(pdev, soc_data->pdata, 0);
-+	host = sdhci_pltfm_init(pdev, soc_data->pdata,
-+				sizeof(*tegra_host));
- 	if (IS_ERR(host))
- 		return PTR_ERR(host);
- 	pltfm_host = sdhci_priv(host);
--
--	tegra_host = devm_kzalloc(&pdev->dev, sizeof(*tegra_host), GFP_KERNEL);
--	if (!tegra_host) {
--		dev_err(mmc_dev(host->mmc), "failed to allocate tegra_host\n");
--		rc = -ENOMEM;
--		goto err_alloc_tegra_host;
+ 	sdhci_arasan->clk_ahb = devm_clk_get(&pdev->dev, "clk_ahb");
+ 	if (IS_ERR(sdhci_arasan->clk_ahb)) {
+@@ -166,20 +169,12 @@ static int sdhci_arasan_probe(struct platform_device *pdev)
+ 		goto clk_dis_ahb;
+ 	}
+ 
+-	host = sdhci_pltfm_init(pdev, &sdhci_arasan_pdata, 0);
+-	if (IS_ERR(host)) {
+-		ret = PTR_ERR(host);
+-		goto clk_disable_all;
 -	}
-+	tegra_host = sdhci_pltfm_priv(pltfm_host);
- 	tegra_host->soc_data = soc_data;
--	pltfm_host->priv = tegra_host;
+-
+ 	if (of_device_is_compatible(pdev->dev.of_node, "arasan,sdhci-4.9a")) {
+ 		host->quirks |= SDHCI_QUIRK_NO_HISPD_BIT;
+ 		host->quirks2 |= SDHCI_QUIRK2_HOST_NO_CMD23;
+ 	}
  
- 	rc = mmc_of_parse(host->mmc);
- 	if (rc)
-@@ -305,7 +299,6 @@ err_add_host:
- err_clk_get:
- err_power_req:
- err_parse_dt:
--err_alloc_tegra_host:
- 	sdhci_pltfm_free(pdev);
- 	return rc;
- }
+ 	sdhci_get_of_property(pdev);
+-	pltfm_host = sdhci_priv(host);
+-	pltfm_host->priv = sdhci_arasan;
+ 	pltfm_host->clk = clk_xin;
+ 
+ 	ret = mmc_of_parse(host->mmc);
+@@ -208,7 +203,7 @@ static int sdhci_arasan_remove(struct platform_device *pdev)
+ {
+ 	struct sdhci_host *host = platform_get_drvdata(pdev);
+ 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+-	struct sdhci_arasan_data *sdhci_arasan = pltfm_host->priv;
++	struct sdhci_arasan_data *sdhci_arasan = sdhci_pltfm_priv(pltfm_host);
+ 
+ 	clk_disable_unprepare(sdhci_arasan->clk_ahb);
+ 
 -- 
 2.6.4
