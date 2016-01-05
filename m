@@ -1,58 +1,46 @@
-From: Rameshwar Sahu <rsahu@apm.com>
-Subject: Re: [PATCH] mmc: host: arasan: sdhci-of-arasan: Remove no-hispd and
- no-cmd23 quirks for sdhci-arasan4.9a
-Date: Tue, 5 Jan 2016 15:55:52 +0530
-Message-ID: <CAFd313ziJ_zgxQ11J6e=ueRLFKXFOsDPg_evRDK2FGQC5rOmfA@mail.gmail.com>
-References: <1450877391-3029-1-git-send-email-rsahu@apm.com>
+From: Jisheng Zhang <jszhang-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>
+Subject: [PATCH 00/11] mmc: use sdhci_pltfm_init for private allocation and clean up
+Date: Tue, 5 Jan 2016 18:51:28 +0800
+Message-ID: <1451991099-4946-1-git-send-email-jszhang@marvell.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-io0-f177.google.com ([209.85.223.177]:32964 "EHLO
-	mail-io0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751477AbcAEKZx (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 5 Jan 2016 05:25:53 -0500
-Received: by mail-io0-f177.google.com with SMTP id q21so182068852iod.0
-        for <linux-mmc@vger.kernel.org>; Tue, 05 Jan 2016 02:25:53 -0800 (PST)
-In-Reply-To: <1450877391-3029-1-git-send-email-rsahu@apm.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain
+Return-path: <linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Sender: linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, swarren-3lzwWm7+Weoh9ZMKESR00Q@public.gmane.org, lee-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, eric-WhKQ6XTQaPysTnJN9+BGXg@public.gmane.org, michal.simek-gjFFaj9aHVfQT0dZR+AlfA@public.gmane.org, soren.brinkmann-gjFFaj9aHVfQT0dZR+AlfA@public.gmane.org, ludovic.desroches-AIFe0yeh4nAAvxtiuMwx3w@public.gmane.org, srinivas.kandagatla-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org, maxime.coquelin-qxv4g6HH51o@public.gmane.org, patrice.chotard-qxv4g6HH51o@public.gmane.org, thierry.reding-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org, sebastian.hesselbarth-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org
+Cc: linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-rpi-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kernel-F5mvAk5X5gdBDgjK7y7TUQ@public.gmane.org, linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Jisheng Zhang <jszhang-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: ulf.hansson@linaro.org, michal.simek@xilinx.com, soren.brinkmann@xilinx.com
-Cc: linux-mmc@vger.kernel.org, Arnd Bergmann <arnd@arndb.de>, linux-kernel@vger.kernel.org, devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, jcm@redhat.com, patches@apm.com, Kaustubh Gondkar <kgondkar@apm.com>, Rameshwar Prasad Sahu <rsahu@apm.com>
 
-Hi Ulf,
+These patches are to complete the TODO in Commit 0e748234293f ("mmc:
+sdhci: Add size for caller in init+register"), I.E:
 
-On Wed, Dec 23, 2015 at 6:59 PM, Rameshswar Prasad Sahu <rsahu@apm.com> wrote:
-> From: Rameshwar Prasad Sahu <rsahu@apm.com>
->
-> The Arason SD host controller supports set block count command (cmd23)
-> and high speed mode. This patch re-enable both of these features that
-> was disabled. For device that doesn't support high speed, it should
-> configure its capability register accordingly instead disables it
-> explicitly.
->
-> Signed-off-by: Rameshwar Prasad Sahu <rsahu@apm.com>
-> ---
->  drivers/mmc/host/sdhci-of-arasan.c |    5 -----
->  1 files changed, 0 insertions(+), 5 deletions(-)
->
-> diff --git a/drivers/mmc/host/sdhci-of-arasan.c b/drivers/mmc/host/sdhci-of-arasan.c
-> index 75379cb..5d9fdb3 100644
-> --- a/drivers/mmc/host/sdhci-of-arasan.c
-> +++ b/drivers/mmc/host/sdhci-of-arasan.c
-> @@ -172,11 +172,6 @@ static int sdhci_arasan_probe(struct platform_device *pdev)
->                 goto clk_disable_all;
->         }
->
-> -       if (of_device_is_compatible(pdev->dev.of_node, "arasan,sdhci-4.9a")) {
-> -               host->quirks |= SDHCI_QUIRK_NO_HISPD_BIT;
-> -               host->quirks2 |= SDHCI_QUIRK2_HOST_NO_CMD23;
-> -       }
-> -
->         sdhci_get_of_property(pdev);
->         pltfm_host = sdhci_priv(host);
->         pltfm_host->priv = sdhci_arasan;
-> --
-> 1.7.1
->
+- todo: migrate clients to using allocation this way
+- todo: remove priv variable once migration is complete
 
-Any comment on this patch ??
+Jisheng Zhang (11):
+  mmc: sdhci-bcm2835: use sdhci_pltfm_init for private allocation
+  mmc: sdhci-esdhc-imx: use sdhci_pltfm_init for private allocation
+  mmc: sdhci-msm: use sdhci_pltfm_init for private allocation
+  mmc: sdhci-of-arasan: use sdhci_pltfm_init for private allocation
+  mmc: sdhci-of-at91: use sdhci_pltfm_init for private allocation
+  mmc: sdhci-of-esdhc: use sdhci_pltfm_init for private allocation
+  mmc: sdhci-pxav3: use sdhci_pltfm_init for private allocation
+  mmc: sdhci-st: use sdhci_pltfm_init for private allocation
+  mmc: sdhci-tegra: use sdhci_pltfm_init for private allocation
+  mmc: sdhci-pxav2: remove unnecessary assignment of pltfm_host->priv
+  mmc: sdhci-pltfm: remove priv variable from sdhci_pltfm_host
+
+ drivers/mmc/host/sdhci-bcm2835.c   | 14 +++-----------
+ drivers/mmc/host/sdhci-esdhc-imx.c | 38 +++++++++++++++++---------------------
+ drivers/mmc/host/sdhci-msm.c       | 13 +++++--------
+ drivers/mmc/host/sdhci-of-arasan.c | 25 ++++++++++---------------
+ drivers/mmc/host/sdhci-of-at91.c   | 21 ++++++++-------------
+ drivers/mmc/host/sdhci-of-esdhc.c  | 17 ++++++++---------
+ drivers/mmc/host/sdhci-pltfm.h     |  1 -
+ drivers/mmc/host/sdhci-pxav2.c     |  1 -
+ drivers/mmc/host/sdhci-pxav3.c     | 21 +++++++++------------
+ drivers/mmc/host/sdhci-st.c        | 36 ++++++++++++++++++------------------
+ drivers/mmc/host/sdhci-tegra.c     | 19 ++++++-------------
+ 11 files changed, 84 insertions(+), 122 deletions(-)
+
+-- 
+2.6.4
