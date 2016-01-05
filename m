@@ -1,79 +1,36 @@
-From: Jisheng Zhang <jszhang@marvell.com>
-Subject: [PATCH 05/11] mmc: sdhci-of-at91: use sdhci_pltfm_init for private allocation
-Date: Tue, 5 Jan 2016 18:51:33 +0800
-Message-ID: <1451991099-4946-6-git-send-email-jszhang@marvell.com>
+From: Jisheng Zhang <jszhang-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>
+Subject: [PATCH 10/11] mmc: sdhci-pxav2: remove unnecessary assignment of pltfm_host->priv
+Date: Tue, 5 Jan 2016 18:51:38 +0800
+Message-ID: <1451991099-4946-11-git-send-email-jszhang@marvell.com>
 References: <1451991099-4946-1-git-send-email-jszhang@marvell.com>
 Mime-Version: 1.0
 Content-Type: text/plain
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1451991099-4946-1-git-send-email-jszhang@marvell.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: ulf.hansson@linaro.org, swarren@wwwdotorg.org, lee@kernel.org, eric@anholt.net, michal.simek@xilinx.com, soren.brinkmann@xilinx.com, ludovic.desroches@atmel.com, srinivas.kandagatla@gmail.com, maxime.coquelin@st.com, patrice.chotard@st.com, thierry.reding@gmail.com, sebastian.hesselbarth@gmail.com
-Cc: linux-mmc@vger.kernel.org, linux-rpi-kernel@lists.infradead.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, kernel@stlinux.com, linux-tegra@vger.kernel.org, Jisheng Zhang <jszhang@marvell.com>
+Return-path: <linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1451991099-4946-1-git-send-email-jszhang-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>
+Sender: linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, swarren-3lzwWm7+Weoh9ZMKESR00Q@public.gmane.org, lee-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, eric-WhKQ6XTQaPysTnJN9+BGXg@public.gmane.org, michal.simek-gjFFaj9aHVfQT0dZR+AlfA@public.gmane.org, soren.brinkmann-gjFFaj9aHVfQT0dZR+AlfA@public.gmane.org, ludovic.desroches-AIFe0yeh4nAAvxtiuMwx3w@public.gmane.org, srinivas.kandagatla-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org, maxime.coquelin-qxv4g6HH51o@public.gmane.org, patrice.chotard-qxv4g6HH51o@public.gmane.org, thierry.reding-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org, sebastian.hesselbarth-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org
+Cc: linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-rpi-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kernel-F5mvAk5X5gdBDgjK7y7TUQ@public.gmane.org, linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Jisheng Zhang <jszhang-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-Commit 0e748234293f ("mmc: sdhci: Add size for caller in init+register")
-allows users of sdhci_pltfm to allocate private space in calls to
-sdhci_pltfm_init+sdhci_pltfm_register. This patch migrates the
-sdhci-of-at91 driver to this allocation.
+The sdhci_pltfm_init() function has initialized the priv member as
+NULL, so there's no need to do it again.
 
-Signed-off-by: Jisheng Zhang <jszhang@marvell.com>
+Signed-off-by: Jisheng Zhang <jszhang-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>
 ---
- drivers/mmc/host/sdhci-of-at91.c | 21 ++++++++-------------
- 1 file changed, 8 insertions(+), 13 deletions(-)
+ drivers/mmc/host/sdhci-pxav2.c | 1 -
+ 1 file changed, 1 deletion(-)
 
-diff --git a/drivers/mmc/host/sdhci-of-at91.c b/drivers/mmc/host/sdhci-of-at91.c
-index 06d0b50..765eb09 100644
---- a/drivers/mmc/host/sdhci-of-at91.c
-+++ b/drivers/mmc/host/sdhci-of-at91.c
-@@ -68,11 +68,13 @@ static int sdhci_at91_probe(struct platform_device *pdev)
- 		return -EINVAL;
- 	soc_data = match->data;
+diff --git a/drivers/mmc/host/sdhci-pxav2.c b/drivers/mmc/host/sdhci-pxav2.c
+index beffd86..1d8dd35 100644
+--- a/drivers/mmc/host/sdhci-pxav2.c
++++ b/drivers/mmc/host/sdhci-pxav2.c
+@@ -177,7 +177,6 @@ static int sdhci_pxav2_probe(struct platform_device *pdev)
+ 		return PTR_ERR(host);
  
--	priv = devm_kzalloc(&pdev->dev, sizeof(*priv), GFP_KERNEL);
--	if (!priv) {
--		dev_err(&pdev->dev, "unable to allocate private data\n");
--		return -ENOMEM;
--	}
-+	host = sdhci_pltfm_init(pdev, soc_data,
-+				sizeof(*priv));
-+	if (IS_ERR(host))
-+		return PTR_ERR(host);
-+
-+	pltfm_host = sdhci_priv(host);
-+	priv = sdhci_pltfm_priv(pltfm_host);
+ 	pltfm_host = sdhci_priv(host);
+-	pltfm_host->priv = NULL;
  
- 	priv->mainck = devm_clk_get(&pdev->dev, "baseclk");
- 	if (IS_ERR(priv->mainck)) {
-@@ -92,10 +94,6 @@ static int sdhci_at91_probe(struct platform_device *pdev)
- 		return PTR_ERR(priv->gck);
- 	}
- 
--	host = sdhci_pltfm_init(pdev, soc_data, 0);
--	if (IS_ERR(host))
--		return PTR_ERR(host);
--
- 	/*
- 	 * The mult clock is provided by as a generated clock by the PMC
- 	 * controller. In order to set the rate of gck, we have to get the
-@@ -135,9 +133,6 @@ static int sdhci_at91_probe(struct platform_device *pdev)
- 	clk_prepare_enable(priv->mainck);
- 	clk_prepare_enable(priv->gck);
- 
--	pltfm_host = sdhci_priv(host);
--	pltfm_host->priv = priv;
--
- 	ret = mmc_of_parse(host->mmc);
- 	if (ret)
- 		goto clocks_disable_unprepare;
-@@ -163,7 +158,7 @@ static int sdhci_at91_remove(struct platform_device *pdev)
- {
- 	struct sdhci_host	*host = platform_get_drvdata(pdev);
- 	struct sdhci_pltfm_host	*pltfm_host = sdhci_priv(host);
--	struct sdhci_at91_priv	*priv = pltfm_host->priv;
-+	struct sdhci_at91_priv	*priv = sdhci_pltfm_priv(pltfm_host);
- 
- 	sdhci_pltfm_unregister(pdev);
- 
+ 	clk = clk_get(dev, "PXA-SDHCLK");
+ 	if (IS_ERR(clk)) {
 -- 
 2.6.4
