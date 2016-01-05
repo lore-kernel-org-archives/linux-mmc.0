@@ -1,46 +1,67 @@
-From: Jisheng Zhang <jszhang-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>
-Subject: [PATCH 00/11] mmc: use sdhci_pltfm_init for private allocation and clean up
-Date: Tue, 5 Jan 2016 18:51:28 +0800
-Message-ID: <1451991099-4946-1-git-send-email-jszhang@marvell.com>
+From: Jisheng Zhang <jszhang@marvell.com>
+Subject: [PATCH 01/11] mmc: sdhci-bcm2835: use sdhci_pltfm_init for private allocation
+Date: Tue, 5 Jan 2016 18:51:29 +0800
+Message-ID: <1451991099-4946-2-git-send-email-jszhang@marvell.com>
+References: <1451991099-4946-1-git-send-email-jszhang@marvell.com>
 Mime-Version: 1.0
 Content-Type: text/plain
-Return-path: <linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Sender: linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, swarren-3lzwWm7+Weoh9ZMKESR00Q@public.gmane.org, lee-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, eric-WhKQ6XTQaPysTnJN9+BGXg@public.gmane.org, michal.simek-gjFFaj9aHVfQT0dZR+AlfA@public.gmane.org, soren.brinkmann-gjFFaj9aHVfQT0dZR+AlfA@public.gmane.org, ludovic.desroches-AIFe0yeh4nAAvxtiuMwx3w@public.gmane.org, srinivas.kandagatla-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org, maxime.coquelin-qxv4g6HH51o@public.gmane.org, patrice.chotard-qxv4g6HH51o@public.gmane.org, thierry.reding-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org, sebastian.hesselbarth-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org
-Cc: linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-rpi-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kernel-F5mvAk5X5gdBDgjK7y7TUQ@public.gmane.org, linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Jisheng Zhang <jszhang-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mx0a-0016f401.pphosted.com ([67.231.148.174]:14606 "EHLO
+	mx0a-0016f401.pphosted.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751603AbcAEKz6 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 5 Jan 2016 05:55:58 -0500
+In-Reply-To: <1451991099-4946-1-git-send-email-jszhang@marvell.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: ulf.hansson@linaro.org, swarren@wwwdotorg.org, lee@kernel.org, eric@anholt.net, michal.simek@xilinx.com, soren.brinkmann@xilinx.com, ludovic.desroches@atmel.com, srinivas.kandagatla@gmail.com, maxime.coquelin@st.com, patrice.chotard@st.com, thierry.reding@gmail.com, sebastian.hesselbarth@gmail.com
+Cc: linux-mmc@vger.kernel.org, linux-rpi-kernel@lists.infradead.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, kernel@stlinux.com, linux-tegra@vger.kernel.org, Jisheng Zhang <jszhang@marvell.com>
 
-These patches are to complete the TODO in Commit 0e748234293f ("mmc:
-sdhci: Add size for caller in init+register"), I.E:
+Commit 0e748234293f ("mmc: sdhci: Add size for caller in init+register")
+allows users of sdhci_pltfm to allocate private space in calls to
+sdhci_pltfm_init+sdhci_pltfm_register. This patch migrates sdhci-bcm2835
+to this allocation.
 
-- todo: migrate clients to using allocation this way
-- todo: remove priv variable once migration is complete
+Signed-off-by: Jisheng Zhang <jszhang@marvell.com>
+---
+ drivers/mmc/host/sdhci-bcm2835.c | 14 +++-----------
+ 1 file changed, 3 insertions(+), 11 deletions(-)
 
-Jisheng Zhang (11):
-  mmc: sdhci-bcm2835: use sdhci_pltfm_init for private allocation
-  mmc: sdhci-esdhc-imx: use sdhci_pltfm_init for private allocation
-  mmc: sdhci-msm: use sdhci_pltfm_init for private allocation
-  mmc: sdhci-of-arasan: use sdhci_pltfm_init for private allocation
-  mmc: sdhci-of-at91: use sdhci_pltfm_init for private allocation
-  mmc: sdhci-of-esdhc: use sdhci_pltfm_init for private allocation
-  mmc: sdhci-pxav3: use sdhci_pltfm_init for private allocation
-  mmc: sdhci-st: use sdhci_pltfm_init for private allocation
-  mmc: sdhci-tegra: use sdhci_pltfm_init for private allocation
-  mmc: sdhci-pxav2: remove unnecessary assignment of pltfm_host->priv
-  mmc: sdhci-pltfm: remove priv variable from sdhci_pltfm_host
-
- drivers/mmc/host/sdhci-bcm2835.c   | 14 +++-----------
- drivers/mmc/host/sdhci-esdhc-imx.c | 38 +++++++++++++++++---------------------
- drivers/mmc/host/sdhci-msm.c       | 13 +++++--------
- drivers/mmc/host/sdhci-of-arasan.c | 25 ++++++++++---------------
- drivers/mmc/host/sdhci-of-at91.c   | 21 ++++++++-------------
- drivers/mmc/host/sdhci-of-esdhc.c  | 17 ++++++++---------
- drivers/mmc/host/sdhci-pltfm.h     |  1 -
- drivers/mmc/host/sdhci-pxav2.c     |  1 -
- drivers/mmc/host/sdhci-pxav3.c     | 21 +++++++++------------
- drivers/mmc/host/sdhci-st.c        | 36 ++++++++++++++++++------------------
- drivers/mmc/host/sdhci-tegra.c     | 19 ++++++-------------
- 11 files changed, 84 insertions(+), 122 deletions(-)
-
+diff --git a/drivers/mmc/host/sdhci-bcm2835.c b/drivers/mmc/host/sdhci-bcm2835.c
+index 1c65d46..4a6a1d1 100644
+--- a/drivers/mmc/host/sdhci-bcm2835.c
++++ b/drivers/mmc/host/sdhci-bcm2835.c
+@@ -74,7 +74,7 @@ static inline u32 bcm2835_sdhci_readl(struct sdhci_host *host, int reg)
+ static void bcm2835_sdhci_writew(struct sdhci_host *host, u16 val, int reg)
+ {
+ 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+-	struct bcm2835_sdhci *bcm2835_host = pltfm_host->priv;
++	struct bcm2835_sdhci *bcm2835_host = sdhci_pltfm_priv(pltfm_host);
+ 	u32 oldval = (reg == SDHCI_COMMAND) ? bcm2835_host->shadow :
+ 		bcm2835_sdhci_readl(host, reg & ~3);
+ 	u32 word_num = (reg >> 1) & 1;
+@@ -152,20 +152,12 @@ static int bcm2835_sdhci_probe(struct platform_device *pdev)
+ 	struct sdhci_pltfm_host *pltfm_host;
+ 	int ret;
+ 
+-	host = sdhci_pltfm_init(pdev, &bcm2835_sdhci_pdata, 0);
++	host = sdhci_pltfm_init(pdev, &bcm2835_sdhci_pdata,
++				sizeof(*bcm2835_host));
+ 	if (IS_ERR(host))
+ 		return PTR_ERR(host);
+ 
+-	bcm2835_host = devm_kzalloc(&pdev->dev, sizeof(*bcm2835_host),
+-					GFP_KERNEL);
+-	if (!bcm2835_host) {
+-		dev_err(mmc_dev(host->mmc),
+-			"failed to allocate bcm2835_sdhci\n");
+-		return -ENOMEM;
+-	}
+-
+ 	pltfm_host = sdhci_priv(host);
+-	pltfm_host->priv = bcm2835_host;
+ 
+ 	pltfm_host->clk = devm_clk_get(&pdev->dev, NULL);
+ 	if (IS_ERR(pltfm_host->clk)) {
 -- 
 2.6.4
+
