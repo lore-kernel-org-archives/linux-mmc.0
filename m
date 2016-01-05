@@ -1,66 +1,79 @@
 From: Jisheng Zhang <jszhang@marvell.com>
-Subject: [PATCH 03/11] mmc: sdhci-msm: use sdhci_pltfm_init for private allocation
-Date: Tue, 5 Jan 2016 18:51:31 +0800
-Message-ID: <1451991099-4946-4-git-send-email-jszhang@marvell.com>
+Subject: [PATCH 05/11] mmc: sdhci-of-at91: use sdhci_pltfm_init for private allocation
+Date: Tue, 5 Jan 2016 18:51:33 +0800
+Message-ID: <1451991099-4946-6-git-send-email-jszhang@marvell.com>
 References: <1451991099-4946-1-git-send-email-jszhang@marvell.com>
 Mime-Version: 1.0
 Content-Type: text/plain
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mx0a-0016f401.pphosted.com ([67.231.148.174]:4525 "EHLO
-	mx0a-0016f401.pphosted.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751603AbcAEK4C (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 5 Jan 2016 05:56:02 -0500
+Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1451991099-4946-1-git-send-email-jszhang@marvell.com>
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Sender: linux-kernel-owner@vger.kernel.org
 To: ulf.hansson@linaro.org, swarren@wwwdotorg.org, lee@kernel.org, eric@anholt.net, michal.simek@xilinx.com, soren.brinkmann@xilinx.com, ludovic.desroches@atmel.com, srinivas.kandagatla@gmail.com, maxime.coquelin@st.com, patrice.chotard@st.com, thierry.reding@gmail.com, sebastian.hesselbarth@gmail.com
 Cc: linux-mmc@vger.kernel.org, linux-rpi-kernel@lists.infradead.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, kernel@stlinux.com, linux-tegra@vger.kernel.org, Jisheng Zhang <jszhang@marvell.com>
+List-Id: linux-mmc@vger.kernel.org
 
 Commit 0e748234293f ("mmc: sdhci: Add size for caller in init+register")
 allows users of sdhci_pltfm to allocate private space in calls to
-sdhci_pltfm_init+sdhci_pltfm_register. This patch migrates sdhci-msm
-to this allocation.
+sdhci_pltfm_init+sdhci_pltfm_register. This patch migrates the
+sdhci-of-at91 driver to this allocation.
 
 Signed-off-by: Jisheng Zhang <jszhang@marvell.com>
 ---
- drivers/mmc/host/sdhci-msm.c | 13 +++++--------
- 1 file changed, 5 insertions(+), 8 deletions(-)
+ drivers/mmc/host/sdhci-of-at91.c | 21 ++++++++-------------
+ 1 file changed, 8 insertions(+), 13 deletions(-)
 
-diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
-index 4695bee..0109446 100644
---- a/drivers/mmc/host/sdhci-msm.c
-+++ b/drivers/mmc/host/sdhci-msm.c
-@@ -437,17 +437,14 @@ static int sdhci_msm_probe(struct platform_device *pdev)
- 	u32 core_version, caps;
- 	u8 core_major;
+diff --git a/drivers/mmc/host/sdhci-of-at91.c b/drivers/mmc/host/sdhci-of-at91.c
+index 06d0b50..765eb09 100644
+--- a/drivers/mmc/host/sdhci-of-at91.c
++++ b/drivers/mmc/host/sdhci-of-at91.c
+@@ -68,11 +68,13 @@ static int sdhci_at91_probe(struct platform_device *pdev)
+ 		return -EINVAL;
+ 	soc_data = match->data;
  
--	msm_host = devm_kzalloc(&pdev->dev, sizeof(*msm_host), GFP_KERNEL);
--	if (!msm_host)
+-	priv = devm_kzalloc(&pdev->dev, sizeof(*priv), GFP_KERNEL);
+-	if (!priv) {
+-		dev_err(&pdev->dev, "unable to allocate private data\n");
 -		return -ENOMEM;
+-	}
++	host = sdhci_pltfm_init(pdev, soc_data,
++				sizeof(*priv));
++	if (IS_ERR(host))
++		return PTR_ERR(host);
++
++	pltfm_host = sdhci_priv(host);
++	priv = sdhci_pltfm_priv(pltfm_host);
+ 
+ 	priv->mainck = devm_clk_get(&pdev->dev, "baseclk");
+ 	if (IS_ERR(priv->mainck)) {
+@@ -92,10 +94,6 @@ static int sdhci_at91_probe(struct platform_device *pdev)
+ 		return PTR_ERR(priv->gck);
+ 	}
+ 
+-	host = sdhci_pltfm_init(pdev, soc_data, 0);
+-	if (IS_ERR(host))
+-		return PTR_ERR(host);
 -
--	msm_host->sdhci_msm_pdata.ops = &sdhci_msm_ops;
--	host = sdhci_pltfm_init(pdev, &msm_host->sdhci_msm_pdata, 0);
-+	host = sdhci_pltfm_init(pdev, &msm_host->sdhci_msm_pdata,
-+				sizeof(*msm_host));
- 	if (IS_ERR(host))
- 		return PTR_ERR(host);
+ 	/*
+ 	 * The mult clock is provided by as a generated clock by the PMC
+ 	 * controller. In order to set the rate of gck, we have to get the
+@@ -135,9 +133,6 @@ static int sdhci_at91_probe(struct platform_device *pdev)
+ 	clk_prepare_enable(priv->mainck);
+ 	clk_prepare_enable(priv->gck);
  
- 	pltfm_host = sdhci_priv(host);
--	pltfm_host->priv = msm_host;
-+	msm_host = sdhci_pltfm_priv(pltfm_host);
-+	msm_host->sdhci_msm_pdata.ops = &sdhci_msm_ops;
- 	msm_host->mmc = host->mmc;
- 	msm_host->pdev = pdev;
- 
-@@ -570,7 +567,7 @@ static int sdhci_msm_remove(struct platform_device *pdev)
+-	pltfm_host = sdhci_priv(host);
+-	pltfm_host->priv = priv;
+-
+ 	ret = mmc_of_parse(host->mmc);
+ 	if (ret)
+ 		goto clocks_disable_unprepare;
+@@ -163,7 +158,7 @@ static int sdhci_at91_remove(struct platform_device *pdev)
  {
- 	struct sdhci_host *host = platform_get_drvdata(pdev);
- 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
--	struct sdhci_msm_host *msm_host = pltfm_host->priv;
-+	struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
- 	int dead = (readl_relaxed(host->ioaddr + SDHCI_INT_STATUS) ==
- 		    0xffffffff);
+ 	struct sdhci_host	*host = platform_get_drvdata(pdev);
+ 	struct sdhci_pltfm_host	*pltfm_host = sdhci_priv(host);
+-	struct sdhci_at91_priv	*priv = pltfm_host->priv;
++	struct sdhci_at91_priv	*priv = sdhci_pltfm_priv(pltfm_host);
+ 
+ 	sdhci_pltfm_unregister(pdev);
  
 -- 
 2.6.4
-
