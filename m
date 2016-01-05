@@ -1,37 +1,28 @@
-From: Jisheng Zhang <jszhang@marvell.com>
-Subject: [PATCH 11/11] mmc: sdhci-pltfm: remove priv variable from sdhci_pltfm_host
-Date: Tue, 5 Jan 2016 18:51:39 +0800
-Message-ID: <1451991099-4946-12-git-send-email-jszhang@marvell.com>
+From: Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>
+Subject: Re: [PATCH 00/11] mmc: use sdhci_pltfm_init for private allocation and clean up
+Date: Tue, 05 Jan 2016 12:45:19 +0100
+Message-ID: <8511961.x8LNDTDGG7@wuerfel>
 References: <1451991099-4946-1-git-send-email-jszhang@marvell.com>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1451991099-4946-1-git-send-email-jszhang@marvell.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: ulf.hansson@linaro.org, swarren@wwwdotorg.org, lee@kernel.org, eric@anholt.net, michal.simek@xilinx.com, soren.brinkmann@xilinx.com, ludovic.desroches@atmel.com, srinivas.kandagatla@gmail.com, maxime.coquelin@st.com, patrice.chotard@st.com, thierry.reding@gmail.com, sebastian.hesselbarth@gmail.com
-Cc: linux-mmc@vger.kernel.org, linux-rpi-kernel@lists.infradead.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, kernel@stlinux.com, linux-tegra@vger.kernel.org, Jisheng Zhang <jszhang@marvell.com>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7Bit
+Return-path: <linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1451991099-4946-1-git-send-email-jszhang-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>
+Sender: linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+Cc: Jisheng Zhang <jszhang-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, swarren-3lzwWm7+Weoh9ZMKESR00Q@public.gmane.org, lee-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, eric-WhKQ6XTQaPysTnJN9+BGXg@public.gmane.org, michal.simek-gjFFaj9aHVfQT0dZR+AlfA@public.gmane.org, soren.brinkmann-gjFFaj9aHVfQT0dZR+AlfA@public.gmane.org, ludovic.desroches-AIFe0yeh4nAAvxtiuMwx3w@public.gmane.org, srinivas.kandagatla-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org, maxime.coquelin-qxv4g6HH51o@public.gmane.org, patrice.chotard-qxv4g6HH51o@public.gmane.org, thierry.reding-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org, sebastian.hesselbarth-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org, kernel-F5mvAk5X5gdBDgjK7y7TUQ@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-rpi-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
 
-Now all clients migration to use sdhci_pltfm_init for private
-allocation is done and there's no users of the priv variable, so we can
-remove it from the sdhci_pltfm_host structure.
+On Tuesday 05 January 2016 18:51:28 Jisheng Zhang wrote:
+> These patches are to complete the TODO in Commit 0e748234293f ("mmc:
+> sdhci: Add size for caller in init+register"), I.E:
+> 
+> - todo: migrate clients to using allocation this way
+> - todo: remove priv variable once migration is complete
+> 
 
-Signed-off-by: Jisheng Zhang <jszhang@marvell.com>
----
- drivers/mmc/host/sdhci-pltfm.h | 1 -
- 1 file changed, 1 deletion(-)
+Very nice series!
 
-diff --git a/drivers/mmc/host/sdhci-pltfm.h b/drivers/mmc/host/sdhci-pltfm.h
-index 04bc248..d38053b 100644
---- a/drivers/mmc/host/sdhci-pltfm.h
-+++ b/drivers/mmc/host/sdhci-pltfm.h
-@@ -23,7 +23,6 @@ struct sdhci_pltfm_data {
- 
- struct sdhci_pltfm_host {
- 	struct clk *clk;
--	void *priv; /* to handle quirks across io-accessor calls */
- 
- 	/* migrate from sdhci_of_host */
- 	unsigned int clock;
--- 
-2.6.4
+Acked-by: Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>
+
+	Arnd
