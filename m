@@ -1,65 +1,98 @@
 From: Jisheng Zhang <jszhang@marvell.com>
-Subject: [PATCH v3 00/12] mmc: use sdhci_pltfm_init for private allocation and clean up
-Date: Wed, 6 Jan 2016 18:31:31 +0800
-Message-ID: <1452076303-1960-1-git-send-email-jszhang@marvell.com>
+Subject: [PATCH v3 07/12] mmc: sdhci-of-esdhc: use sdhci_pltfm_init for private allocation
+Date: Wed, 6 Jan 2016 18:31:38 +0800
+Message-ID: <1452076303-1960-8-git-send-email-jszhang@marvell.com>
+References: <1452076303-1960-1-git-send-email-jszhang@marvell.com>
 Mime-Version: 1.0
 Content-Type: text/plain
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mx0b-0016f401.pphosted.com ([67.231.156.173]:19166 "EHLO
-	mx0b-0016f401.pphosted.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1752059AbcAFKgK (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 6 Jan 2016 05:36:10 -0500
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1452076303-1960-1-git-send-email-jszhang@marvell.com>
+Sender: linux-kernel-owner@vger.kernel.org
 To: ulf.hansson@linaro.org, arnd@arndb.de, ludovic.desroches@atmel.com, swarren@wwwdotorg.org, lee@kernel.org, eric@anholt.net, michal.simek@xilinx.com, soren.brinkmann@xilinx.com, srinivas.kandagatla@gmail.com, maxime.coquelin@st.com, patrice.chotard@st.com, thierry.reding@gmail.com, sebastian.hesselbarth@gmail.com
 Cc: linux-mmc@vger.kernel.org, linux-rpi-kernel@lists.infradead.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, kernel@stlinux.com, linux-tegra@vger.kernel.org, Jisheng Zhang <jszhang@marvell.com>
+List-Id: linux-mmc@vger.kernel.org
 
-These patches are to complete the TODOs in Commit 0e748234293f ("mmc:
-sdhci: Add size for caller in init+register"), I.E:
+Commit 0e748234293f ("mmc: sdhci: Add size for caller in init+register")
+allows users of sdhci_pltfm to allocate private space in calls to
+sdhci_pltfm_init+sdhci_pltfm_register. This patch migrates the
+sdhci-of-esdhc driver to this allocation.
 
-- todo: migrate clients to using allocation this way
-- todo: remove priv variable once migration is complete
+Signed-off-by: Jisheng Zhang <jszhang@marvell.com>
+Acked-by: Arnd Bergmann <arnd@arndb.de>
+---
+ drivers/mmc/host/sdhci-of-esdhc.c | 19 +++++++++----------
+ 1 file changed, 9 insertions(+), 10 deletions(-)
 
-Since v2:
- - based on mmc next tree and remove all priv usage introduced in newly
-   commits in this tree
- - don't break two lines if sdhci_pltfm_init() call could be put into
-   one line. Thank Ludovic Desroches.
-
-Since v1:
- - add new patch03 to factorise sdhci_msm_pdata outisde of sdhci_msm_host.
-   This is to fix drivers/mmc/host/sdhci-msm.c:440:32: warning: 'msm_host'
-   is used uninitialized in this function [-Wuninitialized]
- - Add Arnd's Ack for all patches except patch3 which is new in v2
-
-
-Jisheng Zhang (12):
-  mmc: sdhci-bcm2835: use sdhci_pltfm_init for private allocation
-  mmc: sdhci-esdhc-imx: use sdhci_pltfm_init for private allocation
-  mmc: sdhci-msm: factorise sdhci_msm_pdata outisde of sdhci_msm_host
-  mmc: sdhci-msm: use sdhci_pltfm_init for private allocation
-  mmc: sdhci-of-arasan: use sdhci_pltfm_init for private allocation
-  mmc: sdhci-of-at91: use sdhci_pltfm_init for private allocation
-  mmc: sdhci-of-esdhc: use sdhci_pltfm_init for private allocation
-  mmc: sdhci-pxav3: use sdhci_pltfm_init for private allocation
-  mmc: sdhci-st: use sdhci_pltfm_init for private allocation
-  mmc: sdhci-tegra: use sdhci_pltfm_init for private allocation
-  mmc: sdhci-pxav2: remove unnecessary assignment of pltfm_host->priv
-  mmc: sdhci-pltfm: remove priv variable from sdhci_pltfm_host
-
- drivers/mmc/host/sdhci-bcm2835.c   | 14 +++-----------
- drivers/mmc/host/sdhci-esdhc-imx.c | 38 +++++++++++++++++---------------------
- drivers/mmc/host/sdhci-msm.c       | 23 ++++++++++-------------
- drivers/mmc/host/sdhci-of-arasan.c | 25 ++++++++++---------------
- drivers/mmc/host/sdhci-of-at91.c   | 24 +++++++++---------------
- drivers/mmc/host/sdhci-of-esdhc.c  | 19 +++++++++----------
- drivers/mmc/host/sdhci-pltfm.h     |  1 -
- drivers/mmc/host/sdhci-pxav2.c     |  1 -
- drivers/mmc/host/sdhci-pxav3.c     | 20 ++++++++------------
- drivers/mmc/host/sdhci-st.c        | 35 +++++++++++++++++------------------
- drivers/mmc/host/sdhci-tegra.c     | 21 +++++++--------------
- 11 files changed, 90 insertions(+), 131 deletions(-)
-
+diff --git a/drivers/mmc/host/sdhci-of-esdhc.c b/drivers/mmc/host/sdhci-of-esdhc.c
+index 83b1226..3f34d35 100644
+--- a/drivers/mmc/host/sdhci-of-esdhc.c
++++ b/drivers/mmc/host/sdhci-of-esdhc.c
+@@ -49,7 +49,7 @@ static u32 esdhc_readl_fixup(struct sdhci_host *host,
+ 				     int spec_reg, u32 value)
+ {
+ 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+-	struct sdhci_esdhc *esdhc = pltfm_host->priv;
++	struct sdhci_esdhc *esdhc = sdhci_pltfm_priv(pltfm_host);
+ 	u32 ret;
+ 
+ 	/*
+@@ -354,7 +354,7 @@ static void esdhc_le_writeb(struct sdhci_host *host, u8 val, int reg)
+ static void esdhc_of_adma_workaround(struct sdhci_host *host, u32 intmask)
+ {
+ 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+-	struct sdhci_esdhc *esdhc = pltfm_host->priv;
++	struct sdhci_esdhc *esdhc = sdhci_pltfm_priv(pltfm_host);
+ 	bool applicable;
+ 	dma_addr_t dmastart;
+ 	dma_addr_t dmanow;
+@@ -404,7 +404,7 @@ static unsigned int esdhc_of_get_min_clock(struct sdhci_host *host)
+ static void esdhc_of_set_clock(struct sdhci_host *host, unsigned int clock)
+ {
+ 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+-	struct sdhci_esdhc *esdhc = pltfm_host->priv;
++	struct sdhci_esdhc *esdhc = sdhci_pltfm_priv(pltfm_host);
+ 	int pre_div = 1;
+ 	int div = 1;
+ 	u32 temp;
+@@ -569,15 +569,12 @@ static void esdhc_init(struct platform_device *pdev, struct sdhci_host *host)
+ 	u16 host_ver;
+ 
+ 	pltfm_host = sdhci_priv(host);
+-	esdhc = devm_kzalloc(&pdev->dev, sizeof(struct sdhci_esdhc),
+-			     GFP_KERNEL);
++	esdhc = sdhci_pltfm_priv(pltfm_host);
+ 
+ 	host_ver = sdhci_readw(host, SDHCI_HOST_VERSION);
+ 	esdhc->vendor_ver = (host_ver & SDHCI_VENDOR_VER_MASK) >>
+ 			     SDHCI_VENDOR_VER_SHIFT;
+ 	esdhc->spec_ver = host_ver & SDHCI_SPEC_VER_MASK;
+-
+-	pltfm_host->priv = esdhc;
+ }
+ 
+ static int sdhci_esdhc_probe(struct platform_device *pdev)
+@@ -591,9 +588,11 @@ static int sdhci_esdhc_probe(struct platform_device *pdev)
+ 	np = pdev->dev.of_node;
+ 
+ 	if (of_get_property(np, "little-endian", NULL))
+-		host = sdhci_pltfm_init(pdev, &sdhci_esdhc_le_pdata, 0);
++		host = sdhci_pltfm_init(pdev, &sdhci_esdhc_le_pdata,
++					sizeof(struct sdhci_esdhc));
+ 	else
+-		host = sdhci_pltfm_init(pdev, &sdhci_esdhc_be_pdata, 0);
++		host = sdhci_pltfm_init(pdev, &sdhci_esdhc_be_pdata,
++					sizeof(struct sdhci_esdhc));
+ 
+ 	if (IS_ERR(host))
+ 		return PTR_ERR(host);
+@@ -603,7 +602,7 @@ static int sdhci_esdhc_probe(struct platform_device *pdev)
+ 	sdhci_get_of_property(pdev);
+ 
+ 	pltfm_host = sdhci_priv(host);
+-	esdhc = pltfm_host->priv;
++	esdhc = sdhci_pltfm_priv(pltfm_host);
+ 	if (esdhc->vendor_ver == VENDOR_V_22)
+ 		host->quirks2 |= SDHCI_QUIRK2_HOST_NO_CMD23;
+ 
 -- 
 2.7.0.rc3
-
