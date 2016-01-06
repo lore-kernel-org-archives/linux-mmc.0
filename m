@@ -1,107 +1,107 @@
-From: Jisheng Zhang <jszhang@marvell.com>
-Subject: [PATCH v3 05/12] mmc: sdhci-of-arasan: use sdhci_pltfm_init for
+From: Ludovic Desroches <ludovic.desroches@atmel.com>
+Subject: Re: [PATCH v3 06/12] mmc: sdhci-of-at91: use sdhci_pltfm_init for
  private allocation
-Date: Wed, 6 Jan 2016 18:31:36 +0800
-Message-ID: <1452076303-1960-6-git-send-email-jszhang@marvell.com>
+Date: Wed, 6 Jan 2016 14:13:16 +0100
+Message-ID: <20160106131316.GJ2334@odux.rfo.atmel.com>
 References: <1452076303-1960-1-git-send-email-jszhang@marvell.com>
+ <1452076303-1960-7-git-send-email-jszhang@marvell.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <1452076303-1960-1-git-send-email-jszhang@marvell.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: ulf.hansson@linaro.org, arnd@arndb.de, ludovic.desroches@atmel.com, swarren@wwwdotorg.org, lee@kernel.org, eric@anholt.net, michal.simek@xilinx.com, soren.brinkmann@xilinx.com, srinivas.kandagatla@gmail.com, maxime.coquelin@st.com, patrice.chotard@st.com, thierry.reding@gmail.com, sebastian.hesselbarth@gmail.com
-Cc: Jisheng Zhang <jszhang@marvell.com>, kernel@stlinux.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-rpi-kernel@lists.infradead.org, linux-tegra@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <1452076303-1960-7-git-send-email-jszhang@marvell.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Jisheng Zhang <jszhang@marvell.com>
+Cc: ulf.hansson@linaro.org, arnd@arndb.de, ludovic.desroches@atmel.com, swarren@wwwdotorg.org, lee@kernel.org, eric@anholt.net, michal.simek@xilinx.com, soren.brinkmann@xilinx.com, srinivas.kandagatla@gmail.com, maxime.coquelin@st.com, patrice.chotard@st.com, thierry.reding@gmail.com, sebastian.hesselbarth@gmail.com, linux-mmc@vger.kernel.org, linux-rpi-kernel@lists.infradead.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, kernel@stlinux.com, linux-tegra@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-Commit 0e748234293f ("mmc: sdhci: Add size for caller in init+register")
-allows users of sdhci_pltfm to allocate private space in calls to
-sdhci_pltfm_init+sdhci_pltfm_register. This patch migrates the
-sdhci-of-arasan driver to this allocation.
+On Wed, Jan 06, 2016 at 06:31:37PM +0800, Jisheng Zhang wrote:
+> Commit 0e748234293f ("mmc: sdhci: Add size for caller in init+register")
+> allows users of sdhci_pltfm to allocate private space in calls to
+> sdhci_pltfm_init+sdhci_pltfm_register. This patch migrates the
+> sdhci-of-at91 driver to this allocation.
+> 
+> Signed-off-by: Jisheng Zhang <jszhang@marvell.com>
+> Acked-by: Arnd Bergmann <arnd@arndb.de>
 
-Signed-off-by: Jisheng Zhang <jszhang@marvell.com>
-Acked-by: Arnd Bergmann <arnd@arndb.de>
----
- drivers/mmc/host/sdhci-of-arasan.c | 25 ++++++++++---------------
- 1 file changed, 10 insertions(+), 15 deletions(-)
+Acked-by: Ludovic Desroches <ludovic.desroches@atmel.com>
 
-diff --git a/drivers/mmc/host/sdhci-of-arasan.c b/drivers/mmc/host/sdhci-of-arasan.c
-index 75379cb..53c8d36 100644
---- a/drivers/mmc/host/sdhci-of-arasan.c
-+++ b/drivers/mmc/host/sdhci-of-arasan.c
-@@ -81,7 +81,7 @@ static int sdhci_arasan_suspend(struct device *dev)
- 	struct platform_device *pdev = to_platform_device(dev);
- 	struct sdhci_host *host = platform_get_drvdata(pdev);
- 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
--	struct sdhci_arasan_data *sdhci_arasan = pltfm_host->priv;
-+	struct sdhci_arasan_data *sdhci_arasan = sdhci_pltfm_priv(pltfm_host);
- 	int ret;
- 
- 	ret = sdhci_suspend_host(host);
-@@ -106,7 +106,7 @@ static int sdhci_arasan_resume(struct device *dev)
- 	struct platform_device *pdev = to_platform_device(dev);
- 	struct sdhci_host *host = platform_get_drvdata(pdev);
- 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
--	struct sdhci_arasan_data *sdhci_arasan = pltfm_host->priv;
-+	struct sdhci_arasan_data *sdhci_arasan = sdhci_pltfm_priv(pltfm_host);
- 	int ret;
- 
- 	ret = clk_enable(sdhci_arasan->clk_ahb);
-@@ -137,10 +137,13 @@ static int sdhci_arasan_probe(struct platform_device *pdev)
- 	struct sdhci_pltfm_host *pltfm_host;
- 	struct sdhci_arasan_data *sdhci_arasan;
- 
--	sdhci_arasan = devm_kzalloc(&pdev->dev, sizeof(*sdhci_arasan),
--			GFP_KERNEL);
--	if (!sdhci_arasan)
--		return -ENOMEM;
-+	host = sdhci_pltfm_init(pdev, &sdhci_arasan_pdata,
-+				sizeof(*sdhci_arasan));
-+	if (IS_ERR(host))
-+		return PTR_ERR(host);
-+
-+	pltfm_host = sdhci_priv(host);
-+	sdhci_arasan = sdhci_pltfm_priv(pltfm_host);
- 
- 	sdhci_arasan->clk_ahb = devm_clk_get(&pdev->dev, "clk_ahb");
- 	if (IS_ERR(sdhci_arasan->clk_ahb)) {
-@@ -166,20 +169,12 @@ static int sdhci_arasan_probe(struct platform_device *pdev)
- 		goto clk_dis_ahb;
- 	}
- 
--	host = sdhci_pltfm_init(pdev, &sdhci_arasan_pdata, 0);
--	if (IS_ERR(host)) {
--		ret = PTR_ERR(host);
--		goto clk_disable_all;
--	}
--
- 	if (of_device_is_compatible(pdev->dev.of_node, "arasan,sdhci-4.9a")) {
- 		host->quirks |= SDHCI_QUIRK_NO_HISPD_BIT;
- 		host->quirks2 |= SDHCI_QUIRK2_HOST_NO_CMD23;
- 	}
- 
- 	sdhci_get_of_property(pdev);
--	pltfm_host = sdhci_priv(host);
--	pltfm_host->priv = sdhci_arasan;
- 	pltfm_host->clk = clk_xin;
- 
- 	ret = mmc_of_parse(host->mmc);
-@@ -208,7 +203,7 @@ static int sdhci_arasan_remove(struct platform_device *pdev)
- {
- 	struct sdhci_host *host = platform_get_drvdata(pdev);
- 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
--	struct sdhci_arasan_data *sdhci_arasan = pltfm_host->priv;
-+	struct sdhci_arasan_data *sdhci_arasan = sdhci_pltfm_priv(pltfm_host);
- 
- 	clk_disable_unprepare(sdhci_arasan->clk_ahb);
- 
--- 
-2.7.0.rc3
+Thanks
+
+> ---
+>  drivers/mmc/host/sdhci-of-at91.c | 24 +++++++++---------------
+>  1 file changed, 9 insertions(+), 15 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/sdhci-of-at91.c b/drivers/mmc/host/sdhci-of-at91.c
+> index 7e7d8f0..43f729f 100644
+> --- a/drivers/mmc/host/sdhci-of-at91.c
+> +++ b/drivers/mmc/host/sdhci-of-at91.c
+> @@ -58,7 +58,7 @@ static int sdhci_at91_runtime_suspend(struct device *dev)
+>  {
+>  	struct sdhci_host *host = dev_get_drvdata(dev);
+>  	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+> -	struct sdhci_at91_priv *priv = pltfm_host->priv;
+> +	struct sdhci_at91_priv *priv = sdhci_pltfm_priv(pltfm_host);
+>  	int ret;
+>  
+>  	ret = sdhci_runtime_suspend_host(host);
+> @@ -74,7 +74,7 @@ static int sdhci_at91_runtime_resume(struct device *dev)
+>  {
+>  	struct sdhci_host *host = dev_get_drvdata(dev);
+>  	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+> -	struct sdhci_at91_priv *priv = pltfm_host->priv;
+> +	struct sdhci_at91_priv *priv = sdhci_pltfm_priv(pltfm_host);
+>  	int ret;
+>  
+>  	ret = clk_prepare_enable(priv->mainck);
+> @@ -124,11 +124,12 @@ static int sdhci_at91_probe(struct platform_device *pdev)
+>  		return -EINVAL;
+>  	soc_data = match->data;
+>  
+> -	priv = devm_kzalloc(&pdev->dev, sizeof(*priv), GFP_KERNEL);
+> -	if (!priv) {
+> -		dev_err(&pdev->dev, "unable to allocate private data\n");
+> -		return -ENOMEM;
+> -	}
+> +	host = sdhci_pltfm_init(pdev, soc_data, sizeof(*priv));
+> +	if (IS_ERR(host))
+> +		return PTR_ERR(host);
+> +
+> +	pltfm_host = sdhci_priv(host);
+> +	priv = sdhci_pltfm_priv(pltfm_host);
+>  
+>  	priv->mainck = devm_clk_get(&pdev->dev, "baseclk");
+>  	if (IS_ERR(priv->mainck)) {
+> @@ -148,10 +149,6 @@ static int sdhci_at91_probe(struct platform_device *pdev)
+>  		return PTR_ERR(priv->gck);
+>  	}
+>  
+> -	host = sdhci_pltfm_init(pdev, soc_data, 0);
+> -	if (IS_ERR(host))
+> -		return PTR_ERR(host);
+> -
+>  	/*
+>  	 * The mult clock is provided by as a generated clock by the PMC
+>  	 * controller. In order to set the rate of gck, we have to get the
+> @@ -191,9 +188,6 @@ static int sdhci_at91_probe(struct platform_device *pdev)
+>  	clk_prepare_enable(priv->mainck);
+>  	clk_prepare_enable(priv->gck);
+>  
+> -	pltfm_host = sdhci_priv(host);
+> -	pltfm_host->priv = priv;
+> -
+>  	ret = mmc_of_parse(host->mmc);
+>  	if (ret)
+>  		goto clocks_disable_unprepare;
+> @@ -230,7 +224,7 @@ static int sdhci_at91_remove(struct platform_device *pdev)
+>  {
+>  	struct sdhci_host	*host = platform_get_drvdata(pdev);
+>  	struct sdhci_pltfm_host	*pltfm_host = sdhci_priv(host);
+> -	struct sdhci_at91_priv	*priv = pltfm_host->priv;
+> +	struct sdhci_at91_priv	*priv = sdhci_pltfm_priv(pltfm_host);
+>  
+>  	pm_runtime_get_sync(&pdev->dev);
+>  	pm_runtime_disable(&pdev->dev);
+> -- 
+> 2.7.0.rc3
+> 
