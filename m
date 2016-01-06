@@ -1,105 +1,82 @@
-From: Jisheng Zhang <jszhang@marvell.com>
-Subject: [PATCH v2 08/12] mmc: sdhci-pxav3: use sdhci_pltfm_init for private allocation
-Date: Wed, 6 Jan 2016 11:56:01 +0800
-Message-ID: <1452052565-4232-9-git-send-email-jszhang@marvell.com>
-References: <1452052565-4232-1-git-send-email-jszhang@marvell.com>
+From: Yangbo Lu <yangbo.lu@nxp.com>
+Subject: RE: [v4, 5/6] mmc: kconfig: select FSL_GUTS for MMC_SDHCI_OF_ESDHC
+Date: Wed, 6 Jan 2016 06:58:08 +0000
+Message-ID: <HE1PR04MB0889469615D576548DF0EE75F8F40@HE1PR04MB0889.eurprd04.prod.outlook.com>
+References: <1450067067-44869-1-git-send-email-yangbo.lu@freescale.com>
+	 <1450067067-44869-6-git-send-email-yangbo.lu@freescale.com>
+	 <CAPDyKFo1g5_4bpYnTO96tGfVGStysN0FnmbSx-Se4tOa7f3rZQ@mail.gmail.com>
+	 <1450116253.15946.353.camel@freescale.com>
+	 <CAPDyKFrKSMC0uo8re3CxjNCUsVnEMau=GTKq=v_3ooNnQxw2Eg@mail.gmail.com>
+	 <CAPDyKFoYxM4Nv_pHCZbGzuswMCXTLyj6CYgLjYnRguscUs9LrQ@mail.gmail.com>
+	 <HE1PR04MB0889791AB9F06A5591D4CD5FF8FB0@HE1PR04MB0889.eurprd04.prod.outlook.com>
+	 <CAPDyKFqhRVh9XdY=2aMP5sL5kp+RkHV_tsA4=Oj_88e8NN9DCw@mail.gmail.com>
+ <1451329828.18314.154.camel@freescale.com>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1452052565-4232-1-git-send-email-jszhang@marvell.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: ulf.hansson@linaro.org, arnd@arndb.de, swarren@wwwdotorg.org, lee@kernel.org, eric@anholt.net, michal.simek@xilinx.com, soren.brinkmann@xilinx.com, ludovic.desroches@atmel.com, srinivas.kandagatla@gmail.com, maxime.coquelin@st.com, patrice.chotard@st.com, thierry.reding@gmail.com, sebastian.hesselbarth@gmail.com
-Cc: linux-mmc@vger.kernel.org, linux-rpi-kernel@lists.infradead.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, kernel@stlinux.com, linux-tegra@vger.kernel.org, Jisheng Zhang <jszhang@marvell.com>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-db3on0077.outbound.protection.outlook.com ([157.55.234.77]:22535
+	"EHLO emea01-db3-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1752011AbcAFHNf (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 6 Jan 2016 02:13:35 -0500
+In-Reply-To: <1451329828.18314.154.camel@freescale.com>
+Content-Language: en-US
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Scott Wood <scottwood@freescale.com>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Lu Yangbo-B47093 <yangbo.lu@freescale.com>, linux-mmc <linux-mmc@vger.kernel.org>, Xie Xiaobo-R63061 <X.Xie@freescale.com>, Leo li <LeoLi@freescale.com>
 
-Commit 0e748234293f ("mmc: sdhci: Add size for caller in init+register")
-allows users of sdhci_pltfm to allocate private space in calls to
-sdhci_pltfm_init+sdhci_pltfm_register. This patch migrates sdhci-pxav3
-to this allocation.
-
-Signed-off-by: Jisheng Zhang <jszhang@marvell.com>
-Acked-by: Arnd Bergmann <arnd@arndb.de>
----
- drivers/mmc/host/sdhci-pxav3.c | 21 +++++++++------------
- 1 file changed, 9 insertions(+), 12 deletions(-)
-
-diff --git a/drivers/mmc/host/sdhci-pxav3.c b/drivers/mmc/host/sdhci-pxav3.c
-index f5edf9d..3d6df57 100644
---- a/drivers/mmc/host/sdhci-pxav3.c
-+++ b/drivers/mmc/host/sdhci-pxav3.c
-@@ -132,7 +132,7 @@ static int armada_38x_quirks(struct platform_device *pdev,
- {
- 	struct device_node *np = pdev->dev.of_node;
- 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
--	struct sdhci_pxa *pxa = pltfm_host->priv;
-+	struct sdhci_pxa *pxa = sdhci_pltfm_priv(pltfm_host);
- 	struct resource *res;
- 
- 	host->quirks &= ~SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN;
-@@ -201,7 +201,7 @@ static void pxav3_reset(struct sdhci_host *host, u8 mask)
- static void pxav3_gen_init_74_clocks(struct sdhci_host *host, u8 power_mode)
- {
- 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
--	struct sdhci_pxa *pxa = pltfm_host->priv;
-+	struct sdhci_pxa *pxa = sdhci_pltfm_priv(pltfm_host);
- 	u16 tmp;
- 	int count;
- 
-@@ -250,7 +250,7 @@ static void pxav3_gen_init_74_clocks(struct sdhci_host *host, u8 power_mode)
- static void pxav3_set_uhs_signaling(struct sdhci_host *host, unsigned int uhs)
- {
- 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
--	struct sdhci_pxa *pxa = pltfm_host->priv;
-+	struct sdhci_pxa *pxa = sdhci_pltfm_priv(pltfm_host);
- 	u16 ctrl_2;
- 
- 	/*
-@@ -370,16 +370,13 @@ static int sdhci_pxav3_probe(struct platform_device *pdev)
- 	const struct of_device_id *match;
- 	int ret;
- 
--	pxa = devm_kzalloc(&pdev->dev, sizeof(struct sdhci_pxa), GFP_KERNEL);
--	if (!pxa)
--		return -ENOMEM;
--
--	host = sdhci_pltfm_init(pdev, &sdhci_pxav3_pdata, 0);
-+	host = sdhci_pltfm_init(pdev, &sdhci_pxav3_pdata,
-+				sizeof(*pxa));
- 	if (IS_ERR(host))
- 		return PTR_ERR(host);
- 
- 	pltfm_host = sdhci_priv(host);
--	pltfm_host->priv = pxa;
-+	pxa = sdhci_pltfm_priv(pltfm_host);
- 
- 	pxa->clk_io = devm_clk_get(dev, "io");
- 	if (IS_ERR(pxa->clk_io))
-@@ -486,7 +483,7 @@ static int sdhci_pxav3_remove(struct platform_device *pdev)
- {
- 	struct sdhci_host *host = platform_get_drvdata(pdev);
- 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
--	struct sdhci_pxa *pxa = pltfm_host->priv;
-+	struct sdhci_pxa *pxa = sdhci_pltfm_priv(pltfm_host);
- 
- 	pm_runtime_get_sync(&pdev->dev);
- 	pm_runtime_disable(&pdev->dev);
-@@ -535,7 +532,7 @@ static int sdhci_pxav3_runtime_suspend(struct device *dev)
- {
- 	struct sdhci_host *host = dev_get_drvdata(dev);
- 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
--	struct sdhci_pxa *pxa = pltfm_host->priv;
-+	struct sdhci_pxa *pxa = sdhci_pltfm_priv(pltfm_host);
- 	int ret;
- 
- 	ret = sdhci_runtime_suspend_host(host);
-@@ -553,7 +550,7 @@ static int sdhci_pxav3_runtime_resume(struct device *dev)
- {
- 	struct sdhci_host *host = dev_get_drvdata(dev);
- 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
--	struct sdhci_pxa *pxa = pltfm_host->priv;
-+	struct sdhci_pxa *pxa = sdhci_pltfm_priv(pltfm_host);
- 
- 	clk_prepare_enable(pxa->clk_io);
- 	if (!IS_ERR(pxa->clk_core))
--- 
-2.7.0.rc3
+PiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBTY290dCBXb29kIFttYWlsdG86
+c2NvdHR3b29kQGZyZWVzY2FsZS5jb21dDQo+IFNlbnQ6IFR1ZXNkYXksIERlY2VtYmVyIDI5LCAy
+MDE1IDM6MTAgQU0NCj4gVG86IFVsZiBIYW5zc29uOyBZYW5nYm8gTHUNCj4gQ2M6IEx1IFlhbmdi
+by1CNDcwOTM7IGxpbnV4LW1tYzsgWGllIFhpYW9iby1SNjMwNjE7IExlbyBsaQ0KPiBTdWJqZWN0
+OiBSZTogW3Y0LCA1LzZdIG1tYzoga2NvbmZpZzogc2VsZWN0IEZTTF9HVVRTIGZvcg0KPiBNTUNf
+U0RIQ0lfT0ZfRVNESEMNCj4gDQo+IE9uIE1vbiwgMjAxNS0xMi0yOCBhdCAxMzoxMCArMDEwMCwg
+VWxmIEhhbnNzb24gd3JvdGU6DQo+ID4gT24gMjggRGVjZW1iZXIgMjAxNSBhdCAxMToyNiwgWWFu
+Z2JvIEx1IDx5YW5nYm8ubHVAbnhwLmNvbT4gd3JvdGU6DQo+ID4gPiA+IC0tLS0tT3JpZ2luYWwg
+TWVzc2FnZS0tLS0tDQo+ID4gPiA+IEZyb206IFVsZiBIYW5zc29uIFttYWlsdG86dWxmLmhhbnNz
+b25AbGluYXJvLm9yZ10NCj4gPiA+ID4gU2VudDogVGh1cnNkYXksIERlY2VtYmVyIDE3LCAyMDE1
+IDc6MzEgUE0NCj4gPiA+ID4gVG86IFNjb3R0IFdvb2QNCj4gPiA+ID4gQ2M6IEx1IFlhbmdiby1C
+NDcwOTM7IGxpbnV4LW1tYzsgWGllIFhpYW9iby1SNjMwNjE7IExlbyBsaQ0KPiA+ID4gPiBTdWJq
+ZWN0OiBSZTogW3Y0LCA1LzZdIG1tYzoga2NvbmZpZzogc2VsZWN0IEZTTF9HVVRTIGZvcg0KPiA+
+ID4gPiBNTUNfU0RIQ0lfT0ZfRVNESEMNCj4gPiA+ID4NCj4gPiA+ID4gWy4uLl0NCj4gPiA+ID4N
+Cj4gPiA+ID4gPiA+DQo+ID4gPiA+ID4gPiBBbmQgSSB0aGluayBzdHVicyBmb3IgcmVhZGluZyBT
+VlIgaXMgcXVpdGUgYSBiYWQgaWRlYS4gIEl0J2xsDQo+ID4gPiA+ID4gPiBtYWtlIHRoZSBkcml2
+ZXIgYnVpbGQgYnV0IGl0IHdpbGwgc2lsZW50bHkgbm90IGJlIGFibGUgdG8NCj4gPiA+ID4gPiA+
+IGFwcGx5IFNWUi1iYXNlZA0KPiA+ID4gPiB3b3JrYXJvdW5kcy4NCj4gPiA+ID4gPg0KPiA+ID4g
+PiA+IEl0IGRvZXNuJ3QgaGF2ZSB0byBiZSAic2lsZW50IiwgdGhlIGRyaXZlciBjYW4gcmV0dXJu
+IGFuIGVycm9yDQo+ID4gPiA+ID4gKGFuZCBwcmludCBlcnJvciBtZXNzYWdlcykgZnJvbSBpdHMg
+LT5wcm9iZSgpIG1ldGhvZCwgaWYgdGhlDQo+ID4gPiA+ID4gY2FsbHMgdG8gdGhlIEdVVFMgZHJp
+dmVyIGZhaWxzLg0KPiA+ID4gPiA+DQo+ID4gPiA+ID4gQW55d2F5LCBJIG1lbnRpb25lZCB0aGlz
+IGlkZWEgb25seSB0byB1bmRlcnN0YW5kIHRoZSBuZWVkIGZvcg0KPiA+ID4gPiA+ICpvcHRpb25h
+bCogR1VUUyBzdXBwb3J0cy4gUGVyaGFwcyB0aGVyZSBpcyBhIGNyb3NzIFNPQyBkcml2ZXJzDQo+
+ID4gPiA+ID4gdGhhdCBmb3Igc29tZSBwbGF0Zm9ybXMgZGVwZW5kcyBvbiBHVVRTIGJ1dCBvbiBv
+dGhlcnMgaXQgZG9lc24ndC4NCj4gPiA+ID4gPg0KPiA+ID4gPiA+IE1heWJlIHRoYXQgaXNuJ3Qg
+Y2FzZSB0aGVuIT8NCj4gPiA+ID4NCj4gPiA+ID4gQ2FuIHlvdSBwbGVhc2UgYW5zd2VyIHRoaXMg
+cXVlc3Rpb24hPw0KPiA+ID4gPg0KPiA+ID4gPiBBY2NvcmRpbmcgdG8gdGhlIGVhcmxpZXIgdmVy
+c2lvbnMgb2YgdGhpcyBwYXRjaHNldCBhbmQgZnJvbSB5b3VyDQo+ID4gPiA+IGNvbW1lbnRzIFsx
+XSwgaXQgKmRvKiBzZWVtcyBsaWtlIHRoZSBHVVRTIGRyaXZlciBtYXkgYmUgb3B0aW9uYWwNCj4g
+PiA+ID4gYW5kIHRodXMgc3R1YnMgY291bGQgYWRkcmVzcyB0aGlzLg0KPiA+ID4gPg0KPiA+ID4g
+PiBLaW5kIHJlZ2FyZHMNCj4gPiA+ID4gVWZmZQ0KPiA+ID4gPg0KPiA+ID4gPiBbMV0NCj4gPiA+
+ID4gaHR0cDovL3d3dy5zcGluaWNzLm5ldC9saXN0cy9saW51eC1tbWMvbXNnMzQ0MTIuaHRtbA0K
+PiA+ID4NCj4gPiA+IFtMdSBZYW5nYm8tQjQ3MDkzXSBIaSBTY290dCBhbmQgVWZmZSwgSW4gdGhl
+IGVhcmxpZXIgdmVyc2lvbiwgSSdkDQo+ID4gPiBsaWtlIHRvIHVzZSBzeXNjb24gc3VwcG9ydCBh
+bmQgb25seSBhZGQgJ3N5c2NvbicgY29tcGF0aWJsZSBpbiB0aGUNCj4gPiA+IGR0cyB3aG9zZSBl
+U0RIQyBuZWVkcyB0byB1c2UgaXQgdG8gZ2V0IFNWUi4NCj4gPiA+IEJ1dCBJIG5ldmVyIHRob3Vn
+aHQgdGhpcyBoYWQgY2F1c2VkIHNvIG11Y2ggZGlzY3Vzc2lvbi4uLiA6KA0KPiA+DQo+ID4gU29y
+cnksIEkgdW5kZXJzdGFuZCB5b3VyIGZydXN0cmF0aW9uIGJ1dCB0aGF0J3MgbGlmZSBzb21ldGlt
+ZXMuIDotKQ0KPiA+DQo+ID4gVG8gbWUsIHRoZSBzeXNjb24gc29sdXRpb24gaXMgbW9yZSBlbGVn
+YW50Li4uDQo+IA0KPiBUaGUgc3lzY29uIHBhdGNoIHdhcyB0ZXJyaWJsZS4gIEl0IHdvdWxkIGhh
+dmUgYWNjZXNzZWQgYSBjZXJ0YWluIGxvY2F0aW9uDQo+IGluIGFueSBub2RlIGxhYmVsbGVkICJz
+eXNjb24iIHdoZXRoZXIgaXQgd2FzIGd1dHMgb3Igbm90LCBpbiBhZGRpdGlvbiB0bw0KPiB0aGUg
+b3RoZXIgY29tcGxhaW50cy4NCj4gDQo+IC1TY290dA0KDQpbTHUgWWFuZ2JvLUI0NzA5M10gQXMg
+bXkgdW5kZXJzdGFuZCwgdGhlIHN5c2NvbiBBUElzIHdvdWxkIGp1c3QgY2hlY2sgd2hldGhlciB0
+aGVyZSBpcyBhICdzeXNjb24nIGNvbXBhdGlibGUuDQpJZiBubywgdGhlIEFQSXMgcmV0dXJuLiBX
+ZSBzdGlsbCBjb3VsZCBtYWludGFpbiBhIGxpc3Qgb2YgY29tcGF0aWJsZXMgZm9yIGd1dHMgaWYg
+dXNpbmcgc3lzY29uLg0KSW4gbXkgb3Bpbmlvbiwgc3lzY29uIGFuZCBndXRzIGRyaXZlciBhcmUg
+anVzdCB0d28gbWV0aG9kIHRvIGdldCBTVlIuDQoNCkkgYWdyZWUgd2l0aCBVZmZlLCBiZWNhdXNl
+IEkgdGhpbmsgc3lzY29uIGlzIHJlYWxseSBkZXNpZ25lZCBmb3IgdGhpcyBzaXR1YXRpb24gYW5k
+IG1hbnkgYXJtIHBsYXRmb3JtcyBhcmUgdXNpbmcgaXQuDQpPZiBjb3Vyc2UsIEkgc3RpbGwgd291
+bGQgbGlrZSB0byB0cnkgZ3V0cyBkcml2ZXIgaWYgeW91IGluc2lzdCBvbiBpdC4NCg0KDQoNCg0K
+DQoNCg==
