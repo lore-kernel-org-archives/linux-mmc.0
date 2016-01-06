@@ -1,63 +1,84 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: tegra: don't enable UHS modes on Tegra210
-Date: Tue, 5 Jan 2016 18:06:32 +0100
-Message-ID: <CAPDyKFrgp20TRH-+W874tRxiiXmdLKm6ERW1Zvf=vwPfsZXxJw@mail.gmail.com>
-References: <1451490549-21430-1-git-send-email-dev@lynxeye.de>
+From: Jisheng Zhang <jszhang@marvell.com>
+Subject: Re: [PATCH 03/11] mmc: sdhci-msm: use sdhci_pltfm_init for private
+ allocation
+Date: Wed, 6 Jan 2016 10:36:28 +0800
+Message-ID: <20160106103628.05a8f9c4@xhacker>
+References: <1451991099-4946-4-git-send-email-jszhang@marvell.com>
+	<201601052054.hzEzw4pe%fengguang.wu@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="US-ASCII"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-yk0-f179.google.com ([209.85.160.179]:36117 "EHLO
-	mail-yk0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751809AbcAERGd (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 5 Jan 2016 12:06:33 -0500
-Received: by mail-yk0-f179.google.com with SMTP id v14so194772893ykd.3
-        for <linux-mmc@vger.kernel.org>; Tue, 05 Jan 2016 09:06:33 -0800 (PST)
-In-Reply-To: <1451490549-21430-1-git-send-email-dev@lynxeye.de>
+Received: from mx0a-0016f401.pphosted.com ([67.231.148.174]:8663 "EHLO
+	mx0a-0016f401.pphosted.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751846AbcAFCkr (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 5 Jan 2016 21:40:47 -0500
+In-Reply-To: <201601052054.hzEzw4pe%fengguang.wu@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Lucas Stach <dev@lynxeye.de>
-Cc: Stephen Warren <swarren@wwwdotorg.org>, Thierry Reding <thierry.reding@gmail.com>, Alexandre Courbot <gnurou@gmail.com>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-tegra@vger.kernel.org" <linux-tegra@vger.kernel.org>
+To: kbuild test robot <lkp@intel.com>
+Cc: kbuild-all@01.org, ulf.hansson@linaro.org, swarren@wwwdotorg.org, lee@kernel.org, eric@anholt.net, michal.simek@xilinx.com, soren.brinkmann@xilinx.com, ludovic.desroches@atmel.com, srinivas.kandagatla@gmail.com, maxime.coquelin@st.com, patrice.chotard@st.com, thierry.reding@gmail.com, sebastian.hesselbarth@gmail.com, linux-mmc@vger.kernel.org, linux-rpi-kernel@lists.infradead.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, kernel@stlinux.com, linux-tegra@vger.kernel.org
 
-On 30 December 2015 at 16:49, Lucas Stach <dev@lynxeye.de> wrote:
-> Tegra210 needs a different tuning sequence than Tegra30+. Disable
-> UHS modes until support for this is properly added.
->
-> Signed-off-by: Lucas Stach <dev@lynxeye.de>
+On Tue, 5 Jan 2016 20:47:37 +0800 kbuild test robot wrote:
+
+> Hi Jisheng,
+> 
+> [auto build test WARNING on v4.4-rc8]
+> [also build test WARNING on next-20160105]
+> [cannot apply to ulf.hansson-mmc/next]
+> [if your patch is applied to the wrong git tree, please drop us a note to help improving the system]
+> 
+> url:    https://github.com/0day-ci/linux/commits/Jisheng-Zhang/mmc-sdhci-bcm2835-use-sdhci_pltfm_init-for-private-allocation/20160105-190232
+> config: arm64-allmodconfig (attached as .config)
+> reproduce:
+>         wget https://git.kernel.org/cgit/linux/kernel/git/wfg/lkp-tests.git/plain/sbin/make.cross -O ~/bin/make.cross
+>         chmod +x ~/bin/make.cross
+>         # save the attached .config to linux build tree
+>         make.cross ARCH=arm64 
+> 
+> All warnings (new ones prefixed by >>):
+> 
+>    drivers/mmc/host/sdhci-msm.c: In function 'sdhci_msm_probe':
+> >> drivers/mmc/host/sdhci-msm.c:440:32: warning: 'msm_host' is used uninitialized in this function [-Wuninitialized]  
+>      host = sdhci_pltfm_init(pdev, &msm_host->sdhci_msm_pdata,
+
+OOPS, I'll fix it.
+
+Thanks a lot,
+Jisheng
+
+
+>                                    ^
+> 
+> vim +/msm_host +440 drivers/mmc/host/sdhci-msm.c
+> 
+>    424		.set_clock = sdhci_set_clock,
+>    425		.set_bus_width = sdhci_set_bus_width,
+>    426		.set_uhs_signaling = sdhci_set_uhs_signaling,
+>    427	};
+>    428	
+>    429	static int sdhci_msm_probe(struct platform_device *pdev)
+>    430	{
+>    431		struct sdhci_host *host;
+>    432		struct sdhci_pltfm_host *pltfm_host;
+>    433		struct sdhci_msm_host *msm_host;
+>    434		struct resource *core_memres;
+>    435		int ret;
+>    436		u16 host_version, core_minor;
+>    437		u32 core_version, caps;
+>    438		u8 core_major;
+>    439	
+>  > 440		host = sdhci_pltfm_init(pdev, &msm_host->sdhci_msm_pdata,  
+>    441					sizeof(*msm_host));
+>    442		if (IS_ERR(host))
+>    443			return PTR_ERR(host);
+>    444	
+>    445		pltfm_host = sdhci_priv(host);
+>    446		msm_host = sdhci_pltfm_priv(pltfm_host);
+>    447		msm_host->sdhci_msm_pdata.ops = &sdhci_msm_ops;
+>    448		msm_host->mmc = host->mmc;
+> 
 > ---
-> Ulf,
-> this is a follow on patch to my Tegra UHS-I series. After reading the
-> Tegra210 TRM I realized that the currently implemented tuning sequence will
-> only work on Tegra30..Tegra124.  If you don't keep your tree stable you
-> might want to squash this into [PATCH v2 4/5] mmc: tegra: enable UHS-I modes,
-> otherwise please pick this up as a fix on top.
+> 0-DAY kernel test infrastructure                Open Source Technology Center
+> https://lists.01.org/pipermail/kbuild-all                   Intel Corporation
 
-Thanks, I have squashed the change into patch4.
-
-Kind regards
-Uffe
-
-> ---
->  drivers/mmc/host/sdhci-tegra.c | 3 ---
->  1 file changed, 3 deletions(-)
->
-> diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
-> index b5abbe2..83c4bf7 100644
-> --- a/drivers/mmc/host/sdhci-tegra.c
-> +++ b/drivers/mmc/host/sdhci-tegra.c
-> @@ -353,9 +353,6 @@ static const struct sdhci_pltfm_data sdhci_tegra210_pdata = {
->
->  static const struct sdhci_tegra_soc_data soc_data_tegra210 = {
->         .pdata = &sdhci_tegra210_pdata,
-> -       .nvquirks = NVQUIRK_ENABLE_SDR50 |
-> -                   NVQUIRK_ENABLE_DDR50 |
-> -                   NVQUIRK_ENABLE_SDR104,
->  };
->
->  static const struct of_device_id sdhci_tegra_dt_match[] = {
-> --
-> 2.5.0
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
