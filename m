@@ -1,7 +1,7 @@
 From: Jisheng Zhang <jszhang@marvell.com>
-Subject: [PATCH v3 11/12] mmc: sdhci-pxav2: remove unnecessary assignment of pltfm_host->priv
-Date: Wed, 6 Jan 2016 18:31:42 +0800
-Message-ID: <1452076303-1960-12-git-send-email-jszhang@marvell.com>
+Subject: [PATCH v3 12/12] mmc: sdhci-pltfm: remove priv variable from sdhci_pltfm_host
+Date: Wed, 6 Jan 2016 18:31:43 +0800
+Message-ID: <1452076303-1960-13-git-send-email-jszhang@marvell.com>
 References: <1452076303-1960-1-git-send-email-jszhang@marvell.com>
 Mime-Version: 1.0
 Content-Type: text/plain
@@ -12,26 +12,27 @@ To: ulf.hansson@linaro.org, arnd@arndb.de, ludovic.desroches@atmel.com, swarren@
 Cc: linux-mmc@vger.kernel.org, linux-rpi-kernel@lists.infradead.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, kernel@stlinux.com, linux-tegra@vger.kernel.org, Jisheng Zhang <jszhang@marvell.com>
 List-Id: linux-mmc@vger.kernel.org
 
-The sdhci_pltfm_init() function has initialized the priv member as
-NULL, so there's no need to do it again.
+Now all clients migration to use sdhci_pltfm_init for private
+allocation is done and there's no users of the priv variable, so we can
+remove it from the sdhci_pltfm_host structure.
 
 Signed-off-by: Jisheng Zhang <jszhang@marvell.com>
 Acked-by: Arnd Bergmann <arnd@arndb.de>
 ---
- drivers/mmc/host/sdhci-pxav2.c | 1 -
+ drivers/mmc/host/sdhci-pltfm.h | 1 -
  1 file changed, 1 deletion(-)
 
-diff --git a/drivers/mmc/host/sdhci-pxav2.c b/drivers/mmc/host/sdhci-pxav2.c
-index beffd86..1d8dd35 100644
---- a/drivers/mmc/host/sdhci-pxav2.c
-+++ b/drivers/mmc/host/sdhci-pxav2.c
-@@ -177,7 +177,6 @@ static int sdhci_pxav2_probe(struct platform_device *pdev)
- 		return PTR_ERR(host);
+diff --git a/drivers/mmc/host/sdhci-pltfm.h b/drivers/mmc/host/sdhci-pltfm.h
+index 04bc248..d38053b 100644
+--- a/drivers/mmc/host/sdhci-pltfm.h
++++ b/drivers/mmc/host/sdhci-pltfm.h
+@@ -23,7 +23,6 @@ struct sdhci_pltfm_data {
  
- 	pltfm_host = sdhci_priv(host);
--	pltfm_host->priv = NULL;
+ struct sdhci_pltfm_host {
+ 	struct clk *clk;
+-	void *priv; /* to handle quirks across io-accessor calls */
  
- 	clk = clk_get(dev, "PXA-SDHCLK");
- 	if (IS_ERR(clk)) {
+ 	/* migrate from sdhci_of_host */
+ 	unsigned int clock;
 -- 
 2.7.0.rc3
