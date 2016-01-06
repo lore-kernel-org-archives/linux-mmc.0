@@ -1,74 +1,103 @@
-From: Yangbo Lu <yangbo.lu@nxp.com>
-Subject: RE: [v4, 5/6] mmc: kconfig: select FSL_GUTS for MMC_SDHCI_OF_ESDHC
-Date: Wed, 6 Jan 2016 07:23:10 +0000
-Message-ID: <HE1PR04MB088990115EA46CB6D7D91CAFF8F40@HE1PR04MB0889.eurprd04.prod.outlook.com>
-References: <1450067067-44869-1-git-send-email-yangbo.lu@freescale.com>
-	<1450067067-44869-6-git-send-email-yangbo.lu@freescale.com>
-	<CAPDyKFo1g5_4bpYnTO96tGfVGStysN0FnmbSx-Se4tOa7f3rZQ@mail.gmail.com>
-	<1450116253.15946.353.camel@freescale.com>
-	<CAPDyKFrKSMC0uo8re3CxjNCUsVnEMau=GTKq=v_3ooNnQxw2Eg@mail.gmail.com>
-	<CAPDyKFoYxM4Nv_pHCZbGzuswMCXTLyj6CYgLjYnRguscUs9LrQ@mail.gmail.com>
-	<HE1PR04MB0889791AB9F06A5591D4CD5FF8FB0@HE1PR04MB0889.eurprd04.prod.outlook.com>
- <CAPDyKFqhRVh9XdY=2aMP5sL5kp+RkHV_tsA4=Oj_88e8NN9DCw@mail.gmail.com>
+From: Ludovic Desroches <ludovic.desroches-AIFe0yeh4nAAvxtiuMwx3w@public.gmane.org>
+Subject: Re: [PATCH v2 06/12] mmc: sdhci-of-at91: use sdhci_pltfm_init for
+ private allocation
+Date: Wed, 6 Jan 2016 10:02:15 +0100
+Message-ID: <20160106090215.GG2334@odux.rfo.atmel.com>
+References: <1452052565-4232-1-git-send-email-jszhang@marvell.com>
+ <1452052565-4232-7-git-send-email-jszhang@marvell.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-db3on0066.outbound.protection.outlook.com ([157.55.234.66]:6064
-	"EHLO emea01-db3-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1752025AbcAFH4v (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 6 Jan 2016 02:56:51 -0500
-In-Reply-To: <CAPDyKFqhRVh9XdY=2aMP5sL5kp+RkHV_tsA4=Oj_88e8NN9DCw@mail.gmail.com>
-Content-Language: en-US
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Return-path: <linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <1452052565-4232-7-git-send-email-jszhang-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>
+Sender: linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Jisheng Zhang <jszhang-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>
+Cc: ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, arnd-r2nGTMty4D4@public.gmane.org, swarren-3lzwWm7+Weoh9ZMKESR00Q@public.gmane.org, lee-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, eric-WhKQ6XTQaPysTnJN9+BGXg@public.gmane.org, michal.simek-gjFFaj9aHVfQT0dZR+AlfA@public.gmane.org, soren.brinkmann-gjFFaj9aHVfQT0dZR+AlfA@public.gmane.org, ludovic.desroches-AIFe0yeh4nAAvxtiuMwx3w@public.gmane.org, srinivas.kandagatla-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org, maxime.coquelin-qxv4g6HH51o@public.gmane.org, patrice.chotard-qxv4g6HH51o@public.gmane.org, thierry.reding-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org, sebastian.hesselbarth-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-rpi-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kernel-F5mvAk5X5gdBDgjK7y7TUQ@public.gmane.org, linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Scott Wood <scottwood@freescale.com>, Lu Yangbo-B47093 <yangbo.lu@freescale.com>, linux-mmc <linux-mmc@vger.kernel.org>, Xie Xiaobo-R63061 <X.Xie@freescale.com>, Leo li <LeoLi@freescale.com>
 
-PiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBVbGYgSGFuc3NvbiBbbWFpbHRv
-OnVsZi5oYW5zc29uQGxpbmFyby5vcmddDQo+IFNlbnQ6IE1vbmRheSwgRGVjZW1iZXIgMjgsIDIw
-MTUgODoxMCBQTQ0KPiBUbzogWWFuZ2JvIEx1DQo+IENjOiBTY290dCBXb29kOyBMdSBZYW5nYm8t
-QjQ3MDkzOyBsaW51eC1tbWM7IFhpZSBYaWFvYm8tUjYzMDYxOyBMZW8gbGkNCj4gU3ViamVjdDog
-UmU6IFt2NCwgNS82XSBtbWM6IGtjb25maWc6IHNlbGVjdCBGU0xfR1VUUyBmb3INCj4gTU1DX1NE
-SENJX09GX0VTREhDDQo+IA0KPiBPbiAyOCBEZWNlbWJlciAyMDE1IGF0IDExOjI2LCBZYW5nYm8g
-THUgPHlhbmdiby5sdUBueHAuY29tPiB3cm90ZToNCj4gPj4gLS0tLS1PcmlnaW5hbCBNZXNzYWdl
-LS0tLS0NCj4gPj4gRnJvbTogVWxmIEhhbnNzb24gW21haWx0bzp1bGYuaGFuc3NvbkBsaW5hcm8u
-b3JnXQ0KPiA+PiBTZW50OiBUaHVyc2RheSwgRGVjZW1iZXIgMTcsIDIwMTUgNzozMSBQTQ0KPiA+
-PiBUbzogU2NvdHQgV29vZA0KPiA+PiBDYzogTHUgWWFuZ2JvLUI0NzA5MzsgbGludXgtbW1jOyBY
-aWUgWGlhb2JvLVI2MzA2MTsgTGVvIGxpDQo+ID4+IFN1YmplY3Q6IFJlOiBbdjQsIDUvNl0gbW1j
-OiBrY29uZmlnOiBzZWxlY3QgRlNMX0dVVFMgZm9yDQo+ID4+IE1NQ19TREhDSV9PRl9FU0RIQw0K
-PiA+Pg0KPiA+PiBbLi4uXQ0KPiA+Pg0KPiA+PiA+Pg0KPiA+PiA+PiBBbmQgSSB0aGluayBzdHVi
-cyBmb3IgcmVhZGluZyBTVlIgaXMgcXVpdGUgYSBiYWQgaWRlYS4gIEl0J2xsIG1ha2UNCj4gPj4g
-Pj4gdGhlIGRyaXZlciBidWlsZCBidXQgaXQgd2lsbCBzaWxlbnRseSBub3QgYmUgYWJsZSB0byBh
-cHBseQ0KPiA+PiA+PiBTVlItYmFzZWQNCj4gPj4gd29ya2Fyb3VuZHMuDQo+ID4+ID4NCj4gPj4g
-PiBJdCBkb2Vzbid0IGhhdmUgdG8gYmUgInNpbGVudCIsIHRoZSBkcml2ZXIgY2FuIHJldHVybiBh
-biBlcnJvciAoYW5kDQo+ID4+ID4gcHJpbnQgZXJyb3IgbWVzc2FnZXMpIGZyb20gaXRzIC0+cHJv
-YmUoKSBtZXRob2QsIGlmIHRoZSBjYWxscyB0bw0KPiA+PiA+IHRoZSBHVVRTIGRyaXZlciBmYWls
-cy4NCj4gPj4gPg0KPiA+PiA+IEFueXdheSwgSSBtZW50aW9uZWQgdGhpcyBpZGVhIG9ubHkgdG8g
-dW5kZXJzdGFuZCB0aGUgbmVlZCBmb3INCj4gPj4gPiAqb3B0aW9uYWwqIEdVVFMgc3VwcG9ydHMu
-IFBlcmhhcHMgdGhlcmUgaXMgYSBjcm9zcyBTT0MgZHJpdmVycyB0aGF0DQo+ID4+ID4gZm9yIHNv
-bWUgcGxhdGZvcm1zIGRlcGVuZHMgb24gR1VUUyBidXQgb24gb3RoZXJzIGl0IGRvZXNuJ3QuDQo+
-ID4+ID4NCj4gPj4gPiBNYXliZSB0aGF0IGlzbid0IGNhc2UgdGhlbiE/DQo+ID4+DQo+ID4+IENh
-biB5b3UgcGxlYXNlIGFuc3dlciB0aGlzIHF1ZXN0aW9uIT8NCj4gPj4NCj4gPj4gQWNjb3JkaW5n
-IHRvIHRoZSBlYXJsaWVyIHZlcnNpb25zIG9mIHRoaXMgcGF0Y2hzZXQgYW5kIGZyb20geW91cg0K
-PiA+PiBjb21tZW50cyBbMV0sIGl0ICpkbyogc2VlbXMgbGlrZSB0aGUgR1VUUyBkcml2ZXIgbWF5
-IGJlIG9wdGlvbmFsIGFuZA0KPiA+PiB0aHVzIHN0dWJzIGNvdWxkIGFkZHJlc3MgdGhpcy4NCj4g
-Pj4NCj4gPj4gS2luZCByZWdhcmRzDQo+ID4+IFVmZmUNCj4gPj4NCj4gPj4gWzFdDQo+ID4+IGh0
-dHA6Ly93d3cuc3Bpbmljcy5uZXQvbGlzdHMvbGludXgtbW1jL21zZzM0NDEyLmh0bWwNCj4gPg0K
-PiA+IFtMdSBZYW5nYm8tQjQ3MDkzXSBIaSBTY290dCBhbmQgVWZmZSwNCj4gPiBJbiB0aGUgZWFy
-bGllciB2ZXJzaW9uLCBJJ2QgbGlrZSB0byB1c2Ugc3lzY29uIHN1cHBvcnQgYW5kIG9ubHkgYWRk
-DQo+ICdzeXNjb24nIGNvbXBhdGlibGUgaW4gdGhlIGR0cyB3aG9zZSBlU0RIQyBuZWVkcyB0byB1
-c2UgaXQgdG8gZ2V0IFNWUi4NCj4gPiBCdXQgSSBuZXZlciB0aG91Z2h0IHRoaXMgaGFkIGNhdXNl
-ZCBzbyBtdWNoIGRpc2N1c3Npb24uLi4gOigNCj4gDQo+IFNvcnJ5LCBJIHVuZGVyc3RhbmQgeW91
-ciBmcnVzdHJhdGlvbiBidXQgdGhhdCdzIGxpZmUgc29tZXRpbWVzLiA6LSkNCj4gDQoNCltMdSBZ
-YW5nYm8tQjQ3MDkzXSBUaGFuayB5b3Ugc28gbXVjaCBmb3IgeW91ciB1bmRlcnN0YW5kaW5nIDop
-DQoNCj4gVG8gbWUsIHRoZSBzeXNjb24gc29sdXRpb24gaXMgbW9yZSBlbGVnYW50Li4uDQo+IA0K
-PiA+IENvdWxkIHdlIHJlYWNoIGFuIGFncmVlbWVudCBhYm91dCB0aGUgJ29wdGlvbmFsJyBvciBu
-b3QgJ29wdGlvbmFsJz8NCj4gDQo+IC4uLmJ1dCBJIGFtIGZpbmUgd2l0aCB0aGUgY3VycmVudCBh
-cHByb2FjaCBhcyB3ZWxsLCBhcyBsb25nIGFzIG15IHJlY2VudA0KPiBjb21tZW50cyBnZXRzIGFk
-ZHJlc3NlZC4gTGV0J3MgbWFrZSBpdCBvcHRpb25hbC4NCj4gDQo+IEFkZHJlc3MgU2NvdHQncyBh
-bmQgbXkgcmV2aWV3LWNvbW1lbnRzLCBnZXQgb3RoZXIgcGVvcGxlcyBhY2sgZm9yIHRoZQ0KPiBu
-b24tbW1jIHBhcnRzLCB0aGVuIEkgd2lsbCBoYXBwaWx5IHBpY2sgdXAgdGhlIHBhdGNoZXMuDQo+
-IA0KDQpbTHUgWWFuZ2JvLUI0NzA5M10gVGhhbmtzIGEgbG90LiBJIHdvdWxkIGFkZCBvdGhlciBy
-ZXZpZXdlcnMgaW4gbmV4dCB2ZXJzaW9uLg0KIA0KPiBLaW5kIHJlZ2FyZHMNCj4gVWZmZQ0K
+Hi Jisheng,
+
+Thanks for your patch but it needs to be updated since it breaks this
+driver.
+
+-       struct sdhci_at91_priv  *priv = pltfm_host->priv;
++       struct sdhci_at91_priv  *priv = sdhci_pltfm_priv(pltfm_host);
+
+is missing in sdhci_at91_runtime_suspend and sdhci_at91_runtime_resume
+causing a NULL pointer dereference.
+
+On Wed, Jan 06, 2016 at 11:55:59AM +0800, Jisheng Zhang wrote:
+> Commit 0e748234293f ("mmc: sdhci: Add size for caller in init+register")
+> allows users of sdhci_pltfm to allocate private space in calls to
+> sdhci_pltfm_init+sdhci_pltfm_register. This patch migrates the
+> sdhci-of-at91 driver to this allocation.
+> 
+> Signed-off-by: Jisheng Zhang <jszhang-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>
+> Acked-by: Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>
+> ---
+>  drivers/mmc/host/sdhci-of-at91.c | 21 ++++++++-------------
+>  1 file changed, 8 insertions(+), 13 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/sdhci-of-at91.c b/drivers/mmc/host/sdhci-of-at91.c
+> index 06d0b50..765eb09 100644
+> --- a/drivers/mmc/host/sdhci-of-at91.c
+> +++ b/drivers/mmc/host/sdhci-of-at91.c
+> @@ -68,11 +68,13 @@ static int sdhci_at91_probe(struct platform_device *pdev)
+>  		return -EINVAL;
+>  	soc_data = match->data;
+>  
+> -	priv = devm_kzalloc(&pdev->dev, sizeof(*priv), GFP_KERNEL);
+> -	if (!priv) {
+> -		dev_err(&pdev->dev, "unable to allocate private data\n");
+> -		return -ENOMEM;
+> -	}
+> +	host = sdhci_pltfm_init(pdev, soc_data,
+> +				sizeof(*priv));
+
+Can be on the same line.
+
+Regards
+
+Ludovic
+
+> +	if (IS_ERR(host))
+> +		return PTR_ERR(host);
+> +
+> +	pltfm_host = sdhci_priv(host);
+> +	priv = sdhci_pltfm_priv(pltfm_host);
+>  
+>  	priv->mainck = devm_clk_get(&pdev->dev, "baseclk");
+>  	if (IS_ERR(priv->mainck)) {
+> @@ -92,10 +94,6 @@ static int sdhci_at91_probe(struct platform_device *pdev)
+>  		return PTR_ERR(priv->gck);
+>  	}
+>  
+> -	host = sdhci_pltfm_init(pdev, soc_data, 0);
+> -	if (IS_ERR(host))
+> -		return PTR_ERR(host);
+> -
+>  	/*
+>  	 * The mult clock is provided by as a generated clock by the PMC
+>  	 * controller. In order to set the rate of gck, we have to get the
+> @@ -135,9 +133,6 @@ static int sdhci_at91_probe(struct platform_device *pdev)
+>  	clk_prepare_enable(priv->mainck);
+>  	clk_prepare_enable(priv->gck);
+>  
+> -	pltfm_host = sdhci_priv(host);
+> -	pltfm_host->priv = priv;
+> -
+>  	ret = mmc_of_parse(host->mmc);
+>  	if (ret)
+>  		goto clocks_disable_unprepare;
+> @@ -163,7 +158,7 @@ static int sdhci_at91_remove(struct platform_device *pdev)
+>  {
+>  	struct sdhci_host	*host = platform_get_drvdata(pdev);
+>  	struct sdhci_pltfm_host	*pltfm_host = sdhci_priv(host);
+> -	struct sdhci_at91_priv	*priv = pltfm_host->priv;
+> +	struct sdhci_at91_priv	*priv = sdhci_pltfm_priv(pltfm_host);
+>  
+>  	sdhci_pltfm_unregister(pdev);
+>  
+> -- 
+> 2.7.0.rc3
+> 
