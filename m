@@ -1,89 +1,90 @@
-From: Jisheng Zhang <jszhang-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>
-Subject: [PATCH v2 07/12] mmc: sdhci-of-esdhc: use sdhci_pltfm_init for private allocation
-Date: Wed, 6 Jan 2016 11:56:00 +0800
-Message-ID: <1452052565-4232-8-git-send-email-jszhang@marvell.com>
+From: Jisheng Zhang <jszhang@marvell.com>
+Subject: [PATCH v2 03/12] mmc: sdhci-msm: factorise sdhci_msm_pdata outisde of
+ sdhci_msm_host
+Date: Wed, 6 Jan 2016 11:55:56 +0800
+Message-ID: <1452052565-4232-4-git-send-email-jszhang@marvell.com>
 References: <1452052565-4232-1-git-send-email-jszhang@marvell.com>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1452052565-4232-1-git-send-email-jszhang-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>
-Sender: linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, arnd-r2nGTMty4D4@public.gmane.org, swarren-3lzwWm7+Weoh9ZMKESR00Q@public.gmane.org, lee-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, eric-WhKQ6XTQaPysTnJN9+BGXg@public.gmane.org, michal.simek-gjFFaj9aHVfQT0dZR+AlfA@public.gmane.org, soren.brinkmann-gjFFaj9aHVfQT0dZR+AlfA@public.gmane.org, ludovic.desroches-AIFe0yeh4nAAvxtiuMwx3w@public.gmane.org, srinivas.kandagatla-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org, maxime.coquelin-qxv4g6HH51o@public.gmane.org, patrice.chotard-qxv4g6HH51o@public.gmane.org, thierry.reding-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org, sebastian.hesselbarth-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org
-Cc: linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-rpi-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kernel-F5mvAk5X5gdBDgjK7y7TUQ@public.gmane.org, linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Jisheng Zhang <jszhang-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <1452052565-4232-1-git-send-email-jszhang@marvell.com>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: ulf.hansson@linaro.org, arnd@arndb.de, swarren@wwwdotorg.org, lee@kernel.org, eric@anholt.net, michal.simek@xilinx.com, soren.brinkmann@xilinx.com, ludovic.desroches@atmel.com, srinivas.kandagatla@gmail.com, maxime.coquelin@st.com, patrice.chotard@st.com, thierry.reding@gmail.com, sebastian.hesselbarth@gmail.com
+Cc: Jisheng Zhang <jszhang@marvell.com>, kernel@stlinux.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-rpi-kernel@lists.infradead.org, linux-tegra@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
-Commit 0e748234293f ("mmc: sdhci: Add size for caller in init+register")
-allows users of sdhci_pltfm to allocate private space in calls to
-sdhci_pltfm_init+sdhci_pltfm_register. This patch migrates the
-sdhci-of-esdhc driver to this allocation.
+There's no need to allocate one sdhci_msm_pdata for each sdhci_msm_host.
+This patch removes the sdhci_msm_pdata member from sdhci_msm_host and
+uses one static global sdhci_msm_pdata for all sdhci msm hosts. It also
+marks sdhci_msm_ops as const.
 
-Signed-off-by: Jisheng Zhang <jszhang-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>
-Acked-by: Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>
+Signed-off-by: Jisheng Zhang <jszhang@marvell.com>
 ---
- drivers/mmc/host/sdhci-of-esdhc.c | 17 ++++++++---------
- 1 file changed, 8 insertions(+), 9 deletions(-)
+ drivers/mmc/host/sdhci-msm.c | 15 ++++++++-------
+ 1 file changed, 8 insertions(+), 7 deletions(-)
 
-diff --git a/drivers/mmc/host/sdhci-of-esdhc.c b/drivers/mmc/host/sdhci-of-esdhc.c
-index 90e94a0..2fb8314 100644
---- a/drivers/mmc/host/sdhci-of-esdhc.c
-+++ b/drivers/mmc/host/sdhci-of-esdhc.c
-@@ -49,7 +49,7 @@ static u32 esdhc_readl_fixup(struct sdhci_host *host,
- 				     int spec_reg, u32 value)
+diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
+index 4695bee..ffac9b4 100644
+--- a/drivers/mmc/host/sdhci-msm.c
++++ b/drivers/mmc/host/sdhci-msm.c
+@@ -60,7 +60,6 @@ struct sdhci_msm_host {
+ 	struct clk *pclk;	/* SDHC peripheral bus clock */
+ 	struct clk *bus_clk;	/* SDHC bus voter clock */
+ 	struct mmc_host *mmc;
+-	struct sdhci_pltfm_data sdhci_msm_pdata;
+ };
+ 
+ /* Platform specific tuning */
+@@ -418,7 +417,7 @@ static const struct of_device_id sdhci_msm_dt_match[] = {
+ 
+ MODULE_DEVICE_TABLE(of, sdhci_msm_dt_match);
+ 
+-static struct sdhci_ops sdhci_msm_ops = {
++static const struct sdhci_ops sdhci_msm_ops = {
+ 	.platform_execute_tuning = sdhci_msm_execute_tuning,
+ 	.reset = sdhci_reset,
+ 	.set_clock = sdhci_set_clock,
+@@ -426,6 +425,12 @@ static struct sdhci_ops sdhci_msm_ops = {
+ 	.set_uhs_signaling = sdhci_set_uhs_signaling,
+ };
+ 
++static const struct sdhci_pltfm_data sdhci_msm_pdata = {
++	.quirks = SDHCI_QUIRK_BROKEN_CARD_DETECTION |
++		  SDHCI_QUIRK_SINGLE_POWER_WRITE,
++	.ops = &sdhci_msm_ops,
++};
++
+ static int sdhci_msm_probe(struct platform_device *pdev)
  {
- 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
--	struct sdhci_esdhc *esdhc = pltfm_host->priv;
-+	struct sdhci_esdhc *esdhc = sdhci_pltfm_priv(pltfm_host);
- 	u32 ret;
+ 	struct sdhci_host *host;
+@@ -441,8 +446,7 @@ static int sdhci_msm_probe(struct platform_device *pdev)
+ 	if (!msm_host)
+ 		return -ENOMEM;
  
- 	/*
-@@ -354,7 +354,7 @@ static void esdhc_le_writeb(struct sdhci_host *host, u8 val, int reg)
- static void esdhc_of_adma_workaround(struct sdhci_host *host, u32 intmask)
- {
- 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
--	struct sdhci_esdhc *esdhc = pltfm_host->priv;
-+	struct sdhci_esdhc *esdhc = sdhci_pltfm_priv(pltfm_host);
- 	bool applicable;
- 	dma_addr_t dmastart;
- 	dma_addr_t dmanow;
-@@ -404,7 +404,7 @@ static unsigned int esdhc_of_get_min_clock(struct sdhci_host *host)
- static void esdhc_of_set_clock(struct sdhci_host *host, unsigned int clock)
- {
- 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
--	struct sdhci_esdhc *esdhc = pltfm_host->priv;
-+	struct sdhci_esdhc *esdhc = sdhci_pltfm_priv(pltfm_host);
- 	int pre_div = 1;
- 	int div = 1;
- 	u32 temp;
-@@ -569,15 +569,12 @@ static void esdhc_init(struct platform_device *pdev, struct sdhci_host *host)
- 	u16 host_ver;
- 
- 	pltfm_host = sdhci_priv(host);
--	esdhc = devm_kzalloc(&pdev->dev, sizeof(struct sdhci_esdhc),
--			     GFP_KERNEL);
-+	esdhc = sdhci_pltfm_priv(pltfm_host);
- 
- 	host_ver = sdhci_readw(host, SDHCI_HOST_VERSION);
- 	esdhc->vendor_ver = (host_ver & SDHCI_VENDOR_VER_MASK) >>
- 			     SDHCI_VENDOR_VER_SHIFT;
- 	esdhc->spec_ver = host_ver & SDHCI_SPEC_VER_MASK;
--
--	pltfm_host->priv = esdhc;
- }
- 
- static int sdhci_esdhc_probe(struct platform_device *pdev)
-@@ -589,9 +586,11 @@ static int sdhci_esdhc_probe(struct platform_device *pdev)
- 	np = pdev->dev.of_node;
- 
- 	if (of_get_property(np, "little-endian", NULL))
--		host = sdhci_pltfm_init(pdev, &sdhci_esdhc_le_pdata, 0);
-+		host = sdhci_pltfm_init(pdev, &sdhci_esdhc_le_pdata,
-+					sizeof(struct sdhci_esdhc));
- 	else
--		host = sdhci_pltfm_init(pdev, &sdhci_esdhc_be_pdata, 0);
-+		host = sdhci_pltfm_init(pdev, &sdhci_esdhc_be_pdata,
-+					sizeof(struct sdhci_esdhc));
- 
+-	msm_host->sdhci_msm_pdata.ops = &sdhci_msm_ops;
+-	host = sdhci_pltfm_init(pdev, &msm_host->sdhci_msm_pdata, 0);
++	host = sdhci_pltfm_init(pdev, &sdhci_msm_pdata, 0);
  	if (IS_ERR(host))
  		return PTR_ERR(host);
+ 
+@@ -522,9 +526,6 @@ static int sdhci_msm_probe(struct platform_device *pdev)
+ 	/* Set HC_MODE_EN bit in HC_MODE register */
+ 	writel_relaxed(HC_MODE_EN, (msm_host->core_mem + CORE_HC_MODE));
+ 
+-	host->quirks |= SDHCI_QUIRK_BROKEN_CARD_DETECTION;
+-	host->quirks |= SDHCI_QUIRK_SINGLE_POWER_WRITE;
+-
+ 	host_version = readw_relaxed((host->ioaddr + SDHCI_HOST_VERSION));
+ 	dev_dbg(&pdev->dev, "Host Version: 0x%x Vendor Version 0x%x\n",
+ 		host_version, ((host_version & SDHCI_VENDOR_VER_MASK) >>
 -- 
 2.7.0.rc3
