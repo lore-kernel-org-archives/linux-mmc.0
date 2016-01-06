@@ -1,25 +1,23 @@
-From: Jisheng Zhang <jszhang-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>
+From: Ludovic Desroches <ludovic.desroches@atmel.com>
 Subject: Re: [PATCH v2 06/12] mmc: sdhci-of-at91: use sdhci_pltfm_init for
  private allocation
-Date: Wed, 6 Jan 2016 17:34:54 +0800
-Message-ID: <20160106173454.2e1b5241@xhacker>
+Date: Wed, 6 Jan 2016 11:11:55 +0100
+Message-ID: <20160106101155.GI2334@odux.rfo.atmel.com>
 References: <1452052565-4232-1-git-send-email-jszhang@marvell.com>
-	<1452052565-4232-7-git-send-email-jszhang@marvell.com>
-	<20160106090215.GG2334@odux.rfo.atmel.com>	<20160106172248.7ab58050@xhacker>
+ <1452052565-4232-7-git-send-email-jszhang@marvell.com>
+ <20160106090215.GG2334@odux.rfo.atmel.com>
+ <20160106172248.7ab58050@xhacker>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="US-ASCII"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Type: text/plain; charset="us-ascii"
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Disposition: inline
 In-Reply-To: <20160106172248.7ab58050@xhacker>
-Sender: linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ludovic Desroches <ludovic.desroches-AIFe0yeh4nAAvxtiuMwx3w@public.gmane.org>
-Cc: linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kernel-F5mvAk5X5gdBDgjK7y7TUQ@public.gmane.org, arnd-r2nGTMty4D4@public.gmane.org, swarren-3lzwWm7+Weoh9ZMKESR00Q@public.gmane.org, srinivas.kandagatla-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org, lee-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, michal.simek-gjFFaj9aHVfQT0dZR+AlfA@public.gmane.org, patrice.chotard-qxv4g6HH51o@public.gmane.org, eric-WhKQ6XTQaPysTnJN9+BGXg@public.gmane.org, thierry.reding-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org, linux-rpi-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, sebastian.hesselbarth-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org, soren.brinkmann-gjFFaj9aHVfQT0dZR+AlfA@public.gmane.org, maxime.coquelin-qxv4g6HH51o@public.gmane.org
+Sender: linux-kernel-owner@vger.kernel.org
+To: Jisheng Zhang <jszhang@marvell.com>
+Cc: Ludovic Desroches <ludovic.desroches@atmel.com>, ulf.hansson@linaro.org, arnd@arndb.de, swarren@wwwdotorg.org, lee@kernel.org, eric@anholt.net, michal.simek@xilinx.com, soren.brinkmann@xilinx.com, srinivas.kandagatla@gmail.com, maxime.coquelin@st.com, patrice.chotard@st.com, thierry.reding@gmail.com, sebastian.hesselbarth@gmail.com, linux-mmc@vger.kernel.org, linux-rpi-kernel@lists.infradead.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, kernel@stlinux.com, linux-tegra@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-Dear Ulf,
-
-On Wed, 6 Jan 2016 17:22:48 +0800 Jisheng Zhang wrote:
-
+On Wed, Jan 06, 2016 at 05:22:48PM +0800, Jisheng Zhang wrote:
 > Dear Ludovic,
 > 
 > On Wed, 6 Jan 2016 10:02:15 +0100 Ludovic Desroches wrote:
@@ -33,7 +31,7 @@ On Wed, 6 Jan 2016 17:22:48 +0800 Jisheng Zhang wrote:
 > > +       struct sdhci_at91_priv  *priv = sdhci_pltfm_priv(pltfm_host);
 > > 
 > > is missing in sdhci_at91_runtime_suspend and sdhci_at91_runtime_resume
-> > causing a NULL pointer dereference.  
+> > causing a NULL pointer dereference.
 > 
 > My code base is 4.4-rc8.
 > I didn't see sdhci_at91_runtime_suspend and sdhci_at91_runtime_resume
@@ -42,11 +40,8 @@ On Wed, 6 Jan 2016 17:22:48 +0800 Jisheng Zhang wrote:
 > 
 > So the question is which code base should I use? 
 
-To smooth the patch progress,
-I'll post v3 based on git://git.linaro.org/people/ulf.hansson/mmc next branch
-
-Thanks,
-Jisheng
+I did the test on next-20151222 since next-20160104 is broken for many
+ARM SoC.
 
 > 
 > Hi Ulf,
@@ -57,14 +52,14 @@ Jisheng
 > Jisheng
 > 
 > > 
-> > On Wed, Jan 06, 2016 at 11:55:59AM +0800, Jisheng Zhang wrote:  
+> > On Wed, Jan 06, 2016 at 11:55:59AM +0800, Jisheng Zhang wrote:
 > > > Commit 0e748234293f ("mmc: sdhci: Add size for caller in init+register")
 > > > allows users of sdhci_pltfm to allocate private space in calls to
 > > > sdhci_pltfm_init+sdhci_pltfm_register. This patch migrates the
 > > > sdhci-of-at91 driver to this allocation.
 > > > 
-> > > Signed-off-by: Jisheng Zhang <jszhang-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>
-> > > Acked-by: Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>
+> > > Signed-off-by: Jisheng Zhang <jszhang@marvell.com>
+> > > Acked-by: Arnd Bergmann <arnd@arndb.de>
 > > > ---
 > > >  drivers/mmc/host/sdhci-of-at91.c | 21 ++++++++-------------
 > > >  1 file changed, 8 insertions(+), 13 deletions(-)
@@ -83,9 +78,9 @@ Jisheng
 > > > -		return -ENOMEM;
 > > > -	}
 > > > +	host = sdhci_pltfm_init(pdev, soc_data,
-> > > +				sizeof(*priv));    
+> > > +				sizeof(*priv));  
 > > 
-> > Can be on the same line.  
+> > Can be on the same line.
 > 
 > Great! will do in v3.
 > 
@@ -93,7 +88,7 @@ Jisheng
 > > Regards
 > > 
 > > Ludovic
-> >   
+> > 
 > > > +	if (IS_ERR(host))
 > > > +		return PTR_ERR(host);
 > > > +
@@ -134,10 +129,5 @@ Jisheng
 > > >  
 > > > -- 
 > > > 2.7.0.rc3
-> > >     
+> > >   
 > 
-> 
-> _______________________________________________
-> linux-arm-kernel mailing list
-> linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
-> http://lists.infradead.org/mailman/listinfo/linux-arm-kernel
