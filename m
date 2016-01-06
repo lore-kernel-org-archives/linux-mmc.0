@@ -1,58 +1,80 @@
 From: Jisheng Zhang <jszhang@marvell.com>
-Subject: [PATCH v2 00/12] mmc: use sdhci_pltfm_init for private allocation and clean up
-Date: Wed, 6 Jan 2016 11:55:53 +0800
-Message-ID: <1452052565-4232-1-git-send-email-jszhang@marvell.com>
+Subject: [PATCH v2 06/12] mmc: sdhci-of-at91: use sdhci_pltfm_init for private allocation
+Date: Wed, 6 Jan 2016 11:55:59 +0800
+Message-ID: <1452052565-4232-7-git-send-email-jszhang@marvell.com>
+References: <1452052565-4232-1-git-send-email-jszhang@marvell.com>
 Mime-Version: 1.0
 Content-Type: text/plain
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mx0b-0016f401.pphosted.com ([67.231.156.173]:65157 "EHLO
-	mx0b-0016f401.pphosted.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751935AbcAFEA3 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 5 Jan 2016 23:00:29 -0500
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1452052565-4232-1-git-send-email-jszhang@marvell.com>
+Sender: linux-kernel-owner@vger.kernel.org
 To: ulf.hansson@linaro.org, arnd@arndb.de, swarren@wwwdotorg.org, lee@kernel.org, eric@anholt.net, michal.simek@xilinx.com, soren.brinkmann@xilinx.com, ludovic.desroches@atmel.com, srinivas.kandagatla@gmail.com, maxime.coquelin@st.com, patrice.chotard@st.com, thierry.reding@gmail.com, sebastian.hesselbarth@gmail.com
 Cc: linux-mmc@vger.kernel.org, linux-rpi-kernel@lists.infradead.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, kernel@stlinux.com, linux-tegra@vger.kernel.org, Jisheng Zhang <jszhang@marvell.com>
+List-Id: linux-mmc@vger.kernel.org
 
-These patches are to complete the TODOs in Commit 0e748234293f ("mmc:
-sdhci: Add size for caller in init+register"), I.E:
+Commit 0e748234293f ("mmc: sdhci: Add size for caller in init+register")
+allows users of sdhci_pltfm to allocate private space in calls to
+sdhci_pltfm_init+sdhci_pltfm_register. This patch migrates the
+sdhci-of-at91 driver to this allocation.
 
-- todo: migrate clients to using allocation this way
-- todo: remove priv variable once migration is complete
+Signed-off-by: Jisheng Zhang <jszhang@marvell.com>
+Acked-by: Arnd Bergmann <arnd@arndb.de>
+---
+ drivers/mmc/host/sdhci-of-at91.c | 21 ++++++++-------------
+ 1 file changed, 8 insertions(+), 13 deletions(-)
 
-Since v1:
- - add new patch03 to factorise sdhci_msm_pdata outisde of sdhci_msm_host.
-   This is to fix drivers/mmc/host/sdhci-msm.c:440:32: warning: 'msm_host'
-   is used uninitialized in this function [-Wuninitialized]
- - Add Arnd's Ack for all patches except patch3 which is new in v2
-
-Jisheng Zhang (12):
-  mmc: sdhci-bcm2835: use sdhci_pltfm_init for private allocation
-  mmc: sdhci-esdhc-imx: use sdhci_pltfm_init for private allocation
-  mmc: sdhci-msm: factorise sdhci_msm_pdata outisde of sdhci_msm_host
-  mmc: sdhci-msm: use sdhci_pltfm_init for private allocation
-  mmc: sdhci-of-arasan: use sdhci_pltfm_init for private allocation
-  mmc: sdhci-of-at91: use sdhci_pltfm_init for private allocation
-  mmc: sdhci-of-esdhc: use sdhci_pltfm_init for private allocation
-  mmc: sdhci-pxav3: use sdhci_pltfm_init for private allocation
-  mmc: sdhci-st: use sdhci_pltfm_init for private allocation
-  mmc: sdhci-tegra: use sdhci_pltfm_init for private allocation
-  mmc: sdhci-pxav2: remove unnecessary assignment of pltfm_host->priv
-  mmc: sdhci-pltfm: remove priv variable from sdhci_pltfm_host
-
- drivers/mmc/host/sdhci-bcm2835.c   | 14 +++-----------
- drivers/mmc/host/sdhci-esdhc-imx.c | 38 +++++++++++++++++---------------------
- drivers/mmc/host/sdhci-msm.c       | 24 +++++++++++-------------
- drivers/mmc/host/sdhci-of-arasan.c | 25 ++++++++++---------------
- drivers/mmc/host/sdhci-of-at91.c   | 21 ++++++++-------------
- drivers/mmc/host/sdhci-of-esdhc.c  | 17 ++++++++---------
- drivers/mmc/host/sdhci-pltfm.h     |  1 -
- drivers/mmc/host/sdhci-pxav2.c     |  1 -
- drivers/mmc/host/sdhci-pxav3.c     | 21 +++++++++------------
- drivers/mmc/host/sdhci-st.c        | 36 ++++++++++++++++++------------------
- drivers/mmc/host/sdhci-tegra.c     | 19 ++++++-------------
- 11 files changed, 90 insertions(+), 127 deletions(-)
-
+diff --git a/drivers/mmc/host/sdhci-of-at91.c b/drivers/mmc/host/sdhci-of-at91.c
+index 06d0b50..765eb09 100644
+--- a/drivers/mmc/host/sdhci-of-at91.c
++++ b/drivers/mmc/host/sdhci-of-at91.c
+@@ -68,11 +68,13 @@ static int sdhci_at91_probe(struct platform_device *pdev)
+ 		return -EINVAL;
+ 	soc_data = match->data;
+ 
+-	priv = devm_kzalloc(&pdev->dev, sizeof(*priv), GFP_KERNEL);
+-	if (!priv) {
+-		dev_err(&pdev->dev, "unable to allocate private data\n");
+-		return -ENOMEM;
+-	}
++	host = sdhci_pltfm_init(pdev, soc_data,
++				sizeof(*priv));
++	if (IS_ERR(host))
++		return PTR_ERR(host);
++
++	pltfm_host = sdhci_priv(host);
++	priv = sdhci_pltfm_priv(pltfm_host);
+ 
+ 	priv->mainck = devm_clk_get(&pdev->dev, "baseclk");
+ 	if (IS_ERR(priv->mainck)) {
+@@ -92,10 +94,6 @@ static int sdhci_at91_probe(struct platform_device *pdev)
+ 		return PTR_ERR(priv->gck);
+ 	}
+ 
+-	host = sdhci_pltfm_init(pdev, soc_data, 0);
+-	if (IS_ERR(host))
+-		return PTR_ERR(host);
+-
+ 	/*
+ 	 * The mult clock is provided by as a generated clock by the PMC
+ 	 * controller. In order to set the rate of gck, we have to get the
+@@ -135,9 +133,6 @@ static int sdhci_at91_probe(struct platform_device *pdev)
+ 	clk_prepare_enable(priv->mainck);
+ 	clk_prepare_enable(priv->gck);
+ 
+-	pltfm_host = sdhci_priv(host);
+-	pltfm_host->priv = priv;
+-
+ 	ret = mmc_of_parse(host->mmc);
+ 	if (ret)
+ 		goto clocks_disable_unprepare;
+@@ -163,7 +158,7 @@ static int sdhci_at91_remove(struct platform_device *pdev)
+ {
+ 	struct sdhci_host	*host = platform_get_drvdata(pdev);
+ 	struct sdhci_pltfm_host	*pltfm_host = sdhci_priv(host);
+-	struct sdhci_at91_priv	*priv = pltfm_host->priv;
++	struct sdhci_at91_priv	*priv = sdhci_pltfm_priv(pltfm_host);
+ 
+ 	sdhci_pltfm_unregister(pdev);
+ 
 -- 
 2.7.0.rc3
-
