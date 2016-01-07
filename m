@@ -1,107 +1,76 @@
-From: Ludovic Desroches <ludovic.desroches@atmel.com>
-Subject: Re: [PATCH v3 06/12] mmc: sdhci-of-at91: use sdhci_pltfm_init for
- private allocation
-Date: Wed, 6 Jan 2016 14:13:16 +0100
-Message-ID: <20160106131316.GJ2334@odux.rfo.atmel.com>
-References: <1452076303-1960-1-git-send-email-jszhang@marvell.com>
- <1452076303-1960-7-git-send-email-jszhang@marvell.com>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: Re: [PATCH] mmc: host: arasan: sdhci-of-arasan: Remove no-hispd and
+ no-cmd23 quirks for sdhci-arasan4.9a
+Date: Thu, 07 Jan 2016 10:33:28 +0900
+Message-ID: <568DC068.6020602@samsung.com>
+References: <1450877391-3029-1-git-send-email-rsahu@apm.com>
+ <CAFd313ziJ_zgxQ11J6e=ueRLFKXFOsDPg_evRDK2FGQC5rOmfA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <1452076303-1960-7-git-send-email-jszhang@marvell.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Jisheng Zhang <jszhang@marvell.com>
-Cc: ulf.hansson@linaro.org, arnd@arndb.de, ludovic.desroches@atmel.com, swarren@wwwdotorg.org, lee@kernel.org, eric@anholt.net, michal.simek@xilinx.com, soren.brinkmann@xilinx.com, srinivas.kandagatla@gmail.com, maxime.coquelin@st.com, patrice.chotard@st.com, thierry.reding@gmail.com, sebastian.hesselbarth@gmail.com, linux-mmc@vger.kernel.org, linux-rpi-kernel@lists.infradead.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, kernel@stlinux.com, linux-tegra@vger.kernel.org
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mailout4.samsung.com ([203.254.224.34]:33603 "EHLO
+	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752196AbcAGBdf (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 6 Jan 2016 20:33:35 -0500
+In-reply-to: <CAFd313ziJ_zgxQ11J6e=ueRLFKXFOsDPg_evRDK2FGQC5rOmfA@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Rameshwar Sahu <rsahu@apm.com>, ulf.hansson@linaro.org, michal.simek@xilinx.com, soren.brinkmann@xilinx.com
+Cc: linux-mmc@vger.kernel.org, Arnd Bergmann <arnd@arndb.de>, linux-kernel@vger.kernel.org, devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, jcm@redhat.com, patches@apm.com, Kaustubh Gondkar <kgondkar@apm.com>
 
-On Wed, Jan 06, 2016 at 06:31:37PM +0800, Jisheng Zhang wrote:
-> Commit 0e748234293f ("mmc: sdhci: Add size for caller in init+register")
-> allows users of sdhci_pltfm to allocate private space in calls to
-> sdhci_pltfm_init+sdhci_pltfm_register. This patch migrates the
-> sdhci-of-at91 driver to this allocation.
+Hi,
+
+On 01/05/2016 07:25 PM, Rameshwar Sahu wrote:
+> Hi Ulf,
 > 
-> Signed-off-by: Jisheng Zhang <jszhang@marvell.com>
-> Acked-by: Arnd Bergmann <arnd@arndb.de>
+> On Wed, Dec 23, 2015 at 6:59 PM, Rameshswar Prasad Sahu <rsahu@apm.com> wrote:
+>> From: Rameshwar Prasad Sahu <rsahu@apm.com>
+>>
+>> The Arason SD host controller supports set block count command (cmd23)
+>> and high speed mode. This patch re-enable both of these features that
+>> was disabled. For device that doesn't support high speed, it should
+>> configure its capability register accordingly instead disables it
+>> explicitly.
+>>
+>> Signed-off-by: Rameshwar Prasad Sahu <rsahu@apm.com>
+>> ---
+>>  drivers/mmc/host/sdhci-of-arasan.c |    5 -----
+>>  1 files changed, 0 insertions(+), 5 deletions(-)
+>>
+>> diff --git a/drivers/mmc/host/sdhci-of-arasan.c b/drivers/mmc/host/sdhci-of-arasan.c
+>> index 75379cb..5d9fdb3 100644
+>> --- a/drivers/mmc/host/sdhci-of-arasan.c
+>> +++ b/drivers/mmc/host/sdhci-of-arasan.c
+>> @@ -172,11 +172,6 @@ static int sdhci_arasan_probe(struct platform_device *pdev)
+>>                 goto clk_disable_all;
+>>         }
+>>
+>> -       if (of_device_is_compatible(pdev->dev.of_node, "arasan,sdhci-4.9a")) {
+>> -               host->quirks |= SDHCI_QUIRK_NO_HISPD_BIT;
+>> -               host->quirks2 |= SDHCI_QUIRK2_HOST_NO_CMD23;
 
-Acked-by: Ludovic Desroches <ludovic.desroches@atmel.com>
+I'm not sure what's correct since i didn't have any information for arasan.
+But in case of exynos, SDHCI_QUIRK_NO_HISPD_BIT is used because that bit is used as other purpose.
+If your SoC is not used anymore, i think this patch looks good.
 
-Thanks
+Best Regards,
+Jaehoon Chung
 
-> ---
->  drivers/mmc/host/sdhci-of-at91.c | 24 +++++++++---------------
->  1 file changed, 9 insertions(+), 15 deletions(-)
+>> -       }
+>> -
+>>         sdhci_get_of_property(pdev);
+>>         pltfm_host = sdhci_priv(host);
+>>         pltfm_host->priv = sdhci_arasan;
+>> --
+>> 1.7.1
+>>
 > 
-> diff --git a/drivers/mmc/host/sdhci-of-at91.c b/drivers/mmc/host/sdhci-of-at91.c
-> index 7e7d8f0..43f729f 100644
-> --- a/drivers/mmc/host/sdhci-of-at91.c
-> +++ b/drivers/mmc/host/sdhci-of-at91.c
-> @@ -58,7 +58,7 @@ static int sdhci_at91_runtime_suspend(struct device *dev)
->  {
->  	struct sdhci_host *host = dev_get_drvdata(dev);
->  	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> -	struct sdhci_at91_priv *priv = pltfm_host->priv;
-> +	struct sdhci_at91_priv *priv = sdhci_pltfm_priv(pltfm_host);
->  	int ret;
->  
->  	ret = sdhci_runtime_suspend_host(host);
-> @@ -74,7 +74,7 @@ static int sdhci_at91_runtime_resume(struct device *dev)
->  {
->  	struct sdhci_host *host = dev_get_drvdata(dev);
->  	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> -	struct sdhci_at91_priv *priv = pltfm_host->priv;
-> +	struct sdhci_at91_priv *priv = sdhci_pltfm_priv(pltfm_host);
->  	int ret;
->  
->  	ret = clk_prepare_enable(priv->mainck);
-> @@ -124,11 +124,12 @@ static int sdhci_at91_probe(struct platform_device *pdev)
->  		return -EINVAL;
->  	soc_data = match->data;
->  
-> -	priv = devm_kzalloc(&pdev->dev, sizeof(*priv), GFP_KERNEL);
-> -	if (!priv) {
-> -		dev_err(&pdev->dev, "unable to allocate private data\n");
-> -		return -ENOMEM;
-> -	}
-> +	host = sdhci_pltfm_init(pdev, soc_data, sizeof(*priv));
-> +	if (IS_ERR(host))
-> +		return PTR_ERR(host);
-> +
-> +	pltfm_host = sdhci_priv(host);
-> +	priv = sdhci_pltfm_priv(pltfm_host);
->  
->  	priv->mainck = devm_clk_get(&pdev->dev, "baseclk");
->  	if (IS_ERR(priv->mainck)) {
-> @@ -148,10 +149,6 @@ static int sdhci_at91_probe(struct platform_device *pdev)
->  		return PTR_ERR(priv->gck);
->  	}
->  
-> -	host = sdhci_pltfm_init(pdev, soc_data, 0);
-> -	if (IS_ERR(host))
-> -		return PTR_ERR(host);
-> -
->  	/*
->  	 * The mult clock is provided by as a generated clock by the PMC
->  	 * controller. In order to set the rate of gck, we have to get the
-> @@ -191,9 +188,6 @@ static int sdhci_at91_probe(struct platform_device *pdev)
->  	clk_prepare_enable(priv->mainck);
->  	clk_prepare_enable(priv->gck);
->  
-> -	pltfm_host = sdhci_priv(host);
-> -	pltfm_host->priv = priv;
-> -
->  	ret = mmc_of_parse(host->mmc);
->  	if (ret)
->  		goto clocks_disable_unprepare;
-> @@ -230,7 +224,7 @@ static int sdhci_at91_remove(struct platform_device *pdev)
->  {
->  	struct sdhci_host	*host = platform_get_drvdata(pdev);
->  	struct sdhci_pltfm_host	*pltfm_host = sdhci_priv(host);
-> -	struct sdhci_at91_priv	*priv = pltfm_host->priv;
-> +	struct sdhci_at91_priv	*priv = sdhci_pltfm_priv(pltfm_host);
->  
->  	pm_runtime_get_sync(&pdev->dev);
->  	pm_runtime_disable(&pdev->dev);
-> -- 
-> 2.7.0.rc3
+> Any comment on this patch ??
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 > 
+> 
+
