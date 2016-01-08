@@ -1,56 +1,72 @@
-From: Martin Fuzzey <mfuzzey@parkeon.com>
-Subject: [PATCH] mmc: pwrseq_simple: Support assigned-clocks
-Date: Fri, 08 Jan 2016 10:59:17 +0100
-Message-ID: <20160108095917.32335.11094.stgit@localhost>
+From: Javier Martinez Canillas <javier@osg.samsung.com>
+Subject: Re: [PATCH v2 06/12] mmc: pwrseq: add support for power-on sequencing
+ through DT
+Date: Fri, 8 Jan 2016 09:22:31 -0300
+Message-ID: <568FAA07.1010509@osg.samsung.com>
+References: <1452155155-16232-1-git-send-email-wxt@rock-chips.com>
+ <1452155155-16232-7-git-send-email-wxt@rock-chips.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
+Content-Type: text/plain; charset=windows-1252
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from ip83.parkeon.com ([213.152.31.83]:38320 "EHLO mta2.parkeon.com"
+Received: from lists.s-osg.org ([54.187.51.154]:49301 "EHLO lists.s-osg.org"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751314AbcAHJ7T (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 8 Jan 2016 04:59:19 -0500
+	id S1751233AbcAHMWl (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 8 Jan 2016 07:22:41 -0500
+In-Reply-To: <1452155155-16232-7-git-send-email-wxt@rock-chips.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org
-Cc: linux-arm-kernel@lists.infradead.org
+To: Caesar Wang <wxt@rock-chips.com>, Heiko Stuebner <heiko@sntech.de>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-rockchip@lists.infradead.org, leecam@google.com, leozwang@google.com, keescook@google.com, Srinivas Kandagatla <srinivas.kandagatla@linaro.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Alexandre Courbot <acourbot@nvidia.com>, NeilBrown <neil@brown.name>
 
-The clock subsystem now allows clock rates and parents to be configured
-in the device tree.
+Hello Caesar,
 
-This requires calling of_clk_set_defaults() which is done automatically
-for platform, i2c, spi devices. Since pwrseq_simple does not fit into
-those catagories we must do it ourself.
+On 01/07/2016 05:25 AM, Caesar Wang wrote:
+> This patch enables support for power-on sequencing of SDIO
+> peripherals through DT.
+>
 
-With this patch the standard assigned-clocks, assigned-clock-rates,
-assigned-clock-parents DT properties to be used in pwrseq_simple nodes.
+I think the subject line and this first paragraph are misleading since
+the simple power sequence provider already supports power-on sequencing.
 
-Signed-off-by: Martin Fuzzey <mfuzzey@parkeon.com>
----
- drivers/mmc/core/pwrseq_simple.c |    5 +++++
- 1 file changed, 5 insertions(+)
-
-diff --git a/drivers/mmc/core/pwrseq_simple.c b/drivers/mmc/core/pwrseq_simple.c
-index 4d2962b..fd8f38e 100644
---- a/drivers/mmc/core/pwrseq_simple.c
-+++ b/drivers/mmc/core/pwrseq_simple.c
-@@ -8,6 +8,7 @@
-  *  Simple MMC power sequence management
-  */
- #include <linux/clk.h>
-+#include <linux/clk/clk-conf.h>
- #include <linux/kernel.h>
- #include <linux/slab.h>
- #include <linux/device.h>
-@@ -108,6 +109,10 @@ struct mmc_pwrseq *mmc_pwrseq_simple_alloc(struct mmc_host *host,
- 	if (!pwrseq)
- 		return ERR_PTR(-ENOMEM);
+This patch does not add or enable support but extends the current support
+to also enable a regulator as a part of the SDIO chip power on sequencing.
  
-+	ret = of_clk_set_defaults(dev->of_node, false);
-+	if (ret)
-+		goto free;
-+
- 	pwrseq->ext_clk = clk_get(dev, "ext_clock");
- 	if (IS_ERR(pwrseq->ext_clk) &&
- 	    PTR_ERR(pwrseq->ext_clk) != -ENOENT) {
+> In general, it's quite common that wifi modules and other similar
+> peripherals have several signals in addition to the SDIO interface that
+> needs wiggling before the module will power on.
+> 
+> For example:
+> we need enable wifi module power to via the WL_REG_ON
+> pin, we need enable it as the regulator if this pin is connected to
+> the gpio of cpu.
+>
 
+This part confuses me, so does your chip have an actual regulator that
+needs to be enabled or is just a fake regulator whose gpio property is
+used not to enable the regulator but to toggle the WL_REG_ON pin of
+the WiFi chip?
+ 
+> Maybe, someone will say that can pull up/down from dts.
+> Unfortunately some SoCs can't support pinctrl pull up/down in
+> internal.
+>
+
+Can you please elaborate on this? AFAIU this limitation is the reason
+why you went with the regulator approach so I think it deserve a more
+deep explanation.
+ 
+> Anyway, we can add this patch to supprt the power-on sequencing for
+
+s/supprt/support
+
+> sdio.
+> 
+> Signed-off-by: Caesar Wang <wxt@rock-chips.com>
+> 
+
+Best regards,
+-- 
+Javier Martinez Canillas
+Open Source Group
+Samsung Research America
