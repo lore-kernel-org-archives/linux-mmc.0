@@ -1,74 +1,132 @@
-From: Yangbo Lu <yangbo.lu@nxp.com>
-Subject: RE: [v4, 5/6] mmc: kconfig: select FSL_GUTS for MMC_SDHCI_OF_ESDHC
-Date: Fri, 8 Jan 2016 06:24:31 +0000
-Message-ID: <HE1PR04MB0889C5408E7C372AC397D464F8F60@HE1PR04MB0889.eurprd04.prod.outlook.com>
+From: Scott Wood <oss@buserror.net>
+Subject: Re: [v4, 5/6] mmc: kconfig: select FSL_GUTS for MMC_SDHCI_OF_ESDHC
+Date: Fri, 08 Jan 2016 00:34:32 -0600
+Message-ID: <1452234872.19133.29.camel@buserror.net>
 References: <1450067067-44869-1-git-send-email-yangbo.lu@freescale.com>
 	 <1450067067-44869-6-git-send-email-yangbo.lu@freescale.com>
 	 <CAPDyKFo1g5_4bpYnTO96tGfVGStysN0FnmbSx-Se4tOa7f3rZQ@mail.gmail.com>
 	 <1450116253.15946.353.camel@freescale.com>
 	 <CAPDyKFrKSMC0uo8re3CxjNCUsVnEMau=GTKq=v_3ooNnQxw2Eg@mail.gmail.com>
 	 <CAPDyKFoYxM4Nv_pHCZbGzuswMCXTLyj6CYgLjYnRguscUs9LrQ@mail.gmail.com>
- <1451328478.18314.138.camel@freescale.com>
+	 <HE1PR04MB0889791AB9F06A5591D4CD5FF8FB0@HE1PR04MB0889.eurprd04.prod.outlook.com>
+	 <CAPDyKFqhRVh9XdY=2aMP5sL5kp+RkHV_tsA4=Oj_88e8NN9DCw@mail.gmail.com>
+	 <1451329828.18314.154.camel@freescale.com>
+	 <HE1PR04MB0889469615D576548DF0EE75F8F40@HE1PR04MB0889.eurprd04.prod.outlook.com>
+	 <AM3PR04MB530AAF1632EA442F05C95BF91F50@AM3PR04MB530.eurprd04.prod.outlook.com>
+	 <HE1PR04MB0889197B75CA5C8FDB793F87F8F60@HE1PR04MB0889.eurprd04.prod.outlook.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-am1on0060.outbound.protection.outlook.com ([157.56.112.60]:22240
-	"EHLO emea01-am1-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1750766AbcAHGYf (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 8 Jan 2016 01:24:35 -0500
-Content-Language: en-US
+Received: from host.buserror.net ([209.198.135.123]:35769 "EHLO
+	host.buserror.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750766AbcAHGxS (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 8 Jan 2016 01:53:18 -0500
+In-Reply-To: <HE1PR04MB0889197B75CA5C8FDB793F87F8F60@HE1PR04MB0889.eurprd04.prod.outlook.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Scott Wood <scottwood@freescale.com>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, "X.Xie@freescale.com" <X.Xie@freescale.com>, Leo li <LeoLi@freescale.com>
+To: Yangbo Lu <yangbo.lu@nxp.com>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: "Lu Y.B." <yangbo.lu@freescale.com>, linux-mmc <linux-mmc@vger.kernel.org>, Xiaobo Xie <X.Xie@freescale.com>, Leo li <LeoLi@freescale.com>
 
-PiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBZYW5nYm8gTHUNCj4gU2VudDog
-V2VkbmVzZGF5LCBKYW51YXJ5IDA2LCAyMDE2IDM6MTggUE0NCj4gVG86IFNjb3R0IFdvb2Q7IFVs
-ZiBIYW5zc29uDQo+IENjOiBZYW5nYm8gTHU7IGxpbnV4LW1tYzsgWC5YaWVAZnJlZXNjYWxlLmNv
-bTsgTGVvIGxpDQo+IFN1YmplY3Q6IFJFOiBbdjQsIDUvNl0gbW1jOiBrY29uZmlnOiBzZWxlY3Qg
-RlNMX0dVVFMgZm9yDQo+IE1NQ19TREhDSV9PRl9FU0RIQw0KPiANCj4gPiAtLS0tLU9yaWdpbmFs
-IE1lc3NhZ2UtLS0tLQ0KPiA+IEZyb206IFNjb3R0IFdvb2QgW21haWx0bzpzY290dHdvb2RAZnJl
-ZXNjYWxlLmNvbV0NCj4gPiBTZW50OiBUdWVzZGF5LCBEZWNlbWJlciAyOSwgMjAxNSAyOjQ4IEFN
-DQo+ID4gVG86IFVsZiBIYW5zc29uDQo+ID4gQ2M6IFlhbmdibyBMdTsgbGludXgtbW1jOyBYLlhp
-ZUBmcmVlc2NhbGUuY29tOyBMZW8gbGkNCj4gPiBTdWJqZWN0OiBSZTogW3Y0LCA1LzZdIG1tYzog
-a2NvbmZpZzogc2VsZWN0IEZTTF9HVVRTIGZvcg0KPiA+IE1NQ19TREhDSV9PRl9FU0RIQw0KPiA+
-DQo+ID4gT24gVGh1LCAyMDE1LTEyLTE3IGF0IDEyOjMwICswMTAwLCBVbGYgSGFuc3NvbiB3cm90
-ZToNCj4gPiA+IFsuLi5dDQo+ID4gPg0KPiA+ID4gPiA+DQo+ID4gPiA+ID4gQW5kIEkgdGhpbmsg
-c3R1YnMgZm9yIHJlYWRpbmcgU1ZSIGlzIHF1aXRlIGEgYmFkIGlkZWEuICBJdCdsbA0KPiA+ID4g
-PiA+IG1ha2UgdGhlIGRyaXZlciBidWlsZCBidXQgaXQgd2lsbCBzaWxlbnRseSBub3QgYmUgYWJs
-ZSB0byBhcHBseQ0KPiA+ID4gPiA+IFNWUi1iYXNlZCB3b3JrYXJvdW5kcy4NCj4gPiA+ID4NCj4g
-PiA+ID4gSXQgZG9lc24ndCBoYXZlIHRvIGJlICJzaWxlbnQiLCB0aGUgZHJpdmVyIGNhbiByZXR1
-cm4gYW4gZXJyb3INCj4gPiA+ID4gKGFuZCBwcmludCBlcnJvciBtZXNzYWdlcykgZnJvbSBpdHMg
-LT5wcm9iZSgpIG1ldGhvZCwgaWYgdGhlIGNhbGxzDQo+ID4gPiA+IHRvIHRoZSBHVVRTIGRyaXZl
-ciBmYWlscy4NCj4gPiA+ID4NCj4gPiA+ID4gQW55d2F5LCBJIG1lbnRpb25lZCB0aGlzIGlkZWEg
-b25seSB0byB1bmRlcnN0YW5kIHRoZSBuZWVkIGZvcg0KPiA+ID4gPiAqb3B0aW9uYWwqIEdVVFMg
-c3VwcG9ydHMuIFBlcmhhcHMgdGhlcmUgaXMgYSBjcm9zcyBTT0MgZHJpdmVycw0KPiA+ID4gPiB0
-aGF0IGZvciBzb21lIHBsYXRmb3JtcyBkZXBlbmRzIG9uIEdVVFMgYnV0IG9uIG90aGVycyBpdCBk
-b2Vzbid0Lg0KPiA+ID4gPg0KPiA+ID4gPiBNYXliZSB0aGF0IGlzbid0IGNhc2UgdGhlbiE/DQo+
-ID4gPg0KPiA+ID4gQ2FuIHlvdSBwbGVhc2UgYW5zd2VyIHRoaXMgcXVlc3Rpb24hPw0KPiA+ID4N
-Cj4gPiA+IEFjY29yZGluZyB0byB0aGUgZWFybGllciB2ZXJzaW9ucyBvZiB0aGlzIHBhdGNoc2V0
-IGFuZCBmcm9tIHlvdXINCj4gPiA+IGNvbW1lbnRzIFsxXSwgaXQgKmRvKiBzZWVtcyBsaWtlIHRo
-ZSBHVVRTIGRyaXZlciBtYXkgYmUgb3B0aW9uYWwgYW5kDQo+ID4gPiB0aHVzIHN0dWJzIGNvdWxk
-IGFkZHJlc3MgdGhpcy4NCj4gPg0KPiA+IEknZCByYXRoZXIgaXQgbm90IGJlIG9wdGlvbmFsIGF0
-IGJ1aWxkIHRpbWUgZm9yIHRoZSByZWFzb24gSSBleHBsYWluZWQNCj4gPiBhYm92ZS4NCj4gPiAg
-SXQgd291bGQgYmUgdG9vIGVhc3kgZm9yIHVzZXJzIHRvIGFjY2lkZW50YWxseSBub3QgZW5hYmxl
-IHRoZSBndXRzDQo+ID4gZHJpdmVyIGFuZCBtaXNzIHRoZSB3b3JrYXJvdW5kLiAgRXZlbiBpZiBh
-biBlcnJvciBpcyBwcmludGVkIGl0J3MgZWFzeQ0KPiA+IHRvIG1pc3MgYW1vbmcgYWxsIHRoZSBi
-b290IHNwYW0gLS0gYW5kIGlmIHRoZXJlJ3MgYW55IGxlZ2l0aW1hdGUNCj4gPiByZWFzb24gdG8g
-bm90IGhhdmUgdGhlIGRyaXZlciBlbmFibGVkIHRoZW4gd2h5IHdvdWxkIHRoYXQgYmUgYW4NCj4g
-PiAiZXJyb3IiPyAgSWYgdGhlIGd1dHMgZHJpdmVyIGZhaWxzIHRvIGJpbmQgKGUuZy4gcnVubmlu
-ZyBpbiBhIFZNLCBvciBhDQo+ID4gcGxhdGZvcm0gdGhlIGd1dHMgZHJpdmVyIGRvZXNuJ3QgcmVj
-b2duaXplKSB0aGF0J3MgYW5vdGhlciBtYXR0ZXIsIGJ1dA0KPiA+IHRoYXQgc2hvdWxkIGJlIGhh
-bmRsZWQgYnkgYW4gZXJyb3IgY2hlY2sgaW4gdGhlIGd1dHMgZHJpdmVyLCBub3QgYQ0KPiBidWls
-ZC10aW1lIHN0dWIuDQo+ID4NCj4gPiAtU2NvdHQNCj4gPg0KPiANCj4gW0x1IFlhbmdiby1CNDcw
-OTNdIEZvciB0aGUgJ29wdGlvbmFsIG9yIG5vdCBvcHRpb25hbCcgcHJvYmxlbSwgSSB0aGluaw0K
-PiBTY290dCdzIG9waW5pb24gaXMgcmVhc29uYWJsZS4NCj4gSWYgd2UgdXNlIGd1dHMgZHJpdmVy
-LCAnc2VsZWN0JyBjb3VsZCBhdm9pZCBtaXNzaW5nIHRoZSB3b3JrYXJvdW5kLg0KPiBJZiB3ZSB1
-c2Ugc3lzY29uLCBzZWxlY3QgaXMgYmV0dGVyIHRoYW4gJ2RlcGVuZCBvbicgc2luY2UgJ2RlcGVu
-ZCBvbicNCj4gbmVlZHMgdXNlciBzZWxmIHRvIGZpbmQgb3V0IHRoZSBkZXBlbmRlbmN5Lg0KPiAN
-Cj4gQW55d2F5LCB3ZSBzaG91bGQgY29udGludWUgdGhlIGRpc2N1c3Npb24gdG8gY29tZSB0byBh
-biBhZ3JlZW1lbnQgZmluYWxseS4NCj4gSSB3b3VsZCB2ZXJ5IGFwcHJlY2lhdGUhDQo+IA0KPiBU
-aGFua3MuDQo+IA0KPiANCltMdSBZYW5nYm8tQjQ3MDkzXSBIaSBVZmZlLCBkbyB5b3UgaGF2ZSBh
-bnkgY29tbWVudHM/IDopDQoNCg0K
+On Fri, 2016-01-08 at 06:17 +0000, Yangbo Lu wrote:
+> > -----Original Message-----
+> > From: Scott Wood
+> > Sent: Friday, January 08, 2016 6:24 AM
+> > To: Yangbo Lu; Scott Wood; Ulf Hansson
+> > Cc: Lu Y.B.; linux-mmc; Xiaobo Xie; Li Leo
+> > Subject: Re: [v4, 5/6] mmc: kconfig: select FSL_GUTS for
+> > MMC_SDHCI_OF_ESDHC
+> > 
+> > On 01/06/2016 12:58 AM, Yangbo Lu wrote:
+> > > > -----Original Message-----
+> > > > From: Scott Wood [mailto:scottwood@freescale.com]
+> > > > Sent: Tuesday, December 29, 2015 3:10 AM
+> > > > To: Ulf Hansson; Yangbo Lu
+> > > > Cc: Lu Yangbo-B47093; linux-mmc; Xie Xiaobo-R63061; Leo li
+> > > > Subject: Re: [v4, 5/6] mmc: kconfig: select FSL_GUTS for
+> > > > MMC_SDHCI_OF_ESDHC
+> > > > 
+> > > > On Mon, 2015-12-28 at 13:10 +0100, Ulf Hansson wrote:
+> > > > > On 28 December 2015 at 11:26, Yangbo Lu <yangbo.lu@nxp.com> wrote:
+> > > > > > > -----Original Message-----
+> > > > > > > From: Ulf Hansson [mailto:ulf.hansson@linaro.org]
+> > > > > > > Sent: Thursday, December 17, 2015 7:31 PM
+> > > > > > > To: Scott Wood
+> > > > > > > Cc: Lu Yangbo-B47093; linux-mmc; Xie Xiaobo-R63061; Leo li
+> > > > > > > Subject: Re: [v4, 5/6] mmc: kconfig: select FSL_GUTS for
+> > > > > > > MMC_SDHCI_OF_ESDHC
+> > > > > > > 
+> > > > > > > [...]
+> > > > > > > 
+> > > > > > > > > 
+> > > > > > > > > And I think stubs for reading SVR is quite a bad idea. 
+> > > > > > > > >  It'll
+> > > > > > > > > make the driver build but it will silently not be able to
+> > > > > > > > > apply
+> > > > > > > > > SVR-based
+> > > > > > > workarounds.
+> > > > > > > > 
+> > > > > > > > It doesn't have to be "silent", the driver can return an error
+> > > > > > > > (and print error messages) from its ->probe() method, if the
+> > > > > > > > calls to the GUTS driver fails.
+> > > > > > > > 
+> > > > > > > > Anyway, I mentioned this idea only to understand the need for
+> > > > > > > > *optional* GUTS supports. Perhaps there is a cross SOC drivers
+> > > > > > > > that for some platforms depends on GUTS but on others it
+> > > > > > > > doesn't.
+> > > > > > > > 
+> > > > > > > > Maybe that isn't case then!?
+> > > > > > > 
+> > > > > > > Can you please answer this question!?
+> > > > > > > 
+> > > > > > > According to the earlier versions of this patchset and from your
+> > > > > > > comments [1], it *do* seems like the GUTS driver may be optional
+> > > > > > > and thus stubs could address this.
+> > > > > > > 
+> > > > > > > Kind regards
+> > > > > > > Uffe
+> > > > > > > 
+> > > > > > > [1]
+> > > > > > > http://www.spinics.net/lists/linux-mmc/msg34412.html
+> > > > > > 
+> > > > > > [Lu Yangbo-B47093] Hi Scott and Uffe, In the earlier version, I'd
+> > > > > > like to use syscon support and only add 'syscon' compatible in the
+> > > > > > dts whose eSDHC needs to use it to get SVR.
+> > > > > > But I never thought this had caused so much discussion... :(
+> > > > > 
+> > > > > Sorry, I understand your frustration but that's life sometimes. :-)
+> > > > > 
+> > > > > To me, the syscon solution is more elegant...
+> > > > 
+> > > > The syscon patch was terrible.  It would have accessed a certain
+> > > > location in any node labelled "syscon" whether it was guts or not, in
+> > > > addition to the other complaints.
+> > > > 
+> > > > -Scott
+> > > 
+> > > [Lu Yangbo-B47093] As my understand, the syscon APIs would just check
+> > whether there is a 'syscon' compatible.
+> > > If no, the APIs return. We still could maintain a list of compatibles
+> > for guts if using syscon.
+> > 
+> > Where would that list of compatibles go?  Duplicated in every driver that
+> > needs something from guts?  Why decentralize the implementation?
+> > 
+> > > In my opinion, syscon and guts driver are just two method to get SVR.
+> > 
+> > The guts driver could eventually handle more than just SVR, and it could
+> > handle SVR better (e.g. on PPC fall back to reading the SPR if guts is
+> > unavailable).
+> > 
+> > -Scott
+> 
+> [Lu Yangbo-B47093] Ok... It seems no proper place to maintain the guts list
+> presently...
+> I also have had a question about the guts driver.
+> Could you suggest where to register the guts driver, to make it registered
+> for all QorIQ platforms and avoid unavailability to call it?
+
+In an initcall, just like other normal drivers.  Maybe subsys_initcall.
+
+-Scott
+
