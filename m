@@ -1,125 +1,74 @@
-From: Masahiro Yamada <yamada.masahiro@socionext.com>
-Subject: [PATCH] mmc: remove unnecessary assignment statements before return
-Date: Fri,  8 Jan 2016 11:15:25 +0900
-Message-ID: <1452219325-25357-1-git-send-email-yamada.masahiro@socionext.com>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: Masahiro Yamada <yamada.masahiro@socionext.com>, Adrian Hunter <adrian.hunter@intel.com>, linux-kernel@vger.kernel.org, Jaehoon Chung <jh80.chung@samsung.com>, Chaotian Jing <chaotian.jing@mediatek.com>, Ulf Hansson <ulf.hansson@linaro.org>
+From: Yangbo Lu <yangbo.lu@nxp.com>
+Subject: RE: [v4, 5/6] mmc: kconfig: select FSL_GUTS for MMC_SDHCI_OF_ESDHC
+Date: Fri, 8 Jan 2016 06:24:31 +0000
+Message-ID: <HE1PR04MB0889C5408E7C372AC397D464F8F60@HE1PR04MB0889.eurprd04.prod.outlook.com>
+References: <1450067067-44869-1-git-send-email-yangbo.lu@freescale.com>
+	 <1450067067-44869-6-git-send-email-yangbo.lu@freescale.com>
+	 <CAPDyKFo1g5_4bpYnTO96tGfVGStysN0FnmbSx-Se4tOa7f3rZQ@mail.gmail.com>
+	 <1450116253.15946.353.camel@freescale.com>
+	 <CAPDyKFrKSMC0uo8re3CxjNCUsVnEMau=GTKq=v_3ooNnQxw2Eg@mail.gmail.com>
+	 <CAPDyKFoYxM4Nv_pHCZbGzuswMCXTLyj6CYgLjYnRguscUs9LrQ@mail.gmail.com>
+ <1451328478.18314.138.camel@freescale.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-am1on0060.outbound.protection.outlook.com ([157.56.112.60]:22240
+	"EHLO emea01-am1-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1750766AbcAHGYf (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 8 Jan 2016 01:24:35 -0500
+Content-Language: en-US
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Scott Wood <scottwood@freescale.com>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, "X.Xie@freescale.com" <X.Xie@freescale.com>, Leo li <LeoLi@freescale.com>
 
-Variable assignment just before return is redundant.
-
-Signed-off-by: Masahiro Yamada <yamada.masahiro@socionext.com>
----
-
- drivers/mmc/core/mmc_ops.c  | 19 ++++---------------
- drivers/mmc/core/sd_ops.c   |  7 +------
- drivers/mmc/core/sdio_ops.c |  3 +--
- 3 files changed, 6 insertions(+), 23 deletions(-)
-
-diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
-index 1f44426..ddbb918 100644
---- a/drivers/mmc/core/mmc_ops.c
-+++ b/drivers/mmc/core/mmc_ops.c
-@@ -90,7 +90,6 @@ int mmc_send_status(struct mmc_card *card, u32 *status)
- 
- static int _mmc_select_card(struct mmc_host *host, struct mmc_card *card)
- {
--	int err;
- 	struct mmc_command cmd = {0};
- 
- 	BUG_ON(!host);
-@@ -105,11 +104,7 @@ static int _mmc_select_card(struct mmc_host *host, struct mmc_card *card)
- 		cmd.flags = MMC_RSP_NONE | MMC_CMD_AC;
- 	}
- 
--	err = mmc_wait_for_cmd(host, &cmd, MMC_CMD_RETRIES);
--	if (err)
--		return err;
--
--	return 0;
-+	return mmc_wait_for_cmd(host, &cmd, MMC_CMD_RETRIES);
- }
- 
- int mmc_select_card(struct mmc_card *card)
-@@ -244,7 +239,6 @@ int mmc_all_send_cid(struct mmc_host *host, u32 *cid)
- 
- int mmc_set_relative_addr(struct mmc_card *card)
- {
--	int err;
- 	struct mmc_command cmd = {0};
- 
- 	BUG_ON(!card);
-@@ -254,11 +248,7 @@ int mmc_set_relative_addr(struct mmc_card *card)
- 	cmd.arg = card->rca << 16;
- 	cmd.flags = MMC_RSP_R1 | MMC_CMD_AC;
- 
--	err = mmc_wait_for_cmd(card->host, &cmd, MMC_CMD_RETRIES);
--	if (err)
--		return err;
--
--	return 0;
-+	return mmc_wait_for_cmd(card->host, &cmd, MMC_CMD_RETRIES);
- }
- 
- static int
-@@ -736,7 +726,7 @@ mmc_send_bus_test(struct mmc_card *card, struct mmc_host *host, u8 opcode,
- 
- int mmc_bus_test(struct mmc_card *card, u8 bus_width)
- {
--	int err, width;
-+	int width;
- 
- 	if (bus_width == MMC_BUS_WIDTH_8)
- 		width = 8;
-@@ -752,8 +742,7 @@ int mmc_bus_test(struct mmc_card *card, u8 bus_width)
- 	 * is a problem.  This improves chances that the test will work.
- 	 */
- 	mmc_send_bus_test(card, card->host, MMC_BUS_TEST_W, width);
--	err = mmc_send_bus_test(card, card->host, MMC_BUS_TEST_R, width);
--	return err;
-+	return mmc_send_bus_test(card, card->host, MMC_BUS_TEST_R, width);
- }
- 
- int mmc_send_hpi_cmd(struct mmc_card *card, u32 *status)
-diff --git a/drivers/mmc/core/sd_ops.c b/drivers/mmc/core/sd_ops.c
-index 48d0c93..16b774c 100644
---- a/drivers/mmc/core/sd_ops.c
-+++ b/drivers/mmc/core/sd_ops.c
-@@ -120,7 +120,6 @@ EXPORT_SYMBOL(mmc_wait_for_app_cmd);
- 
- int mmc_app_set_bus_width(struct mmc_card *card, int width)
- {
--	int err;
- 	struct mmc_command cmd = {0};
- 
- 	BUG_ON(!card);
-@@ -140,11 +139,7 @@ int mmc_app_set_bus_width(struct mmc_card *card, int width)
- 		return -EINVAL;
- 	}
- 
--	err = mmc_wait_for_app_cmd(card->host, card, &cmd, MMC_CMD_RETRIES);
--	if (err)
--		return err;
--
--	return 0;
-+	return mmc_wait_for_app_cmd(card->host, card, &cmd, MMC_CMD_RETRIES);
- }
- 
- int mmc_send_app_op_cond(struct mmc_host *host, u32 ocr, u32 *rocr)
-diff --git a/drivers/mmc/core/sdio_ops.c b/drivers/mmc/core/sdio_ops.c
-index 62508b4..34f6e80 100644
---- a/drivers/mmc/core/sdio_ops.c
-+++ b/drivers/mmc/core/sdio_ops.c
-@@ -217,7 +217,6 @@ int sdio_reset(struct mmc_host *host)
- 	else
- 		abort |= 0x08;
- 
--	ret = mmc_io_rw_direct_host(host, 1, 0, SDIO_CCCR_ABORT, abort, NULL);
--	return ret;
-+	return mmc_io_rw_direct_host(host, 1, 0, SDIO_CCCR_ABORT, abort, NULL);
- }
- 
--- 
-1.9.1
+PiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBZYW5nYm8gTHUNCj4gU2VudDog
+V2VkbmVzZGF5LCBKYW51YXJ5IDA2LCAyMDE2IDM6MTggUE0NCj4gVG86IFNjb3R0IFdvb2Q7IFVs
+ZiBIYW5zc29uDQo+IENjOiBZYW5nYm8gTHU7IGxpbnV4LW1tYzsgWC5YaWVAZnJlZXNjYWxlLmNv
+bTsgTGVvIGxpDQo+IFN1YmplY3Q6IFJFOiBbdjQsIDUvNl0gbW1jOiBrY29uZmlnOiBzZWxlY3Qg
+RlNMX0dVVFMgZm9yDQo+IE1NQ19TREhDSV9PRl9FU0RIQw0KPiANCj4gPiAtLS0tLU9yaWdpbmFs
+IE1lc3NhZ2UtLS0tLQ0KPiA+IEZyb206IFNjb3R0IFdvb2QgW21haWx0bzpzY290dHdvb2RAZnJl
+ZXNjYWxlLmNvbV0NCj4gPiBTZW50OiBUdWVzZGF5LCBEZWNlbWJlciAyOSwgMjAxNSAyOjQ4IEFN
+DQo+ID4gVG86IFVsZiBIYW5zc29uDQo+ID4gQ2M6IFlhbmdibyBMdTsgbGludXgtbW1jOyBYLlhp
+ZUBmcmVlc2NhbGUuY29tOyBMZW8gbGkNCj4gPiBTdWJqZWN0OiBSZTogW3Y0LCA1LzZdIG1tYzog
+a2NvbmZpZzogc2VsZWN0IEZTTF9HVVRTIGZvcg0KPiA+IE1NQ19TREhDSV9PRl9FU0RIQw0KPiA+
+DQo+ID4gT24gVGh1LCAyMDE1LTEyLTE3IGF0IDEyOjMwICswMTAwLCBVbGYgSGFuc3NvbiB3cm90
+ZToNCj4gPiA+IFsuLi5dDQo+ID4gPg0KPiA+ID4gPiA+DQo+ID4gPiA+ID4gQW5kIEkgdGhpbmsg
+c3R1YnMgZm9yIHJlYWRpbmcgU1ZSIGlzIHF1aXRlIGEgYmFkIGlkZWEuICBJdCdsbA0KPiA+ID4g
+PiA+IG1ha2UgdGhlIGRyaXZlciBidWlsZCBidXQgaXQgd2lsbCBzaWxlbnRseSBub3QgYmUgYWJs
+ZSB0byBhcHBseQ0KPiA+ID4gPiA+IFNWUi1iYXNlZCB3b3JrYXJvdW5kcy4NCj4gPiA+ID4NCj4g
+PiA+ID4gSXQgZG9lc24ndCBoYXZlIHRvIGJlICJzaWxlbnQiLCB0aGUgZHJpdmVyIGNhbiByZXR1
+cm4gYW4gZXJyb3INCj4gPiA+ID4gKGFuZCBwcmludCBlcnJvciBtZXNzYWdlcykgZnJvbSBpdHMg
+LT5wcm9iZSgpIG1ldGhvZCwgaWYgdGhlIGNhbGxzDQo+ID4gPiA+IHRvIHRoZSBHVVRTIGRyaXZl
+ciBmYWlscy4NCj4gPiA+ID4NCj4gPiA+ID4gQW55d2F5LCBJIG1lbnRpb25lZCB0aGlzIGlkZWEg
+b25seSB0byB1bmRlcnN0YW5kIHRoZSBuZWVkIGZvcg0KPiA+ID4gPiAqb3B0aW9uYWwqIEdVVFMg
+c3VwcG9ydHMuIFBlcmhhcHMgdGhlcmUgaXMgYSBjcm9zcyBTT0MgZHJpdmVycw0KPiA+ID4gPiB0
+aGF0IGZvciBzb21lIHBsYXRmb3JtcyBkZXBlbmRzIG9uIEdVVFMgYnV0IG9uIG90aGVycyBpdCBk
+b2Vzbid0Lg0KPiA+ID4gPg0KPiA+ID4gPiBNYXliZSB0aGF0IGlzbid0IGNhc2UgdGhlbiE/DQo+
+ID4gPg0KPiA+ID4gQ2FuIHlvdSBwbGVhc2UgYW5zd2VyIHRoaXMgcXVlc3Rpb24hPw0KPiA+ID4N
+Cj4gPiA+IEFjY29yZGluZyB0byB0aGUgZWFybGllciB2ZXJzaW9ucyBvZiB0aGlzIHBhdGNoc2V0
+IGFuZCBmcm9tIHlvdXINCj4gPiA+IGNvbW1lbnRzIFsxXSwgaXQgKmRvKiBzZWVtcyBsaWtlIHRo
+ZSBHVVRTIGRyaXZlciBtYXkgYmUgb3B0aW9uYWwgYW5kDQo+ID4gPiB0aHVzIHN0dWJzIGNvdWxk
+IGFkZHJlc3MgdGhpcy4NCj4gPg0KPiA+IEknZCByYXRoZXIgaXQgbm90IGJlIG9wdGlvbmFsIGF0
+IGJ1aWxkIHRpbWUgZm9yIHRoZSByZWFzb24gSSBleHBsYWluZWQNCj4gPiBhYm92ZS4NCj4gPiAg
+SXQgd291bGQgYmUgdG9vIGVhc3kgZm9yIHVzZXJzIHRvIGFjY2lkZW50YWxseSBub3QgZW5hYmxl
+IHRoZSBndXRzDQo+ID4gZHJpdmVyIGFuZCBtaXNzIHRoZSB3b3JrYXJvdW5kLiAgRXZlbiBpZiBh
+biBlcnJvciBpcyBwcmludGVkIGl0J3MgZWFzeQ0KPiA+IHRvIG1pc3MgYW1vbmcgYWxsIHRoZSBi
+b290IHNwYW0gLS0gYW5kIGlmIHRoZXJlJ3MgYW55IGxlZ2l0aW1hdGUNCj4gPiByZWFzb24gdG8g
+bm90IGhhdmUgdGhlIGRyaXZlciBlbmFibGVkIHRoZW4gd2h5IHdvdWxkIHRoYXQgYmUgYW4NCj4g
+PiAiZXJyb3IiPyAgSWYgdGhlIGd1dHMgZHJpdmVyIGZhaWxzIHRvIGJpbmQgKGUuZy4gcnVubmlu
+ZyBpbiBhIFZNLCBvciBhDQo+ID4gcGxhdGZvcm0gdGhlIGd1dHMgZHJpdmVyIGRvZXNuJ3QgcmVj
+b2duaXplKSB0aGF0J3MgYW5vdGhlciBtYXR0ZXIsIGJ1dA0KPiA+IHRoYXQgc2hvdWxkIGJlIGhh
+bmRsZWQgYnkgYW4gZXJyb3IgY2hlY2sgaW4gdGhlIGd1dHMgZHJpdmVyLCBub3QgYQ0KPiBidWls
+ZC10aW1lIHN0dWIuDQo+ID4NCj4gPiAtU2NvdHQNCj4gPg0KPiANCj4gW0x1IFlhbmdiby1CNDcw
+OTNdIEZvciB0aGUgJ29wdGlvbmFsIG9yIG5vdCBvcHRpb25hbCcgcHJvYmxlbSwgSSB0aGluaw0K
+PiBTY290dCdzIG9waW5pb24gaXMgcmVhc29uYWJsZS4NCj4gSWYgd2UgdXNlIGd1dHMgZHJpdmVy
+LCAnc2VsZWN0JyBjb3VsZCBhdm9pZCBtaXNzaW5nIHRoZSB3b3JrYXJvdW5kLg0KPiBJZiB3ZSB1
+c2Ugc3lzY29uLCBzZWxlY3QgaXMgYmV0dGVyIHRoYW4gJ2RlcGVuZCBvbicgc2luY2UgJ2RlcGVu
+ZCBvbicNCj4gbmVlZHMgdXNlciBzZWxmIHRvIGZpbmQgb3V0IHRoZSBkZXBlbmRlbmN5Lg0KPiAN
+Cj4gQW55d2F5LCB3ZSBzaG91bGQgY29udGludWUgdGhlIGRpc2N1c3Npb24gdG8gY29tZSB0byBh
+biBhZ3JlZW1lbnQgZmluYWxseS4NCj4gSSB3b3VsZCB2ZXJ5IGFwcHJlY2lhdGUhDQo+IA0KPiBU
+aGFua3MuDQo+IA0KPiANCltMdSBZYW5nYm8tQjQ3MDkzXSBIaSBVZmZlLCBkbyB5b3UgaGF2ZSBh
+bnkgY29tbWVudHM/IDopDQoNCg0K
