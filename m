@@ -1,72 +1,94 @@
-From: Javier Martinez Canillas <javier@osg.samsung.com>
-Subject: Re: [PATCH v2 06/12] mmc: pwrseq: add support for power-on sequencing
- through DT
-Date: Fri, 8 Jan 2016 09:22:31 -0300
-Message-ID: <568FAA07.1010509@osg.samsung.com>
-References: <1452155155-16232-1-git-send-email-wxt@rock-chips.com>
- <1452155155-16232-7-git-send-email-wxt@rock-chips.com>
+From: Javier Martinez Canillas <javier@dowhile0.org>
+Subject: Re: [PATCH] mmc: pwrseq_simple: Make reset-gpios optional to match doc
+Date: Fri, 8 Jan 2016 13:42:22 -0300
+Message-ID: <CABxcv=mYRG0rikgtY-fPj_BFhY8hgn_LYjcxEeY14rZD-BHpfg@mail.gmail.com>
+References: <20160108090726.13066.66125.stgit@localhost>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from lists.s-osg.org ([54.187.51.154]:49301 "EHLO lists.s-osg.org"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751233AbcAHMWl (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 8 Jan 2016 07:22:41 -0500
-In-Reply-To: <1452155155-16232-7-git-send-email-wxt@rock-chips.com>
+Received: from mail-yk0-f173.google.com ([209.85.160.173]:34890 "EHLO
+	mail-yk0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754437AbcAHQmX (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 8 Jan 2016 11:42:23 -0500
+Received: by mail-yk0-f173.google.com with SMTP id x67so368343349ykd.2
+        for <linux-mmc@vger.kernel.org>; Fri, 08 Jan 2016 08:42:23 -0800 (PST)
+In-Reply-To: <20160108090726.13066.66125.stgit@localhost>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Caesar Wang <wxt@rock-chips.com>, Heiko Stuebner <heiko@sntech.de>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-rockchip@lists.infradead.org, leecam@google.com, leozwang@google.com, keescook@google.com, Srinivas Kandagatla <srinivas.kandagatla@linaro.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Alexandre Courbot <acourbot@nvidia.com>, NeilBrown <neil@brown.name>
+To: Martin Fuzzey <mfuzzey@parkeon.com>, Tony Lindgren <tony@atomide.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
 
-Hello Caesar,
+[adding Tony Lindgren to cc list]
 
-On 01/07/2016 05:25 AM, Caesar Wang wrote:
-> This patch enables support for power-on sequencing of SDIO
-> peripherals through DT.
+Hello Martin,
+
+On Fri, Jan 8, 2016 at 6:07 AM, Martin Fuzzey <mfuzzey@parkeon.com> wrote:
+> The DT binding doc says reset-gpios is an optional property but the code
+> currently bails out if it is omitted.
+>
+> Make the code match the documentation.
+>
+> Signed-off-by: Martin Fuzzey <mfuzzey@parkeon.com>
+> ---
+>  drivers/mmc/core/pwrseq_simple.c |   21 +++++++++++++--------
+>  1 file changed, 13 insertions(+), 8 deletions(-)
+>
+> diff --git a/drivers/mmc/core/pwrseq_simple.c b/drivers/mmc/core/pwrseq_simple.c
+> index d10538b..4d2962b 100644
+> --- a/drivers/mmc/core/pwrseq_simple.c
+> +++ b/drivers/mmc/core/pwrseq_simple.c
+> @@ -29,15 +29,18 @@ struct mmc_pwrseq_simple {
+>  static void mmc_pwrseq_simple_set_gpios_value(struct mmc_pwrseq_simple *pwrseq,
+>                                               int value)
+>  {
+> -       int i;
+>         struct gpio_descs *reset_gpios = pwrseq->reset_gpios;
+> -       int values[reset_gpios->ndescs];
+>
+> -       for (i = 0; i < reset_gpios->ndescs; i++)
+> -               values[i] = value;
+> +       if (!IS_ERR(reset_gpios)) {
+> +               int i;
+> +               int values[reset_gpios->ndescs];
+>
+> -       gpiod_set_array_value_cansleep(reset_gpios->ndescs, reset_gpios->desc,
+> -                                      values);
+> +               for (i = 0; i < reset_gpios->ndescs; i++)
+> +                       values[i] = value;
+> +
+> +               gpiod_set_array_value_cansleep(
+> +                       reset_gpios->ndescs, reset_gpios->desc, values);
+> +       }
+>  }
+>
+>  static void mmc_pwrseq_simple_pre_power_on(struct mmc_host *host)
+> @@ -79,7 +82,8 @@ static void mmc_pwrseq_simple_free(struct mmc_host *host)
+>         struct mmc_pwrseq_simple *pwrseq = container_of(host->pwrseq,
+>                                         struct mmc_pwrseq_simple, pwrseq);
+>
+> -       gpiod_put_array(pwrseq->reset_gpios);
+> +       if (!IS_ERR(pwrseq->reset_gpios))
+> +               gpiod_put_array(pwrseq->reset_gpios);
+>
+>         if (!IS_ERR(pwrseq->ext_clk))
+>                 clk_put(pwrseq->ext_clk);
+> @@ -112,7 +116,8 @@ struct mmc_pwrseq *mmc_pwrseq_simple_alloc(struct mmc_host *host,
+>         }
+>
+>         pwrseq->reset_gpios = gpiod_get_array(dev, "reset", GPIOD_OUT_HIGH);
+> -       if (IS_ERR(pwrseq->reset_gpios)) {
+> +       if (IS_ERR(pwrseq->reset_gpios) &&
+> +           PTR_ERR(pwrseq->reset_gpios) != -ENOENT) {
+>                 ret = PTR_ERR(pwrseq->reset_gpios);
+>                 goto clk_put;
+>         }
+>
 >
 
-I think the subject line and this first paragraph are misleading since
-the simple power sequence provider already supports power-on sequencing.
+Tony already posted a fix for this before [0] but got some feedback so
+is likely to post a v2 soon.
 
-This patch does not add or enable support but extends the current support
-to also enable a regulator as a part of the SDIO chip power on sequencing.
- 
-> In general, it's quite common that wifi modules and other similar
-> peripherals have several signals in addition to the SDIO interface that
-> needs wiggling before the module will power on.
-> 
-> For example:
-> we need enable wifi module power to via the WL_REG_ON
-> pin, we need enable it as the regulator if this pin is connected to
-> the gpio of cpu.
->
-
-This part confuses me, so does your chip have an actual regulator that
-needs to be enabled or is just a fake regulator whose gpio property is
-used not to enable the regulator but to toggle the WL_REG_ON pin of
-the WiFi chip?
- 
-> Maybe, someone will say that can pull up/down from dts.
-> Unfortunately some SoCs can't support pinctrl pull up/down in
-> internal.
->
-
-Can you please elaborate on this? AFAIU this limitation is the reason
-why you went with the regulator approach so I think it deserve a more
-deep explanation.
- 
-> Anyway, we can add this patch to supprt the power-on sequencing for
-
-s/supprt/support
-
-> sdio.
-> 
-> Signed-off-by: Caesar Wang <wxt@rock-chips.com>
-> 
+[0]: http://www.spinics.net/lists/linux-mmc/msg34398.html
 
 Best regards,
--- 
-Javier Martinez Canillas
-Open Source Group
-Samsung Research America
+Javier
