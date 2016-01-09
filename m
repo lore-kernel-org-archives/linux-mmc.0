@@ -1,48 +1,49 @@
-From: Heiko Stuebner <heiko@sntech.de>
-Subject: Re: [PATCH v2 06/12] mmc: pwrseq: add support for power-on sequencing through DT
-Date: Sat, 09 Jan 2016 03:42:03 +0100
-Message-ID: <6960259.dpUH8KWsNS@phil>
-References: <1452155155-16232-1-git-send-email-wxt@rock-chips.com> <1452155155-16232-7-git-send-email-wxt@rock-chips.com> <568FAA07.1010509@osg.samsung.com>
+From: Andy Shevchenko <andy.shevchenko@gmail.com>
+Subject: Re: [PATCH 2/2] mmc: atmel: get rid of struct mci_dma_data
+Date: Sat, 9 Jan 2016 14:10:27 +0200
+Message-ID: <CAHp75Vdq83QRUw_ZxxVWcC6Xut5y-sJfYwLA+cOtGMhjB7Rm3w@mail.gmail.com>
+References: <1452302551-24199-1-git-send-email-mans@mansr.com>
+	<1452302551-24199-2-git-send-email-mans@mansr.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7Bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from gloria.sntech.de ([95.129.55.99]:47881 "EHLO gloria.sntech.de"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754717AbcAICmR (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 8 Jan 2016 21:42:17 -0500
-In-Reply-To: <568FAA07.1010509@osg.samsung.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1452302551-24199-2-git-send-email-mans@mansr.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Mans Rullgard <mans@mansr.com>
+Cc: Haavard Skinnemoen <hskinnemoen@gmail.com>, Hans-Christian Egtvedt <egtvedt@samfundet.no>, Ludovic Desroches <ludovic.desroches@atmel.com>, Ulf Hansson <ulf.hansson@linaro.org>, Arnd Bergmann <arnd@arndb.de>, Andy Shevchenko <andriy.shevchenko@linux.intel.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Javier Martinez Canillas <javier@osg.samsung.com>
-Cc: Caesar Wang <wxt@rock-chips.com>, Ulf Hansson <ulf.hansson@linaro.org>, linux-rockchip@lists.infradead.org, leecam@google.com, leozwang@google.com, keescook@google.com, Srinivas Kandagatla <srinivas.kandagatla@linaro.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Alexandre Courbot <acourbot@nvidia.com>, NeilBrown <neil@brown.name>
 
-Am Freitag, 8. Januar 2016, 09:22:31 schrieb Javier Martinez Canillas:
-> > For example:
-> > we need enable wifi module power to via the WL_REG_ON
-> > pin, we need enable it as the regulator if this pin is connected to
-> > the gpio of cpu.
-> 
-> This part confuses me, so does your chip have an actual regulator that
-> needs to be enabled or is just a fake regulator whose gpio property is
-> used not to enable the regulator but to toggle the WL_REG_ON pin of
-> the WiFi chip?
+On Sat, Jan 9, 2016 at 3:22 AM, Mans Rullgard <mans@mansr.com> wrote:
+> As struct mci_dma_data is now only used by AVR32, it is nothing but
+> pointless indirection.  Replace it with struct dw_dma_slave in the
+> AVR32 platform code and with a void pointer elsewhere.
+>
+> Signed-off-by: Mans Rullgard <mans@mansr.com>
 
-another option would be to use the reset-gpio-handles. rk3288-veyron and I 
-think some Exynos as well use it that way.
+> @@ -1376,15 +1375,15 @@ at32_add_device_mci(unsigned int id, struct mci_platform_data *data)
+>                                 ARRAY_SIZE(atmel_mci0_resource)))
+>                 goto fail;
+>
+> -       slave = kzalloc(sizeof(struct mci_dma_data), GFP_KERNEL);
+> +       slave = kzalloc(sizeof(*slave), GFP_KERNEL);
+>         if (!slave)
+>                 goto fail;
+>
+> -       slave->sdata.dma_dev = &dw_dmac0_device.dev;
+> -       slave->sdata.src_id = 0;
+> -       slave->sdata.dst_id = 1;
+> -       slave->sdata.m_master = 1;
+> -       slave->sdata.p_master = 0;
+
+Seems you based this on top of our non-submitted yet patches.
+
+> +       slave->dma_dev = &dw_dmac0_device.dev;
+> +       slave->src_id = 0;
+> +       slave->dst_id = 1;
+> +       slave->m_master = 1;
+> +       slave->p_master = 0;
 
 
-> > Maybe, someone will say that can pull up/down from dts.
-> > Unfortunately some SoCs can't support pinctrl pull up/down in
-> > internal.
-> 
-> Can you please elaborate on this? AFAIU this limitation is the reason
-> why you went with the regulator approach so I think it deserve a more
-> deep explanation.
-
-On the rk3036 each pin has an individual unchangable pull direction. So it's 
-either no bias or pulling in the predefined direction (the pin_default bias 
-option).
-
-
-Heiko
+-- 
+With Best Regards,
+Andy Shevchenko
