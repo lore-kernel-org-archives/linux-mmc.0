@@ -1,104 +1,48 @@
-From: Mans Rullgard <mans@mansr.com>
-Subject: [PATCH 1/2] mmc: atmel-mci: restore dma on AVR32
-Date: Sat,  9 Jan 2016 01:22:30 +0000
-Message-ID: <1452302551-24199-1-git-send-email-mans@mansr.com>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Haavard Skinnemoen <hskinnemoen@gmail.com>, Hans-Christian Egtvedt <egtvedt@samfundet.no>, Ludovic Desroches <ludovic.desroches@atmel.com>, Ulf Hansson <ulf.hansson@linaro.org>, Arnd Bergmann <arnd@arndb.de>, Andy Shevchenko <andriy.shevchenko@linux.intel.com>, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
+From: Heiko Stuebner <heiko@sntech.de>
+Subject: Re: [PATCH v2 06/12] mmc: pwrseq: add support for power-on sequencing through DT
+Date: Sat, 09 Jan 2016 03:42:03 +0100
+Message-ID: <6960259.dpUH8KWsNS@phil>
+References: <1452155155-16232-1-git-send-email-wxt@rock-chips.com> <1452155155-16232-7-git-send-email-wxt@rock-chips.com> <568FAA07.1010509@osg.samsung.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7Bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from gloria.sntech.de ([95.129.55.99]:47881 "EHLO gloria.sntech.de"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1754717AbcAICmR (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 8 Jan 2016 21:42:17 -0500
+In-Reply-To: <568FAA07.1010509@osg.samsung.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Javier Martinez Canillas <javier@osg.samsung.com>
+Cc: Caesar Wang <wxt@rock-chips.com>, Ulf Hansson <ulf.hansson@linaro.org>, linux-rockchip@lists.infradead.org, leecam@google.com, leozwang@google.com, keescook@google.com, Srinivas Kandagatla <srinivas.kandagatla@linaro.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Alexandre Courbot <acourbot@nvidia.com>, NeilBrown <neil@brown.name>
 
-Commit ecb89f2f5f3e7 ("mmc: atmel-mci: remove compat for non DT board
-when requesting dma chan") broke dma on AVR32 and any other boards not
-using DT.  This restores a fallback mechanism for such cases.
+Am Freitag, 8. Januar 2016, 09:22:31 schrieb Javier Martinez Canillas:
+> > For example:
+> > we need enable wifi module power to via the WL_REG_ON
+> > pin, we need enable it as the regulator if this pin is connected to
+> > the gpio of cpu.
+> 
+> This part confuses me, so does your chip have an actual regulator that
+> needs to be enabled or is just a fake regulator whose gpio property is
+> used not to enable the regulator but to toggle the WL_REG_ON pin of
+> the WiFi chip?
 
-Signed-off-by: Mans Rullgard <mans@mansr.com>
----
- arch/avr32/mach-at32ap/at32ap700x.c | 16 ++++++++++++++++
- drivers/mmc/host/atmel-mci.c        | 17 +++++++++++++++++
- include/linux/atmel-mci.h           |  2 ++
- 3 files changed, 35 insertions(+)
+another option would be to use the reset-gpio-handles. rk3288-veyron and I 
+think some Exynos as well use it that way.
 
-diff --git a/arch/avr32/mach-at32ap/at32ap700x.c b/arch/avr32/mach-at32ap/at32ap700x.c
-index c425a5564c27..f433c7220fff 100644
---- a/arch/avr32/mach-at32ap/at32ap700x.c
-+++ b/arch/avr32/mach-at32ap/at32ap700x.c
-@@ -1338,6 +1338,21 @@ static struct clk atmel_mci0_pclk = {
- 	.index		= 9,
- };
- 
-+static bool at32_mci_dma_filter(struct dma_chan *chan, void *pdata)
-+{
-+	struct mci_dma_data *sl = pdata;
-+
-+	if (!sl)
-+		return false;
-+
-+	if (find_slave_dev(sl) == chan->device->dev) {
-+		chan->private = slave_data_ptr(sl);
-+		return true;
-+	}
-+
-+	return false;
-+}
-+
- struct platform_device *__init
- at32_add_device_mci(unsigned int id, struct mci_platform_data *data)
- {
-@@ -1372,6 +1387,7 @@ at32_add_device_mci(unsigned int id, struct mci_platform_data *data)
- 	slave->sdata.p_master = 0;
- 
- 	data->dma_slave = slave;
-+	data->dma_filter = at32_mci_dma_filter;
- 
- 	if (platform_device_add_data(pdev, data,
- 				sizeof(struct mci_platform_data)))
-diff --git a/drivers/mmc/host/atmel-mci.c b/drivers/mmc/host/atmel-mci.c
-index bf62e429f7fc..070dffc4699e 100644
---- a/drivers/mmc/host/atmel-mci.c
-+++ b/drivers/mmc/host/atmel-mci.c
-@@ -2280,6 +2280,23 @@ static int atmci_configure_dma(struct atmel_mci *host)
- {
- 	host->dma.chan = dma_request_slave_channel_reason(&host->pdev->dev,
- 							"rxtx");
-+
-+	if (PTR_ERR(host->dma.chan) == -ENODEV) {
-+		struct mci_platform_data *pdata = host->pdev->dev.platform_data;
-+		dma_cap_mask_t mask;
-+
-+		if (!pdata->dma_filter)
-+			return -ENODEV;
-+
-+		dma_cap_zero(mask);
-+		dma_cap_set(DMA_SLAVE, mask);
-+
-+		host->dma.chan = dma_request_channel(mask, pdata->dma_filter,
-+						     pdata->dma_slave);
-+		if (!host->dma.chan)
-+			host->dma.chan = ERR_PTR(-ENODEV);
-+	}
-+
- 	if (IS_ERR(host->dma.chan))
- 		return PTR_ERR(host->dma.chan);
- 
-diff --git a/include/linux/atmel-mci.h b/include/linux/atmel-mci.h
-index 9177947bf032..e753062b9355 100644
---- a/include/linux/atmel-mci.h
-+++ b/include/linux/atmel-mci.h
-@@ -2,6 +2,7 @@
- #define __LINUX_ATMEL_MCI_H
- 
- #include <linux/types.h>
-+#include <linux/dmaengine.h>
- 
- #define ATMCI_MAX_NR_SLOTS	2
- 
-@@ -37,6 +38,7 @@ struct mci_slot_pdata {
-  */
- struct mci_platform_data {
- 	struct mci_dma_data	*dma_slave;
-+	dma_filter_fn		dma_filter;
- 	struct mci_slot_pdata	slot[ATMCI_MAX_NR_SLOTS];
- };
- 
--- 
-2.7.0
+
+> > Maybe, someone will say that can pull up/down from dts.
+> > Unfortunately some SoCs can't support pinctrl pull up/down in
+> > internal.
+> 
+> Can you please elaborate on this? AFAIU this limitation is the reason
+> why you went with the regulator approach so I think it deserve a more
+> deep explanation.
+
+On the rk3036 each pin has an individual unchangable pull direction. So it's 
+either no bias or pulling in the predefined direction (the pin_default bias 
+option).
+
+
+Heiko
