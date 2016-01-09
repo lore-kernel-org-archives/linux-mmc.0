@@ -1,65 +1,148 @@
-From: =?iso-8859-1?Q?M=E5ns_Rullg=E5rd?= <mans@mansr.com>
-Subject: Re: [PATCH 2/2] mmc: atmel: get rid of struct mci_dma_data
-Date: Sat, 09 Jan 2016 12:13:03 +0000
-Message-ID: <yw1xwprjx86o.fsf@unicorn.mansr.com>
-References: <1452302551-24199-1-git-send-email-mans@mansr.com>
-	<1452302551-24199-2-git-send-email-mans@mansr.com>
-	<CAHp75Vdq83QRUw_ZxxVWcC6Xut5y-sJfYwLA+cOtGMhjB7Rm3w@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+From: Mans Rullgard <mans@mansr.com>
+Subject: [PATCH v2 2/2] mmc: atmel: get rid of struct mci_dma_data
+Date: Sat,  9 Jan 2016 12:45:11 +0000
+Message-ID: <1452343511-11164-2-git-send-email-mans@mansr.com>
+References: <1452343511-11164-1-git-send-email-mans@mansr.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from unicorn.mansr.com ([81.2.72.234]:50851 "EHLO unicorn.mansr.com"
+Received: from unicorn.mansr.com ([81.2.72.234]:51009 "EHLO unicorn.mansr.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753507AbcAIMNL convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sat, 9 Jan 2016 07:13:11 -0500
-In-Reply-To: <CAHp75Vdq83QRUw_ZxxVWcC6Xut5y-sJfYwLA+cOtGMhjB7Rm3w@mail.gmail.com>
-	(Andy Shevchenko's message of "Sat, 9 Jan 2016 14:10:27 +0200")
+	id S1753482AbcAIMpR (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Sat, 9 Jan 2016 07:45:17 -0500
+In-Reply-To: <1452343511-11164-1-git-send-email-mans@mansr.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Andy Shevchenko <andy.shevchenko@gmail.com>
-Cc: Haavard Skinnemoen <hskinnemoen@gmail.com>, Hans-Christian Egtvedt <egtvedt@samfundet.no>, Ludovic Desroches <ludovic.desroches@atmel.com>, Ulf Hansson <ulf.hansson@linaro.org>, Arnd Bergmann <arnd@arndb.de>, Andy Shevchenko <andriy.shevchenko@linux.intel.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+To: Haavard Skinnemoen <hskinnemoen@gmail.com>, Hans-Christian Egtvedt <egtvedt@samfundet.no>, Ludovic Desroches <ludovic.desroches@atmel.com>, Ulf Hansson <ulf.hansson@linaro.org>, Arnd Bergmann <arnd@arndb.de>, Andy Shevchenko <andriy.shevchenko@linux.intel.com>, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
 
-Andy Shevchenko <andy.shevchenko@gmail.com> writes:
+As struct mci_dma_data is now only used by AVR32, it is nothing but
+pointless indirection.  Replace it with struct dw_dma_slave in the
+AVR32 platform code and with a void pointer elsewhere.
 
-> On Sat, Jan 9, 2016 at 3:22 AM, Mans Rullgard <mans@mansr.com> wrote:
->> As struct mci_dma_data is now only used by AVR32, it is nothing but
->> pointless indirection.  Replace it with struct dw_dma_slave in the
->> AVR32 platform code and with a void pointer elsewhere.
->>
->> Signed-off-by: Mans Rullgard <mans@mansr.com>
->
->> @@ -1376,15 +1375,15 @@ at32_add_device_mci(unsigned int id, struct =
-mci_platform_data *data)
->>                                 ARRAY_SIZE(atmel_mci0_resource)))
->>                 goto fail;
->>
->> -       slave =3D kzalloc(sizeof(struct mci_dma_data), GFP_KERNEL);
->> +       slave =3D kzalloc(sizeof(*slave), GFP_KERNEL);
->>         if (!slave)
->>                 goto fail;
->>
->> -       slave->sdata.dma_dev =3D &dw_dmac0_device.dev;
->> -       slave->sdata.src_id =3D 0;
->> -       slave->sdata.dst_id =3D 1;
->> -       slave->sdata.m_master =3D 1;
->> -       slave->sdata.p_master =3D 0;
->
-> Seems you based this on top of our non-submitted yet patches.
+Signed-off-by: Mans Rullgard <mans@mansr.com>
+---
+Changes:
+- rebase onto v4.4-rc8: some members of struct dw_dma_slave had been
+  renamed in an unsubmitted patch
+---
+ arch/avr32/mach-at32ap/at32ap700x.c         | 21 ++++++++++-----------
+ drivers/mmc/host/atmel-mci.c                |  1 -
+ include/linux/atmel-mci.h                   |  2 +-
+ include/linux/platform_data/mmc-atmel-mci.h | 22 ----------------------
+ 4 files changed, 11 insertions(+), 35 deletions(-)
+ delete mode 100644 include/linux/platform_data/mmc-atmel-mci.h
 
-You're right.  I didn't realise this file had been touched by those
-patches, and I didn't read the code all that carefully when making this
-change.
+diff --git a/arch/avr32/mach-at32ap/at32ap700x.c b/arch/avr32/mach-at32ap/at32ap700x.c
+index 6e906172dc33..bf445aa48282 100644
+--- a/arch/avr32/mach-at32ap/at32ap700x.c
++++ b/arch/avr32/mach-at32ap/at32ap700x.c
+@@ -17,7 +17,6 @@
+ #include <linux/spi/spi.h>
+ #include <linux/usb/atmel_usba_udc.h>
+ 
+-#include <linux/platform_data/mmc-atmel-mci.h>
+ #include <linux/atmel-mci.h>
+ 
+ #include <asm/io.h>
+@@ -1323,13 +1322,13 @@ static struct clk atmel_mci0_pclk = {
+ 
+ static bool at32_mci_dma_filter(struct dma_chan *chan, void *pdata)
+ {
+-	struct mci_dma_data *sl = pdata;
++	struct dw_dma_slave *sl = pdata;
+ 
+ 	if (!sl)
+ 		return false;
+ 
+-	if (find_slave_dev(sl) == chan->device->dev) {
+-		chan->private = slave_data_ptr(sl);
++	if (sl->dma_dev == chan->device->dev) {
++		chan->private = sl;
+ 		return true;
+ 	}
+ 
+@@ -1340,7 +1339,7 @@ struct platform_device *__init
+ at32_add_device_mci(unsigned int id, struct mci_platform_data *data)
+ {
+ 	struct platform_device		*pdev;
+-	struct mci_dma_data	        *slave;
++	struct dw_dma_slave	        *slave;
+ 	u32				pioa_mask;
+ 	u32				piob_mask;
+ 
+@@ -1359,15 +1358,15 @@ at32_add_device_mci(unsigned int id, struct mci_platform_data *data)
+ 				ARRAY_SIZE(atmel_mci0_resource)))
+ 		goto fail;
+ 
+-	slave = kzalloc(sizeof(struct mci_dma_data), GFP_KERNEL);
++	slave = kzalloc(sizeof(*slave), GFP_KERNEL);
+ 	if (!slave)
+ 		goto fail;
+ 
+-	slave->sdata.dma_dev = &dw_dmac0_device.dev;
+-	slave->sdata.src_id = 0;
+-	slave->sdata.dst_id = 1;
+-	slave->sdata.src_master = 1;
+-	slave->sdata.dst_master = 0;
++	slave->dma_dev = &dw_dmac0_device.dev;
++	slave->src_id = 0;
++	slave->dst_id = 1;
++	slave->src_master = 1;
++	slave->dst_master = 0;
+ 
+ 	data->dma_slave = slave;
+ 	data->dma_filter = at32_mci_dma_filter;
+diff --git a/drivers/mmc/host/atmel-mci.c b/drivers/mmc/host/atmel-mci.c
+index 070dffc4699e..97af84d4cdf0 100644
+--- a/drivers/mmc/host/atmel-mci.c
++++ b/drivers/mmc/host/atmel-mci.c
+@@ -29,7 +29,6 @@
+ #include <linux/slab.h>
+ #include <linux/stat.h>
+ #include <linux/types.h>
+-#include <linux/platform_data/mmc-atmel-mci.h>
+ 
+ #include <linux/mmc/host.h>
+ #include <linux/mmc/sdio.h>
+diff --git a/include/linux/atmel-mci.h b/include/linux/atmel-mci.h
+index e753062b9355..42a9e1884842 100644
+--- a/include/linux/atmel-mci.h
++++ b/include/linux/atmel-mci.h
+@@ -37,7 +37,7 @@ struct mci_slot_pdata {
+  * @slot: Per-slot configuration data.
+  */
+ struct mci_platform_data {
+-	struct mci_dma_data	*dma_slave;
++	void			*dma_slave;
+ 	dma_filter_fn		dma_filter;
+ 	struct mci_slot_pdata	slot[ATMCI_MAX_NR_SLOTS];
+ };
+diff --git a/include/linux/platform_data/mmc-atmel-mci.h b/include/linux/platform_data/mmc-atmel-mci.h
+deleted file mode 100644
+index 399a2d5a14bd..000000000000
+--- a/include/linux/platform_data/mmc-atmel-mci.h
++++ /dev/null
+@@ -1,22 +0,0 @@
+-#ifndef __MMC_ATMEL_MCI_H
+-#define __MMC_ATMEL_MCI_H
+-
+-#include <linux/platform_data/dma-atmel.h>
+-#include <linux/platform_data/dma-dw.h>
+-
+-/**
+- * struct mci_dma_data - DMA data for MCI interface
+- */
+-struct mci_dma_data {
+-#ifdef CONFIG_ARM
+-	struct at_dma_slave     sdata;
+-#else
+-	struct dw_dma_slave     sdata;
+-#endif
+-};
+-
+-/* accessor macros */
+-#define	slave_data_ptr(s)	(&(s)->sdata)
+-#define find_slave_dev(s)	((s)->sdata.dma_dev)
+-
+-#endif /* __MMC_ATMEL_MCI_H */
+-- 
+2.7.0
 
->> +       slave->dma_dev =3D &dw_dmac0_device.dev;
->> +       slave->src_id =3D 0;
->> +       slave->dst_id =3D 1;
->> +       slave->m_master =3D 1;
->> +       slave->p_master =3D 0;
->
-> --=20
-> With Best Regards,
-> Andy Shevchenko
-
---=20
-M=E5ns Rullg=E5rd
