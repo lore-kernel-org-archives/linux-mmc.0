@@ -1,76 +1,71 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [RFC 0/6] mmc: Field Firmware Update
-Date: Thu, 14 Jan 2016 14:16:00 +0100
-Message-ID: <CAPDyKFopp9gaaPu_DBR0Rpcsu6BCXu5DexXiVxYv9v5uX150jw@mail.gmail.com>
-References: <1447426572-11756-1-git-send-email-holgerschurig@gmail.com>
-	<SN1PR02MB13891415516DE9FA4756140783070@SN1PR02MB1389.namprd02.prod.outlook.com>
-	<CAOpc7mHbM8EYYNRKR+pKnzc0wf1DR1ojX-iFuDWDYyquC3EVZg@mail.gmail.com>
-	<CAPDyKFp2WEVF4yi=Upzx+58SY15u=Fp4=tr3_hh7AS3T2yz4qQ@mail.gmail.com>
-	<87r3ierjae.fsf@gmail.com>
-	<BLUPR02MB2773299A3F882A172DF0E3694FB0@BLUPR02MB277.namprd02.prod.outlook.com>
+Subject: Re: [PATCH v2 1/2] mmc: atmel-mci: restore dma on AVR32
+Date: Thu, 14 Jan 2016 14:29:44 +0100
+Message-ID: <CAPDyKFoVODFrfTSLqK59YUtJcKYTejpSmUpzJoD1==YF3B0vqg@mail.gmail.com>
+References: <1452343511-11164-1-git-send-email-mans@mansr.com>
+	<20160109193207.GA21906@samfundet.no>
+	<CAPDyKFqazmLYGFFGg38MTKnbQOqGsMF03M08GsNiG0EFLVm6qA@mail.gmail.com>
+	<20160114124353.GA14996@samfundet.no>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qk0-f182.google.com ([209.85.220.182]:36380 "EHLO
-	mail-qk0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754461AbcANNQB (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 14 Jan 2016 08:16:01 -0500
-Received: by mail-qk0-f182.google.com with SMTP id q19so241618195qke.3
-        for <linux-mmc@vger.kernel.org>; Thu, 14 Jan 2016 05:16:01 -0800 (PST)
-In-Reply-To: <BLUPR02MB2773299A3F882A172DF0E3694FB0@BLUPR02MB277.namprd02.prod.outlook.com>
+Received: from mail-qk0-f174.google.com ([209.85.220.174]:35589 "EHLO
+	mail-qk0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754473AbcANN3o (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 14 Jan 2016 08:29:44 -0500
+Received: by mail-qk0-f174.google.com with SMTP id y67so33312294qkc.2
+        for <linux-mmc@vger.kernel.org>; Thu, 14 Jan 2016 05:29:44 -0800 (PST)
+In-Reply-To: <20160114124353.GA14996@samfundet.no>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Alex Lemberg <Alex.Lemberg@sandisk.com>
-Cc: Holger Schurig <holgerschurig@gmail.com>, Avi Shchislowski <Avi.Shchislowski@sandisk.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Chris Ball <chris@printf.net>, Baolin Wang <baolin.wang@linaro.org>
+To: Hans-Christian Noren Egtvedt <egtvedt@samfundet.no>
+Cc: Mans Rullgard <mans@mansr.com>, Haavard Skinnemoen <hskinnemoen@gmail.com>, Ludovic Desroches <ludovic.desroches@atmel.com>, Arnd Bergmann <arnd@arndb.de>, Andy Shevchenko <andriy.shevchenko@linux.intel.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>
 
-On 28 December 2015 at 15:12, Alex Lemberg <Alex.Lemberg@sandisk.com> wrote:
-> Hi Ulf,
+On 14 January 2016 at 13:43, Hans-Christian Noren Egtvedt
+<egtvedt@samfundet.no> wrote:
+> Around Thu 14 Jan 2016 13:07:57 +0100 or thereabout, Ulf Hansson wrote:
+>> On 9 January 2016 at 20:32, Hans-Christian Noren Egtvedt
+>> <egtvedt@samfundet.no> wrote:
+>>> Around Sat 09 Jan 2016 12:45:10 +0000 or thereabout, Mans Rullgard wrote:
+>>>> Commit ecb89f2f5f3e7 ("mmc: atmel-mci: remove compat for non DT board
+>>>> when requesting dma chan") broke dma on AVR32 and any other boards not
+>>>> using DT.  This restores a fallback mechanism for such cases.
+>>>>
+>>>> Signed-off-by: Mans Rullgard <mans@mansr.com>
+>>>> ---
+>>>> Changes:
+>>>> - rebase onto v4.4-rc8: no change to this patch
+>>>> ---
+>>>>  arch/avr32/mach-at32ap/at32ap700x.c | 16 ++++++++++++++++
+>>>>  drivers/mmc/host/atmel-mci.c        | 17 +++++++++++++++++
+>>>>  include/linux/atmel-mci.h           |  2 ++
+>>>>  3 files changed, 35 insertions(+)
+>>>
+>>> <snipp diff>
+>>>
+>>> Thank you for the patch. I have added this to the for-linux branch in the
+>>> linux-avr32 tree.
+>>
+>> What does that mean? Do you intend to send this as a fix for 4.5 rc?
+>>
+>> If so, you have my ack for it!
+>>
+>> Acked-by: Ulf Hansson <ulf.hansson@linaro.org>
 >
-> We succeeded to run FFU via new mmc multi-command ioctl without any code modification,
-> but only by using Single Sector commands (CMD24).
+> Thank you. I might have been a bit quick to append it to my tree, as it
+> mostly touches things outside of arch/avr32. I have not asked Linus to pull
+> yet.
 >
-> From running the FFU and from code review, we see two minor issues in this way of running FFU:
-> 1. There is no support for Multiple Block write commands (CMD25) in existing IOCTL implementation -
+> I can append your Acked-by to #1 and #2 in the series and push through my
+> tree if you are fine with that.
 
-That's right. But I guess we cope without the multiple block support!?
-
-Although, I wonder how hard it would be to add it...
-
-> seems like there is no polling for the card status on data transfer completion.
-
-We should fix that!
-
-In the rpmb case, we check the status so we can probably trigger that
-code to run for CMD24/25 as well.
-
-> (The kernel FFU implementation supports FFU using Multiple Block Write commands).
-> 2. As you probably remember, there are two ways to install the new FW in the end of FFU process -
-> In case MODE_OPERATION_CODES field is not supported by the device, the host sets to NORMAL state
-
-Before starting the update, you can find out which mode that is
-supported and take relevant actions, right?
-
-> and initiates a CMD0/HW_Reset/Power cycle to install the new firmware.
-
-Yes, but that's fragile - as discussed earlier.
-
-What we really need to do is to also remove the "card" device from the
-system, as otherwise we may have invalid data in its member variables
-and who knows what issues that can cause to upper levels.
-
-> This sequence cannot be done via multi-command ioctl, and requires manual reset of the device/platform.
-
-Yepp, it seems so at least for now. Perhaps we can think of a way to
-improve this?
-
-> (The kernel FFU implementation supports both FW install methods).
->
-> For running FFU via new mmc multi-command ioctl, we have modified mmc-utils and add new functionality for FFU.
-> Please let us know if you want us to submit the patch for mmc-utils FFU functionality via multi-command ioctl.
-
-Yes please. Don't forget to send this to Chris as well!
-
-[...]
+Great, thanks!
 
 Kind regards
 Uffe
+
+>
+> https://git.kernel.org/cgit/linux/kernel/git/egtvedt/linux-avr32.git/log/?h=for-linus
+>
+> --
+> Best regards, Hans-Christian Egtvedt
