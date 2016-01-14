@@ -1,57 +1,46 @@
-From: Hans-Christian Noren Egtvedt <egtvedt@samfundet.no>
-Subject: Re: [PATCH v2 1/2] mmc: atmel-mci: restore dma on AVR32
-Date: Thu, 14 Jan 2016 13:43:53 +0100
-Message-ID: <20160114124353.GA14996@samfundet.no>
-References: <1452343511-11164-1-git-send-email-mans@mansr.com>
- <20160109193207.GA21906@samfundet.no>
- <CAPDyKFqazmLYGFFGg38MTKnbQOqGsMF03M08GsNiG0EFLVm6qA@mail.gmail.com>
+From: Ralf Baechle <ralf@linux-mips.org>
+Subject: Re: [PATCH v5 02/14] irqchip: irq-pic32-evic: Add support for PIC32
+ interrupt controller
+Date: Thu, 14 Jan 2016 12:12:13 +0100
+Message-ID: <20160114111213.GC28942__39360.9563041993$1452775660$gmane$org@linux-mips.org>
+References: <1452734299-460-1-git-send-email-joshua.henderson@microchip.com>
+ <1452734299-460-3-git-send-email-joshua.henderson@microchip.com>
+ <alpine.DEB.2.11.1601140901210.3575@nanos>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from eddie.linux-mips.org ([148.251.95.138]:47014 "EHLO
+	cvs.linux-mips.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751998AbcANMr3 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 14 Jan 2016 07:47:29 -0500
+Received: from localhost.localdomain ([127.0.0.1]:41850 "EHLO linux-mips.org"
+        rhost-flags-OK-OK-OK-FAIL) by eddie.linux-mips.org with ESMTP
+        id S27009909AbcANMTUeVEwW (ORCPT <rfc822;linux-mmc@vger.kernel.org>
+        + 5 others); Thu, 14 Jan 2016 13:19:20 +0100
 Content-Disposition: inline
-In-Reply-To: <CAPDyKFqazmLYGFFGg38MTKnbQOqGsMF03M08GsNiG0EFLVm6qA@mail.gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Mans Rullgard <mans@mansr.com>, Haavard Skinnemoen <hskinnemoen@gmail.com>, Ludovic Desroches <ludovic.desroches@atmel.com>, Arnd Bergmann <arnd@arndb.de>, Andy Shevchenko <andriy.shevchenko@linux.intel.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>
+In-Reply-To: <alpine.DEB.2.11.1601140901210.3575@nanos>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Thomas Gleixner <tglx@linutronix.de>
+Cc: Joshua Henderson <joshua.henderson@microchip.com>, linux-kernel@vger.kernel.org, linux-mips@linux-mips.org, Cristian Birsan <cristian.birsan@microchip.com>, Jason Cooper <jason@lakedaemon.net>, Marc Zyngier <marc.zyngier@arm.com>, Purna Chandra Mandal <purna.mandal@microchip.com>, Michael Turquette <mturquette@baylibre.com>, Stephen Boyd <sboyd@codeaurora.org>, linux-clk@vger.kernel.org, Linus Walleij <linus.walleij@linaro.org>, linux-gpio@vger.kernel.org, Andrei Pistirica <andrei.pistirica@microchip.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Jiri Slaby <jslaby@suse.com>, linux-serial@vger.kernel.org, linux-api@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, Jean Delvare <jdelvare@suse.de>, Geert Uytterhoeven <geert@linux-m68k.org>, Corneliu Doban <cdoban@broadcom.com>, Haojian Zhuang <haojian.zhuang@gmail.com>, Luis de Bethencourt <luisbg@osg.sam>
 
-Around Thu 14 Jan 2016 13:07:57 +0100 or thereabout, Ulf Hansson wrote:
-> On 9 January 2016 at 20:32, Hans-Christian Noren Egtvedt
-> <egtvedt@samfundet.no> wrote:
->> Around Sat 09 Jan 2016 12:45:10 +0000 or thereabout, Mans Rullgard wrote:
->>> Commit ecb89f2f5f3e7 ("mmc: atmel-mci: remove compat for non DT board
->>> when requesting dma chan") broke dma on AVR32 and any other boards not
->>> using DT.  This restores a fallback mechanism for such cases.
->>>
->>> Signed-off-by: Mans Rullgard <mans@mansr.com>
->>> ---
->>> Changes:
->>> - rebase onto v4.4-rc8: no change to this patch
->>> ---
->>>  arch/avr32/mach-at32ap/at32ap700x.c | 16 ++++++++++++++++
->>>  drivers/mmc/host/atmel-mci.c        | 17 +++++++++++++++++
->>>  include/linux/atmel-mci.h           |  2 ++
->>>  3 files changed, 35 insertions(+)
->>
->> <snipp diff>
->>
->> Thank you for the patch. I have added this to the for-linux branch in the
->> linux-avr32 tree.
+On Thu, Jan 14, 2016 at 09:10:09AM +0100, Thomas Gleixner wrote:
+
+> I like that approach.
 > 
-> What does that mean? Do you intend to send this as a fix for 4.5 rc?
+> So except for the nit in pic32_set_type_edge() this looks good. It's pretty
+> clear now what the code does and how the hardware works.
 > 
-> If so, you have my ack for it!
-> 
-> Acked-by: Ulf Hansson <ulf.hansson@linaro.org>
+> Thanks for following up!
 
-Thank you. I might have been a bit quick to append it to my tree, as it
-mostly touches things outside of arch/avr32. I have not asked Linus to pull
-yet.
+So I take that for an ack.  I still haven't seen any acks or comments for
+the patches:
 
-I can append your Acked-by to #1 and #2 in the series and push through my
-tree if you are fine with that.
+     4/14      drivers/clk
+     8/14      drivers/pinctrl
+    10/14      drivers/serial
+    12/14      drivers/mmc
 
-https://git.kernel.org/cgit/linux/kernel/git/egtvedt/linux-avr32.git/log/?h=for-linus
+Of this series.  Ping?
 
--- 
-Best regards, Hans-Christian Egtvedt
+  Ralf
