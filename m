@@ -1,61 +1,76 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
 Subject: Re: [RFC 0/6] mmc: Field Firmware Update
-Date: Thu, 14 Jan 2016 13:50:58 +0100
-Message-ID: <CAPDyKFqiMbstjkbzxiz50MvpFc4u1kQtMSSsFv-GYLE6mmBzLg@mail.gmail.com>
+Date: Thu, 14 Jan 2016 14:16:00 +0100
+Message-ID: <CAPDyKFopp9gaaPu_DBR0Rpcsu6BCXu5DexXiVxYv9v5uX150jw@mail.gmail.com>
 References: <1447426572-11756-1-git-send-email-holgerschurig@gmail.com>
 	<SN1PR02MB13891415516DE9FA4756140783070@SN1PR02MB1389.namprd02.prod.outlook.com>
 	<CAOpc7mHbM8EYYNRKR+pKnzc0wf1DR1ojX-iFuDWDYyquC3EVZg@mail.gmail.com>
 	<CAPDyKFp2WEVF4yi=Upzx+58SY15u=Fp4=tr3_hh7AS3T2yz4qQ@mail.gmail.com>
 	<87r3ierjae.fsf@gmail.com>
-	<CAPDyKFpgYLDRt8=mayqB8sqD0ArXnv31a+fTZAnT_4Vf7yuFwQ@mail.gmail.com>
-	<CAPDyKFq5wNARNpDMK0_TJ3P64UAsCr_L42sj+JA-k6DdoFBJsw@mail.gmail.com>
-	<CALiw-2Eisj-WDB3hcsB22MTzHDS7y+V3gvTvq_+Jt8PKMa5GMg@mail.gmail.com>
-	<CAG=SpYGf7czPwLrJVrq49n_Lhph33fmyKq-Nkm6=c0fB1Gn9_w@mail.gmail.com>
+	<BLUPR02MB2773299A3F882A172DF0E3694FB0@BLUPR02MB277.namprd02.prod.outlook.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qk0-f177.google.com ([209.85.220.177]:36640 "EHLO
-	mail-qk0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752554AbcANMu7 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 14 Jan 2016 07:50:59 -0500
-Received: by mail-qk0-f177.google.com with SMTP id q19so240312560qke.3
-        for <linux-mmc@vger.kernel.org>; Thu, 14 Jan 2016 04:50:59 -0800 (PST)
-In-Reply-To: <CAG=SpYGf7czPwLrJVrq49n_Lhph33fmyKq-Nkm6=c0fB1Gn9_w@mail.gmail.com>
+Received: from mail-qk0-f182.google.com ([209.85.220.182]:36380 "EHLO
+	mail-qk0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754461AbcANNQB (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 14 Jan 2016 08:16:01 -0500
+Received: by mail-qk0-f182.google.com with SMTP id q19so241618195qke.3
+        for <linux-mmc@vger.kernel.org>; Thu, 14 Jan 2016 05:16:01 -0800 (PST)
+In-Reply-To: <BLUPR02MB2773299A3F882A172DF0E3694FB0@BLUPR02MB277.namprd02.prod.outlook.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <chris@printf.net>
-Cc: Holger Schurig <holgerschurig@gmail.com>, Olof Johansson <olofj@chromium.org>, Avi Shchislowski <Avi.Shchislowski@sandisk.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Alex Lemberg <Alex.Lemberg@sandisk.com>, Baolin Wang <baolin.wang@linaro.org>, Gwendal Grignou <gwendal@chromium.org>, Grant Grundler <grundler@chromium.org>, Seshagiri Holi <sholi@nvidia.com>, Jon Hunter <jonathanh@nvidia.com>
+To: Alex Lemberg <Alex.Lemberg@sandisk.com>
+Cc: Holger Schurig <holgerschurig@gmail.com>, Avi Shchislowski <Avi.Shchislowski@sandisk.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Chris Ball <chris@printf.net>, Baolin Wang <baolin.wang@linaro.org>
 
-On 22 December 2015 at 19:51, Chris Ball <chris@printf.net> wrote:
-> Hi,
+On 28 December 2015 at 15:12, Alex Lemberg <Alex.Lemberg@sandisk.com> wrote:
+> Hi Ulf,
 >
->> Chris has been busy with other stuff the last couple of years, is there a
->> lot of mmc-utils code that's out there that hasn't been picked up?
-
-I don't really know.
-
-Although, I wanted to make sure that the tool still was still being
-maintained as otherwise people sooner or later will not care to send
-patches.
-
+> We succeeded to run FFU via new mmc multi-command ioctl without any code modification,
+> but only by using Single Sector commands (CMD24).
 >
-> I've been applying mmc-utils patches as I get them -- last push was five
-> weeks ago.  So I don't have a backlog, but if people are sending mmc-utils
-> patches to lists rather than to me directly, I'm unlikely to see them there.
+> From running the FFU and from code review, we see two minor issues in this way of running FFU:
+> 1. There is no support for Multiple Block write commands (CMD25) in existing IOCTL implementation -
+
+That's right. But I guess we cope without the multiple block support!?
+
+Although, I wonder how hard it would be to add it...
+
+> seems like there is no polling for the card status on data transfer completion.
+
+We should fix that!
+
+In the rpmb case, we check the status so we can probably trigger that
+code to run for CMD24/25 as well.
+
+> (The kernel FFU implementation supports FFU using Multiple Block Write commands).
+> 2. As you probably remember, there are two ways to install the new FW in the end of FFU process -
+> In case MODE_OPERATION_CODES field is not supported by the device, the host sets to NORMAL state
+
+Before starting the update, you can find out which mode that is
+supported and take relevant actions, right?
+
+> and initiates a CMD0/HW_Reset/Power cycle to install the new firmware.
+
+Yes, but that's fragile - as discussed earlier.
+
+What we really need to do is to also remove the "card" device from the
+system, as otherwise we may have invalid data in its member variables
+and who knows what issues that can cause to upper levels.
+
+> This sequence cannot be done via multi-command ioctl, and requires manual reset of the device/platform.
+
+Yepp, it seems so at least for now. Perhaps we can think of a way to
+improve this?
+
+> (The kernel FFU implementation supports both FW install methods).
 >
+> For running FFU via new mmc multi-command ioctl, we have modified mmc-utils and add new functionality for FFU.
+> Please let us know if you want us to submit the patch for mmc-utils FFU functionality via multi-command ioctl.
 
-I haven't bothered much at looking at mmc utils patches, although I
-have noticed some being posted without any response or being picked
-up.
-I browsed the history of these patches and noticed that it's exactly
-as you say. These haven't been sent directly you or they were sent to
-an incorrect email address.
+Yes please. Don't forget to send this to Chris as well!
 
-I apologize if I was giving the wrong impression that you didn't
-maintain mmc utils very well, you certainly are!
-
-Perhaps we should add some information about it in the mmc kernel doc,
-to make it more visible.
+[...]
 
 Kind regards
 Uffe
