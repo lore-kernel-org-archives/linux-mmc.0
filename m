@@ -1,97 +1,39 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: tmio_mmc_dma: don't print invalid DMA cookie
-Date: Thu, 14 Jan 2016 11:02:33 +0100
-Message-ID: <CAPDyKFr-Y+pnhkTLYO2k-XHieA1rOEX9Ov129fFtZac8MksooQ@mail.gmail.com>
-References: <5032992.kTQ6Oyibpy@wuerfel>
+Subject: Re: [v4, 5/6] mmc: kconfig: select FSL_GUTS for MMC_SDHCI_OF_ESDHC
+Date: Thu, 14 Jan 2016 11:31:03 +0100
+Message-ID: <CAPDyKFog=YTMBORsf-DpbnxeogW5N0XzsK9FTS6jjiQSdn-GtQ@mail.gmail.com>
+References: <1450067067-44869-1-git-send-email-yangbo.lu@freescale.com>
+	<1450067067-44869-6-git-send-email-yangbo.lu@freescale.com>
+	<CAPDyKFo1g5_4bpYnTO96tGfVGStysN0FnmbSx-Se4tOa7f3rZQ@mail.gmail.com>
+	<1450116253.15946.353.camel@freescale.com>
+	<CAPDyKFrKSMC0uo8re3CxjNCUsVnEMau=GTKq=v_3ooNnQxw2Eg@mail.gmail.com>
+	<CAPDyKFoYxM4Nv_pHCZbGzuswMCXTLyj6CYgLjYnRguscUs9LrQ@mail.gmail.com>
+	<1451328478.18314.138.camel@freescale.com>
+	<HE1PR04MB088973C32016C805D0E4B1E3F8F40@HE1PR04MB0889.eurprd04.prod.outlook.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-sh-owner@vger.kernel.org>
-In-Reply-To: <5032992.kTQ6Oyibpy@wuerfel>
-Sender: linux-sh-owner@vger.kernel.org
-To: Arnd Bergmann <arnd@arndb.de>
-Cc: Ian Molton <ian@mnementh.co.uk>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Linux-sh list <linux-sh@vger.kernel.org>, Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-qk0-f178.google.com ([209.85.220.178]:36067 "EHLO
+	mail-qk0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753622AbcANKbE (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 14 Jan 2016 05:31:04 -0500
+Received: by mail-qk0-f178.google.com with SMTP id q19so234019214qke.3
+        for <linux-mmc@vger.kernel.org>; Thu, 14 Jan 2016 02:31:03 -0800 (PST)
+In-Reply-To: <HE1PR04MB088973C32016C805D0E4B1E3F8F40@HE1PR04MB0889.eurprd04.prod.outlook.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Yangbo Lu <yangbo.lu@nxp.com>
+Cc: Scott Wood <scottwood@freescale.com>, Yangbo Lu <yangbo.lu@freescale.com>, linux-mmc <linux-mmc@vger.kernel.org>, "X.Xie@freescale.com" <X.Xie@freescale.com>, Leo li <LeoLi@freescale.com>
 
-On 13 January 2016 at 22:25, Arnd Bergmann <arnd@arndb.de> wrote:
-> The tmio_mmc_start_dma_{rx,tx} function functions contain debug
-> code that prints the dma cookie among other things. However,
-> in case we fall back to PIO mode for some reason, the cookie
-> variable is never initialized, and gcc warns about this:
+> [Lu Yangbo-B47093] For the 'optional or not optional' problem, I think Scott's opinion is reasonable.
+> If we use guts driver, 'select' could avoid missing the workaround.
+> If we use syscon, select is better than 'depend on' since 'depend on' needs user self to find out the dependency.
 >
-> In file included from ../include/linux/printk.h:277:0,
->                  from ../include/linux/kernel.h:13,
->                  from ../include/linux/list.h:8,
->                  from ../include/linux/kobject.h:20,
->                  from ../include/linux/device.h:17,
->                  from ../drivers/mmc/host/tmio_mmc_dma.c:13:
-> ../drivers/mmc/host/tmio_mmc_dma.c: In function 'tmio_mmc_start_dma':
-> ../include/linux/dynamic_debug.h:86:3: warning: 'cookie' may be used uninitialized in this function [-Wmaybe-uninitialized]
->    __dynamic_dev_dbg(&descriptor, dev, fmt, \
->    ^
-> ../drivers/mmc/host/tmio_mmc_dma.c:128:15: note: 'cookie' was declared here
->   dma_cookie_t cookie;
->
-> This modifies the dev_dbg() statements so we only print the cookie
-> when we are already in the DMA path.
->
-> Signed-off-by: Arnd Bergmann <arnd@arndb.de>
+> Anyway, we should continue the discussion to come to an agreement finally.
+> I would very appreciate!
 
-Thanks, applied for fixes!
+Please, go ahead and use the "select guts driver" option, as you both
+seems to feel that strong about it.
 
 Kind regards
 Uffe
-
-> ---
-> This warning has existed for a long time, and it's only in debug code,
-> so probably nobody cared.
->
-> diff --git a/drivers/mmc/host/tmio_mmc_dma.c b/drivers/mmc/host/tmio_mmc_dma.c
-> index e4b05dbb9ca8..4a0d6b80eaa3 100644
-> --- a/drivers/mmc/host/tmio_mmc_dma.c
-> +++ b/drivers/mmc/host/tmio_mmc_dma.c
-> @@ -94,9 +94,9 @@ static void tmio_mmc_start_dma_rx(struct tmio_mmc_host *host)
->                         desc = NULL;
->                         ret = cookie;
->                 }
-> +               dev_dbg(&host->pdev->dev, "%s(): mapped %d -> %d, cookie %d, rq %p\n",
-> +                       __func__, host->sg_len, ret, cookie, host->mrq);
->         }
-> -       dev_dbg(&host->pdev->dev, "%s(): mapped %d -> %d, cookie %d, rq %p\n",
-> -               __func__, host->sg_len, ret, cookie, host->mrq);
->
->  pio:
->         if (!desc) {
-> @@ -116,8 +116,8 @@ pio:
->                          "DMA failed: %d, falling back to PIO\n", ret);
->         }
->
-> -       dev_dbg(&host->pdev->dev, "%s(): desc %p, cookie %d, sg[%d]\n", __func__,
-> -               desc, cookie, host->sg_len);
-> +       dev_dbg(&host->pdev->dev, "%s(): desc %p, sg[%d]\n", __func__,
-> +               desc, host->sg_len);
->  }
->
->  static void tmio_mmc_start_dma_tx(struct tmio_mmc_host *host)
-> @@ -174,9 +174,9 @@ static void tmio_mmc_start_dma_tx(struct tmio_mmc_host *host)
->                         desc = NULL;
->                         ret = cookie;
->                 }
-> +               dev_dbg(&host->pdev->dev, "%s(): mapped %d -> %d, cookie %d, rq %p\n",
-> +                       __func__, host->sg_len, ret, cookie, host->mrq);
->         }
-> -       dev_dbg(&host->pdev->dev, "%s(): mapped %d -> %d, cookie %d, rq %p\n",
-> -               __func__, host->sg_len, ret, cookie, host->mrq);
->
->  pio:
->         if (!desc) {
-> @@ -196,8 +196,7 @@ pio:
->                          "DMA failed: %d, falling back to PIO\n", ret);
->         }
->
-> -       dev_dbg(&host->pdev->dev, "%s(): desc %p, cookie %d\n", __func__,
-> -               desc, cookie);
-> +       dev_dbg(&host->pdev->dev, "%s(): desc %p\n", __func__, desc);
->  }
->
->  void tmio_mmc_start_dma(struct tmio_mmc_host *host,
->
