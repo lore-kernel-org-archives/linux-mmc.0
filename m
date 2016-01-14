@@ -1,71 +1,42 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v2 1/2] mmc: atmel-mci: restore dma on AVR32
-Date: Thu, 14 Jan 2016 14:29:44 +0100
-Message-ID: <CAPDyKFoVODFrfTSLqK59YUtJcKYTejpSmUpzJoD1==YF3B0vqg@mail.gmail.com>
-References: <1452343511-11164-1-git-send-email-mans@mansr.com>
-	<20160109193207.GA21906@samfundet.no>
-	<CAPDyKFqazmLYGFFGg38MTKnbQOqGsMF03M08GsNiG0EFLVm6qA@mail.gmail.com>
-	<20160114124353.GA14996@samfundet.no>
+From: Tony Lindgren <tony@atomide.com>
+Subject: Re: [PATCH] mmc: host: omap_hsmmc: add a verbose print to enable
+ CONFIG_REGULATOR_PBIAS
+Date: Thu, 14 Jan 2016 08:49:51 -0800
+Message-ID: <20160114164950.GN12777@atomide.com>
+References: <1452762920-2588-1-git-send-email-kishon@ti.com>
+ <20160114120706.GA12774@earth>
+ <569796EE.7030506@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qk0-f174.google.com ([209.85.220.174]:35589 "EHLO
-	mail-qk0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754473AbcANN3o (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 14 Jan 2016 08:29:44 -0500
-Received: by mail-qk0-f174.google.com with SMTP id y67so33312294qkc.2
-        for <linux-mmc@vger.kernel.org>; Thu, 14 Jan 2016 05:29:44 -0800 (PST)
-In-Reply-To: <20160114124353.GA14996@samfundet.no>
+Received: from muru.com ([72.249.23.125]:55337 "EHLO muru.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1754542AbcANQtz (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 14 Jan 2016 11:49:55 -0500
+Content-Disposition: inline
+In-Reply-To: <569796EE.7030506@ti.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Hans-Christian Noren Egtvedt <egtvedt@samfundet.no>
-Cc: Mans Rullgard <mans@mansr.com>, Haavard Skinnemoen <hskinnemoen@gmail.com>, Ludovic Desroches <ludovic.desroches@atmel.com>, Arnd Bergmann <arnd@arndb.de>, Andy Shevchenko <andriy.shevchenko@linux.intel.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>
+To: Kishon Vijay Abraham I <kishon@ti.com>
+Cc: Sebastian Reichel <sre@kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, pali.rohar@gmail.com, pavel@ucw.cz, khilman@kernel.org, aaro.koskinen@iki.fi, ivo.g.dimitrov.75@gmail.com, patrikbachan@gmail.com, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, NeilBrown <neilb@suse.de>, linux-mmc@vger.kernel.org, nsekhar@ti.com
 
-On 14 January 2016 at 13:43, Hans-Christian Noren Egtvedt
-<egtvedt@samfundet.no> wrote:
-> Around Thu 14 Jan 2016 13:07:57 +0100 or thereabout, Ulf Hansson wrote:
->> On 9 January 2016 at 20:32, Hans-Christian Noren Egtvedt
->> <egtvedt@samfundet.no> wrote:
->>> Around Sat 09 Jan 2016 12:45:10 +0000 or thereabout, Mans Rullgard wrote:
->>>> Commit ecb89f2f5f3e7 ("mmc: atmel-mci: remove compat for non DT board
->>>> when requesting dma chan") broke dma on AVR32 and any other boards not
->>>> using DT.  This restores a fallback mechanism for such cases.
->>>>
->>>> Signed-off-by: Mans Rullgard <mans@mansr.com>
->>>> ---
->>>> Changes:
->>>> - rebase onto v4.4-rc8: no change to this patch
->>>> ---
->>>>  arch/avr32/mach-at32ap/at32ap700x.c | 16 ++++++++++++++++
->>>>  drivers/mmc/host/atmel-mci.c        | 17 +++++++++++++++++
->>>>  include/linux/atmel-mci.h           |  2 ++
->>>>  3 files changed, 35 insertions(+)
->>>
->>> <snipp diff>
->>>
->>> Thank you for the patch. I have added this to the for-linux branch in the
->>> linux-avr32 tree.
->>
->> What does that mean? Do you intend to send this as a fix for 4.5 rc?
->>
->> If so, you have my ack for it!
->>
->> Acked-by: Ulf Hansson <ulf.hansson@linaro.org>
->
-> Thank you. I might have been a bit quick to append it to my tree, as it
-> mostly touches things outside of arch/avr32. I have not asked Linus to pull
-> yet.
->
-> I can append your Acked-by to #1 and #2 in the series and push through my
-> tree if you are fine with that.
+* Kishon Vijay Abraham I <kishon@ti.com> [160114 04:39]:
+> On Thursday 14 January 2016 05:37 PM, Sebastian Reichel wrote:
+> > 
+> > Is there a good reason against adding "depends on REGULATOR_PBIAS"
+> > to MMC_OMAP_HS? I guess it's required for most systems and the regulator
+> > driver is just 250 loc. I am aware, that this will disable the
+> > hsmmc driver for 'make oldconfig', but I guess that will be noticed
+> > in a similar way your warning is noticed.
+> 
+> hmm.. only MMC1 requires PBIAS so I'm not sure if it's okay to add depends on
+> REGULATOR_PBIAS for the HSMMC driver as such. And as you said it'll also
+> disable the hsmmc driver if oldconfig is used. But do we get a warning?
 
-Great, thanks!
+Adding depends there is a bit wrong, many designs are not using MMC1
+but use eMMC on the other controllers instead. I think the runtime
+warning is best we can do here to keep things modular.
 
-Kind regards
-Uffe
+Regards,
 
->
-> https://git.kernel.org/cgit/linux/kernel/git/egtvedt/linux-avr32.git/log/?h=for-linus
->
-> --
-> Best regards, Hans-Christian Egtvedt
+Tony
