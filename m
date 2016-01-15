@@ -1,49 +1,67 @@
-From: Russell King - ARM Linux <linux@arm.linux.org.uk>
-Subject: Re: [PATCH] mmc: host: omap_hsmmc: add a verbose print to enable
- CONFIG_REGULATOR_PBIAS
-Date: Fri, 15 Jan 2016 09:14:21 +0000
-Message-ID: <20160115091421.GD5783@n2100.arm.linux.org.uk>
-References: <1452762920-2588-1-git-send-email-kishon@ti.com>
- <20160114120706.GA12774@earth>
- <20160114172549.GC5783@n2100.arm.linux.org.uk>
- <20160114224025.GA26988@earth>
+From: Caesar Wang <caesar.upstream-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Subject: Re: [PATCH v2 06/12] mmc: pwrseq: add support for power-on sequencing
+ through DT
+Date: Fri, 15 Jan 2016 17:15:21 +0800
+Message-ID: <5698B8A9.9040002@gmail.com>
+References: <1452155155-16232-1-git-send-email-wxt@rock-chips.com>
+ <1452155155-16232-7-git-send-email-wxt@rock-chips.com>
+ <568FAA07.1010509@osg.samsung.com> <6960259.dpUH8KWsNS@phil>
+ <5693D226.2000307@osg.samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from pandora.arm.linux.org.uk ([78.32.30.218]:40727 "EHLO
-	pandora.arm.linux.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753670AbcAOJOn (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 15 Jan 2016 04:14:43 -0500
-Content-Disposition: inline
-In-Reply-To: <20160114224025.GA26988@earth>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="utf-8"; Format="flowed"
+Content-Transfer-Encoding: base64
+Return-path: <linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+In-Reply-To: <5693D226.2000307-JPH+aEBZ4P+UEJcrhfAQsw@public.gmane.org>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-rockchip>,
+ <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-rockchip/>
+List-Post: <mailto:linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+List-Help: <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-rockchip>,
+ <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
+Sender: "Linux-rockchip" <linux-rockchip-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+Errors-To: linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+To: Javier Martinez Canillas <javier-JPH+aEBZ4P+UEJcrhfAQsw@public.gmane.org>
+Cc: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Heiko Stuebner <heiko-4mtYJXux2i+zQB+pC5nmwQ@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, leecam-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org, keescook-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org, NeilBrown <neil-+NVA1uvv1dVBDLzU/O5InQ@public.gmane.org>, Srinivas Kandagatla <srinivas.kandagatla-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Alexandre Courbot <acourbot-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>, leozwang-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org, Caesar Wang <wxt-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Sebastian Reichel <sre@kernel.org>
-Cc: Kishon Vijay Abraham I <kishon@ti.com>, Ulf Hansson <ulf.hansson@linaro.org>, ivo.g.dimitrov.75@gmail.com, aaro.koskinen@iki.fi, Tony Lindgren <tony@atomide.com>, nsekhar@ti.com, khilman@kernel.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, NeilBrown <neilb@suse.de>, pavel@ucw.cz, pali.rohar@gmail.com, linux-omap@vger.kernel.org, patrikbachan@gmail.com, linux-arm-kernel@lists.infradead.org
 
-On Thu, Jan 14, 2016 at 11:40:25PM +0100, Sebastian Reichel wrote:
-> On Thu, Jan 14, 2016 at 05:25:49PM +0000, Russell King - ARM Linux wrote:
-> > There are very good reasons not to do this: that will result in
-> > configurations where MMC_OMAP_HS was set but without REGULATOR_PBIAS
-> > ending up with MMC_OMAP_HS being disabled.  That doesn't help the
-> > root problem, which is "why has the kernel boot regressed for my
-> > previous working configuration?"
-> > 
-> > The solution proposed here adds a message to the boot which points
-> > out fair and square what needs to be done to rectify the boot
-> > failure.  Adding a dependency just brings up the question "where
-> > has my MMC driver gone?"
-> 
-> The best thing would be to have no regression. Just printing a
-> message means I have to build another kernel. But more importantly
-> the message may not be visible by the user - e.g. if the display has
-> not yet been initialized.
-
-I agree in principle, but that's not possible here (see Tony's mails
-on why the PBIAS stuff needs to be optional.)  I'd agree with changing
-the Kconfig if PBIAS were a hard and fast requirement, but it isn't.
-
--- 
-RMK's Patch system: http://www.arm.linux.org.uk/developer/patches/
-FTTC broadband for 0.8mile line: currently at 9.6Mbps down 400kbps up
-according to speedtest.net.
+SGkgSmF2aWVyLAoK5ZyoIDIwMTblubQwMeaciDEy5pelIDAwOjAyLCBKYXZpZXIgTWFydGluZXog
+Q2FuaWxsYXMg5YaZ6YGTOgo+IEhlbGxvIEhlaWtvLAo+Cj4gT24gMDEvMDgvMjAxNiAxMTo0MiBQ
+TSwgSGVpa28gU3R1ZWJuZXIgd3JvdGU6Cj4+IEFtIEZyZWl0YWcsIDguIEphbnVhciAyMDE2LCAw
+OToyMjozMSBzY2hyaWViIEphdmllciBNYXJ0aW5leiBDYW5pbGxhczoKPj4+PiBGb3IgZXhhbXBs
+ZToKPj4+PiB3ZSBuZWVkIGVuYWJsZSB3aWZpIG1vZHVsZSBwb3dlciB0byB2aWEgdGhlIFdMX1JF
+R19PTgo+Pj4+IHBpbiwgd2UgbmVlZCBlbmFibGUgaXQgYXMgdGhlIHJlZ3VsYXRvciBpZiB0aGlz
+IHBpbiBpcyBjb25uZWN0ZWQgdG8KPj4+PiB0aGUgZ3BpbyBvZiBjcHUuCj4+PiBUaGlzIHBhcnQg
+Y29uZnVzZXMgbWUsIHNvIGRvZXMgeW91ciBjaGlwIGhhdmUgYW4gYWN0dWFsIHJlZ3VsYXRvciB0
+aGF0Cj4+PiBuZWVkcyB0byBiZSBlbmFibGVkIG9yIGlzIGp1c3QgYSBmYWtlIHJlZ3VsYXRvciB3
+aG9zZSBncGlvIHByb3BlcnR5IGlzCj4+PiB1c2VkIG5vdCB0byBlbmFibGUgdGhlIHJlZ3VsYXRv
+ciBidXQgdG8gdG9nZ2xlIHRoZSBXTF9SRUdfT04gcGluIG9mCj4+PiB0aGUgV2lGaSBjaGlwPwo+
+PiBhbm90aGVyIG9wdGlvbiB3b3VsZCBiZSB0byB1c2UgdGhlIHJlc2V0LWdwaW8taGFuZGxlcy4g
+cmszMjg4LXZleXJvbiBhbmQgSQo+PiB0aGluayBzb21lIEV4eW5vcyBhcyB3ZWxsIHVzZSBpdCB0
+aGF0IHdheS4KPj4KPiBZZXMgSSBrbm93LCBteSBwb2ludCB3YXMgdGhhdCB0aGUgcmVzZXQtZ3Bp
+b3MgcHJvcGVydHkgc2hvdWxkIGJlIHVzZWQKPiBpbnN0ZWFkIG9mIGEgZmFrZSByZWd1bGF0b3Ig
+aWYgd2hhdCdzIG5lZWRlZCBpcyB0byB0b2dnbGUgYSBjaGlwIHBpbi4KPgo+Pj4+IE1heWJlLCBz
+b21lb25lIHdpbGwgc2F5IHRoYXQgY2FuIHB1bGwgdXAvZG93biBmcm9tIGR0cy4KPj4+PiBVbmZv
+cnR1bmF0ZWx5IHNvbWUgU29DcyBjYW4ndCBzdXBwb3J0IHBpbmN0cmwgcHVsbCB1cC9kb3duIGlu
+Cj4+Pj4gaW50ZXJuYWwuCj4+PiBDYW4geW91IHBsZWFzZSBlbGFib3JhdGUgb24gdGhpcz8gQUZB
+SVUgdGhpcyBsaW1pdGF0aW9uIGlzIHRoZSByZWFzb24KPj4+IHdoeSB5b3Ugd2VudCB3aXRoIHRo
+ZSByZWd1bGF0b3IgYXBwcm9hY2ggc28gSSB0aGluayBpdCBkZXNlcnZlIGEgbW9yZQo+Pj4gZGVl
+cCBleHBsYW5hdGlvbi4KPj4gT24gdGhlIHJrMzAzNiBlYWNoIHBpbiBoYXMgYW4gaW5kaXZpZHVh
+bCB1bmNoYW5nYWJsZSBwdWxsIGRpcmVjdGlvbi4gU28gaXQncwo+PiBlaXRoZXIgbm8gYmlhcyBv
+ciBwdWxsaW5nIGluIHRoZSBwcmVkZWZpbmVkIGRpcmVjdGlvbiAodGhlIHBpbl9kZWZhdWx0IGJp
+YXMKPj4gb3B0aW9uKS4KPj4KPiBJIHRoaW5rIGVhY2ggY2hhbmdlIGhhcyB0byBiZSBqdXN0aWZp
+ZWQgb24gaXRzIG93biBzbyBJIHdvdWxkIHNheSB0aGF0Cj4gaGF2aW5nIGEgcmVndWxhdG9yIGVu
+YWJsZWQgYXMgYSBwYXJ0IG9mIGEgU0RJTyBjaGlwJ3MgcG93ZXIgc2VxdWVuY2luZwo+IGlzIHNv
+bWV0aGluZyBuZWVkZWQgZm9yIG1hbnkgcGxhdGZvcm1zLCBhbmQgdGhhdCB0aGlzIHByb3ZpZGVy
+IHNob3VsZAo+IGJlIGV4dGVuZGVkIHRvIHN1cHBvcnQgdGhhdCAoc29tZXRoaW5nIGxpa2UgY29t
+bWl0IG1zZyBpbiBwYXRjaCAwNS8xMikuCj4KPiBBbmQgdGhlbiBpbiB0aGUga3lsaW4gRFRTIGNo
+YW5nZSAocGF0Y2ggMDgvMTIpLCBJIHdvdWxkIGV4cGxhaW4gd2h5IGEKPiBjaGFpbmVkIHJlZ3Vs
+YXRvcnMgYXBwcm9hY2ggaXMgdXNlZC9uZWVkZWQgaW5zdGVhZCBvZiB0aGUgcmVzZXQtZ3Bpb3MK
+PiBkdWUgYW55IHBsYXRmb3JtIGxpbWl0YXRpb25zLgoKT2theSwKSSAnbSBhZ3JlZWQgd2l0aCB5
+b3VyIHBvaW50cyBpbiBoZXJlLgoKVGhlIHJlc2V0LWdwaW9zL3B3cnNxIGNhbiBtZWV0IHRoZSBk
+ZW1hbmQgb2Ygc29tZSB3bGFuIGNoaXBzIHRyaWdnZXIgCmNvbmRpdGlvbi4KTm8gbWF0dGVyIHdo
+YXRldmVyIGlzIHRoZSBCVF9FTiBvciBXTF9FTiAgdHJpZ2dlcnMgcGluLgoKPj4gSGVpa28KPj4K
+PiBCZXN0IHJlZ2FyZHMsCgoKLS0gClRoYW5rcywKQ2Flc2FyCgoKX19fX19fX19fX19fX19fX19f
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX18KTGludXgtcm9ja2NoaXAgbWFpbGluZyBsaXN0
+CkxpbnV4LXJvY2tjaGlwQGxpc3RzLmluZnJhZGVhZC5vcmcKaHR0cDovL2xpc3RzLmluZnJhZGVh
+ZC5vcmcvbWFpbG1hbi9saXN0aW5mby9saW51eC1yb2NrY2hpcAo=
