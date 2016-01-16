@@ -1,61 +1,34 @@
-From: Doug Anderson <dianders@chromium.org>
-Subject: Re: [RFC PATCH] mmc: dw_mmc: remove the prefix "SDMMC_##" into mci_read/write
-Date: Fri, 15 Jan 2016 09:56:39 -0800
-Message-ID: <CAD=FV=W1P0S1G_LCD=-=XoYF3ZWpfmVq1ezsUYeGHrVpz=_u=g@mail.gmail.com>
-References: <569379BE.8070907@samsung.com>
-	<CAGOxZ53SsR6twPsAj==FJFj4-skbxV1FC1hfM2usioTEWM7cQQ@mail.gmail.com>
-	<5699130B.9080705@gmail.com>
+From: Muni Sekhar <munisekharrms@gmail.com>
+Subject: sdhci: SDCLK frequency change
+Date: Sat, 16 Jan 2016 16:46:08 +0530
+Message-ID: <CAHhAz+h7Q0iGVimg17_SpU=MA+3NSZ+o4WYFA1fRAjA4Di-skg@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-yk0-f177.google.com ([209.85.160.177]:36723 "EHLO
-	mail-yk0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753299AbcAOR4k (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 15 Jan 2016 12:56:40 -0500
-Received: by mail-yk0-f177.google.com with SMTP id v14so457771601ykd.3
-        for <linux-mmc@vger.kernel.org>; Fri, 15 Jan 2016 09:56:40 -0800 (PST)
-In-Reply-To: <5699130B.9080705@gmail.com>
+Received: from mail-ig0-f172.google.com ([209.85.213.172]:38204 "EHLO
+	mail-ig0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751463AbcAPLQJ convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sat, 16 Jan 2016 06:16:09 -0500
+Received: by mail-ig0-f172.google.com with SMTP id mw1so25002455igb.1
+        for <linux-mmc@vger.kernel.org>; Sat, 16 Jan 2016 03:16:09 -0800 (PST)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@gmail.com>
-Cc: Alim Akhtar <alim.akhtar@gmail.com>, Jaehoon Chung <jh80.chung@samsung.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, Shawn Lin <shawn.lin@rock-chips.com>
+To: linux-mmc <linux-mmc@vger.kernel.org>
 
-Hi,
+[ Please keep me in CC as I'm not subscribed to the list]
 
-On Fri, Jan 15, 2016 at 7:40 AM, Jaehoon Chung <jh80.chung@gmail.com> wrote:
-> Hi, Alim.
->
-> On 01/15/2016 10:20 PM, Alim Akhtar wrote:
->> Hi Jaehoon,
->>
->> On Mon, Jan 11, 2016 at 3:15 PM, Jaehoon Chung <jh80.chung@samsung.com> wrote:
->>> It's fixed "SDMMC_##" as prefix into mci_read/write.
->>> So it's difficult to debug or read which offset is used.
->>> If it's passed by original defined register name, it can be checked
->>> which offset is used, and more readability than now.
->>>
->>
->> From commit message it is not clear what problem/difficulty you faced
->> with the current setup?
->> and how does this patch help to resolve the same?
->> Can you put some more light on the same?
->
-> Thanks for comments. :)
-> Indeed, there is no problem..It's just difficult to search for the defined location with "ctags".
->
-> Even though we know that it's related with CTRL register,
-> it's difficult to find where CTRL is defined, which offset is used.
-> I used the 'grep', 'cscope' command or other methods.
-> If using this patch, we can search the defined location more easier than now with "ctags".
->
-> When dwmmc controller was implemented, it was defined with "SDMMC_##" in mci_read/write() function.
-> But i didn't find the benefit about wrapping the register name.
->
-> Actually, it should be my preference.
-> If you agree my preference, i will resend the patch with commit msg in more detail.
+ Hello,
 
-I agree with your preference.  It's a bunch of churn that touches lots
-of lines in the file, but it definitely helps when searching through
-the code, especially for those not familiar with it.
+I enabled SDHCI_QUIRK2_PRESET_VALUE_BROKEN and tested the SDCLK
+frequency change by running =E2=80=98echo =E2=80=9C<freq>=E2=80=9D >
+/sys/kernel/debug/mmc0/clock=E2=80=99.
 
--Doug
+=46or this scenario, sdhci_set_clock() called twice from
+sdhci_do_set_ios(). Why sdhci_set_clock() needs to be called twice,
+any explanation?
+
+
+--=20
+Thanks,
+Sekhar
