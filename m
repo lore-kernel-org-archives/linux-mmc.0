@@ -1,34 +1,26 @@
-From: Muni Sekhar <munisekharrms@gmail.com>
-Subject: sdhci: SDCLK frequency change
-Date: Sat, 16 Jan 2016 16:46:08 +0530
-Message-ID: <CAHhAz+h7Q0iGVimg17_SpU=MA+3NSZ+o4WYFA1fRAjA4Di-skg@mail.gmail.com>
+From: Ms Donna Kwok <info@vet.bg.ac.rs>
+Subject: Greetings
+Date: Sun, 17 Jan 2016 00:02:19 +0100
+Message-ID: <25cdb4dec2a810f47bf150f09ff54c3f__17452.3528818556$1452986764$gmane$org@vet.bg.ac.rs>
+Reply-To: Ms.DonnaKwok1@qq.com
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=UTF-8;
+ format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ig0-f172.google.com ([209.85.213.172]:38204 "EHLO
-	mail-ig0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751463AbcAPLQJ convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sat, 16 Jan 2016 06:16:09 -0500
-Received: by mail-ig0-f172.google.com with SMTP id mw1so25002455igb.1
-        for <linux-mmc@vger.kernel.org>; Sat, 16 Jan 2016 03:16:09 -0800 (PST)
+Received: from mailserver.vet.bg.ac.rs ([147.91.250.8]:38779 "EHLO
+	mailserver.vet.bg.ac.rs" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753101AbcAPXZp (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sat, 16 Jan 2016 18:25:45 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc <linux-mmc@vger.kernel.org>
 
-[ Please keep me in CC as I'm not subscribed to the list]
+I am Ms Donna Kwok, HSBC Hong Kong, head of corporate sustainability 
+Asia pacific region. A sum of USD$21,300,000.00 Million was deposited by 
+our Late customer who died without declaring any next of kin before his 
+death in 2006.My suggestion to you is to stand as the next of kin to 
+Fadel Ahmed.We shall share in the ratio of 50% for me, 50% for you.if 
+interested please email: Ms.DonnaKwok1@qq.com
 
- Hello,
-
-I enabled SDHCI_QUIRK2_PRESET_VALUE_BROKEN and tested the SDCLK
-frequency change by running =E2=80=98echo =E2=80=9C<freq>=E2=80=9D >
-/sys/kernel/debug/mmc0/clock=E2=80=99.
-
-=46or this scenario, sdhci_set_clock() called twice from
-sdhci_do_set_ios(). Why sdhci_set_clock() needs to be called twice,
-any explanation?
-
-
---=20
 Thanks,
-Sekhar
+Donna Kwok.
