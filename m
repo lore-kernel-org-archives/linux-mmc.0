@@ -1,61 +1,57 @@
-From: Stefan Wahren <stefan.wahren-eS4NqCHxEME@public.gmane.org>
-Subject: [PATCH 2/5 RFC] mmc: sdhci-iproc: Actually enable the clock
-Date: Sun, 17 Jan 2016 14:59:01 +0000
-Message-ID: <1453042744-16196-3-git-send-email-stefan.wahren@i2se.com>
-References: <1453042744-16196-1-git-send-email-stefan.wahren@i2se.com>
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1453042744-16196-1-git-send-email-stefan.wahren-eS4NqCHxEME@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Scott Branden <sbranden-dY08KVG/lbpWk0Htik3J/w@public.gmane.org>, Ray Jui <rjui-dY08KVG/lbpWk0Htik3J/w@public.gmane.org>, Jon Mason <jonmason-dY08KVG/lbpWk0Htik3J/w@public.gmane.org>, Stephen Warren <swarren-3lzwWm7+Weoh9ZMKESR00Q@public.gmane.org>, Lee Jones <lee-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Eric Anholt <eric-WhKQ6XTQaPysTnJN9+BGXg@public.gmane.org>
-Cc: Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, kernel-TqfNSX0MhmxHKSADF0wUEw@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-rpi-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, bcm-kernel-feedback-list-dY08KVG/lbpWk0Htik3J/w@public.gmane.org, Stefan Wahren <stefan.wahren-eS4NqCHxEME@public.gmane.org>
+From: Stefan Wahren <stefan.wahren@i2se.com>
+Subject: [PATCH 0/5 RFC] mmc: sdhci-iproc: add bcm2835 support
+Date: Sun, 17 Jan 2016 14:58:59 +0000
+Message-ID: <1453042744-16196-1-git-send-email-stefan.wahren@i2se.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mout.kundenserver.de ([212.227.126.130]:52081 "EHLO
+	mout.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752601AbcAQPAO (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 17 Jan 2016 10:00:14 -0500
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Scott Branden <sbranden@broadcom.com>, Ray Jui <rjui@broadcom.com>, Jon Mason <jonmason@broadcom.com>, Stephen Warren <swarren@wwwdotorg.org>, Lee Jones <lee@kernel.org>, Eric Anholt <eric@anholt.net>
+Cc: Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Arnd Bergmann <arnd@arndb.de>, Ulf Hansson <ulf.hansson@linaro.org>, kernel@martin.sperl.org, devicetree@vger.kernel.org, linux-rpi-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, bcm-kernel-feedback-list@broadcom.com, Stefan Wahren <stefan.wahren@i2se.com>
 
-The RPi firmware-based clocks driver can actually disable
-unused clocks, so when switching to use it we ended up losing
-our MMC clock once all devices were probed.
+This patch series based on the suggestion of Scott Branden to implement
+bcm2835 support into sdhci-iproc [1].
 
-This patch adopts the changes from 1e5a0a9a58e2 ("mmc: sdhci-bcm2835:
-Actually enable the clock") to sdhci-iproc.
+These changes provide the following advantages:
+  * no need to maintain a separate driver for bcm2835
+  * improve support and test coverage of bcm2835 mmc support
+  * get the rid of SDHCI_CAPABILITIES hack in bcm2835_sdhci_readl
+  * increase write performance by avoiding delays in write ops
 
-Signed-off-by: Stefan Wahren <stefan.wahren-eS4NqCHxEME@public.gmane.org>
----
- drivers/mmc/host/sdhci-iproc.c |    9 ++++++++-
- 1 file changed, 8 insertions(+), 1 deletion(-)
+Patch 1 and 2 adopt two sdhci-bcm2835 fixes to sdhci-iproc. The third patch
+tries to specify as much quirks as possible in the bcm283x.dtsi as possible.
+Patch 4 and 5 are the actually changes for bcm2835 support.
 
-diff --git a/drivers/mmc/host/sdhci-iproc.c b/drivers/mmc/host/sdhci-iproc.c
-index e22060a..55bc348 100644
---- a/drivers/mmc/host/sdhci-iproc.c
-+++ b/drivers/mmc/host/sdhci-iproc.c
-@@ -207,6 +207,11 @@ static int sdhci_iproc_probe(struct platform_device *pdev)
- 		ret = PTR_ERR(pltfm_host->clk);
- 		goto err;
- 	}
-+	ret = clk_prepare_enable(pltfm_host->clk);
-+	if (ret) {
-+		dev_err(&pdev->dev, "failed to enable host clk\n");
-+		goto err;
-+	}
- 
- 	if (iproc_host->data->pdata->quirks & SDHCI_QUIRK_MISSING_CAPS) {
- 		host->caps = iproc_host->data->caps;
-@@ -215,10 +220,12 @@ static int sdhci_iproc_probe(struct platform_device *pdev)
- 
- 	ret = sdhci_add_host(host);
- 	if (ret)
--		goto err;
-+		goto err_clk;
- 
- 	return 0;
- 
-+err_clk:
-+	clk_disable_unprepare(pltfm_host->clk);
- err:
- 	sdhci_pltfm_free(pdev);
- 	return ret;
+These series has been tested on Raspberry Pi B with dd (direct I/O):
+
+sdhci-bcm2835
+
+378 kB/s WRITE
+10,6 MB/s READ
+
+sdhci-iproc (after applying patch series)
+
+881 kB/s WRITE
+10,8 MB/s READ
+
+[1] - https://lkml.org/lkml/2015/12/22/525
+
+Stefan Wahren (5):
+  mmc: sdhci-iproc: Clean up platform allocations if shdci init fails
+  mmc: sdhci-iproc: Actually enable the clock
+  ARM: bcm283x: specify sdhci quirks in dtsi file
+  mmc: sdhci-iproc: add bcm2835 support
+  DT: sdhci-iproc: add bcm2835 compatible
+
+ .../devicetree/bindings/mmc/brcm,sdhci-iproc.txt   |    5 ++-
+ arch/arm/boot/dts/bcm283x.dtsi                     |    2 ++
+ drivers/mmc/host/Kconfig                           |    6 ++--
+ drivers/mmc/host/sdhci-iproc.c                     |   33 ++++++++++++++++++--
+ 4 files changed, 39 insertions(+), 7 deletions(-)
+
 -- 
 1.7.9.5
 
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
