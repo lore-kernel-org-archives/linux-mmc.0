@@ -1,57 +1,78 @@
-From: Stefan Wahren <stefan.wahren@i2se.com>
-Subject: [PATCH 0/5 RFC] mmc: sdhci-iproc: add bcm2835 support
-Date: Sun, 17 Jan 2016 14:58:59 +0000
-Message-ID: <1453042744-16196-1-git-send-email-stefan.wahren@i2se.com>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: Re: questions about runtime pm
+Date: Mon, 18 Jan 2016 11:35:41 +0900
+Message-ID: <569C4F7D.40700@samsung.com>
+References: <20151222132453.GB2789@odux.rfo.atmel.com>
+ <20160115150143.GA10117@odux.rfo.atmel.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mout.kundenserver.de ([212.227.126.130]:52081 "EHLO
-	mout.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752601AbcAQPAO (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 17 Jan 2016 10:00:14 -0500
+Received: from mailout2.samsung.com ([203.254.224.25]:42992 "EHLO
+	mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753165AbcARCfv (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 17 Jan 2016 21:35:51 -0500
+Received: from epcpsbgr1.samsung.com
+ (u141.gpu120.samsung.co.kr [203.254.230.141])
+ by mailout2.samsung.com (Oracle Communications Messaging Server 7.0.5.31.0
+ 64bit (built May  5 2014))
+ with ESMTP id <0O1402EMTN7PKA20@mailout2.samsung.com> for
+ linux-mmc@vger.kernel.org; Mon, 18 Jan 2016 11:35:49 +0900 (KST)
+In-reply-to: <20160115150143.GA10117@odux.rfo.atmel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Scott Branden <sbranden@broadcom.com>, Ray Jui <rjui@broadcom.com>, Jon Mason <jonmason@broadcom.com>, Stephen Warren <swarren@wwwdotorg.org>, Lee Jones <lee@kernel.org>, Eric Anholt <eric@anholt.net>
-Cc: Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Arnd Bergmann <arnd@arndb.de>, Ulf Hansson <ulf.hansson@linaro.org>, kernel@martin.sperl.org, devicetree@vger.kernel.org, linux-rpi-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, bcm-kernel-feedback-list@broadcom.com, Stefan Wahren <stefan.wahren@i2se.com>
+To: linux-mmc@vger.kernel.org, ulf.hansson@linaro.org
 
-This patch series based on the suggestion of Scott Branden to implement
-bcm2835 support into sdhci-iproc [1].
+Hi,
 
-These changes provide the following advantages:
-  * no need to maintain a separate driver for bcm2835
-  * improve support and test coverage of bcm2835 mmc support
-  * get the rid of SDHCI_CAPABILITIES hack in bcm2835_sdhci_readl
-  * increase write performance by avoiding delays in write ops
+On 01/16/2016 12:01 AM, Ludovic Desroches wrote:
+> On Tue, Dec 22, 2015 at 02:24:53PM +0100, Ludovic Desroches wrote:
+>> Hi guys,
+>>
+>> I have recently added PM support for my driver but I don't have the
+>> behavior I was expecting. I am wondering if I didn't do something wrong.
+>>
+>> I have implemented runtime_suspend in a very simple way, I call
+>> sdhci_runtime_suspend_host() and I disable the clocks. It works pretty
+>> well with the eMMC which is non removable but with a SD card... If I
+>> have my SD card present on boot time, it is detected but
+>> insertion/removal is not detected.
+>>
+>> Having a look to sdhci_runtime_suspend_host() internal, all the
+>> interruptions are disabled expecting the card interrupt if it has been
+>> set earlier.
+>>
+>> From my understanding, it means that if there is no activity on sdhci,
+>> we will go to suspend and then we could wake up only on a software event
+>> (or a sdio interrupt). How to manage card insertion/removal in this
+>> case? My problem is so huge, I have probably missed something...
 
-Patch 1 and 2 adopt two sdhci-bcm2835 fixes to sdhci-iproc. The third patch
-tries to specify as much quirks as possible in the bcm283x.dtsi as possible.
-Patch 4 and 5 are the actually changes for bcm2835 support.
+Is there any detection method for SD-card(removable card)?
+Doesn't use Card-detect pin or Polling..?
 
-These series has been tested on Raspberry Pi B with dd (direct I/O):
+Best Regards,
+Jaehoon Chung
 
-sdhci-bcm2835
-
-378 kB/s WRITE
-10,6 MB/s READ
-
-sdhci-iproc (after applying patch series)
-
-881 kB/s WRITE
-10,8 MB/s READ
-
-[1] - https://lkml.org/lkml/2015/12/22/525
-
-Stefan Wahren (5):
-  mmc: sdhci-iproc: Clean up platform allocations if shdci init fails
-  mmc: sdhci-iproc: Actually enable the clock
-  ARM: bcm283x: specify sdhci quirks in dtsi file
-  mmc: sdhci-iproc: add bcm2835 support
-  DT: sdhci-iproc: add bcm2835 compatible
-
- .../devicetree/bindings/mmc/brcm,sdhci-iproc.txt   |    5 ++-
- arch/arm/boot/dts/bcm283x.dtsi                     |    2 ++
- drivers/mmc/host/Kconfig                           |    6 ++--
- drivers/mmc/host/sdhci-iproc.c                     |   33 ++++++++++++++++++--
- 4 files changed, 39 insertions(+), 7 deletions(-)
-
--- 
-1.7.9.5
+>>
+>> Moreover, to avoid system PM, I have used pm_runtime_force_suspend but I
+>> could not wake up on card insertion/removal too. Do I have to use system
+>> PM if I want to manage this case?
+>>
+>> Thanks for your advices.
+>>
+>> Regards
+>>
+>> Ludovic
+> 
+> 
+> Any feedback?
+> 
+> 
+> Ludovic
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
 
