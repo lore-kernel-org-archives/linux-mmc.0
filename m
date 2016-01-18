@@ -1,40 +1,90 @@
-From: Pawel Wodkowski <pawelx.wodkowski@intel.com>
-Subject: [PATCH] mmc: debugfs: correct wrong voltage value
-Date: Mon, 18 Jan 2016 10:35:19 +0100
-Message-ID: <1453109719-53079-1-git-send-email-pawelx.wodkowski@intel.com>
+From: Shawn Lin <shawn.lin@rock-chips.com>
+Subject: [PATCH] mmc: dw_mmc: remove "disable-wp" property
+Date: Mon, 18 Jan 2016 17:50:04 +0800
+Message-ID: <1453110604-8169-1-git-send-email-shawn.lin@rock-chips.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga11.intel.com ([192.55.52.93]:57366 "EHLO mga11.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754049AbcARJpO (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 18 Jan 2016 04:45:14 -0500
+Received: from lucky1.263xmail.com ([211.157.147.131]:38472 "EHLO
+	lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753418AbcARJyp (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 18 Jan 2016 04:54:45 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: Chuanxiao Dong <chuanxiao.dong@intel.com>
+To: Jaehoon Chung <jh80.chung@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Shawn Lin <shawn.lin@rock-chips.com>
 
-From: Chuanxiao Dong <chuanxiao.dong@intel.com>
+dw_mmc already use mmc_of_parse to get disable-wp,
+so we remove it from dw_mmc. And dw_mci_slot_of_parse
+will not be removed as well.
 
-Correct the wrong voltage value shown in debugfs for mmc/sd/sdio.
-
-Signed-off-by: Chuanxiao Dong <chuanxiao.dong@intel.com>
-Signed-off-by: Pawel Wodkowski <pawelx.wodkowski@intel.com>
+Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
 ---
- drivers/mmc/core/debugfs.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/drivers/mmc/core/debugfs.c b/drivers/mmc/core/debugfs.c
-index bdfce774d848..6239ec3220a8 100644
---- a/drivers/mmc/core/debugfs.c
-+++ b/drivers/mmc/core/debugfs.c
-@@ -170,7 +170,7 @@ static int mmc_ios_show(struct seq_file *s, void *data)
- 		str = "invalid";
- 		break;
- 	}
--	seq_printf(s, "signal voltage:\t%u (%s)\n", ios->chip_select, str);
-+	seq_printf(s, "signal voltage:\t%u (%s)\n", ios->signal_voltage, str);
+ drivers/mmc/host/dw_mmc.c | 43 -------------------------------------------
+ 1 file changed, 43 deletions(-)
+
+diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+index fddbcb6..8687554 100644
+--- a/drivers/mmc/host/dw_mmc.c
++++ b/drivers/mmc/host/dw_mmc.c
+@@ -2493,47 +2493,6 @@ static irqreturn_t dw_mci_interrupt(int irq, void *dev_id)
+ 	return IRQ_HANDLED;
+ }
  
- 	switch (ios->drv_type) {
- 	case MMC_SET_DRIVER_TYPE_A:
+-#ifdef CONFIG_OF
+-/* given a slot, find out the device node representing that slot */
+-static struct device_node *dw_mci_of_find_slot_node(struct dw_mci_slot *slot)
+-{
+-	struct device *dev = slot->mmc->parent;
+-	struct device_node *np;
+-	const __be32 *addr;
+-	int len;
+-
+-	if (!dev || !dev->of_node)
+-		return NULL;
+-
+-	for_each_child_of_node(dev->of_node, np) {
+-		addr = of_get_property(np, "reg", &len);
+-		if (!addr || (len < sizeof(int)))
+-			continue;
+-		if (be32_to_cpup(addr) == slot->id)
+-			return np;
+-	}
+-	return NULL;
+-}
+-
+-static void dw_mci_slot_of_parse(struct dw_mci_slot *slot)
+-{
+-	struct device_node *np = dw_mci_of_find_slot_node(slot);
+-
+-	if (!np)
+-		return;
+-
+-	if (of_property_read_bool(np, "disable-wp")) {
+-		slot->mmc->caps2 |= MMC_CAP2_NO_WRITE_PROTECT;
+-		dev_warn(slot->mmc->parent,
+-			"Slot quirk 'disable-wp' is deprecated\n");
+-	}
+-}
+-#else /* CONFIG_OF */
+-static void dw_mci_slot_of_parse(struct dw_mci_slot *slot)
+-{
+-}
+-#endif /* CONFIG_OF */
+-
+ static int dw_mci_init_slot(struct dw_mci *host, unsigned int id)
+ {
+ 	struct mmc_host *mmc;
+@@ -2590,8 +2549,6 @@ static int dw_mci_init_slot(struct dw_mci *host, unsigned int id)
+ 	if (host->pdata->caps2)
+ 		mmc->caps2 = host->pdata->caps2;
+ 
+-	dw_mci_slot_of_parse(slot);
+-
+ 	ret = mmc_of_parse(mmc);
+ 	if (ret)
+ 		goto err_host_allocated;
 -- 
-1.9.1
+2.3.7
+
+
 
