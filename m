@@ -1,78 +1,117 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: questions about runtime pm
-Date: Mon, 18 Jan 2016 11:35:41 +0900
-Message-ID: <569C4F7D.40700@samsung.com>
-References: <20151222132453.GB2789@odux.rfo.atmel.com>
- <20160115150143.GA10117@odux.rfo.atmel.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 7bit
+From: Shawn Lin <shawn.lin@rock-chips.com>
+Subject: [PATCH] mmc: dw_mmc: remove DW_MCI_QUIRK_BROKEN_CARD_DETECTION quirk
+Date: Mon, 18 Jan 2016 16:50:26 +0800
+Message-ID: <1453107026-19814-1-git-send-email-shawn.lin@rock-chips.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout2.samsung.com ([203.254.224.25]:42992 "EHLO
-	mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753165AbcARCfv (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 17 Jan 2016 21:35:51 -0500
-Received: from epcpsbgr1.samsung.com
- (u141.gpu120.samsung.co.kr [203.254.230.141])
- by mailout2.samsung.com (Oracle Communications Messaging Server 7.0.5.31.0
- 64bit (built May  5 2014))
- with ESMTP id <0O1402EMTN7PKA20@mailout2.samsung.com> for
- linux-mmc@vger.kernel.org; Mon, 18 Jan 2016 11:35:49 +0900 (KST)
-In-reply-to: <20160115150143.GA10117@odux.rfo.atmel.com>
+Received: from lucky1.263xmail.com ([211.157.147.131]:50005 "EHLO
+	lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752522AbcARIzR (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 18 Jan 2016 03:55:17 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org, ulf.hansson@linaro.org
+To: Jaehoon Chung <jh80.chung@samsung.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Shawn Lin <shawn.lin@rock-chips.com>
 
-Hi,
+dw_mmc already use mmc_of_parse to get "broken-cd" property,
+but it considered "broken-cd" to be a quirk in its driver. We
+don't need this quirk here, and just take what we need from
+mmc->caps.
 
-On 01/16/2016 12:01 AM, Ludovic Desroches wrote:
-> On Tue, Dec 22, 2015 at 02:24:53PM +0100, Ludovic Desroches wrote:
->> Hi guys,
->>
->> I have recently added PM support for my driver but I don't have the
->> behavior I was expecting. I am wondering if I didn't do something wrong.
->>
->> I have implemented runtime_suspend in a very simple way, I call
->> sdhci_runtime_suspend_host() and I disable the clocks. It works pretty
->> well with the eMMC which is non removable but with a SD card... If I
->> have my SD card present on boot time, it is detected but
->> insertion/removal is not detected.
->>
->> Having a look to sdhci_runtime_suspend_host() internal, all the
->> interruptions are disabled expecting the card interrupt if it has been
->> set earlier.
->>
->> From my understanding, it means that if there is no activity on sdhci,
->> we will go to suspend and then we could wake up only on a software event
->> (or a sdio interrupt). How to manage card insertion/removal in this
->> case? My problem is so huge, I have probably missed something...
+Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
+---
 
-Is there any detection method for SD-card(removable card)?
-Doesn't use Card-detect pin or Polling..?
+ drivers/mmc/host/dw_mmc.c  | 23 +++--------------------
+ include/linux/mmc/dw_mmc.h |  4 +---
+ 2 files changed, 4 insertions(+), 23 deletions(-)
 
-Best Regards,
-Jaehoon Chung
+diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+index 7128351..bbf9ca6 100644
+--- a/drivers/mmc/host/dw_mmc.c
++++ b/drivers/mmc/host/dw_mmc.c
+@@ -1450,12 +1450,11 @@ static int dw_mci_get_cd(struct mmc_host *mmc)
+ {
+ 	int present;
+ 	struct dw_mci_slot *slot = mmc_priv(mmc);
+-	struct dw_mci_board *brd = slot->host->pdata;
+ 	struct dw_mci *host = slot->host;
+ 	int gpio_cd = mmc_gpio_get_cd(mmc);
+ 
+ 	/* Use platform get_cd function, else try onboard card detect */
+-	if ((brd->quirks & DW_MCI_QUIRK_BROKEN_CARD_DETECTION) ||
++	if ((mmc->caps & MMC_CAP_NEEDS_POLL) ||
+ 	    (mmc->caps & MMC_CAP_NONREMOVABLE))
+ 		present = 1;
+ 	else if (!IS_ERR_VALUE(gpio_cd))
+@@ -2840,23 +2839,13 @@ static void dw_mci_dto_timer(unsigned long arg)
+ }
+ 
+ #ifdef CONFIG_OF
+-static struct dw_mci_of_quirks {
+-	char *quirk;
+-	int id;
+-} of_quirks[] = {
+-	{
+-		.quirk	= "broken-cd",
+-		.id	= DW_MCI_QUIRK_BROKEN_CARD_DETECTION,
+-	},
+-};
+-
+ static struct dw_mci_board *dw_mci_parse_dt(struct dw_mci *host)
+ {
+ 	struct dw_mci_board *pdata;
+ 	struct device *dev = host->dev;
+ 	struct device_node *np = dev->of_node;
+ 	const struct dw_mci_drv_data *drv_data = host->drv_data;
+-	int idx, ret;
++	int ret;
+ 	u32 clock_frequency;
+ 
+ 	pdata = devm_kzalloc(dev, sizeof(*pdata), GFP_KERNEL);
+@@ -2871,11 +2860,6 @@ static struct dw_mci_board *dw_mci_parse_dt(struct dw_mci *host)
+ 		pdata->num_slots = 1;
+ 	}
+ 
+-	/* get quirks */
+-	for (idx = 0; idx < ARRAY_SIZE(of_quirks); idx++)
+-		if (of_get_property(np, of_quirks[idx].quirk, NULL))
+-			pdata->quirks |= of_quirks[idx].id;
+-
+ 	if (of_property_read_u32(np, "fifo-depth", &pdata->fifo_depth))
+ 		dev_info(dev,
+ 			 "fifo-depth property not found, using value of FIFOTH register as default\n");
+@@ -2908,13 +2892,12 @@ static struct dw_mci_board *dw_mci_parse_dt(struct dw_mci *host)
+ 
+ static void dw_mci_enable_cd(struct dw_mci *host)
+ {
+-	struct dw_mci_board *brd = host->pdata;
+ 	unsigned long irqflags;
+ 	u32 temp;
+ 	int i;
+ 
+ 	/* No need for CD if broken card detection */
+-	if (brd->quirks & DW_MCI_QUIRK_BROKEN_CARD_DETECTION)
++	if (host->cur_slot->mmc->caps & MMC_CAP_NEEDS_POLL)
+ 		return;
+ 
+ 	/* No need for CD if all slots have a non-error GPIO */
+diff --git a/include/linux/mmc/dw_mmc.h b/include/linux/mmc/dw_mmc.h
+index 89df7ab..250d822 100644
+--- a/include/linux/mmc/dw_mmc.h
++++ b/include/linux/mmc/dw_mmc.h
+@@ -235,10 +235,8 @@ struct dw_mci_dma_ops {
+ };
+ 
+ /* IP Quirks/flags. */
+-/* Unreliable card detection */
+-#define DW_MCI_QUIRK_BROKEN_CARD_DETECTION	BIT(0)
+ /* Timer for broken data transfer over scheme */
+-#define DW_MCI_QUIRK_BROKEN_DTO			BIT(1)
++#define DW_MCI_QUIRK_BROKEN_DTO			BIT(0)
+ 
+ struct dma_pdata;
+ 
+-- 
+2.3.7
 
->>
->> Moreover, to avoid system PM, I have used pm_runtime_force_suspend but I
->> could not wake up on card insertion/removal too. Do I have to use system
->> PM if I want to manage this case?
->>
->> Thanks for your advices.
->>
->> Regards
->>
->> Ludovic
-> 
-> 
-> Any feedback?
-> 
-> 
-> Ludovic
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
+
 
