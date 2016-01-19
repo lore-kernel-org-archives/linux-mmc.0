@@ -1,50 +1,52 @@
-From: =?utf-8?B?U8O2cmVu?= Brinkmann <soren.brinkmann-gjFFaj9aHVfQT0dZR+AlfA@public.gmane.org>
-Subject: Re: [LINUX PATCH 2/5] Documentation: mmc: Updated the binding doc
+From: Rob Herring <robh@kernel.org>
+Subject: Re: [LINUX PATCH 4/5] Documentation: mmc: Updated the binding doc
  for Arasan SDHCI.
-Date: Tue, 19 Jan 2016 08:50:57 -0800
-Message-ID: <20160119165057.GN6491@xsjsorenbubuntu>
+Date: Tue, 19 Jan 2016 11:16:11 -0600
+Message-ID: <20160119171611.GA2708@rob-hp-laptop>
 References: <1453213055-35563-1-git-send-email-lakshmis@xilinx.com>
- <1453213055-35563-2-git-send-email-lakshmis@xilinx.com>
+ <1453213055-35563-4-git-send-email-lakshmis@xilinx.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail.kernel.org ([198.145.29.136]:51495 "EHLO mail.kernel.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1755297AbcASRQR (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 19 Jan 2016 12:16:17 -0500
 Content-Disposition: inline
-In-Reply-To: <1453213055-35563-2-git-send-email-lakshmis-gjFFaj9aHVfQT0dZR+AlfA@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: P L Sai Krishna <lakshmi.sai.krishna.potthuri-gjFFaj9aHVfQT0dZR+AlfA@public.gmane.org>
-Cc: Michal Simek <michal.simek-gjFFaj9aHVfQT0dZR+AlfA@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Kevin Hao <haokexin-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Emil Lenchak <emill-gjFFaj9aHVfQT0dZR+AlfA@public.gmane.org>, Tobias Klauser <tklauser-93Khv+1bN0NyDzI6CaY1VQ@public.gmane.org>, Sudeep Holla <Sudeep.Holla-5wv7dgnIgG8@public.gmane.org>, Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Jisheng Zhang <jszhang-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, "Ivan T. Ivanov" <ivan.ivanov-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Scott Branden <sbranden-dY08KVG/lbpWk0Htik3J/w@public.gmane.org>, Vincent Yang <vincent.yang.fujitsu-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Haibo Chen <haibo.chen-KZfg59tc24xl57MIdRCFDg@public.gmane.org>, Marek Vasut <marex-ynQEQJNshbs@public.gmane.org>, "ludovic.desroches-AIFe0yeh4nAAvxtiuMwx3w@public.gmane.org" <ludovic.desroches-AIFe0yeh4nAAvxtiuMwx3w@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Pawel Moll <pawel.moll-5wv7dgnIgG8@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Ian Campbell <ijc+devicetree-KcIKpvwj1kUDXYZnReoRVg@public.gmane.org>, Kumar Gala <galak-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, Suman Tripathi <stripathi-qTEPVZfXA3Y@public.gmane.org>, Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-mmc@vger
+In-Reply-To: <1453213055-35563-4-git-send-email-lakshmis@xilinx.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: P L Sai Krishna <lakshmi.sai.krishna.potthuri@xilinx.com>
+Cc: Michal Simek <michal.simek@xilinx.com>, Soren Brinkmann <soren.brinkmann@xilinx.com>, Ulf Hansson <ulf.hansson@linaro.org>, Kevin Hao <haokexin@gmail.com>, Emil Lenchak <emill@xilinx.com>, Tobias Klauser <tklauser@distanz.ch>, Sudeep Holla <Sudeep.Holla@arm.com>, Adrian Hunter <adrian.hunter@intel.com>, Jisheng Zhang <jszhang@marvell.com>, "Ivan T. Ivanov" <ivan.ivanov@linaro.org>, Scott Branden <sbranden@broadcom.com>, Vincent Yang <vincent.yang.fujitsu@gmail.com>, Haibo Chen <haibo.chen@freescale.com>, Marek Vasut <marex@denx.de>, "ludovic.desroches@atmel.com" <ludovic.desroches@atmel.com>, Pawel Moll <pawel.moll@arm.com>, Mark Rutland <mark.rutland@arm.com>, Ian Campbell <ijc+devicetree@hellion.org.uk>, Kumar Gala <galak@codeaurora.org>, Suman Tripathi <stripathi@apm.com>, Shawn Lin <shawn.lin@rock-chips.com>, devicetree@vger.kernel.org, Harini Katakam <harini>
 
-On Tue, 2016-01-19 at 07:47PM +0530, P L Sai Krishna wrote:
-> This patch adds broken-tuning property to the binding
+On Tue, Jan 19, 2016 at 07:47:34PM +0530, P L Sai Krishna wrote:
+> This patch adds broken-mmc-highspeed property to the binding
 > doc for Arasan SDHCI.
->=20
-> Signed-off-by: P L Sai Krishna <lakshmis-gjFFaj9aHVfQT0dZR+AlfA@public.gmane.org>
+> 
+> Signed-off-by: P L Sai Krishna <lakshmis@xilinx.com>
 > ---
->  Documentation/devicetree/bindings/mmc/arasan,sdhci.txt | 4 ++++
->  1 file changed, 4 insertions(+)
->=20
-> diff --git a/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt b=
-/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
-> index da541c3..2088d9f 100644
+>  Documentation/devicetree/bindings/mmc/arasan,sdhci.txt | 3 ++-
+>  1 file changed, 2 insertions(+), 1 deletion(-)
+> 
+> diff --git a/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt b/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
+> index 2088d9f..5884832 100644
 > --- a/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
 > +++ b/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
-> @@ -17,6 +17,10 @@ Required Properties:
->    - interrupt-parent: Phandle for the interrupt controller that serv=
-ices
->  		      interrupts for this device.
-> =20
-> +Optional Properties:
-> +  - broken-tuning: Indicates tuning broken in Silicon 1.0 of
-> +			  Zynq Ultrascale+ MPSoC.
+> @@ -20,7 +20,8 @@ Required Properties:
+>  Optional Properties:
+>    - broken-tuning: Indicates tuning broken in Silicon 1.0 of
+>  			  Zynq Ultrascale+ MPSoC.
+> -
+> +  - broken-mmc-highspeed: Indicates to force
+> +				the controller to use in standard speed.
 
-Describe the purpose/values of the property without reference to the
-SoC. Other broken implementations would want to use this property too.
+We already have the inverse of this with "cap-mmc-highspeed".
 
-	S=C3=B6ren
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" i=
-n
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+The only potential problem is it will need to be added to existing DTs 
+if you start disabling high speed by default. Maybe that's not an issue 
+for users of the Arasan driver.
+
+Otherwise, you should determine this with a more specific compatible 
+string.
+
+Rob
