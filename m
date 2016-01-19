@@ -1,48 +1,34 @@
-From: Mason <slash.tmp@free.fr>
-Subject: mmc0: Invalid maximum block size, assuming 512 bytes
-Date: Tue, 19 Jan 2016 16:33:46 +0100
-Message-ID: <569E575A.5070401@free.fr>
+From: Holger Schurig <holgerschurig@gmail.com>
+Subject: Re: [LINUX PATCH 5/5] mmc: host: Update the quirks for this controller.
+Date: Tue, 19 Jan 2016 17:05:04 +0100
+Message-ID: <87fuxt4ksv.fsf@gmail.com>
+References: <1453213055-35563-1-git-send-email-lakshmis@xilinx.com>
+	<1453213055-35563-5-git-send-email-lakshmis@xilinx.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-15
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp2-g21.free.fr ([212.27.42.2]:26935 "EHLO smtp2-g21.free.fr"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753920AbcASPd4 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 19 Jan 2016 10:33:56 -0500
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1453213055-35563-5-git-send-email-lakshmis@xilinx.com> (P. L.
+	Sai Krishna's message of "Tue, 19 Jan 2016 19:47:35 +0530")
+Sender: linux-kernel-owner@vger.kernel.org
+To: P L Sai Krishna <lakshmi.sai.krishna.potthuri@xilinx.com>
+Cc: Michal Simek <michal.simek@xilinx.com>, Soren Brinkmann <soren.brinkmann@xilinx.com>, Ulf Hansson <ulf.hansson@linaro.org>, Kevin Hao <haokexin@gmail.com>, Emil Lenchak <emill@xilinx.com>, Tobias Klauser <tklauser@distanz.ch>, Sudeep Holla <Sudeep.Holla@arm.com>, Adrian Hunter <adrian.hunter@intel.com>, Jisheng Zhang <jszhang@marvell.com>, "Ivan T. Ivanov" <ivan.ivanov@linaro.org>, Scott Branden <sbranden@broadcom.com>, Vincent Yang <vincent.yang.fujitsu@gmail.com>, Haibo Chen <haibo.chen@freescale.com>, Marek Vasut <marex@denx.de>, "ludovic.desroches@atmel.com" <ludovic.desroches@atmel.com>, Rob Herring <robh+dt@kernel.org>, Pawel Moll <pawel.moll@arm.com>, Mark Rutland <mark.rutland@arm.com>, Ian Campbell <ijc+devicetree@hellion.org.uk>, Kumar Gala <galak@codeaurora.org>, Suman Tripathi <stripathi@apm.com>, Shawn Lin <shawn.lin@rock-chips.com>, devicetree@vger
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc <linux-mmc@vger.kernel.org>
-Cc: Michal Simek <michal.simek@xilinx.com>, Soren Brinkmann <soren.brinkmann@xilinx.com>, Suman Tripathi <stripathi@apm.com>, Arnd Bergmann <arnd@arndb.de>, Ulf Hansson <ulf.hansson@linaro.org>, Sebastian Frias <sf84@laposte.net>
 
-Hello,
+Hi,
 
-My SoC provides an Arasan SDIO/eMMC controller supported by the
-drivers/mmc/host/sdhci-of-arasan.c driver.
+Don't write "of this controller" into subject, write "of sdhci-arasan"
+or something like it.
 
-At init, the driver prints a warning to the console:
+Otherwise people will have to look into your patch description ...
 
-[    0.887301] sdhci: Secure Digital Host Controller Interface driver
-[    0.893537] sdhci: Copyright(c) Pierre Ossman
-[    0.897928] sdhci-pltfm: SDHCI platform and OF driver helper
-[    0.903903] sdhci-arasan 21000.mmc: No vmmc regulator found
-[    0.909537] sdhci-arasan 21000.mmc: No vqmmc regulator found
-[    0.915247] mmc0: Invalid maximum block size, assuming 512 bytes
-[    0.953797] mmc0: SDHCI controller on 21000.mmc [21000.mmc] using ADMA
-[    0.961494] sdhci-arasan 21200.mmc: No vmmc regulator found
-[    0.967110] sdhci-arasan 21200.mmc: No vqmmc regulator found
+> This patch adds SDHCI_QUIRK2_STOP_WITH_TC quirk to remove
+> the following error message.
+> "mmc0: Got data interrupt 0x00000002 even though no data
+> operation was in progress"
 
-Is "mmc0: Invalid maximum block size, assuming 512 bytes" something
-serious which requires investigating, in your experience?
+But wait, it's not there, too. So people have to look into the patch
+itself. :-(
 
-The corresponding DT is:
 
-mmc0: mmc@21000 {
-	compatible = "arasan,sdhci-8.9a";
-	reg = <0x21000 0x200>;
-	clock-names = "clk_xin", "clk_ahb";
-	clocks = <&sdio_clk>, <&clkgen 1>;
-	interrupts = <60 IRQ_TYPE_LEVEL_HIGH>;
-};
 
-Regards.
+Holger
