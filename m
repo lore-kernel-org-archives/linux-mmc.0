@@ -1,45 +1,41 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH 0/3] Convert dw_mci_pltfm_prepare_command into a library
- call
-Date: Tue, 19 Jan 2016 13:07:56 +0900
-Message-ID: <569DB69C.5060003@samsung.com>
-References: <1453174787-13536-1-git-send-email-shawn.lin@rock-chips.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-reply-to: <1453174787-13536-1-git-send-email-shawn.lin@rock-chips.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Shawn Lin <shawn.lin@rock-chips.com>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+From: Pawel Wodkowski <pawelx.wodkowski@intel.com>
+Subject: [PATCH] mmc: Add a restriction to mmc debugfs clock setting.
+Date: Tue, 19 Jan 2016 07:13:15 +0100
+Message-ID: <1453183995-46099-1-git-send-email-pawelx.wodkowski@intel.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mga14.intel.com ([192.55.52.115]:13105 "EHLO mga14.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751109AbcASGSp (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 19 Jan 2016 01:18:45 -0500
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: Chuanxiao Dong <chuanxiao.dong@intel.com>, Yuan Juntao <juntaox.yuan@intel.com>
 
-Hi, Shawn.
+From: Chuanxiao Dong <chuanxiao.dong@intel.com>
 
-On 01/19/2016 12:39 PM, Shawn Lin wrote:
-> This patchset expose dw_mci_pltfm_prepare_command towards to
-> library call and remove the redundant code from dw_mmc-rockchip.
-> Meanwhile we make dw_mmc-exynos to call it instead of changing cmdr
-> in its variant drivers.
+Clock frequency values written to an mmc host should not be less than
+the minimum clock frequency which the mmc host supports.
 
-Thanks for your effort.
-Right way. We need to try that remove the hook for operation.
-Looks good to me. After check, i will pick these. Also other your patch. :)
+Signed-off-by: Yuan Juntao <juntaox.yuan@intel.com>
+Signed-off-by: Pawel Wodkowski <pawelx.wodkowski@intel.com>
+---
+ drivers/mmc/core/debugfs.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-Best Regards,
-Jaehoon Chung
+diff --git a/drivers/mmc/core/debugfs.c b/drivers/mmc/core/debugfs.c
+index 154aced0b91b..bdfce774d848 100644
+--- a/drivers/mmc/core/debugfs.c
++++ b/drivers/mmc/core/debugfs.c
+@@ -220,7 +220,7 @@ static int mmc_clock_opt_set(void *data, u64 val)
+ 	struct mmc_host *host = data;
+ 
+ 	/* We need this check due to input value is u64 */
+-	if (val > host->f_max)
++	if (val > host->f_max || val < host->f_min)
+ 		return -EINVAL;
+ 
+ 	mmc_claim_host(host);
+-- 
+1.9.1
 
-> 
-> 
-> 
-> Shawn Lin (3):
->   mmc: dw_mmc: expose dw_mci_pltfm_prepare_command
->   mmc: dw_mmc-rockchip: remove prepare_command hook
->   mmc: dw_mmc-exynos: wrapper prepare_command
-> 
->  drivers/mmc/host/dw_mmc-exynos.c   | 4 ++--
->  drivers/mmc/host/dw_mmc-pltfm.c    | 3 ++-
->  drivers/mmc/host/dw_mmc-pltfm.h    | 2 +-
->  drivers/mmc/host/dw_mmc-rockchip.c | 9 ++-------
->  4 files changed, 7 insertions(+), 11 deletions(-)
-> 
