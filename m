@@ -1,453 +1,123 @@
-From: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
-Subject: [RFC PATCH 3/3] mmc: pwrseq: convert to proper platform device
-Date: Tue, 19 Jan 2016 10:59:15 +0000
-Message-ID: <1453201155-2598-1-git-send-email-srinivas.kandagatla@linaro.org>
-References: <1453201052-2347-1-git-send-email-srinivas.kandagatla@linaro.org>
+From: Shawn Lin <shawn.lin@rock-chips.com>
+Subject: Re: [PATCH] mmc: dw_mmc-rockchip: add pinctrl support
+Date: Tue, 19 Jan 2016 19:07:16 +0800
+Message-ID: <569E18E4.7050509@rock-chips.com>
+References: <1453197165-20194-1-git-send-email-shawn.lin@rock-chips.com>
+ <7857448.fZE0EdmvdR@phil>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=windows-1252; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wm0-f46.google.com ([74.125.82.46]:34856 "EHLO
-	mail-wm0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752264AbcASK7U (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 19 Jan 2016 05:59:20 -0500
-Received: by mail-wm0-f46.google.com with SMTP id r129so84939080wmr.0
-        for <linux-mmc@vger.kernel.org>; Tue, 19 Jan 2016 02:59:19 -0800 (PST)
-In-Reply-To: <1453201052-2347-1-git-send-email-srinivas.kandagatla@linaro.org>
+Received: from lucky1.263xmail.com ([211.157.147.132]:59895 "EHLO
+	lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750954AbcASLHg (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 19 Jan 2016 06:07:36 -0500
+In-Reply-To: <7857448.fZE0EdmvdR@phil>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org
-Cc: linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
+To: Heiko Stuebner <heiko@sntech.de>
+Cc: shawn.lin@rock-chips.com, Jaehoon Chung <jh80.chung@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, wxt@rock-chips.com
 
-simple-pwrseq and emmc-pwrseq drivers rely on platform_device
-structure from of_find_device_by_node(), this works mostly. But, as there
-is no driver associated with this devices, cases like default/init pinctrl
-setup would never be performed by pwrseq. This becomes problem when the
-gpios used in pwrseq require pinctrl setup.
+On 2016/1/19 18:07, Heiko Stuebner wrote:
+> Hi Shawn,
+>
+> Am Dienstag, 19. Januar 2016, 17:52:45 schrieb Shawn Lin:
+>> We find rk3368 fail to enumerate sd card since
+>> the default state is gpio function. Meahwhile, lots of
+>> rockchip platform dts file assign pinctrl to dw_mmc but actually
+>> dw_mmc never use it. Fortunately, those platforms' default io
+>> state is sdmmc function, but no always right for all.
+>>
+>> Cc: Heiko Stuebner <heiko@sntech.de>
+>> Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
+>
+> I do believe any issue you see, must come from somewhere else, because the
+> driver-core does in drivers/base/dd.c really_probe():
+> 	pinctrl_bind_pins()
 
-Currently most of the common pinctrl setup is done in
-drivers/base/pinctrl.c by pinctrl_bind_pins().
+yes, pinctrl_bind_pins does turn pinctrl state. But I try debug a little
+more and seems somewhere else switch the state before dw_mmc probe. Now 
+I *guess* that may relate to our ATF or MCU firmware since rk3368's 
+sdmmc io can also be used as mcu_jtag for system debug. I need to double 
+check that point, thanks.
 
-There are two ways to slove this issue on either convert pwrseq drivers
-to a proper platform drivers or copy the exact code from
-pcintrl_bind_pins(). I prefer converting pwrseq to proper drivers so that
-other cases like setting up clks/parents from dt would also be possible.
+Hi Caesar,
+does your patch able to consider adding SDMMC/CPU_JTAG/MCU_JTAG 
+managment for rk3368 as well?
 
-Signed-off-by: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
----
- drivers/mmc/core/pwrseq.c        | 99 ++++++++++++++++++++--------------------
- drivers/mmc/core/pwrseq.h        | 13 ++++--
- drivers/mmc/core/pwrseq_emmc.c   | 65 ++++++++++++++++----------
- drivers/mmc/core/pwrseq_simple.c | 71 ++++++++++++++++++----------
- 4 files changed, 145 insertions(+), 103 deletions(-)
+> which in turn already does the needed pinctrl state handling.
+>
+> So that default-state should be set up even before the dwmmc probe function
+> is called.
+>
+> The sharing between sdmmc and uart2 pins is the same on the rk3036 and so
+> far Caesar seems to have been able to switch the pin-state to sdmmc without
+> touching the dw_mmc driver itself.
+>
+>
+> Heiko
+>
+>
+>> ---
+>>
+>>   drivers/mmc/host/dw_mmc-rockchip.c | 15 +++++++++++++++
+>>   1 file changed, 15 insertions(+)
+>>
+>> diff --git a/drivers/mmc/host/dw_mmc-rockchip.c
+>> b/drivers/mmc/host/dw_mmc-rockchip.c index d9c92f3..308b424 100644
+>> --- a/drivers/mmc/host/dw_mmc-rockchip.c
+>> +++ b/drivers/mmc/host/dw_mmc-rockchip.c
+>> @@ -9,6 +9,7 @@
+>>
+>>   #include <linux/module.h>
+>>   #include <linux/platform_device.h>
+>> +#include <linux/pinctrl/consumer.h>
+>>   #include <linux/clk.h>
+>>   #include <linux/mmc/host.h>
+>>   #include <linux/mmc/dw_mmc.h>
+>> @@ -21,6 +22,8 @@
+>>   #define RK3288_CLKGEN_DIV       2
+>>
+>>   struct dw_mci_rockchip_priv_data {
+>> +	struct pinctrl		*pinctrl;
+>> +	struct pinctrl_state	*pins_default;
+>>   	struct clk		*drv_clk;
+>>   	struct clk		*sample_clk;
+>>   	int			default_sample_phase;
+>> @@ -78,6 +81,10 @@ static void dw_mci_rk3288_set_ios(struct dw_mci *host,
+>> struct mmc_ios *ios) /* Make sure we use phases which we can enumerate
+>> with */
+>>   	if (!IS_ERR(priv->sample_clk))
+>>   		clk_set_phase(priv->sample_clk, priv->default_sample_phase);
+>> +
+>> +	/* Make sure we use correct pinctrl which we can enumerate with */
+>> +	if (!IS_ERR(priv->pinctrl) && !IS_ERR(priv->pins_default))
+>> +		pinctrl_select_state(priv->pinctrl, priv->pins_default);
+>>   }
+>>
+>>   #define NUM_PHASES			360
+>> @@ -223,6 +230,14 @@ static int dw_mci_rk3288_parse_dt(struct dw_mci
+>> *host) if (IS_ERR(priv->sample_clk))
+>>   		dev_dbg(host->dev, "ciu_sample not available\n");
+>>
+>> +	priv->pinctrl = devm_pinctrl_get(host->dev);
+>> +	if (!IS_ERR(priv->pinctrl)) {
+>> +		priv->pins_default = pinctrl_lookup_state(priv->pinctrl,
+>> +							  "default");
+>> +		if (IS_ERR(priv->pins_default))
+>> +			dev_dbg(host->dev, "pinctrl not available\n");
+>> +	}
+>> +
+>>   	host->priv = priv;
+>>
+>>   	return 0;
+>
+>
+>
+>
 
-diff --git a/drivers/mmc/core/pwrseq.c b/drivers/mmc/core/pwrseq.c
-index 4c1d175..669608e 100644
---- a/drivers/mmc/core/pwrseq.c
-+++ b/drivers/mmc/core/pwrseq.c
-@@ -8,50 +8,30 @@
-  *  MMC power sequence management
-  */
- #include <linux/kernel.h>
--#include <linux/platform_device.h>
- #include <linux/err.h>
- #include <linux/of.h>
--#include <linux/of_platform.h>
- 
- #include <linux/mmc/host.h>
- 
- #include "pwrseq.h"
- 
--struct mmc_pwrseq_match {
--	const char *compatible;
--	struct mmc_pwrseq *(*alloc)(struct mmc_host *host, struct device *dev);
--};
--
--static struct mmc_pwrseq_match pwrseq_match[] = {
--	{
--		.compatible = "mmc-pwrseq-simple",
--		.alloc = mmc_pwrseq_simple_alloc,
--	}, {
--		.compatible = "mmc-pwrseq-emmc",
--		.alloc = mmc_pwrseq_emmc_alloc,
--	},
--};
--
--static struct mmc_pwrseq_match *mmc_pwrseq_find(struct device_node *np)
-+static DEFINE_MUTEX(pwrseq_list_mutex);
-+static LIST_HEAD(pwrseq_list);
-+
-+static struct mmc_pwrseq *of_find_mmc_pwrseq(struct device_node *np)
- {
--	struct mmc_pwrseq_match *match = ERR_PTR(-ENODEV);
--	int i;
-+	struct mmc_pwrseq *p;
- 
--	for (i = 0; i < ARRAY_SIZE(pwrseq_match); i++) {
--		if (of_device_is_compatible(np,	pwrseq_match[i].compatible)) {
--			match = &pwrseq_match[i];
--			break;
--		}
--	}
-+	list_for_each_entry(p, &pwrseq_list, list)
-+		if (p->dev->of_node == np)
-+			return p;
- 
--	return match;
-+	return NULL;
- }
- 
- int mmc_pwrseq_alloc(struct mmc_host *host)
- {
--	struct platform_device *pdev;
- 	struct device_node *np;
--	struct mmc_pwrseq_match *match;
- 	struct mmc_pwrseq *pwrseq;
- 	int ret = 0;
- 
-@@ -59,25 +39,18 @@ int mmc_pwrseq_alloc(struct mmc_host *host)
- 	if (!np)
- 		return 0;
- 
--	pdev = of_find_device_by_node(np);
--	if (!pdev) {
--		ret = -ENODEV;
--		goto err;
--	}
-+	pwrseq = of_find_mmc_pwrseq(np);
- 
--	match = mmc_pwrseq_find(np);
--	if (IS_ERR(match)) {
--		ret = PTR_ERR(match);
--		goto err;
--	}
-+	if (pwrseq && pwrseq->ops && pwrseq->ops->alloc) {
-+		host->pwrseq = pwrseq;
-+		ret = pwrseq->ops->alloc(host);
-+		if (IS_ERR_VALUE(ret)) {
-+			host->pwrseq = NULL;
-+			goto err;
-+		}
- 
--	pwrseq = match->alloc(host, &pdev->dev);
--	if (IS_ERR(pwrseq)) {
--		ret = PTR_ERR(pwrseq);
--		goto err;
- 	}
- 
--	host->pwrseq = pwrseq;
- 	dev_info(host->parent, "allocated mmc-pwrseq\n");
- 
- err:
-@@ -89,7 +62,7 @@ void mmc_pwrseq_pre_power_on(struct mmc_host *host)
- {
- 	struct mmc_pwrseq *pwrseq = host->pwrseq;
- 
--	if (pwrseq && pwrseq->ops && pwrseq->ops->pre_power_on)
-+	if (pwrseq && pwrseq->ops->pre_power_on)
- 		pwrseq->ops->pre_power_on(host);
- }
- 
-@@ -97,7 +70,7 @@ void mmc_pwrseq_post_power_on(struct mmc_host *host)
- {
- 	struct mmc_pwrseq *pwrseq = host->pwrseq;
- 
--	if (pwrseq && pwrseq->ops && pwrseq->ops->post_power_on)
-+	if (pwrseq && pwrseq->ops->post_power_on)
- 		pwrseq->ops->post_power_on(host);
- }
- 
-@@ -105,7 +78,7 @@ void mmc_pwrseq_power_off(struct mmc_host *host)
- {
- 	struct mmc_pwrseq *pwrseq = host->pwrseq;
- 
--	if (pwrseq && pwrseq->ops && pwrseq->ops->power_off)
-+	if (pwrseq && pwrseq->ops->power_off)
- 		pwrseq->ops->power_off(host);
- }
- 
-@@ -113,8 +86,34 @@ void mmc_pwrseq_free(struct mmc_host *host)
- {
- 	struct mmc_pwrseq *pwrseq = host->pwrseq;
- 
--	if (pwrseq && pwrseq->ops && pwrseq->ops->free)
--		pwrseq->ops->free(host);
-+	if (pwrseq) {
-+		if (pwrseq->ops->free)
-+			pwrseq->ops->free(host);
-+
-+		host->pwrseq = NULL;
-+	}
- 
--	host->pwrseq = NULL;
- }
-+
-+int mmc_pwrseq_register(struct mmc_pwrseq *pwrseq)
-+{
-+	if (!pwrseq || !pwrseq->ops || !pwrseq->dev)
-+		return -EINVAL;
-+
-+	mutex_lock(&pwrseq_list_mutex);
-+	list_add(&pwrseq->list, &pwrseq_list);
-+	mutex_unlock(&pwrseq_list_mutex);
-+
-+	return 0;
-+}
-+EXPORT_SYMBOL_GPL(mmc_pwrseq_register);
-+
-+void mmc_pwrseq_unregister(struct mmc_pwrseq *pwrseq)
-+{
-+	if (pwrseq) {
-+		mutex_lock(&pwrseq_list_mutex);
-+		list_del(&pwrseq->list);
-+		mutex_unlock(&pwrseq_list_mutex);
-+	}
-+}
-+EXPORT_SYMBOL_GPL(mmc_pwrseq_unregister);
-diff --git a/drivers/mmc/core/pwrseq.h b/drivers/mmc/core/pwrseq.h
-index 096da48..08a7d2d 100644
---- a/drivers/mmc/core/pwrseq.h
-+++ b/drivers/mmc/core/pwrseq.h
-@@ -8,7 +8,10 @@
- #ifndef _MMC_CORE_PWRSEQ_H
- #define _MMC_CORE_PWRSEQ_H
- 
-+#include <linux/mmc/host.h>
-+
- struct mmc_pwrseq_ops {
-+	int (*alloc)(struct mmc_host *host);
- 	void (*pre_power_on)(struct mmc_host *host);
- 	void (*post_power_on)(struct mmc_host *host);
- 	void (*power_off)(struct mmc_host *host);
-@@ -17,21 +20,21 @@ struct mmc_pwrseq_ops {
- 
- struct mmc_pwrseq {
- 	struct mmc_pwrseq_ops *ops;
-+	struct device *dev;
-+	struct list_head list;
- };
- 
- #ifdef CONFIG_OF
- 
-+int mmc_pwrseq_register(struct mmc_pwrseq *pwrseq);
-+void mmc_pwrseq_unregister(struct mmc_pwrseq *pwrseq);
-+
- int mmc_pwrseq_alloc(struct mmc_host *host);
- void mmc_pwrseq_pre_power_on(struct mmc_host *host);
- void mmc_pwrseq_post_power_on(struct mmc_host *host);
- void mmc_pwrseq_power_off(struct mmc_host *host);
- void mmc_pwrseq_free(struct mmc_host *host);
- 
--struct mmc_pwrseq *mmc_pwrseq_simple_alloc(struct mmc_host *host,
--					   struct device *dev);
--struct mmc_pwrseq *mmc_pwrseq_emmc_alloc(struct mmc_host *host,
--					 struct device *dev);
--
- #else
- 
- static inline int mmc_pwrseq_alloc(struct mmc_host *host) { return 0; }
-diff --git a/drivers/mmc/core/pwrseq_emmc.c b/drivers/mmc/core/pwrseq_emmc.c
-index 7978fb7..75f7423 100644
---- a/drivers/mmc/core/pwrseq_emmc.c
-+++ b/drivers/mmc/core/pwrseq_emmc.c
-@@ -9,6 +9,7 @@
-  */
- #include <linux/delay.h>
- #include <linux/kernel.h>
-+#include <linux/platform_device.h>
- #include <linux/slab.h>
- #include <linux/device.h>
- #include <linux/err.h>
-@@ -48,14 +49,8 @@ static void mmc_pwrseq_emmc_free(struct mmc_host *host)
- 
- 	unregister_restart_handler(&pwrseq->reset_nb);
- 	gpiod_put(pwrseq->reset_gpio);
--	kfree(pwrseq);
- }
- 
--static struct mmc_pwrseq_ops mmc_pwrseq_emmc_ops = {
--	.post_power_on = mmc_pwrseq_emmc_reset,
--	.free = mmc_pwrseq_emmc_free,
--};
--
- static int mmc_pwrseq_emmc_reset_nb(struct notifier_block *this,
- 				    unsigned long mode, void *cmd)
- {
-@@ -66,21 +61,14 @@ static int mmc_pwrseq_emmc_reset_nb(struct notifier_block *this,
- 	return NOTIFY_DONE;
- }
- 
--struct mmc_pwrseq *mmc_pwrseq_emmc_alloc(struct mmc_host *host,
--					 struct device *dev)
-+static int mmc_pwrseq_emmc_alloc(struct mmc_host *host)
- {
--	struct mmc_pwrseq_emmc *pwrseq;
--	int ret = 0;
--
--	pwrseq = kzalloc(sizeof(struct mmc_pwrseq_emmc), GFP_KERNEL);
--	if (!pwrseq)
--		return ERR_PTR(-ENOMEM);
-+	struct mmc_pwrseq_emmc *pwrseq =  to_pwrseq_emmc(host->pwrseq);
- 
--	pwrseq->reset_gpio = gpiod_get(dev, "reset", GPIOD_OUT_LOW);
--	if (IS_ERR(pwrseq->reset_gpio)) {
--		ret = PTR_ERR(pwrseq->reset_gpio);
--		goto free;
--	}
-+	pwrseq->reset_gpio = gpiod_get(host->pwrseq->dev,
-+					"reset", GPIOD_OUT_LOW);
-+	if (IS_ERR(pwrseq->reset_gpio))
-+		return PTR_ERR(pwrseq->reset_gpio);
- 
- 	/*
- 	 * register reset handler to ensure emmc reset also from
-@@ -91,10 +79,41 @@ struct mmc_pwrseq *mmc_pwrseq_emmc_alloc(struct mmc_host *host,
- 	pwrseq->reset_nb.priority = 255;
- 	register_restart_handler(&pwrseq->reset_nb);
- 
-+	return 0;
-+}
-+
-+static struct mmc_pwrseq_ops mmc_pwrseq_emmc_ops = {
-+	.alloc = mmc_pwrseq_emmc_alloc,
-+	.post_power_on = mmc_pwrseq_emmc_reset,
-+	.free = mmc_pwrseq_emmc_free,
-+};
-+
-+static int mmc_pwrseq_emmc_probe(struct platform_device *pdev)
-+{
-+	struct mmc_pwrseq_emmc *pwrseq;
-+	struct device *dev = &pdev->dev;
-+
-+	pwrseq = devm_kzalloc(dev, sizeof(*pwrseq), GFP_KERNEL);
-+	if (!pwrseq)
-+		return -ENOMEM;
-+
- 	pwrseq->pwrseq.ops = &mmc_pwrseq_emmc_ops;
-+	pwrseq->pwrseq.dev = dev;
- 
--	return &pwrseq->pwrseq;
--free:
--	kfree(pwrseq);
--	return ERR_PTR(ret);
-+	return mmc_pwrseq_register(&pwrseq->pwrseq);
- }
-+
-+static const struct of_device_id mmc_pwrseq_emmc_of_match[] = {
-+	{ .compatible = "mmc-pwrseq-emmc",},
-+	{/* sentinel */},
-+};
-+
-+static struct platform_driver mmc_pwrseq_emmc_driver = {
-+	.probe = mmc_pwrseq_emmc_probe,
-+	.driver = {
-+		.name = "pwrseq_emmc",
-+		.of_match_table = mmc_pwrseq_emmc_of_match,
-+	},
-+};
-+
-+builtin_platform_driver(mmc_pwrseq_emmc_driver);
-diff --git a/drivers/mmc/core/pwrseq_simple.c b/drivers/mmc/core/pwrseq_simple.c
-index c091f98..b04cc2d 100644
---- a/drivers/mmc/core/pwrseq_simple.c
-+++ b/drivers/mmc/core/pwrseq_simple.c
-@@ -9,6 +9,7 @@
-  */
- #include <linux/clk.h>
- #include <linux/kernel.h>
-+#include <linux/platform_device.h>
- #include <linux/slab.h>
- #include <linux/device.h>
- #include <linux/err.h>
-@@ -82,46 +83,66 @@ static void mmc_pwrseq_simple_free(struct mmc_host *host)
- 	if (!IS_ERR(pwrseq->ext_clk))
- 		clk_put(pwrseq->ext_clk);
- 
--	kfree(pwrseq);
- }
- 
--static struct mmc_pwrseq_ops mmc_pwrseq_simple_ops = {
--	.pre_power_on = mmc_pwrseq_simple_pre_power_on,
--	.post_power_on = mmc_pwrseq_simple_post_power_on,
--	.power_off = mmc_pwrseq_simple_power_off,
--	.free = mmc_pwrseq_simple_free,
--};
--
--struct mmc_pwrseq *mmc_pwrseq_simple_alloc(struct mmc_host *host,
--					   struct device *dev)
-+int mmc_pwrseq_simple_alloc(struct mmc_host *host)
- {
--	struct mmc_pwrseq_simple *pwrseq;
-+	struct mmc_pwrseq_simple *pwrseq = to_pwrseq_simple(host->pwrseq);
-+	struct device *dev = host->pwrseq->dev;
- 	int ret = 0;
- 
--	pwrseq = kzalloc(sizeof(*pwrseq), GFP_KERNEL);
--	if (!pwrseq)
--		return ERR_PTR(-ENOMEM);
--
- 	pwrseq->ext_clk = clk_get(dev, "ext_clock");
- 	if (IS_ERR(pwrseq->ext_clk) &&
- 	    PTR_ERR(pwrseq->ext_clk) != -ENOENT) {
--		ret = PTR_ERR(pwrseq->ext_clk);
--		goto free;
-+		return PTR_ERR(pwrseq->ext_clk);
-+
- 	}
- 
- 	pwrseq->reset_gpios = gpiod_get_array(dev, "reset", GPIOD_OUT_HIGH);
- 	if (IS_ERR(pwrseq->reset_gpios)) {
- 		ret = PTR_ERR(pwrseq->reset_gpios);
--		goto clk_put;
-+		clk_put(pwrseq->ext_clk);
-+		return ret;
- 	}
- 
-+	return 0;
-+}
-+
-+static struct mmc_pwrseq_ops mmc_pwrseq_simple_ops = {
-+	.alloc = mmc_pwrseq_simple_alloc,
-+	.pre_power_on = mmc_pwrseq_simple_pre_power_on,
-+	.post_power_on = mmc_pwrseq_simple_post_power_on,
-+	.power_off = mmc_pwrseq_simple_power_off,
-+	.free = mmc_pwrseq_simple_free,
-+};
-+
-+static const struct of_device_id mmc_pwrseq_simple_of_match[] = {
-+	{ .compatible = "mmc-pwrseq-simple",},
-+	{/* sentinel */},
-+};
-+
-+static int mmc_pwrseq_simple_probe(struct platform_device *pdev)
-+{
-+	struct mmc_pwrseq_simple *pwrseq;
-+	struct device *dev = &pdev->dev;
-+
-+	pwrseq = devm_kzalloc(dev, sizeof(*pwrseq), GFP_KERNEL);
-+	if (!pwrseq)
-+		return ERR_PTR(-ENOMEM);
-+
-+	pwrseq->pwrseq.dev = dev;
- 	pwrseq->pwrseq.ops = &mmc_pwrseq_simple_ops;
- 
--	return &pwrseq->pwrseq;
--clk_put:
--	if (!IS_ERR(pwrseq->ext_clk))
--		clk_put(pwrseq->ext_clk);
--free:
--	kfree(pwrseq);
--	return ERR_PTR(ret);
-+	return mmc_pwrseq_register(&pwrseq->pwrseq);
- }
-+
-+
-+static struct platform_driver mmc_pwrseq_simple_driver = {
-+	.probe = mmc_pwrseq_simple_probe,
-+	.driver = {
-+		.name = "pwrseq_simple",
-+		.of_match_table = mmc_pwrseq_simple_of_match,
-+	},
-+};
-+
-+builtin_platform_driver(mmc_pwrseq_simple_driver);
+
 -- 
-1.9.1
+Best Regards
+Shawn Lin
 
