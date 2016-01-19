@@ -1,65 +1,44 @@
-From: Michal Simek <michal.simek-gjFFaj9aHVfQT0dZR+AlfA@public.gmane.org>
-Subject: Re: [LINUX PATCH 2/5] Documentation: mmc: Updated the binding doc for
- Arasan SDHCI.
-Date: Tue, 19 Jan 2016 20:03:01 +0100
-Message-ID: <569E8865.1030504@xilinx.com>
-References: <1453213055-35563-1-git-send-email-lakshmis@xilinx.com>
- <1453213055-35563-2-git-send-email-lakshmis@xilinx.com>
- <20160119171940.GA7207@rob-hp-laptop>
+From: Stefan Wahren <stefan.wahren@i2se.com>
+Subject: Re: [PATCH 4/5 RFC] mmc: sdhci-iproc: add bcm2835 support
+Date: Tue, 19 Jan 2016 20:25:13 +0100 (CET)
+Message-ID: <237859241.191026.18ea8ff0-3c4b-4fe9-876a-992ca235d960.open-xchange@email.1und1.de>
+References: <1453042744-16196-1-git-send-email-stefan.wahren@i2se.com>
+ <1453042744-16196-5-git-send-email-stefan.wahren@i2se.com>
+ <569D5D69.9000003@broadcom.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="windows-1252"
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20160119171940.GA7207@rob-hp-laptop>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Rob Herring <robh-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, P L Sai Krishna <lakshmi.sai.krishna.potthuri-gjFFaj9aHVfQT0dZR+AlfA@public.gmane.org>
-Cc: Michal Simek <michal.simek-gjFFaj9aHVfQT0dZR+AlfA@public.gmane.org>, Soren Brinkmann <soren.brinkmann-gjFFaj9aHVfQT0dZR+AlfA@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Kevin Hao <haokexin-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Emil Lenchak <emill-gjFFaj9aHVfQT0dZR+AlfA@public.gmane.org>, Tobias Klauser <tklauser-93Khv+1bN0NyDzI6CaY1VQ@public.gmane.org>, Sudeep Holla <Sudeep.Holla-5wv7dgnIgG8@public.gmane.org>, Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Jisheng Zhang <jszhang-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, "Ivan T. Ivanov" <ivan.ivanov-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Scott Branden <sbranden-dY08KVG/lbpWk0Htik3J/w@public.gmane.org>, Vincent Yang <vincent.yang.fujitsu-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Haibo Chen <haibo.chen-KZfg59tc24xl57MIdRCFDg@public.gmane.org>, Marek Vasut <marex-ynQEQJNshbs@public.gmane.org>, "ludovic.desroches-AIFe0yeh4nAAvxtiuMwx3w@public.gmane.org" <ludovic.desroches-AIFe0yeh4nAAvxtiuMwx3w@public.gmane.org>, Pawel Moll <pawel.moll-5wv7dgnIgG8@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Ian Campbell <ijc+devicetree-KcIKpvwj1kUDXYZnReoRVg@public.gmane.org>, Kumar Gala <galak-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, Suman Tripathi <stripathi-qTEPVZfXA3Y@public.gmane.org>, Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.orgHarini Katakam <ha>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mout.kundenserver.de ([212.227.126.187]:59076 "EHLO
+	mout.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932702AbcAST0A (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 19 Jan 2016 14:26:00 -0500
+In-Reply-To: <569D5D69.9000003@broadcom.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ray Jui <rjui@broadcom.com>, Lee Jones <lee@kernel.org>, Scott Branden <sbranden@broadcom.com>, Eric Anholt <eric@anholt.net>, Stephen Warren <swarren@wwwdotorg.org>, Jon Mason <jonmason@broadcom.com>
+Cc: kernel@martin.sperl.org, Rob Herring <robh+dt@kernel.org>, linux-mmc@vger.kernel.org, bcm-kernel-feedback-list@broadcom.com, Arnd Bergmann <arnd@arndb.de>, Mark Rutland <mark.rutland@arm.com>, Ulf Hansson <ulf.hansson@linaro.org>, linux-rpi-kernel@lists.infradead.org, devicetree@vger.kernel.org
 
-On 19.1.2016 18:19, Rob Herring wrote:
-> On Tue, Jan 19, 2016 at 07:47:32PM +0530, P L Sai Krishna wrote:
->> This patch adds broken-tuning property to the binding
->> doc for Arasan SDHCI.
->>
->> Signed-off-by: P L Sai Krishna <lakshmis-gjFFaj9aHVfQT0dZR+AlfA@public.gmane.org>
->> ---
->>  Documentation/devicetree/bindings/mmc/arasan,sdhci.txt | 4 ++++
->>  1 file changed, 4 insertions(+)
->>
->> diff --git a/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt b/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
->> index da541c3..2088d9f 100644
->> --- a/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
->> +++ b/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
->> @@ -17,6 +17,10 @@ Required Properties:
->>    - interrupt-parent: Phandle for the interrupt controller that services
->>  		      interrupts for this device.
->>  
->> +Optional Properties:
->> +  - broken-tuning: Indicates tuning broken in Silicon 1.0 of
->> +			  Zynq Ultrascale+ MPSoC.
->> +
-> 
-> Make this a standard property.
-> 
-> Or use the compatible string to determine this. Si errata is exactly 
-> what they are for.
+Hi Scott,
 
-I still think that having interface for runtime Silicon version
-detection in generic way is much better than using compatible strings
-for certain silicon version.
-The same board revisions can have different silicon versions.
+> Scott Branden <sbranden@broadcom.com> hat am 18. Januar 2016 um 22:47
+> geschrieben:
+>
+>
+> Hi Stefan,
+>
+> The caps likely need to be looked at in greater detail. Some comments
+> inline.
 
-Asking secure monitor for this information and based on that setup
-quirks for this case would be preferred solution.
-I want to spend some time to share information about silicon via soc bus
-to user space and there should be similar way for sharing this
-information inside the kernel.
+yes i'm hopeful that someone from Broadcom knows more about the capabilities.
+This patch only copies them from the other driver, because i don't want to
+introduce new issues.
 
-Thanks,
-Michal
+Unfortunately the BCM2835 datasheet refers only to a non-public Asaran document
+( SD3.0_Host_AHB_eMMC4.4_Usersguide_ver5.9_jan11_10.pdf ).
 
+Best regards
+Stefan
 
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+[1] -
+https://www.raspberrypi.org/wp-content/uploads/2012/02/BCM2835-ARM-Peripherals.pdf
