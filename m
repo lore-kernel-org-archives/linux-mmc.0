@@ -1,59 +1,55 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: debugfs: correct wrong voltage value
-Date: Tue, 19 Jan 2016 10:44:08 +0100
-Message-ID: <CAPDyKFqxiSxSeXqsYJoDSh5jQsjTMqs0EuNPOJJHrSX31mdo_w@mail.gmail.com>
-References: <1453109719-53079-1-git-send-email-pawelx.wodkowski@intel.com>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH 0/2] sdio: Prevent re-tuning conflicting with custom sleep
+Date: Tue, 19 Jan 2016 11:51:56 +0200
+Message-ID: <569E073C.7080204@intel.com>
+References: <1430232341-8307-1-git-send-email-adrian.hunter@intel.com>
+ <565701FE.9010403@intel.com>
+ <CAPDyKFrxM25QmbVEqnfRi+gjT6Jg_uAFXuO2xdCw6H2ST7EDZw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-yk0-f170.google.com ([209.85.160.170]:34656 "EHLO
-	mail-yk0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757889AbcASJoJ (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 19 Jan 2016 04:44:09 -0500
-Received: by mail-yk0-f170.google.com with SMTP id a85so563551298ykb.1
-        for <linux-mmc@vger.kernel.org>; Tue, 19 Jan 2016 01:44:09 -0800 (PST)
-In-Reply-To: <1453109719-53079-1-git-send-email-pawelx.wodkowski@intel.com>
+Received: from mga11.intel.com ([192.55.52.93]:53056 "EHLO mga11.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1757627AbcASJzT (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 19 Jan 2016 04:55:19 -0500
+In-Reply-To: <CAPDyKFrxM25QmbVEqnfRi+gjT6Jg_uAFXuO2xdCw6H2ST7EDZw@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Pawel Wodkowski <pawelx.wodkowski@intel.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Chuanxiao Dong <chuanxiao.dong@intel.com>
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Arend van Spriel <arend@broadcom.com>, linux-mmc <linux-mmc@vger.kernel.org>
 
-On 18 January 2016 at 10:35, Pawel Wodkowski <pawelx.wodkowski@intel.com> wrote:
-> From: Chuanxiao Dong <chuanxiao.dong@intel.com>
->
-> Correct the wrong voltage value shown in debugfs for mmc/sd/sdio.
->
-> Signed-off-by: Chuanxiao Dong <chuanxiao.dong@intel.com>
-> Signed-off-by: Pawel Wodkowski <pawelx.wodkowski@intel.com>
+On 27/11/15 16:06, Ulf Hansson wrote:
+> On 26 November 2015 at 13:58, Adrian Hunter <adrian.hunter@intel.com> wrote:
+>> On 28/04/15 17:45, Adrian Hunter wrote:
+>>> Here are 2 patches that allow brcmfmac to awake from a
+>>> custom sleep state that conflicts with re-tuning.
+>>>
+>>> The first patch adds sdio_retune_hold_now() and
+>>> sdio_retune_release(). They are used in the 2nd patch
+>>> to prevent re-tuning for the 'wake-up' command.
+>>>
+>>>
+>>> Adrian Hunter (2):
+>>>       mmc: core: Add functions for SDIO to hold re-tuning
+>>>       brcmfmac: Prevent re-tuning conflicting with 'wake-up'
+>>>
+>>>  drivers/mmc/core/host.c                        |  6 ++++++
+>>>  drivers/mmc/core/host.h                        |  1 +
+>>>  drivers/mmc/core/sdio_io.c                     | 13 +++++++++++++
+>>>  drivers/net/wireless/brcm80211/brcmfmac/sdio.c |  6 ++++++
+>>>  include/linux/mmc/sdio_func.h                  |  3 +++
+>>>  5 files changed, 29 insertions(+)
+>>
+>> Hi
+>>
+>> These patches still apply and are still needed.
+>> Can they be applied?
+>>
+> 
+> I need to have yet another round of thinking about this, I will get
+> back to as soon as I can.
 
-Thanks, applied for fixes and by adding the fixes tag below.
+I see drivers/net/wireless/brcm80211/brcmfmac/sdio.c has moved but otherwise
+these still apply.  Any chance to look at this?
 
-Fixes: 42cd95a0603e ("mmc: core: debugfs: Add signal_voltage to ios dump")
-
-Kind regards
-Uffe
-
-> ---
->  drivers/mmc/core/debugfs.c | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
->
-> diff --git a/drivers/mmc/core/debugfs.c b/drivers/mmc/core/debugfs.c
-> index bdfce774d848..6239ec3220a8 100644
-> --- a/drivers/mmc/core/debugfs.c
-> +++ b/drivers/mmc/core/debugfs.c
-> @@ -170,7 +170,7 @@ static int mmc_ios_show(struct seq_file *s, void *data)
->                 str = "invalid";
->                 break;
->         }
-> -       seq_printf(s, "signal voltage:\t%u (%s)\n", ios->chip_select, str);
-> +       seq_printf(s, "signal voltage:\t%u (%s)\n", ios->signal_voltage, str);
->
->         switch (ios->drv_type) {
->         case MMC_SET_DRIVER_TYPE_A:
-> --
-> 1.9.1
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
