@@ -1,55 +1,72 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH 0/2] sdio: Prevent re-tuning conflicting with custom sleep
-Date: Tue, 19 Jan 2016 11:51:56 +0200
-Message-ID: <569E073C.7080204@intel.com>
-References: <1430232341-8307-1-git-send-email-adrian.hunter@intel.com>
- <565701FE.9010403@intel.com>
- <CAPDyKFrxM25QmbVEqnfRi+gjT6Jg_uAFXuO2xdCw6H2ST7EDZw@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga11.intel.com ([192.55.52.93]:53056 "EHLO mga11.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1757627AbcASJzT (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 19 Jan 2016 04:55:19 -0500
-In-Reply-To: <CAPDyKFrxM25QmbVEqnfRi+gjT6Jg_uAFXuO2xdCw6H2ST7EDZw@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+From: Shawn Lin <shawn.lin@rock-chips.com>
+Subject: [PATCH] mmc: dw_mmc-rockchip: add pinctrl support
+Date: Tue, 19 Jan 2016 17:52:45 +0800
+Message-ID: <1453197165-20194-1-git-send-email-shawn.lin@rock-chips.com>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Jaehoon Chung <jh80.chung@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Shawn Lin <shawn.lin@rock-chips.com>, Heiko Stuebner <heiko@sntech.de>
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Arend van Spriel <arend@broadcom.com>, linux-mmc <linux-mmc@vger.kernel.org>
 
-On 27/11/15 16:06, Ulf Hansson wrote:
-> On 26 November 2015 at 13:58, Adrian Hunter <adrian.hunter@intel.com> wrote:
->> On 28/04/15 17:45, Adrian Hunter wrote:
->>> Here are 2 patches that allow brcmfmac to awake from a
->>> custom sleep state that conflicts with re-tuning.
->>>
->>> The first patch adds sdio_retune_hold_now() and
->>> sdio_retune_release(). They are used in the 2nd patch
->>> to prevent re-tuning for the 'wake-up' command.
->>>
->>>
->>> Adrian Hunter (2):
->>>       mmc: core: Add functions for SDIO to hold re-tuning
->>>       brcmfmac: Prevent re-tuning conflicting with 'wake-up'
->>>
->>>  drivers/mmc/core/host.c                        |  6 ++++++
->>>  drivers/mmc/core/host.h                        |  1 +
->>>  drivers/mmc/core/sdio_io.c                     | 13 +++++++++++++
->>>  drivers/net/wireless/brcm80211/brcmfmac/sdio.c |  6 ++++++
->>>  include/linux/mmc/sdio_func.h                  |  3 +++
->>>  5 files changed, 29 insertions(+)
->>
->> Hi
->>
->> These patches still apply and are still needed.
->> Can they be applied?
->>
-> 
-> I need to have yet another round of thinking about this, I will get
-> back to as soon as I can.
+We find rk3368 fail to enumerate sd card since
+the default state is gpio function. Meahwhile, lots of
+rockchip platform dts file assign pinctrl to dw_mmc but actually
+dw_mmc never use it. Fortunately, those platforms' default io
+state is sdmmc function, but no always right for all.
 
-I see drivers/net/wireless/brcm80211/brcmfmac/sdio.c has moved but otherwise
-these still apply.  Any chance to look at this?
+Cc: Heiko Stuebner <heiko@sntech.de>
+Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
+---
 
+ drivers/mmc/host/dw_mmc-rockchip.c | 15 +++++++++++++++
+ 1 file changed, 15 insertions(+)
+
+diff --git a/drivers/mmc/host/dw_mmc-rockchip.c b/drivers/mmc/host/dw_mmc-rockchip.c
+index d9c92f3..308b424 100644
+--- a/drivers/mmc/host/dw_mmc-rockchip.c
++++ b/drivers/mmc/host/dw_mmc-rockchip.c
+@@ -9,6 +9,7 @@
+ 
+ #include <linux/module.h>
+ #include <linux/platform_device.h>
++#include <linux/pinctrl/consumer.h>
+ #include <linux/clk.h>
+ #include <linux/mmc/host.h>
+ #include <linux/mmc/dw_mmc.h>
+@@ -21,6 +22,8 @@
+ #define RK3288_CLKGEN_DIV       2
+ 
+ struct dw_mci_rockchip_priv_data {
++	struct pinctrl		*pinctrl;
++	struct pinctrl_state	*pins_default;
+ 	struct clk		*drv_clk;
+ 	struct clk		*sample_clk;
+ 	int			default_sample_phase;
+@@ -78,6 +81,10 @@ static void dw_mci_rk3288_set_ios(struct dw_mci *host, struct mmc_ios *ios)
+ 	/* Make sure we use phases which we can enumerate with */
+ 	if (!IS_ERR(priv->sample_clk))
+ 		clk_set_phase(priv->sample_clk, priv->default_sample_phase);
++
++	/* Make sure we use correct pinctrl which we can enumerate with */
++	if (!IS_ERR(priv->pinctrl) && !IS_ERR(priv->pins_default))
++		pinctrl_select_state(priv->pinctrl, priv->pins_default);
+ }
+ 
+ #define NUM_PHASES			360
+@@ -223,6 +230,14 @@ static int dw_mci_rk3288_parse_dt(struct dw_mci *host)
+ 	if (IS_ERR(priv->sample_clk))
+ 		dev_dbg(host->dev, "ciu_sample not available\n");
+ 
++	priv->pinctrl = devm_pinctrl_get(host->dev);
++	if (!IS_ERR(priv->pinctrl)) {
++		priv->pins_default = pinctrl_lookup_state(priv->pinctrl,
++							  "default");
++		if (IS_ERR(priv->pins_default))
++			dev_dbg(host->dev, "pinctrl not available\n");
++	}
++
+ 	host->priv = priv;
+ 
+ 	return 0;
+-- 
+2.3.7
