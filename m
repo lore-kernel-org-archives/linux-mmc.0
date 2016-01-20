@@ -1,74 +1,54 @@
-From: Shawn Lin <shawn.lin@rock-chips.com>
-Subject: Re: mmc0: Invalid maximum block size, assuming 512 bytes
-Date: Wed, 20 Jan 2016 09:17:51 +0800
-Message-ID: <569EE03F.9090008@rock-chips.com>
-References: <569E575A.5070401@free.fr>
+From: Tony Lindgren <tony@atomide.com>
+Subject: Re: [PATCH] mmc: pwrseq_simple: Make reset-gpios optional to match
+ doc
+Date: Tue, 19 Jan 2016 18:34:34 -0800
+Message-ID: <20160120023433.GG19432@atomide.com>
+References: <20160108090726.13066.66125.stgit@localhost>
+ <CABxcv=mYRG0rikgtY-fPj_BFhY8hgn_LYjcxEeY14rZD-BHpfg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-15; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from lucky1.263xmail.com ([211.157.147.132]:57136 "EHLO
-	lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S934296AbcATBSK (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 19 Jan 2016 20:18:10 -0500
-In-Reply-To: <569E575A.5070401@free.fr>
+Received: from muru.com ([72.249.23.125]:56252 "EHLO muru.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S933377AbcATCeh (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 19 Jan 2016 21:34:37 -0500
+Content-Disposition: inline
+In-Reply-To: <CABxcv=mYRG0rikgtY-fPj_BFhY8hgn_LYjcxEeY14rZD-BHpfg@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Mason <slash.tmp@free.fr>, linux-mmc <linux-mmc@vger.kernel.org>
-Cc: shawn.lin@rock-chips.com, Michal Simek <michal.simek@xilinx.com>, Soren Brinkmann <soren.brinkmann@xilinx.com>, Suman Tripathi <stripathi@apm.com>, Arnd Bergmann <arnd@arndb.de>, Ulf Hansson <ulf.hansson@linaro.org>, Sebastian Frias <sf84@laposte.net>
+To: Javier Martinez Canillas <javier@dowhile0.org>
+Cc: Martin Fuzzey <mfuzzey@parkeon.com>, Ulf Hansson <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, linux-omap@vger.kernel.org
 
-On 2016/1/19 23:33, Mason wrote:
-> Hello,
->
-> My SoC provides an Arasan SDIO/eMMC controller supported by the
-> drivers/mmc/host/sdhci-of-arasan.c driver.
->
-> At init, the driver prints a warning to the console:
->
-> [    0.887301] sdhci: Secure Digital Host Controller Interface driver
-> [    0.893537] sdhci: Copyright(c) Pierre Ossman
-> [    0.897928] sdhci-pltfm: SDHCI platform and OF driver helper
-> [    0.903903] sdhci-arasan 21000.mmc: No vmmc regulator found
-> [    0.909537] sdhci-arasan 21000.mmc: No vqmmc regulator found
-> [    0.915247] mmc0: Invalid maximum block size, assuming 512 bytes
-> [    0.953797] mmc0: SDHCI controller on 21000.mmc [21000.mmc] using ADMA
-> [    0.961494] sdhci-arasan 21200.mmc: No vmmc regulator found
-> [    0.967110] sdhci-arasan 21200.mmc: No vqmmc regulator found
->
-> Is "mmc0: Invalid maximum block size, assuming 512 bytes" something
-> serious which requires investigating, in your experience?
->
+Hi,
 
-you can look into this commit 0633f654241
- From <SD host controller simplified specfication version 3.00>
-sdhci doesn't support blocks of 4096 bytes.
+* Javier Martinez Canillas <javier@dowhile0.org> [160108 08:42]:
+> On Fri, Jan 8, 2016 at 6:07 AM, Martin Fuzzey <mfuzzey@parkeon.com> wrote:
+> > The DT binding doc says reset-gpios is an optional property but the code
+> > currently bails out if it is omitted.
+> >
+> > Make the code match the documentation.
+...
+> Tony already posted a fix for this before [0] but got some feedback so
+> is likely to post a v2 soon.
 
-But at least check my arasan-5.1 databook, it supports 4096 from
-the capabilities register. So, you don't force arasan to use
-SDHCI_QUIRK_FORCE_BLK_SZ_2048, then sdhci core force it to be 512 bytes.
-Not serious problem, just a proper warn.
+Hmm I think my patch would end up looking pretty much like Martin's
+patch after fixing the comments. Based on what I understood, Ulf
+wants to keep pwrseq_simple, well, simple as discussed in [0].
 
-> The corresponding DT is:
->
-> mmc0: mmc@21000 {
-> 	compatible = "arasan,sdhci-8.9a";
-> 	reg = <0x21000 0x200>;
-> 	clock-names = "clk_xin", "clk_ahb";
-> 	clocks = <&sdio_clk>, <&clkgen 1>;
-> 	interrupts = <60 IRQ_TYPE_LEVEL_HIGH>;
-> };
->
-> Regards.
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
->
->
+It also seems Ulf also wants to leave out the allocation, and does
+want to add any deeper knowledge of the state of the GPIOs in
+pwrse-simple. Instead, we can do device specific pwrseq for things
+like Marvell 8787 and so on.
 
+Ulf may have more comments, but $subject patch fixes the issue
+I'm seeing with wl12xx on omap5 devices:
 
--- 
-Best Regards
-Shawn Lin
+Tested-by: Tony Lindgren <tony@atomide.com>
 
+Probably should be tagged Cc: stable # v4.4 when applied.
+
+Regards,
+
+Tony
+
+> [0]: http://www.spinics.net/lists/linux-mmc/msg34398.html
