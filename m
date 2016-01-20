@@ -1,108 +1,74 @@
 From: Shawn Lin <shawn.lin@rock-chips.com>
-Subject: Re: [PATCH] mmc: dw_mmc-rockchip: add pinctrl support
-Date: Wed, 20 Jan 2016 08:54:52 +0800
-Message-ID: <569EDADC.4020302@rock-chips.com>
-References: <1453197165-20194-1-git-send-email-shawn.lin@rock-chips.com>
- <7857448.fZE0EdmvdR@phil> <569E18E4.7050509@rock-chips.com>
- <569E21C3.2080606@gmail.com>
+Subject: Re: mmc0: Invalid maximum block size, assuming 512 bytes
+Date: Wed, 20 Jan 2016 09:17:51 +0800
+Message-ID: <569EE03F.9090008@rock-chips.com>
+References: <569E575A.5070401@free.fr>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8;
-	format=flowed
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=iso-8859-15; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from lucky1.263xmail.com ([211.157.147.132]:37709 "EHLO
+Received: from lucky1.263xmail.com ([211.157.147.132]:57136 "EHLO
 	lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S933011AbcATAzO (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 19 Jan 2016 19:55:14 -0500
-In-Reply-To: <569E21C3.2080606@gmail.com>
+	with ESMTP id S934296AbcATBSK (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 19 Jan 2016 20:18:10 -0500
+In-Reply-To: <569E575A.5070401@free.fr>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Caesar Wang <caesar.upstream@gmail.com>, Heiko Stuebner <heiko@sntech.de>
-Cc: shawn.lin@rock-chips.com, Jaehoon Chung <jh80.chung@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+To: Mason <slash.tmp@free.fr>, linux-mmc <linux-mmc@vger.kernel.org>
+Cc: shawn.lin@rock-chips.com, Michal Simek <michal.simek@xilinx.com>, Soren Brinkmann <soren.brinkmann@xilinx.com>, Suman Tripathi <stripathi@apm.com>, Arnd Bergmann <arnd@arndb.de>, Ulf Hansson <ulf.hansson@linaro.org>, Sebastian Frias <sf84@laposte.net>
 
-On 2016/1/19 19:45, Caesar Wang wrote:
+On 2016/1/19 23:33, Mason wrote:
+> Hello,
 >
-> =E5=9C=A8 2016=E5=B9=B401=E6=9C=8819=E6=97=A5 19:07, Shawn Lin =E5=86=
-=99=E9=81=93:
->> On 2016/1/19 18:07, Heiko Stuebner wrote:
->>> Hi Shawn,
->>>
->>> Am Dienstag, 19. Januar 2016, 17:52:45 schrieb Shawn Lin:
->>>> We find rk3368 fail to enumerate sd card since
->>>> the default state is gpio function. Meahwhile, lots of
->>>> rockchip platform dts file assign pinctrl to dw_mmc but actually
->>>> dw_mmc never use it. Fortunately, those platforms' default io
->>>> state is sdmmc function, but no always right for all.
->>>>
->>>> Cc: Heiko Stuebner <heiko@sntech.de>
->>>> Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
->>>
->>> I do believe any issue you see, must come from somewhere else,
->>> because the
->>> driver-core does in drivers/base/dd.c really_probe():
->>>     pinctrl_bind_pins()
->>
->> yes, pinctrl_bind_pins does turn pinctrl state. But I try debug a li=
-ttle
->> more and seems somewhere else switch the state before dw_mmc probe.
->> Now I *guess* that may relate to our ATF or MCU firmware since
->> rk3368's sdmmc io can also be used as mcu_jtag for system debug. I
->> need to double check that point, thanks.
->>
+> My SoC provides an Arasan SDIO/eMMC controller supported by the
+> drivers/mmc/host/sdhci-of-arasan.c driver.
 >
-> Yep,  maybe that's related to the firmware setting.
-> I guess you can repro this issue on RK3368 platform.
-> At least until now, the RK3036, RK3288....that's work well.
+> At init, the driver prints a warning to the console:
+>
+> [    0.887301] sdhci: Secure Digital Host Controller Interface driver
+> [    0.893537] sdhci: Copyright(c) Pierre Ossman
+> [    0.897928] sdhci-pltfm: SDHCI platform and OF driver helper
+> [    0.903903] sdhci-arasan 21000.mmc: No vmmc regulator found
+> [    0.909537] sdhci-arasan 21000.mmc: No vqmmc regulator found
+> [    0.915247] mmc0: Invalid maximum block size, assuming 512 bytes
+> [    0.953797] mmc0: SDHCI controller on 21000.mmc [21000.mmc] using ADMA
+> [    0.961494] sdhci-arasan 21200.mmc: No vmmc regulator found
+> [    0.967110] sdhci-arasan 21200.mmc: No vqmmc regulator found
+>
+> Is "mmc0: Invalid maximum block size, assuming 512 bytes" something
+> serious which requires investigating, in your experience?
 >
 
-Hi Caesar,
+you can look into this commit 0633f654241
+ From <SD host controller simplified specfication version 3.00>
+sdhci doesn't support blocks of 4096 bytes.
 
-Then I check this issue with MCU firmware guys and it does force
-pin setting into mcu_jtag function=E3=80=82 Now I can see only 3368 app=
-ly
-MCU firmware, right? Another thing, seems old version firmware didn't
-break the sdmmc function.
+But at least check my arasan-5.1 databook, it supports 4096 from
+the capabilities register. So, you don't force arasan to use
+SDHCI_QUIRK_FORCE_BLK_SZ_2048, then sdhci core force it to be 512 bytes.
+Not serious problem, just a proper warn.
 
-I think it's better to slove this problem in firmware side,
-not Linux.  So, abandon this patch!
-
-
+> The corresponding DT is:
 >
->> Hi Caesar,
->> does your patch able to consider adding SDMMC/CPU_JTAG/MCU_JTAG
->> managment for rk3368 as well?
->>
+> mmc0: mmc@21000 {
+> 	compatible = "arasan,sdhci-8.9a";
+> 	reg = <0x21000 0x200>;
+> 	clock-names = "clk_xin", "clk_ahb";
+> 	clocks = <&sdio_clk>, <&clkgen 1>;
+> 	interrupts = <60 IRQ_TYPE_LEVEL_HIGH>;
+> };
 >
-> That's no related,  I will add the sdmmc node and check it on tomorro=
-w
-> if the time can be availabled.
->
->
->>> which in turn already does the needed pinctrl state handling.
->>>
->>> So that default-state should be set up even before the dwmmc probe
->>> function
->>> is called.
->>>
->>> The sharing between sdmmc and uart2 pins is the same on the rk3036
->>> and so
->>> far Caesar seems to have been able to switch the pin-state to sdmmc
->>> without
->>> touching the dw_mmc driver itself.
->>>
->
-> Yep, that's working on rk3036 kylin board.
->
->
-> ---
-> Thanks,
-> Caesar
+> Regards.
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 >
 >
 >
 
 
---=20
+-- 
 Best Regards
 Shawn Lin
 
