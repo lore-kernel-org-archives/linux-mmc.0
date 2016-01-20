@@ -1,85 +1,43 @@
-From: Lakshmi Sai Krishna Potthuri
-	<lakshmi.sai.krishna.potthuri@xilinx.com>
-Subject: RE: [LINUX PATCH 1/5] mmc: Workaround for the issue in auto tuning
- mode.
-Date: Wed, 20 Jan 2016 06:02:12 +0000
-Message-ID: <4FF8F58FAA9D5D4193D4E554E4352C5902C527CE@XAP-PVEXMBX02.xlnx.xilinx.com>
-References: <1453213055-35563-1-git-send-email-lakshmis@xilinx.com>
- <20160119175757.GR19062@n2100.arm.linux.org.uk>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+From: Shawn Lin <shawn.lin@rock-chips.com>
+Subject: [PATCH] mmc: sdio_cis: fix unknown tuple for CISTPL_SDIO_STD
+Date: Wed, 20 Jan 2016 16:17:04 +0800
+Message-ID: <1453277824-15719-1-git-send-email-shawn.lin@rock-chips.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-bl2nam02on0052.outbound.protection.outlook.com ([104.47.38.52]:31840
-	"EHLO NAM02-BL2-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1757970AbcATGCV convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 20 Jan 2016 01:02:21 -0500
-In-Reply-To: <20160119175757.GR19062@n2100.arm.linux.org.uk>
-Content-Language: en-US
+Received: from lucky1.263xmail.com ([211.157.147.130]:60607 "EHLO
+	lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1757921AbcATIVs (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 20 Jan 2016 03:21:48 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Russell King - ARM Linux <linux@arm.linux.org.uk>
-Cc: Michal Simek <michals@xilinx.com>, Soren Brinkmann <sorenb@xilinx.com>, Ulf Hansson <ulf.hansson@linaro.org>, Kevin Hao <haokexin@gmail.com>, "Emil P. Lenchak" <emill@xilinx.com>, Tobias Klauser <tklauser@distanz.ch>, Sudeep Holla <Sudeep.Holla@arm.com>, Adrian Hunter <adrian.hunter@intel.com>, Jisheng Zhang <jszhang@marvell.com>, "Ivan T. Ivanov" <ivan.ivanov@linaro.org>, Scott Branden <sbranden@broadcom.com>, Vincent Yang <vincent.yang.fujitsu@gmail.com>, Haibo Chen <haibo.chen@freescale.com>, Marek Vasut <marex@denx.de>, "ludovic.desroches@atmel.com" <ludovic.desroches@atmel.com>, Rob Herring <robh+dt@kernel.org>, Pawel Moll <pawel.moll@arm.com>, Mark Rutland <mark.rutland@arm.com>, Ian Campbell <ijc+devicetree@hellion.org.uk>, Kumar Gala <galak@codeaurora.org>, Suman Tripathi <stripathi@apm.com>, Shawn Lin <shawn.lin@rock-chips.com>, devicetree@vger.ker
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Shawn Lin <shawn.lin@rock-chips.com>
 
-Hi,
+CISTPL_SDIO_STD(0x91) is a known tuple, but sdio_cis didn't define it,
+so we get the warning blow while probing several sdio wifi. Refer to SDIO spec,
+it's no need to parse the tuple, so this patch just make it a known one.
 
-> -----Original Message-----
-> From: Russell King - ARM Linux [mailto:linux@arm.linux.org.uk]
-> Sent: Tuesday, January 19, 2016 11:28 PM
-> To: Lakshmi Sai Krishna Potthuri
-> Cc: Michal Simek; Soren Brinkmann; Ulf Hansson; Kevin Hao; Emil P. Lenchak;
-> Tobias Klauser; Sudeep Holla; Adrian Hunter; Jisheng Zhang; Ivan T. Ivanov;
-> Scott Branden; Vincent Yang; Haibo Chen; Marek Vasut;
-> ludovic.desroches@atmel.com; Rob Herring; Pawel Moll; Mark Rutland; Ian
-> Campbell; Kumar Gala; Suman Tripathi; Shawn Lin;
-> devicetree@vger.kernel.org; Harini Katakam; linux-mmc@vger.kernel.org;
-> linux-kernel@vger.kernel.org; Lakshmi Sai Krishna Potthuri; Anirudha
-> Sarangi; Punnaiah Choudary Kalluri; linux-arm-kernel@lists.infradead.org
-> Subject: Re: [LINUX PATCH 1/5] mmc: Workaround for the issue in auto
-> tuning mode.
->
-<snip>
-> > +
-> > +   /*
-> > +    * As per controller erratum, program the SDCLK Frequency
-> > +    * Select of clock control register with a value, say
-> > +    * clock/2. Wait for the Internal clock stable and program
-> > +    * the desired frequency.
-> > +    */
-> > +   host->ops->set_clock(host, clock/2);
->
-> The comment above says "wait for the internal clock stable" - I see no wait in
-> here.  Does the code actually conform with the comment?
+[    4.098980] mmc2: queuing unknown CIS tuple 0x91 (3 bytes)
+[    4.099033] mmc2: new ultra high speed SDR104 SDIO card at address 0001
 
-Wait for internal clock stable is taken care of inside
-set_clock()
+Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
+---
 
-<snip>
-> > +   if ((host->quirks2 & SDHCI_QUIRK2_BROKEN_TUNING) &&
-> > +           (tuning_loop_counter >= 0) && (ctrl &
-> SDHCI_CTRL_TUNED_CLK)) {
-> > +           host->ops->tune_clk(host);
-> > +   }
->
-> Do we need this "SDHCI_QUIRK2_BROKEN_TUNING" quirk at all?  What's
-> wrong
-> with:
->
->       if (host->ops->tune_clk && tuning_loop_counter >= 0 &&
->           ctrl & SDHCI_CTRL_TUNED_CLK)
->               host->ops->tune_clk(host);
->
-> here?
->
+ drivers/mmc/core/sdio_cis.c | 1 +
+ 1 file changed, 1 insertion(+)
 
-tune_clock is provided as part of ops and will always be present.
-Other users of arasan and this driver might not have tuning broken
-And won't use this manual tuning.
+diff --git a/drivers/mmc/core/sdio_cis.c b/drivers/mmc/core/sdio_cis.c
+index 8e94e55..6f6fc52 100644
+--- a/drivers/mmc/core/sdio_cis.c
++++ b/drivers/mmc/core/sdio_cis.c
+@@ -223,6 +223,7 @@ static const struct cis_tpl cis_tpl_list[] = {
+ 	{	0x20,	4,	cistpl_manfid		},
+ 	{	0x21,	2,	/* cistpl_funcid */	},
+ 	{	0x22,	0,	cistpl_funce		},
++	{	0x91,	2,	/* cistpl_sdio_std */	},
+ };
+ 
+ static int sdio_read_cis(struct mmc_card *card, struct sdio_func *func)
+-- 
+2.3.7
 
-Regards
-Sai Krishna
-
-
-This email and any attachments are intended for the sole use of the named recipient(s) and contain(s) confidential information that may be proprietary, privileged or copyrighted under applicable law. If you are not the intended recipient, do not read, copy, or forward this email message or any attachments. Delete this email message and any attachments immediately.
 
