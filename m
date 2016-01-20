@@ -1,99 +1,62 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: pwrseq_simple: Make reset-gpios optional to match doc
-Date: Wed, 20 Jan 2016 12:36:32 +0100
-Message-ID: <CAPDyKFpgCDHp1atgnZL6GtU9VwiJr0RR-4vW+m=uWHwnN3pz3A@mail.gmail.com>
-References: <20160108090726.13066.66125.stgit@localhost>
+Subject: Re: [PATCH] mmc: sdio_cis: fix unknown tuple for CISTPL_SDIO_STD
+Date: Wed, 20 Jan 2016 12:47:05 +0100
+Message-ID: <CAPDyKFpKaHx+N+mxsQ8BrJwWRSuf49ycr29naJKRP4v77RCPMg@mail.gmail.com>
+References: <1453277824-15719-1-git-send-email-shawn.lin@rock-chips.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-yk0-f176.google.com ([209.85.160.176]:35727 "EHLO
-	mail-yk0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751205AbcATLgd (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 20 Jan 2016 06:36:33 -0500
-Received: by mail-yk0-f176.google.com with SMTP id x67so6066261ykd.2
-        for <linux-mmc@vger.kernel.org>; Wed, 20 Jan 2016 03:36:32 -0800 (PST)
-In-Reply-To: <20160108090726.13066.66125.stgit@localhost>
+Received: from mail-yk0-f173.google.com ([209.85.160.173]:34811 "EHLO
+	mail-yk0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751321AbcATLrG (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 20 Jan 2016 06:47:06 -0500
+Received: by mail-yk0-f173.google.com with SMTP id a85so6293739ykb.1
+        for <linux-mmc@vger.kernel.org>; Wed, 20 Jan 2016 03:47:05 -0800 (PST)
+In-Reply-To: <1453277824-15719-1-git-send-email-shawn.lin@rock-chips.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Martin Fuzzey <mfuzzey@parkeon.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Tony Lindgren <tony@atomide.com>, linux-omap <linux-omap@vger.kernel.org>, Javier Martinez Canillas <javier@dowhile0.org>
+To: Shawn Lin <shawn.lin@rock-chips.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 
-+Tony, Javier, linux-omap
+On 20 January 2016 at 09:17, Shawn Lin <shawn.lin@rock-chips.com> wrote:
+> CISTPL_SDIO_STD(0x91) is a known tuple, but sdio_cis didn't define it,
+> so we get the warning blow while probing several sdio wifi. Refer to SDIO spec,
+> it's no need to parse the tuple, so this patch just make it a known one.
+>
+> [    4.098980] mmc2: queuing unknown CIS tuple 0x91 (3 bytes)
+> [    4.099033] mmc2: new ultra high speed SDR104 SDIO card at address 0001
+>
+> Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
 
-On 8 January 2016 at 10:07, Martin Fuzzey <mfuzzey@parkeon.com> wrote:
-> The DT binding doc says reset-gpios is an optional property but the code
-> currently bails out if it is omitted.
->
-> Make the code match the documentation.
+Thanks, applied for fixes.
 
-As Tony pointed out, this is actually a regression. Can you please
-update the change-log according to that.
-
->
-> Signed-off-by: Martin Fuzzey <mfuzzey@parkeon.com>
-
-Please add a fixes tag:
-Fixes: ce037275861e ("mmc: pwrseq_simple: use GPIO descriptors array API")
-
-> ---
->  drivers/mmc/core/pwrseq_simple.c |   21 +++++++++++++--------
->  1 file changed, 13 insertions(+), 8 deletions(-)
->
-> diff --git a/drivers/mmc/core/pwrseq_simple.c b/drivers/mmc/core/pwrseq_simple.c
-> index d10538b..4d2962b 100644
-> --- a/drivers/mmc/core/pwrseq_simple.c
-> +++ b/drivers/mmc/core/pwrseq_simple.c
-> @@ -29,15 +29,18 @@ struct mmc_pwrseq_simple {
->  static void mmc_pwrseq_simple_set_gpios_value(struct mmc_pwrseq_simple *pwrseq,
->                                               int value)
->  {
-> -       int i;
->         struct gpio_descs *reset_gpios = pwrseq->reset_gpios;
-> -       int values[reset_gpios->ndescs];
->
-> -       for (i = 0; i < reset_gpios->ndescs; i++)
-> -               values[i] = value;
-> +       if (!IS_ERR(reset_gpios)) {
-> +               int i;
-> +               int values[reset_gpios->ndescs];
->
-> -       gpiod_set_array_value_cansleep(reset_gpios->ndescs, reset_gpios->desc,
-> -                                      values);
-> +               for (i = 0; i < reset_gpios->ndescs; i++)
-> +                       values[i] = value;
-> +
-> +               gpiod_set_array_value_cansleep(
-> +                       reset_gpios->ndescs, reset_gpios->desc, values);
-> +       }
->  }
->
->  static void mmc_pwrseq_simple_pre_power_on(struct mmc_host *host)
-> @@ -79,7 +82,8 @@ static void mmc_pwrseq_simple_free(struct mmc_host *host)
->         struct mmc_pwrseq_simple *pwrseq = container_of(host->pwrseq,
->                                         struct mmc_pwrseq_simple, pwrseq);
->
-> -       gpiod_put_array(pwrseq->reset_gpios);
-> +       if (!IS_ERR(pwrseq->reset_gpios))
-> +               gpiod_put_array(pwrseq->reset_gpios);
->
->         if (!IS_ERR(pwrseq->ext_clk))
->                 clk_put(pwrseq->ext_clk);
-> @@ -112,7 +116,8 @@ struct mmc_pwrseq *mmc_pwrseq_simple_alloc(struct mmc_host *host,
->         }
->
->         pwrseq->reset_gpios = gpiod_get_array(dev, "reset", GPIOD_OUT_HIGH);
-> -       if (IS_ERR(pwrseq->reset_gpios)) {
-> +       if (IS_ERR(pwrseq->reset_gpios) &&
-> +           PTR_ERR(pwrseq->reset_gpios) != -ENOENT) {
-
-You need to check also for != -ENOSYS, as otherwise when
-CONFIG_GPIOLIB is unset we will treat that as an error.
-This is also what the original code did.
-
->                 ret = PTR_ERR(pwrseq->reset_gpios);
->                 goto clk_put;
->         }
->
+I also updated the change-log as it caused some checkpatch warnings.
 
 Kind regards
 Uffe
+
+> ---
+>
+>  drivers/mmc/core/sdio_cis.c | 1 +
+>  1 file changed, 1 insertion(+)
+>
+> diff --git a/drivers/mmc/core/sdio_cis.c b/drivers/mmc/core/sdio_cis.c
+> index 8e94e55..6f6fc52 100644
+> --- a/drivers/mmc/core/sdio_cis.c
+> +++ b/drivers/mmc/core/sdio_cis.c
+> @@ -223,6 +223,7 @@ static const struct cis_tpl cis_tpl_list[] = {
+>         {       0x20,   4,      cistpl_manfid           },
+>         {       0x21,   2,      /* cistpl_funcid */     },
+>         {       0x22,   0,      cistpl_funce            },
+> +       {       0x91,   2,      /* cistpl_sdio_std */   },
+>  };
+>
+>  static int sdio_read_cis(struct mmc_card *card, struct sdio_func *func)
+> --
+> 2.3.7
+>
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
