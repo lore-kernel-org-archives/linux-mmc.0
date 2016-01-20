@@ -1,80 +1,108 @@
-From: Eric Anholt <eric@anholt.net>
-Subject: Re: [PATCH 0/5 RFC] mmc: sdhci-iproc: add bcm2835 support
-Date: Tue, 19 Jan 2016 13:00:08 -0800
-Message-ID: <87bn8hcmjr.fsf@eliezer.anholt.net>
-References: <1453042744-16196-1-git-send-email-stefan.wahren@i2se.com>
+From: Shawn Lin <shawn.lin@rock-chips.com>
+Subject: Re: [PATCH] mmc: dw_mmc-rockchip: add pinctrl support
+Date: Wed, 20 Jan 2016 08:54:52 +0800
+Message-ID: <569EDADC.4020302@rock-chips.com>
+References: <1453197165-20194-1-git-send-email-shawn.lin@rock-chips.com>
+ <7857448.fZE0EdmvdR@phil> <569E18E4.7050509@rock-chips.com>
+ <569E21C3.2080606@gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; boundary="=-=-=";
-	micalg=pgp-sha512; protocol="application/pgp-signature"
+Content-Type: text/plain; charset=utf-8;
+	format=flowed
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from gabe.freedesktop.org ([131.252.210.177]:40776 "EHLO
-	gabe.freedesktop.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932702AbcASVAL (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 19 Jan 2016 16:00:11 -0500
-In-Reply-To: <1453042744-16196-1-git-send-email-stefan.wahren@i2se.com>
+Received: from lucky1.263xmail.com ([211.157.147.132]:37709 "EHLO
+	lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S933011AbcATAzO (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 19 Jan 2016 19:55:14 -0500
+In-Reply-To: <569E21C3.2080606@gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Scott Branden <sbranden@broadcom.com>, Ray Jui <rjui@broadcom.com>, Jon Mason <jonmason@broadcom.com>, Stephen Warren <swarren@wwwdotorg.org>, Lee Jones <lee@kernel.org>
-Cc: Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Arnd Bergmann <arnd@arndb.de>, Ulf Hansson <ulf.hansson@linaro.org>, kernel@martin.sperl.org, devicetree@vger.kernel.org, linux-rpi-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, bcm-kernel-feedback-list@broadcom.com, Stefan Wahren <stefan.wahren@i2se.com>
+To: Caesar Wang <caesar.upstream@gmail.com>, Heiko Stuebner <heiko@sntech.de>
+Cc: shawn.lin@rock-chips.com, Jaehoon Chung <jh80.chung@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 
---=-=-=
-Content-Type: text/plain
-
-Stefan Wahren <stefan.wahren@i2se.com> writes:
-
-> This patch series based on the suggestion of Scott Branden to implement
-> bcm2835 support into sdhci-iproc [1].
+On 2016/1/19 19:45, Caesar Wang wrote:
 >
-> These changes provide the following advantages:
->   * no need to maintain a separate driver for bcm2835
->   * improve support and test coverage of bcm2835 mmc support
->   * get the rid of SDHCI_CAPABILITIES hack in bcm2835_sdhci_readl
->   * increase write performance by avoiding delays in write ops
+> =E5=9C=A8 2016=E5=B9=B401=E6=9C=8819=E6=97=A5 19:07, Shawn Lin =E5=86=
+=99=E9=81=93:
+>> On 2016/1/19 18:07, Heiko Stuebner wrote:
+>>> Hi Shawn,
+>>>
+>>> Am Dienstag, 19. Januar 2016, 17:52:45 schrieb Shawn Lin:
+>>>> We find rk3368 fail to enumerate sd card since
+>>>> the default state is gpio function. Meahwhile, lots of
+>>>> rockchip platform dts file assign pinctrl to dw_mmc but actually
+>>>> dw_mmc never use it. Fortunately, those platforms' default io
+>>>> state is sdmmc function, but no always right for all.
+>>>>
+>>>> Cc: Heiko Stuebner <heiko@sntech.de>
+>>>> Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
+>>>
+>>> I do believe any issue you see, must come from somewhere else,
+>>> because the
+>>> driver-core does in drivers/base/dd.c really_probe():
+>>>     pinctrl_bind_pins()
+>>
+>> yes, pinctrl_bind_pins does turn pinctrl state. But I try debug a li=
+ttle
+>> more and seems somewhere else switch the state before dw_mmc probe.
+>> Now I *guess* that may relate to our ATF or MCU firmware since
+>> rk3368's sdmmc io can also be used as mcu_jtag for system debug. I
+>> need to double check that point, thanks.
+>>
 >
-> Patch 1 and 2 adopt two sdhci-bcm2835 fixes to sdhci-iproc. The third patch
-> tries to specify as much quirks as possible in the bcm283x.dtsi as possible.
-> Patch 4 and 5 are the actually changes for bcm2835 support.
+> Yep,  maybe that's related to the firmware setting.
+> I guess you can repro this issue on RK3368 platform.
+> At least until now, the RK3036, RK3288....that's work well.
 >
-> These series has been tested on Raspberry Pi B with dd (direct I/O):
+
+Hi Caesar,
+
+Then I check this issue with MCU firmware guys and it does force
+pin setting into mcu_jtag function=E3=80=82 Now I can see only 3368 app=
+ly
+MCU firmware, right? Another thing, seems old version firmware didn't
+break the sdmmc function.
+
+I think it's better to slove this problem in firmware side,
+not Linux.  So, abandon this patch!
+
+
 >
-> sdhci-bcm2835
+>> Hi Caesar,
+>> does your patch able to consider adding SDMMC/CPU_JTAG/MCU_JTAG
+>> managment for rk3368 as well?
+>>
 >
-> 378 kB/s WRITE
-> 10,6 MB/s READ
+> That's no related,  I will add the sdmmc node and check it on tomorro=
+w
+> if the time can be availabled.
 >
-> sdhci-iproc (after applying patch series)
 >
-> 881 kB/s WRITE
-> 10,8 MB/s READ
+>>> which in turn already does the needed pinctrl state handling.
+>>>
+>>> So that default-state should be set up even before the dwmmc probe
+>>> function
+>>> is called.
+>>>
+>>> The sharing between sdmmc and uart2 pins is the same on the rk3036
+>>> and so
+>>> far Caesar seems to have been able to switch the pin-state to sdmmc
+>>> without
+>>> touching the dw_mmc driver itself.
+>>>
+>
+> Yep, that's working on rk3036 kylin board.
+>
+>
+> ---
+> Thanks,
+> Caesar
+>
+>
+>
 
-I started a while ago at looking at merging the sdhost driver (for the
-other controller on these boards that you can use instead), since
-apparently the hardware's a better choice to use.  This looks like a
-really nice simplification for us for the Arasan mode, though.  Would
-you also want to delete the old 2835 driver after this series?
 
-These patches are all:
+--=20
+Best Regards
+Shawn Lin
 
-Acked-by: Eric Anholt <eric@anholt.net>
-
---=-=-=
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1
-
-iQIcBAEBCgAGBQJWnqPYAAoJELXWKTbR/J7oT74P/Ax4kgCcgPMOlc8iG3mR6iHu
-BmWtYAScqp6vFIbA8tM4CRK+oKx7Lh4tLmLLkqU12wBN573r2jAeUDstEbOiebmF
-JmKtlRB/fSkaMwPRek41wYBYYEiWODVPQW92FArupafpMtyiYVX+hISdaJwZ6GCJ
-3+EGfLSobk2ODzcjqQII6JV9J06Tagb2852h4xmoJW85Drg82yBA0RbHDuFwptzq
-XyhcyzL0Dkx9toWlcxiUy6aZ9wdNQBzykv0Xv17Gt1gjdU1ZqNIg9KBzVZimvhl7
-X0Vx4BcXrX/WOX0AsGtYYoGw+2axuR4rHylHTng94rNJIEU7rw01hkyRwbxx/wOy
-Pw6QQunYTkW73YCTmqmE/CH2xPKcTTcWOznAAM0tbR4Q9SYcuecju6WWn7sQJlzw
-ukLyyWOWR1vlYLcY47fj2wlQGuuRoPG/lmJKYkVsEy8x5BqErbjAjLSs9WwiB22s
-5X0ZW5IIb+8nDqTY/bjVlYO00AJVs7LciJR02hz15aWFj9AbnKzPwQCopx43BCbX
-TCWlFNGglWG50dPF5RtcfVSbX3aZM1dZ5dJ4Ut3Mqj6h46/2zXbwJM0rEV6PG5F2
-THIJqA/bRPYre4KT8E4Zxc+kPlXqEAeob8u+Qr+LJq/qBdlqiLcvYs7lMfJ3lSVq
-Eo0l8gslvCuwELK4cUp7
-=lNTC
------END PGP SIGNATURE-----
---=-=-=--
