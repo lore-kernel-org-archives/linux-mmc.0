@@ -1,80 +1,94 @@
-From: Rob Herring <robh@kernel.org>
-Subject: Re: [LINUX PATCH 4/5] Documentation: mmc: Updated the binding doc for
- Arasan SDHCI.
-Date: Wed, 20 Jan 2016 09:05:22 -0600
-Message-ID: <CAL_JsqLAwzFc2X2UKF5scYuf_h3xNcLibnMLhFnKZR_=0=JR8w@mail.gmail.com>
-References: <1453213055-35563-1-git-send-email-lakshmis@xilinx.com>
- <1453213055-35563-4-git-send-email-lakshmis@xilinx.com> <20160119171611.GA2708@rob-hp-laptop>
- <4FF8F58FAA9D5D4193D4E554E4352C5902C527B7@XAP-PVEXMBX02.xlnx.xilinx.com>
+From: Martin Fuzzey <mfuzzey@parkeon.com>
+Subject: [PATCH V2] mmc: pwrseq_simple: Make reset-gpios optional to match
+ doc
+Date: Wed, 20 Jan 2016 16:08:03 +0100
+Message-ID: <20160120150803.32073.63845.stgit@localhost>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail.kernel.org ([198.145.29.136]:37367 "EHLO mail.kernel.org"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S932744AbcATPFr (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 20 Jan 2016 10:05:47 -0500
-In-Reply-To: <4FF8F58FAA9D5D4193D4E554E4352C5902C527B7@XAP-PVEXMBX02.xlnx.xilinx.com>
+Received: from [213.152.31.83] ([213.152.31.83]:38580 "EHLO mta2.parkeon.com"
+	rhost-flags-FAIL-FAIL-OK-OK) by vger.kernel.org with ESMTP
+	id S933906AbcATPIw (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 20 Jan 2016 10:08:52 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Lakshmi Sai Krishna Potthuri <lakshmi.sai.krishna.potthuri@xilinx.com>
-Cc: Michal Simek <michals@xilinx.com>, Soren Brinkmann <sorenb@xilinx.com>, Ulf Hansson <ulf.hansson@linaro.org>, Kevin Hao <haokexin@gmail.com>, "Emil P. Lenchak" <emill@xilinx.com>, Tobias Klauser <tklauser@distanz.ch>, Sudeep Holla <Sudeep.Holla@arm.com>, Adrian Hunter <adrian.hunter@intel.com>, Jisheng Zhang <jszhang@marvell.com>, "Ivan T. Ivanov" <ivan.ivanov@linaro.org>, Scott Branden <sbranden@broadcom.com>, Vincent Yang <vincent.yang.fujitsu@gmail.com>, Haibo Chen <haibo.chen@freescale.com>, Marek Vasut <marex@denx.de>, "ludovic.desroches@atmel.com" <ludovic.desroches@atmel.com>, Pawel Moll <pawel.moll@arm.com>, Mark Rutland <mark.rutland@arm.com>, Ian Campbell <ijc+devicetree@hellion.org.uk>, Kumar Gala <galak@codeaurora.org>, Suman Tripathi <stripathi@apm.com>, Shawn Lin <shawn.lin@rock-chips.com>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Tony Lindgren <tony@atomide.com>, Javier Martinez Canillas <javier@dowhile0.org>, linux-omap <linux-omap@vger.kernel.org>, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 
-On Tue, Jan 19, 2016 at 11:51 PM, Lakshmi Sai Krishna Potthuri
-<lakshmi.sai.krishna.potthuri@xilinx.com> wrote:
-> Hi,
->
->> -----Original Message-----
->> From: Rob Herring [mailto:robh@kernel.org]
->> Sent: Tuesday, January 19, 2016 10:46 PM
->> To: Lakshmi Sai Krishna Potthuri
->> Cc: Michal Simek; Soren Brinkmann; Ulf Hansson; Kevin Hao; Emil P. Lenchak;
->> Tobias Klauser; Sudeep Holla; Adrian Hunter; Jisheng Zhang; Ivan T. Ivanov;
->> Scott Branden; Vincent Yang; Haibo Chen; Marek Vasut;
->> ludovic.desroches@atmel.com; Pawel Moll; Mark Rutland; Ian Campbell;
->> Kumar Gala; Suman Tripathi; Shawn Lin; devicetree@vger.kernel.org; Harini
->> Katakam; linux-mmc@vger.kernel.org; linux-kernel@vger.kernel.org;
->> Lakshmi Sai Krishna Potthuri; Anirudha Sarangi; Punnaiah Choudary Kalluri;
->> linux-arm-kernel@lists.infradead.org
->> Subject: Re: [LINUX PATCH 4/5] Documentation: mmc: Updated the binding
->> doc for Arasan SDHCI.
->>
->> On Tue, Jan 19, 2016 at 07:47:34PM +0530, P L Sai Krishna wrote:
->> > This patch adds broken-mmc-highspeed property to the binding doc for
->> > Arasan SDHCI.
->> >
->> > Signed-off-by: P L Sai Krishna <lakshmis@xilinx.com>
->> > ---
-> <snip>
->> > -
->> > +  - broken-mmc-highspeed: Indicates to force
->> > +                           the controller to use in standard speed.
->>
->> We already have the inverse of this with "cap-mmc-highspeed".
->>
->> The only potential problem is it will need to be added to existing DTs if you
->> start disabling high speed by default. Maybe that's not an issue for users of
->> the Arasan driver.
->>
->
-> It might be an issue for other users.
-> I know that it will be an issue for older Xilinx SoC (Zynq), for ex.
->
->> Otherwise, you should determine this with a more specific compatible string.
->>
->
-> Since this feature might be broken on any SoC, I thought it would be
-> good to provide a dt property.
-> Using a compatibility string will offer no flexibility as per board or silicon.
+The DT binding doc says reset-gpios is an optional property but the code
+currently bails out if it is omitted.
 
-I've thought about this some more. Since this is an override of the
-SDHCI capabilities register, I'm okay with this property. However, it
-should be common to all SDHCI controller and handled in the core SDHCI
-code. Another way this could be handled is directly provide an
-override value for the capability register in the DT. Then we don't
-have to provide a property for every capability bit.
+This is a regression since it breaks previously working device trees.
+Fix it by restoring the original documented behaviour.
 
-Additionally, the Arasan binding needs to have SOC specific compatible
-strings. IP vendor strings alone have been proven often to be
-insufficient.
+Fixes: ce037275861e ("mmc: pwrseq_simple: use GPIO descriptors array API")
+Tested-by: Tony Lindgren <tony@atomide.com>
+Signed-off-by: Martin Fuzzey <mfuzzey@parkeon.com>
 
-Rob
+---
+V2:
+Fix review comments by Ulf Hansson:
+    * Handle -ENOSYS case when CONFIG_GPIOLIB not selected
+      This causes checkpatch to complain with
+	   "WARNING: ENOSYS means 'invalid syscall nr' and nothing else"
+      but I guess that's ok here.
+    * Update patch description to make it clear this is a regression fix
+    * Add Fixes tag
+
+Add Tested-by tag from Tony Lingdren
+---
+ drivers/mmc/core/pwrseq_simple.c |   22 ++++++++++++++--------
+ 1 file changed, 14 insertions(+), 8 deletions(-)
+
+diff --git a/drivers/mmc/core/pwrseq_simple.c b/drivers/mmc/core/pwrseq_simple.c
+index d10538b..96f45ca 100644
+--- a/drivers/mmc/core/pwrseq_simple.c
++++ b/drivers/mmc/core/pwrseq_simple.c
+@@ -29,15 +29,18 @@ struct mmc_pwrseq_simple {
+ static void mmc_pwrseq_simple_set_gpios_value(struct mmc_pwrseq_simple *pwrseq,
+ 					      int value)
+ {
+-	int i;
+ 	struct gpio_descs *reset_gpios = pwrseq->reset_gpios;
+-	int values[reset_gpios->ndescs];
+ 
+-	for (i = 0; i < reset_gpios->ndescs; i++)
+-		values[i] = value;
++	if (!IS_ERR(reset_gpios)) {
++		int i;
++		int values[reset_gpios->ndescs];
+ 
+-	gpiod_set_array_value_cansleep(reset_gpios->ndescs, reset_gpios->desc,
+-				       values);
++		for (i = 0; i < reset_gpios->ndescs; i++)
++			values[i] = value;
++
++		gpiod_set_array_value_cansleep(
++			reset_gpios->ndescs, reset_gpios->desc, values);
++	}
+ }
+ 
+ static void mmc_pwrseq_simple_pre_power_on(struct mmc_host *host)
+@@ -79,7 +82,8 @@ static void mmc_pwrseq_simple_free(struct mmc_host *host)
+ 	struct mmc_pwrseq_simple *pwrseq = container_of(host->pwrseq,
+ 					struct mmc_pwrseq_simple, pwrseq);
+ 
+-	gpiod_put_array(pwrseq->reset_gpios);
++	if (!IS_ERR(pwrseq->reset_gpios))
++		gpiod_put_array(pwrseq->reset_gpios);
+ 
+ 	if (!IS_ERR(pwrseq->ext_clk))
+ 		clk_put(pwrseq->ext_clk);
+@@ -112,7 +116,9 @@ struct mmc_pwrseq *mmc_pwrseq_simple_alloc(struct mmc_host *host,
+ 	}
+ 
+ 	pwrseq->reset_gpios = gpiod_get_array(dev, "reset", GPIOD_OUT_HIGH);
+-	if (IS_ERR(pwrseq->reset_gpios)) {
++	if (IS_ERR(pwrseq->reset_gpios) &&
++	    PTR_ERR(pwrseq->reset_gpios) != -ENOENT &&
++	    PTR_ERR(pwrseq->reset_gpios) != -ENOSYS) {
+ 		ret = PTR_ERR(pwrseq->reset_gpios);
+ 		goto clk_put;
+ 	}
+
