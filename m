@@ -1,65 +1,88 @@
-From: Stefan Wahren <stefan.wahren@i2se.com>
-Subject: Re: [PATCH 0/5 RFC] mmc: sdhci-iproc: add bcm2835 support
-Date: Wed, 20 Jan 2016 22:18:06 +0100 (CET)
-Message-ID: <374314185.237972.d69bddce-8c03-4cf7-b6d6-f0cbd113f569.open-xchange@email.1und1.de>
+From: Stefan Wahren <stefan.wahren-eS4NqCHxEME@public.gmane.org>
+Subject: Re: [PATCH 4/5 RFC] mmc: sdhci-iproc: add bcm2835 support
+Date: Wed, 20 Jan 2016 22:23:51 +0100 (CET)
+Message-ID: <892755734.238049.d69bddce-8c03-4cf7-b6d6-f0cbd113f569.open-xchange@email.1und1.de>
 References: <1453042744-16196-1-git-send-email-stefan.wahren@i2se.com>
- <87bn8hcmjr.fsf@eliezer.anholt.net>
+ <1453042744-16196-5-git-send-email-stefan.wahren@i2se.com>
+ <569D923D.60306@samsung.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mout.kundenserver.de ([212.227.17.13]:63025 "EHLO
-	mout.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752698AbcATVS6 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 20 Jan 2016 16:18:58 -0500
-In-Reply-To: <87bn8hcmjr.fsf@eliezer.anholt.net>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <569D923D.60306-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Scott Branden <sbranden-dY08KVG/lbpWk0Htik3J/w@public.gmane.org>, Ray Jui <rjui-dY08KVG/lbpWk0Htik3J/w@public.gmane.org>, Lee Jones <lee-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Jaehoon Chung <jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, Eric Anholt <eric-WhKQ6XTQaPysTnJN9+BGXg@public.gmane.org>, Stephen Warren <swarren-3lzwWm7+Weoh9ZMKESR00Q@public.gmane.org>, Jon Mason <jonmason-dY08KVG/lbpWk0Htik3J/w@public.gmane.org>
+Cc: kernel-TqfNSX0MhmxHKSADF0wUEw@public.gmane.org, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, bcm-kernel-feedback-list-dY08KVG/lbpWk0Htik3J/w@public.gmane.org, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-rpi-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
-To: Scott Branden <sbranden@broadcom.com>, Ray Jui <rjui@broadcom.com>, Lee Jones <lee@kernel.org>, Eric Anholt <eric@anholt.net>, Stephen Warren <swarren@wwwdotorg.org>, Jon Mason <jonmason@broadcom.com>
-Cc: kernel@martin.sperl.org, Rob Herring <robh+dt@kernel.org>, linux-mmc@vger.kernel.org, bcm-kernel-feedback-list@broadcom.com, Arnd Bergmann <arnd@arndb.de>, Mark Rutland <mark.rutland@arm.com>, Ulf Hansson <ulf.hansson@linaro.org>, linux-rpi-kernel@lists.infradead.org, devicetree@vger.kernel.org
 
 
-> Eric Anholt <eric@anholt.net> hat am 19. Januar 2016 um 22:00 geschrieben:
+> Jaehoon Chung <jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org> hat am 19. Januar 2016 um 02:32
+> geschrieben:
 >
 >
-> Stefan Wahren <stefan.wahren@i2se.com> writes:
+> On 01/17/2016 11:59 PM, Stefan Wahren wrote:
+> > diff --git a/drivers/mmc/host/sdhci-iproc.c b/drivers/mmc/host/sdhci-iproc.c
+> > index 55bc348..88399eb 100644
+> > --- a/drivers/mmc/host/sdhci-iproc.c
+> > +++ b/drivers/mmc/host/sdhci-iproc.c
+> > @@ -167,7 +167,20 @@ static const struct sdhci_iproc_data iproc_data = {
+> > .caps1 = 0x00000064,
+> > };
+> >
+> > +static const struct sdhci_pltfm_data sdhci_bcm2835_pltfm_data = {
+> > + .quirks = SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK
+> > + | SDHCI_QUIRK_MISSING_CAPS,
+> > + .ops = &sdhci_iproc_ops,
+> > +};
+> > +
+> > +static const struct sdhci_iproc_data bcm2835_data = {
+> > + .pdata = &sdhci_bcm2835_pltfm_data,
+> > + .caps = SDHCI_CAN_VDD_330,
+> > + .caps1 = 0x00000000,
+> > +};
+> > +
+> > static const struct of_device_id sdhci_iproc_of_match[] = {
+> > + { .compatible = "brcm,bcm2835-sdhci", .data = &bcm2835_data },
+> > { .compatible = "brcm,sdhci-iproc-cygnus", .data = &iproc_data },
+> > { }
+> > };
+> > @@ -180,6 +193,7 @@ static int sdhci_iproc_probe(struct platform_device
+> > *pdev)
+> > struct sdhci_host *host;
+> > struct sdhci_iproc_host *iproc_host;
+> > struct sdhci_pltfm_host *pltfm_host;
+> > + struct device_node *np = pdev->dev.of_node;
+> > int ret;
+> >
+> > match = of_match_device(sdhci_iproc_of_match, &pdev->dev);
+> > @@ -199,8 +213,10 @@ static int sdhci_iproc_probe(struct platform_device
+> > *pdev)
+> > mmc_of_parse(host->mmc);
+> > sdhci_get_of_property(pdev);
+> >
+> > - /* Enable EMMC 1/8V DDR capable */
+> > - host->mmc->caps |= MMC_CAP_1_8V_DDR;
+> > + if (of_device_is_compatible(np, "brcm,sdhci-iproc-cygnus")) {
+> > + /* Enable EMMC 1/8V DDR capable */
+> > + host->mmc->caps |= MMC_CAP_1_8V_DDR;
+> > + }
 >
-> > This patch series based on the suggestion of Scott Branden to implement
-> > bcm2835 support into sdhci-iproc [1].
-> >
-> > These changes provide the following advantages:
-> > * no need to maintain a separate driver for bcm2835
-> > * improve support and test coverage of bcm2835 mmc support
-> > * get the rid of SDHCI_CAPABILITIES hack in bcm2835_sdhci_readl
-> > * increase write performance by avoiding delays in write ops
-> >
-> > Patch 1 and 2 adopt two sdhci-bcm2835 fixes to sdhci-iproc. The third patch
-> > tries to specify as much quirks as possible in the bcm283x.dtsi as possible.
-> > Patch 4 and 5 are the actually changes for bcm2835 support.
-> >
-> > These series has been tested on Raspberry Pi B with dd (direct I/O):
-> >
-> > sdhci-bcm2835
-> >
-> > 378 kB/s WRITE
-> > 10,6 MB/s READ
-> >
-> > sdhci-iproc (after applying patch series)
-> >
-> > 881 kB/s WRITE
-> > 10,8 MB/s READ
->
-> I started a while ago at looking at merging the sdhost driver (for the
-> other controller on these boards that you can use instead), since
-> apparently the hardware's a better choice to use. This looks like a
-> really nice simplification for us for the Arasan mode, though. Would
-> you also want to delete the old 2835 driver after this series?
+> Why don't you use the property in device tree?
+> It can be parsed MMC_CAP_1_8V_DDR as property of "mmc-ddr-1_8v".
 
-Yes, that would be a necessary step. I don't know when it's the right time.
-
-What is the usual procedure for such a necessary driver?
+I agree but i don't have a iProc Cygnus to test it and we need to keep
+compatibility to older devicetrees. 
 
 >
-> These patches are all:
+> Best Regards,
+> Jaehoon Chung
 >
-> Acked-by: Eric Anholt <eric@anholt.net>
+> >
+> > pltfm_host->clk = devm_clk_get(&pdev->dev, NULL);
+> > if (IS_ERR(pltfm_host->clk)) {
+> >
+>
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
