@@ -1,77 +1,76 @@
 From: Lakshmi Sai Krishna Potthuri
-	<lakshmi.sai.krishna.potthuri-gjFFaj9aHVfQT0dZR+AlfA@public.gmane.org>
-Subject: RE: [LINUX PATCH 1/5] mmc: Workaround for the issue in auto tuning
- mode.
-Date: Wed, 20 Jan 2016 05:21:24 +0000
-Message-ID: <4FF8F58FAA9D5D4193D4E554E4352C5902C52798@XAP-PVEXMBX02.xlnx.xilinx.com>
+	<lakshmi.sai.krishna.potthuri@xilinx.com>
+Subject: RE: [LINUX PATCH 4/5] Documentation: mmc: Updated the binding doc
+ for Arasan SDHCI.
+Date: Wed, 20 Jan 2016 05:51:15 +0000
+Message-ID: <4FF8F58FAA9D5D4193D4E554E4352C5902C527B7@XAP-PVEXMBX02.xlnx.xilinx.com>
 References: <1453213055-35563-1-git-send-email-lakshmis@xilinx.com>
- <CAGb2v655SF-CUbZKKTif0toHqJ61Z4P4_QzQacfQL9EN0Y0zZQ@mail.gmail.com>
+ <1453213055-35563-4-git-send-email-lakshmis@xilinx.com>
+ <20160119171611.GA2708@rob-hp-laptop>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <CAGb2v655SF-CUbZKKTif0toHqJ61Z4P4_QzQacfQL9EN0Y0zZQ-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-cys01nam02on0044.outbound.protection.outlook.com ([104.47.37.44]:33360
+	"EHLO NAM02-CY1-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S933663AbcATFvX convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 20 Jan 2016 00:51:23 -0500
+In-Reply-To: <20160119171611.GA2708@rob-hp-laptop>
 Content-Language: en-US
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org>
-Cc: Michal Simek <michals-gjFFaj9aHVfQT0dZR+AlfA@public.gmane.org>, Soren Brinkmann <sorenb-gjFFaj9aHVfQT0dZR+AlfA@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Kevin Hao <haokexin-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, "Emil P. Lenchak" <emill-gjFFaj9aHVfQT0dZR+AlfA@public.gmane.org>, Tobias Klauser <tklauser-93Khv+1bN0NyDzI6CaY1VQ@public.gmane.org>, Sudeep Holla <Sudeep.Holla-5wv7dgnIgG8@public.gmane.org>, Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Jisheng Zhang <jszhang-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, "Ivan T. Ivanov" <ivan.ivanov-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Scott Branden <sbranden-dY08KVG/lbpWk0Htik3J/w@public.gmane.org>, Vincent Yang <vincent.yang.fujitsu-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Haibo Chen <haibo.chen-KZfg59tc24xl57MIdRCFDg@public.gmane.org>, Marek Vasut <marex-ynQEQJNshbs@public.gmane.org>, "ludovic.desroches-AIFe0yeh4nAAvxtiuMwx3w@public.gmane.org" <ludovic.desroches-AIFe0yeh4nAAvxtiuMwx3w@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Pawel Moll <pawel.moll-5wv7dgnIgG8@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Ian Campbell <ijc+devicetree-KcIKpvwj1kUDXYZnReoRVg@public.gmane.org>, Kumar Gala <galak-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, Suman Tripathi <stripathi-qTEPVZfXA3Y@public.gmane.org>, Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>devicetree <devicetr>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Rob Herring <robh@kernel.org>
+Cc: Michal Simek <michals@xilinx.com>, Soren Brinkmann <sorenb@xilinx.com>, Ulf Hansson <ulf.hansson@linaro.org>, Kevin Hao <haokexin@gmail.com>, "Emil P. Lenchak" <emill@xilinx.com>, Tobias Klauser <tklauser@distanz.ch>, Sudeep Holla <Sudeep.Holla@arm.com>, Adrian Hunter <adrian.hunter@intel.com>, Jisheng Zhang <jszhang@marvell.com>, "Ivan T. Ivanov" <ivan.ivanov@linaro.org>, Scott Branden <sbranden@broadcom.com>, Vincent Yang <vincent.yang.fujitsu@gmail.com>, Haibo Chen <haibo.chen@freescale.com>, Marek Vasut <marex@denx.de>, "ludovic.desroches@atmel.com" <ludovic.desroches@atmel.com>, Pawel Moll <pawel.moll@arm.com>, Mark Rutland <mark.rutland@arm.com>, Ian Campbell <ijc+devicetree@hellion.org.uk>, Kumar Gala <galak@codeaurora.org>, Suman Tripathi <stripathi@apm.com>, Shawn Lin <shawn.lin@rock-chips.com>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.or>
 
-SGksDQoNCj4gLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4gRnJvbTogQ2hlbi1ZdSBUc2Fp
-IFttYWlsdG86d2Vuc0Bjc2llLm9yZ10NCj4gU2VudDogVHVlc2RheSwgSmFudWFyeSAxOSwgMjAx
-NiA4OjMyIFBNDQo+IFRvOiBMYWtzaG1pIFNhaSBLcmlzaG5hIFBvdHRodXJpDQo+IENjOiBNaWNo
-YWwgU2ltZWs7IFNvcmVuIEJyaW5rbWFubjsgVWxmIEhhbnNzb247IEtldmluIEhhbzsgRW1pbCBQ
-LiBMZW5jaGFrOw0KPiBUb2JpYXMgS2xhdXNlcjsgU3VkZWVwIEhvbGxhOyBBZHJpYW4gSHVudGVy
-OyBKaXNoZW5nIFpoYW5nOyBJdmFuIFQuIEl2YW5vdjsNCj4gU2NvdHQgQnJhbmRlbjsgVmluY2Vu
-dCBZYW5nOyBIYWlibyBDaGVuOyBNYXJlayBWYXN1dDsNCj4gbHVkb3ZpYy5kZXNyb2NoZXNAYXRt
-ZWwuY29tOyBSb2IgSGVycmluZzsgUGF3ZWwgTW9sbDsgTWFyayBSdXRsYW5kOyBJYW4NCj4gQ2Ft
-cGJlbGw7IEt1bWFyIEdhbGE7IFN1bWFuIFRyaXBhdGhpOyBTaGF3biBMaW47IGRldmljZXRyZWU7
-IEhhcmluaQ0KPiBLYXRha2FtOyBsaW51eC1tbWNAdmdlci5rZXJuZWwub3JnOyBsaW51eC1rZXJu
-ZWw7IExha3NobWkgU2FpIEtyaXNobmENCj4gUG90dGh1cmk7IEFuaXJ1ZGhhIFNhcmFuZ2k7IFB1
-bm5haWFoIENob3VkYXJ5IEthbGx1cmk7IGxpbnV4LWFybS1rZXJuZWwNCj4gU3ViamVjdDogUmU6
-IFtMSU5VWCBQQVRDSCAxLzVdIG1tYzogV29ya2Fyb3VuZCBmb3IgdGhlIGlzc3VlIGluIGF1dG8N
-Cj4gdHVuaW5nIG1vZGUuDQo+DQo+IEhpLA0KPg0KPiBPbiBUdWUsIEphbiAxOSwgMjAxNiBhdCAx
-MDoxNyBQTSwgUCBMIFNhaSBLcmlzaG5hDQo+IDxsYWtzaG1pLnNhaS5rcmlzaG5hLnBvdHRodXJp
-QHhpbGlueC5jb20+IHdyb3RlOg0KPiA+IER1cmluZyB0aGUgYXV0byB0dW5pbmcgbW9kZSBvZiBT
-RFIxMDQsIGEgY291cGxlIG9mIHRyYW5zYWN0aW9ucyBvbg0KPiA+IHJ4X3RhcF92YWx1ZSB3aGlj
-aCBhcmUgbm90IGluY3JlbWVudGFsIG9yIGRlY3JlbWVudGFsIGJ5IDEuDQo+ID4gU2luY2UgdGhl
-IERMTCBzdXBwb3J0cyBvbmx5IGluY3JlbWVudC9kZWNyZW1lbnQgYnkgMSBkdXJpbmcgZHluYW1p
-Yw0KPiA+IGNoYW5nZSwgb2JzZXJ2ZWQgdW5leHBlY3RlZCBkZWxheXMgZHVyaW5nIGJvdGggdGhl
-c2UgdHJhbnNhY3Rpb25zLg0KPiA+IFRoZSBmaXJzdCB0cmFuc2FjdGlvbiBvY2N1cnMgd2hlbiB0
-aGUgdGFwIHZhbHVlIHJlYWNoZWQgMHgxRiwgaXQgd2lsbA0KPiA+IHJlc2V0IHRvIDB4MCBhbmQg
-Z28gdGlsbCAweDcuIFRoaXMgdHJhbnNhY3Rpb24gY2FuIGJlIGF2b2lkZWQgYnkNCj4gPiBjaGFu
-Z2luZyB0aGUgY29yZWNmZ19kaXMxcDV4dHVuaW5nY250IHRvIDEnYjEgd2hpY2ggaXMgY3VycmVu
-dGx5IHRpZWQNCj4gPiB0byAxJ2IwIGluIHRoZSBSVEwuDQo+ID4gVGhlIHNlY29uZCB0cmFuc2Fj
-dGlvbiBvY2N1cnMgYWZ0ZXIgdGhlIHR1bmluZyBpcyBjb21wbGV0ZWQuDQo+ID4gT25jZSB0aGUg
-dHVuaW5nIGlzIGRvbmUsIHRoZSB0dW5pbmcgZnNtIGluIHRoZSBob3N0IGNvbnRyb2xsZXINCj4g
-PiBjYWxjdWxhdGVzIHRoZSBhdmVyYWdlIHBhdHRlcm4gbWF0Y2ggYW5kIHdpbGwgd3JpdGUgdGhl
-IHZhbHVlIG9uIHRoZQ0KPiA+IHJ4IHRhcCB2YWx1ZS4gVGhlcmVmb3JlIG9ic2VydmVkIGEgdHJh
-bnNhY3Rpb24gZnJvbSAweDcgdG8gdGhlIGZpbmFsDQo+ID4gdmFsdWUgd2hpY2ggbmVlZCBub3Qg
-YmUgYSBpbmNyZW1lbnQvZGVjcmVtZW50IHZhbHVlLg0KPiA+IEJlY2F1c2Ugb2YgdGhpcyBpc3N1
-ZSBETEwgdHVuaW5nIHdpbGwgbm90IGJlIGFjY3VyYXRlIGFuZCBTRFI1MCwNCj4gPiBTRFIxMDQg
-JiBIUzIwMCBtb2RlcyBtYXkgbm90IHdvcmsuDQo+ID4NCj4gPiBUaGlzIHBhdGNoIGFkZHMgd29y
-a2Fyb3VuZCB0byBjaGFuZ2UgdGhlIFNEIGNsb2NrIGFmdGVyIHR1bmluZyBkb25lIHRvDQo+ID4g
-cHJvdmlkZSBhY2N1cmF0ZSBETEwgdHVuaW5nIGZvciBTRFI1MCwNCj4gPiBTRDEwNCAmIEhTMjAw
-IG1vZGVzLg0KPiA+DQo+ID4gQWZ0ZXIgcmVjZWl2aW5nIHRoZSB0dW5pbmcgZG9uZSwgcHJvZ3Jh
-bSAiU0RDTEsgRnJlcXVlbmN5IFNlbGVjdCINCj4gPiBvZiBjbG9jayBjb250cm9sIHJlZ2lzdGVy
-IHdpdGggYSB2YWx1ZSBkaWZmZXJlbnQgZnJvbSB0aGUgZGVzaXJlZA0KPiA+IHZhbHVlLiBXYWl0
-IGZvciB0aGUgIkludGVybmFsIENsb2NrIFN0YWJsZSIgYml0IG9mIHRoZSBjbG9jayBjb250cm9s
-DQo+ID4gcmVnaXN0ZXIgYW5kIHByb2dyYW0gdGhlIGRlc2lyZWQgZnJlcXVlbmN5Lg0KPg0KPiBE
-b2VzIHRoaXMgc2VyaWVzIGFwcGx5IHRvIGFueSBub24tQXJhc2FuIG9yIG5vbi1zZGhjaSBtbWMg
-aG9zdHM/DQo+IFRoZSBzdWJqZWN0IGRvZXMgbm90IGluZGljYXRlIGEgc3BlY2lmaWMgcGxhdGZv
-cm0uDQoNClRoaXMgc2VyaWVzIGlzIGFwcGxpY2FibGUgb25seSBmb3IgWnlucSBVbHRyYXNjYWwr
-IE1QU29DIHdoaWNoDQp1c2VzIEFyYXNhbiBTREhDSS4NClNvcnJ5LCBJIHdpbGwgY2hhbmdlIHRo
-ZSBkZXNjcmlwdGlvbiB0byBpbmRpY2F0ZSB0aGUgc2FtZS4NClRoZSBEVCBwcm9wZXJ0eSB1c2Vk
-IGlzIG1hZGUgZ2VuZXJpYyBidXQgdGhlIHR1bmluZyB1c2VkIGlzDQpTcGVjaWZpYyB0byB0aGlz
-IFNvQy4NCg0KUmVnYXJkcw0KU2FpIEtyaXNobmENCg0KDQpUaGlzIGVtYWlsIGFuZCBhbnkgYXR0
-YWNobWVudHMgYXJlIGludGVuZGVkIGZvciB0aGUgc29sZSB1c2Ugb2YgdGhlIG5hbWVkIHJlY2lw
-aWVudChzKSBhbmQgY29udGFpbihzKSBjb25maWRlbnRpYWwgaW5mb3JtYXRpb24gdGhhdCBtYXkg
-YmUgcHJvcHJpZXRhcnksIHByaXZpbGVnZWQgb3IgY29weXJpZ2h0ZWQgdW5kZXIgYXBwbGljYWJs
-ZSBsYXcuIElmIHlvdSBhcmUgbm90IHRoZSBpbnRlbmRlZCByZWNpcGllbnQsIGRvIG5vdCByZWFk
-LCBjb3B5LCBvciBmb3J3YXJkIHRoaXMgZW1haWwgbWVzc2FnZSBvciBhbnkgYXR0YWNobWVudHMu
-IERlbGV0ZSB0aGlzIGVtYWlsIG1lc3NhZ2UgYW5kIGFueSBhdHRhY2htZW50cyBpbW1lZGlhdGVs
-eS4NCg0K
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Hi,
+
+> -----Original Message-----
+> From: Rob Herring [mailto:robh@kernel.org]
+> Sent: Tuesday, January 19, 2016 10:46 PM
+> To: Lakshmi Sai Krishna Potthuri
+> Cc: Michal Simek; Soren Brinkmann; Ulf Hansson; Kevin Hao; Emil P. Lenchak;
+> Tobias Klauser; Sudeep Holla; Adrian Hunter; Jisheng Zhang; Ivan T. Ivanov;
+> Scott Branden; Vincent Yang; Haibo Chen; Marek Vasut;
+> ludovic.desroches@atmel.com; Pawel Moll; Mark Rutland; Ian Campbell;
+> Kumar Gala; Suman Tripathi; Shawn Lin; devicetree@vger.kernel.org; Harini
+> Katakam; linux-mmc@vger.kernel.org; linux-kernel@vger.kernel.org;
+> Lakshmi Sai Krishna Potthuri; Anirudha Sarangi; Punnaiah Choudary Kalluri;
+> linux-arm-kernel@lists.infradead.org
+> Subject: Re: [LINUX PATCH 4/5] Documentation: mmc: Updated the binding
+> doc for Arasan SDHCI.
+>
+> On Tue, Jan 19, 2016 at 07:47:34PM +0530, P L Sai Krishna wrote:
+> > This patch adds broken-mmc-highspeed property to the binding doc for
+> > Arasan SDHCI.
+> >
+> > Signed-off-by: P L Sai Krishna <lakshmis@xilinx.com>
+> > ---
+<snip>
+> > -
+> > +  - broken-mmc-highspeed: Indicates to force
+> > +                           the controller to use in standard speed.
+>
+> We already have the inverse of this with "cap-mmc-highspeed".
+>
+> The only potential problem is it will need to be added to existing DTs if you
+> start disabling high speed by default. Maybe that's not an issue for users of
+> the Arasan driver.
+>
+
+It might be an issue for other users.
+I know that it will be an issue for older Xilinx SoC (Zynq), for ex.
+
+> Otherwise, you should determine this with a more specific compatible string.
+>
+
+Since this feature might be broken on any SoC, I thought it would be
+good to provide a dt property.
+Using a compatibility string will offer no flexibility as per board or silicon.
+
+Regards,
+Harini
+
+
+This email and any attachments are intended for the sole use of the named recipient(s) and contain(s) confidential information that may be proprietary, privileged or copyrighted under applicable law. If you are not the intended recipient, do not read, copy, or forward this email message or any attachments. Delete this email message and any attachments immediately.
+
