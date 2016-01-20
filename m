@@ -1,156 +1,77 @@
-From: Shawn Lin <shawn.lin@rock-chips.com>
-Subject: Re: [PATCH v3] mmc: dw_mmc: add hw_reset support
-Date: Wed, 20 Jan 2016 12:26:08 +0800
-Message-ID: <569F0C60.7090100@rock-chips.com>
-References: <1452733682-3164-1-git-send-email-shawn.lin@rock-chips.com>
- <569F0BE1.50801@samsung.com>
+From: Lakshmi Sai Krishna Potthuri
+	<lakshmi.sai.krishna.potthuri-gjFFaj9aHVfQT0dZR+AlfA@public.gmane.org>
+Subject: RE: [LINUX PATCH 1/5] mmc: Workaround for the issue in auto tuning
+ mode.
+Date: Wed, 20 Jan 2016 05:21:24 +0000
+Message-ID: <4FF8F58FAA9D5D4193D4E554E4352C5902C52798@XAP-PVEXMBX02.xlnx.xilinx.com>
+References: <1453213055-35563-1-git-send-email-lakshmis@xilinx.com>
+ <CAGb2v655SF-CUbZKKTif0toHqJ61Z4P4_QzQacfQL9EN0Y0zZQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8;
-	format=flowed
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from lucky1.263xmail.com ([211.157.147.132]:46985 "EHLO
-	lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S933721AbcATE02 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 19 Jan 2016 23:26:28 -0500
-In-Reply-To: <569F0BE1.50801@samsung.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <CAGb2v655SF-CUbZKKTif0toHqJ61Z4P4_QzQacfQL9EN0Y0zZQ-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+Content-Language: en-US
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org>
+Cc: Michal Simek <michals-gjFFaj9aHVfQT0dZR+AlfA@public.gmane.org>, Soren Brinkmann <sorenb-gjFFaj9aHVfQT0dZR+AlfA@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Kevin Hao <haokexin-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, "Emil P. Lenchak" <emill-gjFFaj9aHVfQT0dZR+AlfA@public.gmane.org>, Tobias Klauser <tklauser-93Khv+1bN0NyDzI6CaY1VQ@public.gmane.org>, Sudeep Holla <Sudeep.Holla-5wv7dgnIgG8@public.gmane.org>, Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Jisheng Zhang <jszhang-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, "Ivan T. Ivanov" <ivan.ivanov-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Scott Branden <sbranden-dY08KVG/lbpWk0Htik3J/w@public.gmane.org>, Vincent Yang <vincent.yang.fujitsu-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Haibo Chen <haibo.chen-KZfg59tc24xl57MIdRCFDg@public.gmane.org>, Marek Vasut <marex-ynQEQJNshbs@public.gmane.org>, "ludovic.desroches-AIFe0yeh4nAAvxtiuMwx3w@public.gmane.org" <ludovic.desroches-AIFe0yeh4nAAvxtiuMwx3w@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Pawel Moll <pawel.moll-5wv7dgnIgG8@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Ian Campbell <ijc+devicetree-KcIKpvwj1kUDXYZnReoRVg@public.gmane.org>, Kumar Gala <galak-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, Suman Tripathi <stripathi-qTEPVZfXA3Y@public.gmane.org>, Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>devicetree <devicetr>
 List-Id: linux-mmc@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: shawn.lin@rock-chips.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 
-On 2016/1/20 12:24, Jaehoon Chung wrote:
-> Hi, Shawn.
->
-> On 01/14/2016 10:08 AM, Shawn Lin wrote:
->> This patch implement hw_reset function for DesignWare
->> MMC controller. By adding this feature, mmc blk can
->> do some basic recovery.
->>
->> Set the following resets:
->> software reset =E2=80=93 BMOD[0] for IDMAC only
->> DMA reset=E2=80=93 CTRL[2]
->> FIFO reset =E2=80=93 CTRL[1] bits
->>
->> Program the CARD_RESET register with a value of 0 for the bit
->> corresponding to the card number; This programming asserts the
->> RST_n signal and resets the card. After a minimum of 1 =CE=BCs, de-a=
-sserts the
->> RST_n signal and takes the card out of reset. The application can pr=
-ogram
->> a new CMD only after a minimum of 200 us
->>
->> This implementation can be easily tested by cutting off->On vmmc
->> while doing data accessing in background to simulate that case.
->>
->> Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
->>
->> ---
->>
->> Changes in v3:
->> - reset for each slot
->> - simply the commit msg
->>
->> Changes in v2:
->> - remove unecessary mb
->> - reduce time cost for hw_reset
->> - combine SDMMC_CTRL_DMA_RESET and SDMMC_CTRL_FIFO_RESET
->>
->>   drivers/mmc/host/dw_mmc.c | 29 +++++++++++++++++++++++++++++
->>   drivers/mmc/host/dw_mmc.h |  3 +++
->>   2 files changed, 32 insertions(+)
->>
->> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
->> index 7128351..fddbcb6 100644
->> --- a/drivers/mmc/host/dw_mmc.c
->> +++ b/drivers/mmc/host/dw_mmc.c
->> @@ -1477,6 +1477,34 @@ static int dw_mci_get_cd(struct mmc_host *mmc=
-)
->>   	return present;
->>   }
->>
->> +static void dw_mci_hw_reset(struct mmc_host *mmc)
->> +{
->> +	struct dw_mci_slot *slot =3D mmc_priv(mmc);
->> +	struct dw_mci *host =3D slot->host;
->> +	int reset;
->> +
->> +	if (host->use_dma =3D=3D TRANS_MODE_IDMAC)
->> +		dw_mci_idmac_reset(host);
->> +
->> +	if (!dw_mci_ctrl_reset(host, SDMMC_CTRL_DMA_RESET |
->> +				     SDMMC_CTRL_FIFO_RESET))
->> +		return;
->> +
->> +	/*
->> +	 * According to eMMC spec, card reset procedure:
->> +	 * tRstW >=3D 1us:   RST_n pulse width
->> +	 * tRSCA >=3D 200us: RST_n to Command time
->> +	 * tRSTH >=3D 1us:   RST_n high period
->> +	 */
->> +	reset =3D mci_readl(host, RST_N);
->> +	reset &=3D ~(SDMMC_RST_HWACTIVE << slot->id);
->> +	mci_writel(slot->host, RST_N, reset);
->
-> I will pick this patch, after change "host" instead of "slot->host".
-> (I will change it when i apply this.)
->
-> Thanks!
-
-Thanks, Jaehoon. :)
-
->
-> Best Regards,
-> Jaehoon Chung
->
->> +	usleep_range(1, 2);
->> +	reset |=3D SDMMC_RST_HWACTIVE << slot->id;
->> +	mci_writel(slot->host, RST_N, reset);
->> +	usleep_range(200, 300);
->> +}
->> +
->>   static void dw_mci_init_card(struct mmc_host *mmc, struct mmc_card=
- *card)
->>   {
->>   	struct dw_mci_slot *slot =3D mmc_priv(mmc);
->> @@ -1563,6 +1591,7 @@ static const struct mmc_host_ops dw_mci_ops =3D=
- {
->>   	.set_ios		=3D dw_mci_set_ios,
->>   	.get_ro			=3D dw_mci_get_ro,
->>   	.get_cd			=3D dw_mci_get_cd,
->> +	.hw_reset               =3D dw_mci_hw_reset,
->>   	.enable_sdio_irq	=3D dw_mci_enable_sdio_irq,
->>   	.execute_tuning		=3D dw_mci_execute_tuning,
->>   	.card_busy		=3D dw_mci_card_busy,
->> diff --git a/drivers/mmc/host/dw_mmc.h b/drivers/mmc/host/dw_mmc.h
->> index f695b58..a14b7fc 100644
->> --- a/drivers/mmc/host/dw_mmc.h
->> +++ b/drivers/mmc/host/dw_mmc.h
->> @@ -46,6 +46,7 @@
->>   #define SDMMC_VERID		0x06c
->>   #define SDMMC_HCON		0x070
->>   #define SDMMC_UHS_REG		0x074
->> +#define SDMMC_RST_N		0x078
->>   #define SDMMC_BMOD		0x080
->>   #define SDMMC_PLDMND		0x084
->>   #define SDMMC_DBADDR		0x088
->> @@ -169,6 +170,8 @@
->>   #define SDMMC_IDMAC_ENABLE		BIT(7)
->>   #define SDMMC_IDMAC_FB			BIT(1)
->>   #define SDMMC_IDMAC_SWRESET		BIT(0)
->> +/* H/W reset */
->> +#define SDMMC_RST_HWACTIVE		0x1
->>   /* Version ID register define */
->>   #define SDMMC_GET_VERID(x)		((x) & 0xFFFF)
->>   /* Card read threshold */
->>
->
->
->
->
-
-
---=20
-Best Regards
-Shawn Lin
-
+SGksDQoNCj4gLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4gRnJvbTogQ2hlbi1ZdSBUc2Fp
+IFttYWlsdG86d2Vuc0Bjc2llLm9yZ10NCj4gU2VudDogVHVlc2RheSwgSmFudWFyeSAxOSwgMjAx
+NiA4OjMyIFBNDQo+IFRvOiBMYWtzaG1pIFNhaSBLcmlzaG5hIFBvdHRodXJpDQo+IENjOiBNaWNo
+YWwgU2ltZWs7IFNvcmVuIEJyaW5rbWFubjsgVWxmIEhhbnNzb247IEtldmluIEhhbzsgRW1pbCBQ
+LiBMZW5jaGFrOw0KPiBUb2JpYXMgS2xhdXNlcjsgU3VkZWVwIEhvbGxhOyBBZHJpYW4gSHVudGVy
+OyBKaXNoZW5nIFpoYW5nOyBJdmFuIFQuIEl2YW5vdjsNCj4gU2NvdHQgQnJhbmRlbjsgVmluY2Vu
+dCBZYW5nOyBIYWlibyBDaGVuOyBNYXJlayBWYXN1dDsNCj4gbHVkb3ZpYy5kZXNyb2NoZXNAYXRt
+ZWwuY29tOyBSb2IgSGVycmluZzsgUGF3ZWwgTW9sbDsgTWFyayBSdXRsYW5kOyBJYW4NCj4gQ2Ft
+cGJlbGw7IEt1bWFyIEdhbGE7IFN1bWFuIFRyaXBhdGhpOyBTaGF3biBMaW47IGRldmljZXRyZWU7
+IEhhcmluaQ0KPiBLYXRha2FtOyBsaW51eC1tbWNAdmdlci5rZXJuZWwub3JnOyBsaW51eC1rZXJu
+ZWw7IExha3NobWkgU2FpIEtyaXNobmENCj4gUG90dGh1cmk7IEFuaXJ1ZGhhIFNhcmFuZ2k7IFB1
+bm5haWFoIENob3VkYXJ5IEthbGx1cmk7IGxpbnV4LWFybS1rZXJuZWwNCj4gU3ViamVjdDogUmU6
+IFtMSU5VWCBQQVRDSCAxLzVdIG1tYzogV29ya2Fyb3VuZCBmb3IgdGhlIGlzc3VlIGluIGF1dG8N
+Cj4gdHVuaW5nIG1vZGUuDQo+DQo+IEhpLA0KPg0KPiBPbiBUdWUsIEphbiAxOSwgMjAxNiBhdCAx
+MDoxNyBQTSwgUCBMIFNhaSBLcmlzaG5hDQo+IDxsYWtzaG1pLnNhaS5rcmlzaG5hLnBvdHRodXJp
+QHhpbGlueC5jb20+IHdyb3RlOg0KPiA+IER1cmluZyB0aGUgYXV0byB0dW5pbmcgbW9kZSBvZiBT
+RFIxMDQsIGEgY291cGxlIG9mIHRyYW5zYWN0aW9ucyBvbg0KPiA+IHJ4X3RhcF92YWx1ZSB3aGlj
+aCBhcmUgbm90IGluY3JlbWVudGFsIG9yIGRlY3JlbWVudGFsIGJ5IDEuDQo+ID4gU2luY2UgdGhl
+IERMTCBzdXBwb3J0cyBvbmx5IGluY3JlbWVudC9kZWNyZW1lbnQgYnkgMSBkdXJpbmcgZHluYW1p
+Yw0KPiA+IGNoYW5nZSwgb2JzZXJ2ZWQgdW5leHBlY3RlZCBkZWxheXMgZHVyaW5nIGJvdGggdGhl
+c2UgdHJhbnNhY3Rpb25zLg0KPiA+IFRoZSBmaXJzdCB0cmFuc2FjdGlvbiBvY2N1cnMgd2hlbiB0
+aGUgdGFwIHZhbHVlIHJlYWNoZWQgMHgxRiwgaXQgd2lsbA0KPiA+IHJlc2V0IHRvIDB4MCBhbmQg
+Z28gdGlsbCAweDcuIFRoaXMgdHJhbnNhY3Rpb24gY2FuIGJlIGF2b2lkZWQgYnkNCj4gPiBjaGFu
+Z2luZyB0aGUgY29yZWNmZ19kaXMxcDV4dHVuaW5nY250IHRvIDEnYjEgd2hpY2ggaXMgY3VycmVu
+dGx5IHRpZWQNCj4gPiB0byAxJ2IwIGluIHRoZSBSVEwuDQo+ID4gVGhlIHNlY29uZCB0cmFuc2Fj
+dGlvbiBvY2N1cnMgYWZ0ZXIgdGhlIHR1bmluZyBpcyBjb21wbGV0ZWQuDQo+ID4gT25jZSB0aGUg
+dHVuaW5nIGlzIGRvbmUsIHRoZSB0dW5pbmcgZnNtIGluIHRoZSBob3N0IGNvbnRyb2xsZXINCj4g
+PiBjYWxjdWxhdGVzIHRoZSBhdmVyYWdlIHBhdHRlcm4gbWF0Y2ggYW5kIHdpbGwgd3JpdGUgdGhl
+IHZhbHVlIG9uIHRoZQ0KPiA+IHJ4IHRhcCB2YWx1ZS4gVGhlcmVmb3JlIG9ic2VydmVkIGEgdHJh
+bnNhY3Rpb24gZnJvbSAweDcgdG8gdGhlIGZpbmFsDQo+ID4gdmFsdWUgd2hpY2ggbmVlZCBub3Qg
+YmUgYSBpbmNyZW1lbnQvZGVjcmVtZW50IHZhbHVlLg0KPiA+IEJlY2F1c2Ugb2YgdGhpcyBpc3N1
+ZSBETEwgdHVuaW5nIHdpbGwgbm90IGJlIGFjY3VyYXRlIGFuZCBTRFI1MCwNCj4gPiBTRFIxMDQg
+JiBIUzIwMCBtb2RlcyBtYXkgbm90IHdvcmsuDQo+ID4NCj4gPiBUaGlzIHBhdGNoIGFkZHMgd29y
+a2Fyb3VuZCB0byBjaGFuZ2UgdGhlIFNEIGNsb2NrIGFmdGVyIHR1bmluZyBkb25lIHRvDQo+ID4g
+cHJvdmlkZSBhY2N1cmF0ZSBETEwgdHVuaW5nIGZvciBTRFI1MCwNCj4gPiBTRDEwNCAmIEhTMjAw
+IG1vZGVzLg0KPiA+DQo+ID4gQWZ0ZXIgcmVjZWl2aW5nIHRoZSB0dW5pbmcgZG9uZSwgcHJvZ3Jh
+bSAiU0RDTEsgRnJlcXVlbmN5IFNlbGVjdCINCj4gPiBvZiBjbG9jayBjb250cm9sIHJlZ2lzdGVy
+IHdpdGggYSB2YWx1ZSBkaWZmZXJlbnQgZnJvbSB0aGUgZGVzaXJlZA0KPiA+IHZhbHVlLiBXYWl0
+IGZvciB0aGUgIkludGVybmFsIENsb2NrIFN0YWJsZSIgYml0IG9mIHRoZSBjbG9jayBjb250cm9s
+DQo+ID4gcmVnaXN0ZXIgYW5kIHByb2dyYW0gdGhlIGRlc2lyZWQgZnJlcXVlbmN5Lg0KPg0KPiBE
+b2VzIHRoaXMgc2VyaWVzIGFwcGx5IHRvIGFueSBub24tQXJhc2FuIG9yIG5vbi1zZGhjaSBtbWMg
+aG9zdHM/DQo+IFRoZSBzdWJqZWN0IGRvZXMgbm90IGluZGljYXRlIGEgc3BlY2lmaWMgcGxhdGZv
+cm0uDQoNClRoaXMgc2VyaWVzIGlzIGFwcGxpY2FibGUgb25seSBmb3IgWnlucSBVbHRyYXNjYWwr
+IE1QU29DIHdoaWNoDQp1c2VzIEFyYXNhbiBTREhDSS4NClNvcnJ5LCBJIHdpbGwgY2hhbmdlIHRo
+ZSBkZXNjcmlwdGlvbiB0byBpbmRpY2F0ZSB0aGUgc2FtZS4NClRoZSBEVCBwcm9wZXJ0eSB1c2Vk
+IGlzIG1hZGUgZ2VuZXJpYyBidXQgdGhlIHR1bmluZyB1c2VkIGlzDQpTcGVjaWZpYyB0byB0aGlz
+IFNvQy4NCg0KUmVnYXJkcw0KU2FpIEtyaXNobmENCg0KDQpUaGlzIGVtYWlsIGFuZCBhbnkgYXR0
+YWNobWVudHMgYXJlIGludGVuZGVkIGZvciB0aGUgc29sZSB1c2Ugb2YgdGhlIG5hbWVkIHJlY2lw
+aWVudChzKSBhbmQgY29udGFpbihzKSBjb25maWRlbnRpYWwgaW5mb3JtYXRpb24gdGhhdCBtYXkg
+YmUgcHJvcHJpZXRhcnksIHByaXZpbGVnZWQgb3IgY29weXJpZ2h0ZWQgdW5kZXIgYXBwbGljYWJs
+ZSBsYXcuIElmIHlvdSBhcmUgbm90IHRoZSBpbnRlbmRlZCByZWNpcGllbnQsIGRvIG5vdCByZWFk
+LCBjb3B5LCBvciBmb3J3YXJkIHRoaXMgZW1haWwgbWVzc2FnZSBvciBhbnkgYXR0YWNobWVudHMu
+IERlbGV0ZSB0aGlzIGVtYWlsIG1lc3NhZ2UgYW5kIGFueSBhdHRhY2htZW50cyBpbW1lZGlhdGVs
+eS4NCg0K
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
