@@ -1,7 +1,7 @@
 From: Chen-Yu Tsai <wens@csie.org>
-Subject: [PATCH RFC 07/15] mmc: sunxi: Enable eMMC HS-DDR (MMC_CAP_1_8V_DDR) support
-Date: Thu, 21 Jan 2016 13:26:34 +0800
-Message-ID: <1453354002-28366-8-git-send-email-wens@csie.org>
+Subject: [PATCH RFC 05/15] mmc: sunxi: Support MMC_DDR52 timing modes
+Date: Thu, 21 Jan 2016 13:26:32 +0800
+Message-ID: <1453354002-28366-6-git-send-email-wens@csie.org>
 References: <1453354002-28366-1-git-send-email-wens@csie.org>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1453354002-28366-1-git-send-email-wens@csie.org>
@@ -10,27 +10,37 @@ To: Ulf Hansson <ulf.hansson@linaro.org>, Maxime Ripard <maxime.ripard@free-elec
 Cc: Chen-Yu Tsai <wens@csie.org>, Hans de Goede <hdegoede@redhat.com>, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, linux-sunxi@googlegroups.com
 List-Id: linux-mmc@vger.kernel.org
 
-Now that clock delay settings for 8 bit DDR are correct, and vqmmc
-support is available, we can enable MMC_CAP_1_8V_DDR support. This
-enables MMC HS-DDR at up to 52 MHz, even if signal voltage switching
-is not available.
+DDR transfer modes include UHS-1 DDR50 and MMC HS-DDR (or MMC_DDR52).
+Consider MMC_DDR52 when setting clock delays.
 
 Signed-off-by: Chen-Yu Tsai <wens@csie.org>
 ---
- drivers/mmc/host/sunxi-mmc.c | 1 +
- 1 file changed, 1 insertion(+)
+ drivers/mmc/host/sunxi-mmc.c | 6 ++++--
+ 1 file changed, 4 insertions(+), 2 deletions(-)
 
 diff --git a/drivers/mmc/host/sunxi-mmc.c b/drivers/mmc/host/sunxi-mmc.c
-index d05928091b34..f3a7f36e38c2 100644
+index 4bec87458317..b403a2433eec 100644
 --- a/drivers/mmc/host/sunxi-mmc.c
 +++ b/drivers/mmc/host/sunxi-mmc.c
-@@ -1145,6 +1145,7 @@ static int sunxi_mmc_probe(struct platform_device *pdev)
- 	mmc->f_min		=   400000;
- 	mmc->f_max		= 50000000;
- 	mmc->caps	       |= MMC_CAP_MMC_HIGHSPEED | MMC_CAP_SD_HIGHSPEED |
-+				  MMC_CAP_1_8V_DDR |
- 				  MMC_CAP_ERASE | MMC_CAP_SDIO_IRQ;
+@@ -687,7 +687,8 @@ static int sunxi_mmc_clk_set_rate(struct sunxi_mmc_host *host,
+ 		oclk_dly = host->clk_delays[SDXC_CLK_25M].output;
+ 		sclk_dly = host->clk_delays[SDXC_CLK_25M].sample;
+ 	} else if (rate <= 50000000) {
+-		if (ios->timing == MMC_TIMING_UHS_DDR50) {
++		if (ios->timing == MMC_TIMING_UHS_DDR50 ||
++		    ios->timing == MMC_TIMING_MMC_DDR52) {
+ 			oclk_dly = host->clk_delays[SDXC_CLK_50M_DDR].output;
+ 			sclk_dly = host->clk_delays[SDXC_CLK_50M_DDR].sample;
+ 		} else {
+@@ -762,7 +763,8 @@ static void sunxi_mmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
  
- 	ret = mmc_of_parse(mmc);
+ 	/* set ddr mode */
+ 	rval = mmc_readl(host, REG_GCTRL);
+-	if (ios->timing == MMC_TIMING_UHS_DDR50)
++	if (ios->timing == MMC_TIMING_UHS_DDR50 ||
++	    ios->timing == MMC_TIMING_MMC_DDR52)
+ 		rval |= SDXC_DDR_MODE;
+ 	else
+ 		rval &= ~SDXC_DDR_MODE;
 -- 
 2.7.0.rc3
