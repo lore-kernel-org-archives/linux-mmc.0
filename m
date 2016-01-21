@@ -1,46 +1,103 @@
-From: Pawel Wodkowski <pawelx.wodkowski@intel.com>
-Subject: [PATCH v2] mmc: Add a restriction to mmc debugfs clock setting.
-Date: Thu, 21 Jan 2016 13:57:51 +0100
-Message-ID: <1453381071-47571-1-git-send-email-pawelx.wodkowski@intel.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH V2] mmc: pwrseq_simple: Make reset-gpios optional to match doc
+Date: Thu, 21 Jan 2016 14:23:38 +0100
+Message-ID: <CAPDyKFq0O_Xt=R5=7SVKKiYS8YozXUM+5S8ukzmz8vo4BJmLOg@mail.gmail.com>
+References: <20160120150803.32073.63845.stgit@localhost>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga11.intel.com ([192.55.52.93]:60675 "EHLO mga11.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S965066AbcAUND6 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 21 Jan 2016 08:03:58 -0500
+Received: from mail-yk0-f180.google.com ([209.85.160.180]:34069 "EHLO
+	mail-yk0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1759175AbcAUNXj (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 21 Jan 2016 08:23:39 -0500
+Received: by mail-yk0-f180.google.com with SMTP id a85so47501549ykb.1
+        for <linux-mmc@vger.kernel.org>; Thu, 21 Jan 2016 05:23:39 -0800 (PST)
+In-Reply-To: <20160120150803.32073.63845.stgit@localhost>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: Chuanxiao Dong <chuanxiao.dong@intel.com>, Yuan Juntao <juntaox.yuan@intel.com>
+To: Martin Fuzzey <mfuzzey@parkeon.com>
+Cc: Tony Lindgren <tony@atomide.com>, Javier Martinez Canillas <javier@dowhile0.org>, linux-omap <linux-omap@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
 
-From: Chuanxiao Dong <chuanxiao.dong@intel.com>
+On 20 January 2016 at 16:08, Martin Fuzzey <mfuzzey@parkeon.com> wrote:
+> The DT binding doc says reset-gpios is an optional property but the code
+> currently bails out if it is omitted.
+>
+> This is a regression since it breaks previously working device trees.
+> Fix it by restoring the original documented behaviour.
+>
+> Fixes: ce037275861e ("mmc: pwrseq_simple: use GPIO descriptors array API")
+> Tested-by: Tony Lindgren <tony@atomide.com>
+> Signed-off-by: Martin Fuzzey <mfuzzey@parkeon.com>
 
-Clock frequency values written to an mmc host should not be less than
-the minimum clock frequency which the mmc host supports.
+Thanks, applied for fixes!
 
-Signed-off-by: Yuan Juntao <juntaox.yuan@intel.com>
-Signed-off-by: Pawel Wodkowski <pawelx.wodkowski@intel.com>
+Kind regards
+Uffe
 
----
-
-Changes in v2:
-- Allow setting zero frequency. 
-
- drivers/mmc/core/debugfs.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
-
-diff --git a/drivers/mmc/core/debugfs.c b/drivers/mmc/core/debugfs.c
-index 154aced0b91b..705586dcd9fa 100644
---- a/drivers/mmc/core/debugfs.c
-+++ b/drivers/mmc/core/debugfs.c
-@@ -220,7 +220,7 @@ static int mmc_clock_opt_set(void *data, u64 val)
- 	struct mmc_host *host = data;
- 
- 	/* We need this check due to input value is u64 */
--	if (val > host->f_max)
-+	if (val != 0 && (val > host->f_max || val < host->f_min))
- 		return -EINVAL;
- 
- 	mmc_claim_host(host);
--- 
-1.9.1
-
+>
+> ---
+> V2:
+> Fix review comments by Ulf Hansson:
+>     * Handle -ENOSYS case when CONFIG_GPIOLIB not selected
+>       This causes checkpatch to complain with
+>            "WARNING: ENOSYS means 'invalid syscall nr' and nothing else"
+>       but I guess that's ok here.
+>     * Update patch description to make it clear this is a regression fix
+>     * Add Fixes tag
+>
+> Add Tested-by tag from Tony Lingdren
+> ---
+>  drivers/mmc/core/pwrseq_simple.c |   22 ++++++++++++++--------
+>  1 file changed, 14 insertions(+), 8 deletions(-)
+>
+> diff --git a/drivers/mmc/core/pwrseq_simple.c b/drivers/mmc/core/pwrseq_simple.c
+> index d10538b..96f45ca 100644
+> --- a/drivers/mmc/core/pwrseq_simple.c
+> +++ b/drivers/mmc/core/pwrseq_simple.c
+> @@ -29,15 +29,18 @@ struct mmc_pwrseq_simple {
+>  static void mmc_pwrseq_simple_set_gpios_value(struct mmc_pwrseq_simple *pwrseq,
+>                                               int value)
+>  {
+> -       int i;
+>         struct gpio_descs *reset_gpios = pwrseq->reset_gpios;
+> -       int values[reset_gpios->ndescs];
+>
+> -       for (i = 0; i < reset_gpios->ndescs; i++)
+> -               values[i] = value;
+> +       if (!IS_ERR(reset_gpios)) {
+> +               int i;
+> +               int values[reset_gpios->ndescs];
+>
+> -       gpiod_set_array_value_cansleep(reset_gpios->ndescs, reset_gpios->desc,
+> -                                      values);
+> +               for (i = 0; i < reset_gpios->ndescs; i++)
+> +                       values[i] = value;
+> +
+> +               gpiod_set_array_value_cansleep(
+> +                       reset_gpios->ndescs, reset_gpios->desc, values);
+> +       }
+>  }
+>
+>  static void mmc_pwrseq_simple_pre_power_on(struct mmc_host *host)
+> @@ -79,7 +82,8 @@ static void mmc_pwrseq_simple_free(struct mmc_host *host)
+>         struct mmc_pwrseq_simple *pwrseq = container_of(host->pwrseq,
+>                                         struct mmc_pwrseq_simple, pwrseq);
+>
+> -       gpiod_put_array(pwrseq->reset_gpios);
+> +       if (!IS_ERR(pwrseq->reset_gpios))
+> +               gpiod_put_array(pwrseq->reset_gpios);
+>
+>         if (!IS_ERR(pwrseq->ext_clk))
+>                 clk_put(pwrseq->ext_clk);
+> @@ -112,7 +116,9 @@ struct mmc_pwrseq *mmc_pwrseq_simple_alloc(struct mmc_host *host,
+>         }
+>
+>         pwrseq->reset_gpios = gpiod_get_array(dev, "reset", GPIOD_OUT_HIGH);
+> -       if (IS_ERR(pwrseq->reset_gpios)) {
+> +       if (IS_ERR(pwrseq->reset_gpios) &&
+> +           PTR_ERR(pwrseq->reset_gpios) != -ENOENT &&
+> +           PTR_ERR(pwrseq->reset_gpios) != -ENOSYS) {
+>                 ret = PTR_ERR(pwrseq->reset_gpios);
+>                 goto clk_put;
+>         }
+>
