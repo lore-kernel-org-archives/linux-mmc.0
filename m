@@ -1,83 +1,92 @@
 From: Chen-Yu Tsai <wens@csie.org>
-Subject: Re: [PATCH RFC 05/15] mmc: sunxi: Support MMC_DDR52 timing modes
-Date: Thu, 21 Jan 2016 19:55:01 +0800
-Message-ID: <CAGb2v640b6tygtu1TkBEYM6Uf6JqpytzqUQ-Y1uxKf9PUwpQaA@mail.gmail.com>
+Subject: Re: [PATCH RFC 09/15] ARM: dts: sun6i: sina31s: Switch to mmc3 for
+ onboard eMMC
+Date: Thu, 21 Jan 2016 20:23:19 +0800
+Message-ID: <CAGb2v64-Hx_uCHZVw61OUc-z_KvHHf7gWduwfMQq6T_1ZDtCdA@mail.gmail.com>
 References: <1453354002-28366-1-git-send-email-wens@csie.org>
- <1453354002-28366-6-git-send-email-wens@csie.org> <56A0BD8F.2000805@redhat.com>
+ <1453354002-28366-10-git-send-email-wens@csie.org> <56A0BE25.1020309@redhat.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp.csie.ntu.edu.tw ([140.112.30.61]:56980 "EHLO
+Received: from smtp.csie.ntu.edu.tw ([140.112.30.61]:57084 "EHLO
 	smtp.csie.ntu.edu.tw" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751189AbcAULz1 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 21 Jan 2016 06:55:27 -0500
-In-Reply-To: <56A0BD8F.2000805@redhat.com>
+	with ESMTP id S1758886AbcAUMXm (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 21 Jan 2016 07:23:42 -0500
+In-Reply-To: <56A0BE25.1020309@redhat.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Hans de Goede <hdegoede@redhat.com>
 Cc: Chen-Yu Tsai <wens@csie.org>, Ulf Hansson <ulf.hansson@linaro.org>, Maxime Ripard <maxime.ripard@free-electrons.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-arm-kernel <linux-arm-kernel@lists.infradead.org>, linux-kernel <linux-kernel@vger.kernel.org>, linux-sunxi <linux-sunxi@googlegroups.com>
 
-On Thu, Jan 21, 2016 at 7:14 PM, Hans de Goede <hdegoede@redhat.com> wrote:
+On Thu, Jan 21, 2016 at 7:16 PM, Hans de Goede <hdegoede@redhat.com> wrote:
 > Hi,
 >
 > On 21-01-16 06:26, Chen-Yu Tsai wrote:
 >>
->> DDR transfer modes include UHS-1 DDR50 and MMC HS-DDR (or MMC_DDR52).
->> Consider MMC_DDR52 when setting clock delays.
->>
->> Signed-off-by: Chen-Yu Tsai <wens@csie.org>
->> ---
->>   drivers/mmc/host/sunxi-mmc.c | 6 ++++--
->>   1 file changed, 4 insertions(+), 2 deletions(-)
->>
->> diff --git a/drivers/mmc/host/sunxi-mmc.c b/drivers/mmc/host/sunxi-mmc.c
->> index 4bec87458317..b403a2433eec 100644
->> --- a/drivers/mmc/host/sunxi-mmc.c
->> +++ b/drivers/mmc/host/sunxi-mmc.c
->> @@ -687,7 +687,8 @@ static int sunxi_mmc_clk_set_rate(struct
->> sunxi_mmc_host *host,
->>                 oclk_dly = host->clk_delays[SDXC_CLK_25M].output;
->>                 sclk_dly = host->clk_delays[SDXC_CLK_25M].sample;
->>         } else if (rate <= 50000000) {
+>> According to Allwinner, only mmc3 supports 8 bit DDR transfers for eMMC.
+>> Switch to mmc3 for the onboard eMMC, and also assign vqmmc for signal
+>> voltage sensing/switching, and "cap-mmc-hw-reset" to denote this
+>> instance can use eMMC hardware reset.
 >
 >
-> Shouldn't this be <= 52000000 then, considering that we may at one point get
-> some PLL setup where we may actually be able to do 52000000 for
-> MMC_TIMING_MMC_DDR52 ?
+> This is going to need some more explanation, does this mean
+> that the old dtsi is wrong and the emmc does not work there are all ?
 
-Given that mmc->f_max = 50000000, the core will never try any clock rate higher
-than 50 MHz, and iirc clk_round_rate always rounds down. We could increase both
-numbers at the same time when we actually encounter such hardware.
+mmc2 works fine for either 4 bit SDR/DDR or 8 bit SDR only. It does
+not work for 8 bit DDR. I actually tested all the above combinations.
 
-Or we could increase both now, which I actually did in an earlier version, but
-it really made no difference with current hardware.
+Also see https://groups.google.com/d/msg/linux-sunxi/pMzwMWwLALw/6WGgCN1eAQAJ
+
+About old DTs not working:
+
+a) The old DT will not work with the mmc patches, as it will try 8 bit DDR
+   and fail. Also, the old DT does not use the highest drive strength for
+   the mmc pins, meaning it might not work for the other chip families.
+
+b) Old DT + old kernel works fine (8 bit high-speed), just slower.
+
+An alternative would be to drop MMC_CAP_1_8V_DDR from the driver, and
+use the "mmc-ddr-1_8v" DT capability flag at the dtsi or board level.
+There's no real way to describe "don't use 8 bit with MMC DDR" in the DT.
 
 
 Regards
 ChenYu
 
 >
->> -               if (ios->timing == MMC_TIMING_UHS_DDR50) {
->> +               if (ios->timing == MMC_TIMING_UHS_DDR50 ||
->> +                   ios->timing == MMC_TIMING_MMC_DDR52) {
->>                         oclk_dly =
->> host->clk_delays[SDXC_CLK_50M_DDR].output;
->>                         sclk_dly =
->> host->clk_delays[SDXC_CLK_50M_DDR].sample;
->>                 } else {
->> @@ -762,7 +763,8 @@ static void sunxi_mmc_set_ios(struct mmc_host *mmc,
->> struct mmc_ios *ios)
->>
->>         /* set ddr mode */
->>         rval = mmc_readl(host, REG_GCTRL);
->> -       if (ios->timing == MMC_TIMING_UHS_DDR50)
->> +       if (ios->timing == MMC_TIMING_UHS_DDR50 ||
->> +           ios->timing == MMC_TIMING_MMC_DDR52)
->>                 rval |= SDXC_DDR_MODE;
->>         else
->>                 rval &= ~SDXC_DDR_MODE;
->>
->
 > Regards,
 >
 > Hans
+>
+>
+>
+>>
+>> Signed-off-by: Chen-Yu Tsai <wens@csie.org>
+>> ---
+>>   arch/arm/boot/dts/sun6i-a31s-sina31s-core.dtsi | 6 ++++--
+>>   1 file changed, 4 insertions(+), 2 deletions(-)
+>>
+>> diff --git a/arch/arm/boot/dts/sun6i-a31s-sina31s-core.dtsi
+>> b/arch/arm/boot/dts/sun6i-a31s-sina31s-core.dtsi
+>> index ea69fb8ad4d8..4ec0c8679b2e 100644
+>> --- a/arch/arm/boot/dts/sun6i-a31s-sina31s-core.dtsi
+>> +++ b/arch/arm/boot/dts/sun6i-a31s-sina31s-core.dtsi
+>> @@ -61,12 +61,14 @@
+>>   };
+>>
+>>   /* eMMC on core board */
+>> -&mmc2 {
+>> +&mmc3 {
+>>         pinctrl-names = "default";
+>> -       pinctrl-0 = <&mmc2_8bit_emmc_pins>;
+>> +       pinctrl-0 = <&mmc3_8bit_emmc_pins>;
+>>         vmmc-supply = <&reg_dcdc1>;
+>> +       vqmmc-supply = <&reg_dcdc1>;
+>>         bus-width = <8>;
+>>         non-removable;
+>> +       cap-mmc-hw-reset;
+>>         status = "okay";
+>>   };
+>>
+>>
+>
