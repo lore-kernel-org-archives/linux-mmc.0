@@ -1,48 +1,45 @@
 From: Shawn Lin <shawn.lin@rock-chips.com>
-Subject: [RFC PATCH] mmc: dw_mmc: remove redundant num_slots check
-Date: Thu, 21 Jan 2016 15:52:49 +0800
-Message-ID: <1453362769-16223-1-git-send-email-shawn.lin@rock-chips.com>
+Subject: [PATCH] mmc: dw_mmc: remove struct block_settings
+Date: Thu, 21 Jan 2016 16:06:14 +0800
+Message-ID: <1453363574-30802-1-git-send-email-shawn.lin@rock-chips.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from lucky1.263xmail.com ([211.157.147.132]:41465 "EHLO
+Received: from lucky1.263xmail.com ([211.157.147.131]:35791 "EHLO
 	lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751037AbcAUH52 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 21 Jan 2016 02:57:28 -0500
+	with ESMTP id S1752223AbcAUIKt (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 21 Jan 2016 03:10:49 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Jaehoon Chung <jh80.chung@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>
 Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Shawn Lin <shawn.lin@rock-chips.com>
 
-num_slots comes from pdata if existing, otherwise from
-dw_mci_parse_dt which make it at least one slot. If
-num_slots is less than 1 for the existing pdata case,
-current code return -ENODEV. But dw_mci_probe seems to
-treat this a optional case as it will call SDMMC_GET_SLOT_NUM
-if no slot assigned.
+This patch remove struct block_settings since
+it never be used anywhere.
 
 Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
-
 ---
 
- drivers/mmc/host/dw_mmc.c | 6 ------
- 1 file changed, 6 deletions(-)
+ include/linux/mmc/dw_mmc.h | 8 --------
+ 1 file changed, 8 deletions(-)
 
-diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index 7128351..a116ec6 100644
---- a/drivers/mmc/host/dw_mmc.c
-+++ b/drivers/mmc/host/dw_mmc.c
-@@ -2949,12 +2949,6 @@ int dw_mci_probe(struct dw_mci *host)
- 		}
- 	}
+diff --git a/include/linux/mmc/dw_mmc.h b/include/linux/mmc/dw_mmc.h
+index 89df7ab..e1f90b8 100644
+--- a/include/linux/mmc/dw_mmc.h
++++ b/include/linux/mmc/dw_mmc.h
+@@ -242,14 +242,6 @@ struct dw_mci_dma_ops {
  
--	if (host->pdata->num_slots < 1) {
--		dev_err(host->dev,
--			"Platform data must supply num_slots.\n");
--		return -ENODEV;
--	}
+ struct dma_pdata;
+ 
+-struct block_settings {
+-	unsigned short	max_segs;	/* see blk_queue_max_segments */
+-	unsigned int	max_blk_size;	/* maximum size of one mmc block */
+-	unsigned int	max_blk_count;	/* maximum number of blocks in one req*/
+-	unsigned int	max_req_size;	/* maximum number of bytes in one req*/
+-	unsigned int	max_seg_size;	/* see blk_queue_max_segment_size */
+-};
 -
- 	host->biu_clk = devm_clk_get(host->dev, "biu");
- 	if (IS_ERR(host->biu_clk)) {
- 		dev_dbg(host->dev, "biu clock not available\n");
+ /* Board platform data */
+ struct dw_mci_board {
+ 	u32 num_slots;
 -- 
 2.3.7
 
