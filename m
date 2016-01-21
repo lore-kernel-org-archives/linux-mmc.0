@@ -1,88 +1,133 @@
-From: Stefan Wahren <stefan.wahren-eS4NqCHxEME@public.gmane.org>
-Subject: Re: [PATCH 4/5 RFC] mmc: sdhci-iproc: add bcm2835 support
-Date: Wed, 20 Jan 2016 22:23:51 +0100 (CET)
-Message-ID: <892755734.238049.d69bddce-8c03-4cf7-b6d6-f0cbd113f569.open-xchange@email.1und1.de>
-References: <1453042744-16196-1-git-send-email-stefan.wahren@i2se.com>
- <1453042744-16196-5-git-send-email-stefan.wahren@i2se.com>
- <569D923D.60306@samsung.com>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: Re: [PATCH] mmc: dw_mmc: remove DW_MCI_QUIRK_BROKEN_CARD_DETECTION
+ quirk
+Date: Thu, 21 Jan 2016 10:43:00 +0900
+Message-ID: <56A037A4.4040402@samsung.com>
+References: <1453107026-19814-1-git-send-email-shawn.lin@rock-chips.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=windows-1252
 Content-Transfer-Encoding: 7bit
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <569D923D.60306-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Scott Branden <sbranden-dY08KVG/lbpWk0Htik3J/w@public.gmane.org>, Ray Jui <rjui-dY08KVG/lbpWk0Htik3J/w@public.gmane.org>, Lee Jones <lee-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Jaehoon Chung <jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, Eric Anholt <eric-WhKQ6XTQaPysTnJN9+BGXg@public.gmane.org>, Stephen Warren <swarren-3lzwWm7+Weoh9ZMKESR00Q@public.gmane.org>, Jon Mason <jonmason-dY08KVG/lbpWk0Htik3J/w@public.gmane.org>
-Cc: kernel-TqfNSX0MhmxHKSADF0wUEw@public.gmane.org, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, bcm-kernel-feedback-list-dY08KVG/lbpWk0Htik3J/w@public.gmane.org, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-rpi-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mailout1.samsung.com ([203.254.224.24]:60295 "EHLO
+	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751228AbcAUBnL (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 20 Jan 2016 20:43:11 -0500
+In-reply-to: <1453107026-19814-1-git-send-email-shawn.lin@rock-chips.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Shawn Lin <shawn.lin@rock-chips.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 
+Hi, Shawn.
 
-> Jaehoon Chung <jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org> hat am 19. Januar 2016 um 02:32
-> geschrieben:
->
->
-> On 01/17/2016 11:59 PM, Stefan Wahren wrote:
-> > diff --git a/drivers/mmc/host/sdhci-iproc.c b/drivers/mmc/host/sdhci-iproc.c
-> > index 55bc348..88399eb 100644
-> > --- a/drivers/mmc/host/sdhci-iproc.c
-> > +++ b/drivers/mmc/host/sdhci-iproc.c
-> > @@ -167,7 +167,20 @@ static const struct sdhci_iproc_data iproc_data = {
-> > .caps1 = 0x00000064,
-> > };
-> >
-> > +static const struct sdhci_pltfm_data sdhci_bcm2835_pltfm_data = {
-> > + .quirks = SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK
-> > + | SDHCI_QUIRK_MISSING_CAPS,
-> > + .ops = &sdhci_iproc_ops,
-> > +};
-> > +
-> > +static const struct sdhci_iproc_data bcm2835_data = {
-> > + .pdata = &sdhci_bcm2835_pltfm_data,
-> > + .caps = SDHCI_CAN_VDD_330,
-> > + .caps1 = 0x00000000,
-> > +};
-> > +
-> > static const struct of_device_id sdhci_iproc_of_match[] = {
-> > + { .compatible = "brcm,bcm2835-sdhci", .data = &bcm2835_data },
-> > { .compatible = "brcm,sdhci-iproc-cygnus", .data = &iproc_data },
-> > { }
-> > };
-> > @@ -180,6 +193,7 @@ static int sdhci_iproc_probe(struct platform_device
-> > *pdev)
-> > struct sdhci_host *host;
-> > struct sdhci_iproc_host *iproc_host;
-> > struct sdhci_pltfm_host *pltfm_host;
-> > + struct device_node *np = pdev->dev.of_node;
-> > int ret;
-> >
-> > match = of_match_device(sdhci_iproc_of_match, &pdev->dev);
-> > @@ -199,8 +213,10 @@ static int sdhci_iproc_probe(struct platform_device
-> > *pdev)
-> > mmc_of_parse(host->mmc);
-> > sdhci_get_of_property(pdev);
-> >
-> > - /* Enable EMMC 1/8V DDR capable */
-> > - host->mmc->caps |= MMC_CAP_1_8V_DDR;
-> > + if (of_device_is_compatible(np, "brcm,sdhci-iproc-cygnus")) {
-> > + /* Enable EMMC 1/8V DDR capable */
-> > + host->mmc->caps |= MMC_CAP_1_8V_DDR;
-> > + }
->
-> Why don't you use the property in device tree?
-> It can be parsed MMC_CAP_1_8V_DDR as property of "mmc-ddr-1_8v".
+After applied this patch at my dw-mmc git, i found some problem.
+So I will revert this until fixing problem.
 
-I agree but i don't have a iProc Cygnus to test it and we need to keep
-compatibility to older devicetrees. 
+On 01/18/2016 05:50 PM, Shawn Lin wrote:
+> dw_mmc already use mmc_of_parse to get "broken-cd" property,
+> but it considered "broken-cd" to be a quirk in its driver. We
+> don't need this quirk here, and just take what we need from
+> mmc->caps.
+> 
+> Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
+> ---
+> 
+>  drivers/mmc/host/dw_mmc.c  | 23 +++--------------------
+>  include/linux/mmc/dw_mmc.h |  4 +---
+>  2 files changed, 4 insertions(+), 23 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+> index 7128351..bbf9ca6 100644
+> --- a/drivers/mmc/host/dw_mmc.c
+> +++ b/drivers/mmc/host/dw_mmc.c
+> @@ -1450,12 +1450,11 @@ static int dw_mci_get_cd(struct mmc_host *mmc)
+>  {
+>  	int present;
+>  	struct dw_mci_slot *slot = mmc_priv(mmc);
+> -	struct dw_mci_board *brd = slot->host->pdata;
+>  	struct dw_mci *host = slot->host;
+>  	int gpio_cd = mmc_gpio_get_cd(mmc);
+>  
+>  	/* Use platform get_cd function, else try onboard card detect */
+> -	if ((brd->quirks & DW_MCI_QUIRK_BROKEN_CARD_DETECTION) ||
+> +	if ((mmc->caps & MMC_CAP_NEEDS_POLL) ||
+>  	    (mmc->caps & MMC_CAP_NONREMOVABLE))
+>  		present = 1;
+>  	else if (!IS_ERR_VALUE(gpio_cd))
+> @@ -2840,23 +2839,13 @@ static void dw_mci_dto_timer(unsigned long arg)
+>  }
+>  
+>  #ifdef CONFIG_OF
+> -static struct dw_mci_of_quirks {
+> -	char *quirk;
+> -	int id;
+> -} of_quirks[] = {
+> -	{
+> -		.quirk	= "broken-cd",
+> -		.id	= DW_MCI_QUIRK_BROKEN_CARD_DETECTION,
+> -	},
+> -};
+> -
+>  static struct dw_mci_board *dw_mci_parse_dt(struct dw_mci *host)
+>  {
+>  	struct dw_mci_board *pdata;
+>  	struct device *dev = host->dev;
+>  	struct device_node *np = dev->of_node;
+>  	const struct dw_mci_drv_data *drv_data = host->drv_data;
+> -	int idx, ret;
+> +	int ret;
+>  	u32 clock_frequency;
+>  
+>  	pdata = devm_kzalloc(dev, sizeof(*pdata), GFP_KERNEL);
+> @@ -2871,11 +2860,6 @@ static struct dw_mci_board *dw_mci_parse_dt(struct dw_mci *host)
+>  		pdata->num_slots = 1;
+>  	}
+>  
+> -	/* get quirks */
+> -	for (idx = 0; idx < ARRAY_SIZE(of_quirks); idx++)
+> -		if (of_get_property(np, of_quirks[idx].quirk, NULL))
+> -			pdata->quirks |= of_quirks[idx].id;
+> -
+>  	if (of_property_read_u32(np, "fifo-depth", &pdata->fifo_depth))
+>  		dev_info(dev,
+>  			 "fifo-depth property not found, using value of FIFOTH register as default\n");
+> @@ -2908,13 +2892,12 @@ static struct dw_mci_board *dw_mci_parse_dt(struct dw_mci *host)
+>  
+>  static void dw_mci_enable_cd(struct dw_mci *host)
+>  {
+> -	struct dw_mci_board *brd = host->pdata;
+>  	unsigned long irqflags;
+>  	u32 temp;
+>  	int i;
+>  
+>  	/* No need for CD if broken card detection */
+> -	if (brd->quirks & DW_MCI_QUIRK_BROKEN_CARD_DETECTION)
+> +	if (host->cur_slot->mmc->caps & MMC_CAP_NEEDS_POLL)
 
->
-> Best Regards,
-> Jaehoon Chung
->
-> >
-> > pltfm_host->clk = devm_clk_get(&pdev->dev, NULL);
-> > if (IS_ERR(pltfm_host->clk)) {
-> >
->
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+dw_mci_enable_cd is called in dw_mci_probe.
+So host->cur_slot is not assigned to anything..
+
+Best Regards,
+Jaehoon Chung
+
+>  		return;
+>  
+>  	/* No need for CD if all slots have a non-error GPIO */
+> diff --git a/include/linux/mmc/dw_mmc.h b/include/linux/mmc/dw_mmc.h
+> index 89df7ab..250d822 100644
+> --- a/include/linux/mmc/dw_mmc.h
+> +++ b/include/linux/mmc/dw_mmc.h
+> @@ -235,10 +235,8 @@ struct dw_mci_dma_ops {
+>  };
+>  
+>  /* IP Quirks/flags. */
+> -/* Unreliable card detection */
+> -#define DW_MCI_QUIRK_BROKEN_CARD_DETECTION	BIT(0)
+>  /* Timer for broken data transfer over scheme */
+> -#define DW_MCI_QUIRK_BROKEN_DTO			BIT(1)
+> +#define DW_MCI_QUIRK_BROKEN_DTO			BIT(0)
+>  
+>  struct dma_pdata;
+>  
+> 
+
