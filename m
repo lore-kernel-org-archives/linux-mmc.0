@@ -1,103 +1,78 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH V2] mmc: pwrseq_simple: Make reset-gpios optional to match doc
-Date: Thu, 21 Jan 2016 14:23:38 +0100
-Message-ID: <CAPDyKFq0O_Xt=R5=7SVKKiYS8YozXUM+5S8ukzmz8vo4BJmLOg@mail.gmail.com>
-References: <20160120150803.32073.63845.stgit@localhost>
+From: Mason <slash.tmp@free.fr>
+Subject: Re: mmc0: Invalid maximum block size, assuming 512 bytes
+Date: Thu, 21 Jan 2016 16:00:49 +0100
+Message-ID: <56A0F2A1.3060805@free.fr>
+References: <569E575A.5070401@free.fr> <569EE03F.9090008@rock-chips.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=ISO-8859-15
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-yk0-f180.google.com ([209.85.160.180]:34069 "EHLO
-	mail-yk0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1759175AbcAUNXj (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 21 Jan 2016 08:23:39 -0500
-Received: by mail-yk0-f180.google.com with SMTP id a85so47501549ykb.1
-        for <linux-mmc@vger.kernel.org>; Thu, 21 Jan 2016 05:23:39 -0800 (PST)
-In-Reply-To: <20160120150803.32073.63845.stgit@localhost>
+Received: from smtp4-g21.free.fr ([212.27.42.4]:52081 "EHLO smtp4-g21.free.fr"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S965494AbcAUPBF (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 21 Jan 2016 10:01:05 -0500
+In-Reply-To: <569EE03F.9090008@rock-chips.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Martin Fuzzey <mfuzzey@parkeon.com>
-Cc: Tony Lindgren <tony@atomide.com>, Javier Martinez Canillas <javier@dowhile0.org>, linux-omap <linux-omap@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
+To: Shawn Lin <shawn.lin@rock-chips.com>, linux-mmc <linux-mmc@vger.kernel.org>
+Cc: Michal Simek <michal.simek@xilinx.com>, Soren Brinkmann <soren.brinkmann@xilinx.com>, Suman Tripathi <stripathi@apm.com>, Arnd Bergmann <arnd@arndb.de>, Ulf Hansson <ulf.hansson@linaro.org>, Sebastian Frias <sf84@laposte.net>
 
-On 20 January 2016 at 16:08, Martin Fuzzey <mfuzzey@parkeon.com> wrote:
-> The DT binding doc says reset-gpios is an optional property but the code
-> currently bails out if it is omitted.
->
-> This is a regression since it breaks previously working device trees.
-> Fix it by restoring the original documented behaviour.
->
-> Fixes: ce037275861e ("mmc: pwrseq_simple: use GPIO descriptors array API")
-> Tested-by: Tony Lindgren <tony@atomide.com>
-> Signed-off-by: Martin Fuzzey <mfuzzey@parkeon.com>
+On 20/01/2016 02:17, Shawn Lin wrote:
 
-Thanks, applied for fixes!
+> On 2016/1/19 23:33, Mason wrote:
+>
+>> My SoC provides an Arasan SDIO/eMMC controller supported by the
+>> drivers/mmc/host/sdhci-of-arasan.c driver.
+>>
+>> At init, the driver prints a warning to the console:
+>>
+>> [    0.887301] sdhci: Secure Digital Host Controller Interface driver
+>> [    0.893537] sdhci: Copyright(c) Pierre Ossman
+>> [    0.897928] sdhci-pltfm: SDHCI platform and OF driver helper
+>> [    0.903903] sdhci-arasan 21000.mmc: No vmmc regulator found
+>> [    0.909537] sdhci-arasan 21000.mmc: No vqmmc regulator found
+>> [    0.915247] mmc0: Invalid maximum block size, assuming 512 bytes
+>> [    0.953797] mmc0: SDHCI controller on 21000.mmc [21000.mmc] using ADMA
+>> [    0.961494] sdhci-arasan 21200.mmc: No vmmc regulator found
+>> [    0.967110] sdhci-arasan 21200.mmc: No vqmmc regulator found
+>>
+>> Is "mmc0: Invalid maximum block size, assuming 512 bytes" something
+>> serious which requires investigating, in your experience?
+> 
+> you can look into this commit 0633f654241
+>  From <SD host controller simplified specfication version 3.00>
+> sdhci doesn't support blocks of 4096 bytes.
+> 
+> But at least check my arasan-5.1 databook, it supports 4096 from
+> the capabilities register. So, you don't force arasan to use
+> SDHCI_QUIRK_FORCE_BLK_SZ_2048, then sdhci core force it to be 512 bytes.
+> Not serious problem, just a proper warn.
+> 
+>> The corresponding DT is:
+>>
+>> mmc0: mmc@21000 {
+>> 	compatible = "arasan,sdhci-8.9a";
+>> 	reg = <0x21000 0x200>;
+>> 	clock-names = "clk_xin", "clk_ahb";
+>> 	clocks = <&sdio_clk>, <&clkgen 1>;
+>> 	interrupts = <60 IRQ_TYPE_LEVEL_HIGH>;
+>> };
 
-Kind regards
-Uffe
+Hello Shawn,
 
->
-> ---
-> V2:
-> Fix review comments by Ulf Hansson:
->     * Handle -ENOSYS case when CONFIG_GPIOLIB not selected
->       This causes checkpatch to complain with
->            "WARNING: ENOSYS means 'invalid syscall nr' and nothing else"
->       but I guess that's ok here.
->     * Update patch description to make it clear this is a regression fix
->     * Add Fixes tag
->
-> Add Tested-by tag from Tony Lingdren
-> ---
->  drivers/mmc/core/pwrseq_simple.c |   22 ++++++++++++++--------
->  1 file changed, 14 insertions(+), 8 deletions(-)
->
-> diff --git a/drivers/mmc/core/pwrseq_simple.c b/drivers/mmc/core/pwrseq_simple.c
-> index d10538b..96f45ca 100644
-> --- a/drivers/mmc/core/pwrseq_simple.c
-> +++ b/drivers/mmc/core/pwrseq_simple.c
-> @@ -29,15 +29,18 @@ struct mmc_pwrseq_simple {
->  static void mmc_pwrseq_simple_set_gpios_value(struct mmc_pwrseq_simple *pwrseq,
->                                               int value)
->  {
-> -       int i;
->         struct gpio_descs *reset_gpios = pwrseq->reset_gpios;
-> -       int values[reset_gpios->ndescs];
->
-> -       for (i = 0; i < reset_gpios->ndescs; i++)
-> -               values[i] = value;
-> +       if (!IS_ERR(reset_gpios)) {
-> +               int i;
-> +               int values[reset_gpios->ndescs];
->
-> -       gpiod_set_array_value_cansleep(reset_gpios->ndescs, reset_gpios->desc,
-> -                                      values);
-> +               for (i = 0; i < reset_gpios->ndescs; i++)
-> +                       values[i] = value;
-> +
-> +               gpiod_set_array_value_cansleep(
-> +                       reset_gpios->ndescs, reset_gpios->desc, values);
-> +       }
->  }
->
->  static void mmc_pwrseq_simple_pre_power_on(struct mmc_host *host)
-> @@ -79,7 +82,8 @@ static void mmc_pwrseq_simple_free(struct mmc_host *host)
->         struct mmc_pwrseq_simple *pwrseq = container_of(host->pwrseq,
->                                         struct mmc_pwrseq_simple, pwrseq);
->
-> -       gpiod_put_array(pwrseq->reset_gpios);
-> +       if (!IS_ERR(pwrseq->reset_gpios))
-> +               gpiod_put_array(pwrseq->reset_gpios);
->
->         if (!IS_ERR(pwrseq->ext_clk))
->                 clk_put(pwrseq->ext_clk);
-> @@ -112,7 +116,9 @@ struct mmc_pwrseq *mmc_pwrseq_simple_alloc(struct mmc_host *host,
->         }
->
->         pwrseq->reset_gpios = gpiod_get_array(dev, "reset", GPIOD_OUT_HIGH);
-> -       if (IS_ERR(pwrseq->reset_gpios)) {
-> +       if (IS_ERR(pwrseq->reset_gpios) &&
-> +           PTR_ERR(pwrseq->reset_gpios) != -ENOENT &&
-> +           PTR_ERR(pwrseq->reset_gpios) != -ENOSYS) {
->                 ret = PTR_ERR(pwrseq->reset_gpios);
->                 goto clk_put;
->         }
->
+Thanks for pointing out SDHCI_QUIRK_FORCE_BLK_SZ_2048.
+
+I don't think there is currently a way to enable this quirk
+for the Arasan controller from the device tree, right?
+
+$ git grep SDHCI_QUIRK_FORCE_BLK_SZ_2048 drivers/mmc
+drivers/mmc/host/sdhci-bcm-kona.c:              SDHCI_QUIRK_FORCE_BLK_SZ_2048 |
+drivers/mmc/host/sdhci-esdhc.h:#define ESDHC_DEFAULT_QUIRKS     (SDHCI_QUIRK_FORCE_BLK_SZ_2048 | \
+drivers/mmc/host/sdhci.c:       if (host->quirks & SDHCI_QUIRK_FORCE_BLK_SZ_2048) {
+drivers/mmc/host/sdhci.h:#define SDHCI_QUIRK_FORCE_BLK_SZ_2048                  (1<<20)
+
+So that means I have to write code in
+drivers/mmc/host/sdhci-of-arasan.c correct?
+
+Regards.
+
