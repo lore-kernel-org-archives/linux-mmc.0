@@ -1,132 +1,226 @@
 From: Shawn Lin <shawn.lin@rock-chips.com>
-Subject: [PATCH v2] mmc: dw_mmc: remove DW_MCI_QUIRK_BROKEN_CARD_DETECTION quirk
-Date: Thu, 21 Jan 2016 14:52:52 +0800
-Message-ID: <1453359172-5977-1-git-send-email-shawn.lin@rock-chips.com>
+Subject: Re: [PATCH] mmc: dw_mmc: remove the prepare_command hook
+Date: Thu, 21 Jan 2016 15:14:39 +0800
+Message-ID: <56A0855F.308@rock-chips.com>
+References: <1453341666-26703-1-git-send-email-jh80.chung@samsung.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=gbk; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from lucky1.263xmail.com ([211.157.147.133]:36393 "EHLO
+Received: from lucky1.263xmail.com ([211.157.147.133]:57768 "EHLO
 	lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1758666AbcAUG5a (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 21 Jan 2016 01:57:30 -0500
+	with ESMTP id S1751738AbcAUHO7 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 21 Jan 2016 02:14:59 -0500
+In-Reply-To: <1453341666-26703-1-git-send-email-jh80.chung@samsung.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Shawn Lin <shawn.lin@rock-chips.com>
+To: Jaehoon Chung <jh80.chung@samsung.com>, linux-mmc@vger.kernel.org
+Cc: shawn.lin@rock-chips.com, ulf.hansson@linaro.org
 
-dw_mmc already use mmc_of_parse to get "broken-cd" property,
-but it considered "broken-cd" to be a quirk in its driver. We
-don't need this quirk here, and just take what we need from
-mmc->caps.
+On 2016/1/21 10:01, Jaehoon Chung wrote:
+> This patch removes the prepare_command hook from entire dw_mmc driver.
+> Now, almost all SoCs are using by default, except Exynos.
+> It seems that dwmmc controller is using unnecessary hook.
+> To know whether needs to set this bit or not,
+> add the DW_MMC_CARD_NO_USE_HOLD bit.
+>
+> If some SoCs need to disable this in future, just set the
+> DW_MMC_CARD_NO_USE_HOLD bit.
+> set_bit(DW_MMC_CARD_NO_USE_HOLD, &slot->flags),
+>
+> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
 
-Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
+For dw_mmc-rockchip:
+Tested-by: Shawn Lin <shawn.lin@rock-chips.com>
 
----
+For the full patch:
+Reviewed-by: Shawn Lin <shawn.lin@rock-chips.com>
 
-Changes in v2:
-- fix wrong using of cur_slot
+> ---
+>   drivers/mmc/host/dw_mmc-exynos.c   | 31 ++++++++++---------------------
+>   drivers/mmc/host/dw_mmc-pltfm.c    | 19 ++-----------------
+>   drivers/mmc/host/dw_mmc-rockchip.c |  7 -------
+>   drivers/mmc/host/dw_mmc.c          |  5 ++---
+>   drivers/mmc/host/dw_mmc.h          |  3 +--
+>   5 files changed, 15 insertions(+), 50 deletions(-)
+>
+> diff --git a/drivers/mmc/host/dw_mmc-exynos.c b/drivers/mmc/host/dw_mmc-exynos.c
+> index 3a7e835..8790f2a 100644
+> --- a/drivers/mmc/host/dw_mmc-exynos.c
+> +++ b/drivers/mmc/host/dw_mmc-exynos.c
+> @@ -145,6 +145,16 @@ static void dw_mci_exynos_set_clksel_timing(struct dw_mci *host, u32 timing)
+>   		mci_writel(host, CLKSEL64, clksel);
+>   	else
+>   		mci_writel(host, CLKSEL, clksel);
+> +
+> +	/*
+> +	 * Exynos4412 and Exynos5250 extends the use of CMD register with the
+> +	 * use of bit 29 (which is reserved on standard MSHC controllers) for
+> +	 * optionally bypassing the HOLD register for command and data. The
+> +	 * HOLD register should be bypassed in case there is no phase shift
+> +	 * applied on CMD/DATA that is sent to the card.
+> +	 */
+> +	if (!SDMMC_CLKSEL_GET_DRV_WD3(clksel))
+> +		set_bit(DW_MMC_CARD_NO_USE_HOLD, &host->cur_slot->flags);
+>   }
+>
+>   #ifdef CONFIG_PM_SLEEP
+> @@ -202,26 +212,6 @@ static int dw_mci_exynos_resume_noirq(struct device *dev)
+>   #define dw_mci_exynos_resume_noirq	NULL
+>   #endif /* CONFIG_PM_SLEEP */
+>
+> -static void dw_mci_exynos_prepare_command(struct dw_mci *host, u32 *cmdr)
+> -{
+> -	struct dw_mci_exynos_priv_data *priv = host->priv;
+> -	/*
+> -	 * Exynos4412 and Exynos5250 extends the use of CMD register with the
+> -	 * use of bit 29 (which is reserved on standard MSHC controllers) for
+> -	 * optionally bypassing the HOLD register for command and data. The
+> -	 * HOLD register should be bypassed in case there is no phase shift
+> -	 * applied on CMD/DATA that is sent to the card.
+> -	 */
+> -	if (priv->ctrl_type == DW_MCI_TYPE_EXYNOS7 ||
+> -		priv->ctrl_type == DW_MCI_TYPE_EXYNOS7_SMU) {
+> -		if (SDMMC_CLKSEL_GET_DRV_WD3(mci_readl(host, CLKSEL64)))
+> -			*cmdr |= SDMMC_CMD_USE_HOLD_REG;
+> -	 } else {
+> -		if (SDMMC_CLKSEL_GET_DRV_WD3(mci_readl(host, CLKSEL)))
+> -			*cmdr |= SDMMC_CMD_USE_HOLD_REG;
+> -	}
+> -}
+> -
+>   static void dw_mci_exynos_config_hs400(struct dw_mci *host, u32 timing)
+>   {
+>   	struct dw_mci_exynos_priv_data *priv = host->priv;
+> @@ -500,7 +490,6 @@ static const struct dw_mci_drv_data exynos_drv_data = {
+>   	.caps			= exynos_dwmmc_caps,
+>   	.init			= dw_mci_exynos_priv_init,
+>   	.setup_clock		= dw_mci_exynos_setup_clock,
+> -	.prepare_command	= dw_mci_exynos_prepare_command,
+>   	.set_ios		= dw_mci_exynos_set_ios,
+>   	.parse_dt		= dw_mci_exynos_parse_dt,
+>   	.execute_tuning		= dw_mci_exynos_execute_tuning,
+> diff --git a/drivers/mmc/host/dw_mmc-pltfm.c b/drivers/mmc/host/dw_mmc-pltfm.c
+> index 81bdeeb..c0bb0c7 100644
+> --- a/drivers/mmc/host/dw_mmc-pltfm.c
+> +++ b/drivers/mmc/host/dw_mmc-pltfm.c
+> @@ -26,19 +26,6 @@
+>   #include "dw_mmc.h"
+>   #include "dw_mmc-pltfm.h"
+>
+> -static void dw_mci_pltfm_prepare_command(struct dw_mci *host, u32 *cmdr)
+> -{
+> -	*cmdr |= SDMMC_CMD_USE_HOLD_REG;
+> -}
+> -
+> -static const struct dw_mci_drv_data socfpga_drv_data = {
+> -	.prepare_command	= dw_mci_pltfm_prepare_command,
+> -};
+> -
+> -static const struct dw_mci_drv_data pistachio_drv_data = {
+> -	.prepare_command	= dw_mci_pltfm_prepare_command,
+> -};
+> -
+>   int dw_mci_pltfm_register(struct platform_device *pdev,
+>   			  const struct dw_mci_drv_data *drv_data)
+>   {
+> @@ -94,10 +81,8 @@ EXPORT_SYMBOL_GPL(dw_mci_pltfm_pmops);
+>
+>   static const struct of_device_id dw_mci_pltfm_match[] = {
+>   	{ .compatible = "snps,dw-mshc", },
+> -	{ .compatible = "altr,socfpga-dw-mshc",
+> -		.data = &socfpga_drv_data },
+> -	{ .compatible = "img,pistachio-dw-mshc",
+> -		.data = &pistachio_drv_data },
+> +	{ .compatible = "altr,socfpga-dw-mshc", },
+> +	{ .compatible = "img,pistachio-dw-mshc", },
+>   	{},
+>   };
+>   MODULE_DEVICE_TABLE(of, dw_mci_pltfm_match);
+> diff --git a/drivers/mmc/host/dw_mmc-rockchip.c b/drivers/mmc/host/dw_mmc-rockchip.c
+> index d9c92f3..84e50f3 100644
+> --- a/drivers/mmc/host/dw_mmc-rockchip.c
+> +++ b/drivers/mmc/host/dw_mmc-rockchip.c
+> @@ -26,11 +26,6 @@ struct dw_mci_rockchip_priv_data {
+>   	int			default_sample_phase;
+>   };
+>
+> -static void dw_mci_rockchip_prepare_command(struct dw_mci *host, u32 *cmdr)
+> -{
+> -	*cmdr |= SDMMC_CMD_USE_HOLD_REG;
+> -}
+> -
+>   static int dw_mci_rk3288_setup_clock(struct dw_mci *host)
+>   {
+>   	host->bus_hz /= RK3288_CLKGEN_DIV;
+> @@ -240,12 +235,10 @@ static int dw_mci_rockchip_init(struct dw_mci *host)
+>   }
+>
+>   static const struct dw_mci_drv_data rk2928_drv_data = {
+> -	.prepare_command        = dw_mci_rockchip_prepare_command,
+>   	.init			= dw_mci_rockchip_init,
+>   };
+>
+>   static const struct dw_mci_drv_data rk3288_drv_data = {
+> -	.prepare_command        = dw_mci_rockchip_prepare_command,
+>   	.set_ios		= dw_mci_rk3288_set_ios,
+>   	.execute_tuning		= dw_mci_rk3288_execute_tuning,
+>   	.parse_dt		= dw_mci_rk3288_parse_dt,
+> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+> index ffef24a..7238f66 100644
+> --- a/drivers/mmc/host/dw_mmc.c
+> +++ b/drivers/mmc/host/dw_mmc.c
+> @@ -234,7 +234,6 @@ static u32 dw_mci_prepare_command(struct mmc_host *mmc, struct mmc_command *cmd)
+>   	struct mmc_data	*data;
+>   	struct dw_mci_slot *slot = mmc_priv(mmc);
+>   	struct dw_mci *host = slot->host;
+> -	const struct dw_mci_drv_data *drv_data = slot->host->drv_data;
+>   	u32 cmdr;
+>
+>   	cmd->error = -EINPROGRESS;
+> @@ -296,8 +295,8 @@ static u32 dw_mci_prepare_command(struct mmc_host *mmc, struct mmc_command *cmd)
+>   			cmdr |= SDMMC_CMD_DAT_WR;
+>   	}
+>
+> -	if (drv_data && drv_data->prepare_command)
+> -		drv_data->prepare_command(slot->host, &cmdr);
+> +	if (!test_bit(DW_MMC_CARD_NO_USE_HOLD, &slot->flags))
+> +		cmdr |= SDMMC_CMD_USE_HOLD_REG;
+>
+>   	return cmdr;
+>   }
+> diff --git a/drivers/mmc/host/dw_mmc.h b/drivers/mmc/host/dw_mmc.h
+> index a14b7fc..68d5da2 100644
+> --- a/drivers/mmc/host/dw_mmc.h
+> +++ b/drivers/mmc/host/dw_mmc.h
+> @@ -268,6 +268,7 @@ struct dw_mci_slot {
+>   #define DW_MMC_CARD_PRESENT	0
+>   #define DW_MMC_CARD_NEED_INIT	1
+>   #define DW_MMC_CARD_NO_LOW_PWR	2
+> +#define DW_MMC_CARD_NO_USE_HOLD 3
+>   	int			id;
+>   	int			sdio_id;
+>   };
+> @@ -277,7 +278,6 @@ struct dw_mci_slot {
+>    * @caps: mmc subsystem specified capabilities of the controller(s).
+>    * @init: early implementation specific initialization.
+>    * @setup_clock: implementation specific clock configuration.
+> - * @prepare_command: handle CMD register extensions.
+>    * @set_ios: handle bus specific extensions.
+>    * @parse_dt: parse implementation specific device tree properties.
+>    * @execute_tuning: implementation specific tuning procedure.
+> @@ -290,7 +290,6 @@ struct dw_mci_drv_data {
+>   	unsigned long	*caps;
+>   	int		(*init)(struct dw_mci *host);
+>   	int		(*setup_clock)(struct dw_mci *host);
+> -	void		(*prepare_command)(struct dw_mci *host, u32 *cmdr);
+>   	void		(*set_ios)(struct dw_mci *host, struct mmc_ios *ios);
+>   	int		(*parse_dt)(struct dw_mci *host);
+>   	int		(*execute_tuning)(struct dw_mci_slot *slot, u32 opcode);
+>
 
- drivers/mmc/host/dw_mmc.c  | 35 ++++++++++-------------------------
- include/linux/mmc/dw_mmc.h |  4 +---
- 2 files changed, 11 insertions(+), 28 deletions(-)
 
-diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index 7128351..96f173b 100644
---- a/drivers/mmc/host/dw_mmc.c
-+++ b/drivers/mmc/host/dw_mmc.c
-@@ -1450,12 +1450,11 @@ static int dw_mci_get_cd(struct mmc_host *mmc)
- {
- 	int present;
- 	struct dw_mci_slot *slot = mmc_priv(mmc);
--	struct dw_mci_board *brd = slot->host->pdata;
- 	struct dw_mci *host = slot->host;
- 	int gpio_cd = mmc_gpio_get_cd(mmc);
- 
- 	/* Use platform get_cd function, else try onboard card detect */
--	if ((brd->quirks & DW_MCI_QUIRK_BROKEN_CARD_DETECTION) ||
-+	if ((mmc->caps & MMC_CAP_NEEDS_POLL) ||
- 	    (mmc->caps & MMC_CAP_NONREMOVABLE))
- 		present = 1;
- 	else if (!IS_ERR_VALUE(gpio_cd))
-@@ -2840,23 +2839,13 @@ static void dw_mci_dto_timer(unsigned long arg)
- }
- 
- #ifdef CONFIG_OF
--static struct dw_mci_of_quirks {
--	char *quirk;
--	int id;
--} of_quirks[] = {
--	{
--		.quirk	= "broken-cd",
--		.id	= DW_MCI_QUIRK_BROKEN_CARD_DETECTION,
--	},
--};
--
- static struct dw_mci_board *dw_mci_parse_dt(struct dw_mci *host)
- {
- 	struct dw_mci_board *pdata;
- 	struct device *dev = host->dev;
- 	struct device_node *np = dev->of_node;
- 	const struct dw_mci_drv_data *drv_data = host->drv_data;
--	int idx, ret;
-+	int ret;
- 	u32 clock_frequency;
- 
- 	pdata = devm_kzalloc(dev, sizeof(*pdata), GFP_KERNEL);
-@@ -2871,11 +2860,6 @@ static struct dw_mci_board *dw_mci_parse_dt(struct dw_mci *host)
- 		pdata->num_slots = 1;
- 	}
- 
--	/* get quirks */
--	for (idx = 0; idx < ARRAY_SIZE(of_quirks); idx++)
--		if (of_get_property(np, of_quirks[idx].quirk, NULL))
--			pdata->quirks |= of_quirks[idx].id;
--
- 	if (of_property_read_u32(np, "fifo-depth", &pdata->fifo_depth))
- 		dev_info(dev,
- 			 "fifo-depth property not found, using value of FIFOTH register as default\n");
-@@ -2908,18 +2892,19 @@ static struct dw_mci_board *dw_mci_parse_dt(struct dw_mci *host)
- 
- static void dw_mci_enable_cd(struct dw_mci *host)
- {
--	struct dw_mci_board *brd = host->pdata;
- 	unsigned long irqflags;
- 	u32 temp;
- 	int i;
-+	struct dw_mci_slot *slot;
- 
--	/* No need for CD if broken card detection */
--	if (brd->quirks & DW_MCI_QUIRK_BROKEN_CARD_DETECTION)
--		return;
--
--	/* No need for CD if all slots have a non-error GPIO */
-+	/*
-+	 * No need for CD if all slots have a non-error GPIO
-+	 * as well as broken card detection is found.
-+	 */
- 	for (i = 0; i < host->num_slots; i++) {
--		struct dw_mci_slot *slot = host->slot[i];
-+		slot = host->slot[i];
-+		if (slot->mmc->caps & MMC_CAP_NEEDS_POLL)
-+			return;
- 
- 		if (IS_ERR_VALUE(mmc_gpio_get_cd(slot->mmc)))
- 			break;
-diff --git a/include/linux/mmc/dw_mmc.h b/include/linux/mmc/dw_mmc.h
-index 89df7ab..250d822 100644
---- a/include/linux/mmc/dw_mmc.h
-+++ b/include/linux/mmc/dw_mmc.h
-@@ -235,10 +235,8 @@ struct dw_mci_dma_ops {
- };
- 
- /* IP Quirks/flags. */
--/* Unreliable card detection */
--#define DW_MCI_QUIRK_BROKEN_CARD_DETECTION	BIT(0)
- /* Timer for broken data transfer over scheme */
--#define DW_MCI_QUIRK_BROKEN_DTO			BIT(1)
-+#define DW_MCI_QUIRK_BROKEN_DTO			BIT(0)
- 
- struct dma_pdata;
- 
 -- 
-2.3.7
-
+Best Regards
+Shawn Lin
 
