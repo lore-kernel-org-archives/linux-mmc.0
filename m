@@ -1,38 +1,62 @@
-From: Mason <slash.tmp@free.fr>
-Subject: Re: mmc0: Invalid maximum block size, assuming 512 bytes
-Date: Fri, 22 Jan 2016 08:17:37 +0100
-Message-ID: <56A1D791.9010803@free.fr>
-References: <569E575A.5070401@free.fr> <569EE03F.9090008@rock-chips.com>
- <56A0F2A1.3060805@free.fr> <56A18EFE.6000900@rock-chips.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-15
-Content-Transfer-Encoding: 7bit
+From: Shawn Lin <shawn.lin@rock-chips.com>
+Subject: [PATCH] mmc: dw_mmc: fix num_slots setting
+Date: Fri, 22 Jan 2016 15:43:04 +0800
+Message-ID: <1453448584-9854-1-git-send-email-shawn.lin@rock-chips.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp4-g21.free.fr ([212.27.42.4]:33818 "EHLO smtp4-g21.free.fr"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751273AbcAVHRw (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 22 Jan 2016 02:17:52 -0500
-In-Reply-To: <56A18EFE.6000900@rock-chips.com>
+Received: from lucky1.263xmail.com ([211.157.147.132]:60407 "EHLO
+	lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751273AbcAVHrl (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 22 Jan 2016 02:47:41 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Shawn Lin <shawn.lin@rock-chips.com>, linux-mmc <linux-mmc@vger.kernel.org>
-Cc: Michal Simek <michal.simek@xilinx.com>, Soren Brinkmann <soren.brinkmann@xilinx.com>, Suman Tripathi <stripathi@apm.com>, Arnd Bergmann <arnd@arndb.de>, Ulf Hansson <ulf.hansson@linaro.org>, Sebastian Frias <sf84@laposte.net>
+To: Jaehoon Chung <jh80.chung@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Shawn Lin <shawn.lin@rock-chips.com>
 
-On 22/01/2016 03:07, Shawn Lin wrote:
+This patch make num_slots to 1 if pdata->num_slot is not
+defined. Meanwhile, we need to make sure num_slots should
+not larger that the supported slots
 
-> On 2016/1/21 23:00, Mason wrote:
->
->> So that means I have to write code in
->> drivers/mmc/host/sdhci-of-arasan.c correct?
-> 
-> It depends. If you think 512 block size if okay for you, leave it alone.
-> Otherwise, add it in drivers/mmc/host/sdhci-of-arasan.c :)
+Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
+---
 
-When I measured the read/write throughput to an attached
-SD card, I got around 16 MB/s, and I thought raising the
-block size might help with throughput?
+ drivers/mmc/host/dw_mmc.c | 16 +++++++++-------
+ 1 file changed, 9 insertions(+), 7 deletions(-)
 
-I'll test and report back.
+diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+index 7128351..065a8f5 100644
+--- a/drivers/mmc/host/dw_mmc.c
++++ b/drivers/mmc/host/dw_mmc.c
+@@ -2949,12 +2949,6 @@ int dw_mci_probe(struct dw_mci *host)
+ 		}
+ 	}
+ 
+-	if (host->pdata->num_slots < 1) {
+-		dev_err(host->dev,
+-			"Platform data must supply num_slots.\n");
+-		return -ENODEV;
+-	}
+-
+ 	host->biu_clk = devm_clk_get(host->dev, "biu");
+ 	if (IS_ERR(host->biu_clk)) {
+ 		dev_dbg(host->dev, "biu clock not available\n");
+@@ -3111,7 +3105,15 @@ int dw_mci_probe(struct dw_mci *host)
+ 	if (host->pdata->num_slots)
+ 		host->num_slots = host->pdata->num_slots;
+ 	else
+-		host->num_slots = SDMMC_GET_SLOT_NUM(mci_readl(host, HCON));
++		host->num_slots = 1;
++
++	if (host->num_slots < 1 ||
++	    host->num_slots > SDMMC_GET_SLOT_NUM(mci_readl(host, HCON))) {
++		dev_err(host->dev,
++			"Platform data must supply correct num_slots.\n");
++		ret = -ENODEV;
++		goto err_clk_ciu;
++	}
+ 
+ 	/*
+ 	 * Enable interrupts for command done, data over, data empty,
+-- 
+2.3.7
 
-Regards.
 
