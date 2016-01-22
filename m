@@ -1,17 +1,17 @@
 From: Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>
-Subject: Re: [PATCH RFC 08/15] ARM: dts: sun6i: Add mmc3 pins
- for 8 bit emmc
-Date: Fri, 22 Jan 2016 21:31:38 +0100
-Message-ID: <20160122203138.GB3682@lukather>
+Subject: Re: [PATCH RFC 09/15] ARM: dts: sun6i: sina31s: Switch
+ to mmc3 for onboard eMMC
+Date: Fri, 22 Jan 2016 21:39:27 +0100
+Message-ID: <20160122203927.GC3682@lukather>
 References: <1453354002-28366-1-git-send-email-wens@csie.org>
- <1453354002-28366-9-git-send-email-wens@csie.org>
+ <1453354002-28366-10-git-send-email-wens@csie.org>
 Reply-To: maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org
 Mime-Version: 1.0
 Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="XOIedfhf+7KOe/yw"
-Return-path: <linux-sunxi+bncBD2ZNBF5VYJRBK5DRK2QKGQEJTFPVEQ-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+	protocol="application/pgp-signature"; boundary="vOmOzSkFvhd7u8Ms"
+Return-path: <linux-sunxi+bncBD2ZNBF5VYJRBAFHRK2QKGQEXF3MPWA-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <1453354002-28366-9-git-send-email-wens-jdAy2FN1RRM@public.gmane.org>
+In-Reply-To: <1453354002-28366-10-git-send-email-wens-jdAy2FN1RRM@public.gmane.org>
 List-Post: <https://groups.google.com/group/linux-sunxi/post>, <mailto:linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
 List-Help: <https://groups.google.com/support/>, <mailto:linux-sunxi+help-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
 List-Archive: <https://groups.google.com/group/linux-sunxi
@@ -23,52 +23,44 @@ To: Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org>
 Cc: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
 
---XOIedfhf+7KOe/yw
+--vOmOzSkFvhd7u8Ms
 Content-Type: text/plain; charset=UTF-8
 Content-Disposition: inline
 
-Hi, 
+Hi,
 
-On Thu, Jan 21, 2016 at 01:26:35PM +0800, Chen-Yu Tsai wrote:
-> mmc2 and mmc3 are available on the same pins, with different mux values.
-> However, only mmc3 supports 8 bit DDR transfer modes.
-> 
-> Since preference for mmc3 over mmc2 is due to DDR transfer modes, just
-> set the drive strength to 40mA, which is needed for DDR.
-> 
-> This pinmux setting also includes the hardware reset pin for emmc.
+On Thu, Jan 21, 2016 at 01:26:36PM +0800, Chen-Yu Tsai wrote:
+> According to Allwinner, only mmc3 supports 8 bit DDR transfers for eMMC.
+> Switch to mmc3 for the onboard eMMC, and also assign vqmmc for signal
+> voltage sensing/switching, and "cap-mmc-hw-reset" to denote this
+> instance can use eMMC hardware reset.
 > 
 > Signed-off-by: Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org>
 > ---
->  arch/arm/boot/dts/sun6i-a31.dtsi | 10 ++++++++++
->  1 file changed, 10 insertions(+)
+>  arch/arm/boot/dts/sun6i-a31s-sina31s-core.dtsi | 6 ++++--
+>  1 file changed, 4 insertions(+), 2 deletions(-)
 > 
-> diff --git a/arch/arm/boot/dts/sun6i-a31.dtsi b/arch/arm/boot/dts/sun6i-a31.dtsi
-> index b6ad7850fac6..1867af24ff52 100644
-> --- a/arch/arm/boot/dts/sun6i-a31.dtsi
-> +++ b/arch/arm/boot/dts/sun6i-a31.dtsi
-> @@ -709,6 +709,16 @@
->  				allwinner,pull = <SUN4I_PINCTRL_NO_PULL>;
->  			};
+> diff --git a/arch/arm/boot/dts/sun6i-a31s-sina31s-core.dtsi b/arch/arm/boot/dts/sun6i-a31s-sina31s-core.dtsi
+> index ea69fb8ad4d8..4ec0c8679b2e 100644
+> --- a/arch/arm/boot/dts/sun6i-a31s-sina31s-core.dtsi
+> +++ b/arch/arm/boot/dts/sun6i-a31s-sina31s-core.dtsi
+> @@ -61,12 +61,14 @@
+>  };
 >  
-> +			mmc3_8bit_emmc_pins: mmc3@1 {
-> +				allwinner,pins = "PC6", "PC7", "PC8", "PC9",
-> +						 "PC10", "PC11", "PC12",
-> +						 "PC13", "PC14", "PC15",
-> +						 "PC24";
-> +				allwinner,function = "mmc3";
-> +				allwinner,drive = <SUN4I_PINCTRL_40_MA>;
-> +				allwinner,pull = <SUN4I_PINCTRL_NO_PULL>;
-> +			};
-> +
+>  /* eMMC on core board */
+> -&mmc2 {
+> +&mmc3 {
+>  	pinctrl-names = "default";
+> -	pinctrl-0 = <&mmc2_8bit_emmc_pins>;
+> +	pinctrl-0 = <&mmc3_8bit_emmc_pins>;
+>  	vmmc-supply = <&reg_dcdc1>;
+> +	vqmmc-supply = <&reg_dcdc1>;
 
-Is that reset pin optional?
+That seems odd. IIRC the VCC was supposed to be fixed and VCCQ could
+be either at 1.8 or 3V. Having the same regulator on both would make
+VCCQ forced to 3.3V, which seems to go against your commit log.
 
-If so, I'd prefer it to be a separate node, like we're doing for the
-SPI chip selects for example.
-
-It allows more reusability between different devices without declaring
-new nodes.
+What's the catch ? :)
 
 Thanks!
 Maxime
@@ -77,4 +69,4 @@ Maxime
 Maxime Ripard, Free Electrons
 Embedded Linux, Kernel and Android engineering
 http://free-electrons.com
---XOIedfhf+7KOe/yw--
+--vOmOzSkFvhd7u8Ms--
