@@ -1,62 +1,38 @@
 From: Shawn Lin <shawn.lin@rock-chips.com>
-Subject: [PATCH] mmc: dw_mmc: fix num_slots setting
-Date: Fri, 22 Jan 2016 15:43:04 +0800
-Message-ID: <1453448584-9854-1-git-send-email-shawn.lin@rock-chips.com>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from lucky1.263xmail.com ([211.157.147.132]:60407 "EHLO
-	lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751273AbcAVHrl (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 22 Jan 2016 02:47:41 -0500
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Subject: [PATCH] mmc: dw_mmc: fix err handle of dw_mci_probe
+Date: Fri, 22 Jan 2016 15:43:12 +0800
+Message-ID: <1453448592-9897-1-git-send-email-shawn.lin@rock-chips.com>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
 To: Jaehoon Chung <jh80.chung@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>
 Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Shawn Lin <shawn.lin@rock-chips.com>
+List-Id: linux-mmc@vger.kernel.org
 
-This patch make num_slots to 1 if pdata->num_slot is not
-defined. Meanwhile, we need to make sure num_slots should
-not larger that the supported slots
+This patch add correct err handle if dw_mci_ctrl_reset
+failed while probing.
 
 Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
 ---
 
- drivers/mmc/host/dw_mmc.c | 16 +++++++++-------
- 1 file changed, 9 insertions(+), 7 deletions(-)
+ drivers/mmc/host/dw_mmc.c | 6 ++++--
+ 1 file changed, 4 insertions(+), 2 deletions(-)
 
 diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index 7128351..065a8f5 100644
+index 065a8f5..ec19984 100644
 --- a/drivers/mmc/host/dw_mmc.c
 +++ b/drivers/mmc/host/dw_mmc.c
-@@ -2949,12 +2949,6 @@ int dw_mci_probe(struct dw_mci *host)
- 		}
+@@ -3046,8 +3046,10 @@ int dw_mci_probe(struct dw_mci *host)
  	}
  
--	if (host->pdata->num_slots < 1) {
--		dev_err(host->dev,
--			"Platform data must supply num_slots.\n");
+ 	/* Reset all blocks */
+-	if (!dw_mci_ctrl_reset(host, SDMMC_CTRL_ALL_RESET_FLAGS))
 -		return -ENODEV;
--	}
--
- 	host->biu_clk = devm_clk_get(host->dev, "biu");
- 	if (IS_ERR(host->biu_clk)) {
- 		dev_dbg(host->dev, "biu clock not available\n");
-@@ -3111,7 +3105,15 @@ int dw_mci_probe(struct dw_mci *host)
- 	if (host->pdata->num_slots)
- 		host->num_slots = host->pdata->num_slots;
- 	else
--		host->num_slots = SDMMC_GET_SLOT_NUM(mci_readl(host, HCON));
-+		host->num_slots = 1;
-+
-+	if (host->num_slots < 1 ||
-+	    host->num_slots > SDMMC_GET_SLOT_NUM(mci_readl(host, HCON))) {
-+		dev_err(host->dev,
-+			"Platform data must supply correct num_slots.\n");
++	if (!dw_mci_ctrl_reset(host, SDMMC_CTRL_ALL_RESET_FLAGS)) {
 +		ret = -ENODEV;
 +		goto err_clk_ciu;
 +	}
  
- 	/*
- 	 * Enable interrupts for command done, data over, data empty,
+ 	host->dma_ops = host->pdata->dma_ops;
+ 	dw_mci_init_dma(host);
 -- 
 2.3.7
-
-
