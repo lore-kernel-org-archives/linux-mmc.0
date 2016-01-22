@@ -1,89 +1,60 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: [GIT PULL] MMC fixes for v.4.5 rc1
-Date: Fri, 22 Jan 2016 15:24:02 +0100
-Message-ID: <CAPDyKFpR0HQ7dPkigSwSawPKosCA-9TKUxf=LKwWH9WcD4p39A@mail.gmail.com>
+Subject: Re: [PATCH 1/2 v2] mmc: enable mmc host device to suspend/resume asynchronously
+Date: Fri, 22 Jan 2016 15:51:37 +0100
+Message-ID: <CAPDyKFrKmTfA2GjQDmFnh0hRzeP8kcKGL6oMSzrZihyGL4pQUA@mail.gmail.com>
+References: <56A1A2C2.1030106@linux.intel.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-yk0-f179.google.com ([209.85.160.179]:33133 "EHLO
-	mail-yk0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753569AbcAVOYD (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 22 Jan 2016 09:24:03 -0500
-Received: by mail-yk0-f179.google.com with SMTP id k129so88167729yke.0
-        for <linux-mmc@vger.kernel.org>; Fri, 22 Jan 2016 06:24:02 -0800 (PST)
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <56A1A2C2.1030106@linux.intel.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: "Fu, Zhonghui" <zhonghui.fu@linux.intel.com>
+Cc: Venu Byravarasu <vbyravarasu@nvidia.com>, Adrian Hunter <adrian.hunter@intel.com>, Chaotian Jing <chaotian.jing@mediatek.com>, Lars-Peter Clausen <lars@metafoo.de>, Sudeep Holla <Sudeep.Holla@arm.com>, Sergei Shtylyov <sergei.shtylyov@cogentembedded.com>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Linus Torvalds <torvalds@linux-foundation.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>
-Cc: Jaehoon Chung <jh80.chung@samsung.com>
 
-Hi Linus,
+On 22 January 2016 at 04:32, Fu, Zhonghui <zhonghui.fu@linux.intel.com> wrote:
+> This patch enables mmc hosts to suspend/resume asynchronously.
+> This will improve system suspend/resume speed. After applying
+> this patch and enabling all mmc hosts' child devices to
+> suspend/resume asynchronously on ASUS T100TA, the system
+> suspend-to-idle time is reduced from 1645ms to 1107ms, and the
+> system resume time is reduced from 940ms to 914ms.
 
-Here are some mmc fixes intended for v4.5 rc1. These are based on a
-commit earlier in the merge window but has been tested a while in
-linux-next via my next branch.
+Do you really reduce time at all with this patch by its own? I think not.
 
-Details are as usual found in the signed tag. Please pull this in!
+Moreover, I thought the biggest improvement came from the patch which
+enabled async suspend/resume for the MMC/SD/SDIO device?
+ec076cd226c3 ("mmc: enable MMC/SD/SDIO device to suspend/resume asynchronously")
+
+Similar comment applies to patch2/2, but I would expect it together
+with the $subject patch gives an improvement.
+
+Please update the change-logs one more round.
 
 Kind regards
-Ulf Hansson
+Uffe
 
-
-The following changes since commit 67990608c8b95d2b8ccc29932376ae73d5818727:
-
-  Merge tag 'pm+acpi-4.5-rc1-1' of
-git://git.kernel.org/pub/scm/linux/kernel/git/rafael/linux-pm
-(2016-01-12 20:25:09 -0800)
-
-are available in the git repository at:
-
-
-  git://git.linaro.org/people/ulf.hansson/mmc.git tags/mmc-v4.5-rc1
-
-for you to fetch changes up to 64a67d4762ce3ce4c9466eadd152d825fbf84967:
-
-  mmc: pwrseq_simple: Make reset-gpios optional to match doc
-(2016-01-21 13:52:27 +0100)
-
-----------------------------------------------------------------
-MMC core:
- - Restore reset-gpios to be optional in pwrseq_simple
- - Allow SDIO tuple for CISTPL_SDIO_STD
- - Print correct voltage value in debugfs
- - Enable tuning according to the actual timing
- - Limit SD card power limit according to cards capabilities
-
-MMC host:
- - tmio_mmc_dma: don't print invalid DMA cookie
- - mmci: Pick the correct variant and allow 8-bit mode for Nomadik
-
-----------------------------------------------------------------
-Arnd Bergmann (1):
-      mmc: tmio_mmc_dma: don't print invalid DMA cookie
-
-Carlo Caione (1):
-      mmc: core: Enable tuning according to the actual timing
-
-Chuanxiao Dong (1):
-      mmc: debugfs: correct wrong voltage value
-
-Linus Walleij (2):
-      mmc: mmci: fix an ages old detection error
-      mmc: mmci: support 8bit mode on the Nomadik
-
-Martin Fuzzey (1):
-      mmc: pwrseq_simple: Make reset-gpios optional to match doc
-
-Russell King (1):
-      mmc: sd: limit SD card power limit according to cards capabilities
-
-Shawn Lin (1):
-      mmc: sdio_cis: fix unknown tuple for CISTPL_SDIO_STD
-
-drivers/mmc/core/debugfs.c       |  2 +-
- drivers/mmc/core/pwrseq_simple.c | 22 ++++++++++++++--------
- drivers/mmc/core/sd.c            | 28 ++++++++++++++++++++--------
- drivers/mmc/core/sdio.c          |  4 ++--
- drivers/mmc/core/sdio_cis.c      |  1 +
- drivers/mmc/host/mmci.c          |  3 ++-
- drivers/mmc/host/tmio_mmc_dma.c  | 15 +++++++--------
- 7 files changed, 47 insertions(+), 28 deletions(-)
+>
+> Signed-off-by: Zhonghui Fu <zhonghui.fu@linux.intel.com>
+> Acked-by: Venu Byravarasu <vbyravarasu@nvidia.com>
+> ---
+> Changes in v2:
+> - Update commit message
+>
+>  drivers/mmc/core/host.c |    1 +
+>  1 files changed, 1 insertions(+), 0 deletions(-)
+>
+> diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
+> index 0aecd5c..1d94607 100644
+> --- a/drivers/mmc/core/host.c
+> +++ b/drivers/mmc/core/host.c
+> @@ -339,6 +339,7 @@ struct mmc_host *mmc_alloc_host(int extra, struct device *dev)
+>         host->class_dev.parent = dev;
+>         host->class_dev.class = &mmc_host_class;
+>         device_initialize(&host->class_dev);
+> +       device_enable_async_suspend(&host->class_dev);
+>
+>         if (mmc_gpio_alloc(host)) {
+>                 put_device(&host->class_dev);
+> -- 1.7.1
+>
