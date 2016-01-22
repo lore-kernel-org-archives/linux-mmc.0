@@ -1,13 +1,13 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: [PATCH 3/3] mmc: sdhci-acpi: Fix card detect race for Intel BXT/APL
-Date: Fri, 22 Jan 2016 11:45:02 +0200
-Message-ID: <1453455902-3987-4-git-send-email-adrian.hunter@intel.com>
+Subject: [PATCH 2/3] mmc: sdhci-pci: Fix card detect race for Intel BXT/APL
+Date: Fri, 22 Jan 2016 11:45:01 +0200
+Message-ID: <1453455902-3987-3-git-send-email-adrian.hunter@intel.com>
 References: <1453455902-3987-1-git-send-email-adrian.hunter@intel.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga09.intel.com ([134.134.136.24]:13835 "EHLO mga09.intel.com"
+Received: from mga09.intel.com ([134.134.136.24]:39507 "EHLO mga09.intel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752804AbcAVJsw (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 22 Jan 2016 04:48:52 -0500
+	id S1752502AbcAVJsu (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 22 Jan 2016 04:48:50 -0500
 In-Reply-To: <1453455902-3987-1-git-send-email-adrian.hunter@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
@@ -28,16 +28,16 @@ a 'get_cd' sdhci host operation for BXT/APL that does that.
 Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
 Cc: stable@vger.kernel.org # v4.4+
 ---
- drivers/mmc/host/sdhci-acpi.c | 35 ++++++++++++++++++++++++++++++++++-
- 1 file changed, 34 insertions(+), 1 deletion(-)
+ drivers/mmc/host/sdhci-pci-core.c | 27 +++++++++++++++++++++++++++
+ 1 file changed, 27 insertions(+)
 
-diff --git a/drivers/mmc/host/sdhci-acpi.c b/drivers/mmc/host/sdhci-acpi.c
-index f6047fc94062..d330e99bdd87 100644
---- a/drivers/mmc/host/sdhci-acpi.c
-+++ b/drivers/mmc/host/sdhci-acpi.c
-@@ -146,6 +146,29 @@ static const struct sdhci_acpi_chip sdhci_acpi_chip_int = {
- 	.ops = &sdhci_acpi_ops_int,
- };
+diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-pci-core.c
+index cc851b065d0a..c92652142860 100644
+--- a/drivers/mmc/host/sdhci-pci-core.c
++++ b/drivers/mmc/host/sdhci-pci-core.c
+@@ -330,6 +330,18 @@ static void spt_read_drive_strength(struct sdhci_host *host)
+ 	sdhci_pci_spt_drive_strength = 0x10 | ((val >> 12) & 0xf);
+ }
  
 +static int bxt_get_cd(struct sdhci_host *host)
 +{
@@ -49,48 +49,40 @@ index f6047fc94062..d330e99bdd87 100644
 +	return !!(sdhci_readl(host, SDHCI_PRESENT_STATE) & SDHCI_CARD_PRESENT);
 +}
 +
-+static const struct sdhci_ops sdhci_acpi_ops_bxt = {
-+	.set_clock = sdhci_set_clock,
-+	.enable_dma = sdhci_acpi_enable_dma,
-+	.set_bus_width = sdhci_set_bus_width,
-+	.reset = sdhci_reset,
-+	.set_uhs_signaling = sdhci_set_uhs_signaling,
-+	.get_cd = bxt_get_cd,
-+};
++static const struct sdhci_ops bxt_ops;
 +
-+static const struct sdhci_acpi_chip sdhci_acpi_chip_bxt = {
-+	.ops = &sdhci_acpi_ops_bxt,
-+};
-+
- static int sdhci_acpi_emmc_probe_slot(struct platform_device *pdev,
- 				      const char *hid, const char *uid)
+ static int byt_emmc_probe_slot(struct sdhci_pci_slot *slot)
  {
-@@ -234,6 +257,16 @@ static const struct sdhci_acpi_slot sdhci_acpi_slot_int_sd = {
- 	.probe_slot	= sdhci_acpi_sd_probe_slot,
- };
+ 	slot->host->mmc->caps |= MMC_CAP_8_BIT_DATA | MMC_CAP_NONREMOVABLE |
+@@ -362,6 +374,10 @@ static int byt_sd_probe_slot(struct sdhci_pci_slot *slot)
+ 	slot->cd_con_id = NULL;
+ 	slot->cd_idx = 0;
+ 	slot->cd_override_level = true;
++	if (slot->chip->pdev->device == PCI_DEVICE_ID_INTEL_BXT_SD ||
++	    slot->chip->pdev->device == PCI_DEVICE_ID_INTEL_APL_SD)
++		slot->host->ops = &bxt_ops;
++
+ 	return 0;
+ }
  
-+static const struct sdhci_acpi_slot sdhci_acpi_slot_bxt_sd = {
-+	.chip    = &sdhci_acpi_chip_bxt,
-+	.flags   = SDHCI_ACPI_SD_CD | SDHCI_ACPI_SD_CD_OVERRIDE_LEVEL |
-+		   SDHCI_ACPI_RUNTIME_PM,
-+	.quirks  = SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC,
-+	.quirks2 = SDHCI_QUIRK2_CARD_ON_NEEDS_BUS_ON |
-+		   SDHCI_QUIRK2_STOP_WITH_TC,
-+	.caps    = MMC_CAP_BUS_WIDTH_TEST | MMC_CAP_WAIT_WHILE_BUSY,
+@@ -1362,6 +1378,17 @@ static int sdhci_pci_select_drive_strength(struct sdhci_host *host,
+ 					   card_drv, drv_type);
+ }
+ 
++static const struct sdhci_ops bxt_ops = {
++	.set_clock	= sdhci_set_clock,
++	.enable_dma	= sdhci_pci_enable_dma,
++	.set_bus_width	= sdhci_pci_set_bus_width,
++	.reset		= sdhci_reset,
++	.set_uhs_signaling = sdhci_set_uhs_signaling,
++	.hw_reset		= sdhci_pci_hw_reset,
++	.select_drive_strength	= sdhci_pci_select_drive_strength,
++	.get_cd		= bxt_get_cd,
 +};
 +
- struct sdhci_acpi_uid_slot {
- 	const char *hid;
- 	const char *uid;
-@@ -241,7 +274,7 @@ struct sdhci_acpi_uid_slot {
- };
- 
- static const struct sdhci_acpi_uid_slot sdhci_acpi_uids[] = {
--	{ "80865ACA", NULL, &sdhci_acpi_slot_int_sd },
-+	{ "80865ACA", NULL, &sdhci_acpi_slot_bxt_sd },
- 	{ "80865ACC", NULL, &sdhci_acpi_slot_int_emmc },
- 	{ "80865AD0", NULL, &sdhci_acpi_slot_int_sdio },
- 	{ "80860F14" , "1" , &sdhci_acpi_slot_int_emmc },
+ static const struct sdhci_ops sdhci_pci_ops = {
+ 	.set_clock	= sdhci_set_clock,
+ 	.enable_dma	= sdhci_pci_enable_dma,
 -- 
 1.9.1
 
