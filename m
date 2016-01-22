@@ -1,140 +1,80 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH 1/3] mmc: sdhci: Add get_cd sdhci host operation
-Date: Fri, 22 Jan 2016 16:58:44 +0200
-Message-ID: <56A243A4.6010806@intel.com>
-References: <1453455902-3987-1-git-send-email-adrian.hunter@intel.com>
- <1453455902-3987-2-git-send-email-adrian.hunter@intel.com>
- <CAPDyKFoFGNGMJXtD7bTGWuO2FrDazDcZJ9KMHt_G38zxkn07Zg@mail.gmail.com>
+From: Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>
+Subject: Re: [PATCH RFC 08/15] ARM: dts: sun6i: Add mmc3 pins
+ for 8 bit emmc
+Date: Fri, 22 Jan 2016 21:31:38 +0100
+Message-ID: <20160122203138.GB3682@lukather>
+References: <1453354002-28366-1-git-send-email-wens@csie.org>
+ <1453354002-28366-9-git-send-email-wens@csie.org>
+Reply-To: maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga04.intel.com ([192.55.52.120]:14572 "EHLO mga04.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753332AbcAVPCK (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 22 Jan 2016 10:02:10 -0500
-In-Reply-To: <CAPDyKFoFGNGMJXtD7bTGWuO2FrDazDcZJ9KMHt_G38zxkn07Zg@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="XOIedfhf+7KOe/yw"
+Return-path: <linux-sunxi+bncBD2ZNBF5VYJRBK5DRK2QKGQEJTFPVEQ-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <1453354002-28366-9-git-send-email-wens-jdAy2FN1RRM@public.gmane.org>
+List-Post: <https://groups.google.com/group/linux-sunxi/post>, <mailto:linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Help: <https://groups.google.com/support/>, <mailto:linux-sunxi+help-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Archive: <https://groups.google.com/group/linux-sunxi
+Sender: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
+List-Subscribe: <https://groups.google.com/group/linux-sunxi/subscribe>, <mailto:linux-sunxi+subscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Unsubscribe: <mailto:googlegroups-manage+1076902468213+unsubscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>,
+ <https://groups.google.com/group/linux-sunxi/subscribe>
+To: Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org>
+Cc: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Lakshmi Sai Krishna Potthuri <lakshmi.sai.krishna.potthuri@xilinx.com>, "Ivan T. Ivanov" <ivan.ivanov@linaro.org>, Russell King <linux@arm.linux.org.uk>
 
-On 22/01/16 14:07, Ulf Hansson wrote:
-> On 22 January 2016 at 10:45, Adrian Hunter <adrian.hunter@intel.com> wrote:
->> In the future sdhci will be a library.  When that happens
->> a callback will be needed to allow drivers easily to override
->> the standard way of determining whether a card is present.
+--XOIedfhf+7KOe/yw
+Content-Type: text/plain; charset=UTF-8
+Content-Disposition: inline
+
+Hi, 
+
+On Thu, Jan 21, 2016 at 01:26:35PM +0800, Chen-Yu Tsai wrote:
+> mmc2 and mmc3 are available on the same pins, with different mux values.
+> However, only mmc3 supports 8 bit DDR transfer modes.
 > 
-> There's already a ->get_cd() callback in the struct mmc_host_ops.
+> Since preference for mmc3 over mmc2 is due to DDR transfer modes, just
+> set the drive strength to 40mA, which is needed for DDR.
 > 
-> By turning sdhci into a library, each sdhci variant should decide
-> whether they want to use a default "sdhci_get_cd()" version, rely on
-> slot-gpio or implement their own.
+> This pinmux setting also includes the hardware reset pin for emmc.
 > 
-> I don't understand why we need a specific sdhci callback to deal with
-> this, it doesn't make sense to me.
+> Signed-off-by: Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org>
+> ---
+>  arch/arm/boot/dts/sun6i-a31.dtsi | 10 ++++++++++
+>  1 file changed, 10 insertions(+)
 > 
->> That is needed because functions like sdhci_request() also
->> check the card presence.
-> 
-> Why does sdhci do that? Is that because some variants needs it or
-> because of all?
+> diff --git a/arch/arm/boot/dts/sun6i-a31.dtsi b/arch/arm/boot/dts/sun6i-a31.dtsi
+> index b6ad7850fac6..1867af24ff52 100644
+> --- a/arch/arm/boot/dts/sun6i-a31.dtsi
+> +++ b/arch/arm/boot/dts/sun6i-a31.dtsi
+> @@ -709,6 +709,16 @@
+>  				allwinner,pull = <SUN4I_PINCTRL_NO_PULL>;
+>  			};
+>  
+> +			mmc3_8bit_emmc_pins: mmc3@1 {
+> +				allwinner,pins = "PC6", "PC7", "PC8", "PC9",
+> +						 "PC10", "PC11", "PC12",
+> +						 "PC13", "PC14", "PC15",
+> +						 "PC24";
+> +				allwinner,function = "mmc3";
+> +				allwinner,drive = <SUN4I_PINCTRL_40_MA>;
+> +				allwinner,pull = <SUN4I_PINCTRL_NO_PULL>;
+> +			};
+> +
 
-There has been a check for card present in the request function since the
-driver was added in 2006.  On our host controllers, and I presume others, if
-a command is started when the host controller has decided there is no card,
-then nothing happens.  No interrupts, no errors, it just sits there.
-The driver has a 10-second timer that eventually catches it.
+Is that reset pin optional?
 
-So that is the reason for checking the Present State register.  When GPIO
-support was added, people just decided to substitute the check.
+If so, I'd prefer it to be a separate node, like we're doing for the
+SPI chip selects for example.
 
-> 
-> Reading a state of a GPIO pin before every request doesn't come
-> without a cost in performance. My point is, it should only be done
-> when *really* needed.
-> Again, by having sdhci to become a library each variant should decide
-> what's needed for them.
+It allows more reusability between different devices without declaring
+new nodes.
 
-Sure but this is a bug fix, ideally for stable.  It can't deal with
-unrelated improvements.
+Thanks!
+Maxime
 
-> 
->>
->> The get_cd callback is being added now to facilitate
->> a bug fix, for which subsequent patches are provided.
->>
->> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
->> Cc: stable@vger.kernel.org # v4.4+
->> ---
->>  drivers/mmc/host/sdhci.c | 6 +++++-
->>  drivers/mmc/host/sdhci.h | 1 +
->>  2 files changed, 6 insertions(+), 1 deletion(-)
->>
->> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
->> index d622435d1bcc..535236084b27 100644
->> --- a/drivers/mmc/host/sdhci.c
->> +++ b/drivers/mmc/host/sdhci.c
->> @@ -1612,7 +1612,7 @@ static void sdhci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
->>
->>  static int sdhci_do_get_cd(struct sdhci_host *host)
->>  {
->> -       int gpio_cd = mmc_gpio_get_cd(host->mmc);
->> +       int gpio_cd;
->>
->>         if (host->flags & SDHCI_DEVICE_DEAD)
->>                 return 0;
->> @@ -1621,10 +1621,14 @@ static int sdhci_do_get_cd(struct sdhci_host *host)
->>         if (host->mmc->caps & MMC_CAP_NONREMOVABLE)
->>                 return 1;
->>
->> +       if (host->ops->get_cd)
->> +               return host->ops->get_cd(host);
->> +
->>         /*
->>          * Try slot gpio detect, if defined it take precedence
->>          * over build in controller functionality
->>          */
->> +       gpio_cd = mmc_gpio_get_cd(host->mmc);
->>         if (!IS_ERR_VALUE(gpio_cd))
->>                 return !!gpio_cd;
->>
->> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
->> index 7654ae5d2b4e..a6c2cd8ef0b2 100644
->> --- a/drivers/mmc/host/sdhci.h
->> +++ b/drivers/mmc/host/sdhci.h
->> @@ -552,6 +552,7 @@ struct sdhci_ops {
->>                                          struct mmc_card *card,
->>                                          unsigned int max_dtr, int host_drv,
->>                                          int card_drv, int *drv_type);
->> +       int     (*get_cd)(struct sdhci_host *host);
->>  };
->>
->>  #ifdef CONFIG_MMC_SDHCI_IO_ACCESSORS
->> --
->> 1.9.1
->>
-> 
-> Can you please try to fix this without adding a new callback!? I know,
-> it requires some more efforts but for sure it's doable.
-
-This is a bug fix for v4.4+ so there is limited scope for major changes.
-Could do the change below and replace the other get_cd.  Thoughts?
-
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index ba4f5a0a7b06..e7dd4c82c5f1 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -1301,7 +1301,7 @@ static void sdhci_request(struct mmc_host *mmc, struct
-mmc_request *mrq)
- 	sdhci_runtime_pm_get(host);
-
- 	/* Firstly check card presence */
--	present = sdhci_do_get_cd(host);
-+	present = mmc->ops->get_cd(mmc);
-
- 	spin_lock_irqsave(&host->lock, flags);
-
-
-
-
+-- 
+Maxime Ripard, Free Electrons
+Embedded Linux, Kernel and Android engineering
+http://free-electrons.com
+--XOIedfhf+7KOe/yw--
