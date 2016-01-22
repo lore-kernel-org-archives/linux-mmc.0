@@ -1,107 +1,89 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 1/3] mmc: sdhci: Add get_cd sdhci host operation
-Date: Fri, 22 Jan 2016 13:07:45 +0100
-Message-ID: <CAPDyKFoFGNGMJXtD7bTGWuO2FrDazDcZJ9KMHt_G38zxkn07Zg@mail.gmail.com>
-References: <1453455902-3987-1-git-send-email-adrian.hunter@intel.com>
-	<1453455902-3987-2-git-send-email-adrian.hunter@intel.com>
+Subject: [GIT PULL] MMC fixes for v.4.5 rc1
+Date: Fri, 22 Jan 2016 15:24:02 +0100
+Message-ID: <CAPDyKFpR0HQ7dPkigSwSawPKosCA-9TKUxf=LKwWH9WcD4p39A@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-yk0-f177.google.com ([209.85.160.177]:34201 "EHLO
-	mail-yk0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752733AbcAVMHq (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 22 Jan 2016 07:07:46 -0500
-Received: by mail-yk0-f177.google.com with SMTP id a85so83568036ykb.1
-        for <linux-mmc@vger.kernel.org>; Fri, 22 Jan 2016 04:07:46 -0800 (PST)
-In-Reply-To: <1453455902-3987-2-git-send-email-adrian.hunter@intel.com>
+Received: from mail-yk0-f179.google.com ([209.85.160.179]:33133 "EHLO
+	mail-yk0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753569AbcAVOYD (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 22 Jan 2016 09:24:03 -0500
+Received: by mail-yk0-f179.google.com with SMTP id k129so88167729yke.0
+        for <linux-mmc@vger.kernel.org>; Fri, 22 Jan 2016 06:24:02 -0800 (PST)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Lakshmi Sai Krishna Potthuri <lakshmi.sai.krishna.potthuri@xilinx.com>, "Ivan T. Ivanov" <ivan.ivanov@linaro.org>, Russell King <linux@arm.linux.org.uk>
+To: Linus Torvalds <torvalds@linux-foundation.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>
+Cc: Jaehoon Chung <jh80.chung@samsung.com>
 
-On 22 January 2016 at 10:45, Adrian Hunter <adrian.hunter@intel.com> wrote:
-> In the future sdhci will be a library.  When that happens
-> a callback will be needed to allow drivers easily to override
-> the standard way of determining whether a card is present.
+Hi Linus,
 
-There's already a ->get_cd() callback in the struct mmc_host_ops.
+Here are some mmc fixes intended for v4.5 rc1. These are based on a
+commit earlier in the merge window but has been tested a while in
+linux-next via my next branch.
 
-By turning sdhci into a library, each sdhci variant should decide
-whether they want to use a default "sdhci_get_cd()" version, rely on
-slot-gpio or implement their own.
-
-I don't understand why we need a specific sdhci callback to deal with
-this, it doesn't make sense to me.
-
-> That is needed because functions like sdhci_request() also
-> check the card presence.
-
-Why does sdhci do that? Is that because some variants needs it or
-because of all?
-
-Reading a state of a GPIO pin before every request doesn't come
-without a cost in performance. My point is, it should only be done
-when *really* needed.
-Again, by having sdhci to become a library each variant should decide
-what's needed for them.
-
->
-> The get_cd callback is being added now to facilitate
-> a bug fix, for which subsequent patches are provided.
->
-> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
-> Cc: stable@vger.kernel.org # v4.4+
-> ---
->  drivers/mmc/host/sdhci.c | 6 +++++-
->  drivers/mmc/host/sdhci.h | 1 +
->  2 files changed, 6 insertions(+), 1 deletion(-)
->
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index d622435d1bcc..535236084b27 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -1612,7 +1612,7 @@ static void sdhci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
->
->  static int sdhci_do_get_cd(struct sdhci_host *host)
->  {
-> -       int gpio_cd = mmc_gpio_get_cd(host->mmc);
-> +       int gpio_cd;
->
->         if (host->flags & SDHCI_DEVICE_DEAD)
->                 return 0;
-> @@ -1621,10 +1621,14 @@ static int sdhci_do_get_cd(struct sdhci_host *host)
->         if (host->mmc->caps & MMC_CAP_NONREMOVABLE)
->                 return 1;
->
-> +       if (host->ops->get_cd)
-> +               return host->ops->get_cd(host);
-> +
->         /*
->          * Try slot gpio detect, if defined it take precedence
->          * over build in controller functionality
->          */
-> +       gpio_cd = mmc_gpio_get_cd(host->mmc);
->         if (!IS_ERR_VALUE(gpio_cd))
->                 return !!gpio_cd;
->
-> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-> index 7654ae5d2b4e..a6c2cd8ef0b2 100644
-> --- a/drivers/mmc/host/sdhci.h
-> +++ b/drivers/mmc/host/sdhci.h
-> @@ -552,6 +552,7 @@ struct sdhci_ops {
->                                          struct mmc_card *card,
->                                          unsigned int max_dtr, int host_drv,
->                                          int card_drv, int *drv_type);
-> +       int     (*get_cd)(struct sdhci_host *host);
->  };
->
->  #ifdef CONFIG_MMC_SDHCI_IO_ACCESSORS
-> --
-> 1.9.1
->
-
-Can you please try to fix this without adding a new callback!? I know,
-it requires some more efforts but for sure it's doable.
+Details are as usual found in the signed tag. Please pull this in!
 
 Kind regards
-Uffe
+Ulf Hansson
+
+
+The following changes since commit 67990608c8b95d2b8ccc29932376ae73d5818727:
+
+  Merge tag 'pm+acpi-4.5-rc1-1' of
+git://git.kernel.org/pub/scm/linux/kernel/git/rafael/linux-pm
+(2016-01-12 20:25:09 -0800)
+
+are available in the git repository at:
+
+
+  git://git.linaro.org/people/ulf.hansson/mmc.git tags/mmc-v4.5-rc1
+
+for you to fetch changes up to 64a67d4762ce3ce4c9466eadd152d825fbf84967:
+
+  mmc: pwrseq_simple: Make reset-gpios optional to match doc
+(2016-01-21 13:52:27 +0100)
+
+----------------------------------------------------------------
+MMC core:
+ - Restore reset-gpios to be optional in pwrseq_simple
+ - Allow SDIO tuple for CISTPL_SDIO_STD
+ - Print correct voltage value in debugfs
+ - Enable tuning according to the actual timing
+ - Limit SD card power limit according to cards capabilities
+
+MMC host:
+ - tmio_mmc_dma: don't print invalid DMA cookie
+ - mmci: Pick the correct variant and allow 8-bit mode for Nomadik
+
+----------------------------------------------------------------
+Arnd Bergmann (1):
+      mmc: tmio_mmc_dma: don't print invalid DMA cookie
+
+Carlo Caione (1):
+      mmc: core: Enable tuning according to the actual timing
+
+Chuanxiao Dong (1):
+      mmc: debugfs: correct wrong voltage value
+
+Linus Walleij (2):
+      mmc: mmci: fix an ages old detection error
+      mmc: mmci: support 8bit mode on the Nomadik
+
+Martin Fuzzey (1):
+      mmc: pwrseq_simple: Make reset-gpios optional to match doc
+
+Russell King (1):
+      mmc: sd: limit SD card power limit according to cards capabilities
+
+Shawn Lin (1):
+      mmc: sdio_cis: fix unknown tuple for CISTPL_SDIO_STD
+
+drivers/mmc/core/debugfs.c       |  2 +-
+ drivers/mmc/core/pwrseq_simple.c | 22 ++++++++++++++--------
+ drivers/mmc/core/sd.c            | 28 ++++++++++++++++++++--------
+ drivers/mmc/core/sdio.c          |  4 ++--
+ drivers/mmc/core/sdio_cis.c      |  1 +
+ drivers/mmc/host/mmci.c          |  3 ++-
+ drivers/mmc/host/tmio_mmc_dma.c  | 15 +++++++--------
+ 7 files changed, 47 insertions(+), 28 deletions(-)
