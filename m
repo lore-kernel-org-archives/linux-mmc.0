@@ -1,98 +1,77 @@
-From: Shawn Lin <shawn.lin@rock-chips.com>
-Subject: Re: mmc0: Invalid maximum block size, assuming 512 bytes
-Date: Fri, 22 Jan 2016 10:07:58 +0800
-Message-ID: <56A18EFE.6000900@rock-chips.com>
-References: <569E575A.5070401@free.fr> <569EE03F.9090008@rock-chips.com>
- <56A0F2A1.3060805@free.fr>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: Re: [RFC PATCH] mmc: dw_mmc: remove redundant num_slots check
+Date: Fri, 22 Jan 2016 11:46:41 +0900
+Message-ID: <56A19811.9000101@samsung.com>
+References: <1453362769-16223-1-git-send-email-shawn.lin@rock-chips.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-15; format=flowed
+Content-Type: text/plain; charset=windows-1252
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from lucky1.263xmail.com ([211.157.147.133]:37378 "EHLO
-	lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751263AbcAVCIV (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 21 Jan 2016 21:08:21 -0500
-In-Reply-To: <56A0F2A1.3060805@free.fr>
+Received: from mailout1.samsung.com ([203.254.224.24]:38050 "EHLO
+	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751224AbcAVCqq (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 21 Jan 2016 21:46:46 -0500
+In-reply-to: <1453362769-16223-1-git-send-email-shawn.lin@rock-chips.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Mason <slash.tmp@free.fr>, linux-mmc <linux-mmc@vger.kernel.org>
-Cc: shawn.lin@rock-chips.com, Michal Simek <michal.simek@xilinx.com>, Soren Brinkmann <soren.brinkmann@xilinx.com>, Suman Tripathi <stripathi@apm.com>, Arnd Bergmann <arnd@arndb.de>, Ulf Hansson <ulf.hansson@linaro.org>, Sebastian Frias <sf84@laposte.net>
+To: Shawn Lin <shawn.lin@rock-chips.com>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 
-On 2016/1/21 23:00, Mason wrote:
-> On 20/01/2016 02:17, Shawn Lin wrote:
->
->> On 2016/1/19 23:33, Mason wrote:
->>
->>> My SoC provides an Arasan SDIO/eMMC controller supported by the
->>> drivers/mmc/host/sdhci-of-arasan.c driver.
->>>
->>> At init, the driver prints a warning to the console:
->>>
->>> [    0.887301] sdhci: Secure Digital Host Controller Interface driver
->>> [    0.893537] sdhci: Copyright(c) Pierre Ossman
->>> [    0.897928] sdhci-pltfm: SDHCI platform and OF driver helper
->>> [    0.903903] sdhci-arasan 21000.mmc: No vmmc regulator found
->>> [    0.909537] sdhci-arasan 21000.mmc: No vqmmc regulator found
->>> [    0.915247] mmc0: Invalid maximum block size, assuming 512 bytes
->>> [    0.953797] mmc0: SDHCI controller on 21000.mmc [21000.mmc] using ADMA
->>> [    0.961494] sdhci-arasan 21200.mmc: No vmmc regulator found
->>> [    0.967110] sdhci-arasan 21200.mmc: No vqmmc regulator found
->>>
->>> Is "mmc0: Invalid maximum block size, assuming 512 bytes" something
->>> serious which requires investigating, in your experience?
->>
->> you can look into this commit 0633f654241
->>   From <SD host controller simplified specfication version 3.00>
->> sdhci doesn't support blocks of 4096 bytes.
->>
->> But at least check my arasan-5.1 databook, it supports 4096 from
->> the capabilities register. So, you don't force arasan to use
->> SDHCI_QUIRK_FORCE_BLK_SZ_2048, then sdhci core force it to be 512 bytes.
->> Not serious problem, just a proper warn.
->>
->>> The corresponding DT is:
->>>
->>> mmc0: mmc@21000 {
->>> 	compatible = "arasan,sdhci-8.9a";
->>> 	reg = <0x21000 0x200>;
->>> 	clock-names = "clk_xin", "clk_ahb";
->>> 	clocks = <&sdio_clk>, <&clkgen 1>;
->>> 	interrupts = <60 IRQ_TYPE_LEVEL_HIGH>;
->>> };
->
-> Hello Shawn,
->
-> Thanks for pointing out SDHCI_QUIRK_FORCE_BLK_SZ_2048.
->
-> I don't think there is currently a way to enable this quirk
-> for the Arasan controller from the device tree, right?
+Hi, Shawn.
 
-Right, no property available fot this.
+On 01/21/2016 04:52 PM, Shawn Lin wrote:
+> num_slots comes from pdata if existing, otherwise from
+> dw_mci_parse_dt which make it at least one slot. If
+> num_slots is less than 1 for the existing pdata case,
+> current code return -ENODEV. But dw_mci_probe seems to
+> treat this a optional case as it will call SDMMC_GET_SLOT_NUM
+> if no slot assigned.
 
->
-> $ git grep SDHCI_QUIRK_FORCE_BLK_SZ_2048 drivers/mmc
-> drivers/mmc/host/sdhci-bcm-kona.c:              SDHCI_QUIRK_FORCE_BLK_SZ_2048 |
-> drivers/mmc/host/sdhci-esdhc.h:#define ESDHC_DEFAULT_QUIRKS     (SDHCI_QUIRK_FORCE_BLK_SZ_2048 | \
-> drivers/mmc/host/sdhci.c:       if (host->quirks & SDHCI_QUIRK_FORCE_BLK_SZ_2048) {
-> drivers/mmc/host/sdhci.h:#define SDHCI_QUIRK_FORCE_BLK_SZ_2048                  (1<<20)
->
-> So that means I have to write code in
-> drivers/mmc/host/sdhci-of-arasan.c correct?
+Well, we need to consider more thing..
+Host can get the number of slot from SDMMC_GET_SLOT_NUM().
+But i think this way also has the problem.
 
-It depends. If you think 512 block size if okay for you, leave it alone.
-Otherwise, add it in drivers/mmc/host/sdhci-of-arasan.c :)
+num_slot isn't defined anywhere, and num_slot should be set to value of SDMMC_GET_SLOT_NUM.
+If that value is higher than 1, it should be blocking..(I didn't test all cases..)
 
+Even though this patch is not correct, i could check the problem relevant to num_slot, because of this patch. :)
 
+my suggestion is if pdata->num_slot is not defined anywhere, just set to 1 by default.
+not take from SDMMC_GET_SLOT_NUM.
 
->
-> Regards.
->
->
->
->
+if (host->pdata->nums_slots < 1 || 
+	host->pdata->nums_slots > SDMMC_GET_SLOT_NUM())
 
+This is correct condition. num_slots can't be higher than number of supported slots.
+how about?
 
--- 
-Best Regards
-Shawn Lin
+Best Regards,
+Jaehoon Chung
+
+> 
+> Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
+> 
+> ---
+> 
+>  drivers/mmc/host/dw_mmc.c | 6 ------
+>  1 file changed, 6 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+> index 7128351..a116ec6 100644
+> --- a/drivers/mmc/host/dw_mmc.c
+> +++ b/drivers/mmc/host/dw_mmc.c
+> @@ -2949,12 +2949,6 @@ int dw_mci_probe(struct dw_mci *host)
+>  		}
+>  	}
+>  
+> -	if (host->pdata->num_slots < 1) {
+> -		dev_err(host->dev,
+> -			"Platform data must supply num_slots.\n");
+> -		return -ENODEV;
+> -	}
+> -
+>  	host->biu_clk = devm_clk_get(host->dev, "biu");
+>  	if (IS_ERR(host->biu_clk)) {
+>  		dev_dbg(host->dev, "biu clock not available\n");
+> 
 
