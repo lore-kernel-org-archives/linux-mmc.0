@@ -1,78 +1,304 @@
-From: Mason <slash.tmp@free.fr>
-Subject: Re: mmc0: Invalid maximum block size, assuming 512 bytes
-Date: Thu, 21 Jan 2016 16:00:49 +0100
-Message-ID: <56A0F2A1.3060805@free.fr>
-References: <569E575A.5070401@free.fr> <569EE03F.9090008@rock-chips.com>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: Re: [RFC PATCH] mmc: remove the MMC_DATA_STREAM flag
+Date: Fri, 22 Jan 2016 10:18:05 +0900
+Message-ID: <56A1834D.1070505@samsung.com>
+References: <56978FBF.1080509@samsung.com>
+ <20160115170148.GA10663@odux.rfo.atmel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-15
+Content-Type: text/plain; charset=windows-1252
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp4-g21.free.fr ([212.27.42.4]:52081 "EHLO smtp4-g21.free.fr"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S965494AbcAUPBF (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 21 Jan 2016 10:01:05 -0500
-In-Reply-To: <569EE03F.9090008@rock-chips.com>
+Received: from mailout1.samsung.com ([203.254.224.24]:45517 "EHLO
+	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751084AbcAVBSM (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 21 Jan 2016 20:18:12 -0500
+Received: from epcpsbgr3.samsung.com
+ (u143.gpu120.samsung.co.kr [203.254.230.143])
+ by mailout1.samsung.com (Oracle Communications Messaging Server 7.0.5.31.0
+ 64bit (built May  5 2014))
+ with ESMTP id <0O1B01TNKYAALI40@mailout1.samsung.com> for
+ linux-mmc@vger.kernel.org; Fri, 22 Jan 2016 10:18:10 +0900 (KST)
+In-reply-to: <20160115170148.GA10663@odux.rfo.atmel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Shawn Lin <shawn.lin@rock-chips.com>, linux-mmc <linux-mmc@vger.kernel.org>
-Cc: Michal Simek <michal.simek@xilinx.com>, Soren Brinkmann <soren.brinkmann@xilinx.com>, Suman Tripathi <stripathi@apm.com>, Arnd Bergmann <arnd@arndb.de>, Ulf Hansson <ulf.hansson@linaro.org>, Sebastian Frias <sf84@laposte.net>
+To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, Sonic Zhang <sonic.zhang@analog.com>, Krzysztof Kozlowski <k.kozlowski.k@gmail.com>, Benjamin Herrenschmidt <benh@kernel.crashing.org>, Fabio Estevam <fabio.estevam@freescale.com>, Robert Jarzmik <robert.jarzmik@free.fr>, Ben Dooks <ben-linux@fluff.org>, Hans de Goede <hdegoede@redhat.com>, Adrian Hunter <adrian.hunter@intel.com>
 
-On 20/01/2016 02:17, Shawn Lin wrote:
+Hi,
 
-> On 2016/1/19 23:33, Mason wrote:
->
->> My SoC provides an Arasan SDIO/eMMC controller supported by the
->> drivers/mmc/host/sdhci-of-arasan.c driver.
+On 01/16/2016 02:01 AM, Ludovic Desroches wrote:
+> On Thu, Jan 14, 2016 at 09:08:31PM +0900, Jaehoon Chung wrote:
+>> It's not set to MMC_DATA_STREAM anywhere.
+>> It seems that it had used with CMD11/20. But now CMD11/20 didn't also use.
+>> I didn't know what is exactly, so i sent the patch as just RFC. 
+>> If i get some comments for this, i will resend the patch after separate to each host controller.
 >>
->> At init, the driver prints a warning to the console:
+>> If MMC_DATA_STREAM can be removed, then flags of data should be then one of MMC_DATA_READ and MMC_DATA_WRITE.
 >>
->> [    0.887301] sdhci: Secure Digital Host Controller Interface driver
->> [    0.893537] sdhci: Copyright(c) Pierre Ossman
->> [    0.897928] sdhci-pltfm: SDHCI platform and OF driver helper
->> [    0.903903] sdhci-arasan 21000.mmc: No vmmc regulator found
->> [    0.909537] sdhci-arasan 21000.mmc: No vqmmc regulator found
->> [    0.915247] mmc0: Invalid maximum block size, assuming 512 bytes
->> [    0.953797] mmc0: SDHCI controller on 21000.mmc [21000.mmc] using ADMA
->> [    0.961494] sdhci-arasan 21200.mmc: No vmmc regulator found
->> [    0.967110] sdhci-arasan 21200.mmc: No vqmmc regulator found
->>
->> Is "mmc0: Invalid maximum block size, assuming 512 bytes" something
->> serious which requires investigating, in your experience?
+>> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+>> ---
+>>  drivers/mmc/card/block.c       |  6 +++---
+>>  drivers/mmc/host/atmel-mci.c   |  9 ++-------
 > 
-> you can look into this commit 0633f654241
->  From <SD host controller simplified specfication version 3.00>
-> sdhci doesn't support blocks of 4096 bytes.
+> Hi,
 > 
-> But at least check my arasan-5.1 databook, it supports 4096 from
-> the capabilities register. So, you don't force arasan to use
-> SDHCI_QUIRK_FORCE_BLK_SZ_2048, then sdhci core force it to be 512 bytes.
-> Not serious problem, just a proper warn.
+> Since I don't have use case in mind of data stream instead of blocks and
+> it became dead code, you can add my
+> Acked-by: Ludovic Desroches <ludovic.desroches@atmel.com>
+
+
+Ludovic, Thanks for reviewing this.
+
+Do other guys have any comment? If give me the comment, it's helpful to me.
+
+Best Regards,
+Jaehoon Chung
+
 > 
->> The corresponding DT is:
+> for atmel-mci.c.
+> 
+> Regards
+> 
+> Ludovic
+> 
+>>  drivers/mmc/host/bfin_sdh.c    |  3 ---
+>>  drivers/mmc/host/davinci_mmc.c | 15 +++------------
+>>  drivers/mmc/host/dw_mmc.c      |  2 --
+>>  drivers/mmc/host/jz4740_mmc.c  |  2 --
+>>  drivers/mmc/host/mxcmmc.c      |  3 ---
+>>  drivers/mmc/host/pxamci.c      |  6 ------
+>>  drivers/mmc/host/s3cmci.c      |  3 +--
+>>  drivers/mmc/host/sunxi-mmc.c   |  5 -----
+>>  include/linux/mmc/core.h       |  1 -
+>>  11 files changed, 9 insertions(+), 46 deletions(-)
 >>
->> mmc0: mmc@21000 {
->> 	compatible = "arasan,sdhci-8.9a";
->> 	reg = <0x21000 0x200>;
->> 	clock-names = "clk_xin", "clk_ahb";
->> 	clocks = <&sdio_clk>, <&clkgen 1>;
->> 	interrupts = <60 IRQ_TYPE_LEVEL_HIGH>;
->> };
-
-Hello Shawn,
-
-Thanks for pointing out SDHCI_QUIRK_FORCE_BLK_SZ_2048.
-
-I don't think there is currently a way to enable this quirk
-for the Arasan controller from the device tree, right?
-
-$ git grep SDHCI_QUIRK_FORCE_BLK_SZ_2048 drivers/mmc
-drivers/mmc/host/sdhci-bcm-kona.c:              SDHCI_QUIRK_FORCE_BLK_SZ_2048 |
-drivers/mmc/host/sdhci-esdhc.h:#define ESDHC_DEFAULT_QUIRKS     (SDHCI_QUIRK_FORCE_BLK_SZ_2048 | \
-drivers/mmc/host/sdhci.c:       if (host->quirks & SDHCI_QUIRK_FORCE_BLK_SZ_2048) {
-drivers/mmc/host/sdhci.h:#define SDHCI_QUIRK_FORCE_BLK_SZ_2048                  (1<<20)
-
-So that means I have to write code in
-drivers/mmc/host/sdhci-of-arasan.c correct?
-
-Regards.
+>> diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+>> index 5914263..e7449cb 100644
+>> --- a/drivers/mmc/card/block.c
+>> +++ b/drivers/mmc/card/block.c
+>> @@ -1525,13 +1525,13 @@ static void mmc_blk_rw_rq_prep(struct mmc_queue_req *mqrq,
+>>  	}
+>>  	if (rq_data_dir(req) == READ) {
+>>  		brq->cmd.opcode = readcmd;
+>> -		brq->data.flags |= MMC_DATA_READ;
+>> +		brq->data.flags = MMC_DATA_READ;
+>>  		if (brq->mrq.stop)
+>>  			brq->stop.flags = MMC_RSP_SPI_R1 | MMC_RSP_R1 |
+>>  					MMC_CMD_AC;
+>>  	} else {
+>>  		brq->cmd.opcode = writecmd;
+>> -		brq->data.flags |= MMC_DATA_WRITE;
+>> +		brq->data.flags = MMC_DATA_WRITE;
+>>  		if (brq->mrq.stop)
+>>  			brq->stop.flags = MMC_RSP_SPI_R1B | MMC_RSP_R1B |
+>>  					MMC_CMD_AC;
+>> @@ -1800,7 +1800,7 @@ static void mmc_blk_packed_hdr_wrq_prep(struct mmc_queue_req *mqrq,
+>>  
+>>  	brq->data.blksz = 512;
+>>  	brq->data.blocks = packed->blocks + hdr_blocks;
+>> -	brq->data.flags |= MMC_DATA_WRITE;
+>> +	brq->data.flags = MMC_DATA_WRITE;
+>>  
+>>  	brq->stop.opcode = MMC_STOP_TRANSMISSION;
+>>  	brq->stop.arg = 0;
+>> diff --git a/drivers/mmc/host/atmel-mci.c b/drivers/mmc/host/atmel-mci.c
+>> index a36ebda..e0c8c51 100644
+>> --- a/drivers/mmc/host/atmel-mci.c
+>> +++ b/drivers/mmc/host/atmel-mci.c
+>> @@ -849,9 +849,7 @@ static u32 atmci_prepare_command(struct mmc_host *mmc,
+>>  		if (cmd->opcode == SD_IO_RW_EXTENDED) {
+>>  			cmdr |= ATMCI_CMDR_SDIO_BLOCK;
+>>  		} else {
+>> -			if (data->flags & MMC_DATA_STREAM)
+>> -				cmdr |= ATMCI_CMDR_STREAM;
+>> -			else if (data->blocks > 1)
+>> +			if (data->blocks > 1)
+>>  				cmdr |= ATMCI_CMDR_MULTI_BLOCK;
+>>  			else
+>>  				cmdr |= ATMCI_CMDR_BLOCK;
+>> @@ -1372,10 +1370,7 @@ static void atmci_start_request(struct atmel_mci *host,
+>>  		host->stop_cmdr |= ATMCI_CMDR_STOP_XFER;
+>>  		if (!(data->flags & MMC_DATA_WRITE))
+>>  			host->stop_cmdr |= ATMCI_CMDR_TRDIR_READ;
+>> -		if (data->flags & MMC_DATA_STREAM)
+>> -			host->stop_cmdr |= ATMCI_CMDR_STREAM;
+>> -		else
+>> -			host->stop_cmdr |= ATMCI_CMDR_MULTI_BLOCK;
+>> +		host->stop_cmdr |= ATMCI_CMDR_MULTI_BLOCK;
+>>  	}
+>>  
+>>  	/*
+>> diff --git a/drivers/mmc/host/bfin_sdh.c b/drivers/mmc/host/bfin_sdh.c
+>> index 2b7f37e..526231e 100644
+>> --- a/drivers/mmc/host/bfin_sdh.c
+>> +++ b/drivers/mmc/host/bfin_sdh.c
+>> @@ -126,9 +126,6 @@ static int sdh_setup_data(struct sdh_host *host, struct mmc_data *data)
+>>  	length = data->blksz * data->blocks;
+>>  	bfin_write_SDH_DATA_LGTH(length);
+>>  
+>> -	if (data->flags & MMC_DATA_STREAM)
+>> -		data_ctl |= DTX_MODE;
+>> -
+>>  	if (data->flags & MMC_DATA_READ)
+>>  		data_ctl |= DTX_DIR;
+>>  	/* Only supports power-of-2 block size */
+>> diff --git a/drivers/mmc/host/davinci_mmc.c b/drivers/mmc/host/davinci_mmc.c
+>> index ea2a2eb..693144e 100644
+>> --- a/drivers/mmc/host/davinci_mmc.c
+>> +++ b/drivers/mmc/host/davinci_mmc.c
+>> @@ -346,10 +346,6 @@ static void mmc_davinci_start_command(struct mmc_davinci_host *host,
+>>  	if (cmd->data)
+>>  		cmd_reg |= MMCCMD_WDATX;
+>>  
+>> -	/* Setting whether stream or block transfer */
+>> -	if (cmd->flags & MMC_DATA_STREAM)
+>> -		cmd_reg |= MMCCMD_STRMTP;
+>> -
+>>  	/* Setting whether data read or write */
+>>  	if (host->data_dir == DAVINCI_MMC_DATADIR_WRITE)
+>>  		cmd_reg |= MMCCMD_DTRW;
+>> @@ -568,8 +564,7 @@ mmc_davinci_prepare_data(struct mmc_davinci_host *host, struct mmc_request *req)
+>>  		return;
+>>  	}
+>>  
+>> -	dev_dbg(mmc_dev(host->mmc), "%s %s, %d blocks of %d bytes\n",
+>> -		(data->flags & MMC_DATA_STREAM) ? "stream" : "block",
+>> +	dev_dbg(mmc_dev(host->mmc), "%s, %d blocks of %d bytes\n",
+>>  		(data->flags & MMC_DATA_WRITE) ? "write" : "read",
+>>  		data->blocks, data->blksz);
+>>  	dev_dbg(mmc_dev(host->mmc), "  DTO %d cycles + %d ns\n",
+>> @@ -584,22 +579,18 @@ mmc_davinci_prepare_data(struct mmc_davinci_host *host, struct mmc_request *req)
+>>  	writel(data->blksz, host->base + DAVINCI_MMCBLEN);
+>>  
+>>  	/* Configure the FIFO */
+>> -	switch (data->flags & MMC_DATA_WRITE) {
+>> -	case MMC_DATA_WRITE:
+>> +	if (data->flags & MMC_DATA_WRITE) {
+>>  		host->data_dir = DAVINCI_MMC_DATADIR_WRITE;
+>>  		writel(fifo_lev | MMCFIFOCTL_FIFODIR_WR | MMCFIFOCTL_FIFORST,
+>>  			host->base + DAVINCI_MMCFIFOCTL);
+>>  		writel(fifo_lev | MMCFIFOCTL_FIFODIR_WR,
+>>  			host->base + DAVINCI_MMCFIFOCTL);
+>> -		break;
+>> -
+>> -	default:
+>> +	} else {
+>>  		host->data_dir = DAVINCI_MMC_DATADIR_READ;
+>>  		writel(fifo_lev | MMCFIFOCTL_FIFODIR_RD | MMCFIFOCTL_FIFORST,
+>>  			host->base + DAVINCI_MMCFIFOCTL);
+>>  		writel(fifo_lev | MMCFIFOCTL_FIFODIR_RD,
+>>  			host->base + DAVINCI_MMCFIFOCTL);
+>> -		break;
+>>  	}
+>>  
+>>  	host->buffer = NULL;
+>> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+>> index fddbcb6..b542c42 100644
+>> --- a/drivers/mmc/host/dw_mmc.c
+>> +++ b/drivers/mmc/host/dw_mmc.c
+>> @@ -290,8 +290,6 @@ static u32 dw_mci_prepare_command(struct mmc_host *mmc, struct mmc_command *cmd)
+>>  	data = cmd->data;
+>>  	if (data) {
+>>  		cmdr |= SDMMC_CMD_DAT_EXP;
+>> -		if (data->flags & MMC_DATA_STREAM)
+>> -			cmdr |= SDMMC_CMD_STRM_MODE;
+>>  		if (data->flags & MMC_DATA_WRITE)
+>>  			cmdr |= SDMMC_CMD_DAT_WR;
+>>  	}
+>> diff --git a/drivers/mmc/host/jz4740_mmc.c b/drivers/mmc/host/jz4740_mmc.c
+>> index 76e8bce..03ddf0e 100644
+>> --- a/drivers/mmc/host/jz4740_mmc.c
+>> +++ b/drivers/mmc/host/jz4740_mmc.c
+>> @@ -660,8 +660,6 @@ static void jz4740_mmc_send_command(struct jz4740_mmc_host *host,
+>>  		cmdat |= JZ_MMC_CMDAT_DATA_EN;
+>>  		if (cmd->data->flags & MMC_DATA_WRITE)
+>>  			cmdat |= JZ_MMC_CMDAT_WRITE;
+>> -		if (cmd->data->flags & MMC_DATA_STREAM)
+>> -			cmdat |= JZ_MMC_CMDAT_STREAM;
+>>  		if (host->use_dma)
+>>  			cmdat |= JZ_MMC_CMDAT_DMA_EN;
+>>  
+>> diff --git a/drivers/mmc/host/mxcmmc.c b/drivers/mmc/host/mxcmmc.c
+>> index d110f9e..3d1ea5e 100644
+>> --- a/drivers/mmc/host/mxcmmc.c
+>> +++ b/drivers/mmc/host/mxcmmc.c
+>> @@ -307,9 +307,6 @@ static int mxcmci_setup_data(struct mxcmci_host *host, struct mmc_data *data)
+>>  	enum dma_transfer_direction slave_dirn;
+>>  	int i, nents;
+>>  
+>> -	if (data->flags & MMC_DATA_STREAM)
+>> -		nob = 0xffff;
+>> -
+>>  	host->data = data;
+>>  	data->bytes_xfered = 0;
+>>  
+>> diff --git a/drivers/mmc/host/pxamci.c b/drivers/mmc/host/pxamci.c
+>> index ce08896..4285d3a 100644
+>> --- a/drivers/mmc/host/pxamci.c
+>> +++ b/drivers/mmc/host/pxamci.c
+>> @@ -191,9 +191,6 @@ static void pxamci_setup_data(struct pxamci_host *host, struct mmc_data *data)
+>>  
+>>  	host->data = data;
+>>  
+>> -	if (data->flags & MMC_DATA_STREAM)
+>> -		nob = 0xffff;
+>> -
+>>  	writel(nob, host->base + MMC_NOB);
+>>  	writel(data->blksz, host->base + MMC_BLKLEN);
+>>  
+>> @@ -443,9 +440,6 @@ static void pxamci_request(struct mmc_host *mmc, struct mmc_request *mrq)
+>>  		cmdat |= CMDAT_DATAEN | CMDAT_DMAEN;
+>>  		if (mrq->data->flags & MMC_DATA_WRITE)
+>>  			cmdat |= CMDAT_WRITE;
+>> -
+>> -		if (mrq->data->flags & MMC_DATA_STREAM)
+>> -			cmdat |= CMDAT_STREAM;
+>>  	}
+>>  
+>>  	pxamci_start_cmd(host, mrq->cmd, cmdat);
+>> diff --git a/drivers/mmc/host/s3cmci.c b/drivers/mmc/host/s3cmci.c
+>> index 6291d50..39814f3 100644
+>> --- a/drivers/mmc/host/s3cmci.c
+>> +++ b/drivers/mmc/host/s3cmci.c
+>> @@ -1014,8 +1014,7 @@ static int s3cmci_setup_data(struct s3cmci_host *host, struct mmc_data *data)
+>>  	if (host->bus_width == MMC_BUS_WIDTH_4)
+>>  		dcon |= S3C2410_SDIDCON_WIDEBUS;
+>>  
+>> -	if (!(data->flags & MMC_DATA_STREAM))
+>> -		dcon |= S3C2410_SDIDCON_BLOCKMODE;
+>> +	dcon |= S3C2410_SDIDCON_BLOCKMODE;
+>>  
+>>  	if (data->flags & MMC_DATA_WRITE) {
+>>  		dcon |= S3C2410_SDIDCON_TXAFTERRESP;
+>> diff --git a/drivers/mmc/host/sunxi-mmc.c b/drivers/mmc/host/sunxi-mmc.c
+>> index 83de82b..d61c58e 100644
+>> --- a/drivers/mmc/host/sunxi-mmc.c
+>> +++ b/drivers/mmc/host/sunxi-mmc.c
+>> @@ -815,11 +815,6 @@ static void sunxi_mmc_request(struct mmc_host *mmc, struct mmc_request *mrq)
+>>  
+>>  		if ((cmd->flags & MMC_CMD_MASK) == MMC_CMD_ADTC) {
+>>  			cmd_val |= SDXC_DATA_EXPIRE | SDXC_WAIT_PRE_OVER;
+>> -			if (cmd->data->flags & MMC_DATA_STREAM) {
+>> -				imask |= SDXC_AUTO_COMMAND_DONE;
+>> -				cmd_val |= SDXC_SEQUENCE_MODE |
+>> -					   SDXC_SEND_AUTO_STOP;
+>> -			}
+>>  
+>>  			if (cmd->data->stop) {
+>>  				imask |= SDXC_AUTO_COMMAND_DONE;
+>> diff --git a/include/linux/mmc/core.h b/include/linux/mmc/core.h
+>> index 37967b6..b01e77d 100644
+>> --- a/include/linux/mmc/core.h
+>> +++ b/include/linux/mmc/core.h
+>> @@ -113,7 +113,6 @@ struct mmc_data {
+>>  
+>>  #define MMC_DATA_WRITE	(1 << 8)
+>>  #define MMC_DATA_READ	(1 << 9)
+>> -#define MMC_DATA_STREAM	(1 << 10)
+>>  
+>>  	unsigned int		bytes_xfered;
+>>  
+>> -- 
+>> 1.9.1
+> 
+> 
 
