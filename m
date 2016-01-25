@@ -1,69 +1,76 @@
 From: Wolfram Sang <wsa@the-dreams.de>
-Subject: [PATCH 0/9] mmc: sdhi: some refactoring and adding basic r8a7795 support
-Date: Mon, 25 Jan 2016 20:15:07 +0100
-Message-ID: <1453749316-1848-1-git-send-email-wsa@the-dreams.de>
+Subject: [PATCH 4/9] mmc: tmio: add flag to reduce delay after changing clock status
+Date: Mon, 25 Jan 2016 20:15:11 +0100
+Message-ID: <1453749316-1848-5-git-send-email-wsa@the-dreams.de>
+References: <1453749316-1848-1-git-send-email-wsa@the-dreams.de>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from sauhun.de ([89.238.76.85]:33061 "EHLO pokefinder.org"
+Received: from sauhun.de ([89.238.76.85]:33075 "EHLO pokefinder.org"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1757563AbcAYTPV (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 25 Jan 2016 14:15:21 -0500
+	id S1757858AbcAYTPZ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 25 Jan 2016 14:15:25 -0500
+In-Reply-To: <1453749316-1848-1-git-send-email-wsa@the-dreams.de>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org
 Cc: Wolfram Sang <wsa@the-dreams.de>, linux-renesas-soc@vger.kernel.org, linux-sh@vger.kernel.org, Kuninori Morimoto <kuninori.morimoto.gx@gmail.com>, Magnus Damm <magnus.damm@gmail.com>, Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>, Dirk Behme <dirk.behme@gmail.com>
 
-So, here is the series to enable basic SD support on r8a7795; no DMA and UHS-I
-for now. Will be added incrementally. It turns out that the driver needs a
-little love, so some refactoring is also in place before adding the actual
-support.
+From: Wolfram Sang <wsa+renesas@sang-engineering.com>
 
-eMMC works in 4-bit mode, too. 8-bit mode sadly fails currently. I'll post MMC
-support patches once this issue is fixed.
+The docs for RCar Gen2 & 3 I have access to, mention delays of 5ms after
+stop and 1ms after start. Make it possible to apply these values.
 
-These patches have been tested on Gen3 (Salvator-X) and Gen2 (Lager), doing
-basic operations with SD cards and running the mmc_test driver (its results
-point out some potential corner cases to check later).
+Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+---
+ drivers/mmc/host/tmio_mmc_pio.c | 7 ++++---
+ include/linux/mfd/tmio.h        | 4 ++++
+ 2 files changed, 8 insertions(+), 3 deletions(-)
 
-A branch can be found here (including clock and DTS patches):
-
-git://git.kernel.org/pub/scm/linux/kernel/git/wsa/linux.git renesas/v8-sdhi
-
-Changes since RFC (only sent to sh-devel lists):
-
-* patches 1,7,8 are new
-* patch 4 drops 10ms wait also for set_clock
-* patch 9 also sets MMC_CAP_WAIT_WHILE_BUSY (see comment there)
-* some commit message rewording
-
-Please test, comment, apply...
-
-Thanks,
-
-   Wolfram
-
-
-Shinobu Uehara (1):
-  mmc: sdhi: Add EXT_ACC register busy check
-
-Wolfram Sang (8):
-  mmc: tmio_dma: remove debug messages with little information
-  mmc: sdhi: error message on ENOMEM is superfluous
-  mmc: tmio: add flag to reduce delay after changing clock status
-  mmc: tmio: remove stale comments
-  mmc: sdhi: use faster clock handling on RCar Gen2
-  mmc: tmio: refactor set_clock a little
-  mmc: tmio: disable clock before changing it
-  mmc: sdhi: Add r8a7795 support
-
- Documentation/devicetree/bindings/mmc/tmio_mmc.txt |  1 +
- drivers/mmc/host/Kconfig                           |  2 +-
- drivers/mmc/host/sh_mobile_sdhi.c                  | 54 +++++++++++++++-------
- drivers/mmc/host/tmio_mmc_dma.c                    | 12 -----
- drivers/mmc/host/tmio_mmc_pio.c                    | 27 ++++++-----
- include/linux/mfd/tmio.h                           |  4 ++
- include/linux/mmc/tmio.h                           |  5 ++
- 7 files changed, 63 insertions(+), 42 deletions(-)
-
+diff --git a/drivers/mmc/host/tmio_mmc_pio.c b/drivers/mmc/host/tmio_mmc_pio.c
+index a10fde40b6c3dd..ffff687e98b1e3 100644
+--- a/drivers/mmc/host/tmio_mmc_pio.c
++++ b/drivers/mmc/host/tmio_mmc_pio.c
+@@ -172,7 +172,8 @@ static void tmio_mmc_set_clock(struct tmio_mmc_host *host,
+ 		host->set_clk_div(host->pdev, (clk>>22) & 1);
+ 
+ 	sd_ctrl_write16(host, CTL_SD_CARD_CLK_CTL, clk & 0x1ff);
+-	msleep(10);
++	if (!(host->pdata->flags & TMIO_MMC_FAST_CLK_CHG))
++		msleep(10);
+ }
+ 
+ static void tmio_mmc_clk_stop(struct tmio_mmc_host *host)
+@@ -185,14 +186,14 @@ static void tmio_mmc_clk_stop(struct tmio_mmc_host *host)
+ 
+ 	sd_ctrl_write16(host, CTL_SD_CARD_CLK_CTL, ~0x0100 &
+ 		sd_ctrl_read16(host, CTL_SD_CARD_CLK_CTL));
+-	msleep(10);
++	msleep(host->pdata->flags & TMIO_MMC_FAST_CLK_CHG ? 5 : 10);
+ }
+ 
+ static void tmio_mmc_clk_start(struct tmio_mmc_host *host)
+ {
+ 	sd_ctrl_write16(host, CTL_SD_CARD_CLK_CTL, 0x0100 |
+ 		sd_ctrl_read16(host, CTL_SD_CARD_CLK_CTL));
+-	msleep(10);
++	msleep(host->pdata->flags & TMIO_MMC_FAST_CLK_CHG ? 1 : 10);
+ 
+ 	/* implicit BUG_ON(!res) */
+ 	if (host->pdata->flags & TMIO_MMC_HAVE_HIGH_REG) {
+diff --git a/include/linux/mfd/tmio.h b/include/linux/mfd/tmio.h
+index 24b86d538e8852..05d58ee5e6a78f 100644
+--- a/include/linux/mfd/tmio.h
++++ b/include/linux/mfd/tmio.h
+@@ -65,6 +65,10 @@
+  * Some controllers can support SDIO IRQ signalling.
+  */
+ #define TMIO_MMC_SDIO_IRQ		(1 << 2)
++
++/* Some controllers don't need to wait 10ms for clock changes */
++#define TMIO_MMC_FAST_CLK_CHG		(1 << 3)
++
+ /*
+  * Some controllers require waiting for the SD bus to become
+  * idle before writing to some registers.
 -- 
 2.1.4
 
