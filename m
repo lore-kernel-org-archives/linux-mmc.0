@@ -1,74 +1,117 @@
-From: Arend van Spriel <aspriel@gmail.com>
-Subject: Re: [PATCH] brcmfmac: sdio: Increase the default timeouts a bit
-Date: Mon, 25 Jan 2016 16:36:52 +0100
-Message-ID: <56A64114.3010400@gmail.com>
-References: <1453718849-3508-1-git-send-email-sjoerd.simons@collabora.co.uk>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 8bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1453718849-3508-1-git-send-email-sjoerd.simons@collabora.co.uk>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Sjoerd Simons <sjoerd.simons@collabora.co.uk>, Kalle Valo <kvalo@codeaurora.org>
-Cc: Paul Stewart <pstew@chromium.org>, Doug Anderson <dianders@chromium.org>, linux-rockchip@lists.infradead.org, Arend van Spriel <arend@broadcom.com>, Pieter-Paul Giesberts <pieterpg@broadcom.com>, brcm80211-dev-list@broadcom.com, linux-wireless@vger.kernel.org, linux-kernel@vger.kernel.org, Hante Meuleman <meuleman@broadcom.com>, Brett Rudley <brudley@broadcom.com>, netdev@vger.kernel.org, "Franky (Zhenhui) Lin" <frankyl@broadcom.com>, Adrian Hunter <adrian.hunter@intel.com>, linux-mmc@vger.kernel.org
+From: Arnd Bergmann <arnd@arndb.de>
+Subject: [PATCH] mmc: omap_hsmmc: don't print uninitialized variables
+Date: Mon, 25 Jan 2016 16:50:20 +0100
+Message-ID: <1453737031-1959584-1-git-send-email-arnd@arndb.de>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mout.kundenserver.de ([212.227.17.24]:54830 "EHLO
+	mout.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932889AbcAYPvF (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 25 Jan 2016 10:51:05 -0500
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-arm-kernel@lists.infradead.org, Peter Ujfalusi <peter.ujfalusi@ti.com>, Arnd Bergmann <arnd@arndb.de>, Kishon Vijay Abraham I <kishon@ti.com>, Andreas Fenkart <afenkart@gmail.com>, Tony Lindgren <tony@atomide.com>, Roger Quadros <rogerq@ti.com>, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, linux-kernel@vger.kernel.org
 
-On 25-01-16 11:47, Sjoerd Simons wrote:
-> On a Radxa Rock2 board with a Ampak AP6335 (Broadcom 4339 core) it seems
-> the card responds very quickly most of the time, unfortunately during
-> initialisation it sometimes seems to take just a bit over 2 seconds to
-> respond.
-> 
-> This results intialization failing with message like:
->   brcmf_c_preinit_dcmds: Retreiving cur_etheraddr failed, -52
->   brcmf_bus_start: failed: -52
->   brcmf_sdio_firmware_callback: dongle is not responding
-> 
-> Increasing the timeout to allow for a bit more headroom allows the
-> card to initialize reliably.
+When DT based probing is used but the DMA request fails, the
+driver will print uninitialized stack data from the rx_req
+and tx_req variables, as indicated by this warning:
 
-I would prefer to know where the 2 second response time comes from.
-Could be sdio retuning. Maybe the chromeos people can comment whether
-this has been root caused.
+drivers/mmc/host/omap_hsmmc.c: In function 'omap_hsmmc_probe':
+drivers/mmc/host/omap_hsmmc.c:2162:3: warning: 'rx_req' may be used uninitialized in this function [-Wmaybe-uninitialized]
+   dev_err(mmc_dev(host->mmc), "unable to obtain RX DMA engine channel %u\n", rx_req);
 
-There is a mmc patch pending in which retuning procedure can be deferred
-by the driver. Using that API may resolve the issue as well and I would
-prefer that solution.
+This restructures the function to separate the simple DT probe
+from the more complex platform data code path, and only
+prints the information that is actually available and
+needed in case of an error, which makes it nicer to read
+and avoids the warning.
 
-> A quick search online after diagnosing/fixing this showed that Google
-> has a similar patch in their ChromeOS tree, so this doesn't seem
-> specific to the board I'm using.
-
-As the retuning stuff is not in main line I guess we need this fix for
-now so...
-
-Acked-by: Arend van Spriel <arend@broadcom.com>
-> Signed-off-by: Sjoerd Simons <sjoerd.simons@collabora.co.uk>
-> 
-> ---
-Still would like to know whether it is firmware initialization or some
-mmc stack procedure. Any suggestions to debug this are welcome.
-
-Regards,
-Arend
+Signed-off-by: Arnd Bergmann <arnd@arndb.de>
 ---
-> 
->  drivers/net/wireless/broadcom/brcm80211/brcmfmac/sdio.c | 4 ++--
->  1 file changed, 2 insertions(+), 2 deletions(-)
-> 
-> diff --git a/drivers/net/wireless/broadcom/brcm80211/brcmfmac/sdio.c b/drivers/net/wireless/broadcom/brcm80211/brcmfmac/sdio.c
-> index dd66143..75ac4bd 100644
-> --- a/drivers/net/wireless/broadcom/brcm80211/brcmfmac/sdio.c
-> +++ b/drivers/net/wireless/broadcom/brcm80211/brcmfmac/sdio.c
-> @@ -45,8 +45,8 @@
->  #include "chip.h"
->  #include "firmware.h"
->  
-> -#define DCMD_RESP_TIMEOUT	msecs_to_jiffies(2000)
-> -#define CTL_DONE_TIMEOUT	msecs_to_jiffies(2000)
-> +#define DCMD_RESP_TIMEOUT	msecs_to_jiffies(2500)
-> +#define CTL_DONE_TIMEOUT	msecs_to_jiffies(2500)
->  
->  #ifdef DEBUG
->  
-> 
+ drivers/mmc/host/omap_hsmmc.c | 48 +++++++++++++++++++++----------------------
+ 1 file changed, 23 insertions(+), 25 deletions(-)
+
+diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
+index b6639ea0bf18..e06b1881b6a1 100644
+--- a/drivers/mmc/host/omap_hsmmc.c
++++ b/drivers/mmc/host/omap_hsmmc.c
+@@ -2002,8 +2002,6 @@ static int omap_hsmmc_probe(struct platform_device *pdev)
+ 	struct resource *res;
+ 	int ret, irq;
+ 	const struct of_device_id *match;
+-	dma_cap_mask_t mask;
+-	unsigned tx_req, rx_req;
+ 	const struct omap_mmc_of_data *data;
+ 	void __iomem *base;
+ 
+@@ -2133,7 +2131,17 @@ static int omap_hsmmc_probe(struct platform_device *pdev)
+ 
+ 	omap_hsmmc_conf_bus_power(host);
+ 
+-	if (!pdev->dev.of_node) {
++	host->tx_chan = dma_request_slave_channel(&pdev->dev, "tx");
++	host->rx_chan = dma_request_slave_channel(&pdev->dev, "rx");
++	if (!host->tx_chan || !host->rx_chan) {
++		dma_cap_mask_t mask;
++		unsigned tx_req, rx_req;
++
++		dev_err(mmc_dev(host->mmc), "falling back to manual DMA configuration\n");
++
++		dma_cap_zero(mask);
++		dma_cap_set(DMA_SLAVE, mask);
++
+ 		res = platform_get_resource_byname(pdev, IORESOURCE_DMA, "tx");
+ 		if (!res) {
+ 			dev_err(mmc_dev(host->mmc), "cannot get DMA TX channel\n");
+@@ -2141,6 +2149,12 @@ static int omap_hsmmc_probe(struct platform_device *pdev)
+ 			goto err_irq;
+ 		}
+ 		tx_req = res->start;
++		host->tx_chan = dma_request_channel(mask, omap_dma_filter_fn, &tx_req);
++		if (!host->rx_chan) {
++			dev_err(mmc_dev(host->mmc), "unable to obtain TX DMA engine channel %u\n", tx_req);
++			ret = -ENXIO;
++			goto err_irq;
++		}
+ 
+ 		res = platform_get_resource_byname(pdev, IORESOURCE_DMA, "rx");
+ 		if (!res) {
+@@ -2149,29 +2163,13 @@ static int omap_hsmmc_probe(struct platform_device *pdev)
+ 			goto err_irq;
+ 		}
+ 		rx_req = res->start;
+-	}
+-
+-	dma_cap_zero(mask);
+-	dma_cap_set(DMA_SLAVE, mask);
+-
+-	host->rx_chan =
+-		dma_request_slave_channel_compat(mask, omap_dma_filter_fn,
+-						 &rx_req, &pdev->dev, "rx");
++		host->tx_chan = dma_request_channel(mask, omap_dma_filter_fn, &rx_req);
+ 
+-	if (!host->rx_chan) {
+-		dev_err(mmc_dev(host->mmc), "unable to obtain RX DMA engine channel %u\n", rx_req);
+-		ret = -ENXIO;
+-		goto err_irq;
+-	}
+-
+-	host->tx_chan =
+-		dma_request_slave_channel_compat(mask, omap_dma_filter_fn,
+-						 &tx_req, &pdev->dev, "tx");
+-
+-	if (!host->tx_chan) {
+-		dev_err(mmc_dev(host->mmc), "unable to obtain TX DMA engine channel %u\n", tx_req);
+-		ret = -ENXIO;
+-		goto err_irq;
++		if (!host->tx_chan) {
++			dev_err(mmc_dev(host->mmc), "unable to obtain RX DMA engine channel %u\n", rx_req);
++			ret = -ENXIO;
++			goto err_irq;
++		}
+ 	}
+ 
+ 	/* Request IRQ for MMC operations */
+-- 
+2.7.0
+
