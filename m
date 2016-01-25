@@ -1,73 +1,74 @@
-From: Jisheng Zhang <jszhang-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>
-Subject: Re: [PATCH v3 00/12] mmc: use sdhci_pltfm_init for private
- allocation and clean up
-Date: Mon, 25 Jan 2016 19:09:12 +0800
-Message-ID: <20160125190912.001ee172@xhacker>
-References: <1452076303-1960-1-git-send-email-jszhang@marvell.com>
+From: Arend van Spriel <aspriel@gmail.com>
+Subject: Re: [PATCH] brcmfmac: sdio: Increase the default timeouts a bit
+Date: Mon, 25 Jan 2016 16:36:52 +0100
+Message-ID: <56A64114.3010400@gmail.com>
+References: <1453718849-3508-1-git-send-email-sjoerd.simons@collabora.co.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="US-ASCII"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1452076303-1960-1-git-send-email-jszhang-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>
-Sender: linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, arnd-r2nGTMty4D4@public.gmane.org, ludovic.desroches-AIFe0yeh4nAAvxtiuMwx3w@public.gmane.org, swarren-3lzwWm7+Weoh9ZMKESR00Q@public.gmane.org, lee-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, eric-WhKQ6XTQaPysTnJN9+BGXg@public.gmane.org, michal.simek-gjFFaj9aHVfQT0dZR+AlfA@public.gmane.org, soren.brinkmann-gjFFaj9aHVfQT0dZR+AlfA@public.gmane.org, srinivas.kandagatla-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org, maxime.coquelin-qxv4g6HH51o@public.gmane.org, patrice.chotard-qxv4g6HH51o@public.gmane.org, thierry.reding-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org, sebastian.hesselbarth-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org
-Cc: linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-rpi-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kernel-F5mvAk5X5gdBDgjK7y7TUQ@public.gmane.org, linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 8bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1453718849-3508-1-git-send-email-sjoerd.simons@collabora.co.uk>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Sjoerd Simons <sjoerd.simons@collabora.co.uk>, Kalle Valo <kvalo@codeaurora.org>
+Cc: Paul Stewart <pstew@chromium.org>, Doug Anderson <dianders@chromium.org>, linux-rockchip@lists.infradead.org, Arend van Spriel <arend@broadcom.com>, Pieter-Paul Giesberts <pieterpg@broadcom.com>, brcm80211-dev-list@broadcom.com, linux-wireless@vger.kernel.org, linux-kernel@vger.kernel.org, Hante Meuleman <meuleman@broadcom.com>, Brett Rudley <brudley@broadcom.com>, netdev@vger.kernel.org, "Franky (Zhenhui) Lin" <frankyl@broadcom.com>, Adrian Hunter <adrian.hunter@intel.com>, linux-mmc@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-Dear All,
+On 25-01-16 11:47, Sjoerd Simons wrote:
+> On a Radxa Rock2 board with a Ampak AP6335 (Broadcom 4339 core) it seems
+> the card responds very quickly most of the time, unfortunately during
+> initialisation it sometimes seems to take just a bit over 2 seconds to
+> respond.
+> 
+> This results intialization failing with message like:
+>   brcmf_c_preinit_dcmds: Retreiving cur_etheraddr failed, -52
+>   brcmf_bus_start: failed: -52
+>   brcmf_sdio_firmware_callback: dongle is not responding
+> 
+> Increasing the timeout to allow for a bit more headroom allows the
+> card to initialize reliably.
 
-On Wed, 6 Jan 2016 18:31:31 +0800 Jisheng Zhang wrote:
+I would prefer to know where the 2 second response time comes from.
+Could be sdio retuning. Maybe the chromeos people can comment whether
+this has been root caused.
 
-> These patches are to complete the TODOs in Commit 0e748234293f ("mmc:
-> sdhci: Add size for caller in init+register"), I.E:
-> 
-> - todo: migrate clients to using allocation this way
-> - todo: remove priv variable once migration is complete
+There is a mmc patch pending in which retuning procedure can be deferred
+by the driver. Using that API may resolve the issue as well and I would
+prefer that solution.
 
-What do you think about this series? Do I need to rebase on 4.5-rc1 then send
-a v4? Any suggestions are appreciated.
+> A quick search online after diagnosing/fixing this showed that Google
+> has a similar patch in their ChromeOS tree, so this doesn't seem
+> specific to the board I'm using.
 
-Thanks in advance,
-Jisheng
+As the retuning stuff is not in main line I guess we need this fix for
+now so...
 
+Acked-by: Arend van Spriel <arend@broadcom.com>
+> Signed-off-by: Sjoerd Simons <sjoerd.simons@collabora.co.uk>
 > 
-> Since v2:
->  - based on mmc next tree and remove all priv usage introduced in newly
->    commits in this tree
->  - don't break two lines if sdhci_pltfm_init() call could be put into
->    one line. Thank Ludovic Desroches.
+> ---
+Still would like to know whether it is firmware initialization or some
+mmc stack procedure. Any suggestions to debug this are welcome.
+
+Regards,
+Arend
+---
 > 
-> Since v1:
->  - add new patch03 to factorise sdhci_msm_pdata outisde of sdhci_msm_host.
->    This is to fix drivers/mmc/host/sdhci-msm.c:440:32: warning: 'msm_host'
->    is used uninitialized in this function [-Wuninitialized]
->  - Add Arnd's Ack for all patches except patch3 which is new in v2
+>  drivers/net/wireless/broadcom/brcm80211/brcmfmac/sdio.c | 4 ++--
+>  1 file changed, 2 insertions(+), 2 deletions(-)
 > 
-> 
-> Jisheng Zhang (12):
->   mmc: sdhci-bcm2835: use sdhci_pltfm_init for private allocation
->   mmc: sdhci-esdhc-imx: use sdhci_pltfm_init for private allocation
->   mmc: sdhci-msm: factorise sdhci_msm_pdata outisde of sdhci_msm_host
->   mmc: sdhci-msm: use sdhci_pltfm_init for private allocation
->   mmc: sdhci-of-arasan: use sdhci_pltfm_init for private allocation
->   mmc: sdhci-of-at91: use sdhci_pltfm_init for private allocation
->   mmc: sdhci-of-esdhc: use sdhci_pltfm_init for private allocation
->   mmc: sdhci-pxav3: use sdhci_pltfm_init for private allocation
->   mmc: sdhci-st: use sdhci_pltfm_init for private allocation
->   mmc: sdhci-tegra: use sdhci_pltfm_init for private allocation
->   mmc: sdhci-pxav2: remove unnecessary assignment of pltfm_host->priv
->   mmc: sdhci-pltfm: remove priv variable from sdhci_pltfm_host
-> 
->  drivers/mmc/host/sdhci-bcm2835.c   | 14 +++-----------
->  drivers/mmc/host/sdhci-esdhc-imx.c | 38 +++++++++++++++++---------------------
->  drivers/mmc/host/sdhci-msm.c       | 23 ++++++++++-------------
->  drivers/mmc/host/sdhci-of-arasan.c | 25 ++++++++++---------------
->  drivers/mmc/host/sdhci-of-at91.c   | 24 +++++++++---------------
->  drivers/mmc/host/sdhci-of-esdhc.c  | 19 +++++++++----------
->  drivers/mmc/host/sdhci-pltfm.h     |  1 -
->  drivers/mmc/host/sdhci-pxav2.c     |  1 -
->  drivers/mmc/host/sdhci-pxav3.c     | 20 ++++++++------------
->  drivers/mmc/host/sdhci-st.c        | 35 +++++++++++++++++------------------
->  drivers/mmc/host/sdhci-tegra.c     | 21 +++++++--------------
->  11 files changed, 90 insertions(+), 131 deletions(-)
+> diff --git a/drivers/net/wireless/broadcom/brcm80211/brcmfmac/sdio.c b/drivers/net/wireless/broadcom/brcm80211/brcmfmac/sdio.c
+> index dd66143..75ac4bd 100644
+> --- a/drivers/net/wireless/broadcom/brcm80211/brcmfmac/sdio.c
+> +++ b/drivers/net/wireless/broadcom/brcm80211/brcmfmac/sdio.c
+> @@ -45,8 +45,8 @@
+>  #include "chip.h"
+>  #include "firmware.h"
+>  
+> -#define DCMD_RESP_TIMEOUT	msecs_to_jiffies(2000)
+> -#define CTL_DONE_TIMEOUT	msecs_to_jiffies(2000)
+> +#define DCMD_RESP_TIMEOUT	msecs_to_jiffies(2500)
+> +#define CTL_DONE_TIMEOUT	msecs_to_jiffies(2500)
+>  
+>  #ifdef DEBUG
+>  
 > 
