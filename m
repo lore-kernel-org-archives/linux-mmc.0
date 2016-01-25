@@ -1,53 +1,43 @@
 From: Wolfram Sang <wsa@the-dreams.de>
-Subject: [PATCH 5/9] mmc: tmio: remove stale comments
-Date: Mon, 25 Jan 2016 20:15:12 +0100
-Message-ID: <1453749316-1848-6-git-send-email-wsa@the-dreams.de>
+Subject: [PATCH 2/9] mmc: sdhi: Add EXT_ACC register busy check
+Date: Mon, 25 Jan 2016 20:15:09 +0100
+Message-ID: <1453749316-1848-3-git-send-email-wsa@the-dreams.de>
 References: <1453749316-1848-1-git-send-email-wsa@the-dreams.de>
-Return-path: <linux-renesas-soc-owner@vger.kernel.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from sauhun.de ([89.238.76.85]:33068 "EHLO pokefinder.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1757639AbcAYTPW (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 25 Jan 2016 14:15:22 -0500
 In-Reply-To: <1453749316-1848-1-git-send-email-wsa@the-dreams.de>
-Sender: linux-renesas-soc-owner@vger.kernel.org
+Sender: linux-mmc-owner@vger.kernel.org
+List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org
 Cc: Wolfram Sang <wsa@the-dreams.de>, linux-renesas-soc@vger.kernel.org, linux-sh@vger.kernel.org, Kuninori Morimoto <kuninori.morimoto.gx@gmail.com>, Magnus Damm <magnus.damm@gmail.com>, Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>, Dirk Behme <dirk.behme@gmail.com>
-List-Id: linux-mmc@vger.kernel.org
 
-From: Wolfram Sang <wsa+renesas@sang-engineering.com>
+From: Shinobu Uehara <shinobu.uehara.xc@renesas.com>
 
-These don't make sense anymore. Since commit 5d60e500541ed1 ("mmc: tmio:
-add new TMIO_MMC_HAVE_HIGH_REG flags"), we don't deal with a resource
-here.
+All the docs I have access to say that this register needs the bus busy
+check.
 
+Signed-off-by: Shinobu Uehara <shinobu.uehara.xc@renesas.com>
+Signed-off-by: Ai Kyuse <ai.kyuse.uw@renesas.com>
 Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
 ---
- drivers/mmc/host/tmio_mmc_pio.c | 3 ---
- 1 file changed, 3 deletions(-)
+ drivers/mmc/host/sh_mobile_sdhi.c | 1 +
+ 1 file changed, 1 insertion(+)
 
-diff --git a/drivers/mmc/host/tmio_mmc_pio.c b/drivers/mmc/host/tmio_mmc_pio.c
-index ffff687e98b1e3..207e77a09cda51 100644
---- a/drivers/mmc/host/tmio_mmc_pio.c
-+++ b/drivers/mmc/host/tmio_mmc_pio.c
-@@ -178,7 +178,6 @@ static void tmio_mmc_set_clock(struct tmio_mmc_host *host,
+diff --git a/drivers/mmc/host/sh_mobile_sdhi.c b/drivers/mmc/host/sh_mobile_sdhi.c
+index 354f4f335ed57a..61671f3fa09a11 100644
+--- a/drivers/mmc/host/sh_mobile_sdhi.c
++++ b/drivers/mmc/host/sh_mobile_sdhi.c
+@@ -163,6 +163,7 @@ static int sh_mobile_sdhi_write16_hook(struct tmio_mmc_host *host, int addr)
+ 	case CTL_SD_MEM_CARD_OPT:
+ 	case CTL_TRANSACTION_CTL:
+ 	case CTL_DMA_ENABLE:
++	case EXT_ACC:
+ 		return sh_mobile_sdhi_wait_idle(host);
+ 	}
  
- static void tmio_mmc_clk_stop(struct tmio_mmc_host *host)
- {
--	/* implicit BUG_ON(!res) */
- 	if (host->pdata->flags & TMIO_MMC_HAVE_HIGH_REG) {
- 		sd_ctrl_write16(host, CTL_CLK_AND_WAIT_CTL, 0x0000);
- 		msleep(10);
-@@ -195,7 +194,6 @@ static void tmio_mmc_clk_start(struct tmio_mmc_host *host)
- 		sd_ctrl_read16(host, CTL_SD_CARD_CLK_CTL));
- 	msleep(host->pdata->flags & TMIO_MMC_FAST_CLK_CHG ? 1 : 10);
- 
--	/* implicit BUG_ON(!res) */
- 	if (host->pdata->flags & TMIO_MMC_HAVE_HIGH_REG) {
- 		sd_ctrl_write16(host, CTL_CLK_AND_WAIT_CTL, 0x0100);
- 		msleep(10);
-@@ -206,7 +204,6 @@ static void tmio_mmc_reset(struct tmio_mmc_host *host)
- {
- 	/* FIXME - should we set stop clock reg here */
- 	sd_ctrl_write16(host, CTL_RESET_SD, 0x0000);
--	/* implicit BUG_ON(!res) */
- 	if (host->pdata->flags & TMIO_MMC_HAVE_HIGH_REG)
- 		sd_ctrl_write16(host, CTL_RESET_SDIO, 0x0000);
- 	msleep(10);
 -- 
 2.1.4
+
