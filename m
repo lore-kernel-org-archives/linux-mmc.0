@@ -1,39 +1,121 @@
-From: Wolfram Sang <wsa@the-dreams.de>
-Subject: [PATCH] mmc: mmc_test: mention that '0' runs all tests
-Date: Mon, 25 Jan 2016 20:20:04 +0100
-Message-ID: <1453749604-2236-1-git-send-email-wsa@the-dreams.de>
+From: Doug Anderson <dianders@chromium.org>
+Subject: Re: [PATCH] brcmfmac: sdio: Increase the default timeouts a bit
+Date: Mon, 25 Jan 2016 11:23:04 -0800
+Message-ID: <CAD=FV=X-ejMLnh30TofU7dKP5WwZaXcgLaQwFs__wo9wHsv53Q@mail.gmail.com>
+References: <1453718849-3508-1-git-send-email-sjoerd.simons@collabora.co.uk>
+	<56A64114.3010400@gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from sauhun.de ([89.238.76.85]:33219 "EHLO pokefinder.org"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1757489AbcAYTUQ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 25 Jan 2016 14:20:16 -0500
+Received: from mail-yk0-f170.google.com ([209.85.160.170]:34128 "EHLO
+	mail-yk0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1757808AbcAYTXF (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 25 Jan 2016 14:23:05 -0500
+Received: by mail-yk0-f170.google.com with SMTP id a85so173083027ykb.1
+        for <linux-mmc@vger.kernel.org>; Mon, 25 Jan 2016 11:23:04 -0800 (PST)
+In-Reply-To: <56A64114.3010400@gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: Wolfram Sang <wsa@the-dreams.de>, linux-renesas-soc@vger.kernel.org, Kuninori Morimoto <kuninori.morimoto.gx@gmail.com>, Magnus Damm <magnus.damm@gmail.com>, Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>, Dirk Behme <dirk.behme@gmail.com>
+To: Arend van Spriel <aspriel@gmail.com>
+Cc: Sjoerd Simons <sjoerd.simons@collabora.co.uk>, Kalle Valo <kvalo@codeaurora.org>, Paul Stewart <pstew@chromium.org>, "open list:ARM/Rockchip SoC..." <linux-rockchip@lists.infradead.org>, Arend van Spriel <arend@broadcom.com>, Pieter-Paul Giesberts <pieterpg@broadcom.com>, brcm80211-dev-list@broadcom.com, "linux-wireless@vger.kernel.org" <linux-wireless@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Hante Meuleman <meuleman@broadcom.com>, Brett Rudley <brudley@broadcom.com>, netdev@vger.kernel.org, "Franky (Zhenhui) Lin" <frankyl@broadcom.com>, Adrian Hunter <adrian.hunter@intel.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-From: Wolfram Sang <wsa+renesas@sang-engineering.com>
+Hi,
 
-I had to use the source to determine what I need to write to 'test' so
-that all tests are run. Let's mention this explicitly in 'testlist'.
+On Mon, Jan 25, 2016 at 7:36 AM, Arend van Spriel <aspriel@gmail.com> wrote:
+> On 25-01-16 11:47, Sjoerd Simons wrote:
+>> On a Radxa Rock2 board with a Ampak AP6335 (Broadcom 4339 core) it seems
+>> the card responds very quickly most of the time, unfortunately during
+>> initialisation it sometimes seems to take just a bit over 2 seconds to
+>> respond.
+>>
+>> This results intialization failing with message like:
+>>   brcmf_c_preinit_dcmds: Retreiving cur_etheraddr failed, -52
+>>   brcmf_bus_start: failed: -52
+>>   brcmf_sdio_firmware_callback: dongle is not responding
+>>
+>> Increasing the timeout to allow for a bit more headroom allows the
+>> card to initialize reliably.
+>
+> I would prefer to know where the 2 second response time comes from.
+> Could be sdio retuning. Maybe the chromeos people can comment whether
+> this has been root caused.
 
-Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
----
- drivers/mmc/card/mmc_test.c | 1 +
- 1 file changed, 1 insertion(+)
+I reviewed Paul's change here
+<https://chromium-review.googlesource.com/#/c/225921/> but didn't do
+any root causing.
 
-diff --git a/drivers/mmc/card/mmc_test.c b/drivers/mmc/card/mmc_test.c
-index 7fc9174d46191a..c032eef45762c1 100644
---- a/drivers/mmc/card/mmc_test.c
-+++ b/drivers/mmc/card/mmc_test.c
-@@ -2829,6 +2829,7 @@ static int mtf_testlist_show(struct seq_file *sf, void *data)
- 
- 	mutex_lock(&mmc_test_lock);
- 
-+	seq_printf(sf, "0:\tRun all tests\n");
- 	for (i = 0; i < ARRAY_SIZE(mmc_test_cases); i++)
- 		seq_printf(sf, "%d:\t%s\n", i+1, mmc_test_cases[i].name);
- 
--- 
-2.1.4
+I think that, like Sjoerd saw, we were seeing this problem at boot
+time.  Certainly at boot time lots of things are happening all at the
+same time in the system and there are often delays, so anything that
+might have been close to timing out in the past may now be actually
+timing out.
 
+This is the kind of thing that, IMHO, should have a real timeout that
+is 10x what was expected and a non-fatal warning whenever we go over
+the expected time.  ...but maybe that's overdesign.  :-P
+
+Kinda curious: do we get one or two really slow responses on every
+bootup, or just some bootups?  Do we ever succeed even with a slow
+(like 1.8 or 1.9 seconds) response, or is it always either "fast" or
+"2.1" seconds?
+
+
+In any case, in my experience the Broadcom firmware is fairly
+complicated and has numerous cases where it stretches SDIO more than
+the other SDIO WiFi chip I've worked with.  It wouldn't terribly
+surprise me if there was a period of time during bootup where it was
+non-responsive for 2 seconds.  As unrelated "evidence" showing some of
+the Broadcom SDIO limitations, you can see
+<https://chromium-review.googlesource.com/#/c/250228/> and also the
+fact that Broadcom often holds the SDIO "busy" signal whereas the
+other SDIO WiFi chip I've worked never did that.  Also, even with all
+fixes the Broadcom WiFi module will still show periodic SDIO errors
+that the higher level driver just knows to ignore.
+
+My old debugging from the (sorry, private) bug
+http://crosbug.com/p/36975 showed this periodically even with all
+known fixes:
+
+[21310.271635] dwmmc_rockchip ff0d0000.dwmmc: CMD ERR: 0x00000104
+[21550.583598] dwmmc_rockchip ff0d0000.dwmmc: CMD ERR: 0x00000104
+[21550.616035] brcmfmac: brcmf_sdio_readframes: RXHEADER FAILED: -110
+[21550.648460] brcmfmac: brcmf_sdio_rxfail: abort command, terminate
+frame, send NAK
+[21550.683502] dwmmc_rockchip ff0d0000.dwmmc: CMD ERR: 0x00000104
+[21550.691214] dwmmc_rockchip ff0d0000.dwmmc: CMD ERR: 0x00000100
+[22671.121329] dwmmc_rockchip ff0d0000.dwmmc: CMD ERR: 0x00000104
+[22671.153167] dwmmc_rockchip ff0d0000.dwmmc: CMD ERR: 0x01000104
+[22671.184581] brcmfmac: brcmf_sdio_readframes: RXHEADER FAILED: -110
+[22671.192600] brcmfmac: brcmf_sdio_rxfail: abort command, terminate
+frame, send NAK
+[22671.201929] dwmmc_rockchip ff0d0000.dwmmc: CMD ERR: 0x00000114
+[22671.209536] dwmmc_rockchip ff0d0000.dwmmc: CMD ERR: 0x00000100
+[28463.941736] dwmmc_rockchip ff0d0000.dwmmc: CMD ERR: 0x00000104
+
+At the time dekim@ responded:
+
+> There are several sleep/wake control at different level. The one we're talking
+> about here is controlled by brcmf_sdio_bus_sleep() in the host driver to turn
+> on/off bus core on the chip. There can be a period of time when chip is not
+> paying attention to the host command (cmd52 to the
+> SBSDIO_FUNC1_SLEEPCSR).
+
+...and we decided that the periodic SDIO errors weren't causing any
+huge problems (since they were retried).  As far as I know, they still
+happen today.
+
+
+All of the above may not help you, but it serves as evidence that the
+SDIO communication to Broadcom isn't terribly amazing and apparently
+that's just the way that the module (or perhaps its firmware) is
+designed.  It doesn't seem to affect anything in the real world, so I
+suppose it is just something we need to live with.
+
+
+Obviously if you have access to the firmware source code and can debug
+further, that would be awesome.  I'm just not hopeful.
+
+
+In any case:
+
+Reviewed-by: Douglas Anderson <dianders@chromium.org>
