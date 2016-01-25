@@ -1,41 +1,39 @@
-From: Masahiro Yamada <yamada.masahiro@socionext.com>
-Subject: [MMC question] make sure to receive mrq->data->sg_len == 1
-Date: Mon, 25 Jan 2016 02:32:33 +0900
-Message-ID: <CAK7LNAR0QZN72SmTGx8OtAgJ-Ju4MV_oXGsaD01BKsqNOiDedA@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Russell King - ARM Linux <linux@arm.linux.org.uk>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+From: Shawn Lin <shawn.lin@rock-chips.com>
+Subject: [PATCH] mmc: dw_mmc: remove repetitive clear interrupt
+Date: Mon, 25 Jan 2016 09:13:40 +0800
+Message-ID: <1453684420-1860-1-git-send-email-shawn.lin@rock-chips.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from lucky1.263xmail.com ([211.157.147.132]:33960 "EHLO
+	lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751763AbcAYBSu (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 24 Jan 2016 20:18:50 -0500
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Jaehoon Chung <jh80.chung@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Shawn Lin <shawn.lin@rock-chips.com>
 
-Hi.
+This patch remove repetitive clear interrupt while
+probing dw_mmc.
 
+Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
+---
 
-I am tackling on an MMC host controller driver for the first time.
-Forgive my newbie question.
+ drivers/mmc/host/dw_mmc.c | 1 -
+ 1 file changed, 1 deletion(-)
 
-
-The DMA engine on my MMC host is so simple
-that it can only handle one physically contiguous region
-during one CMD18/CMD25 sequence.
-
-
-In other words, it would be very troublesome for the driver
-to receive two scatter-list entries or more.
-(mrq->data->sg_len > 1).
-
-
-I have not deeply dived into the MMC subsystem,
-but my first guess is that "max_segs" and "max_seg_size"
-are related parameters for controlling the
-number of the entries and total size of the scatter-list,
-respectively.
-Is this correct?
-
-
-
+diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+index 7128351..1991872 100644
+--- a/drivers/mmc/host/dw_mmc.c
++++ b/drivers/mmc/host/dw_mmc.c
+@@ -3117,7 +3117,6 @@ int dw_mci_probe(struct dw_mci *host)
+ 	 * Enable interrupts for command done, data over, data empty,
+ 	 * receive ready and error such as transmit, receive timeout, crc error
+ 	 */
+-	mci_writel(host, RINTSTS, 0xFFFFFFFF);
+ 	mci_writel(host, INTMASK, SDMMC_INT_CMD_DONE | SDMMC_INT_DATA_OVER |
+ 		   SDMMC_INT_TXDR | SDMMC_INT_RXDR |
+ 		   DW_MCI_ERROR_FLAGS);
 -- 
-Best Regards
-Masahiro Yamada
+2.3.7
+
+
