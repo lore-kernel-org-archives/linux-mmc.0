@@ -1,30 +1,63 @@
-From: =?utf-8?B?U8O2cmVu?= Brinkmann <soren.brinkmann@xilinx.com>
-Subject: Re: [PATCH v4 05/13] mmc: sdhci-of-arasan: fix clk issue in
- sdhci_arasan_remove()
-Date: Tue, 26 Jan 2016 10:30:56 -0800
-Message-ID: <20160126183056.GH12716@xsjsorenbubuntu>
-References: <1453803353-6266-1-git-send-email-jszhang@marvell.com>
- <1453803353-6266-6-git-send-email-jszhang@marvell.com>
+From: Tony Lindgren <tony@atomide.com>
+Subject: Re: [PATCH v2] mmc: omap_hsmmc: don't print uninitialized variables
+Date: Tue, 26 Jan 2016 11:37:15 -0800
+Message-ID: <20160126193714.GA19432@atomide.com>
+References: <3411189.gO0215GrNM@wuerfel>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from muru.com ([72.249.23.125]:57706 "EHLO muru.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1750722AbcAZThS (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 26 Jan 2016 14:37:18 -0500
 Content-Disposition: inline
-In-Reply-To: <1453803353-6266-6-git-send-email-jszhang@marvell.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Jisheng Zhang <jszhang@marvell.com>
-Cc: ulf.hansson@linaro.org, arnd@arndb.de, ludovic.desroches@atmel.com, swarren@wwwdotorg.org, lee@kernel.org, eric@anholt.net, michal.simek@xilinx.com, srinivas.kandagatla@gmail.com, maxime.coquelin@st.com, patrice.chotard@st.com, thierry.reding@gmail.com, sebastian.hesselbarth@gmail.com, kernel@stlinux.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-rpi-kernel@lists.infradead.org, linux-tegra@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+In-Reply-To: <3411189.gO0215GrNM@wuerfel>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Arnd Bergmann <arnd@arndb.de>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-arm-kernel@lists.infradead.org, Kishon Vijay Abraham I <kishon@ti.com>, Andreas Fenkart <afenkart@gmail.com>, Roger Quadros <rogerq@ti.com>, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, linux-kernel@vger.kernel.org, Peter Ujfalusi <peter.ujfalusi@ti.com>
 
-On Tue, 2016-01-26 at 06:15PM +0800, Jisheng Zhang wrote:
-> sdhci_pltfm_unregister() could operate host's registers, it will caus=
-e
-> problems if the clk is already disabled and unprepared. Fix this issu=
-e
-> by moving the clk_disable_unprepare() call to the end of remove
-> function.
->=20
-> Signed-off-by: Jisheng Zhang <jszhang@marvell.com>
-Acked-by: S=C3=B6ren Brinkmann <soren.brinkmann@xilinx.com>
+* Arnd Bergmann <arnd@arndb.de> [160126 07:28]:
+> When DT based probing is used but the DMA request fails, the
+> driver will print uninitialized stack data from the rx_req
+> and tx_req variables, as indicated by this warning:
+> 
+> drivers/mmc/host/omap_hsmmc.c: In function 'omap_hsmmc_probe':
+> drivers/mmc/host/omap_hsmmc.c:2162:3: warning: 'rx_req' may be used uninitialized in this function [-Wmaybe-uninitialized]
+>    dev_err(mmc_dev(host->mmc), "unable to obtain RX DMA engine channel %u\n", rx_req);
+> 
+> This removes the DMA request line number from the warning, which
+> is the easiest solution and won't hurt us any more as we are
+> planning to remove the legacy code path anyway.
+> 
+> Signed-off-by: Arnd Bergmann <arnd@arndb.de>
+> ---
+> A simpler patch as v1 with the same result, as suggested by Peter Ujfalusi.
 
-	S=C3=B6ren
+Looks OK to me:
+
+Acked-by: Tony Lindgren <tony@atomide.com>
+
+> diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
+> index b6639ea0bf18..87f0d840a166 100644
+> --- a/drivers/mmc/host/omap_hsmmc.c
+> +++ b/drivers/mmc/host/omap_hsmmc.c
+> @@ -2159,7 +2159,7 @@ static int omap_hsmmc_probe(struct platform_device *pdev)
+>  						 &rx_req, &pdev->dev, "rx");
+>  
+>  	if (!host->rx_chan) {
+> -		dev_err(mmc_dev(host->mmc), "unable to obtain RX DMA engine channel %u\n", rx_req);
+> +		dev_err(mmc_dev(host->mmc), "unable to obtain RX DMA engine channel\n");
+>  		ret = -ENXIO;
+>  		goto err_irq;
+>  	}
+> @@ -2169,7 +2169,7 @@ static int omap_hsmmc_probe(struct platform_device *pdev)
+>  						 &tx_req, &pdev->dev, "tx");
+>  
+>  	if (!host->tx_chan) {
+> -		dev_err(mmc_dev(host->mmc), "unable to obtain TX DMA engine channel %u\n", tx_req);
+> +		dev_err(mmc_dev(host->mmc), "unable to obtain TX DMA engine channel\n");
+>  		ret = -ENXIO;
+>  		goto err_irq;
+>  	}
+> 
