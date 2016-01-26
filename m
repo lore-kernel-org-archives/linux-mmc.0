@@ -1,114 +1,98 @@
-From: Jisheng Zhang <jszhang-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>
-Subject: [PATCH v4 07/13] mmc: sdhci-of-at91: use sdhci_pltfm_init for private allocation
-Date: Tue, 26 Jan 2016 18:15:47 +0800
-Message-ID: <1453803353-6266-8-git-send-email-jszhang@marvell.com>
+From: Jisheng Zhang <jszhang@marvell.com>
+Subject: [PATCH v4 08/13] mmc: sdhci-of-esdhc: use sdhci_pltfm_init for private allocation
+Date: Tue, 26 Jan 2016 18:15:48 +0800
+Message-ID: <1453803353-6266-9-git-send-email-jszhang@marvell.com>
 References: <1453803353-6266-1-git-send-email-jszhang@marvell.com>
 Mime-Version: 1.0
 Content-Type: text/plain
-Return-path: <linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1453803353-6266-1-git-send-email-jszhang-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>
-Sender: linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, arnd-r2nGTMty4D4@public.gmane.org, ludovic.desroches-AIFe0yeh4nAAvxtiuMwx3w@public.gmane.org, swarren-3lzwWm7+Weoh9ZMKESR00Q@public.gmane.org, lee-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, eric-WhKQ6XTQaPysTnJN9+BGXg@public.gmane.org, michal.simek-gjFFaj9aHVfQT0dZR+AlfA@public.gmane.org, soren.brinkmann-gjFFaj9aHVfQT0dZR+AlfA@public.gmane.org, srinivas.kandagatla-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org, maxime.coquelin-qxv4g6HH51o@public.gmane.org, patrice.chotard-qxv4g6HH51o@public.gmane.org, thierry.reding-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org, sebastian.hesselbarth-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org
-Cc: kernel-F5mvAk5X5gdBDgjK7y7TUQ@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-rpi-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, Jisheng Zhang <jszhang-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1453803353-6266-1-git-send-email-jszhang@marvell.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: ulf.hansson@linaro.org, arnd@arndb.de, ludovic.desroches@atmel.com, swarren@wwwdotorg.org, lee@kernel.org, eric@anholt.net, michal.simek@xilinx.com, soren.brinkmann@xilinx.com, srinivas.kandagatla@gmail.com, maxime.coquelin@st.com, patrice.chotard@st.com, thierry.reding@gmail.com, sebastian.hesselbarth@gmail.com
+Cc: kernel@stlinux.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-rpi-kernel@lists.infradead.org, linux-tegra@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Jisheng Zhang <jszhang@marvell.com>
 List-Id: linux-mmc@vger.kernel.org
 
 Commit 0e748234293f ("mmc: sdhci: Add size for caller in init+register")
 allows users of sdhci_pltfm to allocate private space in calls to
 sdhci_pltfm_init+sdhci_pltfm_register. This patch migrates the
-sdhci-of-at91 driver to this allocation.
+sdhci-of-esdhc driver to this allocation.
 
-Signed-off-by: Jisheng Zhang <jszhang-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>
-Acked-by: Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>
-Acked-by: Ludovic Desroches <ludovic.desroches-AIFe0yeh4nAAvxtiuMwx3w@public.gmane.org>
+Signed-off-by: Jisheng Zhang <jszhang@marvell.com>
+Acked-by: Arnd Bergmann <arnd@arndb.de>
 ---
- drivers/mmc/host/sdhci-of-at91.c | 33 +++++++++++++++------------------
- 1 file changed, 15 insertions(+), 18 deletions(-)
+ drivers/mmc/host/sdhci-of-esdhc.c | 19 +++++++++----------
+ 1 file changed, 9 insertions(+), 10 deletions(-)
 
-diff --git a/drivers/mmc/host/sdhci-of-at91.c b/drivers/mmc/host/sdhci-of-at91.c
-index 7e7d8f0..7db7163 100644
---- a/drivers/mmc/host/sdhci-of-at91.c
-+++ b/drivers/mmc/host/sdhci-of-at91.c
-@@ -58,7 +58,7 @@ static int sdhci_at91_runtime_suspend(struct device *dev)
+diff --git a/drivers/mmc/host/sdhci-of-esdhc.c b/drivers/mmc/host/sdhci-of-esdhc.c
+index 83b1226..3f34d35 100644
+--- a/drivers/mmc/host/sdhci-of-esdhc.c
++++ b/drivers/mmc/host/sdhci-of-esdhc.c
+@@ -49,7 +49,7 @@ static u32 esdhc_readl_fixup(struct sdhci_host *host,
+ 				     int spec_reg, u32 value)
  {
- 	struct sdhci_host *host = dev_get_drvdata(dev);
  	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
--	struct sdhci_at91_priv *priv = pltfm_host->priv;
-+	struct sdhci_at91_priv *priv = sdhci_pltfm_priv(pltfm_host);
- 	int ret;
+-	struct sdhci_esdhc *esdhc = pltfm_host->priv;
++	struct sdhci_esdhc *esdhc = sdhci_pltfm_priv(pltfm_host);
+ 	u32 ret;
  
- 	ret = sdhci_runtime_suspend_host(host);
-@@ -74,7 +74,7 @@ static int sdhci_at91_runtime_resume(struct device *dev)
- {
- 	struct sdhci_host *host = dev_get_drvdata(dev);
- 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
--	struct sdhci_at91_priv *priv = pltfm_host->priv;
-+	struct sdhci_at91_priv *priv = sdhci_pltfm_priv(pltfm_host);
- 	int ret;
- 
- 	ret = clk_prepare_enable(priv->mainck);
-@@ -124,11 +124,12 @@ static int sdhci_at91_probe(struct platform_device *pdev)
- 		return -EINVAL;
- 	soc_data = match->data;
- 
--	priv = devm_kzalloc(&pdev->dev, sizeof(*priv), GFP_KERNEL);
--	if (!priv) {
--		dev_err(&pdev->dev, "unable to allocate private data\n");
--		return -ENOMEM;
--	}
-+	host = sdhci_pltfm_init(pdev, soc_data, sizeof(*priv));
-+	if (IS_ERR(host))
-+		return PTR_ERR(host);
-+
-+	pltfm_host = sdhci_priv(host);
-+	priv = sdhci_pltfm_priv(pltfm_host);
- 
- 	priv->mainck = devm_clk_get(&pdev->dev, "baseclk");
- 	if (IS_ERR(priv->mainck)) {
-@@ -148,10 +149,6 @@ static int sdhci_at91_probe(struct platform_device *pdev)
- 		return PTR_ERR(priv->gck);
- 	}
- 
--	host = sdhci_pltfm_init(pdev, soc_data, 0);
--	if (IS_ERR(host))
--		return PTR_ERR(host);
--
  	/*
- 	 * The mult clock is provided by as a generated clock by the PMC
- 	 * controller. In order to set the rate of gck, we have to get the
-@@ -191,9 +188,6 @@ static int sdhci_at91_probe(struct platform_device *pdev)
- 	clk_prepare_enable(priv->mainck);
- 	clk_prepare_enable(priv->gck);
- 
--	pltfm_host = sdhci_priv(host);
--	pltfm_host->priv = priv;
--
- 	ret = mmc_of_parse(host->mmc);
- 	if (ret)
- 		goto clocks_disable_unprepare;
-@@ -230,7 +224,10 @@ static int sdhci_at91_remove(struct platform_device *pdev)
+@@ -354,7 +354,7 @@ static void esdhc_le_writeb(struct sdhci_host *host, u8 val, int reg)
+ static void esdhc_of_adma_workaround(struct sdhci_host *host, u32 intmask)
  {
- 	struct sdhci_host	*host = platform_get_drvdata(pdev);
- 	struct sdhci_pltfm_host	*pltfm_host = sdhci_priv(host);
--	struct sdhci_at91_priv	*priv = pltfm_host->priv;
-+	struct sdhci_at91_priv	*priv = sdhci_pltfm_priv(pltfm_host);
-+	struct clk *gck = priv->gck;
-+	struct clk *hclock = priv->hclock;
-+	struct clk *mainck = priv->mainck;
+ 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+-	struct sdhci_esdhc *esdhc = pltfm_host->priv;
++	struct sdhci_esdhc *esdhc = sdhci_pltfm_priv(pltfm_host);
+ 	bool applicable;
+ 	dma_addr_t dmastart;
+ 	dma_addr_t dmanow;
+@@ -404,7 +404,7 @@ static unsigned int esdhc_of_get_min_clock(struct sdhci_host *host)
+ static void esdhc_of_set_clock(struct sdhci_host *host, unsigned int clock)
+ {
+ 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+-	struct sdhci_esdhc *esdhc = pltfm_host->priv;
++	struct sdhci_esdhc *esdhc = sdhci_pltfm_priv(pltfm_host);
+ 	int pre_div = 1;
+ 	int div = 1;
+ 	u32 temp;
+@@ -569,15 +569,12 @@ static void esdhc_init(struct platform_device *pdev, struct sdhci_host *host)
+ 	u16 host_ver;
  
- 	pm_runtime_get_sync(&pdev->dev);
- 	pm_runtime_disable(&pdev->dev);
-@@ -238,9 +235,9 @@ static int sdhci_at91_remove(struct platform_device *pdev)
+ 	pltfm_host = sdhci_priv(host);
+-	esdhc = devm_kzalloc(&pdev->dev, sizeof(struct sdhci_esdhc),
+-			     GFP_KERNEL);
++	esdhc = sdhci_pltfm_priv(pltfm_host);
  
- 	sdhci_pltfm_unregister(pdev);
- 
--	clk_disable_unprepare(priv->gck);
--	clk_disable_unprepare(priv->hclock);
--	clk_disable_unprepare(priv->mainck);
-+	clk_disable_unprepare(gck);
-+	clk_disable_unprepare(hclock);
-+	clk_disable_unprepare(mainck);
- 
- 	return 0;
+ 	host_ver = sdhci_readw(host, SDHCI_HOST_VERSION);
+ 	esdhc->vendor_ver = (host_ver & SDHCI_VENDOR_VER_MASK) >>
+ 			     SDHCI_VENDOR_VER_SHIFT;
+ 	esdhc->spec_ver = host_ver & SDHCI_SPEC_VER_MASK;
+-
+-	pltfm_host->priv = esdhc;
  }
+ 
+ static int sdhci_esdhc_probe(struct platform_device *pdev)
+@@ -591,9 +588,11 @@ static int sdhci_esdhc_probe(struct platform_device *pdev)
+ 	np = pdev->dev.of_node;
+ 
+ 	if (of_get_property(np, "little-endian", NULL))
+-		host = sdhci_pltfm_init(pdev, &sdhci_esdhc_le_pdata, 0);
++		host = sdhci_pltfm_init(pdev, &sdhci_esdhc_le_pdata,
++					sizeof(struct sdhci_esdhc));
+ 	else
+-		host = sdhci_pltfm_init(pdev, &sdhci_esdhc_be_pdata, 0);
++		host = sdhci_pltfm_init(pdev, &sdhci_esdhc_be_pdata,
++					sizeof(struct sdhci_esdhc));
+ 
+ 	if (IS_ERR(host))
+ 		return PTR_ERR(host);
+@@ -603,7 +602,7 @@ static int sdhci_esdhc_probe(struct platform_device *pdev)
+ 	sdhci_get_of_property(pdev);
+ 
+ 	pltfm_host = sdhci_priv(host);
+-	esdhc = pltfm_host->priv;
++	esdhc = sdhci_pltfm_priv(pltfm_host);
+ 	if (esdhc->vendor_ver == VENDOR_V_22)
+ 		host->quirks2 |= SDHCI_QUIRK2_HOST_NO_CMD23;
+ 
 -- 
 2.7.0
