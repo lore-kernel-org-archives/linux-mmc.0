@@ -1,73 +1,109 @@
 From: Jisheng Zhang <jszhang@marvell.com>
-Subject: [PATCH v4 01/13] mmc: sdhci-bcm2835: use sdhci_pltfm_init for private
- allocation
-Date: Tue, 26 Jan 2016 18:15:41 +0800
-Message-ID: <1453803353-6266-2-git-send-email-jszhang@marvell.com>
+Subject: [PATCH v4 09/13] mmc: sdhci-pxav3: use sdhci_pltfm_init for private allocation
+Date: Tue, 26 Jan 2016 18:15:49 +0800
+Message-ID: <1453803353-6266-10-git-send-email-jszhang@marvell.com>
 References: <1453803353-6266-1-git-send-email-jszhang@marvell.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+Content-Type: text/plain
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mx0a-0016f401.pphosted.com ([67.231.148.174]:38926 "EHLO
+	mx0a-0016f401.pphosted.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S965076AbcAZKUn (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 26 Jan 2016 05:20:43 -0500
 In-Reply-To: <1453803353-6266-1-git-send-email-jszhang@marvell.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: ulf.hansson@linaro.org, arnd@arndb.de, ludovic.desroches@atmel.com, swarren@wwwdotorg.org, lee@kernel.org, eric@anholt.net, michal.simek@xilinx.com, soren.brinkmann@xilinx.com, srinivas.kandagatla@gmail.com, maxime.coquelin@st.com, patrice.chotard@st.com, thierry.reding@gmail.com, sebastian.hesselbarth@gmail.com
-Cc: Jisheng Zhang <jszhang@marvell.com>, kernel@stlinux.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-rpi-kernel@lists.infradead.org, linux-tegra@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: ulf.hansson@linaro.org, arnd@arndb.de, ludovic.desroches@atmel.com, swarren@wwwdotorg.org, lee@kernel.org, eric@anholt.net, michal.simek@xilinx.com, soren.brinkmann@xilinx.com, srinivas.kandagatla@gmail.com, maxime.coquelin@st.com, patrice.chotard@st.com, thierry.reding@gmail.com, sebastian.hesselbarth@gmail.com
+Cc: kernel@stlinux.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-rpi-kernel@lists.infradead.org, linux-tegra@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Jisheng Zhang <jszhang@marvell.com>
 
 Commit 0e748234293f ("mmc: sdhci: Add size for caller in init+register")
 allows users of sdhci_pltfm to allocate private space in calls to
-sdhci_pltfm_init+sdhci_pltfm_register. This patch migrates sdhci-bcm2835
+sdhci_pltfm_init+sdhci_pltfm_register. This patch migrates sdhci-pxav3
 to this allocation.
 
 Signed-off-by: Jisheng Zhang <jszhang@marvell.com>
 Acked-by: Arnd Bergmann <arnd@arndb.de>
 ---
- drivers/mmc/host/sdhci-bcm2835.c | 14 +++-----------
- 1 file changed, 3 insertions(+), 11 deletions(-)
+ drivers/mmc/host/sdhci-pxav3.c | 20 ++++++++------------
+ 1 file changed, 8 insertions(+), 12 deletions(-)
 
-diff --git a/drivers/mmc/host/sdhci-bcm2835.c b/drivers/mmc/host/sdhci-bcm2835.c
-index 1c65d46..4a6a1d1 100644
---- a/drivers/mmc/host/sdhci-bcm2835.c
-+++ b/drivers/mmc/host/sdhci-bcm2835.c
-@@ -74,7 +74,7 @@ static inline u32 bcm2835_sdhci_readl(struct sdhci_host *host, int reg)
- static void bcm2835_sdhci_writew(struct sdhci_host *host, u16 val, int reg)
+diff --git a/drivers/mmc/host/sdhci-pxav3.c b/drivers/mmc/host/sdhci-pxav3.c
+index f5edf9d..c88d2ba 100644
+--- a/drivers/mmc/host/sdhci-pxav3.c
++++ b/drivers/mmc/host/sdhci-pxav3.c
+@@ -132,7 +132,7 @@ static int armada_38x_quirks(struct platform_device *pdev,
+ {
+ 	struct device_node *np = pdev->dev.of_node;
+ 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+-	struct sdhci_pxa *pxa = pltfm_host->priv;
++	struct sdhci_pxa *pxa = sdhci_pltfm_priv(pltfm_host);
+ 	struct resource *res;
+ 
+ 	host->quirks &= ~SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN;
+@@ -201,7 +201,7 @@ static void pxav3_reset(struct sdhci_host *host, u8 mask)
+ static void pxav3_gen_init_74_clocks(struct sdhci_host *host, u8 power_mode)
  {
  	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
--	struct bcm2835_sdhci *bcm2835_host = pltfm_host->priv;
-+	struct bcm2835_sdhci *bcm2835_host = sdhci_pltfm_priv(pltfm_host);
- 	u32 oldval = (reg == SDHCI_COMMAND) ? bcm2835_host->shadow :
- 		bcm2835_sdhci_readl(host, reg & ~3);
- 	u32 word_num = (reg >> 1) & 1;
-@@ -152,20 +152,12 @@ static int bcm2835_sdhci_probe(struct platform_device *pdev)
- 	struct sdhci_pltfm_host *pltfm_host;
+-	struct sdhci_pxa *pxa = pltfm_host->priv;
++	struct sdhci_pxa *pxa = sdhci_pltfm_priv(pltfm_host);
+ 	u16 tmp;
+ 	int count;
+ 
+@@ -250,7 +250,7 @@ static void pxav3_gen_init_74_clocks(struct sdhci_host *host, u8 power_mode)
+ static void pxav3_set_uhs_signaling(struct sdhci_host *host, unsigned int uhs)
+ {
+ 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+-	struct sdhci_pxa *pxa = pltfm_host->priv;
++	struct sdhci_pxa *pxa = sdhci_pltfm_priv(pltfm_host);
+ 	u16 ctrl_2;
+ 
+ 	/*
+@@ -370,16 +370,12 @@ static int sdhci_pxav3_probe(struct platform_device *pdev)
+ 	const struct of_device_id *match;
  	int ret;
  
--	host = sdhci_pltfm_init(pdev, &bcm2835_sdhci_pdata, 0);
-+	host = sdhci_pltfm_init(pdev, &bcm2835_sdhci_pdata,
-+				sizeof(*bcm2835_host));
+-	pxa = devm_kzalloc(&pdev->dev, sizeof(struct sdhci_pxa), GFP_KERNEL);
+-	if (!pxa)
+-		return -ENOMEM;
+-
+-	host = sdhci_pltfm_init(pdev, &sdhci_pxav3_pdata, 0);
++	host = sdhci_pltfm_init(pdev, &sdhci_pxav3_pdata, sizeof(*pxa));
  	if (IS_ERR(host))
  		return PTR_ERR(host);
  
--	bcm2835_host = devm_kzalloc(&pdev->dev, sizeof(*bcm2835_host),
--					GFP_KERNEL);
--	if (!bcm2835_host) {
--		dev_err(mmc_dev(host->mmc),
--			"failed to allocate bcm2835_sdhci\n");
--		return -ENOMEM;
--	}
--
  	pltfm_host = sdhci_priv(host);
--	pltfm_host->priv = bcm2835_host;
+-	pltfm_host->priv = pxa;
++	pxa = sdhci_pltfm_priv(pltfm_host);
  
- 	pltfm_host->clk = devm_clk_get(&pdev->dev, NULL);
- 	if (IS_ERR(pltfm_host->clk)) {
+ 	pxa->clk_io = devm_clk_get(dev, "io");
+ 	if (IS_ERR(pxa->clk_io))
+@@ -486,7 +482,7 @@ static int sdhci_pxav3_remove(struct platform_device *pdev)
+ {
+ 	struct sdhci_host *host = platform_get_drvdata(pdev);
+ 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+-	struct sdhci_pxa *pxa = pltfm_host->priv;
++	struct sdhci_pxa *pxa = sdhci_pltfm_priv(pltfm_host);
+ 
+ 	pm_runtime_get_sync(&pdev->dev);
+ 	pm_runtime_disable(&pdev->dev);
+@@ -535,7 +531,7 @@ static int sdhci_pxav3_runtime_suspend(struct device *dev)
+ {
+ 	struct sdhci_host *host = dev_get_drvdata(dev);
+ 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+-	struct sdhci_pxa *pxa = pltfm_host->priv;
++	struct sdhci_pxa *pxa = sdhci_pltfm_priv(pltfm_host);
+ 	int ret;
+ 
+ 	ret = sdhci_runtime_suspend_host(host);
+@@ -553,7 +549,7 @@ static int sdhci_pxav3_runtime_resume(struct device *dev)
+ {
+ 	struct sdhci_host *host = dev_get_drvdata(dev);
+ 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+-	struct sdhci_pxa *pxa = pltfm_host->priv;
++	struct sdhci_pxa *pxa = sdhci_pltfm_priv(pltfm_host);
+ 
+ 	clk_prepare_enable(pxa->clk_io);
+ 	if (!IS_ERR(pxa->clk_core))
 -- 
 2.7.0
+
