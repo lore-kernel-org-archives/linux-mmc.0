@@ -1,17 +1,17 @@
 From: Russell King <rmk+kernel@arm.linux.org.uk>
-Subject: [PATCH v3 15/25] mmc: sdhci: pass the cookie into
- sdhci_pre_dma_transfer()
-Date: Tue, 26 Jan 2016 13:40:27 +0000
-Message-ID: <E1aO3r9-0005j2-EI@rmk-PC.arm.linux.org.uk>
+Subject: [PATCH v3 14/25] mmc: sdhci: factor out sdhci_pre_dma_transfer() from
+ sdhci_adma_table_pre()
+Date: Tue, 26 Jan 2016 13:40:22 +0000
+Message-ID: <E1aO3r4-0005iw-7J@rmk-PC.arm.linux.org.uk>
 References: <20160126133840.GA32588@n2100.arm.linux.org.uk>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 8bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from pandora.arm.linux.org.uk ([78.32.30.218]:36886 "EHLO
+Received: from pandora.arm.linux.org.uk ([78.32.30.218]:36882 "EHLO
 	pandora.arm.linux.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S965242AbcAZNko (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 26 Jan 2016 08:40:44 -0500
+	with ESMTP id S965242AbcAZNkj (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 26 Jan 2016 08:40:39 -0500
 In-Reply-To: <20160126133840.GA32588@n2100.arm.linux.org.uk>
 Content-Disposition: inline
 Sender: linux-mmc-owner@vger.kernel.org
@@ -19,54 +19,122 @@ List-Id: linux-mmc@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>
 Cc: Gregory CLEMENT <gregory.clement@free-electrons.com>, linux-mmc@vger.kernel.org, Marcin Wojtas <mw@semihalf.com>, Shawn Guo <shawnguo@kernel.org>, Sascha Hauer <kernel@pengutronix.de>
 
-Pass the desired cookie for a successful map.  This is in preparation to
-clean up the MAPPED/GIVEN states.
+In sdhci_prepare_data(), when SDHCI_REQ_USE_DMA is set, there are two
+paths that prepare the data buffers for transfer.  One is when
+SDHCI_USE_ADMA is set, and is located inside sdhci_adma_table_pre().
+The other is when SDHCI_USE_ADMA is clear, in the else clause of the
+above.
+
+Factor out the call to sdhci_pre_dma_transfer() along with its error
+checking.
 
 Signed-off-by: Russell King <rmk+kernel@arm.linux.org.uk>
 ---
- drivers/mmc/host/sdhci.c | 8 ++++----
- 1 file changed, 4 insertions(+), 4 deletions(-)
+ drivers/mmc/host/sdhci.c | 62 ++++++++++++++++++------------------------------
+ 1 file changed, 23 insertions(+), 39 deletions(-)
 
 diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 27f37f562ea7..51f6678879d3 100644
+index f260804d3d65..27f37f562ea7 100644
 --- a/drivers/mmc/host/sdhci.c
 +++ b/drivers/mmc/host/sdhci.c
-@@ -427,7 +427,7 @@ static void sdhci_transfer_pio(struct sdhci_host *host)
+@@ -485,8 +485,8 @@ static void sdhci_adma_mark_end(void *desc)
+ 	dma_desc->cmd |= cpu_to_le16(ADMA2_END);
  }
  
- static int sdhci_pre_dma_transfer(struct sdhci_host *host,
--				  struct mmc_data *data)
-+				  struct mmc_data *data, int cookie)
+-static int sdhci_adma_table_pre(struct sdhci_host *host,
+-	struct mmc_data *data)
++static void sdhci_adma_table_pre(struct sdhci_host *host,
++	struct mmc_data *data, int sg_count)
  {
- 	int sg_count;
+ 	struct scatterlist *sg;
+ 	unsigned long flags;
+@@ -500,9 +500,7 @@ static int sdhci_adma_table_pre(struct sdhci_host *host,
+ 	 * We currently guess that it is LE.
+ 	 */
  
-@@ -446,7 +446,7 @@ static int sdhci_pre_dma_transfer(struct sdhci_host *host,
- 		return -ENOSPC;
+-	host->sg_count = sdhci_pre_dma_transfer(host, data);
+-	if (host->sg_count < 0)
+-		return -EINVAL;
++	host->sg_count = sg_count;
  
- 	data->sg_count = sg_count;
--	data->host_cookie = COOKIE_MAPPED;
-+	data->host_cookie = cookie;
- 
- 	return sg_count;
+ 	desc = host->adma_table;
+ 	align = host->align_buffer;
+@@ -569,7 +567,6 @@ static int sdhci_adma_table_pre(struct sdhci_host *host,
+ 		/* Add a terminating entry - nop, end, valid */
+ 		sdhci_adma_write_desc(host, desc, 0, 0, ADMA2_NOP_END_VALID);
+ 	}
+-	return 0;
  }
-@@ -780,7 +780,7 @@ static void sdhci_prepare_data(struct sdhci_host *host, struct mmc_command *cmd)
+ 
+ static void sdhci_adma_table_post(struct sdhci_host *host,
+@@ -699,7 +696,6 @@ static void sdhci_prepare_data(struct sdhci_host *host, struct mmc_command *cmd)
+ {
+ 	u8 ctrl;
+ 	struct mmc_data *data = cmd->data;
+-	int ret;
+ 
+ 	WARN_ON(host->data);
+ 
+@@ -784,39 +780,27 @@ static void sdhci_prepare_data(struct sdhci_host *host, struct mmc_command *cmd)
  	}
  
  	if (host->flags & SDHCI_REQ_USE_DMA) {
--		int sg_cnt = sdhci_pre_dma_transfer(host, data);
-+		int sg_cnt = sdhci_pre_dma_transfer(host, data, COOKIE_MAPPED);
+-		if (host->flags & SDHCI_USE_ADMA) {
+-			ret = sdhci_adma_table_pre(host, data);
+-			if (ret) {
+-				/*
+-				 * This only happens when someone fed
+-				 * us an invalid request.
+-				 */
+-				WARN_ON(1);
+-				host->flags &= ~SDHCI_REQ_USE_DMA;
+-			} else {
+-				sdhci_writel(host, host->adma_addr,
+-					SDHCI_ADMA_ADDRESS);
+-				if (host->flags & SDHCI_USE_64_BIT_DMA)
+-					sdhci_writel(host,
+-						     (u64)host->adma_addr >> 32,
+-						     SDHCI_ADMA_ADDRESS_HI);
+-			}
+-		} else {
+-			int sg_cnt;
++		int sg_cnt = sdhci_pre_dma_transfer(host, data);
  
- 		if (sg_cnt <= 0) {
- 			/*
-@@ -2085,7 +2085,7 @@ static void sdhci_pre_req(struct mmc_host *mmc, struct mmc_request *mrq,
- 	mrq->data->host_cookie = COOKIE_UNMAPPED;
+-			sg_cnt = sdhci_pre_dma_transfer(host, data);
+-			if (sg_cnt <= 0) {
+-				/*
+-				 * This only happens when someone fed
+-				 * us an invalid request.
+-				 */
+-				WARN_ON(1);
+-				host->flags &= ~SDHCI_REQ_USE_DMA;
+-			} else {
+-				WARN_ON(sg_cnt != 1);
+-				sdhci_writel(host, sg_dma_address(data->sg),
+-					SDHCI_DMA_ADDRESS);
+-			}
++		if (sg_cnt <= 0) {
++			/*
++			 * This only happens when someone fed
++			 * us an invalid request.
++			 */
++			WARN_ON(1);
++			host->flags &= ~SDHCI_REQ_USE_DMA;
++		} else if (host->flags & SDHCI_USE_ADMA) {
++			sdhci_adma_table_pre(host, data, sg_cnt);
++
++			sdhci_writel(host, host->adma_addr, SDHCI_ADMA_ADDRESS);
++			if (host->flags & SDHCI_USE_64_BIT_DMA)
++				sdhci_writel(host,
++					     (u64)host->adma_addr >> 32,
++					     SDHCI_ADMA_ADDRESS_HI);
++		} else {
++			WARN_ON(sg_cnt != 1);
++			sdhci_writel(host, sg_dma_address(data->sg),
++				SDHCI_DMA_ADDRESS);
+ 		}
+ 	}
  
- 	if (host->flags & SDHCI_REQ_USE_DMA)
--		sdhci_pre_dma_transfer(host, mrq->data);
-+		sdhci_pre_dma_transfer(host, mrq->data, COOKIE_MAPPED);
- }
- 
- static void sdhci_card_event(struct mmc_host *mmc)
 -- 
 2.1.0
 
