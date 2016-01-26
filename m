@@ -1,16 +1,17 @@
 From: Russell King <rmk+kernel@arm.linux.org.uk>
-Subject: [PATCH v3 11/25] mmc: sdhci: avoid walking SG list for writes
-Date: Tue, 26 Jan 2016 13:40:06 +0000
-Message-ID: <E1aO3qo-0005ie-3m@rmk-PC.arm.linux.org.uk>
+Subject: [PATCH v3 12/25] mmc: sdhci: factor out common DMA cleanup in
+ sdhci_finish_data()
+Date: Tue, 26 Jan 2016 13:40:11 +0000
+Message-ID: <E1aO3qt-0005ik-Fy@rmk-PC.arm.linux.org.uk>
 References: <20160126133840.GA32588@n2100.arm.linux.org.uk>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 8bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from pandora.arm.linux.org.uk ([78.32.30.218]:36864 "EHLO
+Received: from pandora.arm.linux.org.uk ([78.32.30.218]:36869 "EHLO
 	pandora.arm.linux.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S965242AbcAZNkV (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 26 Jan 2016 08:40:21 -0500
+	with ESMTP id S965242AbcAZNk1 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 26 Jan 2016 08:40:27 -0500
 In-Reply-To: <20160126133840.GA32588@n2100.arm.linux.org.uk>
 Content-Disposition: inline
 Sender: linux-mmc-owner@vger.kernel.org
@@ -18,80 +19,85 @@ List-Id: linux-mmc@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>
 Cc: Gregory CLEMENT <gregory.clement@free-electrons.com>, linux-mmc@vger.kernel.org, Marcin Wojtas <mw@semihalf.com>, Shawn Guo <shawnguo@kernel.org>, Sascha Hauer <kernel@pengutronix.de>
 
-If we are writing data to the card, there is no point in walking the
-scatterlist to find out if there are any unaligned entries; this is a
-needless waste of CPU cycles.  Avoid this by checking for a non-read
-tranfer first.
+sdhci_finish_data() has two paths which result in identical DMA cleanup.
+One is when SDHCI_USE_ADMA is clear, and the other is just before when
+SDHCI_USE_ADMA is set, and is performed within sdhci_adma_table_post().
+
+Simplify the code by removing the 'else' and eliminating the duplicate
+inside sdhci_adma_table_post().
 
 Signed-off-by: Russell King <rmk+kernel@arm.linux.org.uk>
 ---
- drivers/mmc/host/sdhci.c | 42 ++++++++++++++++++++++--------------------
- 1 file changed, 22 insertions(+), 20 deletions(-)
+ drivers/mmc/host/sdhci.c | 29 +++++++----------------------
+ 1 file changed, 7 insertions(+), 22 deletions(-)
 
 diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index d1f802507ab1..fea74ebb4615 100644
+index fea74ebb4615..3a7b0ef0196a 100644
 --- a/drivers/mmc/host/sdhci.c
 +++ b/drivers/mmc/host/sdhci.c
-@@ -559,37 +559,39 @@ static void sdhci_adma_table_post(struct sdhci_host *host,
+@@ -552,19 +552,12 @@ static int sdhci_adma_table_pre(struct sdhci_host *host,
+ static void sdhci_adma_table_post(struct sdhci_host *host,
+ 	struct mmc_data *data)
+ {
+-	int direction;
+-
+ 	struct scatterlist *sg;
+ 	int i, size;
  	void *align;
  	char *buffer;
  	unsigned long flags;
--	bool has_unaligned;
  
- 	if (data->flags & MMC_DATA_READ)
- 		direction = DMA_FROM_DEVICE;
- 	else
- 		direction = DMA_TO_DEVICE;
+-	if (data->flags & MMC_DATA_READ)
+-		direction = DMA_FROM_DEVICE;
+-	else
+-		direction = DMA_TO_DEVICE;
+-
+ 	if (data->flags & MMC_DATA_READ) {
+ 		bool has_unaligned = false;
  
--	/* Do a quick scan of the SG list for any unaligned mappings */
--	has_unaligned = false;
--	for_each_sg(data->sg, sg, host->sg_count, i)
--		if (sg_dma_address(sg) & SDHCI_ADMA2_MASK) {
--			has_unaligned = true;
--			break;
--		}
-+	if (data->flags & MMC_DATA_READ) {
-+		bool has_unaligned = false;
+@@ -577,7 +570,7 @@ static void sdhci_adma_table_post(struct sdhci_host *host,
  
--	if (has_unaligned && data->flags & MMC_DATA_READ) {
--		dma_sync_sg_for_cpu(mmc_dev(host->mmc), data->sg,
--			data->sg_len, direction);
-+		/* Do a quick scan of the SG list for any unaligned mappings */
-+		for_each_sg(data->sg, sg, host->sg_count, i)
-+			if (sg_dma_address(sg) & SDHCI_ADMA2_MASK) {
-+				has_unaligned = true;
-+				break;
-+			}
+ 		if (has_unaligned) {
+ 			dma_sync_sg_for_cpu(mmc_dev(host->mmc), data->sg,
+-				data->sg_len, direction);
++					    data->sg_len, DMA_FROM_DEVICE);
  
--		align = host->align_buffer;
-+		if (has_unaligned) {
-+			dma_sync_sg_for_cpu(mmc_dev(host->mmc), data->sg,
-+				data->sg_len, direction);
+ 			align = host->align_buffer;
  
--		for_each_sg(data->sg, sg, host->sg_count, i) {
--			if (sg_dma_address(sg) & SDHCI_ADMA2_MASK) {
--				size = SDHCI_ADMA2_ALIGN -
--				       (sg_dma_address(sg) & SDHCI_ADMA2_MASK);
-+			align = host->align_buffer;
- 
--				buffer = sdhci_kmap_atomic(sg, &flags);
--				memcpy(buffer, align, size);
--				sdhci_kunmap_atomic(buffer, &flags);
-+			for_each_sg(data->sg, sg, host->sg_count, i) {
-+				if (sg_dma_address(sg) & SDHCI_ADMA2_MASK) {
-+					size = SDHCI_ADMA2_ALIGN -
-+					       (sg_dma_address(sg) & SDHCI_ADMA2_MASK);
- 
--				align += SDHCI_ADMA2_ALIGN;
-+					buffer = sdhci_kmap_atomic(sg, &flags);
-+					memcpy(buffer, align, size);
-+					sdhci_kunmap_atomic(buffer, &flags);
-+
-+					align += SDHCI_ADMA2_ALIGN;
-+				}
+@@ -595,12 +588,6 @@ static void sdhci_adma_table_post(struct sdhci_host *host,
  			}
  		}
  	}
+-
+-	if (data->host_cookie == COOKIE_MAPPED) {
+-		dma_unmap_sg(mmc_dev(host->mmc), data->sg,
+-			data->sg_len, direction);
+-		data->host_cookie = COOKIE_UNMAPPED;
+-	}
+ }
+ 
+ static u8 sdhci_calc_timeout(struct sdhci_host *host, struct mmc_command *cmd)
+@@ -909,14 +896,12 @@ static void sdhci_finish_data(struct sdhci_host *host)
+ 	if (host->flags & SDHCI_REQ_USE_DMA) {
+ 		if (host->flags & SDHCI_USE_ADMA)
+ 			sdhci_adma_table_post(host, data);
+-		else {
+-			if (data->host_cookie == COOKIE_MAPPED) {
+-				dma_unmap_sg(mmc_dev(host->mmc),
+-					data->sg, data->sg_len,
+-					(data->flags & MMC_DATA_READ) ?
+-					DMA_FROM_DEVICE : DMA_TO_DEVICE);
+-				data->host_cookie = COOKIE_UNMAPPED;
+-			}
++
++		if (data->host_cookie == COOKIE_MAPPED) {
++			dma_unmap_sg(mmc_dev(host->mmc), data->sg, data->sg_len,
++				     (data->flags & MMC_DATA_READ) ?
++				     DMA_FROM_DEVICE : DMA_TO_DEVICE);
++			data->host_cookie = COOKIE_UNMAPPED;
+ 		}
+ 	}
+ 
 -- 
 2.1.0
 
