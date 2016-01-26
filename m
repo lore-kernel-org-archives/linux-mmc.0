@@ -1,15 +1,15 @@
 From: Jisheng Zhang <jszhang@marvell.com>
-Subject: [PATCH v4 10/13] mmc: sdhci-st: use sdhci_pltfm_init for private allocation
-Date: Tue, 26 Jan 2016 18:15:50 +0800
-Message-ID: <1453803353-6266-11-git-send-email-jszhang@marvell.com>
+Subject: [PATCH v4 11/13] mmc: sdhci-tegra: use sdhci_pltfm_init for private allocation
+Date: Tue, 26 Jan 2016 18:15:51 +0800
+Message-ID: <1453803353-6266-12-git-send-email-jszhang@marvell.com>
 References: <1453803353-6266-1-git-send-email-jszhang@marvell.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mx0b-0016f401.pphosted.com ([67.231.156.173]:4062 "EHLO
-	mx0b-0016f401.pphosted.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S964995AbcAZKUu (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 26 Jan 2016 05:20:50 -0500
+Received: from mx0a-0016f401.pphosted.com ([67.231.148.174]:62449 "EHLO
+	mx0a-0016f401.pphosted.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S964880AbcAZKUs (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 26 Jan 2016 05:20:48 -0500
 In-Reply-To: <1453803353-6266-1-git-send-email-jszhang@marvell.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
@@ -18,134 +18,95 @@ Cc: kernel@stlinux.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
 
 Commit 0e748234293f ("mmc: sdhci: Add size for caller in init+register")
 allows users of sdhci_pltfm to allocate private space in calls to
-sdhci_pltfm_init+sdhci_pltfm_register. This patch migrates sdhci-st
+sdhci_pltfm_init+sdhci_pltfm_register. This patch migrates sdhci-tegra
 to this allocation.
 
 Signed-off-by: Jisheng Zhang <jszhang@marvell.com>
 Acked-by: Arnd Bergmann <arnd@arndb.de>
 ---
- drivers/mmc/host/sdhci-st.c | 40 ++++++++++++++++++++--------------------
- 1 file changed, 20 insertions(+), 20 deletions(-)
+ drivers/mmc/host/sdhci-tegra.c | 21 +++++++--------------
+ 1 file changed, 7 insertions(+), 14 deletions(-)
 
-diff --git a/drivers/mmc/host/sdhci-st.c b/drivers/mmc/host/sdhci-st.c
-index 969c2b0..320e1c2 100644
---- a/drivers/mmc/host/sdhci-st.c
-+++ b/drivers/mmc/host/sdhci-st.c
-@@ -251,7 +251,7 @@ static int sdhci_st_set_dll_for_clock(struct sdhci_host *host)
- {
- 	int ret = 0;
- 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
--	struct st_mmc_platform_data *pdata = pltfm_host->priv;
-+	struct st_mmc_platform_data *pdata = sdhci_pltfm_priv(pltfm_host);
- 
- 	if (host->clock > CLK_TO_CHECK_DLL_LOCK) {
- 		st_mmcss_set_dll(pdata->top_ioaddr);
-@@ -265,7 +265,7 @@ static void sdhci_st_set_uhs_signaling(struct sdhci_host *host,
- 					unsigned int uhs)
+diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
+index 83c4bf7..2c3c57b 100644
+--- a/drivers/mmc/host/sdhci-tegra.c
++++ b/drivers/mmc/host/sdhci-tegra.c
+@@ -63,7 +63,7 @@ struct sdhci_tegra {
+ static u16 tegra_sdhci_readw(struct sdhci_host *host, int reg)
  {
  	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
--	struct st_mmc_platform_data *pdata = pltfm_host->priv;
-+	struct st_mmc_platform_data *pdata = sdhci_pltfm_priv(pltfm_host);
- 	u16 ctrl_2 = sdhci_readw(host, SDHCI_HOST_CONTROL2);
- 	int ret = 0;
+-	struct sdhci_tegra *tegra_host = pltfm_host->priv;
++	struct sdhci_tegra *tegra_host = sdhci_pltfm_priv(pltfm_host);
+ 	const struct sdhci_tegra_soc_data *soc_data = tegra_host->soc_data;
  
-@@ -357,10 +357,7 @@ static int sdhci_st_probe(struct platform_device *pdev)
- 	int ret = 0;
- 	u16 host_version;
- 	struct resource *res;
--
--	pdata = devm_kzalloc(&pdev->dev, sizeof(*pdata), GFP_KERNEL);
--	if (!pdata)
--		return -ENOMEM;
-+	struct reset_control *rstc;
+ 	if (unlikely((soc_data->nvquirks & NVQUIRK_FORCE_SDHCI_SPEC_200) &&
+@@ -99,7 +99,7 @@ static void tegra_sdhci_writew(struct sdhci_host *host, u16 val, int reg)
+ static void tegra_sdhci_writel(struct sdhci_host *host, u32 val, int reg)
+ {
+ 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+-	struct sdhci_tegra *tegra_host = pltfm_host->priv;
++	struct sdhci_tegra *tegra_host = sdhci_pltfm_priv(pltfm_host);
+ 	const struct sdhci_tegra_soc_data *soc_data = tegra_host->soc_data;
  
- 	clk =  devm_clk_get(&pdev->dev, "mmc");
- 	if (IS_ERR(clk)) {
-@@ -368,19 +365,23 @@ static int sdhci_st_probe(struct platform_device *pdev)
- 		return PTR_ERR(clk);
- 	}
+ 	/* Seems like we're getting spurious timeout and crc errors, so
+@@ -131,7 +131,7 @@ static unsigned int tegra_sdhci_get_ro(struct sdhci_host *host)
+ static void tegra_sdhci_reset(struct sdhci_host *host, u8 mask)
+ {
+ 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+-	struct sdhci_tegra *tegra_host = pltfm_host->priv;
++	struct sdhci_tegra *tegra_host = sdhci_pltfm_priv(pltfm_host);
+ 	const struct sdhci_tegra_soc_data *soc_data = tegra_host->soc_data;
+ 	u32 misc_ctrl, clk_ctrl;
  
--	pdata->rstc = devm_reset_control_get(&pdev->dev, NULL);
--	if (IS_ERR(pdata->rstc))
--		pdata->rstc = NULL;
-+	rstc = devm_reset_control_get(&pdev->dev, NULL);
-+	if (IS_ERR(rstc))
-+		rstc = NULL;
- 	else
--		reset_control_deassert(pdata->rstc);
-+		reset_control_deassert(rstc);
+@@ -184,7 +184,7 @@ static void tegra_sdhci_set_bus_width(struct sdhci_host *host, int bus_width)
+ static void tegra_sdhci_set_clock(struct sdhci_host *host, unsigned int clock)
+ {
+ 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+-	struct sdhci_tegra *tegra_host = pltfm_host->priv;
++	struct sdhci_tegra *tegra_host = sdhci_pltfm_priv(pltfm_host);
+ 	unsigned long host_clk;
  
--	host = sdhci_pltfm_init(pdev, &sdhci_st_pdata, 0);
-+	host = sdhci_pltfm_init(pdev, &sdhci_st_pdata, sizeof(*pdata));
- 	if (IS_ERR(host)) {
- 		dev_err(&pdev->dev, "Failed sdhci_pltfm_init\n");
- 		ret = PTR_ERR(host);
- 		goto err_pltfm_init;
- 	}
+ 	if (!clock)
+@@ -201,7 +201,7 @@ static void tegra_sdhci_set_uhs_signaling(struct sdhci_host *host,
+ 					  unsigned timing)
+ {
+ 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+-	struct sdhci_tegra *tegra_host = pltfm_host->priv;
++	struct sdhci_tegra *tegra_host = sdhci_pltfm_priv(pltfm_host);
  
-+	pltfm_host = sdhci_priv(host);
-+	pdata = sdhci_pltfm_priv(pltfm_host);
-+	pdata->rstc = rstc;
-+
- 	ret = mmc_of_parse(host->mmc);
- 	if (ret) {
- 		dev_err(&pdev->dev, "Failed mmc_of_parse\n");
-@@ -398,8 +399,6 @@ static int sdhci_st_probe(struct platform_device *pdev)
- 		pdata->top_ioaddr = NULL;
- 	}
+ 	if (timing == MMC_TIMING_UHS_DDR50)
+ 		tegra_host->ddr_signaling = true;
+@@ -380,20 +380,14 @@ static int sdhci_tegra_probe(struct platform_device *pdev)
+ 		return -EINVAL;
+ 	soc_data = match->data;
  
--	pltfm_host = sdhci_priv(host);
--	pltfm_host->priv = pdata;
- 	pltfm_host->clk = clk;
+-	host = sdhci_pltfm_init(pdev, soc_data->pdata, 0);
++	host = sdhci_pltfm_init(pdev, soc_data->pdata, sizeof(*tegra_host));
+ 	if (IS_ERR(host))
+ 		return PTR_ERR(host);
+ 	pltfm_host = sdhci_priv(host);
  
- 	/* Configure the Arasan HC inside the flashSS */
-@@ -427,8 +426,8 @@ err_out:
- err_of:
+-	tegra_host = devm_kzalloc(&pdev->dev, sizeof(*tegra_host), GFP_KERNEL);
+-	if (!tegra_host) {
+-		dev_err(mmc_dev(host->mmc), "failed to allocate tegra_host\n");
+-		rc = -ENOMEM;
+-		goto err_alloc_tegra_host;
+-	}
++	tegra_host = sdhci_pltfm_priv(pltfm_host);
+ 	tegra_host->ddr_signaling = false;
+ 	tegra_host->soc_data = soc_data;
+-	pltfm_host->priv = tegra_host;
+ 
+ 	rc = mmc_of_parse(host->mmc);
+ 	if (rc)
+@@ -429,7 +423,6 @@ err_add_host:
+ err_clk_get:
+ err_power_req:
+ err_parse_dt:
+-err_alloc_tegra_host:
  	sdhci_pltfm_free(pdev);
- err_pltfm_init:
--	if (pdata->rstc)
--		reset_control_assert(pdata->rstc);
-+	if (rstc)
-+		reset_control_assert(rstc);
- 
- 	return ret;
+ 	return rc;
  }
-@@ -437,13 +436,14 @@ static int sdhci_st_remove(struct platform_device *pdev)
- {
- 	struct sdhci_host *host = platform_get_drvdata(pdev);
- 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
--	struct st_mmc_platform_data *pdata = pltfm_host->priv;
-+	struct st_mmc_platform_data *pdata = sdhci_pltfm_priv(pltfm_host);
-+	struct reset_control *rstc = pdata->rstc;
- 	int ret;
- 
- 	ret = sdhci_pltfm_unregister(pdev);
- 
--	if (pdata->rstc)
--		reset_control_assert(pdata->rstc);
-+	if (rstc)
-+		reset_control_assert(rstc);
- 
- 	return ret;
- }
-@@ -453,7 +453,7 @@ static int sdhci_st_suspend(struct device *dev)
- {
- 	struct sdhci_host *host = dev_get_drvdata(dev);
- 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
--	struct st_mmc_platform_data *pdata = pltfm_host->priv;
-+	struct st_mmc_platform_data *pdata = sdhci_pltfm_priv(pltfm_host);
- 	int ret = sdhci_suspend_host(host);
- 
- 	if (ret)
-@@ -471,7 +471,7 @@ static int sdhci_st_resume(struct device *dev)
- {
- 	struct sdhci_host *host = dev_get_drvdata(dev);
- 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
--	struct st_mmc_platform_data *pdata = pltfm_host->priv;
-+	struct st_mmc_platform_data *pdata = sdhci_pltfm_priv(pltfm_host);
- 	struct device_node *np = dev->of_node;
- 
- 	clk_prepare_enable(pltfm_host->clk);
 -- 
 2.7.0
 
