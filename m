@@ -1,58 +1,52 @@
 From: Jisheng Zhang <jszhang@marvell.com>
-Subject: [PATCH v4 05/13] mmc: sdhci-of-arasan: fix clk issue in
- sdhci_arasan_remove()
-Date: Tue, 26 Jan 2016 18:15:45 +0800
-Message-ID: <1453803353-6266-6-git-send-email-jszhang@marvell.com>
-References: <1453803353-6266-1-git-send-email-jszhang@marvell.com>
+Subject: [PATCH] mmc: sdhci-iproc: use sdhci_pltfm_unregister directly
+Date: Tue, 26 Jan 2016 18:26:03 +0800
+Message-ID: <1453803963-6385-1-git-send-email-jszhang@marvell.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <1453803353-6266-1-git-send-email-jszhang@marvell.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: ulf.hansson@linaro.org, arnd@arndb.de, ludovic.desroches@atmel.com, swarren@wwwdotorg.org, lee@kernel.org, eric@anholt.net, michal.simek@xilinx.com, soren.brinkmann@xilinx.com, srinivas.kandagatla@gmail.com, maxime.coquelin@st.com, patrice.chotard@st.com, thierry.reding@gmail.com, sebastian.hesselbarth@gmail.com
-Cc: Jisheng Zhang <jszhang@marvell.com>, kernel@stlinux.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-rpi-kernel@lists.infradead.org, linux-tegra@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+Content-Type: text/plain
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mx0a-0016f401.pphosted.com ([67.231.148.174]:17064 "EHLO
+	mx0a-0016f401.pphosted.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S933952AbcAZKaM (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 26 Jan 2016 05:30:12 -0500
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: ulf.hansson@linaro.org, rjui@broadcom.com, sbranden@broadcom.com, jonmason@broadcom.com
+Cc: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, bcm-kernel-feedback-list@broadcom.com, linux-kernel@vger.kernel.org, Jisheng Zhang <jszhang@marvell.com>
 
-sdhci_pltfm_unregister() could operate host's registers, it will cause
-problems if the clk is already disabled and unprepared. Fix this issue
-by moving the clk_disable_unprepare() call to the end of remove
-function.
+The sdhci_iproc_remove() is jsut a wrapper to sdhci_pltfm_unregister.
+So use the sdhci_pltfm_unregister() for the .remove hook directly.
 
 Signed-off-by: Jisheng Zhang <jszhang@marvell.com>
 ---
- drivers/mmc/host/sdhci-of-arasan.c | 5 ++++-
- 1 file changed, 4 insertions(+), 1 deletion(-)
+ drivers/mmc/host/sdhci-iproc.c | 7 +------
+ 1 file changed, 1 insertion(+), 6 deletions(-)
 
-diff --git a/drivers/mmc/host/sdhci-of-arasan.c b/drivers/mmc/host/sdhci-of-arasan.c
-index 75379cb..50eb8bc 100644
---- a/drivers/mmc/host/sdhci-of-arasan.c
-+++ b/drivers/mmc/host/sdhci-of-arasan.c
-@@ -206,13 +206,16 @@ clk_dis_ahb:
- 
- static int sdhci_arasan_remove(struct platform_device *pdev)
- {
-+	int ret;
- 	struct sdhci_host *host = platform_get_drvdata(pdev);
- 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
- 	struct sdhci_arasan_data *sdhci_arasan = pltfm_host->priv;
- 
-+	ret = sdhci_pltfm_unregister(pdev);
-+
- 	clk_disable_unprepare(sdhci_arasan->clk_ahb);
- 
--	return sdhci_pltfm_unregister(pdev);
-+	return ret;
+diff --git a/drivers/mmc/host/sdhci-iproc.c b/drivers/mmc/host/sdhci-iproc.c
+index 3b423b0..24c5546 100644
+--- a/drivers/mmc/host/sdhci-iproc.c
++++ b/drivers/mmc/host/sdhci-iproc.c
+@@ -220,11 +220,6 @@ err:
+ 	return ret;
  }
  
- static const struct of_device_id sdhci_arasan_of_match[] = {
+-static int sdhci_iproc_remove(struct platform_device *pdev)
+-{
+-	return sdhci_pltfm_unregister(pdev);
+-}
+-
+ static struct platform_driver sdhci_iproc_driver = {
+ 	.driver = {
+ 		.name = "sdhci-iproc",
+@@ -232,7 +227,7 @@ static struct platform_driver sdhci_iproc_driver = {
+ 		.pm = SDHCI_PLTFM_PMOPS,
+ 	},
+ 	.probe = sdhci_iproc_probe,
+-	.remove = sdhci_iproc_remove,
++	.remove = sdhci_pltfm_unregister,
+ };
+ module_platform_driver(sdhci_iproc_driver);
+ 
 -- 
 2.7.0
+
