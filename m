@@ -1,197 +1,344 @@
-From: Gregory CLEMENT <gregory.clement@free-electrons.com>
-Subject: Re: [PATCH v3 00/25] MMC/SDHCI fixes
-Date: Tue, 26 Jan 2016 16:33:32 +0100
-Message-ID: <87oac8bbjn.fsf@free-electrons.com>
-References: <20160126133840.GA32588@n2100.arm.linux.org.uk>
+From: Joshua Henderson <joshua.henderson@microchip.com>
+Subject: Re: [PATCH v5 12/14] mmc: sdhci-pic32: Add PIC32 SDHCI host
+ controller driver
+Date: Tue, 26 Jan 2016 10:04:45 -0700
+Message-ID: <56A7A72D.6010007@microchip.com>
+References: <1452734299-460-1-git-send-email-joshua.henderson@microchip.com>
+ <1452734299-460-13-git-send-email-joshua.henderson@microchip.com>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from down.free-electrons.com ([37.187.137.238]:59096 "EHLO
-	mail.free-electrons.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S966462AbcAZPde (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 26 Jan 2016 10:33:34 -0500
-In-Reply-To: <20160126133840.GA32588@n2100.arm.linux.org.uk> (Russell King's
-	message of "Tue, 26 Jan 2016 13:38:41 +0000")
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="windows-1252"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1452734299-460-13-git-send-email-joshua.henderson@microchip.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: linux-kernel@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mips@linux-mips.org, ralf@linux-mips.org, Andrei Pistirica <andrei.pistirica@microchip.com>, Jean Delvare <jdelvare@suse.de>, Geert Uytterhoeven <geert@linux-m68k.org>, Corneliu Doban <cdoban@broadcom.com>, Haojian Zhuang <haojian.zhuang@gmail.com>, Luis de Bethencourt <luisbg@osg.samsung.com>, Weijun Yang <Weijun.Yang@csr.com>, Lokesh Vutla <lokeshvutla@ti.com>, Scott Branden <sbranden@broadcom.com>, Vincent Yang <vincent.yang.fujitsu@gmail.com>, Chaotian Jing <chaotian.jing@mediatek.com>, "ludovic.desroches@atmel.com" <ludovic.desroches@atmel.com>, Shawn Lin <shawn.lin@rock-chips.com>, Stephen Boyd <sboyd@codeaurora.org>, yangbo lu <yangbo.lu@freescale.com>, Kevin Hao <haokexin@gmail.com>, Ben Hutchings <ben@decadent.org.uk>, Andy Green <andy.green@linaro.org>, linux-mmc@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Russell King - ARM Linux <linux@arm.linux.org.uk>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, Marcin Wojtas <mw@semihalf.com>, Shawn Guo <shawnguo@kernel.org>, Sascha Hauer <kernel@pengutronix.de>
 
-Hi ,
- 
- On mar., janv. 26 2016, Russell King - ARM Linux <linux@arm.linux.org.uk> wrote:
+Hi Ulf,
 
-> On Mon, Dec 21, 2015 at 11:39:56AM +0000, Russell King - ARM Linux wrote:
->> This all started with a report from an iMX6 Hummingboard user that
->> they were seeing regular "mmc0: Got data interrupt 0x00000002 even
->> though no data operation was in progress." messages with 4.4-rc and
->> additional patches to enable UHS support in DT for the platform.
->> 
->> When I tested 4.4-rc on an iMX6 Hummingboard with UHS support enabled,
->> I found several other issues.  This patch series addresses some of
->> the issues.
->> 
->> However, while testing on Armada 388, an issue was found there, and
->> a fix is also included in this patch set, however it does not depend
->> on the rest of the patch series.
->> 
->> We all know that the SDHCI driver is in poor state, and Ulf's desire
->> to see it turned into a library (which actually comes from myself.)
->> However, with the driver in such a poor state, it makes sense to fix
->> a few of the issues first, especially if they result in the code
->> shrinking - which they do.
->> 
->> However, given what I've found below, I have to wonder how many of the
->> quirks that we have in this driver are down to the poor code rather than
->> real hardware problems: how many of them are due to poorly investigated
->> bugs.
->> 
->> This series starts off by shutting up some kernel messages that should
->> not be verbose:
->> - the voltage-ranges DT property is optional, so we should not print
->>   a message saying that it's missing from DT.  That suggests it isn't
->>   optional.  As no ill effect comes from not specifying it, I've
->>   dropped this message to debug level.
->> 
->> - reworking the voltage-ranges code so that callers know whether the
->>   optional voltage-ranges property was specified.
->> 
->> - "retrying because a re-tune was needed" - a re-tune is something that
->>   is part of the higher speed SD specs, and it's required to happen
->>   periodically.  So it's expected and normal behaviour.  There's no need
->>   to print this to the kernel log.
->> 
->> - When tuning fails, rather than a bland "mmc0: tuning execution failed"
->>   message, print the error code so that we can see what the reason for
->>   the failure is.  MMC fails on this point in many places.
->> 
->> - Move the initialisation of the command ->error member.  It looks to
->>   me as if this is not required; mmc_start_request() does this already,
->>   as it seems the rest of the MMC core does too.  Maybe this should be
->>   removed altogether?
->> 
->> - Testing error bits, then setting the error, then testing the error
->>   value, and completing the command is a very lengthy way to deal with
->>   errors here.  Test the error bits, and then decide what error occurred
->>   before completing.  (This code is actually buggy, see the next change).
->> 
->> - If a command _response_ CRC error occurs, we can't be certain whether
->>   the card received the command successfully, and has started processing
->>   it.  If it has, and it results in data being read from the card, the
->>   card will enter data transfer state, and start sending data to the
->>   host.  Therefore, it is completely wrong to blindly terminate the
->>   command, especially when such termination fails to clean _anything_
->>   up - eg, it leaves DMA in place so the host can continue DMAing to the
->>   memory, and it leaves buffers DMA mapped - which eventually annoys the
->>   DMA API debugging.  Fix this by assuming that a CRC error is a receive
->>   side error.  If the card did not correctly receive the command, it
->>   will not initiate a data transfer, and we should time out after the
->>   card specified timeout.
->> 
->>   With the unmodified mainline code, even if we reset the state machines
->>   when finishing a request in error, the _card_ itself may well still be
->>   in data transfer mode when this happens.  How can we be sure what state
->>   the data side is actually in?  Could this be why (eg) sdhci-esdhc-imx.c
->>   has this:
->> 
->>         /* FIXME: delay a bit for card to be ready for next tuning due to errors */
->>         mdelay(1);
->> 
->>   And how many more such _hacks_ are working around similar problems?
->> 
->> - The unaligned buffer handling is a total waste of resources in its
->>   current form.  We DMA map, sync, and unmap it on every transfer,
->>   whether the buffer is used or not.  For MMC/SD transfers, these will
->>   be coming from the VFS/MM layers, which operate through the page
->>   cache - hence the vast majority of buffers will be page aligned.
->>   Performance measurements on iMX6 show that this additional DMA
->>   maintanence is responsible for a 10% reduction in read transfer
->>   performance.  Switch this to use a DMA coherent mapping instead, which
->>   needs no DMA maintanence.
->> 
->> - sdhci_adma_table_post() is badly coded: we walk the scatterlist
->>   looking for any buffers which might not be aligned (which can be a
->>   rare event, see above) and then we only do something if we find an
->>   unaligned buffer _and_ it's a read transfer.  So for a write transfer,
->>   this scatterlist walking is a total waste of CPU cycles.  Testing the
->>   transfer direction is much cheaper than walking the scatterlist.
->>   Re-organise the code to do the cheap test first.
->> 
->> - There are two paths to identical DMA unmapping code (the code around
->>   dma_unmap_sg()) in sdhci_finish_data() and its child function
->>   sdhci_adma_table_post().  Trivially simplify this duplication.
->> 
->> - Move sdhci_pre_dma_transfer() so we avoid needing to declare it.
->> 
->> - Do the same thing with sdhci_prepare_data() and sdhci_pre_dma_transfer()
->>   as with sdhci_finish_data() and sdhci_adma_table_post().
->> 
->> - Fix the mess that is the data segment host_cookie handling.  The
->>   existing code seems like a candidate for the obfuscated coding prize!
->>   Four patches address this, turning it into something much easier to
->>   understand, which then allows (finally)...
->> 
->> - The DMA API leak which occurs when we have mapped the DMA buffers in
->>   sdhci_prepare_data() and an error occurs early on in the processing
->>   of a request.
->>
+Ping! Need an ack for this or pull it upstream.
 
-For all the upper change, I made a review of them. I am not an SDHCI
-export but for my point of view everything seems very sensible.
-
->> - A change (mentioned above) which fixes a prior commit for Armada 38x
->>   using sdhci-pxav3.c, found while trying to get the higher speed modes
->>   working on these SoCs.  Clearly the existing code is broken, this at
->>   least resolves some of the breakage by allowing the correct high-order
->>   SDHCI capabilities through.
-
-This one is my fault I ported this patch with the assumption it was
-working. I didn't had a SDCard recent enough to test it at this time. I
-hope having an UHS grade card soon and being able to send a tested-by.
-
->> 
->> - Fixing another DMA API leak with the pre/post request handling, where
->>   a current request can change the state of the SDHCI_REQ_USE_DMA, and
->>   thus stop a mapped request being unmapped.
->> 
->> - Fixing the SDHCI timeout calculation code to correctly round timeouts
->>   up rather than down, and correctly calculate the time (in microseconds)
->>   for a certain number of card clocks.
->> 
->> - Consolidating the SDHCI address/size alignment handling so we only walk
->>   the scatterlist once instead of twice.
-
-As for the first patches, I reviewed them, I didn't find any flaw, but
-again I am not an expert.
-
-Gregory
-
->> 
->> Further patches are necessary as there are still a number of observable
->> problems when using this driver on iMX6 with UHS cards.  Patches up to
->> and including "mmc: sdhci: further fix for DMA unmapping in
->> sdhci_post_req()" should be considered for inclusion in the stable
->> kernel trees.
->> 
->> I've tested these changes on iMX6 at UHS speeds, and Armada 388 SoCs
->> at HS speeds so far.  Others should test them.
->
-> Repost against 4.5-rc1, with one additional patch.
->
->  drivers/mmc/card/block.c       |   4 +-
->  drivers/mmc/core/core.c        |  17 +-
->  drivers/mmc/host/sdhci-pxav3.c |   6 +-
->  drivers/mmc/host/sdhci.c       | 443 ++++++++++++++++++-----------------------
->  drivers/mmc/host/sdhci.h       |   4 +-
->  5 files changed, 212 insertions(+), 262 deletions(-)
->
-> -- 
-> RMK's Patch system: http://www.arm.linux.org.uk/developer/patches/
-> FTTC broadband for 0.8mile line: currently at 9.6Mbps down 400kbps up
-> according to speedtest.net.
-
--- 
-Gregory Clement, Free Electrons
-Kernel, drivers, real-time and embedded Linux
-development, consulting, training and support.
-http://free-electrons.com
+On 01/13/2016 06:15 PM, Joshua Henderson wrote:
+> From: Andrei Pistirica <andrei.pistirica@microchip.com>
+> 
+> This driver supports the SDHCI host controller found on a PIC32.
+> 
+> Signed-off-by: Andrei Pistirica <andrei.pistirica@microchip.com>
+> Signed-off-by: Joshua Henderson <joshua.henderson@microchip.com>
+> Cc: Ralf Baechle <ralf@linux-mips.org>
+> ---
+> Changes since v4: None
+> Changes since v3: None
+> Changes since v2:
+> 	- Use 'sdhci_pltfm_*' instead of 'sdhci_*_host' and other cleanup
+> Changes since v1:
+> 	- Be consistent and use only "SDHCI" when referring to SD host
+> 	  controller
+> 	- Remove unnecessary PIC32 sdhci_ops min clock function.
+> 	- Drop usage of piomode and no-1-8-v DT properties
+>         - Formatting
+>         - Fix use of devm_iounmap
+>         - Address code comment
+> ---
+>  drivers/mmc/host/Kconfig       |   11 ++
+>  drivers/mmc/host/Makefile      |    1 +
+>  drivers/mmc/host/sdhci-pic32.c |  257 ++++++++++++++++++++++++++++++++++++++++
+>  3 files changed, 269 insertions(+)
+>  create mode 100644 drivers/mmc/host/sdhci-pic32.c
+> 
+> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+> index 1dee533..c6a8916 100644
+> --- a/drivers/mmc/host/Kconfig
+> +++ b/drivers/mmc/host/Kconfig
+> @@ -785,3 +785,14 @@ config MMC_MTK
+>  	  If you have a machine with a integrated SD/MMC card reader, say Y or M here.
+>  	  This is needed if support for any SD/SDIO/MMC devices is required.
+>  	  If unsure, say N.
+> +
+> +config MMC_SDHCI_MICROCHIP_PIC32
+> +        tristate "Microchip PIC32MZDA SDHCI support"
+> +        depends on MMC_SDHCI && PIC32MZDA && MMC_SDHCI_PLTFM
+> +        help
+> +          This selects the Secure Digital Host Controller Interface (SDHCI)
+> +          for PIC32MZDA platform.
+> +
+> +          If you have a controller with this interface, say Y or M here.
+> +
+> +          If unsure, say N.
+> diff --git a/drivers/mmc/host/Makefile b/drivers/mmc/host/Makefile
+> index 3595f83..af918d2 100644
+> --- a/drivers/mmc/host/Makefile
+> +++ b/drivers/mmc/host/Makefile
+> @@ -75,6 +75,7 @@ obj-$(CONFIG_MMC_SDHCI_BCM2835)		+= sdhci-bcm2835.o
+>  obj-$(CONFIG_MMC_SDHCI_IPROC)		+= sdhci-iproc.o
+>  obj-$(CONFIG_MMC_SDHCI_MSM)		+= sdhci-msm.o
+>  obj-$(CONFIG_MMC_SDHCI_ST)		+= sdhci-st.o
+> +obj-$(CONFIG_MMC_SDHCI_MICROCHIP_PIC32)	+= sdhci-pic32.o
+>  
+>  ifeq ($(CONFIG_CB710_DEBUG),y)
+>  	CFLAGS-cb710-mmc	+= -DDEBUG
+> diff --git a/drivers/mmc/host/sdhci-pic32.c b/drivers/mmc/host/sdhci-pic32.c
+> new file mode 100644
+> index 0000000..059df70
+> --- /dev/null
+> +++ b/drivers/mmc/host/sdhci-pic32.c
+> @@ -0,0 +1,257 @@
+> +/*
+> + * Support of SDHCI platform devices for Microchip PIC32.
+> + *
+> + * Copyright (C) 2015 Microchip
+> + * Andrei Pistirica, Paul Thacker
+> + *
+> + * Inspired by sdhci-pltfm.c
+> + *
+> + * This file is licensed under the terms of the GNU General Public
+> + * License version 2. This program is licensed "as is" without any
+> + * warranty of any kind, whether express or implied.
+> + */
+> +
+> +#include <linux/clk.h>
+> +#include <linux/delay.h>
+> +#include <linux/highmem.h>
+> +#include <linux/module.h>
+> +#include <linux/interrupt.h>
+> +#include <linux/irq.h>
+> +#include <linux/of.h>
+> +#include <linux/platform_device.h>
+> +#include <linux/pm.h>
+> +#include <linux/slab.h>
+> +#include <linux/mmc/host.h>
+> +#include <linux/io.h>
+> +#include "sdhci.h"
+> +#include "sdhci-pltfm.h"
+> +#include <linux/platform_data/sdhci-pic32.h>
+> +
+> +#define SDH_SHARED_BUS_CTRL		0x000000E0
+> +#define SDH_SHARED_BUS_NR_CLK_PINS_MASK	0x7
+> +#define SDH_SHARED_BUS_NR_IRQ_PINS_MASK	0x30
+> +#define SDH_SHARED_BUS_CLK_PINS		0x10
+> +#define SDH_SHARED_BUS_IRQ_PINS		0x14
+> +#define SDH_CAPS_SDH_SLOT_TYPE_MASK	0xC0000000
+> +#define SDH_SLOT_TYPE_REMOVABLE		0x0
+> +#define SDH_SLOT_TYPE_EMBEDDED		0x1
+> +#define SDH_SLOT_TYPE_SHARED_BUS	0x2
+> +#define SDHCI_CTRL_CDSSEL		0x80
+> +#define SDHCI_CTRL_CDTLVL		0x40
+> +
+> +#define ADMA_FIFO_RD_THSHLD	512
+> +#define ADMA_FIFO_WR_THSHLD	512
+> +
+> +struct pic32_sdhci_priv {
+> +	struct platform_device	*pdev;
+> +	struct clk *sys_clk;
+> +	struct clk *base_clk;
+> +};
+> +
+> +static unsigned int pic32_sdhci_get_max_clock(struct sdhci_host *host)
+> +{
+> +	struct pic32_sdhci_priv *sdhci_pdata = sdhci_priv(host);
+> +
+> +	return clk_get_rate(sdhci_pdata->base_clk);
+> +}
+> +
+> +static void pic32_sdhci_set_bus_width(struct sdhci_host *host, int width)
+> +{
+> +	u8 ctrl;
+> +
+> +	ctrl = sdhci_readb(host, SDHCI_HOST_CONTROL);
+> +	if (width == MMC_BUS_WIDTH_8) {
+> +		ctrl &= ~SDHCI_CTRL_4BITBUS;
+> +		if (host->version >= SDHCI_SPEC_300)
+> +			ctrl |= SDHCI_CTRL_8BITBUS;
+> +	} else {
+> +		if (host->version >= SDHCI_SPEC_300)
+> +			ctrl &= ~SDHCI_CTRL_8BITBUS;
+> +		if (width == MMC_BUS_WIDTH_4)
+> +			ctrl |= SDHCI_CTRL_4BITBUS;
+> +		else
+> +			ctrl &= ~SDHCI_CTRL_4BITBUS;
+> +	}
+> +
+> +	/* CD select and test bits must be set for errata workaround. */
+> +	ctrl &= ~SDHCI_CTRL_CDTLVL;
+> +	ctrl |= SDHCI_CTRL_CDSSEL;
+> +	sdhci_writeb(host, ctrl, SDHCI_HOST_CONTROL);
+> +}
+> +
+> +static unsigned int pic32_sdhci_get_ro(struct sdhci_host *host)
+> +{
+> +	/*
+> +	 * The SDHCI_WRITE_PROTECT bit is unstable on current hardware so we
+> +	 * can't depend on its value in any way.
+> +	 */
+> +	return 0;
+> +}
+> +
+> +static const struct sdhci_ops pic32_sdhci_ops = {
+> +	.get_max_clock = pic32_sdhci_get_max_clock,
+> +	.set_clock = sdhci_set_clock,
+> +	.set_bus_width = pic32_sdhci_set_bus_width,
+> +	.reset = sdhci_reset,
+> +	.set_uhs_signaling = sdhci_set_uhs_signaling,
+> +	.get_ro = pic32_sdhci_get_ro,
+> +};
+> +
+> +static struct sdhci_pltfm_data sdhci_pic32_pdata = {
+> +	.ops = &pic32_sdhci_ops,
+> +	.quirks = SDHCI_QUIRK_NO_HISPD_BIT,
+> +	.quirks2 = SDHCI_QUIRK2_NO_1_8_V,
+> +};
+> +
+> +static void pic32_sdhci_shared_bus(struct platform_device *pdev)
+> +{
+> +	struct sdhci_host *host = platform_get_drvdata(pdev);
+> +	u32 bus = readl(host->ioaddr + SDH_SHARED_BUS_CTRL);
+> +	u32 clk_pins = (bus & SDH_SHARED_BUS_NR_CLK_PINS_MASK) >> 0;
+> +	u32 irq_pins = (bus & SDH_SHARED_BUS_NR_IRQ_PINS_MASK) >> 4;
+> +
+> +	/* select first clock */
+> +	if (clk_pins & 1)
+> +		bus |= (1 << SDH_SHARED_BUS_CLK_PINS);
+> +
+> +	/* select first interrupt */
+> +	if (irq_pins & 1)
+> +		bus |= (1 << SDH_SHARED_BUS_IRQ_PINS);
+> +
+> +	writel(bus, host->ioaddr + SDH_SHARED_BUS_CTRL);
+> +}
+> +
+> +static int pic32_sdhci_probe_platform(struct platform_device *pdev,
+> +				      struct pic32_sdhci_priv *pdata)
+> +{
+> +	int ret = 0;
+> +	u32 caps_slot_type;
+> +	struct sdhci_host *host = platform_get_drvdata(pdev);
+> +
+> +	/* Check card slot connected on shared bus. */
+> +	host->caps = readl(host->ioaddr + SDHCI_CAPABILITIES);
+> +	caps_slot_type = (host->caps & SDH_CAPS_SDH_SLOT_TYPE_MASK) >> 30;
+> +	if (caps_slot_type == SDH_SLOT_TYPE_SHARED_BUS)
+> +		pic32_sdhci_shared_bus(pdev);
+> +
+> +	return ret;
+> +}
+> +
+> +static int pic32_sdhci_probe(struct platform_device *pdev)
+> +{
+> +	struct sdhci_host *host;
+> +	struct sdhci_pltfm_host *pltfm_host;
+> +	struct pic32_sdhci_priv *sdhci_pdata;
+> +	struct pic32_sdhci_platform_data *plat_data;
+> +	int ret;
+> +
+> +	host = sdhci_pltfm_init(pdev, &sdhci_pic32_pdata,
+> +				sizeof(struct pic32_sdhci_priv));
+> +	if (IS_ERR(host)) {
+> +		ret = PTR_ERR(host);
+> +		goto err;
+> +	}
+> +
+> +	pltfm_host = sdhci_priv(host);
+> +	sdhci_pdata = sdhci_pltfm_priv(pltfm_host);
+> +
+> +	plat_data = pdev->dev.platform_data;
+> +	if (plat_data && plat_data->setup_dma) {
+> +		ret = plat_data->setup_dma(ADMA_FIFO_RD_THSHLD,
+> +					   ADMA_FIFO_WR_THSHLD);
+> +		if (ret)
+> +			goto err_host;
+> +	}
+> +
+> +	sdhci_pdata->sys_clk = devm_clk_get(&pdev->dev, "sys_clk");
+> +	if (IS_ERR(sdhci_pdata->sys_clk)) {
+> +		ret = PTR_ERR(sdhci_pdata->sys_clk);
+> +		dev_err(&pdev->dev, "Error getting clock\n");
+> +		goto err_host;
+> +	}
+> +
+> +	ret = clk_prepare_enable(sdhci_pdata->sys_clk);
+> +	if (ret) {
+> +		dev_err(&pdev->dev, "Error enabling clock\n");
+> +		goto err_host;
+> +	}
+> +
+> +	sdhci_pdata->base_clk = devm_clk_get(&pdev->dev, "base_clk");
+> +	if (IS_ERR(sdhci_pdata->base_clk)) {
+> +		ret = PTR_ERR(sdhci_pdata->base_clk);
+> +		dev_err(&pdev->dev, "Error getting clock\n");
+> +		goto err_sys_clk;
+> +	}
+> +
+> +	ret = clk_prepare_enable(sdhci_pdata->base_clk);
+> +	if (ret) {
+> +		dev_err(&pdev->dev, "Error enabling clock\n");
+> +		goto err_base_clk;
+> +	}
+> +
+> +	ret = mmc_of_parse(host->mmc);
+> +	if (ret)
+> +		goto err_base_clk;
+> +
+> +	ret = pic32_sdhci_probe_platform(pdev, sdhci_pdata);
+> +	if (ret) {
+> +		dev_err(&pdev->dev, "failed to probe platform!\n");
+> +		goto err_base_clk;
+> +	}
+> +
+> +	ret = sdhci_add_host(host);
+> +	if (ret) {
+> +		dev_err(&pdev->dev, "error adding host\n");
+> +		goto err_base_clk;
+> +	}
+> +
+> +	dev_info(&pdev->dev, "Successfully added sdhci host\n");
+> +	return 0;
+> +
+> +err_base_clk:
+> +	clk_disable_unprepare(sdhci_pdata->base_clk);
+> +err_sys_clk:
+> +	clk_disable_unprepare(sdhci_pdata->sys_clk);
+> +err_host:
+> +	sdhci_pltfm_free(pdev);
+> +err:
+> +	dev_err(&pdev->dev, "pic32-sdhci probe failed: %d\n", ret);
+> +	return ret;
+> +}
+> +
+> +static int pic32_sdhci_remove(struct platform_device *pdev)
+> +{
+> +	struct sdhci_host *host = platform_get_drvdata(pdev);
+> +	struct pic32_sdhci_priv *sdhci_pdata = sdhci_priv(host);
+> +	u32 scratch;
+> +
+> +	scratch = readl(host->ioaddr + SDHCI_INT_STATUS);
+> +	sdhci_remove_host(host, scratch == (u32)~0);
+> +	clk_disable_unprepare(sdhci_pdata->base_clk);
+> +	clk_disable_unprepare(sdhci_pdata->sys_clk);
+> +	sdhci_pltfm_free(pdev);
+> +
+> +	return 0;
+> +}
+> +
+> +static const struct of_device_id pic32_sdhci_id_table[] = {
+> +	{ .compatible = "microchip,pic32mzda-sdhci" },
+> +	{}
+> +};
+> +MODULE_DEVICE_TABLE(of, pic32_sdhci_id_table);
+> +
+> +static struct platform_driver pic32_sdhci_driver = {
+> +	.driver = {
+> +		.name	= "pic32-sdhci",
+> +		.owner	= THIS_MODULE,
+> +		.of_match_table = of_match_ptr(pic32_sdhci_id_table),
+> +	},
+> +	.probe		= pic32_sdhci_probe,
+> +	.remove		= pic32_sdhci_remove,
+> +};
+> +
+> +module_platform_driver(pic32_sdhci_driver);
+> +
+> +MODULE_DESCRIPTION("Microchip PIC32 SDHCI driver");
+> +MODULE_AUTHOR("Pistirica Sorin Andrei & Sandeep Sheriker");
+> +MODULE_LICENSE("GPL v2");
+> 
