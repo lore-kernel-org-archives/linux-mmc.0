@@ -1,45 +1,52 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 0/2] mmc-host: Fine-tuning for one function
-Date: Wed, 27 Jan 2016 15:15:07 +0100
-Message-ID: <CAPDyKFrDuon00_ts-EgmtS1WJnC_sCBVwFyOeSZBB5FjpzFv7A@mail.gmail.com>
-References: <566ABCD9.1060404@users.sourceforge.net>
-	<5682F3AC.7050107@users.sourceforge.net>
+Subject: Re: [PATCH 4/7] mmc: sh_mmcif: use to_delayed_work
+Date: Wed, 27 Jan 2016 15:15:12 +0100
+Message-ID: <CAPDyKFq97KHVdrmwZeASvn1AsjOXfmTbPhXBU9KBV+sJXk0NOA@mail.gmail.com>
+References: <643e31066f3378b9521dd9cd8c569ccfcf185d61.1451659910.git.geliangtang@163.com>
+	<580d73236305b902cbd6fe7b7880d3e6a6d3a382.1451659910.git.geliangtang@163.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-yk0-f180.google.com ([209.85.160.180]:34970 "EHLO
-	mail-yk0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932680AbcA0OPI (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 27 Jan 2016 09:15:08 -0500
-Received: by mail-yk0-f180.google.com with SMTP id y137so18710409yka.2
-        for <linux-mmc@vger.kernel.org>; Wed, 27 Jan 2016 06:15:07 -0800 (PST)
-In-Reply-To: <5682F3AC.7050107@users.sourceforge.net>
+Received: from mail-yk0-f175.google.com ([209.85.160.175]:35067 "EHLO
+	mail-yk0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932783AbcA0OPN (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 27 Jan 2016 09:15:13 -0500
+Received: by mail-yk0-f175.google.com with SMTP id y137so18713677yka.2
+        for <linux-mmc@vger.kernel.org>; Wed, 27 Jan 2016 06:15:13 -0800 (PST)
+In-Reply-To: <580d73236305b902cbd6fe7b7880d3e6a6d3a382.1451659910.git.geliangtang@163.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: SF Markus Elfring <elfring@users.sourceforge.net>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Sascha Sommer <saschasommer@freenet.de>, LKML <linux-kernel@vger.kernel.org>, kernel-janitors@vger.kernel.org, Julia Lawall <julia.lawall@lip6.fr>
+To: Geliang Tang <geliangtang@163.com>
+Cc: Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 
-On 29 December 2015 at 21:57, SF Markus Elfring
-<elfring@users.sourceforge.net> wrote:
-> From: Markus Elfring <elfring@users.sourceforge.net>
-> Date: Tue, 29 Dec 2015 21:54:14 +0100
+On 1 January 2016 at 15:59, Geliang Tang <geliangtang@163.com> wrote:
+> Use to_delayed_work() instead of open-coding it.
 >
-> A few update suggestions were taken into account
-> from static source code analysis.
->
-> Markus Elfring (2):
->   Delete unnecessary variable initialisations in sdricoh_init_mmc()
->   Less checks in sdricoh_init_mmc() after error detection
->
->  drivers/mmc/host/sdricoh_cs.c | 26 +++++++++++---------------
->  1 file changed, 11 insertions(+), 15 deletions(-)
->
-> --
-> 2.6.3
->
+> Signed-off-by: Geliang Tang <geliangtang@163.com>
 
-Thanks, applied for next - with some minor change to the prefix of the
-commit message header.
+Thanks, applied for next.
 
 Kind regards
 Uffe
+
+> ---
+>  drivers/mmc/host/sh_mmcif.c | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+>
+> diff --git a/drivers/mmc/host/sh_mmcif.c b/drivers/mmc/host/sh_mmcif.c
+> index 1ca8a13..e0c076a 100644
+> --- a/drivers/mmc/host/sh_mmcif.c
+> +++ b/drivers/mmc/host/sh_mmcif.c
+> @@ -1395,7 +1395,7 @@ static irqreturn_t sh_mmcif_intr(int irq, void *dev_id)
+>
+>  static void sh_mmcif_timeout_work(struct work_struct *work)
+>  {
+> -       struct delayed_work *d = container_of(work, struct delayed_work, work);
+> +       struct delayed_work *d = to_delayed_work(work);
+>         struct sh_mmcif_host *host = container_of(d, struct sh_mmcif_host, timeout_work);
+>         struct mmc_request *mrq = host->mrq;
+>         struct device *dev = sh_mmcif_host_to_dev(host);
+> --
+> 2.5.0
+>
+>
