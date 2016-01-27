@@ -1,50 +1,66 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [RFC PATCH 0/21] Totally remove SDHCI_QUIRK_BROKEN_CARD_DETECTION
- quirk
-Date: Wed, 27 Jan 2016 14:59:14 +0200
-Message-ID: <56A8BF22.8010509@intel.com>
+From: Russell King - ARM Linux <linux@arm.linux.org.uk>
+Subject: Re: [RFC PATCH 0/21] Totally remove
+ SDHCI_QUIRK_BROKEN_CARD_DETECTION quirk
+Date: Wed, 27 Jan 2016 13:23:49 +0000
+Message-ID: <20160127132348.GY10826@n2100.arm.linux.org.uk>
 References: <1453871155-3283-1-git-send-email-shawn.lin@rock-chips.com>
+ <56A8BF22.8010509@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga14.intel.com ([192.55.52.115]:8533 "EHLO mga14.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751298AbcA0NC7 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 27 Jan 2016 08:02:59 -0500
-In-Reply-To: <1453871155-3283-1-git-send-email-shawn.lin@rock-chips.com>
+Received: from pandora.arm.linux.org.uk ([78.32.30.218]:39476 "EHLO
+	pandora.arm.linux.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932147AbcA0NYE (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 27 Jan 2016 08:24:04 -0500
+Content-Disposition: inline
+In-Reply-To: <56A8BF22.8010509@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Shawn Lin <shawn.lin@rock-chips.com>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: bcm-kernel-feedback-list@broadcom.com, linux-rpi-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Russell King <rmk+kernel@arm.linux.org.uk>
+To: Adrian Hunter <adrian.hunter@intel.com>
+Cc: Shawn Lin <shawn.lin@rock-chips.com>, Ulf Hansson <ulf.hansson@linaro.org>, bcm-kernel-feedback-list@broadcom.com, linux-rpi-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 
-On 27/01/16 07:05, Shawn Lin wrote:
-> Ulf wants to make sdhci into a library, but it's a huge task
-> since any improvemts may touch too much platforms. But at least
-> we should make some effort to push things torwards to this target.
-> 
-> This patchset remove SDHCI_QUIRK_BROKEN_CARD_DETECTION from sdhci
-> to gradually reduce quirk of sdhci.
-> 
-> Firstly, SDHCI_QUIRK_BROKEN_CARD_DETECTION aims at claiming the slot is
-> a "broken-cd" one, but "broken-cd" is not a quirk from my view.
-> In addition, mmc core stack had already obtain "broken-cd" from dts via
-> mmc_of_parse and pass MMC_CAP_NEEDS_POLL to mmc->caps. So we can reuse it
-> instead of SDHCI_QUIRK_BROKEN_CARD_DETECTION.
+On Wed, Jan 27, 2016 at 02:59:14PM +0200, Adrian Hunter wrote:
+> In my view Ulf needs to explain how the SDHCI library is going to work,
+> particularly in the absence of new callbacks.
 
-That assumes there is no driver that wants to disable the card detect
-interrupts and disable the use of the Present State register, but still use
-a Card Detect GPIO and therefore not have MMC_CAP_NEEDS_POLL.
+We need to add new callbacks as part of the conversion to a library,
+otherwise we're very much into a total rewrite from scratch (which
+I think is far too much work, and prone to errors) or a big flag day
+to switch everything over (which will require a moritorium on sdhci
+patches while the effort to switch everything is ongoing.)
 
-A way forward should provide for drivers do to things like that.
+Both of those approaches suffer from one huge drawback: there is no
+way to bisect between them to locate the cause of a regression.
 
-One way is to make selected existing functions into library functions and
-provide callbacks for them.  In this case do with sdhci_set_card_detection()
-what Russell King did with sdhci_reset().  However Ulf is against new callbacks.
+A piece-meal approach, where the driver is gradually converted is a
+far saner approach, because it means that each conversion in the step
+can be done as a series of transformations, which not only can be
+properly reviewed, but also bisected - and that is _hugely_ important
+for the existing state of SDHCI.
 
-I would much prefer the structure for a SDHCI library be put in place, or at
-least agreed to, before individual quirks are tackled.
+The chances of some hardware behavioural quirk being missed while
+trying to convert SDHCI to a library are _extremely_ high, and the
+only sane approach to this is one which allows a progressive
+transformation of the driver.
 
-In my view Ulf needs to explain how the SDHCI library is going to work,
-particularly in the absence of new callbacks.
+Also, the last thing we want is for drivers to end up duplicating
+entire functions from sdhci.c just because they have one thing
+different (eg, because they need to do something in the middle of
+a set_ios() call which no other SDHCI driver needs.)  Having such
+code duplication will just make maintanence even more of a
+nightmare.
 
+set_ios() is probably one of the worst functions in sdhci right now,
+and there's no obvious way to split it up into several stand-alone
+functions which drivers could chain together.
+
+I think what needs to happen here is that Ulf needs to leave such
+decisions about what is acceptable or unacceptable to those who are
+trying to convert sdhci to a library, otherwise the conversion will
+probably never happen... unless Ulf wants to get directly involved
+in the conversion effort, producing patches to make it happen.
+
+-- 
+RMK's Patch system: http://www.arm.linux.org.uk/developer/patches/
+FTTC broadband for 0.8mile line: currently at 9.6Mbps down 400kbps up
+according to speedtest.net.
