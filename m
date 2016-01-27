@@ -1,71 +1,97 @@
-From: Scott Branden <sbranden@broadcom.com>
-Subject: Re: [PATCH 0/3] mmc: sdhci-iproc: add bcm2835 support
-Date: Wed, 27 Jan 2016 16:36:51 -0800
-Message-ID: <56A962A3.2090205@broadcom.com>
-References: <1453933542-30287-1-git-send-email-stefan.wahren@i2se.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH 2/5 RFC] mmc: sdhci-iproc: Actually enable the clock
+Date: Wed, 27 Jan 2016 22:11:40 +0100
+Message-ID: <CAPDyKFq_=8nKiEse5KAW3FVZBut6mL6Qk6jvFYim9ihxZt5GEA@mail.gmail.com>
+References: <1453042744-16196-1-git-send-email-stefan.wahren@i2se.com>
+	<1453042744-16196-3-git-send-email-stefan.wahren@i2se.com>
+	<CAPDyKFrCV_GCqCjymsKuOov9GT8gbmb9rBQoJfzmMbMtBnoqWQ@mail.gmail.com>
+	<885101040.21976.ad433530-d9a2-4a98-b048-302cf8550d48.open-xchange@email.1und1.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="windows-1252"; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-gw3-out.broadcom.com ([216.31.210.64]:63127 "EHLO
-	mail-gw3-out.broadcom.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S965780AbcA1AhA (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 27 Jan 2016 19:37:00 -0500
-In-Reply-To: <1453933542-30287-1-git-send-email-stefan.wahren@i2se.com>
+Received: from mail-yk0-f173.google.com ([209.85.160.173]:33376 "EHLO
+	mail-yk0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S968011AbcA0VLl (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 27 Jan 2016 16:11:41 -0500
+Received: by mail-yk0-f173.google.com with SMTP id k129so7380722yke.0
+        for <linux-mmc@vger.kernel.org>; Wed, 27 Jan 2016 13:11:41 -0800 (PST)
+In-Reply-To: <885101040.21976.ad433530-d9a2-4a98-b048-302cf8550d48.open-xchange@email.1und1.de>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Stefan Wahren <stefan.wahren@i2se.com>, Ray Jui <rjui@broadcom.com>, Jon Mason <jonmason@broadcom.com>, Stephen Warren <swarren@wwwdotorg.org>, Lee Jones <lee@kernel.org>, Eric Anholt <eric@anholt.net>
-Cc: Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Arnd Bergmann <arnd@arndb.de>, Ulf Hansson <ulf.hansson@linaro.org>, kernel@martin.sperl.org, devicetree@vger.kernel.org, linux-rpi-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, jszhang@marvell.com, shawn.lin@rock-chips.com, bcm-kernel-feedback-list@broadcom.com
+To: Stefan Wahren <stefan.wahren@i2se.com>
+Cc: Lee Jones <lee@kernel.org>, Ray Jui <rjui@broadcom.com>, kernel@martin.sperl.org, Eric Anholt <eric@anholt.net>, Rob Herring <robh+dt@kernel.org>, Arnd Bergmann <arnd@arndb.de>, Scott Branden <sbranden@broadcom.com>, bcm-kernel-feedback-list@broadcom.com, linux-mmc <linux-mmc@vger.kernel.org>, Stephen Warren <swarren@wwwdotorg.org>, linux-rpi-kernel@lists.infradead.org, Mark Rutland <mark.rutland@arm.com>, Jon Mason <jonmason@broadcom.com>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>
 
-Looks clean Stefan.  I'll try and revisit the caps setting in the future 
-and may be able to provide additional settings in a later patch.
+On 27 January 2016 at 20:11, Stefan Wahren <stefan.wahren@i2se.com> wrote:
+> Hi,
+>
+>> Ulf Hansson <ulf.hansson@linaro.org> hat am 27. Januar 2016 um 15:16
+>> geschrieben:
+>>
+>>
+>> On 17 January 2016 at 15:59, Stefan Wahren <stefan.wahren@i2se.com> wrote:
+>> > The RPi firmware-based clocks driver can actually disable
+>> > unused clocks, so when switching to use it we ended up losing
+>> > our MMC clock once all devices were probed.
+>> >
+>> > This patch adopts the changes from 1e5a0a9a58e2 ("mmc: sdhci-bcm2835:
+>> > Actually enable the clock") to sdhci-iproc.
+>> >
+>> > Signed-off-by: Stefan Wahren <stefan.wahren@i2se.com>
+>> > ---
+>> > drivers/mmc/host/sdhci-iproc.c | 9 ++++++++-
+>> > 1 file changed, 8 insertions(+), 1 deletion(-)
+>> >
+>> > diff --git a/drivers/mmc/host/sdhci-iproc.c b/drivers/mmc/host/sdhci-iproc.c
+>> > index e22060a..55bc348 100644
+>> > --- a/drivers/mmc/host/sdhci-iproc.c
+>> > +++ b/drivers/mmc/host/sdhci-iproc.c
+>> > @@ -207,6 +207,11 @@ static int sdhci_iproc_probe(struct platform_device
+>> > *pdev)
+>> > ret = PTR_ERR(pltfm_host->clk);
+>> > goto err;
+>> > }
+>> > + ret = clk_prepare_enable(pltfm_host->clk);
+>> > + if (ret) {
+>> > + dev_err(&pdev->dev, "failed to enable host clk\n");
+>> > + goto err;
+>> > + }
+>> >
+>> > if (iproc_host->data->pdata->quirks & SDHCI_QUIRK_MISSING_CAPS) {
+>> > host->caps = iproc_host->data->caps;
+>> > @@ -215,10 +220,12 @@ static int sdhci_iproc_probe(struct platform_device
+>> > *pdev)
+>> >
+>> > ret = sdhci_add_host(host);
+>> > if (ret)
+>> > - goto err;
+>> > + goto err_clk;
+>> >
+>> > return 0;
+>> >
+>> > +err_clk:
+>> > + clk_disable_unprepare(pltfm_host->clk);
+>> > err:
+>> > sdhci_pltfm_free(pdev);
+>> > return ret;
+>> > --
+>> > 1.7.9.5
+>> >
+>>
+>> There's a missing clk_disable_unprepare() from the ->remove()
+>> callback. Otherwise this looks good.
+>
+> this shouldn't be necessary, because clk_disable_unprepare() is already called
+> by sdhci_pltfm_unregister().
 
-This patch series:
-Acked-by: Scott Branden <sbranden@broadcom.com>
+Huh. That's yet another strange behaviour of the sdhci core.
 
+So there's no clk enabling done via the registering API, but disabling
+is done at unregistering. It's fragile.
 
-On 16-01-27 02:25 PM, Stefan Wahren wrote:
-> This patch series based on the suggestion of Scott Branden to implement
-> bcm2835 support into sdhci-iproc [1].
->
-> These changes provide the following advantages:
->    * no need to maintain a separate driver for bcm2835
->    * improve support and test coverage of bcm2835 mmc support
->    * get the rid of SDHCI_CAPABILITIES hack in bcm2835_sdhci_readl
->    * increase write performance by avoiding delays in write ops
->
-> Patch 1 prepare sdhci-iproc for another platform. Patch 2 and 3
-> are the actually changes for bcm2835 support.
->
-> These series has been tested on Raspberry Pi B with dd (direct I/O):
->
-> sdhci-bcm2835
->
-> 378 kB/s WRITE
-> 10,6 MB/s READ
->
-> sdhci-iproc (after applying patch series)
->
-> 881 kB/s WRITE
-> 10,8 MB/s READ
->
-> Changes since RFC:
->    * drop patch which tries to add quirks for bcm2835 in DT and define all
->      quirks in driver instead to keep old DTs working with sdhci-iproc
->      (suggestion by Stephen Warren)
->    * define MMC caps in shdci-iproc platform data to make adding new
->      platforms more easily (suggestion by Stephen Warren)
->
-> [1] - https://lkml.org/lkml/2015/12/22/525
->
-> Stefan Wahren (3):
->    mmc: sdhci-iproc: define MMC caps in platform data
->    mmc: sdhci-iproc: add bcm2835 support
->    DT: sdhci-iproc: add bcm2835 compatible
->
->   .../devicetree/bindings/mmc/brcm,sdhci-iproc.txt   |    5 ++++-
->   drivers/mmc/host/Kconfig                           |    6 +++---
->   drivers/mmc/host/sdhci-iproc.c                     |   20 ++++++++++++++++++--
->   3 files changed, 25 insertions(+), 6 deletions(-)
->
+That also means there is a clk disable unbalance issue at ->remove()
+for sdhci-iproc, right!?
 
+Anyway, the patch is of course correct. Applied for next!
+
+Thanks and kind regards
+Uffe
