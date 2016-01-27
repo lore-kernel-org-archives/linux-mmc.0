@@ -1,46 +1,47 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 5/7] mmc: usdhi6rol0: use to_delayed_work
-Date: Wed, 27 Jan 2016 15:15:18 +0100
-Message-ID: <CAPDyKFoS2q4-4KXQTZ9Ki54QNqJM6=itLFiH2koW3QFpmuuJfQ@mail.gmail.com>
-References: <643e31066f3378b9521dd9cd8c569ccfcf185d61.1451659910.git.geliangtang@163.com>
-	<a595f073abf2bc9fca98c411e20a1af593b9719d.1451659910.git.geliangtang@163.com>
+Subject: Re: [PATCH 1/1] mmc: core: pwrseq_simple: remove unused header file
+Date: Wed, 27 Jan 2016 15:15:23 +0100
+Message-ID: <CAPDyKFop5_HAW1x=mFjZdezqxo71qR-ZSwGeNXP1Jsc_AKxSyA@mail.gmail.com>
+References: <1452051250-17163-1-git-send-email-peter.chen@freescale.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <a595f073abf2bc9fca98c411e20a1af593b9719d.1451659910.git.geliangtang@163.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Geliang Tang <geliangtang@163.com>
-Cc: Rabin Vincent <rabin.vincent@axis.com>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-yk0-f170.google.com ([209.85.160.170]:35971 "EHLO
+	mail-yk0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932935AbcA0OPY (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 27 Jan 2016 09:15:24 -0500
+Received: by mail-yk0-f170.google.com with SMTP id v14so241598343ykd.3
+        for <linux-mmc@vger.kernel.org>; Wed, 27 Jan 2016 06:15:24 -0800 (PST)
+In-Reply-To: <1452051250-17163-1-git-send-email-peter.chen@freescale.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Peter Chen <peter.chen@freescale.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>
 
-On 1 January 2016 at 15:59, Geliang Tang <geliangtang@163.com> wrote:
-> Use to_delayed_work() instead of open-coding it.
->
-> Signed-off-by: Geliang Tang <geliangtang@163.com>
+On 6 January 2016 at 04:34, Peter Chen <peter.chen@freescale.com> wrote:
+> Signed-off-by: Peter Chen <peter.chen@freescale.com>
 
-Thanks, applied for next.
+Thanks, applied for next!
 
 Kind regards
 Uffe
 
 > ---
->  drivers/mmc/host/usdhi6rol0.c | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
+>  drivers/mmc/core/pwrseq_simple.c | 1 -
+>  1 file changed, 1 deletion(-)
 >
-> diff --git a/drivers/mmc/host/usdhi6rol0.c b/drivers/mmc/host/usdhi6rol0.c
-> index b47122d..b2752fe 100644
-> --- a/drivers/mmc/host/usdhi6rol0.c
-> +++ b/drivers/mmc/host/usdhi6rol0.c
-> @@ -1630,7 +1630,7 @@ static irqreturn_t usdhi6_cd(int irq, void *dev_id)
->   */
->  static void usdhi6_timeout_work(struct work_struct *work)
->  {
-> -       struct delayed_work *d = container_of(work, struct delayed_work, work);
-> +       struct delayed_work *d = to_delayed_work(work);
->         struct usdhi6_host *host = container_of(d, struct usdhi6_host, timeout_work);
->         struct mmc_request *mrq = host->mrq;
->         struct mmc_data *data = mrq ? mrq->data : NULL;
+> diff --git a/drivers/mmc/core/pwrseq_simple.c b/drivers/mmc/core/pwrseq_simple.c
+> index d10538b..f42a956 100644
+> --- a/drivers/mmc/core/pwrseq_simple.c
+> +++ b/drivers/mmc/core/pwrseq_simple.c
+> @@ -12,7 +12,6 @@
+>  #include <linux/slab.h>
+>  #include <linux/device.h>
+>  #include <linux/err.h>
+> -#include <linux/of_gpio.h>
+>  #include <linux/gpio/consumer.h>
+>
+>  #include <linux/mmc/host.h>
 > --
-> 2.5.0
->
+> 1.9.1
 >
