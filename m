@@ -1,47 +1,43 @@
 From: Shawn Lin <shawn.lin@rock-chips.com>
-Subject: [RFC PATCH 17/21] mmc: sdhci-pci-core: remove SDHCI_QUIRK_BROKEN_CARD_DETECTION
-Date: Wed, 27 Jan 2016 13:09:05 +0800
-Message-ID: <1453871345-4011-1-git-send-email-shawn.lin@rock-chips.com>
+Subject: [RFC PATCH 18/21] mmc: sdhci-pltfm: remove SDHCI_QUIRK_BROKEN_CARD_DETECTION
+Date: Wed, 27 Jan 2016 13:09:14 +0800
+Message-ID: <1453871354-4052-1-git-send-email-shawn.lin@rock-chips.com>
 References: <1453871155-3283-1-git-send-email-shawn.lin@rock-chips.com>
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from lucky1.263xmail.com ([211.157.147.132]:46563 "EHLO
+	lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752886AbcA0FNs (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 27 Jan 2016 00:13:48 -0500
 In-Reply-To: <1453871155-3283-1-git-send-email-shawn.lin@rock-chips.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: bcm-kernel-feedback-list@broadcom.com, linux-rpi-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Shawn Lin <shawn.lin@rock-chips.com>, Adrian Hunter <adrian.hunter@intel.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: bcm-kernel-feedback-list@broadcom.com, linux-rpi-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Shawn Lin <shawn.lin@rock-chips.com>
 
-This patch remove SDHCI_QUIRK_BROKEN_CARD_DETECTION and add
-MMC_CAP_NEEDS_POLL for PCI_DEVICE_ID_MARVELL_88ALP01_SD
+We already call mmc_of_parse to get "broken-cd", so just
+remove it here.
 
-Cc: Adrian Hunter <adrian.hunter@intel.com>
 Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
 ---
 
- drivers/mmc/host/sdhci-pci-core.c | 5 ++++-
- 1 file changed, 4 insertions(+), 1 deletion(-)
+ drivers/mmc/host/sdhci-pltfm.c | 3 ---
+ 1 file changed, 3 deletions(-)
 
-diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-pci-core.c
-index cc851b0..1f6d3f6 100644
---- a/drivers/mmc/host/sdhci-pci-core.c
-+++ b/drivers/mmc/host/sdhci-pci-core.c
-@@ -101,7 +101,6 @@ static const struct sdhci_pci_fixes sdhci_ene_714 = {
- static const struct sdhci_pci_fixes sdhci_cafe = {
- 	.quirks		= SDHCI_QUIRK_NO_SIMULT_VDD_AND_POWER |
- 			  SDHCI_QUIRK_NO_BUSY_IRQ |
--			  SDHCI_QUIRK_BROKEN_CARD_DETECTION |
- 			  SDHCI_QUIRK_BROKEN_TIMEOUT_VAL,
- };
+diff --git a/drivers/mmc/host/sdhci-pltfm.c b/drivers/mmc/host/sdhci-pltfm.c
+index 8b0fa73..dae5d0ba9 100644
+--- a/drivers/mmc/host/sdhci-pltfm.c
++++ b/drivers/mmc/host/sdhci-pltfm.c
+@@ -91,9 +91,6 @@ int sdhci_get_of_property(struct platform_device *pdev)
+ 	if (sdhci_of_wp_inverted(np))
+ 		host->quirks |= SDHCI_QUIRK_INVERTED_WRITE_PROTECT;
  
-@@ -1612,6 +1611,10 @@ static struct sdhci_pci_slot *sdhci_pci_probe_slot(
- 	host->quirks = chip->quirks;
- 	host->quirks2 = chip->quirks2;
+-	if (of_get_property(np, "broken-cd", NULL))
+-		host->quirks |= SDHCI_QUIRK_BROKEN_CARD_DETECTION;
+-
+ 	if (of_get_property(np, "no-1-8-v", NULL))
+ 		host->quirks2 |= SDHCI_QUIRK2_NO_1_8_V;
  
-+	if ((chip->pdev->vendor == PCI_VENDOR_ID_MARVELL) &&
-+	    (chip->pdev->device == PCI_DEVICE_ID_MARVELL_88ALP01_SD))
-+	    host->mmc->caps |= MMC_CAP_NEEDS_POLL;
-+
- 	host->irq = pdev->irq;
- 
- 	ret = pci_request_region(pdev, bar, mmc_hostname(host->mmc));
 -- 
 2.3.7
+
+
