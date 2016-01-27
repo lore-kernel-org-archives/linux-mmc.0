@@ -1,91 +1,112 @@
-From: Shawn Lin <shawn.lin@rock-chips.com>
-Subject: Re: [RFC PATCH 07/21] mmc: sdhci-pxav3: consolidate parsing path
-Date: Wed, 27 Jan 2016 14:17:11 +0800
-Message-ID: <56A860E7.4070503@rock-chips.com>
+From: Haibo Chen <haibo.chen-3arQi8VN3Tc@public.gmane.org>
+Subject: RE: [RFC PATCH 14/21] mmc: sdhci-esdhc-imx: remove
+ SDHCI_QUIRK_BROKEN_CARD_DETECTION
+Date: Wed, 27 Jan 2016 06:54:44 +0000
+Message-ID: <DB3PR04MB05535012DD334E9A534407D390D90@DB3PR04MB0553.eurprd04.prod.outlook.com>
 References: <1453871155-3283-1-git-send-email-shawn.lin@rock-chips.com>
- <1453871256-3599-1-git-send-email-shawn.lin@rock-chips.com>
- <20160127134449.310bc952@xhacker>
+ <1453871318-3888-1-git-send-email-shawn.lin@rock-chips.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252; format=flowed
+Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from lucky1.263xmail.com ([211.157.147.130]:47118 "EHLO
-	lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752630AbcA0GRn (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 27 Jan 2016 01:17:43 -0500
-In-Reply-To: <20160127134449.310bc952@xhacker>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-rpi-kernel-bounces+glkr-linux-rpi-kernel=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+In-Reply-To: <1453871318-3888-1-git-send-email-shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
+Content-Language: en-US
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-rpi-kernel>,
+ <mailto:linux-rpi-kernel-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-rpi-kernel/>
+List-Post: <mailto:linux-rpi-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+List-Help: <mailto:linux-rpi-kernel-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-rpi-kernel>,
+ <mailto:linux-rpi-kernel-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
+Sender: "linux-rpi-kernel" <linux-rpi-kernel-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+Errors-To: linux-rpi-kernel-bounces+glkr-linux-rpi-kernel=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+To: Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: Dong Aisheng <aisheng.dong-KZfg59tc24xl57MIdRCFDg@public.gmane.org>, Haibo Chen <haibo.chen-KZfg59tc24xl57MIdRCFDg@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "bcm-kernel-feedback-list-dY08KVG/lbpWk0Htik3J/w@public.gmane.org" <bcm-kernel-feedback-list-dY08KVG/lbpWk0Htik3J/w@public.gmane.org>, "linux-rpi-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-rpi-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Jisheng Zhang <jszhang@marvell.com>
-Cc: shawn.lin@rock-chips.com, Ulf Hansson <ulf.hansson@linaro.org>, bcm-kernel-feedback-list@broadcom.com, linux-rpi-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Gregory CLEMENT <gregory.clement@free-electrons.com>
 
-Hi Jisheng,
+Hi Shawn, 
 
-On 2016/1/27 13:44, Jisheng Zhang wrote:
-> Hi Shawn,
->
-> On Wed, 27 Jan 2016 13:07:36 +0800 Shawn Lin wrote:
->
->> This patch remove mmc_of_parse and check return value
->> of sdhci_get_of_property.
->>
->> Cc: Jisheng Zhang <jszhang@marvell.com>
->> Cc: Gregory CLEMENT <gregory.clement@free-electrons.com>
->> Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
->
-> Reviewed-by: Jisheng Zhang <jszhang@marvell.com>
->
->
-> But I have some comments to your patch10:
->
->> SDHCI_QUIRK_BROKEN_CARD_DETECTION is for "broken-cd".
->> If we add MMC_CAP_NONREMOVABLE("non-removeble"), we shoud
->> not add "broken-cd" together according to mmc.txt for
->> dt-bingdings. Also, "broken-cd" can obtain from mmc_of_parse,
->> which will add MMC_CAP_NEEDS_POLL into mmc->caps.
->
-> The problem is non-dt platforms which need the broken cd quirk don't have
-> chance to set MMC_CAP_NEEDS_POLL in driver, unless we explicitly do so
-> in driver. But then, the driver only need to do so on some platforms but
-> not always.
->
-
-Thanks for sharing your thought. That is indeed a historical baggage
-to improve sdhci. So, it needs to check each platform case by case.
-Let's wait more feedback untile I decide how to respin the patchset. :)
-
-> Thanks,
-> Jisheng
->
->
->> ---
->>
->>   drivers/mmc/host/sdhci-pxav3.c | 4 +---
->>   1 file changed, 1 insertion(+), 3 deletions(-)
->>
->> diff --git a/drivers/mmc/host/sdhci-pxav3.c b/drivers/mmc/host/sdhci-pxav3.c
->> index f5edf9d..06eda25 100644
->> --- a/drivers/mmc/host/sdhci-pxav3.c
->> +++ b/drivers/mmc/host/sdhci-pxav3.c
->> @@ -410,10 +410,8 @@ static int sdhci_pxav3_probe(struct platform_device *pdev)
->>
->>   	match = of_match_device(of_match_ptr(sdhci_pxav3_of_match), &pdev->dev);
->>   	if (match) {
->> -		ret = mmc_of_parse(host->mmc);
->> -		if (ret)
->> +		ret = sdhci_get_of_property(pdev);
->>   			goto err_of_parse;
->> -		sdhci_get_of_property(pdev);
->>   		pdata = pxav3_get_mmc_pdata(dev);
->>   		pdev->dev.platform_data = pdata;
->>   	} else if (pdata) {
->
->
->
->
+Comments below.
 
 
--- 
-Best Regards
-Shawn Lin
 
+> -----Original Message-----
+> From: Shawn Lin [mailto:shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org]
+> Sent: Wednesday, January 27, 2016 1:09 PM
+> To: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+> Cc: bcm-kernel-feedback-list-dY08KVG/lbpWk0Htik3J/w@public.gmane.org; linux-rpi-
+> kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org; linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org; linux-
+> kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org; Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>; Dong
+> Aisheng <aisheng.dong-KZfg59tc24xl57MIdRCFDg@public.gmane.org>; Haibo Chen
+> <haibo.chen-KZfg59tc24xl57MIdRCFDg@public.gmane.org>
+> Subject: [RFC PATCH 14/21] mmc: sdhci-esdhc-imx: remove
+> SDHCI_QUIRK_BROKEN_CARD_DETECTION
+> 
+> sdhci_esdhc_imx_pdata need SDHCI_QUIRK_BROKEN_CARD_DETECTION,
+> so we replace it with MMC_CAP_NEEDS_POLL while probing. For other cases,
+> we directly remove SDHCI_QUIRK_BROKEN_CARD_DETECTION.
+> 
+> Cc: Dong Aisheng <aisheng.dong-KZfg59tc24xl57MIdRCFDg@public.gmane.org>
+> Cc: Haibo Chen <haibo.chen-KZfg59tc24xl57MIdRCFDg@public.gmane.org>
+> Signed-off-by: Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
+> ---
+> 
+>  drivers/mmc/host/sdhci-esdhc-imx.c | 9 +++++----
+>  1 file changed, 5 insertions(+), 4 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-
+> esdhc-imx.c
+> index f25f292..5705be1 100644
+> --- a/drivers/mmc/host/sdhci-esdhc-imx.c
+> +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
+> @@ -952,8 +952,7 @@ static struct sdhci_ops sdhci_esdhc_ops = {  static const
+> struct sdhci_pltfm_data sdhci_esdhc_imx_pdata = {
+>  	.quirks = ESDHC_DEFAULT_QUIRKS | SDHCI_QUIRK_NO_HISPD_BIT
+>  			| SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC
+> -			| SDHCI_QUIRK_BROKEN_ADMA_ZEROLEN_DESC
+> -			| SDHCI_QUIRK_BROKEN_CARD_DETECTION,
+> +			| SDHCI_QUIRK_BROKEN_ADMA_ZEROLEN_DESC,
+>  	.ops = &sdhci_esdhc_ops,
+>  };
+> 
+> @@ -1012,7 +1011,7 @@ sdhci_esdhc_imx_probe_dt(struct platform_device
+> *pdev,
+>  		return ret;
+> 
+>  	if (!IS_ERR_VALUE(mmc_gpio_get_cd(host->mmc)))
+> -		host->quirks &= ~SDHCI_QUIRK_BROKEN_CARD_DETECTION;
+> +		host->mmc->caps &= MMC_CAP_NEEDS_POLL;
+
+You miss ' ~', seems you need to change to:
+host->mmc->caps &=~ MMC_CAP_NEEDS_POLL;
+
+> 
+>  	return 0;
+>  }
+> @@ -1064,7 +1063,7 @@ static int sdhci_esdhc_imx_probe_nondt(struct
+> platform_device *pdev,
+> 
+>  	case ESDHC_CD_CONTROLLER:
+>  		/* we have a working card_detect back */
+> -		host->quirks &= ~SDHCI_QUIRK_BROKEN_CARD_DETECTION;
+> +		host->mmc->caps &= MMC_CAP_NEEDS_POLL;
+
+The same issue.
+
+>  		break;
+> 
+>  	case ESDHC_CD_PERMANENT:
+> @@ -1104,6 +1103,8 @@ static int sdhci_esdhc_imx_probe(struct
+> platform_device *pdev)
+>  	if (IS_ERR(host))
+>  		return PTR_ERR(host);
+> 
+> +	host->mmc->caps |= MMC_CAP_NEEDS_POLL;
+> +
+>  	pltfm_host = sdhci_priv(host);
+> 
+>  	imx_data = devm_kzalloc(&pdev->dev, sizeof(*imx_data),
+> GFP_KERNEL);
+> --
+> 2.3.7
+> 
