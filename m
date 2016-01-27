@@ -1,108 +1,74 @@
-From: Shawn Lin <shawn.lin@rock-chips.com>
-Subject: Re: [RFC PATCH 0/21] Totally remove SDHCI_QUIRK_BROKEN_CARD_DETECTION
- quirk
-Date: Thu, 28 Jan 2016 10:17:11 +0800
-Message-ID: <56A97A27.4000501@rock-chips.com>
-References: <1453871155-3283-1-git-send-email-shawn.lin@rock-chips.com>
- <56A8BF22.8010509@intel.com> <20160127132348.GY10826@n2100.arm.linux.org.uk>
- <CAPDyKFr0MT5xa87F=4LPX7WbNuD0THndTDkvhL9N0h6A5g67eg@mail.gmail.com>
+From: "Laison Computech Inc" <danny@lamicro.com>
+Subject: NEW ARRIVALS, CISCO,CPU's,Memory, LAPTOP AND AVAYA
+Date: Wed, 27 Jan 2016 12:41:51 +0700
+Message-ID: <201601270544.AQX06493__23852.3182496012$1453951451$gmane$org@razorgate1.infokom.net>
+Reply-To: <LaisonComputer@computer4u.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Type: text/plain;
+	charset="Windows-1251"
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from lucky1.263xmail.com ([211.157.147.131]:53916 "EHLO
-	lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S934254AbcA1CRm (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 27 Jan 2016 21:17:42 -0500
-In-Reply-To: <CAPDyKFr0MT5xa87F=4LPX7WbNuD0THndTDkvhL9N0h6A5g67eg@mail.gmail.com>
+Received: from razorgate1.infokom.net ([202.147.192.101]:12251 "EHLO
+	razorgate1.infokom.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1161368AbcA1DXp (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 27 Jan 2016 22:23:45 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>, Russell King - ARM Linux <linux@arm.linux.org.uk>, Adrian Hunter <adrian.hunter@intel.com>
-Cc: shawn.lin@rock-chips.com, bcm-kernel-feedback-list@broadcom.com, linux-rpi-kernel@lists.infradead.org, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 
-On 2016/1/27 23:07, Ulf Hansson wrote:
-> On 27 January 2016 at 14:23, Russell King - ARM Linux
-> <linux@arm.linux.org.uk> wrote:
->> On Wed, Jan 27, 2016 at 02:59:14PM +0200, Adrian Hunter wrote:
->>> In my view Ulf needs to explain how the SDHCI library is going to work,
->>> particularly in the absence of new callbacks.
->>
->> We need to add new callbacks as part of the conversion to a library,
->> otherwise we're very much into a total rewrite from scratch (which
->> I think is far too much work, and prone to errors) or a big flag day
->> to switch everything over (which will require a moritorium on sdhci
->> patches while the effort to switch everything is ongoing.)
->>
+Dear Sir/Madam,
 
-Totally agreed. Maybe that is the reason that frighten some volunteers
-to make the conversion.
+Clean tested working pulls CPUs and QTYs in stock.
 
->> Both of those approaches suffer from one huge drawback: there is no
->> way to bisect between them to locate the cause of a regression.
->>
+115  X   X5650
+65  X   E5410
+75  X   X5660
+145  X   E5530
+100  X   E5645
+40  X   X5680
+75  X   X5690
 
-[...]
+Brand new sealed  IP phones and QTYs in stock.
 
->>
->> I think what needs to happen here is that Ulf needs to leave such
->> decisions about what is acceptable or unacceptable to those who are
->> trying to convert sdhci to a library, otherwise the conversion will
->> probably never happen... unless Ulf wants to get directly involved
->> in the conversion effort, producing patches to make it happen.
->>
->
-> I don't intend to contribute much with actual patches. I am willing to
-> help review and also help with expertise around the PM related parts.
->
-> I do realize that some callbacks may still be needed, even in the end
-> when sdhci has become a pure library. Although, those should be far
-> less then those we have today.
->
-> Currently I am more or less unable to properly maintain sdhci because
-> of it's bad code structure. Therefore I have taken a quite simple
-> approach by rejecting new callbacks and quirks, in a way to prevent it
-> from being worse.
+55 x CP-7937G
+77 x CP-7942G
+54 x CP-7945G
+75 x CP-7962G
+......
+45 x Avaya 9630
+65 x Avaya 9641
+55 x Avaya 9640
 
-Ulf, I do understand your situation. sdhci makes you exhausted and no
-one seems able to maintain it properly. But preventing it from being
-worse doesn't mean making it better, right?
+All NIB.
 
-I'am not a experienced sdhci expert, so when I read the sdhci code
-for the first time last summer, it does shock me a lot. So many
-historical burden it takes with lots kinds of *quirks*, I even cannot
-undertand why some quirks are need since git-blame just tell me some
-useless info because somebody do some coding-style fix or moving code
-here and there, which makes me hard to trace the changes. Another fact,
-how to test these changes for diff hardwares?? Without the help of
-variant drivers folks, it cannot go a step. If we split our "library
-direction" movement, do you think all the variant drivers are willing
-to test all the patchsets for it? I don't think so.
+Here is our current stock list.
 
-Here, I come up with a bold and tentative proposal:
-If someone is willing to be the maintainer of sdhci, he/she can create
-a separate files and rewrite it to be a library. Then we reject to
-accept any new variant drivers to use the old sdhci struct and encourage
-it to fit the library one. Then ask the variant drivers who use the old
-struct to migrate its code to fit the library. Until all done, remove
-the old sdhci. Does that make sense?
+ SSD drives and 750 gig 2.5" sata drives
+
+We also have
+250 x i5 dell
+133 x HP
+360 x Lenevo
+all grade A
+
+Here is the qty in stock for laptops
+ 
+150 x E6500 Dell Latitude E6500 Core 2 Duo 2.80GHz T9600 4GB 160GB DVD+/-RW Win 7
+ 60 x E6510 Dell Ltitude E6510. 15.6" Intel Core i5- M520 @ 2.40GHz. 4GB. 320GB DVD+/-RW Win 7
+30 X 8530P HP EliteBook 8530p 15.4" Laptop 2.53GHz Core 2 Duo T9400, 4GB RAM, 160GB HDD, Win
+100 x  8740W  HP EliteBook 8740w 17" 2.4Ghz Core i5 6GB 250GB Win 7 Pr
+45 x 8760W HP EliteBook 8760W 17.3" 2nd Gen Intel Core i7 2.70GHz 8GB 320GB Windows 7 Pro
+50 x DELL 6520Dell latitude e6520 15.6" i5-2520M 2.5Ghz, 8GB Ram, 500GB HD Win 7 @ $115
+120 x DELL 6420 Laptop Dell Latitude E6420 14" Intel Core i5 2.4Ghz 4GB RAM 250GB HDD DVD Win 7
+150 x T410 Lenovo ThinkPad Laptop T410s 14.1" 2.40GHz Core i5 4GB RAM 160GB Win 7
+180 x 8440P HP EliteBook 8440p 14" M520 Core i5 2.4GHz 4GB 250GB Win 7
 
 
-To me, the best way forward would be if some of you
-> experienced sdhci developers stepped in as a maintainer for it. In
-> that way, I can trust the development moving in the "library
-> direction" so I can pull back from nacking potential interim sdhci
-> callbacks/quirks.
->
-> Does it make sense?
->
-> Kind regards
-> Uffe
->
->
->
+Let me know if you're interested. We are very open to offers and willing to work with you to make sure that we have a deal.
 
-
--- 
-Best Regards
-Shawn Lin
-
+Thank You
+Barbara Johnson
+Laison Computech Inc
+210 N Scoring Ave,
+Rialto California, 92376
+Tel: +1-657-232-7047
+Fax: +1-347-214-047
