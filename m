@@ -1,47 +1,39 @@
 From: Shawn Lin <shawn.lin@rock-chips.com>
-Subject: [RFC PATCH 07/21] mmc: sdhci-pxav3: consolidate parsing path
-Date: Wed, 27 Jan 2016 13:07:36 +0800
-Message-ID: <1453871256-3599-1-git-send-email-shawn.lin@rock-chips.com>
+Subject: [RFC PATCH 12/21] mmc: sdhci-bcm-kona: remove SDHCI_QUIRK_BROKEN_CARD_DETECTION
+Date: Wed, 27 Jan 2016 13:08:19 +0800
+Message-ID: <1453871299-3806-1-git-send-email-shawn.lin@rock-chips.com>
 References: <1453871155-3283-1-git-send-email-shawn.lin@rock-chips.com>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from lucky1.263xmail.com ([211.157.147.133]:33049 "EHLO
-	lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753153AbcA0FMJ (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 27 Jan 2016 00:12:09 -0500
+Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1453871155-3283-1-git-send-email-shawn.lin@rock-chips.com>
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Sender: linux-kernel-owner@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: bcm-kernel-feedback-list@broadcom.com, linux-rpi-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Shawn Lin <shawn.lin@rock-chips.com>, Jisheng Zhang <jszhang@marvell.com>, Gregory CLEMENT <gregory.clement@free-electrons.com>
+Cc: bcm-kernel-feedback-list@broadcom.com, linux-rpi-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Shawn Lin <shawn.lin@rock-chips.com>, Ray Jui <rjui@broadcom.com>, Florian Fainelli <f.fainelli@gmail.com>
+List-Id: linux-mmc@vger.kernel.org
 
-This patch remove mmc_of_parse and check return value
-of sdhci_get_of_property.
+If MMC_CAP_NONREMOVABLE is provided, SDHCI_QUIRK_BROKEN_CARD_DETECTION
+is redunant.
 
-Cc: Jisheng Zhang <jszhang@marvell.com>
-Cc: Gregory CLEMENT <gregory.clement@free-electrons.com>
+Cc: Ray Jui <rjui@broadcom.com>
+Cc: Florian Fainelli <f.fainelli@gmail.com>
 Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
 ---
 
- drivers/mmc/host/sdhci-pxav3.c | 4 +---
- 1 file changed, 1 insertion(+), 3 deletions(-)
+ drivers/mmc/host/sdhci-bcm-kona.c | 3 ---
+ 1 file changed, 3 deletions(-)
 
-diff --git a/drivers/mmc/host/sdhci-pxav3.c b/drivers/mmc/host/sdhci-pxav3.c
-index f5edf9d..06eda25 100644
---- a/drivers/mmc/host/sdhci-pxav3.c
-+++ b/drivers/mmc/host/sdhci-pxav3.c
-@@ -410,10 +410,8 @@ static int sdhci_pxav3_probe(struct platform_device *pdev)
+diff --git a/drivers/mmc/host/sdhci-bcm-kona.c b/drivers/mmc/host/sdhci-bcm-kona.c
+index 00a8a40..2bd541f0 100644
+--- a/drivers/mmc/host/sdhci-bcm-kona.c
++++ b/drivers/mmc/host/sdhci-bcm-kona.c
+@@ -269,9 +269,6 @@ static int sdhci_bcm_kona_probe(struct platform_device *pdev)
+ 		(mmc_gpio_get_cd(host->mmc) != -ENOSYS) ? 'Y' : 'N',
+ 		(mmc_gpio_get_ro(host->mmc) != -ENOSYS) ? 'Y' : 'N');
  
- 	match = of_match_device(of_match_ptr(sdhci_pxav3_of_match), &pdev->dev);
- 	if (match) {
--		ret = mmc_of_parse(host->mmc);
--		if (ret)
-+		ret = sdhci_get_of_property(pdev);
- 			goto err_of_parse;
--		sdhci_get_of_property(pdev);
- 		pdata = pxav3_get_mmc_pdata(dev);
- 		pdev->dev.platform_data = pdata;
- 	} else if (pdata) {
+-	if (host->mmc->caps & MMC_CAP_NONREMOVABLE)
+-		host->quirks |= SDHCI_QUIRK_BROKEN_CARD_DETECTION;
+-
+ 	dev_dbg(dev, "is_8bit=%c\n",
+ 		(host->mmc->caps & MMC_CAP_8_BIT_DATA) ? 'Y' : 'N');
+ 
 -- 
 2.3.7
-
-
