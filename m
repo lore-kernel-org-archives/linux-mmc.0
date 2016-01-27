@@ -1,138 +1,71 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: remove unnecessary assignment statements before return
-Date: Wed, 27 Jan 2016 15:15:35 +0100
-Message-ID: <CAPDyKFo2Kd52QD_r3hZjPV7XNdPCP=3B29083n9Y7dTsbSXZgw@mail.gmail.com>
-References: <1452219325-25357-1-git-send-email-yamada.masahiro@socionext.com>
+Subject: Re: [PATCH] mmc: pwrseq_simple: Support assigned-clocks
+Date: Wed, 27 Jan 2016 15:15:42 +0100
+Message-ID: <CAPDyKFrdraY1hXfikELMr5V7hJRcQP7nOUaOjzKiGUGDSecp6A@mail.gmail.com>
+References: <20160108095917.32335.11094.stgit@localhost>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1452219325-25357-1-git-send-email-yamada.masahiro@socionext.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Masahiro Yamada <yamada.masahiro@socionext.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Jaehoon Chung <jh80.chung@samsung.com>, Chaotian Jing <chaotian.jing@mediatek.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-yk0-f173.google.com ([209.85.160.173]:36322 "EHLO
+	mail-yk0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932581AbcA0OPn (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 27 Jan 2016 09:15:43 -0500
+Received: by mail-yk0-f173.google.com with SMTP id v14so241610707ykd.3
+        for <linux-mmc@vger.kernel.org>; Wed, 27 Jan 2016 06:15:42 -0800 (PST)
+In-Reply-To: <20160108095917.32335.11094.stgit@localhost>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Martin Fuzzey <mfuzzey@parkeon.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
 
-On 8 January 2016 at 03:15, Masahiro Yamada
-<yamada.masahiro@socionext.com> wrote:
-> Variable assignment just before return is redundant.
++ Srini
+
+On 8 January 2016 at 10:59, Martin Fuzzey <mfuzzey@parkeon.com> wrote:
+> The clock subsystem now allows clock rates and parents to be configured
+> in the device tree.
 >
-> Signed-off-by: Masahiro Yamada <yamada.masahiro@socionext.com>
+> This requires calling of_clk_set_defaults() which is done automatically
+> for platform, i2c, spi devices. Since pwrseq_simple does not fit into
+> those catagories we must do it ourself.
+>
+> With this patch the standard assigned-clocks, assigned-clock-rates,
+> assigned-clock-parents DT properties to be used in pwrseq_simple nodes.
 
-Thanks, applied for next.
+I believe this should be solved when we have converted the each pwrseq
+method to become a platform driver. This is being worked on by
+Srinivas Kandagatla.
+http://www.spinics.net/lists/arm-kernel/msg475605.html
 
 Kind regards
-Uffe
+Ulf Hansson
 
+>
+> Signed-off-by: Martin Fuzzey <mfuzzey@parkeon.com>
 > ---
+>  drivers/mmc/core/pwrseq_simple.c |    5 +++++
+>  1 file changed, 5 insertions(+)
 >
->  drivers/mmc/core/mmc_ops.c  | 19 ++++---------------
->  drivers/mmc/core/sd_ops.c   |  7 +------
->  drivers/mmc/core/sdio_ops.c |  3 +--
->  3 files changed, 6 insertions(+), 23 deletions(-)
+> diff --git a/drivers/mmc/core/pwrseq_simple.c b/drivers/mmc/core/pwrseq_simple.c
+> index 4d2962b..fd8f38e 100644
+> --- a/drivers/mmc/core/pwrseq_simple.c
+> +++ b/drivers/mmc/core/pwrseq_simple.c
+> @@ -8,6 +8,7 @@
+>   *  Simple MMC power sequence management
+>   */
+>  #include <linux/clk.h>
+> +#include <linux/clk/clk-conf.h>
+>  #include <linux/kernel.h>
+>  #include <linux/slab.h>
+>  #include <linux/device.h>
+> @@ -108,6 +109,10 @@ struct mmc_pwrseq *mmc_pwrseq_simple_alloc(struct mmc_host *host,
+>         if (!pwrseq)
+>                 return ERR_PTR(-ENOMEM);
 >
-> diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
-> index 1f44426..ddbb918 100644
-> --- a/drivers/mmc/core/mmc_ops.c
-> +++ b/drivers/mmc/core/mmc_ops.c
-> @@ -90,7 +90,6 @@ int mmc_send_status(struct mmc_card *card, u32 *status)
->
->  static int _mmc_select_card(struct mmc_host *host, struct mmc_card *card)
->  {
-> -       int err;
->         struct mmc_command cmd = {0};
->
->         BUG_ON(!host);
-> @@ -105,11 +104,7 @@ static int _mmc_select_card(struct mmc_host *host, struct mmc_card *card)
->                 cmd.flags = MMC_RSP_NONE | MMC_CMD_AC;
->         }
->
-> -       err = mmc_wait_for_cmd(host, &cmd, MMC_CMD_RETRIES);
-> -       if (err)
-> -               return err;
-> -
-> -       return 0;
-> +       return mmc_wait_for_cmd(host, &cmd, MMC_CMD_RETRIES);
->  }
->
->  int mmc_select_card(struct mmc_card *card)
-> @@ -244,7 +239,6 @@ int mmc_all_send_cid(struct mmc_host *host, u32 *cid)
->
->  int mmc_set_relative_addr(struct mmc_card *card)
->  {
-> -       int err;
->         struct mmc_command cmd = {0};
->
->         BUG_ON(!card);
-> @@ -254,11 +248,7 @@ int mmc_set_relative_addr(struct mmc_card *card)
->         cmd.arg = card->rca << 16;
->         cmd.flags = MMC_RSP_R1 | MMC_CMD_AC;
->
-> -       err = mmc_wait_for_cmd(card->host, &cmd, MMC_CMD_RETRIES);
-> -       if (err)
-> -               return err;
-> -
-> -       return 0;
-> +       return mmc_wait_for_cmd(card->host, &cmd, MMC_CMD_RETRIES);
->  }
->
->  static int
-> @@ -736,7 +726,7 @@ mmc_send_bus_test(struct mmc_card *card, struct mmc_host *host, u8 opcode,
->
->  int mmc_bus_test(struct mmc_card *card, u8 bus_width)
->  {
-> -       int err, width;
-> +       int width;
->
->         if (bus_width == MMC_BUS_WIDTH_8)
->                 width = 8;
-> @@ -752,8 +742,7 @@ int mmc_bus_test(struct mmc_card *card, u8 bus_width)
->          * is a problem.  This improves chances that the test will work.
->          */
->         mmc_send_bus_test(card, card->host, MMC_BUS_TEST_W, width);
-> -       err = mmc_send_bus_test(card, card->host, MMC_BUS_TEST_R, width);
-> -       return err;
-> +       return mmc_send_bus_test(card, card->host, MMC_BUS_TEST_R, width);
->  }
->
->  int mmc_send_hpi_cmd(struct mmc_card *card, u32 *status)
-> diff --git a/drivers/mmc/core/sd_ops.c b/drivers/mmc/core/sd_ops.c
-> index 48d0c93..16b774c 100644
-> --- a/drivers/mmc/core/sd_ops.c
-> +++ b/drivers/mmc/core/sd_ops.c
-> @@ -120,7 +120,6 @@ EXPORT_SYMBOL(mmc_wait_for_app_cmd);
->
->  int mmc_app_set_bus_width(struct mmc_card *card, int width)
->  {
-> -       int err;
->         struct mmc_command cmd = {0};
->
->         BUG_ON(!card);
-> @@ -140,11 +139,7 @@ int mmc_app_set_bus_width(struct mmc_card *card, int width)
->                 return -EINVAL;
->         }
->
-> -       err = mmc_wait_for_app_cmd(card->host, card, &cmd, MMC_CMD_RETRIES);
-> -       if (err)
-> -               return err;
-> -
-> -       return 0;
-> +       return mmc_wait_for_app_cmd(card->host, card, &cmd, MMC_CMD_RETRIES);
->  }
->
->  int mmc_send_app_op_cond(struct mmc_host *host, u32 ocr, u32 *rocr)
-> diff --git a/drivers/mmc/core/sdio_ops.c b/drivers/mmc/core/sdio_ops.c
-> index 62508b4..34f6e80 100644
-> --- a/drivers/mmc/core/sdio_ops.c
-> +++ b/drivers/mmc/core/sdio_ops.c
-> @@ -217,7 +217,6 @@ int sdio_reset(struct mmc_host *host)
->         else
->                 abort |= 0x08;
->
-> -       ret = mmc_io_rw_direct_host(host, 1, 0, SDIO_CCCR_ABORT, abort, NULL);
-> -       return ret;
-> +       return mmc_io_rw_direct_host(host, 1, 0, SDIO_CCCR_ABORT, abort, NULL);
->  }
->
-> --
-> 1.9.1
+> +       ret = of_clk_set_defaults(dev->of_node, false);
+> +       if (ret)
+> +               goto free;
+> +
+>         pwrseq->ext_clk = clk_get(dev, "ext_clock");
+>         if (IS_ERR(pwrseq->ext_clk) &&
+>             PTR_ERR(pwrseq->ext_clk) != -ENOENT) {
 >
