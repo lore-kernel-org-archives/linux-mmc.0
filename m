@@ -1,101 +1,62 @@
-From: Haibo Chen <haibo.chen@nxp.com>
-Subject: [PATCH] mmc: sdhci: disable irq in sdhci host suspend ranther than free this irq
-Date: Thu, 28 Jan 2016 17:42:26 +0800
-Message-ID: <1453974146-20951-1-git-send-email-haibo.chen@nxp.com>
+From: Russell King - ARM Linux <linux@arm.linux.org.uk>
+Subject: Re: [PATCH] mmc: sdhci: disable irq in sdhci host suspend ranther
+ than free this irq
+Date: Thu, 28 Jan 2016 10:20:57 +0000
+Message-ID: <20160128102057.GJ10826@n2100.arm.linux.org.uk>
+References: <1453974146-20951-1-git-send-email-haibo.chen@nxp.com>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-db3on0060.outbound.protection.outlook.com ([157.55.234.60]:18228
-	"EHLO emea01-db3-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1751138AbcA1KKS (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 28 Jan 2016 05:10:18 -0500
+Received: from pandora.arm.linux.org.uk ([78.32.30.218]:41610 "EHLO
+	pandora.arm.linux.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751400AbcA1KVG (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 28 Jan 2016 05:21:06 -0500
+Content-Disposition: inline
+In-Reply-To: <1453974146-20951-1-git-send-email-haibo.chen@nxp.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: ulf.hansson@linaro.org
-Cc: rmk+kernel@arm.linux.org.uk, haibo.chen@nxp.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+To: Haibo Chen <haibo.chen@nxp.com>
+Cc: ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 
-Currently sdhci driver free irq in host suspend, and call
-request_threaded_irq() in host resume. But during host resume,
-Ctrl+C can impact sdhci host resume, see the error log:
+On Thu, Jan 28, 2016 at 05:42:26PM +0800, Haibo Chen wrote:
+> Currently sdhci driver free irq in host suspend, and call
+> request_threaded_irq() in host resume. But during host resume,
+> Ctrl+C can impact sdhci host resume, see the error log:
 
-CPU1 is up
-PM: noirq resume of devices complete after 0.637 msecs imx-sdma 30bd0000.sdma: loaded firmware 4.1
-PM: early resume of devices complete after 0.774 msecs
-dpm_run_callback(): platform_pm_resume+0x0/0x44 returns -4
-PM: Device 30b40000.usdhc failed to resume: error -4
-dpm_run_callback(): platform_pm_resume+0x0/0x44 returns -4
-PM: Device 30b50000.usdhc failed to resume: error -4
-dpm_run_callback(): platform_pm_resume+0x0/0x44 returns -4
-PM: Device 30b60000.usdhc failed to resume: error -4 fec 30be0000.ethernet eth0: Link is Up - 100Mbps/Full - flow control rx/tx
-mmc0: Timeout waiting for hardware interrupt.
-mmc0: Timeout waiting for hardware interrupt.
-mmc0: Timeout waiting for hardware interrupt.
-mmc0: Timeout waiting for hardware interrupt.
-mmc0: Timeout waiting for hardware interrupt.
-mmc0: Timeout waiting for hardware interrupt.
-mmc0: error -110 during resume (card was removed?)
-mmc2: Timeout waiting for hardware interrupt.
-mmc2: Timeout waiting for hardware interrupt.
-mmc2: error -110 during resume (card was removed?)
+Ctrl+C should have no effect on this - that seems to imply that there's
+some other bug elsewhere.
 
-In request_threaded_irq-> __setup_irq-> kthread_create
-->kthread_create_on_node, the comment shows that SIGKILLed will
-impact the kthread create, and return -EINTR.
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index d622435..4b1646b 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -2686,7 +2686,7 @@ int sdhci_suspend_host(struct sdhci_host *host)
+>  		host->ier = 0;
+>  		sdhci_writel(host, 0, SDHCI_INT_ENABLE);
+>  		sdhci_writel(host, 0, SDHCI_SIGNAL_ENABLE);
+> -		free_irq(host->irq, host);
+> +		disable_irq(host->irq);
 
-This patch replace them with disable|enable_irq(), that will prevent
-IRQs from being propagated to the sdhci driver.
+This is really not acceptable I'm afraid.  While it's common on ARM for
+each interrupt to be uniquely allocated to a peripheral, not all SDHCI
+platforms have that luxury.
 
-Fixes: 781e989cf593 ("mmc: sdhci: convert to new SDIO IRQ handling")
-Signed-off-by: Haibo Chen <haibo.chen@nxp.com>
----
- drivers/mmc/host/sdhci.c | 12 +++---------
- 1 file changed, 3 insertions(+), 9 deletions(-)
+SDHCI is also used on PCI, and on x86 platforms, it's common to have PCI
+interrupts shared between (sometimes many) different PCI devices.
 
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index d622435..4b1646b 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -2686,7 +2686,7 @@ int sdhci_suspend_host(struct sdhci_host *host)
- 		host->ier = 0;
- 		sdhci_writel(host, 0, SDHCI_INT_ENABLE);
- 		sdhci_writel(host, 0, SDHCI_SIGNAL_ENABLE);
--		free_irq(host->irq, host);
-+		disable_irq(host->irq);
- 	} else {
- 		sdhci_enable_irq_wakeups(host);
- 		enable_irq_wake(host->irq);
-@@ -2698,8 +2698,6 @@ EXPORT_SYMBOL_GPL(sdhci_suspend_host);
- 
- int sdhci_resume_host(struct sdhci_host *host)
- {
--	int ret = 0;
--
- 	if (host->flags & (SDHCI_USE_SDMA | SDHCI_USE_ADMA)) {
- 		if (host->ops->enable_dma)
- 			host->ops->enable_dma(host);
-@@ -2718,11 +2716,7 @@ int sdhci_resume_host(struct sdhci_host *host)
- 	}
- 
- 	if (!device_may_wakeup(mmc_dev(host->mmc))) {
--		ret = request_threaded_irq(host->irq, sdhci_irq,
--					   sdhci_thread_irq, IRQF_SHARED,
--					   mmc_hostname(host->mmc), host);
--		if (ret)
--			return ret;
-+		enable_irq(host->irq);
- 	} else {
- 		sdhci_disable_irq_wakeups(host);
- 		disable_irq_wake(host->irq);
-@@ -2730,7 +2724,7 @@ int sdhci_resume_host(struct sdhci_host *host)
- 
- 	sdhci_enable_card_detection(host);
- 
--	return ret;
-+	return 0;
- }
- 
- EXPORT_SYMBOL_GPL(sdhci_resume_host);
+For example, on my laptop:
+
+ 18:    1089806     286185   IO-APIC-fasteoi   uhci_hcd:usb8, r852, mmc0
+
+the SDHCI interrupt is shared with two other peripherals - one USB
+controller and a NAND device.
+
+Disabling the interrupt will adversely impact other peripherals and
+cause regressions where the interrupt is shared.
+
+So, I'm afraid I'm going to have to NAK this patch.
+
 -- 
-1.9.1
-
+RMK's Patch system: http://www.arm.linux.org.uk/developer/patches/
+FTTC broadband for 0.8mile line: currently at 9.6Mbps down 400kbps up
+according to speedtest.net.
