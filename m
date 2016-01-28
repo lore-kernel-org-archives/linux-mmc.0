@@ -1,94 +1,52 @@
 From: Shawn Lin <shawn.lin@rock-chips.com>
-Subject: [PATCH 2/4] mmc: dw_mmc: add setup_clk for init hook
-Date: Thu, 28 Jan 2016 09:31:04 +0800
-Message-ID: <1453944664-16874-1-git-send-email-shawn.lin@rock-chips.com>
+Subject: [PATCH 3/4] mmc: dw_mmc-exynos: remove dw_mci_exynos_setup_clock
+Date: Thu, 28 Jan 2016 09:31:11 +0800
+Message-ID: <1453944671-16938-1-git-send-email-shawn.lin@rock-chips.com>
 References: <1453944616-16224-1-git-send-email-shawn.lin@rock-chips.com>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from lucky1.263xmail.com ([211.157.147.133]:60853 "EHLO
-	lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S966502AbcA1Bfk (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 27 Jan 2016 20:35:40 -0500
+Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1453944616-16224-1-git-send-email-shawn.lin@rock-chips.com>
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Sender: linux-kernel-owner@vger.kernel.org
 To: Jaehoon Chung <jh80.chung@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>
 Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Shawn Lin <shawn.lin@rock-chips.com>
+List-Id: linux-mmc@vger.kernel.org
 
-We add this new argument into init hook for
-variant drivers to decide whether to do clock
-related stuff inside the hook.
+We combine what dw_mci_exynos_setup_clock does with init
+hook to simplify the code
 
 Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
 ---
 
- drivers/mmc/host/dw_mmc-exynos.c   | 4 ++--
- drivers/mmc/host/dw_mmc-rockchip.c | 2 +-
- drivers/mmc/host/dw_mmc.c          | 2 +-
- drivers/mmc/host/dw_mmc.h          | 2 +-
- 4 files changed, 5 insertions(+), 5 deletions(-)
+ drivers/mmc/host/dw_mmc-exynos.c | 11 ++---------
+ 1 file changed, 2 insertions(+), 9 deletions(-)
 
 diff --git a/drivers/mmc/host/dw_mmc-exynos.c b/drivers/mmc/host/dw_mmc-exynos.c
-index 3a7e835..edaa117 100644
+index edaa117..47d8b1d 100644
 --- a/drivers/mmc/host/dw_mmc-exynos.c
 +++ b/drivers/mmc/host/dw_mmc-exynos.c
-@@ -91,7 +91,7 @@ static inline u8 dw_mci_exynos_get_ciu_div(struct dw_mci *host)
- 		return SDMMC_CLKSEL_GET_DIV(mci_readl(host, CLKSEL)) + 1;
- }
- 
--static int dw_mci_exynos_priv_init(struct dw_mci *host)
-+static int dw_mci_exynos_priv_init(struct dw_mci *host, bool setup_clk)
- {
- 	struct dw_mci_exynos_priv_data *priv = host->priv;
- 
-@@ -159,7 +159,7 @@ static int dw_mci_exynos_resume(struct device *dev)
- {
- 	struct dw_mci *host = dev_get_drvdata(dev);
- 
--	dw_mci_exynos_priv_init(host);
-+	dw_mci_exynos_priv_init(host, false);
- 	return dw_mci_resume(host);
- }
- 
-diff --git a/drivers/mmc/host/dw_mmc-rockchip.c b/drivers/mmc/host/dw_mmc-rockchip.c
-index 9934503..885c801 100644
---- a/drivers/mmc/host/dw_mmc-rockchip.c
-+++ b/drivers/mmc/host/dw_mmc-rockchip.c
-@@ -221,7 +221,7 @@ static int dw_mci_rk3288_parse_dt(struct dw_mci *host)
- 	return 0;
- }
- 
--static int dw_mci_rockchip_init(struct dw_mci *host)
-+static int dw_mci_rockchip_init(struct dw_mci *host, bool setup_clk)
- {
- 	/* It is slot 8 on Rockchip SoCs */
- 	host->sdio_id0 = 8;
-diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index 7128351..1d27a2b 100644
---- a/drivers/mmc/host/dw_mmc.c
-+++ b/drivers/mmc/host/dw_mmc.c
-@@ -2995,7 +2995,7 @@ int dw_mci_probe(struct dw_mci *host)
+@@ -115,14 +115,8 @@ static int dw_mci_exynos_priv_init(struct dw_mci *host, bool setup_clk)
+ 				DQS_CTRL_GET_RD_DELAY(priv->saved_strobe_ctrl);
  	}
  
- 	if (drv_data && drv_data->init) {
--		ret = drv_data->init(host);
-+		ret = drv_data->init(host, true);
- 		if (ret) {
- 			dev_err(host->dev,
- 				"implementation specific init failed\n");
-diff --git a/drivers/mmc/host/dw_mmc.h b/drivers/mmc/host/dw_mmc.h
-index f695b58..1a9492e 100644
---- a/drivers/mmc/host/dw_mmc.h
-+++ b/drivers/mmc/host/dw_mmc.h
-@@ -285,7 +285,7 @@ struct dw_mci_slot {
-  */
- struct dw_mci_drv_data {
- 	unsigned long	*caps;
--	int		(*init)(struct dw_mci *host);
-+	int		(*init)(struct dw_mci *host, bool setup_clk);
- 	int		(*setup_clock)(struct dw_mci *host);
- 	void		(*prepare_command)(struct dw_mci *host, u32 *cmdr);
- 	void		(*set_ios)(struct dw_mci *host, struct mmc_ios *ios);
+-	return 0;
+-}
+-
+-static int dw_mci_exynos_setup_clock(struct dw_mci *host)
+-{
+-	struct dw_mci_exynos_priv_data *priv = host->priv;
+-
+-	host->bus_hz /= (priv->ciu_div + 1);
++	if (setup_clk)
++		host->bus_hz /= (priv->ciu_div + 1);
+ 
+ 	return 0;
+ }
+@@ -499,7 +493,6 @@ static unsigned long exynos_dwmmc_caps[4] = {
+ static const struct dw_mci_drv_data exynos_drv_data = {
+ 	.caps			= exynos_dwmmc_caps,
+ 	.init			= dw_mci_exynos_priv_init,
+-	.setup_clock		= dw_mci_exynos_setup_clock,
+ 	.prepare_command	= dw_mci_exynos_prepare_command,
+ 	.set_ios		= dw_mci_exynos_set_ios,
+ 	.parse_dt		= dw_mci_exynos_parse_dt,
 -- 
 2.3.7
-
-
