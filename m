@@ -1,105 +1,115 @@
-From: One Thousand Gnomes <gnomes@lxorguk.ukuu.org.uk>
-Subject: Re: [RFC PATCH 0/21] Totally remove
- SDHCI_QUIRK_BROKEN_CARD_DETECTION quirk
-Date: Thu, 28 Jan 2016 11:29:46 +0000
-Message-ID: <20160128112946.4d750fae@lxorguk.ukuu.org.uk>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [RFC PATCH 0/21] Totally remove SDHCI_QUIRK_BROKEN_CARD_DETECTION
+ quirk
+Date: Thu, 28 Jan 2016 14:03:54 +0200
+Message-ID: <56AA03AA.5010706@intel.com>
 References: <1453871155-3283-1-git-send-email-shawn.lin@rock-chips.com>
-	<56A8BF22.8010509@intel.com>
-	<20160127132348.GY10826@n2100.arm.linux.org.uk>
-	<CAPDyKFr0MT5xa87F=4LPX7WbNuD0THndTDkvhL9N0h6A5g67eg@mail.gmail.com>
-	<56A97A27.4000501@rock-chips.com>
+ <56A8BF22.8010509@intel.com> <20160127132348.GY10826@n2100.arm.linux.org.uk>
+ <CAPDyKFr0MT5xa87F=4LPX7WbNuD0THndTDkvhL9N0h6A5g67eg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
+Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from lxorguk.ukuu.org.uk ([81.2.110.251]:57812 "EHLO
-	lxorguk.ukuu.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S967331AbcA1Lai (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 28 Jan 2016 06:30:38 -0500
-In-Reply-To: <56A97A27.4000501@rock-chips.com>
+Received: from mga14.intel.com ([192.55.52.115]:7510 "EHLO mga14.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751832AbcA1MHV (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 28 Jan 2016 07:07:21 -0500
+In-Reply-To: <CAPDyKFr0MT5xa87F=4LPX7WbNuD0THndTDkvhL9N0h6A5g67eg@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Shawn Lin <shawn.lin@rock-chips.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Russell King - ARM Linux <linux@arm.linux.org.uk>, Adrian Hunter <adrian.hunter@intel.com>, bcm-kernel-feedback-list@broadcom.com, linux-rpi-kernel@lists.infradead.org, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+To: Ulf Hansson <ulf.hansson@linaro.org>, Russell King - ARM Linux <linux@arm.linux.org.uk>
+Cc: Shawn Lin <shawn.lin@rock-chips.com>, bcm-kernel-feedback-list@broadcom.com, linux-rpi-kernel@lists.infradead.org, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, P L Sai Krishna <lakshmi.sai.krishna.potthuri@xilinx.com>, Wan Zongshun <vincent.wan@amd.com>
 
-On Thu, 28 Jan 2016 10:17:11 +0800
-Shawn Lin <shawn.lin@rock-chips.com> wrote:
+On 27/01/16 17:07, Ulf Hansson wrote:
+> On 27 January 2016 at 14:23, Russell King - ARM Linux
+> <linux@arm.linux.org.uk> wrote:
+>> On Wed, Jan 27, 2016 at 02:59:14PM +0200, Adrian Hunter wrote:
+>>> In my view Ulf needs to explain how the SDHCI library is going to work,
+>>> particularly in the absence of new callbacks.
+>>
+>> We need to add new callbacks as part of the conversion to a library,
+>> otherwise we're very much into a total rewrite from scratch (which
+>> I think is far too much work, and prone to errors) or a big flag day
+>> to switch everything over (which will require a moritorium on sdhci
+>> patches while the effort to switch everything is ongoing.)
+>>
+>> Both of those approaches suffer from one huge drawback: there is no
+>> way to bisect between them to locate the cause of a regression.
+>>
+>> A piece-meal approach, where the driver is gradually converted is a
+>> far saner approach, because it means that each conversion in the step
+>> can be done as a series of transformations, which not only can be
+>> properly reviewed, but also bisected - and that is _hugely_ important
+>> for the existing state of SDHCI.
+>>
+>> The chances of some hardware behavioural quirk being missed while
+>> trying to convert SDHCI to a library are _extremely_ high, and the
+>> only sane approach to this is one which allows a progressive
+>> transformation of the driver.
+>>
+>> Also, the last thing we want is for drivers to end up duplicating
+>> entire functions from sdhci.c just because they have one thing
+>> different (eg, because they need to do something in the middle of
+>> a set_ios() call which no other SDHCI driver needs.)  Having such
+>> code duplication will just make maintanence even more of a
+>> nightmare.
+>>
+>> set_ios() is probably one of the worst functions in sdhci right now,
+>> and there's no obvious way to split it up into several stand-alone
+>> functions which drivers could chain together.
+>>
+>> I think what needs to happen here is that Ulf needs to leave such
+>> decisions about what is acceptable or unacceptable to those who are
+>> trying to convert sdhci to a library, otherwise the conversion will
+>> probably never happen... unless Ulf wants to get directly involved
+>> in the conversion effort, producing patches to make it happen.
+>>
+> 
+> I don't intend to contribute much with actual patches. I am willing to
+> help review and also help with expertise around the PM related parts.
+> 
+> I do realize that some callbacks may still be needed, even in the end
+> when sdhci has become a pure library. Although, those should be far
+> less then those we have today.
+> 
+> Currently I am more or less unable to properly maintain sdhci because
+> of it's bad code structure. Therefore I have taken a quite simple
+> approach by rejecting new callbacks and quirks, in a way to prevent it
+> from being worse. To me, the best way forward would be if some of you
+> experienced sdhci developers stepped in as a maintainer for it. In
+> that way, I can trust the development moving in the "library
+> direction" so I can pull back from nacking potential interim sdhci
+> callbacks/quirks.
+> 
+> Does it make sense?
 
-> On 2016/1/27 23:07, Ulf Hansson wrote:
-> > On 27 January 2016 at 14:23, Russell King - ARM Linux
-> > <linux@arm.linux.org.uk> wrote:  
-> >> On Wed, Jan 27, 2016 at 02:59:14PM +0200, Adrian Hunter wrote:  
-> >>> In my view Ulf needs to explain how the SDHCI library is going to work,
-> >>> particularly in the absence of new callbacks.  
-> >>
-> >> We need to add new callbacks as part of the conversion to a library,
-> >> otherwise we're very much into a total rewrite from scratch (which
-> >> I think is far too much work, and prone to errors) or a big flag day
-> >> to switch everything over (which will require a moritorium on sdhci
-> >> patches while the effort to switch everything is ongoing.)
+I am happy to help and even be the SDHCI maintainer if Russell King and
+others agree.  I have an interest in sdhci-acpi and sdhci-pci and also there
+is UHS-II and ADMA3 on the horizon.
 
-Agreed that won't work. It never works. You simply end up with a bigger
-mess, a giant backlog and lots of people sending patches "on appeal" to
-Linus/GregKH because the maintainer is being unreasonable. At that point
-it all gets messy. It has been done (IDE) where the old core code simply
-couldn't cope with the new hardware, but it was a nightmare
+I agree with Russell that a re-write would introduce more bugs and more work
+than it would be worth.  Making many small steps in the general direction is
+preferable.
 
-> > of it's bad code structure. Therefore I have taken a quite simple
-> > approach by rejecting new callbacks and quirks, in a way to prevent it
-> > from being worse.  
+Initially it would nice to see it made easy for drivers to replace specific
+mmc ops and sdhci ops and then call the standard version before/after doing
+some custom code.  For example, P L Sai Krishna's auto-tuning problem might
+be solved by something to the effect of:
 
-Which merely guarantees that the problem gets worse, because everyone
-just puts their SD patches into Android trees instead and then when that
-device is needed in Linux proper the crap hits the fan or people write
-uglier and more hideous hacks buried elsewhere.
+int arasan_execute_tuning(struct mmc_host *mmc, u32 opcode)
+{
+	struct sdhci_host *host = mmc_priv(mmc);
+	int err;
 
-Eventually something gives way, and it will always be the maintainer,
-because everyone needs to get their devices supported. You can guide new
-callbacks in constructive ways but not stop them.
+	err = sdhci_execute_tuning(mmc, opcode);
+	if (!err)
+		arasan_tune_sdclk(host);
+	return err;
+}
 
-> If someone is willing to be the maintainer of sdhci, he/she can create
-> a separate files and rewrite it to be a library. Then we reject to
-> accept any new variant drivers to use the old sdhci struct and encourage
-> it to fit the library one. Then ask the variant drivers who use the old
-> struct to migrate its code to fit the library. Until all done, remove
-> the old sdhci. Does that make sense?
+And Wan Zongshun also wanted to be able directly to replace
+sdhci_execute_tuning() from sdhci-pci.
 
-I don't think it's the best idea. From past experience with other layers
-of code the most effective approach (except for IDE which *was* a dead
-loss and rewritten) has been something like this
+As suggested, my get_cd problem could also be solved by replacing the mmc
+get_cd op.
 
-- Take a small function with a quirk in it that one driver uses
-- Split it into a clean function and driver specific function, put one in
-  the driver and one in the core
-- Replace the call to it with a call to ->ops->whatever()
-- Add it to the various drivers operations structure as it gets invented
-
-repeat until done.
-
-Some things are shared so you end up moving vendor common quirks to
-perhaps an "intel" file or a "designware" file rather than a single
-driver, but the theory is the same and it ends up in effect as a class
-with some overridden methods.
-
-After this cycle has been repeated a bit you actually have the real
-structure of the core code and the areas it diverges are visible. All your
-ops-> methods are the points of diverge and clearly labelled. If you want
-you can then go through finding all those that fit the pattern where they
-diverge in the form
-
-	do_stuff
-	standard_method()
-	do_stuff
-
-and if the ops callback is not deeply buried look at kicking the whole
-method back out completely so it becomes a true library method that
-drivers can wrap or call.
-
-It can be done. The 8250 serial driver has been going through this
-process for some time (although it didn't start from quite so bad a
-position as the sd layer), and the tty layer went through chunks of it
-several times in its history.
-
-And above all - it bisects.
-
-Alan
