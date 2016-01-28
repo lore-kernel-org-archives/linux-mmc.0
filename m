@@ -1,81 +1,73 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: sdhci: disable irq in sdhci host suspend ranther
- than free this irq
-Date: Thu, 28 Jan 2016 16:47:23 +0100
-Message-ID: <CAPDyKFr0t3BWXV9ip-DKeTXFqGxmK=i=T1UuK6qiu4ZuUJ+i=w@mail.gmail.com>
-References: <1453974146-20951-1-git-send-email-haibo.chen@nxp.com>
-	<20160128102057.GJ10826@n2100.arm.linux.org.uk>
+From: One Thousand Gnomes <gnomes@lxorguk.ukuu.org.uk>
+Subject: Re: [RFC PATCH 0/21] Totally remove
+ SDHCI_QUIRK_BROKEN_CARD_DETECTION quirk
+Date: Thu, 28 Jan 2016 15:54:44 +0000
+Message-ID: <20160128155444.04d72b47@lxorguk.ukuu.org.uk>
+References: <1453871155-3283-1-git-send-email-shawn.lin@rock-chips.com>
+	<56A8BF22.8010509@intel.com>
+	<20160127132348.GY10826@n2100.arm.linux.org.uk>
+	<CAPDyKFr0MT5xa87F=4LPX7WbNuD0THndTDkvhL9N0h6A5g67eg@mail.gmail.com>
+	<56A97A27.4000501@rock-chips.com>
+	<20160128112946.4d750fae@lxorguk.ukuu.org.uk>
+	<CAPDyKFpF6k8My4AZ+sofTBb78_dPDBTRnWH_6gLvbSktOyMnKg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20160128102057.GJ10826@n2100.arm.linux.org.uk>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Russell King - ARM Linux <linux@arm.linux.org.uk>
-Cc: Haibo Chen <haibo.chen@nxp.com>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Thomas Gleixner <tglx@linutronix.de>, Jon Hunter <jonathanh@nvidia.com>
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from lxorguk.ukuu.org.uk ([81.2.110.251]:58900 "EHLO
+	lxorguk.ukuu.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S967620AbcA1Pzp (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 28 Jan 2016 10:55:45 -0500
+In-Reply-To: <CAPDyKFpF6k8My4AZ+sofTBb78_dPDBTRnWH_6gLvbSktOyMnKg@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Shawn Lin <shawn.lin@rock-chips.com>, Russell King - ARM Linux <linux@arm.linux.org.uk>, Adrian Hunter <adrian.hunter@intel.com>, bcm-kernel-feedback-list@broadcom.com, linux-rpi-kernel@lists.infradead.org, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 
-+tglx, Jon
+On Thu, 28 Jan 2016 16:03:34 +0100
+Ulf Hansson <ulf.hansson@linaro.org> wrote:
 
-On 28 January 2016 at 11:20, Russell King - ARM Linux
-<linux@arm.linux.org.uk> wrote:
-> On Thu, Jan 28, 2016 at 05:42:26PM +0800, Haibo Chen wrote:
->> Currently sdhci driver free irq in host suspend, and call
->> request_threaded_irq() in host resume. But during host resume,
->> Ctrl+C can impact sdhci host resume, see the error log:
->
-> Ctrl+C should have no effect on this - that seems to imply that there's
-> some other bug elsewhere.
->
->> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
->> index d622435..4b1646b 100644
->> --- a/drivers/mmc/host/sdhci.c
->> +++ b/drivers/mmc/host/sdhci.c
->> @@ -2686,7 +2686,7 @@ int sdhci_suspend_host(struct sdhci_host *host)
->>               host->ier = 0;
->>               sdhci_writel(host, 0, SDHCI_INT_ENABLE);
->>               sdhci_writel(host, 0, SDHCI_SIGNAL_ENABLE);
->> -             free_irq(host->irq, host);
->> +             disable_irq(host->irq);
->
-> This is really not acceptable I'm afraid.  While it's common on ARM for
-> each interrupt to be uniquely allocated to a peripheral, not all SDHCI
-> platforms have that luxury.
->
-> SDHCI is also used on PCI, and on x86 platforms, it's common to have PCI
-> interrupts shared between (sometimes many) different PCI devices.
->
-> For example, on my laptop:
->
->  18:    1089806     286185   IO-APIC-fasteoi   uhci_hcd:usb8, r852, mmc0
->
-> the SDHCI interrupt is shared with two other peripherals - one USB
-> controller and a NAND device.
->
-> Disabling the interrupt will adversely impact other peripherals and
-> cause regressions where the interrupt is shared.
+> [...]
+> 
+> >  
+> >> > of it's bad code structure. Therefore I have taken a quite simple
+> >> > approach by rejecting new callbacks and quirks, in a way to prevent it
+> >> > from being worse.  
+> >
+> > Which merely guarantees that the problem gets worse, because everyone
+> > just puts their SD patches into Android trees instead and then when that
+> > device is needed in Linux proper the crap hits the fan or people write
+> > uglier and more hideous hacks buried elsewhere.
+> >
+> > Eventually something gives way, and it will always be the maintainer,
+> > because everyone needs to get their devices supported. You can guide new
+> > callbacks in constructive ways but not stop them.  
+> 
+> Well, I did stop them at least temporary.
 
-I thought disable|enable_irq() was being reference counted, so it
-shouldn't impact the other peripherals for shared IRQs. I might have
-understood this wrong though!?
+I always describe it as "putting a cork in the sewerage pipe". It might
+stop it for a bit but
 
-Although, as if that's the case it also means that the IRQ can still
-reach sdhci's irq handler as it hasn't actually been disabled.
+a) you don't want to be too close when it breaks
+b) it's not good what happens further up the pipe
 
-Therefore, the only way we currently can make sure to don't get the
-IRQ is to free and later re-request it. Now, apparently that has
-issues when using threaded IRQ handlers.
+> 
+> Although, I have been telling people *why* and also trying to give
+> some guidelines of how I wanted this to move forward.
+> 
+> I understand some become frustrated from getting patches nacked like this.
+> 
+> In principle I have requested them to help evolving sdhci in a new and
+> better direction, instead of adding yet more hacks. That of course
+> requires a deeper understanding of both the mmc core, but also sdhci
+> in general.
+> 
+> [...]
+> 
+> Also, thanks for sharing your experience in this field. You made some
+> good points!
 
-I have recently discussed a related change on the genirq framework,
-which in principle turned out that we concluded on needing a new API
-to deal with PM related enable/disable IRQ cases.
-http://www.gossamer-threads.com/lists/linux/kernel/2350504?do=post_view_threaded#2350504
+I'm happy to help try and sort the code out. Not maintain it - my
+knowledge of the intricacies of SDHCI is not good enough.
 
-Perhaps that's actually what we need to cover this case.
-
->
-> So, I'm afraid I'm going to have to NAK this patch.
-
-I agree. We need another solution!
-
-Kind regards
-Uffe
+Alan
