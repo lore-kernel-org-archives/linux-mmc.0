@@ -1,46 +1,73 @@
-From: Robert Jarzmik <robert.jarzmik@free.fr>
-Subject: [PATCH] mmc: pxamci: fix again read-only gpio detection polarity
-Date: Fri, 29 Jan 2016 00:21:26 +0100
-Message-ID: <1454023286-25832-1-git-send-email-robert.jarzmik@free.fr>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: [PATCH] mmc: core: use the defined function to check whether card is
+ removable
+Date: Fri, 29 Jan 2016 08:52:57 +0900
+Message-ID: <1454025177-21233-1-git-send-email-jh80.chung@samsung.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp09.smtpout.orange.fr ([80.12.242.131]:32748 "EHLO
-	smtp.smtpout.orange.fr" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750897AbcA1XVd (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 28 Jan 2016 18:21:33 -0500
+Received: from mailout1.samsung.com ([203.254.224.24]:33593 "EHLO
+	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750997AbcA1XxB (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 28 Jan 2016 18:53:01 -0500
+Received: from epcpsbgr1.samsung.com
+ (u141.gpu120.samsung.co.kr [203.254.230.141])
+ by mailout1.samsung.com (Oracle Communications Messaging Server 7.0.5.31.0
+ 64bit (built May  5 2014))
+ with ESMTP id <0O1O00DUJT0BI450@mailout1.samsung.com> for
+ linux-mmc@vger.kernel.org; Fri, 29 Jan 2016 08:52:59 +0900 (KST)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Robert Jarzmik <robert.jarzmik@free.fr>, stable@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: ulf.hansson@linaro.org, adrian.hunter@intel.com, shawn.lin@rock-chips.com, Jaehoon Chung <jh80.chung@samsung.com>
 
-The commit fixing the conversion of pxamci to slot-gpio API fixed the
-inverted the logic of the read-only gpio. Unfortunately, the commit was
-tested on a non-inverted gpio, and not on the inverted one. And the fix
-did work partially, by luck.
+In linux/mmc/host.h, mmc_card_is_removable() is already defined.
+There is no reason that it doesn't use.
 
-This is the remaining missing part of the fix, trivial but still necessary.
-
-Fixes: Fixes: 26d49fe71953 ("mmc: pxamci: fix read-only gpio detection polarity")
-Reported-by: Andrea Adami <andrea.adami@gmail.com>
-Tested-by: Andrea Adami <andrea.adami@gmail.com>
-Signed-off-by: Robert Jarzmik <robert.jarzmik@free.fr>
-Cc: stable@vger.kernel.org
+Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
 ---
- drivers/mmc/host/pxamci.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+ drivers/mmc/core/core.c | 9 ++++-----
+ 1 file changed, 4 insertions(+), 5 deletions(-)
 
-diff --git a/drivers/mmc/host/pxamci.c b/drivers/mmc/host/pxamci.c
-index ce08896b9d69..28a057fae0a1 100644
---- a/drivers/mmc/host/pxamci.c
-+++ b/drivers/mmc/host/pxamci.c
-@@ -804,7 +804,7 @@ static int pxamci_probe(struct platform_device *pdev)
- 		dev_err(&pdev->dev, "Failed requesting gpio_ro %d\n", gpio_ro);
- 		goto out;
- 	} else {
--		mmc->caps |= host->pdata->gpio_card_ro_invert ?
-+		mmc->caps2 |= host->pdata->gpio_card_ro_invert ?
- 			0 : MMC_CAP2_RO_ACTIVE_HIGH;
- 	}
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index f95d41f..9da9b60 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -2532,7 +2532,7 @@ int mmc_detect_card_removed(struct mmc_host *host)
+ 	if (!card)
+ 		return 1;
  
+-	if (host->caps & MMC_CAP_NONREMOVABLE)
++	if (!mmc_card_is_removable(host))
+ 		return 0;
+ 
+ 	ret = mmc_card_removed(card);
+@@ -2570,7 +2570,7 @@ void mmc_rescan(struct work_struct *work)
+ 		return;
+ 
+ 	/* If there is a non-removable card registered, only scan once */
+-	if ((host->caps & MMC_CAP_NONREMOVABLE) && host->rescan_entered)
++	if (!mmc_card_is_removable(host) && host->rescan_entered)
+ 		return;
+ 	host->rescan_entered = 1;
+ 
+@@ -2587,8 +2587,7 @@ void mmc_rescan(struct work_struct *work)
+ 	 * if there is a _removable_ card registered, check whether it is
+ 	 * still present
+ 	 */
+-	if (host->bus_ops && !host->bus_dead
+-	    && !(host->caps & MMC_CAP_NONREMOVABLE))
++	if (host->bus_ops && !host->bus_dead && mmc_card_is_removable(host))
+ 		host->bus_ops->detect(host);
+ 
+ 	host->detect_change = 0;
+@@ -2613,7 +2612,7 @@ void mmc_rescan(struct work_struct *work)
+ 	mmc_bus_put(host);
+ 
+ 	mmc_claim_host(host);
+-	if (!(host->caps & MMC_CAP_NONREMOVABLE) && host->ops->get_cd &&
++	if (mmc_card_is_removable(host) && host->ops->get_cd &&
+ 			host->ops->get_cd(host) == 0) {
+ 		mmc_power_off(host);
+ 		mmc_release_host(host);
 -- 
-2.1.4
+1.9.1
 
