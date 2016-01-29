@@ -1,19 +1,18 @@
 From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: [PATCH 01/12] mmc: core: use the defined function to check whether
- card is removable
-Date: Fri, 29 Jan 2016 13:06:00 +0900
-Message-ID: <1454040371-31625-2-git-send-email-jh80.chung@samsung.com>
+Subject: [PATCH 02/12] mmc: atmel-mci: remove the MMC_DATA_STREAM flag
+Date: Fri, 29 Jan 2016 13:06:01 +0900
+Message-ID: <1454040371-31625-3-git-send-email-jh80.chung@samsung.com>
 References: <1454040371-31625-1-git-send-email-jh80.chung@samsung.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout1.samsung.com ([203.254.224.24]:50318 "EHLO
-	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753272AbcA2EGT (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 28 Jan 2016 23:06:19 -0500
+Received: from mailout3.samsung.com ([203.254.224.33]:44354 "EHLO
+	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753403AbcA2EGV (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 28 Jan 2016 23:06:21 -0500
 Received: from epcpsbgr5.samsung.com
  (u145.gpu120.samsung.co.kr [203.254.230.145])
- by mailout1.samsung.com (Oracle Communications Messaging Server 7.0.5.31.0
+ by mailout3.samsung.com (Oracle Communications Messaging Server 7.0.5.31.0
  64bit (built May  5 2014))
- with ESMTP id <0O1P01O734QHD000@mailout1.samsung.com> for
+ with ESMTP id <0O1P029OD4QHHIC0@mailout3.samsung.com> for
  linux-mmc@vger.kernel.org; Fri, 29 Jan 2016 13:06:17 +0900 (KST)
 In-reply-to: <1454040371-31625-1-git-send-email-jh80.chung@samsung.com>
 Sender: linux-mmc-owner@vger.kernel.org
@@ -21,55 +20,41 @@ List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org
 Cc: ulf.hansson@linaro.org, sonic.zhang@analog.com, robert.jarzmik@free.fr, Jaehoon Chung <jh80.chung@samsung.com>
 
-In linux/mmc/host.h, mmc_card_is_removable() is already defined.
-There is no reason that it doesn't use.
+Remove the MMC_DATA_STREAM flag because it doesn't use anymore.
 
 Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+Acked-by: Ludovic Desroches <ludovic.desroches@atmel.com>
 ---
- drivers/mmc/core/core.c | 9 ++++-----
- 1 file changed, 4 insertions(+), 5 deletions(-)
+ drivers/mmc/host/atmel-mci.c | 9 ++-------
+ 1 file changed, 2 insertions(+), 7 deletions(-)
 
-diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index f95d41f..9da9b60 100644
---- a/drivers/mmc/core/core.c
-+++ b/drivers/mmc/core/core.c
-@@ -2532,7 +2532,7 @@ int mmc_detect_card_removed(struct mmc_host *host)
- 	if (!card)
- 		return 1;
+diff --git a/drivers/mmc/host/atmel-mci.c b/drivers/mmc/host/atmel-mci.c
+index 851ccd9..7f9d3de 100644
+--- a/drivers/mmc/host/atmel-mci.c
++++ b/drivers/mmc/host/atmel-mci.c
+@@ -848,9 +848,7 @@ static u32 atmci_prepare_command(struct mmc_host *mmc,
+ 		if (cmd->opcode == SD_IO_RW_EXTENDED) {
+ 			cmdr |= ATMCI_CMDR_SDIO_BLOCK;
+ 		} else {
+-			if (data->flags & MMC_DATA_STREAM)
+-				cmdr |= ATMCI_CMDR_STREAM;
+-			else if (data->blocks > 1)
++			if (data->blocks > 1)
+ 				cmdr |= ATMCI_CMDR_MULTI_BLOCK;
+ 			else
+ 				cmdr |= ATMCI_CMDR_BLOCK;
+@@ -1371,10 +1369,7 @@ static void atmci_start_request(struct atmel_mci *host,
+ 		host->stop_cmdr |= ATMCI_CMDR_STOP_XFER;
+ 		if (!(data->flags & MMC_DATA_WRITE))
+ 			host->stop_cmdr |= ATMCI_CMDR_TRDIR_READ;
+-		if (data->flags & MMC_DATA_STREAM)
+-			host->stop_cmdr |= ATMCI_CMDR_STREAM;
+-		else
+-			host->stop_cmdr |= ATMCI_CMDR_MULTI_BLOCK;
++		host->stop_cmdr |= ATMCI_CMDR_MULTI_BLOCK;
+ 	}
  
--	if (host->caps & MMC_CAP_NONREMOVABLE)
-+	if (!mmc_card_is_removable(host))
- 		return 0;
- 
- 	ret = mmc_card_removed(card);
-@@ -2570,7 +2570,7 @@ void mmc_rescan(struct work_struct *work)
- 		return;
- 
- 	/* If there is a non-removable card registered, only scan once */
--	if ((host->caps & MMC_CAP_NONREMOVABLE) && host->rescan_entered)
-+	if (!mmc_card_is_removable(host) && host->rescan_entered)
- 		return;
- 	host->rescan_entered = 1;
- 
-@@ -2587,8 +2587,7 @@ void mmc_rescan(struct work_struct *work)
- 	 * if there is a _removable_ card registered, check whether it is
- 	 * still present
- 	 */
--	if (host->bus_ops && !host->bus_dead
--	    && !(host->caps & MMC_CAP_NONREMOVABLE))
-+	if (host->bus_ops && !host->bus_dead && mmc_card_is_removable(host))
- 		host->bus_ops->detect(host);
- 
- 	host->detect_change = 0;
-@@ -2613,7 +2612,7 @@ void mmc_rescan(struct work_struct *work)
- 	mmc_bus_put(host);
- 
- 	mmc_claim_host(host);
--	if (!(host->caps & MMC_CAP_NONREMOVABLE) && host->ops->get_cd &&
-+	if (mmc_card_is_removable(host) && host->ops->get_cd &&
- 			host->ops->get_cd(host) == 0) {
- 		mmc_power_off(host);
- 		mmc_release_host(host);
+ 	/*
 -- 
 1.9.1
 
