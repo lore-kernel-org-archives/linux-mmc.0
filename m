@@ -1,62 +1,69 @@
-From: Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org>
-Subject: [PATCH 0/3] mmc: sunxi: Support eMMC DDR modes
-Date: Sat, 30 Jan 2016 01:21:45 +0800
-Message-ID: <1454088108-2332-1-git-send-email-wens@csie.org>
-Reply-To: wens-jdAy2FN1RRM@public.gmane.org
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-sunxi+bncBCMILY6JWQBBBTV7V22QKGQEYCK2TMQ-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Post: <https://groups.google.com/group/linux-sunxi/post>, <mailto:linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Help: <https://groups.google.com/support/>, <mailto:linux-sunxi+help-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Archive: <https://groups.google.com/group/linux-sunxi
-Sender: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
-List-Subscribe: <https://groups.google.com/group/linux-sunxi/subscribe>, <mailto:linux-sunxi+subscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Unsubscribe: <mailto:googlegroups-manage+1076902468213+unsubscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>,
- <https://groups.google.com/group/linux-sunxi/subscribe>
-To: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>
-Cc: Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org>, Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
+From: Chen-Yu Tsai <wens@csie.org>
+Subject: [PATCH 1/3] mmc: sunxi: Support MMC_DDR52 timing modes
+Date: Sat, 30 Jan 2016 01:21:46 +0800
+Message-ID: <1454088108-2332-2-git-send-email-wens@csie.org>
+References: <1454088108-2332-1-git-send-email-wens@csie.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from smtp.csie.ntu.edu.tw ([140.112.30.61]:60564 "EHLO
+	smtp.csie.ntu.edu.tw" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752621AbcA2RWX (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 29 Jan 2016 12:22:23 -0500
+In-Reply-To: <1454088108-2332-1-git-send-email-wens@csie.org>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>, Maxime Ripard <maxime.ripard@free-electrons.com>
+Cc: Chen-Yu Tsai <wens@csie.org>, Hans de Goede <hdegoede@redhat.com>, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, linux-sunxi@googlegroups.com
 
-Hi everyone,
+DDR transfer modes include UHS-1 DDR50 and MMC HS-DDR (or MMC_DDR52).
+Consider MMC_DDR52 when setting clock delays.
 
-This was "mmc: sunxi: Support vqmmc regulator and eMMC DDR modes". vqmmc
-support and DT patches were merged even though it was an RFC series, to
-my suprise.
+Since MMC high speed mode goes up to 52 MHz instead of 50 MHz for SD,
+and this number is visible in the capability macro, increase the
+clock rate upper limit to 52 MHz.
 
-These are the remaining patches that add eMMC HS-DDR support to sunxi.
+Signed-off-by: Chen-Yu Tsai <wens@csie.org>
+---
+ drivers/mmc/host/sunxi-mmc.c | 12 +++++++-----
+ 1 file changed, 7 insertions(+), 5 deletions(-)
 
-Patch 1 adds timing delays for MMC_DDR52 mode.
-
-Patch 2 adds support for 8 bit eMMC DDR52 mode. Under this mode, the
-controller must run at twice the card clock, and different timing delays
-are needed.
-
-Patch 3 enables eMMC HS-DDR for sunxi-mmc.
-
-
-Changes since RFC:
-
-  - Dropped patches that are merged
-
-  - Dropped "mmc: sunxi: Block signal voltage switching (CMD11)".
-    According to Ulf, the mmc core won't send this command unless the UHS
-    capabilities are set. We don't.
-
-  - Increased f_max to 52 MHz. Clock rate range for 50 MHz timing delay
-    also increased to match. See patch 1.
-
-
-Regards
-ChenYu
-
-
-Chen-Yu Tsai (3):
-  mmc: sunxi: Support MMC_DDR52 timing modes
-  mmc: sunxi: Support 8 bit eMMC DDR transfer modes
-  mmc: sunxi: Enable eMMC HS-DDR (MMC_CAP_1_8V_DDR) support
-
- drivers/mmc/host/sunxi-mmc.c | 42 ++++++++++++++++++++++++++++++++----------
- 1 file changed, 32 insertions(+), 10 deletions(-)
-
+diff --git a/drivers/mmc/host/sunxi-mmc.c b/drivers/mmc/host/sunxi-mmc.c
+index 765dfb9f77ec..fe6c171fd135 100644
+--- a/drivers/mmc/host/sunxi-mmc.c
++++ b/drivers/mmc/host/sunxi-mmc.c
+@@ -686,8 +686,9 @@ static int sunxi_mmc_clk_set_rate(struct sunxi_mmc_host *host,
+ 	} else if (rate <= 25000000) {
+ 		oclk_dly = host->clk_delays[SDXC_CLK_25M].output;
+ 		sclk_dly = host->clk_delays[SDXC_CLK_25M].sample;
+-	} else if (rate <= 50000000) {
+-		if (ios->timing == MMC_TIMING_UHS_DDR50) {
++	} else if (rate <= 52000000) {
++		if (ios->timing == MMC_TIMING_UHS_DDR50 ||
++		    ios->timing == MMC_TIMING_MMC_DDR52) {
+ 			oclk_dly = host->clk_delays[SDXC_CLK_50M_DDR].output;
+ 			sclk_dly = host->clk_delays[SDXC_CLK_50M_DDR].sample;
+ 		} else {
+@@ -762,7 +763,8 @@ static void sunxi_mmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+ 
+ 	/* set ddr mode */
+ 	rval = mmc_readl(host, REG_GCTRL);
+-	if (ios->timing == MMC_TIMING_UHS_DDR50)
++	if (ios->timing == MMC_TIMING_UHS_DDR50 ||
++	    ios->timing == MMC_TIMING_MMC_DDR52)
+ 		rval |= SDXC_DDR_MODE;
+ 	else
+ 		rval &= ~SDXC_DDR_MODE;
+@@ -1106,9 +1108,9 @@ static int sunxi_mmc_probe(struct platform_device *pdev)
+ 	mmc->max_segs		= PAGE_SIZE / sizeof(struct sunxi_idma_des);
+ 	mmc->max_seg_size	= (1 << host->idma_des_size_bits);
+ 	mmc->max_req_size	= mmc->max_seg_size * mmc->max_segs;
+-	/* 400kHz ~ 50MHz */
++	/* 400kHz ~ 52MHz */
+ 	mmc->f_min		=   400000;
+-	mmc->f_max		= 50000000;
++	mmc->f_max		= 52000000;
+ 	mmc->caps	       |= MMC_CAP_MMC_HIGHSPEED | MMC_CAP_SD_HIGHSPEED |
+ 				  MMC_CAP_ERASE | MMC_CAP_SDIO_IRQ;
+ 
 -- 
 2.7.0
+
