@@ -1,16 +1,17 @@
 From: Russell King <rmk+kernel@arm.linux.org.uk>
-Subject: [PATCH v4 21/25] mmc: sdhci: fix data timeout (part 1)
-Date: Fri, 29 Jan 2016 09:45:36 +0000
-Message-ID: <E1aP5cW-0001qe-4c@rmk-PC.arm.linux.org.uk>
+Subject: [PATCH v4 24/25] mmc: sdhci: consolidate the DMA/ADMA size/address
+ quicks
+Date: Fri, 29 Jan 2016 09:45:51 +0000
+Message-ID: <E1aP5cl-0001qw-PN@rmk-PC.arm.linux.org.uk>
 References: <20160129094324.GA20025@n2100.arm.linux.org.uk>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 8bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from pandora.arm.linux.org.uk ([78.32.30.218]:44250 "EHLO
+Received: from pandora.arm.linux.org.uk ([78.32.30.218]:44268 "EHLO
 	pandora.arm.linux.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752721AbcA2Jpj (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 29 Jan 2016 04:45:39 -0500
+	with ESMTP id S1753913AbcA2Jp5 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 29 Jan 2016 04:45:57 -0500
 In-Reply-To: <20160129094324.GA20025@n2100.arm.linux.org.uk>
 Content-Disposition: inline
 Sender: linux-mmc-owner@vger.kernel.org
@@ -18,30 +19,95 @@ List-Id: linux-mmc@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>
 Cc: Gregory CLEMENT <gregory.clement@free-electrons.com>, linux-mmc@vger.kernel.org, Marcin Wojtas <mw@semihalf.com>, Shawn Guo <shawnguo@kernel.org>, Sascha Hauer <kernel@pengutronix.de>
 
-The data timeout gives the minimum amount of time that should be
-waited before timing out if no data is received from the card.
-Simply dividing the nanosecond part by 1000 does not give this
-required guarantee, since such a division rounds down.  Use
-DIV_ROUND_UP() to give the desired timeout.
+Rather than scanning the scatterlist multiple times for each quirk,
+scan it once, checking for each possible quirk.  This should be
+cheaper due to the length and offset members commonly sharing the
+same cache line than scanning the scatterlist multiple times.
 
 Signed-off-by: Russell King <rmk+kernel@arm.linux.org.uk>
 ---
- drivers/mmc/host/sdhci.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+ drivers/mmc/host/sdhci.c | 48 ++++++++++++++++--------------------------------
+ 1 file changed, 16 insertions(+), 32 deletions(-)
 
 diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 7fed845797a0..48bc0c6b74f7 100644
+index a033155984a4..cd5e62f273b3 100644
 --- a/drivers/mmc/host/sdhci.c
 +++ b/drivers/mmc/host/sdhci.c
-@@ -633,7 +633,7 @@ static u8 sdhci_calc_timeout(struct sdhci_host *host, struct mmc_command *cmd)
- 	if (!data)
- 		target_timeout = cmd->busy_timeout * 1000;
- 	else {
--		target_timeout = data->timeout_ns / 1000;
-+		target_timeout = DIV_ROUND_UP(data->timeout_ns, 1000);
- 		if (host->clock)
- 			target_timeout += data->timeout_clks / host->clock;
- 	}
+@@ -731,22 +731,35 @@ static void sdhci_prepare_data(struct sdhci_host *host, struct mmc_command *cmd)
+ 	/*
+ 	 * FIXME: This doesn't account for merging when mapping the
+ 	 * scatterlist.
++	 *
++	 * The assumption here being that alignment and lengths are
++	 * the same after DMA mapping to device address space.
+ 	 */
+ 	if (host->flags & SDHCI_REQ_USE_DMA) {
+ 		struct scatterlist *sg;
+-		unsigned int length_mask;
++		unsigned int length_mask, offset_mask;
+ 		int i;
+ 
+ 		length_mask = 0;
++		offset_mask = 0;
+ 		if (host->flags & SDHCI_USE_ADMA) {
+-			if (host->quirks & SDHCI_QUIRK_32BIT_ADMA_SIZE)
++			if (host->quirks & SDHCI_QUIRK_32BIT_ADMA_SIZE) {
+ 				length_mask = 3;
++				/*
++				 * As we use up to 3 byte chunks to work
++				 * around alignment problems, we need to
++				 * check the offset as well.
++				 */
++				offset_mask = 3;
++			}
+ 		} else {
+ 			if (host->quirks & SDHCI_QUIRK_32BIT_DMA_SIZE)
+ 				length_mask = 3;
++			if (host->quirks & SDHCI_QUIRK_32BIT_DMA_ADDR)
++				offset_mask = 3;
+ 		}
+ 
+-		if (unlikely(length_mask)) {
++		if (unlikely(length_mask | offset_mask)) {
+ 			for_each_sg(data->sg, sg, data->sg_len, i) {
+ 				if (sg->length & length_mask) {
+ 					DBG("Reverting to PIO because of transfer size (%d)\n",
+@@ -754,35 +767,6 @@ static void sdhci_prepare_data(struct sdhci_host *host, struct mmc_command *cmd)
+ 					host->flags &= ~SDHCI_REQ_USE_DMA;
+ 					break;
+ 				}
+-			}
+-		}
+-	}
+-
+-	/*
+-	 * The assumption here being that alignment is the same after
+-	 * translation to device address space.
+-	 */
+-	if (host->flags & SDHCI_REQ_USE_DMA) {
+-		struct scatterlist *sg;
+-		unsigned int offset_mask;
+-		int i;
+-
+-		offset_mask = 0;
+-		if (host->flags & SDHCI_USE_ADMA) {
+-			/*
+-			 * As we use 3 byte chunks to work around
+-			 * alignment problems, we need to check this
+-			 * quirk.
+-			 */
+-			if (host->quirks & SDHCI_QUIRK_32BIT_ADMA_SIZE)
+-				offset_mask = 3;
+-		} else {
+-			if (host->quirks & SDHCI_QUIRK_32BIT_DMA_ADDR)
+-				offset_mask = 3;
+-		}
+-
+-		if (unlikely(offset_mask)) {
+-			for_each_sg(data->sg, sg, data->sg_len, i) {
+ 				if (sg->offset & offset_mask) {
+ 					DBG("Reverting to PIO because of bad alignment\n");
+ 					host->flags &= ~SDHCI_REQ_USE_DMA;
 -- 
 2.1.0
 
