@@ -1,18 +1,18 @@
 From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: [RESEND PATCH 05/11] mmc: jz4740_mmc: remove the MMC_DATA_STREAM flag
-Date: Fri, 29 Jan 2016 14:40:51 +0900
-Message-ID: <1454046057-32318-6-git-send-email-jh80.chung@samsung.com>
+Subject: [RESEND PATCH 03/11] mmc: davinci_mmc: remove the MMC_DATA_STREAM flag
+Date: Fri, 29 Jan 2016 14:40:49 +0900
+Message-ID: <1454046057-32318-4-git-send-email-jh80.chung@samsung.com>
 References: <1454046057-32318-1-git-send-email-jh80.chung@samsung.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout2.samsung.com ([203.254.224.25]:47237 "EHLO
-	mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751240AbcA2FlC (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 29 Jan 2016 00:41:02 -0500
-Received: from epcpsbgr1.samsung.com
- (u141.gpu120.samsung.co.kr [203.254.230.141])
- by mailout2.samsung.com (Oracle Communications Messaging Server 7.0.5.31.0
+Received: from mailout4.samsung.com ([203.254.224.34]:36357 "EHLO
+	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751237AbcA2FlB (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 29 Jan 2016 00:41:01 -0500
+Received: from epcpsbgr5.samsung.com
+ (u145.gpu120.samsung.co.kr [203.254.230.145])
+ by mailout4.samsung.com (Oracle Communications Messaging Server 7.0.5.31.0
  64bit (built May  5 2014))
- with ESMTP id <0O1P01EYV94CX470@mailout2.samsung.com> for
+ with ESMTP id <0O1P01O7Q94C6B80@mailout4.samsung.com> for
  linux-mmc@vger.kernel.org; Fri, 29 Jan 2016 14:41:00 +0900 (KST)
 In-reply-to: <1454046057-32318-1-git-send-email-jh80.chung@samsung.com>
 Sender: linux-mmc-owner@vger.kernel.org
@@ -24,22 +24,59 @@ Remove the MMC_DATA_STREAM flag because it doesn't use anymore.
 
 Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
 ---
- drivers/mmc/host/jz4740_mmc.c | 2 --
- 1 file changed, 2 deletions(-)
+ drivers/mmc/host/davinci_mmc.c | 15 +++------------
+ 1 file changed, 3 insertions(+), 12 deletions(-)
 
-diff --git a/drivers/mmc/host/jz4740_mmc.c b/drivers/mmc/host/jz4740_mmc.c
-index 76e8bce..03ddf0e 100644
---- a/drivers/mmc/host/jz4740_mmc.c
-+++ b/drivers/mmc/host/jz4740_mmc.c
-@@ -660,8 +660,6 @@ static void jz4740_mmc_send_command(struct jz4740_mmc_host *host,
- 		cmdat |= JZ_MMC_CMDAT_DATA_EN;
- 		if (cmd->data->flags & MMC_DATA_WRITE)
- 			cmdat |= JZ_MMC_CMDAT_WRITE;
--		if (cmd->data->flags & MMC_DATA_STREAM)
--			cmdat |= JZ_MMC_CMDAT_STREAM;
- 		if (host->use_dma)
- 			cmdat |= JZ_MMC_CMDAT_DMA_EN;
+diff --git a/drivers/mmc/host/davinci_mmc.c b/drivers/mmc/host/davinci_mmc.c
+index ea2a2eb..693144e 100644
+--- a/drivers/mmc/host/davinci_mmc.c
++++ b/drivers/mmc/host/davinci_mmc.c
+@@ -346,10 +346,6 @@ static void mmc_davinci_start_command(struct mmc_davinci_host *host,
+ 	if (cmd->data)
+ 		cmd_reg |= MMCCMD_WDATX;
  
+-	/* Setting whether stream or block transfer */
+-	if (cmd->flags & MMC_DATA_STREAM)
+-		cmd_reg |= MMCCMD_STRMTP;
+-
+ 	/* Setting whether data read or write */
+ 	if (host->data_dir == DAVINCI_MMC_DATADIR_WRITE)
+ 		cmd_reg |= MMCCMD_DTRW;
+@@ -568,8 +564,7 @@ mmc_davinci_prepare_data(struct mmc_davinci_host *host, struct mmc_request *req)
+ 		return;
+ 	}
+ 
+-	dev_dbg(mmc_dev(host->mmc), "%s %s, %d blocks of %d bytes\n",
+-		(data->flags & MMC_DATA_STREAM) ? "stream" : "block",
++	dev_dbg(mmc_dev(host->mmc), "%s, %d blocks of %d bytes\n",
+ 		(data->flags & MMC_DATA_WRITE) ? "write" : "read",
+ 		data->blocks, data->blksz);
+ 	dev_dbg(mmc_dev(host->mmc), "  DTO %d cycles + %d ns\n",
+@@ -584,22 +579,18 @@ mmc_davinci_prepare_data(struct mmc_davinci_host *host, struct mmc_request *req)
+ 	writel(data->blksz, host->base + DAVINCI_MMCBLEN);
+ 
+ 	/* Configure the FIFO */
+-	switch (data->flags & MMC_DATA_WRITE) {
+-	case MMC_DATA_WRITE:
++	if (data->flags & MMC_DATA_WRITE) {
+ 		host->data_dir = DAVINCI_MMC_DATADIR_WRITE;
+ 		writel(fifo_lev | MMCFIFOCTL_FIFODIR_WR | MMCFIFOCTL_FIFORST,
+ 			host->base + DAVINCI_MMCFIFOCTL);
+ 		writel(fifo_lev | MMCFIFOCTL_FIFODIR_WR,
+ 			host->base + DAVINCI_MMCFIFOCTL);
+-		break;
+-
+-	default:
++	} else {
+ 		host->data_dir = DAVINCI_MMC_DATADIR_READ;
+ 		writel(fifo_lev | MMCFIFOCTL_FIFODIR_RD | MMCFIFOCTL_FIFORST,
+ 			host->base + DAVINCI_MMCFIFOCTL);
+ 		writel(fifo_lev | MMCFIFOCTL_FIFODIR_RD,
+ 			host->base + DAVINCI_MMCFIFOCTL);
+-		break;
+ 	}
+ 
+ 	host->buffer = NULL;
 -- 
 1.9.1
 
