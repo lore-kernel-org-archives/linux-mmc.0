@@ -1,31 +1,30 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v2] mmc: omap_hsmmc: don't print uninitialized variables
-Date: Fri, 29 Jan 2016 12:40:32 +0100
-Message-ID: <CAPDyKFoto2BLyxfko6VX8CZC99LBhJiM1POJOC_Sk=UxnrWcLQ@mail.gmail.com>
-References: <3411189.gO0215GrNM@wuerfel>
+Subject: Re: [PATCH] mmc: mmcif: don't depend on MMC_BLOCK
+Date: Fri, 29 Jan 2016 12:41:04 +0100
+Message-ID: <CAPDyKFocgEkGpuv=gtYhfaCCx427iy++1jTu0XYwUQVTY8edWQ@mail.gmail.com>
+References: <1453749554-2149-1-git-send-email-wsa@the-dreams.de>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <3411189.gO0215GrNM@wuerfel>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Arnd Bergmann <arnd@arndb.de>
-Cc: "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Kishon Vijay Abraham I <kishon@ti.com>, Andreas Fenkart <afenkart@gmail.com>, Tony Lindgren <tony@atomide.com>, Roger Quadros <rogerq@ti.com>, linux-mmc <linux-mmc@vger.kernel.org>, linux-omap <linux-omap@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Peter Ujfalusi <peter.ujfalusi@ti.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-yk0-f171.google.com ([209.85.160.171]:36296 "EHLO
+	mail-yk0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755358AbcA2LlF (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 29 Jan 2016 06:41:05 -0500
+Received: by mail-yk0-f171.google.com with SMTP id v14so65182480ykd.3
+        for <linux-mmc@vger.kernel.org>; Fri, 29 Jan 2016 03:41:05 -0800 (PST)
+In-Reply-To: <1453749554-2149-1-git-send-email-wsa@the-dreams.de>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Wolfram Sang <wsa@the-dreams.de>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, linux-renesas-soc@vger.kernel.org, Kuninori Morimoto <kuninori.morimoto.gx@gmail.com>, Magnus Damm <magnus.damm@gmail.com>, Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>, Linux-sh list <linux-sh@vger.kernel.org>
 
-On 26 January 2016 at 16:26, Arnd Bergmann <arnd@arndb.de> wrote:
-> When DT based probing is used but the DMA request fails, the
-> driver will print uninitialized stack data from the rx_req
-> and tx_req variables, as indicated by this warning:
+On 25 January 2016 at 20:19, Wolfram Sang <wsa@the-dreams.de> wrote:
+> From: Wolfram Sang <wsa+renesas@sang-engineering.com>
 >
-> drivers/mmc/host/omap_hsmmc.c: In function 'omap_hsmmc_probe':
-> drivers/mmc/host/omap_hsmmc.c:2162:3: warning: 'rx_req' may be used uninitialized in this function [-Wmaybe-uninitialized]
->    dev_err(mmc_dev(host->mmc), "unable to obtain RX DMA engine channel %u\n", rx_req);
+> I don't see a reason why a host driver should depend on the card driver.
+> It also prevents that we can use the mmc_test driver. So, remove it.
 >
-> This removes the DMA request line number from the warning, which
-> is the easiest solution and won't hurt us any more as we are
-> planning to remove the legacy code path anyway.
->
-> Signed-off-by: Arnd Bergmann <arnd@arndb.de>
+> Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
 
 Thanks, applied for next!
 
@@ -33,28 +32,26 @@ Kind regards
 Uffe
 
 > ---
-> A simpler patch as v1 with the same result, as suggested by Peter Ujfalusi.
+>  drivers/mmc/host/Kconfig | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
 >
-> diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-> index b6639ea0bf18..87f0d840a166 100644
-> --- a/drivers/mmc/host/omap_hsmmc.c
-> +++ b/drivers/mmc/host/omap_hsmmc.c
-> @@ -2159,7 +2159,7 @@ static int omap_hsmmc_probe(struct platform_device *pdev)
->                                                  &rx_req, &pdev->dev, "rx");
+> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+> index dd1499bd218b16..51919634c3a2ef 100644
+> --- a/drivers/mmc/host/Kconfig
+> +++ b/drivers/mmc/host/Kconfig
+> @@ -673,7 +673,7 @@ config MMC_DW_ROCKCHIP
 >
->         if (!host->rx_chan) {
-> -               dev_err(mmc_dev(host->mmc), "unable to obtain RX DMA engine channel %u\n", rx_req);
-> +               dev_err(mmc_dev(host->mmc), "unable to obtain RX DMA engine channel\n");
->                 ret = -ENXIO;
->                 goto err_irq;
->         }
-> @@ -2169,7 +2169,7 @@ static int omap_hsmmc_probe(struct platform_device *pdev)
->                                                  &tx_req, &pdev->dev, "tx");
+>  config MMC_SH_MMCIF
+>         tristate "SuperH Internal MMCIF support"
+> -       depends on MMC_BLOCK && HAS_DMA
+> +       depends on HAS_DMA
+>         depends on SUPERH || ARCH_SHMOBILE || COMPILE_TEST
+>         help
+>           This selects the MMC Host Interface controller (MMCIF).
+> --
+> 2.1.4
 >
->         if (!host->tx_chan) {
-> -               dev_err(mmc_dev(host->mmc), "unable to obtain TX DMA engine channel %u\n", tx_req);
-> +               dev_err(mmc_dev(host->mmc), "unable to obtain TX DMA engine channel\n");
->                 ret = -ENXIO;
->                 goto err_irq;
->         }
->
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
