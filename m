@@ -1,73 +1,97 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 0/3] mmc: sdhci-iproc: add bcm2835 support
-Date: Fri, 29 Jan 2016 12:41:13 +0100
-Message-ID: <CAPDyKFqzu86xJvm5h_7_qFXuDQTV=nAU8wmhZCXPqj_8=XvxYA@mail.gmail.com>
-References: <1453933542-30287-1-git-send-email-stefan.wahren@i2se.com>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [RFC PATCH 0/21] Totally remove SDHCI_QUIRK_BROKEN_CARD_DETECTION
+ quirk
+Date: Fri, 29 Jan 2016 14:08:21 +0200
+Message-ID: <56AB5635.9030007@intel.com>
+References: <1453871155-3283-1-git-send-email-shawn.lin@rock-chips.com>
+ <56A8BF22.8010509@intel.com> <20160127132348.GY10826@n2100.arm.linux.org.uk>
+ <CAPDyKFr0MT5xa87F=4LPX7WbNuD0THndTDkvhL9N0h6A5g67eg@mail.gmail.com>
+ <56AA03AA.5010706@intel.com>
+ <CAPDyKFoBdJ-5sXyJpTNxDJVJSUA+Gsjc+0+uLedNZCHYcF+rvQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-yk0-f177.google.com ([209.85.160.177]:36416 "EHLO
-	mail-yk0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756093AbcA2LlO (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 29 Jan 2016 06:41:14 -0500
-Received: by mail-yk0-f177.google.com with SMTP id v14so65186063ykd.3
-        for <linux-mmc@vger.kernel.org>; Fri, 29 Jan 2016 03:41:14 -0800 (PST)
-In-Reply-To: <1453933542-30287-1-git-send-email-stefan.wahren@i2se.com>
+Received: from mga14.intel.com ([192.55.52.115]:10671 "EHLO mga14.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752569AbcA2MLt (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 29 Jan 2016 07:11:49 -0500
+In-Reply-To: <CAPDyKFoBdJ-5sXyJpTNxDJVJSUA+Gsjc+0+uLedNZCHYcF+rvQ@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Stefan Wahren <stefan.wahren@i2se.com>
-Cc: Scott Branden <sbranden@broadcom.com>, Ray Jui <rjui@broadcom.com>, Jon Mason <jonmason@broadcom.com>, Stephen Warren <swarren@wwwdotorg.org>, Lee Jones <lee@kernel.org>, Eric Anholt <eric@anholt.net>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Arnd Bergmann <arnd@arndb.de>, kernel@martin.sperl.org, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, linux-rpi-kernel@lists.infradead.org, linux-mmc <linux-mmc@vger.kernel.org>, Jisheng Zhang <jszhang@marvell.com>, Shawn Lin <shawn.lin@rock-chips.com>, bcm-kernel-feedback-list@broadcom.com
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Russell King - ARM Linux <linux@arm.linux.org.uk>, Shawn Lin <shawn.lin@rock-chips.com>, bcm-kernel-feedback-list@broadcom.com, linux-rpi-kernel@lists.infradead.org, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, P L Sai Krishna <lakshmi.sai.krishna.potthuri@xilinx.com>, Wan Zongshun <vincent.wan@amd.com>
 
-On 27 January 2016 at 23:25, Stefan Wahren <stefan.wahren@i2se.com> wrote:
-> This patch series based on the suggestion of Scott Branden to implement
-> bcm2835 support into sdhci-iproc [1].
->
-> These changes provide the following advantages:
->   * no need to maintain a separate driver for bcm2835
->   * improve support and test coverage of bcm2835 mmc support
->   * get the rid of SDHCI_CAPABILITIES hack in bcm2835_sdhci_readl
->   * increase write performance by avoiding delays in write ops
->
-> Patch 1 prepare sdhci-iproc for another platform. Patch 2 and 3
-> are the actually changes for bcm2835 support.
->
-> These series has been tested on Raspberry Pi B with dd (direct I/O):
->
-> sdhci-bcm2835
->
-> 378 kB/s WRITE
-> 10,6 MB/s READ
->
-> sdhci-iproc (after applying patch series)
->
-> 881 kB/s WRITE
-> 10,8 MB/s READ
->
-> Changes since RFC:
->   * drop patch which tries to add quirks for bcm2835 in DT and define all
->     quirks in driver instead to keep old DTs working with sdhci-iproc
->     (suggestion by Stephen Warren)
->   * define MMC caps in shdci-iproc platform data to make adding new
->     platforms more easily (suggestion by Stephen Warren)
->
-> [1] - https://lkml.org/lkml/2015/12/22/525
->
-> Stefan Wahren (3):
->   mmc: sdhci-iproc: define MMC caps in platform data
->   mmc: sdhci-iproc: add bcm2835 support
->   DT: sdhci-iproc: add bcm2835 compatible
->
->  .../devicetree/bindings/mmc/brcm,sdhci-iproc.txt   |    5 ++++-
->  drivers/mmc/host/Kconfig                           |    6 +++---
->  drivers/mmc/host/sdhci-iproc.c                     |   20 ++++++++++++++++++--
->  3 files changed, 25 insertions(+), 6 deletions(-)
->
-> --
-> 1.7.9.5
->
+On 28/01/16 17:16, Ulf Hansson wrote:
+> [...]
+> 
+>>> I don't intend to contribute much with actual patches. I am willing to
+>>> help review and also help with expertise around the PM related parts.
+>>>
+>>> I do realize that some callbacks may still be needed, even in the end
+>>> when sdhci has become a pure library. Although, those should be far
+>>> less then those we have today.
+>>>
+>>> Currently I am more or less unable to properly maintain sdhci because
+>>> of it's bad code structure. Therefore I have taken a quite simple
+>>> approach by rejecting new callbacks and quirks, in a way to prevent it
+>>> from being worse. To me, the best way forward would be if some of you
+>>> experienced sdhci developers stepped in as a maintainer for it. In
+>>> that way, I can trust the development moving in the "library
+>>> direction" so I can pull back from nacking potential interim sdhci
+>>> callbacks/quirks.
+>>>
+>>> Does it make sense?
+>>
+>> I am happy to help and even be the SDHCI maintainer if Russell King and
+>> others agree.  I have an interest in sdhci-acpi and sdhci-pci and also there
+>> is UHS-II and ADMA3 on the horizon.
+> 
+> That's really great news. Thank you very much Adrian!
+> 
+> Perhaps Russell is willing to help co-maintain it?
+> 
+>>
+>> I agree with Russell that a re-write would introduce more bugs and more work
+>> than it would be worth.  Making many small steps in the general direction is
+>> preferable.
+>>
+>> Initially it would nice to see it made easy for drivers to replace specific
+>> mmc ops and sdhci ops and then call the standard version before/after doing
+>> some custom code.  For example, P L Sai Krishna's auto-tuning problem might
+>> be solved by something to the effect of:
+>>
+>> int arasan_execute_tuning(struct mmc_host *mmc, u32 opcode)
+>> {
+>>         struct sdhci_host *host = mmc_priv(mmc);
+>>         int err;
+>>
+>>         err = sdhci_execute_tuning(mmc, opcode);
+>>         if (!err)
+>>                 arasan_tune_sdclk(host);
+>>         return err;
+>> }
+>>
+>> And Wan Zongshun also wanted to be able directly to replace
+>> sdhci_execute_tuning() from sdhci-pci.
+>>
+>> As suggested, my get_cd problem could also be solved by replacing the mmc
+>> get_cd op.
+>>
+> 
+> Sounds like a perfect plan!
+> 
+> Do you want to send a patch to the MAINTAINERS file?
 
+Yes, I'll do that.
 
-Thanks, applied for next!
+> 
+>>From my side I can also continue doing the administrative part of the
+> work, so there's need for you to set up a separate git tree or send
+> pull request. At least initially.
+> Instead I will just pick patches that's been acked by you (and
+> possibly Russell).
 
-Kind regards
-Uffe
+I might make a tree because I want to try to separate Russell's bug fixes
+from the clean-ups, and then cc stable on the bug fixes.
+
