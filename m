@@ -1,7 +1,8 @@
 From: Russell King <rmk+kernel@arm.linux.org.uk>
-Subject: [PATCH v4 19/25] mmc: sdhci-pxav3: fix higher speed mode capabilities
-Date: Fri, 29 Jan 2016 09:45:25 +0000
-Message-ID: <E1aP5cL-0001qS-CF@rmk-PC.arm.linux.org.uk>
+Subject: [PATCH v4 14/25] mmc: sdhci: factor out sdhci_pre_dma_transfer() from
+ sdhci_adma_table_pre()
+Date: Fri, 29 Jan 2016 09:44:58 +0000
+Message-ID: <E1aP5bu-0001pt-2E@rmk-PC.arm.linux.org.uk>
 References: <20160129094324.GA20025@n2100.arm.linux.org.uk>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
@@ -9,8 +10,8 @@ Content-Transfer-Encoding: 8bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
 Received: from pandora.arm.linux.org.uk ([78.32.30.218]:44284 "EHLO
 	pandora.arm.linux.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753171AbcA2JuB (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 29 Jan 2016 04:50:01 -0500
+	with ESMTP id S1752271AbcA2JuG (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 29 Jan 2016 04:50:06 -0500
 In-Reply-To: <20160129094324.GA20025@n2100.arm.linux.org.uk>
 Content-Disposition: inline
 Sender: linux-mmc-owner@vger.kernel.org
@@ -18,58 +19,122 @@ List-Id: linux-mmc@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>
 Cc: Gregory CLEMENT <gregory.clement@free-electrons.com>, linux-mmc@vger.kernel.org, Marcin Wojtas <mw@semihalf.com>, Shawn Guo <shawnguo@kernel.org>, Sascha Hauer <kernel@pengutronix.de>
 
-Commit 1140011ee9d9 ("mmc: sdhci-pxav3: Modify clock settings for the
-SDR50 and DDR50 modes") broke any chance of the SDR50 or DDR50 modes
-being used.
+In sdhci_prepare_data(), when SDHCI_REQ_USE_DMA is set, there are two
+paths that prepare the data buffers for transfer.  One is when
+SDHCI_USE_ADMA is set, and is located inside sdhci_adma_table_pre().
+The other is when SDHCI_USE_ADMA is clear, in the else clause of the
+above.
 
-The commit claims that SDR50 and DDR50 require clock adjustments in
-the SDIO3 Configuration register, which is located via the "conf-sdio3"
-resource.  However, when this resource is given, we fail to read the
-host capabilities 1 register, resulting in host->caps1 being zero.
-Hence, both SDHCI_SUPPORT_SDR50 and SDHCI_SUPPORT_DDR50 bits remain
-zero, disabling the SDR50 and DDR50 modes.
+Factor out the call to sdhci_pre_dma_transfer() along with its error
+checking.
 
-The underlying idea in this function appears to be to read the device
-capabilities, modify them, and set SDHCI_QUIRK_MISSING_CAPS to cause
-our modified capabilities to be used.  Implement exactly that.
-
-Fixes: 1140011ee9d9 ("mmc: sdhci-pxav3: Modify clock settings for the SDR50 and DDR50 modes")
 Signed-off-by: Russell King <rmk+kernel@arm.linux.org.uk>
 ---
- drivers/mmc/host/sdhci-pxav3.c | 6 ++++--
- 1 file changed, 4 insertions(+), 2 deletions(-)
+ drivers/mmc/host/sdhci.c | 62 ++++++++++++++++++------------------------------
+ 1 file changed, 23 insertions(+), 39 deletions(-)
 
-diff --git a/drivers/mmc/host/sdhci-pxav3.c b/drivers/mmc/host/sdhci-pxav3.c
-index f5edf9d3a18a..c7f27fe4805a 100644
---- a/drivers/mmc/host/sdhci-pxav3.c
-+++ b/drivers/mmc/host/sdhci-pxav3.c
-@@ -137,6 +137,10 @@ static int armada_38x_quirks(struct platform_device *pdev,
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 260b1caeced8..c07d4296ee19 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -485,8 +485,8 @@ static void sdhci_adma_mark_end(void *desc)
+ 	dma_desc->cmd |= cpu_to_le16(ADMA2_END);
+ }
  
- 	host->quirks &= ~SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN;
- 	host->quirks |= SDHCI_QUIRK_MISSING_CAPS;
-+
-+	host->caps = sdhci_readl(host, SDHCI_CAPABILITIES);
-+	host->caps1 = sdhci_readl(host, SDHCI_CAPABILITIES_1);
-+
- 	res = platform_get_resource_byname(pdev, IORESOURCE_MEM,
- 					   "conf-sdio3");
- 	if (res) {
-@@ -150,7 +154,6 @@ static int armada_38x_quirks(struct platform_device *pdev,
- 		 * Configuration register, if the adjustment is not done,
- 		 * remove them from the capabilities.
- 		 */
--		host->caps1 = sdhci_readl(host, SDHCI_CAPABILITIES_1);
- 		host->caps1 &= ~(SDHCI_SUPPORT_SDR50 | SDHCI_SUPPORT_DDR50);
- 
- 		dev_warn(&pdev->dev, "conf-sdio3 register not found: disabling SDR50 and DDR50 modes.\nConsider updating your dtb\n");
-@@ -161,7 +164,6 @@ static int armada_38x_quirks(struct platform_device *pdev,
- 	 * controller has different capabilities than the ones shown
- 	 * in its registers
+-static int sdhci_adma_table_pre(struct sdhci_host *host,
+-	struct mmc_data *data)
++static void sdhci_adma_table_pre(struct sdhci_host *host,
++	struct mmc_data *data, int sg_count)
+ {
+ 	struct scatterlist *sg;
+ 	unsigned long flags;
+@@ -500,9 +500,7 @@ static int sdhci_adma_table_pre(struct sdhci_host *host,
+ 	 * We currently guess that it is LE.
  	 */
--	host->caps = sdhci_readl(host, SDHCI_CAPABILITIES);
- 	if (of_property_read_bool(np, "no-1-8-v")) {
- 		host->caps &= ~SDHCI_CAN_VDD_180;
- 		host->mmc->caps &= ~MMC_CAP_1_8V_DDR;
+ 
+-	host->sg_count = sdhci_pre_dma_transfer(host, data);
+-	if (host->sg_count < 0)
+-		return -EINVAL;
++	host->sg_count = sg_count;
+ 
+ 	desc = host->adma_table;
+ 	align = host->align_buffer;
+@@ -569,7 +567,6 @@ static int sdhci_adma_table_pre(struct sdhci_host *host,
+ 		/* Add a terminating entry - nop, end, valid */
+ 		sdhci_adma_write_desc(host, desc, 0, 0, ADMA2_NOP_END_VALID);
+ 	}
+-	return 0;
+ }
+ 
+ static void sdhci_adma_table_post(struct sdhci_host *host,
+@@ -699,7 +696,6 @@ static void sdhci_prepare_data(struct sdhci_host *host, struct mmc_command *cmd)
+ {
+ 	u8 ctrl;
+ 	struct mmc_data *data = cmd->data;
+-	int ret;
+ 
+ 	WARN_ON(host->data);
+ 
+@@ -784,39 +780,27 @@ static void sdhci_prepare_data(struct sdhci_host *host, struct mmc_command *cmd)
+ 	}
+ 
+ 	if (host->flags & SDHCI_REQ_USE_DMA) {
+-		if (host->flags & SDHCI_USE_ADMA) {
+-			ret = sdhci_adma_table_pre(host, data);
+-			if (ret) {
+-				/*
+-				 * This only happens when someone fed
+-				 * us an invalid request.
+-				 */
+-				WARN_ON(1);
+-				host->flags &= ~SDHCI_REQ_USE_DMA;
+-			} else {
+-				sdhci_writel(host, host->adma_addr,
+-					SDHCI_ADMA_ADDRESS);
+-				if (host->flags & SDHCI_USE_64_BIT_DMA)
+-					sdhci_writel(host,
+-						     (u64)host->adma_addr >> 32,
+-						     SDHCI_ADMA_ADDRESS_HI);
+-			}
+-		} else {
+-			int sg_cnt;
++		int sg_cnt = sdhci_pre_dma_transfer(host, data);
+ 
+-			sg_cnt = sdhci_pre_dma_transfer(host, data);
+-			if (sg_cnt <= 0) {
+-				/*
+-				 * This only happens when someone fed
+-				 * us an invalid request.
+-				 */
+-				WARN_ON(1);
+-				host->flags &= ~SDHCI_REQ_USE_DMA;
+-			} else {
+-				WARN_ON(sg_cnt != 1);
+-				sdhci_writel(host, sg_dma_address(data->sg),
+-					SDHCI_DMA_ADDRESS);
+-			}
++		if (sg_cnt <= 0) {
++			/*
++			 * This only happens when someone fed
++			 * us an invalid request.
++			 */
++			WARN_ON(1);
++			host->flags &= ~SDHCI_REQ_USE_DMA;
++		} else if (host->flags & SDHCI_USE_ADMA) {
++			sdhci_adma_table_pre(host, data, sg_cnt);
++
++			sdhci_writel(host, host->adma_addr, SDHCI_ADMA_ADDRESS);
++			if (host->flags & SDHCI_USE_64_BIT_DMA)
++				sdhci_writel(host,
++					     (u64)host->adma_addr >> 32,
++					     SDHCI_ADMA_ADDRESS_HI);
++		} else {
++			WARN_ON(sg_cnt != 1);
++			sdhci_writel(host, sg_dma_address(data->sg),
++				SDHCI_DMA_ADDRESS);
+ 		}
+ 	}
+ 
 -- 
 2.1.0
 
