@@ -1,84 +1,60 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 0/9] mmc: sdhi: some refactoring and adding basic r8a7795 support
-Date: Fri, 29 Jan 2016 12:40:54 +0100
-Message-ID: <CAPDyKFqQ8qMRW_ztMw4giJ062jY7Z1oz_VmOAVX71TAQm3QJAg@mail.gmail.com>
-References: <1453749316-1848-1-git-send-email-wsa@the-dreams.de>
+Subject: Re: [PATCH v2] mmc: omap_hsmmc: don't print uninitialized variables
+Date: Fri, 29 Jan 2016 12:40:32 +0100
+Message-ID: <CAPDyKFoto2BLyxfko6VX8CZC99LBhJiM1POJOC_Sk=UxnrWcLQ@mail.gmail.com>
+References: <3411189.gO0215GrNM@wuerfel>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-yk0-f179.google.com ([209.85.160.179]:33253 "EHLO
-	mail-yk0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755943AbcA2Lkz (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 29 Jan 2016 06:40:55 -0500
-Received: by mail-yk0-f179.google.com with SMTP id k129so65650547yke.0
-        for <linux-mmc@vger.kernel.org>; Fri, 29 Jan 2016 03:40:55 -0800 (PST)
-In-Reply-To: <1453749316-1848-1-git-send-email-wsa@the-dreams.de>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <3411189.gO0215GrNM@wuerfel>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Arnd Bergmann <arnd@arndb.de>
+Cc: "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Kishon Vijay Abraham I <kishon@ti.com>, Andreas Fenkart <afenkart@gmail.com>, Tony Lindgren <tony@atomide.com>, Roger Quadros <rogerq@ti.com>, linux-mmc <linux-mmc@vger.kernel.org>, linux-omap <linux-omap@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Peter Ujfalusi <peter.ujfalusi@ti.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Wolfram Sang <wsa@the-dreams.de>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, linux-renesas-soc@vger.kernel.org, Linux-sh list <linux-sh@vger.kernel.org>, Kuninori Morimoto <kuninori.morimoto.gx@gmail.com>, Magnus Damm <magnus.damm@gmail.com>, Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>, Dirk Behme <dirk.behme@gmail.com>
 
-On 25 January 2016 at 20:15, Wolfram Sang <wsa@the-dreams.de> wrote:
-> So, here is the series to enable basic SD support on r8a7795; no DMA and UHS-I
-> for now. Will be added incrementally. It turns out that the driver needs a
-> little love, so some refactoring is also in place before adding the actual
-> support.
+On 26 January 2016 at 16:26, Arnd Bergmann <arnd@arndb.de> wrote:
+> When DT based probing is used but the DMA request fails, the
+> driver will print uninitialized stack data from the rx_req
+> and tx_req variables, as indicated by this warning:
 >
-> eMMC works in 4-bit mode, too. 8-bit mode sadly fails currently. I'll post MMC
-> support patches once this issue is fixed.
+> drivers/mmc/host/omap_hsmmc.c: In function 'omap_hsmmc_probe':
+> drivers/mmc/host/omap_hsmmc.c:2162:3: warning: 'rx_req' may be used uninitialized in this function [-Wmaybe-uninitialized]
+>    dev_err(mmc_dev(host->mmc), "unable to obtain RX DMA engine channel %u\n", rx_req);
 >
-> These patches have been tested on Gen3 (Salvator-X) and Gen2 (Lager), doing
-> basic operations with SD cards and running the mmc_test driver (its results
-> point out some potential corner cases to check later).
+> This removes the DMA request line number from the warning, which
+> is the easiest solution and won't hurt us any more as we are
+> planning to remove the legacy code path anyway.
 >
-> A branch can be found here (including clock and DTS patches):
->
-> git://git.kernel.org/pub/scm/linux/kernel/git/wsa/linux.git renesas/v8-sdhi
->
-> Changes since RFC (only sent to sh-devel lists):
->
-> * patches 1,7,8 are new
-> * patch 4 drops 10ms wait also for set_clock
-> * patch 9 also sets MMC_CAP_WAIT_WHILE_BUSY (see comment there)
-> * some commit message rewording
->
-> Please test, comment, apply...
->
-> Thanks,
->
->    Wolfram
->
->
-> Shinobu Uehara (1):
->   mmc: sdhi: Add EXT_ACC register busy check
->
-> Wolfram Sang (8):
->   mmc: tmio_dma: remove debug messages with little information
->   mmc: sdhi: error message on ENOMEM is superfluous
->   mmc: tmio: add flag to reduce delay after changing clock status
->   mmc: tmio: remove stale comments
->   mmc: sdhi: use faster clock handling on RCar Gen2
->   mmc: tmio: refactor set_clock a little
->   mmc: tmio: disable clock before changing it
->   mmc: sdhi: Add r8a7795 support
->
->  Documentation/devicetree/bindings/mmc/tmio_mmc.txt |  1 +
->  drivers/mmc/host/Kconfig                           |  2 +-
->  drivers/mmc/host/sh_mobile_sdhi.c                  | 54 +++++++++++++++-------
->  drivers/mmc/host/tmio_mmc_dma.c                    | 12 -----
->  drivers/mmc/host/tmio_mmc_pio.c                    | 27 ++++++-----
->  include/linux/mfd/tmio.h                           |  4 ++
->  include/linux/mmc/tmio.h                           |  5 ++
->  7 files changed, 63 insertions(+), 42 deletions(-)
->
-> --
-> 2.1.4
->
+> Signed-off-by: Arnd Bergmann <arnd@arndb.de>
 
-Patch 1->8 looks good.
-
-Although, I couldn't apply patch1, could you please send a new version
-rebased onto my next branch.
+Thanks, applied for next!
 
 Kind regards
 Uffe
+
+> ---
+> A simpler patch as v1 with the same result, as suggested by Peter Ujfalusi.
+>
+> diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
+> index b6639ea0bf18..87f0d840a166 100644
+> --- a/drivers/mmc/host/omap_hsmmc.c
+> +++ b/drivers/mmc/host/omap_hsmmc.c
+> @@ -2159,7 +2159,7 @@ static int omap_hsmmc_probe(struct platform_device *pdev)
+>                                                  &rx_req, &pdev->dev, "rx");
+>
+>         if (!host->rx_chan) {
+> -               dev_err(mmc_dev(host->mmc), "unable to obtain RX DMA engine channel %u\n", rx_req);
+> +               dev_err(mmc_dev(host->mmc), "unable to obtain RX DMA engine channel\n");
+>                 ret = -ENXIO;
+>                 goto err_irq;
+>         }
+> @@ -2169,7 +2169,7 @@ static int omap_hsmmc_probe(struct platform_device *pdev)
+>                                                  &tx_req, &pdev->dev, "tx");
+>
+>         if (!host->tx_chan) {
+> -               dev_err(mmc_dev(host->mmc), "unable to obtain TX DMA engine channel %u\n", tx_req);
+> +               dev_err(mmc_dev(host->mmc), "unable to obtain TX DMA engine channel\n");
+>                 ret = -ENXIO;
+>                 goto err_irq;
+>         }
+>
