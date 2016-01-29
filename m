@@ -1,17 +1,16 @@
 From: Russell King <rmk+kernel@arm.linux.org.uk>
-Subject: [PATCH v4 05/25] mmc: sdhci: move initialisation of command error
- member
-Date: Fri, 29 Jan 2016 09:44:10 +0000
-Message-ID: <E1aP5b8-0001p1-U3@rmk-PC.arm.linux.org.uk>
+Subject: [PATCH v4 07/25] mmc: sdhci: command response CRC error handling
+Date: Fri, 29 Jan 2016 09:44:21 +0000
+Message-ID: <E1aP5bJ-0001pD-4X@rmk-PC.arm.linux.org.uk>
 References: <20160129094324.GA20025@n2100.arm.linux.org.uk>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 8bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from pandora.arm.linux.org.uk ([78.32.30.218]:44201 "EHLO
+Received: from pandora.arm.linux.org.uk ([78.32.30.218]:44212 "EHLO
 	pandora.arm.linux.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752636AbcA2JoV (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 29 Jan 2016 04:44:21 -0500
+	with ESMTP id S1752835AbcA2Jod (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 29 Jan 2016 04:44:33 -0500
 In-Reply-To: <20160129094324.GA20025@n2100.arm.linux.org.uk>
 Content-Disposition: inline
 Sender: linux-mmc-owner@vger.kernel.org
@@ -19,37 +18,59 @@ List-Id: linux-mmc@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>
 Cc: Gregory CLEMENT <gregory.clement@free-electrons.com>, linux-mmc@vger.kernel.org, Marcin Wojtas <mw@semihalf.com>, Shawn Guo <shawnguo@kernel.org>, Sascha Hauer <kernel@pengutronix.de>
 
-When a command is started, logically it has no error.  Initialise the
-command's error member to zero whenever we start a command.
+When we get a response CRC error on a command, it means that the
+response we received back from the card was not correct.  It does not
+mean that the card did not receive the command correctly.  If the
+command is one which initiates a data transfer, the card can enter the
+data transfer state, and start sending data.
+
+Moreover, if the request contained a data phase, we do not clean this
+up, and this results in the driver triggering DMA API debug warnings,
+and also creates a race condition in the driver, between running the
+finish_tasklet and the data transfer interrupts, which can trigger a
+"Got data interrupt" state dump.
+
+Fix this by handing a response CRC error slightly differently: record
+the failure of the data initiating command, but allow the remainder of
+the request to be processed normally.  This is safe as core MMC checks
+the status of all commands and data transfer phases of the request.
+
+If the card does not initiate a data transfer, then we should time out
+according to the data transfer parameters.
 
 Signed-off-by: Russell King <rmk+kernel@arm.linux.org.uk>
 ---
- drivers/mmc/host/sdhci.c | 5 +++--
- 1 file changed, 3 insertions(+), 2 deletions(-)
+ drivers/mmc/host/sdhci.c | 17 +++++++++++++++++
+ 1 file changed, 17 insertions(+)
 
 diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index d622435d1bcc..eaa217f6e628 100644
+index ada227da39a6..5f22b842cf25 100644
 --- a/drivers/mmc/host/sdhci.c
 +++ b/drivers/mmc/host/sdhci.c
-@@ -1003,6 +1003,9 @@ void sdhci_send_command(struct sdhci_host *host, struct mmc_command *cmd)
+@@ -2330,6 +2330,23 @@ static void sdhci_cmd_irq(struct sdhci_host *host, u32 intmask, u32 *mask)
+ 		else
+ 			host->cmd->error = -EILSEQ;
  
- 	WARN_ON(host->cmd);
- 
-+	/* Initially, a command has no error */
-+	cmd->error = 0;
++		/*
++		 * If this command initiates a data phase and a response
++		 * CRC error is signalled, the card can start transferring
++		 * data - the card may have received the command without
++		 * error.  We must not terminate the mmc_request early.
++		 *
++		 * If the card did not receive the command or returned an
++		 * error which prevented it sending data, the data phase
++		 * will time out.
++		 */
++		if (host->cmd->data &&
++		    (intmask & (SDHCI_INT_CRC | SDHCI_INT_TIMEOUT)) ==
++		     SDHCI_INT_CRC) {
++			host->cmd = NULL;
++			return;
++		}
 +
- 	/* Wait max 10 ms */
- 	timeout = 10;
- 
-@@ -1097,8 +1100,6 @@ static void sdhci_finish_command(struct sdhci_host *host)
- 		}
+ 		tasklet_schedule(&host->finish_tasklet);
+ 		return;
  	}
- 
--	host->cmd->error = 0;
--
- 	/* Finished CMD23, now send actual command. */
- 	if (host->cmd == host->mrq->sbc) {
- 		host->cmd = NULL;
 -- 
 2.1.0
 
