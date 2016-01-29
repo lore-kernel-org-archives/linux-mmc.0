@@ -1,65 +1,56 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: [RESEND PATCH 11/11] mmc: block: don't use the OR operation for flag
- of data
-Date: Fri, 29 Jan 2016 14:40:57 +0900
-Message-ID: <1454046057-32318-12-git-send-email-jh80.chung@samsung.com>
-References: <1454046057-32318-1-git-send-email-jh80.chung@samsung.com>
+From: Wolfram Sang <wsa@the-dreams.de>
+Subject: [PATCH] mmc: sanitize 'bus width' in debug output
+Date: Fri, 29 Jan 2016 09:27:50 +0100
+Message-ID: <1454056070-6164-1-git-send-email-wsa@the-dreams.de>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout2.samsung.com ([203.254.224.25]:47237 "EHLO
-	mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751533AbcA2FlF (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 29 Jan 2016 00:41:05 -0500
-Received: from epcpsbgr1.samsung.com
- (u141.gpu120.samsung.co.kr [203.254.230.141])
- by mailout2.samsung.com (Oracle Communications Messaging Server 7.0.5.31.0
- 64bit (built May  5 2014))
- with ESMTP id <0O1P01AET94DT080@mailout2.samsung.com> for
- linux-mmc@vger.kernel.org; Fri, 29 Jan 2016 14:41:01 +0900 (KST)
-In-reply-to: <1454046057-32318-1-git-send-email-jh80.chung@samsung.com>
+Received: from sauhun.de ([89.238.76.85]:38582 "EHLO pokefinder.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752973AbcA2I2J (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 29 Jan 2016 03:28:09 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org
-Cc: ulf.hansson@linaro.org, sonic.zhang@analog.com, robert.jarzmik@free.fr, Jaehoon Chung <jh80.chung@samsung.com>
+Cc: Wolfram Sang <wsa@the-dreams.de>, linux-renesas-soc@vger.kernel.org, Dirk Behme <dirk.behme@gmail.com>, Kuninori Morimoto <kuninori.morimoto.gx@gmail.com>
 
-After removed the MMC_DATA_STREAM, only two flags are remained.
-(MMC_DATA_READ and MMC_DATA_WRITE)
-The flags of  READ and WRITE can't be used together.
-That's why it doesn't need to use "OR' operation.
+From: Wolfram Sang <wsa+renesas@sang-engineering.com>
 
-Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+The bus width is sometimes the actual bus width, and sometimes indices
+to different arrays encoding the bus width. In my debugging case "2"
+could mean 8-bit as well as 4-bit, which was extremly confusing. Let's
+use the human-readable actual bus width in all places.
+
+Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
 ---
- drivers/mmc/card/block.c | 6 +++---
- 1 file changed, 3 insertions(+), 3 deletions(-)
+ drivers/mmc/core/core.c | 2 +-
+ drivers/mmc/core/mmc.c  | 2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
 
-diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
-index 5914263..e7449cb 100644
---- a/drivers/mmc/card/block.c
-+++ b/drivers/mmc/card/block.c
-@@ -1525,13 +1525,13 @@ static void mmc_blk_rw_rq_prep(struct mmc_queue_req *mqrq,
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index f95d41ffc766e5..746de248defced 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -1033,7 +1033,7 @@ static inline void mmc_set_ios(struct mmc_host *host)
+ 		"width %u timing %u\n",
+ 		 mmc_hostname(host), ios->clock, ios->bus_mode,
+ 		 ios->power_mode, ios->chip_select, ios->vdd,
+-		 ios->bus_width, ios->timing);
++		 1 << ios->bus_width, ios->timing);
+ 
+ 	host->ops->set_ios(host, ios);
+ }
+diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+index 07a135bc893057..4dbe3df8024b2c 100644
+--- a/drivers/mmc/core/mmc.c
++++ b/drivers/mmc/core/mmc.c
+@@ -945,7 +945,7 @@ static int mmc_select_bus_width(struct mmc_card *card)
+ 			break;
+ 		} else {
+ 			pr_warn("%s: switch to bus width %d failed\n",
+-				mmc_hostname(host), ext_csd_bits[idx]);
++				mmc_hostname(host), 1 << bus_width);
+ 		}
  	}
- 	if (rq_data_dir(req) == READ) {
- 		brq->cmd.opcode = readcmd;
--		brq->data.flags |= MMC_DATA_READ;
-+		brq->data.flags = MMC_DATA_READ;
- 		if (brq->mrq.stop)
- 			brq->stop.flags = MMC_RSP_SPI_R1 | MMC_RSP_R1 |
- 					MMC_CMD_AC;
- 	} else {
- 		brq->cmd.opcode = writecmd;
--		brq->data.flags |= MMC_DATA_WRITE;
-+		brq->data.flags = MMC_DATA_WRITE;
- 		if (brq->mrq.stop)
- 			brq->stop.flags = MMC_RSP_SPI_R1B | MMC_RSP_R1B |
- 					MMC_CMD_AC;
-@@ -1800,7 +1800,7 @@ static void mmc_blk_packed_hdr_wrq_prep(struct mmc_queue_req *mqrq,
  
- 	brq->data.blksz = 512;
- 	brq->data.blocks = packed->blocks + hdr_blocks;
--	brq->data.flags |= MMC_DATA_WRITE;
-+	brq->data.flags = MMC_DATA_WRITE;
- 
- 	brq->stop.opcode = MMC_STOP_TRANSMISSION;
- 	brq->stop.arg = 0;
 -- 
-1.9.1
+2.6.2
 
