@@ -1,18 +1,18 @@
 From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: [PATCH 07/12] mmc: mxcmmc: remove the MMC_DATA_STREAM flag
-Date: Fri, 29 Jan 2016 13:06:06 +0900
-Message-ID: <1454040371-31625-8-git-send-email-jh80.chung@samsung.com>
+Subject: [PATCH 03/12] mmc: bfin_sdh: remove the MMC_DATA_STREAM flag
+Date: Fri, 29 Jan 2016 13:06:02 +0900
+Message-ID: <1454040371-31625-4-git-send-email-jh80.chung@samsung.com>
 References: <1454040371-31625-1-git-send-email-jh80.chung@samsung.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
 Received: from mailout4.samsung.com ([203.254.224.34]:43544 "EHLO
 	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753405AbcA2EGW (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 28 Jan 2016 23:06:22 -0500
-Received: from epcpsbgr3.samsung.com
- (u143.gpu120.samsung.co.kr [203.254.230.143])
+	with ESMTP id S1753363AbcA2EGT (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 28 Jan 2016 23:06:19 -0500
+Received: from epcpsbgr5.samsung.com
+ (u145.gpu120.samsung.co.kr [203.254.230.145])
  by mailout4.samsung.com (Oracle Communications Messaging Server 7.0.5.31.0
  64bit (built May  5 2014))
- with ESMTP id <0O1P02V654QIEPE0@mailout4.samsung.com> for
+ with ESMTP id <0O1P02V634QIEPE0@mailout4.samsung.com> for
  linux-mmc@vger.kernel.org; Fri, 29 Jan 2016 13:06:18 +0900 (KST)
 In-reply-to: <1454040371-31625-1-git-send-email-jh80.chung@samsung.com>
 Sender: linux-mmc-owner@vger.kernel.org
@@ -24,23 +24,23 @@ Remove the MMC_DATA_STREAM flag because it doesn't use anymore.
 
 Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
 ---
- drivers/mmc/host/mxcmmc.c | 3 ---
+ drivers/mmc/host/bfin_sdh.c | 3 ---
  1 file changed, 3 deletions(-)
 
-diff --git a/drivers/mmc/host/mxcmmc.c b/drivers/mmc/host/mxcmmc.c
-index d110f9e..3d1ea5e 100644
---- a/drivers/mmc/host/mxcmmc.c
-+++ b/drivers/mmc/host/mxcmmc.c
-@@ -307,9 +307,6 @@ static int mxcmci_setup_data(struct mxcmci_host *host, struct mmc_data *data)
- 	enum dma_transfer_direction slave_dirn;
- 	int i, nents;
+diff --git a/drivers/mmc/host/bfin_sdh.c b/drivers/mmc/host/bfin_sdh.c
+index 2b7f37e..526231e 100644
+--- a/drivers/mmc/host/bfin_sdh.c
++++ b/drivers/mmc/host/bfin_sdh.c
+@@ -126,9 +126,6 @@ static int sdh_setup_data(struct sdh_host *host, struct mmc_data *data)
+ 	length = data->blksz * data->blocks;
+ 	bfin_write_SDH_DATA_LGTH(length);
  
 -	if (data->flags & MMC_DATA_STREAM)
--		nob = 0xffff;
+-		data_ctl |= DTX_MODE;
 -
- 	host->data = data;
- 	data->bytes_xfered = 0;
- 
+ 	if (data->flags & MMC_DATA_READ)
+ 		data_ctl |= DTX_DIR;
+ 	/* Only supports power-of-2 block size */
 -- 
 1.9.1
 
