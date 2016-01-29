@@ -1,71 +1,80 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: mediatek: make sure clock is enabled when executing ops->card_busy()
-Date: Fri, 29 Jan 2016 11:23:39 +0100
-Message-ID: <CAPDyKFrv2dVarscYz79svnhBGMy2TYbgePKYyKw_dMJiWmLrUA@mail.gmail.com>
-References: <1454009514-6474-1-git-send-email-chaotian.jing@mediatek.com>
+From: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: Re: [PATCH RFC 03/15] mmc: sunxi: Block signal voltage
+ switching (CMD11)
+Date: Fri, 29 Jan 2016 11:42:13 +0100
+Message-ID: <CAPDyKFrG8cXChSRuAx-a++iNHUHU_GuUApDhxfPSJZb1Oo1fsg@mail.gmail.com>
+References: <1453354002-28366-1-git-send-email-wens@csie.org>
+	<1453354002-28366-4-git-send-email-wens@csie.org>
+Reply-To: ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-yk0-f182.google.com ([209.85.160.182]:36674 "EHLO
-	mail-yk0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751809AbcA2KXk (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 29 Jan 2016 05:23:40 -0500
-Received: by mail-yk0-f182.google.com with SMTP id v14so63445910ykd.3
-        for <linux-mmc@vger.kernel.org>; Fri, 29 Jan 2016 02:23:40 -0800 (PST)
-In-Reply-To: <1454009514-6474-1-git-send-email-chaotian.jing@mediatek.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-sunxi+bncBDF57NG2XIHRBBUEVW2QKGQEQC2DDHI-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+In-Reply-To: <1453354002-28366-4-git-send-email-wens-jdAy2FN1RRM@public.gmane.org>
+List-Post: <https://groups.google.com/group/linux-sunxi/post>, <mailto:linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Help: <https://groups.google.com/support/>, <mailto:linux-sunxi+help-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Archive: <https://groups.google.com/group/linux-sunxi
+Sender: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
+List-Subscribe: <https://groups.google.com/group/linux-sunxi/subscribe>, <mailto:linux-sunxi+subscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Unsubscribe: <mailto:googlegroups-manage+1076902468213+unsubscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>,
+ <https://groups.google.com/group/linux-sunxi/subscribe>
+To: Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org>
+Cc: Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>, Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, linux-mmc <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chaotian Jing <chaotian.jing@mediatek.com>
-Cc: Matthias Brugger <matthias.bgg@gmail.com>, Geert Uytterhoeven <geert@linux-m68k.org>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, linux-mediatek@lists.infradead.org, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, srv_heupstream <srv_heupstream@mediatek.com>, Sascha Hauer <kernel@pengutronix.de>
 
-On 28 January 2016 at 20:31, Chaotian Jing <chaotian.jing@mediatek.com> wrote:
-> add pm_runtime_get_sync() before access MSDC_PS register
+On 21 January 2016 at 06:26, Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org> wrote:
+> Allwinner's mmc controller supports signal voltage switching. This is
+> supported in code in Allwinner's kernel. However, publicly available
+> boards all tie it to a fixed 3.0/3.3V regulator, with options to tie
+> it to 1.8V for eMMC on some.
+>
+> Since Allwinner's kernel is an ancient 3.4, it is hard to say whether
+> adapting it's code to a modern mainline kernel would work. Block signal
+> voltage switching until someone has proper hardware to implement and
+> test this.
+>
+> This only affects SD UHS-1 modes, as eMMC switches the voltage directly
+> without any signaling.
+>
+> Signed-off-by: Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org>
+> ---
+>  drivers/mmc/host/sunxi-mmc.c | 14 ++++++++++++++
+>  1 file changed, 14 insertions(+)
+>
+> diff --git a/drivers/mmc/host/sunxi-mmc.c b/drivers/mmc/host/sunxi-mmc.c
+> index 790f01662b4e..0495ae7da6d6 100644
+> --- a/drivers/mmc/host/sunxi-mmc.c
+> +++ b/drivers/mmc/host/sunxi-mmc.c
+> @@ -816,6 +816,20 @@ static void sunxi_mmc_request(struct mmc_host *mmc, struct mmc_request *mrq)
+>                 }
+>         }
+>
+> +       /*
+> +        * TODO Support signal voltage switching
+> +        *
+> +        * Compared to Allwinner's kernel, recent updates in the mmc core
+> +        * mean this should be as easy as setting the flags in cmd_val and
+> +        * imask, and waiting for it to finish. However no boards support
+> +        * this so this cannot be tested. Block it for now.
+> +        */
+> +       if (cmd->opcode == SD_SWITCH_VOLTAGE) {
+> +               mrq->cmd->error = -EPERM;
+> +               mmc_request_done(mmc, mrq);
+> +               return;
+> +       }
 
-This isn't need as the mmc core does that when claiming the host, see
-below commit.
+Unless some of the MMC_CAP_UHS* mode is set, this command shouldn't be sent.
 
->From that point there have been some additional fixup, as there were
-actually some paths when to core invoked some of the host_ops
-callbacks, without claiming the host. Although that should also have
-been fixed now.
+So, if you *really* want to protect from this, I think it's better to
+clear these caps in the ->probe() function, after mmc_of_parse() has
+been called.
 
-commit 9250aea76bfcbf4c2a7868e5566281bf2bb7af27
-mmc: core: Enable runtime PM management of host devices
+> +
+>         if (cmd->opcode == MMC_GO_IDLE_STATE) {
+>                 cmd_val |= SDXC_SEND_INIT_SEQUENCE;
+>                 imask |= SDXC_COMMAND_DONE;
+> --
+> 2.7.0.rc3
+>
 
 Kind regards
 Uffe
-
->
-> Signed-off-by: Chaotian Jing <chaotian.jing@mediatek.com>
-> ---
->  drivers/mmc/host/mtk-sd.c | 12 +++++++-----
->  1 file changed, 7 insertions(+), 5 deletions(-)
->
-> diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
-> index 82a97ac..a56b16d 100644
-> --- a/drivers/mmc/host/mtk-sd.c
-> +++ b/drivers/mmc/host/mtk-sd.c
-> @@ -1054,13 +1054,15 @@ static int msdc_ops_switch_volt(struct mmc_host *mmc, struct mmc_ios *ios)
->  static int msdc_card_busy(struct mmc_host *mmc)
->  {
->         struct msdc_host *host = mmc_priv(mmc);
-> -       u32 status = readl(host->base + MSDC_PS);
-> +       u32 status;
->
-> -       /* check if any pin between dat[0:3] is low */
-> -       if (((status >> 16) & 0xf) != 0xf)
-> -               return 1;
-> +       pm_runtime_get_sync(host->dev);
-> +       status = readl(host->base + MSDC_PS);
-> +       pm_runtime_mark_last_busy(host->dev);
-> +       pm_runtime_put_autosuspend(host->dev);
->
-> -       return 0;
-> +       /* check if any pin between dat[0:3] is low */
-> +       return !!(((status >> 16) & 0xf) != 0xf);
->  }
->
->  static void msdc_request_timeout(struct work_struct *work)
-> --
-> 1.8.1.1.dirty
->
