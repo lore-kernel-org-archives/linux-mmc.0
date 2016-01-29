@@ -1,190 +1,73 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 9/9] mmc: sdhi: Add r8a7795 support
-Date: Fri, 29 Jan 2016 12:40:47 +0100
-Message-ID: <CAPDyKFo6oXEAy562p7MTxw0eKYZe_nnT2q+hbLKF4Lv2kMUvGg@mail.gmail.com>
-References: <1453749316-1848-1-git-send-email-wsa@the-dreams.de>
-	<1453749316-1848-10-git-send-email-wsa@the-dreams.de>
+Subject: Re: [PATCH 0/3] mmc: sdhci-iproc: add bcm2835 support
+Date: Fri, 29 Jan 2016 12:41:13 +0100
+Message-ID: <CAPDyKFqzu86xJvm5h_7_qFXuDQTV=nAU8wmhZCXPqj_8=XvxYA@mail.gmail.com>
+References: <1453933542-30287-1-git-send-email-stefan.wahren@i2se.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-sh-owner@vger.kernel.org>
-In-Reply-To: <1453749316-1848-10-git-send-email-wsa@the-dreams.de>
-Sender: linux-sh-owner@vger.kernel.org
-To: Wolfram Sang <wsa@the-dreams.de>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, linux-renesas-soc@vger.kernel.org, Linux-sh list <linux-sh@vger.kernel.org>, Kuninori Morimoto <kuninori.morimoto.gx@gmail.com>, Magnus Damm <magnus.damm@gmail.com>, Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>, Dirk Behme <dirk.behme@gmail.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-yk0-f177.google.com ([209.85.160.177]:36416 "EHLO
+	mail-yk0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756093AbcA2LlO (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 29 Jan 2016 06:41:14 -0500
+Received: by mail-yk0-f177.google.com with SMTP id v14so65186063ykd.3
+        for <linux-mmc@vger.kernel.org>; Fri, 29 Jan 2016 03:41:14 -0800 (PST)
+In-Reply-To: <1453933542-30287-1-git-send-email-stefan.wahren@i2se.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Stefan Wahren <stefan.wahren@i2se.com>
+Cc: Scott Branden <sbranden@broadcom.com>, Ray Jui <rjui@broadcom.com>, Jon Mason <jonmason@broadcom.com>, Stephen Warren <swarren@wwwdotorg.org>, Lee Jones <lee@kernel.org>, Eric Anholt <eric@anholt.net>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Arnd Bergmann <arnd@arndb.de>, kernel@martin.sperl.org, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, linux-rpi-kernel@lists.infradead.org, linux-mmc <linux-mmc@vger.kernel.org>, Jisheng Zhang <jszhang@marvell.com>, Shawn Lin <shawn.lin@rock-chips.com>, bcm-kernel-feedback-list@broadcom.com
 
-On 25 January 2016 at 20:15, Wolfram Sang <wsa@the-dreams.de> wrote:
-> From: Wolfram Sang <wsa+renesas@sang-engineering.com>
+On 27 January 2016 at 23:25, Stefan Wahren <stefan.wahren@i2se.com> wrote:
+> This patch series based on the suggestion of Scott Branden to implement
+> bcm2835 support into sdhci-iproc [1].
 >
-> Registers are 64bit apart, so we refactor bus_shift handling a little
-> and set it based on the DT compatible. Also, EXT_ACC is different.
+> These changes provide the following advantages:
+>   * no need to maintain a separate driver for bcm2835
+>   * improve support and test coverage of bcm2835 mmc support
+>   * get the rid of SDHCI_CAPABILITIES hack in bcm2835_sdhci_readl
+>   * increase write performance by avoiding delays in write ops
 >
-> Signed-off-by: Ai Kyuse <ai.kyuse.uw@renesas.com>
-> Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
-> ---
+> Patch 1 prepare sdhci-iproc for another platform. Patch 2 and 3
+> are the actually changes for bcm2835 support.
 >
-> @MMC maintainers: I set the MMC_CAP_WAIT_WHILE_BUSY flage here and it is needed
-> to probe the eMMC (implementing RSP_R1 without CRC would also work). However, I
-> can't find an explicit statement in the documentation saying that it really
-> waits when the bus is busy. Is my "it works, let's use it" approach enough, or
-> is there more I can do to verify that setting MMC_CAP_WAIT_WHILE_BUSY is valid
-> for this hardware?
+> These series has been tested on Raspberry Pi B with dd (direct I/O):
+>
+> sdhci-bcm2835
+>
+> 378 kB/s WRITE
+> 10,6 MB/s READ
+>
+> sdhci-iproc (after applying patch series)
+>
+> 881 kB/s WRITE
+> 10,8 MB/s READ
+>
+> Changes since RFC:
+>   * drop patch which tries to add quirks for bcm2835 in DT and define all
+>     quirks in driver instead to keep old DTs working with sdhci-iproc
+>     (suggestion by Stephen Warren)
+>   * define MMC caps in shdci-iproc platform data to make adding new
+>     platforms more easily (suggestion by Stephen Warren)
+>
+> [1] - https://lkml.org/lkml/2015/12/22/525
+>
+> Stefan Wahren (3):
+>   mmc: sdhci-iproc: define MMC caps in platform data
+>   mmc: sdhci-iproc: add bcm2835 support
+>   DT: sdhci-iproc: add bcm2835 compatible
+>
+>  .../devicetree/bindings/mmc/brcm,sdhci-iproc.txt   |    5 ++++-
+>  drivers/mmc/host/Kconfig                           |    6 +++---
+>  drivers/mmc/host/sdhci-iproc.c                     |   20 ++++++++++++++++++--
+>  3 files changed, 25 insertions(+), 6 deletions(-)
+>
+> --
+> 1.7.9.5
+>
 
-In general from the mmc core perspective, when a host announces
-MMC_CAP_WAIT_WHILE_BUSY it won't send a CMD13 to poll for busy.
 
-I think you should try without MMC_CAP_WAIT_WHILE_BUSY, and then check
-that a following CMD13 command always states that the card isn't busy.
-I think the best path to try this is when sending a big write data
-request, as in that case you can be quite certain that the card gets
-busy between the requests.
-
-So somewhere in the mmc block layer add some debug prints, that should do it.
+Thanks, applied for next!
 
 Kind regards
 Uffe
-
->
->  Documentation/devicetree/bindings/mmc/tmio_mmc.txt |  1 +
->  drivers/mmc/host/Kconfig                           |  2 +-
->  drivers/mmc/host/sh_mobile_sdhi.c                  | 47 ++++++++++++++++------
->  3 files changed, 36 insertions(+), 14 deletions(-)
->
-> diff --git a/Documentation/devicetree/bindings/mmc/tmio_mmc.txt b/Documentation/devicetree/bindings/mmc/tmio_mmc.txt
-> index 400b640fabc768..7fb746dd1a68ca 100644
-> --- a/Documentation/devicetree/bindings/mmc/tmio_mmc.txt
-> +++ b/Documentation/devicetree/bindings/mmc/tmio_mmc.txt
-> @@ -22,6 +22,7 @@ Required properties:
->                 "renesas,sdhi-r8a7792" - SDHI IP on R8A7792 SoC
->                 "renesas,sdhi-r8a7793" - SDHI IP on R8A7793 SoC
->                 "renesas,sdhi-r8a7794" - SDHI IP on R8A7794 SoC
-> +               "renesas,sdhi-r8a7795" - SDHI IP on R8A7795 SoC
->
->  Optional properties:
->  - toshiba,mmc-wrprotect-disable: write-protect detection is unavailable
-> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
-> index 1526b8a10b094e..dd1499bd218b16 100644
-> --- a/drivers/mmc/host/Kconfig
-> +++ b/drivers/mmc/host/Kconfig
-> @@ -560,7 +560,7 @@ config MMC_TMIO
->
->  config MMC_SDHI
->         tristate "SH-Mobile SDHI SD/SDIO controller support"
-> -       depends on SUPERH || ARM
-> +       depends on SUPERH || ARM || ARM64
->         depends on SUPERH || ARCH_SHMOBILE || COMPILE_TEST
->         select MMC_TMIO_CORE
->         help
-> diff --git a/drivers/mmc/host/sh_mobile_sdhi.c b/drivers/mmc/host/sh_mobile_sdhi.c
-> index 557e2b9dadeec7..f7eff5f53e0013 100644
-> --- a/drivers/mmc/host/sh_mobile_sdhi.c
-> +++ b/drivers/mmc/host/sh_mobile_sdhi.c
-> @@ -1,6 +1,8 @@
->  /*
->   * SuperH Mobile SDHI
->   *
-> + * Copyright (C) 2016 Sang Engineering, Wolfram Sang
-> + * Copyright (C) 2015-16 Renesas Electronics Corporation
->   * Copyright (C) 2009 Magnus Damm
->   *
->   * This program is free software; you can redistribute it and/or modify
-> @@ -43,6 +45,7 @@ struct sh_mobile_sdhi_of_data {
->         unsigned long capabilities2;
->         enum dma_slave_buswidth dma_buswidth;
->         dma_addr_t dma_rx_offset;
-> +       unsigned bus_shift;
->  };
->
->  static const struct sh_mobile_sdhi_of_data sh_mobile_sdhi_of_cfg[] = {
-> @@ -65,6 +68,13 @@ static const struct sh_mobile_sdhi_of_data of_rcar_gen2_compatible = {
->         .dma_rx_offset  = 0x2000,
->  };
->
-> +static const struct sh_mobile_sdhi_of_data of_rcar_gen3_compatible = {
-> +       .tmio_flags     = TMIO_MMC_HAS_IDLE_WAIT | TMIO_MMC_WRPROTECT_DISABLE |
-> +                         TMIO_MMC_CLK_ACTUAL | TMIO_MMC_FAST_CLK_CHG,
-> +       .capabilities   = MMC_CAP_SD_HIGHSPEED | MMC_CAP_WAIT_WHILE_BUSY,
-> +       .bus_shift      = 2,
-> +};
-> +
->  static const struct of_device_id sh_mobile_sdhi_of_match[] = {
->         { .compatible = "renesas,sdhi-shmobile" },
->         { .compatible = "renesas,sdhi-sh7372" },
-> @@ -78,6 +88,7 @@ static const struct of_device_id sh_mobile_sdhi_of_match[] = {
->         { .compatible = "renesas,sdhi-r8a7792", .data = &of_rcar_gen2_compatible, },
->         { .compatible = "renesas,sdhi-r8a7793", .data = &of_rcar_gen2_compatible, },
->         { .compatible = "renesas,sdhi-r8a7794", .data = &of_rcar_gen2_compatible, },
-> +       { .compatible = "renesas,sdhi-r8a7795", .data = &of_rcar_gen3_compatible, },
->         {},
->  };
->  MODULE_DEVICE_TABLE(of, sh_mobile_sdhi_of_match);
-> @@ -103,6 +114,15 @@ static void sh_mobile_sdhi_sdbuf_width(struct tmio_mmc_host *host, int width)
->         case 0xCB0D:
->                 val = (width == 32) ? 0x0000 : 0x0001;
->                 break;
-> +       case 0xCC10: /* Gen3, SD only */
-> +       case 0xCD10: /* Gen3, SD + MMC */
-> +               if (width == 64)
-> +                       val = 0x0000;
-> +               else if (width == 32)
-> +                       val = 0x0101;
-> +               else
-> +                       val = 0x0001;
-> +               break;
->         default:
->                 /* nothing to do */
->                 return;
-> @@ -233,16 +253,26 @@ static int sh_mobile_sdhi_probe(struct platform_device *pdev)
->                 goto eprobe;
->         }
->
-> +       if (of_id && of_id->data) {
-> +               const struct sh_mobile_sdhi_of_data *of_data = of_id->data;
-> +
-> +               mmc_data->flags |= of_data->tmio_flags;
-> +               mmc_data->capabilities |= of_data->capabilities;
-> +               mmc_data->capabilities2 |= of_data->capabilities2;
-> +               mmc_data->dma_rx_offset = of_data->dma_rx_offset;
-> +               dma_priv->dma_buswidth = of_data->dma_buswidth;
-> +               host->bus_shift = of_data->bus_shift;
-> +       }
-> +
->         host->dma               = dma_priv;
->         host->write16_hook      = sh_mobile_sdhi_write16_hook;
->         host->clk_enable        = sh_mobile_sdhi_clk_enable;
->         host->clk_disable       = sh_mobile_sdhi_clk_disable;
->         host->multi_io_quirk    = sh_mobile_sdhi_multi_io_quirk;
-> -       /* SD control register space size is 0x100, 0x200 for bus_shift=1 */
-> -       if (resource_size(res) > 0x100)
-> +
-> +       /* Orginally registers were 16 bit apart, could be 32 or 64 nowadays */
-> +       if (!host->bus_shift && resource_size(res) > 0x100) /* old way to determine the shift */
->                 host->bus_shift = 1;
-> -       else
-> -               host->bus_shift = 0;
->
->         if (mmd)
->                 *mmc_data = *mmd;
-> @@ -274,15 +304,6 @@ static int sh_mobile_sdhi_probe(struct platform_device *pdev)
->          */
->         mmc_data->flags |= TMIO_MMC_SDIO_STATUS_QUIRK;
->
-> -       if (of_id && of_id->data) {
-> -               const struct sh_mobile_sdhi_of_data *of_data = of_id->data;
-> -               mmc_data->flags |= of_data->tmio_flags;
-> -               mmc_data->capabilities |= of_data->capabilities;
-> -               mmc_data->capabilities2 |= of_data->capabilities2;
-> -               mmc_data->dma_rx_offset = of_data->dma_rx_offset;
-> -               dma_priv->dma_buswidth = of_data->dma_buswidth;
-> -       }
-> -
->         ret = tmio_mmc_host_probe(host, mmc_data);
->         if (ret < 0)
->                 goto efree;
-> --
-> 2.1.4
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
