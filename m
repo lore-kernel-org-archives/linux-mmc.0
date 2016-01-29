@@ -1,65 +1,71 @@
-From: Russell King <rmk+kernel@arm.linux.org.uk>
-Subject: [PATCH v4 20/25] mmc: sdhci: further fix for DMA unmapping in
- sdhci_post_req()
-Date: Fri, 29 Jan 2016 09:45:30 +0000
-Message-ID: <E1aP5cQ-0001qY-Or@rmk-PC.arm.linux.org.uk>
-References: <20160129094324.GA20025@n2100.arm.linux.org.uk>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH] mmc: mediatek: make sure clock is enabled when executing ops->card_busy()
+Date: Fri, 29 Jan 2016 11:23:39 +0100
+Message-ID: <CAPDyKFrv2dVarscYz79svnhBGMy2TYbgePKYyKw_dMJiWmLrUA@mail.gmail.com>
+References: <1454009514-6474-1-git-send-email-chaotian.jing@mediatek.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from pandora.arm.linux.org.uk ([78.32.30.218]:44284 "EHLO
-	pandora.arm.linux.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752995AbcA2Jua (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 29 Jan 2016 04:50:30 -0500
-In-Reply-To: <20160129094324.GA20025@n2100.arm.linux.org.uk>
-Content-Disposition: inline
+Received: from mail-yk0-f182.google.com ([209.85.160.182]:36674 "EHLO
+	mail-yk0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751809AbcA2KXk (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 29 Jan 2016 05:23:40 -0500
+Received: by mail-yk0-f182.google.com with SMTP id v14so63445910ykd.3
+        for <linux-mmc@vger.kernel.org>; Fri, 29 Jan 2016 02:23:40 -0800 (PST)
+In-Reply-To: <1454009514-6474-1-git-send-email-chaotian.jing@mediatek.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Gregory CLEMENT <gregory.clement@free-electrons.com>, linux-mmc@vger.kernel.org, Marcin Wojtas <mw@semihalf.com>, Shawn Guo <shawnguo@kernel.org>, Sascha Hauer <kernel@pengutronix.de>
+To: Chaotian Jing <chaotian.jing@mediatek.com>
+Cc: Matthias Brugger <matthias.bgg@gmail.com>, Geert Uytterhoeven <geert@linux-m68k.org>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, linux-mediatek@lists.infradead.org, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, srv_heupstream <srv_heupstream@mediatek.com>, Sascha Hauer <kernel@pengutronix.de>
 
-sdhci_post_req() exists to unmap a previously mapped but already
-finished request, while the next request is in progress.  However, the
-state of the SDHCI_REQ_USE_DMA flag depends on the last submitted
-request.
+On 28 January 2016 at 20:31, Chaotian Jing <chaotian.jing@mediatek.com> wrote:
+> add pm_runtime_get_sync() before access MSDC_PS register
 
-This means we can end up clearing the flag due to a quirk, which then
-means that sdhci_post_req() fails to unmap the DMA buffer, potentially
-leading to data corruption.
+This isn't need as the mmc core does that when claiming the host, see
+below commit.
 
-We can safely ignore the SDHCI_REQ_USE_DMA here, as testing
-data->host_cookie is entirely sufficient.
+>From that point there have been some additional fixup, as there were
+actually some paths when to core invoked some of the host_ops
+callbacks, without claiming the host. Although that should also have
+been fixed now.
 
-Signed-off-by: Russell King <rmk+kernel@arm.linux.org.uk>
----
- drivers/mmc/host/sdhci.c | 13 ++++++-------
- 1 file changed, 6 insertions(+), 7 deletions(-)
+commit 9250aea76bfcbf4c2a7868e5566281bf2bb7af27
+mmc: core: Enable runtime PM management of host devices
 
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index b4808ca8e497..7fed845797a0 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -2059,13 +2059,12 @@ static void sdhci_post_req(struct mmc_host *mmc, struct mmc_request *mrq,
- 	struct sdhci_host *host = mmc_priv(mmc);
- 	struct mmc_data *data = mrq->data;
- 
--	if (host->flags & SDHCI_REQ_USE_DMA) {
--		if (data->host_cookie != COOKIE_UNMAPPED)
--			dma_unmap_sg(mmc_dev(host->mmc), data->sg, data->sg_len,
--					 data->flags & MMC_DATA_WRITE ?
--					 DMA_TO_DEVICE : DMA_FROM_DEVICE);
--		data->host_cookie = COOKIE_UNMAPPED;
--	}
-+	if (data->host_cookie != COOKIE_UNMAPPED)
-+		dma_unmap_sg(mmc_dev(host->mmc), data->sg, data->sg_len,
-+			     data->flags & MMC_DATA_WRITE ?
-+			       DMA_TO_DEVICE : DMA_FROM_DEVICE);
-+
-+	data->host_cookie = COOKIE_UNMAPPED;
- }
- 
- static void sdhci_pre_req(struct mmc_host *mmc, struct mmc_request *mrq,
--- 
-2.1.0
+Kind regards
+Uffe
 
+>
+> Signed-off-by: Chaotian Jing <chaotian.jing@mediatek.com>
+> ---
+>  drivers/mmc/host/mtk-sd.c | 12 +++++++-----
+>  1 file changed, 7 insertions(+), 5 deletions(-)
+>
+> diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
+> index 82a97ac..a56b16d 100644
+> --- a/drivers/mmc/host/mtk-sd.c
+> +++ b/drivers/mmc/host/mtk-sd.c
+> @@ -1054,13 +1054,15 @@ static int msdc_ops_switch_volt(struct mmc_host *mmc, struct mmc_ios *ios)
+>  static int msdc_card_busy(struct mmc_host *mmc)
+>  {
+>         struct msdc_host *host = mmc_priv(mmc);
+> -       u32 status = readl(host->base + MSDC_PS);
+> +       u32 status;
+>
+> -       /* check if any pin between dat[0:3] is low */
+> -       if (((status >> 16) & 0xf) != 0xf)
+> -               return 1;
+> +       pm_runtime_get_sync(host->dev);
+> +       status = readl(host->base + MSDC_PS);
+> +       pm_runtime_mark_last_busy(host->dev);
+> +       pm_runtime_put_autosuspend(host->dev);
+>
+> -       return 0;
+> +       /* check if any pin between dat[0:3] is low */
+> +       return !!(((status >> 16) & 0xf) != 0xf);
+>  }
+>
+>  static void msdc_request_timeout(struct work_struct *work)
+> --
+> 1.8.1.1.dirty
+>
