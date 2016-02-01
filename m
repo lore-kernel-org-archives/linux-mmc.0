@@ -1,102 +1,55 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [RFC PATCH 0/21] Totally remove SDHCI_QUIRK_BROKEN_CARD_DETECTION
- quirk
-Date: Mon, 1 Feb 2016 14:32:49 +0200
-Message-ID: <56AF5071.9050103@intel.com>
-References: <1453871155-3283-1-git-send-email-shawn.lin@rock-chips.com>
- <56A8BF22.8010509@intel.com> <20160127132348.GY10826@n2100.arm.linux.org.uk>
- <CAPDyKFr0MT5xa87F=4LPX7WbNuD0THndTDkvhL9N0h6A5g67eg@mail.gmail.com>
- <56AA03AA.5010706@intel.com>
- <CAPDyKFoBdJ-5sXyJpTNxDJVJSUA+Gsjc+0+uLedNZCHYcF+rvQ@mail.gmail.com>
- <56AB5635.9030007@intel.com> <20160129172817.GR10826@n2100.arm.linux.org.uk>
+From: Wolfram Schlich <lists@wolfram.schlich.org>
+Subject: sdhci-pci: probe of 0000:11:00.0 failed with error -22
+Date: Mon, 1 Feb 2016 15:19:44 +0100
+Message-ID: <20160201141944.GT13086@bla.fasel.org>
+References: <S932267AbcBANb3/20160201133129Z+1138@vger.kernel.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga14.intel.com ([192.55.52.115]:58843 "EHLO mga14.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753671AbcBAMgS (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 1 Feb 2016 07:36:18 -0500
-In-Reply-To: <20160129172817.GR10826@n2100.arm.linux.org.uk>
+Received: from mail.laber.fasel.org ([212.7.178.68]:33483 "EHLO
+	mail.laber.fasel.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932418AbcBAO1u (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 1 Feb 2016 09:27:50 -0500
+Received: from localhost (localhost [127.0.0.1])
+	by mail.laber.fasel.org (Postfix/wolfram.schlich.biz) with ESMTP id 6810B83CA3FB
+	for <linux-mmc@vger.kernel.org>; Mon,  1 Feb 2016 15:19:44 +0100 (CET)
+Content-Disposition: inline
+In-Reply-To: <S932267AbcBANb3/20160201133129Z+1138@vger.kernel.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Russell King - ARM Linux <linux@arm.linux.org.uk>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Shawn Lin <shawn.lin@rock-chips.com>, bcm-kernel-feedback-list@broadcom.com, linux-rpi-kernel@lists.infradead.org, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, P L Sai Krishna <lakshmi.sai.krishna.potthuri@xilinx.com>, Wan Zongshun <vincent.wan@amd.com>, Jisheng Zhang <jszhang@marvell.com>
+To: linux-mmc@vger.kernel.org
 
-On 29/01/16 19:28, Russell King - ARM Linux wrote:
-> On Fri, Jan 29, 2016 at 02:08:21PM +0200, Adrian Hunter wrote:
->> I might make a tree because I want to try to separate Russell's bug fixes
->> from the clean-ups, and then cc stable on the bug fixes.
-> 
-> It would be good if you could ask for that, I'll look at rearranging
-> (and re-testing) the patches to achieve that.  Had I known that, I
-> could've done it before posting the latest set of patches.
+[ Issue originally reported as https://bugzilla.kernel.org/show_bug.cgi?id=110411 ]
 
-If you don't mind doing that, that would be great!
+Hi!
 
-So far the fixes, I have identified:
+I am working on a Dell Precision M4800 laptop with Gentoo Linux and Kernel 4.3.3:
 
-1. mmc: sdhci: command response CRC error handling
+--8<--
+Linux zephyr 4.3.3-gentoo #2 SMP Wed Jan 6 00:33:28 CET 2016 x86_64 Intel(R) Core(TM) i7-4910MQ CPU @ 2.90GHz GenuineIntel GNU/Linux
+--8<--
 
-Could have "fix" in the subject i.e. "fix command response CRC error handling".
+It has an O2 Micro SD/MMC card reader (1217:8520) which is supposed to be supported by sdhci-pci-o2micro:
 
-Could change to be dependent only on "mmc: sdhci: move initialisation of
-command error member".  Also I would treat end-bit and index errors the same
-as CRC errors i.e. probably end up with:
+--8<--
+11:00.0 SD Host controller: O2 Micro, Inc. SD/MMC Card Reader Controller (rev 01)
+11:00.0 0805: 1217:8520 (rev 01)
+--8<--
 
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index d622435d1bcc..6cae93a89eba 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -2325,8 +2325,23 @@ static void sdhci_cmd_irq(struct sdhci_host *host,
-u32 intmask, u32 *mask)
- 	if (intmask & SDHCI_INT_TIMEOUT)
- 		host->cmd->error = -ETIMEDOUT;
- 	else if (intmask & (SDHCI_INT_CRC | SDHCI_INT_END_BIT |
--			SDHCI_INT_INDEX))
-+			SDHCI_INT_INDEX)) {
- 		host->cmd->error = -EILSEQ;
-+		/*
-+		 * If this command initiates a data phase and a response
-+		 * CRC error is signalled, the card can start transferring
-+		 * data - the card may have received the command without
-+		 * error.  We must not terminate the mmc_request early.
-+		 *
-+		 * If the card did not receive the command or returned an
-+		 * error which prevented it sending data, the data phase
-+		 * will time out.
-+		 */
-+		if (host->cmd->data) {
-+			host->cmd = NULL;
-+			return;
-+		}
-+	}
+On bootup, the sdhci-pci driver fails to initialize the card reader with error -22:
+--8<--
+[    4.782054] sdhci: Secure Digital Host Controller Interface driver
+[    4.782057] sdhci: Copyright(c) Pierre Ossman
+[    4.782187] sdhci-pci 0000:11:00.0: SDHCI controller found [1217:8520] (rev 1)
+[    4.782328] sdhci-pci: probe of 0000:11:00.0 failed with error -22
+[    4.782376] sdhci-pltfm: SDHCI platform and OF driver helper
+--8<--
 
- 	if (host->cmd->error) {
- 		tasklet_schedule(&host->finish_tasklet);
+What's wrong?
 
-2. mmc: sdhci: avoid unnecessary mapping/unmapping of align buffer
+BIOS version is A15 from 09/29/2015.
 
-This looks like a bug fix because the mapping can be leaked on the error
-path i.e. similar problem to the one fixed by "mmc: sdhci: plug DMA mapping
-leak on error"
+UPDATE: The issue remains unchanged with kernel 4.3.5-gentoo.
 
-3. mmc: sdhci: plug DMA mapping leak on error
-
-It looks like the 2nd chunk could be taken as a separate fix without
-dependence on other patches.
-
-4. mmc: sdhci-pxav3: fix higher speed mode capabilities
-
-I can't test this so please indicate if you want it for stable.
-
-5. mmc: sdhci: further fix for DMA unmapping in sdhci_post_req()
-
-Could be made independent of other patches.
-
-6. mmc: sdhci: fix data timeout (part 1)
-mmc: sdhci: fix data timeout (part 2)
-
-Could be just 1 patch.
-
-
+Cheers,
+Wolfram
