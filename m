@@ -1,53 +1,71 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: pxamci: fix again read-only gpio detection polarity
-Date: Tue, 2 Feb 2016 14:11:12 +0100
-Message-ID: <CAPDyKFpAHpPVZ4TEEscESr2=wZCbi+ERxCG_MSawkeqqR02g3w@mail.gmail.com>
-References: <1454023286-25832-1-git-send-email-robert.jarzmik@free.fr>
+From: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: Re: [PATCH 0/3] mmc: sunxi: Support eMMC DDR modes
+Date: Tue, 2 Feb 2016 14:11:25 +0100
+Message-ID: <CAPDyKFrH80eb3dC=AuxXHBHhk-P7puGtModHEmfywRXskVmWQQ@mail.gmail.com>
+References: <1454088108-2332-1-git-send-email-wens@csie.org>
+Reply-To: ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <stable-owner@vger.kernel.org>
-In-Reply-To: <1454023286-25832-1-git-send-email-robert.jarzmik@free.fr>
-Sender: stable-owner@vger.kernel.org
-To: Robert Jarzmik <robert.jarzmik@free.fr>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "# 4.0+" <stable@vger.kernel.org>
+Return-path: <linux-sunxi+bncBDF57NG2XIHRB7WVYK2QKGQE4NIWTHA-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+In-Reply-To: <1454088108-2332-1-git-send-email-wens-jdAy2FN1RRM@public.gmane.org>
+List-Post: <https://groups.google.com/group/linux-sunxi/post>, <mailto:linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Help: <https://groups.google.com/support/>, <mailto:linux-sunxi+help-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Archive: <https://groups.google.com/group/linux-sunxi
+Sender: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
+List-Subscribe: <https://groups.google.com/group/linux-sunxi/subscribe>, <mailto:linux-sunxi+subscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Unsubscribe: <mailto:googlegroups-manage+1076902468213+unsubscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>,
+ <https://groups.google.com/group/linux-sunxi/subscribe>
+To: Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org>
+Cc: Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>, Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, linux-mmc <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
 
-On 29 January 2016 at 00:21, Robert Jarzmik <robert.jarzmik@free.fr> wrote:
-> The commit fixing the conversion of pxamci to slot-gpio API fixed the
-> inverted the logic of the read-only gpio. Unfortunately, the commit was
-> tested on a non-inverted gpio, and not on the inverted one. And the fix
-> did work partially, by luck.
+On 29 January 2016 at 18:21, Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org> wrote:
+> Hi everyone,
 >
-> This is the remaining missing part of the fix, trivial but still necessary.
+> This was "mmc: sunxi: Support vqmmc regulator and eMMC DDR modes". vqmmc
+> support and DT patches were merged even though it was an RFC series, to
+> my suprise.
 >
-> Fixes: Fixes: 26d49fe71953 ("mmc: pxamci: fix read-only gpio detection polarity")
-> Reported-by: Andrea Adami <andrea.adami@gmail.com>
-> Tested-by: Andrea Adami <andrea.adami@gmail.com>
-> Signed-off-by: Robert Jarzmik <robert.jarzmik@free.fr>
-> Cc: stable@vger.kernel.org
+> These are the remaining patches that add eMMC HS-DDR support to sunxi.
+>
+> Patch 1 adds timing delays for MMC_DDR52 mode.
+>
+> Patch 2 adds support for 8 bit eMMC DDR52 mode. Under this mode, the
+> controller must run at twice the card clock, and different timing delays
+> are needed.
+>
+> Patch 3 enables eMMC HS-DDR for sunxi-mmc.
+>
+>
+> Changes since RFC:
+>
+>   - Dropped patches that are merged
+>
+>   - Dropped "mmc: sunxi: Block signal voltage switching (CMD11)".
+>     According to Ulf, the mmc core won't send this command unless the UHS
+>     capabilities are set. We don't.
+>
+>   - Increased f_max to 52 MHz. Clock rate range for 50 MHz timing delay
+>     also increased to match. See patch 1.
+>
+>
+> Regards
+> ChenYu
+>
+>
+> Chen-Yu Tsai (3):
+>   mmc: sunxi: Support MMC_DDR52 timing modes
+>   mmc: sunxi: Support 8 bit eMMC DDR transfer modes
+>   mmc: sunxi: Enable eMMC HS-DDR (MMC_CAP_1_8V_DDR) support
+>
+>  drivers/mmc/host/sunxi-mmc.c | 42 ++++++++++++++++++++++++++++++++----------
+>  1 file changed, 32 insertions(+), 10 deletions(-)
+>
+> --
+> 2.7.0
+>
 
-Thanks, applied for fixes!
+Thanks, applied for next!
 
 Kind regards
 Uffe
-
-> ---
->  drivers/mmc/host/pxamci.c | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
->
-> diff --git a/drivers/mmc/host/pxamci.c b/drivers/mmc/host/pxamci.c
-> index ce08896b9d69..28a057fae0a1 100644
-> --- a/drivers/mmc/host/pxamci.c
-> +++ b/drivers/mmc/host/pxamci.c
-> @@ -804,7 +804,7 @@ static int pxamci_probe(struct platform_device *pdev)
->                 dev_err(&pdev->dev, "Failed requesting gpio_ro %d\n", gpio_ro);
->                 goto out;
->         } else {
-> -               mmc->caps |= host->pdata->gpio_card_ro_invert ?
-> +               mmc->caps2 |= host->pdata->gpio_card_ro_invert ?
->                         0 : MMC_CAP2_RO_ACTIVE_HIGH;
->         }
->
-> --
-> 2.1.4
->
