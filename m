@@ -1,71 +1,83 @@
-From: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH 0/3] mmc: sunxi: Support eMMC DDR modes
-Date: Tue, 2 Feb 2016 14:11:25 +0100
-Message-ID: <CAPDyKFrH80eb3dC=AuxXHBHhk-P7puGtModHEmfywRXskVmWQQ@mail.gmail.com>
-References: <1454088108-2332-1-git-send-email-wens@csie.org>
-Reply-To: ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH] mmc: core: use the defined function to check whether card
+ is removable
+Date: Tue, 2 Feb 2016 14:11:17 +0100
+Message-ID: <CAPDyKFpgc_9t+fKY-=ODENR9B=_S50EnB9tc9x7+7Adfm=rX6g@mail.gmail.com>
+References: <1454025177-21233-1-git-send-email-jh80.chung@samsung.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-sunxi+bncBDF57NG2XIHRB7WVYK2QKGQE4NIWTHA-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-In-Reply-To: <1454088108-2332-1-git-send-email-wens-jdAy2FN1RRM@public.gmane.org>
-List-Post: <https://groups.google.com/group/linux-sunxi/post>, <mailto:linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Help: <https://groups.google.com/support/>, <mailto:linux-sunxi+help-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Archive: <https://groups.google.com/group/linux-sunxi
-Sender: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
-List-Subscribe: <https://groups.google.com/group/linux-sunxi/subscribe>, <mailto:linux-sunxi+subscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Unsubscribe: <mailto:googlegroups-manage+1076902468213+unsubscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>,
- <https://groups.google.com/group/linux-sunxi/subscribe>
-To: Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org>
-Cc: Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>, Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, linux-mmc <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-yk0-f174.google.com ([209.85.160.174]:32935 "EHLO
+	mail-yk0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755109AbcBBNLR (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 2 Feb 2016 08:11:17 -0500
+Received: by mail-yk0-f174.google.com with SMTP id z13so81588407ykd.0
+        for <linux-mmc@vger.kernel.org>; Tue, 02 Feb 2016 05:11:17 -0800 (PST)
+In-Reply-To: <1454025177-21233-1-git-send-email-jh80.chung@samsung.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Jaehoon Chung <jh80.chung@samsung.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, Shawn Lin <shawn.lin@rock-chips.com>
 
-On 29 January 2016 at 18:21, Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org> wrote:
-> Hi everyone,
+On 29 January 2016 at 00:52, Jaehoon Chung <jh80.chung@samsung.com> wrote:
+> In linux/mmc/host.h, mmc_card_is_removable() is already defined.
+> There is no reason that it doesn't use.
 >
-> This was "mmc: sunxi: Support vqmmc regulator and eMMC DDR modes". vqmmc
-> support and DT patches were merged even though it was an RFC series, to
-> my suprise.
->
-> These are the remaining patches that add eMMC HS-DDR support to sunxi.
->
-> Patch 1 adds timing delays for MMC_DDR52 mode.
->
-> Patch 2 adds support for 8 bit eMMC DDR52 mode. Under this mode, the
-> controller must run at twice the card clock, and different timing delays
-> are needed.
->
-> Patch 3 enables eMMC HS-DDR for sunxi-mmc.
->
->
-> Changes since RFC:
->
->   - Dropped patches that are merged
->
->   - Dropped "mmc: sunxi: Block signal voltage switching (CMD11)".
->     According to Ulf, the mmc core won't send this command unless the UHS
->     capabilities are set. We don't.
->
->   - Increased f_max to 52 MHz. Clock rate range for 50 MHz timing delay
->     also increased to match. See patch 1.
->
->
-> Regards
-> ChenYu
->
->
-> Chen-Yu Tsai (3):
->   mmc: sunxi: Support MMC_DDR52 timing modes
->   mmc: sunxi: Support 8 bit eMMC DDR transfer modes
->   mmc: sunxi: Enable eMMC HS-DDR (MMC_CAP_1_8V_DDR) support
->
->  drivers/mmc/host/sunxi-mmc.c | 42 ++++++++++++++++++++++++++++++++----------
->  1 file changed, 32 insertions(+), 10 deletions(-)
->
-> --
-> 2.7.0
->
+> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
 
 Thanks, applied for next!
 
+Regarding the host drivers, as pointed out by Shawn. Let's fix them in
+one separate patch.
+
 Kind regards
 Uffe
+
+> ---
+>  drivers/mmc/core/core.c | 9 ++++-----
+>  1 file changed, 4 insertions(+), 5 deletions(-)
+>
+> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+> index f95d41f..9da9b60 100644
+> --- a/drivers/mmc/core/core.c
+> +++ b/drivers/mmc/core/core.c
+> @@ -2532,7 +2532,7 @@ int mmc_detect_card_removed(struct mmc_host *host)
+>         if (!card)
+>                 return 1;
+>
+> -       if (host->caps & MMC_CAP_NONREMOVABLE)
+> +       if (!mmc_card_is_removable(host))
+>                 return 0;
+>
+>         ret = mmc_card_removed(card);
+> @@ -2570,7 +2570,7 @@ void mmc_rescan(struct work_struct *work)
+>                 return;
+>
+>         /* If there is a non-removable card registered, only scan once */
+> -       if ((host->caps & MMC_CAP_NONREMOVABLE) && host->rescan_entered)
+> +       if (!mmc_card_is_removable(host) && host->rescan_entered)
+>                 return;
+>         host->rescan_entered = 1;
+>
+> @@ -2587,8 +2587,7 @@ void mmc_rescan(struct work_struct *work)
+>          * if there is a _removable_ card registered, check whether it is
+>          * still present
+>          */
+> -       if (host->bus_ops && !host->bus_dead
+> -           && !(host->caps & MMC_CAP_NONREMOVABLE))
+> +       if (host->bus_ops && !host->bus_dead && mmc_card_is_removable(host))
+>                 host->bus_ops->detect(host);
+>
+>         host->detect_change = 0;
+> @@ -2613,7 +2612,7 @@ void mmc_rescan(struct work_struct *work)
+>         mmc_bus_put(host);
+>
+>         mmc_claim_host(host);
+> -       if (!(host->caps & MMC_CAP_NONREMOVABLE) && host->ops->get_cd &&
+> +       if (mmc_card_is_removable(host) && host->ops->get_cd &&
+>                         host->ops->get_cd(host) == 0) {
+>                 mmc_power_off(host);
+>                 mmc_release_host(host);
+> --
+> 1.9.1
+>
