@@ -1,99 +1,70 @@
-From: Mason <slash.tmp@free.fr>
-Subject: Re: mmc0: Invalid maximum block size, assuming 512 bytes
-Date: Tue, 2 Feb 2016 11:12:22 +0100
-Message-ID: <56B08106.9090708@free.fr>
-References: <569E575A.5070401@free.fr> <569EE03F.9090008@rock-chips.com>
- <56A0F2A1.3060805@free.fr> <56A18EFE.6000900@rock-chips.com>
- <56A1D791.9010803@free.fr> <56AFCEE0.1090005@free.fr>
- <56B06FD0.6000109@intel.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH v4] mmc: meson: Add driver for the SD/MMC host found on
+ Amlogic MesonX SoCs
+Date: Tue, 2 Feb 2016 12:21:32 +0100
+Message-ID: <CAPDyKFpX+_fHvv_bJUKZmSufKKnuONC582E7u3b20a+Rbbggng@mail.gmail.com>
+References: <1448988109-32630-1-git-send-email-carlo@caione.org>
+	<CAPDyKFp=buvJ8Li3XC8XSUAUO7BsE+U6vEQH2xTrgcHAkdG8bQ@mail.gmail.com>
+	<CAOQ7t2aJAPWd3Xmvu7n0EWL-KC8ZriM3KryfsYEh556uXhuR+g@mail.gmail.com>
+	<CAPDyKFpcsKihuOiF5=RwoWrF0Jf7hRsXVSU5uV8qZf1mUsa-iQ@mail.gmail.com>
+	<CAOQ7t2afXxStCsj=M-FX7eMep1gLt4jkyXDiLas_SQ1UwHc0=Q@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp2-g21.free.fr ([212.27.42.2]:58706 "EHLO smtp2-g21.free.fr"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754442AbcBBKMg (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 2 Feb 2016 05:12:36 -0500
-In-Reply-To: <56B06FD0.6000109@intel.com>
+Received: from mail-yk0-f173.google.com ([209.85.160.173]:32875 "EHLO
+	mail-yk0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754458AbcBBLVd (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 2 Feb 2016 06:21:33 -0500
+Received: by mail-yk0-f173.google.com with SMTP id z13so79060904ykd.0
+        for <linux-mmc@vger.kernel.org>; Tue, 02 Feb 2016 03:21:32 -0800 (PST)
+In-Reply-To: <CAOQ7t2afXxStCsj=M-FX7eMep1gLt4jkyXDiLas_SQ1UwHc0=Q@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>, linux-mmc <linux-mmc@vger.kernel.org>
-Cc: Shawn Lin <shawn.lin@rock-chips.com>, Michal Simek <michal.simek@xilinx.com>, Soren Brinkmann <soren.brinkmann@xilinx.com>, Suman Tripathi <stripathi@apm.com>, Arnd Bergmann <arnd@arndb.de>, Ulf Hansson <ulf.hansson@linaro.org>, Sebastian Frias <sf84@laposte.net>, Anton Vorontsov <anton@enomsg.org>, Pierre Ossman <pierre@ossman.eu>
+To: Carlo Caione <carlo@caione.org>
+Cc: "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, linux-mmc <linux-mmc@vger.kernel.org>, linux-meson@googlegroups.com, linux@endlessm.com
 
-On 02/02/2016 09:58, Adrian Hunter wrote:
-> On 01/02/16 23:32, Mason wrote:
->> On 22/01/2016 08:17, Mason wrote:
+On 1 February 2016 at 23:05, Carlo Caione <carlo@caione.org> wrote:
+> On Tue, Dec 8, 2015 at 9:35 PM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+>
+> Hi Ulf,
+> (old thread, I know)
+>
+>>> I have actually a problem and a question related to this value. On the
+>>> boards I'm currently using to test this driver I have no CD GPIO. In
+>>> this case do I have to specify the MMC as "non-removable"? Also if I
 >>
->>> On 22/01/2016 03:07, Shawn Lin wrote:
->>>
->>>> On 2016/1/21 23:00, Mason wrote:
->>>>
->>>>> So that means I have to write code in
->>>>> drivers/mmc/host/sdhci-of-arasan.c correct?
->>>>
->>>> It depends. If you think 512 block size if okay for you, leave it alone.
->>>> Otherwise, add it in drivers/mmc/host/sdhci-of-arasan.c :)
->>>
->>> When I measured the read/write throughput to an attached
->>> SD card, I got around 16 MB/s, and I thought raising the
->>> block size might help with throughput?
->>>
->>> I'll test and report back.
+>> "non-removable" is intended to be used for eMMC or other cards
+>> (SD/SDIO) that is not possible to remove/insert at runtime.
 >>
->> Haven't had time to test yet, but I wanted to ask experienced
->> folks what to expect when raising the block size from 512 to
->> 2048 bytes?
-> 
-> mmc block driver sets block size to 512.
-> 
-> What you are looking at is maximum block size.  SDIO uses bigger block
-> sizes, so it is useful for that.
+>>> try to change an SD card at runtime I have to wait 3 times the timeout
+>>> before being able to do it successfully.
+>>
+>> I guess you are using the "broken-cd" binding, which will enable
+>> MMC_CAP_NEEDS_POLL and thus the mmc core will poll to detect cards
+>> being inserted or removed.
+>
+> I still fail to see what the correct behaviour should be.
+> Using the v4 of this driver with a "broken-cd" binding and a timeout
+> of 10s my SD card takes 30s to be identified as removed after I take
+> it out from the SD slot.
+> Also, if I take it out and insert it again, I still have to wait 30s
+> to be able to access it again. Is this a limitation / bug of my driver
+> or is this the expected behaviour when we do not have a dedicated GPIO
+> for card detection?
 
-You're right. I was looking at this block of code:
+It's *not* an expected a behaviour.
 
-	/*
-	 * Maximum block size. This varies from controller to controller and
-	 * is specified in the capabilities register.
-	 */
-	if (host->quirks & SDHCI_QUIRK_FORCE_BLK_SZ_2048) {
-		mmc->max_blk_size = 2;
-	} else {
-		mmc->max_blk_size = (caps[0] & SDHCI_MAX_BLOCK_MASK) >>
-				SDHCI_MAX_BLOCK_SHIFT;
-		if (mmc->max_blk_size >= 3) {
-			pr_warn("%s: Invalid maximum block size, assuming 512 bytes\n",
-				mmc_hostname(mmc));
-			mmc->max_blk_size = 0;
-		}
-	}
+Using MMC_CAP_NEEDS_POLL, means that the mmc core will send CMD13
+commands in a polling manner to find out whether a card has been
+removed.
 
-	mmc->max_blk_size = 512 << mmc->max_blk_size;
+It seems like when the card is removed, the host driver doesn't get an
+IRQ which indicates a command timeout. Instead it waits for the 10 s
+timeout to expire.
 
+My question is then; why don't the driver get an IRQ for the command
+timeout? Is that because of non-correct setup of the IRQ masks or
+because the controller HW doesn't support this?
 
-As Shawn pointed out, this was updated by commit 0633f654241
-
-Author: Anton Vorontsov
-Date:   Tue Mar 17 00:14:03 2009 +0300
-
-    sdhci: Add quirk for forcing maximum block size to 2048 bytes
-    
-    FSL eSDHC controllers can support maximum block size up to 4096 bytes,
-    the MBL (Maximum Block Length) field in the capabilities register
-    extended by one bit, and is set to 0x3.
-    
-    But the SDHCI core doesn't support blocks of 4096 bytes, and thus
-    forces blksz to the lowest value -- 512 bytes. With this patch we can
-    pin up the blksz to the maximum supported block size, i.e. 2048 bytes.
-
-
-But I'm wondering if the 2048-byte limitation in SDHCI core is
-still present?
-
-I see some drivers apparently setting it to a higher value:
-
-host/atmel-mci.c:	mmc->max_blk_size = 32768;
-host/dw_mmc.c:		mmc->max_blk_size = 65536;
-host/wbsd.c:		mmc->max_blk_size = 4087;
-
-Regards.
-
+Kind regards
+Uffe
