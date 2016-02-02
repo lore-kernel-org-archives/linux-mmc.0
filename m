@@ -1,56 +1,81 @@
-From: Carlo Caione <carlo@caione.org>
-Subject: Re: [PATCH v4] mmc: meson: Add driver for the SD/MMC host found on
- Amlogic MesonX SoCs
-Date: Mon, 1 Feb 2016 23:05:31 +0100
-Message-ID: <CAOQ7t2afXxStCsj=M-FX7eMep1gLt4jkyXDiLas_SQ1UwHc0=Q@mail.gmail.com>
-References: <1448988109-32630-1-git-send-email-carlo@caione.org>
-	<CAPDyKFp=buvJ8Li3XC8XSUAUO7BsE+U6vEQH2xTrgcHAkdG8bQ@mail.gmail.com>
-	<CAOQ7t2aJAPWd3Xmvu7n0EWL-KC8ZriM3KryfsYEh556uXhuR+g@mail.gmail.com>
-	<CAPDyKFpcsKihuOiF5=RwoWrF0Jf7hRsXVSU5uV8qZf1mUsa-iQ@mail.gmail.com>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: Re: [PATCH] mmc: dw_mmc: fix num_slots setting
+Date: Tue, 02 Feb 2016 13:42:38 +0900
+Message-ID: <56B033BE.5040102@samsung.com>
+References: <1453448584-9854-1-git-send-email-shawn.lin@rock-chips.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wm0-f67.google.com ([74.125.82.67]:34626 "EHLO
-	mail-wm0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753524AbcBAWFc (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 1 Feb 2016 17:05:32 -0500
-Received: by mail-wm0-f67.google.com with SMTP id p63so11067632wmp.1
-        for <linux-mmc@vger.kernel.org>; Mon, 01 Feb 2016 14:05:32 -0800 (PST)
-In-Reply-To: <CAPDyKFpcsKihuOiF5=RwoWrF0Jf7hRsXVSU5uV8qZf1mUsa-iQ@mail.gmail.com>
+Received: from mailout2.samsung.com ([203.254.224.25]:54206 "EHLO
+	mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752111AbcBBEmk (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 1 Feb 2016 23:42:40 -0500
+In-reply-to: <1453448584-9854-1-git-send-email-shawn.lin@rock-chips.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, linux-mmc <linux-mmc@vger.kernel.org>, linux-meson@googlegroups.com, linux@endlessm.com
+To: Shawn Lin <shawn.lin@rock-chips.com>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 
-On Tue, Dec 8, 2015 at 9:35 PM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+Hi, Shawn.
 
-Hi Ulf,
-(old thread, I know)
+On 01/22/2016 04:43 PM, Shawn Lin wrote:
+> This patch make num_slots to 1 if pdata->num_slot is not
+> defined. Meanwhile, we need to make sure num_slots should
+> not larger that the supported slots
+> 
+> Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
+> ---
+> 
+>  drivers/mmc/host/dw_mmc.c | 16 +++++++++-------
+>  1 file changed, 9 insertions(+), 7 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+> index 7128351..065a8f5 100644
+> --- a/drivers/mmc/host/dw_mmc.c
+> +++ b/drivers/mmc/host/dw_mmc.c
+> @@ -2949,12 +2949,6 @@ int dw_mci_probe(struct dw_mci *host)
+>  		}
+>  	}
+>  
+> -	if (host->pdata->num_slots < 1) {
+> -		dev_err(host->dev,
+> -			"Platform data must supply num_slots.\n");
+> -		return -ENODEV;
+> -	}
+> -
+>  	host->biu_clk = devm_clk_get(host->dev, "biu");
+>  	if (IS_ERR(host->biu_clk)) {
+>  		dev_dbg(host->dev, "biu clock not available\n");
+> @@ -3111,7 +3105,15 @@ int dw_mci_probe(struct dw_mci *host)
+>  	if (host->pdata->num_slots)
+>  		host->num_slots = host->pdata->num_slots;
+>  	else
+> -		host->num_slots = SDMMC_GET_SLOT_NUM(mci_readl(host, HCON));
+> +		host->num_slots = 1;
 
->> I have actually a problem and a question related to this value. On the
->> boards I'm currently using to test this driver I have no CD GPIO. In
->> this case do I have to specify the MMC as "non-removable"? Also if I
->
-> "non-removable" is intended to be used for eMMC or other cards
-> (SD/SDIO) that is not possible to remove/insert at runtime.
->
->> try to change an SD card at runtime I have to wait 3 times the timeout
->> before being able to do it successfully.
->
-> I guess you are using the "broken-cd" binding, which will enable
-> MMC_CAP_NEEDS_POLL and thus the mmc core will poll to detect cards
-> being inserted or removed.
+If host->nums_slots is set to 1, it assumes that there is one slot.
+Then the code in dw_mci_parse_dt() can be removed 
 
-I still fail to see what the correct behaviour should be.
-Using the v4 of this driver with a "broken-cd" binding and a timeout
-of 10s my SD card takes 30s to be identified as removed after I take
-it out from the SD slot.
-Also, if I take it out and insert it again, I still have to wait 30s
-to be able to access it again. Is this a limitation / bug of my driver
-or is this the expected behaviour when we do not have a dedicated GPIO
-for card detection?
+                dev_info(dev,
+                         "num-slots property not found, assuming 1 slot is available\n");
+                pdata->num_slots = 1;
 
-Cheers,
 
--- 
-Carlo Caione
+Best Regards,
+Jaehoon Chung
+            
+
+> +
+> +	if (host->num_slots < 1 ||
+> +	    host->num_slots > SDMMC_GET_SLOT_NUM(mci_readl(host, HCON))) {
+> +		dev_err(host->dev,
+> +			"Platform data must supply correct num_slots.\n");
+> +		ret = -ENODEV;
+> +		goto err_clk_ciu;
+> +	}
+>  
+>  	/*
+>  	 * Enable interrupts for command done, data over, data empty,
+> 
+
