@@ -1,54 +1,61 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v2] mmc: sdhci-of-at91: fix pm runtime unbalanced issue in
- error path
-Date: Tue, 2 Feb 2016 14:11:34 +0100
-Message-ID: <CAPDyKFoMo5q_93Rofh+_HAcg+vhGqVM7WeVLbSTCxRLwbgEpqA@mail.gmail.com>
-References: <1454414106-4441-1-git-send-email-jszhang@marvell.com>
+From: Wolfram Sang <wsa@the-dreams.de>
+Subject: Re: [PATCH 0/9] mmc: sdhi: some refactoring and adding basic r8a7795
+ support
+Date: Tue, 2 Feb 2016 15:06:31 +0100
+Message-ID: <20160202140631.GA2887@tetsubishi>
+References: <1453749316-1848-1-git-send-email-wsa@the-dreams.de>
+ <CAPDyKFqQ8qMRW_ztMw4giJ062jY7Z1oz_VmOAVX71TAQm3QJAg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1454414106-4441-1-git-send-email-jszhang@marvell.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Jisheng Zhang <jszhang@marvell.com>
-Cc: Ludovic Desroches <ludovic.desroches@atmel.com>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="UugvWAfsgieZRqgk"
+Return-path: <linux-sh-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <CAPDyKFqQ8qMRW_ztMw4giJ062jY7Z1oz_VmOAVX71TAQm3QJAg@mail.gmail.com>
+Sender: linux-sh-owner@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, linux-renesas-soc@vger.kernel.org, Linux-sh list <linux-sh@vger.kernel.org>, Kuninori Morimoto <kuninori.morimoto.gx@gmail.com>, Magnus Damm <magnus.damm@gmail.com>, Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>, Dirk Behme <dirk.behme@gmail.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On 2 February 2016 at 12:55, Jisheng Zhang <jszhang@marvell.com> wrote:
-> The device power usage counter is increased by pm_runtime_get_noresume
-> but isn't decreased in err_add_host error path.
->
-> Fix this issue by calling pm_runtime_put_noidle() in the error path to
-> restore the device's power usage counter.
->
-> Signed-off-by: Jisheng Zhang <jszhang@marvell.com>
-> Acked-by: Ludovic Desroches <ludovic.desroches@atmel.com>
-> Fixes: f5f17813ae9b ("mmc: sdhci-of-at91: add PM support)
 
-Thanks, applied for fixes!
+--UugvWAfsgieZRqgk
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 
-Kind regards
-Uffe
 
-> ---
-> Since v1:
->  - Add Ludovic ack
->  - address Ulf's comment
->
->  drivers/mmc/host/sdhci-of-at91.c | 1 +
->  1 file changed, 1 insertion(+)
->
-> diff --git a/drivers/mmc/host/sdhci-of-at91.c b/drivers/mmc/host/sdhci-of-at91.c
-> index 7db7163..35c02fc 100644
-> --- a/drivers/mmc/host/sdhci-of-at91.c
-> +++ b/drivers/mmc/host/sdhci-of-at91.c
-> @@ -211,6 +211,7 @@ static int sdhci_at91_probe(struct platform_device *pdev)
->  pm_runtime_disable:
->         pm_runtime_disable(&pdev->dev);
->         pm_runtime_set_suspended(&pdev->dev);
-> +       pm_runtime_put_noidle(&pdev->dev);
->  clocks_disable_unprepare:
->         clk_disable_unprepare(priv->gck);
->         clk_disable_unprepare(priv->mainck);
-> --
-> 1.9.1
->
+> Although, I couldn't apply patch1, could you please send a new version
+> rebased onto my next branch.
+
+I rebased to your tree (especially patch 1, rest stayed the same) and
+pushed patches 1-8 here:
+
+git://git.kernel.org/pub/scm/linux/kernel/git/wsa/linux.git mmc/sdhi-refactor
+
+Is pulling okay, or do you want me to resend?
+
+Thanks,
+
+   Wolfram
+
+
+--UugvWAfsgieZRqgk
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1
+
+iQIcBAEBAgAGBQJWsLfnAAoJEBQN5MwUoCm2sLEQAJ2sa6r1CYbx5ooGXskM5b5W
+e+qXdMLOoXn77wspQLR77w0MZXpwucHdf8bQfsPaRmqYZirU0QltZZ/UKl2HseWa
+N0DW3yijQQjMb2HiFg1/koM1T/RONmYWAZjMpXF0X+KFro/OIoYaBcwwnW3UjB6F
+qCUDM794g3e9bIQjrJmjEl1dSJGlTaDUJetKu1hWunD4bQc0AZb/OMoWm47nOl5r
+pUyGY+LSv02b+wW0Ol2QolMAne1X8CBpCcB174P3Vc0+KkXtSHuCukFp3XDw5NKp
+MPBTKS92wlFWM01NIzu/4AmorN+13+c4Iw+jMGc6K+yvqZS+1e78GxajwXkxMyRQ
+dZfGJdZhD7Dzsp2WgvZYeLzB9CbH0gzNdm1SWnijJ/FgmgXOTtozcvJOqLh3A6fD
+eEk30ApSDj2gJHvMOBPGAQqbGCdtX4HnPalxZQS3/+a0VBJLbbfhopvfZgXaPAHp
+qQUiA5Gj89ISES3c/SfRvrkVkb5NI51Hdt5E3kBQbSo0BzRHCRLzcDnuGZwKPPvs
+Jp9dWq/ywl4cL9t/a4Pa03IYwFqTNK//yDaGbbu9SaWOs8eTUCjUdYGW3Vw5m5CN
+/OWMBvelAYucN0nkgOlf4gqj9v0oUlVW+25OwUl2xi179r3YoedU1MB/XsebTPqJ
+Vr6WQLNf6TsQKnz0gH3H
+=p7+q
+-----END PGP SIGNATURE-----
+
+--UugvWAfsgieZRqgk--
