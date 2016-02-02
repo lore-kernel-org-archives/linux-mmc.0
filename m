@@ -1,83 +1,73 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: core: use the defined function to check whether card
- is removable
-Date: Tue, 2 Feb 2016 14:11:17 +0100
-Message-ID: <CAPDyKFpgc_9t+fKY-=ODENR9B=_S50EnB9tc9x7+7Adfm=rX6g@mail.gmail.com>
-References: <1454025177-21233-1-git-send-email-jh80.chung@samsung.com>
+Subject: Re: [PATCH] mmc: sanitize 'bus width' in debug output
+Date: Tue, 2 Feb 2016 14:11:21 +0100
+Message-ID: <CAPDyKFp9dtUbpzdUw4a-JtJm0y3JdTWLSV=jA4CUc3-9Ct2C0Q@mail.gmail.com>
+References: <1454056070-6164-1-git-send-email-wsa@the-dreams.de>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-yk0-f174.google.com ([209.85.160.174]:32935 "EHLO
-	mail-yk0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755109AbcBBNLR (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 2 Feb 2016 08:11:17 -0500
-Received: by mail-yk0-f174.google.com with SMTP id z13so81588407ykd.0
-        for <linux-mmc@vger.kernel.org>; Tue, 02 Feb 2016 05:11:17 -0800 (PST)
-In-Reply-To: <1454025177-21233-1-git-send-email-jh80.chung@samsung.com>
+Received: from mail-yk0-f176.google.com ([209.85.160.176]:32991 "EHLO
+	mail-yk0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755080AbcBBNLW (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 2 Feb 2016 08:11:22 -0500
+Received: by mail-yk0-f176.google.com with SMTP id z13so81590422ykd.0
+        for <linux-mmc@vger.kernel.org>; Tue, 02 Feb 2016 05:11:21 -0800 (PST)
+In-Reply-To: <1454056070-6164-1-git-send-email-wsa@the-dreams.de>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, Shawn Lin <shawn.lin@rock-chips.com>
+To: Wolfram Sang <wsa@the-dreams.de>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, linux-renesas-soc@vger.kernel.org, Dirk Behme <dirk.behme@gmail.com>, Kuninori Morimoto <kuninori.morimoto.gx@gmail.com>
 
-On 29 January 2016 at 00:52, Jaehoon Chung <jh80.chung@samsung.com> wrote:
-> In linux/mmc/host.h, mmc_card_is_removable() is already defined.
-> There is no reason that it doesn't use.
+On 29 January 2016 at 09:27, Wolfram Sang <wsa@the-dreams.de> wrote:
+> From: Wolfram Sang <wsa+renesas@sang-engineering.com>
 >
-> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+> The bus width is sometimes the actual bus width, and sometimes indices
+> to different arrays encoding the bus width. In my debugging case "2"
+> could mean 8-bit as well as 4-bit, which was extremly confusing. Let's
+> use the human-readable actual bus width in all places.
+>
+> Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
 
 Thanks, applied for next!
-
-Regarding the host drivers, as pointed out by Shawn. Let's fix them in
-one separate patch.
 
 Kind regards
 Uffe
 
 > ---
->  drivers/mmc/core/core.c | 9 ++++-----
->  1 file changed, 4 insertions(+), 5 deletions(-)
+>  drivers/mmc/core/core.c | 2 +-
+>  drivers/mmc/core/mmc.c  | 2 +-
+>  2 files changed, 2 insertions(+), 2 deletions(-)
 >
 > diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-> index f95d41f..9da9b60 100644
+> index f95d41ffc766e5..746de248defced 100644
 > --- a/drivers/mmc/core/core.c
 > +++ b/drivers/mmc/core/core.c
-> @@ -2532,7 +2532,7 @@ int mmc_detect_card_removed(struct mmc_host *host)
->         if (!card)
->                 return 1;
+> @@ -1033,7 +1033,7 @@ static inline void mmc_set_ios(struct mmc_host *host)
+>                 "width %u timing %u\n",
+>                  mmc_hostname(host), ios->clock, ios->bus_mode,
+>                  ios->power_mode, ios->chip_select, ios->vdd,
+> -                ios->bus_width, ios->timing);
+> +                1 << ios->bus_width, ios->timing);
 >
-> -       if (host->caps & MMC_CAP_NONREMOVABLE)
-> +       if (!mmc_card_is_removable(host))
->                 return 0;
+>         host->ops->set_ios(host, ios);
+>  }
+> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+> index 07a135bc893057..4dbe3df8024b2c 100644
+> --- a/drivers/mmc/core/mmc.c
+> +++ b/drivers/mmc/core/mmc.c
+> @@ -945,7 +945,7 @@ static int mmc_select_bus_width(struct mmc_card *card)
+>                         break;
+>                 } else {
+>                         pr_warn("%s: switch to bus width %d failed\n",
+> -                               mmc_hostname(host), ext_csd_bits[idx]);
+> +                               mmc_hostname(host), 1 << bus_width);
+>                 }
+>         }
 >
->         ret = mmc_card_removed(card);
-> @@ -2570,7 +2570,7 @@ void mmc_rescan(struct work_struct *work)
->                 return;
->
->         /* If there is a non-removable card registered, only scan once */
-> -       if ((host->caps & MMC_CAP_NONREMOVABLE) && host->rescan_entered)
-> +       if (!mmc_card_is_removable(host) && host->rescan_entered)
->                 return;
->         host->rescan_entered = 1;
->
-> @@ -2587,8 +2587,7 @@ void mmc_rescan(struct work_struct *work)
->          * if there is a _removable_ card registered, check whether it is
->          * still present
->          */
-> -       if (host->bus_ops && !host->bus_dead
-> -           && !(host->caps & MMC_CAP_NONREMOVABLE))
-> +       if (host->bus_ops && !host->bus_dead && mmc_card_is_removable(host))
->                 host->bus_ops->detect(host);
->
->         host->detect_change = 0;
-> @@ -2613,7 +2612,7 @@ void mmc_rescan(struct work_struct *work)
->         mmc_bus_put(host);
->
->         mmc_claim_host(host);
-> -       if (!(host->caps & MMC_CAP_NONREMOVABLE) && host->ops->get_cd &&
-> +       if (mmc_card_is_removable(host) && host->ops->get_cd &&
->                         host->ops->get_cd(host) == 0) {
->                 mmc_power_off(host);
->                 mmc_release_host(host);
 > --
-> 1.9.1
+> 2.6.2
 >
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
