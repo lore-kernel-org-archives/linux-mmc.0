@@ -1,50 +1,64 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: mmc0: Invalid maximum block size, assuming 512 bytes
-Date: Tue, 2 Feb 2016 10:58:56 +0200
-Message-ID: <56B06FD0.6000109@intel.com>
-References: <569E575A.5070401@free.fr> <569EE03F.9090008@rock-chips.com>
- <56A0F2A1.3060805@free.fr> <56A18EFE.6000900@rock-chips.com>
- <56A1D791.9010803@free.fr> <56AFCEE0.1090005@free.fr>
+Subject: Re: sdhci-pci: probe of 0000:11:00.0 failed with error -22
+Date: Tue, 2 Feb 2016 11:18:35 +0200
+Message-ID: <56B0746B.9050902@intel.com>
+References: <S932267AbcBANb3/20160201133129Z+1138@vger.kernel.org>
+ <20160201141944.GT13086@bla.fasel.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga09.intel.com ([134.134.136.24]:45380 "EHLO mga09.intel.com"
+Received: from mga02.intel.com ([134.134.136.20]:45884 "EHLO mga02.intel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753962AbcBBJDJ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 2 Feb 2016 04:03:09 -0500
-In-Reply-To: <56AFCEE0.1090005@free.fr>
+	id S1754243AbcBBJXL (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 2 Feb 2016 04:23:11 -0500
+In-Reply-To: <20160201141944.GT13086@bla.fasel.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Mason <slash.tmp@free.fr>, linux-mmc <linux-mmc@vger.kernel.org>
-Cc: Shawn Lin <shawn.lin@rock-chips.com>, Michal Simek <michal.simek@xilinx.com>, Soren Brinkmann <soren.brinkmann@xilinx.com>, Suman Tripathi <stripathi@apm.com>, Arnd Bergmann <arnd@arndb.de>, Ulf Hansson <ulf.hansson@linaro.org>, Sebastian Frias <sf84@laposte.net>
+To: peter.guo@bayhubtech.com, adam.lee@canonical.com
+Cc: Wolfram Schlich <lists@wolfram.schlich.org>, linux-mmc@vger.kernel.org
 
-On 01/02/16 23:32, Mason wrote:
-> On 22/01/2016 08:17, Mason wrote:
++ Peter Guo and Adam Lee
+
+
+On 01/02/16 16:19, Wolfram Schlich wrote:
+> [ Issue originally reported as https://bugzilla.kernel.org/show_bug.cgi?id=110411 ]
 > 
->> On 22/01/2016 03:07, Shawn Lin wrote:
->>
->>> On 2016/1/21 23:00, Mason wrote:
->>>
->>>> So that means I have to write code in
->>>> drivers/mmc/host/sdhci-of-arasan.c correct?
->>>
->>> It depends. If you think 512 block size if okay for you, leave it alone.
->>> Otherwise, add it in drivers/mmc/host/sdhci-of-arasan.c :)
->>
->> When I measured the read/write throughput to an attached
->> SD card, I got around 16 MB/s, and I thought raising the
->> block size might help with throughput?
->>
->> I'll test and report back.
+> Hi!
 > 
-> Haven't had time to test yet, but I wanted to ask experienced
-> folks what to expect when raising the block size from 512 to
-> 2048 bytes?
-
-mmc block driver sets block size to 512.
-
-What you are looking at is maximum block size.  SDIO uses bigger block
-sizes, so it is useful for that.
-
+> I am working on a Dell Precision M4800 laptop with Gentoo Linux and Kernel 4.3.3:
+> 
+> --8<--
+> Linux zephyr 4.3.3-gentoo #2 SMP Wed Jan 6 00:33:28 CET 2016 x86_64 Intel(R) Core(TM) i7-4910MQ CPU @ 2.90GHz GenuineIntel GNU/Linux
+> --8<--
+> 
+> It has an O2 Micro SD/MMC card reader (1217:8520) which is supposed to be supported by sdhci-pci-o2micro:
+> 
+> --8<--
+> 11:00.0 SD Host controller: O2 Micro, Inc. SD/MMC Card Reader Controller (rev 01)
+> 11:00.0 0805: 1217:8520 (rev 01)
+> --8<--
+> 
+> On bootup, the sdhci-pci driver fails to initialize the card reader with error -22:
+> --8<--
+> [    4.782054] sdhci: Secure Digital Host Controller Interface driver
+> [    4.782057] sdhci: Copyright(c) Pierre Ossman
+> [    4.782187] sdhci-pci 0000:11:00.0: SDHCI controller found [1217:8520] (rev 1)
+> [    4.782328] sdhci-pci: probe of 0000:11:00.0 failed with error -22
+> [    4.782376] sdhci-pltfm: SDHCI platform and OF driver helper
+> --8<--
+> 
+> What's wrong?
+> 
+> BIOS version is A15 from 09/29/2015.
+> 
+> UPDATE: The issue remains unchanged with kernel 4.3.5-gentoo.
+> 
+> Cheers,
+> Wolfram
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
 
