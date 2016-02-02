@@ -1,64 +1,103 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: sdhci-pci: probe of 0000:11:00.0 failed with error -22
-Date: Tue, 2 Feb 2016 11:18:35 +0200
-Message-ID: <56B0746B.9050902@intel.com>
-References: <S932267AbcBANb3/20160201133129Z+1138@vger.kernel.org>
- <20160201141944.GT13086@bla.fasel.org>
+From: Mason <slash.tmp@free.fr>
+Subject: arasan,sdhci.txt "compatibility" DT binding
+Date: Tue, 2 Feb 2016 10:49:25 +0100
+Message-ID: <56B07BA5.4060407@free.fr>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=ISO-8859-15
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga02.intel.com ([134.134.136.20]:45884 "EHLO mga02.intel.com"
+Received: from smtp2-g21.free.fr ([212.27.42.2]:32936 "EHLO smtp2-g21.free.fr"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754243AbcBBJXL (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 2 Feb 2016 04:23:11 -0500
-In-Reply-To: <20160201141944.GT13086@bla.fasel.org>
+	id S1754227AbcBBJte (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 2 Feb 2016 04:49:34 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: peter.guo@bayhubtech.com, adam.lee@canonical.com
-Cc: Wolfram Schlich <lists@wolfram.schlich.org>, linux-mmc@vger.kernel.org
+To: linux-mmc <linux-mmc@vger.kernel.org>
+Cc: Michal Simek <monstr@monstr.eu>, Anton Vorontsov <anton@enomsg.org>, Xiaobo Xie <x.xie@freescale.com>, Suman Tripathi <stripathi@apm.com>, Shawn Lin <shawn.lin@rock-chips.com>
 
-+ Peter Guo and Adam Lee
+Hello everyone,
+
+Documentation/devicetree/bindings/mmc/arasan,sdhci.txt states:
+
+Required Properties:
+  - compatible: Compatibility string. Must be 'arasan,sdhci-8.9a' or
+                'arasan,sdhci-4.9a' or 'arasan,sdhci-5.1'
+
+What do 8.9a, 4.9a, and 5.1 refer to?
+
+$ git ls Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
+da795ec26e25 mmc: sdhci-of-arasan: Add the support for sdhci-5.1
+308f3f8d8112 mmc: sdhci-of-arasan: Add the support for sdhci-arasan4.9a
+e3ec3a3d11ad mmc: arasan: Add driver for Arasan SDHCI
 
 
-On 01/02/16 16:19, Wolfram Schlich wrote:
-> [ Issue originally reported as https://bugzilla.kernel.org/show_bug.cgi?id=110411 ]
-> 
-> Hi!
-> 
-> I am working on a Dell Precision M4800 laptop with Gentoo Linux and Kernel 4.3.3:
-> 
-> --8<--
-> Linux zephyr 4.3.3-gentoo #2 SMP Wed Jan 6 00:33:28 CET 2016 x86_64 Intel(R) Core(TM) i7-4910MQ CPU @ 2.90GHz GenuineIntel GNU/Linux
-> --8<--
-> 
-> It has an O2 Micro SD/MMC card reader (1217:8520) which is supposed to be supported by sdhci-pci-o2micro:
-> 
-> --8<--
-> 11:00.0 SD Host controller: O2 Micro, Inc. SD/MMC Card Reader Controller (rev 01)
-> 11:00.0 0805: 1217:8520 (rev 01)
-> --8<--
-> 
-> On bootup, the sdhci-pci driver fails to initialize the card reader with error -22:
-> --8<--
-> [    4.782054] sdhci: Secure Digital Host Controller Interface driver
-> [    4.782057] sdhci: Copyright(c) Pierre Ossman
-> [    4.782187] sdhci-pci 0000:11:00.0: SDHCI controller found [1217:8520] (rev 1)
-> [    4.782328] sdhci-pci: probe of 0000:11:00.0 failed with error -22
-> [    4.782376] sdhci-pltfm: SDHCI platform and OF driver helper
-> --8<--
-> 
-> What's wrong?
-> 
-> BIOS version is A15 from 09/29/2015.
-> 
-> UPDATE: The issue remains unchanged with kernel 4.3.5-gentoo.
-> 
-> Cheers,
-> Wolfram
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
+I found two Arasan data sheets.
 
+The first data sheet, created 2010-02-19, is titled
+"SD3.0 / SDIO3.0 / eMMC4.4 AHB Host Controller"
+and the documentation revision number is 6.0
+
+The revision history mentions:
+
+1.0	05.02.2005
+1.1	02.08.2006
+1.2	03.10.2006
+1.3	03.27.2006
+1.4	04.11.2006
+1.5	04.18.2006
+1.6	05.18.2006
+1.7	06.05.2006
+1.8	10.06.2006
+1.9	19.06.2006
+2.0	01.08.2007
+2.1	01.30.2007
+2.2	02.22.2007
+2.3	04.30.2007
+2.4	05.07.2007
+2.5	06.04.2007
+2.6	06.25.2007
+2.7	06.29.2007
+2.8	07.24.2007
+2.9	07.31.2007
+3.0	11.12.2007
+3.1	11.14.2007
+3.2	11.21.2007
+3.3	12.13.2007
+3.4	12.15.2007
+3.5	04.11.2008
+3.6	08.19.2008
+3.7	10.11.2008
+3.7a	11.11.2008
+3.8a	11.25.2008
+3.9a	01.22.2009
+4.0a	02.13.2009
+4.1a	04.06.2009
+4.2a	06.16.2009
+5.0	07.01.2009
+5.1	07.13.2009
+5.2	07.16.2009
+5.3	07.29.2009
+5.4	08.17.2009
+5.5	08.29.2009
+5.6	09.30.2009
+5.7	11.04.2009
+5.8	12.04.2009
+5.9	01.19.2010
+6.0	02.19.2010
+
+
+The second data sheet, created 2012-09-07, is titled
+"SD3.0 / SDIO3.0/ eMMC4.5 Host Controller"
+and the documentation revision number is 1.13
+
+Revision history mentions a "new architecture" for rev 1.0
+in 2011-06-01
+
+
+Neither of these data sheets mention anything about a 4.9a or 8.9a
+version of the controller... And I don't think 5.1 refers to the
+documentation rev, right?
+
+So what do 8.9a, 4.9a, and 5.1 refer to?
+
+Regards.
