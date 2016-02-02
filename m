@@ -1,103 +1,99 @@
 From: Mason <slash.tmp@free.fr>
-Subject: arasan,sdhci.txt "compatibility" DT binding
-Date: Tue, 2 Feb 2016 10:49:25 +0100
-Message-ID: <56B07BA5.4060407@free.fr>
+Subject: Re: mmc0: Invalid maximum block size, assuming 512 bytes
+Date: Tue, 2 Feb 2016 11:12:22 +0100
+Message-ID: <56B08106.9090708@free.fr>
+References: <569E575A.5070401@free.fr> <569EE03F.9090008@rock-chips.com>
+ <56A0F2A1.3060805@free.fr> <56A18EFE.6000900@rock-chips.com>
+ <56A1D791.9010803@free.fr> <56AFCEE0.1090005@free.fr>
+ <56B06FD0.6000109@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-15
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp2-g21.free.fr ([212.27.42.2]:32936 "EHLO smtp2-g21.free.fr"
+Received: from smtp2-g21.free.fr ([212.27.42.2]:58706 "EHLO smtp2-g21.free.fr"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754227AbcBBJte (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 2 Feb 2016 04:49:34 -0500
+	id S1754442AbcBBKMg (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 2 Feb 2016 05:12:36 -0500
+In-Reply-To: <56B06FD0.6000109@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc <linux-mmc@vger.kernel.org>
-Cc: Michal Simek <monstr@monstr.eu>, Anton Vorontsov <anton@enomsg.org>, Xiaobo Xie <x.xie@freescale.com>, Suman Tripathi <stripathi@apm.com>, Shawn Lin <shawn.lin@rock-chips.com>
+To: Adrian Hunter <adrian.hunter@intel.com>, linux-mmc <linux-mmc@vger.kernel.org>
+Cc: Shawn Lin <shawn.lin@rock-chips.com>, Michal Simek <michal.simek@xilinx.com>, Soren Brinkmann <soren.brinkmann@xilinx.com>, Suman Tripathi <stripathi@apm.com>, Arnd Bergmann <arnd@arndb.de>, Ulf Hansson <ulf.hansson@linaro.org>, Sebastian Frias <sf84@laposte.net>, Anton Vorontsov <anton@enomsg.org>, Pierre Ossman <pierre@ossman.eu>
 
-Hello everyone,
+On 02/02/2016 09:58, Adrian Hunter wrote:
+> On 01/02/16 23:32, Mason wrote:
+>> On 22/01/2016 08:17, Mason wrote:
+>>
+>>> On 22/01/2016 03:07, Shawn Lin wrote:
+>>>
+>>>> On 2016/1/21 23:00, Mason wrote:
+>>>>
+>>>>> So that means I have to write code in
+>>>>> drivers/mmc/host/sdhci-of-arasan.c correct?
+>>>>
+>>>> It depends. If you think 512 block size if okay for you, leave it alone.
+>>>> Otherwise, add it in drivers/mmc/host/sdhci-of-arasan.c :)
+>>>
+>>> When I measured the read/write throughput to an attached
+>>> SD card, I got around 16 MB/s, and I thought raising the
+>>> block size might help with throughput?
+>>>
+>>> I'll test and report back.
+>>
+>> Haven't had time to test yet, but I wanted to ask experienced
+>> folks what to expect when raising the block size from 512 to
+>> 2048 bytes?
+> 
+> mmc block driver sets block size to 512.
+> 
+> What you are looking at is maximum block size.  SDIO uses bigger block
+> sizes, so it is useful for that.
 
-Documentation/devicetree/bindings/mmc/arasan,sdhci.txt states:
+You're right. I was looking at this block of code:
 
-Required Properties:
-  - compatible: Compatibility string. Must be 'arasan,sdhci-8.9a' or
-                'arasan,sdhci-4.9a' or 'arasan,sdhci-5.1'
+	/*
+	 * Maximum block size. This varies from controller to controller and
+	 * is specified in the capabilities register.
+	 */
+	if (host->quirks & SDHCI_QUIRK_FORCE_BLK_SZ_2048) {
+		mmc->max_blk_size = 2;
+	} else {
+		mmc->max_blk_size = (caps[0] & SDHCI_MAX_BLOCK_MASK) >>
+				SDHCI_MAX_BLOCK_SHIFT;
+		if (mmc->max_blk_size >= 3) {
+			pr_warn("%s: Invalid maximum block size, assuming 512 bytes\n",
+				mmc_hostname(mmc));
+			mmc->max_blk_size = 0;
+		}
+	}
 
-What do 8.9a, 4.9a, and 5.1 refer to?
-
-$ git ls Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
-da795ec26e25 mmc: sdhci-of-arasan: Add the support for sdhci-5.1
-308f3f8d8112 mmc: sdhci-of-arasan: Add the support for sdhci-arasan4.9a
-e3ec3a3d11ad mmc: arasan: Add driver for Arasan SDHCI
-
-
-I found two Arasan data sheets.
-
-The first data sheet, created 2010-02-19, is titled
-"SD3.0 / SDIO3.0 / eMMC4.4 AHB Host Controller"
-and the documentation revision number is 6.0
-
-The revision history mentions:
-
-1.0	05.02.2005
-1.1	02.08.2006
-1.2	03.10.2006
-1.3	03.27.2006
-1.4	04.11.2006
-1.5	04.18.2006
-1.6	05.18.2006
-1.7	06.05.2006
-1.8	10.06.2006
-1.9	19.06.2006
-2.0	01.08.2007
-2.1	01.30.2007
-2.2	02.22.2007
-2.3	04.30.2007
-2.4	05.07.2007
-2.5	06.04.2007
-2.6	06.25.2007
-2.7	06.29.2007
-2.8	07.24.2007
-2.9	07.31.2007
-3.0	11.12.2007
-3.1	11.14.2007
-3.2	11.21.2007
-3.3	12.13.2007
-3.4	12.15.2007
-3.5	04.11.2008
-3.6	08.19.2008
-3.7	10.11.2008
-3.7a	11.11.2008
-3.8a	11.25.2008
-3.9a	01.22.2009
-4.0a	02.13.2009
-4.1a	04.06.2009
-4.2a	06.16.2009
-5.0	07.01.2009
-5.1	07.13.2009
-5.2	07.16.2009
-5.3	07.29.2009
-5.4	08.17.2009
-5.5	08.29.2009
-5.6	09.30.2009
-5.7	11.04.2009
-5.8	12.04.2009
-5.9	01.19.2010
-6.0	02.19.2010
+	mmc->max_blk_size = 512 << mmc->max_blk_size;
 
 
-The second data sheet, created 2012-09-07, is titled
-"SD3.0 / SDIO3.0/ eMMC4.5 Host Controller"
-and the documentation revision number is 1.13
+As Shawn pointed out, this was updated by commit 0633f654241
 
-Revision history mentions a "new architecture" for rev 1.0
-in 2011-06-01
+Author: Anton Vorontsov
+Date:   Tue Mar 17 00:14:03 2009 +0300
+
+    sdhci: Add quirk for forcing maximum block size to 2048 bytes
+    
+    FSL eSDHC controllers can support maximum block size up to 4096 bytes,
+    the MBL (Maximum Block Length) field in the capabilities register
+    extended by one bit, and is set to 0x3.
+    
+    But the SDHCI core doesn't support blocks of 4096 bytes, and thus
+    forces blksz to the lowest value -- 512 bytes. With this patch we can
+    pin up the blksz to the maximum supported block size, i.e. 2048 bytes.
 
 
-Neither of these data sheets mention anything about a 4.9a or 8.9a
-version of the controller... And I don't think 5.1 refers to the
-documentation rev, right?
+But I'm wondering if the 2048-byte limitation in SDHCI core is
+still present?
 
-So what do 8.9a, 4.9a, and 5.1 refer to?
+I see some drivers apparently setting it to a higher value:
+
+host/atmel-mci.c:	mmc->max_blk_size = 32768;
+host/dw_mmc.c:		mmc->max_blk_size = 65536;
+host/wbsd.c:		mmc->max_blk_size = 4087;
 
 Regards.
+
