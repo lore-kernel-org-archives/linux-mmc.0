@@ -1,41 +1,105 @@
-From: Stefan Wahren <stefan.wahren@i2se.com>
-Subject: Re: [PATCH v4] mmc: meson: Add driver for the SD/MMC host found on
- Amlogic MesonX SoCs
-Date: Wed, 3 Feb 2016 13:17:15 +0100
-Message-ID: <56B1EFCB.1020508@i2se.com>
-References: <1448988109-32630-1-git-send-email-carlo@caione.org>
+From: =?utf-8?B?U8O2cmVu?= Brinkmann <soren.brinkmann@xilinx.com>
+Subject: Re: arasan,sdhci.txt "compatibility" DT binding
+Date: Wed, 3 Feb 2016 07:21:04 -0800
+Message-ID: <20160203152104.GP4215@xsjsorenbubuntu>
+References: <56B07BA5.4060407@free.fr>
+ <56B166F1.5080605@rock-chips.com>
+ <56B1AA44.1010108@xilinx.com>
+ <56B1BAF8.2050907@free.fr>
+ <56B1CF40.1030203@xilinx.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mout.kundenserver.de ([212.227.126.135]:59522 "EHLO
-	mout.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751952AbcBCMSe (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 3 Feb 2016 07:18:34 -0500
-In-Reply-To: <1448988109-32630-1-git-send-email-carlo@caione.org>
+Received: from mail-sn1nam02on0073.outbound.protection.outlook.com ([104.47.36.73]:26476
+	"EHLO NAM02-SN1-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1754374AbcBCPSv (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 3 Feb 2016 10:18:51 -0500
+Content-Disposition: inline
+In-Reply-To: <56B1CF40.1030203@xilinx.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Carlo Caione <carlo@caione.org>
-Cc: linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, drake@endlessm.com, jerry.cao@amlogic.com, victor.wan@amlogic.com, linux-meson@googlegroups.com, ulf.hansson@linaro.org, Carlo Caione <carlo@endlessm.com>
+To: Michal Simek <michal.simek@xilinx.com>
+Cc: Mason <slash.tmp@free.fr>, Shawn Lin <shawn.lin@rock-chips.com>, linux-mmc <linux-mmc@vger.kernel.org>, Michal Simek <monstr@monstr.eu>, Anton Vorontsov <anton@enomsg.org>, Xiaobo Xie <x.xie@freescale.com>, Suman Tripathi <stripathi@apm.com>
 
-Hi Carlo,
+On Wed, 2016-02-03 at 10:58:24 +0100, Michal Simek wrote:
+> On 3.2.2016 09:31, Mason wrote:
+> > On 03/02/2016 08:20, Michal Simek wrote:
+> >=20
+> >> Hi,
+> >>
+> >> On 3.2.2016 03:33, Shawn Lin wrote:
+> >>> + Michal, S=C3=B6ren Brinkmann
+> >>>
+> >>> On 2016/2/2 17:49, Mason wrote:
+> >>>> Hello everyone,
+> >>>>
+> >>>> Documentation/devicetree/bindings/mmc/arasan,sdhci.txt states:
+> >>>>
+> >>>> Required Properties:
+> >>>>    - compatible: Compatibility string. Must be 'arasan,sdhci-8.9=
+a' or
+> >>>>                  'arasan,sdhci-4.9a' or 'arasan,sdhci-5.1'
+> >>>>
+> >>>> What do 8.9a, 4.9a, and 5.1 refer to?
+> >>>>
+> >>>
+> >>> Good question.
+> >>>
+> >>> Michal told me that 8.9a and 4.9a came from Xilinx
+> >>> databook which define their available arasan controller to be ver=
+sion
+> >>> 4.9a and 8.9a.
+> >>
+> >> Our version is coming from here.
+> >> http://www.xilinx.com/support/documentation/user_guides/ug585-Zynq=
+-7000-TRM.pdf
+> >> page 28
+> >>
+> >> Datasheets from 2012 and 2010 doesn't look too recent and I expect=
+ that
+> >> Arasan did a lot of work from that time that's why I am not surpri=
+sed
+> >> that you are not able to see that versions.
+> >=20
+> > Hello Michal,
+> >=20
+> > I'm even more confused.
+> >=20
+> > Arasan's 2010-02-19 data sheet is titled
+> > SD3.0 / SDIO3.0 / eMMC4.4 AHB Host Controller
+> >=20
+> > Page 28 of the Xilinx data sheet mentions
+> > SD2.0 / SDIO2.0 / MMC3.31 AHB Host Controller
+> > Version 8.9A_apr02nd_2010
+> >=20
+> > It does not make sense that Arasan would support SD3.0 in February,
+> > then go back to SD 2.0 in April.
+> >=20
+> > I do note eMMC4.4 vs MMC3.31 =3D> perhaps these are two *different*
+> > IP blocks?
+> >=20
+> > Do your data sheets come with revision history?
+>=20
+> I don't have datasheet for this IP in my hand that's why I can't chec=
+k it.
+> But I can't see any problem with it. Our zynq SoC supports SD2.0 and =
+it
+> was requirement at that time. Bugs can happen. Arasan fixed it and
+> create new version.
+> At the same time can have 3.0 versions but vendor is just decide not =
+to
+> use it for whatever reason.
+>=20
+> That's why timing of features and versions can upgrade any time and
+> unfortunately bugs happen.
 
-Am 01.12.2015 um 17:41 schrieb Carlo Caione:
-> From: Carlo Caione <carlo@endlessm.com>
->
-> Add a driver for the SD/MMC host found on the Amlogic MesonX SoCs. This
-> is an MMC controller which provides an interface between the application
-> processor and various memory cards. It supports the SD specification
-> v2.0 and the eMMC specification v4.41.
->
-> This patch adds also the binding documentation.
+We have several Arasan data sheets here. The document names are:
+"SD2.0 / SDIO2.0 / MMC3.31 AHB Userguide" and the revisions are 9.2a,
+4.4a and 5.4a. I have the feeling that the document revisions have
+been mistaken as the IP revision. I cannot find any other indicator
+for the IP revision though. Does the IP have a way to discover its
+revision?
 
-according to Documentation/devicetree/bindings/submitting-patches.txt
-
-the binding should be a separate patch in a series.
-
-Stefan
-
-
-
-
+	S=C3=B6ren
