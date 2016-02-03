@@ -1,93 +1,63 @@
-From: Shawn Lin <shawn.lin@rock-chips.com>
-Subject: Re: arasan,sdhci.txt "compatibility" DT binding
-Date: Wed, 3 Feb 2016 10:33:21 +0800
-Message-ID: <56B166F1.5080605@rock-chips.com>
-References: <56B07BA5.4060407@free.fr>
+From: Baolin Wang <baolin.wang@linaro.org>
+Subject: Re: [PATCH v2] mmc-utils: Merge the lsmmc tool into mmc-utils
+Date: Wed, 3 Feb 2016 10:34:03 +0800
+Message-ID: <CAMz4kuJgiVDy=oN1mioj+SzU601wHx4MD47zMG-oQzm-noryvQ@mail.gmail.com>
+References: <d59ece1ff066b7fd7c8b538a560f726751fb1f9a.1454401105.git.baolin.wang@linaro.org>
+	<CAAgDR1Mb5utsrVD9V3QOvPPOD+bRfyMwoRfn-B=9OxgY0v=ezQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-15;
-	format=flowed
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from lucky1.263xmail.com ([211.157.147.131]:43924 "EHLO
-	lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755458AbcBCCd2 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 2 Feb 2016 21:33:28 -0500
-In-Reply-To: <56B07BA5.4060407@free.fr>
+Received: from mail-yk0-f174.google.com ([209.85.160.174]:33468 "EHLO
+	mail-yk0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755289AbcBCCeF (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 2 Feb 2016 21:34:05 -0500
+Received: by mail-yk0-f174.google.com with SMTP id z13so7578722ykd.0
+        for <linux-mmc@vger.kernel.org>; Tue, 02 Feb 2016 18:34:04 -0800 (PST)
+In-Reply-To: <CAAgDR1Mb5utsrVD9V3QOvPPOD+bRfyMwoRfn-B=9OxgY0v=ezQ@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Mason <slash.tmp@free.fr>, linux-mmc <linux-mmc@vger.kernel.org>
-Cc: shawn.lin@rock-chips.com, Michal Simek <monstr@monstr.eu>, Anton Vorontsov <anton@enomsg.org>, Xiaobo Xie <x.xie@freescale.com>, Suman Tripathi <stripathi@apm.com>, Michal Simek <michal.simek@xilinx.com>, soren.brinkmann@xilinx.com
+To: Sebastian Rasmussen <sebras@gmail.com>
+Cc: Chris Ball <chris@printf.net>, linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, Mark Brown <broonie@kernel.org>, Linus Walleij <linus.walleij@linaro.org>
 
-+ Michal, S=F6ren Brinkmann
-
-On 2016/2/2 17:49, Mason wrote:
-> Hello everyone,
+On 3 February 2016 at 06:04, Sebastian Rasmussen <sebras@gmail.com> wrote:
+>> The original code is created by Sebastian Rasmussen and still lives in
+>> private git.
 >
-> Documentation/devicetree/bindings/mmc/arasan,sdhci.txt states:
->
-> Required Properties:
->    - compatible: Compatibility string. Must be 'arasan,sdhci-8.9a' or
->                  'arasan,sdhci-4.9a' or 'arasan,sdhci-5.1'
->
-> What do 8.9a, 4.9a, and 5.1 refer to?
->
+> Actually the company at which I developed the code has since been
+> dissolved so I believe that the only place where this code currently
+> lives is as an attachment in the mail archive of linux-mmc.
 
-Good question.
-
-Michal told me that 8.9a and 4.9a came from Xilinx
-databook which define their available arasan controller to be version
-4.9a and 8.9a.
-
-5.1 refer to the lastest arasan controller version which supports
-emmc standard 5.1+(with a command queue engine and enhanced-strobe=20
-function inside)
-
-I not 100% sure how arasan folks define these versions or just
-vendor define it themself in thire databook. But, something need to
-be done to clarify these vague definitions.
-
-Hello, Michal and Soren,
-
-Could you elaborate more? :)
-
-> $ git ls Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
-> da795ec26e25 mmc: sdhci-of-arasan: Add the support for sdhci-5.1
-> 308f3f8d8112 mmc: sdhci-of-arasan: Add the support for sdhci-arasan4.=
-9a
-> e3ec3a3d11ad mmc: arasan: Add driver for Arasan SDHCI
->
->
-> I found two Arasan data sheets.
->
-> The first data sheet, created 2010-02-19, is titled
-> "SD3.0 / SDIO3.0 / eMMC4.4 AHB Host Controller"
-> and the documentation revision number is 6.0
->
-
-----8<------------
+Got it.
 
 >
-> The second data sheet, created 2012-09-07, is titled
-> "SD3.0 / SDIO3.0/ eMMC4.5 Host Controller"
-> and the documentation revision number is 1.13
+>> It need to be merged into mmc-utils repository, which is
+>> convenient for testing MMC device from userspace.
 >
-> Revision history mentions a "new architecture" for rev 1.0
-> in 2011-06-01
+> I fully agree. Though maybe the subcommands csd/cid/scr read all should be
+> brought to conform to the other subcommands in terms of using e.g.
+> CHECK() and checking for errors using perror(). Basically I would want
+> the new subcommands to be indistiguishable from the existing commands.
+> Even if I developed the code at my previous employer it just looks
+> nasty if it is tacked on without being a proper part of the existing
+> code. :)
 >
+> Also I'm a bit wary of that lsmmc.ids database as it is currently not
+> installed if you do "make install" as it probably should be. Maybe it
+> is better to hardcode this internally in the program and avoid having
+> to deal with installation?
+
+OK. So it can remove the '-f' parameter.
+
 >
-> Neither of these data sheets mention anything about a 4.9a or 8.9a
-> version of the controller... And I don't think 5.1 refers to the
-> documentation rev, right?
+> Either way, I'm happy to continue working getting this into mmc-utils.
+
+That's great. I think you can continue doing it. Thanks a lot.
+
 >
-> So what do 8.9a, 4.9a, and 5.1 refer to?
->
-> Regards.
->
->
->
+>  / Sebastian
 
 
---=20
+
+-- 
+Baolin.wang
 Best Regards
-Shawn Lin
-
