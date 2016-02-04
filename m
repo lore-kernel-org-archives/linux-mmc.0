@@ -1,103 +1,108 @@
 From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH] mmc: core: use the defined function to check whether card
- is removable
-Date: Thu, 04 Feb 2016 14:56:15 +0900
-Message-ID: <56B2E7FF.8030903@samsung.com>
-References: <1454025177-21233-1-git-send-email-jh80.chung@samsung.com>
- <CAPDyKFpgc_9t+fKY-=ODENR9B=_S50EnB9tc9x7+7Adfm=rX6g@mail.gmail.com>
+Subject: Re: [PATCH 2/4] mmc: dw_mmc: add setup_clk for init hook
+Date: Thu, 04 Feb 2016 15:04:58 +0900
+Message-ID: <56B2EA0A.5020208@samsung.com>
+References: <1453944616-16224-1-git-send-email-shawn.lin@rock-chips.com>
+ <1453944664-16874-1-git-send-email-shawn.lin@rock-chips.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=windows-1252
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout4.samsung.com ([203.254.224.34]:52342 "EHLO
-	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932840AbcBDF4S (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 4 Feb 2016 00:56:18 -0500
-Received: from epcpsbgr3.samsung.com
- (u143.gpu120.samsung.co.kr [203.254.230.143])
- by mailout4.samsung.com (Oracle Communications Messaging Server 7.0.5.31.0
- 64bit (built May  5 2014))
- with ESMTP id <0O2002I4SDTS1IC0@mailout4.samsung.com> for
- linux-mmc@vger.kernel.org; Thu, 04 Feb 2016 14:56:16 +0900 (KST)
-In-reply-to: <CAPDyKFpgc_9t+fKY-=ODENR9B=_S50EnB9tc9x7+7Adfm=rX6g@mail.gmail.com>
+Received: from mailout2.samsung.com ([203.254.224.25]:36099 "EHLO
+	mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752396AbcBDGFA (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 4 Feb 2016 01:05:00 -0500
+In-reply-to: <1453944664-16874-1-git-send-email-shawn.lin@rock-chips.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, Shawn Lin <shawn.lin@rock-chips.com>
+To: Shawn Lin <shawn.lin@rock-chips.com>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 
-On 02/02/2016 10:11 PM, Ulf Hansson wrote:
-> On 29 January 2016 at 00:52, Jaehoon Chung <jh80.chung@samsung.com> wrote:
->> In linux/mmc/host.h, mmc_card_is_removable() is already defined.
->> There is no reason that it doesn't use.
->>
->> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
-> 
-> Thanks, applied for next!
-> 
-> Regarding the host drivers, as pointed out by Shawn. Let's fix them in
-> one separate patch.
+Hi, Shawn.
 
-I will do it. Thanks!
+On 01/28/2016 10:31 AM, Shawn Lin wrote:
+> We add this new argument into init hook for
+> variant drivers to decide whether to do clock
+> related stuff inside the hook.
+> 
+> Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
+> ---
+> 
+>  drivers/mmc/host/dw_mmc-exynos.c   | 4 ++--
+>  drivers/mmc/host/dw_mmc-rockchip.c | 2 +-
+>  drivers/mmc/host/dw_mmc.c          | 2 +-
+>  drivers/mmc/host/dw_mmc.h          | 2 +-
+>  4 files changed, 5 insertions(+), 5 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/dw_mmc-exynos.c b/drivers/mmc/host/dw_mmc-exynos.c
+> index 3a7e835..edaa117 100644
+> --- a/drivers/mmc/host/dw_mmc-exynos.c
+> +++ b/drivers/mmc/host/dw_mmc-exynos.c
+> @@ -91,7 +91,7 @@ static inline u8 dw_mci_exynos_get_ciu_div(struct dw_mci *host)
+>  		return SDMMC_CLKSEL_GET_DIV(mci_readl(host, CLKSEL)) + 1;
+>  }
+>  
+> -static int dw_mci_exynos_priv_init(struct dw_mci *host)
+> +static int dw_mci_exynos_priv_init(struct dw_mci *host, bool setup_clk)
+>  {
+
+"bool setup_clk" is made because of exynos SoC, right?
+Hmm. I'm checking how we can control without "setup_clk". Waiting for this.
+
+Thanks for removing the hooks. :)
 
 Best Regards,
 Jaehoon Chung
 
-> 
-> Kind regards
-> Uffe
-> 
->> ---
->>  drivers/mmc/core/core.c | 9 ++++-----
->>  1 file changed, 4 insertions(+), 5 deletions(-)
->>
->> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
->> index f95d41f..9da9b60 100644
->> --- a/drivers/mmc/core/core.c
->> +++ b/drivers/mmc/core/core.c
->> @@ -2532,7 +2532,7 @@ int mmc_detect_card_removed(struct mmc_host *host)
->>         if (!card)
->>                 return 1;
->>
->> -       if (host->caps & MMC_CAP_NONREMOVABLE)
->> +       if (!mmc_card_is_removable(host))
->>                 return 0;
->>
->>         ret = mmc_card_removed(card);
->> @@ -2570,7 +2570,7 @@ void mmc_rescan(struct work_struct *work)
->>                 return;
->>
->>         /* If there is a non-removable card registered, only scan once */
->> -       if ((host->caps & MMC_CAP_NONREMOVABLE) && host->rescan_entered)
->> +       if (!mmc_card_is_removable(host) && host->rescan_entered)
->>                 return;
->>         host->rescan_entered = 1;
->>
->> @@ -2587,8 +2587,7 @@ void mmc_rescan(struct work_struct *work)
->>          * if there is a _removable_ card registered, check whether it is
->>          * still present
->>          */
->> -       if (host->bus_ops && !host->bus_dead
->> -           && !(host->caps & MMC_CAP_NONREMOVABLE))
->> +       if (host->bus_ops && !host->bus_dead && mmc_card_is_removable(host))
->>                 host->bus_ops->detect(host);
->>
->>         host->detect_change = 0;
->> @@ -2613,7 +2612,7 @@ void mmc_rescan(struct work_struct *work)
->>         mmc_bus_put(host);
->>
->>         mmc_claim_host(host);
->> -       if (!(host->caps & MMC_CAP_NONREMOVABLE) && host->ops->get_cd &&
->> +       if (mmc_card_is_removable(host) && host->ops->get_cd &&
->>                         host->ops->get_cd(host) == 0) {
->>                 mmc_power_off(host);
->>                 mmc_release_host(host);
->> --
->> 1.9.1
->>
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
+>  	struct dw_mci_exynos_priv_data *priv = host->priv;
+>  
+> @@ -159,7 +159,7 @@ static int dw_mci_exynos_resume(struct device *dev)
+>  {
+>  	struct dw_mci *host = dev_get_drvdata(dev);
+>  
+> -	dw_mci_exynos_priv_init(host);
+> +	dw_mci_exynos_priv_init(host, false);
+>  	return dw_mci_resume(host);
+>  }
+>  
+> diff --git a/drivers/mmc/host/dw_mmc-rockchip.c b/drivers/mmc/host/dw_mmc-rockchip.c
+> index 9934503..885c801 100644
+> --- a/drivers/mmc/host/dw_mmc-rockchip.c
+> +++ b/drivers/mmc/host/dw_mmc-rockchip.c
+> @@ -221,7 +221,7 @@ static int dw_mci_rk3288_parse_dt(struct dw_mci *host)
+>  	return 0;
+>  }
+>  
+> -static int dw_mci_rockchip_init(struct dw_mci *host)
+> +static int dw_mci_rockchip_init(struct dw_mci *host, bool setup_clk)
+>  {
+>  	/* It is slot 8 on Rockchip SoCs */
+>  	host->sdio_id0 = 8;
+> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+> index 7128351..1d27a2b 100644
+> --- a/drivers/mmc/host/dw_mmc.c
+> +++ b/drivers/mmc/host/dw_mmc.c
+> @@ -2995,7 +2995,7 @@ int dw_mci_probe(struct dw_mci *host)
+>  	}
+>  
+>  	if (drv_data && drv_data->init) {
+> -		ret = drv_data->init(host);
+> +		ret = drv_data->init(host, true);
+>  		if (ret) {
+>  			dev_err(host->dev,
+>  				"implementation specific init failed\n");
+> diff --git a/drivers/mmc/host/dw_mmc.h b/drivers/mmc/host/dw_mmc.h
+> index f695b58..1a9492e 100644
+> --- a/drivers/mmc/host/dw_mmc.h
+> +++ b/drivers/mmc/host/dw_mmc.h
+> @@ -285,7 +285,7 @@ struct dw_mci_slot {
+>   */
+>  struct dw_mci_drv_data {
+>  	unsigned long	*caps;
+> -	int		(*init)(struct dw_mci *host);
+> +	int		(*init)(struct dw_mci *host, bool setup_clk);
+>  	int		(*setup_clock)(struct dw_mci *host);
+>  	void		(*prepare_command)(struct dw_mci *host, u32 *cmdr);
+>  	void		(*set_ios)(struct dw_mci *host, struct mmc_ios *ios);
 > 
 
