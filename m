@@ -1,71 +1,84 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v4] mmc: meson: Add driver for the SD/MMC host found on
- Amlogic MesonX SoCs
-Date: Thu, 4 Feb 2016 11:34:16 +0100
-Message-ID: <CAPDyKFqpgEtAvK9HesdA5tLuj7htUmo5ZrvbDC0wCzHB3=_-xQ@mail.gmail.com>
-References: <1448988109-32630-1-git-send-email-carlo@caione.org>
-	<CAPDyKFp=buvJ8Li3XC8XSUAUO7BsE+U6vEQH2xTrgcHAkdG8bQ@mail.gmail.com>
-	<CAOQ7t2aJAPWd3Xmvu7n0EWL-KC8ZriM3KryfsYEh556uXhuR+g@mail.gmail.com>
-	<CAPDyKFpcsKihuOiF5=RwoWrF0Jf7hRsXVSU5uV8qZf1mUsa-iQ@mail.gmail.com>
-	<CAOQ7t2afXxStCsj=M-FX7eMep1gLt4jkyXDiLas_SQ1UwHc0=Q@mail.gmail.com>
-	<CAPDyKFpX+_fHvv_bJUKZmSufKKnuONC582E7u3b20a+Rbbggng@mail.gmail.com>
-	<CAOQ7t2aS0yRDhM3+8wW5xrycG371uthDJy6U_oDAZip4jHRiRA@mail.gmail.com>
-	<CAPDyKFo=LdzFsELZJKXj_CDcNYj96J4Q9-KqS63041d3BVUEDQ@mail.gmail.com>
-	<CAOQ7t2aF=wzYHF8LXK5WVMJ=mEDHzfvbL=iRvorq+FZshL0q0g@mail.gmail.com>
+From: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: Re: [PATCH v4 00/13] mmc: use sdhci_pltfm_init for private allocation
+ and clean up
+Date: Thu, 4 Feb 2016 11:38:35 +0100
+Message-ID: <CAPDyKFpFSTYsAUCG9nFnnzmVsA3zm4hAPO8+6REArt9BJtn+0Q@mail.gmail.com>
+References: <1453803353-6266-1-git-send-email-jszhang@marvell.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-yw0-f176.google.com ([209.85.161.176]:33081 "EHLO
-	mail-yw0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S964780AbcBDKeR (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 4 Feb 2016 05:34:17 -0500
-Received: by mail-yw0-f176.google.com with SMTP id z185so23971585ywf.0
-        for <linux-mmc@vger.kernel.org>; Thu, 04 Feb 2016 02:34:17 -0800 (PST)
-In-Reply-To: <CAOQ7t2aF=wzYHF8LXK5WVMJ=mEDHzfvbL=iRvorq+FZshL0q0g@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1453803353-6266-1-git-send-email-jszhang-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>
+Sender: linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Jisheng Zhang <jszhang-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Cc: Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Ludovic Desroches <ludovic.desroches-AIFe0yeh4nAAvxtiuMwx3w@public.gmane.org>, Stephen Warren <swarren-3lzwWm7+Weoh9ZMKESR00Q@public.gmane.org>, Lee Jones <lee-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Eric Anholt <eric-WhKQ6XTQaPysTnJN9+BGXg@public.gmane.org>, Michal Simek <michal.simek-gjFFaj9aHVfQT0dZR+AlfA@public.gmane.org>, =?UTF-8?Q?S=C3=B6ren_Brinkmann?= <soren.brinkmann-gjFFaj9aHVfQT0dZR+AlfA@public.gmane.org>, Srinivas Kandagatla <srinivas.kandagatla-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Maxime Coquelin <maxime.coquelin-qxv4g6HH51o@public.gmane.org>, Patrice CHOTARD <patrice.chotard-qxv4g6HH51o@public.gmane.org>, Thierry Reding <thierry.reding-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Sebastian Hesselbarth <sebastian.hesselbarth-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, kernel-F5mvAk5X5gdBDgjK7y7TUQ@public.gmane.org, linux-mmc <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-rpi-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, "linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Carlo Caione <carlo@caione.org>
-Cc: "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, linux-mmc <linux-mmc@vger.kernel.org>, linux-meson@googlegroups.com, linux@endlessm.com
 
-On 4 February 2016 at 10:12, Carlo Caione <carlo@caione.org> wrote:
-> On Wed, Feb 3, 2016 at 11:46 AM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
->> On 2 February 2016 at 22:54, Carlo Caione <carlo@caione.org> wrote:
->
-> [cut]
->
->> Huh, another broken MMC controller. :-)
->
-> Oh, actually I found in the datasheet a couple of undocumented
-> registers (also not used in the original Amlogic SDK code) that seems
-> to have something to do with timeout (hard to say without proper
-> documentation but they are called "Timeout counter for preload setting
-> and present status" and "Timeout Counter Interrupt Enable for ARC/ARM"
-> so I guess I'm on the right track here).
-> I briefly tried yesterday to enable this timeout interrupt with a
-> dummy value in the counter register (I have no idea how get this value
-> from the clocking) and it seems working (the counter value is
-> decremented when reading the register upon command completion).
++ Adrian
 
-Let's hope this works, as this will for sure be a better solution.
-
+On 26 January 2016 at 11:15, Jisheng Zhang <jszhang-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org> wrote:
+> These patches are to complete the TODOs in Commit 0e748234293f ("mmc:
+> sdhci: Add size for caller in init+register"), I.E:
 >
->> In some cases there are no data in the request, it's just a command
->> being sent. So to deal with this issue, you will have to adjust the
->> timer depending on the request we send to the controller.
+> - todo: migrate clients to using allocation this way
+> - todo: remove priv variable once migration is complete
 >
-> I see that the CMD13 used to poll the card has no data so in that case
-> should we use a fixed / dummy value to use as timeout counter?
-> I'm kind of confused here since the MMC drivers I'm looking at use the
-> hardware timeout register only when the data->timeout_ns is actually
-> present.
+> Since v3:
+>  - based on v4.5-rc1
+>  - add Ludovic's ack for sdhci-of-at91 changes
+>  - fix use-after-free in some drivers: some host drivers still needs to
+>    access sdhci_pltfm_host->private after sdhci_pltfm_unregister(), but
+>    the private should be already freed by sdhci_pltfm_unregister.
+>  - add patch5 to fix one clk bug in sdhci_arasan_remove(). IMHO, It's
+>    better to add this patch to fixes rather than waiting for next merge
+>    window
+>
+> Since v2:
+>  - based on mmc next tree and remove all priv usage introduced in newly
+>    commits in this tree
+>  - don't break two lines if sdhci_pltfm_init() call could be put into
+>    one line. Thank Ludovic Desroches.
+>
+> Since v1:
+>  - add new patch03 to factorise sdhci_msm_pdata outisde of sdhci_msm_host.
+>    This is to fix drivers/mmc/host/sdhci-msm.c:440:32: warning: 'msm_host'
+>    is used uninitialized in this function [-Wuninitialized]
+>  - Add Arnd's Ack for all patches except patch3 which is new in v2
+>
+>
+> Jisheng Zhang (13):
+>   mmc: sdhci-bcm2835: use sdhci_pltfm_init for private allocation
+>   mmc: sdhci-esdhc-imx: use sdhci_pltfm_init for private allocation
+>   mmc: sdhci-msm: factorise sdhci_msm_pdata outisde of sdhci_msm_host
+>   mmc: sdhci-msm: use sdhci_pltfm_init for private allocation
+>   mmc: sdhci-of-arasan: fix clk issue in sdhci_arasan_remove()
+>   mmc: sdhci-of-arasan: use sdhci_pltfm_init for private allocation
+>   mmc: sdhci-of-at91: use sdhci_pltfm_init for private allocation
+>   mmc: sdhci-of-esdhc: use sdhci_pltfm_init for private allocation
+>   mmc: sdhci-pxav3: use sdhci_pltfm_init for private allocation
+>   mmc: sdhci-st: use sdhci_pltfm_init for private allocation
+>   mmc: sdhci-tegra: use sdhci_pltfm_init for private allocation
+>   mmc: sdhci-pxav2: remove unnecessary assignment of pltfm_host->priv
+>   mmc: sdhci-pltfm: remove priv variable from sdhci_pltfm_host
+>
+>  drivers/mmc/host/sdhci-bcm2835.c   | 14 +++----------
+>  drivers/mmc/host/sdhci-esdhc-imx.c | 38 ++++++++++++++++--------------------
+>  drivers/mmc/host/sdhci-msm.c       | 25 +++++++++++-------------
+>  drivers/mmc/host/sdhci-of-arasan.c | 33 +++++++++++++++----------------
+>  drivers/mmc/host/sdhci-of-at91.c   | 33 ++++++++++++++-----------------
+>  drivers/mmc/host/sdhci-of-esdhc.c  | 19 +++++++++---------
+>  drivers/mmc/host/sdhci-pltfm.h     |  1 -
+>  drivers/mmc/host/sdhci-pxav2.c     |  1 -
+>  drivers/mmc/host/sdhci-pxav3.c     | 20 ++++++++-----------
+>  drivers/mmc/host/sdhci-st.c        | 40 +++++++++++++++++++-------------------
+>  drivers/mmc/host/sdhci-tegra.c     | 21 +++++++-------------
+>  11 files changed, 106 insertions(+), 139 deletions(-)
+>
+> --
+> 2.7.0
+>
 
-That's a different timeout value. It's elated to *each* block data
-transfer and not the entire request. So it provides information to the
-controller about what delays it shall accept during a block being
-written/read.
-
-More details is found in the electrical descriptions of the interface
-in the eMMC/SD spec.
+To avoid confusions. I don't intend to pick up any further sdhci
+patches, unless they are acked by Adrian Hunter.
 
 Kind regards
 Uffe
