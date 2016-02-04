@@ -1,120 +1,58 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [bug] kernel panic if writting data to mmc after suspendding
-Date: Thu, 4 Feb 2016 09:26:48 +0100
-Message-ID: <CAPDyKFoWt2Xt1xHsGSfyzxX_kvNVSn5Y1rRbZ8Mc8sWOjhX+bw@mail.gmail.com>
-References: <566A21D2.4080009@jinso.co.jp>
-	<566E2AC0.8060800@jinso.co.jp>
-	<CAMuHMdWU0WVBiWSsLti=KSidFk198k_3CAiNm=iGLtmw4wQOgw@mail.gmail.com>
-	<CAPDyKFomFTn7iX2kSXFVqstjEWpezNOB-B_DdFFRBWi9upUrpg@mail.gmail.com>
-	<5678C081.5090001@jinso.co.jp>
-	<56B2A0C1.9050808@jinso.co.jp>
+From: Carlo Caione <carlo@caione.org>
+Subject: Re: [PATCH v4] mmc: meson: Add driver for the SD/MMC host found on
+ Amlogic MesonX SoCs
+Date: Thu, 4 Feb 2016 10:12:05 +0100
+Message-ID: <CAOQ7t2aF=wzYHF8LXK5WVMJ=mEDHzfvbL=iRvorq+FZshL0q0g@mail.gmail.com>
+References: <1448988109-32630-1-git-send-email-carlo@caione.org>
+	<CAPDyKFp=buvJ8Li3XC8XSUAUO7BsE+U6vEQH2xTrgcHAkdG8bQ@mail.gmail.com>
+	<CAOQ7t2aJAPWd3Xmvu7n0EWL-KC8ZriM3KryfsYEh556uXhuR+g@mail.gmail.com>
+	<CAPDyKFpcsKihuOiF5=RwoWrF0Jf7hRsXVSU5uV8qZf1mUsa-iQ@mail.gmail.com>
+	<CAOQ7t2afXxStCsj=M-FX7eMep1gLt4jkyXDiLas_SQ1UwHc0=Q@mail.gmail.com>
+	<CAPDyKFpX+_fHvv_bJUKZmSufKKnuONC582E7u3b20a+Rbbggng@mail.gmail.com>
+	<CAOQ7t2aS0yRDhM3+8wW5xrycG371uthDJy6U_oDAZip4jHRiRA@mail.gmail.com>
+	<CAPDyKFo=LdzFsELZJKXj_CDcNYj96J4Q9-KqS63041d3BVUEDQ@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-sh-owner@vger.kernel.org>
-In-Reply-To: <56B2A0C1.9050808@jinso.co.jp>
-Sender: linux-sh-owner@vger.kernel.org
-To: Nguyen Viet Dung <nv-dung@jinso.co.jp>
-Cc: Geert Uytterhoeven <geert@linux-m68k.org>, Linux MMC List <linux-mmc@vger.kernel.org>, Linux-sh list <linux-sh@vger.kernel.org>, "ltsi-dev@lists.linuxfoundation.org" <ltsi-dev@lists.linuxfoundation.org>, =?UTF-8?B?U2ltb24g44GV44KT?= <simon@horms.net>, Geert Uytterhoeven <geert+renesas@glider.be>, "Shimoda, Yoshihiro" <yoshihiro.shimoda.uh@renesas.com>, Hisao Munakata <hisao.munakata.vt@renesas.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-wm0-f65.google.com ([74.125.82.65]:35063 "EHLO
+	mail-wm0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S965359AbcBDJMH (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 4 Feb 2016 04:12:07 -0500
+Received: by mail-wm0-f65.google.com with SMTP id l66so11191176wml.2
+        for <linux-mmc@vger.kernel.org>; Thu, 04 Feb 2016 01:12:06 -0800 (PST)
+In-Reply-To: <CAPDyKFo=LdzFsELZJKXj_CDcNYj96J4Q9-KqS63041d3BVUEDQ@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Carlo Caione <carlo@caione.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, linux-mmc <linux-mmc@vger.kernel.org>, linux-meson@googlegroups.com, linux@endlessm.com
 
-On 4 February 2016 at 01:52, Nguyen Viet Dung <nv-dung@jinso.co.jp> wro=
-te:
-> Hi Ulf
->
-> I want to test this problem withc your patch.
-> Please sent pacthset for me.
-> I have checked below link but detail of patch haven't.
+On Wed, Feb 3, 2016 at 11:46 AM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+> On 2 February 2016 at 22:54, Carlo Caione <carlo@caione.org> wrote:
 
-Sorry for the delay. I haven't been able to rebase my patchset yet.
+[cut]
 
-Give me another couple of days, then I will post a new version.
+> Huh, another broken MMC controller. :-)
 
-Kind regards
-Uffe
+Oh, actually I found in the datasheet a couple of undocumented
+registers (also not used in the original Amlogic SDK code) that seems
+to have something to do with timeout (hard to say without proper
+documentation but they are called "Timeout counter for preload setting
+and present status" and "Timeout Counter Interrupt Enable for ARC/ARM"
+so I guess I'm on the right track here).
+I briefly tried yesterday to enable this timeout interrupt with a
+dummy value in the counter register (I have no idea how get this value
+from the clocking) and it seems working (the counter value is
+decremented when reading the register upon command completion).
 
->
-> Best regard,
-> Nguyen Viet Dung
->
-> On 2015=E5=B9=B412=E6=9C=8822=E6=97=A5 12:16, Nguyen Viet Dung wrote:
->>
->> Hi Geert
->>
->> Thank for your reply.
->>
->> On 2015=E5=B9=B412=E6=9C=8818=E6=97=A5 19:27, Ulf Hansson wrote:
->>>
->>> On 18 December 2015 at 10:33, Geert Uytterhoeven <geert@linux-m68k.=
-org>
->>> wrote:
->>>>
->>>> Hi Dung-san,
->>>>
->>>> CC Ulf
->>>>
->>>> On Mon, Dec 14, 2015 at 3:34 AM, Nguyen Viet Dung <nv-dung@jinso.c=
-o.jp>
->>>> wrote:
->>>>>
->>>>> While is testting LTSI-v4.1.13-rc1, we have found the following t=
-he
->>>>> failure
->>>>> of mmcif.
->>>>> 1. mount mmc block
->>>>> 2. write data to mmc block
->>>>> 3. suspend/resume
->>>>> 4. write data to mmc block one again =3D> happen kernel panic
->>>>> (Probability in this test procedure is 100%)
->>>>>
->>>>> We have used git bisect to find cause of failure in LTS-v4.1.13 t=
-o
->>>>> LTSI-v4.1.13-rc1
->>>>> and have found commit which cause failure.
->>>>> (On LTS-v4.1.13 has not this failure)
->>>>>   drivers: sh: Disable PM runtime for multi-platform ARM with gen=
-pd
->>>>>   commit :cbc41d0a761bffb3166a413a3c77100a737c0cd7
->>>>
->>>> That means there's a bug in Runtime PM handling of the sh_mmcif dr=
-iver,
->>>> or
->>>> in the MMC subsystem.
->>>>
->>>> Usually such bugs cause a kernel hang on register access, not a NU=
-LL
->>>> pointer
->>>> dereference, though.
->>>
->>> Agree!
->>>
->>> I doubt the bisected commit is where the *real* issue is. Looking i=
-nto
->>> the details for how system PM and runtime PM is deployed in sh_mmci=
-f,
->>> I believe some improvements are needed.
->>>
->>> Actually, I made an attempt to modernize the PM code for sh_mmcif a=
- while
->>> ago.
->>> http://marc.info/?l=3Dlinux-mmc&m=3D138245085523815&w=3D2
->>>
->>> Whether that fixes the problem reported here, I have no idea. Altho=
-ugh
->>> if not, it should move the code to a position where it becomes easi=
-er
->>> to properly fix this issue.
->>>
->>> I am willing to help and rebase that patchset, but I require help i=
-n
->>> testing since I haven't been able to get a hold of a HW. Can I coun=
-t
->>> on that?
->>
->> Yes , I can help you test.
->> If you have rebased patchset, phease tell me.
->>
->> Best regards,
->> Nguyen Viet Dung
->
->
+> In some cases there are no data in the request, it's just a command
+> being sent. So to deal with this issue, you will have to adjust the
+> timer depending on the request we send to the controller.
+
+I see that the CMD13 used to poll the card has no data so in that case
+should we use a fixed / dummy value to use as timeout counter?
+I'm kind of confused here since the MMC drivers I'm looking at use the
+hardware timeout register only when the data->timeout_ns is actually
+present.
+
+-- 
+Carlo Caione
