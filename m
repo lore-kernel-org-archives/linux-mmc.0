@@ -1,98 +1,185 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [RFC PATCH 0/21] Totally remove SDHCI_QUIRK_BROKEN_CARD_DETECTION quirk
-Date: Thu, 4 Feb 2016 11:40:04 +0100
-Message-ID: <CAPDyKFqcXnJHN0hQB1u9mZhARG5OZRv2-m38gwcaycNrVeYv9A@mail.gmail.com>
-References: <1453871043-2985-1-git-send-email-shawn.lin@rock-chips.com>
+Subject: Re: [PATCH v4 00/25] MMC/SDHCI fixes
+Date: Thu, 4 Feb 2016 11:55:09 +0100
+Message-ID: <CAPDyKFqEEHudbQ=GiQzrvrTMRynuBzFMNH5K1Yh3ZVU7UsW2mA@mail.gmail.com>
+References: <20160129094324.GA20025@n2100.arm.linux.org.uk>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1453871043-2985-1-git-send-email-shawn.lin@rock-chips.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Shawn Lin <shawn.lin@rock-chips.com>, Adrian Hunter <adrian.hunter@intel.com>
-Cc: bcm-kernel-feedback-list@broadcom.com, linux-rpi-kernel@lists.infradead.org, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-yw0-f179.google.com ([209.85.161.179]:35182 "EHLO
+	mail-yw0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1757719AbcBDKzJ (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 4 Feb 2016 05:55:09 -0500
+Received: by mail-yw0-f179.google.com with SMTP id g127so24200146ywf.2
+        for <linux-mmc@vger.kernel.org>; Thu, 04 Feb 2016 02:55:09 -0800 (PST)
+In-Reply-To: <20160129094324.GA20025@n2100.arm.linux.org.uk>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Russell King - ARM Linux <linux@arm.linux.org.uk>, Adrian Hunter <adrian.hunter@intel.com>
+Cc: Gregory CLEMENT <gregory.clement@free-electrons.com>, linux-mmc <linux-mmc@vger.kernel.org>, Marcin Wojtas <mw@semihalf.com>, Shawn Guo <shawnguo@kernel.org>, Sascha Hauer <kernel@pengutronix.de>
 
 + Adrian
 
-On 27 January 2016 at 06:04, Shawn Lin <shawn.lin@rock-chips.com> wrote:
+On 29 January 2016 at 10:43, Russell King - ARM Linux
+<linux@arm.linux.org.uk> wrote:
+> On Mon, Dec 21, 2015 at 11:39:56AM +0000, Russell King - ARM Linux wrote:
+>> This all started with a report from an iMX6 Hummingboard user that
+>> they were seeing regular "mmc0: Got data interrupt 0x00000002 even
+>> though no data operation was in progress." messages with 4.4-rc and
+>> additional patches to enable UHS support in DT for the platform.
+>>
+>> When I tested 4.4-rc on an iMX6 Hummingboard with UHS support enabled,
+>> I found several other issues.  This patch series addresses some of
+>> the issues.
+>>
+>> However, while testing on Armada 388, an issue was found there, and
+>> a fix is also included in this patch set, however it does not depend
+>> on the rest of the patch series.
+>>
+>> We all know that the SDHCI driver is in poor state, and Ulf's desire
+>> to see it turned into a library (which actually comes from myself.)
+>> However, with the driver in such a poor state, it makes sense to fix
+>> a few of the issues first, especially if they result in the code
+>> shrinking - which they do.
+>>
+>> However, given what I've found below, I have to wonder how many of the
+>> quirks that we have in this driver are down to the poor code rather than
+>> real hardware problems: how many of them are due to poorly investigated
+>> bugs.
+>>
+>> This series starts off by shutting up some kernel messages that should
+>> not be verbose:
+>> - the voltage-ranges DT property is optional, so we should not print
+>>   a message saying that it's missing from DT.  That suggests it isn't
+>>   optional.  As no ill effect comes from not specifying it, I've
+>>   dropped this message to debug level.
+>>
+>> - reworking the voltage-ranges code so that callers know whether the
+>>   optional voltage-ranges property was specified.
+>>
+>> - "retrying because a re-tune was needed" - a re-tune is something that
+>>   is part of the higher speed SD specs, and it's required to happen
+>>   periodically.  So it's expected and normal behaviour.  There's no need
+>>   to print this to the kernel log.
+>>
+>> - When tuning fails, rather than a bland "mmc0: tuning execution failed"
+>>   message, print the error code so that we can see what the reason for
+>>   the failure is.  MMC fails on this point in many places.
+>>
+>> - Move the initialisation of the command ->error member.  It looks to
+>>   me as if this is not required; mmc_start_request() does this already,
+>>   as it seems the rest of the MMC core does too.  Maybe this should be
+>>   removed altogether?
+>>
+>> - Testing error bits, then setting the error, then testing the error
+>>   value, and completing the command is a very lengthy way to deal with
+>>   errors here.  Test the error bits, and then decide what error occurred
+>>   before completing.  (This code is actually buggy, see the next change).
+>>
+>> - If a command _response_ CRC error occurs, we can't be certain whether
+>>   the card received the command successfully, and has started processing
+>>   it.  If it has, and it results in data being read from the card, the
+>>   card will enter data transfer state, and start sending data to the
+>>   host.  Therefore, it is completely wrong to blindly terminate the
+>>   command, especially when such termination fails to clean _anything_
+>>   up - eg, it leaves DMA in place so the host can continue DMAing to the
+>>   memory, and it leaves buffers DMA mapped - which eventually annoys the
+>>   DMA API debugging.  Fix this by assuming that a CRC error is a receive
+>>   side error.  If the card did not correctly receive the command, it
+>>   will not initiate a data transfer, and we should time out after the
+>>   card specified timeout.
+>>
+>>   With the unmodified mainline code, even if we reset the state machines
+>>   when finishing a request in error, the _card_ itself may well still be
+>>   in data transfer mode when this happens.  How can we be sure what state
+>>   the data side is actually in?  Could this be why (eg) sdhci-esdhc-imx.c
+>>   has this:
+>>
+>>         /* FIXME: delay a bit for card to be ready for next tuning due to errors */
+>>         mdelay(1);
+>>
+>>   And how many more such _hacks_ are working around similar problems?
+>>
+>> - The unaligned buffer handling is a total waste of resources in its
+>>   current form.  We DMA map, sync, and unmap it on every transfer,
+>>   whether the buffer is used or not.  For MMC/SD transfers, these will
+>>   be coming from the VFS/MM layers, which operate through the page
+>>   cache - hence the vast majority of buffers will be page aligned.
+>>   Performance measurements on iMX6 show that this additional DMA
+>>   maintanence is responsible for a 10% reduction in read transfer
+>>   performance.  Switch this to use a DMA coherent mapping instead, which
+>>   needs no DMA maintanence.
+>>
+>> - sdhci_adma_table_post() is badly coded: we walk the scatterlist
+>>   looking for any buffers which might not be aligned (which can be a
+>>   rare event, see above) and then we only do something if we find an
+>>   unaligned buffer _and_ it's a read transfer.  So for a write transfer,
+>>   this scatterlist walking is a total waste of CPU cycles.  Testing the
+>>   transfer direction is much cheaper than walking the scatterlist.
+>>   Re-organise the code to do the cheap test first.
+>>
+>> - There are two paths to identical DMA unmapping code (the code around
+>>   dma_unmap_sg()) in sdhci_finish_data() and its child function
+>>   sdhci_adma_table_post().  Trivially simplify this duplication.
+>>
+>> - Move sdhci_pre_dma_transfer() so we avoid needing to declare it.
+>>
+>> - Do the same thing with sdhci_prepare_data() and sdhci_pre_dma_transfer()
+>>   as with sdhci_finish_data() and sdhci_adma_table_post().
+>>
+>> - Fix the mess that is the data segment host_cookie handling.  The
+>>   existing code seems like a candidate for the obfuscated coding prize!
+>>   Four patches address this, turning it into something much easier to
+>>   understand, which then allows (finally)...
+>>
+>> - The DMA API leak which occurs when we have mapped the DMA buffers in
+>>   sdhci_prepare_data() and an error occurs early on in the processing
+>>   of a request.
+>>
+>> - A change (mentioned above) which fixes a prior commit for Armada 38x
+>>   using sdhci-pxav3.c, found while trying to get the higher speed modes
+>>   working on these SoCs.  Clearly the existing code is broken, this at
+>>   least resolves some of the breakage by allowing the correct high-order
+>>   SDHCI capabilities through.
+>>
+>> - Fixing another DMA API leak with the pre/post request handling, where
+>>   a current request can change the state of the SDHCI_REQ_USE_DMA, and
+>>   thus stop a mapped request being unmapped.
+>>
+>> - Fixing the SDHCI timeout calculation code to correctly round timeouts
+>>   up rather than down, and correctly calculate the time (in microseconds)
+>>   for a certain number of card clocks.
+>>
+>> - Consolidating the SDHCI address/size alignment handling so we only walk
+>>   the scatterlist once instead of twice.
+>>
+>> Further patches are necessary as there are still a number of observable
+>> problems when using this driver on iMX6 with UHS cards.  Patches up to
+>> and including "mmc: sdhci: further fix for DMA unmapping in
+>> sdhci_post_req()" should be considered for inclusion in the stable
+>> kernel trees.
+>>
+>> I've tested these changes on iMX6 at UHS speeds, and Armada 388 SoCs
+>> at HS speeds so far.  Others should test them.
 >
-> Ulf wants to make sdhci into a library, but it's a huge task
-> since any improvemts may touch too much platforms. But at least
-> we should make some effort to push things torwards to this target.
+> One comment from Adrian addressed.
 >
-> This patchset remove SDHCI_QUIRK_BROKEN_CARD_DETECTION from sdhci
-> to gradually reduce quirk of sdhci.
->
-> Firstly, SDHCI_QUIRK_BROKEN_CARD_DETECTION aims at claiming the slot is
-> a "broken-cd" one, but "broken-cd" is not a quirk from my view.
-> In addition, mmc core stack had already obtain "broken-cd" from dts via
-> mmc_of_parse and pass MMC_CAP_NEEDS_POLL to mmc->caps. So we can reuse it
-> instead of SDHCI_QUIRK_BROKEN_CARD_DETECTION.
->
-> However, before doing the cleanup work, I find that geting _of_ property
-> for sdhci* is not so pretty good and consistent. Some variant drives use
-> mmc_of_parse, while another ones use sdhci_get_of_property. I also find some
-> variant drivers combine these two paths. So in order to make my "broken-cd"
-> cleanup running, I decide to add mmc_of_parse into sdhci_get_of_property and
-> replace mmc_of_parse with sdhci_get_of_property for all variant drivers if
-> needed.
->
-> Unfortunately, I don't have all these platforms touched to test my patchset.
-> I might make some mistakes for these changes, so any comments are welcomed.
->
->
->
-> Shawn Lin (21):
->   mmc: sdhci-pltfm: consolidate parsing path
->   mmc: sdhci-iproc: consolidate parsing path
->   mmc: sdhci-msm: consolidate parsing path
->   mmc: sdhci-of-arasan: consolidate parsing path
->   mmc: sdhci-of-at91: consolidate parsing path
->   mmc: sdhci-of-esdhc: consolidate parsing path
->   mmc: sdhci-pxav3: consolidate parsing path
->   mmc: sdhci-sirf: check sdhci_get_of_property return value
->   mmc: sdhci_f_sdh30: check sdhci_get_of_property return value
->   mmc: sdhci: remove SDHCI_QUIRK_BROKEN_CARD_DETECTION
->   mmc: sdhci-acpi: remove SDHCI_QUIRK_BROKEN_CARD_DETECTION
->   mmc: sdhci-bcm-kona: remove SDHCI_QUIRK_BROKEN_CARD_DETECTION
->   mmc: sdhci-bcm2835: remove SDHCI_QUIRK_BROKEN_CARD_DETECTION
->   mmc: sdhci-esdhc-imx: remove SDHCI_QUIRK_BROKEN_CARD_DETECTION
->   mmc: sdhci-msm: remove SDHCI_QUIRK_BROKEN_CARD_DETECTION
->   mmc: sdhci-of-esdhc: remove SDHCI_QUIRK_BROKEN_CARD_DETECTION
->   mmc: sdhci-pci-core: remove SDHCI_QUIRK_BROKEN_CARD_DETECTION
->   mmc: sdhci-pltfm: remove SDHCI_QUIRK_BROKEN_CARD_DETECTION
->   mmc: sdhci-pxav2: remove SDHCI_QUIRK_BROKEN_CARD_DETECTION
->   mmc: sdhci-s3c: remove SDHCI_QUIRK_BROKEN_CARD_DETECTION
->   mmc: sdhci.h: remove SDHCI_QUIRK_BROKEN_CARD_DETECTION
->
->  drivers/mmc/host/sdhci-acpi.c      |  3 +--
->  drivers/mmc/host/sdhci-bcm-kona.c  |  3 ---
->  drivers/mmc/host/sdhci-bcm2835.c   |  5 +++--
->  drivers/mmc/host/sdhci-esdhc-imx.c |  9 +++++----
->  drivers/mmc/host/sdhci-iproc.c     |  5 +++--
->  drivers/mmc/host/sdhci-msm.c       |  6 ++----
->  drivers/mmc/host/sdhci-of-arasan.c | 11 ++++-------
->  drivers/mmc/host/sdhci-of-at91.c   |  4 +---
->  drivers/mmc/host/sdhci-of-esdhc.c  | 25 ++++++++++++-------------
->  drivers/mmc/host/sdhci-pci-core.c  |  5 ++++-
->  drivers/mmc/host/sdhci-pltfm.c     | 26 +++++++++++++++++++-------
->  drivers/mmc/host/sdhci-pltfm.h     |  2 +-
->  drivers/mmc/host/sdhci-pxav2.c     |  1 -
->  drivers/mmc/host/sdhci-pxav3.c     |  4 +---
->  drivers/mmc/host/sdhci-s3c.c       |  2 +-
->  drivers/mmc/host/sdhci-sirf.c      |  4 +++-
->  drivers/mmc/host/sdhci.c           | 14 +++++---------
->  drivers/mmc/host/sdhci.h           | 30 ++++++++++++++----------------
->  drivers/mmc/host/sdhci_f_sdh30.c   |  5 ++++-
->  19 files changed, 83 insertions(+), 81 deletions(-)
+>  drivers/mmc/card/block.c       |   4 +-
+>  drivers/mmc/core/core.c        |  17 +-
+>  drivers/mmc/host/sdhci-pxav3.c |   6 +-
+>  drivers/mmc/host/sdhci.c       | 444 ++++++++++++++++++-----------------------
+>  drivers/mmc/host/sdhci.h       |   4 +-
+>  5 files changed, 213 insertions(+), 262 deletions(-)
 >
 > --
-> 2.3.7
->
->
+> RMK's Patch system: http://www.arm.linux.org.uk/developer/patches/
+> FTTC broadband for 0.8mile line: currently at 9.6Mbps down 400kbps up
+> according to speedtest.net.
 
-To avoid confusions. I don't intend to pick up any further sdhci
-patches, unless they are acked by Adrian Hunter.
+I have applied patch 1 to 4, for next!
 
-Kind regards
+The rest are sdhci patches, which from now on needs acks from Adrian
+for me to pick them up.
+
+Thanks and kind regards!
 Uffe
