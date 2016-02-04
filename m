@@ -1,94 +1,103 @@
-From: Nguyen Viet Dung <nv-dung@jinso.co.jp>
-Subject: Re: [bug] kernel panic if writting data to mmc after suspendding
-Date: Thu, 4 Feb 2016 09:52:17 +0900
-Message-ID: <56B2A0C1.9050808@jinso.co.jp>
-References: <566A21D2.4080009@jinso.co.jp> <566E2AC0.8060800@jinso.co.jp>
- <CAMuHMdWU0WVBiWSsLti=KSidFk198k_3CAiNm=iGLtmw4wQOgw@mail.gmail.com>
- <CAPDyKFomFTn7iX2kSXFVqstjEWpezNOB-B_DdFFRBWi9upUrpg@mail.gmail.com>
- <5678C081.5090001@jinso.co.jp>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: Re: [PATCH] mmc: core: use the defined function to check whether card
+ is removable
+Date: Thu, 04 Feb 2016 14:56:15 +0900
+Message-ID: <56B2E7FF.8030903@samsung.com>
+References: <1454025177-21233-1-git-send-email-jh80.chung@samsung.com>
+ <CAPDyKFpgc_9t+fKY-=ODENR9B=_S50EnB9tc9x7+7Adfm=rX6g@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8;
-	format=flowed
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-sh-owner@vger.kernel.org>
-In-Reply-To: <5678C081.5090001@jinso.co.jp>
-Sender: linux-sh-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>, Geert Uytterhoeven <geert@linux-m68k.org>, Linux MMC List <linux-mmc@vger.kernel.org>
-Cc: Linux-sh list <linux-sh@vger.kernel.org>, "ltsi-dev@lists.linuxfoundation.org" <ltsi-dev@lists.linuxfoundation.org>, =?UTF-8?B?U2ltb24g44GV44KT?= <simon@horms.net>, Geert Uytterhoeven <geert+renesas@glider.be>, "Shimoda, Yoshihiro" <yoshihiro.shimoda.uh@renesas.com>, Hisao Munakata <hisao.munakata.vt@renesas.com>
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mailout4.samsung.com ([203.254.224.34]:52342 "EHLO
+	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932840AbcBDF4S (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 4 Feb 2016 00:56:18 -0500
+Received: from epcpsbgr3.samsung.com
+ (u143.gpu120.samsung.co.kr [203.254.230.143])
+ by mailout4.samsung.com (Oracle Communications Messaging Server 7.0.5.31.0
+ 64bit (built May  5 2014))
+ with ESMTP id <0O2002I4SDTS1IC0@mailout4.samsung.com> for
+ linux-mmc@vger.kernel.org; Thu, 04 Feb 2016 14:56:16 +0900 (KST)
+In-reply-to: <CAPDyKFpgc_9t+fKY-=ODENR9B=_S50EnB9tc9x7+7Adfm=rX6g@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, Shawn Lin <shawn.lin@rock-chips.com>
 
-Hi Ulf
+On 02/02/2016 10:11 PM, Ulf Hansson wrote:
+> On 29 January 2016 at 00:52, Jaehoon Chung <jh80.chung@samsung.com> wrote:
+>> In linux/mmc/host.h, mmc_card_is_removable() is already defined.
+>> There is no reason that it doesn't use.
+>>
+>> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+> 
+> Thanks, applied for next!
+> 
+> Regarding the host drivers, as pointed out by Shawn. Let's fix them in
+> one separate patch.
 
-I want to test this problem withc your patch.
-Please sent pacthset for me.
-I have checked below link but detail of patch haven't.
+I will do it. Thanks!
 
-Best regard,
-Nguyen Viet Dung
+Best Regards,
+Jaehoon Chung
 
-On 2015=E5=B9=B412=E6=9C=8822=E6=97=A5 12:16, Nguyen Viet Dung wrote:
-> Hi Geert
->
-> Thank for your reply.
->
-> On 2015=E5=B9=B412=E6=9C=8818=E6=97=A5 19:27, Ulf Hansson wrote:
->> On 18 December 2015 at 10:33, Geert Uytterhoeven=20
->> <geert@linux-m68k.org> wrote:
->>> Hi Dung-san,
->>>
->>> CC Ulf
->>>
->>> On Mon, Dec 14, 2015 at 3:34 AM, Nguyen Viet Dung=20
->>> <nv-dung@jinso.co.jp> wrote:
->>>> While is testting LTSI-v4.1.13-rc1, we have found the following th=
-e=20
->>>> failure
->>>> of mmcif.
->>>> 1. mount mmc block
->>>> 2. write data to mmc block
->>>> 3. suspend/resume
->>>> 4. write data to mmc block one again =3D> happen kernel panic
->>>> (Probability in this test procedure is 100%)
->>>>
->>>> We have used git bisect to find cause of failure in LTS-v4.1.13 to
->>>> LTSI-v4.1.13-rc1
->>>> and have found commit which cause failure.
->>>> (On LTS-v4.1.13 has not this failure)
->>>>   drivers: sh: Disable PM runtime for multi-platform ARM with genp=
-d
->>>>   commit :cbc41d0a761bffb3166a413a3c77100a737c0cd7
->>> That means there's a bug in Runtime PM handling of the sh_mmcif=20
->>> driver, or
->>> in the MMC subsystem.
->>>
->>> Usually such bugs cause a kernel hang on register access, not a NUL=
-L=20
->>> pointer
->>> dereference, though.
->> Agree!
+> 
+> Kind regards
+> Uffe
+> 
+>> ---
+>>  drivers/mmc/core/core.c | 9 ++++-----
+>>  1 file changed, 4 insertions(+), 5 deletions(-)
 >>
->> I doubt the bisected commit is where the *real* issue is. Looking in=
-to
->> the details for how system PM and runtime PM is deployed in sh_mmcif=
-,
->> I believe some improvements are needed.
+>> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+>> index f95d41f..9da9b60 100644
+>> --- a/drivers/mmc/core/core.c
+>> +++ b/drivers/mmc/core/core.c
+>> @@ -2532,7 +2532,7 @@ int mmc_detect_card_removed(struct mmc_host *host)
+>>         if (!card)
+>>                 return 1;
 >>
->> Actually, I made an attempt to modernize the PM code for sh_mmcif a=20
->> while ago.
->> http://marc.info/?l=3Dlinux-mmc&m=3D138245085523815&w=3D2
+>> -       if (host->caps & MMC_CAP_NONREMOVABLE)
+>> +       if (!mmc_card_is_removable(host))
+>>                 return 0;
 >>
->> Whether that fixes the problem reported here, I have no idea. Althou=
-gh
->> if not, it should move the code to a position where it becomes easie=
-r
->> to properly fix this issue.
+>>         ret = mmc_card_removed(card);
+>> @@ -2570,7 +2570,7 @@ void mmc_rescan(struct work_struct *work)
+>>                 return;
 >>
->> I am willing to help and rebase that patchset, but I require help in
->> testing since I haven't been able to get a hold of a HW. Can I count
->> on that?
-> Yes , I can help you test.
-> If you have rebased patchset, phease tell me.
->
-> Best regards,
-> Nguyen Viet Dung
+>>         /* If there is a non-removable card registered, only scan once */
+>> -       if ((host->caps & MMC_CAP_NONREMOVABLE) && host->rescan_entered)
+>> +       if (!mmc_card_is_removable(host) && host->rescan_entered)
+>>                 return;
+>>         host->rescan_entered = 1;
+>>
+>> @@ -2587,8 +2587,7 @@ void mmc_rescan(struct work_struct *work)
+>>          * if there is a _removable_ card registered, check whether it is
+>>          * still present
+>>          */
+>> -       if (host->bus_ops && !host->bus_dead
+>> -           && !(host->caps & MMC_CAP_NONREMOVABLE))
+>> +       if (host->bus_ops && !host->bus_dead && mmc_card_is_removable(host))
+>>                 host->bus_ops->detect(host);
+>>
+>>         host->detect_change = 0;
+>> @@ -2613,7 +2612,7 @@ void mmc_rescan(struct work_struct *work)
+>>         mmc_bus_put(host);
+>>
+>>         mmc_claim_host(host);
+>> -       if (!(host->caps & MMC_CAP_NONREMOVABLE) && host->ops->get_cd &&
+>> +       if (mmc_card_is_removable(host) && host->ops->get_cd &&
+>>                         host->ops->get_cd(host) == 0) {
+>>                 mmc_power_off(host);
+>>                 mmc_release_host(host);
+>> --
+>> 1.9.1
+>>
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
 
