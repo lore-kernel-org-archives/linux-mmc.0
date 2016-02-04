@@ -1,80 +1,120 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH] mmc: dw_mmc-rockchip: remove dw_mci_rockchip_pmops
-Date: Thu, 04 Feb 2016 15:15:03 +0900
-Message-ID: <56B2EC67.4010909@samsung.com>
-References: <1454470004-21408-1-git-send-email-shawn.lin@rock-chips.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [bug] kernel panic if writting data to mmc after suspendding
+Date: Thu, 4 Feb 2016 09:26:48 +0100
+Message-ID: <CAPDyKFoWt2Xt1xHsGSfyzxX_kvNVSn5Y1rRbZ8Mc8sWOjhX+bw@mail.gmail.com>
+References: <566A21D2.4080009@jinso.co.jp>
+	<566E2AC0.8060800@jinso.co.jp>
+	<CAMuHMdWU0WVBiWSsLti=KSidFk198k_3CAiNm=iGLtmw4wQOgw@mail.gmail.com>
+	<CAPDyKFomFTn7iX2kSXFVqstjEWpezNOB-B_DdFFRBWi9upUrpg@mail.gmail.com>
+	<5678C081.5090001@jinso.co.jp>
+	<56B2A0C1.9050808@jinso.co.jp>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout2.samsung.com ([203.254.224.25]:33466 "EHLO
-	mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755722AbcBDGPE (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 4 Feb 2016 01:15:04 -0500
-In-reply-to: <1454470004-21408-1-git-send-email-shawn.lin@rock-chips.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-sh-owner@vger.kernel.org>
+In-Reply-To: <56B2A0C1.9050808@jinso.co.jp>
+Sender: linux-sh-owner@vger.kernel.org
+To: Nguyen Viet Dung <nv-dung@jinso.co.jp>
+Cc: Geert Uytterhoeven <geert@linux-m68k.org>, Linux MMC List <linux-mmc@vger.kernel.org>, Linux-sh list <linux-sh@vger.kernel.org>, "ltsi-dev@lists.linuxfoundation.org" <ltsi-dev@lists.linuxfoundation.org>, =?UTF-8?B?U2ltb24g44GV44KT?= <simon@horms.net>, Geert Uytterhoeven <geert+renesas@glider.be>, "Shimoda, Yoshihiro" <yoshihiro.shimoda.uh@renesas.com>, Hisao Munakata <hisao.munakata.vt@renesas.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Shawn Lin <shawn.lin@rock-chips.com>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 
-Hi, Shawn.
+On 4 February 2016 at 01:52, Nguyen Viet Dung <nv-dung@jinso.co.jp> wro=
+te:
+> Hi Ulf
+>
+> I want to test this problem withc your patch.
+> Please sent pacthset for me.
+> I have checked below link but detail of patch haven't.
 
-On 02/03/2016 12:26 PM, Shawn Lin wrote:
-> dw_mci_rockchip_pmops just copy-paste what dw_mci_pltfm_pmops
-> have done. Let's remove it.
+Sorry for the delay. I haven't been able to rebase my patchset yet.
 
-Yep, it's possible to remove.
-I'm not sure but i want to know there is no plan to add the specific code of rockchip in suspend/resume.
-Could you check this?
+Give me another couple of days, then I will post a new version.
 
-Best Regards,
-Jaehoon Chung
+Kind regards
+Uffe
 
-> 
-> Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
-> ---
-> 
->  drivers/mmc/host/dw_mmc-rockchip.c | 22 +---------------------
->  1 file changed, 1 insertion(+), 21 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/dw_mmc-rockchip.c b/drivers/mmc/host/dw_mmc-rockchip.c
-> index d9c92f3..3438ab3 100644
-> --- a/drivers/mmc/host/dw_mmc-rockchip.c
-> +++ b/drivers/mmc/host/dw_mmc-rockchip.c
-> @@ -276,33 +276,13 @@ static int dw_mci_rockchip_probe(struct platform_device *pdev)
->  	return dw_mci_pltfm_register(pdev, drv_data);
->  }
->  
-> -#ifdef CONFIG_PM_SLEEP
-> -static int dw_mci_rockchip_suspend(struct device *dev)
-> -{
-> -	struct dw_mci *host = dev_get_drvdata(dev);
-> -
-> -	return dw_mci_suspend(host);
-> -}
-> -
-> -static int dw_mci_rockchip_resume(struct device *dev)
-> -{
-> -	struct dw_mci *host = dev_get_drvdata(dev);
-> -
-> -	return dw_mci_resume(host);
-> -}
-> -#endif /* CONFIG_PM_SLEEP */
-> -
-> -static SIMPLE_DEV_PM_OPS(dw_mci_rockchip_pmops,
-> -			 dw_mci_rockchip_suspend,
-> -			 dw_mci_rockchip_resume);
-> -
->  static struct platform_driver dw_mci_rockchip_pltfm_driver = {
->  	.probe		= dw_mci_rockchip_probe,
->  	.remove		= dw_mci_pltfm_remove,
->  	.driver		= {
->  		.name		= "dwmmc_rockchip",
->  		.of_match_table	= dw_mci_rockchip_match,
-> -		.pm		= &dw_mci_rockchip_pmops,
-> +		.pm		= &dw_mci_pltfm_pmops,
->  	},
->  };
->  
-> 
-
+>
+> Best regard,
+> Nguyen Viet Dung
+>
+> On 2015=E5=B9=B412=E6=9C=8822=E6=97=A5 12:16, Nguyen Viet Dung wrote:
+>>
+>> Hi Geert
+>>
+>> Thank for your reply.
+>>
+>> On 2015=E5=B9=B412=E6=9C=8818=E6=97=A5 19:27, Ulf Hansson wrote:
+>>>
+>>> On 18 December 2015 at 10:33, Geert Uytterhoeven <geert@linux-m68k.=
+org>
+>>> wrote:
+>>>>
+>>>> Hi Dung-san,
+>>>>
+>>>> CC Ulf
+>>>>
+>>>> On Mon, Dec 14, 2015 at 3:34 AM, Nguyen Viet Dung <nv-dung@jinso.c=
+o.jp>
+>>>> wrote:
+>>>>>
+>>>>> While is testting LTSI-v4.1.13-rc1, we have found the following t=
+he
+>>>>> failure
+>>>>> of mmcif.
+>>>>> 1. mount mmc block
+>>>>> 2. write data to mmc block
+>>>>> 3. suspend/resume
+>>>>> 4. write data to mmc block one again =3D> happen kernel panic
+>>>>> (Probability in this test procedure is 100%)
+>>>>>
+>>>>> We have used git bisect to find cause of failure in LTS-v4.1.13 t=
+o
+>>>>> LTSI-v4.1.13-rc1
+>>>>> and have found commit which cause failure.
+>>>>> (On LTS-v4.1.13 has not this failure)
+>>>>>   drivers: sh: Disable PM runtime for multi-platform ARM with gen=
+pd
+>>>>>   commit :cbc41d0a761bffb3166a413a3c77100a737c0cd7
+>>>>
+>>>> That means there's a bug in Runtime PM handling of the sh_mmcif dr=
+iver,
+>>>> or
+>>>> in the MMC subsystem.
+>>>>
+>>>> Usually such bugs cause a kernel hang on register access, not a NU=
+LL
+>>>> pointer
+>>>> dereference, though.
+>>>
+>>> Agree!
+>>>
+>>> I doubt the bisected commit is where the *real* issue is. Looking i=
+nto
+>>> the details for how system PM and runtime PM is deployed in sh_mmci=
+f,
+>>> I believe some improvements are needed.
+>>>
+>>> Actually, I made an attempt to modernize the PM code for sh_mmcif a=
+ while
+>>> ago.
+>>> http://marc.info/?l=3Dlinux-mmc&m=3D138245085523815&w=3D2
+>>>
+>>> Whether that fixes the problem reported here, I have no idea. Altho=
+ugh
+>>> if not, it should move the code to a position where it becomes easi=
+er
+>>> to properly fix this issue.
+>>>
+>>> I am willing to help and rebase that patchset, but I require help i=
+n
+>>> testing since I haven't been able to get a hold of a HW. Can I coun=
+t
+>>> on that?
+>>
+>> Yes , I can help you test.
+>> If you have rebased patchset, phease tell me.
+>>
+>> Best regards,
+>> Nguyen Viet Dung
+>
+>
