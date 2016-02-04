@@ -1,18 +1,17 @@
 From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH 2/4] mmc: dw_mmc: add setup_clk for init hook
-Date: Thu, 04 Feb 2016 15:04:58 +0900
-Message-ID: <56B2EA0A.5020208@samsung.com>
-References: <1453944616-16224-1-git-send-email-shawn.lin@rock-chips.com>
- <1453944664-16874-1-git-send-email-shawn.lin@rock-chips.com>
+Subject: Re: [PATCH v2] mmc: dw_mmc: fix num_slots setting
+Date: Thu, 04 Feb 2016 15:10:17 +0900
+Message-ID: <56B2EB49.6010505@samsung.com>
+References: <1454393485-4770-1-git-send-email-shawn.lin@rock-chips.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=windows-1252
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout2.samsung.com ([203.254.224.25]:36099 "EHLO
-	mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752396AbcBDGFA (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 4 Feb 2016 01:05:00 -0500
-In-reply-to: <1453944664-16874-1-git-send-email-shawn.lin@rock-chips.com>
+Received: from mailout4.samsung.com ([203.254.224.34]:47829 "EHLO
+	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S933504AbcBDGKT (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 4 Feb 2016 01:10:19 -0500
+In-reply-to: <1454393485-4770-1-git-send-email-shawn.lin@rock-chips.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Shawn Lin <shawn.lin@rock-chips.com>, Ulf Hansson <ulf.hansson@linaro.org>
@@ -20,89 +19,74 @@ Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 
 Hi, Shawn.
 
-On 01/28/2016 10:31 AM, Shawn Lin wrote:
-> We add this new argument into init hook for
-> variant drivers to decide whether to do clock
-> related stuff inside the hook.
-> 
-> Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
-> ---
-> 
->  drivers/mmc/host/dw_mmc-exynos.c   | 4 ++--
->  drivers/mmc/host/dw_mmc-rockchip.c | 2 +-
->  drivers/mmc/host/dw_mmc.c          | 2 +-
->  drivers/mmc/host/dw_mmc.h          | 2 +-
->  4 files changed, 5 insertions(+), 5 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/dw_mmc-exynos.c b/drivers/mmc/host/dw_mmc-exynos.c
-> index 3a7e835..edaa117 100644
-> --- a/drivers/mmc/host/dw_mmc-exynos.c
-> +++ b/drivers/mmc/host/dw_mmc-exynos.c
-> @@ -91,7 +91,7 @@ static inline u8 dw_mci_exynos_get_ciu_div(struct dw_mci *host)
->  		return SDMMC_CLKSEL_GET_DIV(mci_readl(host, CLKSEL)) + 1;
->  }
->  
-> -static int dw_mci_exynos_priv_init(struct dw_mci *host)
-> +static int dw_mci_exynos_priv_init(struct dw_mci *host, bool setup_clk)
->  {
+On 02/02/2016 03:11 PM, Shawn Lin wrote:
+> This patch make num_slots to 1 if pdata->num_slot is not
+> defined. Meanwhile, we need to make sure num_slots should
+> not larger that the supported slots
 
-"bool setup_clk" is made because of exynos SoC, right?
-Hmm. I'm checking how we can control without "setup_clk". Waiting for this.
-
-Thanks for removing the hooks. :)
+Thanks! I will apply this.
 
 Best Regards,
 Jaehoon Chung
 
->  	struct dw_mci_exynos_priv_data *priv = host->priv;
->  
-> @@ -159,7 +159,7 @@ static int dw_mci_exynos_resume(struct device *dev)
->  {
->  	struct dw_mci *host = dev_get_drvdata(dev);
->  
-> -	dw_mci_exynos_priv_init(host);
-> +	dw_mci_exynos_priv_init(host, false);
->  	return dw_mci_resume(host);
->  }
->  
-> diff --git a/drivers/mmc/host/dw_mmc-rockchip.c b/drivers/mmc/host/dw_mmc-rockchip.c
-> index 9934503..885c801 100644
-> --- a/drivers/mmc/host/dw_mmc-rockchip.c
-> +++ b/drivers/mmc/host/dw_mmc-rockchip.c
-> @@ -221,7 +221,7 @@ static int dw_mci_rk3288_parse_dt(struct dw_mci *host)
->  	return 0;
->  }
->  
-> -static int dw_mci_rockchip_init(struct dw_mci *host)
-> +static int dw_mci_rockchip_init(struct dw_mci *host, bool setup_clk)
->  {
->  	/* It is slot 8 on Rockchip SoCs */
->  	host->sdio_id0 = 8;
+> 
+> Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
+> 
+> ---
+> 
+> Changes in v2:
+> - remove default num-slots setting from dw_mci_parse_dt
+> 
+>  drivers/mmc/host/dw_mmc.c | 23 ++++++++++-------------
+>  1 file changed, 10 insertions(+), 13 deletions(-)
+> 
 > diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-> index 7128351..1d27a2b 100644
+> index 7128351..9696b77 100644
 > --- a/drivers/mmc/host/dw_mmc.c
 > +++ b/drivers/mmc/host/dw_mmc.c
-> @@ -2995,7 +2995,7 @@ int dw_mci_probe(struct dw_mci *host)
+> @@ -2864,12 +2864,7 @@ static struct dw_mci_board *dw_mci_parse_dt(struct dw_mci *host)
+>  		return ERR_PTR(-ENOMEM);
+>  
+>  	/* find out number of slots supported */
+> -	if (of_property_read_u32(dev->of_node, "num-slots",
+> -				&pdata->num_slots)) {
+> -		dev_info(dev,
+> -			 "num-slots property not found, assuming 1 slot is available\n");
+> -		pdata->num_slots = 1;
+> -	}
+> +	of_property_read_u32(np, "num-slots", &pdata->num_slots);
+>  
+>  	/* get quirks */
+>  	for (idx = 0; idx < ARRAY_SIZE(of_quirks); idx++)
+> @@ -2949,12 +2944,6 @@ int dw_mci_probe(struct dw_mci *host)
+>  		}
 >  	}
 >  
->  	if (drv_data && drv_data->init) {
-> -		ret = drv_data->init(host);
-> +		ret = drv_data->init(host, true);
->  		if (ret) {
->  			dev_err(host->dev,
->  				"implementation specific init failed\n");
-> diff --git a/drivers/mmc/host/dw_mmc.h b/drivers/mmc/host/dw_mmc.h
-> index f695b58..1a9492e 100644
-> --- a/drivers/mmc/host/dw_mmc.h
-> +++ b/drivers/mmc/host/dw_mmc.h
-> @@ -285,7 +285,7 @@ struct dw_mci_slot {
->   */
->  struct dw_mci_drv_data {
->  	unsigned long	*caps;
-> -	int		(*init)(struct dw_mci *host);
-> +	int		(*init)(struct dw_mci *host, bool setup_clk);
->  	int		(*setup_clock)(struct dw_mci *host);
->  	void		(*prepare_command)(struct dw_mci *host, u32 *cmdr);
->  	void		(*set_ios)(struct dw_mci *host, struct mmc_ios *ios);
+> -	if (host->pdata->num_slots < 1) {
+> -		dev_err(host->dev,
+> -			"Platform data must supply num_slots.\n");
+> -		return -ENODEV;
+> -	}
+> -
+>  	host->biu_clk = devm_clk_get(host->dev, "biu");
+>  	if (IS_ERR(host->biu_clk)) {
+>  		dev_dbg(host->dev, "biu clock not available\n");
+> @@ -3111,7 +3100,15 @@ int dw_mci_probe(struct dw_mci *host)
+>  	if (host->pdata->num_slots)
+>  		host->num_slots = host->pdata->num_slots;
+>  	else
+> -		host->num_slots = SDMMC_GET_SLOT_NUM(mci_readl(host, HCON));
+> +		host->num_slots = 1;
+> +
+> +	if (host->num_slots < 1 ||
+> +	    host->num_slots > SDMMC_GET_SLOT_NUM(mci_readl(host, HCON))) {
+> +		dev_err(host->dev,
+> +			"Platform data must supply correct num_slots.\n");
+> +		ret = -ENODEV;
+> +		goto err_clk_ciu;
+> +	}
+>  
+>  	/*
+>  	 * Enable interrupts for command done, data over, data empty,
 > 
 
