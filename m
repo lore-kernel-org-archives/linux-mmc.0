@@ -1,17 +1,17 @@
 From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH 1/2] mmc: dw_mmc: remove unused EVENT_XFER_ERROR
-Date: Thu, 04 Feb 2016 15:12:55 +0900
-Message-ID: <56B2EBE7.3030008@samsung.com>
-References: <1454469964-21365-1-git-send-email-shawn.lin@rock-chips.com>
+Subject: Re: [PATCH] mmc: dw_mmc-rockchip: remove dw_mci_rockchip_pmops
+Date: Thu, 04 Feb 2016 15:15:03 +0900
+Message-ID: <56B2EC67.4010909@samsung.com>
+References: <1454470004-21408-1-git-send-email-shawn.lin@rock-chips.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=windows-1252
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout3.samsung.com ([203.254.224.33]:48623 "EHLO
-	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756097AbcBDGM5 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 4 Feb 2016 01:12:57 -0500
-In-reply-to: <1454469964-21365-1-git-send-email-shawn.lin@rock-chips.com>
+Received: from mailout2.samsung.com ([203.254.224.25]:33466 "EHLO
+	mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755722AbcBDGPE (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 4 Feb 2016 01:15:04 -0500
+In-reply-to: <1454470004-21408-1-git-send-email-shawn.lin@rock-chips.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Shawn Lin <shawn.lin@rock-chips.com>, Ulf Hansson <ulf.hansson@linaro.org>
@@ -20,11 +20,12 @@ Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 Hi, Shawn.
 
 On 02/03/2016 12:26 PM, Shawn Lin wrote:
-> EVENT_XFER_ERROR isn't been used now, so we can
-> remove it.
+> dw_mci_rockchip_pmops just copy-paste what dw_mci_pltfm_pmops
+> have done. Let's remove it.
 
-If you are ok, after changing the commit message, I will apply this.
-Thanks!
+Yep, it's possible to remove.
+I'm not sure but i want to know there is no plan to add the specific code of rockchip in suspend/resume.
+Could you check this?
 
 Best Regards,
 Jaehoon Chung
@@ -33,20 +34,47 @@ Jaehoon Chung
 > Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
 > ---
 > 
->  include/linux/mmc/dw_mmc.h | 1 -
->  1 file changed, 1 deletion(-)
+>  drivers/mmc/host/dw_mmc-rockchip.c | 22 +---------------------
+>  1 file changed, 1 insertion(+), 21 deletions(-)
 > 
-> diff --git a/include/linux/mmc/dw_mmc.h b/include/linux/mmc/dw_mmc.h
-> index 89df7ab..b29e06e 100644
-> --- a/include/linux/mmc/dw_mmc.h
-> +++ b/include/linux/mmc/dw_mmc.h
-> @@ -36,7 +36,6 @@ enum {
->  	EVENT_XFER_COMPLETE,
->  	EVENT_DATA_COMPLETE,
->  	EVENT_DATA_ERROR,
-> -	EVENT_XFER_ERROR
+> diff --git a/drivers/mmc/host/dw_mmc-rockchip.c b/drivers/mmc/host/dw_mmc-rockchip.c
+> index d9c92f3..3438ab3 100644
+> --- a/drivers/mmc/host/dw_mmc-rockchip.c
+> +++ b/drivers/mmc/host/dw_mmc-rockchip.c
+> @@ -276,33 +276,13 @@ static int dw_mci_rockchip_probe(struct platform_device *pdev)
+>  	return dw_mci_pltfm_register(pdev, drv_data);
+>  }
+>  
+> -#ifdef CONFIG_PM_SLEEP
+> -static int dw_mci_rockchip_suspend(struct device *dev)
+> -{
+> -	struct dw_mci *host = dev_get_drvdata(dev);
+> -
+> -	return dw_mci_suspend(host);
+> -}
+> -
+> -static int dw_mci_rockchip_resume(struct device *dev)
+> -{
+> -	struct dw_mci *host = dev_get_drvdata(dev);
+> -
+> -	return dw_mci_resume(host);
+> -}
+> -#endif /* CONFIG_PM_SLEEP */
+> -
+> -static SIMPLE_DEV_PM_OPS(dw_mci_rockchip_pmops,
+> -			 dw_mci_rockchip_suspend,
+> -			 dw_mci_rockchip_resume);
+> -
+>  static struct platform_driver dw_mci_rockchip_pltfm_driver = {
+>  	.probe		= dw_mci_rockchip_probe,
+>  	.remove		= dw_mci_pltfm_remove,
+>  	.driver		= {
+>  		.name		= "dwmmc_rockchip",
+>  		.of_match_table	= dw_mci_rockchip_match,
+> -		.pm		= &dw_mci_rockchip_pmops,
+> +		.pm		= &dw_mci_pltfm_pmops,
+>  	},
 >  };
 >  
->  struct mmc_data;
 > 
 
