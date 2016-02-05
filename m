@@ -1,54 +1,65 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [bug] kernel panic if writting data to mmc after suspendding
-Date: Fri, 5 Feb 2016 18:34:23 +0100
-Message-ID: <CAPDyKFqf-DEdkBXVd82W1r9t=Kb0y95trGFVLgf5JmQQpvJc=g@mail.gmail.com>
-References: <566A21D2.4080009@jinso.co.jp>
-	<566E2AC0.8060800@jinso.co.jp>
-	<CAMuHMdWU0WVBiWSsLti=KSidFk198k_3CAiNm=iGLtmw4wQOgw@mail.gmail.com>
-	<CAPDyKFomFTn7iX2kSXFVqstjEWpezNOB-B_DdFFRBWi9upUrpg@mail.gmail.com>
-	<5678C081.5090001@jinso.co.jp>
-	<56B2A0C1.9050808@jinso.co.jp>
-	<CAPDyKFoWt2Xt1xHsGSfyzxX_kvNVSn5Y1rRbZ8Mc8sWOjhX+bw@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-sh-owner@vger.kernel.org>
-In-Reply-To: <CAPDyKFoWt2Xt1xHsGSfyzxX_kvNVSn5Y1rRbZ8Mc8sWOjhX+bw@mail.gmail.com>
-Sender: linux-sh-owner@vger.kernel.org
-To: Nguyen Viet Dung <nv-dung@jinso.co.jp>
-Cc: Geert Uytterhoeven <geert@linux-m68k.org>, Linux MMC List <linux-mmc@vger.kernel.org>, Linux-sh list <linux-sh@vger.kernel.org>, "ltsi-dev@lists.linuxfoundation.org" <ltsi-dev@lists.linuxfoundation.org>, =?UTF-8?B?U2ltb24g44GV44KT?= <simon@horms.net>, Geert Uytterhoeven <geert+renesas@glider.be>, "Shimoda, Yoshihiro" <yoshihiro.shimoda.uh@renesas.com>, Hisao Munakata <hisao.munakata.vt@renesas.com>
+From: Alexey Khoroshilov <khoroshilov@ispras.ru>
+Subject: [PATCH] mmc: mmc_spi: add checks for dma mapping error
+Date: Sat,  6 Feb 2016 02:36:35 +0300
+Message-ID: <1454715395-9462-1-git-send-email-khoroshilov@ispras.ru>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Alexey Khoroshilov <khoroshilov@ispras.ru>, Javier Martinez Canillas <javier@osg.samsung.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, ldv-project@linuxtesting.org
 List-Id: linux-mmc@vger.kernel.org
 
-On 4 February 2016 at 09:26, Ulf Hansson <ulf.hansson@linaro.org> wrote:
-> On 4 February 2016 at 01:52, Nguyen Viet Dung <nv-dung@jinso.co.jp> wrote:
->> Hi Ulf
->>
->> I want to test this problem withc your patch.
->> Please sent pacthset for me.
->> I have checked below link but detail of patch haven't.
->
-> Sorry for the delay. I haven't been able to rebase my patchset yet.
->
-> Give me another couple of days, then I will post a new version.
+There is no checks for dma mapping errors in mmc_spi.
+Tha patch fixes that and by the way it adds dma_unmap_single(ones_dma)
+that was left on a failure path mmc_spi_probe().
 
-Hi again,
+Found by Linux Driver Verification project (linuxtesting.org).
 
-I did a quick retry in re-basing my patches, but realized that it
-requires quite some work.
+Signed-off-by: Alexey Khoroshilov <khoroshilov@ispras.ru>
+---
+ drivers/mmc/host/mmc_spi.c | 15 +++++++++++++--
+ 1 file changed, 13 insertions(+), 2 deletions(-)
 
-With a quite small effort I did manage to improve the code in
-->probe() and in ->set_ios(), related to runtime PM and clock
-management. I will post these patches after the weekend, but
-unfortunate I doubt these will fix the problem you reported here.
-Although, please help and test them.
-
-To fix the problem properly, one should probable re-write the locking
-and the state machine code in the driver, because it's rather messy
-and has likely problems.
-As a quick fix, one could validate pointers before accessing them in
-the sh_mmcif_irqt() function, because that's not done currently.
-
-So to be clear, this is all can help with currently. I wish I could
-help more, but I have limited bandwidth and no HW to test on. :-)
-
-Kind regards
-Uffe
+diff --git a/drivers/mmc/host/mmc_spi.c b/drivers/mmc/host/mmc_spi.c
+index 1c1b45ef3faf..3446097a43c0 100644
+--- a/drivers/mmc/host/mmc_spi.c
++++ b/drivers/mmc/host/mmc_spi.c
+@@ -925,6 +925,10 @@ mmc_spi_data_do(struct mmc_spi_host *host, struct mmc_command *cmd,
+ 
+ 			dma_addr = dma_map_page(dma_dev, sg_page(sg), 0,
+ 						PAGE_SIZE, dir);
++			if (dma_mapping_error(dma_dev, dma_addr)) {
++				data->error = -EFAULT;
++				break;
++			}
+ 			if (direction == DMA_TO_DEVICE)
+ 				t->tx_dma = dma_addr + sg->offset;
+ 			else
+@@ -1393,10 +1397,12 @@ static int mmc_spi_probe(struct spi_device *spi)
+ 		host->dma_dev = dev;
+ 		host->ones_dma = dma_map_single(dev, ones,
+ 				MMC_SPI_BLOCKSIZE, DMA_TO_DEVICE);
++		if (dma_mapping_error(dev, host->ones_dma))
++			goto fail_ones_dma;
+ 		host->data_dma = dma_map_single(dev, host->data,
+ 				sizeof(*host->data), DMA_BIDIRECTIONAL);
+-
+-		/* REVISIT in theory those map operations can fail... */
++		if (dma_mapping_error(dev, host->data_dma))
++			goto fail_data_dma;
+ 
+ 		dma_sync_single_for_cpu(host->dma_dev,
+ 				host->data_dma, sizeof(*host->data),
+@@ -1462,6 +1468,11 @@ fail_glue_init:
+ 	if (host->dma_dev)
+ 		dma_unmap_single(host->dma_dev, host->data_dma,
+ 				sizeof(*host->data), DMA_BIDIRECTIONAL);
++fail_data_dma:
++	if (host->dma_dev)
++		dma_unmap_single(host->dma_dev, host->ones_dma,
++				MMC_SPI_BLOCKSIZE, DMA_TO_DEVICE);
++fail_ones_dma:
+ 	kfree(host->data);
+ 
+ fail_nobuf1:
+-- 
+1.9.1
