@@ -1,65 +1,109 @@
-From: Alexey Khoroshilov <khoroshilov@ispras.ru>
-Subject: [PATCH] mmc: mmc_spi: add checks for dma mapping error
-Date: Sat,  6 Feb 2016 02:36:35 +0300
-Message-ID: <1454715395-9462-1-git-send-email-khoroshilov@ispras.ru>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Alexey Khoroshilov <khoroshilov@ispras.ru>, Javier Martinez Canillas <javier@osg.samsung.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, ldv-project@linuxtesting.org
+From: Robert Jarzmik <robert.jarzmik@free.fr>
+Subject: [PATCH v2] mmc: pxamci: fix the device-tree probe deferral path
+Date: Sat,  6 Feb 2016 22:14:54 +0100
+Message-ID: <1454793294-7256-1-git-send-email-robert.jarzmik@free.fr>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from smtp05.smtpout.orange.fr ([80.12.242.127]:25915 "EHLO
+	smtp.smtpout.orange.fr" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752796AbcBFVPD (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sat, 6 Feb 2016 16:15:03 -0500
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Robert Jarzmik <robert.jarzmik@free.fr>
 
-There is no checks for dma mapping errors in mmc_spi.
-Tha patch fixes that and by the way it adds dma_unmap_single(ones_dma)
-that was left on a failure path mmc_spi_probe().
+When the gpio driver is probed after the mmc one, the read/write gpio
+and card detection one return -EPROBE_DEFER. Unfortunately, the memory
+region remains requested, and upon the next probe, the probe will fail
+anyway with -EBUSY.
 
-Found by Linux Driver Verification project (linuxtesting.org).
+Fix this by releasing the memory resource upon probe failure.
 
-Signed-off-by: Alexey Khoroshilov <khoroshilov@ispras.ru>
+More broadly, this patch uses devm_*() primitives whenever possible in
+the probe function.
+
+Signed-off-by: Robert Jarzmik <robert.jarzmik@free.fr>
 ---
- drivers/mmc/host/mmc_spi.c | 15 +++++++++++++--
- 1 file changed, 13 insertions(+), 2 deletions(-)
+Since v1: broaden the devm_*() enveloppe
+---
+ drivers/mmc/host/pxamci.c | 24 +++++++-----------------
+ 1 file changed, 7 insertions(+), 17 deletions(-)
 
-diff --git a/drivers/mmc/host/mmc_spi.c b/drivers/mmc/host/mmc_spi.c
-index 1c1b45ef3faf..3446097a43c0 100644
---- a/drivers/mmc/host/mmc_spi.c
-+++ b/drivers/mmc/host/mmc_spi.c
-@@ -925,6 +925,10 @@ mmc_spi_data_do(struct mmc_spi_host *host, struct mmc_command *cmd,
+diff --git a/drivers/mmc/host/pxamci.c b/drivers/mmc/host/pxamci.c
+index 28a057fae0a1..a672b9259d34 100644
+--- a/drivers/mmc/host/pxamci.c
++++ b/drivers/mmc/host/pxamci.c
+@@ -654,12 +654,8 @@ static int pxamci_probe(struct platform_device *pdev)
  
- 			dma_addr = dma_map_page(dma_dev, sg_page(sg), 0,
- 						PAGE_SIZE, dir);
-+			if (dma_mapping_error(dma_dev, dma_addr)) {
-+				data->error = -EFAULT;
-+				break;
-+			}
- 			if (direction == DMA_TO_DEVICE)
- 				t->tx_dma = dma_addr + sg->offset;
- 			else
-@@ -1393,10 +1397,12 @@ static int mmc_spi_probe(struct spi_device *spi)
- 		host->dma_dev = dev;
- 		host->ones_dma = dma_map_single(dev, ones,
- 				MMC_SPI_BLOCKSIZE, DMA_TO_DEVICE);
-+		if (dma_mapping_error(dev, host->ones_dma))
-+			goto fail_ones_dma;
- 		host->data_dma = dma_map_single(dev, host->data,
- 				sizeof(*host->data), DMA_BIDIRECTIONAL);
+ 	r = platform_get_resource(pdev, IORESOURCE_MEM, 0);
+ 	irq = platform_get_irq(pdev, 0);
+-	if (!r || irq < 0)
+-		return -ENXIO;
 -
--		/* REVISIT in theory those map operations can fail... */
-+		if (dma_mapping_error(dev, host->data_dma))
-+			goto fail_data_dma;
+-	r = request_mem_region(r->start, SZ_4K, DRIVER_NAME);
+-	if (!r)
+-		return -EBUSY;
++	if (irq < 0)
++		return irq;
  
- 		dma_sync_single_for_cpu(host->dma_dev,
- 				host->data_dma, sizeof(*host->data),
-@@ -1462,6 +1468,11 @@ fail_glue_init:
- 	if (host->dma_dev)
- 		dma_unmap_single(host->dma_dev, host->data_dma,
- 				sizeof(*host->data), DMA_BIDIRECTIONAL);
-+fail_data_dma:
-+	if (host->dma_dev)
-+		dma_unmap_single(host->dma_dev, host->ones_dma,
-+				MMC_SPI_BLOCKSIZE, DMA_TO_DEVICE);
-+fail_ones_dma:
- 	kfree(host->data);
+ 	mmc = mmc_alloc_host(sizeof(struct pxamci_host), &pdev->dev);
+ 	if (!mmc) {
+@@ -727,9 +723,9 @@ static int pxamci_probe(struct platform_device *pdev)
+ 	host->irq = irq;
+ 	host->imask = MMC_I_MASK_ALL;
  
- fail_nobuf1:
+-	host->base = ioremap(r->start, SZ_4K);
+-	if (!host->base) {
+-		ret = -ENOMEM;
++	host->base = devm_ioremap_resource(&pdev->dev, r);
++	if (IS_ERR(host->base)) {
++		ret = PTR_ERR(host->base);
+ 		goto out;
+ 	}
+ 
+@@ -742,7 +738,8 @@ static int pxamci_probe(struct platform_device *pdev)
+ 	writel(64, host->base + MMC_RESTO);
+ 	writel(host->imask, host->base + MMC_I_MASK);
+ 
+-	ret = request_irq(host->irq, pxamci_irq, 0, DRIVER_NAME, host);
++	ret = devm_request_irq(&pdev->dev, host->irq, pxamci_irq, 0,
++			       DRIVER_NAME, host);
+ 	if (ret)
+ 		goto out;
+ 
+@@ -833,14 +830,11 @@ out:
+ 			dma_release_channel(host->dma_chan_rx);
+ 		if (host->dma_chan_tx)
+ 			dma_release_channel(host->dma_chan_tx);
+-		if (host->base)
+-			iounmap(host->base);
+ 		if (host->clk)
+ 			clk_put(host->clk);
+ 	}
+ 	if (mmc)
+ 		mmc_free_host(mmc);
+-	release_resource(r);
+ 	return ret;
+ }
+ 
+@@ -870,17 +864,13 @@ static int pxamci_remove(struct platform_device *pdev)
+ 		       END_CMD_RES|PRG_DONE|DATA_TRAN_DONE,
+ 		       host->base + MMC_I_MASK);
+ 
+-		free_irq(host->irq, host);
+ 		dmaengine_terminate_all(host->dma_chan_rx);
+ 		dmaengine_terminate_all(host->dma_chan_tx);
+ 		dma_release_channel(host->dma_chan_rx);
+ 		dma_release_channel(host->dma_chan_tx);
+-		iounmap(host->base);
+ 
+ 		clk_put(host->clk);
+ 
+-		release_resource(host->res);
+-
+ 		mmc_free_host(mmc);
+ 	}
+ 	return 0;
 -- 
-1.9.1
+2.1.4
+
