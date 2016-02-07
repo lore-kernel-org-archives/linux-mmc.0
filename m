@@ -1,109 +1,26 @@
-From: Robert Jarzmik <robert.jarzmik@free.fr>
-Subject: [PATCH v2] mmc: pxamci: fix the device-tree probe deferral path
-Date: Sat,  6 Feb 2016 22:14:54 +0100
-Message-ID: <1454793294-7256-1-git-send-email-robert.jarzmik@free.fr>
+From: Ms Ayala <ana.mascarenhas@mj.gov.br>
+Subject: Very Urgent,response needed.
+Date: Mon, 8 Feb 2016 00:28:22 +0300
+Message-ID: <579bd258-34b3-4b55-8e0f-146384ea4e21@TIMON.mj.gov.br>
+Reply-To: msayalabrnaca101@163.com
+Mime-Version: 1.0
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp05.smtpout.orange.fr ([80.12.242.127]:25915 "EHLO
-	smtp.smtpout.orange.fr" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752796AbcBFVPD (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sat, 6 Feb 2016 16:15:03 -0500
+Received: from piaget.mj.gov.br ([200.198.212.76]:43257 "EHLO piaget.mj.gov.br"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753989AbcBHDvB convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 7 Feb 2016 22:51:01 -0500
+Content-Description: Mail message body
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Robert Jarzmik <robert.jarzmik@free.fr>
+To: Recipients <ana.mascarenhas@mj.gov.br>
 
-When the gpio driver is probed after the mmc one, the read/write gpio
-and card detection one return -EPROBE_DEFER. Unfortunately, the memory
-region remains requested, and upon the next probe, the probe will fail
-anyway with -EBUSY.
+Hi,
 
-Fix this by releasing the memory resource upon probe failure.
+I am Ms. Ayala; I am getting in touch with you regarding an extremely
+important and urgent matter.If you would oblige me the opportunity,I shall
+provide you with details upon your response.Please respond to: msayalabrnaca101@163.com
 
-More broadly, this patch uses devm_*() primitives whenever possible in
-the probe function.
-
-Signed-off-by: Robert Jarzmik <robert.jarzmik@free.fr>
----
-Since v1: broaden the devm_*() enveloppe
----
- drivers/mmc/host/pxamci.c | 24 +++++++-----------------
- 1 file changed, 7 insertions(+), 17 deletions(-)
-
-diff --git a/drivers/mmc/host/pxamci.c b/drivers/mmc/host/pxamci.c
-index 28a057fae0a1..a672b9259d34 100644
---- a/drivers/mmc/host/pxamci.c
-+++ b/drivers/mmc/host/pxamci.c
-@@ -654,12 +654,8 @@ static int pxamci_probe(struct platform_device *pdev)
- 
- 	r = platform_get_resource(pdev, IORESOURCE_MEM, 0);
- 	irq = platform_get_irq(pdev, 0);
--	if (!r || irq < 0)
--		return -ENXIO;
--
--	r = request_mem_region(r->start, SZ_4K, DRIVER_NAME);
--	if (!r)
--		return -EBUSY;
-+	if (irq < 0)
-+		return irq;
- 
- 	mmc = mmc_alloc_host(sizeof(struct pxamci_host), &pdev->dev);
- 	if (!mmc) {
-@@ -727,9 +723,9 @@ static int pxamci_probe(struct platform_device *pdev)
- 	host->irq = irq;
- 	host->imask = MMC_I_MASK_ALL;
- 
--	host->base = ioremap(r->start, SZ_4K);
--	if (!host->base) {
--		ret = -ENOMEM;
-+	host->base = devm_ioremap_resource(&pdev->dev, r);
-+	if (IS_ERR(host->base)) {
-+		ret = PTR_ERR(host->base);
- 		goto out;
- 	}
- 
-@@ -742,7 +738,8 @@ static int pxamci_probe(struct platform_device *pdev)
- 	writel(64, host->base + MMC_RESTO);
- 	writel(host->imask, host->base + MMC_I_MASK);
- 
--	ret = request_irq(host->irq, pxamci_irq, 0, DRIVER_NAME, host);
-+	ret = devm_request_irq(&pdev->dev, host->irq, pxamci_irq, 0,
-+			       DRIVER_NAME, host);
- 	if (ret)
- 		goto out;
- 
-@@ -833,14 +830,11 @@ out:
- 			dma_release_channel(host->dma_chan_rx);
- 		if (host->dma_chan_tx)
- 			dma_release_channel(host->dma_chan_tx);
--		if (host->base)
--			iounmap(host->base);
- 		if (host->clk)
- 			clk_put(host->clk);
- 	}
- 	if (mmc)
- 		mmc_free_host(mmc);
--	release_resource(r);
- 	return ret;
- }
- 
-@@ -870,17 +864,13 @@ static int pxamci_remove(struct platform_device *pdev)
- 		       END_CMD_RES|PRG_DONE|DATA_TRAN_DONE,
- 		       host->base + MMC_I_MASK);
- 
--		free_irq(host->irq, host);
- 		dmaengine_terminate_all(host->dma_chan_rx);
- 		dmaengine_terminate_all(host->dma_chan_tx);
- 		dma_release_channel(host->dma_chan_rx);
- 		dma_release_channel(host->dma_chan_tx);
--		iounmap(host->base);
- 
- 		clk_put(host->clk);
- 
--		release_resource(host->res);
--
- 		mmc_free_host(mmc);
- 	}
- 	return 0;
--- 
-2.1.4
-
+Faithfully,
+Ms. Ayala Bracha
