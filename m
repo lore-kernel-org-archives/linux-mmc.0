@@ -1,44 +1,132 @@
 From: Robert Jarzmik <robert.jarzmik@free.fr>
-Subject: Re: [PATCH v2] mmc: pxamci: fix the device-tree probe deferral path
-Date: Mon, 08 Feb 2016 15:16:15 +0100
-Message-ID: <87lh6v2spc.fsf@belgarion.home>
-References: <1454793294-7256-1-git-send-email-robert.jarzmik@free.fr>
-	<CAPDyKFoKyRYSz+T0xCX5Pdfs3BDEw4nMEg+d0ji-cmn=x5e1WA@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp04.smtpout.orange.fr ([80.12.242.126]:28975 "EHLO
-	smtp.smtpout.orange.fr" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751258AbcBHOQT (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 8 Feb 2016 09:16:19 -0500
-In-Reply-To: <CAPDyKFoKyRYSz+T0xCX5Pdfs3BDEw4nMEg+d0ji-cmn=x5e1WA@mail.gmail.com>
-	(Ulf Hansson's message of "Mon, 8 Feb 2016 10:19:12 +0100")
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Subject: [PATCH v3] mmc: pxamci: fix the device-tree probe deferral path
+Date: Mon,  8 Feb 2016 15:17:57 +0100
+Message-ID: <1454941077-12042-1-git-send-email-robert.jarzmik@free.fr>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Robert Jarzmik <robert.jarzmik@free.fr>
+List-Id: linux-mmc@vger.kernel.org
 
-Ulf Hansson <ulf.hansson@linaro.org> writes:
+When the gpio driver is probed after the mmc one, the read/write gpio
+and card detection one return -EPROBE_DEFER. Unfortunately, the memory
+region remains requested, and upon the next probe, the probe will fail
+anyway with -EBUSY.
 
-> On 6 February 2016 at 22:14, Robert Jarzmik <robert.jarzmik@free.fr> wrote:
->> When the gpio driver is probed after the mmc one, the read/write gpio
->> and card detection one return -EPROBE_DEFER. Unfortunately, the memory
->> region remains requested, and upon the next probe, the probe will fail
->> anyway with -EBUSY.
->>
->> Fix this by releasing the memory resource upon probe failure.
->>
->> More broadly, this patch uses devm_*() primitives whenever possible in
->> the probe function.
->
-> There's actually also clocks and regulators that may be converted to
-> use the devm* functions.
-> Do you want to do that as a part of this patch as well? Otherwise I
-> can apply as is.
-Yes, I will add the regulator and clock in this patch, you're right, this makes
-sense to me, v3 on its way.
+Fix this by releasing the memory resource upon probe failure.
 
-Cheers.
+More broadly, this patch uses devm_*() primitives whenever possible in
+the probe function.
 
---
-Robert
+Signed-off-by: Robert Jarzmik <robert.jarzmik@free.fr>
+---
+Since v1: broaden the devm_*() enveloppe
+Since v2: further broaden devm_*(): regulator + clock
+---
+ drivers/mmc/host/pxamci.c | 35 +++++++++--------------------------
+ 1 file changed, 9 insertions(+), 26 deletions(-)
+
+diff --git a/drivers/mmc/host/pxamci.c b/drivers/mmc/host/pxamci.c
+index 28a057fae0a1..da824772bbb4 100644
+--- a/drivers/mmc/host/pxamci.c
++++ b/drivers/mmc/host/pxamci.c
+@@ -86,7 +86,7 @@ struct pxamci_host {
+ static inline void pxamci_init_ocr(struct pxamci_host *host)
+ {
+ #ifdef CONFIG_REGULATOR
+-	host->vcc = regulator_get_optional(mmc_dev(host->mmc), "vmmc");
++	host->vcc = devm_regulator_get_optional(mmc_dev(host->mmc), "vmmc");
+ 
+ 	if (IS_ERR(host->vcc))
+ 		host->vcc = NULL;
+@@ -654,12 +654,8 @@ static int pxamci_probe(struct platform_device *pdev)
+ 
+ 	r = platform_get_resource(pdev, IORESOURCE_MEM, 0);
+ 	irq = platform_get_irq(pdev, 0);
+-	if (!r || irq < 0)
+-		return -ENXIO;
+-
+-	r = request_mem_region(r->start, SZ_4K, DRIVER_NAME);
+-	if (!r)
+-		return -EBUSY;
++	if (irq < 0)
++		return irq;
+ 
+ 	mmc = mmc_alloc_host(sizeof(struct pxamci_host), &pdev->dev);
+ 	if (!mmc) {
+@@ -695,7 +691,7 @@ static int pxamci_probe(struct platform_device *pdev)
+ 	host->pdata = pdev->dev.platform_data;
+ 	host->clkrt = CLKRT_OFF;
+ 
+-	host->clk = clk_get(&pdev->dev, NULL);
++	host->clk = devm_clk_get(&pdev->dev, NULL);
+ 	if (IS_ERR(host->clk)) {
+ 		ret = PTR_ERR(host->clk);
+ 		host->clk = NULL;
+@@ -727,9 +723,9 @@ static int pxamci_probe(struct platform_device *pdev)
+ 	host->irq = irq;
+ 	host->imask = MMC_I_MASK_ALL;
+ 
+-	host->base = ioremap(r->start, SZ_4K);
+-	if (!host->base) {
+-		ret = -ENOMEM;
++	host->base = devm_ioremap_resource(&pdev->dev, r);
++	if (IS_ERR(host->base)) {
++		ret = PTR_ERR(host->base);
+ 		goto out;
+ 	}
+ 
+@@ -742,7 +738,8 @@ static int pxamci_probe(struct platform_device *pdev)
+ 	writel(64, host->base + MMC_RESTO);
+ 	writel(host->imask, host->base + MMC_I_MASK);
+ 
+-	ret = request_irq(host->irq, pxamci_irq, 0, DRIVER_NAME, host);
++	ret = devm_request_irq(&pdev->dev, host->irq, pxamci_irq, 0,
++			       DRIVER_NAME, host);
+ 	if (ret)
+ 		goto out;
+ 
+@@ -833,14 +830,9 @@ out:
+ 			dma_release_channel(host->dma_chan_rx);
+ 		if (host->dma_chan_tx)
+ 			dma_release_channel(host->dma_chan_tx);
+-		if (host->base)
+-			iounmap(host->base);
+-		if (host->clk)
+-			clk_put(host->clk);
+ 	}
+ 	if (mmc)
+ 		mmc_free_host(mmc);
+-	release_resource(r);
+ 	return ret;
+ }
+ 
+@@ -859,9 +851,6 @@ static int pxamci_remove(struct platform_device *pdev)
+ 			gpio_ro = host->pdata->gpio_card_ro;
+ 			gpio_power = host->pdata->gpio_power;
+ 		}
+-		if (host->vcc)
+-			regulator_put(host->vcc);
+-
+ 		if (host->pdata && host->pdata->exit)
+ 			host->pdata->exit(&pdev->dev, mmc);
+ 
+@@ -870,16 +859,10 @@ static int pxamci_remove(struct platform_device *pdev)
+ 		       END_CMD_RES|PRG_DONE|DATA_TRAN_DONE,
+ 		       host->base + MMC_I_MASK);
+ 
+-		free_irq(host->irq, host);
+ 		dmaengine_terminate_all(host->dma_chan_rx);
+ 		dmaengine_terminate_all(host->dma_chan_tx);
+ 		dma_release_channel(host->dma_chan_rx);
+ 		dma_release_channel(host->dma_chan_tx);
+-		iounmap(host->base);
+-
+-		clk_put(host->clk);
+-
+-		release_resource(host->res);
+ 
+ 		mmc_free_host(mmc);
+ 	}
+-- 
+2.1.4
