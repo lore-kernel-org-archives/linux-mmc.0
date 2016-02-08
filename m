@@ -1,352 +1,94 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v5 12/14] mmc: sdhci-pic32: Add PIC32 SDHCI host
- controller driver
-Date: Mon, 8 Feb 2016 10:59:01 +0100
-Message-ID: <CAPDyKFovwmFBXp2nf=UU=cHbBLrsBF5Yjfj0H49w-SdzGn_PJA@mail.gmail.com>
-References: <1452734299-460-1-git-send-email-joshua.henderson@microchip.com>
-	<1452734299-460-13-git-send-email-joshua.henderson@microchip.com>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH v4 00/13] mmc: use sdhci_pltfm_init for private allocation
+ and clean up
+Date: Mon, 8 Feb 2016 16:09:37 +0200
+Message-ID: <56B8A1A1.2080408@intel.com>
+References: <1453803353-6266-1-git-send-email-jszhang@marvell.com>
+ <CAPDyKFpFSTYsAUCG9nFnnzmVsA3zm4hAPO8+6REArt9BJtn+0Q@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1452734299-460-13-git-send-email-joshua.henderson@microchip.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Joshua Henderson <joshua.henderson@microchip.com>, Adrian Hunter <adrian.hunter@intel.com>
-Cc: "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-mips@linux-mips.org, Ralf Baechle <ralf@linux-mips.org>, Andrei Pistirica <andrei.pistirica@microchip.com>, Jean Delvare <jdelvare@suse.de>, Geert Uytterhoeven <geert@linux-m68k.org>, Corneliu Doban <cdoban@broadcom.com>, Haojian Zhuang <haojian.zhuang@gmail.com>, Luis de Bethencourt <luisbg@osg.samsung.com>, Weijun Yang <Weijun.Yang@csr.com>, Lokesh Vutla <lokeshvutla@ti.com>, Scott Branden <sbranden@broadcom.com>, Vincent Yang <vincent.yang.fujitsu@gmail.com>, Chaotian Jing <chaotian.jing@mediatek.com>, "ludovic.desroches@atmel.com" <ludovic.desroches@atmel.com>, Shawn Lin <shawn.lin@rock-chips.com>, Stephen Boyd <sboyd@codeaurora.org>, yangbo lu <yangbo.lu@freescale.com>, Kevin Hao <haokexin@gmail.com>, Ben Hutchings <ben@decadent.org.uk>, Andy Green <andy.green@linaro.org>linux-mmc <linux-m>
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mga11.intel.com ([192.55.52.93]:22941 "EHLO mga11.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1750866AbcBHONK (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 8 Feb 2016 09:13:10 -0500
+In-Reply-To: <CAPDyKFpFSTYsAUCG9nFnnzmVsA3zm4hAPO8+6REArt9BJtn+0Q@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>, Jisheng Zhang <jszhang@marvell.com>
+Cc: Arnd Bergmann <arnd@arndb.de>, Ludovic Desroches <ludovic.desroches@atmel.com>, Stephen Warren <swarren@wwwdotorg.org>, Lee Jones <lee@kernel.org>, Eric Anholt <eric@anholt.net>, Michal Simek <michal.simek@xilinx.com>, =?UTF-8?Q?S=c3=b6ren_Brinkmann?= <soren.brinkmann@xilinx.com>, Srinivas Kandagatla <srinivas.kandagatla@gmail.com>, Maxime Coquelin <maxime.coquelin@st.com>, Patrice CHOTARD <patrice.chotard@st.com>, Thierry Reding <thierry.reding@gmail.com>, Sebastian Hesselbarth <sebastian.hesselbarth@gmail.com>, kernel@stlinux.com, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-rpi-kernel@lists.infradead.org, "linux-tegra@vger.kernel.org" <linux-tegra@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
 
-+ Adrian
+On 04/02/16 12:38, Ulf Hansson wrote:
+> + Adrian
+> 
+> On 26 January 2016 at 11:15, Jisheng Zhang <jszhang@marvell.com> wrote:
+>> These patches are to complete the TODOs in Commit 0e748234293f ("mmc:
+>> sdhci: Add size for caller in init+register"), I.E:
+>>
+>> - todo: migrate clients to using allocation this way
+>> - todo: remove priv variable once migration is complete
+>>
+>> Since v3:
+>>  - based on v4.5-rc1
+>>  - add Ludovic's ack for sdhci-of-at91 changes
+>>  - fix use-after-free in some drivers: some host drivers still needs to
+>>    access sdhci_pltfm_host->private after sdhci_pltfm_unregister(), but
+>>    the private should be already freed by sdhci_pltfm_unregister.
+>>  - add patch5 to fix one clk bug in sdhci_arasan_remove(). IMHO, It's
+>>    better to add this patch to fixes rather than waiting for next merge
+>>    window
+>>
+>> Since v2:
+>>  - based on mmc next tree and remove all priv usage introduced in newly
+>>    commits in this tree
+>>  - don't break two lines if sdhci_pltfm_init() call could be put into
+>>    one line. Thank Ludovic Desroches.
+>>
+>> Since v1:
+>>  - add new patch03 to factorise sdhci_msm_pdata outisde of sdhci_msm_host.
+>>    This is to fix drivers/mmc/host/sdhci-msm.c:440:32: warning: 'msm_host'
+>>    is used uninitialized in this function [-Wuninitialized]
+>>  - Add Arnd's Ack for all patches except patch3 which is new in v2
+>>
+>>
+>> Jisheng Zhang (13):
+>>   mmc: sdhci-bcm2835: use sdhci_pltfm_init for private allocation
+>>   mmc: sdhci-esdhc-imx: use sdhci_pltfm_init for private allocation
+>>   mmc: sdhci-msm: factorise sdhci_msm_pdata outisde of sdhci_msm_host
+>>   mmc: sdhci-msm: use sdhci_pltfm_init for private allocation
+>>   mmc: sdhci-of-arasan: fix clk issue in sdhci_arasan_remove()
+>>   mmc: sdhci-of-arasan: use sdhci_pltfm_init for private allocation
+>>   mmc: sdhci-of-at91: use sdhci_pltfm_init for private allocation
+>>   mmc: sdhci-of-esdhc: use sdhci_pltfm_init for private allocation
+>>   mmc: sdhci-pxav3: use sdhci_pltfm_init for private allocation
+>>   mmc: sdhci-st: use sdhci_pltfm_init for private allocation
+>>   mmc: sdhci-tegra: use sdhci_pltfm_init for private allocation
+>>   mmc: sdhci-pxav2: remove unnecessary assignment of pltfm_host->priv
+>>   mmc: sdhci-pltfm: remove priv variable from sdhci_pltfm_host
+>>
+>>  drivers/mmc/host/sdhci-bcm2835.c   | 14 +++----------
+>>  drivers/mmc/host/sdhci-esdhc-imx.c | 38 ++++++++++++++++--------------------
+>>  drivers/mmc/host/sdhci-msm.c       | 25 +++++++++++-------------
+>>  drivers/mmc/host/sdhci-of-arasan.c | 33 +++++++++++++++----------------
+>>  drivers/mmc/host/sdhci-of-at91.c   | 33 ++++++++++++++-----------------
+>>  drivers/mmc/host/sdhci-of-esdhc.c  | 19 +++++++++---------
+>>  drivers/mmc/host/sdhci-pltfm.h     |  1 -
+>>  drivers/mmc/host/sdhci-pxav2.c     |  1 -
+>>  drivers/mmc/host/sdhci-pxav3.c     | 20 ++++++++-----------
+>>  drivers/mmc/host/sdhci-st.c        | 40 +++++++++++++++++++-------------------
+>>  drivers/mmc/host/sdhci-tegra.c     | 21 +++++++-------------
+>>  11 files changed, 106 insertions(+), 139 deletions(-)
+>>
+>> --
+>> 2.7.0
+>>
+> 
+> To avoid confusions. I don't intend to pick up any further sdhci
+> patches, unless they are acked by Adrian Hunter.
 
-On 14 January 2016 at 02:15, Joshua Henderson
-<joshua.henderson@microchip.com> wrote:
-> From: Andrei Pistirica <andrei.pistirica@microchip.com>
->
-> This driver supports the SDHCI host controller found on a PIC32.
->
-> Signed-off-by: Andrei Pistirica <andrei.pistirica@microchip.com>
-> Signed-off-by: Joshua Henderson <joshua.henderson@microchip.com>
-> Cc: Ralf Baechle <ralf@linux-mips.org>
+The patches look OK, although patch 6 doesn't apply cleanly anymore.
+Nevertheless:
 
-I have queued this up for next via my mmc tree.
+Acked-by: Adrian Hunter <adrian.hunter@intel.com>
 
-Adrian, please tell me if you have any objections.
-
-Thanks and kind regards!
-Uffe
-
-> ---
-> Changes since v4: None
-> Changes since v3: None
-> Changes since v2:
->         - Use 'sdhci_pltfm_*' instead of 'sdhci_*_host' and other cleanup
-> Changes since v1:
->         - Be consistent and use only "SDHCI" when referring to SD host
->           controller
->         - Remove unnecessary PIC32 sdhci_ops min clock function.
->         - Drop usage of piomode and no-1-8-v DT properties
->         - Formatting
->         - Fix use of devm_iounmap
->         - Address code comment
-> ---
->  drivers/mmc/host/Kconfig       |   11 ++
->  drivers/mmc/host/Makefile      |    1 +
->  drivers/mmc/host/sdhci-pic32.c |  257 ++++++++++++++++++++++++++++++++++++++++
->  3 files changed, 269 insertions(+)
->  create mode 100644 drivers/mmc/host/sdhci-pic32.c
->
-> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
-> index 1dee533..c6a8916 100644
-> --- a/drivers/mmc/host/Kconfig
-> +++ b/drivers/mmc/host/Kconfig
-> @@ -785,3 +785,14 @@ config MMC_MTK
->           If you have a machine with a integrated SD/MMC card reader, say Y or M here.
->           This is needed if support for any SD/SDIO/MMC devices is required.
->           If unsure, say N.
-> +
-> +config MMC_SDHCI_MICROCHIP_PIC32
-> +        tristate "Microchip PIC32MZDA SDHCI support"
-> +        depends on MMC_SDHCI && PIC32MZDA && MMC_SDHCI_PLTFM
-> +        help
-> +          This selects the Secure Digital Host Controller Interface (SDHCI)
-> +          for PIC32MZDA platform.
-> +
-> +          If you have a controller with this interface, say Y or M here.
-> +
-> +          If unsure, say N.
-> diff --git a/drivers/mmc/host/Makefile b/drivers/mmc/host/Makefile
-> index 3595f83..af918d2 100644
-> --- a/drivers/mmc/host/Makefile
-> +++ b/drivers/mmc/host/Makefile
-> @@ -75,6 +75,7 @@ obj-$(CONFIG_MMC_SDHCI_BCM2835)               += sdhci-bcm2835.o
->  obj-$(CONFIG_MMC_SDHCI_IPROC)          += sdhci-iproc.o
->  obj-$(CONFIG_MMC_SDHCI_MSM)            += sdhci-msm.o
->  obj-$(CONFIG_MMC_SDHCI_ST)             += sdhci-st.o
-> +obj-$(CONFIG_MMC_SDHCI_MICROCHIP_PIC32)        += sdhci-pic32.o
->
->  ifeq ($(CONFIG_CB710_DEBUG),y)
->         CFLAGS-cb710-mmc        += -DDEBUG
-> diff --git a/drivers/mmc/host/sdhci-pic32.c b/drivers/mmc/host/sdhci-pic32.c
-> new file mode 100644
-> index 0000000..059df70
-> --- /dev/null
-> +++ b/drivers/mmc/host/sdhci-pic32.c
-> @@ -0,0 +1,257 @@
-> +/*
-> + * Support of SDHCI platform devices for Microchip PIC32.
-> + *
-> + * Copyright (C) 2015 Microchip
-> + * Andrei Pistirica, Paul Thacker
-> + *
-> + * Inspired by sdhci-pltfm.c
-> + *
-> + * This file is licensed under the terms of the GNU General Public
-> + * License version 2. This program is licensed "as is" without any
-> + * warranty of any kind, whether express or implied.
-> + */
-> +
-> +#include <linux/clk.h>
-> +#include <linux/delay.h>
-> +#include <linux/highmem.h>
-> +#include <linux/module.h>
-> +#include <linux/interrupt.h>
-> +#include <linux/irq.h>
-> +#include <linux/of.h>
-> +#include <linux/platform_device.h>
-> +#include <linux/pm.h>
-> +#include <linux/slab.h>
-> +#include <linux/mmc/host.h>
-> +#include <linux/io.h>
-> +#include "sdhci.h"
-> +#include "sdhci-pltfm.h"
-> +#include <linux/platform_data/sdhci-pic32.h>
-> +
-> +#define SDH_SHARED_BUS_CTRL            0x000000E0
-> +#define SDH_SHARED_BUS_NR_CLK_PINS_MASK        0x7
-> +#define SDH_SHARED_BUS_NR_IRQ_PINS_MASK        0x30
-> +#define SDH_SHARED_BUS_CLK_PINS                0x10
-> +#define SDH_SHARED_BUS_IRQ_PINS                0x14
-> +#define SDH_CAPS_SDH_SLOT_TYPE_MASK    0xC0000000
-> +#define SDH_SLOT_TYPE_REMOVABLE                0x0
-> +#define SDH_SLOT_TYPE_EMBEDDED         0x1
-> +#define SDH_SLOT_TYPE_SHARED_BUS       0x2
-> +#define SDHCI_CTRL_CDSSEL              0x80
-> +#define SDHCI_CTRL_CDTLVL              0x40
-> +
-> +#define ADMA_FIFO_RD_THSHLD    512
-> +#define ADMA_FIFO_WR_THSHLD    512
-> +
-> +struct pic32_sdhci_priv {
-> +       struct platform_device  *pdev;
-> +       struct clk *sys_clk;
-> +       struct clk *base_clk;
-> +};
-> +
-> +static unsigned int pic32_sdhci_get_max_clock(struct sdhci_host *host)
-> +{
-> +       struct pic32_sdhci_priv *sdhci_pdata = sdhci_priv(host);
-> +
-> +       return clk_get_rate(sdhci_pdata->base_clk);
-> +}
-> +
-> +static void pic32_sdhci_set_bus_width(struct sdhci_host *host, int width)
-> +{
-> +       u8 ctrl;
-> +
-> +       ctrl = sdhci_readb(host, SDHCI_HOST_CONTROL);
-> +       if (width == MMC_BUS_WIDTH_8) {
-> +               ctrl &= ~SDHCI_CTRL_4BITBUS;
-> +               if (host->version >= SDHCI_SPEC_300)
-> +                       ctrl |= SDHCI_CTRL_8BITBUS;
-> +       } else {
-> +               if (host->version >= SDHCI_SPEC_300)
-> +                       ctrl &= ~SDHCI_CTRL_8BITBUS;
-> +               if (width == MMC_BUS_WIDTH_4)
-> +                       ctrl |= SDHCI_CTRL_4BITBUS;
-> +               else
-> +                       ctrl &= ~SDHCI_CTRL_4BITBUS;
-> +       }
-> +
-> +       /* CD select and test bits must be set for errata workaround. */
-> +       ctrl &= ~SDHCI_CTRL_CDTLVL;
-> +       ctrl |= SDHCI_CTRL_CDSSEL;
-> +       sdhci_writeb(host, ctrl, SDHCI_HOST_CONTROL);
-> +}
-> +
-> +static unsigned int pic32_sdhci_get_ro(struct sdhci_host *host)
-> +{
-> +       /*
-> +        * The SDHCI_WRITE_PROTECT bit is unstable on current hardware so we
-> +        * can't depend on its value in any way.
-> +        */
-> +       return 0;
-> +}
-> +
-> +static const struct sdhci_ops pic32_sdhci_ops = {
-> +       .get_max_clock = pic32_sdhci_get_max_clock,
-> +       .set_clock = sdhci_set_clock,
-> +       .set_bus_width = pic32_sdhci_set_bus_width,
-> +       .reset = sdhci_reset,
-> +       .set_uhs_signaling = sdhci_set_uhs_signaling,
-> +       .get_ro = pic32_sdhci_get_ro,
-> +};
-> +
-> +static struct sdhci_pltfm_data sdhci_pic32_pdata = {
-> +       .ops = &pic32_sdhci_ops,
-> +       .quirks = SDHCI_QUIRK_NO_HISPD_BIT,
-> +       .quirks2 = SDHCI_QUIRK2_NO_1_8_V,
-> +};
-> +
-> +static void pic32_sdhci_shared_bus(struct platform_device *pdev)
-> +{
-> +       struct sdhci_host *host = platform_get_drvdata(pdev);
-> +       u32 bus = readl(host->ioaddr + SDH_SHARED_BUS_CTRL);
-> +       u32 clk_pins = (bus & SDH_SHARED_BUS_NR_CLK_PINS_MASK) >> 0;
-> +       u32 irq_pins = (bus & SDH_SHARED_BUS_NR_IRQ_PINS_MASK) >> 4;
-> +
-> +       /* select first clock */
-> +       if (clk_pins & 1)
-> +               bus |= (1 << SDH_SHARED_BUS_CLK_PINS);
-> +
-> +       /* select first interrupt */
-> +       if (irq_pins & 1)
-> +               bus |= (1 << SDH_SHARED_BUS_IRQ_PINS);
-> +
-> +       writel(bus, host->ioaddr + SDH_SHARED_BUS_CTRL);
-> +}
-> +
-> +static int pic32_sdhci_probe_platform(struct platform_device *pdev,
-> +                                     struct pic32_sdhci_priv *pdata)
-> +{
-> +       int ret = 0;
-> +       u32 caps_slot_type;
-> +       struct sdhci_host *host = platform_get_drvdata(pdev);
-> +
-> +       /* Check card slot connected on shared bus. */
-> +       host->caps = readl(host->ioaddr + SDHCI_CAPABILITIES);
-> +       caps_slot_type = (host->caps & SDH_CAPS_SDH_SLOT_TYPE_MASK) >> 30;
-> +       if (caps_slot_type == SDH_SLOT_TYPE_SHARED_BUS)
-> +               pic32_sdhci_shared_bus(pdev);
-> +
-> +       return ret;
-> +}
-> +
-> +static int pic32_sdhci_probe(struct platform_device *pdev)
-> +{
-> +       struct sdhci_host *host;
-> +       struct sdhci_pltfm_host *pltfm_host;
-> +       struct pic32_sdhci_priv *sdhci_pdata;
-> +       struct pic32_sdhci_platform_data *plat_data;
-> +       int ret;
-> +
-> +       host = sdhci_pltfm_init(pdev, &sdhci_pic32_pdata,
-> +                               sizeof(struct pic32_sdhci_priv));
-> +       if (IS_ERR(host)) {
-> +               ret = PTR_ERR(host);
-> +               goto err;
-> +       }
-> +
-> +       pltfm_host = sdhci_priv(host);
-> +       sdhci_pdata = sdhci_pltfm_priv(pltfm_host);
-> +
-> +       plat_data = pdev->dev.platform_data;
-> +       if (plat_data && plat_data->setup_dma) {
-> +               ret = plat_data->setup_dma(ADMA_FIFO_RD_THSHLD,
-> +                                          ADMA_FIFO_WR_THSHLD);
-> +               if (ret)
-> +                       goto err_host;
-> +       }
-> +
-> +       sdhci_pdata->sys_clk = devm_clk_get(&pdev->dev, "sys_clk");
-> +       if (IS_ERR(sdhci_pdata->sys_clk)) {
-> +               ret = PTR_ERR(sdhci_pdata->sys_clk);
-> +               dev_err(&pdev->dev, "Error getting clock\n");
-> +               goto err_host;
-> +       }
-> +
-> +       ret = clk_prepare_enable(sdhci_pdata->sys_clk);
-> +       if (ret) {
-> +               dev_err(&pdev->dev, "Error enabling clock\n");
-> +               goto err_host;
-> +       }
-> +
-> +       sdhci_pdata->base_clk = devm_clk_get(&pdev->dev, "base_clk");
-> +       if (IS_ERR(sdhci_pdata->base_clk)) {
-> +               ret = PTR_ERR(sdhci_pdata->base_clk);
-> +               dev_err(&pdev->dev, "Error getting clock\n");
-> +               goto err_sys_clk;
-> +       }
-> +
-> +       ret = clk_prepare_enable(sdhci_pdata->base_clk);
-> +       if (ret) {
-> +               dev_err(&pdev->dev, "Error enabling clock\n");
-> +               goto err_base_clk;
-> +       }
-> +
-> +       ret = mmc_of_parse(host->mmc);
-> +       if (ret)
-> +               goto err_base_clk;
-> +
-> +       ret = pic32_sdhci_probe_platform(pdev, sdhci_pdata);
-> +       if (ret) {
-> +               dev_err(&pdev->dev, "failed to probe platform!\n");
-> +               goto err_base_clk;
-> +       }
-> +
-> +       ret = sdhci_add_host(host);
-> +       if (ret) {
-> +               dev_err(&pdev->dev, "error adding host\n");
-> +               goto err_base_clk;
-> +       }
-> +
-> +       dev_info(&pdev->dev, "Successfully added sdhci host\n");
-> +       return 0;
-> +
-> +err_base_clk:
-> +       clk_disable_unprepare(sdhci_pdata->base_clk);
-> +err_sys_clk:
-> +       clk_disable_unprepare(sdhci_pdata->sys_clk);
-> +err_host:
-> +       sdhci_pltfm_free(pdev);
-> +err:
-> +       dev_err(&pdev->dev, "pic32-sdhci probe failed: %d\n", ret);
-> +       return ret;
-> +}
-> +
-> +static int pic32_sdhci_remove(struct platform_device *pdev)
-> +{
-> +       struct sdhci_host *host = platform_get_drvdata(pdev);
-> +       struct pic32_sdhci_priv *sdhci_pdata = sdhci_priv(host);
-> +       u32 scratch;
-> +
-> +       scratch = readl(host->ioaddr + SDHCI_INT_STATUS);
-> +       sdhci_remove_host(host, scratch == (u32)~0);
-> +       clk_disable_unprepare(sdhci_pdata->base_clk);
-> +       clk_disable_unprepare(sdhci_pdata->sys_clk);
-> +       sdhci_pltfm_free(pdev);
-> +
-> +       return 0;
-> +}
-> +
-> +static const struct of_device_id pic32_sdhci_id_table[] = {
-> +       { .compatible = "microchip,pic32mzda-sdhci" },
-> +       {}
-> +};
-> +MODULE_DEVICE_TABLE(of, pic32_sdhci_id_table);
-> +
-> +static struct platform_driver pic32_sdhci_driver = {
-> +       .driver = {
-> +               .name   = "pic32-sdhci",
-> +               .owner  = THIS_MODULE,
-> +               .of_match_table = of_match_ptr(pic32_sdhci_id_table),
-> +       },
-> +       .probe          = pic32_sdhci_probe,
-> +       .remove         = pic32_sdhci_remove,
-> +};
-> +
-> +module_platform_driver(pic32_sdhci_driver);
-> +
-> +MODULE_DESCRIPTION("Microchip PIC32 SDHCI driver");
-> +MODULE_AUTHOR("Pistirica Sorin Andrei & Sandeep Sheriker");
-> +MODULE_LICENSE("GPL v2");
-> --
-> 1.7.9.5
->
