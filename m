@@ -1,29 +1,25 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v3] mmc: pxamci: fix the device-tree probe deferral path
-Date: Mon, 8 Feb 2016 16:23:33 +0100
-Message-ID: <CAPDyKFrs=8hUgGL4OMYo9+LoG6E0CbS0b7ywO-2JzMN-yHBQaA@mail.gmail.com>
-References: <1454941077-12042-1-git-send-email-robert.jarzmik@free.fr>
+Subject: Re: [PATCH] mmc: mmc_spi: add checks for dma mapping error
+Date: Mon, 8 Feb 2016 16:23:39 +0100
+Message-ID: <CAPDyKFpc118zhWv4KFo0EHhZyu6RnPu0ot1mDWygXcKmuVQ3Cw@mail.gmail.com>
+References: <1454715395-9462-1-git-send-email-khoroshilov@ispras.ru>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1454941077-12042-1-git-send-email-robert.jarzmik@free.fr>
+In-Reply-To: <1454715395-9462-1-git-send-email-khoroshilov@ispras.ru>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Robert Jarzmik <robert.jarzmik@free.fr>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+To: Alexey Khoroshilov <khoroshilov@ispras.ru>
+Cc: Javier Martinez Canillas <javier@osg.samsung.com>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, ldv-project@linuxtesting.org
 List-Id: linux-mmc@vger.kernel.org
 
-On 8 February 2016 at 15:17, Robert Jarzmik <robert.jarzmik@free.fr> wrote:
-> When the gpio driver is probed after the mmc one, the read/write gpio
-> and card detection one return -EPROBE_DEFER. Unfortunately, the memory
-> region remains requested, and upon the next probe, the probe will fail
-> anyway with -EBUSY.
+On 6 February 2016 at 00:36, Alexey Khoroshilov <khoroshilov@ispras.ru> wrote:
+> There is no checks for dma mapping errors in mmc_spi.
+> Tha patch fixes that and by the way it adds dma_unmap_single(ones_dma)
+> that was left on a failure path mmc_spi_probe().
 >
-> Fix this by releasing the memory resource upon probe failure.
+> Found by Linux Driver Verification project (linuxtesting.org).
 >
-> More broadly, this patch uses devm_*() primitives whenever possible in
-> the probe function.
->
-> Signed-off-by: Robert Jarzmik <robert.jarzmik@free.fr>
+> Signed-off-by: Alexey Khoroshilov <khoroshilov@ispras.ru>
 
 Thanks, applied for fixes!
 
@@ -31,114 +27,51 @@ Kind regards
 Uffe
 
 > ---
-> Since v1: broaden the devm_*() enveloppe
-> Since v2: further broaden devm_*(): regulator + clock
-> ---
->  drivers/mmc/host/pxamci.c | 35 +++++++++--------------------------
->  1 file changed, 9 insertions(+), 26 deletions(-)
+>  drivers/mmc/host/mmc_spi.c | 15 +++++++++++++--
+>  1 file changed, 13 insertions(+), 2 deletions(-)
 >
-> diff --git a/drivers/mmc/host/pxamci.c b/drivers/mmc/host/pxamci.c
-> index 28a057fae0a1..da824772bbb4 100644
-> --- a/drivers/mmc/host/pxamci.c
-> +++ b/drivers/mmc/host/pxamci.c
-> @@ -86,7 +86,7 @@ struct pxamci_host {
->  static inline void pxamci_init_ocr(struct pxamci_host *host)
->  {
->  #ifdef CONFIG_REGULATOR
-> -       host->vcc = regulator_get_optional(mmc_dev(host->mmc), "vmmc");
-> +       host->vcc = devm_regulator_get_optional(mmc_dev(host->mmc), "vmmc");
+> diff --git a/drivers/mmc/host/mmc_spi.c b/drivers/mmc/host/mmc_spi.c
+> index 1c1b45ef3faf..3446097a43c0 100644
+> --- a/drivers/mmc/host/mmc_spi.c
+> +++ b/drivers/mmc/host/mmc_spi.c
+> @@ -925,6 +925,10 @@ mmc_spi_data_do(struct mmc_spi_host *host, struct mmc_command *cmd,
 >
->         if (IS_ERR(host->vcc))
->                 host->vcc = NULL;
-> @@ -654,12 +654,8 @@ static int pxamci_probe(struct platform_device *pdev)
->
->         r = platform_get_resource(pdev, IORESOURCE_MEM, 0);
->         irq = platform_get_irq(pdev, 0);
-> -       if (!r || irq < 0)
-> -               return -ENXIO;
+>                         dma_addr = dma_map_page(dma_dev, sg_page(sg), 0,
+>                                                 PAGE_SIZE, dir);
+> +                       if (dma_mapping_error(dma_dev, dma_addr)) {
+> +                               data->error = -EFAULT;
+> +                               break;
+> +                       }
+>                         if (direction == DMA_TO_DEVICE)
+>                                 t->tx_dma = dma_addr + sg->offset;
+>                         else
+> @@ -1393,10 +1397,12 @@ static int mmc_spi_probe(struct spi_device *spi)
+>                 host->dma_dev = dev;
+>                 host->ones_dma = dma_map_single(dev, ones,
+>                                 MMC_SPI_BLOCKSIZE, DMA_TO_DEVICE);
+> +               if (dma_mapping_error(dev, host->ones_dma))
+> +                       goto fail_ones_dma;
+>                 host->data_dma = dma_map_single(dev, host->data,
+>                                 sizeof(*host->data), DMA_BIDIRECTIONAL);
 > -
-> -       r = request_mem_region(r->start, SZ_4K, DRIVER_NAME);
-> -       if (!r)
-> -               return -EBUSY;
-> +       if (irq < 0)
-> +               return irq;
+> -               /* REVISIT in theory those map operations can fail... */
+> +               if (dma_mapping_error(dev, host->data_dma))
+> +                       goto fail_data_dma;
 >
->         mmc = mmc_alloc_host(sizeof(struct pxamci_host), &pdev->dev);
->         if (!mmc) {
-> @@ -695,7 +691,7 @@ static int pxamci_probe(struct platform_device *pdev)
->         host->pdata = pdev->dev.platform_data;
->         host->clkrt = CLKRT_OFF;
+>                 dma_sync_single_for_cpu(host->dma_dev,
+>                                 host->data_dma, sizeof(*host->data),
+> @@ -1462,6 +1468,11 @@ fail_glue_init:
+>         if (host->dma_dev)
+>                 dma_unmap_single(host->dma_dev, host->data_dma,
+>                                 sizeof(*host->data), DMA_BIDIRECTIONAL);
+> +fail_data_dma:
+> +       if (host->dma_dev)
+> +               dma_unmap_single(host->dma_dev, host->ones_dma,
+> +                               MMC_SPI_BLOCKSIZE, DMA_TO_DEVICE);
+> +fail_ones_dma:
+>         kfree(host->data);
 >
-> -       host->clk = clk_get(&pdev->dev, NULL);
-> +       host->clk = devm_clk_get(&pdev->dev, NULL);
->         if (IS_ERR(host->clk)) {
->                 ret = PTR_ERR(host->clk);
->                 host->clk = NULL;
-> @@ -727,9 +723,9 @@ static int pxamci_probe(struct platform_device *pdev)
->         host->irq = irq;
->         host->imask = MMC_I_MASK_ALL;
->
-> -       host->base = ioremap(r->start, SZ_4K);
-> -       if (!host->base) {
-> -               ret = -ENOMEM;
-> +       host->base = devm_ioremap_resource(&pdev->dev, r);
-> +       if (IS_ERR(host->base)) {
-> +               ret = PTR_ERR(host->base);
->                 goto out;
->         }
->
-> @@ -742,7 +738,8 @@ static int pxamci_probe(struct platform_device *pdev)
->         writel(64, host->base + MMC_RESTO);
->         writel(host->imask, host->base + MMC_I_MASK);
->
-> -       ret = request_irq(host->irq, pxamci_irq, 0, DRIVER_NAME, host);
-> +       ret = devm_request_irq(&pdev->dev, host->irq, pxamci_irq, 0,
-> +                              DRIVER_NAME, host);
->         if (ret)
->                 goto out;
->
-> @@ -833,14 +830,9 @@ out:
->                         dma_release_channel(host->dma_chan_rx);
->                 if (host->dma_chan_tx)
->                         dma_release_channel(host->dma_chan_tx);
-> -               if (host->base)
-> -                       iounmap(host->base);
-> -               if (host->clk)
-> -                       clk_put(host->clk);
->         }
->         if (mmc)
->                 mmc_free_host(mmc);
-> -       release_resource(r);
->         return ret;
->  }
->
-> @@ -859,9 +851,6 @@ static int pxamci_remove(struct platform_device *pdev)
->                         gpio_ro = host->pdata->gpio_card_ro;
->                         gpio_power = host->pdata->gpio_power;
->                 }
-> -               if (host->vcc)
-> -                       regulator_put(host->vcc);
-> -
->                 if (host->pdata && host->pdata->exit)
->                         host->pdata->exit(&pdev->dev, mmc);
->
-> @@ -870,16 +859,10 @@ static int pxamci_remove(struct platform_device *pdev)
->                        END_CMD_RES|PRG_DONE|DATA_TRAN_DONE,
->                        host->base + MMC_I_MASK);
->
-> -               free_irq(host->irq, host);
->                 dmaengine_terminate_all(host->dma_chan_rx);
->                 dmaengine_terminate_all(host->dma_chan_tx);
->                 dma_release_channel(host->dma_chan_rx);
->                 dma_release_channel(host->dma_chan_tx);
-> -               iounmap(host->base);
-> -
-> -               clk_put(host->clk);
-> -
-> -               release_resource(host->res);
->
->                 mmc_free_host(mmc);
->         }
+>  fail_nobuf1:
 > --
-> 2.1.4
+> 1.9.1
 >
