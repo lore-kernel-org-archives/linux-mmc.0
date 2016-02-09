@@ -1,13 +1,13 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: [PATCH V2 4/4] mmc: sdhci-acpi: Fix card detect race for Intel BXT/APL
-Date: Tue,  9 Feb 2016 16:12:38 +0200
-Message-ID: <1455027158-21564-5-git-send-email-adrian.hunter@intel.com>
+Subject: [PATCH V2 3/4] mmc: sdhci-pci: Fix card detect race for Intel BXT/APL
+Date: Tue,  9 Feb 2016 16:12:37 +0200
+Message-ID: <1455027158-21564-4-git-send-email-adrian.hunter@intel.com>
 References: <1455027158-21564-1-git-send-email-adrian.hunter@intel.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
 Received: from mga01.intel.com ([192.55.52.88]:45280 "EHLO mga01.intel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1757327AbcBIOQc (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 9 Feb 2016 09:16:32 -0500
+	id S1757314AbcBIOQb (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 9 Feb 2016 09:16:31 -0500
 In-Reply-To: <1455027158-21564-1-git-send-email-adrian.hunter@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
@@ -28,16 +28,16 @@ a 'get_cd' mmc host operation for BXT/APL that does that.
 Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
 Cc: stable@vger.kernel.org # v4.4+
 ---
- drivers/mmc/host/sdhci-acpi.c | 30 ++++++++++++++++++++++++++++++
- 1 file changed, 30 insertions(+)
+ drivers/mmc/host/sdhci-pci-core.c | 31 +++++++++++++++++++++++++++++++
+ 1 file changed, 31 insertions(+)
 
-diff --git a/drivers/mmc/host/sdhci-acpi.c b/drivers/mmc/host/sdhci-acpi.c
-index 3d27f2de0054..195ff0853dc8 100644
---- a/drivers/mmc/host/sdhci-acpi.c
-+++ b/drivers/mmc/host/sdhci-acpi.c
-@@ -146,6 +146,33 @@ static const struct sdhci_acpi_chip sdhci_acpi_chip_int = {
- 	.ops = &sdhci_acpi_ops_int,
- };
+diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-pci-core.c
+index cc851b065d0a..df3b8eced8c4 100644
+--- a/drivers/mmc/host/sdhci-pci-core.c
++++ b/drivers/mmc/host/sdhci-pci-core.c
+@@ -330,6 +330,33 @@ static void spt_read_drive_strength(struct sdhci_host *host)
+ 	sdhci_pci_spt_drive_strength = 0x10 | ((val >> 12) & 0xf);
+ }
  
 +static int bxt_get_cd(struct mmc_host *mmc)
 +{
@@ -66,15 +66,16 @@ index 3d27f2de0054..195ff0853dc8 100644
 +	return ret;
 +}
 +
- static int sdhci_acpi_emmc_probe_slot(struct platform_device *pdev,
- 				      const char *hid, const char *uid)
+ static int byt_emmc_probe_slot(struct sdhci_pci_slot *slot)
  {
-@@ -196,6 +223,9 @@ static int sdhci_acpi_sd_probe_slot(struct platform_device *pdev,
- 
- 	/* Platform specific code during sd probe slot goes here */
- 
-+	if (hid && !strcmp(hid, "80865ACA"))
-+		host->mmc_host_ops.get_cd = bxt_get_cd;
+ 	slot->host->mmc->caps |= MMC_CAP_8_BIT_DATA | MMC_CAP_NONREMOVABLE |
+@@ -362,6 +389,10 @@ static int byt_sd_probe_slot(struct sdhci_pci_slot *slot)
+ 	slot->cd_con_id = NULL;
+ 	slot->cd_idx = 0;
+ 	slot->cd_override_level = true;
++	if (slot->chip->pdev->device == PCI_DEVICE_ID_INTEL_BXT_SD ||
++	    slot->chip->pdev->device == PCI_DEVICE_ID_INTEL_APL_SD)
++		slot->host->mmc_host_ops.get_cd = bxt_get_cd;
 +
  	return 0;
  }
