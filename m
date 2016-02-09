@@ -1,77 +1,49 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: mmc_spi: add checks for dma mapping error
-Date: Mon, 8 Feb 2016 16:23:39 +0100
-Message-ID: <CAPDyKFpc118zhWv4KFo0EHhZyu6RnPu0ot1mDWygXcKmuVQ3Cw@mail.gmail.com>
-References: <1454715395-9462-1-git-send-email-khoroshilov@ispras.ru>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+From: Masahiro Yamada <yamada.masahiro@socionext.com>
+Subject: [PATCH] mmc: reduce nesting and join error strings into one line
+Date: Tue,  9 Feb 2016 20:43:11 +0900
+Message-ID: <1455018191-8545-1-git-send-email-yamada.masahiro@socionext.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1454715395-9462-1-git-send-email-khoroshilov@ispras.ru>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Alexey Khoroshilov <khoroshilov@ispras.ru>
-Cc: Javier Martinez Canillas <javier@osg.samsung.com>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, ldv-project@linuxtesting.org
+To: linux-mmc@vger.kernel.org
+Cc: Masahiro Yamada <yamada.masahiro@socionext.com>, Adrian Hunter <adrian.hunter@intel.com>, linux-kernel@vger.kernel.org, Chaotian Jing <chaotian.jing@mediatek.com>, Ulf Hansson <ulf.hansson@linaro.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On 6 February 2016 at 00:36, Alexey Khoroshilov <khoroshilov@ispras.ru> wrote:
-> There is no checks for dma mapping errors in mmc_spi.
-> Tha patch fixes that and by the way it adds dma_unmap_single(ones_dma)
-> that was left on a failure path mmc_spi_probe().
->
-> Found by Linux Driver Verification project (linuxtesting.org).
->
-> Signed-off-by: Alexey Khoroshilov <khoroshilov@ispras.ru>
+No reason to use the double "if" nesting.  This fix allows to move
+the nested block to the left and tidy up the error message without
+80-col overflow.
 
-Thanks, applied for fixes!
+Signed-off-by: Masahiro Yamada <yamada.masahiro@socionext.com>
+---
 
-Kind regards
-Uffe
+ drivers/mmc/core/mmc.c | 16 ++++++++--------
+ 1 file changed, 8 insertions(+), 8 deletions(-)
 
-> ---
->  drivers/mmc/host/mmc_spi.c | 15 +++++++++++++--
->  1 file changed, 13 insertions(+), 2 deletions(-)
->
-> diff --git a/drivers/mmc/host/mmc_spi.c b/drivers/mmc/host/mmc_spi.c
-> index 1c1b45ef3faf..3446097a43c0 100644
-> --- a/drivers/mmc/host/mmc_spi.c
-> +++ b/drivers/mmc/host/mmc_spi.c
-> @@ -925,6 +925,10 @@ mmc_spi_data_do(struct mmc_spi_host *host, struct mmc_command *cmd,
->
->                         dma_addr = dma_map_page(dma_dev, sg_page(sg), 0,
->                                                 PAGE_SIZE, dir);
-> +                       if (dma_mapping_error(dma_dev, dma_addr)) {
-> +                               data->error = -EFAULT;
-> +                               break;
-> +                       }
->                         if (direction == DMA_TO_DEVICE)
->                                 t->tx_dma = dma_addr + sg->offset;
->                         else
-> @@ -1393,10 +1397,12 @@ static int mmc_spi_probe(struct spi_device *spi)
->                 host->dma_dev = dev;
->                 host->ones_dma = dma_map_single(dev, ones,
->                                 MMC_SPI_BLOCKSIZE, DMA_TO_DEVICE);
-> +               if (dma_mapping_error(dev, host->ones_dma))
-> +                       goto fail_ones_dma;
->                 host->data_dma = dma_map_single(dev, host->data,
->                                 sizeof(*host->data), DMA_BIDIRECTIONAL);
-> -
-> -               /* REVISIT in theory those map operations can fail... */
-> +               if (dma_mapping_error(dev, host->data_dma))
-> +                       goto fail_data_dma;
->
->                 dma_sync_single_for_cpu(host->dma_dev,
->                                 host->data_dma, sizeof(*host->data),
-> @@ -1462,6 +1468,11 @@ fail_glue_init:
->         if (host->dma_dev)
->                 dma_unmap_single(host->dma_dev, host->data_dma,
->                                 sizeof(*host->data), DMA_BIDIRECTIONAL);
-> +fail_data_dma:
-> +       if (host->dma_dev)
-> +               dma_unmap_single(host->dma_dev, host->ones_dma,
-> +                               MMC_SPI_BLOCKSIZE, DMA_TO_DEVICE);
-> +fail_ones_dma:
->         kfree(host->data);
->
->  fail_nobuf1:
-> --
-> 1.9.1
->
+diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+index bf49e44..3789a50 100644
+--- a/drivers/mmc/core/mmc.c
++++ b/drivers/mmc/core/mmc.c
+@@ -345,14 +345,14 @@ static int mmc_decode_ext_csd(struct mmc_card *card, u8 *ext_csd)
+ 
+ 	/* Version is coded in the CSD_STRUCTURE byte in the EXT_CSD register */
+ 	card->ext_csd.raw_ext_csd_structure = ext_csd[EXT_CSD_STRUCTURE];
+-	if (card->csd.structure == 3) {
+-		if (card->ext_csd.raw_ext_csd_structure > 2) {
+-			pr_err("%s: unrecognised EXT_CSD structure "
+-				"version %d\n", mmc_hostname(card->host),
+-					card->ext_csd.raw_ext_csd_structure);
+-			err = -EINVAL;
+-			goto out;
+-		}
++
++	if (card->csd.structure == 3 &&
++	    card->ext_csd.raw_ext_csd_structure > 2) {
++		pr_err("%s: unrecognised EXT_CSD structure version %d\n",
++		       mmc_hostname(card->host),
++		       card->ext_csd.raw_ext_csd_structure);
++		err = -EINVAL;
++		goto out;
+ 	}
+ 
+ 	np = mmc_of_find_child_device(card->host, 0);
+-- 
+1.9.1
