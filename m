@@ -1,34 +1,74 @@
-From: Chris Paterson <chris.paterson2@renesas.com>
-Subject: [PATCH] mmc: sh_mmcif: Correct TX DMA channel allocation
-Date: Wed, 10 Feb 2016 14:07:01 +0000
-Message-ID: <1455113221-18117-1-git-send-email-chris.paterson2@renesas.com>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: ulf.hansson@linaro.org
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, kuninori.morimoto.gx@renesas.com, ykaneko0929@gmail.com, arnd@arndb.de, geert+renesas@glider.be, laurent.pinchart@ideasonboard.com, kouichi.tomita.yn@renesas.com, takeshi.kihara.df@renesas.com, koji.matsuoka.xm@renesas.com, Chris Paterson <chris.paterson2@renesas.com>
+From: Ludovic Desroches <ludovic.desroches@atmel.com>
+Subject: Re: [RFC PATCH] mmc: sdhci-of-at91: don't put device in suspend
+ after probe
+Date: Wed, 10 Feb 2016 15:16:24 +0100
+Message-ID: <20160210141624.GC14937@odux.rfo.atmel.com>
+References: <1455098283-14500-1-git-send-email-ludovic.desroches@atmel.com>
+ <56BB2414.1040606@intel.com>
+ <20160210125139.GB14937@odux.rfo.atmel.com>
+ <56BB3459.6090506@intel.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from eusmtp01.atmel.com ([212.144.249.243]:59764 "EHLO
+	eusmtp01.atmel.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751168AbcBJOQ2 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 10 Feb 2016 09:16:28 -0500
+Content-Disposition: inline
+In-Reply-To: <56BB3459.6090506@intel.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Adrian Hunter <adrian.hunter@intel.com>
+Cc: nicolas.ferre@atmel.com, Ludovic Desroches <ludovic.desroches@atmel.com>, ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 
-Commit 27cbd7e815a8 ("mmc: sh_mmcif: rework dma channel handling")
-introduced a typo causing the TX DMA channel allocation to be overwritten
-by the requested RX DMA channel.
+On Wed, Feb 10, 2016 at 03:00:09PM +0200, Adrian Hunter wrote:
+> On 10/02/16 14:51, Ludovic Desroches wrote:
+> > Hi Adrian,
+> > 
+> > On Wed, Feb 10, 2016 at 01:50:44PM +0200, Adrian Hunter wrote:
+> >> On 10/02/16 11:58, Ludovic Desroches wrote:
+> >>> By putting the device in suspend at the end of the probe, it is
+> >>> impossible to wake up on non software event such as card
+> >>> insertion/removal.
+> >>>
+> >>> Signed-off-by: Ludovic Desroches <ludovic.desroches@atmel.com>
+> >>> ---
+> >>>
+> >>> Hi,
+> >>>
+> >>> Since I had no feedback on this topic:
+> >>> http://permalink.gmane.org/gmane.linux.kernel.mmc/35160
+> >>>
+> >>> I would like to no more put the device in suspend at the end of the probe. If
+> >>> my device is suspended at the end of the probe, I have no issue to resume on
+> >>> a software event such as mounting my sdcard but hardware event such as card
+> >>> insertion and removal do not trigger a resume.
+> >>
+> >> You can't use runtime PM unless you have a way to wake-up.
+> >>
+> > 
+> > Thanks for your feedback. I am a bit disappointed since Ulf advised me to use
+> > runtime PM instead of system PM.
+> > 
+> >> Currently, sdhci disables card detect interrupts when runtime suspended,
+> >> and drivers use a card-detect GPIO to wake-up.
+> >>
+> > 
+> > It is what I have seen going through the sdhci layer. So next question is:
+> > is it normal to not take care of card detect interrupts? We keep enabled
+> > some IRQs probably for SDIO modules IRQ but not for card detection. I
+> > don't understand the reason.
+> 
+> Does sdhci-of-at91.c generate card detect interrupts while runtime suspended?
 
-Signed-off-by: Chris Paterson <chris.paterson2@renesas.com>
----
- drivers/mmc/host/sh_mmcif.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+It could if I keep one or two clocks enabled (need extra tests to be
+sure about the clock needed to get this interrupt). I have tried to modify
+quickly sdhci_runtime_suspend_host() to enable card insertion/removal,
+there is an irq generated but the kernel complains this irq is not
+handled. I didn't dig further, it was only to do a simple test.
 
-diff --git a/drivers/mmc/host/sh_mmcif.c b/drivers/mmc/host/sh_mmcif.c
-index e0c076a..8d870ce 100644
---- a/drivers/mmc/host/sh_mmcif.c
-+++ b/drivers/mmc/host/sh_mmcif.c
-@@ -445,7 +445,7 @@ static void sh_mmcif_request_dma(struct sh_mmcif_host *host)
- 							pdata->slave_id_rx);
- 	} else {
- 		host->chan_tx = dma_request_slave_channel(dev, "tx");
--		host->chan_tx = dma_request_slave_channel(dev, "rx");
-+		host->chan_rx = dma_request_slave_channel(dev, "rx");
- 	}
- 	dev_dbg(dev, "%s: got channel TX %p RX %p\n", __func__, host->chan_tx,
- 		host->chan_rx);
--- 
-1.9.1
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
