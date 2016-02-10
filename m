@@ -1,18 +1,14 @@
 From: Tony Lindgren <tony@atomide.com>
-Subject: [PATCH 3/7] spi: omap2-mcspi: Fix PM regression with deferred probe for pm_runtime_reinit
-Date: Wed, 10 Feb 2016 15:02:46 -0800
-Message-ID: <1455145370-20301-4-git-send-email-tony@atomide.com>
+Subject: [PATCH 2/7] i2c: omap: Fix PM regression with deferred probe for pm_runtime_reinit
+Date: Wed, 10 Feb 2016 15:02:45 -0800
+Message-ID: <1455145370-20301-3-git-send-email-tony@atomide.com>
 References: <1455145370-20301-1-git-send-email-tony@atomide.com>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from muru.com ([72.249.23.125]:33435 "EHLO muru.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751083AbcBJXDG (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 10 Feb 2016 18:03:06 -0500
+Return-path: <linux-i2c-owner@vger.kernel.org>
 In-Reply-To: <1455145370-20301-1-git-send-email-tony@atomide.com>
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Sender: linux-i2c-owner@vger.kernel.org
 To: linux-omap@vger.kernel.org
-Cc: linux-arm-kernel@lists.infradead.org, linux-spi@vger.kernel.org, Alan Stern <stern@rowland.harvard.edu>, Kevin Hilman <khilman@baylibre.com>, Mark Brown <broonie@kernel.org>, Nishanth Menon <nm@ti.com>, "Rafael J . Wysocki" <rafael@kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, Tero Kristo <t-kristo@ti.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, linux-i2c@vger.kernel.org, linux-mmc@vger.kernel.org, linux-serial@vger.kernel.org, Peter Hurley <peter@hurleysoftware.com>, Wolfram Sang <wsa@the-dreams.de>
+Cc: linux-arm-kernel@lists.infradead.org, linux-i2c@vger.kernel.org, Alan Stern <stern@rowland.harvard.edu>, Kevin Hilman <khilman@baylibre.com>, Nishanth Menon <nm@ti.com>, "Rafael J . Wysocki" <rafael@kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, Tero Kristo <t-kristo@ti.com>, Wolfram Sang <wsa@the-dreams.de>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, linux-mmc@vger.kernel.org, linux-serial@vger.kernel.org, linux-spi@vger.kernel.org, Mark Brown <broonie@kernel.org>, Peter Hurley <peter@hurleysoftware.com>
+List-Id: linux-mmc@vger.kernel.org
 
 Commit 5de85b9d57ab ("PM / runtime: Re-init runtime PM states at probe
 error and driver unbind") introduced pm_runtime_reinit() that is used
@@ -42,47 +38,48 @@ The solution is to fix the drivers to follow the PM runtime documentation:
 
 Fixes: 5de85b9d57ab ("PM / runtime: Re-init runtime PM states at probe
 error and driver unbind")
-Cc: linux-spi@vger.kernel.org
+Cc: linux-i2c@vger.kernel.org
 Cc: Alan Stern <stern@rowland.harvard.edu>
 Cc: Kevin Hilman <khilman@baylibre.com>
-Cc: Mark Brown <broonie@kernel.org>
 Cc: Nishanth Menon <nm@ti.com>
 Cc: Rafael J. Wysocki <rafael@kernel.org>
 Cc: Ulf Hansson <ulf.hansson@linaro.org>
 Cc: Tero Kristo <t-kristo@ti.com>
+Cc: Wolfram Sang <wsa@the-dreams.de>
 Signed-off-by: Tony Lindgren <tony@atomide.com>
 ---
 
-Mark, I'd like to merge this along with other related fixes via
+Wolfram, I'd like to merge this along with other related fixes via
 the ARM SoC tree if no objections, please review and ack if this
 look OK to you.
 
 
 ---
- drivers/spi/spi-omap2-mcspi.c | 3 +++
- 1 file changed, 3 insertions(+)
 
-diff --git a/drivers/spi/spi-omap2-mcspi.c b/drivers/spi/spi-omap2-mcspi.c
-index 7273820..0caa3c8 100644
---- a/drivers/spi/spi-omap2-mcspi.c
-+++ b/drivers/spi/spi-omap2-mcspi.c
-@@ -1490,6 +1490,8 @@ static int omap2_mcspi_probe(struct platform_device *pdev)
- 	return status;
+ drivers/i2c/busses/i2c-omap.c | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/drivers/i2c/busses/i2c-omap.c b/drivers/i2c/busses/i2c-omap.c
+index 08d26ba..13c4529 100644
+--- a/drivers/i2c/busses/i2c-omap.c
++++ b/drivers/i2c/busses/i2c-omap.c
+@@ -1450,7 +1450,8 @@ omap_i2c_probe(struct platform_device *pdev)
  
- disable_pm:
+ err_unuse_clocks:
+ 	omap_i2c_write_reg(omap, OMAP_I2C_CON_REG, 0);
+-	pm_runtime_put(omap->dev);
++	pm_runtime_dont_use_autosuspend(omap->dev);
++	pm_runtime_put_sync(omap->dev);
+ 	pm_runtime_disable(&pdev->dev);
+ err_free_mem:
+ 
+@@ -1468,6 +1469,7 @@ static int omap_i2c_remove(struct platform_device *pdev)
+ 		return ret;
+ 
+ 	omap_i2c_write_reg(omap, OMAP_I2C_CON_REG, 0);
 +	pm_runtime_dont_use_autosuspend(&pdev->dev);
-+	pm_runtime_put_sync(&pdev->dev);
+ 	pm_runtime_put_sync(&pdev->dev);
  	pm_runtime_disable(&pdev->dev);
- free_master:
- 	spi_master_put(master);
-@@ -1501,6 +1503,7 @@ static int omap2_mcspi_remove(struct platform_device *pdev)
- 	struct spi_master *master = platform_get_drvdata(pdev);
- 	struct omap2_mcspi *mcspi = spi_master_get_devdata(master);
- 
-+	pm_runtime_dont_use_autosuspend(mcspi->dev);
- 	pm_runtime_put_sync(mcspi->dev);
- 	pm_runtime_disable(&pdev->dev);
- 
+ 	return 0;
 -- 
 2.7.0
-
