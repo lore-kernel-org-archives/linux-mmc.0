@@ -1,71 +1,53 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [RFC PATCH] mmc: sdhci-of-at91: don't put device in suspend after
- probe
-Date: Wed, 10 Feb 2016 16:20:43 +0200
-Message-ID: <56BB473B.2010105@intel.com>
-References: <1455098283-14500-1-git-send-email-ludovic.desroches@atmel.com>
- <56BB2414.1040606@intel.com> <20160210125139.GB14937@odux.rfo.atmel.com>
- <56BB3459.6090506@intel.com> <20160210141624.GC14937@odux.rfo.atmel.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH] mmc: sh_mmcif: Correct TX DMA channel allocation
+Date: Wed, 10 Feb 2016 15:33:34 +0100
+Message-ID: <CAPDyKFoNGH2e5qJ=YBZOOzxT_qbv0nK+Aok=hPRw8O892tus8g@mail.gmail.com>
+References: <1455113221-18117-1-git-send-email-chris.paterson2@renesas.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga14.intel.com ([192.55.52.115]:57374 "EHLO mga14.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751411AbcBJOYN (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 10 Feb 2016 09:24:13 -0500
-In-Reply-To: <20160210141624.GC14937@odux.rfo.atmel.com>
+Received: from mail-yk0-f181.google.com ([209.85.160.181]:36753 "EHLO
+	mail-yk0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751419AbcBJOdf (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 10 Feb 2016 09:33:35 -0500
+Received: by mail-yk0-f181.google.com with SMTP id z7so8103756yka.3
+        for <linux-mmc@vger.kernel.org>; Wed, 10 Feb 2016 06:33:35 -0800 (PST)
+In-Reply-To: <1455113221-18117-1-git-send-email-chris.paterson2@renesas.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: nicolas.ferre@atmel.com, ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+To: Chris Paterson <chris.paterson2@renesas.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>, Yoshihiro Kaneko <ykaneko0929@gmail.com>, Arnd Bergmann <arnd@arndb.de>, Geert Uytterhoeven <geert+renesas@glider.be>, Laurent Pinchart <laurent.pinchart@ideasonboard.com>, Kouichi Tomita <kouichi.tomita.yn@renesas.com>, takeshi.kihara.df@renesas.com, koji.matsuoka.xm@renesas.com
 
-On 10/02/16 16:16, Ludovic Desroches wrote:
-> On Wed, Feb 10, 2016 at 03:00:09PM +0200, Adrian Hunter wrote:
->> On 10/02/16 14:51, Ludovic Desroches wrote:
->>> Hi Adrian,
->>>
->>> On Wed, Feb 10, 2016 at 01:50:44PM +0200, Adrian Hunter wrote:
->>>> On 10/02/16 11:58, Ludovic Desroches wrote:
->>>>> By putting the device in suspend at the end of the probe, it is
->>>>> impossible to wake up on non software event such as card
->>>>> insertion/removal.
->>>>>
->>>>> Signed-off-by: Ludovic Desroches <ludovic.desroches@atmel.com>
->>>>> ---
->>>>>
->>>>> Hi,
->>>>>
->>>>> Since I had no feedback on this topic:
->>>>> http://permalink.gmane.org/gmane.linux.kernel.mmc/35160
->>>>>
->>>>> I would like to no more put the device in suspend at the end of the probe. If
->>>>> my device is suspended at the end of the probe, I have no issue to resume on
->>>>> a software event such as mounting my sdcard but hardware event such as card
->>>>> insertion and removal do not trigger a resume.
->>>>
->>>> You can't use runtime PM unless you have a way to wake-up.
->>>>
->>>
->>> Thanks for your feedback. I am a bit disappointed since Ulf advised me to use
->>> runtime PM instead of system PM.
->>>
->>>> Currently, sdhci disables card detect interrupts when runtime suspended,
->>>> and drivers use a card-detect GPIO to wake-up.
->>>>
->>>
->>> It is what I have seen going through the sdhci layer. So next question is:
->>> is it normal to not take care of card detect interrupts? We keep enabled
->>> some IRQs probably for SDIO modules IRQ but not for card detection. I
->>> don't understand the reason.
->>
->> Does sdhci-of-at91.c generate card detect interrupts while runtime suspended?
-> 
-> It could if I keep one or two clocks enabled (need extra tests to be
-> sure about the clock needed to get this interrupt). I have tried to modify
-> quickly sdhci_runtime_suspend_host() to enable card insertion/removal,
-> there is an irq generated but the kernel complains this irq is not
-> handled. I didn't dig further, it was only to do a simple test.
+On 10 February 2016 at 15:07, Chris Paterson
+<chris.paterson2@renesas.com> wrote:
+> Commit 27cbd7e815a8 ("mmc: sh_mmcif: rework dma channel handling")
+> introduced a typo causing the TX DMA channel allocation to be overwritten
+> by the requested RX DMA channel.
+>
+> Signed-off-by: Chris Paterson <chris.paterson2@renesas.com>
 
-sdhci_irq() returns immediately if (host->runtime_suspended &&
-!sdhci_sdio_irq_enabled(host))
+Thanks, applied for fixes and I also added a corresponding fixes tag.
 
+Kind regards
+Uffe
+
+> ---
+>  drivers/mmc/host/sh_mmcif.c | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+>
+> diff --git a/drivers/mmc/host/sh_mmcif.c b/drivers/mmc/host/sh_mmcif.c
+> index e0c076a..8d870ce 100644
+> --- a/drivers/mmc/host/sh_mmcif.c
+> +++ b/drivers/mmc/host/sh_mmcif.c
+> @@ -445,7 +445,7 @@ static void sh_mmcif_request_dma(struct sh_mmcif_host *host)
+>                                                         pdata->slave_id_rx);
+>         } else {
+>                 host->chan_tx = dma_request_slave_channel(dev, "tx");
+> -               host->chan_tx = dma_request_slave_channel(dev, "rx");
+> +               host->chan_rx = dma_request_slave_channel(dev, "rx");
+>         }
+>         dev_dbg(dev, "%s: got channel TX %p RX %p\n", __func__, host->chan_tx,
+>                 host->chan_rx);
+> --
+> 1.9.1
+>
