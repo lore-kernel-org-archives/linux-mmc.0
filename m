@@ -1,129 +1,60 @@
-From: David Daney <ddaney@caviumnetworks.com>
-Subject: Re: [PATCH v5] mmc: OCTEON: Add host driver for OCTEON MMC controller
-Date: Wed, 10 Feb 2016 10:02:23 -0800
-Message-ID: <56BB7B2F.60307@caviumnetworks.com>
-References: <1455125775-7245-1-git-send-email-matt.redfearn@imgtec.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH 9/9] mmc: sdhi: Add r8a7795 support
+Date: Wed, 10 Feb 2016 19:43:06 +0100
+Message-ID: <CAPDyKFrzFA_3MnkOPGLD7Fy84XAyx7+=utERbNF1cX31KWxHMg@mail.gmail.com>
+References: <1453749316-1848-1-git-send-email-wsa@the-dreams.de>
+	<1453749316-1848-10-git-send-email-wsa@the-dreams.de>
+	<CAPDyKFo6oXEAy562p7MTxw0eKYZe_nnT2q+hbLKF4Lv2kMUvGg@mail.gmail.com>
+	<20160210163623.GA15453@katana>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="ISO-8859-1"; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mips-bounce@linux-mips.org>
-In-Reply-To: <1455125775-7245-1-git-send-email-matt.redfearn@imgtec.com>
-Sender: linux-mips-bounce@linux-mips.org
-Errors-to: linux-mips-bounce@linux-mips.org
-List-help: <mailto:ecartis@linux-mips.org?Subject=help>
-List-unsubscribe: <mailto:ecartis@linux-mips.org?subject=unsubscribe%20linux-mips>
-List-software: Ecartis version 1.0.0
-List-subscribe: <mailto:ecartis@linux-mips.org?subject=subscribe%20linux-mips>
-List-owner: <mailto:ralf@linux-mips.org>
-List-post: <mailto:linux-mips@linux-mips.org>
-List-archive: <http://www.linux-mips.org/archives/linux-mips/>
-To: Matt Redfearn <matt.redfearn@imgtec.com>
-Cc: linux-mmc@vger.kernel.org, david.daney@cavium.com, ulf.hansson@linaro.org, linux-mips@linux-mips.org, linux-kernel@vger.kernel.org, devicetree@vger.kernel.org, Zubair.Kakakhel@imgtec.com, Aleksey Makarov <aleksey.makarov@caviumnetworks.com>, Chandrakala Chavva <cchavva@caviumnetworks.com>, Aleksey Makarov <aleksey.makarov@auriga.com>, Leonid Rosenboim <lrosenboim@caviumnetworks.com>, Peter Swain <pswain@cavium.com>, Aaron Williams <aaron.williams@cavium.com>
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-yk0-f176.google.com ([209.85.160.176]:34370 "EHLO
+	mail-yk0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753111AbcBJSnH (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 10 Feb 2016 13:43:07 -0500
+Received: by mail-yk0-f176.google.com with SMTP id u9so11462042ykd.1
+        for <linux-mmc@vger.kernel.org>; Wed, 10 Feb 2016 10:43:07 -0800 (PST)
+In-Reply-To: <20160210163623.GA15453@katana>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Wolfram Sang <wsa@the-dreams.de>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, linux-renesas-soc@vger.kernel.org, Linux-sh list <linux-sh@vger.kernel.org>, Kuninori Morimoto <kuninori.morimoto.gx@gmail.com>, Magnus Damm <magnus.damm@gmail.com>, Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>, Dirk Behme <dirk.behme@gmail.com>
 
-On 02/10/2016 09:36 AM, Matt Redfearn wrote:
-> From: Aleksey Makarov<aleksey.makarov@caviumnetworks.com>
+On 10 February 2016 at 17:36, Wolfram Sang <wsa@the-dreams.de> wrote:
+> ^
+>> I think you should try without MMC_CAP_WAIT_WHILE_BUSY, and then check
+>> that a following CMD13 command always states that the card isn't busy.
+>> I think the best path to try this is when sending a big write data
+>> request, as in that case you can be quite certain that the card gets
+>> busy between the requests.
+>>
+>> So somewhere in the mmc block layer add some debug prints, that should do it.
 >
-> The OCTEON MMC controller is currently found on cn61XX and cnf71XX
-> devices.  Device parameters are configured from device tree data.
+> I'd think the mmc_test driver already helped me with this. I ran tests
+> like 31 (Consecutive write performance by transfer size) or 36 (Large
+> sequential write from scattered pages) which both succeeded without any
+> warnings printed. And the code explicitly sends a CMD13 after transfer,
+> checks for busy and prints a warning when MMC_CAP_WAIT_WHILE_BUSY is
+> set and a busy state is detected. Nice test thing this driver is :)
+
+That should do it!
+
 >
-> eMMC, MMC and SD devices are supported.
+> So, it looks to me that patch 9 is fine to go in?
 >
-> Tested-by: Aaro Koskinen<aaro.koskinen@iki.fi>
-> Signed-off-by: Chandrakala Chavva<cchavva@caviumnetworks.com>
-> Signed-off-by: David Daney<david.daney@cavium.com>
-> Signed-off-by: Aleksey Makarov<aleksey.makarov@auriga.com>
-> Signed-off-by: Leonid Rosenboim<lrosenboim@caviumnetworks.com>
-> Signed-off-by: Peter Swain<pswain@cavium.com>
-> Signed-off-by: Aaron Williams<aaron.williams@cavium.com>
-> Signed-off-by: Matt Redfearn<matt.redfearn@imgtec.com>
-> ---
-> v5:
-> Incoroprate comments from review
-> http://patchwork.linux-mips.org/patch/9558/
-> - Use standard <bus-width> property instead of <cavium,bus-max-width>.
-> - Use standard <max-frequency> property instead of <spi-max-frequency>.
-> - Add octeon_mmc_of_parse_legacy function to deal with the above
->    properties, since many devices have shipped with those properties
->    embedded in firmware.
-> - Allow the <vmmc-supply> binding in addition to the legacy
->    <gpios-power>.
-> - Remove the secondary driver for each slot.
-> - Use core gpio cd/wp handling
->
-[...]
 
-> +static int octeon_mmc_of_copy_legacy_u32(struct device_node *node,
-> +					  const char *legacy_name,
-> +					  const char *new_name)
-> +{
-> +	u32 value;
-> +	int ret;
-> +
-> +	ret = of_property_read_u32(node, legacy_name, &value);
-> +	if (!ret) {
-> +		/* Found legacy - set generic property */
-> +		struct property *new_p;
-> +		u32 *new_v;
-> +
-> +		pr_warn(FW_WARN "%s: Legacy property '%s'. Please remove\n",
-> +			node->full_name, legacy_name);
-> +
+Not yet. :-)
 
-I don't like this warning message.
+I suspect you are using a delayed work in this driver to deal with
+request timeouts.
 
-The vast majority of people that see it will not be able to change their 
-firmware.  So it will be forever cluttering up their boot logs.
+The value for the delay that is used, needs to be informed towards the
+mmc core via the "->max_busy_timeout".
 
-We are not ever planning on removing support for legacy firmware 
-properties, so alarming people is really all this message does.
+One more thing, as the documentation of your host controllers lacks
+some information about the busy mode, perhaps it's worth to add some
+comments about this in the code and as well in the change-log!?
 
-If you insist on a message then make it something like pr_info("This is 
-working properly, but please consider using modern device tree 
-properties...")
-
-> +		new_p = kzalloc(sizeof(*new_p), GFP_KERNEL);
-> +		new_v = kzalloc(sizeof(u32), GFP_KERNEL);
-> +		if (!new_p || !new_v)
-> +			return -ENOMEM;
-> +
-> +		*new_v = value;
-> +		new_p->name = kstrdup(new_name, GFP_KERNEL);
-> +		new_p->length = sizeof(u32);
-> +		new_p->value = new_v;
-> +
-> +		of_update_property(node, new_p);
-> +	}
-> +	return 0;
-> +}
-> +
-> +/*
-> + * This function parses the legacy device tree that may be found in devices
-> + * shipped before the driver was upstreamed. Future devices should not require
-> + * it as standard bindings should be used
-> + */
-> +static int octeon_mmc_of_parse_legacy(struct device *dev,
-> +				      struct device_node *node,
-> +				      struct octeon_mmc_slot *slot)
-> +{
-> +	int ret;
-> +
-> +	ret = octeon_mmc_of_copy_legacy_u32(node, "cavium,bus-max-width",
-> +					    "bus-width");
-> +	if (ret)
-> +		return ret;
-> +
-> +	ret = octeon_mmc_of_copy_legacy_u32(node, "spi-max-frequency",
-> +					    "max-frequency");
-> +	if (ret)
-> +		return ret;
-> +
-> +	slot->pwr_gpiod = devm_gpiod_get_optional(dev, "power", GPIOD_OUT_LOW);
-> +	if (!IS_ERR(slot->pwr_gpiod)) {
-> +		pr_warn(FW_WARN "%s: Legacy property '%s'. Please remove\n",
-> +			node->full_name, "gpios-power");
-> +	}
-> +
-> +	return 0;
-> +}
-> +
+Kind regards
+Uffe
