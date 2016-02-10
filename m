@@ -1,69 +1,88 @@
 From: Tony Lindgren <tony@atomide.com>
-Subject: [PATCH 7/7] ARM: OMAP2+: Fix omap_device for module reload on PM runtime forbid
-Date: Wed, 10 Feb 2016 15:02:50 -0800
-Message-ID: <1455145370-20301-8-git-send-email-tony@atomide.com>
+Subject: [PATCH 3/7] spi: omap2-mcspi: Fix PM regression with deferred probe for pm_runtime_reinit
+Date: Wed, 10 Feb 2016 15:02:46 -0800
+Message-ID: <1455145370-20301-4-git-send-email-tony@atomide.com>
 References: <1455145370-20301-1-git-send-email-tony@atomide.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from muru.com ([72.249.23.125]:33463 "EHLO muru.com"
+Received: from muru.com ([72.249.23.125]:33435 "EHLO muru.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752090AbcBJXDL (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 10 Feb 2016 18:03:11 -0500
+	id S1751083AbcBJXDG (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 10 Feb 2016 18:03:06 -0500
 In-Reply-To: <1455145370-20301-1-git-send-email-tony@atomide.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-omap@vger.kernel.org
-Cc: linux-arm-kernel@lists.infradead.org, Alan Stern <stern@rowland.harvard.edu>, Kevin Hilman <khilman@baylibre.com>, Nishanth Menon <nm@ti.com>, "Rafael J . Wysocki" <rafael@kernel.org>, Tero Kristo <t-kristo@ti.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, linux-i2c@vger.kernel.org, linux-mmc@vger.kernel.org, linux-serial@vger.kernel.org, linux-spi@vger.kernel.org, Mark Brown <broonie@kernel.org>, Peter Hurley <peter@hurleysoftware.com>, Ulf Hansson <ulf.hansson@linaro.org>, Wolfram Sang <wsa@the-dreams.de>
+Cc: linux-arm-kernel@lists.infradead.org, linux-spi@vger.kernel.org, Alan Stern <stern@rowland.harvard.edu>, Kevin Hilman <khilman@baylibre.com>, Mark Brown <broonie@kernel.org>, Nishanth Menon <nm@ti.com>, "Rafael J . Wysocki" <rafael@kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, Tero Kristo <t-kristo@ti.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, linux-i2c@vger.kernel.org, linux-mmc@vger.kernel.org, linux-serial@vger.kernel.org, Peter Hurley <peter@hurleysoftware.com>, Wolfram Sang <wsa@the-dreams.de>
 
-If a driver PM runtime is disabled via sysfs, and the module is
-unloaded, PM runtime can't do anything to disable the device. Let's
-let the interconnect disable the device on BUS_NOTIFY_UNBOUND_DRIVER.
+Commit 5de85b9d57ab ("PM / runtime: Re-init runtime PM states at probe
+error and driver unbind") introduced pm_runtime_reinit() that is used
+to reinitialize PM runtime after -EPROBE_DEFER. This allows shutting
+down the device after a failed probe.
 
-Otherwise omap_device will produce and error on the following module
-reload. This can be easily tested with something like:
+However, for drivers using pm_runtime_use_autosuspend() this can cause
+a state where suspend callback is never called after -EPROBE_DEFER.
+On the following device driver probe, hardware state is different from
+the PM runtime state causing omap_device to produce the following
+error:
 
-# modprobe omap_hsmmc
-# echo on > /sys/devices/platform/68000000.ocp/4809c000.mmc/power/control
-# rmmod omap_hsmmc
-# modprobe omap_hsmmc
+omap_device_enable() called from invalid state 1
 
+And with omap_device and omap hardware being picky for PM, this will
+block any deeper idle states in hardware.
+
+The solution is to fix the drivers to follow the PM runtime documentation:
+
+1. For sections of code that needs the device disabled, use
+   pm_runtime_put_sync_suspend() if pm_runtime_set_autosuspend() has
+   been set.
+
+2. For driver exit code, use pm_runtime_dont_use_autosuspend() before
+   pm_runtime_put_sync() if pm_runtime_use_autosuspend() has been
+   set.
+
+Fixes: 5de85b9d57ab ("PM / runtime: Re-init runtime PM states at probe
+error and driver unbind")
+Cc: linux-spi@vger.kernel.org
 Cc: Alan Stern <stern@rowland.harvard.edu>
 Cc: Kevin Hilman <khilman@baylibre.com>
+Cc: Mark Brown <broonie@kernel.org>
 Cc: Nishanth Menon <nm@ti.com>
 Cc: Rafael J. Wysocki <rafael@kernel.org>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>
 Cc: Tero Kristo <t-kristo@ti.com>
-Reported-by: Ulf Hansson <ulf.hansson@linaro.org>
 Signed-off-by: Tony Lindgren <tony@atomide.com>
 ---
- arch/arm/mach-omap2/omap_device.c | 10 ++++++++++
- 1 file changed, 10 insertions(+)
 
-diff --git a/arch/arm/mach-omap2/omap_device.c b/arch/arm/mach-omap2/omap_device.c
-index ebd8369..f7ff3b9 100644
---- a/arch/arm/mach-omap2/omap_device.c
-+++ b/arch/arm/mach-omap2/omap_device.c
-@@ -191,12 +191,22 @@ static int _omap_device_notifier_call(struct notifier_block *nb,
- {
- 	struct platform_device *pdev = to_platform_device(dev);
- 	struct omap_device *od;
-+	int err;
+Mark, I'd like to merge this along with other related fixes via
+the ARM SoC tree if no objections, please review and ack if this
+look OK to you.
+
+
+---
+ drivers/spi/spi-omap2-mcspi.c | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/drivers/spi/spi-omap2-mcspi.c b/drivers/spi/spi-omap2-mcspi.c
+index 7273820..0caa3c8 100644
+--- a/drivers/spi/spi-omap2-mcspi.c
++++ b/drivers/spi/spi-omap2-mcspi.c
+@@ -1490,6 +1490,8 @@ static int omap2_mcspi_probe(struct platform_device *pdev)
+ 	return status;
  
- 	switch (event) {
- 	case BUS_NOTIFY_DEL_DEVICE:
- 		if (pdev->archdata.od)
- 			omap_device_delete(pdev->archdata.od);
- 		break;
-+	case BUS_NOTIFY_UNBOUND_DRIVER:
-+		od = to_omap_device(pdev);
-+		if (od && (od->_state == OMAP_DEVICE_STATE_ENABLED)) {
-+			dev_info(dev, "enabled after unload, idling\n");
-+			err = omap_device_idle(pdev);
-+			if (err)
-+				dev_err(dev, "failed to idle\n");
-+		}
-+		break;
- 	case BUS_NOTIFY_ADD_DEVICE:
- 		if (pdev->dev.of_node)
- 			omap_device_build_from_dt(pdev);
+ disable_pm:
++	pm_runtime_dont_use_autosuspend(&pdev->dev);
++	pm_runtime_put_sync(&pdev->dev);
+ 	pm_runtime_disable(&pdev->dev);
+ free_master:
+ 	spi_master_put(master);
+@@ -1501,6 +1503,7 @@ static int omap2_mcspi_remove(struct platform_device *pdev)
+ 	struct spi_master *master = platform_get_drvdata(pdev);
+ 	struct omap2_mcspi *mcspi = spi_master_get_devdata(master);
+ 
++	pm_runtime_dont_use_autosuspend(mcspi->dev);
+ 	pm_runtime_put_sync(mcspi->dev);
+ 	pm_runtime_disable(&pdev->dev);
+ 
 -- 
 2.7.0
 
