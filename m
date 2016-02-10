@@ -1,61 +1,28 @@
-From: Florian Fainelli <f.fainelli@gmail.com>
-Subject: Re: [PATCH v5] mmc: OCTEON: Add host driver for OCTEON MMC controller
-Date: Wed, 10 Feb 2016 18:55:55 -0800
-Message-ID: <56BBF83B.8020908@gmail.com>
-References: <1455125775-7245-1-git-send-email-matt.redfearn@imgtec.com>
- <56BB7B2F.60307@caviumnetworks.com>
- <20160210234907.GC1640@darkstar.musicnaut.iki.fi>
- <56BBD6AD.2090902@caviumnetworks.com>
+From: fu.zhongjun@execs.com
+Subject: Good day
+Date: Wed, 10 Feb 2016 17:33:56 +0100
+Message-ID: <TRU-DC2I8NFr9oD6XML00009987__40668.5325004675$1455162624$gmane$org@TRU-DC2.utu-trust.com>
+Reply-To: fuzhong348@gmail.com
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <56BBD6AD.2090902@caviumnetworks.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: David Daney <ddaney@caviumnetworks.com>, Aaro Koskinen <aaro.koskinen@iki.fi>
-Cc: Matt Redfearn <matt.redfearn@imgtec.com>, linux-mmc@vger.kernel.org, david.daney@cavium.com, ulf.hansson@linaro.org, linux-mips@linux-mips.org, linux-kernel@vger.kernel.org, devicetree@vger.kernel.org, Zubair.Kakakhel@imgtec.com, Aleksey Makarov <aleksey.makarov@caviumnetworks.com>, Chandrakala Chavva <cchavva@caviumnetworks.com>, Aleksey Makarov <aleksey.makarov@auriga.com>, Leonid Rosenboim <lrosenboim@caviumnetworks.com>, Peter Swain <pswain@cavium.com>, Aaron Williams <aaron.williams@cavium.com>
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7BIT
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from 71-95-209-123.static.mtpk.ca.charter.com ([71.95.209.123]:22398
+	"HELO TRU-DC2.utu-trust.com" rhost-flags-OK-OK-OK-FAIL)
+	by vger.kernel.org with SMTP id S1753195AbcBKDuF convert rfc822-to-8bit
+	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 10 Feb 2016 22:50:05 -0500
+Content-Description: Mail message body
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Recipients <fu.zhongjun@execs.com>
 
-Le 10/02/2016 16:32, David Daney a =C3=A9crit :
-> On 02/10/2016 03:49 PM, Aaro Koskinen wrote:
->> Hi,
->>
->> On Wed, Feb 10, 2016 at 10:02:23AM -0800, David Daney wrote:
->>> On 02/10/2016 09:36 AM, Matt Redfearn wrote:
->>>> +        pr_warn(FW_WARN "%s: Legacy property '%s'. Please remove\=
-n",
->>>> +            node->full_name, legacy_name);
->>>
->>> I don't like this warning message.
->>>
->>> The vast majority of people that see it will not be able to change =
-their
->>> firmware.  So it will be forever cluttering up their boot logs.
->>
->> Until they switch to use APPENDED_DTB. :-)
->>
->=20
-> I am philosophically opposed to making the DTB an internal kernel
-> implementation detail.
->=20
-> For OCTEON boards, it is an ABI between the boot firmware and the
-> kernel, and is impractical to change.
->=20
-> One could argue that many years ago, when the decision was made (by m=
-e),
-> that we should have opted to carry in the kernel source code tree the
-> DTS files for all OCTEON boards ever made, but we did not do that.  D=
-ue
-> to the non-reversibility of time, the decision is hard to reverse.
->=20
-> In the case of this MMC driver, the only real difference is that two
-> properties have legacy names that later had differing "official" name=
-s.
->  The overhead of carrying the legacy bindings is very low.
+Good day,
 
-Since there is an existing FDT patching infrastructure in
-arch/mips/cavium-octeon/ would not that be a place where you could put
-an adaptation layer between your legacy firmware properties and the
-upstream binding?
---=20
-=46lorian
+I need a foreign partner for a proposed mutual business, which refers to the transfer of a large sum of money to an account abroad, as the beneficiary of the funds. Everything about this operation, will be legally done without any bridge financial authority, both in my country and yours.I wil indulge you exercise the utmost discretion in all matters concerning this issue. If you are interested, please reply back through my private email address written down, I'll give you more information about myself with the financial institution I represented and the actual amounts involved about the project so I receive your positive response.
+
+Private E-mail: fu.zhong@fuzhongjun.net
+
+Friendly greeting,
+
+Executive director.
