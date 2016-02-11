@@ -1,44 +1,80 @@
-From: Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>
-Subject: Re: [PATCH 3/7] spi: omap2-mcspi: Fix PM regression with deferred
- probe for pm_runtime_reinit
-Date: Thu, 11 Feb 2016 07:08:06 -0800
-Message-ID: <20160211150806.GS19432@atomide.com>
-References: <1455145370-20301-1-git-send-email-tony@atomide.com>
- <1455145370-20301-4-git-send-email-tony@atomide.com>
- <20160211115128.GF13270@sirena.org.uk>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH] mmc: sdhci-of-at91: fix card detect when using runtime PM
+Date: Thu, 11 Feb 2016 16:10:54 +0100
+Message-ID: <CAPDyKFpPE31maSEVxLZx6BXD5i1Ugs79+OVQojpUCR2EzMeM3A@mail.gmail.com>
+References: <1455198537-21791-1-git-send-email-ludovic.desroches@atmel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-spi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <20160211115128.GF13270-GFdadSzt00ze9xe1eoZjHA@public.gmane.org>
-Sender: linux-spi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Mark Brown <broonie-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-Cc: linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-spi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Alan Stern <stern-nwvwT67g6+6dFdvTe/nMLpVzexx5G7lz@public.gmane.org>, Kevin Hilman <khilman-rdvid1DuHRBWk0Htik3J/w@public.gmane.org>, Nishanth Menon <nm-l0cyMroinI0@public.gmane.org>, "Rafael J . Wysocki" <rafael-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Tero Kristo <t-kristo-l0cyMroinI0@public.gmane.org>, Greg Kroah-Hartman <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>, linux-i2c-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-serial-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Peter Hurley <peter-WaGBZJeGNqdsbIuE7sb01tBPR1lH4CV8@public.gmane.org>, Wolfram Sang <wsa-z923LK4zBo2bacvFa/9K2g@public.gmane.org>
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1455198537-21791-1-git-send-email-ludovic.desroches@atmel.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Ludovic Desroches <ludovic.desroches@atmel.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Nicolas Ferre <nicolas.ferre@atmel.com>, Adrian Hunter <adrian.hunter@intel.com>
 List-Id: linux-mmc@vger.kernel.org
 
-* Mark Brown <broonie-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org> [160211 03:52]:
-> On Wed, Feb 10, 2016 at 03:02:46PM -0800, Tony Lindgren wrote:
-> 
-> > Mark, I'd like to merge this along with other related fixes via
-> > the ARM SoC tree if no objections, please review and ack if this
-> > look OK to you.
-> 
-> Why, I'm not seeing any dependencies here?  I'd also expect to be seeing
-> an awful lot more changes like this, this shouldn't be an OMAP thing -
-> do we need to fix the core API and then roll out the transition in a
-> different way?
+On 11 February 2016 at 14:48, Ludovic Desroches
+<ludovic.desroches@atmel.com> wrote:
+> Add quirk broken card detection to enable card detection polling. It is
+> a short term solution until reworking PM stuff.
+>
+> If the card detect signal is connected to the sdhci controller and not a
+> gpio, when runtime PM suspend happens, we have no way to wake up on a card
+> detect event since these irqs are no more enabled.
+>
+> Signed-off-by: Ludovic Desroches <ludovic.desroches@atmel.com>
+> Fixes: f5f17813ae9b ("mmc: sdhci-of-at91: add PM support")
+> ---
+>  drivers/mmc/host/sdhci-of-at91.c | 1 +
+>  1 file changed, 1 insertion(+)
+>
+> diff --git a/drivers/mmc/host/sdhci-of-at91.c b/drivers/mmc/host/sdhci-of-at91.c
+> index 9cb86fb..efec736 100644
+> --- a/drivers/mmc/host/sdhci-of-at91.c
+> +++ b/drivers/mmc/host/sdhci-of-at91.c
+> @@ -45,6 +45,7 @@ static const struct sdhci_ops sdhci_at91_sama5d2_ops = {
+>
+>  static const struct sdhci_pltfm_data soc_data_sama5d2 = {
+>         .ops = &sdhci_at91_sama5d2_ops,
+> +       .quirks = SDHCI_QUIRK_BROKEN_CARD_DETECTION,
+>         .quirks2 = SDHCI_QUIRK2_NEED_DELAY_AFTER_INT_CLK_RST,
+>  };
+>
+> --
+> 2.7.0
+>
 
-Please feel free to pick up this one if you have other fixes
-lined up, nothing stopping that.
+According to the below commit, SDHCI_QUIRK_BROKEN_CARD_DETECTION was
+invented because of unreliable card detection mechanism inside the
+sdhci controller.
+Therefore it required polling to be used, but also to make ->get_cd()
+to always return 1 in these cases.
 
-There will be likely more fixes like this to make drivers follow
-the PM runtime API documentation. These were just the initial
-ones that were obvious.
+Although, as I understand it that's not the case here. You can still
+rely on card detection to work, but as you don't have wakeups you
+can't fully make use of card detect, when combined with runtime PM.
+I am not sure we should add more users of
+SDHCI_QUIRK_BROKEN_CARD_DETECTION, especially since in this case it's
+not reflecting the capability of the hardware.
 
-Regards,
+Can't we think of another way?
 
-Tony
---
-To unsubscribe from this list: send the line "unsubscribe linux-spi" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Kind regards
+Uffe
+
+
+commit 68d1fb7e229c6f95be4fbbe3eb46b24e41184924
+Author: Anton Vorontsov <avorontsov@ru.mvista.com>
+sdhci: Add support for card-detection polling
+
+This patch adds SDHCI_QUIRK_BROKEN_CARD_DETECTION quirk. When specified,
+sdhci driver will set MMC_CAP_NEEDS_POLL MMC host capability, and won't
+enable card insert/remove interrupts.
+
+This is needed for hosts with unreliable card detection, such as FSL
+eSDHC. The original eSDHC driver was tring to "debounce" card-detection
+IRQs by reading present state and disabling particular interrupts. But
+with this debouncing scheme I noticed that sometimes we miss card
+insertion/removal events.
+
+Signed-off-by: Anton Vorontsov <avorontsov@ru.mvista.com>
+Signed-off-by: Pierre Ossman <drzeus@drzeus.cx>
