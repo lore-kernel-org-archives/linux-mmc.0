@@ -1,64 +1,61 @@
-From: Tony Lindgren <tony@atomide.com>
-Subject: Re: [PATCH 3/7] spi: omap2-mcspi: Fix PM regression with deferred
- probe for pm_runtime_reinit
-Date: Thu, 11 Feb 2016 10:52:01 -0800
-Message-ID: <20160211185201.GX19432@atomide.com>
-References: <1455145370-20301-1-git-send-email-tony@atomide.com>
- <1455145370-20301-4-git-send-email-tony@atomide.com>
- <20160211115128.GF13270@sirena.org.uk>
- <20160211150806.GS19432@atomide.com>
- <20160211155255.GA1953@sirena.org.uk>
- <20160211173620.GU19432@atomide.com>
- <20160211183640.GB1953@sirena.org.uk>
+From: "Maciej W. Rozycki" <macro-1AXoQHu6uovQT0dZR+AlfA@public.gmane.org>
+Subject: Re: [PATCH v5] mmc: OCTEON: Add host driver for OCTEON MMC
+ controller
+Date: Thu, 11 Feb 2016 19:28:17 +0000
+Message-ID: <alpine.DEB.2.00.1602111910240.15885@tp.orcam.me.uk>
+References: <1455125775-7245-1-git-send-email-matt.redfearn@imgtec.com> <56BB7B2F.60307@caviumnetworks.com> <20160210234907.GC1640@darkstar.musicnaut.iki.fi> <56BBD6AD.2090902@caviumnetworks.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from muru.com ([72.249.23.125]:33755 "EHLO muru.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750787AbcBKSwG (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 11 Feb 2016 13:52:06 -0500
-Content-Disposition: inline
-In-Reply-To: <20160211183640.GB1953@sirena.org.uk>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="US-ASCII"
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <56BBD6AD.2090902-M3mlKVOIwJVv6pq1l3V1OdBPR1lH4CV8@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: David Daney <ddaney-M3mlKVOIwJVv6pq1l3V1OdBPR1lH4CV8@public.gmane.org>
+Cc: Aaro Koskinen <aaro.koskinen-X3B1VOXEql0@public.gmane.org>, Matt Redfearn <matt.redfearn-1AXoQHu6uovQT0dZR+AlfA@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, david.daney-YGCgFSpz5w/QT0dZR+AlfA@public.gmane.org, ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, linux-mips-6z/3iImG2C8G8FEW9MqTrA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Zubair.Kakakhel-1AXoQHu6uovQT0dZR+AlfA@public.gmane.org, Aleksey Makarov <aleksey.makarov-M3mlKVOIwJVv6pq1l3V1OdBPR1lH4CV8@public.gmane.org>, Chandrakala Chavva <cchavva-M3mlKVOIwJVv6pq1l3V1OdBPR1lH4CV8@public.gmane.org>, Aleksey Makarov <aleksey.makarov-tx70/tkNEWbQT0dZR+AlfA@public.gmane.org>, Leonid Rosenboim <lrosenboim-M3mlKVOIwJVv6pq1l3V1OdBPR1lH4CV8@public.gmane.org>, Peter Swain <pswain-YGCgFSpz5w/QT0dZR+AlfA@public.gmane.org>, Aaron Williams <aaron.williams-YGCgFSpz5w/QT0dZR+AlfA@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Mark Brown <broonie@kernel.org>
-Cc: linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-spi@vger.kernel.org, Alan Stern <stern@rowland.harvard.edu>, Kevin Hilman <khilman@baylibre.com>, Nishanth Menon <nm@ti.com>, "Rafael J . Wysocki" <rafael@kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, Tero Kristo <t-kristo@ti.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, linux-i2c@vger.kernel.org, linux-mmc@vger.kernel.org, linux-serial@vger.kernel.org, Peter Hurley <peter@hurleysoftware.com>, Wolfram Sang <wsa@the-dreams.de>
 
-* Mark Brown <broonie@kernel.org> [160211 10:38]:
-> On Thu, Feb 11, 2016 at 09:36:20AM -0800, Tony Lindgren wrote:
-> > * Mark Brown <broonie@kernel.org> [160211 07:54]:
+On Thu, 11 Feb 2016, David Daney wrote:
+
+> > > The vast majority of people that see it will not be able to change their
+> > > firmware.  So it will be forever cluttering up their boot logs.
+> > 
+> > Until they switch to use APPENDED_DTB. :-)
+> > 
 > 
-> > > This does sound like there's been a change in the interface compared to
-> > > what users are actually doing - is this an actual problem or is it just
-> > > a divergence from docs?
+> I am philosophically opposed to making the DTB an internal kernel
+> implementation detail.
 > 
-> > It's an actual problem at least on omaps as the omap_device code
-> > is very picky about the hardware state.
+> For OCTEON boards, it is an ABI between the boot firmware and the kernel, and
+> is impractical to change.
 > 
-> > Depending how the PM runtime is implemented, it may be a problem
-> > for some other cases too.
-> 
-> Or people just aren't testing mainline that well (if this is broken in
-> v4.5 that suggests nobody noticed in -next) - do you know when this
-> broke?  It really seems like we may need to spin round on how this is
-> deployed.
+> One could argue that many years ago, when the decision was made (by me), that
+> we should have opted to carry in the kernel source code tree the DTS files for
+> all OCTEON boards ever made, but we did not do that.  Due to the
+> non-reversibility of time, the decision is hard to reverse.
 
-I noticed it only with v4.5-rc1 and bisected it to commit 5de85b9d57ab
-("PM / runtime: Re-init runtime PM states at probe error and driver
-unbind") as it broke my PM tests for n900. For Linux next probably
-was also broken for before that for some time.
+ I concur, a very good decision as far as I'm concerned!
 
-Unfortunately based on the regressions I'm chasing every merge window
-I'm suspecting that very few people are actually testing PM runtime
-with mainline Linux kernel. Or they don't have the PM runtime fully
-implemented in the mainline kernel for their devices. This is at
-least for the SoC PM use case.
+ I had the misfortune to work with some Freescale Power boards which used 
+in-kernel DTS files in a hope to match the respective board's firmware 
+(U-boot).  Needless to say, that didn't quite work.  The mapping of board 
+resources was reportedly changed in some version of the firmware to give 
+more flexibility and the DTS files bundled with Linux updated accordingly, 
+however no version of the old files was kept around and maintained.  So a 
+kernel upgrade, which turned out inevitable at one point, became a 
+challenging task to update the DTS files so as to match the version of the 
+firmware the boards had.
 
-Ulf is working on a generic PM runtime test driver :) I'm hoping we
-can then use that for basic regression testing on in an arch
-independent way.
+ With some pain I was eventually able to sort this out through patching 
+the old DTS files to match the ever-changing DTS syntax and get them 
+accepted for a DTB build and work to an acceptable extent with the then 
+current version of Linux.  However some board resources were lost, for 
+example the IDE interface was no longer accessible; fortunately I didn't 
+need it, so I just left it like that and didn't figure out what else I'd 
+have to do to regain access.
 
-Regards,
+ So no, no standalone DTS/DTBs please, thank you very much.
 
-Tony
-
+  Maciej
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
