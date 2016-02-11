@@ -1,117 +1,48 @@
-From: Matt Redfearn <matt.redfearn@imgtec.com>
-Subject: Re: [PATCH v5] mmc: OCTEON: Add host driver for OCTEON MMC controller
-Date: Thu, 11 Feb 2016 08:24:24 +0000
-Message-ID: <56BC4538.20207@imgtec.com>
-References: <1455125775-7245-1-git-send-email-matt.redfearn@imgtec.com>
- <CAPDyKFrMgt9snP2NLbQ6EQ5X7gjQLA+e+TEfqgjzLYTuH+G1OA@mail.gmail.com>
- <56BB9877.9000305@caviumnetworks.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH 9/9] mmc: sdhi: Add r8a7795 support
+Date: Thu, 11 Feb 2016 10:00:50 +0100
+Message-ID: <CAPDyKFp-CMkqa-Y_C_z6bhA_KNm+6oQZhv3_f0bV8WoVDJHfVg@mail.gmail.com>
+References: <1453749316-1848-1-git-send-email-wsa@the-dreams.de>
+	<1453749316-1848-10-git-send-email-wsa@the-dreams.de>
+	<CAPDyKFo6oXEAy562p7MTxw0eKYZe_nnT2q+hbLKF4Lv2kMUvGg@mail.gmail.com>
+	<20160210163623.GA15453@katana>
+	<CAPDyKFrzFA_3MnkOPGLD7Fy84XAyx7+=utERbNF1cX31KWxHMg@mail.gmail.com>
+	<20160211000716.GA2058@tetsubishi>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailapp01.imgtec.com ([195.59.15.196]:35038 "EHLO
-	mailapp01.imgtec.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750905AbcBKIY0 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 11 Feb 2016 03:24:26 -0500
-In-Reply-To: <56BB9877.9000305@caviumnetworks.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-sh-owner@vger.kernel.org>
+In-Reply-To: <20160211000716.GA2058@tetsubishi>
+Sender: linux-sh-owner@vger.kernel.org
+To: Wolfram Sang <wsa@the-dreams.de>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, linux-renesas-soc@vger.kernel.org, Linux-sh list <linux-sh@vger.kernel.org>, Kuninori Morimoto <kuninori.morimoto.gx@gmail.com>, Magnus Damm <magnus.damm@gmail.com>, Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>, Dirk Behme <dirk.behme@gmail.com>
 List-Id: linux-mmc@vger.kernel.org
-To: David Daney <ddaney@caviumnetworks.com>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, David Daney <david.daney@cavium.com>, linux-mips@linux-mips.org, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, Zubair.Kakakhel@imgtec.com, Aleksey Makarov <aleksey.makarov@caviumnetworks.com>, Chandrakala Chavva <cchavva@caviumnetworks.com>, Aleksey Makarov <aleksey.makarov@auriga.com>, Leonid Rosenboim <lrosenboim@caviumnetworks.com>, Peter Swain <pswain@cavium.com>, Aaron Williams <aaron.williams@cavium.com>
 
-Hi,
-I will split the DT binding document into a separate patch, and move the 
-legacy FDT patch-up code to
-arch/mips/cavium-octeon/octeon-platform.c as suggested by Florian.
+On 11 February 2016 at 01:07, Wolfram Sang <wsa@the-dreams.de> wrote:
+>> I suspect you are using a delayed work in this driver to deal with
+>> request timeouts.
+>>
+>> The value for the delay that is used, needs to be informed towards the
+>> mmc core via the "->max_busy_timeout".
+>
+> Shouldn't that be a seperate patch? In patch 9, I add support for
+> another SoC. But your requested change will affect all SoCs.
 
-Ulf, your objections to the structure of the DT and driver were the only 
-driver for the changes v4->v5.
-I changed the DT binding and the structure of the driver to more closely 
-resemble the atmel-mci driver, which has the same concept of one 
-controller, multiple slots.
+This is related to how the core treat hosts that announces
+MMC_CAP_WAIT_WHILE_BUSY.
 
-Thanks,
-Matt
+Therefore max_busy_timeout needs to be set within the same patch.
 
-On 10/02/16 20:07, David Daney wrote:
-> On 02/10/2016 11:01 AM, Ulf Hansson wrote:
->> On 10 February 2016 at 18:36, Matt Redfearn 
->> <matt.redfearn@imgtec.com> wrote:
->>> From: Aleksey Makarov <aleksey.makarov@caviumnetworks.com>
->>>
->>> The OCTEON MMC controller is currently found on cn61XX and cnf71XX
->>> devices.  Device parameters are configured from device tree data.
->>>
->>> eMMC, MMC and SD devices are supported.
->>>
->>> Tested-by: Aaro Koskinen <aaro.koskinen@iki.fi>
->>> Signed-off-by: Chandrakala Chavva <cchavva@caviumnetworks.com>
->>> Signed-off-by: David Daney <david.daney@cavium.com>
->>> Signed-off-by: Aleksey Makarov <aleksey.makarov@auriga.com>
->>> Signed-off-by: Leonid Rosenboim <lrosenboim@caviumnetworks.com>
->>> Signed-off-by: Peter Swain <pswain@cavium.com>
->>> Signed-off-by: Aaron Williams <aaron.williams@cavium.com>
->>> Signed-off-by: Matt Redfearn <matt.redfearn@imgtec.com>
->>> ---
->>> v5:
->>> Incoroprate comments from review
->>> http://patchwork.linux-mips.org/patch/9558/
->>> - Use standard <bus-width> property instead of <cavium,bus-max-width>.
->>> - Use standard <max-frequency> property instead of <spi-max-frequency>.
->>> - Add octeon_mmc_of_parse_legacy function to deal with the above
->>>    properties, since many devices have shipped with those properties
->>>    embedded in firmware.
->>> - Allow the <vmmc-supply> binding in addition to the legacy
->>>    <gpios-power>.
->>> - Remove the secondary driver for each slot.
->>> - Use core gpio cd/wp handling
->>
->> Seems like you decided to ignore most comments realted to the DT
->> bindings from the earlier version.
->> Although, let's discuss this one more time.
 >
-> I think you may have misread the patch.  The DT bindings have been
-> changed based on the feedback we received on v4.
+>> One more thing, as the documentation of your host controllers lacks
+>> some information about the busy mode, perhaps it's worth to add some
+>> comments about this in the code and as well in the change-log!?
 >
->>
->> Therefore I recomend you to split this patch. DT documentation should
->> be a separate patch preceeding the actual mmc driver patch.
->
-> You may have missed it the first time it was posted, but the legacy DT
-> bindings have been around for a while.
->
-> See:
->
-> https://lists.ozlabs.org/pipermail/devicetree-discuss/2012-May/015482.html 
->
->
->
->> The DT patch needs to be acked by the DT maintainers.
->
-> The legacy DT has been deployed in firmware for several years now.  We
-> are adding more "modern" bindings, and the DT maintainers are
-> encouraged to review that portion, but the legacy is what it is and it
-> isn't changing.
->
->>
->> Until we somewhat agreed on the DT parts, I am going to defer the
->> in-depth review of the driver code as I have limited bandwidth.
->>
->
-> As I stated above, the legacy DT bindings are not changing and must be
-> supported.  Waiting for legacy DT bindings to change is equivalent to
-> infinite deferral.
->
->> Does that make sense to you?
->>
->
-> I understand why you would say this.  However, I think it doesn't
-> fully take into account the need to support devices that have already
-> been deployed.
->
-> That said, Matt really needs to get the DT maintainers reviewing the 
-> new DT bindings.
->
->
-> David Daney
+> Do you mean documenting my findings with the mmc_test driver? Or
+> something else?
 
+It doesn't have to be very much data, just that the documentation
+isn't clear and therefore some tests has been done to verify that it
+works as expected.
+
+Kind regards
+Uffe
