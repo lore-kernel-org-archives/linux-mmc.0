@@ -1,41 +1,62 @@
-From: Tony Lindgren <tony@atomide.com>
-Subject: Re: [PATCH 2/7] i2c: omap: Fix PM regression with deferred probe for
- pm_runtime_reinit
-Date: Thu, 11 Feb 2016 09:56:58 -0800
-Message-ID: <20160211175658.GW19432@atomide.com>
-References: <1455145370-20301-1-git-send-email-tony@atomide.com>
- <1455145370-20301-3-git-send-email-tony@atomide.com>
- <20160211173427.GB1524@katana>
+From: Valdis.Kletnieks@vt.edu
+Subject: Re: [PATCH RESEND] mmc:host:Fix error handling for calls to the function shdci_runtime_pm_get in the file sdhci.c
+Date: Thu, 11 Feb 2016 13:08:08 -0500
+Message-ID: <90967.1455214088@turing-police.cc.vt.edu>
+References: <1455114866-27601-1-git-send-email-xerofoify@gmail.com>
+ <56BC40EC.60301@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: multipart/signed; boundary="==_Exmh_1455214088_2260P";
+	 micalg=pgp-sha1; protocol="application/pgp-signature"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from muru.com ([72.249.23.125]:33735 "EHLO muru.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751246AbcBKR5B (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 11 Feb 2016 12:57:01 -0500
-Content-Disposition: inline
-In-Reply-To: <20160211173427.GB1524@katana>
+Received: from outbound.smtp.vt.edu ([198.82.183.121]:59187 "EHLO
+	omr1.cc.vt.edu" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1751036AbcBKSIa (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 11 Feb 2016 13:08:30 -0500
+In-Reply-To: <56BC40EC.60301@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Wolfram Sang <wsa@the-dreams.de>
-Cc: linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-i2c@vger.kernel.org, Alan Stern <stern@rowland.harvard.edu>, Kevin Hilman <khilman@baylibre.com>, Nishanth Menon <nm@ti.com>, "Rafael J . Wysocki" <rafael@kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, Tero Kristo <t-kristo@ti.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, linux-mmc@vger.kernel.org, linux-serial@vger.kernel.org, linux-spi@vger.kernel.org, Mark Brown <broonie@kernel.org>, Peter Hurley <peter@hurleysoftware.com>
+To: Adrian Hunter <adrian.hunter@intel.com>
+Cc: Nicholas Krause <xerofoify@gmail.com>, ulf.hansson@linaro.org, ludovic.desroches@atmel.com, ivan.ivanov@linaro.org, sbranden@broadcom.com, haibo.chen@freescale.com, jszhang@marvell.com, marex@denx.de, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 
-* Wolfram Sang <wsa@the-dreams.de> [160211 09:35]:
-> 
-> > Wolfram, I'd like to merge this along with other related fixes via
-> > the ARM SoC tree if no objections, please review and ack if this
-> > look OK to you.
-> 
-> Well, since most patches seem to be picked up individually now, I'd
-> prefer to do the same. This is v4.5 material, or?
+--==_Exmh_1455214088_2260P
+Content-Type: text/plain; charset=us-ascii
 
-Sure please do, thanks. And yes for v4.5 please. Although
-I've only seen this happen with the MMC driver so far, there's
-still a slight chance of this happening with the other drivers
-using omap_device.
+On Thu, 11 Feb 2016 10:06:04 +0200, Adrian Hunter said:
+> On 10/02/16 16:34, Nicholas Krause wrote:
+> > This fixes error handling for various function calls to
 
-Regards,
+> pm_runtime_resume() returns 1 if the device's runtime PM status was already
+> 'active', and -EACCES means that 'power.disable_depth' is different from 0
+> (i.e. runtime pm not enabled), so this does not look coded correctly for
+> those cases.
 
-Tony
+I wonder if Nicholas has a different meaning of the word "fixes".
+
+Seriously Nicholas - you're wasting maintainer resources with all these
+broken patches.  Please stop doing it.
 
 
+--==_Exmh_1455214088_2260P
+Content-Type: application/pgp-signature
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1
+Comment: Exmh version 2.5 07/13/2001
+
+iQIVAwUBVrzOCAdmEQWDXROgAQL29w/9GDaZe0ywPAiH5zDXrXRouCeuG+f7yTuJ
++IO4x97BriJsRF3IZYnn3aqIIQ1fi9BihVl1U0RB3kNln0F0k/gF2wKYrfUpB99Z
+VEuTXk+Omv8sS9xslPE2HfIqvu1v2cxuZw0QAYn6sgK4SJbg7d+JQor1LAWbSGbF
+uhkWDj06ES8Qd87Melsd1Rk9xPRkcpld4s2fSDiKxCQwrFREDabTfyC0J/kCvx3H
+oWHQQtfxFM6C+AqowXsoJKJne182IWJ/uUedwDIpAkSyVX5GHGqXkM54qKCzKFDk
+XsE3YiUI6sQb4EBGisLTI3+yVNmzFHI10seJQvWYiwPiblEFcKyONyFkOEC4TAtX
+hjUsfXj8hLLcKUS7WPf2kQq4aexiEDJ0T4KdHNGqm0FrXDKKIZE2Y8IlyWg4+0dR
+8JzPlNouk+Yq+8Ql0tpr0a434o0DATq6n2yIWDUuVYV6rodTNnH5YZRk2yadtqSJ
+GWeG+zHIe1JGA2K2atMxJD0W+ccT3uKTJmdS6L06OQOwG9EZcFsIrddxuPFkoYMx
+6JEom0RuQgyUaTSDRW1WMnxj0azC2mAYEUDCTq9WdvJSALfF8Di5gk+Ujw0/YxNx
+9WFdd2fMlyfLuJa/5XLLLjwPA4tg9z4NqPpUei/u+y5INCrjwU+iylmtRH8p/2BP
+UWWyBp7I9Ro=
+=6qzV
+-----END PGP SIGNATURE-----
+
+--==_Exmh_1455214088_2260P--
