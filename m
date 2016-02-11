@@ -1,155 +1,71 @@
-From: Matt Redfearn <matt.redfearn@imgtec.com>
+From: Matt Redfearn <matt.redfearn-1AXoQHu6uovQT0dZR+AlfA@public.gmane.org>
 Subject: Re: [PATCH v5] mmc: OCTEON: Add host driver for OCTEON MMC controller
-Date: Thu, 11 Feb 2016 08:12:59 +0000
-Message-ID: <56BC428B.5030903@imgtec.com>
+Date: Thu, 11 Feb 2016 08:15:42 +0000
+Message-ID: <56BC432E.8000600@imgtec.com>
 References: <1455125775-7245-1-git-send-email-matt.redfearn@imgtec.com>
  <56BB7B2F.60307@caviumnetworks.com>
+ <20160210234907.GC1640@darkstar.musicnaut.iki.fi>
+ <56BBD6AD.2090902@caviumnetworks.com> <56BBF83B.8020908@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="windows-1252"; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <56BB7B2F.60307@caviumnetworks.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: David Daney <ddaney@caviumnetworks.com>
-Cc: linux-mmc@vger.kernel.org, david.daney@cavium.com, ulf.hansson@linaro.org, linux-mips@linux-mips.org, linux-kernel@vger.kernel.org, devicetree@vger.kernel.org, Zubair.Kakakhel@imgtec.com, Aleksey Makarov <aleksey.makarov@caviumnetworks.com>, Chandrakala Chavva <cchavva@caviumnetworks.com>, Aleksey Makarov <aleksey.makarov@auriga.com>, Leonid Rosenboim <lrosenboim@caviumnetworks.com>, Peter Swain <pswain@cavium.com>, Aaron Williams <aaron.williams@cavium.com>
+Content-Type: text/plain; charset=utf-8;
+	format=flowed
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <56BBF83B.8020908-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Florian Fainelli <f.fainelli-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, David Daney <ddaney-M3mlKVOIwJVv6pq1l3V1OdBPR1lH4CV8@public.gmane.org>, Aaro Koskinen <aaro.koskinen-X3B1VOXEql0@public.gmane.org>
+Cc: linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, david.daney-YGCgFSpz5w/QT0dZR+AlfA@public.gmane.org, ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, linux-mips-6z/3iImG2C8G8FEW9MqTrA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Zubair.Kakakhel-1AXoQHu6uovQT0dZR+AlfA@public.gmane.org, Aleksey Makarov <aleksey.makarov-M3mlKVOIwJVv6pq1l3V1OdBPR1lH4CV8@public.gmane.org>, Chandrakala Chavva <cchavva-M3mlKVOIwJVv6pq1l3V1OdBPR1lH4CV8@public.gmane.org>, Aleksey Makarov <aleksey.makarov-tx70/tkNEWbQT0dZR+AlfA@public.gmane.org>, Leonid Rosenboim <lrosenboim-M3mlKVOIwJVv6pq1l3V1OdBPR1lH4CV8@public.gmane.org>, Peter Swain <pswain-YGCgFSpz5w/QT0dZR+AlfA@public.gmane.org>, Aaron Williams <aaron.williams-YGCgFSpz5w/QT0dZR+AlfA@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-Hi David
+Hi Florian.
 
-On 10/02/16 18:02, David Daney wrote:
-> On 02/10/2016 09:36 AM, Matt Redfearn wrote:
->> From: Aleksey Makarov<aleksey.makarov@caviumnetworks.com>
+On 11/02/16 02:55, Florian Fainelli wrote:
+> Le 10/02/2016 16:32, David Daney a =C3=A9crit :
+>> On 02/10/2016 03:49 PM, Aaro Koskinen wrote:
+>>> Hi,
+>>>
+>>> On Wed, Feb 10, 2016 at 10:02:23AM -0800, David Daney wrote:
+>>>> On 02/10/2016 09:36 AM, Matt Redfearn wrote:
+>>>>> +        pr_warn(FW_WARN "%s: Legacy property '%s'. Please remove=
+\n",
+>>>>> +            node->full_name, legacy_name);
+>>>> I don't like this warning message.
+>>>>
+>>>> The vast majority of people that see it will not be able to change=
+ their
+>>>> firmware.  So it will be forever cluttering up their boot logs.
+>>> Until they switch to use APPENDED_DTB. :-)
+>>>
+>> I am philosophically opposed to making the DTB an internal kernel
+>> implementation detail.
 >>
->> The OCTEON MMC controller is currently found on cn61XX and cnf71XX
->> devices.  Device parameters are configured from device tree data.
+>> For OCTEON boards, it is an ABI between the boot firmware and the
+>> kernel, and is impractical to change.
 >>
->> eMMC, MMC and SD devices are supported.
+>> One could argue that many years ago, when the decision was made (by =
+me),
+>> that we should have opted to carry in the kernel source code tree th=
+e
+>> DTS files for all OCTEON boards ever made, but we did not do that.  =
+Due
+>> to the non-reversibility of time, the decision is hard to reverse.
 >>
->> Tested-by: Aaro Koskinen<aaro.koskinen@iki.fi>
->> Signed-off-by: Chandrakala Chavva<cchavva@caviumnetworks.com>
->> Signed-off-by: David Daney<david.daney@cavium.com>
->> Signed-off-by: Aleksey Makarov<aleksey.makarov@auriga.com>
->> Signed-off-by: Leonid Rosenboim<lrosenboim@caviumnetworks.com>
->> Signed-off-by: Peter Swain<pswain@cavium.com>
->> Signed-off-by: Aaron Williams<aaron.williams@cavium.com>
->> Signed-off-by: Matt Redfearn<matt.redfearn@imgtec.com>
->> ---
->> v5:
->> Incoroprate comments from review
->> http://patchwork.linux-mips.org/patch/9558/
->> - Use standard <bus-width> property instead of <cavium,bus-max-width>.
->> - Use standard <max-frequency> property instead of <spi-max-frequency>.
->> - Add octeon_mmc_of_parse_legacy function to deal with the above
->>    properties, since many devices have shipped with those properties
->>    embedded in firmware.
->> - Allow the <vmmc-supply> binding in addition to the legacy
->>    <gpios-power>.
->> - Remove the secondary driver for each slot.
->> - Use core gpio cd/wp handling
->>
-> [...]
->
->> +static int octeon_mmc_of_copy_legacy_u32(struct device_node *node,
->> +                      const char *legacy_name,
->> +                      const char *new_name)
->> +{
->> +    u32 value;
->> +    int ret;
->> +
->> +    ret = of_property_read_u32(node, legacy_name, &value);
->> +    if (!ret) {
->> +        /* Found legacy - set generic property */
->> +        struct property *new_p;
->> +        u32 *new_v;
->> +
->> +        pr_warn(FW_WARN "%s: Legacy property '%s'. Please remove\n",
->> +            node->full_name, legacy_name);
->> +
->
-> I don't like this warning message.
->
-> The vast majority of people that see it will not be able to change 
-> their firmware.  So it will be forever cluttering up their boot logs.
->
-> We are not ever planning on removing support for legacy firmware 
-> properties, so alarming people is really all this message does.
->
-> If you insist on a message then make it something like pr_info("This 
-> is working properly, but please consider using modern device tree 
-> properties...")
-
-Fair enough - I was just following what the PHY driver does when it 
-encounters a whitelisted compatible string, e.g. when my board boots:
-
-[Firmware Warn]: /soc@0/mdio@1180000001800/ethernet-phy@0: Whitelisted 
-compatible string. Please remove
-[Firmware Warn]: /soc@0/mdio@1180000001800/ethernet-phy@1: Whitelisted 
-compatible string. Please remove
-[Firmware Warn]: /soc@0/mdio@1180000001800/ethernet-phy@2: Whitelisted 
-compatible string. Please remove
-[Firmware Warn]: /soc@0/mdio@1180000001800/ethernet-phy@3: Whitelisted 
-compatible string. Please remove
-[Firmware Warn]: /soc@0/mdio@1180000001800/ethernet-phy@4: Whitelisted 
-compatible string. Please remove
-[Firmware Warn]: /soc@0/mdio@1180000001800/ethernet-phy@5: Whitelisted 
-compatible string. Please remove
-[Firmware Warn]: /soc@0/mdio@1180000001800/ethernet-phy@6: Whitelisted 
-compatible string. Please remove
-[Firmware Warn]: /soc@0/mdio@1180000001800/ethernet-phy@7: Whitelisted 
-compatible string. Please remove
-
-But I can see why it would be preferable to avoid this kind of message. 
-I don't think it's essential so could be removed.
+>> In the case of this MMC driver, the only real difference is that two
+>> properties have legacy names that later had differing "official" nam=
+es.
+>>   The overhead of carrying the legacy bindings is very low.
+> Since there is an existing FDT patching infrastructure in
+> arch/mips/cavium-octeon/ would not that be a place where you could pu=
+t
+> an adaptation layer between your legacy firmware properties and the
+> upstream binding?
+Thanks for your constructive advice. That does, indeed, look like a=20
+better place to put this.
 
 Thanks,
 Matt
->
->> +        new_p = kzalloc(sizeof(*new_p), GFP_KERNEL);
->> +        new_v = kzalloc(sizeof(u32), GFP_KERNEL);
->> +        if (!new_p || !new_v)
->> +            return -ENOMEM;
->> +
->> +        *new_v = value;
->> +        new_p->name = kstrdup(new_name, GFP_KERNEL);
->> +        new_p->length = sizeof(u32);
->> +        new_p->value = new_v;
->> +
->> +        of_update_property(node, new_p);
->> +    }
->> +    return 0;
->> +}
->> +
->> +/*
->> + * This function parses the legacy device tree that may be found in 
->> devices
->> + * shipped before the driver was upstreamed. Future devices should 
->> not require
->> + * it as standard bindings should be used
->> + */
->> +static int octeon_mmc_of_parse_legacy(struct device *dev,
->> +                      struct device_node *node,
->> +                      struct octeon_mmc_slot *slot)
->> +{
->> +    int ret;
->> +
->> +    ret = octeon_mmc_of_copy_legacy_u32(node, "cavium,bus-max-width",
->> +                        "bus-width");
->> +    if (ret)
->> +        return ret;
->> +
->> +    ret = octeon_mmc_of_copy_legacy_u32(node, "spi-max-frequency",
->> +                        "max-frequency");
->> +    if (ret)
->> +        return ret;
->> +
->> +    slot->pwr_gpiod = devm_gpiod_get_optional(dev, "power", 
->> GPIOD_OUT_LOW);
->> +    if (!IS_ERR(slot->pwr_gpiod)) {
->> +        pr_warn(FW_WARN "%s: Legacy property '%s'. Please remove\n",
->> +            node->full_name, "gpios-power");
->> +    }
->> +
->> +    return 0;
->> +}
->> +
->
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" i=
+n
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
