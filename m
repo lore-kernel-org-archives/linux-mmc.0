@@ -1,48 +1,56 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: [PATCH] MAINTAINERS: mmc: Add Adrian Hunter as the maintainer for SDHCI
-Date: Thu, 11 Feb 2016 15:14:59 +0100
-Message-ID: <1455200099-5306-1-git-send-email-ulf.hansson@linaro.org>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, Russell King <rmk+kernel@arm.linux.org.uk>
-Cc: Jaehoon Chung <jh80.chung@samsung.com>, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org
+Subject: Re: [PATCH 9/9] mmc: sdhi: Add r8a7795 support
+Date: Thu, 11 Feb 2016 15:30:22 +0100
+Message-ID: <CAPDyKFpYCi5X=rsnAYqcadPHV-LsdVbGbD1u7A-5JGxXB7o7aA@mail.gmail.com>
+References: <1453749316-1848-1-git-send-email-wsa@the-dreams.de>
+	<1453749316-1848-10-git-send-email-wsa@the-dreams.de>
+	<CAPDyKFo6oXEAy562p7MTxw0eKYZe_nnT2q+hbLKF4Lv2kMUvGg@mail.gmail.com>
+	<20160210163623.GA15453@katana>
+	<CAPDyKFrzFA_3MnkOPGLD7Fy84XAyx7+=utERbNF1cX31KWxHMg@mail.gmail.com>
+	<20160211000716.GA2058@tetsubishi>
+	<CAPDyKFp-CMkqa-Y_C_z6bhA_KNm+6oQZhv3_f0bV8WoVDJHfVg@mail.gmail.com>
+	<20160211133212.GA1656@katana>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-renesas-soc-owner@vger.kernel.org>
+In-Reply-To: <20160211133212.GA1656@katana>
+Sender: linux-renesas-soc-owner@vger.kernel.org
+To: Wolfram Sang <wsa@the-dreams.de>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, linux-renesas-soc@vger.kernel.org, Linux-sh list <linux-sh@vger.kernel.org>, Kuninori Morimoto <kuninori.morimoto.gx@gmail.com>, Magnus Damm <magnus.damm@gmail.com>, Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>, Dirk Behme <dirk.behme@gmail.com>
 List-Id: linux-mmc@vger.kernel.org
 
->From discussions on linux-mmc I have been encouraging someone to pick
-up the maintainer role for SDHCI. I am very pleased that Adrian Hunter
-volunteered and accepted the challenge!
+On 11 February 2016 at 14:32, Wolfram Sang <wsa@the-dreams.de> wrote:
+> On Thu, Feb 11, 2016 at 10:00:50AM +0100, Ulf Hansson wrote:
+>> On 11 February 2016 at 01:07, Wolfram Sang <wsa@the-dreams.de> wrote:
+>> >> I suspect you are using a delayed work in this driver to deal with
+>> >> request timeouts.
+>> >>
+>> >> The value for the delay that is used, needs to be informed towards the
+>> >> mmc core via the "->max_busy_timeout".
+>> >
+>> > Shouldn't that be a seperate patch? In patch 9, I add support for
+>> > another SoC. But your requested change will affect all SoCs.
+>>
+>> This is related to how the core treat hosts that announces
+>> MMC_CAP_WAIT_WHILE_BUSY.
+>>
+>> Therefore max_busy_timeout needs to be set within the same patch.
+>
+> Right. I assumed previous SoC (Gen2) were using MMC_CAP_WAIT_WHILE_BUSY
+> already, so this step would then have to be taken seperately to catch
+> all SoC. But I was wrong.
+>
+> I meanwhile found the timeout bits which are present in Gen3 and also in
+> Gen2 and are currently unused by the driver. While this helps explaining
+> that the HW has internal busy detection, its full potential is not
+> implemented yet.
+>
+> So, I am going to resend patch 9 without MMC_CAP_WAIT_WHILE_BUSY set and
+> will implement timeout handling incrementally as a seperate series.
+>
+> Sounds good?
 
-The SDHCI code is currently in quite poor quality, but we have agreed on
-a way forward to try to reach a point where the SDHCI core becomes more of
-a set of library functions. Each SDHCI driver variant can then decide
-which functions to use and allows it to implement variant specific code,
-without needing to also change SDHCI core code.
+Yes, please!
 
-In the end we aim to get better optimized and maintainable code.
-
-Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
----
- MAINTAINERS | 7 ++++---
- 1 file changed, 4 insertions(+), 3 deletions(-)
-
-diff --git a/MAINTAINERS b/MAINTAINERS
-index 30aca4a..5511069 100644
---- a/MAINTAINERS
-+++ b/MAINTAINERS
-@@ -9706,10 +9706,11 @@ S:	Maintained
- F:	drivers/mmc/host/sdricoh_cs.c
- 
- SECURE DIGITAL HOST CONTROLLER INTERFACE (SDHCI) DRIVER
-+M:	Adrian Hunter <adrian.hunter@intel.com>
- L:	linux-mmc@vger.kernel.org
--S:	Orphan
--F:	drivers/mmc/host/sdhci.*
--F:	drivers/mmc/host/sdhci-pltfm.[ch]
-+S:	Maintained
-+F:	drivers/mmc/host/sdhci*
-+F:	include/linux/mmc/sdhci*
- 
- SECURE COMPUTING
- M:	Kees Cook <keescook@chromium.org>
--- 
-1.9.1
+Kind regards
+Uffe
