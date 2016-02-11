@@ -1,45 +1,63 @@
-From: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH 1/7] mmc: omap_hsmmc: Fix PM regression with deferred
+From: Mark Brown <broonie@kernel.org>
+Subject: Re: [PATCH 3/7] spi: omap2-mcspi: Fix PM regression with deferred
  probe for pm_runtime_reinit
-Date: Thu, 11 Feb 2016 16:13:44 +0100
-Message-ID: <CAPDyKFo4Jyjwyvr3P5VHfDhQ87K9mnR01N-NtKz-yx2ycnfOLg@mail.gmail.com>
+Date: Thu, 11 Feb 2016 15:52:55 +0000
+Message-ID: <20160211155255.GA1953@sirena.org.uk>
 References: <1455145370-20301-1-git-send-email-tony@atomide.com>
-	<1455145370-20301-2-git-send-email-tony@atomide.com>
-	<CAPDyKFpAcsfLgtu93P45fTEg11MjdGwREcyeGSS7vt6GWbNu_w@mail.gmail.com>
-	<20160211150240.GR19432@atomide.com>
+ <1455145370-20301-4-git-send-email-tony@atomide.com>
+ <20160211115128.GF13270@sirena.org.uk>
+ <20160211150806.GS19432@atomide.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-spi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20160211150240.GR19432-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>
-Sender: linux-spi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>
-Cc: linux-omap <linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, linux-mmc <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Alan Stern <stern-nwvwT67g6+6dFdvTe/nMLpVzexx5G7lz@public.gmane.org>, Kevin Hilman <khilman-rdvid1DuHRBWk0Htik3J/w@public.gmane.org>, Nishanth Menon <nm-l0cyMroinI0@public.gmane.org>, "Rafael J . Wysocki" <rafael-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Tero Kristo <t-kristo-l0cyMroinI0@public.gmane.org>, Greg Kroah-Hartman <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>, "linux-i2c-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-i2c-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-serial-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, "linux-spi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-spi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Mark Brown <broonie-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Peter Hurley <peter-WaGBZJeGNqdsbIuE7sb01tBPR1lH4CV8@public.gmane.org>, Wolfram Sang <wsa-z923LK4zBo2bacvFa/9K2g@public.gmane.org>
+Content-Type: multipart/signed; micalg=pgp-sha256;
+	protocol="application/pgp-signature"; boundary="k1lZvvs/B4yU6o8G"
+Return-path: <linux-i2c-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <20160211150806.GS19432@atomide.com>
+Sender: linux-i2c-owner@vger.kernel.org
+To: Tony Lindgren <tony@atomide.com>
+Cc: linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-spi@vger.kernel.org, Alan Stern <stern@rowland.harvard.edu>, Kevin Hilman <khilman@baylibre.com>, Nishanth Menon <nm@ti.com>, "Rafael J . Wysocki" <rafael@kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, Tero Kristo <t-kristo@ti.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, linux-i2c@vger.kernel.org, linux-mmc@vger.kernel.org, linux-serial@vger.kernel.org, Peter Hurley <peter@hurleysoftware.com>, Wolfram Sang <wsa@the-dreams.de>
 List-Id: linux-mmc@vger.kernel.org
 
-On 11 February 2016 at 16:02, Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org> wrote:
-> * Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> [160211 02:19]:
->> On 11 February 2016 at 00:02, Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org> wrote:
->> >
->> > Ulf, I'd like to merge this along with other related fixes via the
->> > ARM SoC tree if no objections, please review and ack if this look OK
->> > to you.
->>
->> I have some other omap_hsmmc patches queued for 4.6, so I prefer to
->> send this via my mmc tree.
->>
->> I guess that's okay as well!?
->
-> Naturally yes, please go ahead thanks!
 
-Okay!
+--k1lZvvs/B4yU6o8G
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 
-BTW, did you notice my other comments to the patch?
+On Thu, Feb 11, 2016 at 07:08:06AM -0800, Tony Lindgren wrote:
+> * Mark Brown <broonie@kernel.org> [160211 03:52]:
 
-I can fix them before applying, unless you want to send a v2?
+> > Why, I'm not seeing any dependencies here?  I'd also expect to be seeing
+> > an awful lot more changes like this, this shouldn't be an OMAP thing -
+> > do we need to fix the core API and then roll out the transition in a
+> > different way?
 
-Kind regards
-Uffe
---
-To unsubscribe from this list: send the line "unsubscribe linux-spi" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> Please feel free to pick up this one if you have other fixes
+> lined up, nothing stopping that.
+
+I'll take it myself unless there is a strong reason to merge it as part
+of another series.
+
+> There will be likely more fixes like this to make drivers follow
+> the PM runtime API documentation. These were just the initial
+> ones that were obvious.
+
+This does sound like there's been a change in the interface compared to
+what users are actually doing - is this an actual problem or is it just
+a divergence from docs?
+
+--k1lZvvs/B4yU6o8G
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2
+
+iQEcBAEBCAAGBQJWvK5WAAoJECTWi3JdVIfQE7QH/3g03VkdaXgc2bDPCzrmonTA
+y2oDDu1KuPFAZ51kG7Lv6oBOErT0IeqtBa81h/RVV9Mwfq4dhezSoOA0CrB8NN8K
+frG7VzvivMz+qqeu2wj2KIJdtlZIdkn4qr4iKQPQ561NY7l3h7apM6CKeX1j+xiJ
+43DL6DK9YUDwLTqs6Ti91bRoSZZ7kaWOazwv4UbjdgD2wIxBBk5ADLpHUTScd+va
+UPFoxo3ePs6S10LujriLF1Afq8/pV7Xg3v0mib26sp4Ccg4LBrzGZPYgKj7xTiO1
+HloVZPizcXel9tIpfJ9wuF95+pR/1Jr7RlQ8aDBxcBPzYuSIKiwVIaqGcMJ7m+8=
+=7zKN
+-----END PGP SIGNATURE-----
+
+--k1lZvvs/B4yU6o8G--
