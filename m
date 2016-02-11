@@ -1,61 +1,41 @@
-From: Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>
-Subject: Re: [PATCH 3/7] spi: omap2-mcspi: Fix PM regression with deferred
- probe for pm_runtime_reinit
-Date: Thu, 11 Feb 2016 09:36:20 -0800
-Message-ID: <20160211173620.GU19432@atomide.com>
+From: Tony Lindgren <tony@atomide.com>
+Subject: Re: [PATCH 2/7] i2c: omap: Fix PM regression with deferred probe for
+ pm_runtime_reinit
+Date: Thu, 11 Feb 2016 09:56:58 -0800
+Message-ID: <20160211175658.GW19432@atomide.com>
 References: <1455145370-20301-1-git-send-email-tony@atomide.com>
- <1455145370-20301-4-git-send-email-tony@atomide.com>
- <20160211115128.GF13270@sirena.org.uk>
- <20160211150806.GS19432@atomide.com>
- <20160211155255.GA1953@sirena.org.uk>
+ <1455145370-20301-3-git-send-email-tony@atomide.com>
+ <20160211173427.GB1524@katana>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-spi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from muru.com ([72.249.23.125]:33735 "EHLO muru.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751246AbcBKR5B (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 11 Feb 2016 12:57:01 -0500
 Content-Disposition: inline
-In-Reply-To: <20160211155255.GA1953-GFdadSzt00ze9xe1eoZjHA@public.gmane.org>
-Sender: linux-spi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Mark Brown <broonie-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-Cc: linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-spi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Alan Stern <stern-nwvwT67g6+6dFdvTe/nMLpVzexx5G7lz@public.gmane.org>, Kevin Hilman <khilman-rdvid1DuHRBWk0Htik3J/w@public.gmane.org>, Nishanth Menon <nm-l0cyMroinI0@public.gmane.org>, "Rafael J . Wysocki" <rafael-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Tero Kristo <t-kristo-l0cyMroinI0@public.gmane.org>, Greg Kroah-Hartman <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>, linux-i2c-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-serial-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Peter Hurley <peter-WaGBZJeGNqdsbIuE7sb01tBPR1lH4CV8@public.gmane.org>, Wolfram Sang <wsa-z923LK4zBo2bacvFa/9K2g@public.gmane.org>
+In-Reply-To: <20160211173427.GB1524@katana>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Wolfram Sang <wsa@the-dreams.de>
+Cc: linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-i2c@vger.kernel.org, Alan Stern <stern@rowland.harvard.edu>, Kevin Hilman <khilman@baylibre.com>, Nishanth Menon <nm@ti.com>, "Rafael J . Wysocki" <rafael@kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, Tero Kristo <t-kristo@ti.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, linux-mmc@vger.kernel.org, linux-serial@vger.kernel.org, linux-spi@vger.kernel.org, Mark Brown <broonie@kernel.org>, Peter Hurley <peter@hurleysoftware.com>
 
-* Mark Brown <broonie-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org> [160211 07:54]:
-> On Thu, Feb 11, 2016 at 07:08:06AM -0800, Tony Lindgren wrote:
-> > * Mark Brown <broonie-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org> [160211 03:52]:
+* Wolfram Sang <wsa@the-dreams.de> [160211 09:35]:
 > 
-> > > Why, I'm not seeing any dependencies here?  I'd also expect to be seeing
-> > > an awful lot more changes like this, this shouldn't be an OMAP thing -
-> > > do we need to fix the core API and then roll out the transition in a
-> > > different way?
+> > Wolfram, I'd like to merge this along with other related fixes via
+> > the ARM SoC tree if no objections, please review and ack if this
+> > look OK to you.
 > 
-> > Please feel free to pick up this one if you have other fixes
-> > lined up, nothing stopping that.
-> 
-> I'll take it myself unless there is a strong reason to merge it as part
-> of another series.
+> Well, since most patches seem to be picked up individually now, I'd
+> prefer to do the same. This is v4.5 material, or?
 
-OK thanks!
-
-> > There will be likely more fixes like this to make drivers follow
-> > the PM runtime API documentation. These were just the initial
-> > ones that were obvious.
-> 
-> This does sound like there's been a change in the interface compared to
-> what users are actually doing - is this an actual problem or is it just
-> a divergence from docs?
-
-It's an actual problem at least on omaps as the omap_device code
-is very picky about the hardware state.
-
-Depending how the PM runtime is implemented, it may be a problem
-for some other cases too.
-
-For non-omap cases, my guess is that it's mostly a divergence from
-the docs and non-critical.
+Sure please do, thanks. And yes for v4.5 please. Although
+I've only seen this happen with the MMC driver so far, there's
+still a slight chance of this happening with the other drivers
+using omap_device.
 
 Regards,
 
 Tony
---
-To unsubscribe from this list: send the line "unsubscribe linux-spi" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
+
