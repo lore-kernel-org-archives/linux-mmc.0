@@ -1,63 +1,156 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] Revert "mmc: block: don't use parameter prefix if built
- as module"
-Date: Thu, 11 Feb 2016 16:57:57 +0100
-Message-ID: <CAPDyKFp=yU1uSHxpPXO5rq4VGZc2VtJepgYNfzSoomgED4g5mw@mail.gmail.com>
-References: <1455206051-8633-1-git-send-email-ulf.hansson@linaro.org>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1455206051-8633-1-git-send-email-ulf.hansson@linaro.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: John Stultz <john.stultz@linaro.org>
-Cc: "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>, Greg KH <gregkh@linuxfoundation.org>, Andy Shevchenko <andriy.shevchenko@linux.intel.com>
+From: Wolfram Sang <wsa@the-dreams.de>
+Subject: [PATCH] mmc: sdhi: Add r8a7795 support
+Date: Thu, 11 Feb 2016 16:59:19 +0100
+Message-ID: <1455206359-5638-1-git-send-email-wsa@the-dreams.de>
+Return-path: <linux-renesas-soc-owner@vger.kernel.org>
+Sender: linux-renesas-soc-owner@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: Wolfram Sang <wsa@the-dreams.de>, Ulf Hansson <ulf.hansson@linaro.org>, linux-renesas-soc@vger.kernel.org, Dirk Behme <dirk.behme@gmail.com>, Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>, Magnus Damm <magnus.damm@gmail.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On 11 February 2016 at 16:54, Ulf Hansson <ulf.hansson@linaro.org> wrote:
-> This reverts commit 829b6962f7e3cfc06f7c5c26269fd47ad48cf503.
->
-> Revert this change as it causes a sysfs path to change and therefore
-> introduces and ABI regression. More precisely Android's vold is not being
-> able to access /sys/module/mmcblk/parameters/perdev_minors any more, since
-> the path becomes changed to: "/sys/module/mmc_block/..."
->
-> Fixes: 829b6962f7e3 ("mmc: block: don't use parameter prefix if built as
-> module")
-> Reported-by: John Stultz <john.stultz@linaro.org>
-> Cc: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
-> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+From: Wolfram Sang <wsa+renesas@sang-engineering.com>
 
-John, I noticed your regression report. Thanks!
+Registers are 64bit apart, so we refactor bus_shift handling a little
+and set it based on the DT compatible. Also, EXT_ACC is different.
 
-I decided to send this patch and I have already queued it for fixes.
+Signed-off-by: Ai Kyuse <ai.kyuse.uw@renesas.com>
+Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+---
+ Documentation/devicetree/bindings/mmc/tmio_mmc.txt |  1 +
+ drivers/mmc/host/Kconfig                           |  2 +-
+ drivers/mmc/host/sh_mobile_sdhi.c                  | 47 ++++++++++++++++------
+ 3 files changed, 36 insertions(+), 14 deletions(-)
 
-Sorry for not thinking clear when I applied the earlier patch.
-
-Kind regards
-Uffe
-
-> ---
->  drivers/mmc/card/block.c | 3 ---
->  1 file changed, 3 deletions(-)
->
-> diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
-> index 951641a..fe207e5 100644
-> --- a/drivers/mmc/card/block.c
-> +++ b/drivers/mmc/card/block.c
-> @@ -47,13 +47,10 @@
->  #include "queue.h"
->
->  MODULE_ALIAS("mmc:block");
-> -
-> -#ifdef KERNEL
->  #ifdef MODULE_PARAM_PREFIX
->  #undef MODULE_PARAM_PREFIX
->  #endif
->  #define MODULE_PARAM_PREFIX "mmcblk."
-> -#endif
->
->  #define INAND_CMD38_ARG_EXT_CSD  113
->  #define INAND_CMD38_ARG_ERASE    0x00
-> --
-> 1.9.1
->
+diff --git a/Documentation/devicetree/bindings/mmc/tmio_mmc.txt b/Documentation/devicetree/bindings/mmc/tmio_mmc.txt
+index 400b640fabc768..7fb746dd1a68ca 100644
+--- a/Documentation/devicetree/bindings/mmc/tmio_mmc.txt
++++ b/Documentation/devicetree/bindings/mmc/tmio_mmc.txt
+@@ -22,6 +22,7 @@ Required properties:
+ 		"renesas,sdhi-r8a7792" - SDHI IP on R8A7792 SoC
+ 		"renesas,sdhi-r8a7793" - SDHI IP on R8A7793 SoC
+ 		"renesas,sdhi-r8a7794" - SDHI IP on R8A7794 SoC
++		"renesas,sdhi-r8a7795" - SDHI IP on R8A7795 SoC
+ 
+ Optional properties:
+ - toshiba,mmc-wrprotect-disable: write-protect detection is unavailable
+diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+index 4a35ebf5165d83..d9a9d92fa8379a 100644
+--- a/drivers/mmc/host/Kconfig
++++ b/drivers/mmc/host/Kconfig
+@@ -560,7 +560,7 @@ config MMC_TMIO
+ 
+ config MMC_SDHI
+ 	tristate "SH-Mobile SDHI SD/SDIO controller support"
+-	depends on SUPERH || ARM
++	depends on SUPERH || ARM || ARM64
+ 	depends on SUPERH || ARCH_SHMOBILE || COMPILE_TEST
+ 	select MMC_TMIO_CORE
+ 	help
+diff --git a/drivers/mmc/host/sh_mobile_sdhi.c b/drivers/mmc/host/sh_mobile_sdhi.c
+index 557e2b9dadeec7..9aa147959276d0 100644
+--- a/drivers/mmc/host/sh_mobile_sdhi.c
++++ b/drivers/mmc/host/sh_mobile_sdhi.c
+@@ -1,6 +1,8 @@
+ /*
+  * SuperH Mobile SDHI
+  *
++ * Copyright (C) 2016 Sang Engineering, Wolfram Sang
++ * Copyright (C) 2015-16 Renesas Electronics Corporation
+  * Copyright (C) 2009 Magnus Damm
+  *
+  * This program is free software; you can redistribute it and/or modify
+@@ -43,6 +45,7 @@ struct sh_mobile_sdhi_of_data {
+ 	unsigned long capabilities2;
+ 	enum dma_slave_buswidth dma_buswidth;
+ 	dma_addr_t dma_rx_offset;
++	unsigned bus_shift;
+ };
+ 
+ static const struct sh_mobile_sdhi_of_data sh_mobile_sdhi_of_cfg[] = {
+@@ -65,6 +68,13 @@ static const struct sh_mobile_sdhi_of_data of_rcar_gen2_compatible = {
+ 	.dma_rx_offset	= 0x2000,
+ };
+ 
++static const struct sh_mobile_sdhi_of_data of_rcar_gen3_compatible = {
++	.tmio_flags	= TMIO_MMC_HAS_IDLE_WAIT | TMIO_MMC_WRPROTECT_DISABLE |
++			  TMIO_MMC_CLK_ACTUAL | TMIO_MMC_FAST_CLK_CHG,
++	.capabilities	= MMC_CAP_SD_HIGHSPEED,
++	.bus_shift	= 2,
++};
++
+ static const struct of_device_id sh_mobile_sdhi_of_match[] = {
+ 	{ .compatible = "renesas,sdhi-shmobile" },
+ 	{ .compatible = "renesas,sdhi-sh7372" },
+@@ -78,6 +88,7 @@ static const struct of_device_id sh_mobile_sdhi_of_match[] = {
+ 	{ .compatible = "renesas,sdhi-r8a7792", .data = &of_rcar_gen2_compatible, },
+ 	{ .compatible = "renesas,sdhi-r8a7793", .data = &of_rcar_gen2_compatible, },
+ 	{ .compatible = "renesas,sdhi-r8a7794", .data = &of_rcar_gen2_compatible, },
++	{ .compatible = "renesas,sdhi-r8a7795", .data = &of_rcar_gen3_compatible, },
+ 	{},
+ };
+ MODULE_DEVICE_TABLE(of, sh_mobile_sdhi_of_match);
+@@ -103,6 +114,15 @@ static void sh_mobile_sdhi_sdbuf_width(struct tmio_mmc_host *host, int width)
+ 	case 0xCB0D:
+ 		val = (width == 32) ? 0x0000 : 0x0001;
+ 		break;
++	case 0xCC10: /* Gen3, SD only */
++	case 0xCD10: /* Gen3, SD + MMC */
++		if (width == 64)
++			val = 0x0000;
++		else if (width == 32)
++			val = 0x0101;
++		else
++			val = 0x0001;
++		break;
+ 	default:
+ 		/* nothing to do */
+ 		return;
+@@ -233,16 +253,26 @@ static int sh_mobile_sdhi_probe(struct platform_device *pdev)
+ 		goto eprobe;
+ 	}
+ 
++	if (of_id && of_id->data) {
++		const struct sh_mobile_sdhi_of_data *of_data = of_id->data;
++
++		mmc_data->flags |= of_data->tmio_flags;
++		mmc_data->capabilities |= of_data->capabilities;
++		mmc_data->capabilities2 |= of_data->capabilities2;
++		mmc_data->dma_rx_offset = of_data->dma_rx_offset;
++		dma_priv->dma_buswidth = of_data->dma_buswidth;
++		host->bus_shift = of_data->bus_shift;
++	}
++
+ 	host->dma		= dma_priv;
+ 	host->write16_hook	= sh_mobile_sdhi_write16_hook;
+ 	host->clk_enable	= sh_mobile_sdhi_clk_enable;
+ 	host->clk_disable	= sh_mobile_sdhi_clk_disable;
+ 	host->multi_io_quirk	= sh_mobile_sdhi_multi_io_quirk;
+-	/* SD control register space size is 0x100, 0x200 for bus_shift=1 */
+-	if (resource_size(res) > 0x100)
++
++	/* Orginally registers were 16 bit apart, could be 32 or 64 nowadays */
++	if (!host->bus_shift && resource_size(res) > 0x100) /* old way to determine the shift */
+ 		host->bus_shift = 1;
+-	else
+-		host->bus_shift = 0;
+ 
+ 	if (mmd)
+ 		*mmc_data = *mmd;
+@@ -274,15 +304,6 @@ static int sh_mobile_sdhi_probe(struct platform_device *pdev)
+ 	 */
+ 	mmc_data->flags |= TMIO_MMC_SDIO_STATUS_QUIRK;
+ 
+-	if (of_id && of_id->data) {
+-		const struct sh_mobile_sdhi_of_data *of_data = of_id->data;
+-		mmc_data->flags |= of_data->tmio_flags;
+-		mmc_data->capabilities |= of_data->capabilities;
+-		mmc_data->capabilities2 |= of_data->capabilities2;
+-		mmc_data->dma_rx_offset = of_data->dma_rx_offset;
+-		dma_priv->dma_buswidth = of_data->dma_buswidth;
+-	}
+-
+ 	ret = tmio_mmc_host_probe(host, mmc_data);
+ 	if (ret < 0)
+ 		goto efree;
+-- 
+2.1.4
