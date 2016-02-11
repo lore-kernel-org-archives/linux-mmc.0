@@ -1,59 +1,80 @@
-From: Wolfram Sang <wsa-z923LK4zBo2bacvFa/9K2g@public.gmane.org>
-Subject: Re: [PATCH 2/7] i2c: omap: Fix PM regression with deferred probe for
- pm_runtime_reinit
-Date: Thu, 11 Feb 2016 18:34:28 +0100
-Message-ID: <20160211173427.GB1524@katana>
-References: <1455145370-20301-1-git-send-email-tony@atomide.com>
- <1455145370-20301-3-git-send-email-tony@atomide.com>
+From: David Daney <ddaney-M3mlKVOIwJVv6pq1l3V1OdBPR1lH4CV8@public.gmane.org>
+Subject: Re: [PATCH v6 2/3] MIPS: OCTEON: Rename legacy properties in internal
+ device trees.
+Date: Thu, 11 Feb 2016 09:35:06 -0800
+Message-ID: <56BCC64A.5040902@caviumnetworks.com>
+References: <1455207976-2262-1-git-send-email-matt.redfearn@imgtec.com> <1455207976-2262-2-git-send-email-matt.redfearn@imgtec.com> <56BCB7AE.2050901@gmail.com> <56BCBC90.6090805@imgtec.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="8GpibOaaTibBMecb"
-Return-path: <linux-spi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <1455145370-20301-3-git-send-email-tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>
-Sender: linux-spi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Tony Lindgren <tony-4v6yS6AI5VpBDgjK7y7TUQ@public.gmane.org>
-Cc: linux-omap-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-i2c-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Alan Stern <stern-nwvwT67g6+6dFdvTe/nMLpVzexx5G7lz@public.gmane.org>, Kevin Hilman <khilman-rdvid1DuHRBWk0Htik3J/w@public.gmane.org>, Nishanth Menon <nm-l0cyMroinI0@public.gmane.org>, "Rafael J . Wysocki" <rafael-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Tero Kristo <t-kristo-l0cyMroinI0@public.gmane.org>, Greg Kroah-Hartman <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-serial-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-spi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Mark Brown <broonie-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Peter Hurley <peter-WaGBZJeGNqdsbIuE7sb01tBPR1lH4CV8@public.gmane.org>
+Content-Type: text/plain; charset="windows-1252"; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <56BCBC90.6090805-1AXoQHu6uovQT0dZR+AlfA@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Matt Redfearn <matt.redfearn-1AXoQHu6uovQT0dZR+AlfA@public.gmane.org>
+Cc: David Daney <ddaney.cavm-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, david.daney-YGCgFSpz5w/QT0dZR+AlfA@public.gmane.org, aleksey.makarov-M3mlKVOIwJVv6pq1l3V1OdBPR1lH4CV8@public.gmane.org, ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, robh-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, ralf-6z/3iImG2C8G8FEW9MqTrA@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mips-6z/3iImG2C8G8FEW9MqTrA@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
 
+On 02/11/2016 08:53 AM, Matt Redfearn wrote:
+> Hi David,
+>
+> On 11/02/16 16:32, David Daney wrote:
+>> On 02/11/2016 08:26 AM, Matt Redfearn wrote:
+>>> Many OCTEON devices have been shipped in products with fixed DTBs. These
+>>> DTBS contain properties which are not compatible with newer kernels with
+>>> upstream drivers.
+>>> Therefore some mechanism is necessary to convert legacy naming into
+>>> upstream naming. In the first instance this is to support the OCTEON MMC
+>>> controller, which is in a later patch of this series.
+>>> This patch adds a octeon_handle_legacy_device_tree() function which is
+>>> always called from device_tree_init() to fix up the device tree so that
+>>> drivers need have no knowledge of the legacy naming or properties.
+>>>
+>>> Signed-off-by: Matt Redfearn <matt.redfearn-1AXoQHu6uovQT0dZR+AlfA@public.gmane.org>
+>>
+>> NAK...
+>>
+>> I already sent e-mail on this, but it crossed in flight.
+>
+> Yeah, unfortunate timing.
+>
+>>
+>> Basically, this patch is much more complex than the original code
+>> which was just a few lines to check the alternate "legacy" names.
+>
+> This code is functionally equivalent to the previous version, just
+> located in platform code rather than the driver itself.
 
---8GpibOaaTibBMecb
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+I know, one thing I really don't like about it, is that we are modifying 
+the kernel's view of the device that was passed in.  How does that 
+effect what is seen in /sys/firmware ?
+
+I would rather see code that calls mmc_of_parse(), and then, if the two 
+properties in question (bus-width, and max-frequency) have not been 
+filled in, attempt to read them with the legacy names using 
+of_property_read_u32()
+
+The implementation of mmc_of_parse() already contains support for 
+parsing legacy properties, so we could also add a couple more there, 
+which would be the simplest change of all.
 
 
-> Wolfram, I'd like to merge this along with other related fixes via
-> the ARM SoC tree if no objections, please review and ack if this
-> look OK to you.
+> In terms of LOC
+> it's not much different. Doing it this was does allow future flexibility
+> to change other bindings that are fixed in firmware without having to
+> support each set in the individual drivers.
 
-Well, since most patches seem to be picked up individually now, I'd
-prefer to do the same. This is v4.5 material, or?
+I think the controversy is limited to the MMC driver.  As far as I know, 
+we are in good shape with the bindings for the other drivers.
 
 
---8GpibOaaTibBMecb
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: Digital signature
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1
-
-iQIcBAEBAgAGBQJWvMYjAAoJEBQN5MwUoCm2tI8P/iG7TLX3h5d14u9u12bh4qR9
-o+soGafJJtaPKD9LP8VbOOSb3jLurtZ+V79DN0xuOEhTk/V4KrPUIFPVuLX2HCjv
-kkYFrcaJb9/OC6fvDN3fainZQMMqbSNEIhEXKaYkhpbV9cUQchp8o0+olHmcZQ06
-1H61F7jcxxG+fpUEHQlmaIdkMV1IIR3/UarjSW0yl5oq/I0KLoWHVpejcsm/bVaX
-NSPPnIK4/nD92FyFdA/X6+IQ8vt9vNxj64DkZttnZKuSZbEC3CkcGWmDeI6jmOdA
-E5yYSLarvoTRtv9SJsLG5tCNNGzMkko40r8ZEYITUywlIduNKtBqHhvhW1iw3Qiu
-rV6B7pcaF2J5my46Er2DMy+Bo5FECG4cgLAdCzR8cKTL2WLNp/rCz7BtUkcBGgig
-9TGC1Y8Dt7Hs0/Gz9M8iw0VONxkplQDjukWElIbG4a7JwZOh4Z3cqQaQx9Ykp6l/
-9ScX/lZsjgCB0TMvFv9Cu97bIbEN+yt6VmZ3lDGHVZj5feKak5NjphaUP/+FPaE7
-X5ORMwByctd+4zAzO2ScUBQGdMm8iJCvckeGdqxuhDEeYlriLAX6IE9zUut3Pn8q
-2/6V3EawJTeqdJh2p8TMqVPsmDzXMTaI+O7+NbiZw1Hi4ZztUlLDatFk+BIiQ/mN
-pX/dgdvKVoapY+4SOd1y
-=KPxS
------END PGP SIGNATURE-----
-
---8GpibOaaTibBMecb--
+> Leaving this patch out will mean having to get any legacy bindings
+> accepted into each driver via their maintainer.
+> But for the moment we're just talking about the MMC driver - if this
+> patch is not accepted then the only way to support legacy devices is
+> with Ulf's signoff of handling both binding versions in the driver.
+>
+[...]
 --
-To unsubscribe from this list: send the line "unsubscribe linux-spi" in
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
 the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 More majordomo info at  http://vger.kernel.org/majordomo-info.html
