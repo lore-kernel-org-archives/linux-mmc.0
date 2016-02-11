@@ -1,63 +1,53 @@
-From: Mark Brown <broonie@kernel.org>
-Subject: Re: [PATCH 3/7] spi: omap2-mcspi: Fix PM regression with deferred
- probe for pm_runtime_reinit
-Date: Thu, 11 Feb 2016 15:52:55 +0000
-Message-ID: <20160211155255.GA1953@sirena.org.uk>
-References: <1455145370-20301-1-git-send-email-tony@atomide.com>
- <1455145370-20301-4-git-send-email-tony@atomide.com>
- <20160211115128.GF13270@sirena.org.uk>
- <20160211150806.GS19432@atomide.com>
-Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha256;
-	protocol="application/pgp-signature"; boundary="k1lZvvs/B4yU6o8G"
-Return-path: <linux-i2c-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20160211150806.GS19432@atomide.com>
-Sender: linux-i2c-owner@vger.kernel.org
-To: Tony Lindgren <tony@atomide.com>
-Cc: linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-spi@vger.kernel.org, Alan Stern <stern@rowland.harvard.edu>, Kevin Hilman <khilman@baylibre.com>, Nishanth Menon <nm@ti.com>, "Rafael J . Wysocki" <rafael@kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, Tero Kristo <t-kristo@ti.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, linux-i2c@vger.kernel.org, linux-mmc@vger.kernel.org, linux-serial@vger.kernel.org, Peter Hurley <peter@hurleysoftware.com>, Wolfram Sang <wsa@the-dreams.de>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: [PATCH] Revert "mmc: block: don't use parameter prefix if built as module"
+Date: Thu, 11 Feb 2016 16:54:11 +0100
+Message-ID: <1455206051-8633-1-git-send-email-ulf.hansson@linaro.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-lb0-f181.google.com ([209.85.217.181]:36327 "EHLO
+	mail-lb0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751137AbcBKPyX (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 11 Feb 2016 10:54:23 -0500
+Received: by mail-lb0-f181.google.com with SMTP id tk3so17756966lbb.3
+        for <linux-mmc@vger.kernel.org>; Thu, 11 Feb 2016 07:54:22 -0800 (PST)
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-kernel@vger.kernel.org, John Stultz <john.stultz@linaro.org>, Greg KH <gregkh@linuxfoundation.org>, Andy Shevchenko <andriy.shevchenko@linux.intel.com>
 
+This reverts commit 829b6962f7e3cfc06f7c5c26269fd47ad48cf503.
 
---k1lZvvs/B4yU6o8G
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+Revert this change as it causes a sysfs path to change and therefore
+introduces and ABI regression. More precisely Android's vold is not being
+able to access /sys/module/mmcblk/parameters/perdev_minors any more, since
+the path becomes changed to: "/sys/module/mmc_block/..."
 
-On Thu, Feb 11, 2016 at 07:08:06AM -0800, Tony Lindgren wrote:
-> * Mark Brown <broonie@kernel.org> [160211 03:52]:
+Fixes: 829b6962f7e3 ("mmc: block: don't use parameter prefix if built as
+module")
+Reported-by: John Stultz <john.stultz@linaro.org>
+Cc: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
+Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+---
+ drivers/mmc/card/block.c | 3 ---
+ 1 file changed, 3 deletions(-)
 
-> > Why, I'm not seeing any dependencies here?  I'd also expect to be seeing
-> > an awful lot more changes like this, this shouldn't be an OMAP thing -
-> > do we need to fix the core API and then roll out the transition in a
-> > different way?
+diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+index 951641a..fe207e5 100644
+--- a/drivers/mmc/card/block.c
++++ b/drivers/mmc/card/block.c
+@@ -47,13 +47,10 @@
+ #include "queue.h"
+ 
+ MODULE_ALIAS("mmc:block");
+-
+-#ifdef KERNEL
+ #ifdef MODULE_PARAM_PREFIX
+ #undef MODULE_PARAM_PREFIX
+ #endif
+ #define MODULE_PARAM_PREFIX "mmcblk."
+-#endif
+ 
+ #define INAND_CMD38_ARG_EXT_CSD  113
+ #define INAND_CMD38_ARG_ERASE    0x00
+-- 
+1.9.1
 
-> Please feel free to pick up this one if you have other fixes
-> lined up, nothing stopping that.
-
-I'll take it myself unless there is a strong reason to merge it as part
-of another series.
-
-> There will be likely more fixes like this to make drivers follow
-> the PM runtime API documentation. These were just the initial
-> ones that were obvious.
-
-This does sound like there's been a change in the interface compared to
-what users are actually doing - is this an actual problem or is it just
-a divergence from docs?
-
---k1lZvvs/B4yU6o8G
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2
-
-iQEcBAEBCAAGBQJWvK5WAAoJECTWi3JdVIfQE7QH/3g03VkdaXgc2bDPCzrmonTA
-y2oDDu1KuPFAZ51kG7Lv6oBOErT0IeqtBa81h/RVV9Mwfq4dhezSoOA0CrB8NN8K
-frG7VzvivMz+qqeu2wj2KIJdtlZIdkn4qr4iKQPQ561NY7l3h7apM6CKeX1j+xiJ
-43DL6DK9YUDwLTqs6Ti91bRoSZZ7kaWOazwv4UbjdgD2wIxBBk5ADLpHUTScd+va
-UPFoxo3ePs6S10LujriLF1Afq8/pV7Xg3v0mib26sp4Ccg4LBrzGZPYgKj7xTiO1
-HloVZPizcXel9tIpfJ9wuF95+pR/1Jr7RlQ8aDBxcBPzYuSIKiwVIaqGcMJ7m+8=
-=7zKN
------END PGP SIGNATURE-----
-
---k1lZvvs/B4yU6o8G--
