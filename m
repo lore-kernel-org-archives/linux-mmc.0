@@ -1,50 +1,54 @@
-From: Mark Brown <broonie@kernel.org>
-Subject: Re: [PATCH 3/7] spi: omap2-mcspi: Fix PM regression with deferred
- probe for pm_runtime_reinit
-Date: Thu, 11 Feb 2016 11:51:28 +0000
-Message-ID: <20160211115128.GF13270@sirena.org.uk>
-References: <1455145370-20301-1-git-send-email-tony@atomide.com>
- <1455145370-20301-4-git-send-email-tony@atomide.com>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH V3 1/2] mmc: sdhci: Allow CAPS check for SDHCI_CAN_64BIT
+ to use overridden caps
+Date: Thu, 11 Feb 2016 14:22:41 +0200
+Message-ID: <56BC7D11.6020505@intel.com>
+References: <1455135940-29758-1-git-send-email-alcooperx@gmail.com>
+ <1455135940-29758-2-git-send-email-alcooperx@gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha256;
-	protocol="application/pgp-signature"; boundary="DEfZqDS1MPR2ysog"
-Return-path: <linux-i2c-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <1455145370-20301-4-git-send-email-tony@atomide.com>
-Sender: linux-i2c-owner@vger.kernel.org
-To: Tony Lindgren <tony@atomide.com>
-Cc: linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-spi@vger.kernel.org, Alan Stern <stern@rowland.harvard.edu>, Kevin Hilman <khilman@baylibre.com>, Nishanth Menon <nm@ti.com>, "Rafael J . Wysocki" <rafael@kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, Tero Kristo <t-kristo@ti.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, linux-i2c@vger.kernel.org, linux-mmc@vger.kernel.org, linux-serial@vger.kernel.org, Peter Hurley <peter@hurleysoftware.com>, Wolfram Sang <wsa@the-dreams.de>
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mga03.intel.com ([134.134.136.65]:42546 "EHLO mga03.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751175AbcBKM0M (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 11 Feb 2016 07:26:12 -0500
+In-Reply-To: <1455135940-29758-2-git-send-email-alcooperx@gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Al Cooper <alcooperx@gmail.com>, ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, bcm-kernel-feedback-list@broadcom.com
 
+On 10/02/16 22:25, Al Cooper wrote:
+> sdhci_add_host() allows the Host Controller Capability registers
+> to be supplied by the calling driver by using
+> SDHCI_QUIRK_MISSING_CAPS, but the check for the Capabilities bit
+> SDHCI_CAN_64BIT doesn't use the applied value and instead reads
+> the Host register directly. This change uses the supplied "caps"
+> register instead of reading the host register.
+> 
+> This change will allow a calling driver to simply clear the
+> SDHCI_CAN_64BIT bit in "caps" to handle some cases of
+> SDHCI_QUIRK2_BROKEN_64_BIT_DMA.
+> 
+> Signed-off-by: Al Cooper <alcooperx@gmail.com>
+> ---
+>  drivers/mmc/host/sdhci.c | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+> 
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index d622435..ba3b072 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -2926,7 +2926,7 @@ int sdhci_add_host(struct sdhci_host *host)
+>  	 * SDHCI_QUIRK2_BROKEN_64_BIT_DMA must be left to the drivers to
+>  	 * implement.
+>  	 */
+> -	if (sdhci_readl(host, SDHCI_CAPABILITIES) & SDHCI_CAN_64BIT)
+> +	if (caps[0] & SDHCI_CAN_64BIT)
+>  		host->flags |= SDHCI_USE_64_BIT_DMA;
+>  
+>  	if (host->flags & (SDHCI_USE_SDMA | SDHCI_USE_ADMA)) {
+> 
 
---DEfZqDS1MPR2ysog
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+Acked-by: Adrian Hunter <adrian.hunter@intel.com>
 
-On Wed, Feb 10, 2016 at 03:02:46PM -0800, Tony Lindgren wrote:
-
-> Mark, I'd like to merge this along with other related fixes via
-> the ARM SoC tree if no objections, please review and ack if this
-> look OK to you.
-
-Why, I'm not seeing any dependencies here?  I'd also expect to be seeing
-an awful lot more changes like this, this shouldn't be an OMAP thing -
-do we need to fix the core API and then roll out the transition in a
-different way?
-
---DEfZqDS1MPR2ysog
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2
-
-iQEcBAEBCAAGBQJWvHW/AAoJECTWi3JdVIfQeZAH/R2Kzo+fNp+2bzMytHvEdP24
-MptS9ziFSJZXnoIJhTlW+4v1e0UKdfV+0sMx6NAuiWbu0XTz/hBSddIDsDPxejTn
-cgLPRl4bJ//U0lZ5SHZVcYAyKTy6bniVzTBulaugKkPNVgmYrirtAvSylyK8p7Ov
-eE6RB89yHmP1xzyNY8NupOcg3BVv2Ho73Q3CHdr04dMu6j09ahv7+5VDultCewm0
-LDXp1yyF/HqY3bIrYka3f5SYMG6bs2RP8FOSsWKJRzCvOHInqQ3JGBYQ63S9OaLD
-xFyq+qEPJWNdqoMsyrc15zQbeXQnsHaYZmqjOuZl3znVe0iVZKX/Mt3mUC4udmw=
-=3xLd
------END PGP SIGNATURE-----
-
---DEfZqDS1MPR2ysog--
