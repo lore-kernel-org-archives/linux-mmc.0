@@ -1,95 +1,91 @@
-From: Shawn Lin <shawn.lin@rock-chips.com>
-Subject: Re: [PATCH] mmc: dw_mmc-rockchip: remove dw_mci_rockchip_pmops
-Date: Fri, 12 Feb 2016 19:42:31 +0800
-Message-ID: <56BDC527.9090002@rock-chips.com>
-References: <1454470004-21408-1-git-send-email-shawn.lin@rock-chips.com>
- <56B2EC67.4010909@samsung.com>
+From: Ludovic Desroches <ludovic.desroches@atmel.com>
+Subject: Re: [PATCH] mmc: sdhci-of-at91: fix card detect when using runtime PM
+Date: Fri, 12 Feb 2016 13:04:15 +0100
+Message-ID: <20160212120415.GJ14937@odux.rfo.atmel.com>
+References: <1455198537-21791-1-git-send-email-ludovic.desroches@atmel.com>
+ <CAPDyKFpPE31maSEVxLZx6BXD5i1Ugs79+OVQojpUCR2EzMeM3A@mail.gmail.com>
+ <20160212083828.GI14937@odux.rfo.atmel.com>
+ <CAPDyKFpU+fRb6qR8Wzh2D2TjKK-givGo0FYOAksyj_db91Z3SA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <56B2EC67.4010909@samsung.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: shawn.lin@rock-chips.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from eusmtp01.atmel.com ([212.144.249.242]:13827 "EHLO
+	eusmtp01.atmel.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752174AbcBLMET (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 12 Feb 2016 07:04:19 -0500
+Content-Disposition: inline
+In-Reply-To: <CAPDyKFpU+fRb6qR8Wzh2D2TjKK-givGo0FYOAksyj_db91Z3SA@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Nicolas Ferre <nicolas.ferre@atmel.com>, Adrian Hunter <adrian.hunter@intel.com>, Ludovic Desroches <ludovic.desroches@atmel.com>
 
-On 2016/2/4 14:15, Jaehoon Chung wrote:
-> Hi, Shawn.
->
-> On 02/03/2016 12:26 PM, Shawn Lin wrote:
->> dw_mci_rockchip_pmops just copy-paste what dw_mci_pltfm_pmops
->> have done. Let's remove it.
->
-> Yep, it's possible to remove.
-> I'm not sure but i want to know there is no plan to add the specific code of rockchip in suspend/resume.
-> Could you check this?
+On Fri, Feb 12, 2016 at 12:01:39PM +0100, Ulf Hansson wrote:
+> >>
+> >> According to the below commit, SDHCI_QUIRK_BROKEN_CARD_DETECTION was
+> >> invented because of unreliable card detection mechanism inside the
+> >> sdhci controller.
+> >> Therefore it required polling to be used, but also to make ->get_cd()
+> >> to always return 1 in these cases.
+> >>
+> >> Although, as I understand it that's not the case here. You can still
+> >> rely on card detection to work, but as you don't have wakeups you
+> >> can't fully make use of card detect, when combined with runtime PM.
+> >> I am not sure we should add more users of
+> >> SDHCI_QUIRK_BROKEN_CARD_DETECTION, especially since in this case it's
+> >> not reflecting the capability of the hardware.
+> >>
+> >> Can't we think of another way?
+> >
+> > Sorry but I am not sure to understand. In the previous thread, you told
+> > me to use MMC_CAP_NEEDS_POLL which is set if we have
+> > SDHCI_QUIRK_BROKEN_CARD_DETECTION. I was not confortable to do this
+> > because as you say it is not reflecting the capability of the hardware.
+> >
+> > Do you mean that I can simply add MMC_CAP_NEEDS_POLL after sdhci_add_host()?
+> 
+> Yes, something like that, but...
+> 
+> Within this context, I realize that the DT binding "broken-cd" has two
+> different meanings, while comparing the generic MMC bindings towards
+> SDHCI's. That's bad.
+> 
+> In the SDHCI case it means, enable MMC_CAP_NEEDS_POLL *and* make
+> ->get_cd() to always return 1 (via adding
+> SDHCI_QUIRK_BROKEN_CARD_DETECTION).
+> 
+> In the generic MMC case, it means only to enable MMC_CAP_NEEDS_POLL,
+> which is exactly what you want.
+> 
+> Perhaps you wonder why I think it's a good good idea to use DT to
+> decide if MMC_CAP_NEEDS_POLL should be enabled?
+> It allows flexibility for future platforms. For example, there may be
+> platforms adding GPIO card detect support or even cards that's
+> non-removable.
 
-Jaehoon,
+I agree.
 
-:) I can't say "never plan to add anything" in case of some broken Socs
-need something special to do in the future. But I will that would not 
-happen, and personally we not going to add specific code here.
+> 
+> I realize that the fix to solve this regression would then mean that
+> sdhci-of-at91 need to clear SDHCI_QUIRK_BROKEN_CARD_DETECTION after
+> parsing the shdci DTB, but then the DTB for your platform also needs
+> an update as the "broken-cd" options needs to be set.
+> 
+> Do you think this can work?
+> 
 
-Thanks for sharing your thought.
+It should but as SDHCI_QUIRK_BROKEN_CARD_DETECTION, broken-cd is not
+reflecting the capability of the hardware.
 
->
-> Best Regards,
-> Jaehoon Chung
->
->>
->> Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
->> ---
->>
->>   drivers/mmc/host/dw_mmc-rockchip.c | 22 +---------------------
->>   1 file changed, 1 insertion(+), 21 deletions(-)
->>
->> diff --git a/drivers/mmc/host/dw_mmc-rockchip.c b/drivers/mmc/host/dw_mmc-rockchip.c
->> index d9c92f3..3438ab3 100644
->> --- a/drivers/mmc/host/dw_mmc-rockchip.c
->> +++ b/drivers/mmc/host/dw_mmc-rockchip.c
->> @@ -276,33 +276,13 @@ static int dw_mci_rockchip_probe(struct platform_device *pdev)
->>   	return dw_mci_pltfm_register(pdev, drv_data);
->>   }
->>
->> -#ifdef CONFIG_PM_SLEEP
->> -static int dw_mci_rockchip_suspend(struct device *dev)
->> -{
->> -	struct dw_mci *host = dev_get_drvdata(dev);
->> -
->> -	return dw_mci_suspend(host);
->> -}
->> -
->> -static int dw_mci_rockchip_resume(struct device *dev)
->> -{
->> -	struct dw_mci *host = dev_get_drvdata(dev);
->> -
->> -	return dw_mci_resume(host);
->> -}
->> -#endif /* CONFIG_PM_SLEEP */
->> -
->> -static SIMPLE_DEV_PM_OPS(dw_mci_rockchip_pmops,
->> -			 dw_mci_rockchip_suspend,
->> -			 dw_mci_rockchip_resume);
->> -
->>   static struct platform_driver dw_mci_rockchip_pltfm_driver = {
->>   	.probe		= dw_mci_rockchip_probe,
->>   	.remove		= dw_mci_pltfm_remove,
->>   	.driver		= {
->>   		.name		= "dwmmc_rockchip",
->>   		.of_match_table	= dw_mci_rockchip_match,
->> -		.pm		= &dw_mci_rockchip_pmops,
->> +		.pm		= &dw_mci_pltfm_pmops,
->>   	},
->>   };
->>
->>
->
->
->
->
+I was thinking about checking non-removable and using mmc_gpio_get_cd()
+in my runtime_suspend callback. If I have a non removable device or a
+gpio for card detection then I can disable all clocks and call
+sdhci_runtime_suspend_host(). If not, I keep enabled the clock for the
+'interface', disable the other one and that's all. The controller won't
+be set as runtime suspended but I would save some power. Does it sounds
+good?
 
 
--- 
-Best Regards
-Shawn Lin
+Regards
+
+Ludovic
