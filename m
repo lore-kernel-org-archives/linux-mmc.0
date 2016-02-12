@@ -1,89 +1,96 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: [GIT PULL] MMC fixes for v.4.5 rc4
-Date: Fri, 12 Feb 2016 13:38:26 +0100
-Message-ID: <CAPDyKFocsaFabaRRSD0XPg68EBPY2JAfnOUjmmtBODN7NoKr+g@mail.gmail.com>
+Subject: Re: [PATCH 2/7] i2c: omap: Fix PM regression with deferred probe for pm_runtime_reinit
+Date: Fri, 12 Feb 2016 13:50:37 +0100
+Message-ID: <CAPDyKFqGAhWefDtFMPwYAv2m1J8tPPUNOdznRtAPVpTbwnAN1A@mail.gmail.com>
+References: <1455145370-20301-1-git-send-email-tony@atomide.com>
+	<1455145370-20301-3-git-send-email-tony@atomide.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-yw0-f181.google.com ([209.85.161.181]:35972 "EHLO
-	mail-yw0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752426AbcBLMi1 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 12 Feb 2016 07:38:27 -0500
-Received: by mail-yw0-f181.google.com with SMTP id q190so63271825ywd.3
-        for <linux-mmc@vger.kernel.org>; Fri, 12 Feb 2016 04:38:26 -0800 (PST)
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-i2c-owner@vger.kernel.org>
+In-Reply-To: <1455145370-20301-3-git-send-email-tony@atomide.com>
+Sender: linux-i2c-owner@vger.kernel.org
+To: Tony Lindgren <tony@atomide.com>
+Cc: linux-omap <linux-omap@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-i2c@vger.kernel.org" <linux-i2c@vger.kernel.org>, Alan Stern <stern@rowland.harvard.edu>, Kevin Hilman <khilman@baylibre.com>, Nishanth Menon <nm@ti.com>, "Rafael J . Wysocki" <rafael@kernel.org>, Tero Kristo <t-kristo@ti.com>, Wolfram Sang <wsa@the-dreams.de>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, linux-mmc <linux-mmc@vger.kernel.org>, linux-serial@vger.kernel.org, "linux-spi@vger.kernel.org" <linux-spi@vger.kernel.org>, Mark Brown <broonie@kernel.org>, Peter Hurley <peter@hurleysoftware.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Linus Torvalds <torvalds@linux-foundation.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>
-Cc: Jaehoon Chung <jh80.chung@samsung.com>, Adrian Hunter <adrian.hunter@intel.com>
 
-Hi Linus,
+On 11 February 2016 at 00:02, Tony Lindgren <tony@atomide.com> wrote:
+> Commit 5de85b9d57ab ("PM / runtime: Re-init runtime PM states at probe
+> error and driver unbind") introduced pm_runtime_reinit() that is used
+> to reinitialize PM runtime after -EPROBE_DEFER. This allows shutting
+> down the device after a failed probe.
+>
+> However, for drivers using pm_runtime_use_autosuspend() this can cause
+> a state where suspend callback is never called after -EPROBE_DEFER.
+> On the following device driver probe, hardware state is different from
+> the PM runtime state causing omap_device to produce the following
+> error:
+>
+> omap_device_enable() called from invalid state 1
+>
+> And with omap_device and omap hardware being picky for PM, this will
+> block any deeper idle states in hardware.
+>
+> The solution is to fix the drivers to follow the PM runtime documentation:
+>
+> 1. For sections of code that needs the device disabled, use
+>    pm_runtime_put_sync_suspend() if pm_runtime_set_autosuspend() has
+>    been set.
+>
+> 2. For driver exit code, use pm_runtime_dont_use_autosuspend() before
+>    pm_runtime_put_sync() if pm_runtime_use_autosuspend() has been
+>    set.
+>
+> Fixes: 5de85b9d57ab ("PM / runtime: Re-init runtime PM states at probe
+> error and driver unbind")
+> Cc: linux-i2c@vger.kernel.org
+> Cc: Alan Stern <stern@rowland.harvard.edu>
+> Cc: Kevin Hilman <khilman@baylibre.com>
+> Cc: Nishanth Menon <nm@ti.com>
+> Cc: Rafael J. Wysocki <rafael@kernel.org>
+> Cc: Ulf Hansson <ulf.hansson@linaro.org>
+> Cc: Tero Kristo <t-kristo@ti.com>
+> Cc: Wolfram Sang <wsa@the-dreams.de>
+> Signed-off-by: Tony Lindgren <tony@atomide.com>
 
-Here are some mmc fixes intended for v4.5 rc4. These are based on v4.5 rc2.
-
-Details are as usual found in the signed tag. Please pull this in!
+Acked-by: Ulf Hansson <ulf.hansson@linaro.org>
 
 Kind regards
-Ulf Hansson
+Uffe
 
-
-The following changes since commit 36f90b0a2ddd60823fe193a85e60ff1906c2a9b3:
-
-  Linux 4.5-rc2 (2016-01-31 18:12:16 -0800)
-
-are available in the git repository at:
-
-  git://git.linaro.org/people/ulf.hansson/mmc.git tags/mmc-v4.5-rc2
-
-for you to fetch changes up to a5ebb87db84392edfd3142c3a6a78431d820a789:
-
-  Revert "mmc: block: don't use parameter prefix if built as module"
-(2016-02-11 16:49:35 +0100)
-
-----------------------------------------------------------------
-MMC core:
- - Fix an sysfs ABI regression
- - Return an error in a specific error path dealing with mmc ioctls
-
-MMM host:
- - sdhci-pci|acpi: Fix card detect race for Intel BXT/APL
- - sh_mmcif: Correct TX DMA channel allocation
- - mmc_spi: Fix error handling for dma mapping errors
- - sdhci-of-at91: Fix an unbalance issue for the runtime PM usage count
- - pxamci: Fix the device-tree probe deferral path
- - pxamci: Fix read-only GPIO polarity
-
-----------------------------------------------------------------
-Adrian Hunter (4):
-      mmc: sdhci: Allow override of mmc host operations
-      mmc: sdhci: Allow override of get_cd() called from sdhci_request()
-      mmc: sdhci-pci: Fix card detect race for Intel BXT/APL
-      mmc: sdhci-acpi: Fix card detect race for Intel BXT/APL
-
-Alexey Khoroshilov (1):
-      mmc: mmc_spi: add checks for dma mapping error
-
-Chris Paterson (1):
-      mmc: sh_mmcif: Correct TX DMA channel allocation
-
-Jisheng Zhang (1):
-      mmc: sdhci-of-at91: fix pm runtime unbalanced issue in error path
-
-Olof Johansson (1):
-      mmc: block: return error on failed mmc_blk_get()
-
-Robert Jarzmik (2):
-      mmc: pxamci: fix again read-only gpio detection polarity
-      mmc: pxamci: fix the device-tree probe deferral path
-
-Ulf Hansson (1):
-      Revert "mmc: block: don't use parameter prefix if built as module"
-
- drivers/mmc/card/block.c          |  7 +++----
- drivers/mmc/host/mmc_spi.c        | 15 +++++++++++++--
- drivers/mmc/host/pxamci.c         | 37 ++++++++++---------------------------
- drivers/mmc/host/sdhci-acpi.c     | 30 ++++++++++++++++++++++++++++++
- drivers/mmc/host/sdhci-of-at91.c  |  1 +
- drivers/mmc/host/sdhci-pci-core.c | 31 +++++++++++++++++++++++++++++++
- drivers/mmc/host/sdhci.c          |  5 +++--
- drivers/mmc/host/sdhci.h          |  1 +
- drivers/mmc/host/sh_mmcif.c       |  2 +-
+> ---
+>
+> Wolfram, I'd like to merge this along with other related fixes via
+> the ARM SoC tree if no objections, please review and ack if this
+> look OK to you.
+>
+>
+> ---
+>
+>  drivers/i2c/busses/i2c-omap.c | 4 +++-
+>  1 file changed, 3 insertions(+), 1 deletion(-)
+>
+> diff --git a/drivers/i2c/busses/i2c-omap.c b/drivers/i2c/busses/i2c-omap.c
+> index 08d26ba..13c4529 100644
+> --- a/drivers/i2c/busses/i2c-omap.c
+> +++ b/drivers/i2c/busses/i2c-omap.c
+> @@ -1450,7 +1450,8 @@ omap_i2c_probe(struct platform_device *pdev)
+>
+>  err_unuse_clocks:
+>         omap_i2c_write_reg(omap, OMAP_I2C_CON_REG, 0);
+> -       pm_runtime_put(omap->dev);
+> +       pm_runtime_dont_use_autosuspend(omap->dev);
+> +       pm_runtime_put_sync(omap->dev);
+>         pm_runtime_disable(&pdev->dev);
+>  err_free_mem:
+>
+> @@ -1468,6 +1469,7 @@ static int omap_i2c_remove(struct platform_device *pdev)
+>                 return ret;
+>
+>         omap_i2c_write_reg(omap, OMAP_I2C_CON_REG, 0);
+> +       pm_runtime_dont_use_autosuspend(&pdev->dev);
+>         pm_runtime_put_sync(&pdev->dev);
+>         pm_runtime_disable(&pdev->dev);
+>         return 0;
+> --
+> 2.7.0
+>
