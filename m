@@ -1,49 +1,82 @@
-From: John Stultz <john.stultz@linaro.org>
-Subject: Re: [PATCH] Revert "mmc: block: don't use parameter prefix if built
- as module"
-Date: Thu, 11 Feb 2016 13:52:26 -0800
-Message-ID: <CALAqxLWueU+bAsfGj0farfhB8JbMCqrt_Ji_3MkE9VvK2gvKgg@mail.gmail.com>
-References: <1455206051-8633-1-git-send-email-ulf.hansson@linaro.org>
-	<CAPDyKFp=yU1uSHxpPXO5rq4VGZc2VtJepgYNfzSoomgED4g5mw@mail.gmail.com>
+From: Kevin Hilman <khilman@baylibre.com>
+Subject: Re: [PATCH 6/7] ARM: OMAP2+: Improve omap_device error for driver writers
+Date: Thu, 11 Feb 2016 17:13:23 -0800
+Message-ID: <7hfuwy6898.fsf@baylibre.com>
+References: <1455145370-20301-1-git-send-email-tony@atomide.com>
+	<1455145370-20301-7-git-send-email-tony@atomide.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAPDyKFp=yU1uSHxpPXO5rq4VGZc2VtJepgYNfzSoomgED4g5mw@mail.gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>, Greg KH <gregkh@linuxfoundation.org>, Andy Shevchenko <andriy.shevchenko@linux.intel.com>
+Content-Type: text/plain
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-pa0-f54.google.com ([209.85.220.54]:33348 "EHLO
+	mail-pa0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750860AbcBLBNZ (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 11 Feb 2016 20:13:25 -0500
+Received: by mail-pa0-f54.google.com with SMTP id fl4so25839664pad.0
+        for <linux-mmc@vger.kernel.org>; Thu, 11 Feb 2016 17:13:25 -0800 (PST)
+In-Reply-To: <1455145370-20301-7-git-send-email-tony@atomide.com> (Tony
+	Lindgren's message of "Wed, 10 Feb 2016 15:02:49 -0800")
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Tony Lindgren <tony@atomide.com>
+Cc: linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Alan Stern <stern@rowland.harvard.edu>, Nishanth Menon <nm@ti.com>, "Rafael J . Wysocki" <rafael@kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, Tero Kristo <t-kristo@ti.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, linux-i2c@vger.kernel.org, linux-mmc@vger.kernel.org, linux-serial@vger.kernel.org, linux-spi@vger.kernel.org, Mark Brown <broonie@kernel.org>, Peter Hurley <peter@hurleysoftware.com>, Wolfram Sang <wsa@the-dreams.de>
 
-On Thu, Feb 11, 2016 at 7:57 AM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
-> On 11 February 2016 at 16:54, Ulf Hansson <ulf.hansson@linaro.org> wrote:
->> This reverts commit 829b6962f7e3cfc06f7c5c26269fd47ad48cf503.
->>
->> Revert this change as it causes a sysfs path to change and therefore
->> introduces and ABI regression. More precisely Android's vold is not being
->> able to access /sys/module/mmcblk/parameters/perdev_minors any more, since
->> the path becomes changed to: "/sys/module/mmc_block/..."
->>
->> Fixes: 829b6962f7e3 ("mmc: block: don't use parameter prefix if built as
->> module")
->> Reported-by: John Stultz <john.stultz@linaro.org>
->> Cc: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
->> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+Tony Lindgren <tony@atomide.com> writes:
+
+> Drivers using pm_runtime_use_autosuspend() may not get disabled after
+> -EPROBE_DEFER. On the following device driver probe, hardware state
+> is different from the PM runtime state causing omap_device to produce
+> the following error:
 >
-> John, I noticed your regression report. Thanks!
+> omap_device_enable() called from invalid state 1
 >
-> I decided to send this patch and I have already queued it for fixes.
+> And with omap_device and omap hardware being picky for PM, this will
+> block any deeper idle states in hardware.
 >
-> Sorry for not thinking clear when I applied the earlier patch.
+> Let's add a proper error message so driver writers can easily fix
+> their drivers for PM.
+>
+> In general, the solution is to fix the drivers to follow the PM
+> runtime documentation:
+>
+> 1. For sections of code that needs the device disabled, use
+>    pm_runtime_put_sync_suspend() if pm_runtime_set_autosuspend() has
+>    been set.
+>
+> 2. For driver exit code, use pm_runtime_dont_use_autosuspend() before
+>    pm_runtime_put_sync() if pm_runtime_use_autosuspend() has been
+>    set.
+>
+> Let's not return with 0 from _od_runtime_resume() as that will
+> eventually lead into new drivers with broken PM runtime that will
+> block deeper idle states on omaps.
+>
+> Cc: Alan Stern <stern@rowland.harvard.edu>
+> Cc: Kevin Hilman <khilman@baylibre.com>
+> Cc: Nishanth Menon <nm@ti.com>
+> Cc: Rafael J. Wysocki <rafael@kernel.org>
+> Cc: Ulf Hansson <ulf.hansson@linaro.org>
+> Cc: Tero Kristo <t-kristo@ti.com>
+> Signed-off-by: Tony Lindgren <tony@atomide.com>
 
-Don't worry, those sorts of changes are subtle. I've seen a lot of
-funny sysfs path breakage recently, but usually they are in paths that
-are device specific (often related to the paths I think changed in the
-dts - ie: lots of paths now have .../soc/... in them), so its not too
-hard to just fix it for the device.
+Acked-by: Kevin Hilman <khilman@baylibre.com>
 
-This one was more painful because it was generic path across all
-devices. So I'm just glad to have caught it before the new behavior
-became established and we'd be a bit stuck having to support both.
-
-thanks
--john
+> ---
+>  arch/arm/mach-omap2/omap_device.c | 4 +++-
+>  1 file changed, 3 insertions(+), 1 deletion(-)
+>
+> diff --git a/arch/arm/mach-omap2/omap_device.c b/arch/arm/mach-omap2/omap_device.c
+> index 0437537..ebd8369 100644
+> --- a/arch/arm/mach-omap2/omap_device.c
+> +++ b/arch/arm/mach-omap2/omap_device.c
+> @@ -602,8 +602,10 @@ static int _od_runtime_resume(struct device *dev)
+>  	int ret;
+>  
+>  	ret = omap_device_enable(pdev);
+> -	if (ret)
+> +	if (ret) {
+> +		dev_err(dev, "use pm_runtime_put_sync_suspend() in driver?\n");
+>  		return ret;
+> +	}
+>  
+>  	return pm_generic_runtime_resume(dev);
+>  }
