@@ -1,89 +1,126 @@
-From: Wolfram Sang <wsa@the-dreams.de>
-Subject: Re: [PATCH 2/7] i2c: omap: Fix PM regression with deferred probe for
- pm_runtime_reinit
-Date: Fri, 12 Feb 2016 19:43:36 +0100
-Message-ID: <20160212184335.GF1520@katana>
-References: <1455145370-20301-1-git-send-email-tony@atomide.com>
- <1455145370-20301-3-git-send-email-tony@atomide.com>
+From: Ludovic Desroches <ludovic.desroches@atmel.com>
+Subject: [PATCH] mmc: sdhci-of-at91: fix wakeup issue when using runtime pm
+Date: Sat, 13 Feb 2016 10:56:40 +0100
+Message-ID: <1455357400-32145-1-git-send-email-ludovic.desroches@atmel.com>
+References: <20160212120415.GJ14937@odux.rfo.atmel.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="7cm2iqirTL37Ot+N"
-Return-path: <linux-i2c-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <1455145370-20301-3-git-send-email-tony@atomide.com>
-Sender: linux-i2c-owner@vger.kernel.org
-To: Tony Lindgren <tony@atomide.com>
-Cc: linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-i2c@vger.kernel.org, Alan Stern <stern@rowland.harvard.edu>, Kevin Hilman <khilman@baylibre.com>, Nishanth Menon <nm@ti.com>, "Rafael J . Wysocki" <rafael@kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, Tero Kristo <t-kristo@ti.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, linux-mmc@vger.kernel.org, linux-serial@vger.kernel.org, linux-spi@vger.kernel.org, Mark Brown <broonie@kernel.org>, Peter Hurley <peter@hurleysoftware.com>
+Content-Type: text/plain
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from eusmtp01.atmel.com ([212.144.249.243]:34007 "EHLO
+	eusmtp01.atmel.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750826AbcBMJ4r (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sat, 13 Feb 2016 04:56:47 -0500
+In-Reply-To: <20160212120415.GJ14937@odux.rfo.atmel.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: ulf.hansson@linaro.org
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, nicolas.ferre@atmel.com, adrian.hunter@intel.com, Ludovic Desroches <ludovic.desroches@atmel.com>
 
+When suspending the sdhci host, the only hardware event that could wake
+up the host is a sdio irq if they are enabled. If we want to wakeup on
+card detect events, a gpio as to be used.
+If we don't want to use a gpio but the card detect pio of the controller
+then we need to keep enabled the clock of the controller interface to
+get the interrupt and to not set the host in a suspended state to have the
+interrupt handled.
 
---7cm2iqirTL37Ot+N
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+Signed-off-by: Ludovic Desroches <ludovic.desroches@atmel.com>
+---
+ drivers/mmc/host/sdhci-of-at91.c | 46 ++++++++++++++++++++++++++++++----------
+ 1 file changed, 35 insertions(+), 11 deletions(-)
 
-On Wed, Feb 10, 2016 at 03:02:45PM -0800, Tony Lindgren wrote:
-> Commit 5de85b9d57ab ("PM / runtime: Re-init runtime PM states at probe
-> error and driver unbind") introduced pm_runtime_reinit() that is used
-> to reinitialize PM runtime after -EPROBE_DEFER. This allows shutting
-> down the device after a failed probe.
->=20
-> However, for drivers using pm_runtime_use_autosuspend() this can cause
-> a state where suspend callback is never called after -EPROBE_DEFER.
-> On the following device driver probe, hardware state is different from
-> the PM runtime state causing omap_device to produce the following
-> error:
->=20
-> omap_device_enable() called from invalid state 1
->=20
-> And with omap_device and omap hardware being picky for PM, this will
-> block any deeper idle states in hardware.
->=20
-> The solution is to fix the drivers to follow the PM runtime documentation:
->=20
-> 1. For sections of code that needs the device disabled, use
->    pm_runtime_put_sync_suspend() if pm_runtime_set_autosuspend() has
->    been set.
->=20
-> 2. For driver exit code, use pm_runtime_dont_use_autosuspend() before
->    pm_runtime_put_sync() if pm_runtime_use_autosuspend() has been
->    set.
->=20
-> Fixes: 5de85b9d57ab ("PM / runtime: Re-init runtime PM states at probe
-> error and driver unbind")
-> Cc: linux-i2c@vger.kernel.org
-> Cc: Alan Stern <stern@rowland.harvard.edu>
-> Cc: Kevin Hilman <khilman@baylibre.com>
-> Cc: Nishanth Menon <nm@ti.com>
-> Cc: Rafael J. Wysocki <rafael@kernel.org>
-> Cc: Ulf Hansson <ulf.hansson@linaro.org>
-> Cc: Tero Kristo <t-kristo@ti.com>
-> Cc: Wolfram Sang <wsa@the-dreams.de>
-> Signed-off-by: Tony Lindgren <tony@atomide.com>
+diff --git a/drivers/mmc/host/sdhci-of-at91.c b/drivers/mmc/host/sdhci-of-at91.c
+index efec736..2159c6e 100644
+--- a/drivers/mmc/host/sdhci-of-at91.c
++++ b/drivers/mmc/host/sdhci-of-at91.c
+@@ -18,6 +18,7 @@
+ #include <linux/err.h>
+ #include <linux/io.h>
+ #include <linux/mmc/host.h>
++#include <linux/mmc/slot-gpio.h>
+ #include <linux/module.h>
+ #include <linux/of.h>
+ #include <linux/of_device.h>
+@@ -45,7 +46,6 @@ static const struct sdhci_ops sdhci_at91_sama5d2_ops = {
+ 
+ static const struct sdhci_pltfm_data soc_data_sama5d2 = {
+ 	.ops = &sdhci_at91_sama5d2_ops,
+-	.quirks = SDHCI_QUIRK_BROKEN_CARD_DETECTION,
+ 	.quirks2 = SDHCI_QUIRK2_NEED_DELAY_AFTER_INT_CLK_RST,
+ };
+ 
+@@ -55,17 +55,37 @@ static const struct of_device_id sdhci_at91_dt_match[] = {
+ };
+ 
+ #ifdef CONFIG_PM
++static bool sdhci_at91_use_sdhci_runtime(struct sdhci_host *host)
++{
++	u32 caps = host->mmc->caps;
++
++	return (caps & MMC_CAP_NONREMOVABLE) ||
++	       (!IS_ERR_VALUE(mmc_gpio_get_cd(host->mmc)));
++}
++
+ static int sdhci_at91_runtime_suspend(struct device *dev)
+ {
+ 	struct sdhci_host *host = dev_get_drvdata(dev);
+ 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+ 	struct sdhci_at91_priv *priv = pltfm_host->priv;
+-	int ret;
++	int ret = 0;
+ 
+-	ret = sdhci_runtime_suspend_host(host);
++	/*
++	 * If we call sdhci_runtime_suspend(), we could wakeup only if sdio
++	 * irqs are enabled. If we want to wakeup on a card detect event there
++	 * are two options:
++	 * - do not call sdhci_runtime_suspend() but save power by disabling
++	 *   all clocks excepting the one for the controller interface.
++	 * - call sdhci_runtime_suspend(), save maximum power by disabling
++	 *   all clocks but use a gpio for the card detect signal to have a way
++	 *   to wakeup.
++	 */
++	if (sdhci_at91_use_sdhci_runtime(host)) {
++		ret = sdhci_runtime_suspend_host(host);
++		clk_disable_unprepare(priv->hclock);
++	}
+ 
+ 	clk_disable_unprepare(priv->gck);
+-	clk_disable_unprepare(priv->hclock);
+ 	clk_disable_unprepare(priv->mainck);
+ 
+ 	return ret;
+@@ -84,19 +104,23 @@ static int sdhci_at91_runtime_resume(struct device *dev)
+ 		return ret;
+ 	}
+ 
+-	ret = clk_prepare_enable(priv->hclock);
+-	if (ret) {
+-		dev_err(dev, "can't enable hclock\n");
+-		return ret;
+-	}
+-
+ 	ret = clk_prepare_enable(priv->gck);
+ 	if (ret) {
+ 		dev_err(dev, "can't enable gck\n");
+ 		return ret;
+ 	}
+ 
+-	return sdhci_runtime_resume_host(host);
++	if (sdhci_at91_use_sdhci_runtime(host)) {
++		ret = clk_prepare_enable(priv->hclock);
++		if (ret) {
++			dev_err(dev, "can't enable hclock\n");
++			return ret;
++		}
++
++		ret = sdhci_runtime_resume_host(host);
++	}
++
++	return ret;
+ }
+ #endif /* CONFIG_PM */
+ 
+-- 
+2.7.0
 
-Applied to for-current, thanks!
-
-
---7cm2iqirTL37Ot+N
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: Digital signature
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1
-
-iQIcBAEBAgAGBQJWvifXAAoJEBQN5MwUoCm2u3gP/0siHYGbBX7efB637S6GialN
-ufvgD31ukWw1xebwQy02EEi2d4/JU/Th2XkhulqC435TEbC2KaDKurauJ++iXIeC
-qJX8tYaiZDT2w+OEzRAheoUsGBeF6bVbSUX1kLNJwXRDKBh2OOm4apr363F2xp/F
-l3asdMzvthXLw38oxB/YpC5baHKNcIz59aWJKtdMmTreobvZ9ygU40iNtJsaGjdE
-8UbAXFt2Ncf3vNAzVLwGfcMfxl/zbnSdSgj0VInmNe3Akt3MLo6bZZcseaky7u8q
-AU6SqCrk/xr1mWi9pJBKCEqYzCMspqYOapHpa6f8uLaaTQCpUDUzWgxrbN95CTSb
-FkWW4kDrc2GSHAACs7cv5uNNqbAuLmmUarej82V96VIqATPpIHYJq4bpot5EjH8K
-99/2rsVAgZuHGw4j7/AuuV64FmAnTUwsVGA59VGKQIpi8Ew/Xyl3+8HFECYhl7Y/
-dnxyEI4TGnAwbhgmcw/Zt4idlw9YBtuFAELAkqcFU0qMyFDm7Pm3Bz+8KaW2Dx5J
-ZBX99K1zStqVS+sBoRN1bmZgDcdAh4qAxrwgnivJlxG9I+I4WqumcqsQDbnpRqE2
-5M+noBKtdByQKdEgcSVmUv4LQVPFan5Jqh4kQ6FDkc+gAA4KBOLN5fyC20mWmZoV
-hQkZTE6ZbbccnGLlhkX3
-=Jr//
------END PGP SIGNATURE-----
-
---7cm2iqirTL37Ot+N--
