@@ -1,96 +1,46 @@
-From: Shawn Lin <shawn.lin@rock-chips.com>
-Subject: Re: [PATCH 1/2] mmc: dw_mmc: remove unused EVENT_XFER_ERROR
-Date: Mon, 15 Feb 2016 08:20:14 +0800
-Message-ID: <56C119BE.8000608@rock-chips.com>
-References: <1454469964-21365-1-git-send-email-shawn.lin@rock-chips.com>
- <56B2EBE7.3030008@samsung.com> <56BDC2A0.1000702@rock-chips.com>
- <56C0FF3F.4010706@samsung.com> <56C0FFD7.60406@samsung.com>
+From: Chaotian Jing <chaotian.jing@mediatek.com>
+Subject: [PATCH] mmc: mediatek: add SD write protect support
+Date: Mon, 15 Feb 2016 02:31:00 +0800
+Message-ID: <1455474660-19864-1-git-send-email-chaotian.jing@mediatek.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <56C0FFD7.60406@samsung.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: shawn.lin@rock-chips.com, shawn.lin@kernel-upstream.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Content-Type: text/plain
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mailgw01.mediatek.com ([210.61.82.183]:17002 "EHLO
+	mailgw01.mediatek.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1751540AbcBOCbf (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 14 Feb 2016 21:31:35 -0500
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Matthias Brugger <matthias.bgg@gmail.com>, Chaotian Jing <chaotian.jing@mediatek.com>, Geert Uytterhoeven <geert@linux-m68k.org>, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mediatek@lists.infradead.org, linux-kernel@vger.kernel.org, srv_heupstream@mediatek.com, Sascha Hauer <kernel@pengutronix.de>, Daniel Kurtz <djkurtz@chromium.org>
 
-Hi Jaehoon,
+use mmc core layer's API to support sd write protect
 
-On 2016/2/15 6:29, Jaehoon Chung wrote:
-> On 02/15/2016 07:27 AM, Jaehoon Chung wrote:
->> On 02/12/2016 08:31 PM, Shawn Lin wrote:
->>> On 2016/2/4 14:12, Jaehoon Chung wrote:
->>>> Hi, Shawn.
->>>>
->>>> On 02/03/2016 12:26 PM, Shawn Lin wrote:
->>>>> EVENT_XFER_ERROR isn't been used now, so we can
->>>>> remove it.
->>>>
->>>> If you are ok, after changing the commit message, I will apply this.
->>>> Thanks!
->>>
->>> Should I respin v2 to amend the commit msg? :-)
->>
->> Not important..but i want to use this. :)
->> "we can remove it" -> "It can be removed."
->
+Signed-off-by: Chaotian Jing <chaotian.jing@mediatek.com>
+---
+ drivers/mmc/host/mtk-sd.c | 2 ++
+ 1 file changed, 2 insertions(+)
 
-yes, please.
-
-> One more..This patch is [1/2]..I didn't see the second patch [2/2].
-
-Only one patch here, no [2/2]. sorry for the noise
-
->
->>
->> Best Regards,
->> Jaehoon Chung
->>
->>>
->>>>
->>>> Best Regards,
->>>> Jaehoon Chung
->>>>
->>>>>
->>>>> Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
->>>>> ---
->>>>>
->>>>>    include/linux/mmc/dw_mmc.h | 1 -
->>>>>    1 file changed, 1 deletion(-)
->>>>>
->>>>> diff --git a/include/linux/mmc/dw_mmc.h b/include/linux/mmc/dw_mmc.h
->>>>> index 89df7ab..b29e06e 100644
->>>>> --- a/include/linux/mmc/dw_mmc.h
->>>>> +++ b/include/linux/mmc/dw_mmc.h
->>>>> @@ -36,7 +36,6 @@ enum {
->>>>>        EVENT_XFER_COMPLETE,
->>>>>        EVENT_DATA_COMPLETE,
->>>>>        EVENT_DATA_ERROR,
->>>>> -    EVENT_XFER_ERROR
->>>>>    };
->>>>>
->>>>>    struct mmc_data;
->>>>>
->>>>
->>>>
->>>>
->>>>
->>>
->>>
->>
->> --
->> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>
->>
->
->
->
->
-
-
+diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
+index 82a97ac..f01972e 100644
+--- a/drivers/mmc/host/mtk-sd.c
++++ b/drivers/mmc/host/mtk-sd.c
+@@ -35,6 +35,7 @@
+ #include <linux/mmc/mmc.h>
+ #include <linux/mmc/sd.h>
+ #include <linux/mmc/sdio.h>
++#include <linux/mmc/slot-gpio.h>
+ 
+ #define MAX_BD_NUM          1024
+ 
+@@ -1452,6 +1453,7 @@ static struct mmc_host_ops mt_msdc_ops = {
+ 	.pre_req = msdc_pre_req,
+ 	.request = msdc_ops_request,
+ 	.set_ios = msdc_ops_set_ios,
++	.get_ro = mmc_gpio_get_ro,
+ 	.start_signal_voltage_switch = msdc_ops_switch_volt,
+ 	.card_busy = msdc_card_busy,
+ 	.execute_tuning = msdc_execute_tuning,
 -- 
-Best Regards
-Shawn Lin
+1.8.1.1.dirty
+
