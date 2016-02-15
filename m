@@ -1,7 +1,7 @@
 From: Wolfram Sang <wsa@the-dreams.de>
-Subject: [PATCH RESEND 2/3] arm64: dts: r8a7795: Add SDHI support to dtsi
-Date: Mon, 15 Feb 2016 16:01:49 +0100
-Message-ID: <1455548510-1690-3-git-send-email-wsa@the-dreams.de>
+Subject: [PATCH RESEND 1/3] mmc: sdhi: Add r8a7795 support
+Date: Mon, 15 Feb 2016 16:01:48 +0100
+Message-ID: <1455548510-1690-2-git-send-email-wsa@the-dreams.de>
 References: <1455548510-1690-1-git-send-email-wsa@the-dreams.de>
 Return-path: <linux-renesas-soc-owner@vger.kernel.org>
 In-Reply-To: <1455548510-1690-1-git-send-email-wsa@the-dreams.de>
@@ -10,63 +10,150 @@ To: linux-mmc@vger.kernel.org
 Cc: Wolfram Sang <wsa@the-dreams.de>, linux-renesas-soc@vger.kernel.org, Dirk Behme <dirk.behme@gmail.com>, Ulf Hansson <ulf.hansson@linaro.org>, Geert Uytterhoeven <geert@linux-m68k.org>, Simon Horman <horms@verge.net.au>
 List-Id: linux-mmc@vger.kernel.org
 
-From: Ai Kyuse <ai.kyuse.uw@renesas.com>
+From: Wolfram Sang <wsa+renesas@sang-engineering.com>
+
+Registers are 64bit apart, so we refactor bus_shift handling a little and set
+it based on the DT compatible. Also, EXT_ACC is different. It has been tested
+on a Salvator-X (Gen3) and, to check for regressions, on a Lager (Gen2).
 
 Signed-off-by: Ai Kyuse <ai.kyuse.uw@renesas.com>
-Signed-off-by: Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
-[wsa: squashed some fixes and added mmc-caps]
 Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
 ---
- arch/arm64/boot/dts/renesas/r8a7795.dtsi | 38 ++++++++++++++++++++++++++++++++
- 1 file changed, 38 insertions(+)
+ Documentation/devicetree/bindings/mmc/tmio_mmc.txt |  1 +
+ drivers/mmc/host/Kconfig                           |  2 +-
+ drivers/mmc/host/sh_mobile_sdhi.c                  | 47 ++++++++++++++++------
+ 3 files changed, 36 insertions(+), 14 deletions(-)
 
-diff --git a/arch/arm64/boot/dts/renesas/r8a7795.dtsi b/arch/arm64/boot/dts/renesas/r8a7795.dtsi
-index afd01942e4a79f..d94abe28e698cf 100644
---- a/arch/arm64/boot/dts/renesas/r8a7795.dtsi
-+++ b/arch/arm64/boot/dts/renesas/r8a7795.dtsi
-@@ -1019,5 +1019,43 @@
- 			power-domains = <&cpg>;
- 			status = "disabled";
- 		};
-+
-+		sdhi0: sd@ee100000 {
-+			compatible = "renesas,sdhi-r8a7795";
-+			reg = <0 0xee100000 0 0x2000>;
-+			interrupts = <GIC_SPI 165 IRQ_TYPE_LEVEL_HIGH>;
-+			clocks = <&cpg CPG_MOD 314>;
-+			power-domains = <&cpg>;
-+			status = "disabled";
-+		};
-+
-+		sdhi1: sd@ee120000 {
-+			compatible = "renesas,sdhi-r8a7795";
-+			reg = <0 0xee120000 0 0x2000>;
-+			interrupts = <GIC_SPI 166 IRQ_TYPE_LEVEL_HIGH>;
-+			clocks = <&cpg CPG_MOD 313>;
-+			power-domains = <&cpg>;
-+			status = "disabled";
-+		};
-+
-+		sdhi2: sd@ee140000 {
-+			compatible = "renesas,sdhi-r8a7795";
-+			reg = <0 0xee140000 0 0x2000>;
-+			interrupts = <GIC_SPI 167 IRQ_TYPE_LEVEL_HIGH>;
-+			clocks = <&cpg CPG_MOD 312>;
-+			power-domains = <&cpg>;
-+			cap-mmc-highspeed;
-+			status = "disabled";
-+		};
-+
-+		sdhi3: sd@ee160000 {
-+			compatible = "renesas,sdhi-r8a7795";
-+			reg = <0 0xee160000 0 0x2000>;
-+			interrupts = <GIC_SPI 168 IRQ_TYPE_LEVEL_HIGH>;
-+			clocks = <&cpg CPG_MOD 311>;
-+			power-domains = <&cpg>;
-+			cap-mmc-highspeed;
-+			status = "disabled";
-+		};
- 	};
+diff --git a/Documentation/devicetree/bindings/mmc/tmio_mmc.txt b/Documentation/devicetree/bindings/mmc/tmio_mmc.txt
+index 400b640fabc768..7fb746dd1a68ca 100644
+--- a/Documentation/devicetree/bindings/mmc/tmio_mmc.txt
++++ b/Documentation/devicetree/bindings/mmc/tmio_mmc.txt
+@@ -22,6 +22,7 @@ Required properties:
+ 		"renesas,sdhi-r8a7792" - SDHI IP on R8A7792 SoC
+ 		"renesas,sdhi-r8a7793" - SDHI IP on R8A7793 SoC
+ 		"renesas,sdhi-r8a7794" - SDHI IP on R8A7794 SoC
++		"renesas,sdhi-r8a7795" - SDHI IP on R8A7795 SoC
+ 
+ Optional properties:
+ - toshiba,mmc-wrprotect-disable: write-protect detection is unavailable
+diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+index 4a35ebf5165d83..d9a9d92fa8379a 100644
+--- a/drivers/mmc/host/Kconfig
++++ b/drivers/mmc/host/Kconfig
+@@ -560,7 +560,7 @@ config MMC_TMIO
+ 
+ config MMC_SDHI
+ 	tristate "SH-Mobile SDHI SD/SDIO controller support"
+-	depends on SUPERH || ARM
++	depends on SUPERH || ARM || ARM64
+ 	depends on SUPERH || ARCH_SHMOBILE || COMPILE_TEST
+ 	select MMC_TMIO_CORE
+ 	help
+diff --git a/drivers/mmc/host/sh_mobile_sdhi.c b/drivers/mmc/host/sh_mobile_sdhi.c
+index 557e2b9dadeec7..9aa147959276d0 100644
+--- a/drivers/mmc/host/sh_mobile_sdhi.c
++++ b/drivers/mmc/host/sh_mobile_sdhi.c
+@@ -1,6 +1,8 @@
+ /*
+  * SuperH Mobile SDHI
+  *
++ * Copyright (C) 2016 Sang Engineering, Wolfram Sang
++ * Copyright (C) 2015-16 Renesas Electronics Corporation
+  * Copyright (C) 2009 Magnus Damm
+  *
+  * This program is free software; you can redistribute it and/or modify
+@@ -43,6 +45,7 @@ struct sh_mobile_sdhi_of_data {
+ 	unsigned long capabilities2;
+ 	enum dma_slave_buswidth dma_buswidth;
+ 	dma_addr_t dma_rx_offset;
++	unsigned bus_shift;
  };
+ 
+ static const struct sh_mobile_sdhi_of_data sh_mobile_sdhi_of_cfg[] = {
+@@ -65,6 +68,13 @@ static const struct sh_mobile_sdhi_of_data of_rcar_gen2_compatible = {
+ 	.dma_rx_offset	= 0x2000,
+ };
+ 
++static const struct sh_mobile_sdhi_of_data of_rcar_gen3_compatible = {
++	.tmio_flags	= TMIO_MMC_HAS_IDLE_WAIT | TMIO_MMC_WRPROTECT_DISABLE |
++			  TMIO_MMC_CLK_ACTUAL | TMIO_MMC_FAST_CLK_CHG,
++	.capabilities	= MMC_CAP_SD_HIGHSPEED,
++	.bus_shift	= 2,
++};
++
+ static const struct of_device_id sh_mobile_sdhi_of_match[] = {
+ 	{ .compatible = "renesas,sdhi-shmobile" },
+ 	{ .compatible = "renesas,sdhi-sh7372" },
+@@ -78,6 +88,7 @@ static const struct of_device_id sh_mobile_sdhi_of_match[] = {
+ 	{ .compatible = "renesas,sdhi-r8a7792", .data = &of_rcar_gen2_compatible, },
+ 	{ .compatible = "renesas,sdhi-r8a7793", .data = &of_rcar_gen2_compatible, },
+ 	{ .compatible = "renesas,sdhi-r8a7794", .data = &of_rcar_gen2_compatible, },
++	{ .compatible = "renesas,sdhi-r8a7795", .data = &of_rcar_gen3_compatible, },
+ 	{},
+ };
+ MODULE_DEVICE_TABLE(of, sh_mobile_sdhi_of_match);
+@@ -103,6 +114,15 @@ static void sh_mobile_sdhi_sdbuf_width(struct tmio_mmc_host *host, int width)
+ 	case 0xCB0D:
+ 		val = (width == 32) ? 0x0000 : 0x0001;
+ 		break;
++	case 0xCC10: /* Gen3, SD only */
++	case 0xCD10: /* Gen3, SD + MMC */
++		if (width == 64)
++			val = 0x0000;
++		else if (width == 32)
++			val = 0x0101;
++		else
++			val = 0x0001;
++		break;
+ 	default:
+ 		/* nothing to do */
+ 		return;
+@@ -233,16 +253,26 @@ static int sh_mobile_sdhi_probe(struct platform_device *pdev)
+ 		goto eprobe;
+ 	}
+ 
++	if (of_id && of_id->data) {
++		const struct sh_mobile_sdhi_of_data *of_data = of_id->data;
++
++		mmc_data->flags |= of_data->tmio_flags;
++		mmc_data->capabilities |= of_data->capabilities;
++		mmc_data->capabilities2 |= of_data->capabilities2;
++		mmc_data->dma_rx_offset = of_data->dma_rx_offset;
++		dma_priv->dma_buswidth = of_data->dma_buswidth;
++		host->bus_shift = of_data->bus_shift;
++	}
++
+ 	host->dma		= dma_priv;
+ 	host->write16_hook	= sh_mobile_sdhi_write16_hook;
+ 	host->clk_enable	= sh_mobile_sdhi_clk_enable;
+ 	host->clk_disable	= sh_mobile_sdhi_clk_disable;
+ 	host->multi_io_quirk	= sh_mobile_sdhi_multi_io_quirk;
+-	/* SD control register space size is 0x100, 0x200 for bus_shift=1 */
+-	if (resource_size(res) > 0x100)
++
++	/* Orginally registers were 16 bit apart, could be 32 or 64 nowadays */
++	if (!host->bus_shift && resource_size(res) > 0x100) /* old way to determine the shift */
+ 		host->bus_shift = 1;
+-	else
+-		host->bus_shift = 0;
+ 
+ 	if (mmd)
+ 		*mmc_data = *mmd;
+@@ -274,15 +304,6 @@ static int sh_mobile_sdhi_probe(struct platform_device *pdev)
+ 	 */
+ 	mmc_data->flags |= TMIO_MMC_SDIO_STATUS_QUIRK;
+ 
+-	if (of_id && of_id->data) {
+-		const struct sh_mobile_sdhi_of_data *of_data = of_id->data;
+-		mmc_data->flags |= of_data->tmio_flags;
+-		mmc_data->capabilities |= of_data->capabilities;
+-		mmc_data->capabilities2 |= of_data->capabilities2;
+-		mmc_data->dma_rx_offset = of_data->dma_rx_offset;
+-		dma_priv->dma_buswidth = of_data->dma_buswidth;
+-	}
+-
+ 	ret = tmio_mmc_host_probe(host, mmc_data);
+ 	if (ret < 0)
+ 		goto efree;
 -- 
 2.1.4
