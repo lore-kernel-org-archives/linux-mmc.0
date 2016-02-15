@@ -1,109 +1,453 @@
-From: Matt Redfearn <matt.redfearn@imgtec.com>
-Subject: Re: [PATCH v6 2/3] MIPS: OCTEON: Rename legacy properties in internal
- device trees.
-Date: Mon, 15 Feb 2016 08:17:59 +0000
-Message-ID: <56C189B7.5020504@imgtec.com>
-References: <1455207976-2262-1-git-send-email-matt.redfearn@imgtec.com>
- <1455207976-2262-2-git-send-email-matt.redfearn@imgtec.com>
- <56BCB7AE.2050901@gmail.com> <56BCBC90.6090805@imgtec.com>
- <56BCC64A.5040902@caviumnetworks.com>
+From: Alex Lemberg <Alex.Lemberg@sandisk.com>
+Subject: RE: [PATCH 1/1] mmc_utils: add ffu support
+Date: Mon, 15 Feb 2016 08:31:56 +0000
+Message-ID: <BLUPR02MB27702B5C01E71C7ECE2870E94AC0@BLUPR02MB277.namprd02.prod.outlook.com>
+References: <SN1PR02MB13896AB22521C993B24F90A283DF0@SN1PR02MB1389.namprd02.prod.outlook.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="windows-1252"; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailapp01.imgtec.com ([195.59.15.196]:65314 "EHLO
-	mailapp01.imgtec.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752058AbcBOISC (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 15 Feb 2016 03:18:02 -0500
-In-Reply-To: <56BCC64A.5040902@caviumnetworks.com>
+Received: from mail-bn1bon0078.outbound.protection.outlook.com ([157.56.111.78]:37348
+	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1752305AbcBOIrU convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 15 Feb 2016 03:47:20 -0500
+In-Reply-To: <SN1PR02MB13896AB22521C993B24F90A283DF0@SN1PR02MB1389.namprd02.prod.outlook.com>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: David Daney <ddaney@caviumnetworks.com>
-Cc: David Daney <ddaney.cavm@gmail.com>, david.daney@cavium.com, aleksey.makarov@caviumnetworks.com, ulf.hansson@linaro.org, robh@kernel.org, ralf@linux-mips.org, linux-mmc@vger.kernel.org, linux-mips@linux-mips.org, devicetree@vger.kernel.org
+To: Avi Shchislowski <Avi.Shchislowski@sandisk.com>, Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Yaniv Agman <Yaniv.Agman@sandisk.com>
 
-Hi David,
+Ping...
 
-On 11/02/16 17:35, David Daney wrote:
-> On 02/11/2016 08:53 AM, Matt Redfearn wrote:
->> Hi David,
->>
->> On 11/02/16 16:32, David Daney wrote:
->>> On 02/11/2016 08:26 AM, Matt Redfearn wrote:
->>>> Many OCTEON devices have been shipped in products with fixed DTBs. 
->>>> These
->>>> DTBS contain properties which are not compatible with newer kernels 
->>>> with
->>>> upstream drivers.
->>>> Therefore some mechanism is necessary to convert legacy naming into
->>>> upstream naming. In the first instance this is to support the 
->>>> OCTEON MMC
->>>> controller, which is in a later patch of this series.
->>>> This patch adds a octeon_handle_legacy_device_tree() function which is
->>>> always called from device_tree_init() to fix up the device tree so 
->>>> that
->>>> drivers need have no knowledge of the legacy naming or properties.
->>>>
->>>> Signed-off-by: Matt Redfearn <matt.redfearn@imgtec.com>
->>>
->>> NAK...
->>>
->>> I already sent e-mail on this, but it crossed in flight.
->>
->> Yeah, unfortunate timing.
->>
->>>
->>> Basically, this patch is much more complex than the original code
->>> which was just a few lines to check the alternate "legacy" names.
->>
->> This code is functionally equivalent to the previous version, just
->> located in platform code rather than the driver itself.
->
-> I know, one thing I really don't like about it, is that we are 
-> modifying the kernel's view of the device that was passed in.  How 
-> does that effect what is seen in /sys/firmware ?
-
-Yes, that's true. The tree as visible in /sys/firmware is the modified 
-version, because the modifications are performed on the DTB before it is 
-unflattened and copied. This is what can be seen with the update:
-
-# ls /sys/firmware/devicetree/base/soc\@0/mmc\@1180000002000/mmc-slot\@0/
-bus-width  compatible  max-frequency  name  reg  voltage-ranges
-
->
-> I would rather see code that calls mmc_of_parse(), and then, if the 
-> two properties in question (bus-width, and max-frequency) have not 
-> been filled in, attempt to read them with the legacy names using 
-> of_property_read_u32()
-
-OK, well we can go back to that...
-
->
-> The implementation of mmc_of_parse() already contains support for 
-> parsing legacy properties, so we could also add a couple more there, 
-> which would be the simplest change of all.
-
-Best to keep the support in the driver, I think.
-
->
->
->> In terms of LOC
->> it's not much different. Doing it this was does allow future flexibility
->> to change other bindings that are fixed in firmware without having to
->> support each set in the individual drivers.
->
-> I think the controversy is limited to the MMC driver.  As far as I 
-> know, we are in good shape with the bindings for the other drivers.
-OK cool, well let's go back to that version, then.
+Hi Chris,
+Could you please review the patch?
 
 Thanks,
-Matt
->
->
->> Leaving this patch out will mean having to get any legacy bindings
->> accepted into each driver via their maintainer.
->> But for the moment we're just talking about the MMC driver - if this
->> patch is not accepted then the only way to support legacy devices is
->> with Ulf's signoff of handling both binding versions in the driver.
->>
-> [...]
+Alex
 
+> -----Original Message-----
+> From: Avi Shchislowski
+> Sent: Tuesday, February 02, 2016 6:12 PM
+> To: Chris Ball; Ulf Hansson
+> Cc: linux-mmc@vger.kernel.org; Alex Lemberg; Yaniv Agman
+> Subject: [PATCH 1/1] mmc_utils: add ffu support
+> 
+> Adding support for field firmware update over multiple command ioctl.
+> As multiple command ioctl is supported only from kernel 4.4, this patch
+> should be used against kernel 4.4 and above.
+> 
+> Known issues:
+> - There is no support for Multiple Block write commands (CMD25) in existing
+>    IOCTL implementation
+> - In case MODE_OPERATION_CODES field is not supported by the device
+>    manual reset of the device/platform is required.
+>    The reset issue discussed in another email thread - " [RFC 0/6] mmc: Field
+> Firmware Update"
+> 
+> Signed-off-by: Yaniv Agman <yaniv.agman@sandisk.com>
+> Signed-off-by: Avi Shchislowski <avi.shchislowski@sandisk.com>
+> 
+> diff --git a/mmc.c b/mmc.c
+> index a13d9ae..b1a8b3a 100644
+> --- a/mmc.c
+> +++ b/mmc.c
+> @@ -13,6 +13,9 @@
+>   * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+>   * Boston, MA 021110-1307, USA.
+>   *
+> + * Modified Jan. 2016 by SanDisk Corp.
+> + * Copyright (c) 2016 SanDisk Corp.
+> + *
+>   * (This code is based on btrfs-progs/btrfs.c.)
+>   */
+> 
+> @@ -175,6 +178,11 @@ static struct Command commands[] = {
+>  		"NOTE! The cache is an optional feature on devices >=
+> eMMC4.5.",
+>  	  NULL
+>  	},
+> +	{ do_ffu, -2,
+> +	  "ffu", "<image name> <device>\n"
+> +		"Run Field Firmware Update with <image name> on
+> <device>.\n",
+> +	  NULL
+> +	},
+>  	{ 0, 0, 0, 0 }
+>  };
+> 
+> diff --git a/mmc.h b/mmc.h
+> index b7063fb..9de8bcc 100644
+> --- a/mmc.h
+> +++ b/mmc.h
+> @@ -12,6 +12,9 @@
+>   * License along with this program; if not, write to the
+>   * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+>   * Boston, MA 021110-1307, USA.
+> + *
+> + * Modified Jan. 2016 by SanDisk Corp.
+> + * Copyright (c) 2016 SanDisk Corp.
+>   */
+> 
+>  #include <asm-generic/int-ll64.h>
+> @@ -34,6 +37,7 @@
+>  #define R1_SWITCH_ERROR   (1 << 7)  /* sx, c */
+>  #define MMC_SWITCH_MODE_WRITE_BYTE	0x03	/* Set target to value
+> */
+>  #define MMC_READ_MULTIPLE_BLOCK  18   /* adtc [31:0] data addr   R1  */
+> +#define MMC_WRITE_BLOCK		24	/* adtc [31:0] data addr
+> 	R1  */
+>  #define MMC_WRITE_MULTIPLE_BLOCK 25   /* adtc                    R1  */
+> 
+>  /*
+> @@ -42,6 +46,17 @@
+>  #define EXT_CSD_S_CMD_SET		504
+>  #define EXT_CSD_HPI_FEATURE		503
+>  #define EXT_CSD_BKOPS_SUPPORT		502	/* RO */
+> +#define EXT_CSD_SUPPORTED_MODES		493	/* RO */
+> +#define EXT_CSD_FFU_FEATURES		492	/* RO */
+> +#define EXT_CSD_FFU_ARG_3		490	/* RO */
+> +#define EXT_CSD_FFU_ARG_2		489	/* RO */
+> +#define EXT_CSD_FFU_ARG_1		488	/* RO */
+> +#define EXT_CSD_FFU_ARG_0		487	/* RO */
+> +#define EXT_CSD_NUM_OF_FW_SEC_PROG_3	305	/* RO */
+> +#define EXT_CSD_NUM_OF_FW_SEC_PROG_2	304	/* RO */
+> +#define EXT_CSD_NUM_OF_FW_SEC_PROG_1	303	/* RO */
+> +#define EXT_CSD_NUM_OF_FW_SEC_PROG_0	302	/* RO */
+> +#define EXT_CSD_FIRMWARE_VERSION	254	/* RO */
+>  #define EXT_CSD_CACHE_SIZE_3		252
+>  #define EXT_CSD_CACHE_SIZE_2		251
+>  #define EXT_CSD_CACHE_SIZE_1		250
+> @@ -58,6 +73,7 @@
+>  #define EXT_CSD_BOOT_BUS_CONDITIONS	177
+>  #define EXT_CSD_ERASE_GROUP_DEF		175
+>  #define EXT_CSD_BOOT_WP			173
+> +#define EXT_CSD_FW_CONFIG		169	/* R/W */
+>  #define EXT_CSD_WR_REL_SET		167
+>  #define EXT_CSD_WR_REL_PARAM		166
+>  #define EXT_CSD_SANITIZE_START		165
+> @@ -94,6 +110,9 @@
+>  #define EXT_CSD_EXT_PARTITIONS_ATTRIBUTE_1	53
+>  #define EXT_CSD_EXT_PARTITIONS_ATTRIBUTE_0	52
+>  #define EXT_CSD_CACHE_CTRL		33
+> +#define EXT_CSD_MODE_CONFIG		30
+> +#define EXT_CSD_MODE_OPERATION_CODES	29	/* W */
+> +#define EXT_CSD_FFU_STATUS		26	/* R */
+> 
+>  /*
+>   * WR_REL_PARAM field definitions
+> @@ -109,6 +128,11 @@
+>  /*
+>   * EXT_CSD field definitions
+>   */
+> +#define EXT_CSD_FFU_INSTALL		(0x01)
+> +#define EXT_CSD_FFU_MODE		(0x01)
+> +#define EXT_CSD_NORMAL_MODE		(0x00)
+> +#define EXT_CSD_FFU			(1<<0)
+> +#define EXT_CSD_UPDATE_DISABLE		(1<<0)
+>  #define EXT_CSD_HPI_SUPP		(1<<0)
+>  #define EXT_CSD_HPI_IMPL		(1<<1)
+>  #define EXT_CSD_CMD_SET_NORMAL		(1<<0)
+> diff --git a/mmc_cmds.c b/mmc_cmds.c
+> index 77446b4..dec9b9e 100644
+> --- a/mmc_cmds.c
+> +++ b/mmc_cmds.c
+> @@ -12,6 +12,9 @@
+>   * License along with this program; if not, write to the
+>   * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+>   * Boston, MA 021110-1307, USA.
+> + *
+> + * Modified Jan. 2016 by SanDisk Corp.
+> + * Copyright (c) 2016 SanDisk Corp.
+>   */
+> 
+>  #include <stdio.h>
+> @@ -1017,6 +1020,9 @@ int do_read_extcsd(int nargs, char **argv)
+>  	ext_csd_rev = ext_csd[EXT_CSD_REV];
+> 
+>  	switch (ext_csd_rev) {
+> +	case 8:
+> +		str = "5.1";
+> +		break;
+>  	case 7:
+>  		str = "5.0";
+>  		break;
+> @@ -1430,6 +1436,10 @@ int do_read_extcsd(int nargs, char **argv)
+>  		/*Reserved [31:0] */
+>  	}
+> 
+> +	if (ext_csd_rev >= 7) {
+> +		printf("eMMC Firmware Version: %s\n",
+> +			(char*)&ext_csd[EXT_CSD_FIRMWARE_VERSION]);
+> +	}
+>  out_free:
+>  	return ret;
+>  }
+> @@ -2032,3 +2042,218 @@ int do_cache_dis(int nargs, char **argv)  {
+>  	return do_cache_ctrl(0, nargs, argv);
+>  }
+> +
+> +int do_ffu(int nargs, char **argv)
+> +{
+> +	int dev_fd, img_fd;
+> +	int sect_done = 0, retry = 3, ret = -EINVAL;
+> +	unsigned int sect_size;
+> +	__u8 ext_csd[512];
+> +	__u8 *buf;
+> +	__u32 arg;
+> +	off_t fw_size;
+> +	ssize_t chunk_size;
+> +	char *device;
+> +	struct mmc_ioc_multi_cmd *multi_cmd;
+> +
+> +	CHECK(nargs != 3, "Usage: ffu <image name> </path/to/mmcblkX>
+> \n",
+> +			exit(1));
+> +
+> +	device = argv[2];
+> +	dev_fd = open(device, O_RDWR);
+> +	if (dev_fd < 0) {
+> +		perror("device open failed");
+> +		exit(1);
+> +	}
+> +	img_fd = open(argv[1], O_RDONLY);
+> +	if (img_fd < 0) {
+> +		perror("image open failed");
+> +		close(dev_fd);
+> +		exit(1);
+> +	}
+> +
+> +	buf = malloc(512);
+> +	multi_cmd = calloc(1, sizeof(struct mmc_ioc_multi_cmd) +
+> +				3 * sizeof(struct mmc_ioc_cmd));
+> +	if (!buf || !multi_cmd) {
+> +		perror("failed to allocate memory");
+> +		goto out;
+> +	}
+> +
+> +	ret = read_extcsd(dev_fd, ext_csd);
+> +	if (ret) {
+> +		fprintf(stderr, "Could not read EXT_CSD from %s\n", device);
+> +		goto out;
+> +	}
+> +
+> +	if (ext_csd[EXT_CSD_REV] < EXT_CSD_REV_V5_0) {
+> +		fprintf(stderr,
+> +			"The FFU feature is only available on devices >= "
+> +			"MMC 5.0, not supported in %s\n", device);
+> +		goto out;
+> +	}
+> +
+> +	if (!(ext_csd[EXT_CSD_SUPPORTED_MODES] & EXT_CSD_FFU)) {
+> +		fprintf(stderr, "FFU is not supported in %s\n", device);
+> +		goto out;
+> +	}
+> +
+> +	if (ext_csd[EXT_CSD_FW_CONFIG] & EXT_CSD_UPDATE_DISABLE) {
+> +		fprintf(stderr, "Firmware update was disabled in %s\n",
+> device);
+> +		goto out;
+> +	}
+> +
+> +	fw_size = lseek(img_fd, 0, SEEK_END);
+> +
+> +	if (fw_size == 0) {
+> +		fprintf(stderr, "Firmware image is empty");
+> +		goto out;
+> +	}
+> +
+> +	sect_size = (ext_csd[EXT_CSD_DATA_SECTOR_SIZE] == 0) ? 512 :
+> 4096;
+> +	if (fw_size % sect_size) {
+> +		fprintf(stderr, "Firmware data size (%jd) is not aligned!\n",
+> (intmax_t)fw_size);
+> +		goto out;
+> +	}
+> +
+> +	/* set CMD ARG */
+> +	arg = ext_csd[EXT_CSD_FFU_ARG_0] |
+> +		ext_csd[EXT_CSD_FFU_ARG_1] << 8 |
+> +		ext_csd[EXT_CSD_FFU_ARG_2] << 16 |
+> +		ext_csd[EXT_CSD_FFU_ARG_3] << 24;
+> +
+> +	/* prepare multi_cmd to be sent */
+> +	multi_cmd->num_of_cmds = 3;
+> +
+> +	/* put device into ffu mode */
+> +	multi_cmd->cmds[0].opcode = MMC_SWITCH;
+> +	multi_cmd->cmds[0].arg = (MMC_SWITCH_MODE_WRITE_BYTE <<
+> 24) |
+> +			(EXT_CSD_MODE_CONFIG << 16) |
+> +			(EXT_CSD_FFU_MODE << 8) |
+> +			EXT_CSD_CMD_SET_NORMAL;
+> +	multi_cmd->cmds[0].flags = MMC_RSP_SPI_R1B | MMC_RSP_R1B |
+> MMC_CMD_AC;
+> +	multi_cmd->cmds[0].write_flag = 1;
+> +
+> +	/* send image chunk */
+> +	multi_cmd->cmds[1].opcode = MMC_WRITE_BLOCK;
+> +	multi_cmd->cmds[1].blksz = sect_size;
+> +	multi_cmd->cmds[1].blocks = 1;
+> +	multi_cmd->cmds[1].arg = arg;
+> +	multi_cmd->cmds[1].flags = MMC_RSP_SPI_R1 | MMC_RSP_R1 |
+> MMC_CMD_ADTC;
+> +	multi_cmd->cmds[1].write_flag = 1;
+> +	mmc_ioc_cmd_set_data(multi_cmd->cmds[1], buf);
+> +
+> +	/* return device into normal mode */
+> +	multi_cmd->cmds[2].opcode = MMC_SWITCH;
+> +	multi_cmd->cmds[2].arg = (MMC_SWITCH_MODE_WRITE_BYTE <<
+> 24) |
+> +			(EXT_CSD_MODE_CONFIG << 16) |
+> +			(EXT_CSD_NORMAL_MODE << 8) |
+> +			EXT_CSD_CMD_SET_NORMAL;
+> +	multi_cmd->cmds[2].flags = MMC_RSP_SPI_R1B | MMC_RSP_R1B |
+> MMC_CMD_AC;
+> +	multi_cmd->cmds[2].write_flag = 1;
+> +
+> +do_retry:
+> +	/* read firmware chunk */
+> +	lseek(img_fd, 0, SEEK_SET);
+> +	chunk_size = read(img_fd, buf, 512);
+> +
+> +	while (chunk_size > 0) {
+> +		/* send ioctl with multi-cmd */
+> +		ret = ioctl(dev_fd, MMC_IOC_MULTI_CMD, multi_cmd);
+> +
+> +		if (ret) {
+> +			perror("Multi-cmd ioctl");
+> +			/* In case multi-cmd ioctl failed before exiting from
+> ffu mode */
+> +			ioctl(dev_fd, MMC_IOC_CMD, &multi_cmd-
+> >cmds[2]);
+> +			goto out;
+> +		}
+> +
+> +		ret = read_extcsd(dev_fd, ext_csd);
+> +		if (ret) {
+> +			fprintf(stderr, "Could not read EXT_CSD from %s\n",
+> device);
+> +			goto out;
+> +		}
+> +
+> +		/* Test if we need to restart the download */
+> +		sect_done = ext_csd[EXT_CSD_NUM_OF_FW_SEC_PROG_0]
+> |
+> +
+> 	ext_csd[EXT_CSD_NUM_OF_FW_SEC_PROG_1] << 8 |
+> +
+> 	ext_csd[EXT_CSD_NUM_OF_FW_SEC_PROG_2] << 16 |
+> +
+> 	ext_csd[EXT_CSD_NUM_OF_FW_SEC_PROG_3] << 24;
+> +		/* By spec, host should re-start download from the first
+> sector if sect_done is 0 */
+> +		if (sect_done == 0) {
+> +			if (retry > 0) {
+> +				retry--;
+> +				fprintf(stderr, "Programming failed.
+> Retrying... (%d)\n", retry);
+> +				goto do_retry;
+> +			}
+> +			fprintf(stderr, "Programming failed! Aborting...\n");
+> +			goto out;
+> +		} else {
+> +			fprintf(stderr, "Programmed %d/%jd bytes\r",
+> sect_done * sect_size, (intmax_t)fw_size);
+> +		}
+> +
+> +		/* read the next firmware chunk (if any) */
+> +		chunk_size = read(img_fd, buf, 512);
+> +	}
+> +
+> +	if ((sect_done * sect_size) == fw_size) {
+> +		fprintf(stderr, "Programmed %jd/%jd bytes\n",
+> (intmax_t)fw_size, (intmax_t)fw_size);
+> +		fprintf(stderr, "Programming finished with status %d \n", ret);
+> +	}
+> +	else {
+> +		fprintf(stderr, "FW size and number of sectors written
+> mismatch. Status return %d\n", ret);
+> +		goto out;
+> +	}
+> +
+> +	/* check mode operation for ffu install*/
+> +	if (!ext_csd[EXT_CSD_FFU_FEATURES]) {
+> +		fprintf(stderr, "Please reboot to complete firmware
+> installation on %s\n", device);
+> +	} else {
+> +		fprintf(stderr, "Installing firmware on %s...\n", device);
+> +		/* Re-enter ffu mode and install the firmware */
+> +		multi_cmd->num_of_cmds = 2;
+> +
+> +		/* set ext_csd to install mode */
+> +		multi_cmd->cmds[1].opcode = MMC_SWITCH;
+> +		multi_cmd->cmds[1].blksz = 0;
+> +		multi_cmd->cmds[1].blocks = 0;
+> +		multi_cmd->cmds[1].arg =
+> (MMC_SWITCH_MODE_WRITE_BYTE << 24) |
+> +				(EXT_CSD_MODE_OPERATION_CODES << 16)
+> |
+> +				(EXT_CSD_FFU_INSTALL << 8) |
+> +				EXT_CSD_CMD_SET_NORMAL;
+> +		multi_cmd->cmds[1].flags = MMC_RSP_SPI_R1B |
+> MMC_RSP_R1B | MMC_CMD_AC;
+> +		multi_cmd->cmds[1].write_flag = 1;
+> +
+> +		/* send ioctl with multi-cmd */
+> +		ret = ioctl(dev_fd, MMC_IOC_MULTI_CMD, multi_cmd);
+> +
+> +		if (ret) {
+> +			perror("Multi-cmd ioctl failed setting install mode");
+> +			/* In case multi-cmd ioctl failed before exiting from
+> ffu mode */
+> +			ioctl(dev_fd, MMC_IOC_CMD, &multi_cmd-
+> >cmds[2]);
+> +			goto out;
+> +		}
+> +
+> +		ret = read_extcsd(dev_fd, ext_csd);
+> +		if (ret) {
+> +			fprintf(stderr, "Could not read EXT_CSD from %s\n",
+> device);
+> +			goto out;
+> +		}
+> +
+> +		/* return status */
+> +		ret = ext_csd[EXT_CSD_FFU_STATUS];
+> +		if (ret) {
+> +			fprintf(stderr, "%s: error %d during FFU install:\n",
+> device, ret);
+> +			goto out;
+> +		} else {
+> +			fprintf(stderr, "FFU finished successfully\n");
+> +		}
+> +	}
+> +
+> +out:
+> +	free(buf);
+> +	free(multi_cmd);
+> +	close(img_fd);
+> +	close(dev_fd);
+> +	return ret;
+> +}
+> diff --git a/mmc_cmds.h b/mmc_cmds.h
+> index 75d8f8c..f645c38 100644
+> --- a/mmc_cmds.h
+> +++ b/mmc_cmds.h
+> @@ -12,6 +12,9 @@
+>   * License along with this program; if not, write to the
+>   * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+>   * Boston, MA 021110-1307, USA.
+> + *
+> + * Modified Jan. 2016 by SanDisk Corp.
+> + * Copyright (c) 2016 SanDisk Corp.
+>   */
+> 
+>  /* mmc_cmds.c */
+> @@ -36,3 +39,4 @@ int do_rpmb_read_block(int nargs, char **argv);  int
+> do_rpmb_write_block(int nargs, char **argv);  int do_cache_en(int nargs,
+> char **argv);  int do_cache_dis(int nargs, char **argv);
+> +int do_ffu(int nargs, char **argv);
+> --
+> 1.9.1
