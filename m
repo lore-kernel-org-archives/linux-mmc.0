@@ -1,46 +1,68 @@
-From: Chaotian Jing <chaotian.jing@mediatek.com>
-Subject: [PATCH] mmc: mediatek: add SD write protect support
-Date: Mon, 15 Feb 2016 02:31:00 +0800
-Message-ID: <1455474660-19864-1-git-send-email-chaotian.jing@mediatek.com>
+From: Wolfram Schlich <lists@wolfram.schlich.org>
+Subject: Re: sdhci-pci: probe of 0000:11:00.0 failed with error -22
+Date: Mon, 15 Feb 2016 08:38:25 +0100
+Message-ID: <20160215073825.GK17591@bla.fasel.org>
+References: <S932267AbcBANb3/20160201133129Z+1138@vger.kernel.org>
+ <20160201141944.GT13086@bla.fasel.org>
+ <56B0746B.9050902@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailgw01.mediatek.com ([210.61.82.183]:17002 "EHLO
-	mailgw01.mediatek.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1751540AbcBOCbf (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 14 Feb 2016 21:31:35 -0500
+Received: from mail.laber.fasel.org ([212.7.178.68]:53688 "EHLO
+	mail.laber.fasel.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751605AbcBOHi3 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 15 Feb 2016 02:38:29 -0500
+Content-Disposition: inline
+In-Reply-To: <56B0746B.9050902@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Matthias Brugger <matthias.bgg@gmail.com>, Chaotian Jing <chaotian.jing@mediatek.com>, Geert Uytterhoeven <geert@linux-m68k.org>, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mediatek@lists.infradead.org, linux-kernel@vger.kernel.org, srv_heupstream@mediatek.com, Sascha Hauer <kernel@pengutronix.de>, Daniel Kurtz <djkurtz@chromium.org>
+To: adrian.hunter@intel.com
+Cc: linux-mmc@vger.kernel.org
 
-use mmc core layer's API to support sd write protect
+* Adrian Hunter <adrian.hunter@intel.com> [2016-02-02 10:23]:
+> + Peter Guo and Adam Lee
 
-Signed-off-by: Chaotian Jing <chaotian.jing@mediatek.com>
----
- drivers/mmc/host/mtk-sd.c | 2 ++
- 1 file changed, 2 insertions(+)
+Adrian,
 
-diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
-index 82a97ac..f01972e 100644
---- a/drivers/mmc/host/mtk-sd.c
-+++ b/drivers/mmc/host/mtk-sd.c
-@@ -35,6 +35,7 @@
- #include <linux/mmc/mmc.h>
- #include <linux/mmc/sd.h>
- #include <linux/mmc/sdio.h>
-+#include <linux/mmc/slot-gpio.h>
- 
- #define MAX_BD_NUM          1024
- 
-@@ -1452,6 +1453,7 @@ static struct mmc_host_ops mt_msdc_ops = {
- 	.pre_req = msdc_pre_req,
- 	.request = msdc_ops_request,
- 	.set_ios = msdc_ops_set_ios,
-+	.get_ro = mmc_gpio_get_ro,
- 	.start_signal_voltage_switch = msdc_ops_switch_volt,
- 	.card_busy = msdc_card_busy,
- 	.execute_tuning = msdc_execute_tuning,
--- 
-1.8.1.1.dirty
+any news here?
+Adam Lee has left Canonical and Peter Guo doesn't respond.
+Is there something I can do to help?
 
+Cheers,
+Wolfram
+
+> On 01/02/16 16:19, Wolfram Schlich wrote:
+> > [ Issue originally reported as https://bugzilla.kernel.org/show_bug.cgi?id=110411 ]
+> > 
+> > Hi!
+> > 
+> > I am working on a Dell Precision M4800 laptop with Gentoo Linux and Kernel 4.3.3:
+> > 
+> > --8<--
+> > Linux zephyr 4.3.3-gentoo #2 SMP Wed Jan 6 00:33:28 CET 2016 x86_64 Intel(R) Core(TM) i7-4910MQ CPU @ 2.90GHz GenuineIntel GNU/Linux
+> > --8<--
+> > 
+> > It has an O2 Micro SD/MMC card reader (1217:8520) which is supposed to be supported by sdhci-pci-o2micro:
+> > 
+> > --8<--
+> > 11:00.0 SD Host controller: O2 Micro, Inc. SD/MMC Card Reader Controller (rev 01)
+> > 11:00.0 0805: 1217:8520 (rev 01)
+> > --8<--
+> > 
+> > On bootup, the sdhci-pci driver fails to initialize the card reader with error -22:
+> > --8<--
+> > [    4.782054] sdhci: Secure Digital Host Controller Interface driver
+> > [    4.782057] sdhci: Copyright(c) Pierre Ossman
+> > [    4.782187] sdhci-pci 0000:11:00.0: SDHCI controller found [1217:8520] (rev 1)
+> > [    4.782328] sdhci-pci: probe of 0000:11:00.0 failed with error -22
+> > [    4.782376] sdhci-pltfm: SDHCI platform and OF driver helper
+> > --8<--
+> > 
+> > What's wrong?
+> > 
+> > BIOS version is A15 from 09/29/2015.
+> > 
+> > UPDATE: The issue remains unchanged with kernel 4.3.5-gentoo.
+> > 
+> > Cheers,
+> > Wolfram
