@@ -1,104 +1,89 @@
-From: Jisheng Zhang <jszhang@marvell.com>
-Subject: Re: [PATCH v4 00/13] mmc: use sdhci_pltfm_init for private
- allocation and clean up
-Date: Tue, 16 Feb 2016 10:38:02 +0800
-Message-ID: <20160216103802.266f356c@xhacker>
-References: <1453803353-6266-1-git-send-email-jszhang@marvell.com>
-	<CAPDyKFpFSTYsAUCG9nFnnzmVsA3zm4hAPO8+6REArt9BJtn+0Q@mail.gmail.com>
-	<56B8A1A1.2080408@intel.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="US-ASCII"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <56B8A1A1.2080408@intel.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Arnd Bergmann <arnd@arndb.de>, Ludovic Desroches <ludovic.desroches@atmel.com>, Stephen Warren <swarren@wwwdotorg.org>, Lee Jones <lee@kernel.org>, Eric Anholt <eric@anholt.net>, Michal Simek <michal.simek@xilinx.com>, =?UTF-8?B?U8O2cmVu?= Brinkmann <soren.brinkmann@xilinx.com>, Srinivas Kandagatla <srinivas.kandagatla@gmail.com>, Maxime Coquelin <maxime.coquelin@st.com>, Patrice CHOTARD <patrice.chotard@st.com>, Thierry Reding <thierry.reding@gmail.com>, Sebastian Hesselbarth <sebastian.hesselbarth@gmail.com>, kernel@stlinux.com, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-rpi-kernel@lists.infradead.org, "linux-tegra@vger.kernel.org" <linux-tegra@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
+From: Magnus Damm <magnus.damm@gmail.com>
+Subject: [PATCH] mmc: mmc_spi: Add Card Detect comments and fix CD GPIO case
+Date: Tue, 16 Feb 2016 13:06:41 +0900
+Message-ID: <20160216040641.31979.6202.sendpatchset@little-apple>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-pf0-f180.google.com ([209.85.192.180]:34625 "EHLO
+	mail-pf0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751635AbcBPEDx (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 15 Feb 2016 23:03:53 -0500
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: ulf.hansson@linaro.org, swarren@nvidia.com, linux-kernel@vger.kernel.org, eha@doredevelopment.dk, adrian.hunter@intel.com, Magnus Damm <magnus.damm@gmail.com>
 
-Dear Adrian, Ulf,
+From: Magnus Damm <damm+renesas@opensource.se>
 
-On Mon, 8 Feb 2016 16:09:37 +0200 Adrian Hunter wrote:
+This patch adds comments to describe the various ways card detection
+may be implemented and when polling is needed. Also a fix is included
+to prevent the MMC SPI driver from polling when a CD GPIO that supports
+interrupts is specified using the gpios DT property (case 1).
 
-> On 04/02/16 12:38, Ulf Hansson wrote:
-> > + Adrian
-> > 
-> > On 26 January 2016 at 11:15, Jisheng Zhang <jszhang@marvell.com> wrote:  
-> >> These patches are to complete the TODOs in Commit 0e748234293f ("mmc:
-> >> sdhci: Add size for caller in init+register"), I.E:
-> >>
-> >> - todo: migrate clients to using allocation this way
-> >> - todo: remove priv variable once migration is complete
-> >>
-> >> Since v3:
-> >>  - based on v4.5-rc1
-> >>  - add Ludovic's ack for sdhci-of-at91 changes
-> >>  - fix use-after-free in some drivers: some host drivers still needs to
-> >>    access sdhci_pltfm_host->private after sdhci_pltfm_unregister(), but
-> >>    the private should be already freed by sdhci_pltfm_unregister.
-> >>  - add patch5 to fix one clk bug in sdhci_arasan_remove(). IMHO, It's
-> >>    better to add this patch to fixes rather than waiting for next merge
-> >>    window
-> >>
-> >> Since v2:
-> >>  - based on mmc next tree and remove all priv usage introduced in newly
-> >>    commits in this tree
-> >>  - don't break two lines if sdhci_pltfm_init() call could be put into
-> >>    one line. Thank Ludovic Desroches.
-> >>
-> >> Since v1:
-> >>  - add new patch03 to factorise sdhci_msm_pdata outisde of sdhci_msm_host.
-> >>    This is to fix drivers/mmc/host/sdhci-msm.c:440:32: warning: 'msm_host'
-> >>    is used uninitialized in this function [-Wuninitialized]
-> >>  - Add Arnd's Ack for all patches except patch3 which is new in v2
-> >>
-> >>
-> >> Jisheng Zhang (13):
-> >>   mmc: sdhci-bcm2835: use sdhci_pltfm_init for private allocation
-> >>   mmc: sdhci-esdhc-imx: use sdhci_pltfm_init for private allocation
-> >>   mmc: sdhci-msm: factorise sdhci_msm_pdata outisde of sdhci_msm_host
-> >>   mmc: sdhci-msm: use sdhci_pltfm_init for private allocation
-> >>   mmc: sdhci-of-arasan: fix clk issue in sdhci_arasan_remove()
-> >>   mmc: sdhci-of-arasan: use sdhci_pltfm_init for private allocation
-> >>   mmc: sdhci-of-at91: use sdhci_pltfm_init for private allocation
-> >>   mmc: sdhci-of-esdhc: use sdhci_pltfm_init for private allocation
-> >>   mmc: sdhci-pxav3: use sdhci_pltfm_init for private allocation
-> >>   mmc: sdhci-st: use sdhci_pltfm_init for private allocation
-> >>   mmc: sdhci-tegra: use sdhci_pltfm_init for private allocation
-> >>   mmc: sdhci-pxav2: remove unnecessary assignment of pltfm_host->priv
-> >>   mmc: sdhci-pltfm: remove priv variable from sdhci_pltfm_host
-> >>
-> >>  drivers/mmc/host/sdhci-bcm2835.c   | 14 +++----------
-> >>  drivers/mmc/host/sdhci-esdhc-imx.c | 38 ++++++++++++++++--------------------
-> >>  drivers/mmc/host/sdhci-msm.c       | 25 +++++++++++-------------
-> >>  drivers/mmc/host/sdhci-of-arasan.c | 33 +++++++++++++++----------------
-> >>  drivers/mmc/host/sdhci-of-at91.c   | 33 ++++++++++++++-----------------
-> >>  drivers/mmc/host/sdhci-of-esdhc.c  | 19 +++++++++---------
-> >>  drivers/mmc/host/sdhci-pltfm.h     |  1 -
-> >>  drivers/mmc/host/sdhci-pxav2.c     |  1 -
-> >>  drivers/mmc/host/sdhci-pxav3.c     | 20 ++++++++-----------
-> >>  drivers/mmc/host/sdhci-st.c        | 40 +++++++++++++++++++-------------------
-> >>  drivers/mmc/host/sdhci-tegra.c     | 21 +++++++-------------
-> >>  11 files changed, 106 insertions(+), 139 deletions(-)
-> >>
-> >> --
-> >> 2.7.0
-> >>  
-> > 
-> > To avoid confusions. I don't intend to pick up any further sdhci
-> > patches, unless they are acked by Adrian Hunter.  
-> 
-> The patches look OK, although patch 6 doesn't apply cleanly anymore.
-> Nevertheless:
+Without this patch the DT node below results in the following output:
 
-Sorry for being late. I'm just back from vacation.
-Thank you very much for reviewing! I'll send a new series based on Ulf's next
-branch.
+ spi_gpio: spi-gpio { /* SD2 @ CN12 */
+         compatible = "spi-gpio";
+         #address-cells = <1>;
+         #size-cells = <0>;
+         gpio-sck = <&gpio6 16 GPIO_ACTIVE_HIGH>;
+         gpio-mosi = <&gpio6 17 GPIO_ACTIVE_HIGH>;
+         gpio-miso = <&gpio6 18 GPIO_ACTIVE_HIGH>;
+         num-chipselects = <1>;
+         cs-gpios = <&gpio6 21 GPIO_ACTIVE_LOW>;
+         status = "okay";
 
-> 
-> Acked-by: Adrian Hunter <adrian.hunter@intel.com>
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+         spi@0 {
+                 compatible = "mmc-spi-slot";
+                 reg = <0>;
+                 voltage-ranges = <3200 3400>;
+                 spi-max-frequency = <25000000>;
+                 gpios = <&gpio6 22 GPIO_ACTIVE_LOW>;   /* CD */
+         };
+ };
+
+ # dmesg | grep mmc
+ mmc_spi spi32766.0: SD/MMC host mmc0, no WP, no poweroff, cd polling
+ mmc0: host does not support reading read-only switch, assuming write-enable
+ mmc0: new SDHC card on SPI
+ mmcblk0: mmc0:0000 SU04G 3.69 GiB 
+ mmcblk0: p1
+
+ With this patch applied the "cd polling" portion above disappears.
+
+Signed-off-by: Magnus Damm <damm+renesas@opensource.se>
+---
+
+ Developed on top of renesas-drivers-2016-02-09-v4.5-rc3 which
+ simply put is v4.5-rc3 + selected linux-next trees.
+
+ drivers/mmc/host/mmc_spi.c |   14 ++++++++++++++
+ 1 file changed, 14 insertions(+)
+
+--- 0001/drivers/mmc/host/mmc_spi.c
++++ work/drivers/mmc/host/mmc_spi.c	2016-02-16 12:47:47.900513000 +0900
+@@ -1437,11 +1437,25 @@ static int mmc_spi_probe(struct spi_devi
+ 	if (status != 0)
+ 		goto fail_add_host;
+ 
++	/* Card detection in case of DT is supported in several ways:
++	 * 1) GPIO with interrupt support using "gpios" DT property.
++	 * 2) GPIO without interrupt support using "gpios" DT property.
++	 * 3) Interrupt only using "interrupt-parent/interrupts" DT properties.
++	 * 4) Both "gpios" and "interrupt-parent/interrupts" DT properties.
++	 * 5) Nothing specified.
++	 * For case 2 and 5 above polling is required.
++	 */
+ 	if (host->pdata && host->pdata->flags & MMC_SPI_USE_CD_GPIO) {
+ 		status = mmc_gpio_request_cd(mmc, host->pdata->cd_gpio,
+ 					     host->pdata->cd_debounce);
+ 		if (status != 0)
+ 			goto fail_add_host;
++
++		/* The platform has a CD GPIO signal that may support
++		 * interrupts, so let mmc_gpiod_request_cd_irq() decide
++		 * if polling is needed or not.
++		 */
++		mmc->caps &= ~MMC_CAP_NEEDS_POLL;
+ 		mmc_gpiod_request_cd_irq(mmc);
+ 	}
+ 
