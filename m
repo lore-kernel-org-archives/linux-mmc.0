@@ -1,10 +1,11 @@
 From: Jisheng Zhang <jszhang@marvell.com>
-Subject: [PATCH v5 06/13] mmc: sdhci-of-arasan: use sdhci_pltfm_init for private allocation
-Date: Tue, 16 Feb 2016 21:08:24 +0800
-Message-ID: <1455628111-5583-7-git-send-email-jszhang@marvell.com>
+Subject: [PATCH v5 05/13] mmc: sdhci-of-arasan: fix clk issue in sdhci_arasan_remove()
+Date: Tue, 16 Feb 2016 21:08:23 +0800
+Message-ID: <1455628111-5583-6-git-send-email-jszhang@marvell.com>
 References: <1455628111-5583-1-git-send-email-jszhang@marvell.com>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1455628111-5583-1-git-send-email-jszhang@marvell.com>
 Sender: linux-kernel-owner@vger.kernel.org
@@ -12,88 +13,40 @@ To: ulf.hansson@linaro.org, adrian.hunter@intel.com, arnd@arndb.de, ludovic.desr
 Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-tegra@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-rpi-kernel@lists.infradead.org, Jisheng Zhang <jszhang@marvell.com>
 List-Id: linux-mmc@vger.kernel.org
 
-Commit 0e748234293f ("mmc: sdhci: Add size for caller in init+register")
-allows users of sdhci_pltfm to allocate private space in calls to
-sdhci_pltfm_init+sdhci_pltfm_register. This patch migrates the
-sdhci-of-arasan driver to this allocation.
+sdhci_pltfm_unregister() could operate host's registers, it will cause
+problems if the clk is already disabled and unprepared. Fix this issue
+by moving the clk_disable_unprepare() call to the end of remove
+function.
 
 Signed-off-by: Jisheng Zhang <jszhang@marvell.com>
-Acked-by: Arnd Bergmann <arnd@arndb.de>
+Acked-by: S=C3=B6ren Brinkmann <soren.brinkmann@xilinx.com>
 Acked-by: Adrian Hunter <adrian.hunter@intel.com>
 ---
- drivers/mmc/host/sdhci-of-arasan.c | 28 ++++++++++++----------------
- 1 file changed, 12 insertions(+), 16 deletions(-)
+ drivers/mmc/host/sdhci-of-arasan.c | 5 ++++-
+ 1 file changed, 4 insertions(+), 1 deletion(-)
 
-diff --git a/drivers/mmc/host/sdhci-of-arasan.c b/drivers/mmc/host/sdhci-of-arasan.c
-index 8b4f8f7..1e4b5e0 100644
+diff --git a/drivers/mmc/host/sdhci-of-arasan.c b/drivers/mmc/host/sdhc=
+i-of-arasan.c
+index 5d9fdb3..8b4f8f7 100644
 --- a/drivers/mmc/host/sdhci-of-arasan.c
 +++ b/drivers/mmc/host/sdhci-of-arasan.c
-@@ -81,7 +81,7 @@ static int sdhci_arasan_suspend(struct device *dev)
- 	struct platform_device *pdev = to_platform_device(dev);
- 	struct sdhci_host *host = platform_get_drvdata(pdev);
- 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
--	struct sdhci_arasan_data *sdhci_arasan = pltfm_host->priv;
-+	struct sdhci_arasan_data *sdhci_arasan = sdhci_pltfm_priv(pltfm_host);
- 	int ret;
- 
- 	ret = sdhci_suspend_host(host);
-@@ -106,7 +106,7 @@ static int sdhci_arasan_resume(struct device *dev)
- 	struct platform_device *pdev = to_platform_device(dev);
- 	struct sdhci_host *host = platform_get_drvdata(pdev);
- 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
--	struct sdhci_arasan_data *sdhci_arasan = pltfm_host->priv;
-+	struct sdhci_arasan_data *sdhci_arasan = sdhci_pltfm_priv(pltfm_host);
- 	int ret;
- 
- 	ret = clk_enable(sdhci_arasan->clk_ahb);
-@@ -137,10 +137,13 @@ static int sdhci_arasan_probe(struct platform_device *pdev)
- 	struct sdhci_pltfm_host *pltfm_host;
- 	struct sdhci_arasan_data *sdhci_arasan;
- 
--	sdhci_arasan = devm_kzalloc(&pdev->dev, sizeof(*sdhci_arasan),
--			GFP_KERNEL);
--	if (!sdhci_arasan)
--		return -ENOMEM;
-+	host = sdhci_pltfm_init(pdev, &sdhci_arasan_pdata,
-+				sizeof(*sdhci_arasan));
-+	if (IS_ERR(host))
-+		return PTR_ERR(host);
+@@ -201,13 +201,16 @@ clk_dis_ahb:
+=20
+ static int sdhci_arasan_remove(struct platform_device *pdev)
+ {
++	int ret;
+ 	struct sdhci_host *host =3D platform_get_drvdata(pdev);
+ 	struct sdhci_pltfm_host *pltfm_host =3D sdhci_priv(host);
+ 	struct sdhci_arasan_data *sdhci_arasan =3D pltfm_host->priv;
+=20
++	ret =3D sdhci_pltfm_unregister(pdev);
 +
-+	pltfm_host = sdhci_priv(host);
-+	sdhci_arasan = sdhci_pltfm_priv(pltfm_host);
- 
- 	sdhci_arasan->clk_ahb = devm_clk_get(&pdev->dev, "clk_ahb");
- 	if (IS_ERR(sdhci_arasan->clk_ahb)) {
-@@ -166,15 +169,7 @@ static int sdhci_arasan_probe(struct platform_device *pdev)
- 		goto clk_dis_ahb;
- 	}
- 
--	host = sdhci_pltfm_init(pdev, &sdhci_arasan_pdata, 0);
--	if (IS_ERR(host)) {
--		ret = PTR_ERR(host);
--		goto clk_disable_all;
--	}
--
- 	sdhci_get_of_property(pdev);
--	pltfm_host = sdhci_priv(host);
--	pltfm_host->priv = sdhci_arasan;
- 	pltfm_host->clk = clk_xin;
- 
- 	ret = mmc_of_parse(host->mmc);
-@@ -204,11 +199,12 @@ static int sdhci_arasan_remove(struct platform_device *pdev)
- 	int ret;
- 	struct sdhci_host *host = platform_get_drvdata(pdev);
- 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
--	struct sdhci_arasan_data *sdhci_arasan = pltfm_host->priv;
-+	struct sdhci_arasan_data *sdhci_arasan = sdhci_pltfm_priv(pltfm_host);
-+	struct clk *clk_ahb = sdhci_arasan->clk_ahb;
- 
- 	ret = sdhci_pltfm_unregister(pdev);
- 
--	clk_disable_unprepare(sdhci_arasan->clk_ahb);
-+	clk_disable_unprepare(clk_ahb);
- 
- 	return ret;
+ 	clk_disable_unprepare(sdhci_arasan->clk_ahb);
+=20
+-	return sdhci_pltfm_unregister(pdev);
++	return ret;
  }
--- 
+=20
+ static const struct of_device_id sdhci_arasan_of_match[] =3D {
+--=20
 2.7.0
