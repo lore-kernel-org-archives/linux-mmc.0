@@ -1,78 +1,104 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: sdhci-pci: probe of 0000:11:00.0 failed with error -22
-Date: Mon, 15 Feb 2016 23:16:50 +0200
-Message-ID: <56C24042.7030404@intel.com>
-References: <S932267AbcBANb3/20160201133129Z+1138@vger.kernel.org>
- <20160201141944.GT13086@bla.fasel.org> <56B0746B.9050902@intel.com>
- <20160215073825.GK17591@bla.fasel.org>
+From: Jisheng Zhang <jszhang@marvell.com>
+Subject: Re: [PATCH v4 00/13] mmc: use sdhci_pltfm_init for private
+ allocation and clean up
+Date: Tue, 16 Feb 2016 10:38:02 +0800
+Message-ID: <20160216103802.266f356c@xhacker>
+References: <1453803353-6266-1-git-send-email-jszhang@marvell.com>
+	<CAPDyKFpFSTYsAUCG9nFnnzmVsA3zm4hAPO8+6REArt9BJtn+0Q@mail.gmail.com>
+	<56B8A1A1.2080408@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252; format=flowed
+Content-Type: text/plain; charset="US-ASCII"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga02.intel.com ([134.134.136.20]:55477 "EHLO mga02.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751153AbcBOVQy (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 15 Feb 2016 16:16:54 -0500
-In-Reply-To: <20160215073825.GK17591@bla.fasel.org>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <56B8A1A1.2080408@intel.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Arnd Bergmann <arnd@arndb.de>, Ludovic Desroches <ludovic.desroches@atmel.com>, Stephen Warren <swarren@wwwdotorg.org>, Lee Jones <lee@kernel.org>, Eric Anholt <eric@anholt.net>, Michal Simek <michal.simek@xilinx.com>, =?UTF-8?B?U8O2cmVu?= Brinkmann <soren.brinkmann@xilinx.com>, Srinivas Kandagatla <srinivas.kandagatla@gmail.com>, Maxime Coquelin <maxime.coquelin@st.com>, Patrice CHOTARD <patrice.chotard@st.com>, Thierry Reding <thierry.reding@gmail.com>, Sebastian Hesselbarth <sebastian.hesselbarth@gmail.com>, kernel@stlinux.com, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-rpi-kernel@lists.infradead.org, "linux-tegra@vger.kernel.org" <linux-tegra@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Wolfram Schlich <lists@wolfram.schlich.org>
-Cc: linux-mmc@vger.kernel.org
 
-On 15/02/2016 9:38 a.m., Wolfram Schlich wrote:
-> * Adrian Hunter <adrian.hunter@intel.com> [2016-02-02 10:23]:
->> + Peter Guo and Adam Lee
->
-> Adrian,
->
-> any news here?
-> Adam Lee has left Canonical and Peter Guo doesn't respond.
-> Is there something I can do to help?
+Dear Adrian, Ulf,
 
-I am traveling for a couple of weeks so I can't do much now.
-First we need to determine where in the probe function the error
-occurs.  Then maybe we can figure out a workaround.  But I don't
-have the hardware.
+On Mon, 8 Feb 2016 16:09:37 +0200 Adrian Hunter wrote:
 
-Can you build a kernel and put some prints into the probe
-function to try to find where the error occurs?
+> On 04/02/16 12:38, Ulf Hansson wrote:
+> > + Adrian
+> > 
+> > On 26 January 2016 at 11:15, Jisheng Zhang <jszhang@marvell.com> wrote:  
+> >> These patches are to complete the TODOs in Commit 0e748234293f ("mmc:
+> >> sdhci: Add size for caller in init+register"), I.E:
+> >>
+> >> - todo: migrate clients to using allocation this way
+> >> - todo: remove priv variable once migration is complete
+> >>
+> >> Since v3:
+> >>  - based on v4.5-rc1
+> >>  - add Ludovic's ack for sdhci-of-at91 changes
+> >>  - fix use-after-free in some drivers: some host drivers still needs to
+> >>    access sdhci_pltfm_host->private after sdhci_pltfm_unregister(), but
+> >>    the private should be already freed by sdhci_pltfm_unregister.
+> >>  - add patch5 to fix one clk bug in sdhci_arasan_remove(). IMHO, It's
+> >>    better to add this patch to fixes rather than waiting for next merge
+> >>    window
+> >>
+> >> Since v2:
+> >>  - based on mmc next tree and remove all priv usage introduced in newly
+> >>    commits in this tree
+> >>  - don't break two lines if sdhci_pltfm_init() call could be put into
+> >>    one line. Thank Ludovic Desroches.
+> >>
+> >> Since v1:
+> >>  - add new patch03 to factorise sdhci_msm_pdata outisde of sdhci_msm_host.
+> >>    This is to fix drivers/mmc/host/sdhci-msm.c:440:32: warning: 'msm_host'
+> >>    is used uninitialized in this function [-Wuninitialized]
+> >>  - Add Arnd's Ack for all patches except patch3 which is new in v2
+> >>
+> >>
+> >> Jisheng Zhang (13):
+> >>   mmc: sdhci-bcm2835: use sdhci_pltfm_init for private allocation
+> >>   mmc: sdhci-esdhc-imx: use sdhci_pltfm_init for private allocation
+> >>   mmc: sdhci-msm: factorise sdhci_msm_pdata outisde of sdhci_msm_host
+> >>   mmc: sdhci-msm: use sdhci_pltfm_init for private allocation
+> >>   mmc: sdhci-of-arasan: fix clk issue in sdhci_arasan_remove()
+> >>   mmc: sdhci-of-arasan: use sdhci_pltfm_init for private allocation
+> >>   mmc: sdhci-of-at91: use sdhci_pltfm_init for private allocation
+> >>   mmc: sdhci-of-esdhc: use sdhci_pltfm_init for private allocation
+> >>   mmc: sdhci-pxav3: use sdhci_pltfm_init for private allocation
+> >>   mmc: sdhci-st: use sdhci_pltfm_init for private allocation
+> >>   mmc: sdhci-tegra: use sdhci_pltfm_init for private allocation
+> >>   mmc: sdhci-pxav2: remove unnecessary assignment of pltfm_host->priv
+> >>   mmc: sdhci-pltfm: remove priv variable from sdhci_pltfm_host
+> >>
+> >>  drivers/mmc/host/sdhci-bcm2835.c   | 14 +++----------
+> >>  drivers/mmc/host/sdhci-esdhc-imx.c | 38 ++++++++++++++++--------------------
+> >>  drivers/mmc/host/sdhci-msm.c       | 25 +++++++++++-------------
+> >>  drivers/mmc/host/sdhci-of-arasan.c | 33 +++++++++++++++----------------
+> >>  drivers/mmc/host/sdhci-of-at91.c   | 33 ++++++++++++++-----------------
+> >>  drivers/mmc/host/sdhci-of-esdhc.c  | 19 +++++++++---------
+> >>  drivers/mmc/host/sdhci-pltfm.h     |  1 -
+> >>  drivers/mmc/host/sdhci-pxav2.c     |  1 -
+> >>  drivers/mmc/host/sdhci-pxav3.c     | 20 ++++++++-----------
+> >>  drivers/mmc/host/sdhci-st.c        | 40 +++++++++++++++++++-------------------
+> >>  drivers/mmc/host/sdhci-tegra.c     | 21 +++++++-------------
+> >>  11 files changed, 106 insertions(+), 139 deletions(-)
+> >>
+> >> --
+> >> 2.7.0
+> >>  
+> > 
+> > To avoid confusions. I don't intend to pick up any further sdhci
+> > patches, unless they are acked by Adrian Hunter.  
+> 
+> The patches look OK, although patch 6 doesn't apply cleanly anymore.
+> Nevertheless:
 
->
-> Cheers,
-> Wolfram
->
->> On 01/02/16 16:19, Wolfram Schlich wrote:
->>> [ Issue originally reported as https://bugzilla.kernel.org/show_bug.cgi?id=110411 ]
->>>
->>> Hi!
->>>
->>> I am working on a Dell Precision M4800 laptop with Gentoo Linux and Kernel 4.3.3:
->>>
->>> --8<--
->>> Linux zephyr 4.3.3-gentoo #2 SMP Wed Jan 6 00:33:28 CET 2016 x86_64 Intel(R) Core(TM) i7-4910MQ CPU @ 2.90GHz GenuineIntel GNU/Linux
->>> --8<--
->>>
->>> It has an O2 Micro SD/MMC card reader (1217:8520) which is supposed to be supported by sdhci-pci-o2micro:
->>>
->>> --8<--
->>> 11:00.0 SD Host controller: O2 Micro, Inc. SD/MMC Card Reader Controller (rev 01)
->>> 11:00.0 0805: 1217:8520 (rev 01)
->>> --8<--
->>>
->>> On bootup, the sdhci-pci driver fails to initialize the card reader with error -22:
->>> --8<--
->>> [    4.782054] sdhci: Secure Digital Host Controller Interface driver
->>> [    4.782057] sdhci: Copyright(c) Pierre Ossman
->>> [    4.782187] sdhci-pci 0000:11:00.0: SDHCI controller found [1217:8520] (rev 1)
->>> [    4.782328] sdhci-pci: probe of 0000:11:00.0 failed with error -22
->>> [    4.782376] sdhci-pltfm: SDHCI platform and OF driver helper
->>> --8<--
->>>
->>> What's wrong?
->>>
->>> BIOS version is A15 from 09/29/2015.
->>>
->>> UPDATE: The issue remains unchanged with kernel 4.3.5-gentoo.
->>>
->>> Cheers,
->>> Wolfram
+Sorry for being late. I'm just back from vacation.
+Thank you very much for reviewing! I'll send a new series based on Ulf's next
+branch.
+
+> 
+> Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
