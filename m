@@ -1,84 +1,64 @@
-From: Jisheng Zhang <jszhang-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>
-Subject: [PATCH v5 00/13] mmc: use sdhci_pltfm_init for private allocation and clean up
-Date: Tue, 16 Feb 2016 21:08:18 +0800
-Message-ID: <1455628111-5583-1-git-send-email-jszhang@marvell.com>
+From: Jisheng Zhang <jszhang@marvell.com>
+Subject: [PATCH v5 01/13] mmc: sdhci-bcm2835: use sdhci_pltfm_init for private allocation
+Date: Tue, 16 Feb 2016 21:08:19 +0800
+Message-ID: <1455628111-5583-2-git-send-email-jszhang@marvell.com>
+References: <1455628111-5583-1-git-send-email-jszhang@marvell.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Sender: linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, arnd-r2nGTMty4D4@public.gmane.org, ludovic.desroches-AIFe0yeh4nAAvxtiuMwx3w@public.gmane.org, swarren-3lzwWm7+Weoh9ZMKESR00Q@public.gmane.org, lee-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, eric-WhKQ6XTQaPysTnJN9+BGXg@public.gmane.org, michal.simek-gjFFaj9aHVfQT0dZR+AlfA@public.gmane.org, soren.brinkmann-gjFFaj9aHVfQT0dZR+AlfA@public.gmane.org, srinivas.kandagatla-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org, maxime.coquelin-qxv4g6HH51o@public.gmane.org, patrice.chotard-qxv4g6HH51o@public.gmane.org, thierry.reding-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org, sebastian.hesselbarth-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org, kernel-F5mvAk5X5gdBDgjK7y7TUQ@public.gmane.org
-Cc: linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-rpi-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, Jisheng Zhang <jszhang-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>
+Content-Type: text/plain
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1455628111-5583-1-git-send-email-jszhang@marvell.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: ulf.hansson@linaro.org, adrian.hunter@intel.com, arnd@arndb.de, ludovic.desroches@atmel.com, swarren@wwwdotorg.org, lee@kernel.org, eric@anholt.net, michal.simek@xilinx.com, soren.brinkmann@xilinx.com, srinivas.kandagatla@gmail.com, maxime.coquelin@st.com, patrice.chotard@st.com, thierry.reding@gmail.com, sebastian.hesselbarth@gmail.com, kernel@stlinux.com
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-tegra@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-rpi-kernel@lists.infradead.org, Jisheng Zhang <jszhang@marvell.com>
 List-Id: linux-mmc@vger.kernel.org
 
-These patches are to complete the TODOs in Commit 0e748234293f ("mmc:
-sdhci: Add size for caller in init+register"), I.E:
+Commit 0e748234293f ("mmc: sdhci: Add size for caller in init+register")
+allows users of sdhci_pltfm to allocate private space in calls to
+sdhci_pltfm_init+sdhci_pltfm_register. This patch migrates sdhci-bcm2835
+to this allocation.
 
-- todo: migrate clients to using allocation this way
-- todo: remove priv variable once migration is complete
+Signed-off-by: Jisheng Zhang <jszhang@marvell.com>
+Acked-by: Arnd Bergmann <arnd@arndb.de>
+Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+---
+ drivers/mmc/host/sdhci-bcm2835.c | 14 +++-----------
+ 1 file changed, 3 insertions(+), 11 deletions(-)
 
-Since v4:
- - based on Ulf's latest next branch
- - add Adrian's Ack for all patches, add Thierry's Ack and Test for pat=
-ch 11
-   add S=C3=B6ren Ack for patch 5.
-
-Since v3:
- - based on v4.5-rc1
- - add Ludovic's ack for sdhci-of-at91 changes
- - fix use-after-free in some drivers: some host drivers still needs to
-   access sdhci_pltfm_host->private after sdhci_pltfm_unregister(), but
-   the private should be already freed by sdhci_pltfm_unregister.
- - add patch5 to fix one clk bug in sdhci_arasan_remove(). IMHO, It's
-   better to add this patch to fixes rather than waiting for next merge
-   window
-
-Since v2:
- - based on mmc next tree and remove all priv usage introduced in newly
-   commits in this tree
- - don't break two lines if sdhci_pltfm_init() call could be put into
-   one line. Thank Ludovic Desroches.
-
-Since v1:
- - add new patch03 to factorise sdhci_msm_pdata outisde of sdhci_msm_ho=
-st.
-   This is to fix drivers/mmc/host/sdhci-msm.c:440:32: warning: 'msm_ho=
-st'
-   is used uninitialized in this function [-Wuninitialized]
- - Add Arnd's Ack for all patches except patch3 which is new in v2
-
-
-Jisheng Zhang (13):
-  mmc: sdhci-bcm2835: use sdhci_pltfm_init for private allocation
-  mmc: sdhci-esdhc-imx: use sdhci_pltfm_init for private allocation
-  mmc: sdhci-msm: factorise sdhci_msm_pdata outisde of sdhci_msm_host
-  mmc: sdhci-msm: use sdhci_pltfm_init for private allocation
-  mmc: sdhci-of-arasan: fix clk issue in sdhci_arasan_remove()
-  mmc: sdhci-of-arasan: use sdhci_pltfm_init for private allocation
-  mmc: sdhci-of-at91: use sdhci_pltfm_init for private allocation
-  mmc: sdhci-of-esdhc: use sdhci_pltfm_init for private allocation
-  mmc: sdhci-pxav3: use sdhci_pltfm_init for private allocation
-  mmc: sdhci-st: use sdhci_pltfm_init for private allocation
-  mmc: sdhci-tegra: use sdhci_pltfm_init for private allocation
-  mmc: sdhci-pxav2: remove unnecessary assignment of pltfm_host->priv
-  mmc: sdhci-pltfm: remove priv variable from sdhci_pltfm_host
-
- drivers/mmc/host/sdhci-bcm2835.c   | 14 +++----------
- drivers/mmc/host/sdhci-esdhc-imx.c | 38 ++++++++++++++++--------------=
-------
- drivers/mmc/host/sdhci-msm.c       | 25 +++++++++++-------------
- drivers/mmc/host/sdhci-of-arasan.c | 33 +++++++++++++++---------------=
+diff --git a/drivers/mmc/host/sdhci-bcm2835.c b/drivers/mmc/host/sdhci-bcm2835.c
+index 1c65d46..4a6a1d1 100644
+--- a/drivers/mmc/host/sdhci-bcm2835.c
++++ b/drivers/mmc/host/sdhci-bcm2835.c
+@@ -74,7 +74,7 @@ static inline u32 bcm2835_sdhci_readl(struct sdhci_host *host, int reg)
+ static void bcm2835_sdhci_writew(struct sdhci_host *host, u16 val, int reg)
+ {
+ 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+-	struct bcm2835_sdhci *bcm2835_host = pltfm_host->priv;
++	struct bcm2835_sdhci *bcm2835_host = sdhci_pltfm_priv(pltfm_host);
+ 	u32 oldval = (reg == SDHCI_COMMAND) ? bcm2835_host->shadow :
+ 		bcm2835_sdhci_readl(host, reg & ~3);
+ 	u32 word_num = (reg >> 1) & 1;
+@@ -152,20 +152,12 @@ static int bcm2835_sdhci_probe(struct platform_device *pdev)
+ 	struct sdhci_pltfm_host *pltfm_host;
+ 	int ret;
+ 
+-	host = sdhci_pltfm_init(pdev, &bcm2835_sdhci_pdata, 0);
++	host = sdhci_pltfm_init(pdev, &bcm2835_sdhci_pdata,
++				sizeof(*bcm2835_host));
+ 	if (IS_ERR(host))
+ 		return PTR_ERR(host);
+ 
+-	bcm2835_host = devm_kzalloc(&pdev->dev, sizeof(*bcm2835_host),
+-					GFP_KERNEL);
+-	if (!bcm2835_host) {
+-		dev_err(mmc_dev(host->mmc),
+-			"failed to allocate bcm2835_sdhci\n");
+-		return -ENOMEM;
+-	}
 -
- drivers/mmc/host/sdhci-of-at91.c   | 33 ++++++++++++++----------------=
--
- drivers/mmc/host/sdhci-of-esdhc.c  | 19 +++++++++---------
- drivers/mmc/host/sdhci-pltfm.h     |  1 -
- drivers/mmc/host/sdhci-pxav2.c     |  1 -
- drivers/mmc/host/sdhci-pxav3.c     | 20 ++++++++-----------
- drivers/mmc/host/sdhci-st.c        | 40 +++++++++++++++++++-----------=
---------
- drivers/mmc/host/sdhci-tegra.c     | 21 +++++++-------------
- 11 files changed, 106 insertions(+), 139 deletions(-)
-
---=20
+ 	pltfm_host = sdhci_priv(host);
+-	pltfm_host->priv = bcm2835_host;
+ 
+ 	pltfm_host->clk = devm_clk_get(&pdev->dev, NULL);
+ 	if (IS_ERR(pltfm_host->clk)) {
+-- 
 2.7.0
