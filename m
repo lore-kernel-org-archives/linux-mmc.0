@@ -1,217 +1,147 @@
-From: Andre Przywara <andre.przywara-5wv7dgnIgG8@public.gmane.org>
-Subject: [RFC PATCH] (broken) implementation of A64 MMC delay calibration
-Date: Tue, 16 Feb 2016 14:16:19 +0000
-Message-ID: <1455632179-8102-1-git-send-email-andre.przywara@arm.com>
-Reply-To: andre.przywara-5wv7dgnIgG8@public.gmane.org
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH] mmc: sdhci-of-at91: fix wakeup issue when using runtime pm
+Date: Tue, 16 Feb 2016 15:38:29 +0100
+Message-ID: <CAPDyKFroVY0ZdqPScpGiJ8Y_QhhZ7asf0R0MzSx0WzVi5c2neg@mail.gmail.com>
+References: <20160212120415.GJ14937@odux.rfo.atmel.com>
+	<1455357400-32145-1-git-send-email-ludovic.desroches@atmel.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-sunxi+bncBDNZNK75ZIKRBQO6RS3AKGQE2RVEPGA-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Post: <https://groups.google.com/group/linux-sunxi/post>, <mailto:linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Help: <https://groups.google.com/support/>, <mailto:linux-sunxi+help-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Archive: <https://groups.google.com/group/linux-sunxi
-Sender: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
-List-Subscribe: <https://groups.google.com/group/linux-sunxi/subscribe>, <mailto:linux-sunxi+subscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Unsubscribe: <mailto:googlegroups-manage+1076902468213+unsubscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>,
- <https://groups.google.com/group/linux-sunxi/subscribe>
-To: Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org>, Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>, Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-yw0-f176.google.com ([209.85.161.176]:35317 "EHLO
+	mail-yw0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932657AbcBPOia (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 16 Feb 2016 09:38:30 -0500
+Received: by mail-yw0-f176.google.com with SMTP id g127so140386709ywf.2
+        for <linux-mmc@vger.kernel.org>; Tue, 16 Feb 2016 06:38:29 -0800 (PST)
+In-Reply-To: <1455357400-32145-1-git-send-email-ludovic.desroches@atmel.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ludovic Desroches <ludovic.desroches@atmel.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Nicolas Ferre <nicolas.ferre@atmel.com>, Adrian Hunter <adrian.hunter@intel.com>
 
-Hi,
+On 13 February 2016 at 10:56, Ludovic Desroches
+<ludovic.desroches@atmel.com> wrote:
+> When suspending the sdhci host, the only hardware event that could wake
+> up the host is a sdio irq if they are enabled. If we want to wakeup on
+> card detect events, a gpio as to be used.
+> If we don't want to use a gpio but the card detect pio of the controller
+> then we need to keep enabled the clock of the controller interface to
+> get the interrupt and to not set the host in a suspended state to have the
+> interrupt handled.
+>
+> Signed-off-by: Ludovic Desroches <ludovic.desroches@atmel.com>
+> ---
+>  drivers/mmc/host/sdhci-of-at91.c | 46 ++++++++++++++++++++++++++++++----------
+>  1 file changed, 35 insertions(+), 11 deletions(-)
+>
+> diff --git a/drivers/mmc/host/sdhci-of-at91.c b/drivers/mmc/host/sdhci-of-at91.c
+> index efec736..2159c6e 100644
+> --- a/drivers/mmc/host/sdhci-of-at91.c
+> +++ b/drivers/mmc/host/sdhci-of-at91.c
+> @@ -18,6 +18,7 @@
+>  #include <linux/err.h>
+>  #include <linux/io.h>
+>  #include <linux/mmc/host.h>
+> +#include <linux/mmc/slot-gpio.h>
+>  #include <linux/module.h>
+>  #include <linux/of.h>
+>  #include <linux/of_device.h>
+> @@ -45,7 +46,6 @@ static const struct sdhci_ops sdhci_at91_sama5d2_ops = {
+>
+>  static const struct sdhci_pltfm_data soc_data_sama5d2 = {
+>         .ops = &sdhci_at91_sama5d2_ops,
+> -       .quirks = SDHCI_QUIRK_BROKEN_CARD_DETECTION,
 
-as people were asking for it, here is my first attempt on proper
-Allwinner A64 MMC support.
-Former Allwinner MMC implementations used a special MMC clock, where
-two clocks could be phase-offset-ed to match the timing requirements.
-Those clocks have vanished, instead the phase seems to be now created
-internally in the MMC blob using some new registers. Also there is an
-auto-calibration feature with should help us to get the right values.
+You probably have some leftovers from earlier local changes, as this
+isn't going to apply to my next branch.
 
-This patch is a naive implementation by just looking at the manual.
-Unfortunately it does not work: The first calibration loop seems to
-work, but returns all 1's as the result, which sounds suspicious.
-The second calibration loop hangs (which reminds me of adding a
-timeout):
-[ 4.187144] sunxi_mmc: starting sample delay calibration
-[ 4.192306] calibrate 0x144: register reads as 0x2000
-[ 4.201770] calibrate 0x144: tried 16 times, reg=0x7f00
-[ 4.206976] sunxi-mmc: delay for register 0x144: 63
-[ 4.211665] calibrate 0x144: writing: 0x7fbf
-[ 4.216353] sunxi_mmc: starting data strobe delay calibration
-[ 4.221865] calibrate 0x148: register reads as 0x2000
-(hang)
+>         .quirks2 = SDHCI_QUIRK2_NEED_DELAY_AFTER_INT_CLK_RST,
+>  };
+>
+> @@ -55,17 +55,37 @@ static const struct of_device_id sdhci_at91_dt_match[] = {
+>  };
+>
+>  #ifdef CONFIG_PM
+> +static bool sdhci_at91_use_sdhci_runtime(struct sdhci_host *host)
+> +{
+> +       u32 caps = host->mmc->caps;
+> +
+> +       return (caps & MMC_CAP_NONREMOVABLE) ||
+> +              (!IS_ERR_VALUE(mmc_gpio_get_cd(host->mmc)));
+> +}
+> +
+>  static int sdhci_at91_runtime_suspend(struct device *dev)
+>  {
+>         struct sdhci_host *host = dev_get_drvdata(dev);
+>         struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+>         struct sdhci_at91_priv *priv = pltfm_host->priv;
+> -       int ret;
+> +       int ret = 0;
+>
+> -       ret = sdhci_runtime_suspend_host(host);
+> +       /*
+> +        * If we call sdhci_runtime_suspend(), we could wakeup only if sdio
+> +        * irqs are enabled. If we want to wakeup on a card detect event there
+> +        * are two options:
+> +        * - do not call sdhci_runtime_suspend() but save power by disabling
+> +        *   all clocks excepting the one for the controller interface.
+> +        * - call sdhci_runtime_suspend(), save maximum power by disabling
+> +        *   all clocks but use a gpio for the card detect signal to have a way
+> +        *   to wakeup.
+> +        */
+> +       if (sdhci_at91_use_sdhci_runtime(host)) {
 
-I didn't have time (and courage) yet to take a closer look at the BSP
-kernel, but it seems like they don't use this feature for some reason?
+I am not sure this approach is safe, particularly for cases when
+sdhci_runtime_suspend() isn't invoked.
 
-Also my knowledge of MMC is very limited, so I might be missing
-something obvious. Do we need to setup this other register
-(SMHC Drive Delay Control Register at 0x0140) as well or are the
-default settings good enough?
+As I understand it, in those cases potentially the sdhci's IRQ handler
+may be invoked to serve even other IRQs than a card detect IRQ. Doing
+that while being runtime suspended doesn't seem like a good idea. Will
+it even work?
 
-I am posting this so that other people can have a look or use it as
-a base for own experiments.
+> +               ret = sdhci_runtime_suspend_host(host);
+> +               clk_disable_unprepare(priv->hclock);
+> +       }
+>
+>         clk_disable_unprepare(priv->gck);
+> -       clk_disable_unprepare(priv->hclock);
+>         clk_disable_unprepare(priv->mainck);
+>
+>         return ret;
+> @@ -84,19 +104,23 @@ static int sdhci_at91_runtime_resume(struct device *dev)
+>                 return ret;
+>         }
+>
+> -       ret = clk_prepare_enable(priv->hclock);
+> -       if (ret) {
+> -               dev_err(dev, "can't enable hclock\n");
+> -               return ret;
+> -       }
+> -
+>         ret = clk_prepare_enable(priv->gck);
+>         if (ret) {
+>                 dev_err(dev, "can't enable gck\n");
+>                 return ret;
+>         }
+>
+> -       return sdhci_runtime_resume_host(host);
+> +       if (sdhci_at91_use_sdhci_runtime(host)) {
+> +               ret = clk_prepare_enable(priv->hclock);
+> +               if (ret) {
+> +                       dev_err(dev, "can't enable hclock\n");
+> +                       return ret;
+> +               }
+> +
+> +               ret = sdhci_runtime_resume_host(host);
+> +       }
+> +
+> +       return ret;
+>  }
+>  #endif /* CONFIG_PM */
+>
+> --
+> 2.7.0
+>
 
-Signed-off-by: Andre Przywara <andre.przywara-5wv7dgnIgG8@public.gmane.org>
-
----
- drivers/mmc/host/sunxi-mmc.c | 103 +++++++++++++++++++++++++++++++++----------
- 1 file changed, 79 insertions(+), 24 deletions(-)
-
-diff --git a/drivers/mmc/host/sunxi-mmc.c b/drivers/mmc/host/sunxi-mmc.c
-index 8372a41..0c81a4d 100644
---- a/drivers/mmc/host/sunxi-mmc.c
-+++ b/drivers/mmc/host/sunxi-mmc.c
-@@ -71,6 +71,8 @@
- #define SDXC_REG_IDIE	(0x8C) /* SMC IDMAC Interrupt Enable Register */
- #define SDXC_REG_CHDA	(0x90)
- #define SDXC_REG_CBDA	(0x94)
-+#define SDXC_REG_SAMP_DL_REG	0x144	/* SMC sample delay control */
-+#define SDXC_REG_DS_DL_REG	0x148	/* SMC data strobe delay control */
- 
- #define mmc_readl(host, reg) \
- 	readl((host)->reg_base + SDXC_##reg)
-@@ -217,6 +219,13 @@
- #define SDXC_CLK_50M_DDR	3
- #define SDXC_CLK_50M_DDR_8BIT	4
- 
-+#define SDXC_CAL_START		BIT(15)
-+#define SDXC_CAL_DONE		BIT(14)
-+#define SDXC_CAL_DL_SHIFT	8
-+#define SDXC_CAL_DL_SW_EN	BIT(7)
-+#define SDXC_CAL_DL_SW_SHIFT	0
-+#define SDXC_CAL_DL_MASK	0x3f
-+
- struct sunxi_mmc_clk_delay {
- 	u32 output;
- 	u32 sample;
-@@ -261,6 +270,9 @@ struct sunxi_mmc_host {
- 
- 	/* vqmmc */
- 	bool		vqmmc_enabled;
-+
-+	/* does the IP block support autocalibration? */
-+	bool		can_calibrate;
- };
- 
- static int sunxi_mmc_reset_host(struct sunxi_mmc_host *host)
-@@ -653,10 +665,62 @@ static int sunxi_mmc_oclk_onoff(struct sunxi_mmc_host *host, u32 oclk_en)
- 	return 0;
- }
- 
-+static int sunxi_mmc_calibrate(struct sunxi_mmc_host *host,
-+			       struct mmc_ios *ios, int reg_off)
-+{
-+	u32 reg = readl(host->reg_base + reg_off);
-+	u32 delay;
-+
-+	reg &= ~(SDXC_CAL_DL_MASK << SDXC_CAL_DL_SW_SHIFT);
-+	reg &= ~SDXC_CAL_DL_SW_EN;
-+
-+	writel(reg | SDXC_CAL_START, host->reg_base + reg_off);
-+
-+	while (!((reg = readl(host->reg_base + reg_off)) & SDXC_CAL_DONE))
-+		cpu_relax();
-+
-+	delay = (reg >> SDXC_CAL_DL_SHIFT) & SDXC_CAL_DL_MASK;
-+
-+	reg &= ~SDXC_CAL_START;
-+	reg |= (delay << SDXC_CAL_DL_SW_SHIFT) | SDXC_CAL_DL_SW_EN;
-+
-+	writel(reg, host->reg_base + reg_off);
-+
-+	return 0;
-+}
-+
-+static int sunxi_mmc_determine_delays(struct sunxi_mmc_host *host,
-+				      struct mmc_ios *ios, int rate)
-+{
-+	int index;
-+
-+	if (rate <= 400000) {
-+		index = SDXC_CLK_400K;
-+	} else if (rate <= 25000000) {
-+		index = SDXC_CLK_25M;
-+	} else if (rate <= 52000000) {
-+		if (ios->timing != MMC_TIMING_UHS_DDR50 &&
-+		    ios->timing != MMC_TIMING_MMC_DDR52) {
-+			index = SDXC_CLK_50M;
-+		} else if (ios->bus_width == MMC_BUS_WIDTH_8) {
-+			index = SDXC_CLK_50M_DDR_8BIT;
-+		} else {
-+			index = SDXC_CLK_50M_DDR;
-+		}
-+	} else {
-+		return -EINVAL;
-+	}
-+
-+	clk_set_phase(host->clk_sample, host->clk_delays[index].sample);
-+	clk_set_phase(host->clk_output, host->clk_delays[index].output);
-+
-+	return 0;
-+}
-+
- static int sunxi_mmc_clk_set_rate(struct sunxi_mmc_host *host,
- 				  struct mmc_ios *ios)
- {
--	u32 rate, oclk_dly, rval, sclk_dly;
-+	u32 rate, rval;
- 	u32 clock = ios->clock;
- 	int ret;
- 
-@@ -692,32 +756,20 @@ static int sunxi_mmc_clk_set_rate(struct sunxi_mmc_host *host,
- 	}
- 	mmc_writel(host, REG_CLKCR, rval);
- 
--	/* determine delays */
--	if (rate <= 400000) {
--		oclk_dly = host->clk_delays[SDXC_CLK_400K].output;
--		sclk_dly = host->clk_delays[SDXC_CLK_400K].sample;
--	} else if (rate <= 25000000) {
--		oclk_dly = host->clk_delays[SDXC_CLK_25M].output;
--		sclk_dly = host->clk_delays[SDXC_CLK_25M].sample;
--	} else if (rate <= 52000000) {
--		if (ios->timing != MMC_TIMING_UHS_DDR50 &&
--		    ios->timing != MMC_TIMING_MMC_DDR52) {
--			oclk_dly = host->clk_delays[SDXC_CLK_50M].output;
--			sclk_dly = host->clk_delays[SDXC_CLK_50M].sample;
--		} else if (ios->bus_width == MMC_BUS_WIDTH_8) {
--			oclk_dly = host->clk_delays[SDXC_CLK_50M_DDR_8BIT].output;
--			sclk_dly = host->clk_delays[SDXC_CLK_50M_DDR_8BIT].sample;
--		} else {
--			oclk_dly = host->clk_delays[SDXC_CLK_50M_DDR].output;
--			sclk_dly = host->clk_delays[SDXC_CLK_50M_DDR].sample;
--		}
-+	if (host->can_calibrate) {
-+		ret = sunxi_mmc_calibrate(host, ios, SDXC_REG_SAMP_DL_REG);
-+		if (ret)
-+			return ret;
-+
-+		ret = sunxi_mmc_calibrate(host, ios, SDXC_REG_DS_DL_REG);
-+		if (ret)
-+			return ret;
- 	} else {
--		return -EINVAL;
-+		ret = sunxi_mmc_determine_delays(host, ios, rate);
-+		if (ret)
-+			return ret;
- 	}
- 
--	clk_set_phase(host->clk_sample, sclk_dly);
--	clk_set_phase(host->clk_output, oclk_dly);
--
- 	return sunxi_mmc_oclk_onoff(host, 1);
- }
- 
-@@ -990,6 +1042,9 @@ static int sunxi_mmc_resource_request(struct sunxi_mmc_host *host,
- 	else
- 		host->clk_delays = sunxi_mmc_clk_delays;
- 
-+	if (of_device_is_compatible(np, "allwinner,sun50i-a64-mmc"))
-+		host->can_calibrate = true;
-+
- 	ret = mmc_regulator_get_supply(host->mmc);
- 	if (ret) {
- 		if (ret != -EPROBE_DEFER)
--- 
-2.6.4
+Kind regards
+Uffe
