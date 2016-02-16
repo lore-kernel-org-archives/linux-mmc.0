@@ -1,7 +1,7 @@
 From: Jisheng Zhang <jszhang@marvell.com>
-Subject: [PATCH v5 13/13] mmc: sdhci-pltfm: remove priv variable from sdhci_pltfm_host
-Date: Tue, 16 Feb 2016 21:08:31 +0800
-Message-ID: <1455628111-5583-14-git-send-email-jszhang@marvell.com>
+Subject: [PATCH v5 08/13] mmc: sdhci-of-esdhc: use sdhci_pltfm_init for private allocation
+Date: Tue, 16 Feb 2016 21:08:26 +0800
+Message-ID: <1455628111-5583-9-git-send-email-jszhang@marvell.com>
 References: <1455628111-5583-1-git-send-email-jszhang@marvell.com>
 Mime-Version: 1.0
 Content-Type: text/plain
@@ -12,28 +12,88 @@ To: ulf.hansson@linaro.org, adrian.hunter@intel.com, arnd@arndb.de, ludovic.desr
 Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-tegra@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-rpi-kernel@lists.infradead.org, Jisheng Zhang <jszhang@marvell.com>
 List-Id: linux-mmc@vger.kernel.org
 
-Now all clients migration to use sdhci_pltfm_init for private
-allocation is done and there's no users of the priv variable, so we can
-remove it from the sdhci_pltfm_host structure.
+Commit 0e748234293f ("mmc: sdhci: Add size for caller in init+register")
+allows users of sdhci_pltfm to allocate private space in calls to
+sdhci_pltfm_init+sdhci_pltfm_register. This patch migrates the
+sdhci-of-esdhc driver to this allocation.
 
 Signed-off-by: Jisheng Zhang <jszhang@marvell.com>
 Acked-by: Arnd Bergmann <arnd@arndb.de>
 Acked-by: Adrian Hunter <adrian.hunter@intel.com>
 ---
- drivers/mmc/host/sdhci-pltfm.h | 1 -
- 1 file changed, 1 deletion(-)
+ drivers/mmc/host/sdhci-of-esdhc.c | 19 +++++++++----------
+ 1 file changed, 9 insertions(+), 10 deletions(-)
 
-diff --git a/drivers/mmc/host/sdhci-pltfm.h b/drivers/mmc/host/sdhci-pltfm.h
-index 04bc248..d38053b 100644
---- a/drivers/mmc/host/sdhci-pltfm.h
-+++ b/drivers/mmc/host/sdhci-pltfm.h
-@@ -23,7 +23,6 @@ struct sdhci_pltfm_data {
+diff --git a/drivers/mmc/host/sdhci-of-esdhc.c b/drivers/mmc/host/sdhci-of-esdhc.c
+index 83b1226..3f34d35 100644
+--- a/drivers/mmc/host/sdhci-of-esdhc.c
++++ b/drivers/mmc/host/sdhci-of-esdhc.c
+@@ -49,7 +49,7 @@ static u32 esdhc_readl_fixup(struct sdhci_host *host,
+ 				     int spec_reg, u32 value)
+ {
+ 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+-	struct sdhci_esdhc *esdhc = pltfm_host->priv;
++	struct sdhci_esdhc *esdhc = sdhci_pltfm_priv(pltfm_host);
+ 	u32 ret;
  
- struct sdhci_pltfm_host {
- 	struct clk *clk;
--	void *priv; /* to handle quirks across io-accessor calls */
+ 	/*
+@@ -354,7 +354,7 @@ static void esdhc_le_writeb(struct sdhci_host *host, u8 val, int reg)
+ static void esdhc_of_adma_workaround(struct sdhci_host *host, u32 intmask)
+ {
+ 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+-	struct sdhci_esdhc *esdhc = pltfm_host->priv;
++	struct sdhci_esdhc *esdhc = sdhci_pltfm_priv(pltfm_host);
+ 	bool applicable;
+ 	dma_addr_t dmastart;
+ 	dma_addr_t dmanow;
+@@ -404,7 +404,7 @@ static unsigned int esdhc_of_get_min_clock(struct sdhci_host *host)
+ static void esdhc_of_set_clock(struct sdhci_host *host, unsigned int clock)
+ {
+ 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+-	struct sdhci_esdhc *esdhc = pltfm_host->priv;
++	struct sdhci_esdhc *esdhc = sdhci_pltfm_priv(pltfm_host);
+ 	int pre_div = 1;
+ 	int div = 1;
+ 	u32 temp;
+@@ -569,15 +569,12 @@ static void esdhc_init(struct platform_device *pdev, struct sdhci_host *host)
+ 	u16 host_ver;
  
- 	/* migrate from sdhci_of_host */
- 	unsigned int clock;
+ 	pltfm_host = sdhci_priv(host);
+-	esdhc = devm_kzalloc(&pdev->dev, sizeof(struct sdhci_esdhc),
+-			     GFP_KERNEL);
++	esdhc = sdhci_pltfm_priv(pltfm_host);
+ 
+ 	host_ver = sdhci_readw(host, SDHCI_HOST_VERSION);
+ 	esdhc->vendor_ver = (host_ver & SDHCI_VENDOR_VER_MASK) >>
+ 			     SDHCI_VENDOR_VER_SHIFT;
+ 	esdhc->spec_ver = host_ver & SDHCI_SPEC_VER_MASK;
+-
+-	pltfm_host->priv = esdhc;
+ }
+ 
+ static int sdhci_esdhc_probe(struct platform_device *pdev)
+@@ -591,9 +588,11 @@ static int sdhci_esdhc_probe(struct platform_device *pdev)
+ 	np = pdev->dev.of_node;
+ 
+ 	if (of_get_property(np, "little-endian", NULL))
+-		host = sdhci_pltfm_init(pdev, &sdhci_esdhc_le_pdata, 0);
++		host = sdhci_pltfm_init(pdev, &sdhci_esdhc_le_pdata,
++					sizeof(struct sdhci_esdhc));
+ 	else
+-		host = sdhci_pltfm_init(pdev, &sdhci_esdhc_be_pdata, 0);
++		host = sdhci_pltfm_init(pdev, &sdhci_esdhc_be_pdata,
++					sizeof(struct sdhci_esdhc));
+ 
+ 	if (IS_ERR(host))
+ 		return PTR_ERR(host);
+@@ -603,7 +602,7 @@ static int sdhci_esdhc_probe(struct platform_device *pdev)
+ 	sdhci_get_of_property(pdev);
+ 
+ 	pltfm_host = sdhci_priv(host);
+-	esdhc = pltfm_host->priv;
++	esdhc = sdhci_pltfm_priv(pltfm_host);
+ 	if (esdhc->vendor_ver == VENDOR_V_22)
+ 		host->quirks2 |= SDHCI_QUIRK2_HOST_NO_CMD23;
+ 
 -- 
 2.7.0
