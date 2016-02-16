@@ -1,121 +1,84 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v4 00/25] MMC/SDHCI fixes
-Date: Tue, 16 Feb 2016 14:08:34 +0100
-Message-ID: <CAPDyKFr9yxCwywVfXGHxQ5oiEuLbeCv0Btt7SKJZv9gz3+FuDg@mail.gmail.com>
-References: <20160129094324.GA20025@n2100.arm.linux.org.uk>
-	<CAPDyKFqEEHudbQ=GiQzrvrTMRynuBzFMNH5K1Yh3ZVU7UsW2mA@mail.gmail.com>
-	<56BDAAB0.6010209@intel.com>
+From: Jisheng Zhang <jszhang-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>
+Subject: [PATCH v5 00/13] mmc: use sdhci_pltfm_init for private allocation and clean up
+Date: Tue, 16 Feb 2016 21:08:18 +0800
+Message-ID: <1455628111-5583-1-git-send-email-jszhang@marvell.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-yw0-f175.google.com ([209.85.161.175]:34386 "EHLO
-	mail-yw0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932086AbcBPNIf (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 16 Feb 2016 08:08:35 -0500
-Received: by mail-yw0-f175.google.com with SMTP id h129so138508748ywb.1
-        for <linux-mmc@vger.kernel.org>; Tue, 16 Feb 2016 05:08:34 -0800 (PST)
-In-Reply-To: <56BDAAB0.6010209@intel.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Sender: linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, arnd-r2nGTMty4D4@public.gmane.org, ludovic.desroches-AIFe0yeh4nAAvxtiuMwx3w@public.gmane.org, swarren-3lzwWm7+Weoh9ZMKESR00Q@public.gmane.org, lee-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, eric-WhKQ6XTQaPysTnJN9+BGXg@public.gmane.org, michal.simek-gjFFaj9aHVfQT0dZR+AlfA@public.gmane.org, soren.brinkmann-gjFFaj9aHVfQT0dZR+AlfA@public.gmane.org, srinivas.kandagatla-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org, maxime.coquelin-qxv4g6HH51o@public.gmane.org, patrice.chotard-qxv4g6HH51o@public.gmane.org, thierry.reding-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org, sebastian.hesselbarth-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org, kernel-F5mvAk5X5gdBDgjK7y7TUQ@public.gmane.org
+Cc: linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-rpi-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, Jisheng Zhang <jszhang-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: Russell King - ARM Linux <linux@arm.linux.org.uk>, Gregory CLEMENT <gregory.clement@free-electrons.com>, linux-mmc <linux-mmc@vger.kernel.org>, Marcin Wojtas <mw@semihalf.com>, Shawn Guo <shawnguo@kernel.org>, Sascha Hauer <kernel@pengutronix.de>
 
-[...]
+These patches are to complete the TODOs in Commit 0e748234293f ("mmc:
+sdhci: Add size for caller in init+register"), I.E:
 
->
-> I have taken the liberty of re-organizing Russell's patches to put the
-> bug fixes first with stable cc's.  I also did 2 tweaks which result in
-> final code having the diff below to the original:
->
->
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index f857cb2a3d05..03fbb36580f7 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -2270,7 +2270,7 @@ static void sdhci_cmd_irq(struct sdhci_host *host, u32 intmask, u32 *mask)
->                  * will time out.
->                  */
->                 if (host->cmd->data &&
-> -                   intmask & (SDHCI_INT_CRC | SDHCI_INT_TIMEOUT) ==
-> +                   (intmask & (SDHCI_INT_CRC | SDHCI_INT_TIMEOUT)) ==
->                      SDHCI_INT_CRC) {
->                         host->cmd = NULL;
->                         return;
-> @@ -2920,7 +2920,8 @@ int sdhci_add_host(struct sdhci_host *host)
->                         pr_warn("%s: Unable to allocate ADMA buffers - falling back to standard DMA\n",
->                                 mmc_hostname(mmc));
->                         host->flags &= ~SDHCI_USE_ADMA;
-> -               } else if (dma & SDHCI_ADMA2_MASK) {
-> +               } else if ((dma + host->align_buffer_sz) &
-> +                          (SDHCI_ADMA2_DESC_ALIGN - 1)) {
->                         pr_warn("%s: unable to allocate aligned ADMA descriptor\n",
->                                 mmc_hostname(mmc));
->                         host->flags &= ~SDHCI_USE_ADMA;
->
->
-> Where I have made changes, they are indicated in the patch commit.
->
-> I did some basic testing of eMMC, SD card and SDIO, for the fixes alone
-> and also the entire patch set.
->
-> Russell, please let me know if this is OK, and if so, Ulf please consider
-> pulling:
->
->
-> The following changes since commit 7d9e20d2be0d836c4eb7afca901eced34274c8dd:
->
->   Merge branch 'fixes' into next (2016-02-08 16:22:56 +0100)
->
-> are available in the git repository at:
->
->
->   git://git.infradead.org/users/ahunter/linux-sdhci.git master
->
-> for you to fetch changes up to eb6bf3c3513d2e2ab77d86bc6c2f2755073f0745:
->
->   mmc: sdhci: further code simplication (2016-02-11 16:24:46 +0200)
->
-> ----------------------------------------------------------------
-> Russell King (22):
->       mmc: sdhci: move initialisation of command error member
->       mmc: sdhci: clean up command error handling
->       mmc: sdhci: fix command response CRC error handling
->       mmc: sdhci: avoid unnecessary mapping/unmapping of align buffer
->       mmc: sdhci: plug DMA mapping leak on error
->       mmc: sdhci-pxav3: fix higher speed mode capabilities
->       mmc: sdhci: further fix for DMA unmapping in sdhci_post_req()
->       mmc: sdhci: fix data timeout (part 1)
->       mmc: sdhci: fix data timeout (part 2)
->       mmc: sdhci: allocate alignment and DMA descriptor buffer together
->       mmc: sdhci: clean up coding style in sdhci_adma_table_pre()
->       mmc: sdhci: avoid walking SG list for writes
->       mmc: sdhci: factor out common DMA cleanup in sdhci_finish_data()
->       mmc: sdhci: move sdhci_pre_dma_transfer()
->       mmc: sdhci: factor out sdhci_pre_dma_transfer() from sdhci_adma_table_pre()
->       mmc: sdhci: pass the cookie into sdhci_pre_dma_transfer()
->       mmc: sdhci: always unmap a mapped data transfer in sdhci_post_req()
->       mmc: sdhci: clean up host cookie handling
->       mmc: sdhci: cleanup DMA un-mapping
->       mmc: sdhci: prepare DMA address/size quirk handling consolidation
->       mmc: sdhci: consolidate the DMA/ADMA size/address quicks
->       mmc: sdhci: further code simplication
->
->  drivers/mmc/host/sdhci-pxav3.c |   6 ++-
->  drivers/mmc/host/sdhci.c       | 444 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++-------------------------------------------------------------------------------------------
->  drivers/mmc/host/sdhci.h       |   4 +-
->  3 files changed, 200 insertions(+), 254 deletions(-)
->
->
-> Regards
-> Adrian
+- todo: migrate clients to using allocation this way
+- todo: remove priv variable once migration is complete
+
+Since v4:
+ - based on Ulf's latest next branch
+ - add Adrian's Ack for all patches, add Thierry's Ack and Test for pat=
+ch 11
+   add S=C3=B6ren Ack for patch 5.
+
+Since v3:
+ - based on v4.5-rc1
+ - add Ludovic's ack for sdhci-of-at91 changes
+ - fix use-after-free in some drivers: some host drivers still needs to
+   access sdhci_pltfm_host->private after sdhci_pltfm_unregister(), but
+   the private should be already freed by sdhci_pltfm_unregister.
+ - add patch5 to fix one clk bug in sdhci_arasan_remove(). IMHO, It's
+   better to add this patch to fixes rather than waiting for next merge
+   window
+
+Since v2:
+ - based on mmc next tree and remove all priv usage introduced in newly
+   commits in this tree
+ - don't break two lines if sdhci_pltfm_init() call could be put into
+   one line. Thank Ludovic Desroches.
+
+Since v1:
+ - add new patch03 to factorise sdhci_msm_pdata outisde of sdhci_msm_ho=
+st.
+   This is to fix drivers/mmc/host/sdhci-msm.c:440:32: warning: 'msm_ho=
+st'
+   is used uninitialized in this function [-Wuninitialized]
+ - Add Arnd's Ack for all patches except patch3 which is new in v2
 
 
-Thanks Adrian!
+Jisheng Zhang (13):
+  mmc: sdhci-bcm2835: use sdhci_pltfm_init for private allocation
+  mmc: sdhci-esdhc-imx: use sdhci_pltfm_init for private allocation
+  mmc: sdhci-msm: factorise sdhci_msm_pdata outisde of sdhci_msm_host
+  mmc: sdhci-msm: use sdhci_pltfm_init for private allocation
+  mmc: sdhci-of-arasan: fix clk issue in sdhci_arasan_remove()
+  mmc: sdhci-of-arasan: use sdhci_pltfm_init for private allocation
+  mmc: sdhci-of-at91: use sdhci_pltfm_init for private allocation
+  mmc: sdhci-of-esdhc: use sdhci_pltfm_init for private allocation
+  mmc: sdhci-pxav3: use sdhci_pltfm_init for private allocation
+  mmc: sdhci-st: use sdhci_pltfm_init for private allocation
+  mmc: sdhci-tegra: use sdhci_pltfm_init for private allocation
+  mmc: sdhci-pxav2: remove unnecessary assignment of pltfm_host->priv
+  mmc: sdhci-pltfm: remove priv variable from sdhci_pltfm_host
 
-I have pulled in the changes, or actually cherry-picked them as I have
-re-based my next branch.
+ drivers/mmc/host/sdhci-bcm2835.c   | 14 +++----------
+ drivers/mmc/host/sdhci-esdhc-imx.c | 38 ++++++++++++++++--------------=
+------
+ drivers/mmc/host/sdhci-msm.c       | 25 +++++++++++-------------
+ drivers/mmc/host/sdhci-of-arasan.c | 33 +++++++++++++++---------------=
+-
+ drivers/mmc/host/sdhci-of-at91.c   | 33 ++++++++++++++----------------=
+-
+ drivers/mmc/host/sdhci-of-esdhc.c  | 19 +++++++++---------
+ drivers/mmc/host/sdhci-pltfm.h     |  1 -
+ drivers/mmc/host/sdhci-pxav2.c     |  1 -
+ drivers/mmc/host/sdhci-pxav3.c     | 20 ++++++++-----------
+ drivers/mmc/host/sdhci-st.c        | 40 +++++++++++++++++++-----------=
+--------
+ drivers/mmc/host/sdhci-tegra.c     | 21 +++++++-------------
+ 11 files changed, 106 insertions(+), 139 deletions(-)
 
-Also, I have added Gregory's tested-by tag.
-
-Kind regards
-Uffe
+--=20
+2.7.0
