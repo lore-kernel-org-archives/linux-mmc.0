@@ -1,193 +1,217 @@
-From: Jisheng Zhang <jszhang@marvell.com>
-Subject: [PATCH v5 02/13] mmc: sdhci-esdhc-imx: use sdhci_pltfm_init for
- private allocation
-Date: Tue, 16 Feb 2016 21:08:20 +0800
-Message-ID: <1455628111-5583-3-git-send-email-jszhang@marvell.com>
-References: <1455628111-5583-1-git-send-email-jszhang@marvell.com>
+From: Andre Przywara <andre.przywara-5wv7dgnIgG8@public.gmane.org>
+Subject: [RFC PATCH] (broken) implementation of A64 MMC delay calibration
+Date: Tue, 16 Feb 2016 14:16:19 +0000
+Message-ID: <1455632179-8102-1-git-send-email-andre.przywara@arm.com>
+Reply-To: andre.przywara-5wv7dgnIgG8@public.gmane.org
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <1455628111-5583-1-git-send-email-jszhang@marvell.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: ulf.hansson@linaro.org, adrian.hunter@intel.com, arnd@arndb.de, ludovic.desroches@atmel.com, swarren@wwwdotorg.org, lee@kernel.org, eric@anholt.net, michal.simek@xilinx.com, soren.brinkmann@xilinx.com, srinivas.kandagatla@gmail.com, maxime.coquelin@st.com, patrice.chotard@st.com, thierry.reding@gmail.com, sebastian.hesselbarth@gmail.com, kernel@stlinux.com
-Cc: Jisheng Zhang <jszhang@marvell.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-rpi-kernel@lists.infradead.org, linux-tegra@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-sunxi+bncBDNZNK75ZIKRBQO6RS3AKGQE2RVEPGA-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Post: <https://groups.google.com/group/linux-sunxi/post>, <mailto:linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Help: <https://groups.google.com/support/>, <mailto:linux-sunxi+help-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Archive: <https://groups.google.com/group/linux-sunxi
+Sender: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
+List-Subscribe: <https://groups.google.com/group/linux-sunxi/subscribe>, <mailto:linux-sunxi+subscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Unsubscribe: <mailto:googlegroups-manage+1076902468213+unsubscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>,
+ <https://groups.google.com/group/linux-sunxi/subscribe>
+To: Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org>, Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>, Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
 
-Commit 0e748234293f ("mmc: sdhci: Add size for caller in init+register")
-allows users of sdhci_pltfm to allocate private space in calls to
-sdhci_pltfm_init+sdhci_pltfm_register. This patch migrates the sdhci
-esdhc-imx driver to this allocation.
+Hi,
 
-Signed-off-by: Jisheng Zhang <jszhang@marvell.com>
-Acked-by: Arnd Bergmann <arnd@arndb.de>
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+as people were asking for it, here is my first attempt on proper
+Allwinner A64 MMC support.
+Former Allwinner MMC implementations used a special MMC clock, where
+two clocks could be phase-offset-ed to match the timing requirements.
+Those clocks have vanished, instead the phase seems to be now created
+internally in the MMC blob using some new registers. Also there is an
+auto-calibration feature with should help us to get the right values.
+
+This patch is a naive implementation by just looking at the manual.
+Unfortunately it does not work: The first calibration loop seems to
+work, but returns all 1's as the result, which sounds suspicious.
+The second calibration loop hangs (which reminds me of adding a
+timeout):
+[ 4.187144] sunxi_mmc: starting sample delay calibration
+[ 4.192306] calibrate 0x144: register reads as 0x2000
+[ 4.201770] calibrate 0x144: tried 16 times, reg=0x7f00
+[ 4.206976] sunxi-mmc: delay for register 0x144: 63
+[ 4.211665] calibrate 0x144: writing: 0x7fbf
+[ 4.216353] sunxi_mmc: starting data strobe delay calibration
+[ 4.221865] calibrate 0x148: register reads as 0x2000
+(hang)
+
+I didn't have time (and courage) yet to take a closer look at the BSP
+kernel, but it seems like they don't use this feature for some reason?
+
+Also my knowledge of MMC is very limited, so I might be missing
+something obvious. Do we need to setup this other register
+(SMHC Drive Delay Control Register at 0x0140) as well or are the
+default settings good enough?
+
+I am posting this so that other people can have a look or use it as
+a base for own experiments.
+
+Signed-off-by: Andre Przywara <andre.przywara-5wv7dgnIgG8@public.gmane.org>
+
 ---
- drivers/mmc/host/sdhci-esdhc-imx.c | 38 +++++++++++++++++---------------------
- 1 file changed, 17 insertions(+), 21 deletions(-)
+ drivers/mmc/host/sunxi-mmc.c | 103 +++++++++++++++++++++++++++++++++----------
+ 1 file changed, 79 insertions(+), 24 deletions(-)
 
-diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
-index f25f292..2d300d8 100644
---- a/drivers/mmc/host/sdhci-esdhc-imx.c
-+++ b/drivers/mmc/host/sdhci-esdhc-imx.c
-@@ -260,7 +260,7 @@ static inline void esdhc_clrset_le(struct sdhci_host *host, u32 mask, u32 val, i
- static u32 esdhc_readl_le(struct sdhci_host *host, int reg)
- {
- 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
--	struct pltfm_imx_data *imx_data = pltfm_host->priv;
-+	struct pltfm_imx_data *imx_data = sdhci_pltfm_priv(pltfm_host);
- 	u32 val = readl(host->ioaddr + reg);
+diff --git a/drivers/mmc/host/sunxi-mmc.c b/drivers/mmc/host/sunxi-mmc.c
+index 8372a41..0c81a4d 100644
+--- a/drivers/mmc/host/sunxi-mmc.c
++++ b/drivers/mmc/host/sunxi-mmc.c
+@@ -71,6 +71,8 @@
+ #define SDXC_REG_IDIE	(0x8C) /* SMC IDMAC Interrupt Enable Register */
+ #define SDXC_REG_CHDA	(0x90)
+ #define SDXC_REG_CBDA	(0x94)
++#define SDXC_REG_SAMP_DL_REG	0x144	/* SMC sample delay control */
++#define SDXC_REG_DS_DL_REG	0x148	/* SMC data strobe delay control */
  
- 	if (unlikely(reg == SDHCI_PRESENT_STATE)) {
-@@ -338,7 +338,7 @@ static u32 esdhc_readl_le(struct sdhci_host *host, int reg)
- static void esdhc_writel_le(struct sdhci_host *host, u32 val, int reg)
- {
- 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
--	struct pltfm_imx_data *imx_data = pltfm_host->priv;
-+	struct pltfm_imx_data *imx_data = sdhci_pltfm_priv(pltfm_host);
- 	u32 data;
+ #define mmc_readl(host, reg) \
+ 	readl((host)->reg_base + SDXC_##reg)
+@@ -217,6 +219,13 @@
+ #define SDXC_CLK_50M_DDR	3
+ #define SDXC_CLK_50M_DDR_8BIT	4
  
- 	if (unlikely(reg == SDHCI_INT_ENABLE || reg == SDHCI_SIGNAL_ENABLE)) {
-@@ -388,7 +388,7 @@ static void esdhc_writel_le(struct sdhci_host *host, u32 val, int reg)
- static u16 esdhc_readw_le(struct sdhci_host *host, int reg)
- {
- 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
--	struct pltfm_imx_data *imx_data = pltfm_host->priv;
-+	struct pltfm_imx_data *imx_data = sdhci_pltfm_priv(pltfm_host);
- 	u16 ret = 0;
- 	u32 val;
++#define SDXC_CAL_START		BIT(15)
++#define SDXC_CAL_DONE		BIT(14)
++#define SDXC_CAL_DL_SHIFT	8
++#define SDXC_CAL_DL_SW_EN	BIT(7)
++#define SDXC_CAL_DL_SW_SHIFT	0
++#define SDXC_CAL_DL_MASK	0x3f
++
+ struct sunxi_mmc_clk_delay {
+ 	u32 output;
+ 	u32 sample;
+@@ -261,6 +270,9 @@ struct sunxi_mmc_host {
  
-@@ -448,7 +448,7 @@ static u16 esdhc_readw_le(struct sdhci_host *host, int reg)
- static void esdhc_writew_le(struct sdhci_host *host, u16 val, int reg)
- {
- 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
--	struct pltfm_imx_data *imx_data = pltfm_host->priv;
-+	struct pltfm_imx_data *imx_data = sdhci_pltfm_priv(pltfm_host);
- 	u32 new_val = 0;
+ 	/* vqmmc */
+ 	bool		vqmmc_enabled;
++
++	/* does the IP block support autocalibration? */
++	bool		can_calibrate;
+ };
  
- 	switch (reg) {
-@@ -556,7 +556,7 @@ static void esdhc_writew_le(struct sdhci_host *host, u16 val, int reg)
- static void esdhc_writeb_le(struct sdhci_host *host, u8 val, int reg)
- {
- 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
--	struct pltfm_imx_data *imx_data = pltfm_host->priv;
-+	struct pltfm_imx_data *imx_data = sdhci_pltfm_priv(pltfm_host);
- 	u32 new_val;
- 	u32 mask;
- 
-@@ -633,7 +633,7 @@ static inline void esdhc_pltfm_set_clock(struct sdhci_host *host,
- 					 unsigned int clock)
- {
- 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
--	struct pltfm_imx_data *imx_data = pltfm_host->priv;
-+	struct pltfm_imx_data *imx_data = sdhci_pltfm_priv(pltfm_host);
- 	unsigned int host_clock = pltfm_host->clock;
- 	int pre_div = 2;
- 	int div = 1;
-@@ -692,7 +692,7 @@ static inline void esdhc_pltfm_set_clock(struct sdhci_host *host,
- static unsigned int esdhc_pltfm_get_ro(struct sdhci_host *host)
- {
- 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
--	struct pltfm_imx_data *imx_data = pltfm_host->priv;
-+	struct pltfm_imx_data *imx_data = sdhci_pltfm_priv(pltfm_host);
- 	struct esdhc_platform_data *boarddata = &imx_data->boarddata;
- 
- 	switch (boarddata->wp_type) {
-@@ -794,7 +794,7 @@ static int esdhc_change_pinstate(struct sdhci_host *host,
- 						unsigned int uhs)
- {
- 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
--	struct pltfm_imx_data *imx_data = pltfm_host->priv;
-+	struct pltfm_imx_data *imx_data = sdhci_pltfm_priv(pltfm_host);
- 	struct pinctrl_state *pinctrl;
- 
- 	dev_dbg(mmc_dev(host->mmc), "change pinctrl state for uhs %d\n", uhs);
-@@ -864,7 +864,7 @@ static void esdhc_set_uhs_signaling(struct sdhci_host *host, unsigned timing)
- {
- 	u32 m;
- 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
--	struct pltfm_imx_data *imx_data = pltfm_host->priv;
-+	struct pltfm_imx_data *imx_data = sdhci_pltfm_priv(pltfm_host);
- 	struct esdhc_platform_data *boarddata = &imx_data->boarddata;
- 
- 	/* disable ddr mode and disable HS400 mode */
-@@ -917,7 +917,7 @@ static void esdhc_reset(struct sdhci_host *host, u8 mask)
- static unsigned int esdhc_get_max_timeout_count(struct sdhci_host *host)
- {
- 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
--	struct pltfm_imx_data *imx_data = pltfm_host->priv;
-+	struct pltfm_imx_data *imx_data = sdhci_pltfm_priv(pltfm_host);
- 
- 	return esdhc_is_usdhc(imx_data) ? 1 << 28 : 1 << 27;
+ static int sunxi_mmc_reset_host(struct sunxi_mmc_host *host)
+@@ -653,10 +665,62 @@ static int sunxi_mmc_oclk_onoff(struct sunxi_mmc_host *host, u32 oclk_en)
+ 	return 0;
  }
-@@ -925,7 +925,7 @@ static unsigned int esdhc_get_max_timeout_count(struct sdhci_host *host)
- static void esdhc_set_timeout(struct sdhci_host *host, struct mmc_command *cmd)
+ 
++static int sunxi_mmc_calibrate(struct sunxi_mmc_host *host,
++			       struct mmc_ios *ios, int reg_off)
++{
++	u32 reg = readl(host->reg_base + reg_off);
++	u32 delay;
++
++	reg &= ~(SDXC_CAL_DL_MASK << SDXC_CAL_DL_SW_SHIFT);
++	reg &= ~SDXC_CAL_DL_SW_EN;
++
++	writel(reg | SDXC_CAL_START, host->reg_base + reg_off);
++
++	while (!((reg = readl(host->reg_base + reg_off)) & SDXC_CAL_DONE))
++		cpu_relax();
++
++	delay = (reg >> SDXC_CAL_DL_SHIFT) & SDXC_CAL_DL_MASK;
++
++	reg &= ~SDXC_CAL_START;
++	reg |= (delay << SDXC_CAL_DL_SW_SHIFT) | SDXC_CAL_DL_SW_EN;
++
++	writel(reg, host->reg_base + reg_off);
++
++	return 0;
++}
++
++static int sunxi_mmc_determine_delays(struct sunxi_mmc_host *host,
++				      struct mmc_ios *ios, int rate)
++{
++	int index;
++
++	if (rate <= 400000) {
++		index = SDXC_CLK_400K;
++	} else if (rate <= 25000000) {
++		index = SDXC_CLK_25M;
++	} else if (rate <= 52000000) {
++		if (ios->timing != MMC_TIMING_UHS_DDR50 &&
++		    ios->timing != MMC_TIMING_MMC_DDR52) {
++			index = SDXC_CLK_50M;
++		} else if (ios->bus_width == MMC_BUS_WIDTH_8) {
++			index = SDXC_CLK_50M_DDR_8BIT;
++		} else {
++			index = SDXC_CLK_50M_DDR;
++		}
++	} else {
++		return -EINVAL;
++	}
++
++	clk_set_phase(host->clk_sample, host->clk_delays[index].sample);
++	clk_set_phase(host->clk_output, host->clk_delays[index].output);
++
++	return 0;
++}
++
+ static int sunxi_mmc_clk_set_rate(struct sunxi_mmc_host *host,
+ 				  struct mmc_ios *ios)
  {
- 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
--	struct pltfm_imx_data *imx_data = pltfm_host->priv;
-+	struct pltfm_imx_data *imx_data = sdhci_pltfm_priv(pltfm_host);
- 
- 	/* use maximum timeout counter */
- 	sdhci_writeb(host, esdhc_is_usdhc(imx_data) ? 0xF : 0xE,
-@@ -1100,21 +1100,17 @@ static int sdhci_esdhc_imx_probe(struct platform_device *pdev)
- 	int err;
- 	struct pltfm_imx_data *imx_data;
- 
--	host = sdhci_pltfm_init(pdev, &sdhci_esdhc_imx_pdata, 0);
-+	host = sdhci_pltfm_init(pdev, &sdhci_esdhc_imx_pdata,
-+				sizeof(*imx_data));
- 	if (IS_ERR(host))
- 		return PTR_ERR(host);
- 
- 	pltfm_host = sdhci_priv(host);
- 
--	imx_data = devm_kzalloc(&pdev->dev, sizeof(*imx_data), GFP_KERNEL);
--	if (!imx_data) {
--		err = -ENOMEM;
--		goto free_sdhci;
--	}
-+	imx_data = sdhci_pltfm_priv(pltfm_host);
- 
- 	imx_data->socdata = of_id ? of_id->data : (struct esdhc_soc_data *)
- 						  pdev->id_entry->driver_data;
--	pltfm_host->priv = imx_data;
- 
- 	imx_data->clk_ipg = devm_clk_get(&pdev->dev, "ipg");
- 	if (IS_ERR(imx_data->clk_ipg)) {
-@@ -1241,7 +1237,7 @@ static int sdhci_esdhc_imx_remove(struct platform_device *pdev)
- {
- 	struct sdhci_host *host = platform_get_drvdata(pdev);
- 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
--	struct pltfm_imx_data *imx_data = pltfm_host->priv;
-+	struct pltfm_imx_data *imx_data = sdhci_pltfm_priv(pltfm_host);
- 	int dead = (readl(host->ioaddr + SDHCI_INT_STATUS) == 0xffffffff);
- 
- 	pm_runtime_get_sync(&pdev->dev);
-@@ -1264,7 +1260,7 @@ static int sdhci_esdhc_runtime_suspend(struct device *dev)
- {
- 	struct sdhci_host *host = dev_get_drvdata(dev);
- 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
--	struct pltfm_imx_data *imx_data = pltfm_host->priv;
-+	struct pltfm_imx_data *imx_data = sdhci_pltfm_priv(pltfm_host);
+-	u32 rate, oclk_dly, rval, sclk_dly;
++	u32 rate, rval;
+ 	u32 clock = ios->clock;
  	int ret;
  
- 	ret = sdhci_runtime_suspend_host(host);
-@@ -1282,7 +1278,7 @@ static int sdhci_esdhc_runtime_resume(struct device *dev)
- {
- 	struct sdhci_host *host = dev_get_drvdata(dev);
- 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
--	struct pltfm_imx_data *imx_data = pltfm_host->priv;
-+	struct pltfm_imx_data *imx_data = sdhci_pltfm_priv(pltfm_host);
+@@ -692,32 +756,20 @@ static int sunxi_mmc_clk_set_rate(struct sunxi_mmc_host *host,
+ 	}
+ 	mmc_writel(host, REG_CLKCR, rval);
  
- 	if (!sdhci_sdio_irq_enabled(host)) {
- 		clk_prepare_enable(imx_data->clk_per);
+-	/* determine delays */
+-	if (rate <= 400000) {
+-		oclk_dly = host->clk_delays[SDXC_CLK_400K].output;
+-		sclk_dly = host->clk_delays[SDXC_CLK_400K].sample;
+-	} else if (rate <= 25000000) {
+-		oclk_dly = host->clk_delays[SDXC_CLK_25M].output;
+-		sclk_dly = host->clk_delays[SDXC_CLK_25M].sample;
+-	} else if (rate <= 52000000) {
+-		if (ios->timing != MMC_TIMING_UHS_DDR50 &&
+-		    ios->timing != MMC_TIMING_MMC_DDR52) {
+-			oclk_dly = host->clk_delays[SDXC_CLK_50M].output;
+-			sclk_dly = host->clk_delays[SDXC_CLK_50M].sample;
+-		} else if (ios->bus_width == MMC_BUS_WIDTH_8) {
+-			oclk_dly = host->clk_delays[SDXC_CLK_50M_DDR_8BIT].output;
+-			sclk_dly = host->clk_delays[SDXC_CLK_50M_DDR_8BIT].sample;
+-		} else {
+-			oclk_dly = host->clk_delays[SDXC_CLK_50M_DDR].output;
+-			sclk_dly = host->clk_delays[SDXC_CLK_50M_DDR].sample;
+-		}
++	if (host->can_calibrate) {
++		ret = sunxi_mmc_calibrate(host, ios, SDXC_REG_SAMP_DL_REG);
++		if (ret)
++			return ret;
++
++		ret = sunxi_mmc_calibrate(host, ios, SDXC_REG_DS_DL_REG);
++		if (ret)
++			return ret;
+ 	} else {
+-		return -EINVAL;
++		ret = sunxi_mmc_determine_delays(host, ios, rate);
++		if (ret)
++			return ret;
+ 	}
+ 
+-	clk_set_phase(host->clk_sample, sclk_dly);
+-	clk_set_phase(host->clk_output, oclk_dly);
+-
+ 	return sunxi_mmc_oclk_onoff(host, 1);
+ }
+ 
+@@ -990,6 +1042,9 @@ static int sunxi_mmc_resource_request(struct sunxi_mmc_host *host,
+ 	else
+ 		host->clk_delays = sunxi_mmc_clk_delays;
+ 
++	if (of_device_is_compatible(np, "allwinner,sun50i-a64-mmc"))
++		host->can_calibrate = true;
++
+ 	ret = mmc_regulator_get_supply(host->mmc);
+ 	if (ret) {
+ 		if (ret != -EPROBE_DEFER)
 -- 
-2.7.0
+2.6.4
