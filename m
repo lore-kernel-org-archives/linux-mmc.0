@@ -1,27 +1,21 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH RESEND 1/3] mmc: sdhi: Add r8a7795 support
-Date: Tue, 16 Feb 2016 17:35:26 +0100
-Message-ID: <CAPDyKFpgSGKwLNEVor3-ZfM5KhVjnfDnGXqmXeTiftPZFS8N4g@mail.gmail.com>
-References: <1455548510-1690-1-git-send-email-wsa@the-dreams.de>
-	<1455548510-1690-2-git-send-email-wsa@the-dreams.de>
+Subject: Re: [PATCH] mmc: mediatek: add SD write protect support
+Date: Tue, 16 Feb 2016 17:35:33 +0100
+Message-ID: <CAPDyKFoVj9BDsAsuDV+h7=06FD7Kv=ivN=p=LZMMO+yF2QZ67Q@mail.gmail.com>
+References: <1455474660-19864-1-git-send-email-chaotian.jing@mediatek.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-renesas-soc-owner@vger.kernel.org>
-In-Reply-To: <1455548510-1690-2-git-send-email-wsa@the-dreams.de>
-Sender: linux-renesas-soc-owner@vger.kernel.org
-To: Wolfram Sang <wsa@the-dreams.de>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, linux-renesas-soc@vger.kernel.org, Dirk Behme <dirk.behme@gmail.com>, Geert Uytterhoeven <geert@linux-m68k.org>, Simon Horman <horms@verge.net.au>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1455474660-19864-1-git-send-email-chaotian.jing@mediatek.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Chaotian Jing <chaotian.jing@mediatek.com>
+Cc: Matthias Brugger <matthias.bgg@gmail.com>, Geert Uytterhoeven <geert@linux-m68k.org>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, linux-mediatek@lists.infradead.org, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, srv_heupstream <srv_heupstream@mediatek.com>, Sascha Hauer <kernel@pengutronix.de>, Daniel Kurtz <djkurtz@chromium.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On 15 February 2016 at 16:01, Wolfram Sang <wsa@the-dreams.de> wrote:
-> From: Wolfram Sang <wsa+renesas@sang-engineering.com>
+On 14 February 2016 at 19:31, Chaotian Jing <chaotian.jing@mediatek.com> wrote:
+> use mmc core layer's API to support sd write protect
 >
-> Registers are 64bit apart, so we refactor bus_shift handling a little and set
-> it based on the DT compatible. Also, EXT_ACC is different. It has been tested
-> on a Salvator-X (Gen3) and, to check for regressions, on a Lager (Gen2).
->
-> Signed-off-by: Ai Kyuse <ai.kyuse.uw@renesas.com>
-> Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+> Signed-off-by: Chaotian Jing <chaotian.jing@mediatek.com>
 
 Thanks, applied for next!
 
@@ -29,142 +23,29 @@ Kind regards
 Uffe
 
 > ---
->  Documentation/devicetree/bindings/mmc/tmio_mmc.txt |  1 +
->  drivers/mmc/host/Kconfig                           |  2 +-
->  drivers/mmc/host/sh_mobile_sdhi.c                  | 47 ++++++++++++++++------
->  3 files changed, 36 insertions(+), 14 deletions(-)
+>  drivers/mmc/host/mtk-sd.c | 2 ++
+>  1 file changed, 2 insertions(+)
 >
-> diff --git a/Documentation/devicetree/bindings/mmc/tmio_mmc.txt b/Documentation/devicetree/bindings/mmc/tmio_mmc.txt
-> index 400b640fabc768..7fb746dd1a68ca 100644
-> --- a/Documentation/devicetree/bindings/mmc/tmio_mmc.txt
-> +++ b/Documentation/devicetree/bindings/mmc/tmio_mmc.txt
-> @@ -22,6 +22,7 @@ Required properties:
->                 "renesas,sdhi-r8a7792" - SDHI IP on R8A7792 SoC
->                 "renesas,sdhi-r8a7793" - SDHI IP on R8A7793 SoC
->                 "renesas,sdhi-r8a7794" - SDHI IP on R8A7794 SoC
-> +               "renesas,sdhi-r8a7795" - SDHI IP on R8A7795 SoC
+> diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
+> index 82a97ac..f01972e 100644
+> --- a/drivers/mmc/host/mtk-sd.c
+> +++ b/drivers/mmc/host/mtk-sd.c
+> @@ -35,6 +35,7 @@
+>  #include <linux/mmc/mmc.h>
+>  #include <linux/mmc/sd.h>
+>  #include <linux/mmc/sdio.h>
+> +#include <linux/mmc/slot-gpio.h>
 >
->  Optional properties:
->  - toshiba,mmc-wrprotect-disable: write-protect detection is unavailable
-> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
-> index 4a35ebf5165d83..d9a9d92fa8379a 100644
-> --- a/drivers/mmc/host/Kconfig
-> +++ b/drivers/mmc/host/Kconfig
-> @@ -560,7 +560,7 @@ config MMC_TMIO
+>  #define MAX_BD_NUM          1024
 >
->  config MMC_SDHI
->         tristate "SH-Mobile SDHI SD/SDIO controller support"
-> -       depends on SUPERH || ARM
-> +       depends on SUPERH || ARM || ARM64
->         depends on SUPERH || ARCH_SHMOBILE || COMPILE_TEST
->         select MMC_TMIO_CORE
->         help
-> diff --git a/drivers/mmc/host/sh_mobile_sdhi.c b/drivers/mmc/host/sh_mobile_sdhi.c
-> index 557e2b9dadeec7..9aa147959276d0 100644
-> --- a/drivers/mmc/host/sh_mobile_sdhi.c
-> +++ b/drivers/mmc/host/sh_mobile_sdhi.c
-> @@ -1,6 +1,8 @@
->  /*
->   * SuperH Mobile SDHI
->   *
-> + * Copyright (C) 2016 Sang Engineering, Wolfram Sang
-> + * Copyright (C) 2015-16 Renesas Electronics Corporation
->   * Copyright (C) 2009 Magnus Damm
->   *
->   * This program is free software; you can redistribute it and/or modify
-> @@ -43,6 +45,7 @@ struct sh_mobile_sdhi_of_data {
->         unsigned long capabilities2;
->         enum dma_slave_buswidth dma_buswidth;
->         dma_addr_t dma_rx_offset;
-> +       unsigned bus_shift;
->  };
->
->  static const struct sh_mobile_sdhi_of_data sh_mobile_sdhi_of_cfg[] = {
-> @@ -65,6 +68,13 @@ static const struct sh_mobile_sdhi_of_data of_rcar_gen2_compatible = {
->         .dma_rx_offset  = 0x2000,
->  };
->
-> +static const struct sh_mobile_sdhi_of_data of_rcar_gen3_compatible = {
-> +       .tmio_flags     = TMIO_MMC_HAS_IDLE_WAIT | TMIO_MMC_WRPROTECT_DISABLE |
-> +                         TMIO_MMC_CLK_ACTUAL | TMIO_MMC_FAST_CLK_CHG,
-> +       .capabilities   = MMC_CAP_SD_HIGHSPEED,
-> +       .bus_shift      = 2,
-> +};
-> +
->  static const struct of_device_id sh_mobile_sdhi_of_match[] = {
->         { .compatible = "renesas,sdhi-shmobile" },
->         { .compatible = "renesas,sdhi-sh7372" },
-> @@ -78,6 +88,7 @@ static const struct of_device_id sh_mobile_sdhi_of_match[] = {
->         { .compatible = "renesas,sdhi-r8a7792", .data = &of_rcar_gen2_compatible, },
->         { .compatible = "renesas,sdhi-r8a7793", .data = &of_rcar_gen2_compatible, },
->         { .compatible = "renesas,sdhi-r8a7794", .data = &of_rcar_gen2_compatible, },
-> +       { .compatible = "renesas,sdhi-r8a7795", .data = &of_rcar_gen3_compatible, },
->         {},
->  };
->  MODULE_DEVICE_TABLE(of, sh_mobile_sdhi_of_match);
-> @@ -103,6 +114,15 @@ static void sh_mobile_sdhi_sdbuf_width(struct tmio_mmc_host *host, int width)
->         case 0xCB0D:
->                 val = (width == 32) ? 0x0000 : 0x0001;
->                 break;
-> +       case 0xCC10: /* Gen3, SD only */
-> +       case 0xCD10: /* Gen3, SD + MMC */
-> +               if (width == 64)
-> +                       val = 0x0000;
-> +               else if (width == 32)
-> +                       val = 0x0101;
-> +               else
-> +                       val = 0x0001;
-> +               break;
->         default:
->                 /* nothing to do */
->                 return;
-> @@ -233,16 +253,26 @@ static int sh_mobile_sdhi_probe(struct platform_device *pdev)
->                 goto eprobe;
->         }
->
-> +       if (of_id && of_id->data) {
-> +               const struct sh_mobile_sdhi_of_data *of_data = of_id->data;
-> +
-> +               mmc_data->flags |= of_data->tmio_flags;
-> +               mmc_data->capabilities |= of_data->capabilities;
-> +               mmc_data->capabilities2 |= of_data->capabilities2;
-> +               mmc_data->dma_rx_offset = of_data->dma_rx_offset;
-> +               dma_priv->dma_buswidth = of_data->dma_buswidth;
-> +               host->bus_shift = of_data->bus_shift;
-> +       }
-> +
->         host->dma               = dma_priv;
->         host->write16_hook      = sh_mobile_sdhi_write16_hook;
->         host->clk_enable        = sh_mobile_sdhi_clk_enable;
->         host->clk_disable       = sh_mobile_sdhi_clk_disable;
->         host->multi_io_quirk    = sh_mobile_sdhi_multi_io_quirk;
-> -       /* SD control register space size is 0x100, 0x200 for bus_shift=1 */
-> -       if (resource_size(res) > 0x100)
-> +
-> +       /* Orginally registers were 16 bit apart, could be 32 or 64 nowadays */
-> +       if (!host->bus_shift && resource_size(res) > 0x100) /* old way to determine the shift */
->                 host->bus_shift = 1;
-> -       else
-> -               host->bus_shift = 0;
->
->         if (mmd)
->                 *mmc_data = *mmd;
-> @@ -274,15 +304,6 @@ static int sh_mobile_sdhi_probe(struct platform_device *pdev)
->          */
->         mmc_data->flags |= TMIO_MMC_SDIO_STATUS_QUIRK;
->
-> -       if (of_id && of_id->data) {
-> -               const struct sh_mobile_sdhi_of_data *of_data = of_id->data;
-> -               mmc_data->flags |= of_data->tmio_flags;
-> -               mmc_data->capabilities |= of_data->capabilities;
-> -               mmc_data->capabilities2 |= of_data->capabilities2;
-> -               mmc_data->dma_rx_offset = of_data->dma_rx_offset;
-> -               dma_priv->dma_buswidth = of_data->dma_buswidth;
-> -       }
-> -
->         ret = tmio_mmc_host_probe(host, mmc_data);
->         if (ret < 0)
->                 goto efree;
+> @@ -1452,6 +1453,7 @@ static struct mmc_host_ops mt_msdc_ops = {
+>         .pre_req = msdc_pre_req,
+>         .request = msdc_ops_request,
+>         .set_ios = msdc_ops_set_ios,
+> +       .get_ro = mmc_gpio_get_ro,
+>         .start_signal_voltage_switch = msdc_ops_switch_volt,
+>         .card_busy = msdc_card_busy,
+>         .execute_tuning = msdc_execute_tuning,
 > --
-> 2.1.4
+> 1.8.1.1.dirty
 >
