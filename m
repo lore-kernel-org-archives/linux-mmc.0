@@ -1,56 +1,62 @@
-From: Eric Anholt <eric@anholt.net>
-Subject: Re: [PATCH v5 01/13] mmc: sdhci-bcm2835: use sdhci_pltfm_init for private allocation
-Date: Tue, 16 Feb 2016 10:10:59 -0800
-Message-ID: <87y4ak4jbg.fsf@eliezer.anholt.net>
-References: <1455628111-5583-1-git-send-email-jszhang@marvell.com> <1455628111-5583-2-git-send-email-jszhang@marvell.com>
+From: Chris Ball <chris@printf.net>
+Subject: Re: [PATCH v2] mmc-utils: Merge the lsmmc tool into mmc-utils
+Date: Tue, 16 Feb 2016 20:02:15 +0000
+Message-ID: <86fuwse854.fsf@void.printf.net>
+References: <32aeb1c8c24a29aabe3f58bcdf60faf7a39c6491.1454660477.git.baolin.wang@linaro.org>
 Mime-Version: 1.0
-Content-Type: multipart/signed; boundary="=-=-=";
-	micalg=pgp-sha512; protocol="application/pgp-signature"
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from gabe.freedesktop.org ([131.252.210.177]:46453 "EHLO
-	gabe.freedesktop.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755747AbcBPSLE (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 16 Feb 2016 13:11:04 -0500
-In-Reply-To: <1455628111-5583-2-git-send-email-jszhang@marvell.com>
+Received: from void.printf.net ([192.34.86.38]:52897 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752230AbcBPUhh (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 16 Feb 2016 15:37:37 -0500
+In-Reply-To: <32aeb1c8c24a29aabe3f58bcdf60faf7a39c6491.1454660477.git.baolin.wang@linaro.org>
+	(Baolin Wang's message of "Fri, 5 Feb 2016 16:23:34 +0800")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: ulf.hansson@linaro.org, adrian.hunter@intel.com, arnd@arndb.de, ludovic.desroches@atmel.com, swarren@wwwdotorg.org, lee@kernel.org, michal.simek@xilinx.com, soren.brinkmann@xilinx.com, srinivas.kandagatla@gmail.com, maxime.coquelin@st.com, patrice.chotard@st.com, thierry.reding@gmail.com, sebastian.hesselbarth@gmail.com, kernel@stlinux.com
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-tegra@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-rpi-kernel@lists.infradead.org, Jisheng Zhang <jszhang@marvell.com>
+To: Baolin Wang <baolin.wang@linaro.org>
+Cc: linux-mmc@vger.kernel.org, ulf.hansson@linaro.org, broonie@kernel.org, linus.walleij@linaro.org, sebras@gmail.com
 
---=-=-=
-Content-Type: text/plain
+Hi everyone,
 
-Jisheng Zhang <jszhang@marvell.com> writes:
+Sorry, I'm missing something hopefully-obvious about this patch:
 
-> Commit 0e748234293f ("mmc: sdhci: Add size for caller in init+register")
-> allows users of sdhci_pltfm to allocate private space in calls to
-> sdhci_pltfm_init+sdhci_pltfm_register. This patch migrates sdhci-bcm2835
-> to this allocation.
->
-> Signed-off-by: Jisheng Zhang <jszhang@marvell.com>
-> Acked-by: Arnd Bergmann <arnd@arndb.de>
-> Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+Which command does someone use to run the new ext_csd code in lsmmc?
 
-Acked-by: Eric Anholt <eric@anholt.net>
+I thought that this patch would add lsmmc's ext_csd parsing to the
+existing "mmc extcsd read" command.  But it doesn't seem to do that --
+it duplicates the code, so there are two separate, unrelated extcsd
+parsers in:
 
---=-=-=
-Content-Type: application/pgp-signature; name="signature.asc"
+    * lsmmc.c:print_mmc_ext_csd()
+    * mmc_cmds.c:do_read_extcsd().
 
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1
+I don't think that's what Ulf's suggestion intended -- as I read it,
+he was hoping to see the parsers merged to make one better parser.
+I'd like to see that too, though I understand that it's more work.
 
-iQIcBAEBCgAGBQJWw2YzAAoJELXWKTbR/J7oTkoP/R37bu8dv96gem8FYlC2Hyjn
-+jCcoCBswalifmxkcl4nMD0RH7OwY+i0MlD/pEMa/VHvTGbJcCU4+xKVPFNGD6/1
-caGOMdu/MXEYzSKzYn/ooJez/nHKe3Z0pkd80xhfan+Vuwz/+EQ5viCL4ZGgS+na
-kJR/2ttP0eOnQpKCiJJVgsN8WUNcFnRG4vbr4fhHQLkpHMVRyXHBLXkDy7UplxWx
-3/M1DWFuq6lUge2BQARvpAuz3EP26FKXUiG03r7yW2sIBmGHFACS4dDkOrXrd2yY
-vmIhgBlKu7PkRLZvjx9ZTz5VZ3Y9Cq1mrgz7oWdqmGibVuFrZoysNzooDf0Kjrm8
-7agNbBWyMwzjCJzPdc142ofgFccMdDx0E1bZXnK3Y4kRbJKmvf0XFYEhRFEqwnCd
-w7QH1WY9zQj/sVtSnH2V1kbE8Qwn5wt226Lo0r6myn4C+cWE0QFTSvO0b49n17RN
-E0uv5/hIaXJ2mRT54a9bX8qHGSAFGydmNhQZIwIV4qrcep6Sm76t3z39tePpKW9L
-L80fjpDRKBRuKItWgyhw0g7AL+4Lj00Hk46AEPx05yRq/WHBll8JwIrTrKVq8lyU
-S7+ZK2uVWb1lgO4Z6oZAIp3Vb3SmAb2BBgKK3UyFXNIOFCGmfjMVzFzTgyEqk6dD
-CU5i91QPRMWDYjjNXHfX
-=Py2S
------END PGP SIGNATURE-----
---=-=-=--
+And I'm still confused, as above, about how to actually use the new
+extcsd parser, because "mmc extcsd read" doesn't seem to be it, and
+the new commands added:
+
+    int do_read_scr(int argc, char **argv);
+    int do_read_cid(int argc, char **argv);
+    int do_read_csd(int argc, char **argv);
+
+.. don't seem to be it either, since they don't pass "EXT_CSD" to
+process_dir(), which is the only way I can see to activate lsmmc's
+ext_csd printer.  How's it supposed to work?
+
+Also:
+
+On Fri, Feb 05 2016, Baolin Wang wrote:
+> +void usage(void)
+> +int parse_opts(int argc, char **argv, struct config *config)
+
+These functions could be totally removed now, I think?
+
+Thanks!
+
+- Chris.
+-- 
+Chris Ball   <http://printf.net/>
