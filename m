@@ -1,147 +1,91 @@
 From: Jisheng Zhang <jszhang@marvell.com>
-Subject: [PATCH v5 10/13] mmc: sdhci-st: use sdhci_pltfm_init for private allocation
-Date: Tue, 16 Feb 2016 21:08:28 +0800
-Message-ID: <1455628111-5583-11-git-send-email-jszhang@marvell.com>
+Subject: [PATCH v5 03/13] mmc: sdhci-msm: factorise sdhci_msm_pdata outisde of
+ sdhci_msm_host
+Date: Tue, 16 Feb 2016 21:08:21 +0800
+Message-ID: <1455628111-5583-4-git-send-email-jszhang@marvell.com>
 References: <1455628111-5583-1-git-send-email-jszhang@marvell.com>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
 In-Reply-To: <1455628111-5583-1-git-send-email-jszhang@marvell.com>
-Sender: linux-kernel-owner@vger.kernel.org
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
 To: ulf.hansson@linaro.org, adrian.hunter@intel.com, arnd@arndb.de, ludovic.desroches@atmel.com, swarren@wwwdotorg.org, lee@kernel.org, eric@anholt.net, michal.simek@xilinx.com, soren.brinkmann@xilinx.com, srinivas.kandagatla@gmail.com, maxime.coquelin@st.com, patrice.chotard@st.com, thierry.reding@gmail.com, sebastian.hesselbarth@gmail.com, kernel@stlinux.com
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-tegra@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-rpi-kernel@lists.infradead.org, Jisheng Zhang <jszhang@marvell.com>
+Cc: Jisheng Zhang <jszhang@marvell.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-rpi-kernel@lists.infradead.org, linux-tegra@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
-Commit 0e748234293f ("mmc: sdhci: Add size for caller in init+register")
-allows users of sdhci_pltfm to allocate private space in calls to
-sdhci_pltfm_init+sdhci_pltfm_register. This patch migrates sdhci-st
-to this allocation.
+There's no need to allocate one sdhci_msm_pdata for each sdhci_msm_host.
+This patch removes the sdhci_msm_pdata member from sdhci_msm_host and
+uses one static global sdhci_msm_pdata for all sdhci msm hosts. It also
+marks sdhci_msm_ops as const.
 
 Signed-off-by: Jisheng Zhang <jszhang@marvell.com>
-Acked-by: Arnd Bergmann <arnd@arndb.de>
 Acked-by: Adrian Hunter <adrian.hunter@intel.com>
 ---
- drivers/mmc/host/sdhci-st.c | 40 ++++++++++++++++++++--------------------
- 1 file changed, 20 insertions(+), 20 deletions(-)
+ drivers/mmc/host/sdhci-msm.c | 15 ++++++++-------
+ 1 file changed, 8 insertions(+), 7 deletions(-)
 
-diff --git a/drivers/mmc/host/sdhci-st.c b/drivers/mmc/host/sdhci-st.c
-index 969c2b0..320e1c2 100644
---- a/drivers/mmc/host/sdhci-st.c
-+++ b/drivers/mmc/host/sdhci-st.c
-@@ -251,7 +251,7 @@ static int sdhci_st_set_dll_for_clock(struct sdhci_host *host)
- {
- 	int ret = 0;
- 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
--	struct st_mmc_platform_data *pdata = pltfm_host->priv;
-+	struct st_mmc_platform_data *pdata = sdhci_pltfm_priv(pltfm_host);
+diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
+index 4695bee..ffac9b4 100644
+--- a/drivers/mmc/host/sdhci-msm.c
++++ b/drivers/mmc/host/sdhci-msm.c
+@@ -60,7 +60,6 @@ struct sdhci_msm_host {
+ 	struct clk *pclk;	/* SDHC peripheral bus clock */
+ 	struct clk *bus_clk;	/* SDHC bus voter clock */
+ 	struct mmc_host *mmc;
+-	struct sdhci_pltfm_data sdhci_msm_pdata;
+ };
  
- 	if (host->clock > CLK_TO_CHECK_DLL_LOCK) {
- 		st_mmcss_set_dll(pdata->top_ioaddr);
-@@ -265,7 +265,7 @@ static void sdhci_st_set_uhs_signaling(struct sdhci_host *host,
- 					unsigned int uhs)
- {
- 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
--	struct st_mmc_platform_data *pdata = pltfm_host->priv;
-+	struct st_mmc_platform_data *pdata = sdhci_pltfm_priv(pltfm_host);
- 	u16 ctrl_2 = sdhci_readw(host, SDHCI_HOST_CONTROL2);
- 	int ret = 0;
+ /* Platform specific tuning */
+@@ -418,7 +417,7 @@ static const struct of_device_id sdhci_msm_dt_match[] = {
  
-@@ -357,10 +357,7 @@ static int sdhci_st_probe(struct platform_device *pdev)
- 	int ret = 0;
- 	u16 host_version;
- 	struct resource *res;
--
--	pdata = devm_kzalloc(&pdev->dev, sizeof(*pdata), GFP_KERNEL);
--	if (!pdata)
--		return -ENOMEM;
-+	struct reset_control *rstc;
+ MODULE_DEVICE_TABLE(of, sdhci_msm_dt_match);
  
- 	clk =  devm_clk_get(&pdev->dev, "mmc");
- 	if (IS_ERR(clk)) {
-@@ -368,19 +365,23 @@ static int sdhci_st_probe(struct platform_device *pdev)
- 		return PTR_ERR(clk);
- 	}
+-static struct sdhci_ops sdhci_msm_ops = {
++static const struct sdhci_ops sdhci_msm_ops = {
+ 	.platform_execute_tuning = sdhci_msm_execute_tuning,
+ 	.reset = sdhci_reset,
+ 	.set_clock = sdhci_set_clock,
+@@ -426,6 +425,12 @@ static struct sdhci_ops sdhci_msm_ops = {
+ 	.set_uhs_signaling = sdhci_set_uhs_signaling,
+ };
  
--	pdata->rstc = devm_reset_control_get(&pdev->dev, NULL);
--	if (IS_ERR(pdata->rstc))
--		pdata->rstc = NULL;
-+	rstc = devm_reset_control_get(&pdev->dev, NULL);
-+	if (IS_ERR(rstc))
-+		rstc = NULL;
- 	else
--		reset_control_deassert(pdata->rstc);
-+		reset_control_deassert(rstc);
- 
--	host = sdhci_pltfm_init(pdev, &sdhci_st_pdata, 0);
-+	host = sdhci_pltfm_init(pdev, &sdhci_st_pdata, sizeof(*pdata));
- 	if (IS_ERR(host)) {
- 		dev_err(&pdev->dev, "Failed sdhci_pltfm_init\n");
- 		ret = PTR_ERR(host);
- 		goto err_pltfm_init;
- 	}
- 
-+	pltfm_host = sdhci_priv(host);
-+	pdata = sdhci_pltfm_priv(pltfm_host);
-+	pdata->rstc = rstc;
++static const struct sdhci_pltfm_data sdhci_msm_pdata = {
++	.quirks = SDHCI_QUIRK_BROKEN_CARD_DETECTION |
++		  SDHCI_QUIRK_SINGLE_POWER_WRITE,
++	.ops = &sdhci_msm_ops,
++};
 +
- 	ret = mmc_of_parse(host->mmc);
- 	if (ret) {
- 		dev_err(&pdev->dev, "Failed mmc_of_parse\n");
-@@ -398,8 +399,6 @@ static int sdhci_st_probe(struct platform_device *pdev)
- 		pdata->top_ioaddr = NULL;
- 	}
- 
--	pltfm_host = sdhci_priv(host);
--	pltfm_host->priv = pdata;
- 	pltfm_host->clk = clk;
- 
- 	/* Configure the Arasan HC inside the flashSS */
-@@ -427,8 +426,8 @@ err_out:
- err_of:
- 	sdhci_pltfm_free(pdev);
- err_pltfm_init:
--	if (pdata->rstc)
--		reset_control_assert(pdata->rstc);
-+	if (rstc)
-+		reset_control_assert(rstc);
- 
- 	return ret;
- }
-@@ -437,13 +436,14 @@ static int sdhci_st_remove(struct platform_device *pdev)
+ static int sdhci_msm_probe(struct platform_device *pdev)
  {
- 	struct sdhci_host *host = platform_get_drvdata(pdev);
- 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
--	struct st_mmc_platform_data *pdata = pltfm_host->priv;
-+	struct st_mmc_platform_data *pdata = sdhci_pltfm_priv(pltfm_host);
-+	struct reset_control *rstc = pdata->rstc;
- 	int ret;
+ 	struct sdhci_host *host;
+@@ -441,8 +446,7 @@ static int sdhci_msm_probe(struct platform_device *pdev)
+ 	if (!msm_host)
+ 		return -ENOMEM;
  
- 	ret = sdhci_pltfm_unregister(pdev);
+-	msm_host->sdhci_msm_pdata.ops = &sdhci_msm_ops;
+-	host = sdhci_pltfm_init(pdev, &msm_host->sdhci_msm_pdata, 0);
++	host = sdhci_pltfm_init(pdev, &sdhci_msm_pdata, 0);
+ 	if (IS_ERR(host))
+ 		return PTR_ERR(host);
  
--	if (pdata->rstc)
--		reset_control_assert(pdata->rstc);
-+	if (rstc)
-+		reset_control_assert(rstc);
+@@ -522,9 +526,6 @@ static int sdhci_msm_probe(struct platform_device *pdev)
+ 	/* Set HC_MODE_EN bit in HC_MODE register */
+ 	writel_relaxed(HC_MODE_EN, (msm_host->core_mem + CORE_HC_MODE));
  
- 	return ret;
- }
-@@ -453,7 +453,7 @@ static int sdhci_st_suspend(struct device *dev)
- {
- 	struct sdhci_host *host = dev_get_drvdata(dev);
- 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
--	struct st_mmc_platform_data *pdata = pltfm_host->priv;
-+	struct st_mmc_platform_data *pdata = sdhci_pltfm_priv(pltfm_host);
- 	int ret = sdhci_suspend_host(host);
- 
- 	if (ret)
-@@ -471,7 +471,7 @@ static int sdhci_st_resume(struct device *dev)
- {
- 	struct sdhci_host *host = dev_get_drvdata(dev);
- 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
--	struct st_mmc_platform_data *pdata = pltfm_host->priv;
-+	struct st_mmc_platform_data *pdata = sdhci_pltfm_priv(pltfm_host);
- 	struct device_node *np = dev->of_node;
- 
- 	clk_prepare_enable(pltfm_host->clk);
+-	host->quirks |= SDHCI_QUIRK_BROKEN_CARD_DETECTION;
+-	host->quirks |= SDHCI_QUIRK_SINGLE_POWER_WRITE;
+-
+ 	host_version = readw_relaxed((host->ioaddr + SDHCI_HOST_VERSION));
+ 	dev_dbg(&pdev->dev, "Host Version: 0x%x Vendor Version 0x%x\n",
+ 		host_version, ((host_version & SDHCI_VENDOR_VER_MASK) >>
 -- 
 2.7.0
