@@ -1,154 +1,170 @@
-From: Ludovic Desroches <ludovic.desroches@atmel.com>
-Subject: Re: [PATCH] mmc: sdhci-of-at91: fix wakeup issue when using runtime
- pm
-Date: Tue, 16 Feb 2016 16:22:04 +0100
-Message-ID: <20160216152204.GE2607@odux.rfo.atmel.com>
-References: <20160212120415.GJ14937@odux.rfo.atmel.com>
- <1455357400-32145-1-git-send-email-ludovic.desroches@atmel.com>
- <CAPDyKFroVY0ZdqPScpGiJ8Y_QhhZ7asf0R0MzSx0WzVi5c2neg@mail.gmail.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH RESEND 1/3] mmc: sdhi: Add r8a7795 support
+Date: Tue, 16 Feb 2016 17:35:26 +0100
+Message-ID: <CAPDyKFpgSGKwLNEVor3-ZfM5KhVjnfDnGXqmXeTiftPZFS8N4g@mail.gmail.com>
+References: <1455548510-1690-1-git-send-email-wsa@the-dreams.de>
+	<1455548510-1690-2-git-send-email-wsa@the-dreams.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <CAPDyKFroVY0ZdqPScpGiJ8Y_QhhZ7asf0R0MzSx0WzVi5c2neg@mail.gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Ludovic Desroches <ludovic.desroches@atmel.com>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Nicolas Ferre <nicolas.ferre@atmel.com>, Adrian Hunter <adrian.hunter@intel.com>
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-renesas-soc-owner@vger.kernel.org>
+In-Reply-To: <1455548510-1690-2-git-send-email-wsa@the-dreams.de>
+Sender: linux-renesas-soc-owner@vger.kernel.org
+To: Wolfram Sang <wsa@the-dreams.de>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, linux-renesas-soc@vger.kernel.org, Dirk Behme <dirk.behme@gmail.com>, Geert Uytterhoeven <geert@linux-m68k.org>, Simon Horman <horms@verge.net.au>
 List-Id: linux-mmc@vger.kernel.org
 
-On Tue, Feb 16, 2016 at 03:38:29PM +0100, Ulf Hansson wrote:
-> On 13 February 2016 at 10:56, Ludovic Desroches
-> <ludovic.desroches@atmel.com> wrote:
-> > When suspending the sdhci host, the only hardware event that could wake
-> > up the host is a sdio irq if they are enabled. If we want to wakeup on
-> > card detect events, a gpio as to be used.
-> > If we don't want to use a gpio but the card detect pio of the controller
-> > then we need to keep enabled the clock of the controller interface to
-> > get the interrupt and to not set the host in a suspended state to have the
-> > interrupt handled.
-> >
-> > Signed-off-by: Ludovic Desroches <ludovic.desroches@atmel.com>
-> > ---
-> >  drivers/mmc/host/sdhci-of-at91.c | 46 ++++++++++++++++++++++++++++++----------
-> >  1 file changed, 35 insertions(+), 11 deletions(-)
-> >
-> > diff --git a/drivers/mmc/host/sdhci-of-at91.c b/drivers/mmc/host/sdhci-of-at91.c
-> > index efec736..2159c6e 100644
-> > --- a/drivers/mmc/host/sdhci-of-at91.c
-> > +++ b/drivers/mmc/host/sdhci-of-at91.c
-> > @@ -18,6 +18,7 @@
-> >  #include <linux/err.h>
-> >  #include <linux/io.h>
-> >  #include <linux/mmc/host.h>
-> > +#include <linux/mmc/slot-gpio.h>
-> >  #include <linux/module.h>
-> >  #include <linux/of.h>
-> >  #include <linux/of_device.h>
-> > @@ -45,7 +46,6 @@ static const struct sdhci_ops sdhci_at91_sama5d2_ops = {
-> >
-> >  static const struct sdhci_pltfm_data soc_data_sama5d2 = {
-> >         .ops = &sdhci_at91_sama5d2_ops,
-> > -       .quirks = SDHCI_QUIRK_BROKEN_CARD_DETECTION,
-> 
-> You probably have some leftovers from earlier local changes, as this
-> isn't going to apply to my next branch.
-> 
+On 15 February 2016 at 16:01, Wolfram Sang <wsa@the-dreams.de> wrote:
+> From: Wolfram Sang <wsa+renesas@sang-engineering.com>
+>
+> Registers are 64bit apart, so we refactor bus_shift handling a little and set
+> it based on the DT compatible. Also, EXT_ACC is different. It has been tested
+> on a Salvator-X (Gen3) and, to check for regressions, on a Lager (Gen2).
+>
+> Signed-off-by: Ai Kyuse <ai.kyuse.uw@renesas.com>
+> Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
 
-Yes, it is based on the first patch of this thread, it was only to
-discuss about it.
+Thanks, applied for next!
 
-> >         .quirks2 = SDHCI_QUIRK2_NEED_DELAY_AFTER_INT_CLK_RST,
-> >  };
-> >
-> > @@ -55,17 +55,37 @@ static const struct of_device_id sdhci_at91_dt_match[] = {
-> >  };
-> >
-> >  #ifdef CONFIG_PM
-> > +static bool sdhci_at91_use_sdhci_runtime(struct sdhci_host *host)
-> > +{
-> > +       u32 caps = host->mmc->caps;
-> > +
-> > +       return (caps & MMC_CAP_NONREMOVABLE) ||
-> > +              (!IS_ERR_VALUE(mmc_gpio_get_cd(host->mmc)));
-> > +}
-> > +
-> >  static int sdhci_at91_runtime_suspend(struct device *dev)
-> >  {
-> >         struct sdhci_host *host = dev_get_drvdata(dev);
-> >         struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> >         struct sdhci_at91_priv *priv = pltfm_host->priv;
-> > -       int ret;
-> > +       int ret = 0;
-> >
-> > -       ret = sdhci_runtime_suspend_host(host);
-> > +       /*
-> > +        * If we call sdhci_runtime_suspend(), we could wakeup only if sdio
-> > +        * irqs are enabled. If we want to wakeup on a card detect event there
-> > +        * are two options:
-> > +        * - do not call sdhci_runtime_suspend() but save power by disabling
-> > +        *   all clocks excepting the one for the controller interface.
-> > +        * - call sdhci_runtime_suspend(), save maximum power by disabling
-> > +        *   all clocks but use a gpio for the card detect signal to have a way
-> > +        *   to wakeup.
-> > +        */
-> > +       if (sdhci_at91_use_sdhci_runtime(host)) {
-> 
-> I am not sure this approach is safe, particularly for cases when
-> sdhci_runtime_suspend() isn't invoked.
-> 
-> As I understand it, in those cases potentially the sdhci's IRQ handler
-> may be invoked to serve even other IRQs than a card detect IRQ. Doing
-> that while being runtime suspended doesn't seem like a good idea. Will
-> it even work?
-> 
+Kind regards
+Uffe
 
-Yes it is the idea. It will allow to save some power. I don't see how I can use
-runtime PM if I need to invoke sdhci_runtime_suspend_host() without modifying
-sdhci layer to handle card detect irq.
-
-I was also afraid to have some side effects but it works, at least for the
-card detect case.
-
-> > +               ret = sdhci_runtime_suspend_host(host);
-> > +               clk_disable_unprepare(priv->hclock);
-> > +       }
-> >
-> >         clk_disable_unprepare(priv->gck);
-> > -       clk_disable_unprepare(priv->hclock);
-> >         clk_disable_unprepare(priv->mainck);
-> >
-> >         return ret;
-> > @@ -84,19 +104,23 @@ static int sdhci_at91_runtime_resume(struct device *dev)
-> >                 return ret;
-> >         }
-> >
-> > -       ret = clk_prepare_enable(priv->hclock);
-> > -       if (ret) {
-> > -               dev_err(dev, "can't enable hclock\n");
-> > -               return ret;
-> > -       }
-> > -
-> >         ret = clk_prepare_enable(priv->gck);
-> >         if (ret) {
-> >                 dev_err(dev, "can't enable gck\n");
-> >                 return ret;
-> >         }
-> >
-> > -       return sdhci_runtime_resume_host(host);
-> > +       if (sdhci_at91_use_sdhci_runtime(host)) {
-> > +               ret = clk_prepare_enable(priv->hclock);
-> > +               if (ret) {
-> > +                       dev_err(dev, "can't enable hclock\n");
-> > +                       return ret;
-> > +               }
-> > +
-> > +               ret = sdhci_runtime_resume_host(host);
-> > +       }
-> > +
-> > +       return ret;
-> >  }
-> >  #endif /* CONFIG_PM */
-
-Regards
-
-Ludovic
+> ---
+>  Documentation/devicetree/bindings/mmc/tmio_mmc.txt |  1 +
+>  drivers/mmc/host/Kconfig                           |  2 +-
+>  drivers/mmc/host/sh_mobile_sdhi.c                  | 47 ++++++++++++++++------
+>  3 files changed, 36 insertions(+), 14 deletions(-)
+>
+> diff --git a/Documentation/devicetree/bindings/mmc/tmio_mmc.txt b/Documentation/devicetree/bindings/mmc/tmio_mmc.txt
+> index 400b640fabc768..7fb746dd1a68ca 100644
+> --- a/Documentation/devicetree/bindings/mmc/tmio_mmc.txt
+> +++ b/Documentation/devicetree/bindings/mmc/tmio_mmc.txt
+> @@ -22,6 +22,7 @@ Required properties:
+>                 "renesas,sdhi-r8a7792" - SDHI IP on R8A7792 SoC
+>                 "renesas,sdhi-r8a7793" - SDHI IP on R8A7793 SoC
+>                 "renesas,sdhi-r8a7794" - SDHI IP on R8A7794 SoC
+> +               "renesas,sdhi-r8a7795" - SDHI IP on R8A7795 SoC
+>
+>  Optional properties:
+>  - toshiba,mmc-wrprotect-disable: write-protect detection is unavailable
+> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+> index 4a35ebf5165d83..d9a9d92fa8379a 100644
+> --- a/drivers/mmc/host/Kconfig
+> +++ b/drivers/mmc/host/Kconfig
+> @@ -560,7 +560,7 @@ config MMC_TMIO
+>
+>  config MMC_SDHI
+>         tristate "SH-Mobile SDHI SD/SDIO controller support"
+> -       depends on SUPERH || ARM
+> +       depends on SUPERH || ARM || ARM64
+>         depends on SUPERH || ARCH_SHMOBILE || COMPILE_TEST
+>         select MMC_TMIO_CORE
+>         help
+> diff --git a/drivers/mmc/host/sh_mobile_sdhi.c b/drivers/mmc/host/sh_mobile_sdhi.c
+> index 557e2b9dadeec7..9aa147959276d0 100644
+> --- a/drivers/mmc/host/sh_mobile_sdhi.c
+> +++ b/drivers/mmc/host/sh_mobile_sdhi.c
+> @@ -1,6 +1,8 @@
+>  /*
+>   * SuperH Mobile SDHI
+>   *
+> + * Copyright (C) 2016 Sang Engineering, Wolfram Sang
+> + * Copyright (C) 2015-16 Renesas Electronics Corporation
+>   * Copyright (C) 2009 Magnus Damm
+>   *
+>   * This program is free software; you can redistribute it and/or modify
+> @@ -43,6 +45,7 @@ struct sh_mobile_sdhi_of_data {
+>         unsigned long capabilities2;
+>         enum dma_slave_buswidth dma_buswidth;
+>         dma_addr_t dma_rx_offset;
+> +       unsigned bus_shift;
+>  };
+>
+>  static const struct sh_mobile_sdhi_of_data sh_mobile_sdhi_of_cfg[] = {
+> @@ -65,6 +68,13 @@ static const struct sh_mobile_sdhi_of_data of_rcar_gen2_compatible = {
+>         .dma_rx_offset  = 0x2000,
+>  };
+>
+> +static const struct sh_mobile_sdhi_of_data of_rcar_gen3_compatible = {
+> +       .tmio_flags     = TMIO_MMC_HAS_IDLE_WAIT | TMIO_MMC_WRPROTECT_DISABLE |
+> +                         TMIO_MMC_CLK_ACTUAL | TMIO_MMC_FAST_CLK_CHG,
+> +       .capabilities   = MMC_CAP_SD_HIGHSPEED,
+> +       .bus_shift      = 2,
+> +};
+> +
+>  static const struct of_device_id sh_mobile_sdhi_of_match[] = {
+>         { .compatible = "renesas,sdhi-shmobile" },
+>         { .compatible = "renesas,sdhi-sh7372" },
+> @@ -78,6 +88,7 @@ static const struct of_device_id sh_mobile_sdhi_of_match[] = {
+>         { .compatible = "renesas,sdhi-r8a7792", .data = &of_rcar_gen2_compatible, },
+>         { .compatible = "renesas,sdhi-r8a7793", .data = &of_rcar_gen2_compatible, },
+>         { .compatible = "renesas,sdhi-r8a7794", .data = &of_rcar_gen2_compatible, },
+> +       { .compatible = "renesas,sdhi-r8a7795", .data = &of_rcar_gen3_compatible, },
+>         {},
+>  };
+>  MODULE_DEVICE_TABLE(of, sh_mobile_sdhi_of_match);
+> @@ -103,6 +114,15 @@ static void sh_mobile_sdhi_sdbuf_width(struct tmio_mmc_host *host, int width)
+>         case 0xCB0D:
+>                 val = (width == 32) ? 0x0000 : 0x0001;
+>                 break;
+> +       case 0xCC10: /* Gen3, SD only */
+> +       case 0xCD10: /* Gen3, SD + MMC */
+> +               if (width == 64)
+> +                       val = 0x0000;
+> +               else if (width == 32)
+> +                       val = 0x0101;
+> +               else
+> +                       val = 0x0001;
+> +               break;
+>         default:
+>                 /* nothing to do */
+>                 return;
+> @@ -233,16 +253,26 @@ static int sh_mobile_sdhi_probe(struct platform_device *pdev)
+>                 goto eprobe;
+>         }
+>
+> +       if (of_id && of_id->data) {
+> +               const struct sh_mobile_sdhi_of_data *of_data = of_id->data;
+> +
+> +               mmc_data->flags |= of_data->tmio_flags;
+> +               mmc_data->capabilities |= of_data->capabilities;
+> +               mmc_data->capabilities2 |= of_data->capabilities2;
+> +               mmc_data->dma_rx_offset = of_data->dma_rx_offset;
+> +               dma_priv->dma_buswidth = of_data->dma_buswidth;
+> +               host->bus_shift = of_data->bus_shift;
+> +       }
+> +
+>         host->dma               = dma_priv;
+>         host->write16_hook      = sh_mobile_sdhi_write16_hook;
+>         host->clk_enable        = sh_mobile_sdhi_clk_enable;
+>         host->clk_disable       = sh_mobile_sdhi_clk_disable;
+>         host->multi_io_quirk    = sh_mobile_sdhi_multi_io_quirk;
+> -       /* SD control register space size is 0x100, 0x200 for bus_shift=1 */
+> -       if (resource_size(res) > 0x100)
+> +
+> +       /* Orginally registers were 16 bit apart, could be 32 or 64 nowadays */
+> +       if (!host->bus_shift && resource_size(res) > 0x100) /* old way to determine the shift */
+>                 host->bus_shift = 1;
+> -       else
+> -               host->bus_shift = 0;
+>
+>         if (mmd)
+>                 *mmc_data = *mmd;
+> @@ -274,15 +304,6 @@ static int sh_mobile_sdhi_probe(struct platform_device *pdev)
+>          */
+>         mmc_data->flags |= TMIO_MMC_SDIO_STATUS_QUIRK;
+>
+> -       if (of_id && of_id->data) {
+> -               const struct sh_mobile_sdhi_of_data *of_data = of_id->data;
+> -               mmc_data->flags |= of_data->tmio_flags;
+> -               mmc_data->capabilities |= of_data->capabilities;
+> -               mmc_data->capabilities2 |= of_data->capabilities2;
+> -               mmc_data->dma_rx_offset = of_data->dma_rx_offset;
+> -               dma_priv->dma_buswidth = of_data->dma_buswidth;
+> -       }
+> -
+>         ret = tmio_mmc_host_probe(host, mmc_data);
+>         if (ret < 0)
+>                 goto efree;
+> --
+> 2.1.4
+>
