@@ -1,86 +1,174 @@
-From: Baolin Wang <baolin.wang@linaro.org>
-Subject: Re: [PATCH v2] mmc-utils: Merge the lsmmc tool into mmc-utils
-Date: Wed, 17 Feb 2016 10:31:13 +0800
-Message-ID: <CAMz4kuLnLeERAsM_piro_q_+V2P+OfjxNROKYNaSBr7qEUQ7bQ@mail.gmail.com>
-References: <32aeb1c8c24a29aabe3f58bcdf60faf7a39c6491.1454660477.git.baolin.wang@linaro.org>
-	<86fuwse854.fsf@void.printf.net>
+From: Ludovic Desroches <ludovic.desroches@atmel.com>
+Subject: Re: [PATCH] mmc: sdhci-of-at91: fix wakeup issue when using runtime
+ pm
+Date: Wed, 17 Feb 2016 11:35:15 +0100
+Message-ID: <20160217103515.GM2607@odux.rfo.atmel.com>
+References: <20160212120415.GJ14937@odux.rfo.atmel.com>
+ <1455357400-32145-1-git-send-email-ludovic.desroches@atmel.com>
+ <CAPDyKFroVY0ZdqPScpGiJ8Y_QhhZ7asf0R0MzSx0WzVi5c2neg@mail.gmail.com>
+ <20160216152204.GE2607@odux.rfo.atmel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-yw0-f178.google.com ([209.85.161.178]:36625 "EHLO
-	mail-yw0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S965038AbcBQCbO (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 16 Feb 2016 21:31:14 -0500
-Received: by mail-yw0-f178.google.com with SMTP id e63so2702638ywc.3
-        for <linux-mmc@vger.kernel.org>; Tue, 16 Feb 2016 18:31:13 -0800 (PST)
-In-Reply-To: <86fuwse854.fsf@void.printf.net>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <20160216152204.GE2607@odux.rfo.atmel.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Nicolas Ferre <nicolas.ferre@atmel.com>, Adrian Hunter <adrian.hunter@intel.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <chris@printf.net>
-Cc: linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, Mark Brown <broonie@kernel.org>, Linus Walleij <linus.walleij@linaro.org>, Sebastian Rasmussen <sebras@gmail.com>
 
-On 17 February 2016 at 04:02, Chris Ball <chris@printf.net> wrote:
-> Hi everyone,
->
-> Sorry, I'm missing something hopefully-obvious about this patch:
->
-> Which command does someone use to run the new ext_csd code in lsmmc?
->
-> I thought that this patch would add lsmmc's ext_csd parsing to the
-> existing "mmc extcsd read" command.  But it doesn't seem to do that --
-> it duplicates the code, so there are two separate, unrelated extcsd
-> parsers in:
->
->     * lsmmc.c:print_mmc_ext_csd()
->     * mmc_cmds.c:do_read_extcsd().
->
-> I don't think that's what Ulf's suggestion intended -- as I read it,
-> he was hoping to see the parsers merged to make one better parser.
-> I'd like to see that too, though I understand that it's more work.
->
-> And I'm still confused, as above, about how to actually use the new
-> extcsd parser, because "mmc extcsd read" doesn't seem to be it, and
-> the new commands added:
->
->     int do_read_scr(int argc, char **argv);
->     int do_read_cid(int argc, char **argv);
->     int do_read_csd(int argc, char **argv);
->
-> .. don't seem to be it either, since they don't pass "EXT_CSD" to
-> process_dir(), which is the only way I can see to activate lsmmc's
-> ext_csd printer.  How's it supposed to work?
-
-I want to merge the lsmmc code into mmc-utils firstly, then start to
-modify the extcsd parser, but that seems not a good plan.
-
-I'm also confused how to make one better extcsd parser. Remove the
-do_read_extcsd() function in mmc_cmds.c file replacing with
-print_mmc_ext_csd() function? Or merge the parser of
-print_mmc_ext_csd() into do_read_extcsd(), then remove the
-print_mmc_ext_csd() function? But I think it is not compatible to
-merge different parser style together.
-
->
-> Also:
->
-> On Fri, Feb 05 2016, Baolin Wang wrote:
->> +void usage(void)
->> +int parse_opts(int argc, char **argv, struct config *config)
->
-> These functions could be totally removed now, I think?
-
-But there is one '- v' parameter, we just enable 'verbose' all the
-time with removing the '-v' parameter?
-
->
-> Thanks!
->
-> - Chris.
-> --
-> Chris Ball   <http://printf.net/>
+On Tue, Feb 16, 2016 at 04:22:04PM +0100, Ludovic Desroches wrote:
+> On Tue, Feb 16, 2016 at 03:38:29PM +0100, Ulf Hansson wrote:
+> > On 13 February 2016 at 10:56, Ludovic Desroches
+> > <ludovic.desroches@atmel.com> wrote:
+> > > When suspending the sdhci host, the only hardware event that could wake
+> > > up the host is a sdio irq if they are enabled. If we want to wakeup on
+> > > card detect events, a gpio as to be used.
+> > > If we don't want to use a gpio but the card detect pio of the controller
+> > > then we need to keep enabled the clock of the controller interface to
+> > > get the interrupt and to not set the host in a suspended state to have the
+> > > interrupt handled.
+> > >
+> > > Signed-off-by: Ludovic Desroches <ludovic.desroches@atmel.com>
+> > > ---
+> > >  drivers/mmc/host/sdhci-of-at91.c | 46 ++++++++++++++++++++++++++++++----------
+> > >  1 file changed, 35 insertions(+), 11 deletions(-)
+> > >
+> > > diff --git a/drivers/mmc/host/sdhci-of-at91.c b/drivers/mmc/host/sdhci-of-at91.c
+> > > index efec736..2159c6e 100644
+> > > --- a/drivers/mmc/host/sdhci-of-at91.c
+> > > +++ b/drivers/mmc/host/sdhci-of-at91.c
+> > > @@ -18,6 +18,7 @@
+> > >  #include <linux/err.h>
+> > >  #include <linux/io.h>
+> > >  #include <linux/mmc/host.h>
+> > > +#include <linux/mmc/slot-gpio.h>
+> > >  #include <linux/module.h>
+> > >  #include <linux/of.h>
+> > >  #include <linux/of_device.h>
+> > > @@ -45,7 +46,6 @@ static const struct sdhci_ops sdhci_at91_sama5d2_ops = {
+> > >
+> > >  static const struct sdhci_pltfm_data soc_data_sama5d2 = {
+> > >         .ops = &sdhci_at91_sama5d2_ops,
+> > > -       .quirks = SDHCI_QUIRK_BROKEN_CARD_DETECTION,
+> > 
+> > You probably have some leftovers from earlier local changes, as this
+> > isn't going to apply to my next branch.
+> > 
+> 
+> Yes, it is based on the first patch of this thread, it was only to
+> discuss about it.
+> 
+> > >         .quirks2 = SDHCI_QUIRK2_NEED_DELAY_AFTER_INT_CLK_RST,
+> > >  };
+> > >
+> > > @@ -55,17 +55,37 @@ static const struct of_device_id sdhci_at91_dt_match[] = {
+> > >  };
+> > >
+> > >  #ifdef CONFIG_PM
+> > > +static bool sdhci_at91_use_sdhci_runtime(struct sdhci_host *host)
+> > > +{
+> > > +       u32 caps = host->mmc->caps;
+> > > +
+> > > +       return (caps & MMC_CAP_NONREMOVABLE) ||
+> > > +              (!IS_ERR_VALUE(mmc_gpio_get_cd(host->mmc)));
 
 
+I am wondering if I should take account of sdio irq enabled or not here.
 
--- 
-Baolin.wang
-Best Regards
+I have a sdio device which drives me crazy because of power management.
+The driver of this device is in staging, it is wilc1000. It seems that I
+am stuck because the sdio irq are not received. If I don't disable the
+clock of the controller (hclock), I should receive the sdio IRQ as I
+receive card detect ones, isn't it?
+
+It doesn't work, it seems I have also to not disabled mainck and gck
+which are clocks needed to generate the clock sent to the sdio device.
+If none of the clocks have to be disabled, where it has to be managed?
+
+Do I have to anticipate this use case in the driver of my sdhci
+controller or does it have to be managed in the sdio device driver? They
+are using sdio_claim/release_host to suspend or resume the host but
+maybe they use it in a bad way.
+
+> > > +}
+> > > +
+> > >  static int sdhci_at91_runtime_suspend(struct device *dev)
+> > >  {
+> > >         struct sdhci_host *host = dev_get_drvdata(dev);
+> > >         struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+> > >         struct sdhci_at91_priv *priv = pltfm_host->priv;
+> > > -       int ret;
+> > > +       int ret = 0;
+> > >
+> > > -       ret = sdhci_runtime_suspend_host(host);
+> > > +       /*
+> > > +        * If we call sdhci_runtime_suspend(), we could wakeup only if sdio
+> > > +        * irqs are enabled. If we want to wakeup on a card detect event there
+> > > +        * are two options:
+> > > +        * - do not call sdhci_runtime_suspend() but save power by disabling
+> > > +        *   all clocks excepting the one for the controller interface.
+> > > +        * - call sdhci_runtime_suspend(), save maximum power by disabling
+> > > +        *   all clocks but use a gpio for the card detect signal to have a way
+> > > +        *   to wakeup.
+> > > +        */
+> > > +       if (sdhci_at91_use_sdhci_runtime(host)) {
+> > 
+> > I am not sure this approach is safe, particularly for cases when
+> > sdhci_runtime_suspend() isn't invoked.
+> > 
+> > As I understand it, in those cases potentially the sdhci's IRQ handler
+> > may be invoked to serve even other IRQs than a card detect IRQ. Doing
+> > that while being runtime suspended doesn't seem like a good idea. Will
+> > it even work?
+> > 
+> 
+> Yes it is the idea. It will allow to save some power. I don't see how I can use
+> runtime PM if I need to invoke sdhci_runtime_suspend_host() without modifying
+> sdhci layer to handle card detect irq.
+> 
+> I was also afraid to have some side effects but it works, at least for the
+> card detect case.
+> 
+> > > +               ret = sdhci_runtime_suspend_host(host);
+> > > +               clk_disable_unprepare(priv->hclock);
+> > > +       }
+> > >
+> > >         clk_disable_unprepare(priv->gck);
+> > > -       clk_disable_unprepare(priv->hclock);
+> > >         clk_disable_unprepare(priv->mainck);
+> > >
+> > >         return ret;
+> > > @@ -84,19 +104,23 @@ static int sdhci_at91_runtime_resume(struct device *dev)
+> > >                 return ret;
+> > >         }
+> > >
+> > > -       ret = clk_prepare_enable(priv->hclock);
+> > > -       if (ret) {
+> > > -               dev_err(dev, "can't enable hclock\n");
+> > > -               return ret;
+> > > -       }
+> > > -
+> > >         ret = clk_prepare_enable(priv->gck);
+> > >         if (ret) {
+> > >                 dev_err(dev, "can't enable gck\n");
+> > >                 return ret;
+> > >         }
+> > >
+> > > -       return sdhci_runtime_resume_host(host);
+> > > +       if (sdhci_at91_use_sdhci_runtime(host)) {
+> > > +               ret = clk_prepare_enable(priv->hclock);
+> > > +               if (ret) {
+> > > +                       dev_err(dev, "can't enable hclock\n");
+> > > +                       return ret;
+> > > +               }
+> > > +
+> > > +               ret = sdhci_runtime_resume_host(host);
+> > > +       }
+> > > +
+> > > +       return ret;
+> > >  }
+> > >  #endif /* CONFIG_PM */
+> 
+> Regards
+> 
+> Ludovic
