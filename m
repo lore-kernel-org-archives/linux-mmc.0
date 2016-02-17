@@ -1,174 +1,139 @@
-From: Ludovic Desroches <ludovic.desroches@atmel.com>
-Subject: Re: [PATCH] mmc: sdhci-of-at91: fix wakeup issue when using runtime
- pm
-Date: Wed, 17 Feb 2016 11:35:15 +0100
-Message-ID: <20160217103515.GM2607@odux.rfo.atmel.com>
-References: <20160212120415.GJ14937@odux.rfo.atmel.com>
- <1455357400-32145-1-git-send-email-ludovic.desroches@atmel.com>
- <CAPDyKFroVY0ZdqPScpGiJ8Y_QhhZ7asf0R0MzSx0WzVi5c2neg@mail.gmail.com>
- <20160216152204.GE2607@odux.rfo.atmel.com>
+From: Jon Hunter <jonathanh-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
+Subject: Re: [PATCH v2 0/5] Tegra SDHCI UHS-I support
+Date: Wed, 17 Feb 2016 13:19:36 +0000
+Message-ID: <56C47368.4010304@nvidia.com>
+References: <1450809664-11360-1-git-send-email-dev@lynxeye.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20160216152204.GE2607@odux.rfo.atmel.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Nicolas Ferre <nicolas.ferre@atmel.com>, Adrian Hunter <adrian.hunter@intel.com>
+Content-Type: text/plain; charset="windows-1252"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1450809664-11360-1-git-send-email-dev-8ppwABl0HbeELgA04lAiVw@public.gmane.org>
+Sender: linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Lucas Stach <dev-8ppwABl0HbeELgA04lAiVw@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: Stephen Warren <swarren-3lzwWm7+Weoh9ZMKESR00Q@public.gmane.org>, Thierry Reding <thierry.reding-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Alexandre Courbot <gnurou-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
 
-On Tue, Feb 16, 2016 at 04:22:04PM +0100, Ludovic Desroches wrote:
-> On Tue, Feb 16, 2016 at 03:38:29PM +0100, Ulf Hansson wrote:
-> > On 13 February 2016 at 10:56, Ludovic Desroches
-> > <ludovic.desroches@atmel.com> wrote:
-> > > When suspending the sdhci host, the only hardware event that could wake
-> > > up the host is a sdio irq if they are enabled. If we want to wakeup on
-> > > card detect events, a gpio as to be used.
-> > > If we don't want to use a gpio but the card detect pio of the controller
-> > > then we need to keep enabled the clock of the controller interface to
-> > > get the interrupt and to not set the host in a suspended state to have the
-> > > interrupt handled.
-> > >
-> > > Signed-off-by: Ludovic Desroches <ludovic.desroches@atmel.com>
-> > > ---
-> > >  drivers/mmc/host/sdhci-of-at91.c | 46 ++++++++++++++++++++++++++++++----------
-> > >  1 file changed, 35 insertions(+), 11 deletions(-)
-> > >
-> > > diff --git a/drivers/mmc/host/sdhci-of-at91.c b/drivers/mmc/host/sdhci-of-at91.c
-> > > index efec736..2159c6e 100644
-> > > --- a/drivers/mmc/host/sdhci-of-at91.c
-> > > +++ b/drivers/mmc/host/sdhci-of-at91.c
-> > > @@ -18,6 +18,7 @@
-> > >  #include <linux/err.h>
-> > >  #include <linux/io.h>
-> > >  #include <linux/mmc/host.h>
-> > > +#include <linux/mmc/slot-gpio.h>
-> > >  #include <linux/module.h>
-> > >  #include <linux/of.h>
-> > >  #include <linux/of_device.h>
-> > > @@ -45,7 +46,6 @@ static const struct sdhci_ops sdhci_at91_sama5d2_ops = {
-> > >
-> > >  static const struct sdhci_pltfm_data soc_data_sama5d2 = {
-> > >         .ops = &sdhci_at91_sama5d2_ops,
-> > > -       .quirks = SDHCI_QUIRK_BROKEN_CARD_DETECTION,
-> > 
-> > You probably have some leftovers from earlier local changes, as this
-> > isn't going to apply to my next branch.
-> > 
-> 
-> Yes, it is based on the first patch of this thread, it was only to
-> discuss about it.
-> 
-> > >         .quirks2 = SDHCI_QUIRK2_NEED_DELAY_AFTER_INT_CLK_RST,
-> > >  };
-> > >
-> > > @@ -55,17 +55,37 @@ static const struct of_device_id sdhci_at91_dt_match[] = {
-> > >  };
-> > >
-> > >  #ifdef CONFIG_PM
-> > > +static bool sdhci_at91_use_sdhci_runtime(struct sdhci_host *host)
-> > > +{
-> > > +       u32 caps = host->mmc->caps;
-> > > +
-> > > +       return (caps & MMC_CAP_NONREMOVABLE) ||
-> > > +              (!IS_ERR_VALUE(mmc_gpio_get_cd(host->mmc)));
+Hi Lucas,
 
-
-I am wondering if I should take account of sdio irq enabled or not here.
-
-I have a sdio device which drives me crazy because of power management.
-The driver of this device is in staging, it is wilc1000. It seems that I
-am stuck because the sdio irq are not received. If I don't disable the
-clock of the controller (hclock), I should receive the sdio IRQ as I
-receive card detect ones, isn't it?
-
-It doesn't work, it seems I have also to not disabled mainck and gck
-which are clocks needed to generate the clock sent to the sdio device.
-If none of the clocks have to be disabled, where it has to be managed?
-
-Do I have to anticipate this use case in the driver of my sdhci
-controller or does it have to be managed in the sdio device driver? They
-are using sdio_claim/release_host to suspend or resume the host but
-maybe they use it in a bad way.
-
-> > > +}
-> > > +
-> > >  static int sdhci_at91_runtime_suspend(struct device *dev)
-> > >  {
-> > >         struct sdhci_host *host = dev_get_drvdata(dev);
-> > >         struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> > >         struct sdhci_at91_priv *priv = pltfm_host->priv;
-> > > -       int ret;
-> > > +       int ret = 0;
-> > >
-> > > -       ret = sdhci_runtime_suspend_host(host);
-> > > +       /*
-> > > +        * If we call sdhci_runtime_suspend(), we could wakeup only if sdio
-> > > +        * irqs are enabled. If we want to wakeup on a card detect event there
-> > > +        * are two options:
-> > > +        * - do not call sdhci_runtime_suspend() but save power by disabling
-> > > +        *   all clocks excepting the one for the controller interface.
-> > > +        * - call sdhci_runtime_suspend(), save maximum power by disabling
-> > > +        *   all clocks but use a gpio for the card detect signal to have a way
-> > > +        *   to wakeup.
-> > > +        */
-> > > +       if (sdhci_at91_use_sdhci_runtime(host)) {
-> > 
-> > I am not sure this approach is safe, particularly for cases when
-> > sdhci_runtime_suspend() isn't invoked.
-> > 
-> > As I understand it, in those cases potentially the sdhci's IRQ handler
-> > may be invoked to serve even other IRQs than a card detect IRQ. Doing
-> > that while being runtime suspended doesn't seem like a good idea. Will
-> > it even work?
-> > 
+On 22/12/15 18:40, Lucas Stach wrote:
+> Hi all,
 > 
-> Yes it is the idea. It will allow to save some power. I don't see how I can use
-> runtime PM if I need to invoke sdhci_runtime_suspend_host() without modifying
-> sdhci layer to handle card detect irq.
+> this series implements UHS-I signaling for the Tegra SDHCI host,
+> which mainly means putting a proper tuning sequence in place.
 > 
-> I was also afraid to have some side effects but it works, at least for the
-> card detect case.
+> I've tested this on Jetson TK1 and got the following speed results,
+> where mmcblk0 is the on-board eMMC and mmcblk1 is a micro SDXC card:
 > 
-> > > +               ret = sdhci_runtime_suspend_host(host);
-> > > +               clk_disable_unprepare(priv->hclock);
-> > > +       }
-> > >
-> > >         clk_disable_unprepare(priv->gck);
-> > > -       clk_disable_unprepare(priv->hclock);
-> > >         clk_disable_unprepare(priv->mainck);
-> > >
-> > >         return ret;
-> > > @@ -84,19 +104,23 @@ static int sdhci_at91_runtime_resume(struct device *dev)
-> > >                 return ret;
-> > >         }
-> > >
-> > > -       ret = clk_prepare_enable(priv->hclock);
-> > > -       if (ret) {
-> > > -               dev_err(dev, "can't enable hclock\n");
-> > > -               return ret;
-> > > -       }
-> > > -
-> > >         ret = clk_prepare_enable(priv->gck);
-> > >         if (ret) {
-> > >                 dev_err(dev, "can't enable gck\n");
-> > >                 return ret;
-> > >         }
-> > >
-> > > -       return sdhci_runtime_resume_host(host);
-> > > +       if (sdhci_at91_use_sdhci_runtime(host)) {
-> > > +               ret = clk_prepare_enable(priv->hclock);
-> > > +               if (ret) {
-> > > +                       dev_err(dev, "can't enable hclock\n");
-> > > +                       return ret;
-> > > +               }
-> > > +
-> > > +               ret = sdhci_runtime_resume_host(host);
-> > > +       }
-> > > +
-> > > +       return ret;
-> > >  }
-> > >  #endif /* CONFIG_PM */
+> Without series applied:
+> hdparm -t /dev/mmcblk0
+>  Timing buffered disk reads:  110 MB in  3.05 seconds =  36.02 MB/sec
+> hdparm -t /dev/mmcblk1
+>  Timing buffered disk reads:   56 MB in  3.01 seconds =  18.63 MB/sec
+>  
+> With series applied:
+> hdparm -t /dev/mmcblk0
+>  Timing buffered disk reads:  236 MB in  3.00 seconds =  78.58 MB/sec
+> hdparm -t /dev/mmcblk1
+>  Timing buffered disk reads:  102 MB in  3.04 seconds =  33.51 MB/sec
 > 
-> Regards
+> Tegra 30 does support UHS-I speeds too, but currently has problems
+> when lowering the card voltage, which is needed in order to switch
+> to UHS-I signaling. I have some more patches to fix this, but they
+> need a bit more cleanup, with them applied the gains on Tegra30 are
+> similar to the results above.
 > 
-> Ludovic
+> For now the gains are limited to Tegra124+, with no regressions on
+> Tegra30 and Tegra20.
+> 
+> V2 fixes some minor style problems and is rebased on top of mmc/next.
+> This means it enables the same tuning logic on Tegra210 also. I
+> don't have a way to test this myself, so any testing on Tegra210 much
+> appreciated.
+
+I have recently noticed that on my tegra114-dalmore-a04, SD cards are no
+longer recognised on boot. It appears that the problem started after
+this series was merged.
+
+On tegra114 I see:
+
+[    1.777006] mmc0: error -110 whilst initialising SD card
+
+If I disable the UHS-I changes then it works again (see below). I am
+guessing you don't have a tegra114 board to test on? I have not had time
+to look into this further, but I am not sure if we should disable UHS-I
+on tegra114 for now?
+
+Cheers
+Jon
+
+diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
+index 83c4bf7bc16c..bc7a0847e316 100644
+--- a/drivers/mmc/host/sdhci-tegra.c
++++ b/drivers/mmc/host/sdhci-tegra.c
+@@ -147,10 +147,16 @@ static void tegra_sdhci_reset(struct sdhci_host
+*host, u8 mask)
+ 	/* Advertise UHS modes as supported by host */
+ 	if (soc_data->nvquirks & NVQUIRK_ENABLE_SDR50)
+ 		misc_ctrl |= SDHCI_MISC_CTRL_ENABLE_SDR50;
++	else
++		misc_ctrl &= ~SDHCI_MISC_CTRL_ENABLE_SDR50;
+ 	if (soc_data->nvquirks & NVQUIRK_ENABLE_DDR50)
+ 		misc_ctrl |= SDHCI_MISC_CTRL_ENABLE_DDR50;
++	else
++		misc_ctrl &= ~SDHCI_MISC_CTRL_ENABLE_DDR50;
+ 	if (soc_data->nvquirks & NVQUIRK_ENABLE_SDR104)
+ 		misc_ctrl |= SDHCI_MISC_CTRL_ENABLE_SDR104;
++	else
++		misc_ctrl &= ~SDHCI_MISC_CTRL_ENABLE_SDR104;
+ 	sdhci_writel(host, misc_ctrl, SDHCI_TEGRA_VENDOR_MISC_CTRL);
+
+ 	clk_ctrl = sdhci_readl(host, SDHCI_TEGRA_VENDOR_CLOCK_CTRL);
+@@ -315,6 +321,32 @@ static const struct sdhci_ops tegra114_sdhci_ops = {
+ 	.write_w    = tegra_sdhci_writew,
+ 	.write_l    = tegra_sdhci_writel,
+ 	.set_clock  = tegra_sdhci_set_clock,
++	.set_bus_width = sdhci_set_bus_width,
++	.reset      = tegra_sdhci_reset,
++	.set_uhs_signaling = sdhci_set_uhs_signaling,
++	.get_max_clock = sdhci_pltfm_clk_get_max_clock,
++};
++
++static const struct sdhci_pltfm_data sdhci_tegra114_pdata = {
++	.quirks = SDHCI_QUIRK_BROKEN_TIMEOUT_VAL |
++		  SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK |
++		  SDHCI_QUIRK_SINGLE_POWER_WRITE |
++		  SDHCI_QUIRK_NO_HISPD_BIT |
++		  SDHCI_QUIRK_BROKEN_ADMA_ZEROLEN_DESC |
++		  SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN,
++	.ops  = &tegra114_sdhci_ops,
++};
++
++static const struct sdhci_tegra_soc_data soc_data_tegra114 = {
++	.pdata = &sdhci_tegra114_pdata,
++};
++
++static const struct sdhci_ops tegra124_sdhci_ops = {
++	.get_ro     = tegra_sdhci_get_ro,
++	.read_w     = tegra_sdhci_readw,
++	.write_w    = tegra_sdhci_writew,
++	.write_l    = tegra_sdhci_writel,
++	.set_clock  = tegra_sdhci_set_clock,
+ 	.set_bus_width = tegra_sdhci_set_bus_width,
+ 	.reset      = tegra_sdhci_reset,
+ 	.platform_execute_tuning = tegra_sdhci_execute_tuning,
+@@ -322,7 +354,7 @@ static const struct sdhci_ops tegra114_sdhci_ops = {
+ 	.get_max_clock = tegra_sdhci_get_max_clock,
+ };
+
+-static const struct sdhci_pltfm_data sdhci_tegra114_pdata = {
++static const struct sdhci_pltfm_data sdhci_tegra124_pdata = {
+ 	.quirks = SDHCI_QUIRK_BROKEN_TIMEOUT_VAL |
+ 		  SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK |
+ 		  SDHCI_QUIRK_SINGLE_POWER_WRITE |
+@@ -330,11 +362,11 @@ static const struct sdhci_pltfm_data
+sdhci_tegra114_pdata = {
+ 		  SDHCI_QUIRK_BROKEN_ADMA_ZEROLEN_DESC |
+ 		  SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN,
+ 	.quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN,
+-	.ops  = &tegra114_sdhci_ops,
++	.ops  = &tegra124_sdhci_ops,
