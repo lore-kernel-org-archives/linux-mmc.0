@@ -1,103 +1,113 @@
-From: Lucas Stach <dev@lynxeye.de>
-Subject: Re: [PATCH v2 0/5] Tegra SDHCI UHS-I support
-Date: Wed, 17 Feb 2016 20:52:38 +0100
-Message-ID: <1455738758.6319.5.camel@lynxeye.de>
-References: <1450809664-11360-1-git-send-email-dev@lynxeye.de>
-	 <56C47368.4010304@nvidia.com>
+From: Russell King - ARM Linux <linux@arm.linux.org.uk>
+Subject: Re: SDIO wifi card is not detected with 4.5-rc kernels
+Date: Wed, 17 Feb 2016 21:18:19 +0000
+Message-ID: <20160217211818.GI19428@n2100.arm.linux.org.uk>
+References: <CA+7w51i3Kf2Jm=AXP5QhDj_8ZmzhUowbwwNEtu8UgiNkWwMYxg@mail.gmail.com>
+ <CAOMZO5DzhVMaE76Y_ZVzRMpCMyovSs4seWXKyCqeA9f=nb2CJg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from ns.lynxeye.de ([87.118.118.114]:53821 "EHLO lynxeye.de"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1161663AbcBQT6t (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 17 Feb 2016 14:58:49 -0500
-In-Reply-To: <56C47368.4010304@nvidia.com>
+Received: from pandora.arm.linux.org.uk ([78.32.30.218]:59067 "EHLO
+	pandora.arm.linux.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1422654AbcBQVS1 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 17 Feb 2016 16:18:27 -0500
+Content-Disposition: inline
+In-Reply-To: <CAOMZO5DzhVMaE76Y_ZVzRMpCMyovSs4seWXKyCqeA9f=nb2CJg@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Jon Hunter <jonathanh@nvidia.com>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Stephen Warren <swarren@wwwdotorg.org>, Thierry Reding <thierry.reding@gmail.com>, Alexandre Courbot <gnurou@gmail.com>, linux-mmc@vger.kernel.org, linux-tegra@vger.kernel.org
+To: Fabio Estevam <festevam@gmail.com>, Michael Turquette <mturquette@baylibre.com>
+Cc: Laszlo Fiat <laszlo.fiat@gmail.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-Hi Jon,
+On Wed, Feb 17, 2016 at 04:41:04PM -0200, Fabio Estevam wrote:
+> On Wed, Feb 17, 2016 at 4:06 PM, Laszlo Fiat <laszlo.fiat@gmail.com> wrote:
+> > Hello,
+> >
+> > The SDIO wifi card is not detected in my Baytrail tablet with 4.5-RC kernels,
+> > which worked fine with pre-4.5 kernels.
+> >
+> > Kernel v4.0-4.4 versions worked nicely:
+> >
+> > $ grep mmc dmesg-4.4.0-rc2-next-20151127.txt
+> > [    2.421329] mmc0: SDHCI controller on ACPI [80860F14:00] using ADMA
+> > [    2.425847] mmc1: SDHCI controller on ACPI [INT33BB:00] using ADMA
+> > [    2.431164] mmc2: SDHCI controller on ACPI [80860F14:02] using ADMA
+> > [    2.561342] mmc0: MAN_BKOPS_EN bit is not set
+> > [    2.569496] mmc0: new HS200 MMC card at address 0001
+> > [    2.571164] mmcblk0: mmc0:0001 032GE4 29.1 GiB
+> > [    2.571453] mmcblk0boot0: mmc0:0001 032GE4 partition 1 4.00 MiB
+> > [    2.571655] mmcblk0boot1: mmc0:0001 032GE4 partition 2 4.00 MiB
+> > [    2.571863] mmcblk0rpmb: mmc0:0001 032GE4 partition 3 4.00 MiB
+> > [    2.573835]  mmcblk0: p1 p2 p3 p4 p5 p6
+> > [    2.647372] mmc1: new high speed SDIO card at address 0001
+> > [    2.812340] mmc2: new high speed SDXC card at address 0001
+> > [    2.812719] mmcblk1: mmc2:0001 00000 59.6 GiB
+> >
+> > With v4.5:
+> >
+> > $ grep mmc dmesg-4.5.0-rc4.txt
+> > [    2.678828] mmc0: SDHCI controller on ACPI [80860F14:00] using ADMA
+> > [    2.683332] mmc1: SDHCI controller on ACPI [INT33BB:00] using ADMA
+> > [    2.705315] mmc2: SDHCI controller on ACPI [80860F14:02] using ADMA
+> > [    2.850013] mmc2: new high speed SDXC card at address 0001
+> > [    2.858675] mmcblk0: mmc2:0001 00000 59.6 GiB
+> > [    2.871384] mmc0: MAN_BKOPS_EN bit is not set
+> > [    2.883166] mmc0: new HS200 MMC card at address 0001
+> > [    2.883725] mmcblk1: mmc0:0001 032GE4 29.1 GiB
+> > [    2.884029] mmcblk1boot0: mmc0:0001 032GE4 partition 1 4.00 MiB
+> > [    2.884322] mmcblk1boot1: mmc0:0001 032GE4 partition 2 4.00 MiB
+> > [    2.884518] mmcblk1rpmb: mmc0:0001 032GE4 partition 3 4.00 MiB
+> > [    2.886442]  mmcblk1: p1 p2 p3 p4 p5 p6
+> >
+> > Notice that the following line is missing with v4.5:
+> >
+> > mmc1: new high speed SDIO card at address 0001
+> >
+> > And of course the out-of-tree wifi driver (rtl8723bs) cannot find the
+> > hardware with kernel v4.5.
+> >
+> > The hardware is a Teclast X80h Baytrail tablet.
+> > Cpu:  Intel(R) Atom(TM) CPU  Z3735F
+> >
+> > I've opened a bug report for it:
+> > https://bugzilla.kernel.org/show_bug.cgi?id=112571
+> >
+> > The full dmesg of 4.5-rc4 is available in the bug report.
+> 
+> I noticed the same on a imx6q-cubox-i board: the Broadcom Wifi chip
+> could not be detected with 4.5-rc.
+> 
+> Haven't had a chance to debug this yet.
 
-Am Mittwoch, den 17.02.2016, 13:19 +0000 schrieb Jon Hunter:
-> Hi Lucas,
->=20
-> On 22/12/15 18:40, Lucas Stach wrote:
-> > Hi all,
-> >=20
-> > this series implements UHS-I signaling for the Tegra SDHCI host,
-> > which mainly means putting a proper tuning sequence in place.
-> >=20
-> > I've tested this on Jetson TK1 and got the following speed results,
-> > where mmcblk0 is the on-board eMMC and mmcblk1 is a micro SDXC
-> > card:
-> >=20
-> > Without series applied:
-> > hdparm -t /dev/mmcblk0
-> > =C2=A0Timing buffered disk reads:=C2=A0=C2=A0110 MB in=C2=A0=C2=A03=
-=2E05 seconds =3D=C2=A0=C2=A036.02
-> > MB/sec
-> > hdparm -t /dev/mmcblk1
-> > =C2=A0Timing buffered disk reads:=C2=A0=C2=A0=C2=A056 MB in=C2=A0=C2=
-=A03.01 seconds =3D=C2=A0=C2=A018.63
-> > MB/sec
-> > =C2=A0
-> > With series applied:
-> > hdparm -t /dev/mmcblk0
-> > =C2=A0Timing buffered disk reads:=C2=A0=C2=A0236 MB in=C2=A0=C2=A03=
-=2E00 seconds =3D=C2=A0=C2=A078.58
-> > MB/sec
-> > hdparm -t /dev/mmcblk1
-> > =C2=A0Timing buffered disk reads:=C2=A0=C2=A0102 MB in=C2=A0=C2=A03=
-=2E04 seconds =3D=C2=A0=C2=A033.51
-> > MB/sec
-> >=20
-> > Tegra 30 does support UHS-I speeds too, but currently has problems
-> > when lowering the card voltage, which is needed in order to switch
-> > to UHS-I signaling. I have some more patches to fix this, but they
-> > need a bit more cleanup, with them applied the gains on Tegra30 are
-> > similar to the results above.
-> >=20
-> > For now the gains are limited to Tegra124+, with no regressions on
-> > Tegra30 and Tegra20.
-> >=20
-> > V2 fixes some minor style problems and is rebased on top of
-> > mmc/next.
-> > This means it enables the same tuning logic on Tegra210 also. I
-> > don't have a way to test this myself, so any testing on Tegra210
-> > much
-> > appreciated.
->=20
-> I have recently noticed that on my tegra114-dalmore-a04, SD cards are
-> no
-> longer recognised on boot. It appears that the problem started after
-> this series was merged.
->=20
-> On tegra114 I see:
->=20
-> [=C2=A0=C2=A0=C2=A0=C2=A01.777006] mmc0: error -110 whilst initialisi=
-ng SD card
->=20
-> If I disable the UHS-I changes then it works again (see below). I am
-> guessing you don't have a tegra114 board to test on? I have not had
-> time
-> to look into this further, but I am not sure if we should disable
-> UHS-I
-> on tegra114 for now?
->=20
-> Cheers
-> Jon
->=20
-Right I don't have a Tegra114 board to test with.
+Looks strange - my patch series was tested on Hummingboards and
+Armada38x, though that was before 4.4.  The Hummingboards have
+the same Broadcom wifi chip(s) as the Cubox-i, and they worked
+fine with my original set patches - here's 4.4-rc6 on a
+Hummingboard:
 
-I already know that Tegra30 needs some more fixes to get UHS-I to work
-and I have patches for that, but they are not yet ready for sending
-out. I would guess that Tegra114 may need the same fix as Tegra30. I
-can Cc you on those patches if you prefer.
+[    0.000000] Linux version 4.4.0-rc6+ (rmk@rmk-PC.arm.linux.org.uk) (gcc version 4.7.4 (GCC) ) #1972 SMP Sat Jan 2 18:55:35 GMT 2016
+[    5.158107] brcmfmac: F1 signature read @0x18000000=0x16044330
+[    5.528484] brcmfmac: brcmf_c_preinit_dcmds: Firmware version = wl0: Jan 23 2013 17:47:32 version 5.90.195.114 FWID 01-f9e7e464
+[    5.567722] brcmfmac: brcmf_cfg80211_reg_notifier: not a ISO3166 code
+[    5.629961] brcmfmac: brcmf_cfg80211_reg_notifier: not a ISO3166 code
 
-Please submit a formal patch to disable UHS-I on Tegra114, I think it's
-the right thing to do at this point and will happily ACK it.
+Since then, I rebased my patch series on 4.5-rc1 before re-posting
+it - though I didn't test it on the Wifi capable HBs, but now that I
+try, I find that there's more serious issues here: the SDHCI driver
+doesn't even probe the device, returning -ENODEV.  So, something _else_
+has broken in SDHCI/MMC for the Broadcom WIFI here - tracing through
+the code seems to point at the pwrseq stuff being the culpret:
 
-Regards,
-Lucas
+[   52.175162] match->alloc failed: -517
+[   52.178874] sdhci-esdhc-imx 2190000.usdhc: mmc_of_parse failed: -517
+[   52.185271] sdhci-esdhc-imx 2190000.usdhc: imx probe failed
+
+-517 is -EPROBE_DEFER, and looking at what's in the clk_summary
+debugfs file, my guess is that the clk_sdio gpio-gate-clock is not
+being registered for some unknown reason.  Adding Michael - any
+ideas why gpio-gate-clock has stopped working between 4.4 and
+present?
+
+-- 
+RMK's Patch system: http://www.arm.linux.org.uk/developer/patches/
+FTTC broadband for 0.8mile line: currently at 9.6Mbps down 400kbps up
+according to speedtest.net.
