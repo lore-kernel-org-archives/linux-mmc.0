@@ -1,99 +1,121 @@
-From: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH v5 00/13] mmc: use sdhci_pltfm_init for private allocation
- and clean up
-Date: Thu, 18 Feb 2016 13:40:47 +0100
-Message-ID: <CAPDyKFr2RBOuVM+QeOrbH=uZE+3wymqgZzvDPUa0JUnoK+raWg@mail.gmail.com>
-References: <1455628111-5583-1-git-send-email-jszhang@marvell.com>
+From: Rob Herring <robh@kernel.org>
+Subject: Re: [PATCH v7 1/2] mmc: OCTEON: Add DT bindings for OCTEON MMC
+ controller
+Date: Thu, 18 Feb 2016 08:35:16 -0600
+Message-ID: <20160218143516.GA9654@rob-hp-laptop>
+References: <1455725574-9947-1-git-send-email-matt.redfearn@imgtec.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1455628111-5583-1-git-send-email-jszhang-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>
-Sender: linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Jisheng Zhang <jszhang-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>
-Cc: Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Ludovic Desroches <ludovic.desroches-AIFe0yeh4nAAvxtiuMwx3w@public.gmane.org>, Stephen Warren <swarren-3lzwWm7+Weoh9ZMKESR00Q@public.gmane.org>, Lee Jones <lee-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Eric Anholt <eric-WhKQ6XTQaPysTnJN9+BGXg@public.gmane.org>, Michal Simek <michal.simek-gjFFaj9aHVfQT0dZR+AlfA@public.gmane.org>, =?UTF-8?Q?S=C3=B6ren_Brinkmann?= <soren.brinkmann-gjFFaj9aHVfQT0dZR+AlfA@public.gmane.org>, Srinivas Kandagatla <srinivas.kandagatla-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Maxime Coquelin <maxime.coquelin-qxv4g6HH51o@public.gmane.org>, Patrice CHOTARD <patrice.chotard-qxv4g6HH51o@public.gmane.org>, Thierry Reding <thierry.reding-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Sebastian Hesselbarth <sebastian.hesselbarth-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, kernel-F5mvAk5X5gdBDgjK7y7TUQ@public.gmane.org, linux-mmc <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, linux-rpi-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail.kernel.org ([198.145.29.136]:52835 "EHLO mail.kernel.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1424150AbcBROfW (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 18 Feb 2016 09:35:22 -0500
+Content-Disposition: inline
+In-Reply-To: <1455725574-9947-1-git-send-email-matt.redfearn@imgtec.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Matt Redfearn <matt.redfearn@imgtec.com>
+Cc: david.daney@cavium.com, aleksey.makarov@caviumnetworks.com, ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-mips@linux-mips.org, Chandrakala Chavva <cchavva@caviumnetworks.com>, Aleksey Makarov <aleksey.makarov@auriga.com>, Leonid Rosenboim <lrosenboim@caviumnetworks.com>, Peter Swain <pswain@cavium.com>, Aaron Williams <aaron.williams@cavium.com>
 
-On 16 February 2016 at 14:08, Jisheng Zhang <jszhang-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org> wrote=
-:
-> These patches are to complete the TODOs in Commit 0e748234293f ("mmc:
-> sdhci: Add size for caller in init+register"), I.E:
->
-> - todo: migrate clients to using allocation this way
-> - todo: remove priv variable once migration is complete
->
-> Since v4:
->  - based on Ulf's latest next branch
->  - add Adrian's Ack for all patches, add Thierry's Ack and Test for p=
-atch 11
->    add S=C3=B6ren Ack for patch 5.
->
-> Since v3:
->  - based on v4.5-rc1
->  - add Ludovic's ack for sdhci-of-at91 changes
->  - fix use-after-free in some drivers: some host drivers still needs =
-to
->    access sdhci_pltfm_host->private after sdhci_pltfm_unregister(), b=
-ut
->    the private should be already freed by sdhci_pltfm_unregister.
->  - add patch5 to fix one clk bug in sdhci_arasan_remove(). IMHO, It's
->    better to add this patch to fixes rather than waiting for next mer=
-ge
->    window
->
-> Since v2:
->  - based on mmc next tree and remove all priv usage introduced in new=
-ly
->    commits in this tree
->  - don't break two lines if sdhci_pltfm_init() call could be put into
->    one line. Thank Ludovic Desroches.
->
-> Since v1:
->  - add new patch03 to factorise sdhci_msm_pdata outisde of sdhci_msm_=
-host.
->    This is to fix drivers/mmc/host/sdhci-msm.c:440:32: warning: 'msm_=
-host'
->    is used uninitialized in this function [-Wuninitialized]
->  - Add Arnd's Ack for all patches except patch3 which is new in v2
->
->
-> Jisheng Zhang (13):
->   mmc: sdhci-bcm2835: use sdhci_pltfm_init for private allocation
->   mmc: sdhci-esdhc-imx: use sdhci_pltfm_init for private allocation
->   mmc: sdhci-msm: factorise sdhci_msm_pdata outisde of sdhci_msm_host
->   mmc: sdhci-msm: use sdhci_pltfm_init for private allocation
->   mmc: sdhci-of-arasan: fix clk issue in sdhci_arasan_remove()
->   mmc: sdhci-of-arasan: use sdhci_pltfm_init for private allocation
->   mmc: sdhci-of-at91: use sdhci_pltfm_init for private allocation
->   mmc: sdhci-of-esdhc: use sdhci_pltfm_init for private allocation
->   mmc: sdhci-pxav3: use sdhci_pltfm_init for private allocation
->   mmc: sdhci-st: use sdhci_pltfm_init for private allocation
->   mmc: sdhci-tegra: use sdhci_pltfm_init for private allocation
->   mmc: sdhci-pxav2: remove unnecessary assignment of pltfm_host->priv
->   mmc: sdhci-pltfm: remove priv variable from sdhci_pltfm_host
->
->  drivers/mmc/host/sdhci-bcm2835.c   | 14 +++----------
->  drivers/mmc/host/sdhci-esdhc-imx.c | 38 ++++++++++++++++------------=
---------
->  drivers/mmc/host/sdhci-msm.c       | 25 +++++++++++-------------
->  drivers/mmc/host/sdhci-of-arasan.c | 33 +++++++++++++++-------------=
----
->  drivers/mmc/host/sdhci-of-at91.c   | 33 ++++++++++++++--------------=
----
->  drivers/mmc/host/sdhci-of-esdhc.c  | 19 +++++++++---------
->  drivers/mmc/host/sdhci-pltfm.h     |  1 -
->  drivers/mmc/host/sdhci-pxav2.c     |  1 -
->  drivers/mmc/host/sdhci-pxav3.c     | 20 ++++++++-----------
->  drivers/mmc/host/sdhci-st.c        | 40 +++++++++++++++++++---------=
-----------
->  drivers/mmc/host/sdhci-tegra.c     | 21 +++++++-------------
->  11 files changed, 106 insertions(+), 139 deletions(-)
->
-> --
-> 2.7.0
->
+On Wed, Feb 17, 2016 at 04:12:53PM +0000, Matt Redfearn wrote:
+> From: Aleksey Makarov <aleksey.makarov@caviumnetworks.com>
+> 
+> Add Device Tree binding document for Octeon MMC controller. The driver
+> is in a following patch.
+> 
+> The MMC controller can be connected to up to 4 "slots" which may be
+> eMMC, MMC or SD card devices. As there is a single controller, each
+> available slot is represented as a child node of the controller.
+> 
+> This is a similar concept to the atmel-mci driver.
+> 
+> Tested-by: Aaro Koskinen <aaro.koskinen@iki.fi>
+> Signed-off-by: Chandrakala Chavva <cchavva@caviumnetworks.com>
+> Signed-off-by: David Daney <david.daney@cavium.com>
+> Signed-off-by: Aleksey Makarov <aleksey.makarov@auriga.com>
+> Signed-off-by: Leonid Rosenboim <lrosenboim@caviumnetworks.com>
+> Signed-off-by: Peter Swain <pswain@cavium.com>
+> Signed-off-by: Aaron Williams <aaron.williams@cavium.com>
+> Signed-off-by: Matt Redfearn <matt.redfearn@imgtec.com>
+> ---
+> v7: No changes
+> 
+> v6:
+> - Split up patch
+> - Moved device tree fixup to platform code
+> ---
+>  .../devicetree/bindings/mmc/octeon-mmc.txt         | 79 ++++++++++++++++++++++
+>  1 file changed, 79 insertions(+)
+>  create mode 100644 Documentation/devicetree/bindings/mmc/octeon-mmc.txt
+> 
+> diff --git a/Documentation/devicetree/bindings/mmc/octeon-mmc.txt b/Documentation/devicetree/bindings/mmc/octeon-mmc.txt
+> new file mode 100644
+> index 000000000000..d2c576d9ad65
+> --- /dev/null
+> +++ b/Documentation/devicetree/bindings/mmc/octeon-mmc.txt
+> @@ -0,0 +1,79 @@
+> +* OCTEON SD/MMC Host Controller
+> +
+> +This controller is present on some members of the Cavium OCTEON SoC
+> +family, provide an interface for eMMC, MMC and SD devices.  There is a
+> +single controller that may have several "slots" connected.  These
+> +slots appear as children of the main controller node.
+> +The DMA engine is an integral part of the controller block.
+> +
+> +1) MMC node
+> +
+> +Required properties:
+> +- compatible : Should be "cavium,octeon-6130-mmc" or "cavium,octeon-7890-mmc"
+> +- reg : Two entries:
+> +	1) The base address of the MMC controller register bank.
+> +	2) The base address of the MMC DMA engine register bank.
+> +- interrupts :
+> +	For "cavium,octeon-6130-mmc": two entries:
+> +	1) The MMC controller interrupt line.
+> +	2) The MMC DMA engine interrupt line.
+> +	For "cavium,octeon-7890-mmc": nine entries:
+> +	1) The next block transfer of a multiblock transfer has completed (BUF_DONE)
+> +	2) Operation completed successfully (CMD_DONE).
+> +	3) DMA transfer completed successfully (DMA_DONE).
+> +	4) Operation encountered an error (CMD_ERR).
+> +	5) DMA transfer encountered an error (DMA_ERR).
+> +	6) Switch operation completed successfully (SWITCH_DONE).
+> +	7) Switch operation encountered an error (SWITCH_ERR).
+> +	8) Internal DMA engine request completion interrupt (DONE).
+> +	9) Internal DMA FIFO underflow (FIFO).
+> +- #address-cells : Must be <1>
+> +- #size-cells : Must be <0>
+> +
+> +The node contains child nodes for each slot that the platform uses.
+> +
+> +Example:
+> +mmc@1180000002000 {
+> +	compatible = "cavium,octeon-6130-mmc";
+> +	reg = <0x11800 0x00002000 0x0 0x100>,
+> +		<0x11800 0x00000168 0x0 0x20>;
+> +	#address-cells = <1>;
+> +	#size-cells = <0>;
+> +	/* EMM irq, DMA irq */
+> +	interrupts = <1 19>, <0 63>;
+> +
+> +	[ child node definitions...]
+> +};
+> +
+> +
+> +2) Slot nodes
+> +Properties in mmc.txt apply to each slot node that the platform uses.
+> +
+> +Required properties:
+> +- reg : The slot number.
+> +
+> +Optional properties:
+> +- cavium,cmd-clk-skew : the amount of delay (in pS) past the clock edge
+> +	to sample the command pin.
+> +- cavium,dat-clk-skew : the amount of delay (in pS) past the clock edge
+> +	to sample the data pin.
 
-Thanks, applied for next!
+I thought you were okay with adding -ps? Either way:
 
-Kind regards
-Uffe
+Acked-by: Rob Herring <robh@kernel.org>
+
