@@ -1,134 +1,133 @@
-From: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH] mmc: tegra: Disable UHS-I modes for tegra114
-Date: Thu, 18 Feb 2016 17:07:01 +0100
-Message-ID: <CAPDyKFowEH=4PU1ErNxMA0=SiDT1Q86H0SfMuiH5jA+H7mvquA@mail.gmail.com>
-References: <1455806924-14967-1-git-send-email-jonathanh@nvidia.com>
+From: Matt Redfearn <matt.redfearn@imgtec.com>
+Subject: Re: [PATCH v7 1/2] mmc: OCTEON: Add DT bindings for OCTEON MMC
+ controller
+Date: Thu, 18 Feb 2016 16:48:00 +0000
+Message-ID: <56C5F5C0.7010008@imgtec.com>
+References: <1455725574-9947-1-git-send-email-matt.redfearn@imgtec.com>
+ <20160218143516.GA9654@rob-hp-laptop>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1455806924-14967-1-git-send-email-jonathanh-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
-Sender: linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Jon Hunter <jonathanh-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
-Cc: Stephen Warren <swarren-3lzwWm7+Weoh9ZMKESR00Q@public.gmane.org>, Thierry Reding <thierry.reding-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Alexandre Courbot <gnurou-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Lucas Stach <dev-8ppwABl0HbeELgA04lAiVw@public.gmane.org>, linux-mmc <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Content-Type: text/plain; charset="windows-1252"; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mailapp01.imgtec.com ([195.59.15.196]:35099 "EHLO
+	mailapp01.imgtec.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1425080AbcBRQsE (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 18 Feb 2016 11:48:04 -0500
+In-Reply-To: <20160218143516.GA9654@rob-hp-laptop>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Rob Herring <robh@kernel.org>
+Cc: david.daney@cavium.com, aleksey.makarov@caviumnetworks.com, ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-mips@linux-mips.org, Chandrakala Chavva <cchavva@caviumnetworks.com>, Aleksey Makarov <aleksey.makarov@auriga.com>, Leonid Rosenboim <lrosenboim@caviumnetworks.com>, Peter Swain <pswain@cavium.com>, Aaron Williams <aaron.williams@cavium.com>
 
-+Adrian
 
-On 18 February 2016 at 15:48, Jon Hunter <jonathanh-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org> wrote:
-> SD card support for Tegra114 started failing after commit a8e326a911d3
-> ("mmc: tegra: implement module external clock change") was merged. This
-> commit was part of a series to enable UHS-I modes for Tegra. To
-> workaround this problem for now, only disable UHS-I modes for Tegra114
-> and in order to do this it is necessary to revert changes from commits
-> a8e326a911d3 ("mmc: tegra: implement module external clock change"),
-> c3c2384c3ac0 ("mmc: tegra: implement UHS tuning"), 7ad2ed1dfcbe
-> ("mmc: tegra: enable UHS-I modes") that impact Tegra114. To do this so
-> that UHS-I mode can be disabled for Tegra114 but not for Tegra124
-> separate the platform data, soc data and sdhci-ops so they are no longer
-> common to both Tegra114 and Tegra124.
->
-> Fixes: a8e326a911d3 ("mmc: tegra: implement module external clock change")
->
-> Signed-off-by: Jon Hunter <jonathanh-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
 
-This looks okay to me, although I need and ack from Adrian to pick up
-this for fixes. Adrian did recently step in as the maintainer for
-sdhci.
+On 18/02/16 14:35, Rob Herring wrote:
+> On Wed, Feb 17, 2016 at 04:12:53PM +0000, Matt Redfearn wrote:
+>> From: Aleksey Makarov <aleksey.makarov@caviumnetworks.com>
+>>
+>> Add Device Tree binding document for Octeon MMC controller. The driver
+>> is in a following patch.
+>>
+>> The MMC controller can be connected to up to 4 "slots" which may be
+>> eMMC, MMC or SD card devices. As there is a single controller, each
+>> available slot is represented as a child node of the controller.
+>>
+>> This is a similar concept to the atmel-mci driver.
+>>
+>> Tested-by: Aaro Koskinen <aaro.koskinen@iki.fi>
+>> Signed-off-by: Chandrakala Chavva <cchavva@caviumnetworks.com>
+>> Signed-off-by: David Daney <david.daney@cavium.com>
+>> Signed-off-by: Aleksey Makarov <aleksey.makarov@auriga.com>
+>> Signed-off-by: Leonid Rosenboim <lrosenboim@caviumnetworks.com>
+>> Signed-off-by: Peter Swain <pswain@cavium.com>
+>> Signed-off-by: Aaron Williams <aaron.williams@cavium.com>
+>> Signed-off-by: Matt Redfearn <matt.redfearn@imgtec.com>
+>> ---
+>> v7: No changes
+>>
+>> v6:
+>> - Split up patch
+>> - Moved device tree fixup to platform code
+>> ---
+>>   .../devicetree/bindings/mmc/octeon-mmc.txt         | 79 ++++++++++++++++++++++
+>>   1 file changed, 79 insertions(+)
+>>   create mode 100644 Documentation/devicetree/bindings/mmc/octeon-mmc.txt
+>>
+>> diff --git a/Documentation/devicetree/bindings/mmc/octeon-mmc.txt b/Documentation/devicetree/bindings/mmc/octeon-mmc.txt
+>> new file mode 100644
+>> index 000000000000..d2c576d9ad65
+>> --- /dev/null
+>> +++ b/Documentation/devicetree/bindings/mmc/octeon-mmc.txt
+>> @@ -0,0 +1,79 @@
+>> +* OCTEON SD/MMC Host Controller
+>> +
+>> +This controller is present on some members of the Cavium OCTEON SoC
+>> +family, provide an interface for eMMC, MMC and SD devices.  There is a
+>> +single controller that may have several "slots" connected.  These
+>> +slots appear as children of the main controller node.
+>> +The DMA engine is an integral part of the controller block.
+>> +
+>> +1) MMC node
+>> +
+>> +Required properties:
+>> +- compatible : Should be "cavium,octeon-6130-mmc" or "cavium,octeon-7890-mmc"
+>> +- reg : Two entries:
+>> +	1) The base address of the MMC controller register bank.
+>> +	2) The base address of the MMC DMA engine register bank.
+>> +- interrupts :
+>> +	For "cavium,octeon-6130-mmc": two entries:
+>> +	1) The MMC controller interrupt line.
+>> +	2) The MMC DMA engine interrupt line.
+>> +	For "cavium,octeon-7890-mmc": nine entries:
+>> +	1) The next block transfer of a multiblock transfer has completed (BUF_DONE)
+>> +	2) Operation completed successfully (CMD_DONE).
+>> +	3) DMA transfer completed successfully (DMA_DONE).
+>> +	4) Operation encountered an error (CMD_ERR).
+>> +	5) DMA transfer encountered an error (DMA_ERR).
+>> +	6) Switch operation completed successfully (SWITCH_DONE).
+>> +	7) Switch operation encountered an error (SWITCH_ERR).
+>> +	8) Internal DMA engine request completion interrupt (DONE).
+>> +	9) Internal DMA FIFO underflow (FIFO).
+>> +- #address-cells : Must be <1>
+>> +- #size-cells : Must be <0>
+>> +
+>> +The node contains child nodes for each slot that the platform uses.
+>> +
+>> +Example:
+>> +mmc@1180000002000 {
+>> +	compatible = "cavium,octeon-6130-mmc";
+>> +	reg = <0x11800 0x00002000 0x0 0x100>,
+>> +		<0x11800 0x00000168 0x0 0x20>;
+>> +	#address-cells = <1>;
+>> +	#size-cells = <0>;
+>> +	/* EMM irq, DMA irq */
+>> +	interrupts = <1 19>, <0 63>;
+>> +
+>> +	[ child node definitions...]
+>> +};
+>> +
+>> +
+>> +2) Slot nodes
+>> +Properties in mmc.txt apply to each slot node that the platform uses.
+>> +
+>> +Required properties:
+>> +- reg : The slot number.
+>> +
+>> +Optional properties:
+>> +- cavium,cmd-clk-skew : the amount of delay (in pS) past the clock edge
+>> +	to sample the command pin.
+>> +- cavium,dat-clk-skew : the amount of delay (in pS) past the clock edge
+>> +	to sample the data pin.
+> I thought you were okay with adding -ps? Either way:
+>
+> Acked-by: Rob Herring <robh@kernel.org>
+>
+Thanks Rob.
+Adding the -ps to the binding creates quite a bit of extra code in the 
+driver, as we have to support the legacy version (without -ps) which is 
+already in shipped devices. Depending how many revisions the driver 
+itself goes through and how that code ends up being structured I may add 
+them back in.
 
-Kind regards
-Uffe
-
-> ---
->  drivers/mmc/host/sdhci-tegra.c | 42 +++++++++++++++++++++++++++++++++++++-----
->  1 file changed, 37 insertions(+), 5 deletions(-)
->
-> diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
-> index 83c4bf7bc16c..bc7a0847e316 100644
-> --- a/drivers/mmc/host/sdhci-tegra.c
-> +++ b/drivers/mmc/host/sdhci-tegra.c
-> @@ -147,10 +147,16 @@ static void tegra_sdhci_reset(struct sdhci_host *host, u8 mask)
->         /* Advertise UHS modes as supported by host */
->         if (soc_data->nvquirks & NVQUIRK_ENABLE_SDR50)
->                 misc_ctrl |= SDHCI_MISC_CTRL_ENABLE_SDR50;
-> +       else
-> +               misc_ctrl &= ~SDHCI_MISC_CTRL_ENABLE_SDR50;
->         if (soc_data->nvquirks & NVQUIRK_ENABLE_DDR50)
->                 misc_ctrl |= SDHCI_MISC_CTRL_ENABLE_DDR50;
-> +       else
-> +               misc_ctrl &= ~SDHCI_MISC_CTRL_ENABLE_DDR50;
->         if (soc_data->nvquirks & NVQUIRK_ENABLE_SDR104)
->                 misc_ctrl |= SDHCI_MISC_CTRL_ENABLE_SDR104;
-> +       else
-> +               misc_ctrl &= ~SDHCI_MISC_CTRL_ENABLE_SDR104;
->         sdhci_writel(host, misc_ctrl, SDHCI_TEGRA_VENDOR_MISC_CTRL);
->
->         clk_ctrl = sdhci_readl(host, SDHCI_TEGRA_VENDOR_CLOCK_CTRL);
-> @@ -315,6 +321,32 @@ static const struct sdhci_ops tegra114_sdhci_ops = {
->         .write_w    = tegra_sdhci_writew,
->         .write_l    = tegra_sdhci_writel,
->         .set_clock  = tegra_sdhci_set_clock,
-> +       .set_bus_width = sdhci_set_bus_width,
-> +       .reset      = tegra_sdhci_reset,
-> +       .set_uhs_signaling = sdhci_set_uhs_signaling,
-> +       .get_max_clock = sdhci_pltfm_clk_get_max_clock,
-> +};
-> +
-> +static const struct sdhci_pltfm_data sdhci_tegra114_pdata = {
-> +       .quirks = SDHCI_QUIRK_BROKEN_TIMEOUT_VAL |
-> +                 SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK |
-> +                 SDHCI_QUIRK_SINGLE_POWER_WRITE |
-> +                 SDHCI_QUIRK_NO_HISPD_BIT |
-> +                 SDHCI_QUIRK_BROKEN_ADMA_ZEROLEN_DESC |
-> +                 SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN,
-> +       .ops  = &tegra114_sdhci_ops,
-> +};
-> +
-> +static const struct sdhci_tegra_soc_data soc_data_tegra114 = {
-> +       .pdata = &sdhci_tegra114_pdata,
-> +};
-> +
-> +static const struct sdhci_ops tegra124_sdhci_ops = {
-> +       .get_ro     = tegra_sdhci_get_ro,
-> +       .read_w     = tegra_sdhci_readw,
-> +       .write_w    = tegra_sdhci_writew,
-> +       .write_l    = tegra_sdhci_writel,
-> +       .set_clock  = tegra_sdhci_set_clock,
->         .set_bus_width = tegra_sdhci_set_bus_width,
->         .reset      = tegra_sdhci_reset,
->         .platform_execute_tuning = tegra_sdhci_execute_tuning,
-> @@ -322,7 +354,7 @@ static const struct sdhci_ops tegra114_sdhci_ops = {
->         .get_max_clock = tegra_sdhci_get_max_clock,
->  };
->
-> -static const struct sdhci_pltfm_data sdhci_tegra114_pdata = {
-> +static const struct sdhci_pltfm_data sdhci_tegra124_pdata = {
->         .quirks = SDHCI_QUIRK_BROKEN_TIMEOUT_VAL |
->                   SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK |
->                   SDHCI_QUIRK_SINGLE_POWER_WRITE |
-> @@ -330,11 +362,11 @@ static const struct sdhci_pltfm_data sdhci_tegra114_pdata = {
->                   SDHCI_QUIRK_BROKEN_ADMA_ZEROLEN_DESC |
->                   SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN,
->         .quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN,
-> -       .ops  = &tegra114_sdhci_ops,
-> +       .ops  = &tegra124_sdhci_ops,
->  };
->
-> -static const struct sdhci_tegra_soc_data soc_data_tegra114 = {
-> -       .pdata = &sdhci_tegra114_pdata,
-> +static const struct sdhci_tegra_soc_data soc_data_tegra124 = {
-> +       .pdata = &sdhci_tegra124_pdata,
->         .nvquirks = NVQUIRK_ENABLE_SDR50 |
->                     NVQUIRK_ENABLE_DDR50 |
->                     NVQUIRK_ENABLE_SDR104,
-> @@ -357,7 +389,7 @@ static const struct sdhci_tegra_soc_data soc_data_tegra210 = {
->
->  static const struct of_device_id sdhci_tegra_dt_match[] = {
->         { .compatible = "nvidia,tegra210-sdhci", .data = &soc_data_tegra210 },
-> -       { .compatible = "nvidia,tegra124-sdhci", .data = &soc_data_tegra114 },
-> +       { .compatible = "nvidia,tegra124-sdhci", .data = &soc_data_tegra124 },
->         { .compatible = "nvidia,tegra114-sdhci", .data = &soc_data_tegra114 },
->         { .compatible = "nvidia,tegra30-sdhci", .data = &soc_data_tegra30 },
->         { .compatible = "nvidia,tegra20-sdhci", .data = &soc_data_tegra20 },
-> --
-> 2.1.4
->
+Thanks,
+Matt
