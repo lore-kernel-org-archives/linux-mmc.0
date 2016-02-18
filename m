@@ -1,45 +1,99 @@
-From: Russell King - ARM Linux <linux@arm.linux.org.uk>
-Subject: Re: SDIO wifi card is not detected with 4.5-rc kernels
-Date: Wed, 17 Feb 2016 23:35:00 +0000
-Message-ID: <20160217233500.GN19428@n2100.arm.linux.org.uk>
-References: <CA+7w51i3Kf2Jm=AXP5QhDj_8ZmzhUowbwwNEtu8UgiNkWwMYxg@mail.gmail.com>
- <CAOMZO5DzhVMaE76Y_ZVzRMpCMyovSs4seWXKyCqeA9f=nb2CJg@mail.gmail.com>
- <20160217211818.GI19428@n2100.arm.linux.org.uk>
- <CAEG3pNDW6FefMhrgmJAFj+hGcoOZTuFDOx+NaA9sNSfD-ko+dQ@mail.gmail.com>
- <20160217221136.GL19428@n2100.arm.linux.org.uk>
- <20160217230226.GA27645@n2100.arm.linux.org.uk>
+From: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: Re: [PATCH v5 00/13] mmc: use sdhci_pltfm_init for private allocation
+ and clean up
+Date: Thu, 18 Feb 2016 13:40:47 +0100
+Message-ID: <CAPDyKFr2RBOuVM+QeOrbH=uZE+3wymqgZzvDPUa0JUnoK+raWg@mail.gmail.com>
+References: <1455628111-5583-1-git-send-email-jszhang@marvell.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from pandora.arm.linux.org.uk ([78.32.30.218]:59296 "EHLO
-	pandora.arm.linux.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1423667AbcBQXfM (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 17 Feb 2016 18:35:12 -0500
-Content-Disposition: inline
-In-Reply-To: <20160217230226.GA27645@n2100.arm.linux.org.uk>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1455628111-5583-1-git-send-email-jszhang-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>
+Sender: linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Jisheng Zhang <jszhang-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>
+Cc: Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Ludovic Desroches <ludovic.desroches-AIFe0yeh4nAAvxtiuMwx3w@public.gmane.org>, Stephen Warren <swarren-3lzwWm7+Weoh9ZMKESR00Q@public.gmane.org>, Lee Jones <lee-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Eric Anholt <eric-WhKQ6XTQaPysTnJN9+BGXg@public.gmane.org>, Michal Simek <michal.simek-gjFFaj9aHVfQT0dZR+AlfA@public.gmane.org>, =?UTF-8?Q?S=C3=B6ren_Brinkmann?= <soren.brinkmann-gjFFaj9aHVfQT0dZR+AlfA@public.gmane.org>, Srinivas Kandagatla <srinivas.kandagatla-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Maxime Coquelin <maxime.coquelin-qxv4g6HH51o@public.gmane.org>, Patrice CHOTARD <patrice.chotard-qxv4g6HH51o@public.gmane.org>, Thierry Reding <thierry.reding-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Sebastian Hesselbarth <sebastian.hesselbarth-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, kernel-F5mvAk5X5gdBDgjK7y7TUQ@public.gmane.org, linux-mmc <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, linux-rpi-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
-To: Michael Turquette <mturquette@baylibre.com>, Fabio Estevam <festevam@gmail.com>
-Cc: Laszlo Fiat <laszlo.fiat@gmail.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-On Wed, Feb 17, 2016 at 11:02:26PM +0000, Russell King - ARM Linux wrote:
-> From what I remember - I debugged a problem in this area, I sent a
-> _tested_ patch, which you changed before merging because you had
-> the above conflicting patch.  Unfortunately, the conflicting patch
-> is the cause of this problem...
+On 16 February 2016 at 14:08, Jisheng Zhang <jszhang-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org> wrote=
+:
+> These patches are to complete the TODOs in Commit 0e748234293f ("mmc:
+> sdhci: Add size for caller in init+register"), I.E:
+>
+> - todo: migrate clients to using allocation this way
+> - todo: remove priv variable once migration is complete
+>
+> Since v4:
+>  - based on Ulf's latest next branch
+>  - add Adrian's Ack for all patches, add Thierry's Ack and Test for p=
+atch 11
+>    add S=C3=B6ren Ack for patch 5.
+>
+> Since v3:
+>  - based on v4.5-rc1
+>  - add Ludovic's ack for sdhci-of-at91 changes
+>  - fix use-after-free in some drivers: some host drivers still needs =
+to
+>    access sdhci_pltfm_host->private after sdhci_pltfm_unregister(), b=
+ut
+>    the private should be already freed by sdhci_pltfm_unregister.
+>  - add patch5 to fix one clk bug in sdhci_arasan_remove(). IMHO, It's
+>    better to add this patch to fixes rather than waiting for next mer=
+ge
+>    window
+>
+> Since v2:
+>  - based on mmc next tree and remove all priv usage introduced in new=
+ly
+>    commits in this tree
+>  - don't break two lines if sdhci_pltfm_init() call could be put into
+>    one line. Thank Ludovic Desroches.
+>
+> Since v1:
+>  - add new patch03 to factorise sdhci_msm_pdata outisde of sdhci_msm_=
+host.
+>    This is to fix drivers/mmc/host/sdhci-msm.c:440:32: warning: 'msm_=
+host'
+>    is used uninitialized in this function [-Wuninitialized]
+>  - Add Arnd's Ack for all patches except patch3 which is new in v2
+>
+>
+> Jisheng Zhang (13):
+>   mmc: sdhci-bcm2835: use sdhci_pltfm_init for private allocation
+>   mmc: sdhci-esdhc-imx: use sdhci_pltfm_init for private allocation
+>   mmc: sdhci-msm: factorise sdhci_msm_pdata outisde of sdhci_msm_host
+>   mmc: sdhci-msm: use sdhci_pltfm_init for private allocation
+>   mmc: sdhci-of-arasan: fix clk issue in sdhci_arasan_remove()
+>   mmc: sdhci-of-arasan: use sdhci_pltfm_init for private allocation
+>   mmc: sdhci-of-at91: use sdhci_pltfm_init for private allocation
+>   mmc: sdhci-of-esdhc: use sdhci_pltfm_init for private allocation
+>   mmc: sdhci-pxav3: use sdhci_pltfm_init for private allocation
+>   mmc: sdhci-st: use sdhci_pltfm_init for private allocation
+>   mmc: sdhci-tegra: use sdhci_pltfm_init for private allocation
+>   mmc: sdhci-pxav2: remove unnecessary assignment of pltfm_host->priv
+>   mmc: sdhci-pltfm: remove priv variable from sdhci_pltfm_host
+>
+>  drivers/mmc/host/sdhci-bcm2835.c   | 14 +++----------
+>  drivers/mmc/host/sdhci-esdhc-imx.c | 38 ++++++++++++++++------------=
+--------
+>  drivers/mmc/host/sdhci-msm.c       | 25 +++++++++++-------------
+>  drivers/mmc/host/sdhci-of-arasan.c | 33 +++++++++++++++-------------=
+---
+>  drivers/mmc/host/sdhci-of-at91.c   | 33 ++++++++++++++--------------=
+---
+>  drivers/mmc/host/sdhci-of-esdhc.c  | 19 +++++++++---------
+>  drivers/mmc/host/sdhci-pltfm.h     |  1 -
+>  drivers/mmc/host/sdhci-pxav2.c     |  1 -
+>  drivers/mmc/host/sdhci-pxav3.c     | 20 ++++++++-----------
+>  drivers/mmc/host/sdhci-st.c        | 40 +++++++++++++++++++---------=
+----------
+>  drivers/mmc/host/sdhci-tegra.c     | 21 +++++++-------------
+>  11 files changed, 106 insertions(+), 139 deletions(-)
+>
+> --
+> 2.7.0
+>
 
-... and, no surprises, if I undo the changes in that original patch
-and implement exactly what I sent you on January 2nd, then everything
-starts working again.
+Thanks, applied for next!
 
-And we finally have a sort-of answer on the SDHCI problem: it works
-here with my _original_ set of patches I sent to the MMC list, so I
-don't think this is a problem with my original set of SDHCI patches.
-It could be a problem introduced by Adrian modifying my patches
-before applying (which, if so, sounds just like what's happened with
-clk-gpio.c all over again.)
-
--- 
-RMK's Patch system: http://www.arm.linux.org.uk/developer/patches/
-FTTC broadband for 0.8mile line: currently at 9.6Mbps down 400kbps up
-according to speedtest.net.
+Kind regards
+Uffe
