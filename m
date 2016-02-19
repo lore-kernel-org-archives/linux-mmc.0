@@ -1,162 +1,97 @@
 From: Wolfram Sang <wsa@the-dreams.de>
-Subject: [RFC 1/7] pinctrl: sh-pfc: r8a7790: Implement voltage switching for SDHI
-Date: Fri, 19 Feb 2016 21:16:37 +0100
-Message-ID: <1455913003-6140-2-git-send-email-wsa@the-dreams.de>
+Subject: [RFC 4/7] mmc: tmio: Add UHS-I mode support
+Date: Fri, 19 Feb 2016 21:16:40 +0100
+Message-ID: <1455913003-6140-5-git-send-email-wsa@the-dreams.de>
 References: <1455913003-6140-1-git-send-email-wsa@the-dreams.de>
-Return-path: <linux-renesas-soc-owner@vger.kernel.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from sauhun.de ([89.238.76.85]:40797 "EHLO pokefinder.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S2992639AbcBSURS (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 19 Feb 2016 15:17:18 -0500
 In-Reply-To: <1455913003-6140-1-git-send-email-wsa@the-dreams.de>
-Sender: linux-renesas-soc-owner@vger.kernel.org
-To: linux-renesas-soc@vger.kernel.org
-Cc: linux-mmc@vger.kernel.org, Ben Hutchings <ben.hutchings@codethink.co.uk>, Dirk Behme <dirk.behme@gmail.com>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Ulrich Hecht <ulrich.hecht@gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-renesas-soc@vger.kernel.org
+Cc: linux-mmc@vger.kernel.org, Ben Hutchings <ben.hutchings@codethink.co.uk>, Dirk Behme <dirk.behme@gmail.com>, Wolfram Sang <wsa+renesas@sang-engineering.com>
 
-From: Wolfram Sang <wsa+renesas@sang-engineering.com>
+From: Ben Hutchings <ben.hutchings@codethink.co.uk>
 
-All the SHDIs can operate with either 3.3V or 1.8V signals, depending
-on negotiation with the card.
+Based on work by Shinobu Uehara and Ben Dooks.  This adds the voltage
+switch operation needed for all UHS-I modes, but not the tuning needed
+for SDR-104 which will come later.
 
-Implement the {get,set}_io_voltage operations and set the related
-capability flag for the associated pins.
+The card_busy implementation is a bit of a guess, but works for me on
+an R8A7790 chip.
 
 Signed-off-by: Ben Hutchings <ben.hutchings@codethink.co.uk>
 Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
-Cc: Ulrich Hecht <ulrich.hecht@gmail.com>
 ---
+ drivers/mmc/host/tmio_mmc.h     |  3 +++
+ drivers/mmc/host/tmio_mmc_pio.c | 31 +++++++++++++++++++++++++++++++
+ 2 files changed, 34 insertions(+)
 
-The get/set-functions introduced here are the same for all Gen2, except for
-the pin-sanity checks at the beginning. Somehow a generic function might be
-nice for consistency reasons (I don't care so much about the code savings).
-But not sure if it is worth the hazzle.
-
-@Uli, Geert: Since bias support is probably similar, what do you think? Does
-it make sense to add gen{2,3}.c?
-
-
- drivers/pinctrl/sh-pfc/core.c        |  2 +-
- drivers/pinctrl/sh-pfc/core.h        |  1 +
- drivers/pinctrl/sh-pfc/pfc-r8a7790.c | 60 +++++++++++++++++++++++++++++++++++-
- 3 files changed, 61 insertions(+), 2 deletions(-)
-
-diff --git a/drivers/pinctrl/sh-pfc/core.c b/drivers/pinctrl/sh-pfc/core.c
-index 181ea98a63b7ab..315f9db9f5affe 100644
---- a/drivers/pinctrl/sh-pfc/core.c
-+++ b/drivers/pinctrl/sh-pfc/core.c
-@@ -88,7 +88,7 @@ static int sh_pfc_map_resources(struct sh_pfc *pfc,
- 	return 0;
+diff --git a/drivers/mmc/host/tmio_mmc.h b/drivers/mmc/host/tmio_mmc.h
+index b44b5890290622..aabd36955e73fb 100644
+--- a/drivers/mmc/host/tmio_mmc.h
++++ b/drivers/mmc/host/tmio_mmc.h
+@@ -101,6 +101,9 @@ struct tmio_mmc_host {
+ 	void (*clk_disable)(struct tmio_mmc_host *host);
+ 	int (*multi_io_quirk)(struct mmc_card *card,
+ 			      unsigned int direction, int blk_size);
++
++	int (*start_signal_voltage_switch)(struct tmio_mmc_host *host,
++					   unsigned char signal_voltage);
+ };
+ 
+ struct tmio_mmc_host *tmio_mmc_host_alloc(struct platform_device *pdev);
+diff --git a/drivers/mmc/host/tmio_mmc_pio.c b/drivers/mmc/host/tmio_mmc_pio.c
+index ae81b34f17a5a5..081a3def9305c1 100644
+--- a/drivers/mmc/host/tmio_mmc_pio.c
++++ b/drivers/mmc/host/tmio_mmc_pio.c
+@@ -1012,12 +1012,43 @@ static int tmio_multi_io_quirk(struct mmc_card *card,
+ 	return blk_size;
  }
  
--static void __iomem *sh_pfc_phys_to_virt(struct sh_pfc *pfc, u32 reg)
-+void __iomem *sh_pfc_phys_to_virt(struct sh_pfc *pfc, u32 reg)
- {
- 	struct sh_pfc_window *window;
- 	phys_addr_t address = reg;
-diff --git a/drivers/pinctrl/sh-pfc/core.h b/drivers/pinctrl/sh-pfc/core.h
-index 62f53b22ae8500..ca041a753a2521 100644
---- a/drivers/pinctrl/sh-pfc/core.h
-+++ b/drivers/pinctrl/sh-pfc/core.h
-@@ -59,6 +59,7 @@ int sh_pfc_unregister_gpiochip(struct sh_pfc *pfc);
- int sh_pfc_register_pinctrl(struct sh_pfc *pfc);
- int sh_pfc_unregister_pinctrl(struct sh_pfc *pfc);
- 
-+void __iomem *sh_pfc_phys_to_virt(struct sh_pfc *pfc, u32 address);
- u32 sh_pfc_read_raw_reg(void __iomem *mapped_reg, unsigned int reg_width);
- void sh_pfc_write_raw_reg(void __iomem *mapped_reg, unsigned int reg_width,
- 			  u32 data);
-diff --git a/drivers/pinctrl/sh-pfc/pfc-r8a7790.c b/drivers/pinctrl/sh-pfc/pfc-r8a7790.c
-index 0f4d48f9400ba0..ed51d67609050d 100644
---- a/drivers/pinctrl/sh-pfc/pfc-r8a7790.c
-+++ b/drivers/pinctrl/sh-pfc/pfc-r8a7790.c
-@@ -21,16 +21,21 @@
-  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-  */
- 
-+#include <linux/io.h>
- #include <linux/kernel.h>
- 
- #include "core.h"
- #include "sh_pfc.h"
- 
-+/*
-+ * All pins assigned to GPIO bank 3 can be used for SD interfaces in
-+ * which case they support both 3.3V and 1.8V signalling.
-+ */
- #define CPU_ALL_PORT(fn, sfx)						\
- 	PORT_GP_32(0, fn, sfx),						\
- 	PORT_GP_30(1, fn, sfx),						\
- 	PORT_GP_30(2, fn, sfx),						\
--	PORT_GP_32(3, fn, sfx),						\
-+	PORT_GP_CFG_32(3, fn, sfx, SH_PFC_PIN_CFG_IO_VOLTAGE),		\
- 	PORT_GP_32(4, fn, sfx),						\
- 	PORT_GP_32(5, fn, sfx)
- 
-@@ -4691,6 +4696,53 @@ static const char * const vin3_groups[] = {
- 	"vin3_clk",
- };
- 
-+#define IOCTRL6 0xe606008c
-+
-+static int r8a7790_get_io_voltage(struct sh_pfc *pfc, unsigned int pin)
++static int tmio_mmc_start_signal_voltage_switch(struct mmc_host *mmc,
++	struct mmc_ios *ios)
 +{
-+	void __iomem *reg;
-+	u32 data, mask;
++	struct tmio_mmc_host *host = mmc_priv(mmc);
 +
-+	if (WARN(pin < RCAR_GP_PIN(3, 0) || pin > RCAR_GP_PIN(3, 31), "invalid pin %#x", pin))
-+		return -EINVAL;
++	if (!host->start_signal_voltage_switch)
++		return 0;
 +
-+	reg = sh_pfc_phys_to_virt(pfc, IOCTRL6);
-+	data = ioread32(reg);
-+
-+	/* Bits in IOCTRL6 are numbered in opposite order to pins */
-+	mask = 0x80000000 >> (pin & 0x1f);
-+
-+	return (data & mask) ? 3300 : 1800;
++	return host->start_signal_voltage_switch(host, ios->signal_voltage);
 +}
 +
-+static int r8a7790_set_io_voltage(struct sh_pfc *pfc, unsigned int pin, u16 mV)
++static int tmio_mmc_card_busy(struct mmc_host *mmc)
 +{
-+	void __iomem *reg;
-+	u32 data, mask;
++	struct tmio_mmc_host *host = mmc_priv(mmc);
++	u32 status;
 +
-+	if (WARN(pin < RCAR_GP_PIN(3, 0) || pin > RCAR_GP_PIN(3, 31), "invalid pin %#x", pin))
-+		return -EINVAL;
++	pm_runtime_get_sync(mmc_dev(mmc));
++	status = sd_ctrl_read32(host, CTL_STATUS);
++	pm_runtime_mark_last_busy(mmc_dev(mmc));
++	pm_runtime_put_autosuspend(mmc_dev(mmc));
 +
-+	if (mV != 1800 && mV != 3300)
-+		return -EINVAL;
-+
-+	reg = sh_pfc_phys_to_virt(pfc, IOCTRL6);
-+	data = ioread32(reg);
-+
-+	/* Bits in IOCTRL6 are numbered in opposite order to pins */
-+	mask = 0x80000000 >> (pin & 0x1f);
-+
-+	if (mV == 3300)
-+		data |= mask;
-+	else
-+		data &= ~mask;
-+
-+	iowrite32(~data, sh_pfc_phys_to_virt(pfc, pfc->info->unlock_reg));
-+	iowrite32(data, reg);
-+
-+	return 0;
++	/*
++	 * Card signals busy by pulling down all of DAT[3:0].  This status
++	 * flag appears to reflect DAT3.
++	 */
++	return !(status & TMIO_STAT_SIGSTATE_A);
 +}
 +
- static const struct sh_pfc_function pinmux_functions[] = {
- 	SH_PFC_FUNCTION(audio_clk),
- 	SH_PFC_FUNCTION(avb),
-@@ -5690,8 +5742,14 @@ static const struct pinmux_cfg_reg pinmux_config_regs[] = {
- 	{ },
+ static const struct mmc_host_ops tmio_mmc_ops = {
+ 	.request	= tmio_mmc_request,
+ 	.set_ios	= tmio_mmc_set_ios,
+ 	.get_ro         = tmio_mmc_get_ro,
+ 	.get_cd		= mmc_gpio_get_cd,
+ 	.enable_sdio_irq = tmio_mmc_enable_sdio_irq,
++	.start_signal_voltage_switch
++			= tmio_mmc_start_signal_voltage_switch,
++	.card_busy	= tmio_mmc_card_busy,
+ 	.multi_io_quirk	= tmio_multi_io_quirk,
  };
  
-+static const struct sh_pfc_soc_operations pinmux_ops = {
-+	.get_io_voltage = r8a7790_get_io_voltage,
-+	.set_io_voltage = r8a7790_set_io_voltage,
-+};
-+
- const struct sh_pfc_soc_info r8a7790_pinmux_info = {
- 	.name = "r8a77900_pfc",
-+	.ops = &pinmux_ops,
- 	.unlock_reg = 0xe6060000, /* PMMR */
- 
- 	.function = { PINMUX_FUNCTION_BEGIN, PINMUX_FUNCTION_END },
 -- 
 2.7.0
+
