@@ -1,191 +1,108 @@
-From: Shawn Lin <shawn.lin@rock-chips.com>
-Subject: [RESEND PATCH v5 2/2] mmc: sdhci-of-arasan: add phy support for sdhci-of-arasan
-Date: Fri, 19 Feb 2016 10:20:20 +0800
-Message-ID: <1455848420-2293-1-git-send-email-shawn.lin@rock-chips.com>
-References: <1455848322-2210-1-git-send-email-shawn.lin@rock-chips.com>
+From: Vishal Thanki <vishalthanki@gmail.com>
+Subject: Re: omap_hsmmc: sdio: issue with generic wakeup IRQ handling
+Date: Fri, 19 Feb 2016 15:11:37 +0100
+Message-ID: <20160219141135.GA14354@c50.bag.software>
+References: <20160218182750.GA5948@c50.bag.software>
+ <CALtMJEBdXLef8AJ1-8Txmg2iS413bVV7cpQSb+nL5M7jN_QYzw@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from lucky1.263xmail.com ([211.157.147.131]:39825 "EHLO
-	lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1948274AbcBSCY4 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 18 Feb 2016 21:24:56 -0500
-In-Reply-To: <1455848322-2210-1-git-send-email-shawn.lin@rock-chips.com>
+Received: from mail-wm0-f42.google.com ([74.125.82.42]:37704 "EHLO
+	mail-wm0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1947080AbcBSOLl (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 19 Feb 2016 09:11:41 -0500
+Content-Disposition: inline
+In-Reply-To: <CALtMJEBdXLef8AJ1-8Txmg2iS413bVV7cpQSb+nL5M7jN_QYzw@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>
-Cc: Michal Simek <michal.simek@xilinx.com>, soren.brinkmann@xilinx.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, devicetree@vger.kernel.org, Shawn Lin <shawn.lin@rock-chips.com>
+To: Andreas Fenkart <afenkart@gmail.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, linux-omap@vger.kernel.org
 
-This patch adds Generic PHY access for sdhci-of-arasan. Driver
-can get PHY handler from dt-binding, and power-on/init the PHY.
-Currently, it's just mandatory for arasan,sdhci-5.1.
+Hi Andreas,
 
-Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
+On Thu, Feb 18, 2016 at 10:31:04PM +0100, Andreas Fenkart wrote:
+> Hi Vishal,
+> 
+> I remember there was a problem with IRQ, but can't remember on top of
+> my head. Meanwhile this might be some pointer:
+> 
+> diff --git a/drivers/net/wireless/mwifiex/sta_ioctl.c
+> b/drivers/net/wireless/mwifiex/sta_ioctl.c
+> index a6c8a4f..67587c2 100644
+> --- a/drivers/net/wireless/mwifiex/sta_ioctl.c
+> +++ b/drivers/net/wireless/mwifiex/sta_ioctl.c
+> @@ -517,6 +517,17 @@ int mwifiex_enable_hs(struct mwifiex_adapter *adapter)
+>         adapter->hs_enabling = true;
+>         mwifiex_cancel_all_pending_cmd(adapter);
+> 
+> +       /* if the MMC host is already in suspend it will not detect SDIO irq
+> +        * and we might run into response timeout. By claiming the MMC host we
+> +        * wake it up, which is sufficient to detect a pending IRQ
+> +        */
+> +       {
+> +               struct sdio_mmc_card *card = adapter->card;
+> +               sdio_claim_host(card->func);
+> +               printk("+++ poll mmc host for IRQ +++\n");
+> +               sdio_release_host(card->func);
+> +       }
+> +
+>         if (mwifiex_set_hs_params(mwifiex_get_priv(adapter,
+>                                                    MWIFIEX_BSS_ROLE_STA),
+>                                   HostCmd_ACT_GEN_SET, MWIFIEX_SYNC_CMD,
 
-Serise-changes: 5
-- remove rpm support from this serise
-- fix some err case for handling phy
+I tried this code change but that did not help. I saw that the code
+change is in a function called mwifiex_enable_hs(), which only gets
+invoked by mwifiex_sdio_suspend(); which is why I think it is not having
+any effect. Because when I run the command to scan the channel list
+(i.e. iw dev wlan0 scan), the system is not in suspend state. And I
+noticed (by adding prints in omap_hsmmc.c for suspend and resume
+callbacks) that during the "scan" command, the suspend routine gets invoked
+for HSMMC but it never gets resumed (may be due to the missed wakeup
+IRQ) from mwifiex and the command times out.
 
-Serise-changes: 4
-- remove suspend/resume_phy
-- add err handle label for system PM callback
-- fix comments of struct sdhci_arasan_data and system PM
-  callback suggested by Michal
+Thanks for your help.
 
-Serise-changes: 3
-- remove phy_init/exit for suspend/resume
-- adjust phy_int/power_on seq to make code more reasonable
-- simplify suspend/resume_phy
-
-Serise-changes: 2
-- Keep phy as a mandatory requirement for arasan,sdhci-5.1
-
----
-
-Changes in v2: None
-
- drivers/mmc/host/sdhci-of-arasan.c | 66 +++++++++++++++++++++++++++++++++++---
- 1 file changed, 62 insertions(+), 4 deletions(-)
-
-diff --git a/drivers/mmc/host/sdhci-of-arasan.c b/drivers/mmc/host/sdhci-of-arasan.c
-index 5d9fdb3..cc40b1d 100644
---- a/drivers/mmc/host/sdhci-of-arasan.c
-+++ b/drivers/mmc/host/sdhci-of-arasan.c
-@@ -21,6 +21,7 @@
- 
- #include <linux/module.h>
- #include <linux/of_device.h>
-+#include <linux/phy/phy.h>
- #include "sdhci-pltfm.h"
- 
- #define SDHCI_ARASAN_CLK_CTRL_OFFSET	0x2c
-@@ -32,9 +33,11 @@
- /**
-  * struct sdhci_arasan_data
-  * @clk_ahb:	Pointer to the AHB clock
-+ * @phy: Pointer to the generic phy
-  */
- struct sdhci_arasan_data {
- 	struct clk	*clk_ahb;
-+	struct phy	*phy;
- };
- 
- static unsigned int sdhci_arasan_get_timeout_clock(struct sdhci_host *host)
-@@ -72,7 +75,7 @@ static struct sdhci_pltfm_data sdhci_arasan_pdata = {
- /**
-  * sdhci_arasan_suspend - Suspend method for the driver
-  * @dev:	Address of the device structure
-- * Returns 0 on success and error value on error
-+ * Return: 0 on success and error value on error
-  *
-  * Put the device in a low power state.
-  */
-@@ -88,6 +91,14 @@ static int sdhci_arasan_suspend(struct device *dev)
- 	if (ret)
- 		return ret;
- 
-+	if (!IS_ERR(sdhci_arasan->phy)) {
-+		ret = phy_power_off(sdhci_arasan->phy);
-+		if (ret) {
-+			dev_err(dev, "Cannot power off phy.\n");
-+			return ret;
-+		}
-+	}
-+
- 	clk_disable(pltfm_host->clk);
- 	clk_disable(sdhci_arasan->clk_ahb);
- 
-@@ -97,7 +108,7 @@ static int sdhci_arasan_suspend(struct device *dev)
- /**
-  * sdhci_arasan_resume - Resume method for the driver
-  * @dev:	Address of the device structure
-- * Returns 0 on success and error value on error
-+ * Return: 0 on success and error value on error
-  *
-  * Resume operation after suspend
-  */
-@@ -118,11 +129,24 @@ static int sdhci_arasan_resume(struct device *dev)
- 	ret = clk_enable(pltfm_host->clk);
- 	if (ret) {
- 		dev_err(dev, "Cannot enable SD clock.\n");
--		clk_disable(sdhci_arasan->clk_ahb);
--		return ret;
-+		goto err_clk_en;
-+	}
-+
-+	if (!IS_ERR(sdhci_arasan->phy)) {
-+		ret = phy_power_on(sdhci_arasan->phy);
-+		if (ret) {
-+			dev_err(dev, "Cannot power on phy.\n");
-+			goto err_phy_power;
-+		}
- 	}
- 
- 	return sdhci_resume_host(host);
-+
-+err_phy_power:
-+	clk_disable(pltfm_host->clk);
-+err_clk_en:
-+	clk_disable(sdhci_arasan->clk_ahb);
-+	return ret;
- }
- #endif /* ! CONFIG_PM_SLEEP */
- 
-@@ -183,6 +207,30 @@ static int sdhci_arasan_probe(struct platform_device *pdev)
- 		goto clk_disable_all;
- 	}
- 
-+	sdhci_arasan->phy = ERR_PTR(-ENODEV);
-+	if (of_device_is_compatible(pdev->dev.of_node,
-+				    "arasan,sdhci-5.1")) {
-+		sdhci_arasan->phy = devm_phy_get(&pdev->dev,
-+						 "phy_arasan");
-+		if (IS_ERR(sdhci_arasan->phy)) {
-+			ret = PTR_ERR(sdhci_arasan->phy);
-+			dev_err(&pdev->dev, "No phy for arasan,sdhci-5.1.\n");
-+			goto clk_disable_all;
-+		}
-+
-+		ret = phy_init(sdhci_arasan->phy);
-+		if (ret < 0) {
-+			dev_err(&pdev->dev, "phy_init err.\n");
-+			goto clk_disable_all;
-+		}
-+
-+		ret = phy_power_on(sdhci_arasan->phy);
-+		if (ret < 0) {
-+			dev_err(&pdev->dev, "phy_power_on err.\n");
-+			goto err_phy_power;
-+		}
-+	}
-+
- 	ret = sdhci_add_host(host);
- 	if (ret)
- 		goto err_pltfm_free;
-@@ -190,7 +238,12 @@ static int sdhci_arasan_probe(struct platform_device *pdev)
- 	return 0;
- 
- err_pltfm_free:
-+	if (!IS_ERR(sdhci_arasan->phy))
-+		phy_power_off(sdhci_arasan->phy);
- 	sdhci_pltfm_free(pdev);
-+err_phy_power:
-+	if (!IS_ERR(sdhci_arasan->phy))
-+		phy_exit(sdhci_arasan->phy);
- clk_disable_all:
- 	clk_disable_unprepare(clk_xin);
- clk_dis_ahb:
-@@ -205,6 +258,11 @@ static int sdhci_arasan_remove(struct platform_device *pdev)
- 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
- 	struct sdhci_arasan_data *sdhci_arasan = pltfm_host->priv;
- 
-+	if (!IS_ERR(sdhci_arasan->phy)) {
-+		phy_power_off(sdhci_arasan->phy);
-+		phy_exit(sdhci_arasan->phy);
-+	}
-+
- 	clk_disable_unprepare(sdhci_arasan->clk_ahb);
- 
- 	return sdhci_pltfm_unregister(pdev);
--- 
-2.3.7
+Vishal
 
 
+> 
+> 2016-02-18 19:27 GMT+01:00 Vishal Thanki <vishalthanki@gmail.com>:
+> > Hi,
+> >
+> > On a custom built am335x based board, I am facing an issue mwifiex wifi
+> > module which is connected to host via SDIO interface. I am using kernel
+> > version 4.4.
+> >
+> > The problem is related to the wifi "ext_scan" command getting timed out
+> > over SDIO. This was working with old kernel (v4.0), but does not work on
+> > kernel v4.4. I found the following commit is responsible for this
+> > behavior.
+> >
+> > =================================
+> > 5b83b2234be6733cfe22036c38031b2c890b3db8
+> >
+> > mmc: omap_hsmmc: Change wake-up interrupt to use generic wakeirq
+> >
+> > We can now use generic wakeirq handling and remove the custom handling
+> > for the wake-up interrupts.
+> > =================================
+> >
+> > There is no wifi issue if I revert the above mentioned commit on kernel
+> > v4.4.
+> >
+> > I see that before this commit, the wakeup IRQ handler was registered
+> > within the omap_hsmmc.c itself with additional IRQF_TRIGGER_LOW flag.
+> > But with the introduction to dev_pm_set_dedicated_wake_irq(), the
+> > generic wakeup IRQ handler is registered which does not take the
+> > IRQF_TRIGGER flag. I am not sure if that is the issue, but I added that
+> > IRQF_TRIGGER_LOW flag in dev_pm_set_dedicated_wake_irq() while
+> > registering a threaded IRQ handler, I could see the problem disappears.
+> > However, this change is causing the infinite interrupts because the of
+> > level triggered interrupt is not handled in generic wakeup IRQ handling
+> > code (as it was done specially in omap_hsmmc.c code earlier).
+> >
+> > I am not much familiar with MMC/SDIO driver and I am not sure how to fix
+> > this behavior. So any guidance would be really helpful.
+> >
+> > Thanks,
+> > Vishal
