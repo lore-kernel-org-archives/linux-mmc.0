@@ -1,64 +1,58 @@
 From: Wolfram Sang <wsa@the-dreams.de>
-Subject: Re: [PATCH RESEND 3/3] arm64: dts: r8a7795: salvator-x: enable SDHI0
- & 3
-Date: Fri, 19 Feb 2016 18:58:23 +0100
-Message-ID: <20160219175823.GA1392@katana>
-References: <1455548510-1690-1-git-send-email-wsa@the-dreams.de>
- <1455548510-1690-4-git-send-email-wsa@the-dreams.de>
-Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="k+w/mQv8wyuph6w0"
-Return-path: <linux-renesas-soc-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <1455548510-1690-4-git-send-email-wsa@the-dreams.de>
-Sender: linux-renesas-soc-owner@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: linux-renesas-soc@vger.kernel.org, Dirk Behme <dirk.behme@gmail.com>, Ulf Hansson <ulf.hansson@linaro.org>, Geert Uytterhoeven <geert@linux-m68k.org>, Simon Horman <horms@verge.net.au>
+Subject: [RFC 0/7] r8a7790: add UHS-I (SDR50) support to Lager
+Date: Fri, 19 Feb 2016 21:16:36 +0100
+Message-ID: <1455913003-6140-1-git-send-email-wsa@the-dreams.de>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from sauhun.de ([89.238.76.85]:40781 "EHLO pokefinder.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1949378AbcBSURJ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 19 Feb 2016 15:17:09 -0500
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-renesas-soc@vger.kernel.org
+Cc: linux-mmc@vger.kernel.org, Ben Hutchings <ben.hutchings@codethink.co.uk>, Dirk Behme <dirk.behme@gmail.com>, Wolfram Sang <wsa@the-dreams.de>
 
+So, I rebased and updated the series from Ben to latest renesas-driver and made
+it run on my Lager board. I verified that the voltage switching was done. The
+transfer speed of my UHS-I card went from 10 MB/s up to 29 MB/s which is the
+upper limit of this card. Will try a faster one next week.
 
---k+w/mQv8wyuph6w0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+The SDHI patches only needed slight modifications due to the rebase. The PFC
+patch needed some more rework, but luckily things have gotten easier since back
+then, because we can reuse new macros added for bias support. There is one
+question regarding this patch, see the comment there. This question is the
+reason why the series is RFC because I'd like to hear your opinions there.
 
-On Mon, Feb 15, 2016 at 04:01:50PM +0100, Wolfram Sang wrote:
-> From: Ai Kyuse <ai.kyuse.uw@renesas.com>
->=20
-> Add the exposed SD card slots. The on-board eMMC needs to wait until we
-> fixed the 8bit support (it works with 4bit if you really want it now).
->=20
-> Signed-off-by: Ai Kyuse <ai.kyuse.uw@renesas.com>
-> Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+Regarding the MMC subsystem, I'd like to ask if it is okay to name the second
+pinctrl binding (for uhs) simply "1v8". Is this name driver specific or shall
+we aim for a generic name which is used amongst all drivers?
 
-Simon, if you apply this, can you drop the sentence inside the brackets?
-It is probably not true until I fix the timeout handling. Or do you want
-me to resend?
-
-Have a nice weekend,
+Thanks and happy hacking,
 
    Wolfram
 
 
---k+w/mQv8wyuph6w0
-Content-Type: application/pgp-signature; name="signature.asc"
+Ben Hutchings (6):
+  mmc: tmio, sh_mobile_sdhi: Pass tmio_mmc_host ptr to clk_{enable,disable} ops
+  mmc: tmio, sh_mobile_sdhi: Add support for variable input clock frequency
+  mmc: tmio: Add UHS-I mode support
+  mmc: sh_mobile_sdhi: Add UHS-I mode support
+  ARM: shmobile: r8a7790: Set maximum frequencies for SDHI clocks
+  ARM: shmobile: r8a7790: lager: Enable UHS-I SDR-50
 
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1
+Wolfram Sang (1):
+  pinctrl: sh-pfc: r8a7790: Implement voltage switching for SDHI
 
-iQIcBAEBAgAGBQJWx1e+AAoJEBQN5MwUoCm2HxcQAK0+8xoTFBPWxBo4sboCrUnH
-veWd/lWLgW34Nhp5NceEv2vEcguLgqUOdirI5Tp1omJnLlpwMeeMCy5SqULE0On0
-OFzJETn7Gd64/lfANDL9A6nEFmZu5FSpHLxnz9ZL/jU896MvcbvWWtUNVvJfrXMW
-T+A+SZulZXyXvXKFUYmhO09QK53X7tu2xLsVr+Zwzx7z6AqnAJpPgVotxhDzK0Ns
-Z+LTOmOkA9rfhrz+K3CJvdmb/dIgns9zyh5hICJL+JDVjmsD1E0pO1nGPu5X7RmB
-Rrp2Vv4JmKVchCCQpbDRwqgi1xm8bqK1P9pdCOU89HzqRqM41J8C9l8qQba/AtSD
-P6tNn0SCfUeoSfjN0GTtaK21fXXmRgGrcIITP9jDTncRZLER6jifPcSSsZs1GQpN
-NTqCZoOvorqIb8qYFNYEpvM9q99YEgSTaCjsGaxyl5yIaDnQA1C4rZHxDliEobNe
-pbTIC2Z0P/MdEnqE9+6DkXBr6DzC7i848niNC+zmwJMYTpN1EjQMzB/bMAMHLosD
-qmVsNJdSE5cwV5ERPrknDQNwJp7zPySg888Hy72jmVuldMFQ6LB9j/zYEHnA1dXH
-zecdLmxKBldU40yAWPF4gvDiLL9s8kiRBjy9y6eQYGSRIQpBbA3pfZHvNUJekBEl
-01gEgOtzYI8VvWpPwN1a
-=xJox
------END PGP SIGNATURE-----
+ arch/arm/boot/dts/r8a7790-lager.dts  |  22 ++++++-
+ arch/arm/boot/dts/r8a7790.dtsi       |   4 ++
+ drivers/mmc/host/sh_mobile_sdhi.c    | 123 ++++++++++++++++++++++++++++++++---
+ drivers/mmc/host/tmio_mmc.h          |   9 ++-
+ drivers/mmc/host/tmio_mmc_pio.c      |  57 +++++++++++-----
+ drivers/pinctrl/sh-pfc/core.c        |   2 +-
+ drivers/pinctrl/sh-pfc/core.h        |   1 +
+ drivers/pinctrl/sh-pfc/pfc-r8a7790.c |  60 ++++++++++++++++-
+ 8 files changed, 249 insertions(+), 29 deletions(-)
 
---k+w/mQv8wyuph6w0--
+-- 
+2.7.0
+
