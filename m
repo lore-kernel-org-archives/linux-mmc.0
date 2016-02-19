@@ -1,108 +1,64 @@
-From: Vishal Thanki <vishalthanki@gmail.com>
-Subject: Re: omap_hsmmc: sdio: issue with generic wakeup IRQ handling
-Date: Fri, 19 Feb 2016 15:11:37 +0100
-Message-ID: <20160219141135.GA14354@c50.bag.software>
-References: <20160218182750.GA5948@c50.bag.software>
- <CALtMJEBdXLef8AJ1-8Txmg2iS413bVV7cpQSb+nL5M7jN_QYzw@mail.gmail.com>
+From: Wolfram Sang <wsa@the-dreams.de>
+Subject: Re: [PATCH RESEND 3/3] arm64: dts: r8a7795: salvator-x: enable SDHI0
+ & 3
+Date: Fri, 19 Feb 2016 18:58:23 +0100
+Message-ID: <20160219175823.GA1392@katana>
+References: <1455548510-1690-1-git-send-email-wsa@the-dreams.de>
+ <1455548510-1690-4-git-send-email-wsa@the-dreams.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wm0-f42.google.com ([74.125.82.42]:37704 "EHLO
-	mail-wm0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1947080AbcBSOLl (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 19 Feb 2016 09:11:41 -0500
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="k+w/mQv8wyuph6w0"
+Return-path: <linux-renesas-soc-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <CALtMJEBdXLef8AJ1-8Txmg2iS413bVV7cpQSb+nL5M7jN_QYzw@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+In-Reply-To: <1455548510-1690-4-git-send-email-wsa@the-dreams.de>
+Sender: linux-renesas-soc-owner@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: linux-renesas-soc@vger.kernel.org, Dirk Behme <dirk.behme@gmail.com>, Ulf Hansson <ulf.hansson@linaro.org>, Geert Uytterhoeven <geert@linux-m68k.org>, Simon Horman <horms@verge.net.au>
 List-Id: linux-mmc@vger.kernel.org
-To: Andreas Fenkart <afenkart@gmail.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, linux-omap@vger.kernel.org
-
-Hi Andreas,
-
-On Thu, Feb 18, 2016 at 10:31:04PM +0100, Andreas Fenkart wrote:
-> Hi Vishal,
-> 
-> I remember there was a problem with IRQ, but can't remember on top of
-> my head. Meanwhile this might be some pointer:
-> 
-> diff --git a/drivers/net/wireless/mwifiex/sta_ioctl.c
-> b/drivers/net/wireless/mwifiex/sta_ioctl.c
-> index a6c8a4f..67587c2 100644
-> --- a/drivers/net/wireless/mwifiex/sta_ioctl.c
-> +++ b/drivers/net/wireless/mwifiex/sta_ioctl.c
-> @@ -517,6 +517,17 @@ int mwifiex_enable_hs(struct mwifiex_adapter *adapter)
->         adapter->hs_enabling = true;
->         mwifiex_cancel_all_pending_cmd(adapter);
-> 
-> +       /* if the MMC host is already in suspend it will not detect SDIO irq
-> +        * and we might run into response timeout. By claiming the MMC host we
-> +        * wake it up, which is sufficient to detect a pending IRQ
-> +        */
-> +       {
-> +               struct sdio_mmc_card *card = adapter->card;
-> +               sdio_claim_host(card->func);
-> +               printk("+++ poll mmc host for IRQ +++\n");
-> +               sdio_release_host(card->func);
-> +       }
-> +
->         if (mwifiex_set_hs_params(mwifiex_get_priv(adapter,
->                                                    MWIFIEX_BSS_ROLE_STA),
->                                   HostCmd_ACT_GEN_SET, MWIFIEX_SYNC_CMD,
-
-I tried this code change but that did not help. I saw that the code
-change is in a function called mwifiex_enable_hs(), which only gets
-invoked by mwifiex_sdio_suspend(); which is why I think it is not having
-any effect. Because when I run the command to scan the channel list
-(i.e. iw dev wlan0 scan), the system is not in suspend state. And I
-noticed (by adding prints in omap_hsmmc.c for suspend and resume
-callbacks) that during the "scan" command, the suspend routine gets invoked
-for HSMMC but it never gets resumed (may be due to the missed wakeup
-IRQ) from mwifiex and the command times out.
-
-Thanks for your help.
-
-Vishal
 
 
-> 
-> 2016-02-18 19:27 GMT+01:00 Vishal Thanki <vishalthanki@gmail.com>:
-> > Hi,
-> >
-> > On a custom built am335x based board, I am facing an issue mwifiex wifi
-> > module which is connected to host via SDIO interface. I am using kernel
-> > version 4.4.
-> >
-> > The problem is related to the wifi "ext_scan" command getting timed out
-> > over SDIO. This was working with old kernel (v4.0), but does not work on
-> > kernel v4.4. I found the following commit is responsible for this
-> > behavior.
-> >
-> > =================================
-> > 5b83b2234be6733cfe22036c38031b2c890b3db8
-> >
-> > mmc: omap_hsmmc: Change wake-up interrupt to use generic wakeirq
-> >
-> > We can now use generic wakeirq handling and remove the custom handling
-> > for the wake-up interrupts.
-> > =================================
-> >
-> > There is no wifi issue if I revert the above mentioned commit on kernel
-> > v4.4.
-> >
-> > I see that before this commit, the wakeup IRQ handler was registered
-> > within the omap_hsmmc.c itself with additional IRQF_TRIGGER_LOW flag.
-> > But with the introduction to dev_pm_set_dedicated_wake_irq(), the
-> > generic wakeup IRQ handler is registered which does not take the
-> > IRQF_TRIGGER flag. I am not sure if that is the issue, but I added that
-> > IRQF_TRIGGER_LOW flag in dev_pm_set_dedicated_wake_irq() while
-> > registering a threaded IRQ handler, I could see the problem disappears.
-> > However, this change is causing the infinite interrupts because the of
-> > level triggered interrupt is not handled in generic wakeup IRQ handling
-> > code (as it was done specially in omap_hsmmc.c code earlier).
-> >
-> > I am not much familiar with MMC/SDIO driver and I am not sure how to fix
-> > this behavior. So any guidance would be really helpful.
-> >
-> > Thanks,
-> > Vishal
+--k+w/mQv8wyuph6w0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
+
+On Mon, Feb 15, 2016 at 04:01:50PM +0100, Wolfram Sang wrote:
+> From: Ai Kyuse <ai.kyuse.uw@renesas.com>
+>=20
+> Add the exposed SD card slots. The on-board eMMC needs to wait until we
+> fixed the 8bit support (it works with 4bit if you really want it now).
+>=20
+> Signed-off-by: Ai Kyuse <ai.kyuse.uw@renesas.com>
+> Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+
+Simon, if you apply this, can you drop the sentence inside the brackets?
+It is probably not true until I fix the timeout handling. Or do you want
+me to resend?
+
+Have a nice weekend,
+
+   Wolfram
+
+
+--k+w/mQv8wyuph6w0
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1
+
+iQIcBAEBAgAGBQJWx1e+AAoJEBQN5MwUoCm2HxcQAK0+8xoTFBPWxBo4sboCrUnH
+veWd/lWLgW34Nhp5NceEv2vEcguLgqUOdirI5Tp1omJnLlpwMeeMCy5SqULE0On0
+OFzJETn7Gd64/lfANDL9A6nEFmZu5FSpHLxnz9ZL/jU896MvcbvWWtUNVvJfrXMW
+T+A+SZulZXyXvXKFUYmhO09QK53X7tu2xLsVr+Zwzx7z6AqnAJpPgVotxhDzK0Ns
+Z+LTOmOkA9rfhrz+K3CJvdmb/dIgns9zyh5hICJL+JDVjmsD1E0pO1nGPu5X7RmB
+Rrp2Vv4JmKVchCCQpbDRwqgi1xm8bqK1P9pdCOU89HzqRqM41J8C9l8qQba/AtSD
+P6tNn0SCfUeoSfjN0GTtaK21fXXmRgGrcIITP9jDTncRZLER6jifPcSSsZs1GQpN
+NTqCZoOvorqIb8qYFNYEpvM9q99YEgSTaCjsGaxyl5yIaDnQA1C4rZHxDliEobNe
+pbTIC2Z0P/MdEnqE9+6DkXBr6DzC7i848niNC+zmwJMYTpN1EjQMzB/bMAMHLosD
+qmVsNJdSE5cwV5ERPrknDQNwJp7zPySg888Hy72jmVuldMFQ6LB9j/zYEHnA1dXH
+zecdLmxKBldU40yAWPF4gvDiLL9s8kiRBjy9y6eQYGSRIQpBbA3pfZHvNUJekBEl
+01gEgOtzYI8VvWpPwN1a
+=xJox
+-----END PGP SIGNATURE-----
+
+--k+w/mQv8wyuph6w0--
