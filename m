@@ -1,42 +1,51 @@
 From: Simon Horman <horms@verge.net.au>
 Subject: Re: [PATCH RESEND 3/3] arm64: dts: r8a7795: salvator-x: enable SDHI0
  & 3
-Date: Mon, 22 Feb 2016 11:39:13 +0900
-Message-ID: <20160222023910.GA19765@verge.net.au>
+Date: Mon, 22 Feb 2016 13:35:30 +0900
+Message-ID: <20160222043530.GA16107@verge.net.au>
 References: <1455548510-1690-1-git-send-email-wsa@the-dreams.de>
  <1455548510-1690-4-git-send-email-wsa@the-dreams.de>
  <20160219175823.GA1392@katana>
+ <20160222023910.GA19765@verge.net.au>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-renesas-soc-owner@vger.kernel.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from kirsty.vergenet.net ([202.4.237.240]:43422 "EHLO
+	kirsty.vergenet.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752539AbcBVEfj (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 21 Feb 2016 23:35:39 -0500
 Content-Disposition: inline
-In-Reply-To: <20160219175823.GA1392@katana>
-Sender: linux-renesas-soc-owner@vger.kernel.org
+In-Reply-To: <20160222023910.GA19765@verge.net.au>
+Sender: linux-mmc-owner@vger.kernel.org
+List-Id: linux-mmc@vger.kernel.org
 To: Wolfram Sang <wsa@the-dreams.de>
 Cc: linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org, Dirk Behme <dirk.behme@gmail.com>, Ulf Hansson <ulf.hansson@linaro.org>, Geert Uytterhoeven <geert@linux-m68k.org>
-List-Id: linux-mmc@vger.kernel.org
 
-On Fri, Feb 19, 2016 at 06:58:23PM +0100, Wolfram Sang wrote:
-> On Mon, Feb 15, 2016 at 04:01:50PM +0100, Wolfram Sang wrote:
-> > From: Ai Kyuse <ai.kyuse.uw@renesas.com>
+On Mon, Feb 22, 2016 at 11:39:12AM +0900, Simon Horman wrote:
+> On Fri, Feb 19, 2016 at 06:58:23PM +0100, Wolfram Sang wrote:
+> > On Mon, Feb 15, 2016 at 04:01:50PM +0100, Wolfram Sang wrote:
+> > > From: Ai Kyuse <ai.kyuse.uw@renesas.com>
+> > > 
+> > > Add the exposed SD card slots. The on-board eMMC needs to wait until we
+> > > fixed the 8bit support (it works with 4bit if you really want it now).
+> > > 
+> > > Signed-off-by: Ai Kyuse <ai.kyuse.uw@renesas.com>
+> > > Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
 > > 
-> > Add the exposed SD card slots. The on-board eMMC needs to wait until we
-> > fixed the 8bit support (it works with 4bit if you really want it now).
-> > 
-> > Signed-off-by: Ai Kyuse <ai.kyuse.uw@renesas.com>
-> > Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+> > Simon, if you apply this, can you drop the sentence inside the brackets?
+> > It is probably not true until I fix the timeout handling. Or do you want
+> > me to resend?
 > 
-> Simon, if you apply this, can you drop the sentence inside the brackets?
-> It is probably not true until I fix the timeout handling. Or do you want
-> me to resend?
+> 
+> Sure, I have dropped the text in ().
+> 
+> 
+> I have queued up the following after resolving a minor conflict.
+> There was also some fuzz when I applied patch 2/2 so I'd appreciate it if
+> you could double check that too.
 
-
-Sure, I have dropped the text in ().
-
-
-I have queued up the following after resolving a minor conflict.
-There was also some fuzz when I applied patch 2/2 so I'd appreciate it if
-you could double check that too.
+There was a syntax error in my previous effort.
+Please look over this one instead.
 
 From: Ai Kyuse <ai.kyuse.uw@renesas.com>
 Date: Mon, 15 Feb 2016 16:01:50 +0100
@@ -53,7 +62,7 @@ Signed-off-by: Simon Horman <horms+renesas@verge.net.au>
  1 file changed, 83 insertions(+)
 
 diff --git a/arch/arm64/boot/dts/renesas/r8a7795-salvator-x.dts b/arch/arm64/boot/dts/renesas/r8a7795-salvator-x.dts
-index 31ace9c1f79d..53541351a56d 100644
+index 31ace9c1f79d..1af67579e07a 100644
 --- a/arch/arm64/boot/dts/renesas/r8a7795-salvator-x.dts
 +++ b/arch/arm64/boot/dts/renesas/r8a7795-salvator-x.dts
 @@ -33,6 +33,7 @@
@@ -136,12 +145,10 @@ index 31ace9c1f79d..53541351a56d 100644
  	sound_pins: sound {
  		renesas,groups = "ssi01239_ctrl", "ssi0_data", "ssi1_data_a";
  		renesas,function = "ssi";
-@@ -226,6 +285,30 @@
- 
- &sata {
+@@ -228,6 +287,30 @@
  	status = "okay";
-+;
-+
+ };
+ 
 +&sdhi0 {
 +	pinctrl-0 = <&sdhi0_pins>;
 +	pinctrl-names = "default";
@@ -164,8 +171,11 @@ index 31ace9c1f79d..53541351a56d 100644
 +	wp-gpios = <&gpio4 16 GPIO_ACTIVE_HIGH>;
 +	bus-width = <4>;
 +	status = "okay";
- };
- 
++};
++
  &ssi1 {
+ 	shared-pin;
+ };
 -- 
 2.1.4
+
