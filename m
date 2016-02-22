@@ -1,45 +1,55 @@
-From: Pavel Machek <pavel@ucw.cz>
-Subject: Re: mmc: Add CONFIG_MMC_BLOCK_MAX_SPEED
-Date: Mon, 22 Feb 2016 07:45:52 +0100
-Message-ID: <20160222064551.GA23884@amd>
-References: <1454617771-9842-1-git-send-email-salyzyn@android.com>
+From: Wolfram Sang <wsa@the-dreams.de>
+Subject: Re: [PATCH RESEND 3/3] arm64: dts: r8a7795: salvator-x: enable SDHI0
+ & 3
+Date: Mon, 22 Feb 2016 09:02:01 +0100
+Message-ID: <20160222080200.GA1389@katana>
+References: <1455548510-1690-1-git-send-email-wsa@the-dreams.de>
+ <1455548510-1690-4-git-send-email-wsa@the-dreams.de>
+ <20160219175823.GA1392@katana>
+ <20160222023910.GA19765@verge.net.au>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from atrey.karlin.mff.cuni.cz ([195.113.26.193]:51840 "EHLO
-	atrey.karlin.mff.cuni.cz" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752791AbcBVGpz (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 22 Feb 2016 01:45:55 -0500
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="SUOF0GtieIMvvwua"
+Return-path: <linux-renesas-soc-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <1454617771-9842-1-git-send-email-salyzyn@android.com>
-Sender: linux-mmc-owner@vger.kernel.org
+In-Reply-To: <20160222023910.GA19765@verge.net.au>
+Sender: linux-renesas-soc-owner@vger.kernel.org
+To: Simon Horman <horms@verge.net.au>
+Cc: linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org, Dirk Behme <dirk.behme@gmail.com>, Ulf Hansson <ulf.hansson@linaro.org>, Geert Uytterhoeven <geert@linux-m68k.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Mark Salyzyn <salyzyn@android.com>
-Cc: linux-kernel@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, Andy Shevchenko <andriy.shevchenko@linux.intel.com>, Luca Porzio <lporzio@micron.com>, yalin wang <yalin.wang2010@gmail.com>, Shawn Lin <shawn.lin@rock-chips.com>, Jon Hunter <jonathanh@nvidia.com>, Grant Grundler <grundler@chromium.org>, Yunpeng Gao <yunpeng.gao@intel.com>, Chuanxiao Dong <chuanxiao.dong@intel.com>, linux-mmc@vger.kernel.org
 
-Hi!
 
-On Thu 2016-02-04 12:29:07, Mark Salyzyn wrote:
-> When CONFIG_MMC_BLOCK_MAX_SPEED is enabled, Expose max_read_speed,
-> max_write_speed and cache_size controls to simulate a slow eMMC device.
-> The boot default values for each respectively are
-> CONFIG_MMC_BLOCK_MAX_READ_SPEED, CONFIG_MMC_BLOCK_MAX_WRITE_SPEED and
-> CONFIG_MMC_BLOCK_CACHE_SIZE respectively; and if not defined are
-> 0 (off), 0, (off) and 4 MB also respectively.
+--SUOF0GtieIMvvwua
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 
-Extra , after 0.
 
-Dunno. At minimum, I'd call the option something like
-"MMC_DEBUG_MAX_SPEED" and the speeds should be really controlled via
-/sys or something...
+> I have queued up the following after resolving a minor conflict.
+> There was also some fuzz when I applied patch 2/2 so I'd appreciate it if
+> you could double check that too.
 
-...and ... is there reason to limit it to mmc devices? Making
-harddrive slow would make it useful for testing, too...
+Looks good to me. Thanks!
 
-...and you have the /sys interface. Drop the config options?
 
-Best regards,
-									Pavel
--- 
-(english) http://www.livejournal.com/~pavelmachek
-(cesky, pictures) http://atrey.karlin.mff.cuni.cz/~pavel/picture/horses/blog.html
+--SUOF0GtieIMvvwua
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1
+
+iQIcBAEBAgAGBQJWysB4AAoJEBQN5MwUoCm2HwoP/1BVo8iBwpDPFyrMp9l6D7Yz
+u3NLJ2T9JQ++UPjURT5LtLPiQAo4P/w6TlyVdG135Noa4H3nemJvIkreXXx1R9TH
+Dv5H6jOc4sUCBqpI4XWH8G+49B9UBG5ghFxQWVr93VWsxAY4TongiECKyEqCbn9Y
+eVm7FrUzbVkQqfhMzWM2awCCEBcd4BN+cxSVaz3hXWojnIqo6xc8/YNfuuyqoGHy
+5SoumOTq1UFWjzOQlYpokL32P1oOn6x5hG1OX3lxs9+zGusRMkqYpg4e0A7vKDwc
+wWdqHE/kg+Mj0lsqyJnTpGm1YgD8OUvKnKI4EzcCXK7tlZB0v1g4t+aWspyr5qXA
+Q6UA6TGk4vr/ogAq4dXJ4jLOWs0vCavFPXUImxF5CsHlyd/kkmfM6M+FRrYc4vlV
+bQLlQiZljEUbQbNavPz5l/K1qG5cAlAtdKGNhGqA8xSUxlltPrRq+XraBF8ycY8J
+IAAWUXki0x/3EjPLhFgDP34Sq2MqEQ3abVsuIgaFvDCUGnnXCNwZ6RIIDT1gQm/F
+qA26wNDWGg6dMnvXcc1DnpPgBBhG6SqxcRYeXn9sRU8n1scbEh18F/eVpLTqOF9V
+G14My32R6wHDlFExML/lq6sojruqMth/cmN1ZomME6PeBsYEC3az22uPGB/6hwTl
+kIMxlJJ1P2BdLwZl6hnP
+=1HEC
+-----END PGP SIGNATURE-----
+
+--SUOF0GtieIMvvwua--
