@@ -1,58 +1,60 @@
-From: Wolfram Sang <wsa@the-dreams.de>
-Subject: Re: [PATCH RESEND 3/3] arm64: dts: r8a7795: salvator-x: enable SDHI0
- & 3
-Date: Mon, 22 Feb 2016 09:10:36 +0100
-Message-ID: <20160222081036.GC1389@katana>
-References: <1455548510-1690-1-git-send-email-wsa@the-dreams.de>
- <1455548510-1690-4-git-send-email-wsa@the-dreams.de>
- <20160219175823.GA1392@katana>
- <20160222023910.GA19765@verge.net.au>
- <20160222043530.GA16107@verge.net.au>
+From: Mark Salyzyn <salyzyn@android.com>
+Subject: Re: mmc: Add CONFIG_MMC_BLOCK_MAX_SPEED
+Date: Mon, 22 Feb 2016 08:04:29 -0800
+Message-ID: <56CB318D.7070403@android.com>
+References: <1454617771-9842-1-git-send-email-salyzyn@android.com>
+ <20160222064551.GA23884@amd>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="f0KYrhQ4vYSV2aJu"
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from sauhun.de ([89.238.76.85]:60880 "EHLO pokefinder.org"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750897AbcBVIKj (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 22 Feb 2016 03:10:39 -0500
-Content-Disposition: inline
-In-Reply-To: <20160222043530.GA16107@verge.net.au>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=windows-1252; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20160222064551.GA23884@amd>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Pavel Machek <pavel@ucw.cz>
+Cc: linux-kernel@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, Andy Shevchenko <andriy.shevchenko@linux.intel.com>, Luca Porzio <lporzio@micron.com>, yalin wang <yalin.wang2010@gmail.com>, Shawn Lin <shawn.lin@rock-chips.com>, Jon Hunter <jonathanh@nvidia.com>, Grant Grundler <grundler@chromium.org>, Yunpeng Gao <yunpeng.gao@intel.com>, Chuanxiao Dong <chuanxiao.dong@intel.com>, linux-mmc@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Simon Horman <horms@verge.net.au>
-Cc: linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org, Dirk Behme <dirk.behme@gmail.com>, Ulf Hansson <ulf.hansson@linaro.org>, Geert Uytterhoeven <geert@linux-m68k.org>
 
+On 02/21/2016 10:45 PM, Pavel Machek wrote:
+> Hi!
+>
+> On Thu 2016-02-04 12:29:07, Mark Salyzyn wrote:
+>> When CONFIG_MMC_BLOCK_MAX_SPEED is enabled, Expose max_read_speed,
+>> max_write_speed and cache_size controls to simulate a slow eMMC device.
+>> The boot default values for each respectively are
+>> CONFIG_MMC_BLOCK_MAX_READ_SPEED, CONFIG_MMC_BLOCK_MAX_WRITE_SPEED and
+>> CONFIG_MMC_BLOCK_CACHE_SIZE respectively; and if not defined are
+>> 0 (off), 0, (off) and 4 MB also respectively.
+> Extra , after 0.
 
---f0KYrhQ4vYSV2aJu
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+Yes :-)
+> Dunno. At minimum, I'd call the option something like
+> "MMC_DEBUG_MAX_SPEED" and the speeds should be really controlled via
+> /sys or something...
 
-> There was a syntax error in my previous effort.
-> Please look over this one instead.
+Are controlled by sys.  Concern over DEBUG_MAX_SPEED is the sys nodes 
+changing name to debug_max_read_speed, etc, which would in turn result 
+in a move to debugfs instead. Will have to think about all the side 
+effects of such a move.
 
-Yeah, wit the missing '}' it's even better ;)
+> ...and ... is there reason to limit it to mmc devices? Making
+> harddrive slow would make it useful for testing, too...
 
+The speed limit at this layer is not the same as in the block layer, the 
+two methods would 'join' at the same value when one does sustained I/O 
+most likely, but not at the random patterns we have experienced on the 
+devices. We would like additional wiggle room to simulate eMMC stalls 
+due to load leveling and other behaviors in the future. If we moved up a 
+layer we would have to simulate head seek and rotational latency opening 
+a can of worms we would feel best if left closed. View it as a political 
+decision.
+>
+> ...and you have the /sys interface. Drop the config options?
 
---f0KYrhQ4vYSV2aJu
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1
-
-iQIcBAEBAgAGBQJWysJ8AAoJEBQN5MwUoCm2JNcQAINwoIWr82fAc3qDaJ+m+U0P
-mU37SPHdrYj3l6jeYoRyXebIOhqFYc6Wi/Wn7wER3rE9TzH7ThTRFHMfWGa/zkxz
-3OmSDjhXPXFwbJbLJt6wOyjuiuRuel+4q+B1FHpXQ8SwJM3DKyj+hYSPHgftYapl
-oxVyKa/oh68N6TFD755PghKJjm6bF5f5/bBl7CqXEFp0wNoxNL/RfrA0ojWN5d/j
-usBhOjmQzvnPi2HjSgWsuH77NDcewPIC7wENEjvjy5H2gR7ro5FzLX0ow3dXb8HG
-16eaKRAgRofdGsYaaTjq8PEVKIbuiuhMk+w7WiNPXKO3nkn5/sKFz93pqwuKRxpC
-biBmpd+L2FUQuX1jn1sCzjTZ3UYTWX8kLyJ+5uI+d9nR3VXAfutOFI544zEgjZ1U
-V/vfKGWCFR80I/0RKw0kr7rRA8nhqKbQyoimH0lWu3O917AJ8Zk9XEa6my3CkTCw
-ZDH3iSoQPpB6zHsc7al/8qpF81bsM01/lCuMYc5+6PNZPmg0bblgqw39DDpiiZ0X
-Y3s8tv5xvgLMzpmpYtQXkP3fRQ0Q7ugAuw4xhUCCvQ8pCUJjxCikE8N2Vf6ykorn
-zK+SIoWiPG9G58CP5PbO4xgRiPwkf0j6za5GLjfFWjCIrqmG1ap+za+2viR7Tnrb
-493xQdELdnnPCq+jqiij
-=FRek
------END PGP SIGNATURE-----
-
---f0KYrhQ4vYSV2aJu--
+I needed a start up default value for boot-time simulations. If just sys 
+options, we would be applying the values far too late in the operation. 
+I expect some other folks using this simulation would like to forgo an 
+extended boot time, to have them set/reset under programmed control. I 
+was covering two bases.
+> Best regards,
+> 									Pavel
+Sincerely -- Mark Salyzyn
