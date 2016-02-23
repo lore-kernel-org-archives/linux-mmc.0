@@ -1,37 +1,35 @@
-From: Tony Lindgren <tony@atomide.com>
-Subject: Re: [PATCH 1/7] mmc: omap_hsmmc: Fix PM regression with deferred
- probe for pm_runtime_reinit
-Date: Mon, 22 Feb 2016 09:54:26 -0800
-Message-ID: <20160222175426.GI13417@atomide.com>
-References: <1455145370-20301-1-git-send-email-tony@atomide.com>
- <1455145370-20301-2-git-send-email-tony@atomide.com>
- <CAPDyKFpAcsfLgtu93P45fTEg11MjdGwREcyeGSS7vt6GWbNu_w@mail.gmail.com>
- <20160211150240.GR19432@atomide.com>
- <CAPDyKFo4Jyjwyvr3P5VHfDhQ87K9mnR01N-NtKz-yx2ycnfOLg@mail.gmail.com>
- <20160211172632.GT19432@atomide.com>
- <CAPDyKFpwGcCW_Vwz07cgh8LxGmxu9=GVch0MVJEpNJ19zoLZ7g@mail.gmail.com>
+From: Chris Ball <chris@printf.net>
+Subject: Re: [PATCH v3] mmc-utils: Merge the lsmmc tool into mmc-utils
+Date: Tue, 23 Feb 2016 04:18:09 +0000
+Message-ID: <86bn78dpq6.fsf@void.printf.net>
+References: <4230761e156940906a837686e1cc780f417567b7.1456194879.git.baolin.wang@spreadtrum.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-i2c-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <CAPDyKFpwGcCW_Vwz07cgh8LxGmxu9=GVch0MVJEpNJ19zoLZ7g@mail.gmail.com>
-Sender: linux-i2c-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-omap <linux-omap@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, linux-mmc <linux-mmc@vger.kernel.org>, Alan Stern <stern@rowland.harvard.edu>, Kevin Hilman <khilman@baylibre.com>, Nishanth Menon <nm@ti.com>, "Rafael J . Wysocki" <rafael@kernel.org>, Tero Kristo <t-kristo@ti.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, "linux-i2c@vger.kernel.org" <linux-i2c@vger.kernel.org>, linux-serial@vger.kernel.org, "linux-spi@vger.kernel.org" <linux-spi@vger.kernel.org>, Mark Brown <broonie@kernel.org>, Peter Hurley <peter@hurleysoftware.com>, Wolfram Sang <wsa@the-dreams.de>
+Content-Type: text/plain
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from void.printf.net ([192.34.86.38]:40822 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1757028AbcBWEZ1 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 22 Feb 2016 23:25:27 -0500
+In-Reply-To: <4230761e156940906a837686e1cc780f417567b7.1456194879.git.baolin.wang@spreadtrum.com>
+	(Baolin Wang's message of "Tue, 23 Feb 2016 10:36:46 +0800")
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Baolin Wang <baolin.wang@linaro.org>
+Cc: linux-mmc@vger.kernel.org, ulf.hansson@linaro.org, broonie@kernel.org, linus.walleij@linaro.org, sebras@gmail.com
 
-* Ulf Hansson <ulf.hansson@linaro.org> [160212 05:00]:
-> On 11 February 2016 at 18:26, Tony Lindgren <tony@atomide.com> wrote:
-> > Subject: [PATCH] mmc: omap_hsmmc: Fix PM regression with deferred probe for
-> >  pm_runtime_reinit
->
-> Thanks, applied for fixes!
+Hi Baolin,
 
-Ulf, any news on getting this into the mainline tree?
+What is the difference between v2 and v3?  It's good to include a
+changelog with each new patch.
 
-My PM tests have been now broken for six weeks or something
-because of this!
+Regarding the merge, I don't think it makes sense to merge in lsmmc.c
+if the entire EXT_CSD parser inside it can't be used right now.
+We might as well just leave it out altogether until it's ready to
+be used.  I don't think there's any point in adding a lot of new
+unused code just because we might want to use it later.
 
-Regards,
+Does that make sense?  Thanks,
 
-Tony
+- Chris.
+-- 
+Chris Ball   <http://printf.net/>
