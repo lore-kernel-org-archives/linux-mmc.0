@@ -1,52 +1,40 @@
-From: Simon Horman <horms+renesas@verge.net.au>
-Subject: [PATCH] mmc: sh_mmcif, tmio: Use ARCH_RENESAS
-Date: Wed, 24 Feb 2016 11:39:33 +0900
-Message-ID: <1456281573-16458-1-git-send-email-horms+renesas@verge.net.au>
+From: Geert Uytterhoeven <geert@linux-m68k.org>
+Subject: Re: [PATCH] mmc: sh_mmcif, tmio: Use ARCH_RENESAS
+Date: Wed, 24 Feb 2016 08:38:07 +0100
+Message-ID: <CAMuHMdX=b9ezL8zd4XoPwYQkr9RwJ3j11Z2=Lmmx-qnL+L6tHw@mail.gmail.com>
+References: <1456281573-16458-1-git-send-email-horms+renesas@verge.net.au>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from kirsty.vergenet.net ([202.4.237.240]:43822 "EHLO
-	kirsty.vergenet.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753223AbcBXCjl (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 23 Feb 2016 21:39:41 -0500
+Received: from mail-io0-f182.google.com ([209.85.223.182]:34908 "EHLO
+	mail-io0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755067AbcBXHiI (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 24 Feb 2016 02:38:08 -0500
+In-Reply-To: <1456281573-16458-1-git-send-email-horms+renesas@verge.net.au>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Ian Molton <ian@mnementh.co.uk>, Magnus Damm <magnus.damm@gmail.com>, linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org, Simon Horman <horms+renesas@verge.net.au>
+To: Simon Horman <horms+renesas@verge.net.au>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Ian Molton <ian@mnementh.co.uk>, Magnus Damm <magnus.damm@gmail.com>, Linux MMC List <linux-mmc@vger.kernel.org>, linux-renesas-soc@vger.kernel.org
 
-Make use of ARCH_RENESAS in place of ARCH_SHMOBILE.
+On Wed, Feb 24, 2016 at 3:39 AM, Simon Horman
+<horms+renesas@verge.net.au> wrote:
+> Make use of ARCH_RENESAS in place of ARCH_SHMOBILE.
+>
+> This is part of an ongoing process to migrate from ARCH_SHMOBILE to
+> ARCH_RENESAS the motivation for which being that RENESAS seems to be a more
+> appropriate name than SHMOBILE for the majority of Renesas ARM based SoCs.
+>
+> Signed-off-by: Simon Horman <horms+renesas@verge.net.au>
 
-This is part of an ongoing process to migrate from ARCH_SHMOBILE to
-ARCH_RENESAS the motivation for which being that RENESAS seems to be a more
-appropriate name than SHMOBILE for the majority of Renesas ARM based SoCs.
+Acked-by: Geert Uytterhoeven <geert+renesas@glider.be>
 
-Signed-off-by: Simon Horman <horms+renesas@verge.net.au>
----
- drivers/mmc/host/Kconfig | 4 ++--
- 1 file changed, 2 insertions(+), 2 deletions(-)
+Gr{oetje,eeting}s,
 
- Based on mmc/next
+                        Geert
 
-diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
-index d9a9d92fa837..04feea8354cb 100644
---- a/drivers/mmc/host/Kconfig
-+++ b/drivers/mmc/host/Kconfig
-@@ -561,7 +561,7 @@ config MMC_TMIO
- config MMC_SDHI
- 	tristate "SH-Mobile SDHI SD/SDIO controller support"
- 	depends on SUPERH || ARM || ARM64
--	depends on SUPERH || ARCH_SHMOBILE || COMPILE_TEST
-+	depends on SUPERH || ARCH_RENESAS || COMPILE_TEST
- 	select MMC_TMIO_CORE
- 	help
- 	  This provides support for the SDHI SD/SDIO controller found in
-@@ -674,7 +674,7 @@ config MMC_DW_ROCKCHIP
- config MMC_SH_MMCIF
- 	tristate "SuperH Internal MMCIF support"
- 	depends on HAS_DMA
--	depends on SUPERH || ARCH_SHMOBILE || COMPILE_TEST
-+	depends on SUPERH || ARCH_RENESAS || COMPILE_TEST
- 	help
- 	  This selects the MMC Host Interface controller (MMCIF).
- 
--- 
-2.1.4
+--
+Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
 
+In personal conversations with technical people, I call myself a hacker. But
+when I'm talking to journalists I just say "programmer" or something like that.
+                                -- Linus Torvalds
