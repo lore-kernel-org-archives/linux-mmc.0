@@ -1,135 +1,94 @@
-From: Ludovic Desroches <ludovic.desroches@atmel.com>
-Subject: Re: [PATCH] mmc: sdhci-of-at91: fix wakeup issue when using runtime
- pm
-Date: Thu, 25 Feb 2016 10:49:12 +0100
-Message-ID: <20160225094912.GC7249@odux.rfo.atmel.com>
-References: <20160212120415.GJ14937@odux.rfo.atmel.com>
- <1455357400-32145-1-git-send-email-ludovic.desroches@atmel.com>
+From: Alexandre Courbot <gnurou@gmail.com>
+Subject: Re: [PATCH] mmc: sdhci-tegra: Set DMA mask
+Date: Thu, 25 Feb 2016 18:49:06 +0900
+Message-ID: <CAAVeFu+oesnB9d3wOo5QmUR++UFekahwjOQWbJw_X=MxaimDHg@mail.gmail.com>
+References: <1456305079-27779-1-git-send-email-acourbot@nvidia.com> <2393024.oLdk3CGNWo@wuerfel>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <1455357400-32145-1-git-send-email-ludovic.desroches@atmel.com>
+In-Reply-To: <2393024.oLdk3CGNWo@wuerfel>
 Sender: linux-kernel-owner@vger.kernel.org
-To: ulf.hansson@linaro.org
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, nicolas.ferre@atmel.com, adrian.hunter@intel.com, Ludovic Desroches <ludovic.desroches@atmel.com>
+To: Arnd Bergmann <arnd@arndb.de>
+Cc: Alexandre Courbot <acourbot@nvidia.com>, Ulf Hansson <ulf.hansson@linaro.org>, Stephen Warren <swarren@wwwdotorg.org>, Thierry Reding <thierry.reding@gmail.com>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-tegra@vger.kernel.org" <linux-tegra@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Sat, Feb 13, 2016 at 10:56:40AM +0100, Ludovic Desroches wrote:
-> When suspending the sdhci host, the only hardware event that could wake
-> up the host is a sdio irq if they are enabled. If we want to wakeup on
-> card detect events, a gpio as to be used.
-> If we don't want to use a gpio but the card detect pio of the controller
-> then we need to keep enabled the clock of the controller interface to
-> get the interrupt and to not set the host in a suspended state to have the
-> interrupt handled.
-> 
+On Wed, Feb 24, 2016 at 9:37 PM, Arnd Bergmann <arnd@arndb.de> wrote:
+> On Wednesday 24 February 2016 18:11:19 Alexandre Courbot wrote:
+>> On T210, the sdhci controller can address more than 32 bits of address
+>> space. Failing to express this fact results in the use of bounce
+>> buffers and affects performance.
+>>
+>> Signed-off-by: Alexandre Courbot <acourbot@nvidia.com>
+>> ---
+>> I am pretty sure this one is wrong in some way, but just to get the ball
+>> rolling as the use of bounce buffers is currently quite heavy on Jetson TX1.
+>>
+>> Thierry, Stephen, could you confirm that I got the DMA masks correctly? I
+>> am not sure about the actual addressable size on TX1, and also suspect TK1 can
+>> also address more than 32 bits.
+>>
+>> Also, I noticed that sdhci_host has a dma_mask member which I thought would do
+>> the trick but actually doesn't seem to be used for anything useful. Could the
+>> MMC maintainers comment on this and let me know if the DMA mask setting should
+>> be moved at the core level instead of being done per-driver?
+>
+> So the question is what the DMA capabilities of the sdhci device are.
+>
+> Usually I think SDHCI should just support a 64-bit mask, and you can
+> request that in the driver, but the platform might reject it, e.g.
+> if the parent bus is lacking a dma-ranges property.
+>
+> On 32-bit platforms with no RAM above the 4GB boundary, setting a 64-bit
+> mask typically succeeds, because there is no harm in using it.
+>
+> You should only set a 34-bit mask in the specific case that:
+>
+> * SDHCI reports that it supports 64-bit addressing
+> * The parent bus supports 64-bit addressing and correctly sets up
+>   its dma-ranges property
+> * The device is connected incorrectly to the parent bus and
+>   any access above 0x400000000ull fail to end up in the correct
+>   memory for this particular device, but not other devices on the
+>   same bus.
 
-How can I move forward on this topic? I have several issues related to
-runtime PM (card detection, wifi module which doesn't like to get clocks
-disabled) but I am not in favour to get rid of it.
+Thanks for the clarification. The hardware is definitely capable of >
+32 bits addressing (how much more exactly, I still have to figure out
+as Stephen pointed out). Parent bus is the platform bus (root node in
+the DT) so I'm not too sure how the dma-ranges property should be used
+in that case (as of today we have no dma-ranges property at all in
+Tegra DTs). We could maybe specify it at the root level (I see at
+least one arm device doing that), but then we need to make sure every
+platform device supports the same range.
 
-Regards
+Actually even if we specify a dma-ranges on the parent DT node, the
+DMA range will still be limited to 32 bits because of the following
+code in of_dma_configure():
 
-Ludovic
+    /*
+     * Set default coherent_dma_mask to 32 bit.  Drivers are expected to
+     * setup the correct supported mask.
+     */
+    if (!dev->coherent_dma_mask)
+        dev->coherent_dma_mask = DMA_BIT_MASK(32);
 
-> Signed-off-by: Ludovic Desroches <ludovic.desroches@atmel.com>
-> ---
->  drivers/mmc/host/sdhci-of-at91.c | 46 ++++++++++++++++++++++++++++++----------
->  1 file changed, 35 insertions(+), 11 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/sdhci-of-at91.c b/drivers/mmc/host/sdhci-of-at91.c
-> index efec736..2159c6e 100644
-> --- a/drivers/mmc/host/sdhci-of-at91.c
-> +++ b/drivers/mmc/host/sdhci-of-at91.c
-> @@ -18,6 +18,7 @@
->  #include <linux/err.h>
->  #include <linux/io.h>
->  #include <linux/mmc/host.h>
-> +#include <linux/mmc/slot-gpio.h>
->  #include <linux/module.h>
->  #include <linux/of.h>
->  #include <linux/of_device.h>
-> @@ -45,7 +46,6 @@ static const struct sdhci_ops sdhci_at91_sama5d2_ops = {
->  
->  static const struct sdhci_pltfm_data soc_data_sama5d2 = {
->  	.ops = &sdhci_at91_sama5d2_ops,
-> -	.quirks = SDHCI_QUIRK_BROKEN_CARD_DETECTION,
->  	.quirks2 = SDHCI_QUIRK2_NEED_DELAY_AFTER_INT_CLK_RST,
->  };
->  
-> @@ -55,17 +55,37 @@ static const struct of_device_id sdhci_at91_dt_match[] = {
->  };
->  
->  #ifdef CONFIG_PM
-> +static bool sdhci_at91_use_sdhci_runtime(struct sdhci_host *host)
-> +{
-> +	u32 caps = host->mmc->caps;
-> +
-> +	return (caps & MMC_CAP_NONREMOVABLE) ||
-> +	       (!IS_ERR_VALUE(mmc_gpio_get_cd(host->mmc)));
-> +}
-> +
->  static int sdhci_at91_runtime_suspend(struct device *dev)
->  {
->  	struct sdhci_host *host = dev_get_drvdata(dev);
->  	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
->  	struct sdhci_at91_priv *priv = pltfm_host->priv;
-> -	int ret;
-> +	int ret = 0;
->  
-> -	ret = sdhci_runtime_suspend_host(host);
-> +	/*
-> +	 * If we call sdhci_runtime_suspend(), we could wakeup only if sdio
-> +	 * irqs are enabled. If we want to wakeup on a card detect event there
-> +	 * are two options:
-> +	 * - do not call sdhci_runtime_suspend() but save power by disabling
-> +	 *   all clocks excepting the one for the controller interface.
-> +	 * - call sdhci_runtime_suspend(), save maximum power by disabling
-> +	 *   all clocks but use a gpio for the card detect signal to have a way
-> +	 *   to wakeup.
-> +	 */
-> +	if (sdhci_at91_use_sdhci_runtime(host)) {
-> +		ret = sdhci_runtime_suspend_host(host);
-> +		clk_disable_unprepare(priv->hclock);
-> +	}
->  
->  	clk_disable_unprepare(priv->gck);
-> -	clk_disable_unprepare(priv->hclock);
->  	clk_disable_unprepare(priv->mainck);
->  
->  	return ret;
-> @@ -84,19 +104,23 @@ static int sdhci_at91_runtime_resume(struct device *dev)
->  		return ret;
->  	}
->  
-> -	ret = clk_prepare_enable(priv->hclock);
-> -	if (ret) {
-> -		dev_err(dev, "can't enable hclock\n");
-> -		return ret;
-> -	}
-> -
->  	ret = clk_prepare_enable(priv->gck);
->  	if (ret) {
->  		dev_err(dev, "can't enable gck\n");
->  		return ret;
->  	}
->  
-> -	return sdhci_runtime_resume_host(host);
-> +	if (sdhci_at91_use_sdhci_runtime(host)) {
-> +		ret = clk_prepare_enable(priv->hclock);
-> +		if (ret) {
-> +			dev_err(dev, "can't enable hclock\n");
-> +			return ret;
-> +		}
-> +
-> +		ret = sdhci_runtime_resume_host(host);
-> +	}
-> +
-> +	return ret;
->  }
->  #endif /* CONFIG_PM */
->  
-> -- 
-> 2.7.0
-> 
+    /*
+     * Set it to coherent_dma_mask by default if the architecture
+     * code has not set it.
+     */
+    if (!dev->dma_mask)
+        dev->dma_mask = &dev->coherent_dma_mask;
+
+    ....
+    /* gets dma-ranges into dma_addr and size */
+    ....
+
+
+    *dev->dma_mask = min((*dev->dma_mask),
+                 DMA_BIT_MASK(ilog2(dma_addr + size)));
+
+So unless the DMA mask is set on the device before of_dma_configure()
+is called, the min() statement will choose the 32 bits mask that has
+been previously set. So IIUC in any case, the driver will need to call
+dma_set_mask()
+
+Can I have your thoughts on this? Am I missing something?
