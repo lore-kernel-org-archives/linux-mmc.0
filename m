@@ -1,119 +1,141 @@
-From: Vishal Thanki <vishalthanki@gmail.com>
-Subject: Re: omap_hsmmc: sdio: issue with generic wakeup IRQ handling
-Date: Thu, 25 Feb 2016 03:02:50 +0530
-Message-ID: <CAC3a_SDH3zspEAUHkGN0qCBKQZBdnhmei2Rqw2Md=7R2iXostA@mail.gmail.com>
-References: <20160218182750.GA5948@c50.bag.software> <CALtMJEBdXLef8AJ1-8Txmg2iS413bVV7cpQSb+nL5M7jN_QYzw@mail.gmail.com>
- <20160219141135.GA14354@c50.bag.software>
+From: Jon Hunter <jonathanh-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
+Subject: Re: [PATCH] mmc: tegra: Disable UHS-I modes for tegra114
+Date: Thu, 25 Feb 2016 09:42:54 +0000
+Message-ID: <56CECC9E.9010501@nvidia.com>
+References: <1455806924-14967-1-git-send-email-jonathanh@nvidia.com>
+ <CAPDyKFowEH=4PU1ErNxMA0=SiDT1Q86H0SfMuiH5jA+H7mvquA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-lf0-f48.google.com ([209.85.215.48]:34810 "EHLO
-	mail-lf0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756334AbcBXVdM (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 24 Feb 2016 16:33:12 -0500
-In-Reply-To: <20160219141135.GA14354@c50.bag.software>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <CAPDyKFowEH=4PU1ErNxMA0=SiDT1Q86H0SfMuiH5jA+H7mvquA-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+Sender: linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Lucas Stach <dev-8ppwABl0HbeELgA04lAiVw@public.gmane.org>, Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Cc: Stephen Warren <swarren-3lzwWm7+Weoh9ZMKESR00Q@public.gmane.org>, Thierry Reding <thierry.reding-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Alexandre Courbot <gnurou-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, linux-mmc <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Andreas Fenkart <afenkart@gmail.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, linux-omap@vger.kernel.org
 
-Hi,
+Hi Adrian, Lucas,
 
-On Fri, Feb 19, 2016 at 7:41 PM, Vishal Thanki <vishalthanki@gmail.com> wrote:
-> Hi Andreas,
->
-> On Thu, Feb 18, 2016 at 10:31:04PM +0100, Andreas Fenkart wrote:
->> Hi Vishal,
+On 18/02/16 16:07, Ulf Hansson wrote:
+> +Adrian
+> 
+> On 18 February 2016 at 15:48, Jon Hunter <jonathanh-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org> wrote:
+>> SD card support for Tegra114 started failing after commit a8e326a911d3
+>> ("mmc: tegra: implement module external clock change") was merged. This
+>> commit was part of a series to enable UHS-I modes for Tegra. To
+>> workaround this problem for now, only disable UHS-I modes for Tegra114
+>> and in order to do this it is necessary to revert changes from commits
+>> a8e326a911d3 ("mmc: tegra: implement module external clock change"),
+>> c3c2384c3ac0 ("mmc: tegra: implement UHS tuning"), 7ad2ed1dfcbe
+>> ("mmc: tegra: enable UHS-I modes") that impact Tegra114. To do this so
+>> that UHS-I mode can be disabled for Tegra114 but not for Tegra124
+>> separate the platform data, soc data and sdhci-ops so they are no longer
+>> common to both Tegra114 and Tegra124.
 >>
->> I remember there was a problem with IRQ, but can't remember on top of
->> my head. Meanwhile this might be some pointer:
+>> Fixes: a8e326a911d3 ("mmc: tegra: implement module external clock change")
 >>
->> diff --git a/drivers/net/wireless/mwifiex/sta_ioctl.c
->> b/drivers/net/wireless/mwifiex/sta_ioctl.c
->> index a6c8a4f..67587c2 100644
->> --- a/drivers/net/wireless/mwifiex/sta_ioctl.c
->> +++ b/drivers/net/wireless/mwifiex/sta_ioctl.c
->> @@ -517,6 +517,17 @@ int mwifiex_enable_hs(struct mwifiex_adapter *adapter)
->>         adapter->hs_enabling = true;
->>         mwifiex_cancel_all_pending_cmd(adapter);
+>> Signed-off-by: Jon Hunter <jonathanh-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
+> 
+> This looks okay to me, although I need and ack from Adrian to pick up
+> this for fixes. Adrian did recently step in as the maintainer for
+> sdhci.
+
+Are you guys ok with this? It would be good to get your ACK's so that
+Ulf can pick it up.
+
+Jon
+
+>> ---
+>>  drivers/mmc/host/sdhci-tegra.c | 42 +++++++++++++++++++++++++++++++++++++-----
+>>  1 file changed, 37 insertions(+), 5 deletions(-)
 >>
->> +       /* if the MMC host is already in suspend it will not detect SDIO irq
->> +        * and we might run into response timeout. By claiming the MMC host we
->> +        * wake it up, which is sufficient to detect a pending IRQ
->> +        */
->> +       {
->> +               struct sdio_mmc_card *card = adapter->card;
->> +               sdio_claim_host(card->func);
->> +               printk("+++ poll mmc host for IRQ +++\n");
->> +               sdio_release_host(card->func);
->> +       }
+>> diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
+>> index 83c4bf7bc16c..bc7a0847e316 100644
+>> --- a/drivers/mmc/host/sdhci-tegra.c
+>> +++ b/drivers/mmc/host/sdhci-tegra.c
+>> @@ -147,10 +147,16 @@ static void tegra_sdhci_reset(struct sdhci_host *host, u8 mask)
+>>         /* Advertise UHS modes as supported by host */
+>>         if (soc_data->nvquirks & NVQUIRK_ENABLE_SDR50)
+>>                 misc_ctrl |= SDHCI_MISC_CTRL_ENABLE_SDR50;
+>> +       else
+>> +               misc_ctrl &= ~SDHCI_MISC_CTRL_ENABLE_SDR50;
+>>         if (soc_data->nvquirks & NVQUIRK_ENABLE_DDR50)
+>>                 misc_ctrl |= SDHCI_MISC_CTRL_ENABLE_DDR50;
+>> +       else
+>> +               misc_ctrl &= ~SDHCI_MISC_CTRL_ENABLE_DDR50;
+>>         if (soc_data->nvquirks & NVQUIRK_ENABLE_SDR104)
+>>                 misc_ctrl |= SDHCI_MISC_CTRL_ENABLE_SDR104;
+>> +       else
+>> +               misc_ctrl &= ~SDHCI_MISC_CTRL_ENABLE_SDR104;
+>>         sdhci_writel(host, misc_ctrl, SDHCI_TEGRA_VENDOR_MISC_CTRL);
+>>
+>>         clk_ctrl = sdhci_readl(host, SDHCI_TEGRA_VENDOR_CLOCK_CTRL);
+>> @@ -315,6 +321,32 @@ static const struct sdhci_ops tegra114_sdhci_ops = {
+>>         .write_w    = tegra_sdhci_writew,
+>>         .write_l    = tegra_sdhci_writel,
+>>         .set_clock  = tegra_sdhci_set_clock,
+>> +       .set_bus_width = sdhci_set_bus_width,
+>> +       .reset      = tegra_sdhci_reset,
+>> +       .set_uhs_signaling = sdhci_set_uhs_signaling,
+>> +       .get_max_clock = sdhci_pltfm_clk_get_max_clock,
+>> +};
 >> +
->>         if (mwifiex_set_hs_params(mwifiex_get_priv(adapter,
->>                                                    MWIFIEX_BSS_ROLE_STA),
->>                                   HostCmd_ACT_GEN_SET, MWIFIEX_SYNC_CMD,
->
-> I tried this code change but that did not help. I saw that the code
-> change is in a function called mwifiex_enable_hs(), which only gets
-> invoked by mwifiex_sdio_suspend(); which is why I think it is not having
-> any effect. Because when I run the command to scan the channel list
-> (i.e. iw dev wlan0 scan), the system is not in suspend state. And I
-> noticed (by adding prints in omap_hsmmc.c for suspend and resume
-> callbacks) that during the "scan" command, the suspend routine gets invoked
-> for HSMMC but it never gets resumed (may be due to the missed wakeup
-> IRQ) from mwifiex and the command times out.
->
-
-Is there any other suggestion for mwifiex that I should try out? Or
-is there any way in omap_hsmmc to specify the wakeup interrupt
-type (IRQF_TRIGGER_LOW) while using generic wakeup IRQ
-mechanism. I could not find it, but I may be missing something.
-
-Thanks,
-Vishal
-
-> Thanks for your help.
->
-> Vishal
->
->
+>> +static const struct sdhci_pltfm_data sdhci_tegra114_pdata = {
+>> +       .quirks = SDHCI_QUIRK_BROKEN_TIMEOUT_VAL |
+>> +                 SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK |
+>> +                 SDHCI_QUIRK_SINGLE_POWER_WRITE |
+>> +                 SDHCI_QUIRK_NO_HISPD_BIT |
+>> +                 SDHCI_QUIRK_BROKEN_ADMA_ZEROLEN_DESC |
+>> +                 SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN,
+>> +       .ops  = &tegra114_sdhci_ops,
+>> +};
+>> +
+>> +static const struct sdhci_tegra_soc_data soc_data_tegra114 = {
+>> +       .pdata = &sdhci_tegra114_pdata,
+>> +};
+>> +
+>> +static const struct sdhci_ops tegra124_sdhci_ops = {
+>> +       .get_ro     = tegra_sdhci_get_ro,
+>> +       .read_w     = tegra_sdhci_readw,
+>> +       .write_w    = tegra_sdhci_writew,
+>> +       .write_l    = tegra_sdhci_writel,
+>> +       .set_clock  = tegra_sdhci_set_clock,
+>>         .set_bus_width = tegra_sdhci_set_bus_width,
+>>         .reset      = tegra_sdhci_reset,
+>>         .platform_execute_tuning = tegra_sdhci_execute_tuning,
+>> @@ -322,7 +354,7 @@ static const struct sdhci_ops tegra114_sdhci_ops = {
+>>         .get_max_clock = tegra_sdhci_get_max_clock,
+>>  };
 >>
->> 2016-02-18 19:27 GMT+01:00 Vishal Thanki <vishalthanki@gmail.com>:
->> > Hi,
->> >
->> > On a custom built am335x based board, I am facing an issue mwifiex wifi
->> > module which is connected to host via SDIO interface. I am using kernel
->> > version 4.4.
->> >
->> > The problem is related to the wifi "ext_scan" command getting timed out
->> > over SDIO. This was working with old kernel (v4.0), but does not work on
->> > kernel v4.4. I found the following commit is responsible for this
->> > behavior.
->> >
->> > =================================
->> > 5b83b2234be6733cfe22036c38031b2c890b3db8
->> >
->> > mmc: omap_hsmmc: Change wake-up interrupt to use generic wakeirq
->> >
->> > We can now use generic wakeirq handling and remove the custom handling
->> > for the wake-up interrupts.
->> > =================================
->> >
->> > There is no wifi issue if I revert the above mentioned commit on kernel
->> > v4.4.
->> >
->> > I see that before this commit, the wakeup IRQ handler was registered
->> > within the omap_hsmmc.c itself with additional IRQF_TRIGGER_LOW flag.
->> > But with the introduction to dev_pm_set_dedicated_wake_irq(), the
->> > generic wakeup IRQ handler is registered which does not take the
->> > IRQF_TRIGGER flag. I am not sure if that is the issue, but I added that
->> > IRQF_TRIGGER_LOW flag in dev_pm_set_dedicated_wake_irq() while
->> > registering a threaded IRQ handler, I could see the problem disappears.
->> > However, this change is causing the infinite interrupts because the of
->> > level triggered interrupt is not handled in generic wakeup IRQ handling
->> > code (as it was done specially in omap_hsmmc.c code earlier).
->> >
->> > I am not much familiar with MMC/SDIO driver and I am not sure how to fix
->> > this behavior. So any guidance would be really helpful.
->> >
->> > Thanks,
->> > Vishal
+>> -static const struct sdhci_pltfm_data sdhci_tegra114_pdata = {
+>> +static const struct sdhci_pltfm_data sdhci_tegra124_pdata = {
+>>         .quirks = SDHCI_QUIRK_BROKEN_TIMEOUT_VAL |
+>>                   SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK |
+>>                   SDHCI_QUIRK_SINGLE_POWER_WRITE |
+>> @@ -330,11 +362,11 @@ static const struct sdhci_pltfm_data sdhci_tegra114_pdata = {
+>>                   SDHCI_QUIRK_BROKEN_ADMA_ZEROLEN_DESC |
+>>                   SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN,
+>>         .quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN,
+>> -       .ops  = &tegra114_sdhci_ops,
+>> +       .ops  = &tegra124_sdhci_ops,
+>>  };
+>>
+>> -static const struct sdhci_tegra_soc_data soc_data_tegra114 = {
+>> -       .pdata = &sdhci_tegra114_pdata,
+>> +static const struct sdhci_tegra_soc_data soc_data_tegra124 = {
+>> +       .pdata = &sdhci_tegra124_pdata,
+>>         .nvquirks = NVQUIRK_ENABLE_SDR50 |
+>>                     NVQUIRK_ENABLE_DDR50 |
+>>                     NVQUIRK_ENABLE_SDR104,
+>> @@ -357,7 +389,7 @@ static const struct sdhci_tegra_soc_data soc_data_tegra210 = {
+>>
+>>  static const struct of_device_id sdhci_tegra_dt_match[] = {
+>>         { .compatible = "nvidia,tegra210-sdhci", .data = &soc_data_tegra210 },
+>> -       { .compatible = "nvidia,tegra124-sdhci", .data = &soc_data_tegra114 },
+>> +       { .compatible = "nvidia,tegra124-sdhci", .data = &soc_data_tegra124 },
+>>         { .compatible = "nvidia,tegra114-sdhci", .data = &soc_data_tegra114 },
+>>         { .compatible = "nvidia,tegra30-sdhci", .data = &soc_data_tegra30 },
+>>         { .compatible = "nvidia,tegra20-sdhci", .data = &soc_data_tegra20 },
+>> --
+>> 2.1.4
+>>
