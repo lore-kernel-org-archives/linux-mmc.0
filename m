@@ -1,45 +1,63 @@
 From: Chris Ball <chris@printf.net>
-Subject: Re: [PATCH v4] mmc-utils: Merge the lsmmc tool into mmc-utils
-Date: Fri, 26 Feb 2016 14:37:44 +0000
-Message-ID: <867fhredvr.fsf@void.printf.net>
-References: <89e1e3481efb45327716d76dd16a05ace046c083.1456205801.git.baolin.wang@linaro.org>
+Subject: Re: [PATCH 1/1 v2] mmc_utils: add ffu support
+Date: Fri, 26 Feb 2016 14:45:05 +0000
+Message-ID: <86ziuncyz2.fsf@void.printf.net>
+References: <SN1PR02MB13890B1700C4AE8F6FCD8C6C83A40@SN1PR02MB1389.namprd02.prod.outlook.com>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([192.34.86.38]:56718 "EHLO void.printf.net"
+Received: from void.printf.net ([192.34.86.38]:56915 "EHLO void.printf.net"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754061AbcBZOpI (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 26 Feb 2016 09:45:08 -0500
-In-Reply-To: <89e1e3481efb45327716d76dd16a05ace046c083.1456205801.git.baolin.wang@linaro.org>
-	(Baolin Wang's message of "Tue, 23 Feb 2016 13:37:28 +0800")
+	id S932066AbcBZOw3 convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 26 Feb 2016 09:52:29 -0500
+In-Reply-To: <SN1PR02MB13890B1700C4AE8F6FCD8C6C83A40@SN1PR02MB1389.namprd02.prod.outlook.com>
+	(Avi Shchislowski's message of "Tue, 23 Feb 2016 11:27:44 +0000")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Baolin Wang <baolin.wang@linaro.org>
-Cc: linux-mmc@vger.kernel.org, ulf.hansson@linaro.org, broonie@kernel.org, linus.walleij@linaro.org, sebras@gmail.com
+To: Avi Shchislowski <Avi.Shchislowski@sandisk.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Alex Lemberg <Alex.Lemberg@sandisk.com>, Yaniv Agman <Yaniv.Agman@sandisk.com>
 
-Hi Baolin,
+Hi Avi,
 
-On Tue, Feb 23 2016, Baolin Wang wrote:
-> From: Sebastian Rasmussen <sebras@gmail.com>
+On Tue, Feb 23 2016, Avi Shchislowski wrote:
+> Adding support for field firmware update over multiple command ioctl.
+> As multiple command ioctl is supported only from kernel 4.4, this pat=
+ch should be used against kernel 4.4 and above.
 >
-> The lsmmc tools contains an extensive parser of the CID, CSD, SCR
-> registers from userspace. The utility works as-is and uses sysfs
-> to read the register values.
+> Known issues:
+> - There is no support for Multiple Block write commands (CMD25) in ex=
+isting=20
+>    IOCTL implementation
+> - In case MODE_OPERATION_CODES field is not supported by the device
+>    manual reset of the device/platform is required.
+>    The reset issue discussed in another email thread - " [RFC 0/6] mm=
+c: Field Firmware Update"
 >
-> The original code is created by Sebastian Rasmussen and still lives
-> in an attachment in the mail archive of linux-mmc. It need to be merged
-> into mmc-utils repository, which is convenient for testing MMC device
-> from userspace.
+> Change since v1:
+> - modified copyright header
 >
-> Change since v3:
->  - Remove the unused EXT_CSD parser in lsmmc.c file.
->
-> Signed-off-by: Sebastian Rasmussen <sebras@gmail.com>
-> Signed-off-by: Chris Ball <chris@printf.net>
-> Signed-off-by: Baolin Wang <baolin.wang@linaro.org>
+> Signed-off-by: Yaniv Agman <yaniv.agman@sandisk.com>
+> Signed-off-by: Avi Shchislowski <avi.shchislowski@sandisk.com>
 
-This is merged into mmc-utils now.  Thanks!
+Thanks for resending.  I'm getting some compile errors, any ideas?
+
+mmc_cmds.c: In function =E2=80=98do_ffu=E2=80=99:
+mmc_cmds.c:2076:31: error: invalid application of =E2=80=98sizeof=E2=80=
+=99 to incomplete type =E2=80=98struct mmc_ioc_multi_cmd=E2=80=99
+  multi_cmd =3D calloc(1, sizeof(struct mmc_ioc_multi_cmd) +
+                               ^
+
+mmc_cmds.c:2126:11: error: dereferencing pointer to incomplete type =E2=
+=80=98struct mmc_ioc_multi_cmd=E2=80=99
+  multi_cmd->num_of_cmds =3D 3;
+           ^
+
+mmc_cmds.c:2162:23: error: =E2=80=98MMC_IOC_MULTI_CMD=E2=80=99 undeclar=
+ed (first use in this function)
+   ret =3D ioctl(dev_fd, MMC_IOC_MULTI_CMD, multi_cmd);
+                       ^
 
 - Chris.
--- 
+--=20
 Chris Ball   <http://printf.net/>
