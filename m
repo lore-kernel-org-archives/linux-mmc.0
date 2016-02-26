@@ -1,79 +1,89 @@
-From: Jon Hunter <jonathanh-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
-Subject: Re: [PATCH] mmc: tegra: Disable UHS-I modes for tegra114
-Date: Fri, 26 Feb 2016 09:39:11 +0000
-Message-ID: <56D01D3F.7040205@nvidia.com>
-References: <1455806924-14967-1-git-send-email-jonathanh@nvidia.com>
- <CAPDyKFowEH=4PU1ErNxMA0=SiDT1Q86H0SfMuiH5jA+H7mvquA@mail.gmail.com>
- <56CECC9E.9010501@nvidia.com> <1456428771.7433.4.camel@lynxeye.de>
- <56CF89DF.1000206@intel.com>
+From: Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>
+Subject: Re: [PATCH] mmc: sdhci-tegra: Set DMA mask
+Date: Fri, 26 Feb 2016 12:31:36 +0100
+Message-ID: <6561324.RvoTsUTSRM@wuerfel>
+References: <1456305079-27779-1-git-send-email-acourbot@nvidia.com> <29473125.UhEGU5khX5@wuerfel> <CAAVeFuLL-SP3_x2GC4UWcH4KEVora6r-e5xmORQdVfjcjfWDOw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7Bit
 Return-path: <linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <56CF89DF.1000206-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+In-Reply-To: <CAAVeFuLL-SP3_x2GC4UWcH4KEVora6r-e5xmORQdVfjcjfWDOw-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
 Sender: linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Lucas Stach <dev-8ppwABl0HbeELgA04lAiVw@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: Stephen Warren <swarren-3lzwWm7+Weoh9ZMKESR00Q@public.gmane.org>, Thierry Reding <thierry.reding-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Alexandre Courbot <gnurou-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, linux-mmc <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+To: Alexandre Courbot <gnurou-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Cc: Alexandre Courbot <acourbot-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Stephen Warren <swarren-3lzwWm7+Weoh9ZMKESR00Q@public.gmane.org>, Thierry Reding <thierry.reding-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, linux-mmc <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-
-On 25/02/16 23:10, Adrian Hunter wrote:
-> On 25/02/2016 9:32 p.m., Lucas Stach wrote:
->> Am Donnerstag, den 25.02.2016, 09:42 +0000 schrieb Jon Hunter:
->>> Hi Adrian, Lucas,
->>>
->>> On 18/02/16 16:07, Ulf Hansson wrote:
->>>> +Adrian
->>>>
->>>> On 18 February 2016 at 15:48, Jon Hunter <jonathanh-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
->>>> wrote:
->>>>> SD card support for Tegra114 started failing after commit
->>>>> a8e326a911d3
->>>>> ("mmc: tegra: implement module external clock change") was
->>>>> merged. This
->>>>> commit was part of a series to enable UHS-I modes for Tegra. To
->>>>> workaround this problem for now, only disable UHS-I modes for
->>>>> Tegra114
->>>>> and in order to do this it is necessary to revert changes from
->>>>> commits
->>>>> a8e326a911d3 ("mmc: tegra: implement module external clock
->>>>> change"),
->>>>> c3c2384c3ac0 ("mmc: tegra: implement UHS tuning"), 7ad2ed1dfcbe
->>>>> ("mmc: tegra: enable UHS-I modes") that impact Tegra114. To do
->>>>> this so
->>>>> that UHS-I mode can be disabled for Tegra114 but not for Tegra124
->>>>> separate the platform data, soc data and sdhci-ops so they are no
->>>>> longer
->>>>> common to both Tegra114 and Tegra124.
->>>>>
->>>>> Fixes: a8e326a911d3 ("mmc: tegra: implement module external clock
->>>>> change")
->>>>>
->>>>> Signed-off-by: Jon Hunter <jonathanh-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
->>>>
->>>> This looks okay to me, although I need and ack from Adrian to pick
->>>> up
->>>> this for fixes. Adrian did recently step in as the maintainer for
->>>> sdhci.
->>>
->>> Are you guys ok with this? It would be good to get your ACK's so that
->>> Ulf can pick it up.
->>>
->> I don't see why you need to duplicate the tegra114_sdhci_ops.
->> Together with the first hunk of this patch, having soc_data_tegra114
->> not set any UHS-I capabilities (quirks) should be enough to disable
->> UHS-I modes on Tegra114. The core should never call any of the UHS-I
->> related functions from tegra114_sdhci_ops in that case.
+On Friday 26 February 2016 16:24:34 Alexandre Courbot wrote:
+> On Thu, Feb 25, 2016 at 11:52 PM, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org> wrote:
+> >> Actually even if we specify a dma-ranges on the parent DT node, the
+> >> DMA range will still be limited to 32 bits because of the following
+> >> code in of_dma_configure():
+> >>
+> >>     /*
+> >>      * Set default coherent_dma_mask to 32 bit.  Drivers are expected to
+> >>      * setup the correct supported mask.
+> >>      */
+> >>     if (!dev->coherent_dma_mask)
+> >>         dev->coherent_dma_mask = DMA_BIT_MASK(32);
+> >>
+> >>     /*
+> >>      * Set it to coherent_dma_mask by default if the architecture
+> >>      * code has not set it.
+> >>      */
+> >>     if (!dev->dma_mask)
+> >>         dev->dma_mask = &dev->coherent_dma_mask;
+> >>
+> >>     ....
+> >>     /* gets dma-ranges into dma_addr and size */
+> >>     ....
+> >>
+> >>
+> >>     *dev->dma_mask = min((*dev->dma_mask),
+> >>                  DMA_BIT_MASK(ilog2(dma_addr + size)));
+> >>
+> >> So unless the DMA mask is set on the device before of_dma_configure()
+> >> is called, the min() statement will choose the 32 bits mask that has
+> >> been previously set. So IIUC in any case, the driver will need to call
+> >> dma_set_mask()
+> >
+> > Yes, the driver definitely has to call dma_set_mask(), the property of
+> > the parent bus is used to make that fail when the bus doesn't support
+> > it.
 > 
-> I am on vacation until the middle of next week so I haven't had a
-> chance to look at this, but it is not obvious if the changes to
-> the ops are needed.  Jon, please comment.
+> And that's where things seem to stop working: the driver's probe
+> function is invoked by the platform bus, *after* of_dma_configure() is
+> called. So unless I am missing something there is no way for the
+> driver to set the DMA mask in such a way that of_dma_configure() can
+> see it and do the right thing.
+> 
+> In other words, most of the DMA mask logic in of_dma_configure()
+> doesn't seem to have any effect (and a 32 bits mask will be set), at
+> least on the platform bus.
 
-No problem. I was not sure so reverted all the changes for Tegra114. I
-have posted an updated version [0] without the duplicate ops (forgot to
-mark as V2). I have tested this and confirm that it is working. Please
-ACK this if you are happy.
+That is correct: of_dma_configure has to set a 32-bit DMA mask
+because that is the default that we expect to see in Linux drivers.
 
-Jon
+A lot of drivers don't call dma_set_mask() at all, so this is
+the most reasonable value that typically works, unless the
+device is more limited, or you want the extra performance you
+get on devices that actually support a bigger mask.
 
-[0] http://marc.info/?l=linux-mmc&m=145647928317400&w=2
+> >> Can I have your thoughts on this? Am I missing something?
+> >
+> > One point: I think the dma_set_mask() probably should be in the
+> > generic part of the sdhci driver, not the tegra specific portion.
+> 
+> Ok, but then how does the generic part of the driver knows which DMA
+> mask applies to the device?
+
+If dma_set_mask() succeeds when passed a 64-bit mask, the driver
+can pass high addresses into dma_map_*() and put the result into
+the 64-bit DMA registers of the device. That is all the driver
+needs to know here.
+
+When the bus is more limited than the device, we either have
+an swiotlb/iommu that will use bounce buffers to map dma_map_* work
+anyway (using low DMA addresses for high memory), or we don't have
+an swiotlb and the dma_set_mask() operation has to fail.
+
+	Arnd
