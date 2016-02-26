@@ -1,91 +1,65 @@
-From: Lucas Stach <dev-8ppwABl0HbeELgA04lAiVw@public.gmane.org>
-Subject: Re: [PATCH] mmc: tegra: Disable UHS-I modes for tegra114
-Date: Fri, 26 Feb 2016 18:47:24 +0100
-Message-ID: <1456508844.28237.1.camel@lynxeye.de>
-References: <1455806924-14967-1-git-send-email-jonathanh@nvidia.com>
-	 <1456479257-12147-1-git-send-email-jonathanh@nvidia.com>
+From: Eric Anholt <eric@anholt.net>
+Subject: [PATCH 1/4] dt-bindings: Add binding for brcm,bcm2835-sdhost.
+Date: Fri, 26 Feb 2016 15:05:39 -0800
+Message-ID: <1456527942-3045-2-git-send-email-eric@anholt.net>
+References: <1456527942-3045-1-git-send-email-eric@anholt.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1456479257-12147-1-git-send-email-jonathanh-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
-Sender: linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Jon Hunter <jonathanh-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Stephen Warren <swarren-3lzwWm7+Weoh9ZMKESR00Q@public.gmane.org>, Thierry Reding <thierry.reding-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Alexandre Courbot <gnurou-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Cc: linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <1456527942-3045-1-git-send-email-eric@anholt.net>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: linux-rpi-kernel@lists.infradead.org
+Cc: Mark Rutland <mark.rutland@arm.com>, devicetree@vger.kernel.org, Ian Campbell <ijc+devicetree@hellion.org.uk>, Florian Fainelli <f.fainelli@gmail.com>, Pawel Moll <pawel.moll@arm.com>, Stephen Warren <swarren@wwwdotorg.org>, Lee Jones <lee@kernel.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Eric Anholt <eric@anholt.net>, Rob Herring <robh+dt@kernel.org>, Kumar Gala <galak@codeaurora.org>, Ulf Hansson <ulf.hansson@linaro.org>, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
-Am Freitag, den 26.02.2016, 09:34 +0000 schrieb Jon Hunter:
-> SD card support for Tegra114 started failing after commit
-> a8e326a911d3
-> ("mmc: tegra: implement module external clock change") was merged.
-> This
-> commit was part of a series to enable UHS-I modes for Tegra. To
-> workaround this problem for now, disable UHS-I modes for Tegra114 by
-> separating the soc data structures for Tegra114 and Tegra124 so that
-> UHS-I is still enabled for Tegra124 but not Tegra114.
->=20
-> Fixes: a8e326a911d3 ("mmc: tegra: implement module external clock
-> change")
->=20
-> Signed-off-by: Jon Hunter <jonathanh-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
+This is the other SD controller on the platform, which can be swapped
+to the role of SD card host using pin muxing.
 
-This looks good to me now,
+Signed-off-by: Eric Anholt <eric@anholt.net>
+---
+ .../bindings/mmc/brcm,bcm2835-sdhost.txt           | 25 ++++++++++++++++++++++
+ 1 file changed, 25 insertions(+)
+ create mode 100644 Documentation/devicetree/bindings/mmc/brcm,bcm2835-sdhost.txt
 
-Reviewed-by: Lucas Stach <dev-8ppwABl0HbeELgA04lAiVw@public.gmane.org>
-
-> ---
-> =C2=A0drivers/mmc/host/sdhci-tegra.c | 12 +++++++++++-
-> =C2=A01 file changed, 11 insertions(+), 1 deletion(-)
->=20
-> diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-
-> tegra.c
-> index 83c4bf7bc16c..212d51f08939 100644
-> --- a/drivers/mmc/host/sdhci-tegra.c
-> +++ b/drivers/mmc/host/sdhci-tegra.c
-> @@ -147,10 +147,16 @@ static void tegra_sdhci_reset(struct sdhci_host
-> *host, u8 mask)
-> =C2=A0	/* Advertise UHS modes as supported by host */
-> =C2=A0	if (soc_data->nvquirks & NVQUIRK_ENABLE_SDR50)
-> =C2=A0		misc_ctrl |=3D SDHCI_MISC_CTRL_ENABLE_SDR50;
-> +	else
-> +		misc_ctrl &=3D ~SDHCI_MISC_CTRL_ENABLE_SDR50;
-> =C2=A0	if (soc_data->nvquirks & NVQUIRK_ENABLE_DDR50)
-> =C2=A0		misc_ctrl |=3D SDHCI_MISC_CTRL_ENABLE_DDR50;
-> +	else
-> +		misc_ctrl &=3D ~SDHCI_MISC_CTRL_ENABLE_DDR50;
-> =C2=A0	if (soc_data->nvquirks & NVQUIRK_ENABLE_SDR104)
-> =C2=A0		misc_ctrl |=3D SDHCI_MISC_CTRL_ENABLE_SDR104;
-> +	else
-> +		misc_ctrl &=3D ~SDHCI_MISC_CTRL_ENABLE_SDR104;
-> =C2=A0	sdhci_writel(host, misc_ctrl, SDHCI_TEGRA_VENDOR_MISC_CTRL);
-> =C2=A0
-> =C2=A0	clk_ctrl =3D sdhci_readl(host, SDHCI_TEGRA_VENDOR_CLOCK_CTRL);
-> @@ -335,6 +341,10 @@ static const struct sdhci_pltfm_data
-> sdhci_tegra114_pdata =3D {
-> =C2=A0
-> =C2=A0static const struct sdhci_tegra_soc_data soc_data_tegra114 =3D =
-{
-> =C2=A0	.pdata =3D &sdhci_tegra114_pdata,
-> +};
-> +
-> +static const struct sdhci_tegra_soc_data soc_data_tegra124 =3D {
-> +	.pdata =3D &sdhci_tegra114_pdata,
-> =C2=A0	.nvquirks =3D NVQUIRK_ENABLE_SDR50 |
-> =C2=A0		=C2=A0=C2=A0=C2=A0=C2=A0NVQUIRK_ENABLE_DDR50 |
-> =C2=A0		=C2=A0=C2=A0=C2=A0=C2=A0NVQUIRK_ENABLE_SDR104,
-> @@ -357,7 +367,7 @@ static const struct sdhci_tegra_soc_data
-> soc_data_tegra210 =3D {
-> =C2=A0
-> =C2=A0static const struct of_device_id sdhci_tegra_dt_match[] =3D {
-> =C2=A0	{ .compatible =3D "nvidia,tegra210-sdhci", .data =3D
-> &soc_data_tegra210 },
-> -	{ .compatible =3D "nvidia,tegra124-sdhci", .data =3D
-> &soc_data_tegra114 },
-> +	{ .compatible =3D "nvidia,tegra124-sdhci", .data =3D
-> &soc_data_tegra124 },
-> =C2=A0	{ .compatible =3D "nvidia,tegra114-sdhci", .data =3D
-> &soc_data_tegra114 },
-> =C2=A0	{ .compatible =3D "nvidia,tegra30-sdhci", .data =3D
-> &soc_data_tegra30 },
-> =C2=A0	{ .compatible =3D "nvidia,tegra20-sdhci", .data =3D
-> &soc_data_tegra20 },
+diff --git a/Documentation/devicetree/bindings/mmc/brcm,bcm2835-sdhost.txt b/Documentation/devicetree/bindings/mmc/brcm,bcm2835-sdhost.txt
+new file mode 100644
+index 0000000..f55c446
+--- /dev/null
++++ b/Documentation/devicetree/bindings/mmc/brcm,bcm2835-sdhost.txt
+@@ -0,0 +1,25 @@
++Broadcom BCM2835 SDHOST controller
++
++This file documents differences between the core properties described
++by mmc.txt and the properties that represent the BCM2835 SDHOST controller.
++
++Required properties:
++- compatible:	Must be "brcm,bcm2835-sdhost"
++- clocks:	The phandle for the clock feeding the SDHOST controller
++
++Optional properties:
++- dmas:		DMA channel phandles for read and write
++- dma-names:	DMA channel names for read and write, must be "rx" and "tx"
++	          See Documentation/devicetree/bindings/dma/dma.txt for details
++
++Example:
++
++sdhost: sdhost@7e202000 {
++	compatible = "brcm,bcm2835-sdhost";
++	reg = <0x7e202000 0x100>;
++	interrupts = <2 24>;
++	clocks = <&clocks BCM2835_CLOCK_VPU>;
++	dmas = <&dma 13>,
++	       <&dma 13>;
++	dma-names = "tx", "rx";
++};
+-- 
+2.7.0
