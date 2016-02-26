@@ -1,104 +1,75 @@
-From: Magnus Damm <magnus.damm@gmail.com>
-Subject: Re: [PATCH] mmc: mmc_spi: Add Card Detect comments and fix CD GPIO case
-Date: Fri, 26 Feb 2016 17:50:18 +0900
-Message-ID: <CANqRtoQkr+XOYUFNNPOmREsJo5XgMHfX0gG=bEgpbEewryEbUA@mail.gmail.com>
-References: <20160216040641.31979.6202.sendpatchset@little-apple>
+From: Jon Hunter <jonathanh@nvidia.com>
+Subject: Re: [PATCH] mmc: tegra: Disable UHS-I modes for tegra114
+Date: Fri, 26 Feb 2016 08:58:10 +0000
+Message-ID: <56D013A2.7080909@nvidia.com>
+References: <1455806924-14967-1-git-send-email-jonathanh@nvidia.com>
+ <CAPDyKFowEH=4PU1ErNxMA0=SiDT1Q86H0SfMuiH5jA+H7mvquA@mail.gmail.com>
+ <56CECC9E.9010501@nvidia.com> <1456428771.7433.4.camel@lynxeye.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-vk0-f47.google.com ([209.85.213.47]:36287 "EHLO
-	mail-vk0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750699AbcBZIuU (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 26 Feb 2016 03:50:20 -0500
-In-Reply-To: <20160216040641.31979.6202.sendpatchset@little-apple>
+Received: from hqemgate15.nvidia.com ([216.228.121.64]:2964 "EHLO
+	hqemgate15.nvidia.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750699AbcBZI6S (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 26 Feb 2016 03:58:18 -0500
+In-Reply-To: <1456428771.7433.4.camel@lynxeye.de>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Stephen Warren <swarren@nvidia.com>, linux-kernel <linux-kernel@vger.kernel.org>, adrian.hunter@intel.com, Magnus Damm <magnus.damm@gmail.com>
+To: Lucas Stach <dev@lynxeye.de>, Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>
+Cc: Stephen Warren <swarren@wwwdotorg.org>, Thierry Reding <thierry.reding@gmail.com>, Alexandre Courbot <gnurou@gmail.com>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-tegra@vger.kernel.org" <linux-tegra@vger.kernel.org>
 
-On Tue, Feb 16, 2016 at 1:06 PM, Magnus Damm <magnus.damm@gmail.com> wrote:
-> From: Magnus Damm <damm+renesas@opensource.se>
->
-> This patch adds comments to describe the various ways card detection
-> may be implemented and when polling is needed. Also a fix is included
-> to prevent the MMC SPI driver from polling when a CD GPIO that supports
-> interrupts is specified using the gpios DT property (case 1).
->
-> Without this patch the DT node below results in the following output:
->
->  spi_gpio: spi-gpio { /* SD2 @ CN12 */
->          compatible = "spi-gpio";
->          #address-cells = <1>;
->          #size-cells = <0>;
->          gpio-sck = <&gpio6 16 GPIO_ACTIVE_HIGH>;
->          gpio-mosi = <&gpio6 17 GPIO_ACTIVE_HIGH>;
->          gpio-miso = <&gpio6 18 GPIO_ACTIVE_HIGH>;
->          num-chipselects = <1>;
->          cs-gpios = <&gpio6 21 GPIO_ACTIVE_LOW>;
->          status = "okay";
->
->          spi@0 {
->                  compatible = "mmc-spi-slot";
->                  reg = <0>;
->                  voltage-ranges = <3200 3400>;
->                  spi-max-frequency = <25000000>;
->                  gpios = <&gpio6 22 GPIO_ACTIVE_LOW>;   /* CD */
->          };
->  };
->
->  # dmesg | grep mmc
->  mmc_spi spi32766.0: SD/MMC host mmc0, no WP, no poweroff, cd polling
->  mmc0: host does not support reading read-only switch, assuming write-enable
->  mmc0: new SDHC card on SPI
->  mmcblk0: mmc0:0000 SU04G 3.69 GiB
->  mmcblk0: p1
->
->  With this patch applied the "cd polling" portion above disappears.
->
-> Signed-off-by: Magnus Damm <damm+renesas@opensource.se>
-> ---
->
->  Developed on top of renesas-drivers-2016-02-09-v4.5-rc3 which
->  simply put is v4.5-rc3 + selected linux-next trees.
->
->  drivers/mmc/host/mmc_spi.c |   14 ++++++++++++++
->  1 file changed, 14 insertions(+)
->
-> --- 0001/drivers/mmc/host/mmc_spi.c
-> +++ work/drivers/mmc/host/mmc_spi.c     2016-02-16 12:47:47.900513000 +0900
-> @@ -1437,11 +1437,25 @@ static int mmc_spi_probe(struct spi_devi
->         if (status != 0)
->                 goto fail_add_host;
->
-> +       /* Card detection in case of DT is supported in several ways:
-> +        * 1) GPIO with interrupt support using "gpios" DT property.
-> +        * 2) GPIO without interrupt support using "gpios" DT property.
-> +        * 3) Interrupt only using "interrupt-parent/interrupts" DT properties.
-> +        * 4) Both "gpios" and "interrupt-parent/interrupts" DT properties.
-> +        * 5) Nothing specified.
-> +        * For case 2 and 5 above polling is required.
-> +        */
->         if (host->pdata && host->pdata->flags & MMC_SPI_USE_CD_GPIO) {
->                 status = mmc_gpio_request_cd(mmc, host->pdata->cd_gpio,
->                                              host->pdata->cd_debounce);
->                 if (status != 0)
->                         goto fail_add_host;
-> +
-> +               /* The platform has a CD GPIO signal that may support
-> +                * interrupts, so let mmc_gpiod_request_cd_irq() decide
-> +                * if polling is needed or not.
-> +                */
-> +               mmc->caps &= ~MMC_CAP_NEEDS_POLL;
->                 mmc_gpiod_request_cd_irq(mmc);
->         }
->
 
-Did anyone run into the same issue that CD polling is enabled even
-though the GPIO supports interrupt?
+On 25/02/16 19:32, Lucas Stach wrote:
+> Am Donnerstag, den 25.02.2016, 09:42 +0000 schrieb Jon Hunter:
+>> Hi Adrian, Lucas,
+>>
+>> On 18/02/16 16:07, Ulf Hansson wrote:
+>>> +Adrian
+>>>
+>>> On 18 February 2016 at 15:48, Jon Hunter <jonathanh@nvidia.com>
+>>> wrote:
+>>>> SD card support for Tegra114 started failing after commit
+>>>> a8e326a911d3
+>>>> ("mmc: tegra: implement module external clock change") was
+>>>> merged. This
+>>>> commit was part of a series to enable UHS-I modes for Tegra. To
+>>>> workaround this problem for now, only disable UHS-I modes for
+>>>> Tegra114
+>>>> and in order to do this it is necessary to revert changes from
+>>>> commits
+>>>> a8e326a911d3 ("mmc: tegra: implement module external clock
+>>>> change"),
+>>>> c3c2384c3ac0 ("mmc: tegra: implement UHS tuning"), 7ad2ed1dfcbe
+>>>> ("mmc: tegra: enable UHS-I modes") that impact Tegra114. To do
+>>>> this so
+>>>> that UHS-I mode can be disabled for Tegra114 but not for Tegra124
+>>>> separate the platform data, soc data and sdhci-ops so they are no
+>>>> longer
+>>>> common to both Tegra114 and Tegra124.
+>>>>
+>>>> Fixes: a8e326a911d3 ("mmc: tegra: implement module external clock
+>>>> change")
+>>>>
+>>>> Signed-off-by: Jon Hunter <jonathanh@nvidia.com>
+>>>
+>>> This looks okay to me, although I need and ack from Adrian to pick
+>>> up
+>>> this for fixes. Adrian did recently step in as the maintainer for
+>>> sdhci.
+>>
+>> Are you guys ok with this? It would be good to get your ACK's so that
+>> Ulf can pick it up.
+>>
+> I don't see why you need to duplicate the tegra114_sdhci_ops.
+> Together with the first hunk of this patch, having soc_data_tegra114
+> not set any UHS-I capabilities (quirks) should be enough to disable
+> UHS-I modes on Tegra114. The core should never call any of the UHS-I
+> related functions from tegra114_sdhci_ops in that case.
 
-Perhaps it would be better to break this out into two patches - one
-for the fix and one for the documentation bits?
+Ok, I will give that a try. I was not sure if I needed to completely
+remove all the changes or not and so I wanted to make it equivalent to
+what we had before to ensure there would be no other problems crop up. I
+will re-work and test and hopefully we can get this sorted.
 
-Thanks,
-
-/ magnus
+Jon
