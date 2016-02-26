@@ -1,58 +1,91 @@
-From: Chris Ball <chris@printf.net>
-Subject: Re: [PATCH 1/1 v2] mmc_utils: add ffu support
-Date: Fri, 26 Feb 2016 14:50:59 +0000
-Message-ID: <86vb5bcyp8.fsf@void.printf.net>
-References: <SN1PR02MB13890B1700C4AE8F6FCD8C6C83A40@SN1PR02MB1389.namprd02.prod.outlook.com>
-	<86ziuncyz2.fsf@void.printf.net>
+From: Lucas Stach <dev-8ppwABl0HbeELgA04lAiVw@public.gmane.org>
+Subject: Re: [PATCH] mmc: tegra: Disable UHS-I modes for tegra114
+Date: Fri, 26 Feb 2016 18:47:24 +0100
+Message-ID: <1456508844.28237.1.camel@lynxeye.de>
+References: <1455806924-14967-1-git-send-email-jonathanh@nvidia.com>
+	 <1456479257-12147-1-git-send-email-jonathanh@nvidia.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from void.printf.net ([192.34.86.38]:57060 "EHLO void.printf.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754318AbcBZO6W convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 26 Feb 2016 09:58:22 -0500
-In-Reply-To: <86ziuncyz2.fsf@void.printf.net> (Chris Ball's message of "Fri,
-	26 Feb 2016 14:45:05 +0000")
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1456479257-12147-1-git-send-email-jonathanh-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
+Sender: linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Jon Hunter <jonathanh-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Stephen Warren <swarren-3lzwWm7+Weoh9ZMKESR00Q@public.gmane.org>, Thierry Reding <thierry.reding-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Alexandre Courbot <gnurou-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Cc: linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
-To: Avi Shchislowski <Avi.Shchislowski@sandisk.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Alex Lemberg <Alex.Lemberg@sandisk.com>, Yaniv Agman <Yaniv.Agman@sandisk.com>
 
-Hi,
+Am Freitag, den 26.02.2016, 09:34 +0000 schrieb Jon Hunter:
+> SD card support for Tegra114 started failing after commit
+> a8e326a911d3
+> ("mmc: tegra: implement module external clock change") was merged.
+> This
+> commit was part of a series to enable UHS-I modes for Tegra. To
+> workaround this problem for now, disable UHS-I modes for Tegra114 by
+> separating the soc data structures for Tegra114 and Tegra124 so that
+> UHS-I is still enabled for Tegra124 but not Tegra114.
+>=20
+> Fixes: a8e326a911d3 ("mmc: tegra: implement module external clock
+> change")
+>=20
+> Signed-off-by: Jon Hunter <jonathanh-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
 
-On Fri, Feb 26 2016, Chris Ball wrote:
-> Thanks for resending.  I'm getting some compile errors, any ideas?
->
-> mmc_cmds.c: In function =E2=80=98do_ffu=E2=80=99:
-> mmc_cmds.c:2076:31: error: invalid application of =E2=80=98sizeof=E2=80=
-=99 to incomplete type =E2=80=98struct mmc_ioc_multi_cmd=E2=80=99
->   multi_cmd =3D calloc(1, sizeof(struct mmc_ioc_multi_cmd) +
->                                ^
->
-> mmc_cmds.c:2126:11: error: dereferencing pointer to incomplete type =E2=
-=80=98struct mmc_ioc_multi_cmd=E2=80=99
->   multi_cmd->num_of_cmds =3D 3;
->            ^
->
-> mmc_cmds.c:2162:23: error: =E2=80=98MMC_IOC_MULTI_CMD=E2=80=99 undecl=
-ared (first use in this function)
->    ret =3D ioctl(dev_fd, MMC_IOC_MULTI_CMD, multi_cmd);
->                        ^
+This looks good to me now,
 
-Oh, I bet it's because we include <linux/mmc/ioctl.h>, and now that
-needs to be coming from Linux 4.4+ to include the new ioctl.
+Reviewed-by: Lucas Stach <dev-8ppwABl0HbeELgA04lAiVw@public.gmane.org>
 
-Putting a compile-dependency on Linux 4.4+ seems very tough, though.
-mmc-utils is built on many distributions (e.g. Debian repository build
-machines, ChromeOS build machines) where it may not be possible to
-upgrade the system kernel headers.
-
-Please could we get some #ifdefs on MMC_IOC_MULTI_CMD around the
-=46FU code?
-
-Thanks!
-
-- Chris.
---=20
-Chris Ball   <http://printf.net/>
+> ---
+> =C2=A0drivers/mmc/host/sdhci-tegra.c | 12 +++++++++++-
+> =C2=A01 file changed, 11 insertions(+), 1 deletion(-)
+>=20
+> diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-
+> tegra.c
+> index 83c4bf7bc16c..212d51f08939 100644
+> --- a/drivers/mmc/host/sdhci-tegra.c
+> +++ b/drivers/mmc/host/sdhci-tegra.c
+> @@ -147,10 +147,16 @@ static void tegra_sdhci_reset(struct sdhci_host
+> *host, u8 mask)
+> =C2=A0	/* Advertise UHS modes as supported by host */
+> =C2=A0	if (soc_data->nvquirks & NVQUIRK_ENABLE_SDR50)
+> =C2=A0		misc_ctrl |=3D SDHCI_MISC_CTRL_ENABLE_SDR50;
+> +	else
+> +		misc_ctrl &=3D ~SDHCI_MISC_CTRL_ENABLE_SDR50;
+> =C2=A0	if (soc_data->nvquirks & NVQUIRK_ENABLE_DDR50)
+> =C2=A0		misc_ctrl |=3D SDHCI_MISC_CTRL_ENABLE_DDR50;
+> +	else
+> +		misc_ctrl &=3D ~SDHCI_MISC_CTRL_ENABLE_DDR50;
+> =C2=A0	if (soc_data->nvquirks & NVQUIRK_ENABLE_SDR104)
+> =C2=A0		misc_ctrl |=3D SDHCI_MISC_CTRL_ENABLE_SDR104;
+> +	else
+> +		misc_ctrl &=3D ~SDHCI_MISC_CTRL_ENABLE_SDR104;
+> =C2=A0	sdhci_writel(host, misc_ctrl, SDHCI_TEGRA_VENDOR_MISC_CTRL);
+> =C2=A0
+> =C2=A0	clk_ctrl =3D sdhci_readl(host, SDHCI_TEGRA_VENDOR_CLOCK_CTRL);
+> @@ -335,6 +341,10 @@ static const struct sdhci_pltfm_data
+> sdhci_tegra114_pdata =3D {
+> =C2=A0
+> =C2=A0static const struct sdhci_tegra_soc_data soc_data_tegra114 =3D =
+{
+> =C2=A0	.pdata =3D &sdhci_tegra114_pdata,
+> +};
+> +
+> +static const struct sdhci_tegra_soc_data soc_data_tegra124 =3D {
+> +	.pdata =3D &sdhci_tegra114_pdata,
+> =C2=A0	.nvquirks =3D NVQUIRK_ENABLE_SDR50 |
+> =C2=A0		=C2=A0=C2=A0=C2=A0=C2=A0NVQUIRK_ENABLE_DDR50 |
+> =C2=A0		=C2=A0=C2=A0=C2=A0=C2=A0NVQUIRK_ENABLE_SDR104,
+> @@ -357,7 +367,7 @@ static const struct sdhci_tegra_soc_data
+> soc_data_tegra210 =3D {
+> =C2=A0
+> =C2=A0static const struct of_device_id sdhci_tegra_dt_match[] =3D {
+> =C2=A0	{ .compatible =3D "nvidia,tegra210-sdhci", .data =3D
+> &soc_data_tegra210 },
+> -	{ .compatible =3D "nvidia,tegra124-sdhci", .data =3D
+> &soc_data_tegra114 },
+> +	{ .compatible =3D "nvidia,tegra124-sdhci", .data =3D
+> &soc_data_tegra124 },
+> =C2=A0	{ .compatible =3D "nvidia,tegra114-sdhci", .data =3D
+> &soc_data_tegra114 },
+> =C2=A0	{ .compatible =3D "nvidia,tegra30-sdhci", .data =3D
+> &soc_data_tegra30 },
+> =C2=A0	{ .compatible =3D "nvidia,tegra20-sdhci", .data =3D
+> &soc_data_tegra20 },
