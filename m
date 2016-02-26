@@ -1,80 +1,104 @@
-From: Alexandre Courbot <gnurou@gmail.com>
-Subject: Re: [PATCH] mmc: sdhci-tegra: Set DMA mask
-Date: Fri, 26 Feb 2016 16:24:34 +0900
-Message-ID: <CAAVeFuLL-SP3_x2GC4UWcH4KEVora6r-e5xmORQdVfjcjfWDOw@mail.gmail.com>
-References: <1456305079-27779-1-git-send-email-acourbot@nvidia.com>
- <2393024.oLdk3CGNWo@wuerfel> <CAAVeFu+oesnB9d3wOo5QmUR++UFekahwjOQWbJw_X=MxaimDHg@mail.gmail.com>
- <29473125.UhEGU5khX5@wuerfel>
+From: Magnus Damm <magnus.damm@gmail.com>
+Subject: Re: [PATCH] mmc: mmc_spi: Add Card Detect comments and fix CD GPIO case
+Date: Fri, 26 Feb 2016 17:50:18 +0900
+Message-ID: <CANqRtoQkr+XOYUFNNPOmREsJo5XgMHfX0gG=bEgpbEewryEbUA@mail.gmail.com>
+References: <20160216040641.31979.6202.sendpatchset@little-apple>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-io0-f177.google.com ([209.85.223.177]:35477 "EHLO
-	mail-io0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753671AbcBZHYy (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 26 Feb 2016 02:24:54 -0500
-In-Reply-To: <29473125.UhEGU5khX5@wuerfel>
+Received: from mail-vk0-f47.google.com ([209.85.213.47]:36287 "EHLO
+	mail-vk0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750699AbcBZIuU (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 26 Feb 2016 03:50:20 -0500
+In-Reply-To: <20160216040641.31979.6202.sendpatchset@little-apple>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Arnd Bergmann <arnd@arndb.de>
-Cc: Alexandre Courbot <acourbot@nvidia.com>, Ulf Hansson <ulf.hansson@linaro.org>, Stephen Warren <swarren@wwwdotorg.org>, Thierry Reding <thierry.reding@gmail.com>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-tegra@vger.kernel.org" <linux-tegra@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+To: linux-mmc@vger.kernel.org
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Stephen Warren <swarren@nvidia.com>, linux-kernel <linux-kernel@vger.kernel.org>, adrian.hunter@intel.com, Magnus Damm <magnus.damm@gmail.com>
 
-On Thu, Feb 25, 2016 at 11:52 PM, Arnd Bergmann <arnd@arndb.de> wrote:
->> Actually even if we specify a dma-ranges on the parent DT node, the
->> DMA range will still be limited to 32 bits because of the following
->> code in of_dma_configure():
->>
->>     /*
->>      * Set default coherent_dma_mask to 32 bit.  Drivers are expected to
->>      * setup the correct supported mask.
->>      */
->>     if (!dev->coherent_dma_mask)
->>         dev->coherent_dma_mask = DMA_BIT_MASK(32);
->>
->>     /*
->>      * Set it to coherent_dma_mask by default if the architecture
->>      * code has not set it.
->>      */
->>     if (!dev->dma_mask)
->>         dev->dma_mask = &dev->coherent_dma_mask;
->>
->>     ....
->>     /* gets dma-ranges into dma_addr and size */
->>     ....
->>
->>
->>     *dev->dma_mask = min((*dev->dma_mask),
->>                  DMA_BIT_MASK(ilog2(dma_addr + size)));
->>
->> So unless the DMA mask is set on the device before of_dma_configure()
->> is called, the min() statement will choose the 32 bits mask that has
->> been previously set. So IIUC in any case, the driver will need to call
->> dma_set_mask()
+On Tue, Feb 16, 2016 at 1:06 PM, Magnus Damm <magnus.damm@gmail.com> wrote:
+> From: Magnus Damm <damm+renesas@opensource.se>
 >
-> Yes, the driver definitely has to call dma_set_mask(), the property of
-> the parent bus is used to make that fail when the bus doesn't support
-> it.
-
-And that's where things seem to stop working: the driver's probe
-function is invoked by the platform bus, *after* of_dma_configure() is
-called. So unless I am missing something there is no way for the
-driver to set the DMA mask in such a way that of_dma_configure() can
-see it and do the right thing.
-
-In other words, most of the DMA mask logic in of_dma_configure()
-doesn't seem to have any effect (and a 32 bits mask will be set), at
-least on the platform bus.
-
->> Can I have your thoughts on this? Am I missing something?
+> This patch adds comments to describe the various ways card detection
+> may be implemented and when polling is needed. Also a fix is included
+> to prevent the MMC SPI driver from polling when a CD GPIO that supports
+> interrupts is specified using the gpios DT property (case 1).
 >
-> One point: I think the dma_set_mask() probably should be in the
-> generic part of the sdhci driver, not the tegra specific portion.
+> Without this patch the DT node below results in the following output:
+>
+>  spi_gpio: spi-gpio { /* SD2 @ CN12 */
+>          compatible = "spi-gpio";
+>          #address-cells = <1>;
+>          #size-cells = <0>;
+>          gpio-sck = <&gpio6 16 GPIO_ACTIVE_HIGH>;
+>          gpio-mosi = <&gpio6 17 GPIO_ACTIVE_HIGH>;
+>          gpio-miso = <&gpio6 18 GPIO_ACTIVE_HIGH>;
+>          num-chipselects = <1>;
+>          cs-gpios = <&gpio6 21 GPIO_ACTIVE_LOW>;
+>          status = "okay";
+>
+>          spi@0 {
+>                  compatible = "mmc-spi-slot";
+>                  reg = <0>;
+>                  voltage-ranges = <3200 3400>;
+>                  spi-max-frequency = <25000000>;
+>                  gpios = <&gpio6 22 GPIO_ACTIVE_LOW>;   /* CD */
+>          };
+>  };
+>
+>  # dmesg | grep mmc
+>  mmc_spi spi32766.0: SD/MMC host mmc0, no WP, no poweroff, cd polling
+>  mmc0: host does not support reading read-only switch, assuming write-enable
+>  mmc0: new SDHC card on SPI
+>  mmcblk0: mmc0:0000 SU04G 3.69 GiB
+>  mmcblk0: p1
+>
+>  With this patch applied the "cd polling" portion above disappears.
+>
+> Signed-off-by: Magnus Damm <damm+renesas@opensource.se>
+> ---
+>
+>  Developed on top of renesas-drivers-2016-02-09-v4.5-rc3 which
+>  simply put is v4.5-rc3 + selected linux-next trees.
+>
+>  drivers/mmc/host/mmc_spi.c |   14 ++++++++++++++
+>  1 file changed, 14 insertions(+)
+>
+> --- 0001/drivers/mmc/host/mmc_spi.c
+> +++ work/drivers/mmc/host/mmc_spi.c     2016-02-16 12:47:47.900513000 +0900
+> @@ -1437,11 +1437,25 @@ static int mmc_spi_probe(struct spi_devi
+>         if (status != 0)
+>                 goto fail_add_host;
+>
+> +       /* Card detection in case of DT is supported in several ways:
+> +        * 1) GPIO with interrupt support using "gpios" DT property.
+> +        * 2) GPIO without interrupt support using "gpios" DT property.
+> +        * 3) Interrupt only using "interrupt-parent/interrupts" DT properties.
+> +        * 4) Both "gpios" and "interrupt-parent/interrupts" DT properties.
+> +        * 5) Nothing specified.
+> +        * For case 2 and 5 above polling is required.
+> +        */
+>         if (host->pdata && host->pdata->flags & MMC_SPI_USE_CD_GPIO) {
+>                 status = mmc_gpio_request_cd(mmc, host->pdata->cd_gpio,
+>                                              host->pdata->cd_debounce);
+>                 if (status != 0)
+>                         goto fail_add_host;
+> +
+> +               /* The platform has a CD GPIO signal that may support
+> +                * interrupts, so let mmc_gpiod_request_cd_irq() decide
+> +                * if polling is needed or not.
+> +                */
+> +               mmc->caps &= ~MMC_CAP_NEEDS_POLL;
+>                 mmc_gpiod_request_cd_irq(mmc);
+>         }
+>
 
-Ok, but then how does the generic part of the driver knows which DMA
-mask applies to the device?
+Did anyone run into the same issue that CD polling is enabled even
+though the GPIO supports interrupt?
 
-> I also forget how this really needs to interact with swiotlb. I know
-> we have discussed this a couple of times, but the result currently
-> is lost to me.
-> Maybe the answer was that if swiotlb or iommu are enabled, then
-> dma_set_mask() should always succeed, but the mask should not actually
-> be updated?
+Perhaps it would be better to break this out into two patches - one
+for the fix and one for the documentation bits?
+
+Thanks,
+
+/ magnus
