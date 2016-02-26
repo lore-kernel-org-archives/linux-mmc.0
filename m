@@ -1,89 +1,45 @@
-From: Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>
-Subject: Re: [PATCH] mmc: sdhci-tegra: Set DMA mask
-Date: Fri, 26 Feb 2016 12:31:36 +0100
-Message-ID: <6561324.RvoTsUTSRM@wuerfel>
-References: <1456305079-27779-1-git-send-email-acourbot@nvidia.com> <29473125.UhEGU5khX5@wuerfel> <CAAVeFuLL-SP3_x2GC4UWcH4KEVora6r-e5xmORQdVfjcjfWDOw@mail.gmail.com>
+From: Chris Ball <chris@printf.net>
+Subject: Re: [PATCH v4] mmc-utils: Merge the lsmmc tool into mmc-utils
+Date: Fri, 26 Feb 2016 14:37:44 +0000
+Message-ID: <867fhredvr.fsf@void.printf.net>
+References: <89e1e3481efb45327716d76dd16a05ace046c083.1456205801.git.baolin.wang@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7Bit
-Return-path: <linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <CAAVeFuLL-SP3_x2GC4UWcH4KEVora6r-e5xmORQdVfjcjfWDOw-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-Sender: linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Alexandre Courbot <gnurou-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Cc: Alexandre Courbot <acourbot-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Stephen Warren <swarren-3lzwWm7+Weoh9ZMKESR00Q@public.gmane.org>, Thierry Reding <thierry.reding-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, linux-mmc <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Type: text/plain
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from void.printf.net ([192.34.86.38]:56718 "EHLO void.printf.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1754061AbcBZOpI (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 26 Feb 2016 09:45:08 -0500
+In-Reply-To: <89e1e3481efb45327716d76dd16a05ace046c083.1456205801.git.baolin.wang@linaro.org>
+	(Baolin Wang's message of "Tue, 23 Feb 2016 13:37:28 +0800")
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Baolin Wang <baolin.wang@linaro.org>
+Cc: linux-mmc@vger.kernel.org, ulf.hansson@linaro.org, broonie@kernel.org, linus.walleij@linaro.org, sebras@gmail.com
 
-On Friday 26 February 2016 16:24:34 Alexandre Courbot wrote:
-> On Thu, Feb 25, 2016 at 11:52 PM, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org> wrote:
-> >> Actually even if we specify a dma-ranges on the parent DT node, the
-> >> DMA range will still be limited to 32 bits because of the following
-> >> code in of_dma_configure():
-> >>
-> >>     /*
-> >>      * Set default coherent_dma_mask to 32 bit.  Drivers are expected to
-> >>      * setup the correct supported mask.
-> >>      */
-> >>     if (!dev->coherent_dma_mask)
-> >>         dev->coherent_dma_mask = DMA_BIT_MASK(32);
-> >>
-> >>     /*
-> >>      * Set it to coherent_dma_mask by default if the architecture
-> >>      * code has not set it.
-> >>      */
-> >>     if (!dev->dma_mask)
-> >>         dev->dma_mask = &dev->coherent_dma_mask;
-> >>
-> >>     ....
-> >>     /* gets dma-ranges into dma_addr and size */
-> >>     ....
-> >>
-> >>
-> >>     *dev->dma_mask = min((*dev->dma_mask),
-> >>                  DMA_BIT_MASK(ilog2(dma_addr + size)));
-> >>
-> >> So unless the DMA mask is set on the device before of_dma_configure()
-> >> is called, the min() statement will choose the 32 bits mask that has
-> >> been previously set. So IIUC in any case, the driver will need to call
-> >> dma_set_mask()
-> >
-> > Yes, the driver definitely has to call dma_set_mask(), the property of
-> > the parent bus is used to make that fail when the bus doesn't support
-> > it.
-> 
-> And that's where things seem to stop working: the driver's probe
-> function is invoked by the platform bus, *after* of_dma_configure() is
-> called. So unless I am missing something there is no way for the
-> driver to set the DMA mask in such a way that of_dma_configure() can
-> see it and do the right thing.
-> 
-> In other words, most of the DMA mask logic in of_dma_configure()
-> doesn't seem to have any effect (and a 32 bits mask will be set), at
-> least on the platform bus.
+Hi Baolin,
 
-That is correct: of_dma_configure has to set a 32-bit DMA mask
-because that is the default that we expect to see in Linux drivers.
+On Tue, Feb 23 2016, Baolin Wang wrote:
+> From: Sebastian Rasmussen <sebras@gmail.com>
+>
+> The lsmmc tools contains an extensive parser of the CID, CSD, SCR
+> registers from userspace. The utility works as-is and uses sysfs
+> to read the register values.
+>
+> The original code is created by Sebastian Rasmussen and still lives
+> in an attachment in the mail archive of linux-mmc. It need to be merged
+> into mmc-utils repository, which is convenient for testing MMC device
+> from userspace.
+>
+> Change since v3:
+>  - Remove the unused EXT_CSD parser in lsmmc.c file.
+>
+> Signed-off-by: Sebastian Rasmussen <sebras@gmail.com>
+> Signed-off-by: Chris Ball <chris@printf.net>
+> Signed-off-by: Baolin Wang <baolin.wang@linaro.org>
 
-A lot of drivers don't call dma_set_mask() at all, so this is
-the most reasonable value that typically works, unless the
-device is more limited, or you want the extra performance you
-get on devices that actually support a bigger mask.
+This is merged into mmc-utils now.  Thanks!
 
-> >> Can I have your thoughts on this? Am I missing something?
-> >
-> > One point: I think the dma_set_mask() probably should be in the
-> > generic part of the sdhci driver, not the tegra specific portion.
-> 
-> Ok, but then how does the generic part of the driver knows which DMA
-> mask applies to the device?
-
-If dma_set_mask() succeeds when passed a 64-bit mask, the driver
-can pass high addresses into dma_map_*() and put the result into
-the 64-bit DMA registers of the device. That is all the driver
-needs to know here.
-
-When the bus is more limited than the device, we either have
-an swiotlb/iommu that will use bounce buffers to map dma_map_* work
-anyway (using low DMA addresses for high memory), or we don't have
-an swiotlb and the dma_set_mask() operation has to fail.
-
-	Arnd
+- Chris.
+-- 
+Chris Ball   <http://printf.net/>
