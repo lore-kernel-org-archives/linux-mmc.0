@@ -1,62 +1,46 @@
-From: Thierry Reding <thierry.reding-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: Re: [PATCH] mmc: tegra: Disable UHS-I modes for tegra114
-Date: Mon, 29 Feb 2016 07:43:38 +0100
-Message-ID: <20160229064338.GC23745@ulmo>
-References: <1455806924-14967-1-git-send-email-jonathanh@nvidia.com>
- <1456479257-12147-1-git-send-email-jonathanh@nvidia.com>
-Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha256;
-	protocol="application/pgp-signature"; boundary="0vzXIDBeUiKkjNJl"
-Return-path: <linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <1456479257-12147-1-git-send-email-jonathanh-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
-Sender: linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Jon Hunter <jonathanh-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
-Cc: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Stephen Warren <swarren-3lzwWm7+Weoh9ZMKESR00Q@public.gmane.org>, Alexandre Courbot <gnurou-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Lucas Stach <dev-8ppwABl0HbeELgA04lAiVw@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-List-Id: linux-mmc@vger.kernel.org
-
-
---0vzXIDBeUiKkjNJl
+From: Martin Sperl <martin@sperl.org>
+Subject: Re: [PATCH 0/4] bcm2835 SDHOST controller
+Date: Mon, 29 Feb 2016 11:09:03 +0100
+Message-ID: <8DAA6B46-4AF3-4DB2-AFAF-E9749FA178E8@sperl.org>
+References: <1456527942-3045-1-git-send-email-eric@anholt.net>
+Mime-Version: 1.0 (Mac OS X Mail 8.2 \(2104\))
 Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from 212-186-180-163.dynamic.surfer.at ([212.186.180.163]:45215 "EHLO
+	cgate.sperl.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751986AbcB2KIz (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 29 Feb 2016 05:08:55 -0500
+In-Reply-To: <1456527942-3045-1-git-send-email-eric@anholt.net>
+Sender: linux-mmc-owner@vger.kernel.org
+List-Id: linux-mmc@vger.kernel.org
+To: Eric Anholt <eric@anholt.net>
+Cc: linux-rpi-kernel@lists.infradead.org, Mark Rutland <mark.rutland@arm.com>, devicetree@vger.kernel.org, Ian Campbell <ijc+devicetree@hellion.org.uk>, Florian Fainelli <f.fainelli@gmail.com>, Pawel Moll <pawel.moll@arm.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Rob Herring <robh+dt@kernel.org>, Kumar Gala <galak@codeaurora.org>, Ulf Hansson <ulf.hansson@linaro.org>, linux-arm-kernel@lists.infradead.org
 
-On Fri, Feb 26, 2016 at 09:34:17AM +0000, Jon Hunter wrote:
-> SD card support for Tegra114 started failing after commit a8e326a911d3
-> ("mmc: tegra: implement module external clock change") was merged. This
-> commit was part of a series to enable UHS-I modes for Tegra. To
-> workaround this problem for now, disable UHS-I modes for Tegra114 by
-> separating the soc data structures for Tegra114 and Tegra124 so that
-> UHS-I is still enabled for Tegra124 but not Tegra114.
->=20
-> Fixes: a8e326a911d3 ("mmc: tegra: implement module external clock change")
->=20
-> Signed-off-by: Jon Hunter <jonathanh-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
-> ---
->  drivers/mmc/host/sdhci-tegra.c | 12 +++++++++++-
->  1 file changed, 11 insertions(+), 1 deletion(-)
 
-Acked-by: Thierry Reding <treding-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
+> On 27.02.2016, at 00:05, Eric Anholt <eric@anholt.net> wrote:
+> 
+> Here's a series to enable the SDHOST controller.  It gives us better
+> performance than our old sdhci-bcm2835.c.  The downstream Raspberry Pi
+> kernel appears to be using this controller by default at this point.
+> 
+> I've tried to do some testing on it (mounting filesystem,
+> reading/writing files, speed tests), but I'm not sure what a good
+> testing regimen for storage drivers would be.
+> 
+> Eric Anholt (4):
+>  dt-bindings: Add binding for brcm,bcm2835-sdhost.
+>  mmc: bcm2835-sdhost: Add new driver for the internal SD controller.
+>  ARM: bcm2835: Include SDHOST in the device tree.
+>  ARM: bcm2835: Enable SDHOST by default.
 
---0vzXIDBeUiKkjNJl
-Content-Type: application/pgp-signature; name="signature.asc"
+This patchset misses defconfig changes to enable
+the new sdhost driver.
 
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2
+So we end up with a default kernel
+without the sdhost driver compiled in
+but with sdhost enabled in the default device-tree (patch4)
+resulting in a system that does not boot.
 
-iQIcBAABCAAGBQJW0+iaAAoJEN0jrNd/PrOh8wEP/0UGFZpcHnHh9ZIx8hgA4EBX
-smIwNkQb9Z89qo8BzBUQuh3jBgmwgvIzFPfL13gfc8929dQlaqsoS2dh1lXRR0xc
-T8e4edeiPeCF80C16lHvdTeizjAOJCg8XTjL6bH7/Rwa+Obb/V5fT8dJoZCYd45E
-DiW+IUle0dscXzZwMvGNs6VUC+s5vf8nNO7WcXwwyNZJbVI6B28IBwjt/ZdfDZap
-jEManeYRseuCJIaDvKh2RMC+qgo91xRXf17/+ReTCr6Mz+yAFt+hx05DI5HpAxGt
-6+95WNYIuVbWYCwN8nsi+V6YwNa8LMmuP6BPStp1FeLmSswLQYxOs83r2bXCdHbs
-ibHoBWEy58T01D+l7rRte667/qpXLhuqF2u+ZLRLCAODjMyb/dSjjxdgGC376u6c
-So4hgYCw/9L1VtD32L7wbNrA7N9HZMa7o5STCzPmSwBf+4k+AYiori+FgMx9AdlZ
-5lb4lTsRnu2V5TbuplZHbSkykn8DvnAS6G6UXtr8bE+UyFb8Go5tIyhoJDcJlmOK
-jRwH7bPOcBLpYQgJgXPl4Jb5oO06bS2+h7+AsKDemUfWiJe/VMd8GXFj8b+/768j
-PBW2BuUXJImgnmndi0FsiXjgho4iEHgw4Nb9SJYRB1jbo5XfD8BladZyZu2GooK3
-K9Mu139FBUZuM0yQu5Le
-=dSLp
------END PGP SIGNATURE-----
-
---0vzXIDBeUiKkjNJl--
+Thanks,
+	Martin
