@@ -1,41 +1,49 @@
-From: Lucas Stach <dev@lynxeye.de>
-Subject: [PATCH 1/2] mmc: tegra: properly disable card clock
-Date: Mon, 29 Feb 2016 21:56:24 +0100
-Message-ID: <1456779385-18996-1-git-send-email-dev@lynxeye.de>
+From: Shawn Lin <shawn.lin@kernel-upstream.org>
+Subject: Re: MMC broken in kernel 4.4
+Date: Tue, 1 Mar 2016 10:21:54 +0800
+Message-ID: <56D4FCC2.1020604@kernel-upstream.org>
+References: <hubert_tonneau/BJJ9BVJR/0G321OJ19@hubert-tonneau.storga.com>
+ <56D44249.7070200@kernel-upstream.org>
+ <hubert_tonneau/727MOBXX/0G32U5D@hubert-tonneau.storga.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from ns.lynxeye.de ([87.118.118.114]:60848 "EHLO lynxeye.de"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1750732AbcB2U4c (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 29 Feb 2016 15:56:32 -0500
+Received: from mr213138.mail.yeah.net ([223.252.213.138]:34567 "EHLO
+	mr213138.mail.yeah.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750760AbcCACWh (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 29 Feb 2016 21:22:37 -0500
+In-Reply-To: <hubert_tonneau/727MOBXX/0G32U5D@hubert-tonneau.storga.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>
-Cc: Stephen Warren <swarren@wwwdotorg.org>, Thierry Reding <thierry.reding@gmail.com>, Alexandre Courbot <gnurou@gmail.com>, Jon Hunter <jonathanh@nvidia.com>, linux-mmc@vger.kernel.org, linux-tegra@vger.kernel.org
+To: Hubert Tonneau <hubert.tonneau@fullpliant.org>
+Cc: linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>
 
-The new code to do the clock rate setting externally to the SDMMC
-module has a shortcut to not propagate changes with a 0 rate to
-the CAR by simply bailing out. This breaks proper cutting of the
-card clock. Fix it by directly calling the correct sdhci function.
++Ulf and Adrian
 
-Fixes: a8e326a911d3 "mmc: tegra: implement module external clock change"
-Signed-off-by: Lucas Stach <dev@lynxeye.de>
----
- drivers/mmc/host/sdhci-tegra.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+On 2016-3-1 3:23, Hubert Tonneau wrote:
+>
+> Shawn Lin wrote:
+> >
+> > On 2016/2/29 18:17, Hubert Tonneau wrote:
+> > > Hi everybody,
+> > >
+> > > MMC support seems to be broken on kernel 4.4.X as opposed to 
+> kernel 4.3.X on Lenovo Yoga 8 inch tablet.
+> >
+> > Do you have this part of code[0] in your repository?
+> >
+> > [0]: https://patchwork.kernel.org/patch/7323541/
+>
+> Yes. I tested with stock kernel 4.4.3 and the patch your are pointing 
+> is included in stock kernel 4.4.3
+>
 
-diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
-index 212d51f..46a6bd1 100644
---- a/drivers/mmc/host/sdhci-tegra.c
-+++ b/drivers/mmc/host/sdhci-tegra.c
-@@ -194,7 +194,7 @@ static void tegra_sdhci_set_clock(struct sdhci_host *host, unsigned int clock)
- 	unsigned long host_clk;
- 
- 	if (!clock)
--		return;
-+		return sdhci_set_clock(host, clock);;
- 
- 	host_clk = tegra_host->ddr_signaling ? clock * 2 : clock;
- 	clk_set_rate(pltfm_host->clk, host_clk);
--- 
-2.5.0
+Hubert,
+     Could you help revert this change to see if it's possible for your 
+Yoga to work again?
+
+> Regards,
+> Hubert Tonneau
+>
 
