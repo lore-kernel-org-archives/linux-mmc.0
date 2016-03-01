@@ -1,51 +1,62 @@
-From: Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>
-Subject: Re: [PATCH v2 2/2] mmc: sdhci-tegra: Specify valid DMA mask
-Date: Tue, 01 Mar 2016 22:34:02 +0100
-Message-ID: <10092864.HLRl1VM3vC@wuerfel>
-References: <1456806764-16467-1-git-send-email-acourbot@nvidia.com> <1456806764-16467-3-git-send-email-acourbot@nvidia.com>
+From: Laison Computech Inc <7sales@laiisoncomputech.com>
+Subject: CISCO AND AVAYA IP Phones
+Date: Wed, 02 Mar 2016 03:10:35 +0700
+Message-ID: <20160301210942.5F83E574BB8@srv-mta.gcmillenium.com.br>
+Reply-To: sales@laiisoncomputech.com
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7Bit
-Return-path: <linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1456806764-16467-3-git-send-email-acourbot-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
-Sender: linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Alexandre Courbot <acourbot-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
-Cc: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Stephen Warren <swarren-3lzwWm7+Weoh9ZMKESR00Q@public.gmane.org>, Thierry Reding <thierry.reding-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, gnurou-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org
+Content-Type: text/plain; charset=iso-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from srv-mta.gcmillenium.com.br ([177.125.218.132]:51815 "EHLO
+	srv-mta.gcmillenium.com.br" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751350AbcCAXRh convert rfc822-to-8bit
+	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 1 Mar 2016 18:17:37 -0500
+Content-Description: Mail message body
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Recipients <7sales@laiisoncomputech.com>
 
-On Tuesday 01 March 2016 13:32:44 Alexandre Courbot wrote:
-> On T210, the sdhci controller can address more than 32 bits of address
-> space. Failing to express this fact results in the use of bounce
-> buffers and affects performance.
-> 
-> Signed-off-by: Alexandre Courbot <acourbot-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
+Hi,
 
-I don't get this one. Why don't you just set the (SDHCI_USE_SDMA | SDHCI_USE_ADMA)
-flags that are checked in the first patch?
+Clean tested working pulls CPUs and QTYs in stock.
 
-> @@ -289,6 +291,7 @@ static const struct sdhci_tegra_soc_data soc_data_tegra20 = {
->  	.pdata = &sdhci_tegra20_pdata,
->  	.nvquirks = NVQUIRK_FORCE_SDHCI_SPEC_200 |
->  		    NVQUIRK_ENABLE_BLOCK_GAP_DET,
-> +	.dma_mask = DMA_BIT_MASK(32),
->  };
+115 X X5650
+65 X E5410
+75 X X5660
+145 X E5530
+100 X E5645
+40 X X5680
+75 X X5690
 
-Can you describe what the specific bug is in these controllers? Do you mean they
-support SDHCI_USE_SDMA or SDHCI_USE_ADMA in theory but you still have to prevent
-them from using high addresses?
+Brand new sealed IP phones and QTYs in stock.
 
-> @@ -353,6 +358,7 @@ static const struct sdhci_pltfm_data sdhci_tegra210_pdata = {
->  
->  static const struct sdhci_tegra_soc_data soc_data_tegra210 = {
->  	.pdata = &sdhci_tegra210_pdata,
-> +	.dma_mask = DMA_BIT_MASK(34),
->  };
->  
->  static const struct of_device_id sdhci_tegra_dt_match[] = {
+55 x CP-7937G
+77 x CP-7942G
+54 x CP-7945G
+75 x CP-7962G
+=2E.....
+45 x Avaya 9630
+65 x Avaya 9641
+55 x Avaya 9640=20
 
-This one still completely weirds me out. What kind of odd limitation does
-the controller have in Tegra 210?
+USED IT HARDWARE FROM:
 
-Are there actually any machines with more than 16GB?
+=46UJITSU       IBM         SUN        HP
+QUANTUM   DELL       HDS        STK
+NETAPP      SGI         Oracle      EMC=B2
 
-	Arnd
+3Com, ADVA, Alcatel, Brocade, Cisco,
+Cabletron, Enterasys, Extreme Networks,
+Huawei, Marconi, Nortel, Qlogic, Avaya
+
+Let me know if you're interested. We are very open to offers and willin=
+g to work with you to make sure that we have a deal.
+
+Sincerely
+Barbara Johnson
+Laison Computech Inc
+Tel: +1-657-205-7860
+=46ax: +1-347-214-0478
+Email: sales@laiisoncomputech.com
+Web: www.laisoncomputech.com
