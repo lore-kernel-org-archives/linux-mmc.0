@@ -1,415 +1,584 @@
-From: Avi Shchislowski <Avi.Shchislowski@sandisk.com>
-Subject: [PATCH 1/1 v3] mmc_utils: add ffu support
-Date: Tue, 1 Mar 2016 09:04:54 +0000
-Message-ID: <SN1PR02MB138923B8D2F1819665213E4283BB0@SN1PR02MB1389.namprd02.prod.outlook.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH v2 3/3] mmc: pwrseq: convert to proper platform device
+Date: Tue, 1 Mar 2016 10:51:38 +0100
+Message-ID: <CAPDyKFp+LhGfGF5vW85Tk7WCvPU6ovktsunE+8fN+NkUYbGn8Q@mail.gmail.com>
+References: <1453975315-13424-1-git-send-email-srinivas.kandagatla@linaro.org>
+	<1453975435-13564-1-git-send-email-srinivas.kandagatla@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-bn1bon0098.outbound.protection.outlook.com ([157.56.111.98]:36688
-	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1750933AbcCAJhw convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 1 Mar 2016 04:37:52 -0500
-Content-Language: en-US
+Received: from mail-wm0-f45.google.com ([74.125.82.45]:34374 "EHLO
+	mail-wm0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750933AbcCAJvk (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 1 Mar 2016 04:51:40 -0500
+Received: by mail-wm0-f45.google.com with SMTP id p65so27196501wmp.1
+        for <linux-mmc@vger.kernel.org>; Tue, 01 Mar 2016 01:51:39 -0800 (PST)
+In-Reply-To: <1453975435-13564-1-git-send-email-srinivas.kandagatla@linaro.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Alex Lemberg <Alex.Lemberg@sandisk.com>, Yaniv Agman <Yaniv.Agman@sandisk.com>
+To: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Martin Fuzzey <mfuzzey@parkeon.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
 
-Adding support for field firmware update over multiple command ioctl.
-As multiple command ioctl is supported only from kernel 4.4, this patch should be used against kernel 4.4 and above.
+On 28 January 2016 at 11:03, Srinivas Kandagatla
+<srinivas.kandagatla@linaro.org> wrote:
+> simple-pwrseq and emmc-pwrseq drivers rely on platform_device
+> structure from of_find_device_by_node(), this works mostly. But, as there
+> is no driver associated with this devices, cases like default/init pinctrl
+> setup would never be performed by pwrseq. This becomes problem when the
+> gpios used in pwrseq require pinctrl setup.
+>
+> Currently most of the common pinctrl setup is done in
+> drivers/base/pinctrl.c by pinctrl_bind_pins().
+>
+> There are two ways to solve this issue on either convert pwrseq drivers
+> to a proper platform drivers or copy the exact code from
+> pcintrl_bind_pins(). I prefer converting pwrseq to proper drivers so that
+> other cases like setting up clks/parents from dt would also be possible.
+>
+> Signed-off-by: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
+> ---
+>  drivers/mmc/Kconfig              |   2 +
+>  drivers/mmc/core/Kconfig         |   7 +++
+>  drivers/mmc/core/Makefile        |   4 +-
+>  drivers/mmc/core/pwrseq.c        | 115 +++++++++++++++++++++------------------
+>  drivers/mmc/core/pwrseq.h        |  19 +++++--
+>  drivers/mmc/core/pwrseq_emmc.c   |  81 +++++++++++++++++++--------
+>  drivers/mmc/core/pwrseq_simple.c |  85 ++++++++++++++++++++---------
+>  7 files changed, 207 insertions(+), 106 deletions(-)
+>
+> diff --git a/drivers/mmc/Kconfig b/drivers/mmc/Kconfig
+> index f2eeb38..7b2412a 100644
+> --- a/drivers/mmc/Kconfig
+> +++ b/drivers/mmc/Kconfig
+> @@ -5,6 +5,8 @@
+>  menuconfig MMC
+>         tristate "MMC/SD/SDIO card support"
+>         depends on HAS_IOMEM
+> +       select PWRSEQ_SIMPLE if OF
+> +       select PWRSEQ_EMMC if OF
 
-Known issues:
-- There is no support for Multiple Block write commands (CMD25) in existing 
-   IOCTL implementation
-- In case MODE_OPERATION_CODES field is not supported by the device
-   manual reset of the device/platform is required.
-   The reset issue discussed in another email thread - " [RFC 0/6] mmc: Field Firmware Update"
+In general I don't like "select" and for this case I think there is a
+better way. See below.
 
-Change since v2:
-- add MMC_IOC_MULTI_CMD define to avoid compile error 
+>         help
+>           This selects MultiMediaCard, Secure Digital and Secure
+>           Digital I/O support.
+> diff --git a/drivers/mmc/core/Kconfig b/drivers/mmc/core/Kconfig
+> index 4c33d76..b26f756 100644
+> --- a/drivers/mmc/core/Kconfig
+> +++ b/drivers/mmc/core/Kconfig
+> @@ -1,3 +1,10 @@
+>  #
+>  # MMC core configuration
+>  #
+> +config PWRSEQ_EMMC
+> +       tristate "PwrSeq EMMC"
 
-Change since v1:
-- modified copyright header
+I suggest change this to:
+bool "HW reset support for eMMC"
 
-Signed-off-by: Yaniv Agman <yaniv.agman@sandisk.com>
-Signed-off-by: Avi Shchislowski <avi.shchislowski@sandisk.com>
+> +       depends on OF
 
-diff --git a/mmc.c b/mmc.c
-index a13d9ae..2ac98ae 100644
---- a/mmc.c
-+++ b/mmc.c
-@@ -13,6 +13,9 @@
-  * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
-  * Boston, MA 021110-1307, USA.
-  *
-+ * Modified to add field firmware update support,
-+ * those modifications are Copyright (c) 2016 SanDisk Corp.
-+ *
-  * (This code is based on btrfs-progs/btrfs.c.)
-  */
- 
-@@ -175,6 +178,11 @@ static struct Command commands[] = {
- 		"NOTE! The cache is an optional feature on devices >= eMMC4.5.",
- 	  NULL
- 	},
-+	{ do_ffu, -2,
-+	  "ffu", "<image name> <device>\n"
-+		"Run Field Firmware Update with <image name> on <device>.\n",
-+	  NULL
-+	},
- 	{ 0, 0, 0, 0 }
- };
- 
-diff --git a/mmc.h b/mmc.h
-index b7063fb..38b215f 100644
---- a/mmc.h
-+++ b/mmc.h
-@@ -12,6 +12,9 @@
-  * License along with this program; if not, write to the
-  * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
-  * Boston, MA 021110-1307, USA.
-+ *
-+ * Modified to add field firmware update support,
-+ * those modifications are Copyright (c) 2016 SanDisk Corp.
-  */
- 
- #include <asm-generic/int-ll64.h>
-@@ -34,6 +37,7 @@
- #define R1_SWITCH_ERROR   (1 << 7)  /* sx, c */
- #define MMC_SWITCH_MODE_WRITE_BYTE	0x03	/* Set target to value */
- #define MMC_READ_MULTIPLE_BLOCK  18   /* adtc [31:0] data addr   R1  */
-+#define MMC_WRITE_BLOCK		24	/* adtc [31:0] data addr	R1  */
- #define MMC_WRITE_MULTIPLE_BLOCK 25   /* adtc                    R1  */
- 
- /*
-@@ -42,6 +46,17 @@
- #define EXT_CSD_S_CMD_SET		504
- #define EXT_CSD_HPI_FEATURE		503
- #define EXT_CSD_BKOPS_SUPPORT		502	/* RO */
-+#define EXT_CSD_SUPPORTED_MODES		493	/* RO */
-+#define EXT_CSD_FFU_FEATURES		492	/* RO */
-+#define EXT_CSD_FFU_ARG_3		490	/* RO */
-+#define EXT_CSD_FFU_ARG_2		489	/* RO */
-+#define EXT_CSD_FFU_ARG_1		488	/* RO */
-+#define EXT_CSD_FFU_ARG_0		487	/* RO */
-+#define EXT_CSD_NUM_OF_FW_SEC_PROG_3	305	/* RO */
-+#define EXT_CSD_NUM_OF_FW_SEC_PROG_2	304	/* RO */
-+#define EXT_CSD_NUM_OF_FW_SEC_PROG_1	303	/* RO */
-+#define EXT_CSD_NUM_OF_FW_SEC_PROG_0	302	/* RO */
-+#define EXT_CSD_FIRMWARE_VERSION	254	/* RO */
- #define EXT_CSD_CACHE_SIZE_3		252
- #define EXT_CSD_CACHE_SIZE_2		251
- #define EXT_CSD_CACHE_SIZE_1		250
-@@ -58,6 +73,7 @@
- #define EXT_CSD_BOOT_BUS_CONDITIONS	177
- #define EXT_CSD_ERASE_GROUP_DEF		175
- #define EXT_CSD_BOOT_WP			173
-+#define EXT_CSD_FW_CONFIG		169	/* R/W */
- #define EXT_CSD_WR_REL_SET		167
- #define EXT_CSD_WR_REL_PARAM		166
- #define EXT_CSD_SANITIZE_START		165
-@@ -94,6 +110,9 @@
- #define EXT_CSD_EXT_PARTITIONS_ATTRIBUTE_1	53
- #define EXT_CSD_EXT_PARTITIONS_ATTRIBUTE_0	52
- #define EXT_CSD_CACHE_CTRL		33
-+#define EXT_CSD_MODE_CONFIG		30
-+#define EXT_CSD_MODE_OPERATION_CODES	29	/* W */
-+#define EXT_CSD_FFU_STATUS		26	/* R */
- 
- /*
-  * WR_REL_PARAM field definitions
-@@ -109,6 +128,11 @@
- /*
-  * EXT_CSD field definitions
-  */
-+#define EXT_CSD_FFU_INSTALL		(0x01)
-+#define EXT_CSD_FFU_MODE		(0x01)
-+#define EXT_CSD_NORMAL_MODE		(0x00)
-+#define EXT_CSD_FFU			(1<<0)
-+#define EXT_CSD_UPDATE_DISABLE		(1<<0)
- #define EXT_CSD_HPI_SUPP		(1<<0)
- #define EXT_CSD_HPI_IMPL		(1<<1)
- #define EXT_CSD_CMD_SET_NORMAL		(1<<0)
-diff --git a/mmc_cmds.c b/mmc_cmds.c
-index 77446b4..da3c5ce 100644
---- a/mmc_cmds.c
-+++ b/mmc_cmds.c
-@@ -12,6 +12,9 @@
-  * License along with this program; if not, write to the
-  * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
-  * Boston, MA 021110-1307, USA.
-+ *
-+ * Modified to add field firmware update support,
-+ * those modifications are Copyright (c) 2016 SanDisk Corp.
-  */
- 
- #include <stdio.h>
-@@ -1017,6 +1020,9 @@ int do_read_extcsd(int nargs, char **argv)
- 	ext_csd_rev = ext_csd[EXT_CSD_REV];
- 
- 	switch (ext_csd_rev) {
-+	case 8:
-+		str = "5.1";
-+		break;
- 	case 7:
- 		str = "5.0";
- 		break;
-@@ -1430,6 +1436,10 @@ int do_read_extcsd(int nargs, char **argv)
- 		/*Reserved [31:0] */
- 	}
- 
-+	if (ext_csd_rev >= 7) {
-+		printf("eMMC Firmware Version: %s\n",
-+			(char*)&ext_csd[EXT_CSD_FIRMWARE_VERSION]);
-+	}
- out_free:
- 	return ret;
- }
-@@ -2032,3 +2042,224 @@ int do_cache_dis(int nargs, char **argv)
- {
- 	return do_cache_ctrl(0, nargs, argv);
- }
-+
-+int do_ffu(int nargs, char **argv)
-+{
-+#ifndef MMC_IOC_MULTI_CMD
-+	fprintf(stderr, "mmc-utils has been compiled without MMC_IOC_MULTI_CMD"
-+			" support, needed by FFU.\n");
-+	exit(1);
-+#else
-+	int dev_fd, img_fd;
-+	int sect_done = 0, retry = 3, ret = -EINVAL;
-+	unsigned int sect_size;
-+	__u8 ext_csd[512];
-+	__u8 *buf;
-+	__u32 arg;
-+	off_t fw_size;
-+	ssize_t chunk_size;
-+	char *device;
-+	struct mmc_ioc_multi_cmd *multi_cmd;
-+
-+	CHECK(nargs != 3, "Usage: ffu <image name> </path/to/mmcblkX> \n",
-+			exit(1));
-+
-+	device = argv[2];
-+	dev_fd = open(device, O_RDWR);
-+	if (dev_fd < 0) {
-+		perror("device open failed");
-+		exit(1);
-+	}
-+	img_fd = open(argv[1], O_RDONLY);
-+	if (img_fd < 0) {
-+		perror("image open failed");
-+		close(dev_fd);
-+		exit(1);
-+	}
-+
-+	buf = malloc(512);
-+	multi_cmd = calloc(1, sizeof(struct mmc_ioc_multi_cmd) +
-+				3 * sizeof(struct mmc_ioc_cmd));
-+	if (!buf || !multi_cmd) {
-+		perror("failed to allocate memory");
-+		goto out;
-+	}
-+
-+	ret = read_extcsd(dev_fd, ext_csd);
-+	if (ret) {
-+		fprintf(stderr, "Could not read EXT_CSD from %s\n", device);
-+		goto out;
-+	}
-+
-+	if (ext_csd[EXT_CSD_REV] < EXT_CSD_REV_V5_0) {
-+		fprintf(stderr,
-+			"The FFU feature is only available on devices >= "
-+			"MMC 5.0, not supported in %s\n", device);
-+		goto out;
-+	}
-+
-+	if (!(ext_csd[EXT_CSD_SUPPORTED_MODES] & EXT_CSD_FFU)) {
-+		fprintf(stderr, "FFU is not supported in %s\n", device);
-+		goto out;
-+	}
-+
-+	if (ext_csd[EXT_CSD_FW_CONFIG] & EXT_CSD_UPDATE_DISABLE) {
-+		fprintf(stderr, "Firmware update was disabled in %s\n", device);
-+		goto out;
-+	}
-+
-+	fw_size = lseek(img_fd, 0, SEEK_END);
-+
-+	if (fw_size == 0) {
-+		fprintf(stderr, "Firmware image is empty");
-+		goto out;
-+	}
-+
-+	sect_size = (ext_csd[EXT_CSD_DATA_SECTOR_SIZE] == 0) ? 512 : 4096;
-+	if (fw_size % sect_size) {
-+		fprintf(stderr, "Firmware data size (%jd) is not aligned!\n", (intmax_t)fw_size);
-+		goto out;
-+	}
-+
-+	/* set CMD ARG */
-+	arg = ext_csd[EXT_CSD_FFU_ARG_0] |
-+		ext_csd[EXT_CSD_FFU_ARG_1] << 8 |
-+		ext_csd[EXT_CSD_FFU_ARG_2] << 16 |
-+		ext_csd[EXT_CSD_FFU_ARG_3] << 24;
-+
-+	/* prepare multi_cmd to be sent */
-+	multi_cmd->num_of_cmds = 3;
-+
-+	/* put device into ffu mode */
-+	multi_cmd->cmds[0].opcode = MMC_SWITCH;
-+	multi_cmd->cmds[0].arg = (MMC_SWITCH_MODE_WRITE_BYTE << 24) |
-+			(EXT_CSD_MODE_CONFIG << 16) |
-+			(EXT_CSD_FFU_MODE << 8) |
-+			EXT_CSD_CMD_SET_NORMAL;
-+	multi_cmd->cmds[0].flags = MMC_RSP_SPI_R1B | MMC_RSP_R1B | MMC_CMD_AC;
-+	multi_cmd->cmds[0].write_flag = 1;
-+
-+	/* send image chunk */
-+	multi_cmd->cmds[1].opcode = MMC_WRITE_BLOCK;
-+	multi_cmd->cmds[1].blksz = sect_size;
-+	multi_cmd->cmds[1].blocks = 1;
-+	multi_cmd->cmds[1].arg = arg;
-+	multi_cmd->cmds[1].flags = MMC_RSP_SPI_R1 | MMC_RSP_R1 | MMC_CMD_ADTC;
-+	multi_cmd->cmds[1].write_flag = 1;
-+	mmc_ioc_cmd_set_data(multi_cmd->cmds[1], buf);
-+
-+	/* return device into normal mode */
-+	multi_cmd->cmds[2].opcode = MMC_SWITCH;
-+	multi_cmd->cmds[2].arg = (MMC_SWITCH_MODE_WRITE_BYTE << 24) |
-+			(EXT_CSD_MODE_CONFIG << 16) |
-+			(EXT_CSD_NORMAL_MODE << 8) |
-+			EXT_CSD_CMD_SET_NORMAL;
-+	multi_cmd->cmds[2].flags = MMC_RSP_SPI_R1B | MMC_RSP_R1B | MMC_CMD_AC;
-+	multi_cmd->cmds[2].write_flag = 1;
-+
-+do_retry:
-+	/* read firmware chunk */
-+	lseek(img_fd, 0, SEEK_SET);
-+	chunk_size = read(img_fd, buf, 512);
-+
-+	while (chunk_size > 0) {
-+		/* send ioctl with multi-cmd */
-+		ret = ioctl(dev_fd, MMC_IOC_MULTI_CMD, multi_cmd);
-+
-+		if (ret) {
-+			perror("Multi-cmd ioctl");
-+			/* In case multi-cmd ioctl failed before exiting from ffu mode */
-+			ioctl(dev_fd, MMC_IOC_CMD, &multi_cmd->cmds[2]);
-+			goto out;
-+		}
-+
-+		ret = read_extcsd(dev_fd, ext_csd);
-+		if (ret) {
-+			fprintf(stderr, "Could not read EXT_CSD from %s\n", device);
-+			goto out;
-+		}
-+
-+		/* Test if we need to restart the download */
-+		sect_done = ext_csd[EXT_CSD_NUM_OF_FW_SEC_PROG_0] |
-+				ext_csd[EXT_CSD_NUM_OF_FW_SEC_PROG_1] << 8 |
-+				ext_csd[EXT_CSD_NUM_OF_FW_SEC_PROG_2] << 16 |
-+				ext_csd[EXT_CSD_NUM_OF_FW_SEC_PROG_3] << 24;
-+		/* By spec, host should re-start download from the first sector if sect_done is 0 */
-+		if (sect_done == 0) {
-+			if (retry > 0) {
-+				retry--;
-+				fprintf(stderr, "Programming failed. Retrying... (%d)\n", retry);
-+				goto do_retry;
-+			}
-+			fprintf(stderr, "Programming failed! Aborting...\n");
-+			goto out;
-+		} else {
-+			fprintf(stderr, "Programmed %d/%jd bytes\r", sect_done * sect_size, (intmax_t)fw_size);
-+		}
-+
-+		/* read the next firmware chunk (if any) */
-+		chunk_size = read(img_fd, buf, 512);
-+	}
-+
-+	if ((sect_done * sect_size) == fw_size) {
-+		fprintf(stderr, "Programmed %jd/%jd bytes\n", (intmax_t)fw_size, (intmax_t)fw_size);
-+		fprintf(stderr, "Programming finished with status %d \n", ret);
-+	}
-+	else {
-+		fprintf(stderr, "FW size and number of sectors written mismatch. Status return %d\n", ret);
-+		goto out;
-+	}
-+
-+	/* check mode operation for ffu install*/
-+	if (!ext_csd[EXT_CSD_FFU_FEATURES]) {
-+		fprintf(stderr, "Please reboot to complete firmware installation on %s\n", device);
-+	} else {
-+		fprintf(stderr, "Installing firmware on %s...\n", device);
-+		/* Re-enter ffu mode and install the firmware */
-+		multi_cmd->num_of_cmds = 2;
-+
-+		/* set ext_csd to install mode */
-+		multi_cmd->cmds[1].opcode = MMC_SWITCH;
-+		multi_cmd->cmds[1].blksz = 0;
-+		multi_cmd->cmds[1].blocks = 0;
-+		multi_cmd->cmds[1].arg = (MMC_SWITCH_MODE_WRITE_BYTE << 24) |
-+				(EXT_CSD_MODE_OPERATION_CODES << 16) |
-+				(EXT_CSD_FFU_INSTALL << 8) |
-+				EXT_CSD_CMD_SET_NORMAL;
-+		multi_cmd->cmds[1].flags = MMC_RSP_SPI_R1B | MMC_RSP_R1B | MMC_CMD_AC;
-+		multi_cmd->cmds[1].write_flag = 1;
-+
-+		/* send ioctl with multi-cmd */
-+		ret = ioctl(dev_fd, MMC_IOC_MULTI_CMD, multi_cmd);
-+
-+		if (ret) {
-+			perror("Multi-cmd ioctl failed setting install mode");
-+			/* In case multi-cmd ioctl failed before exiting from ffu mode */
-+			ioctl(dev_fd, MMC_IOC_CMD, &multi_cmd->cmds[2]);
-+			goto out;
-+		}
-+
-+		ret = read_extcsd(dev_fd, ext_csd);
-+		if (ret) {
-+			fprintf(stderr, "Could not read EXT_CSD from %s\n", device);
-+			goto out;
-+		}
-+
-+		/* return status */
-+		ret = ext_csd[EXT_CSD_FFU_STATUS];
-+		if (ret) {
-+			fprintf(stderr, "%s: error %d during FFU install:\n", device, ret);
-+			goto out;
-+		} else {
-+			fprintf(stderr, "FFU finished successfully\n");
-+		}
-+	}
-+
-+out:
-+	free(buf);
-+	free(multi_cmd);
-+	close(img_fd);
-+	close(dev_fd);
-+	return ret;
-+#endif
-+}
-diff --git a/mmc_cmds.h b/mmc_cmds.h
-index 75d8f8c..54abf0f 100644
---- a/mmc_cmds.h
-+++ b/mmc_cmds.h
-@@ -12,6 +12,9 @@
-  * License along with this program; if not, write to the
-  * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
-  * Boston, MA 021110-1307, USA.
-+ *
-+ * Modified to add field firmware update support,
-+ * those modifications are Copyright (c) 2016 SanDisk Corp.
-  */
- 
- /* mmc_cmds.c */
-@@ -36,3 +39,4 @@ int do_rpmb_read_block(int nargs, char **argv);
- int do_rpmb_write_block(int nargs, char **argv);
- int do_cache_en(int nargs, char **argv);
- int do_cache_dis(int nargs, char **argv);
-+int do_ffu(int nargs, char **argv);
--- 
-1.9.1
+Add:
+default y
+
+Also I think some brief "help" text, describing the feature would be nice.
+
+> +
+> +config PWRSEQ_SIMPLE
+> +       tristate "PwrSeq Simple"
+> +       depends on OF
+
+Similar comments as above for PWRSEQ_EMMC.
+
+> diff --git a/drivers/mmc/core/Makefile b/drivers/mmc/core/Makefile
+> index 2c25138..f007151 100644
+> --- a/drivers/mmc/core/Makefile
+> +++ b/drivers/mmc/core/Makefile
+> @@ -8,5 +8,7 @@ mmc_core-y                      := core.o bus.o host.o \
+>                                    sdio.o sdio_ops.o sdio_bus.o \
+>                                    sdio_cis.o sdio_io.o sdio_irq.o \
+>                                    quirks.o slot-gpio.o
+> -mmc_core-$(CONFIG_OF)          += pwrseq.o pwrseq_simple.o pwrseq_emmc.o
+> +mmc_core-$(CONFIG_OF)          += pwrseq.o
+> +obj-$(CONFIG_PWRSEQ_SIMPLE)    += pwrseq_simple.o
+> +obj-$(CONFIG_PWRSEQ_EMMC)      += pwrseq_emmc.o
+>  mmc_core-$(CONFIG_DEBUG_FS)    += debugfs.o
+> diff --git a/drivers/mmc/core/pwrseq.c b/drivers/mmc/core/pwrseq.c
+> index 4c1d175..64c7c79 100644
+> --- a/drivers/mmc/core/pwrseq.c
+> +++ b/drivers/mmc/core/pwrseq.c
+> @@ -8,80 +8,64 @@
+>   *  MMC power sequence management
+>   */
+>  #include <linux/kernel.h>
+> -#include <linux/platform_device.h>
+>  #include <linux/err.h>
+> +#include <linux/module.h>
+>  #include <linux/of.h>
+> -#include <linux/of_platform.h>
+>
+>  #include <linux/mmc/host.h>
+>
+>  #include "pwrseq.h"
+>
+> -struct mmc_pwrseq_match {
+> -       const char *compatible;
+> -       struct mmc_pwrseq *(*alloc)(struct mmc_host *host, struct device *dev);
+> -};
+> -
+> -static struct mmc_pwrseq_match pwrseq_match[] = {
+> -       {
+> -               .compatible = "mmc-pwrseq-simple",
+> -               .alloc = mmc_pwrseq_simple_alloc,
+> -       }, {
+> -               .compatible = "mmc-pwrseq-emmc",
+> -               .alloc = mmc_pwrseq_emmc_alloc,
+> -       },
+> -};
+> -
+> -static struct mmc_pwrseq_match *mmc_pwrseq_find(struct device_node *np)
+> +static DEFINE_MUTEX(pwrseq_list_mutex);
+> +static LIST_HEAD(pwrseq_list);
+> +
+> +static struct mmc_pwrseq *of_find_mmc_pwrseq(struct mmc_host *host)
+>  {
+> -       struct mmc_pwrseq_match *match = ERR_PTR(-ENODEV);
+> -       int i;
+> +       struct device_node *np;
+> +       struct mmc_pwrseq *p, *pwrseq = NULL;
+>
+> -       for (i = 0; i < ARRAY_SIZE(pwrseq_match); i++) {
+> -               if (of_device_is_compatible(np, pwrseq_match[i].compatible)) {
+> -                       match = &pwrseq_match[i];
+> +       np = of_parse_phandle(host->parent->of_node, "mmc-pwrseq", 0);
+> +       if (!np)
+> +               return NULL;
+> +
+> +       mutex_lock(&pwrseq_list_mutex);
+> +       list_for_each_entry(p, &pwrseq_list, list) {
+> +               if (p->dev->of_node == np) {
+> +                       pwrseq = p;
+>                         break;
+>                 }
+>         }
+>
+> -       return match;
+> +       of_node_put(np);
+> +       mutex_unlock(&pwrseq_list_mutex);
+> +
+> +       return pwrseq ? : ERR_PTR(-EPROBE_DEFER);
+>  }
+>
+>  int mmc_pwrseq_alloc(struct mmc_host *host)
+>  {
+> -       struct platform_device *pdev;
+> -       struct device_node *np;
+> -       struct mmc_pwrseq_match *match;
+>         struct mmc_pwrseq *pwrseq;
+>         int ret = 0;
+>
+> -       np = of_parse_phandle(host->parent->of_node, "mmc-pwrseq", 0);
+> -       if (!np)
+> -               return 0;
+> +       pwrseq = of_find_mmc_pwrseq(host);
+>
+
+I think you can remove another empty line here.
+
+> -       pdev = of_find_device_by_node(np);
+> -       if (!pdev) {
+> -               ret = -ENODEV;
+> -               goto err;
+> -       }
+> +       if (IS_ERR_OR_NULL(pwrseq))
+> +               return PTR_ERR(pwrseq);
+
+You need "return PTR_ERR_OR_ZERO(pwrseq)", as pwrse is what you want here.
+
+>
+> -       match = mmc_pwrseq_find(np);
+> -       if (IS_ERR(match)) {
+> -               ret = PTR_ERR(match);
+> -               goto err;
+> -       }
+> +       if (pwrseq->ops && pwrseq->ops->alloc) {
+> +               host->pwrseq = pwrseq;
+> +               ret = pwrseq->ops->alloc(host);
+>
+> -       pwrseq = match->alloc(host, &pdev->dev);
+> -       if (IS_ERR(pwrseq)) {
+> -               ret = PTR_ERR(pwrseq);
+> -               goto err;
+> +               if (IS_ERR_VALUE(ret)) {
+> +                       host->pwrseq = NULL;
+> +                       goto err;
+> +               }
+> +               try_module_get(pwrseq->owner);
+>         }
+>
+> -       host->pwrseq = pwrseq;
+>         dev_info(host->parent, "allocated mmc-pwrseq\n");
+>
+>  err:
+> -       of_node_put(np);
+>         return ret;
+>  }
+>
+> @@ -89,7 +73,7 @@ void mmc_pwrseq_pre_power_on(struct mmc_host *host)
+>  {
+>         struct mmc_pwrseq *pwrseq = host->pwrseq;
+>
+> -       if (pwrseq && pwrseq->ops && pwrseq->ops->pre_power_on)
+> +       if (pwrseq && pwrseq->ops->pre_power_on)
+>                 pwrseq->ops->pre_power_on(host);
+>  }
+>
+> @@ -97,7 +81,7 @@ void mmc_pwrseq_post_power_on(struct mmc_host *host)
+>  {
+>         struct mmc_pwrseq *pwrseq = host->pwrseq;
+>
+> -       if (pwrseq && pwrseq->ops && pwrseq->ops->post_power_on)
+> +       if (pwrseq && pwrseq->ops->post_power_on)
+>                 pwrseq->ops->post_power_on(host);
+>  }
+>
+> @@ -105,7 +89,7 @@ void mmc_pwrseq_power_off(struct mmc_host *host)
+>  {
+>         struct mmc_pwrseq *pwrseq = host->pwrseq;
+>
+> -       if (pwrseq && pwrseq->ops && pwrseq->ops->power_off)
+> +       if (pwrseq && pwrseq->ops->power_off)
+>                 pwrseq->ops->power_off(host);
+>  }
+>
+> @@ -113,8 +97,35 @@ void mmc_pwrseq_free(struct mmc_host *host)
+>  {
+>         struct mmc_pwrseq *pwrseq = host->pwrseq;
+>
+> -       if (pwrseq && pwrseq->ops && pwrseq->ops->free)
+> -               pwrseq->ops->free(host);
+> +       if (pwrseq) {
+> +               if (pwrseq->ops->free)
+> +                       pwrseq->ops->free(host);
+> +               module_put(pwrseq->owner);
+> +
+> +               host->pwrseq = NULL;
+> +       }
+> +
+> +}
+> +
+> +int mmc_pwrseq_register(struct mmc_pwrseq *pwrseq)
+> +{
+> +       if (!pwrseq || !pwrseq->ops || !pwrseq->dev)
+> +               return -EINVAL;
+> +
+> +       mutex_lock(&pwrseq_list_mutex);
+> +       list_add(&pwrseq->list, &pwrseq_list);
+> +       mutex_unlock(&pwrseq_list_mutex);
+> +
+> +       return 0;
+> +}
+> +EXPORT_SYMBOL_GPL(mmc_pwrseq_register);
+>
+> -       host->pwrseq = NULL;
+> +void mmc_pwrseq_unregister(struct mmc_pwrseq *pwrseq)
+> +{
+> +       if (pwrseq) {
+> +               mutex_lock(&pwrseq_list_mutex);
+> +               list_del(&pwrseq->list);
+> +               mutex_unlock(&pwrseq_list_mutex);
+> +       }
+>  }
+> +EXPORT_SYMBOL_GPL(mmc_pwrseq_unregister);
+> diff --git a/drivers/mmc/core/pwrseq.h b/drivers/mmc/core/pwrseq.h
+> index 133de04..913587c 100644
+> --- a/drivers/mmc/core/pwrseq.h
+> +++ b/drivers/mmc/core/pwrseq.h
+> @@ -8,7 +8,10 @@
+>  #ifndef _MMC_CORE_PWRSEQ_H
+>  #define _MMC_CORE_PWRSEQ_H
+>
+> +#include <linux/mmc/host.h>
+> +
+>  struct mmc_pwrseq_ops {
+> +       int (*alloc)(struct mmc_host *host);
+>         void (*pre_power_on)(struct mmc_host *host);
+>         void (*post_power_on)(struct mmc_host *host);
+>         void (*power_off)(struct mmc_host *host);
+> @@ -17,23 +20,29 @@ struct mmc_pwrseq_ops {
+>
+>  struct mmc_pwrseq {
+>         const struct mmc_pwrseq_ops *ops;
+> +       struct device *dev;
+> +       struct list_head list;
+> +       struct module *owner;
+>  };
+>
+>  #ifdef CONFIG_OF
+>
+> +int mmc_pwrseq_register(struct mmc_pwrseq *pwrseq);
+> +void mmc_pwrseq_unregister(struct mmc_pwrseq *pwrseq);
+> +
+>  int mmc_pwrseq_alloc(struct mmc_host *host);
+>  void mmc_pwrseq_pre_power_on(struct mmc_host *host);
+>  void mmc_pwrseq_post_power_on(struct mmc_host *host);
+>  void mmc_pwrseq_power_off(struct mmc_host *host);
+>  void mmc_pwrseq_free(struct mmc_host *host);
+>
+> -struct mmc_pwrseq *mmc_pwrseq_simple_alloc(struct mmc_host *host,
+> -                                          struct device *dev);
+> -struct mmc_pwrseq *mmc_pwrseq_emmc_alloc(struct mmc_host *host,
+> -                                        struct device *dev);
+> -
+>  #else
+>
+> +static inline int mmc_pwrseq_register(struct mmc_pwrseq *pwrseq)
+> +{
+> +       return -ENOSYS;
+> +}
+> +static inline void mmc_pwrseq_unregister(struct mmc_pwrseq *pwrseq) {}
+>  static inline int mmc_pwrseq_alloc(struct mmc_host *host) { return 0; }
+>  static inline void mmc_pwrseq_pre_power_on(struct mmc_host *host) {}
+>  static inline void mmc_pwrseq_post_power_on(struct mmc_host *host) {}
+> diff --git a/drivers/mmc/core/pwrseq_emmc.c b/drivers/mmc/core/pwrseq_emmc.c
+> index c2d732a..1b14e32 100644
+> --- a/drivers/mmc/core/pwrseq_emmc.c
+> +++ b/drivers/mmc/core/pwrseq_emmc.c
+> @@ -9,6 +9,9 @@
+>   */
+>  #include <linux/delay.h>
+>  #include <linux/kernel.h>
+> +#include <linux/init.h>
+> +#include <linux/platform_device.h>
+> +#include <linux/module.h>
+>  #include <linux/slab.h>
+>  #include <linux/device.h>
+>  #include <linux/err.h>
+> @@ -48,14 +51,8 @@ static void mmc_pwrseq_emmc_free(struct mmc_host *host)
+>
+>         unregister_restart_handler(&pwrseq->reset_nb);
+>         gpiod_put(pwrseq->reset_gpio);
+> -       kfree(pwrseq);
+>  }
+>
+> -static const struct mmc_pwrseq_ops mmc_pwrseq_emmc_ops = {
+> -       .post_power_on = mmc_pwrseq_emmc_reset,
+> -       .free = mmc_pwrseq_emmc_free,
+> -};
+> -
+>  static int mmc_pwrseq_emmc_reset_nb(struct notifier_block *this,
+>                                     unsigned long mode, void *cmd)
+>  {
+> @@ -66,21 +63,14 @@ static int mmc_pwrseq_emmc_reset_nb(struct notifier_block *this,
+>         return NOTIFY_DONE;
+>  }
+>
+> -struct mmc_pwrseq *mmc_pwrseq_emmc_alloc(struct mmc_host *host,
+> -                                        struct device *dev)
+> +static int mmc_pwrseq_emmc_alloc(struct mmc_host *host)
+>  {
+> -       struct mmc_pwrseq_emmc *pwrseq;
+> -       int ret = 0;
+> -
+> -       pwrseq = kzalloc(sizeof(struct mmc_pwrseq_emmc), GFP_KERNEL);
+> -       if (!pwrseq)
+> -               return ERR_PTR(-ENOMEM);
+> +       struct mmc_pwrseq_emmc *pwrseq =  to_pwrseq_emmc(host->pwrseq);
+>
+> -       pwrseq->reset_gpio = gpiod_get(dev, "reset", GPIOD_OUT_LOW);
+> -       if (IS_ERR(pwrseq->reset_gpio)) {
+> -               ret = PTR_ERR(pwrseq->reset_gpio);
+> -               goto free;
+> -       }
+> +       pwrseq->reset_gpio = gpiod_get(host->pwrseq->dev,
+> +                                       "reset", GPIOD_OUT_LOW);
+> +       if (IS_ERR(pwrseq->reset_gpio))
+> +               return PTR_ERR(pwrseq->reset_gpio);
+>
+>         /*
+>          * register reset handler to ensure emmc reset also from
+> @@ -91,10 +81,55 @@ struct mmc_pwrseq *mmc_pwrseq_emmc_alloc(struct mmc_host *host,
+>         pwrseq->reset_nb.priority = 255;
+>         register_restart_handler(&pwrseq->reset_nb);
+>
+> +       return 0;
+> +}
+> +
+> +static const struct mmc_pwrseq_ops mmc_pwrseq_emmc_ops = {
+> +       .alloc = mmc_pwrseq_emmc_alloc,
+> +       .post_power_on = mmc_pwrseq_emmc_reset,
+> +       .free = mmc_pwrseq_emmc_free,
+> +};
+> +
+> +static int mmc_pwrseq_emmc_probe(struct platform_device *pdev)
+> +{
+> +       struct mmc_pwrseq_emmc *pwrseq;
+> +       struct device *dev = &pdev->dev;
+> +
+> +       pwrseq = devm_kzalloc(dev, sizeof(*pwrseq), GFP_KERNEL);
+> +       if (!pwrseq)
+> +               return -ENOMEM;
+> +
+>         pwrseq->pwrseq.ops = &mmc_pwrseq_emmc_ops;
+> +       pwrseq->pwrseq.dev = dev;
+> +       pwrseq->pwrseq.owner = THIS_MODULE;
+> +
+> +       return mmc_pwrseq_register(&pwrseq->pwrseq);
+> +}
+> +
+> +static int mmc_pwrseq_emmc_remove(struct platform_device *pdev)
+> +{
+> +       struct mmc_pwrseq_emmc *spwrseq = platform_get_drvdata(pdev);
+> +
+> +       mmc_pwrseq_unregister(&spwrseq->pwrseq);
+>
+> -       return &pwrseq->pwrseq;
+> -free:
+> -       kfree(pwrseq);
+> -       return ERR_PTR(ret);
+> +       return 0;
+>  }
+> +
+> +static const struct of_device_id mmc_pwrseq_emmc_of_match[] = {
+> +       { .compatible = "mmc-pwrseq-emmc",},
+> +       {/* sentinel */},
+> +};
+> +
+> +MODULE_DEVICE_TABLE(of, mmc_pwrseq_emmc_of_match);
+> +
+> +static struct platform_driver mmc_pwrseq_emmc_driver = {
+> +       .probe = mmc_pwrseq_emmc_probe,
+> +       .remove = mmc_pwrseq_emmc_remove,
+> +       .driver = {
+> +               .name = "pwrseq_emmc",
+> +               .of_match_table = mmc_pwrseq_emmc_of_match,
+> +       },
+> +};
+> +
+> +module_platform_driver(mmc_pwrseq_emmc_driver);
+> +MODULE_LICENSE("GPL v2");
+> diff --git a/drivers/mmc/core/pwrseq_simple.c b/drivers/mmc/core/pwrseq_simple.c
+> index 03573e1..2f509ca 100644
+> --- a/drivers/mmc/core/pwrseq_simple.c
+> +++ b/drivers/mmc/core/pwrseq_simple.c
+> @@ -8,7 +8,10 @@
+>   *  Simple MMC power sequence management
+>   */
+>  #include <linux/clk.h>
+> +#include <linux/init.h>
+>  #include <linux/kernel.h>
+> +#include <linux/platform_device.h>
+> +#include <linux/module.h>
+>  #include <linux/slab.h>
+>  #include <linux/device.h>
+>  #include <linux/err.h>
+> @@ -86,31 +89,19 @@ static void mmc_pwrseq_simple_free(struct mmc_host *host)
+>         if (!IS_ERR(pwrseq->ext_clk))
+>                 clk_put(pwrseq->ext_clk);
+>
+> -       kfree(pwrseq);
+>  }
+>
+> -static const struct mmc_pwrseq_ops mmc_pwrseq_simple_ops = {
+> -       .pre_power_on = mmc_pwrseq_simple_pre_power_on,
+> -       .post_power_on = mmc_pwrseq_simple_post_power_on,
+> -       .power_off = mmc_pwrseq_simple_power_off,
+> -       .free = mmc_pwrseq_simple_free,
+> -};
+> -
+> -struct mmc_pwrseq *mmc_pwrseq_simple_alloc(struct mmc_host *host,
+> -                                          struct device *dev)
+> +int mmc_pwrseq_simple_alloc(struct mmc_host *host)
+>  {
+> -       struct mmc_pwrseq_simple *pwrseq;
+> +       struct mmc_pwrseq_simple *pwrseq = to_pwrseq_simple(host->pwrseq);
+> +       struct device *dev = host->pwrseq->dev;
+>         int ret = 0;
+>
+> -       pwrseq = kzalloc(sizeof(*pwrseq), GFP_KERNEL);
+> -       if (!pwrseq)
+> -               return ERR_PTR(-ENOMEM);
+> -
+>         pwrseq->ext_clk = clk_get(dev, "ext_clock");
+>         if (IS_ERR(pwrseq->ext_clk) &&
+>             PTR_ERR(pwrseq->ext_clk) != -ENOENT) {
+> -               ret = PTR_ERR(pwrseq->ext_clk);
+> -               goto free;
+> +               return PTR_ERR(pwrseq->ext_clk);
+> +
+>         }
+>
+>         pwrseq->reset_gpios = gpiod_get_array(dev, "reset", GPIOD_OUT_HIGH);
+> @@ -118,16 +109,60 @@ struct mmc_pwrseq *mmc_pwrseq_simple_alloc(struct mmc_host *host,
+>             PTR_ERR(pwrseq->reset_gpios) != -ENOENT &&
+>             PTR_ERR(pwrseq->reset_gpios) != -ENOSYS) {
+>                 ret = PTR_ERR(pwrseq->reset_gpios);
+> -               goto clk_put;
+> +               clk_put(pwrseq->ext_clk);
+> +               return ret;
+>         }
+>
+> +       return 0;
+> +}
+> +
+> +static const struct mmc_pwrseq_ops mmc_pwrseq_simple_ops = {
+> +       .alloc = mmc_pwrseq_simple_alloc,
+> +       .pre_power_on = mmc_pwrseq_simple_pre_power_on,
+> +       .post_power_on = mmc_pwrseq_simple_post_power_on,
+> +       .power_off = mmc_pwrseq_simple_power_off,
+> +       .free = mmc_pwrseq_simple_free,
+> +};
+> +
+> +static const struct of_device_id mmc_pwrseq_simple_of_match[] = {
+> +       { .compatible = "mmc-pwrseq-simple",},
+> +       {/* sentinel */},
+> +};
+> +MODULE_DEVICE_TABLE(of, mmc_pwrseq_simple_of_match);
+> +
+> +static int mmc_pwrseq_simple_probe(struct platform_device *pdev)
+> +{
+> +       struct mmc_pwrseq_simple *pwrseq;
+> +       struct device *dev = &pdev->dev;
+> +
+> +       pwrseq = devm_kzalloc(dev, sizeof(*pwrseq), GFP_KERNEL);
+> +       if (!pwrseq)
+> +               return -ENOMEM;
+> +
+> +       pwrseq->pwrseq.dev = dev;
+>         pwrseq->pwrseq.ops = &mmc_pwrseq_simple_ops;
+> +       pwrseq->pwrseq.owner = THIS_MODULE;
+>
+> -       return &pwrseq->pwrseq;
+> -clk_put:
+> -       if (!IS_ERR(pwrseq->ext_clk))
+> -               clk_put(pwrseq->ext_clk);
+> -free:
+> -       kfree(pwrseq);
+> -       return ERR_PTR(ret);
+> +       return mmc_pwrseq_register(&pwrseq->pwrseq);
+>  }
+> +
+> +static int mmc_pwrseq_simple_remove(struct platform_device *pdev)
+> +{
+> +       struct mmc_pwrseq_simple *spwrseq = platform_get_drvdata(pdev);
+> +
+> +       mmc_pwrseq_unregister(&spwrseq->pwrseq);
+> +
+> +       return 0;
+> +}
+> +
+> +static struct platform_driver mmc_pwrseq_simple_driver = {
+> +       .probe = mmc_pwrseq_simple_probe,
+> +       .remove = mmc_pwrseq_simple_remove,
+> +       .driver = {
+> +               .name = "pwrseq_simple",
+> +               .of_match_table = mmc_pwrseq_simple_of_match,
+> +       },
+> +};
+> +
+> +module_platform_driver(mmc_pwrseq_simple_driver);
+> +MODULE_LICENSE("GPL v2");
+> --
+> 1.9.1
+>
