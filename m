@@ -1,108 +1,59 @@
-From: Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>
-Subject: Re: [PATCH v2 2/2] mmc: sdhci-tegra: Specify valid DMA mask
-Date: Wed, 02 Mar 2016 12:25:31 +0100
-Message-ID: <1671523.8ABQgk2cvG@wuerfel>
-References: <1456806764-16467-1-git-send-email-acourbot@nvidia.com> <10092864.HLRl1VM3vC@wuerfel> <CAAVeFuLqWcjAvCA4Stu=APFt0_jY6C=HiFfLiUnx=_W5Mj9gQg@mail.gmail.com>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: MMC broken in kernel 4.4
+Date: Wed, 2 Mar 2016 13:55:24 +0200
+Message-ID: <56D6D4AC.40205@intel.com>
+References: <hubert_tonneau/BJJ9BVJR/0G321OJ19@hubert-tonneau.storga.com>
+ <56D44249.7070200@kernel-upstream.org>
+ <hubert_tonneau/727MOBXX/0G32U5D@hubert-tonneau.storga.com>
+ <56D4FCC2.1020604@kernel-upstream.org>
+ <hubert_tonneau/RM1SK4J9/0G33XJU@hubert-tonneau.storga.com>
+ <56D56ABA.5020206@kernel-upstream.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7Bit
-Return-path: <linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <CAAVeFuLqWcjAvCA4Stu=APFt0_jY6C=HiFfLiUnx=_W5Mj9gQg-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-Sender: linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Alexandre Courbot <gnurou-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Cc: Alexandre Courbot <acourbot-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Stephen Warren <swarren-3lzwWm7+Weoh9ZMKESR00Q@public.gmane.org>, Thierry Reding <thierry.reding-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, linux-mmc <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mga04.intel.com ([192.55.52.120]:24087 "EHLO mga04.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1754682AbcCBL7B (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 2 Mar 2016 06:59:01 -0500
+In-Reply-To: <56D56ABA.5020206@kernel-upstream.org>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Hubert Tonneau <hubert.tonneau@fullpliant.org>
+Cc: Shawn Lin <shawn.lin@kernel-upstream.org>, linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, Barry Song <Baohua.Song@csr.com>
 
-On Wednesday 02 March 2016 19:36:23 Alexandre Courbot wrote:
-> On Wed, Mar 2, 2016 at 6:34 AM, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org> wrote:
-> > On Tuesday 01 March 2016 13:32:44 Alexandre Courbot wrote:
-> >> On T210, the sdhci controller can address more than 32 bits of address
-> >> space. Failing to express this fact results in the use of bounce
-> >> buffers and affects performance.
-> >>
-> >> Signed-off-by: Alexandre Courbot <acourbot-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
-> >
-> > I don't get this one. Why don't you just set the (SDHCI_USE_SDMA | SDHCI_USE_ADMA)
-> > flags that are checked in the first patch?
+On 01/03/16 12:11, Shawn Lin wrote:
+> Thanks for testing and plus Barry.
 > 
-> The test is against (!(host->flags & (SDHCI_USE_SDMA |
-> SDHCI_USE_ADMA))), (see the '!') so it will be true (and the DMA mask
-> will be set) if both flags are *not* set (why we set the mask to 64
-> bits here in that case, I don't know).
+> So Ulf, I can't remember we have a fix into 4.4#[-rc*] for it, right?
+> How about take this changes into more consideration?
 > 
-> T210 is capable of SDMA, so we cannot use this condition for that
-> purpose (maybe you missed the '!', in which case I understand why you
-> were surprised).
-
-Ok, I see now that this code was just setting a fake mask in case
-of PIO mode, which doesn't apply here. That in turn means that
-your first patch is wrong though:
-
-For a device that is not DMA capable (neither SDMA nor ADMA
-claimed to be supported), we should not call dma_set_mask_and_coherent()
-because that is likely to fail as well. It's an ugly hack to
-just override the mask in that case, and I'd say it requires
-a comment explaining what is going on.
-
-> >> @@ -289,6 +291,7 @@ static const struct sdhci_tegra_soc_data soc_data_tegra20 = {
-> >>       .pdata = &sdhci_tegra20_pdata,
-> >>       .nvquirks = NVQUIRK_FORCE_SDHCI_SPEC_200 |
-> >>                   NVQUIRK_ENABLE_BLOCK_GAP_DET,
-> >> +     .dma_mask = DMA_BIT_MASK(32),
-> >>  };
-> >
-> > Can you describe what the specific bug is in these controllers? Do you mean they
-> > support SDHCI_USE_SDMA or SDHCI_USE_ADMA in theory but you still have to prevent
-> > them from using high addresses?
+> From the changelog, it's modified for SD 3.01 which makes bus test
+> a mandatory requirement. But how mmc stack know its version is  3.0 or 3.1 ?
 > 
-> Ok, I think you probably missed the '!' then. :)
+> On 2016-3-1 17:46, Hubert Tonneau wrote:
+>>
+>> Hi,
+>>
+>> With the patch reversed, 4.4.X kernel works on Lenovo Yoga 8 tablet, just
+>> like kernel 4.3.X
 
-I missed the larger context of that check too, but I think I've got it now.
+It might also be related to the problem here:
 
-> >> @@ -353,6 +358,7 @@ static const struct sdhci_pltfm_data sdhci_tegra210_pdata = {
-> >>
-> >>  static const struct sdhci_tegra_soc_data soc_data_tegra210 = {
-> >>       .pdata = &sdhci_tegra210_pdata,
-> >> +     .dma_mask = DMA_BIT_MASK(34),
-> >>  };
-> >>
-> >>  static const struct of_device_id sdhci_tegra_dt_match[] = {
-> >
-> > This one still completely weirds me out. What kind of odd limitation does
-> > the controller have in Tegra 210?
-> >
-> > Are there actually any machines with more than 16GB?
+	http://marc.info/?l=linux-mmc&m=145319732219412
+
+You might try keeping the patch and applying the two referred to above.
+
+>>
+>> Shawn Lin wrote:
+>> >
+>> > Do you have this part of code[0] in your repository?
+>> >
+>> > [0]: https://patchwork.kernel.org/patch/7323541/
+>>
+>> Regards,
+>> Hubert Tonneau
+>>
 > 
-> It is not a limitation of the controller - I am just limiting the mask
-> to the range of physical memory we can ever access on T210. My intent
-> here is to overcome the default 32-bit mask, not to limit the range,
-> so I could have set a 64-bit mask if not for my OCD. :P
 > 
-> But actually looking at how the various flags are interpreted in
-> sdhci_add_host(), I see the following:
-> 
->     /*
->      * It is assumed that a 64-bit capable device has set a 64-bit DMA mask
->      * and *must* do 64-bit DMA.  A driver has the opportunity to change
->      * that during the first call to ->enable_dma().  Similarly
->      * SDHCI_QUIRK2_BROKEN_64_BIT_DMA must be left to the drivers to
->      * implement.
->      */
->     if (caps[0] & SDHCI_CAN_64BIT)
->         host->flags |= SDHCI_USE_64_BIT_DMA;
-> 
-> Since this relies on what the hardware declares being capable of and
-> is set on T210, I am very tempted to set a 64-bit dma_mask here and
-> call it a day, but the above comment seems to suggest that this should
-> have been done before.
 
-Right, that sounds good, that also makes it independent of the specific
-Tegra SoC, right?
-
-> If you think this is cool though, I will just do that and in
-> conjunction with patch 1 this will do the job nicely.
-
-as mentioned above, I now have doubts about patch 1, why do you still
-need this now?
-
-	Arnd
