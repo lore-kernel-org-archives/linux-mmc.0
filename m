@@ -1,62 +1,67 @@
-From: Laison Computech Inc <7sales@laiisoncomputech.com>
-Subject: CISCO AND AVAYA IP Phones
-Date: Wed, 02 Mar 2016 03:10:35 +0700
-Message-ID: <20160301210942.5F83E574BB8@srv-mta.gcmillenium.com.br>
-Reply-To: sales@laiisoncomputech.com
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: Re: [PATCH] mmc: dw_mmc-rockchip: fix failing to mount partition with
+ "discard"
+Date: Wed, 02 Mar 2016 10:29:30 +0900
+Message-ID: <56D641FA.8010606@samsung.com>
+References: <1456816373-32518-1-git-send-email-shawn.lin@rock-chips.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from srv-mta.gcmillenium.com.br ([177.125.218.132]:51815 "EHLO
-	srv-mta.gcmillenium.com.br" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751350AbcCAXRh convert rfc822-to-8bit
-	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 1 Mar 2016 18:17:37 -0500
-Content-Description: Mail message body
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-reply-to: <1456816373-32518-1-git-send-email-shawn.lin@rock-chips.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Shawn Lin <shawn.lin@rock-chips.com>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-rockchip@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
-To: Recipients <7sales@laiisoncomputech.com>
 
-Hi,
+Hi Shawn.
 
-Clean tested working pulls CPUs and QTYs in stock.
+On 03/01/2016 04:12 PM, Shawn Lin wrote:
+> Without MMC_CAP_ERASE support, we fail to mount partition
+> with "discard" option since mmc_queue_setup_discard is limited
+> for checking mmc_can_erase. Without doing mmc_queue_setup_discard,
+> blk_queue_discard fails to test QUEUE_FLAG_DISCARD flag, so we get
+> the following log from f2fs(actually similar to other file system):
+> 
+> mounting with "discard" option, but the device does not support discard
 
-115 X X5650
-65 X E5410
-75 X X5660
-145 X E5530
-100 X E5645
-40 X X5680
-75 X X5690
+We can enable MMC_CAP_ERASE by default, since other SoC also needs this capability.
+I had sent some patch for enabling by default, but at that time i didn't remember why not enabled by default.
+I will check that reason..and share the information.
 
-Brand new sealed IP phones and QTYs in stock.
+Best Regards,
+Jaehoon Chung
 
-55 x CP-7937G
-77 x CP-7942G
-54 x CP-7945G
-75 x CP-7962G
-=2E.....
-45 x Avaya 9630
-65 x Avaya 9641
-55 x Avaya 9640=20
-
-USED IT HARDWARE FROM:
-
-=46UJITSU       IBM         SUN        HP
-QUANTUM   DELL       HDS        STK
-NETAPP      SGI         Oracle      EMC=B2
-
-3Com, ADVA, Alcatel, Brocade, Cisco,
-Cabletron, Enterasys, Extreme Networks,
-Huawei, Marconi, Nortel, Qlogic, Avaya
-
-Let me know if you're interested. We are very open to offers and willin=
-g to work with you to make sure that we have a deal.
-
-Sincerely
-Barbara Johnson
-Laison Computech Inc
-Tel: +1-657-205-7860
-=46ax: +1-347-214-0478
-Email: sales@laiisoncomputech.com
-Web: www.laisoncomputech.com
+> 
+> Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
+> ---
+> 
+>  drivers/mmc/host/dw_mmc-rockchip.c | 9 +++++++++
+>  1 file changed, 9 insertions(+)
+> 
+> diff --git a/drivers/mmc/host/dw_mmc-rockchip.c b/drivers/mmc/host/dw_mmc-rockchip.c
+> index 84e50f3..2eda118 100644
+> --- a/drivers/mmc/host/dw_mmc-rockchip.c
+> +++ b/drivers/mmc/host/dw_mmc-rockchip.c
+> @@ -234,11 +234,20 @@ static int dw_mci_rockchip_init(struct dw_mci *host)
+>  	return 0;
+>  }
+>  
+> +/* Common capabilities of RK3288 SoC */
+> +static unsigned long dw_mci_rk3288_dwmmc_caps[4] = {
+> +	MMC_CAP_ERASE,
+> +	MMC_CAP_ERASE,
+> +	MMC_CAP_ERASE,
+> +	MMC_CAP_ERASE,
+> +};
+> +
+>  static const struct dw_mci_drv_data rk2928_drv_data = {
+>  	.init			= dw_mci_rockchip_init,
+>  };
+>  
+>  static const struct dw_mci_drv_data rk3288_drv_data = {
+> +	.caps			= dw_mci_rk3288_dwmmc_caps,
+>  	.set_ios		= dw_mci_rk3288_set_ios,
+>  	.execute_tuning		= dw_mci_rk3288_execute_tuning,
+>  	.parse_dt		= dw_mci_rk3288_parse_dt,
+> 
