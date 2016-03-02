@@ -1,59 +1,37 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: MMC broken in kernel 4.4
-Date: Wed, 2 Mar 2016 13:55:24 +0200
-Message-ID: <56D6D4AC.40205@intel.com>
-References: <hubert_tonneau/BJJ9BVJR/0G321OJ19@hubert-tonneau.storga.com>
- <56D44249.7070200@kernel-upstream.org>
- <hubert_tonneau/727MOBXX/0G32U5D@hubert-tonneau.storga.com>
- <56D4FCC2.1020604@kernel-upstream.org>
- <hubert_tonneau/RM1SK4J9/0G33XJU@hubert-tonneau.storga.com>
- <56D56ABA.5020206@kernel-upstream.org>
+From: Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Subject: Re: [PATCH] mmc: tegra: Disable UHS-I modes for tegra114
+Date: Wed, 2 Mar 2016 15:50:38 +0200
+Message-ID: <56D6EFAE.5050802@intel.com>
+References: <1455806924-14967-1-git-send-email-jonathanh@nvidia.com>
+ <1456479257-12147-1-git-send-email-jonathanh@nvidia.com>
+ <20160229064338.GC23745@ulmo>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=windows-1252
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga04.intel.com ([192.55.52.120]:24087 "EHLO mga04.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754682AbcCBL7B (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 2 Mar 2016 06:59:01 -0500
-In-Reply-To: <56D56ABA.5020206@kernel-upstream.org>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <20160229064338.GC23745@ulmo>
+Sender: linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Thierry Reding <thierry.reding-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Jon Hunter <jonathanh-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
+Cc: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Stephen Warren <swarren-3lzwWm7+Weoh9ZMKESR00Q@public.gmane.org>, Alexandre Courbot <gnurou-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Lucas Stach <dev-8ppwABl0HbeELgA04lAiVw@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
-To: Hubert Tonneau <hubert.tonneau@fullpliant.org>
-Cc: Shawn Lin <shawn.lin@kernel-upstream.org>, linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, Barry Song <Baohua.Song@csr.com>
 
-On 01/03/16 12:11, Shawn Lin wrote:
-> Thanks for testing and plus Barry.
+On 29/02/16 08:43, Thierry Reding wrote:
+> On Fri, Feb 26, 2016 at 09:34:17AM +0000, Jon Hunter wrote:
+>> SD card support for Tegra114 started failing after commit a8e326a911d3
+>> ("mmc: tegra: implement module external clock change") was merged. This
+>> commit was part of a series to enable UHS-I modes for Tegra. To
+>> workaround this problem for now, disable UHS-I modes for Tegra114 by
+>> separating the soc data structures for Tegra114 and Tegra124 so that
+>> UHS-I is still enabled for Tegra124 but not Tegra114.
+>>
+>> Fixes: a8e326a911d3 ("mmc: tegra: implement module external clock change")
+>>
+>> Signed-off-by: Jon Hunter <jonathanh-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
+>> ---
+>>  drivers/mmc/host/sdhci-tegra.c | 12 +++++++++++-
+>>  1 file changed, 11 insertions(+), 1 deletion(-)
 > 
-> So Ulf, I can't remember we have a fix into 4.4#[-rc*] for it, right?
-> How about take this changes into more consideration?
-> 
-> From the changelog, it's modified for SD 3.01 which makes bus test
-> a mandatory requirement. But how mmc stack know its version is  3.0 or 3.1 ?
-> 
-> On 2016-3-1 17:46, Hubert Tonneau wrote:
->>
->> Hi,
->>
->> With the patch reversed, 4.4.X kernel works on Lenovo Yoga 8 tablet, just
->> like kernel 4.3.X
-
-It might also be related to the problem here:
-
-	http://marc.info/?l=linux-mmc&m=145319732219412
-
-You might try keeping the patch and applying the two referred to above.
-
->>
->> Shawn Lin wrote:
->> >
->> > Do you have this part of code[0] in your repository?
->> >
->> > [0]: https://patchwork.kernel.org/patch/7323541/
->>
->> Regards,
->> Hubert Tonneau
->>
-> 
+> Acked-by: Thierry Reding <treding-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
 > 
 
+Acked-by: Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
