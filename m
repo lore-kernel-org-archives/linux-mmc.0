@@ -1,99 +1,107 @@
 From: Shawn Lin <shawn.lin@rock-chips.com>
-Subject: Re: [PATCH 2/2] mmc: dw_mmc: add resets support to dw_mci_parse_dt()
-Date: Thu, 3 Mar 2016 10:00:20 +0800
-Message-ID: <56D79AB4.7050809@rock-chips.com>
-References: <1456968818-22140-1-git-send-email-guodong.xu@linaro.org>
- <1456968818-22140-2-git-send-email-guodong.xu@linaro.org>
+Subject: [RFC PATCH 0/4] Add enhanced strobe support for emmc version 5.1 or later
+Date: Thu,  3 Mar 2016 10:35:57 +0800
+Message-ID: <1456972557-7994-1-git-send-email-shawn.lin@rock-chips.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=gbk; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from lucky1.263xmail.com ([211.157.147.131]:41403 "EHLO
+Received: from lucky1.263xmail.com ([211.157.147.132]:60413 "EHLO
 	lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751270AbcCCCAn (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 2 Mar 2016 21:00:43 -0500
-In-Reply-To: <1456968818-22140-2-git-send-email-guodong.xu@linaro.org>
+	with ESMTP id S1755392AbcCCCnv (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 2 Mar 2016 21:43:51 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Guodong Xu <guodong.xu@linaro.org>, robh+dt@kernel.org, pawel.moll@arm.com, mark.rutland@arm.com, ijc+devicetree@hellion.org.uk, galak@codeaurora.org, jh80.chung@samsung.com, ulf.hansson@linaro.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
-Cc: shawn.lin@rock-chips.com, shawn.lin@kernel-upstream.org, Xinwei Kong <kong.kongxinwei@hisilicon.com>, Zhangfei Gao <zhangfei.gao@linaro.org>
-
-Hi Guodong,
-
-On 2016/3/3 9:33, Guodong Xu wrote:
-> With this, user can add a 'resets' property into dw_mmc dts
-> node, and when driver probe and parse_dt, it will call
-> reset APIs to reset dw_mmc host controller.
->
-> Please also refer to Documentation/devicetree/bindings/reset/reset.txt
-
-I have no hard objection for this patch, but I'd rather not add it
-unless we actually need it. Could you elaborate more about any futher
-actions you will take if it's applied(i.e: deal with some unrecoverable
-broken case)?  If we just reset the controller while probing, actually I
-can't find any problems without it based on tons of my reboot test.
+To: Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Michal Simek <michal.simek@xilinx.com>, soren.brinkmann@xilinx.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Shawn Lin <shawn.lin@rock-chips.com>
 
 
->
-> Signed-off-by: Guodong Xu <guodong.xu@linaro.org>
-> Signed-off-by: Xinwei Kong <kong.kongxinwei@hisilicon.com>
-> Signed-off-by: Zhangfei Gao <zhangfei.gao@linaro.org>
-> ---
->   drivers/mmc/host/dw_mmc.c  | 7 +++++++
->   include/linux/mmc/dw_mmc.h | 6 ++++--
->   2 files changed, 11 insertions(+), 2 deletions(-)
->
-> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-> index 242f9a0..d3a7376 100644
-> --- a/drivers/mmc/host/dw_mmc.c
-> +++ b/drivers/mmc/host/dw_mmc.c
-> @@ -2878,6 +2878,13 @@ static struct dw_mci_board *dw_mci_parse_dt(struct dw_mci *host)
->   	if (!pdata)
->   		return ERR_PTR(-ENOMEM);
->
-> +	/* find reset controller when exist */
-> +	pdata->rstc = devm_reset_control_get_optional(dev, NULL);
-> +	if (IS_ERR(pdata->rstc))
-> +		pdata->rstc = NULL;
-> +	else
-> +		reset_control_deassert(pdata->rstc);
-> +
+Hello Ulf and Adrian,
 
-if the PTR_ERR(pdata->rstc) is -EPROBE_DEFER, should we defer probing
-the driver?
+This RFC patch is going to support enhanced strobe function
+for emmc version 5.1+ introduced by JEDEC recently.
 
->   	/* find out number of slots supported */
->   	of_property_read_u32(np, "num-slots", &pdata->num_slots);
->
-> diff --git a/include/linux/mmc/dw_mmc.h b/include/linux/mmc/dw_mmc.h
-> index 7b41c6d..b95cd84 100644
-> --- a/include/linux/mmc/dw_mmc.h
-> +++ b/include/linux/mmc/dw_mmc.h
-> @@ -14,9 +14,10 @@
->   #ifndef LINUX_MMC_DW_MMC_H
->   #define LINUX_MMC_DW_MMC_H
->
-> -#include <linux/scatterlist.h>
-> -#include <linux/mmc/core.h>
->   #include <linux/dmaengine.h>
-> +#include <linux/mmc/core.h>
-> +#include <linux/reset.h>
-> +#include <linux/scatterlist.h>
->
->   #define MAX_MCI_SLOTS	2
->
-> @@ -260,6 +261,7 @@ struct dw_mci_board {
->   	/* delay in mS before detecting cards after interrupt */
->   	u32 detect_delay_ms;
->
-> +	struct reset_control *rstc;
->   	struct dw_mci_dma_ops *dma_ops;
->   	struct dma_pdata *data;
->   };
->
+=46irstly=EF=BC=8Cfrom the former discussion of sdhci, I write these co=
+de
+inspired by Adrian's patch[0] for variant drivers to overwrite the
+callback in order not to add new callback into sdhci. And enchanced
+strobe is a optional function, so we add a new cap* for drivers to
+decide whether to use it.
+
+1. History
+   When introduing hs400 mode, JEDEC asks controllers to use data strob=
+e line
+to latch the data from emmc devives. But for cmd-reponse, not mentioned=
+ yet.
+Since emmc version 5.1 published, JEDEC adds enhanced strobe function t=
+o deal
+with cmd-response the same way as dara-read. This feature is optional.
+
+2. Current situation
+   I can't find a upstreamed controller claimed to support it, as well =
+as the
+mmc stack. But my "arasan,sdhci-5.1" actially supports this function. S=
+o I decide
+to work for this part.
+
+3. About the code
+   1)This patchset is taken from Yi Sun's patch[1], but after reviewing=
+ the details
+and applying to test, I find some problems. We ask devices to switch to=
+ enhanced
+strobe mode, but we don't notify drivers to enable enhanced strobe mode=
+=2E And we can't
+force controller to use enhanced strobe even if devices claims to suppo=
+rt it. So I
+rework most of the code and take over the ownership from Yi Sun(If any =
+objections
+here, please let know).
+   2)By looking into the SDHCI spec, I find there isn't any registers t=
+o enable the
+enhanced strobe function. But from my "arasan,sdhci-5.1" databook, it d=
+escribes a
+register called VENDOR_REGISTER(0x78) to trigger this mode. So I guess =
+other sdhci
+variant drivers may also need s vendor specific register to deal with i=
+t.
+
+4. Howto
+   If we are sure that our controller supports enhanced strobe mode, ju=
+st add
+cap-enhanced-strobe in DT. Once emmc devices claims to support this mod=
+e,
+we enable it automatically. Of course, other sdhci*/non-sdhci drivers s=
+hould
+implement/overwrite the prepare_enhanced_strobe by themselves. I believ=
+e all of the
+platforms which need to support this mode should do some basic preparat=
+ion for their
+controllers.
+
+Reference:
+[0]: https://patchwork.kernel.org/patch/8262231/
+[1]: https://patchwork.kernel.org/patch/6545421/
 
 
--- 
-Best Regards
-Shawn Lin
+
+Shawn Lin (4):
+  mmc: core: add cap-enhanced-strobe support
+  mmc: core: implement enhanced strobe support
+  mmc: sdhci: implement enhanced strobe callback
+  mmc: sdhci-of-arasan: overwrite enhanced strobe callback
+
+ Documentation/devicetree/bindings/mmc/mmc.txt |  1 +
+ drivers/mmc/core/host.c                       |  2 +
+ drivers/mmc/core/mmc.c                        | 54 +++++++++++++++++++=
++++++++-
+ drivers/mmc/host/sdhci-of-arasan.c            | 20 ++++++++++
+ drivers/mmc/host/sdhci.c                      | 11 ++++++
+ include/linux/mmc/card.h                      |  1 +
+ include/linux/mmc/host.h                      |  8 ++++
+ include/linux/mmc/mmc.h                       |  2 +
+ 8 files changed, 98 insertions(+), 1 deletion(-)
+
+--=20
+2.3.7
+
 
