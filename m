@@ -1,43 +1,57 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: MMC broken in kernel 4.4
-Date: Thu, 3 Mar 2016 14:17:15 +0100
-Message-ID: <CAPDyKFooDVdzBw_ygMF67pWmwxiwWpRDQwyToTH4Zi4ek5cdTw@mail.gmail.com>
-References: <hubert_tonneau/BJJ9BVJR/0G321OJ19@hubert-tonneau.storga.com>
-	<56D44249.7070200@kernel-upstream.org>
-	<hubert_tonneau/727MOBXX/0G32U5D@hubert-tonneau.storga.com>
-	<56D4FCC2.1020604@kernel-upstream.org>
-	<hubert_tonneau/RM1SK4J9/0G33XJU@hubert-tonneau.storga.com>
-	<56D56ABA.5020206@kernel-upstream.org>
+Subject: Re: [PATCH] Revert "mmc: block: don't use parameter prefix if built
+ as module"
+Date: Thu, 3 Mar 2016 14:37:04 +0100
+Message-ID: <CAPDyKFpRNQuTE9c6Ux_Bj0FXMnL4EiVFkswNf7F+c254W0xM1Q@mail.gmail.com>
+References: <1455206051-8633-1-git-send-email-ulf.hansson@linaro.org>
+	<20160211171941.GA29378@kroah.com>
+	<CAPDyKFp+2SQhAuDt26CpDQnd-KwhWM3GffgQip7aj-QtuUUjEA@mail.gmail.com>
+	<20160212163216.GB5646@kroah.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wm0-f44.google.com ([74.125.82.44]:34580 "EHLO
-	mail-wm0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751002AbcCCNRQ (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 3 Mar 2016 08:17:16 -0500
-Received: by mail-wm0-f44.google.com with SMTP id p65so34368586wmp.1
-        for <linux-mmc@vger.kernel.org>; Thu, 03 Mar 2016 05:17:16 -0800 (PST)
-In-Reply-To: <56D56ABA.5020206@kernel-upstream.org>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20160212163216.GB5646@kroah.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Greg KH <gregkh@linuxfoundation.org>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, John Stultz <john.stultz@linaro.org>, Andy Shevchenko <andriy.shevchenko@linux.intel.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Shawn Lin <shawn.lin@kernel-upstream.org>, Hubert Tonneau <hubert.tonneau@fullpliant.org>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, Barry Song <Baohua.Song@csr.com>, Carlo Caione <carlo@endlessm.com>
 
-+Carlo
-
-On 1 March 2016 at 11:11, Shawn Lin <shawn.lin@kernel-upstream.org> wrote:
-> Thanks for testing and plus Barry.
+On 12 February 2016 at 17:32, Greg KH <gregkh@linuxfoundation.org> wrote:
+> On Fri, Feb 12, 2016 at 11:06:03AM +0100, Ulf Hansson wrote:
+>> On 11 February 2016 at 18:19, Greg KH <gregkh@linuxfoundation.org> wrote:
+>> > On Thu, Feb 11, 2016 at 04:54:11PM +0100, Ulf Hansson wrote:
+>> >> This reverts commit 829b6962f7e3cfc06f7c5c26269fd47ad48cf503.
+>> >>
+>> >> Revert this change as it causes a sysfs path to change and therefore
+>> >> introduces and ABI regression. More precisely Android's vold is not being
+>> >> able to access /sys/module/mmcblk/parameters/perdev_minors any more, since
+>> >> the path becomes changed to: "/sys/module/mmc_block/..."
+>> >>
+>> >> Fixes: 829b6962f7e3 ("mmc: block: don't use parameter prefix if built as
+>> >> module")
+>> >> Reported-by: John Stultz <john.stultz@linaro.org>
+>> >> Cc: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
+>> >> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+>> >
+>> > Please also add a "cc: stable..." tag to the patch so it gets picked up
+>> > in stable kernel releases.
+>>
+>> Doesn't the Fixes tag take care of that?
 >
-> So Ulf, I can't remember we have a fix into 4.4#[-rc*] for it, right?
+> Not at all, never rely on that, please read
+> Documentation/stable_kernel_rules.txt for how to properly tag a patch
+> for a stable release.
+>
+> Sometimes I get bored and look at patches with only a fixes: tag on them
+> to see how bad the maintainer is messing up and then do their work for
+> them, but that's rare these days...
 
-This one should fix the problem. It was included as fix in 4.5 rc1 and
-tagged @stable.
-http://git.kernel.org/cgit/linux/kernel/git/torvalds/linux.git/commit?id=e10c321977091f163eceedec0650e0ef4b3cf4bb
+That's sounds like you do this entirely manually, I doubt you have
+time for that? :-)
 
-I assume you want it added to the 4.4.x stable tree. Perhaps you can
-resend it as stable patch, to make sure the maintainer picks it up.
-
-[...]
+So, isn't it quite simple to automate this thing, as all the
+information you need (ideally) is to know what commit is being fixed.
+Right?
 
 Kind regards
 Uffe
