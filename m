@@ -1,73 +1,39 @@
 From: Nicolas Boichat <drinkcat@chromium.org>
-Subject: [PATCH 2/2] mmc: mediatek: Use mmc_regulator_set_vqmmc in start_signal_voltage_switch
-Date: Thu,  3 Mar 2016 18:19:45 +0800
-Message-ID: <1457000385-2317-2-git-send-email-drinkcat@chromium.org>
-References: <1457000385-2317-1-git-send-email-drinkcat@chromium.org>
+Subject: [PATCH 1/2] mmc: mediatek: Change signal voltage error to dev_dbg()
+Date: Thu,  3 Mar 2016 18:19:44 +0800
+Message-ID: <1457000385-2317-1-git-send-email-drinkcat@chromium.org>
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1457000385-2317-1-git-send-email-drinkcat@chromium.org>
 Sender: linux-kernel-owner@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>
 Cc: Matthias Brugger <matthias.bgg@gmail.com>, Chaotian Jing <chaotian.jing@mediatek.com>, Nicolas Boichat <drinkcat@chromium.org>, Geert Uytterhoeven <geert@linux-m68k.org>, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mediatek@lists.infradead.org, linux-kernel@vger.kernel.org, dianders@chromium.org
 List-Id: linux-mmc@vger.kernel.org
 
-We've introduced a new helper in the MMC core:
-mmc_regulator_set_vqmmc().  Let's use this in mtk-sd.  Using this new
-helper has some advantages:
-
-    1. We get the mmc_regulator_set_vqmmc() behavior of trying to match
-       VQMMC and VMMC when the signal voltage is 3.3V.  This ensures max
-       compatibility.
-
-    2. We get rid of a few more warnings when probing unsupported
-       voltages.
-
-    3. We get rid of some non-mediatek specific code in mtk-sd.
+In commit ceae98f20e36 ("mmc: core: Try other signal levels
+during power up") we can see that there are times when it's
+valid to try several signal voltages.  Don't print an ugly
+error in the logs when that happens.
 
 Signed-off-by: Nicolas Boichat <drinkcat@chromium.org>
 ---
 
-Similar to e0848f5d294c703917260a6228cc08b8be46c527
-mmc: dw_mmc: Use mmc_regulator_set_vqmmc in start_signal_voltage_switch ,
-where I copied the commit message from.
+Similar to b19caf379c82e99737c29bc15d7b7fd7d24279f9
+mmc: dw_mmc: Change signal voltage error to dev_dbg()
 
- drivers/mmc/host/mtk-sd.c | 17 +++++------------
- 1 file changed, 5 insertions(+), 12 deletions(-)
+ drivers/mmc/host/mtk-sd.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
-index 07809f4..b17f30d 100644
+index f01972e..07809f4 100644
 --- a/drivers/mmc/host/mtk-sd.c
 +++ b/drivers/mmc/host/mtk-sd.c
-@@ -1021,26 +1021,19 @@ static void msdc_set_buswidth(struct msdc_host *host, u32 width)
- static int msdc_ops_switch_volt(struct mmc_host *mmc, struct mmc_ios *ios)
- {
- 	struct msdc_host *host = mmc_priv(mmc);
--	int min_uv, max_uv;
- 	int ret = 0;
+@@ -1038,7 +1038,7 @@ static int msdc_ops_switch_volt(struct mmc_host *mmc, struct mmc_ios *ios)
  
- 	if (!IS_ERR(mmc->supply.vqmmc)) {
--		if (ios->signal_voltage == MMC_SIGNAL_VOLTAGE_330) {
--			min_uv = 3300000;
--			max_uv = 3300000;
--		} else if (ios->signal_voltage == MMC_SIGNAL_VOLTAGE_180) {
--			min_uv = 1800000;
--			max_uv = 1800000;
--		} else {
-+		if (ios->signal_voltage != MMC_SIGNAL_VOLTAGE_330 &&
-+		    ios->signal_voltage != MMC_SIGNAL_VOLTAGE_180) {
- 			dev_err(host->dev, "Unsupported signal voltage!\n");
- 			return -EINVAL;
- 		}
- 
--		ret = regulator_set_voltage(mmc->supply.vqmmc, min_uv, max_uv);
-+		ret = mmc_regulator_set_vqmmc(mmc, ios);
+ 		ret = regulator_set_voltage(mmc->supply.vqmmc, min_uv, max_uv);
  		if (ret) {
--			dev_dbg(host->dev,
--					"Regulator set error %d: %d - %d\n",
--					ret, min_uv, max_uv);
-+			dev_dbg(host->dev, "Regulator set error %d (%d)\n",
-+				ret, ios->signal_voltage);
+-			dev_err(host->dev,
++			dev_dbg(host->dev,
+ 					"Regulator set error %d: %d - %d\n",
+ 					ret, min_uv, max_uv);
  		} else {
- 			/* Apply different pinctrl settings for different signal voltage */
- 			if (ios->signal_voltage == MMC_SIGNAL_VOLTAGE_180)
 -- 
 2.7.0.rc3.207.g0ac5344
