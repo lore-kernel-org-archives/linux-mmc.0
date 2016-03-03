@@ -1,68 +1,42 @@
-From: Philip Elcan <pelcan@codeaurora.org>
-Subject: [PATCH] mmc: sdhci-acpi: add QCOM controllers
-Date: Thu,  3 Mar 2016 11:38:46 -0500
-Message-ID: <1457023128-23720-1-git-send-email-pelcan@codeaurora.org>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp.codeaurora.org ([198.145.29.96]:51380 "EHLO
-	smtp.codeaurora.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751530AbcCCQjG (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 3 Mar 2016 11:39:06 -0500
-Sender: linux-mmc-owner@vger.kernel.org
+From: Doug Anderson <dianders@chromium.org>
+Subject: Re: [PATCH 2/2] mmc: mediatek: Use mmc_regulator_set_vqmmc in start_signal_voltage_switch
+Date: Thu, 3 Mar 2016 09:57:37 -0800
+Message-ID: <CAD=FV=VSO9S++DNuYDANkYhig7z6hV+ij4RRsJe_uSRY88feeA@mail.gmail.com>
+References: <1457000385-2317-1-git-send-email-drinkcat@chromium.org>
+	<1457000385-2317-2-git-send-email-drinkcat@chromium.org>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1457000385-2317-2-git-send-email-drinkcat@chromium.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Nicolas Boichat <drinkcat@chromium.org>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Matthias Brugger <matthias.bgg@gmail.com>, Chaotian Jing <chaotian.jing@mediatek.com>, Geert Uytterhoeven <geert@linux-m68k.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "moderated list:ARM/Mediatek SoC support" <linux-mediatek@lists.infradead.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, Michele Curti <michele.curti@gmail.com>, Philip Elcan <pelcan@codeaurora.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
-Cc: Timur Tabi <timur@codeaurora.org>, linux-arm-msm@vger.kernel.org
 
-This adds the HIDs for Qualcomm Technologies Inc SDHC
-controllers:
-QCOM8051: non-removable device that does not support 1.8v
-QCOM8052: non-removable device that does support 1.8v
+Nicolas,
 
-Signed-off-by: Philip Elcan <pelcan@codeaurora.org>
----
- drivers/mmc/host/sdhci-acpi.c | 15 +++++++++++++++
- 1 file changed, 15 insertions(+)
+On Thu, Mar 3, 2016 at 2:19 AM, Nicolas Boichat <drinkcat@chromium.org> wrote:
+> We've introduced a new helper in the MMC core:
+> mmc_regulator_set_vqmmc().  Let's use this in mtk-sd.  Using this new
+> helper has some advantages:
+>
+>     1. We get the mmc_regulator_set_vqmmc() behavior of trying to match
+>        VQMMC and VMMC when the signal voltage is 3.3V.  This ensures max
+>        compatibility.
+>
+>     2. We get rid of a few more warnings when probing unsupported
+>        voltages.
+>
+>     3. We get rid of some non-mediatek specific code in mtk-sd.
+>
+> Signed-off-by: Nicolas Boichat <drinkcat@chromium.org>
+> ---
+>
+> Similar to e0848f5d294c703917260a6228cc08b8be46c527
+> mmc: dw_mmc: Use mmc_regulator_set_vqmmc in start_signal_voltage_switch ,
+> where I copied the commit message from.
+>
+>  drivers/mmc/host/mtk-sd.c | 17 +++++------------
+>  1 file changed, 5 insertions(+), 12 deletions(-)
 
-diff --git a/drivers/mmc/host/sdhci-acpi.c b/drivers/mmc/host/sdhci-acpi.c
-index a5cda92..041e739 100644
---- a/drivers/mmc/host/sdhci-acpi.c
-+++ b/drivers/mmc/host/sdhci-acpi.c
-@@ -264,6 +264,17 @@ static const struct sdhci_acpi_slot sdhci_acpi_slot_int_sd = {
- 	.probe_slot	= sdhci_acpi_sd_probe_slot,
- };
- 
-+static const struct sdhci_acpi_slot sdhci_acpi_slot_qcom_sd_3v = {
-+	.quirks  = SDHCI_QUIRK_BROKEN_CARD_DETECTION,
-+	.quirks2 = SDHCI_QUIRK2_NO_1_8_V,
-+	.caps    = MMC_CAP_NONREMOVABLE,
-+};
-+
-+static const struct sdhci_acpi_slot sdhci_acpi_slot_qcom_sd = {
-+	.quirks  = SDHCI_QUIRK_BROKEN_CARD_DETECTION,
-+	.caps    = MMC_CAP_NONREMOVABLE,
-+};
-+
- struct sdhci_acpi_uid_slot {
- 	const char *hid;
- 	const char *uid;
-@@ -284,6 +295,8 @@ static const struct sdhci_acpi_uid_slot sdhci_acpi_uids[] = {
- 	{ "INT344D"  , NULL, &sdhci_acpi_slot_int_sdio },
- 	{ "PNP0FFF"  , "3" , &sdhci_acpi_slot_int_sd   },
- 	{ "PNP0D40"  },
-+	{ "QCOM8051", NULL, &sdhci_acpi_slot_qcom_sd_3v },
-+	{ "QCOM8052", NULL, &sdhci_acpi_slot_qcom_sd },
- 	{ },
- };
- 
-@@ -298,6 +311,8 @@ static const struct acpi_device_id sdhci_acpi_ids[] = {
- 	{ "INT3436"  },
- 	{ "INT344D"  },
- 	{ "PNP0D40"  },
-+	{ "QCOM8051" },
-+	{ "QCOM8052" },
- 	{ },
- };
- MODULE_DEVICE_TABLE(acpi, sdhci_acpi_ids);
--- 
-The Qualcomm Innovation Center, Inc. is a member of the Code Aurora Forum,
-a Linux Foundation Collaborative Project
-
+Reviewed-by: Douglas Anderson <dianders@chromium.org>
