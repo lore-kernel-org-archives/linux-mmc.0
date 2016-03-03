@@ -1,107 +1,85 @@
 From: Shawn Lin <shawn.lin@rock-chips.com>
-Subject: [RFC PATCH 0/4] Add enhanced strobe support for emmc version 5.1 or later
-Date: Thu,  3 Mar 2016 10:35:57 +0800
-Message-ID: <1456972557-7994-1-git-send-email-shawn.lin@rock-chips.com>
+Subject: [RFC PATCH 1/4] mmc: core: add cap-enhanced-strobe support
+Date: Thu,  3 Mar 2016 10:36:25 +0800
+Message-ID: <1456972585-8036-1-git-send-email-shawn.lin@rock-chips.com>
+References: <1456972557-7994-1-git-send-email-shawn.lin@rock-chips.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Transfer-Encoding: 8bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from lucky1.263xmail.com ([211.157.147.132]:60413 "EHLO
+Received: from lucky1.263xmail.com ([211.157.147.132]:60567 "EHLO
 	lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755392AbcCCCnv (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 2 Mar 2016 21:43:51 -0500
+	with ESMTP id S1756008AbcCCCoC (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 2 Mar 2016 21:44:02 -0500
+In-Reply-To: <1456972557-7994-1-git-send-email-shawn.lin@rock-chips.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>
 Cc: Michal Simek <michal.simek@xilinx.com>, soren.brinkmann@xilinx.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Shawn Lin <shawn.lin@rock-chips.com>
 
+This patch introduce cap-enhanced-strobe for platforms which
+want to enable enhanced strobe function from DT if the mmc host
+controller claims to support enhanced strobe.
 
-Hello Ulf and Adrian,
+Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
 
-This RFC patch is going to support enhanced strobe function
-for emmc version 5.1+ introduced by JEDEC recently.
+---
 
-=46irstly=EF=BC=8Cfrom the former discussion of sdhci, I write these co=
-de
-inspired by Adrian's patch[0] for variant drivers to overwrite the
-callback in order not to add new callback into sdhci. And enchanced
-strobe is a optional function, so we add a new cap* for drivers to
-decide whether to use it.
+ Documentation/devicetree/bindings/mmc/mmc.txt | 1 +
+ drivers/mmc/core/host.c                       | 2 ++
+ include/linux/mmc/host.h                      | 6 ++++++
+ 3 files changed, 9 insertions(+)
 
-1. History
-   When introduing hs400 mode, JEDEC asks controllers to use data strob=
-e line
-to latch the data from emmc devives. But for cmd-reponse, not mentioned=
- yet.
-Since emmc version 5.1 published, JEDEC adds enhanced strobe function t=
-o deal
-with cmd-response the same way as dara-read. This feature is optional.
-
-2. Current situation
-   I can't find a upstreamed controller claimed to support it, as well =
-as the
-mmc stack. But my "arasan,sdhci-5.1" actially supports this function. S=
-o I decide
-to work for this part.
-
-3. About the code
-   1)This patchset is taken from Yi Sun's patch[1], but after reviewing=
- the details
-and applying to test, I find some problems. We ask devices to switch to=
- enhanced
-strobe mode, but we don't notify drivers to enable enhanced strobe mode=
-=2E And we can't
-force controller to use enhanced strobe even if devices claims to suppo=
-rt it. So I
-rework most of the code and take over the ownership from Yi Sun(If any =
-objections
-here, please let know).
-   2)By looking into the SDHCI spec, I find there isn't any registers t=
-o enable the
-enhanced strobe function. But from my "arasan,sdhci-5.1" databook, it d=
-escribes a
-register called VENDOR_REGISTER(0x78) to trigger this mode. So I guess =
-other sdhci
-variant drivers may also need s vendor specific register to deal with i=
-t.
-
-4. Howto
-   If we are sure that our controller supports enhanced strobe mode, ju=
-st add
-cap-enhanced-strobe in DT. Once emmc devices claims to support this mod=
-e,
-we enable it automatically. Of course, other sdhci*/non-sdhci drivers s=
-hould
-implement/overwrite the prepare_enhanced_strobe by themselves. I believ=
-e all of the
-platforms which need to support this mode should do some basic preparat=
-ion for their
-controllers.
-
-Reference:
-[0]: https://patchwork.kernel.org/patch/8262231/
-[1]: https://patchwork.kernel.org/patch/6545421/
-
-
-
-Shawn Lin (4):
-  mmc: core: add cap-enhanced-strobe support
-  mmc: core: implement enhanced strobe support
-  mmc: sdhci: implement enhanced strobe callback
-  mmc: sdhci-of-arasan: overwrite enhanced strobe callback
-
- Documentation/devicetree/bindings/mmc/mmc.txt |  1 +
- drivers/mmc/core/host.c                       |  2 +
- drivers/mmc/core/mmc.c                        | 54 +++++++++++++++++++=
-+++++++-
- drivers/mmc/host/sdhci-of-arasan.c            | 20 ++++++++++
- drivers/mmc/host/sdhci.c                      | 11 ++++++
- include/linux/mmc/card.h                      |  1 +
- include/linux/mmc/host.h                      |  8 ++++
- include/linux/mmc/mmc.h                       |  2 +
- 8 files changed, 98 insertions(+), 1 deletion(-)
-
---=20
+diff --git a/Documentation/devicetree/bindings/mmc/mmc.txt b/Documentation/devicetree/bindings/mmc/mmc.txt
+index ed23b9b..51ec979 100644
+--- a/Documentation/devicetree/bindings/mmc/mmc.txt
++++ b/Documentation/devicetree/bindings/mmc/mmc.txt
+@@ -39,6 +39,7 @@ Optional properties:
+ - cap-power-off-card: powering off the card is safe
+ - cap-mmc-hw-reset: eMMC hardware reset is supported
+ - cap-sdio-irq: enable SDIO IRQ signalling on this interface
++- cap-enhanced-strobe: enable enhanced strobe function for emmc v5.1+
+ - full-pwr-cycle: full power cycle of the card is supported
+ - mmc-ddr-1_8v: eMMC high-speed DDR mode(1.8V I/O) is supported
+ - mmc-ddr-1_2v: eMMC high-speed DDR mode(1.2V I/O) is supported
+diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
+index 1d94607..b49d786 100644
+--- a/drivers/mmc/core/host.c
++++ b/drivers/mmc/core/host.c
+@@ -270,6 +270,8 @@ int mmc_of_parse(struct mmc_host *host)
+ 		host->caps |= MMC_CAP_HW_RESET;
+ 	if (of_property_read_bool(np, "cap-sdio-irq"))
+ 		host->caps |= MMC_CAP_SDIO_IRQ;
++	if (of_property_read_bool(np, "cap-enhanced-strobe"))
++		host->caps |= MMC_CAP_ENHANCED_STROBE;
+ 	if (of_property_read_bool(np, "full-pwr-cycle"))
+ 		host->caps2 |= MMC_CAP2_FULL_PWR_CYCLE;
+ 	if (of_property_read_bool(np, "keep-power-in-suspend"))
+diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+index 8dd4d29..2a292b3 100644
+--- a/include/linux/mmc/host.h
++++ b/include/linux/mmc/host.h
+@@ -264,6 +264,7 @@ struct mmc_host {
+ #define MMC_CAP_DRIVER_TYPE_A	(1 << 23)	/* Host supports Driver Type A */
+ #define MMC_CAP_DRIVER_TYPE_C	(1 << 24)	/* Host supports Driver Type C */
+ #define MMC_CAP_DRIVER_TYPE_D	(1 << 25)	/* Host supports Driver Type D */
++#define MMC_CAP_ENHANCED_STROBE	(1 << 20)	/* Host supports enhanced strobe */
+ #define MMC_CAP_CMD23		(1 << 30)	/* CMD23 supported. */
+ #define MMC_CAP_HW_RESET	(1 << 31)	/* Hardware reset */
+ 
+@@ -469,6 +470,11 @@ static inline int mmc_host_uhs(struct mmc_host *host)
+ 		 MMC_CAP_UHS_DDR50);
+ }
+ 
++static inline int mmc_host_enhanced_strobe(struct mmc_host *host)
++{
++	return host->caps & MMC_CAP_ENHANCED_STROBE;
++}
++
+ static inline int mmc_host_packed_wr(struct mmc_host *host)
+ {
+ 	return host->caps2 & MMC_CAP2_PACKED_WR;
+-- 
 2.3.7
 
 
