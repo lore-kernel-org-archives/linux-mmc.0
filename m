@@ -1,39 +1,33 @@
-From: Nicolas Boichat <drinkcat@chromium.org>
-Subject: [PATCH 1/2] mmc: mediatek: Change signal voltage error to dev_dbg()
-Date: Thu,  3 Mar 2016 18:19:44 +0800
-Message-ID: <1457000385-2317-1-git-send-email-drinkcat@chromium.org>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Matthias Brugger <matthias.bgg@gmail.com>, Chaotian Jing <chaotian.jing@mediatek.com>, Nicolas Boichat <drinkcat@chromium.org>, Geert Uytterhoeven <geert@linux-m68k.org>, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mediatek@lists.infradead.org, linux-kernel@vger.kernel.org, dianders@chromium.org
+From: Hubert Tonneau <hubert.tonneau@fullpliant.org>
+Subject: Re: MMC broken in kernel 4.4
+Date: Thu, 3 Mar 2016 10:29:48 +0000
+Message-ID: <hubert_tonneau/RM1SK4J9/0G37PAN@hubert-tonneau.storga.com>
+References: <hubert_tonneau/BJJ9BVJR/0G321OJ19@hubert-tonneau.storga.com> <56D44249.7070200@kernel-upstream.org> <hubert_tonneau/727MOBXX/0G32U5D@hubert-tonneau.storga.com> <56D4FCC2.1020604@kernel-upstream.org> <hubert_tonneau/RM1SK4J9/0G33XJU@hubert-tonneau.storga.com> <56D56ABA.5020206@kernel-upstream.org> <56D6D4AC.40205@intel.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from dc1.fullpliant.org ([213.186.44.166]:44222 "HELO
+	storga1.copliant.eu" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with SMTP id S1753924AbcCCKiy (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 3 Mar 2016 05:38:54 -0500
+In-Reply-To: <56D6D4AC.40205@intel.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Adrian Hunter <adrian.hunter@intel.com>
+Cc: Shawn Lin <shawn.lin@kernel-upstream.org>, linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, Barry Song <Baohua.Song@csr.com>
 
-In commit ceae98f20e36 ("mmc: core: Try other signal levels
-during power up") we can see that there are times when it's
-valid to try several signal voltages.  Don't print an ugly
-error in the logs when that happens.
+Adrian Hunter wrote:
+>
+> It might also be related to the problem here:
+> 
+> 	http://marc.info/?l=linux-mmc&m=145319732219412
+> 
+> You might try keeping the patch and applying the two referred to above.
 
-Signed-off-by: Nicolas Boichat <drinkcat@chromium.org>
----
+Hi,
 
-Similar to b19caf379c82e99737c29bc15d7b7fd7d24279f9
-mmc: dw_mmc: Change signal voltage error to dev_dbg()
+Stock kernel 4.4.3 with the two extra patches does not work.
 
- drivers/mmc/host/mtk-sd.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
-
-diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
-index f01972e..07809f4 100644
---- a/drivers/mmc/host/mtk-sd.c
-+++ b/drivers/mmc/host/mtk-sd.c
-@@ -1038,7 +1038,7 @@ static int msdc_ops_switch_volt(struct mmc_host *mmc, struct mmc_ios *ios)
- 
- 		ret = regulator_set_voltage(mmc->supply.vqmmc, min_uv, max_uv);
- 		if (ret) {
--			dev_err(host->dev,
-+			dev_dbg(host->dev,
- 					"Regulator set error %d: %d - %d\n",
- 					ret, min_uv, max_uv);
- 		} else {
--- 
-2.7.0.rc3.207.g0ac5344
+Regards,
+Hubert Tonneau
