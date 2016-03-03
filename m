@@ -1,57 +1,36 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] Revert "mmc: block: don't use parameter prefix if built
- as module"
-Date: Thu, 3 Mar 2016 14:37:04 +0100
-Message-ID: <CAPDyKFpRNQuTE9c6Ux_Bj0FXMnL4EiVFkswNf7F+c254W0xM1Q@mail.gmail.com>
-References: <1455206051-8633-1-git-send-email-ulf.hansson@linaro.org>
-	<20160211171941.GA29378@kroah.com>
-	<CAPDyKFp+2SQhAuDt26CpDQnd-KwhWM3GffgQip7aj-QtuUUjEA@mail.gmail.com>
-	<20160212163216.GB5646@kroah.com>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [RFC PATCH 2/4] mmc: core: implement enhanced strobe support
+Date: Thu, 3 Mar 2016 15:37:13 +0200
+Message-ID: <56D83E09.70008@intel.com>
+References: <1456972557-7994-1-git-send-email-shawn.lin@rock-chips.com>
+ <1456972596-8077-1-git-send-email-shawn.lin@rock-chips.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20160212163216.GB5646@kroah.com>
+In-Reply-To: <1456972596-8077-1-git-send-email-shawn.lin@rock-chips.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Greg KH <gregkh@linuxfoundation.org>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, John Stultz <john.stultz@linaro.org>, Andy Shevchenko <andriy.shevchenko@linux.intel.com>
+To: Shawn Lin <shawn.lin@rock-chips.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Michal Simek <michal.simek@xilinx.com>, soren.brinkmann@xilinx.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-On 12 February 2016 at 17:32, Greg KH <gregkh@linuxfoundation.org> wrote:
-> On Fri, Feb 12, 2016 at 11:06:03AM +0100, Ulf Hansson wrote:
->> On 11 February 2016 at 18:19, Greg KH <gregkh@linuxfoundation.org> wrote:
->> > On Thu, Feb 11, 2016 at 04:54:11PM +0100, Ulf Hansson wrote:
->> >> This reverts commit 829b6962f7e3cfc06f7c5c26269fd47ad48cf503.
->> >>
->> >> Revert this change as it causes a sysfs path to change and therefore
->> >> introduces and ABI regression. More precisely Android's vold is not being
->> >> able to access /sys/module/mmcblk/parameters/perdev_minors any more, since
->> >> the path becomes changed to: "/sys/module/mmc_block/..."
->> >>
->> >> Fixes: 829b6962f7e3 ("mmc: block: don't use parameter prefix if built as
->> >> module")
->> >> Reported-by: John Stultz <john.stultz@linaro.org>
->> >> Cc: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
->> >> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
->> >
->> > Please also add a "cc: stable..." tag to the patch so it gets picked up
->> > in stable kernel releases.
->>
->> Doesn't the Fixes tag take care of that?
->
-> Not at all, never rely on that, please read
-> Documentation/stable_kernel_rules.txt for how to properly tag a patch
-> for a stable release.
->
-> Sometimes I get bored and look at patches with only a fixes: tag on them
-> to see how bad the maintainer is messing up and then do their work for
-> them, but that's rare these days...
+On 03/03/16 04:36, Shawn Lin wrote:
+> Controllers use data strobe line to latch data from devices
+> under hs400 mode, but not for cmd line. So from emmc 5.1, JEDEC
+> introduces enhanced strobe mode for latching cmd response from
+> emmc devices to host controllers. This new feature is optional.
 
-That's sounds like you do this entirely manually, I doubt you have
-time for that? :-)
+As I currently understand it, HS400ES does not require tuning.
+Consequently you can go straight to HS400ES and do not need to do
+HS200 first.  If that is the case then more changes are needed.
 
-So, isn't it quite simple to automate this thing, as all the
-information you need (ideally) is to know what commit is being fixed.
-Right?
+Also it would be nice if the transfer mode displayed reflected enhanced
+strobe e.g.
 
-Kind regards
-Uffe
+	Currently
+
+		mmc1: new HS400 MMC card at address 0001
+
+	Change for enhance strobe supported
+
+		mmc1: new HS400ES MMC card at address 0001
