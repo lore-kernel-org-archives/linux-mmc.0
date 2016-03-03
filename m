@@ -1,31 +1,47 @@
-From: Christoph Hellwig <hch@infradead.org>
-Subject: Re: [PATCH 0/2] mmc, block: override default max_dev_sectors
-Date: Wed, 2 Mar 2016 09:12:28 -0800
-Message-ID: <20160302171227.GA5229@infradead.org>
-References: <cover.1456847028.git.pawelx.wodkowski@intel.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from bombadil.infradead.org ([198.137.202.9]:34015 "EHLO
-	bombadil.infradead.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755116AbcCBRM2 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 2 Mar 2016 12:12:28 -0500
-Content-Disposition: inline
-In-Reply-To: <cover.1456847028.git.pawelx.wodkowski@intel.com>
-Sender: linux-mmc-owner@vger.kernel.org
+From: Guodong Xu <guodong.xu@linaro.org>
+Subject: [PATCH 1/2] Documentation: synopsys-dw-mshc: add binding for resets
+Date: Thu,  3 Mar 2016 09:33:37 +0800
+Message-ID: <1456968818-22140-1-git-send-email-guodong.xu@linaro.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: robh+dt@kernel.org, pawel.moll@arm.com, mark.rutland@arm.com, ijc+devicetree@hellion.org.uk, galak@codeaurora.org, jh80.chung@samsung.com, ulf.hansson@linaro.org, shawn.lin@rock-chips.com, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
+Cc: Guodong Xu <guodong.xu@linaro.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Pawel Wodkowski <pawelx.wodkowski@intel.com>
-Cc: linux-block@vger.kernel.org, Mateusz Nowak <mateusz.nowak@intel.com>, linux-mmc@vger.kernel.org
 
-On Wed, Mar 02, 2016 at 09:54:15AM +0100, Pawel Wodkowski wrote:
-> From: Mateusz Nowak <mateusz.nowak@intel.com>
-> 
-> commit ca369d51b3e1 ("block/sd: Fix device-imposed transfer length limits")
-> introduced max_dev_sectors as upper limit for max_hw_sectors. This caused
-> limitation of maximum block size to default max_dev_sectors value - 127,
-> causing performance degradation with higher block sizes.
-> 
-> This patchset is allowing mmc driver to override max_dev_sectors value.
+Add resets property to synopsys-dw-mshc bindings. It is intended to
+represent the hardware reset signal present internally in some host
+controller IC designs.
 
-Past commit 5f009d ("block: Initialize max_dev_sectors to 0"), this
-should not be needed.
+See Documentation/devicetree/bindings/reset/reset.txt for details.
+
+Signed-off-by: Guodong Xu <guodong.xu@linaro.org>
+---
+ Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.txt | 6 +++++-
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+
+diff --git a/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.txt b/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.txt
+index 8636f5a..9b4896c 100644
+--- a/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.txt
++++ b/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.txt
+@@ -39,6 +39,10 @@ Required Properties:
+ 
+ Optional properties:
+ 
++* resets: phandle + reset specifier pair, intended to represent hardware
++  reset signal present internally in some host controller IC designs.
++  See Documentation/devicetree/bindings/reset/reset.txt for details.
++
+ * clocks: from common clock binding: handle to biu and ciu clocks for the
+   bus interface unit clock and the card interface unit clock.
+ 
+@@ -48,7 +52,7 @@ Optional properties:
+   clock-frequency.  It is an error to omit both the ciu clock and the
+   clock-frequency.
+ 
+-* clock-frequency: should be the frequency (in Hz) of the ciu clock.  If this
++* clock-frequency: should be tke frequency (in Hz) of the ciu clock.  If this
+   is specified and the ciu clock is specified then we'll try to set the ciu
+   clock to this at probe time.
+ 
+-- 
+1.9.1
