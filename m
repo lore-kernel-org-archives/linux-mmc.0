@@ -1,97 +1,102 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 1/3] mmc: sh_mmcif: Make sure the device stays active when
- needed in ->probe()
-Date: Thu, 3 Mar 2016 15:59:17 +0100
-Message-ID: <CAPDyKFqZkJGPgojY52H2=4JjdR9gvJCe99_ZCv98ZNs4eUdRrg@mail.gmail.com>
-References: <1455195595-5121-1-git-send-email-ulf.hansson@linaro.org>
+Subject: Re: [PATCH] mmc: mmc_spi: Add Card Detect comments and fix CD GPIO case
+Date: Thu, 3 Mar 2016 16:28:23 +0100
+Message-ID: <CAPDyKFo-+OWq1S7jD+j8e8fBOgL3A7igtp_rG5qFBwjgJF5U9A@mail.gmail.com>
+References: <20160216040641.31979.6202.sendpatchset@little-apple>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wm0-f53.google.com ([74.125.82.53]:37284 "EHLO
-	mail-wm0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751067AbcCCO7S (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 3 Mar 2016 09:59:18 -0500
-Received: by mail-wm0-f53.google.com with SMTP id p65so35101997wmp.0
-        for <linux-mmc@vger.kernel.org>; Thu, 03 Mar 2016 06:59:18 -0800 (PST)
-In-Reply-To: <1455195595-5121-1-git-send-email-ulf.hansson@linaro.org>
+Received: from mail-wm0-f48.google.com ([74.125.82.48]:33957 "EHLO
+	mail-wm0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932561AbcCCP2Z (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 3 Mar 2016 10:28:25 -0500
+Received: by mail-wm0-f48.google.com with SMTP id p65so39926448wmp.1
+        for <linux-mmc@vger.kernel.org>; Thu, 03 Mar 2016 07:28:24 -0800 (PST)
+In-Reply-To: <20160216040641.31979.6202.sendpatchset@little-apple>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Nguyen Viet Dung <nv-dung@jinso.co.jp>
-Cc: Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>, Geert Uytterhoeven <geert+renesas@glider.be>, Magnus Damm <magnus.damm@gmail.com>, Simon Horman <horms@verge.net.au>, linux-mmc <linux-mmc@vger.kernel.org>, Laurent Pinchart <laurent.pinchart@ideasonboard.com>
+To: Magnus Damm <magnus.damm@gmail.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Stephen Warren <swarren@nvidia.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, eha@doredevelopment.dk, Adrian Hunter <adrian.hunter@intel.com>
 
-On 11 February 2016 at 13:59, Ulf Hansson <ulf.hansson@linaro.org> wrote:
-> While accessing the device, make sure it stays active by increasing the
-> runtime PM usage count for it.
+On 16 February 2016 at 05:06, Magnus Damm <magnus.damm@gmail.com> wrote:
+> From: Magnus Damm <damm+renesas@opensource.se>
 >
-> Let's also defer to enable runtime PM until we really need access to the
-> device. This also enables the error path in ->probe() to become simpler.
+> This patch adds comments to describe the various ways card detection
+> may be implemented and when polling is needed. Also a fix is included
+> to prevent the MMC SPI driver from polling when a CD GPIO that supports
+> interrupts is specified using the gpios DT property (case 1).
 >
-> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+> Without this patch the DT node below results in the following output:
+>
+>  spi_gpio: spi-gpio { /* SD2 @ CN12 */
+>          compatible = "spi-gpio";
+>          #address-cells = <1>;
+>          #size-cells = <0>;
+>          gpio-sck = <&gpio6 16 GPIO_ACTIVE_HIGH>;
+>          gpio-mosi = <&gpio6 17 GPIO_ACTIVE_HIGH>;
+>          gpio-miso = <&gpio6 18 GPIO_ACTIVE_HIGH>;
+>          num-chipselects = <1>;
+>          cs-gpios = <&gpio6 21 GPIO_ACTIVE_LOW>;
+>          status = "okay";
+>
+>          spi@0 {
+>                  compatible = "mmc-spi-slot";
+>                  reg = <0>;
+>                  voltage-ranges = <3200 3400>;
+>                  spi-max-frequency = <25000000>;
+>                  gpios = <&gpio6 22 GPIO_ACTIVE_LOW>;   /* CD */
+>          };
+>  };
+>
+>  # dmesg | grep mmc
+>  mmc_spi spi32766.0: SD/MMC host mmc0, no WP, no poweroff, cd polling
+>  mmc0: host does not support reading read-only switch, assuming write-enable
+>  mmc0: new SDHC card on SPI
+>  mmcblk0: mmc0:0000 SU04G 3.69 GiB
+>  mmcblk0: p1
+>
+>  With this patch applied the "cd polling" portion above disappears.
+>
+> Signed-off-by: Magnus Damm <damm+renesas@opensource.se>
 
-Nguyen, sorry for bothering you. Did you manage to test out these three patches?
-
-Even if it doesn't solve the original issue that you reported [1],
-perhaps these can anyway be useful as cleanups?
+This looks good to me. Although do you think we need this for @stable as well?
 
 Kind regards
 Uffe
 
-[1]
-http://www.spinics.net/lists/linux-sh/msg47766.html
-
 > ---
->  drivers/mmc/host/sh_mmcif.c | 15 ++++++++-------
->  1 file changed, 8 insertions(+), 7 deletions(-)
 >
-> diff --git a/drivers/mmc/host/sh_mmcif.c b/drivers/mmc/host/sh_mmcif.c
-> index 8d870ce..c6c2a08 100644
-> --- a/drivers/mmc/host/sh_mmcif.c
-> +++ b/drivers/mmc/host/sh_mmcif.c
-> @@ -1519,23 +1519,23 @@ static int sh_mmcif_probe(struct platform_device *pdev)
+>  Developed on top of renesas-drivers-2016-02-09-v4.5-rc3 which
+>  simply put is v4.5-rc3 + selected linux-next trees.
 >
->         platform_set_drvdata(pdev, host);
+>  drivers/mmc/host/mmc_spi.c |   14 ++++++++++++++
+>  1 file changed, 14 insertions(+)
 >
-> -       pm_runtime_enable(dev);
-> -       host->power = false;
-> -
->         host->clk = devm_clk_get(dev, NULL);
->         if (IS_ERR(host->clk)) {
->                 ret = PTR_ERR(host->clk);
->                 dev_err(dev, "cannot get clock: %d\n", ret);
-> -               goto err_pm;
-> +               goto err_host;
->         }
+> --- 0001/drivers/mmc/host/mmc_spi.c
+> +++ work/drivers/mmc/host/mmc_spi.c     2016-02-16 12:47:47.900513000 +0900
+> @@ -1437,11 +1437,25 @@ static int mmc_spi_probe(struct spi_devi
+>         if (status != 0)
+>                 goto fail_add_host;
 >
->         ret = clk_prepare_enable(host->clk);
->         if (ret < 0)
-> -               goto err_pm;
-> +               goto err_host;
->
->         sh_mmcif_clk_setup(host);
->
-> -       ret = pm_runtime_resume(dev);
-> +       pm_runtime_enable(dev);
-> +       host->power = false;
+> +       /* Card detection in case of DT is supported in several ways:
+> +        * 1) GPIO with interrupt support using "gpios" DT property.
+> +        * 2) GPIO without interrupt support using "gpios" DT property.
+> +        * 3) Interrupt only using "interrupt-parent/interrupts" DT properties.
+> +        * 4) Both "gpios" and "interrupt-parent/interrupts" DT properties.
+> +        * 5) Nothing specified.
+> +        * For case 2 and 5 above polling is required.
+> +        */
+>         if (host->pdata && host->pdata->flags & MMC_SPI_USE_CD_GPIO) {
+>                 status = mmc_gpio_request_cd(mmc, host->pdata->cd_gpio,
+>                                              host->pdata->cd_debounce);
+>                 if (status != 0)
+>                         goto fail_add_host;
 > +
-> +       ret = pm_runtime_get_sync(dev);
->         if (ret < 0)
->                 goto err_clk;
->
-> @@ -1579,12 +1579,13 @@ static int sh_mmcif_probe(struct platform_device *pdev)
->                  sh_mmcif_readl(host->addr, MMCIF_CE_VERSION) & 0xffff,
->                  clk_get_rate(host->clk) / 1000000UL);
->
-> +       pm_runtime_put(dev);
->         clk_disable_unprepare(host->clk);
->         return ret;
->
->  err_clk:
->         clk_disable_unprepare(host->clk);
-> -err_pm:
-> +       pm_runtime_put_sync(dev);
->         pm_runtime_disable(dev);
->  err_host:
->         mmc_free_host(mmc);
-> --
-> 1.9.1
+> +               /* The platform has a CD GPIO signal that may support
+> +                * interrupts, so let mmc_gpiod_request_cd_irq() decide
+> +                * if polling is needed or not.
+> +                */
+> +               mmc->caps &= ~MMC_CAP_NEEDS_POLL;
+>                 mmc_gpiod_request_cd_irq(mmc);
+>         }
 >
