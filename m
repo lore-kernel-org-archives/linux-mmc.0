@@ -1,31 +1,68 @@
-From: Hubert Tonneau <hubert.tonneau@fullpliant.org>
-Subject: Re: MMC broken in kernel 4.4
-Date: Thu, 3 Mar 2016 16:23:05 +0000
-Message-ID: <hubert_tonneau/RM1SK4J9/0G3839T@hubert-tonneau.storga.com>
-References: <hubert_tonneau/BJJ9BVJR/0G321OJ19@hubert-tonneau.storga.com>	<56D44249.7070200@kernel-upstream.org>	<hubert_tonneau/727MOBXX/0G32U5D@hubert-tonneau.storga.com>	<56D4FCC2.1020604@kernel-upstream.org>	<hubert_tonneau/RM1SK4J9/0G33XJU@hubert-tonneau.storga.com>	<56D56ABA.5020206@kernel-upstream.org> <CAPDyKFooDVdzBw_ygMF67pWmwxiwWpRDQwyToTH4Zi4ek5cdTw@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8bit
+From: Philip Elcan <pelcan@codeaurora.org>
+Subject: [PATCH] mmc: sdhci-acpi: add QCOM controllers
+Date: Thu,  3 Mar 2016 11:38:46 -0500
+Message-ID: <1457023128-23720-1-git-send-email-pelcan@codeaurora.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from dc1.fullpliant.org ([213.186.44.166]:35038 "HELO
-	storga1.copliant.eu" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with SMTP id S1751002AbcCCQcH (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 3 Mar 2016 11:32:07 -0500
-In-Reply-To: <CAPDyKFooDVdzBw_ygMF67pWmwxiwWpRDQwyToTH4Zi4ek5cdTw@mail.gmail.com>
+Received: from smtp.codeaurora.org ([198.145.29.96]:51380 "EHLO
+	smtp.codeaurora.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751530AbcCCQjG (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 3 Mar 2016 11:39:06 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>, Shawn Lin <shawn.lin@kernel-upstream.org>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, Barry Song <Baohua.Song@csr.com>, Carlo Caione <carlo@endlessm.com>
+To: Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, Michele Curti <michele.curti@gmail.com>, Philip Elcan <pelcan@codeaurora.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Cc: Timur Tabi <timur@codeaurora.org>, linux-arm-msm@vger.kernel.org
 
-Hi,
+This adds the HIDs for Qualcomm Technologies Inc SDHC
+controllers:
+QCOM8051: non-removable device that does not support 1.8v
+QCOM8052: non-removable device that does support 1.8v
 
-Ulf Hansson wrote:
->
-> This one should fix the problem. It was included as fix in 4.5 rc1 and
-> tagged @stable.
-> http://git.kernel.org/cgit/linux/kernel/git/torvalds/linux.git/commit?id=e10c321977091f163eceedec0650e0ef4b3cf4bb
+Signed-off-by: Philip Elcan <pelcan@codeaurora.org>
+---
+ drivers/mmc/host/sdhci-acpi.c | 15 +++++++++++++++
+ 1 file changed, 15 insertions(+)
 
-This patch do solves the 4.4.X issue on Lenovo Yoga 8 inch tablet.
+diff --git a/drivers/mmc/host/sdhci-acpi.c b/drivers/mmc/host/sdhci-acpi.c
+index a5cda92..041e739 100644
+--- a/drivers/mmc/host/sdhci-acpi.c
++++ b/drivers/mmc/host/sdhci-acpi.c
+@@ -264,6 +264,17 @@ static const struct sdhci_acpi_slot sdhci_acpi_slot_int_sd = {
+ 	.probe_slot	= sdhci_acpi_sd_probe_slot,
+ };
+ 
++static const struct sdhci_acpi_slot sdhci_acpi_slot_qcom_sd_3v = {
++	.quirks  = SDHCI_QUIRK_BROKEN_CARD_DETECTION,
++	.quirks2 = SDHCI_QUIRK2_NO_1_8_V,
++	.caps    = MMC_CAP_NONREMOVABLE,
++};
++
++static const struct sdhci_acpi_slot sdhci_acpi_slot_qcom_sd = {
++	.quirks  = SDHCI_QUIRK_BROKEN_CARD_DETECTION,
++	.caps    = MMC_CAP_NONREMOVABLE,
++};
++
+ struct sdhci_acpi_uid_slot {
+ 	const char *hid;
+ 	const char *uid;
+@@ -284,6 +295,8 @@ static const struct sdhci_acpi_uid_slot sdhci_acpi_uids[] = {
+ 	{ "INT344D"  , NULL, &sdhci_acpi_slot_int_sdio },
+ 	{ "PNP0FFF"  , "3" , &sdhci_acpi_slot_int_sd   },
+ 	{ "PNP0D40"  },
++	{ "QCOM8051", NULL, &sdhci_acpi_slot_qcom_sd_3v },
++	{ "QCOM8052", NULL, &sdhci_acpi_slot_qcom_sd },
+ 	{ },
+ };
+ 
+@@ -298,6 +311,8 @@ static const struct acpi_device_id sdhci_acpi_ids[] = {
+ 	{ "INT3436"  },
+ 	{ "INT344D"  },
+ 	{ "PNP0D40"  },
++	{ "QCOM8051" },
++	{ "QCOM8052" },
+ 	{ },
+ };
+ MODULE_DEVICE_TABLE(acpi, sdhci_acpi_ids);
+-- 
+The Qualcomm Innovation Center, Inc. is a member of the Code Aurora Forum,
+a Linux Foundation Collaborative Project
 
-Regards,
-Hubert Tonneau
