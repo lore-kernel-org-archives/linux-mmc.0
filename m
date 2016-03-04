@@ -1,80 +1,110 @@
-From: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH] mmc: tegra: Disable UHS-I modes for tegra114
-Date: Fri, 4 Mar 2016 10:41:15 +0100
-Message-ID: <CAPDyKFrvaLq3dD5qFJBLVTL5gXA9NaHxfc_mM9PCfczfwQiJLA@mail.gmail.com>
-References: <1455806924-14967-1-git-send-email-jonathanh@nvidia.com>
-	<1456479257-12147-1-git-send-email-jonathanh@nvidia.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH] mmc: mmc_spi: Add Card Detect comments and fix CD GPIO case
+Date: Fri, 4 Mar 2016 10:41:34 +0100
+Message-ID: <CAPDyKFrKGnvFgDS_jwHAE3Jb36Vkp0JaexOVb_8KF1HVi+8OvA@mail.gmail.com>
+References: <20160216040641.31979.6202.sendpatchset@little-apple>
+	<CAPDyKFo-+OWq1S7jD+j8e8fBOgL3A7igtp_rG5qFBwjgJF5U9A@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1456479257-12147-1-git-send-email-jonathanh-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
-Sender: linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Jon Hunter <jonathanh-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
-Cc: Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Stephen Warren <swarren-3lzwWm7+Weoh9ZMKESR00Q@public.gmane.org>, Thierry Reding <thierry.reding-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Alexandre Courbot <gnurou-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Lucas Stach <dev-8ppwABl0HbeELgA04lAiVw@public.gmane.org>, linux-mmc <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <CAPDyKFo-+OWq1S7jD+j8e8fBOgL3A7igtp_rG5qFBwjgJF5U9A@mail.gmail.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Magnus Damm <magnus.damm@gmail.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Stephen Warren <swarren@nvidia.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Esben Haabendal <eha@doredevelopment.dk>, Adrian Hunter <adrian.hunter@intel.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On 26 February 2016 at 10:34, Jon Hunter <jonathanh-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org> wrote:
-> SD card support for Tegra114 started failing after commit a8e326a911d3
-> ("mmc: tegra: implement module external clock change") was merged. This
-> commit was part of a series to enable UHS-I modes for Tegra. To
-> workaround this problem for now, disable UHS-I modes for Tegra114 by
-> separating the soc data structures for Tegra114 and Tegra124 so that
-> UHS-I is still enabled for Tegra124 but not Tegra114.
+On 3 March 2016 at 16:28, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+> On 16 February 2016 at 05:06, Magnus Damm <magnus.damm@gmail.com> wrote:
+>> From: Magnus Damm <damm+renesas@opensource.se>
+>>
+>> This patch adds comments to describe the various ways card detection
+>> may be implemented and when polling is needed. Also a fix is included
+>> to prevent the MMC SPI driver from polling when a CD GPIO that supports
+>> interrupts is specified using the gpios DT property (case 1).
+>>
+>> Without this patch the DT node below results in the following output:
+>>
+>>  spi_gpio: spi-gpio { /* SD2 @ CN12 */
+>>          compatible = "spi-gpio";
+>>          #address-cells = <1>;
+>>          #size-cells = <0>;
+>>          gpio-sck = <&gpio6 16 GPIO_ACTIVE_HIGH>;
+>>          gpio-mosi = <&gpio6 17 GPIO_ACTIVE_HIGH>;
+>>          gpio-miso = <&gpio6 18 GPIO_ACTIVE_HIGH>;
+>>          num-chipselects = <1>;
+>>          cs-gpios = <&gpio6 21 GPIO_ACTIVE_LOW>;
+>>          status = "okay";
+>>
+>>          spi@0 {
+>>                  compatible = "mmc-spi-slot";
+>>                  reg = <0>;
+>>                  voltage-ranges = <3200 3400>;
+>>                  spi-max-frequency = <25000000>;
+>>                  gpios = <&gpio6 22 GPIO_ACTIVE_LOW>;   /* CD */
+>>          };
+>>  };
+>>
+>>  # dmesg | grep mmc
+>>  mmc_spi spi32766.0: SD/MMC host mmc0, no WP, no poweroff, cd polling
+>>  mmc0: host does not support reading read-only switch, assuming write-enable
+>>  mmc0: new SDHC card on SPI
+>>  mmcblk0: mmc0:0000 SU04G 3.69 GiB
+>>  mmcblk0: p1
+>>
+>>  With this patch applied the "cd polling" portion above disappears.
+>>
+>> Signed-off-by: Magnus Damm <damm+renesas@opensource.se>
 >
-> Fixes: a8e326a911d3 ("mmc: tegra: implement module external clock change")
->
-> Signed-off-by: Jon Hunter <jonathanh-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
+> This looks good to me. Although do you think we need this for @stable as well?
 
-Thanks, applied for fixes!
+Ehh, as I am soon will be travelling and wanted this to be tested in
+linux next, I took the liberty to remove the comments, updated the
+change log and applied a stable tag.
+
+If think the comments are useful, please send a separate patch on top.
+
+So applied for fixes! Please have a look to make sure I looks okay to you.
 
 Kind regards
 Uffe
 
-> ---
->  drivers/mmc/host/sdhci-tegra.c | 12 +++++++++++-
->  1 file changed, 11 insertions(+), 1 deletion(-)
 >
-> diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
-> index 83c4bf7bc16c..212d51f08939 100644
-> --- a/drivers/mmc/host/sdhci-tegra.c
-> +++ b/drivers/mmc/host/sdhci-tegra.c
-> @@ -147,10 +147,16 @@ static void tegra_sdhci_reset(struct sdhci_host *host, u8 mask)
->         /* Advertise UHS modes as supported by host */
->         if (soc_data->nvquirks & NVQUIRK_ENABLE_SDR50)
->                 misc_ctrl |= SDHCI_MISC_CTRL_ENABLE_SDR50;
-> +       else
-> +               misc_ctrl &= ~SDHCI_MISC_CTRL_ENABLE_SDR50;
->         if (soc_data->nvquirks & NVQUIRK_ENABLE_DDR50)
->                 misc_ctrl |= SDHCI_MISC_CTRL_ENABLE_DDR50;
-> +       else
-> +               misc_ctrl &= ~SDHCI_MISC_CTRL_ENABLE_DDR50;
->         if (soc_data->nvquirks & NVQUIRK_ENABLE_SDR104)
->                 misc_ctrl |= SDHCI_MISC_CTRL_ENABLE_SDR104;
-> +       else
-> +               misc_ctrl &= ~SDHCI_MISC_CTRL_ENABLE_SDR104;
->         sdhci_writel(host, misc_ctrl, SDHCI_TEGRA_VENDOR_MISC_CTRL);
+> Kind regards
+> Uffe
 >
->         clk_ctrl = sdhci_readl(host, SDHCI_TEGRA_VENDOR_CLOCK_CTRL);
-> @@ -335,6 +341,10 @@ static const struct sdhci_pltfm_data sdhci_tegra114_pdata = {
->
->  static const struct sdhci_tegra_soc_data soc_data_tegra114 = {
->         .pdata = &sdhci_tegra114_pdata,
-> +};
-> +
-> +static const struct sdhci_tegra_soc_data soc_data_tegra124 = {
-> +       .pdata = &sdhci_tegra114_pdata,
->         .nvquirks = NVQUIRK_ENABLE_SDR50 |
->                     NVQUIRK_ENABLE_DDR50 |
->                     NVQUIRK_ENABLE_SDR104,
-> @@ -357,7 +367,7 @@ static const struct sdhci_tegra_soc_data soc_data_tegra210 = {
->
->  static const struct of_device_id sdhci_tegra_dt_match[] = {
->         { .compatible = "nvidia,tegra210-sdhci", .data = &soc_data_tegra210 },
-> -       { .compatible = "nvidia,tegra124-sdhci", .data = &soc_data_tegra114 },
-> +       { .compatible = "nvidia,tegra124-sdhci", .data = &soc_data_tegra124 },
->         { .compatible = "nvidia,tegra114-sdhci", .data = &soc_data_tegra114 },
->         { .compatible = "nvidia,tegra30-sdhci", .data = &soc_data_tegra30 },
->         { .compatible = "nvidia,tegra20-sdhci", .data = &soc_data_tegra20 },
-> --
-> 2.1.4
->
+>> ---
+>>
+>>  Developed on top of renesas-drivers-2016-02-09-v4.5-rc3 which
+>>  simply put is v4.5-rc3 + selected linux-next trees.
+>>
+>>  drivers/mmc/host/mmc_spi.c |   14 ++++++++++++++
+>>  1 file changed, 14 insertions(+)
+>>
+>> --- 0001/drivers/mmc/host/mmc_spi.c
+>> +++ work/drivers/mmc/host/mmc_spi.c     2016-02-16 12:47:47.900513000 +0900
+>> @@ -1437,11 +1437,25 @@ static int mmc_spi_probe(struct spi_devi
+>>         if (status != 0)
+>>                 goto fail_add_host;
+>>
+>> +       /* Card detection in case of DT is supported in several ways:
+>> +        * 1) GPIO with interrupt support using "gpios" DT property.
+>> +        * 2) GPIO without interrupt support using "gpios" DT property.
+>> +        * 3) Interrupt only using "interrupt-parent/interrupts" DT properties.
+>> +        * 4) Both "gpios" and "interrupt-parent/interrupts" DT properties.
+>> +        * 5) Nothing specified.
+>> +        * For case 2 and 5 above polling is required.
+>> +        */
+>>         if (host->pdata && host->pdata->flags & MMC_SPI_USE_CD_GPIO) {
+>>                 status = mmc_gpio_request_cd(mmc, host->pdata->cd_gpio,
+>>                                              host->pdata->cd_debounce);
+>>                 if (status != 0)
+>>                         goto fail_add_host;
+>> +
+>> +               /* The platform has a CD GPIO signal that may support
+>> +                * interrupts, so let mmc_gpiod_request_cd_irq() decide
+>> +                * if polling is needed or not.
+>> +                */
+>> +               mmc->caps &= ~MMC_CAP_NEEDS_POLL;
+>>                 mmc_gpiod_request_cd_irq(mmc);
+>>         }
+>>
