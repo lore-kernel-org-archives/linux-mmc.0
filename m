@@ -1,67 +1,202 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [v5, 0/5] Fix eSDHC host version register bug
-Date: Fri, 4 Mar 2016 11:51:31 +0100
-Message-ID: <CAPDyKFpXBmx7Tbdz5i4VHbnycUikZUwtv0BvPGXYKGOuU1g9PQ@mail.gmail.com>
-References: <1457084321-10003-1-git-send-email-yangbo.lu@nxp.com>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [RESEND PATCH v5 2/2] mmc: sdhci-of-arasan: add phy support for
+ sdhci-of-arasan
+Date: Fri, 4 Mar 2016 14:12:24 +0200
+Message-ID: <56D97BA8.7090302@intel.com>
+References: <1455848322-2210-1-git-send-email-shawn.lin@rock-chips.com>
+ <1455848420-2293-1-git-send-email-shawn.lin@rock-chips.com>
+ <56D951F9.6060602@intel.com> <56D96259.20207@rock-chips.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wm0-f54.google.com ([74.125.82.54]:34383 "EHLO
-	mail-wm0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751362AbcCDKvd (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 4 Mar 2016 05:51:33 -0500
-Received: by mail-wm0-f54.google.com with SMTP id p65so14922573wmp.1
-        for <linux-mmc@vger.kernel.org>; Fri, 04 Mar 2016 02:51:32 -0800 (PST)
-In-Reply-To: <1457084321-10003-1-git-send-email-yangbo.lu@nxp.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <56D96259.20207@rock-chips.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Shawn Lin <shawn.lin@rock-chips.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>, Michal Simek <michal.simek@xilinx.com>, soren.brinkmann@xilinx.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, devicetree@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Yangbo Lu <yangbo.lu@nxp.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, scott.wood@nxp.com, leoyang.li@nxp.com, xiaobo.xie@nxp.com, Rob Herring <robh+dt@kernel.org>, Bhupesh Sharma <bhupesh.sharma@freescale.com>, Zhao Qiang <qiang.zhao@freescale.com>, Kumar Gala <galak@codeaurora.org>, Santosh Shilimkar <ssantosh@kernel.org>
 
-On 4 March 2016 at 10:38, Yangbo Lu <yangbo.lu@nxp.com> wrote:
-> This patchset is used to fix a host version register bug in the T4240-R1.0-R2.0
-> eSDHC controller. To get the SoC version and revision, it's needed to add the
-> GUTS driver to access the global utilities registers.
->
-> So, the first three patches are to add the GUTS driver.
-> The following two patches are to enable GUTS driver support to get SVR in eSDHC
-> driver and fix host version for T4240.
->
-> Yangbo Lu (5):
->   ARM64: dts: ls2080a: add device configuration node
->   soc: fsl: add GUTS driver for QorIQ platforms
->   dt: move guts devicetree doc out of powerpc directory
->   powerpc/fsl: move mpc85xx.h to include/linux/fsl
->   mmc: sdhci-of-esdhc: fix host version for T4240-R1.0-R2.0
->
->  .../bindings/{powerpc => soc}/fsl/guts.txt         |   3 +
->  arch/arm64/boot/dts/freescale/fsl-ls2080a.dtsi     |   6 ++
->  drivers/clk/clk-qoriq.c                            |   3 +-
->  drivers/i2c/busses/i2c-mpc.c                       |   2 +-
->  drivers/iommu/fsl_pamu.c                           |   3 +-
->  drivers/mmc/host/Kconfig                           |   1 +
->  drivers/mmc/host/sdhci-of-esdhc.c                  |  23 +++++
->  drivers/net/ethernet/freescale/gianfar.c           |   2 +-
->  drivers/soc/Kconfig                                |   2 +-
->  drivers/soc/fsl/Kconfig                            |   8 ++
->  drivers/soc/fsl/Makefile                           |   1 +
->  drivers/soc/fsl/guts.c                             | 103 +++++++++++++++++++++
->  include/linux/fsl/guts.h                           | 100 ++++++++++----------
->  .../asm/mpc85xx.h => include/linux/fsl/svr.h       |   4 +-
->  14 files changed, 204 insertions(+), 57 deletions(-)
->  rename Documentation/devicetree/bindings/{powerpc => soc}/fsl/guts.txt (91%)
->  create mode 100644 drivers/soc/fsl/Kconfig
->  create mode 100644 drivers/soc/fsl/guts.c
->  rename arch/powerpc/include/asm/mpc85xx.h => include/linux/fsl/svr.h (97%)
->
-> --
-> 2.1.0.27.g96db324
->
+On 04/03/16 12:24, Shawn Lin wrote:
+> Hi Adrian,
+> 
+> On 2016/3/4 17:14, Adrian Hunter wrote:
+>> On 19/02/16 04:20, Shawn Lin wrote:
+>>> This patch adds Generic PHY access for sdhci-of-arasan. Driver
+> 
+> [...]
+> 
+>>>   /**
+>>>    * sdhci_arasan_suspend - Suspend method for the driver
+>>>    * @dev:    Address of the device structure
+>>> - * Returns 0 on success and error value on error
+>>> + * Return: 0 on success and error value on error
+>>
+>> Really should be a separate patch for the comment fixes.
+> 
+> yep, I won't touch it when I rebase my patch for this topic.
+> 
+>>
+>>>    *
+>>>    * Put the device in a low power state.
+>>>    */
+>>> @@ -88,6 +91,14 @@ static int sdhci_arasan_suspend(struct device *dev)
+>>>       if (ret)
+>>>           return ret;
+>>>
+>>> +    if (!IS_ERR(sdhci_arasan->phy)) {
+>>> +        ret = phy_power_off(sdhci_arasan->phy);
+>>> +        if (ret) {
+>>> +            dev_err(dev, "Cannot power off phy.\n");
+>>
+>> I would expect you ought to call sdhci_resume_host() here.
+> 
+> oh, got it.
+> 
+>>
+>>> +            return ret;
+>>> +        }
+>>> +    }
+>>> +
+>>>       clk_disable(pltfm_host->clk);
+>>>       clk_disable(sdhci_arasan->clk_ahb);
+>>>
+>>> @@ -97,7 +108,7 @@ static int sdhci_arasan_suspend(struct device *dev)
+>>>   /**
+>>>    * sdhci_arasan_resume - Resume method for the driver
+>>>    * @dev:    Address of the device structure
+>>> - * Returns 0 on success and error value on error
+>>> + * Return: 0 on success and error value on error
+>>>    *
+>>>    * Resume operation after suspend
+>>>    */
+>>> @@ -118,11 +129,24 @@ static int sdhci_arasan_resume(struct device *dev)
+>>>       ret = clk_enable(pltfm_host->clk);
+>>>       if (ret) {
+>>>           dev_err(dev, "Cannot enable SD clock.\n");
+>>> -        clk_disable(sdhci_arasan->clk_ahb);
+>>> -        return ret;
+>>> +        goto err_clk_en;
+>>> +    }
+>>> +
+>>> +    if (!IS_ERR(sdhci_arasan->phy)) {
+>>> +        ret = phy_power_on(sdhci_arasan->phy);
+>>> +        if (ret) {
+>>> +            dev_err(dev, "Cannot power on phy.\n");
+>>> +            goto err_phy_power;
+>>> +        }
+>>>       }
+>>>
+>>>       return sdhci_resume_host(host);
+>>> +
+>>> +err_phy_power:
+>>> +    clk_disable(pltfm_host->clk);
+>>> +err_clk_en:
+>>> +    clk_disable(sdhci_arasan->clk_ahb);
+>>
+>> I don't know that disabling clocks is necessarily the right thing to do if
+>> the resume fails.  You might want to consider what happens if the system
+>> tries to use the device when it is in that state.  It's been a long time
+>> since I did any ARM work but aren't you risking bus errors.  Might just as
+>> well not bother and save a few lines of code.
+>>
+> 
+> Firstly, I really just follow the orginal err handle.
+> It's risking bus errors if disabling ahb clk, but ahb clk is most very
+> likely to shared by many controllers. So regarding to the clk reference
+> count, the ahb_clk is not *really* disabled and just decrease the
+> reference count. How about keep these handles here?
 
-Please resend this to the respective mailing lists. There's no arm,
-dt, powerpc, clk, etc...
+I would remove the error handling on the grounds that it does not do
+anything useful.
 
-Regarding the mmc patch, it looks good to me so you can add my ack for it.
-
-Kind regards
-Uffe
+> 
+> 
+>>> +    return ret;
+>>>   }
+>>>   #endif /* ! CONFIG_PM_SLEEP */
+>>>
+>>> @@ -183,6 +207,30 @@ static int sdhci_arasan_probe(struct platform_device
+>>> *pdev)
+>>>           goto clk_disable_all;
+>>>       }
+>>>
+>>> +    sdhci_arasan->phy = ERR_PTR(-ENODEV);
+>>> +    if (of_device_is_compatible(pdev->dev.of_node,
+>>> +                    "arasan,sdhci-5.1")) {
+>>> +        sdhci_arasan->phy = devm_phy_get(&pdev->dev,
+>>> +                         "phy_arasan");
+>>> +        if (IS_ERR(sdhci_arasan->phy)) {
+>>> +            ret = PTR_ERR(sdhci_arasan->phy);
+>>> +            dev_err(&pdev->dev, "No phy for arasan,sdhci-5.1.\n");
+>>> +            goto clk_disable_all;
+>>> +        }
+>>> +
+>>> +        ret = phy_init(sdhci_arasan->phy);
+>>> +        if (ret < 0) {
+>>> +            dev_err(&pdev->dev, "phy_init err.\n");
+>>> +            goto clk_disable_all;
+>>> +        }
+>>> +
+>>> +        ret = phy_power_on(sdhci_arasan->phy);
+>>> +        if (ret < 0) {
+>>> +            dev_err(&pdev->dev, "phy_power_on err.\n");
+>>> +            goto err_phy_power;
+>>> +        }
+>>> +    }
+>>> +
+>>>       ret = sdhci_add_host(host);
+>>>       if (ret)
+>>>           goto err_pltfm_free;
+>>> @@ -190,7 +238,12 @@ static int sdhci_arasan_probe(struct platform_device
+>>> *pdev)
+>>>       return 0;
+>>>
+>>>   err_pltfm_free:
+>>> +    if (!IS_ERR(sdhci_arasan->phy))
+>>> +        phy_power_off(sdhci_arasan->phy);
+>>>       sdhci_pltfm_free(pdev);
+>>> +err_phy_power:
+>>> +    if (!IS_ERR(sdhci_arasan->phy))
+>>
+>> Looks like you are using sdhci_arasan after it has been free'd by
+>> sdhci_pltfm_free().
+>>
+>> Also there seem to be cases where sdhci_arasan_probe() can exit after
+>> sdhci_pltfm_init() without calling sdhci_pltfm_free().
+> 
+> Good catch, will fix it.
+> 
+>>
+>>> +        phy_exit(sdhci_arasan->phy);
+>>>   clk_disable_all:
+>>>       clk_disable_unprepare(clk_xin);
+>>>   clk_dis_ahb:
+>>> @@ -205,6 +258,11 @@ static int sdhci_arasan_remove(struct
+>>> platform_device *pdev)
+>>>       struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+>>>       struct sdhci_arasan_data *sdhci_arasan = pltfm_host->priv;
+>>>
+>>> +    if (!IS_ERR(sdhci_arasan->phy)) {
+>>> +        phy_power_off(sdhci_arasan->phy);
+>>> +        phy_exit(sdhci_arasan->phy);
+>>> +    }
+>>> +
+>>
+>> When you re-base, take care to keep this chunk above
+>> sdhci_pltfm_unregister().
+> 
+> sure.
+> 
+> Thanks for reviewing it.
+> 
+>>
+>>>       clk_disable_unprepare(sdhci_arasan->clk_ahb);
+>>>
+>>>       return sdhci_pltfm_unregister(pdev);
+>>>
+>>
+>>
+>>
+>>
+> 
+> 
