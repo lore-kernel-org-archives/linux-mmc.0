@@ -1,90 +1,127 @@
-From: Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
-Subject: Re: [PATCH 2/2] mmc: dw_mmc: add resets support to dw_mci_parse_dt()
-Date: Fri, 4 Mar 2016 11:45:57 +0800
-Message-ID: <56D904F5.9020700@rock-chips.com>
-References: <1456968818-22140-1-git-send-email-guodong.xu@linaro.org>
- <1456968818-22140-2-git-send-email-guodong.xu@linaro.org>
- <56D79AB4.7050809@rock-chips.com> <56D900A8.9070204@linaro.org>
+From: Alexandre Courbot <gnurou@gmail.com>
+Subject: Re: [PATCH v2 2/2] mmc: sdhci-tegra: Specify valid DMA mask
+Date: Fri, 4 Mar 2016 15:08:02 +0900
+Message-ID: <CAAVeFuLN7SUM3rSgYXOut+2xgwHEzyY51c2tKP2fqKCRD7ZZXg@mail.gmail.com>
+References: <1456806764-16467-1-git-send-email-acourbot@nvidia.com>
+ <10092864.HLRl1VM3vC@wuerfel> <CAAVeFuLqWcjAvCA4Stu=APFt0_jY6C=HiFfLiUnx=_W5Mj9gQg@mail.gmail.com>
+ <1671523.8ABQgk2cvG@wuerfel>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=gbk;
-	format=flowed
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <56D900A8.9070204-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: zhangfei <zhangfei.gao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Guodong Xu <guodong.xu-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, pawel.moll-5wv7dgnIgG8@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, ijc+devicetree-KcIKpvwj1kUDXYZnReoRVg@public.gmane.org, galak-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org, ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-Cc: shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org, shawn.lin-NgiFYW8Wbx6Ta72+1OMJgUB+6BGkLq7r@public.gmane.org, Xinwei Kong <kong.kongxinwei-C8/M+/jPZTeaMJb+Lgu22Q@public.gmane.org>
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-io0-f181.google.com ([209.85.223.181]:35242 "EHLO
+	mail-io0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751005AbcCDGIX (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 4 Mar 2016 01:08:23 -0500
+In-Reply-To: <1671523.8ABQgk2cvG@wuerfel>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Arnd Bergmann <arnd@arndb.de>
+Cc: Alexandre Courbot <acourbot@nvidia.com>, Ulf Hansson <ulf.hansson@linaro.org>, Stephen Warren <swarren@wwwdotorg.org>, Thierry Reding <thierry.reding@gmail.com>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-tegra@vger.kernel.org" <linux-tegra@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
 
-=D4=DA 2016/3/4 11:27, zhangfei =D0=B4=B5=C0:
->
->
-> On 03/03/2016 10:00 AM, Shawn Lin wrote:
->> Hi Guodong,
+On Wed, Mar 2, 2016 at 8:25 PM, Arnd Bergmann <arnd@arndb.de> wrote:
+> On Wednesday 02 March 2016 19:36:23 Alexandre Courbot wrote:
+>> On Wed, Mar 2, 2016 at 6:34 AM, Arnd Bergmann <arnd@arndb.de> wrote:
+>> > On Tuesday 01 March 2016 13:32:44 Alexandre Courbot wrote:
+>> >> On T210, the sdhci controller can address more than 32 bits of address
+>> >> space. Failing to express this fact results in the use of bounce
+>> >> buffers and affects performance.
+>> >>
+>> >> Signed-off-by: Alexandre Courbot <acourbot@nvidia.com>
+>> >
+>> > I don't get this one. Why don't you just set the (SDHCI_USE_SDMA | SDHCI_USE_ADMA)
+>> > flags that are checked in the first patch?
 >>
->> On 2016/3/3 9:33, Guodong Xu wrote:
->>> With this, user can add a 'resets' property into dw_mmc dts
->>> node, and when driver probe and parse_dt, it will call
->>> reset APIs to reset dw_mmc host controller.
->>>
->>> Please also refer to Documentation/devicetree/bindings/reset/reset.=
-txt
+>> The test is against (!(host->flags & (SDHCI_USE_SDMA |
+>> SDHCI_USE_ADMA))), (see the '!') so it will be true (and the DMA mask
+>> will be set) if both flags are *not* set (why we set the mask to 64
+>> bits here in that case, I don't know).
 >>
->> I have no hard objection for this patch, but I'd rather not add it
->> unless we actually need it. Could you elaborate more about any futhe=
-r
->> actions you will take if it's applied(i.e: deal with some unrecovera=
-ble
->> broken case)?  If we just reset the controller while probing, actual=
-ly I
->> can't find any problems without it based on tons of my reboot test.
+>> T210 is capable of SDMA, so we cannot use this condition for that
+>> purpose (maybe you missed the '!', in which case I understand why you
+>> were surprised).
 >
-> mmc register maybe abnormal state, if mmc is used in uefi, like boot
-> from emmc.
-> So we need reset mmc register when kernel boot up, instead of assumin=
-g
-> mmc is in clean state.
-> Next step is adding reset node in dts for drivers/mmc/host/dw_mmc-k3.=
-c
-> as reset driver is already there.
+> Ok, I see now that this code was just setting a fake mask in case
+> of PIO mode, which doesn't apply here. That in turn means that
+> your first patch is wrong though:
+>
+> For a device that is not DMA capable (neither SDMA nor ADMA
+> claimed to be supported), we should not call dma_set_mask_and_coherent()
+> because that is likely to fail as well. It's an ugly hack to
+> just override the mask in that case, and I'd say it requires
+> a comment explaining what is going on.
 
-=46air enough. Thanks for explaining.
+Yeah, I'm not too sure what is the point of setting the fake mask to
+be honest, but you are definitely right that it is a contradiction to
+call a DMA function on a device that is not DMA-capable.
 
 >
->>> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
->>> index 242f9a0..d3a7376 100644
->>> --- a/drivers/mmc/host/dw_mmc.c
->>> +++ b/drivers/mmc/host/dw_mmc.c
->>> @@ -2878,6 +2878,13 @@ static struct dw_mci_board
->>> *dw_mci_parse_dt(struct dw_mci *host)
->>>       if (!pdata)
->>>           return ERR_PTR(-ENOMEM);
->>>
->>> +    /* find reset controller when exist */
->>> +    pdata->rstc =3D devm_reset_control_get_optional(dev, NULL);
->>> +    if (IS_ERR(pdata->rstc))
->>> +        pdata->rstc =3D NULL;
->>> +    else
->>> +        reset_control_deassert(pdata->rstc);
->>> +
+>> >> @@ -289,6 +291,7 @@ static const struct sdhci_tegra_soc_data soc_data_tegra20 = {
+>> >>       .pdata = &sdhci_tegra20_pdata,
+>> >>       .nvquirks = NVQUIRK_FORCE_SDHCI_SPEC_200 |
+>> >>                   NVQUIRK_ENABLE_BLOCK_GAP_DET,
+>> >> +     .dma_mask = DMA_BIT_MASK(32),
+>> >>  };
+>> >
+>> > Can you describe what the specific bug is in these controllers? Do you mean they
+>> > support SDHCI_USE_SDMA or SDHCI_USE_ADMA in theory but you still have to prevent
+>> > them from using high addresses?
 >>
->> if the PTR_ERR(pdata->rstc) is -EPROBE_DEFER, should we defer probin=
-g
->> the driver?
-> Yes, good catch.
+>> Ok, I think you probably missed the '!' then. :)
 >
-> Thanks
+> I missed the larger context of that check too, but I think I've got it now.
 >
+>> >> @@ -353,6 +358,7 @@ static const struct sdhci_pltfm_data sdhci_tegra210_pdata = {
+>> >>
+>> >>  static const struct sdhci_tegra_soc_data soc_data_tegra210 = {
+>> >>       .pdata = &sdhci_tegra210_pdata,
+>> >> +     .dma_mask = DMA_BIT_MASK(34),
+>> >>  };
+>> >>
+>> >>  static const struct of_device_id sdhci_tegra_dt_match[] = {
+>> >
+>> > This one still completely weirds me out. What kind of odd limitation does
+>> > the controller have in Tegra 210?
+>> >
+>> > Are there actually any machines with more than 16GB?
+>>
+>> It is not a limitation of the controller - I am just limiting the mask
+>> to the range of physical memory we can ever access on T210. My intent
+>> here is to overcome the default 32-bit mask, not to limit the range,
+>> so I could have set a 64-bit mask if not for my OCD. :P
+>>
+>> But actually looking at how the various flags are interpreted in
+>> sdhci_add_host(), I see the following:
+>>
+>>     /*
+>>      * It is assumed that a 64-bit capable device has set a 64-bit DMA mask
+>>      * and *must* do 64-bit DMA.  A driver has the opportunity to change
+>>      * that during the first call to ->enable_dma().  Similarly
+>>      * SDHCI_QUIRK2_BROKEN_64_BIT_DMA must be left to the drivers to
+>>      * implement.
+>>      */
+>>     if (caps[0] & SDHCI_CAN_64BIT)
+>>         host->flags |= SDHCI_USE_64_BIT_DMA;
+>>
+>> Since this relies on what the hardware declares being capable of and
+>> is set on T210, I am very tempted to set a 64-bit dma_mask here and
+>> call it a day, but the above comment seems to suggest that this should
+>> have been done before.
 >
->
+> Right, that sounds good, that also makes it independent of the specific
+> Tegra SoC, right?
 
+Yes - it would just be a 2-liner that should set things properly for
+all 64-bit capable controllers.
 
---=20
-Best Regards
-Shawn Lin
+>> If you think this is cool though, I will just do that and in
+>> conjunction with patch 1 this will do the job nicely.
+>
+> as mentioned above, I now have doubts about patch 1, why do you still
+> need this now?
 
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" i=
-n
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+We would not need patch 1 anymore.
+
+Let me send this and see if it looks better.
+
+Thanks,
+Alex.
