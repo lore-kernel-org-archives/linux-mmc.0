@@ -1,25 +1,24 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: sh_mmcif, tmio: Use ARCH_RENESAS
-Date: Fri, 4 Mar 2016 10:41:41 +0100
-Message-ID: <CAPDyKFoVSrwspS2yx5h6ZWzHr6OHyPYZDmC7Yw_mGM0BOk+Qxw@mail.gmail.com>
-References: <1456281573-16458-1-git-send-email-horms+renesas@verge.net.au>
+Subject: Re: [PATCH 1/2] mmc: mediatek: Change signal voltage error to dev_dbg()
+Date: Fri, 4 Mar 2016 10:41:46 +0100
+Message-ID: <CAPDyKFqt111susg4GtDsWkYAEPAk0NU7vv67DjG+6FBAw_N1Dw@mail.gmail.com>
+References: <1457000385-2317-1-git-send-email-drinkcat@chromium.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-renesas-soc-owner@vger.kernel.org>
-In-Reply-To: <1456281573-16458-1-git-send-email-horms+renesas@verge.net.au>
-Sender: linux-renesas-soc-owner@vger.kernel.org
-To: Simon Horman <horms+renesas@verge.net.au>
-Cc: Ian Molton <ian@mnementh.co.uk>, Magnus Damm <magnus.damm@gmail.com>, linux-mmc <linux-mmc@vger.kernel.org>, linux-renesas-soc@vger.kernel.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1457000385-2317-1-git-send-email-drinkcat@chromium.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Nicolas Boichat <drinkcat@chromium.org>
+Cc: Matthias Brugger <matthias.bgg@gmail.com>, Chaotian Jing <chaotian.jing@mediatek.com>, Geert Uytterhoeven <geert@linux-m68k.org>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, linux-mediatek@lists.infradead.org, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Doug Anderson <dianders@chromium.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On 24 February 2016 at 03:39, Simon Horman <horms+renesas@verge.net.au> wrote:
-> Make use of ARCH_RENESAS in place of ARCH_SHMOBILE.
+On 3 March 2016 at 11:19, Nicolas Boichat <drinkcat@chromium.org> wrote:
+> In commit ceae98f20e36 ("mmc: core: Try other signal levels
+> during power up") we can see that there are times when it's
+> valid to try several signal voltages.  Don't print an ugly
+> error in the logs when that happens.
 >
-> This is part of an ongoing process to migrate from ARCH_SHMOBILE to
-> ARCH_RENESAS the motivation for which being that RENESAS seems to be a more
-> appropriate name than SHMOBILE for the majority of Renesas ARM based SoCs.
->
-> Signed-off-by: Simon Horman <horms+renesas@verge.net.au>
+> Signed-off-by: Nicolas Boichat <drinkcat@chromium.org>
 
 Thanks, applied for next!
 
@@ -27,37 +26,26 @@ Kind regards
 Uffe
 
 > ---
->  drivers/mmc/host/Kconfig | 4 ++--
->  1 file changed, 2 insertions(+), 2 deletions(-)
 >
->  Based on mmc/next
+> Similar to b19caf379c82e99737c29bc15d7b7fd7d24279f9
+> mmc: dw_mmc: Change signal voltage error to dev_dbg()
 >
-> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
-> index d9a9d92fa837..04feea8354cb 100644
-> --- a/drivers/mmc/host/Kconfig
-> +++ b/drivers/mmc/host/Kconfig
-> @@ -561,7 +561,7 @@ config MMC_TMIO
->  config MMC_SDHI
->         tristate "SH-Mobile SDHI SD/SDIO controller support"
->         depends on SUPERH || ARM || ARM64
-> -       depends on SUPERH || ARCH_SHMOBILE || COMPILE_TEST
-> +       depends on SUPERH || ARCH_RENESAS || COMPILE_TEST
->         select MMC_TMIO_CORE
->         help
->           This provides support for the SDHI SD/SDIO controller found in
-> @@ -674,7 +674,7 @@ config MMC_DW_ROCKCHIP
->  config MMC_SH_MMCIF
->         tristate "SuperH Internal MMCIF support"
->         depends on HAS_DMA
-> -       depends on SUPERH || ARCH_SHMOBILE || COMPILE_TEST
-> +       depends on SUPERH || ARCH_RENESAS || COMPILE_TEST
->         help
->           This selects the MMC Host Interface controller (MMCIF).
+>  drivers/mmc/host/mtk-sd.c | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
 >
+> diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
+> index f01972e..07809f4 100644
+> --- a/drivers/mmc/host/mtk-sd.c
+> +++ b/drivers/mmc/host/mtk-sd.c
+> @@ -1038,7 +1038,7 @@ static int msdc_ops_switch_volt(struct mmc_host *mmc, struct mmc_ios *ios)
+>
+>                 ret = regulator_set_voltage(mmc->supply.vqmmc, min_uv, max_uv);
+>                 if (ret) {
+> -                       dev_err(host->dev,
+> +                       dev_dbg(host->dev,
+>                                         "Regulator set error %d: %d - %d\n",
+>                                         ret, min_uv, max_uv);
+>                 } else {
 > --
-> 2.1.4
+> 2.7.0.rc3.207.g0ac5344
 >
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
