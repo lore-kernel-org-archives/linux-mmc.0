@@ -1,101 +1,62 @@
-From: Ludovic Desroches <ludovic.desroches@atmel.com>
-Subject: Re: [PATCH] mmc: sdhci-of-at91: fix wakeup issue when using runtime
- pm
-Date: Fri, 4 Mar 2016 14:48:30 +0100
-Message-ID: <20160304134830.GG2690@odux.rfo.atmel.com>
-References: <20160212120415.GJ14937@odux.rfo.atmel.com>
- <1455357400-32145-1-git-send-email-ludovic.desroches@atmel.com>
- <CAPDyKFroVY0ZdqPScpGiJ8Y_QhhZ7asf0R0MzSx0WzVi5c2neg@mail.gmail.com>
- <20160216152204.GE2607@odux.rfo.atmel.com>
- <20160217103515.GM2607@odux.rfo.atmel.com>
- <CAPDyKFpovsOMVSxifefFcvHFoNL-AaBH_tbWbN7QRQqv2hrSnw@mail.gmail.com>
+From: Arnd Bergmann <arnd@arndb.de>
+Subject: Re: [PATCH v3 1/3] mmc: sdhci: Set DMA mask when adding host
+Date: Fri, 04 Mar 2016 16:57:15 +0100
+Message-ID: <2562091.6cJRuD3dK9@wuerfel>
+References: <1457087925-992-1-git-send-email-acourbot@nvidia.com> <1457087925-992-2-git-send-email-acourbot@nvidia.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7Bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from eusmtp01.atmel.com ([212.144.249.243]:47822 "EHLO
-	eusmtp01.atmel.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756656AbcCDNsz (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 4 Mar 2016 08:48:55 -0500
-Content-Disposition: inline
-In-Reply-To: <CAPDyKFpovsOMVSxifefFcvHFoNL-AaBH_tbWbN7QRQqv2hrSnw@mail.gmail.com>
+Received: from mout.kundenserver.de ([217.72.192.73]:51723 "EHLO
+	mout.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756841AbcCDP53 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 4 Mar 2016 10:57:29 -0500
+In-Reply-To: <1457087925-992-2-git-send-email-acourbot@nvidia.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Nicolas Ferre <nicolas.ferre@atmel.com>, Adrian Hunter <adrian.hunter@intel.com>
+To: Alexandre Courbot <acourbot@nvidia.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, gnurou@gmail.com
 
-Hi Ulf,
-
-On Fri, Mar 04, 2016 at 10:09:37AM +0100, Ulf Hansson wrote:
-> On 17 February 2016 at 11:35, Ludovic Desroches
-
-[snip]
-
-> > I am wondering if I should take account of sdio irq enabled or not here.
-> >
-> > I have a sdio device which drives me crazy because of power management.
-> > The driver of this device is in staging, it is wilc1000. It seems that I
-> > am stuck because the sdio irq are not received. If I don't disable the
-> > clock of the controller (hclock), I should receive the sdio IRQ as I
-> > receive card detect ones, isn't it?
-> >
-> > It doesn't work, it seems I have also to not disabled mainck and gck
-> > which are clocks needed to generate the clock sent to the sdio device.
-> > If none of the clocks have to be disabled, where it has to be managed?
+On Friday 04 March 2016 19:38:43 Alexandre Courbot wrote:
+> Set the DMA mask in sdhci_add_host() after we determined the
+> capabilities of the device. 64-bit devices in particular are given the
+> proper mask that ensures bounce buffers are not used.
 > 
-> That's a typical issue for SDIO IRQs, especially when the controller
-> HW manages IRQs (there are other ways to deal with SDIO IRQs as well).
+> Also disable DMA if no proper DMA mask can be set, as the DMA-API
+> documentation specifies.
 > 
-> Currently, the simplest way to deal with this in the driver is to do a
-> pm_runtime_get_sync() when the SDIO IRQ gets enabled, and
-> pm_runtime_put() when it gets disabled.
-
-Which driver? sdio device driver or controller driver?
-
-> >
-> > Do I have to anticipate this use case in the driver of my sdhci
-> > controller or does it have to be managed in the sdio device driver? They
-> > are using sdio_claim/release_host to suspend or resume the host but
-> > maybe they use it in a bad way.
+> Signed-off-by: Alexandre Courbot <acourbot@nvidia.com>
+> ---
+>  drivers/mmc/host/sdhci.c | 46 +++++++++++++++++++++++++++++++++++++++-------
+>  1 file changed, 39 insertions(+), 7 deletions(-)
 > 
-> The wilc100 SDIO func driver should *not* keep the host claimed to
-> deal with SDIO irqs. Only when it configures them.
-> 
-> Instead, you need to deal with this in the sdhci driver, when you get
-> the call to enable/disable SDIO IRQs.
-> 
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index fd9139947fa3..00fb45ba6f39 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -2857,6 +2857,34 @@ struct sdhci_host *sdhci_alloc_host(struct device *dev,
+>  
+>  EXPORT_SYMBOL_GPL(sdhci_alloc_host);
+>  
+> +static int sdhci_set_dma_mask(struct sdhci_host *host)
+> +{
+> +	struct mmc_host *mmc = host->mmc;
+> +	struct device *dev = mmc_dev(mmc);
+> +	int ret = -EINVAL;
+> +
+> +	if (host->quirks2 & SDHCI_QUIRK2_BROKEN_64_BIT_DMA)
+> +		host->flags &= ~SDHCI_USE_64_BIT_DMA;
+> +
+> +	/* Try 64-bit mask if hardware is capable  of it */
+> +	if (host->flags & SDHCI_USE_64_BIT_DMA) {
+> +		ret = dma_set_mask_and_coherent(dev, DMA_BIT_MASK(64));
+> +		if (ret)
+> +			pr_warn("%s: Failed to set 64-bit DMA mask.\n",
+> +				mmc_hostname(mmc));
+> +	}
+> +
 
-Do you mean in sdhci_enable_sdio_irq?
+I think you need to disable the SDHCI_USE_64_BIT_DMA flag when
+dma_set_mask_and_coherent() fails here. Otherwise looks good.
 
-> Moreover, from a system PM point of view. If the wilc100 SDIO func
-> driver wants the platform to wake up on SDIO IRQs, it needs to set
-> MMC_PM_KEEP_POWER and MMC_PM_WAKE_SDIO_IRQ from its ->suspend()
-> callback.
-> 
-> In that way, your sdhci driver can act accordingly from its system PM
-> callbacks. In other words, depending on MMC_PM_KEEP_POWER and
-> MMC_PM_WAKE_SDIO_IRQ to *not* call pm_runtime_force_suspend().
-> 
-
-Ok, it makes sense.
-
-
-Coming back to the initial discussion and patch which were motivated by
-the fact that after runtime suspend I can't wake-up on card detect event,
-I have the feeling we don't have the same assumption about runtime PM.
-
->From what you and Adrian told me, I should not use runtime PM if I have
-no way to wake-up. In your minds, the way to wake-up is to use an
-externel GPIO because the controller will be 'totally' disabled, isn't it?
-
-On my side, runtime PM allows me to save power when the sdhci controller
-is not used. If I can disable two clocks out of three, I should use
-runtime PM. Do you agree?
-
-If not, tell me how I can convince you :) Otherwise, next step is to rework
-my patch but I think I have no other solution that not calling
-sdhci_runtime_suspend_host if I expect to use the card detect irq of the
-controller.
-
-Regards
-
-Ludovic
+	Arnd
