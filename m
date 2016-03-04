@@ -1,31 +1,29 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 1/2] mmc: tegra: properly disable card clock
-Date: Fri, 4 Mar 2016 10:41:22 +0100
-Message-ID: <CAPDyKFoJfNE7HcL3BcbRQpw6uOvQYrD=bEYvgUxjvOaX36o=fA@mail.gmail.com>
-References: <1456779385-18996-1-git-send-email-dev@lynxeye.de>
+From: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: Re: [PATCH] mmc: tegra: Disable UHS-I modes for tegra114
+Date: Fri, 4 Mar 2016 10:41:15 +0100
+Message-ID: <CAPDyKFrvaLq3dD5qFJBLVTL5gXA9NaHxfc_mM9PCfczfwQiJLA@mail.gmail.com>
+References: <1455806924-14967-1-git-send-email-jonathanh@nvidia.com>
+	<1456479257-12147-1-git-send-email-jonathanh@nvidia.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wm0-f43.google.com ([74.125.82.43]:35588 "EHLO
-	mail-wm0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1759559AbcCDJlY (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 4 Mar 2016 04:41:24 -0500
-Received: by mail-wm0-f43.google.com with SMTP id l68so26420864wml.0
-        for <linux-mmc@vger.kernel.org>; Fri, 04 Mar 2016 01:41:23 -0800 (PST)
-In-Reply-To: <1456779385-18996-1-git-send-email-dev@lynxeye.de>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1456479257-12147-1-git-send-email-jonathanh-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
+Sender: linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Jon Hunter <jonathanh-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
+Cc: Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Stephen Warren <swarren-3lzwWm7+Weoh9ZMKESR00Q@public.gmane.org>, Thierry Reding <thierry.reding-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Alexandre Courbot <gnurou-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Lucas Stach <dev-8ppwABl0HbeELgA04lAiVw@public.gmane.org>, linux-mmc <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Lucas Stach <dev@lynxeye.de>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, Stephen Warren <swarren@wwwdotorg.org>, Thierry Reding <thierry.reding@gmail.com>, Alexandre Courbot <gnurou@gmail.com>, Jon Hunter <jonathanh@nvidia.com>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-tegra@vger.kernel.org" <linux-tegra@vger.kernel.org>
 
-On 29 February 2016 at 21:56, Lucas Stach <dev@lynxeye.de> wrote:
-> The new code to do the clock rate setting externally to the SDMMC
-> module has a shortcut to not propagate changes with a 0 rate to
-> the CAR by simply bailing out. This breaks proper cutting of the
-> card clock. Fix it by directly calling the correct sdhci function.
+On 26 February 2016 at 10:34, Jon Hunter <jonathanh-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org> wrote:
+> SD card support for Tegra114 started failing after commit a8e326a911d3
+> ("mmc: tegra: implement module external clock change") was merged. This
+> commit was part of a series to enable UHS-I modes for Tegra. To
+> workaround this problem for now, disable UHS-I modes for Tegra114 by
+> separating the soc data structures for Tegra114 and Tegra124 so that
+> UHS-I is still enabled for Tegra124 but not Tegra114.
 >
-> Fixes: a8e326a911d3 "mmc: tegra: implement module external clock change"
-> Signed-off-by: Lucas Stach <dev@lynxeye.de>
+> Fixes: a8e326a911d3 ("mmc: tegra: implement module external clock change")
+>
+> Signed-off-by: Jon Hunter <jonathanh-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
 
 Thanks, applied for fixes!
 
@@ -33,26 +31,50 @@ Kind regards
 Uffe
 
 > ---
->  drivers/mmc/host/sdhci-tegra.c | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
+>  drivers/mmc/host/sdhci-tegra.c | 12 +++++++++++-
+>  1 file changed, 11 insertions(+), 1 deletion(-)
 >
 > diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
-> index 212d51f..46a6bd1 100644
+> index 83c4bf7bc16c..212d51f08939 100644
 > --- a/drivers/mmc/host/sdhci-tegra.c
 > +++ b/drivers/mmc/host/sdhci-tegra.c
-> @@ -194,7 +194,7 @@ static void tegra_sdhci_set_clock(struct sdhci_host *host, unsigned int clock)
->         unsigned long host_clk;
+> @@ -147,10 +147,16 @@ static void tegra_sdhci_reset(struct sdhci_host *host, u8 mask)
+>         /* Advertise UHS modes as supported by host */
+>         if (soc_data->nvquirks & NVQUIRK_ENABLE_SDR50)
+>                 misc_ctrl |= SDHCI_MISC_CTRL_ENABLE_SDR50;
+> +       else
+> +               misc_ctrl &= ~SDHCI_MISC_CTRL_ENABLE_SDR50;
+>         if (soc_data->nvquirks & NVQUIRK_ENABLE_DDR50)
+>                 misc_ctrl |= SDHCI_MISC_CTRL_ENABLE_DDR50;
+> +       else
+> +               misc_ctrl &= ~SDHCI_MISC_CTRL_ENABLE_DDR50;
+>         if (soc_data->nvquirks & NVQUIRK_ENABLE_SDR104)
+>                 misc_ctrl |= SDHCI_MISC_CTRL_ENABLE_SDR104;
+> +       else
+> +               misc_ctrl &= ~SDHCI_MISC_CTRL_ENABLE_SDR104;
+>         sdhci_writel(host, misc_ctrl, SDHCI_TEGRA_VENDOR_MISC_CTRL);
 >
->         if (!clock)
-> -               return;
-> +               return sdhci_set_clock(host, clock);;
+>         clk_ctrl = sdhci_readl(host, SDHCI_TEGRA_VENDOR_CLOCK_CTRL);
+> @@ -335,6 +341,10 @@ static const struct sdhci_pltfm_data sdhci_tegra114_pdata = {
 >
->         host_clk = tegra_host->ddr_signaling ? clock * 2 : clock;
->         clk_set_rate(pltfm_host->clk, host_clk);
+>  static const struct sdhci_tegra_soc_data soc_data_tegra114 = {
+>         .pdata = &sdhci_tegra114_pdata,
+> +};
+> +
+> +static const struct sdhci_tegra_soc_data soc_data_tegra124 = {
+> +       .pdata = &sdhci_tegra114_pdata,
+>         .nvquirks = NVQUIRK_ENABLE_SDR50 |
+>                     NVQUIRK_ENABLE_DDR50 |
+>                     NVQUIRK_ENABLE_SDR104,
+> @@ -357,7 +367,7 @@ static const struct sdhci_tegra_soc_data soc_data_tegra210 = {
+>
+>  static const struct of_device_id sdhci_tegra_dt_match[] = {
+>         { .compatible = "nvidia,tegra210-sdhci", .data = &soc_data_tegra210 },
+> -       { .compatible = "nvidia,tegra124-sdhci", .data = &soc_data_tegra114 },
+> +       { .compatible = "nvidia,tegra124-sdhci", .data = &soc_data_tegra124 },
+>         { .compatible = "nvidia,tegra114-sdhci", .data = &soc_data_tegra114 },
+>         { .compatible = "nvidia,tegra30-sdhci", .data = &soc_data_tegra30 },
+>         { .compatible = "nvidia,tegra20-sdhci", .data = &soc_data_tegra20 },
 > --
-> 2.5.0
+> 2.1.4
 >
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
