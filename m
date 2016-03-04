@@ -1,86 +1,82 @@
-From: Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
-Subject: Re: [RESEND PATCH v5 0/2] Add phy support for arasan,sdhci-5.1
-Date: Fri, 4 Mar 2016 09:27:39 +0800
-Message-ID: <56D8E48B.1040604@rock-chips.com>
-References: <1455848322-2210-1-git-send-email-shawn.lin@rock-chips.com>
- <CAPDyKFojtZamH-xwM9UTyWdeW3SSSS3-uUyVr2R1t9NkwCXvYg@mail.gmail.com>
+From: Shawn Lin <shawn.lin@rock-chips.com>
+Subject: Re: [RFC PATCH 1/4] mmc: core: add cap-enhanced-strobe support
+Date: Fri, 4 Mar 2016 09:39:23 +0800
+Message-ID: <56D8E74B.3010603@rock-chips.com>
+References: <1456972557-7994-1-git-send-email-shawn.lin@rock-chips.com>
+ <1456972585-8036-1-git-send-email-shawn.lin@rock-chips.com>
+ <56D82934.3040205@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8;
-	format=flowed
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <CAPDyKFojtZamH-xwM9UTyWdeW3SSSS3-uUyVr2R1t9NkwCXvYg-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Cc: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org, Michal Simek <michal.simek-gjFFaj9aHVfQT0dZR+AlfA@public.gmane.org>, =?UTF-8?Q?S=c3=b6ren_Brinkmann?= <soren.brinkmann-gjFFaj9aHVfQT0dZR+AlfA@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from lucky1.263xmail.com ([211.157.147.130]:33654 "EHLO
+	lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751420AbcCDBjw (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 3 Mar 2016 20:39:52 -0500
+In-Reply-To: <56D82934.3040205@samsung.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Jaehoon Chung <jh80.chung@samsung.com>, Shawn Lin <shawn.lin@rock-chips.com>, Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Michal Simek <michal.simek@xilinx.com>, soren.brinkmann@xilinx.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 
-=E5=9C=A8 2016/2/20 6:23, Ulf Hansson =E5=86=99=E9=81=93:
+Hi Jaehoon,
+
+On 2016/3/3 20:08, Jaehoon Chung wrote:
+> Hi Shawn,
 >
-> Den 19 feb 2016 3:24 fm skrev "Shawn Lin" <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org
-> <mailto:shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>>:
->  >
->  >
->  > Hello Ulf and Adrian,
->  >
->  > Sorry for delay the new version for this topic. Actually I have no
->  > platform available to test phy stuff since v4. Now, I can rework i=
-t.:)
->  > I remove rpm support from v5 because this patchset just need to fo=
-cus
->  > on phy stuff, which will make the changes more precise. Another re=
-ason
->  > is that phy_power_on take too much time from rpm, however the powe=
-r
-> profit
->  > gained from phy_power_off is little due to the low power mechanism
-> with the
->  > phy itself observed from experiments.
->  >
->  > v4 can be found here:
->  > https://patchwork.kernel.org/patch/7463251/
->  >
->  > Note:
->  > Phy is mandatory requirement for arasan,sdhci-5.1, so we introduce
->  > generic phy support for sdhci-of-arasan.
->  >
->  >
->  > Shawn Lin (2):
->  >   Documentation: bindings: add description of phy for sdhci-of-ara=
-san
->  >   mmc: sdhci-of-arasan: add phy support for sdhci-of-arasan
->  >
->  >  .../devicetree/bindings/mmc/arasan,sdhci.txt       | 20 ++++++-
->  >  drivers/mmc/host/sdhci-of-arasan.c                 | 66
-> ++++++++++++++++++++--
->  >  2 files changed, 80 insertions(+), 6 deletions(-)
->  >
->  > --
->  > 2.3.7
->  >
->  >
+> On 03/03/2016 11:36 AM, Shawn Lin wrote:
+>> This patch introduce cap-enhanced-strobe for platforms which
+>> want to enable enhanced strobe function from DT if the mmc host
+>> controller claims to support enhanced strobe.
 >
-> This looks good to me! When acks has been received I am ready to queu=
-e
-> it for next.
+> I don't know why need to add the capability and property.
 >
 
-Hi Adrian,
+ From my point, HS400-ES is a optional feature, so we should leave it
+for people to decide whether to use it. Just as my controller supports 
+hs400, but I can't force all the people using my platform to use hs400?
+That's why we add mmc-hs400-* in DT.
 
-	Any chance to look at this patch? I assume Ulf need your ack for
-sdhci* patch. :)
+But maybe I can change the name to mmc-hs400es-* ?
 
-> Kind regards
-> Uffe
+
+[...]
+
+>>   #define MMC_CAP_DRIVER_TYPE_A	(1 << 23)	/* Host supports Driver Type A */
+>>   #define MMC_CAP_DRIVER_TYPE_C	(1 << 24)	/* Host supports Driver Type C */
+>>   #define MMC_CAP_DRIVER_TYPE_D	(1 << 25)	/* Host supports Driver Type D */
+>> +#define MMC_CAP_ENHANCED_STROBE	(1 << 20)	/* Host supports enhanced strobe */
+>
+> Need to fix ordering.
+
+yeah~~ good catch!
+
+>
+>>   #define MMC_CAP_CMD23		(1 << 30)	/* CMD23 supported. */
+>>   #define MMC_CAP_HW_RESET	(1 << 31)	/* Hardware reset */
+>>
+>> @@ -469,6 +470,11 @@ static inline int mmc_host_uhs(struct mmc_host *host)
+>>   		 MMC_CAP_UHS_DDR50);
+>>   }
+>>
+>> +static inline int mmc_host_enhanced_strobe(struct mmc_host *host)
+>> +{
+>> +	return host->caps & MMC_CAP_ENHANCED_STROBE;
+>> +}
+>> +
+>>   static inline int mmc_host_packed_wr(struct mmc_host *host)
+>>   {
+>>   	return host->caps2 & MMC_CAP2_PACKED_WR;
+>>
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 >
 
 
---=20
+-- 
 Best Regards
 Shawn Lin
 
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" i=
-n
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
