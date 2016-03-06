@@ -1,40 +1,46 @@
-From: "Martin K. Petersen" <martin.petersen@oracle.com>
-Subject: Re: [PATCH 0/2] mmc, block: override default max_dev_sectors
-Date: Sat, 05 Mar 2016 16:58:57 -0500
-Message-ID: <yq1fuw44me6.fsf@sermon.lab.mkp.net>
-References: <cover.1456847028.git.pawelx.wodkowski@intel.com>
-	<20160302171227.GA5229@infradead.org>
-	<07856956733C274AB06C493240019A2D76CDEC35@IRSMSX101.ger.corp.intel.com>
-Mime-Version: 1.0
-Content-Type: text/plain
+From: Guodong Xu <guodong.xu@linaro.org>
+Subject: [PATCH 1/2] Documentation: synopsys-dw-mshc: add binding for resets
+Date: Sun,  6 Mar 2016 15:47:41 +0700
+Message-ID: <1457254062-22677-1-git-send-email-guodong.xu@linaro.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from aserp1040.oracle.com ([141.146.126.69]:49534 "EHLO
-	aserp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750801AbcCEV7Z (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sat, 5 Mar 2016 16:59:25 -0500
-In-Reply-To: <07856956733C274AB06C493240019A2D76CDEC35@IRSMSX101.ger.corp.intel.com>
-	(Mateusz Nowak's message of "Fri, 4 Mar 2016 10:49:29 +0000")
+Received: from mail-pa0-f54.google.com ([209.85.220.54]:33103 "EHLO
+	mail-pa0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751145AbcCFIsD (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 6 Mar 2016 03:48:03 -0500
+Received: by mail-pa0-f54.google.com with SMTP id fl4so60387998pad.0
+        for <linux-mmc@vger.kernel.org>; Sun, 06 Mar 2016 00:48:02 -0800 (PST)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "Nowak, Mateusz" <mateusz.nowak@intel.com>
-Cc: Christoph Hellwig <hch@infradead.org>, "Wodkowski, PawelX" <pawelx.wodkowski@intel.com>, "linux-block@vger.kernel.org" <linux-block@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+To: robh+dt@kernel.org, pawel.moll@arm.com, mark.rutland@arm.com, ijc+devicetree@hellion.org.uk, galak@codeaurora.org, jh80.chung@samsung.com, ulf.hansson@linaro.org, shawn.lin@rock-chips.com, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
+Cc: Guodong Xu <guodong.xu@linaro.org>
 
->>>>> "Mateusz" == Nowak, Mateusz <mateusz.nowak@intel.com> writes:
+Add resets property to synopsys-dw-mshc bindings. It is intended to
+represent the hardware reset signal present internally in some host
+controller IC designs.
 
->> Past commit 5f009d ("block: Initialize max_dev_sectors to 0"), this
->> should not be needed.
+See Documentation/devicetree/bindings/reset/reset.txt for details.
 
-Mateusz> I missed the fix you mention while rebasing from rc3. Thus
-Mateusz> apologies for providing incorrectly described and not
-Mateusz> necessarily needed patch set.
+Signed-off-by: Guodong Xu <guodong.xu@linaro.org>
+Acked-by: Rob Herring <robh@kernel.org>
+---
+ Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.txt | 4 ++++
+ 1 file changed, 4 insertions(+)
 
-Mateusz> However, since some drivers may still want to override
-Mateusz> max_dev_sectors, would the patches be good to be redone and
-Mateusz> resubmitted as improvement?
-
-Nothing prevents you from setting max_dev_sectors in the driver. That's
-why it's there. The default being set in my original patch just had the
-unfortunate side-effect of clamping the controller limit.
-
+diff --git a/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.txt b/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.txt
+index 8636f5a..4e00e85 100644
+--- a/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.txt
++++ b/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.txt
+@@ -39,6 +39,10 @@ Required Properties:
+ 
+ Optional properties:
+ 
++* resets: phandle + reset specifier pair, intended to represent hardware
++  reset signal present internally in some host controller IC designs.
++  See Documentation/devicetree/bindings/reset/reset.txt for details.
++
+ * clocks: from common clock binding: handle to biu and ciu clocks for the
+   bus interface unit clock and the card interface unit clock.
+ 
 -- 
-Martin K. Petersen	Oracle Linux Engineering
+1.9.1
+
