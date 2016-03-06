@@ -1,132 +1,92 @@
-From: Shawn Lin <shawn.lin@rock-chips.com>
-Subject: Re: [PATCH 2/2] mmc: dw_mmc: add resets support to dw_mmc
-Date: Sun, 6 Mar 2016 22:16:13 +0800
-Message-ID: <56DC3BAD.8020107@rock-chips.com>
-References: <1457254062-22677-1-git-send-email-guodong.xu@linaro.org>
- <1457254062-22677-2-git-send-email-guodong.xu@linaro.org>
+From: Wolfram Sang <wsa@the-dreams.de>
+Subject: Re: [RFC 4/7] mmc: tmio: Add UHS-I mode support
+Date: Sun, 6 Mar 2016 16:25:41 +0100
+Message-ID: <20160306152541.GB5376@katana>
+References: <1455913003-6140-1-git-send-email-wsa@the-dreams.de>
+ <1455913003-6140-5-git-send-email-wsa@the-dreams.de>
+ <CAPDyKFpxE3XU8ocRLTyMvBo-FPOECY7zeJAr7O1oLwKXEZ20zQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=gbk; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="LpQ9ahxlCli8rRTG"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from lucky1.263xmail.com ([211.157.147.131]:35690 "EHLO
-	lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751282AbcCFOQx (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 6 Mar 2016 09:16:53 -0500
-In-Reply-To: <1457254062-22677-2-git-send-email-guodong.xu@linaro.org>
+Received: from sauhun.de ([89.238.76.85]:60012 "EHLO pokefinder.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751475AbcCFPZt (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Sun, 6 Mar 2016 10:25:49 -0500
+Content-Disposition: inline
+In-Reply-To: <CAPDyKFpxE3XU8ocRLTyMvBo-FPOECY7zeJAr7O1oLwKXEZ20zQ@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Guodong Xu <guodong.xu@linaro.org>, robh+dt@kernel.org, pawel.moll@arm.com, mark.rutland@arm.com, ijc+devicetree@hellion.org.uk, galak@codeaurora.org, jh80.chung@samsung.com, ulf.hansson@linaro.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
-Cc: shawn.lin@rock-chips.com, shawn.lin@kernel-upstream.org, Xinwei Kong <kong.kongxinwei@hisilicon.com>, Zhangfei Gao <zhangfei.gao@linaro.org>
-
-On 2016/3/6 16:47, Guodong Xu wrote:
-> mmc registers may in abnormal state if mmc is used in bootloader,
-> eg. to support booting from eMMC. So we need reset mmc registers
-> when kernel boots up, instead of assuming mmc is in clean state.
->
-> With this patch, user can add a 'resets' property into dw_mmc dts
-> node. When driver parse_dt and probe, it calls reset API to
-> deassert the 'reset' of dw_mmc host controller. When probe error or
-> remove, it calls reset API to assert it.
->
-> Please also refer to Documentation/devicetree/bindings/reset/reset.txt
->
-> Signed-off-by: Guodong Xu <guodong.xu@linaro.org>
-> Signed-off-by: Xinwei Kong <kong.kongxinwei@hisilicon.com>
-> Signed-off-by: Zhangfei Gao <zhangfei.gao@linaro.org>
-
-Really should V2 and add the changelog.
-
-> ---
->   drivers/mmc/host/dw_mmc.c | 22 +++++++++++++++++++++-
->   1 file changed, 21 insertions(+), 1 deletion(-)
->
-> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-> index 242f9a0..281ea9c 100644
-> --- a/drivers/mmc/host/dw_mmc.c
-> +++ b/drivers/mmc/host/dw_mmc.c
-> @@ -2878,6 +2878,14 @@ static struct dw_mci_board *dw_mci_parse_dt(struct dw_mci *host)
->   	if (!pdata)
->   		return ERR_PTR(-ENOMEM);
->
-> +	/* find reset controller when exist */
-> +	pdata->rstc = devm_reset_control_get_optional(dev, NULL);
-> +	if (IS_ERR(pdata->rstc)) {
-> +		if (PTR_ERR(pdata->rstc) == -EPROBE_DEFER)
-> +			return ERR_PTR(-EPROBE_DEFER);
-> +		pdata->rstc = NULL;
-
-maybe we can remove "pdata->rstc = NULL", and directly
-use IS_ERR(..) for the following "if (host->pdata->rstc != NULL)"
-statement
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-renesas-soc@vger.kernel.org, linux-mmc <linux-mmc@vger.kernel.org>, Ben Hutchings <ben.hutchings@codethink.co.uk>, Dirk Behme <dirk.behme@gmail.com>, Wolfram Sang <wsa+renesas@sang-engineering.com>
 
 
-> +	}
-> +
->   	/* find out number of slots supported */
->   	of_property_read_u32(np, "num-slots", &pdata->num_slots);
->
-> @@ -2949,7 +2957,9 @@ int dw_mci_probe(struct dw_mci *host)
->
->   	if (!host->pdata) {
->   		host->pdata = dw_mci_parse_dt(host);
-> -		if (IS_ERR(host->pdata)) {
-> +		if (PTR_ERR(host->pdata) == -EPROBE_DEFER)
-> +			return -EPROBE_DEFER;
+--LpQ9ahxlCli8rRTG
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-please fix the coding style here.
+On Thu, Mar 03, 2016 at 03:41:13PM +0100, Ulf Hansson wrote:
+> On 19 February 2016 at 21:16, Wolfram Sang <wsa@the-dreams.de> wrote:
+> > From: Ben Hutchings <ben.hutchings@codethink.co.uk>
+> >
+> > Based on work by Shinobu Uehara and Ben Dooks.  This adds the voltage
+> > switch operation needed for all UHS-I modes, but not the tuning needed
+> > for SDR-104 which will come later.
+> >
+> > The card_busy implementation is a bit of a guess, but works for me on
+> > an R8A7790 chip.
+> >
+> > Signed-off-by: Ben Hutchings <ben.hutchings@codethink.co.uk>
+> > Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+> > ---
+> >  drivers/mmc/host/tmio_mmc.h     |  3 +++
+> >  drivers/mmc/host/tmio_mmc_pio.c | 31 +++++++++++++++++++++++++++++++
+> >  2 files changed, 34 insertions(+)
+> >
+> > diff --git a/drivers/mmc/host/tmio_mmc.h b/drivers/mmc/host/tmio_mmc.h
+> > index b44b5890290622..aabd36955e73fb 100644
+> > --- a/drivers/mmc/host/tmio_mmc.h
+> > +++ b/drivers/mmc/host/tmio_mmc.h
+> > @@ -101,6 +101,9 @@ struct tmio_mmc_host {
+> >         void (*clk_disable)(struct tmio_mmc_host *host);
+> >         int (*multi_io_quirk)(struct mmc_card *card,
+> >                               unsigned int direction, int blk_size);
+> > +
+> > +       int (*start_signal_voltage_switch)(struct tmio_mmc_host *host,
+> > +                                          unsigned char signal_voltage=
+);
+>=20
+> Do you really need to add a new tmio specific callback for this?
+>=20
+> Why can't you instead have the tmio variant driver assign the
+> ->start_signal_voltage_switch() callback into the struct mmc_host_ops
+> instead?
 
-> +		else if (IS_ERR(host->pdata)) {
->   			dev_err(host->dev, "platform data not available\n");
->   			return -EINVAL;
->   		}
-> @@ -3012,6 +3022,9 @@ int dw_mci_probe(struct dw_mci *host)
->   		}
->   	}
->
-> +	if (host->pdata->rstc != NULL)
-> +		reset_control_deassert(host->pdata->rstc);
-> +
-
-sorry, I can't follow your intention here. Shouldn't it be something
-like "assert mmc -> may need delay -> deassert mmc". As your current
-code, nothing happend right?
-
->   	setup_timer(&host->cmd11_timer,
->   		    dw_mci_cmd11_timer, (unsigned long)host);
->
-> @@ -3164,6 +3177,9 @@ err_dmaunmap:
->   	if (host->use_dma && host->dma_ops->exit)
->   		host->dma_ops->exit(host);
->
-> +	if (host->pdata->rstc != NULL)
-> +		reset_control_assert(host->pdata->rstc);
-> +
->   err_clk_ciu:
->   	if (!IS_ERR(host->ciu_clk))
->   		clk_disable_unprepare(host->ciu_clk);
-> @@ -3196,11 +3212,15 @@ void dw_mci_remove(struct dw_mci *host)
->   	if (host->use_dma && host->dma_ops->exit)
->   		host->dma_ops->exit(host);
->
-> +	if (host->pdata->rstc != NULL)
-> +		reset_control_assert(host->pdata->rstc);
-> +
->   	if (!IS_ERR(host->ciu_clk))
->   		clk_disable_unprepare(host->ciu_clk);
->
->   	if (!IS_ERR(host->biu_clk))
->   		clk_disable_unprepare(host->biu_clk);
-> +
->   }
-
-unnecessary new line here.
-
->   EXPORT_SYMBOL(dw_mci_remove);
->
->
+Can do if you prefer that. I agree that it will save a bit of code; but
+it also hides this feature, because all the other config is in struct
+tmio_mmc_host. I like the better visibility a tad more.
 
 
--- 
-Best Regards
-Shawn Lin
+--LpQ9ahxlCli8rRTG
+Content-Type: application/pgp-signature; name="signature.asc"
 
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1
+
+iQIcBAEBAgAGBQJW3Ev0AAoJEBQN5MwUoCm2gYUP/2Q0goLacQ0SHnMLxk/qp8eL
+trU9mAB9LZnJfQpEP9mB8sGJobxvcQXMFSbf5YS0D2SOwI1U3N2/hjlO4in0RL+0
+hC4ApoqNgZzHQ7fYM0TEQijkoMN8nhOh5hLlm/uF4uYq+bC5a6DnJNkI0xHsUlfr
+VcC7TqDXY8lNJGeIfLsh8LtFDTiDRr0l00ENdBaGwTdE2mSj7wczVDhGy4MfjFn3
+q00lQN55L8Xvk7JY2znGXWccofjPnwr38CBohE3QV0oTF5jg9X+j5mWhtkVH6mQS
+aG9lZiZ6MEn03Yu5CM/mj32eZ4WKFciOR9PO/iF61h1AjR9qKq1Fqqo7x0qXsPyc
+66bENN06/kiinCVkHIfZ+M5389UP3t3oPvuTVnKbOqw57ai2ZKqy5nFUoGqFnWG8
+CjOW3hc2lxB6FMQP9tNg3AmpWJnyZpHH906LceJX+mRDcMogAIf7QFIfGK5gH6g6
+BptOfVw9cuiW3pHF8oj06xR9F8OGeuzAohwUgi0sONRd9asQtcoInVgynYvTeI9m
+V3xGGn+3OXwUgweyLk/8VVf9xM019XDcAxfVOJfjlH5j/i0NcAg8s9OvxHI+ZNtX
+diV6EmPeFrv1O6lG6DY3hPJGWslDrvxTZyohTIblV4AT268nzmqwr7TjJvH/oIjn
+SXFPV5/EinsBxmSE2ljC
+=2hzz
+-----END PGP SIGNATURE-----
+
+--LpQ9ahxlCli8rRTG--
