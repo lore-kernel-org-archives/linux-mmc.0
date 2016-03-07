@@ -1,80 +1,56 @@
 From: Shawn Lin <shawn.lin@rock-chips.com>
-Subject: [PATCH v7 3/4] mmc: sdhci-of-arasan: fix missing sdhci_pltfm_free for err handling
-Date: Mon,  7 Mar 2016 23:39:08 +0800
-Message-ID: <1457365148-23373-1-git-send-email-shawn.lin@rock-chips.com>
-References: <1457365099-23248-1-git-send-email-shawn.lin@rock-chips.com>
+Subject: [PATCH v7 0/4] Add phy support for arasan,sdhci-5.1
+Date: Mon,  7 Mar 2016 23:38:19 +0800
+Message-ID: <1457365099-23248-1-git-send-email-shawn.lin@rock-chips.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1457365099-23248-1-git-send-email-shawn.lin@rock-chips.com>
 Sender: linux-kernel-owner@vger.kernel.org
 To: Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>
 Cc: Michal Simek <michal.simek@xilinx.com>, soren.brinkmann@xilinx.com, Rob Herring <robh+dt@kernel.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, devicetree@vger.kernel.org, Shawn Lin <shawn.lin@rock-chips.com>
 List-Id: linux-mmc@vger.kernel.org
 
-Currently, some err handling of sdhci_arasan_probe return directly
-without calling sdhci_pltfm_free. This patch fixes them.
 
-Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
----
+Phy is mandatory requirement for arasan,sdhci-5.1, so we introduce
+generic phy support for sdhci-of-arasan.
+This version is rebased on Ulf's next to make it applied cleanly.
+Also, we fix some preexisting problems of err handling suggested by Adrian.
 
-Changes in v7: None
-Changes in v6: None
-Changes in v5: None
-Changes in v4: None
-Changes in v3: None
-Changes in v2: None
 
- drivers/mmc/host/sdhci-of-arasan.c | 15 ++++++++-------
- 1 file changed, 8 insertions(+), 7 deletions(-)
+Changes in v7:
+- split two changes into seperate patches
 
-diff --git a/drivers/mmc/host/sdhci-of-arasan.c b/drivers/mmc/host/sdhci-of-arasan.c
-index ae8052d..91b7c62 100644
---- a/drivers/mmc/host/sdhci-of-arasan.c
-+++ b/drivers/mmc/host/sdhci-of-arasan.c
-@@ -147,19 +147,21 @@ static int sdhci_arasan_probe(struct platform_device *pdev)
- 	sdhci_arasan->clk_ahb = devm_clk_get(&pdev->dev, "clk_ahb");
- 	if (IS_ERR(sdhci_arasan->clk_ahb)) {
- 		dev_err(&pdev->dev, "clk_ahb clock not found.\n");
--		return PTR_ERR(sdhci_arasan->clk_ahb);
-+		ret = PTR_ERR(sdhci_arasan->clk_ahb);
-+		goto err_pltfm_free;
- 	}
- 
- 	clk_xin = devm_clk_get(&pdev->dev, "clk_xin");
- 	if (IS_ERR(clk_xin)) {
- 		dev_err(&pdev->dev, "clk_xin clock not found.\n");
--		return PTR_ERR(clk_xin);
-+		ret = PTR_ERR(clk_xin);
-+		goto err_pltfm_free;
- 	}
- 
- 	ret = clk_prepare_enable(sdhci_arasan->clk_ahb);
- 	if (ret) {
- 		dev_err(&pdev->dev, "Unable to enable AHB clock.\n");
--		return ret;
-+		goto err_pltfm_free;
- 	}
- 
- 	ret = clk_prepare_enable(clk_xin);
-@@ -179,17 +181,16 @@ static int sdhci_arasan_probe(struct platform_device *pdev)
- 
- 	ret = sdhci_add_host(host);
- 	if (ret)
--		goto err_pltfm_free;
-+		goto clk_disable_all;
- 
- 	return 0;
- 
--err_pltfm_free:
--	sdhci_pltfm_free(pdev);
- clk_disable_all:
- 	clk_disable_unprepare(clk_xin);
- clk_dis_ahb:
- 	clk_disable_unprepare(sdhci_arasan->clk_ahb);
--
-+err_pltfm_free:
-+	sdhci_pltfm_free(pdev);
- 	return ret;
- }
- 
+Changes in v6:
+- rebase on Ulf's next
+- fix some preexisting problems of err handling suggested
+      by Adrian
+- add Rob's Acked-by tag
+
+Changes in v5:
+- remove rpm support from this serise
+- fix some err case for handling phy
+
+Changes in v4:
+- remove suspend/resume_phy
+- add err handle label for system PM callback
+- fix comments of struct sdhci_arasan_data and system PM
+  callback suggested by Michal
+
+Changes in v3:
+- remove phy_init/exit for suspend/resume
+- adjust phy_int/power_on seq to make code more reasonable
+  simplify suspend/resume_phy
+
+Changes in v2:
+- Keep phy as a mandatory requirement for arasan,sdhci-5.1
+
+Shawn Lin (4):
+  Documentation: bindings: add description of phy for sdhci-of-arasan
+  mmc: sdhci-of-arasan: remove disable clk_ahb from sdhci_arasan_resume
+  mmc: sdhci-of-arasan: fix missing sdhci_pltfm_free for err handling
+  mmc: sdhci-of-arasan: add phy support for sdhci-of-arasan
+
+ .../devicetree/bindings/mmc/arasan,sdhci.txt       | 20 +++++-
+ drivers/mmc/host/sdhci-of-arasan.c                 | 71 +++++++++++++++++++---
+ 2 files changed, 81 insertions(+), 10 deletions(-)
+
 -- 
 2.3.7
