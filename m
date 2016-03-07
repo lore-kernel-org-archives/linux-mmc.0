@@ -1,100 +1,96 @@
 From: Shawn Lin <shawn.lin@rock-chips.com>
-Subject: Re: [PATCH] mmc: block: fix ABI regression of mmc_blk_ioctl
-Date: Mon, 7 Mar 2016 15:16:57 +0800
-Message-ID: <56DD2AE9.7000708@rock-chips.com>
-References: <1457331857-4953-1-git-send-email-shawn.lin@rock-chips.com>
- <4aa8686868a640499a9313f4a77ddc46@bgmail102.nvidia.com>
+Subject: Re: [PATCH 1/2] Documentation: synopsys-dw-mshc: add binding for
+ resets
+Date: Mon, 7 Mar 2016 17:35:53 +0800
+Message-ID: <56DD4B79.2090509@rock-chips.com>
+References: <1457254062-22677-1-git-send-email-guodong.xu@linaro.org>
+ <56DCD11E.5000901@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8;
+	format=flowed
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from lucky1.263xmail.com ([211.157.147.132]:56548 "EHLO
+Received: from lucky1.263xmail.com ([211.157.147.131]:58907 "EHLO
 	lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751641AbcCGHRU (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 7 Mar 2016 02:17:20 -0500
-In-Reply-To: <4aa8686868a640499a9313f4a77ddc46@bgmail102.nvidia.com>
+	with ESMTP id S1751938AbcCGJg3 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 7 Mar 2016 04:36:29 -0500
+In-Reply-To: <56DCD11E.5000901@samsung.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Seshagiri Holi <sholi@nvidia.com>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: shawn.lin@rock-chips.com, shawn.lin@kernel-upstream.org, Jonathan Hunter <jonathanh@nvidia.com>, linux-mmc <linux-mmc@vger.kernel.org>
+To: Jaehoon Chung <jh80.chung@samsung.com>, Guodong Xu <guodong.xu@linaro.org>, robh+dt@kernel.org, pawel.moll@arm.com, mark.rutland@arm.com, ijc+devicetree@hellion.org.uk, galak@codeaurora.org, ulf.hansson@linaro.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
+Cc: shawn.lin@rock-chips.com, shawn.lin@kernel-upstream.org
 
-On 2016/3/7 15:04, Seshagiri Holi wrote:
-> Hi Shawn,
-> 	I am not sure how why blkdev_roset is iocl function call  is landing in mmc_blk_ioctl. Could it be a IOCTL mapping issue ?
-> Regards
-> Seshagiri
->
+Hi Jaehoon,
 
-Really no.
-blkdev_ioctl-> case BLKROSET ->
-blkdev_roset -> __blkdev_driver_ioctl ->disk->fops->ioctl
+On 2016/3/7 8:53, Jaehoon Chung wrote:
+> Hi Goudong,
+>
+> On 03/06/2016 05:47 PM, Guodong Xu wrote:
+>> Add resets property to synopsys-dw-mshc bindings. It is intended to
+>> represent the hardware reset signal present internally in some host
+>> controller IC designs.
+>>
+>> See Documentation/devicetree/bindings/reset/reset.txt for details.
+>>
+>> Signed-off-by: Guodong Xu <guodong.xu@linaro.org>
+>> Acked-by: Rob Herring <robh@kernel.org>
+>> ---
+>>   Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.txt | 4 +++=
++
+>>   1 file changed, 4 insertions(+)
+>>
+>> diff --git a/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.=
+txt b/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.txt
+>> index 8636f5a..4e00e85 100644
+>> --- a/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.txt
+>> +++ b/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.txt
+>> @@ -39,6 +39,10 @@ Required Properties:
+>>
+>>   Optional properties:
+>>
+>> +* resets: phandle + reset specifier pair, intended to represent har=
+dware
+>> +  reset signal present internally in some host controller IC design=
+s.
+>> +  See Documentation/devicetree/bindings/reset/reset.txt for details=
+=2E
+>
+> Is this reset property for common dwmmc IP controller?
 
-If mmc_blk_ioctl return -EINVAL, that will fails
-the check of !is_unrecognized_ioctl. Then the code will continue
-to work. But commit: a5f5774c55a2 ("mmc: block: Add new ioctl to send 
-multi commands") changes the behaviour to check the cmd(BLKROSET) with
-CAP_SYS_RAWIO firstly. So blkdev_ioctl finally get -EPERM instead of
--EINVAL. So the result you can find:
+I think so. By discussion with my ASIC team, it's provided by synopsys.
+ From dw_mmc databook version 270a, section 3.2.5, FBE Scenarios:
 
-remount of /system failed;
-couldn't make block device writable: Operation not permitted
+An FBE occurs due to an AHB error response on the AHB bus. This is a
+system error, so the software driver should not perform any further
+programming to the DWC_mobile_storage. The only recovery mechanism
+from such scenarios is to do one of the following:
+=E2=96=A0 Issue a hard reset by asserting the reset_n signal
+=E2=96=A0 Do a program controller reset by writing to the CTRL[0] regis=
+ter
 
-openat(AT_FDCWD, "/dev/block/platform/ff420000.dwmmc/by-name/system", 
-O_RDONLY) = 3 ioctl(3, BLKROSET, 0)  = -1 EPERM (Operation not permitted)
+the reset_n signal can be used to reset all the internal logic block
+with dwmmc and reset the register value to default stat.
+
+Note: reset_n is a internal signal, which is diff from rst_n for mmc hw
+reset. (refer to databook section 5.2 Signal Descriptions, table 5-1)
 
 >
-> -----Original Message-----
-> From: Shawn Lin [mailto:shawn.lin@rock-chips.com]
-> Sent: Monday, March 07, 2016 11:54 AM
-> To: Ulf Hansson
-> Cc: Seshagiri Holi; Jonathan Hunter; Shawn Lin; stable@vger.kernel.org; #@263.net; 4.4.x@263.net
-> Subject: [PATCH] mmc: block: fix ABI regression of mmc_blk_ioctl
+> Best Regards,
+> Jaehoon Chung
 >
-> We should return -EINVAL if cmd is not MMC_IOC_CMD or MMC_IOC_MULTI_CMD, otherwise blkdev_roset will return -EPERM.
+>> +
+>>   * clocks: from common clock binding: handle to biu and ciu clocks =
+for the
+>>     bus interface unit clock and the card interface unit clock.
+>>
+>>
 >
-> Android-adb calls make_block_device_writable with ioctl(BLKROSET), which will return error, make remount failed:
-> remount of /system failed;
-> couldn't make block device writable: Operation not permitted
->
-> openat(AT_FDCWD, "/dev/block/platform/ff420000.dwmmc/by-name/system", O_RDONLY) = 3 ioctl(3, BLKROSET, 0)  = -1 EPERM (Operation not permitted)
->
-> Fixes: a5f5774c55a2 ("mmc: block: Add new ioctl to send multi commands")
-> Cc: <stable@vger.kernel.org> # 4.4.x
-> Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
-> ---
->
->   drivers/mmc/card/block.c | 3 +++
->   1 file changed, 3 insertions(+)
->
-> diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c index 47bc87d..170f099 100644
-> --- a/drivers/mmc/card/block.c
-> +++ b/drivers/mmc/card/block.c
-> @@ -688,6 +688,9 @@ cmd_err:
->   static int mmc_blk_ioctl(struct block_device *bdev, fmode_t mode,
->   	unsigned int cmd, unsigned long arg)
->   {
-> +	if (cmd != MMC_IOC_CMD && cmd != MMC_IOC_MULTI_CMD)
-> +		return -EINVAL;
-> +
->   	/*
->   	 * The caller must have CAP_SYS_RAWIO, and must be calling this on the
->   	 * whole block device, not on a partition.  This prevents overspray
-> --
-> 2.3.7
->
->
-> -----------------------------------------------------------------------------------
-> This email message is for the sole use of the intended recipient(s) and may contain
-> confidential information.  Any unauthorized review, use, disclosure or distribution
-> is prohibited.  If you are not the intended recipient, please contact the sender by
-> reply email and destroy all copies of the original message.
-> -----------------------------------------------------------------------------------
 >
 >
 >
 
 
--- 
+--=20
 Best Regards
 Shawn Lin
 
