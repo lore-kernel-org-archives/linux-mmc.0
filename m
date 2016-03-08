@@ -1,51 +1,34 @@
-From: Brian Norris <computersforpeace@gmail.com>
-Subject: [PATCH] mmc: of_mmc_spi: fix unused warning
-Date: Mon,  7 Mar 2016 15:36:39 -0800
-Message-ID: <1457393799-121767-1-git-send-email-computersforpeace@gmail.com>
+From: Kevin Cernekee <cernekee@gmail.com>
+Subject: Re: [PATCH RESEND V3 2/2] mmc: sdhci-brcmstb: Add driver for Broadcom
+ BRCMSTB SoCs
+Date: Mon, 7 Mar 2016 18:54:53 -0800
+Message-ID: <CAJiQ=7ATvz8nVFtckrKW5n64WOpAt8eMA_S5tQDwDAw+LZ8gZg@mail.gmail.com>
+References: <1457114844-18841-1-git-send-email-alcooperx@gmail.com>
+ <CAJiQ=7D2A=6-e-2K8xePR5SeQENsUUVVLyPDSvVK=x_m5nfrAw@mail.gmail.com> <CAOGqxeVz3L9nFTX_0BArDu1q_EAKAb3nMXRDQ3tsdPg-wmuZAw@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pf0-f177.google.com ([209.85.192.177]:34674 "EHLO
-	mail-pf0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932518AbcCGXgv (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 7 Mar 2016 18:36:51 -0500
-Received: by mail-pf0-f177.google.com with SMTP id 129so44126511pfw.1
-        for <linux-mmc@vger.kernel.org>; Mon, 07 Mar 2016 15:36:50 -0800 (PST)
+Received: from mail-io0-f196.google.com ([209.85.223.196]:35427 "EHLO
+	mail-io0-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753436AbcCHCzN (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 7 Mar 2016 21:55:13 -0500
+Received: by mail-io0-f196.google.com with SMTP id n190so916900iof.2
+        for <linux-mmc@vger.kernel.org>; Mon, 07 Mar 2016 18:55:13 -0800 (PST)
+In-Reply-To: <CAOGqxeVz3L9nFTX_0BArDu1q_EAKAb3nMXRDQ3tsdPg-wmuZAw@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Brian Norris <computersforpeace@gmail.com>
+To: Alan Cooper <alcooperx@gmail.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, adrian.hunter@intel.com, linux-mmc <linux-mmc@vger.kernel.org>, bcm-kernel-feedback-list@broadcom.com
 
-drivers/mmc/host/of_mmc_spi.c: In function 'mmc_spi_get_pdata':
-drivers/mmc/host/of_mmc_spi.c:77:6: warning: variable 'ret' set but not used [-Wunused-but-set-variable]
-  int ret = -EINVAL;
-      ^
+On Mon, Mar 7, 2016 at 1:32 PM, Alan Cooper <alcooperx@gmail.com> wrote:
+>> When the hardware block changes frequently, we've gone as far as
+>> creating a different compatible string for each variant.  For
+>> Documentation/devicetree/bindings/net/brcm,bcmgenet.txt we encoded the
+>> hardware generation number in the compatible string.
+>
+> Something like "brcm,bcm7425-sdhci"?
 
-Signed-off-by: Brian Norris <computersforpeace@gmail.com>
----
-Compile tested only
-
- drivers/mmc/host/of_mmc_spi.c | 2 --
- 1 file changed, 2 deletions(-)
-
-diff --git a/drivers/mmc/host/of_mmc_spi.c b/drivers/mmc/host/of_mmc_spi.c
-index 660170cd04d9..85bbebfde02e 100644
---- a/drivers/mmc/host/of_mmc_spi.c
-+++ b/drivers/mmc/host/of_mmc_spi.c
-@@ -74,7 +74,6 @@ struct mmc_spi_platform_data *mmc_spi_get_pdata(struct spi_device *spi)
- 	const u32 *voltage_ranges;
- 	int num_ranges;
- 	int i;
--	int ret = -EINVAL;
- 
- 	if (dev->platform_data || !np)
- 		return dev->platform_data;
-@@ -97,7 +96,6 @@ struct mmc_spi_platform_data *mmc_spi_get_pdata(struct spi_device *spi)
- 		mask = mmc_vddrange_to_ocrmask(be32_to_cpu(voltage_ranges[j]),
- 					       be32_to_cpu(voltage_ranges[j + 1]));
- 		if (!mask) {
--			ret = -EINVAL;
- 			dev_err(dev, "OF: voltage-range #%d is invalid\n", i);
- 			goto err_ocr;
- 		}
--- 
-2.7.0.rc3.207.g0ac5344
-
+That sounds like a reasonable approximation.  Several major design
+issues like IRQs and endianness got cleaned up in the 40nm generation
+(although IIRC there were still a lot of fresh bugs in every new
+chip).
