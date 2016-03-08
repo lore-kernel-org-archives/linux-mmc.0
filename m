@@ -1,25 +1,24 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH v7 4/4] mmc: sdhci-of-arasan: add phy support for
- sdhci-of-arasan
-Date: Tue, 8 Mar 2016 15:50:43 +0200
-Message-ID: <56DED8B3.2020804@intel.com>
-References: <1457365099-23248-1-git-send-email-shawn.lin@rock-chips.com>
- <1457365159-23414-1-git-send-email-shawn.lin@rock-chips.com>
+Subject: Re: [PATCH] mmc: sdhci-acpi: add QCOM controllers
+Date: Tue, 8 Mar 2016 15:57:43 +0200
+Message-ID: <56DEDA57.1080200@intel.com>
+References: <1457023128-23720-1-git-send-email-pelcan@codeaurora.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=windows-1252
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1457365159-23414-1-git-send-email-shawn.lin@rock-chips.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Shawn Lin <shawn.lin@rock-chips.com>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Michal Simek <michal.simek@xilinx.com>, soren.brinkmann@xilinx.com, Rob Herring <robh+dt@kernel.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, devicetree@vger.kernel.org
+Return-path: <linux-arm-msm-owner@vger.kernel.org>
+In-Reply-To: <1457023128-23720-1-git-send-email-pelcan@codeaurora.org>
+Sender: linux-arm-msm-owner@vger.kernel.org
+To: Philip Elcan <pelcan@codeaurora.org>, Ulf Hansson <ulf.hansson@linaro.org>, Michele Curti <michele.curti@gmail.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Cc: Timur Tabi <timur@codeaurora.org>, linux-arm-msm@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-On 07/03/16 17:39, Shawn Lin wrote:
-> This patch adds Generic PHY access for sdhci-of-arasan. Driver
-> can get PHY handler from dt-binding, and power-on/init the PHY.
-> Currently, it's just mandatory for arasan,sdhci-5.1.
+On 03/03/16 18:38, Philip Elcan wrote:
+> This adds the HIDs for Qualcomm Technologies Inc SDHC
+> controllers:
+> QCOM8051: non-removable device that does not support 1.8v
+> QCOM8052: non-removable device that does support 1.8v
 > 
-> Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
+> Signed-off-by: Philip Elcan <pelcan@codeaurora.org>
 
 Acked-by: Adrian Hunter <adrian.hunter@intel.com>
