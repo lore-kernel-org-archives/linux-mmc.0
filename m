@@ -1,102 +1,77 @@
-From: Shawn Lin <shawn.lin@kernel-upstream.org>
-Subject: Re: [RESENT PATCH] mmc: block: fix ABI regression of mmc_blk_ioctl
-Date: Wed, 9 Mar 2016 21:51:29 +0800
-Message-ID: <56E02A61.6010003@kernel-upstream.org>
-References: <1457333940-13076-1-git-send-email-shawn.lin@rock-chips.com>
- <56DFFFF2.5050508@nvidia.com>
+From: Wolfram Sang <wsa@the-dreams.de>
+Subject: Re: [RFC 4/7] mmc: tmio: Add UHS-I mode support
+Date: Wed, 9 Mar 2016 17:17:35 +0100
+Message-ID: <20160309161735.GB9443@katana>
+References: <1455913003-6140-1-git-send-email-wsa@the-dreams.de>
+ <1455913003-6140-5-git-send-email-wsa@the-dreams.de>
+ <CAPDyKFpxE3XU8ocRLTyMvBo-FPOECY7zeJAr7O1oLwKXEZ20zQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mr213139.mail.yeah.net ([223.252.213.139]:53673 "EHLO
-	mr213139.mail.yeah.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932763AbcCIOCu (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 9 Mar 2016 09:02:50 -0500
-In-Reply-To: <56DFFFF2.5050508@nvidia.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="/NkBOFFp2J2Af1nK"
+Return-path: <linux-renesas-soc-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <CAPDyKFpxE3XU8ocRLTyMvBo-FPOECY7zeJAr7O1oLwKXEZ20zQ@mail.gmail.com>
+Sender: linux-renesas-soc-owner@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-renesas-soc@vger.kernel.org, linux-mmc <linux-mmc@vger.kernel.org>, Ben Hutchings <ben.hutchings@codethink.co.uk>, Dirk Behme <dirk.behme@gmail.com>, Wolfram Sang <wsa+renesas@sang-engineering.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Jon Hunter <jonathanh@nvidia.com>, Shawn Lin <shawn.lin@rock-chips.com>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: shawn.lin@kernel-upstream.org, Seshagiri Holi <sholi@nvidia.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, stable@vger.kernel.org
 
-On 2016/3/9 18:50, Jon Hunter wrote:
->
-> On 07/03/16 06:59, Shawn Lin wrote:
->> We should return -EINVAL if cmd is not MMC_IOC_CMD or MMC_IOC_MULTI_CMD,
->> otherwise blkdev_roset will return -EPERM.
->>
->> Android-adb calls make_block_device_writable with ioctl(BLKROSET), which
->> will return error, make remount failed:
->> remount of /system failed;
->> couldn't make block device writable: Operation not permitted
->
-> I think you should elaborate here why the behaviour between -EINVAL and
-> -EPERM is different as they are both errors. In other words, add your
-> comment about how the ADB code is checking for a supported command.
 
-yep. So if need to send v2 after comment from Ulf, I will add more into
-commit-msg.
+--/NkBOFFp2J2Af1nK
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
->
->> openat(AT_FDCWD, "/dev/block/platform/ff420000.dwmmc/by-name/system", O_RDONLY) = 3
->> ioctl(3, BLKROSET, 0)  = -1 EPERM (Operation not permitted)
->>
->> Fixes: a5f5774c55a2 ("mmc: block: Add new ioctl to send multi commands")
->> Cc: stable@vger.kernel.org
->> Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
->> ---
->>
->>   drivers/mmc/card/block.c | 3 +++
->>   1 file changed, 3 insertions(+)
->>
->> diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
->> index 47bc87d..170f099 100644
->> --- a/drivers/mmc/card/block.c
->> +++ b/drivers/mmc/card/block.c
->> @@ -688,6 +688,9 @@ cmd_err:
->>   static int mmc_blk_ioctl(struct block_device *bdev, fmode_t mode,
->>   	unsigned int cmd, unsigned long arg)
->>   {
->> +	if (cmd != MMC_IOC_CMD && cmd != MMC_IOC_MULTI_CMD)
->> +		return -EINVAL;
->> +
->>   	/*
->>   	 * The caller must have CAP_SYS_RAWIO, and must be calling this on the
->>   	 * whole block device, not on a partition.  This prevents overspray
->
-> The change is fine with me, but I agree with Seshagiri's comment that
-> instead of the above, move the following test to the mmc_blk_ioctl_cmd
-> and mmc_blk_ioctl_multi_cmd functions:
->
-> if ((!capable(CAP_SYS_RAWIO)) || (bdev != bdev->bd_contains))
->                  return -EPERM;
->
 
-right, and both are ok to me :).
-Adding this check for mmc_blk_ioctl_cmd and mmc_blk_ioctl_multi_cmd
-respectively may also looks like we produce two some code sections that 
-do the same thing.
+> > +
+> > +       int (*start_signal_voltage_switch)(struct tmio_mmc_host *host,
+> > +                                          unsigned char signal_voltage=
+);
+>=20
+> Do you really need to add a new tmio specific callback for this?
+>=20
+> Why can't you instead have the tmio variant driver assign the
+> ->start_signal_voltage_switch() callback into the struct mmc_host_ops
+> instead?
 
-I think it depends on how Ulf want the solution to be? Let's wait for
-Ulf' comment.
+Just to see how it looks, I tried your suggestion. However, mmc_ops is
+consted all the way into the core (rightfully, I'd say), so this makes
+this approach quite clumsy. I kept the above callback now, just changed
+the second paramater to pass the whole ios so I can use it with
+mmc_regulator_set_vqmmc().
 
-> There is a case statement that then would return -EINVAL if the command
-> is not supported.
->
-> If you look at V3 of the patch "mmc: block: Add new ioctl to send multi
-> commands" [0] this is how we had it and only in V4 (the final version)
-> did we move it.
+> > +static int tmio_mmc_card_busy(struct mmc_host *mmc)
+> > +{
+> > +       struct tmio_mmc_host *host =3D mmc_priv(mmc);
+> > +       u32 status;
+> > +
+> > +       pm_runtime_get_sync(mmc_dev(mmc));
+>=20
+> This isn't needed as the mmc core already deal with runtime PM of the
+> host device via mmc_claim|release_host().
 
-yes, I read V3 and V4 both to see how the patch was going. Thanks for
-sharing it.
+sdhci.c does it, too - missing cleanup?
 
->
-> Cheers
-> Jon
->
-> [0] http://marc.info/?l=linux-mmc&m=144224289716299&w=2
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
 
+--/NkBOFFp2J2Af1nK
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1
+
+iQIcBAEBAgAGBQJW4EyfAAoJEBQN5MwUoCm2OTEP/RJ70sds82REnnWaEwE2kTUf
+ndmOFioksuyIj5hd/hCUVTuC0ieWOIb+81/nsPfSVldr2nvE568g32Hmc4wxxuGs
+GY4TwUjUA79TYZC2EoQKxIZTBHHjiEbYZ3rIvFLb9PCCfF4lDpH/fcq7wTygysCY
+jAIU/rvH5pi3LOTAvdCdd+oj1wWthcRyuiN5F04lJ+ZDv9iAb2bhop5H5k/ufb4F
+BFwj3TQ0ueHoNkL+iZhGwVIowTbz8AlYZQy5eGqzM3JueNY4AMrZQCtJ2cbsxAuH
+O3G/TBC7Yt32MkKE7+YTLqy1dGG6o1FFE3izx7m1Dy/DQdt5frFg4xf+ngR/DRkb
+aNziZJO14kTe9blqCAxeTeo/H20qqoEHUcHvN5U321KaNnmCHu2ZFIKcK8XNbycq
+NnY1PPUm2R0tRZEPGDMW1ncDMcuUcLJVSWaVLURwFP1th3p69WMDp+sK79egr1WR
+ajqm3nANeyu7ZRzG6ndbNtFnGmt2Kdjhzmviz6FKL3EXAPt/lIyS3UAGR8QBGUi6
+i5iXUhQc4GzdAQB8yQZdaSlO9sKBjPEcjTVT8taEFbHek5H5nIFe9LoqlD+9UX65
+vHGPeoYZp3sZ4JZLCT9wl7JfOSNm3V1Twjf3/wqTykz4WJhNDp4cJtDB/B4QiihQ
+9Peodqp2Ae42XWAa1DBp
+=jsAX
+-----END PGP SIGNATURE-----
+
+--/NkBOFFp2J2Af1nK--
