@@ -1,38 +1,49 @@
-From: John Stultz <john.stultz@linaro.org>
-Subject: Re: [RESENT PATCH] mmc: block: fix ABI regression of mmc_blk_ioctl
-Date: Wed, 9 Mar 2016 14:55:17 +0700
-Message-ID: <CANcMJZAONMxfht8W5oGR7nnNvw9ac9hpDKekvcXbo6UM20auQw@mail.gmail.com>
-References: <1457333940-13076-1-git-send-email-shawn.lin@rock-chips.com>
+From: Yangbo Lu <yangbo.lu@nxp.com>
+Subject: [v6, 0/5] Fix eSDHC host version register bug
+Date: Wed, 9 Mar 2016 18:08:46 +0800
+Message-ID: <1457518131-11339-1-git-send-email-yangbo.lu@nxp.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <stable-owner@vger.kernel.org>
-In-Reply-To: <1457333940-13076-1-git-send-email-shawn.lin@rock-chips.com>
-Sender: stable-owner@vger.kernel.org
-To: Shawn Lin <shawn.lin@rock-chips.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Seshagiri Holi <sholi@nvidia.com>, Jon Hunter <jonathanh@nvidia.com>, linux-mmc@vger.kernel.org, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, stable@vger.kernel.org
+Content-Type: text/plain
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, linuxppc-dev@lists.ozlabs.org, linux-clk@vger.kernel.org, linux-i2c@vger.kernel.org, iommu@lists.linux-foundation.org, netdev@vger.kernel.org, linux-mmc@vger.kernel.org
+Cc: Rob Herring <robh+dt@kernel.org>, scott.wood@nxp.com, Russell King <linux@arm.linux.org.uk>, Jochen Friedrich <jochen@scram.de>, Joerg Roedel <joro@8bytes.org>, Claudiu Manoil <claudiu.manoil@freescale.com>, ulf.hansson@linaro.org, Bhupesh Sharma <bhupesh.sharma@freescale.com>, Zhao Qiang <qiang.zhao@freescale.com>, Kumar Gala <galak@codeaurora.org>, Santosh Shilimkar <ssantosh@kernel.org>, leoyang.li@nxp.com, xiaobo.xie@nxp.com, Yangbo Lu <yangbo.lu@nxp.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On Mon, Mar 7, 2016 at 1:59 PM, Shawn Lin <shawn.lin@rock-chips.com> wrote:
-> We should return -EINVAL if cmd is not MMC_IOC_CMD or MMC_IOC_MULTI_CMD,
-> otherwise blkdev_roset will return -EPERM.
->
-> Android-adb calls make_block_device_writable with ioctl(BLKROSET), which
-> will return error, make remount failed:
-> remount of /system failed;
-> couldn't make block device writable: Operation not permitted
->
-> openat(AT_FDCWD, "/dev/block/platform/ff420000.dwmmc/by-name/system", O_RDONLY) = 3
-> ioctl(3, BLKROSET, 0)  = -1 EPERM (Operation not permitted)
->
-> Fixes: a5f5774c55a2 ("mmc: block: Add new ioctl to send multi commands")
-> Cc: stable@vger.kernel.org
-> Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
+This patchset is used to fix a host version register bug in the T4240-R1.0-R2.0
+eSDHC controller. To get the SoC version and revision, it's needed to add the
+GUTS driver to access the global utilities registers.
 
+So, the first three patches are to add the GUTS driver.
+The following two patches are to enable GUTS driver support to get SVR in eSDHC
+driver and fix host version for T4240.
 
-Ulf,
-   We're hitting this as well, and Shawn's patch seems to fix it for me.
+Yangbo Lu (5):
+  ARM64: dts: ls2080a: add device configuration node
+  soc: fsl: add GUTS driver for QorIQ platforms
+  dt: move guts devicetree doc out of powerpc directory
+  powerpc/fsl: move mpc85xx.h to include/linux/fsl
+  mmc: sdhci-of-esdhc: fix host version for T4240-R1.0-R2.0
 
-Tested-by: John Stultz <john.stultz@linaro.org>
+ .../bindings/{powerpc => soc}/fsl/guts.txt         |   3 +
+ arch/arm64/boot/dts/freescale/fsl-ls2080a.dtsi     |   6 ++
+ drivers/clk/clk-qoriq.c                            |   3 +-
+ drivers/i2c/busses/i2c-mpc.c                       |   2 +-
+ drivers/iommu/fsl_pamu.c                           |   3 +-
+ drivers/mmc/host/Kconfig                           |   1 +
+ drivers/mmc/host/sdhci-of-esdhc.c                  |  23 ++++
+ drivers/net/ethernet/freescale/gianfar.c           |   2 +-
+ drivers/soc/Kconfig                                |   2 +-
+ drivers/soc/fsl/Kconfig                            |   8 ++
+ drivers/soc/fsl/Makefile                           |   1 +
+ drivers/soc/fsl/guts.c                             | 119 +++++++++++++++++++++
+ include/linux/fsl/guts.h                           | 100 ++++++++---------
+ .../asm/mpc85xx.h => include/linux/fsl/svr.h       |   4 +-
+ 14 files changed, 220 insertions(+), 57 deletions(-)
+ rename Documentation/devicetree/bindings/{powerpc => soc}/fsl/guts.txt (91%)
+ create mode 100644 drivers/soc/fsl/Kconfig
+ create mode 100644 drivers/soc/fsl/guts.c
+ rename arch/powerpc/include/asm/mpc85xx.h => include/linux/fsl/svr.h (97%)
 
-Thanks Shawn!
--john
+-- 
+2.1.0.27.g96db324
