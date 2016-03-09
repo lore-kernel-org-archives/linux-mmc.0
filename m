@@ -1,100 +1,283 @@
-From: Ludovic Desroches <ludovic.desroches@atmel.com>
-Subject: Re: [PATCH] mmc: sdhci-of-at91: fix wakeup issue when using runtime
- pm
-Date: Wed, 9 Mar 2016 17:38:09 +0100
-Message-ID: <20160309163809.GM2690@odux.rfo.atmel.com>
-References: <20160212120415.GJ14937@odux.rfo.atmel.com>
- <1455357400-32145-1-git-send-email-ludovic.desroches@atmel.com>
- <CAPDyKFroVY0ZdqPScpGiJ8Y_QhhZ7asf0R0MzSx0WzVi5c2neg@mail.gmail.com>
- <20160216152204.GE2607@odux.rfo.atmel.com>
- <20160217103515.GM2607@odux.rfo.atmel.com>
- <CAPDyKFpovsOMVSxifefFcvHFoNL-AaBH_tbWbN7QRQqv2hrSnw@mail.gmail.com>
- <20160304134830.GG2690@odux.rfo.atmel.com>
- <CAPDyKFrDmWGiMF2fOt1kGyp03mRiTV2ug-i3mg=yYr5UF=WLeQ@mail.gmail.com>
- <CAPDyKFpDHooacBrTXQzinO4U10SeoedybN5HZ5y1bwbO-F04ug@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+From: Al Cooper <alcooperx@gmail.com>
+Subject: [PATCH V4 2/2] mmc: sdhci-brcmstb: Add driver for Broadcom BRCMSTB SoCs
+Date: Wed,  9 Mar 2016 17:04:25 -0500
+Message-ID: <1457561065-15132-1-git-send-email-alcooperx@gmail.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from eusmtp01.atmel.com ([212.144.249.243]:2528 "EHLO
-	eusmtp01.atmel.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753712AbcCIQib (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 9 Mar 2016 11:38:31 -0500
-Content-Disposition: inline
-In-Reply-To: <CAPDyKFpDHooacBrTXQzinO4U10SeoedybN5HZ5y1bwbO-F04ug@mail.gmail.com>
+Received: from 5520-maca-inet1-outside.broadcom.com ([216.31.211.11]:34299
+	"EHLO mail-irv-18.broadcom.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S933159AbcCIWFj (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 9 Mar 2016 17:05:39 -0500
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Ludovic Desroches <ludovic.desroches@atmel.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, Nicolas Ferre <nicolas.ferre@atmel.com>, linux-pm@vger.kernel.org, rjw@rjwysocki.net, khilman@kernel.org
+To: ulf.hansson@linaro.org, adrian.hunter@intel.com, linux-mmc@vger.kernel.org, bcm-kernel-feedback-list@broadcom.com, cernekee@gmail.com
+Cc: Al Cooper <alcooperx@gmail.com>
 
-+ PM mailing list since the discussion is mixing PM and sdhci
+Signed-off-by: Al Cooper <alcooperx@gmail.com>
+---
+V4 - Change the DT compatible property to "brcm,bcm7425-sdhci".
+     Add "clocks" property to DT bindings document.
+---
+ .../devicetree/bindings/mmc/brcm,bcm7425-sdhci.txt |  37 +++++
+ MAINTAINERS                                        |   7 +
+ drivers/mmc/host/Kconfig                           |  11 ++
+ drivers/mmc/host/Makefile                          |   1 +
+ drivers/mmc/host/sdhci-brcmstb.c                   | 154 +++++++++++++++++++++
+ 5 files changed, 210 insertions(+)
+ create mode 100644 Documentation/devicetree/bindings/mmc/brcm,bcm7425-sdhci.txt
+ create mode 100644 drivers/mmc/host/sdhci-brcmstb.c
 
-On Tue, Mar 08, 2016 at 10:56:31PM +0100, Ulf Hansson wrote:
-> +Ludovic
-> 
-> On 8 March 2016 at 22:54, Ulf Hansson <ulf.hansson@linaro.org> wrote:
-> > On 4 March 2016 at 14:48, Ludovic Desroches <ludovic.desroches@atmel.com> wrote:
+diff --git a/Documentation/devicetree/bindings/mmc/brcm,bcm7425-sdhci.txt b/Documentation/devicetree/bindings/mmc/brcm,bcm7425-sdhci.txt
+new file mode 100644
+index 0000000..cffd890
+--- /dev/null
++++ b/Documentation/devicetree/bindings/mmc/brcm,bcm7425-sdhci.txt
+@@ -0,0 +1,37 @@
++* BROADCOM BRCMSTB/BMIPS SDHCI Controller
++
++This file documents differences between the core properties in mmc.txt
++and the properties used by the sdhci-brcmstb driver.
++
++Required properties:
++- compatible: "brcm,bcm7425-sdhci"
++
++Optional properties:
++- clocks: Phandle to clock.
++- broken-sdr50: The Host Controller's SDR50 mode is broken.
++- broken-ddr50: The Host Controller's DDR50 mode is broken.
++- broken-64-bit-dma: 64 BIT DMA mode is broken, use 32 BIT DMA.
++- broken-timeout-value: The Host Controller CAPABILITY timeout value is incorrrect, use the maximum timeout.
++
++
++Example:
++
++	sdhci@f03e0100 {
++		compatible = "brcm,bcm7425-sdhci";
++		reg = <0xf03e0000 0x100>;
++		interrupts = <0x0 0x26 0x0>;
++		sdhci,auto-cmd12;
++		clocks = <0x13>;
++		broken-sdr50;
++	};
++
++	sdhci@f03e0300 {
++		no-1-8-v;
++		non-removable;
++		bus-width = <0x8>;
++		compatible = "brcm,bcm7425-sdhci";
++		reg = <0xf03e0200 0x100>;
++		interrupts = <0x0 0x27 0x0>;
++		sdhci,auto-cmd12;
++		clocks = <0x13>;
++	};
+diff --git a/MAINTAINERS b/MAINTAINERS
+index 30aca4a..2d9c90c 100644
+--- a/MAINTAINERS
++++ b/MAINTAINERS
+@@ -9724,6 +9724,13 @@ F:	tools/testing/selftests/seccomp/*
+ K:	\bsecure_computing
+ K:	\bTIF_SECCOMP\b
+ 
++SECURE DIGITAL HOST CONTROLLER INTERFACE (SDHCI) Broadcom BRCMSTB DRIVER
++M:	Al Cooper <alcooperx@gmail.com>
++L:	linux-mmc@vger.kernel.org
++L:	bcm-kernel-feedback-list@broadcom.com
++S:	Maintained
++F:	drivers/mmc/host/sdhci-brcmstb*
++
+ SECURE DIGITAL HOST CONTROLLER INTERFACE (SDHCI) SAMSUNG DRIVER
+ M:	Ben Dooks <ben-linux@fluff.org>
+ M:	Jaehoon Chung <jh80.chung@samsung.com>
+diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+index 4a35ebf..85bf266 100644
+--- a/drivers/mmc/host/Kconfig
++++ b/drivers/mmc/host/Kconfig
+@@ -797,3 +797,14 @@ config MMC_SDHCI_MICROCHIP_PIC32
+           If you have a controller with this interface, say Y or M here.
+ 
+           If unsure, say N.
++config MMC_SDHCI_BRCMSTB
++	tristate "Broadcom SDIO/SD/MMC support"
++	depends on ARCH_BRCMSTB || BMIPS_GENERIC
++	depends on MMC_SDHCI_PLTFM
++	default y
++	select MMC_SDHCI_IO_ACCESSORS
++	help
++	  This selects support for the SDIO/SD/MMC Host Controller on
++	  Broadcom STB SoCs.
++
++	  If unsure, say Y.
+diff --git a/drivers/mmc/host/Makefile b/drivers/mmc/host/Makefile
+index af918d2..2075c11 100644
+--- a/drivers/mmc/host/Makefile
++++ b/drivers/mmc/host/Makefile
+@@ -76,6 +76,7 @@ obj-$(CONFIG_MMC_SDHCI_IPROC)		+= sdhci-iproc.o
+ obj-$(CONFIG_MMC_SDHCI_MSM)		+= sdhci-msm.o
+ obj-$(CONFIG_MMC_SDHCI_ST)		+= sdhci-st.o
+ obj-$(CONFIG_MMC_SDHCI_MICROCHIP_PIC32)	+= sdhci-pic32.o
++obj-$(CONFIG_MMC_SDHCI_BRCMSTB)		+= sdhci-brcmstb.o
+ 
+ ifeq ($(CONFIG_CB710_DEBUG),y)
+ 	CFLAGS-cb710-mmc	+= -DDEBUG
+diff --git a/drivers/mmc/host/sdhci-brcmstb.c b/drivers/mmc/host/sdhci-brcmstb.c
+new file mode 100644
+index 0000000..d0520fd
+--- /dev/null
++++ b/drivers/mmc/host/sdhci-brcmstb.c
+@@ -0,0 +1,154 @@
++/*
++ * sdhci-brcmstb.c Support for SDHCI on Broadcom BRCMSTB SoC's
++ *
++ * Copyright (C) 2015 Broadcom Corporation
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License version 2 as
++ * published by the Free Software Foundation.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ *
++ */
++
++#include <linux/io.h>
++#include <linux/mmc/host.h>
++#include <linux/module.h>
++#include <linux/of.h>
++
++#include "sdhci-pltfm.h"
++
++static void brcmstb_of_parse(struct platform_device *pdev,
++			struct sdhci_host *host)
++{
++	struct device_node *np = pdev->dev.of_node;
++
++	host->quirks |= SDHCI_QUIRK_MISSING_CAPS;
++	host->caps = sdhci_readl(host, SDHCI_CAPABILITIES);
++	host->caps1 = sdhci_readl(host, SDHCI_CAPABILITIES_1);
++	if (of_get_property(np, "broken-sdr50", NULL))
++		host->caps1 &= ~(SDHCI_SUPPORT_SDR104 | SDHCI_SUPPORT_SDR50);
++	if (of_find_property(np, "broken-ddr50", NULL))
++		host->caps1 &= ~SDHCI_SUPPORT_DDR50;
++	if (of_get_property(np, "broken-64-bit-dma", NULL))
++		host->caps &= ~SDHCI_CAN_64BIT;
++	if (of_get_property(np, "broken-timeout-value", NULL))
++		host->quirks |= SDHCI_QUIRK_BROKEN_TIMEOUT_VAL;
++}
++
++
++#ifdef CONFIG_PM_SLEEP
++
++static int sdhci_brcmstb_suspend(struct device *dev)
++{
++	struct sdhci_host *host = dev_get_drvdata(dev);
++	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
++	int res;
++
++	res = sdhci_suspend_host(host);
++	if (res)
++		return res;
++	clk_disable(pltfm_host->clk);
++	return res;
++}
++
++static int sdhci_brcmstb_resume(struct device *dev)
++{
++	struct sdhci_host *host = dev_get_drvdata(dev);
++	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
++	int err;
++
++	err = clk_enable(pltfm_host->clk);
++	if (err)
++		return err;
++	return sdhci_resume_host(host);
++}
++
++#endif /* CONFIG_PM_SLEEP */
++
++static SIMPLE_DEV_PM_OPS(sdhci_brcmstb_pmops, sdhci_brcmstb_suspend,
++			sdhci_brcmstb_resume);
++
++static const struct sdhci_ops sdhci_brcmstb_ops = {
++	.set_clock = sdhci_set_clock,
++	.set_bus_width = sdhci_set_bus_width,
++	.reset = sdhci_reset,
++	.set_uhs_signaling = sdhci_set_uhs_signaling,
++};
++
++static struct sdhci_pltfm_data sdhci_brcmstb_pdata = {
++	.ops = &sdhci_brcmstb_ops,
++};
++
++static int sdhci_brcmstb_probe(struct platform_device *pdev)
++{
++	struct device_node *dn = pdev->dev.of_node;
++	struct sdhci_host *host;
++	struct sdhci_pltfm_host *pltfm_host;
++	struct clk *clk;
++	int res;
++
++	clk = of_clk_get_by_name(dn, "sw_sdio");
++	if (IS_ERR(clk)) {
++		dev_err(&pdev->dev, "Clock not found in Device Tree\n");
++		clk = NULL;
++	}
++	res = clk_prepare_enable(clk);
++	if (res)
++		goto undo_clk_get;
++
++	host = sdhci_pltfm_init(pdev, &sdhci_brcmstb_pdata, 0);
++	if (IS_ERR(host)) {
++		res = PTR_ERR(host);
++		goto undo_clk_prep;
++	}
++
++	/* Enable MMC_CAP2_HC_ERASE_SZ for better max discard calculations */
++	host->mmc->caps2 |= MMC_CAP2_HC_ERASE_SZ;
++
++	sdhci_get_of_property(pdev);
++	mmc_of_parse(host->mmc);
++	brcmstb_of_parse(pdev, host);
++
++	res = sdhci_add_host(host);
++	if (res)
++		goto undo_pltfm_init;
++
++	pltfm_host = sdhci_priv(host);
++	pltfm_host->clk = clk;
++	return res;
++
++undo_pltfm_init:
++	sdhci_pltfm_free(pdev);
++undo_clk_prep:
++	clk_disable_unprepare(clk);
++undo_clk_get:
++	clk_put(clk);
++	return res;
++}
++
++static const struct of_device_id sdhci_brcm_of_match[] = {
++	{ .compatible = "brcm,bcm7425-sdhci" },
++	{},
++};
++MODULE_DEVICE_TABLE(of, sdhci_brcm_of_match);
++
++static struct platform_driver sdhci_brcmstb_driver = {
++	.driver		= {
++		.name	= "sdhci-brcmstb",
++		.owner	= THIS_MODULE,
++		.pm	= &sdhci_brcmstb_pmops,
++		.of_match_table = of_match_ptr(sdhci_brcm_of_match),
++	},
++	.probe		= sdhci_brcmstb_probe,
++	.remove		= sdhci_pltfm_unregister,
++};
++
++module_platform_driver(sdhci_brcmstb_driver);
++
++MODULE_DESCRIPTION("SDHCI driver for Broadcom BRCMSTB SoCs");
++MODULE_AUTHOR("Broadcom");
++MODULE_LICENSE("GPL v2");
+-- 
+1.9.0.138.g2de3478
 
-[snip]
-
-> >>
-> >> Coming back to the initial discussion and patch which were motivated by
-> >> the fact that after runtime suspend I can't wake-up on card detect event,
-> >> I have the feeling we don't have the same assumption about runtime PM.
-> >>
-> >> From what you and Adrian told me, I should not use runtime PM if I have
-> >> no way to wake-up. In your minds, the way to wake-up is to use an
-> >> externel GPIO because the controller will be 'totally' disabled, isn't it?
-> >
-> > I agree to the first part here.
-> >
-> > Although, as you also have the option to use polling for card detect,
-> > this actually means you don't really *need* to have a wakeup
-> > configured. Especially in the case where you don't have GPIO card
-> > detect.
-> >
-> > In that way, *all* the clocks can gated in between the polling
-> > attempts, thus you will save power even in the polling mode
-> > configuration and when runtime PM is enabled.
-> >
-
-As you said, I can gate all the clocks but only between attempts.
-Regularly, I will resume and suspend my controller to perform the card
-detection. I don't know if it is a better solution than keeping one
-clock enabled and waiting for an interrupt to enable the other ones.
-
-> >>
-> >> On my side, runtime PM allows me to save power when the sdhci controller
-> >> is not used. If I can disable two clocks out of three, I should use
-> >> runtime PM. Do you agree?
-> >>
-> >> If not, tell me how I can convince you :) Otherwise, next step is to rework
-> >> my patch but I think I have no other solution that not calling
-> >> sdhci_runtime_suspend_host if I expect to use the card detect irq of the
-> >> controller.
-> >
-> > So, to summarize.
-> >
-> > I think the best fix is to add a clever check in ->probe() and then
-> > enable polling when you can't rely on GPIO card detect IRQ.
-> >
-> > Moreover, to have a robust solution, you also need to clear
-> > SDHCI_QUIRK_BROKEN_CARD_DETECTION for your sdhci variant, as otherwise
-> > the "broken-cd" DT binding could wrongly be used for this variant.
-> >
-> > Does that make sense?
-
-
-Well I don't agree totally because I have the feeling to use a
-workaround because if sdhci_runtime_suspend_host has been called the
-controlled is considered as 'disabled' then we won't deal with its IRQs.
-
-I would like to move forward on this issue so it could be a trade-off.
-
-Since the sdhci layer is going to be reworked, maybe it could be
-interesting to have another approach of runtime PM to get more
-flexibility.
-
-
-Regards
-
-Ludovic
