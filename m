@@ -1,125 +1,138 @@
 From: Wolfram Sang <wsa@the-dreams.de>
-Subject: [PATCH 01/10] pinctrl: sh-pfc: r8a7790: Implement voltage switching for SDHI
-Date: Sat, 12 Mar 2016 10:15:03 +0100
-Message-ID: <1457774112-16958-2-git-send-email-wsa@the-dreams.de>
+Subject: [PATCH 08/10] mmc: sh_mobile_sdhi: Add UHS-I mode support
+Date: Sat, 12 Mar 2016 10:15:10 +0100
+Message-ID: <1457774112-16958-9-git-send-email-wsa@the-dreams.de>
 References: <1457774112-16958-1-git-send-email-wsa@the-dreams.de>
-Return-path: <linux-gpio-owner@vger.kernel.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from sauhun.de ([89.238.76.85]:48805 "EHLO pokefinder.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752127AbcCLJPf (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Sat, 12 Mar 2016 04:15:35 -0500
 In-Reply-To: <1457774112-16958-1-git-send-email-wsa@the-dreams.de>
-Sender: linux-gpio-owner@vger.kernel.org
-To: linux-renesas-soc@vger.kernel.org
-Cc: Wolfram Sang <wsa@the-dreams.de>, linux-mmc@vger.kernel.org, Dirk Behme <dirk.behme@gmail.com>, Ben Hutchings <ben.hutchings@codethink.co.uk>, linux-gpio@vger.kernel.org
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-renesas-soc@vger.kernel.org
+Cc: Wolfram Sang <wsa@the-dreams.de>, linux-mmc@vger.kernel.org, Dirk Behme <dirk.behme@gmail.com>, Ben Hutchings <ben.hutchings@codethink.co.uk>
 
 From: Wolfram Sang <wsa+renesas@sang-engineering.com>
 
-All the SHDIs can operate with either 3.3V or 1.8V signals, depending
-on negotiation with the card.
+Implement voltage switch, supporting modes up to SDR-50.
 
-Implement the {get,set}_io_voltage operations and set the related
-capability flag for the associated pins.
+Based on work by Shinobu Uehara, Rob Taylor, William Towle and Ian Molton.
 
 Signed-off-by: Ben Hutchings <ben.hutchings@codethink.co.uk>
 Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
-Cc: linux-gpio@vger.kernel.org
 ---
 
 Changes since RFC:
 
-* Don't export sh_pfc_phys_to_virt but use pfc->windows->virt directly.
+* added binding docs
+* use mmc_regulator_set_vqmmc instead of open coding it
+* rename DT binding name and pinctrl variables to "*uhs" instead of "*1v8"
 
- drivers/pinctrl/sh-pfc/pfc-r8a7790.c | 54 +++++++++++++++++++++++++++++++++++-
- 1 file changed, 53 insertions(+), 1 deletion(-)
+ Documentation/devicetree/bindings/mmc/tmio_mmc.txt |  3 ++
+ drivers/mmc/host/sh_mobile_sdhi.c                  | 49 ++++++++++++++++++++++
+ 2 files changed, 52 insertions(+)
 
-diff --git a/drivers/pinctrl/sh-pfc/pfc-r8a7790.c b/drivers/pinctrl/sh-pfc/pfc-r8a7790.c
-index 0f4d48f9400ba0..eed8daa464cc1e 100644
---- a/drivers/pinctrl/sh-pfc/pfc-r8a7790.c
-+++ b/drivers/pinctrl/sh-pfc/pfc-r8a7790.c
-@@ -21,16 +21,21 @@
-  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-  */
+diff --git a/Documentation/devicetree/bindings/mmc/tmio_mmc.txt b/Documentation/devicetree/bindings/mmc/tmio_mmc.txt
+index 7fb746dd1a68ca..0f610d4b5b005f 100644
+--- a/Documentation/devicetree/bindings/mmc/tmio_mmc.txt
++++ b/Documentation/devicetree/bindings/mmc/tmio_mmc.txt
+@@ -26,3 +26,6 @@ Required properties:
  
-+#include <linux/io.h>
- #include <linux/kernel.h>
+ Optional properties:
+ - toshiba,mmc-wrprotect-disable: write-protect detection is unavailable
++- pinctrl-names: should be "default", "state_uhs"
++- pinctrl-0: should contain default/high speed pin ctrl
++- pinctrl-1: should contain uhs mode pin ctrl
+diff --git a/drivers/mmc/host/sh_mobile_sdhi.c b/drivers/mmc/host/sh_mobile_sdhi.c
+index 8fd1d6b29190b6..5d2a852f17eebd 100644
+--- a/drivers/mmc/host/sh_mobile_sdhi.c
++++ b/drivers/mmc/host/sh_mobile_sdhi.c
+@@ -32,6 +32,9 @@
+ #include <linux/mfd/tmio.h>
+ #include <linux/sh_dma.h>
+ #include <linux/delay.h>
++#include <linux/pinctrl/consumer.h>
++#include <linux/pinctrl/pinctrl-state.h>
++#include <linux/regulator/consumer.h>
  
- #include "core.h"
- #include "sh_pfc.h"
+ #include "tmio_mmc.h"
  
-+/*
-+ * All pins assigned to GPIO bank 3 can be used for SD interfaces in
-+ * which case they support both 3.3V and 1.8V signalling.
-+ */
- #define CPU_ALL_PORT(fn, sfx)						\
- 	PORT_GP_32(0, fn, sfx),						\
- 	PORT_GP_30(1, fn, sfx),						\
- 	PORT_GP_30(2, fn, sfx),						\
--	PORT_GP_32(3, fn, sfx),						\
-+	PORT_GP_CFG_32(3, fn, sfx, SH_PFC_PIN_CFG_IO_VOLTAGE),		\
- 	PORT_GP_32(4, fn, sfx),						\
- 	PORT_GP_32(5, fn, sfx)
- 
-@@ -4691,6 +4696,47 @@ static const char * const vin3_groups[] = {
- 	"vin3_clk",
+@@ -97,6 +100,8 @@ struct sh_mobile_sdhi {
+ 	struct clk *clk;
+ 	struct tmio_mmc_data mmc_data;
+ 	struct tmio_mmc_dma dma_priv;
++	struct pinctrl *pinctrl;
++	struct pinctrl_state *pins_default, *pins_uhs;
  };
  
-+#define IOCTRL6 0x8c
-+
-+static int r8a7790_get_io_voltage(struct sh_pfc *pfc, unsigned int pin)
+ static void sh_mobile_sdhi_sdbuf_width(struct tmio_mmc_host *host, int width)
+@@ -205,6 +210,43 @@ static void sh_mobile_sdhi_clk_disable(struct tmio_mmc_host *host)
+ 	clk_disable_unprepare(priv->clk);
+ }
+ 
++static int sh_mobile_sdhi_start_signal_voltage_switch(struct tmio_mmc_host *host,
++						      struct mmc_ios *ios)
 +{
-+	u32 data, mask;
++	struct sh_mobile_sdhi *priv = host_to_priv(host);
++	struct pinctrl_state *pin_state;
++	int ret;
 +
-+	if (WARN(pin < RCAR_GP_PIN(3, 0) || pin > RCAR_GP_PIN(3, 31), "invalid pin %#x", pin))
++	switch (ios->signal_voltage) {
++	case MMC_SIGNAL_VOLTAGE_330:
++		pin_state = priv->pins_default;
++		break;
++	case MMC_SIGNAL_VOLTAGE_180:
++		pin_state = priv->pins_uhs;
++		break;
++	default:
 +		return -EINVAL;
++	}
 +
-+	data = ioread32(pfc->windows->virt + IOCTRL6),
-+	/* Bits in IOCTRL6 are numbered in opposite order to pins */
-+	mask = 0x80000000 >> (pin & 0x1f);
++	/*
++	 * If anything is missing, assume signal voltage is fixed at
++	 * 3.3V and succeed/fail accordingly.
++	 */
++	if (IS_ERR(priv->pinctrl) || IS_ERR(pin_state))
++		return ios->signal_voltage == MMC_SIGNAL_VOLTAGE_330 ? 0 : -EINVAL;
 +
-+	return (data & mask) ? 3300 : 1800;
-+}
++	ret = mmc_regulator_set_vqmmc(host->mmc, ios);
++	if (ret)
++		return ret;
 +
-+static int r8a7790_set_io_voltage(struct sh_pfc *pfc, unsigned int pin, u16 mV)
-+{
-+	u32 data, mask;
++	ret = pinctrl_select_state(priv->pinctrl, pin_state);
++	if (ret)
++		return ret;
 +
-+	if (WARN(pin < RCAR_GP_PIN(3, 0) || pin > RCAR_GP_PIN(3, 31), "invalid pin %#x", pin))
-+		return -EINVAL;
-+
-+	if (mV != 1800 && mV != 3300)
-+		return -EINVAL;
-+
-+	data = ioread32(pfc->windows->virt + IOCTRL6);
-+	/* Bits in IOCTRL6 are numbered in opposite order to pins */
-+	mask = 0x80000000 >> (pin & 0x1f);
-+
-+	if (mV == 3300)
-+		data |= mask;
-+	else
-+		data &= ~mask;
-+
-+	iowrite32(~data, pfc->windows->virt); /* unlock reg */
-+	iowrite32(data, pfc->windows->virt + IOCTRL6);
-+
++	usleep_range(5000, 5500);
 +	return 0;
 +}
 +
- static const struct sh_pfc_function pinmux_functions[] = {
- 	SH_PFC_FUNCTION(audio_clk),
- 	SH_PFC_FUNCTION(avb),
-@@ -5690,8 +5736,14 @@ static const struct pinmux_cfg_reg pinmux_config_regs[] = {
- 	{ },
- };
+ static int sh_mobile_sdhi_wait_idle(struct tmio_mmc_host *host)
+ {
+ 	int timeout = 1000;
+@@ -296,6 +338,12 @@ static int sh_mobile_sdhi_probe(struct platform_device *pdev)
+ 		goto eprobe;
+ 	}
  
-+static const struct sh_pfc_soc_operations pinmux_ops = {
-+	.get_io_voltage = r8a7790_get_io_voltage,
-+	.set_io_voltage = r8a7790_set_io_voltage,
-+};
++	priv->pinctrl = devm_pinctrl_get(&pdev->dev);
++	if (!IS_ERR(priv->pinctrl)) {
++		priv->pins_default = pinctrl_lookup_state(priv->pinctrl, PINCTRL_STATE_DEFAULT);
++		priv->pins_uhs = pinctrl_lookup_state(priv->pinctrl, "state_uhs");
++	}
 +
- const struct sh_pfc_soc_info r8a7790_pinmux_info = {
- 	.name = "r8a77900_pfc",
-+	.ops = &pinmux_ops,
- 	.unlock_reg = 0xe6060000, /* PMMR */
+ 	host = tmio_mmc_host_alloc(pdev);
+ 	if (!host) {
+ 		ret = -ENOMEM;
+@@ -319,6 +367,7 @@ static int sh_mobile_sdhi_probe(struct platform_device *pdev)
+ 	host->clk_update	= sh_mobile_sdhi_clk_update;
+ 	host->clk_disable	= sh_mobile_sdhi_clk_disable;
+ 	host->multi_io_quirk	= sh_mobile_sdhi_multi_io_quirk;
++	host->start_signal_voltage_switch = sh_mobile_sdhi_start_signal_voltage_switch;
  
- 	.function = { PINMUX_FUNCTION_BEGIN, PINMUX_FUNCTION_END },
+ 	/* Orginally registers were 16 bit apart, could be 32 or 64 nowadays */
+ 	if (!host->bus_shift && resource_size(res) > 0x100) /* old way to determine the shift */
 -- 
 2.7.0
 
