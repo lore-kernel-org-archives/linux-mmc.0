@@ -1,81 +1,65 @@
 From: Wolfram Sang <wsa@the-dreams.de>
-Subject: [PATCH 07/10] mmc: host: add note that set_ios needs to handle 0Hz properly
-Date: Sat, 12 Mar 2016 10:15:09 +0100
-Message-ID: <1457774112-16958-8-git-send-email-wsa@the-dreams.de>
+Subject: [PATCH 09/10] ARM: shmobile: r8a7790: Set maximum frequencies for SDHI clocks
+Date: Sat, 12 Mar 2016 10:15:11 +0100
+Message-ID: <1457774112-16958-10-git-send-email-wsa@the-dreams.de>
 References: <1457774112-16958-1-git-send-email-wsa@the-dreams.de>
-Return-path: <linux-renesas-soc-owner@vger.kernel.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from sauhun.de ([89.238.76.85]:48810 "EHLO pokefinder.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752129AbcCLJPg (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Sat, 12 Mar 2016 04:15:36 -0500
 In-Reply-To: <1457774112-16958-1-git-send-email-wsa@the-dreams.de>
-Sender: linux-renesas-soc-owner@vger.kernel.org
+Sender: linux-mmc-owner@vger.kernel.org
+List-Id: linux-mmc@vger.kernel.org
 To: linux-renesas-soc@vger.kernel.org
 Cc: Wolfram Sang <wsa@the-dreams.de>, linux-mmc@vger.kernel.org, Dirk Behme <dirk.behme@gmail.com>, Ben Hutchings <ben.hutchings@codethink.co.uk>
-List-Id: linux-mmc@vger.kernel.org
 
-From: Wolfram Sang <wsa+renesas@sang-engineering.com>
+From: Ben Hutchings <ben.hutchings@codethink.co.uk>
 
-While here, refactor the comments so that they are before the
-declaration they are referring to.
+Taken from the datasheet.
 
+Signed-off-by: Ben Hutchings <ben.hutchings@codethink.co.uk>
 Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
 ---
+ arch/arm/boot/dts/r8a7790.dtsi | 4 ++++
+ 1 file changed, 4 insertions(+)
 
-New patch, was not in RFC.
-
- include/linux/mmc/host.h | 31 +++++++++++++++++++++----------
- 1 file changed, 21 insertions(+), 10 deletions(-)
-
-diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-index 8dd4d290ab0d86..85800b48241fad 100644
---- a/include/linux/mmc/host.h
-+++ b/include/linux/mmc/host.h
-@@ -93,28 +93,39 @@ struct mmc_host_ops {
- 	void	(*pre_req)(struct mmc_host *host, struct mmc_request *req,
- 			   bool is_first_req);
- 	void	(*request)(struct mmc_host *host, struct mmc_request *req);
-+
-+	/*
-+	 * Avoid calling the next three functions too often or in a "fast
-+	 * path", since underlaying controller might implement them in an
-+	 * expensive and/or slow way. Also note that these functions might
-+	 * sleep, so don't call them in the atomic contexts!
-+	 */
-+
-+	/*
-+	 * Notes to the set_ios callback:
-+	 * ios->clock might be 0. For some controllers, setting 0Hz
-+	 * as any other frequency works. However, some controllers
-+	 * explicitly need to disable the clock. Otherwise e.g. voltage
-+	 * switching might fail because the SDCLK is not really quiet.
-+	 */
-+	void	(*set_ios)(struct mmc_host *host, struct mmc_ios *ios);
-+
- 	/*
--	 * Avoid calling these three functions too often or in a "fast path",
--	 * since underlaying controller might implement them in an expensive
--	 * and/or slow way.
--	 *
--	 * Also note that these functions might sleep, so don't call them
--	 * in the atomic contexts!
--	 *
- 	 * Return values for the get_ro callback should be:
- 	 *   0 for a read/write card
- 	 *   1 for a read-only card
- 	 *   -ENOSYS when not supported (equal to NULL callback)
- 	 *   or a negative errno value when something bad happened
--	 *
-+	 */
-+	int	(*get_ro)(struct mmc_host *host);
-+
-+	/*
- 	 * Return values for the get_cd callback should be:
- 	 *   0 for a absent card
- 	 *   1 for a present card
- 	 *   -ENOSYS when not supported (equal to NULL callback)
- 	 *   or a negative errno value when something bad happened
- 	 */
--	void	(*set_ios)(struct mmc_host *host, struct mmc_ios *ios);
--	int	(*get_ro)(struct mmc_host *host);
- 	int	(*get_cd)(struct mmc_host *host);
- 
- 	void	(*enable_sdio_irq)(struct mmc_host *host, int enable);
+diff --git a/arch/arm/boot/dts/r8a7790.dtsi b/arch/arm/boot/dts/r8a7790.dtsi
+index 6d435e10a4de0c..318ba8129c3463 100644
+--- a/arch/arm/boot/dts/r8a7790.dtsi
++++ b/arch/arm/boot/dts/r8a7790.dtsi
+@@ -597,6 +597,7 @@
+ 		reg = <0 0xee100000 0 0x328>;
+ 		interrupts = <GIC_SPI 165 IRQ_TYPE_LEVEL_HIGH>;
+ 		clocks = <&mstp3_clks R8A7790_CLK_SDHI0>;
++		max-frequency = <156000000>;
+ 		dmas = <&dmac1 0xcd>, <&dmac1 0xce>;
+ 		dma-names = "tx", "rx";
+ 		power-domains = <&cpg_clocks>;
+@@ -608,6 +609,7 @@
+ 		reg = <0 0xee120000 0 0x328>;
+ 		interrupts = <GIC_SPI 166 IRQ_TYPE_LEVEL_HIGH>;
+ 		clocks = <&mstp3_clks R8A7790_CLK_SDHI1>;
++		max-frequency = <156000000>;
+ 		dmas = <&dmac1 0xc9>, <&dmac1 0xca>;
+ 		dma-names = "tx", "rx";
+ 		power-domains = <&cpg_clocks>;
+@@ -619,6 +621,7 @@
+ 		reg = <0 0xee140000 0 0x100>;
+ 		interrupts = <GIC_SPI 167 IRQ_TYPE_LEVEL_HIGH>;
+ 		clocks = <&mstp3_clks R8A7790_CLK_SDHI2>;
++		max-frequency = <97500000>;
+ 		dmas = <&dmac1 0xc1>, <&dmac1 0xc2>;
+ 		dma-names = "tx", "rx";
+ 		power-domains = <&cpg_clocks>;
+@@ -630,6 +633,7 @@
+ 		reg = <0 0xee160000 0 0x100>;
+ 		interrupts = <GIC_SPI 168 IRQ_TYPE_LEVEL_HIGH>;
+ 		clocks = <&mstp3_clks R8A7790_CLK_SDHI3>;
++		max-frequency = <97500000>;
+ 		dmas = <&dmac1 0xd3>, <&dmac1 0xd4>;
+ 		dma-names = "tx", "rx";
+ 		power-domains = <&cpg_clocks>;
 -- 
 2.7.0
+
