@@ -1,86 +1,59 @@
 From: Wolfram Sang <wsa@the-dreams.de>
-Subject: [PATCH 10/10] ARM: shmobile: r8a7790: lager: Enable UHS-I SDR-50
-Date: Sat, 12 Mar 2016 10:15:12 +0100
-Message-ID: <1457774112-16958-11-git-send-email-wsa@the-dreams.de>
-References: <1457774112-16958-1-git-send-email-wsa@the-dreams.de>
-Return-path: <linux-renesas-soc-owner@vger.kernel.org>
-In-Reply-To: <1457774112-16958-1-git-send-email-wsa@the-dreams.de>
-Sender: linux-renesas-soc-owner@vger.kernel.org
-To: linux-renesas-soc@vger.kernel.org
-Cc: Wolfram Sang <wsa@the-dreams.de>, linux-mmc@vger.kernel.org, Dirk Behme <dirk.behme@gmail.com>, Ben Hutchings <ben.hutchings@codethink.co.uk>
+Subject: Re: [v6, 4/5] powerpc/fsl: move mpc85xx.h to include/linux/fsl
+Date: Sat, 12 Mar 2016 16:52:54 +0100
+Message-ID: <20160312155254.GJ1661@katana>
+References: <1457518131-11339-1-git-send-email-yangbo.lu@nxp.com>
+ <1457518131-11339-5-git-send-email-yangbo.lu@nxp.com>
+Mime-Version: 1.0
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="AXxEqdD4tcVTjWte"
+Return-path: <linux-clk-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <1457518131-11339-5-git-send-email-yangbo.lu@nxp.com>
+Sender: linux-clk-owner@vger.kernel.org
+To: Yangbo Lu <yangbo.lu@nxp.com>
+Cc: devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, linuxppc-dev@lists.ozlabs.org, linux-clk@vger.kernel.org, linux-i2c@vger.kernel.org, iommu@lists.linux-foundation.org, netdev@vger.kernel.org, linux-mmc@vger.kernel.org, Rob Herring <robh+dt@kernel.org>, scott.wood@nxp.com, Russell King <linux@arm.linux.org.uk>, Jochen Friedrich <jochen@scram.de>, Joerg Roedel <joro@8bytes.org>, Claudiu Manoil <claudiu.manoil@freescale.com>, ulf.hansson@linaro.org, Bhupesh Sharma <bhupesh.sharma@freescale.com>, Zhao Qiang <qiang.zhao@freescale.com>, Kumar Gala <galak@codeaurora.org>, Santosh Shilimkar <ssantosh@kernel.org>, leoyang.li@nxp.com, xiaobo.xie@nxp.com
 List-Id: linux-mmc@vger.kernel.org
 
-From: Ben Hutchings <ben.hutchings@codethink.co.uk>
 
-Add the "1v8" pinctrl state and sd-uhs-sdr50 property to SDHI{0,2}.
+--AXxEqdD4tcVTjWte
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-Signed-off-by: Ben Hutchings <ben.hutchings@codethink.co.uk>
-Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
----
-Changes since RFC:
+On Wed, Mar 09, 2016 at 06:08:50PM +0800, Yangbo Lu wrote:
+> Move mpc85xx.h to include/linux/fsl and rename it to svr.h as
+> a common header file. It has been used for mpc85xx and it will
+> be used for ARM-based SoC as well.
+>=20
+> Signed-off-by: Yangbo Lu <yangbo.lu@nxp.com>
 
-* rename DT binding name and pinctrl variables to "*uhs" instead of "*1v8"
+=46rom a glimpse, looks like proper refactoring. Thanks!
 
- arch/arm/boot/dts/r8a7790-lager.dts | 22 ++++++++++++++++++++--
- 1 file changed, 20 insertions(+), 2 deletions(-)
+For the I2C part:
 
-diff --git a/arch/arm/boot/dts/r8a7790-lager.dts b/arch/arm/boot/dts/r8a7790-lager.dts
-index 4972d24a609d2a..db87041617b1d8 100644
---- a/arch/arm/boot/dts/r8a7790-lager.dts
-+++ b/arch/arm/boot/dts/r8a7790-lager.dts
-@@ -346,11 +346,25 @@
- 	sdhi0_pins: sd0 {
- 		renesas,groups = "sdhi0_data4", "sdhi0_ctrl";
- 		renesas,function = "sdhi0";
-+		power-source = <3300>;
-+	};
-+
-+	sdhi0_pins_uhs: sd0_uhs {
-+		renesas,groups = "sdhi0_data4", "sdhi0_ctrl";
-+		renesas,function = "sdhi0";
-+		power-source = <1800>;
- 	};
- 
- 	sdhi2_pins: sd2 {
- 		renesas,groups = "sdhi2_data4", "sdhi2_ctrl";
- 		renesas,function = "sdhi2";
-+		power-source = <3300>;
-+	};
-+
-+	sdhi2_pins_uhs: sd2_uhs {
-+		renesas,groups = "sdhi2_data4", "sdhi2_ctrl";
-+		renesas,function = "sdhi2";
-+		power-source = <1800>;
- 	};
- 
- 	mmc1_pins: mmc1 {
-@@ -539,21 +553,25 @@
- 
- &sdhi0 {
- 	pinctrl-0 = <&sdhi0_pins>;
--	pinctrl-names = "default";
-+	pinctrl-1 = <&sdhi0_pins_uhs>;
-+	pinctrl-names = "default", "state_uhs";
- 
- 	vmmc-supply = <&vcc_sdhi0>;
- 	vqmmc-supply = <&vccq_sdhi0>;
- 	cd-gpios = <&gpio3 6 GPIO_ACTIVE_LOW>;
-+	sd-uhs-sdr50;
- 	status = "okay";
- };
- 
- &sdhi2 {
- 	pinctrl-0 = <&sdhi2_pins>;
--	pinctrl-names = "default";
-+	pinctrl-1 = <&sdhi2_pins_uhs>;
-+	pinctrl-names = "default", "state_uhs";
- 
- 	vmmc-supply = <&vcc_sdhi2>;
- 	vqmmc-supply = <&vccq_sdhi2>;
- 	cd-gpios = <&gpio3 22 GPIO_ACTIVE_LOW>;
-+	sd-uhs-sdr50;
- 	status = "okay";
- };
- 
--- 
-2.7.0
+Acked-by: Wolfram Sang <wsa@the-dreams.de>
+
+
+--AXxEqdD4tcVTjWte
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1
+
+iQIcBAEBAgAGBQJW5DtWAAoJEBQN5MwUoCm2N8wP/A+9PzzjAh69NdEWEYwAmYNQ
+O+VKHOPKJS8+cx+LgBtRcfEPQFa1Yjhbc67iLD3iCZmflpMTPkTxJaCXtCpX7spT
+czvjtG2dnaW57mkuuu1M1n6g2Pk8AqFScH7fgJ8/T0PsLo9n/+uZQOqsahYLYBA6
+eHz4NL7vhXW0X8K1v2VnPI8PzEc3jxz72ZsGo4JdKrrSNjs20rHpjXm4/c6L/IxY
+ww6eMTeOY+aXfNEHyWX67bwVX0j+9puiQ0RWdnQEo/3n9XMdketiEwpClO/fzAmb
+YGg7ChK0pVFqt54gk5Kj6eA9hCDiNsOK9LSeVNX5qsqmIcr1enxD9WNOV0zjPTfP
+pF1mR52ygaACR5KU8LQSZVyZBjar9lMq60Fw6KCRunwCMjpnkUxLWHFH8TrH5NAG
+bcVaO158C7FW7Ixk+d0uaZpqIMg2co62nUXXLxUvMSVbDNxuzvo6gCosZt5z3oKr
+9oEVkaqTk7QhX8szHB+BYKjoBVK+oi4UsgvQ3LnTCCt5r9vGGwGGnNEluOKHzB5o
+hEdKZ7/Ubd8yuCAkVzZHW4s0i248RxUY+a45u2adw6Zp5L7Dvw4JWPo0YD6qT4UN
+AMUJnu+dAf/WgL1wn1Nb1AKsbnN3dz8paP0kdGXTtfO51B1FeFrs7x9io1wvUFyn
+4zIuW6V0i4oZlV+/XynJ
+=VEQJ
+-----END PGP SIGNATURE-----
+
+--AXxEqdD4tcVTjWte--
