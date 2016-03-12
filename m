@@ -1,138 +1,207 @@
 From: Wolfram Sang <wsa@the-dreams.de>
-Subject: [PATCH 08/10] mmc: sh_mobile_sdhi: Add UHS-I mode support
-Date: Sat, 12 Mar 2016 10:15:10 +0100
-Message-ID: <1457774112-16958-9-git-send-email-wsa@the-dreams.de>
+Subject: [PATCH 03/10] mmc: tmio, sh_mobile_sdhi: Add support for variable input clock frequency
+Date: Sat, 12 Mar 2016 10:15:05 +0100
+Message-ID: <1457774112-16958-4-git-send-email-wsa@the-dreams.de>
 References: <1457774112-16958-1-git-send-email-wsa@the-dreams.de>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from sauhun.de ([89.238.76.85]:48805 "EHLO pokefinder.org"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752127AbcCLJPf (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Sat, 12 Mar 2016 04:15:35 -0500
+Return-path: <linux-renesas-soc-owner@vger.kernel.org>
 In-Reply-To: <1457774112-16958-1-git-send-email-wsa@the-dreams.de>
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Sender: linux-renesas-soc-owner@vger.kernel.org
 To: linux-renesas-soc@vger.kernel.org
 Cc: Wolfram Sang <wsa@the-dreams.de>, linux-mmc@vger.kernel.org, Dirk Behme <dirk.behme@gmail.com>, Ben Hutchings <ben.hutchings@codethink.co.uk>
+List-Id: linux-mmc@vger.kernel.org
 
-From: Wolfram Sang <wsa+renesas@sang-engineering.com>
+From: Ben Hutchings <ben.hutchings@codethink.co.uk>
 
-Implement voltage switch, supporting modes up to SDR-50.
+Currently tmio_mmc assumes that the input clock frequency is fixed and
+only its own clock divider can be changed.  This is not true in the
+case of sh_mobile_sdhi; we can use the clock API to change it.
 
-Based on work by Shinobu Uehara, Rob Taylor, William Towle and Ian Molton.
+In tmio_mmc:
+- Delegate setting of f_min from tmio to the clk_enable operation (if
+  implemented), as it can be smaller than f_max / 512
+- Add an optional clk_update operation called from tmio_mmc_set_clock()
+  that updates the input clock frequency
+- Rename tmio_mmc_clk_update() to tmio_mmc_clk_enable(), to avoid
+  confusion with the clk_update operation
+
+In sh_mobile_sdhi:
+- Make the setting of f_max conditional; it should be set through the
+  max-frequency property in the device tree in future
+- Set f_min based on the input clock's minimum frequency
+- Implement the clk_update operation, selecting the best input clock
+  frequency for the bus frequency that's wanted
+
+sh_mobile_sdhi_clk_update() is loosely based on Kuninori Morimoto's work
+in sh_mmcif.
 
 Signed-off-by: Ben Hutchings <ben.hutchings@codethink.co.uk>
 Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
 ---
+ drivers/mmc/host/sh_mobile_sdhi.c | 56 +++++++++++++++++++++++++++++++++++++--
+ drivers/mmc/host/tmio_mmc.h       |  2 ++
+ drivers/mmc/host/tmio_mmc_pio.c   | 24 +++++++----------
+ 3 files changed, 66 insertions(+), 16 deletions(-)
 
-Changes since RFC:
-
-* added binding docs
-* use mmc_regulator_set_vqmmc instead of open coding it
-* rename DT binding name and pinctrl variables to "*uhs" instead of "*1v8"
-
- Documentation/devicetree/bindings/mmc/tmio_mmc.txt |  3 ++
- drivers/mmc/host/sh_mobile_sdhi.c                  | 49 ++++++++++++++++++++++
- 2 files changed, 52 insertions(+)
-
-diff --git a/Documentation/devicetree/bindings/mmc/tmio_mmc.txt b/Documentation/devicetree/bindings/mmc/tmio_mmc.txt
-index 7fb746dd1a68ca..0f610d4b5b005f 100644
---- a/Documentation/devicetree/bindings/mmc/tmio_mmc.txt
-+++ b/Documentation/devicetree/bindings/mmc/tmio_mmc.txt
-@@ -26,3 +26,6 @@ Required properties:
- 
- Optional properties:
- - toshiba,mmc-wrprotect-disable: write-protect detection is unavailable
-+- pinctrl-names: should be "default", "state_uhs"
-+- pinctrl-0: should contain default/high speed pin ctrl
-+- pinctrl-1: should contain uhs mode pin ctrl
 diff --git a/drivers/mmc/host/sh_mobile_sdhi.c b/drivers/mmc/host/sh_mobile_sdhi.c
-index 8fd1d6b29190b6..5d2a852f17eebd 100644
+index 55849350202b7d..8fd1d6b29190b6 100644
 --- a/drivers/mmc/host/sh_mobile_sdhi.c
 +++ b/drivers/mmc/host/sh_mobile_sdhi.c
-@@ -32,6 +32,9 @@
- #include <linux/mfd/tmio.h>
- #include <linux/sh_dma.h>
- #include <linux/delay.h>
-+#include <linux/pinctrl/consumer.h>
-+#include <linux/pinctrl/pinctrl-state.h>
-+#include <linux/regulator/consumer.h>
+@@ -139,7 +139,20 @@ static int sh_mobile_sdhi_clk_enable(struct tmio_mmc_host *host)
+ 	if (ret < 0)
+ 		return ret;
  
- #include "tmio_mmc.h"
- 
-@@ -97,6 +100,8 @@ struct sh_mobile_sdhi {
- 	struct clk *clk;
- 	struct tmio_mmc_data mmc_data;
- 	struct tmio_mmc_dma dma_priv;
-+	struct pinctrl *pinctrl;
-+	struct pinctrl_state *pins_default, *pins_uhs;
- };
- 
- static void sh_mobile_sdhi_sdbuf_width(struct tmio_mmc_host *host, int width)
-@@ -205,6 +210,43 @@ static void sh_mobile_sdhi_clk_disable(struct tmio_mmc_host *host)
- 	clk_disable_unprepare(priv->clk);
- }
- 
-+static int sh_mobile_sdhi_start_signal_voltage_switch(struct tmio_mmc_host *host,
-+						      struct mmc_ios *ios)
-+{
-+	struct sh_mobile_sdhi *priv = host_to_priv(host);
-+	struct pinctrl_state *pin_state;
-+	int ret;
-+
-+	switch (ios->signal_voltage) {
-+	case MMC_SIGNAL_VOLTAGE_330:
-+		pin_state = priv->pins_default;
-+		break;
-+	case MMC_SIGNAL_VOLTAGE_180:
-+		pin_state = priv->pins_uhs;
-+		break;
-+	default:
-+		return -EINVAL;
-+	}
+-	mmc->f_max = clk_get_rate(priv->clk);
++	/*
++	 * The clock driver may not know what maximum frequency
++	 * actually works, so it should be set with the max-frequency
++	 * property which will already have been read to f_max.  If it
++	 * was missing, assume the current frequency is the maximum.
++	 */
++	if (!mmc->f_max)
++		mmc->f_max = clk_get_rate(priv->clk);
 +
 +	/*
-+	 * If anything is missing, assume signal voltage is fixed at
-+	 * 3.3V and succeed/fail accordingly.
++	 * Minimum frequency is the minimum input clock frequency
++	 * divided by our maximum divider.
 +	 */
-+	if (IS_ERR(priv->pinctrl) || IS_ERR(pin_state))
-+		return ios->signal_voltage == MMC_SIGNAL_VOLTAGE_330 ? 0 : -EINVAL;
-+
-+	ret = mmc_regulator_set_vqmmc(host->mmc, ios);
-+	if (ret)
-+		return ret;
-+
-+	ret = pinctrl_select_state(priv->pinctrl, pin_state);
-+	if (ret)
-+		return ret;
-+
-+	usleep_range(5000, 5500);
-+	return 0;
-+}
-+
- static int sh_mobile_sdhi_wait_idle(struct tmio_mmc_host *host)
- {
- 	int timeout = 1000;
-@@ -296,6 +338,12 @@ static int sh_mobile_sdhi_probe(struct platform_device *pdev)
- 		goto eprobe;
- 	}
++	mmc->f_min = max(clk_round_rate(priv->clk, 1) / 512, 1L);
  
-+	priv->pinctrl = devm_pinctrl_get(&pdev->dev);
-+	if (!IS_ERR(priv->pinctrl)) {
-+		priv->pins_default = pinctrl_lookup_state(priv->pinctrl, PINCTRL_STATE_DEFAULT);
-+		priv->pins_uhs = pinctrl_lookup_state(priv->pinctrl, "state_uhs");
+ 	/* enable 16bit data access on SDBUF as default */
+ 	sh_mobile_sdhi_sdbuf_width(host, 16);
+@@ -147,6 +160,44 @@ static int sh_mobile_sdhi_clk_enable(struct tmio_mmc_host *host)
+ 	return 0;
+ }
+ 
++static unsigned int sh_mobile_sdhi_clk_update(struct tmio_mmc_host *host,
++					      unsigned int new_clock)
++{
++	struct sh_mobile_sdhi *priv = host_to_priv(host);
++	unsigned int freq, best_freq, diff_min, diff;
++	int i;
++
++	diff_min = ~0;
++	best_freq = 0;
++
++	/*
++	 * We want the bus clock to be as close as possible to, but no
++	 * greater than, new_clock.  As we can divide by 1 << i for
++	 * any i in [0, 9] we want the input clock to be as close as
++	 * possible, but no greater than, new_clock << i.
++	 */
++	for (i = min(9, ilog2(UINT_MAX / new_clock)); i >= 0; i--) {
++		freq = clk_round_rate(priv->clk, new_clock << i);
++		if (freq > (new_clock << i)) {
++			/* Too fast; look for a slightly slower option */
++			freq = clk_round_rate(priv->clk,
++					      (new_clock << i) / 4 * 3);
++			if (freq > (new_clock << i))
++				continue;
++		}
++
++		diff = new_clock - (freq >> i);
++		if (diff <= diff_min) {
++			best_freq = freq;
++			diff_min = diff;
++		}
 +	}
 +
- 	host = tmio_mmc_host_alloc(pdev);
- 	if (!host) {
- 		ret = -ENOMEM;
-@@ -319,6 +367,7 @@ static int sh_mobile_sdhi_probe(struct platform_device *pdev)
- 	host->clk_update	= sh_mobile_sdhi_clk_update;
++	clk_set_rate(priv->clk, best_freq);
++
++	return best_freq;
++}
++
+ static void sh_mobile_sdhi_clk_disable(struct tmio_mmc_host *host)
+ {
+ 	struct sh_mobile_sdhi *priv = host_to_priv(host);
+@@ -265,6 +316,7 @@ static int sh_mobile_sdhi_probe(struct platform_device *pdev)
+ 	host->dma		= dma_priv;
+ 	host->write16_hook	= sh_mobile_sdhi_write16_hook;
+ 	host->clk_enable	= sh_mobile_sdhi_clk_enable;
++	host->clk_update	= sh_mobile_sdhi_clk_update;
  	host->clk_disable	= sh_mobile_sdhi_clk_disable;
  	host->multi_io_quirk	= sh_mobile_sdhi_multi_io_quirk;
-+	host->start_signal_voltage_switch = sh_mobile_sdhi_start_signal_voltage_switch;
  
- 	/* Orginally registers were 16 bit apart, could be 32 or 64 nowadays */
- 	if (!host->bus_shift && resource_size(res) > 0x100) /* old way to determine the shift */
+@@ -362,7 +414,7 @@ static int sh_mobile_sdhi_probe(struct platform_device *pdev)
+ 		}
+ 	}
+ 
+-	dev_info(&pdev->dev, "%s base at 0x%08lx clock rate %u MHz\n",
++	dev_info(&pdev->dev, "%s base at 0x%08lx max clock rate %u MHz\n",
+ 		 mmc_hostname(host->mmc), (unsigned long)
+ 		 (platform_get_resource(pdev, IORESOURCE_MEM, 0)->start),
+ 		 host->mmc->f_max / 1000000);
+diff --git a/drivers/mmc/host/tmio_mmc.h b/drivers/mmc/host/tmio_mmc.h
+index 68fd8d791358c1..b44b5890290622 100644
+--- a/drivers/mmc/host/tmio_mmc.h
++++ b/drivers/mmc/host/tmio_mmc.h
+@@ -96,6 +96,8 @@ struct tmio_mmc_host {
+ 
+ 	int (*write16_hook)(struct tmio_mmc_host *host, int addr);
+ 	int (*clk_enable)(struct tmio_mmc_host *host);
++	unsigned int (*clk_update)(struct tmio_mmc_host *host,
++				   unsigned int new_clock);
+ 	void (*clk_disable)(struct tmio_mmc_host *host);
+ 	int (*multi_io_quirk)(struct mmc_card *card,
+ 			      unsigned int direction, int blk_size);
+diff --git a/drivers/mmc/host/tmio_mmc_pio.c b/drivers/mmc/host/tmio_mmc_pio.c
+index d1160156678ade..ae81b34f17a5a5 100644
+--- a/drivers/mmc/host/tmio_mmc_pio.c
++++ b/drivers/mmc/host/tmio_mmc_pio.c
+@@ -160,9 +160,12 @@ static void tmio_mmc_set_clock(struct tmio_mmc_host *host,
+ 	u32 clk = 0, clock;
+ 
+ 	if (new_clock) {
+-		for (clock = host->mmc->f_min, clk = 0x80000080;
+-		     new_clock >= (clock << 1);
+-		     clk >>= 1)
++		if (host->clk_update)
++			clock = host->clk_update(host, new_clock) / 512;
++		else
++			clock = host->mmc->f_min;
++
++		for (clk = 0x80000080; new_clock >= (clock << 1); clk >>= 1)
+ 			clock <<= 1;
+ 
+ 		/* 1/1 clock is option */
+@@ -837,19 +840,12 @@ fail:
+ 	pm_runtime_put_autosuspend(mmc_dev(mmc));
+ }
+ 
+-static int tmio_mmc_clk_update(struct tmio_mmc_host *host)
++static int tmio_mmc_clk_enable(struct tmio_mmc_host *host)
+ {
+-	struct mmc_host *mmc = host->mmc;
+-	int ret;
+-
+ 	if (!host->clk_enable)
+ 		return -ENOTSUPP;
+ 
+-	ret = host->clk_enable(host);
+-	if (!ret)
+-		mmc->f_min = mmc->f_max / 512;
+-
+-	return ret;
++	return host->clk_enable(host);
+ }
+ 
+ static void tmio_mmc_power_on(struct tmio_mmc_host *host, unsigned short vdd)
+@@ -1135,7 +1131,7 @@ int tmio_mmc_host_probe(struct tmio_mmc_host *_host,
+ 				  mmc->caps & MMC_CAP_NONREMOVABLE ||
+ 				  mmc->slot.cd_irq >= 0);
+ 
+-	if (tmio_mmc_clk_update(_host) < 0) {
++	if (tmio_mmc_clk_enable(_host) < 0) {
+ 		mmc->f_max = pdata->hclk;
+ 		mmc->f_min = mmc->f_max / 512;
+ 	}
+@@ -1263,7 +1259,7 @@ int tmio_mmc_host_runtime_resume(struct device *dev)
+ 	struct tmio_mmc_host *host = mmc_priv(mmc);
+ 
+ 	tmio_mmc_reset(host);
+-	tmio_mmc_clk_update(host);
++	tmio_mmc_clk_enable(host);
+ 
+ 	if (host->clk_cache) {
+ 		tmio_mmc_set_clock(host, host->clk_cache);
 -- 
 2.7.0
-
