@@ -1,35 +1,34 @@
-From: Shawn Lin <shawn.lin@rock-chips.com>
-Subject: [PATCH] mmc: core: remove redundant memset of sdio_read_cccr
-Date: Mon, 14 Mar 2016 12:41:33 +0800
-Message-ID: <1457930493-19021-1-git-send-email-shawn.lin@rock-chips.com>
+From: Wang Hongcheng <annie.wang@amd.com>
+Subject: [PATCH v2] ARM: mmci:Remove unnecessary #include header file in mmci.c
+Date: Mon, 14 Mar 2016 13:44:33 +0800
+Message-ID: <1457934273-2977-1-git-send-email-annie.wang@amd.com>
+Mime-Version: 1.0
+Content-Type: text/plain
 Return-path: <linux-kernel-owner@vger.kernel.org>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Shawn Lin <shawn.lin@rock-chips.com>
+To: Russell King <linux@arm.linux.org.uk>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Borislav Petkov <bp@alien8.de>, SPG_Linux_Kernel <SPG_Linux_Kernel@amd.com>
+Cc: Wang Hongcheng <annie.wang@amd.com>
 List-Id: linux-mmc@vger.kernel.org
 
-When initializing sdio card, we get struct mmc_card
-from mmc_alloc_card which allocates it by kzalloc. So we
-don't need another memset while reading cccr.
+The header file asm/sizes.h is unnecessary.
+And it can also be compiled under X86 arch after the removal.
 
-Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
+Signed-off-by: Wang Hongcheng <annie.wang@amd.com>
 ---
+ drivers/mmc/host/mmci.c | 1 -
+ 1 file changed, 1 deletion(-)
 
- drivers/mmc/core/sdio.c | 2 --
- 1 file changed, 2 deletions(-)
-
-diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
-index 467b3cf..bd44ba8 100644
---- a/drivers/mmc/core/sdio.c
-+++ b/drivers/mmc/core/sdio.c
-@@ -106,8 +106,6 @@ static int sdio_read_cccr(struct mmc_card *card, u32 ocr)
- 	unsigned char data;
- 	unsigned char speed;
+diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
+index fb26674..e5e5441 100644
+--- a/drivers/mmc/host/mmci.c
++++ b/drivers/mmc/host/mmci.c
+@@ -40,7 +40,6 @@
  
--	memset(&card->cccr, 0, sizeof(struct sdio_cccr));
--
- 	ret = mmc_io_rw_direct(card, 0, 0, SDIO_CCCR_CCCR, 0, &data);
- 	if (ret)
- 		goto out;
+ #include <asm/div64.h>
+ #include <asm/io.h>
+-#include <asm/sizes.h>
+ 
+ #include "mmci.h"
+ #include "mmci_qcom_dml.h"
 -- 
-2.3.7
+1.9.1
