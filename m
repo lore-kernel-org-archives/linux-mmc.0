@@ -1,51 +1,36 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH v4 3/3] mmc: sdhci-pci: Do not set DMA mask in
- enable_dma()
-Date: Mon, 14 Mar 2016 15:00:36 +0200
-Message-ID: <56E6B5F4.6090602@intel.com>
-References: <1457316477-8153-1-git-send-email-acourbot@nvidia.com>
- <1457316477-8153-4-git-send-email-acourbot@nvidia.com>
- <56DED13E.9060106@intel.com>
- <CAAVeFuJS6E8f3y710+Hu52HvZp7PgwfHjbvL5FMeHz9LZ7sDYA@mail.gmail.com>
+From: Sekhar Nori <nsekhar@ti.com>
+Subject: Re: [PATCH 4/4] mmc: davinci: suppress waring when using DT
+Date: Mon, 14 Mar 2016 19:11:18 +0530
+Message-ID: <56E6BF7E.7020401@ti.com>
+References: <1457567405-30475-1-git-send-email-david@lechnology.com>
+ <1457567405-30475-5-git-send-email-david@lechnology.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset="windows-1252"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAAVeFuJS6E8f3y710+Hu52HvZp7PgwfHjbvL5FMeHz9LZ7sDYA@mail.gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: "Rafael J. Wysocki" <rafael.j.wysocki@intel.com>
-Cc: Alexandre Courbot <gnurou@gmail.com>, linux-pci@vger.kernel.org, Bjorn Helgaas <bhelgaas@google.com>, Alexandre Courbot <acourbot@nvidia.com>, Ulf Hansson <ulf.hansson@linaro.org>, Arnd Bergmann <arnd@arndb.de>, linux-mmc <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from arroyo.ext.ti.com ([192.94.94.40]:43275 "EHLO arroyo.ext.ti.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S932432AbcCNNmf (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 14 Mar 2016 09:42:35 -0400
+In-Reply-To: <1457567405-30475-5-git-send-email-david@lechnology.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: David Lechner <david@lechnology.com>, ulf.hansson@linaro.org, k.kozlowski.k@gmail.com, linux-mmc@vger.kernel.org
+Cc: khilman@deeprootsystems.com, linux-arm-kernel@lists.infradead.org
 
-On 14/03/16 05:15, Alexandre Courbot wrote:
-> On Tue, Mar 8, 2016 at 10:18 PM, Adrian Hunter <adrian.hunter@intel.com> wrote:
->> On 07/03/16 04:07, Alexandre Courbot wrote:
->>> DMA mask will already be set by sdhci_set_dma_mask(), which
->>> is equivalent to the removed code since pci_set_dma_mask()
->>> expands to its DMA-API counterpart.
->>>
->>> There should also be no reason to set the DMA mask after probe.
->>
->> Let's run that by the PCI mailing list just to be sure.  The patches for
->> reference:
->>
->>         http://marc.info/?l=linux-mmc&m=145731654328126&w=2
->>         http://marc.info/?l=linux-mmc&m=145731654328128&w=2
->>
->> change the sdhci-pci driver to set the DMA mask once during probe instead of
->> every time during resume.  Is there any reason a PCI device driver might
->> need to set the DMA mask every time during resume?
+On Thursday 10 March 2016 05:20 AM, David Lechner wrote:
+> When using device tree dms resources are not obtained via IORESOURCE_DMA.
+> As a result, we would get warning even though DMA was working.
 > 
-> Not seeing much reaction for this patchset. PCI being the only
-> possible point of contention, can we maybe roll it into -next and see
-> what happens?
+> This fixes the problem by checking for dev.of_node and skipping trying to
+> get the dma platform resource if we are using device tree.
+> 
+> Signed-off-by: David Lechner <david@lechnology.com>
 
-+Rafael
+Actually, with Peter's series adding dma_slave_map[] for all
+mach-davinci platforms, this code should not be needed at all. Can you
+try that dropping the platform_get_resource() calls for DMA works with
+linux-next?
 
-Rafael, can you offer any thoughts on this:
-
-PCI drivers that want to use DMA might call pci_set_master() in the pm
-resume callback.  Some drivers (like sdhci-pci) also, presumably out of
-convenience, set the DMA mask at the same time.  The question is: is it OK
-instead to set the DMA mask just once during probe, or is there some other
-reason the DMA mask needs to be set every time during resume?
+Thanks,
+Sekhar
