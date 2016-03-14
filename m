@@ -1,40 +1,40 @@
-From: Arnd Bergmann <arnd@arndb.de>
-Subject: Re: [v6, 5/5] mmc: sdhci-of-esdhc: fix host version for T4240-R1.0-R2.0
-Date: Sun, 13 Mar 2016 23:26:28 +0100
-Message-ID: <4947024.WeMycs2fID@wuerfel>
-References: <1457518131-11339-1-git-send-email-yangbo.lu@nxp.com> <1457518131-11339-6-git-send-email-yangbo.lu@nxp.com>
+From: Alexandre Courbot <gnurou@gmail.com>
+Subject: Re: [PATCH v4 3/3] mmc: sdhci-pci: Do not set DMA mask in enable_dma()
+Date: Mon, 14 Mar 2016 12:15:51 +0900
+Message-ID: <CAAVeFuJS6E8f3y710+Hu52HvZp7PgwfHjbvL5FMeHz9LZ7sDYA@mail.gmail.com>
+References: <1457316477-8153-1-git-send-email-acourbot@nvidia.com>
+ <1457316477-8153-4-git-send-email-acourbot@nvidia.com> <56DED13E.9060106@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7Bit
-Return-path: <linux-clk-owner@vger.kernel.org>
-In-Reply-To: <1457518131-11339-6-git-send-email-yangbo.lu@nxp.com>
-Sender: linux-clk-owner@vger.kernel.org
-To: linuxppc-dev@lists.ozlabs.org
-Cc: Yangbo Lu <yangbo.lu@nxp.com>, devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, linux-clk@vger.kernel.org, linux-i2c@vger.kernel.org, iommu@lists.linux-foundation.org, netdev@vger.kernel.org, linux-mmc@vger.kernel.org, ulf.hansson@linaro.org, Zhao Qiang <qiang.zhao@freescale.com>, Russell King <linux@arm.linux.org.uk>, Bhupesh Sharma <bhupesh.sharma@freescale.com>, Joerg Roedel <joro@8bytes.org>, Santosh Shilimkar <ssantosh@kernel.org>, scott.wood@nxp.com, Rob Herring <robh+dt@kernel.org>, Claudiu Manoil <claudiu.manoil@freescale.com>, Kumar Gala <galak@codeaurora.org>, leoyang.li@nxp.com, xiaobo.xie@nxp.com
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-io0-f172.google.com ([209.85.223.172]:34093 "EHLO
+	mail-io0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932411AbcCNDQM (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 13 Mar 2016 23:16:12 -0400
+In-Reply-To: <56DED13E.9060106@intel.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Adrian Hunter <adrian.hunter@intel.com>
+Cc: linux-pci@vger.kernel.org, Bjorn Helgaas <bhelgaas@google.com>, Alexandre Courbot <acourbot@nvidia.com>, Ulf Hansson <ulf.hansson@linaro.org>, Arnd Bergmann <arnd@arndb.de>, linux-mmc <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
 
-On Wednesday 09 March 2016 18:08:51 Yangbo Lu wrote:
-> @@ -567,10 +580,20 @@ static void esdhc_init(struct platform_device *pdev, struct sdhci_host *host)
->         struct sdhci_pltfm_host *pltfm_host;
->         struct sdhci_esdhc *esdhc;
->         u16 host_ver;
-> +       u32 svr;
->  
->         pltfm_host = sdhci_priv(host);
->         esdhc = sdhci_pltfm_priv(pltfm_host);
->  
-> +       fsl_guts_init();
-> +       svr = fsl_guts_get_svr();
-> +       if (svr) {
-> +               esdhc->soc_ver = SVR_SOC_VER(svr);
-> +               esdhc->soc_rev = SVR_REV(svr);
-> +       } else {
-> +               dev_err(&pdev->dev, "Failed to get SVR value!\n");
-> +       }
-> +
+On Tue, Mar 8, 2016 at 10:18 PM, Adrian Hunter <adrian.hunter@intel.com> wrote:
+> On 07/03/16 04:07, Alexandre Courbot wrote:
+>> DMA mask will already be set by sdhci_set_dma_mask(), which
+>> is equivalent to the removed code since pci_set_dma_mask()
+>> expands to its DMA-API counterpart.
+>>
+>> There should also be no reason to set the DMA mask after probe.
+>
+> Let's run that by the PCI mailing list just to be sure.  The patches for
+> reference:
+>
+>         http://marc.info/?l=linux-mmc&m=145731654328126&w=2
+>         http://marc.info/?l=linux-mmc&m=145731654328128&w=2
+>
+> change the sdhci-pci driver to set the DMA mask once during probe instead of
+> every time during resume.  Is there any reason a PCI device driver might
+> need to set the DMA mask every time during resume?
 
-This makes the driver non-portable. Better identify the specific workarounds
-based on the compatible string for this device, or add a boolean DT property
-for the quirk.
-
-	Arnd
+Not seeing much reaction for this patchset. PCI being the only
+possible point of contention, can we maybe roll it into -next and see
+what happens?
