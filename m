@@ -1,30 +1,62 @@
-From: Sekhar Nori <nsekhar@ti.com>
-Subject: Re: [PATCH 1/4] mmc: davinci: remove matching string
-Date: Mon, 14 Mar 2016 19:11:56 +0530
-Message-ID: <56E6BFA4.1030703@ti.com>
-References: <1457567405-30475-1-git-send-email-david@lechnology.com>
- <1457567405-30475-2-git-send-email-david@lechnology.com>
+From: Bjorn Helgaas <helgaas@kernel.org>
+Subject: Re: [PATCH v4 3/3] mmc: sdhci-pci: Do not set DMA mask in
+ enable_dma()
+Date: Mon, 14 Mar 2016 10:52:12 -0500
+Message-ID: <20160314155211.GC13471@localhost>
+References: <1457316477-8153-1-git-send-email-acourbot@nvidia.com>
+ <1457316477-8153-4-git-send-email-acourbot@nvidia.com>
+ <56DED13E.9060106@intel.com>
+ <CAAVeFuJS6E8f3y710+Hu52HvZp7PgwfHjbvL5FMeHz9LZ7sDYA@mail.gmail.com>
+ <56E6B5F4.6090602@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="windows-1252"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from bear.ext.ti.com ([192.94.94.41]:51502 "EHLO bear.ext.ti.com"
+Received: from mail.kernel.org ([198.145.29.136]:40076 "EHLO mail.kernel.org"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S964938AbcCNNnM (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 14 Mar 2016 09:43:12 -0400
-In-Reply-To: <1457567405-30475-2-git-send-email-david@lechnology.com>
+	id S1754286AbcCNPwU (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 14 Mar 2016 11:52:20 -0400
+Content-Disposition: inline
+In-Reply-To: <56E6B5F4.6090602@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: David Lechner <david@lechnology.com>, ulf.hansson@linaro.org, k.kozlowski.k@gmail.com, linux-mmc@vger.kernel.org
-Cc: khilman@deeprootsystems.com, linux-arm-kernel@lists.infradead.org
+To: Adrian Hunter <adrian.hunter@intel.com>
+Cc: "Rafael J. Wysocki" <rafael.j.wysocki@intel.com>, Alexandre Courbot <gnurou@gmail.com>, linux-pci@vger.kernel.org, Bjorn Helgaas <bhelgaas@google.com>, Alexandre Courbot <acourbot@nvidia.com>, Ulf Hansson <ulf.hansson@linaro.org>, Arnd Bergmann <arnd@arndb.de>, linux-mmc <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
 
-On Thursday 10 March 2016 05:20 AM, David Lechner wrote:
-> The string "MMCSDCLK" is not actually used for clock lookup, so can be removed.
+On Mon, Mar 14, 2016 at 03:00:36PM +0200, Adrian Hunter wrote:
+> On 14/03/16 05:15, Alexandre Courbot wrote:
+> > On Tue, Mar 8, 2016 at 10:18 PM, Adrian Hunter <adrian.hunter@intel.com> wrote:
+> >> On 07/03/16 04:07, Alexandre Courbot wrote:
+> >>> DMA mask will already be set by sdhci_set_dma_mask(), which
+> >>> is equivalent to the removed code since pci_set_dma_mask()
+> >>> expands to its DMA-API counterpart.
+> >>>
+> >>> There should also be no reason to set the DMA mask after probe.
+> >>
+> >> Let's run that by the PCI mailing list just to be sure.  The patches for
+> >> reference:
+> >>
+> >>         http://marc.info/?l=linux-mmc&m=145731654328126&w=2
+> >>         http://marc.info/?l=linux-mmc&m=145731654328128&w=2
+> >>
+> >> change the sdhci-pci driver to set the DMA mask once during probe instead of
+> >> every time during resume.  Is there any reason a PCI device driver might
+> >> need to set the DMA mask every time during resume?
+> > 
+> > Not seeing much reaction for this patchset. PCI being the only
+> > possible point of contention, can we maybe roll it into -next and see
+> > what happens?
 > 
-> Signed-off-by: David Lechner <david@lechnology.com>
+> +Rafael
+> 
+> Rafael, can you offer any thoughts on this:
+> 
+> PCI drivers that want to use DMA might call pci_set_master() in the pm
+> resume callback.  Some drivers (like sdhci-pci) also, presumably out of
+> convenience, set the DMA mask at the same time.  The question is: is it OK
+> instead to set the DMA mask just once during probe, or is there some other
+> reason the DMA mask needs to be set every time during resume?
 
-Acked-by: Sekhar Nori <nsekhar@ti.com>
+I don't see a reason why the DMA mask would need to be set during
+resume.
 
-Thanks,
-Sekhar
-
+Bjorn
