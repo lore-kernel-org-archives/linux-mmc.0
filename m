@@ -1,62 +1,37 @@
-From: Bjorn Helgaas <helgaas@kernel.org>
-Subject: Re: [PATCH v4 3/3] mmc: sdhci-pci: Do not set DMA mask in
- enable_dma()
-Date: Mon, 14 Mar 2016 10:52:12 -0500
-Message-ID: <20160314155211.GC13471@localhost>
-References: <1457316477-8153-1-git-send-email-acourbot@nvidia.com>
- <1457316477-8153-4-git-send-email-acourbot@nvidia.com>
- <56DED13E.9060106@intel.com>
- <CAAVeFuJS6E8f3y710+Hu52HvZp7PgwfHjbvL5FMeHz9LZ7sDYA@mail.gmail.com>
- <56E6B5F4.6090602@intel.com>
+From: David Lechner <david@lechnology.com>
+Subject: Re: [PATCH 3/4] mmc: davinci: prepare clock
+Date: Mon, 14 Mar 2016 12:09:19 -0500
+Message-ID: <56E6F03F.5060908@lechnology.com>
+References: <1457567405-30475-1-git-send-email-david@lechnology.com>
+ <1457567405-30475-4-git-send-email-david@lechnology.com>
+ <56E6A66D.1080909@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=windows-1252; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail.kernel.org ([198.145.29.136]:40076 "EHLO mail.kernel.org"
+Received: from vern.gendns.com ([206.190.152.46]:57982 "EHLO vern.gendns.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754286AbcCNPwU (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 14 Mar 2016 11:52:20 -0400
-Content-Disposition: inline
-In-Reply-To: <56E6B5F4.6090602@intel.com>
+	id S1752169AbcCNRJO (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 14 Mar 2016 13:09:14 -0400
+In-Reply-To: <56E6A66D.1080909@ti.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: "Rafael J. Wysocki" <rafael.j.wysocki@intel.com>, Alexandre Courbot <gnurou@gmail.com>, linux-pci@vger.kernel.org, Bjorn Helgaas <bhelgaas@google.com>, Alexandre Courbot <acourbot@nvidia.com>, Ulf Hansson <ulf.hansson@linaro.org>, Arnd Bergmann <arnd@arndb.de>, linux-mmc <linux-mmc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+To: Sekhar Nori <nsekhar@ti.com>, ulf.hansson@linaro.org, k.kozlowski.k@gmail.com, linux-mmc@vger.kernel.org
+Cc: khilman@deeprootsystems.com, linux-arm-kernel@lists.infradead.org
 
-On Mon, Mar 14, 2016 at 03:00:36PM +0200, Adrian Hunter wrote:
-> On 14/03/16 05:15, Alexandre Courbot wrote:
-> > On Tue, Mar 8, 2016 at 10:18 PM, Adrian Hunter <adrian.hunter@intel.com> wrote:
-> >> On 07/03/16 04:07, Alexandre Courbot wrote:
-> >>> DMA mask will already be set by sdhci_set_dma_mask(), which
-> >>> is equivalent to the removed code since pci_set_dma_mask()
-> >>> expands to its DMA-API counterpart.
-> >>>
-> >>> There should also be no reason to set the DMA mask after probe.
-> >>
-> >> Let's run that by the PCI mailing list just to be sure.  The patches for
-> >> reference:
-> >>
-> >>         http://marc.info/?l=linux-mmc&m=145731654328126&w=2
-> >>         http://marc.info/?l=linux-mmc&m=145731654328128&w=2
-> >>
-> >> change the sdhci-pci driver to set the DMA mask once during probe instead of
-> >> every time during resume.  Is there any reason a PCI device driver might
-> >> need to set the DMA mask every time during resume?
-> > 
-> > Not seeing much reaction for this patchset. PCI being the only
-> > possible point of contention, can we maybe roll it into -next and see
-> > what happens?
-> 
-> +Rafael
-> 
-> Rafael, can you offer any thoughts on this:
-> 
-> PCI drivers that want to use DMA might call pci_set_master() in the pm
-> resume callback.  Some drivers (like sdhci-pci) also, presumably out of
-> convenience, set the DMA mask at the same time.  The question is: is it OK
-> instead to set the DMA mask just once during probe, or is there some other
-> reason the DMA mask needs to be set every time during resume?
-
-I don't see a reason why the DMA mask would need to be set during
-resume.
-
-Bjorn
+On 03/14/2016 06:54 AM, Sekhar Nori wrote:
+> On Thursday 10 March 2016 05:20 AM, David Lechner wrote:
+>> When trying to use this driver with the common clock framework, enabling
+>> the clock fails because it was not prepared. This fixes the problem by
+>> calling clk_prepare and clk_enable in a single function.
+>>
+>> Signed-off-by: David Lechner <david@lechnology.com>
+> Patch looks good. But I wonder how you hit this issue since we dont use
+> common clock framework on mach-davinci and this driver is not used
+> anywhere else AFAIK.
+>
+> Regards,
+> Sekhar
+>
+Because I am working towards getting the common clock framework working 
+on mach-davinci - at least with da8xx/device tree. :-)
