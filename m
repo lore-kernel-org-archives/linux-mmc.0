@@ -1,41 +1,91 @@
-From: David Lechner <david@lechnology.com>
-Subject: Re: [PATCH 3/4] mmc: davinci: prepare clock
-Date: Mon, 14 Mar 2016 12:13:49 -0500
-Message-ID: <56E6F14D.4090106@lechnology.com>
-References: <1457567405-30475-1-git-send-email-david@lechnology.com>
- <1457567405-30475-4-git-send-email-david@lechnology.com>
- <56E6A66D.1080909@ti.com> <56E6F03F.5060908@lechnology.com>
+From: Scott Wood <scott.wood@nxp.com>
+Subject: Re: [v6, 5/5] mmc: sdhci-of-esdhc: fix host version for
+ T4240-R1.0-R2.0
+Date: Mon, 14 Mar 2016 17:45:43 +0000
+Message-ID: <DB5PR0401MB19286B2D23D07F5C60DB799D91880@DB5PR0401MB1928.eurprd04.prod.outlook.com>
+References: <1457518131-11339-1-git-send-email-yangbo.lu@nxp.com>
+ <1457518131-11339-6-git-send-email-yangbo.lu@nxp.com>
+ <4947024.WeMycs2fID@wuerfel>
+ <HE1PR04MB0889CE4742B92461A925B9C4F8880@HE1PR04MB0889.eurprd04.prod.outlook.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from vern.gendns.com ([206.190.152.46]:58283 "EHLO vern.gendns.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752480AbcCNRNn (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 14 Mar 2016 13:13:43 -0400
-In-Reply-To: <56E6F03F.5060908@lechnology.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="windows-1252"
+Content-Transfer-Encoding: quoted-printable
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+Content-Language: en-US
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Yangbo Lu <yangbo.lu@nxp.com>, Arnd Bergmann <arnd@arndb.de>, "linuxppc-dev@lists.ozlabs.org" <linuxppc-dev@lists.ozlabs.org>
+Cc: "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>, Zhao Qiang <qiang.zhao@freescale.com>, Russell King <linux@arm.linux.org.uk>, Bhupesh Sharma <bhupesh.sharma@freescale.com>, "netdev@vger.kernel.org" <netdev@vger.kernel.org>, Joerg Roedel <joro@8bytes.org>, Kumar Gala <galak@codeaurora.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Yang-Leo Li <leoyang.li@nxp.com>, "iommu@lists.linux-foundation.org" <iommu@lists.linux-foundation.org>, Rob Herring <robh+dt@kernel.org>, "linux-i2c@vger.kernel.org" <linux-i2c@vger.kernel.org>, Claudiu Manoil <claudiu.manoil@freescale.com>, Santosh Shilimkar <ssantosh@kernel.org>, Xiaobo Xie <xiaobo.xie@nxp.com>, "linux-clk@vger.kernel.org" <linux-clk@vger.kernel.org>, linux-arm-kernel@lists.infradead.
 List-Id: linux-mmc@vger.kernel.org
-To: Sekhar Nori <nsekhar@ti.com>, ulf.hansson@linaro.org, k.kozlowski.k@gmail.com, linux-mmc@vger.kernel.org
-Cc: khilman@deeprootsystems.com, linux-arm-kernel@lists.infradead.org
 
-On 03/14/2016 12:09 PM, David Lechner wrote:
-> On 03/14/2016 06:54 AM, Sekhar Nori wrote:
->> On Thursday 10 March 2016 05:20 AM, David Lechner wrote:
->>> When trying to use this driver with the common clock framework, enabling
->>> the clock fails because it was not prepared. This fixes the problem by
->>> calling clk_prepare and clk_enable in a single function.
+On 03/14/2016 02:29 AM, Yangbo Lu wrote:
+>> -----Original Message-----
+>> From: Arnd Bergmann [mailto:arnd@arndb.de]
+>> Sent: Monday, March 14, 2016 6:26 AM
+>> To: linuxppc-dev@lists.ozlabs.org
+>> Cc: Yangbo Lu; devicetree@vger.kernel.org; linux-arm-
+>> kernel@lists.infradead.org; linux-kernel@vger.kernel.org; linux-
+>> clk@vger.kernel.org; linux-i2c@vger.kernel.org; iommu@lists.linux-
+>> foundation.org; netdev@vger.kernel.org; linux-mmc@vger.kernel.org;
+>> ulf.hansson@linaro.org; Zhao Qiang; Russell King; Bhupesh Sharma; Joerg
+>> Roedel; Santosh Shilimkar; Scott Wood; Rob Herring; Claudiu Manoil; Kumar
+>> Gala; Yang-Leo Li; Xiaobo Xie
+>> Subject: Re: [v6, 5/5] mmc: sdhci-of-esdhc: fix host version for T4240-
+>> R1.0-R2.0
+>>
+>> On Wednesday 09 March 2016 18:08:51 Yangbo Lu wrote:
+>>> @@ -567,10 +580,20 @@ static void esdhc_init(struct platform_device
+>> *pdev, struct sdhci_host *host)
+>>>         struct sdhci_pltfm_host *pltfm_host;
+>>>         struct sdhci_esdhc *esdhc;
+>>>         u16 host_ver;
+>>> +       u32 svr;
 >>>
->>> Signed-off-by: David Lechner <david@lechnology.com>
->> Patch looks good. But I wonder how you hit this issue since we dont use
->> common clock framework on mach-davinci and this driver is not used
->> anywhere else AFAIK.
+>>>         pltfm_host =3D sdhci_priv(host);
+>>>         esdhc =3D sdhci_pltfm_priv(pltfm_host);
+>>>
+>>> +       fsl_guts_init();
+>>> +       svr =3D fsl_guts_get_svr();
+>>> +       if (svr) {
+>>> +               esdhc->soc_ver =3D SVR_SOC_VER(svr);
+>>> +               esdhc->soc_rev =3D SVR_REV(svr);
+>>> +       } else {
+>>> +               dev_err(&pdev->dev, "Failed to get SVR value!\n");
+>>> +       }
+>>> +
 >>
->> Regards,
->> Sekhar
+>> This makes the driver non-portable. Better identify the specific
+>> workarounds based on the compatible string for this device, or add a
+>> boolean DT property for the quirk.
 >>
-> Because I am working towards getting the common clock framework working
-> on mach-davinci - at least with da8xx/device tree. :-)
+>> 	Arnd
+> =
 
-I should also mention that I did test using the existing mach-davinci 
-clocks as well.
+> [Lu Yangbo-B47093] Hi Arnd, we did have a discussion about using DTS in v=
+1 before.
+> https://patchwork.kernel.org/patch/6834221/
+> =
+
+> We don=92t have a separate DTS file for each revision of an SOC and if we=
+ did, we'd constantly have people using the wrong one.
+> In addition, the device tree is stable ABI and errata are often discovere=
+d after device tree are deployed.
+> See the link for details.
+> =
+
+> So we decide to read SVR from the device-config/guts MMIO block other tha=
+n using DTS.
+> Thanks.
+
+Also note that this driver is already only for fsl-specific hardware,
+and it will still work even if fsl_guts doesn't find anything to bind to
+-- it just wouldn't be able to detect errata based on SVR in that case.
+
+-Scott
