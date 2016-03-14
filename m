@@ -1,34 +1,77 @@
-From: Wang Hongcheng <annie.wang@amd.com>
-Subject: [PATCH v2] ARM: mmci:Remove unnecessary #include header file in mmci.c
-Date: Mon, 14 Mar 2016 13:44:33 +0800
-Message-ID: <1457934273-2977-1-git-send-email-annie.wang@amd.com>
+From: Yangbo Lu <yangbo.lu-3arQi8VN3Tc@public.gmane.org>
+Subject: RE: [v6, 5/5] mmc: sdhci-of-esdhc: fix host version for
+	T4240-R1.0-R2.0
+Date: Mon, 14 Mar 2016 07:29:26 +0000
+Message-ID: <HE1PR04MB0889CE4742B92461A925B9C4F8880@HE1PR04MB0889.eurprd04.prod.outlook.com>
+References: <1457518131-11339-1-git-send-email-yangbo.lu@nxp.com>
+	<1457518131-11339-6-git-send-email-yangbo.lu@nxp.com>
+	<4947024.WeMycs2fID@wuerfel>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Russell King <linux@arm.linux.org.uk>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Borislav Petkov <bp@alien8.de>, SPG_Linux_Kernel <SPG_Linux_Kernel@amd.com>
-Cc: Wang Hongcheng <annie.wang@amd.com>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
+In-Reply-To: <4947024.WeMycs2fID@wuerfel>
+Content-Language: en-US
+List-Unsubscribe: <https://lists.linuxfoundation.org/mailman/options/iommu>,
+	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.linuxfoundation.org/pipermail/iommu/>
+List-Post: <mailto:iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
+List-Help: <mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=help>
+List-Subscribe: <https://lists.linuxfoundation.org/mailman/listinfo/iommu>,
+	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=subscribe>
+Sender: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
+Errors-To: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
+To: Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, "linuxppc-dev-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org" <linuxppc-dev-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
+Cc: "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org" <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Zhao Qiang <qiang.zhao-KZfg59tc24xl57MIdRCFDg@public.gmane.org>, Russell King <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, Bhupesh Sharma <bhupesh.sharma-KZfg59tc24xl57MIdRCFDg@public.gmane.org>, "netdev-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <netdev-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Kumar Gala <galak-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Scott Wood <scott.wood-3arQi8VN3Tc@public.gmane.org>, "iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org" <iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, "linux-i2c-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-i2c-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Claudiu Manoil <claudiu.manoil-KZfg59tc24xl57MIdRCFDg@public.gmane.org>, Santosh Shilimkar <ssantosh-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Yang-Leo Li <leoyang.li-3arQi8VN3Tc@public.gmane.org>, Xiaobo Xie <xiaobo.xie-3arQi8VN3Tc@public.gmane.org>, "linux-clk-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-clk-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-arm-kernel-IAPFreCvJWOunwaRDDq4rA@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
 
-The header file asm/sizes.h is unnecessary.
-And it can also be compiled under X86 arch after the removal.
+> -----Original Message-----
+> From: Arnd Bergmann [mailto:arnd-r2nGTMty4D4@public.gmane.org]
+> Sent: Monday, March 14, 2016 6:26 AM
+> To: linuxppc-dev-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org
+> Cc: Yangbo Lu; devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org; linux-arm-
+> kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org; linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org; linux-
+> clk-u79uwXL29TY76Z2rM5mHXA@public.gmane.org; linux-i2c-u79uwXL29TY76Z2rM5mHXA@public.gmane.org; iommu-cunTk1MwBs/ROKNJybVBZg@public.gmane.org
+> foundation.org; netdev-u79uwXL29TY76Z2rM5mHXA@public.gmane.org; linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org;
+> ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org; Zhao Qiang; Russell King; Bhupesh Sharma; Joerg
+> Roedel; Santosh Shilimkar; Scott Wood; Rob Herring; Claudiu Manoil; Kumar
+> Gala; Yang-Leo Li; Xiaobo Xie
+> Subject: Re: [v6, 5/5] mmc: sdhci-of-esdhc: fix host version for T4240-
+> R1.0-R2.0
+> 
+> On Wednesday 09 March 2016 18:08:51 Yangbo Lu wrote:
+> > @@ -567,10 +580,20 @@ static void esdhc_init(struct platform_device
+> *pdev, struct sdhci_host *host)
+> >         struct sdhci_pltfm_host *pltfm_host;
+> >         struct sdhci_esdhc *esdhc;
+> >         u16 host_ver;
+> > +       u32 svr;
+> >
+> >         pltfm_host = sdhci_priv(host);
+> >         esdhc = sdhci_pltfm_priv(pltfm_host);
+> >
+> > +       fsl_guts_init();
+> > +       svr = fsl_guts_get_svr();
+> > +       if (svr) {
+> > +               esdhc->soc_ver = SVR_SOC_VER(svr);
+> > +               esdhc->soc_rev = SVR_REV(svr);
+> > +       } else {
+> > +               dev_err(&pdev->dev, "Failed to get SVR value!\n");
+> > +       }
+> > +
+> 
+> This makes the driver non-portable. Better identify the specific
+> workarounds based on the compatible string for this device, or add a
+> boolean DT property for the quirk.
+> 
+> 	Arnd
 
-Signed-off-by: Wang Hongcheng <annie.wang@amd.com>
----
- drivers/mmc/host/mmci.c | 1 -
- 1 file changed, 1 deletion(-)
+[Lu Yangbo-B47093] Hi Arnd, we did have a discussion about using DTS in v1 before.
+https://patchwork.kernel.org/patch/6834221/
 
-diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
-index fb26674..e5e5441 100644
---- a/drivers/mmc/host/mmci.c
-+++ b/drivers/mmc/host/mmci.c
-@@ -40,7 +40,6 @@
- 
- #include <asm/div64.h>
- #include <asm/io.h>
--#include <asm/sizes.h>
- 
- #include "mmci.h"
- #include "mmci_qcom_dml.h"
--- 
-1.9.1
+We don't have a separate DTS file for each revision of an SOC and if we did, we'd constantly have people using the wrong one.
+In addition, the device tree is stable ABI and errata are often discovered after device tree are deployed.
+See the link for details.
+
+So we decide to read SVR from the device-config/guts MMIO block other than using DTS.
+Thanks.
