@@ -1,62 +1,92 @@
-From: Arnd Bergmann <arnd@arndb.de>
-Subject: Re: [PATCH v4 1/3] mmc: sdhci: Set DMA mask when adding host
-Date: Wed, 16 Mar 2016 11:05:34 +0100
-Message-ID: <2646031.AqmqXYeZyr@wuerfel>
-References: <1457316477-8153-1-git-send-email-acourbot@nvidia.com> <4404643.KcAFCUffYS@wuerfel> <56E926D8.7020908@intel.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7Bit
+From: Shawn Lin <shawn.lin@rock-chips.com>
+Subject: [PATCH v2] mmc: block: fix ABI regression of mmc_blk_ioctl
+Date: Wed, 16 Mar 2016 18:15:47 +0800
+Message-ID: <1458123347-32392-1-git-send-email-shawn.lin@rock-chips.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mout.kundenserver.de ([212.227.126.131]:60629 "EHLO
-	mout.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S964968AbcCPKF6 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 16 Mar 2016 06:05:58 -0400
-In-Reply-To: <56E926D8.7020908@intel.com>
+Received: from lucky1.263xmail.com ([211.157.147.131]:49006 "EHLO
+	lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S966308AbcCPKQQ (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 16 Mar 2016 06:16:16 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: Alexandre Courbot <acourbot@nvidia.com>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, gnurou@gmail.com
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Jon Hunter <jonathanh@nvidia.com>, sholi@nvidia.com, John Stultz <john.stultz@linaro.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Shawn Lin <shawn.lin@rock-chips.com>, stable@vger.kernel.org
 
-On Wednesday 16 March 2016 11:26:48 Adrian Hunter wrote:
-> On 16/03/16 11:07, Arnd Bergmann wrote:
-> > On Wednesday 16 March 2016 10:43:33 Adrian Hunter wrote:
-> >>> +
-> >>> +     /* 32-bit mask as default & fallback */
-> >>> +     if (ret) {
-> >>> +             ret = dma_set_mask_and_coherent(dev, DMA_BIT_MASK(32));
-> >>
-> >> What happens if device enumeration (e.g. of_dma_configure) has already set a
-> >> more restrictive DMA mask?
-> >>
-> >>
-> > 
-> > In this case, dma_set_mask_and_coherent() is supposed to check the
-> > bus properties settings again and fail dma_set_mask_and_coherent().
-> 
-> So the logic this patch introduces will disable DMA in that case.  Would it
-> be better just to leave the DMA mask alone (as it does now for most sdhci
-> drivers) in the 32-bit case?
+If mmc_blk_ioctl returns -EINVAL, blkdev_ioctl continues to
+work without returning err to user-space. But now we check
+CAP_SYS_RAWIO firstly, so we return -EPERM to blkdev_ioctl,
+which make blkdev_ioctl return -EPERM to user-space directly.
+So this will break all the ioctl with BLKROSET. Now we find
+Android-adb suffer it for the following log:
 
-It depends to some degree on the specific capabilities of the system.
+remount of /system failed;
+couldn't make block device writable: Operation not permitted
+openat(AT_FDCWD, "/dev/block/platform/ff420000.dwmmc/by-name/system", O_RDONLY) = 3
+ioctl(3, BLKROSET, 0)  = -1 EPERM (Operation not permitted)
 
-Basically when the driver asks for a 32-bit mask, we have to check if that
-is actually possible, and there are a couple of possible outcomes:
+Fixes: a5f5774c55a2 ("mmc: block: Add new ioctl to send multi commands")
+Cc: stable@vger.kernel.org
+Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
 
-- If the bus is less than 32-bit wide but the RAM is small enough to
-  to fit within the addressable range of the bus, the
-  dma_set_mask_and_coherent() should succeed
+---
 
-- If the RAM is larger than what the bus can address, but swiotlb
-  is configured and the swiotlb bounce buffer is addressable by
-  the bus, dma_set_mask_and_coherent() should also succeed
+Changes in v2:
+- move checking CAP_SYS_RAWIO inside the mmc_blk_ioctl_cmd and
+  mmc_blk_ioctl_multi_cmd
 
-- If there is no swiotlb and there is RAM that fits into the 32-bit
-  mask but that is not addressable by the bus, the
-  dma_set_mask_and_coherent() should fail, and the driver should not
-  use DMA.
+ drivers/mmc/card/block.c | 24 ++++++++++++++++--------
+ 1 file changed, 16 insertions(+), 8 deletions(-)
 
-- Similarly, if swiotlb is enabled, but its bounce buffer is not
-  reachable by the bus, the call needs to fail and the driver must
-  not use DMA.
+diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+index 47bc87d..3bdbe50 100644
+--- a/drivers/mmc/card/block.c
++++ b/drivers/mmc/card/block.c
+@@ -589,6 +589,14 @@ static int mmc_blk_ioctl_cmd(struct block_device *bdev,
+ 	struct mmc_card *card;
+ 	int err = 0, ioc_err = 0;
+ 
++	/*
++	 * The caller must have CAP_SYS_RAWIO, and must be calling this on the
++	 * whole block device, not on a partition.  This prevents overspray
++	 * between sibling partitions.
++	 */
++	if ((!capable(CAP_SYS_RAWIO)) || (bdev != bdev->bd_contains))
++		return -EPERM;
++
+ 	idata = mmc_blk_ioctl_copy_from_user(ic_ptr);
+ 	if (IS_ERR(idata))
+ 		return PTR_ERR(idata);
+@@ -631,6 +639,14 @@ static int mmc_blk_ioctl_multi_cmd(struct block_device *bdev,
+ 	int i, err = 0, ioc_err = 0;
+ 	__u64 num_of_cmds;
+ 
++	/*
++	 * The caller must have CAP_SYS_RAWIO, and must be calling this on the
++	 * whole block device, not on a partition.  This prevents overspray
++	 * between sibling partitions.
++	 */
++	if ((!capable(CAP_SYS_RAWIO)) || (bdev != bdev->bd_contains))
++		return -EPERM;
++
+ 	if (copy_from_user(&num_of_cmds, &user->num_of_cmds,
+ 			   sizeof(num_of_cmds)))
+ 		return -EFAULT;
+@@ -688,14 +704,6 @@ cmd_err:
+ static int mmc_blk_ioctl(struct block_device *bdev, fmode_t mode,
+ 	unsigned int cmd, unsigned long arg)
+ {
+-	/*
+-	 * The caller must have CAP_SYS_RAWIO, and must be calling this on the
+-	 * whole block device, not on a partition.  This prevents overspray
+-	 * between sibling partitions.
+-	 */
+-	if ((!capable(CAP_SYS_RAWIO)) || (bdev != bdev->bd_contains))
+-		return -EPERM;
+-
+ 	switch (cmd) {
+ 	case MMC_IOC_CMD:
+ 		return mmc_blk_ioctl_cmd(bdev,
+-- 
+2.3.7
 
-	Arnd
+
