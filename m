@@ -1,92 +1,87 @@
-From: Shawn Lin <shawn.lin@rock-chips.com>
-Subject: [PATCH v2] mmc: block: fix ABI regression of mmc_blk_ioctl
-Date: Wed, 16 Mar 2016 18:15:47 +0800
-Message-ID: <1458123347-32392-1-git-send-email-shawn.lin@rock-chips.com>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from lucky1.263xmail.com ([211.157.147.131]:49006 "EHLO
-	lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S966308AbcCPKQQ (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 16 Mar 2016 06:16:16 -0400
-Sender: linux-mmc-owner@vger.kernel.org
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH] mmc: sdhci-of-at91: fix wakeup issue when using runtime pm
+Date: Wed, 16 Mar 2016 12:04:46 +0100
+Message-ID: <CAPDyKFrs9PoqkH1YLYziuzfGPn25PAjs8+ukz-t7LTk7OU6hDA@mail.gmail.com>
+References: <20160309163809.GM2690@odux.rfo.atmel.com>
+	<1457605858-30907-1-git-send-email-ludovic.desroches@atmel.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-pm-owner@vger.kernel.org>
+In-Reply-To: <1457605858-30907-1-git-send-email-ludovic.desroches@atmel.com>
+Sender: linux-pm-owner@vger.kernel.org
+To: Ludovic Desroches <ludovic.desroches@atmel.com>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-pm@vger.kernel.org" <linux-pm@vger.kernel.org>, "Rafael J. Wysocki" <rjw@rjwysocki.net>, Kevin Hilman <khilman@kernel.org>, Nicolas Ferre <nicolas.ferre@atmel.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Jon Hunter <jonathanh@nvidia.com>, sholi@nvidia.com, John Stultz <john.stultz@linaro.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Shawn Lin <shawn.lin@rock-chips.com>, stable@vger.kernel.org
 
-If mmc_blk_ioctl returns -EINVAL, blkdev_ioctl continues to
-work without returning err to user-space. But now we check
-CAP_SYS_RAWIO firstly, so we return -EPERM to blkdev_ioctl,
-which make blkdev_ioctl return -EPERM to user-space directly.
-So this will break all the ioctl with BLKROSET. Now we find
-Android-adb suffer it for the following log:
+On 10 March 2016 at 11:30, Ludovic Desroches
+<ludovic.desroches@atmel.com> wrote:
+> It was impossible to wake-up on card detect event because when sdhci
+> controller is runtime suspend, it is assumed that all the clocks are
+> disabled so we can't get irqs.
+> If the device is removable and there is no gpio to manage the card
+> detection then card detection polling is used.
+>
+> Signed-off-by: Ludovic Desroches <ludovic.desroches@atmel.com>
+> ---
+>
+> Hi Ulf, Adrian,
+>
+> Following the discussion, I need to fix my issue. I think we could both agree
+> on this patch that I see more as temporary workaround.
+>
+> I will try to change the muxing of the card detect pio in order to no more
+> use the sdhci controller to manage it but a gpio. If it do not work then
+> I may send another patch in the spirit of the previous one (keeping one clock
+> enabled and not calling sdhci_runtime_suspend_host()).
+>
+> Regards
+>
+>  drivers/mmc/host/sdhci-of-at91.c | 16 ++++++++++++++++
+>  1 file changed, 16 insertions(+)
+>
+> diff --git a/drivers/mmc/host/sdhci-of-at91.c b/drivers/mmc/host/sdhci-of-at91.c
+> index 35c02fc..dac8508 100644
+> --- a/drivers/mmc/host/sdhci-of-at91.c
+> +++ b/drivers/mmc/host/sdhci-of-at91.c
+> @@ -18,6 +18,7 @@
+>  #include <linux/err.h>
+>  #include <linux/io.h>
+>  #include <linux/mmc/host.h>
+> +#include <linux/mmc/slot-gpio.h>
+>  #include <linux/module.h>
+>  #include <linux/of.h>
+>  #include <linux/of_device.h>
+> @@ -204,6 +205,21 @@ static int sdhci_at91_probe(struct platform_device *pdev)
+>         if (ret)
+>                 goto pm_runtime_disable;
+>
+> +       /*
+> +        * When calling sdhci_runtime_suspend_host(), the sdhci layer makes
+> +        * the assumption that all the clocks of the controller are disabled.
+> +        * It means we can't get irq from it when it is runtime suspended.
+> +        * For that reason, it is not planned to wake-up on a card detect irq
+> +        * from the controller.
+> +        * If we want to use runtime PM and to be able to wake-up on card
+> +        * insertion, we have to use a GPIO for the card detection or we can
+> +        * use polling for the card detection. Be aware that using polling
+> +        * will resume/suspend the controller between each attempt.
+> +        */
+> +       if (!(host->mmc->caps & MMC_CAP_NONREMOVABLE) &&
+> +           IS_ERR_VALUE(mmc_gpio_get_cd(host->mmc)))
+> +               host->mmc->caps |= MMC_CAP_NEEDS_POLL;
 
-remount of /system failed;
-couldn't make block device writable: Operation not permitted
-openat(AT_FDCWD, "/dev/block/platform/ff420000.dwmmc/by-name/system", O_RDONLY) = 3
-ioctl(3, BLKROSET, 0)  = -1 EPERM (Operation not permitted)
+Perhaps also clearing SDHCI_QUIRK_BROKEN_CARD_DETECTION, as this
+doesn't play well if this is set via parsing the DTS.
 
-Fixes: a5f5774c55a2 ("mmc: block: Add new ioctl to send multi commands")
-Cc: stable@vger.kernel.org
-Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
+> +
+>         pm_runtime_put_autosuspend(&pdev->dev);
+>
+>         return 0;
+> --
+> 2.5.0
+>
 
----
+Otherwise this looks okay to me.
 
-Changes in v2:
-- move checking CAP_SYS_RAWIO inside the mmc_blk_ioctl_cmd and
-  mmc_blk_ioctl_multi_cmd
-
- drivers/mmc/card/block.c | 24 ++++++++++++++++--------
- 1 file changed, 16 insertions(+), 8 deletions(-)
-
-diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
-index 47bc87d..3bdbe50 100644
---- a/drivers/mmc/card/block.c
-+++ b/drivers/mmc/card/block.c
-@@ -589,6 +589,14 @@ static int mmc_blk_ioctl_cmd(struct block_device *bdev,
- 	struct mmc_card *card;
- 	int err = 0, ioc_err = 0;
- 
-+	/*
-+	 * The caller must have CAP_SYS_RAWIO, and must be calling this on the
-+	 * whole block device, not on a partition.  This prevents overspray
-+	 * between sibling partitions.
-+	 */
-+	if ((!capable(CAP_SYS_RAWIO)) || (bdev != bdev->bd_contains))
-+		return -EPERM;
-+
- 	idata = mmc_blk_ioctl_copy_from_user(ic_ptr);
- 	if (IS_ERR(idata))
- 		return PTR_ERR(idata);
-@@ -631,6 +639,14 @@ static int mmc_blk_ioctl_multi_cmd(struct block_device *bdev,
- 	int i, err = 0, ioc_err = 0;
- 	__u64 num_of_cmds;
- 
-+	/*
-+	 * The caller must have CAP_SYS_RAWIO, and must be calling this on the
-+	 * whole block device, not on a partition.  This prevents overspray
-+	 * between sibling partitions.
-+	 */
-+	if ((!capable(CAP_SYS_RAWIO)) || (bdev != bdev->bd_contains))
-+		return -EPERM;
-+
- 	if (copy_from_user(&num_of_cmds, &user->num_of_cmds,
- 			   sizeof(num_of_cmds)))
- 		return -EFAULT;
-@@ -688,14 +704,6 @@ cmd_err:
- static int mmc_blk_ioctl(struct block_device *bdev, fmode_t mode,
- 	unsigned int cmd, unsigned long arg)
- {
--	/*
--	 * The caller must have CAP_SYS_RAWIO, and must be calling this on the
--	 * whole block device, not on a partition.  This prevents overspray
--	 * between sibling partitions.
--	 */
--	if ((!capable(CAP_SYS_RAWIO)) || (bdev != bdev->bd_contains))
--		return -EPERM;
--
- 	switch (cmd) {
- 	case MMC_IOC_CMD:
- 		return mmc_blk_ioctl_cmd(bdev,
--- 
-2.3.7
-
-
+Kind regards
+Uffe
