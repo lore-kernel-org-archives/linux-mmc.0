@@ -1,73 +1,45 @@
-From: Baolin Wang <baolin.wang@linaro.org>
-Subject: [PATCH] Documentation: mmc: Add the introduction for mmc-utils
-Date: Wed, 16 Mar 2016 20:07:09 +0800
-Message-ID: <3a35aa84d79119536fb67bc423f928a930167a73.1458129983.git.baolin.wang@linaro.org>
-Return-path: <linux-doc-owner@vger.kernel.org>
-Sender: linux-doc-owner@vger.kernel.org
-To: corbet@lwn.net
-Cc: chris@printf.net, broonie@kernel.org, linus.walleij@linaro.org, arnd@arndb.de, ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, linux-doc@vger.kernel.org, linux-kernel@vger.kernel.org, baolin.wang@linaro.org
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH] mmc: tegra: Disable UHS-I modes for tegra114
+Date: Wed, 16 Mar 2016 13:32:09 +0100
+Message-ID: <CAPDyKFpXk8r1mQzUkYD9vBYEtzvaO07f1WnfST2897xYkBpcPg@mail.gmail.com>
+References: <1455806924-14967-1-git-send-email-jonathanh@nvidia.com>
+	<1456479257-12147-1-git-send-email-jonathanh@nvidia.com>
+	<CAPDyKFrvaLq3dD5qFJBLVTL5gXA9NaHxfc_mM9PCfczfwQiJLA@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-wm0-f48.google.com ([74.125.82.48]:35306 "EHLO
+	mail-wm0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752308AbcCPMcL (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 16 Mar 2016 08:32:11 -0400
+Received: by mail-wm0-f48.google.com with SMTP id l68so186897727wml.0
+        for <linux-mmc@vger.kernel.org>; Wed, 16 Mar 2016 05:32:10 -0700 (PDT)
+In-Reply-To: <CAPDyKFrvaLq3dD5qFJBLVTL5gXA9NaHxfc_mM9PCfczfwQiJLA@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Jon Hunter <jonathanh@nvidia.com>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, Stephen Warren <swarren@wwwdotorg.org>, Thierry Reding <thierry.reding@gmail.com>, Alexandre Courbot <gnurou@gmail.com>, Lucas Stach <dev@lynxeye.de>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-tegra@vger.kernel.org" <linux-tegra@vger.kernel.org>
 
-This patch introduces one mmc test tool called mmc-utils, which is convenient
-if someone want to exercise and test MMC/SD devices from userspace.
+On 4 March 2016 at 10:41, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+> On 26 February 2016 at 10:34, Jon Hunter <jonathanh@nvidia.com> wrote:
+>> SD card support for Tegra114 started failing after commit a8e326a911d3
+>> ("mmc: tegra: implement module external clock change") was merged. This
+>> commit was part of a series to enable UHS-I modes for Tegra. To
+>> workaround this problem for now, disable UHS-I modes for Tegra114 by
+>> separating the soc data structures for Tegra114 and Tegra124 so that
+>> UHS-I is still enabled for Tegra124 but not Tegra114.
+>>
+>> Fixes: a8e326a911d3 ("mmc: tegra: implement module external clock change")
+>>
+>> Signed-off-by: Jon Hunter <jonathanh@nvidia.com>
+>
+> Thanks, applied for fixes!
 
-Signed-off-by: Baolin Wang <baolin.wang@linaro.org>
----
- Documentation/mmc/00-INDEX      |    2 ++
- Documentation/mmc/mmc-tools.txt |   34 ++++++++++++++++++++++++++++++++++
- 2 files changed, 36 insertions(+)
- create mode 100644 Documentation/mmc/mmc-tools.txt
+Unfortunate I failed to send this in a PR to Linus within the 4.5 rc
+cycle, apologize for the inconvenience!
+Instead I have this queued for 4.6 and I have added a stable tag to it.
 
-diff --git a/Documentation/mmc/00-INDEX b/Documentation/mmc/00-INDEX
-index a9ba672..4623bc0 100644
---- a/Documentation/mmc/00-INDEX
-+++ b/Documentation/mmc/00-INDEX
-@@ -6,3 +6,5 @@ mmc-dev-parts.txt
-         - info on SD and MMC device partitions
- mmc-async-req.txt
-         - info on mmc asynchronous requests
-+mmc-tools.txt
-+	- info on mmc-utils tools
-diff --git a/Documentation/mmc/mmc-tools.txt b/Documentation/mmc/mmc-tools.txt
-new file mode 100644
-index 0000000..499b0f4
---- /dev/null
-+++ b/Documentation/mmc/mmc-tools.txt
-@@ -0,0 +1,34 @@
-+MMC tools introduction
-+======================
-+
-+There is one mmc test tools called mmc-utils, which is maintained by Chris Ball,
-+you can find it at the below public git repository:
-+http://git.kernel.org/cgit/linux/kernel/git/cjb/mmc-utils.git/
-+
-+Functions
-+=========
-+
-+The mmc-utils tools can do the following:
-+ - Print and parse extcsd data.
-+ - Determine the eMMC writeprotect status.
-+ - Set the eMMC writeprotect status.
-+ - Set the eMMC data sector size to 4KB by disabling emulation.
-+ - Create general purpose partition.
-+ - Enable the enhanced user area.
-+ - Enable write reliability per partition.
-+ - Print the response to STATUS_SEND (CMD13).
-+ - Enable the boot partition.
-+ - Set Boot Bus Conditions.
-+ - Enable the eMMC BKOPS feature.
-+ - Permanently enable the eMMC H/W Reset feature.
-+ - Permanently disable the eMMC H/W Reset feature.
-+ - Send Sanitize command.
-+ - Program authentication key for the device.
-+ - Counter value for the rpmb device will be read to stdout.
-+ - Read from rpmb device to output.
-+ - Write to rpmb device from data file.
-+ - Enable the eMMC cache feature.
-+ - Disable the eMMC cache feature.
-+ - Print and parse CID data.
-+ - Print and parse CSD data.
-+ - Print and parse SCR data.
--- 
-1.7.9.5
+[...]
 
+Kind regards
+Uffe
