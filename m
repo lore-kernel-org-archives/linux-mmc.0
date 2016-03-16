@@ -1,100 +1,50 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH v4 1/3] mmc: sdhci: Set DMA mask when adding host
-Date: Wed, 16 Mar 2016 10:43:33 +0200
-Message-ID: <56E91CB5.7030007@intel.com>
-References: <1457316477-8153-1-git-send-email-acourbot@nvidia.com>
- <1457316477-8153-2-git-send-email-acourbot@nvidia.com>
+From: Peter Ujfalusi <peter.ujfalusi@ti.com>
+Subject: Re: [PATCH v2 4/5] mmc: davinci: don't use dma platform resources
+Date: Wed, 16 Mar 2016 10:46:42 +0200
+Message-ID: <56E91D72.4030606@ti.com>
+References: <56E6BF7E.7020401@ti.com>
+ <1457996081-21975-1-git-send-email-david@lechnology.com>
+ <1457996081-21975-5-git-send-email-david@lechnology.com>
+ <56E7CDAC.1090907@ti.com> <56E842EE.7030301@lechnology.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1457316477-8153-2-git-send-email-acourbot@nvidia.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Alexandre Courbot <acourbot@nvidia.com>, Ulf Hansson <ulf.hansson@linaro.org>, Arnd Bergmann <arnd@arndb.de>
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, gnurou@gmail.com
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from devils.ext.ti.com ([198.47.26.153]:55705 "EHLO
+	devils.ext.ti.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S964829AbcCPIr6 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 16 Mar 2016 04:47:58 -0400
+In-Reply-To: <56E842EE.7030301@lechnology.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: David Lechner <david@lechnology.com>, nsekhar@ti.com
+Cc: ulf.hansson@linaro.org, khilman@kernel.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 
-On 07/03/16 04:07, Alexandre Courbot wrote:
-> Set the DMA mask in sdhci_add_host() after we determined the
-> capabilities of the device. 64-bit devices in particular are given the
-> proper mask that ensures bounce buffers are not used.
-> 
-> Also disable DMA if no proper DMA mask can be set, as the DMA-API
-> documentation specifies.
-> 
-> Signed-off-by: Alexandre Courbot <acourbot@nvidia.com>
-> ---
->  drivers/mmc/host/sdhci.c | 48 +++++++++++++++++++++++++++++++++++++++++-------
->  1 file changed, 41 insertions(+), 7 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index fd9139947fa3..920e1c996280 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -2857,6 +2857,36 @@ struct sdhci_host *sdhci_alloc_host(struct device *dev,
->  
->  EXPORT_SYMBOL_GPL(sdhci_alloc_host);
->  
-> +static int sdhci_set_dma_mask(struct sdhci_host *host)
-> +{
-> +	struct mmc_host *mmc = host->mmc;
-> +	struct device *dev = mmc_dev(mmc);
-> +	int ret = -EINVAL;
-> +
-> +	if (host->quirks2 & SDHCI_QUIRK2_BROKEN_64_BIT_DMA)
-> +		host->flags &= ~SDHCI_USE_64_BIT_DMA;
-> +
-> +	/* Try 64-bit mask if hardware is capable  of it */
-> +	if (host->flags & SDHCI_USE_64_BIT_DMA) {
-> +		ret = dma_set_mask_and_coherent(dev, DMA_BIT_MASK(64));
-> +		if (ret) {
-> +			pr_warn("%s: Failed to set 64-bit DMA mask.\n",
-> +				mmc_hostname(mmc));
-> +			host->flags &= ~SDHCI_USE_64_BIT_DMA;
-> +		}
-> +	}
-> +
-> +	/* 32-bit mask as default & fallback */
-> +	if (ret) {
-> +		ret = dma_set_mask_and_coherent(dev, DMA_BIT_MASK(32));
+On 03/15/16 19:14, David Lechner wrote:
+> On 03/15/2016 03:54 AM, Peter Ujfalusi wrote:
+>> On 03/15/16 00:54, David Lechner wrote:
+>>>
+>>>       host->dma_tx =3D
+>>> -        dma_request_slave_channel_compat(mask, edma_filter_fn,
+>>> -                &host->txdma, mmc_dev(host->mmc), "tx");
+>>> +        dma_request_slave_channel(mmc_dev(host->mmc), "tx");
+>>
+>> you would need to use dma_request_chan() to be able to rely on the l=
+egacy
+>> channel mapping.
+>> I have staged commits for converting all daVinci and OMAP drivers, I=
+'ll attach
+>> the patch I have for davinci-mmc for reference.
+>> When we convert to use the dma_request_chan() we can handle deferred=
+ probing
+>> also...
+>>
+>=20
+> OK. So I should redo this patch on top of the patch you attached?
 
-What happens if device enumeration (e.g. of_dma_configure) has already set a
-more restrictive DMA mask?
+Or replace your patch with mine in your series. In my patch I forgot to=
+ remove
+the 'u32 rxdma, txdma;' from struct mmc_davinci_host...
 
-> +		if (ret)
-> +			pr_warn("%s: Failed to set 32-bit DMA mask.\n",
-> +				mmc_hostname(mmc));
-> +	}
-> +
-> +	return ret;
-> +}
-> +
->  int sdhci_add_host(struct sdhci_host *host)
->  {
->  	struct mmc_host *mmc;
-> @@ -2932,13 +2962,17 @@ int sdhci_add_host(struct sdhci_host *host)
->  		host->flags |= SDHCI_USE_64_BIT_DMA;
->  
->  	if (host->flags & (SDHCI_USE_SDMA | SDHCI_USE_ADMA)) {
-> -		if (host->ops->enable_dma) {
-> -			if (host->ops->enable_dma(host)) {
-> -				pr_warn("%s: No suitable DMA available - falling back to PIO\n",
-> -					mmc_hostname(mmc));
-> -				host->flags &=
-> -					~(SDHCI_USE_SDMA | SDHCI_USE_ADMA);
-> -			}
-> +		ret = sdhci_set_dma_mask(host);
-> +
-> +		if (!ret && host->ops->enable_dma)
-> +			ret = host->ops->enable_dma(host);
-> +
-> +		if (ret) {
-> +			pr_warn("%s: No suitable DMA available - falling back to PIO\n",
-> +				mmc_hostname(mmc));
-> +			host->flags &= ~(SDHCI_USE_SDMA | SDHCI_USE_ADMA);
-> +
-> +			ret = 0;
->  		}
->  	}
->  
-> 
+--=20
+P=E9ter
