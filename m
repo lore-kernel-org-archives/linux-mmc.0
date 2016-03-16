@@ -1,33 +1,48 @@
-From: Ulrich Hecht <ulrich.hecht+renesas@gmail.com>
-Subject: [PATCH 0/2] ARM: dts: r8a7793/gose: enable SDHI
-Date: Wed, 16 Mar 2016 18:11:35 +0100
-Message-ID: <1458148297-22159-1-git-send-email-ulrich.hecht+renesas@gmail.com>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wm0-f65.google.com ([74.125.82.65]:34819 "EHLO
-	mail-wm0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S934332AbcCPRLm (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 16 Mar 2016 13:11:42 -0400
-Sender: linux-mmc-owner@vger.kernel.org
+From: Sergei Shtylyov <sergei.shtylyov@cogentembedded.com>
+Subject: Re: [PATCH] ARM: dts: r8a7793: Add MMCIF0
+Date: Wed, 16 Mar 2016 20:20:46 +0300
+Message-ID: <56E995EE.2010805@cogentembedded.com>
+References: <1458148237-21902-1-git-send-email-ulrich.hecht+renesas@gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=windows-1252; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-renesas-soc-owner@vger.kernel.org>
+In-Reply-To: <1458148237-21902-1-git-send-email-ulrich.hecht+renesas@gmail.com>
+Sender: linux-renesas-soc-owner@vger.kernel.org
+To: Ulrich Hecht <ulrich.hecht+renesas@gmail.com>, horms@verge.net.au
+Cc: linux-renesas-soc@vger.kernel.org, linux-mmc@vger.kernel.org, magnus.damm@gmail.com
 List-Id: linux-mmc@vger.kernel.org
-To: horms@verge.net.au
-Cc: linux-renesas-soc@vger.kernel.org, linux-mmc@vger.kernel.org, magnus.damm@gmail.com, Ulrich Hecht <ulrich.hecht+renesas@gmail.com>
 
-Hi!
+Hello.
 
-This enables SDHI on the Gose board, including pins and regulators.
+On 03/16/2016 08:10 PM, Ulrich Hecht wrote:
 
-CU
-Uli
+> Same as on r8a7794.
+>
+> Signed-off-by: Ulrich Hecht <ulrich.hecht+renesas@gmail.com>
+> ---
+>   arch/arm/boot/dts/r8a7793.dtsi | 12 ++++++++++++
+>   1 file changed, 12 insertions(+)
+>
+> diff --git a/arch/arm/boot/dts/r8a7793.dtsi b/arch/arm/boot/dts/r8a7793.dtsi
+> index 63f811d..33413e8 100644
+> --- a/arch/arm/boot/dts/r8a7793.dtsi
+> +++ b/arch/arm/boot/dts/r8a7793.dtsi
+> @@ -509,6 +509,18 @@
+>   		reg = <0 0xe6060000 0 0x250>;
+>   	};
+>
+> +	mmcif0: mmcif@ee200000 {
+> +		compatible = "renesas,mmcif-r8a7793", "renesas,sh-mmcif";
+> +		reg = <0 0xee200000 0 0x80>;
+> +		interrupts = <0 169 IRQ_TYPE_LEVEL_HIGH>;
+> +		clocks = <&mstp3_clks R8A7793_CLK_MMCIF0>;
+> +		dmas = <&dmac0 0xd1>, <&dmac0 0xd2>,
+> +		       <&dmac1 0xd1>, <&dmac1 0xd2>;
+> +		dma-names = "tx", "rx";
 
+    4 DMA channels but only 2 channel names?
 
-Ulrich Hecht (2):
-  ARM: dts: r8a7793: Add SDHI controllers
-  ARM: dts: gose: Enable SDHI controllers
+[...]
 
- arch/arm/boot/dts/r8a7793-gose.dts | 119 +++++++++++++++++++++++++++++++++++++
- arch/arm/boot/dts/r8a7793.dtsi     |  33 ++++++++++
- 2 files changed, 152 insertions(+)
-
--- 
-2.6.4
-
+MBR, Sergei
