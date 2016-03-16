@@ -1,30 +1,23 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: of_mmc_spi: fix unused warning
-Date: Wed, 16 Mar 2016 12:38:05 +0100
-Message-ID: <CAPDyKFowVCGCB+NzmO4tb4xE6UG-Vwv+gh0xjvFUac_9FBvYZg@mail.gmail.com>
-References: <1457393799-121767-1-git-send-email-computersforpeace@gmail.com>
+Subject: Re: [PATCH] mmc: core: remove redundant memset of mmc_decode_cid
+Date: Wed, 16 Mar 2016 12:38:10 +0100
+Message-ID: <CAPDyKFp7=G7nCjGtzD-mJ4ZjZUBw8ekc_AK4gAEr-JrdEVevsw@mail.gmail.com>
+References: <1457714145-6958-1-git-send-email-shawn.lin@rock-chips.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wm0-f54.google.com ([74.125.82.54]:38426 "EHLO
-	mail-wm0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S965880AbcCPLiH (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 16 Mar 2016 07:38:07 -0400
-Received: by mail-wm0-f54.google.com with SMTP id l68so68048005wml.1
-        for <linux-mmc@vger.kernel.org>; Wed, 16 Mar 2016 04:38:06 -0700 (PDT)
-In-Reply-To: <1457393799-121767-1-git-send-email-computersforpeace@gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1457714145-6958-1-git-send-email-shawn.lin@rock-chips.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Shawn Lin <shawn.lin@rock-chips.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Brian Norris <computersforpeace@gmail.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>
 
-On 8 March 2016 at 00:36, Brian Norris <computersforpeace@gmail.com> wrote:
-> drivers/mmc/host/of_mmc_spi.c: In function 'mmc_spi_get_pdata':
-> drivers/mmc/host/of_mmc_spi.c:77:6: warning: variable 'ret' set but not used [-Wunused-but-set-variable]
->   int ret = -EINVAL;
->       ^
+On 11 March 2016 at 17:35, Shawn Lin <shawn.lin@rock-chips.com> wrote:
+> When initializing sd or sdio card, we get struct mmc_card
+> from mmc_alloc_card which allocates it by kzalloc. So we don't
+> need another memset while decoding cid.
 >
-> Signed-off-by: Brian Norris <computersforpeace@gmail.com>
+> Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
 
 Thanks, applied for next!
 
@@ -32,31 +25,28 @@ Kind regards
 Uffe
 
 > ---
-> Compile tested only
 >
->  drivers/mmc/host/of_mmc_spi.c | 2 --
+>  drivers/mmc/core/sd.c | 2 --
 >  1 file changed, 2 deletions(-)
 >
-> diff --git a/drivers/mmc/host/of_mmc_spi.c b/drivers/mmc/host/of_mmc_spi.c
-> index 660170cd04d9..85bbebfde02e 100644
-> --- a/drivers/mmc/host/of_mmc_spi.c
-> +++ b/drivers/mmc/host/of_mmc_spi.c
-> @@ -74,7 +74,6 @@ struct mmc_spi_platform_data *mmc_spi_get_pdata(struct spi_device *spi)
->         const u32 *voltage_ranges;
->         int num_ranges;
->         int i;
-> -       int ret = -EINVAL;
+> diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
+> index bb39a29..b95bd24 100644
+> --- a/drivers/mmc/core/sd.c
+> +++ b/drivers/mmc/core/sd.c
+> @@ -74,8 +74,6 @@ void mmc_decode_cid(struct mmc_card *card)
+>  {
+>         u32 *resp = card->raw_cid;
 >
->         if (dev->platform_data || !np)
->                 return dev->platform_data;
-> @@ -97,7 +96,6 @@ struct mmc_spi_platform_data *mmc_spi_get_pdata(struct spi_device *spi)
->                 mask = mmc_vddrange_to_ocrmask(be32_to_cpu(voltage_ranges[j]),
->                                                be32_to_cpu(voltage_ranges[j + 1]));
->                 if (!mask) {
-> -                       ret = -EINVAL;
->                         dev_err(dev, "OF: voltage-range #%d is invalid\n", i);
->                         goto err_ocr;
->                 }
+> -       memset(&card->cid, 0, sizeof(struct mmc_cid));
+> -
+>         /*
+>          * SD doesn't currently have a version field so we will
+>          * have to assume we can parse this.
 > --
-> 2.7.0.rc3.207.g0ac5344
+> 2.3.7
 >
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
