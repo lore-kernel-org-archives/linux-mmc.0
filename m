@@ -1,191 +1,81 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 2/2] mmc: tegra: implement memcomp pad calibration
-Date: Wed, 16 Mar 2016 12:37:38 +0100
-Message-ID: <CAPDyKFp7P3H-AZWs+kQa4eufs8gSeVaU8MWhy0_L2CsPspRX0A@mail.gmail.com>
-References: <1456779385-18996-1-git-send-email-dev@lynxeye.de>
-	<1456779385-18996-2-git-send-email-dev@lynxeye.de>
+Subject: Re: [PATCH] mmc: sdhci-acpi: add QCOM controllers
+Date: Wed, 16 Mar 2016 12:37:44 +0100
+Message-ID: <CAPDyKFodFfpRfXoLkQwL3ZDmpPdSQZ7uD5iMn0Rfu6SfzhGykg@mail.gmail.com>
+References: <1457023128-23720-1-git-send-email-pelcan@codeaurora.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wm0-f48.google.com ([74.125.82.48]:35506 "EHLO
-	mail-wm0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S934826AbcCPLhp (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 16 Mar 2016 07:37:45 -0400
-Received: by mail-wm0-f48.google.com with SMTP id l68so185057310wml.0
-        for <linux-mmc@vger.kernel.org>; Wed, 16 Mar 2016 04:37:44 -0700 (PDT)
-In-Reply-To: <1456779385-18996-2-git-send-email-dev@lynxeye.de>
+Received: from mail-wm0-f50.google.com ([74.125.82.50]:36254 "EHLO
+	mail-wm0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S934854AbcCPLhq (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 16 Mar 2016 07:37:46 -0400
+Received: by mail-wm0-f50.google.com with SMTP id l124so44946414wmf.1
+        for <linux-mmc@vger.kernel.org>; Wed, 16 Mar 2016 04:37:45 -0700 (PDT)
+In-Reply-To: <1457023128-23720-1-git-send-email-pelcan@codeaurora.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Lucas Stach <dev@lynxeye.de>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, Stephen Warren <swarren@wwwdotorg.org>, Thierry Reding <thierry.reding@gmail.com>, Alexandre Courbot <gnurou@gmail.com>, Jon Hunter <jonathanh@nvidia.com>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-tegra@vger.kernel.org" <linux-tegra@vger.kernel.org>
+To: Philip Elcan <pelcan@codeaurora.org>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, Michele Curti <michele.curti@gmail.com>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Timur Tabi <timur@codeaurora.org>, "linux-arm-msm@vger.kernel.org" <linux-arm-msm@vger.kernel.org>
 
-On 29 February 2016 at 21:56, Lucas Stach <dev@lynxeye.de> wrote:
-> The Tegra30+ SDMMC module has memcomp pads that are used to
-> automatically find and set the correct drive strength settings to
-> the sdmmc pads. The calibration needs to be manually kicked off
-> when the card signal voltage is changed, after the card clock is
-> supplied again.
+On 3 March 2016 at 17:38, Philip Elcan <pelcan@codeaurora.org> wrote:
+> This adds the HIDs for Qualcomm Technologies Inc SDHC
+> controllers:
+> QCOM8051: non-removable device that does not support 1.8v
+> QCOM8052: non-removable device that does support 1.8v
 >
-> Signed-off-by: Lucas Stach <dev@lynxeye.de>
+> Signed-off-by: Philip Elcan <pelcan@codeaurora.org>
 
-Thanks applied for next, with a minor trivial fixup to resolve the
-conflict when applying.
+Thanks, applied for next!
 
 Kind regards
 Uffe
 
 > ---
-> This commit allows signal voltage changes on my Tegar30 Beaver to
-> succeed, making UHS-I modes work.
-> ---
->  drivers/mmc/host/sdhci-tegra.c | 47 +++++++++++++++++++++++++++++++++++++++---
->  1 file changed, 44 insertions(+), 3 deletions(-)
+>  drivers/mmc/host/sdhci-acpi.c | 15 +++++++++++++++
+>  1 file changed, 15 insertions(+)
 >
-> diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
-> index 46a6bd1..9971732 100644
-> --- a/drivers/mmc/host/sdhci-tegra.c
-> +++ b/drivers/mmc/host/sdhci-tegra.c
-> @@ -12,6 +12,7 @@
->   *
->   */
->
-> +#include "linux/delay.h"
->  #include <linux/err.h>
->  #include <linux/module.h>
->  #include <linux/init.h>
-> @@ -42,12 +43,17 @@
->  #define SDHCI_MISC_CTRL_ENABLE_SDHCI_SPEC_300  0x20
->  #define SDHCI_MISC_CTRL_ENABLE_DDR50           0x200
->
-> +#define SDHCI_TEGRA_AUTO_CAL_CONFIG            0x1e4
-> +#define SDHCI_AUTO_CAL_START                   BIT(31)
-> +#define SDHCI_AUTO_CAL_ENABLE                  BIT(29)
-> +
->  #define NVQUIRK_FORCE_SDHCI_SPEC_200   BIT(0)
->  #define NVQUIRK_ENABLE_BLOCK_GAP_DET   BIT(1)
->  #define NVQUIRK_ENABLE_SDHCI_SPEC_300  BIT(2)
->  #define NVQUIRK_ENABLE_SDR50           BIT(3)
->  #define NVQUIRK_ENABLE_SDR104          BIT(4)
->  #define NVQUIRK_ENABLE_DDR50           BIT(5)
-> +#define NVQUIRK_HAS_PADCALIB           BIT(6)
->
->  struct sdhci_tegra_soc_data {
->         const struct sdhci_pltfm_data *pdata;
-> @@ -58,6 +64,7 @@ struct sdhci_tegra {
->         const struct sdhci_tegra_soc_data *soc_data;
->         struct gpio_desc *power_gpio;
->         bool ddr_signaling;
-> +       bool pad_calib_required;
+> diff --git a/drivers/mmc/host/sdhci-acpi.c b/drivers/mmc/host/sdhci-acpi.c
+> index a5cda92..041e739 100644
+> --- a/drivers/mmc/host/sdhci-acpi.c
+> +++ b/drivers/mmc/host/sdhci-acpi.c
+> @@ -264,6 +264,17 @@ static const struct sdhci_acpi_slot sdhci_acpi_slot_int_sd = {
+>         .probe_slot     = sdhci_acpi_sd_probe_slot,
 >  };
 >
->  static u16 tegra_sdhci_readw(struct sdhci_host *host, int reg)
-> @@ -165,6 +172,9 @@ static void tegra_sdhci_reset(struct sdhci_host *host, u8 mask)
->                 clk_ctrl |= SDHCI_CLOCK_CTRL_SDR50_TUNING_OVERRIDE;
->         sdhci_writel(host, clk_ctrl, SDHCI_TEGRA_VENDOR_CLOCK_CTRL);
->
-> +       if (soc_data->nvquirks & NVQUIRK_HAS_PADCALIB)
-> +               tegra_host->pad_calib_required = true;
+> +static const struct sdhci_acpi_slot sdhci_acpi_slot_qcom_sd_3v = {
+> +       .quirks  = SDHCI_QUIRK_BROKEN_CARD_DETECTION,
+> +       .quirks2 = SDHCI_QUIRK2_NO_1_8_V,
+> +       .caps    = MMC_CAP_NONREMOVABLE,
+> +};
 > +
->         tegra_host->ddr_signaling = false;
->  }
->
-> @@ -187,6 +197,17 @@ static void tegra_sdhci_set_bus_width(struct sdhci_host *host, int bus_width)
->         sdhci_writeb(host, ctrl, SDHCI_HOST_CONTROL);
->  }
->
-> +static void tegra_sdhci_pad_autocalib(struct sdhci_host *host)
-> +{
-> +       u32 val;
+> +static const struct sdhci_acpi_slot sdhci_acpi_slot_qcom_sd = {
+> +       .quirks  = SDHCI_QUIRK_BROKEN_CARD_DETECTION,
+> +       .caps    = MMC_CAP_NONREMOVABLE,
+> +};
 > +
-> +       mdelay(1);
-> +
-> +       val = sdhci_readl(host, SDHCI_TEGRA_AUTO_CAL_CONFIG);
-> +       val |= SDHCI_AUTO_CAL_ENABLE | SDHCI_AUTO_CAL_START;
-> +       sdhci_writel(host,val, SDHCI_TEGRA_AUTO_CAL_CONFIG);
-> +}
-> +
->  static void tegra_sdhci_set_clock(struct sdhci_host *host, unsigned int clock)
->  {
->         struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> @@ -200,7 +221,12 @@ static void tegra_sdhci_set_clock(struct sdhci_host *host, unsigned int clock)
->         clk_set_rate(pltfm_host->clk, host_clk);
->         host->max_clk = clk_get_rate(pltfm_host->clk);
->
-> -       return sdhci_set_clock(host, clock);
-> +       sdhci_set_clock(host, clock);
-> +
-> +       if (tegra_host->pad_calib_required) {
-> +               tegra_sdhci_pad_autocalib(host);
-> +               tegra_host->pad_calib_required = false;
-> +       }
->  }
->
->  static void tegra_sdhci_set_uhs_signaling(struct sdhci_host *host,
-> @@ -270,6 +296,16 @@ static int tegra_sdhci_execute_tuning(struct sdhci_host *host, u32 opcode)
->         return mmc_send_tuning(host->mmc, opcode, NULL);
->  }
->
-> +static void tegra_sdhci_voltage_switch(struct sdhci_host *host)
-> +{
-> +       struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> +       struct sdhci_tegra *tegra_host = pltfm_host->priv;
-> +       const struct sdhci_tegra_soc_data *soc_data = tegra_host->soc_data;
-> +
-> +       if (soc_data->nvquirks & NVQUIRK_HAS_PADCALIB)
-> +               tegra_host->pad_calib_required = true;
-> +}
-> +
->  static const struct sdhci_ops tegra_sdhci_ops = {
->         .get_ro     = tegra_sdhci_get_ro,
->         .read_w     = tegra_sdhci_readw,
-> @@ -279,6 +315,7 @@ static const struct sdhci_ops tegra_sdhci_ops = {
->         .reset      = tegra_sdhci_reset,
->         .platform_execute_tuning = tegra_sdhci_execute_tuning,
->         .set_uhs_signaling = tegra_sdhci_set_uhs_signaling,
-> +       .voltage_switch = tegra_sdhci_voltage_switch,
->         .get_max_clock = tegra_sdhci_get_max_clock,
+>  struct sdhci_acpi_uid_slot {
+>         const char *hid;
+>         const char *uid;
+> @@ -284,6 +295,8 @@ static const struct sdhci_acpi_uid_slot sdhci_acpi_uids[] = {
+>         { "INT344D"  , NULL, &sdhci_acpi_slot_int_sdio },
+>         { "PNP0FFF"  , "3" , &sdhci_acpi_slot_int_sd   },
+>         { "PNP0D40"  },
+> +       { "QCOM8051", NULL, &sdhci_acpi_slot_qcom_sd_3v },
+> +       { "QCOM8052", NULL, &sdhci_acpi_slot_qcom_sd },
+>         { },
 >  };
 >
-> @@ -312,7 +349,8 @@ static const struct sdhci_tegra_soc_data soc_data_tegra30 = {
->         .pdata = &sdhci_tegra30_pdata,
->         .nvquirks = NVQUIRK_ENABLE_SDHCI_SPEC_300 |
->                     NVQUIRK_ENABLE_SDR50 |
-> -                   NVQUIRK_ENABLE_SDR104,
-> +                   NVQUIRK_ENABLE_SDR104 |
-> +                   NVQUIRK_HAS_PADCALIB,
+> @@ -298,6 +311,8 @@ static const struct acpi_device_id sdhci_acpi_ids[] = {
+>         { "INT3436"  },
+>         { "INT344D"  },
+>         { "PNP0D40"  },
+> +       { "QCOM8051" },
+> +       { "QCOM8052" },
+>         { },
 >  };
->
->  static const struct sdhci_ops tegra114_sdhci_ops = {
-> @@ -325,6 +363,7 @@ static const struct sdhci_ops tegra114_sdhci_ops = {
->         .reset      = tegra_sdhci_reset,
->         .platform_execute_tuning = tegra_sdhci_execute_tuning,
->         .set_uhs_signaling = tegra_sdhci_set_uhs_signaling,
-> +       .voltage_switch = tegra_sdhci_voltage_switch,
->         .get_max_clock = tegra_sdhci_get_max_clock,
->  };
->
-> @@ -347,7 +386,8 @@ static const struct sdhci_tegra_soc_data soc_data_tegra124 = {
->         .pdata = &sdhci_tegra114_pdata,
->         .nvquirks = NVQUIRK_ENABLE_SDR50 |
->                     NVQUIRK_ENABLE_DDR50 |
-> -                   NVQUIRK_ENABLE_SDR104,
-> +                   NVQUIRK_ENABLE_SDR104 |
-> +                   NVQUIRK_HAS_PADCALIB,
->  };
->
->  static const struct sdhci_pltfm_data sdhci_tegra210_pdata = {
-> @@ -402,6 +442,7 @@ static int sdhci_tegra_probe(struct platform_device *pdev)
->                 goto err_alloc_tegra_host;
->         }
->         tegra_host->ddr_signaling = false;
-> +       tegra_host->pad_calib_required = false;
->         tegra_host->soc_data = soc_data;
->         pltfm_host->priv = tegra_host;
->
+>  MODULE_DEVICE_TABLE(acpi, sdhci_acpi_ids);
 > --
-> 2.5.0
+> The Qualcomm Innovation Center, Inc. is a member of the Code Aurora Forum,
+> a Linux Foundation Collaborative Project
 >
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
