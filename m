@@ -1,50 +1,71 @@
-From: Peter Ujfalusi <peter.ujfalusi@ti.com>
-Subject: Re: [PATCH v2 4/5] mmc: davinci: don't use dma platform resources
-Date: Wed, 16 Mar 2016 10:46:42 +0200
-Message-ID: <56E91D72.4030606@ti.com>
-References: <56E6BF7E.7020401@ti.com>
- <1457996081-21975-1-git-send-email-david@lechnology.com>
- <1457996081-21975-5-git-send-email-david@lechnology.com>
- <56E7CDAC.1090907@ti.com> <56E842EE.7030301@lechnology.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [RFC 4/7] mmc: tmio: Add UHS-I mode support
+Date: Wed, 16 Mar 2016 09:58:38 +0100
+Message-ID: <CAPDyKFp_d=GKxKvNt7nyGoWLFSUYTycbS6jb-khPC1cBvJENog@mail.gmail.com>
+References: <1455913003-6140-1-git-send-email-wsa@the-dreams.de>
+	<1455913003-6140-5-git-send-email-wsa@the-dreams.de>
+	<CAPDyKFpxE3XU8ocRLTyMvBo-FPOECY7zeJAr7O1oLwKXEZ20zQ@mail.gmail.com>
+	<20160309161735.GB9443@katana>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from devils.ext.ti.com ([198.47.26.153]:55705 "EHLO
-	devils.ext.ti.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S964829AbcCPIr6 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 16 Mar 2016 04:47:58 -0400
-In-Reply-To: <56E842EE.7030301@lechnology.com>
+Received: from mail-wm0-f47.google.com ([74.125.82.47]:33541 "EHLO
+	mail-wm0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754567AbcCPI6o (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 16 Mar 2016 04:58:44 -0400
+Received: by mail-wm0-f47.google.com with SMTP id l68so179616778wml.0
+        for <linux-mmc@vger.kernel.org>; Wed, 16 Mar 2016 01:58:44 -0700 (PDT)
+In-Reply-To: <20160309161735.GB9443@katana>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: David Lechner <david@lechnology.com>, nsekhar@ti.com
-Cc: ulf.hansson@linaro.org, khilman@kernel.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+To: Wolfram Sang <wsa@the-dreams.de>
+Cc: linux-renesas-soc@vger.kernel.org, linux-mmc <linux-mmc@vger.kernel.org>, Ben Hutchings <ben.hutchings@codethink.co.uk>, Dirk Behme <dirk.behme@gmail.com>, Wolfram Sang <wsa+renesas@sang-engineering.com>
 
-On 03/15/16 19:14, David Lechner wrote:
-> On 03/15/2016 03:54 AM, Peter Ujfalusi wrote:
->> On 03/15/16 00:54, David Lechner wrote:
->>>
->>>       host->dma_tx =3D
->>> -        dma_request_slave_channel_compat(mask, edma_filter_fn,
->>> -                &host->txdma, mmc_dev(host->mmc), "tx");
->>> +        dma_request_slave_channel(mmc_dev(host->mmc), "tx");
+On 9 March 2016 at 17:17, Wolfram Sang <wsa@the-dreams.de> wrote:
+>
+>> > +
+>> > +       int (*start_signal_voltage_switch)(struct tmio_mmc_host *host,
+>> > +                                          unsigned char signal_voltage);
 >>
->> you would need to use dma_request_chan() to be able to rely on the l=
-egacy
->> channel mapping.
->> I have staged commits for converting all daVinci and OMAP drivers, I=
-'ll attach
->> the patch I have for davinci-mmc for reference.
->> When we convert to use the dma_request_chan() we can handle deferred=
- probing
->> also...
+>> Do you really need to add a new tmio specific callback for this?
 >>
->=20
-> OK. So I should redo this patch on top of the patch you attached?
+>> Why can't you instead have the tmio variant driver assign the
+>> ->start_signal_voltage_switch() callback into the struct mmc_host_ops
+>> instead?
+>
+> Just to see how it looks, I tried your suggestion. However, mmc_ops is
+> consted all the way into the core (rightfully, I'd say), so this makes
+> this approach quite clumsy. I kept the above callback now, just changed
+> the second paramater to pass the whole ios so I can use it with
+> mmc_regulator_set_vqmmc().
 
-Or replace your patch with mine in your series. In my patch I forgot to=
- remove
-the 'u32 rxdma, txdma;' from struct mmc_davinci_host...
+Okay, let me elaborate a bit more on what I really meant.
 
---=20
-P=E9ter
+In tmio_mmc_of_parse(), the mmc->ops gets assigned to the
+&tmio_mmc_ops. Before doing that, you can conditionally assign
+->start_signal_voltage_switch() callback within the &tmio_mmc_ops,
+right!?
+
+Why am I suggesting this? I want to avoid us evolving the code in the
+wrong direction, similar what has happened to SDHCI. *One* way to
+address this, is to minimize unnecessary variant specific callbacks.
+
+>
+>> > +static int tmio_mmc_card_busy(struct mmc_host *mmc)
+>> > +{
+>> > +       struct tmio_mmc_host *host = mmc_priv(mmc);
+>> > +       u32 status;
+>> > +
+>> > +       pm_runtime_get_sync(mmc_dev(mmc));
+>>
+>> This isn't needed as the mmc core already deal with runtime PM of the
+>> host device via mmc_claim|release_host().
+>
+> sdhci.c does it, too - missing cleanup?
+
+We quite recently added this into the mmc core, before it was the
+controller driver itself who dealt with pm_runtime_get|put().
+So, yes several drivers can be cleaned up.
+
+Kind regards
+Uffe
