@@ -1,15 +1,15 @@
 From: Baolin Wang <baolin.wang@linaro.org>
-Subject: [RFC v2] Documentation: mmc: Add the introduction for mmc-utils
-Date: Wed, 16 Mar 2016 20:02:49 +0800
-Message-ID: <3a35aa84d79119536fb67bc423f928a930167a73.1458031864.git.baolin.wang@linaro.org>
+Subject: [PATCH] Documentation: mmc: Add the introduction for mmc-utils
+Date: Wed, 16 Mar 2016 20:07:09 +0800
+Message-ID: <3a35aa84d79119536fb67bc423f928a930167a73.1458129983.git.baolin.wang@linaro.org>
 Return-path: <linux-doc-owner@vger.kernel.org>
 Sender: linux-doc-owner@vger.kernel.org
 To: corbet@lwn.net
 Cc: chris@printf.net, broonie@kernel.org, linus.walleij@linaro.org, arnd@arndb.de, ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, linux-doc@vger.kernel.org, linux-kernel@vger.kernel.org, baolin.wang@linaro.org
 List-Id: linux-mmc@vger.kernel.org
 
-This patch introduces one mmc test tools called mmc-utils, which is convenient
-if someone wants to exercise and test MMC/SD devices from userspace.
+This patch introduces one mmc test tool called mmc-utils, which is convenient
+if someone want to exercise and test MMC/SD devices from userspace.
 
 Signed-off-by: Baolin Wang <baolin.wang@linaro.org>
 ---
@@ -37,7 +37,7 @@ index 0000000..499b0f4
 +MMC tools introduction
 +======================
 +
-+There is one MMC test tools called mmc-utils, which is maintained by Chris Ball,
++There is one mmc test tools called mmc-utils, which is maintained by Chris Ball,
 +you can find it at the below public git repository:
 +http://git.kernel.org/cgit/linux/kernel/git/cjb/mmc-utils.git/
 +
