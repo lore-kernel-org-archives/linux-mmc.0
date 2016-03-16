@@ -1,81 +1,45 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: sdhci-acpi: add QCOM controllers
-Date: Wed, 16 Mar 2016 12:37:44 +0100
-Message-ID: <CAPDyKFodFfpRfXoLkQwL3ZDmpPdSQZ7uD5iMn0Rfu6SfzhGykg@mail.gmail.com>
-References: <1457023128-23720-1-git-send-email-pelcan@codeaurora.org>
+Subject: Re: [PATCH v2] ARM: mmci:Remove unnecessary #include header file in mmci.c
+Date: Wed, 16 Mar 2016 12:37:51 +0100
+Message-ID: <CAPDyKFrtAVK2CHxzw0B783pxe6ixreab-XT7uX3cWi7XB8mtpg@mail.gmail.com>
+References: <1457934273-2977-1-git-send-email-annie.wang@amd.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wm0-f50.google.com ([74.125.82.50]:36254 "EHLO
-	mail-wm0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S934854AbcCPLhq (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 16 Mar 2016 07:37:46 -0400
-Received: by mail-wm0-f50.google.com with SMTP id l124so44946414wmf.1
-        for <linux-mmc@vger.kernel.org>; Wed, 16 Mar 2016 04:37:45 -0700 (PDT)
-In-Reply-To: <1457023128-23720-1-git-send-email-pelcan@codeaurora.org>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1457934273-2977-1-git-send-email-annie.wang@amd.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Wang Hongcheng <annie.wang@amd.com>
+Cc: Russell King <linux@arm.linux.org.uk>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Borislav Petkov <bp@alien8.de>, SPG_Linux_Kernel <SPG_Linux_Kernel@amd.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Philip Elcan <pelcan@codeaurora.org>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, Michele Curti <michele.curti@gmail.com>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Timur Tabi <timur@codeaurora.org>, "linux-arm-msm@vger.kernel.org" <linux-arm-msm@vger.kernel.org>
 
-On 3 March 2016 at 17:38, Philip Elcan <pelcan@codeaurora.org> wrote:
-> This adds the HIDs for Qualcomm Technologies Inc SDHC
-> controllers:
-> QCOM8051: non-removable device that does not support 1.8v
-> QCOM8052: non-removable device that does support 1.8v
+On 14 March 2016 at 06:44, Wang Hongcheng <annie.wang@amd.com> wrote:
+> The header file asm/sizes.h is unnecessary.
+> And it can also be compiled under X86 arch after the removal.
 >
-> Signed-off-by: Philip Elcan <pelcan@codeaurora.org>
+> Signed-off-by: Wang Hongcheng <annie.wang@amd.com>
 
-Thanks, applied for next!
+Thanks, applied for next! I took the liberty to update the change log
+a bit as well as the header for it.
 
 Kind regards
 Uffe
 
 > ---
->  drivers/mmc/host/sdhci-acpi.c | 15 +++++++++++++++
->  1 file changed, 15 insertions(+)
+>  drivers/mmc/host/mmci.c | 1 -
+>  1 file changed, 1 deletion(-)
 >
-> diff --git a/drivers/mmc/host/sdhci-acpi.c b/drivers/mmc/host/sdhci-acpi.c
-> index a5cda92..041e739 100644
-> --- a/drivers/mmc/host/sdhci-acpi.c
-> +++ b/drivers/mmc/host/sdhci-acpi.c
-> @@ -264,6 +264,17 @@ static const struct sdhci_acpi_slot sdhci_acpi_slot_int_sd = {
->         .probe_slot     = sdhci_acpi_sd_probe_slot,
->  };
+> diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
+> index fb26674..e5e5441 100644
+> --- a/drivers/mmc/host/mmci.c
+> +++ b/drivers/mmc/host/mmci.c
+> @@ -40,7 +40,6 @@
 >
-> +static const struct sdhci_acpi_slot sdhci_acpi_slot_qcom_sd_3v = {
-> +       .quirks  = SDHCI_QUIRK_BROKEN_CARD_DETECTION,
-> +       .quirks2 = SDHCI_QUIRK2_NO_1_8_V,
-> +       .caps    = MMC_CAP_NONREMOVABLE,
-> +};
-> +
-> +static const struct sdhci_acpi_slot sdhci_acpi_slot_qcom_sd = {
-> +       .quirks  = SDHCI_QUIRK_BROKEN_CARD_DETECTION,
-> +       .caps    = MMC_CAP_NONREMOVABLE,
-> +};
-> +
->  struct sdhci_acpi_uid_slot {
->         const char *hid;
->         const char *uid;
-> @@ -284,6 +295,8 @@ static const struct sdhci_acpi_uid_slot sdhci_acpi_uids[] = {
->         { "INT344D"  , NULL, &sdhci_acpi_slot_int_sdio },
->         { "PNP0FFF"  , "3" , &sdhci_acpi_slot_int_sd   },
->         { "PNP0D40"  },
-> +       { "QCOM8051", NULL, &sdhci_acpi_slot_qcom_sd_3v },
-> +       { "QCOM8052", NULL, &sdhci_acpi_slot_qcom_sd },
->         { },
->  };
+>  #include <asm/div64.h>
+>  #include <asm/io.h>
+> -#include <asm/sizes.h>
 >
-> @@ -298,6 +311,8 @@ static const struct acpi_device_id sdhci_acpi_ids[] = {
->         { "INT3436"  },
->         { "INT344D"  },
->         { "PNP0D40"  },
-> +       { "QCOM8051" },
-> +       { "QCOM8052" },
->         { },
->  };
->  MODULE_DEVICE_TABLE(acpi, sdhci_acpi_ids);
+>  #include "mmci.h"
+>  #include "mmci_qcom_dml.h"
 > --
-> The Qualcomm Innovation Center, Inc. is a member of the Code Aurora Forum,
-> a Linux Foundation Collaborative Project
+> 1.9.1
 >
