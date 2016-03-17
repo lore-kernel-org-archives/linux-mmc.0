@@ -1,66 +1,57 @@
-From: Dan Carpenter <dan.carpenter@oracle.com>
-Subject: re: mmc: omap_hsmmc: Pin remux workaround to support SDIO interrupt
- on AM335x
-Date: Thu, 17 Mar 2016 20:32:50 +0300
-Message-ID: <20160317173250.GA21370@mwanda>
+From: Rob Herring <robh@kernel.org>
+Subject: Re: [v6, 3/5] dt: move guts devicetree doc out of powerpc directory
+Date: Thu, 17 Mar 2016 12:57:49 -0500
+Message-ID: <CAL_JsqL8NkEQx2NoVHSUGYhtNsybCo-yfBCde+_OuMmfwbhYEw@mail.gmail.com>
+References: <1457518131-11339-1-git-send-email-yangbo.lu@nxp.com>
+ <1457518131-11339-4-git-send-email-yangbo.lu@nxp.com> <20160317170640.GB21009@rob-hp-laptop>
+ <4107975.rId64mooHz@wuerfel>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from aserp1040.oracle.com ([141.146.126.69]:49623 "EHLO
-	aserp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1030207AbcCQRdB (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 17 Mar 2016 13:33:01 -0400
-Content-Disposition: inline
+Received: from mail.kernel.org ([198.145.29.136]:43623 "EHLO mail.kernel.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S936695AbcCQR6N (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 17 Mar 2016 13:58:13 -0400
+In-Reply-To: <4107975.rId64mooHz@wuerfel>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: afenkart@gmail.com
-Cc: linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org
+To: Arnd Bergmann <arnd@arndb.de>
+Cc: Yangbo Lu <yangbo.lu@nxp.com>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linuxppc-dev <linuxppc-dev@lists.ozlabs.org>, linux-clk <linux-clk@vger.kernel.org>, "linux-i2c@vger.kernel.org" <linux-i2c@vger.kernel.org>, Linux IOMMU <iommu@lists.linux-foundation.org>, netdev <netdev@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, scott.wood@nxp.com, Russell King <linux@arm.linux.org.uk>, Jochen Friedrich <jochen@scram.de>, Joerg Roedel <joro@8bytes.org>, Claudiu Manoil <claudiu.manoil@freescale.com>, Ulf Hansson <ulf.hansson@linaro.org>, Bhupesh Sharma <bhupesh.sharma@freescale.com>, Zhao Qiang <qiang.zhao@freescale.com>, Kumar Gala <galak@codeaurora.org>, Santosh Shilimkar <ssantosh@ker>
 
-Hello Andreas Fenkart,
+On Thu, Mar 17, 2016 at 12:11 PM, Arnd Bergmann <arnd@arndb.de> wrote:
+> On Thursday 17 March 2016 12:06:40 Rob Herring wrote:
+>> > diff --git a/Documentation/devicetree/bindings/powerpc/fsl/guts.txt b/Documentation/devicetree/bindings/soc/fsl/guts.txt
+>> > similarity index 91%
+>> > rename from Documentation/devicetree/bindings/powerpc/fsl/guts.txt
+>> > rename to Documentation/devicetree/bindings/soc/fsl/guts.txt
+>> > index b71b203..07adca9 100644
+>> > --- a/Documentation/devicetree/bindings/powerpc/fsl/guts.txt
+>> > +++ b/Documentation/devicetree/bindings/soc/fsl/guts.txt
+>> > @@ -25,6 +25,9 @@ Recommended properties:
+>> >   - fsl,liodn-bits : Indicates the number of defined bits in the LIODN
+>> >     registers, for those SOCs that have a PAMU device.
+>> >
+>> > + - little-endian : Indicates that the global utilities block is little
+>> > +   endian. The default is big endian.
+>>
+>> The default is "the native endianness of the system".
+>
+> This may be what is currently documented, but not what we are doing
+> in practice, as there is no "native endianess" for either PowerPC or
+> ARM -- both allow running big-endian or little-endian kernels and the
+> device registers are fixed.
 
-The patch 455e5cd6f736: "mmc: omap_hsmmc: Pin remux workaround to
-support SDIO interrupt on AM335x" from May 29, 2014, leads to the
-following static checker warning:
+Notice I said system, not architecture. The way the device registers
+are fixed is what I mean by native endianness.
 
-	drivers/mmc/host/omap_hsmmc.c:1788 omap_hsmmc_configure_wake_irq()
-	error: 'p' dereferencing possible ERR_PTR()
+If the purpose of adding this property now is to support GUTS on the
+ARM SoCs, then I'd argue using this property is probably wrong. If the
+PPC systems are designed with BE device registers and ARM systems with
+LE, then this property is not needed.
 
-drivers/mmc/host/omap_hsmmc.c
-  1780          if (host->pdata->controller_flags & OMAP_HSMMC_SWAKEUP_MISSING) {
-  1781                  struct pinctrl *p = devm_pinctrl_get(host->dev);
-                                            ^^^^^^^^^^^^^^^^^^^^^^^^^^
-  1782                  if (!p) {
-  1783                          ret = -ENODEV;
-  1784                          goto err_free_irq;
-  1785                  }
-  1786                  if (IS_ERR(pinctrl_lookup_state(p, PINCTRL_STATE_DEFAULT))) {
-  1787                          dev_info(host->dev, "missing default pinctrl state\n");
-  1788                          devm_pinctrl_put(p);
-                                ^^^^^^^^^^^^^^^^^^^^
+> I think the property here is fine.
 
-I believe that devm_pinctrl_get() only returns NULL when we are building
-with COMPILE_TEST and not on bootable kernels.
+Unless you have studied the FSL ARM based SoCs, then there is not
+enough information here to tell.
 
-This is an annoying thing, btw, because Smatch does cross function
-analysis and I have to handle all these as a special case.  "Whatever
-function() returns ERR_PTR (and never NULL) in real life but NULL when
-you are parsing the inline code."  A lot of people do this or the
-opposite and I can't see how it hels anyone, only how it hurts me.
-
-And of course doing it all backwards depending leads to bugs like this.
-
-  1789                          ret = -EINVAL;
-  1790                          goto err_free_irq;
-  1791                  }
-  1792  
-  1793                  if (IS_ERR(pinctrl_lookup_state(p, PINCTRL_STATE_IDLE))) {
-  1794                          dev_info(host->dev, "missing idle pinctrl state\n");
-  1795                          devm_pinctrl_put(p);
-  1796                          ret = -EINVAL;
-  1797                          goto err_free_irq;
-  1798                  }
-  1799                  devm_pinctrl_put(p);
-  1800          }
-
-regards,
-dan carpenter
+Rob
