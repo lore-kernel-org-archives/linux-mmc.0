@@ -1,62 +1,30 @@
-From: Simon Horman <horms@verge.net.au>
-Subject: Re: [PATCH] ARM: dts: r8a7793: Add MMCIF0
-Date: Thu, 17 Mar 2016 10:23:55 +0900
-Message-ID: <20160317012355.GF17728@verge.net.au>
-References: <1458148237-21902-1-git-send-email-ulrich.hecht+renesas@gmail.com>
- <56E995EE.2010805@cogentembedded.com>
- <20160317002907.GC17728@verge.net.au>
+From: Shawn Lin <shawn.lin@rock-chips.com>
+Subject: [RFC] improve mmc init sequence
+Date: Thu, 17 Mar 2016 11:41:12 +0800
+Message-ID: <56EA2758.7090200@rock-chips.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-renesas-soc-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20160317002907.GC17728@verge.net.au>
-Sender: linux-renesas-soc-owner@vger.kernel.org
-To: Sergei Shtylyov <sergei.shtylyov@cogentembedded.com>
-Cc: Ulrich Hecht <ulrich.hecht+renesas@gmail.com>, linux-renesas-soc@vger.kernel.org, linux-mmc@vger.kernel.org, magnus.damm@gmail.com
+Content-Type: text/plain; charset=gbk; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from lucky1.263xmail.com ([211.157.147.132]:36376 "EHLO
+	lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754361AbcCQDla (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 16 Mar 2016 23:41:30 -0400
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>
+Cc: shawn.lin@rock-chips.com
 
-On Thu, Mar 17, 2016 at 09:29:08AM +0900, Simon Horman wrote:
-> On Wed, Mar 16, 2016 at 08:20:46PM +0300, Sergei Shtylyov wrote:
-> > Hello.
-> > 
-> > On 03/16/2016 08:10 PM, Ulrich Hecht wrote:
-> > 
-> > >Same as on r8a7794.
-> 
-> Thanks, I'm pleased to see this.
-> Its been on my todo list for a while.
-> 
-> > >
-> > >Signed-off-by: Ulrich Hecht <ulrich.hecht+renesas@gmail.com>
-> > >---
-> > >  arch/arm/boot/dts/r8a7793.dtsi | 12 ++++++++++++
-> > >  1 file changed, 12 insertions(+)
-> > >
-> > >diff --git a/arch/arm/boot/dts/r8a7793.dtsi b/arch/arm/boot/dts/r8a7793.dtsi
-> > >index 63f811d..33413e8 100644
-> > >--- a/arch/arm/boot/dts/r8a7793.dtsi
-> > >+++ b/arch/arm/boot/dts/r8a7793.dtsi
-> > >@@ -509,6 +509,18 @@
-> > >  		reg = <0 0xe6060000 0 0x250>;
-> > >  	};
-> > >
-> > >+	mmcif0: mmcif@ee200000 {
-> > >+		compatible = "renesas,mmcif-r8a7793", "renesas,sh-mmcif";
-> > >+		reg = <0 0xee200000 0 0x80>;
-> > >+		interrupts = <0 169 IRQ_TYPE_LEVEL_HIGH>;
-> > >+		clocks = <&mstp3_clks R8A7793_CLK_MMCIF0>;
-> > >+		dmas = <&dmac0 0xd1>, <&dmac0 0xd2>,
-> > >+		       <&dmac1 0xd1>, <&dmac1 0xd2>;
-> > >+		dma-names = "tx", "rx";
-> > 
-> >    4 DMA channels but only 2 channel names?
-> 
-> Right, it looks like it should be:
-> 
-> 		dma-names = "tx", "rx", "tx", "rx";
-> 
-> Ulrich, could you verify that and repost?
+Hello Ulf,
+	I notice we add MMC_CAP2_NO_SDIO to avoid sending sdio commands during 
+initialization. So that means we can use it to improve mmc init
+sequence if a specific board use one slot just for emmc or sd. But I 
+realize that we can move a step further to add more cap2 like NO_SD/
+NO_MMC in order to reduce the boot time. Does that make sense? If the
+answer is *yes*, I am happy to push some patches for it since I have
+been doing it on my local tree and testing for a long time.
 
-One more thing. I think you also need a power domains property:
+-- 
+Best Regards
+Shawn Lin
 
-	power-domains = <&cpg_clocks>;
