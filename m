@@ -1,87 +1,83 @@
-From: Shawn Lin <shawn.lin@rock-chips.com>
-Subject: Re: [PATCH] mmc: dw_mmc-rockchip: fix failing to mount partition with
- "discard"
-Date: Thu, 17 Mar 2016 23:46:05 +0800
-Message-ID: <56EAD13D.8050400@rock-chips.com>
-References: <1456816373-32518-1-git-send-email-shawn.lin@rock-chips.com>
- <56D641FA.8010606@samsung.com>
+From: Rob Herring <robh-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+Subject: Re: [v6, 5/5] mmc: sdhci-of-esdhc: fix host version for
+	T4240-R1.0-R2.0
+Date: Thu, 17 Mar 2016 12:01:01 -0500
+Message-ID: <20160317170101.GA21009@rob-hp-laptop>
+References: <1457518131-11339-1-git-send-email-yangbo.lu@nxp.com>
+	<1457518131-11339-6-git-send-email-yangbo.lu@nxp.com>
+	<4947024.WeMycs2fID@wuerfel>
+	<HE1PR04MB0889CE4742B92461A925B9C4F8880@HE1PR04MB0889.eurprd04.prod.outlook.com>
+	<DB5PR0401MB19286B2D23D07F5C60DB799D91880@DB5PR0401MB1928.eurprd04.prod.outlook.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <56D641FA.8010606@samsung.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>, Shawn Lin <shawn.lin@rock-chips.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-rockchip@lists.infradead.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <DB5PR0401MB19286B2D23D07F5C60DB799D91880-GXldUsIPo7Z/SeJcUcAJq43W/0Ik+aLCnBOFsp37pqbUKgpGm//BTAC/G2K4zDHf@public.gmane.org>
+List-Unsubscribe: <https://lists.linuxfoundation.org/mailman/options/iommu>,
+	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.linuxfoundation.org/pipermail/iommu/>
+List-Post: <mailto:iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
+List-Help: <mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=help>
+List-Subscribe: <https://lists.linuxfoundation.org/mailman/listinfo/iommu>,
+	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=subscribe>
+Sender: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
+Errors-To: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
+To: Scott Wood <scott.wood-3arQi8VN3Tc@public.gmane.org>
+Cc: "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org" <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Zhao Qiang <qiang.zhao-KZfg59tc24xl57MIdRCFDg@public.gmane.org>, Russell King <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Bhupesh Sharma <bhupesh.sharma-KZfg59tc24xl57MIdRCFDg@public.gmane.org>, "netdev-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <netdev-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Kumar Gala <galak-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Yang-Leo Li <leoyang.li-3arQi8VN3Tc@public.gmane.org>, Santosh Shilimkar <ssantosh-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, "iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org" <iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>, "linux-i2c-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-i2c-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Claudiu Manoil <claudiu.manoil-KZfg59tc24xl57MIdRCFDg@public.gmane.org>, Yangbo Lu <yangbo.lu-3arQi8VN3Tc@public.gmane.org>, "linuxppc-dev-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org" <linuxppc-dev@li>
 List-Id: linux-mmc@vger.kernel.org
 
-Hi jaehoon,
-
-On 2016/3/2 9:29, Jaehoon Chung wrote:
-> Hi Shawn.
->
-> On 03/01/2016 04:12 PM, Shawn Lin wrote:
->> Without MMC_CAP_ERASE support, we fail to mount partition
->> with "discard" option since mmc_queue_setup_discard is limited
->> for checking mmc_can_erase. Without doing mmc_queue_setup_discard,
->> blk_queue_discard fails to test QUEUE_FLAG_DISCARD flag, so we get
->> the following log from f2fs(actually similar to other file system):
->>
->> mounting with "discard" option, but the device does not support discard
->
-> We can enable MMC_CAP_ERASE by default, since other SoC also needs this capability.
-> I had sent some patch for enabling by default, but at that time i didn't remember why not enabled by default.
-> I will check that reason..and share the information.
->
-
-Any good news? :)
-Or let add it for dw_mmc by default?
-
-> Best Regards,
-> Jaehoon Chung
->
->>
->> Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
->> ---
->>
->>   drivers/mmc/host/dw_mmc-rockchip.c | 9 +++++++++
->>   1 file changed, 9 insertions(+)
->>
->> diff --git a/drivers/mmc/host/dw_mmc-rockchip.c b/drivers/mmc/host/dw_mmc-rockchip.c
->> index 84e50f3..2eda118 100644
->> --- a/drivers/mmc/host/dw_mmc-rockchip.c
->> +++ b/drivers/mmc/host/dw_mmc-rockchip.c
->> @@ -234,11 +234,20 @@ static int dw_mci_rockchip_init(struct dw_mci *host)
->>   	return 0;
->>   }
->>
->> +/* Common capabilities of RK3288 SoC */
->> +static unsigned long dw_mci_rk3288_dwmmc_caps[4] = {
->> +	MMC_CAP_ERASE,
->> +	MMC_CAP_ERASE,
->> +	MMC_CAP_ERASE,
->> +	MMC_CAP_ERASE,
->> +};
->> +
->>   static const struct dw_mci_drv_data rk2928_drv_data = {
->>   	.init			= dw_mci_rockchip_init,
->>   };
->>
->>   static const struct dw_mci_drv_data rk3288_drv_data = {
->> +	.caps			= dw_mci_rk3288_dwmmc_caps,
->>   	.set_ios		= dw_mci_rk3288_set_ios,
->>   	.execute_tuning		= dw_mci_rk3288_execute_tuning,
->>   	.parse_dt		= dw_mci_rk3288_parse_dt,
->>
->
->
-> _______________________________________________
-> Linux-rockchip mailing list
-> Linux-rockchip@lists.infradead.org
-> http://lists.infradead.org/mailman/listinfo/linux-rockchip
->
-
-
--- 
-Best Regards
-Shawn Lin
+T24gTW9uLCBNYXIgMTQsIDIwMTYgYXQgMDU6NDU6NDNQTSArMDAwMCwgU2NvdHQgV29vZCB3cm90
+ZToKPiBPbiAwMy8xNC8yMDE2IDAyOjI5IEFNLCBZYW5nYm8gTHUgd3JvdGU6Cj4gPj4gLS0tLS1P
+cmlnaW5hbCBNZXNzYWdlLS0tLS0KPiA+PiBGcm9tOiBBcm5kIEJlcmdtYW5uIFttYWlsdG86YXJu
+ZEBhcm5kYi5kZV0KPiA+PiBTZW50OiBNb25kYXksIE1hcmNoIDE0LCAyMDE2IDY6MjYgQU0KPiA+
+PiBUbzogbGludXhwcGMtZGV2QGxpc3RzLm96bGFicy5vcmcKPiA+PiBDYzogWWFuZ2JvIEx1OyBk
+ZXZpY2V0cmVlQHZnZXIua2VybmVsLm9yZzsgbGludXgtYXJtLQo+ID4+IGtlcm5lbEBsaXN0cy5p
+bmZyYWRlYWQub3JnOyBsaW51eC1rZXJuZWxAdmdlci5rZXJuZWwub3JnOyBsaW51eC0KPiA+PiBj
+bGtAdmdlci5rZXJuZWwub3JnOyBsaW51eC1pMmNAdmdlci5rZXJuZWwub3JnOyBpb21tdUBsaXN0
+cy5saW51eC0KPiA+PiBmb3VuZGF0aW9uLm9yZzsgbmV0ZGV2QHZnZXIua2VybmVsLm9yZzsgbGlu
+dXgtbW1jQHZnZXIua2VybmVsLm9yZzsKPiA+PiB1bGYuaGFuc3NvbkBsaW5hcm8ub3JnOyBaaGFv
+IFFpYW5nOyBSdXNzZWxsIEtpbmc7IEJodXBlc2ggU2hhcm1hOyBKb2VyZwo+ID4+IFJvZWRlbDsg
+U2FudG9zaCBTaGlsaW1rYXI7IFNjb3R0IFdvb2Q7IFJvYiBIZXJyaW5nOyBDbGF1ZGl1IE1hbm9p
+bDsgS3VtYXIKPiA+PiBHYWxhOyBZYW5nLUxlbyBMaTsgWGlhb2JvIFhpZQo+ID4+IFN1YmplY3Q6
+IFJlOiBbdjYsIDUvNV0gbW1jOiBzZGhjaS1vZi1lc2RoYzogZml4IGhvc3QgdmVyc2lvbiBmb3Ig
+VDQyNDAtCj4gPj4gUjEuMC1SMi4wCj4gPj4KPiA+PiBPbiBXZWRuZXNkYXkgMDkgTWFyY2ggMjAx
+NiAxODowODo1MSBZYW5nYm8gTHUgd3JvdGU6Cj4gPj4+IEBAIC01NjcsMTAgKzU4MCwyMCBAQCBz
+dGF0aWMgdm9pZCBlc2RoY19pbml0KHN0cnVjdCBwbGF0Zm9ybV9kZXZpY2UKPiA+PiAqcGRldiwg
+c3RydWN0IHNkaGNpX2hvc3QgKmhvc3QpCj4gPj4+ICAgICAgICAgc3RydWN0IHNkaGNpX3BsdGZt
+X2hvc3QgKnBsdGZtX2hvc3Q7Cj4gPj4+ICAgICAgICAgc3RydWN0IHNkaGNpX2VzZGhjICplc2Ro
+YzsKPiA+Pj4gICAgICAgICB1MTYgaG9zdF92ZXI7Cj4gPj4+ICsgICAgICAgdTMyIHN2cjsKPiA+
+Pj4KPiA+Pj4gICAgICAgICBwbHRmbV9ob3N0ID0gc2RoY2lfcHJpdihob3N0KTsKPiA+Pj4gICAg
+ICAgICBlc2RoYyA9IHNkaGNpX3BsdGZtX3ByaXYocGx0Zm1faG9zdCk7Cj4gPj4+Cj4gPj4+ICsg
+ICAgICAgZnNsX2d1dHNfaW5pdCgpOwo+ID4+PiArICAgICAgIHN2ciA9IGZzbF9ndXRzX2dldF9z
+dnIoKTsKPiA+Pj4gKyAgICAgICBpZiAoc3ZyKSB7Cj4gPj4+ICsgICAgICAgICAgICAgICBlc2Ro
+Yy0+c29jX3ZlciA9IFNWUl9TT0NfVkVSKHN2cik7Cj4gPj4+ICsgICAgICAgICAgICAgICBlc2Ro
+Yy0+c29jX3JldiA9IFNWUl9SRVYoc3ZyKTsKPiA+Pj4gKyAgICAgICB9IGVsc2Ugewo+ID4+PiAr
+ICAgICAgICAgICAgICAgZGV2X2VycigmcGRldi0+ZGV2LCAiRmFpbGVkIHRvIGdldCBTVlIgdmFs
+dWUhXG4iKTsKPiA+Pj4gKyAgICAgICB9Cj4gPj4+ICsKPiA+Pgo+ID4+IFRoaXMgbWFrZXMgdGhl
+IGRyaXZlciBub24tcG9ydGFibGUuIEJldHRlciBpZGVudGlmeSB0aGUgc3BlY2lmaWMKPiA+PiB3
+b3JrYXJvdW5kcyBiYXNlZCBvbiB0aGUgY29tcGF0aWJsZSBzdHJpbmcgZm9yIHRoaXMgZGV2aWNl
+LCBvciBhZGQgYQo+ID4+IGJvb2xlYW4gRFQgcHJvcGVydHkgZm9yIHRoZSBxdWlyay4KPiA+Pgo+
+ID4+IAlBcm5kCj4gPiAKPiA+IFtMdSBZYW5nYm8tQjQ3MDkzXSBIaSBBcm5kLCB3ZSBkaWQgaGF2
+ZSBhIGRpc2N1c3Npb24gYWJvdXQgdXNpbmcgRFRTIGluIHYxIGJlZm9yZS4KPiA+IGh0dHBzOi8v
+cGF0Y2h3b3JrLmtlcm5lbC5vcmcvcGF0Y2gvNjgzNDIyMS8KPiA+IAo+ID4gV2UgZG9u4oCZdCBo
+YXZlIGEgc2VwYXJhdGUgRFRTIGZpbGUgZm9yIGVhY2ggcmV2aXNpb24gb2YgYW4gU09DIGFuZCBp
+ZiB3ZSBkaWQsIHdlJ2QgY29uc3RhbnRseSBoYXZlIHBlb3BsZSB1c2luZyB0aGUgd3Jvbmcgb25l
+Lgo+ID4gSW4gYWRkaXRpb24sIHRoZSBkZXZpY2UgdHJlZSBpcyBzdGFibGUgQUJJIGFuZCBlcnJh
+dGEgYXJlIG9mdGVuIGRpc2NvdmVyZWQgYWZ0ZXIgZGV2aWNlIHRyZWUgYXJlIGRlcGxveWVkLgo+
+ID4gU2VlIHRoZSBsaW5rIGZvciBkZXRhaWxzLgo+ID4gCj4gPiBTbyB3ZSBkZWNpZGUgdG8gcmVh
+ZCBTVlIgZnJvbSB0aGUgZGV2aWNlLWNvbmZpZy9ndXRzIE1NSU8gYmxvY2sgb3RoZXIgdGhhbiB1
+c2luZyBEVFMuCj4gPiBUaGFua3MuCj4gCj4gQWxzbyBub3RlIHRoYXQgdGhpcyBkcml2ZXIgaXMg
+YWxyZWFkeSBvbmx5IGZvciBmc2wtc3BlY2lmaWMgaGFyZHdhcmUsCj4gYW5kIGl0IHdpbGwgc3Rp
+bGwgd29yayBldmVuIGlmIGZzbF9ndXRzIGRvZXNuJ3QgZmluZCBhbnl0aGluZyB0byBiaW5kIHRv
+Cj4gLS0gaXQganVzdCB3b3VsZG4ndCBiZSBhYmxlIHRvIGRldGVjdCBlcnJhdGEgYmFzZWQgb24g
+U1ZSIGluIHRoYXQgY2FzZS4KCklJUkMsIGl0IGlzIHRoZSBzYW1lIElQIGJsb2NrIGFzIGkuTVgg
+YW5kIEFybmQncyBwb2ludCBpcyB0aGlzIHdvbid0IApldmVuIGNvbXBpbGUgb24gIVBQQy4gSXQg
+aXMgdGhpbmdzIGxpa2UgdGhpcyB0aGF0IHByZXZlbnQgc2hhcmluZyB0aGUgCmRyaXZlci4gRGVh
+bGluZyB3aXRoIFNpIHJldnMgaXMgYSBjb21tb24gcHJvYmxlbS4gV2Ugc2hvdWxkIGhhdmUgYSAK
+Y29tbW9uIHNvbHV0aW9uLiBUaGVyZSBpcyBzb2NfZGV2aWNlIGZvciB0aGlzIHB1cnBvc2UuCgpP
+VE9ILCB0aGUgaW50ZWdyYXRpb24gZGlmZmVyZW5jZXMgbWF5IGJlIGVub3VnaCB0aGF0IHRyeWlu
+ZyB0byBoYXZlIGEgCmNvbW1vbiBkcml2ZXIgd2l0aCBpLk1YIHdvdWxkIG5vdCBiZSB3b3J0aCBp
+dC4KClJvYgpfX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fXwpp
+b21tdSBtYWlsaW5nIGxpc3QKaW9tbXVAbGlzdHMubGludXgtZm91bmRhdGlvbi5vcmcKaHR0cHM6
+Ly9saXN0cy5saW51eGZvdW5kYXRpb24ub3JnL21haWxtYW4vbGlzdGluZm8vaW9tbXU=
