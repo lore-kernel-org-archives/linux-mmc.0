@@ -1,79 +1,84 @@
 From: Scott Wood <scott.wood@nxp.com>
-Subject: Re: [v6, 3/5] dt: move guts devicetree doc out of powerpc directory
-Date: Fri, 18 Mar 2016 18:16:06 +0000
-Message-ID: <HE1PR0401MB1931444381E249E41C45C748918C0@HE1PR0401MB1931.eurprd04.prod.outlook.com>
+Subject: Re: [v6, 5/5] mmc: sdhci-of-esdhc: fix host version for
+ T4240-R1.0-R2.0
+Date: Fri, 18 Mar 2016 18:28:05 +0000
+Message-ID: <DB5PR0401MB1928DA88B03970E1EACFB1FF918C0@DB5PR0401MB1928.eurprd04.prod.outlook.com>
 References: <1457518131-11339-1-git-send-email-yangbo.lu@nxp.com>
- <1457518131-11339-4-git-send-email-yangbo.lu@nxp.com>
- <20160317170640.GB21009@rob-hp-laptop>
+ <DB5PR0401MB19286B2D23D07F5C60DB799D91880@DB5PR0401MB1928.eurprd04.prod.outlook.com>
+ <20160317170101.GA21009@rob-hp-laptop> <3706958.XeRFmKM0K5@wuerfel>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=Windows-1252
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-clk-owner@vger.kernel.org>
 Content-Language: en-US
 Sender: linux-clk-owner@vger.kernel.org
-To: Rob Herring <robh@kernel.org>, Yangbo Lu <yangbo.lu@nxp.com>
-Cc: "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linuxppc-dev@lists.ozlabs.org" <linuxppc-dev@lists.ozlabs.org>, "linux-clk@vger.kernel.org" <linux-clk@vger.kernel.org>, "linux-i2c@vger.kernel.org" <linux-i2c@vger.kernel.org>, "iommu@lists.linux-foundation.org" <iommu@lists.linux-foundation.org>, "netdev@vger.kernel.org" <netdev@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Russell King <linux@arm.linux.org.uk>, Jochen Friedrich <jochen@scram.de>, Joerg Roedel <joro@8bytes.org>, Claudiu Manoil <claudiu.manoil@freescale.com>, "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>, Bhupesh Sharma <bhupesh.sharma@freescale.com>, Zhao Qiang <qiang.zhao@freescale.com>, Kumar Gala <galak@codeau>
+To: Arnd Bergmann <arnd@arndb.de>, Rob Herring <robh@kernel.org>
+Cc: Yangbo Lu <yangbo.lu@nxp.com>, "linuxppc-dev@lists.ozlabs.org" <linuxppc-dev@lists.ozlabs.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>, Zhao Qiang <qiang.zhao@freescale.com>, Russell King <linux@arm.linux.org.uk>, Bhupesh Sharma <bhupesh.sharma@freescale.com>, "netdev@vger.kernel.org" <netdev@vger.kernel.org>, Joerg Roedel <joro@8bytes.org>, Kumar Gala <galak@codeaurora.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Yang-Leo Li <leoyang.li@nxp.com>, "iommu@lists.linux-foundation.org" <iommu@lists.linux-foundation.org>, "linux-i2c@vger.kernel.org" <linux-i2c@vger.kernel.org>, Claudiu Manoil <claudiu.manoil@freescale.com>, Santosh Shilimkar <ssantosh@kernel.org>, Xiaobo Xie <xiaobo.xie@nxp.com>, linux-clk@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-On 03/17/2016 12:06 PM, Rob Herring wrote:
-> On Wed, Mar 09, 2016 at 06:08:49PM +0800, Yangbo Lu wrote:
->> Move guts devicetree doc to Documentation/devicetree/bindings/soc/fsl/
->> since it's used by not only PowerPC but also ARM. And add a specification
->> for 'little-endian' property.
+On 03/17/2016 12:06 PM, Arnd Bergmann wrote:
+> On Thursday 17 March 2016 12:01:01 Rob Herring wrote:
+>> On Mon, Mar 14, 2016 at 05:45:43PM +0000, Scott Wood wrote:
+>=20
+>>>>> This makes the driver non-portable. Better identify the specific
+>>>>> workarounds based on the compatible string for this device, or ad=
+d a
+>>>>> boolean DT property for the quirk.
+>>>>>
+>>>>>    Arnd
+>>>>
+>>>> [Lu Yangbo-B47093] Hi Arnd, we did have a discussion about using D=
+TS in v1 before.
+>>>> https://patchwork.kernel.org/patch/6834221/
+>>>>
+>>>> We don=92t have a separate DTS file for each revision of an SOC an=
+d if we did, we'd constantly have people using the wrong one.
+>>>> In addition, the device tree is stable ABI and errata are often di=
+scovered after device tree are deployed.
+>>>> See the link for details.
+>>>>
+>>>> So we decide to read SVR from the device-config/guts MMIO block ot=
+her than using DTS.
+>>>> Thanks.
+>>>
+>>> Also note that this driver is already only for fsl-specific hardwar=
+e,
+>>> and it will still work even if fsl_guts doesn't find anything to bi=
+nd to
+>>> -- it just wouldn't be able to detect errata based on SVR in that c=
+ase.
 >>
->> Signed-off-by: Yangbo Lu <yangbo.lu@nxp.com>
->> ---
->> Changes for v2:
->> 	- None
->> Changes for v3:
->> 	- None
->> Changes for v4:
->> 	- Added this patch
->> Changes for v5:
->> 	- Modified the description for little-endian property
->> Changes for v6:
->> 	- None
->> ---
->>  Documentation/devicetree/bindings/{powerpc => soc}/fsl/guts.txt | 3 +++
->>  1 file changed, 3 insertions(+)
->>  rename Documentation/devicetree/bindings/{powerpc => soc}/fsl/guts.txt (91%)
->>
->> diff --git a/Documentation/devicetree/bindings/powerpc/fsl/guts.txt b/Documentation/devicetree/bindings/soc/fsl/guts.txt
->> similarity index 91%
->> rename from Documentation/devicetree/bindings/powerpc/fsl/guts.txt
->> rename to Documentation/devicetree/bindings/soc/fsl/guts.txt
->> index b71b203..07adca9 100644
->> --- a/Documentation/devicetree/bindings/powerpc/fsl/guts.txt
->> +++ b/Documentation/devicetree/bindings/soc/fsl/guts.txt
->> @@ -25,6 +25,9 @@ Recommended properties:
->>   - fsl,liodn-bits : Indicates the number of defined bits in the LIODN
->>     registers, for those SOCs that have a PAMU device.
->>  
->> + - little-endian : Indicates that the global utilities block is little
->> +   endian. The default is big endian.
-> 
-> The default is "the native endianness of the system". So absence on an 
-> ARM system would be LE.
+>> IIRC, it is the same IP block as i.MX and Arnd's point is this won't=
+=20
+>> even compile on !PPC. It is things like this that prevent sharing th=
+e=20
+>> driver.
 
-No.  For this binding, the default is big-endian, because that's what
-existed for this device before an endian property was added.
+The whole point of using the MMIO SVR instead of the PPC SPR is so that
+it will work on ARM...  The guts driver should build on any platform as
+long as OF is enabled, and if it doesn't find a node to bind to it will
+return 0 for SVR, and the eSDHC driver will continue (after printing an
+error that should be removed) without the ability to test for errata
+based on SVR.
 
-"endianness of the system" is not a well-defined concept.
+> I think the first four patches take care of building for ARM,
+> but the problem remains if you want to enable COMPILE_TEST as
+> we need for certain automated checking.
 
-> This property is valid for any simple-bus device, 
+What specific problem is there with COMPILE_TEST?
 
-Since when does simple-bus mean anything more than that the nodes
-underneath it can be used without bus-specific knowledge?
+>> Dealing with Si revs is a common problem. We should have a=20
+>> common solution. There is soc_device for this purpose.
+>=20
+> Exactly. The last time this came up, I think we agreed to implement a
+> helper using glob_match() on the soc_device strings. Unfortunately
+> this hasn't happened then, but I'd still prefer that over yet another
+> vendor-specific way of dealing with the generic issue.
 
-> so it isn't really required to document per device. You can, but 
-> your description had better match the documented behaviour.
-
-Documented where?
-
-In fact, Documentation/devicetree/bindings/common-properties.txt
-explicitly says of the endian properties, "If a binding supports these
-properties, then the binding should also specify the default behavior if
-none of these properties are present."
+soc_device would require encoding the SVR as a string and then decoding
+the string, which is more complicated and error prone than having
+platform-specific code test a platform-specific number.  And when would
+it get registered on arm64, which doesn't have platform code?
 
 -Scott
 
