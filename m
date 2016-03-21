@@ -1,94 +1,62 @@
-From: Andreas Fenkart <afenkart@gmail.com>
-Subject: [PATCH] mmc: omap_hsmmc: pass omap_hsmmc_host pointer directly
-Date: Mon, 21 Mar 2016 00:58:08 +0100
-Message-ID: <1458518288-22774-1-git-send-email-afenkart@gmail.com>
+From: Dan Carpenter <dan.carpenter@oracle.com>
+Subject: Re: [PATCH] mmc: omap_hsmmc: devm_pinctrl_get returns ERR_PTR upon
+ error
+Date: Mon, 21 Mar 2016 11:41:48 +0300
+Message-ID: <20160321084148.GV5273@mwanda>
+References: <1458514504-21380-1-git-send-email-afenkart@gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wm0-f52.google.com ([74.125.82.52]:34007 "EHLO
-	mail-wm0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751232AbcCTX6Q (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 20 Mar 2016 19:58:16 -0400
-Received: by mail-wm0-f52.google.com with SMTP id p65so133233776wmp.1
-        for <linux-mmc@vger.kernel.org>; Sun, 20 Mar 2016 16:58:15 -0700 (PDT)
+Received: from userp1040.oracle.com ([156.151.31.81]:42867 "EHLO
+	userp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751973AbcCUIl4 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 21 Mar 2016 04:41:56 -0400
+Content-Disposition: inline
+In-Reply-To: <1458514504-21380-1-git-send-email-afenkart@gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: Andreas Fenkart <afenkart@gmail.com>
+To: Andreas Fenkart <afenkart@gmail.com>
+Cc: linux-mmc@vger.kernel.org
 
-unnecessary indirection via 'struct device' back to omap_hsmmc_host
+On Sun, Mar 20, 2016 at 11:55:04PM +0100, Andreas Fenkart wrote:
+> devm_pinctrl_get returns NULL if CONFIG_PINCTRL is not set,
+> returns ERR_PTR on error otherwise
+> 
+> Reported-by: Dan Carpenter <dan.carpenter@oracle.com>
+> Signed-off-by: Andreas Fenkart <afenkart@gmail.com>
+> ---
+>  drivers/mmc/host/omap_hsmmc.c | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+> 
+> diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
+> index 62e421a..898878d 100644
+> --- a/drivers/mmc/host/omap_hsmmc.c
+> +++ b/drivers/mmc/host/omap_hsmmc.c
+> @@ -1842,7 +1842,7 @@ static int omap_hsmmc_configure_wake_irq(struct omap_hsmmc_host *host)
+>  	 */
+>  	if (host->pdata->controller_flags & OMAP_HSMMC_SWAKEUP_MISSING) {
+>  		struct pinctrl *p = devm_pinctrl_get(host->dev);
+> -		if (!p) {
+> +		if (!p || IS_ERR(p)) {
+>  			ret = -ENODEV;
 
-Signed-off-by: Andreas Fenkart <afenkart@gmail.com>
----
- drivers/mmc/host/omap_hsmmc.c | 19 +++++++++----------
- 1 file changed, 9 insertions(+), 10 deletions(-)
+I think I know why it returns NULL with pinctrl disabled, it's not
+because of COMPILE_TEST as I said before.  The reason is that it's not
+supposed to be treated as an error if we turn off that config.  In
+other words, the person configuring the kernel wanted it to just boot
+here.  If it's not possible to boot then instead of checking for NULL we
+should make it impossible to compile without PINCTRL by setting that in
+the Kconfig.
 
-diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-index d2b2525..898878d 100644
---- a/drivers/mmc/host/omap_hsmmc.c
-+++ b/drivers/mmc/host/omap_hsmmc.c
-@@ -357,15 +357,14 @@ static int omap_hsmmc_set_pbias(struct omap_hsmmc_host *host, bool power_on,
- 	return 0;
- }
- 
--static int omap_hsmmc_set_power(struct device *dev, int power_on, int vdd)
-+static int omap_hsmmc_set_power(struct omap_hsmmc_host *host, int power_on,
-+				int vdd)
- {
--	struct omap_hsmmc_host *host =
--		platform_get_drvdata(to_platform_device(dev));
- 	struct mmc_host *mmc = host->mmc;
- 	int ret = 0;
- 
- 	if (mmc_pdata(host)->set_power)
--		return mmc_pdata(host)->set_power(dev, power_on, vdd);
-+		return mmc_pdata(host)->set_power(host->dev, power_on, vdd);
- 
- 	/*
- 	 * If we don't see a Vcc regulator, assume it's a fixed
-@@ -375,7 +374,7 @@ static int omap_hsmmc_set_power(struct device *dev, int power_on, int vdd)
- 		return 0;
- 
- 	if (mmc_pdata(host)->before_set_reg)
--		mmc_pdata(host)->before_set_reg(dev, power_on, vdd);
-+		mmc_pdata(host)->before_set_reg(host->dev, power_on, vdd);
- 
- 	ret = omap_hsmmc_set_pbias(host, false, 0);
- 	if (ret)
-@@ -409,7 +408,7 @@ static int omap_hsmmc_set_power(struct device *dev, int power_on, int vdd)
- 	}
- 
- 	if (mmc_pdata(host)->after_set_reg)
--		mmc_pdata(host)->after_set_reg(dev, power_on, vdd);
-+		mmc_pdata(host)->after_set_reg(host->dev, power_on, vdd);
- 
- 	return 0;
- 
-@@ -1278,11 +1277,11 @@ static int omap_hsmmc_switch_opcond(struct omap_hsmmc_host *host, int vdd)
- 		clk_disable_unprepare(host->dbclk);
- 
- 	/* Turn the power off */
--	ret = omap_hsmmc_set_power(host->dev, 0, 0);
-+	ret = omap_hsmmc_set_power(host, 0, 0);
- 
- 	/* Turn the power ON with given VDD 1.8 or 3.0v */
- 	if (!ret)
--		ret = omap_hsmmc_set_power(host->dev, 1, vdd);
-+		ret = omap_hsmmc_set_power(host, 1, vdd);
- 	pm_runtime_get_sync(host->dev);
- 	if (host->dbclk)
- 		clk_prepare_enable(host->dbclk);
-@@ -1722,10 +1721,10 @@ static void omap_hsmmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
- 	if (ios->power_mode != host->power_mode) {
- 		switch (ios->power_mode) {
- 		case MMC_POWER_OFF:
--			omap_hsmmc_set_power(host->dev, 0, 0);
-+			omap_hsmmc_set_power(host, 0, 0);
- 			break;
- 		case MMC_POWER_UP:
--			omap_hsmmc_set_power(host->dev, 1, ios->vdd);
-+			omap_hsmmc_set_power(host, 1, ios->vdd);
- 			break;
- 		case MMC_POWER_ON:
- 			do_send_init_stream = 1;
--- 
-2.7.0
+It may be that the Kconfig already force you to have PINCTRL.
+ARCH_OMAP2PLUS does, but I'm not sure about ARCH_KEYSTONE.
+
+So the check for NULL should be removed and also we should preserve the
+error code.
+
+	if (IS_ERR(p)) {
+		ret = PTR_ERR(p);
+
+regards,
+dan carpenter
 
