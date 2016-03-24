@@ -1,315 +1,203 @@
-From: Baolin Wang <baolin.wang@linaro.org>
-Subject: [PATCH] mmc: Provide tracepoints for request processing
-Date: Thu, 24 Mar 2016 19:54:08 +0800
-Message-ID: <05d6338bddae751c1755e7825d4179658e78cc71.1458819912.git.baolin.wang@linaro.org>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pa0-f45.google.com ([209.85.220.45]:33258 "EHLO
-	mail-pa0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750926AbcCXLy4 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 24 Mar 2016 07:54:56 -0400
-Received: by mail-pa0-f45.google.com with SMTP id fl4so19893784pad.0
-        for <linux-mmc@vger.kernel.org>; Thu, 24 Mar 2016 04:54:55 -0700 (PDT)
-Sender: linux-mmc-owner@vger.kernel.org
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: Warnings for invalid VDD (sdhci-s3c)
+Date: Thu, 24 Mar 2016 15:11:25 +0200
+Message-ID: <56F3E77D.7030201@intel.com>
+References: <CAJKOXPcGDnPm-Ykh6wHqV1YxfTaov5E8iVqBoBn4OJc7BnhgEQ@mail.gmail.com>
+ <20160324155840.50474b98@xhacker> <56F3A0B7.4050509@samsung.com>
+ <20160324162449.29c9cf78@xhacker> <56F3A88F.50603@samsung.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+In-Reply-To: <56F3A88F.50603@samsung.com>
+Sender: linux-samsung-soc-owner@vger.kernel.org
+To: Krzysztof Kozlowski <k.kozlowski@samsung.com>, Jisheng Zhang <jszhang@marvell.com>, Jaehoon Chung <jh80.chung@samsung.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, ludovic.desroches@atmel.com, "Ivan T. Ivanov" <ivan.ivanov@linaro.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-samsung-soc@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: ulf.hansson@linaro.org, rostedt@goodmis.org, mingo@redhat.com
-Cc: adrian.hunter@intel.com, yangbo.lu@freescale.com, akpm@linux-foundation.org, JBottomley@Odin.com, lporzio@micron.com, jonathanh@nvidia.com, grundler@chromium.org, axboe@fb.com, fabf@skynet.be, yunpeng.gao@intel.com, dan.j.williams@intel.com, rabin.vincent@axis.com, chuanxiao.dong@intel.com, shawn.lin@rock-chips.com, heiko@sntech.de, dianders@chromium.org, david@protonic.nl, broonie@kernel.org, linus.walleij@linaro.org, takahiro.akashi@linaro.org, baolin.wang@linaro.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
 
-This patch provides some tracepoints for the lifecycle of a request from
-fetching to completion to help with performance analysis of MMC subsystem.
+On 24/03/16 10:42, Krzysztof Kozlowski wrote:
+> On 24.03.2016 17:24, Jisheng Zhang wrote:
+>> Hi,
+>>
+>> On Thu, 24 Mar 2016 17:09:27 +0900 Jaehoon Chung wrote:
+>>
+>>> Hi,
+>>>
+>>> On 03/24/2016 04:58 PM, Jisheng Zhang wrote:
+>>>> Hi,
+>>>>
+>>>> On Thu, 24 Mar 2016 16:28:56 +0900 Krzysztof Kozlowski wrote:
+>>>>   
+>>>>> Hi,
+>>>>>
+>>>>> After 918f4cbd4340 ("mmc: sdhci: restore behavior when setting VDD via
+>>>>> external regulator") On Trats2 board I see warnings for invalid VDD
+>>>>> value (2.8V):
+>>>>>
+>>>>> [    3.119656] ------------[ cut here ]------------
+>>>>> [    3.119666] WARNING: CPU: 3 PID: 90 at
+>>>>> ../drivers/mmc/host/sdhci.c:1234 sdhci_do_set_ios+0x4cc/0x5e0
+>>>>> [    3.119669] mmc0: Invalid vdd 0x10  
+>>>>
+>>>> Per my understanding, the wrong vdd indicates a wrong ocr, what's the voltage of
+>>>> this host's vmmc regulator?  
+>>>
+>>> As i know, it's fixed-voltage with gpio on trats2. It's 2.8V.
+>>> I didn't check this entirely..need to check ocr value.
+>>>
+>>
+>> I may know the reason. the vmmc is 2.8v, then mmc_regulator_get_supply() convert
+>> the value to a ocr as 0x10. The key here is that the 2.8v is invalid in SDHCI
+>> case and isn't accepted by current sdhci driver.
+> 
+> Yeah, I already wrote that. It is the part of the warning and my email.
+> Our regulator is fixed at 2.8 which is 0x10. :)
+> 
+>> I dunno the elegant solution to handle this case, let's wait for sdhci maintainers
+>> idea.
+> 
+> Hmm...
 
-Signed-off-by: Baolin Wang <baolin.wang@linaro.org>
+I haven't tested it, but what about this:
+
+From: Adrian Hunter <adrian.hunter@intel.com>
+Date: Thu, 24 Mar 2016 14:29:24 +0200
+Subject: [PATCH] mmc: sdhci: Fix regression setting power on Trats2 board
+
+Several commits relating to setting power have been introducing
+problems by putting driver-specific rules into generic SDHCI code.
+
+Fix by adding a 'set_power' callback and restoring the default
+behaviour prior to commit 918f4cbd4340.  The desired behaviour
+of commit 918f4cbd4340 is gotten by having sdhci-pxav3 provide
+its own set_power callback.
+
+Reported-by: Krzysztof Kozlowski <k.kozlowski@samsung.com>
+Fixes: 918f4cbd4340 ("mmc: sdhci: restore behavior when setting VDD...)
+Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
+Cc: stable@vger.kernel.org # v4.5+
 ---
- drivers/mmc/card/block.c   |    6 ++
- drivers/mmc/card/queue.c   |    4 +
- drivers/mmc/core/core.c    |    5 ++
- include/trace/events/mmc.h |  188 ++++++++++++++++++++++++++++++++++++++++++++
- 4 files changed, 203 insertions(+)
- create mode 100644 include/trace/events/mmc.h
+ drivers/mmc/host/sdhci-pxav3.c | 17 +++++++++++++++++
+ drivers/mmc/host/sdhci.c       | 36 +++++++++++++++++++++++++++++-------
+ drivers/mmc/host/sdhci.h       |  4 ++++
+ 3 files changed, 50 insertions(+), 7 deletions(-)
 
-diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
-index fe207e5..d372a2d 100644
---- a/drivers/mmc/card/block.c
-+++ b/drivers/mmc/card/block.c
-@@ -46,6 +46,9 @@
+diff --git a/drivers/mmc/host/sdhci-pxav3.c b/drivers/mmc/host/sdhci-pxav3.c
+index f5edf9d3a18a..673d1e8446a5 100644
+--- a/drivers/mmc/host/sdhci-pxav3.c
++++ b/drivers/mmc/host/sdhci-pxav3.c
+@@ -307,8 +307,25 @@ static void pxav3_set_uhs_signaling(struct sdhci_host *host, unsigned int uhs)
+ 		__func__, uhs, ctrl_2);
+ }
  
- #include "queue.h"
- 
-+#define CREATE_TRACE_POINTS
-+#include <trace/events/mmc.h>
++static void pxav3_set_power(struct sdhci_host *host, unsigned char mode,
++			    unsigned short vdd)
++{
++	struct mmc_host *mmc = host->mmc;
++	u8 pwr = host->pwr;
 +
- MODULE_ALIAS("mmc:block");
- #ifdef MODULE_PARAM_PREFIX
- #undef MODULE_PARAM_PREFIX
-@@ -1709,6 +1712,7 @@ static u8 mmc_blk_prep_packed_list(struct mmc_queue *mq, struct request *req)
- 		if (phys_segments > max_phys_segs)
- 			break;
++	sdhci_set_power(host, mode, vdd);
++
++	if (host->pwr == pwr)
++		return;
++
++	spin_unlock_irq(&host->lock);
++	mmc_regulator_set_ocr(mmc, mmc->supply.vmmc, vdd);
++	spin_lock_irq(&host->lock);
++}
++
+ static const struct sdhci_ops pxav3_sdhci_ops = {
+ 	.set_clock = sdhci_set_clock,
++	.set_power = pxav3_set_power,
+ 	.platform_send_init_74_clocks = pxav3_gen_init_74_clocks,
+ 	.get_max_clock = sdhci_pltfm_clk_get_max_clock,
+ 	.set_bus_width = sdhci_set_bus_width,
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index add9fdfd1d8f..3c5dc2f73d5e 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -1269,10 +1269,24 @@ clock_set:
+ }
+ EXPORT_SYMBOL_GPL(sdhci_set_clock);
  
-+		trace_mmc_block_packed_req(next);
- 		list_add_tail(&next->queuelist, &mqrq->packed->list);
- 		cur = next;
- 		reqs++;
-@@ -1870,6 +1874,7 @@ static int mmc_blk_end_packed_req(struct mmc_queue_req *mq_rq)
+-static void sdhci_set_power(struct sdhci_host *host, unsigned char mode,
++static void sdhci_set_power_reg(struct sdhci_host *host, unsigned char mode,
+ 			    unsigned short vdd)
+ {
+ 	struct mmc_host *mmc = host->mmc;
++
++	spin_unlock_irq(&host->lock);
++	mmc_regulator_set_ocr(mmc, mmc->supply.vmmc, vdd);
++	spin_lock_irq(&host->lock);
++
++	if (mode != MMC_POWER_OFF)
++		sdhci_writeb(host, SDHCI_POWER_ON, SDHCI_POWER_CONTROL);
++	else
++		sdhci_writeb(host, 0, SDHCI_POWER_CONTROL);
++}
++
++void sdhci_set_power(struct sdhci_host *host, unsigned char mode,
++		     unsigned short vdd)
++{
+ 	u8 pwr = 0;
+ 
+ 	if (mode != MMC_POWER_OFF) {
+@@ -1335,12 +1349,20 @@ static void sdhci_set_power(struct sdhci_host *host, unsigned char mode,
+ 		if (host->quirks & SDHCI_QUIRK_DELAY_AFTER_POWER)
+ 			mdelay(10);
+ 	}
++}
++EXPORT_SYMBOL_GPL(sdhci_set_power);
+ 
+-	if (!IS_ERR(mmc->supply.vmmc)) {
+-		spin_unlock_irq(&host->lock);
+-		mmc_regulator_set_ocr(mmc, mmc->supply.vmmc, vdd);
+-		spin_lock_irq(&host->lock);
+-	}
++static void __sdhci_set_power(struct sdhci_host *host, unsigned char mode,
++			      unsigned short vdd)
++{
++	struct mmc_host *mmc = host->mmc;
++
++	if (host->ops->set_power)
++		host->ops->set_power(host, mode, vdd);
++	else if (!IS_ERR(mmc->supply.vmmc))
++		sdhci_set_power_reg(host, mode, vdd);
++	else
++		sdhci_set_power(host, mode, vdd);
+ }
+ 
+ /*****************************************************************************\
+@@ -1490,7 +1512,7 @@ static void sdhci_do_set_ios(struct sdhci_host *host, struct mmc_ios *ios)
  		}
- 		list_del_init(&prq->queuelist);
- 		blk_end_request(prq, 0, blk_rq_bytes(prq));
-+		trace_mmc_block_req_done(prq);
- 		i++;
  	}
  
-@@ -1985,6 +1990,7 @@ static int mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *rqc)
- 			} else {
- 				ret = blk_end_request(req, 0,
- 						brq->data.bytes_xfered);
-+				trace_mmc_block_req_done(req);
- 			}
+-	sdhci_set_power(host, ios->power_mode, ios->vdd);
++	__sdhci_set_power(host, ios->power_mode, ios->vdd);
  
- 			/*
-diff --git a/drivers/mmc/card/queue.c b/drivers/mmc/card/queue.c
-index 6f4323c..d0388cf 100644
---- a/drivers/mmc/card/queue.c
-+++ b/drivers/mmc/card/queue.c
-@@ -16,6 +16,7 @@
- #include <linux/kthread.h>
- #include <linux/scatterlist.h>
- #include <linux/dma-mapping.h>
-+#include <trace/events/mmc.h>
+ 	if (host->ops->platform_send_init_74_clocks)
+ 		host->ops->platform_send_init_74_clocks(host, ios->power_mode);
+diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+index 0115e9907bf8..033d72b5bbd5 100644
+--- a/drivers/mmc/host/sdhci.h
++++ b/drivers/mmc/host/sdhci.h
+@@ -529,6 +529,8 @@ struct sdhci_ops {
+ #endif
  
- #include <linux/mmc/card.h>
- #include <linux/mmc/host.h>
-@@ -64,6 +65,9 @@ static int mmc_queue_thread(void *d)
- 		mq->mqrq_cur->req = req;
- 		spin_unlock_irq(q->queue_lock);
+ 	void	(*set_clock)(struct sdhci_host *host, unsigned int clock);
++	void	(*set_power)(struct sdhci_host *host, unsigned char mode,
++			     unsigned short vdd);
  
-+		if (req)
-+			trace_mmc_queue_fetch(req);
-+
- 		if (req || mq->mqrq_prev->req) {
- 			set_current_state(TASK_RUNNING);
- 			cmd_flags = req ? req->cmd_flags : 0;
-diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index f95d41f..cb575ca 100644
---- a/drivers/mmc/core/core.c
-+++ b/drivers/mmc/core/core.c
-@@ -29,6 +29,7 @@
- #include <linux/random.h>
- #include <linux/slab.h>
- #include <linux/of.h>
-+#include <trace/events/mmc.h>
+ 	int		(*enable_dma)(struct sdhci_host *host);
+ 	unsigned int	(*get_max_clock)(struct sdhci_host *host);
+@@ -660,6 +662,8 @@ static inline bool sdhci_sdio_irq_enabled(struct sdhci_host *host)
+ }
  
- #include <linux/mmc/card.h>
- #include <linux/mmc/host.h>
-@@ -152,6 +153,8 @@ void mmc_request_done(struct mmc_host *host, struct mmc_request *mrq)
- 
- 		led_trigger_event(host->led, LED_OFF);
- 
-+		trace_mmc_request_done(host, mrq);
-+
- 		if (mrq->sbc) {
- 			pr_debug("%s: req done <CMD%u>: %d: %08x %08x %08x %08x\n",
- 				mmc_hostname(host), mrq->sbc->opcode,
-@@ -229,6 +232,8 @@ static int mmc_start_request(struct mmc_host *host, struct mmc_request *mrq)
- 	if (mmc_card_removed(host->card))
- 		return -ENOMEDIUM;
- 
-+	trace_mmc_request_start(host, mrq);
-+
- 	if (mrq->sbc) {
- 		pr_debug("<%s: starting CMD%u arg %08x flags %08x>\n",
- 			 mmc_hostname(host), mrq->sbc->opcode,
-diff --git a/include/trace/events/mmc.h b/include/trace/events/mmc.h
-new file mode 100644
-index 0000000..1af63cd
---- /dev/null
-+++ b/include/trace/events/mmc.h
-@@ -0,0 +1,188 @@
-+#undef TRACE_SYSTEM
-+#define TRACE_SYSTEM mmc
-+
-+#if !defined(_TRACE_MMC_H) || defined(TRACE_HEADER_MULTI_READ)
-+#define _TRACE_MMC_H
-+
-+#include <linux/blkdev.h>
-+#include <linux/mmc/core.h>
-+#include <linux/mmc/host.h>
-+#include <linux/tracepoint.h>
-+
-+DECLARE_EVENT_CLASS(mmc_request,
-+
-+	TP_PROTO(struct request *rq),
-+
-+	TP_ARGS(rq),
-+
-+	TP_STRUCT__entry(
-+		__field(sector_t,		sector)
-+		__field(unsigned int,		data_len)
-+		__field(int,			cmd_dir)
-+		__field(struct request *,	rq)
-+	),
-+
-+	TP_fast_assign(
-+		__entry->sector = blk_rq_pos(rq);
-+		__entry->data_len = blk_rq_bytes(rq);
-+		__entry->cmd_dir = rq_data_dir(rq);
-+		__entry->rq = rq;
-+	),
-+
-+	TP_printk("struct request[%p]:sector=%lu rw=%d len=%u",
-+		  (struct request *)__entry->rq,
-+		  (unsigned long)__entry->sector,
-+		  (int)__entry->cmd_dir,
-+		  (unsigned int)__entry->data_len)
-+);
-+
-+DEFINE_EVENT(mmc_request, mmc_queue_fetch,
-+
-+	TP_PROTO(struct request *rq),
-+
-+	TP_ARGS(rq)
-+
-+);
-+
-+DEFINE_EVENT(mmc_request, mmc_block_packed_req,
-+
-+	TP_PROTO(struct request *rq),
-+
-+	TP_ARGS(rq)
-+
-+);
-+
-+DEFINE_EVENT(mmc_request, mmc_block_req_done,
-+
-+	TP_PROTO(struct request *rq),
-+
-+	TP_ARGS(rq)
-+
-+);
-+
-+TRACE_EVENT(mmc_request_start,
-+
-+	TP_PROTO(struct mmc_host *host, struct mmc_request *mrq),
-+
-+	TP_ARGS(host, mrq),
-+
-+	TP_STRUCT__entry(
-+		__field(u32,			cmd_opcode)
-+		__field(u32,			cmd_arg)
-+		__field(unsigned int,		cmd_flags)
-+		__field(u32,			stop_opcode)
-+		__field(u32,			stop_arg)
-+		__field(unsigned int,		stop_flags)
-+		__field(u32,			sbc_opcode)
-+		__field(u32,			sbc_arg)
-+		__field(unsigned int,		sbc_flags)
-+		__field(unsigned int,		blocks)
-+		__field(unsigned int,		blksz)
-+		__field(unsigned int,		data_flags)
-+		__field(struct mmc_request *,	mrq)
-+		__field(struct mmc_host *,	host)
-+	),
-+
-+	TP_fast_assign(
-+		__entry->cmd_opcode = mrq->cmd->opcode;
-+		__entry->cmd_arg = mrq->cmd->arg;
-+		__entry->cmd_flags = mrq->cmd->flags;
-+		__entry->stop_opcode = mrq->stop ? mrq->stop->opcode : 0;
-+		__entry->stop_arg = mrq->stop ? mrq->stop->arg : 0;
-+		__entry->stop_flags = mrq->stop ? mrq->stop->flags : 0;
-+		__entry->sbc_opcode = mrq->sbc ? mrq->sbc->opcode : 0;
-+		__entry->sbc_arg = mrq->sbc ? mrq->sbc->arg : 0;
-+		__entry->sbc_flags = mrq->sbc ? mrq->sbc->flags : 0;
-+		__entry->blksz = mrq->data ? mrq->data->blksz : 0;
-+		__entry->blocks = mrq->data ? mrq->data->blocks : 0;
-+		__entry->data_flags = mrq->data ? mrq->data->flags : 0;
-+		__entry->mrq = mrq;
-+		__entry->host = host;
-+	),
-+
-+	TP_printk("%s: start struct mmc_request[%p]: "
-+		  "cmd_opcode=%u cmd_arg=0x%x cmd_flags=0x%x "
-+		  "stop_opcode=%u stop_arg=0x%x stop_flags=0x%x "
-+		  "sbc_opcode=%u sbc_arg=0x%x sbc_flags=0x%x "
-+		  "blocks=%u blksz=%u data_flags=0x%x",
-+		  mmc_hostname((struct mmc_host *)__entry->host),
-+		  (struct mmc_request *)__entry->mrq,
-+		  (u32)__entry->cmd_opcode, (u32)__entry->cmd_arg,
-+		  (unsigned int)__entry->cmd_flags,
-+		  (u32)__entry->stop_opcode, (u32)__entry->stop_arg,
-+		  (unsigned int)__entry->stop_flags,
-+		  (u32)__entry->sbc_opcode, (u32)__entry->sbc_arg,
-+		  (unsigned int)__entry->sbc_flags,
-+		  (unsigned int)__entry->blocks,
-+		  (unsigned int)__entry->blksz,
-+		  (unsigned int)__entry->data_flags)
-+);
-+
-+TRACE_EVENT(mmc_request_done,
-+
-+	TP_PROTO(struct mmc_host *host, struct mmc_request *mrq),
-+
-+	TP_ARGS(host, mrq),
-+
-+	TP_STRUCT__entry(
-+		__field(u32,		cmd_opcode)
-+		__field(int,		cmd_err)
-+		__array(u32,		cmd_resp,	4)
-+		__field(u32,		stop_opcode)
-+		__field(int,		stop_err)
-+		__array(u32,		stop_resp,	4)
-+		__field(u32,		sbc_opcode)
-+		__field(int,		sbc_err)
-+		__array(u32,		sbc_resp,	4)
-+		__field(unsigned int,		bytes_xfered)
-+		__field(int,			data_err)
-+		__field(struct mmc_request *,	mrq)
-+		__field(struct mmc_host *,	host)
-+	),
-+
-+	TP_fast_assign(
-+		__entry->cmd_opcode = mrq->cmd->opcode;
-+		__entry->cmd_err = mrq->cmd->error;
-+		memcpy(__entry->cmd_resp, mrq->cmd->resp, 4);
-+		__entry->stop_opcode = mrq->stop ? mrq->stop->opcode : 0;
-+		__entry->stop_err = mrq->stop ? mrq->stop->error : 0;
-+		__entry->stop_resp[0] = mrq->stop ? mrq->stop->resp[0] : 0;
-+		__entry->stop_resp[1] = mrq->stop ? mrq->stop->resp[1] : 0;
-+		__entry->stop_resp[2] = mrq->stop ? mrq->stop->resp[2] : 0;
-+		__entry->stop_resp[3] = mrq->stop ? mrq->stop->resp[3] : 0;
-+		__entry->sbc_opcode = mrq->sbc ? mrq->sbc->opcode : 0;
-+		__entry->sbc_err = mrq->sbc ? mrq->sbc->error : 0;
-+		__entry->sbc_resp[0] = mrq->sbc ? mrq->sbc->resp[0] : 0;
-+		__entry->sbc_resp[1] = mrq->sbc ? mrq->sbc->resp[1] : 0;
-+		__entry->sbc_resp[2] = mrq->sbc ? mrq->sbc->resp[2] : 0;
-+		__entry->sbc_resp[3] = mrq->sbc ? mrq->sbc->resp[3] : 0;
-+		__entry->bytes_xfered = mrq->data ? mrq->data->bytes_xfered : 0;
-+		__entry->data_err = mrq->data ? mrq->data->error : 0;
-+		__entry->host = host;
-+		__entry->mrq = mrq;
-+	),
-+
-+	TP_printk("%s: end struct mmc_request[%p]: "
-+		  "cmd_opcode=%u cmd_err=%d cmd_resp=0x%x 0x%x 0x%x 0x%x "
-+		  "stop_opcode=%u stop_err=%d stop_resp=0x%x 0x%x 0x%x 0x%x "
-+		  "sbc_opcode=%u sbc_err=%d sbc_resp=0x%x 0x%x 0x%x 0x%x "
-+		  "bytes_xfered=%u data_err=%d",
-+		  mmc_hostname((struct mmc_host *)__entry->host),
-+		  (struct mmc_request *)__entry->mrq,
-+		  (u32)__entry->cmd_opcode, (int)__entry->cmd_err,
-+		  (u32)__entry->cmd_resp[0], (u32)__entry->cmd_resp[1],
-+		  (u32)__entry->cmd_resp[2], (u32)__entry->cmd_resp[3],
-+		  (u32)__entry->stop_opcode, (int)__entry->stop_err,
-+		  (u32)__entry->stop_resp[0], (u32)__entry->stop_resp[1],
-+		  (u32)__entry->stop_resp[2], (u32)__entry->stop_resp[3],
-+		  (u32)__entry->sbc_opcode, (int)__entry->sbc_err,
-+		  (u32)__entry->sbc_resp[0], (u32)__entry->sbc_resp[1],
-+		  (u32)__entry->sbc_resp[2], (u32)__entry->sbc_resp[3],
-+		  (unsigned int)__entry->bytes_xfered,
-+		  (int)__entry->data_err)
-+);
-+
-+#endif /* _TRACE_MMC_H */
-+
-+/* This part must be outside protection */
-+#include <trace/define_trace.h>
+ void sdhci_set_clock(struct sdhci_host *host, unsigned int clock);
++void sdhci_set_power(struct sdhci_host *host, unsigned char mode,
++		     unsigned short vdd);
+ void sdhci_set_bus_width(struct sdhci_host *host, int width);
+ void sdhci_reset(struct sdhci_host *host, u8 mask);
+ void sdhci_set_uhs_signaling(struct sdhci_host *host, unsigned timing);
 -- 
-1.7.9.5
-
+1.9.1
