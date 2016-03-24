@@ -1,94 +1,68 @@
 From: Krzysztof Kozlowski <k.kozlowski@samsung.com>
-Subject: Re: [PATCH 2/2] regulator: core: Ensure we are at least in bounds for
- our constraints
-Date: Thu, 24 Mar 2016 16:18:25 +0900
-Message-ID: <CAJKOXPcBOT_8NOH-=sEHSP0Rc+=Dvz-aqVTsBTMKg-VNWqQotw@mail.gmail.com>
-References: <1458587912-32665-1-git-send-email-broonie@kernel.org>
-	<1458587912-32665-2-git-send-email-broonie@kernel.org>
-	<56F0624C.8010004@gmail.com>
-	<CAJKOXPd5h0Cq++OxdiXytNJH94PN4Kh_wM3M=p3JdU1m_qyFTA@mail.gmail.com>
+Subject: Warnings for invalid VDD (sdhci-s3c)
+Date: Thu, 24 Mar 2016 16:28:56 +0900
+Message-ID: <CAJKOXPcGDnPm-Ykh6wHqV1YxfTaov5E8iVqBoBn4OJc7BnhgEQ@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ob0-f195.google.com ([209.85.214.195]:35607 "EHLO
-	mail-ob0-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751051AbcCXHS0 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 24 Mar 2016 03:18:26 -0400
-In-Reply-To: <CAJKOXPd5h0Cq++OxdiXytNJH94PN4Kh_wM3M=p3JdU1m_qyFTA@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+Sender: linux-samsung-soc-owner@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, "Ivan T. Ivanov" <ivan.ivanov@linaro.org>, ludovic.desroches@atmel.com, Jisheng Zhang <jszhang@marvell.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-samsung-soc@vger.kernel.org, Jaehoon Chung <jh80.chung@samsung.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Ivaylo Dimitrov <ivo.g.dimitrov.75@gmail.com>, Mark Brown <broonie@kernel.org>
-Cc: Liam Girdwood <lgirdwood@gmail.com>, linux-kernel@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, linux-samsung-soc@vger.kernel.org, Javier Martinez Canillas <javier@osg.samsung.com>, Marek Szyprowski <m.szyprowski@samsung.com>
 
-On Thu, Mar 24, 2016 at 3:11 PM, Krzysztof Kozlowski
-<k.kozlowski@samsung.com> wrote:
-> On Tue, Mar 22, 2016 at 6:06 AM, Ivaylo Dimitrov
-> <ivo.g.dimitrov.75@gmail.com> wrote:
->> Hi,
->>
->> On 21.03.2016 21:18, Mark Brown wrote:
->>>
->>> Currently we only attempt to set the voltage during constraints
->>> application if an exact voltage is specified.  Extend this so that if
->>> the currently set voltage for the regualtor is outside the bounds set in
->>
->>
->> regulator
->>
->>> constraints we will move the voltage to the nearest constraint, raising
->>> to the minimum or lowering to the maximum as needed.  This ensures that
->>> drivers can probe without the hardware being driven out of spec.
->>>
->>> Reported-by: Ivaylo Dimitrov <ivo.g.dimitrov.75@gmail.com>
->>> Signed-off-by: Mark Brown <broonie@kernel.org>
->>> ---
->>>
->>> Untested so far, will give it a spin later/tomorrow.
->>>
->>>   drivers/regulator/core.c | 32 +++++++++++++++++++++++++-------
->>>   1 file changed, 25 insertions(+), 7 deletions(-)
->>>
->>
->> Patch 1 does not apply cleanly on 4.5-rc5, so I applied it by hand, however,
->> you may add:
->>
->> Tested-by: Ivaylo Dimitrov <ivo.g.dimitrov.75@gmail.com>
->
->
-> Cc: Ulf, mmc
->
-> I bisected today's next MMC/SD card failure to this patch. Plugging a
-> SD card on Odroid XU3/XU4 (Exynos5422) causes:
-> [   11.759954] mmc1: card never left busy state
-> [   11.762795] mmc1: error -110 whilst initialising SD card
->
-> Full log (for booting from SD but it happens also when plugging the
-> card to the board booted from eMMC):
-> http://www.krzk.eu/builders/boot-odroid-xu3-multi_v7/builds/538/steps/Boot%20odroid/logs/serial
+Hi,
 
-+Cc: linux-samsung-soc, Javier and Marek.
+After 918f4cbd4340 ("mmc: sdhci: restore behavior when setting VDD via
+external regulator") On Trats2 board I see warnings for invalid VDD
+value (2.8V):
 
-Although bisect complained about this patch but I am not convinced
-that it is the cause. Before the patch the constraints were not
-applied. To none of the regulators. With the patch the constraints are
-applied to bucks... which are not directly used by SD card.
+[    3.119656] ------------[ cut here ]------------
+[    3.119666] WARNING: CPU: 3 PID: 90 at
+../drivers/mmc/host/sdhci.c:1234 sdhci_do_set_ios+0x4cc/0x5e0
+[    3.119669] mmc0: Invalid vdd 0x10
+[    3.119673] Modules linked in:
+[    3.119679] CPU: 3 PID: 90 Comm: kworker/3:1 Tainted: G        W
+   4.5.0-next-20160324 #23
+[    3.119681] Hardware name: SAMSUNG EXYNOS (Flattened Device Tree)
+[    3.119690] Workqueue: events_freezable mmc_rescan
+[    3.119708] [<c010e0ac>] (unwind_backtrace) from [<c010ae10>]
+(show_stack+0x10/0x14)
+[    3.119719] [<c010ae10>] (show_stack) from [<c0323260>]
+(dump_stack+0x88/0x9c)
+[    3.119728] [<c0323260>] (dump_stack) from [<c011b754>] (__warn+0xe8/0x100)
+[    3.119734] [<c011b754>] (__warn) from [<c011b7a4>]
+(warn_slowpath_fmt+0x38/0x48)
+[    3.119740] [<c011b7a4>] (warn_slowpath_fmt) from [<c0527d28>]
+(sdhci_do_set_ios+0x4cc/0x5e0)
+[    3.119748] [<c0527d28>] (sdhci_do_set_ios) from [<c0528018>]
+(sdhci_runtime_resume_host+0x60/0x114)
+[    3.119758] [<c0528018>] (sdhci_runtime_resume_host) from
+[<c0402570>] (__rpm_callback+0x2c/0x60)
+[    3.119767] [<c0402570>] (__rpm_callback) from [<c04025c4>]
+(rpm_callback+0x20/0x80)
+[    3.119773] [<c04025c4>] (rpm_callback) from [<c04034b8>]
+(rpm_resume+0x36c/0x558)
+[    3.119780] [<c04034b8>] (rpm_resume) from [<c04036f0>]
+(__pm_runtime_resume+0x4c/0x64)
+[    3.119788] [<c04036f0>] (__pm_runtime_resume) from [<c0512728>]
+(__mmc_claim_host+0x170/0x1b0)
+[    3.119795] [<c0512728>] (__mmc_claim_host) from [<c0514e2c>]
+(mmc_rescan+0x54/0x348)
+[    3.119807] [<c0514e2c>] (mmc_rescan) from [<c0130dac>]
+(process_one_work+0x120/0x3f4)
+[    3.119815] [<c0130dac>] (process_one_work) from [<c01310b8>]
+(worker_thread+0x38/0x554)
+[    3.119823] [<c01310b8>] (worker_thread) from [<c01365a4>]
+(kthread+0xdc/0xf4)
+[    3.119831] [<c01365a4>] (kthread) from [<c0107878>]
+(ret_from_fork+0x14/0x3c)
+[    3.119834] ---[ end trace a22d652aa3276886 ]---
 
-Instead some of the bucks are apparently supplying other LDOs. I
-suspect buck9 which is mentioned as a supply for VDD 2.8V (2.8V
-happens to be also the voltage of regulators going to SD card).
-With the patch following constraints are applied:
-                 target_min, target max, current
-setting BUCK1 to 1100000 1100000 1100000
-setting BUCK2 to 1000000 1000000 1000000
-setting BUCK3 to 1000000 1000000 1000000
-setting BUCK4 to 1000000 1000000 1000000
-setting BUCK5 to 1200000 1200000 1200000
-setting BUCK6 to 1025000 1025000 1025000
-setting BUCK7 to 900000 900000 900000
-setting BUCK8 to 1225000 1225000 1225000
-setting BUCK9 to 3750000 3750000 5000000
+The device seems to work correctly but I suppose the patch still has
+an effect - the mmc_regulator_set_ocr() is not called.
 
-Why the heck current_uV is 5V? I'll try to figure this out...
+Any ideas for fixing this?
+
+The board is Trats2 (Exynos4412).
 
 Best regards,
 Krzysztof
