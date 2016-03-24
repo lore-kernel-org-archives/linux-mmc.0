@@ -1,49 +1,31 @@
-From: Doug Anderson <dianders@chromium.org>
+From: Russell King - ARM Linux <linux@arm.linux.org.uk>
 Subject: Re: [PATCH] mmc: dw_mmc: Wait for data transfer after response errors
-Date: Thu, 24 Mar 2016 08:16:49 -0700
-Message-ID: <CAD=FV=X2rO+zKoq3BOLcShwA555GMXdKhA92M_SijNDkfcjA1g@mail.gmail.com>
+Date: Thu, 24 Mar 2016 15:30:56 +0000
+Message-ID: <20160324153056.GT19428@n2100.arm.linux.org.uk>
 References: <CAFqH_53X-cAP4O7PeSOyDybAG9CHQGoPkUE76CacGjVV4cX6Pg@mail.gmail.com>
-	<CAD=FV=XBZr9q9CoodewrUhChuoKSmwR4viGx+-htq+ZHCA066w@mail.gmail.com>
-	<CAFqH_51=a7qsLFv_v3uDTsQzz8YD=GiAo3SUcR6rW_MObm=M7Q@mail.gmail.com>
+ <CAD=FV=XBZr9q9CoodewrUhChuoKSmwR4viGx+-htq+ZHCA066w@mail.gmail.com>
+ <CAFqH_51=a7qsLFv_v3uDTsQzz8YD=GiAo3SUcR6rW_MObm=M7Q@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-vk0-f54.google.com ([209.85.213.54]:33920 "EHLO
-	mail-vk0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751338AbcCXPQu (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 24 Mar 2016 11:16:50 -0400
-Received: by mail-vk0-f54.google.com with SMTP id e185so62866706vkb.1
-        for <linux-mmc@vger.kernel.org>; Thu, 24 Mar 2016 08:16:50 -0700 (PDT)
+Received: from pandora.arm.linux.org.uk ([78.32.30.218]:56695 "EHLO
+	pandora.arm.linux.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752428AbcCXPbO (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 24 Mar 2016 11:31:14 -0400
+Content-Disposition: inline
 In-Reply-To: <CAFqH_51=a7qsLFv_v3uDTsQzz8YD=GiAo3SUcR6rW_MObm=M7Q@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Enric Balletbo Serra <eballetbo@gmail.com>, Jaehoon Chung <jh80.chung@samsung.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Alim Akhtar <alim.akhtar@gmail.com>, Ulf Hansson <ulf.hansson@linaro.org>, Alim Akhtar <alim.akhtar@samsung.com>, Sonny Rao <sonnyrao@chromium.org>, Andrew Bresticker <abrestic@chromium.org>, Heiko Stuebner <heiko@sntech.de>, Addy Ke <addy.ke@rock-chips.com>, Alexandru Stan <amstan@chromium.org>, Chris Zhong <zyw@rock-chips.com>, Caesar Wang <wxt@rock-chips.com>, Javier Martinez Canillas <javier@osg.samsung.com>, Russell King <linux@arm.linux.org.uk>
+To: Enric Balletbo Serra <eballetbo@gmail.com>
+Cc: Doug Anderson <dianders@chromium.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Alim Akhtar <alim.akhtar@gmail.com>, Jaehoon Chung <jh80.chung@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>, Alim Akhtar <alim.akhtar@samsung.com>, Sonny Rao <sonnyrao@chromium.org>, Andrew Bresticker <abrestic@chromium.org>, Heiko Stuebner <heiko@sntech.de>, Addy Ke <addy.ke@rock-chips.com>, Alexandru Stan <amstan@chromium.org>, Chris Zhong <zyw@rock-chips.com>, Caesar Wang <wxt@rock-chips.com>, Javier Martinez Canillas <javier@osg.samsung.com>
 
-Hi,
-
-On Thu, Mar 24, 2016 at 4:26 AM, Enric Balletbo Serra
-<eballetbo@gmail.com> wrote:
->> Ah, that would make some sense why things work OK on Rockchip.  Adding
->> DW_MCI_QUIRK_BROKEN_DTO to peach probably doesn't make sense, then.
->> Hrm...
->>
->> Since my original debugging of the issue was over a year ago, I think
->> I've almost totally lost context of any debugging I did on the issue,
->> so I'm not sure I'm going to be too much help in giving any details
->> other than what I put in the original commit message.  From the
->> original message it appears that I thought we could solve this other
->> ways but just that my patch was easier than the alternative of
->> handling every error case.  Maybe we just need to go back to the
->> drawing board and handle the error directly?
->>
->
+On Thu, Mar 24, 2016 at 12:26:43PM +0100, Enric Balletbo Serra wrote:
 > I just saw that Russell introduced a patch [1] that will land on 4.6.
 > I think that patch solves the same issue that we're trying to fix, but
 > for sdhci controller.
 
-Yes, the description sounds very similar for sure.
-
+It doesn't sound like the same issue to me, though it was a long while
+back when I was looking at sdhci, so I may be misremembering.
 
 > The problem that we have on peach-pi, with our patch applied, is that
 > when we get a response CRC error on a command and we move to start
@@ -53,22 +35,38 @@ Yes, the description sounds very similar for sure.
 > looks like the sdhci controller has a timer to signal the command
 > timed out.
 
-I haven't spent any amount of time looking at SDHCI driver.
+>From what I remember, the problem I was seeing is that SDHCI sends a
+command (iirc, a tuning command), and receives a response CRC error.
+The card, however, knows nothing about the CRC error, so it moves into
+the transfer state.
 
-If we have no other better solution, enabling the DTO timer for this
-specific case on all dw_mmc might be a good idea?
+Meanwhile, SDHCI stopped processing the command, resetting the SDHCI
+controller and reporting the error to the upper layers.
 
+Then, a new command gets queued, issued to the card, and this fails
+because the card is still in transfer state.  This totally screws up
+the SDHCI UHS tuning.
 
-> ooi, anyone knows what was the test case that caused the necessity of
-> the DTO quirk?
+This is not the only SDHCI UHS tuning bug: others exist which do not
+yet have patches, where we can get spurious false positives/false
+negatives for various tuning steps which totally confuse the code.
 
-If I remember correctly, the DTO quirk is necessary to get basic
-tuning working on almost every UHS card out there on rk3288.  Take it
-out and you'll see lots of problems.  If you have it in there and add
-a printout when the DTO quirk fires, you'll see your printout a decent
-amount during tuning.  Should be easy to test that...
+>From what you say above, your issue is that you get a response CRC
+error, but the dw MMC masks the data side, which sounds like a
+different solution is needed.  The MMC block driver error handling
+is fairly robust, but there is no core error handling (because the
+error handling is not obvious.)  So any command not eminating from
+the MMC block driver that invokes a transfer from the card which
+fails won't have a stop command sent for it.
 
-Those same cards work fine on exynos devices without the DTO quirk.
+Maybe that's a weakness of the core MMC code: when I originally
+designed that part of the MMC code, my thoughts were to leave error
+handling to the higher levels (such as MMC block) because its
+dependent on those higher levels.  Eg, the various status bits
+which report errors, whether a stop command needs to be issued,
+etc.
 
-
--Doug
+-- 
+RMK's Patch system: http://www.arm.linux.org.uk/developer/patches/
+FTTC broadband for 0.8mile line: currently at 9.6Mbps down 400kbps up
+according to speedtest.net.
