@@ -1,51 +1,77 @@
-From: Yangbo Lu <yangbo.lu-3arQi8VN3Tc@public.gmane.org>
-Subject: RE: [v6, 2/5] soc: fsl: add GUTS driver for QorIQ platforms
-Date: Fri, 25 Mar 2016 06:44:33 +0000
-Message-ID: <HE1PR04MB0889420582187F850129D3D0F8830@HE1PR04MB0889.eurprd04.prod.outlook.com>
-References: <1457518131-11339-1-git-send-email-yangbo.lu@nxp.com>
-	<1457518131-11339-3-git-send-email-yangbo.lu@nxp.com>
-	<DB5PR0401MB1928302BB0DDE8D9B47E4361918C0@DB5PR0401MB1928.eurprd04.prod.outlook.com>
+From: Markus Reichl <reichl@t-online.de>
+Subject: Re: [PATCH] ARM: dts: exynos: Fix invalid maximum voltage for buck9
+ supplying SD card
+Date: Fri, 25 Mar 2016 08:07:40 +0100
+Message-ID: <3355646.rVxAcJbDaQ@dell2.five-lan.de>
+References: <1458807125-13580-1-git-send-email-k.kozlowski@samsung.com>
+ <56F4D070.4020403@osg.samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
-In-Reply-To: <DB5PR0401MB1928302BB0DDE8D9B47E4361918C0-GXldUsIPo7Z/SeJcUcAJq43W/0Ik+aLCnBOFsp37pqbUKgpGm//BTAC/G2K4zDHf@public.gmane.org>
-Content-Language: en-US
-List-Unsubscribe: <https://lists.linuxfoundation.org/mailman/options/iommu>,
-	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.linuxfoundation.org/pipermail/iommu/>
-List-Post: <mailto:iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
-List-Help: <mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=help>
-List-Subscribe: <https://lists.linuxfoundation.org/mailman/listinfo/iommu>,
-	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=subscribe>
-Sender: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
-Errors-To: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
-To: Scott Wood <scott.wood-3arQi8VN3Tc@public.gmane.org>, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linuxppc-dev-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org" <linuxppc-dev-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>, "linux-clk-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-clk-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-i2c-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-i2c-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org" <iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>, "netdev-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <netdev-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Cc: "ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org" <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Zhao Qiang <qiang.zhao-KZfg59tc24xl57MIdRCFDg@public.gmane.org>, Russell King <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, Bhupesh Sharma <bhupesh.sharma-KZfg59tc24xl57MIdRCFDg@public.gmane.org>, Santosh Shilimkar <ssantosh-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Jochen Friedrich <jochen-NIgtFMG+Po8@public.gmane.org>, Yang-Leo Li <leoyang.li-3arQi8VN3Tc@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Claudiu Manoil <claudiu.manoil-KZfg59tc24xl57MIdRCFDg@public.gmane.org>, Kumar Gala <galak-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, Xiaobo Xie <xiaobo.xie-3arQi8VN3Tc@public.gmane.org>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <56F4D070.4020403@osg.samsung.com>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Javier Martinez Canillas <javier@osg.samsung.com>
+Cc: devicetree@vger.kernel.org, Krzysztof Kozlowski <k.kozlowski@samsung.com>, linux-samsung-soc@vger.kernel.org, Mark Brown <broonie@kernel.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Kukjin Kim <kgene@kernel.org>, Ivaylo Dimitrov <ivo.g.dimitrov.75@gmail.com>, Ulf Hansson <ulf.hansson@linaro.org>, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
-> -----Original Message-----
-> From: Scott Wood
-> Sent: Saturday, March 19, 2016 6:55 AM
-> To: Yangbo Lu; devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org; linux-arm-
-> kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org; linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org; linuxppc-
-> dev-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org; linux-clk-u79uwXL29TY76Z2rM5mHXA@public.gmane.org; linux-
-> i2c-u79uwXL29TY76Z2rM5mHXA@public.gmane.org; iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org;
-> netdev-u79uwXL29TY76Z2rM5mHXA@public.gmane.org; linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-> Cc: Rob Herring; Russell King; Jochen Friedrich; Joerg Roedel; Claudiu
-> Manoil; ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org; Bhupesh Sharma; Zhao Qiang; Kumar Gala;
-> Santosh Shilimkar; Yang-Leo Li; Xiaobo Xie
-> Subject: Re: [v6, 2/5] soc: fsl: add GUTS driver for QorIQ platforms
-> 
-> On 03/09/2016 04:18 AM, Yangbo Lu wrote:
-> > +#ifdef CONFIG_FSL_GUTS
-> > +u32 fsl_guts_get_svr(void);
-> > +int fsl_guts_init(void);
-> > +#endif
-> 
-> Don't ifdef prototypes (when not providing a stub alternative).
-> 
-> -Scott
-
-[Lu Yangbo-B47093] Ok, will remove the ifdef.
-Thank you very much.
+SGkgSmF2aWVyLAoKQW0gRnJlaXRhZywgMjUuIE3DpHJ6IDIwMTYsIDAyOjQ1OjIwIHNjaHJpZWIg
+SmF2aWVyIE1hcnRpbmV6IENhbmlsbGFzOgo+IEhlbGxvIEtyenlzenRvZiwKPiAKPiBPbiAwMy8y
+NC8yMDE2IDA1OjEyIEFNLCBLcnp5c3p0b2YgS296bG93c2tpIHdyb3RlOgo+ID4gVGhlIGJ1Y2s5
+IHJlZ3VsYXRvciBvZiBTMk1QUzExIFBNSUMgaGFkIGluY29ycmVjdCBtYXhpbXVtIHZvbHRhZ2Ug
+LQo+ID4gbG93ZXIgYnkgNSBtViB0aGFuIHNwZWNpZmllZCBieSBkYXRhc2hlZXQuIFRoaXMgYnVj
+azkgcHJvdmlkZXMgcG93ZXIgdG8KPiA+IG90aGVyIHJlZ3VsYXRvcnMsIGluY2x1ZGluZyBMRE8x
+MyBhbmQgTERPMTkgd2hpY2ggc3VwcGx5IHRoZSBNTUMyIChTRAo+ID4gY2FyZCkuCj4gPiAKPiA+
+IFdoZW4gY29uc3RyYWludHMgd2VyZSBhcHBsaWVkLCB0aGUgZGVwZW5kaW5nIHJlZ3VsYXRvcnMg
+d2VyZSBub3QKPiA+IHByb3ZpZGluZyBlbm91Z2ggcG93ZXIsIGxlYWRpbmcgdG8gU0QgY2FyZCBk
+ZXRlY3Rpb24gZXJyb3JzOgo+ID4gCW1tYzE6IGNhcmQgbmV2ZXIgbGVmdCBidXN5IHN0YXRlCj4g
+PiAJbW1jMTogZXJyb3IgLTExMCB3aGlsc3QgaW5pdGlhbGlzaW5nIFNEIGNhcmQKPiA+IAo+ID4g
+Rml4ZXM6IDg2YTJkMmFjNWU1ZCAoIkFSTTogZHRzOiBBZGQgZHRzIGZpbGUgZm9yIE9kcm9pZCBY
+VTMgYm9hcmQiKQo+ID4gU2lnbmVkLW9mZi1ieTogS3J6eXN6dG9mIEtvemxvd3NraSA8ay5rb3ps
+b3dza2lAc2Ftc3VuZy5jb20+Cj4gPiAKPiA+IC0tLQo+ID4gCj4gPiBUaGUgaXNzdWUgY2FuIGJl
+IHJlcHJvZHVjZWQgb24gbmV4dC0yMDE2MDMyNCB3aXRoCj4gPiBiYWU0ZmRjODhkN2Y3ZGRhMSAo
+cmVndWxhdG9yOiBjb3JlOiBFbnN1cmUgd2UgYXJlIGF0IGxlYXN0IGluIGJvdW5kcyBmb3Igb3Vy
+IGNvbnN0cmFpbnRzKS4KPiA+IC0tLQo+ID4gIGFyY2gvYXJtL2Jvb3QvZHRzL2V4eW5vczU0MjIt
+b2Ryb2lkeHUzLWNvbW1vbi5kdHNpIHwgMiArLQo+ID4gIDEgZmlsZSBjaGFuZ2VkLCAxIGluc2Vy
+dGlvbigrKSwgMSBkZWxldGlvbigtKQo+ID4gCj4gPiBkaWZmIC0tZ2l0IGEvYXJjaC9hcm0vYm9v
+dC9kdHMvZXh5bm9zNTQyMi1vZHJvaWR4dTMtY29tbW9uLmR0c2kgYi9hcmNoL2FybS9ib290L2R0
+cy9leHlub3M1NDIyLW9kcm9pZHh1My1jb21tb24uZHRzaQo+ID4gaW5kZXggMWJkNTA3YmZhNzUw
+Li44MmIyYmE2MzJjZjYgMTAwNjQ0Cj4gPiAtLS0gYS9hcmNoL2FybS9ib290L2R0cy9leHlub3M1
+NDIyLW9kcm9pZHh1My1jb21tb24uZHRzaQo+ID4gKysrIGIvYXJjaC9hcm0vYm9vdC9kdHMvZXh5
+bm9zNTQyMi1vZHJvaWR4dTMtY29tbW9uLmR0c2kKPiA+IEBAIC0yOTksNyArMjk5LDcgQEAKPiA+
+ICAJCQlidWNrOV9yZWc6IEJVQ0s5IHsKPiA+ICAJCQkJcmVndWxhdG9yLW5hbWUgPSAidmRkXzIu
+OHZfbGRvIjsKPiA+ICAJCQkJcmVndWxhdG9yLW1pbi1taWNyb3ZvbHQgPSA8MzAwMDAwMD47Cj4g
+PiAtCQkJCXJlZ3VsYXRvci1tYXgtbWljcm92b2x0ID0gPDM3NTAwMDA+Owo+ID4gKwkJCQlyZWd1
+bGF0b3ItbWF4LW1pY3Jvdm9sdCA9IDwzNzU1MDAwPjsKPiA+ICAJCQkJcmVndWxhdG9yLWFsd2F5
+cy1vbjsKPiA+ICAJCQkJcmVndWxhdG9yLWJvb3Qtb247Cj4gPiAgCQkJfTsKPiA+IAo+IAo+IEkg
+dGVzdGVkIG5leHQtMjAxNjAzMjQgKyAkU1VCSkVDVCBvbiBhbiBPZHJvaWQgWFU0ICh3aXRoIGV4
+eW5vc19kZWZjb25maWcpCj4gYW5kIHdoaWxlIGl0J3MgdHJ1ZSB0aGF0IHRoZSBwYXRjaCBtYWtl
+cyB0aGUgU0QgY2FyZCBlcnJvciB0byBnbyBhd2F5LCBJIHNlZQo+IHRoYXQgdGhlIHMybXBzMTEg
+cmVndWxhdG9yIGRyaXZlciBmYWlscyB0byBwcm9iZSBkdWUgYW4gLUVJTlZBTCBiZWluZyByZXR1
+cm4KPiBieSBtYWNoaW5lX2NvbnN0cmFpbnRzX3ZvbHRhZ2UoKSAtPiBfcmVndWxhdG9yX2RvX3Nl
+dF92b2x0YWdlKCk6Cj4gCj4gWyAgICAxLjcxMDMwMF0gdmRkXzIuOHZfbGRvOiBmYWlsZWQgdG8g
+YXBwbHkgMzc1NTAwMC0zNzU1MDAwdVYgY29uc3RyYWludCgtMjIpCj4gWyAgICAxLjcxNjM4N10g
+czJtcHMxMS1wbWljIHMybXBzMTEtcmVndWxhdG9yOiByZWd1bGF0b3IgaW5pdCBmYWlsZWQgZm9y
+IDQ2Cj4gWyAgICAxLjczNDg3OF0gczJtcHMxMS1wbWljOiBwcm9iZSBvZiBzMm1wczExLXJlZ3Vs
+YXRvciBmYWlsZWQgd2l0aCBlcnJvciAtMjIKPiAKPiBJIHdvbmRlciBob3cgbmVpdGhlciBNYXJr
+dXMgbm9yIHlvdSBzYXcgdGhpcyBpc3N1ZSB3aGVuIHRlc3Rpbmcgc28gbWF5YmUgSSdtCj4gZG9p
+bmcgc29tZXRoaW5nIHdyb25nPyBTaW5jZSBBRkFJQ1QgaXQncyBvbmx5IHdvcmtpbmcgYmVjYXVz
+ZSB0aGUgZHJpdmVyIGZhaWxzCj4gdG8gcHJvYmUgc28gdGhlIHNhbWUgZWZmZWN0IGNhbiBiZSBh
+Y2hpZXZlZCBkaXNhYmxpbmcgQ09ORklHX1JFR1VMQVRPUl9TMk1QUzExLgo+IAo+IEJlc3QgcmVn
+YXJkcywKPiAKTXkgZmlyc3QgdGVzdCB5ZXN0ZXJkYXkgd2FzIHdpdGggbmV4dC0yMDE2MDMyNCAr
+ICRTVUJKRUNULCB0b28sIGFuZCBJIGVuY291bnRlcmVkIHRoZSBzYW1lCmVycm9yIG9mIHRoZSBy
+ZWd1bGF0b3Igc3lzdGVtIGFzIHlvdS4KQXMgd2l0aCBuZXh0LTIwMTYwMzI0IEkgY291bGQgbm90
+IGdldCB0aGUgZXRoZXJuZXQgY2hpcCBydW5uaW5nICh3aXRoIG9yIHdpdGhvdXQgJFNVQkpFQ1Qp
+IEkgc3dpdGNoZWQgYmFjayB0bwpuZXh0LTIwMTYwMzIzICsgJFNVQkpFQ1QgYW5kIHBvc3RlZCB0
+aGUgcmVzdWx0IGFib3ZlLgoKUmVnYXJkcywKLS0KTWFya3VzIAoKX19fX19fX19fX19fX19fX19f
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX18KbGludXgtYXJtLWtlcm5lbCBtYWlsaW5nIGxp
+c3QKbGludXgtYXJtLWtlcm5lbEBsaXN0cy5pbmZyYWRlYWQub3JnCmh0dHA6Ly9saXN0cy5pbmZy
+YWRlYWQub3JnL21haWxtYW4vbGlzdGluZm8vbGludXgtYXJtLWtlcm5lbAo=
