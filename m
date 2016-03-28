@@ -1,121 +1,105 @@
-From: Baolin Wang <baolin.wang@linaro.org>
-Subject: Re: [PATCH v2] mmc: Provide tracepoints for request processing
-Date: Mon, 28 Mar 2016 13:53:24 +0800
-Message-ID: <CAMz4kuJHBSMq=X=XocDBy5_=5pXu4P9_ZOmYM3DJuGKFV_QU9A@mail.gmail.com>
-References: <7dff940d08f26e9994557d94652f581ad84899e0.1458893798.git.baolin.wang@linaro.org>
-	<56F546D5.5090107@fb.com>
+From: Krzysztof Kozlowski <k.kozlowski@samsung.com>
+Subject: Re: Warnings for invalid VDD (sdhci-s3c)
+Date: Mon, 28 Mar 2016 15:07:08 +0900
+Message-ID: <56F8CA0C.2080908@samsung.com>
+References: <CAJKOXPcGDnPm-Ykh6wHqV1YxfTaov5E8iVqBoBn4OJc7BnhgEQ@mail.gmail.com>
+ <20160324155840.50474b98@xhacker> <56F3A0B7.4050509@samsung.com>
+ <20160324162449.29c9cf78@xhacker> <56F3A88F.50603@samsung.com>
+ <56F3E77D.7030201@intel.com> <56F3E9EB.3090207@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qk0-f169.google.com ([209.85.220.169]:34679 "EHLO
-	mail-qk0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753081AbcC1Fx0 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 28 Mar 2016 01:53:26 -0400
-Received: by mail-qk0-f169.google.com with SMTP id x64so57994695qkd.1
-        for <linux-mmc@vger.kernel.org>; Sun, 27 Mar 2016 22:53:25 -0700 (PDT)
-In-Reply-To: <56F546D5.5090107@fb.com>
+Received: from mailout2.w1.samsung.com ([210.118.77.12]:31104 "EHLO
+	mailout2.w1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752627AbcC1GHS (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 28 Mar 2016 02:07:18 -0400
+In-reply-to: <56F3E9EB.3090207@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Jens Axboe <axboe@fb.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Steven Rostedt <rostedt@goodmis.org>, mingo@redhat.com, adrian.hunter@intel.com, yangbo.lu@freescale.com, akpm@linux-foundation.org, JBottomley@odin.com, lporzio@micron.com, jonathanh@nvidia.com, Grant Grundler <grundler@chromium.org>, fabf@skynet.be, yunpeng.gao@intel.com, dan.j.williams@intel.com, rabin.vincent@axis.com, chuanxiao.dong@intel.com, shawn.lin@rock-chips.com, =?UTF-8?Q?Heiko_St=C3=BCbner?= <heiko@sntech.de>, Douglas Anderson <dianders@chromium.org>, david@protonic.nl, Mark Brown <broonie@kernel.org>, Linus Walleij <linus.walleij@linaro.org>, Takahiro Akashi <takahiro.akashi@linaro.org>, LKML <linux-kernel@vger.kernel.org>, linux-mmc@vger.kernel.org
+To: Adrian Hunter <adrian.hunter@intel.com>, Jisheng Zhang <jszhang@marvell.com>, Jaehoon Chung <jh80.chung@samsung.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, ludovic.desroches@atmel.com, "Ivan T. Ivanov" <ivan.ivanov@linaro.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-samsung-soc@vger.kernel.org
 
-On 25 March 2016 at 22:10, Jens Axboe <axboe@fb.com> wrote:
-> On 03/25/2016 02:19 AM, Baolin Wang wrote:
+On 24.03.2016 22:21, Adrian Hunter wrote:
+> On 24/03/16 15:11, Adrian Hunter wrote:
+>> On 24/03/16 10:42, Krzysztof Kozlowski wrote:
+>>> On 24.03.2016 17:24, Jisheng Zhang wrote:
+>>>> Hi,
+>>>>
+>>>> On Thu, 24 Mar 2016 17:09:27 +0900 Jaehoon Chung wrote:
+>>>>
+>>>>> Hi,
+>>>>>
+>>>>> On 03/24/2016 04:58 PM, Jisheng Zhang wrote:
+>>>>>> Hi,
+>>>>>>
+>>>>>> On Thu, 24 Mar 2016 16:28:56 +0900 Krzysztof Kozlowski wrote:
+>>>>>>   
+>>>>>>> Hi,
+>>>>>>>
+>>>>>>> After 918f4cbd4340 ("mmc: sdhci: restore behavior when setting VDD via
+>>>>>>> external regulator") On Trats2 board I see warnings for invalid VDD
+>>>>>>> value (2.8V):
+>>>>>>>
+>>>>>>> [    3.119656] ------------[ cut here ]------------
+>>>>>>> [    3.119666] WARNING: CPU: 3 PID: 90 at
+>>>>>>> ../drivers/mmc/host/sdhci.c:1234 sdhci_do_set_ios+0x4cc/0x5e0
+>>>>>>> [    3.119669] mmc0: Invalid vdd 0x10  
+>>>>>>
+>>>>>> Per my understanding, the wrong vdd indicates a wrong ocr, what's the voltage of
+>>>>>> this host's vmmc regulator?  
+>>>>>
+>>>>> As i know, it's fixed-voltage with gpio on trats2. It's 2.8V.
+>>>>> I didn't check this entirely..need to check ocr value.
+>>>>>
+>>>>
+>>>> I may know the reason. the vmmc is 2.8v, then mmc_regulator_get_supply() convert
+>>>> the value to a ocr as 0x10. The key here is that the 2.8v is invalid in SDHCI
+>>>> case and isn't accepted by current sdhci driver.
+>>>
+>>> Yeah, I already wrote that. It is the part of the warning and my email.
+>>> Our regulator is fixed at 2.8 which is 0x10. :)
+>>>
+>>>> I dunno the elegant solution to handle this case, let's wait for sdhci maintainers
+>>>> idea.
+>>>
+>>> Hmm...
 >>
->> diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
->> index fe207e5..d372a2d 100644
->> --- a/drivers/mmc/card/block.c
->> +++ b/drivers/mmc/card/block.c
->> @@ -46,6 +46,9 @@
->>
->>   #include "queue.h"
->>
->> +#define CREATE_TRACE_POINTS
->> +#include <trace/events/mmc.h>
->> +
->>   MODULE_ALIAS("mmc:block");
->>   #ifdef MODULE_PARAM_PREFIX
->>   #undef MODULE_PARAM_PREFIX
->> @@ -1709,6 +1712,7 @@ static u8 mmc_blk_prep_packed_list(struct mmc_queue
->> *mq, struct request *req)
->>                 if (phys_segments > max_phys_segs)
->>                         break;
->>
->> +               trace_mmc_block_packed_req(next);
->>                 list_add_tail(&next->queuelist, &mqrq->packed->list);
->>                 cur = next;
->>                 reqs++;
->
->
-> This looks like the only valid trace point in the block part.
+>> I haven't tested it, but what about this:
+> 
+> And now with checkpatch complaints fixed:
+> 
+> From: Adrian Hunter <adrian.hunter@intel.com>
+> Date: Thu, 24 Mar 2016 14:29:24 +0200
+> Subject: [PATCH V2] mmc: sdhci: Fix regression setting power on Trats2 board
+> 
+> Several commits relating to setting power have been introducing
+> problems by putting driver-specific rules into generic SDHCI code.
+> 
+> Fix by adding a 'set_power' callback and restoring the default
+> behaviour prior to commit 918f4cbd4340 ("mmc: sdhci: restore
+> behavior when setting VDD via external regulator").  The desired
 
-OK.
+s/behavior/behaviour/
 
->
->> @@ -1870,6 +1874,7 @@ static int mmc_blk_end_packed_req(struct
->> mmc_queue_req *mq_rq)
->>                 }
->>                 list_del_init(&prq->queuelist);
->>                 blk_end_request(prq, 0, blk_rq_bytes(prq));
->> +               trace_mmc_block_req_done(prq);
->
->
-> We just logged a complete event through blk_end_request() here.
-
-I'll remove this repeated tracepoint.
-
->>
->> @@ -1985,6 +1990,7 @@ static int mmc_blk_issue_rw_rq(struct mmc_queue *mq,
->> struct request *rqc)
->>                         } else {
->>                                 ret = blk_end_request(req, 0,
->>                                                 brq->data.bytes_xfered);
->> +                               trace_mmc_block_req_done(req);
->>                         }
->
->
-> Ditto
-
-Will remove it too.
-
->
->> diff --git a/drivers/mmc/card/queue.c b/drivers/mmc/card/queue.c
->> index 6f4323c..d0388cf 100644
->> --- a/drivers/mmc/card/queue.c
->> +++ b/drivers/mmc/card/queue.c
->> @@ -16,6 +16,7 @@
->>   #include <linux/kthread.h>
->>   #include <linux/scatterlist.h>
->>   #include <linux/dma-mapping.h>
->> +#include <trace/events/mmc.h>
->>
->>   #include <linux/mmc/card.h>
->>   #include <linux/mmc/host.h>
->> @@ -64,6 +65,9 @@ static int mmc_queue_thread(void *d)
->>                 mq->mqrq_cur->req = req;
->>                 spin_unlock_irq(q->queue_lock);
->>
->> +               if (req)
->> +                       trace_mmc_queue_fetch(req);
->
->
-> Issue event was just logged here, if req != NULL. So also redundant.
-
-Make sense.
-
->
-> Basically only your core mmc events would potentially have merit, the rest
-> are all dupes. So nak.
-
-I'll remove the redundant tracepoints. Thanks for your comments.
-
->
-> --
-> Jens Axboe
+> behaviour of that commit is gotten by having sdhci-pxav3 provide
+> its own set_power callback.
+> 
+> Reported-by: Krzysztof Kozlowski <k.kozlowski@samsung.com>
+> Fixes: 918f4cbd4340 ("mmc: sdhci: restore behavior when setting VDD...)
+> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
+> Cc: stable@vger.kernel.org # v4.5+
+> ---
+>  drivers/mmc/host/sdhci-pxav3.c | 17 +++++++++++++++++
+>  drivers/mmc/host/sdhci.c       | 38 ++++++++++++++++++++++++++++++--------
+>  drivers/mmc/host/sdhci.h       |  4 ++++
+>  3 files changed, 51 insertions(+), 8 deletions(-)
 >
 
+Works for me (sdhci-s3c, Exynos4412 on Trats2 board):
+Tested-by: Krzysztof Kozlowski <k.kozlowski@samsung.com>
 
 
--- 
-Baolin.wang
-Best Regards
+Best regards,
+Krzysztof
+
