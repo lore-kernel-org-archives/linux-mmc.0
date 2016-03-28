@@ -1,30 +1,121 @@
-From: Krzysztof Kozlowski <k.kozlowski@samsung.com>
-Subject: Re: [PATCH] regulator: s2mps11: Fix invalid minimal selector for buck9
- supplying SD card
-Date: Mon, 28 Mar 2016 14:37:49 +0900
-Message-ID: <56F8C32D.3090609@samsung.com>
-References: <1459126489-18311-1-git-send-email-k.kozlowski@samsung.com>
- <56F8900D.3080203@osg.samsung.com> <56F8A5E8.5010908@samsung.com>
- <CANAwSgRm1djUXUUua9mDM37qa7_jz_7X88igQtejupC5GoSQoQ@mail.gmail.com>
+From: Baolin Wang <baolin.wang@linaro.org>
+Subject: Re: [PATCH v2] mmc: Provide tracepoints for request processing
+Date: Mon, 28 Mar 2016 13:53:24 +0800
+Message-ID: <CAMz4kuJHBSMq=X=XocDBy5_=5pXu4P9_ZOmYM3DJuGKFV_QU9A@mail.gmail.com>
+References: <7dff940d08f26e9994557d94652f581ad84899e0.1458893798.git.baolin.wang@linaro.org>
+	<56F546D5.5090107@fb.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-In-reply-to: <CANAwSgRm1djUXUUua9mDM37qa7_jz_7X88igQtejupC5GoSQoQ@mail.gmail.com>
-Sender: linux-samsung-soc-owner@vger.kernel.org
-To: Anand Moon <linux.amoon@gmail.com>
-Cc: Javier Martinez Canillas <javier@osg.samsung.com>, Sangbeom Kim <sbkim73@samsung.com>, Liam Girdwood <lgirdwood@gmail.com>, Mark Brown <broonie@kernel.org>, Lee Jones <lee.jones@linaro.org>, Linux Kernel <linux-kernel@vger.kernel.org>, "linux-samsung-soc@vger.kernel.org" <linux-samsung-soc@vger.kernel.org>, linux-mmc@vger.kernel.org, Ivaylo Dimitrov <ivo.g.dimitrov.75@gmail.com>, stable@vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-qk0-f169.google.com ([209.85.220.169]:34679 "EHLO
+	mail-qk0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753081AbcC1Fx0 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 28 Mar 2016 01:53:26 -0400
+Received: by mail-qk0-f169.google.com with SMTP id x64so57994695qkd.1
+        for <linux-mmc@vger.kernel.org>; Sun, 27 Mar 2016 22:53:25 -0700 (PDT)
+In-Reply-To: <56F546D5.5090107@fb.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Jens Axboe <axboe@fb.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Steven Rostedt <rostedt@goodmis.org>, mingo@redhat.com, adrian.hunter@intel.com, yangbo.lu@freescale.com, akpm@linux-foundation.org, JBottomley@odin.com, lporzio@micron.com, jonathanh@nvidia.com, Grant Grundler <grundler@chromium.org>, fabf@skynet.be, yunpeng.gao@intel.com, dan.j.williams@intel.com, rabin.vincent@axis.com, chuanxiao.dong@intel.com, shawn.lin@rock-chips.com, =?UTF-8?Q?Heiko_St=C3=BCbner?= <heiko@sntech.de>, Douglas Anderson <dianders@chromium.org>, david@protonic.nl, Mark Brown <broonie@kernel.org>, Linus Walleij <linus.walleij@linaro.org>, Takahiro Akashi <takahiro.akashi@linaro.org>, LKML <linux-kernel@vger.kernel.org>, linux-mmc@vger.kernel.org
 
-On 28.03.2016 14:35, Anand Moon wrote:
-> Should their be a fix in the u-boot for HK for this issue ?
+On 25 March 2016 at 22:10, Jens Axboe <axboe@fb.com> wrote:
+> On 03/25/2016 02:19 AM, Baolin Wang wrote:
+>>
+>> diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+>> index fe207e5..d372a2d 100644
+>> --- a/drivers/mmc/card/block.c
+>> +++ b/drivers/mmc/card/block.c
+>> @@ -46,6 +46,9 @@
+>>
+>>   #include "queue.h"
+>>
+>> +#define CREATE_TRACE_POINTS
+>> +#include <trace/events/mmc.h>
+>> +
+>>   MODULE_ALIAS("mmc:block");
+>>   #ifdef MODULE_PARAM_PREFIX
+>>   #undef MODULE_PARAM_PREFIX
+>> @@ -1709,6 +1712,7 @@ static u8 mmc_blk_prep_packed_list(struct mmc_queue
+>> *mq, struct request *req)
+>>                 if (phys_segments > max_phys_segs)
+>>                         break;
+>>
+>> +               trace_mmc_block_packed_req(next);
+>>                 list_add_tail(&next->queuelist, &mqrq->packed->list);
+>>                 cur = next;
+>>                 reqs++;
+>
+>
+> This looks like the only valid trace point in the block part.
 
-It depends whether U-Boot S2MPS11 driver has this bug or has not. I did
-not observe any issues with U-Boot at this matter.
+OK.
 
-> mmc card detection logic is pretty old in HK u-boot.
+>
+>> @@ -1870,6 +1874,7 @@ static int mmc_blk_end_packed_req(struct
+>> mmc_queue_req *mq_rq)
+>>                 }
+>>                 list_del_init(&prq->queuelist);
+>>                 blk_end_request(prq, 0, blk_rq_bytes(prq));
+>> +               trace_mmc_block_req_done(prq);
+>
+>
+> We just logged a complete event through blk_end_request() here.
 
-This is not related to MMC card detection logic.
+I'll remove this repeated tracepoint.
 
-Best regards,
-Krzysztof
+>>
+>> @@ -1985,6 +1990,7 @@ static int mmc_blk_issue_rw_rq(struct mmc_queue *mq,
+>> struct request *rqc)
+>>                         } else {
+>>                                 ret = blk_end_request(req, 0,
+>>                                                 brq->data.bytes_xfered);
+>> +                               trace_mmc_block_req_done(req);
+>>                         }
+>
+>
+> Ditto
+
+Will remove it too.
+
+>
+>> diff --git a/drivers/mmc/card/queue.c b/drivers/mmc/card/queue.c
+>> index 6f4323c..d0388cf 100644
+>> --- a/drivers/mmc/card/queue.c
+>> +++ b/drivers/mmc/card/queue.c
+>> @@ -16,6 +16,7 @@
+>>   #include <linux/kthread.h>
+>>   #include <linux/scatterlist.h>
+>>   #include <linux/dma-mapping.h>
+>> +#include <trace/events/mmc.h>
+>>
+>>   #include <linux/mmc/card.h>
+>>   #include <linux/mmc/host.h>
+>> @@ -64,6 +65,9 @@ static int mmc_queue_thread(void *d)
+>>                 mq->mqrq_cur->req = req;
+>>                 spin_unlock_irq(q->queue_lock);
+>>
+>> +               if (req)
+>> +                       trace_mmc_queue_fetch(req);
+>
+>
+> Issue event was just logged here, if req != NULL. So also redundant.
+
+Make sense.
+
+>
+> Basically only your core mmc events would potentially have merit, the rest
+> are all dupes. So nak.
+
+I'll remove the redundant tracepoints. Thanks for your comments.
+
+>
+> --
+> Jens Axboe
+>
+
+
+
+-- 
+Baolin.wang
+Best Regards
