@@ -1,64 +1,160 @@
-From: Bjorn Andersson <bjorn.andersson@linaro.org>
-Subject: Re: [PATCH 2/2] regulator: core: Ensure we are at least in bounds for
- our constraints
-Date: Mon, 28 Mar 2016 09:16:15 -0700
-Message-ID: <CAOCOHw7Gwy1a0+UfteQJ3rs_sL1iip9EN-3GhTYW0BrHD5jhKg@mail.gmail.com>
-References: <1458587912-32665-1-git-send-email-broonie@kernel.org>
-	<1458587912-32665-2-git-send-email-broonie@kernel.org>
-	<56F0624C.8010004@gmail.com>
-	<CAJKOXPd5h0Cq++OxdiXytNJH94PN4Kh_wM3M=p3JdU1m_qyFTA@mail.gmail.com>
-	<CAJKOXPcBOT_8NOH-=sEHSP0Rc+=Dvz-aqVTsBTMKg-VNWqQotw@mail.gmail.com>
-	<CAJAp7OgGQ3qm-_QhydvN0n6QeNoHFdso4zOk41qvVJhKNeRn8Q@mail.gmail.com>
-	<20160327090859.GH5028@sirena.org.uk>
+From: Vladimir Zapolskiy <vladimir_zapolskiy@mentor.com>
+Subject: Re: ARC dw-mshc binding compat string
+Date: Mon, 28 Mar 2016 19:16:28 +0300
+Message-ID: <56F958DC.5010203@mentor.com>
+References: <56F66121.8050507@denx.de> <56F6C639.5000301@mentor.com>
+ <56F6C71B.6070002@denx.de> <56F6CC68.5040408@mentor.com>
+ <56F6D083.1020402@denx.de> <56F6D1E9.3050606@mentor.com>
+ <56F6E860.8070207@denx.de> <56F6ED41.5020908@mentor.com>
+ <56F6EFFD.9070007@denx.de> <1459157818.4785.5.camel@synopsys.com>
+ <56F908A1.3070701@samsung.com> <56F9287F.1020707@denx.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ob0-f181.google.com ([209.85.214.181]:33780 "EHLO
-	mail-ob0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754691AbcC1QQQ (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 28 Mar 2016 12:16:16 -0400
-Received: by mail-ob0-f181.google.com with SMTP id x3so34582149obt.0
-        for <linux-mmc@vger.kernel.org>; Mon, 28 Mar 2016 09:16:16 -0700 (PDT)
-In-Reply-To: <20160327090859.GH5028@sirena.org.uk>
+Received: from relay1.mentorg.com ([192.94.38.131]:61901 "EHLO
+	relay1.mentorg.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754020AbcC1QQe (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 28 Mar 2016 12:16:34 -0400
+In-Reply-To: <56F9287F.1020707@denx.de>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Mark Brown <broonie@kernel.org>
-Cc: Bjorn Andersson <bjorn@kryo.se>, Krzysztof Kozlowski <k.kozlowski@samsung.com>, Ivaylo Dimitrov <ivo.g.dimitrov.75@gmail.com>, Liam Girdwood <lgirdwood@gmail.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, linux-samsung-soc <linux-samsung-soc@vger.kernel.org>, Javier Martinez Canillas <javier@osg.samsung.com>, Marek Szyprowski <m.szyprowski@samsung.com>
+To: Marek Vasut <marex@denx.de>, Jaehoon Chung <jh80.chung@samsung.com>, Alexey Brodkin <Alexey.Brodkin@synopsys.com>, "robh+dt@kernel.org" <robh+dt@kernel.org>
+Cc: "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>
 
-On Sun, Mar 27, 2016 at 2:08 AM, Mark Brown <broonie@kernel.org> wrote:
-> On Sat, Mar 26, 2016 at 04:50:41PM -0700, Bjorn Andersson wrote:
->
->> Reinstating the following snippet in of_get_regulation_constraints()
->> sort this out:
->
->> if (constraints->min_uV && constraints->max_uV)
->>                                        constraints->apply_uV = true;
->
-> The existing check in the patch should be an || not an ==, or possibly
-> we should just not bother looking for min_uV at all.  I just pushed out
-> a version of that, let's see how that goes.
->
+Hi,
 
-Either way is fine with me, as long as we either go ahead and apply a
-voltage setting now or allow a consumer to do so later (your posted
-patch does both).
+On 28.03.2016 15:50, Marek Vasut wrote:
+> On 03/28/2016 12:34 PM, Jaehoon Chung wrote:
+>> Hi,
+> 
+> Hi,
+> 
+> [...]
+> 
+>>>>>>>>> That said, I would rather prefer to see "snps,dw-mshc" prefix on description
+>>>>>>>>> of an MMC controller found on SoCFPGA series, "altr,socfpga-dw-mshc" seems
+>>>>>>>>> to be redundant.
+>>
+>> Yes..it's redundant..i should be combined to "snps,dw-mshc".
+> 
+> Should the compat string be
+>   compatible = "altr,socfpga-dw-mshc", "snps,dw-mshc";
+> or just
+>   compatible = "snps,dw-mshc";
+> ?
+> 
+> I am under the impression that a soc-specific identifier in addition to
+> a generic one (used by the driver compat table) is a good idea, because
+> it can help discerning the IP block from a generic one if needed at some
+> future point in time. It will also not break the DT for systems
+> which may depend on the non-generic compat, like *BSDs and such.
+> 
+> What do you think ? (btw this is very much my question in this thread)
 
->> I did look at an alternative of having regulator_set_voltage() pass
->> and call set_voltage() if the requested voltage matches the
->> constraints, but this does indeed seem to mess things up. So checking
->> in with you before continuing on that hack.
->
-> Yes, not everything is writeable.
+IMO just 'compatible = "snps,dw-mshc"' is good enough, if it completely
+describes the IP block on SoCFGPA --- and from what I get it is the case.
+You can add a SoC-specific compatible if it is needed later on, and to my
+taste only if SoC specific features can not be covered by properties.
 
-Right, looking at your posted patch [1] we're changing this logic so
-that normal regulators defined with min == max will be allowed to
-set_voltage(). Thinking about it that makes sense and cleans the logic
-up, so I'm in favor of this.
+The same sole "snps,dw-mshc" compatible is specified for NXP LPC18xx/43xx,
+ZTE ZX and HiSilicon ARM SoCs.
 
-I know it's published, but fwiw you have my Acked-by on the posted patch.
+Another similar example is ARM PrimeCell PLxxx IP blocks, as far as
+I know there is no SoC-specific compatibles/aliases for PrimeCell IP blocks.
 
+Rob, please correct me.
 
-[1] https://git.kernel.org/cgit/linux/kernel/git/broonie/regulator.git/commit/?h=for-next&id=fa93fd4ecc9c58475abac6db93a797bff893bc16
+>>>>>>>> According to drivers/mmc/host/dw_mmc-pltfm.c , the Altera SoCFPGA one
+>>>>>>>> "altr,socfpga-dw-mshc" and also Imagination Technology Pistacio one
+>>>>>>>> "img,pistachio-dw-mshc" need specialty bit (SDMMC_CMD_USE_HOLD_REG),
+>>>>>>>> while the stock one "snps,dw-mshc" does not. I am not sure if the ARC
+>>>>>>>> one needs it as well, but most likely yes.
+>>>>>>>>
+>>>>>>>> I wonder if that bit is needed on some particular version of the DWMMC
+>>>>>>>> core. In that case, should we have "snps,dw-mshc" and "snps,dw-mshc-vN"
+>>>>>>>> binding ? Or should we use DT property to discern the need for this bit ?
+>>>>>>>>
+>>>>>>> That's the most common way to take into account peculiarities, add
+>>>>>>> a property and handle it from the driver.
+>>>>>> And by "that" you mean which of those two I listed , the
+>>>>>> "snps,dw-mshc-vN" or adding new DT prop ?
+>>>>>>
+>>>>> I meant to add a new property, not a new compatible, but that's just
+>>>>> my experience.
+>>>>>
+>>>>> Let me say it __might__ happen that a particular change you need is
+>>>>> specific to a particular version of the DWMMC IP (query Synopsys
+>>>>> by the way), but more probably it might be e.g. the same IP version with
+>>>>> a different reduced or extended configuration or a minor fix/improvement
+>>>>> to the IP block without resulting version number bump.
+>>>>>
+>>>>> For example I don't remember that errata fixes in IP blocks result in
+>>>>> a new compatible, instead there are quite common optional "quirk"
+>>>>> properties for broken IPs -- e.g. check bindings/usb/dwc3.txt :)
+>>>> Right, this very much matches how I see it as well. Thanks for confirming.
+>>>>
+>>>> Alexey, can you tell us if the requirement for setting
+>>>> SDMMC_CMD_USE_HOLD_REG came with some new revision of the core or
+>>>> disappeared with some revision OR if this is some configuration
+>>>> option of the core during synthesis ?
+>>>
+>>> Sorry for not following that discussion during my weekend but I'll try
+>>> to address all questions now.
+>>
+>> SDMMC_CMD_USE_HOLD_REG didn't come with new revision..It's using continuously.
+>> But it's difficult to use the generic feature..because it's considered the below things.
+>>
+>> If Card is SDR50/SDR104/DDR50 mode..
+>> 	1) and phase shift of cclk_in_drv is 0 then SDMMC_CMD_USE_HOLD_REG bit is set to 0,
+>> 	2) and phase shift of cclk_in_drv > 0 then SDMMC_CMD_USE_HOLD_REG bit is set to 1,
+>> If Card is SDR12/SDR25 mode, then this bit is set to 1.
+>>
+>> We need to check phase shift scheme..but as i knew, each SoC have been implemented differently for phase shift.
+>> (Phase shift have dependency to SoC.)
+>>
+>> And it have to check HCON register..there is IMPLEMENT_HOLD_REG(bit[22]).
+>> (It described whether IP have hold register or not)
+>>
+>> I didn't read this thread entirely.
+>> I'm not sure what you have discussed..but my understanding is right..i recommend to use "snps,dw-mshc" for ARC compat string.
+>> Otherwise it need to add "dw_mmc-<SoC>.c". dw_mmc-pltfm.c should provide the basic dw-mmc controller functionality.
+>>
+>> After read this thread entirely, i will check more detailed what you discussed.
+>> If i missed something, let me know, plz.
+> 
+> Thanks for the clarification, linux-next indeed contains changes which
+> make snps,dw-mshc and altr,socfpga-dw-mshc equal.
+> 
+>> Best Regards,
+>> Jaehoon Chung
+>>
+>>>
+>>> DW Mobile Storage databook says:
+>>> --------------------->8-----------------------
+>>> To meet the relatively high Input Hold Time requirement for SDR12, SDR25,
+>>> and other MMC speed modes, you should program bit[29]use_hold_Reg of the
+>>> CMD register to 1'b1.
+>>> --------------------->8-----------------------
+>>>
+>>> So I'd say this specific setting has nothing to do with a particular IP block
+>>> but instead it is related to card's mode of operation. More precisely bus clock.
+>>> SDR12 stands for 12.5 MByte/s, SDR25 stands for 25 MByte/s. I.e. we probably need
+>>> so set that bit just for certain cases and regardless board that uses DW MMC.
+>>>
+>>> I'm adding DW MMC maintainer as well as linux-mmc mailing list so people who
+>>> understands that stuff better may comment here as well.
+>>>
+>>> -Alexey--
+>>> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+>>> the body of a message to majordomo@vger.kernel.org
+>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>>
+>>>
+>>
+> 
+> 
 
-Regards,
-Bjorn
+--
+With best wishes,
+Vladimir
