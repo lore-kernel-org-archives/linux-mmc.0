@@ -1,177 +1,125 @@
-From: Jaehoon Chung <jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>
+From: Alexey Brodkin <Alexey.Brodkin@synopsys.com>
 Subject: Re: ARC dw-mshc binding compat string
-Date: Mon, 28 Mar 2016 19:34:09 +0900
-Message-ID: <56F908A1.3070701@samsung.com>
+Date: Mon, 28 Mar 2016 10:55:37 +0000
+Message-ID: <1459162537.4785.45.camel@synopsys.com>
 References: <56F66121.8050507@denx.de> <56F6C639.5000301@mentor.com>
- <56F6C71B.6070002@denx.de> <56F6CC68.5040408@mentor.com>
- <56F6D083.1020402@denx.de> <56F6D1E9.3050606@mentor.com>
- <56F6E860.8070207@denx.de> <56F6ED41.5020908@mentor.com>
- <56F6EFFD.9070007@denx.de> <1459157818.4785.5.camel@synopsys.com>
+	 <56F6C71B.6070002@denx.de> <56F6CC68.5040408@mentor.com>
+	 <56F6D083.1020402@denx.de> <56F6D1E9.3050606@mentor.com>
+	 <56F6E860.8070207@denx.de> <56F6ED41.5020908@mentor.com>
+	 <56F6EFFD.9070007@denx.de> <1459157818.4785.5.camel@synopsys.com>
+	 <56F908A1.3070701@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-reply-to: <1459157818.4785.5.camel-HKixBCOQz3hWk0Htik3J/w@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Alexey Brodkin <Alexey.Brodkin-HKixBCOQz3hWk0Htik3J/w@public.gmane.org>, "marex-ynQEQJNshbs@public.gmane.org" <marex-ynQEQJNshbs@public.gmane.org>, "vladimir_zapolskiy-nmGgyN9QBj3QT0dZR+AlfA@public.gmane.org" <vladimir_zapolskiy-nmGgyN9QBj3QT0dZR+AlfA@public.gmane.org>
-Cc: "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org" <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Type: text/plain; charset="utf-7"
+Content-Transfer-Encoding: 8BIT
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from smtprelay.synopsys.com ([198.182.60.111]:44227 "EHLO
+	smtprelay.synopsys.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753141AbcC1Kzt convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 28 Mar 2016 06:55:49 -0400
+In-Reply-To: <56F908A1.3070701@samsung.com>
+Content-Language: en-US
+Content-ID: <17E6EF8E053FA146AA0158893243A32F@internal.synopsys.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: "jh80.chung@samsung.com" <jh80.chung@samsung.com>
+Cc: "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "marex@denx.de" <marex@denx.de>, "vladimir_zapolskiy@mentor.com" <vladimir_zapolskiy@mentor.com>, "robh+dt@kernel.org" <robh+dt@kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>
 
-Hi,
+Hi+AKA-Jaehoon,
 
-On 03/28/2016 06:37 PM, Alexey Brodkin wrote:
-> Hi Marek, Vladimir,
-> 
-> On Sat, 2016-03-26 at 21:24 +0100, Marek Vasut wrote:
->> On 03/26/2016 09:12 PM, Vladimir Zapolskiy wrote:
->>>
->>> On 26.03.2016 21:52, Marek Vasut wrote:
->>>>
->>>> On 03/26/2016 07:16 PM, Vladimir Zapolskiy wrote:
->>>>>
->>>>> On 26.03.2016 20:10, Marek Vasut wrote:
->>>>>>
->>>>>> On 03/26/2016 06:52 PM, Vladimir Zapolskiy wrote:
->>>>>>>
->>>>>>> Hi Marek,
->>>>>>>
->>>>>>> On 26.03.2016 19:30, Marek Vasut wrote:
->>>>>>>>
->>>>>>>> On 03/26/2016 06:26 PM, Vladimir Zapolskiy wrote:
->>>>>>>>>
->>>>>>>>> On 26.03.2016 12:14, Marek Vasut wrote:
->>>>>>>>>>
->>>>>>>>>> Hi!
->>>>>>>>>>
->>>>>>>>>> I noticed that arch/arc/boot/dts/axs10x_mb.dtsi uses "altr," prefix in
->>>>>>>>>> the DT compatible string:
->>>>>>>>>>
->>>>>>>>>> mmc@0x15000 {
->>>>>>>>>>         compatible = "altr,socfpga-dw-mshc";
->>>>>>>>>>         reg = < 0x15000 0x400 >;
->>>>>>>>>>         num-slots = < 1 >;
->>>>>>>>>>         fifo-depth = < 16 >;
->>>>>>>>>>         card-detect-delay = < 200 >;
->>>>>>>>>>         clocks = <&apbclk>, <&mmcclk>;
->>>>>>>>>>         clock-names = "biu", "ciu";
->>>>>>>>>>         interrupts = < 7 >;
->>>>>>>>>>         bus-width = < 4 >;
->>>>>>>>>> };
->>>>>>>>>>
->>>>>>>>>> I don't think this is OK, since ARC is unrelated to Altera, which is
->>>>>>>>>> what the "altr," prefix stands for. I think the socfpga-dw-mshc shim
->>>>>>>>>> should be extended with another compatibility string, something like
->>>>>>>>>> "snps,arc-dw-mshc" and the axs10x_mb.dtsi should be adjusted
->>>>>>>>>> accordingly. What do you think ?
->>>>>>>>>>
->>>>>>>>> There is "snps,dw-mshc" described in
->>>>>>>>> Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.txt and supported by
->>>>>>>>> dw_mmc host controller driver.
->>>>>>>> Thanks, that's even better.
->>>>>>>>
->>>>>>>> btw what do you think of using altr, prefix on non-altera system, that
->>>>>>>> doesn't seem ok, right ?
->>>>>>> according to ePAPR the prefix should represent a device (IP block here
->>>>>>> I believe) manufacturer, so it should be okay to use "altr" prefix on
->>>>>>> non-Altera system, if Altera provides  another hardware vendor with
->>>>>>> some own IP block.
->>>>>> In this case, it's Synopsys who provides the SD/MMC/MS core to other
->>>>>> chip makers (Altera etc).
->>>>> Correct.
->>>>>
->>>>>>
->>>>>>>
->>>>>>> That said, I would rather prefer to see "snps,dw-mshc" prefix on description
->>>>>>> of an MMC controller found on SoCFPGA series, "altr,socfpga-dw-mshc" seems
->>>>>>> to be redundant.
+On Mon, 2016-03-28 at 19:34 +-0900, Jaehoon Chung wrote:
++AD4- Hi,
 
-Yes..it's redundant..i should be combined to "snps,dw-mshc".
++AFs-snip+AF0-
 
->>>>>> According to drivers/mmc/host/dw_mmc-pltfm.c , the Altera SoCFPGA one
->>>>>> "altr,socfpga-dw-mshc" and also Imagination Technology Pistacio one
->>>>>> "img,pistachio-dw-mshc" need specialty bit (SDMMC_CMD_USE_HOLD_REG),
->>>>>> while the stock one "snps,dw-mshc" does not. I am not sure if the ARC
->>>>>> one needs it as well, but most likely yes.
->>>>>>
->>>>>> I wonder if that bit is needed on some particular version of the DWMMC
->>>>>> core. In that case, should we have "snps,dw-mshc" and "snps,dw-mshc-vN"
->>>>>> binding ? Or should we use DT property to discern the need for this bit ?
->>>>>>
->>>>> That's the most common way to take into account peculiarities, add
->>>>> a property and handle it from the driver.
->>>> And by "that" you mean which of those two I listed , the
->>>> "snps,dw-mshc-vN" or adding new DT prop ?
->>>>
->>> I meant to add a new property, not a new compatible, but that's just
->>> my experience.
->>>
->>> Let me say it __might__ happen that a particular change you need is
->>> specific to a particular version of the DWMMC IP (query Synopsys
->>> by the way), but more probably it might be e.g. the same IP version with
->>> a different reduced or extended configuration or a minor fix/improvement
->>> to the IP block without resulting version number bump.
->>>
->>> For example I don't remember that errata fixes in IP blocks result in
->>> a new compatible, instead there are quite common optional "quirk"
->>> properties for broken IPs -- e.g. check bindings/usb/dwc3.txt :)
->> Right, this very much matches how I see it as well. Thanks for confirming.
->>
->> Alexey, can you tell us if the requirement for setting
->> SDMMC_CMD_USE_HOLD_REG came with some new revision of the core or
->> disappeared with some revision OR if this is some configuration
->> option of the core during synthesis ?
-> 
-> Sorry for not following that discussion during my weekend but I'll try
-> to address all questions now.
++AD4- +AD4- +AD4- +AD4- +AD4- +AD4- +AD4- +AD4- 
++AD4- +AD4- +AD4- +AD4- +AD4- +AD4- +AD4- +AD4- That said, I would rather prefer to see +ACI-snps,dw-mshc+ACI- prefix on description
++AD4- +AD4- +AD4- +AD4- +AD4- +AD4- +AD4- +AD4- of an MMC controller found on SoCFPGA series, +ACI-altr,socfpga-dw-mshc+ACI- seems
++AD4- +AD4- +AD4- +AD4- +AD4- +AD4- +AD4- +AD4- to be redundant.
++AD4- Yes..it's redundant..i should be combined to +ACI-snps,dw-mshc+ACI-.
 
-SDMMC_CMD_USE_HOLD_REG didn't come with new revision..It's using continuously.
-But it's difficult to use the generic feature..because it's considered the below things.
+So for socfpga platform compat string should be something like +ACI-snps,dw-mshc-socfpga+ACI- then?
 
-If Card is SDR50/SDR104/DDR50 mode..
-	1) and phase shift of cclk_in_drv is 0 then SDMMC_CMD_USE_HOLD_REG bit is set to 0,
-	2) and phase shift of cclk_in_drv > 0 then SDMMC_CMD_USE_HOLD_REG bit is set to 1,
-If Card is SDR12/SDR25 mode, then this bit is set to 1.
++AD4- +AD4- 
++AD4- +AD4- +AD4- 
++AD4- +AD4- +AD4- +AD4- 
++AD4- +AD4- +AD4- +AD4- +AD4- 
++AD4- +AD4- +AD4- +AD4- +AD4- +AD4- 
++AD4- +AD4- +AD4- +AD4- +AD4- +AD4- +AD4- 
++AD4- +AD4- +AD4- +AD4- +AD4- +AD4- +AD4- According to drivers/mmc/host/dw+AF8-mmc-pltfm.c , the Altera SoCFPGA one
++AD4- +AD4- +AD4- +AD4- +AD4- +AD4- +AD4- +ACI-altr,socfpga-dw-mshc+ACI- and also Imagination Technology Pistacio one
++AD4- +AD4- +AD4- +AD4- +AD4- +AD4- +AD4- +ACI-img,pistachio-dw-mshc+ACI- need specialty bit (SDMMC+AF8-CMD+AF8-USE+AF8-HOLD+AF8-REG),
++AD4- +AD4- +AD4- +AD4- +AD4- +AD4- +AD4- while the stock one +ACI-snps,dw-mshc+ACI- does not. I am not sure if the ARC
++AD4- +AD4- +AD4- +AD4- +AD4- +AD4- +AD4- one needs it as well, but most likely yes.
++AD4- +AD4- +AD4- +AD4- +AD4- +AD4- +AD4- 
++AD4- +AD4- +AD4- +AD4- +AD4- +AD4- +AD4- I wonder if that bit is needed on some particular version of the DWMMC
++AD4- +AD4- +AD4- +AD4- +AD4- +AD4- +AD4- core. In that case, should we have +ACI-snps,dw-mshc+ACI- and +ACI-snps,dw-mshc-vN+ACI-
++AD4- +AD4- +AD4- +AD4- +AD4- +AD4- +AD4- binding ? Or should we use DT property to discern the need for this bit ?
++AD4- +AD4- +AD4- +AD4- +AD4- +AD4- +AD4- 
++AD4- +AD4- +AD4- +AD4- +AD4- +AD4- That's the most common way to take into account peculiarities, add
++AD4- +AD4- +AD4- +AD4- +AD4- +AD4- a property and handle it from the driver.
++AD4- +AD4- +AD4- +AD4- +AD4- And by +ACI-that+ACI- you mean which of those two I listed , the
++AD4- +AD4- +AD4- +AD4- +AD4- +ACI-snps,dw-mshc-vN+ACI- or adding new DT prop ?
++AD4- +AD4- +AD4- +AD4- +AD4- 
++AD4- +AD4- +AD4- +AD4- I meant to add a new property, not a new compatible, but that's just
++AD4- +AD4- +AD4- +AD4- my experience.
++AD4- +AD4- +AD4- +AD4- 
++AD4- +AD4- +AD4- +AD4- Let me say it +AF8AXw-might+AF8AXw- happen that a particular change you need is
++AD4- +AD4- +AD4- +AD4- specific to a particular version of the DWMMC IP (query Synopsys
++AD4- +AD4- +AD4- +AD4- by the way), but more probably it might be e.g. the same IP version with
++AD4- +AD4- +AD4- +AD4- a different reduced or extended configuration or a minor fix/improvement
++AD4- +AD4- +AD4- +AD4- to the IP block without resulting version number bump.
++AD4- +AD4- +AD4- +AD4- 
++AD4- +AD4- +AD4- +AD4- For example I don't remember that errata fixes in IP blocks result in
++AD4- +AD4- +AD4- +AD4- a new compatible, instead there are quite common optional +ACI-quirk+ACI-
++AD4- +AD4- +AD4- +AD4- properties for broken IPs -- e.g. check bindings/usb/dwc3.txt :)
++AD4- +AD4- +AD4- Right, this very much matches how I see it as well. Thanks for confirming.
++AD4- +AD4- +AD4- 
++AD4- +AD4- +AD4- Alexey, can you tell us if the requirement for setting
++AD4- +AD4- +AD4- SDMMC+AF8-CMD+AF8-USE+AF8-HOLD+AF8-REG came with some new revision of the core or
++AD4- +AD4- +AD4- disappeared with some revision OR if this is some configuration
++AD4- +AD4- +AD4- option of the core during synthesis ?
++AD4- +AD4- Sorry for not following that discussion during my weekend but I'll try
++AD4- +AD4- to address all questions now.
++AD4- SDMMC+AF8-CMD+AF8-USE+AF8-HOLD+AF8-REG didn't come with new revision..It's using continuously.
++AD4- But it's difficult to use the generic feature..because it's considered the below things.
++AD4- 
++AD4- If Card is SDR50/SDR104/DDR50 mode..
++AD4- 	1) and phase shift of cclk+AF8-in+AF8-drv is 0 then SDMMC+AF8-CMD+AF8-USE+AF8-HOLD+AF8-REG bit is set to 0,
++AD4- 	2) and phase shift of cclk+AF8-in+AF8-drv +AD4- 0 then SDMMC+AF8-CMD+AF8-USE+AF8-HOLD+AF8-REG bit is set to 1,
++AD4- If Card is SDR12/SDR25 mode, then this bit is set to 1.
 
-We need to check phase shift scheme..but as i knew, each SoC have been implemented differently for phase shift.
-(Phase shift have dependency to SoC.)
+So card type is also important here and for certain card type we don't need to
+set+AKA-SDMMC+AF8-CMD+AF8-USE+AF8-HOLD+AF8-REG, right?
 
-And it have to check HCON register..there is IMPLEMENT_HOLD_REG(bit[22]).
-(It described whether IP have hold register or not)
++AD4- We need to check phase shift scheme..but as i knew, each SoC have been implemented differently for phase shift.
++AD4- (Phase shift have dependency to SoC.)
 
-I didn't read this thread entirely.
-I'm not sure what you have discussed..but my understanding is right..i recommend to use "snps,dw-mshc" for ARC compat string.
-Otherwise it need to add "dw_mmc-<SoC>.c". dw_mmc-pltfm.c should provide the basic dw-mmc controller functionality.
+Given my assumption above we need to check 2 things:
++AKAAKg- Card type
++AKAAKg- SoC-specific implementation detail (phase shift scheme)
 
-After read this thread entirely, i will check more detailed what you discussed.
-If i missed something, let me know, plz.
++AD4- And it have to check HCON register..there is IMPLEMENT+AF8-HOLD+AF8-REG(bit+AFs-22+AF0-).
++AD4- (It described whether IP have hold register or not)
 
-Best Regards,
-Jaehoon Chung
+Ah actually 3 things
++AKAAKwCg-IMPLEMENT+AF8-HOLD+AF8-REG
 
-> 
-> DW Mobile Storage databook says:
-> --------------------->8-----------------------
-> To meet the relatively high Input Hold Time requirement for SDR12, SDR25,
-> and other MMC speed modes, you should program bit[29]use_hold_Reg of the
-> CMD register to 1'b1.
-> --------------------->8-----------------------
-> 
-> So I'd say this specific setting has nothing to do with a particular IP block
-> but instead it is related to card's mode of operation. More precisely bus clock.
-> SDR12 stands for 12.5 MByte/s, SDR25 stands for 25 MByte/s. I.e. we probably need
-> so set that bit just for certain cases and regardless board that uses DW MMC.
-> 
-> I'm adding DW MMC maintainer as well as linux-mmc mailing list so people who
-> understands that stuff better may comment here as well.
-> 
-> -Alexey--
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
++AD4- I didn't read this thread entirely.
++AD4- I'm not sure what you have discussed..but my understanding is right..i recommend to use +ACI-snps,dw-mshc+ACI- for ARC compat
++AD4- string.
++AD4- Otherwise it need to add +ACI-dw+AF8-mmc-+ADw-SoC+AD4-.c+ACI-. dw+AF8-mmc-pltfm.c should provide the basic dw-mmc controller functionality.
 
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Hm, interesting looks like you already made some changes here:
+http://git.kernel.org/cgit/linux/kernel/git/torvalds/linux.git/commit/?id+AD0-aaaaeb7a933471f6413ca44dd36efd57f2fa9429
+
+So now driver checks if SoC has HOLD REG then SDMMC+AF8-CMD+AF8-USE+AF8-HOLD+AF8-REG will be set
+(regardless card type).
+
+And what's interesting and connected to this discussion since mentioned commit
+there's no point in having both+AKAAIg-altr,socfpga-dw-mshc+ACI- and+AKAAIg-img,pistachio-dw-mshc+ACI-
+compat strings because the do nothing now. I.e. it's time to replace both mentioned
+compat strings with generic+AKAAIg-snps,dw-mshc+ACI-.
+
+Anybody volunteers for that .dts+ACo- cleanup?
+
+-Alexey
