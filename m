@@ -1,18 +1,21 @@
 From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH] mmc: dw_mmc-rockchip: fix failing to mount partition with
- "discard"
-Date: Tue, 29 Mar 2016 10:17:42 +0900
-Message-ID: <56F9D7B6.1070108@samsung.com>
-References: <1456816373-32518-1-git-send-email-shawn.lin@rock-chips.com>
+Subject: Re: [PATCH 1/2] mmc: dw_mmc: fix warning reported by kernel-doc
+Date: Tue, 29 Mar 2016 10:18:55 +0900
+Message-ID: <56F9D7FF.4030107@samsung.com>
+References: <1457490835-18045-1-git-send-email-shawn.lin@rock-chips.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=windows-1252
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-reply-to: <1456816373-32518-1-git-send-email-shawn.lin@rock-chips.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Shawn Lin <shawn.lin@rock-chips.com>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-rockchip@lists.infradead.org
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mailout3.samsung.com ([203.254.224.33]:52929 "EHLO
+	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751587AbcC2BTC (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 28 Mar 2016 21:19:02 -0400
+In-reply-to: <1457490835-18045-1-git-send-email-shawn.lin@rock-chips.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Shawn Lin <shawn.lin@rock-chips.com>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 
 Hi Shawn,
 
@@ -22,44 +25,89 @@ Applied on my repository.
 Best Regards,
 Jaehoon Chung
 
-On 03/01/2016 04:12 PM, Shawn Lin wrote:
-> Without MMC_CAP_ERASE support, we fail to mount partition
-> with "discard" option since mmc_queue_setup_discard is limited
-> for checking mmc_can_erase. Without doing mmc_queue_setup_discard,
-> blk_queue_discard fails to test QUEUE_FLAG_DISCARD flag, so we get
-> the following log from f2fs(actually similar to other file system):
+On 03/09/2016 11:33 AM, Shawn Lin wrote:
+> Try to fix the warning reported by:
+> scripts/kernel-doc -man -v include/linux/mmc/dw_mmc.h > /dev/null
 > 
-> mounting with "discard" option, but the device does not support discard
+> warning: No description found for parameter 'irq_lock'
+> warning: No description found for parameter 'stop_abort'
+> warning: No description found for parameter 'prev_blksz'
+> warning: No description found for parameter 'timing'
+> warning: No description found for parameter 'ring_size'
+> warning: No description found for parameter 'dms'
+> warning: No description found for parameter 'phy_regs'
+> warning: No description found for parameter 'fifoth_val'
+> warning: No description found for parameter 'vqmmc_enabled'
+> warning: No description found for parameter 'cmd11_timer'
+> warning: Excess struct/union/enum/typedef member 'card_tasklet'
+> description in 'dw_mci'
 > 
 > Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
 > ---
 > 
->  drivers/mmc/host/dw_mmc-rockchip.c | 9 +++++++++
->  1 file changed, 9 insertions(+)
+>  include/linux/mmc/dw_mmc.h | 11 ++++++++++-
+>  1 file changed, 10 insertions(+), 1 deletion(-)
 > 
-> diff --git a/drivers/mmc/host/dw_mmc-rockchip.c b/drivers/mmc/host/dw_mmc-rockchip.c
-> index 84e50f3..2eda118 100644
-> --- a/drivers/mmc/host/dw_mmc-rockchip.c
-> +++ b/drivers/mmc/host/dw_mmc-rockchip.c
-> @@ -234,11 +234,20 @@ static int dw_mci_rockchip_init(struct dw_mci *host)
->  	return 0;
->  }
->  
-> +/* Common capabilities of RK3288 SoC */
-> +static unsigned long dw_mci_rk3288_dwmmc_caps[4] = {
-> +	MMC_CAP_ERASE,
-> +	MMC_CAP_ERASE,
-> +	MMC_CAP_ERASE,
-> +	MMC_CAP_ERASE,
-> +};
-> +
->  static const struct dw_mci_drv_data rk2928_drv_data = {
->  	.init			= dw_mci_rockchip_init,
->  };
->  
->  static const struct dw_mci_drv_data rk3288_drv_data = {
-> +	.caps			= dw_mci_rk3288_dwmmc_caps,
->  	.set_ios		= dw_mci_rk3288_set_ios,
->  	.execute_tuning		= dw_mci_rk3288_execute_tuning,
->  	.parse_dt		= dw_mci_rk3288_parse_dt,
+> diff --git a/include/linux/mmc/dw_mmc.h b/include/linux/mmc/dw_mmc.h
+> index 7b41c6d..c8b6a4d 100644
+> --- a/include/linux/mmc/dw_mmc.h
+> +++ b/include/linux/mmc/dw_mmc.h
+> @@ -55,6 +55,7 @@ struct dw_mci_dma_slave {
+>  /**
+>   * struct dw_mci - MMC controller state shared between all slots
+>   * @lock: Spinlock protecting the queue and associated data.
+> + * @irq_lock: Spinlock protecting the INTMASK setting.
+>   * @regs: Pointer to MMIO registers.
+>   * @fifo_reg: Pointer to MMIO registers for data FIFO
+>   * @sg: Scatterlist entry currently being processed by PIO code, if any.
+> @@ -65,6 +66,9 @@ struct dw_mci_dma_slave {
+>   * @cmd: The command currently being sent to the card, or NULL.
+>   * @data: The data currently being transferred, or NULL if no data
+>   *	transfer is in progress.
+> + * @stop_abort: The command currently prepared for stoping transfer.
+> + * @prev_blksz: The former transfer blksz record.
+> + * @timing: Record of current ios timing.
+>   * @use_dma: Whether DMA channel is initialized or not.
+>   * @using_dma: Whether DMA is in use for the current transfer.
+>   * @dma_64bit_address: Whether DMA supports 64-bit address mode or not.
+> @@ -72,7 +76,10 @@ struct dw_mci_dma_slave {
+>   * @sg_cpu: Virtual address of DMA buffer.
+>   * @dma_ops: Pointer to platform-specific DMA callbacks.
+>   * @cmd_status: Snapshot of SR taken upon completion of the current
+> + * @ring_size: Buffer size for idma descriptors.
+>   *	command. Only valid when EVENT_CMD_COMPLETE is pending.
+> + * @dms: structure of slave-dma private data.
+> + * @phy_regs: physical address of controller's register map
+>   * @data_status: Snapshot of SR taken upon completion of the current
+>   *	data transfer. Only valid when EVENT_DATA_COMPLETE or
+>   *	EVENT_DATA_ERROR is pending.
+> @@ -80,7 +87,6 @@ struct dw_mci_dma_slave {
+>   *	to be sent.
+>   * @dir_status: Direction of current transfer.
+>   * @tasklet: Tasklet running the request state machine.
+> - * @card_tasklet: Tasklet handling card detect.
+>   * @pending_events: Bitmask of events flagged by the interrupt handler
+>   *	to be processed by the tasklet.
+>   * @completed_events: Bitmask of events which the state machine has
+> @@ -91,6 +97,7 @@ struct dw_mci_dma_slave {
+>   *	rate and timeout calculations.
+>   * @current_speed: Configured rate of the controller.
+>   * @num_slots: Number of slots available.
+> + * @fifoth_val: The value of FIFOTH register.
+>   * @verid: Denote Version ID.
+>   * @dev: Device associated with the MMC controller.
+>   * @pdata: Platform data associated with the MMC controller.
+> @@ -107,9 +114,11 @@ struct dw_mci_dma_slave {
+>   * @push_data: Pointer to FIFO push function.
+>   * @pull_data: Pointer to FIFO pull function.
+>   * @quirks: Set of quirks that apply to specific versions of the IP.
+> + * @vqmmc_enabled: Status of vqmmc, should be true or false.
+>   * @irq_flags: The flags to be passed to request_irq.
+>   * @irq: The irq value to be passed to request_irq.
+>   * @sdio_id0: Number of slot0 in the SDIO interrupt registers.
+> + * @cmd11_timer: Timer for SD3.0 voltage switch over scheme.
+>   * @dto_timer: Timer for broken data transfer over scheme.
+>   *
+>   * Locking
 > 
+
