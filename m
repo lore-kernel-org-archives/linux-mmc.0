@@ -1,101 +1,137 @@
-From: Geert Uytterhoeven <geert@linux-m68k.org>
-Subject: Re: [PATCH 2/2] regulator: core: Ensure we are at least in bounds for
- our constraints
-Date: Tue, 29 Mar 2016 14:00:52 +0200
-Message-ID: <CAMuHMdXuy2TxACTcsgOpZvrJEeTSQbCgCUmS9PXfBhhZfgbBBA@mail.gmail.com>
-References: <1458587912-32665-1-git-send-email-broonie@kernel.org>
-	<1458587912-32665-2-git-send-email-broonie@kernel.org>
-	<56F0624C.8010004@gmail.com>
-	<CAJKOXPd5h0Cq++OxdiXytNJH94PN4Kh_wM3M=p3JdU1m_qyFTA@mail.gmail.com>
-	<CAJKOXPcBOT_8NOH-=sEHSP0Rc+=Dvz-aqVTsBTMKg-VNWqQotw@mail.gmail.com>
-	<CAJAp7OgGQ3qm-_QhydvN0n6QeNoHFdso4zOk41qvVJhKNeRn8Q@mail.gmail.com>
-	<20160327090859.GH5028@sirena.org.uk>
+From: Amitkumar Karwar <akarwar@marvell.com>
+Subject: [PATCH] mmc: add API for data write using scatter gather DMA
+Date: Tue, 29 Mar 2016 05:57:41 -0700
+Message-ID: <1459256261-22492-1-git-send-email-akarwar@marvell.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-In-Reply-To: <20160327090859.GH5028@sirena.org.uk>
-Sender: linux-samsung-soc-owner@vger.kernel.org
-To: Mark Brown <broonie@kernel.org>
-Cc: Bjorn Andersson <bjorn@kryo.se>, Krzysztof Kozlowski <k.kozlowski@samsung.com>, Ivaylo Dimitrov <ivo.g.dimitrov.75@gmail.com>, Liam Girdwood <lgirdwood@gmail.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, linux-samsung-soc <linux-samsung-soc@vger.kernel.org>, Javier Martinez Canillas <javier@osg.samsung.com>, Marek Szyprowski <m.szyprowski@samsung.com>, linux-renesas-soc@vger.kernel.org
+Content-Type: text/plain
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mx0a-0016f401.pphosted.com ([67.231.148.174]:46426 "EHLO
+	mx0a-0016f401.pphosted.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751826AbcC2ND6 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 29 Mar 2016 09:03:58 -0400
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-wireless@vger.kernel.org
+Cc: Nishant Sarmukadam <nishants@marvell.com>, linux-mmc@vger.kernel.org, bin9zha0@gmail.com, Cathy Luo <cluo@marvell.com>, Bing Zhao <bzhao@marvell.com>, Xinming Hu <huxm@marvell.com>, Amitkumar Karwar <akarwar@marvell.com>
 
-Hi Mark,
+From: Bing Zhao <bzhao@marvell.com>
 
-On Sun, Mar 27, 2016 at 11:08 AM, Mark Brown <broonie@kernel.org> wrote:
-> On Sat, Mar 26, 2016 at 04:50:41PM -0700, Bjorn Andersson wrote:
->
->> Reinstating the following snippet in of_get_regulation_constraints()
->> sort this out:
->
->> if (constraints->min_uV && constraints->max_uV)
->>                                        constraints->apply_uV = true;
->
-> The existing check in the patch should be an || not an ==, or possibly
-> we should just not bother looking for min_uV at all.  I just pushed out
-> a version of that, let's see how that goes.
+This patch adds new API for SDIO scatter gather.
 
-Has the fix really been pushed out?
+Existing mmc_io_rw_extended() API expects caller to pass single contiguous
+buffer. It will be split if it exceeds segment size, SG table is prepared
+and used it for reading/writing the data.
 
-With commit fa93fd4ecc9c58475abac6db93a797bff893bc16
-Author: Mark Brown <broonie@kernel.org>
-Date:   Mon Mar 21 18:12:52 2016 +0000
+Our intention for defining new API here is to facilitate caller to provide
+ready SG table(scattered buffer list). It will be useful for the drivers
+which intend to handle SDIO SG internally.
 
-    regulator: core: Ensure we are at least in bounds for our constraints
+Signed-off-by: Bing Zhao <bzhao@marvell.com>
+Signed-off-by: Xinming Hu <huxm@marvell.com>
+Signed-off-by: Amitkumar Karwar <akarwar@marvell.com>
+---
+ drivers/mmc/core/sdio_ops.c   | 64 +++++++++++++++++++++++++++++++++++++++++++
+ include/linux/mmc/sdio_func.h |  5 ++++
+ 2 files changed, 69 insertions(+)
 
-I see a few cases of
+diff --git a/drivers/mmc/core/sdio_ops.c b/drivers/mmc/core/sdio_ops.c
+index 62508b4..6875980 100644
+--- a/drivers/mmc/core/sdio_ops.c
++++ b/drivers/mmc/core/sdio_ops.c
+@@ -204,6 +204,70 @@ int mmc_io_rw_extended(struct mmc_card *card, int write, unsigned fn,
+ 	return 0;
+ }
+ 
++int mmc_io_rw_extended_sg(struct mmc_card *card, int write, unsigned fn,
++			  unsigned addr, int incr_addr,
++			  struct sg_table *sgt, unsigned blksz)
++{
++	struct mmc_request mrq = {NULL};
++	struct mmc_command cmd = {0};
++	struct mmc_data data = {0};
++	struct scatterlist *sg_ptr;
++	unsigned blocks = 0;
++	int i;
++
++	WARN_ON(!card || !card->host);
++	WARN_ON(fn > 7);
++	WARN_ON(blksz == 0);
++	for_each_sg(sgt->sgl, sg_ptr, sgt->nents, i) {
++		WARN_ON(sg_ptr->length > card->host->max_seg_size);
++		blocks += DIV_ROUND_UP(sg_ptr->length, blksz);
++	}
++
++	/* sanity check */
++	if (addr & ~0x1FFFF)
++		return -EINVAL;
++
++	mrq.cmd = &cmd;
++	mrq.data = &data;
++
++	cmd.opcode = SD_IO_RW_EXTENDED;
++	cmd.arg = write ? 0x80000000 : 0x00000000;
++	cmd.arg |= fn << 28;
++	cmd.arg |= incr_addr ? 0x04000000 : 0x00000000;
++	cmd.arg |= addr << 9;
++	cmd.arg |= 0x08000000 | blocks;
++	cmd.flags = MMC_RSP_SPI_R5 | MMC_RSP_R5 | MMC_CMD_ADTC;
++
++	data.blksz = blksz;
++	data.blocks = blocks;
++	data.flags = write ? MMC_DATA_WRITE : MMC_DATA_READ;
++
++	data.sg = sgt->sgl;
++	data.sg_len = sgt->nents;
++
++	mmc_set_data_timeout(&data, card);
++	mmc_wait_for_req(card->host, &mrq);
++
++	if (cmd.error)
++		return cmd.error;
++	if (data.error)
++		return data.error;
++
++	if (mmc_host_is_spi(card->host)) {
++		/* host driver already reported errors */
++	} else {
++		if (cmd.resp[0] & R5_ERROR)
++			return -EIO;
++		if (cmd.resp[0] & R5_FUNCTION_NUMBER)
++			return -EINVAL;
++		if (cmd.resp[0] & R5_OUT_OF_RANGE)
++			return -ERANGE;
++	}
++
++	return 0;
++}
++EXPORT_SYMBOL_GPL(mmc_io_rw_extended_sg);
++
+ int sdio_reset(struct mmc_host *host)
+ {
+ 	int ret;
+diff --git a/include/linux/mmc/sdio_func.h b/include/linux/mmc/sdio_func.h
+index aab032a..2107e91 100644
+--- a/include/linux/mmc/sdio_func.h
++++ b/include/linux/mmc/sdio_func.h
+@@ -14,6 +14,7 @@
+ 
+ #include <linux/device.h>
+ #include <linux/mod_devicetable.h>
++#include <linux/scatterlist.h>
+ 
+ #include <linux/mmc/pm.h>
+ 
+@@ -151,6 +152,10 @@ extern int sdio_memcpy_toio(struct sdio_func *func, unsigned int addr,
+ extern int sdio_writesb(struct sdio_func *func, unsigned int addr,
+ 	void *src, int count);
+ 
++int mmc_io_rw_extended_sg(struct mmc_card *card, int write, unsigned fn,
++			  unsigned addr, int incr_addr,
++			  struct sg_table *sgt, unsigned blksz);
++
+ extern unsigned char sdio_f0_readb(struct sdio_func *func,
+ 	unsigned int addr, int *err_ret);
+ extern void sdio_f0_writeb(struct sdio_func *func, unsigned char b,
+-- 
+1.8.1.4
 
-------------[ cut here ]------------
-WARNING: CPU: 1 PID: 31 at drivers/regulator/core.c:2223
-_regulator_disable+0x2c/0x128
-unbalanced disables for SDHI0 VccQ
-Modules linked in:
-CPU: 1 PID: 31 Comm: kworker/1:1 Not tainted
-4.6.0-rc1-koelsch-00724-g58d619227282dc16 #2422
-Hardware name: Generic R8A7791 (Flattened Device Tree)
-Workqueue: events_freezable mmc_rescan
-sh_mobile_sdhi ee140000.sd: could not set regulator OCR (-22)
-
-[<c020e040>] (unwind_backtrace) from [<c0209d70>] (show_stack+0x10/0x14)
-[<c0209d70>] (show_stack) from [<c03c7584>] (dump_stack+0x7c/0x9c)
-[<c03c7584>] (dump_stack) from [<c021fa48>] (__warn+0xcc/0xfc)
-[<c021fa48>] (__warn) from [<c021faac>] (warn_slowpath_fmt+0x34/0x44)
-[<c021faac>] (warn_slowpath_fmt) from [<c041e464>]
-(_regulator_disable+0x2c/0x128)
-[<c041e464>] (_regulator_disable) from [<c041e590>]
-(regulator_disable+0x30/0x60)
-[<c041e590>] (regulator_disable) from [<c0572e18>] (tmio_mmc_set_ios+0xb8/0x1d4)
-[<c0572e18>] (tmio_mmc_set_ios) from [<c056300c>] (mmc_power_off+0x34/0x54)
-[<c056300c>] (mmc_power_off) from [<c0563a5c>] (mmc_rescan+0x214/0x30c)
-[<c0563a5c>] (mmc_rescan) from [<c0233368>] (process_one_work+0x1bc/0x2f4)
-[<c0233368>] (process_one_work) from [<c0233a2c>] (worker_thread+0x2a8/0x3d0)
-[<c0233a2c>] (worker_thread) from [<c0237a9c>] (kthread+0xd8/0xec)
-[<c0237a9c>] (kthread) from [<c0206b68>] (ret_from_fork+0x14/0x2c)
----[ end trace 1c61a7f6221c11ea ]---
-
-when booting on r8a7791/koelsch.
-
-I'm a bit confused by the discussion of "&&" vs. "||" vs. "==", but the
-warnings do go away when using "!=", cfr. the whitespace-damaged patch below.
-
---- a/drivers/regulator/of_regulator.c
-+++ b/drivers/regulator/of_regulator.c
-@@ -43,7 +43,7 @@ static void of_get_regulation_constraints(struct device_node *
-                constraints->max_uV = pval;
-
-        /* Voltage change possible? */
--       if (constraints->min_uV && constraints->max_uV) {
-+       if (constraints->min_uV != constraints->max_uV) {
-                constraints->valid_ops_mask |= REGULATOR_CHANGE_VOLTAGE;
-                constraints->apply_uV = true;
-        }
-
-Gr{oetje,eeting}s,
-
-                        Geert
-
---
-Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
-
-In personal conversations with technical people, I call myself a hacker. But
-when I'm talking to journalists I just say "programmer" or something like that.
-                                -- Linus Torvalds
