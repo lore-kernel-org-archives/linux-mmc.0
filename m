@@ -1,71 +1,112 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: [PATCH 1/8] mmc: atmel-mci: Remove redundant runtime PM calls
-Date: Tue, 29 Mar 2016 09:31:06 +0200
-Message-ID: <1459236673-5639-1-git-send-email-ulf.hansson@linaro.org>
+Subject: [PATCH 4/8] mmc: omap_hsmmc: Remove redundant runtime PM calls
+Date: Tue, 29 Mar 2016 09:31:09 +0200
+Message-ID: <1459236673-5639-4-git-send-email-ulf.hansson@linaro.org>
+References: <1459236673-5639-1-git-send-email-ulf.hansson@linaro.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-lb0-f176.google.com ([209.85.217.176]:35869 "EHLO
-	mail-lb0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751876AbcC2HbY (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 29 Mar 2016 03:31:24 -0400
-Received: by mail-lb0-f176.google.com with SMTP id qe11so4637396lbc.3
-        for <linux-mmc@vger.kernel.org>; Tue, 29 Mar 2016 00:31:23 -0700 (PDT)
+Received: from mail-lb0-f178.google.com ([209.85.217.178]:33722 "EHLO
+	mail-lb0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755927AbcC2Hb2 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 29 Mar 2016 03:31:28 -0400
+Received: by mail-lb0-f178.google.com with SMTP id u8so4727317lbk.0
+        for <linux-mmc@vger.kernel.org>; Tue, 29 Mar 2016 00:31:27 -0700 (PDT)
+In-Reply-To: <1459236673-5639-1-git-send-email-ulf.hansson@linaro.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Ludovic Desroches <ludovic.desroches@atmel.com>
 
 Commit 9250aea76bfc ("mmc: core: Enable runtime PM management of host
 devices"), made some calls to the runtime PM API from the driver
 redundant. Especially those which deals with runtime PM reference
 counting, so let's remove them.
 
-Cc: Ludovic Desroches <ludovic.desroches@atmel.com>
 Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
 ---
- drivers/mmc/host/atmel-mci.c | 9 ---------
- 1 file changed, 9 deletions(-)
+ drivers/mmc/host/omap_hsmmc.c | 15 ---------------
+ 1 file changed, 15 deletions(-)
 
-diff --git a/drivers/mmc/host/atmel-mci.c b/drivers/mmc/host/atmel-mci.c
-index 9268c41..0ad8ef5 100644
---- a/drivers/mmc/host/atmel-mci.c
-+++ b/drivers/mmc/host/atmel-mci.c
-@@ -1410,8 +1410,6 @@ static void atmci_request(struct mmc_host *mmc, struct mmc_request *mrq)
- 	WARN_ON(slot->mrq);
- 	dev_dbg(&host->pdev->dev, "MRQ: cmd %u\n", mrq->cmd->opcode);
+diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
+index f9ac3bb..835943a 100644
+--- a/drivers/mmc/host/omap_hsmmc.c
++++ b/drivers/mmc/host/omap_hsmmc.c
+@@ -968,8 +968,6 @@ static void omap_hsmmc_request_done(struct omap_hsmmc_host *host, struct mmc_req
+ 		return;
+ 	host->mrq = NULL;
+ 	mmc_request_done(host->mmc, mrq);
+-	pm_runtime_mark_last_busy(host->dev);
+-	pm_runtime_put_autosuspend(host->dev);
+ }
  
--	pm_runtime_get_sync(&host->pdev->dev);
--
- 	/*
- 	 * We may "know" the card is gone even though there's still an
- 	 * electrical connection. If so, we really need to communicate
-@@ -1442,8 +1440,6 @@ static void atmci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
- 	struct atmel_mci	*host = slot->host;
- 	unsigned int		i;
+ /*
+@@ -1250,7 +1248,6 @@ static int omap_hsmmc_switch_opcond(struct omap_hsmmc_host *host, int vdd)
+ 	int ret;
  
--	pm_runtime_get_sync(&host->pdev->dev);
--
- 	slot->sdc_reg &= ~ATMCI_SDCBUS_MASK;
- 	switch (ios->bus_width) {
- 	case MMC_BUS_WIDTH_1:
-@@ -1576,8 +1572,6 @@ static void atmci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
- 		break;
+ 	/* Disable the clocks */
+-	pm_runtime_put_sync(host->dev);
+ 	if (host->dbclk)
+ 		clk_disable_unprepare(host->dbclk);
+ 
+@@ -1260,7 +1257,6 @@ static int omap_hsmmc_switch_opcond(struct omap_hsmmc_host *host, int vdd)
+ 	/* Turn the power ON with given VDD 1.8 or 3.0v */
+ 	if (!ret)
+ 		ret = omap_hsmmc_set_power(host->dev, 1, vdd);
+-	pm_runtime_get_sync(host->dev);
+ 	if (host->dbclk)
+ 		clk_prepare_enable(host->dbclk);
+ 
+@@ -1368,8 +1364,6 @@ static void omap_hsmmc_dma_callback(void *param)
+ 
+ 		host->mrq = NULL;
+ 		mmc_request_done(host->mmc, mrq);
+-		pm_runtime_mark_last_busy(host->dev);
+-		pm_runtime_put_autosuspend(host->dev);
  	}
- 
--	pm_runtime_mark_last_busy(&host->pdev->dev);
--	pm_runtime_put_autosuspend(&host->pdev->dev);
  }
  
- static int atmci_get_ro(struct mmc_host *mmc)
-@@ -1669,9 +1663,6 @@ static void atmci_request_end(struct atmel_mci *host, struct mmc_request *mrq)
- 	spin_unlock(&host->lock);
- 	mmc_request_done(prev_mmc, mrq);
- 	spin_lock(&host->lock);
+@@ -1602,7 +1596,6 @@ static void omap_hsmmc_request(struct mmc_host *mmc, struct mmc_request *req)
+ 
+ 	BUG_ON(host->req_in_progress);
+ 	BUG_ON(host->dma_ch != -1);
+-	pm_runtime_get_sync(host->dev);
+ 	if (host->protect_card) {
+ 		if (host->reqs_blocked < 3) {
+ 			/*
+@@ -1619,8 +1612,6 @@ static void omap_hsmmc_request(struct mmc_host *mmc, struct mmc_request *req)
+ 			req->data->error = -EBADF;
+ 		req->cmd->retries = 0;
+ 		mmc_request_done(mmc, req);
+-		pm_runtime_mark_last_busy(host->dev);
+-		pm_runtime_put_autosuspend(host->dev);
+ 		return;
+ 	} else if (host->reqs_blocked)
+ 		host->reqs_blocked = 0;
+@@ -1634,8 +1625,6 @@ static void omap_hsmmc_request(struct mmc_host *mmc, struct mmc_request *req)
+ 			req->data->error = err;
+ 		host->mrq = NULL;
+ 		mmc_request_done(mmc, req);
+-		pm_runtime_mark_last_busy(host->dev);
+-		pm_runtime_put_autosuspend(host->dev);
+ 		return;
+ 	}
+ 	if (req->sbc && !(host->flags & AUTO_CMD23)) {
+@@ -1653,8 +1642,6 @@ static void omap_hsmmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+ 	struct omap_hsmmc_host *host = mmc_priv(mmc);
+ 	int do_send_init_stream = 0;
+ 
+-	pm_runtime_get_sync(host->dev);
 -
--	pm_runtime_mark_last_busy(&host->pdev->dev);
--	pm_runtime_put_autosuspend(&host->pdev->dev);
+ 	if (ios->power_mode != host->power_mode) {
+ 		switch (ios->power_mode) {
+ 		case MMC_POWER_OFF:
+@@ -1698,8 +1685,6 @@ static void omap_hsmmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+ 		send_init_stream(host);
+ 
+ 	omap_hsmmc_set_bus_mode(host);
+-
+-	pm_runtime_put_autosuspend(host->dev);
  }
  
- static void atmci_command_complete(struct atmel_mci *host,
+ static int omap_hsmmc_get_cd(struct mmc_host *mmc)
 -- 
 1.9.1
 
