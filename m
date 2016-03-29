@@ -1,86 +1,105 @@
-From: Rob Herring <robh+dt@kernel.org>
-Subject: Re: ARC dw-mshc binding compat string
-Date: Mon, 28 Mar 2016 14:00:55 -0500
-Message-ID: <CAL_JsqL1asMFVFX_p3P+ov_+9prmcQ0PZJOiAX7D5iJ7GEssgQ@mail.gmail.com>
-References: <56F66121.8050507@denx.de> <56F6C639.5000301@mentor.com>
- <56F6C71B.6070002@denx.de> <56F6CC68.5040408@mentor.com> <56F6D083.1020402@denx.de>
- <56F6D1E9.3050606@mentor.com> <56F6E860.8070207@denx.de> <56F6ED41.5020908@mentor.com>
- <56F6EFFD.9070007@denx.de> <1459157818.4785.5.camel@synopsys.com>
- <56F908A1.3070701@samsung.com> <56F9287F.1020707@denx.de> <56F958DC.5010203@mentor.com>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: Re: [PATCH] mmc: dw_mmc-rockchip: remove dw_mci_rockchip_pmops
+Date: Tue, 29 Mar 2016 10:17:34 +0900
+Message-ID: <56F9D7AE.9010909@samsung.com>
+References: <1454470004-21408-1-git-send-email-shawn.lin@rock-chips.com>
+ <56B2EC67.4010909@samsung.com> <56BDC527.9090002@rock-chips.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <56F958DC.5010203@mentor.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Vladimir Zapolskiy <vladimir_zapolskiy@mentor.com>
-Cc: Marek Vasut <marex@denx.de>, Jaehoon Chung <jh80.chung@samsung.com>, Alexey Brodkin <Alexey.Brodkin@synopsys.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mailout3.samsung.com ([203.254.224.33]:48337 "EHLO
+	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755204AbcC2BRh (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 28 Mar 2016 21:17:37 -0400
+In-reply-to: <56BDC527.9090002@rock-chips.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Shawn Lin <shawn.lin@rock-chips.com>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 
-On Mon, Mar 28, 2016 at 11:16 AM, Vladimir Zapolskiy
-<vladimir_zapolskiy@mentor.com> wrote:
-> Hi,
->
-> On 28.03.2016 15:50, Marek Vasut wrote:
->> On 03/28/2016 12:34 PM, Jaehoon Chung wrote:
->>> Hi,
+Hi Shawn,
+
+Sorry for applying late.
+Applied on my repository.
+
+Best Regards,
+Jaehoon Chung
+
+On 02/12/2016 08:42 PM, Shawn Lin wrote:
+> On 2016/2/4 14:15, Jaehoon Chung wrote:
+>> Hi, Shawn.
 >>
->> Hi,
+>> On 02/03/2016 12:26 PM, Shawn Lin wrote:
+>>> dw_mci_rockchip_pmops just copy-paste what dw_mci_pltfm_pmops
+>>> have done. Let's remove it.
 >>
->> [...]
+>> Yep, it's possible to remove.
+>> I'm not sure but i want to know there is no plan to add the specific code of rockchip in suspend/resume.
+>> Could you check this?
+> 
+> Jaehoon,
+> 
+> :) I can't say "never plan to add anything" in case of some broken Socs
+> need something special to do in the future. But I will that would not happen, and personally we not going to add specific code here.
+> 
+> Thanks for sharing your thought.
+> 
 >>
->>>>>>>>>> That said, I would rather prefer to see "snps,dw-mshc" prefix on description
->>>>>>>>>> of an MMC controller found on SoCFPGA series, "altr,socfpga-dw-mshc" seems
->>>>>>>>>> to be redundant.
+>> Best Regards,
+>> Jaehoon Chung
+>>
 >>>
->>> Yes..it's redundant..i should be combined to "snps,dw-mshc".
+>>> Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
+>>> ---
+>>>
+>>>   drivers/mmc/host/dw_mmc-rockchip.c | 22 +---------------------
+>>>   1 file changed, 1 insertion(+), 21 deletions(-)
+>>>
+>>> diff --git a/drivers/mmc/host/dw_mmc-rockchip.c b/drivers/mmc/host/dw_mmc-rockchip.c
+>>> index d9c92f3..3438ab3 100644
+>>> --- a/drivers/mmc/host/dw_mmc-rockchip.c
+>>> +++ b/drivers/mmc/host/dw_mmc-rockchip.c
+>>> @@ -276,33 +276,13 @@ static int dw_mci_rockchip_probe(struct platform_device *pdev)
+>>>       return dw_mci_pltfm_register(pdev, drv_data);
+>>>   }
+>>>
+>>> -#ifdef CONFIG_PM_SLEEP
+>>> -static int dw_mci_rockchip_suspend(struct device *dev)
+>>> -{
+>>> -    struct dw_mci *host = dev_get_drvdata(dev);
+>>> -
+>>> -    return dw_mci_suspend(host);
+>>> -}
+>>> -
+>>> -static int dw_mci_rockchip_resume(struct device *dev)
+>>> -{
+>>> -    struct dw_mci *host = dev_get_drvdata(dev);
+>>> -
+>>> -    return dw_mci_resume(host);
+>>> -}
+>>> -#endif /* CONFIG_PM_SLEEP */
+>>> -
+>>> -static SIMPLE_DEV_PM_OPS(dw_mci_rockchip_pmops,
+>>> -             dw_mci_rockchip_suspend,
+>>> -             dw_mci_rockchip_resume);
+>>> -
+>>>   static struct platform_driver dw_mci_rockchip_pltfm_driver = {
+>>>       .probe        = dw_mci_rockchip_probe,
+>>>       .remove        = dw_mci_pltfm_remove,
+>>>       .driver        = {
+>>>           .name        = "dwmmc_rockchip",
+>>>           .of_match_table    = dw_mci_rockchip_match,
+>>> -        .pm        = &dw_mci_rockchip_pmops,
+>>> +        .pm        = &dw_mci_pltfm_pmops,
+>>>       },
+>>>   };
+>>>
+>>>
 >>
->> Should the compat string be
->>   compatible = "altr,socfpga-dw-mshc", "snps,dw-mshc";
->> or just
->>   compatible = "snps,dw-mshc";
->> ?
 >>
->> I am under the impression that a soc-specific identifier in addition to
->> a generic one (used by the driver compat table) is a good idea, because
->> it can help discerning the IP block from a generic one if needed at some
->> future point in time. It will also not break the DT for systems
->> which may depend on the non-generic compat, like *BSDs and such.
 >>
->> What do you think ? (btw this is very much my question in this thread)
->
-> IMO just 'compatible = "snps,dw-mshc"' is good enough, if it completely
-> describes the IP block on SoCFGPA --- and from what I get it is the case.
-> You can add a SoC-specific compatible if it is needed later on, and to my
-> taste only if SoC specific features can not be covered by properties.
+>>
+> 
+> 
 
-You can add the SoC-specific compatible string to the kernel later on.
-You may not be able to update your DTB later on. So the specific
-compatible strings need to be in the DT from the start.
-
-There's no set rule on properties vs. implied by a compatible string,
-but generally if it is fixed in the SoC, get the information based on
-the compatible string. If it is a board level decision or has to be
-tuned, then use a property.
-
-> The same sole "snps,dw-mshc" compatible is specified for NXP LPC18xx/43xx,
-> ZTE ZX and HiSilicon ARM SoCs.
-
-They should be fixed.
-
-> Another similar example is ARM PrimeCell PLxxx IP blocks, as far as
-> I know there is no SoC-specific compatibles/aliases for PrimeCell IP blocks.
-
-There are some for ST variants I think. PrimeCell blocks are a bit
-different in that they generally pretty simple blocks, have not
-changed much, and they
-have a standard ID register that has been sufficient for determining
-differences. And we have a standard way to override the ID register
-when it is wrong. Look at recent patches for Denali NAND controller if
-you want an example of why IP version registers (or compatible
-strings) can't be trusted.
-
-Once you get into IP blocks with lots of configuration options,
-complicated clocking, power domains, and with phys on the front end,
-then you hit all the integration differences.
-
-Rob
