@@ -1,204 +1,105 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: [PATCH 7/8] mmc: sdhci: Remove redundant runtime PM calls
-Date: Tue, 29 Mar 2016 09:31:12 +0200
-Message-ID: <1459236673-5639-7-git-send-email-ulf.hansson@linaro.org>
+Subject: [PATCH 3/8] mmc: mediatek: Remove redundant runtime PM calls
+Date: Tue, 29 Mar 2016 09:31:08 +0200
+Message-ID: <1459236673-5639-3-git-send-email-ulf.hansson@linaro.org>
 References: <1459236673-5639-1-git-send-email-ulf.hansson@linaro.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-lf0-f47.google.com ([209.85.215.47]:35440 "EHLO
-	mail-lf0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756044AbcC2Hbe (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 29 Mar 2016 03:31:34 -0400
-Received: by mail-lf0-f47.google.com with SMTP id k79so5262216lfb.2
-        for <linux-mmc@vger.kernel.org>; Tue, 29 Mar 2016 00:31:33 -0700 (PDT)
+Received: from mail-lb0-f177.google.com ([209.85.217.177]:33710 "EHLO
+	mail-lb0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751876AbcC2Hb1 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 29 Mar 2016 03:31:27 -0400
+Received: by mail-lb0-f177.google.com with SMTP id u8so4726932lbk.0
+        for <linux-mmc@vger.kernel.org>; Tue, 29 Mar 2016 00:31:26 -0700 (PDT)
 In-Reply-To: <1459236673-5639-1-git-send-email-ulf.hansson@linaro.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Adrian Hunter <adrian.hunter@intel.com>
+Cc: Chaotian Jing <chaotian.jing@mediatek.com>
 
 Commit 9250aea76bfc ("mmc: core: Enable runtime PM management of host
 devices"), made some calls to the runtime PM API from the driver
 redundant. Especially those which deals with runtime PM reference
 counting, so let's remove them.
 
-Moreover as SDHCI have its own wrapper functions for runtime PM these
-becomes superfluous, so let's remove them as well.
-
-Cc: Adrian Hunter <adrian.hunter@intel.com>
+Cc: Chaotian Jing <chaotian.jing@mediatek.com>
 Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
 ---
- drivers/mmc/host/sdhci.c | 56 ++++++------------------------------------------
- 1 file changed, 7 insertions(+), 49 deletions(-)
+ drivers/mmc/host/mtk-sd.c | 19 ++-----------------
+ 1 file changed, 2 insertions(+), 17 deletions(-)
 
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 8670f16..4bb9bfd 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -56,19 +56,9 @@ static void sdhci_enable_preset_value(struct sdhci_host *host, bool enable);
- static int sdhci_do_get_cd(struct sdhci_host *host);
- 
- #ifdef CONFIG_PM
--static int sdhci_runtime_pm_get(struct sdhci_host *host);
--static int sdhci_runtime_pm_put(struct sdhci_host *host);
- static void sdhci_runtime_pm_bus_on(struct sdhci_host *host);
- static void sdhci_runtime_pm_bus_off(struct sdhci_host *host);
- #else
--static inline int sdhci_runtime_pm_get(struct sdhci_host *host)
--{
--	return 0;
--}
--static inline int sdhci_runtime_pm_put(struct sdhci_host *host)
--{
--	return 0;
--}
- static void sdhci_runtime_pm_bus_on(struct sdhci_host *host)
- {
- }
-@@ -1298,8 +1288,6 @@ static void sdhci_request(struct mmc_host *mmc, struct mmc_request *mrq)
- 
- 	host = mmc_priv(mmc);
- 
--	sdhci_runtime_pm_get(host);
--
- 	/* Firstly check card presence */
- 	present = mmc->ops->get_cd(mmc);
- 
-@@ -1546,9 +1534,7 @@ static void sdhci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
- {
- 	struct sdhci_host *host = mmc_priv(mmc);
- 
--	sdhci_runtime_pm_get(host);
- 	sdhci_do_set_ios(host, ios);
--	sdhci_runtime_pm_put(host);
- }
- 
- static int sdhci_do_get_cd(struct sdhci_host *host)
-@@ -1580,12 +1566,8 @@ static int sdhci_do_get_cd(struct sdhci_host *host)
- static int sdhci_get_cd(struct mmc_host *mmc)
- {
- 	struct sdhci_host *host = mmc_priv(mmc);
--	int ret;
- 
--	sdhci_runtime_pm_get(host);
--	ret = sdhci_do_get_cd(host);
--	sdhci_runtime_pm_put(host);
--	return ret;
-+	return sdhci_do_get_cd(host);
- }
- 
- static int sdhci_check_ro(struct sdhci_host *host)
-@@ -1641,12 +1623,8 @@ static void sdhci_hw_reset(struct mmc_host *mmc)
- static int sdhci_get_ro(struct mmc_host *mmc)
- {
- 	struct sdhci_host *host = mmc_priv(mmc);
--	int ret;
- 
--	sdhci_runtime_pm_get(host);
--	ret = sdhci_do_get_ro(host);
--	sdhci_runtime_pm_put(host);
--	return ret;
-+	return sdhci_do_get_ro(host);
- }
- 
- static void sdhci_enable_sdio_irq_nolock(struct sdhci_host *host, int enable)
-@@ -1668,7 +1646,7 @@ static void sdhci_enable_sdio_irq(struct mmc_host *mmc, int enable)
- 	struct sdhci_host *host = mmc_priv(mmc);
- 	unsigned long flags;
- 
--	sdhci_runtime_pm_get(host);
-+	pm_runtime_get_sync(mmc_dev(mmc));
- 
- 	spin_lock_irqsave(&host->lock, flags);
- 	if (enable)
-@@ -1679,7 +1657,8 @@ static void sdhci_enable_sdio_irq(struct mmc_host *mmc, int enable)
- 	sdhci_enable_sdio_irq_nolock(host, enable);
- 	spin_unlock_irqrestore(&host->lock, flags);
- 
--	sdhci_runtime_pm_put(host);
-+	pm_runtime_mark_last_busy(mmc_dev(mmc));
-+	pm_runtime_put_autosuspend(mmc_dev(mmc));
- }
- 
- static int sdhci_do_start_signal_voltage_switch(struct sdhci_host *host,
-@@ -1777,14 +1756,11 @@ static int sdhci_start_signal_voltage_switch(struct mmc_host *mmc,
- 	struct mmc_ios *ios)
- {
- 	struct sdhci_host *host = mmc_priv(mmc);
--	int err;
- 
- 	if (host->version < SDHCI_SPEC_300)
- 		return 0;
--	sdhci_runtime_pm_get(host);
--	err = sdhci_do_start_signal_voltage_switch(host, ios);
--	sdhci_runtime_pm_put(host);
--	return err;
-+
-+	return sdhci_do_start_signal_voltage_switch(host, ios);
- }
- 
- static int sdhci_card_busy(struct mmc_host *mmc)
-@@ -1792,10 +1768,8 @@ static int sdhci_card_busy(struct mmc_host *mmc)
- 	struct sdhci_host *host = mmc_priv(mmc);
- 	u32 present_state;
- 
--	sdhci_runtime_pm_get(host);
- 	/* Check whether DAT[3:0] is 0000 */
- 	present_state = sdhci_readl(host, SDHCI_PRESENT_STATE);
--	sdhci_runtime_pm_put(host);
- 
- 	return !(present_state & SDHCI_DATA_LVL_MASK);
- }
-@@ -1822,7 +1796,6 @@ static int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode)
- 	unsigned int tuning_count = 0;
- 	bool hs400_tuning;
- 
--	sdhci_runtime_pm_get(host);
- 	spin_lock_irqsave(&host->lock, flags);
- 
- 	hs400_tuning = host->flags & SDHCI_HS400_TUNING;
-@@ -1870,7 +1843,6 @@ static int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode)
- 	if (host->ops->platform_execute_tuning) {
- 		spin_unlock_irqrestore(&host->lock, flags);
- 		err = host->ops->platform_execute_tuning(host, opcode);
--		sdhci_runtime_pm_put(host);
- 		return err;
- 	}
- 
-@@ -2002,8 +1974,6 @@ out:
- 	sdhci_writel(host, host->ier, SDHCI_SIGNAL_ENABLE);
- out_unlock:
- 	spin_unlock_irqrestore(&host->lock, flags);
--	sdhci_runtime_pm_put(host);
--
- 	return err;
- }
- 
-@@ -2201,7 +2171,6 @@ static void sdhci_tasklet_finish(unsigned long param)
- 	spin_unlock_irqrestore(&host->lock, flags);
- 
+diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
+index b17f30d..5642f71 100644
+--- a/drivers/mmc/host/mtk-sd.c
++++ b/drivers/mmc/host/mtk-sd.c
+@@ -736,9 +736,6 @@ static void msdc_request_done(struct msdc_host *host, struct mmc_request *mrq)
+ 	if (mrq->data)
+ 		msdc_unprepare_data(host, mrq);
  	mmc_request_done(host->mmc, mrq);
--	sdhci_runtime_pm_put(host);
+-
+-	pm_runtime_mark_last_busy(host->dev);
+-	pm_runtime_put_autosuspend(host->dev);
  }
  
- static void sdhci_timeout_timer(unsigned long data)
-@@ -2682,17 +2651,6 @@ int sdhci_resume_host(struct sdhci_host *host)
+ /* returns true if command is fully handled; returns false otherwise */
+@@ -886,8 +883,6 @@ static void msdc_ops_request(struct mmc_host *mmc, struct mmc_request *mrq)
+ 	WARN_ON(host->mrq);
+ 	host->mrq = mrq;
  
- EXPORT_SYMBOL_GPL(sdhci_resume_host);
+-	pm_runtime_get_sync(host->dev);
+-
+ 	if (mrq->data)
+ 		msdc_prepare_data(host, mrq);
  
--static int sdhci_runtime_pm_get(struct sdhci_host *host)
--{
--	return pm_runtime_get_sync(host->mmc->parent);
--}
+@@ -1201,8 +1196,6 @@ static void msdc_ops_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+ 	struct msdc_host *host = mmc_priv(mmc);
+ 	int ret;
+ 
+-	pm_runtime_get_sync(host->dev);
 -
--static int sdhci_runtime_pm_put(struct sdhci_host *host)
--{
--	pm_runtime_mark_last_busy(host->mmc->parent);
--	return pm_runtime_put_autosuspend(host->mmc->parent);
--}
+ 	msdc_set_buswidth(host, ios->bus_width);
+ 
+ 	/* Suspend/Resume will do power off/on */
+@@ -1214,7 +1207,7 @@ static void msdc_ops_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+ 					ios->vdd);
+ 			if (ret) {
+ 				dev_err(host->dev, "Failed to set vmmc power!\n");
+-				goto end;
++				return;
+ 			}
+ 		}
+ 		break;
+@@ -1242,10 +1235,6 @@ static void msdc_ops_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+ 
+ 	if (host->mclk != ios->clock || host->timing != ios->timing)
+ 		msdc_set_mclk(host, ios->timing, ios->clock);
 -
- static void sdhci_runtime_pm_bus_on(struct sdhci_host *host)
- {
- 	if (host->bus_on)
+-end:
+-	pm_runtime_mark_last_busy(host->dev);
+-	pm_runtime_put_autosuspend(host->dev);
+ }
+ 
+ static u32 test_delay_bit(u32 delay, u32 bit)
+@@ -1408,19 +1397,15 @@ static int msdc_execute_tuning(struct mmc_host *mmc, u32 opcode)
+ 	struct msdc_host *host = mmc_priv(mmc);
+ 	int ret;
+ 
+-	pm_runtime_get_sync(host->dev);
+ 	ret = msdc_tune_response(mmc, opcode);
+ 	if (ret == -EIO) {
+ 		dev_err(host->dev, "Tune response fail!\n");
+-		goto out;
++		return ret;
+ 	}
+ 	ret = msdc_tune_data(mmc, opcode);
+ 	if (ret == -EIO)
+ 		dev_err(host->dev, "Tune data fail!\n");
+ 
+-out:
+-	pm_runtime_mark_last_busy(host->dev);
+-	pm_runtime_put_autosuspend(host->dev);
+ 	return ret;
+ }
+ 
 -- 
 1.9.1
 
