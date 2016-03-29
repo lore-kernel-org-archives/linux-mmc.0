@@ -1,24 +1,27 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH V3] mmc: sdhci: Fix regression setting power on Trats2 board
-Date: Tue, 29 Mar 2016 19:02:38 +0900
-Message-ID: <56FA52BE.30401@samsung.com>
+From: Jisheng Zhang <jszhang@marvell.com>
+Subject: Re: [PATCH V3] mmc: sdhci: Fix regression setting power on Trats2
+ board
+Date: Tue, 29 Mar 2016 18:00:59 +0800
+Message-ID: <20160329180059.18b7726b@xhacker>
 References: <CAJKOXPcGDnPm-Ykh6wHqV1YxfTaov5E8iVqBoBn4OJc7BnhgEQ@mail.gmail.com>
- <20160324155840.50474b98@xhacker> <56F3A0B7.4050509@samsung.com>
- <20160324162449.29c9cf78@xhacker> <56F3A88F.50603@samsung.com>
- <56F3E77D.7030201@intel.com> <56F3E9EB.3090207@intel.com>
- <56F8CA0C.2080908@samsung.com> <56FA4D66.3030109@intel.com>
- <56FA4EC7.8090004@intel.com>
+	<20160324155840.50474b98@xhacker>	<56F3A0B7.4050509@samsung.com>
+	<20160324162449.29c9cf78@xhacker>	<56F3A88F.50603@samsung.com>
+	<56F3E77D.7030201@intel.com>	<56F3E9EB.3090207@intel.com>
+	<56F8CA0C.2080908@samsung.com>	<56FA4D66.3030109@intel.com>
+	<56FA4EC7.8090004@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
+Content-Type: text/plain; charset="US-ASCII"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-reply-to: <56FA4EC7.8090004@intel.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>, Krzysztof Kozlowski <k.kozlowski@samsung.com>, Jisheng Zhang <jszhang@marvell.com>
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+In-Reply-To: <56FA4EC7.8090004@intel.com>
+Sender: linux-samsung-soc-owner@vger.kernel.org
+To: Adrian Hunter <adrian.hunter@intel.com>, Krzysztof Kozlowski <k.kozlowski@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>
 Cc: Ulf Hansson <ulf.hansson@linaro.org>, ludovic.desroches@atmel.com, "Ivan T. Ivanov" <ivan.ivanov@linaro.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-samsung-soc@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-On 03/29/2016 06:45 PM, Adrian Hunter wrote:
+On Tue, 29 Mar 2016 12:45:43 +0300
+Adrian Hunter <adrian.hunter@intel.com> wrote:
+
 > Several commits relating to setting power have been introducing
 > problems by putting driver-specific rules into generic SDHCI code.
 > 
@@ -80,14 +83,13 @@ On 03/29/2016 06:45 PM, Adrian Hunter wrote:
 > Tested-by: Krzysztof Kozlowski <k.kozlowski@samsung.com>
 > Tested-by: Ludovic Desroches <ludovic.desroches@atmel.com>
 > Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
+
+Reviewed-by: Jisheng Zhang <jszhang@marvell.com>
+Tested-by: Jisheng Zhang <jszhang@marvell.com>
+
 > Cc: stable@vger.kernel.org # v4.5+
 > ---
 > 
-
-Tested-by: Jaehoon Chung <jh80.chung@samsung.com>
-
-With trats2 board.
-
 > 
 > Changes in V3:
 > 
@@ -235,4 +237,3 @@ With trats2 board.
 >  void sdhci_set_bus_width(struct sdhci_host *host, int width);
 >  void sdhci_reset(struct sdhci_host *host, u8 mask);
 >  void sdhci_set_uhs_signaling(struct sdhci_host *host, unsigned timing);
-> 
