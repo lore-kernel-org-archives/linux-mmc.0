@@ -1,103 +1,110 @@
-From: Lee Jones <lee.jones@linaro.org>
-Subject: Re: [PATCH] regulator: s2mps11: Fix invalid minimal selector for
- buck9 supplying SD card
-Date: Tue, 29 Mar 2016 10:40:23 +0100
-Message-ID: <20160329094023.GD8659@x1>
-References: <1459126489-18311-1-git-send-email-k.kozlowski@samsung.com>
- <20160329090856.GB8659@x1>
- <56FA499F.2060206@samsung.com>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: Warnings for invalid VDD (sdhci-s3c)
+Date: Tue, 29 Mar 2016 12:39:50 +0300
+Message-ID: <56FA4D66.3030109@intel.com>
+References: <CAJKOXPcGDnPm-Ykh6wHqV1YxfTaov5E8iVqBoBn4OJc7BnhgEQ@mail.gmail.com>
+ <20160324155840.50474b98@xhacker> <56F3A0B7.4050509@samsung.com>
+ <20160324162449.29c9cf78@xhacker> <56F3A88F.50603@samsung.com>
+ <56F3E77D.7030201@intel.com> <56F3E9EB.3090207@intel.com>
+ <56F8CA0C.2080908@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <56FA499F.2060206@samsung.com>
-Sender: linux-samsung-soc-owner@vger.kernel.org
-To: Krzysztof Kozlowski <k.kozlowski@samsung.com>
-Cc: Sangbeom Kim <sbkim73@samsung.com>, Liam Girdwood <lgirdwood@gmail.com>, Mark Brown <broonie@kernel.org>, linux-kernel@vger.kernel.org, linux-samsung-soc@vger.kernel.org, linux-mmc@vger.kernel.org, Javier Martinez Canillas <javier@osg.samsung.com>, Ivaylo Dimitrov <ivo.g.dimitrov.75@gmail.com>, stable@vger.kernel.org
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mga03.intel.com ([134.134.136.65]:54792 "EHLO mga03.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752005AbcC2Jnd (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 29 Mar 2016 05:43:33 -0400
+In-Reply-To: <56F8CA0C.2080908@samsung.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Krzysztof Kozlowski <k.kozlowski@samsung.com>, Jisheng Zhang <jszhang@marvell.com>, Jaehoon Chung <jh80.chung@samsung.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, ludovic.desroches@atmel.com, "Ivan T. Ivanov" <ivan.ivanov@linaro.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-samsung-soc@vger.kernel.org
 
-On Tue, 29 Mar 2016, Krzysztof Kozlowski wrote:
+On 28/03/16 09:07, Krzysztof Kozlowski wrote:
+> On 24.03.2016 22:21, Adrian Hunter wrote:
+>> On 24/03/16 15:11, Adrian Hunter wrote:
+>>> On 24/03/16 10:42, Krzysztof Kozlowski wrote:
+>>>> On 24.03.2016 17:24, Jisheng Zhang wrote:
+>>>>> Hi,
+>>>>>
+>>>>> On Thu, 24 Mar 2016 17:09:27 +0900 Jaehoon Chung wrote:
+>>>>>
+>>>>>> Hi,
+>>>>>>
+>>>>>> On 03/24/2016 04:58 PM, Jisheng Zhang wrote:
+>>>>>>> Hi,
+>>>>>>>
+>>>>>>> On Thu, 24 Mar 2016 16:28:56 +0900 Krzysztof Kozlowski wrote:
+>>>>>>>   
+>>>>>>>> Hi,
+>>>>>>>>
+>>>>>>>> After 918f4cbd4340 ("mmc: sdhci: restore behavior when setting VDD via
+>>>>>>>> external regulator") On Trats2 board I see warnings for invalid VDD
+>>>>>>>> value (2.8V):
+>>>>>>>>
+>>>>>>>> [    3.119656] ------------[ cut here ]------------
+>>>>>>>> [    3.119666] WARNING: CPU: 3 PID: 90 at
+>>>>>>>> ../drivers/mmc/host/sdhci.c:1234 sdhci_do_set_ios+0x4cc/0x5e0
+>>>>>>>> [    3.119669] mmc0: Invalid vdd 0x10  
+>>>>>>>
+>>>>>>> Per my understanding, the wrong vdd indicates a wrong ocr, what's the voltage of
+>>>>>>> this host's vmmc regulator?  
+>>>>>>
+>>>>>> As i know, it's fixed-voltage with gpio on trats2. It's 2.8V.
+>>>>>> I didn't check this entirely..need to check ocr value.
+>>>>>>
+>>>>>
+>>>>> I may know the reason. the vmmc is 2.8v, then mmc_regulator_get_supply() convert
+>>>>> the value to a ocr as 0x10. The key here is that the 2.8v is invalid in SDHCI
+>>>>> case and isn't accepted by current sdhci driver.
+>>>>
+>>>> Yeah, I already wrote that. It is the part of the warning and my email.
+>>>> Our regulator is fixed at 2.8 which is 0x10. :)
+>>>>
+>>>>> I dunno the elegant solution to handle this case, let's wait for sdhci maintainers
+>>>>> idea.
+>>>>
+>>>> Hmm...
+>>>
+>>> I haven't tested it, but what about this:
+>>
+>> And now with checkpatch complaints fixed:
+>>
+>> From: Adrian Hunter <adrian.hunter@intel.com>
+>> Date: Thu, 24 Mar 2016 14:29:24 +0200
+>> Subject: [PATCH V2] mmc: sdhci: Fix regression setting power on Trats2 board
+>>
+>> Several commits relating to setting power have been introducing
+>> problems by putting driver-specific rules into generic SDHCI code.
+>>
+>> Fix by adding a 'set_power' callback and restoring the default
+>> behaviour prior to commit 918f4cbd4340 ("mmc: sdhci: restore
+>> behavior when setting VDD via external regulator").  The desired
+> 
+> s/behavior/behaviour/
 
-> On 29.03.2016 18:08, Lee Jones wrote:
-> > On Mon, 28 Mar 2016, Krzysztof Kozlowski wrote:
-> >=20
-> >> The buck9 regulator of S2MPS11 PMIC lacked minimal selector for li=
-near
-> >> mapping. The mapping starts from 0x40 (3 V).
-> >>
-> >> This buck9 provides power to other regulators, including LDO13 and=
- LDO19
-> >> which supply the MMC2 (SD card).
-> >>
-> >> Bootloader initializes the regulator with value of 0xff (5 V) whic=
-h is
-> >> outside of supported voltage range. When (during boot) constraints=
- to
-> >> buck9 were applied, the driver wrote value counting from 0x00, not=
- 0x40.
-> >> Effectively driver set lower voltage than required leading to SD c=
-ard
-> >> detection errors on Odroid XU3/XU4:
-> >> 	mmc1: card never left busy state
-> >> 	mmc1: error -110 whilst initialising SD card
-> >>
-> >> Fixes: cb74685ecb39 ("regulator: s2mps11: Add samsung s2mps11 regu=
-lator driver")
-> >> Cc: <stable@vger.kernel.org>
-> >> Signed-off-by: Krzysztof Kozlowski <k.kozlowski@samsung.com>
-> >>
-> >> ---
-> >>
-> >> The issue can be reproduced on next-20160324 with
-> >> bae4fdc88d7f7dda1 (regulator: core: Ensure we are at least in boun=
-ds
-> >> for our constraints).
-> >> ---
-> >>  drivers/regulator/s2mps11.c         | 19 ++++++++++++++++++-
-> >>  include/linux/mfd/samsung/s2mps11.h |  9 +++++++++
-> >>  2 files changed, 27 insertions(+), 1 deletion(-)
-> >=20
-> > [...]
-> >=20
-> >> diff --git a/include/linux/mfd/samsung/s2mps11.h b/include/linux/m=
-fd/samsung/s2mps11.h
-> >> index b288965e8101..3937a932bfe0 100644
-> >> --- a/include/linux/mfd/samsung/s2mps11.h
-> >> +++ b/include/linux/mfd/samsung/s2mps11.h
-> >> @@ -173,10 +173,19 @@ enum s2mps11_regulators {
-> >> =20
-> >>  #define S2MPS11_LDO_VSEL_MASK	0x3F
-> >>  #define S2MPS11_BUCK_VSEL_MASK	0xFF
-> >> +#define S2MPS11_BUCK9_MIN_VSEL	0x40
-> >>  #define S2MPS11_ENABLE_MASK	(0x03 << S2MPS11_ENABLE_SHIFT)
-> >>  #define S2MPS11_ENABLE_SHIFT	0x06
-> >>  #define S2MPS11_LDO_N_VOLTAGES	(S2MPS11_LDO_VSEL_MASK + 1)
-> >>  #define S2MPS11_BUCK_N_VOLTAGES (S2MPS11_BUCK_VSEL_MASK + 1)
-> >> +/*
-> >> + * Buck9 supports only 32 voltages (values from 0x40 to 0x5F) but=
- bootloader
-> >> + * initializes the register with value of 0xff so when probing th=
-is would
-> >> + * cause a failure (Odroid XU3):
-> >> + *	vdd_2.8v_ldo: failed to get the current voltage(-22)
-> >> + * Instead pretend we support up to 0xff (5 V).
-> >> + */
-> >> +#define S2MPS11_BUCK9_N_VOLTAGES	192
-> >=20
-> > Err... NACK.
-> >=20
-> > Please go and fix the bootloader instead of hacking the kernel.
->=20
-> The change is not needed and was an effect of my inaccurate
-> understanding of device and driver behaviour. In v2 there is no such
-> statement and changes. Instead driver properly uses the mask without
-> touching other parts of register.
+It seems checkpatch insists the commit message must be identical to the
+original, so I am leaving it that way.
 
-Very well.  Thanks for letting me know.
+> 
+>> behaviour of that commit is gotten by having sdhci-pxav3 provide
+>> its own set_power callback.
+>>
+>> Reported-by: Krzysztof Kozlowski <k.kozlowski@samsung.com>
+>> Fixes: 918f4cbd4340 ("mmc: sdhci: restore behavior when setting VDD...)
+>> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
+>> Cc: stable@vger.kernel.org # v4.5+
+>> ---
+>>  drivers/mmc/host/sdhci-pxav3.c | 17 +++++++++++++++++
+>>  drivers/mmc/host/sdhci.c       | 38 ++++++++++++++++++++++++++++++--------
+>>  drivers/mmc/host/sdhci.h       |  4 ++++
+>>  3 files changed, 51 insertions(+), 8 deletions(-)
+>>
+> 
+> Works for me (sdhci-s3c, Exynos4412 on Trats2 board):
+> Tested-by: Krzysztof Kozlowski <k.kozlowski@samsung.com>
 
---=20
-Lee Jones
-Linaro STMicroelectronics Landing Team Lead
-Linaro.org =E2=94=82 Open source software for ARM SoCs
-=46ollow Linaro: Facebook | Twitter | Blog
+I made a V3 which has a couple of minor changes for pxav3_set_power()
+and consequently have not added the Reviewed/Tested-by Jisheng Zhang.
+
