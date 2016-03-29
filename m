@@ -1,74 +1,114 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: SDIO wifi card is not detected with 4.5-rc kernels
-Date: Tue, 29 Mar 2016 12:31:44 +0200
-Message-ID: <CAPDyKFq74ppimCo0AGgqdtT=C-41y6LKZHELSpJXvDaSdTT=1A@mail.gmail.com>
-References: <CA+7w51i3Kf2Jm=AXP5QhDj_8ZmzhUowbwwNEtu8UgiNkWwMYxg@mail.gmail.com>
-	<CA+7w51gXWgfU0NzfKSkRtimgOH7v5G3TMTb8WNGg6GXg-xTf5w@mail.gmail.com>
-	<CAOMZO5BXRhc4hV52hnBDRL1nr1SnnTumf_8S2cHOGovVJF+yBA@mail.gmail.com>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: [RFC PATCH] mmc: block: Support the fixed index for mmcblk with
+ aliases nodes
+Date: Tue, 29 Mar 2016 19:43:34 +0900
+Message-ID: <56FA5C56.9080009@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wm0-f53.google.com ([74.125.82.53]:37851 "EHLO
-	mail-wm0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932127AbcC2Kbq (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 29 Mar 2016 06:31:46 -0400
-Received: by mail-wm0-f53.google.com with SMTP id p65so19614073wmp.0
-        for <linux-mmc@vger.kernel.org>; Tue, 29 Mar 2016 03:31:45 -0700 (PDT)
-In-Reply-To: <CAOMZO5BXRhc4hV52hnBDRL1nr1SnnTumf_8S2cHOGovVJF+yBA@mail.gmail.com>
+Received: from mailout4.samsung.com ([203.254.224.34]:35211 "EHLO
+	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751450AbcC2Kni (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 29 Mar 2016 06:43:38 -0400
+Received: from epcpsbgr1.samsung.com
+ (u141.gpu120.samsung.co.kr [203.254.230.141])
+ by mailout4.samsung.com (Oracle Communications Messaging Server 7.0.5.31.0
+ 64bit (built May  5 2014))
+ with ESMTP id <0O4S01IQVR4M01D0@mailout4.samsung.com> for
+ linux-mmc@vger.kernel.org; Tue, 29 Mar 2016 19:43:34 +0900 (KST)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Laszlo Fiat <laszlo.fiat@gmail.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Fabio Estevam <festevam@gmail.com>, Russell King <rmk+kernel@arm.linux.org.uk>, Michael Turquette <mturquette@baylibre.com>
+To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Shawn Lin <shawn.lin@rock-chips.com>, Adrian Hunter <adrian.hunter@intel.com>
 
-+Russell, Mike
+This patch is just RFC. I want to know opinions.
 
-On 24 March 2016 at 18:50, Fabio Estevam <festevam@gmail.com> wrote:
-> On Thu, Mar 24, 2016 at 2:45 PM, Laszlo Fiat <laszlo.fiat@gmail.com> wrote:
->> Hello,
->>
->> The original issue I reported on 17 Feb is that the SDIO WIFI card is
->> not detected with 4.5RC and now mainline 4.5.0 kernel on baytrail
->> tablets.
->> BzukTuk commented on the bug report, that he has bisected the problem,
->> and found that reverting  patch
->> 520bd7a8b4152aacfbd34eb7f7a447354b631039 ("mmc: core:
->> Optimize boot time by detecting cards simultaneously")  solves the problem.
->> I tested this, by compiling a 4.5.0 kernel with that patch reverted,
->> and the SDIO WiFi works that way.
->
-> Adding Ulf on Cc.
+Now, index of mmcblk is allocated in accordance with probing time.
+If want to use the mmcblk1 for some device, it can use alias.
 
->From earlier discussions [1], it seems like Russell pointed out a mmc
-pwrseq related bug, but there seems to be yet another issue here.
+aliases {
+	mmc0 = &mmc0;	/* mmcblk0 for eMMC */
+	mmc1 = &mmc2;	/* mmcblk1 for SD */
+	mmc2 = &mmc1;	/* mmcblk2 for SDIO*/
+};
 
-The bisected bad commit 520bd7a8b415 ("mmc: core: Optimize boot time
-by detecting cards simultaneously"), affects the timing and then maybe
-also the order of how cards (mmc, sd, sdio) may be detected.
+If there are no corresponding values, it might be allocated with
+existing scheme.
 
-More precisely SD/(e)MMC cards may get different block ids (mmcblk[n])
-than they had before. According the information from the logs in
-bugzilla [2], a qualified guess is that the firmware to the SDIO WLAN
-chip is loaded from an hardcoded path. Since that path gets changed,
-the firmware can't be found and loaded, right?
+Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+---
+ Documentation/devicetree/bindings/mmc/mmc.txt | 11 +++++++++++
+ drivers/mmc/card/block.c                      | 17 ++++++++++++++++-
+ 2 files changed, 27 insertions(+), 1 deletion(-)
 
-So, just to be clear, there has *never* been any deterministic way to
-always get the same mmc block id for a card. If hardcoded paths have
-worked, it's because of luck! Let me elaborate a bit on that.
-
-Earlier and with commit 520bd7a8b415, the probe order (a successful
-probe) of the mmc host device and whether removable cards are present
-or not, affects the mmc block id. The change that commit 520bd7a8b415
-introduces is that card detection can now happen simultaneously, thus
-it adds another parameter that affects the mmc block id.
-
-Unless I am mistaken, the hard coded paths should be fixed to use
-UUID/PARTUUID in favour of reverting 520bd7a8b415.
-
-Kind regards
-Uffe
-
-[1]
-http://comments.gmane.org/gmane.linux.kernel.mmc/36045
-
-[2]
-https://bugzilla.kernel.org/show_bug.cgi?id=112571
+diff --git a/Documentation/devicetree/bindings/mmc/mmc.txt b/Documentation/devicetree/bindings/mmc/mmc.txt
+index ed23b9b..e37ea29 100644
+--- a/Documentation/devicetree/bindings/mmc/mmc.txt
++++ b/Documentation/devicetree/bindings/mmc/mmc.txt
+@@ -71,6 +71,10 @@ Optional SDIO properties:
+ - wakeup-source: Enables wake up of host system on SDIO IRQ assertion
+ 		 (Legacy property supported: "enable-sdio-wakeup")
+ 
++Aliases (Optional):
++- If you want to use the fixed index for block device like mmcblkX, should be
++represented in the aliases node using following format "mmc(X)".
++(X is an unique number for the alias.)
+ 
+ MMC power sequences:
+ --------------------
+@@ -145,3 +149,10 @@ mmc3: mmc@01c12000 {
+ 		interrupt-names = "host-wake";
+ 	};
+ };
++
++Example with aliases nodes:
++
++aliases {
++	mmc0 = &mmc0;	/* Fixed to mmcblk0 for &mmc0 */
++	mmc1 = &mmc2;	/* Fixed to mmcblk1 for &mmc2 */
++};
+diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+index 3bdbe50..6a40de5 100644
+--- a/drivers/mmc/card/block.c
++++ b/drivers/mmc/card/block.c
+@@ -35,6 +35,7 @@
+ #include <linux/capability.h>
+ #include <linux/compat.h>
+ #include <linux/pm_runtime.h>
++#include <linux/of.h>
+ 
+ #include <linux/mmc/ioctl.h>
+ #include <linux/mmc/card.h>
+@@ -2190,6 +2191,7 @@ static struct mmc_blk_data *mmc_blk_alloc_req(struct mmc_card *card,
+ {
+ 	struct mmc_blk_data *md;
+ 	int devidx, ret;
++	int idx = 0;
+ 
+ 	devidx = find_first_zero_bit(dev_use, max_devices);
+ 	if (devidx >= max_devices)
+@@ -2209,7 +2211,20 @@ static struct mmc_blk_data *mmc_blk_alloc_req(struct mmc_card *card,
+ 	 * index anymore so we keep track of a name index.
+ 	 */
+ 	if (!subname) {
+-		md->name_idx = find_first_zero_bit(name_use, max_devices);
++		if (card->dev.parent->parent->of_node)
++			idx = of_alias_get_id(card->dev.parent->parent->of_node,
++					"mmc");
++
++		if (idx < 0)
++			md->name_idx = find_first_zero_bit(name_use,
++					max_devices);
++		else {
++			if (test_bit(idx, name_use))
++				md->name_idx = find_first_zero_bit(name_use,
++						max_devices);
++			else
++				md->name_idx = (unsigned int)idx;
++		}
+ 		__set_bit(md->name_idx, name_use);
+ 	} else
+ 		md->name_idx = ((struct mmc_blk_data *)
+-- 
+1.9.1
