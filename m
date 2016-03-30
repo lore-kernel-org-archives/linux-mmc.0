@@ -1,125 +1,84 @@
-From: Mark Brown <broonie@kernel.org>
-Subject: Re: [PATCH 2/2] regulator: core: Ensure we are at least in bounds
- for our constraints
-Date: Wed, 30 Mar 2016 08:25:00 -0700
-Message-ID: <20160330152500.GU2350@sirena.org.uk>
-References: <56F0624C.8010004@gmail.com>
- <CAJKOXPd5h0Cq++OxdiXytNJH94PN4Kh_wM3M=p3JdU1m_qyFTA@mail.gmail.com>
- <CAJKOXPcBOT_8NOH-=sEHSP0Rc+=Dvz-aqVTsBTMKg-VNWqQotw@mail.gmail.com>
- <CAJAp7OgGQ3qm-_QhydvN0n6QeNoHFdso4zOk41qvVJhKNeRn8Q@mail.gmail.com>
- <20160327090859.GH5028@sirena.org.uk>
- <CAMuHMdXuy2TxACTcsgOpZvrJEeTSQbCgCUmS9PXfBhhZfgbBBA@mail.gmail.com>
- <20160329145823.GK2350@sirena.org.uk>
- <CAMuHMdXx_=LzH7w+9u=o3WZ-qVPqMA2LDCeanvdGs-ywXRCy_A@mail.gmail.com>
- <20160329182725.GD2350@sirena.org.uk>
- <HE1PR0401MB180138D15E4D2101330543DC90980@HE1PR0401MB1801.eurprd04.prod.outlook.com>
+From: Enric Balletbo Serra <eballetbo@gmail.com>
+Subject: Re: [PATCH] mmc: dw_mmc: Wait for data transfer after response errors
+Date: Wed, 30 Mar 2016 19:16:18 +0200
+Message-ID: <CAFqH_53Dsm5Cd6XzLai=_zGSvjQ_-uO4jQGKpBp-crztTXc-mg@mail.gmail.com>
+References: <CAFqH_53X-cAP4O7PeSOyDybAG9CHQGoPkUE76CacGjVV4cX6Pg@mail.gmail.com>
+	<CAD=FV=XBZr9q9CoodewrUhChuoKSmwR4viGx+-htq+ZHCA066w@mail.gmail.com>
+	<CAFqH_51=a7qsLFv_v3uDTsQzz8YD=GiAo3SUcR6rW_MObm=M7Q@mail.gmail.com>
+	<20160324153056.GT19428@n2100.arm.linux.org.uk>
+	<CAD=FV=VkQKaVBdR6gaoeXDso5L37aGaXV717=y=0tyAMwigpbA@mail.gmail.com>
+	<20160324162220.GV19428@n2100.arm.linux.org.uk>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha256;
-	protocol="application/pgp-signature"; boundary="Jp4gq2voFtVFKZdE"
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <HE1PR0401MB180138D15E4D2101330543DC90980@HE1PR0401MB1801.eurprd04.prod.outlook.com>
-Sender: linux-samsung-soc-owner@vger.kernel.org
-To: Haibo Chen <haibo.chen@nxp.com>
-Cc: Geert Uytterhoeven <geert@linux-m68k.org>, Bjorn Andersson <bjorn@kryo.se>, Krzysztof Kozlowski <k.kozlowski@samsung.com>, Ivaylo Dimitrov <ivo.g.dimitrov.75@gmail.com>, Liam Girdwood <lgirdwood@gmail.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, linux-samsung-soc <linux-samsung-soc@vger.kernel.org>, Javier Martinez Canillas <javier@osg.samsung.com>, Marek Szyprowski <m.szyprowski@samsung.com>, "linux-renesas-soc@vger.kernel.org" <linux-renesas-soc@vger.kernel.org>
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-ig0-f194.google.com ([209.85.213.194]:34524 "EHLO
+	mail-ig0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753393AbcC3RQT (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 30 Mar 2016 13:16:19 -0400
+In-Reply-To: <20160324162220.GV19428@n2100.arm.linux.org.uk>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Russell King - ARM Linux <linux@arm.linux.org.uk>
+Cc: Doug Anderson <dianders@chromium.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Alim Akhtar <alim.akhtar@gmail.com>, Jaehoon Chung <jh80.chung@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>, Alim Akhtar <alim.akhtar@samsung.com>, Sonny Rao <sonnyrao@chromium.org>, Andrew Bresticker <abrestic@chromium.org>, Heiko Stuebner <heiko@sntech.de>, Addy Ke <addy.ke@rock-chips.com>, Alexandru Stan <amstan@chromium.org>, Chris Zhong <zyw@rock-chips.com>, Caesar Wang <wxt@rock-chips.com>, Javier Martinez Canillas <javier@osg.samsung.com>
+
+2016-03-24 17:22 GMT+01:00 Russell King - ARM Linux <linux@arm.linux.org.uk>:
+> On Thu, Mar 24, 2016 at 09:06:45AM -0700, Doug Anderson wrote:
+>> Russell,
+> ...
+>> Presumably this is similar to what you saw: the host saw the CRC error
+>> but the card knew nothing about it.  Sending the stop command during
+>> this time confused the card.  Presumably the card was in transfer
+>> state during this time?
+>
+> If the card was in transfer state for a command which expects a stop
+> command, and that stop command was issued after the card entered
+> the transfer state, then I'd expect the card to handle it... though
+> there's always the firmware bug issue.
+>
+> If the card hadn't entered transfer state at the time the stop command
+> was issued.. I think that's more likely to hit card firmware issues.
+>
+> With the tuning commands, there's another case you can hit though:
+> the data transfer may have completed before you get around to sending
+> the stop command.
+>
+> That's why, for sdhci, I came to the conclusion that waiting for the
+> data transfer to complete or timeout was the best solution for SDHCI.
+>
+
+In fact I only saw the problem with dw_mmc-exynos, on dw_mmc-rockchip
+it doesn't happen because it enables the DW_MCI_QUIRK_BROKEN_DTO
+behaviour. What does this is use a kernel timer to signal when DTO
+interrupt does NOT come. Note that if I disable this quirk I can also
+saw the problem on rockchip.
+
+> Maybe, if sending a STOP command does cause card firmware issues, then:
+>
+> 1) it provides evidence that trying to send a stop command on response
+>    CRC error is the wrong thing to do (it was talked about making SDHCI
+>    do this.)
+>
+
+Seems the same here, so guess is the wrong thing to do.
+
+> 2) it suggests that the solution I came up with for SDHCI is the better
+>    solution, rather than trying to immediately recover the situation by
+>    sending a STOP command.
+>
+
+I'm wondering if just enable this quirk on exynos too is the proper
+solution. Unfortunately I don't have enough documentation to check
+differences between those controllers.
+Also will really help have access to some hardware that uses
+dw_mmc-pltfm to check if, like on exynos, same issue is triggered.
+Anyone with the hardware who can do some tests?
 
 
---Jp4gq2voFtVFKZdE
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
-
-On Wed, Mar 30, 2016 at 09:07:21AM +0000, Haibo Chen wrote:
-
-Please fix your mail client to word wrap within paragraphs at something
-substantially less than 80 columns.  Doing this makes your messages much
-easier to read and reply to.
-
-> In our sdhci.c, we call the function=20
-> regulator_set_voltage ---> regulator_set_voltage_unlocked(struct regulato=
-r *regulator, int min_uV, int max_uV)
-> here, the parameter min_uV is 3300000, and the max_uV is 3400000
->=20
-> currently with your patch (the upper operator is &&), when insert a SD3.0=
- card,=20
-> it will do the sanity check, and return -EINVAL
-
-> but when I change the upper operator from && to !=3D,=20
-> before the sanity check, it will first get the current_uV, and then go to=
- out.
->=20
-> I'm not familiar with regulator common code. Hope the upper describe can =
-help you debug this issue.
-
-No, that's not helping clarify anything.  To repeat what I said to Geert=20
-this patch changes code that is only called when the regulator is
-probed.  This means that the changed code is not running when the SDHCI
-code is running.  You need to investigate what exactly is causing the
-error.
-
-Just randomly thrashing around with a separate bit of code with no
-coharent explanation for what you think is happening is not helping
-here, we need some analysis of what is going on.  The change you are
-both proposing is guaranteed to break other boards since it means that
-the case we supported originally where we set a specific voltage that is
-specified by setting equal minimum and maximum constraints is no longer
-going have the voltage applied.
-
-Having taken another look I *suspect* that the SDHCI code is broken in
-the way it enumerates the set of voltages that can be set and that this
-will probably trigger in other situations where the set of voltages that
-can be set is limited but I can't put my finger on it, someone with the
-ability to run the code will need to investigate.
-
-The following patch *might* help the SDHCI but I'm just guessing and
-like I say it looks like this is flagging up a problem in the SDHCI
-code.
-
-diff --git a/drivers/regulator/of_regulator.c b/drivers/regulator/of_regula=
-tor.c
-index f45106a44635..cd828dbf9d52 100644
---- a/drivers/regulator/of_regulator.c
-+++ b/drivers/regulator/of_regulator.c
-@@ -43,10 +43,12 @@ static void of_get_regulation_constraints(struct device=
-_node *np,
- 		constraints->max_uV =3D pval;
-=20
- 	/* Voltage change possible? */
--	if (constraints->min_uV && constraints->max_uV) {
-+	if (constraints->min_uV !=3D constraints->max_uV)
- 		constraints->valid_ops_mask |=3D REGULATOR_CHANGE_VOLTAGE;
-+
-+	/* Do we have a voltage range, if so try to apply it? */
-+	if (constraints->min_uV && constraints->max_uV)
- 		constraints->apply_uV =3D true;
--	}
-=20
- 	if (!of_property_read_u32(np, "regulator-microvolt-offset", &pval))
- 		constraints->uV_offset =3D pval;
-
-> > -----Original Message-----
-> > From: linux-mmc-owner@vger.kernel.org [mailto:linux-mmc-
-> > owner@vger.kernel.org] On Behalf Of Mark Brown
-
-Please don't top post, reply in line with needed context.  This allows
-readers to readily follow the flow of conversation and understand what
-you are talking about and also helps ensure that everything in the
-discussion is being addressed.
-
---Jp4gq2voFtVFKZdE
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2
-
-iQEcBAEBCAAGBQJW++/JAAoJECTWi3JdVIfQLAIH/3n53T8m+WIzN63kYqRK6+Wc
-DuTrCqo5x+lPHk9d66lvu9YjqvQn0jZo/M4dmi7wYUQFnMxl68UobN6D0xHFwSyF
-h6qcS6RxeXrPoJREBt4ppGqkVhI1tWDktwqPWDerEE61DjTces8fHTkh1f7DjKL1
-OBxPf++CXtrZkrMrsM/JML0uwDp5B3S97T1Mka5vMigjEb1/dxVOkMpjn4f/ky8x
-aArLFblsSMrQuOo3IpTFC157KD2LL9Wqz21/cx1bOUr4gx/OyIUFflQauxKGUQFj
-G6AN+Vv62sd+5DDqq+2fEHe/xbmrTipkztZkuzO7f8/LBktpk8BM90abTtfTynI=
-=3yX7
------END PGP SIGNATURE-----
-
---Jp4gq2voFtVFKZdE--
+> Maybe dw-mmc can do something similar, but with the lack of data transfer
+> timeout, maybe it's possible to do something with a kernel timer instead,
+> and check what the hardware is doing after a response CRC error?
+>
+> --
+> RMK's Patch system: http://www.arm.linux.org.uk/developer/patches/
+> FTTC broadband for 0.8mile line: currently at 9.6Mbps down 400kbps up
+> according to speedtest.net.
