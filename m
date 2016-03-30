@@ -1,63 +1,148 @@
-From: Mark Brown <broonie@kernel.org>
-Subject: Re: [PATCH 2/2] regulator: core: Ensure we are at least in bounds
- for our constraints
-Date: Tue, 29 Mar 2016 11:27:25 -0700
-Message-ID: <20160329182725.GD2350@sirena.org.uk>
-References: <1458587912-32665-1-git-send-email-broonie@kernel.org>
- <1458587912-32665-2-git-send-email-broonie@kernel.org>
- <56F0624C.8010004@gmail.com>
- <CAJKOXPd5h0Cq++OxdiXytNJH94PN4Kh_wM3M=p3JdU1m_qyFTA@mail.gmail.com>
- <CAJKOXPcBOT_8NOH-=sEHSP0Rc+=Dvz-aqVTsBTMKg-VNWqQotw@mail.gmail.com>
- <CAJAp7OgGQ3qm-_QhydvN0n6QeNoHFdso4zOk41qvVJhKNeRn8Q@mail.gmail.com>
- <20160327090859.GH5028@sirena.org.uk>
- <CAMuHMdXuy2TxACTcsgOpZvrJEeTSQbCgCUmS9PXfBhhZfgbBBA@mail.gmail.com>
- <20160329145823.GK2350@sirena.org.uk>
- <CAMuHMdXx_=LzH7w+9u=o3WZ-qVPqMA2LDCeanvdGs-ywXRCy_A@mail.gmail.com>
+From: Shawn Lin <shawn.lin@rock-chips.com>
+Subject: Re: [RFC PATCH] mmc: block: Support the fixed index for mmcblk with
+ aliases nodes
+Date: Wed, 30 Mar 2016 08:15:30 +0800
+Message-ID: <56FB1AA2.8050005@rock-chips.com>
+References: <56FA5C56.9080009@samsung.com> <20160329184920.29a240fc@xhacker>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha256;
-	protocol="application/pgp-signature"; boundary="7QsOHKuLbhbLTwLB"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <CAMuHMdXx_=LzH7w+9u=o3WZ-qVPqMA2LDCeanvdGs-ywXRCy_A@mail.gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Geert Uytterhoeven <geert@linux-m68k.org>
-Cc: Bjorn Andersson <bjorn@kryo.se>, Krzysztof Kozlowski <k.kozlowski@samsung.com>, Ivaylo Dimitrov <ivo.g.dimitrov.75@gmail.com>, Liam Girdwood <lgirdwood@gmail.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, linux-samsung-soc <linux-samsung-soc@vger.kernel.org>, Javier Martinez Canillas <javier@osg.samsung.com>, Marek Szyprowski <m.szyprowski@samsung.com>, linux-renesas-soc@vger.kernel.org
+Content-Type: text/plain; charset=UTF-8;
+	format=flowed
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from lucky1.263xmail.com ([211.157.147.132]:50491 "EHLO
+	lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753102AbcC3APp (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 29 Mar 2016 20:15:45 -0400
+In-Reply-To: <20160329184920.29a240fc@xhacker>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Jisheng Zhang <jszhang@marvell.com>, Jaehoon Chung <jh80.chung@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: shawn.lin@rock-chips.com, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>
+
+=E5=9C=A8 2016/3/29 18:49, Jisheng Zhang =E5=86=99=E9=81=93:
+> Hi Jaehoon,
+>
+> On Tue, 29 Mar 2016 19:43:34 +0900 Jaehoon Chung wrote:
+>
+>> This patch is just RFC. I want to know opinions.
+>>
+>> Now, index of mmcblk is allocated in accordance with probing time.
+>> If want to use the mmcblk1 for some device, it can use alias.
+>>
+>> aliases {
+>> 	mmc0 =3D &mmc0;	/* mmcblk0 for eMMC */
+>> 	mmc1 =3D &mmc2;	/* mmcblk1 for SD */
+>> 	mmc2 =3D &mmc1;	/* mmcblk2 for SDIO*/
+>> };
+>
+> I like this feature and we do need it. In the past, we have to put em=
+mc dt node
+> before the sd node, but on our platform, the register base of sdhc ho=
+st for emmc
+> is higher than the one for sd, putting emmc dt node before sd looks a=
+ bit
+> strange, but we have no better solutions.
+>
+
+:) That is also what I suffered currently. I have to prepare two
+seperate firmware with two diff fstab files to assign the mount point
+since sometime I need to boot from sd, but sometimes from emmc....
+With this patch, I only need to dtc a new dtb... quite simple.
+
+> Thanks,
+> Jisheng
+>
+>>
+>> If there are no corresponding values, it might be allocated with
+>> existing scheme.
+>>
+>> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+>> ---
+>>   Documentation/devicetree/bindings/mmc/mmc.txt | 11 +++++++++++
+>>   drivers/mmc/card/block.c                      | 17 +++++++++++++++=
++-
+>>   2 files changed, 27 insertions(+), 1 deletion(-)
+>>
+>> diff --git a/Documentation/devicetree/bindings/mmc/mmc.txt b/Documen=
+tation/devicetree/bindings/mmc/mmc.txt
+>> index ed23b9b..e37ea29 100644
+>> --- a/Documentation/devicetree/bindings/mmc/mmc.txt
+>> +++ b/Documentation/devicetree/bindings/mmc/mmc.txt
+>> @@ -71,6 +71,10 @@ Optional SDIO properties:
+>>   - wakeup-source: Enables wake up of host system on SDIO IRQ assert=
+ion
+>>   		 (Legacy property supported: "enable-sdio-wakeup")
+>>
+>> +Aliases (Optional):
+>> +- If you want to use the fixed index for block device like mmcblkX,=
+ should be
+>> +represented in the aliases node using following format "mmc(X)".
+>> +(X is an unique number for the alias.)
+>>
+>>   MMC power sequences:
+>>   --------------------
+>> @@ -145,3 +149,10 @@ mmc3: mmc@01c12000 {
+>>   		interrupt-names =3D "host-wake";
+>>   	};
+>>   };
+>> +
+>> +Example with aliases nodes:
+>> +
+>> +aliases {
+>> +	mmc0 =3D &mmc0;	/* Fixed to mmcblk0 for &mmc0 */
+>> +	mmc1 =3D &mmc2;	/* Fixed to mmcblk1 for &mmc2 */
+>> +};
+>> diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+>> index 3bdbe50..6a40de5 100644
+>> --- a/drivers/mmc/card/block.c
+>> +++ b/drivers/mmc/card/block.c
+>> @@ -35,6 +35,7 @@
+>>   #include <linux/capability.h>
+>>   #include <linux/compat.h>
+>>   #include <linux/pm_runtime.h>
+>> +#include <linux/of.h>
+>>
+>>   #include <linux/mmc/ioctl.h>
+>>   #include <linux/mmc/card.h>
+>> @@ -2190,6 +2191,7 @@ static struct mmc_blk_data *mmc_blk_alloc_req(=
+struct mmc_card *card,
+>>   {
+>>   	struct mmc_blk_data *md;
+>>   	int devidx, ret;
+>> +	int idx =3D 0;
+>>
+>>   	devidx =3D find_first_zero_bit(dev_use, max_devices);
+>>   	if (devidx >=3D max_devices)
+>> @@ -2209,7 +2211,20 @@ static struct mmc_blk_data *mmc_blk_alloc_req=
+(struct mmc_card *card,
+>>   	 * index anymore so we keep track of a name index.
+>>   	 */
+>>   	if (!subname) {
+>> -		md->name_idx =3D find_first_zero_bit(name_use, max_devices);
+>> +		if (card->dev.parent->parent->of_node)
+>> +			idx =3D of_alias_get_id(card->dev.parent->parent->of_node,
+>> +					"mmc");
+>> +
+>> +		if (idx < 0)
+>> +			md->name_idx =3D find_first_zero_bit(name_use,
+>> +					max_devices);
+>> +		else {
+>> +			if (test_bit(idx, name_use))
+>> +				md->name_idx =3D find_first_zero_bit(name_use,
+>> +						max_devices);
+>> +			else
+>> +				md->name_idx =3D (unsigned int)idx;
+>> +		}
+>>   		__set_bit(md->name_idx, name_use);
+>>   	} else
+>>   		md->name_idx =3D ((struct mmc_blk_data *)
+>
+>
+>
+>
 
 
---7QsOHKuLbhbLTwLB
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+--=20
+Best Regards
+Shawn Lin
 
-On Tue, Mar 29, 2016 at 08:05:34PM +0200, Geert Uytterhoeven wrote:
-
->         sh_mobile_sdhi ee100000.sd: Got WP GPIO
-> ======> sh_mobile_sdhi ee100000.sd: could not set regulator OCR (-22)
->         gpio_rcar e6055400.gpio: sense irq = 6, type = 3
->         sh_mobile_sdhi ee100000.sd: mmc0 base at 0xee100000 clock rate 97 MHz
-
-> The line marked with the arrow is introduced by the changed check, and looks
-> to be the origin of the failure.
-
-This isn't making any sense.  Why would a change in how we apply voltage
-constraints on initial probe of the regulator have an impact here?  The
-changed code shouldn't even be executing at the point where the SDHCI
-driver is trying to use the regulator.  There's something else going on
-here.
-
---7QsOHKuLbhbLTwLB
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2
-
-iQEcBAEBCAAGBQJW+skLAAoJECTWi3JdVIfQ3GcH/1d/JVUnb6U4nra2rhLzVTiF
-UPwWSW9pkuSrDgS0R5TZsK2Mylgq91/NOj3nVbxHg58VVSyTZL0i6QqN4YypfHpa
-4hN4/A8e0vRX+s2SXKM8lg2c0NlPEaAbPHLg+xm4lp3ZfZwprIEYmPCII732J88O
-Y6NfIM/WbKF27PsdIYjEuclevciBma5jCt4NMNpvFLX3jZO2UKU0ph0A5dcOtpkD
-BKQFvJ8nagSt9o8IiWPRVF2sdQnAgQCR/EnrXqZXlebM6JFjCb3UuHVwzm9Y9ITA
-8PbCwSn6KagpIjv0ipLfW9E2gPQJ0qvPV01weyWSTlAyBx1e0CvKMHqJ8iBbQdc=
-=Wh6y
------END PGP SIGNATURE-----
-
---7QsOHKuLbhbLTwLB--
