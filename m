@@ -1,144 +1,125 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH v3 2/2] mmc: dw_mmc: add resets support to dw_mmc
-Date: Wed, 30 Mar 2016 20:40:31 +0900
-Message-ID: <56FBBB2F.5030308@samsung.com>
-References: <1459322696-29919-1-git-send-email-guodong.xu@linaro.org>
- <1459322696-29919-3-git-send-email-guodong.xu@linaro.org>
+From: Mark Brown <broonie@kernel.org>
+Subject: Re: [PATCH 2/2] regulator: core: Ensure we are at least in bounds
+ for our constraints
+Date: Wed, 30 Mar 2016 08:25:00 -0700
+Message-ID: <20160330152500.GU2350@sirena.org.uk>
+References: <56F0624C.8010004@gmail.com>
+ <CAJKOXPd5h0Cq++OxdiXytNJH94PN4Kh_wM3M=p3JdU1m_qyFTA@mail.gmail.com>
+ <CAJKOXPcBOT_8NOH-=sEHSP0Rc+=Dvz-aqVTsBTMKg-VNWqQotw@mail.gmail.com>
+ <CAJAp7OgGQ3qm-_QhydvN0n6QeNoHFdso4zOk41qvVJhKNeRn8Q@mail.gmail.com>
+ <20160327090859.GH5028@sirena.org.uk>
+ <CAMuHMdXuy2TxACTcsgOpZvrJEeTSQbCgCUmS9PXfBhhZfgbBBA@mail.gmail.com>
+ <20160329145823.GK2350@sirena.org.uk>
+ <CAMuHMdXx_=LzH7w+9u=o3WZ-qVPqMA2LDCeanvdGs-ywXRCy_A@mail.gmail.com>
+ <20160329182725.GD2350@sirena.org.uk>
+ <HE1PR0401MB180138D15E4D2101330543DC90980@HE1PR0401MB1801.eurprd04.prod.outlook.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout1.samsung.com ([203.254.224.24]:51372 "EHLO
-	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752319AbcC3Lkf (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 30 Mar 2016 07:40:35 -0400
-In-reply-to: <1459322696-29919-3-git-send-email-guodong.xu@linaro.org>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: multipart/signed; micalg=pgp-sha256;
+	protocol="application/pgp-signature"; boundary="Jp4gq2voFtVFKZdE"
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <HE1PR0401MB180138D15E4D2101330543DC90980@HE1PR0401MB1801.eurprd04.prod.outlook.com>
+Sender: linux-samsung-soc-owner@vger.kernel.org
+To: Haibo Chen <haibo.chen@nxp.com>
+Cc: Geert Uytterhoeven <geert@linux-m68k.org>, Bjorn Andersson <bjorn@kryo.se>, Krzysztof Kozlowski <k.kozlowski@samsung.com>, Ivaylo Dimitrov <ivo.g.dimitrov.75@gmail.com>, Liam Girdwood <lgirdwood@gmail.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, linux-samsung-soc <linux-samsung-soc@vger.kernel.org>, Javier Martinez Canillas <javier@osg.samsung.com>, Marek Szyprowski <m.szyprowski@samsung.com>, "linux-renesas-soc@vger.kernel.org" <linux-renesas-soc@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Guodong Xu <guodong.xu@linaro.org>, shawn.lin@rock-chips.com, "robh+dt@kernel.org" <robh+dt@kernel.org>, pawel.moll@arm.com, mark.rutland@arm.com, ijc+devicetree@hellion.org.uk, galak@codeaurora.org, ulf.hansson@linaro.org
-Cc: devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, Xinwei Kong <kong.kongxinwei@hisilicon.com>, Zhangfei Gao <zhangfei.gao@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-modified Rob's mail address.
 
-On 03/30/2016 04:24 PM, Guodong Xu wrote:
-> mmc registers may in abnormal state if mmc is used in bootloader,
-> eg. to support booting from eMMC. So we need reset mmc registers
-> when kernel boots up, instead of assuming mmc is in clean state.
+--Jp4gq2voFtVFKZdE
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-Do you mean mmc(card side) register or dwmmc host controller's register on host side?
+On Wed, Mar 30, 2016 at 09:07:21AM +0000, Haibo Chen wrote:
 
-According to dwmmc controller TMR, there are two reset signals. One is reset_n, other is rst_n.
-It seems this patch is relevant to reset_n(For host). (rst_n is hardware reset for card.)
+Please fix your mail client to word wrap within paragraphs at something
+substantially less than 80 columns.  Doing this makes your messages much
+easier to read and reply to.
 
-So could you clarify better? Then it's helpful to me for understanding..
+> In our sdhci.c, we call the function=20
+> regulator_set_voltage ---> regulator_set_voltage_unlocked(struct regulato=
+r *regulator, int min_uV, int max_uV)
+> here, the parameter min_uV is 3300000, and the max_uV is 3400000
+>=20
+> currently with your patch (the upper operator is &&), when insert a SD3.0=
+ card,=20
+> it will do the sanity check, and return -EINVAL
 
-It seems that it means "mmc" is card, mmc registers is host controller register, right?
+> but when I change the upper operator from && to !=3D,=20
+> before the sanity check, it will first get the current_uV, and then go to=
+ out.
+>=20
+> I'm not familiar with regulator common code. Hope the upper describe can =
+help you debug this issue.
 
-> 
-> With this patch, user can add a 'resets' property into dw_mmc dts
-> node. When driver parse_dt and probe, it calls reset API to
-> deassert the 'reset' of dw_mmc host controller. When probe error or
-> remove, it calls reset API to assert it.
-> 
-> Please also refer to Documentation/devicetree/bindings/reset/reset.txt
-> 
-> Signed-off-by: Guodong Xu <guodong.xu@linaro.org>
-> Signed-off-by: Xinwei Kong <kong.kongxinwei@hisilicon.com>
-> Signed-off-by: Zhangfei Gao <zhangfei.gao@linaro.org>
-> ---
->  drivers/mmc/host/dw_mmc.c  | 20 +++++++++++++++++++-
->  include/linux/mmc/dw_mmc.h |  6 ++++--
->  2 files changed, 23 insertions(+), 3 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-> index 242f9a0..d0a4535 100644
-> --- a/drivers/mmc/host/dw_mmc.c
-> +++ b/drivers/mmc/host/dw_mmc.c
-> @@ -2878,6 +2878,13 @@ static struct dw_mci_board *dw_mci_parse_dt(struct dw_mci *host)
->  	if (!pdata)
->  		return ERR_PTR(-ENOMEM);
->  
-> +	/* find reset controller when exist */
-> +	pdata->rstc = devm_reset_control_get_optional(dev, NULL);
-> +	if (IS_ERR(pdata->rstc)) {
-> +		if (PTR_ERR(pdata->rstc) == -EPROBE_DEFER)
-> +			return ERR_PTR(-EPROBE_DEFER);
-> +	}
-> +
->  	/* find out number of slots supported */
->  	of_property_read_u32(np, "num-slots", &pdata->num_slots);
->  
-> @@ -2949,7 +2956,9 @@ int dw_mci_probe(struct dw_mci *host)
->  
->  	if (!host->pdata) {
->  		host->pdata = dw_mci_parse_dt(host);
-> -		if (IS_ERR(host->pdata)) {
-> +		if (PTR_ERR(host->pdata) == -EPROBE_DEFER) {
-> +			return -EPROBE_DEFER;
-> +		} else if (IS_ERR(host->pdata)) {
->  			dev_err(host->dev, "platform data not available\n");
->  			return -EINVAL;
->  		}
-> @@ -3012,6 +3021,9 @@ int dw_mci_probe(struct dw_mci *host)
->  		}
->  	}
->  
-> +	if (!IS_ERR(host->pdata->rstc))
-> +		reset_control_deassert(host->pdata->rstc);
-> +
->  	setup_timer(&host->cmd11_timer,
->  		    dw_mci_cmd11_timer, (unsigned long)host);
->  
-> @@ -3164,6 +3176,9 @@ err_dmaunmap:
->  	if (host->use_dma && host->dma_ops->exit)
->  		host->dma_ops->exit(host);
->  
-> +	if (!IS_ERR(host->pdata->rstc))
-> +		reset_control_assert(host->pdata->rstc);
+No, that's not helping clarify anything.  To repeat what I said to Geert=20
+this patch changes code that is only called when the regulator is
+probed.  This means that the changed code is not running when the SDHCI
+code is running.  You need to investigate what exactly is causing the
+error.
 
-location is correct?
+Just randomly thrashing around with a separate bit of code with no
+coharent explanation for what you think is happening is not helping
+here, we need some analysis of what is going on.  The change you are
+both proposing is guaranteed to break other boards since it means that
+the case we supported originally where we set a specific voltage that is
+specified by setting equal minimum and maximum constraints is no longer
+going have the voltage applied.
 
-> +
->  err_clk_ciu:
->  	if (!IS_ERR(host->ciu_clk))
->  		clk_disable_unprepare(host->ciu_clk);
-> @@ -3196,6 +3211,9 @@ void dw_mci_remove(struct dw_mci *host)
->  	if (host->use_dma && host->dma_ops->exit)
->  		host->dma_ops->exit(host);
->  
-> +	if (!IS_ERR(host->pdata->rstc))
-> +		reset_control_assert(host->pdata->rstc);
-> +
->  	if (!IS_ERR(host->ciu_clk))
->  		clk_disable_unprepare(host->ciu_clk);
->  
-> diff --git a/include/linux/mmc/dw_mmc.h b/include/linux/mmc/dw_mmc.h
-> index 7b41c6d..b95cd84 100644
-> --- a/include/linux/mmc/dw_mmc.h
-> +++ b/include/linux/mmc/dw_mmc.h
-> @@ -14,9 +14,10 @@
->  #ifndef LINUX_MMC_DW_MMC_H
->  #define LINUX_MMC_DW_MMC_H
->  
-> -#include <linux/scatterlist.h>
-> -#include <linux/mmc/core.h>
->  #include <linux/dmaengine.h>
-> +#include <linux/mmc/core.h>
-> +#include <linux/reset.h>
-> +#include <linux/scatterlist.h>
+Having taken another look I *suspect* that the SDHCI code is broken in
+the way it enumerates the set of voltages that can be set and that this
+will probably trigger in other situations where the set of voltages that
+can be set is limited but I can't put my finger on it, someone with the
+ability to run the code will need to investigate.
 
-Why did you touch other things?
+The following patch *might* help the SDHCI but I'm just guessing and
+like I say it looks like this is flagging up a problem in the SDHCI
+code.
 
->  
->  #define MAX_MCI_SLOTS	2
->  
-> @@ -260,6 +261,7 @@ struct dw_mci_board {
->  	/* delay in mS before detecting cards after interrupt */
->  	u32 detect_delay_ms;
->  
-> +	struct reset_control *rstc;
->  	struct dw_mci_dma_ops *dma_ops;
->  	struct dma_pdata *data;
->  };
-> 
+diff --git a/drivers/regulator/of_regulator.c b/drivers/regulator/of_regula=
+tor.c
+index f45106a44635..cd828dbf9d52 100644
+--- a/drivers/regulator/of_regulator.c
++++ b/drivers/regulator/of_regulator.c
+@@ -43,10 +43,12 @@ static void of_get_regulation_constraints(struct device=
+_node *np,
+ 		constraints->max_uV =3D pval;
+=20
+ 	/* Voltage change possible? */
+-	if (constraints->min_uV && constraints->max_uV) {
++	if (constraints->min_uV !=3D constraints->max_uV)
+ 		constraints->valid_ops_mask |=3D REGULATOR_CHANGE_VOLTAGE;
++
++	/* Do we have a voltage range, if so try to apply it? */
++	if (constraints->min_uV && constraints->max_uV)
+ 		constraints->apply_uV =3D true;
+-	}
+=20
+ 	if (!of_property_read_u32(np, "regulator-microvolt-offset", &pval))
+ 		constraints->uV_offset =3D pval;
 
+> > -----Original Message-----
+> > From: linux-mmc-owner@vger.kernel.org [mailto:linux-mmc-
+> > owner@vger.kernel.org] On Behalf Of Mark Brown
+
+Please don't top post, reply in line with needed context.  This allows
+readers to readily follow the flow of conversation and understand what
+you are talking about and also helps ensure that everything in the
+discussion is being addressed.
+
+--Jp4gq2voFtVFKZdE
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2
+
+iQEcBAEBCAAGBQJW++/JAAoJECTWi3JdVIfQLAIH/3n53T8m+WIzN63kYqRK6+Wc
+DuTrCqo5x+lPHk9d66lvu9YjqvQn0jZo/M4dmi7wYUQFnMxl68UobN6D0xHFwSyF
+h6qcS6RxeXrPoJREBt4ppGqkVhI1tWDktwqPWDerEE61DjTces8fHTkh1f7DjKL1
+OBxPf++CXtrZkrMrsM/JML0uwDp5B3S97T1Mka5vMigjEb1/dxVOkMpjn4f/ky8x
+aArLFblsSMrQuOo3IpTFC157KD2LL9Wqz21/cx1bOUr4gx/OyIUFflQauxKGUQFj
+G6AN+Vv62sd+5DDqq+2fEHe/xbmrTipkztZkuzO7f8/LBktpk8BM90abTtfTynI=
+=3yX7
+-----END PGP SIGNATURE-----
+
+--Jp4gq2voFtVFKZdE--
