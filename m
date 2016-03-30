@@ -1,105 +1,144 @@
-From: Baolin Wang <baolin.wang@linaro.org>
-Subject: Re: [PATCH v3] mmc: Provide tracepoints for request processing
-Date: Wed, 30 Mar 2016 17:42:00 +0800
-Message-ID: <CAMz4kuK=Eog9D6wtQNOHqD1puU_CQTie7a8NkseQT9P3TiuSrw@mail.gmail.com>
-References: <45a62181170848cbd00c8e863f7c84772f2a8a5c.1459147046.git.baolin.wang@linaro.org>
-	<CAPDyKFq3p37rwKHD_YwV_i0T+bAA1iiDBkm63e5McVBkO0a+3A@mail.gmail.com>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: Re: [PATCH v3 2/2] mmc: dw_mmc: add resets support to dw_mmc
+Date: Wed, 30 Mar 2016 20:40:31 +0900
+Message-ID: <56FBBB2F.5030308@samsung.com>
+References: <1459322696-29919-1-git-send-email-guodong.xu@linaro.org>
+ <1459322696-29919-3-git-send-email-guodong.xu@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-yw0-f176.google.com ([209.85.161.176]:34292 "EHLO
-	mail-yw0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751340AbcC3JmC (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 30 Mar 2016 05:42:02 -0400
-Received: by mail-yw0-f176.google.com with SMTP id h129so51281862ywb.1
-        for <linux-mmc@vger.kernel.org>; Wed, 30 Mar 2016 02:42:01 -0700 (PDT)
-In-Reply-To: <CAPDyKFq3p37rwKHD_YwV_i0T+bAA1iiDBkm63e5McVBkO0a+3A@mail.gmail.com>
+Received: from mailout1.samsung.com ([203.254.224.24]:51372 "EHLO
+	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752319AbcC3Lkf (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 30 Mar 2016 07:40:35 -0400
+In-reply-to: <1459322696-29919-3-git-send-email-guodong.xu@linaro.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Steven Rostedt <rostedt@goodmis.org>, mingo@redhat.com, Adrian Hunter <adrian.hunter@intel.com>, Yangbo Lu <yangbo.lu@freescale.com>, Andrew Morton <akpm@linux-foundation.org>, "JBottomley@Odin.com" <JBottomley@odin.com>, "Luca Porzio (lporzio)" <lporzio@micron.com>, Jon Hunter <jonathanh@nvidia.com>, Grant Grundler <grundler@chromium.org>, Jens Axboe <axboe@fb.com>, Fabian Frederick <fabf@skynet.be>, Yunpeng Gao <yunpeng.gao@intel.com>, Dan Williams <dan.j.williams@intel.com>, Rabin Vincent <rabin.vincent@axis.com>, "Dong, Chuanxiao" <chuanxiao.dong@intel.com>, Shawn Lin <shawn.lin@rock-chips.com>, =?UTF-8?Q?Heiko_St=C3=BCbner?= <heiko@sntech.de>, Doug Anderson <dianders@chromium.org>, David Jander <david@protonic.nl>, Mark Brown <broonie@kernel.org>, Linus Walleij <linus.walleij@linaro.org>, Takahiro Akashi <takahiro.akashi@linaro.org>, linux-kernel@vger.kernel
+To: Guodong Xu <guodong.xu@linaro.org>, shawn.lin@rock-chips.com, "robh+dt@kernel.org" <robh+dt@kernel.org>, pawel.moll@arm.com, mark.rutland@arm.com, ijc+devicetree@hellion.org.uk, galak@codeaurora.org, ulf.hansson@linaro.org
+Cc: devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, Xinwei Kong <kong.kongxinwei@hisilicon.com>, Zhangfei Gao <zhangfei.gao@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-On 30 March 2016 at 17:25, Ulf Hansson <ulf.hansson@linaro.org> wrote:
-> On 28 March 2016 at 08:39, Baolin Wang <baolin.wang@linaro.org> wrote:
->> This patch provides some tracepoints for the lifecycle of a mmc request from
->> starting to completion to help with performance analysis of MMC subsystem.
->>
->> Changes since v2:
->>  - Remove some redundant tracepoints which are repeated in block layer.
->>
->> Signed-off-by: Baolin Wang <baolin.wang@linaro.org>
->> ---
->>  drivers/mmc/core/core.c    |    7 +++
->>  include/trace/events/mmc.h |  129 ++++++++++++++++++++++++++++++++++++++++++++
->>  2 files changed, 136 insertions(+)
->>  create mode 100644 include/trace/events/mmc.h
->>
->> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
->> index f95d41f..7222e3f 100644
->> --- a/drivers/mmc/core/core.c
->> +++ b/drivers/mmc/core/core.c
->> @@ -36,6 +36,9 @@
->>  #include <linux/mmc/sd.h>
->>  #include <linux/mmc/slot-gpio.h>
->>
->> +#define CREATE_TRACE_POINTS
->> +#include <trace/events/mmc.h>
->> +
->>  #include "core.h"
->>  #include "bus.h"
->>  #include "host.h"
->> @@ -152,6 +155,8 @@ void mmc_request_done(struct mmc_host *host, struct mmc_request *mrq)
->>
->>                 led_trigger_event(host->led, LED_OFF);
->>
->> +               trace_mmc_request_done(host, mrq);
->> +
->
-> At this point we will lack information about "retries" and also about
-> the re-tune state. I think both would be valuable information to share
-> about each request.
->
-> So, I would suggest you to move the trace a bit further up, before the
-> if-sentence and include "retries" and the "re-tune state" via trace
-> print.
+modified Rob's mail address.
 
-Make sense. I'll add the "retries" and the "re-tune state" information
-in next version.
+On 03/30/2016 04:24 PM, Guodong Xu wrote:
+> mmc registers may in abnormal state if mmc is used in bootloader,
+> eg. to support booting from eMMC. So we need reset mmc registers
+> when kernel boots up, instead of assuming mmc is in clean state.
 
->
->>                 if (mrq->sbc) {
->>                         pr_debug("%s: req done <CMD%u>: %d: %08x %08x %08x %08x\n",
->>                                 mmc_hostname(host), mrq->sbc->opcode,
->> @@ -229,6 +234,8 @@ static int mmc_start_request(struct mmc_host *host, struct mmc_request *mrq)
->>         if (mmc_card_removed(host->card))
->>                 return -ENOMEDIUM;
->>
->> +       trace_mmc_request_start(host, mrq);
->
-> This isn't the only place a request will be started from, thus we may
-> be missing valuable information about which command/request is being
-> sent.
->
-> I would move this to __mmc_start_request() instead and similar to my
-> upper comment, please add "retries" and "re-tune state" in the trace
-> print.
+Do you mean mmc(card side) register or dwmmc host controller's register on host side?
 
-Make sense. Thanks for your comments.
+According to dwmmc controller TMR, there are two reset signals. One is reset_n, other is rst_n.
+It seems this patch is relevant to reset_n(For host). (rst_n is hardware reset for card.)
 
->
->> +
->>         if (mrq->sbc) {
->>                 pr_debug("<%s: starting CMD%u arg %08x flags %08x>\n",
->>                          mmc_hostname(host), mrq->sbc->opcode,
->>
->
-> [...]
->
-> Kind regards
-> Uffe
+So could you clarify better? Then it's helpful to me for understanding..
 
+It seems that it means "mmc" is card, mmc registers is host controller register, right?
 
+> 
+> With this patch, user can add a 'resets' property into dw_mmc dts
+> node. When driver parse_dt and probe, it calls reset API to
+> deassert the 'reset' of dw_mmc host controller. When probe error or
+> remove, it calls reset API to assert it.
+> 
+> Please also refer to Documentation/devicetree/bindings/reset/reset.txt
+> 
+> Signed-off-by: Guodong Xu <guodong.xu@linaro.org>
+> Signed-off-by: Xinwei Kong <kong.kongxinwei@hisilicon.com>
+> Signed-off-by: Zhangfei Gao <zhangfei.gao@linaro.org>
+> ---
+>  drivers/mmc/host/dw_mmc.c  | 20 +++++++++++++++++++-
+>  include/linux/mmc/dw_mmc.h |  6 ++++--
+>  2 files changed, 23 insertions(+), 3 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+> index 242f9a0..d0a4535 100644
+> --- a/drivers/mmc/host/dw_mmc.c
+> +++ b/drivers/mmc/host/dw_mmc.c
+> @@ -2878,6 +2878,13 @@ static struct dw_mci_board *dw_mci_parse_dt(struct dw_mci *host)
+>  	if (!pdata)
+>  		return ERR_PTR(-ENOMEM);
+>  
+> +	/* find reset controller when exist */
+> +	pdata->rstc = devm_reset_control_get_optional(dev, NULL);
+> +	if (IS_ERR(pdata->rstc)) {
+> +		if (PTR_ERR(pdata->rstc) == -EPROBE_DEFER)
+> +			return ERR_PTR(-EPROBE_DEFER);
+> +	}
+> +
+>  	/* find out number of slots supported */
+>  	of_property_read_u32(np, "num-slots", &pdata->num_slots);
+>  
+> @@ -2949,7 +2956,9 @@ int dw_mci_probe(struct dw_mci *host)
+>  
+>  	if (!host->pdata) {
+>  		host->pdata = dw_mci_parse_dt(host);
+> -		if (IS_ERR(host->pdata)) {
+> +		if (PTR_ERR(host->pdata) == -EPROBE_DEFER) {
+> +			return -EPROBE_DEFER;
+> +		} else if (IS_ERR(host->pdata)) {
+>  			dev_err(host->dev, "platform data not available\n");
+>  			return -EINVAL;
+>  		}
+> @@ -3012,6 +3021,9 @@ int dw_mci_probe(struct dw_mci *host)
+>  		}
+>  	}
+>  
+> +	if (!IS_ERR(host->pdata->rstc))
+> +		reset_control_deassert(host->pdata->rstc);
+> +
+>  	setup_timer(&host->cmd11_timer,
+>  		    dw_mci_cmd11_timer, (unsigned long)host);
+>  
+> @@ -3164,6 +3176,9 @@ err_dmaunmap:
+>  	if (host->use_dma && host->dma_ops->exit)
+>  		host->dma_ops->exit(host);
+>  
+> +	if (!IS_ERR(host->pdata->rstc))
+> +		reset_control_assert(host->pdata->rstc);
 
--- 
-Baolin.wang
-Best Regards
+location is correct?
+
+> +
+>  err_clk_ciu:
+>  	if (!IS_ERR(host->ciu_clk))
+>  		clk_disable_unprepare(host->ciu_clk);
+> @@ -3196,6 +3211,9 @@ void dw_mci_remove(struct dw_mci *host)
+>  	if (host->use_dma && host->dma_ops->exit)
+>  		host->dma_ops->exit(host);
+>  
+> +	if (!IS_ERR(host->pdata->rstc))
+> +		reset_control_assert(host->pdata->rstc);
+> +
+>  	if (!IS_ERR(host->ciu_clk))
+>  		clk_disable_unprepare(host->ciu_clk);
+>  
+> diff --git a/include/linux/mmc/dw_mmc.h b/include/linux/mmc/dw_mmc.h
+> index 7b41c6d..b95cd84 100644
+> --- a/include/linux/mmc/dw_mmc.h
+> +++ b/include/linux/mmc/dw_mmc.h
+> @@ -14,9 +14,10 @@
+>  #ifndef LINUX_MMC_DW_MMC_H
+>  #define LINUX_MMC_DW_MMC_H
+>  
+> -#include <linux/scatterlist.h>
+> -#include <linux/mmc/core.h>
+>  #include <linux/dmaengine.h>
+> +#include <linux/mmc/core.h>
+> +#include <linux/reset.h>
+> +#include <linux/scatterlist.h>
+
+Why did you touch other things?
+
+>  
+>  #define MAX_MCI_SLOTS	2
+>  
+> @@ -260,6 +261,7 @@ struct dw_mci_board {
+>  	/* delay in mS before detecting cards after interrupt */
+>  	u32 detect_delay_ms;
+>  
+> +	struct reset_control *rstc;
+>  	struct dw_mci_dma_ops *dma_ops;
+>  	struct dma_pdata *data;
+>  };
+> 
+
