@@ -1,99 +1,84 @@
-From: zhangfei <zhangfei.gao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH 2/2] mmc: dw_mmc: add resets support to dw_mmc
-Date: Wed, 30 Mar 2016 09:18:46 +0800
-Message-ID: <56FB2976.60205@linaro.org>
-References: <1457254062-22677-1-git-send-email-guodong.xu@linaro.org> <1457254062-22677-2-git-send-email-guodong.xu@linaro.org> <56DC3BAD.8020107@rock-chips.com> <CAFGCpxz3GfFeduaz1Dkg0WvRJWs+GHdVu8uY0-wV=RGyRfBE=A@mail.gmail.com> <56F9E6E5.9000100@kernel-upstream.org> <56FA3B70.2090902@linaro.org> <56FB21E8.30008@rock-chips.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH v3] mmc: Provide tracepoints for request processing
+Date: Wed, 30 Mar 2016 11:25:55 +0200
+Message-ID: <CAPDyKFq3p37rwKHD_YwV_i0T+bAA1iiDBkm63e5McVBkO0a+3A@mail.gmail.com>
+References: <45a62181170848cbd00c8e863f7c84772f2a8a5c.1459147046.git.baolin.wang@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8;
-	format=flowed
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <56FB21E8.30008-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>, Guodong Xu <guodong.xu-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, =?UTF-8?B?UGF3ZcWCIE1vbGw=?= <pawel.moll-5wv7dgnIgG8@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, ijc+devicetree-KcIKpvwj1kUDXYZnReoRVg@public.gmane.org, Kumar Gala <galak-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Xinwei Kong <kong.kongxinwei-C8/M+/jPZTeaMJb+Lgu22Q@public.gmane.org>
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <45a62181170848cbd00c8e863f7c84772f2a8a5c.1459147046.git.baolin.wang@linaro.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Baolin Wang <baolin.wang@linaro.org>
+Cc: rostedt@goodmis.org, mingo@redhat.com, Adrian Hunter <adrian.hunter@intel.com>, Yangbo Lu <yangbo.lu@freescale.com>, Andrew Morton <akpm@linux-foundation.org>, "JBottomley@Odin.com" <JBottomley@odin.com>, "Luca Porzio (lporzio)" <lporzio@micron.com>, Jon Hunter <jonathanh@nvidia.com>, Grant Grundler <grundler@chromium.org>, Jens Axboe <axboe@fb.com>, Fabian Frederick <fabf@skynet.be>, Yunpeng Gao <yunpeng.gao@intel.com>, Dan Williams <dan.j.williams@intel.com>, Rabin Vincent <rabin.vincent@axis.com>, "Dong, Chuanxiao" <chuanxiao.dong@intel.com>, Shawn Lin <shawn.lin@rock-chips.com>, =?UTF-8?Q?Heiko_St=C3=BCbner?= <heiko@sntech.de>, Doug Anderson <dianders@chromium.org>, David Jander <david@protonic.nl>, Mark Brown <broonie@kernel.org>, Linus Walleij <linus.walleij@linaro.org>, Takahiro Akashi <takahiro.akashi@linaro.org>, "linux-kernel@vger.kernel.org" <linux-kern>
 List-Id: linux-mmc@vger.kernel.org
 
-
-
-On 03/30/2016 08:46 AM, Shawn Lin wrote:
-> =E5=9C=A8 2016/3/29 16:23, zhangfei =E5=86=99=E9=81=93:
-
->>> More to think, Is it ok to match the behaviour of bootloader stage?
->>> My bootloader doesn't assert the reset pin of dw_mmc, so it seams i=
-f
->>> I want to fix you issue on kernel stage, I need a new round of
->>> assert->delay->deassert.
->>
->> The process like delay (if required) should be abstracted in reset
->> driver.
->> reset framework just export reset_control_assert/reset_control_deass=
-ert
->> API.
->> Unfortunately not find clear description in Documentation/.
->> Suppose deassert is like start, while assert is like stop.
->>
+On 28 March 2016 at 08:39, Baolin Wang <baolin.wang@linaro.org> wrote:
+> This patch provides some tracepoints for the lifecycle of a mmc request from
+> starting to completion to help with performance analysis of MMC subsystem.
 >
-> yes, no docs except dt-bindings..... So seems the usage of these two
-> APIs depends on the implementation of reset controller driver
+> Changes since v2:
+>  - Remove some redundant tracepoints which are repeated in block layer.
 >
->> drivers/reset/core.c
->> reset_control_deassert - deasserts the reset line
->> reset_control_assert - asserts the reset line
->>
->> More example:
->> drivers/mmc/host/sdhci-st.c
->> drivers/mmc/host/sunxi-mmc.c
->> drivers/usb/host/ohci-platform.c
->> drivers/i2c/busses/i2c-mv64xxx.c
+> Signed-off-by: Baolin Wang <baolin.wang@linaro.org>
+> ---
+>  drivers/mmc/core/core.c    |    7 +++
+>  include/trace/events/mmc.h |  129 ++++++++++++++++++++++++++++++++++++++++++++
+>  2 files changed, 136 insertions(+)
+>  create mode 100644 include/trace/events/mmc.h
 >
-> But I'm afraid I have to nack here....
+> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+> index f95d41f..7222e3f 100644
+> --- a/drivers/mmc/core/core.c
+> +++ b/drivers/mmc/core/core.c
+> @@ -36,6 +36,9 @@
+>  #include <linux/mmc/sd.h>
+>  #include <linux/mmc/slot-gpio.h>
 >
-> Looking at these files:
-> drivers/dma/stm32-dma.c
-> drivers/net/ethernet/mediatek/mtk_eth_soc.c
-> drivers/devfreq/tegra-devfreq.c
-> drivers/crypto/rockchip/rk3288_crypto.c
-> drivers/thermal/rockchip_thermal.c
-> drivers/thermal/tegra_soctherm.c
-> drivers/i2c/busses/i2c-tegra.c
-> ....
+> +#define CREATE_TRACE_POINTS
+> +#include <trace/events/mmc.h>
+> +
+>  #include "core.h"
+>  #include "bus.h"
+>  #include "host.h"
+> @@ -152,6 +155,8 @@ void mmc_request_done(struct mmc_host *host, struct mmc_request *mrq)
 >
-> they just do the way like: assert->[delay](maybe abstracted)->deasser=
-t
-> I think these drivers are vendor specific, so they can do
-> the reset operations in consistent with the implementation of
-> their platforms' reset controller drivers.
-
-Yes, have checked drivers/i2c/busses/i2c-tegra.c
-         reset_control_assert(i2c_dev->rst);
-         udelay(2);
-         reset_control_deassert(i2c_dev->rst);
-
-This usage looks strange, reset does not mean gpio reset, it maybe=20
-register accessing.
-I think all these three operation should be abstracted to deassert=20
-function, while cover the details for sharing.
-
-However, not doc describing the assert/deassert behavior so causing=20
-confusion.
-
+>                 led_trigger_event(host->led, LED_OFF);
 >
-> But, dw_mmc is shared by many Socs. So It's not good to do it in
-> dw_mci_probe, otherwise you force my reset controller driver to be
-> implemented in the same way as yours..... Right?
+> +               trace_mmc_request_done(host, mrq);
+> +
+
+At this point we will lack information about "retries" and also about
+the re-tune state. I think both would be valuable information to share
+about each request.
+
+So, I would suggest you to move the trace a bit further up, before the
+if-sentence and include "retries" and the "re-tune state" via trace
+print.
+
+>                 if (mrq->sbc) {
+>                         pr_debug("%s: req done <CMD%u>: %d: %08x %08x %08x %08x\n",
+>                                 mmc_hostname(host), mrq->sbc->opcode,
+> @@ -229,6 +234,8 @@ static int mmc_start_request(struct mmc_host *host, struct mmc_request *mrq)
+>         if (mmc_card_removed(host->card))
+>                 return -ENOMEDIUM;
 >
-> How about move it to your drv_data->init callback?
-Yes, we can.
-But firstly we should consider put in common file for sharing, otherwis=
-e=20
-there maybe many assert/deassert in dw_mmc-xx.c.
+> +       trace_mmc_request_start(host, mrq);
 
-Guodong may send another version and wait for Jaehoon's decision.
+This isn't the only place a request will be started from, thus we may
+be missing valuable information about which command/request is being
+sent.
 
-Thanks
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" i=
-n
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+I would move this to __mmc_start_request() instead and similar to my
+upper comment, please add "retries" and "re-tune state" in the trace
+print.
+
+> +
+>         if (mrq->sbc) {
+>                 pr_debug("<%s: starting CMD%u arg %08x flags %08x>\n",
+>                          mmc_hostname(host), mrq->sbc->opcode,
+>
+
+[...]
+
+Kind regards
+Uffe
