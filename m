@@ -1,125 +1,105 @@
-From: Haibo Chen <haibo.chen@nxp.com>
-Subject: RE: [PATCH 2/2] regulator: core: Ensure we are at least in bounds for
- our constraints
-Date: Wed, 30 Mar 2016 09:07:21 +0000
-Message-ID: <HE1PR0401MB180138D15E4D2101330543DC90980@HE1PR0401MB1801.eurprd04.prod.outlook.com>
-References: <1458587912-32665-1-git-send-email-broonie@kernel.org>
- <1458587912-32665-2-git-send-email-broonie@kernel.org>
- <56F0624C.8010004@gmail.com>
- <CAJKOXPd5h0Cq++OxdiXytNJH94PN4Kh_wM3M=p3JdU1m_qyFTA@mail.gmail.com>
- <CAJKOXPcBOT_8NOH-=sEHSP0Rc+=Dvz-aqVTsBTMKg-VNWqQotw@mail.gmail.com>
- <CAJAp7OgGQ3qm-_QhydvN0n6QeNoHFdso4zOk41qvVJhKNeRn8Q@mail.gmail.com>
- <20160327090859.GH5028@sirena.org.uk>
- <CAMuHMdXuy2TxACTcsgOpZvrJEeTSQbCgCUmS9PXfBhhZfgbBBA@mail.gmail.com>
- <20160329145823.GK2350@sirena.org.uk>
- <CAMuHMdXx_=LzH7w+9u=o3WZ-qVPqMA2LDCeanvdGs-ywXRCy_A@mail.gmail.com>
- <20160329182725.GD2350@sirena.org.uk>
+From: Baolin Wang <baolin.wang@linaro.org>
+Subject: Re: [PATCH v3] mmc: Provide tracepoints for request processing
+Date: Wed, 30 Mar 2016 17:42:00 +0800
+Message-ID: <CAMz4kuK=Eog9D6wtQNOHqD1puU_CQTie7a8NkseQT9P3TiuSrw@mail.gmail.com>
+References: <45a62181170848cbd00c8e863f7c84772f2a8a5c.1459147046.git.baolin.wang@linaro.org>
+	<CAPDyKFq3p37rwKHD_YwV_i0T+bAA1iiDBkm63e5McVBkO0a+3A@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-am1on0071.outbound.protection.outlook.com ([157.56.112.71]:46310
-	"EHLO emea01-am1-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1751954AbcC3Jk2 convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 30 Mar 2016 05:40:28 -0400
-In-Reply-To: <20160329182725.GD2350@sirena.org.uk>
-Content-Language: en-US
+Received: from mail-yw0-f176.google.com ([209.85.161.176]:34292 "EHLO
+	mail-yw0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751340AbcC3JmC (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 30 Mar 2016 05:42:02 -0400
+Received: by mail-yw0-f176.google.com with SMTP id h129so51281862ywb.1
+        for <linux-mmc@vger.kernel.org>; Wed, 30 Mar 2016 02:42:01 -0700 (PDT)
+In-Reply-To: <CAPDyKFq3p37rwKHD_YwV_i0T+bAA1iiDBkm63e5McVBkO0a+3A@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Mark Brown <broonie@kernel.org>, Geert Uytterhoeven <geert@linux-m68k.org>
-Cc: Bjorn Andersson <bjorn@kryo.se>, Krzysztof Kozlowski <k.kozlowski@samsung.com>, Ivaylo Dimitrov <ivo.g.dimitrov.75@gmail.com>, Liam Girdwood <lgirdwood@gmail.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, linux-samsung-soc <linux-samsung-soc@vger.kernel.org>, Javier Martinez Canillas <javier@osg.samsung.com>, Marek Szyprowski <m.szyprowski@samsung.com>, "linux-renesas-soc@vger.kernel.org" <linux-renesas-soc@vger.kernel.org>
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Steven Rostedt <rostedt@goodmis.org>, mingo@redhat.com, Adrian Hunter <adrian.hunter@intel.com>, Yangbo Lu <yangbo.lu@freescale.com>, Andrew Morton <akpm@linux-foundation.org>, "JBottomley@Odin.com" <JBottomley@odin.com>, "Luca Porzio (lporzio)" <lporzio@micron.com>, Jon Hunter <jonathanh@nvidia.com>, Grant Grundler <grundler@chromium.org>, Jens Axboe <axboe@fb.com>, Fabian Frederick <fabf@skynet.be>, Yunpeng Gao <yunpeng.gao@intel.com>, Dan Williams <dan.j.williams@intel.com>, Rabin Vincent <rabin.vincent@axis.com>, "Dong, Chuanxiao" <chuanxiao.dong@intel.com>, Shawn Lin <shawn.lin@rock-chips.com>, =?UTF-8?Q?Heiko_St=C3=BCbner?= <heiko@sntech.de>, Doug Anderson <dianders@chromium.org>, David Jander <david@protonic.nl>, Mark Brown <broonie@kernel.org>, Linus Walleij <linus.walleij@linaro.org>, Takahiro Akashi <takahiro.akashi@linaro.org>, linux-kernel@vger.kernel
 
-Hi Brown,
+On 30 March 2016 at 17:25, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+> On 28 March 2016 at 08:39, Baolin Wang <baolin.wang@linaro.org> wrote:
+>> This patch provides some tracepoints for the lifecycle of a mmc request from
+>> starting to completion to help with performance analysis of MMC subsystem.
+>>
+>> Changes since v2:
+>>  - Remove some redundant tracepoints which are repeated in block layer.
+>>
+>> Signed-off-by: Baolin Wang <baolin.wang@linaro.org>
+>> ---
+>>  drivers/mmc/core/core.c    |    7 +++
+>>  include/trace/events/mmc.h |  129 ++++++++++++++++++++++++++++++++++++++++++++
+>>  2 files changed, 136 insertions(+)
+>>  create mode 100644 include/trace/events/mmc.h
+>>
+>> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+>> index f95d41f..7222e3f 100644
+>> --- a/drivers/mmc/core/core.c
+>> +++ b/drivers/mmc/core/core.c
+>> @@ -36,6 +36,9 @@
+>>  #include <linux/mmc/sd.h>
+>>  #include <linux/mmc/slot-gpio.h>
+>>
+>> +#define CREATE_TRACE_POINTS
+>> +#include <trace/events/mmc.h>
+>> +
+>>  #include "core.h"
+>>  #include "bus.h"
+>>  #include "host.h"
+>> @@ -152,6 +155,8 @@ void mmc_request_done(struct mmc_host *host, struct mmc_request *mrq)
+>>
+>>                 led_trigger_event(host->led, LED_OFF);
+>>
+>> +               trace_mmc_request_done(host, mrq);
+>> +
+>
+> At this point we will lack information about "retries" and also about
+> the re-tune state. I think both would be valuable information to share
+> about each request.
+>
+> So, I would suggest you to move the trace a bit further up, before the
+> if-sentence and include "retries" and the "re-tune state" via trace
+> print.
 
-I also meet the similar issue on i.MX6 platforms.
+Make sense. I'll add the "retries" and the "re-tune state" information
+in next version.
 
-With your patch   ---> regulator: core: Ensure we are at least in bounds for our constraints
-When I insert an SD3.0 card, shows the following log:
+>
+>>                 if (mrq->sbc) {
+>>                         pr_debug("%s: req done <CMD%u>: %d: %08x %08x %08x %08x\n",
+>>                                 mmc_hostname(host), mrq->sbc->opcode,
+>> @@ -229,6 +234,8 @@ static int mmc_start_request(struct mmc_host *host, struct mmc_request *mrq)
+>>         if (mmc_card_removed(host->card))
+>>                 return -ENOMEDIUM;
+>>
+>> +       trace_mmc_request_start(host, mrq);
+>
+> This isn't the only place a request will be started from, thus we may
+> be missing valuable information about which command/request is being
+> sent.
+>
+> I would move this to __mmc_start_request() instead and similar to my
+> upper comment, please add "retries" and "re-tune state" in the trace
+> print.
 
-root@imx6qdlsolo:~# [   59.733941] sdhci-esdhc-imx 2190000.usdhc: could not set regulator OCR (-22)
-[   60.829911] sdhci-esdhc-imx 2190000.usdhc: could not set regulator OCR (-22)
-[   61.917951] sdhci-esdhc-imx 2190000.usdhc: could not set regulator OCR (-22)
-[   63.009498] sdhci-esdhc-imx 2190000.usdhc: could not set regulator OCR (-22)
+Make sense. Thanks for your comments.
 
-I did a quick debug, and find when I change the operator   &&  to  !=  , this issue gone.
--       if (constraints->min_uV != constraints->max_uV) {
-+       if (constraints->min_uV && constraints->max_uV) {
+>
+>> +
+>>         if (mrq->sbc) {
+>>                 pr_debug("<%s: starting CMD%u arg %08x flags %08x>\n",
+>>                          mmc_hostname(host), mrq->sbc->opcode,
+>>
+>
+> [...]
+>
+> Kind regards
+> Uffe
 
 
-In our sdhci.c, we call the function 
-regulator_set_voltage ---> regulator_set_voltage_unlocked(struct regulator *regulator, int min_uV, int max_uV)
-here, the parameter min_uV is 3300000, and the max_uV is 3400000
 
-currently with your patch (the upper operator is &&), when insert a SD3.0 card, 
-it will do the sanity check, and return -EINVAL
-
-but when I change the upper operator from && to !=, 
-before the sanity check, it will first get the current_uV, and then go to out.
-
-I'm not familiar with regulator common code. Hope the upper describe can help you debug this issue.
-
-The following attach our dts piece code.
-
-126 &usdhc1 {
-127         pinctrl-names = "default", "state_100mhz", "state_200mhz";
-128         pinctrl-0 = <&pinctrl_usdhc1>;
-129         pinctrl-1 = <&pinctrl_usdhc1_100mhz>;
-130         pinctrl-2 = <&pinctrl_usdhc1_200mhz>;
-131         cd-gpios = <&gpio1 19 GPIO_ACTIVE_LOW>;
-132         keep-power-in-suspend;
-133         wakeup-source;
-134         vmmc-supply = <&reg_sd1_vmmc>;
-135         status = "okay";
-136 };
-
-regulators {
- 26                 compatible = "simple-bus";
- 27                 #address-cells = <1>;
- 28                 #size-cells = <0>;
- 29
- 30                 reg_sd1_vmmc: sd1_regulator {
- 31                         compatible = "regulator-fixed";
- 32                         regulator-name = "VSD_3V3";
- 33                         regulator-min-microvolt = <3300000>;
- 34                         regulator-max-microvolt = <3300000>;
- 35                         gpio = <&gpio1 9 GPIO_ACTIVE_HIGH>;
- 36                         enable-active-high;
- 37                 };
- 38         };
-
+-- 
+Baolin.wang
 Best Regards
-Haibo Chen
-
-
-
-> -----Original Message-----
-> From: linux-mmc-owner@vger.kernel.org [mailto:linux-mmc-
-> owner@vger.kernel.org] On Behalf Of Mark Brown
-> Sent: Wednesday, March 30, 2016 2:27 AM
-> To: Geert Uytterhoeven <geert@linux-m68k.org>
-> Cc: Bjorn Andersson <bjorn@kryo.se>; Krzysztof Kozlowski
-> <k.kozlowski@samsung.com>; Ivaylo Dimitrov <ivo.g.dimitrov.75@gmail.com>;
-> Liam Girdwood <lgirdwood@gmail.com>; linux-kernel@vger.kernel.org; Ulf
-> Hansson <ulf.hansson@linaro.org>; linux-mmc <linux-mmc@vger.kernel.org>;
-> linux-samsung-soc <linux-samsung-soc@vger.kernel.org>; Javier Martinez
-> Canillas <javier@osg.samsung.com>; Marek Szyprowski
-> <m.szyprowski@samsung.com>; linux-renesas-soc@vger.kernel.org
-> Subject: Re: [PATCH 2/2] regulator: core: Ensure we are at least in bounds for
-> our constraints
-> 
-> On Tue, Mar 29, 2016 at 08:05:34PM +0200, Geert Uytterhoeven wrote:
-> 
-> >         sh_mobile_sdhi ee100000.sd: Got WP GPIO ======> sh_mobile_sdhi
-> > ee100000.sd: could not set regulator OCR (-22)
-> >         gpio_rcar e6055400.gpio: sense irq = 6, type = 3
-> >         sh_mobile_sdhi ee100000.sd: mmc0 base at 0xee100000 clock rate
-> > 97 MHz
-> 
-> > The line marked with the arrow is introduced by the changed check, and
-> > looks to be the origin of the failure.
-> 
-> This isn't making any sense.  Why would a change in how we apply voltage
-> constraints on initial probe of the regulator have an impact here?  The changed
-> code shouldn't even be executing at the point where the SDHCI driver is trying
-> to use the regulator.  There's something else going on here.
