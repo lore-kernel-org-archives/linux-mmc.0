@@ -1,141 +1,140 @@
 From: Shawn Lin <shawn.lin@rock-chips.com>
-Subject: Re: [RFC PATCH] mmc: block: Support the fixed index for mmcblk with
- aliases nodes
-Date: Wed, 30 Mar 2016 08:15:30 +0800
-Message-ID: <56FB1AA2.8050005@rock-chips.com>
-References: <56FA5C56.9080009@samsung.com> <20160329184920.29a240fc@xhacker>
+Subject: Re: [PATCH 2/2] mmc: dw_mmc: add resets support to dw_mmc
+Date: Wed, 30 Mar 2016 08:46:32 +0800
+Message-ID: <56FB21E8.30008@rock-chips.com>
+References: <1457254062-22677-1-git-send-email-guodong.xu@linaro.org>
+ <1457254062-22677-2-git-send-email-guodong.xu@linaro.org>
+ <56DC3BAD.8020107@rock-chips.com>
+ <CAFGCpxz3GfFeduaz1Dkg0WvRJWs+GHdVu8uY0-wV=RGyRfBE=A@mail.gmail.com>
+ <56F9E6E5.9000100@kernel-upstream.org> <56FA3B70.2090902@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8;
+Content-Type: text/plain; charset=utf-8;
 	format=flowed
 Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from lucky1.263xmail.com ([211.157.147.132]:50491 "EHLO
-	lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753102AbcC3APp (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 29 Mar 2016 20:15:45 -0400
-In-Reply-To: <20160329184920.29a240fc@xhacker>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <56FA3B70.2090902@linaro.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: zhangfei <zhangfei.gao@linaro.org>, Guodong Xu <guodong.xu@linaro.org>
+Cc: shawn.lin@rock-chips.com, robh+dt@kernel.org, =?UTF-8?Q?Pawe=c5=82_Moll?= <pawel.moll@arm.com>, Mark Rutland <mark.rutland@arm.com>, ijc+devicetree@hellion.org.uk, Kumar Gala <galak@codeaurora.org>, jh80.chung@samsung.com, Ulf Hansson <ulf.hansson@linaro.org>, devicetree@vger.kernel.org, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-mmc@vger.kernel.org, Xinwei Kong <kong.kongxinwei@hisilicon.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Jisheng Zhang <jszhang@marvell.com>, Jaehoon Chung <jh80.chung@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: shawn.lin@rock-chips.com, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>
 
-=E5=9C=A8 2016/3/29 18:49, Jisheng Zhang =E5=86=99=E9=81=93:
-> Hi Jaehoon,
+=E5=9C=A8 2016/3/29 16:23, zhangfei =E5=86=99=E9=81=93:
 >
-> On Tue, 29 Mar 2016 19:43:34 +0900 Jaehoon Chung wrote:
 >
->> This patch is just RFC. I want to know opinions.
+> On 03/29/2016 10:22 AM, Shawn Lin wrote:
+>
+>>>
+>>>
+>>>
+>>>         +               else if (IS_ERR(host->pdata)) {
+>>>                                  dev_err(host->dev, "platform data =
+not
+>>>         available\n");
+>>>                                  return -EINVAL;
+>>>                          }
+>>>         @@ -3012,6 +3022,9 @@ int dw_mci_probe(struct dw_mci *host)
+>>>                          }
+>>>                  }
+>>>
+>>>         +       if (host->pdata->rstc !=3D NULL)
+>>>         +               reset_control_deassert(host->pdata->rstc);
+>>>         +
+>>>
+>>>
+>>>     sorry, I can't follow your intention here. Shouldn't it be some=
+thing
+>>>     like "assert mmc -> may need delay -> deassert mmc". As your cu=
+rrent
+>>>     code, nothing happend right?
+> Should be abstracted in reset driver.
+>
+>>>
+>>>
+>>> The chip exits from bootloader with this bit asserted. And when ent=
+ering
+>>> kernel, we only need to deassert.
+>>>
+>>> In my current code, the driver deassert mmc in _probe(), and assert=
+ mmc
+>>> in _remove().
 >>
->> Now, index of mmcblk is allocated in accordance with probing time.
->> If want to use the mmcblk1 for some device, it can use alias.
->>
->> aliases {
->> 	mmc0 =3D &mmc0;	/* mmcblk0 for eMMC */
->> 	mmc1 =3D &mmc2;	/* mmcblk1 for SD */
->> 	mmc2 =3D &mmc1;	/* mmcblk2 for SDIO*/
->> };
+>> I catch your point. From the previous discussion, we add it to make =
+sure
+>> dw_mmc in good state after leaving bootloader to kernel. But My real
+>> question is that you can assert it in  bootloader, so you can also
+>> dessert it in bootloaer to make sure dw_mmc work fine when probing
+>> in kernel. In that way, we don't need this patch?
 >
-> I like this feature and we do need it. In the past, we have to put em=
-mc dt node
-> before the sd node, but on our platform, the register base of sdhc ho=
-st for emmc
-> is higher than the one for sd, putting emmc dt node before sd looks a=
- bit
-> strange, but we have no better solutions.
+> uefi does not have exit point, and kernel may not assume mmc controll=
+er
+> state is always correct when boot.
+> If Uefi need copy Image from mmc, mmc controller is in working state.
+> When jump to kernel, uefi mmc driver can not recover itself.
+> If kernel assume mmc controller state is clean, mmc will be in abnorm=
+al
+> state.
+> Some controller will clear itself when set clock, however, hip660 doe=
+s
+> not, it need special register to access.
 >
 
-:) That is also what I suffered currently. I have to prepare two
-seperate firmware with two diff fstab files to assign the mount point
-since sometime I need to boot from sd, but sometimes from emmc....
-With this patch, I only need to dtc a new dtb... quite simple.
+yep, I understand your requirement.
 
-> Thanks,
-> Jisheng
 >
 >>
->> If there are no corresponding values, it might be allocated with
->> existing scheme.
->>
->> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
->> ---
->>   Documentation/devicetree/bindings/mmc/mmc.txt | 11 +++++++++++
->>   drivers/mmc/card/block.c                      | 17 +++++++++++++++=
-+-
->>   2 files changed, 27 insertions(+), 1 deletion(-)
->>
->> diff --git a/Documentation/devicetree/bindings/mmc/mmc.txt b/Documen=
-tation/devicetree/bindings/mmc/mmc.txt
->> index ed23b9b..e37ea29 100644
->> --- a/Documentation/devicetree/bindings/mmc/mmc.txt
->> +++ b/Documentation/devicetree/bindings/mmc/mmc.txt
->> @@ -71,6 +71,10 @@ Optional SDIO properties:
->>   - wakeup-source: Enables wake up of host system on SDIO IRQ assert=
-ion
->>   		 (Legacy property supported: "enable-sdio-wakeup")
->>
->> +Aliases (Optional):
->> +- If you want to use the fixed index for block device like mmcblkX,=
- should be
->> +represented in the aliases node using following format "mmc(X)".
->> +(X is an unique number for the alias.)
->>
->>   MMC power sequences:
->>   --------------------
->> @@ -145,3 +149,10 @@ mmc3: mmc@01c12000 {
->>   		interrupt-names =3D "host-wake";
->>   	};
->>   };
->> +
->> +Example with aliases nodes:
->> +
->> +aliases {
->> +	mmc0 =3D &mmc0;	/* Fixed to mmcblk0 for &mmc0 */
->> +	mmc1 =3D &mmc2;	/* Fixed to mmcblk1 for &mmc2 */
->> +};
->> diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
->> index 3bdbe50..6a40de5 100644
->> --- a/drivers/mmc/card/block.c
->> +++ b/drivers/mmc/card/block.c
->> @@ -35,6 +35,7 @@
->>   #include <linux/capability.h>
->>   #include <linux/compat.h>
->>   #include <linux/pm_runtime.h>
->> +#include <linux/of.h>
->>
->>   #include <linux/mmc/ioctl.h>
->>   #include <linux/mmc/card.h>
->> @@ -2190,6 +2191,7 @@ static struct mmc_blk_data *mmc_blk_alloc_req(=
-struct mmc_card *card,
->>   {
->>   	struct mmc_blk_data *md;
->>   	int devidx, ret;
->> +	int idx =3D 0;
->>
->>   	devidx =3D find_first_zero_bit(dev_use, max_devices);
->>   	if (devidx >=3D max_devices)
->> @@ -2209,7 +2211,20 @@ static struct mmc_blk_data *mmc_blk_alloc_req=
-(struct mmc_card *card,
->>   	 * index anymore so we keep track of a name index.
->>   	 */
->>   	if (!subname) {
->> -		md->name_idx =3D find_first_zero_bit(name_use, max_devices);
->> +		if (card->dev.parent->parent->of_node)
->> +			idx =3D of_alias_get_id(card->dev.parent->parent->of_node,
->> +					"mmc");
->> +
->> +		if (idx < 0)
->> +			md->name_idx =3D find_first_zero_bit(name_use,
->> +					max_devices);
->> +		else {
->> +			if (test_bit(idx, name_use))
->> +				md->name_idx =3D find_first_zero_bit(name_use,
->> +						max_devices);
->> +			else
->> +				md->name_idx =3D (unsigned int)idx;
->> +		}
->>   		__set_bit(md->name_idx, name_use);
->>   	} else
->>   		md->name_idx =3D ((struct mmc_blk_data *)
+>> More to think, Is it ok to match the behaviour of bootloader stage?
+>> My bootloader doesn't assert the reset pin of dw_mmc, so it seams if
+>> I want to fix you issue on kernel stage, I need a new round of
+>> assert->delay->deassert.
+>
+> The process like delay (if required) should be abstracted in reset dr=
+iver.
+> reset framework just export reset_control_assert/reset_control_deasse=
+rt
+> API.
+> Unfortunately not find clear description in Documentation/.
+> Suppose deassert is like start, while assert is like stop.
+>
+
+yes, no docs except dt-bindings..... So seems the usage of these two
+APIs depends on the implementation of reset controller driver
+
+> drivers/reset/core.c
+> reset_control_deassert - deasserts the reset line
+> reset_control_assert - asserts the reset line
+>
+> More example:
+> drivers/mmc/host/sdhci-st.c
+> drivers/mmc/host/sunxi-mmc.c
+> drivers/usb/host/ohci-platform.c
+> drivers/i2c/busses/i2c-mv64xxx.c
+
+But I'm afraid I have to nack here....
+
+Looking at these files:
+drivers/dma/stm32-dma.c
+drivers/net/ethernet/mediatek/mtk_eth_soc.c
+drivers/devfreq/tegra-devfreq.c
+drivers/crypto/rockchip/rk3288_crypto.c
+drivers/thermal/rockchip_thermal.c
+drivers/thermal/tegra_soctherm.c
+drivers/i2c/busses/i2c-tegra.c
+=2E...
+
+they just do the way like: assert->[delay](maybe abstracted)->deassert
+I think these drivers are vendor specific, so they can do
+the reset operations in consistent with the implementation of
+their platforms' reset controller drivers.
+
+But, dw_mmc is shared by many Socs. So It's not good to do it in
+dw_mci_probe, otherwise you force my reset controller driver to be
+implemented in the same way as yours..... Right?
+
+How about move it to your drv_data->init callback?
+
+
+>
+> Thanks
 >
 >
 >
@@ -145,4 +144,3 @@ struct mmc_card *card,
 --=20
 Best Regards
 Shawn Lin
-
