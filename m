@@ -1,77 +1,59 @@
 From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: [PATCH] mmc: dw_mmc: exynos: add the function for controlling SMU
-Date: Thu, 31 Mar 2016 14:53:18 +0900
-Message-ID: <1459403598-5256-1-git-send-email-jh80.chung@samsung.com>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout1.samsung.com ([203.254.224.24]:36747 "EHLO
-	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751567AbcCaFxW (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 31 Mar 2016 01:53:22 -0400
-Received: from epcpsbgr5.samsung.com
- (u145.gpu120.samsung.co.kr [203.254.230.145])
- by mailout1.samsung.com (Oracle Communications Messaging Server 7.0.5.31.0
- 64bit (built May  5 2014))
- with ESMTP id <0O4W01JOH30VO480@mailout1.samsung.com> for
- linux-mmc@vger.kernel.org; Thu, 31 Mar 2016 14:53:19 +0900 (KST)
-Sender: linux-mmc-owner@vger.kernel.org
+Subject: Re: [PATCH 0/4] Cleanup setup_clock callback from dw_mmc
+Date: Thu, 31 Mar 2016 15:37:07 +0900
+Message-ID: <56FCC593.9020007@samsung.com>
+References: <1453944616-16224-1-git-send-email-shawn.lin@rock-chips.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-reply-to: <1453944616-16224-1-git-send-email-shawn.lin@rock-chips.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Shawn Lin <shawn.lin@rock-chips.com>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: ulf.hansson@linaro.org, shawn.lin@rock-chips.com, Jaehoon Chung <jh80.chung@samsung.com>
 
-Some of Exynos has the Security management Unit(SMU).
-This patch adds the function for controlling SMU.
+Hi Shawn,
 
-In future, if exynos needs to control SMU, it can be implemented
-in "config_smu" function, not "init" function.
 
-Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
----
- drivers/mmc/host/dw_mmc-exynos.c | 15 +++++++++++++--
- 1 file changed, 13 insertions(+), 2 deletions(-)
+On 01/28/2016 10:30 AM, Shawn Lin wrote:
+> Hello Jeahoon
+> 
+> Currently dw_mmc is a little too queen-size. As we had cleanup
+> prepare_command callback some days before, there are also some
+> ones deserve to remove. Also we should avoid add new quirks or
+> callbacks into dw_mmc in order to avoid the dilemma sdhci meets
+> now.
+> 
+> This patchset remove setup_clock callback. Obviously, adding a
+> callback just for one-time-used clk stuff makes no sense. We combine
+> what setup_clock does before into init callback. For exynos platfrom,
+> it needs call init hook after resume, so we add new argument in init
+> hook to indicate whether it needs do clk stuff or not.
+> 
 
-diff --git a/drivers/mmc/host/dw_mmc-exynos.c b/drivers/mmc/host/dw_mmc-exynos.c
-index 8790f2a..0e989eb 100644
---- a/drivers/mmc/host/dw_mmc-exynos.c
-+++ b/drivers/mmc/host/dw_mmc-exynos.c
-@@ -91,10 +91,14 @@ static inline u8 dw_mci_exynos_get_ciu_div(struct dw_mci *host)
- 		return SDMMC_CLKSEL_GET_DIV(mci_readl(host, CLKSEL)) + 1;
- }
- 
--static int dw_mci_exynos_priv_init(struct dw_mci *host)
-+static void dw_mci_exynos_config_smu(struct dw_mci *host)
- {
- 	struct dw_mci_exynos_priv_data *priv = host->priv;
- 
-+	/*
-+	 * If Exynos is provided the Security management,
-+	 * set for non-ecryption mode at this time.
-+	 */
- 	if (priv->ctrl_type == DW_MCI_TYPE_EXYNOS5420_SMU ||
- 		priv->ctrl_type == DW_MCI_TYPE_EXYNOS7_SMU) {
- 		mci_writel(host, MPSBEGIN0, 0);
-@@ -104,6 +108,13 @@ static int dw_mci_exynos_priv_init(struct dw_mci *host)
- 			   SDMMC_MPSCTRL_VALID |
- 			   SDMMC_MPSCTRL_NON_SECURE_WRITE_BIT);
- 	}
-+}
-+
-+static int dw_mci_exynos_priv_init(struct dw_mci *host)
-+{
-+	struct dw_mci_exynos_priv_data *priv = host->priv;
-+
-+	dw_mci_exynos_config_smu(host);
- 
- 	if (priv->ctrl_type >= DW_MCI_TYPE_EXYNOS5420) {
- 		priv->saved_strobe_ctrl = mci_readl(host, HS400_DLINE_CTRL);
-@@ -169,7 +180,7 @@ static int dw_mci_exynos_resume(struct device *dev)
- {
- 	struct dw_mci *host = dev_get_drvdata(dev);
- 
--	dw_mci_exynos_priv_init(host);
-+	dw_mci_exynos_config_smu(host);
- 	return dw_mci_resume(host);
- }
- 
--- 
-1.9.1
+I sent the patch "mmc: dw_mmc: exynos: add the function for controlling SMU"
+https://patchwork.kernel.org/patch/8707591/
 
+Then it doesn't need this patch for adding setup_clk argument.
+"mmc: dw_mmc: add setup_clk for init hook"
+
+Could you resend the patch-set after applying my patch?
+
+Best Regards,
+Jaehoon Chung
+
+> 
+> 
+> Shawn Lin (4):
+>   mmc: dw_mmc-rockchip: remove setup_clock for rockchip
+>   mmc: dw_mmc: add setup_clk for init hook
+>   mmc: dw_mmc-exynos: remove dw_mci_exynos_setup_clock
+>   mmc: dw_mmc: remove setup_clock callback
+> 
+>  drivers/mmc/host/dw_mmc-exynos.c   | 15 ++++-----------
+>  drivers/mmc/host/dw_mmc-rockchip.c | 14 +++++---------
+>  drivers/mmc/host/dw_mmc.c          | 11 +----------
+>  drivers/mmc/host/dw_mmc.h          |  3 +--
+>  4 files changed, 11 insertions(+), 32 deletions(-)
+> 
