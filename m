@@ -1,77 +1,38 @@
-From: Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
-Subject: [PATCH v2 3/3] mmc: dw_mmc: remove setup_clock callback
-Date: Thu, 31 Mar 2016 15:34:10 +0800
-Message-ID: <1459409650-20429-1-git-send-email-shawn.lin@rock-chips.com>
-References: <1459409616-20306-1-git-send-email-shawn.lin@rock-chips.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-In-Reply-To: <1459409616-20306-1-git-send-email-shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-rockchip>,
- <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-rockchip/>
-List-Post: <mailto:linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-List-Help: <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-rockchip>,
- <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
-Sender: "Linux-rockchip" <linux-rockchip-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-Errors-To: linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
-To: Jaehoon Chung <jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Heiko Stuebner <heiko-4mtYJXux2i+zQB+pC5nmwQ@public.gmane.org>
+From: Naveen Kumar Parna <naveenkumar.parna@gmail.com>
+Subject: [PATCH] mmc: core: Fix bug on signal voltage switch failure
+Date: Thu, 31 Mar 2016 19:47:11 +0530
+Message-ID: <1459433831-4162-1-git-send-email-naveenkumar.parna@gmail.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-pa0-f68.google.com ([209.85.220.68]:33928 "EHLO
+	mail-pa0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751500AbcCaOR3 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 31 Mar 2016 10:17:29 -0400
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: ulf.hansson@linaro.org, adrian.hunter@intel.com, chris@printf.net
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Naveen Kumar Parna <naveenkumar.parna@gmail.com>
 
-Now, no dw_mmc variant drivers use this callback, let's
-remove it.
+When switching SD and SDIO cards from 3.3V to 1.8V signal level fails, a bug in sdhci_set_power() will trigger.
+To fix the kernel crash during recovery from signal voltage switch failure, OCR should be reset to avail voltage mask before power-cycle the card.
 
-Signed-off-by: Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
+Signed-off-by: Naveen Kumar Parna <naveenkumar.parna@gmail.com>
 ---
+ drivers/mmc/core/core.c | 2 ++
+ 1 file changed, 2 insertions(+)
 
-Changes in v2: None
-
- drivers/mmc/host/dw_mmc.c | 9 ---------
- drivers/mmc/host/dw_mmc.h | 2 --
- 2 files changed, 11 deletions(-)
-
-diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index 242f9a0..e03cc66 100644
---- a/drivers/mmc/host/dw_mmc.c
-+++ b/drivers/mmc/host/dw_mmc.c
-@@ -3003,15 +3003,6 @@ int dw_mci_probe(struct dw_mci *host)
- 		}
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index f26a5f1..e7eb427 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -1477,6 +1477,8 @@ power_cycle:
+ 	if (err) {
+ 		pr_debug("%s: Signal voltage switch failed, "
+ 			"power cycling card\n", mmc_hostname(host));
++		/* Reset OCR mask */
++		ocr =  host->ocr_avail;
+ 		mmc_power_cycle(host, ocr);
  	}
  
--	if (drv_data && drv_data->setup_clock) {
--		ret = drv_data->setup_clock(host);
--		if (ret) {
--			dev_err(host->dev,
--				"implementation specific clock setup failed\n");
--			goto err_clk_ciu;
--		}
--	}
--
- 	setup_timer(&host->cmd11_timer,
- 		    dw_mci_cmd11_timer, (unsigned long)host);
- 
-diff --git a/drivers/mmc/host/dw_mmc.h b/drivers/mmc/host/dw_mmc.h
-index 68d5da2..1e8d838 100644
---- a/drivers/mmc/host/dw_mmc.h
-+++ b/drivers/mmc/host/dw_mmc.h
-@@ -277,7 +277,6 @@ struct dw_mci_slot {
-  * dw_mci driver data - dw-mshc implementation specific driver data.
-  * @caps: mmc subsystem specified capabilities of the controller(s).
-  * @init: early implementation specific initialization.
-- * @setup_clock: implementation specific clock configuration.
-  * @set_ios: handle bus specific extensions.
-  * @parse_dt: parse implementation specific device tree properties.
-  * @execute_tuning: implementation specific tuning procedure.
-@@ -289,7 +288,6 @@ struct dw_mci_slot {
- struct dw_mci_drv_data {
- 	unsigned long	*caps;
- 	int		(*init)(struct dw_mci *host);
--	int		(*setup_clock)(struct dw_mci *host);
- 	void		(*set_ios)(struct dw_mci *host, struct mmc_ios *ios);
- 	int		(*parse_dt)(struct dw_mci *host);
- 	int		(*execute_tuning)(struct dw_mci_slot *slot, u32 opcode);
 -- 
-2.3.7
+1.9.1
+
