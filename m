@@ -1,44 +1,76 @@
 From: Gwendal Grignou <gwendal@chromium.org>
-Subject: Re: [PATCH] Revert "mmc: core: Remove redundant ->power_restore() callback"
-Date: Fri, 1 Apr 2016 09:43:16 -0700
-Message-ID: <CAMHSBOXPuQYB06hDtpBawABJhsuygbP8KPnZmFnPzRzON58TpA@mail.gmail.com>
-References: <1459455931-19538-1-git-send-email-gwendal@chromium.org> <CAPDyKFqc_w1Cr+3DWgV=rWxOU4homsJfGoeRHKWfk4bQyEBZ7g@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Subject: [PATCH] mmc: core: in mmc_hw_reset(), allow power cycle.
+Date: Fri,  1 Apr 2016 09:46:20 -0700
+Message-ID: <1459529180-32604-1-git-send-email-gwendal@chromium.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wm0-f50.google.com ([74.125.82.50]:36825 "EHLO
-	mail-wm0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750907AbcDAQnh (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 1 Apr 2016 12:43:37 -0400
-Received: by mail-wm0-f50.google.com with SMTP id 127so25860180wmu.1
-        for <linux-mmc@vger.kernel.org>; Fri, 01 Apr 2016 09:43:36 -0700 (PDT)
-In-Reply-To: <CAPDyKFqc_w1Cr+3DWgV=rWxOU4homsJfGoeRHKWfk4bQyEBZ7g@mail.gmail.com>
+Received: from mail-pa0-f43.google.com ([209.85.220.43]:36001 "EHLO
+	mail-pa0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752144AbcDAQq1 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 1 Apr 2016 12:46:27 -0400
+Received: by mail-pa0-f43.google.com with SMTP id tt10so95299640pab.3
+        for <linux-mmc@vger.kernel.org>; Fri, 01 Apr 2016 09:46:27 -0700 (PDT)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Gwendal Grignou <gwendal@chromium.org>, linux-mmc <linux-mmc@vger.kernel.org>
+To: ulf.hansson@linaro.org
+Cc: linux-mmc@vger.kernel.org
 
-On Fri, Apr 1, 2016 at 3:06 AM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
->
->
-> I don't want to restore the callbacks.
->
-> Instead, let's be a bit more clever and try to extend mmc_reset() to
-> cover the MMC case as well. I haven't thought about that in detail,
-> but I think it should work.
+When the eMMC device does not support/allow sending RST_n signal,
+do a brute force power cycle instead of returning EOPNOTSUPP.
 
-I am posting a different path soon.
-Also, given power_restore is gone, mmc_host_power_restore is going to
-crash when called for a MMC or SD device.
-Shall we remove the interface  mmc_power_save_host/mmc_power_restore_host?
-It is only supported for sdio devices, and used only by the wl1271 to
-power cycle the controller via sysfs. I am wondering if we could use
-the suspend/resume entry point instead.
+Signed-off-by: Gwendal Grignou <gwendal@chromium.org>
+---
+ drivers/mmc/core/core.c |  5 +++--
+ drivers/mmc/core/mmc.c  | 18 ++++++++----------
+ 2 files changed, 11 insertions(+), 12 deletions(-)
 
-Gwendal.
->
->
-> [...]
->
-> Kind regards
-> Uffe
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index d8bbc78..d5bc2d8 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -2468,8 +2468,9 @@ int mmc_hw_reset(struct mmc_host *host)
+ 	ret = host->bus_ops->reset(host);
+ 	mmc_bus_put(host);
+ 
+-	if (ret != -EOPNOTSUPP)
+-		pr_warn("%s: tried to reset card\n", mmc_hostname(host));
++	if (ret)
++		pr_warn("%s: tried to reset card, got error %d\n",
++			mmc_hostname(host), ret);
+ 
+ 	return ret;
+ }
+diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+index 96cc7e2..deb8c16 100644
+--- a/drivers/mmc/core/mmc.c
++++ b/drivers/mmc/core/mmc.c
+@@ -1988,19 +1988,17 @@ static int mmc_reset(struct mmc_host *host)
+ {
+ 	struct mmc_card *card = host->card;
+ 
+-	if (!(host->caps & MMC_CAP_HW_RESET) || !host->ops->hw_reset)
+-		return -EOPNOTSUPP;
+-
+-	if (!mmc_can_reset(card))
+-		return -EOPNOTSUPP;
+-
+ 	mmc_set_clock(host, host->f_init);
+-
+-	host->ops->hw_reset(host);
+-
++	if ((host->caps & MMC_CAP_HW_RESET) && host->ops->hw_reset &&
++	     mmc_can_reset(card)) {
++		 /* If the card accept RST_n signal, send it. */
++		host->ops->hw_reset(host);
++	} else {
++		/* Do a brute force power cycle */
++		mmc_power_cycle(host, host->card->ocr);
++	}
+ 	/* Set initial state and call mmc_set_ios */
+ 	mmc_set_initial_state(host);
+-
+ 	return mmc_init_card(host, card->ocr, card);
+ }
+ 
+-- 
+2.8.0.rc3.226.g39d4020
+
