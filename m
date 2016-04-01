@@ -1,40 +1,78 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] Revert "mmc: core: Remove redundant ->power_restore() callback"
-Date: Fri, 1 Apr 2016 12:06:12 +0200
-Message-ID: <CAPDyKFqc_w1Cr+3DWgV=rWxOU4homsJfGoeRHKWfk4bQyEBZ7g@mail.gmail.com>
-References: <1459455931-19538-1-git-send-email-gwendal@chromium.org>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wm0-f43.google.com ([74.125.82.43]:34607 "EHLO
-	mail-wm0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750963AbcDAKGN (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 1 Apr 2016 06:06:13 -0400
-Received: by mail-wm0-f43.google.com with SMTP id p65so19167772wmp.1
-        for <linux-mmc@vger.kernel.org>; Fri, 01 Apr 2016 03:06:12 -0700 (PDT)
-In-Reply-To: <1459455931-19538-1-git-send-email-gwendal@chromium.org>
-Sender: linux-mmc-owner@vger.kernel.org
+From: Wolfram Sang <wsa@the-dreams.de>
+Subject: [PATCH v2 6/9] mmc: host: add note that set_ios needs to handle 0Hz properly
+Date: Fri,  1 Apr 2016 17:44:36 +0200
+Message-ID: <1459525479-20842-7-git-send-email-wsa@the-dreams.de>
+References: <1459525479-20842-1-git-send-email-wsa@the-dreams.de>
+Return-path: <linux-renesas-soc-owner@vger.kernel.org>
+In-Reply-To: <1459525479-20842-1-git-send-email-wsa@the-dreams.de>
+Sender: linux-renesas-soc-owner@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: Wolfram Sang <wsa@the-dreams.de>, linux-renesas-soc@vger.kernel.org, Ben Hutchings <ben.hutchings@codethink.co.uk>
 List-Id: linux-mmc@vger.kernel.org
-To: Gwendal Grignou <gwendal@chromium.org>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>
 
-On 31 March 2016 at 22:25, Gwendal Grignou <gwendal@chromium.org> wrote:
-> This reverts commit 364549ddc29d ("mmc: core: Remove redundant
-> ->power_restore() callback for MMC")
-> and commit 3056c49c35c1 ("mmc: core: Remove redundant
->  ->power_restore() callback for SD")
->
-> ->power_restore() is called by mmc_host_power_restore(). For MMC, We can
-> not use mmc_reset() instead, because the device may not have
-> RST_n_FUNCTION set up.
+From: Wolfram Sang <wsa+renesas@sang-engineering.com>
 
-I don't want to restore the callbacks.
+While here, refactor the comments so that they are before the
+declaration they are referring to.
 
-Instead, let's be a bit more clever and try to extend mmc_reset() to
-cover the MMC case as well. I haven't thought about that in detail,
-but I think it should work.
+Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+---
+ include/linux/mmc/host.h | 31 +++++++++++++++++++++----------
+ 1 file changed, 21 insertions(+), 10 deletions(-)
 
-[...]
-
-Kind regards
-Uffe
+diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+index 8dd4d290ab0d86..85800b48241fad 100644
+--- a/include/linux/mmc/host.h
++++ b/include/linux/mmc/host.h
+@@ -93,28 +93,39 @@ struct mmc_host_ops {
+ 	void	(*pre_req)(struct mmc_host *host, struct mmc_request *req,
+ 			   bool is_first_req);
+ 	void	(*request)(struct mmc_host *host, struct mmc_request *req);
++
++	/*
++	 * Avoid calling the next three functions too often or in a "fast
++	 * path", since underlaying controller might implement them in an
++	 * expensive and/or slow way. Also note that these functions might
++	 * sleep, so don't call them in the atomic contexts!
++	 */
++
++	/*
++	 * Notes to the set_ios callback:
++	 * ios->clock might be 0. For some controllers, setting 0Hz
++	 * as any other frequency works. However, some controllers
++	 * explicitly need to disable the clock. Otherwise e.g. voltage
++	 * switching might fail because the SDCLK is not really quiet.
++	 */
++	void	(*set_ios)(struct mmc_host *host, struct mmc_ios *ios);
++
+ 	/*
+-	 * Avoid calling these three functions too often or in a "fast path",
+-	 * since underlaying controller might implement them in an expensive
+-	 * and/or slow way.
+-	 *
+-	 * Also note that these functions might sleep, so don't call them
+-	 * in the atomic contexts!
+-	 *
+ 	 * Return values for the get_ro callback should be:
+ 	 *   0 for a read/write card
+ 	 *   1 for a read-only card
+ 	 *   -ENOSYS when not supported (equal to NULL callback)
+ 	 *   or a negative errno value when something bad happened
+-	 *
++	 */
++	int	(*get_ro)(struct mmc_host *host);
++
++	/*
+ 	 * Return values for the get_cd callback should be:
+ 	 *   0 for a absent card
+ 	 *   1 for a present card
+ 	 *   -ENOSYS when not supported (equal to NULL callback)
+ 	 *   or a negative errno value when something bad happened
+ 	 */
+-	void	(*set_ios)(struct mmc_host *host, struct mmc_ios *ios);
+-	int	(*get_ro)(struct mmc_host *host);
+ 	int	(*get_cd)(struct mmc_host *host);
+ 
+ 	void	(*enable_sdio_irq)(struct mmc_host *host, int enable);
+-- 
+2.7.0
