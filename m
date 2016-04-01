@@ -1,67 +1,87 @@
 From: Wolfram Sang <wsa@the-dreams.de>
-Subject: [PATCH v2 0/9] r8a7790: add UHS-I (SDR50) support to Lager
-Date: Fri,  1 Apr 2016 17:44:30 +0200
-Message-ID: <1459525479-20842-1-git-send-email-wsa@the-dreams.de>
-Return-path: <linux-renesas-soc-owner@vger.kernel.org>
-Sender: linux-renesas-soc-owner@vger.kernel.org
+Subject: [PATCH v2 9/9] ARM: shmobile: r8a7790: lager: Enable UHS-I SDR-50
+Date: Fri,  1 Apr 2016 17:44:39 +0200
+Message-ID: <1459525479-20842-10-git-send-email-wsa@the-dreams.de>
+References: <1459525479-20842-1-git-send-email-wsa@the-dreams.de>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from sauhun.de ([89.238.76.85]:60314 "EHLO pokefinder.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753427AbcDAPpL (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 1 Apr 2016 11:45:11 -0400
+In-Reply-To: <1459525479-20842-1-git-send-email-wsa@the-dreams.de>
+Sender: linux-mmc-owner@vger.kernel.org
+List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org
 Cc: Wolfram Sang <wsa@the-dreams.de>, linux-renesas-soc@vger.kernel.org, Ben Hutchings <ben.hutchings@codethink.co.uk>
-List-Id: linux-mmc@vger.kernel.org
 
-So, here is v2 of the series adding SDR50 support to the Renesas Lager board.
-Change since v1:
+From: Wolfram Sang <wsa+renesas@sang-engineering.com>
 
-* rebased to renesas-drivers based on v4.6-rc1
-* dropped pinctrl patch which was already picked up
-* directly populate start_signal_voltage_switch() in mmc_ops
-  instead of using a wrapper function
-* use generic DT pinctrl bindings instead of vendor specific ones
-  (e.g. "groups" instead of "renesas,groups")
+Add the "1v8" pinctrl state and sd-uhs-sdr50 property to SDHI{0,2}.
 
-The RFC series worked fine with my Transcend card, but failed to switch
-voltages on a SanDisk and Samsung card. This bug hunting resulted in patches
-4-6 newly added: The clock really has to be disabled on ios->clock == 0,
-setting frequency to 0Hz doesn't work. I wonder if this isn't true for some
-more controllers? Is this known already?
+Signed-off-by: Ben Hutchings <ben.hutchings@codethink.co.uk>
+Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+---
+ arch/arm/boot/dts/r8a7790-lager.dts | 22 ++++++++++++++++++++--
+ 1 file changed, 20 insertions(+), 2 deletions(-)
 
-My "copy-large-files-around"-setup showed now 30MB/s while it had 19MB/s
-without SDR50. Frankly, I hoped for a little more, but let's start with this
-initial support and do the tuning incrementally I'd say.
-
-Patches 1-7 should go via Ulf. After those patches went in, Simon can take 8+9
-to tie it all together.
-
-Please comment, test, apply...
-
-Thanks,
-
-   Wolfram
-
-
-Ben Hutchings (3):
-  mmc: tmio, sh_mobile_sdhi: Pass tmio_mmc_host ptr to
-    clk_{enable,disable} ops
-  mmc: tmio, sh_mobile_sdhi: Add support for variable input clock
-    frequency
-  ARM: shmobile: r8a7790: Set maximum frequencies for SDHI clocks
-
-Wolfram Sang (6):
-  mmc: tmio: Add UHS-I mode support
-  mmc: tmio: always start clock after frequency calculation
-  mmc: tmio: stop clock when 0Hz is requested
-  mmc: host: add note that set_ios needs to handle 0Hz properly
-  mmc: sh_mobile_sdhi: Add UHS-I mode support
-  ARM: shmobile: r8a7790: lager: Enable UHS-I SDR-50
-
- Documentation/devicetree/bindings/mmc/tmio_mmc.txt |   3 +
- arch/arm/boot/dts/r8a7790-lager.dts                |  22 +++-
- arch/arm/boot/dts/r8a7790.dtsi                     |   4 +
- drivers/mmc/host/sh_mobile_sdhi.c                  | 116 +++++++++++++++++++--
- drivers/mmc/host/tmio_mmc.h                        |   8 +-
- drivers/mmc/host/tmio_mmc_pio.c                    | 102 +++++++++---------
- include/linux/mmc/host.h                           |  31 ++++--
- include/linux/mmc/tmio.h                           |   2 +
- 8 files changed, 218 insertions(+), 70 deletions(-)
-
+diff --git a/arch/arm/boot/dts/r8a7790-lager.dts b/arch/arm/boot/dts/r8a7790-lager.dts
+index 454fce0c5b8d12..4b8d9fc94c9658 100644
+--- a/arch/arm/boot/dts/r8a7790-lager.dts
++++ b/arch/arm/boot/dts/r8a7790-lager.dts
+@@ -345,11 +345,25 @@
+ 	sdhi0_pins: sd0 {
+ 		groups = "sdhi0_data4", "sdhi0_ctrl";
+ 		function = "sdhi0";
++		power-source = <3300>;
++	};
++
++	sdhi0_pins_uhs: sd0_uhs {
++		groups = "sdhi0_data4", "sdhi0_ctrl";
++		function = "sdhi0";
++		power-source = <1800>;
+ 	};
+ 
+ 	sdhi2_pins: sd2 {
+ 		groups = "sdhi2_data4", "sdhi2_ctrl";
+ 		function = "sdhi2";
++		power-source = <3300>;
++	};
++
++	sdhi2_pins_uhs: sd2_uhs {
++		groups = "sdhi2_data4", "sdhi2_ctrl";
++		function = "sdhi2";
++		power-source = <1800>;
+ 	};
+ 
+ 	mmc1_pins: mmc1 {
+@@ -538,21 +552,25 @@
+ 
+ &sdhi0 {
+ 	pinctrl-0 = <&sdhi0_pins>;
+-	pinctrl-names = "default";
++	pinctrl-1 = <&sdhi0_pins_uhs>;
++	pinctrl-names = "default", "state_uhs";
+ 
+ 	vmmc-supply = <&vcc_sdhi0>;
+ 	vqmmc-supply = <&vccq_sdhi0>;
+ 	cd-gpios = <&gpio3 6 GPIO_ACTIVE_LOW>;
++	sd-uhs-sdr50;
+ 	status = "okay";
+ };
+ 
+ &sdhi2 {
+ 	pinctrl-0 = <&sdhi2_pins>;
+-	pinctrl-names = "default";
++	pinctrl-1 = <&sdhi2_pins_uhs>;
++	pinctrl-names = "default", "state_uhs";
+ 
+ 	vmmc-supply = <&vcc_sdhi2>;
+ 	vqmmc-supply = <&vccq_sdhi2>;
+ 	cd-gpios = <&gpio3 22 GPIO_ACTIVE_LOW>;
++	sd-uhs-sdr50;
+ 	status = "okay";
+ };
+ 
 -- 
 2.7.0
+
