@@ -1,127 +1,67 @@
 From: Wolfram Sang <wsa@the-dreams.de>
-Subject: [PATCH v2 7/9] mmc: sh_mobile_sdhi: Add UHS-I mode support
-Date: Fri,  1 Apr 2016 17:44:37 +0200
-Message-ID: <1459525479-20842-8-git-send-email-wsa@the-dreams.de>
-References: <1459525479-20842-1-git-send-email-wsa@the-dreams.de>
+Subject: [PATCH v2 0/9] r8a7790: add UHS-I (SDR50) support to Lager
+Date: Fri,  1 Apr 2016 17:44:30 +0200
+Message-ID: <1459525479-20842-1-git-send-email-wsa@the-dreams.de>
 Return-path: <linux-renesas-soc-owner@vger.kernel.org>
-In-Reply-To: <1459525479-20842-1-git-send-email-wsa@the-dreams.de>
 Sender: linux-renesas-soc-owner@vger.kernel.org
 To: linux-mmc@vger.kernel.org
 Cc: Wolfram Sang <wsa@the-dreams.de>, linux-renesas-soc@vger.kernel.org, Ben Hutchings <ben.hutchings@codethink.co.uk>
 List-Id: linux-mmc@vger.kernel.org
 
-From: Wolfram Sang <wsa+renesas@sang-engineering.com>
+So, here is v2 of the series adding SDR50 support to the Renesas Lager board.
+Change since v1:
 
-Implement voltage switch, supporting modes up to SDR-50.
+* rebased to renesas-drivers based on v4.6-rc1
+* dropped pinctrl patch which was already picked up
+* directly populate start_signal_voltage_switch() in mmc_ops
+  instead of using a wrapper function
+* use generic DT pinctrl bindings instead of vendor specific ones
+  (e.g. "groups" instead of "renesas,groups")
 
-Based on work by Shinobu Uehara, Rob Taylor, William Towle and Ian Molton.
+The RFC series worked fine with my Transcend card, but failed to switch
+voltages on a SanDisk and Samsung card. This bug hunting resulted in patches
+4-6 newly added: The clock really has to be disabled on ios->clock == 0,
+setting frequency to 0Hz doesn't work. I wonder if this isn't true for some
+more controllers? Is this known already?
 
-Signed-off-by: Ben Hutchings <ben.hutchings@codethink.co.uk>
-Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
----
- Documentation/devicetree/bindings/mmc/tmio_mmc.txt |  3 ++
- drivers/mmc/host/sh_mobile_sdhi.c                  | 50 ++++++++++++++++++++++
- 2 files changed, 53 insertions(+)
+My "copy-large-files-around"-setup showed now 30MB/s while it had 19MB/s
+without SDR50. Frankly, I hoped for a little more, but let's start with this
+initial support and do the tuning incrementally I'd say.
 
-diff --git a/Documentation/devicetree/bindings/mmc/tmio_mmc.txt b/Documentation/devicetree/bindings/mmc/tmio_mmc.txt
-index 7fb746dd1a68ca..0f610d4b5b005f 100644
---- a/Documentation/devicetree/bindings/mmc/tmio_mmc.txt
-+++ b/Documentation/devicetree/bindings/mmc/tmio_mmc.txt
-@@ -26,3 +26,6 @@ Required properties:
- 
- Optional properties:
- - toshiba,mmc-wrprotect-disable: write-protect detection is unavailable
-+- pinctrl-names: should be "default", "state_uhs"
-+- pinctrl-0: should contain default/high speed pin ctrl
-+- pinctrl-1: should contain uhs mode pin ctrl
-diff --git a/drivers/mmc/host/sh_mobile_sdhi.c b/drivers/mmc/host/sh_mobile_sdhi.c
-index 8fd1d6b29190b6..89e0c5e9fcc668 100644
---- a/drivers/mmc/host/sh_mobile_sdhi.c
-+++ b/drivers/mmc/host/sh_mobile_sdhi.c
-@@ -32,6 +32,9 @@
- #include <linux/mfd/tmio.h>
- #include <linux/sh_dma.h>
- #include <linux/delay.h>
-+#include <linux/pinctrl/consumer.h>
-+#include <linux/pinctrl/pinctrl-state.h>
-+#include <linux/regulator/consumer.h>
- 
- #include "tmio_mmc.h"
- 
-@@ -97,6 +100,8 @@ struct sh_mobile_sdhi {
- 	struct clk *clk;
- 	struct tmio_mmc_data mmc_data;
- 	struct tmio_mmc_dma dma_priv;
-+	struct pinctrl *pinctrl;
-+	struct pinctrl_state *pins_default, *pins_uhs;
- };
- 
- static void sh_mobile_sdhi_sdbuf_width(struct tmio_mmc_host *host, int width)
-@@ -205,6 +210,44 @@ static void sh_mobile_sdhi_clk_disable(struct tmio_mmc_host *host)
- 	clk_disable_unprepare(priv->clk);
- }
- 
-+static int sh_mobile_sdhi_start_signal_voltage_switch(struct mmc_host *mmc,
-+						      struct mmc_ios *ios)
-+{
-+	struct tmio_mmc_host *host = mmc_priv(mmc);
-+	struct sh_mobile_sdhi *priv = host_to_priv(host);
-+	struct pinctrl_state *pin_state;
-+	int ret;
-+
-+	switch (ios->signal_voltage) {
-+	case MMC_SIGNAL_VOLTAGE_330:
-+		pin_state = priv->pins_default;
-+		break;
-+	case MMC_SIGNAL_VOLTAGE_180:
-+		pin_state = priv->pins_uhs;
-+		break;
-+	default:
-+		return -EINVAL;
-+	}
-+
-+	/*
-+	 * If anything is missing, assume signal voltage is fixed at
-+	 * 3.3V and succeed/fail accordingly.
-+	 */
-+	if (IS_ERR(priv->pinctrl) || IS_ERR(pin_state))
-+		return ios->signal_voltage == MMC_SIGNAL_VOLTAGE_330 ? 0 : -EINVAL;
-+
-+	ret = mmc_regulator_set_vqmmc(host->mmc, ios);
-+	if (ret)
-+		return ret;
-+
-+	ret = pinctrl_select_state(priv->pinctrl, pin_state);
-+	if (ret)
-+		return ret;
-+
-+	usleep_range(5000, 5500);
-+	return 0;
-+}
-+
- static int sh_mobile_sdhi_wait_idle(struct tmio_mmc_host *host)
- {
- 	int timeout = 1000;
-@@ -296,6 +339,12 @@ static int sh_mobile_sdhi_probe(struct platform_device *pdev)
- 		goto eprobe;
- 	}
- 
-+	priv->pinctrl = devm_pinctrl_get(&pdev->dev);
-+	if (!IS_ERR(priv->pinctrl)) {
-+		priv->pins_default = pinctrl_lookup_state(priv->pinctrl, PINCTRL_STATE_DEFAULT);
-+		priv->pins_uhs = pinctrl_lookup_state(priv->pinctrl, "state_uhs");
-+	}
-+
- 	host = tmio_mmc_host_alloc(pdev);
- 	if (!host) {
- 		ret = -ENOMEM;
-@@ -319,6 +368,7 @@ static int sh_mobile_sdhi_probe(struct platform_device *pdev)
- 	host->clk_update	= sh_mobile_sdhi_clk_update;
- 	host->clk_disable	= sh_mobile_sdhi_clk_disable;
- 	host->multi_io_quirk	= sh_mobile_sdhi_multi_io_quirk;
-+	host->start_signal_voltage_switch = sh_mobile_sdhi_start_signal_voltage_switch;
- 
- 	/* Orginally registers were 16 bit apart, could be 32 or 64 nowadays */
- 	if (!host->bus_shift && resource_size(res) > 0x100) /* old way to determine the shift */
+Patches 1-7 should go via Ulf. After those patches went in, Simon can take 8+9
+to tie it all together.
+
+Please comment, test, apply...
+
+Thanks,
+
+   Wolfram
+
+
+Ben Hutchings (3):
+  mmc: tmio, sh_mobile_sdhi: Pass tmio_mmc_host ptr to
+    clk_{enable,disable} ops
+  mmc: tmio, sh_mobile_sdhi: Add support for variable input clock
+    frequency
+  ARM: shmobile: r8a7790: Set maximum frequencies for SDHI clocks
+
+Wolfram Sang (6):
+  mmc: tmio: Add UHS-I mode support
+  mmc: tmio: always start clock after frequency calculation
+  mmc: tmio: stop clock when 0Hz is requested
+  mmc: host: add note that set_ios needs to handle 0Hz properly
+  mmc: sh_mobile_sdhi: Add UHS-I mode support
+  ARM: shmobile: r8a7790: lager: Enable UHS-I SDR-50
+
+ Documentation/devicetree/bindings/mmc/tmio_mmc.txt |   3 +
+ arch/arm/boot/dts/r8a7790-lager.dts                |  22 +++-
+ arch/arm/boot/dts/r8a7790.dtsi                     |   4 +
+ drivers/mmc/host/sh_mobile_sdhi.c                  | 116 +++++++++++++++++++--
+ drivers/mmc/host/tmio_mmc.h                        |   8 +-
+ drivers/mmc/host/tmio_mmc_pio.c                    | 102 +++++++++---------
+ include/linux/mmc/host.h                           |  31 ++++--
+ include/linux/mmc/tmio.h                           |   2 +
+ 8 files changed, 218 insertions(+), 70 deletions(-)
+
 -- 
 2.7.0
