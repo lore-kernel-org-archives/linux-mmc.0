@@ -1,7 +1,7 @@
 From: Wolfram Sang <wsa@the-dreams.de>
-Subject: [PATCH v2 1/9] mmc: tmio, sh_mobile_sdhi: Pass tmio_mmc_host ptr to clk_{enable,disable} ops
-Date: Fri,  1 Apr 2016 17:44:31 +0200
-Message-ID: <1459525479-20842-2-git-send-email-wsa@the-dreams.de>
+Subject: [PATCH v2 8/9] ARM: shmobile: r8a7790: Set maximum frequencies for SDHI clocks
+Date: Fri,  1 Apr 2016 17:44:38 +0200
+Message-ID: <1459525479-20842-9-git-send-email-wsa@the-dreams.de>
 References: <1459525479-20842-1-git-send-email-wsa@the-dreams.de>
 Return-path: <linux-renesas-soc-owner@vger.kernel.org>
 In-Reply-To: <1459525479-20842-1-git-send-email-wsa@the-dreams.de>
@@ -12,92 +12,49 @@ List-Id: linux-mmc@vger.kernel.org
 
 From: Ben Hutchings <ben.hutchings@codethink.co.uk>
 
-Change the clk_enable operation to take a pointer to the struct
-tmio_mmc_host and have it set f_max.  For consistency, also change the
-clk_disable operation to take a pointer to struct tmio_mmc_host.
+Taken from the datasheet.
 
 Signed-off-by: Ben Hutchings <ben.hutchings@codethink.co.uk>
 Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
 ---
- drivers/mmc/host/sh_mobile_sdhi.c | 12 +++++-------
- drivers/mmc/host/tmio_mmc.h       |  4 ++--
- drivers/mmc/host/tmio_mmc_pio.c   |  4 ++--
- 3 files changed, 9 insertions(+), 11 deletions(-)
+ arch/arm/boot/dts/r8a7790.dtsi | 4 ++++
+ 1 file changed, 4 insertions(+)
 
-diff --git a/drivers/mmc/host/sh_mobile_sdhi.c b/drivers/mmc/host/sh_mobile_sdhi.c
-index 9aa147959276d0..55849350202b7d 100644
---- a/drivers/mmc/host/sh_mobile_sdhi.c
-+++ b/drivers/mmc/host/sh_mobile_sdhi.c
-@@ -131,16 +131,15 @@ static void sh_mobile_sdhi_sdbuf_width(struct tmio_mmc_host *host, int width)
- 	sd_ctrl_write16(host, EXT_ACC, val);
- }
- 
--static int sh_mobile_sdhi_clk_enable(struct platform_device *pdev, unsigned int *f)
-+static int sh_mobile_sdhi_clk_enable(struct tmio_mmc_host *host)
- {
--	struct mmc_host *mmc = platform_get_drvdata(pdev);
--	struct tmio_mmc_host *host = mmc_priv(mmc);
-+	struct mmc_host *mmc = host->mmc;
- 	struct sh_mobile_sdhi *priv = host_to_priv(host);
- 	int ret = clk_prepare_enable(priv->clk);
- 	if (ret < 0)
- 		return ret;
- 
--	*f = clk_get_rate(priv->clk);
-+	mmc->f_max = clk_get_rate(priv->clk);
- 
- 	/* enable 16bit data access on SDBUF as default */
- 	sh_mobile_sdhi_sdbuf_width(host, 16);
-@@ -148,11 +147,10 @@ static int sh_mobile_sdhi_clk_enable(struct platform_device *pdev, unsigned int
- 	return 0;
- }
- 
--static void sh_mobile_sdhi_clk_disable(struct platform_device *pdev)
-+static void sh_mobile_sdhi_clk_disable(struct tmio_mmc_host *host)
- {
--	struct mmc_host *mmc = platform_get_drvdata(pdev);
--	struct tmio_mmc_host *host = mmc_priv(mmc);
- 	struct sh_mobile_sdhi *priv = host_to_priv(host);
-+
- 	clk_disable_unprepare(priv->clk);
- }
- 
-diff --git a/drivers/mmc/host/tmio_mmc.h b/drivers/mmc/host/tmio_mmc.h
-index 4a597f5a53e20f..68fd8d791358c1 100644
---- a/drivers/mmc/host/tmio_mmc.h
-+++ b/drivers/mmc/host/tmio_mmc.h
-@@ -95,8 +95,8 @@ struct tmio_mmc_host {
- 	bool			sdio_irq_enabled;
- 
- 	int (*write16_hook)(struct tmio_mmc_host *host, int addr);
--	int (*clk_enable)(struct platform_device *pdev, unsigned int *f);
--	void (*clk_disable)(struct platform_device *pdev);
-+	int (*clk_enable)(struct tmio_mmc_host *host);
-+	void (*clk_disable)(struct tmio_mmc_host *host);
- 	int (*multi_io_quirk)(struct mmc_card *card,
- 			      unsigned int direction, int blk_size);
- };
-diff --git a/drivers/mmc/host/tmio_mmc_pio.c b/drivers/mmc/host/tmio_mmc_pio.c
-index 03f6e74c190691..d1160156678ade 100644
---- a/drivers/mmc/host/tmio_mmc_pio.c
-+++ b/drivers/mmc/host/tmio_mmc_pio.c
-@@ -845,7 +845,7 @@ static int tmio_mmc_clk_update(struct tmio_mmc_host *host)
- 	if (!host->clk_enable)
- 		return -ENOTSUPP;
- 
--	ret = host->clk_enable(host->pdev, &mmc->f_max);
-+	ret = host->clk_enable(host);
- 	if (!ret)
- 		mmc->f_min = mmc->f_max / 512;
- 
-@@ -1251,7 +1251,7 @@ int tmio_mmc_host_runtime_suspend(struct device *dev)
- 		tmio_mmc_clk_stop(host);
- 
- 	if (host->clk_disable)
--		host->clk_disable(host->pdev);
-+		host->clk_disable(host);
- 
- 	return 0;
- }
+diff --git a/arch/arm/boot/dts/r8a7790.dtsi b/arch/arm/boot/dts/r8a7790.dtsi
+index abd7d88c411e4a..1a3b6b08f1f3c9 100644
+--- a/arch/arm/boot/dts/r8a7790.dtsi
++++ b/arch/arm/boot/dts/r8a7790.dtsi
+@@ -607,6 +607,7 @@
+ 		dmas = <&dmac1 0xcd>, <&dmac1 0xce>,
+ 		       <&dmac0 0xcd>, <&dmac0 0xce>;
+ 		dma-names = "tx", "rx", "tx", "rx";
++		max-frequency = <156000000>;
+ 		power-domains = <&cpg_clocks>;
+ 		status = "disabled";
+ 	};
+@@ -619,6 +620,7 @@
+ 		dmas = <&dmac1 0xc9>, <&dmac1 0xca>,
+ 		       <&dmac0 0xc9>, <&dmac0 0xca>;
+ 		dma-names = "tx", "rx", "tx", "rx";
++		max-frequency = <156000000>;
+ 		power-domains = <&cpg_clocks>;
+ 		status = "disabled";
+ 	};
+@@ -631,6 +633,7 @@
+ 		dmas = <&dmac1 0xc1>, <&dmac1 0xc2>,
+ 		       <&dmac0 0xc1>, <&dmac0 0xc2>;
+ 		dma-names = "tx", "rx", "tx", "rx";
++		max-frequency = <97500000>;
+ 		power-domains = <&cpg_clocks>;
+ 		status = "disabled";
+ 	};
+@@ -643,6 +646,7 @@
+ 		dmas = <&dmac1 0xd3>, <&dmac1 0xd4>,
+ 		       <&dmac0 0xd3>, <&dmac0 0xd4>;
+ 		dma-names = "tx", "rx", "tx", "rx";
++		max-frequency = <97500000>;
+ 		power-domains = <&cpg_clocks>;
+ 		status = "disabled";
+ 	};
 -- 
 2.7.0
