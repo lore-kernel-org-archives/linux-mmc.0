@@ -1,212 +1,103 @@
 From: Wolfram Sang <wsa@the-dreams.de>
-Subject: [PATCH v2 2/9] mmc: tmio, sh_mobile_sdhi: Add support for variable input clock frequency
-Date: Fri,  1 Apr 2016 17:44:32 +0200
-Message-ID: <1459525479-20842-3-git-send-email-wsa@the-dreams.de>
+Subject: [PATCH v2 1/9] mmc: tmio, sh_mobile_sdhi: Pass tmio_mmc_host ptr to clk_{enable,disable} ops
+Date: Fri,  1 Apr 2016 17:44:31 +0200
+Message-ID: <1459525479-20842-2-git-send-email-wsa@the-dreams.de>
 References: <1459525479-20842-1-git-send-email-wsa@the-dreams.de>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from sauhun.de ([89.238.76.85]:60301 "EHLO pokefinder.org"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753184AbcDAPpF (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 1 Apr 2016 11:45:05 -0400
+Return-path: <linux-renesas-soc-owner@vger.kernel.org>
 In-Reply-To: <1459525479-20842-1-git-send-email-wsa@the-dreams.de>
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Sender: linux-renesas-soc-owner@vger.kernel.org
 To: linux-mmc@vger.kernel.org
 Cc: Wolfram Sang <wsa@the-dreams.de>, linux-renesas-soc@vger.kernel.org, Ben Hutchings <ben.hutchings@codethink.co.uk>
+List-Id: linux-mmc@vger.kernel.org
 
 From: Ben Hutchings <ben.hutchings@codethink.co.uk>
 
-Currently tmio_mmc assumes that the input clock frequency is fixed and
-only its own clock divider can be changed.  This is not true in the
-case of sh_mobile_sdhi; we can use the clock API to change it.
-
-In tmio_mmc:
-- Delegate setting of f_min from tmio to the clk_enable operation (if
-  implemented), as it can be smaller than f_max / 512
-- Add an optional clk_update operation called from tmio_mmc_set_clock()
-  that updates the input clock frequency
-- Rename tmio_mmc_clk_update() to tmio_mmc_clk_enable(), to avoid
-  confusion with the clk_update operation
-
-In sh_mobile_sdhi:
-- Make the setting of f_max conditional; it should be set through the
-  max-frequency property in the device tree in future
-- Set f_min based on the input clock's minimum frequency
-- Implement the clk_update operation, selecting the best input clock
-  frequency for the bus frequency that's wanted
-
-sh_mobile_sdhi_clk_update() is loosely based on Kuninori Morimoto's work
-in sh_mmcif.
+Change the clk_enable operation to take a pointer to the struct
+tmio_mmc_host and have it set f_max.  For consistency, also change the
+clk_disable operation to take a pointer to struct tmio_mmc_host.
 
 Signed-off-by: Ben Hutchings <ben.hutchings@codethink.co.uk>
 Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
 ---
- drivers/mmc/host/sh_mobile_sdhi.c | 56 +++++++++++++++++++++++++++++++++++++--
- drivers/mmc/host/tmio_mmc.h       |  2 ++
- drivers/mmc/host/tmio_mmc_pio.c   | 24 +++++++----------
- 3 files changed, 66 insertions(+), 16 deletions(-)
+ drivers/mmc/host/sh_mobile_sdhi.c | 12 +++++-------
+ drivers/mmc/host/tmio_mmc.h       |  4 ++--
+ drivers/mmc/host/tmio_mmc_pio.c   |  4 ++--
+ 3 files changed, 9 insertions(+), 11 deletions(-)
 
 diff --git a/drivers/mmc/host/sh_mobile_sdhi.c b/drivers/mmc/host/sh_mobile_sdhi.c
-index 55849350202b7d..8fd1d6b29190b6 100644
+index 9aa147959276d0..55849350202b7d 100644
 --- a/drivers/mmc/host/sh_mobile_sdhi.c
 +++ b/drivers/mmc/host/sh_mobile_sdhi.c
-@@ -139,7 +139,20 @@ static int sh_mobile_sdhi_clk_enable(struct tmio_mmc_host *host)
+@@ -131,16 +131,15 @@ static void sh_mobile_sdhi_sdbuf_width(struct tmio_mmc_host *host, int width)
+ 	sd_ctrl_write16(host, EXT_ACC, val);
+ }
+ 
+-static int sh_mobile_sdhi_clk_enable(struct platform_device *pdev, unsigned int *f)
++static int sh_mobile_sdhi_clk_enable(struct tmio_mmc_host *host)
+ {
+-	struct mmc_host *mmc = platform_get_drvdata(pdev);
+-	struct tmio_mmc_host *host = mmc_priv(mmc);
++	struct mmc_host *mmc = host->mmc;
+ 	struct sh_mobile_sdhi *priv = host_to_priv(host);
+ 	int ret = clk_prepare_enable(priv->clk);
  	if (ret < 0)
  		return ret;
  
--	mmc->f_max = clk_get_rate(priv->clk);
-+	/*
-+	 * The clock driver may not know what maximum frequency
-+	 * actually works, so it should be set with the max-frequency
-+	 * property which will already have been read to f_max.  If it
-+	 * was missing, assume the current frequency is the maximum.
-+	 */
-+	if (!mmc->f_max)
-+		mmc->f_max = clk_get_rate(priv->clk);
-+
-+	/*
-+	 * Minimum frequency is the minimum input clock frequency
-+	 * divided by our maximum divider.
-+	 */
-+	mmc->f_min = max(clk_round_rate(priv->clk, 1) / 512, 1L);
+-	*f = clk_get_rate(priv->clk);
++	mmc->f_max = clk_get_rate(priv->clk);
  
  	/* enable 16bit data access on SDBUF as default */
  	sh_mobile_sdhi_sdbuf_width(host, 16);
-@@ -147,6 +160,44 @@ static int sh_mobile_sdhi_clk_enable(struct tmio_mmc_host *host)
+@@ -148,11 +147,10 @@ static int sh_mobile_sdhi_clk_enable(struct platform_device *pdev, unsigned int
  	return 0;
  }
  
-+static unsigned int sh_mobile_sdhi_clk_update(struct tmio_mmc_host *host,
-+					      unsigned int new_clock)
-+{
-+	struct sh_mobile_sdhi *priv = host_to_priv(host);
-+	unsigned int freq, best_freq, diff_min, diff;
-+	int i;
-+
-+	diff_min = ~0;
-+	best_freq = 0;
-+
-+	/*
-+	 * We want the bus clock to be as close as possible to, but no
-+	 * greater than, new_clock.  As we can divide by 1 << i for
-+	 * any i in [0, 9] we want the input clock to be as close as
-+	 * possible, but no greater than, new_clock << i.
-+	 */
-+	for (i = min(9, ilog2(UINT_MAX / new_clock)); i >= 0; i--) {
-+		freq = clk_round_rate(priv->clk, new_clock << i);
-+		if (freq > (new_clock << i)) {
-+			/* Too fast; look for a slightly slower option */
-+			freq = clk_round_rate(priv->clk,
-+					      (new_clock << i) / 4 * 3);
-+			if (freq > (new_clock << i))
-+				continue;
-+		}
-+
-+		diff = new_clock - (freq >> i);
-+		if (diff <= diff_min) {
-+			best_freq = freq;
-+			diff_min = diff;
-+		}
-+	}
-+
-+	clk_set_rate(priv->clk, best_freq);
-+
-+	return best_freq;
-+}
-+
- static void sh_mobile_sdhi_clk_disable(struct tmio_mmc_host *host)
+-static void sh_mobile_sdhi_clk_disable(struct platform_device *pdev)
++static void sh_mobile_sdhi_clk_disable(struct tmio_mmc_host *host)
  {
+-	struct mmc_host *mmc = platform_get_drvdata(pdev);
+-	struct tmio_mmc_host *host = mmc_priv(mmc);
  	struct sh_mobile_sdhi *priv = host_to_priv(host);
-@@ -265,6 +316,7 @@ static int sh_mobile_sdhi_probe(struct platform_device *pdev)
- 	host->dma		= dma_priv;
- 	host->write16_hook	= sh_mobile_sdhi_write16_hook;
- 	host->clk_enable	= sh_mobile_sdhi_clk_enable;
-+	host->clk_update	= sh_mobile_sdhi_clk_update;
- 	host->clk_disable	= sh_mobile_sdhi_clk_disable;
- 	host->multi_io_quirk	= sh_mobile_sdhi_multi_io_quirk;
- 
-@@ -362,7 +414,7 @@ static int sh_mobile_sdhi_probe(struct platform_device *pdev)
- 		}
- 	}
- 
--	dev_info(&pdev->dev, "%s base at 0x%08lx clock rate %u MHz\n",
-+	dev_info(&pdev->dev, "%s base at 0x%08lx max clock rate %u MHz\n",
- 		 mmc_hostname(host->mmc), (unsigned long)
- 		 (platform_get_resource(pdev, IORESOURCE_MEM, 0)->start),
- 		 host->mmc->f_max / 1000000);
-diff --git a/drivers/mmc/host/tmio_mmc.h b/drivers/mmc/host/tmio_mmc.h
-index 68fd8d791358c1..b44b5890290622 100644
---- a/drivers/mmc/host/tmio_mmc.h
-+++ b/drivers/mmc/host/tmio_mmc.h
-@@ -96,6 +96,8 @@ struct tmio_mmc_host {
- 
- 	int (*write16_hook)(struct tmio_mmc_host *host, int addr);
- 	int (*clk_enable)(struct tmio_mmc_host *host);
-+	unsigned int (*clk_update)(struct tmio_mmc_host *host,
-+				   unsigned int new_clock);
- 	void (*clk_disable)(struct tmio_mmc_host *host);
- 	int (*multi_io_quirk)(struct mmc_card *card,
- 			      unsigned int direction, int blk_size);
-diff --git a/drivers/mmc/host/tmio_mmc_pio.c b/drivers/mmc/host/tmio_mmc_pio.c
-index d1160156678ade..ae81b34f17a5a5 100644
---- a/drivers/mmc/host/tmio_mmc_pio.c
-+++ b/drivers/mmc/host/tmio_mmc_pio.c
-@@ -160,9 +160,12 @@ static void tmio_mmc_set_clock(struct tmio_mmc_host *host,
- 	u32 clk = 0, clock;
- 
- 	if (new_clock) {
--		for (clock = host->mmc->f_min, clk = 0x80000080;
--		     new_clock >= (clock << 1);
--		     clk >>= 1)
-+		if (host->clk_update)
-+			clock = host->clk_update(host, new_clock) / 512;
-+		else
-+			clock = host->mmc->f_min;
 +
-+		for (clk = 0x80000080; new_clock >= (clock << 1); clk >>= 1)
- 			clock <<= 1;
- 
- 		/* 1/1 clock is option */
-@@ -837,19 +840,12 @@ fail:
- 	pm_runtime_put_autosuspend(mmc_dev(mmc));
+ 	clk_disable_unprepare(priv->clk);
  }
  
--static int tmio_mmc_clk_update(struct tmio_mmc_host *host)
-+static int tmio_mmc_clk_enable(struct tmio_mmc_host *host)
- {
--	struct mmc_host *mmc = host->mmc;
--	int ret;
--
+diff --git a/drivers/mmc/host/tmio_mmc.h b/drivers/mmc/host/tmio_mmc.h
+index 4a597f5a53e20f..68fd8d791358c1 100644
+--- a/drivers/mmc/host/tmio_mmc.h
++++ b/drivers/mmc/host/tmio_mmc.h
+@@ -95,8 +95,8 @@ struct tmio_mmc_host {
+ 	bool			sdio_irq_enabled;
+ 
+ 	int (*write16_hook)(struct tmio_mmc_host *host, int addr);
+-	int (*clk_enable)(struct platform_device *pdev, unsigned int *f);
+-	void (*clk_disable)(struct platform_device *pdev);
++	int (*clk_enable)(struct tmio_mmc_host *host);
++	void (*clk_disable)(struct tmio_mmc_host *host);
+ 	int (*multi_io_quirk)(struct mmc_card *card,
+ 			      unsigned int direction, int blk_size);
+ };
+diff --git a/drivers/mmc/host/tmio_mmc_pio.c b/drivers/mmc/host/tmio_mmc_pio.c
+index 03f6e74c190691..d1160156678ade 100644
+--- a/drivers/mmc/host/tmio_mmc_pio.c
++++ b/drivers/mmc/host/tmio_mmc_pio.c
+@@ -845,7 +845,7 @@ static int tmio_mmc_clk_update(struct tmio_mmc_host *host)
  	if (!host->clk_enable)
  		return -ENOTSUPP;
  
--	ret = host->clk_enable(host);
--	if (!ret)
--		mmc->f_min = mmc->f_max / 512;
--
--	return ret;
-+	return host->clk_enable(host);
- }
- 
- static void tmio_mmc_power_on(struct tmio_mmc_host *host, unsigned short vdd)
-@@ -1135,7 +1131,7 @@ int tmio_mmc_host_probe(struct tmio_mmc_host *_host,
- 				  mmc->caps & MMC_CAP_NONREMOVABLE ||
- 				  mmc->slot.cd_irq >= 0);
- 
--	if (tmio_mmc_clk_update(_host) < 0) {
-+	if (tmio_mmc_clk_enable(_host) < 0) {
- 		mmc->f_max = pdata->hclk;
+-	ret = host->clk_enable(host->pdev, &mmc->f_max);
++	ret = host->clk_enable(host);
+ 	if (!ret)
  		mmc->f_min = mmc->f_max / 512;
- 	}
-@@ -1263,7 +1259,7 @@ int tmio_mmc_host_runtime_resume(struct device *dev)
- 	struct tmio_mmc_host *host = mmc_priv(mmc);
  
- 	tmio_mmc_reset(host);
--	tmio_mmc_clk_update(host);
-+	tmio_mmc_clk_enable(host);
+@@ -1251,7 +1251,7 @@ int tmio_mmc_host_runtime_suspend(struct device *dev)
+ 		tmio_mmc_clk_stop(host);
  
- 	if (host->clk_cache) {
- 		tmio_mmc_set_clock(host, host->clk_cache);
+ 	if (host->clk_disable)
+-		host->clk_disable(host->pdev);
++		host->clk_disable(host);
+ 
+ 	return 0;
+ }
 -- 
 2.7.0
-
