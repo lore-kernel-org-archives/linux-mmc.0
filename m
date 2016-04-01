@@ -1,82 +1,52 @@
-From: Gwendal Grignou <gwendal@chromium.org>
-Subject: [PATCH v2] mmc: core: in mmc_hw_reset(), allow power cycle.
-Date: Fri,  1 Apr 2016 10:25:22 -0700
-Message-ID: <1459531522-31874-1-git-send-email-gwendal@chromium.org>
-References: <1459529180-32604-1-git-send-email-gwendal@chromium.org>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pf0-f173.google.com ([209.85.192.173]:34587 "EHLO
-	mail-pf0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751097AbcDARZ2 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 1 Apr 2016 13:25:28 -0400
-Received: by mail-pf0-f173.google.com with SMTP id x3so95721709pfb.1
-        for <linux-mmc@vger.kernel.org>; Fri, 01 Apr 2016 10:25:28 -0700 (PDT)
-In-Reply-To: <1459529180-32604-1-git-send-email-gwendal@chromium.org>
-Sender: linux-mmc-owner@vger.kernel.org
+From: Heiko Stuebner <heiko@sntech.de>
+Subject: Re: [PATCH v3 2/2] mmc: dw_mmc: add resets support to dw_mmc
+Date: Fri, 01 Apr 2016 20:42 +0200
+Message-ID: <1754831.FONmYVUinF@phil>
+References: <1459322696-29919-1-git-send-email-guodong.xu@linaro.org> <1459322696-29919-3-git-send-email-guodong.xu@linaro.org> <56FBBB2F.5030308@samsung.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=iso-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <56FBBB2F.5030308@samsung.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Jaehoon Chung <jh80.chung@samsung.com>
+Cc: Guodong Xu <guodong.xu@linaro.org>, shawn.lin@rock-chips.com, "robh+dt@kernel.org" <robh+dt@kernel.org>, pawel.moll@arm.com, mark.rutland@arm.com, ijc+devicetree@hellion.org.uk, galak@codeaurora.org, ulf.hansson@linaro.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, Xinwei Kong <kong.kongxinwei@hisilicon.com>, Zhangfei Gao <zhangfei.gao@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
-To: ulf.hansson@linaro.org
-Cc: linux-mmc@vger.kernel.org
 
-When the eMMC device does not support/allow sending RST_n signal,
-do a brute force power cycle instead of returning EOPNOTSUPP.
+Am Mittwoch, 30. M=E4rz 2016, 20:40:31 schrieb Jaehoon Chung:
+> modified Rob's mail address.
+>=20
+> On 03/30/2016 04:24 PM, Guodong Xu wrote:
+> > mmc registers may in abnormal state if mmc is used in bootloader,
+> > eg. to support booting from eMMC. So we need reset mmc registers
+> > when kernel boots up, instead of assuming mmc is in clean state.
+>=20
+> Do you mean mmc(card side) register or dwmmc host controller's regist=
+er on
+> host side?
+>=20
+> According to dwmmc controller TMR, there are two reset signals. One i=
+s
+> reset_n, other is rst_n. It seems this patch is relevant to reset_n(F=
+or
+> host). (rst_n is hardware reset for card.)
+>=20
+> So could you clarify better? Then it's helpful to me for understandin=
+g..
 
-Signed-off-by: Gwendal Grignou <gwendal@chromium.org>
----
-Changes in v2:
-- Fix indentation.
-- Use card instead of host->card when available.
+I think that actually means a reset of controller IP block logic, outsi=
+de=20
+the control of the dw_mmc block itself.
 
- drivers/mmc/core/core.c |  5 +++--
- drivers/mmc/core/mmc.c  | 18 ++++++++----------
- 2 files changed, 11 insertions(+), 12 deletions(-)
+On Rockchip SoCs this gets triggered from the CRU (clock and reset unit=
+), so=20
+I guess if I'm reading the manual correctly, should be the reset_n sign=
+al of=20
+the ip block.
 
-diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index d8bbc78..d5bc2d8 100644
---- a/drivers/mmc/core/core.c
-+++ b/drivers/mmc/core/core.c
-@@ -2468,8 +2468,9 @@ int mmc_hw_reset(struct mmc_host *host)
- 	ret = host->bus_ops->reset(host);
- 	mmc_bus_put(host);
- 
--	if (ret != -EOPNOTSUPP)
--		pr_warn("%s: tried to reset card\n", mmc_hostname(host));
-+	if (ret)
-+		pr_warn("%s: tried to reset card, got error %d\n",
-+			mmc_hostname(host), ret);
- 
- 	return ret;
- }
-diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-index 96cc7e2..deb8c16 100644
---- a/drivers/mmc/core/mmc.c
-+++ b/drivers/mmc/core/mmc.c
-@@ -1988,19 +1988,17 @@ static int mmc_reset(struct mmc_host *host)
- {
- 	struct mmc_card *card = host->card;
- 
--	if (!(host->caps & MMC_CAP_HW_RESET) || !host->ops->hw_reset)
--		return -EOPNOTSUPP;
--
--	if (!mmc_can_reset(card))
--		return -EOPNOTSUPP;
--
- 	mmc_set_clock(host, host->f_init);
--
--	host->ops->hw_reset(host);
--
-+	if ((host->caps & MMC_CAP_HW_RESET) && host->ops->hw_reset &&
-+	     mmc_can_reset(card)) {
-+		/* If the card accept RST_n signal, send it. */
-+		host->ops->hw_reset(host);
-+	} else {
-+		/* Do a brute force power cycle */
-+		mmc_power_cycle(host, card->ocr);
-+	}
- 	/* Set initial state and call mmc_set_ios */
- 	mmc_set_initial_state(host);
--
- 	return mmc_init_card(host, card->ocr, card);
- }
- 
--- 
-2.8.0.rc3.226.g39d4020
+rst_n on the other hand gets triggered through a dw_mmc register settin=
+g and=20
+is already handled by the dw_mmc driver.
 
+
+Heiko
