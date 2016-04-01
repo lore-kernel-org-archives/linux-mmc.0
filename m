@@ -1,38 +1,86 @@
-From: Scott Wood <oss@buserror.net>
-Subject: Re: [v7, 0/5] Fix eSDHC host version register bug
-Date: Fri, 01 Apr 2016 17:25:43 -0500
-Message-ID: <1459549543.32510.28.camel@buserror.net>
-References: <1459480051-3701-1-git-send-email-yangbo.lu@nxp.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-clk-owner@vger.kernel.org>
-In-Reply-To: <1459480051-3701-1-git-send-email-yangbo.lu@nxp.com>
-Sender: linux-clk-owner@vger.kernel.org
-To: Yangbo Lu <yangbo.lu@nxp.com>, devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, linuxppc-dev@lists.ozlabs.org, linux-clk@vger.kernel.org, linux-i2c@vger.kernel.org, iommu@lists.linux-foundation.org, netdev@vger.kernel.org, linux-mmc@vger.kernel.org
-Cc: ulf.hansson@linaro.org, Zhao Qiang <qiang.zhao@freescale.com>, Russell King <linux@arm.linux.org.uk>, Bhupesh Sharma <bhupesh.sharma@freescale.com>, Joerg Roedel <joro@8bytes.org>, Santosh Shilimkar <ssantosh@kernel.org>, Jochen Friedrich <jochen@scram.de>, scott.wood@nxp.com, Rob Herring <robh+dt@kernel.org>, Claudiu Manoil <claudiu.manoil@freescale.com>, Kumar Gala <galak@codeaurora.org>, leoyang.li@nxp.com, xiaobo.xie@nxp.com
+From: Gwendal Grignou <gwendal@chromium.org>
+Subject: [PATCH v3] mmc: core: in mmc_hw_reset(), allow power cycle.
+Date: Fri,  1 Apr 2016 16:04:22 -0700
+Message-ID: <1459551862-38853-1-git-send-email-gwendal@chromium.org>
+References: <1459531522-31874-1-git-send-email-gwendal@chromium.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-pf0-f171.google.com ([209.85.192.171]:34022 "EHLO
+	mail-pf0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752898AbcDAXEn (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 1 Apr 2016 19:04:43 -0400
+Received: by mail-pf0-f171.google.com with SMTP id x3so100487112pfb.1
+        for <linux-mmc@vger.kernel.org>; Fri, 01 Apr 2016 16:04:43 -0700 (PDT)
+In-Reply-To: <1459531522-31874-1-git-send-email-gwendal@chromium.org>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: ulf.hansson@linaro.org
+Cc: linux-mmc@vger.kernel.org
 
-On Fri, 2016-04-01 at 11:07 +0800, Yangbo Lu wrote:
-> This patchset is used to fix a host version register bug in the T4240-R1.0
-> -R2.0
-> eSDHC controller. To get the SoC version and revision, it's needed to add
-> the
-> GUTS driver to access the global utilities registers.
-> 
-> So, the first three patches are to add the GUTS driver.
-> The following two patches are to enable GUTS driver support to get SVR in
-> eSDHC
-> driver and fix host version for T4240.
-> 
-> Yangbo Lu (5):
->   ARM64: dts: ls2080a: add device configuration node
->   soc: fsl: add GUTS driver for QorIQ platforms
->   dt: move guts devicetree doc out of powerpc directory
->   powerpc/fsl: move mpc85xx.h to include/linux/fsl
->   mmc: sdhci-of-esdhc: fix host version for T4240-R1.0-R2.0
+When the eMMC device does not support/allow sending RST_n signal,
+try to do a brute force power cycle instead of returning EOPNOTSUPP.
+If power cycle is not supported by the hardware, mmc_init_card still
+send a CMD0, performing a Software Reset.
 
-Acked-by: Scott Wood <oss@buserror.net>
+Signed-off-by: Gwendal Grignou <gwendal@chromium.org>
+---
+Changes in v3:
+- clock setting in already done in power_cycle.
+- clarify behavior when power cycle is not implemented. .
+ drivers/mmc/core/core.c |  5 +++--
+ drivers/mmc/core/mmc.c  | 24 +++++++++++-------------
+ 2 files changed, 14 insertions(+), 15 deletions(-)
 
--Scott
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index d8bbc78..d5bc2d8 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -2468,8 +2468,9 @@ int mmc_hw_reset(struct mmc_host *host)
+ 	ret = host->bus_ops->reset(host);
+ 	mmc_bus_put(host);
+ 
+-	if (ret != -EOPNOTSUPP)
+-		pr_warn("%s: tried to reset card\n", mmc_hostname(host));
++	if (ret)
++		pr_warn("%s: tried to reset card, got error %d\n",
++			mmc_hostname(host), ret);
+ 
+ 	return ret;
+ }
+diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+index 96cc7e2..92b7bea 100644
+--- a/drivers/mmc/core/mmc.c
++++ b/drivers/mmc/core/mmc.c
+@@ -1988,19 +1988,17 @@ static int mmc_reset(struct mmc_host *host)
+ {
+ 	struct mmc_card *card = host->card;
+ 
+-	if (!(host->caps & MMC_CAP_HW_RESET) || !host->ops->hw_reset)
+-		return -EOPNOTSUPP;
+-
+-	if (!mmc_can_reset(card))
+-		return -EOPNOTSUPP;
+-
+-	mmc_set_clock(host, host->f_init);
+-
+-	host->ops->hw_reset(host);
+-
+-	/* Set initial state and call mmc_set_ios */
+-	mmc_set_initial_state(host);
+-
++	if ((host->caps & MMC_CAP_HW_RESET) && host->ops->hw_reset &&
++	     mmc_can_reset(card)) {
++		/* If the card accept RST_n signal, send it. */
++		mmc_set_clock(host, host->f_init);
++		host->ops->hw_reset(host);
++		/* Set initial state and call mmc_set_ios */
++		mmc_set_initial_state(host);
++	} else {
++		/* Do a brute force power cycle */
++		mmc_power_cycle(host, card->ocr);
++	}
+ 	return mmc_init_card(host, card->ocr, card);
+ }
+ 
+-- 
+2.8.0.rc3.226.g39d4020
 
