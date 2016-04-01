@@ -1,52 +1,35 @@
-From: Heiko Stuebner <heiko@sntech.de>
-Subject: Re: [PATCH v3 2/2] mmc: dw_mmc: add resets support to dw_mmc
-Date: Fri, 01 Apr 2016 20:42 +0200
-Message-ID: <1754831.FONmYVUinF@phil>
-References: <1459322696-29919-1-git-send-email-guodong.xu@linaro.org> <1459322696-29919-3-git-send-email-guodong.xu@linaro.org> <56FBBB2F.5030308@samsung.com>
+From: Stephen Boyd <sboyd-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
+Subject: Re: [v7, 4/5] powerpc/fsl: move mpc85xx.h to include/linux/fsl
+Date: Fri, 1 Apr 2016 12:03:29 -0700
+Message-ID: <56FEC601.7020800@codeaurora.org>
+References: <1459480051-3701-1-git-send-email-yangbo.lu@nxp.com>
+	<1459480051-3701-5-git-send-email-yangbo.lu@nxp.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <56FBBB2F.5030308@samsung.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>
-Cc: Guodong Xu <guodong.xu@linaro.org>, shawn.lin@rock-chips.com, "robh+dt@kernel.org" <robh+dt@kernel.org>, pawel.moll@arm.com, mark.rutland@arm.com, ijc+devicetree@hellion.org.uk, galak@codeaurora.org, ulf.hansson@linaro.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, Xinwei Kong <kong.kongxinwei@hisilicon.com>, Zhangfei Gao <zhangfei.gao@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
+In-Reply-To: <1459480051-3701-5-git-send-email-yangbo.lu-3arQi8VN3Tc@public.gmane.org>
+List-Unsubscribe: <https://lists.linuxfoundation.org/mailman/options/iommu>,
+	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.linuxfoundation.org/pipermail/iommu/>
+List-Post: <mailto:iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
+List-Help: <mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=help>
+List-Subscribe: <https://lists.linuxfoundation.org/mailman/listinfo/iommu>,
+	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=subscribe>
+Sender: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
+Errors-To: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
+To: Yangbo Lu <yangbo.lu-3arQi8VN3Tc@public.gmane.org>, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linuxppc-dev-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org, linux-clk-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-i2c-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org, netdev-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, Zhao Qiang <qiang.zhao-KZfg59tc24xl57MIdRCFDg@public.gmane.org>, Russell King <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, Bhupesh Sharma <bhupesh.sharma-KZfg59tc24xl57MIdRCFDg@public.gmane.org>, Santosh Shilimkar <ssantosh-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Jochen Friedrich <jochen-NIgtFMG+Po8@public.gmane.org>, scott.wood-3arQi8VN3Tc@public.gmane.org, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Claudiu Manoil <claudiu.manoil-KZfg59tc24xl57MIdRCFDg@public.gmane.org>, Kumar Gala <galak-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, leoyang.li-3arQi8VN3Tc@public.gmane.org, xiaobo.xie-3arQi8VN3Tc@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
 
-Am Mittwoch, 30. M=E4rz 2016, 20:40:31 schrieb Jaehoon Chung:
-> modified Rob's mail address.
->=20
-> On 03/30/2016 04:24 PM, Guodong Xu wrote:
-> > mmc registers may in abnormal state if mmc is used in bootloader,
-> > eg. to support booting from eMMC. So we need reset mmc registers
-> > when kernel boots up, instead of assuming mmc is in clean state.
->=20
-> Do you mean mmc(card side) register or dwmmc host controller's regist=
-er on
-> host side?
->=20
-> According to dwmmc controller TMR, there are two reset signals. One i=
-s
-> reset_n, other is rst_n. It seems this patch is relevant to reset_n(F=
-or
-> host). (rst_n is hardware reset for card.)
->=20
-> So could you clarify better? Then it's helpful to me for understandin=
-g..
+On 03/31/2016 08:07 PM, Yangbo Lu wrote:
+>  drivers/clk/clk-qoriq.c                                       | 3 +--
+>
 
-I think that actually means a reset of controller IP block logic, outsi=
-de=20
-the control of the dw_mmc block itself.
+For clk part:
 
-On Rockchip SoCs this gets triggered from the CRU (clock and reset unit=
-), so=20
-I guess if I'm reading the manual correctly, should be the reset_n sign=
-al of=20
-the ip block.
+Acked-by: Stephen Boyd <sboyd-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
 
-rst_n on the other hand gets triggered through a dw_mmc register settin=
-g and=20
-is already handled by the dw_mmc driver.
-
-
-Heiko
+-- 
+Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum,
+a Linux Foundation Collaborative Project
