@@ -1,104 +1,44 @@
-From: Wolfram Sang <wsa@the-dreams.de>
-Subject: [PATCH v2 4/9] mmc: tmio: always start clock after frequency calculation
-Date: Fri,  1 Apr 2016 17:44:34 +0200
-Message-ID: <1459525479-20842-5-git-send-email-wsa@the-dreams.de>
-References: <1459525479-20842-1-git-send-email-wsa@the-dreams.de>
-Return-path: <linux-renesas-soc-owner@vger.kernel.org>
-In-Reply-To: <1459525479-20842-1-git-send-email-wsa@the-dreams.de>
-Sender: linux-renesas-soc-owner@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: Wolfram Sang <wsa@the-dreams.de>, linux-renesas-soc@vger.kernel.org, Ben Hutchings <ben.hutchings@codethink.co.uk>
+From: Gwendal Grignou <gwendal@chromium.org>
+Subject: Re: [PATCH] Revert "mmc: core: Remove redundant ->power_restore() callback"
+Date: Fri, 1 Apr 2016 09:43:16 -0700
+Message-ID: <CAMHSBOXPuQYB06hDtpBawABJhsuygbP8KPnZmFnPzRzON58TpA@mail.gmail.com>
+References: <1459455931-19538-1-git-send-email-gwendal@chromium.org> <CAPDyKFqc_w1Cr+3DWgV=rWxOU4homsJfGoeRHKWfk4bQyEBZ7g@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-wm0-f50.google.com ([74.125.82.50]:36825 "EHLO
+	mail-wm0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750907AbcDAQnh (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 1 Apr 2016 12:43:37 -0400
+Received: by mail-wm0-f50.google.com with SMTP id 127so25860180wmu.1
+        for <linux-mmc@vger.kernel.org>; Fri, 01 Apr 2016 09:43:36 -0700 (PDT)
+In-Reply-To: <CAPDyKFqc_w1Cr+3DWgV=rWxOU4homsJfGoeRHKWfk4bQyEBZ7g@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Gwendal Grignou <gwendal@chromium.org>, linux-mmc <linux-mmc@vger.kernel.org>
 
-From: Wolfram Sang <wsa+renesas@sang-engineering.com>
+On Fri, Apr 1, 2016 at 3:06 AM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+>
+>
+> I don't want to restore the callbacks.
+>
+> Instead, let's be a bit more clever and try to extend mmc_reset() to
+> cover the MMC case as well. I haven't thought about that in detail,
+> but I think it should work.
 
-Starting the clock is always done after frequency change anyhow, so we can do
-it directly after the clock calculation and remove the specific calls. This is
-the first part of doing proper clock de-/activation at calculation time.
+I am posting a different path soon.
+Also, given power_restore is gone, mmc_host_power_restore is going to
+crash when called for a MMC or SD device.
+Shall we remove the interface  mmc_power_save_host/mmc_power_restore_host?
+It is only supported for sdio devices, and used only by the wl1271 to
+power cycle the controller via sysfs. I am wondering if we could use
+the suspend/resume entry point instead.
 
-Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
----
- drivers/mmc/host/tmio_mmc_pio.c | 34 ++++++++++++++++------------------
- 1 file changed, 16 insertions(+), 18 deletions(-)
-
-diff --git a/drivers/mmc/host/tmio_mmc_pio.c b/drivers/mmc/host/tmio_mmc_pio.c
-index 53e5ba5a21914c..a05938da049bd6 100644
---- a/drivers/mmc/host/tmio_mmc_pio.c
-+++ b/drivers/mmc/host/tmio_mmc_pio.c
-@@ -154,6 +154,18 @@ static void tmio_mmc_enable_sdio_irq(struct mmc_host *mmc, int enable)
- 	}
- }
- 
-+static void tmio_mmc_clk_start(struct tmio_mmc_host *host)
-+{
-+	sd_ctrl_write16(host, CTL_SD_CARD_CLK_CTL, CLK_CTL_SCLKEN |
-+		sd_ctrl_read16(host, CTL_SD_CARD_CLK_CTL));
-+	msleep(host->pdata->flags & TMIO_MMC_FAST_CLK_CHG ? 1 : 10);
-+
-+	if (host->pdata->flags & TMIO_MMC_HAVE_HIGH_REG) {
-+		sd_ctrl_write16(host, CTL_CLK_AND_WAIT_CTL, 0x0100);
-+		msleep(10);
-+	}
-+}
-+
- static void tmio_mmc_set_clock(struct tmio_mmc_host *host,
- 				unsigned int new_clock)
- {
-@@ -182,6 +194,8 @@ static void tmio_mmc_set_clock(struct tmio_mmc_host *host,
- 	sd_ctrl_write16(host, CTL_SD_CARD_CLK_CTL, clk & CLK_CTL_DIV_MASK);
- 	if (!(host->pdata->flags & TMIO_MMC_FAST_CLK_CHG))
- 		msleep(10);
-+
-+	tmio_mmc_clk_start(host);
- }
- 
- static void tmio_mmc_clk_stop(struct tmio_mmc_host *host)
-@@ -196,18 +210,6 @@ static void tmio_mmc_clk_stop(struct tmio_mmc_host *host)
- 	msleep(host->pdata->flags & TMIO_MMC_FAST_CLK_CHG ? 5 : 10);
- }
- 
--static void tmio_mmc_clk_start(struct tmio_mmc_host *host)
--{
--	sd_ctrl_write16(host, CTL_SD_CARD_CLK_CTL, CLK_CTL_SCLKEN |
--		sd_ctrl_read16(host, CTL_SD_CARD_CLK_CTL));
--	msleep(host->pdata->flags & TMIO_MMC_FAST_CLK_CHG ? 1 : 10);
--
--	if (host->pdata->flags & TMIO_MMC_HAVE_HIGH_REG) {
--		sd_ctrl_write16(host, CTL_CLK_AND_WAIT_CTL, 0x0100);
--		msleep(10);
--	}
--}
--
- static void tmio_mmc_reset(struct tmio_mmc_host *host)
- {
- 	/* FIXME - should we set stop clock reg here */
-@@ -955,14 +957,12 @@ static void tmio_mmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
- 		tmio_mmc_clk_stop(host);
- 		break;
- 	case MMC_POWER_UP:
--		tmio_mmc_set_clock(host, ios->clock);
- 		tmio_mmc_power_on(host, ios->vdd);
--		tmio_mmc_clk_start(host);
-+		tmio_mmc_set_clock(host, ios->clock);
- 		tmio_mmc_set_bus_width(host, ios->bus_width);
- 		break;
- 	case MMC_POWER_ON:
- 		tmio_mmc_set_clock(host, ios->clock);
--		tmio_mmc_clk_start(host);
- 		tmio_mmc_set_bus_width(host, ios->bus_width);
- 		break;
- 	}
-@@ -1271,10 +1271,8 @@ int tmio_mmc_host_runtime_resume(struct device *dev)
- 	tmio_mmc_reset(host);
- 	tmio_mmc_clk_enable(host);
- 
--	if (host->clk_cache) {
-+	if (host->clk_cache)
- 		tmio_mmc_set_clock(host, host->clk_cache);
--		tmio_mmc_clk_start(host);
--	}
- 
- 	tmio_mmc_enable_dma(host, true);
- 
--- 
-2.7.0
+Gwendal.
+>
+>
+> [...]
+>
+> Kind regards
+> Uffe
