@@ -1,86 +1,94 @@
 From: Gwendal Grignou <gwendal@chromium.org>
-Subject: [PATCH v3] mmc: core: in mmc_hw_reset(), allow power cycle.
-Date: Fri,  1 Apr 2016 16:04:22 -0700
-Message-ID: <1459551862-38853-1-git-send-email-gwendal@chromium.org>
-References: <1459531522-31874-1-git-send-email-gwendal@chromium.org>
+Subject: Re: [RFC 0/6] mmc: Field Firmware Update
+Date: Fri, 1 Apr 2016 17:23:19 -0700
+Message-ID: <CAMHSBOUCT0mQfpN6+7NfeaR5wKMOizQeH__-j9fup1Y-H48Wcg@mail.gmail.com>
+References: <1447426572-11756-1-git-send-email-holgerschurig@gmail.com>
+ <SN1PR02MB13891415516DE9FA4756140783070@SN1PR02MB1389.namprd02.prod.outlook.com>
+ <CAOpc7mHbM8EYYNRKR+pKnzc0wf1DR1ojX-iFuDWDYyquC3EVZg@mail.gmail.com>
+ <CAPDyKFp2WEVF4yi=Upzx+58SY15u=Fp4=tr3_hh7AS3T2yz4qQ@mail.gmail.com>
+ <87r3ierjae.fsf@gmail.com> <BLUPR02MB2773299A3F882A172DF0E3694FB0@BLUPR02MB277.namprd02.prod.outlook.com>
+ <CAPDyKFopp9gaaPu_DBR0Rpcsu6BCXu5DexXiVxYv9v5uX150jw@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pf0-f171.google.com ([209.85.192.171]:34022 "EHLO
-	mail-pf0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752898AbcDAXEn (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 1 Apr 2016 19:04:43 -0400
-Received: by mail-pf0-f171.google.com with SMTP id x3so100487112pfb.1
-        for <linux-mmc@vger.kernel.org>; Fri, 01 Apr 2016 16:04:43 -0700 (PDT)
-In-Reply-To: <1459531522-31874-1-git-send-email-gwendal@chromium.org>
+Received: from mail-lb0-f181.google.com ([209.85.217.181]:35371 "EHLO
+	mail-lb0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752095AbcDBAXk (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 1 Apr 2016 20:23:40 -0400
+Received: by mail-lb0-f181.google.com with SMTP id bc4so82755702lbc.2
+        for <linux-mmc@vger.kernel.org>; Fri, 01 Apr 2016 17:23:39 -0700 (PDT)
+In-Reply-To: <CAPDyKFopp9gaaPu_DBR0Rpcsu6BCXu5DexXiVxYv9v5uX150jw@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: ulf.hansson@linaro.org
-Cc: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Alex Lemberg <Alex.Lemberg@sandisk.com>, Holger Schurig <holgerschurig@gmail.com>, Avi Shchislowski <Avi.Shchislowski@sandisk.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Chris Ball <chris@printf.net>, Baolin Wang <baolin.wang@linaro.org>
 
-When the eMMC device does not support/allow sending RST_n signal,
-try to do a brute force power cycle instead of returning EOPNOTSUPP.
-If power cycle is not supported by the hardware, mmc_init_card still
-send a CMD0, performing a Software Reset.
+On Thu, Jan 14, 2016 at 5:16 AM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+> On 28 December 2015 at 15:12, Alex Lemberg <Alex.Lemberg@sandisk.com> wrote:
+>> Hi Ulf,
+>>
+>> We succeeded to run FFU via new mmc multi-command ioctl without any code modification,
+>> but only by using Single Sector commands (CMD24).
+>>
+>> From running the FFU and from code review, we see two minor issues in this way of running FFU:
+>> 1. There is no support for Multiple Block write commands (CMD25) in existing IOCTL implementation -
+>
+> That's right. But I guess we cope without the multiple block support!?
+>
+> Although, I wonder how hard it would be to add it...
+>
+>> seems like there is no polling for the card status on data transfer completion.
+>
+> We should fix that!
+>
+> In the rpmb case, we check the status so we can probably trigger that
+> code to run for CMD24/25 as well.
+>
+>> (The kernel FFU implementation supports FFU using Multiple Block Write commands).
+>> 2. As you probably remember, there are two ways to install the new FW in the end of FFU process -
+>> In case MODE_OPERATION_CODES field is not supported by the device, the host sets to NORMAL state
+>
+> Before starting the update, you can find out which mode that is
+> supported and take relevant actions, right?
+>
+>> and initiates a CMD0/HW_Reset/Power cycle to install the new firmware.
+>
+> Yes, but that's fragile - as discussed earlier.
+>
+> What we really need to do is to also remove the "card" device from the
+> system, as otherwise we may have invalid data in its member variables
+> and who knows what issues that can cause to upper levels.
+>
+>> This sequence cannot be done via multi-command ioctl, and requires manual reset of the device/platform.
+>
+> Yepp, it seems so at least for now. Perhaps we can think of a way to
+> improve this?
+>
+>> (The kernel FFU implementation supports both FW install methods).
+>>
+>> For running FFU via new mmc multi-command ioctl, we have modified mmc-utils and add new functionality for FFU.
+>> Please let us know if you want us to submit the patch for mmc-utils FFU functionality via multi-command ioctl.
+>
+> Yes please. Don't forget to send this to Chris as well!
+I am arriving after the battle, but I have finally rebased the eMMC
+FFU kernel ffu code to 4.x. It is based on what Avi and Alex have
+written.
+As stated earlier, the advantage over using MMC_MUTLI_CMD is we can
+force a reset and rescan of the card without asking the user to reboot
+their machine.
+Also, by only sending a firmware name over the ioctl, we can use Kees'
+work for firmware validation (https://lwn.net/Articles/605432/).
+To prevent downloading firmware from unknown source, we would reject
+some commands (like SWITCH with FFU_MODE) in the kernel
+MMC_IOC/MULTI_CMD ioctl handler.
 
-Signed-off-by: Gwendal Grignou <gwendal@chromium.org>
----
-Changes in v3:
-- clock setting in already done in power_cycle.
-- clarify behavior when power cycle is not implemented. .
- drivers/mmc/core/core.c |  5 +++--
- drivers/mmc/core/mmc.c  | 24 +++++++++++-------------
- 2 files changed, 14 insertions(+), 15 deletions(-)
-
-diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index d8bbc78..d5bc2d8 100644
---- a/drivers/mmc/core/core.c
-+++ b/drivers/mmc/core/core.c
-@@ -2468,8 +2468,9 @@ int mmc_hw_reset(struct mmc_host *host)
- 	ret = host->bus_ops->reset(host);
- 	mmc_bus_put(host);
- 
--	if (ret != -EOPNOTSUPP)
--		pr_warn("%s: tried to reset card\n", mmc_hostname(host));
-+	if (ret)
-+		pr_warn("%s: tried to reset card, got error %d\n",
-+			mmc_hostname(host), ret);
- 
- 	return ret;
- }
-diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-index 96cc7e2..92b7bea 100644
---- a/drivers/mmc/core/mmc.c
-+++ b/drivers/mmc/core/mmc.c
-@@ -1988,19 +1988,17 @@ static int mmc_reset(struct mmc_host *host)
- {
- 	struct mmc_card *card = host->card;
- 
--	if (!(host->caps & MMC_CAP_HW_RESET) || !host->ops->hw_reset)
--		return -EOPNOTSUPP;
--
--	if (!mmc_can_reset(card))
--		return -EOPNOTSUPP;
--
--	mmc_set_clock(host, host->f_init);
--
--	host->ops->hw_reset(host);
--
--	/* Set initial state and call mmc_set_ios */
--	mmc_set_initial_state(host);
--
-+	if ((host->caps & MMC_CAP_HW_RESET) && host->ops->hw_reset &&
-+	     mmc_can_reset(card)) {
-+		/* If the card accept RST_n signal, send it. */
-+		mmc_set_clock(host, host->f_init);
-+		host->ops->hw_reset(host);
-+		/* Set initial state and call mmc_set_ios */
-+		mmc_set_initial_state(host);
-+	} else {
-+		/* Do a brute force power cycle */
-+		mmc_power_cycle(host, card->ocr);
-+	}
- 	return mmc_init_card(host, card->ocr, card);
- }
- 
--- 
-2.8.0.rc3.226.g39d4020
-
+Gwendal.
+>
+> [...]
+>
+> Kind regards
+> Uffe
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
