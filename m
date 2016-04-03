@@ -1,49 +1,89 @@
-From: "Winkler, Tomas" <tomas.winkler@intel.com>
-Subject: RE: [PATCH 0/8] Replay Protected Memory Block (RPMB) subsystem
-Date: Sun, 3 Apr 2016 19:27:23 +0000
-Message-ID: <5B8DA87D05A7694D9FA63FD143655C1B541DDE71@hasmsx108.ger.corp.intel.com>
-References: <1459676572-29921-1-git-send-email-tomas.winkler@intel.com>
- <57011A3F.1010007@kernel.org>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: Re: [PATCH] mmc: dw_mmc: exynos: add the function for controlling SMU
+Date: Mon, 04 Apr 2016 08:46:24 +0900
+Message-ID: <5701AB50.9000105@samsung.com>
+References: <1459403598-5256-1-git-send-email-jh80.chung@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga11.intel.com ([192.55.52.93]:18229 "EHLO mga11.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751307AbcDCT11 convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 3 Apr 2016 15:27:27 -0400
-In-Reply-To: <57011A3F.1010007@kernel.org>
-Content-Language: en-US
+Received: from mailout1.samsung.com ([203.254.224.24]:50965 "EHLO
+	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753870AbcDCXq0 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 3 Apr 2016 19:46:26 -0400
+Received: from epcpsbgr5.samsung.com
+ (u145.gpu120.samsung.co.kr [203.254.230.145])
+ by mailout1.samsung.com (Oracle Communications Messaging Server 7.0.5.31.0
+ 64bit (built May  5 2014))
+ with ESMTP id <0O5301C0F0PCC7B0@mailout1.samsung.com> for
+ linux-mmc@vger.kernel.org; Mon, 04 Apr 2016 08:46:24 +0900 (KST)
+In-reply-to: <1459403598-5256-1-git-send-email-jh80.chung@samsung.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Andy Lutomirski <luto@kernel.org>, "gregkh@linuxfoundation.org" <gregkh@linuxfoundation.org>, Ulf Hansson <ulf.hansson@linaro.org>, "Hunter, Adrian" <adrian.hunter@intel.com>, James Bottomley <James.Bottomley@HansenPartnership.com>, "Martin K. Petersen" <martin.petersen@oracle.com>, Vinayak Holikatti <vinholikatti@gmail.com>
-Cc: Christoph Hellwig <hch@lst.de>, Yaniv Gardi <ygardi@codeaurora.org>, Joao Pinto <Joao.Pinto@synopsys.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-scsi@vger.kernel.org" <linux-scsi@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+To: linux-mmc@vger.kernel.org
+Cc: ulf.hansson@linaro.org, shawn.lin@rock-chips.com
 
+Hi,
 
+Picked this patch on my repository.
 
-On 04/03/2016 02:42 AM, Tomas Winkler wrote:
-> Few storage technology such is EMMC, UFS, and NVMe support RPMB 
-> hardware partition with common protocol and frame layout.
-> The RPMB partition cannot be accessed via standard block layer, but by 
-> a set of specific commands: WRITE, READ, GET_WRITE_COUNTER, and 
-> PROGRAM_KEY.
-> Such a partition provides authenticated and replay protected access, 
-> hence suitable as a secure storage.
->
-> A storage device registers its RPMB hardware (emmc) partition or RPMB 
-> W-LUN (ufs) with the RPMB layer providing an implementation for
-> send_rpmb_req() handler.
-> Tere is as well simulation platform device. This is handy as an RPMB 
-> key can be programmed only once at storage device lifetime.
->
-> The RPMB layer aims to provide in-kernel API for Trusted Execution 
-> Environment (TEE) devices that are capable to securely compute block 
-> frame signature. A TEE driver can claim rpmb interface, for example, 
-> via  class_interface_register ().
+Best Regards,
+Jaehoon Chung
 
-What's the workflow?  Does the TEE ask the kernel to do RPMB operations for it and supply the kernel with the authenticated request blobs to forward to the RPMB?
+On 03/31/2016 02:53 PM, Jaehoon Chung wrote:
+> Some of Exynos has the Security management Unit(SMU).
+> This patch adds the function for controlling SMU.
+> 
+> In future, if exynos needs to control SMU, it can be implemented
+> in "config_smu" function, not "init" function.
+> 
+> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+> ---
+>  drivers/mmc/host/dw_mmc-exynos.c | 15 +++++++++++++--
+>  1 file changed, 13 insertions(+), 2 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/dw_mmc-exynos.c b/drivers/mmc/host/dw_mmc-exynos.c
+> index 8790f2a..0e989eb 100644
+> --- a/drivers/mmc/host/dw_mmc-exynos.c
+> +++ b/drivers/mmc/host/dw_mmc-exynos.c
+> @@ -91,10 +91,14 @@ static inline u8 dw_mci_exynos_get_ciu_div(struct dw_mci *host)
+>  		return SDMMC_CLKSEL_GET_DIV(mci_readl(host, CLKSEL)) + 1;
+>  }
+>  
+> -static int dw_mci_exynos_priv_init(struct dw_mci *host)
+> +static void dw_mci_exynos_config_smu(struct dw_mci *host)
+>  {
+>  	struct dw_mci_exynos_priv_data *priv = host->priv;
+>  
+> +	/*
+> +	 * If Exynos is provided the Security management,
+> +	 * set for non-ecryption mode at this time.
+> +	 */
+>  	if (priv->ctrl_type == DW_MCI_TYPE_EXYNOS5420_SMU ||
+>  		priv->ctrl_type == DW_MCI_TYPE_EXYNOS7_SMU) {
+>  		mci_writel(host, MPSBEGIN0, 0);
+> @@ -104,6 +108,13 @@ static int dw_mci_exynos_priv_init(struct dw_mci *host)
+>  			   SDMMC_MPSCTRL_VALID |
+>  			   SDMMC_MPSCTRL_NON_SECURE_WRITE_BIT);
+>  	}
+> +}
+> +
+> +static int dw_mci_exynos_priv_init(struct dw_mci *host)
+> +{
+> +	struct dw_mci_exynos_priv_data *priv = host->priv;
+> +
+> +	dw_mci_exynos_config_smu(host);
+>  
+>  	if (priv->ctrl_type >= DW_MCI_TYPE_EXYNOS5420) {
+>  		priv->saved_strobe_ctrl = mci_readl(host, HS400_DLINE_CTRL);
+> @@ -169,7 +180,7 @@ static int dw_mci_exynos_resume(struct device *dev)
+>  {
+>  	struct dw_mci *host = dev_get_drvdata(dev);
+>  
+> -	dw_mci_exynos_priv_init(host);
+> +	dw_mci_exynos_config_smu(host);
+>  	return dw_mci_resume(host);
+>  }
+>  
+> 
 
-Exactly, though it's not exactly a blob, just the data part,  but it has to have the whole frame in orther to copute the signature correctly.   Neither emmc nor ufs  have dual head so a TEE device cannot access the RPMB partition directly and the access has to done via kernel storage device.
-
-Thanks
-Tomas 
