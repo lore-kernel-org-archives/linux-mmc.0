@@ -1,88 +1,86 @@
-From: Peter Hurley <peter@hurleysoftware.com>
-Subject: [bisect] Merge tag 'mmc-v4.6' of
- git://git.linaro.org/people/ulf.hansson/mmc (was [GIT PULL] MMC for v.4.6)
-Date: Sat, 2 Apr 2016 19:56:05 -0700
-Message-ID: <57008645.4070808@hurleysoftware.com>
-References: <CAPDyKFqM1ffAdj7jVJmcPW2Wxy88Mhx_UrAzyuXpKSJg1yUPdg@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+From: Tomas Winkler <tomas.winkler@intel.com>
+Subject: [PATCH 0/8] Replay Protected Memory Block (RPMB) subsystem
+Date: Sun,  3 Apr 2016 12:42:44 +0300
+Message-ID: <1459676572-29921-1-git-send-email-tomas.winkler@intel.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pf0-f180.google.com ([209.85.192.180]:36176 "EHLO
-	mail-pf0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750819AbcDCC4J (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sat, 2 Apr 2016 22:56:09 -0400
-Received: by mail-pf0-f180.google.com with SMTP id e128so97452833pfe.3
-        for <linux-mmc@vger.kernel.org>; Sat, 02 Apr 2016 19:56:09 -0700 (PDT)
-In-Reply-To: <CAPDyKFqM1ffAdj7jVJmcPW2Wxy88Mhx_UrAzyuXpKSJg1yUPdg@mail.gmail.com>
+Received: from mga01.intel.com ([192.55.52.88]:63623 "EHLO mga01.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751978AbcDCJoL (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Sun, 3 Apr 2016 05:44:11 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>, Linus Torvalds <torvalds@linux-foundation.org>, linux-mmc <linux-mmc@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>
-Cc: "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Jaehoon Chung <jh80.chung@samsung.com>
+To: gregkh@linuxfoundation.org, Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, James Bottomley <James.Bottomley@HansenPartnership.com>, "Martin K. Petersen" <martin.petersen@oracle.com>, Vinayak Holikatti <vinholikatti@gmail.com>
+Cc: Christoph Hellwig <hch@lst.de>, Yaniv Gardi <ygardi@codeaurora.org>, Joao Pinto <Joao.Pinto@synopsys.com>, linux-mmc@vger.kernel.org, linux-scsi@vger.kernel.org, linux-kernel@vger.kernel.org, Tomas Winkler <tomas.winkler@intel.com>
 
-On 03/21/2016 05:59 AM, Ulf Hansson wrote:
-> Hi Linus,
-> 
-> Here's the PR for MMC v4.6.
-> 
-> Details about the highlights are as usual found in the signed tag.
-> 
-> Please pull this in!
-> 
-> Kind regards
-> Ulf Hansson
-> 
-> 
-> The following changes since commit fc77dbd34c5c99bce46d40a2491937c3bcbd10af:
-> 
->   Linux 4.5-rc6 (2016-02-28 08:41:20 -0800)
-> 
-> are available in the git repository at:
-> 
->   git://git.linaro.org/people/ulf.hansson/mmc.git tags/mmc-v4.6
-> 
-> for you to fetch changes up to 64e5cd723120643a4c8bef0880a03a60161d3ccb:
-> 
->   mmc: sdhci-of-at91: fix wake-up issue when using runtime pm
-> (2016-03-18 09:12:32 +0100)
+Few storage technology such is EMMC, UFS, and NVMe support RPMB
+hardware partition with common protocol and frame layout.
+The RPMB partition cannot be accessed via standard block layer, but
+by a set of specific commands: WRITE, READ, GET_WRITE_COUNTER, and
+PROGRAM_KEY.
+Such a partition provides authenticated and replay protected access,
+hence suitable as a secure storage.
 
-This merge commit e531cdf50a8a0fb7a4d51c06e52097bd01e9bf7c
-Merge: 4526b71 64e5cd7
-Author: Linus Torvalds <torvalds@linux-foundation.org>
-Date:   Mon Mar 21 14:35:52 2016 -0700
+A storage device registers its RPMB hardware (emmc) partition or
+RPMB W-LUN (ufs) with the RPMB layer providing an implementation for
+send_rpmb_req() handler.
+Tere is as well simulation platform device. This is handy as an RPMB
+key can be programmed only once at storage device lifetime.
 
-    Merge tag 'mmc-v4.6' of git://git.linaro.org/people/ulf.hansson/mmc
-    
-    Pull MMC updates from Ulf Hansson:
-    ...
+The RPMB layer aims to provide in-kernel API for Trusted Execution
+Environment (TEE) devices that are capable to securely compute block
+frame signature. A TEE driver can claim rpmb interface, for example,
+via  class_interface_register ().
 
-is fingered by git bisect as the cause for a mashup of mmc block devices
-on a Beaglebone Black:
+A parallel user space API is provided via /dev/rpmbX character
+device with a single IOCTL command similar to the one provided by
+mmc/ioctl. h
+There is a sample tool under tools/rpmb/ directory that exercises
+this interface.
 
-[    2.916209] mmc1: new high speed MMC card at address 0001
-[    2.923755] mmcblk0: mmc1:0001 MMC04G 3.60 GiB
-[    2.929479] mmcblk0boot0: mmc1:0001 MMC04G partition 1 2.00 MiB
-[    2.936821] tps65217 0-0024: TPS65217 ID 0xe version 1.2
-[    2.942270] mmcblk0boot1: mmc1:0001 MMC04G partition 2 2.00 MiB
-[    2.949388]  mmcblk0: p1 p2
-[    2.950031] mmc0: new high speed SDHC card at address e624
-[    2.961118] mmcblk1: mmc0:e624 SU08G 7.40 GiB
-[    2.967047] at24 0-0050: 32768 byte 24c256 EEPROM, writable, 1 bytes/write
-[    2.974190]  mmcblk1: p1 p2
+Tomas Winkler (8):
+  rpmb: add Replay Protected Memory Block (RPMB) subsystem
+  char: rpmb: add sysfs-class ABI documentation
+  char: rpmb: add device attributes
+  char: rpmb: provide user space interface
+  char: rpmb: add RPMB simulation device
+  tools rpmb: add RPBM access tool
+  mmc: block: register rpmb partition with the RPMB subsystem
+  scsi: ufs: connect to RPMB subsystem
 
-Note how mmc1 => mmcblk0 and mmc0 => mmcblk1.
+ Documentation/ABI/testing/sysfs-class-rpmb |  39 ++
+ Documentation/ioctl/ioctl-number.txt       |   1 +
+ MAINTAINERS                                |  10 +
+ drivers/char/Kconfig                       |   2 +
+ drivers/char/Makefile                      |   1 +
+ drivers/char/rpmb/Kconfig                  |  25 +
+ drivers/char/rpmb/Makefile                 |   6 +
+ drivers/char/rpmb/cdev.c                   | 209 ++++++++
+ drivers/char/rpmb/core.c                   | 408 +++++++++++++++
+ drivers/char/rpmb/rpmb-cdev.h              |  31 ++
+ drivers/char/rpmb/rpmb_sim.c               | 584 +++++++++++++++++++++
+ drivers/mmc/card/block.c                   | 289 +++++++++++
+ drivers/scsi/ufs/ufshcd.c                  | 219 ++++++++
+ drivers/scsi/ufs/ufshcd.h                  |   2 +
+ include/linux/rpmb.h                       | 138 +++++
+ include/uapi/linux/rpmb.h                  | 120 +++++
+ tools/Makefile                             |  16 +-
+ tools/rpmb/.gitignore                      |   2 +
+ tools/rpmb/Makefile                        |  32 ++
+ tools/rpmb/rpmb.c                          | 807 +++++++++++++++++++++++++++++
+ 20 files changed, 2936 insertions(+), 5 deletions(-)
+ create mode 100644 Documentation/ABI/testing/sysfs-class-rpmb
+ create mode 100644 drivers/char/rpmb/Kconfig
+ create mode 100644 drivers/char/rpmb/Makefile
+ create mode 100644 drivers/char/rpmb/cdev.c
+ create mode 100644 drivers/char/rpmb/core.c
+ create mode 100644 drivers/char/rpmb/rpmb-cdev.h
+ create mode 100644 drivers/char/rpmb/rpmb_sim.c
+ create mode 100644 include/linux/rpmb.h
+ create mode 100644 include/uapi/linux/rpmb.h
+ create mode 100644 tools/rpmb/.gitignore
+ create mode 100644 tools/rpmb/Makefile
+ create mode 100644 tools/rpmb/rpmb.c
 
-This produces a failure to boot as the wrong partition is mounted as
-root (/dev/mmcblk0p2 is now on the wrong mmc).
-
-The bisect tried all the mmc tree patches which were all good.
-I double-checked by cloning the mmc tree and building both mmc-v4.6
-and v4.5-rc6, and both tested good.
-
-I interpret that to mean some change in mmc + some new behavior elsewhere
-for v4.6 is causing this. Any ideas?
-
-Regards,
-Peter Hurley
-
+-- 
+2.4.3
 
