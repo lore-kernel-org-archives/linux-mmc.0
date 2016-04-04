@@ -1,59 +1,43 @@
-From: Ludovic Desroches <ludovic.desroches@atmel.com>
-Subject: [PATCH v2 3/3] mmc: sdhci: removal of SDHCI_QUIRK2_NEED_DELAY_AFTER_INT_CLK_RST
-Date: Mon, 4 Apr 2016 17:27:55 +0200
-Message-ID: <1459783675-7798-4-git-send-email-ludovic.desroches@atmel.com>
-References: <1459783675-7798-1-git-send-email-ludovic.desroches@atmel.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH v2 7/9] mmc: sh_mobile_sdhi: Add UHS-I mode support
+Date: Mon, 4 Apr 2016 17:52:58 +0200
+Message-ID: <CAPDyKFrvofSBTYpV2fNy=JnOFH9jVntFDLD9sui2jfrTnwf=tA@mail.gmail.com>
+References: <1459525479-20842-1-git-send-email-wsa@the-dreams.de>
+	<1459525479-20842-8-git-send-email-wsa@the-dreams.de>
+	<CAPDyKFq2HZFw8ZFH0LzYGRBidcKFsmz2D4LrHsm8DviU+ZkGGQ@mail.gmail.com>
+	<20160404151708.GF2983@katana>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from eusmtp01.atmel.com ([212.144.249.242]:15950 "EHLO
-	eusmtp01.atmel.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932314AbcDDP1w (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 4 Apr 2016 11:27:52 -0400
-In-Reply-To: <1459783675-7798-1-git-send-email-ludovic.desroches@atmel.com>
+Received: from mail-lb0-f169.google.com ([209.85.217.169]:33834 "EHLO
+	mail-lb0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753575AbcDDPxA (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 4 Apr 2016 11:53:00 -0400
+Received: by mail-lb0-f169.google.com with SMTP id vo2so168108421lbb.1
+        for <linux-mmc@vger.kernel.org>; Mon, 04 Apr 2016 08:52:59 -0700 (PDT)
+In-Reply-To: <20160404151708.GF2983@katana>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: ulf.hansson@linaro.org, adrian.hunter@intel.com
-Cc: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, nicolas.ferre@atmel.com, Ludovic Desroches <ludovic.desroches@atmel.com>
+To: Wolfram Sang <wsa@the-dreams.de>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, linux-renesas-soc@vger.kernel.org, Ben Hutchings <ben.hutchings@codethink.co.uk>
 
-SDHCI_QUIRK2_NEED_DELAY_AFTER_INT_CLK_RST quirk is not used anymore so
-remove it.
+On 4 April 2016 at 17:17, Wolfram Sang <wsa@the-dreams.de> wrote:
+>
+>> > +       usleep_range(5000, 5500);
+>>
+>> Why do you need this delay/sleep?
+>
+> My datasheet says to wait at least 5ms before re-enabling the clock
+> after a voltage switch...
+>
+> Ah, found it in the core. It is doing it for 10ms. Maybe my search
+> pattern was not fuzzy enough ;)
+>
+> Okay, so this delay can go.
+>
 
-Signed-off-by: Ludovic Desroches <ludovic.desroches@atmel.com>
----
- drivers/mmc/host/sdhci.c | 2 --
- drivers/mmc/host/sdhci.h | 5 -----
- 2 files changed, 7 deletions(-)
+Thanks for the clarification. I will amend the patch, no need for you
+to send a new version!
 
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 2c3dede..e2cfe6c 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -1191,8 +1191,6 @@ void sdhci_set_clock(struct sdhci_host *host, unsigned int clock)
- 	host->mmc->actual_clock = 0;
- 
- 	sdhci_writew(host, 0, SDHCI_CLOCK_CONTROL);
--	if (host->quirks2 & SDHCI_QUIRK2_NEED_DELAY_AFTER_INT_CLK_RST)
--		mdelay(1);
- 
- 	if (clock == 0)
- 		return;
-diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-index 23ddd6e..4f60105 100644
---- a/drivers/mmc/host/sdhci.h
-+++ b/drivers/mmc/host/sdhci.h
-@@ -417,11 +417,6 @@ struct sdhci_host {
- #define SDHCI_QUIRK2_ACMD23_BROKEN			(1<<14)
- /* Broken Clock divider zero in controller */
- #define SDHCI_QUIRK2_CLOCK_DIV_ZERO_BROKEN		(1<<15)
--/*
-- * When internal clock is disabled, a delay is needed before modifying the
-- * SD clock frequency or enabling back the internal clock.
-- */
--#define SDHCI_QUIRK2_NEED_DELAY_AFTER_INT_CLK_RST	(1<<16)
- 
- 	int irq;		/* Device IRQ */
- 	void __iomem *ioaddr;	/* Mapped address */
--- 
-2.5.0
-
+Kind regards
+Uffe
