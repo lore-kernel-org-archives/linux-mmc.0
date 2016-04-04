@@ -1,43 +1,58 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
+From: Wolfram Sang <wsa@the-dreams.de>
 Subject: Re: [PATCH v2 7/9] mmc: sh_mobile_sdhi: Add UHS-I mode support
-Date: Mon, 4 Apr 2016 17:52:58 +0200
-Message-ID: <CAPDyKFrvofSBTYpV2fNy=JnOFH9jVntFDLD9sui2jfrTnwf=tA@mail.gmail.com>
+Date: Mon, 4 Apr 2016 17:56:49 +0200
+Message-ID: <20160404155649.GI2983@katana>
 References: <1459525479-20842-1-git-send-email-wsa@the-dreams.de>
-	<1459525479-20842-8-git-send-email-wsa@the-dreams.de>
-	<CAPDyKFq2HZFw8ZFH0LzYGRBidcKFsmz2D4LrHsm8DviU+ZkGGQ@mail.gmail.com>
-	<20160404151708.GF2983@katana>
+ <1459525479-20842-8-git-send-email-wsa@the-dreams.de>
+ <CAPDyKFq2HZFw8ZFH0LzYGRBidcKFsmz2D4LrHsm8DviU+ZkGGQ@mail.gmail.com>
+ <20160404151708.GF2983@katana>
+ <CAPDyKFrvofSBTYpV2fNy=JnOFH9jVntFDLD9sui2jfrTnwf=tA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-lb0-f169.google.com ([209.85.217.169]:33834 "EHLO
-	mail-lb0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753575AbcDDPxA (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 4 Apr 2016 11:53:00 -0400
-Received: by mail-lb0-f169.google.com with SMTP id vo2so168108421lbb.1
-        for <linux-mmc@vger.kernel.org>; Mon, 04 Apr 2016 08:52:59 -0700 (PDT)
-In-Reply-To: <20160404151708.GF2983@katana>
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
-To: Wolfram Sang <wsa@the-dreams.de>
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="l0l+eSofNeLXHSnY"
+Return-path: <linux-renesas-soc-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <CAPDyKFrvofSBTYpV2fNy=JnOFH9jVntFDLD9sui2jfrTnwf=tA@mail.gmail.com>
+Sender: linux-renesas-soc-owner@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
 Cc: linux-mmc <linux-mmc@vger.kernel.org>, linux-renesas-soc@vger.kernel.org, Ben Hutchings <ben.hutchings@codethink.co.uk>
+List-Id: linux-mmc@vger.kernel.org
 
-On 4 April 2016 at 17:17, Wolfram Sang <wsa@the-dreams.de> wrote:
->
->> > +       usleep_range(5000, 5500);
->>
->> Why do you need this delay/sleep?
->
-> My datasheet says to wait at least 5ms before re-enabling the clock
-> after a voltage switch...
->
-> Ah, found it in the core. It is doing it for 10ms. Maybe my search
-> pattern was not fuzzy enough ;)
->
-> Okay, so this delay can go.
->
 
-Thanks for the clarification. I will amend the patch, no need for you
-to send a new version!
+--l0l+eSofNeLXHSnY
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-Kind regards
-Uffe
+
+> > Okay, so this delay can go.
+> >
+>=20
+> Thanks for the clarification. I will amend the patch, no need for you
+> to send a new version!
+
+Thanks a lot!
+
+
+--l0l+eSofNeLXHSnY
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1
+
+iQIcBAEBAgAGBQJXAo7BAAoJEBQN5MwUoCm25sEP/RPEm3pgzZdMVMl19socX2/V
+GOUsvFzm00L/7iJWzqSwJkja4Mp4j8FZhxJDmeuv8MtvJTcDSSitlES1Xda+9QSr
+/Z+KGHxHlhSzTc5LDUhCL7LPoQqlnC40ew4EKH9cG1sE+tvC7X9X9kA2n6Mw43e4
+I02nQ2JyLtrhXVKDwxGwAnWxbjBxZLte1OZQ1GKTilyAhV1T2HUvZUqgu7Aea8ru
+Zt61eJWt1B9phbCaaRAhnETzidl+FIiZy1u7X9NLqllFKIXEekI70yCRcWq08UXD
+kfWfhBNaJ26fwXQX3jeY9vYPMQvsi4ddPAZ3Lu8/kHmkAXJwInuG0GH4Zbc6H+PX
+5M0OZ6c6rwTZ8I/uEymBZprjAufkaCXP8GXf0HqNlLoN8DlwjPeHziOfeso5zXRP
+BM9/Nl6ZqLdHYINTKDM3IBHW3EPuTWZZgxeo2625yvq0C4CM8QghV1fwFg6FlbC6
+aH6SCj2gElD8k8HVpqwN2kRr+O0dfpdFYyjXJFYoIBO2Cnn5o+IpaHWUnQ0sPuc2
+rHO7JS1UUhw0srk9UhCKikT9cmqanvRzTfO4a2gKW0aR6eTZuepSEsy/QKlGBncx
+/BT/QGTtBzB1FncLPlfBZJJUl6uVH4nqDZSLbXu6xCIJzGUbk4IezoFz1SMRNnyk
+8CnVrUSHMIwW1R1G+fjI
+=ONcu
+-----END PGP SIGNATURE-----
+
+--l0l+eSofNeLXHSnY--
