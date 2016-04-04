@@ -1,99 +1,103 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [bisect] Merge tag 'mmc-v4.6' of git://git.linaro.org/people/ulf.hansson/mmc
- (was [GIT PULL] MMC for v.4.6)
-Date: Mon, 4 Apr 2016 13:29:20 +0200
-Message-ID: <CAPDyKFr6zCm4wBS97bUCwq4qhsM8u3mEpyBf4uicJ_UQ7L-q5w@mail.gmail.com>
-References: <CAPDyKFqM1ffAdj7jVJmcPW2Wxy88Mhx_UrAzyuXpKSJg1yUPdg@mail.gmail.com>
-	<57008645.4070808@hurleysoftware.com>
-	<CA+55aFwjQP25NYfjPMTicO-M8yjm5c0aKFx-1saWmrro0c0NVQ@mail.gmail.com>
+Subject: Re: [RFC 0/6] mmc: Field Firmware Update
+Date: Mon, 4 Apr 2016 13:50:29 +0200
+Message-ID: <CAPDyKFoH3=czLW5_AKcJLRZa2ptTuumiMT24PZw6zKBW38WOwQ@mail.gmail.com>
+References: <1447426572-11756-1-git-send-email-holgerschurig@gmail.com>
+	<SN1PR02MB13891415516DE9FA4756140783070@SN1PR02MB1389.namprd02.prod.outlook.com>
+	<CAOpc7mHbM8EYYNRKR+pKnzc0wf1DR1ojX-iFuDWDYyquC3EVZg@mail.gmail.com>
+	<CAPDyKFp2WEVF4yi=Upzx+58SY15u=Fp4=tr3_hh7AS3T2yz4qQ@mail.gmail.com>
+	<87r3ierjae.fsf@gmail.com>
+	<BLUPR02MB2773299A3F882A172DF0E3694FB0@BLUPR02MB277.namprd02.prod.outlook.com>
+	<CAPDyKFopp9gaaPu_DBR0Rpcsu6BCXu5DexXiVxYv9v5uX150jw@mail.gmail.com>
+	<CAMHSBOUCT0mQfpN6+7NfeaR5wKMOizQeH__-j9fup1Y-H48Wcg@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CA+55aFwjQP25NYfjPMTicO-M8yjm5c0aKFx-1saWmrro0c0NVQ@mail.gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Linus Torvalds <torvalds@linux-foundation.org>, Peter Hurley <peter@hurleysoftware.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Jaehoon Chung <jh80.chung@samsung.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-lb0-f178.google.com ([209.85.217.178]:32857 "EHLO
+	mail-lb0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753154AbcDDLuf (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 4 Apr 2016 07:50:35 -0400
+Received: by mail-lb0-f178.google.com with SMTP id u8so157183984lbk.0
+        for <linux-mmc@vger.kernel.org>; Mon, 04 Apr 2016 04:50:34 -0700 (PDT)
+In-Reply-To: <CAMHSBOUCT0mQfpN6+7NfeaR5wKMOizQeH__-j9fup1Y-H48Wcg@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Gwendal Grignou <gwendal@chromium.org>
+Cc: Alex Lemberg <Alex.Lemberg@sandisk.com>, Holger Schurig <holgerschurig@gmail.com>, Avi Shchislowski <Avi.Shchislowski@sandisk.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Chris Ball <chris@printf.net>, Baolin Wang <baolin.wang@linaro.org>
 
-On 3 April 2016 at 13:54, Linus Torvalds <torvalds@linux-foundation.org> wrote:
-> On Sat, Apr 2, 2016 at 9:56 PM, Peter Hurley <peter@hurleysoftware.com> wrote:
+On 2 April 2016 at 02:23, Gwendal Grignou <gwendal@chromium.org> wrote:
+> On Thu, Jan 14, 2016 at 5:16 AM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+>> On 28 December 2015 at 15:12, Alex Lemberg <Alex.Lemberg@sandisk.com> wrote:
+>>> Hi Ulf,
+>>>
+>>> We succeeded to run FFU via new mmc multi-command ioctl without any code modification,
+>>> but only by using Single Sector commands (CMD24).
+>>>
+>>> From running the FFU and from code review, we see two minor issues in this way of running FFU:
+>>> 1. There is no support for Multiple Block write commands (CMD25) in existing IOCTL implementation -
 >>
->> Note how mmc1 => mmcblk0 and mmc0 => mmcblk1.
+>> That's right. But I guess we cope without the multiple block support!?
 >>
->> This produces a failure to boot as the wrong partition is mounted as
->> root (/dev/mmcblk0p2 is now on the wrong mmc).
->
-> It *looks* very much like somebody is doing asynchronous probing of
-> the bus, meaning that the devices get probed in random order.
-
-Correct.
-
->
-> And that "random order" is admittedly probably usually fairly static
-> on any particular hardware platform, but then something happens to
-> change timing, and...
->
-> This is why you should never probe the actual *bus* asynchronously,
-> just do the end-point setup async. For example, you'd enumerate ports
-> (and assign devices to the ports) synchronously, but then after device
-> assignment the actual device probing can be async.
-
-So to do this, we need to tie the mmc/sd/sdio controller to a
-dedicated mmcblk id.
-
-There have been some ideas to fix this by using "aliases" in a DT
-based configuration.
-
->
->> The bisect tried all the mmc tree patches which were all good.
->> I double-checked by cloning the mmc tree and building both mmc-v4.6
->> and v4.5-rc6, and both tested good.
+>> Although, I wonder how hard it would be to add it...
 >>
->> I interpret that to mean some change in mmc + some new behavior elsewhere
->> for v4.6 is causing this. Any ideas?
->
-> Hmm. If it really is just timing, it could have been around forever,
-> and just hidden by the fact that normally mmc0 gets probed before
-> mmc1, but then some other probing thing slowed down or the exact
-> details of the async workqueue  scheduling changed, and now mmc1 just
-> *happens* to get probed first..
->
-> The thing that changed scheduling order could easily have come from
-> some non-mmc change.
->
-> NOTE! I have nothing to back this up except that (a) we've had
-> problems like this before and (b) it does look from your dmesg that
-> mmcX is simply probed in the "wrong" order. I didn't look at exactly
-> what mmc does or who does the probing.
->
-> Maybe Ulf can explain what it is that is _supposed_ to keep the mmc
-> probe order stable. Ulf?
->
->              Linus
+>>> seems like there is no polling for the card status on data transfer completion.
+>>
+>> We should fix that!
+>>
+>> In the rpmb case, we check the status so we can probably trigger that
+>> code to run for CMD24/25 as well.
+>>
+>>> (The kernel FFU implementation supports FFU using Multiple Block Write commands).
+>>> 2. As you probably remember, there are two ways to install the new FW in the end of FFU process -
+>>> In case MODE_OPERATION_CODES field is not supported by the device, the host sets to NORMAL state
+>>
+>> Before starting the update, you can find out which mode that is
+>> supported and take relevant actions, right?
+>>
+>>> and initiates a CMD0/HW_Reset/Power cycle to install the new firmware.
+>>
+>> Yes, but that's fragile - as discussed earlier.
+>>
+>> What we really need to do is to also remove the "card" device from the
+>> system, as otherwise we may have invalid data in its member variables
+>> and who knows what issues that can cause to upper levels.
+>>
+>>> This sequence cannot be done via multi-command ioctl, and requires manual reset of the device/platform.
+>>
+>> Yepp, it seems so at least for now. Perhaps we can think of a way to
+>> improve this?
+>>
+>>> (The kernel FFU implementation supports both FW install methods).
+>>>
+>>> For running FFU via new mmc multi-command ioctl, we have modified mmc-utils and add new functionality for FFU.
+>>> Please let us know if you want us to submit the patch for mmc-utils FFU functionality via multi-command ioctl.
+>>
+>> Yes please. Don't forget to send this to Chris as well!
+> I am arriving after the battle, but I have finally rebased the eMMC
+> FFU kernel ffu code to 4.x. It is based on what Avi and Alex have
+> written.
+> As stated earlier, the advantage over using MMC_MUTLI_CMD is we can
+> force a reset and rescan of the card without asking the user to reboot
+> their machine.
 
-The commit that's likely to cause the regression is:
-520bd7a8b415 ("mmc: core: Optimize boot time by detecting cards
-simultaneously").
+No matter what, I think the problem is how you would *safely* deal
+with the reset. Especially in the case when the eMMC already has an
+mounted file system on it.
 
-This commit further enables asynchronous detection of (e)MMC/SD/SDIO
-cards, by converting from an *ordered* work-queue to a *non-ordered*
-work-queue for card detection.
+Just doing something that *might* work, isn't good enough to me.
 
-Although, one should know that there have *never* been any guarantees
-to get a fixed mmcblk id for a card. I expect that's what has been
-assumed here.
+> Also, by only sending a firmware name over the ioctl, we can use Kees'
+> work for firmware validation (https://lwn.net/Articles/605432/).
 
-Let me elaborate a bit on the card detection procedure. When the mmc
-controller has been successfully probed, its driver schedules a work
-to start enumeration of cards. Only cards that gets detected
-successfully becomes registered and those gets an mmcblk id assigned
-to it. The picked id, is the first available starting from zero. Now,
-as cards can be removable and because drivers for mmc controllers may
-sometimes returns -EPROBE_DEFER (for whatever reason), there's never
-been support for fixed mmcblk ids.
+The request_firmware() interface would indeed be good to use. Although
+unless we can figure out a way on how to safely deal with reset, we
+will have to live without request_firmware().
 
-To deal with this, one should use the so called UUID/PARTUUID. Is
-there any reasons to why that can't be done in this case?
+> To prevent downloading firmware from unknown source, we would reject
+> some commands (like SWITCH with FFU_MODE) in the kernel
+> MMC_IOC/MULTI_CMD ioctl handler.
+
+I don't follow, can you elaborate on this please.
 
 Kind regards
 Uffe
