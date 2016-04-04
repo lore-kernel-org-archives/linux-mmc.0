@@ -1,67 +1,55 @@
-From: Wolfram Sang <wsa@the-dreams.de>
-Subject: Re: [PATCH v2 0/9] r8a7790: add UHS-I (SDR50) support to Lager
-Date: Mon, 4 Apr 2016 17:21:53 +0200
-Message-ID: <20160404152153.GG2983@katana>
-References: <1459525479-20842-1-git-send-email-wsa@the-dreams.de>
- <CAPDyKFocCsLmPbFAuN989w4MCH_QKZzS8_YxqKvTZU5+yApZVw@mail.gmail.com>
+From: Ludovic Desroches <ludovic.desroches@atmel.com>
+Subject: [PATCH v2 0/3] SDHCI_QUIRK2_NEED_DELAY_AFTER_INT_CLK_RST removal
+Date: Mon, 4 Apr 2016 17:27:52 +0200
+Message-ID: <1459783675-7798-1-git-send-email-ludovic.desroches@atmel.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="4eRLI4hEmsdu6Npr"
-Return-path: <linux-renesas-soc-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <CAPDyKFocCsLmPbFAuN989w4MCH_QKZzS8_YxqKvTZU5+yApZVw@mail.gmail.com>
-Sender: linux-renesas-soc-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, linux-renesas-soc@vger.kernel.org, Ben Hutchings <ben.hutchings@codethink.co.uk>
+Content-Type: text/plain
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from eusmtp01.atmel.com ([212.144.249.242]:15900 "EHLO
+	eusmtp01.atmel.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755447AbcDDP10 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 4 Apr 2016 11:27:26 -0400
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: ulf.hansson@linaro.org, adrian.hunter@intel.com
+Cc: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, nicolas.ferre@atmel.com, Ludovic Desroches <ludovic.desroches@atmel.com>
+
+Hi,
+
+I have recently observed that the quirk
+SDHCI_QUIRK2_NEED_DELAY_AFTER_INT_CLK_RST I have introduced doesn't fix all
+the bugs relative to the internal clock disabling while configuring the SD
+clock. This delay was introduced because of a re-synchronisation done when
+disabling the internal clock.
+
+Unfortunately, we can still have clock stabilization bug even if it occurs
+rarely. Moreover, trying to use presets, disabling the internal clock causes an
+unexpected switch to the base clock. It should be solved on next revision of
+the chip.
+
+For those reasons plus the non acceptance of new quirks, I have decided to
+remove it and to implement my own set_clock() function. In ordrer to reduce
+code duplication with the sdhci set_clock function, I moved some of the
+code in a new sdhci_compute_clock_config() function.
+
+Regards
+
+Changes:
+- v2:
+  - sdhci_compute_clock_config uses a returned value instead of an
+  out-parameter to provide the clock configuration.
 
 
---4eRLI4hEmsdu6Npr
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+Ludovic Desroches (3):
+  mmc: sdhci: introduce sdhci_compute_clock_config
+  mmc: sdhci-of-at91: implement specific set_clock function
+  mmc: sdhci: removal of SDHCI_QUIRK2_NEED_DELAY_AFTER_INT_CLK_RST
 
+ drivers/mmc/host/sdhci-of-at91.c | 48 ++++++++++++++++++++++++++++++++++++++--
+ drivers/mmc/host/sdhci.c         | 31 +++++++++++++++++---------
+ drivers/mmc/host/sdhci.h         |  6 +----
+ 3 files changed, 67 insertions(+), 18 deletions(-)
 
-> The documentation of mmc is quite poor. There are both code and
-> specification that needs to be understand, so some more help from
-> kernel doc could clearly help.
+-- 
+2.5.0
 
-I agree.
-
-> Anyway, I noticed that patch 6 helps to improve some documentation,
-> that's great - thanks!
-
-You're welcome. It wasn't too much work and maybe it helps someone with
-debugging. I found some bug reports on the web which sounded somewhat
-similar.
-
-> I only had one minor comment on patch 7, the rest looks good to me!
-
-Do you want me to resend or could you fix it before applying?
-
-Thanks for the review!
-
-   Wolfram
-
-
---4eRLI4hEmsdu6Npr
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1
-
-iQIcBAEBAgAGBQJXAoaRAAoJEBQN5MwUoCm2UPIP/iSOjzfkGDqCLBMoLs2hPZVh
-wcIVaaitDgfb6pp5ZKleDJyRPfa+Bo39/vSEyKfRLxFJJ9kRG4/mjYJuJrqovQi9
-ZK2z2f3DKgGEJC5q4+qdrCbpRV7eAm4AVHvKiQ08GJaAMgLcRkovj3zOKUXDOHLv
-OSzkUP3JrH2fJgWiCnx6EZEW9mNshsrvTustR4WKiE5f+BJhA5sRA1qInAAH2M2S
-T3uVrGDrxTkAopDf6if8HYDC91kaqndi/mmV4DxQAS2lgNDEX8Fs4Ma68Gm/+ytb
-nDu/BfMii6Vk7EMjbL0u3vH8NkmT3OmjyKyixtHRvDurxd4JwIK+3y/SqffsmoL5
-GyHszEYdel3/0Jz4SmD2Q5n3LKA2wVlmudskyJGC4R0R06Xg1afLkBnjIWprri6r
-h3PVhTU/LhVWiAdhCr8//+To642Ay7mdr+Ba3+G73GJsSYJd7GW7WHFjjA8eJ6gI
-seY4JEykis5Walc8ePjviLsH8IZoUbpOKGwP1q9nOVAaSz2yqLSeSjaE+99DZUzz
-FzCExCfQUBgHnlmJqRvCmIv14Z9neiAFCGiOD0UDk4X57VvLsyf2APjQau0L2EIZ
-CvZIk1fO2lkfAepE6u2E5l/yv68w3vwNCqUCa1vdJzKWBL57zOYSkIR50+6zw/pC
-t0u+s6L/NePK0S/v5qc/
-=VpoS
------END PGP SIGNATURE-----
-
---4eRLI4hEmsdu6Npr--
