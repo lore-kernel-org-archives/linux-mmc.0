@@ -1,140 +1,99 @@
-From: Tomas Winkler <tomas.winkler@intel.com>
-Subject: [PATCH v2 3/8] char: rpmb: add device attributes
-Date: Mon,  4 Apr 2016 14:11:19 +0300
-Message-ID: <1459768284-26997-4-git-send-email-tomas.winkler@intel.com>
-References: <1459768284-26997-1-git-send-email-tomas.winkler@intel.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [bisect] Merge tag 'mmc-v4.6' of git://git.linaro.org/people/ulf.hansson/mmc
+ (was [GIT PULL] MMC for v.4.6)
+Date: Mon, 4 Apr 2016 13:29:20 +0200
+Message-ID: <CAPDyKFr6zCm4wBS97bUCwq4qhsM8u3mEpyBf4uicJ_UQ7L-q5w@mail.gmail.com>
+References: <CAPDyKFqM1ffAdj7jVJmcPW2Wxy88Mhx_UrAzyuXpKSJg1yUPdg@mail.gmail.com>
+	<57008645.4070808@hurleysoftware.com>
+	<CA+55aFwjQP25NYfjPMTicO-M8yjm5c0aKFx-1saWmrro0c0NVQ@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1459768284-26997-1-git-send-email-tomas.winkler@intel.com>
+In-Reply-To: <CA+55aFwjQP25NYfjPMTicO-M8yjm5c0aKFx-1saWmrro0c0NVQ@mail.gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: gregkh@linuxfoundation.org, Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, James Bottomley <James.Bottomley@HansenPartnership.com>, "Martin K. Petersen" <martin.petersen@oracle.com>, Vinayak Holikatti <vinholikatti@gmail.com>, Andy Lutomirski <luto@kernel.org>
-Cc: Christoph Hellwig <hch@lst.de>, Yaniv Gardi <ygardi@codeaurora.org>, Joao Pinto <Joao.Pinto@synopsys.com>, linux-mmc@vger.kernel.org, linux-scsi@vger.kernel.org, linux-kernel@vger.kernel.org, Tomas Winkler <tomas.winkler@intel.com>
+To: Linus Torvalds <torvalds@linux-foundation.org>, Peter Hurley <peter@hurleysoftware.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Jaehoon Chung <jh80.chung@samsung.com>
 List-Id: linux-mmc@vger.kernel.org
 
-Add attribute type that displays underlay storage type technology
-EMMC, UFS, and attribute id, that displays underlay storage device id.
-For EMMC this would be content of CID and for UFS serial number from
-the device descriptor
+On 3 April 2016 at 13:54, Linus Torvalds <torvalds@linux-foundation.org> wrote:
+> On Sat, Apr 2, 2016 at 9:56 PM, Peter Hurley <peter@hurleysoftware.com> wrote:
+>>
+>> Note how mmc1 => mmcblk0 and mmc0 => mmcblk1.
+>>
+>> This produces a failure to boot as the wrong partition is mounted as
+>> root (/dev/mmcblk0p2 is now on the wrong mmc).
+>
+> It *looks* very much like somebody is doing asynchronous probing of
+> the bus, meaning that the devices get probed in random order.
 
-Signed-off-by: Tomas Winkler <tomas.winkler@intel.com>
----
-V2: resend
- Documentation/ABI/testing/sysfs-class-rpmb | 24 +++++++++++
- drivers/char/rpmb/core.c                   | 64 ++++++++++++++++++++++++++++++
- 2 files changed, 88 insertions(+)
+Correct.
 
-diff --git a/Documentation/ABI/testing/sysfs-class-rpmb b/Documentation/ABI/testing/sysfs-class-rpmb
-index 62d1959bf19e..9b2bf65dae95 100644
---- a/Documentation/ABI/testing/sysfs-class-rpmb
-+++ b/Documentation/ABI/testing/sysfs-class-rpmb
-@@ -13,3 +13,27 @@ Contact:	Tomas Winkler <tomas.winkler@intel.com>
- Description:
- 		The /sys/class/rpmb/rpmbN directory is created for
- 		each RPMB registered device
-+
-+What:		/sys/class/rpmb/rpmbN/id
-+Date:		Mar 2016
-+KernelVersion:	TBD
-+Contact:	Tomas Winkler <tomas.winkler@intel.com>
-+Description:
-+		The /sys/class/rpmb/rpmbN/id file contains device id
-+		in a binary form
-+
-+What:		/sys/class/rpmb/rpmbN/type
-+Date:		Mar 2016
-+KernelVersion:	TBD
-+Contact:	Tomas Winkler <tomas.winkler@intel.com>
-+Description:
-+		The /sys/class/rpmb/rpmbN/type file contains device
-+		underlay storage type technology: EMMC, UFS
-+
-+What:		/sys/class/rpmb/rpmbN/reliable_wr_cnt
-+Date:		Mar 2016
-+KernelVersion:	TBD
-+Contact:	Tomas Winkler <tomas.winkler@intel.com>
-+Description:
-+		The /sys/class/rpmb/rpmbN/reliable_wr_cnt file contains
-+		number of blocks that can be written in a single request
-diff --git a/drivers/char/rpmb/core.c b/drivers/char/rpmb/core.c
-index c9ea30aca6be..fb401331d345 100644
---- a/drivers/char/rpmb/core.c
-+++ b/drivers/char/rpmb/core.c
-@@ -230,6 +230,68 @@ struct rpmb_dev *rpmb_dev_find_by_device(struct device *parent)
- }
- EXPORT_SYMBOL_GPL(rpmb_dev_find_by_device);
- 
-+static ssize_t type_show(struct device *dev,
-+			 struct device_attribute *attr, char *buf)
-+{
-+	struct rpmb_dev *rdev = to_rpmb_dev(dev);
-+	ssize_t ret;
-+
-+	switch (rdev->ops->type) {
-+	case RPMB_TYPE_EMMC:
-+		ret = scnprintf(buf, PAGE_SIZE, "EMMC\n");
-+		break;
-+	case RPMB_TYPE_UFS:
-+		ret = scnprintf(buf, PAGE_SIZE, "UFS\n");
-+		break;
-+	default:
-+		ret = scnprintf(buf, PAGE_SIZE, "UNKNOWN\n");
-+		break;
-+	}
-+
-+	return ret;
-+}
-+static DEVICE_ATTR_RO(type);
-+
-+static ssize_t id_show(struct device *dev,
-+		       struct device_attribute *attr, char *buf)
-+{
-+	struct rpmb_dev *rdev = to_rpmb_dev(dev);
-+	size_t sz = min_t(size_t, rdev->ops->dev_id_len, PAGE_SIZE);
-+
-+	if (!rdev->ops->dev_id)
-+		return 0;
-+
-+	memcpy(buf, rdev->ops->dev_id, sz);
-+	return sz;
-+}
-+static DEVICE_ATTR_RO(id);
-+
-+static ssize_t reliable_wr_cnt_show(struct device *dev,
-+				    struct device_attribute *attr, char *buf)
-+{
-+	struct rpmb_dev *rdev = to_rpmb_dev(dev);
-+
-+	return scnprintf(buf, PAGE_SIZE, "%u\n", rdev->ops->reliable_wr_cnt);
-+}
-+static DEVICE_ATTR_RO(reliable_wr_cnt);
-+
-+
-+static struct attribute *rpmb_attrs[] = {
-+	&dev_attr_type.attr,
-+	&dev_attr_id.attr,
-+	&dev_attr_reliable_wr_cnt.attr,
-+	NULL,
-+};
-+
-+static struct attribute_group rpmb_attr_group = {
-+	.attrs = rpmb_attrs,
-+};
-+
-+static const struct attribute_group *rpmb_attr_groups[] = {
-+	&rpmb_attr_group,
-+	NULL
-+};
-+
- /**
-  * rpmb_dev_unregister - unregister RPMB partition from the RPMB subsystem
-  *
-@@ -300,6 +362,8 @@ struct rpmb_dev *rpmb_dev_register(struct device *dev,
- 	dev_set_name(&rdev->dev, "rpmb%d", id);
- 	rdev->dev.class = &rpmb_class;
- 	rdev->dev.parent = dev;
-+	rdev->dev.groups = rpmb_attr_groups;
-+
- 	ret = device_register(&rdev->dev);
- 	if (ret)
- 		goto exit;
--- 
-2.4.3
+>
+> And that "random order" is admittedly probably usually fairly static
+> on any particular hardware platform, but then something happens to
+> change timing, and...
+>
+> This is why you should never probe the actual *bus* asynchronously,
+> just do the end-point setup async. For example, you'd enumerate ports
+> (and assign devices to the ports) synchronously, but then after device
+> assignment the actual device probing can be async.
+
+So to do this, we need to tie the mmc/sd/sdio controller to a
+dedicated mmcblk id.
+
+There have been some ideas to fix this by using "aliases" in a DT
+based configuration.
+
+>
+>> The bisect tried all the mmc tree patches which were all good.
+>> I double-checked by cloning the mmc tree and building both mmc-v4.6
+>> and v4.5-rc6, and both tested good.
+>>
+>> I interpret that to mean some change in mmc + some new behavior elsewhere
+>> for v4.6 is causing this. Any ideas?
+>
+> Hmm. If it really is just timing, it could have been around forever,
+> and just hidden by the fact that normally mmc0 gets probed before
+> mmc1, but then some other probing thing slowed down or the exact
+> details of the async workqueue  scheduling changed, and now mmc1 just
+> *happens* to get probed first..
+>
+> The thing that changed scheduling order could easily have come from
+> some non-mmc change.
+>
+> NOTE! I have nothing to back this up except that (a) we've had
+> problems like this before and (b) it does look from your dmesg that
+> mmcX is simply probed in the "wrong" order. I didn't look at exactly
+> what mmc does or who does the probing.
+>
+> Maybe Ulf can explain what it is that is _supposed_ to keep the mmc
+> probe order stable. Ulf?
+>
+>              Linus
+
+The commit that's likely to cause the regression is:
+520bd7a8b415 ("mmc: core: Optimize boot time by detecting cards
+simultaneously").
+
+This commit further enables asynchronous detection of (e)MMC/SD/SDIO
+cards, by converting from an *ordered* work-queue to a *non-ordered*
+work-queue for card detection.
+
+Although, one should know that there have *never* been any guarantees
+to get a fixed mmcblk id for a card. I expect that's what has been
+assumed here.
+
+Let me elaborate a bit on the card detection procedure. When the mmc
+controller has been successfully probed, its driver schedules a work
+to start enumeration of cards. Only cards that gets detected
+successfully becomes registered and those gets an mmcblk id assigned
+to it. The picked id, is the first available starting from zero. Now,
+as cards can be removable and because drivers for mmc controllers may
+sometimes returns -EPROBE_DEFER (for whatever reason), there's never
+been support for fixed mmcblk ids.
+
+To deal with this, one should use the so called UUID/PARTUUID. Is
+there any reasons to why that can't be done in this case?
+
+Kind regards
+Uffe
