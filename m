@@ -1,45 +1,57 @@
-From: Baolin Wang <baolin.wang@linaro.org>
-Subject: Re: [PATCH v4] mmc: Provide tracepoints for request processing
-Date: Tue, 5 Apr 2016 19:18:51 +0800
-Message-ID: <CAMz4kuLNiEKowkr_r+Tn4amgmP1zqY2FnjL_sxG0kJOSETxpPA@mail.gmail.com>
-References: <5e5fca2076b5ae6307ef48b279c8f4fcf27de91b.1459393711.git.baolin.wang@linaro.org>
-	<CAPDyKFqUktG+KHqCQ=YPmXarYy13SqfXm9ajBcRCSthiOmD6Dg@mail.gmail.com>
+From: Wolfram Sang <wsa@the-dreams.de>
+Subject: Re: [PATCH v2 0/9] r8a7790: add UHS-I (SDR50) support to Lager
+Date: Tue, 5 Apr 2016 13:19:20 +0200
+Message-ID: <20160405111919.GA1386@katana>
+References: <1459525479-20842-1-git-send-email-wsa@the-dreams.de>
+ <CAPDyKFocCsLmPbFAuN989w4MCH_QKZzS8_YxqKvTZU5+yApZVw@mail.gmail.com>
+ <20160404152153.GG2983@katana>
+ <CAPDyKFpgXEyKiZd9X9krX1kNPiqwfAF_kMS_T42a_bFxLYrQSQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-yw0-f170.google.com ([209.85.161.170]:33514 "EHLO
-	mail-yw0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757835AbcDELSx (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 5 Apr 2016 07:18:53 -0400
-Received: by mail-yw0-f170.google.com with SMTP id t10so12151095ywa.0
-        for <linux-mmc@vger.kernel.org>; Tue, 05 Apr 2016 04:18:52 -0700 (PDT)
-In-Reply-To: <CAPDyKFqUktG+KHqCQ=YPmXarYy13SqfXm9ajBcRCSthiOmD6Dg@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="J2SCkAp4GZ/dPZZf"
+Return-path: <linux-renesas-soc-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <CAPDyKFpgXEyKiZd9X9krX1kNPiqwfAF_kMS_T42a_bFxLYrQSQ@mail.gmail.com>
+Sender: linux-renesas-soc-owner@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>, Simon Horman <horms@verge.net.au>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, linux-renesas-soc@vger.kernel.org, Ben Hutchings <ben.hutchings@codethink.co.uk>
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Steven Rostedt <rostedt@goodmis.org>, mingo@redhat.com, Adrian Hunter <adrian.hunter@intel.com>, Yangbo Lu <yangbo.lu@freescale.com>, Andrew Morton <akpm@linux-foundation.org>, "JBottomley@Odin.com" <JBottomley@odin.com>, "Luca Porzio (lporzio)" <lporzio@micron.com>, Jon Hunter <jonathanh@nvidia.com>, Grant Grundler <grundler@chromium.org>, Jens Axboe <axboe@fb.com>, Fabian Frederick <fabf@skynet.be>, Yunpeng Gao <yunpeng.gao@intel.com>, Dan Williams <dan.j.williams@intel.com>, Rabin Vincent <rabin.vincent@axis.com>, "Dong, Chuanxiao" <chuanxiao.dong@intel.com>, Shawn Lin <shawn.lin@rock-chips.com>, =?UTF-8?Q?Heiko_St=C3=BCbner?= <heiko@sntech.de>, Doug Anderson <dianders@chromium.org>, David Jander <david@protonic.nl>, Mark Brown <broonie@kernel.org>, Linus Walleij <linus.walleij@linaro.org>, Takahiro Akashi <takahiro.akashi@linaro.org>, linux-kernel@vger.kernel
 
-On 5 April 2016 at 19:12, Ulf Hansson <ulf.hansson@linaro.org> wrote:
-> On 31 March 2016 at 05:16, Baolin Wang <baolin.wang@linaro.org> wrote:
->> This patch provides some tracepoints for the lifecycle of a mmc request from
->> starting to completion to help with performance analysis of MMC subsystem.
->>
->> Changes since v3:
->>  - Add "retries" and "re-tune state" in the trace print.
->>  - Move trace_mmc_request_start() to __mmc_start_request() function to avoid
->>  missing valuable information about which command/request is being sent.
->>
->> Signed-off-by: Baolin Wang <baolin.wang@linaro.org>
->
-> Thanks, applied for next!
->
-> I did some clean-up of the change log, as I think the history of the
-> patch is not relevant in there. Next time, please provide the history
-> as patch information (just add the text below "---" and end the
-> message by adding yet another "---" and a newline.
 
-Make sense. Thanks.
+--J2SCkAp4GZ/dPZZf
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
--- 
-Baolin.wang
-Best Regards
+
+> > Do you want me to resend or could you fix it before applying?
+>=20
+> Patch 1->7 is applied for next (amended patch7), thanks!
+
+Thanks! Simon, can you pick up patches 8+9 now?
+
+Next series coming soon... ;)
+
+
+--J2SCkAp4GZ/dPZZf
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1
+
+iQIcBAEBAgAGBQJXA583AAoJEBQN5MwUoCm2tx0P/1OuXWQ2jS9MqRz4zv7yhIhl
+7Utwdk6HDu5CknYLJHZxUx5i0wjzsGx+hc49HEcUM/DK4AyaaGKfYHCk7a9kiDqD
+8d+b6TVz6140xE01I2uDomTmoMKfuXvhZkOKSnbeIXuencL9SXE9AAxLNHt3kqPd
+8S2nEfEfqqR5FjxLnZ5AvTWU3Z1C+UUi2yCGiT3WO35LazV+a6w+wf4SUbC7Pko2
+hJzvKTgo1HTcWaYai00kbk4fUl2LBejnSq4tkONiH8nHtNd/vzu7j1R/UhmnfJhA
++qzHuWXfBoFqdhGwUYqFm1hIyCC/UKNp00/xNV0UZQT/CJVB+6tP7D7ub87JAfvw
+qDq4w9glafi80I0ztvw37o6OVitxVU8eSTJ26qHTRGKfvaAcqveY03V0TVP2rxj1
+p3Isq/ZJsZjosM2De7mRHDCTIdhw40Y6Kre3y0tUzhO/yShq4TOnLeLyRJRfvDcE
+QstkTSCwR9yDjxGY5+ocUnDUw/mxPslXBqlZfxNcmd/3o9iPN/Den1fQ27c3VGFA
+CUCbAu0AWUk44dA9+LB52hyYeZihzIed7L8BZIWq6aBqeri9uq+Dg+c2yLA1YGy/
+Oc6erECtCF9xmw23ZKLvw0IfzU8zKNhNLrl+KKhPSDH8cL1phkft//15dtCzTyrY
+iVaqAvE+iE9nCyddfpM0
+=doYQ
+-----END PGP SIGNATURE-----
+
+--J2SCkAp4GZ/dPZZf--
