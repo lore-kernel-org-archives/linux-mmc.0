@@ -1,57 +1,70 @@
-From: Wolfram Sang <wsa@the-dreams.de>
-Subject: Re: [PATCH v2 0/9] r8a7790: add UHS-I (SDR50) support to Lager
-Date: Tue, 5 Apr 2016 13:19:20 +0200
-Message-ID: <20160405111919.GA1386@katana>
-References: <1459525479-20842-1-git-send-email-wsa@the-dreams.de>
- <CAPDyKFocCsLmPbFAuN989w4MCH_QKZzS8_YxqKvTZU5+yApZVw@mail.gmail.com>
- <20160404152153.GG2983@katana>
- <CAPDyKFpgXEyKiZd9X9krX1kNPiqwfAF_kMS_T42a_bFxLYrQSQ@mail.gmail.com>
+From: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: Re: [v7, 0/5] Fix eSDHC host version register bug
+Date: Tue, 5 Apr 2016 13:27:58 +0200
+Message-ID: <CAPDyKFqgMCvbqMYZ-uM-rTnVvfJkCYbhv2kucCRyNyc9FWoR=Q@mail.gmail.com>
+References: <1459480051-3701-1-git-send-email-yangbo.lu@nxp.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="J2SCkAp4GZ/dPZZf"
-Return-path: <linux-renesas-soc-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <CAPDyKFpgXEyKiZd9X9krX1kNPiqwfAF_kMS_T42a_bFxLYrQSQ@mail.gmail.com>
-Sender: linux-renesas-soc-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>, Simon Horman <horms@verge.net.au>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, linux-renesas-soc@vger.kernel.org, Ben Hutchings <ben.hutchings@codethink.co.uk>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
+In-Reply-To: <1459480051-3701-1-git-send-email-yangbo.lu-3arQi8VN3Tc@public.gmane.org>
+List-Unsubscribe: <https://lists.linuxfoundation.org/mailman/options/iommu>,
+	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.linuxfoundation.org/pipermail/iommu/>
+List-Post: <mailto:iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
+List-Help: <mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=help>
+List-Subscribe: <https://lists.linuxfoundation.org/mailman/listinfo/iommu>,
+	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=subscribe>
+Sender: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
+Errors-To: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
+To: Yangbo Lu <yangbo.lu-3arQi8VN3Tc@public.gmane.org>
+Cc: "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Zhao Qiang <qiang.zhao-KZfg59tc24xl57MIdRCFDg@public.gmane.org>, Russell King <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, Claudiu Manoil <claudiu.manoil-KZfg59tc24xl57MIdRCFDg@public.gmane.org>, Bhupesh Sharma <bhupesh.sharma-KZfg59tc24xl57MIdRCFDg@public.gmane.org>, netdev-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Santosh Shilimkar <ssantosh-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, linux-mmc <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, scott.wood-3arQi8VN3Tc@public.gmane.org, xiaobo.xie-3arQi8VN3Tc@public.gmane.org, iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, "linux-i2c-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-i2c-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Jochen Friedrich <jochen-NIgtFMG+Po8@public.gmane.org>, Kumar Gala <galak-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, leoyang.li-3arQi8VN3Tc@public.gmane.org, "linuxppc-dev-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org" <linuxppc-dev-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>, linux-clk-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
+On 1 April 2016 at 05:07, Yangbo Lu <yangbo.lu-3arQi8VN3Tc@public.gmane.org> wrote:
+> This patchset is used to fix a host version register bug in the T4240-R1.0-R2.0
+> eSDHC controller. To get the SoC version and revision, it's needed to add the
+> GUTS driver to access the global utilities registers.
+>
+> So, the first three patches are to add the GUTS driver.
+> The following two patches are to enable GUTS driver support to get SVR in eSDHC
+> driver and fix host version for T4240.
+>
+> Yangbo Lu (5):
+>   ARM64: dts: ls2080a: add device configuration node
+>   soc: fsl: add GUTS driver for QorIQ platforms
+>   dt: move guts devicetree doc out of powerpc directory
+>   powerpc/fsl: move mpc85xx.h to include/linux/fsl
+>   mmc: sdhci-of-esdhc: fix host version for T4240-R1.0-R2.0
+>
+>  .../bindings/{powerpc => soc}/fsl/guts.txt         |   3 +
+>  arch/arm64/boot/dts/freescale/fsl-ls2080a.dtsi     |   6 ++
+>  arch/powerpc/kernel/cpu_setup_fsl_booke.S          |   2 +-
+>  drivers/clk/clk-qoriq.c                            |   3 +-
+>  drivers/i2c/busses/i2c-mpc.c                       |   2 +-
+>  drivers/iommu/fsl_pamu.c                           |   3 +-
+>  drivers/mmc/host/Kconfig                           |   1 +
+>  drivers/mmc/host/sdhci-of-esdhc.c                  |  23 ++++
+>  drivers/net/ethernet/freescale/gianfar.c           |   2 +-
+>  drivers/soc/Kconfig                                |   2 +-
+>  drivers/soc/fsl/Kconfig                            |   8 ++
+>  drivers/soc/fsl/Makefile                           |   1 +
+>  drivers/soc/fsl/guts.c                             | 119 +++++++++++++++++++++
+>  include/linux/fsl/guts.h                           |  98 ++++++++---------
+>  .../asm/mpc85xx.h => include/linux/fsl/svr.h       |   4 +-
+>  15 files changed, 219 insertions(+), 58 deletions(-)
+>  rename Documentation/devicetree/bindings/{powerpc => soc}/fsl/guts.txt (91%)
+>  create mode 100644 drivers/soc/fsl/Kconfig
+>  create mode 100644 drivers/soc/fsl/guts.c
+>  rename arch/powerpc/include/asm/mpc85xx.h => include/linux/fsl/svr.h (97%)
+>
+> --
+> 2.1.0.27.g96db324
+>
 
---J2SCkAp4GZ/dPZZf
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+I was about to queue this for next, when I noticed that checkpatch is
+complaining/warning lots about these patches. Can you please a round
+of checkpatch and fix what makes sense.
 
-
-> > Do you want me to resend or could you fix it before applying?
->=20
-> Patch 1->7 is applied for next (amended patch7), thanks!
-
-Thanks! Simon, can you pick up patches 8+9 now?
-
-Next series coming soon... ;)
-
-
---J2SCkAp4GZ/dPZZf
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1
-
-iQIcBAEBAgAGBQJXA583AAoJEBQN5MwUoCm2tx0P/1OuXWQ2jS9MqRz4zv7yhIhl
-7Utwdk6HDu5CknYLJHZxUx5i0wjzsGx+hc49HEcUM/DK4AyaaGKfYHCk7a9kiDqD
-8d+b6TVz6140xE01I2uDomTmoMKfuXvhZkOKSnbeIXuencL9SXE9AAxLNHt3kqPd
-8S2nEfEfqqR5FjxLnZ5AvTWU3Z1C+UUi2yCGiT3WO35LazV+a6w+wf4SUbC7Pko2
-hJzvKTgo1HTcWaYai00kbk4fUl2LBejnSq4tkONiH8nHtNd/vzu7j1R/UhmnfJhA
-+qzHuWXfBoFqdhGwUYqFm1hIyCC/UKNp00/xNV0UZQT/CJVB+6tP7D7ub87JAfvw
-qDq4w9glafi80I0ztvw37o6OVitxVU8eSTJ26qHTRGKfvaAcqveY03V0TVP2rxj1
-p3Isq/ZJsZjosM2De7mRHDCTIdhw40Y6Kre3y0tUzhO/yShq4TOnLeLyRJRfvDcE
-QstkTSCwR9yDjxGY5+ocUnDUw/mxPslXBqlZfxNcmd/3o9iPN/Den1fQ27c3VGFA
-CUCbAu0AWUk44dA9+LB52hyYeZihzIed7L8BZIWq6aBqeri9uq+Dg+c2yLA1YGy/
-Oc6erECtCF9xmw23ZKLvw0IfzU8zKNhNLrl+KKhPSDH8cL1phkft//15dtCzTyrY
-iVaqAvE+iE9nCyddfpM0
-=doYQ
------END PGP SIGNATURE-----
-
---J2SCkAp4GZ/dPZZf--
+Kind regards
+Uffe
