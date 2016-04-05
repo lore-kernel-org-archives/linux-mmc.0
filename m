@@ -1,109 +1,87 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: omap_hsmmc: pass omap_hsmmc_host pointer directly
-Date: Tue, 5 Apr 2016 13:12:03 +0200
-Message-ID: <CAPDyKFrDSxqOs4g9cvcXk92=5iQOadZti_QFUmxggePSG=OTOA@mail.gmail.com>
-References: <1458518288-22774-1-git-send-email-afenkart@gmail.com>
+Subject: Re: [PATCH 1/3] mmc: sh_mmcif: Make sure the device stays active when
+ needed in ->probe()
+Date: Tue, 5 Apr 2016 13:11:56 +0200
+Message-ID: <CAPDyKFrNYuKmDjvz=-7OH=S32eHK=8tGwQbh8n=JEVjJM7uDmw@mail.gmail.com>
+References: <1455195595-5121-1-git-send-email-ulf.hansson@linaro.org>
+	<CAPDyKFqZkJGPgojY52H2=4JjdR9gvJCe99_ZCv98ZNs4eUdRrg@mail.gmail.com>
+	<56DCF2AD.3000806@jinso.co.jp>
+	<CAPDyKFr8wrWYn2sy2rdKmmTkiLEuLOCarbL51gYr=xGJ_6C7SA@mail.gmail.com>
+	<56EA5E83.5050008@jinso.co.jp>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wm0-f42.google.com ([74.125.82.42]:34698 "EHLO
-	mail-wm0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756807AbcDELMF (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 5 Apr 2016 07:12:05 -0400
-Received: by mail-wm0-f42.google.com with SMTP id l6so18732432wml.1
-        for <linux-mmc@vger.kernel.org>; Tue, 05 Apr 2016 04:12:04 -0700 (PDT)
-In-Reply-To: <1458518288-22774-1-git-send-email-afenkart@gmail.com>
+Received: from mail-wm0-f51.google.com ([74.125.82.51]:34581 "EHLO
+	mail-wm0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756807AbcDELL6 convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 5 Apr 2016 07:11:58 -0400
+Received: by mail-wm0-f51.google.com with SMTP id l6so18728506wml.1
+        for <linux-mmc@vger.kernel.org>; Tue, 05 Apr 2016 04:11:57 -0700 (PDT)
+In-Reply-To: <56EA5E83.5050008@jinso.co.jp>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Andreas Fenkart <afenkart@gmail.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>
+To: Nguyen Viet Dung <nv-dung@jinso.co.jp>
+Cc: Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>, Geert Uytterhoeven <geert+renesas@glider.be>, Magnus Damm <magnus.damm@gmail.com>, Simon Horman <horms@verge.net.au>, linux-mmc <linux-mmc@vger.kernel.org>, Laurent Pinchart <laurent.pinchart@ideasonboard.com>
 
-On 21 March 2016 at 00:58, Andreas Fenkart <afenkart@gmail.com> wrote:
-> unnecessary indirection via 'struct device' back to omap_hsmmc_host
+On 17 March 2016 at 08:36, Nguyen Viet Dung <nv-dung@jinso.co.jp> wrote=
+:
+> Hi Ulf,
 >
-> Signed-off-by: Andreas Fenkart <afenkart@gmail.com>
+> Thank for your reply.
+>
+> On 2016=E5=B9=B403=E6=9C=8816=E6=97=A5 18:53, Ulf Hansson wrote:
+>>
+>> On 7 March 2016 at 04:17, Nguyen Viet Dung <nv-dung@jinso.co.jp> wro=
+te:
+>>>
+>>> Hi Ulf
+>>>
+>>> I have testted two cases use these patchs that you send.
+>>>
+>>> case01:
+>>> [PATCH 1/3] mmc: sh_mmcif: Make sure the device stays active when n=
+eeded
+>>> in
+>>> ->probe()
+>>> [PATCH 2/3] mmc: sh_mmcif: Restructure ->set_ios()
+>>> [PATCH 3/3] mmc: sh_mmci: Get rid of wrapper function for regulator=
+s
+>>>
+>>> case02:
+>>> [PATCH 1/3] mmc: sh_mmcif: Make sure the device stays active when n=
+eeded
+>>> in
+>>> ->probe()
+>>>
+>>> The problem of mmcif is not resolved by both two cases.
+>>
+>> Okay, thanks for testing!
+>>
+>> Even if it doesn't solve you original issue after a system PM resume=
+d
+>> has been accomplished, does the driver still works as before? In oth=
+er
+>> words are cards detected properly and can data transfers be done?
+>
+> After a system PM resumed has been accomplished,if write data to mmc =
+then
+> happen kernel panic.
+>>
+>> The reason for my question, is that I think these patches makes some
+>> nice cleanups of some of the PM related code in the driver. So unles=
+s
+>> you see a *new* regression, I would like to apply them.
+>
+> If see only this problem of mmc,i can not know effect of these patchs=
+=2E
 
-Thanks, applied for next!
+As I understand your test, there are no new issues observed. For that
+reason, I am going to apply patch 1->3 for next to give them some more
+testing. Please tell me if any new issues pops up.
+
+Regarding the issue you reported as a regression, unfortunate it seems
+like someone with the hardware at hand needs to some debugging.
 
 Kind regards
 Uffe
-
-> ---
->  drivers/mmc/host/omap_hsmmc.c | 19 +++++++++----------
->  1 file changed, 9 insertions(+), 10 deletions(-)
->
-> diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-> index d2b2525..898878d 100644
-> --- a/drivers/mmc/host/omap_hsmmc.c
-> +++ b/drivers/mmc/host/omap_hsmmc.c
-> @@ -357,15 +357,14 @@ static int omap_hsmmc_set_pbias(struct omap_hsmmc_host *host, bool power_on,
->         return 0;
->  }
->
-> -static int omap_hsmmc_set_power(struct device *dev, int power_on, int vdd)
-> +static int omap_hsmmc_set_power(struct omap_hsmmc_host *host, int power_on,
-> +                               int vdd)
->  {
-> -       struct omap_hsmmc_host *host =
-> -               platform_get_drvdata(to_platform_device(dev));
->         struct mmc_host *mmc = host->mmc;
->         int ret = 0;
->
->         if (mmc_pdata(host)->set_power)
-> -               return mmc_pdata(host)->set_power(dev, power_on, vdd);
-> +               return mmc_pdata(host)->set_power(host->dev, power_on, vdd);
->
->         /*
->          * If we don't see a Vcc regulator, assume it's a fixed
-> @@ -375,7 +374,7 @@ static int omap_hsmmc_set_power(struct device *dev, int power_on, int vdd)
->                 return 0;
->
->         if (mmc_pdata(host)->before_set_reg)
-> -               mmc_pdata(host)->before_set_reg(dev, power_on, vdd);
-> +               mmc_pdata(host)->before_set_reg(host->dev, power_on, vdd);
->
->         ret = omap_hsmmc_set_pbias(host, false, 0);
->         if (ret)
-> @@ -409,7 +408,7 @@ static int omap_hsmmc_set_power(struct device *dev, int power_on, int vdd)
->         }
->
->         if (mmc_pdata(host)->after_set_reg)
-> -               mmc_pdata(host)->after_set_reg(dev, power_on, vdd);
-> +               mmc_pdata(host)->after_set_reg(host->dev, power_on, vdd);
->
->         return 0;
->
-> @@ -1278,11 +1277,11 @@ static int omap_hsmmc_switch_opcond(struct omap_hsmmc_host *host, int vdd)
->                 clk_disable_unprepare(host->dbclk);
->
->         /* Turn the power off */
-> -       ret = omap_hsmmc_set_power(host->dev, 0, 0);
-> +       ret = omap_hsmmc_set_power(host, 0, 0);
->
->         /* Turn the power ON with given VDD 1.8 or 3.0v */
->         if (!ret)
-> -               ret = omap_hsmmc_set_power(host->dev, 1, vdd);
-> +               ret = omap_hsmmc_set_power(host, 1, vdd);
->         pm_runtime_get_sync(host->dev);
->         if (host->dbclk)
->                 clk_prepare_enable(host->dbclk);
-> @@ -1722,10 +1721,10 @@ static void omap_hsmmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
->         if (ios->power_mode != host->power_mode) {
->                 switch (ios->power_mode) {
->                 case MMC_POWER_OFF:
-> -                       omap_hsmmc_set_power(host->dev, 0, 0);
-> +                       omap_hsmmc_set_power(host, 0, 0);
->                         break;
->                 case MMC_POWER_UP:
-> -                       omap_hsmmc_set_power(host->dev, 1, ios->vdd);
-> +                       omap_hsmmc_set_power(host, 1, ios->vdd);
->                         break;
->                 case MMC_POWER_ON:
->                         do_send_init_stream = 1;
-> --
-> 2.7.0
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
