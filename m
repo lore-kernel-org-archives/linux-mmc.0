@@ -1,70 +1,88 @@
-From: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [v7, 0/5] Fix eSDHC host version register bug
-Date: Tue, 5 Apr 2016 13:27:58 +0200
-Message-ID: <CAPDyKFqgMCvbqMYZ-uM-rTnVvfJkCYbhv2kucCRyNyc9FWoR=Q@mail.gmail.com>
-References: <1459480051-3701-1-git-send-email-yangbo.lu@nxp.com>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH 7/8] mmc: sdhci: Remove redundant runtime PM calls
+Date: Tue, 5 Apr 2016 14:40:04 +0300
+Message-ID: <5703A414.8070005@intel.com>
+References: <1459236673-5639-1-git-send-email-ulf.hansson@linaro.org>
+ <1459236673-5639-7-git-send-email-ulf.hansson@linaro.org>
+ <56FE2739.2030100@intel.com>
+ <CAPDyKFpOdS2C9_NjqMxtWRK4-qGc1gjL6TtKVAyBqVEot=u3gg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
-Return-path: <iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
-In-Reply-To: <1459480051-3701-1-git-send-email-yangbo.lu-3arQi8VN3Tc@public.gmane.org>
-List-Unsubscribe: <https://lists.linuxfoundation.org/mailman/options/iommu>,
-	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.linuxfoundation.org/pipermail/iommu/>
-List-Post: <mailto:iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
-List-Help: <mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=help>
-List-Subscribe: <https://lists.linuxfoundation.org/mailman/listinfo/iommu>,
-	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=subscribe>
-Sender: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
-Errors-To: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
-To: Yangbo Lu <yangbo.lu-3arQi8VN3Tc@public.gmane.org>
-Cc: "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Zhao Qiang <qiang.zhao-KZfg59tc24xl57MIdRCFDg@public.gmane.org>, Russell King <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, Claudiu Manoil <claudiu.manoil-KZfg59tc24xl57MIdRCFDg@public.gmane.org>, Bhupesh Sharma <bhupesh.sharma-KZfg59tc24xl57MIdRCFDg@public.gmane.org>, netdev-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Santosh Shilimkar <ssantosh-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, linux-mmc <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, scott.wood-3arQi8VN3Tc@public.gmane.org, xiaobo.xie-3arQi8VN3Tc@public.gmane.org, iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, "linux-i2c-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-i2c-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Jochen Friedrich <jochen-NIgtFMG+Po8@public.gmane.org>, Kumar Gala <galak-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, leoyang.li-3arQi8VN3Tc@public.gmane.org, "linuxppc-dev-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org" <linuxppc-dev-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>, linux-clk-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mga03.intel.com ([134.134.136.65]:12096 "EHLO mga03.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1757827AbcDELnr (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 5 Apr 2016 07:43:47 -0400
+In-Reply-To: <CAPDyKFpOdS2C9_NjqMxtWRK4-qGc1gjL6TtKVAyBqVEot=u3gg@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>
 
-On 1 April 2016 at 05:07, Yangbo Lu <yangbo.lu-3arQi8VN3Tc@public.gmane.org> wrote:
-> This patchset is used to fix a host version register bug in the T4240-R1.0-R2.0
-> eSDHC controller. To get the SoC version and revision, it's needed to add the
-> GUTS driver to access the global utilities registers.
->
-> So, the first three patches are to add the GUTS driver.
-> The following two patches are to enable GUTS driver support to get SVR in eSDHC
-> driver and fix host version for T4240.
->
-> Yangbo Lu (5):
->   ARM64: dts: ls2080a: add device configuration node
->   soc: fsl: add GUTS driver for QorIQ platforms
->   dt: move guts devicetree doc out of powerpc directory
->   powerpc/fsl: move mpc85xx.h to include/linux/fsl
->   mmc: sdhci-of-esdhc: fix host version for T4240-R1.0-R2.0
->
->  .../bindings/{powerpc => soc}/fsl/guts.txt         |   3 +
->  arch/arm64/boot/dts/freescale/fsl-ls2080a.dtsi     |   6 ++
->  arch/powerpc/kernel/cpu_setup_fsl_booke.S          |   2 +-
->  drivers/clk/clk-qoriq.c                            |   3 +-
->  drivers/i2c/busses/i2c-mpc.c                       |   2 +-
->  drivers/iommu/fsl_pamu.c                           |   3 +-
->  drivers/mmc/host/Kconfig                           |   1 +
->  drivers/mmc/host/sdhci-of-esdhc.c                  |  23 ++++
->  drivers/net/ethernet/freescale/gianfar.c           |   2 +-
->  drivers/soc/Kconfig                                |   2 +-
->  drivers/soc/fsl/Kconfig                            |   8 ++
->  drivers/soc/fsl/Makefile                           |   1 +
->  drivers/soc/fsl/guts.c                             | 119 +++++++++++++++++++++
->  include/linux/fsl/guts.h                           |  98 ++++++++---------
->  .../asm/mpc85xx.h => include/linux/fsl/svr.h       |   4 +-
->  15 files changed, 219 insertions(+), 58 deletions(-)
->  rename Documentation/devicetree/bindings/{powerpc => soc}/fsl/guts.txt (91%)
->  create mode 100644 drivers/soc/fsl/Kconfig
->  create mode 100644 drivers/soc/fsl/guts.c
->  rename arch/powerpc/include/asm/mpc85xx.h => include/linux/fsl/svr.h (97%)
->
-> --
-> 2.1.0.27.g96db324
->
+On 01/04/16 12:46, Ulf Hansson wrote:
+> On 1 April 2016 at 09:46, Adrian Hunter <adrian.hunter@intel.com> wrote:
+>> On 29/03/16 10:31, Ulf Hansson wrote:
+>>> Commit 9250aea76bfc ("mmc: core: Enable runtime PM management of host
+>>> devices"), made some calls to the runtime PM API from the driver
+>>> redundant. Especially those which deals with runtime PM reference
+>>> counting, so let's remove them.
+>>>
+>>> Moreover as SDHCI have its own wrapper functions for runtime PM these
+>>> becomes superfluous, so let's remove them as well.
+>>>
+>>> Cc: Adrian Hunter <adrian.hunter@intel.com>
+>>> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+>>
+>> Looks good, but I have one comment below.
+>>
+> 
+> [...]
+> 
+>>>
+>>>  static void sdhci_enable_sdio_irq_nolock(struct sdhci_host *host, int enable)
+>>> @@ -1668,7 +1646,7 @@ static void sdhci_enable_sdio_irq(struct mmc_host *mmc, int enable)
+>>>       struct sdhci_host *host = mmc_priv(mmc);
+>>>       unsigned long flags;
+>>>
+>>> -     sdhci_runtime_pm_get(host);
+>>> +     pm_runtime_get_sync(mmc_dev(mmc));
+>>
+>> Why can't this be moved into the core as well?  At the least, there should
+>> be a comment here and explanation in the commit message.
+> 
+> That's indeed a very good question! :-)
+> 
+> SDHCI is a special case for how a host driver deals with SDIO IRQs as
+> it's the only user of MMC_CAP2_SDIO_IRQ_NOTHREAD.
+> 
+> It means it has its own SDIO IRQ thread (threaded IRQ) which will
+> invoke sdio_run_irqs() to consume a received SDIO IRQ. Other host
+> drivers are using the mmc_signal_sdio_irq() API to deal with this,
+> which behaves a bit different.
+> 
+> The sdio_run_irqs() API claims the host (mmc_claim|release_host())
+> before it starts to consume the SDIO IRQ. This triggers the host to be
+> runtime resumed before the host ops ->enable_sdio_irq() gets called.
+> So, actually it means it *should* be safe to remove
+> pm_runtime_get|put() in it's current form from within
+> sdhci_enable_sdio_irq()...
 
-I was about to queue this for next, when I noticed that checkpatch is
-complaining/warning lots about these patches. Can you please a round
-of checkpatch and fix what makes sense.
+Sorry for slow reply.
 
-Kind regards
-Uffe
+Yes it looks safe.  Please remove it.
+
+> 
+> Although, I wonder how SDHCI can allow to have SDIO IRQs enabled
+> without *keeping* the host runtime resumed, because I fail to see that
+> any wakeups are being configured when the host becomes runtime
+> suspended. I may be missing something, but what do you think?
+
+As you probably know, it was done by Russell King, for the sdhci_esdhc-imx
+driver by the look of it.  The clocks are left on during runtime suspend iff
+the SDIO IRQ is enabled, and IIRC it says the registers are accessible.  I
+would not expect any wakeups would need to be configured because the system
+is not asleep.  I don't know exactly what Russell was aiming for, but one
+advantage is that the host controller will go to a lower power state (clocks
+off) when the SDIO IRQ is not enabled.
+
