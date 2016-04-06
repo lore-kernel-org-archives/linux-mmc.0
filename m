@@ -1,62 +1,87 @@
-From: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [v7, 0/5] Fix eSDHC host version register bug
-Date: Wed, 6 Apr 2016 10:14:36 +0200
-Message-ID: <CAPDyKFp8GDzSkpbTKoRL=rwiBrsWmsgN95zB-QJwfZTnq4M8BA@mail.gmail.com>
-References: <1459480051-3701-1-git-send-email-yangbo.lu@nxp.com>
-	<CAPDyKFqgMCvbqMYZ-uM-rTnVvfJkCYbhv2kucCRyNyc9FWoR=Q@mail.gmail.com>
-	<HE1PR04MB0889D75DC56E180D3508E7A1F89F0@HE1PR04MB0889.eurprd04.prod.outlook.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [bisect] Merge tag 'mmc-v4.6' of git://git.linaro.org/people/ulf.hansson/mmc
+ (was [GIT PULL] MMC for v.4.6)
+Date: Wed, 6 Apr 2016 10:26:25 +0200
+Message-ID: <CAPDyKFrG_sdAUHmYnStWKnBD7jWQHiY7rAXSD5fn3HxQ51UARA@mail.gmail.com>
+References: <CAPDyKFqM1ffAdj7jVJmcPW2Wxy88Mhx_UrAzyuXpKSJg1yUPdg@mail.gmail.com>
+	<57008645.4070808@hurleysoftware.com>
+	<CA+55aFwjQP25NYfjPMTicO-M8yjm5c0aKFx-1saWmrro0c0NVQ@mail.gmail.com>
+	<CAPDyKFr6zCm4wBS97bUCwq4qhsM8u3mEpyBf4uicJ_UQ7L-q5w@mail.gmail.com>
+	<CA+55aFwFVBg5joDd0QYjmSA6t8TM7tmZvmcArZu3Ar8u4vDecw@mail.gmail.com>
+	<CAPDyKFqFoJybrr4dBt8xO7iHt9CAbET=i-v9ZLht7J6K091Phw@mail.gmail.com>
+	<20160406154740.51715633@xhacker>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
-In-Reply-To: <HE1PR04MB0889D75DC56E180D3508E7A1F89F0-6LN7OEpIatX1kPMWxTxe+c9NdZoXdze2vxpqHgZTriW3zl9H0oFU5g@public.gmane.org>
-List-Unsubscribe: <https://lists.linuxfoundation.org/mailman/options/iommu>,
-	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.linuxfoundation.org/pipermail/iommu/>
-List-Post: <mailto:iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
-List-Help: <mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=help>
-List-Subscribe: <https://lists.linuxfoundation.org/mailman/listinfo/iommu>,
-	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=subscribe>
-Sender: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
-Errors-To: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
-To: Yangbo Lu <yangbo.lu-3arQi8VN3Tc@public.gmane.org>, Scott Wood <scott.wood-3arQi8VN3Tc@public.gmane.org>
-Cc: "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Zhao Qiang <qiang.zhao-KZfg59tc24xl57MIdRCFDg@public.gmane.org>, Russell King <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, Bhupesh Sharma <bhupesh.sharma-KZfg59tc24xl57MIdRCFDg@public.gmane.org>, "netdev-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <netdev-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Santosh Shilimkar <ssantosh-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, linux-mmc <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Jochen Friedrich <jochen-NIgtFMG+Po8@public.gmane.org>, Xiaobo Xie <xiaobo.xie-3arQi8VN3Tc@public.gmane.org>, "iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org" <iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, "linux-i2c-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-i2c-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Claudiu Manoil <claudiu.manoil-KZfg59tc24xl57MIdRCFDg@public.gmane.org>, Kumar Gala <galak-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, Yang-Leo Li <leoyang.li-3arQi8VN3Tc@public.gmane.org>, "linuxppc-dev-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org" <linuxppc-dev-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>, "linux-clk-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-clk-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM1dQTEkxZZdg@public.gmane.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20160406154740.51715633@xhacker>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Jisheng Zhang <jszhang@marvell.com>
+Cc: Linus Torvalds <torvalds@linux-foundation.org>, Peter Hurley <peter@hurleysoftware.com>, Jaehoon Chung <jh80.chung@samsung.com>, linux-mmc <linux-mmc@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
+On 6 April 2016 at 09:47, Jisheng Zhang <jszhang@marvell.com> wrote:
+> Hi Ulf,
+>
+> On Tue, 5 Apr 2016 10:59:28 +0200 Ulf Hansson wrote:
+>
+>> On 4 April 2016 at 20:59, Linus Torvalds <torvalds@linux-foundation.org> wrote:
+>> > On Mon, Apr 4, 2016 at 4:29 AM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+>> >>
+>> >> The commit that's likely to cause the regression is:
+>> >> 520bd7a8b415 ("mmc: core: Optimize boot time by detecting cards
+>> >> simultaneously").
+>> >
+>> > Peter, mind testing if you can revert that and get the old behavior
+>> > back? It seems to still revert cleanly, although I didn't check if the
+>> > revert actually then builds..
 >>
->> I was about to queue this for next, when I noticed that checkpatch is
->> complaining/warning lots about these patches. Can you please a round of
->> checkpatch and fix what makes sense.
+>> I have checked, the revert should be a safe option. There is nothing
+>> added on top that relies on it.
 >>
->> Kind regards
->> Uffe
+>> Moreover, I have no problem dealing with the revert, as it me
+>> personally that screwed this up.
+>>
+>> >
+>> >> This commit further enables asynchronous detection of (e)MMC/SD/SDIO
+>> >> cards, by converting from an *ordered* work-queue to a *non-ordered*
+>> >> work-queue for card detection.
+>> >>
+>> >> Although, one should know that there have *never* been any guarantees
+>> >> to get a fixed mmcblk id for a card. I expect that's what has been
+>> >> assumed here.
+>> >
+>> > So quite frankly, for the whole "no regressions" issue, "documented
+>> > behavior" simply isn't an issue. It doesn't matter one whit or not if
+>> > something has been documented: if it has worked and people have
+>> > depended on it, it's what we in the industry call "reality".
+>> >
+>> > And reality trumps documentation. Every time.
+>>
+>> I totally agree.
+>>
+>> Although, what puzzles me around this particular issue, is how an SoC
+>> configuration can rely on this fragile behaviour.
+>> All you have to do to break the assumption of fixed mmcblk ids, is to
+>> boot with an SD card inserted and then without. Perhaps these SoCs
+>> just doesn't support this use case!?
 >
-> [Lu Yangbo-B47093] Sorry about this, Uffe...
+> This use case is supported by carefully always letting emmc host be probed
+> before the sd hosts. For example, this can be done by putting the emmc host
+> DT node before the SD hosts' ;)
 
-No worries!
+This is just a workaround and it's still *really* fragile.
 
-> Should I ignore the warnings that update MAINTAINERS?
+The workaround you describe, relies on a certain behaviour of the DTS
+parsing and the driver core, as you need the the first device in the
+DTS to probe first. You are also relying on that the mmc driver
+doesn't mess up the probe order by returning -EPROBE_DEFER for the
+eMMC slot (because some resources wasn't ready yet).
 
-drivers/soc/fsl/guts.c isn't part of the MAINTAINERS file, it should be.
-
-I also realize that the FREESCALE QUICC ENGINE LIBRARY section
-drivers/soc/fsl/qe/* also need an active maintainer, as it's currently
-orphan.
-
-Perhaps we should have create a new section for drivers/soc/fsl/*
-instead that covers all of the above? Maybe you or Scott are
-interested to pick it up?
-
-I also noted that, "include/linux/fsl/" isn't present in MAINTAINERS,
-please add that as well.
-
-> Regarding the 'undocumented' warning, I will added a patch updates doc before all the patches, Ok?
-
-Yes, good!
+Anyway, I get the point and thanks for you feedback!
 
 >
-> Thanks a lot :)
->
+> Thanks,
+> Jisheng
 
 Kind regards
 Uffe
