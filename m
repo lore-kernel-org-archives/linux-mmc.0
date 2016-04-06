@@ -1,51 +1,97 @@
-From: Wolfram Sang <wsa@the-dreams.de>
-Subject: Re: [PATCH 1/6] mmc: sh_mobile_sdhi: don't use array for DT configs
-Date: Wed, 6 Apr 2016 12:27:26 +0200
-Message-ID: <20160406102726.GA1386@katana>
-References: <1459934734-3613-1-git-send-email-wsa@the-dreams.de>
- <1459934734-3613-2-git-send-email-wsa@the-dreams.de>
- <CAMuHMdV=Ts_mF6MougLh1qqOTJV__x0Zu2TfMVsiPdfe+O--3g@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="SUOF0GtieIMvvwua"
-Return-path: <linux-sh-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <CAMuHMdV=Ts_mF6MougLh1qqOTJV__x0Zu2TfMVsiPdfe+O--3g@mail.gmail.com>
-Sender: linux-sh-owner@vger.kernel.org
-To: Geert Uytterhoeven <geert@linux-m68k.org>
-Cc: Linux MMC List <linux-mmc@vger.kernel.org>, linux-renesas-soc@vger.kernel.org, Linux-sh list <linux-sh@vger.kernel.org>, Simon Horman <horms@verge.net.au>, Kuninori Morimoto <kuninori.morimoto.gx@gmail.com>
+From: Baolin Wang <baolin.wang@linaro.org>
+Subject: [PATCH] mmc: Remove some redundant debug prints
+Date: Wed,  6 Apr 2016 19:38:30 +0800
+Message-ID: <5cddc2f870eccf8cf50d463c72d2908dad9e1017.1459942344.git.baolin.wang@linaro.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-pf0-f180.google.com ([209.85.192.180]:34820 "EHLO
+	mail-pf0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751553AbcDFLjb (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 6 Apr 2016 07:39:31 -0400
+Received: by mail-pf0-f180.google.com with SMTP id n1so31894711pfn.2
+        for <linux-mmc@vger.kernel.org>; Wed, 06 Apr 2016 04:39:31 -0700 (PDT)
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: ulf.hansson@linaro.org
+Cc: adrian.hunter@intel.com, rmk+kernel@arm.linux.org.uk, shawn.lin@rock-chips.com, dianders@chromium.org, david@protonic.nl, broonie@kernel.org, linus.walleij@linaro.org, takahiro.akashi@linaro.org, baolin.wang@linaro.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
 
+This patch removes some redundant debug prints, since we have added some
+tracepoints to help with performance analysis of MMC subsystem.
 
---SUOF0GtieIMvvwua
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+Signed-off-by: Baolin Wang <baolin.wang@linaro.org>
+---
+ drivers/mmc/core/core.c |   52 -----------------------------------------------
+ 1 file changed, 52 deletions(-)
 
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index f80b3ab..3f1362a 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -157,33 +157,6 @@ void mmc_request_done(struct mmc_host *host, struct mmc_request *mrq)
+ 
+ 		led_trigger_event(host->led, LED_OFF);
+ 
+-		if (mrq->sbc) {
+-			pr_debug("%s: req done <CMD%u>: %d: %08x %08x %08x %08x\n",
+-				mmc_hostname(host), mrq->sbc->opcode,
+-				mrq->sbc->error,
+-				mrq->sbc->resp[0], mrq->sbc->resp[1],
+-				mrq->sbc->resp[2], mrq->sbc->resp[3]);
+-		}
+-
+-		pr_debug("%s: req done (CMD%u): %d: %08x %08x %08x %08x\n",
+-			mmc_hostname(host), cmd->opcode, err,
+-			cmd->resp[0], cmd->resp[1],
+-			cmd->resp[2], cmd->resp[3]);
+-
+-		if (mrq->data) {
+-			pr_debug("%s:     %d bytes transferred: %d\n",
+-				mmc_hostname(host),
+-				mrq->data->bytes_xfered, mrq->data->error);
+-		}
+-
+-		if (mrq->stop) {
+-			pr_debug("%s:     (CMD%u): %d: %08x %08x %08x %08x\n",
+-				mmc_hostname(host), mrq->stop->opcode,
+-				mrq->stop->error,
+-				mrq->stop->resp[0], mrq->stop->resp[1],
+-				mrq->stop->resp[2], mrq->stop->resp[3]);
+-		}
+-
+ 		if (mrq->done)
+ 			mrq->done(mrq);
+ 	}
+@@ -236,31 +209,6 @@ static int mmc_start_request(struct mmc_host *host, struct mmc_request *mrq)
+ 	if (mmc_card_removed(host->card))
+ 		return -ENOMEDIUM;
+ 
+-	if (mrq->sbc) {
+-		pr_debug("<%s: starting CMD%u arg %08x flags %08x>\n",
+-			 mmc_hostname(host), mrq->sbc->opcode,
+-			 mrq->sbc->arg, mrq->sbc->flags);
+-	}
+-
+-	pr_debug("%s: starting CMD%u arg %08x flags %08x\n",
+-		 mmc_hostname(host), mrq->cmd->opcode,
+-		 mrq->cmd->arg, mrq->cmd->flags);
+-
+-	if (mrq->data) {
+-		pr_debug("%s:     blksz %d blocks %d flags %08x "
+-			"tsac %d ms nsac %d\n",
+-			mmc_hostname(host), mrq->data->blksz,
+-			mrq->data->blocks, mrq->data->flags,
+-			mrq->data->timeout_ns / 1000000,
+-			mrq->data->timeout_clks);
+-	}
+-
+-	if (mrq->stop) {
+-		pr_debug("%s:     CMD%u arg %08x flags %08x\n",
+-			 mmc_hostname(host), mrq->stop->opcode,
+-			 mrq->stop->arg, mrq->stop->flags);
+-	}
+-
+ 	WARN_ON(!host->claimed);
+ 
+ 	mrq->cmd->error = 0;
+-- 
+1.7.9.5
 
-> It does remove 2 lines of source code ;-)
-
-Memory on disk :)
-
-
---SUOF0GtieIMvvwua
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1
-
-iQIcBAEBAgAGBQJXBOSNAAoJEBQN5MwUoCm2VEcP/ArZUfjOeuEMR6jaK4DKl/im
-WmofZRdPKDQI3SMocD5GGT1HFbqIxfVE8WatxNzoqgAKbbVhBs/l1YcBcWDrcEzi
-E5W99PQIzXLxXZlLi63Dalcn66tTPIRpFKnom8Fp0/SIyFjVft77rpBGmEdi+z15
-BDlGbSQGtEnKzkLX60VzoVAqbaB+JpOGJLzNjs+wndewT6BSdwK0MKqbhkjDHMk0
-BYmtAg9RnoSYuzrszkrLD/RhDZpJ0jo0K+kJeWR7HZDHRNmCxaR0pnkQv8aypTHz
-XK/FEOFUqY1/+fNsQT97bY6Z9dTIholVb1kS/T1dm56tYVHbvfCAoGmsB5cLxnN/
-9ei5FFrBJnBFi6EBa25G+e7WOJuNTRYfeu30dpGWaQqVQ8lh8DLm7CfRpl+TNyeY
-hLVWjo5yQ/7HfnXM/OGyROuCLprZxdAgbTHfDUWnaqnmhr7bw5g1Ml1JkhJ47TXn
-7qvibzpDP1cB0LKc+wr1jROT9aYUAY7M8mCWdvuH9ITQAlD1nqSwPzImk5ENMUEr
-MzNM7M25vGk8rEA2G5/W6QjKODIExv7K/bdw9c2/686P0LmoKcDeJozw9/6j8fgC
-sob6p/1OauyiyCfXAlI4yqQai2neMBcpKUNr/IuI/v5UnlIia3vUROrS47SgkX1Q
-8rAbRFiMnnpbBztAyPZq
-=ytMI
------END PGP SIGNATURE-----
-
---SUOF0GtieIMvvwua--
