@@ -1,63 +1,41 @@
-From: David Lechner <david@lechnology.com>
-Subject: [PATCH v4 2/3] mmc: davinci: prepare clock
-Date: Tue,  5 Apr 2016 12:31:50 -0500
-Message-ID: <1459877512-25479-3-git-send-email-david@lechnology.com>
-References: <1459877512-25479-1-git-send-email-david@lechnology.com>
+From: Peter Hurley <peter@hurleysoftware.com>
+Subject: Re: [bisect] Merge tag 'mmc-v4.6' of
+ git://git.linaro.org/people/ulf.hansson/mmc (was [GIT PULL] MMC for v.4.6)
+Date: Tue, 5 Apr 2016 17:24:57 -0700
+Message-ID: <57045759.70308@hurleysoftware.com>
+References: <CAPDyKFqM1ffAdj7jVJmcPW2Wxy88Mhx_UrAzyuXpKSJg1yUPdg@mail.gmail.com>
+ <57008645.4070808@hurleysoftware.com>
+ <CA+55aFwjQP25NYfjPMTicO-M8yjm5c0aKFx-1saWmrro0c0NVQ@mail.gmail.com>
+ <CAPDyKFr6zCm4wBS97bUCwq4qhsM8u3mEpyBf4uicJ_UQ7L-q5w@mail.gmail.com>
+ <CA+55aFwFVBg5joDd0QYjmSA6t8TM7tmZvmcArZu3Ar8u4vDecw@mail.gmail.com>
+ <CAPDyKFqFoJybrr4dBt8xO7iHt9CAbET=i-v9ZLht7J6K091Phw@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1459877512-25479-1-git-send-email-david@lechnology.com>
+In-Reply-To: <CAPDyKFqFoJybrr4dBt8xO7iHt9CAbET=i-v9ZLht7J6K091Phw@mail.gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: David Lechner <david@lechnology.com>, Sekhar Nori <nsekhar@ti.com>, Kevin Hilman <khilman@kernel.org>, Russell King <linux@arm.linux.org.uk>, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
+Cc: Linus Torvalds <torvalds@linux-foundation.org>, linux-mmc <linux-mmc@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Jaehoon Chung <jh80.chung@samsung.com>
 List-Id: linux-mmc@vger.kernel.org
 
-When trying to use this driver with the common clock framework, enabling
-the clock fails because it was not prepared. This fixes the problem by
-calling clk_prepare and clk_enable in a single function. Ditto for
-clk_disable_unprepare.
+On 04/05/2016 01:59 AM, Ulf Hansson wrote:
+> Although, what puzzles me around this particular issue, is how an SoC
+> configuration can rely on this fragile behaviour.
+> All you have to do to break the assumption of fixed mmcblk ids, is to
+> boot with an SD card inserted and then without. Perhaps these SoCs
+> just doesn't support this use case!?
 
-Signed-off-by: David Lechner <david@lechnology.com>
----
+Both configurations boot reliably; without the uSD inserted, the
+boot and root partitions on the eMMC are booted instead.
 
-no change
+Without a uSD inserted, the only mmc block device is the eMMC which is
+/dev/mmcblk0, and the root partition is still /dev/mmcblk0p2.
 
- drivers/mmc/host/davinci_mmc.c | 10 +++++-----
- 1 file changed, 5 insertions(+), 5 deletions(-)
+Note though that this particular bootscript can load add'l bootscripts
+from the boot partition; in this particular case, the eMMC root
+partition is set as a fixed UUID in the bootscript from the
+boot partition.
 
-diff --git a/drivers/mmc/host/davinci_mmc.c b/drivers/mmc/host/davinci_mmc.c
-index 8503214..a56373c 100644
---- a/drivers/mmc/host/davinci_mmc.c
-+++ b/drivers/mmc/host/davinci_mmc.c
-@@ -1245,9 +1245,9 @@ static int __init davinci_mmcsd_probe(struct platform_device *pdev)
- 		ret = PTR_ERR(host->clk);
- 		goto clk_get_fail;
- 	}
--	ret = clk_enable(host->clk);
-+	ret = clk_prepare_enable(host->clk);
- 	if (ret)
--		goto clk_enable_fail;
-+		goto clk_prepare_enable_fail;
- 
- 	host->mmc_input_clk = clk_get_rate(host->clk);
- 
-@@ -1353,8 +1353,8 @@ mmc_add_host_fail:
- cpu_freq_fail:
- 	davinci_release_dma_channels(host);
- dma_probe_defer:
--	clk_disable(host->clk);
--clk_enable_fail:
-+	clk_disable_unprepare(host->clk);
-+clk_prepare_enable_fail:
- clk_get_fail:
- ioremap_fail:
- 	mmc_free_host(mmc);
-@@ -1369,7 +1369,7 @@ static int __exit davinci_mmcsd_remove(struct platform_device *pdev)
- 	mmc_remove_host(host->mmc);
- 	mmc_davinci_cpufreq_deregister(host);
- 	davinci_release_dma_channels(host);
--	clk_disable(host->clk);
-+	clk_disable_unprepare(host->clk);
- 	mmc_free_host(host->mmc);
- 
- 	return 0;
--- 
-1.9.1
+Regards,
+Peter Hurley
