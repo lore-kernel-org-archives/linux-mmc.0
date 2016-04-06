@@ -1,95 +1,70 @@
-From: Yangbo Lu <yangbo.lu-3arQi8VN3Tc@public.gmane.org>
-Subject: RE: [v7, 0/5] Fix eSDHC host version register bug
-Date: Wed, 6 Apr 2016 06:12:58 +0000
-Message-ID: <HE1PR04MB0889D75DC56E180D3508E7A1F89F0@HE1PR04MB0889.eurprd04.prod.outlook.com>
-References: <1459480051-3701-1-git-send-email-yangbo.lu@nxp.com>
-	<CAPDyKFqgMCvbqMYZ-uM-rTnVvfJkCYbhv2kucCRyNyc9FWoR=Q@mail.gmail.com>
+From: Geert Uytterhoeven <geert@linux-m68k.org>
+Subject: Re: [v2,9/9] ARM: shmobile: r8a7790: lager: Enable UHS-I SDR-50
+Date: Wed, 6 Apr 2016 08:38:02 +0200
+Message-ID: <CAMuHMdX8CYgdOPodapDppNq5LPdorgmf9sJvaZ9GkNJGxKxZwQ@mail.gmail.com>
+References: <1459525479-20842-10-git-send-email-wsa@the-dreams.de>
+	<20160406005616.GA7135@verge.net.au>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
-In-Reply-To: <CAPDyKFqgMCvbqMYZ-uM-rTnVvfJkCYbhv2kucCRyNyc9FWoR=Q@mail.gmail.com>
-Content-Language: en-US
-List-Unsubscribe: <https://lists.linuxfoundation.org/mailman/options/iommu>,
-	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.linuxfoundation.org/pipermail/iommu/>
-List-Post: <mailto:iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
-List-Help: <mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=help>
-List-Subscribe: <https://lists.linuxfoundation.org/mailman/listinfo/iommu>,
-	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=subscribe>
-Sender: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
-Errors-To: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
-To: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Zhao Qiang <qiang.zhao-KZfg59tc24xl57MIdRCFDg@public.gmane.org>, Russell King <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, Claudiu Manoil <claudiu.manoil-KZfg59tc24xl57MIdRCFDg@public.gmane.org>, Bhupesh Sharma <bhupesh.sharma-KZfg59tc24xl57MIdRCFDg@public.gmane.org>, "netdev-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <netdev-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Santosh Shilimkar <ssantosh-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, linux-mmc <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Scott Wood <scott.wood-3arQi8VN3Tc@public.gmane.org>, Xiaobo Xie <xiaobo.xie-3arQi8VN3Tc@public.gmane.org>, "iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org" <iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, "linux-i2c-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-i2c-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Jochen Friedrich <jochen-NIgtFMG+Po8@public.gmane.org>, Kumar Gala <galak-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, Yang-Leo Li <leoyang.li-3arQi8VN3Tc@public.gmane.org>, "linuxppc-dev-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org" <linuxppc-dev-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>, "linux-clk-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-clk-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-renesas-soc-owner@vger.kernel.org>
+In-Reply-To: <20160406005616.GA7135@verge.net.au>
+Sender: linux-renesas-soc-owner@vger.kernel.org
+To: Simon Horman <horms@verge.net.au>
+Cc: Wolfram Sang <wsa@the-dreams.de>, Linux MMC List <linux-mmc@vger.kernel.org>, linux-renesas-soc@vger.kernel.org, Ben Hutchings <ben.hutchings@codethink.co.uk>
 List-Id: linux-mmc@vger.kernel.org
 
-> -----Original Message-----
-> From: Ulf Hansson [mailto:ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org]
-> Sent: Tuesday, April 05, 2016 7:28 PM
-> To: Yangbo Lu
-> Cc: devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org; linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org;
-> linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org; linuxppc-dev-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org; linux-
-> clk-u79uwXL29TY76Z2rM5mHXA@public.gmane.org; linux-i2c-u79uwXL29TY76Z2rM5mHXA@public.gmane.org; iommu-cunTk1MwBs/ROKNJybVBZg@public.gmane.org
-> foundation.org; netdev-u79uwXL29TY76Z2rM5mHXA@public.gmane.org; linux-mmc; Rob Herring; Scott
-> Wood; Russell King; Jochen Friedrich; Joerg Roedel; Claudiu Manoil;
-> Bhupesh Sharma; Zhao Qiang; Kumar Gala; Santosh Shilimkar; Yang-Leo Li;
-> Xiaobo Xie
-> Subject: Re: [v7, 0/5] Fix eSDHC host version register bug
-> 
-> On 1 April 2016 at 05:07, Yangbo Lu <yangbo.lu-3arQi8VN3Tc@public.gmane.org> wrote:
-> > This patchset is used to fix a host version register bug in the
-> > T4240-R1.0-R2.0 eSDHC controller. To get the SoC version and revision,
-> > it's needed to add the GUTS driver to access the global utilities
-> registers.
-> >
-> > So, the first three patches are to add the GUTS driver.
-> > The following two patches are to enable GUTS driver support to get SVR
-> > in eSDHC driver and fix host version for T4240.
-> >
-> > Yangbo Lu (5):
-> >   ARM64: dts: ls2080a: add device configuration node
-> >   soc: fsl: add GUTS driver for QorIQ platforms
-> >   dt: move guts devicetree doc out of powerpc directory
-> >   powerpc/fsl: move mpc85xx.h to include/linux/fsl
-> >   mmc: sdhci-of-esdhc: fix host version for T4240-R1.0-R2.0
-> >
-> >  .../bindings/{powerpc => soc}/fsl/guts.txt         |   3 +
-> >  arch/arm64/boot/dts/freescale/fsl-ls2080a.dtsi     |   6 ++
-> >  arch/powerpc/kernel/cpu_setup_fsl_booke.S          |   2 +-
-> >  drivers/clk/clk-qoriq.c                            |   3 +-
-> >  drivers/i2c/busses/i2c-mpc.c                       |   2 +-
-> >  drivers/iommu/fsl_pamu.c                           |   3 +-
-> >  drivers/mmc/host/Kconfig                           |   1 +
-> >  drivers/mmc/host/sdhci-of-esdhc.c                  |  23 ++++
-> >  drivers/net/ethernet/freescale/gianfar.c           |   2 +-
-> >  drivers/soc/Kconfig                                |   2 +-
-> >  drivers/soc/fsl/Kconfig                            |   8 ++
-> >  drivers/soc/fsl/Makefile                           |   1 +
-> >  drivers/soc/fsl/guts.c                             | 119
-> +++++++++++++++++++++
-> >  include/linux/fsl/guts.h                           |  98 ++++++++-----
-> ----
-> >  .../asm/mpc85xx.h => include/linux/fsl/svr.h       |   4 +-
-> >  15 files changed, 219 insertions(+), 58 deletions(-)  rename
-> > Documentation/devicetree/bindings/{powerpc => soc}/fsl/guts.txt (91%)
-> > create mode 100644 drivers/soc/fsl/Kconfig  create mode 100644
-> > drivers/soc/fsl/guts.c  rename arch/powerpc/include/asm/mpc85xx.h =>
-> > include/linux/fsl/svr.h (97%)
-> >
-> > --
-> > 2.1.0.27.g96db324
-> >
-> 
-> I was about to queue this for next, when I noticed that checkpatch is
-> complaining/warning lots about these patches. Can you please a round of
-> checkpatch and fix what makes sense.
-> 
-> Kind regards
-> Uffe
+Hi Simon,
 
-[Lu Yangbo-B47093] Sorry about this, Uffe...
-Should I ignore the warnings that update MAINTAINERS?
-Regarding the 'undocumented' warning, I will added a patch updates doc before all the patches, Ok?
+On Wed, Apr 6, 2016 at 2:56 AM, Simon Horman <horms@verge.net.au> wrote:
+> On Fri, Apr 01, 2016 at 05:44:39PM +0200, Wolfram Sang wrote:
+>> From: Wolfram Sang <wsa+renesas@sang-engineering.com>
+>>
+>> Add the "1v8" pinctrl state and sd-uhs-sdr50 property to SDHI{0,2}.
+>
+> For some reason which I am entirely unsure of git didn't apply this cleanly
+> so I did so manually. Please double check that the following is correct.
+>
+> From: Wolfram Sang <wsa+renesas@sang-engineering.com>
+> Subject: [PATCH] ARM: shmobile: r8a7790: lager: Enable UHS-I SDR-50
+>
+> Add the "1v8" pinctrl state and sd-uhs-sdr50 property to SDHI{0,2}.
+>
+> Signed-off-by: Ben Hutchings <ben.hutchings@codethink.co.uk>
+> Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+> Signed-off-by: Simon Horman <horms+renesas@verge.net.au>
+> ---
+>  arch/arm/boot/dts/r8a7790-lager.dts | 22 ++++++++++++++++++++--
+>  1 file changed, 20 insertions(+), 2 deletions(-)
+>
+> diff --git a/arch/arm/boot/dts/r8a7790-lager.dts b/arch/arm/boot/dts/r8a7790-lager.dts
+> index aa6ca92a9485..75fc8d1cb7e3 100644
+> --- a/arch/arm/boot/dts/r8a7790-lager.dts
+> +++ b/arch/arm/boot/dts/r8a7790-lager.dts
+> @@ -346,11 +346,25 @@
+>         sdhi0_pins: sd0 {
+>                 renesas,groups = "sdhi0_data4", "sdhi0_ctrl";
+>                 renesas,function = "sdhi0";
 
-Thanks a lot :)
- 
+How come you still have "renesas,*" pinctrl properties?
+Applied to wrong branch?
+
+> +               power-source = <3300>;
+> +       };
+> +
+> +       sdhi0_pins_uhs: sd0_uhs {
+> +               groups = "sdhi0_data4", "sdhi0_ctrl";
+> +               function = "sdhi0";
+
+Pinctrl properties with and without prefixes must not be combined in a single
+preprocessed DTS (and in the overlays).
+
+Gr{oetje,eeting}s,
+
+                        Geert
+
+--
+Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
+
+In personal conversations with technical people, I call myself a hacker. But
+when I'm talking to journalists I just say "programmer" or something like that.
+                                -- Linus Torvalds
