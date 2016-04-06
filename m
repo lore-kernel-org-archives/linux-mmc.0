@@ -1,100 +1,63 @@
-From: Simon Horman <horms@verge.net.au>
-Subject: Re: [v2,9/9] ARM: shmobile: r8a7790: lager: Enable UHS-I SDR-50
-Date: Wed, 6 Apr 2016 09:56:16 +0900
-Message-ID: <20160406005616.GA7135@verge.net.au>
-References: <1459525479-20842-10-git-send-email-wsa@the-dreams.de>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: [GIT PULL] Update dw-mmc controller
+Date: Wed, 06 Apr 2016 10:56:45 +0900
+Message-ID: <57046CDD.7090403@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from kirsty.vergenet.net ([202.4.237.240]:55104 "EHLO
-	kirsty.vergenet.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754114AbcDFA4a (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 5 Apr 2016 20:56:30 -0400
-Content-Disposition: inline
-In-Reply-To: <1459525479-20842-10-git-send-email-wsa@the-dreams.de>
+Received: from mailout3.samsung.com ([203.254.224.33]:39666 "EHLO
+	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751455AbcDFB4u (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 5 Apr 2016 21:56:50 -0400
+Received: from epcpsbgr2.samsung.com
+ (u142.gpu120.samsung.co.kr [203.254.230.142])
+ by mailout3.samsung.com (Oracle Communications Messaging Server 7.0.5.31.0
+ 64bit (built May  5 2014))
+ with ESMTP id <0O5603396W2M7Q80@mailout3.samsung.com> for
+ linux-mmc@vger.kernel.org; Wed, 06 Apr 2016 10:56:46 +0900 (KST)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Wolfram Sang <wsa@the-dreams.de>
-Cc: linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org, Ben Hutchings <ben.hutchings@codethink.co.uk>
+To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Shawn Lin <shawn.lin@rock-chips.com>
 
-On Fri, Apr 01, 2016 at 05:44:39PM +0200, Wolfram Sang wrote:
-> From: Wolfram Sang <wsa+renesas@sang-engineering.com>
-> 
-> Add the "1v8" pinctrl state and sd-uhs-sdr50 property to SDHI{0,2}.
+Dear Ulf.
 
-For some reason which I am entirely unsure of git didn't apply this cleanly
-so I did so manually. Please double check that the following is correct.
+Could you pull these patches into your repository (next branch)?
 
-From: Wolfram Sang <wsa+renesas@sang-engineering.com>
-Subject: [PATCH] ARM: shmobile: r8a7790: lager: Enable UHS-I SDR-50
+Best Regards,
+Jaehoon Chung
 
-Add the "1v8" pinctrl state and sd-uhs-sdr50 property to SDHI{0,2}.
+The following changes since commit 49f6c1ea8c8e96d610f713741544ae6adc5499eb:
 
-Signed-off-by: Ben Hutchings <ben.hutchings@codethink.co.uk>
-Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
-Signed-off-by: Simon Horman <horms+renesas@verge.net.au>
----
- arch/arm/boot/dts/r8a7790-lager.dts | 22 ++++++++++++++++++++--
- 1 file changed, 20 insertions(+), 2 deletions(-)
+  Merge branch 'fixes' into next (2016-04-05 13:11:07 +0200)
 
-diff --git a/arch/arm/boot/dts/r8a7790-lager.dts b/arch/arm/boot/dts/r8a7790-lager.dts
-index aa6ca92a9485..75fc8d1cb7e3 100644
---- a/arch/arm/boot/dts/r8a7790-lager.dts
-+++ b/arch/arm/boot/dts/r8a7790-lager.dts
-@@ -346,11 +346,25 @@
- 	sdhi0_pins: sd0 {
- 		renesas,groups = "sdhi0_data4", "sdhi0_ctrl";
- 		renesas,function = "sdhi0";
-+		power-source = <3300>;
-+	};
-+
-+	sdhi0_pins_uhs: sd0_uhs {
-+		groups = "sdhi0_data4", "sdhi0_ctrl";
-+		function = "sdhi0";
-+		power-source = <1800>;
- 	};
- 
- 	sdhi2_pins: sd2 {
- 		renesas,groups = "sdhi2_data4", "sdhi2_ctrl";
- 		renesas,function = "sdhi2";
-+		power-source = <3300>;
-+	};
-+
-+	sdhi2_pins_uhs: sd2_uhs {
-+		groups = "sdhi2_data4", "sdhi2_ctrl";
-+		function = "sdhi2";
-+		power-source = <1800>;
- 	};
- 
- 	mmc1_pins: mmc1 {
-@@ -539,21 +553,25 @@
- 
- &sdhi0 {
- 	pinctrl-0 = <&sdhi0_pins>;
--	pinctrl-names = "default";
-+	pinctrl-1 = <&sdhi0_pins_uhs>;
-+	pinctrl-names = "default", "state_uhs";
- 
- 	vmmc-supply = <&vcc_sdhi0>;
- 	vqmmc-supply = <&vccq_sdhi0>;
- 	cd-gpios = <&gpio3 6 GPIO_ACTIVE_LOW>;
-+	sd-uhs-sdr50;
- 	status = "okay";
- };
- 
- &sdhi2 {
- 	pinctrl-0 = <&sdhi2_pins>;
--	pinctrl-names = "default";
-+	pinctrl-1 = <&sdhi2_pins_uhs>;
-+	pinctrl-names = "default", "state_uhs";
- 
- 	vmmc-supply = <&vcc_sdhi2>;
- 	vqmmc-supply = <&vccq_sdhi2>;
- 	cd-gpios = <&gpio3 22 GPIO_ACTIVE_LOW>;
-+	sd-uhs-sdr50;
- 	status = "okay";
- };
- 
--- 
-2.1.4
+are available in the git repository at:
 
+
+  https://github.com/jh80chung/dw-mmc.git for-ulf
+
+for you to fetch changes up to c5495422af70fa424424cbf2c689d12af2d4296d:
+
+  mmc: dw_mmc: remove setup_clock callback (2016-04-06 08:19:50 +0900)
+
+----------------------------------------------------------------
+Jaehoon Chung (1):
+      mmc: dw_mmc: exynos: add the function for controlling SMU
+
+Shawn Lin (8):
+      mmc: dw_mmc-rockchip: remove dw_mci_rockchip_pmops
+      mmc: dw_mmc-rockchip: fix failing to mount partition with "discard"
+      mmc: dw_mmc: fix warning reported by kernel-doc
+      mmc: dw_mmc: avoid using dmaengine_terminate_all
+      mmc: dw_mmc: remove unused EVENT_XFER_ERROR
+      mmc: dw_mmc-rockchip: remove setup_clock for rockchip
+      mmc: dw_mmc-exynos: remove dw_mci_exynos_setup_clock
+      mmc: dw_mmc: remove setup_clock callback
+
+ drivers/mmc/host/dw_mmc-exynos.c   | 23 +++++++++++---------
+ drivers/mmc/host/dw_mmc-rockchip.c | 43 +++++++++++++-------------------------
+ drivers/mmc/host/dw_mmc.c          | 11 +---------
+ drivers/mmc/host/dw_mmc.h          |  2 --
+ include/linux/mmc/dw_mmc.h         | 12 +++++++++--
+ 5 files changed, 38 insertions(+), 53 deletions(-)
