@@ -1,42 +1,44 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v4 0/3] davinci_mmc fixes
-Date: Wed, 6 Apr 2016 10:32:54 +0200
-Message-ID: <CAPDyKFrAWu7hYY_Jwpm5qWz=b=cvDrFwMFedhZHRWCwP-EtJsw@mail.gmail.com>
-References: <1459877512-25479-1-git-send-email-david@lechnology.com>
+From: Joao Pinto <Joao.Pinto@synopsys.com>
+Subject: Re: [PATCH v2 8/8] scsi: ufs: connect to RPMB subsystem
+Date: Wed, 6 Apr 2016 09:51:23 +0100
+Message-ID: <5704CE0B.2010700@synopsys.com>
+References: <1459768284-26997-1-git-send-email-tomas.winkler@intel.com>
+ <1459768284-26997-9-git-send-email-tomas.winkler@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="windows-1252"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wm0-f52.google.com ([74.125.82.52]:33918 "EHLO
-	mail-wm0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1760042AbcDFIc5 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 6 Apr 2016 04:32:57 -0400
-Received: by mail-wm0-f52.google.com with SMTP id l6so54457435wml.1
-        for <linux-mmc@vger.kernel.org>; Wed, 06 Apr 2016 01:32:56 -0700 (PDT)
-In-Reply-To: <1459877512-25479-1-git-send-email-david@lechnology.com>
+Received: from us01smtprelay-2.synopsys.com ([198.182.60.111]:37310 "EHLO
+	smtprelay.synopsys.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S933693AbcDFIve (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 6 Apr 2016 04:51:34 -0400
+In-Reply-To: <1459768284-26997-9-git-send-email-tomas.winkler@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: David Lechner <david@lechnology.com>
-Cc: Sekhar Nori <nsekhar@ti.com>, Kevin Hilman <khilman@kernel.org>, Russell King <linux@arm.linux.org.uk>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>
+To: Tomas Winkler <tomas.winkler@intel.com>, gregkh@linuxfoundation.org, Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, James Bottomley <James.Bottomley@HansenPartnership.com>, "Martin K. Petersen" <martin.petersen@oracle.com>, Vinayak Holikatti <vinholikatti@gmail.com>, Andy Lutomirski <luto@kernel.org>
+Cc: Christoph Hellwig <hch@lst.de>, Yaniv Gardi <ygardi@codeaurora.org>, Joao Pinto <Joao.Pinto@synopsys.com>, linux-mmc@vger.kernel.org, linux-scsi@vger.kernel.org, linux-kernel@vger.kernel.org, Alexander Usyskin <alexander.usyskin@intel.com>
 
-On 5 April 2016 at 19:31, David Lechner <david@lechnology.com> wrote:
-> This fixes a compiler warning in the "fix unwinding in probe" patch where ret
-> was used uninitalized.
->
-> David Lechner (3):
->   mmc: davinci: fix unwinding in probe
->   mmc: davinci: prepare clock
->   ARM: davinci: remove mmc dma resources
->
->  arch/arm/mach-davinci/devices-da8xx.c |  20 -------
->  arch/arm/mach-davinci/devices.c       |  16 ------
->  drivers/mmc/host/davinci_mmc.c        | 100 ++++++++++++++--------------------
->  3 files changed, 40 insertions(+), 96 deletions(-)
->
-> --
-> 1.9.1
->
+Hi!
 
-Thanks, applied for next!
+On 4/4/2016 12:11 PM, Tomas Winkler wrote:
+> Register UFS RPMB LUN with the RPMB subsystem and provide
+> implementation for the RPMB access operations. RPMB partition is
+> accessed via a sequence of security protocol in and security protocol
+> out commands with UFS specific parameters. This multi step process is
+> abstracted into 4 basic RPMB commands.
 
-Kind regards
-Uffe
+[snip]
+
+>  	 * "UFS device" W-LU.
+>  	 */
+>  	struct scsi_device *sdev_ufs_device;
+> +	struct scsi_device *sdev_ufs_rpmb;
+>  
+>  	enum ufs_dev_pwr_mode curr_dev_pwr_mode;
+>  	enum uic_link_state uic_link_state;
+> 
+
+I have a UFS device emulator that has the RPMB capability. What are the expected
+good results for me to validate?
+
+Thanks.
