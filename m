@@ -1,44 +1,61 @@
-From: Joao Pinto <Joao.Pinto@synopsys.com>
-Subject: Re: [PATCH v2 8/8] scsi: ufs: connect to RPMB subsystem
-Date: Wed, 6 Apr 2016 09:51:23 +0100
-Message-ID: <5704CE0B.2010700@synopsys.com>
-References: <1459768284-26997-1-git-send-email-tomas.winkler@intel.com>
- <1459768284-26997-9-git-send-email-tomas.winkler@intel.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="windows-1252"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from us01smtprelay-2.synopsys.com ([198.182.60.111]:37310 "EHLO
-	smtprelay.synopsys.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S933693AbcDFIve (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 6 Apr 2016 04:51:34 -0400
-In-Reply-To: <1459768284-26997-9-git-send-email-tomas.winkler@intel.com>
-Sender: linux-mmc-owner@vger.kernel.org
+From: Wolfram Sang <wsa@the-dreams.de>
+Subject: [PATCH 0/6] mmc: tmio/sdhi: clean up cruft
+Date: Wed,  6 Apr 2016 11:25:28 +0200
+Message-ID: <1459934734-3613-1-git-send-email-wsa@the-dreams.de>
+Return-path: <linux-sh-owner@vger.kernel.org>
+Sender: linux-sh-owner@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: Wolfram Sang <wsa@the-dreams.de>, linux-renesas-soc@vger.kernel.org, linux-sh@vger.kernel.org, Simon Horman <horms@verge.net.au>, Kuninori Morimoto <kuninori.morimoto.gx@gmail.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Tomas Winkler <tomas.winkler@intel.com>, gregkh@linuxfoundation.org, Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, James Bottomley <James.Bottomley@HansenPartnership.com>, "Martin K. Petersen" <martin.petersen@oracle.com>, Vinayak Holikatti <vinholikatti@gmail.com>, Andy Lutomirski <luto@kernel.org>
-Cc: Christoph Hellwig <hch@lst.de>, Yaniv Gardi <ygardi@codeaurora.org>, Joao Pinto <Joao.Pinto@synopsys.com>, linux-mmc@vger.kernel.org, linux-scsi@vger.kernel.org, linux-kernel@vger.kernel.org, Alexander Usyskin <alexander.usyskin@intel.com>
 
-Hi!
+Largely due to DT unification, some parts of the code became obsolete. Let's
+remove that, the code is complex enough still:
 
-On 4/4/2016 12:11 PM, Tomas Winkler wrote:
-> Register UFS RPMB LUN with the RPMB subsystem and provide
-> implementation for the RPMB access operations. RPMB partition is
-> accessed via a sequence of security protocol in and security protocol
-> out commands with UFS specific parameters. This multi step process is
-> abstracted into 4 basic RPMB commands.
+* There are no boards anymore with named interrupt support. Drop support for
+  that (patches 2-4)
+* No need anymore for a public mmc/tmio.h header file. Merge it into the
+  private one (patch 5)
 
-[snip]
+Patches 1+6 are small cleanups found on the way :)
 
->  	 * "UFS device" W-LU.
->  	 */
->  	struct scsi_device *sdev_ufs_device;
-> +	struct scsi_device *sdev_ufs_rpmb;
->  
->  	enum ufs_dev_pwr_mode curr_dev_pwr_mode;
->  	enum uic_link_state uic_link_state;
-> 
+Based on latest renesas-drivers which is based on v4.6-rc1 with my sdr50
+patches on top. Tested on a Renesas Lager board and build bot is happy, too
+(after finding some issues initially). A branch for testing is here:
 
-I have a UFS device emulator that has the RPMB capability. What are the expected
-good results for me to validate?
+git://git.kernel.org/pub/scm/linux/kernel/git/wsa/linux.git renesas/sdhi-uhs
 
-Thanks.
+I'd think this should all go via mmc, so an ACK from a sh-maintainer on patch 2
+would be much appreciated.
+
+Please test, comment, apply...
+
+   Wolfram
+
+
+Wolfram Sang (6):
+  mmc: sh_mobile_sdhi: don't use array for DT configs
+  mmc: sh_mobile_sdhi: remove obsolete irq_by_name registration
+  mmc: tmio: remove now unneeded seperate irq handlers
+  mmc: tmio: simplify irq handler
+  mmc: tmio: merge distributed include files
+  mmc: sh_mobile_sdhi: simplify code for voltage switching
+
+ arch/sh/boards/board-sh7757lcr.c     |  1 -
+ arch/sh/boards/mach-ap325rxa/setup.c |  1 -
+ arch/sh/boards/mach-ecovec24/setup.c |  1 -
+ arch/sh/boards/mach-kfr2r09/setup.c  |  1 -
+ arch/sh/boards/mach-migor/setup.c    |  1 -
+ arch/sh/boards/mach-se/7724/setup.c  |  1 -
+ drivers/mmc/host/sh_mobile_sdhi.c    | 75 +++++++-----------------------------
+ drivers/mmc/host/tmio_mmc.h          | 59 ++++++++++++++++++++++++++--
+ drivers/mmc/host/tmio_mmc_dma.c      |  1 -
+ drivers/mmc/host/tmio_mmc_pio.c      | 55 +++++---------------------
+ include/linux/mmc/sh_mobile_sdhi.h   | 10 -----
+ include/linux/mmc/tmio.h             | 73 -----------------------------------
+ 12 files changed, 79 insertions(+), 200 deletions(-)
+ delete mode 100644 include/linux/mmc/sh_mobile_sdhi.h
+ delete mode 100644 include/linux/mmc/tmio.h
+
+-- 
+2.7.0
+
