@@ -1,24 +1,25 @@
 From: Wolfram Sang <wsa@the-dreams.de>
-Subject: [PATCH 5/6] mmc: tmio: merge distributed include files
-Date: Wed,  6 Apr 2016 11:25:33 +0200
-Message-ID: <1459934734-3613-6-git-send-email-wsa@the-dreams.de>
-References: <1459934734-3613-1-git-send-email-wsa@the-dreams.de>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from sauhun.de ([89.238.76.85]:58215 "EHLO pokefinder.org"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S932360AbcDFJZx (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 6 Apr 2016 05:25:53 -0400
-In-Reply-To: <1459934734-3613-1-git-send-email-wsa@the-dreams.de>
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Subject: [PATCH v2 5/6] mmc: tmio: merge distributed include files
+Date: Wed,  6 Apr 2016 11:34:38 +0200
+Message-ID: <1459935278-4181-1-git-send-email-wsa@the-dreams.de>
+References: <1459934734-3613-6-git-send-email-wsa@the-dreams.de>
+Return-path: <linux-sh-owner@vger.kernel.org>
+In-Reply-To: <1459934734-3613-6-git-send-email-wsa@the-dreams.de>
+Sender: linux-sh-owner@vger.kernel.org
 To: linux-mmc@vger.kernel.org
 Cc: Wolfram Sang <wsa@the-dreams.de>, linux-renesas-soc@vger.kernel.org, linux-sh@vger.kernel.org, Simon Horman <horms@verge.net.au>, Kuninori Morimoto <kuninori.morimoto.gx@gmail.com>
+List-Id: linux-mmc@vger.kernel.org
+
+From: Wolfram Sang <wsa+renesas@sang-engineering.com>
 
 There is no reason to have a public and private header file. Merge them
 into a private one, so looking up symbols is less confusing.
 
-Signed-off-by: Wolfram Sang <wsa@the-dreams.de>
+Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
 ---
+
+change since v1: correct authorship. Sorry for the noise.
+
  drivers/mmc/host/tmio_mmc.h     | 56 ++++++++++++++++++++++++++++++-
  drivers/mmc/host/tmio_mmc_dma.c |  1 -
  drivers/mmc/host/tmio_mmc_pio.c |  1 -
