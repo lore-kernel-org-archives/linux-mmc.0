@@ -1,7 +1,7 @@
 From: Ludovic Desroches <ludovic.desroches@atmel.com>
-Subject: [PATCH v3 3/3] mmc: sdhci: removal of SDHCI_QUIRK2_NEED_DELAY_AFTER_INT_CLK_RST
-Date: Thu, 7 Apr 2016 11:13:10 +0200
-Message-ID: <1460020390-503-4-git-send-email-ludovic.desroches@atmel.com>
+Subject: [PATCH v3 1/3] mmc: sdhci: introduce sdhci_compute_clock_config
+Date: Thu, 7 Apr 2016 11:13:08 +0200
+Message-ID: <1460020390-503-2-git-send-email-ludovic.desroches@atmel.com>
 References: <1460020390-503-1-git-send-email-ludovic.desroches@atmel.com>
 Mime-Version: 1.0
 Content-Type: text/plain
@@ -12,43 +12,92 @@ To: ulf.hansson@linaro.org, adrian.hunter@intel.com
 Cc: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, nicolas.ferre@atmel.com, Ludovic Desroches <ludovic.desroches@atmel.com>
 List-Id: linux-mmc@vger.kernel.org
 
-SDHCI_QUIRK2_NEED_DELAY_AFTER_INT_CLK_RST quirk is not used anymore so
-remove it.
+In order to remove the SDHCI_QUIRK2_NEED_DELAY_AFTER_INT_CLK_RST and to
+reduce code duplication, put the code relative to the SD clock
+configuration in a function which can be used by hosts for the
+implementation of the set_clock() callback.
 
 Signed-off-by: Ludovic Desroches <ludovic.desroches@atmel.com>
 ---
- drivers/mmc/host/sdhci.c | 2 --
- drivers/mmc/host/sdhci.h | 5 -----
- 2 files changed, 7 deletions(-)
+ drivers/mmc/host/sdhci.c | 36 ++++++++++++++++++++++++------------
+ drivers/mmc/host/sdhci.h |  2 ++
+ 2 files changed, 26 insertions(+), 12 deletions(-)
 
 diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index abd34d1..0ca16ee 100644
+index 6bd3d17..abd34d1 100644
 --- a/drivers/mmc/host/sdhci.c
 +++ b/drivers/mmc/host/sdhci.c
-@@ -1192,8 +1192,6 @@ void sdhci_set_clock(struct sdhci_host *host, unsigned int clock)
- 	host->mmc->actual_clock = 0;
+@@ -1091,23 +1091,14 @@ static u16 sdhci_get_preset_value(struct sdhci_host *host)
+ 	return preset;
+ }
  
- 	sdhci_writew(host, 0, SDHCI_CLOCK_CONTROL);
+-void sdhci_set_clock(struct sdhci_host *host, unsigned int clock)
++u16 sdhci_calc_clk(struct sdhci_host *host, unsigned int clock,
++		   unsigned int *actual_clock)
+ {
+ 	int div = 0; /* Initialized for compiler warning */
+ 	int real_div = div, clk_mul = 1;
+ 	u16 clk = 0;
+-	unsigned long timeout;
+ 	bool switch_base_clk = false;
+ 
+-	host->mmc->actual_clock = 0;
+-
+-	sdhci_writew(host, 0, SDHCI_CLOCK_CONTROL);
 -	if (host->quirks2 & SDHCI_QUIRK2_NEED_DELAY_AFTER_INT_CLK_RST)
 -		mdelay(1);
+-
+-	if (clock == 0)
+-		return;
+-
+ 	if (host->version >= SDHCI_SPEC_300) {
+ 		if (host->preset_enabled) {
+ 			u16 pre_val;
+@@ -1184,10 +1175,31 @@ void sdhci_set_clock(struct sdhci_host *host, unsigned int clock)
  
- 	if (clock == 0)
- 		return;
+ clock_set:
+ 	if (real_div)
+-		host->mmc->actual_clock = (host->max_clk * clk_mul) / real_div;
++		*actual_clock = (host->max_clk * clk_mul) / real_div;
+ 	clk |= (div & SDHCI_DIV_MASK) << SDHCI_DIVIDER_SHIFT;
+ 	clk |= ((div & SDHCI_DIV_HI_MASK) >> SDHCI_DIV_MASK_LEN)
+ 		<< SDHCI_DIVIDER_HI_SHIFT;
++
++	return clk;
++}
++EXPORT_SYMBOL_GPL(sdhci_calc_clk);
++
++void sdhci_set_clock(struct sdhci_host *host, unsigned int clock)
++{
++	u16 clk;
++	unsigned long timeout;
++
++	host->mmc->actual_clock = 0;
++
++	sdhci_writew(host, 0, SDHCI_CLOCK_CONTROL);
++	if (host->quirks2 & SDHCI_QUIRK2_NEED_DELAY_AFTER_INT_CLK_RST)
++		mdelay(1);
++
++	if (clock == 0)
++		return;
++
++	clk = sdhci_calc_clk(host, clock, &host->mmc->actual_clock);
++
+ 	clk |= SDHCI_CLOCK_INT_EN;
+ 	sdhci_writew(host, clk, SDHCI_CLOCK_CONTROL);
+ 
 diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-index 9db5090..0decc85 100644
+index 0f39f4f..9db5090 100644
 --- a/drivers/mmc/host/sdhci.h
 +++ b/drivers/mmc/host/sdhci.h
-@@ -417,11 +417,6 @@ struct sdhci_host {
- #define SDHCI_QUIRK2_ACMD23_BROKEN			(1<<14)
- /* Broken Clock divider zero in controller */
- #define SDHCI_QUIRK2_CLOCK_DIV_ZERO_BROKEN		(1<<15)
--/*
-- * When internal clock is disabled, a delay is needed before modifying the
-- * SD clock frequency or enabling back the internal clock.
-- */
--#define SDHCI_QUIRK2_NEED_DELAY_AFTER_INT_CLK_RST	(1<<16)
+@@ -661,6 +661,8 @@ static inline bool sdhci_sdio_irq_enabled(struct sdhci_host *host)
+ 	return !!(host->flags & SDHCI_SDIO_IRQ_ENABLED);
+ }
  
- 	int irq;		/* Device IRQ */
- 	void __iomem *ioaddr;	/* Mapped address */
++u16 sdhci_calc_clk(struct sdhci_host *host, unsigned int clock,
++		   unsigned int *actual_clock);
+ void sdhci_set_clock(struct sdhci_host *host, unsigned int clock);
+ void sdhci_set_power(struct sdhci_host *host, unsigned char mode,
+ 		     unsigned short vdd);
 -- 
 2.5.0
