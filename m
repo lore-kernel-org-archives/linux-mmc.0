@@ -1,124 +1,125 @@
-From: Ludovic Desroches <ludovic.desroches@atmel.com>
-Subject: Re: [PATCH v2 1/3] mmc: sdhci: introduce sdhci_compute_clock_config
-Date: Wed, 6 Apr 2016 17:13:23 +0200
-Message-ID: <20160406151323.GB32232@odux.rfo.atmel.com>
-References: <1459783675-7798-1-git-send-email-ludovic.desroches@atmel.com>
- <1459783675-7798-2-git-send-email-ludovic.desroches@atmel.com>
- <57050308.2070006@intel.com>
- <20160406150445.GA32232@odux.rfo.atmel.com>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: Re: [PATCH] mmc: Remove some redundant debug prints
+Date: Thu, 07 Apr 2016 10:40:42 +0900
+Message-ID: <5705BA9A.6050300@samsung.com>
+References: <5cddc2f870eccf8cf50d463c72d2908dad9e1017.1459942344.git.baolin.wang@linaro.org>
+ <20160406195732.67430c96@xhacker>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20160406150445.GA32232@odux.rfo.atmel.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>, ulf.hansson@linaro.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, nicolas.ferre@atmel.com
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mailout2.samsung.com ([203.254.224.25]:38766 "EHLO
+	mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752901AbcDGBkq (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 6 Apr 2016 21:40:46 -0400
+In-reply-to: <20160406195732.67430c96@xhacker>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Jisheng Zhang <jszhang@marvell.com>, Baolin Wang <baolin.wang@linaro.org>
+Cc: ulf.hansson@linaro.org, adrian.hunter@intel.com, rmk+kernel@arm.linux.org.uk, shawn.lin@rock-chips.com, dianders@chromium.org, david@protonic.nl, broonie@kernel.org, linus.walleij@linaro.org, takahiro.akashi@linaro.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
 
-On Wed, Apr 06, 2016 at 05:04:45PM +0200, Ludovic Desroches wrote:
-> On Wed, Apr 06, 2016 at 03:37:28PM +0300, Adrian Hunter wrote:
-> > On 04/04/16 18:27, Ludovic Desroches wrote:
-> > > In order to remove the SDHCI_QUIRK2_NEED_DELAY_AFTER_INT_CLK_RST and to
-> > > reduce code duplication, put the code relative to the SD clock
-> > > configuration in a function which can be used by hosts for the
-> > > implementation of the set_clock() callback.
-> > > 
-> > > Signed-off-by: Ludovic Desroches <ludovic.desroches@atmel.com>
-> > > ---
-> > >  drivers/mmc/host/sdhci.c | 33 ++++++++++++++++++++++-----------
-> > >  drivers/mmc/host/sdhci.h |  1 +
-> > >  2 files changed, 23 insertions(+), 11 deletions(-)
-> > > 
-> > > diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> > > index 6bd3d17..2c3dede 100644
-> > > --- a/drivers/mmc/host/sdhci.c
-> > > +++ b/drivers/mmc/host/sdhci.c
-> > > @@ -1091,23 +1091,13 @@ static u16 sdhci_get_preset_value(struct sdhci_host *host)
-> > >  	return preset;
-> > >  }
-> > >  
-> > > -void sdhci_set_clock(struct sdhci_host *host, unsigned int clock)
-> > > +u16 sdhci_compute_clock_config(struct sdhci_host *host, unsigned int clock)
-> > 
-> > The function name 'sdhci_compute_clock_config' seems a bit long.  How about
-> > just sdhci_calc_clk.
+On 04/06/2016 08:57 PM, Jisheng Zhang wrote:
 > 
-> Ok.
 > 
-> > 
-> > Also it needs to calculate 'actual_clock' too, so it needs to do that and
-> > return the value.
-> > 
+> On Wed,  6 Apr 2016 19:38:30 +0800 Baolin Wang wrote:
 > 
-> actual_clock is updated at the end of the function.
+>> This patch removes some redundant debug prints, since we have added some
+>> tracepoints to help with performance analysis of MMC subsystem.
+> 
+> I think the debug prints you removed are useful for debugging mmc err, how is
+> this purpose achieved by tracepoints? From another side, why should I enable
+> tracepoints to debug mmc err?
 
-Maybe it makes more sens to keep it in sdhci_set_clock().
+I agreed Jisheng's opinion. tracepoint is helpful for analyzing performance and debugging something.
+But I think it's more easier to check the mmc error at booting time or some time.
+
+Best Regards,
+Jaehoon Chung
 
 > 
-> Which value has to be returned? actual_clock or clock configuration?
+> Thanks
 > 
-> Regards
+>>
+>> Signed-off-by: Baolin Wang <baolin.wang@linaro.org>
+>> ---
+>>  drivers/mmc/core/core.c |   52 -----------------------------------------------
+>>  1 file changed, 52 deletions(-)
+>>
+>> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+>> index f80b3ab..3f1362a 100644
+>> --- a/drivers/mmc/core/core.c
+>> +++ b/drivers/mmc/core/core.c
+>> @@ -157,33 +157,6 @@ void mmc_request_done(struct mmc_host *host, struct mmc_request *mrq)
+>>  
+>>  		led_trigger_event(host->led, LED_OFF);
+>>  
+>> -		if (mrq->sbc) {
+>> -			pr_debug("%s: req done <CMD%u>: %d: %08x %08x %08x %08x\n",
+>> -				mmc_hostname(host), mrq->sbc->opcode,
+>> -				mrq->sbc->error,
+>> -				mrq->sbc->resp[0], mrq->sbc->resp[1],
+>> -				mrq->sbc->resp[2], mrq->sbc->resp[3]);
+>> -		}
+>> -
+>> -		pr_debug("%s: req done (CMD%u): %d: %08x %08x %08x %08x\n",
+>> -			mmc_hostname(host), cmd->opcode, err,
+>> -			cmd->resp[0], cmd->resp[1],
+>> -			cmd->resp[2], cmd->resp[3]);
+>> -
+>> -		if (mrq->data) {
+>> -			pr_debug("%s:     %d bytes transferred: %d\n",
+>> -				mmc_hostname(host),
+>> -				mrq->data->bytes_xfered, mrq->data->error);
+>> -		}
+>> -
+>> -		if (mrq->stop) {
+>> -			pr_debug("%s:     (CMD%u): %d: %08x %08x %08x %08x\n",
+>> -				mmc_hostname(host), mrq->stop->opcode,
+>> -				mrq->stop->error,
+>> -				mrq->stop->resp[0], mrq->stop->resp[1],
+>> -				mrq->stop->resp[2], mrq->stop->resp[3]);
+>> -		}
+>> -
+>>  		if (mrq->done)
+>>  			mrq->done(mrq);
+>>  	}
+>> @@ -236,31 +209,6 @@ static int mmc_start_request(struct mmc_host *host, struct mmc_request *mrq)
+>>  	if (mmc_card_removed(host->card))
+>>  		return -ENOMEDIUM;
+>>  
+>> -	if (mrq->sbc) {
+>> -		pr_debug("<%s: starting CMD%u arg %08x flags %08x>\n",
+>> -			 mmc_hostname(host), mrq->sbc->opcode,
+>> -			 mrq->sbc->arg, mrq->sbc->flags);
+>> -	}
+>> -
+>> -	pr_debug("%s: starting CMD%u arg %08x flags %08x\n",
+>> -		 mmc_hostname(host), mrq->cmd->opcode,
+>> -		 mrq->cmd->arg, mrq->cmd->flags);
+>> -
+>> -	if (mrq->data) {
+>> -		pr_debug("%s:     blksz %d blocks %d flags %08x "
+>> -			"tsac %d ms nsac %d\n",
+>> -			mmc_hostname(host), mrq->data->blksz,
+>> -			mrq->data->blocks, mrq->data->flags,
+>> -			mrq->data->timeout_ns / 1000000,
+>> -			mrq->data->timeout_clks);
+>> -	}
+>> -
+>> -	if (mrq->stop) {
+>> -		pr_debug("%s:     CMD%u arg %08x flags %08x\n",
+>> -			 mmc_hostname(host), mrq->stop->opcode,
+>> -			 mrq->stop->arg, mrq->stop->flags);
+>> -	}
+>> -
+>>  	WARN_ON(!host->claimed);
+>>  
+>>  	mrq->cmd->error = 0;
 > 
-> Ludovic
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 > 
-> > >  {
-> > >  	int div = 0; /* Initialized for compiler warning */
-> > >  	int real_div = div, clk_mul = 1;
-> > >  	u16 clk = 0;
-> > > -	unsigned long timeout;
-> > >  	bool switch_base_clk = false;
-> > >  
-> > > -	host->mmc->actual_clock = 0;
-> > > -
-> > > -	sdhci_writew(host, 0, SDHCI_CLOCK_CONTROL);
-> > > -	if (host->quirks2 & SDHCI_QUIRK2_NEED_DELAY_AFTER_INT_CLK_RST)
-> > > -		mdelay(1);
-> > > -
-> > > -	if (clock == 0)
-> > > -		return;
-> > > -
-> > >  	if (host->version >= SDHCI_SPEC_300) {
-> > >  		if (host->preset_enabled) {
-> > >  			u16 pre_val;
-> > > @@ -1188,6 +1178,27 @@ clock_set:
-> > >  	clk |= (div & SDHCI_DIV_MASK) << SDHCI_DIVIDER_SHIFT;
-> > >  	clk |= ((div & SDHCI_DIV_HI_MASK) >> SDHCI_DIV_MASK_LEN)
-> > >  		<< SDHCI_DIVIDER_HI_SHIFT;
-> > > +
-> > > +	return clk;
-> > > +}
-> > > +EXPORT_SYMBOL_GPL(sdhci_compute_clock_config);
-> > > +
-> > > +void sdhci_set_clock(struct sdhci_host *host, unsigned int clock)
-> > > +{
-> > > +	u16 clk;
-> > > +	unsigned long timeout;
-> > > +
-> > > +	host->mmc->actual_clock = 0;
-> > > +
-> > > +	sdhci_writew(host, 0, SDHCI_CLOCK_CONTROL);
-> > > +	if (host->quirks2 & SDHCI_QUIRK2_NEED_DELAY_AFTER_INT_CLK_RST)
-> > > +		mdelay(1);
-> > > +
-> > > +	if (clock == 0)
-> > > +		return;
-> > > +
-> > > +	clk = sdhci_compute_clock_config(host, clock);
-> > > +
-> > >  	clk |= SDHCI_CLOCK_INT_EN;
-> > >  	sdhci_writew(host, clk, SDHCI_CLOCK_CONTROL);
-> > >  
-> > > diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-> > > index 0f39f4f..23ddd6e 100644
-> > > --- a/drivers/mmc/host/sdhci.h
-> > > +++ b/drivers/mmc/host/sdhci.h
-> > > @@ -661,6 +661,7 @@ static inline bool sdhci_sdio_irq_enabled(struct sdhci_host *host)
-> > >  	return !!(host->flags & SDHCI_SDIO_IRQ_ENABLED);
-> > >  }
-> > >  
-> > > +u16 sdhci_compute_clock_config(struct sdhci_host *host, unsigned int clock);
-> > >  void sdhci_set_clock(struct sdhci_host *host, unsigned int clock);
-> > >  void sdhci_set_power(struct sdhci_host *host, unsigned char mode,
-> > >  		     unsigned short vdd);
-> > > 
-> > 
+> 
+
