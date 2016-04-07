@@ -1,74 +1,58 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] sdhci: wakeup from runtime PM
-Date: Thu, 7 Apr 2016 11:11:08 +0200
-Message-ID: <CAPDyKFpvE2N+B3-S+tOKJ7+ViWddpxWxCWRGs2LBjWS9CmMxwA@mail.gmail.com>
-References: <1458921903-11133-1-git-send-email-ludovic.desroches@atmel.com>
-	<5703B241.6030007@intel.com>
+From: Ludovic Desroches <ludovic.desroches@atmel.com>
+Subject: [PATCH v3 0/3] SDHCI_QUIRK2_NEED_DELAY_AFTER_INT_CLK_RST removal
+Date: Thu, 7 Apr 2016 11:13:07 +0200
+Message-ID: <1460020390-503-1-git-send-email-ludovic.desroches@atmel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-pm-owner@vger.kernel.org>
-In-Reply-To: <5703B241.6030007@intel.com>
-Sender: linux-pm-owner@vger.kernel.org
-To: Ludovic Desroches <ludovic.desroches@atmel.com>, Adrian Hunter <adrian.hunter@intel.com>
-Cc: "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-pm@vger.kernel.org" <linux-pm@vger.kernel.org>, Nicolas Ferre <nicolas.ferre@atmel.com>
+Content-Type: text/plain
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from eusmtp01.atmel.com ([212.144.249.243]:45963 "EHLO
+	eusmtp01.atmel.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751139AbcDGJMr (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 7 Apr 2016 05:12:47 -0400
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: ulf.hansson@linaro.org, adrian.hunter@intel.com
+Cc: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, nicolas.ferre@atmel.com, Ludovic Desroches <ludovic.desroches@atmel.com>
 
-On 5 April 2016 at 14:40, Adrian Hunter <adrian.hunter@intel.com> wrote:
-> On 25/03/16 18:05, Ludovic Desroches wrote:
->> Hi,
->>
->> When not using the SDHCI controller, it is logical to save power by suspending
->> it. The issue is that SDHCI assumes that the controller is completely disabled.
->> It means the only way to wake up on a card event is to have a gpio for the card
->> detection (so two pins for the same signal). A possible workaround is to use
->> polling but the controller will be resumed/suspended between each attempts.
->>
->> We have already discussed a long time about this and it seems we don't agree.
->> In my opinion, even if I can't disable all clocks, I should use runtime PM
->> to save some power.
->>
->> I propose two patches, one which is a draft to try to solve it at sdhci level
->> and one at sdhci-of-at91 level.
->>
->> Concerning the first one, I don't understand why we need to reject irqs if
->> runtime_suspended is true.
->
-> The interrupt handler might be called because the interrupt is shared i.e.
-> the interrupt is for a different device.  In that case the host controller
-> might be off and the registers inaccessible.  In that case we cannot even
-> look at the interrupt register to determine if we were expecting the interrupt.
->
->>                            Only SDHCI_INT_CARD_INT irq is enabled so why we
->> should have other IRQs than this one?
->
-> In the case of SDIO Card interrupt, it is delivered via the host controller,
-> so we have to assume the registers are accessible if we are
-> runtime-suspended with the SDIO IRQ enabled.
->
->>
->> Since you were not in favour of allowing to wakeup on SDHCI_INT_CARD_INSERT or
->> SDHCI_INT_CARD_REMOVE, I assume you won't take it so I
->> solved my issue only by modifying my driver.
->
-> I don't mind allowing card detect interrupts while runtime suspended, but we
-> need a flag so that:
-> - runtime suspend leaves the insert/remove interrupts enabled
-> - irq handler knows it can access registers
+Hi,
 
-To me, this seem like the wrong way of how to configure wake-ups for
-these kind of devices.
+I have recently observed that the quirk
+SDHCI_QUIRK2_NEED_DELAY_AFTER_INT_CLK_RST I have introduced doesn't fix all
+the bugs relative to the internal clock disabling while configuring the SD
+clock. This delay was introduced because of a re-synchronisation done when
+disabling the internal clock.
 
-I don't think the regular IRQs shall be enabled and the driver
-shouldn't assume the registers are accessible without first runtime
-resuming the device.
+Unfortunately, we can still have clock stabilization bug even if it occurs
+rarely. Moreover, trying to use presets, disabling the internal clock causes an
+unexpected switch to the base clock. It should be solved on next revision of
+the chip.
 
-> - irq thread handler knows to runtime resume before doing anything else
->
-> But it seems like you need to persuade Ulf first.
+For those reasons plus the non acceptance of new quirks, I have decided to
+remove it and to implement my own set_clock() function. In ordrer to reduce
+code duplication with the sdhci set_clock function, I moved some of the
+code in a new sdhci_compute_clock_config() function.
 
-For a more thorough explanation to why I don't like, please have a
-look at my comment for another related thread on the mmc list.
-http://www.spinics.net/lists/linux-mmc/msg36132.html
+Regards
 
-Kind regards
-Uffe
+Changes:
+- v3:
+  - s/sdhci_compute_clock_config/sdhci_calc_clk.
+  - don't update actual_clock in sdhci_calc_clk but return its value as an
+  output parameter.
+- v2:
+  - sdhci_compute_clock_config uses a returned value instead of an
+  out-parameter to provide the clock configuration.
+
+Ludovic Desroches (3):
+  mmc: sdhci: introduce sdhci_compute_clock_config
+  mmc: sdhci-of-at91: implement specific set_clock function
+  mmc: sdhci: removal of SDHCI_QUIRK2_NEED_DELAY_AFTER_INT_CLK_RST
+
+ drivers/mmc/host/sdhci-of-at91.c | 48 ++++++++++++++++++++++++++++++++++++++--
+ drivers/mmc/host/sdhci.c         | 34 ++++++++++++++++++----------
+ drivers/mmc/host/sdhci.h         |  7 ++----
+ 3 files changed, 70 insertions(+), 19 deletions(-)
+
+-- 
+2.5.0
+
