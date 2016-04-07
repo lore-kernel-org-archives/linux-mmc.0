@@ -1,207 +1,74 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: [PATCH V2] mmc: sdhci: Remove redundant runtime PM calls
-Date: Thu,  7 Apr 2016 10:56:39 +0200
-Message-ID: <1460019399-922-1-git-send-email-ulf.hansson@linaro.org>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-lb0-f180.google.com ([209.85.217.180]:33350 "EHLO
-	mail-lb0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751387AbcDGI4z (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 7 Apr 2016 04:56:55 -0400
-Received: by mail-lb0-f180.google.com with SMTP id u8so45588324lbk.0
-        for <linux-mmc@vger.kernel.org>; Thu, 07 Apr 2016 01:56:54 -0700 (PDT)
-Sender: linux-mmc-owner@vger.kernel.org
+Subject: Re: [PATCH] sdhci: wakeup from runtime PM
+Date: Thu, 7 Apr 2016 11:11:08 +0200
+Message-ID: <CAPDyKFpvE2N+B3-S+tOKJ7+ViWddpxWxCWRGs2LBjWS9CmMxwA@mail.gmail.com>
+References: <1458921903-11133-1-git-send-email-ludovic.desroches@atmel.com>
+	<5703B241.6030007@intel.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-pm-owner@vger.kernel.org>
+In-Reply-To: <5703B241.6030007@intel.com>
+Sender: linux-pm-owner@vger.kernel.org
+To: Ludovic Desroches <ludovic.desroches@atmel.com>, Adrian Hunter <adrian.hunter@intel.com>
+Cc: "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-pm@vger.kernel.org" <linux-pm@vger.kernel.org>, Nicolas Ferre <nicolas.ferre@atmel.com>
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>
-Cc: Russell King <rmk+kernel@arm.linux.org.uk>
 
-Commit 9250aea76bfc ("mmc: core: Enable runtime PM management of host
-devices"), made some calls to the runtime PM API from the driver
-redundant. Especially those which deals with runtime PM reference
-counting, so let's remove them.
+On 5 April 2016 at 14:40, Adrian Hunter <adrian.hunter@intel.com> wrote:
+> On 25/03/16 18:05, Ludovic Desroches wrote:
+>> Hi,
+>>
+>> When not using the SDHCI controller, it is logical to save power by suspending
+>> it. The issue is that SDHCI assumes that the controller is completely disabled.
+>> It means the only way to wake up on a card event is to have a gpio for the card
+>> detection (so two pins for the same signal). A possible workaround is to use
+>> polling but the controller will be resumed/suspended between each attempts.
+>>
+>> We have already discussed a long time about this and it seems we don't agree.
+>> In my opinion, even if I can't disable all clocks, I should use runtime PM
+>> to save some power.
+>>
+>> I propose two patches, one which is a draft to try to solve it at sdhci level
+>> and one at sdhci-of-at91 level.
+>>
+>> Concerning the first one, I don't understand why we need to reject irqs if
+>> runtime_suspended is true.
+>
+> The interrupt handler might be called because the interrupt is shared i.e.
+> the interrupt is for a different device.  In that case the host controller
+> might be off and the registers inaccessible.  In that case we cannot even
+> look at the interrupt register to determine if we were expecting the interrupt.
+>
+>>                            Only SDHCI_INT_CARD_INT irq is enabled so why we
+>> should have other IRQs than this one?
+>
+> In the case of SDIO Card interrupt, it is delivered via the host controller,
+> so we have to assume the registers are accessible if we are
+> runtime-suspended with the SDIO IRQ enabled.
+>
+>>
+>> Since you were not in favour of allowing to wakeup on SDHCI_INT_CARD_INSERT or
+>> SDHCI_INT_CARD_REMOVE, I assume you won't take it so I
+>> solved my issue only by modifying my driver.
+>
+> I don't mind allowing card detect interrupts while runtime suspended, but we
+> need a flag so that:
+> - runtime suspend leaves the insert/remove interrupts enabled
+> - irq handler knows it can access registers
 
-Moreover as SDHCI have its own wrapper functions for runtime PM these
-becomes superfluous, so let's remove them as well.
+To me, this seem like the wrong way of how to configure wake-ups for
+these kind of devices.
 
-Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
----
+I don't think the regular IRQs shall be enabled and the driver
+shouldn't assume the registers are accessible without first runtime
+resuming the device.
 
-Changes in v2:
-	- Remove also redundant runtime PM calls when enabling/disabling the
-	SDIO IRQ.
-	- Remove the Cc to Adrian as a part of the change log.
+> - irq thread handler knows to runtime resume before doing anything else
+>
+> But it seems like you need to persuade Ulf first.
 
----
- drivers/mmc/host/sdhci.c | 55 ++++--------------------------------------------
- 1 file changed, 4 insertions(+), 51 deletions(-)
+For a more thorough explanation to why I don't like, please have a
+look at my comment for another related thread on the mmc list.
+http://www.spinics.net/lists/linux-mmc/msg36132.html
 
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 6bd3d17..8e74e75 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -56,19 +56,9 @@ static void sdhci_enable_preset_value(struct sdhci_host *host, bool enable);
- static int sdhci_do_get_cd(struct sdhci_host *host);
- 
- #ifdef CONFIG_PM
--static int sdhci_runtime_pm_get(struct sdhci_host *host);
--static int sdhci_runtime_pm_put(struct sdhci_host *host);
- static void sdhci_runtime_pm_bus_on(struct sdhci_host *host);
- static void sdhci_runtime_pm_bus_off(struct sdhci_host *host);
- #else
--static inline int sdhci_runtime_pm_get(struct sdhci_host *host)
--{
--	return 0;
--}
--static inline int sdhci_runtime_pm_put(struct sdhci_host *host)
--{
--	return 0;
--}
- static void sdhci_runtime_pm_bus_on(struct sdhci_host *host)
- {
- }
-@@ -1319,8 +1309,6 @@ static void sdhci_request(struct mmc_host *mmc, struct mmc_request *mrq)
- 
- 	host = mmc_priv(mmc);
- 
--	sdhci_runtime_pm_get(host);
--
- 	/* Firstly check card presence */
- 	present = mmc->ops->get_cd(mmc);
- 
-@@ -1567,9 +1555,7 @@ static void sdhci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
- {
- 	struct sdhci_host *host = mmc_priv(mmc);
- 
--	sdhci_runtime_pm_get(host);
- 	sdhci_do_set_ios(host, ios);
--	sdhci_runtime_pm_put(host);
- }
- 
- static int sdhci_do_get_cd(struct sdhci_host *host)
-@@ -1601,12 +1587,8 @@ static int sdhci_do_get_cd(struct sdhci_host *host)
- static int sdhci_get_cd(struct mmc_host *mmc)
- {
- 	struct sdhci_host *host = mmc_priv(mmc);
--	int ret;
- 
--	sdhci_runtime_pm_get(host);
--	ret = sdhci_do_get_cd(host);
--	sdhci_runtime_pm_put(host);
--	return ret;
-+	return sdhci_do_get_cd(host);
- }
- 
- static int sdhci_check_ro(struct sdhci_host *host)
-@@ -1662,12 +1644,8 @@ static void sdhci_hw_reset(struct mmc_host *mmc)
- static int sdhci_get_ro(struct mmc_host *mmc)
- {
- 	struct sdhci_host *host = mmc_priv(mmc);
--	int ret;
- 
--	sdhci_runtime_pm_get(host);
--	ret = sdhci_do_get_ro(host);
--	sdhci_runtime_pm_put(host);
--	return ret;
-+	return sdhci_do_get_ro(host);
- }
- 
- static void sdhci_enable_sdio_irq_nolock(struct sdhci_host *host, int enable)
-@@ -1689,8 +1667,6 @@ static void sdhci_enable_sdio_irq(struct mmc_host *mmc, int enable)
- 	struct sdhci_host *host = mmc_priv(mmc);
- 	unsigned long flags;
- 
--	sdhci_runtime_pm_get(host);
--
- 	spin_lock_irqsave(&host->lock, flags);
- 	if (enable)
- 		host->flags |= SDHCI_SDIO_IRQ_ENABLED;
-@@ -1699,8 +1675,6 @@ static void sdhci_enable_sdio_irq(struct mmc_host *mmc, int enable)
- 
- 	sdhci_enable_sdio_irq_nolock(host, enable);
- 	spin_unlock_irqrestore(&host->lock, flags);
--
--	sdhci_runtime_pm_put(host);
- }
- 
- static int sdhci_do_start_signal_voltage_switch(struct sdhci_host *host,
-@@ -1798,14 +1772,11 @@ static int sdhci_start_signal_voltage_switch(struct mmc_host *mmc,
- 	struct mmc_ios *ios)
- {
- 	struct sdhci_host *host = mmc_priv(mmc);
--	int err;
- 
- 	if (host->version < SDHCI_SPEC_300)
- 		return 0;
--	sdhci_runtime_pm_get(host);
--	err = sdhci_do_start_signal_voltage_switch(host, ios);
--	sdhci_runtime_pm_put(host);
--	return err;
-+
-+	return sdhci_do_start_signal_voltage_switch(host, ios);
- }
- 
- static int sdhci_card_busy(struct mmc_host *mmc)
-@@ -1813,10 +1784,8 @@ static int sdhci_card_busy(struct mmc_host *mmc)
- 	struct sdhci_host *host = mmc_priv(mmc);
- 	u32 present_state;
- 
--	sdhci_runtime_pm_get(host);
- 	/* Check whether DAT[3:0] is 0000 */
- 	present_state = sdhci_readl(host, SDHCI_PRESENT_STATE);
--	sdhci_runtime_pm_put(host);
- 
- 	return !(present_state & SDHCI_DATA_LVL_MASK);
- }
-@@ -1843,7 +1812,6 @@ static int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode)
- 	unsigned int tuning_count = 0;
- 	bool hs400_tuning;
- 
--	sdhci_runtime_pm_get(host);
- 	spin_lock_irqsave(&host->lock, flags);
- 
- 	hs400_tuning = host->flags & SDHCI_HS400_TUNING;
-@@ -1891,7 +1859,6 @@ static int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode)
- 	if (host->ops->platform_execute_tuning) {
- 		spin_unlock_irqrestore(&host->lock, flags);
- 		err = host->ops->platform_execute_tuning(host, opcode);
--		sdhci_runtime_pm_put(host);
- 		return err;
- 	}
- 
-@@ -2023,8 +1990,6 @@ out:
- 	sdhci_writel(host, host->ier, SDHCI_SIGNAL_ENABLE);
- out_unlock:
- 	spin_unlock_irqrestore(&host->lock, flags);
--	sdhci_runtime_pm_put(host);
--
- 	return err;
- }
- 
-@@ -2222,7 +2187,6 @@ static void sdhci_tasklet_finish(unsigned long param)
- 	spin_unlock_irqrestore(&host->lock, flags);
- 
- 	mmc_request_done(host->mmc, mrq);
--	sdhci_runtime_pm_put(host);
- }
- 
- static void sdhci_timeout_timer(unsigned long data)
-@@ -2703,17 +2667,6 @@ int sdhci_resume_host(struct sdhci_host *host)
- 
- EXPORT_SYMBOL_GPL(sdhci_resume_host);
- 
--static int sdhci_runtime_pm_get(struct sdhci_host *host)
--{
--	return pm_runtime_get_sync(host->mmc->parent);
--}
--
--static int sdhci_runtime_pm_put(struct sdhci_host *host)
--{
--	pm_runtime_mark_last_busy(host->mmc->parent);
--	return pm_runtime_put_autosuspend(host->mmc->parent);
--}
--
- static void sdhci_runtime_pm_bus_on(struct sdhci_host *host)
- {
- 	if (host->bus_on)
--- 
-1.9.1
-
+Kind regards
+Uffe
