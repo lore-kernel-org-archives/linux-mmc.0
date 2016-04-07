@@ -1,141 +1,115 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH v2 1/3] mmc: sdhci: introduce sdhci_compute_clock_config
-Date: Thu, 7 Apr 2016 10:47:38 +0300
-Message-ID: <5706109A.1060907@intel.com>
-References: <1459783675-7798-1-git-send-email-ludovic.desroches@atmel.com>
- <1459783675-7798-2-git-send-email-ludovic.desroches@atmel.com>
- <57050308.2070006@intel.com> <20160406150445.GA32232@odux.rfo.atmel.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20160406150445.GA32232@odux.rfo.atmel.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Ludovic Desroches <ludovic.desroches@atmel.com>
-Cc: ulf.hansson@linaro.org, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, nicolas.ferre@atmel.com
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: [PATCH] mmc: block: Use the mmc host device index as the mmcblk device index
+Date: Thu,  7 Apr 2016 09:57:41 +0200
+Message-ID: <1460015861-14004-1-git-send-email-ulf.hansson@linaro.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-lb0-f182.google.com ([209.85.217.182]:36659 "EHLO
+	mail-lb0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750784AbcDGH55 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 7 Apr 2016 03:57:57 -0400
+Received: by mail-lb0-f182.google.com with SMTP id bk9so17514594lbc.3
+        for <linux-mmc@vger.kernel.org>; Thu, 07 Apr 2016 00:57:56 -0700 (PDT)
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Jaehoon Chung <jh80.chung@samsung.com>, Adrian Hunter <adrian.hunter@intel.com>, Jisheng Zhang <jszhang@marvell.com>, Peter Hurley <peter@hurleysoftware.com>, Laszlo Fiat <laszlo.fiat@gmail.com>, linux-kernel@vger.kernel.org, Linus Torvalds <torvalds@linux-foundation.org>, stable@vger.kernel.org
 
-On 06/04/16 18:04, Ludovic Desroches wrote:
-> On Wed, Apr 06, 2016 at 03:37:28PM +0300, Adrian Hunter wrote:
->> On 04/04/16 18:27, Ludovic Desroches wrote:
->>> In order to remove the SDHCI_QUIRK2_NEED_DELAY_AFTER_INT_CLK_RST and to
->>> reduce code duplication, put the code relative to the SD clock
->>> configuration in a function which can be used by hosts for the
->>> implementation of the set_clock() callback.
->>>
->>> Signed-off-by: Ludovic Desroches <ludovic.desroches@atmel.com>
->>> ---
->>>  drivers/mmc/host/sdhci.c | 33 ++++++++++++++++++++++-----------
->>>  drivers/mmc/host/sdhci.h |  1 +
->>>  2 files changed, 23 insertions(+), 11 deletions(-)
->>>
->>> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
->>> index 6bd3d17..2c3dede 100644
->>> --- a/drivers/mmc/host/sdhci.c
->>> +++ b/drivers/mmc/host/sdhci.c
->>> @@ -1091,23 +1091,13 @@ static u16 sdhci_get_preset_value(struct sdhci_host *host)
->>>  	return preset;
->>>  }
->>>  
->>> -void sdhci_set_clock(struct sdhci_host *host, unsigned int clock)
->>> +u16 sdhci_compute_clock_config(struct sdhci_host *host, unsigned int clock)
->>
->> The function name 'sdhci_compute_clock_config' seems a bit long.  How about
->> just sdhci_calc_clk.
-> 
-> Ok.
-> 
->>
->> Also it needs to calculate 'actual_clock' too, so it needs to do that and
->> return the value.
->>
-> 
-> actual_clock is updated at the end of the function.
-> 
-> Which value has to be returned? actual_clock or clock configuration?
+Commit 520bd7a8b415 ("mmc: core: Optimize boot time by detecting cards
+simultaneously") causes regressions for some platforms.
 
-The function doesn't update the clock, so I don't think it should update
-actual_clock either, just return it. i.e.
+These platforms relies on fixed mmcblk device indexes, instead of
+deploying the defacto standard with UUID/PARTUUID. In other words their
+rootfs needs to be available at hardcoded paths, like /dev/mmcblk0p2.
 
-u16 sdhci_calc_clk(struct sdhci_host *host, unsigned int clock, unsigned int *actual_clock)
-{
-	...
-	if (real_div)
-		*actual_clock = (host->max_clk * clk_mul) / real_div;
-	...
-	return clk;
-}
+Such guarantees have never been made by the kernel, but clearly the above
+commit changes the behaviour. More precisely, because of that the order
+changes of how cards becomes detected, so do their corresponding mmcblk
+device indexes.
 
-then
+As the above commit significantly improves boot time for some platforms
+(magnitude of seconds), let's avoid reverting this change but instead
+restore the behaviour of how mmcblk device indexes becomes picked.
 
-	clk = sdhci_calc_clk(host, clock, &host->mmc->actual_clock);
+By using the same index for the mmcblk device as for the corresponding mmc
+host device, the probe order of mmc host devices decides the index we get
+for the mmcblk device.
 
+For those platforms that suffers from a regression, one could expect that
+this updated behaviour should be sufficient to meet their expectations of
+"fixed" mmcblk device indexes.
 
+Another side effect from this change, is that the same index is used for
+the mmc host device, the mmcblk device and the mmc block queue. That
+should clarify their relationship.
 
-> 
-> Regards
-> 
-> Ludovic
-> 
->>>  {
->>>  	int div = 0; /* Initialized for compiler warning */
->>>  	int real_div = div, clk_mul = 1;
->>>  	u16 clk = 0;
->>> -	unsigned long timeout;
->>>  	bool switch_base_clk = false;
->>>  
->>> -	host->mmc->actual_clock = 0;
->>> -
->>> -	sdhci_writew(host, 0, SDHCI_CLOCK_CONTROL);
->>> -	if (host->quirks2 & SDHCI_QUIRK2_NEED_DELAY_AFTER_INT_CLK_RST)
->>> -		mdelay(1);
->>> -
->>> -	if (clock == 0)
->>> -		return;
->>> -
->>>  	if (host->version >= SDHCI_SPEC_300) {
->>>  		if (host->preset_enabled) {
->>>  			u16 pre_val;
->>> @@ -1188,6 +1178,27 @@ clock_set:
->>>  	clk |= (div & SDHCI_DIV_MASK) << SDHCI_DIVIDER_SHIFT;
->>>  	clk |= ((div & SDHCI_DIV_HI_MASK) >> SDHCI_DIV_MASK_LEN)
->>>  		<< SDHCI_DIVIDER_HI_SHIFT;
->>> +
->>> +	return clk;
->>> +}
->>> +EXPORT_SYMBOL_GPL(sdhci_compute_clock_config);
->>> +
->>> +void sdhci_set_clock(struct sdhci_host *host, unsigned int clock)
->>> +{
->>> +	u16 clk;
->>> +	unsigned long timeout;
->>> +
->>> +	host->mmc->actual_clock = 0;
->>> +
->>> +	sdhci_writew(host, 0, SDHCI_CLOCK_CONTROL);
->>> +	if (host->quirks2 & SDHCI_QUIRK2_NEED_DELAY_AFTER_INT_CLK_RST)
->>> +		mdelay(1);
->>> +
->>> +	if (clock == 0)
->>> +		return;
->>> +
->>> +	clk = sdhci_compute_clock_config(host, clock);
->>> +
->>>  	clk |= SDHCI_CLOCK_INT_EN;
->>>  	sdhci_writew(host, clk, SDHCI_CLOCK_CONTROL);
->>>  
->>> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
->>> index 0f39f4f..23ddd6e 100644
->>> --- a/drivers/mmc/host/sdhci.h
->>> +++ b/drivers/mmc/host/sdhci.h
->>> @@ -661,6 +661,7 @@ static inline bool sdhci_sdio_irq_enabled(struct sdhci_host *host)
->>>  	return !!(host->flags & SDHCI_SDIO_IRQ_ENABLED);
->>>  }
->>>  
->>> +u16 sdhci_compute_clock_config(struct sdhci_host *host, unsigned int clock);
->>>  void sdhci_set_clock(struct sdhci_host *host, unsigned int clock);
->>>  void sdhci_set_power(struct sdhci_host *host, unsigned char mode,
->>>  		     unsigned short vdd);
->>>
->>
-> 
+Reported-by: Peter Hurley <peter@hurleysoftware.com>
+Reported-by: Laszlo Fiat <laszlo.fiat@gmail.com>
+Cc: Linus Torvalds <torvalds@linux-foundation.org>
+Fixes: 520bd7a8b415 ("mmc: core: Optimize boot time by detecting cards
+simultaneously")
+Cc: <stable@vger.kernel.org>
+Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+---
+ drivers/mmc/card/block.c | 18 +-----------------
+ 1 file changed, 1 insertion(+), 17 deletions(-)
+
+diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+index 3bdbe50..8a0147d 100644
+--- a/drivers/mmc/card/block.c
++++ b/drivers/mmc/card/block.c
+@@ -86,7 +86,6 @@ static int max_devices;
+ 
+ /* TODO: Replace these with struct ida */
+ static DECLARE_BITMAP(dev_use, MAX_DEVICES);
+-static DECLARE_BITMAP(name_use, MAX_DEVICES);
+ 
+ /*
+  * There is one mmc_blk_data per slot.
+@@ -105,7 +104,6 @@ struct mmc_blk_data {
+ 	unsigned int	usage;
+ 	unsigned int	read_only;
+ 	unsigned int	part_type;
+-	unsigned int	name_idx;
+ 	unsigned int	reset_done;
+ #define MMC_BLK_READ		BIT(0)
+ #define MMC_BLK_WRITE		BIT(1)
+@@ -2202,19 +2200,6 @@ static struct mmc_blk_data *mmc_blk_alloc_req(struct mmc_card *card,
+ 		goto out;
+ 	}
+ 
+-	/*
+-	 * !subname implies we are creating main mmc_blk_data that will be
+-	 * associated with mmc_card with dev_set_drvdata. Due to device
+-	 * partitions, devidx will not coincide with a per-physical card
+-	 * index anymore so we keep track of a name index.
+-	 */
+-	if (!subname) {
+-		md->name_idx = find_first_zero_bit(name_use, max_devices);
+-		__set_bit(md->name_idx, name_use);
+-	} else
+-		md->name_idx = ((struct mmc_blk_data *)
+-				dev_to_disk(parent)->private_data)->name_idx;
+-
+ 	md->area_type = area_type;
+ 
+ 	/*
+@@ -2264,7 +2249,7 @@ static struct mmc_blk_data *mmc_blk_alloc_req(struct mmc_card *card,
+ 	 */
+ 
+ 	snprintf(md->disk->disk_name, sizeof(md->disk->disk_name),
+-		 "mmcblk%u%s", md->name_idx, subname ? subname : "");
++		 "mmcblk%u%s", card->host->index, subname ? subname : "");
+ 
+ 	if (mmc_card_mmc(card))
+ 		blk_queue_logical_block_size(md->queue.queue,
+@@ -2418,7 +2403,6 @@ static void mmc_blk_remove_parts(struct mmc_card *card,
+ 	struct list_head *pos, *q;
+ 	struct mmc_blk_data *part_md;
+ 
+-	__clear_bit(md->name_idx, name_use);
+ 	list_for_each_safe(pos, q, &md->part) {
+ 		part_md = list_entry(pos, struct mmc_blk_data, part);
+ 		list_del(pos);
+-- 
+1.9.1
+
