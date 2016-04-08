@@ -1,22 +1,33 @@
-From: =?utf-8?B?5oiR55qE5Lqk5Y+L5L+h5oGv5Zyo?= <cmm@hbsyny.gov.cn>
-Subject: =?utf-8?B?5oiR55qE5Lqk5Y+L5L+h5oGv5Zyo?=
-Date: Fri, 8 Apr 2016 08:44:10 +0800
-Message-ID: <20160408084421800327@hbsyny.gov.cn>
-Mime-Version: 1.0
-Content-Type: text/plain;
-	charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from [61.184.93.75] ([61.184.93.75]:2971 "HELO hbsyny.gov.cn"
-	rhost-flags-FAIL-FAIL-OK-OK) by vger.kernel.org with SMTP
-	id S1756754AbcDHAyC (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 7 Apr 2016 20:54:02 -0400
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+From: Masahiro Yamada <yamada.masahiro@socionext.com>
+Subject: [PATCH] mmc: sdhci-pic32: remove owner assignment
+Date: Fri,  8 Apr 2016 14:22:37 +0900
+Message-ID: <1460092958-16591-1-git-send-email-yamada.masahiro@socionext.com>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
 To: linux-mmc@vger.kernel.org
+Cc: Masahiro Yamada <yamada.masahiro@socionext.com>, linux-kernel@vger.kernel.org, Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>
+List-Id: linux-mmc@vger.kernel.org
 
-5L2g55qE6ICB5pyL5Y+L6YKA5L2g5p2lUee+pDozNDMyNTc3NTkg5oqi57qi5YyFIOaKouenkuad
-gCDmiqJ2aXAg5LuA5LmI6YO96KaB5oqi44CC5aSq5Yi65r+A5LqG44CC5LiN6Z2g5omL5rCU5Y+q
-5ou85omL6YCfDQo=
+A platform_driver does not need to set an owner, it will be populated
+by the driver core.
 
+Signed-off-by: Masahiro Yamada <yamada.masahiro@socionext.com>
+---
 
+ drivers/mmc/host/sdhci-pic32.c | 1 -
+ 1 file changed, 1 deletion(-)
+
+diff --git a/drivers/mmc/host/sdhci-pic32.c b/drivers/mmc/host/sdhci-pic32.c
+index 059df70..72c13b6 100644
+--- a/drivers/mmc/host/sdhci-pic32.c
++++ b/drivers/mmc/host/sdhci-pic32.c
+@@ -243,7 +243,6 @@ MODULE_DEVICE_TABLE(of, pic32_sdhci_id_table);
+ static struct platform_driver pic32_sdhci_driver = {
+ 	.driver = {
+ 		.name	= "pic32-sdhci",
+-		.owner	= THIS_MODULE,
+ 		.of_match_table = of_match_ptr(pic32_sdhci_id_table),
+ 	},
+ 	.probe		= pic32_sdhci_probe,
+-- 
+1.9.1
