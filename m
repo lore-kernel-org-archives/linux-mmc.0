@@ -1,38 +1,68 @@
-From: Alan Stern <stern@rowland.harvard.edu>
-Subject: Re: [PATCH] sdhci: wakeup from runtime PM
-Date: Fri, 8 Apr 2016 11:19:16 -0400 (EDT)
-Message-ID: <Pine.LNX.4.44L0.1604081114480.2069-100000@iolanthe.rowland.org>
-References: <CAPDyKFqJ4Q9hdsv427GaT_2qFpvv=Nn3rZQUS+P8O7FF-gKgyw@mail.gmail.com>
+From: Joao Pinto <Joao.Pinto@synopsys.com>
+Subject: Re: [PATCH v2 8/8] scsi: ufs: connect to RPMB subsystem
+Date: Fri, 8 Apr 2016 18:29:59 +0100
+Message-ID: <5707EA97.2050408@synopsys.com>
+References: <1459768284-26997-1-git-send-email-tomas.winkler@intel.com>
+ <1459768284-26997-9-git-send-email-tomas.winkler@intel.com>
+ <5704CE0B.2010700@synopsys.com> <1460063682.4468.7.camel@intel.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <linux-pm-owner@vger.kernel.org>
-In-Reply-To: <CAPDyKFqJ4Q9hdsv427GaT_2qFpvv=Nn3rZQUS+P8O7FF-gKgyw@mail.gmail.com>
-Sender: linux-pm-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Ludovic Desroches <ludovic.desroches@atmel.com>, Nicolas Ferre <nicolas.ferre@atmel.com>, Adrian Hunter <adrian.hunter@intel.com>, "linux-pm@vger.kernel.org" <linux-pm@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-scsi-owner@vger.kernel.org>
+In-Reply-To: <1460063682.4468.7.camel@intel.com>
+Sender: linux-scsi-owner@vger.kernel.org
+To: "Winkler, Tomas" <tomas.winkler@intel.com>, "vinholikatti@gmail.com" <vinholikatti@gmail.com>, "martin.petersen@oracle.com" <martin.petersen@oracle.com>, "Joao.Pinto@synopsys.com" <Joao.Pinto@synopsys.com>, "James.Bottomley@HansenPartnership.com" <James.Bottomley@HansenPartnership.com>, "gregkh@linuxfoundation.org" <gregkh@linuxfoundation.org>, "luto@kernel.org" <luto@kernel.org>, "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>, "Hunter, Adrian" <adrian.hunter@intel.com>
+Cc: "hch@lst.de" <hch@lst.de>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "ygardi@codeaurora.org" <ygardi@codeaurora.org>, "linux-scsi@vger.kernel.org" <linux-scsi@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "Usyskin, Alexander" <alexander.usyskin@intel.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On Fri, 8 Apr 2016, Ulf Hansson wrote:
+Hi,
 
-> From power consumption point if view we already discussed this
-> particular case in an earlier thread, but let me elaborate what I
-> think one more time:
+On 4/7/2016 10:15 PM, Winkler, Tomas wrote:
+> On Wed, 2016-04-06 at 09:51 +0100, Joao Pinto wrote:
+>> Hi!
+>>
+>> On 4/4/2016 12:11 PM, Tomas Winkler wrote:
+>>> Register UFS RPMB LUN with the RPMB subsystem and provide
+>>> implementation for the RPMB access operations. RPMB partition is
+>>> accessed via a sequence of security protocol in and security
+>>> protocol
+>>> out commands with UFS specific parameters. This multi step process
+>>> is
+>>> abstracted into 4 basic RPMB commands.
+>>
+>> [snip]
+>>
+>>>  	 * "UFS device" W-LU.
+>>>  	 */
+>>>  	struct scsi_device *sdev_ufs_device;
+>>> +	struct scsi_device *sdev_ufs_rpmb;
+>>>  
+>>>  	enum ufs_dev_pwr_mode curr_dev_pwr_mode;
+>>>  	enum uic_link_state uic_link_state;
+>>>
+>>
+>> I have a UFS device emulator that has the RPMB capability. What are
+>> the expected
+>> good results for me to validate?
 > 
-> Now, this is relevant for removable cards lacking GPIO card detect, as
-> for other cases and non-removable cards I think we are in agreement
-> that their is no issue from power consumption point of view, right!?
+> Hi Joao, thanks for that. I'm attaching an archive with few basic
+> samples via user space interface. 
+> You should run the program key first (program-key.sh), just don't do it
+> on a real device it's one in life time operation. 
 > 
-> 1. The current solution:
-> - Use MMC_CAP_NEEDS_POLL which makes the mmc core to re-schedule a
-> work once every second to poll for a card (Why is it one second? Could
-> we perhaps have that configurable?).
 
-The block layer handles media polling for removable block devices, and
-it is configurable.  For example, /sys/block/sr0/events_poll_msecs can
-be set to control how often the system polls for a disc in my DVD
-drive.
+Managed to cross-compile to ARC and execute your test app in my platform. I made
+it in Buildroot, so I have the patches to enable the tool cross-compilation if
+necessary in the future.
 
-Does MMC do its own polling separate from the block layer?  If so, why?
+The tool execution gives no errors, but also no info. I suggest you had success
+info and maybe some statistic (e.g. bytes read or written).
 
-Alan Stern
+> Thanks
+> Tomas
+> 
+
+Thanks,
+Joao
+
 
