@@ -1,45 +1,19 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] sdhci: wakeup from runtime PM
-Date: Fri, 8 Apr 2016 22:51:51 +0200
-Message-ID: <CAPDyKFqMOmNhXfJGVyvBvc5dD=wTR3Wvz64CuL8iq4dQJSHk3g@mail.gmail.com>
-References: <CAPDyKFqJ4Q9hdsv427GaT_2qFpvv=Nn3rZQUS+P8O7FF-gKgyw@mail.gmail.com>
-	<Pine.LNX.4.44L0.1604081114480.2069-100000@iolanthe.rowland.org>
+From: darlehen@info.com
+Subject: LOAN
+Date: Sat, 09 Apr 2016 03:33:13 +0530
+Message-ID: <20160408220116.799193B6D56__33757.1320510053$1460221174$gmane$org@bescomm.terengganu.my>
+Reply-To: legacyassetgrougp@hotmail.com
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-pm-owner@vger.kernel.org>
-In-Reply-To: <Pine.LNX.4.44L0.1604081114480.2069-100000@iolanthe.rowland.org>
-Sender: linux-pm-owner@vger.kernel.org
-To: Alan Stern <stern@rowland.harvard.edu>
-Cc: Ludovic Desroches <ludovic.desroches@atmel.com>, Nicolas Ferre <nicolas.ferre@atmel.com>, Adrian Hunter <adrian.hunter@intel.com>, "linux-pm@vger.kernel.org" <linux-pm@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7BIT
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from bescomm.terengganu.my ([202.188.29.20]:59681 "EHLO
+	bescomm.terengganu.my" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754578AbcDIQ7I convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sat, 9 Apr 2016 12:59:08 -0400
+Content-Description: Mail message body
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Recipients <darlehen@info.com>
 
-On 8 April 2016 at 17:19, Alan Stern <stern@rowland.harvard.edu> wrote:
-> On Fri, 8 Apr 2016, Ulf Hansson wrote:
->
->> From power consumption point if view we already discussed this
->> particular case in an earlier thread, but let me elaborate what I
->> think one more time:
->>
->> Now, this is relevant for removable cards lacking GPIO card detect, as
->> for other cases and non-removable cards I think we are in agreement
->> that their is no issue from power consumption point of view, right!?
->>
->> 1. The current solution:
->> - Use MMC_CAP_NEEDS_POLL which makes the mmc core to re-schedule a
->> work once every second to poll for a card (Why is it one second? Could
->> we perhaps have that configurable?).
->
-> The block layer handles media polling for removable block devices, and
-> it is configurable.  For example, /sys/block/sr0/events_poll_msecs can
-> be set to control how often the system polls for a disc in my DVD
-> drive.
->
-> Does MMC do its own polling separate from the block layer?  If so, why?
-
-Good question. Probably because of legacy or perhaps to deal with corner cases.
-
-When I get some spare bandwidth I will check to see if it makes sense
-to convert MMC polling to the block layer polling.
-
-Kind regards
-Uffe
+Brauchen Sie einen Kredit? Wir bieten Darlehen in 2% gelten heute Kontakt mit uns auf: legacyassetgrougp@hotmail.com
