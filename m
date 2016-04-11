@@ -1,173 +1,75 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: block: Use the mmc host device index as the mmcblk
- device index
-Date: Mon, 11 Apr 2016 10:25:41 +0200
-Message-ID: <CAPDyKFp8pfZ1iY7HsAZL1f2qgTuLcimDL_f1k59RMcUq5f-iRQ@mail.gmail.com>
-References: <1460015861-14004-1-git-send-email-ulf.hansson@linaro.org>
-	<CA+7w51h=A4vVjkJTEvNoRG=GRt-GPSwqN4N4P3k-OqnubPo+kg@mail.gmail.com>
+From: "Winkler, Tomas" <tomas.winkler@intel.com>
+Subject: Re: [PATCH v2 6/8] tools rpmb: add RPBM access tool
+Date: Mon, 11 Apr 2016 10:50:38 +0000
+Message-ID: <1460396988.30275.2.camel@intel.com>
+References: <201604052018.uIYWSrsd%fengguang.wu@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wm0-f50.google.com ([74.125.82.50]:38176 "EHLO
-	mail-wm0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752789AbcDKIZm (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 11 Apr 2016 04:25:42 -0400
-Received: by mail-wm0-f50.google.com with SMTP id u206so93543590wme.1
-        for <linux-mmc@vger.kernel.org>; Mon, 11 Apr 2016 01:25:42 -0700 (PDT)
-In-Reply-To: <CA+7w51h=A4vVjkJTEvNoRG=GRt-GPSwqN4N4P3k-OqnubPo+kg@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <201604052018.uIYWSrsd%fengguang.wu@intel.com>
+Content-Language: en-US
+Content-ID: <B8FC2592E825814CB84011915927AAAD@intel.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: lkp <lkp@intel.com>
+Cc: "vinholikatti@gmail.com" <vinholikatti@gmail.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "hch@lst.de" <hch@lst.de>, "martin.petersen@oracle.com" <martin.petersen@oracle.com>, "linux-scsi@vger.kernel.org" <linux-scsi@vger.kernel.org>, "James.Bottomley@HansenPartnership.com" <James.Bottomley@HansenPartnership.com>, "kbuild-all@01.org" <kbuild-all@01.org>, "gregkh@linuxfoundation.org" <gregkh@linuxfoundation.org>, "luto@kernel.org" <luto@kernel.org>, "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>, "ygardi@codeaurora.org" <ygardi@codeaurora.org>, "Hunter, Adrian" <adrian.hunter@intel.com>, "Joao.Pinto@synopsys.com" <Joao.Pinto@synopsys.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Laszlo Fiat <laszlo.fiat@gmail.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>
 
-+ Adrian
-
-On 10 April 2016 at 20:04, Laszlo Fiat <laszlo.fiat@gmail.com> wrote:
-> Hello,
->
-
-Hi Laszlo,
-
-Thanks for your report!
-
-> I have tested this patch on top of v4.6-rc2 + our usual out-of-tree
-> patches from [1], and there is still no SDIO wifi showing up on
-> baytrail-t. dmesg is available at [2].
->
-> [1] https://github.com/hadess/rtl8723bs/tree/master/patches
-> [2] https://bugzilla.kernel.org/show_bug.cgi?id=112571#c9
->
-
-I understand this issue isn't for an upstream kernel, as you are
-carrying out of tree patches to enable sdhci, sdhci-acpi and sdhci-pci
-to work for your platform.
-
-As my bandwidth is limited, normally I can't spend time on
-non-upstream kernel reported regressions. Anyway, I decided to help
-study the kernel log in a bit more detail, but unfortunate I am not
-able to figure out what goes wrong.
-
->From looking at the errors and a stack trace that gets dumped in the
-kernel log, my guess is that the problem lies within sdhci/sdhci-acpi.
-The errors seems related to your out of tree patches.
-
-Regarding commit 520bd7a8b415 ("mmc: core: Optimize boot time by
-detecting cards simultaneously"), even if it seems to be triggering
-the regression for you, I find it highly unlikely that this is the
-root cause.
-
-Someone that knows Baytrail/sdhci-acpi needs to help out with
-debugging. Perhaps Adrian or some other Intel folkz are available!?
-
-A final note, $subject patch is suppose to fix problems for platforms
-using hardcoded paths to rootfs. Your Baytrail platform don't need it,
-as you are using UUID/PARTUUID, which is great!
-
-Kind regards
-Uffe
-
->
-> Best regards,
->
-> Laszlo Fiat
->
-> On Thu, Apr 7, 2016 at 9:57 AM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
->> Commit 520bd7a8b415 ("mmc: core: Optimize boot time by detecting cards
->> simultaneously") causes regressions for some platforms.
->>
->> These platforms relies on fixed mmcblk device indexes, instead of
->> deploying the defacto standard with UUID/PARTUUID. In other words their
->> rootfs needs to be available at hardcoded paths, like /dev/mmcblk0p2.
->>
->> Such guarantees have never been made by the kernel, but clearly the above
->> commit changes the behaviour. More precisely, because of that the order
->> changes of how cards becomes detected, so do their corresponding mmcblk
->> device indexes.
->>
->> As the above commit significantly improves boot time for some platforms
->> (magnitude of seconds), let's avoid reverting this change but instead
->> restore the behaviour of how mmcblk device indexes becomes picked.
->>
->> By using the same index for the mmcblk device as for the corresponding mmc
->> host device, the probe order of mmc host devices decides the index we get
->> for the mmcblk device.
->>
->> For those platforms that suffers from a regression, one could expect that
->> this updated behaviour should be sufficient to meet their expectations of
->> "fixed" mmcblk device indexes.
->>
->> Another side effect from this change, is that the same index is used for
->> the mmc host device, the mmcblk device and the mmc block queue. That
->> should clarify their relationship.
->>
->> Reported-by: Peter Hurley <peter@hurleysoftware.com>
->> Reported-by: Laszlo Fiat <laszlo.fiat@gmail.com>
->> Cc: Linus Torvalds <torvalds@linux-foundation.org>
->> Fixes: 520bd7a8b415 ("mmc: core: Optimize boot time by detecting cards
->> simultaneously")
->> Cc: <stable@vger.kernel.org>
->> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
->> ---
->>  drivers/mmc/card/block.c | 18 +-----------------
->>  1 file changed, 1 insertion(+), 17 deletions(-)
->>
->> diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
->> index 3bdbe50..8a0147d 100644
->> --- a/drivers/mmc/card/block.c
->> +++ b/drivers/mmc/card/block.c
->> @@ -86,7 +86,6 @@ static int max_devices;
->>
->>  /* TODO: Replace these with struct ida */
->>  static DECLARE_BITMAP(dev_use, MAX_DEVICES);
->> -static DECLARE_BITMAP(name_use, MAX_DEVICES);
->>
->>  /*
->>   * There is one mmc_blk_data per slot.
->> @@ -105,7 +104,6 @@ struct mmc_blk_data {
->>         unsigned int    usage;
->>         unsigned int    read_only;
->>         unsigned int    part_type;
->> -       unsigned int    name_idx;
->>         unsigned int    reset_done;
->>  #define MMC_BLK_READ           BIT(0)
->>  #define MMC_BLK_WRITE          BIT(1)
->> @@ -2202,19 +2200,6 @@ static struct mmc_blk_data *mmc_blk_alloc_req(struct mmc_card *card,
->>                 goto out;
->>         }
->>
->> -       /*
->> -        * !subname implies we are creating main mmc_blk_data that will be
->> -        * associated with mmc_card with dev_set_drvdata. Due to device
->> -        * partitions, devidx will not coincide with a per-physical card
->> -        * index anymore so we keep track of a name index.
->> -        */
->> -       if (!subname) {
->> -               md->name_idx = find_first_zero_bit(name_use, max_devices);
->> -               __set_bit(md->name_idx, name_use);
->> -       } else
->> -               md->name_idx = ((struct mmc_blk_data *)
->> -                               dev_to_disk(parent)->private_data)->name_idx;
->> -
->>         md->area_type = area_type;
->>
->>         /*
->> @@ -2264,7 +2249,7 @@ static struct mmc_blk_data *mmc_blk_alloc_req(struct mmc_card *card,
->>          */
->>
->>         snprintf(md->disk->disk_name, sizeof(md->disk->disk_name),
->> -                "mmcblk%u%s", md->name_idx, subname ? subname : "");
->> +                "mmcblk%u%s", card->host->index, subname ? subname : "");
->>
->>         if (mmc_card_mmc(card))
->>                 blk_queue_logical_block_size(md->queue.queue,
->> @@ -2418,7 +2403,6 @@ static void mmc_blk_remove_parts(struct mmc_card *card,
->>         struct list_head *pos, *q;
->>         struct mmc_blk_data *part_md;
->>
->> -       __clear_bit(md->name_idx, name_use);
->>         list_for_each_safe(pos, q, &md->part) {
->>                 part_md = list_entry(pos, struct mmc_blk_data, part);
->>                 list_del(pos);
->> --
->> 1.9.1
->>
+T24gVHVlLCAyMDE2LTA0LTA1IGF0IDIwOjE2ICswODAwLCBrYnVpbGQgdGVzdCByb2JvdCB3cm90
+ZToNCj4gSGkgVG9tYXMsDQo+IA0KPiBbYXV0byBidWlsZCB0ZXN0IEVSUk9SIG9uIGNoYXItbWlz
+Yy9jaGFyLW1pc2MtdGVzdGluZ10NCj4gW2Fsc28gYnVpbGQgdGVzdCBFUlJPUiBvbiB2NC42LXJj
+MiBuZXh0LTIwMTYwNDA1XQ0KPiBbaWYgeW91ciBwYXRjaCBpcyBhcHBsaWVkIHRvIHRoZSB3cm9u
+ZyBnaXQgdHJlZSwgcGxlYXNlIGRyb3AgdXMgYQ0KPiBub3RlIHRvIGhlbHAgaW1wcm92aW5nIHRo
+ZSBzeXN0ZW1dDQo+IA0KPiB1cmw6wqDCoMKgwqBodHRwczovL2dpdGh1Yi5jb20vMGRheS1jaS9s
+aW51eC9jb21taXRzL1RvbWFzLVdpbmtsZXIvUmVwbGF5DQo+IC1Qcm90ZWN0ZWQtTWVtb3J5LUJs
+b2NrLVJQTUItc3Vic3lzdGVtLzIwMTYwNDA0LTE5MjI0Mw0KPiBjb25maWc6IHg4Nl82NC1yYW5k
+Y29uZmlnLXMzLTA0MDUxODU4IChhdHRhY2hlZCBhcyAuY29uZmlnKQ0KPiByZXByb2R1Y2U6DQo+
+IMKgwqDCoMKgwqDCoMKgwqAjIHNhdmUgdGhlIGF0dGFjaGVkIC5jb25maWcgdG8gbGludXggYnVp
+bGQgdHJlZQ0KPiDCoMKgwqDCoMKgwqDCoMKgbWFrZSBBUkNIPXg4Nl82NMKgDQo+IA0KPiBBbGwg
+ZXJyb3JzIChuZXcgb25lcyBwcmVmaXhlZCBieSA+Pik6DQo+IA0KPiDCoMKgwqBtYWtlWzNdOiAq
+KiogTm8gcnVsZSB0byBtYWtlIHRhcmdldCAna2VybmVsL2djb3YvYmFzZS5vJywgbmVlZGVkDQo+
+IGJ5ICdrZXJuZWwvZ2Nvdi9idWlsdC1pbi5vJy4NCj4gwqDCoMKgbWFrZVszXTogKioqIE5vIHJ1
+bGUgdG8gbWFrZSB0YXJnZXQgJ2tlcm5lbC9nY292L2ZzLm8nLCBuZWVkZWQgYnkNCj4gJ2tlcm5l
+bC9nY292L2J1aWx0LWluLm8nLg0KPiA+IA0KPiA+ID4gDQo+ID4gPiBtYWtlWzNdOiAqKiogTm8g
+cnVsZSB0byBtYWtlIHRhcmdldCAna2VybmVsL2djb3YvZ2NjXzNfNC5vJywNCj4gPiA+IG5lZWRl
+ZCBieSAna2VybmVsL2djb3YvYnVpbHQtaW4ubycuDQo+IMKgwqDCoG1ha2VbM106IFRhcmdldCAn
+X19idWlsZCcgbm90IHJlbWFkZSBiZWNhdXNlIG9mIGVycm9ycy4NCj4gLS0NCj4gPiANCj4gPiA+
+IA0KPiA+ID4gbWFrZVszXTogKioqIE5vIHJ1bGUgdG8gbWFrZSB0YXJnZXQgJ3Rvb2xzL29ianRv
+b2wvb2JqdG9vbCcsDQo+ID4gPiBuZWVkZWQgYnkgJ2RyaXZlcnMvbWZkLzg4cG04MDAubycuDQo+
+IMKgwqDCoG1ha2VbM106IFRhcmdldCAnX19idWlsZCcgbm90IHJlbWFkZSBiZWNhdXNlIG9mIGVy
+cm9ycy4NCj4gLS0NCj4gPiANCj4gPiA+IA0KPiA+ID4gbWFrZVs0XTogKioqIE5vIHJ1bGUgdG8g
+bWFrZSB0YXJnZXQgJ3Rvb2xzL29ianRvb2wvb2JqdG9vbCcsDQo+ID4gPiBuZWVkZWQgYnkgJ2Ry
+aXZlcnMvZmlybXdhcmUvZ29vZ2xlL21lbWNvbnNvbGUubycuDQo+IMKgwqDCoG1ha2VbNF06IFRh
+cmdldCAnX19idWlsZCcgbm90IHJlbWFkZSBiZWNhdXNlIG9mIGVycm9ycy4NCj4gLS0NCj4gPiAN
+Cj4gPiA+IA0KPiA+ID4gbWFrZVs0XTogKioqIE5vIHJ1bGUgdG8gbWFrZSB0YXJnZXQgJ3Rvb2xz
+L29ianRvb2wvb2JqdG9vbCcsDQo+ID4gPiBuZWVkZWQgYnkgJ2RyaXZlcnMvaWlvL2RhYy9hZDU2
+MjRyX3NwaS5vJy4NCj4gwqDCoMKgbWFrZVs0XTogVGFyZ2V0ICdfX2J1aWxkJyBub3QgcmVtYWRl
+IGJlY2F1c2Ugb2YgZXJyb3JzLg0KPiAtLQ0KPiA+IA0KPiA+ID4gDQo+ID4gPiBtYWtlWzRdOiAq
+KiogTm8gcnVsZSB0byBtYWtlIHRhcmdldCAndG9vbHMvb2JqdG9vbC9vYmp0b29sJywNCj4gPiA+
+IG5lZWRlZCBieSAnZHJpdmVycy9paW8vdHJpZ2dlci9paW8tdHJpZy1pbnRlcnJ1cHQubycuDQo+
+IMKgwqDCoG1ha2VbNF06IFRhcmdldCAnX19idWlsZCcgbm90IHJlbWFkZSBiZWNhdXNlIG9mIGVy
+cm9ycy4NCj4gLS0NCj4gPiANCj4gPiA+IA0KPiA+ID4gbWFrZVs0XTogKioqIE5vIHJ1bGUgdG8g
+bWFrZSB0YXJnZXQgJ3Rvb2xzL29ianRvb2wvb2JqdG9vbCcsDQo+ID4gPiBuZWVkZWQgYnkgJ2Ry
+aXZlcnMvaW5wdXQvam95c3RpY2svZ2Yyay5vJy4NCj4gwqDCoMKgbWFrZVs0XTogKioqIFtkcml2
+ZXJzL2lucHV0L2pveXN0aWNrL2lmb3JjZV0gRXJyb3IgMg0KPiDCoMKgwqBtYWtlWzRdOiBUYXJn
+ZXQgJ19fYnVpbGQnIG5vdCByZW1hZGUgYmVjYXVzZSBvZiBlcnJvcnMuDQo+IC0tDQo+ID4gDQo+
+ID4gPiANCj4gPiA+IG1ha2VbNF06ICoqKiBObyBydWxlIHRvIG1ha2UgdGFyZ2V0ICd0b29scy9v
+Ymp0b29sL29ianRvb2wnLA0KPiA+ID4gbmVlZGVkIGJ5ICdkcml2ZXJzL21pc2MvZWVwcm9tL21h
+eDY4NzUubycuDQo+IMKgwqDCoG1ha2VbNF06IFRhcmdldCAnX19idWlsZCcgbm90IHJlbWFkZSBi
+ZWNhdXNlIG9mIGVycm9ycy4NCj4gLS0NCj4gPiANCj4gPiA+IA0KPiA+ID4gbWFrZVs0XTogKioq
+IE5vIHJ1bGUgdG8gbWFrZSB0YXJnZXQgJ3Rvb2xzL29ianRvb2wvb2JqdG9vbCcsDQo+ID4gPiBu
+ZWVkZWQgYnkgJ2RyaXZlcnMvbW1jL2NhcmQvbW1jX3Rlc3QubycuDQo+IMKgwqDCoG1ha2VbNF06
+IFRhcmdldCAnX19idWlsZCcgbm90IHJlbWFkZSBiZWNhdXNlIG9mIGVycm9ycy4NCj4gLS0NCj4g
+PiANCj4gPiA+IA0KPiA+ID4gbWFrZVs0XTogKioqIE5vIHJ1bGUgdG8gbWFrZSB0YXJnZXQgJ3Rv
+b2xzL29ianRvb2wvb2JqdG9vbCcsDQo+ID4gPiBuZWVkZWQgYnkgJ2RyaXZlcnMvbW1jL2hvc3Qv
+c2RoY2kubycuDQo+IMKgwqDCoG1ha2VbNF06IFRhcmdldCAnX19idWlsZCcgbm90IHJlbWFkZSBi
+ZWNhdXNlIG9mIGVycm9ycy4NCj4gLS0NCj4gPiANCj4gPiA+IA0KPiA+ID4gbWFrZVs0XTogKioq
+IE5vIHJ1bGUgdG8gbWFrZSB0YXJnZXQgJ3Rvb2xzL29ianRvb2wvb2JqdG9vbCcsDQo+ID4gPiBu
+ZWVkZWQgYnkgJ2RyaXZlcnMvcGluY3RybC9pbnRlbC9waW5jdHJsLWludGVsLm8nLg0KPiDCoMKg
+wqBtYWtlWzRdOiBUYXJnZXQgJ19fYnVpbGQnIG5vdCByZW1hZGUgYmVjYXVzZSBvZiBlcnJvcnMu
+DQo+IC0tDQo+ID4gDQo+ID4gPiANCj4gPiA+IG1ha2VbNF06ICoqKiBObyBydWxlIHRvIG1ha2Ug
+dGFyZ2V0ICd0b29scy9vYmp0b29sL29ianRvb2wnLA0KPiA+ID4gbmVlZGVkIGJ5ICdkcml2ZXJz
+L3BsYXRmb3JtL2Nocm9tZS9jaHJvbWVvc19sYXB0b3AubycuDQo+IMKgwqDCoG1ha2VbNF06IFRh
+cmdldCAnX19idWlsZCcgbm90IHJlbWFkZSBiZWNhdXNlIG9mIGVycm9ycy4NCj4gLi4NCkp1c3Qg
+dG8gcHV0IHRoYXQgc3RyYWlnaHQsIHRob3NlIGFyZSBpc3N1ZXMgaW4gdGhlIHRlc3RpbmcgZW52
+aXJvbm1lbnQNCm5vdCBpbiB0aGUgcGF0Y2hlcy4NCg0KVGhhbmtzDQpUb21hcw0K
