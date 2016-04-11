@@ -1,64 +1,173 @@
-From: Yangbo Lu <yangbo.lu-3arQi8VN3Tc@public.gmane.org>
-Subject: RE: [v7, 0/5] Fix eSDHC host version register bug
-Date: Mon, 11 Apr 2016 02:54:31 +0000
-Message-ID: <HE1PR04MB0889938012DBB9B1F91C6C65F8940@HE1PR04MB0889.eurprd04.prod.outlook.com>
-References: <1459480051-3701-1-git-send-email-yangbo.lu@nxp.com>
-	<CAPDyKFqgMCvbqMYZ-uM-rTnVvfJkCYbhv2kucCRyNyc9FWoR=Q@mail.gmail.com>
-	<HE1PR04MB0889D75DC56E180D3508E7A1F89F0@HE1PR04MB0889.eurprd04.prod.outlook.com>
-	<CAPDyKFp8GDzSkpbTKoRL=rwiBrsWmsgN95zB-QJwfZTnq4M8BA@mail.gmail.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH] mmc: block: Use the mmc host device index as the mmcblk
+ device index
+Date: Mon, 11 Apr 2016 10:25:41 +0200
+Message-ID: <CAPDyKFp8pfZ1iY7HsAZL1f2qgTuLcimDL_f1k59RMcUq5f-iRQ@mail.gmail.com>
+References: <1460015861-14004-1-git-send-email-ulf.hansson@linaro.org>
+	<CA+7w51h=A4vVjkJTEvNoRG=GRt-GPSwqN4N4P3k-OqnubPo+kg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
-In-Reply-To: <CAPDyKFp8GDzSkpbTKoRL=rwiBrsWmsgN95zB-QJwfZTnq4M8BA-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-Content-Language: en-US
-List-Unsubscribe: <https://lists.linuxfoundation.org/mailman/options/iommu>,
-	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.linuxfoundation.org/pipermail/iommu/>
-List-Post: <mailto:iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
-List-Help: <mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=help>
-List-Subscribe: <https://lists.linuxfoundation.org/mailman/listinfo/iommu>,
-	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=subscribe>
-Sender: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
-Errors-To: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
-To: Scott Wood <scott.wood-3arQi8VN3Tc@public.gmane.org>, Yang-Leo Li <leoyang.li-3arQi8VN3Tc@public.gmane.org>
-Cc: "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Zhao Qiang <qiang.zhao-KZfg59tc24xl57MIdRCFDg@public.gmane.org>, Russell King <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, Bhupesh Sharma <bhupesh.sharma-KZfg59tc24xl57MIdRCFDg@public.gmane.org>, "netdev-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <netdev-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Santosh Shilimkar <ssantosh-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, linux-mmc <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Jochen Friedrich <jochen-NIgtFMG+Po8@public.gmane.org>, Xiaobo Xie <xiaobo.xie-3arQi8VN3Tc@public.gmane.org>, "iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org" <iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, "linux-i2c-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-i2c-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Claudiu Manoil <claudiu.manoil-KZfg59tc24xl57MIdRCFDg@public.gmane.org>, Kumar Gala <galak-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, "linuxppc-dev-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org" <linuxppc-dev-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>, "linux-clk-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-clk-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-arm-kernel-IAPFreCvJWNGWvitb5QawA@public.gmane.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-wm0-f50.google.com ([74.125.82.50]:38176 "EHLO
+	mail-wm0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752789AbcDKIZm (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 11 Apr 2016 04:25:42 -0400
+Received: by mail-wm0-f50.google.com with SMTP id u206so93543590wme.1
+        for <linux-mmc@vger.kernel.org>; Mon, 11 Apr 2016 01:25:42 -0700 (PDT)
+In-Reply-To: <CA+7w51h=A4vVjkJTEvNoRG=GRt-GPSwqN4N4P3k-OqnubPo+kg@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Laszlo Fiat <laszlo.fiat@gmail.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>
 
-SGkgTGVvIGFuZCBTY290dCwNCg0KDQo+IC0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQo+IEZy
-b206IFVsZiBIYW5zc29uIFttYWlsdG86dWxmLmhhbnNzb25AbGluYXJvLm9yZ10NCj4gU2VudDog
-V2VkbmVzZGF5LCBBcHJpbCAwNiwgMjAxNiA0OjE1IFBNDQo+IFRvOiBZYW5nYm8gTHU7IFNjb3R0
-IFdvb2QNCj4gQ2M6IGRldmljZXRyZWVAdmdlci5rZXJuZWwub3JnOyBsaW51eC1hcm0ta2VybmVs
-QGxpc3RzLmluZnJhZGVhZC5vcmc7DQo+IGxpbnV4LWtlcm5lbEB2Z2VyLmtlcm5lbC5vcmc7IGxp
-bnV4cHBjLWRldkBsaXN0cy5vemxhYnMub3JnOyBsaW51eC0NCj4gY2xrQHZnZXIua2VybmVsLm9y
-ZzsgbGludXgtaTJjQHZnZXIua2VybmVsLm9yZzsgaW9tbXVAbGlzdHMubGludXgtDQo+IGZvdW5k
-YXRpb24ub3JnOyBuZXRkZXZAdmdlci5rZXJuZWwub3JnOyBsaW51eC1tbWM7IFJvYiBIZXJyaW5n
-OyBSdXNzZWxsDQo+IEtpbmc7IEpvY2hlbiBGcmllZHJpY2g7IEpvZXJnIFJvZWRlbDsgQ2xhdWRp
-dSBNYW5vaWw7IEJodXBlc2ggU2hhcm1hOw0KPiBaaGFvIFFpYW5nOyBLdW1hciBHYWxhOyBTYW50
-b3NoIFNoaWxpbWthcjsgWWFuZy1MZW8gTGk7IFhpYW9ibyBYaWUNCj4gU3ViamVjdDogUmU6IFt2
-NywgMC81XSBGaXggZVNESEMgaG9zdCB2ZXJzaW9uIHJlZ2lzdGVyIGJ1Zw0KPiANCj4gPj4NCj4g
-Pj4gSSB3YXMgYWJvdXQgdG8gcXVldWUgdGhpcyBmb3IgbmV4dCwgd2hlbiBJIG5vdGljZWQgdGhh
-dCBjaGVja3BhdGNoIGlzDQo+ID4+IGNvbXBsYWluaW5nL3dhcm5pbmcgbG90cyBhYm91dCB0aGVz
-ZSBwYXRjaGVzLiBDYW4geW91IHBsZWFzZSBhIHJvdW5kDQo+ID4+IG9mIGNoZWNrcGF0Y2ggYW5k
-IGZpeCB3aGF0IG1ha2VzIHNlbnNlLg0KPiA+Pg0KPiA+PiBLaW5kIHJlZ2FyZHMNCj4gPj4gVWZm
-ZQ0KPiA+DQo+ID4gW0x1IFlhbmdiby1CNDcwOTNdIFNvcnJ5IGFib3V0IHRoaXMsIFVmZmUuLi4N
-Cj4gDQo+IE5vIHdvcnJpZXMhDQo+IA0KPiA+IFNob3VsZCBJIGlnbm9yZSB0aGUgd2FybmluZ3Mg
-dGhhdCB1cGRhdGUgTUFJTlRBSU5FUlM/DQo+IA0KPiBkcml2ZXJzL3NvYy9mc2wvZ3V0cy5jIGlz
-bid0IHBhcnQgb2YgdGhlIE1BSU5UQUlORVJTIGZpbGUsIGl0IHNob3VsZCBiZS4NCj4gDQo+IEkg
-YWxzbyByZWFsaXplIHRoYXQgdGhlIEZSRUVTQ0FMRSBRVUlDQyBFTkdJTkUgTElCUkFSWSBzZWN0
-aW9uDQo+IGRyaXZlcnMvc29jL2ZzbC9xZS8qIGFsc28gbmVlZCBhbiBhY3RpdmUgbWFpbnRhaW5l
-ciwgYXMgaXQncyBjdXJyZW50bHkNCj4gb3JwaGFuLg0KPiANCj4gUGVyaGFwcyB3ZSBzaG91bGQg
-aGF2ZSBjcmVhdGUgYSBuZXcgc2VjdGlvbiBmb3IgZHJpdmVycy9zb2MvZnNsLyogaW5zdGVhZA0K
-PiB0aGF0IGNvdmVycyBhbGwgb2YgdGhlIGFib3ZlPyBNYXliZSB5b3Ugb3IgU2NvdHQgYXJlIGlu
-dGVyZXN0ZWQgdG8gcGljaw0KPiBpdCB1cD8NCj4gDQo+IEkgYWxzbyBub3RlZCB0aGF0LCAiaW5j
-bHVkZS9saW51eC9mc2wvIiBpc24ndCBwcmVzZW50IGluIE1BSU5UQUlORVJTLA0KPiBwbGVhc2Ug
-YWRkIHRoYXQgYXMgd2VsbC4NCg0KW0x1IFlhbmdiby1CNDcwOTNdIENvdWxkIGdpdmUgc29tZSBh
-ZHZpY2Ugb24gdGhlIE1BSU5UQUlORVJTIGZvciB0aGVzZSAnZnNsJyBmaWxlcw0Kc2luY2UgSSBy
-ZWFsbHkgZG9u4oCZdCBrbm93IHdobyBzaG91bGQgYmUgdGhlIHJpZ2h0IHBlcnNvbj8NCkkgd2ls
-bCBhcHByZWNpYXRlIHRoYXQhDQoNClRoYW5rcyBhIGxvdC4NCg0KPiANCj4gPiBSZWdhcmRpbmcg
-dGhlICd1bmRvY3VtZW50ZWQnIHdhcm5pbmcsIEkgd2lsbCBhZGRlZCBhIHBhdGNoIHVwZGF0ZXMg
-ZG9jDQo+IGJlZm9yZSBhbGwgdGhlIHBhdGNoZXMsIE9rPw0KPiANCj4gWWVzLCBnb29kIQ0KPiAN
-Cj4gPg0KPiA+IFRoYW5rcyBhIGxvdCA6KQ0KPiA+DQo+IA0KPiBLaW5kIHJlZ2FyZHMNCj4gVWZm
-ZQ0KX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18KaW9tbXUg
-bWFpbGluZyBsaXN0CmlvbW11QGxpc3RzLmxpbnV4LWZvdW5kYXRpb24ub3JnCmh0dHBzOi8vbGlz
-dHMubGludXhmb3VuZGF0aW9uLm9yZy9tYWlsbWFuL2xpc3RpbmZvL2lvbW11
++ Adrian
+
+On 10 April 2016 at 20:04, Laszlo Fiat <laszlo.fiat@gmail.com> wrote:
+> Hello,
+>
+
+Hi Laszlo,
+
+Thanks for your report!
+
+> I have tested this patch on top of v4.6-rc2 + our usual out-of-tree
+> patches from [1], and there is still no SDIO wifi showing up on
+> baytrail-t. dmesg is available at [2].
+>
+> [1] https://github.com/hadess/rtl8723bs/tree/master/patches
+> [2] https://bugzilla.kernel.org/show_bug.cgi?id=112571#c9
+>
+
+I understand this issue isn't for an upstream kernel, as you are
+carrying out of tree patches to enable sdhci, sdhci-acpi and sdhci-pci
+to work for your platform.
+
+As my bandwidth is limited, normally I can't spend time on
+non-upstream kernel reported regressions. Anyway, I decided to help
+study the kernel log in a bit more detail, but unfortunate I am not
+able to figure out what goes wrong.
+
+>From looking at the errors and a stack trace that gets dumped in the
+kernel log, my guess is that the problem lies within sdhci/sdhci-acpi.
+The errors seems related to your out of tree patches.
+
+Regarding commit 520bd7a8b415 ("mmc: core: Optimize boot time by
+detecting cards simultaneously"), even if it seems to be triggering
+the regression for you, I find it highly unlikely that this is the
+root cause.
+
+Someone that knows Baytrail/sdhci-acpi needs to help out with
+debugging. Perhaps Adrian or some other Intel folkz are available!?
+
+A final note, $subject patch is suppose to fix problems for platforms
+using hardcoded paths to rootfs. Your Baytrail platform don't need it,
+as you are using UUID/PARTUUID, which is great!
+
+Kind regards
+Uffe
+
+>
+> Best regards,
+>
+> Laszlo Fiat
+>
+> On Thu, Apr 7, 2016 at 9:57 AM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+>> Commit 520bd7a8b415 ("mmc: core: Optimize boot time by detecting cards
+>> simultaneously") causes regressions for some platforms.
+>>
+>> These platforms relies on fixed mmcblk device indexes, instead of
+>> deploying the defacto standard with UUID/PARTUUID. In other words their
+>> rootfs needs to be available at hardcoded paths, like /dev/mmcblk0p2.
+>>
+>> Such guarantees have never been made by the kernel, but clearly the above
+>> commit changes the behaviour. More precisely, because of that the order
+>> changes of how cards becomes detected, so do their corresponding mmcblk
+>> device indexes.
+>>
+>> As the above commit significantly improves boot time for some platforms
+>> (magnitude of seconds), let's avoid reverting this change but instead
+>> restore the behaviour of how mmcblk device indexes becomes picked.
+>>
+>> By using the same index for the mmcblk device as for the corresponding mmc
+>> host device, the probe order of mmc host devices decides the index we get
+>> for the mmcblk device.
+>>
+>> For those platforms that suffers from a regression, one could expect that
+>> this updated behaviour should be sufficient to meet their expectations of
+>> "fixed" mmcblk device indexes.
+>>
+>> Another side effect from this change, is that the same index is used for
+>> the mmc host device, the mmcblk device and the mmc block queue. That
+>> should clarify their relationship.
+>>
+>> Reported-by: Peter Hurley <peter@hurleysoftware.com>
+>> Reported-by: Laszlo Fiat <laszlo.fiat@gmail.com>
+>> Cc: Linus Torvalds <torvalds@linux-foundation.org>
+>> Fixes: 520bd7a8b415 ("mmc: core: Optimize boot time by detecting cards
+>> simultaneously")
+>> Cc: <stable@vger.kernel.org>
+>> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+>> ---
+>>  drivers/mmc/card/block.c | 18 +-----------------
+>>  1 file changed, 1 insertion(+), 17 deletions(-)
+>>
+>> diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+>> index 3bdbe50..8a0147d 100644
+>> --- a/drivers/mmc/card/block.c
+>> +++ b/drivers/mmc/card/block.c
+>> @@ -86,7 +86,6 @@ static int max_devices;
+>>
+>>  /* TODO: Replace these with struct ida */
+>>  static DECLARE_BITMAP(dev_use, MAX_DEVICES);
+>> -static DECLARE_BITMAP(name_use, MAX_DEVICES);
+>>
+>>  /*
+>>   * There is one mmc_blk_data per slot.
+>> @@ -105,7 +104,6 @@ struct mmc_blk_data {
+>>         unsigned int    usage;
+>>         unsigned int    read_only;
+>>         unsigned int    part_type;
+>> -       unsigned int    name_idx;
+>>         unsigned int    reset_done;
+>>  #define MMC_BLK_READ           BIT(0)
+>>  #define MMC_BLK_WRITE          BIT(1)
+>> @@ -2202,19 +2200,6 @@ static struct mmc_blk_data *mmc_blk_alloc_req(struct mmc_card *card,
+>>                 goto out;
+>>         }
+>>
+>> -       /*
+>> -        * !subname implies we are creating main mmc_blk_data that will be
+>> -        * associated with mmc_card with dev_set_drvdata. Due to device
+>> -        * partitions, devidx will not coincide with a per-physical card
+>> -        * index anymore so we keep track of a name index.
+>> -        */
+>> -       if (!subname) {
+>> -               md->name_idx = find_first_zero_bit(name_use, max_devices);
+>> -               __set_bit(md->name_idx, name_use);
+>> -       } else
+>> -               md->name_idx = ((struct mmc_blk_data *)
+>> -                               dev_to_disk(parent)->private_data)->name_idx;
+>> -
+>>         md->area_type = area_type;
+>>
+>>         /*
+>> @@ -2264,7 +2249,7 @@ static struct mmc_blk_data *mmc_blk_alloc_req(struct mmc_card *card,
+>>          */
+>>
+>>         snprintf(md->disk->disk_name, sizeof(md->disk->disk_name),
+>> -                "mmcblk%u%s", md->name_idx, subname ? subname : "");
+>> +                "mmcblk%u%s", card->host->index, subname ? subname : "");
+>>
+>>         if (mmc_card_mmc(card))
+>>                 blk_queue_logical_block_size(md->queue.queue,
+>> @@ -2418,7 +2403,6 @@ static void mmc_blk_remove_parts(struct mmc_card *card,
+>>         struct list_head *pos, *q;
+>>         struct mmc_blk_data *part_md;
+>>
+>> -       __clear_bit(md->name_idx, name_use);
+>>         list_for_each_safe(pos, q, &md->part) {
+>>                 part_md = list_entry(pos, struct mmc_blk_data, part);
+>>                 list_del(pos);
+>> --
+>> 1.9.1
+>>
