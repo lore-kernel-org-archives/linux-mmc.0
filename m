@@ -1,110 +1,97 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v3] mmc: core: in mmc_hw_reset(), allow power cycle.
-Date: Mon, 11 Apr 2016 15:33:11 +0200
-Message-ID: <CAPDyKFocr6No-1TZR_x6ss6WGh05ZduA5oH6hiyxUEuTGzmSog@mail.gmail.com>
-References: <1459531522-31874-1-git-send-email-gwendal@chromium.org>
-	<1459551862-38853-1-git-send-email-gwendal@chromium.org>
-	<CAPDyKFq0o8ii27c8Qwh73EgANOfdEc-kXNdDDsjgVk_eU4y_TA@mail.gmail.com>
+From: Josh Poimboeuf <jpoimboe@redhat.com>
+Subject: Re: [PATCH v2 6/8] tools rpmb: add RPBM access tool
+Date: Mon, 11 Apr 2016 08:33:14 -0500
+Message-ID: <20160411133314.gzjuqzadhoxf3u3i@treble>
+References: <1459768284-26997-1-git-send-email-tomas.winkler@intel.com>
+ <1459768284-26997-7-git-send-email-tomas.winkler@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-vk0-f42.google.com ([209.85.213.42]:33396 "EHLO
-	mail-vk0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932095AbcDKNdN (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 11 Apr 2016 09:33:13 -0400
-Received: by mail-vk0-f42.google.com with SMTP id k1so212460187vkb.0
-        for <linux-mmc@vger.kernel.org>; Mon, 11 Apr 2016 06:33:12 -0700 (PDT)
-In-Reply-To: <CAPDyKFq0o8ii27c8Qwh73EgANOfdEc-kXNdDDsjgVk_eU4y_TA@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=utf-8
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <1459768284-26997-7-git-send-email-tomas.winkler@intel.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Tomas Winkler <tomas.winkler@intel.com>
+Cc: gregkh@linuxfoundation.org, Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, James Bottomley <James.Bottomley@HansenPartnership.com>, "Martin K. Petersen" <martin.petersen@oracle.com>, Vinayak Holikatti <vinholikatti@gmail.com>, Andy Lutomirski <luto@kernel.org>, Christoph Hellwig <hch@lst.de>, Yaniv Gardi <ygardi@codeaurora.org>, Joao Pinto <Joao.Pinto@synopsys.com>, linux-mmc@vger.kernel.org, linux-scsi@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Gwendal Grignou <gwendal@chromium.org>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>
 
-On 4 April 2016 at 14:39, Ulf Hansson <ulf.hansson@linaro.org> wrote:
-> On 2 April 2016 at 01:04, Gwendal Grignou <gwendal@chromium.org> wrote:
->> When the eMMC device does not support/allow sending RST_n signal,
->> try to do a brute force power cycle instead of returning EOPNOTSUPP.
->> If power cycle is not supported by the hardware, mmc_init_card still
->> send a CMD0, performing a Software Reset.
->>
->> Signed-off-by: Gwendal Grignou <gwendal@chromium.org>
->> ---
->> Changes in v3:
->> - clock setting in already done in power_cycle.
->> - clarify behavior when power cycle is not implemented. .
->>  drivers/mmc/core/core.c |  5 +++--
->>  drivers/mmc/core/mmc.c  | 24 +++++++++++-------------
->>  2 files changed, 14 insertions(+), 15 deletions(-)
->>
->> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
->> index d8bbc78..d5bc2d8 100644
->> --- a/drivers/mmc/core/core.c
->> +++ b/drivers/mmc/core/core.c
->> @@ -2468,8 +2468,9 @@ int mmc_hw_reset(struct mmc_host *host)
->>         ret = host->bus_ops->reset(host);
->>         mmc_bus_put(host);
->>
->> -       if (ret != -EOPNOTSUPP)
->> -               pr_warn("%s: tried to reset card\n", mmc_hostname(host));
->> +       if (ret)
->> +               pr_warn("%s: tried to reset card, got error %d\n",
->> +                       mmc_hostname(host), ret);
->>
->>         return ret;
->>  }
->> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
->> index 96cc7e2..92b7bea 100644
->> --- a/drivers/mmc/core/mmc.c
->> +++ b/drivers/mmc/core/mmc.c
->> @@ -1988,19 +1988,17 @@ static int mmc_reset(struct mmc_host *host)
->>  {
->>         struct mmc_card *card = host->card;
->>
->> -       if (!(host->caps & MMC_CAP_HW_RESET) || !host->ops->hw_reset)
->> -               return -EOPNOTSUPP;
->> -
->> -       if (!mmc_can_reset(card))
->> -               return -EOPNOTSUPP;
->> -
->> -       mmc_set_clock(host, host->f_init);
->> -
->> -       host->ops->hw_reset(host);
->> -
->> -       /* Set initial state and call mmc_set_ios */
->> -       mmc_set_initial_state(host);
->> -
->> +       if ((host->caps & MMC_CAP_HW_RESET) && host->ops->hw_reset &&
->> +            mmc_can_reset(card)) {
->> +               /* If the card accept RST_n signal, send it. */
->> +               mmc_set_clock(host, host->f_init);
->> +               host->ops->hw_reset(host);
->> +               /* Set initial state and call mmc_set_ios */
->> +               mmc_set_initial_state(host);
->> +       } else {
->> +               /* Do a brute force power cycle */
->> +               mmc_power_cycle(host, card->ocr);
->> +       }
->>         return mmc_init_card(host, card->ocr, card);
->>  }
->>
->> --
->> 2.8.0.rc3.226.g39d4020
->>
->
-> There are more two callers triggering the host->ops->hw_reset() to be
-> called, which also have special treatment of the error code
-> -EOPNOTSUPP. These are mmc_hw_reset() and mmc_blk_reset().
->
-> Please make sure to update their error handling accordingly. Otherwise
-> this looks okay to me.
+Hi Tomas,
 
-After some more investigations, I realized that the error path in the
-mmc block layer needed some additional cleanups.
-Therefore I have decided to apply the v3 version of $subject patch for
-next, then I am going to post some cleanups changes on top.
+On Mon, Apr 04, 2016 at 02:11:22PM +0300, Tomas Winkler wrote:
+> Add simple RPMB host testing tool. It can be used
+> to program key, write and read data block, and retrieve
+> write counter.
+> 
+> Signed-off-by: Tomas Winkler <tomas.winkler@intel.com>
+> ---
+> V2: resend
+>  MAINTAINERS           |   1 +
+>  tools/Makefile        |  16 +-
+>  tools/rpmb/.gitignore |   2 +
+>  tools/rpmb/Makefile   |  32 ++
+>  tools/rpmb/rpmb.c     | 807 ++++++++++++++++++++++++++++++++++++++++++++++++++
+>  5 files changed, 853 insertions(+), 5 deletions(-)
+>  create mode 100644 tools/rpmb/.gitignore
+>  create mode 100644 tools/rpmb/Makefile
+>  create mode 100644 tools/rpmb/rpmb.c
+> 
+> diff --git a/MAINTAINERS b/MAINTAINERS
+> index 07bd6f380460..b7966b95c265 100644
+> --- a/MAINTAINERS
+> +++ b/MAINTAINERS
+> @@ -9425,6 +9425,7 @@ F:	drivers/char/rpmb/*
+>  F:	include/uapi/linux/rpmb.h
+>  F:	include/linux/rpmb.h
+>  F:	Documentation/ABI/testing/sysfs-class-rpmb
+> +F:	tools/rpmb/
+>  
+>  RTL2830 MEDIA DRIVER
+>  M:	Antti Palosaari <crope@iki.fi>
+> diff --git a/tools/Makefile b/tools/Makefile
+> index 60c7e6c8ff17..5b37ccd95cab 100644
+> --- a/tools/Makefile
+> +++ b/tools/Makefile
+> @@ -19,6 +19,7 @@ help:
+>  	@echo '  lguest                 - a minimal 32-bit x86 hypervisor'
+>  	@echo '  net                    - misc networking tools'
+>  	@echo '  perf                   - Linux performance measurement and analysis tool'
+> +	@echo '  rpmb                   - Replay protected memory block access tool'
+>  	@echo '  selftests              - various kernel selftests'
+>  	@echo '  spi                    - spi tools'
+>  	@echo '  objtool                - an ELF object analysis tool'
+> @@ -55,7 +56,8 @@ acpi: FORCE
+>  cpupower: FORCE
+>  	$(call descend,power/$@)
+>  
+> -cgroup firewire hv guest spi usb virtio vm net iio gpio objtool: FORCE
+> +cgroup firewire hv guest rpmb spi usb virtio vm net iio gpio objtool: FORCE
+> +cgroup firewire hv guest rpmb spi usb virtio vm net iio: FORCE
 
-I also took the liberty to update the changelog as I think it needed
-to be extended with some more information.
+This looks like an artifact from a bad merge resolution.  The second
+line needs to be deleted.  This probably explains the kbuild robot build
+errors, since CONFIG_STACK_VALIDATION requires objtool to be built.
 
-Thanks and kind regards
-Uffe
+>  	$(call descend,$@)
+>  
+>  liblockdep: FORCE
+> @@ -85,7 +87,7 @@ freefall: FORCE
+>  	$(call descend,laptop/$@)
+>  
+>  all: acpi cgroup cpupower hv firewire lguest \
+> -		perf selftests turbostat usb \
+> +		perf rpmb selftests turbostat usb \
+>  		virtio vm net x86_energy_perf_policy \
+>  		tmon freefall objtool
+>  
+> @@ -95,7 +97,8 @@ acpi_install:
+>  cpupower_install:
+>  	$(call descend,power/$(@:_install=),install)
+>  
+> -cgroup_install firewire_install hv_install lguest_install perf_install usb_install virtio_install vm_install net_install objtool_install:
+> +cgroup_install firewire_install hv_install lguest_install perf_install rpmb_install usb_install virtio_install vm_install net_install objtool_install:
+> +cgroup_install firewire_install hv_install lguest_install perf_install rpmb_install usb_install virtio_install vm_install net_install:
+
+Same here.
+
+
+-- 
+Josh
