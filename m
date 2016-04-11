@@ -1,66 +1,97 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH] mmc: block: Use the mmc host device index as the mmcblk
- device index
-Date: Mon, 11 Apr 2016 15:46:05 +0300
-Message-ID: <570B9C8D.2000600@intel.com>
-References: <1460015861-14004-1-git-send-email-ulf.hansson@linaro.org>
- <CA+7w51h=A4vVjkJTEvNoRG=GRt-GPSwqN4N4P3k-OqnubPo+kg@mail.gmail.com>
- <CAPDyKFp8pfZ1iY7HsAZL1f2qgTuLcimDL_f1k59RMcUq5f-iRQ@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: [PATCH] mmc: sdhci: Move sdhci_runtime_pm_bus_off|on() to avoid pre-definition
+Date: Mon, 11 Apr 2016 15:32:41 +0200
+Message-ID: <1460381561-12511-1-git-send-email-ulf.hansson@linaro.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga03.intel.com ([134.134.136.65]:13038 "EHLO mga03.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754384AbcDKMt5 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 11 Apr 2016 08:49:57 -0400
-In-Reply-To: <CAPDyKFp8pfZ1iY7HsAZL1f2qgTuLcimDL_f1k59RMcUq5f-iRQ@mail.gmail.com>
+Received: from mail-lf0-f48.google.com ([209.85.215.48]:32892 "EHLO
+	mail-lf0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S933050AbcDKNcs (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 11 Apr 2016 09:32:48 -0400
+Received: by mail-lf0-f48.google.com with SMTP id e190so155215119lfe.0
+        for <linux-mmc@vger.kernel.org>; Mon, 11 Apr 2016 06:32:47 -0700 (PDT)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Laszlo Fiat <laszlo.fiat@gmail.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>
+To: linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>
 
-On 11/04/16 11:25, Ulf Hansson wrote:
-> + Adrian
-> 
-> On 10 April 2016 at 20:04, Laszlo Fiat <laszlo.fiat@gmail.com> wrote:
->> Hello,
->>
-> 
-> Hi Laszlo,
-> 
-> Thanks for your report!
-> 
->> I have tested this patch on top of v4.6-rc2 + our usual out-of-tree
->> patches from [1], and there is still no SDIO wifi showing up on
->> baytrail-t. dmesg is available at [2].
->>
->> [1] https://github.com/hadess/rtl8723bs/tree/master/patches
->> [2] https://bugzilla.kernel.org/show_bug.cgi?id=112571#c9
->>
-> 
-> I understand this issue isn't for an upstream kernel, as you are
-> carrying out of tree patches to enable sdhci, sdhci-acpi and sdhci-pci
-> to work for your platform.
-> 
-> As my bandwidth is limited, normally I can't spend time on
-> non-upstream kernel reported regressions. Anyway, I decided to help
-> study the kernel log in a bit more detail, but unfortunate I am not
-> able to figure out what goes wrong.
-> 
->>From looking at the errors and a stack trace that gets dumped in the
-> kernel log, my guess is that the problem lies within sdhci/sdhci-acpi.
-> The errors seems related to your out of tree patches.
-> 
-> Regarding commit 520bd7a8b415 ("mmc: core: Optimize boot time by
-> detecting cards simultaneously"), even if it seems to be triggering
-> the regression for you, I find it highly unlikely that this is the
-> root cause.
-> 
-> Someone that knows Baytrail/sdhci-acpi needs to help out with
-> debugging. Perhaps Adrian or some other Intel folkz are available!?
+There are no need to have two versions of sdhci_runtime_pm_bus_off|on(),
+depending on whether CONFIG_PM is set or unset. Thus it's easy to move the
+implementation of these functions a bit earlier to avoid the unnecessary
+pre-definition of them, so let's do that.
 
-Need to know exactly what patches you have.  Is it only the ones from [1] above?
+Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+---
+ drivers/mmc/host/sdhci.c | 44 ++++++++++++++++----------------------------
+ 1 file changed, 16 insertions(+), 28 deletions(-)
 
-You could do an acpidump and also try the failing case with CONFIG_MMC_DEBUG=y.
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 8e74e75..c6dbe65 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -55,18 +55,6 @@ static int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode);
+ static void sdhci_enable_preset_value(struct sdhci_host *host, bool enable);
+ static int sdhci_do_get_cd(struct sdhci_host *host);
+ 
+-#ifdef CONFIG_PM
+-static void sdhci_runtime_pm_bus_on(struct sdhci_host *host);
+-static void sdhci_runtime_pm_bus_off(struct sdhci_host *host);
+-#else
+-static void sdhci_runtime_pm_bus_on(struct sdhci_host *host)
+-{
+-}
+-static void sdhci_runtime_pm_bus_off(struct sdhci_host *host)
+-{
+-}
+-#endif
+-
+ static void sdhci_dumpregs(struct sdhci_host *host)
+ {
+ 	pr_debug(DRIVER_NAME ": =========== REGISTER DUMP (%s)===========\n",
+@@ -161,6 +149,22 @@ static void sdhci_disable_card_detection(struct sdhci_host *host)
+ 	sdhci_set_card_detection(host, false);
+ }
+ 
++static void sdhci_runtime_pm_bus_on(struct sdhci_host *host)
++{
++	if (host->bus_on)
++		return;
++	host->bus_on = true;
++	pm_runtime_get_noresume(host->mmc->parent);
++}
++
++static void sdhci_runtime_pm_bus_off(struct sdhci_host *host)
++{
++	if (!host->bus_on)
++		return;
++	host->bus_on = false;
++	pm_runtime_put_noidle(host->mmc->parent);
++}
++
+ void sdhci_reset(struct sdhci_host *host, u8 mask)
+ {
+ 	unsigned long timeout;
+@@ -2667,22 +2671,6 @@ int sdhci_resume_host(struct sdhci_host *host)
+ 
+ EXPORT_SYMBOL_GPL(sdhci_resume_host);
+ 
+-static void sdhci_runtime_pm_bus_on(struct sdhci_host *host)
+-{
+-	if (host->bus_on)
+-		return;
+-	host->bus_on = true;
+-	pm_runtime_get_noresume(host->mmc->parent);
+-}
+-
+-static void sdhci_runtime_pm_bus_off(struct sdhci_host *host)
+-{
+-	if (!host->bus_on)
+-		return;
+-	host->bus_on = false;
+-	pm_runtime_put_noidle(host->mmc->parent);
+-}
+-
+ int sdhci_runtime_suspend_host(struct sdhci_host *host)
+ {
+ 	unsigned long flags;
+-- 
+1.9.1
 
