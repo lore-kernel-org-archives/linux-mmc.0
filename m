@@ -1,75 +1,106 @@
-From: "Winkler, Tomas" <tomas.winkler@intel.com>
-Subject: Re: [PATCH v2 6/8] tools rpmb: add RPBM access tool
-Date: Mon, 11 Apr 2016 10:50:38 +0000
-Message-ID: <1460396988.30275.2.camel@intel.com>
-References: <201604052018.uIYWSrsd%fengguang.wu@intel.com>
+From: Ludovic Desroches <ludovic.desroches@atmel.com>
+Subject: Re: [PATCH] sdhci: wakeup from runtime PM
+Date: Mon, 11 Apr 2016 14:09:05 +0200
+Message-ID: <20160411120905.GA7269@odux.rfo.atmel.com>
+References: <1458921903-11133-1-git-send-email-ludovic.desroches@atmel.com>
+ <5703B241.6030007@intel.com>
+ <CAPDyKFpvE2N+B3-S+tOKJ7+ViWddpxWxCWRGs2LBjWS9CmMxwA@mail.gmail.com>
+ <20160407151208.GA13961@odux.rfo.atmel.com>
+ <CAPDyKFqJ4Q9hdsv427GaT_2qFpvv=Nn3rZQUS+P8O7FF-gKgyw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <201604052018.uIYWSrsd%fengguang.wu@intel.com>
-Content-Language: en-US
-Content-ID: <B8FC2592E825814CB84011915927AAAD@intel.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: lkp <lkp@intel.com>
-Cc: "vinholikatti@gmail.com" <vinholikatti@gmail.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "hch@lst.de" <hch@lst.de>, "martin.petersen@oracle.com" <martin.petersen@oracle.com>, "linux-scsi@vger.kernel.org" <linux-scsi@vger.kernel.org>, "James.Bottomley@HansenPartnership.com" <James.Bottomley@HansenPartnership.com>, "kbuild-all@01.org" <kbuild-all@01.org>, "gregkh@linuxfoundation.org" <gregkh@linuxfoundation.org>, "luto@kernel.org" <luto@kernel.org>, "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>, "ygardi@codeaurora.org" <ygardi@codeaurora.org>, "Hunter, Adrian" <adrian.hunter@intel.com>, "Joao.Pinto@synopsys.com" <Joao.Pinto@synopsys.com>
+Content-Type: text/plain; charset="us-ascii"
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from eusmtp01.atmel.com ([212.144.249.243]:40608 "EHLO
+	eusmtp01.atmel.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753441AbcDKMJz (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 11 Apr 2016 08:09:55 -0400
+Content-Disposition: inline
+In-Reply-To: <CAPDyKFqJ4Q9hdsv427GaT_2qFpvv=Nn3rZQUS+P8O7FF-gKgyw@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Ludovic Desroches <ludovic.desroches@atmel.com>, Nicolas Ferre <nicolas.ferre@atmel.com>, Adrian Hunter <adrian.hunter@intel.com>, "linux-pm@vger.kernel.org" <linux-pm@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>
 
-T24gVHVlLCAyMDE2LTA0LTA1IGF0IDIwOjE2ICswODAwLCBrYnVpbGQgdGVzdCByb2JvdCB3cm90
-ZToNCj4gSGkgVG9tYXMsDQo+IA0KPiBbYXV0byBidWlsZCB0ZXN0IEVSUk9SIG9uIGNoYXItbWlz
-Yy9jaGFyLW1pc2MtdGVzdGluZ10NCj4gW2Fsc28gYnVpbGQgdGVzdCBFUlJPUiBvbiB2NC42LXJj
-MiBuZXh0LTIwMTYwNDA1XQ0KPiBbaWYgeW91ciBwYXRjaCBpcyBhcHBsaWVkIHRvIHRoZSB3cm9u
-ZyBnaXQgdHJlZSwgcGxlYXNlIGRyb3AgdXMgYQ0KPiBub3RlIHRvIGhlbHAgaW1wcm92aW5nIHRo
-ZSBzeXN0ZW1dDQo+IA0KPiB1cmw6wqDCoMKgwqBodHRwczovL2dpdGh1Yi5jb20vMGRheS1jaS9s
-aW51eC9jb21taXRzL1RvbWFzLVdpbmtsZXIvUmVwbGF5DQo+IC1Qcm90ZWN0ZWQtTWVtb3J5LUJs
-b2NrLVJQTUItc3Vic3lzdGVtLzIwMTYwNDA0LTE5MjI0Mw0KPiBjb25maWc6IHg4Nl82NC1yYW5k
-Y29uZmlnLXMzLTA0MDUxODU4IChhdHRhY2hlZCBhcyAuY29uZmlnKQ0KPiByZXByb2R1Y2U6DQo+
-IMKgwqDCoMKgwqDCoMKgwqAjIHNhdmUgdGhlIGF0dGFjaGVkIC5jb25maWcgdG8gbGludXggYnVp
-bGQgdHJlZQ0KPiDCoMKgwqDCoMKgwqDCoMKgbWFrZSBBUkNIPXg4Nl82NMKgDQo+IA0KPiBBbGwg
-ZXJyb3JzIChuZXcgb25lcyBwcmVmaXhlZCBieSA+Pik6DQo+IA0KPiDCoMKgwqBtYWtlWzNdOiAq
-KiogTm8gcnVsZSB0byBtYWtlIHRhcmdldCAna2VybmVsL2djb3YvYmFzZS5vJywgbmVlZGVkDQo+
-IGJ5ICdrZXJuZWwvZ2Nvdi9idWlsdC1pbi5vJy4NCj4gwqDCoMKgbWFrZVszXTogKioqIE5vIHJ1
-bGUgdG8gbWFrZSB0YXJnZXQgJ2tlcm5lbC9nY292L2ZzLm8nLCBuZWVkZWQgYnkNCj4gJ2tlcm5l
-bC9nY292L2J1aWx0LWluLm8nLg0KPiA+IA0KPiA+ID4gDQo+ID4gPiBtYWtlWzNdOiAqKiogTm8g
-cnVsZSB0byBtYWtlIHRhcmdldCAna2VybmVsL2djb3YvZ2NjXzNfNC5vJywNCj4gPiA+IG5lZWRl
-ZCBieSAna2VybmVsL2djb3YvYnVpbHQtaW4ubycuDQo+IMKgwqDCoG1ha2VbM106IFRhcmdldCAn
-X19idWlsZCcgbm90IHJlbWFkZSBiZWNhdXNlIG9mIGVycm9ycy4NCj4gLS0NCj4gPiANCj4gPiA+
-IA0KPiA+ID4gbWFrZVszXTogKioqIE5vIHJ1bGUgdG8gbWFrZSB0YXJnZXQgJ3Rvb2xzL29ianRv
-b2wvb2JqdG9vbCcsDQo+ID4gPiBuZWVkZWQgYnkgJ2RyaXZlcnMvbWZkLzg4cG04MDAubycuDQo+
-IMKgwqDCoG1ha2VbM106IFRhcmdldCAnX19idWlsZCcgbm90IHJlbWFkZSBiZWNhdXNlIG9mIGVy
-cm9ycy4NCj4gLS0NCj4gPiANCj4gPiA+IA0KPiA+ID4gbWFrZVs0XTogKioqIE5vIHJ1bGUgdG8g
-bWFrZSB0YXJnZXQgJ3Rvb2xzL29ianRvb2wvb2JqdG9vbCcsDQo+ID4gPiBuZWVkZWQgYnkgJ2Ry
-aXZlcnMvZmlybXdhcmUvZ29vZ2xlL21lbWNvbnNvbGUubycuDQo+IMKgwqDCoG1ha2VbNF06IFRh
-cmdldCAnX19idWlsZCcgbm90IHJlbWFkZSBiZWNhdXNlIG9mIGVycm9ycy4NCj4gLS0NCj4gPiAN
-Cj4gPiA+IA0KPiA+ID4gbWFrZVs0XTogKioqIE5vIHJ1bGUgdG8gbWFrZSB0YXJnZXQgJ3Rvb2xz
-L29ianRvb2wvb2JqdG9vbCcsDQo+ID4gPiBuZWVkZWQgYnkgJ2RyaXZlcnMvaWlvL2RhYy9hZDU2
-MjRyX3NwaS5vJy4NCj4gwqDCoMKgbWFrZVs0XTogVGFyZ2V0ICdfX2J1aWxkJyBub3QgcmVtYWRl
-IGJlY2F1c2Ugb2YgZXJyb3JzLg0KPiAtLQ0KPiA+IA0KPiA+ID4gDQo+ID4gPiBtYWtlWzRdOiAq
-KiogTm8gcnVsZSB0byBtYWtlIHRhcmdldCAndG9vbHMvb2JqdG9vbC9vYmp0b29sJywNCj4gPiA+
-IG5lZWRlZCBieSAnZHJpdmVycy9paW8vdHJpZ2dlci9paW8tdHJpZy1pbnRlcnJ1cHQubycuDQo+
-IMKgwqDCoG1ha2VbNF06IFRhcmdldCAnX19idWlsZCcgbm90IHJlbWFkZSBiZWNhdXNlIG9mIGVy
-cm9ycy4NCj4gLS0NCj4gPiANCj4gPiA+IA0KPiA+ID4gbWFrZVs0XTogKioqIE5vIHJ1bGUgdG8g
-bWFrZSB0YXJnZXQgJ3Rvb2xzL29ianRvb2wvb2JqdG9vbCcsDQo+ID4gPiBuZWVkZWQgYnkgJ2Ry
-aXZlcnMvaW5wdXQvam95c3RpY2svZ2Yyay5vJy4NCj4gwqDCoMKgbWFrZVs0XTogKioqIFtkcml2
-ZXJzL2lucHV0L2pveXN0aWNrL2lmb3JjZV0gRXJyb3IgMg0KPiDCoMKgwqBtYWtlWzRdOiBUYXJn
-ZXQgJ19fYnVpbGQnIG5vdCByZW1hZGUgYmVjYXVzZSBvZiBlcnJvcnMuDQo+IC0tDQo+ID4gDQo+
-ID4gPiANCj4gPiA+IG1ha2VbNF06ICoqKiBObyBydWxlIHRvIG1ha2UgdGFyZ2V0ICd0b29scy9v
-Ymp0b29sL29ianRvb2wnLA0KPiA+ID4gbmVlZGVkIGJ5ICdkcml2ZXJzL21pc2MvZWVwcm9tL21h
-eDY4NzUubycuDQo+IMKgwqDCoG1ha2VbNF06IFRhcmdldCAnX19idWlsZCcgbm90IHJlbWFkZSBi
-ZWNhdXNlIG9mIGVycm9ycy4NCj4gLS0NCj4gPiANCj4gPiA+IA0KPiA+ID4gbWFrZVs0XTogKioq
-IE5vIHJ1bGUgdG8gbWFrZSB0YXJnZXQgJ3Rvb2xzL29ianRvb2wvb2JqdG9vbCcsDQo+ID4gPiBu
-ZWVkZWQgYnkgJ2RyaXZlcnMvbW1jL2NhcmQvbW1jX3Rlc3QubycuDQo+IMKgwqDCoG1ha2VbNF06
-IFRhcmdldCAnX19idWlsZCcgbm90IHJlbWFkZSBiZWNhdXNlIG9mIGVycm9ycy4NCj4gLS0NCj4g
-PiANCj4gPiA+IA0KPiA+ID4gbWFrZVs0XTogKioqIE5vIHJ1bGUgdG8gbWFrZSB0YXJnZXQgJ3Rv
-b2xzL29ianRvb2wvb2JqdG9vbCcsDQo+ID4gPiBuZWVkZWQgYnkgJ2RyaXZlcnMvbW1jL2hvc3Qv
-c2RoY2kubycuDQo+IMKgwqDCoG1ha2VbNF06IFRhcmdldCAnX19idWlsZCcgbm90IHJlbWFkZSBi
-ZWNhdXNlIG9mIGVycm9ycy4NCj4gLS0NCj4gPiANCj4gPiA+IA0KPiA+ID4gbWFrZVs0XTogKioq
-IE5vIHJ1bGUgdG8gbWFrZSB0YXJnZXQgJ3Rvb2xzL29ianRvb2wvb2JqdG9vbCcsDQo+ID4gPiBu
-ZWVkZWQgYnkgJ2RyaXZlcnMvcGluY3RybC9pbnRlbC9waW5jdHJsLWludGVsLm8nLg0KPiDCoMKg
-wqBtYWtlWzRdOiBUYXJnZXQgJ19fYnVpbGQnIG5vdCByZW1hZGUgYmVjYXVzZSBvZiBlcnJvcnMu
-DQo+IC0tDQo+ID4gDQo+ID4gPiANCj4gPiA+IG1ha2VbNF06ICoqKiBObyBydWxlIHRvIG1ha2Ug
-dGFyZ2V0ICd0b29scy9vYmp0b29sL29ianRvb2wnLA0KPiA+ID4gbmVlZGVkIGJ5ICdkcml2ZXJz
-L3BsYXRmb3JtL2Nocm9tZS9jaHJvbWVvc19sYXB0b3AubycuDQo+IMKgwqDCoG1ha2VbNF06IFRh
-cmdldCAnX19idWlsZCcgbm90IHJlbWFkZSBiZWNhdXNlIG9mIGVycm9ycy4NCj4gLi4NCkp1c3Qg
-dG8gcHV0IHRoYXQgc3RyYWlnaHQsIHRob3NlIGFyZSBpc3N1ZXMgaW4gdGhlIHRlc3RpbmcgZW52
-aXJvbm1lbnQNCm5vdCBpbiB0aGUgcGF0Y2hlcy4NCg0KVGhhbmtzDQpUb21hcw0K
+On Fri, Apr 08, 2016 at 10:35:00AM +0200, Ulf Hansson wrote:
+> - linux-kernel list
+> 
+> On 7 April 2016 at 17:12, Ludovic Desroches <ludovic.desroches@atmel.com> wrote:
+> > On Thu, Apr 07, 2016 at 11:11:08AM +0200, Ulf Hansson wrote:
+> >> On 5 April 2016 at 14:40, Adrian Hunter <adrian.hunter@intel.com> wrote:
+> >> > On 25/03/16 18:05, Ludovic Desroches wrote:
+> >> >> Hi,
+> >> >>
+> >> >> When not using the SDHCI controller, it is logical to save power by suspending
+> >> >> it. The issue is that SDHCI assumes that the controller is completely disabled.
+> >> >> It means the only way to wake up on a card event is to have a gpio for the card
+> >> >> detection (so two pins for the same signal). A possible workaround is to use
+> >> >> polling but the controller will be resumed/suspended between each attempts.
+> >> >>
+> 
+> From power consumption point if view we already discussed this
+> particular case in an earlier thread, but let me elaborate what I
+> think one more time:
+> 
+> Now, this is relevant for removable cards lacking GPIO card detect, as
+> for other cases and non-removable cards I think we are in agreement
+> that their is no issue from power consumption point of view, right!?
+> 
+> 1. The current solution:
+> - Use MMC_CAP_NEEDS_POLL which makes the mmc core to re-schedule a
+> work once every second to poll for a card (Why is it one second? Could
+> we perhaps have that configurable?).
+> 
+> In case of no card inserted, the polling consists of runtime resuming
+> the SDHCI controller and then reading a couple of registers to find
+> out if there is a new card. I assume this will be a fast operation. In
+> the below calculation I have neglected its impact which of course is a
+> simplification.
+> 
+> This solution allows the driver in runtime suspend to *gate all three
+> clocks* used by the SDHCI controller. In-between polling attempts it
+> will thus save power.
+> 
+> Currently the mmc core *always* respects runtime PM autosuspend when
+> putting the controller device back to runtime suspend. I suggest we
+> change this in cases when the polling operation doesn't detect any
+> changes.
+> 
+> For the sdhci-of-at91 driver case, the autosuspend timeout is set to
+> 50 ms (which is a common value among mmc host drivers).
+> 
+> In the current code this means for a period over ~10 s, *all three
+> clocks* will be ungated for 50 ms x 10 times = ~500 ms.
+> 
+> If we adopt to what I propose above, this time will become significant
+> lesser as the autosuspend timer will not be respected.
+> 
+> 2. What you propose (I think):
+> * Don't use MMC_CAP_NEEDS_POLL, but instead rely on the SDHCI
+> controller to pick up card detect IRQs in runtime suspended state.
+> 
+> In case of no card inserted, the controller would then stay runtime
+> suspended but with IRQs enabled to deal with card detect IRQs.
+> According to what you told me earlier, this means that the controller
+> requires one of the three clocks to be ungated in the runtime suspend
+> state. So, only two clocks can be managed by runtime PM.
+> 
+> Assuming that no cards get inserted over a period of ~10 s, *one clock
+> will be ungated* for ~10 s.
+> 
+> 
+> Can you show that option 2) is better in saving power than option 1) ?
+
+Unfortunately not. I have discussed with hardware guys. They confirmed me
+that the power consumption to keep the interface enabled is very low but it
+will be difficult to measure the consumption difference between the two
+options because it would be minimal.
+
+If in practice the result was almost the same, it is not useful to
+continue this debate. I'll keep the polling workaround and I'll update system
+PM callbacks.
+
+[...]
+
+Regards
+
+Ludovic
