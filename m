@@ -1,97 +1,78 @@
-From: Josh Poimboeuf <jpoimboe@redhat.com>
-Subject: Re: [PATCH v2 6/8] tools rpmb: add RPBM access tool
-Date: Mon, 11 Apr 2016 08:33:14 -0500
-Message-ID: <20160411133314.gzjuqzadhoxf3u3i@treble>
-References: <1459768284-26997-1-git-send-email-tomas.winkler@intel.com>
- <1459768284-26997-7-git-send-email-tomas.winkler@intel.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH] qcom: sdhci-msm: enable the DLL clock
+Date: Mon, 11 Apr 2016 15:33:16 +0200
+Message-ID: <CAPDyKFr7dWOxb_o7b9AyEWYSROtjdktPXwKexAjBGaFw5M-Fig@mail.gmail.com>
+References: <1459842403-4052-1-git-send-email-ssambang@codeaurora.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <1459768284-26997-7-git-send-email-tomas.winkler@intel.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Tomas Winkler <tomas.winkler@intel.com>
-Cc: gregkh@linuxfoundation.org, Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, James Bottomley <James.Bottomley@HansenPartnership.com>, "Martin K. Petersen" <martin.petersen@oracle.com>, Vinayak Holikatti <vinholikatti@gmail.com>, Andy Lutomirski <luto@kernel.org>, Christoph Hellwig <hch@lst.de>, Yaniv Gardi <ygardi@codeaurora.org>, Joao Pinto <Joao.Pinto@synopsys.com>, linux-mmc@vger.kernel.org, linux-scsi@vger.kernel.org, linux-kernel@vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-vk0-f53.google.com ([209.85.213.53]:35132 "EHLO
+	mail-vk0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S933063AbcDKNdW (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 11 Apr 2016 09:33:22 -0400
+Received: by mail-vk0-f53.google.com with SMTP id t129so126132114vkg.2
+        for <linux-mmc@vger.kernel.org>; Mon, 11 Apr 2016 06:33:17 -0700 (PDT)
+In-Reply-To: <1459842403-4052-1-git-send-email-ssambang@codeaurora.org>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Sreedhar Sambangi <ssambang@codeaurora.org>
+Cc: Andy Gross <andy.gross@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-arm-msm@vger.kernel.org" <linux-arm-msm@vger.kernel.org>, qca-upstream.external@qca.qualcomm.com, Ivan Ivanov <ivan.ivanov@linaro.org>, Stephen Boyd <sboyd@codeaurora.org>, Georgi Djakov <georgi.djakov@linaro.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>
 
-Hi Tomas,
++ Adrian
 
-On Mon, Apr 04, 2016 at 02:11:22PM +0300, Tomas Winkler wrote:
-> Add simple RPMB host testing tool. It can be used
-> to program key, write and read data block, and retrieve
-> write counter.
-> 
-> Signed-off-by: Tomas Winkler <tomas.winkler@intel.com>
+On 5 April 2016 at 09:46, Sreedhar Sambangi <ssambang@codeaurora.org> wrote:
+> The DLL clock has to be enabled until the correct
+> clock frequency is delivered to DLL
+> '1'(default) - DLL clock is disabled
+> '0' - dll clock has legacly clock enable.
+>
+> Signed-off-by: Varadarajan Narayanan <varada@codeaurora.org>
+> Signed-off-by: Sreedhar Sambangi <ssambang@codeaurora.org>
+
+Adrian Hunter is the maintainer for sdhci, next time make sure to post to him.
+
+As this seems like fairly trivial change I decided to pick it up
+anyway. So applied for next!
+
+Note, that I changed the prefix of the commit message header to "mmc".
+
+Thanks and kind regards
+Uffe
+
 > ---
-> V2: resend
->  MAINTAINERS           |   1 +
->  tools/Makefile        |  16 +-
->  tools/rpmb/.gitignore |   2 +
->  tools/rpmb/Makefile   |  32 ++
->  tools/rpmb/rpmb.c     | 807 ++++++++++++++++++++++++++++++++++++++++++++++++++
->  5 files changed, 853 insertions(+), 5 deletions(-)
->  create mode 100644 tools/rpmb/.gitignore
->  create mode 100644 tools/rpmb/Makefile
->  create mode 100644 tools/rpmb/rpmb.c
-> 
-> diff --git a/MAINTAINERS b/MAINTAINERS
-> index 07bd6f380460..b7966b95c265 100644
-> --- a/MAINTAINERS
-> +++ b/MAINTAINERS
-> @@ -9425,6 +9425,7 @@ F:	drivers/char/rpmb/*
->  F:	include/uapi/linux/rpmb.h
->  F:	include/linux/rpmb.h
->  F:	Documentation/ABI/testing/sysfs-class-rpmb
-> +F:	tools/rpmb/
->  
->  RTL2830 MEDIA DRIVER
->  M:	Antti Palosaari <crope@iki.fi>
-> diff --git a/tools/Makefile b/tools/Makefile
-> index 60c7e6c8ff17..5b37ccd95cab 100644
-> --- a/tools/Makefile
-> +++ b/tools/Makefile
-> @@ -19,6 +19,7 @@ help:
->  	@echo '  lguest                 - a minimal 32-bit x86 hypervisor'
->  	@echo '  net                    - misc networking tools'
->  	@echo '  perf                   - Linux performance measurement and analysis tool'
-> +	@echo '  rpmb                   - Replay protected memory block access tool'
->  	@echo '  selftests              - various kernel selftests'
->  	@echo '  spi                    - spi tools'
->  	@echo '  objtool                - an ELF object analysis tool'
-> @@ -55,7 +56,8 @@ acpi: FORCE
->  cpupower: FORCE
->  	$(call descend,power/$@)
->  
-> -cgroup firewire hv guest spi usb virtio vm net iio gpio objtool: FORCE
-> +cgroup firewire hv guest rpmb spi usb virtio vm net iio gpio objtool: FORCE
-> +cgroup firewire hv guest rpmb spi usb virtio vm net iio: FORCE
-
-This looks like an artifact from a bad merge resolution.  The second
-line needs to be deleted.  This probably explains the kbuild robot build
-errors, since CONFIG_STACK_VALIDATION requires objtool to be built.
-
->  	$(call descend,$@)
->  
->  liblockdep: FORCE
-> @@ -85,7 +87,7 @@ freefall: FORCE
->  	$(call descend,laptop/$@)
->  
->  all: acpi cgroup cpupower hv firewire lguest \
-> -		perf selftests turbostat usb \
-> +		perf rpmb selftests turbostat usb \
->  		virtio vm net x86_energy_perf_policy \
->  		tmon freefall objtool
->  
-> @@ -95,7 +97,8 @@ acpi_install:
->  cpupower_install:
->  	$(call descend,power/$(@:_install=),install)
->  
-> -cgroup_install firewire_install hv_install lguest_install perf_install usb_install virtio_install vm_install net_install objtool_install:
-> +cgroup_install firewire_install hv_install lguest_install perf_install rpmb_install usb_install virtio_install vm_install net_install objtool_install:
-> +cgroup_install firewire_install hv_install lguest_install perf_install rpmb_install usb_install virtio_install vm_install net_install:
-
-Same here.
-
-
--- 
-Josh
+>  drivers/mmc/host/sdhci-msm.c | 7 +++++++
+>  1 file changed, 7 insertions(+)
+>
+> diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
+> index 4695bee..95b8b70 100644
+> --- a/drivers/mmc/host/sdhci-msm.c
+> +++ b/drivers/mmc/host/sdhci-msm.c
+> @@ -43,6 +43,9 @@
+>  #define CORE_DLL_CONFIG                0x100
+>  #define CORE_DLL_STATUS                0x108
+>
+> +#define CORE_DLL_CONFIG2       0x1b4
+> +#define CORE_DLL_CLK_DISABLE   BIT(21)
+> +
+>  #define CORE_VENDOR_SPEC       0x10c
+>  #define CORE_CLK_PWRSAVE       BIT(1)
+>
+> @@ -326,6 +329,10 @@ static int msm_init_cm_dll(struct sdhci_host *host)
+>         writel_relaxed((readl_relaxed(host->ioaddr + CORE_DLL_CONFIG)
+>                         | CORE_CK_OUT_EN), host->ioaddr + CORE_DLL_CONFIG);
+>
+> +       /* Write 0 to DLL_CLOCK_DISABLE bit of DLL_CONFIG_2 register */
+> +       writel_relaxed((readl_relaxed(host->ioaddr + CORE_DLL_CONFIG2)
+> +               & ~CORE_DLL_CLK_DISABLE), host->ioaddr + CORE_DLL_CONFIG2);
+> +
+>         /* Wait until DLL_LOCK bit of DLL_STATUS register becomes '1' */
+>         while (!(readl_relaxed(host->ioaddr + CORE_DLL_STATUS) &
+>                  CORE_DLL_LOCK)) {
+> --
+> The Qualcomm Innovation Center, Inc. is a member of the Code Aurora Forum,
+> a Linux Foundation Collaborative Project
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
