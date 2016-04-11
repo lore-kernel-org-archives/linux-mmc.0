@@ -1,106 +1,66 @@
-From: Ludovic Desroches <ludovic.desroches@atmel.com>
-Subject: Re: [PATCH] sdhci: wakeup from runtime PM
-Date: Mon, 11 Apr 2016 14:09:05 +0200
-Message-ID: <20160411120905.GA7269@odux.rfo.atmel.com>
-References: <1458921903-11133-1-git-send-email-ludovic.desroches@atmel.com>
- <5703B241.6030007@intel.com>
- <CAPDyKFpvE2N+B3-S+tOKJ7+ViWddpxWxCWRGs2LBjWS9CmMxwA@mail.gmail.com>
- <20160407151208.GA13961@odux.rfo.atmel.com>
- <CAPDyKFqJ4Q9hdsv427GaT_2qFpvv=Nn3rZQUS+P8O7FF-gKgyw@mail.gmail.com>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH] mmc: block: Use the mmc host device index as the mmcblk
+ device index
+Date: Mon, 11 Apr 2016 15:46:05 +0300
+Message-ID: <570B9C8D.2000600@intel.com>
+References: <1460015861-14004-1-git-send-email-ulf.hansson@linaro.org>
+ <CA+7w51h=A4vVjkJTEvNoRG=GRt-GPSwqN4N4P3k-OqnubPo+kg@mail.gmail.com>
+ <CAPDyKFp8pfZ1iY7HsAZL1f2qgTuLcimDL_f1k59RMcUq5f-iRQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from eusmtp01.atmel.com ([212.144.249.243]:40608 "EHLO
-	eusmtp01.atmel.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753441AbcDKMJz (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 11 Apr 2016 08:09:55 -0400
-Content-Disposition: inline
-In-Reply-To: <CAPDyKFqJ4Q9hdsv427GaT_2qFpvv=Nn3rZQUS+P8O7FF-gKgyw@mail.gmail.com>
+Received: from mga03.intel.com ([134.134.136.65]:13038 "EHLO mga03.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1754384AbcDKMt5 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 11 Apr 2016 08:49:57 -0400
+In-Reply-To: <CAPDyKFp8pfZ1iY7HsAZL1f2qgTuLcimDL_f1k59RMcUq5f-iRQ@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Ludovic Desroches <ludovic.desroches@atmel.com>, Nicolas Ferre <nicolas.ferre@atmel.com>, Adrian Hunter <adrian.hunter@intel.com>, "linux-pm@vger.kernel.org" <linux-pm@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>
+To: Laszlo Fiat <laszlo.fiat@gmail.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>
 
-On Fri, Apr 08, 2016 at 10:35:00AM +0200, Ulf Hansson wrote:
-> - linux-kernel list
+On 11/04/16 11:25, Ulf Hansson wrote:
+> + Adrian
 > 
-> On 7 April 2016 at 17:12, Ludovic Desroches <ludovic.desroches@atmel.com> wrote:
-> > On Thu, Apr 07, 2016 at 11:11:08AM +0200, Ulf Hansson wrote:
-> >> On 5 April 2016 at 14:40, Adrian Hunter <adrian.hunter@intel.com> wrote:
-> >> > On 25/03/16 18:05, Ludovic Desroches wrote:
-> >> >> Hi,
-> >> >>
-> >> >> When not using the SDHCI controller, it is logical to save power by suspending
-> >> >> it. The issue is that SDHCI assumes that the controller is completely disabled.
-> >> >> It means the only way to wake up on a card event is to have a gpio for the card
-> >> >> detection (so two pins for the same signal). A possible workaround is to use
-> >> >> polling but the controller will be resumed/suspended between each attempts.
-> >> >>
+> On 10 April 2016 at 20:04, Laszlo Fiat <laszlo.fiat@gmail.com> wrote:
+>> Hello,
+>>
 > 
-> From power consumption point if view we already discussed this
-> particular case in an earlier thread, but let me elaborate what I
-> think one more time:
+> Hi Laszlo,
 > 
-> Now, this is relevant for removable cards lacking GPIO card detect, as
-> for other cases and non-removable cards I think we are in agreement
-> that their is no issue from power consumption point of view, right!?
+> Thanks for your report!
 > 
-> 1. The current solution:
-> - Use MMC_CAP_NEEDS_POLL which makes the mmc core to re-schedule a
-> work once every second to poll for a card (Why is it one second? Could
-> we perhaps have that configurable?).
+>> I have tested this patch on top of v4.6-rc2 + our usual out-of-tree
+>> patches from [1], and there is still no SDIO wifi showing up on
+>> baytrail-t. dmesg is available at [2].
+>>
+>> [1] https://github.com/hadess/rtl8723bs/tree/master/patches
+>> [2] https://bugzilla.kernel.org/show_bug.cgi?id=112571#c9
+>>
 > 
-> In case of no card inserted, the polling consists of runtime resuming
-> the SDHCI controller and then reading a couple of registers to find
-> out if there is a new card. I assume this will be a fast operation. In
-> the below calculation I have neglected its impact which of course is a
-> simplification.
+> I understand this issue isn't for an upstream kernel, as you are
+> carrying out of tree patches to enable sdhci, sdhci-acpi and sdhci-pci
+> to work for your platform.
 > 
-> This solution allows the driver in runtime suspend to *gate all three
-> clocks* used by the SDHCI controller. In-between polling attempts it
-> will thus save power.
+> As my bandwidth is limited, normally I can't spend time on
+> non-upstream kernel reported regressions. Anyway, I decided to help
+> study the kernel log in a bit more detail, but unfortunate I am not
+> able to figure out what goes wrong.
 > 
-> Currently the mmc core *always* respects runtime PM autosuspend when
-> putting the controller device back to runtime suspend. I suggest we
-> change this in cases when the polling operation doesn't detect any
-> changes.
+>>From looking at the errors and a stack trace that gets dumped in the
+> kernel log, my guess is that the problem lies within sdhci/sdhci-acpi.
+> The errors seems related to your out of tree patches.
 > 
-> For the sdhci-of-at91 driver case, the autosuspend timeout is set to
-> 50 ms (which is a common value among mmc host drivers).
+> Regarding commit 520bd7a8b415 ("mmc: core: Optimize boot time by
+> detecting cards simultaneously"), even if it seems to be triggering
+> the regression for you, I find it highly unlikely that this is the
+> root cause.
 > 
-> In the current code this means for a period over ~10 s, *all three
-> clocks* will be ungated for 50 ms x 10 times = ~500 ms.
-> 
-> If we adopt to what I propose above, this time will become significant
-> lesser as the autosuspend timer will not be respected.
-> 
-> 2. What you propose (I think):
-> * Don't use MMC_CAP_NEEDS_POLL, but instead rely on the SDHCI
-> controller to pick up card detect IRQs in runtime suspended state.
-> 
-> In case of no card inserted, the controller would then stay runtime
-> suspended but with IRQs enabled to deal with card detect IRQs.
-> According to what you told me earlier, this means that the controller
-> requires one of the three clocks to be ungated in the runtime suspend
-> state. So, only two clocks can be managed by runtime PM.
-> 
-> Assuming that no cards get inserted over a period of ~10 s, *one clock
-> will be ungated* for ~10 s.
-> 
-> 
-> Can you show that option 2) is better in saving power than option 1) ?
+> Someone that knows Baytrail/sdhci-acpi needs to help out with
+> debugging. Perhaps Adrian or some other Intel folkz are available!?
 
-Unfortunately not. I have discussed with hardware guys. They confirmed me
-that the power consumption to keep the interface enabled is very low but it
-will be difficult to measure the consumption difference between the two
-options because it would be minimal.
+Need to know exactly what patches you have.  Is it only the ones from [1] above?
 
-If in practice the result was almost the same, it is not useful to
-continue this debate. I'll keep the polling workaround and I'll update system
-PM callbacks.
+You could do an acpidump and also try the failing case with CONFIG_MMC_DEBUG=y.
 
-[...]
-
-Regards
-
-Ludovic
