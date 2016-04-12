@@ -1,125 +1,105 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: block: Use the mmc host device index as the mmcblk
- device index
-Date: Tue, 12 Apr 2016 08:59:28 +0200
-Message-ID: <CAPDyKFpz_03pFr9h5MwLdUJ1sNvGT9zB7RODCDKdNq6fFQ2Z=A@mail.gmail.com>
-References: <1460015861-14004-1-git-send-email-ulf.hansson@linaro.org>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH] mmc: sdhci: Move sdhci_runtime_pm_bus_off|on() to avoid
+ pre-definition
+Date: Tue, 12 Apr 2016 14:24:52 +0300
+Message-ID: <570CDB04.8070305@intel.com>
+References: <1460381561-12511-1-git-send-email-ulf.hansson@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <stable-owner@vger.kernel.org>
-In-Reply-To: <1460015861-14004-1-git-send-email-ulf.hansson@linaro.org>
-Sender: stable-owner@vger.kernel.org
-To: linux-mmc <linux-mmc@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Jaehoon Chung <jh80.chung@samsung.com>, Adrian Hunter <adrian.hunter@intel.com>, Jisheng Zhang <jszhang@marvell.com>, Peter Hurley <peter@hurleysoftware.com>, Laszlo Fiat <laszlo.fiat@gmail.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Linus Torvalds <torvalds@linux-foundation.org>, "# 4.0+" <stable@vger.kernel.org>
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mga11.intel.com ([192.55.52.93]:8040 "EHLO mga11.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S932307AbcDLL2g (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 12 Apr 2016 07:28:36 -0400
+In-Reply-To: <1460381561-12511-1-git-send-email-ulf.hansson@linaro.org>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org
 
-On 7 April 2016 at 09:57, Ulf Hansson <ulf.hansson@linaro.org> wrote:
-> Commit 520bd7a8b415 ("mmc: core: Optimize boot time by detecting cards
-> simultaneously") causes regressions for some platforms.
->
-> These platforms relies on fixed mmcblk device indexes, instead of
-> deploying the defacto standard with UUID/PARTUUID. In other words their
-> rootfs needs to be available at hardcoded paths, like /dev/mmcblk0p2.
->
-> Such guarantees have never been made by the kernel, but clearly the above
-> commit changes the behaviour. More precisely, because of that the order
-> changes of how cards becomes detected, so do their corresponding mmcblk
-> device indexes.
->
-> As the above commit significantly improves boot time for some platforms
-> (magnitude of seconds), let's avoid reverting this change but instead
-> restore the behaviour of how mmcblk device indexes becomes picked.
->
-> By using the same index for the mmcblk device as for the corresponding mmc
-> host device, the probe order of mmc host devices decides the index we get
-> for the mmcblk device.
->
-> For those platforms that suffers from a regression, one could expect that
-> this updated behaviour should be sufficient to meet their expectations of
-> "fixed" mmcblk device indexes.
->
-> Another side effect from this change, is that the same index is used for
-> the mmc host device, the mmcblk device and the mmc block queue. That
-> should clarify their relationship.
->
-> Reported-by: Peter Hurley <peter@hurleysoftware.com>
-> Reported-by: Laszlo Fiat <laszlo.fiat@gmail.com>
-> Cc: Linus Torvalds <torvalds@linux-foundation.org>
-> Fixes: 520bd7a8b415 ("mmc: core: Optimize boot time by detecting cards
-> simultaneously")
-> Cc: <stable@vger.kernel.org>
+On 11/04/16 16:32, Ulf Hansson wrote:
+> There are no need to have two versions of sdhci_runtime_pm_bus_off|on(),
+> depending on whether CONFIG_PM is set or unset. Thus it's easy to move the
+> implementation of these functions a bit earlier to avoid the unnecessary
+> pre-definition of them, so let's do that.
+> 
 > Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
 
-To get this more thoroughly tested in linux-next, I have applied this
-for my next branch.
+Acked-by: Adrian Hunter <adrian.hunter@intel.com>
 
-I will be monitoring test reports from kernelci, but of course I
-appreciate also any other feedback on this.
-
-Kind regards
-Uffe
 
 > ---
->  drivers/mmc/card/block.c | 18 +-----------------
->  1 file changed, 1 insertion(+), 17 deletions(-)
->
-> diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
-> index 3bdbe50..8a0147d 100644
-> --- a/drivers/mmc/card/block.c
-> +++ b/drivers/mmc/card/block.c
-> @@ -86,7 +86,6 @@ static int max_devices;
->
->  /* TODO: Replace these with struct ida */
->  static DECLARE_BITMAP(dev_use, MAX_DEVICES);
-> -static DECLARE_BITMAP(name_use, MAX_DEVICES);
->
->  /*
->   * There is one mmc_blk_data per slot.
-> @@ -105,7 +104,6 @@ struct mmc_blk_data {
->         unsigned int    usage;
->         unsigned int    read_only;
->         unsigned int    part_type;
-> -       unsigned int    name_idx;
->         unsigned int    reset_done;
->  #define MMC_BLK_READ           BIT(0)
->  #define MMC_BLK_WRITE          BIT(1)
-> @@ -2202,19 +2200,6 @@ static struct mmc_blk_data *mmc_blk_alloc_req(struct mmc_card *card,
->                 goto out;
->         }
->
-> -       /*
-> -        * !subname implies we are creating main mmc_blk_data that will be
-> -        * associated with mmc_card with dev_set_drvdata. Due to device
-> -        * partitions, devidx will not coincide with a per-physical card
-> -        * index anymore so we keep track of a name index.
-> -        */
-> -       if (!subname) {
-> -               md->name_idx = find_first_zero_bit(name_use, max_devices);
-> -               __set_bit(md->name_idx, name_use);
-> -       } else
-> -               md->name_idx = ((struct mmc_blk_data *)
-> -                               dev_to_disk(parent)->private_data)->name_idx;
+>  drivers/mmc/host/sdhci.c | 44 ++++++++++++++++----------------------------
+>  1 file changed, 16 insertions(+), 28 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index 8e74e75..c6dbe65 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -55,18 +55,6 @@ static int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode);
+>  static void sdhci_enable_preset_value(struct sdhci_host *host, bool enable);
+>  static int sdhci_do_get_cd(struct sdhci_host *host);
+>  
+> -#ifdef CONFIG_PM
+> -static void sdhci_runtime_pm_bus_on(struct sdhci_host *host);
+> -static void sdhci_runtime_pm_bus_off(struct sdhci_host *host);
+> -#else
+> -static void sdhci_runtime_pm_bus_on(struct sdhci_host *host)
+> -{
+> -}
+> -static void sdhci_runtime_pm_bus_off(struct sdhci_host *host)
+> -{
+> -}
+> -#endif
 > -
->         md->area_type = area_type;
->
->         /*
-> @@ -2264,7 +2249,7 @@ static struct mmc_blk_data *mmc_blk_alloc_req(struct mmc_card *card,
->          */
->
->         snprintf(md->disk->disk_name, sizeof(md->disk->disk_name),
-> -                "mmcblk%u%s", md->name_idx, subname ? subname : "");
-> +                "mmcblk%u%s", card->host->index, subname ? subname : "");
->
->         if (mmc_card_mmc(card))
->                 blk_queue_logical_block_size(md->queue.queue,
-> @@ -2418,7 +2403,6 @@ static void mmc_blk_remove_parts(struct mmc_card *card,
->         struct list_head *pos, *q;
->         struct mmc_blk_data *part_md;
->
-> -       __clear_bit(md->name_idx, name_use);
->         list_for_each_safe(pos, q, &md->part) {
->                 part_md = list_entry(pos, struct mmc_blk_data, part);
->                 list_del(pos);
-> --
-> 1.9.1
->
+>  static void sdhci_dumpregs(struct sdhci_host *host)
+>  {
+>  	pr_debug(DRIVER_NAME ": =========== REGISTER DUMP (%s)===========\n",
+> @@ -161,6 +149,22 @@ static void sdhci_disable_card_detection(struct sdhci_host *host)
+>  	sdhci_set_card_detection(host, false);
+>  }
+>  
+> +static void sdhci_runtime_pm_bus_on(struct sdhci_host *host)
+> +{
+> +	if (host->bus_on)
+> +		return;
+> +	host->bus_on = true;
+> +	pm_runtime_get_noresume(host->mmc->parent);
+> +}
+> +
+> +static void sdhci_runtime_pm_bus_off(struct sdhci_host *host)
+> +{
+> +	if (!host->bus_on)
+> +		return;
+> +	host->bus_on = false;
+> +	pm_runtime_put_noidle(host->mmc->parent);
+> +}
+> +
+>  void sdhci_reset(struct sdhci_host *host, u8 mask)
+>  {
+>  	unsigned long timeout;
+> @@ -2667,22 +2671,6 @@ int sdhci_resume_host(struct sdhci_host *host)
+>  
+>  EXPORT_SYMBOL_GPL(sdhci_resume_host);
+>  
+> -static void sdhci_runtime_pm_bus_on(struct sdhci_host *host)
+> -{
+> -	if (host->bus_on)
+> -		return;
+> -	host->bus_on = true;
+> -	pm_runtime_get_noresume(host->mmc->parent);
+> -}
+> -
+> -static void sdhci_runtime_pm_bus_off(struct sdhci_host *host)
+> -{
+> -	if (!host->bus_on)
+> -		return;
+> -	host->bus_on = false;
+> -	pm_runtime_put_noidle(host->mmc->parent);
+> -}
+> -
+>  int sdhci_runtime_suspend_host(struct sdhci_host *host)
+>  {
+>  	unsigned long flags;
+> 
+
