@@ -1,77 +1,93 @@
-From: Ben Hutchings <ben.hutchings@codethink.co.uk>
-Subject: Re: [PATCH v2 2/9] mmc: tmio, sh_mobile_sdhi: Add support for
- variable input clock frequency
-Date: Tue, 12 Apr 2016 17:19:38 +0100
-Message-ID: <1460477978.32355.14.camel@codethink.co.uk>
-References: <1459525479-20842-1-git-send-email-wsa@the-dreams.de>
-	 <1459525479-20842-3-git-send-email-wsa@the-dreams.de>
-	 <CAMuHMdWdJ2AoCrwC5K2QEfuf=w=q8=XnJRzoyg99EurJBDwbTg@mail.gmail.com>
+From: Laszlo Fiat <laszlo.fiat@gmail.com>
+Subject: Re: [PATCH] mmc: block: Use the mmc host device index as the mmcblk
+ device index
+Date: Tue, 12 Apr 2016 20:15:37 +0200
+Message-ID: <CA+7w51iP3Th-m8kqdx_iObEs+kYJruNd62f5n2OfD0XaeGw=9w@mail.gmail.com>
+References: <1460015861-14004-1-git-send-email-ulf.hansson@linaro.org>
+	<CA+7w51h=A4vVjkJTEvNoRG=GRt-GPSwqN4N4P3k-OqnubPo+kg@mail.gmail.com>
+	<CAPDyKFp8pfZ1iY7HsAZL1f2qgTuLcimDL_f1k59RMcUq5f-iRQ@mail.gmail.com>
+	<570B9C8D.2000600@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-renesas-soc-owner@vger.kernel.org>
-In-Reply-To: <CAMuHMdWdJ2AoCrwC5K2QEfuf=w=q8=XnJRzoyg99EurJBDwbTg@mail.gmail.com>
-Sender: linux-renesas-soc-owner@vger.kernel.org
-To: Geert Uytterhoeven <geert@linux-m68k.org>
-Cc: Wolfram Sang <wsa@the-dreams.de>, Linux MMC List <linux-mmc@vger.kernel.org>, linux-renesas-soc@vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-wm0-f52.google.com ([74.125.82.52]:36543 "EHLO
+	mail-wm0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S965598AbcDLSPi (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 12 Apr 2016 14:15:38 -0400
+Received: by mail-wm0-f52.google.com with SMTP id v188so137517360wme.1
+        for <linux-mmc@vger.kernel.org>; Tue, 12 Apr 2016 11:15:38 -0700 (PDT)
+In-Reply-To: <570B9C8D.2000600@intel.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Adrian Hunter <adrian.hunter@intel.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>
 
-On Tue, 2016-04-12 at 14:55 +0200, Geert Uytterhoeven wrote:
-> On Fri, Apr 1, 2016 at 5:44 PM, Wolfram Sang <wsa@the-dreams.de> wrote:
-> > From: Ben Hutchings <ben.hutchings@codethink.co.uk>
-> >
-> > Currently tmio_mmc assumes that the input clock frequency is fixed and
-> > only its own clock divider can be changed.  This is not true in the
-> > case of sh_mobile_sdhi; we can use the clock API to change it.
-> >
-> > In tmio_mmc:
-> > - Delegate setting of f_min from tmio to the clk_enable operation (if
-> >   implemented), as it can be smaller than f_max / 512
-> > - Add an optional clk_update operation called from tmio_mmc_set_clock()
-> >   that updates the input clock frequency
-> > - Rename tmio_mmc_clk_update() to tmio_mmc_clk_enable(), to avoid
-> >   confusion with the clk_update operation
-> >
-> > In sh_mobile_sdhi:
-> > - Make the setting of f_max conditional; it should be set through the
-> >   max-frequency property in the device tree in future
-> > - Set f_min based on the input clock's minimum frequency
-> > - Implement the clk_update operation, selecting the best input clock
-> >   frequency for the bus frequency that's wanted
-> >
-> > sh_mobile_sdhi_clk_update() is loosely based on Kuninori Morimoto's work
-> > in sh_mmcif.
-> >
-> > Signed-off-by: Ben Hutchings <ben.hutchings@codethink.co.uk>
-> > Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
-> 
-> This is now commit 2e21101df4fe8bdc ("mmc: tmio, sh_mobile_sdhi: Add support
-> for variable input clock frequency") in the next branch of Ulf's mmc.git.
-> 
->   1. The SDHI/MMC clocks now run much slower than before. Perhaps this is
->      intentional, and a consequence of finding the best way to drive the SD
->      card at the target frequency?
+Adrian, Ulf,
 
-I don't think is generally a problem.  Probably even saves a little
-power.
+All the mmc related patches are from [1] above. I have one extra patch
+for rfkill-gpio to get bluetooth working, and one to ignore efi-bgrt,
+but these are unrelated to mmc. Actually we can survive some time
+without the out-of-tree mmc patches, but usually we freeze within 1-2
+hours, that is why we need them.
 
->   2. On r8a7740, the situation is worse: the HP ("High-speed Peripheral")
->      clock is also scaled down from 99 MHz to 12.375 MHz.
->      As the HP clock is the parent of lots of on-chip devices, this may affect
->      performance for all of them.
+I have compiled a v4.6-rc3 vanilla, without any additional patches and
+with CONFIG_MMC_DEBUG=y, and created dmesg: [3]
+
+I will compile the same one with the offending commit 520bd7a8b415
+reverted, so that we can compare what happens differently.
+
+For acpidump, which format do you need?
+
+Thank you for looking into this.
+
+Best regards,
+
+Laszlo Fiat
+
+[3]: https://bugzilla.kernel.org/show_bug.cgi?id=112571#c10
+
+On Mon, Apr 11, 2016 at 2:46 PM, Adrian Hunter <adrian.hunter@intel.com> wrote:
+> On 11/04/16 11:25, Ulf Hansson wrote:
+>> + Adrian
+>>
+>> On 10 April 2016 at 20:04, Laszlo Fiat <laszlo.fiat@gmail.com> wrote:
+>>> Hello,
+>>>
+>>
+>> Hi Laszlo,
+>>
+>> Thanks for your report!
+>>
+>>> I have tested this patch on top of v4.6-rc2 + our usual out-of-tree
+>>> patches from [1], and there is still no SDIO wifi showing up on
+>>> baytrail-t. dmesg is available at [2].
+>>>
+>>> [1] https://github.com/hadess/rtl8723bs/tree/master/patches
+>>> [2] https://bugzilla.kernel.org/show_bug.cgi?id=112571#c9
+>>>
+>>
+>> I understand this issue isn't for an upstream kernel, as you are
+>> carrying out of tree patches to enable sdhci, sdhci-acpi and sdhci-pci
+>> to work for your platform.
+>>
+>> As my bandwidth is limited, normally I can't spend time on
+>> non-upstream kernel reported regressions. Anyway, I decided to help
+>> study the kernel log in a bit more detail, but unfortunate I am not
+>> able to figure out what goes wrong.
+>>
+>>>From looking at the errors and a stack trace that gets dumped in the
+>> kernel log, my guess is that the problem lies within sdhci/sdhci-acpi.
+>> The errors seems related to your out of tree patches.
+>>
+>> Regarding commit 520bd7a8b415 ("mmc: core: Optimize boot time by
+>> detecting cards simultaneously"), even if it seems to be triggering
+>> the regression for you, I find it highly unlikely that this is the
+>> root cause.
+>>
+>> Someone that knows Baytrail/sdhci-acpi needs to help out with
+>> debugging. Perhaps Adrian or some other Intel folkz are available!?
 >
-> On r8a73a4, r8a7791, and sh73a0, the SDHI clocks are children of the pll1_div2
-> clocks, which are fixed.
-> On r8a7740, the SDHI and MMC clocks are children of the HP clock,
-> which is also scaled down, affecting all other siblings.
-[...]
-
-That seems like a bug in the clock driver.  If it doesn't have
-independent dividers for each clock client then it shouldn't allow any
-client to change the frequency.
-
-Ben.
-
--- 
-Ben Hutchings
-Software Developer, Codethink Ltd.
+> Need to know exactly what patches you have.  Is it only the ones from [1] above?
+>
+> You could do an acpidump and also try the failing case with CONFIG_MMC_DEBUG=y.
+>
