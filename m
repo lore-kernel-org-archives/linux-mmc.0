@@ -1,73 +1,102 @@
-From: "Yuan, Juntao" <juntao.yuan@intel.com>
-Subject: RE: [PATCH] mmc: block: Correct response type of stop command for
- sdcard
-Date: Wed, 13 Apr 2016 11:18:58 +0000
-Message-ID: <588D8A7789B2934A9950BF189ED6F50A200614DE@SHSMSX104.ccr.corp.intel.com>
-References: <588D8A7789B2934A9950BF189ED6F50A20061122@SHSMSX104.ccr.corp.intel.com>
- <CAPDyKFogQMA-ggtnJBRbempR8zKOc+vydXiyKeq=BhQ1Vrw2xA@mail.gmail.com>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH] mmc: block: Use the mmc host device index as the mmcblk
+ device index
+Date: Wed, 13 Apr 2016 14:19:09 +0300
+Message-ID: <570E2B2D.1080507@intel.com>
+References: <1460015861-14004-1-git-send-email-ulf.hansson@linaro.org>
+ <CA+7w51h=A4vVjkJTEvNoRG=GRt-GPSwqN4N4P3k-OqnubPo+kg@mail.gmail.com>
+ <CAPDyKFp8pfZ1iY7HsAZL1f2qgTuLcimDL_f1k59RMcUq5f-iRQ@mail.gmail.com>
+ <570B9C8D.2000600@intel.com>
+ <CA+7w51iP3Th-m8kqdx_iObEs+kYJruNd62f5n2OfD0XaeGw=9w@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga03.intel.com ([134.134.136.65]:8221 "EHLO mga03.intel.com"
+Received: from mga09.intel.com ([134.134.136.24]:19498 "EHLO mga09.intel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S932793AbcDMLTF (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 13 Apr 2016 07:19:05 -0400
-In-Reply-To: <CAPDyKFogQMA-ggtnJBRbempR8zKOc+vydXiyKeq=BhQ1Vrw2xA@mail.gmail.com>
-Content-Language: en-US
+	id S1757690AbcDMLWz (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 13 Apr 2016 07:22:55 -0400
+In-Reply-To: <CA+7w51iP3Th-m8kqdx_iObEs+kYJruNd62f5n2OfD0XaeGw=9w@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "Hunter, Adrian" <adrian.hunter@intel.com>
+To: Laszlo Fiat <laszlo.fiat@gmail.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>
 
-SSB0cmllZCBib3RoIFIxIGFuZCBSMWIgZm9yIHN0b3AgY29tbWFuZCBvZiBTRCBjYXJkLg0KSSBn
-b3QgcGxlbnR5IG9mIHdhcm5pbmcgbWVzc2FnZSAnbW1jMTogR290IGRhdGEgaW50ZXJydXB0IDB4
-MDAwMDAwMDIgZXZlbiB0aG91Z2ggbm8gZGF0YSBvcGVyYXRpb24gd2FzIGluIHByb2dyZXNzJyBp
-biBjb25zb2xlIHdoZW4gUjEgd2FzIGJlaW5nIHVzZWQgZm9yIHN0b3AgY29tbWFuZC4NCkl0IHJl
-cGVhdGVkIGFuZCByZXBlYXRlZCwgZW5kbGVzc2x5LiBEaWQgeW91IHNlZSB0aGlzIHdhcm5pbmcg
-YmVmb3JlPw0KDQoNClRoYW5rcy4NCkp1bnRhby4NCg0KDQotLS0tLU9yaWdpbmFsIE1lc3NhZ2Ut
-LS0tLQ0KRnJvbTogVWxmIEhhbnNzb24gW21haWx0bzp1bGYuaGFuc3NvbkBsaW5hcm8ub3JnXSAN
-ClNlbnQ6IFdlZG5lc2RheSwgQXByaWwgMTMsIDIwMTYgNDoxNSBQTQ0KVG86IFl1YW4sIEp1bnRh
-byA8anVudGFvLnl1YW5AaW50ZWwuY29tPg0KQ2M6IGxpbnV4LW1tY0B2Z2VyLmtlcm5lbC5vcmc7
-IEh1bnRlciwgQWRyaWFuIDxhZHJpYW4uaHVudGVyQGludGVsLmNvbT4NClN1YmplY3Q6IFJlOiBb
-UEFUQ0hdIG1tYzogYmxvY2s6IENvcnJlY3QgcmVzcG9uc2UgdHlwZSBvZiBzdG9wIGNvbW1hbmQg
-Zm9yIHNkY2FyZA0KDQpPbiAxMyBBcHJpbCAyMDE2IGF0IDA3OjU5LCBZdWFuLCBKdW50YW8gPGp1
-bnRhby55dWFuQGludGVsLmNvbT4gd3JvdGU6DQo+DQo+IEFjY29yZGluZyB0byBQaHlzaWNhbCBM
-YXllciBTaW1wbGlmaWVkIFNwZWNpZmljYXRpb24gVmVyc2lvbiA0LjEwLCBTRCANCj4gY2FyZCBu
-ZWVkcyBhIFIxYiByZXNwb25zZSBmb3Igc3RvcCBjb21tYW5kLg0KDQpJIGhhdmUgbG9va2VkIGF0
-IHRoaXMgZWFybGllciBhbmQgSSBkb24ndCB0aGluayBSMUIgaXMgbmVlZGVkLg0KDQpBY2NvcmRp
-bmcgdG8gdGhlIENvbW1hbmQgdGFibGUgaW4gdGhlIHNwZWMsIHdoZXJlIGNvbW1hbmRzIGFyZSBs
-aXN0ZWQgd2l0aCB0aGVpciBjb3JyZXNwb25kaW5nIHJlc3BvbnNlIHR5cGUsIGEgQ01EMTIgKHN0
-b3ApIGhhcyBhbiBSMUIgcmVzcG9uc2UuIEFzIHlvdSBwcm9iYWJseSBrbm93LCB0aGUgZGlmZmVy
-ZW5jZSBiZXR3ZWVuIFIxIGFuZCBSMUIgaXMgdGhlIG9wdGlvbmFsIGJ1c3kgc2lnbmFsbGluZyBv
-biBEQVQwLg0KDQpOb3csIGlmIHlvdSBsb29rIGludG8gdGhlIGRldGFpbHMgYWJvdXQgUkVBRCBh
-bmQgV1JJVEUgdHJhbnNmZXJzIGluIHRoZSBzcGVjLCBpdCBiZWNvbWVzIGNsZWFyIHRoYXQgdGhl
-cmUncyBhIGRpZmZlcmVuY2UgaW4gdGhlIHJlc3BvbnNlIHlvdSBnZXQgZnJvbSBhIENNRDEyLiBJ
-biB0aGUgUkVBRCBjYXNlIHRoZXJlJ3MgKm5vKiBidXN5IHNpZ25hbGxpbmcgYnV0IHRoZXJlIGlz
-IGZvciBXUklURS4gRm9yIHRoYXQgcmVhc29uLCB1c2luZyBSMSBpbiBjYXNlIG9mIFJFQUQgc2Vl
-bXMgbGlrZSB0aGUgY29ycmVjdCB0aGluZyB0byBkby4NCg0KSSBoYXZlbid0IGxvb2tlZCBhdCBT
-RCA0LjEwLCBidXQgYWNjb3JkaW5nIHRvIGVhcmxpZXIgdmVyc2lvbnMgeW91IGNhbiBmaW5kIHRo
-ZXNlIGRldGFpbHMgaW4gdGhlICJUaW1pbmdzIiBzZWN0aW9uLg0KDQpJIGd1ZXNzIHNvbWUgY29t
-bWVudCBpbiB0aGUgY29kZSB3b3VsZCBiZSB2YWx1YWJsZSBhcyB0aGUgc3BlYyBpcyBpbmRlZWQg
-YSBiaXQgdW5jbGVhciwgbGV0IG1lIHN1Ym1pdCBhIGNoYW5nZSBmb3IgaXQuDQoNCktpbmQgcmVn
-YXJkcw0KVWZmZQ0KDQo+DQo+IFNpZ25lZC1vZmYtYnk6IFl1YW4gSnVudGFvIDxqdW50YW8ueXVh
-bkBpbnRlbC5jb20+DQo+IC0tLQ0KPiAgZHJpdmVycy9tbWMvY2FyZC9ibG9jay5jIHwgICAxMSAr
-KysrKysrKy0tLQ0KPiAgMSBmaWxlIGNoYW5nZWQsIDggaW5zZXJ0aW9ucygrKSwgMyBkZWxldGlv
-bnMoLSkNCj4NCj4gZGlmZiAtLWdpdCBhL2RyaXZlcnMvbW1jL2NhcmQvYmxvY2suYyBiL2RyaXZl
-cnMvbW1jL2NhcmQvYmxvY2suYyBpbmRleCANCj4gM2JkYmU1MC4uYWE4ZmM5OGIgMTAwNjQ0DQo+
-IC0tLSBhL2RyaXZlcnMvbW1jL2NhcmQvYmxvY2suYw0KPiArKysgYi9kcml2ZXJzL21tYy9jYXJk
-L2Jsb2NrLmMNCj4gQEAgLTE1MzMsOSArMTUzMywxNCBAQCBzdGF0aWMgdm9pZCBtbWNfYmxrX3J3
-X3JxX3ByZXAoc3RydWN0IG1tY19xdWV1ZV9yZXEgKm1xcnEsDQo+ICAgICBpZiAocnFfZGF0YV9k
-aXIocmVxKSA9PSBSRUFEKSB7DQo+ICAgICAgICAgYnJxLT5jbWQub3Bjb2RlID0gcmVhZGNtZDsN
-Cj4gICAgICAgICBicnEtPmRhdGEuZmxhZ3MgPSBNTUNfREFUQV9SRUFEOw0KPiAtICAgICAgIGlm
-IChicnEtPm1ycS5zdG9wKQ0KPiAtICAgICAgICAgICBicnEtPnN0b3AuZmxhZ3MgPSBNTUNfUlNQ
-X1NQSV9SMSB8IE1NQ19SU1BfUjEgfA0KPiAtICAgICAgICAgICAgICAgICAgIE1NQ19DTURfQUM7
-DQo+ICsgICAgICAgaWYgKGJycS0+bXJxLnN0b3ApIHsNCj4gKyAgICAgICAgICAgaWYgKG1tY19j
-YXJkX21tYyhjYXJkKSkNCj4gKyAgICAgICAgICAgICAgIGJycS0+c3RvcC5mbGFncyA9IE1NQ19S
-U1BfU1BJX1IxIHwgTU1DX1JTUF9SMSB8DQo+ICsgICAgICAgICAgICAgICAgICAgICAgIE1NQ19D
-TURfQUM7DQo+ICsgICAgICAgICAgIGVsc2UNCj4gKyAgICAgICAgICAgICAgIGJycS0+c3RvcC5m
-bGFncyA9IE1NQ19SU1BfU1BJX1IxQiB8IE1NQ19SU1BfUjFCIHwNCj4gKyAgICAgICAgICAgICAg
-ICAgICAgICAgTU1DX0NNRF9BQzsNCj4gKyAgICAgICB9DQo+ICAgICB9IGVsc2Ugew0KPiAgICAg
-ICAgIGJycS0+Y21kLm9wY29kZSA9IHdyaXRlY21kOw0KPiAgICAgICAgIGJycS0+ZGF0YS5mbGFn
-cyA9IE1NQ19EQVRBX1dSSVRFOw0KPiAtLQ0KPiAxLjcuOS41DQo+DQo+DQo+DQo+IFRoYW5rcy4N
-Cj4gSnVudGFvLg0KPg0K
+On 12/04/16 21:15, Laszlo Fiat wrote:
+> Adrian, Ulf,
+> 
+> All the mmc related patches are from [1] above. I have one extra patch
+> for rfkill-gpio to get bluetooth working, and one to ignore efi-bgrt,
+> but these are unrelated to mmc. Actually we can survive some time
+> without the out-of-tree mmc patches, but usually we freeze within 1-2
+> hours, that is why we need them.
+> 
+> I have compiled a v4.6-rc3 vanilla, without any additional patches and
+> with CONFIG_MMC_DEBUG=y, and created dmesg: [3]
+
+Looks like every command to the SDIO card fails.
+
+> 
+> I will compile the same one with the offending commit 520bd7a8b415
+> reverted, so that we can compare what happens differently.
+> 
+> For acpidump, which format do you need?
+
+Doesn't matter which format.
+
+> 
+> Thank you for looking into this.
+> 
+> Best regards,
+> 
+> Laszlo Fiat
+> 
+> [3]: https://bugzilla.kernel.org/show_bug.cgi?id=112571#c10
+> 
+> On Mon, Apr 11, 2016 at 2:46 PM, Adrian Hunter <adrian.hunter@intel.com> wrote:
+>> On 11/04/16 11:25, Ulf Hansson wrote:
+>>> + Adrian
+>>>
+>>> On 10 April 2016 at 20:04, Laszlo Fiat <laszlo.fiat@gmail.com> wrote:
+>>>> Hello,
+>>>>
+>>>
+>>> Hi Laszlo,
+>>>
+>>> Thanks for your report!
+>>>
+>>>> I have tested this patch on top of v4.6-rc2 + our usual out-of-tree
+>>>> patches from [1], and there is still no SDIO wifi showing up on
+>>>> baytrail-t. dmesg is available at [2].
+>>>>
+>>>> [1] https://github.com/hadess/rtl8723bs/tree/master/patches
+>>>> [2] https://bugzilla.kernel.org/show_bug.cgi?id=112571#c9
+>>>>
+>>>
+>>> I understand this issue isn't for an upstream kernel, as you are
+>>> carrying out of tree patches to enable sdhci, sdhci-acpi and sdhci-pci
+>>> to work for your platform.
+>>>
+>>> As my bandwidth is limited, normally I can't spend time on
+>>> non-upstream kernel reported regressions. Anyway, I decided to help
+>>> study the kernel log in a bit more detail, but unfortunate I am not
+>>> able to figure out what goes wrong.
+>>>
+>>> >From looking at the errors and a stack trace that gets dumped in the
+>>> kernel log, my guess is that the problem lies within sdhci/sdhci-acpi.
+>>> The errors seems related to your out of tree patches.
+>>>
+>>> Regarding commit 520bd7a8b415 ("mmc: core: Optimize boot time by
+>>> detecting cards simultaneously"), even if it seems to be triggering
+>>> the regression for you, I find it highly unlikely that this is the
+>>> root cause.
+>>>
+>>> Someone that knows Baytrail/sdhci-acpi needs to help out with
+>>> debugging. Perhaps Adrian or some other Intel folkz are available!?
+>>
+>> Need to know exactly what patches you have.  Is it only the ones from [1] above?
+>>
+>> You could do an acpidump and also try the failing case with CONFIG_MMC_DEBUG=y.
+>>
+> 
+
