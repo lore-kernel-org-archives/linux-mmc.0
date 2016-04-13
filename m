@@ -1,57 +1,99 @@
-From: "Yuan, Juntao" <juntao.yuan@intel.com>
-Subject: [PATCH] mmc: block: Correct response type of stop command for sdcard
-Date: Wed, 13 Apr 2016 05:59:21 +0000
-Message-ID: <588D8A7789B2934A9950BF189ED6F50A20061122@SHSMSX104.ccr.corp.intel.com>
+From: "Fu, Zhonghui" <zhonghui.fu@linux.intel.com>
+Subject: [PATCH] mmc/sdio: utilize runtime PM to speed up SDIO card's resume
+ process
+Date: Wed, 13 Apr 2016 14:42:37 +0800
+Message-ID: <570DEA5D.8070708@linux.intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga04.intel.com ([192.55.52.120]:30096 "EHLO mga04.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1759306AbcDMF71 convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 13 Apr 2016 01:59:27 -0400
-Content-Language: en-US
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, Andreas Fenkart <afenkart@gmail.com>, kishon@ti.com, shawn.lin@rock-chips.com, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
-To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
-Cc: "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>, "Hunter, Adrian" <adrian.hunter@intel.com>
 
+Leave some work of SDIO card's resume process into it's runtime resume
+process to shorten system resume latency.
 
-According to Physical Layer Simplified Specification Version 4.10, SD
-card needs a R1b response for stop command.
-
-Signed-off-by: Yuan Juntao <juntao.yuan@intel.com>
+Signed-off-by: Zhonghui Fu <zhonghui.fu@linux.intel.com>
 ---
- drivers/mmc/card/block.c |   11 ++++++++---
- 1 file changed, 8 insertions(+), 3 deletions(-)
+ drivers/mmc/core/sdio.c  |   21 ++++++++++-----------
+ include/linux/mmc/host.h |    9 ++++++---
+ 2 files changed, 16 insertions(+), 14 deletions(-)
 
-diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
-index 3bdbe50..aa8fc98b 100644
---- a/drivers/mmc/card/block.c
-+++ b/drivers/mmc/card/block.c
-@@ -1533,9 +1533,14 @@ static void mmc_blk_rw_rq_prep(struct mmc_queue_req *mqrq,
-    if (rq_data_dir(req) == READ) {
-        brq->cmd.opcode = readcmd;
-        brq->data.flags = MMC_DATA_READ;
--       if (brq->mrq.stop)
--           brq->stop.flags = MMC_RSP_SPI_R1 | MMC_RSP_R1 |
--                   MMC_CMD_AC;
-+       if (brq->mrq.stop) {
-+           if (mmc_card_mmc(card))
-+               brq->stop.flags = MMC_RSP_SPI_R1 | MMC_RSP_R1 |
-+                       MMC_CMD_AC;
-+           else
-+               brq->stop.flags = MMC_RSP_SPI_R1B | MMC_RSP_R1B |
-+                       MMC_CMD_AC;
-+       }
-    } else {
-        brq->cmd.opcode = writecmd;
-        brq->data.flags = MMC_DATA_WRITE;
---
-1.7.9.5
-
-
-
-Thanks.
-Juntao.
-
+diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
+index bd44ba8..fe5d3c5 100644
+--- a/drivers/mmc/core/sdio.c
++++ b/drivers/mmc/core/sdio.c
+@@ -902,6 +902,10 @@ static int mmc_sdio_suspend(struct mmc_host *host)
+ 
+ 	if (!mmc_card_keep_power(host)) {
+ 		mmc_power_off(host);
++		if (host->caps & MMC_CAP_POWER_OFF_CARD) {
++			pm_runtime_disable(&host->card->dev);
++			pm_runtime_set_suspended(&host->card->dev);
++		}
+ 	} else if (host->retune_period) {
+ 		mmc_retune_timer_stop(host);
+ 		mmc_retune_needed(host);
+@@ -924,18 +928,16 @@ static int mmc_sdio_resume(struct mmc_host *host)
+ 
+ 	/* Restore power if needed */
+ 	if (!mmc_card_keep_power(host)) {
+-		mmc_power_up(host, host->card->ocr);
+ 		/*
+-		 * Tell runtime PM core we just powered up the card,
+-		 * since it still believes the card is powered off.
+ 		 * Note that currently runtime PM is only enabled
+ 		 * for SDIO cards that are MMC_CAP_POWER_OFF_CARD
+ 		 */
+ 		if (host->caps & MMC_CAP_POWER_OFF_CARD) {
+-			pm_runtime_disable(&host->card->dev);
+-			pm_runtime_set_active(&host->card->dev);
+ 			pm_runtime_enable(&host->card->dev);
++			goto out;
+ 		}
++
++		mmc_power_up(host, host->card->ocr);
+ 	}
+ 
+ 	/* No need to reinitialize powered-resumed nonremovable cards */
+@@ -953,13 +955,10 @@ static int mmc_sdio_resume(struct mmc_host *host)
+ 		err = sdio_enable_4bit_bus(host->card);
+ 	}
+ 
+-	if (!err && host->sdio_irqs) {
+-		if (!(host->caps2 & MMC_CAP2_SDIO_IRQ_NOTHREAD))
+-			wake_up_process(host->sdio_irq_thread);
+-		else if (host->caps & MMC_CAP_SDIO_IRQ)
+-			host->ops->enable_sdio_irq(host, 1);
+-	}
++	if (!err && host->sdio_irqs)
++		mmc_signal_sdio_irq(host);
+ 
++out:
+ 	mmc_release_host(host);
+ 
+ 	host->pm_flags &= ~MMC_PM_KEEP_POWER;
+diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+index 8dd4d29..8faaa5b 100644
+--- a/include/linux/mmc/host.h
++++ b/include/linux/mmc/host.h
+@@ -400,10 +400,13 @@ void mmc_request_done(struct mmc_host *, struct mmc_request *);
+ 
+ static inline void mmc_signal_sdio_irq(struct mmc_host *host)
+ {
+-	host->ops->enable_sdio_irq(host, 0);
+-	host->sdio_irq_pending = true;
+-	if (host->sdio_irq_thread)
++	if (!(host->caps2 & MMC_CAP2_SDIO_IRQ_NOTHREAD)) {
++		host->ops->enable_sdio_irq(host, 0);
++		host->sdio_irq_pending = true;
+ 		wake_up_process(host->sdio_irq_thread);
++	} else if (host->caps & MMC_CAP_SDIO_IRQ) {
++		host->ops->enable_sdio_irq(host, 1);
++	}
+ }
+ 
+ void sdio_run_irqs(struct mmc_host *host);
+-- 1.7.1
