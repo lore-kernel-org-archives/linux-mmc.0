@@ -1,71 +1,45 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
 Subject: Re: [PATCH 4/5] mmc: sdhci: Fix error paths in sdhci_add_host()
-Date: Wed, 13 Apr 2016 14:41:29 +0300
-Message-ID: <570E3069.5010903@intel.com>
+Date: Wed, 13 Apr 2016 13:47:12 +0200
+Message-ID: <CAPDyKFoNMer9n8fxnZ+rqBuRcGNSKwQdYduxpH=EoeiWfQ3v=g@mail.gmail.com>
 References: <1460460309-13619-1-git-send-email-adrian.hunter@intel.com>
- <1460460309-13619-5-git-send-email-adrian.hunter@intel.com>
- <CAPDyKFqJf4hNVeYw8wvp3aOp9fLSXMADVrGaBeZFG=QLAR1tZg@mail.gmail.com>
+	<1460460309-13619-5-git-send-email-adrian.hunter@intel.com>
+	<CAPDyKFqJf4hNVeYw8wvp3aOp9fLSXMADVrGaBeZFG=QLAR1tZg@mail.gmail.com>
+	<570E3069.5010903@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga02.intel.com ([134.134.136.20]:54196 "EHLO mga02.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753001AbcDMLpP (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 13 Apr 2016 07:45:15 -0400
-In-Reply-To: <CAPDyKFqJf4hNVeYw8wvp3aOp9fLSXMADVrGaBeZFG=QLAR1tZg@mail.gmail.com>
+Received: from mail-wm0-f54.google.com ([74.125.82.54]:36502 "EHLO
+	mail-wm0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S933961AbcDMLrO (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 13 Apr 2016 07:47:14 -0400
+Received: by mail-wm0-f54.google.com with SMTP id v188so169751037wme.1
+        for <linux-mmc@vger.kernel.org>; Wed, 13 Apr 2016 04:47:13 -0700 (PDT)
+In-Reply-To: <570E3069.5010903@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
+To: Adrian Hunter <adrian.hunter@intel.com>
 Cc: linux-mmc <linux-mmc@vger.kernel.org>
 
-On 13/04/16 14:41, Ulf Hansson wrote:
-> [...]
-> 
+On 13 April 2016 at 13:41, Adrian Hunter <adrian.hunter@intel.com> wrote:
+> On 13/04/16 14:41, Ulf Hansson wrote:
+>> [...]
 >>
->>         pr_info("%s: SDHCI controller on %s [%s] using %s\n",
->>                 mmc_hostname(mmc), host->hw_name, dev_name(mmc_dev(mmc)),
->> @@ -3331,15 +3337,27 @@ int sdhci_add_host(struct sdhci_host *host)
+>>>
+>>>         pr_info("%s: SDHCI controller on %s [%s] using %s\n",
+>>>                 mmc_hostname(mmc), host->hw_name, dev_name(mmc_dev(mmc)),
+>>> @@ -3331,15 +3337,27 @@ int sdhci_add_host(struct sdhci_host *host)
+>>>
+>>>         return 0;
+>>>
+>>> +unled:
+>>>  #ifdef SDHCI_USE_LEDS_CLASS
 >>
->>         return 0;
->>
->> +unled:
->>  #ifdef SDHCI_USE_LEDS_CLASS
-> 
-> Shouldn't this ifdef be removed in the earlier patch?
+>> Shouldn't this ifdef be removed in the earlier patch?
+>
+> It gets removed in the next patch.  Is that what you meant?
 
-It gets removed in the next patch.  Is that what you meant?
+Ahh, yes. I reviewed them in the wrong order. :-)
 
-> 
->> -reset:
->> +       led_classdev_unregister(&host->led);
->> +unirq:
->> +#endif
->>         sdhci_do_reset(host, SDHCI_RESET_ALL);
->>         sdhci_writel(host, 0, SDHCI_INT_ENABLE);
->>         sdhci_writel(host, 0, SDHCI_SIGNAL_ENABLE);
->>         free_irq(host->irq, host);
->> -#endif
->>  untasklet:
->>         tasklet_kill(&host->finish_tasklet);
->> +unreg:
->> +       if (!IS_ERR(mmc->supply.vqmmc))
->> +               regulator_disable(mmc->supply.vqmmc);
->> +undma:
->> +       if (host->align_buffer)
->> +               dma_free_coherent(mmc_dev(mmc), host->align_buffer_sz +
->> +                                 host->adma_table_sz, host->align_buffer,
->> +                                 host->align_addr);
->> +       host->adma_table = NULL;
->> +       host->align_buffer = NULL;
->>
->>         return ret;
->>  }
->> --
->> 1.9.1
->>
-> 
-> Kind regards
-> Uffe
-> 
-
+Kind regards
+Uffe
