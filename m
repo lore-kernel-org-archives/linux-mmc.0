@@ -1,103 +1,88 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: block: Correct response type of stop command for sdcard
-Date: Wed, 13 Apr 2016 13:41:02 +0200
-Message-ID: <CAPDyKFrE534Nmog9BnPbXpZbu_FKpNXxC5mWyBtwckoNdEPe9Q@mail.gmail.com>
-References: <588D8A7789B2934A9950BF189ED6F50A20061122@SHSMSX104.ccr.corp.intel.com>
-	<CAPDyKFogQMA-ggtnJBRbempR8zKOc+vydXiyKeq=BhQ1Vrw2xA@mail.gmail.com>
-	<588D8A7789B2934A9950BF189ED6F50A200614DE@SHSMSX104.ccr.corp.intel.com>
+From: Richard Ash <richardashaudacity@googlemail.com>
+Subject: 'error -110 sending stop command' on Zynq platform
+Date: Wed, 13 Apr 2016 12:40:45 +0100
+Message-ID: <CACOFwa=KnacTNDvsTcMzj4_0YCu8uADp3hrxFG7RDK+jLDCing@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wm0-f45.google.com ([74.125.82.45]:38811 "EHLO
-	mail-wm0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757293AbcDMLlE convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 13 Apr 2016 07:41:04 -0400
-Received: by mail-wm0-f45.google.com with SMTP id u206so72442779wme.1
-        for <linux-mmc@vger.kernel.org>; Wed, 13 Apr 2016 04:41:03 -0700 (PDT)
-In-Reply-To: <588D8A7789B2934A9950BF189ED6F50A200614DE@SHSMSX104.ccr.corp.intel.com>
+Received: from mail-ob0-f182.google.com ([209.85.214.182]:34289 "EHLO
+	mail-ob0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1760214AbcDMLkq (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 13 Apr 2016 07:40:46 -0400
+Received: by mail-ob0-f182.google.com with SMTP id bg3so31158794obb.1
+        for <linux-mmc@vger.kernel.org>; Wed, 13 Apr 2016 04:40:46 -0700 (PDT)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "Yuan, Juntao" <juntao.yuan@intel.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "Hunter, Adrian" <adrian.hunter@intel.com>
+To: Linux MMC / SD subsystem <linux-mmc@vger.kernel.org>
 
-On 13 April 2016 at 13:18, Yuan, Juntao <juntao.yuan@intel.com> wrote:
-> I tried both R1 and R1b for stop command of SD card.
-> I got plenty of warning message 'mmc1: Got data interrupt 0x00000002 even though no data operation was in progress' in console when R1 was being used for stop command.
-> It repeated and repeated, endlessly. Did you see this warning before?
+I am regularly suffering system lock-ups caused by the above error on
+my custom board based on the Xilinx Zynq 7000 Soc. The error from the
+kernel is always exactly the same (including all the same hex values):
 
-Please don't top post!
+ mmcblk0: error -110 sending stop command, original cmd response
+0x900, card status 0xe00
 
-I haven't seen it. It seems like a problem in the mmc host driver (I
-assume it's an SDHCI variant you are using).
+Has this error been reported before (I couldn't find a match in the
+mailing list archive), and is the problem likely to be in the kernel
+driver or in hardware? I have spent some time tracing waveforms and
+checking signal integrity, pull-up resistors and so on to no avail.
 
-Kind regards
-Uffe
+The error always occurs when writing to the SD card, and most often
+when more than one file is being written and the file system cache is
+flushed (by running the 'sync' command). Usually doing this three of
+four times, or packing up some zip files, is enough to trigger the
+error, which then causes all access to the CD card to hang until the
+system is hard reset. The access pattern is in some sense important,
+because I also tried the f3 flash test utilities
+(http://oss.digirati.com.br/f3/) which write a few large files of
+sequential data and read them back. These all run fine on all the
+cards I have tested, so they don't trigger the problem.
 
->
->
-> Thanks.
-> Juntao.
->
->
-> -----Original Message-----
-> From: Ulf Hansson [mailto:ulf.hansson@linaro.org]
-> Sent: Wednesday, April 13, 2016 4:15 PM
-> To: Yuan, Juntao <juntao.yuan@intel.com>
-> Cc: linux-mmc@vger.kernel.org; Hunter, Adrian <adrian.hunter@intel.com>
-> Subject: Re: [PATCH] mmc: block: Correct response type of stop command for sdcard
->
-> On 13 April 2016 at 07:59, Yuan, Juntao <juntao.yuan@intel.com> wrote:
->>
->> According to Physical Layer Simplified Specification Version 4.10, SD
->> card needs a R1b response for stop command.
->
-> I have looked at this earlier and I don't think R1B is needed.
->
-> According to the Command table in the spec, where commands are listed with their corresponding response type, a CMD12 (stop) has an R1B response. As you probably know, the difference between R1 and R1B is the optional busy signalling on DAT0.
->
-> Now, if you look into the details about READ and WRITE transfers in the spec, it becomes clear that there's a difference in the response you get from a CMD12. In the READ case there's *no* busy signalling but there is for WRITE. For that reason, using R1 in case of READ seems like the correct thing to do.
->
-> I haven't looked at SD 4.10, but according to earlier versions you can find these details in the "Timings" section.
->
-> I guess some comment in the code would be valuable as the spec is indeed a bit unclear, let me submit a change for it.
->
-> Kind regards
-> Uffe
->
->>
->> Signed-off-by: Yuan Juntao <juntao.yuan@intel.com>
->> ---
->>  drivers/mmc/card/block.c |   11 ++++++++---
->>  1 file changed, 8 insertions(+), 3 deletions(-)
->>
->> diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c index
->> 3bdbe50..aa8fc98b 100644
->> --- a/drivers/mmc/card/block.c
->> +++ b/drivers/mmc/card/block.c
->> @@ -1533,9 +1533,14 @@ static void mmc_blk_rw_rq_prep(struct mmc_queue_req *mqrq,
->>     if (rq_data_dir(req) == READ) {
->>         brq->cmd.opcode = readcmd;
->>         brq->data.flags = MMC_DATA_READ;
->> -       if (brq->mrq.stop)
->> -           brq->stop.flags = MMC_RSP_SPI_R1 | MMC_RSP_R1 |
->> -                   MMC_CMD_AC;
->> +       if (brq->mrq.stop) {
->> +           if (mmc_card_mmc(card))
->> +               brq->stop.flags = MMC_RSP_SPI_R1 | MMC_RSP_R1 |
->> +                       MMC_CMD_AC;
->> +           else
->> +               brq->stop.flags = MMC_RSP_SPI_R1B | MMC_RSP_R1B |
->> +                       MMC_CMD_AC;
->> +       }
->>     } else {
->>         brq->cmd.opcode = writecmd;
->>         brq->data.flags = MMC_DATA_WRITE;
->> --
->> 1.7.9.5
->>
->>
->>
->> Thanks.
->> Juntao.
->>
+All cards are formatted FAT32.
+
+This problem has now been reported with three different card vendors
+(I am getting the last two sent to me so I can re-test them all here):
+* Phison 8GB cards (industrial cards using Toshiba flash, multiple
+samples and firmware versions tested)
+* Sandisk 16GB Class 4 card
+* PNY 16GB Class 10 card
+
+however I also have cards from Samsung and Kingston which are
+absolutely fine, and will run my test script for hours without
+faltering. So the problem is not with all SD cards (however we have
+stocks of the Phison industrial cards so we do not want to move away
+from them if we can help it).
+
+The Zynq SOC uses the sdhci kernel driver, our board has a microSD
+card slot connected to sdhci0 with the following device tree fragments
+(generated by the Xilinx Zynq development tools):
+
+sdhci0: sdhci@e0100000 {
+           compatible = "arasan,sdhci-8.9a";
+           status = "disabled";
+           clock-names = "clk_xin", "clk_ahb";
+           clocks = <&clkc 21>, <&clkc 32>;
+           interrupt-parent = <&intc>;
+           interrupts = <0 24 4>;
+           reg = <0xe0100000 0x1000>;
+};
+
+&sdhci0 {
+        clock-frequency = <50000000>;
+        status = "okay";
+};
+
+Changing the clock frequency downwards does not affect the problem, it
+still occurs in the same way with the same reproducibility.
+
+This problem originally showed up in a Xilinx kernel based on 3.18, I
+have subsequently upgraded the kernel to the Xilinx v2105.4.01 which
+is based on mainline 4.0.0, with no change in the messages and
+results. I am about to start on trying to run a stock mainline kernel
+to see if I can reproduce the problem there (although this generates
+other issues with drivers for the Xilinx QSPI controller).
+
+Richard
+
+Richard Ash
+EA Technology
