@@ -1,59 +1,71 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 5/5] mmc: sdhci: Tidy together LED code
-Date: Wed, 13 Apr 2016 15:45:43 +0200
-Message-ID: <CAPDyKFrDyvghsojWty8kiWDv0KPYrabF+-y826NzTk8cE46mfA@mail.gmail.com>
-References: <1460460309-13619-1-git-send-email-adrian.hunter@intel.com>
-	<1460460309-13619-6-git-send-email-adrian.hunter@intel.com>
-	<CAPDyKFoi-3oLK90Bk68wfccF+D6P3gJq_jUZupR66abQ-wPaZg@mail.gmail.com>
-	<570E316C.3010305@intel.com>
-	<CAPDyKFqjY+qcie7mCJx-mmzO+rXgQPZZtBLY71gz=2Fh9op7OQ@mail.gmail.com>
-	<570E3D49.9030204@intel.com>
+From: Jon Hunter <jonathanh-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
+Subject: [PATCH] mmc: tegra: Disable UHS-I modes for tegra124
+Date: Wed, 13 Apr 2016 15:35:56 +0100
+Message-ID: <1460558156-10407-1-git-send-email-jonathanh@nvidia.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wm0-f49.google.com ([74.125.82.49]:37538 "EHLO
-	mail-wm0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1030640AbcDMNpp (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 13 Apr 2016 09:45:45 -0400
-Received: by mail-wm0-f49.google.com with SMTP id n3so79259309wmn.0
-        for <linux-mmc@vger.kernel.org>; Wed, 13 Apr 2016 06:45:44 -0700 (PDT)
-In-Reply-To: <570E3D49.9030204@intel.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain
+Return-path: <linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Sender: linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Stephen Warren <swarren-3lzwWm7+Weoh9ZMKESR00Q@public.gmane.org>, Thierry Reding <thierry.reding-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Alexandre Courbot <gnurou-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Cc: linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Lucas Stach <dev-8ppwABl0HbeELgA04lAiVw@public.gmane.org>, Jon Hunter <jonathanh-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>
 
-[...]
+Tegra124 has been randomly hanging during system suspend when entering
+the Tegra LP1 low power state. The hang is caused by the tegra SDHCI
+driver and linked to the UHS-I tuning sequence. Disabling the UHS-I
+modes for Tegra124 prevents any hangs from occurring when entering
+system suspend.
 
->>>>>
->>>>> -static void sdhci_activate_led(struct sdhci_host *host)
->>>>> +static void __sdhci_led_activate(struct sdhci_host *host)
->>>>
->>>> The renaming here seems a bit unnecessary, but more importantly why
->>>> can't you move these functions within the "if def sdhci leds" instead?
->>>
->>> They get used either way.  Either we use the LEDS subsystem (and mmc core
->>> controls them) or we turn them on/off directly from sdhci_request() etc.
->>
->> That seems wrong. Moreover it changes the current behaviour.
->
-> How does it change the current behaviour?  It was meant to be exactly the
-> same.  Perhaps looking closely at whether the original code was 'ifdef' or
-> 'ifndef' will help.
+Unfortunately, the tuning sequence described in the public Tegra
+documentation is incomplete and on inspection of the current tuning
+sequence that has been implemented is also incomplete and may cause
+problems. In the short-term it is safer to disable UHS-I modes for now
+and fix later because it would be too large of a change to simply patch
+now. Therefore, disable UHS-I modes for Tegra124.
 
-Huh. Yes, indeed you are right! Sorry for noise, again.
+Signed-off-by: Jon Hunter <jonathanh-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
+---
 
->
->>
->> I am not sure why you want to use the leds in case of when the LED
->> subsystem isn't available?
->
-> I am attempting to preserve the existing behaviour, so that is just how it was.
->
+I previously brought up this issue in this thread [0], but there has
+been no resolution and so I think that for v4.6 we need to disable this
+for now. I also pointered out that there is a complete implementation
+available in the v3.18 kernel used by chromeos products [1]. We do plan
+to get better support for UHS-I modes for Tegra it is just a matter of
+bandwidth at the moment :-(
 
-I have applied all five patches for next! Thanks!
+[0] http://marc.info/?l=linux-tegra&m=145926947408663&w=2
+[1] https://chromium.googlesource.com/chromiumos/third_party/kernel/+/chromeos-3.10/drivers/mmc/host/sdhci-tegra.c
 
-Still, perhaps a future clean-up can adopt to my proposal above!?
+ drivers/mmc/host/sdhci-tegra.c | 10 +---------
+ 1 file changed, 1 insertion(+), 9 deletions(-)
 
-Kind regards
-Uffe
+diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
+index f8c4762bb48d..bcc0de47fe7e 100644
+--- a/drivers/mmc/host/sdhci-tegra.c
++++ b/drivers/mmc/host/sdhci-tegra.c
+@@ -382,14 +382,6 @@ static const struct sdhci_tegra_soc_data soc_data_tegra114 = {
+ 	.pdata = &sdhci_tegra114_pdata,
+ };
+ 
+-static const struct sdhci_tegra_soc_data soc_data_tegra124 = {
+-	.pdata = &sdhci_tegra114_pdata,
+-	.nvquirks = NVQUIRK_ENABLE_SDR50 |
+-		    NVQUIRK_ENABLE_DDR50 |
+-		    NVQUIRK_ENABLE_SDR104 |
+-		    NVQUIRK_HAS_PADCALIB,
+-};
+-
+ static const struct sdhci_pltfm_data sdhci_tegra210_pdata = {
+ 	.quirks = SDHCI_QUIRK_BROKEN_TIMEOUT_VAL |
+ 		  SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK |
+@@ -407,7 +399,7 @@ static const struct sdhci_tegra_soc_data soc_data_tegra210 = {
+ 
+ static const struct of_device_id sdhci_tegra_dt_match[] = {
+ 	{ .compatible = "nvidia,tegra210-sdhci", .data = &soc_data_tegra210 },
+-	{ .compatible = "nvidia,tegra124-sdhci", .data = &soc_data_tegra124 },
++	{ .compatible = "nvidia,tegra124-sdhci", .data = &soc_data_tegra114 },
+ 	{ .compatible = "nvidia,tegra114-sdhci", .data = &soc_data_tegra114 },
+ 	{ .compatible = "nvidia,tegra30-sdhci", .data = &soc_data_tegra30 },
+ 	{ .compatible = "nvidia,tegra20-sdhci", .data = &soc_data_tegra20 },
+-- 
+2.1.4
