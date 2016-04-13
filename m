@@ -1,230 +1,103 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 5/5] mmc: sdhci: Tidy together LED code
-Date: Wed, 13 Apr 2016 13:42:00 +0200
-Message-ID: <CAPDyKFoi-3oLK90Bk68wfccF+D6P3gJq_jUZupR66abQ-wPaZg@mail.gmail.com>
-References: <1460460309-13619-1-git-send-email-adrian.hunter@intel.com>
-	<1460460309-13619-6-git-send-email-adrian.hunter@intel.com>
+Subject: Re: [PATCH] mmc: block: Correct response type of stop command for sdcard
+Date: Wed, 13 Apr 2016 13:41:02 +0200
+Message-ID: <CAPDyKFrE534Nmog9BnPbXpZbu_FKpNXxC5mWyBtwckoNdEPe9Q@mail.gmail.com>
+References: <588D8A7789B2934A9950BF189ED6F50A20061122@SHSMSX104.ccr.corp.intel.com>
+	<CAPDyKFogQMA-ggtnJBRbempR8zKOc+vydXiyKeq=BhQ1Vrw2xA@mail.gmail.com>
+	<588D8A7789B2934A9950BF189ED6F50A200614DE@SHSMSX104.ccr.corp.intel.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wm0-f50.google.com ([74.125.82.50]:38074 "EHLO
-	mail-wm0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1760378AbcDMLmB (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 13 Apr 2016 07:42:01 -0400
-Received: by mail-wm0-f50.google.com with SMTP id u206so72488031wme.1
-        for <linux-mmc@vger.kernel.org>; Wed, 13 Apr 2016 04:42:01 -0700 (PDT)
-In-Reply-To: <1460460309-13619-6-git-send-email-adrian.hunter@intel.com>
+Received: from mail-wm0-f45.google.com ([74.125.82.45]:38811 "EHLO
+	mail-wm0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1757293AbcDMLlE convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 13 Apr 2016 07:41:04 -0400
+Received: by mail-wm0-f45.google.com with SMTP id u206so72442779wme.1
+        for <linux-mmc@vger.kernel.org>; Wed, 13 Apr 2016 04:41:03 -0700 (PDT)
+In-Reply-To: <588D8A7789B2934A9950BF189ED6F50A200614DE@SHSMSX104.ccr.corp.intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>
+To: "Yuan, Juntao" <juntao.yuan@intel.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "Hunter, Adrian" <adrian.hunter@intel.com>
 
-On 12 April 2016 at 13:25, Adrian Hunter <adrian.hunter@intel.com> wrote:
-> ifdef's make the code more complicated and harder to read.
-> Move all the LED code together to reduce the ifdef's to
-> one place.
->
-> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
-> ---
->  drivers/mmc/host/sdhci.c | 96 +++++++++++++++++++++++++++++++-----------------
->  1 file changed, 63 insertions(+), 33 deletions(-)
->
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index be5b5c95138c..13f3dd8992d5 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -38,11 +38,6 @@
->  #define DBG(f, x...) \
->         pr_debug(DRIVER_NAME " [%s()]: " f, __func__,## x)
->
-> -#if defined(CONFIG_LEDS_CLASS) || (defined(CONFIG_LEDS_CLASS_MODULE) && \
-> -       defined(CONFIG_MMC_SDHCI_MODULE))
-> -#define SDHCI_USE_LEDS_CLASS
-> -#endif
-> -
->  #define MAX_TUNING_LOOP 40
->
->  static unsigned int debug_quirks = 0;
-> @@ -246,7 +241,7 @@ static void sdhci_reinit(struct sdhci_host *host)
->         sdhci_enable_card_detection(host);
->  }
->
-> -static void sdhci_activate_led(struct sdhci_host *host)
-> +static void __sdhci_led_activate(struct sdhci_host *host)
+On 13 April 2016 at 13:18, Yuan, Juntao <juntao.yuan@intel.com> wrote:
+> I tried both R1 and R1b for stop command of SD card.
+> I got plenty of warning message 'mmc1: Got data interrupt 0x00000002 even though no data operation was in progress' in console when R1 was being used for stop command.
+> It repeated and repeated, endlessly. Did you see this warning before?
 
-The renaming here seems a bit unnecessary, but more importantly why
-can't you move these functions within the "if def sdhci leds" instead?
+Please don't top post!
 
->  {
->         u8 ctrl;
->
-> @@ -255,7 +250,7 @@ static void sdhci_activate_led(struct sdhci_host *host)
->         sdhci_writeb(host, ctrl, SDHCI_HOST_CONTROL);
->  }
->
-> -static void sdhci_deactivate_led(struct sdhci_host *host)
-> +static void __sdhci_led_deactivate(struct sdhci_host *host)
->  {
->         u8 ctrl;
->
-> @@ -264,9 +259,11 @@ static void sdhci_deactivate_led(struct sdhci_host *host)
->         sdhci_writeb(host, ctrl, SDHCI_HOST_CONTROL);
->  }
->
-> -#ifdef SDHCI_USE_LEDS_CLASS
-> +#if defined(CONFIG_LEDS_CLASS) || (defined(CONFIG_LEDS_CLASS_MODULE) && \
-> +                                  defined(CONFIG_MMC_SDHCI_MODULE))
-> +
->  static void sdhci_led_control(struct led_classdev *led,
-> -       enum led_brightness brightness)
-> +                             enum led_brightness brightness)
->  {
->         struct sdhci_host *host = container_of(led, struct sdhci_host, led);
->         unsigned long flags;
-> @@ -277,12 +274,62 @@ static void sdhci_led_control(struct led_classdev *led,
->                 goto out;
->
->         if (brightness == LED_OFF)
-> -               sdhci_deactivate_led(host);
-> +               __sdhci_led_deactivate(host);
->         else
-> -               sdhci_activate_led(host);
-> +               __sdhci_led_activate(host);
->  out:
->         spin_unlock_irqrestore(&host->lock, flags);
->  }
-> +
-> +static int sdhci_led_register(struct sdhci_host *host)
-> +{
-> +       struct mmc_host *mmc = host->mmc;
-> +
-> +       snprintf(host->led_name, sizeof(host->led_name),
-> +                "%s::", mmc_hostname(mmc));
-> +
-> +       host->led.name = host->led_name;
-> +       host->led.brightness = LED_OFF;
-> +       host->led.default_trigger = mmc_hostname(mmc);
-> +       host->led.brightness_set = sdhci_led_control;
-> +
-> +       return led_classdev_register(mmc_dev(mmc), &host->led);
-> +}
-> +
-> +static void sdhci_led_unregister(struct sdhci_host *host)
-> +{
-> +       led_classdev_unregister(&host->led);
-> +}
-> +
-> +static inline void sdhci_led_activate(struct sdhci_host *host)
-> +{
-> +}
-> +
-> +static inline void sdhci_led_deactivate(struct sdhci_host *host)
-> +{
-> +}
-
-This seems wrong. I assume you actually want to control the registered
-leds within this ifdef and not have the two functions above being
-stubs?
-
-> +
-> +#else
-> +
-> +static inline int sdhci_led_register(struct sdhci_host *host)
-> +{
-> +       return 0;
-> +}
-> +
-> +static inline void sdhci_led_unregister(struct sdhci_host *host)
-> +{
-> +}
-> +
-> +static inline void sdhci_led_activate(struct sdhci_host *host)
-> +{
-> +       __sdhci_led_activate(host);
-> +}
-> +
-> +static inline void sdhci_led_deactivate(struct sdhci_host *host)
-> +{
-> +       __sdhci_led_deactivate(host);
-> +}
-
-See my comment above. Shouldn't these two functions be stubs?
-
-> +
->  #endif
->
->  /*****************************************************************************\
-> @@ -1320,9 +1367,7 @@ static void sdhci_request(struct mmc_host *mmc, struct mmc_request *mrq)
->
->         WARN_ON(host->mrq != NULL);
->
-> -#ifndef SDHCI_USE_LEDS_CLASS
-> -       sdhci_activate_led(host);
-> -#endif
-> +       sdhci_led_activate(host);
->
->         /*
->          * Ensure we don't send the STOP for non-SET_BLOCK_COUNTED
-> @@ -2183,9 +2228,7 @@ static void sdhci_tasklet_finish(unsigned long param)
->         host->cmd = NULL;
->         host->data = NULL;
->
-> -#ifndef SDHCI_USE_LEDS_CLASS
-> -       sdhci_deactivate_led(host);
-> -#endif
-> +       sdhci_led_deactivate(host);
->
->         mmiowb();
->         spin_unlock_irqrestore(&host->lock, flags);
-> @@ -3305,21 +3348,12 @@ int sdhci_add_host(struct sdhci_host *host)
->         sdhci_dumpregs(host);
->  #endif
->
-> -#ifdef SDHCI_USE_LEDS_CLASS
-> -       snprintf(host->led_name, sizeof(host->led_name),
-> -               "%s::", mmc_hostname(mmc));
-> -       host->led.name = host->led_name;
-> -       host->led.brightness = LED_OFF;
-> -       host->led.default_trigger = mmc_hostname(mmc);
-> -       host->led.brightness_set = sdhci_led_control;
-> -
-> -       ret = led_classdev_register(mmc_dev(mmc), &host->led);
-> +       ret = sdhci_led_register(host);
->         if (ret) {
->                 pr_err("%s: Failed to register LED device: %d\n",
->                        mmc_hostname(mmc), ret);
->                 goto unirq;
->         }
-> -#endif
->
->         mmiowb();
->
-> @@ -3338,10 +3372,8 @@ int sdhci_add_host(struct sdhci_host *host)
->         return 0;
->
->  unled:
-> -#ifdef SDHCI_USE_LEDS_CLASS
-> -       led_classdev_unregister(&host->led);
-> +       sdhci_led_unregister(host);
->  unirq:
-> -#endif
->         sdhci_do_reset(host, SDHCI_RESET_ALL);
->         sdhci_writel(host, 0, SDHCI_INT_ENABLE);
->         sdhci_writel(host, 0, SDHCI_SIGNAL_ENABLE);
-> @@ -3389,9 +3421,7 @@ void sdhci_remove_host(struct sdhci_host *host, int dead)
->
->         mmc_remove_host(mmc);
->
-> -#ifdef SDHCI_USE_LEDS_CLASS
-> -       led_classdev_unregister(&host->led);
-> -#endif
-> +       sdhci_led_unregister(host);
->
->         if (!dead)
->                 sdhci_do_reset(host, SDHCI_RESET_ALL);
-> --
-> 1.9.1
->
+I haven't seen it. It seems like a problem in the mmc host driver (I
+assume it's an SDHCI variant you are using).
 
 Kind regards
 Uffe
+
+>
+>
+> Thanks.
+> Juntao.
+>
+>
+> -----Original Message-----
+> From: Ulf Hansson [mailto:ulf.hansson@linaro.org]
+> Sent: Wednesday, April 13, 2016 4:15 PM
+> To: Yuan, Juntao <juntao.yuan@intel.com>
+> Cc: linux-mmc@vger.kernel.org; Hunter, Adrian <adrian.hunter@intel.com>
+> Subject: Re: [PATCH] mmc: block: Correct response type of stop command for sdcard
+>
+> On 13 April 2016 at 07:59, Yuan, Juntao <juntao.yuan@intel.com> wrote:
+>>
+>> According to Physical Layer Simplified Specification Version 4.10, SD
+>> card needs a R1b response for stop command.
+>
+> I have looked at this earlier and I don't think R1B is needed.
+>
+> According to the Command table in the spec, where commands are listed with their corresponding response type, a CMD12 (stop) has an R1B response. As you probably know, the difference between R1 and R1B is the optional busy signalling on DAT0.
+>
+> Now, if you look into the details about READ and WRITE transfers in the spec, it becomes clear that there's a difference in the response you get from a CMD12. In the READ case there's *no* busy signalling but there is for WRITE. For that reason, using R1 in case of READ seems like the correct thing to do.
+>
+> I haven't looked at SD 4.10, but according to earlier versions you can find these details in the "Timings" section.
+>
+> I guess some comment in the code would be valuable as the spec is indeed a bit unclear, let me submit a change for it.
+>
+> Kind regards
+> Uffe
+>
+>>
+>> Signed-off-by: Yuan Juntao <juntao.yuan@intel.com>
+>> ---
+>>  drivers/mmc/card/block.c |   11 ++++++++---
+>>  1 file changed, 8 insertions(+), 3 deletions(-)
+>>
+>> diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c index
+>> 3bdbe50..aa8fc98b 100644
+>> --- a/drivers/mmc/card/block.c
+>> +++ b/drivers/mmc/card/block.c
+>> @@ -1533,9 +1533,14 @@ static void mmc_blk_rw_rq_prep(struct mmc_queue_req *mqrq,
+>>     if (rq_data_dir(req) == READ) {
+>>         brq->cmd.opcode = readcmd;
+>>         brq->data.flags = MMC_DATA_READ;
+>> -       if (brq->mrq.stop)
+>> -           brq->stop.flags = MMC_RSP_SPI_R1 | MMC_RSP_R1 |
+>> -                   MMC_CMD_AC;
+>> +       if (brq->mrq.stop) {
+>> +           if (mmc_card_mmc(card))
+>> +               brq->stop.flags = MMC_RSP_SPI_R1 | MMC_RSP_R1 |
+>> +                       MMC_CMD_AC;
+>> +           else
+>> +               brq->stop.flags = MMC_RSP_SPI_R1B | MMC_RSP_R1B |
+>> +                       MMC_CMD_AC;
+>> +       }
+>>     } else {
+>>         brq->cmd.opcode = writecmd;
+>>         brq->data.flags = MMC_DATA_WRITE;
+>> --
+>> 1.7.9.5
+>>
+>>
+>>
+>> Thanks.
+>> Juntao.
+>>
