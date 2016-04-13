@@ -1,88 +1,71 @@
-From: Richard Ash <richardashaudacity@googlemail.com>
-Subject: 'error -110 sending stop command' on Zynq platform
-Date: Wed, 13 Apr 2016 12:40:45 +0100
-Message-ID: <CACOFwa=KnacTNDvsTcMzj4_0YCu8uADp3hrxFG7RDK+jLDCing@mail.gmail.com>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH 4/5] mmc: sdhci: Fix error paths in sdhci_add_host()
+Date: Wed, 13 Apr 2016 14:41:29 +0300
+Message-ID: <570E3069.5010903@intel.com>
+References: <1460460309-13619-1-git-send-email-adrian.hunter@intel.com>
+ <1460460309-13619-5-git-send-email-adrian.hunter@intel.com>
+ <CAPDyKFqJf4hNVeYw8wvp3aOp9fLSXMADVrGaBeZFG=QLAR1tZg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ob0-f182.google.com ([209.85.214.182]:34289 "EHLO
-	mail-ob0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1760214AbcDMLkq (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 13 Apr 2016 07:40:46 -0400
-Received: by mail-ob0-f182.google.com with SMTP id bg3so31158794obb.1
-        for <linux-mmc@vger.kernel.org>; Wed, 13 Apr 2016 04:40:46 -0700 (PDT)
+Received: from mga02.intel.com ([134.134.136.20]:54196 "EHLO mga02.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753001AbcDMLpP (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 13 Apr 2016 07:45:15 -0400
+In-Reply-To: <CAPDyKFqJf4hNVeYw8wvp3aOp9fLSXMADVrGaBeZFG=QLAR1tZg@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Linux MMC / SD subsystem <linux-mmc@vger.kernel.org>
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>
 
-I am regularly suffering system lock-ups caused by the above error on
-my custom board based on the Xilinx Zynq 7000 Soc. The error from the
-kernel is always exactly the same (including all the same hex values):
+On 13/04/16 14:41, Ulf Hansson wrote:
+> [...]
+> 
+>>
+>>         pr_info("%s: SDHCI controller on %s [%s] using %s\n",
+>>                 mmc_hostname(mmc), host->hw_name, dev_name(mmc_dev(mmc)),
+>> @@ -3331,15 +3337,27 @@ int sdhci_add_host(struct sdhci_host *host)
+>>
+>>         return 0;
+>>
+>> +unled:
+>>  #ifdef SDHCI_USE_LEDS_CLASS
+> 
+> Shouldn't this ifdef be removed in the earlier patch?
 
- mmcblk0: error -110 sending stop command, original cmd response
-0x900, card status 0xe00
+It gets removed in the next patch.  Is that what you meant?
 
-Has this error been reported before (I couldn't find a match in the
-mailing list archive), and is the problem likely to be in the kernel
-driver or in hardware? I have spent some time tracing waveforms and
-checking signal integrity, pull-up resistors and so on to no avail.
+> 
+>> -reset:
+>> +       led_classdev_unregister(&host->led);
+>> +unirq:
+>> +#endif
+>>         sdhci_do_reset(host, SDHCI_RESET_ALL);
+>>         sdhci_writel(host, 0, SDHCI_INT_ENABLE);
+>>         sdhci_writel(host, 0, SDHCI_SIGNAL_ENABLE);
+>>         free_irq(host->irq, host);
+>> -#endif
+>>  untasklet:
+>>         tasklet_kill(&host->finish_tasklet);
+>> +unreg:
+>> +       if (!IS_ERR(mmc->supply.vqmmc))
+>> +               regulator_disable(mmc->supply.vqmmc);
+>> +undma:
+>> +       if (host->align_buffer)
+>> +               dma_free_coherent(mmc_dev(mmc), host->align_buffer_sz +
+>> +                                 host->adma_table_sz, host->align_buffer,
+>> +                                 host->align_addr);
+>> +       host->adma_table = NULL;
+>> +       host->align_buffer = NULL;
+>>
+>>         return ret;
+>>  }
+>> --
+>> 1.9.1
+>>
+> 
+> Kind regards
+> Uffe
+> 
 
-The error always occurs when writing to the SD card, and most often
-when more than one file is being written and the file system cache is
-flushed (by running the 'sync' command). Usually doing this three of
-four times, or packing up some zip files, is enough to trigger the
-error, which then causes all access to the CD card to hang until the
-system is hard reset. The access pattern is in some sense important,
-because I also tried the f3 flash test utilities
-(http://oss.digirati.com.br/f3/) which write a few large files of
-sequential data and read them back. These all run fine on all the
-cards I have tested, so they don't trigger the problem.
-
-All cards are formatted FAT32.
-
-This problem has now been reported with three different card vendors
-(I am getting the last two sent to me so I can re-test them all here):
-* Phison 8GB cards (industrial cards using Toshiba flash, multiple
-samples and firmware versions tested)
-* Sandisk 16GB Class 4 card
-* PNY 16GB Class 10 card
-
-however I also have cards from Samsung and Kingston which are
-absolutely fine, and will run my test script for hours without
-faltering. So the problem is not with all SD cards (however we have
-stocks of the Phison industrial cards so we do not want to move away
-from them if we can help it).
-
-The Zynq SOC uses the sdhci kernel driver, our board has a microSD
-card slot connected to sdhci0 with the following device tree fragments
-(generated by the Xilinx Zynq development tools):
-
-sdhci0: sdhci@e0100000 {
-           compatible = "arasan,sdhci-8.9a";
-           status = "disabled";
-           clock-names = "clk_xin", "clk_ahb";
-           clocks = <&clkc 21>, <&clkc 32>;
-           interrupt-parent = <&intc>;
-           interrupts = <0 24 4>;
-           reg = <0xe0100000 0x1000>;
-};
-
-&sdhci0 {
-        clock-frequency = <50000000>;
-        status = "okay";
-};
-
-Changing the clock frequency downwards does not affect the problem, it
-still occurs in the same way with the same reproducibility.
-
-This problem originally showed up in a Xilinx kernel based on 3.18, I
-have subsequently upgraded the kernel to the Xilinx v2105.4.01 which
-is based on mainline 4.0.0, with no change in the messages and
-results. I am about to start on trying to run a stock mainline kernel
-to see if I can reproduce the problem there (although this generates
-other issues with drivers for the Xilinx QSPI controller).
-
-Richard
-
-Richard Ash
-EA Technology
