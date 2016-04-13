@@ -1,58 +1,65 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] qcom: sdhci-msm: enable the DLL clock
-Date: Wed, 13 Apr 2016 13:40:12 +0200
-Message-ID: <CAPDyKFp4Njdb7g6p_yM7E4MSqYiHGA4O1rB3wLy8X_F3q5j5nA@mail.gmail.com>
-References: <1459842403-4052-1-git-send-email-ssambang@codeaurora.org>
-	<CAPDyKFr7dWOxb_o7b9AyEWYSROtjdktPXwKexAjBGaFw5M-Fig@mail.gmail.com>
-	<20160411221126.GD14441@codeaurora.org>
+Subject: Re: [PATCH 4/5] mmc: sdhci: Fix error paths in sdhci_add_host()
+Date: Wed, 13 Apr 2016 13:41:45 +0200
+Message-ID: <CAPDyKFqJf4hNVeYw8wvp3aOp9fLSXMADVrGaBeZFG=QLAR1tZg@mail.gmail.com>
+References: <1460460309-13619-1-git-send-email-adrian.hunter@intel.com>
+	<1460460309-13619-5-git-send-email-adrian.hunter@intel.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-arm-msm-owner@vger.kernel.org>
-In-Reply-To: <20160411221126.GD14441@codeaurora.org>
-Sender: linux-arm-msm-owner@vger.kernel.org
-To: Stephen Boyd <sboyd@codeaurora.org>
-Cc: Sreedhar Sambangi <ssambang@codeaurora.org>, Andy Gross <andy.gross@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-arm-msm@vger.kernel.org" <linux-arm-msm@vger.kernel.org>, qca-upstream.external@qca.qualcomm.com, Ivan Ivanov <ivan.ivanov@linaro.org>, Georgi Djakov <georgi.djakov@linaro.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-wm0-f54.google.com ([74.125.82.54]:37872 "EHLO
+	mail-wm0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1760358AbcDMLlq (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 13 Apr 2016 07:41:46 -0400
+Received: by mail-wm0-f54.google.com with SMTP id n3so72685864wmn.0
+        for <linux-mmc@vger.kernel.org>; Wed, 13 Apr 2016 04:41:46 -0700 (PDT)
+In-Reply-To: <1460460309-13619-5-git-send-email-adrian.hunter@intel.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Adrian Hunter <adrian.hunter@intel.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>
 
-On 12 April 2016 at 00:11, Stephen Boyd <sboyd@codeaurora.org> wrote:
-> On 04/11, Ulf Hansson wrote:
->> + Adrian
->>
->> On 5 April 2016 at 09:46, Sreedhar Sambangi <ssambang@codeaurora.org> wrote:
->> > The DLL clock has to be enabled until the correct
->> > clock frequency is delivered to DLL
->> > '1'(default) - DLL clock is disabled
->> > '0' - dll clock has legacly clock enable.
->> >
->> > Signed-off-by: Varadarajan Narayanan <varada@codeaurora.org>
->> > Signed-off-by: Sreedhar Sambangi <ssambang@codeaurora.org>
->>
->> Adrian Hunter is the maintainer for sdhci, next time make sure to post to him.
->>
->> As this seems like fairly trivial change I decided to pick it up
->> anyway. So applied for next!
->>
->> Note, that I changed the prefix of the commit message header to "mmc".
->>
+[...]
+
 >
-> I'm not sure this patch is actually right. In the downstream
-> sources we do quite a few more reads and writes if we need to
-> poke this second DLL configuration register. Furthermore, on
-> msm8974 and apq8084 this register doesn't even exist so writing
-> to it may cause problems if it isn't write ignored (I haven't
-> checked).
+>         pr_info("%s: SDHCI controller on %s [%s] using %s\n",
+>                 mmc_hostname(mmc), host->hw_name, dev_name(mmc_dev(mmc)),
+> @@ -3331,15 +3337,27 @@ int sdhci_add_host(struct sdhci_host *host)
 >
-> I think we should follow the downstream kernel design instead.
-> Namely, reading the major/minor version registers to figure out
-> if we should be touching this register in the first place, and
-> then adding a clock property to the DT binding for the XO source
-> so we can determine the XO frequency. It seems that we need this
-> frequency to figure out how to program the second DLL
-> configuration register appropriately.
+>         return 0;
+>
+> +unled:
+>  #ifdef SDHCI_USE_LEDS_CLASS
 
-Stephen,
+Shouldn't this ifdef be removed in the earlier patch?
 
-Thanks for reviewing. I have dropped this patch for now.
+> -reset:
+> +       led_classdev_unregister(&host->led);
+> +unirq:
+> +#endif
+>         sdhci_do_reset(host, SDHCI_RESET_ALL);
+>         sdhci_writel(host, 0, SDHCI_INT_ENABLE);
+>         sdhci_writel(host, 0, SDHCI_SIGNAL_ENABLE);
+>         free_irq(host->irq, host);
+> -#endif
+>  untasklet:
+>         tasklet_kill(&host->finish_tasklet);
+> +unreg:
+> +       if (!IS_ERR(mmc->supply.vqmmc))
+> +               regulator_disable(mmc->supply.vqmmc);
+> +undma:
+> +       if (host->align_buffer)
+> +               dma_free_coherent(mmc_dev(mmc), host->align_buffer_sz +
+> +                                 host->adma_table_sz, host->align_buffer,
+> +                                 host->align_addr);
+> +       host->adma_table = NULL;
+> +       host->align_buffer = NULL;
+>
+>         return ret;
+>  }
+> --
+> 1.9.1
+>
 
 Kind regards
 Uffe
