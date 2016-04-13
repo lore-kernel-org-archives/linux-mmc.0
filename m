@@ -1,53 +1,73 @@
-From: Masahiro Yamada <yamada.masahiro@socionext.com>
-Subject: Re: [PATCH] mmc: sdhci: use IS_REACHABLE(CONFIG_LEDS_CLASS) to enable
- LED code
-Date: Wed, 13 Apr 2016 18:09:17 +0900
-Message-ID: <CAK7LNATKxZdfKyaKeNAoN7ozT7LhAqTav5TwORVaPC-wZ1-nDg@mail.gmail.com>
-References: <1460537730-23430-1-git-send-email-yamada.masahiro@socionext.com>
-	<570E0A7F.8070200@intel.com>
+From: "Yuan, Juntao" <juntao.yuan@intel.com>
+Subject: RE: [PATCH] mmc: block: Correct response type of stop command for
+ sdcard
+Date: Wed, 13 Apr 2016 11:18:58 +0000
+Message-ID: <588D8A7789B2934A9950BF189ED6F50A200614DE@SHSMSX104.ccr.corp.intel.com>
+References: <588D8A7789B2934A9950BF189ED6F50A20061122@SHSMSX104.ccr.corp.intel.com>
+ <CAPDyKFogQMA-ggtnJBRbempR8zKOc+vydXiyKeq=BhQ1Vrw2xA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from conssluserg-06.nifty.com ([210.131.2.91]:32374 "EHLO
-	conssluserg-06.nifty.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1759723AbcDMJJc (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 13 Apr 2016 05:09:32 -0400
-In-Reply-To: <570E0A7F.8070200@intel.com>
+Received: from mga03.intel.com ([134.134.136.65]:8221 "EHLO mga03.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S932793AbcDMLTF (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 13 Apr 2016 07:19:05 -0400
+In-Reply-To: <CAPDyKFogQMA-ggtnJBRbempR8zKOc+vydXiyKeq=BhQ1Vrw2xA@mail.gmail.com>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: linux-mmc@vger.kernel.org, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "Hunter, Adrian" <adrian.hunter@intel.com>
 
-2016-04-13 17:59 GMT+09:00 Adrian Hunter <adrian.hunter@intel.com>:
-> On 13/04/16 11:55, Masahiro Yamada wrote:
->> defined(CONFIG_LEDS_CLASS) || (defined(CONFIG_LEDS_CLASS_MODULE) && \
->>     defined(CONFIG_MMC_SDHCI_MODULE))
->>
->> is equivalent to:
->>
->> defined(CONFIG_LEDS_CLASS) || (defined(CONFIG_LEDS_CLASS_MODULE) && \
->>     defined(MODULE))
->>
->> and it can also be written shortly as:
->>
->> IS_REACHABLE(CONFIG_LEDS_CLASS)
->>
->> Signed-off-by: Masahiro Yamada <yamada.masahiro@socionext.com>
->
-> I recently sent a change to the LEDS code:
->
->         http://marc.info/?l=linux-mmc&m=146046055330711
->
-> So, if that is accepted, this will need to be changed - there will be only
-> one place CONFIG_LEDS_CLASS is used then.
->
-
-OK.
-
-If yours is accepted, i will rebase this patch on top of yours.
-
-
-
--- 
-Best Regards
-Masahiro Yamada
+SSB0cmllZCBib3RoIFIxIGFuZCBSMWIgZm9yIHN0b3AgY29tbWFuZCBvZiBTRCBjYXJkLg0KSSBn
+b3QgcGxlbnR5IG9mIHdhcm5pbmcgbWVzc2FnZSAnbW1jMTogR290IGRhdGEgaW50ZXJydXB0IDB4
+MDAwMDAwMDIgZXZlbiB0aG91Z2ggbm8gZGF0YSBvcGVyYXRpb24gd2FzIGluIHByb2dyZXNzJyBp
+biBjb25zb2xlIHdoZW4gUjEgd2FzIGJlaW5nIHVzZWQgZm9yIHN0b3AgY29tbWFuZC4NCkl0IHJl
+cGVhdGVkIGFuZCByZXBlYXRlZCwgZW5kbGVzc2x5LiBEaWQgeW91IHNlZSB0aGlzIHdhcm5pbmcg
+YmVmb3JlPw0KDQoNClRoYW5rcy4NCkp1bnRhby4NCg0KDQotLS0tLU9yaWdpbmFsIE1lc3NhZ2Ut
+LS0tLQ0KRnJvbTogVWxmIEhhbnNzb24gW21haWx0bzp1bGYuaGFuc3NvbkBsaW5hcm8ub3JnXSAN
+ClNlbnQ6IFdlZG5lc2RheSwgQXByaWwgMTMsIDIwMTYgNDoxNSBQTQ0KVG86IFl1YW4sIEp1bnRh
+byA8anVudGFvLnl1YW5AaW50ZWwuY29tPg0KQ2M6IGxpbnV4LW1tY0B2Z2VyLmtlcm5lbC5vcmc7
+IEh1bnRlciwgQWRyaWFuIDxhZHJpYW4uaHVudGVyQGludGVsLmNvbT4NClN1YmplY3Q6IFJlOiBb
+UEFUQ0hdIG1tYzogYmxvY2s6IENvcnJlY3QgcmVzcG9uc2UgdHlwZSBvZiBzdG9wIGNvbW1hbmQg
+Zm9yIHNkY2FyZA0KDQpPbiAxMyBBcHJpbCAyMDE2IGF0IDA3OjU5LCBZdWFuLCBKdW50YW8gPGp1
+bnRhby55dWFuQGludGVsLmNvbT4gd3JvdGU6DQo+DQo+IEFjY29yZGluZyB0byBQaHlzaWNhbCBM
+YXllciBTaW1wbGlmaWVkIFNwZWNpZmljYXRpb24gVmVyc2lvbiA0LjEwLCBTRCANCj4gY2FyZCBu
+ZWVkcyBhIFIxYiByZXNwb25zZSBmb3Igc3RvcCBjb21tYW5kLg0KDQpJIGhhdmUgbG9va2VkIGF0
+IHRoaXMgZWFybGllciBhbmQgSSBkb24ndCB0aGluayBSMUIgaXMgbmVlZGVkLg0KDQpBY2NvcmRp
+bmcgdG8gdGhlIENvbW1hbmQgdGFibGUgaW4gdGhlIHNwZWMsIHdoZXJlIGNvbW1hbmRzIGFyZSBs
+aXN0ZWQgd2l0aCB0aGVpciBjb3JyZXNwb25kaW5nIHJlc3BvbnNlIHR5cGUsIGEgQ01EMTIgKHN0
+b3ApIGhhcyBhbiBSMUIgcmVzcG9uc2UuIEFzIHlvdSBwcm9iYWJseSBrbm93LCB0aGUgZGlmZmVy
+ZW5jZSBiZXR3ZWVuIFIxIGFuZCBSMUIgaXMgdGhlIG9wdGlvbmFsIGJ1c3kgc2lnbmFsbGluZyBv
+biBEQVQwLg0KDQpOb3csIGlmIHlvdSBsb29rIGludG8gdGhlIGRldGFpbHMgYWJvdXQgUkVBRCBh
+bmQgV1JJVEUgdHJhbnNmZXJzIGluIHRoZSBzcGVjLCBpdCBiZWNvbWVzIGNsZWFyIHRoYXQgdGhl
+cmUncyBhIGRpZmZlcmVuY2UgaW4gdGhlIHJlc3BvbnNlIHlvdSBnZXQgZnJvbSBhIENNRDEyLiBJ
+biB0aGUgUkVBRCBjYXNlIHRoZXJlJ3MgKm5vKiBidXN5IHNpZ25hbGxpbmcgYnV0IHRoZXJlIGlz
+IGZvciBXUklURS4gRm9yIHRoYXQgcmVhc29uLCB1c2luZyBSMSBpbiBjYXNlIG9mIFJFQUQgc2Vl
+bXMgbGlrZSB0aGUgY29ycmVjdCB0aGluZyB0byBkby4NCg0KSSBoYXZlbid0IGxvb2tlZCBhdCBT
+RCA0LjEwLCBidXQgYWNjb3JkaW5nIHRvIGVhcmxpZXIgdmVyc2lvbnMgeW91IGNhbiBmaW5kIHRo
+ZXNlIGRldGFpbHMgaW4gdGhlICJUaW1pbmdzIiBzZWN0aW9uLg0KDQpJIGd1ZXNzIHNvbWUgY29t
+bWVudCBpbiB0aGUgY29kZSB3b3VsZCBiZSB2YWx1YWJsZSBhcyB0aGUgc3BlYyBpcyBpbmRlZWQg
+YSBiaXQgdW5jbGVhciwgbGV0IG1lIHN1Ym1pdCBhIGNoYW5nZSBmb3IgaXQuDQoNCktpbmQgcmVn
+YXJkcw0KVWZmZQ0KDQo+DQo+IFNpZ25lZC1vZmYtYnk6IFl1YW4gSnVudGFvIDxqdW50YW8ueXVh
+bkBpbnRlbC5jb20+DQo+IC0tLQ0KPiAgZHJpdmVycy9tbWMvY2FyZC9ibG9jay5jIHwgICAxMSAr
+KysrKysrKy0tLQ0KPiAgMSBmaWxlIGNoYW5nZWQsIDggaW5zZXJ0aW9ucygrKSwgMyBkZWxldGlv
+bnMoLSkNCj4NCj4gZGlmZiAtLWdpdCBhL2RyaXZlcnMvbW1jL2NhcmQvYmxvY2suYyBiL2RyaXZl
+cnMvbW1jL2NhcmQvYmxvY2suYyBpbmRleCANCj4gM2JkYmU1MC4uYWE4ZmM5OGIgMTAwNjQ0DQo+
+IC0tLSBhL2RyaXZlcnMvbW1jL2NhcmQvYmxvY2suYw0KPiArKysgYi9kcml2ZXJzL21tYy9jYXJk
+L2Jsb2NrLmMNCj4gQEAgLTE1MzMsOSArMTUzMywxNCBAQCBzdGF0aWMgdm9pZCBtbWNfYmxrX3J3
+X3JxX3ByZXAoc3RydWN0IG1tY19xdWV1ZV9yZXEgKm1xcnEsDQo+ICAgICBpZiAocnFfZGF0YV9k
+aXIocmVxKSA9PSBSRUFEKSB7DQo+ICAgICAgICAgYnJxLT5jbWQub3Bjb2RlID0gcmVhZGNtZDsN
+Cj4gICAgICAgICBicnEtPmRhdGEuZmxhZ3MgPSBNTUNfREFUQV9SRUFEOw0KPiAtICAgICAgIGlm
+IChicnEtPm1ycS5zdG9wKQ0KPiAtICAgICAgICAgICBicnEtPnN0b3AuZmxhZ3MgPSBNTUNfUlNQ
+X1NQSV9SMSB8IE1NQ19SU1BfUjEgfA0KPiAtICAgICAgICAgICAgICAgICAgIE1NQ19DTURfQUM7
+DQo+ICsgICAgICAgaWYgKGJycS0+bXJxLnN0b3ApIHsNCj4gKyAgICAgICAgICAgaWYgKG1tY19j
+YXJkX21tYyhjYXJkKSkNCj4gKyAgICAgICAgICAgICAgIGJycS0+c3RvcC5mbGFncyA9IE1NQ19S
+U1BfU1BJX1IxIHwgTU1DX1JTUF9SMSB8DQo+ICsgICAgICAgICAgICAgICAgICAgICAgIE1NQ19D
+TURfQUM7DQo+ICsgICAgICAgICAgIGVsc2UNCj4gKyAgICAgICAgICAgICAgIGJycS0+c3RvcC5m
+bGFncyA9IE1NQ19SU1BfU1BJX1IxQiB8IE1NQ19SU1BfUjFCIHwNCj4gKyAgICAgICAgICAgICAg
+ICAgICAgICAgTU1DX0NNRF9BQzsNCj4gKyAgICAgICB9DQo+ICAgICB9IGVsc2Ugew0KPiAgICAg
+ICAgIGJycS0+Y21kLm9wY29kZSA9IHdyaXRlY21kOw0KPiAgICAgICAgIGJycS0+ZGF0YS5mbGFn
+cyA9IE1NQ19EQVRBX1dSSVRFOw0KPiAtLQ0KPiAxLjcuOS41DQo+DQo+DQo+DQo+IFRoYW5rcy4N
+Cj4gSnVudGFvLg0KPg0K
