@@ -1,49 +1,53 @@
 From: Masahiro Yamada <yamada.masahiro@socionext.com>
-Subject: [PATCH 4/7] mmc: sdhci-pltfm: use devm_ioremap()
-Date: Thu, 14 Apr 2016 11:29:47 +0900
-Message-ID: <1460600990-10993-5-git-send-email-yamada.masahiro@socionext.com>
-References: <1460600990-10993-1-git-send-email-yamada.masahiro@socionext.com>
+Subject: [PATCH v2 1/2] mmc: sdhci: use IS_REACHABLE(CONFIG_LEDS_CLASS) to enable LED code
+Date: Thu, 14 Apr 2016 13:19:39 +0900
+Message-ID: <1460607580-22599-1-git-send-email-yamada.masahiro@socionext.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from conuserg-07.nifty.com ([210.131.2.74]:40557 "EHLO
-	conuserg-07.nifty.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753555AbcDNC3a (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 13 Apr 2016 22:29:30 -0400
-In-Reply-To: <1460600990-10993-1-git-send-email-yamada.masahiro@socionext.com>
+Received: from conuserg-09.nifty.com ([210.131.2.76]:44612 "EHLO
+	conuserg-09.nifty.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750886AbcDNETI (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 14 Apr 2016 00:19:08 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org
 Cc: Masahiro Yamada <yamada.masahiro@socionext.com>, linux-kernel@vger.kernel.org, Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>
 
-Use the managed variant of ioremap().
+defined(CONFIG_LEDS_CLASS) || (defined(CONFIG_LEDS_CLASS_MODULE) && \
+    defined(CONFIG_MMC_SDHCI_MODULE))
+
+is equivalent to:
+
+defined(CONFIG_LEDS_CLASS) || (defined(CONFIG_LEDS_CLASS_MODULE) && \
+    defined(MODULE))
+
+and it can also be written shortly as:
+
+IS_REACHABLE(CONFIG_LEDS_CLASS)
 
 Signed-off-by: Masahiro Yamada <yamada.masahiro@socionext.com>
 ---
 
- drivers/mmc/host/sdhci-pltfm.c | 4 ++--
- 1 file changed, 2 insertions(+), 2 deletions(-)
+Changes in v2:
+  - Rebase on the next branch (7766e58f5be39dcc35d30a703422a3d0b8ec8c0c)
 
-diff --git a/drivers/mmc/host/sdhci-pltfm.c b/drivers/mmc/host/sdhci-pltfm.c
-index e4da44a..c81a72d 100644
---- a/drivers/mmc/host/sdhci-pltfm.c
-+++ b/drivers/mmc/host/sdhci-pltfm.c
-@@ -166,7 +166,8 @@ struct sdhci_host *sdhci_pltfm_init(struct platform_device *pdev,
- 		goto err_request;
- 	}
- 
--	host->ioaddr = ioremap(iomem->start, resource_size(iomem));
-+	host->ioaddr = devm_ioremap(&pdev->dev, iomem->start,
-+				    resource_size(iomem));
- 	if (!host->ioaddr) {
- 		dev_err(&pdev->dev, "failed to remap registers\n");
- 		ret = -ENOMEM;
-@@ -196,7 +197,6 @@ void sdhci_pltfm_free(struct platform_device *pdev)
- {
- 	struct sdhci_host *host = platform_get_drvdata(pdev);
- 
--	iounmap(host->ioaddr);
- 	sdhci_free_host(host);
+ drivers/mmc/host/sdhci.c | 4 +---
+ 1 file changed, 1 insertion(+), 3 deletions(-)
+
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index b284924..eedc18a 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -259,9 +259,7 @@ static void __sdhci_led_deactivate(struct sdhci_host *host)
+ 	sdhci_writeb(host, ctrl, SDHCI_HOST_CONTROL);
  }
- EXPORT_SYMBOL_GPL(sdhci_pltfm_free);
+ 
+-#if defined(CONFIG_LEDS_CLASS) || (defined(CONFIG_LEDS_CLASS_MODULE) && \
+-				   defined(CONFIG_MMC_SDHCI_MODULE))
+-
++#if IS_REACHABLE(CONFIG_LEDS_CLASS)
+ static void sdhci_led_control(struct led_classdev *led,
+ 			      enum led_brightness brightness)
+ {
 -- 
 1.9.1
 
