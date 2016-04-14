@@ -1,65 +1,80 @@
 From: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
-Subject: [PATCH v4 0/3] mmc: pwrseq: convert to proper driver
-Date: Thu, 14 Apr 2016 14:02:13 +0100
-Message-ID: <1460638936-26990-1-git-send-email-srinivas.kandagatla@linaro.org>
+Subject: [PATCH v4 1/3] mmc: pwrseq_simple: add to_pwrseq_simple() macro
+Date: Thu, 14 Apr 2016 14:02:14 +0100
+Message-ID: <1460638936-26990-2-git-send-email-srinivas.kandagatla@linaro.org>
+References: <1460638936-26990-1-git-send-email-srinivas.kandagatla@linaro.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wm0-f50.google.com ([74.125.82.50]:35074 "EHLO
-	mail-wm0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753238AbcDNNCX (ORCPT
+Received: from mail-wm0-f48.google.com ([74.125.82.48]:38579 "EHLO
+	mail-wm0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753800AbcDNNCX (ORCPT
 	<rfc822;linux-mmc@vger.kernel.org>); Thu, 14 Apr 2016 09:02:23 -0400
-Received: by mail-wm0-f50.google.com with SMTP id a140so146360296wma.0
+Received: by mail-wm0-f48.google.com with SMTP id u206so124618063wme.1
         for <linux-mmc@vger.kernel.org>; Thu, 14 Apr 2016 06:02:22 -0700 (PDT)
+In-Reply-To: <1460638936-26990-1-git-send-email-srinivas.kandagatla@linaro.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org
 Cc: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>, linux-kernel@vger.kernel.org, mfuzzey@parkeon.com
 
-Thanks for reviewing v3.
+This patch adds to_pwrseq_simple() macro to make the code more readable.
 
-This patchset aims at converting the pwrseq devices to proper in drivers,
-The issue is that on Qualcomm based platforms, most of the gpios require
-a pinctrl setup. Existing pwrseq code does not do any kind of pinctrl setup.
-So this makes the pwrseq unusable on those platfroms.
+Signed-off-by: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
+---
+ drivers/mmc/core/pwrseq_simple.c | 14 ++++++--------
+ 1 file changed, 6 insertions(+), 8 deletions(-)
 
-Convert the pwrseq to proper drivers so that they can reuse
-common driver setup like pinctrl from drivers/base/pinctrl.c and clocks.
-This solution works much better and would make pwrseq to reuse 
-all the driver setup done in the common code.
-
-Changes since v3:
-	- Add error handling for try_module_get failures, suggested by Ulf.
-
-Changes since v2: All changes suggested by Ulf
-	- Moved all the allocations/gpio_get/clk_get to probe
-	- Removed alloc and free callbacks
-	- try_get_module inside a mutex
-	- Fixed Kconfigs
-	- renamed list to pwrseq_node
-	- add mssing pdev_set_drvdata()
-
-Changes since v1:
-	- Fixed issue while building as module.
-
-Changes since RFC:
-	- Fixed issues reported by kbuild test robot.
-	- return EPROBE_DEFER from *_alloc() suggested by Ulf.
-
-Thanks,
-srini
-
-Srinivas Kandagatla (3):
-  mmc: pwrseq_simple: add to_pwrseq_simple() macro
-  mmc: pwrseq_emmc: add to_pwrseq_emmc() macro
-  mmc: pwrseq: convert to proper platform device
-
- drivers/mmc/core/Kconfig         |  21 ++++++++
- drivers/mmc/core/Makefile        |   4 +-
- drivers/mmc/core/pwrseq.c        | 108 ++++++++++++++++++---------------------
- drivers/mmc/core/pwrseq.h        |  19 ++++---
- drivers/mmc/core/pwrseq_emmc.c   |  81 ++++++++++++++++++-----------
- drivers/mmc/core/pwrseq_simple.c |  91 ++++++++++++++++++---------------
- 6 files changed, 185 insertions(+), 139 deletions(-)
-
+diff --git a/drivers/mmc/core/pwrseq_simple.c b/drivers/mmc/core/pwrseq_simple.c
+index bc173e1..f94271b 100644
+--- a/drivers/mmc/core/pwrseq_simple.c
++++ b/drivers/mmc/core/pwrseq_simple.c
+@@ -25,6 +25,8 @@ struct mmc_pwrseq_simple {
+ 	struct gpio_descs *reset_gpios;
+ };
+ 
++#define to_pwrseq_simple(p) container_of(p, struct mmc_pwrseq_simple, pwrseq)
++
+ static void mmc_pwrseq_simple_set_gpios_value(struct mmc_pwrseq_simple *pwrseq,
+ 					      int value)
+ {
+@@ -44,8 +46,7 @@ static void mmc_pwrseq_simple_set_gpios_value(struct mmc_pwrseq_simple *pwrseq,
+ 
+ static void mmc_pwrseq_simple_pre_power_on(struct mmc_host *host)
+ {
+-	struct mmc_pwrseq_simple *pwrseq = container_of(host->pwrseq,
+-					struct mmc_pwrseq_simple, pwrseq);
++	struct mmc_pwrseq_simple *pwrseq = to_pwrseq_simple(host->pwrseq);
+ 
+ 	if (!IS_ERR(pwrseq->ext_clk) && !pwrseq->clk_enabled) {
+ 		clk_prepare_enable(pwrseq->ext_clk);
+@@ -57,16 +58,14 @@ static void mmc_pwrseq_simple_pre_power_on(struct mmc_host *host)
+ 
+ static void mmc_pwrseq_simple_post_power_on(struct mmc_host *host)
+ {
+-	struct mmc_pwrseq_simple *pwrseq = container_of(host->pwrseq,
+-					struct mmc_pwrseq_simple, pwrseq);
++	struct mmc_pwrseq_simple *pwrseq = to_pwrseq_simple(host->pwrseq);
+ 
+ 	mmc_pwrseq_simple_set_gpios_value(pwrseq, 0);
+ }
+ 
+ static void mmc_pwrseq_simple_power_off(struct mmc_host *host)
+ {
+-	struct mmc_pwrseq_simple *pwrseq = container_of(host->pwrseq,
+-					struct mmc_pwrseq_simple, pwrseq);
++	struct mmc_pwrseq_simple *pwrseq = to_pwrseq_simple(host->pwrseq);
+ 
+ 	mmc_pwrseq_simple_set_gpios_value(pwrseq, 1);
+ 
+@@ -78,8 +77,7 @@ static void mmc_pwrseq_simple_power_off(struct mmc_host *host)
+ 
+ static void mmc_pwrseq_simple_free(struct mmc_host *host)
+ {
+-	struct mmc_pwrseq_simple *pwrseq = container_of(host->pwrseq,
+-					struct mmc_pwrseq_simple, pwrseq);
++	struct mmc_pwrseq_simple *pwrseq = to_pwrseq_simple(host->pwrseq);
+ 
+ 	if (!IS_ERR(pwrseq->reset_gpios))
+ 		gpiod_put_array(pwrseq->reset_gpios);
 -- 
 2.5.0
 
