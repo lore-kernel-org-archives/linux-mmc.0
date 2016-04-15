@@ -1,8 +1,7 @@
 From: Dong Aisheng <aisheng.dong@nxp.com>
-Subject: [PATCH 16/23] doc: dt: fsl-imx-esdhc: add set tuning start point
- binding
-Date: Sat, 16 Apr 2016 01:29:40 +0800
-Message-ID: <1460741387-23815-17-git-send-email-aisheng.dong@nxp.com>
+Subject: [PATCH 17/23] mmc: sdhci: add standard hw auto retuning support
+Date: Sat, 16 Apr 2016 01:29:41 +0800
+Message-ID: <1460741387-23815-18-git-send-email-aisheng.dong@nxp.com>
 References: <1460741387-23815-1-git-send-email-aisheng.dong@nxp.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
@@ -22,25 +21,91 @@ To: linux-mmc@vger.kernel.org
 Cc: aisheng.dong@nxp.com, ulf.hansson@linaro.org, dongas86@gmail.com, chris@printf.net, haibo.chen@nxp.com, adrian.hunter@intel.com, shawnguo@kernel.org, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
-add tuning start point binding
+If HW supports SDHCI_TUNING_MODE_3 which is auto retuning, we won't
+retune during runtime suspend and resume, instead we use Re-tuning
+Request signaled via SDHCI_INT_RETUNE interrupt to do retuning and
+hw auto retuning during data transfer to guarantee the signal sample
+window correction.
+
+This can avoid a mass of repeatly retuning during small file system
+data access and improve the performance.
 
 Signed-off-by: Dong Aisheng <aisheng.dong@nxp.com>
 ---
- Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.txt | 2 ++
- 1 file changed, 2 insertions(+)
+ drivers/mmc/host/sdhci.c | 18 ++++++++++++++----
+ drivers/mmc/host/sdhci.h |  3 +++
+ 2 files changed, 17 insertions(+), 4 deletions(-)
 
-diff --git a/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.txt b/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.txt
-index dca56d6..3e29050 100644
---- a/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.txt
-+++ b/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.txt
-@@ -28,6 +28,8 @@ Optional properties:
-   transparent level shifters on the outputs of the controller. Two cells are
-   required, first cell specifies minimum slot voltage (mV), second cell
-   specifies maximum slot voltage (mV). Several ranges could be specified.
-+- fsl,tuning-start-tap: Specify the start dealy cell point when send first CMD19
-+  in tuning procedure.
- - fsl,tuning-step: Specify the increasing delay cell steps in tuning procedure.
-   The uSDHC use one delay cell as default increasing step to do tuning process.
-   This property allows user to change the tuning step to more than one delay
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 2eb0e34..0027b87 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -252,6 +252,9 @@ static void sdhci_init(struct sdhci_host *host, int soft)
+ 		    SDHCI_INT_TIMEOUT | SDHCI_INT_DATA_END |
+ 		    SDHCI_INT_RESPONSE;
+ 
++	if (host->tuning_mode == SDHCI_TUNING_MODE_3)
++		host->ier |= SDHCI_INT_RETUNE;
++
+ 	sdhci_writel(host, host->ier, SDHCI_INT_ENABLE);
+ 	sdhci_writel(host, host->ier, SDHCI_SIGNAL_ENABLE);
+ 
+@@ -2477,6 +2480,9 @@ static irqreturn_t sdhci_irq(int irq, void *dev_id)
+ 			pr_err("%s: Card is consuming too much power!\n",
+ 				mmc_hostname(host->mmc));
+ 
++		if (intmask & SDHCI_INT_RETUNE)
++			mmc_retune_needed(host->mmc);
++
+ 		if (intmask & SDHCI_INT_CARD_INT) {
+ 			sdhci_enable_sdio_irq_nolock(host, false);
+ 			host->thread_isr |= SDHCI_INT_CARD_INT;
+@@ -2575,8 +2581,10 @@ int sdhci_suspend_host(struct sdhci_host *host)
+ {
+ 	sdhci_disable_card_detection(host);
+ 
+-	mmc_retune_timer_stop(host->mmc);
+-	mmc_retune_needed(host->mmc);
++	if (host->tuning_mode == SDHCI_TUNING_MODE_1) {
++		mmc_retune_timer_stop(host->mmc);
++		mmc_retune_needed(host->mmc);
++	}
+ 
+ 	if (!device_may_wakeup(mmc_dev(host->mmc))) {
+ 		host->ier = 0;
+@@ -2651,8 +2659,10 @@ int sdhci_runtime_suspend_host(struct sdhci_host *host)
+ {
+ 	unsigned long flags;
+ 
+-	mmc_retune_timer_stop(host->mmc);
+-	mmc_retune_needed(host->mmc);
++	if (host->tuning_mode == SDHCI_TUNING_MODE_1) {
++		mmc_retune_timer_stop(host->mmc);
++		mmc_retune_needed(host->mmc);
++	}
+ 
+ 	spin_lock_irqsave(&host->lock, flags);
+ 	host->ier &= SDHCI_INT_CARD_INT;
+diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+index afa4de8..2c2404f 100644
+--- a/drivers/mmc/host/sdhci.h
++++ b/drivers/mmc/host/sdhci.h
+@@ -128,6 +128,7 @@
+ #define  SDHCI_INT_CARD_INSERT	0x00000040
+ #define  SDHCI_INT_CARD_REMOVE	0x00000080
+ #define  SDHCI_INT_CARD_INT	0x00000100
++#define  SDHCI_INT_RETUNE	0x00001000
+ #define  SDHCI_INT_ERROR	0x00008000
+ #define  SDHCI_INT_TIMEOUT	0x00010000
+ #define  SDHCI_INT_CRC		0x00020000
+@@ -514,6 +515,8 @@ struct sdhci_host {
+ 	unsigned int		tuning_count;	/* Timer count for re-tuning */
+ 	unsigned int		tuning_mode;	/* Re-tuning mode supported by host */
+ #define SDHCI_TUNING_MODE_1	0
++#define SDHCI_TUNING_MODE_2	1
++#define SDHCI_TUNING_MODE_3	2
+ 
+ 	unsigned long private[0] ____cacheline_aligned;
+ };
 -- 
 1.9.1
