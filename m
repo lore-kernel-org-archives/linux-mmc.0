@@ -1,72 +1,167 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: reduce nesting and join error strings into one line
-Date: Fri, 15 Apr 2016 13:03:08 +0200
-Message-ID: <CAPDyKFpe_oRAC+7okpLbK+tEv_Vkw4DkZ7GBXB3i23+TLOBkQQ@mail.gmail.com>
-References: <1455018191-8545-1-git-send-email-yamada.masahiro@socionext.com>
-	<CAK7LNARfTbN2ZO5APHtM7gY1cmqyCQV4FuSHx5h_D+PkfjxOAw@mail.gmail.com>
-	<CAPDyKFqV4bwrqsGOsEnWWYrYmC5Z9-PvH9faBXuWsnJNQck6Ag@mail.gmail.com>
-	<CAK7LNAS2eoDJCcHuiNP8vBE2W0=TNrqSqguYqnX4y5iHPJH2uA@mail.gmail.com>
-	<CAPDyKFr-6ZEw+0EchJJHE4_Rh_9WMe8yoxtiaXze1_U-3Tmhhg@mail.gmail.com>
-	<CAK7LNAS8mLwYdRFyuevh7RbGutC8-xAQPUHmfg28fyEfHk1_Aw@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAK7LNAS8mLwYdRFyuevh7RbGutC8-xAQPUHmfg28fyEfHk1_Aw@mail.gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Masahiro Yamada <yamada.masahiro@socionext.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Chaotian Jing <chaotian.jing@mediatek.com>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: [PATCH 1/1] mmc: sdhci-acpi: Reduce Baytrail eMMC/SD/SDIO hangs
+Date: Fri, 15 Apr 2016 14:06:57 +0300
+Message-ID: <1460718417-20920-2-git-send-email-adrian.hunter@intel.com>
+References: <1460718417-20920-1-git-send-email-adrian.hunter@intel.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mga14.intel.com ([192.55.52.115]:31269 "EHLO mga14.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753180AbcDOLLA (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 15 Apr 2016 07:11:00 -0400
+In-Reply-To: <1460718417-20920-1-git-send-email-adrian.hunter@intel.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>
 
-On 15 April 2016 at 12:14, Masahiro Yamada
-<yamada.masahiro@socionext.com> wrote:
-> 2016-04-15 18:36 GMT+09:00 Ulf Hansson <ulf.hansson@linaro.org>:
->> On 15 April 2016 at 11:30, Masahiro Yamada
->> <yamada.masahiro@socionext.com> wrote:
->>> 2016-04-15 18:26 GMT+09:00 Ulf Hansson <ulf.hansson@linaro.org>:
->>>> On 15 April 2016 at 11:01, Masahiro Yamada
->>>> <yamada.masahiro@socionext.com> wrote:
->>>>> Hi Ulf,
->>>>>
->>>>> No interest in this clean-up?
->>>>>
->>>>
->>>> Well, no.
->>>>
->>>> Don't get me wrong, I am interested in clean-ups, but this doesn't
->>>> improve code quality that much.
->>>>
->>>
->>> At least, current code splits the error message string into two lines.
->>>
->>>
->>
->> Yes, and that minor improvement also makes it more cumbersome to use
->> "git blame" when trying to understand why something was changed.
->>
->> Hopes that clarifies how I think. It's balance. :-)
->
-> OK.  This balance slightly varies from maintainer to maintainer.
->
-> I am quite new to this sub-system, so I need to learn your criteria.
->
-> I spent some time to read the MMC core code before starting to write
-> my own MMC driver.
-> During diving into the code, I left some tiny patches,
-> which I think clean-ups(, but perhaps sound cumbersome for you).
->
-> So, please give me your 1 minute to learn how your bar's height.
->
-> For example, is the following above or below your bar?
-> https://github.com/masahir0y/linux-yamada/commit/fe4e4bc06
+Baytrail eMMC/SD/SDIO host controllers have been known to
+hang.  A change to a hardware setting has been found to
+reduce the occurrence of such hangs.  This patch ensures
+the correct setting.
 
-This one is good. Although not because of changing to use the BIT
-macro, but because you remove an unnecessary check.
+This patch applies cleanly to v4.4+.  It could go to
+earlier kernels also, so I will send backports to the
+stable list in due course.
 
->
-> If welcome, I am happy to post it, of course.
-> but if not, please feel free to say so.
+Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
+Cc: stable@vger.kernel.org # v4.4+
+---
+ drivers/mmc/host/Kconfig      |  1 +
+ drivers/mmc/host/sdhci-acpi.c | 81 +++++++++++++++++++++++++++++++++++++++++++
+ 2 files changed, 82 insertions(+)
 
-Feel free to post it. Hopes this clarifies!
+diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+index 04feea8354cb..e657af0e95fa 100644
+--- a/drivers/mmc/host/Kconfig
++++ b/drivers/mmc/host/Kconfig
+@@ -97,6 +97,7 @@ config MMC_RICOH_MMC
+ config MMC_SDHCI_ACPI
+ 	tristate "SDHCI support for ACPI enumerated SDHCI controllers"
+ 	depends on MMC_SDHCI && ACPI
++	select IOSF_MBI if X86
+ 	help
+ 	  This selects support for ACPI enumerated SDHCI controllers,
+ 	  identified by ACPI Compatibility ID PNP0D40 or specific
+diff --git a/drivers/mmc/host/sdhci-acpi.c b/drivers/mmc/host/sdhci-acpi.c
+index 6106354c6c17..b2d70ba6caa7 100644
+--- a/drivers/mmc/host/sdhci-acpi.c
++++ b/drivers/mmc/host/sdhci-acpi.c
+@@ -41,6 +41,11 @@
+ #include <linux/mmc/pm.h>
+ #include <linux/mmc/slot-gpio.h>
+ 
++#ifdef CONFIG_X86
++#include <asm/cpu_device_id.h>
++#include <asm/iosf_mbi.h>
++#endif
++
+ #include "sdhci.h"
+ 
+ enum {
+@@ -116,6 +121,75 @@ static const struct sdhci_acpi_chip sdhci_acpi_chip_int = {
+ 	.ops = &sdhci_acpi_ops_int,
+ };
+ 
++#ifdef CONFIG_X86
++
++static bool sdhci_acpi_byt(void)
++{
++	static const struct x86_cpu_id byt[] = {
++		{ X86_VENDOR_INTEL, 6, 0x37 },
++		{}
++	};
++
++	return x86_match_cpu(byt);
++}
++
++#define BYT_IOSF_SCCEP			0x63
++#define BYT_IOSF_OCP_NETCTRL0		0x1078
++#define BYT_IOSF_OCP_TIMEOUT_BASE	GENMASK(10, 8)
++
++static void sdhci_acpi_byt_setting(struct device *dev)
++{
++	u32 val = 0;
++
++	if (!sdhci_acpi_byt())
++		return;
++
++	if (iosf_mbi_read(BYT_IOSF_SCCEP, MBI_CR_READ, BYT_IOSF_OCP_NETCTRL0,
++			  &val)) {
++		dev_err(dev, "%s read error\n", __func__);
++		return;
++	}
++
++	if (!(val & BYT_IOSF_OCP_TIMEOUT_BASE))
++		return;
++
++	val &= ~BYT_IOSF_OCP_TIMEOUT_BASE;
++
++	if (iosf_mbi_write(BYT_IOSF_SCCEP, MBI_CR_WRITE, BYT_IOSF_OCP_NETCTRL0,
++			   val)) {
++		dev_err(dev, "%s write error\n", __func__);
++		return;
++	}
++
++	dev_dbg(dev, "%s completed\n", __func__);
++}
++
++static bool sdhci_acpi_byt_defer(struct device *dev)
++{
++	if (!sdhci_acpi_byt())
++		return false;
++
++	if (!iosf_mbi_available())
++		return true;
++
++	sdhci_acpi_byt_setting(dev);
++
++	return false;
++}
++
++#else
++
++static inline void sdhci_acpi_byt_setting(struct device *dev)
++{
++}
++
++static inline bool sdhci_acpi_byt_defer(struct device *dev)
++{
++	return false;
++}
++
++#endif
++
+ static int bxt_get_cd(struct mmc_host *mmc)
+ {
+ 	int gpio_cd = mmc_gpio_get_cd(mmc);
+@@ -319,6 +393,9 @@ static int sdhci_acpi_probe(struct platform_device *pdev)
+ 	if (acpi_bus_get_status(device) || !device->status.present)
+ 		return -ENODEV;
+ 
++	if (sdhci_acpi_byt_defer(dev))
++		return -EPROBE_DEFER;
++
+ 	hid = acpi_device_hid(device);
+ 	uid = device->pnp.unique_id;
+ 
+@@ -444,6 +521,8 @@ static int sdhci_acpi_resume(struct device *dev)
+ {
+ 	struct sdhci_acpi_host *c = dev_get_drvdata(dev);
+ 
++	sdhci_acpi_byt_setting(&c->pdev->dev);
++
+ 	return sdhci_resume_host(c->host);
+ }
+ 
+@@ -467,6 +546,8 @@ static int sdhci_acpi_runtime_resume(struct device *dev)
+ {
+ 	struct sdhci_acpi_host *c = dev_get_drvdata(dev);
+ 
++	sdhci_acpi_byt_setting(&c->pdev->dev);
++
+ 	return sdhci_runtime_resume_host(c->host);
+ }
+ 
+-- 
+1.9.1
 
-Kind regards
-Uffe
