@@ -1,48 +1,38 @@
-From: Masahiro Yamada <yamada.masahiro@socionext.com>
-Subject: [PATCH] mmc: drop unnecessary bit checking
-Date: Fri, 15 Apr 2016 20:16:12 +0900
-Message-ID: <1460718972-17306-1-git-send-email-yamada.masahiro@socionext.com>
+From: Richard Ash <richardashaudacity@googlemail.com>
+Subject: Re: 'error -110 sending stop command' on Zynq platform
+Date: Fri, 15 Apr 2016 17:04:52 +0100
+Message-ID: <CACOFwak1k_pFMSTH91j5tNq0VRr5rCRHUwMPj2Z3bwgt4tFByg@mail.gmail.com>
+References: <CACOFwa=KnacTNDvsTcMzj4_0YCu8uADp3hrxFG7RDK+jLDCing@mail.gmail.com>
+	<CACOFwanA-Bx6GYaJLRUAfwgXSxDkX55yGUbFzCTMovCgSZmQ_A@mail.gmail.com>
+	<CACOFwamDP=pa=C8veOOQQ-FOKhj_MbjBXgmGqKSToMBYEeMMJQ@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from conuserg-09.nifty.com ([210.131.2.76]:18105 "EHLO
-	conuserg-09.nifty.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752847AbcDOLQM (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 15 Apr 2016 07:16:12 -0400
+Received: from mail-oi0-f46.google.com ([209.85.218.46]:33435 "EHLO
+	mail-oi0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751375AbcDOQEx (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 15 Apr 2016 12:04:53 -0400
+Received: by mail-oi0-f46.google.com with SMTP id w85so128492201oiw.0
+        for <linux-mmc@vger.kernel.org>; Fri, 15 Apr 2016 09:04:53 -0700 (PDT)
+In-Reply-To: <CACOFwamDP=pa=C8veOOQQ-FOKhj_MbjBXgmGqKSToMBYEeMMJQ@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: Masahiro Yamada <yamada.masahiro@socionext.com>, Adrian Hunter <adrian.hunter@intel.com>, Sergei Shtylyov <sergei.shtylyov@cogentembedded.com>, Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>, linux-kernel@vger.kernel.org, Chaotian Jing <chaotian.jing@mediatek.com>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Ulf Hansson <ulf.hansson@linaro.org>
+To: Linux MMC / SD subsystem <linux-mmc@vger.kernel.org>
 
-This if-block is going to call mmc_card_set_blockaddr(), so
-mmc_card_blockaddr() right before it is redundant.
+On 14 April 2016 at 14:52, Richard Ash
+<richardashaudacity@googlemail.com> wrote:
+> On 14 April 2016 at 14:20, Richard Ash
+> <richardashaudacity@googlemail.com> wrote:
+>> I have now repeated the test using kernel 4.5.1 from kernel.org, which
+>> supports enough hardware to get a serial console and test the SD card.
+>> I am seeing effectively the same error
+>>
+>>  mmcblk0: error -110 sending stop command, original cmd response
+>> 0x900, card status 0x400e00
+To complete this saga, I took the same card back to a zedboard (so
+removing our custom hardware from the equation) and have reproduced
+the exact same problem there, the same error. Does this indicate the
+problem is not with the custom PCB design but with the SD card
+firmware, or the Linux SDHCI driver?
 
-I am fixing the block comment style while I am here.
-
-Signed-off-by: Masahiro Yamada <yamada.masahiro@socionext.com>
----
-
- drivers/mmc/core/mmc.c | 5 +++--
- 1 file changed, 3 insertions(+), 2 deletions(-)
-
-diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-index 4dbe3df..c96bc81 100644
---- a/drivers/mmc/core/mmc.c
-+++ b/drivers/mmc/core/mmc.c
-@@ -1483,12 +1483,13 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
- 		if (err)
- 			goto free_card;
- 
--		/* If doing byte addressing, check if required to do sector
-+		/*
-+		 * If doing byte addressing, check if required to do sector
- 		 * addressing.  Handle the case of <2GB cards needing sector
- 		 * addressing.  See section 8.1 JEDEC Standard JED84-A441;
- 		 * ocr register has bit 30 set for sector addressing.
- 		 */
--		if (!(mmc_card_blockaddr(card)) && (rocr & (1<<30)))
-+		if (rocr & BIT(30))
- 			mmc_card_set_blockaddr(card);
- 
- 		/* Erase size depends on CSD and Extended CSD */
--- 
-1.9.1
-
+Richard
