@@ -1,38 +1,40 @@
-From: Richard Ash <richardashaudacity@googlemail.com>
-Subject: Re: 'error -110 sending stop command' on Zynq platform
-Date: Fri, 15 Apr 2016 17:04:52 +0100
-Message-ID: <CACOFwak1k_pFMSTH91j5tNq0VRr5rCRHUwMPj2Z3bwgt4tFByg@mail.gmail.com>
-References: <CACOFwa=KnacTNDvsTcMzj4_0YCu8uADp3hrxFG7RDK+jLDCing@mail.gmail.com>
-	<CACOFwanA-Bx6GYaJLRUAfwgXSxDkX55yGUbFzCTMovCgSZmQ_A@mail.gmail.com>
-	<CACOFwamDP=pa=C8veOOQQ-FOKhj_MbjBXgmGqKSToMBYEeMMJQ@mail.gmail.com>
+From: Dong Aisheng <aisheng.dong@nxp.com>
+Subject: [PATCH 03/23] mmc: core: fix a comment typo
+Date: Sat, 16 Apr 2016 01:29:27 +0800
+Message-ID: <1460741387-23815-4-git-send-email-aisheng.dong@nxp.com>
+References: <1460741387-23815-1-git-send-email-aisheng.dong@nxp.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-oi0-f46.google.com ([209.85.218.46]:33435 "EHLO
-	mail-oi0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751375AbcDOQEx (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 15 Apr 2016 12:04:53 -0400
-Received: by mail-oi0-f46.google.com with SMTP id w85so128492201oiw.0
-        for <linux-mmc@vger.kernel.org>; Fri, 15 Apr 2016 09:04:53 -0700 (PDT)
-In-Reply-To: <CACOFwamDP=pa=C8veOOQQ-FOKhj_MbjBXgmGqKSToMBYEeMMJQ@mail.gmail.com>
+Received: from mail-bl2on0090.outbound.protection.outlook.com ([65.55.169.90]:24039
+	"EHLO na01-bl2-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1752640AbcDORhY (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 15 Apr 2016 13:37:24 -0400
+In-Reply-To: <1460741387-23815-1-git-send-email-aisheng.dong@nxp.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Linux MMC / SD subsystem <linux-mmc@vger.kernel.org>
+To: linux-mmc@vger.kernel.org
+Cc: ulf.hansson@linaro.org, chris@printf.net, shawnguo@kernel.org, adrian.hunter@intel.com, linux-arm-kernel@lists.infradead.org, aisheng.dong@nxp.com, haibo.chen@nxp.com, dongas86@gmail.com
 
-On 14 April 2016 at 14:52, Richard Ash
-<richardashaudacity@googlemail.com> wrote:
-> On 14 April 2016 at 14:20, Richard Ash
-> <richardashaudacity@googlemail.com> wrote:
->> I have now repeated the test using kernel 4.5.1 from kernel.org, which
->> supports enough hardware to get a serial console and test the SD card.
->> I am seeing effectively the same error
->>
->>  mmcblk0: error -110 sending stop command, original cmd response
->> 0x900, card status 0x400e00
-To complete this saga, I took the same card back to a zedboard (so
-removing our custom hardware from the equation) and have reproduced
-the exact same problem there, the same error. Does this indicate the
-problem is not with the custom PCB design but with the SD card
-firmware, or the Linux SDHCI driver?
+Signed-off-by: Dong Aisheng <aisheng.dong@nxp.com>
+---
+ drivers/mmc/core/mmc_ops.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-Richard
+diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
+index 62355bd..d220bbd 100644
+--- a/drivers/mmc/core/mmc_ops.c
++++ b/drivers/mmc/core/mmc_ops.c
+@@ -553,7 +553,7 @@ int __mmc_switch(struct mmc_card *card, u8 set, u8 index, u8 value,
+ 
+ 		/*
+ 		 * We are not allowed to issue a status command and the host
+-		 * does'nt support MMC_CAP_WAIT_WHILE_BUSY, then we can only
++		 * doesn't support MMC_CAP_WAIT_WHILE_BUSY, then we can only
+ 		 * rely on waiting for the stated timeout to be sufficient.
+ 		 */
+ 		if (!send_status) {
+-- 
+1.9.1
+
