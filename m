@@ -1,8 +1,8 @@
 From: Dong Aisheng <aisheng.dong@nxp.com>
-Subject: [PATCH 05/23] mmc: core: mmc_regulator_set_vqmmc not return error if
- vqmmc/vmmc not exist
-Date: Sat, 16 Apr 2016 01:29:29 +0800
-Message-ID: <1460741387-23815-6-git-send-email-aisheng.dong@nxp.com>
+Subject: [PATCH 10/23] mmc: core: disable auto retune during card detection
+ process
+Date: Sat, 16 Apr 2016 01:29:34 +0800
+Message-ID: <1460741387-23815-11-git-send-email-aisheng.dong@nxp.com>
 References: <1460741387-23815-1-git-send-email-aisheng.dong@nxp.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
@@ -22,27 +22,33 @@ To: linux-mmc@vger.kernel.org
 Cc: aisheng.dong@nxp.com, ulf.hansson@linaro.org, dongas86@gmail.com, chris@printf.net, haibo.chen@nxp.com, adrian.hunter@intel.com, shawnguo@kernel.org, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
-Treat vqmmc/vmmc regulator the same way as mmc_regulator_get_supply()
-in mmc_regulator_set_vqmmc(), since they're optional, do not return an
-error if not exist.
+During card detection process, mmc core may sends commands
+to detect if card is still exist in mmc_rescan for removable
+card which may trigger mmc retuning process after a bit time
+of runtime pm suspend.
+Obviously this retuning process is meaningless for card remove
+case, so we disable mmc_retune in mmc_detect_change() for it.
+For card insert case, the mmc_retune will be enabled normally
+in its card initialization process later in mmc_execute_tuning().
+So disable it at first has no side effection.
 
+CC: stable <stable@vger.kernel.org>
 Signed-off-by: Dong Aisheng <aisheng.dong@nxp.com>
 ---
- drivers/mmc/core/core.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+ drivers/mmc/core/core.c | 1 +
+ 1 file changed, 1 insertion(+)
 
 diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index 99275e4..52bfaf0 100644
+index 52bfaf0..76d0802 100644
 --- a/drivers/mmc/core/core.c
 +++ b/drivers/mmc/core/core.c
-@@ -1440,7 +1440,7 @@ int mmc_regulator_set_vqmmc(struct mmc_host *mmc, struct mmc_ios *ios)
+@@ -1888,6 +1888,7 @@ static void _mmc_detect_change(struct mmc_host *host, unsigned long delay,
+ 		pm_wakeup_event(mmc_dev(host), 5000);
  
- 	/* If no vqmmc supply then we can't change the voltage */
- 	if (IS_ERR(mmc->supply.vqmmc))
--		return -EINVAL;
-+		return 0;
+ 	host->detect_change = 1;
++	mmc_retune_disable(host);
+ 	mmc_schedule_delayed_work(&host->detect, delay);
+ }
  
- 	switch (ios->signal_voltage) {
- 	case MMC_SIGNAL_VOLTAGE_120:
 -- 
 1.9.1
