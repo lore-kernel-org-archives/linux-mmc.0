@@ -1,8 +1,8 @@
 From: Dong Aisheng <aisheng.dong@nxp.com>
-Subject: [PATCH 13/23] mmc: sdhci-esdhc-imx: restore watermark level setting
- after resume
-Date: Sat, 16 Apr 2016 01:29:37 +0800
-Message-ID: <1460741387-23815-14-git-send-email-aisheng.dong@nxp.com>
+Subject: [PATCH 14/23] mmc: sdhci-esdhci-imx: disable DLL delay line settings
+ explicitly
+Date: Sat, 16 Apr 2016 01:29:38 +0800
+Message-ID: <1460741387-23815-15-git-send-email-aisheng.dong@nxp.com>
 References: <1460741387-23815-1-git-send-email-aisheng.dong@nxp.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
@@ -22,36 +22,33 @@ To: linux-mmc@vger.kernel.org
 Cc: aisheng.dong@nxp.com, ulf.hansson@linaro.org, dongas86@gmail.com, chris@printf.net, haibo.chen@nxp.com, adrian.hunter@intel.com, shawnguo@kernel.org, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
-Currently, we config the watermark_level register only in probe.
-This will cause the mmc write operation timeout issue after system
-resume back in LPSR mode. Because in LPSR mode, after system resume
-back, the watermark_level register(0x44) changes to 0x08000880, which
-set the write watermark level as 0, and set the read watermark level
-as 128. This value is incorrect.
+From: Dong Aisheng <aisheng.dong@freescale.com>
 
-This patch restores the setting of watermark level register after
-system resume back.
+Disable DLL delay line settings explicitly during driver initialization
+in case ROM/uBoot had set an invalid delay.
+e.g. MX6DL ROM has set the default delay line(DLLCTRL) to 0x1000021,
+the uSDHC clock timing will become marginal when works on DDR mode
+due to default delay and will possibly see CRC errors in case the board
+is not perfectly designed on the eMMC chip layout.
 
 Signed-off-by: Dong Aisheng <aisheng.dong@nxp.com>
 ---
- drivers/mmc/host/sdhci-esdhc-imx.c | 5 +++++
- 1 file changed, 5 insertions(+)
+ drivers/mmc/host/sdhci-esdhc-imx.c | 3 +++
+ 1 file changed, 3 insertions(+)
 
 diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
-index 6fef6bc..4c28fbb 100644
+index 4c28fbb..d02db66 100644
 --- a/drivers/mmc/host/sdhci-esdhc-imx.c
 +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
-@@ -1261,6 +1261,11 @@ static int sdhci_esdhc_suspend(struct device *dev)
- 
- static int sdhci_esdhc_resume(struct device *dev)
- {
-+	struct sdhci_host *host = dev_get_drvdata(dev);
+@@ -1186,6 +1186,9 @@ static int sdhci_esdhc_imx_probe(struct platform_device *pdev)
+ 		*/
+ 		writel(readl(host->ioaddr + 0x6c) | BIT(7),
+ 			host->ioaddr + 0x6c);
 +
-+	/* restore watermark setting in case it's lost in low power mode */
-+	writel(0x10401040, host->ioaddr + ESDHC_WTMK_LVL);
-+
- 	return sdhci_pltfm_resume(dev);
- }
++		/* disable DLL_CTRL delay line settings */
++		writel(0x0, host->ioaddr + ESDHC_DLL_CTRL);
+ 	}
  
+ 	if (imx_data->socdata->flags & ESDHC_FLAG_MAN_TUNING)
 -- 
 1.9.1
