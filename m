@@ -1,8 +1,8 @@
 From: Dong Aisheng <aisheng.dong@nxp.com>
-Subject: [PATCH 14/23] mmc: sdhci-esdhci-imx: disable DLL delay line settings
- explicitly
-Date: Sat, 16 Apr 2016 01:29:38 +0800
-Message-ID: <1460741387-23815-15-git-send-email-aisheng.dong@nxp.com>
+Subject: [PATCH 16/23] doc: dt: fsl-imx-esdhc: add set tuning start point
+ binding
+Date: Sat, 16 Apr 2016 01:29:40 +0800
+Message-ID: <1460741387-23815-17-git-send-email-aisheng.dong@nxp.com>
 References: <1460741387-23815-1-git-send-email-aisheng.dong@nxp.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
@@ -22,33 +22,25 @@ To: linux-mmc@vger.kernel.org
 Cc: aisheng.dong@nxp.com, ulf.hansson@linaro.org, dongas86@gmail.com, chris@printf.net, haibo.chen@nxp.com, adrian.hunter@intel.com, shawnguo@kernel.org, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
-From: Dong Aisheng <aisheng.dong@freescale.com>
-
-Disable DLL delay line settings explicitly during driver initialization
-in case ROM/uBoot had set an invalid delay.
-e.g. MX6DL ROM has set the default delay line(DLLCTRL) to 0x1000021,
-the uSDHC clock timing will become marginal when works on DDR mode
-due to default delay and will possibly see CRC errors in case the board
-is not perfectly designed on the eMMC chip layout.
+add tuning start point binding
 
 Signed-off-by: Dong Aisheng <aisheng.dong@nxp.com>
 ---
- drivers/mmc/host/sdhci-esdhc-imx.c | 3 +++
- 1 file changed, 3 insertions(+)
+ Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.txt | 2 ++
+ 1 file changed, 2 insertions(+)
 
-diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
-index 4c28fbb..d02db66 100644
---- a/drivers/mmc/host/sdhci-esdhc-imx.c
-+++ b/drivers/mmc/host/sdhci-esdhc-imx.c
-@@ -1186,6 +1186,9 @@ static int sdhci_esdhc_imx_probe(struct platform_device *pdev)
- 		*/
- 		writel(readl(host->ioaddr + 0x6c) | BIT(7),
- 			host->ioaddr + 0x6c);
-+
-+		/* disable DLL_CTRL delay line settings */
-+		writel(0x0, host->ioaddr + ESDHC_DLL_CTRL);
- 	}
- 
- 	if (imx_data->socdata->flags & ESDHC_FLAG_MAN_TUNING)
+diff --git a/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.txt b/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.txt
+index dca56d6..3e29050 100644
+--- a/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.txt
++++ b/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.txt
+@@ -28,6 +28,8 @@ Optional properties:
+   transparent level shifters on the outputs of the controller. Two cells are
+   required, first cell specifies minimum slot voltage (mV), second cell
+   specifies maximum slot voltage (mV). Several ranges could be specified.
++- fsl,tuning-start-tap: Specify the start dealy cell point when send first CMD19
++  in tuning procedure.
+ - fsl,tuning-step: Specify the increasing delay cell steps in tuning procedure.
+   The uSDHC use one delay cell as default increasing step to do tuning process.
+   This property allows user to change the tuning step to more than one delay
 -- 
 1.9.1
