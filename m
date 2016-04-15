@@ -1,8 +1,8 @@
 From: Dong Aisheng <aisheng.dong@nxp.com>
-Subject: [PATCH 12/23] mmc: sdhci-esdhc-imx: add esdhc specific suspend resume
- callback
-Date: Sat, 16 Apr 2016 01:29:36 +0800
-Message-ID: <1460741387-23815-13-git-send-email-aisheng.dong@nxp.com>
+Subject: [PATCH 13/23] mmc: sdhci-esdhc-imx: restore watermark level setting
+ after resume
+Date: Sat, 16 Apr 2016 01:29:37 +0800
+Message-ID: <1460741387-23815-14-git-send-email-aisheng.dong@nxp.com>
 References: <1460741387-23815-1-git-send-email-aisheng.dong@nxp.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
@@ -22,43 +22,36 @@ To: linux-mmc@vger.kernel.org
 Cc: aisheng.dong@nxp.com, ulf.hansson@linaro.org, dongas86@gmail.com, chris@printf.net, haibo.chen@nxp.com, adrian.hunter@intel.com, shawnguo@kernel.org, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
-It will be used for platform specific suspend/resume state save/restore
-work for some low power mode like Mega/Fast or LPSR mode.
+Currently, we config the watermark_level register only in probe.
+This will cause the mmc write operation timeout issue after system
+resume back in LPSR mode. Because in LPSR mode, after system resume
+back, the watermark_level register(0x44) changes to 0x08000880, which
+set the write watermark level as 0, and set the read watermark level
+as 128. This value is incorrect.
+
+This patch restores the setting of watermark level register after
+system resume back.
 
 Signed-off-by: Dong Aisheng <aisheng.dong@nxp.com>
 ---
- drivers/mmc/host/sdhci-esdhc-imx.c | 12 +++++++++++-
- 1 file changed, 11 insertions(+), 1 deletion(-)
+ drivers/mmc/host/sdhci-esdhc-imx.c | 5 +++++
+ 1 file changed, 5 insertions(+)
 
 diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
-index 03980db..6fef6bc 100644
+index 6fef6bc..4c28fbb 100644
 --- a/drivers/mmc/host/sdhci-esdhc-imx.c
 +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
-@@ -1254,6 +1254,16 @@ static int sdhci_esdhc_imx_remove(struct platform_device *pdev)
+@@ -1261,6 +1261,11 @@ static int sdhci_esdhc_suspend(struct device *dev)
+ 
+ static int sdhci_esdhc_resume(struct device *dev)
+ {
++	struct sdhci_host *host = dev_get_drvdata(dev);
++
++	/* restore watermark setting in case it's lost in low power mode */
++	writel(0x10401040, host->ioaddr + ESDHC_WTMK_LVL);
++
+ 	return sdhci_pltfm_resume(dev);
  }
  
- #ifdef CONFIG_PM
-+static int sdhci_esdhc_suspend(struct device *dev)
-+{
-+	return sdhci_pltfm_suspend(dev);
-+}
-+
-+static int sdhci_esdhc_resume(struct device *dev)
-+{
-+	return sdhci_pltfm_resume(dev);
-+}
-+
- static int sdhci_esdhc_runtime_suspend(struct device *dev)
- {
- 	struct sdhci_host *host = dev_get_drvdata(dev);
-@@ -1289,7 +1299,7 @@ static int sdhci_esdhc_runtime_resume(struct device *dev)
- #endif
- 
- static const struct dev_pm_ops sdhci_esdhc_pmops = {
--	SET_SYSTEM_SLEEP_PM_OPS(sdhci_pltfm_suspend, sdhci_pltfm_resume)
-+	SET_SYSTEM_SLEEP_PM_OPS(sdhci_esdhc_suspend, sdhci_esdhc_resume)
- 	SET_RUNTIME_PM_OPS(sdhci_esdhc_runtime_suspend,
- 				sdhci_esdhc_runtime_resume, NULL)
- };
 -- 
 1.9.1
