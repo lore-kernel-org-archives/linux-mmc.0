@@ -1,189 +1,52 @@
 From: Dong Aisheng <aisheng.dong@nxp.com>
-Subject: [PATCH 01/23] mmc: sdhci: removed unneeded function wrappers
-Date: Sat, 16 Apr 2016 01:29:25 +0800
-Message-ID: <1460741387-23815-2-git-send-email-aisheng.dong@nxp.com>
+Subject: [PATCH 23/23] mmc: sdhci-esdhc-imx: clear tuning bits during hwinit
+Date: Sat, 16 Apr 2016 01:29:47 +0800
+Message-ID: <1460741387-23815-24-git-send-email-aisheng.dong@nxp.com>
 References: <1460741387-23815-1-git-send-email-aisheng.dong@nxp.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+Content-Type: text/plain
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-bn1on0062.outbound.protection.outlook.com ([157.56.110.62]:25952
+	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1752646AbcDORiR (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 15 Apr 2016 13:38:17 -0400
 In-Reply-To: <1460741387-23815-1-git-send-email-aisheng.dong@nxp.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: linux-mmc@vger.kernel.org
-Cc: aisheng.dong@nxp.com, ulf.hansson@linaro.org, dongas86@gmail.com, chris@printf.net, haibo.chen@nxp.com, adrian.hunter@intel.com, shawnguo@kernel.org, linux-arm-kernel@lists.infradead.org
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: ulf.hansson@linaro.org, chris@printf.net, shawnguo@kernel.org, adrian.hunter@intel.com, linux-arm-kernel@lists.infradead.org, aisheng.dong@nxp.com, haibo.chen@nxp.com, dongas86@gmail.com
 
-After commit d6463f170cf0 ("mmc: sdhci: Remove redundant runtime PM calls"),
-some of original sdhci_do_xx() function wrappers becomes meaningless,
-so remove them.
+The tuning bits like FBCLK_SEL, SMP_CLK_SEL and DLY_CELL which affects
+timing may have already been set by ROM if booting from SD3.0 mode like
+SDR104. Let's clear it first during hw initialization before do the
+new card enumeration.
+
+For system resume case, it's safe to clear them too since the following
+card re-initialization in mmc_xx_init_card() will do retuning and set
+correct value again.
 
 Signed-off-by: Dong Aisheng <aisheng.dong@nxp.com>
 ---
- drivers/mmc/host/sdhci.c | 60 ++++++++++++------------------------------------
- 1 file changed, 15 insertions(+), 45 deletions(-)
+ drivers/mmc/host/sdhci-esdhc-imx.c | 5 +++++
+ 1 file changed, 5 insertions(+)
 
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 8e74e75..be52a3a 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -53,7 +53,7 @@ static void sdhci_finish_data(struct sdhci_host *);
- static void sdhci_finish_command(struct sdhci_host *);
- static int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode);
- static void sdhci_enable_preset_value(struct sdhci_host *host, bool enable);
--static int sdhci_do_get_cd(struct sdhci_host *host);
-+static int sdhci_get_cd(struct mmc_host *mmc);
- 
- #ifdef CONFIG_PM
- static void sdhci_runtime_pm_bus_on(struct sdhci_host *host);
-@@ -194,7 +194,7 @@ EXPORT_SYMBOL_GPL(sdhci_reset);
- static void sdhci_do_reset(struct sdhci_host *host, u8 mask)
- {
- 	if (host->quirks & SDHCI_QUIRK_NO_CARD_NO_RESET) {
--		if (!sdhci_do_get_cd(host))
-+		if (!sdhci_get_cd(host->mmc))
- 			return;
- 	}
- 
-@@ -1393,11 +1393,11 @@ void sdhci_set_uhs_signaling(struct sdhci_host *host, unsigned timing)
- }
- EXPORT_SYMBOL_GPL(sdhci_set_uhs_signaling);
- 
--static void sdhci_do_set_ios(struct sdhci_host *host, struct mmc_ios *ios)
-+static void sdhci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
- {
-+	struct sdhci_host *host = mmc_priv(mmc);
- 	unsigned long flags;
- 	u8 ctrl;
--	struct mmc_host *mmc = host->mmc;
- 
- 	spin_lock_irqsave(&host->lock, flags);
- 
-@@ -1551,16 +1551,10 @@ static void sdhci_do_set_ios(struct sdhci_host *host, struct mmc_ios *ios)
- 	spin_unlock_irqrestore(&host->lock, flags);
- }
- 
--static void sdhci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
-+static int sdhci_get_cd(struct mmc_host *mmc)
- {
- 	struct sdhci_host *host = mmc_priv(mmc);
--
--	sdhci_do_set_ios(host, ios);
--}
--
--static int sdhci_do_get_cd(struct sdhci_host *host)
--{
--	int gpio_cd = mmc_gpio_get_cd(host->mmc);
-+	int gpio_cd = mmc_gpio_get_cd(mmc);
- 
- 	if (host->flags & SDHCI_DEVICE_DEAD)
- 		return 0;
-@@ -1584,13 +1578,6 @@ static int sdhci_do_get_cd(struct sdhci_host *host)
- 	return !!(sdhci_readl(host, SDHCI_PRESENT_STATE) & SDHCI_CARD_PRESENT);
- }
- 
--static int sdhci_get_cd(struct mmc_host *mmc)
--{
--	struct sdhci_host *host = mmc_priv(mmc);
--
--	return sdhci_do_get_cd(host);
--}
--
- static int sdhci_check_ro(struct sdhci_host *host)
- {
- 	unsigned long flags;
-@@ -1615,8 +1602,9 @@ static int sdhci_check_ro(struct sdhci_host *host)
- 
- #define SAMPLE_COUNT	5
- 
--static int sdhci_do_get_ro(struct sdhci_host *host)
-+static int sdhci_get_ro(struct mmc_host *mmc)
- {
-+	struct sdhci_host *host = mmc_priv(mmc);
- 	int i, ro_count;
- 
- 	if (!(host->quirks & SDHCI_QUIRK_UNSTABLE_RO_DETECT))
-@@ -1641,13 +1629,6 @@ static void sdhci_hw_reset(struct mmc_host *mmc)
- 		host->ops->hw_reset(host);
- }
- 
--static int sdhci_get_ro(struct mmc_host *mmc)
--{
--	struct sdhci_host *host = mmc_priv(mmc);
--
--	return sdhci_do_get_ro(host);
--}
--
- static void sdhci_enable_sdio_irq_nolock(struct sdhci_host *host, int enable)
- {
- 	if (!(host->flags & SDHCI_DEVICE_DEAD)) {
-@@ -1677,10 +1658,10 @@ static void sdhci_enable_sdio_irq(struct mmc_host *mmc, int enable)
- 	spin_unlock_irqrestore(&host->lock, flags);
- }
- 
--static int sdhci_do_start_signal_voltage_switch(struct sdhci_host *host,
--						struct mmc_ios *ios)
-+static int sdhci_start_signal_voltage_switch(struct mmc_host *mmc,
-+					     struct mmc_ios *ios)
- {
--	struct mmc_host *mmc = host->mmc;
-+	struct sdhci_host *host = mmc_priv(mmc);
- 	u16 ctrl;
- 	int ret;
- 
-@@ -1768,17 +1749,6 @@ static int sdhci_do_start_signal_voltage_switch(struct sdhci_host *host,
+diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
+index 98aa6b5..6a699d1 100644
+--- a/drivers/mmc/host/sdhci-esdhc-imx.c
++++ b/drivers/mmc/host/sdhci-esdhc-imx.c
+@@ -1018,6 +1018,11 @@ static void sdhci_esdhc_imx_hwinit(struct sdhci_host *host)
+ 			}
+ 			writel(tmp, host->ioaddr + ESDHC_TUNING_CTRL);
+ 		}
++
++		/* clear tuning bits in case ROM has set it already */
++		writel(0x0, host->ioaddr + ESDHC_MIX_CTRL);
++		writel(0x0, host->ioaddr + SDHCI_ACMD12_ERR);
++		writel(0x0, host->ioaddr + ESDHC_TUNE_CTRL_STATUS);
  	}
  }
  
--static int sdhci_start_signal_voltage_switch(struct mmc_host *mmc,
--	struct mmc_ios *ios)
--{
--	struct sdhci_host *host = mmc_priv(mmc);
--
--	if (host->version < SDHCI_SPEC_300)
--		return 0;
--
--	return sdhci_do_start_signal_voltage_switch(host, ios);
--}
--
- static int sdhci_card_busy(struct mmc_host *mmc)
- {
- 	struct sdhci_host *host = mmc_priv(mmc);
-@@ -2070,7 +2040,7 @@ static void sdhci_card_event(struct mmc_host *mmc)
- 	if (host->ops->card_event)
- 		host->ops->card_event(host);
- 
--	present = sdhci_do_get_cd(host);
-+	present = sdhci_get_cd(host->mmc);
- 
- 	spin_lock_irqsave(&host->lock, flags);
- 
-@@ -2643,7 +2613,7 @@ int sdhci_resume_host(struct sdhci_host *host)
- 		sdhci_init(host, 0);
- 		host->pwr = 0;
- 		host->clock = 0;
--		sdhci_do_set_ios(host, &host->mmc->ios);
-+		sdhci_set_ios(host->mmc, &host->mmc->ios);
- 	} else {
- 		sdhci_init(host, (host->mmc->pm_flags & MMC_PM_KEEP_POWER));
- 		mmiowb();
-@@ -2721,8 +2691,8 @@ int sdhci_runtime_resume_host(struct sdhci_host *host)
- 	/* Force clock and power re-program */
- 	host->pwr = 0;
- 	host->clock = 0;
--	sdhci_do_start_signal_voltage_switch(host, &host->mmc->ios);
--	sdhci_do_set_ios(host, &host->mmc->ios);
-+	sdhci_start_signal_voltage_switch(host->mmc, &host->mmc->ios);
-+	sdhci_set_ios(host->mmc, &host->mmc->ios);
- 
- 	if ((host_flags & SDHCI_PV_ENABLED) &&
- 		!(host->quirks2 & SDHCI_QUIRK2_PRESET_VALUE_BROKEN)) {
 -- 
 1.9.1
+
