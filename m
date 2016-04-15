@@ -1,7 +1,8 @@
 From: Dong Aisheng <aisheng.dong@nxp.com>
-Subject: [PATCH 17/23] mmc: sdhci: add standard hw auto retuning support
-Date: Sat, 16 Apr 2016 01:29:41 +0800
-Message-ID: <1460741387-23815-18-git-send-email-aisheng.dong@nxp.com>
+Subject: [PATCH 22/23] mmc: sdhci-esdhc-imx: move tuning static configuration
+ into hwinit function
+Date: Sat, 16 Apr 2016 01:29:46 +0800
+Message-ID: <1460741387-23815-23-git-send-email-aisheng.dong@nxp.com>
 References: <1460741387-23815-1-git-send-email-aisheng.dong@nxp.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
@@ -21,91 +22,89 @@ To: linux-mmc@vger.kernel.org
 Cc: aisheng.dong@nxp.com, ulf.hansson@linaro.org, dongas86@gmail.com, chris@printf.net, haibo.chen@nxp.com, adrian.hunter@intel.com, shawnguo@kernel.org, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
-If HW supports SDHCI_TUNING_MODE_3 which is auto retuning, we won't
-retune during runtime suspend and resume, instead we use Re-tuning
-Request signaled via SDHCI_INT_RETUNE interrupt to do retuning and
-hw auto retuning during data transfer to guarantee the signal sample
-window correction.
-
-This can avoid a mass of repeatly retuning during small file system
-data access and improve the performance.
+Move tuning static configuration into hwinit function.
+Tuning configuration may also be lost in low power mode,
+so need restore in hwinit().
 
 Signed-off-by: Dong Aisheng <aisheng.dong@nxp.com>
 ---
- drivers/mmc/host/sdhci.c | 18 ++++++++++++++----
- drivers/mmc/host/sdhci.h |  3 +++
- 2 files changed, 17 insertions(+), 4 deletions(-)
+ drivers/mmc/host/sdhci-esdhc-imx.c | 36 ++++++++++++++++++------------------
+ 1 file changed, 18 insertions(+), 18 deletions(-)
 
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 2eb0e34..0027b87 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -252,6 +252,9 @@ static void sdhci_init(struct sdhci_host *host, int soft)
- 		    SDHCI_INT_TIMEOUT | SDHCI_INT_DATA_END |
- 		    SDHCI_INT_RESPONSE;
- 
-+	if (host->tuning_mode == SDHCI_TUNING_MODE_3)
-+		host->ier |= SDHCI_INT_RETUNE;
-+
- 	sdhci_writel(host, host->ier, SDHCI_INT_ENABLE);
- 	sdhci_writel(host, host->ier, SDHCI_SIGNAL_ENABLE);
- 
-@@ -2477,6 +2480,9 @@ static irqreturn_t sdhci_irq(int irq, void *dev_id)
- 			pr_err("%s: Card is consuming too much power!\n",
- 				mmc_hostname(host->mmc));
- 
-+		if (intmask & SDHCI_INT_RETUNE)
-+			mmc_retune_needed(host->mmc);
-+
- 		if (intmask & SDHCI_INT_CARD_INT) {
- 			sdhci_enable_sdio_irq_nolock(host, false);
- 			host->thread_isr |= SDHCI_INT_CARD_INT;
-@@ -2575,8 +2581,10 @@ int sdhci_suspend_host(struct sdhci_host *host)
+diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
+index 95f3632..98aa6b5 100644
+--- a/drivers/mmc/host/sdhci-esdhc-imx.c
++++ b/drivers/mmc/host/sdhci-esdhc-imx.c
+@@ -483,7 +483,6 @@ static void esdhc_writew_le(struct sdhci_host *host, u16 val, int reg)
+ 		} else if (imx_data->socdata->flags & ESDHC_FLAG_STD_TUNING) {
+ 			u32 v = readl(host->ioaddr + SDHCI_ACMD12_ERR);
+ 			u32 m = readl(host->ioaddr + ESDHC_MIX_CTRL);
+-			u32 tuning_ctrl;
+ 			if (val & SDHCI_CTRL_TUNED_CLK) {
+ 				v |= ESDHC_MIX_CTRL_SMPCLK_SEL;
+ 			} else {
+@@ -496,18 +495,6 @@ static void esdhc_writew_le(struct sdhci_host *host, u16 val, int reg)
+ 				v |= ESDHC_MIX_CTRL_EXE_TUNE;
+ 				m |= ESDHC_MIX_CTRL_FBCLK_SEL;
+ 				m |= ESDHC_MIX_CTRL_AUTO_TUNE_EN;
+-				tuning_ctrl = readl(host->ioaddr + ESDHC_TUNING_CTRL);
+-				tuning_ctrl |= ESDHC_STD_TUNING_EN | ESDHC_TUNING_START_TAP_DEFAULT;
+-				if (imx_data->boarddata.tuning_start_tap) {
+-					tuning_ctrl &= ~ESDHC_TUNING_START_TAP_MASK;
+-					tuning_ctrl |= imx_data->boarddata.tuning_start_tap;
+-				}
+-
+-				if (imx_data->boarddata.tuning_step) {
+-					tuning_ctrl &= ~ESDHC_TUNING_STEP_MASK;
+-					tuning_ctrl |= imx_data->boarddata.tuning_step << ESDHC_TUNING_STEP_SHIFT;
+-				}
+-				writel(tuning_ctrl, host->ioaddr + ESDHC_TUNING_CTRL);
+ 			} else {
+ 				v &= ~ESDHC_MIX_CTRL_EXE_TUNE;
+ 			}
+@@ -982,6 +969,7 @@ static void sdhci_esdhc_imx_hwinit(struct sdhci_host *host)
  {
- 	sdhci_disable_card_detection(host);
+ 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+ 	struct pltfm_imx_data *imx_data = sdhci_pltfm_priv(pltfm_host);
++	int tmp;
  
--	mmc_retune_timer_stop(host->mmc);
--	mmc_retune_needed(host->mmc);
-+	if (host->tuning_mode == SDHCI_TUNING_MODE_1) {
-+		mmc_retune_timer_stop(host->mmc);
-+		mmc_retune_needed(host->mmc);
-+	}
+ 	if (esdhc_is_usdhc(imx_data)) {
+ 		/*
+@@ -1013,6 +1001,23 @@ static void sdhci_esdhc_imx_hwinit(struct sdhci_host *host)
  
- 	if (!device_may_wakeup(mmc_dev(host->mmc))) {
- 		host->ier = 0;
-@@ -2651,8 +2659,10 @@ int sdhci_runtime_suspend_host(struct sdhci_host *host)
- {
- 	unsigned long flags;
+ 		/* disable DLL_CTRL delay line settings */
+ 		writel(0x0, host->ioaddr + ESDHC_DLL_CTRL);
++
++		if (imx_data->socdata->flags & ESDHC_FLAG_STD_TUNING) {
++			tmp = readl(host->ioaddr + ESDHC_TUNING_CTRL);
++			tmp |= ESDHC_STD_TUNING_EN |
++				ESDHC_TUNING_START_TAP_DEFAULT;
++			if (imx_data->boarddata.tuning_start_tap) {
++				tmp &= ~ESDHC_TUNING_START_TAP_MASK;
++				tmp |= imx_data->boarddata.tuning_start_tap;
++			}
++
++			if (imx_data->boarddata.tuning_step) {
++				tmp &= ~ESDHC_TUNING_STEP_MASK;
++				tmp |= imx_data->boarddata.tuning_step
++					<< ESDHC_TUNING_STEP_SHIFT;
++			}
++			writel(tmp, host->ioaddr + ESDHC_TUNING_CTRL);
++		}
+ 	}
+ }
  
--	mmc_retune_timer_stop(host->mmc);
--	mmc_retune_needed(host->mmc);
-+	if (host->tuning_mode == SDHCI_TUNING_MODE_1) {
-+		mmc_retune_timer_stop(host->mmc);
-+		mmc_retune_needed(host->mmc);
-+	}
+@@ -1226,11 +1231,6 @@ static int sdhci_esdhc_imx_probe(struct platform_device *pdev)
+ 		sdhci_esdhc_ops.platform_execute_tuning =
+ 					esdhc_executing_tuning;
  
- 	spin_lock_irqsave(&host->lock, flags);
- 	host->ier &= SDHCI_INT_CARD_INT;
-diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-index afa4de8..2c2404f 100644
---- a/drivers/mmc/host/sdhci.h
-+++ b/drivers/mmc/host/sdhci.h
-@@ -128,6 +128,7 @@
- #define  SDHCI_INT_CARD_INSERT	0x00000040
- #define  SDHCI_INT_CARD_REMOVE	0x00000080
- #define  SDHCI_INT_CARD_INT	0x00000100
-+#define  SDHCI_INT_RETUNE	0x00001000
- #define  SDHCI_INT_ERROR	0x00008000
- #define  SDHCI_INT_TIMEOUT	0x00010000
- #define  SDHCI_INT_CRC		0x00020000
-@@ -514,6 +515,8 @@ struct sdhci_host {
- 	unsigned int		tuning_count;	/* Timer count for re-tuning */
- 	unsigned int		tuning_mode;	/* Re-tuning mode supported by host */
- #define SDHCI_TUNING_MODE_1	0
-+#define SDHCI_TUNING_MODE_2	1
-+#define SDHCI_TUNING_MODE_3	2
+-	if (imx_data->socdata->flags & ESDHC_FLAG_STD_TUNING)
+-		writel(readl(host->ioaddr + ESDHC_TUNING_CTRL) |
+-			ESDHC_STD_TUNING_EN | ESDHC_TUNING_START_TAP_DEFAULT,
+-			host->ioaddr + ESDHC_TUNING_CTRL);
+-
+ 	if (imx_data->socdata->flags & ESDHC_FLAG_ERR004536)
+ 		host->quirks |= SDHCI_QUIRK_BROKEN_ADMA;
  
- 	unsigned long private[0] ____cacheline_aligned;
- };
 -- 
 1.9.1
