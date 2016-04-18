@@ -1,32 +1,109 @@
 From: Lars Persson <lars.persson@axis.com>
-Subject: [PATCH v2 0/3] mmc: usdhi6rol0: UHS support
-Date: Mon, 18 Apr 2016 15:44:52 +0200
-Message-ID: <cover.1460986983.git.larper@axis.com>
+Subject: [PATCH v2 3/3] mmc: usdhi6rol0: add pinctrl to set pin drive strength
+Date: Mon, 18 Apr 2016 15:44:55 +0200
+Message-ID: <181127e4ec8bbfbf0f80018ff157b59d63597c44.1460986983.git.larper@axis.com>
+References: <cover.1460986983.git.larper@axis.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from bes.se.axis.com ([195.60.68.10]:50295 "EHLO bes.se.axis.com"
+Received: from bes.se.axis.com ([195.60.68.10]:50319 "EHLO bes.se.axis.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752827AbcDRNpZ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 18 Apr 2016 09:45:25 -0400
+	id S1752900AbcDRNp1 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 18 Apr 2016 09:45:27 -0400
+In-Reply-To: <cover.1460986983.git.larper@axis.com>
+In-Reply-To: <cover.1460986983.git.larper@axis.com>
+References: <cover.1460986983.git.larper@axis.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org, devicetree@vger.kernel.org
 Cc: g.liakhovetski@gmx.de, ulf.hansson@linaro.org, robh+dt@kernel.org, pawel.moll@arm.com, mark.rutland@arm.com, ijc+devicetree@hellion.org.uk, galak@codeaurora.org, Lars Persson <larper@axis.com>
 
-This patch set adds UHS support to the usdhi6rol0 driver, with control of the
-regulator and pin state settings.
+Some boards need different pin drive strength for the UHS mode. Add an
+optional pinctrl setting with two pin states covering UHS speeds and
+other speeds.
 
-Changes since v1:
-- Use mmc_regulator_set_vqmmc().
+Signed-off-by: Lars Persson <larper@axis.com>
+---
+ drivers/mmc/host/usdhi6rol0.c | 40 +++++++++++++++++++++++++++++++++++++++-
+ 1 file changed, 39 insertions(+), 1 deletion(-)
 
-Lars Persson (3):
-  mmc: dt: usdhi6rol0: add optional pinctrl binding
-  mmc: usdhi6rol0: add support for UHS modes
-  mmc: usdhi6rol0: add pinctrl to set pin drive strength
-
- .../devicetree/bindings/mmc/usdhi6rol0.txt         |  4 ++
- drivers/mmc/host/usdhi6rol0.c                      | 51 ++++++++++++++++++++++
- 2 files changed, 55 insertions(+)
-
+diff --git a/drivers/mmc/host/usdhi6rol0.c b/drivers/mmc/host/usdhi6rol0.c
+index 2585ea4..e8a5c8f 100644
+--- a/drivers/mmc/host/usdhi6rol0.c
++++ b/drivers/mmc/host/usdhi6rol0.c
+@@ -22,6 +22,7 @@
+ #include <linux/mmc/sdio.h>
+ #include <linux/module.h>
+ #include <linux/pagemap.h>
++#include <linux/pinctrl/consumer.h>
+ #include <linux/platform_device.h>
+ #include <linux/scatterlist.h>
+ #include <linux/string.h>
+@@ -198,6 +199,11 @@ struct usdhi6_host {
+ 	struct dma_chan *chan_rx;
+ 	struct dma_chan *chan_tx;
+ 	bool dma_active;
++
++	/* Pin control */
++	struct pinctrl *pinctrl;
++	struct pinctrl_state *pins_default;
++	struct pinctrl_state *pins_uhs;
+ };
+ 
+ /*			I/O primitives					*/
+@@ -1147,14 +1153,39 @@ static void usdhi6_enable_sdio_irq(struct mmc_host *mmc, int enable)
+ 	}
+ }
+ 
++static int usdhi6_set_pinstates(struct usdhi6_host *host, int voltage)
++{
++	if (IS_ERR(host->pinctrl) || IS_ERR(host->pins_default) ||
++	    IS_ERR(host->pins_uhs))
++		return 0;
++
++	switch (voltage) {
++	case MMC_SIGNAL_VOLTAGE_180:
++	case MMC_SIGNAL_VOLTAGE_120:
++		return pinctrl_select_state(host->pinctrl,
++					    host->pins_uhs);
++
++	default:
++		return pinctrl_select_state(host->pinctrl,
++					    host->pins_default);
++	}
++}
++
+ static int usdhi6_sig_volt_switch(struct mmc_host *mmc, struct mmc_ios *ios)
+ {
+ 	int ret;
+ 
+ 	ret = mmc_regulator_set_vqmmc(mmc, ios);
+ 
+-	if (ret < 0)
++	if (ret < 0) {
+ 		dev_warn(mmc_dev(mmc), "Voltage switch failed: %d\n", ret);
++		return ret;
++	}
++
++	ret = usdhi6_set_pinstates(mmc_priv(mmc), ios->signal_voltage);
++	if (ret)
++		dev_warn_once(mmc_dev(mmc),
++			      "Failed to set pinstate err=%d\n", ret);
+ 
+ 	return ret;
+ }
+@@ -1817,6 +1848,13 @@ static int usdhi6_probe(struct platform_device *pdev)
+ 		mmc->f_max = host->imclk;
+ 	mmc->f_min = host->imclk / 512;
+ 
++	host->pinctrl = devm_pinctrl_get(&pdev->dev);
++	if (!IS_ERR(host->pinctrl)) {
++		host->pins_default = pinctrl_lookup_state(host->pinctrl,
++							  PINCTRL_STATE_DEFAULT);
++		host->pins_uhs     = pinctrl_lookup_state(host->pinctrl,
++							  "pins_uhs");
++	}
+ 	platform_set_drvdata(pdev, host);
+ 
+ 	ret = mmc_add_host(mmc);
 -- 
 2.1.4
 
