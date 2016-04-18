@@ -1,240 +1,208 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 2/6] mmc: sh_mobile_sdhi: remove obsolete irq_by_name registration
-Date: Mon, 18 Apr 2016 10:21:41 +0200
-Message-ID: <CAPDyKFqixO2EGxdx4ERy=DSTR+KBunrYyfR26+AYN0k5_dVHiw@mail.gmail.com>
-References: <1459934734-3613-1-git-send-email-wsa@the-dreams.de>
-	<1459934734-3613-3-git-send-email-wsa@the-dreams.de>
+From: Matt Redfearn <Matt.Redfearn@imgtec.com>
+Subject: Re: [RESEND PATCH v7 1/2] mmc: OCTEON: Add DT bindings for OCTEON
+ MMC controller
+Date: Mon, 18 Apr 2016 08:53:15 +0000
+Message-ID: <9FCBB1D1936B2F4DB2DD02BA3957FB504A067CE2@LEMAIL01.le.imgtec.org>
+References: <1459438013-25088-1-git-send-email-matt.redfearn@imgtec.com>
+ <CAPDyKFpZqiv7iVbunr+mrLyxLx=V-NVSnDpvbMaaekxn7FdKrQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wm0-f42.google.com ([74.125.82.42]:38011 "EHLO
-	mail-wm0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751149AbcDRIVn (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 18 Apr 2016 04:21:43 -0400
-Received: by mail-wm0-f42.google.com with SMTP id u206so111824778wme.1
-        for <linux-mmc@vger.kernel.org>; Mon, 18 Apr 2016 01:21:42 -0700 (PDT)
-In-Reply-To: <1459934734-3613-3-git-send-email-wsa@the-dreams.de>
+Received: from mailapp01.imgtec.com ([195.59.15.196]:60166 "EHLO
+	mailapp01.imgtec.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751485AbcDRIxT convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 18 Apr 2016 04:53:19 -0400
+In-Reply-To: <CAPDyKFpZqiv7iVbunr+mrLyxLx=V-NVSnDpvbMaaekxn7FdKrQ@mail.gmail.com>
+Content-Language: en-GB
+Content-ID: <C87F8C38B04E4042A1600C1AC8074590@imgtec.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Wolfram Sang <wsa@the-dreams.de>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, linux-renesas-soc@vger.kernel.org, Linux-sh list <linux-sh@vger.kernel.org>, Simon Horman <horms@verge.net.au>, Kuninori Morimoto <kuninori.morimoto.gx@gmail.com>
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Aleksey Makarov <aleksey.makarov@caviumnetworks.com>, Chandrakala Chavva <cchavva@caviumnetworks.com>, David Daney <david.daney@cavium.com>, Aleksey Makarov <aleksey.makarov@auriga.com>, Leonid Rosenboim <lrosenboim@caviumnetworks.com>, Peter Swain <pswain@cavium.com>, Aaron Williams <aaron.williams@cavium.com>, Rob Herring <robh+dt@kernel.org>, Ralf Baechle <ralf@linux-mips.org>
 
-On 6 April 2016 at 11:25, Wolfram Sang <wsa@the-dreams.de> wrote:
-> From: Wolfram Sang <wsa+renesas@sang-engineering.com>
->
-> There is no user left in the kernel, so this code can be removed.
-> (Legacy, non-DT sh_mobile boards have been removed a while ago.) The
-> diff looks more complicated than it is: The if-block for multiplexed isr
-> is now the main code path, the rest is removed. A number of sh boards
-> included the now deleted include file without needing it. Remove that,
-> too.
->
-> Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
-> ---
->  arch/sh/boards/board-sh7757lcr.c     |  1 -
->  arch/sh/boards/mach-ap325rxa/setup.c |  1 -
->  arch/sh/boards/mach-ecovec24/setup.c |  1 -
->  arch/sh/boards/mach-kfr2r09/setup.c  |  1 -
->  arch/sh/boards/mach-migor/setup.c    |  1 -
->  arch/sh/boards/mach-se/7724/setup.c  |  1 -
->  drivers/mmc/host/sh_mobile_sdhi.c    | 57 +++++-------------------------------
->  include/linux/mmc/sh_mobile_sdhi.h   | 10 -------
->  8 files changed, 8 insertions(+), 65 deletions(-)
->  delete mode 100644 include/linux/mmc/sh_mobile_sdhi.h
+On 14/04/16 13:45, Ulf Hansson wrote:
 
-Hi Wolfram,
++ Rob and Ralf
 
-I need and ack from the Superh arch maintainer to apply this one.
+On 31 March 2016 at 17:26, Matt Redfearn <matt.redfearn@imgtec.com><mailto:matt.redfearn@imgtec.com> wrote:
 
-It seems like you didn't include them on "to/cc" list, perhaps repost!?
+
+From: Aleksey Makarov <aleksey.makarov@caviumnetworks.com><mailto:aleksey.makarov@caviumnetworks.com>
+
+Add Device Tree binding document for Octeon MMC controller. The driver
+is in a following patch.
+
+The MMC controller can be connected to up to 4 "slots" which may be
+eMMC, MMC or SD card devices. As there is a single controller, each
+available slot is represented as a child node of the controller.
+
+This is a similar concept to the atmel-mci driver.
+
+Tested-by: Aaro Koskinen <aaro.koskinen@iki.fi><mailto:aaro.koskinen@iki.fi>
+Signed-off-by: Chandrakala Chavva <cchavva@caviumnetworks.com><mailto:cchavva@caviumnetworks.com>
+Signed-off-by: David Daney <david.daney@cavium.com><mailto:david.daney@cavium.com>
+Signed-off-by: Aleksey Makarov <aleksey.makarov@auriga.com><mailto:aleksey.makarov@auriga.com>
+Signed-off-by: Leonid Rosenboim <lrosenboim@caviumnetworks.com><mailto:lrosenboim@caviumnetworks.com>
+Signed-off-by: Peter Swain <pswain@cavium.com><mailto:pswain@cavium.com>
+Signed-off-by: Aaron Williams <aaron.williams@cavium.com><mailto:aaron.williams@cavium.com>
+Signed-off-by: Matt Redfearn <matt.redfearn@imgtec.com><mailto:matt.redfearn@imgtec.com>
+Acked-by: Rob Herring <robh@kernel.org><mailto:robh@kernel.org>
+---
+v7: No changes
+
+v6:
+- Split up patch
+- Moved device tree fixup to platform code
+---
+ .../devicetree/bindings/mmc/octeon-mmc.txt         | 79 ++++++++++++++++++++++
+ 1 file changed, 79 insertions(+)
+ create mode 100644 Documentation/devicetree/bindings/mmc/octeon-mmc.txt
+
+diff --git a/Documentation/devicetree/bindings/mmc/octeon-mmc.txt b/Documentation/devicetree/bindings/mmc/octeon-mmc.txt
+new file mode 100644
+index 000000000000..d2c576d9ad65
+--- /dev/null
++++ b/Documentation/devicetree/bindings/mmc/octeon-mmc.txt
+@@ -0,0 +1,79 @@
++* OCTEON SD/MMC Host Controller
++
++This controller is present on some members of the Cavium OCTEON SoC
++family, provide an interface for eMMC, MMC and SD devices.  There is a
++single controller that may have several "slots" connected.  These
++slots appear as children of the main controller node.
++The DMA engine is an integral part of the controller block.
++
++1) MMC node
++
++Required properties:
++- compatible : Should be "cavium,octeon-6130-mmc" or "cavium,octeon-7890-mmc"
++- reg : Two entries:
++       1) The base address of the MMC controller register bank.
++       2) The base address of the MMC DMA engine register bank.
++- interrupts :
++       For "cavium,octeon-6130-mmc": two entries:
++       1) The MMC controller interrupt line.
++       2) The MMC DMA engine interrupt line.
++       For "cavium,octeon-7890-mmc": nine entries:
++       1) The next block transfer of a multiblock transfer has completed (BUF_DONE)
++       2) Operation completed successfully (CMD_DONE).
++       3) DMA transfer completed successfully (DMA_DONE).
++       4) Operation encountered an error (CMD_ERR).
++       5) DMA transfer encountered an error (DMA_ERR).
++       6) Switch operation completed successfully (SWITCH_DONE).
++       7) Switch operation encountered an error (SWITCH_ERR).
++       8) Internal DMA engine request completion interrupt (DONE).
++       9) Internal DMA FIFO underflow (FIFO).
++- #address-cells : Must be <1>
++- #size-cells : Must be <0>
++
++The node contains child nodes for each slot that the platform uses.
++
++Example:
++mmc@1180000002000 {
++       compatible = "cavium,octeon-6130-mmc";
++       reg = <0x11800 0x00002000 0x0 0x100>,
++               <0x11800 0x00000168 0x0 0x20>;
++       #address-cells = <1>;
++       #size-cells = <0>;
++       /* EMM irq, DMA irq */
++       interrupts = <1 19>, <0 63>;
++
++       [ child node definitions...]
++};
++
++
++2) Slot nodes
++Properties in mmc.txt apply to each slot node that the platform uses.
++
++Required properties:
++- reg : The slot number.
++
++Optional properties:
++- cavium,cmd-clk-skew : the amount of delay (in pS) past the clock edge
++       to sample the command pin.
++- cavium,dat-clk-skew : the amount of delay (in pS) past the clock edge
++       to sample the data pin.
++
++Example:
++       mmc@1180000002000 {
++               compatible = "cavium,octeon-6130-mmc";
++               reg = <0x11800 0x00002000 0x0 0x100>,
++                     <0x11800 0x00000168 0x0 0x20>;
++               #address-cells = <1>;
++               #size-cells = <0>;
++               /* EMM irq, DMA irq */
++               interrupts = <1 19>, <0 63>;
++
++               mmc-slot@0 {
++                       reg = <0>;
+
+
+Let me elaborate on how child nodes are being used by the MMC subsystem today.
+
+1)
+When a child node has "reg = <0>", the mmc core treat this as being
+represented by a non-removable/embedded card.
+We have also added a compatible string, "mmc-card", that help us to
+deal with constraints for eMMC cards during initialization. You may
+have a look at Documentation/devicetree/bindings/mmc/mmc-card.txt to
+know more about this.
+
+Additionally, the dynamically created struct device representing the
+card, gets its device node pointer assigned to the child node when
+"reg = <0>". In that way, the bus/drivers for the card can use it as
+well.
+
+2)
+When "reg" is non-zero and it's an SDIO card that has been detected,
+we treat the child node as representing the embedded SDIO functional
+device. The maximum amount of SDIO functional devices that is
+supported is dynamic, as it's encoded inside registers of the SDIO
+card. The "reg" number needs to be within this range, which allows the
+dynamically created struct device for the SDIO func device, to get its
+device node assigned to its corresponding child node.
+
+Typically an SDIO function device may be a WLAN chip, which thus is
+being attached to an SDIO interface. This is especially needed when
+the WLAN driver requires platform specific resources, like some GPIOs
+or wake IRQs. An example is available in
+arch/arm/boot/dts/sun7i-a20-wits-pro-a20-dkt.dts, where mmc3 use this.
+
+
+
++                       max-frequency = <20000000>;
++                       bus-width = <8>;
++                       vmmc-supply = <&reg_vmmc3>;
++                       cd-gpios = <&gpio 9 0>;
++                       wp-gpios = <&gpio 10 0>;
++               };
++       };
+--
+2.5.0
+
+
+
+So to summarize, the mmc core has a different view of what child nodes
+represents than what is being suggested here. I am not sure it's good
+idea to add/change that interpretation.
+
+Perhaps it's better to implement the machine specific patching of the
+DTS and then remove the "mmc-slot". I think something along those
+lines was proposed in one of the earlier versions as well!?
+
+What do you think?
 
 Kind regards
 Uffe
 
->
-> diff --git a/arch/sh/boards/board-sh7757lcr.c b/arch/sh/boards/board-sh7757lcr.c
-> index 324599bfad1420..0104c8199c48fe 100644
-> --- a/arch/sh/boards/board-sh7757lcr.c
-> +++ b/arch/sh/boards/board-sh7757lcr.c
-> @@ -20,7 +20,6 @@
->  #include <linux/mfd/tmio.h>
->  #include <linux/mmc/host.h>
->  #include <linux/mmc/sh_mmcif.h>
-> -#include <linux/mmc/sh_mobile_sdhi.h>
->  #include <linux/sh_eth.h>
->  #include <linux/sh_intc.h>
->  #include <linux/usb/renesas_usbhs.h>
-> diff --git a/arch/sh/boards/mach-ap325rxa/setup.c b/arch/sh/boards/mach-ap325rxa/setup.c
-> index 62c3b81300ed28..de8393cb7313bc 100644
-> --- a/arch/sh/boards/mach-ap325rxa/setup.c
-> +++ b/arch/sh/boards/mach-ap325rxa/setup.c
-> @@ -15,7 +15,6 @@
->  #include <linux/interrupt.h>
->  #include <linux/platform_device.h>
->  #include <linux/mmc/host.h>
-> -#include <linux/mmc/sh_mobile_sdhi.h>
->  #include <linux/mtd/physmap.h>
->  #include <linux/mtd/sh_flctl.h>
->  #include <linux/mfd/tmio.h>
-> diff --git a/arch/sh/boards/mach-ecovec24/setup.c b/arch/sh/boards/mach-ecovec24/setup.c
-> index a9c0c07386fddd..6d612792f6b8ec 100644
-> --- a/arch/sh/boards/mach-ecovec24/setup.c
-> +++ b/arch/sh/boards/mach-ecovec24/setup.c
-> @@ -13,7 +13,6 @@
->  #include <linux/platform_device.h>
->  #include <linux/mmc/host.h>
->  #include <linux/mmc/sh_mmcif.h>
-> -#include <linux/mmc/sh_mobile_sdhi.h>
->  #include <linux/mtd/physmap.h>
->  #include <linux/mfd/tmio.h>
->  #include <linux/gpio.h>
-> diff --git a/arch/sh/boards/mach-kfr2r09/setup.c b/arch/sh/boards/mach-kfr2r09/setup.c
-> index 6bd9230e64e300..5deb2d82f19f78 100644
-> --- a/arch/sh/boards/mach-kfr2r09/setup.c
-> +++ b/arch/sh/boards/mach-kfr2r09/setup.c
-> @@ -11,7 +11,6 @@
->  #include <linux/platform_device.h>
->  #include <linux/interrupt.h>
->  #include <linux/mmc/host.h>
-> -#include <linux/mmc/sh_mobile_sdhi.h>
->  #include <linux/mfd/tmio.h>
->  #include <linux/mtd/physmap.h>
->  #include <linux/mtd/onenand.h>
-> diff --git a/arch/sh/boards/mach-migor/setup.c b/arch/sh/boards/mach-migor/setup.c
-> index 7a04da3efce402..5de60a77eaa1ab 100644
-> --- a/arch/sh/boards/mach-migor/setup.c
-> +++ b/arch/sh/boards/mach-migor/setup.c
-> @@ -13,7 +13,6 @@
->  #include <linux/input.h>
->  #include <linux/input/sh_keysc.h>
->  #include <linux/mmc/host.h>
-> -#include <linux/mmc/sh_mobile_sdhi.h>
->  #include <linux/mtd/physmap.h>
->  #include <linux/mfd/tmio.h>
->  #include <linux/mtd/nand.h>
-> diff --git a/arch/sh/boards/mach-se/7724/setup.c b/arch/sh/boards/mach-se/7724/setup.c
-> index e0e1df136642cd..f1fecd395679ae 100644
-> --- a/arch/sh/boards/mach-se/7724/setup.c
-> +++ b/arch/sh/boards/mach-se/7724/setup.c
-> @@ -15,7 +15,6 @@
->  #include <linux/interrupt.h>
->  #include <linux/platform_device.h>
->  #include <linux/mmc/host.h>
-> -#include <linux/mmc/sh_mobile_sdhi.h>
->  #include <linux/mfd/tmio.h>
->  #include <linux/mtd/physmap.h>
->  #include <linux/delay.h>
-> diff --git a/drivers/mmc/host/sh_mobile_sdhi.c b/drivers/mmc/host/sh_mobile_sdhi.c
-> index 9beee48d2e280d..51d8dbd5b06a3e 100644
-> --- a/drivers/mmc/host/sh_mobile_sdhi.c
-> +++ b/drivers/mmc/host/sh_mobile_sdhi.c
-> @@ -28,7 +28,6 @@
->  #include <linux/of_device.h>
->  #include <linux/platform_device.h>
->  #include <linux/mmc/host.h>
-> -#include <linux/mmc/sh_mobile_sdhi.h>
->  #include <linux/mfd/tmio.h>
->  #include <linux/sh_dma.h>
->  #include <linux/delay.h>
-> @@ -315,7 +314,6 @@ static int sh_mobile_sdhi_probe(struct platform_device *pdev)
->         struct tmio_mmc_host *host;
->         struct resource *res;
->         int irq, ret, i = 0;
-> -       bool multiplexed_isr = true;
->         struct tmio_mmc_dma *dma_priv;
->
->         res = platform_get_resource(pdev, IORESOURCE_MEM, 0);
-> @@ -405,62 +403,23 @@ static int sh_mobile_sdhi_probe(struct platform_device *pdev)
->         if (ret < 0)
->                 goto efree;
->
-> -       /*
-> -        * Allow one or more specific (named) ISRs or
-> -        * one or more multiplexed (un-named) ISRs.
-> -        */
-> -
-> -       irq = platform_get_irq_byname(pdev, SH_MOBILE_SDHI_IRQ_CARD_DETECT);
-> -       if (irq >= 0) {
-> -               multiplexed_isr = false;
-> -               ret = devm_request_irq(&pdev->dev, irq, tmio_mmc_card_detect_irq, 0,
-> +       while (1) {
-> +               irq = platform_get_irq(pdev, i);
-> +               if (irq < 0)
-> +                       break;
-> +               i++;
-> +               ret = devm_request_irq(&pdev->dev, irq, tmio_mmc_irq, 0,
->                                   dev_name(&pdev->dev), host);
->                 if (ret)
->                         goto eirq;
->         }
->
-> -       irq = platform_get_irq_byname(pdev, SH_MOBILE_SDHI_IRQ_SDIO);
-> -       if (irq >= 0) {
-> -               multiplexed_isr = false;
-> -               ret = devm_request_irq(&pdev->dev, irq, tmio_mmc_sdio_irq, 0,
-> -                                 dev_name(&pdev->dev), host);
-> -               if (ret)
-> -                       goto eirq;
-> -       }
-> -
-> -       irq = platform_get_irq_byname(pdev, SH_MOBILE_SDHI_IRQ_SDCARD);
-> -       if (irq >= 0) {
-> -               multiplexed_isr = false;
-> -               ret = devm_request_irq(&pdev->dev, irq, tmio_mmc_sdcard_irq, 0,
-> -                                 dev_name(&pdev->dev), host);
-> -               if (ret)
-> -                       goto eirq;
-> -       } else if (!multiplexed_isr) {
-> -               dev_err(&pdev->dev,
-> -                       "Principal SD-card IRQ is missing among named interrupts\n");
-> +       /* There must be at least one IRQ source */
-> +       if (!i) {
->                 ret = irq;
->                 goto eirq;
->         }
->
-> -       if (multiplexed_isr) {
-> -               while (1) {
-> -                       irq = platform_get_irq(pdev, i);
-> -                       if (irq < 0)
-> -                               break;
-> -                       i++;
-> -                       ret = devm_request_irq(&pdev->dev, irq, tmio_mmc_irq, 0,
-> -                                         dev_name(&pdev->dev), host);
-> -                       if (ret)
-> -                               goto eirq;
-> -               }
-> -
-> -               /* There must be at least one IRQ source */
-> -               if (!i) {
-> -                       ret = irq;
-> -                       goto eirq;
-> -               }
-> -       }
-> -
->         dev_info(&pdev->dev, "%s base at 0x%08lx max clock rate %u MHz\n",
->                  mmc_hostname(host->mmc), (unsigned long)
->                  (platform_get_resource(pdev, IORESOURCE_MEM, 0)->start),
-> diff --git a/include/linux/mmc/sh_mobile_sdhi.h b/include/linux/mmc/sh_mobile_sdhi.h
-> deleted file mode 100644
-> index 95d6f0314a7ded..00000000000000
-> --- a/include/linux/mmc/sh_mobile_sdhi.h
-> +++ /dev/null
-> @@ -1,10 +0,0 @@
-> -#ifndef LINUX_MMC_SH_MOBILE_SDHI_H
-> -#define LINUX_MMC_SH_MOBILE_SDHI_H
-> -
-> -#include <linux/types.h>
-> -
-> -#define SH_MOBILE_SDHI_IRQ_CARD_DETECT "card_detect"
-> -#define SH_MOBILE_SDHI_IRQ_SDCARD      "sdcard"
-> -#define SH_MOBILE_SDHI_IRQ_SDIO                "sdio"
-> -
-> -#endif /* LINUX_MMC_SH_MOBILE_SDHI_H */
-> --
-> 2.7.0
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
+Hi Ulf,
+
+Thanks for taking the time to reply and your detailed answer. I see why the bindings currently don't fit into the mmc core model. However, we still have the issue that these bindings are shipping in hardware and we can't change them. As far as I can see, ther major difference between these bindings and what is upstream, is the interpretation of the reg property, and the compatible string of what is connected to the controller. The Octeon MMC controller supports connections to up to 4 devices, either eMMC devices or SD card slots. I think it will be difficult to impossible to programatically interpret the device tree supplied by the bootloader to classify the slots as SD card / eMMC such that the necessary reg / compatible strings can be added.
+
+If we were to remove the slots entirely from the device tree, how would the core deal with having one controller with multiple devices attached? Obviously we need some locking of the shared controller between the child devices.
+
+Thanks,
+Matt
+
