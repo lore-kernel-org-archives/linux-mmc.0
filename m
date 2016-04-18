@@ -1,101 +1,76 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 2/3] mmc: usdhi6rol0: add support for UHS modes
-Date: Mon, 18 Apr 2016 13:18:24 +0200
-Message-ID: <CAPDyKFqTwZG6AA4ALEACM_vuWUTZNymrwzUPzUOcV2euoHKz5w@mail.gmail.com>
-References: <cover.1460971625.git.larper@axis.com>
-	<ba126adf4953f61ed11ed8b0219608663cfb5fbc.1460971625.git.larper@axis.com>
+Subject: Re: [PATCH v4 0/3] mmc: pwrseq: convert to proper driver
+Date: Mon, 18 Apr 2016 13:21:07 +0200
+Message-ID: <CAPDyKFpDurzJdJP17knVwpRn-q+xQv=fkEgCP1R=S5PMTWYAQg@mail.gmail.com>
+References: <1460638936-26990-1-git-send-email-srinivas.kandagatla@linaro.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wm0-f44.google.com ([74.125.82.44]:35558 "EHLO
-	mail-wm0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752849AbcDRLS0 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 18 Apr 2016 07:18:26 -0400
-Received: by mail-wm0-f44.google.com with SMTP id a140so114918475wma.0
-        for <linux-mmc@vger.kernel.org>; Mon, 18 Apr 2016 04:18:25 -0700 (PDT)
-In-Reply-To: <ba126adf4953f61ed11ed8b0219608663cfb5fbc.1460971625.git.larper@axis.com>
+Received: from mail-wm0-f48.google.com ([74.125.82.48]:35677 "EHLO
+	mail-wm0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752542AbcDRLVJ (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 18 Apr 2016 07:21:09 -0400
+Received: by mail-wm0-f48.google.com with SMTP id a140so115017288wma.0
+        for <linux-mmc@vger.kernel.org>; Mon, 18 Apr 2016 04:21:08 -0700 (PDT)
+In-Reply-To: <1460638936-26990-1-git-send-email-srinivas.kandagatla@linaro.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Lars Persson <lars.persson@axis.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Rob Herring <robh+dt@kernel.org>, =?UTF-8?Q?Pawe=C5=82_Moll?= <pawel.moll@arm.com>, Mark Rutland <mark.rutland@arm.com>, Ian Campbell <ijc+devicetree@hellion.org.uk>, Kumar Gala <galak@codeaurora.org>, Phil Edworthy <phil@edworthys.org>, Lars Persson <larper@axis.com>
+To: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Martin Fuzzey <mfuzzey@parkeon.com>
 
-On 18 April 2016 at 11:38, Lars Persson <lars.persson@axis.com> wrote:
-> From: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+On 14 April 2016 at 15:02, Srinivas Kandagatla
+<srinivas.kandagatla@linaro.org> wrote:
+> Thanks for reviewing v3.
 >
-> The mmc core will only enable UHS modes if the host supports the
-> .start_signal_voltage_switch() operation. Add this method to the v08r07
-> driver even if there's actually nothing to do in it.
+> This patchset aims at converting the pwrseq devices to proper in drivers,
+> The issue is that on Qualcomm based platforms, most of the gpios require
+> a pinctrl setup. Existing pwrseq code does not do any kind of pinctrl setup.
+> So this makes the pwrseq unusable on those platfroms.
 >
-> Signed-off-by: Guennadi Liakhovetski <g.liakhovetski@gmx.de>
-> Signed-off-by: Phil Edworthy <phil@edworthys.org>
-> Signed-off-by: Lars Persson <larper@axis.com>
-> ---
->  drivers/mmc/host/usdhi6rol0.c | 32 ++++++++++++++++++++++++++++++++
->  1 file changed, 32 insertions(+)
+> Convert the pwrseq to proper drivers so that they can reuse
+> common driver setup like pinctrl from drivers/base/pinctrl.c and clocks.
+> This solution works much better and would make pwrseq to reuse
+> all the driver setup done in the common code.
 >
-> diff --git a/drivers/mmc/host/usdhi6rol0.c b/drivers/mmc/host/usdhi6rol0.c
-> index 807c06e..5dde31b 100644
-> --- a/drivers/mmc/host/usdhi6rol0.c
-> +++ b/drivers/mmc/host/usdhi6rol0.c
-> @@ -23,6 +23,7 @@
->  #include <linux/module.h>
->  #include <linux/pagemap.h>
->  #include <linux/platform_device.h>
-> +#include <linux/regulator/consumer.h>
->  #include <linux/scatterlist.h>
->  #include <linux/string.h>
->  #include <linux/time.h>
-> @@ -1147,12 +1148,43 @@ static void usdhi6_enable_sdio_irq(struct mmc_host *mmc, int enable)
->         }
->  }
+> Changes since v3:
+>         - Add error handling for try_module_get failures, suggested by Ulf.
 >
-> +static int usdhi6_sig_volt_switch(struct mmc_host *mmc, struct mmc_ios *ios)
-> +{
-> +       int ret;
-> +
-> +       if (IS_ERR(mmc->supply.vqmmc))
-> +               return 0;
-> +
-> +       switch (ios->signal_voltage) {
-> +       case MMC_SIGNAL_VOLTAGE_330:
-> +               ret = regulator_set_voltage(mmc->supply.vqmmc,
-> +                                           2700000, 3600000);
-> +               break;
-> +       case MMC_SIGNAL_VOLTAGE_180:
-> +               ret = regulator_set_voltage(mmc->supply.vqmmc,
-> +                                           1700000, 1950000);
-> +               break;
-> +       case MMC_SIGNAL_VOLTAGE_120:
-> +               ret = regulator_set_voltage(mmc->supply.vqmmc,
-> +                                           1100000, 1300000);
-> +               break;
-> +       default:
-> +               return 0;
-> +       }
-
-Please replace this switch statement with a call to
-mmc_regulator_set_vqmmc() instead.
-
-> +
-> +       if (ret < 0)
-> +               dev_warn(mmc_dev(mmc), "Voltage switch failed: %d\n", ret);
-> +
-> +       return ret;
-> +}
-> +
->  static struct mmc_host_ops usdhi6_ops = {
->         .request        = usdhi6_request,
->         .set_ios        = usdhi6_set_ios,
->         .get_cd         = usdhi6_get_cd,
->         .get_ro         = usdhi6_get_ro,
->         .enable_sdio_irq = usdhi6_enable_sdio_irq,
-> +       .start_signal_voltage_switch = usdhi6_sig_volt_switch,
->  };
+> Changes since v2: All changes suggested by Ulf
+>         - Moved all the allocations/gpio_get/clk_get to probe
+>         - Removed alloc and free callbacks
+>         - try_get_module inside a mutex
+>         - Fixed Kconfigs
+>         - renamed list to pwrseq_node
+>         - add mssing pdev_set_drvdata()
 >
->  /*                     State machine handlers                          */
+> Changes since v1:
+>         - Fixed issue while building as module.
+>
+> Changes since RFC:
+>         - Fixed issues reported by kbuild test robot.
+>         - return EPROBE_DEFER from *_alloc() suggested by Ulf.
+>
+> Thanks,
+> srini
+>
+> Srinivas Kandagatla (3):
+>   mmc: pwrseq_simple: add to_pwrseq_simple() macro
+>   mmc: pwrseq_emmc: add to_pwrseq_emmc() macro
+>   mmc: pwrseq: convert to proper platform device
+>
+>  drivers/mmc/core/Kconfig         |  21 ++++++++
+>  drivers/mmc/core/Makefile        |   4 +-
+>  drivers/mmc/core/pwrseq.c        | 108 ++++++++++++++++++---------------------
+>  drivers/mmc/core/pwrseq.h        |  19 ++++---
+>  drivers/mmc/core/pwrseq_emmc.c   |  81 ++++++++++++++++++-----------
+>  drivers/mmc/core/pwrseq_simple.c |  91 ++++++++++++++++++---------------
+>  6 files changed, 185 insertions(+), 139 deletions(-)
+>
 > --
-> 2.1.4
+> 2.5.0
 >
+
+Thanks, applied for next!
 
 Kind regards
 Uffe
