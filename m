@@ -1,78 +1,61 @@
-From: Chaotian Jing <chaotian.jing@mediatek.com>
-Subject: [PATCH] mmc: mediatek: fix request blocked by cancel_delayed_work
-Date: Mon, 18 Apr 2016 15:13:29 +0800
-Message-ID: <1460963609-16179-1-git-send-email-chaotian.jing@mediatek.com>
+From: Geert Uytterhoeven <geert@linux-m68k.org>
+Subject: Re: [PATCH v2 2/9] mmc: tmio, sh_mobile_sdhi: Add support for
+ variable input clock frequency
+Date: Mon, 18 Apr 2016 09:33:57 +0200
+Message-ID: <CAMuHMdV9s54iTPdv6kw=J5tdn6N5mp9oKWe4rrQf==hOHhGSyg@mail.gmail.com>
+References: <1459525479-20842-1-git-send-email-wsa@the-dreams.de>
+	<1459525479-20842-3-git-send-email-wsa@the-dreams.de>
+	<CAMuHMdWdJ2AoCrwC5K2QEfuf=w=q8=XnJRzoyg99EurJBDwbTg@mail.gmail.com>
+	<1460477978.32355.14.camel@codethink.co.uk>
+	<20160415202803.GA3105@katana>
+	<20160415204156.GB3105@katana>
+	<20160417124902.GB4954@katana>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailgw01.mediatek.com ([210.61.82.183]:59750 "EHLO
-	mailgw01.mediatek.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1751649AbcDRHNj (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 18 Apr 2016 03:13:39 -0400
+Received: from mail-ig0-f195.google.com ([209.85.213.195]:35127 "EHLO
+	mail-ig0-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751650AbcDRHd6 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 18 Apr 2016 03:33:58 -0400
+In-Reply-To: <20160417124902.GB4954@katana>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Matthias Brugger <matthias.bgg@gmail.com>, Chaotian Jing <chaotian.jing@mediatek.com>, Nicolas Boichat <drinkcat@chromium.org>, Douglas Anderson <dianders@chromium.org>, Geert Uytterhoeven <geert@linux-m68k.org>, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mediatek@lists.infradead.org, linux-kernel@vger.kernel.org, srv_heupstream@mediatek.com, Sascha Hauer <kernel@pengutronix.de>
+To: Wolfram Sang <wsa@the-dreams.de>
+Cc: Ben Hutchings <ben.hutchings@codethink.co.uk>, Linux MMC List <linux-mmc@vger.kernel.org>, linux-renesas-soc@vger.kernel.org, Laurent Pinchart <laurent.pinchart@ideasonboard.com>
 
-there are 2 points will cause could not call mmc_request_done()
-and eventually cause the caller thread blocked.
+On Sun, Apr 17, 2016 at 2:49 PM, Wolfram Sang <wsa@the-dreams.de> wrote:
+> On Fri, Apr 15, 2016 at 10:41:57PM +0200, Wolfram Sang wrote:
+>> > > That seems like a bug in the clock driver.  If it doesn't have
+>> > > independent dividers for each clock client then it shouldn't allow any
+>> > > client to change the frequency.
+>>
+>> So, we need MSTP clocks which do not use CLK_SET_RATE_PARENT on r8a7740.
+>> Probably the best way is to use the "renesas,r8a7740-mstp-clocks"
+>> compatible entry to determine the difference? Geert?
+>
+> Well, I like the idea of a virtual sd clock even better. I sent a series
+> doing that a minute ago to the renesas-soc list.
 
-A. if card was busy, cancel_delayed_work() will return false because
-the delay work has not been scheduled, in this case, need put
-mod_delayed_work() in front of msdc_cmd_is_ready()
+While I don't doubt the "virtual sd" clock will work, this doesn't match the
+hardware, so I have to object against it.
 
-B. if a request really need more than 5s(Some Sandisk TF card), it will
-use cancel_delayed_work() to cancel itself, and also return false, so use
-in_interrupt() to avoid this case
+Hence I think it should be handled in the driver. This is indeed more difficult
+to do with clk-mstp.c than with renesas-cpg-mssr.c...
 
-Signed-off-by: Chaotian Jing <chaotian.jing@mediatek.com>
----
- drivers/mmc/host/mtk-sd.c | 11 ++++++++---
- 1 file changed, 8 insertions(+), 3 deletions(-)
+BTW, this behavior seems to be introduced by
+commit e44df332f30bf3040c60c1ed6674d1431fdb48b9
+Author: Ben Dooks <ben.dooks@codethink.co.uk>
+Date:   Mon Mar 31 18:47:27 2014 +0100
 
-diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
-index b17f30d..1511b1b 100644
---- a/drivers/mmc/host/mtk-sd.c
-+++ b/drivers/mmc/host/mtk-sd.c
-@@ -724,7 +724,7 @@ static void msdc_request_done(struct msdc_host *host, struct mmc_request *mrq)
- 	bool ret;
- 
- 	ret = cancel_delayed_work(&host->req_timeout);
--	if (!ret) {
-+	if (!ret && in_interrupt()) {
- 		/* delay work already running */
- 		return;
- 	}
-@@ -824,7 +824,12 @@ static inline bool msdc_cmd_is_ready(struct msdc_host *host,
- 	}
- 
- 	if (mmc_resp_type(cmd) == MMC_RSP_R1B || cmd->data) {
--		tmo = jiffies + msecs_to_jiffies(20);
-+		/*
-+		 * 2550ms is from EXT_CSD[248], after switch to hs200,
-+		 * using CMD13 to polling card status, it will get response
-+		 * of 0x800, but EMMC still pull-low DAT0.
-+		 */
-+		tmo = jiffies + msecs_to_jiffies(2550);
- 		/* R1B or with data, should check SDCBUSY */
- 		while ((readl(host->base + SDC_STS) & SDC_STS_SDCBUSY) &&
- 				time_before(jiffies, tmo))
-@@ -847,6 +852,7 @@ static void msdc_start_command(struct msdc_host *host,
- 	WARN_ON(host->cmd);
- 	host->cmd = cmd;
- 
-+	mod_delayed_work(system_wq, &host->req_timeout, DAT_TIMEOUT);
- 	if (!msdc_cmd_is_ready(host, mrq, cmd))
- 		return;
- 
-@@ -858,7 +864,6 @@ static void msdc_start_command(struct msdc_host *host,
- 
- 	cmd->error = 0;
- 	rawcmd = msdc_cmd_prepare_raw_cmd(host, mrq, cmd);
--	mod_delayed_work(system_wq, &host->req_timeout, DAT_TIMEOUT);
- 
- 	sdr_set_bits(host->base + MSDC_INTEN, cmd_ints_mask);
- 	writel(cmd->arg, host->base + SDC_ARG);
--- 
-1.8.1.1.dirty
+    clk: shmobile: fix setting paretn clock rate
 
+Gr{oetje,eeting}s,
+
+                        Geert
+
+--
+Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
+
+In personal conversations with technical people, I call myself a hacker. But
+when I'm talking to journalists I just say "programmer" or something like that.
+                                -- Linus Torvalds
