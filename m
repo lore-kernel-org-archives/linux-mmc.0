@@ -1,44 +1,55 @@
-From: Lars Persson <lars.persson-VrBV9hrLPhE@public.gmane.org>
-Subject: [PATCH v2 1/3] mmc: dt: usdhi6rol0: add optional pinctrl binding
-Date: Mon, 18 Apr 2016 15:44:53 +0200
-Message-ID: <0376e04a938f459cee9e1f80e1447e060ba7e497.1460986983.git.larper@axis.com>
-References: <cover.1460986983.git.larper@axis.com>
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <cover.1460986983.git.larper-VrBV9hrLPhE@public.gmane.org>
-In-Reply-To: <cover.1460986983.git.larper-VrBV9hrLPhE@public.gmane.org>
-References: <cover.1460986983.git.larper-VrBV9hrLPhE@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-Cc: g.liakhovetski-Mmb7MZpHnFY@public.gmane.org, ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, pawel.moll-5wv7dgnIgG8@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, ijc+devicetree-KcIKpvwj1kUDXYZnReoRVg@public.gmane.org, galak-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, Lars Persson <larper-VrBV9hrLPhE@public.gmane.org>
+From: Ulrich Hecht <ulrich.hecht+renesas@gmail.com>
+Subject: [PATCH v2] ARM: dts: r8a7793: Add MMCIF0
+Date: Mon, 18 Apr 2016 18:02:40 +0200
+Message-ID: <1460995360-11417-1-git-send-email-ulrich.hecht+renesas@gmail.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-wm0-f67.google.com ([74.125.82.67]:34541 "EHLO
+	mail-wm0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752123AbcDRQCp (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 18 Apr 2016 12:02:45 -0400
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: horms@verge.net.au
+Cc: linux-renesas-soc@vger.kernel.org, linux-mmc@vger.kernel.org, sergei.shtylyov@cogentembedded.com, magnus.damm@gmail.com, Ulrich Hecht <ulrich.hecht+renesas@gmail.com>
 
-Add a pinctrl binding to specify different pin settings for high speed
-modes and UHS modes.
+Same as on r8a7794.
 
-Signed-off-by: Lars Persson <larper-VrBV9hrLPhE@public.gmane.org>
+Signed-off-by: Ulrich Hecht <ulrich.hecht+renesas@gmail.com>
 ---
- Documentation/devicetree/bindings/mmc/usdhi6rol0.txt | 4 ++++
- 1 file changed, 4 insertions(+)
+This revision adds the missing dma-names and power-domains entires spotted
+by Sergei and Simon.
 
-diff --git a/Documentation/devicetree/bindings/mmc/usdhi6rol0.txt b/Documentation/devicetree/bindings/mmc/usdhi6rol0.txt
-index 8babdaa..9dd9478 100644
---- a/Documentation/devicetree/bindings/mmc/usdhi6rol0.txt
-+++ b/Documentation/devicetree/bindings/mmc/usdhi6rol0.txt
-@@ -12,6 +12,10 @@ Optional properties:
+CU
+Uli
+
+
+ arch/arm/boot/dts/r8a7793.dtsi | 13 +++++++++++++
+ 1 file changed, 13 insertions(+)
+
+diff --git a/arch/arm/boot/dts/r8a7793.dtsi b/arch/arm/boot/dts/r8a7793.dtsi
+index bf70c46..6843f46 100644
+--- a/arch/arm/boot/dts/r8a7793.dtsi
++++ b/arch/arm/boot/dts/r8a7793.dtsi
+@@ -510,6 +510,19 @@
+ 		reg = <0 0xe6060000 0 0x250>;
+ 	};
  
- - vmmc-supply:	a phandle of a regulator, supplying Vcc to the card
- - vqmmc-supply:	a phandle of a regulator, supplying VccQ to the card
-+- pinctrl-names: Must contain a "default" entry and optionally a "pins_uhs"
-+                 entry for the UHS pin configuration.
-+- pinctrl-N: One property for each name listed in pinctrl-names, see
-+             ../pinctrl/pinctrl-bindings.txt.
- 
- Additionally any standard mmc bindings from mmc.txt can be used.
- 
++	mmcif0: mmcif@ee200000 {
++		compatible = "renesas,mmcif-r8a7793", "renesas,sh-mmcif";
++		reg = <0 0xee200000 0 0x80>;
++		interrupts = <0 169 IRQ_TYPE_LEVEL_HIGH>;
++		clocks = <&mstp3_clks R8A7793_CLK_MMCIF0>;
++		dmas = <&dmac0 0xd1>, <&dmac0 0xd2>,
++		       <&dmac1 0xd1>, <&dmac1 0xd2>;
++		dma-names = "tx", "rx", "tx", "rx";
++		power-domains = <&cpg_clocks>;
++		reg-io-width = <4>;
++		status = "disabled";
++	};
++
+ 	scifa0: serial@e6c40000 {
+ 		compatible = "renesas,scifa-r8a7793",
+ 			     "renesas,rcar-gen2-scifa", "renesas,scifa";
 -- 
-2.1.4
+2.7.4
 
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
