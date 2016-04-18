@@ -1,115 +1,78 @@
-From: "Fu, Zhonghui" <zhonghui.fu@linux.intel.com>
-Subject: Re: [PATCH] mmc/sdio: utilize runtime PM to speed up SDIO card's
- resume process
-Date: Mon, 18 Apr 2016 11:59:03 +0800
-Message-ID: <57145B87.1070708@linux.intel.com>
-References: <570DEA5D.8070708@linux.intel.com>
+From: Chaotian Jing <chaotian.jing@mediatek.com>
+Subject: [PATCH] mmc: mediatek: fix request blocked by cancel_delayed_work
+Date: Mon, 18 Apr 2016 15:13:29 +0800
+Message-ID: <1460963609-16179-1-git-send-email-chaotian.jing@mediatek.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga11.intel.com ([192.55.52.93]:32020 "EHLO mga11.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751232AbcDRD7I (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Sun, 17 Apr 2016 23:59:08 -0400
-In-Reply-To: <570DEA5D.8070708@linux.intel.com>
+Received: from mailgw01.mediatek.com ([210.61.82.183]:59750 "EHLO
+	mailgw01.mediatek.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1751649AbcDRHNj (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 18 Apr 2016 03:13:39 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, Andreas Fenkart <afenkart@gmail.com>, kishon@ti.com, shawn.lin@rock-chips.com, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+Cc: Matthias Brugger <matthias.bgg@gmail.com>, Chaotian Jing <chaotian.jing@mediatek.com>, Nicolas Boichat <drinkcat@chromium.org>, Douglas Anderson <dianders@chromium.org>, Geert Uytterhoeven <geert@linux-m68k.org>, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mediatek@lists.infradead.org, linux-kernel@vger.kernel.org, srv_heupstream@mediatek.com, Sascha Hauer <kernel@pengutronix.de>
 
+there are 2 points will cause could not call mmc_request_done()
+and eventually cause the caller thread blocked.
 
-Any comments are welcome.
+A. if card was busy, cancel_delayed_work() will return false because
+the delay work has not been scheduled, in this case, need put
+mod_delayed_work() in front of msdc_cmd_is_ready()
 
+B. if a request really need more than 5s(Some Sandisk TF card), it will
+use cancel_delayed_work() to cancel itself, and also return false, so use
+in_interrupt() to avoid this case
 
-Thanks,
-Zhonghui
+Signed-off-by: Chaotian Jing <chaotian.jing@mediatek.com>
+---
+ drivers/mmc/host/mtk-sd.c | 11 ++++++++---
+ 1 file changed, 8 insertions(+), 3 deletions(-)
 
-On 4/13/2016 2:42 PM, Fu, Zhonghui wrote:
-> Leave some work of SDIO card's resume process into it's runtime resume
-> process to shorten system resume latency.
->
-> Signed-off-by: Zhonghui Fu <zhonghui.fu@linux.intel.com>
-> ---
->  drivers/mmc/core/sdio.c  |   21 ++++++++++-----------
->  include/linux/mmc/host.h |    9 ++++++---
->  2 files changed, 16 insertions(+), 14 deletions(-)
->
-> diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
-> index bd44ba8..fe5d3c5 100644
-> --- a/drivers/mmc/core/sdio.c
-> +++ b/drivers/mmc/core/sdio.c
-> @@ -902,6 +902,10 @@ static int mmc_sdio_suspend(struct mmc_host *host)
->  
->  	if (!mmc_card_keep_power(host)) {
->  		mmc_power_off(host);
-> +		if (host->caps & MMC_CAP_POWER_OFF_CARD) {
-> +			pm_runtime_disable(&host->card->dev);
-> +			pm_runtime_set_suspended(&host->card->dev);
-> +		}
->  	} else if (host->retune_period) {
->  		mmc_retune_timer_stop(host);
->  		mmc_retune_needed(host);
-> @@ -924,18 +928,16 @@ static int mmc_sdio_resume(struct mmc_host *host)
->  
->  	/* Restore power if needed */
->  	if (!mmc_card_keep_power(host)) {
-> -		mmc_power_up(host, host->card->ocr);
->  		/*
-> -		 * Tell runtime PM core we just powered up the card,
-> -		 * since it still believes the card is powered off.
->  		 * Note that currently runtime PM is only enabled
->  		 * for SDIO cards that are MMC_CAP_POWER_OFF_CARD
->  		 */
->  		if (host->caps & MMC_CAP_POWER_OFF_CARD) {
-> -			pm_runtime_disable(&host->card->dev);
-> -			pm_runtime_set_active(&host->card->dev);
->  			pm_runtime_enable(&host->card->dev);
-> +			goto out;
->  		}
-> +
-> +		mmc_power_up(host, host->card->ocr);
->  	}
->  
->  	/* No need to reinitialize powered-resumed nonremovable cards */
-> @@ -953,13 +955,10 @@ static int mmc_sdio_resume(struct mmc_host *host)
->  		err = sdio_enable_4bit_bus(host->card);
->  	}
->  
-> -	if (!err && host->sdio_irqs) {
-> -		if (!(host->caps2 & MMC_CAP2_SDIO_IRQ_NOTHREAD))
-> -			wake_up_process(host->sdio_irq_thread);
-> -		else if (host->caps & MMC_CAP_SDIO_IRQ)
-> -			host->ops->enable_sdio_irq(host, 1);
-> -	}
-> +	if (!err && host->sdio_irqs)
-> +		mmc_signal_sdio_irq(host);
->  
-> +out:
->  	mmc_release_host(host);
->  
->  	host->pm_flags &= ~MMC_PM_KEEP_POWER;
-> diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-> index 8dd4d29..8faaa5b 100644
-> --- a/include/linux/mmc/host.h
-> +++ b/include/linux/mmc/host.h
-> @@ -400,10 +400,13 @@ void mmc_request_done(struct mmc_host *, struct mmc_request *);
->  
->  static inline void mmc_signal_sdio_irq(struct mmc_host *host)
->  {
-> -	host->ops->enable_sdio_irq(host, 0);
-> -	host->sdio_irq_pending = true;
-> -	if (host->sdio_irq_thread)
-> +	if (!(host->caps2 & MMC_CAP2_SDIO_IRQ_NOTHREAD)) {
-> +		host->ops->enable_sdio_irq(host, 0);
-> +		host->sdio_irq_pending = true;
->  		wake_up_process(host->sdio_irq_thread);
-> +	} else if (host->caps & MMC_CAP_SDIO_IRQ) {
-> +		host->ops->enable_sdio_irq(host, 1);
-> +	}
->  }
->  
->  void sdio_run_irqs(struct mmc_host *host);
-> -- 1.7.1
->
+diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
+index b17f30d..1511b1b 100644
+--- a/drivers/mmc/host/mtk-sd.c
++++ b/drivers/mmc/host/mtk-sd.c
+@@ -724,7 +724,7 @@ static void msdc_request_done(struct msdc_host *host, struct mmc_request *mrq)
+ 	bool ret;
+ 
+ 	ret = cancel_delayed_work(&host->req_timeout);
+-	if (!ret) {
++	if (!ret && in_interrupt()) {
+ 		/* delay work already running */
+ 		return;
+ 	}
+@@ -824,7 +824,12 @@ static inline bool msdc_cmd_is_ready(struct msdc_host *host,
+ 	}
+ 
+ 	if (mmc_resp_type(cmd) == MMC_RSP_R1B || cmd->data) {
+-		tmo = jiffies + msecs_to_jiffies(20);
++		/*
++		 * 2550ms is from EXT_CSD[248], after switch to hs200,
++		 * using CMD13 to polling card status, it will get response
++		 * of 0x800, but EMMC still pull-low DAT0.
++		 */
++		tmo = jiffies + msecs_to_jiffies(2550);
+ 		/* R1B or with data, should check SDCBUSY */
+ 		while ((readl(host->base + SDC_STS) & SDC_STS_SDCBUSY) &&
+ 				time_before(jiffies, tmo))
+@@ -847,6 +852,7 @@ static void msdc_start_command(struct msdc_host *host,
+ 	WARN_ON(host->cmd);
+ 	host->cmd = cmd;
+ 
++	mod_delayed_work(system_wq, &host->req_timeout, DAT_TIMEOUT);
+ 	if (!msdc_cmd_is_ready(host, mrq, cmd))
+ 		return;
+ 
+@@ -858,7 +864,6 @@ static void msdc_start_command(struct msdc_host *host,
+ 
+ 	cmd->error = 0;
+ 	rawcmd = msdc_cmd_prepare_raw_cmd(host, mrq, cmd);
+-	mod_delayed_work(system_wq, &host->req_timeout, DAT_TIMEOUT);
+ 
+ 	sdr_set_bits(host->base + MSDC_INTEN, cmd_ints_mask);
+ 	writel(cmd->arg, host->base + SDC_ARG);
+-- 
+1.8.1.1.dirty
 
