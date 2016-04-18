@@ -1,208 +1,110 @@
-From: Matt Redfearn <Matt.Redfearn@imgtec.com>
-Subject: Re: [RESEND PATCH v7 1/2] mmc: OCTEON: Add DT bindings for OCTEON
- MMC controller
-Date: Mon, 18 Apr 2016 08:53:15 +0000
-Message-ID: <9FCBB1D1936B2F4DB2DD02BA3957FB504A067CE2@LEMAIL01.le.imgtec.org>
-References: <1459438013-25088-1-git-send-email-matt.redfearn@imgtec.com>
- <CAPDyKFpZqiv7iVbunr+mrLyxLx=V-NVSnDpvbMaaekxn7FdKrQ@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+From: Lars Persson <lars.persson@axis.com>
+Subject: [PATCH 3/3] mmc: usdhi6rol0: add pinctrl to set pin drive strength
+Date: Mon, 18 Apr 2016 11:38:26 +0200
+Message-ID: <de3688db670eaeada3d2dd7fa97cec1d6d44203d.1460971625.git.larper@axis.com>
+References: <cover.1460971625.git.larper@axis.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailapp01.imgtec.com ([195.59.15.196]:60166 "EHLO
-	mailapp01.imgtec.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751485AbcDRIxT convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 18 Apr 2016 04:53:19 -0400
-In-Reply-To: <CAPDyKFpZqiv7iVbunr+mrLyxLx=V-NVSnDpvbMaaekxn7FdKrQ@mail.gmail.com>
-Content-Language: en-GB
-Content-ID: <C87F8C38B04E4042A1600C1AC8074590@imgtec.com>
+Received: from bes.se.axis.com ([195.60.68.10]:58538 "EHLO bes.se.axis.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752291AbcDRJjK (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 18 Apr 2016 05:39:10 -0400
+In-Reply-To: <cover.1460971625.git.larper@axis.com>
+In-Reply-To: <cover.1460971625.git.larper@axis.com>
+References: <cover.1460971625.git.larper@axis.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Aleksey Makarov <aleksey.makarov@caviumnetworks.com>, Chandrakala Chavva <cchavva@caviumnetworks.com>, David Daney <david.daney@cavium.com>, Aleksey Makarov <aleksey.makarov@auriga.com>, Leonid Rosenboim <lrosenboim@caviumnetworks.com>, Peter Swain <pswain@cavium.com>, Aaron Williams <aaron.williams@cavium.com>, Rob Herring <robh+dt@kernel.org>, Ralf Baechle <ralf@linux-mips.org>
+To: linux-mmc@vger.kernel.org, devicetree@vger.kernel.org
+Cc: g.liakhovetski@gmx.de, ulf.hansson@linaro.org, robh+dt@kernel.org, pawel.moll@arm.com, mark.rutland@arm.com, ijc+devicetree@hellion.org.uk, galak@codeaurora.org, Lars Persson <larper@axis.com>
 
-On 14/04/16 13:45, Ulf Hansson wrote:
+Some boards need different pin drive strength for the UHS mode. Add an
+optional pinctrl setting with two pin states covering UHS speeds and
+other speeds.
 
-+ Rob and Ralf
-
-On 31 March 2016 at 17:26, Matt Redfearn <matt.redfearn@imgtec.com><mailto:matt.redfearn@imgtec.com> wrote:
-
-
-From: Aleksey Makarov <aleksey.makarov@caviumnetworks.com><mailto:aleksey.makarov@caviumnetworks.com>
-
-Add Device Tree binding document for Octeon MMC controller. The driver
-is in a following patch.
-
-The MMC controller can be connected to up to 4 "slots" which may be
-eMMC, MMC or SD card devices. As there is a single controller, each
-available slot is represented as a child node of the controller.
-
-This is a similar concept to the atmel-mci driver.
-
-Tested-by: Aaro Koskinen <aaro.koskinen@iki.fi><mailto:aaro.koskinen@iki.fi>
-Signed-off-by: Chandrakala Chavva <cchavva@caviumnetworks.com><mailto:cchavva@caviumnetworks.com>
-Signed-off-by: David Daney <david.daney@cavium.com><mailto:david.daney@cavium.com>
-Signed-off-by: Aleksey Makarov <aleksey.makarov@auriga.com><mailto:aleksey.makarov@auriga.com>
-Signed-off-by: Leonid Rosenboim <lrosenboim@caviumnetworks.com><mailto:lrosenboim@caviumnetworks.com>
-Signed-off-by: Peter Swain <pswain@cavium.com><mailto:pswain@cavium.com>
-Signed-off-by: Aaron Williams <aaron.williams@cavium.com><mailto:aaron.williams@cavium.com>
-Signed-off-by: Matt Redfearn <matt.redfearn@imgtec.com><mailto:matt.redfearn@imgtec.com>
-Acked-by: Rob Herring <robh@kernel.org><mailto:robh@kernel.org>
+Signed-off-by: Lars Persson <larper@axis.com>
 ---
-v7: No changes
+ drivers/mmc/host/usdhi6rol0.c | 40 +++++++++++++++++++++++++++++++++++++++-
+ 1 file changed, 39 insertions(+), 1 deletion(-)
 
-v6:
-- Split up patch
-- Moved device tree fixup to platform code
----
- .../devicetree/bindings/mmc/octeon-mmc.txt         | 79 ++++++++++++++++++++++
- 1 file changed, 79 insertions(+)
- create mode 100644 Documentation/devicetree/bindings/mmc/octeon-mmc.txt
-
-diff --git a/Documentation/devicetree/bindings/mmc/octeon-mmc.txt b/Documentation/devicetree/bindings/mmc/octeon-mmc.txt
-new file mode 100644
-index 000000000000..d2c576d9ad65
---- /dev/null
-+++ b/Documentation/devicetree/bindings/mmc/octeon-mmc.txt
-@@ -0,0 +1,79 @@
-+* OCTEON SD/MMC Host Controller
+diff --git a/drivers/mmc/host/usdhi6rol0.c b/drivers/mmc/host/usdhi6rol0.c
+index 5dde31b..4675ec0 100644
+--- a/drivers/mmc/host/usdhi6rol0.c
++++ b/drivers/mmc/host/usdhi6rol0.c
+@@ -22,6 +22,7 @@
+ #include <linux/mmc/sdio.h>
+ #include <linux/module.h>
+ #include <linux/pagemap.h>
++#include <linux/pinctrl/consumer.h>
+ #include <linux/platform_device.h>
+ #include <linux/regulator/consumer.h>
+ #include <linux/scatterlist.h>
+@@ -199,6 +200,11 @@ struct usdhi6_host {
+ 	struct dma_chan *chan_rx;
+ 	struct dma_chan *chan_tx;
+ 	bool dma_active;
 +
-+This controller is present on some members of the Cavium OCTEON SoC
-+family, provide an interface for eMMC, MMC and SD devices.  There is a
-+single controller that may have several "slots" connected.  These
-+slots appear as children of the main controller node.
-+The DMA engine is an integral part of the controller block.
++	/* Pin control */
++	struct pinctrl *pinctrl;
++	struct pinctrl_state *pins_default;
++	struct pinctrl_state *pins_uhs;
+ };
+ 
+ /*			I/O primitives					*/
+@@ -1148,6 +1154,24 @@ static void usdhi6_enable_sdio_irq(struct mmc_host *mmc, int enable)
+ 	}
+ }
+ 
++static int usdhi6_set_pinstates(struct usdhi6_host *host, int voltage)
++{
++	if (IS_ERR(host->pinctrl) || IS_ERR(host->pins_default) ||
++	    IS_ERR(host->pins_uhs))
++		return 0;
 +
-+1) MMC node
++	switch (voltage) {
++	case MMC_SIGNAL_VOLTAGE_180:
++	case MMC_SIGNAL_VOLTAGE_120:
++		return pinctrl_select_state(host->pinctrl,
++					    host->pins_uhs);
 +
-+Required properties:
-+- compatible : Should be "cavium,octeon-6130-mmc" or "cavium,octeon-7890-mmc"
-+- reg : Two entries:
-+       1) The base address of the MMC controller register bank.
-+       2) The base address of the MMC DMA engine register bank.
-+- interrupts :
-+       For "cavium,octeon-6130-mmc": two entries:
-+       1) The MMC controller interrupt line.
-+       2) The MMC DMA engine interrupt line.
-+       For "cavium,octeon-7890-mmc": nine entries:
-+       1) The next block transfer of a multiblock transfer has completed (BUF_DONE)
-+       2) Operation completed successfully (CMD_DONE).
-+       3) DMA transfer completed successfully (DMA_DONE).
-+       4) Operation encountered an error (CMD_ERR).
-+       5) DMA transfer encountered an error (DMA_ERR).
-+       6) Switch operation completed successfully (SWITCH_DONE).
-+       7) Switch operation encountered an error (SWITCH_ERR).
-+       8) Internal DMA engine request completion interrupt (DONE).
-+       9) Internal DMA FIFO underflow (FIFO).
-+- #address-cells : Must be <1>
-+- #size-cells : Must be <0>
++	default:
++		return pinctrl_select_state(host->pinctrl,
++					    host->pins_default);
++	}
++}
 +
-+The node contains child nodes for each slot that the platform uses.
+ static int usdhi6_sig_volt_switch(struct mmc_host *mmc, struct mmc_ios *ios)
+ {
+ 	int ret;
+@@ -1172,8 +1196,15 @@ static int usdhi6_sig_volt_switch(struct mmc_host *mmc, struct mmc_ios *ios)
+ 		return 0;
+ 	}
+ 
+-	if (ret < 0)
++	if (ret < 0) {
+ 		dev_warn(mmc_dev(mmc), "Voltage switch failed: %d\n", ret);
++		return ret;
++	}
 +
-+Example:
-+mmc@1180000002000 {
-+       compatible = "cavium,octeon-6130-mmc";
-+       reg = <0x11800 0x00002000 0x0 0x100>,
-+               <0x11800 0x00000168 0x0 0x20>;
-+       #address-cells = <1>;
-+       #size-cells = <0>;
-+       /* EMM irq, DMA irq */
-+       interrupts = <1 19>, <0 63>;
-+
-+       [ child node definitions...]
-+};
-+
-+
-+2) Slot nodes
-+Properties in mmc.txt apply to each slot node that the platform uses.
-+
-+Required properties:
-+- reg : The slot number.
-+
-+Optional properties:
-+- cavium,cmd-clk-skew : the amount of delay (in pS) past the clock edge
-+       to sample the command pin.
-+- cavium,dat-clk-skew : the amount of delay (in pS) past the clock edge
-+       to sample the data pin.
-+
-+Example:
-+       mmc@1180000002000 {
-+               compatible = "cavium,octeon-6130-mmc";
-+               reg = <0x11800 0x00002000 0x0 0x100>,
-+                     <0x11800 0x00000168 0x0 0x20>;
-+               #address-cells = <1>;
-+               #size-cells = <0>;
-+               /* EMM irq, DMA irq */
-+               interrupts = <1 19>, <0 63>;
-+
-+               mmc-slot@0 {
-+                       reg = <0>;
-
-
-Let me elaborate on how child nodes are being used by the MMC subsystem today.
-
-1)
-When a child node has "reg = <0>", the mmc core treat this as being
-represented by a non-removable/embedded card.
-We have also added a compatible string, "mmc-card", that help us to
-deal with constraints for eMMC cards during initialization. You may
-have a look at Documentation/devicetree/bindings/mmc/mmc-card.txt to
-know more about this.
-
-Additionally, the dynamically created struct device representing the
-card, gets its device node pointer assigned to the child node when
-"reg = <0>". In that way, the bus/drivers for the card can use it as
-well.
-
-2)
-When "reg" is non-zero and it's an SDIO card that has been detected,
-we treat the child node as representing the embedded SDIO functional
-device. The maximum amount of SDIO functional devices that is
-supported is dynamic, as it's encoded inside registers of the SDIO
-card. The "reg" number needs to be within this range, which allows the
-dynamically created struct device for the SDIO func device, to get its
-device node assigned to its corresponding child node.
-
-Typically an SDIO function device may be a WLAN chip, which thus is
-being attached to an SDIO interface. This is especially needed when
-the WLAN driver requires platform specific resources, like some GPIOs
-or wake IRQs. An example is available in
-arch/arm/boot/dts/sun7i-a20-wits-pro-a20-dkt.dts, where mmc3 use this.
-
-
-
-+                       max-frequency = <20000000>;
-+                       bus-width = <8>;
-+                       vmmc-supply = <&reg_vmmc3>;
-+                       cd-gpios = <&gpio 9 0>;
-+                       wp-gpios = <&gpio 10 0>;
-+               };
-+       };
---
-2.5.0
-
-
-
-So to summarize, the mmc core has a different view of what child nodes
-represents than what is being suggested here. I am not sure it's good
-idea to add/change that interpretation.
-
-Perhaps it's better to implement the machine specific patching of the
-DTS and then remove the "mmc-slot". I think something along those
-lines was proposed in one of the earlier versions as well!?
-
-What do you think?
-
-Kind regards
-Uffe
-
-
-Hi Ulf,
-
-Thanks for taking the time to reply and your detailed answer. I see why the bindings currently don't fit into the mmc core model. However, we still have the issue that these bindings are shipping in hardware and we can't change them. As far as I can see, ther major difference between these bindings and what is upstream, is the interpretation of the reg property, and the compatible string of what is connected to the controller. The Octeon MMC controller supports connections to up to 4 devices, either eMMC devices or SD card slots. I think it will be difficult to impossible to programatically interpret the device tree supplied by the bootloader to classify the slots as SD card / eMMC such that the necessary reg / compatible strings can be added.
-
-If we were to remove the slots entirely from the device tree, how would the core deal with having one controller with multiple devices attached? Obviously we need some locking of the shared controller between the child devices.
-
-Thanks,
-Matt
++	ret = usdhi6_set_pinstates(mmc_priv(mmc), ios->signal_voltage);
++	if (ret)
++		dev_warn_once(mmc_dev(mmc),
++			      "Failed to set pinstate err=%d\n", ret);
+ 
+ 	return ret;
+ }
+@@ -1836,6 +1867,13 @@ static int usdhi6_probe(struct platform_device *pdev)
+ 		mmc->f_max = host->imclk;
+ 	mmc->f_min = host->imclk / 512;
+ 
++	host->pinctrl = devm_pinctrl_get(&pdev->dev);
++	if (!IS_ERR(host->pinctrl)) {
++		host->pins_default = pinctrl_lookup_state(host->pinctrl,
++							  PINCTRL_STATE_DEFAULT);
++		host->pins_uhs     = pinctrl_lookup_state(host->pinctrl,
++							  "pins_uhs");
++	}
+ 	platform_set_drvdata(pdev, host);
+ 
+ 	ret = mmc_add_host(mmc);
+-- 
+2.1.4
 
