@@ -1,348 +1,122 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH V4 2/2] mmc: sdhci-brcmstb: Add driver for Broadcom
- BRCMSTB SoCs
-Date: Tue, 19 Apr 2016 22:03:30 +0200
-Message-ID: <CAPDyKFqpb+L3NPLoaJJc4hJ81byk8yKtWV0SFmjYNPNCDyXJbg@mail.gmail.com>
-References: <1457561065-15132-1-git-send-email-alcooperx@gmail.com>
-	<57166611.7040700@gmail.com>
+From: David Daney <ddaney@caviumnetworks.com>
+Subject: Re: [RESEND PATCH v7 1/2] mmc: OCTEON: Add DT bindings for OCTEON
+ MMC controller
+Date: Tue, 19 Apr 2016 13:25:13 -0700
+Message-ID: <57169429.10601@caviumnetworks.com>
+References: <1459438013-25088-1-git-send-email-matt.redfearn@imgtec.com> <CAPDyKFpZqiv7iVbunr+mrLyxLx=V-NVSnDpvbMaaekxn7FdKrQ@mail.gmail.com> <9FCBB1D1936B2F4DB2DD02BA3957FB504A067CE2@LEMAIL01.le.imgtec.org> <CAPDyKFo+=U978UfjP+zLfAyYm2JptWu77shR8v1z-sD+d9KDOw@mail.gmail.com> <9FCBB1D1936B2F4DB2DD02BA3957FB504A067E8D@LEMAIL01.le.imgtec.org> <CAPDyKFpw+_Lfk0d5tgZ1iQ9suvrx76foX-hpu503K55buGoiKg@mail.gmail.com> <9FCBB1D1936B2F4DB2DD02BA3957FB504A0680EA@LEMAIL01.le.imgtec.org> <CAPDyKFpYfDeT5LDfEMXxgZiHmnNx7Aau+m7Dq=+Sj+4ntrtfDw@mail.gmail.com> <5716592A.6000505@caviumnetworks.com> <CAPDyKFqM3VxYE+KtC++=5=Bjket0mCnLAuN3_436O_=TSMzAHA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="UTF-8"; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wm0-f45.google.com ([74.125.82.45]:37943 "EHLO
-	mail-wm0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932071AbcDSUDc (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 19 Apr 2016 16:03:32 -0400
-Received: by mail-wm0-f45.google.com with SMTP id u206so48100881wme.1
-        for <linux-mmc@vger.kernel.org>; Tue, 19 Apr 2016 13:03:31 -0700 (PDT)
-In-Reply-To: <57166611.7040700@gmail.com>
+Received: from mail-bn1bon0066.outbound.protection.outlook.com ([157.56.111.66]:11215
+	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S933690AbcDSUlT (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 19 Apr 2016 16:41:19 -0400
+In-Reply-To: <CAPDyKFqM3VxYE+KtC++=5=Bjket0mCnLAuN3_436O_=TSMzAHA@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Florian Fainelli <f.fainelli@gmail.com>, Al Cooper <alcooperx@gmail.com>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, linux-mmc <linux-mmc@vger.kernel.org>, bcm-kernel-feedback-list@broadcom.com, cernekee@gmail.com
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Matt Redfearn <Matt.Redfearn@imgtec.com>, David Daney <david.daney@cavium.com>, linux-mmc <linux-mmc@vger.kernel.org>, Aleksey Makarov <aleksey.makarov@caviumnetworks.com>, Chandrakala Chavva <cchavva@caviumnetworks.com>, Aleksey Makarov <aleksey.makarov@auriga.com>, Leonid Rosenboim <lrosenboim@caviumnetworks.com>, Peter Swain <pswain@cavium.com>, Aaron Williams <aaron.williams@cavium.com>, Rob Herring <robh+dt@kernel.org>, Ralf Baechle <ralf@linux-mips.org>
 
-On 19 April 2016 at 19:08, Florian Fainelli <f.fainelli@gmail.com> wrote:
-> On 09/03/16 14:04, Al Cooper wrote:
->> Signed-off-by: Al Cooper <alcooperx@gmail.com>
->> ---
->> V4 - Change the DT compatible property to "brcm,bcm7425-sdhci".
->>      Add "clocks" property to DT bindings document.
+On 04/19/2016 12:33 PM, Ulf Hansson wrote:
+> On 19 April 2016 at 18:13, David Daney <ddaney@caviumnetworks.com> wrote:
+>> On 04/19/2016 02:15 AM, Ulf Hansson wrote:
+>> [...]
+>>>
+>>>
+>>>   From this discussion I have understood that we clearly need a way to
+>>> describe mmc slots in DT!
+>>>
+>>> Unfortunate we should have discussed this before you decided to ship
+>>> devices with DTBs containing non accepted DT bindings, but hey better
+>>> late than never! :-)
+>>
+>>
+>> This is a point where the DT and mmc maintainers have a continual
+>> misunderstanding of the facts.
+>>
+>> There were requests to discuss the binding as far back as 2012:
+>>
+>> https://www.linux-mips.org/archives/linux-mips/2012-05/msg00119.html
+>>
+>> They were met with silence.
 >
-> Ulf, are you okay with that version of the driver?
+> I am aware of that. I was not the maintainer of MMC back then, if I
+> where I would probably said the same thing as of today.
+>
+> Moreover, for sure you could have been more persistent trying to get
+> peoples attention before you decided to deploy the DTB.
 
-Sorry for the delay.
-
-Here are my comments...
+We cannot change the past.  Our only concern should be to develop the 
+simplest and cleanest overall implementation possible given the facts as 
+they exist today.
 
 >
->> ---
->>  .../devicetree/bindings/mmc/brcm,bcm7425-sdhci.txt |  37 +++++
->>  MAINTAINERS                                        |   7 +
->>  drivers/mmc/host/Kconfig                           |  11 ++
->>  drivers/mmc/host/Makefile                          |   1 +
->>  drivers/mmc/host/sdhci-brcmstb.c                   | 154 +++++++++++++++++++++
->>  5 files changed, 210 insertions(+)
->>  create mode 100644 Documentation/devicetree/bindings/mmc/brcm,bcm7425-sdhci.txt
->>  create mode 100644 drivers/mmc/host/sdhci-brcmstb.c
-
-DT bindings shall be documented in a separate patch. Please split it up.
-
 >>
->> diff --git a/Documentation/devicetree/bindings/mmc/brcm,bcm7425-sdhci.txt b/Documentation/devicetree/bindings/mmc/brcm,bcm7425-sdhci.txt
->> new file mode 100644
->> index 0000000..cffd890
->> --- /dev/null
->> +++ b/Documentation/devicetree/bindings/mmc/brcm,bcm7425-sdhci.txt
->> @@ -0,0 +1,37 @@
->> +* BROADCOM BRCMSTB/BMIPS SDHCI Controller
->> +
->> +This file documents differences between the core properties in mmc.txt
->> +and the properties used by the sdhci-brcmstb driver.
->> +
->> +Required properties:
->> +- compatible: "brcm,bcm7425-sdhci"
->> +
->> +Optional properties:
->> +- clocks: Phandle to clock.
->> +- broken-sdr50: The Host Controller's SDR50 mode is broken.
->> +- broken-ddr50: The Host Controller's DDR50 mode is broken.
-
-I don't like these bindings!
-
-Instead of trusting the capability registers of the SDHCI HW, let's
-make it possible to pick up what *is* supported from DT.
-
-We already have bindings that you can use to tell whether SDR50 and
-DDR50 is supported, you can use them.
-
->> +- broken-64-bit-dma: 64 BIT DMA mode is broken, use 32 BIT DMA.
-
-Can't this be figured out in runtime? If not, is this really a
-capability of the MMC controller?
-
->> +- broken-timeout-value: The Host Controller CAPABILITY timeout value is incorrrect, use the maximum timeout.
-
-Similar comment as for sdr50/ddr50 bindings.
-
-Perhaps you don't even need a DT binding, but instead you can rely on
-the compatible string which tells that the timeout shall be set to the
-"maximum" timeout.
-
->> +
->> +
->> +Example:
->> +
->> +     sdhci@f03e0100 {
->> +             compatible = "brcm,bcm7425-sdhci";
->> +             reg = <0xf03e0000 0x100>;
->> +             interrupts = <0x0 0x26 0x0>;
->> +             sdhci,auto-cmd12;
->> +             clocks = <0x13>;
->> +             broken-sdr50;
->> +     };
->> +
->> +     sdhci@f03e0300 {
->> +             no-1-8-v;
-
-In general I don't like this binding at all, as it's being interpreted
-differently depending on the sdhci variant.
-
-Therefore I would rather see that you specify which speed modes that
-*are* supported and those we already have bindings for.
-
->> +             non-removable;
->> +             bus-width = <0x8>;
->> +             compatible = "brcm,bcm7425-sdhci";
->> +             reg = <0xf03e0200 0x100>;
->> +             interrupts = <0x0 0x27 0x0>;
->> +             sdhci,auto-cmd12;
->> +             clocks = <0x13>;
->> +     };
->> diff --git a/MAINTAINERS b/MAINTAINERS
->> index 30aca4a..2d9c90c 100644
->> --- a/MAINTAINERS
->> +++ b/MAINTAINERS
->> @@ -9724,6 +9724,13 @@ F:     tools/testing/selftests/seccomp/*
->>  K:   \bsecure_computing
->>  K:   \bTIF_SECCOMP\b
+>> The firmware containing these bindings is out in the wild.  If we deprecate
+>> some of the bindings, the driver will still have to support them in the
+>> future.
 >>
->> +SECURE DIGITAL HOST CONTROLLER INTERFACE (SDHCI) Broadcom BRCMSTB DRIVER
->> +M:   Al Cooper <alcooperx@gmail.com>
->> +L:   linux-mmc@vger.kernel.org
->> +L:   bcm-kernel-feedback-list@broadcom.com
->> +S:   Maintained
->> +F:   drivers/mmc/host/sdhci-brcmstb*
->> +
->>  SECURE DIGITAL HOST CONTROLLER INTERFACE (SDHCI) SAMSUNG DRIVER
->>  M:   Ben Dooks <ben-linux@fluff.org>
->>  M:   Jaehoon Chung <jh80.chung@samsung.com>
->> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
->> index 4a35ebf..85bf266 100644
->> --- a/drivers/mmc/host/Kconfig
->> +++ b/drivers/mmc/host/Kconfig
->> @@ -797,3 +797,14 @@ config MMC_SDHCI_MICROCHIP_PIC32
->>            If you have a controller with this interface, say Y or M here.
->>
->>            If unsure, say N.
->> +config MMC_SDHCI_BRCMSTB
->> +     tristate "Broadcom SDIO/SD/MMC support"
->> +     depends on ARCH_BRCMSTB || BMIPS_GENERIC
->> +     depends on MMC_SDHCI_PLTFM
->> +     default y
->> +     select MMC_SDHCI_IO_ACCESSORS
->> +     help
->> +       This selects support for the SDIO/SD/MMC Host Controller on
->> +       Broadcom STB SoCs.
->> +
->> +       If unsure, say Y.
->> diff --git a/drivers/mmc/host/Makefile b/drivers/mmc/host/Makefile
->> index af918d2..2075c11 100644
->> --- a/drivers/mmc/host/Makefile
->> +++ b/drivers/mmc/host/Makefile
->> @@ -76,6 +76,7 @@ obj-$(CONFIG_MMC_SDHCI_IPROC)               += sdhci-iproc.o
->>  obj-$(CONFIG_MMC_SDHCI_MSM)          += sdhci-msm.o
->>  obj-$(CONFIG_MMC_SDHCI_ST)           += sdhci-st.o
->>  obj-$(CONFIG_MMC_SDHCI_MICROCHIP_PIC32)      += sdhci-pic32.o
->> +obj-$(CONFIG_MMC_SDHCI_BRCMSTB)              += sdhci-brcmstb.o
->>
->>  ifeq ($(CONFIG_CB710_DEBUG),y)
->>       CFLAGS-cb710-mmc        += -DDEBUG
->> diff --git a/drivers/mmc/host/sdhci-brcmstb.c b/drivers/mmc/host/sdhci-brcmstb.c
->> new file mode 100644
->> index 0000000..d0520fd
->> --- /dev/null
->> +++ b/drivers/mmc/host/sdhci-brcmstb.c
->> @@ -0,0 +1,154 @@
->> +/*
->> + * sdhci-brcmstb.c Support for SDHCI on Broadcom BRCMSTB SoC's
->> + *
->> + * Copyright (C) 2015 Broadcom Corporation
->> + *
->> + * This program is free software; you can redistribute it and/or modify
->> + * it under the terms of the GNU General Public License version 2 as
->> + * published by the Free Software Foundation.
->> + *
->> + * This program is distributed in the hope that it will be useful,
->> + * but WITHOUT ANY WARRANTY; without even the implied warranty of
->> + * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
->> + * GNU General Public License for more details.
->> + *
->> + */
->> +
->> +#include <linux/io.h>
->> +#include <linux/mmc/host.h>
->> +#include <linux/module.h>
->> +#include <linux/of.h>
->> +
->> +#include "sdhci-pltfm.h"
->> +
->> +static void brcmstb_of_parse(struct platform_device *pdev,
->> +                     struct sdhci_host *host)
->> +{
->> +     struct device_node *np = pdev->dev.of_node;
->> +
->> +     host->quirks |= SDHCI_QUIRK_MISSING_CAPS;
->> +     host->caps = sdhci_readl(host, SDHCI_CAPABILITIES);
->> +     host->caps1 = sdhci_readl(host, SDHCI_CAPABILITIES_1);
->> +     if (of_get_property(np, "broken-sdr50", NULL))
->> +             host->caps1 &= ~(SDHCI_SUPPORT_SDR104 | SDHCI_SUPPORT_SDR50);
->> +     if (of_find_property(np, "broken-ddr50", NULL))
->> +             host->caps1 &= ~SDHCI_SUPPORT_DDR50;
->> +     if (of_get_property(np, "broken-64-bit-dma", NULL))
->> +             host->caps &= ~SDHCI_CAN_64BIT;
->> +     if (of_get_property(np, "broken-timeout-value", NULL))
->> +             host->quirks |= SDHCI_QUIRK_BROKEN_TIMEOUT_VAL;
->> +}
->> +
->> +
->> +#ifdef CONFIG_PM_SLEEP
->> +
->> +static int sdhci_brcmstb_suspend(struct device *dev)
->> +{
->> +     struct sdhci_host *host = dev_get_drvdata(dev);
->> +     struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
->> +     int res;
->> +
->> +     res = sdhci_suspend_host(host);
->> +     if (res)
->> +             return res;
->> +     clk_disable(pltfm_host->clk);
-
-Pehaps clk_disable_unprepare().
-
->> +     return res;
->> +}
->> +
->> +static int sdhci_brcmstb_resume(struct device *dev)
->> +{
->> +     struct sdhci_host *host = dev_get_drvdata(dev);
->> +     struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
->> +     int err;
->> +
->> +     err = clk_enable(pltfm_host->clk);
-
-Perhaps clk_prepare_enable().
-
->> +     if (err)
->> +             return err;
->> +     return sdhci_resume_host(host);
->> +}
->> +
->> +#endif /* CONFIG_PM_SLEEP */
->> +
->> +static SIMPLE_DEV_PM_OPS(sdhci_brcmstb_pmops, sdhci_brcmstb_suspend,
->> +                     sdhci_brcmstb_resume);
->> +
->> +static const struct sdhci_ops sdhci_brcmstb_ops = {
->> +     .set_clock = sdhci_set_clock,
->> +     .set_bus_width = sdhci_set_bus_width,
->> +     .reset = sdhci_reset,
->> +     .set_uhs_signaling = sdhci_set_uhs_signaling,
->> +};
->> +
->> +static struct sdhci_pltfm_data sdhci_brcmstb_pdata = {
->> +     .ops = &sdhci_brcmstb_ops,
->> +};
->> +
->> +static int sdhci_brcmstb_probe(struct platform_device *pdev)
->> +{
->> +     struct device_node *dn = pdev->dev.of_node;
->> +     struct sdhci_host *host;
->> +     struct sdhci_pltfm_host *pltfm_host;
->> +     struct clk *clk;
->> +     int res;
->> +
->> +     clk = of_clk_get_by_name(dn, "sw_sdio");
-
-I don't remember this clock being documented in the DT doc. Please add it.
-
-Any reason why you don't want to use devm_clk_get() instead? It would
-also simplify the error handling a bit.
-
->> +     if (IS_ERR(clk)) {
->> +             dev_err(&pdev->dev, "Clock not found in Device Tree\n");
->> +             clk = NULL;
->> +     }
->> +     res = clk_prepare_enable(clk);
->> +     if (res)
->> +             goto undo_clk_get;
->> +
->> +     host = sdhci_pltfm_init(pdev, &sdhci_brcmstb_pdata, 0);
->> +     if (IS_ERR(host)) {
->> +             res = PTR_ERR(host);
->> +             goto undo_clk_prep;
->> +     }
->> +
->> +     /* Enable MMC_CAP2_HC_ERASE_SZ for better max discard calculations */
->> +     host->mmc->caps2 |= MMC_CAP2_HC_ERASE_SZ;
->> +
->> +     sdhci_get_of_property(pdev);
->> +     mmc_of_parse(host->mmc);
->> +     brcmstb_of_parse(pdev, host);
->> +
->> +     res = sdhci_add_host(host);
->> +     if (res)
->> +             goto undo_pltfm_init;
->> +
->> +     pltfm_host = sdhci_priv(host);
->> +     pltfm_host->clk = clk;
->> +     return res;
->> +
->> +undo_pltfm_init:
->> +     sdhci_pltfm_free(pdev);
->> +undo_clk_prep:
->> +     clk_disable_unprepare(clk);
->> +undo_clk_get:
->> +     clk_put(clk);
->> +     return res;
->> +}
->> +
->> +static const struct of_device_id sdhci_brcm_of_match[] = {
->> +     { .compatible = "brcm,bcm7425-sdhci" },
->> +     {},
->> +};
->> +MODULE_DEVICE_TABLE(of, sdhci_brcm_of_match);
->> +
->> +static struct platform_driver sdhci_brcmstb_driver = {
->> +     .driver         = {
->> +             .name   = "sdhci-brcmstb",
->> +             .owner  = THIS_MODULE,
->> +             .pm     = &sdhci_brcmstb_pmops,
->> +             .of_match_table = of_match_ptr(sdhci_brcm_of_match),
->> +     },
->> +     .probe          = sdhci_brcmstb_probe,
->> +     .remove         = sdhci_pltfm_unregister,
->> +};
->> +
->> +module_platform_driver(sdhci_brcmstb_driver);
->> +
->> +MODULE_DESCRIPTION("SDHCI driver for Broadcom BRCMSTB SoCs");
->> +MODULE_AUTHOR("Broadcom");
->> +MODULE_LICENSE("GPL v2");
->>
+>> In the case of OCTEON based devices, the device tree bindings are a firmware
+>> <--> kernel ABI as the device trees always come from the firmware and not
+>> some other place.
 >
+> Now, I am not going spend more time arguing, instead I prefer if we
+> can be constructive.
 >
-> --
-> Florian
+> As the maintainer of MMC, I have tried to be helpful by providing you
+> with my view on how we can move forward.
+>
+> I don't think it's a big deal for you to implement something along
+> those lines for what I have requested, or is it?
 
-Kind regards
-Uffe
+It is a matter of how much manipulation of the device tree we want to do 
+before it is handed off to the driver core for device creation.  I would 
+like to not do any.
+
+There is a global cost to changing the device tree in early boot.  It 
+may not be borne by the MMC sub-system, but it exists none the less.
+
+Given that:
+
+  A) The MMC core doesn't contain the concept of one bus controller with 
+multiple "slots".
+
+  B) The existing OCTEON device tree bindings should continue to be 
+supported.
+
+There are several options.
+
+   1) Invent new MMC device tree bindings that are different from what 
+we currently have, but that convey the same information.
+
+   1a) Change the OCTEON MMC driver to use only these new bindings, and 
+write some sort of device tree fix up code that runs in early boot to 
+rewrite the device tree MMC properties.   This results in the code 
+supporting the OCTEON MMC devices being split between the driver and 
+system early boot code.  The cost is an increase in system complexity to 
+generate the device tree nodes with new bindings.
+
+   1b) Change the OCTEON MMC driver to use either these new bindings or 
+legacy bindings.  In this case all OCTEON MMC code is localized to a 
+single driver file.  There is a small increase in complexity to carry 
+code to decode both new and legacy device tree bindings.
+
+   2) Use existing OCTEON MMC device tree bindings, as they are 
+sufficient to achieve a working driver.  Since the code is all specific 
+to the OCTEON MMC driver, any ugliness is contained lexicographically 
+near to the features being implemented.  Any feedback related to the 
+architecture and style of the driver code would be addressed.
+
+The current state is #2.  My interpretation of your desires is #1a.
+
+I am fine with introducing a new device tree binding.  But, I don't 
+think the kernel as a whole nor this specific OCTEON MMC driver will be 
+improved by adding more device tree synthesis code in early boot.  Any 
+thing that is there should be limited to supporting very old (pre OCTEON 
+MMC) firmware that doesn't supply a device tree.  So I would strongly 
+support either approach #1b or #2.
+
+David Daney
+
