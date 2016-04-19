@@ -1,45 +1,51 @@
-From: Prabu Thangamuthu <Prabu.T@synopsys.com>
-Subject: RE: [PATCH 1/1] mmc: sdhci-pci: add Support of Synopsys DWC_MSHC IP
-Date: Tue, 19 Apr 2016 05:17:49 +0000
-Message-ID: <705D14B1C7978B40A723277C067CEDE2010A4B0FA7@IN01WEMBXB.internal.synopsys.com>
-References: <705D14B1C7978B40A723277C067CEDE2010A4B0DFB@IN01WEMBXB.internal.synopsys.com>
- <20160418185517.GB10906@kroah.com>
+From: Olliver Schinagl <oliver@schinagl.nl>
+Subject: [PATCHv1 0/2] mmc: Move broken-hpi also to the chipset level
+Date: Tue, 19 Apr 2016 09:12:12 +0200
+Message-ID: <1461049934-12848-1-git-send-email-oliver@schinagl.nl>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtprelay.synopsys.com ([198.182.60.111]:35263 "EHLO
-	smtprelay.synopsys.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751509AbcDSFR5 convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 19 Apr 2016 01:17:57 -0400
-In-Reply-To: <20160418185517.GB10906@kroah.com>
-Content-Language: en-US
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Ulf Hansson <ulf.hansson@linaro.org>, Maxime Ripard <maxime.ripard@free-electrons.com>, Chen-Yu Tsai <wens@csie.org>, Venu Byravarasu <vbyravarasu@nvidia.com>, Adrian Hunter <adrian.hunter@intel.com>, Michal Hocko <mhocko@suse.com>, Lars-Peter Clausen <lars@metafoo.de>, Sudeep Holla <Sudeep.Holla@arm.com>, Sergei Shtylyov <sergei.shtylyov@cogentembedded.com>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Wenkai Du <wenkai.du@intel.com>, Chaotian Jing <chaotian.jing@mediatek.com>, Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>, Hans de Goede <hdegoede@redhat.com>, Jaehoon Chung <jh80.chung@samsung.com>, Michal Suchanek <hramrach@gmail.com>
+Cc: Olliver Schinagl <oliver@schinagl.nl>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
-To: Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Prabu Thangamuthu <Prabu.T@synopsys.com>
-Cc: "Ulf Hansson (ulf.hansson@linaro.org)" <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, Bjorn Helgaas <bhelgaas@google.com>, Andrew Morton <akpm@linux-foundation.org>, "David S. Miller" <davem@davemloft.net>, Kalle Valo <kvalo@codeaurora.org>, Mauro Carvalho Chehab <mchehab@osg.samsung.com>, Guenter Roeck <linux@roeck-us.net>, Jiri Slaby <jslaby@suse.com>, Chaotian Jing <chaotian.jing@mediatek.com>, Andrei Pistirica <andrei.pistirica@microchip.com>, Ben Hutchings <ben.hutchings@codethink.co.uk>, Joshua Henderson <joshua.henderson@microchip.com>, Ludovic Desroches <ludovic.desroches@atmel.com>, Manjunath M Bettegowda <Manjunath.MB@synopsys.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-pci@vger.kernel.org" <linux-pci@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 
-Hi Greg K-H,
+A few months ago, hans de Goede and I where talking about the behavior of HPI on
+eMMC modules. We came to the conclusion that more often then not, the mmc
+chipset might be the problem and not the eMMC module itself. To remedy this the
+broken-hpi parameter is now also checked on the chipset level.
 
-> On  Tuesday, April 19, 2016 12:25 AM, Greg Kroah-Hartman Wrote:
->
-> > diff --git a/include/linux/pci_ids.h b/include/linux/pci_ids.h index
-> > 247da8c..01f743b 100644
-> > --- a/include/linux/pci_ids.h
-> > +++ b/include/linux/pci_ids.h
-> > @@ -2318,6 +2318,9 @@
-> >  #define PCI_DEVICE_ID_CENATEK_IDE	0x0001
-> >
-> >  #define PCI_VENDOR_ID_SYNOPSYS		0x16c3
-> > +#define PCI_DEVICE_ID_MOBSTOR_HAPS51	0xc101
-> > +#define PCI_DEVICE_ID_MSHC_HAPS51	0xc201
-> > +#define PCI_DEVICE_ID_MSHC_HAPSDX	0xc202
-> 
-> Please read the top of this file for why you should not add any new entries to
-> it. 
+On the sunxi platform, all the eMMC users with emmc modules that support HPI
+need the broken-hpi flag, indicating that the sunxi mmc controller is likely
+not properly supporting HPI. We disable this on the chipset level for these
+chipsets.
 
-Thank you for pointing it. 
-I will update the Patch accordingly.
+As for the broken-hpi flag in the devicetree's, those should in theory be
+removed from the boards in question in a separate patch when in agreement, as
+technically, the eMMC module supports HPI just fine and thus the we are lying
+about what really is broken.
 
-Regards,
-Prabu Thangamuthu.
+This was tested on an OLinuXino Lime2 with 4GB industrial grade Micron eMMC
+flash.
+
+Olliver Schinagl (2):
+  mmc: core: Improve marking broken HPI through devicetree
+  mmc: sunxi: Mark the HPI of the mmc controller broken by default
+
+ drivers/mmc/core/host.c      | 2 ++
+ drivers/mmc/core/mmc.c       | 2 +-
+ drivers/mmc/host/sunxi-mmc.c | 4 ++--
+ include/linux/mmc/host.h     | 1 +
+ 4 files changed, 6 insertions(+), 3 deletions(-)
+
+-- 
+2.8.0.rc3
