@@ -1,13 +1,13 @@
 From: Lars Persson <lars.persson@axis.com>
-Subject: [PATCH v3 2/3] mmc: usdhi6rol0: add support for UHS modes
-Date: Wed, 20 Apr 2016 16:53:12 +0200
-Message-ID: <92b72ede5f8ddf2b2f74cdb7422bc8ef5458b23c.1461163234.git.larper@axis.com>
+Subject: [PATCH v3 3/3] mmc: usdhi6rol0: add pinctrl to set pin drive strength
+Date: Wed, 20 Apr 2016 16:53:13 +0200
+Message-ID: <aacd3dcf6a2e5a8249ca5ff2e614b3e4c04d2020.1461163234.git.larper@axis.com>
 References: <cover.1461163234.git.larper@axis.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from bes.se.axis.com ([195.60.68.10]:33187 "EHLO bes.se.axis.com"
+Received: from bes.se.axis.com ([195.60.68.10]:33195 "EHLO bes.se.axis.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S932379AbcDTOx2 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 20 Apr 2016 10:53:28 -0400
+	id S932382AbcDTOx3 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 20 Apr 2016 10:53:29 -0400
 In-Reply-To: <cover.1461163234.git.larper@axis.com>
 In-Reply-To: <cover.1461163234.git.larper@axis.com>
 References: <cover.1461163234.git.larper@axis.com>
@@ -16,44 +16,105 @@ List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org, devicetree@vger.kernel.org
 Cc: g.liakhovetski@gmx.de, ulf.hansson@linaro.org, robh+dt@kernel.org, pawel.moll@arm.com, mark.rutland@arm.com, ijc+devicetree@hellion.org.uk, galak@codeaurora.org, Lars Persson <larper@axis.com>
 
-Add a start_signal_voltage_switch() operation to support enabling of
-UHS modes.
+Some boards need different pin drive strength for the UHS mode. Add an
+optional pinctrl setting with two pin states covering UHS speeds and
+other speeds.
 
 Signed-off-by: Lars Persson <larper@axis.com>
 ---
- drivers/mmc/host/usdhi6rol0.c | 13 +++++++++++++
- 1 file changed, 13 insertions(+)
+ drivers/mmc/host/usdhi6rol0.c | 51 ++++++++++++++++++++++++++++++++++++++++++-
+ 1 file changed, 50 insertions(+), 1 deletion(-)
 
 diff --git a/drivers/mmc/host/usdhi6rol0.c b/drivers/mmc/host/usdhi6rol0.c
-index 807c06e..2585ea4 100644
+index 2585ea4..c4d923b 100644
 --- a/drivers/mmc/host/usdhi6rol0.c
 +++ b/drivers/mmc/host/usdhi6rol0.c
-@@ -1147,12 +1147,25 @@ static void usdhi6_enable_sdio_irq(struct mmc_host *mmc, int enable)
+@@ -22,6 +22,7 @@
+ #include <linux/mmc/sdio.h>
+ #include <linux/module.h>
+ #include <linux/pagemap.h>
++#include <linux/pinctrl/consumer.h>
+ #include <linux/platform_device.h>
+ #include <linux/scatterlist.h>
+ #include <linux/string.h>
+@@ -198,6 +199,11 @@ struct usdhi6_host {
+ 	struct dma_chan *chan_rx;
+ 	struct dma_chan *chan_tx;
+ 	bool dma_active;
++
++	/* Pin control */
++	struct pinctrl *pinctrl;
++	struct pinctrl_state *pins_default;
++	struct pinctrl_state *pins_uhs;
+ };
+ 
+ /*			I/O primitives					*/
+@@ -1147,14 +1153,38 @@ static void usdhi6_enable_sdio_irq(struct mmc_host *mmc, int enable)
  	}
  }
  
-+static int usdhi6_sig_volt_switch(struct mmc_host *mmc, struct mmc_ios *ios)
++static int usdhi6_set_pinstates(struct usdhi6_host *host, int voltage)
 +{
-+	int ret;
++	if (IS_ERR(host->pins_uhs))
++		return 0;
 +
-+	ret = mmc_regulator_set_vqmmc(mmc, ios);
++	switch (voltage) {
++	case MMC_SIGNAL_VOLTAGE_180:
++	case MMC_SIGNAL_VOLTAGE_120:
++		return pinctrl_select_state(host->pinctrl,
++					    host->pins_uhs);
 +
-+	if (ret < 0)
-+		dev_warn(mmc_dev(mmc), "Voltage switch failed: %d\n", ret);
-+
-+	return ret;
++	default:
++		return pinctrl_select_state(host->pinctrl,
++					    host->pins_default);
++	}
 +}
 +
- static struct mmc_host_ops usdhi6_ops = {
- 	.request	= usdhi6_request,
- 	.set_ios	= usdhi6_set_ios,
- 	.get_cd		= usdhi6_get_cd,
- 	.get_ro		= usdhi6_get_ro,
- 	.enable_sdio_irq = usdhi6_enable_sdio_irq,
-+	.start_signal_voltage_switch = usdhi6_sig_volt_switch,
- };
+ static int usdhi6_sig_volt_switch(struct mmc_host *mmc, struct mmc_ios *ios)
+ {
+ 	int ret;
  
- /*			State machine handlers				*/
+ 	ret = mmc_regulator_set_vqmmc(mmc, ios);
+ 
+-	if (ret < 0)
++	if (ret < 0) {
+ 		dev_warn(mmc_dev(mmc), "Voltage switch failed: %d\n", ret);
++		return ret;
++	}
++
++	ret = usdhi6_set_pinstates(mmc_priv(mmc), ios->signal_voltage);
++	if (ret)
++		dev_warn_once(mmc_dev(mmc),
++			      "Failed to set pinstate err=%d\n", ret);
+ 
+ 	return ret;
+ }
+@@ -1743,6 +1773,25 @@ static int usdhi6_probe(struct platform_device *pdev)
+ 	host->wait	= USDHI6_WAIT_FOR_REQUEST;
+ 	host->timeout	= msecs_to_jiffies(4000);
+ 
++	host->pinctrl = devm_pinctrl_get(&pdev->dev);
++	if (IS_ERR(host->pinctrl)) {
++		ret = PTR_ERR(host->pinctrl);
++		goto e_free_mmc;
++	}
++
++	host->pins_uhs = pinctrl_lookup_state(host->pinctrl, "state_uhs");
++	if (!IS_ERR(host->pins_uhs)) {
++		host->pins_default = pinctrl_lookup_state(host->pinctrl,
++							  PINCTRL_STATE_DEFAULT);
++
++		if (IS_ERR(host->pins_default)) {
++			dev_err(dev,
++				"UHS pinctrl requires a default pin state.\n");
++			ret = PTR_ERR(host->pins_default);
++			goto e_free_mmc;
++		}
++	}
++
+ 	res = platform_get_resource(pdev, IORESOURCE_MEM, 0);
+ 	host->base = devm_ioremap_resource(dev, res);
+ 	if (IS_ERR(host->base)) {
 -- 
 2.1.4
 
