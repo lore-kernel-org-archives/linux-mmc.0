@@ -1,53 +1,67 @@
 From: Masahiro Yamada <yamada.masahiro@socionext.com>
-Subject: [PATCH v2 1/7] mmc: sdhci-pltfm: drop error message for too small MMIO resource size
-Date: Wed, 20 Apr 2016 11:16:25 +0900
-Message-ID: <1461118591-21595-2-git-send-email-yamada.masahiro@socionext.com>
+Subject: [PATCH v2 6/7] mmc: sdhci-pltfm: move devm_ioremap_resource() up
+Date: Wed, 20 Apr 2016 11:16:30 +0900
+Message-ID: <1461118591-21595-7-git-send-email-yamada.masahiro@socionext.com>
 References: <1461118591-21595-1-git-send-email-yamada.masahiro@socionext.com>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from conuserg-11.nifty.com ([210.131.2.78]:38197 "EHLO
-	conuserg-11.nifty.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751791AbcDTCP4 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 19 Apr 2016 22:15:56 -0400
+Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1461118591-21595-1-git-send-email-yamada.masahiro@socionext.com>
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Sender: linux-kernel-owner@vger.kernel.org
 To: linux-mmc@vger.kernel.org
 Cc: Masahiro Yamada <yamada.masahiro@socionext.com>, linux-kernel@vger.kernel.org, Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>
+List-Id: linux-mmc@vger.kernel.org
 
-The requirement resource_size >= 0x100 may not necessarily be
-reasonable; for example, sdhci-dove appears to sidestep some
-registers in sdhci_dove_readw().
-
-Moreover, current code displays an error message for too small
-resource size, but still moves forward.
-
-Every DT should be responsible for describing its properties
-correctly, so lets's remove this error message from the common
-framework.
+Call devm_ioremap_resource() right after platform_get_resource().
+This saves the error check of platform_get_resource() because
+devm_ioremap_resource() checks if the given resource is NULL.
 
 Signed-off-by: Masahiro Yamada <yamada.masahiro@socionext.com>
 ---
 
-Changes in v2:
-  - Remove resource size checking rather than fix it.
+Changes in v2: None
 
- drivers/mmc/host/sdhci-pltfm.c | 3 ---
- 1 file changed, 3 deletions(-)
+ drivers/mmc/host/sdhci-pltfm.c | 13 +++++--------
+ 1 file changed, 5 insertions(+), 8 deletions(-)
 
 diff --git a/drivers/mmc/host/sdhci-pltfm.c b/drivers/mmc/host/sdhci-pltfm.c
-index 072bb27..03dbdeb 100644
+index caa05d7..1d74db8 100644
 --- a/drivers/mmc/host/sdhci-pltfm.c
 +++ b/drivers/mmc/host/sdhci-pltfm.c
-@@ -127,9 +127,6 @@ struct sdhci_host *sdhci_pltfm_init(struct platform_device *pdev,
+@@ -119,11 +119,13 @@ struct sdhci_host *sdhci_pltfm_init(struct platform_device *pdev,
+ {
+ 	struct sdhci_host *host;
+ 	struct resource *iomem;
++	void __iomem *ioaddr;
+ 	int ret;
+ 
+ 	iomem = platform_get_resource(pdev, IORESOURCE_MEM, 0);
+-	if (!iomem) {
+-		ret = -ENOMEM;
++	ioaddr = devm_ioremap_resource(&pdev->dev, iomem);
++	if (IS_ERR(ioaddr)) {
++		ret = PTR_ERR(ioaddr);
  		goto err;
  	}
  
--	if (resource_size(iomem) < 0x100)
--		dev_err(&pdev->dev, "Invalid iomem size!\n");
--
- 	host = sdhci_alloc_host(&pdev->dev,
- 		sizeof(struct sdhci_pltfm_host) + priv_size);
+@@ -135,6 +137,7 @@ struct sdhci_host *sdhci_pltfm_init(struct platform_device *pdev,
+ 		goto err;
+ 	}
  
++	host->ioaddr = ioaddr;
+ 	host->hw_name = dev_name(&pdev->dev);
+ 	if (pdata && pdata->ops)
+ 		host->ops = pdata->ops;
+@@ -152,12 +155,6 @@ struct sdhci_host *sdhci_pltfm_init(struct platform_device *pdev,
+ 		goto err_request;
+ 	}
+ 
+-	host->ioaddr = devm_ioremap_resource(&pdev->dev, iomem);
+-	if (IS_ERR(host->ioaddr)) {
+-		ret = PTR_ERR(host->ioaddr);
+-		goto err_request;
+-	}
+-
+ 	/*
+ 	 * Some platforms need to probe the controller to be able to
+ 	 * determine which caps should be used.
 -- 
 1.9.1
-
