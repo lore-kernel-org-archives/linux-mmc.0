@@ -1,70 +1,67 @@
-From: Tony Lindgren <tony@atomide.com>
-Subject: Re: [PATCH v3 1/1] mmc: omap_hsmmc: devm_pinctrl_get returns ERR_PTR
- upon error
-Date: Wed, 20 Apr 2016 08:13:37 -0700
-Message-ID: <20160420151337.GK5973@atomide.com>
-References: <1461099853-15011-1-git-send-email-afenkart@gmail.com>
- <1461099853-15011-2-git-send-email-afenkart@gmail.com>
- <5784587.0IP58U3KN7@wuerfel>
- <20160420081145.GR4247@mwanda>
- <CALtMJEA0XaekLgZnOVU4XMPmc61VendSCCV2uKjesxzQRcwR8w@mail.gmail.com>
+From: Dong Aisheng <aisheng.dong@nxp.com>
+Subject: [PATCH 2/3] mmc: core: remove the invalid message in mmc_select_timing
+Date: Thu, 21 Apr 2016 00:51:31 +0800
+Message-ID: <1461171092-30631-2-git-send-email-aisheng.dong@nxp.com>
+References: <1461171092-30631-1-git-send-email-aisheng.dong@nxp.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from muru.com ([72.249.23.125]:51561 "EHLO muru.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751285AbcDTPNl (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 20 Apr 2016 11:13:41 -0400
-Content-Disposition: inline
-In-Reply-To: <CALtMJEA0XaekLgZnOVU4XMPmc61VendSCCV2uKjesxzQRcwR8w@mail.gmail.com>
+Received: from mail-bl2on0083.outbound.protection.outlook.com ([65.55.169.83]:35136
+	"EHLO na01-bl2-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1751231AbcDTQ7H (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 20 Apr 2016 12:59:07 -0400
+In-Reply-To: <1461171092-30631-1-git-send-email-aisheng.dong@nxp.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Andreas Fenkart <afenkart@gmail.com>
-Cc: Dan Carpenter <dan.carpenter@oracle.com>, Arnd Bergmann <arnd@arndb.de>, linux-mmc <linux-mmc@vger.kernel.org>, linux-omap@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: ulf.hansson@linaro.org, chris@printf.net, shawnguo@kernel.org, adrian.hunter@intel.com, linux-arm-kernel@lists.infradead.org, aisheng.dong@nxp.com, haibo.chen@nxp.com, dongas86@gmail.com
 
-* Andreas Fenkart <afenkart@gmail.com> [160420 04:39]:
-> 2016-04-20 10:11 GMT+02:00 Dan Carpenter <dan.carpenter@oracle.com>:
-> > On Tue, Apr 19, 2016 at 03:12:27PM -0700, Arnd Bergmann wrote:
-> >> On Tuesday 19 April 2016 23:04:13 Andreas Fenkart wrote:
-> >> > Only the dummy implementation of devm_pinctrl_get returns NULL.
-> >> > The real implementation returns ERR_PTR. By enforcing pinselect
-> >> > in Kconfig we can simplify the test to check only for ERR_PTR.
-> >> > detected/triggered by static code checker.
-> >>
-> >> This is not how the interface is meant to work:
-> >>
-> >> The dummy devm_pinctrl_get() intentionally returns NULL because IS_ERR()
-> >> treats that as valid. All other pinctrl functions subsequently ignore
-> >> that NULL pointer, so the second half of the patch is ok without the
-> >> first half.
-> >>
-> >
-> > We had that discussion.  The static checker warning triggered the
-> > discussion but the real reason for this patch is that the
-> > hardware will not work without PINCTRL.  So instead of compiling an
-> > unusable kernel we added the select.
-> 
-> beaglebone needs the workaround, most chips don't. The code discussed,
-> only gives some feedback to users about an incorrect configuration.
-> I can drop that part or replace it with a dev_info line, pointing to
-> "Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt"
+mmc_select_hs200() and mmc_select_hs() will keep the timing
+as before if switch fails. So it's meaningless to print the
+failed switched mode outside based on the current host timing.
 
-Yes pinctrl is optional for sure. And leaving pinctrl out does not
-produce an unusable kernel for some boards that do all the pin muxing
-in the bootloader. Like Andreas says, only some boards need dynamic
-pin muxing for the wake-up events.
+Furthermore, the original print is wrong, it should be:
+pr_warn("%s: switch to %s failed\n",
+	mmc_hostname(card->host),
+	mmc_card_hs(card) ? "high-speed" :
+	(mmc_card_hs200(card) ? "hs200" : ""));
 
-The dev_info change sounds like papering over the issue.. I'm fine
-with that, but isn't the real problem devm_pinctrl_get prototype?
+Since we already have error message in mmc_select_hs200(),
+simply remove it outside.
 
-> > I forget, but I think one of ARCH_OMAP2PLUS or ARCH_KEYSTONE selects
-> > PINCTRL already and the other doesn't.  That was part of the discussion
-> > as well.
-> 
-> ARCH_KEYSTONE doesn't have pinctrl, ARCH_OMAP2PLUS does
+Signed-off-by: Dong Aisheng <aisheng.dong@nxp.com>
+---
+ drivers/mmc/core/mmc.c | 10 +---------
+ 1 file changed, 1 insertion(+), 9 deletions(-)
 
-Yes.
+diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+index f6683a9..55c8201 100644
+--- a/drivers/mmc/core/mmc.c
++++ b/drivers/mmc/core/mmc.c
+@@ -1321,21 +1321,13 @@ static int mmc_select_timing(struct mmc_card *card)
+ 	if (err && err != -EBADMSG)
+ 		return err;
+ 
+-	if (err) {
+-		pr_warn("%s: switch to %s failed\n",
+-			mmc_card_hs(card) ? "high-speed" :
+-			(mmc_card_hs200(card) ? "hs200" : ""),
+-			mmc_hostname(card->host));
+-		err = 0;
+-	}
+-
+ bus_speed:
+ 	/*
+ 	 * Set the bus speed to the selected bus timing.
+ 	 * If timing is not selected, backward compatible is the default.
+ 	 */
+ 	mmc_set_bus_speed(card);
+-	return err;
++	return 0;
+ }
+ 
+ /*
+-- 
+1.9.1
 
-Regards,
-
-Tony
