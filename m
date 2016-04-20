@@ -1,41 +1,57 @@
-From: Yangbo Lu <yangbo.lu@nxp.com>
-Subject: [PATCH 1/2] powerpc/85xx: adapt QorIQ eSDHC to the new clocking model
-Date: Wed, 20 Apr 2016 18:20:43 +0800
-Message-ID: <1461147644-18041-1-git-send-email-yangbo.lu@nxp.com>
+From: Andreas Fenkart <afenkart@gmail.com>
+Subject: Re: [PATCH v3 1/1] mmc: omap_hsmmc: devm_pinctrl_get returns ERR_PTR
+ upon error
+Date: Wed, 20 Apr 2016 13:38:36 +0200
+Message-ID: <CALtMJEA0XaekLgZnOVU4XMPmc61VendSCCV2uKjesxzQRcwR8w@mail.gmail.com>
+References: <1461099853-15011-1-git-send-email-afenkart@gmail.com>
+	<1461099853-15011-2-git-send-email-afenkart@gmail.com>
+	<5784587.0IP58U3KN7@wuerfel>
+	<20160420081145.GR4247@mwanda>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-by2on0089.outbound.protection.outlook.com ([207.46.100.89]:51264
-	"EHLO na01-by2-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1753896AbcDTKaI (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 20 Apr 2016 06:30:08 -0400
+Received: from mail-wm0-f45.google.com ([74.125.82.45]:38165 "EHLO
+	mail-wm0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752155AbcDTLih (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 20 Apr 2016 07:38:37 -0400
+Received: by mail-wm0-f45.google.com with SMTP id u206so76530882wme.1
+        for <linux-mmc@vger.kernel.org>; Wed, 20 Apr 2016 04:38:37 -0700 (PDT)
+In-Reply-To: <20160420081145.GR4247@mwanda>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org, linuxppc-dev@lists.ozlabs.org, devicetree@vger.kernel.org
-Cc: ulf.hansson@linaro.org, scott.wood@nxp.com, Rob Herring <robh+dt@kernel.org>, Yangbo Lu <yangbo.lu@nxp.com>
+To: Dan Carpenter <dan.carpenter@oracle.com>
+Cc: Arnd Bergmann <arnd@arndb.de>, linux-mmc <linux-mmc@vger.kernel.org>, Tony Lindgren <tony@atomide.com>
 
-Provide clocks property instead of clock-frequency for QorIQ eSDHC
-dts node to adapt to the new clocking model, so that the driver
-could get clock value by the common clk API and the u-boot could
-remove the clock fixup.
+2016-04-20 10:11 GMT+02:00 Dan Carpenter <dan.carpenter@oracle.com>:
+> On Tue, Apr 19, 2016 at 03:12:27PM -0700, Arnd Bergmann wrote:
+>> On Tuesday 19 April 2016 23:04:13 Andreas Fenkart wrote:
+>> > Only the dummy implementation of devm_pinctrl_get returns NULL.
+>> > The real implementation returns ERR_PTR. By enforcing pinselect
+>> > in Kconfig we can simplify the test to check only for ERR_PTR.
+>> > detected/triggered by static code checker.
+>>
+>> This is not how the interface is meant to work:
+>>
+>> The dummy devm_pinctrl_get() intentionally returns NULL because IS_ERR()
+>> treats that as valid. All other pinctrl functions subsequently ignore
+>> that NULL pointer, so the second half of the patch is ok without the
+>> first half.
+>>
+>
+> We had that discussion.  The static checker warning triggered the
+> discussion but the real reason for this patch is that the
+> hardware will not work without PINCTRL.  So instead of compiling an
+> unusable kernel we added the select.
 
-Signed-off-by: Yangbo Lu <yangbo.lu@nxp.com>
----
- arch/powerpc/boot/dts/fsl/qoriq-esdhc-0.dtsi | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+beaglebone needs the workaround, most chips don't. The code discussed,
+only gives some feedback to users about an incorrect configuration.
+I can drop that part or replace it with a dev_info line, pointing to
+"Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt"
 
-diff --git a/arch/powerpc/boot/dts/fsl/qoriq-esdhc-0.dtsi b/arch/powerpc/boot/dts/fsl/qoriq-esdhc-0.dtsi
-index 20835ae..ddbe562 100644
---- a/arch/powerpc/boot/dts/fsl/qoriq-esdhc-0.dtsi
-+++ b/arch/powerpc/boot/dts/fsl/qoriq-esdhc-0.dtsi
-@@ -36,5 +36,5 @@ sdhc: sdhc@114000 {
- 	compatible = "fsl,esdhc";
- 	reg = <0x114000 0x1000>;
- 	interrupts = <48 2 0 0>;
--	clock-frequency = <0>;
-+	clocks = <&clockgen 4 1>;
- };
--- 
-2.1.0.27.g96db324
+> I forget, but I think one of ARCH_OMAP2PLUS or ARCH_KEYSTONE selects
+> PINCTRL already and the other doesn't.  That was part of the discussion
+> as well.
 
+ARCH_KEYSTONE doesn't have pinctrl, ARCH_OMAP2PLUS does
+
+/Andi
