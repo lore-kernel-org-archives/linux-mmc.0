@@ -1,76 +1,43 @@
-From: Dong Aisheng <aisheng.dong@nxp.com>
-Subject: [PATCH 1/3] mmc: core: fix using wrong io voltage if mmc_select_hs200 fails
-Date: Thu, 21 Apr 2016 00:51:30 +0800
-Message-ID: <1461171092-30631-1-git-send-email-aisheng.dong@nxp.com>
+From: Richard Ash <richardashaudacity@googlemail.com>
+Subject: SD cards which hang - card problem or controller bug?
+Date: Wed, 20 Apr 2016 18:09:04 +0100
+Message-ID: <CACOFwa=Uk5Zszso4DQbU6yWCzQxGp7c37dyCVpm300Y0e3c7AQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-by2on0067.outbound.protection.outlook.com ([207.46.100.67]:35388
-	"EHLO na01-by2-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1751231AbcDTQ7E (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 20 Apr 2016 12:59:04 -0400
+Received: from mail-ob0-f169.google.com ([209.85.214.169]:36294 "EHLO
+	mail-ob0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750807AbcDTRJG (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 20 Apr 2016 13:09:06 -0400
+Received: by mail-ob0-f169.google.com with SMTP id j9so35354809obd.3
+        for <linux-mmc@vger.kernel.org>; Wed, 20 Apr 2016 10:09:05 -0700 (PDT)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: ulf.hansson@linaro.org, chris@printf.net, shawnguo@kernel.org, adrian.hunter@intel.com, linux-arm-kernel@lists.infradead.org, aisheng.dong@nxp.com, haibo.chen@nxp.com, dongas86@gmail.com
+To: Linux MMC / SD subsystem <linux-mmc@vger.kernel.org>
 
-Currently MMC core will keep going if HS200/HS timing switch failed
-with -EBADMSG error by the assumption that the old timing is still valid.
+Following up on my previous thread ('error -110 sending stop command'
+on Zynq platform), I have now done a lot more testing across multiple
+cards and devices. In summary:
+* Most cards work fine in my custom board and and a ZedBoard, both
+using Zynq / sdhci controller
+* The Phison cards I have been buying do not work reliably in either
+of these devices
+* The Phison cards do work reliably when put into a laptop using a
+Realtek RTS5229 PCI Express Card Reader / rtsx_pci
 
-However, for mmc_select_hs200 case, the signal voltage may have already
-been switched. If the timing switch failed, we should fall back to
-the old voltage in case the card is continue run with legacy timing.
+Because of the latter, I can't easily reject the cards as defective,
+because they work fine in some devices. Also, I don't know what I
+should get to have working cards in the future, as all of the ones I
+have which work are consumer cards and never the same twice when you
+buy them.
 
-If fall back signal voltage failed, we explicitly report an EIO error
-to force retry during the next power cycle.
+This leaves me with two questions:
+1. Does the rtsx_pci driver go through the mmc sub-system, or do I
+need to go and query somewhere else for that?
+2. Is it possible work out from the fact that the card works reliably
+with this driver, but not with sdhci, which is going wrong? Should I
+be comparing a list of quirks applied somewhere (I couldn't find one)?
 
-Signed-off-by: Dong Aisheng <aisheng.dong@nxp.com>
----
- drivers/mmc/core/mmc.c | 11 +++++++++--
- 1 file changed, 9 insertions(+), 2 deletions(-)
+Thanks for any input to this,
 
-diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-index b8aa12c..f6683a9 100644
---- a/drivers/mmc/core/mmc.c
-+++ b/drivers/mmc/core/mmc.c
-@@ -1245,9 +1245,11 @@ static int mmc_select_hs200(struct mmc_card *card)
- 	struct mmc_host *host = card->host;
- 	bool send_status = true;
- 	unsigned int old_timing;
-+	unsigned int old_signal_voltage;
- 	int err = -EINVAL;
- 	u8 val;
- 
-+	old_signal_voltage = host->ios.signal_voltage;
- 	if (card->mmc_avail_type & EXT_CSD_CARD_TYPE_HS200_1_2V)
- 		err = __mmc_set_signal_voltage(host, MMC_SIGNAL_VOLTAGE_120);
- 
-@@ -1256,7 +1258,7 @@ static int mmc_select_hs200(struct mmc_card *card)
- 
- 	/* If fails try again during next card power cycle */
- 	if (err)
--		goto err;
-+		return err;
- 
- 	mmc_select_driver_type(card);
- 
-@@ -1290,9 +1292,14 @@ static int mmc_select_hs200(struct mmc_card *card)
- 		}
- 	}
- err:
--	if (err)
-+	if (err) {
-+		/* fall back to the old signal voltage, if fails report error */
-+		if (__mmc_set_signal_voltage(host, old_signal_voltage))
-+			err = -EIO;
-+
- 		pr_err("%s: %s failed, error %d\n", mmc_hostname(card->host),
- 		       __func__, err);
-+	}
- 	return err;
- }
- 
--- 
-1.9.1
-
+Richard Ash
