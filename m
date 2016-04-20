@@ -1,43 +1,65 @@
-From: Richard Ash <richardashaudacity@googlemail.com>
-Subject: SD cards which hang - card problem or controller bug?
-Date: Wed, 20 Apr 2016 18:09:04 +0100
-Message-ID: <CACOFwa=Uk5Zszso4DQbU6yWCzQxGp7c37dyCVpm300Y0e3c7AQ@mail.gmail.com>
+From: Arnd Bergmann <arnd@arndb.de>
+Subject: Re: [PATCH v3 1/1] mmc: omap_hsmmc: devm_pinctrl_get returns ERR_PTR upon error
+Date: Thu, 21 Apr 2016 00:28:05 +0200
+Message-ID: <4155990.SfY6i69ddf@wuerfel>
+References: <1461099853-15011-1-git-send-email-afenkart@gmail.com> <CALtMJEA0XaekLgZnOVU4XMPmc61VendSCCV2uKjesxzQRcwR8w@mail.gmail.com> <20160420151337.GK5973@atomide.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7Bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ob0-f169.google.com ([209.85.214.169]:36294 "EHLO
-	mail-ob0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750807AbcDTRJG (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 20 Apr 2016 13:09:06 -0400
-Received: by mail-ob0-f169.google.com with SMTP id j9so35354809obd.3
-        for <linux-mmc@vger.kernel.org>; Wed, 20 Apr 2016 10:09:05 -0700 (PDT)
+Received: from mout.kundenserver.de ([217.72.192.74]:61870 "EHLO
+	mout.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751188AbcDTW2R (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 20 Apr 2016 18:28:17 -0400
+In-Reply-To: <20160420151337.GK5973@atomide.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Linux MMC / SD subsystem <linux-mmc@vger.kernel.org>
+To: Tony Lindgren <tony@atomide.com>
+Cc: Andreas Fenkart <afenkart@gmail.com>, Dan Carpenter <dan.carpenter@oracle.com>, linux-mmc <linux-mmc@vger.kernel.org>, linux-omap@vger.kernel.org
 
-Following up on my previous thread ('error -110 sending stop command'
-on Zynq platform), I have now done a lot more testing across multiple
-cards and devices. In summary:
-* Most cards work fine in my custom board and and a ZedBoard, both
-using Zynq / sdhci controller
-* The Phison cards I have been buying do not work reliably in either
-of these devices
-* The Phison cards do work reliably when put into a laptop using a
-Realtek RTS5229 PCI Express Card Reader / rtsx_pci
+On Wednesday 20 April 2016 08:13:37 Tony Lindgren wrote:
+> * Andreas Fenkart <afenkart@gmail.com> [160420 04:39]:
+> > 2016-04-20 10:11 GMT+02:00 Dan Carpenter <dan.carpenter@oracle.com>:
+> > > On Tue, Apr 19, 2016 at 03:12:27PM -0700, Arnd Bergmann wrote:
+> > >> On Tuesday 19 April 2016 23:04:13 Andreas Fenkart wrote:
+> > >> > Only the dummy implementation of devm_pinctrl_get returns NULL.
+> > >> > The real implementation returns ERR_PTR. By enforcing pinselect
+> > >> > in Kconfig we can simplify the test to check only for ERR_PTR.
+> > >> > detected/triggered by static code checker.
+> > >>
+> > >> This is not how the interface is meant to work:
+> > >>
+> > >> The dummy devm_pinctrl_get() intentionally returns NULL because IS_ERR()
+> > >> treats that as valid. All other pinctrl functions subsequently ignore
+> > >> that NULL pointer, so the second half of the patch is ok without the
+> > >> first half.
+> > >>
+> > >
+> > > We had that discussion.  The static checker warning triggered the
+> > > discussion but the real reason for this patch is that the
+> > > hardware will not work without PINCTRL.  So instead of compiling an
+> > > unusable kernel we added the select.
 
-Because of the latter, I can't easily reject the cards as defective,
-because they work fine in some devices. Also, I don't know what I
-should get to have working cards in the future, as all of the ones I
-have which work are consumer cards and never the same twice when you
-buy them.
+Ok, but if that is the case, that the changelog text above should be
+rewritten to explain it (but as Tony explains it was probably a
+misinterpretation).
 
-This leaves me with two questions:
-1. Does the rtsx_pci driver go through the mmc sub-system, or do I
-need to go and query somewhere else for that?
-2. Is it possible work out from the fact that the card works reliably
-with this driver, but not with sdhci, which is going wrong? Should I
-be comparing a list of quirks applied somewhere (I couldn't find one)?
+> > beaglebone needs the workaround, most chips don't. The code discussed,
+> > only gives some feedback to users about an incorrect configuration.
+> > I can drop that part or replace it with a dev_info line, pointing to
+> > "Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt"
+> 
+> Yes pinctrl is optional for sure. And leaving pinctrl out does not
+> produce an unusable kernel for some boards that do all the pin muxing
+> in the bootloader. Like Andreas says, only some boards need dynamic
+> pin muxing for the wake-up events.
+> 
+> The dev_info change sounds like papering over the issue.. I'm fine
+> with that, but isn't the real problem devm_pinctrl_get prototype?
+> 
+> 
 
-Thanks for any input to this,
+I don't see anything wrong with the devm_pinctrl_get prototype other
+than how it frequently confuses driver writers.
 
-Richard Ash
+	Arnd
