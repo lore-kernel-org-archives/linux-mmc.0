@@ -1,44 +1,79 @@
-From: Lars Persson <lars.persson@axis.com>
-Subject: Re: [PATCH v3 2/3] mmc: usdhi6rol0: add support for UHS modes
-Date: Thu, 21 Apr 2016 15:47:33 +0200
-Message-ID: <5718D9F5.5040808@axis.com>
-References: <cover.1461163234.git.larper@axis.com> <4129305.Ka9B8YpEaI@wuerfel> <57188ECF.70101@axis.com> <14935418.cYIzx5HmZZ@wuerfel>
+From: Ludovic Desroches <ludovic.desroches@atmel.com>
+Subject: [PATCH] mmc: sdhci-of-at91: add presets setup
+Date: Thu, 21 Apr 2016 15:54:06 +0200
+Message-ID: <1461246846-30925-1-git-send-email-ludovic.desroches@atmel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="windows-1252"; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from bes.se.axis.com ([195.60.68.10]:54613 "EHLO bes.se.axis.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751647AbcDUNsD (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 21 Apr 2016 09:48:03 -0400
-In-Reply-To: <14935418.cYIzx5HmZZ@wuerfel>
+Received: from eusmtp01.atmel.com ([212.144.249.243]:8531 "EHLO
+	eusmtp01.atmel.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752614AbcDUNxj (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 21 Apr 2016 09:53:39 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Arnd Bergmann <arnd@arndb.de>, ulf.hansson@linaro.org
-Cc: linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, g.liakhovetski@gmx.de, robh+dt@kernel.org, pawel.moll@arm.com, mark.rutland@arm.com, ijc+devicetree@hellion.org.uk, galak@codeaurora.org
+To: adrian.hunter@intel.com, ulf.hansson@linaro.org
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, nicolas.ferre@atmel.com, Ludovic Desroches <ludovic.desroches@atmel.com>
 
+The controller claims to support SDR104. In fact, it only supports a
+degraded SDR104 since the maximum frequency of the SD clock is 120 MHz
+instead of 208 MHz.
+The sdhci core is unaware of it and will compute a wrong clock divider.
+We can deal with this specific case by using presets.
 
+Signed-off-by: Ludovic Desroches <ludovic.desroches@atmel.com>
+---
+ drivers/mmc/host/sdhci-of-at91.c | 24 ++++++++++++++++++++++++
+ 1 file changed, 24 insertions(+)
 
-On 04/21/2016 11:52 AM, Arnd Bergmann wrote:
-> On Thursday 21 April 2016 10:26:55 Lars Persson wrote:
->>
->> It is a common pattern in all upstream mmc drivers to not make the call
->> to mmc_regulator_set_vqmmc() when a regulator is missing. We basically
->> want to log errors except for the EINVAL returned in case of a missing
->> regulator.
->>
->>
->
-> I see what you mean here: two out of four drivers calling
-> mmc_regulator_set_vqmmc() log errors to the console.
->
-> If we want all drivers to behave consistently here, how about
-> moving that error output into the mmc_regulator_set_vqmmc() function
-> itself?
->
+diff --git a/drivers/mmc/host/sdhci-of-at91.c b/drivers/mmc/host/sdhci-of-at91.c
+index c1923c0..76308b1 100644
+--- a/drivers/mmc/host/sdhci-of-at91.c
++++ b/drivers/mmc/host/sdhci-of-at91.c
+@@ -18,6 +18,7 @@
+ #include <linux/delay.h>
+ #include <linux/err.h>
+ #include <linux/io.h>
++#include <linux/kernel.h>
+ #include <linux/mmc/host.h>
+ #include <linux/mmc/slot-gpio.h>
+ #include <linux/module.h>
+@@ -163,6 +164,7 @@ static int sdhci_at91_probe(struct platform_device *pdev)
+ 	unsigned int			clk_base, clk_mul;
+ 	unsigned int			gck_rate, real_gck_rate;
+ 	int				ret;
++	unsigned int			preset_div, preset_common = 0x400; /* drv type B, programmable clock mode */
+ 
+ 	match = of_match_device(sdhci_at91_dt_match, &pdev->dev);
+ 	if (!match)
+@@ -230,6 +232,28 @@ static int sdhci_at91_probe(struct platform_device *pdev)
+ 			 clk_mul, real_gck_rate);
+ 	}
+ 
++	/*
++	 * We have to set preset values because it depends on the clk_mul
++	 * value. Moreover, SDR104 is supported in a degraded mode since the
++	 * maximum sd clock value is 120 MHz instead of 208 MHz. For that
++	 * reason, we need to use presets to support SDR104.
++	 */
++	preset_div = DIV_ROUND_UP(real_gck_rate, 24000000) - 1;
++	writew(preset_common | preset_div,
++	       host->ioaddr + SDHCI_PRESET_FOR_SDR12);
++	preset_div = DIV_ROUND_UP(real_gck_rate, 50000000) - 1;
++	writew(preset_common | preset_div,
++	       host->ioaddr + SDHCI_PRESET_FOR_SDR25);
++	preset_div = DIV_ROUND_UP(real_gck_rate, 100000000) - 1;
++	writew(preset_common | preset_div,
++	       host->ioaddr + SDHCI_PRESET_FOR_SDR50);
++	preset_div = DIV_ROUND_UP(real_gck_rate, 120000000) - 1;
++	writew(preset_common | preset_div,
++	       host->ioaddr + SDHCI_PRESET_FOR_SDR104);
++	preset_div = DIV_ROUND_UP(real_gck_rate, 50000000) - 1;
++	writew(preset_common | preset_div,
++	       host->ioaddr + SDHCI_PRESET_FOR_DDR50);
++
+ 	clk_prepare_enable(priv->mainck);
+ 	clk_prepare_enable(priv->gck);
+ 
+-- 
+2.5.0
 
-I will make a v4 that skips the error output and if Ulf agrees with your 
-proposal I will make another patch series to move the dev_dbg() into 
-mmc_regulator_set_vqmmc().
-
-- Lars
