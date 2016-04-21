@@ -1,79 +1,43 @@
-From: Ludovic Desroches <ludovic.desroches@atmel.com>
-Subject: [PATCH] mmc: sdhci-of-at91: add presets setup
-Date: Thu, 21 Apr 2016 15:54:06 +0200
-Message-ID: <1461246846-30925-1-git-send-email-ludovic.desroches@atmel.com>
-Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from eusmtp01.atmel.com ([212.144.249.243]:8531 "EHLO
-	eusmtp01.atmel.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752614AbcDUNxj (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 21 Apr 2016 09:53:39 -0400
-Sender: linux-mmc-owner@vger.kernel.org
+From: Lars Persson <lars.persson-VrBV9hrLPhE@public.gmane.org>
+Subject: [PATCH v4 0/3] mmc: usdhi6rol0: UHS support
+Date: Thu, 21 Apr 2016 15:55:41 +0200
+Message-ID: <cover.1461246772.git.larper@axis.com>
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: g.liakhovetski-Mmb7MZpHnFY@public.gmane.org, ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, pawel.moll-5wv7dgnIgG8@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, ijc+devicetree-KcIKpvwj1kUDXYZnReoRVg@public.gmane.org, galak-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, Lars Persson <larper-VrBV9hrLPhE@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: adrian.hunter@intel.com, ulf.hansson@linaro.org
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, nicolas.ferre@atmel.com, Ludovic Desroches <ludovic.desroches@atmel.com>
 
-The controller claims to support SDR104. In fact, it only supports a
-degraded SDR104 since the maximum frequency of the SD clock is 120 MHz
-instead of 208 MHz.
-The sdhci core is unaware of it and will compute a wrong clock divider.
-We can deal with this specific case by using presets.
+This patch set adds UHS support to the usdhi6rol0 driver, with control of the
+regulator and pin state settings.
 
-Signed-off-by: Ludovic Desroches <ludovic.desroches@atmel.com>
----
- drivers/mmc/host/sdhci-of-at91.c | 24 ++++++++++++++++++++++++
- 1 file changed, 24 insertions(+)
+Changes since v3:
+- No error print for failure of mmc_regulator_set_vqmmc().
+- Do not set UHS caps if the vqmmc regulator is missing.
+- No not set UHS caps if the no-1-8-v property is set.
 
-diff --git a/drivers/mmc/host/sdhci-of-at91.c b/drivers/mmc/host/sdhci-of-at91.c
-index c1923c0..76308b1 100644
---- a/drivers/mmc/host/sdhci-of-at91.c
-+++ b/drivers/mmc/host/sdhci-of-at91.c
-@@ -18,6 +18,7 @@
- #include <linux/delay.h>
- #include <linux/err.h>
- #include <linux/io.h>
-+#include <linux/kernel.h>
- #include <linux/mmc/host.h>
- #include <linux/mmc/slot-gpio.h>
- #include <linux/module.h>
-@@ -163,6 +164,7 @@ static int sdhci_at91_probe(struct platform_device *pdev)
- 	unsigned int			clk_base, clk_mul;
- 	unsigned int			gck_rate, real_gck_rate;
- 	int				ret;
-+	unsigned int			preset_div, preset_common = 0x400; /* drv type B, programmable clock mode */
- 
- 	match = of_match_device(sdhci_at91_dt_match, &pdev->dev);
- 	if (!match)
-@@ -230,6 +232,28 @@ static int sdhci_at91_probe(struct platform_device *pdev)
- 			 clk_mul, real_gck_rate);
- 	}
- 
-+	/*
-+	 * We have to set preset values because it depends on the clk_mul
-+	 * value. Moreover, SDR104 is supported in a degraded mode since the
-+	 * maximum sd clock value is 120 MHz instead of 208 MHz. For that
-+	 * reason, we need to use presets to support SDR104.
-+	 */
-+	preset_div = DIV_ROUND_UP(real_gck_rate, 24000000) - 1;
-+	writew(preset_common | preset_div,
-+	       host->ioaddr + SDHCI_PRESET_FOR_SDR12);
-+	preset_div = DIV_ROUND_UP(real_gck_rate, 50000000) - 1;
-+	writew(preset_common | preset_div,
-+	       host->ioaddr + SDHCI_PRESET_FOR_SDR25);
-+	preset_div = DIV_ROUND_UP(real_gck_rate, 100000000) - 1;
-+	writew(preset_common | preset_div,
-+	       host->ioaddr + SDHCI_PRESET_FOR_SDR50);
-+	preset_div = DIV_ROUND_UP(real_gck_rate, 120000000) - 1;
-+	writew(preset_common | preset_div,
-+	       host->ioaddr + SDHCI_PRESET_FOR_SDR104);
-+	preset_div = DIV_ROUND_UP(real_gck_rate, 50000000) - 1;
-+	writew(preset_common | preset_div,
-+	       host->ioaddr + SDHCI_PRESET_FOR_DDR50);
-+
- 	clk_prepare_enable(priv->mainck);
- 	clk_prepare_enable(priv->gck);
- 
+Changes since v2:
+- dt: renamed pins_uhs to state_uhs.
+- dt: made default optional in pinctrl-names.
+- dt: document that use of state_uhs also requires a default pin state.
+- add error handling for missing pin states.
+
+Changes since v1:
+- Use mmc_regulator_set_vqmmc().
+
+Lars Persson (3):
+  mmc: dt: usdhi6rol0: add optional pinctrl binding
+  mmc: usdhi6rol0: add support for UHS modes
+  mmc: usdhi6rol0: add pinctrl to set pin drive strength
+
+ .../devicetree/bindings/mmc/usdhi6rol0.txt         |  6 ++
+ drivers/mmc/host/usdhi6rol0.c                      | 71 +++++++++++++++++++++-
+ 2 files changed, 76 insertions(+), 1 deletion(-)
+
 -- 
-2.5.0
+2.1.4
 
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
