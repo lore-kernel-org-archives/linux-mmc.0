@@ -1,92 +1,82 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: [PATCH RFC 2/3] mmc: mmc: Factor out mmc_hs400_to_hs() and __mmc_hs_to_hs200()
-Date: Thu, 21 Apr 2016 16:28:33 +0300
-Message-ID: <1461245314-6282-3-git-send-email-adrian.hunter@intel.com>
-References: <1461245314-6282-1-git-send-email-adrian.hunter@intel.com>
+Subject: [PATCH RFC 0/3] mmc: block: Fix tuning (by avoiding it) for RPMB
+Date: Thu, 21 Apr 2016 16:28:31 +0300
+Message-ID: <1461245314-6282-1-git-send-email-adrian.hunter@intel.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
 Received: from mga11.intel.com ([192.55.52.93]:12239 "EHLO mga11.intel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751988AbcDUNc0 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 21 Apr 2016 09:32:26 -0400
-In-Reply-To: <1461245314-6282-1-git-send-email-adrian.hunter@intel.com>
+	id S1751988AbcDUNcW (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 21 Apr 2016 09:32:22 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>
 Cc: linux-mmc <linux-mmc@vger.kernel.org>, Tomas Winkler <tomas.winkler@intel.com>
 
-Factor out mmc_hs400_to_hs() and __mmc_hs_to_hs200() so they can be
-re-used in a later patch.
+Hi
 
-Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
----
- drivers/mmc/core/mmc.c | 40 +++++++++++++++++++++++++++++++++++++++-
- 1 file changed, 39 insertions(+), 1 deletion(-)
+The RPMB partition only allows certain commands.  In particular,
+the tuning command (CMD21) is not allowed -  refer JEDEC eMMC
+standard v5.1 section 6.2.2 Command restrictions.
 
-diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-index a3fff994e6af..4f771c6088f7 100644
---- a/drivers/mmc/core/mmc.c
-+++ b/drivers/mmc/core/mmc.c
-@@ -1162,7 +1162,7 @@ int mmc_hs200_to_hs400(struct mmc_card *card)
- 	return mmc_select_hs400(card);
- }
- 
--int mmc_hs400_to_hs200(struct mmc_card *card)
-+static int mmc_hs400_to_hs(struct mmc_card *card)
- {
- 	struct mmc_host *host = card->host;
- 	bool send_status = true;
-@@ -1208,6 +1208,24 @@ int mmc_hs400_to_hs200(struct mmc_card *card)
- 			goto out_err;
- 	}
- 
-+	return 0;
-+
-+out_err:
-+	pr_err("%s: %s failed, error %d\n", mmc_hostname(card->host),
-+	       __func__, err);
-+	return err;
-+}
-+
-+static int __mmc_hs_to_hs200(struct mmc_card *card)
-+{
-+	struct mmc_host *host = card->host;
-+	bool send_status = true;
-+	int err;
-+	u8 val;
-+
-+	if (host->caps & MMC_CAP_WAIT_WHILE_BUSY)
-+		send_status = false;
-+
- 	/* Switch HS to HS200 */
- 	val = EXT_CSD_TIMING_HS200 |
- 	      card->drive_strength << EXT_CSD_DRV_STR_SHIFT;
-@@ -1235,6 +1253,26 @@ out_err:
- 	return err;
- }
- 
-+int mmc_hs400_to_hs200(struct mmc_card *card)
-+{
-+	int err;
-+
-+	err = mmc_hs400_to_hs(card);
-+	if (err)
-+		goto out_err;
-+
-+	err = __mmc_hs_to_hs200(card);
-+	if (err)
-+		goto out_err;
-+
-+	return 0;
-+
-+out_err:
-+	pr_err("%s: %s failed, error %d\n", mmc_hostname(card->host),
-+	       __func__, err);
-+	return err;
-+}
-+
- static void mmc_select_driver_type(struct mmc_card *card)
- {
- 	int card_drv_type, drive_strength, drv_type;
--- 
-1.9.1
+That means commands will begin failing if re-tuning is needed
+while switched to the RPMB partition.
 
+Here are 4 options to fix the problem:
+
+
+1. The approach taken by this patch set:
+
+To avoid tuning for RPMB, switch to High Speed mode from HS200
+or HS400 mode if re-tuning has been enabled.  And switch back
+when leaving RPMB.
+
+Advantages: Directly does what needs to be done.
+
+Disadvantages: Assumes the mode switching will work.
+
+
+2. Same as 1 but disable the tuning modes by removing them from
+card->mmc_avail_type and doing a full mmc_reset().
+
+Advantages: Simpler to program
+
+Disadvantages: Doing a full reset is slower.  Doing a full reset
+is not an expected consequence of accessing RPMB.
+
+
+3. Simply disable re-tuning and attempt to recover from any errors.
+
+Disadvantages: Due to the interdependent nature of RPMB reads/writes
+it might not be possible to recover without returning an error to the
+RPMB user.  Also it would be difficult to test if the recovery actually
+worked in all cases.
+
+
+4. Do a partiton switch as part of re-tuning.
+
+Disadvantages: Makes re-tuning more complicated.  Would require moving
+the control of partition switching into the core.  CRC errors arising
+from the need to re-tune might break the interdependent nature of RPMB
+operations.
+
+
+As a final note, if a solution is found then we might be able to revert
+commit 4e93b9a6abc0 ("mmc: card: Don't access RPMB partitions for normal
+read/write").
+
+
+Adrian Hunter (3):
+      mmc: mmc: Factor out mmc_hs200_to_hs()
+      mmc: mmc: Factor out mmc_hs400_to_hs() and __mmc_hs_to_hs200()
+      mmc: block: Fix tuning (by avoiding it) for RPMB
+
+ drivers/mmc/card/block.c |  36 +++++++++++
+ drivers/mmc/core/mmc.c   | 156 ++++++++++++++++++++++++++++++++++++++++++-----
+ include/linux/mmc/card.h |   2 +-
+ include/linux/mmc/core.h |   3 +
+ include/linux/mmc/host.h |   5 ++
+ 5 files changed, 186 insertions(+), 16 deletions(-)
+
+
+Regards
+Adrian
