@@ -1,27 +1,41 @@
 From: Geert Uytterhoeven <geert@linux-m68k.org>
 Subject: Re: [PATCH v2 1/2] ARM: dts: r8a7793: Add SDHI controllers
-Date: Thu, 21 Apr 2016 14:54:30 +0200
-Message-ID: <CAMuHMdUwHhd-C=PCTubUUpQY4w5hDPjiCQMF65KMRojrnQgd+w@mail.gmail.com>
+Date: Thu, 21 Apr 2016 14:55:06 +0200
+Message-ID: <CAMuHMdUQh0OnJhJ6RCH_MzDnOLd_ni_tEi4jC=KDewqTMQX7-w@mail.gmail.com>
 References: <1460995377-11478-1-git-send-email-ulrich.hecht+renesas@gmail.com>
 	<1460995377-11478-2-git-send-email-ulrich.hecht+renesas@gmail.com>
+	<20160421032733.GE11116@verge.net.au>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ig0-f194.google.com ([209.85.213.194]:36533 "EHLO
-	mail-ig0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751650AbcDUMyb (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 21 Apr 2016 08:54:31 -0400
-In-Reply-To: <1460995377-11478-2-git-send-email-ulrich.hecht+renesas@gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-renesas-soc-owner@vger.kernel.org>
+In-Reply-To: <20160421032733.GE11116@verge.net.au>
+Sender: linux-renesas-soc-owner@vger.kernel.org
+To: Simon Horman <horms@verge.net.au>
+Cc: Ulrich Hecht <ulrich.hecht+renesas@gmail.com>, linux-renesas-soc@vger.kernel.org, Linux MMC List <linux-mmc@vger.kernel.org>, Magnus Damm <magnus.damm@gmail.com>, Sergei Shtylyov <sergei.shtylyov@cogentembedded.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Ulrich Hecht <ulrich.hecht+renesas@gmail.com>
-Cc: Simon Horman <horms@verge.net.au>, linux-renesas-soc@vger.kernel.org, Linux MMC List <linux-mmc@vger.kernel.org>, Magnus Damm <magnus.damm@gmail.com>, Sergei Shtylyov <sergei.shtylyov@cogentembedded.com>
 
-On Mon, Apr 18, 2016 at 6:02 PM, Ulrich Hecht
-<ulrich.hecht+renesas@gmail.com> wrote:
+On Thu, Apr 21, 2016 at 5:27 AM, Simon Horman <horms@verge.net.au> wrote:
+>
+> We are back to one DMA controller this week so I updated your patch and
+> queued up the following.
+>
+> From: Ulrich Hecht <ulrich.hecht+renesas@gmail.com>
+> Date: Mon, 18 Apr 2016 18:02:56 +0200
+> Subject: [PATCH] ARM: dts: r8a7793: Add SDHI controllers
+>
+> Same as on r8a7791.
+>
+> Signed-off-by: Ulrich Hecht <ulrich.hecht+renesas@gmail.com>
+> Signed-off-by: Simon Horman <horms+renesas@verge.net.au>
+> ---
+>  arch/arm/boot/dts/r8a7793.dtsi | 33 +++++++++++++++++++++++++++++++++
+>  1 file changed, 33 insertions(+)
+>
+> diff --git a/arch/arm/boot/dts/r8a7793.dtsi b/arch/arm/boot/dts/r8a7793.dtsi
+> index fc552629ed4a..a93d509732a8 100644
 > --- a/arch/arm/boot/dts/r8a7793.dtsi
 > +++ b/arch/arm/boot/dts/r8a7793.dtsi
-> @@ -510,6 +510,42 @@
+> @@ -507,6 +507,39 @@
 >                 reg = <0 0xe6060000 0 0x250>;
 >         };
 >
@@ -29,8 +43,12 @@ On Mon, Apr 18, 2016 at 6:02 PM, Ulrich Hecht
 > +               compatible = "renesas,sdhi-r8a7793";
 > +               reg = <0 0xee100000 0 0x328>;
 > +               interrupts = <0 165 IRQ_TYPE_LEVEL_HIGH>;
+> +               clocks = <&mstp3_clks R8A7793_CLK_SDHI0>;
+> +               dmas = <&dmac0 0xcd>, <&dmac0 0xce>;
+> +               dma-names = "tx", "rx", "tx", "rx";
 
-GIC_SPI (x3)
+If you drop the last two dma values, you should drop the last two
+dma-names values, too.
 
 Gr{oetje,eeting}s,
 
