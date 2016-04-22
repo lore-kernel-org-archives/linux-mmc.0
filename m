@@ -1,92 +1,70 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: mediatek: fix request blocked by cancel_delayed_work
-Date: Fri, 22 Apr 2016 14:24:44 +0200
-Message-ID: <CAPDyKFrXVaq85sSQ+ib-U=rgdxB_k2tif0aHQi_0d8kZ2FZDcA@mail.gmail.com>
-References: <1460963609-16179-1-git-send-email-chaotian.jing@mediatek.com>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH 07/23] mmc: sdhci: check SDHCI_QUIRK2_NO_1_8_V when do
+ voltage switch
+Date: Fri, 22 Apr 2016 15:30:40 +0300
+Message-ID: <571A1970.7010800@intel.com>
+References: <1460741387-23815-1-git-send-email-aisheng.dong@nxp.com>
+ <1460741387-23815-8-git-send-email-aisheng.dong@nxp.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wm0-f41.google.com ([74.125.82.41]:37513 "EHLO
-	mail-wm0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751788AbcDVMYq (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 22 Apr 2016 08:24:46 -0400
-Received: by mail-wm0-f41.google.com with SMTP id n3so24408309wmn.0
-        for <linux-mmc@vger.kernel.org>; Fri, 22 Apr 2016 05:24:45 -0700 (PDT)
-In-Reply-To: <1460963609-16179-1-git-send-email-chaotian.jing@mediatek.com>
+Received: from mga09.intel.com ([134.134.136.24]:27869 "EHLO mga09.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751761AbcDVMea (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 22 Apr 2016 08:34:30 -0400
+In-Reply-To: <1460741387-23815-8-git-send-email-aisheng.dong@nxp.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chaotian Jing <chaotian.jing@mediatek.com>
-Cc: Matthias Brugger <matthias.bgg@gmail.com>, Nicolas Boichat <drinkcat@chromium.org>, Douglas Anderson <dianders@chromium.org>, Geert Uytterhoeven <geert@linux-m68k.org>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, linux-mediatek@lists.infradead.org, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, srv_heupstream <srv_heupstream@mediatek.com>, Sascha Hauer <kernel@pengutronix.de>
+To: Dong Aisheng <aisheng.dong@nxp.com>, linux-mmc@vger.kernel.org
+Cc: ulf.hansson@linaro.org, chris@printf.net, shawnguo@kernel.org, linux-arm-kernel@lists.infradead.org, haibo.chen@nxp.com, dongas86@gmail.com
 
-On 18 April 2016 at 09:13, Chaotian Jing <chaotian.jing@mediatek.com> wrote:
-> there are 2 points will cause could not call mmc_request_done()
-> and eventually cause the caller thread blocked.
->
-> A. if card was busy, cancel_delayed_work() will return false because
-> the delay work has not been scheduled, in this case, need put
-> mod_delayed_work() in front of msdc_cmd_is_ready()
->
-> B. if a request really need more than 5s(Some Sandisk TF card), it will
-> use cancel_delayed_work() to cancel itself, and also return false, so use
-> in_interrupt() to avoid this case
->
-> Signed-off-by: Chaotian Jing <chaotian.jing@mediatek.com>
+On 15/04/16 20:29, Dong Aisheng wrote:
+> Currently when card type supports EXT_CSD_CARD_TYPE_DDR_1_8V
+> which means it can work on DDR mode with either 3.3v IO or 1.8v
+> IO voltage. MMC core will first try 1.8v then 3.3v if host claims
+> MMC_CAP_1_8V_DDR support.
+> However the host driver voltage switch code does not check NO_1_8_V
+> quirk which may set a wrong 1.8v and causes the card fixed to 3.3v
+> VIO un-work.
+> 
+> Checking 1.8V quirk before setting it to avoid such issue.
+
+We need to look forward to when SDHCI_QUIRK2_NO_1_8_V doesn't exist.
+
+There are two possibilities:
+
+1. Add MMC_CAP_3_3V_DDR and support to core and use that instead of
+MMC_CAP_1_8V_DDR.  You'll need Ulf's feedback on that.
+
+2. Replace ->start_signal_voltage_switch() i.e.
+
+host->mmc_host_ops.start_signal_voltage_switch =
+esdhci_start_signal_voltage_switch;
+
+You will also need to change all calls to
+sdhci_start_signal_voltage_switch() with
+host->mmc->ops->start_signal_voltage_switch(), but that needs to be done anyway.
+
+> 
+> CC: stable <stable@vger.kernel.org>
+> Signed-off-by: Dong Aisheng <aisheng.dong@nxp.com>
 > ---
->  drivers/mmc/host/mtk-sd.c | 11 ++++++++---
->  1 file changed, 8 insertions(+), 3 deletions(-)
->
-> diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
-> index b17f30d..1511b1b 100644
-> --- a/drivers/mmc/host/mtk-sd.c
-> +++ b/drivers/mmc/host/mtk-sd.c
-> @@ -724,7 +724,7 @@ static void msdc_request_done(struct msdc_host *host, struct mmc_request *mrq)
->         bool ret;
->
->         ret = cancel_delayed_work(&host->req_timeout);
-> -       if (!ret) {
-> +       if (!ret && in_interrupt()) {
->                 /* delay work already running */
->                 return;
->         }
-> @@ -824,7 +824,12 @@ static inline bool msdc_cmd_is_ready(struct msdc_host *host,
->         }
->
->         if (mmc_resp_type(cmd) == MMC_RSP_R1B || cmd->data) {
-> -               tmo = jiffies + msecs_to_jiffies(20);
-> +               /*
-> +                * 2550ms is from EXT_CSD[248], after switch to hs200,
-> +                * using CMD13 to polling card status, it will get response
-> +                * of 0x800, but EMMC still pull-low DAT0.
-> +                */
+>  drivers/mmc/host/sdhci.c | 2 ++
+>  1 file changed, 2 insertions(+)
+> 
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index 2338aab..96ccb15 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -1683,6 +1683,8 @@ static int sdhci_do_signal_voltage_switch(struct sdhci_host *host,
+>  
+>  		return -EAGAIN;
+>  	case MMC_SIGNAL_VOLTAGE_180:
+> +		if (host->quirks2 & SDHCI_QUIRK2_NO_1_8_V)
+> +			return -EINVAL;
+>  		/*
+>  		 * Enable 1.8V Signal Enable in the Host Control2
+>  		 * register
+> 
 
-Seems like you are solving a eMMC specific issue on your driver?
-
-Perhaps we should try to use a card quirk instead?
-
-
-> +               tmo = jiffies + msecs_to_jiffies(2550);
->                 /* R1B or with data, should check SDCBUSY */
->                 while ((readl(host->base + SDC_STS) & SDC_STS_SDCBUSY) &&
->                                 time_before(jiffies, tmo))
-> @@ -847,6 +852,7 @@ static void msdc_start_command(struct msdc_host *host,
->         WARN_ON(host->cmd);
->         host->cmd = cmd;
->
-> +       mod_delayed_work(system_wq, &host->req_timeout, DAT_TIMEOUT);
->         if (!msdc_cmd_is_ready(host, mrq, cmd))
->                 return;
->
-> @@ -858,7 +864,6 @@ static void msdc_start_command(struct msdc_host *host,
->
->         cmd->error = 0;
->         rawcmd = msdc_cmd_prepare_raw_cmd(host, mrq, cmd);
-> -       mod_delayed_work(system_wq, &host->req_timeout, DAT_TIMEOUT);
->
->         sdr_set_bits(host->base + MSDC_INTEN, cmd_ints_mask);
->         writel(cmd->arg, host->base + SDC_ARG);
-> --
-> 1.8.1.1.dirty
->
-
-Kind regards
-Uffe
