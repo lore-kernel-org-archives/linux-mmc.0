@@ -1,123 +1,44 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH 02/23] mmc: sdhci: move sdhci_get_cd() forward to avoid
- declaration
-Date: Fri, 22 Apr 2016 13:27:55 +0300
-Message-ID: <5719FCAB.1050806@intel.com>
+Subject: Re: [PATCH 03/23] mmc: core: fix a comment typo
+Date: Fri, 22 Apr 2016 13:28:06 +0300
+Message-ID: <5719FCB6.6010601@intel.com>
 References: <1460741387-23815-1-git-send-email-aisheng.dong@nxp.com>
- <1460741387-23815-3-git-send-email-aisheng.dong@nxp.com>
+ <1460741387-23815-4-git-send-email-aisheng.dong@nxp.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=windows-1252
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga03.intel.com ([134.134.136.65]:1787 "EHLO mga03.intel.com"
+Received: from mga11.intel.com ([192.55.52.93]:26936 "EHLO mga11.intel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751614AbcDVKbo (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 22 Apr 2016 06:31:44 -0400
-In-Reply-To: <1460741387-23815-3-git-send-email-aisheng.dong@nxp.com>
+	id S1751614AbcDVKbz (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 22 Apr 2016 06:31:55 -0400
+In-Reply-To: <1460741387-23815-4-git-send-email-aisheng.dong@nxp.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Dong Aisheng <aisheng.dong@nxp.com>, linux-mmc@vger.kernel.org
-Cc: ulf.hansson@linaro.org, chris@printf.net, shawnguo@kernel.org, linux-arm-kernel@lists.infradead.org, haibo.chen@nxp.com, dongas86@gmail.com
+To: Dong Aisheng <aisheng.dong@nxp.com>, linux-mmc@vger.kernel.org, ulf.hansson@linaro.org
+Cc: chris@printf.net, shawnguo@kernel.org, linux-arm-kernel@lists.infradead.org, haibo.chen@nxp.com, dongas86@gmail.com
 
 On 15/04/16 20:29, Dong Aisheng wrote:
-> Move sdhci_get_cd() to avoid needing to declare this function
-> before use.
-
-In fact, we shouldn't be calling host functions directly. i.e. the call
-should be host->mmc->ops->get_cd().
-
-However the caller sdhci_do_reset() is called under spinlock so it should
-not be calling ->get_cd at all.
-
-What that means is that we really need to get rid of
-SDHCI_QUIRK_NO_CARD_NO_RESET, after which this patch wouldn't be needed, so
-let's leave it for now.
-
-> 
 > Signed-off-by: Dong Aisheng <aisheng.dong@nxp.com>
+
+I'll leave this one up to Ulf.
+
 > ---
->  drivers/mmc/host/sdhci.c | 55 ++++++++++++++++++++++++------------------------
->  1 file changed, 27 insertions(+), 28 deletions(-)
+>  drivers/mmc/core/mmc_ops.c | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
 > 
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index be52a3a..839aa4c 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -53,7 +53,6 @@ static void sdhci_finish_data(struct sdhci_host *);
->  static void sdhci_finish_command(struct sdhci_host *);
->  static int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode);
->  static void sdhci_enable_preset_value(struct sdhci_host *host, bool enable);
-> -static int sdhci_get_cd(struct mmc_host *mmc);
+> diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
+> index 62355bd..d220bbd 100644
+> --- a/drivers/mmc/core/mmc_ops.c
+> +++ b/drivers/mmc/core/mmc_ops.c
+> @@ -553,7 +553,7 @@ int __mmc_switch(struct mmc_card *card, u8 set, u8 index, u8 value,
 >  
->  #ifdef CONFIG_PM
->  static void sdhci_runtime_pm_bus_on(struct sdhci_host *host);
-> @@ -161,6 +160,33 @@ static void sdhci_disable_card_detection(struct sdhci_host *host)
->  	sdhci_set_card_detection(host, false);
->  }
->  
-> +static int sdhci_get_cd(struct mmc_host *mmc)
-> +{
-> +	struct sdhci_host *host = mmc_priv(mmc);
-> +	int gpio_cd = mmc_gpio_get_cd(mmc);
-> +
-> +	if (host->flags & SDHCI_DEVICE_DEAD)
-> +		return 0;
-> +
-> +	/* If nonremovable, assume that the card is always present. */
-> +	if (host->mmc->caps & MMC_CAP_NONREMOVABLE)
-> +		return 1;
-> +
-> +	/*
-> +	 * Try slot gpio detect, if defined it take precedence
-> +	 * over build in controller functionality
-> +	 */
-> +	if (!IS_ERR_VALUE(gpio_cd))
-> +		return !!gpio_cd;
-> +
-> +	/* If polling, assume that the card is always present. */
-> +	if (host->quirks & SDHCI_QUIRK_BROKEN_CARD_DETECTION)
-> +		return 1;
-> +
-> +	/* Host native card detect */
-> +	return !!(sdhci_readl(host, SDHCI_PRESENT_STATE) & SDHCI_CARD_PRESENT);
-> +}
-> +
->  void sdhci_reset(struct sdhci_host *host, u8 mask)
->  {
->  	unsigned long timeout;
-> @@ -1551,33 +1577,6 @@ static void sdhci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
->  	spin_unlock_irqrestore(&host->lock, flags);
->  }
->  
-> -static int sdhci_get_cd(struct mmc_host *mmc)
-> -{
-> -	struct sdhci_host *host = mmc_priv(mmc);
-> -	int gpio_cd = mmc_gpio_get_cd(mmc);
-> -
-> -	if (host->flags & SDHCI_DEVICE_DEAD)
-> -		return 0;
-> -
-> -	/* If nonremovable, assume that the card is always present. */
-> -	if (host->mmc->caps & MMC_CAP_NONREMOVABLE)
-> -		return 1;
-> -
-> -	/*
-> -	 * Try slot gpio detect, if defined it take precedence
-> -	 * over build in controller functionality
-> -	 */
-> -	if (!IS_ERR_VALUE(gpio_cd))
-> -		return !!gpio_cd;
-> -
-> -	/* If polling, assume that the card is always present. */
-> -	if (host->quirks & SDHCI_QUIRK_BROKEN_CARD_DETECTION)
-> -		return 1;
-> -
-> -	/* Host native card detect */
-> -	return !!(sdhci_readl(host, SDHCI_PRESENT_STATE) & SDHCI_CARD_PRESENT);
-> -}
-> -
->  static int sdhci_check_ro(struct sdhci_host *host)
->  {
->  	unsigned long flags;
+>  		/*
+>  		 * We are not allowed to issue a status command and the host
+> -		 * does'nt support MMC_CAP_WAIT_WHILE_BUSY, then we can only
+> +		 * doesn't support MMC_CAP_WAIT_WHILE_BUSY, then we can only
+>  		 * rely on waiting for the stated timeout to be sufficient.
+>  		 */
+>  		if (!send_status) {
 > 
 
