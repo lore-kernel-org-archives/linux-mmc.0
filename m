@@ -1,69 +1,60 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v2 1/2] mmc: sdhci: use IS_REACHABLE(CONFIG_LEDS_CLASS) to
- enable LED code
-Date: Fri, 22 Apr 2016 14:54:58 +0200
-Message-ID: <CAPDyKFrj1t_-9ErqWfz-X0CKLutS46Pw+kXbASRBTkUtXwLXyA@mail.gmail.com>
-References: <1460607580-22599-1-git-send-email-yamada.masahiro@socionext.com>
+From: Mark Rutland <mark.rutland@arm.com>
+Subject: Re: [v8, 1/7] Documentation: DT: update Freescale DCFG compatible
+Date: Fri, 22 Apr 2016 14:11:51 +0100
+Message-ID: <20160422131151.GJ10606@leverpostej>
+References: <1461306464-19521-1-git-send-email-yangbo.lu@nxp.com>
+ <1461306464-19521-2-git-send-email-yangbo.lu@nxp.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wm0-f44.google.com ([74.125.82.44]:36175 "EHLO
-	mail-wm0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752764AbcDVMzA (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 22 Apr 2016 08:55:00 -0400
-Received: by mail-wm0-f44.google.com with SMTP id v188so19960631wme.1
-        for <linux-mmc@vger.kernel.org>; Fri, 22 Apr 2016 05:54:59 -0700 (PDT)
-In-Reply-To: <1460607580-22599-1-git-send-email-yamada.masahiro@socionext.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <netdev-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <1461306464-19521-2-git-send-email-yangbo.lu@nxp.com>
+Sender: netdev-owner@vger.kernel.org
+To: Yangbo Lu <yangbo.lu@nxp.com>
+Cc: linux-mmc@vger.kernel.org, linuxppc-dev@lists.ozlabs.org, devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, linux-clk@vger.kernel.org, linux-i2c@vger.kernel.org, iommu@lists.linux-foundation.org, netdev@vger.kernel.org, ulf.hansson@linaro.org, scott.wood@nxp.com, Rob Herring <robh+dt@kernel.org>, Russell King <linux@arm.linux.org.uk>, Jochen Friedrich <jochen@scram.de>, Joerg Roedel <joro@8bytes.org>, Claudiu Manoil <claudiu.manoil@freescale.com>, Bhupesh Sharma <bhupesh.sharma@freescale.com>, Zhao Qiang <qiang.zhao@freescale.com>, Kumar Gala <galak@codeaurora.org>, Santosh Shilimkar <ssantosh@kernel.org>, leoyang.li@nxp.com, xiaobo.xie@nxp.com
 List-Id: linux-mmc@vger.kernel.org
-To: Masahiro Yamada <yamada.masahiro@socionext.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>
 
-On 14 April 2016 at 06:19, Masahiro Yamada
-<yamada.masahiro@socionext.com> wrote:
-> defined(CONFIG_LEDS_CLASS) || (defined(CONFIG_LEDS_CLASS_MODULE) && \
->     defined(CONFIG_MMC_SDHCI_MODULE))
->
-> is equivalent to:
->
-> defined(CONFIG_LEDS_CLASS) || (defined(CONFIG_LEDS_CLASS_MODULE) && \
->     defined(MODULE))
->
-> and it can also be written shortly as:
->
-> IS_REACHABLE(CONFIG_LEDS_CLASS)
->
-> Signed-off-by: Masahiro Yamada <yamada.masahiro@socionext.com>
-
-Thanks, applied for next!
-
-Kind regards
-Uffe
-
-
+On Fri, Apr 22, 2016 at 02:27:38PM +0800, Yangbo Lu wrote:
+> Update Freescale DCFG compatible with 'fsl,<chip>-dcfg' instead
+> of 'fsl,ls1021a-dcfg' to include more chips.
+> 
+> Signed-off-by: Yangbo Lu <yangbo.lu@nxp.com>
 > ---
->
-> Changes in v2:
->   - Rebase on the next branch (7766e58f5be39dcc35d30a703422a3d0b8ec8c0c)
->
->  drivers/mmc/host/sdhci.c | 4 +---
->  1 file changed, 1 insertion(+), 3 deletions(-)
->
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index b284924..eedc18a 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -259,9 +259,7 @@ static void __sdhci_led_deactivate(struct sdhci_host *host)
->         sdhci_writeb(host, ctrl, SDHCI_HOST_CONTROL);
->  }
->
-> -#if defined(CONFIG_LEDS_CLASS) || (defined(CONFIG_LEDS_CLASS_MODULE) && \
-> -                                  defined(CONFIG_MMC_SDHCI_MODULE))
-> -
-> +#if IS_REACHABLE(CONFIG_LEDS_CLASS)
->  static void sdhci_led_control(struct led_classdev *led,
->                               enum led_brightness brightness)
->  {
+> Changes for v8:
+> 	- Added this patch
+> ---
+>  Documentation/devicetree/bindings/arm/fsl.txt | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+> 
+> diff --git a/Documentation/devicetree/bindings/arm/fsl.txt b/Documentation/devicetree/bindings/arm/fsl.txt
+> index 752a685..1d5f512 100644
+> --- a/Documentation/devicetree/bindings/arm/fsl.txt
+> +++ b/Documentation/devicetree/bindings/arm/fsl.txt
+> @@ -119,7 +119,7 @@ Freescale DCFG
+>  configuration and status for the device. Such as setting the secondary
+>  core start address and release the secondary core from holdoff and startup.
+>    Required properties:
+> -  - compatible: should be "fsl,ls1021a-dcfg"
+> +  - compatible: should be "fsl,<chip>-dcfg"
+
+Please list specific values expected for <chip>, while jusy saying
+<chip> may be more generic, it makes it practically impossible to search
+for the correct binding given a compatible string, and it's vague as to
+exaclty what <chip> should be.
+
+Thanks,
+Mark.
+
+
+
+>    - reg : should contain base address and length of DCFG memory-mapped registers
+>  
+>  Example:
+> -- 
+> 2.1.0.27.g96db324
+> 
 > --
-> 1.9.1
->
+> To unsubscribe from this list: send the line "unsubscribe devicetree" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
