@@ -1,117 +1,176 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [RESEND PATCH v7 2/2] mmc: OCTEON: Add host driver for OCTEON MMC controller
-Date: Fri, 22 Apr 2016 15:54:56 +0200
-Message-ID: <CAPDyKFpsmdtsdoa4D9f-vTV-WKYAZOQ7aGae7J5Y3RVdT_kh0Q@mail.gmail.com>
-References: <1459438013-25088-1-git-send-email-matt.redfearn@imgtec.com>
-	<4647014.anjrLICQKc@wuerfel>
-	<CAPDyKFpM4P8LrAnVB5kRxWrgEfPS7iTtF=YBeKuyvSM=O-KF8w@mail.gmail.com>
-	<4611130.vJzBsRp8Hx@wuerfel>
+From: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: Re: [PATCH] mmc: add API for data write using scatter gather DMA
+Date: Fri, 22 Apr 2016 16:17:43 +0200
+Message-ID: <CAPDyKFpDyBtGKxqhuo2NnioXfXcn8ZKB=EbyoaFkZ1LX34ZzkQ@mail.gmail.com>
+References: <1459256261-22492-1-git-send-email-akarwar@marvell.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wm0-f47.google.com ([74.125.82.47]:36226 "EHLO
-	mail-wm0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752636AbcDVNy6 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 22 Apr 2016 09:54:58 -0400
-Received: by mail-wm0-f47.google.com with SMTP id v188so22050487wme.1
-        for <linux-mmc@vger.kernel.org>; Fri, 22 Apr 2016 06:54:57 -0700 (PDT)
-In-Reply-To: <4611130.vJzBsRp8Hx@wuerfel>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1459256261-22492-1-git-send-email-akarwar-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>
+Sender: linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Amitkumar Karwar <akarwar-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>
+Cc: "linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Nishant Sarmukadam <nishants-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, linux-mmc <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Bing Zhao <bin9zha0-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Cathy Luo <cluo-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, Bing Zhao <bzhao-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, Xinming Hu <huxm-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Arnd Bergmann <arnd@arndb.de>
-Cc: David Daney <ddaney@caviumnetworks.com>, Matt Redfearn <matt.redfearn@imgtec.com>, linux-mmc <linux-mmc@vger.kernel.org>, Aleksey Makarov <aleksey.makarov@caviumnetworks.com>, Chandrakala Chavva <cchavva@caviumnetworks.com>, David Daney <david.daney@cavium.com>, Aleksey Makarov <aleksey.makarov@auriga.com>, Leonid Rosenboim <lrosenboim@caviumnetworks.com>, Peter Swain <pswain@cavium.com>, Aaron Williams <aaron.williams@cavium.com>
 
-On 21 April 2016 at 15:19, Arnd Bergmann <arnd@arndb.de> wrote:
-> On Thursday 21 April 2016 14:44:08 Ulf Hansson wrote:
->> [...]
->>
->> >> So the question I have is *why* do you have to be in IRQ context when
->> >> using the semaphore...
->> >>
->> >> I would rather see that you use a threaded IRQ handler, perhaps in
->> >> conjunction with a hard IRQ handler if that is needed.
->> >
->> > That does not solve the problem though: it is not allowed for a mutex
->> > to be taken in the request function but released in the interrupt,
->> > both have to be in the same thread.
->> >
->> > Using a threaded IRQ handler would help by avoiding the spinlock
->> > inside of it (it could be replaced with a mutex there), but it
->> > doesn't solve the problem of serializing between the slots.
->>
->> My point is, the may not need to be released in the IRQ handler, but
->> instead in the threaded IRQ handler.
+On 29 March 2016 at 14:57, Amitkumar Karwar <akarwar-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org> wrote:
+> From: Bing Zhao <bzhao-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>
 >
-> That doesn't change anything.
+> This patch adds new API for SDIO scatter gather.
 >
->> >> Although to clarify a bit more, the mmc core invokes *all* mmc host
->> >> ops callbacks from non-atomic context.
->> >
->> > Oh, so you mean the .request() function must not sleep and cannot
->> > call mutex_lock() or down() or wait_event()?
->>
->> No.
->>
->> *non-atomic* context. :-)
->>
->> I should probably said thread/process context instead.
->>
+> Existing mmc_io_rw_extended() API expects caller to pass single contiguous
+> buffer. It will be split if it exceeds segment size, SG table is prepared
+> and used it for reading/writing the data.
 >
-> My mistake, you were being clear enough here, I just misread.
+> Our intention for defining new API here is to facilitate caller to provide
+> ready SG table(scattered buffer list). It will be useful for the drivers
+> which intend to handle SDIO SG internally.
 >
->> >> In the ->request() callback:
->> >> ....
->> >> mutex_lock()
->
->> >> In the threaded IRQ handler:
->> >> ...
->> >> mutex_unlock()
->> >>
->> >> Do you think something along these lines should work for your case?
->> >
->> > This is the case I described above, it is against the rules for mutexes()
->> > and you will get a lockdep warning if you attempt this.
->>
->> No.
->>
->> Considering my comments in this reply, can you please re-think and see
->> if my solution could make sense?
->
-> The problem is not that mutex_unlock() has to be called from non-atomic
-> context (it doesn't, you are allowed  to call mutex_unlock while holding
-> a spinlock), but instead the problem is that it has to be done from the
-> same thread that called mutex_lock(), and the threaded IRQ handler
-> is never the same thread that is currently holding the mutex.
+> Signed-off-by: Bing Zhao <bzhao-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>
+> Signed-off-by: Xinming Hu <huxm-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>
+> Signed-off-by: Amitkumar Karwar <akarwar-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>
+> ---
 
-Of course, you are right!
+So this has been posted and discussed earlier. In upcoming revisions,
+please attach that history so people know when reviewing.
 
->
-> My suggestion with using
->
->         wait_event(host->wq, !cmpxchg(host->current_req, NULL, mrq));
->
-> should sufficiently solve the problem, but the suggestion of using
-> a kthread (even though not needed for taking a mutex) would still
-> have some advantages and one disadvantage:
->
-> + We never need to spin in the irq context (also achievable using
->   a threaded handler)
-> + The request callback always returns immediately after queuing up
->   the request to the kthread, rather than blocking for a potentially
->   long time while waiting for an operation in another slot to complete
-> + it very easily avoids the problem of serialization between
->   the slots, and ensures that each slot gets an equal chance to
->   send the next request.
-> - you get a slightly higher latency for waking up the kthread in
->   oder to do a simple request (comparable amount of latency that
->   is introduced by an irq thread).
->
+Moreover, if you have been using this API to improve throughput,
+perhaps you can provide us with some numbers as well!?
 
-Currently I can't think of anything better, so I guess something along
-these lines is worth a try.
+>  drivers/mmc/core/sdio_ops.c   | 64 +++++++++++++++++++++++++++++++++++++++++++
+>  include/linux/mmc/sdio_func.h |  5 ++++
+>  2 files changed, 69 insertions(+)
+>
+> diff --git a/drivers/mmc/core/sdio_ops.c b/drivers/mmc/core/sdio_ops.c
+> index 62508b4..6875980 100644
+> --- a/drivers/mmc/core/sdio_ops.c
+> +++ b/drivers/mmc/core/sdio_ops.c
+> @@ -204,6 +204,70 @@ int mmc_io_rw_extended(struct mmc_card *card, int write, unsigned fn,
+>         return 0;
+>  }
+>
+> +int mmc_io_rw_extended_sg(struct mmc_card *card, int write, unsigned fn,
+> +                         unsigned addr, int incr_addr,
+> +                         struct sg_table *sgt, unsigned blksz)
+> +{
+> +       struct mmc_request mrq = {NULL};
+> +       struct mmc_command cmd = {0};
+> +       struct mmc_data data = {0};
+> +       struct scatterlist *sg_ptr;
+> +       unsigned blocks = 0;
+> +       int i;
+> +
+> +       WARN_ON(!card || !card->host);
+> +       WARN_ON(fn > 7);
+> +       WARN_ON(blksz == 0);
 
-No matter what, I guess we want to avoid to use a semaphore as long as
-possible, right!?
+WARN_ON is not correct here. You should return proper error codes instead.
+
+> +       for_each_sg(sgt->sgl, sg_ptr, sgt->nents, i) {
+> +               WARN_ON(sg_ptr->length > card->host->max_seg_size);
+
+This raises a concern. Somehow the callers of this new API needs to be
+able to fetch the max_seg_size, as otherwise how would they know what
+size to use when allocating the buffers.
+
+Of course they can just pick the value from card->host->max_seg_size,
+but that's not the correct way. Can we add a separate SDIO API for
+this!?
+
+Moreover, I think you should return a proper error code instead of WARN_ON.
+
+> +               blocks += DIV_ROUND_UP(sg_ptr->length, blksz);
+> +       }
+> +
+> +       /* sanity check */
+> +       if (addr & ~0x1FFFF)
+> +               return -EINVAL;
+> +
+> +       mrq.cmd = &cmd;
+> +       mrq.data = &data;
+> +
+> +       cmd.opcode = SD_IO_RW_EXTENDED;
+> +       cmd.arg = write ? 0x80000000 : 0x00000000;
+> +       cmd.arg |= fn << 28;
+> +       cmd.arg |= incr_addr ? 0x04000000 : 0x00000000;
+> +       cmd.arg |= addr << 9;
+> +       cmd.arg |= 0x08000000 | blocks;
+> +       cmd.flags = MMC_RSP_SPI_R5 | MMC_RSP_R5 | MMC_CMD_ADTC;
+> +
+> +       data.blksz = blksz;
+> +       data.blocks = blocks;
+> +       data.flags = write ? MMC_DATA_WRITE : MMC_DATA_READ;
+> +
+> +       data.sg = sgt->sgl;
+> +       data.sg_len = sgt->nents;
+> +
+> +       mmc_set_data_timeout(&data, card);
+> +       mmc_wait_for_req(card->host, &mrq);
+> +
+> +       if (cmd.error)
+> +               return cmd.error;
+> +       if (data.error)
+> +               return data.error;
+> +
+> +       if (mmc_host_is_spi(card->host)) {
+> +               /* host driver already reported errors */
+> +       } else {
+> +               if (cmd.resp[0] & R5_ERROR)
+> +                       return -EIO;
+> +               if (cmd.resp[0] & R5_FUNCTION_NUMBER)
+> +                       return -EINVAL;
+> +               if (cmd.resp[0] & R5_OUT_OF_RANGE)
+> +                       return -ERANGE;
+> +       }
+> +
+> +       return 0;
+> +}
+> +EXPORT_SYMBOL_GPL(mmc_io_rw_extended_sg);
+
+Besides these comment, clearly you have duplicated code from
+mmc_io_rw_extended() in the above function.
+
+Can you try to re-factor mmc_io_rw_extended(), so we can avoid too
+much code duplications.
+
+> +
+>  int sdio_reset(struct mmc_host *host)
+>  {
+>         int ret;
+> diff --git a/include/linux/mmc/sdio_func.h b/include/linux/mmc/sdio_func.h
+> index aab032a..2107e91 100644
+> --- a/include/linux/mmc/sdio_func.h
+> +++ b/include/linux/mmc/sdio_func.h
+> @@ -14,6 +14,7 @@
+>
+>  #include <linux/device.h>
+>  #include <linux/mod_devicetable.h>
+> +#include <linux/scatterlist.h>
+>
+>  #include <linux/mmc/pm.h>
+>
+> @@ -151,6 +152,10 @@ extern int sdio_memcpy_toio(struct sdio_func *func, unsigned int addr,
+>  extern int sdio_writesb(struct sdio_func *func, unsigned int addr,
+>         void *src, int count);
+>
+> +int mmc_io_rw_extended_sg(struct mmc_card *card, int write, unsigned fn,
+> +                         unsigned addr, int incr_addr,
+> +                         struct sg_table *sgt, unsigned blksz);
+> +
+>  extern unsigned char sdio_f0_readb(struct sdio_func *func,
+>         unsigned int addr, int *err_ret);
+>  extern void sdio_f0_writeb(struct sdio_func *func, unsigned char b,
+> --
+> 1.8.1.4
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
 
 Kind regards
 Uffe
+--
+To unsubscribe from this list: send the line "unsubscribe linux-wireless" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
