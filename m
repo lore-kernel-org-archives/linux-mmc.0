@@ -1,133 +1,63 @@
-From: Simon Horman <horms@verge.net.au>
-Subject: Re: [PATCH v2 1/2] ARM: dts: r8a7793: Add SDHI controllers
-Date: Fri, 22 Apr 2016 10:25:32 +1000
-Message-ID: <20160422002531.GD25416@verge.net.au>
-References: <CAMuHMdUQh0OnJhJ6RCH_MzDnOLd_ni_tEi4jC=KDewqTMQX7-w@mail.gmail.com>
+From: Yangbo Lu <yangbo.lu-3arQi8VN3Tc@public.gmane.org>
+Subject: [v8, 0/7] Fix eSDHC host version register bug
+Date: Fri, 22 Apr 2016 14:27:37 +0800
+Message-ID: <1461306464-19521-1-git-send-email-yangbo.lu@nxp.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-renesas-soc-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <CAMuHMdUQh0OnJhJ6RCH_MzDnOLd_ni_tEi4jC=KDewqTMQX7-w@mail.gmail.com>
- <CAMuHMdUwHhd-C=PCTubUUpQY4w5hDPjiCQMF65KMRojrnQgd+w@mail.gmail.com>
-Sender: linux-renesas-soc-owner@vger.kernel.org
-To: Geert Uytterhoeven <geert@linux-m68k.org>
-Cc: Ulrich Hecht <ulrich.hecht+renesas@gmail.com>, linux-renesas-soc@vger.kernel.org, Linux MMC List <linux-mmc@vger.kernel.org>, Magnus Damm <magnus.damm@gmail.com>, Sergei Shtylyov <sergei.shtylyov@cogentembedded.com>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
+List-Unsubscribe: <https://lists.linuxfoundation.org/mailman/options/iommu>,
+	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.linuxfoundation.org/pipermail/iommu/>
+List-Post: <mailto:iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
+List-Help: <mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=help>
+List-Subscribe: <https://lists.linuxfoundation.org/mailman/listinfo/iommu>,
+	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=subscribe>
+Sender: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
+Errors-To: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
+To: linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linuxppc-dev-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-clk-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-i2c-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org, netdev-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, Zhao Qiang <qiang.zhao-KZfg59tc24xl57MIdRCFDg@public.gmane.org>, Russell King <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, Yangbo Lu <yangbo.lu-3arQi8VN3Tc@public.gmane.org>, Bhupesh Sharma <bhupesh.sharma-KZfg59tc24xl57MIdRCFDg@public.gmane.org>, Santosh Shilimkar <ssantosh-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Jochen Friedrich <jochen-NIgtFMG+Po8@public.gmane.org>, scott.wood-3arQi8VN3Tc@public.gmane.org, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Claudiu Manoil <claudiu.manoil-KZfg59tc24xl57MIdRCFDg@public.gmane.org>, Kumar Gala <galak-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, leoyang.li-3arQi8VN3Tc@public.gmane.org, xiaobo.xie-3arQi8VN3Tc@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
 
-On Thu, Apr 21, 2016 at 02:54:30PM +0200, Geert Uytterhoeven wrote:
-> On Mon, Apr 18, 2016 at 6:02 PM, Ulrich Hecht
-> <ulrich.hecht+renesas@gmail.com> wrote:
-> > --- a/arch/arm/boot/dts/r8a7793.dtsi
-> > +++ b/arch/arm/boot/dts/r8a7793.dtsi
-> > @@ -510,6 +510,42 @@
-> >                 reg = <0 0xe6060000 0 0x250>;
-> >         };
-> >
-> > +       sdhi0: sd@ee100000 {
-> > +               compatible = "renesas,sdhi-r8a7793";
-> > +               reg = <0 0xee100000 0 0x328>;
-> > +               interrupts = <0 165 IRQ_TYPE_LEVEL_HIGH>;
-> 
-> GIC_SPI (x3)
+This patchset is used to fix a host version register bug in the T4240-R1.0-R2.0
+eSDHC controller. To get the SoC version and revision, it's needed to add the
+GUTS driver to access the global utilities registers.
 
-Thanks, I should have noticed that.
+So, the first four patches are to add the GUTS driver.
+The following patches except the updating MAINTAINERS patch are to enable
+GUTS driver support to get SVR in eSDHC driver and fix host version for T4240.
 
-On Thu, Apr 21, 2016 at 02:55:06PM +0200, Geert Uytterhoeven wrote:
-> On Thu, Apr 21, 2016 at 5:27 AM, Simon Horman <horms@verge.net.au> wrote:
-> >
-> > We are back to one DMA controller this week so I updated your patch and
-> > queued up the following.
-> >
-> > From: Ulrich Hecht <ulrich.hecht+renesas@gmail.com>
-> > Date: Mon, 18 Apr 2016 18:02:56 +0200
-> > Subject: [PATCH] ARM: dts: r8a7793: Add SDHI controllers
-> >
-> > Same as on r8a7791.
-> >
-> > Signed-off-by: Ulrich Hecht <ulrich.hecht+renesas@gmail.com>
-> > Signed-off-by: Simon Horman <horms+renesas@verge.net.au>
-> > ---
-> >  arch/arm/boot/dts/r8a7793.dtsi | 33 +++++++++++++++++++++++++++++++++
-> >  1 file changed, 33 insertions(+)
-> >
-> > diff --git a/arch/arm/boot/dts/r8a7793.dtsi b/arch/arm/boot/dts/r8a7793.dtsi
-> > index fc552629ed4a..a93d509732a8 100644
-> > --- a/arch/arm/boot/dts/r8a7793.dtsi
-> > +++ b/arch/arm/boot/dts/r8a7793.dtsi
-> > @@ -507,6 +507,39 @@
-> >                 reg = <0 0xe6060000 0 0x250>;
-> >         };
-> >
-> > +       sdhi0: sd@ee100000 {
-> > +               compatible = "renesas,sdhi-r8a7793";
-> > +               reg = <0 0xee100000 0 0x328>;
-> > +               interrupts = <0 165 IRQ_TYPE_LEVEL_HIGH>;
-> > +               clocks = <&mstp3_clks R8A7793_CLK_SDHI0>;
-> > +               dmas = <&dmac0 0xcd>, <&dmac0 0xce>;
-> > +               dma-names = "tx", "rx", "tx", "rx";
-> 
-> If you drop the last two dma values, you should drop the last two
-> dma-names values, too.
+Yangbo Lu (7):
+  Documentation: DT: update Freescale DCFG compatible
+  ARM64: dts: ls2080a: add device configuration node
+  soc: fsl: add GUTS driver for QorIQ platforms
+  dt: move guts devicetree doc out of powerpc directory
+  powerpc/fsl: move mpc85xx.h to include/linux/fsl
+  MAINTAINERS: add entry for Freescale SoC specific driver
+  mmc: sdhci-of-esdhc: fix host version for T4240-R1.0-R2.0
 
-Sorry about that, I'm unsure how I managed to mess that up.
+ Documentation/devicetree/bindings/arm/fsl.txt      |   2 +-
+ .../bindings/{powerpc => soc}/fsl/guts.txt         |   3 +
+ MAINTAINERS                                        |  16 ++-
+ arch/arm64/boot/dts/freescale/fsl-ls2080a.dtsi     |   6 +
+ arch/powerpc/kernel/cpu_setup_fsl_booke.S          |   2 +-
+ drivers/clk/clk-qoriq.c                            |   3 +-
+ drivers/i2c/busses/i2c-mpc.c                       |   2 +-
+ drivers/iommu/fsl_pamu.c                           |   3 +-
+ drivers/mmc/host/Kconfig                           |   1 +
+ drivers/mmc/host/sdhci-of-esdhc.c                  |  23 ++++
+ drivers/net/ethernet/freescale/gianfar.c           |   2 +-
+ drivers/soc/Kconfig                                |   2 +-
+ drivers/soc/fsl/Kconfig                            |   8 ++
+ drivers/soc/fsl/Makefile                           |   1 +
+ drivers/soc/fsl/guts.c                             | 119 +++++++++++++++++++
+ include/linux/fsl/guts.h                           | 126 +++++++++++++--------
+ .../asm/mpc85xx.h => include/linux/fsl/svr.h       |   4 +-
+ 17 files changed, 263 insertions(+), 60 deletions(-)
+ rename Documentation/devicetree/bindings/{powerpc => soc}/fsl/guts.txt (91%)
+ create mode 100644 drivers/soc/fsl/Kconfig
+ create mode 100644 drivers/soc/fsl/guts.c
+ rename arch/powerpc/include/asm/mpc85xx.h => include/linux/fsl/svr.h (97%)
 
-I have updated the patch and re-queued the following.
-
-From: Ulrich Hecht <ulrich.hecht+renesas@gmail.com>
-Date: Mon, 18 Apr 2016 18:02:56 +0200
-Subject: [PATCH] ARM: dts: r8a7793: Add SDHI controllers
-
-Same as on r8a7791.
-
-Signed-off-by: Ulrich Hecht <ulrich.hecht+renesas@gmail.com>
-Signed-off-by: Simon Horman <horms+renesas@verge.net.au>
----
- arch/arm/boot/dts/r8a7793.dtsi | 33 +++++++++++++++++++++++++++++++++
- 1 file changed, 33 insertions(+)
-
-diff --git a/arch/arm/boot/dts/r8a7793.dtsi b/arch/arm/boot/dts/r8a7793.dtsi
-index bddc31283bd9..6186179fd66d 100644
---- a/arch/arm/boot/dts/r8a7793.dtsi
-+++ b/arch/arm/boot/dts/r8a7793.dtsi
-@@ -507,6 +507,39 @@
- 		reg = <0 0xe6060000 0 0x250>;
- 	};
- 
-+	sdhi0: sd@ee100000 {
-+		compatible = "renesas,sdhi-r8a7793";
-+		reg = <0 0xee100000 0 0x328>;
-+		interrupts = <GIC_SPI 165 IRQ_TYPE_LEVEL_HIGH>;
-+		clocks = <&mstp3_clks R8A7793_CLK_SDHI0>;
-+		dmas = <&dmac0 0xcd>, <&dmac0 0xce>;
-+		dma-names = "tx", "rx";
-+		power-domains = <&cpg_clocks>;
-+		status = "disabled";
-+	};
-+
-+	sdhi1: sd@ee140000 {
-+		compatible = "renesas,sdhi-r8a7793";
-+		reg = <0 0xee140000 0 0x100>;
-+		interrupts = <GIC_SPI 167 IRQ_TYPE_LEVEL_HIGH>;
-+		clocks = <&mstp3_clks R8A7793_CLK_SDHI1>;
-+		dmas = <&dmac0 0xc1>, <&dmac0 0xc2>;
-+		dma-names = "tx", "rx";
-+		power-domains = <&cpg_clocks>;
-+		status = "disabled";
-+	};
-+
-+	sdhi2: sd@ee160000 {
-+		compatible = "renesas,sdhi-r8a7793";
-+		reg = <0 0xee160000 0 0x100>;
-+		interrupts = <GIC_SPI 168 IRQ_TYPE_LEVEL_HIGH>;
-+		clocks = <&mstp3_clks R8A7793_CLK_SDHI2>;
-+		dmas = <&dmac0 0xd3>, <&dmac0 0xd4>;
-+		dma-names = "tx", "rx";
-+		power-domains = <&cpg_clocks>;
-+		status = "disabled";
-+	};
-+
- 	scifa0: serial@e6c40000 {
- 		compatible = "renesas,scifa-r8a7793",
- 			     "renesas,rcar-gen2-scifa", "renesas,scifa";
 -- 
-2.7.0.rc3.207.g0ac5344
+2.1.0.27.g96db324
