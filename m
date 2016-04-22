@@ -1,48 +1,61 @@
-From: Scott Wood <oss@buserror.net>
-Subject: Re: [PATCH 1/2] powerpc/85xx: adapt QorIQ eSDHC to the new clocking
- model
-Date: Thu, 21 Apr 2016 18:08:16 -0500
-Message-ID: <1461280096.32510.213.camel@buserror.net>
-References: <1461147644-18041-1-git-send-email-yangbo.lu@nxp.com>
+From: Simon Horman <horms@verge.net.au>
+Subject: Re: [PATCH v2] ARM: dts: r8a7793: Add MMCIF0
+Date: Fri, 22 Apr 2016 10:20:18 +1000
+Message-ID: <20160422002017.GC25416@verge.net.au>
+References: <1460995360-11417-1-git-send-email-ulrich.hecht+renesas@gmail.com>
+ <CAMuHMdW0uJZU947gXR0QVYOUFYH2K0fvuhBaD+rd8=RuvTVq-A@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from host.buserror.net ([209.198.135.123]:48454 "EHLO
-	host.buserror.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751603AbcDUXIW (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 21 Apr 2016 19:08:22 -0400
-In-Reply-To: <1461147644-18041-1-git-send-email-yangbo.lu@nxp.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-renesas-soc-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <CAMuHMdW0uJZU947gXR0QVYOUFYH2K0fvuhBaD+rd8=RuvTVq-A@mail.gmail.com>
+Sender: linux-renesas-soc-owner@vger.kernel.org
+To: Geert Uytterhoeven <geert@linux-m68k.org>
+Cc: Ulrich Hecht <ulrich.hecht+renesas@gmail.com>, linux-renesas-soc@vger.kernel.org, Linux MMC List <linux-mmc@vger.kernel.org>, Sergei Shtylyov <sergei.shtylyov@cogentembedded.com>, Magnus Damm <magnus.damm@gmail.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Yangbo Lu <yangbo.lu@nxp.com>, linux-mmc@vger.kernel.org, linuxppc-dev@lists.ozlabs.org, devicetree@vger.kernel.org
-Cc: ulf.hansson@linaro.org, Rob Herring <robh+dt@kernel.org>, scott.wood@nxp.com
 
-On Wed, 2016-04-20 at 18:20 +0800, Yangbo Lu wrote:
-> Provide clocks property instead of clock-frequency for QorIQ eSDHC
-> dts node to adapt to the new clocking model, so that the driver
-> could get clock value by the common clk API and the u-boot could
-> remove the clock fixup.
+On Thu, Apr 21, 2016 at 02:52:09PM +0200, Geert Uytterhoeven wrote:
+> On Mon, Apr 18, 2016 at 6:02 PM, Ulrich Hecht
+> <ulrich.hecht+renesas@gmail.com> wrote:
+> > Same as on r8a7794.
 > 
-> Signed-off-by: Yangbo Lu <yangbo.lu@nxp.com>
-> ---
->  arch/powerpc/boot/dts/fsl/qoriq-esdhc-0.dtsi | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
+> r8a7791?
 > 
-> diff --git a/arch/powerpc/boot/dts/fsl/qoriq-esdhc-0.dtsi
-> b/arch/powerpc/boot/dts/fsl/qoriq-esdhc-0.dtsi
-> index 20835ae..ddbe562 100644
-> --- a/arch/powerpc/boot/dts/fsl/qoriq-esdhc-0.dtsi
-> +++ b/arch/powerpc/boot/dts/fsl/qoriq-esdhc-0.dtsi
-> @@ -36,5 +36,5 @@ sdhc: sdhc@114000 {
->  	compatible = "fsl,esdhc";
->  	reg = <0x114000 0x1000>;
->  	interrupts = <48 2 0 0>;
-> -	clock-frequency = <0>;
-> +	clocks = <&clockgen 4 1>;
->  };
+> > --- a/arch/arm/boot/dts/r8a7793.dtsi
+> > +++ b/arch/arm/boot/dts/r8a7793.dtsi
+> > @@ -510,6 +510,19 @@
+> >                 reg = <0 0xe6060000 0 0x250>;
+> >         };
+> >
+> > +       mmcif0: mmcif@ee200000 {
+> > +               compatible = "renesas,mmcif-r8a7793", "renesas,sh-mmcif";
+> > +               reg = <0 0xee200000 0 0x80>;
+> > +               interrupts = <0 169 IRQ_TYPE_LEVEL_HIGH>;
+> 
+> s/0/GIC_SPI/
+> 
+> > +               clocks = <&mstp3_clks R8A7793_CLK_MMCIF0>;
+> > +               dmas = <&dmac0 0xd1>, <&dmac0 0xd2>,
+> > +                      <&dmac1 0xd1>, <&dmac1 0xd2>;
+> > +               dma-names = "tx", "rx", "tx", "rx";
+> > +               power-domains = <&cpg_clocks>;
+> > +               reg-io-width = <4>;
+> > +               status = "disabled";
+> 
+> max-frequency = <97500000>;?
+> 
+> It's always a good idea to compare r8a7791.dts and r8a7793.dtsi
+> after s/r8a779[13]/r8a779x/...
+> 
+> > +       };
 
-Binding update?
+Thanks Geert,
 
--Scott
+it looks like I was a little hasty in queueing up this patch.
+I have dropped it for now. 
 
+Ulrich,
+
+please address the feedback and repost.
+
+Thanks
