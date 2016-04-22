@@ -1,70 +1,52 @@
-From: Arnd Bergmann <arnd@arndb.de>
-Subject: Re: [RESEND PATCH v7 2/2] mmc: OCTEON: Add host driver for OCTEON MMC controller
-Date: Fri, 22 Apr 2016 22:23:58 +0200
-Message-ID: <4807095.U0fzMFt2B3@wuerfel>
-References: <1459438013-25088-1-git-send-email-matt.redfearn@imgtec.com> <3831277.QfySLsdCii@wuerfel> <571A6412.6070303@caviumnetworks.com>
+From: Rob Herring <robh@kernel.org>
+Subject: Re: [PATCH v4 1/3] mmc: dt: usdhi6rol0: add optional pinctrl binding
+Date: Fri, 22 Apr 2016 15:27:33 -0500
+Message-ID: <20160422202733.GA11270@rob-hp-laptop>
+References: <cover.1461246772.git.larper@axis.com>
+ <a96281244b55d55e36b72a40cd061d7ffd70b88e.1461246772.git.larper@axis.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7Bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mout.kundenserver.de ([212.227.17.10]:62336 "EHLO
-	mout.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751084AbcDVUYZ (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 22 Apr 2016 16:24:25 -0400
-In-Reply-To: <571A6412.6070303@caviumnetworks.com>
+Received: from mail.kernel.org ([198.145.29.136]:33677 "EHLO mail.kernel.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751172AbcDVU1i (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 22 Apr 2016 16:27:38 -0400
+Content-Disposition: inline
+In-Reply-To: <a96281244b55d55e36b72a40cd061d7ffd70b88e.1461246772.git.larper@axis.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: David Daney <ddaney@caviumnetworks.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Matt Redfearn <matt.redfearn@imgtec.com>, linux-mmc <linux-mmc@vger.kernel.org>, Aleksey Makarov <aleksey.makarov@caviumnetworks.com>, Chandrakala Chavva <cchavva@caviumnetworks.com>, David Daney <david.daney@cavium.com>, Aleksey Makarov <aleksey.makarov@auriga.com>, Leonid Rosenboim <lrosenboim@caviumnetworks.com>, Peter Swain <pswain@cavium.com>, Aaron Williams <aaron.williams@cavium.com>
+To: Lars Persson <lars.persson@axis.com>
+Cc: linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, g.liakhovetski@gmx.de, ulf.hansson@linaro.org, pawel.moll@arm.com, mark.rutland@arm.com, ijc+devicetree@hellion.org.uk, galak@codeaurora.org, Lars Persson <larper@axis.com>
 
-On Friday 22 April 2016 10:49:06 David Daney wrote:
-> On 04/22/2016 09:42 AM, Arnd Bergmann wrote:
-> > On Friday 22 April 2016 15:54:56 Ulf Hansson wrote:
-> >>
-> >>>
-> >>> My suggestion with using
-> >>>
-> >>>          wait_event(host->wq, !cmpxchg(host->current_req, NULL, mrq));
-> >>>
-> >>> should sufficiently solve the problem, but the suggestion of using
-> >>> a kthread (even though not needed for taking a mutex) would still
-> >>> have some advantages and one disadvantage:
-> >>>
-> >>> + We never need to spin in the irq context (also achievable using
-> >>>    a threaded handler)
-> >>> + The request callback always returns immediately after queuing up
-> >>>    the request to the kthread, rather than blocking for a potentially
-> >>>    long time while waiting for an operation in another slot to complete
-> >>> + it very easily avoids the problem of serialization between
-> >>>    the slots, and ensures that each slot gets an equal chance to
-> >>>    send the next request.
-> >>> - you get a slightly higher latency for waking up the kthread in
-> >>>    oder to do a simple request (comparable amount of latency that
-> >>>    is introduced by an irq thread).
-> >>>
-> >>
-> >> Currently I can't think of anything better, so I guess something along
-> >> these lines is worth a try.
-> >>
-> >> No matter what, I guess we want to avoid to use a semaphore as long as
-> >> possible, right!?
-> >
-> > Yes, I think that would be good, to avoid curses from whoever tries
-> > to eliminate them the next time.
-> >
-> > I think there is some renewed interest in realtime kernels these
-> > days, and semaphores are known to cause problems with priority
-> > inversion (precisely because you don't know which thread will
-> > release it).
+On Thu, Apr 21, 2016 at 03:55:42PM +0200, Lars Persson wrote:
+> Add a pinctrl binding to specify different pin settings for high speed
+> modes and UHS modes.
 > 
-> In this particular case, there can be no priority inversion, as the 
-> thing we are waiting for is a hardware event.  The timing of that is not 
-> influenced by task scheduling.  The use of wait_event instead of struct 
-> semaphore would be purely cosmetic.
+> Signed-off-by: Lars Persson <larper@axis.com>
+> ---
+>  Documentation/devicetree/bindings/mmc/usdhi6rol0.txt | 6 ++++++
+>  1 file changed, 6 insertions(+)
+> 
+> diff --git a/Documentation/devicetree/bindings/mmc/usdhi6rol0.txt b/Documentation/devicetree/bindings/mmc/usdhi6rol0.txt
+> index 8babdaa..6d1b797 100644
+> --- a/Documentation/devicetree/bindings/mmc/usdhi6rol0.txt
+> +++ b/Documentation/devicetree/bindings/mmc/usdhi6rol0.txt
+> @@ -12,6 +12,12 @@ Optional properties:
+>  
+>  - vmmc-supply:	a phandle of a regulator, supplying Vcc to the card
+>  - vqmmc-supply:	a phandle of a regulator, supplying VccQ to the card
+> +- pinctrl-names: Can contain a "default" entry and a "state_uhs"
 
-My point was just that it's possible someone will try to remove all
-the semaphores again soon. You are right that any possible priority
-inversion in the existing code would not get changed by using a
-different method to wait for the completion of the request.
+Don't use underscores. Just "uhs" should be sufficient, right?
 
-	Arnd
+> +                 entry. The state_uhs entry is used together with the default
+> +                 entry when the board requires distinct settings for UHS speeds.
+> +
+> +- pinctrl-N: One property for each name listed in pinctrl-names, see
+> +             ../pinctrl/pinctrl-bindings.txt.
+>  
+>  Additionally any standard mmc bindings from mmc.txt can be used.
+>  
+> -- 
+> 2.1.4
+> 
