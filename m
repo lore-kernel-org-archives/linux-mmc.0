@@ -1,118 +1,94 @@
 From: Dong Aisheng <dongas86@gmail.com>
-Subject: Re: [PATCH 08/23] mmc: sdhci: rename quirk SDHCI_QUIRK_MULTIBLOCK_READ_ACMD12
-Date: Sun, 24 Apr 2016 18:00:28 +0800
-Message-ID: <CAA+hA=QtexWh4H_FvjajNqDskBTZxKJXsgkUaW-AoubgbbWnfQ@mail.gmail.com>
+Subject: Re: [PATCH 10/23] mmc: core: disable auto retune during card
+ detection process
+Date: Sun, 24 Apr 2016 18:47:52 +0800
+Message-ID: <CAA+hA=R9JfV4ScuM=OZ3VHdSiQiMO9io8mQQDNXfkTwNv7RVvg@mail.gmail.com>
 References: <1460741387-23815-1-git-send-email-aisheng.dong@nxp.com>
-	<1460741387-23815-9-git-send-email-aisheng.dong@nxp.com>
-	<571A1A34.40004@intel.com>
+	<1460741387-23815-11-git-send-email-aisheng.dong@nxp.com>
+	<571A1D85.3020200@intel.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qk0-f196.google.com ([209.85.220.196]:36406 "EHLO
-	mail-qk0-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752221AbcDXKA3 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 24 Apr 2016 06:00:29 -0400
-Received: by mail-qk0-f196.google.com with SMTP id l68so8732676qkf.3
-        for <linux-mmc@vger.kernel.org>; Sun, 24 Apr 2016 03:00:28 -0700 (PDT)
-In-Reply-To: <571A1A34.40004@intel.com>
+Received: from mail-qg0-f68.google.com ([209.85.192.68]:34737 "EHLO
+	mail-qg0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752462AbcDXKrx (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 24 Apr 2016 06:47:53 -0400
+Received: by mail-qg0-f68.google.com with SMTP id d90so3531366qgd.1
+        for <linux-mmc@vger.kernel.org>; Sun, 24 Apr 2016 03:47:52 -0700 (PDT)
+In-Reply-To: <571A1D85.3020200@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Adrian Hunter <adrian.hunter@intel.com>
 Cc: Dong Aisheng <aisheng.dong@nxp.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, Chris Ball <chris@printf.net>, Shawn Guo <shawnguo@kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, haibo.chen@nxp.com
 
-On Fri, Apr 22, 2016 at 8:33 PM, Adrian Hunter <adrian.hunter@intel.com> wrote:
+On Fri, Apr 22, 2016 at 8:48 PM, Adrian Hunter <adrian.hunter@intel.com> wrote:
 > On 15/04/16 20:29, Dong Aisheng wrote:
->> Rename ACMD12 quirk to SDHCI_QUIRK_MULTIBLOCK_ACMD12 to avoid confusion
->> since it's needed for both read and write.
+>> During card detection process, mmc core may sends commands
+>> to detect if card is still exist in mmc_rescan for removable
+>> card which may trigger mmc retuning process after a bit time
+>> of runtime pm suspend.
+>> Obviously this retuning process is meaningless for card remove
+>> case, so we disable mmc_retune in mmc_detect_change() for it.
+>> For card insert case, the mmc_retune will be enabled normally
+>> in its card initialization process later in mmc_execute_tuning().
+>> So disable it at first has no side effection.
 >
-> I am not in favour of renaming unless the original name is really really
-> bad.  In this case it is a quirk which we anyway expect to remove at some
-> point, so let's leave it alone for now.
+> We don't assume that the card has been removed, which is why we send
+> commands to find out if it is still there.  If it is still there, this
+> change will have incorrectly disabled re-tuning.
 >
 
-It is really confusing when i first see it. So i made this patch.
-We could clear it later.
-And i think it's more like a capability rather than a quirk.
+Do you mean the 'fake' card remove interrupt like caused by glitch?
+Yes, if that the card is still exist and re-tuning is wrongly disabled.
 
-Anyway, it's up to you whether we should pick it.
+So we could re-enable re-tuning for this special case?
+Something like:
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index 41b1e76..e1990a8 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -2607,6 +2607,8 @@ void mmc_rescan(struct work_struct *work)
+
+        /* if there still is a card present, stop here */
+        if (host->bus_ops != NULL) {
++               if (tuning_is_enabled_before())
++                       mmc_retune_enable(host);
+                mmc_bus_put(host);
+                goto out;
+        }
+
+
+> Do you have an actual problem with the way it works now?
+>
+
+No actual problems now.
+I just observe a lot tuning commands keep sending although the card is already
+removed which seems a bit meaningless.
+And most tuning execution process is executed with sin_lock_irqsave, i'm not
+sure if the mass tuning commands may affect the system when CPU is busy.
+What do you think?
 
 Regards
 Dong Aisheng
 
 >>
+>> CC: stable <stable@vger.kernel.org>
 >> Signed-off-by: Dong Aisheng <aisheng.dong@nxp.com>
 >> ---
->>  drivers/mmc/host/sdhci-pci-o2micro.c | 2 +-
->>  drivers/mmc/host/sdhci-pltfm.c       | 2 +-
->>  drivers/mmc/host/sdhci-s3c.c         | 2 +-
->>  drivers/mmc/host/sdhci.c             | 2 +-
->>  drivers/mmc/host/sdhci.h             | 2 +-
->>  5 files changed, 5 insertions(+), 5 deletions(-)
+>>  drivers/mmc/core/core.c | 1 +
+>>  1 file changed, 1 insertion(+)
 >>
->> diff --git a/drivers/mmc/host/sdhci-pci-o2micro.c b/drivers/mmc/host/sdhci-pci-o2micro.c
->> index d48f031..1ed1f995 100644
->> --- a/drivers/mmc/host/sdhci-pci-o2micro.c
->> +++ b/drivers/mmc/host/sdhci-pci-o2micro.c
->> @@ -162,7 +162,7 @@ int sdhci_pci_o2_probe_slot(struct sdhci_pci_slot *slot)
->>       case PCI_DEVICE_ID_O2_FUJIN2:
->>               reg = sdhci_readl(host, O2_SD_VENDOR_SETTING);
->>               if (reg & 0x1)
->> -                     host->quirks |= SDHCI_QUIRK_MULTIBLOCK_READ_ACMD12;
->> +                     host->quirks |= SDHCI_QUIRK_MULTIBLOCK_ACMD12;
+>> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+>> index 52bfaf0..76d0802 100644
+>> --- a/drivers/mmc/core/core.c
+>> +++ b/drivers/mmc/core/core.c
+>> @@ -1888,6 +1888,7 @@ static void _mmc_detect_change(struct mmc_host *host, unsigned long delay,
+>>               pm_wakeup_event(mmc_dev(host), 5000);
 >>
->>               if (chip->pdev->device != PCI_DEVICE_ID_O2_FUJIN2)
->>                       break;
->> diff --git a/drivers/mmc/host/sdhci-pltfm.c b/drivers/mmc/host/sdhci-pltfm.c
->> index 072bb27..206057a 100644
->> --- a/drivers/mmc/host/sdhci-pltfm.c
->> +++ b/drivers/mmc/host/sdhci-pltfm.c
->> @@ -74,7 +74,7 @@ void sdhci_get_of_property(struct platform_device *pdev)
->>       u32 bus_width;
+>>       host->detect_change = 1;
+>> +     mmc_retune_disable(host);
+>>       mmc_schedule_delayed_work(&host->detect, delay);
+>>  }
 >>
->>       if (of_get_property(np, "sdhci,auto-cmd12", NULL))
->> -             host->quirks |= SDHCI_QUIRK_MULTIBLOCK_READ_ACMD12;
->> +             host->quirks |= SDHCI_QUIRK_MULTIBLOCK_ACMD12;
->>
->>       if (of_get_property(np, "sdhci,1-bit-only", NULL) ||
->>           (of_property_read_u32(np, "bus-width", &bus_width) == 0 &&
->> diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3c.c
->> index 70c724b..756b9bb 100644
->> --- a/drivers/mmc/host/sdhci-s3c.c
->> +++ b/drivers/mmc/host/sdhci-s3c.c
->> @@ -564,7 +564,7 @@ static int sdhci_s3c_probe(struct platform_device *pdev)
->>       host->quirks |= SDHCI_QUIRK_NO_BUSY_IRQ;
->>
->>       /* This host supports the Auto CMD12 */
->> -     host->quirks |= SDHCI_QUIRK_MULTIBLOCK_READ_ACMD12;
->> +     host->quirks |= SDHCI_QUIRK_MULTIBLOCK_ACMD12;
->>
->>       /* Samsung SoCs need BROKEN_ADMA_ZEROLEN_DESC */
->>       host->quirks |= SDHCI_QUIRK_BROKEN_ADMA_ZEROLEN_DESC;
->> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
->> index 96ccb15..40e3551 100644
->> --- a/drivers/mmc/host/sdhci.c
->> +++ b/drivers/mmc/host/sdhci.c
->> @@ -2988,7 +2988,7 @@ int sdhci_add_host(struct sdhci_host *host)
->>       mmc->caps |= MMC_CAP_SDIO_IRQ | MMC_CAP_ERASE | MMC_CAP_CMD23;
->>       mmc->caps2 |= MMC_CAP2_SDIO_IRQ_NOTHREAD;
->>
->> -     if (host->quirks & SDHCI_QUIRK_MULTIBLOCK_READ_ACMD12)
->> +     if (host->quirks & SDHCI_QUIRK_MULTIBLOCK_ACMD12)
->>               host->flags |= SDHCI_AUTO_CMD12;
->>
->>       /* Auto-CMD23 stuff only works in ADMA or PIO. */
->> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
->> index 0f39f4f..afa4de8 100644
->> --- a/drivers/mmc/host/sdhci.h
->> +++ b/drivers/mmc/host/sdhci.h
->> @@ -379,7 +379,7 @@ struct sdhci_host {
->>  /* Controller is missing device caps. Use caps provided by host */
->>  #define SDHCI_QUIRK_MISSING_CAPS                     (1<<27)
->>  /* Controller uses Auto CMD12 command to stop the transfer */
->> -#define SDHCI_QUIRK_MULTIBLOCK_READ_ACMD12           (1<<28)
->> +#define SDHCI_QUIRK_MULTIBLOCK_ACMD12                        (1<<28)
->>  /* Controller doesn't have HISPD bit field in HI-SPEED SD card */
->>  #define SDHCI_QUIRK_NO_HISPD_BIT                     (1<<29)
->>  /* Controller treats ADMA descriptors with length 0000h incorrectly */
 >>
 >
