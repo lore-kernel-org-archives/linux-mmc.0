@@ -1,80 +1,106 @@
-From: Ludovic Desroches <ludovic.desroches@atmel.com>
-Subject: [PATCH] mmc: sdhci: fix wakeup configuration
-Date: Mon, 25 Apr 2016 15:15:24 +0200
-Message-ID: <1461590124-23783-1-git-send-email-ludovic.desroches@atmel.com>
-Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: adrian.hunter@intel.com, ulf.hansson@linaro.org
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, nicolas.ferre@atmel.com, Ludovic Desroches <ludovic.desroches@atmel.com>
+From: Enric Balletbo i Serra <enric.balletbo@collabora.com>
+Subject: [PATCH v2] mmc: dw_mmc: Wait for data transfer after response errors.
+Date: Mon, 25 Apr 2016 17:18:49 +0200
+Message-ID: <1461597529-6470-2-git-send-email-enric.balletbo@collabora.com>
+References: <1461597529-6470-1-git-send-email-enric.balletbo@collabora.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from bhuna.collabora.co.uk ([46.235.227.227]:43528 "EHLO
+	bhuna.collabora.co.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932685AbcDYPTB (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 25 Apr 2016 11:19:01 -0400
+In-Reply-To: <1461597529-6470-1-git-send-email-enric.balletbo@collabora.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Jaehoon Chung <jh80.chung@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Cc: Doug Anderson <dianders@chromium.org>, Alim Akhtar <alim.akhtar@gmail.com>
 
-Activating wakeup event is not enough to get a wakeup signal. The
-corresponding events have to be enabled in the Interrupt Status Enable
-Register too.
+From: Doug Anderson <dianders@chromium.org>
 
-Signed-off-by: Ludovic Desroches <ludovic.desroches@atmel.com>
+According to the DesignWare state machine description, after we get a
+"response error" or "response CRC error" we move into data transfer
+mode. That means that we don't necessarily need to special case
+trying to deal with the failure right away. We can wait until we are
+notified that the data transfer is complete (with or without errors)
+and then we can deal with the failure.
+
+It may sound strange to defer dealing with a command that we know will
+fail anyway, but this appears to fix a bug. During tuning (CMD19) on
+a specific card on an rk3288-based system, we found that we could get
+a "response CRC error". Sending the stop command after the "response
+CRC error" would then throw the system into a confused state causing
+all future tuning phases to report failure.
+
+When in the confused state, the controller would show these (hex codes
+are interrupt status register):
+ CMD ERR: 0x00000046 (cmd=19)
+ CMD ERR: 0x0000004e (cmd=12)
+ DATA ERR: 0x00000208
+ DATA ERR: 0x0000020c
+ CMD ERR: 0x00000104 (cmd=19)
+ CMD ERR: 0x00000104 (cmd=12)
+ DATA ERR: 0x00000208
+ DATA ERR: 0x0000020c
+ ...
+ ...
+
+It is inherently difficult to deal with the complexity of trying to
+correctly send a stop command while a data transfer is taking place
+since you need to deal with different corner cases caused by the fact
+that the data transfer could complete (with errors or without errors)
+during various places in sending the stop command (dw_mci_stop_dma,
+send_stop_abort, etc)
+
+Instead of adding a bunch of extra complexity to deal with this, it
+seems much simpler to just use the more straightforward (and less
+error-prone) path of letting the data transfer finish. There
+shouldn't be any huge benefit to sending the stop command slightly
+earlier, anyway.
+
+Signed-off-by: Doug Anderson <dianders@chromium.org>
+Signed-off-by: Enric Balletbo i Serra <enric.balletbo@collabora.com>
+Cc: Alim Akhtar <alim.akhtar@gmail.com>
 ---
-Hi,
+ drivers/mmc/host/dw_mmc.c | 27 +++++++++++++++++++++++++++
+ 1 file changed, 27 insertions(+)
 
-I just updated sdhci_enable_irq_wakeups() not sdhci_disable_irq_wakeups()
-because I don't think it is necessary to configure SDHCI_INT_ENABLE at this
-step, it will be done with sdhci_init() or sdhci_enable_card_detection().
-
-While I was writing this patch, several questions came to my mind:
-- Is the naming correct? wakeup signal is not an irq. 'enable_irq_wakeups' can
-  be a bit confusing.
-- If we want to wakeup from irq, we may have to set SDHCI_INT_ENABLE and
-  SDHCI_SIGNAL_ENABLE and not rely on a previous configuration, isn't it?
-
-Regards
-
-Ludovic
-
- drivers/mmc/host/sdhci.c | 26 ++++++++++++++++++--------
- 1 file changed, 18 insertions(+), 8 deletions(-)
-
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index b284924..6fc69ed 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -2638,18 +2638,28 @@ static irqreturn_t sdhci_thread_irq(int irq, void *dev_id)
- \*****************************************************************************/
+diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+index 242f9a0..2ebeea8 100644
+--- a/drivers/mmc/host/dw_mmc.c
++++ b/drivers/mmc/host/dw_mmc.c
+@@ -1761,6 +1761,33 @@ static void dw_mci_tasklet_func(unsigned long priv)
+ 			}
  
- #ifdef CONFIG_PM
-+/*
-+ * To enable wakeup events, the corresponding events have to be enabled in
-+ * the Interrupt Status Enable register too. See 'Table 1-6: Wakeup Signal
-+ * Table' in the SD Host Controller Standard Specification.
-+ */
- void sdhci_enable_irq_wakeups(struct sdhci_host *host)
- {
--	u8 val;
--	u8 mask = SDHCI_WAKE_ON_INSERT | SDHCI_WAKE_ON_REMOVE
--			| SDHCI_WAKE_ON_INT;
-+	u8 wakeup_val;
-+	u8 wakeup_mask = SDHCI_WAKE_ON_INSERT | SDHCI_WAKE_ON_REMOVE |
-+			 SDHCI_WAKE_ON_INT;
-+	u32 irq_val = SDHCI_INT_CARD_INSERT | SDHCI_INT_CARD_REMOVE |
-+		      SDHCI_INT_CARD_INT;
- 
--	val = sdhci_readb(host, SDHCI_WAKE_UP_CONTROL);
--	val |= mask ;
-+	wakeup_val = sdhci_readb(host, SDHCI_WAKE_UP_CONTROL);
-+	wakeup_val |= wakeup_mask;
- 	/* Avoid fake wake up */
--	if (host->quirks & SDHCI_QUIRK_BROKEN_CARD_DETECTION)
--		val &= ~(SDHCI_WAKE_ON_INSERT | SDHCI_WAKE_ON_REMOVE);
--	sdhci_writeb(host, val, SDHCI_WAKE_UP_CONTROL);
-+	if (host->quirks & SDHCI_QUIRK_BROKEN_CARD_DETECTION) {
-+		wakeup_val &= ~(SDHCI_WAKE_ON_INSERT | SDHCI_WAKE_ON_REMOVE);
-+		irq_val &= ~(SDHCI_INT_CARD_INSERT | SDHCI_INT_CARD_REMOVE);
-+	}
-+	sdhci_writeb(host, wakeup_val, SDHCI_WAKE_UP_CONTROL);
-+	sdhci_writel(host, irq_val, SDHCI_INT_ENABLE);
- }
- EXPORT_SYMBOL_GPL(sdhci_enable_irq_wakeups);
- 
+ 			if (cmd->data && err) {
++				/*
++				 * During UHS tuning sequence, sending the stop
++				 * command after the response CRC error would
++				 * throw the system into a confused state
++				 * causing all future tuning phases to report
++				 * failure.
++				 *
++				 * In such case controller will move into a data
++				 * transfer state after a response error or
++				 * response CRC error. Let's let that finish
++				 * before trying to send a stop, so we'll go to
++				 * STATE_SENDING_DATA.
++				 *
++				 * Although letting the data transfer take place
++				 * will waste a bit of time (we already know
++				 * the command was bad), it can't cause any
++				 * errors since it's possible it would have
++				 * taken place anyway if this tasklet got
++				 * delayed. Allowing the transfer to take place
++				 * avoids races and keeps things simple.
++				 */
++				if ((err != -ETIMEDOUT) &&
++				    (cmd->opcode == MMC_SEND_TUNING_BLOCK)) {
++					state = STATE_SENDING_DATA;
++					continue;
++				}
++
+ 				dw_mci_stop_dma(host);
+ 				send_stop_abort(host, data);
+ 				state = STATE_SENDING_STOP;
 -- 
-2.5.0
+2.1.0
+
