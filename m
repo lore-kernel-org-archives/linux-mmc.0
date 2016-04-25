@@ -1,61 +1,80 @@
-From: "Winkler, Tomas" <tomas.winkler@intel.com>
-Subject: RE: [PATCH 2/8] char: rpmb: add sysfs-class ABI documentation
-Date: Sun, 24 Apr 2016 16:27:54 +0000
-Message-ID: <5B8DA87D05A7694D9FA63FD143655C1B542452C5@hasmsx108.ger.corp.intel.com>
-References: <1459676572-29921-1-git-send-email-tomas.winkler@intel.com>
- <1459676572-29921-3-git-send-email-tomas.winkler@intel.com>
- <20160424091951.GA23015@amd>
+From: Ludovic Desroches <ludovic.desroches@atmel.com>
+Subject: [PATCH] mmc: sdhci: fix wakeup configuration
+Date: Mon, 25 Apr 2016 15:15:24 +0200
+Message-ID: <1461590124-23783-1-git-send-email-ludovic.desroches@atmel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20160424091951.GA23015@amd>
-Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: Pavel Machek <pavel@ucw.cz>
-Cc: "gregkh@linuxfoundation.org" <gregkh@linuxfoundation.org>, Ulf Hansson <ulf.hansson@linaro.org>, "Hunter, Adrian" <adrian.hunter@intel.com>, James Bottomley <James.Bottomley@HansenPartnership.com>, "Martin K. Petersen" <martin.petersen@oracle.com>, Vinayak Holikatti <vinholikatti@gmail.com>, Christoph Hellwig <hch@lst.de>, Yaniv Gardi <ygardi@codeaurora.org>, Joao Pinto <Joao.Pinto@synopsys.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-scsi@vger.kernel.org" <linux-scsi@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+To: adrian.hunter@intel.com, ulf.hansson@linaro.org
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, nicolas.ferre@atmel.com, Ludovic Desroches <ludovic.desroches@atmel.com>
 List-Id: linux-mmc@vger.kernel.org
 
-> 
-> On Sun 2016-04-03 12:42:46, Tomas Winkler wrote:
-> > Signed-off-by: Tomas Winkler <tomas.winkler@intel.com>
-> > ---
-> >  Documentation/ABI/testing/sysfs-class-rpmb | 15 +++++++++++++++
-> >  MAINTAINERS                                |  1 +
-> >  2 files changed, 16 insertions(+)
-> >  create mode 100644 Documentation/ABI/testing/sysfs-class-rpmb
-> >
-> > diff --git a/Documentation/ABI/testing/sysfs-class-rpmb
-> > b/Documentation/ABI/testing/sysfs-class-rpmb
-> > new file mode 100644
-> > index 000000000000..62d1959bf19e
-> > --- /dev/null
-> > +++ b/Documentation/ABI/testing/sysfs-class-rpmb
-> > @@ -0,0 +1,15 @@
-> > +What:		/sys/class/rpmb/
-> > +Date:		Mar 2016
-> > +KernelVersion:	TBD
-> > +Contact:	Tomas Winkler <tomas.winkler@intel.com>
-> > +Description:
-> > +		The rpmb/ class sub-directory belongs to RPMB device class
-> > +
-> > +
-> > +What:		/sys/class/rpmb/rpmbN/
-> > +Date:		Mar 2016
-> > +KernelVersion:	TBD
-> > +Contact:	Tomas Winkler <tomas.winkler@intel.com>
-> > +Description:
-> > +		The /sys/class/rpmb/rpmbN directory is created for
-> > +		each RPMB registered device
-> 
-> 
-> Umm. Can we get some better documentation?
-> 
-> This is useless.
-> 
-> Interested reader would also like to know what "RPMB" is, and why he
-> should be interested...
+Activating wakeup event is not enough to get a wakeup signal. The
+corresponding events have to be enabled in the Interrupt Status Enable
+Register too.
 
-No, problem I'll paste here some information from the intro mail.
-Thanks 
-Tomas 
+Signed-off-by: Ludovic Desroches <ludovic.desroches@atmel.com>
+---
+Hi,
+
+I just updated sdhci_enable_irq_wakeups() not sdhci_disable_irq_wakeups()
+because I don't think it is necessary to configure SDHCI_INT_ENABLE at this
+step, it will be done with sdhci_init() or sdhci_enable_card_detection().
+
+While I was writing this patch, several questions came to my mind:
+- Is the naming correct? wakeup signal is not an irq. 'enable_irq_wakeups' can
+  be a bit confusing.
+- If we want to wakeup from irq, we may have to set SDHCI_INT_ENABLE and
+  SDHCI_SIGNAL_ENABLE and not rely on a previous configuration, isn't it?
+
+Regards
+
+Ludovic
+
+ drivers/mmc/host/sdhci.c | 26 ++++++++++++++++++--------
+ 1 file changed, 18 insertions(+), 8 deletions(-)
+
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index b284924..6fc69ed 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -2638,18 +2638,28 @@ static irqreturn_t sdhci_thread_irq(int irq, void *dev_id)
+ \*****************************************************************************/
+ 
+ #ifdef CONFIG_PM
++/*
++ * To enable wakeup events, the corresponding events have to be enabled in
++ * the Interrupt Status Enable register too. See 'Table 1-6: Wakeup Signal
++ * Table' in the SD Host Controller Standard Specification.
++ */
+ void sdhci_enable_irq_wakeups(struct sdhci_host *host)
+ {
+-	u8 val;
+-	u8 mask = SDHCI_WAKE_ON_INSERT | SDHCI_WAKE_ON_REMOVE
+-			| SDHCI_WAKE_ON_INT;
++	u8 wakeup_val;
++	u8 wakeup_mask = SDHCI_WAKE_ON_INSERT | SDHCI_WAKE_ON_REMOVE |
++			 SDHCI_WAKE_ON_INT;
++	u32 irq_val = SDHCI_INT_CARD_INSERT | SDHCI_INT_CARD_REMOVE |
++		      SDHCI_INT_CARD_INT;
+ 
+-	val = sdhci_readb(host, SDHCI_WAKE_UP_CONTROL);
+-	val |= mask ;
++	wakeup_val = sdhci_readb(host, SDHCI_WAKE_UP_CONTROL);
++	wakeup_val |= wakeup_mask;
+ 	/* Avoid fake wake up */
+-	if (host->quirks & SDHCI_QUIRK_BROKEN_CARD_DETECTION)
+-		val &= ~(SDHCI_WAKE_ON_INSERT | SDHCI_WAKE_ON_REMOVE);
+-	sdhci_writeb(host, val, SDHCI_WAKE_UP_CONTROL);
++	if (host->quirks & SDHCI_QUIRK_BROKEN_CARD_DETECTION) {
++		wakeup_val &= ~(SDHCI_WAKE_ON_INSERT | SDHCI_WAKE_ON_REMOVE);
++		irq_val &= ~(SDHCI_INT_CARD_INSERT | SDHCI_INT_CARD_REMOVE);
++	}
++	sdhci_writeb(host, wakeup_val, SDHCI_WAKE_UP_CONTROL);
++	sdhci_writel(host, irq_val, SDHCI_INT_ENABLE);
+ }
+ EXPORT_SYMBOL_GPL(sdhci_enable_irq_wakeups);
+ 
+-- 
+2.5.0
