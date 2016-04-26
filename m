@@ -1,88 +1,53 @@
-From: Scott Wood <scott.wood@nxp.com>
-Subject: Re: [PATCH 1/2] powerpc/85xx: adapt QorIQ eSDHC to the new clocking
- model
-Date: Tue, 26 Apr 2016 06:31:14 +0000
-Message-ID: <DB5PR0401MB1928ABB01CEAF524071C851591630@DB5PR0401MB1928.eurprd04.prod.outlook.com>
-References: <1461147644-18041-1-git-send-email-yangbo.lu@nxp.com>
- <1461280096.32510.213.camel@buserror.net>
- <HE1PR04MB0889A9EA3955E0723146A2A9F8630@HE1PR04MB0889.eurprd04.prod.outlook.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+From: Shawn Lin <shawn.lin@rock-chips.com>
+Subject: [PATCH] mmc: dw_mmc-rockchip: add MMC_CAP_CMD23 capabilities
+Date: Tue, 26 Apr 2016 14:53:59 +0800
+Message-ID: <1461653639-14470-1-git-send-email-shawn.lin@rock-chips.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-db3on0081.outbound.protection.outlook.com ([157.55.234.81]:60409
-	"EHLO emea01-db3-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1751115AbcDZGbS convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 26 Apr 2016 02:31:18 -0400
-Content-Language: en-US
+Received: from lucky1.263xmail.com ([211.157.147.133]:44314 "EHLO
+	lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751101AbcDZGzG (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 26 Apr 2016 02:55:06 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Yangbo Lu <yangbo.lu@nxp.com>, Scott Wood <oss@buserror.net>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linuxppc-dev@lists.ozlabs.org" <linuxppc-dev@lists.ozlabs.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>
-Cc: "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>
+To: Jaehoon Chung <jh80.chung@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Heiko Stuebner <heiko@sntech.de>, linux-rockchip@lists.infradead.org, Shawn Lin <shawn.lin@rock-chips.com>
 
-On 04/26/2016 01:29 AM, Yangbo Lu wrote:
-> 
-> 
->> -----Original Message-----
->> From: Yangbo Lu
->> Sent: Tuesday, April 26, 2016 2:19 PM
->> To: 'Scott Wood'; linux-mmc@vger.kernel.org; linuxppc-
->> dev@lists.ozlabs.org; devicetree@vger.kernel.org
->> Cc: ulf.hansson@linaro.org; Rob Herring; Scott Wood
->> Subject: RE: [PATCH 1/2] powerpc/85xx: adapt QorIQ eSDHC to the new
->> clocking model
->>
->>> -----Original Message-----
->>> From: Scott Wood [mailto:oss@buserror.net]
->>> Sent: Friday, April 22, 2016 7:08 AM
->>> To: Yangbo Lu; linux-mmc@vger.kernel.org;
->>> linuxppc-dev@lists.ozlabs.org; devicetree@vger.kernel.org
->>> Cc: ulf.hansson@linaro.org; Rob Herring; Scott Wood
->>> Subject: Re: [PATCH 1/2] powerpc/85xx: adapt QorIQ eSDHC to the new
->>> clocking model
->>>
->>> On Wed, 2016-04-20 at 18:20 +0800, Yangbo Lu wrote:
->>>> Provide clocks property instead of clock-frequency for QorIQ eSDHC
->>>> dts node to adapt to the new clocking model, so that the driver
->>>> could get clock value by the common clk API and the u-boot could
->>>> remove the clock fixup.
->>>>
->>>> Signed-off-by: Yangbo Lu <yangbo.lu@nxp.com>
->>>> ---
->>>>  arch/powerpc/boot/dts/fsl/qoriq-esdhc-0.dtsi | 2 +-
->>>>  1 file changed, 1 insertion(+), 1 deletion(-)
->>>>
->>>> diff --git a/arch/powerpc/boot/dts/fsl/qoriq-esdhc-0.dtsi
->>>> b/arch/powerpc/boot/dts/fsl/qoriq-esdhc-0.dtsi
->>>> index 20835ae..ddbe562 100644
->>>> --- a/arch/powerpc/boot/dts/fsl/qoriq-esdhc-0.dtsi
->>>> +++ b/arch/powerpc/boot/dts/fsl/qoriq-esdhc-0.dtsi
->>>> @@ -36,5 +36,5 @@ sdhc: sdhc@114000 {
->>>>  	compatible = "fsl,esdhc";
->>>>  	reg = <0x114000 0x1000>;
->>>>  	interrupts = <48 2 0 0>;
->>>> -	clock-frequency = <0>;
->>>> +	clocks = <&clockgen 4 1>;
->>>>  };
->>>
->>> Binding update?
->>>
->>> -Scott
->>
->> [Lu Yangbo-B47093] Sorry, did you mean the doc update? ...
->> It has already had a description in
->> Documentation/devicetree/bindings/clock/qoriq-clock.txt
->>
->> - clock-frequency: Input system clock frequency (SYSCLK)
->> - clocks: If clock-frequency is not specified, sysclk may be provided
->>         as an input clock.  Either clock-frequency or clocks must be
->>         provided.
-> 
-> [Lu Yangbo-B47093] Or update mmc doc?
+Add MMC_CAP_CMD23 for dw_mmc-rockchip, otherwise
+failing to create rpmb partition. With it, we can
+get rpmb successfully:
 
-Yes, mmc.  This patch has nothing to do with the clockgen node's input
-clock...
+mmc1: new HS200 MMC card at address 0001
+mmcblk0: mmc1:0001 DS2016 14.7 GiB
+mmcblk0boot0: mmc1:0001 DS2016 partition 1 4.00 MiB
+mmcblk0boot1: mmc1:0001 DS2016 partition 2 4.00 MiB
+mmcblk0rpmb: mmc1:0001 DS2016 partition 3 4.00 MiB
 
--Scott
+Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
+---
+
+ drivers/mmc/host/dw_mmc-rockchip.c | 8 ++++----
+ 1 file changed, 4 insertions(+), 4 deletions(-)
+
+diff --git a/drivers/mmc/host/dw_mmc-rockchip.c b/drivers/mmc/host/dw_mmc-rockchip.c
+index 8c20b81..2b4bcd2 100644
+--- a/drivers/mmc/host/dw_mmc-rockchip.c
++++ b/drivers/mmc/host/dw_mmc-rockchip.c
+@@ -233,10 +233,10 @@ static int dw_mci_rockchip_init(struct dw_mci *host)
+ 
+ /* Common capabilities of RK3288 SoC */
+ static unsigned long dw_mci_rk3288_dwmmc_caps[4] = {
+-	MMC_CAP_ERASE,
+-	MMC_CAP_ERASE,
+-	MMC_CAP_ERASE,
+-	MMC_CAP_ERASE,
++	MMC_CAP_ERASE | MMC_CAP_CMD23,
++	MMC_CAP_ERASE | MMC_CAP_CMD23,
++	MMC_CAP_ERASE | MMC_CAP_CMD23,
++	MMC_CAP_ERASE | MMC_CAP_CMD23,
+ };
+ 
+ static const struct dw_mci_drv_data rk2928_drv_data = {
+-- 
+2.3.7
+
 
