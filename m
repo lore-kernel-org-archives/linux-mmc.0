@@ -1,61 +1,88 @@
-From: Yangbo Lu <yangbo.lu@nxp.com>
-Subject: RE: [PATCH 1/2] powerpc/85xx: adapt QorIQ eSDHC to the new clocking
+From: Scott Wood <scott.wood@nxp.com>
+Subject: Re: [PATCH 1/2] powerpc/85xx: adapt QorIQ eSDHC to the new clocking
  model
-Date: Tue, 26 Apr 2016 06:29:28 +0000
-Message-ID: <HE1PR04MB0889A9EA3955E0723146A2A9F8630@HE1PR04MB0889.eurprd04.prod.outlook.com>
+Date: Tue, 26 Apr 2016 06:31:14 +0000
+Message-ID: <DB5PR0401MB1928ABB01CEAF524071C851591630@DB5PR0401MB1928.eurprd04.prod.outlook.com>
 References: <1461147644-18041-1-git-send-email-yangbo.lu@nxp.com>
  <1461280096.32510.213.camel@buserror.net>
+ <HE1PR04MB0889A9EA3955E0723146A2A9F8630@HE1PR04MB0889.eurprd04.prod.outlook.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-db3on0064.outbound.protection.outlook.com ([157.55.234.64]:58448
+Received: from mail-db3on0081.outbound.protection.outlook.com ([157.55.234.81]:60409
 	"EHLO emea01-db3-obe.outbound.protection.outlook.com"
 	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1750995AbcDZG3d (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 26 Apr 2016 02:29:33 -0400
+	id S1751115AbcDZGbS convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 26 Apr 2016 02:31:18 -0400
 Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Yangbo Lu <yangbo.lu@nxp.com>, Scott Wood <oss@buserror.net>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linuxppc-dev@lists.ozlabs.org" <linuxppc-dev@lists.ozlabs.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>
-Cc: "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>, Scott Wood <scott.wood@nxp.com>
+Cc: "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>
 
-DQoNCj4gLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4gRnJvbTogWWFuZ2JvIEx1DQo+IFNl
-bnQ6IFR1ZXNkYXksIEFwcmlsIDI2LCAyMDE2IDI6MTkgUE0NCj4gVG86ICdTY290dCBXb29kJzsg
-bGludXgtbW1jQHZnZXIua2VybmVsLm9yZzsgbGludXhwcGMtDQo+IGRldkBsaXN0cy5vemxhYnMu
-b3JnOyBkZXZpY2V0cmVlQHZnZXIua2VybmVsLm9yZw0KPiBDYzogdWxmLmhhbnNzb25AbGluYXJv
-Lm9yZzsgUm9iIEhlcnJpbmc7IFNjb3R0IFdvb2QNCj4gU3ViamVjdDogUkU6IFtQQVRDSCAxLzJd
-IHBvd2VycGMvODV4eDogYWRhcHQgUW9ySVEgZVNESEMgdG8gdGhlIG5ldw0KPiBjbG9ja2luZyBt
-b2RlbA0KPiANCj4gPiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiA+IEZyb206IFNjb3R0
-IFdvb2QgW21haWx0bzpvc3NAYnVzZXJyb3IubmV0XQ0KPiA+IFNlbnQ6IEZyaWRheSwgQXByaWwg
-MjIsIDIwMTYgNzowOCBBTQ0KPiA+IFRvOiBZYW5nYm8gTHU7IGxpbnV4LW1tY0B2Z2VyLmtlcm5l
-bC5vcmc7DQo+ID4gbGludXhwcGMtZGV2QGxpc3RzLm96bGFicy5vcmc7IGRldmljZXRyZWVAdmdl
-ci5rZXJuZWwub3JnDQo+ID4gQ2M6IHVsZi5oYW5zc29uQGxpbmFyby5vcmc7IFJvYiBIZXJyaW5n
-OyBTY290dCBXb29kDQo+ID4gU3ViamVjdDogUmU6IFtQQVRDSCAxLzJdIHBvd2VycGMvODV4eDog
-YWRhcHQgUW9ySVEgZVNESEMgdG8gdGhlIG5ldw0KPiA+IGNsb2NraW5nIG1vZGVsDQo+ID4NCj4g
-PiBPbiBXZWQsIDIwMTYtMDQtMjAgYXQgMTg6MjAgKzA4MDAsIFlhbmdibyBMdSB3cm90ZToNCj4g
-PiA+IFByb3ZpZGUgY2xvY2tzIHByb3BlcnR5IGluc3RlYWQgb2YgY2xvY2stZnJlcXVlbmN5IGZv
-ciBRb3JJUSBlU0RIQw0KPiA+ID4gZHRzIG5vZGUgdG8gYWRhcHQgdG8gdGhlIG5ldyBjbG9ja2lu
-ZyBtb2RlbCwgc28gdGhhdCB0aGUgZHJpdmVyDQo+ID4gPiBjb3VsZCBnZXQgY2xvY2sgdmFsdWUg
-YnkgdGhlIGNvbW1vbiBjbGsgQVBJIGFuZCB0aGUgdS1ib290IGNvdWxkDQo+ID4gPiByZW1vdmUg
-dGhlIGNsb2NrIGZpeHVwLg0KPiA+ID4NCj4gPiA+IFNpZ25lZC1vZmYtYnk6IFlhbmdibyBMdSA8
-eWFuZ2JvLmx1QG54cC5jb20+DQo+ID4gPiAtLS0NCj4gPiA+ICBhcmNoL3Bvd2VycGMvYm9vdC9k
-dHMvZnNsL3FvcmlxLWVzZGhjLTAuZHRzaSB8IDIgKy0NCj4gPiA+ICAxIGZpbGUgY2hhbmdlZCwg
-MSBpbnNlcnRpb24oKyksIDEgZGVsZXRpb24oLSkNCj4gPiA+DQo+ID4gPiBkaWZmIC0tZ2l0IGEv
-YXJjaC9wb3dlcnBjL2Jvb3QvZHRzL2ZzbC9xb3JpcS1lc2RoYy0wLmR0c2kNCj4gPiA+IGIvYXJj
-aC9wb3dlcnBjL2Jvb3QvZHRzL2ZzbC9xb3JpcS1lc2RoYy0wLmR0c2kNCj4gPiA+IGluZGV4IDIw
-ODM1YWUuLmRkYmU1NjIgMTAwNjQ0DQo+ID4gPiAtLS0gYS9hcmNoL3Bvd2VycGMvYm9vdC9kdHMv
-ZnNsL3FvcmlxLWVzZGhjLTAuZHRzaQ0KPiA+ID4gKysrIGIvYXJjaC9wb3dlcnBjL2Jvb3QvZHRz
-L2ZzbC9xb3JpcS1lc2RoYy0wLmR0c2kNCj4gPiA+IEBAIC0zNiw1ICszNiw1IEBAIHNkaGM6IHNk
-aGNAMTE0MDAwIHsNCj4gPiA+ICAJY29tcGF0aWJsZSA9ICJmc2wsZXNkaGMiOw0KPiA+ID4gIAly
-ZWcgPSA8MHgxMTQwMDAgMHgxMDAwPjsNCj4gPiA+ICAJaW50ZXJydXB0cyA9IDw0OCAyIDAgMD47
-DQo+ID4gPiAtCWNsb2NrLWZyZXF1ZW5jeSA9IDwwPjsNCj4gPiA+ICsJY2xvY2tzID0gPCZjbG9j
-a2dlbiA0IDE+Ow0KPiA+ID4gIH07DQo+ID4NCj4gPiBCaW5kaW5nIHVwZGF0ZT8NCj4gPg0KPiA+
-IC1TY290dA0KPiANCj4gW0x1IFlhbmdiby1CNDcwOTNdIFNvcnJ5LCBkaWQgeW91IG1lYW4gdGhl
-IGRvYyB1cGRhdGU/IC4uLg0KPiBJdCBoYXMgYWxyZWFkeSBoYWQgYSBkZXNjcmlwdGlvbiBpbg0K
-PiBEb2N1bWVudGF0aW9uL2RldmljZXRyZWUvYmluZGluZ3MvY2xvY2svcW9yaXEtY2xvY2sudHh0
-DQo+IA0KPiAtIGNsb2NrLWZyZXF1ZW5jeTogSW5wdXQgc3lzdGVtIGNsb2NrIGZyZXF1ZW5jeSAo
-U1lTQ0xLKQ0KPiAtIGNsb2NrczogSWYgY2xvY2stZnJlcXVlbmN5IGlzIG5vdCBzcGVjaWZpZWQs
-IHN5c2NsayBtYXkgYmUgcHJvdmlkZWQNCj4gICAgICAgICBhcyBhbiBpbnB1dCBjbG9jay4gIEVp
-dGhlciBjbG9jay1mcmVxdWVuY3kgb3IgY2xvY2tzIG11c3QgYmUNCj4gICAgICAgICBwcm92aWRl
-ZC4NCg0KW0x1IFlhbmdiby1CNDcwOTNdIE9yIHVwZGF0ZSBtbWMgZG9jPw0KVGhhbmtzLg0K
+On 04/26/2016 01:29 AM, Yangbo Lu wrote:
+> 
+> 
+>> -----Original Message-----
+>> From: Yangbo Lu
+>> Sent: Tuesday, April 26, 2016 2:19 PM
+>> To: 'Scott Wood'; linux-mmc@vger.kernel.org; linuxppc-
+>> dev@lists.ozlabs.org; devicetree@vger.kernel.org
+>> Cc: ulf.hansson@linaro.org; Rob Herring; Scott Wood
+>> Subject: RE: [PATCH 1/2] powerpc/85xx: adapt QorIQ eSDHC to the new
+>> clocking model
+>>
+>>> -----Original Message-----
+>>> From: Scott Wood [mailto:oss@buserror.net]
+>>> Sent: Friday, April 22, 2016 7:08 AM
+>>> To: Yangbo Lu; linux-mmc@vger.kernel.org;
+>>> linuxppc-dev@lists.ozlabs.org; devicetree@vger.kernel.org
+>>> Cc: ulf.hansson@linaro.org; Rob Herring; Scott Wood
+>>> Subject: Re: [PATCH 1/2] powerpc/85xx: adapt QorIQ eSDHC to the new
+>>> clocking model
+>>>
+>>> On Wed, 2016-04-20 at 18:20 +0800, Yangbo Lu wrote:
+>>>> Provide clocks property instead of clock-frequency for QorIQ eSDHC
+>>>> dts node to adapt to the new clocking model, so that the driver
+>>>> could get clock value by the common clk API and the u-boot could
+>>>> remove the clock fixup.
+>>>>
+>>>> Signed-off-by: Yangbo Lu <yangbo.lu@nxp.com>
+>>>> ---
+>>>>  arch/powerpc/boot/dts/fsl/qoriq-esdhc-0.dtsi | 2 +-
+>>>>  1 file changed, 1 insertion(+), 1 deletion(-)
+>>>>
+>>>> diff --git a/arch/powerpc/boot/dts/fsl/qoriq-esdhc-0.dtsi
+>>>> b/arch/powerpc/boot/dts/fsl/qoriq-esdhc-0.dtsi
+>>>> index 20835ae..ddbe562 100644
+>>>> --- a/arch/powerpc/boot/dts/fsl/qoriq-esdhc-0.dtsi
+>>>> +++ b/arch/powerpc/boot/dts/fsl/qoriq-esdhc-0.dtsi
+>>>> @@ -36,5 +36,5 @@ sdhc: sdhc@114000 {
+>>>>  	compatible = "fsl,esdhc";
+>>>>  	reg = <0x114000 0x1000>;
+>>>>  	interrupts = <48 2 0 0>;
+>>>> -	clock-frequency = <0>;
+>>>> +	clocks = <&clockgen 4 1>;
+>>>>  };
+>>>
+>>> Binding update?
+>>>
+>>> -Scott
+>>
+>> [Lu Yangbo-B47093] Sorry, did you mean the doc update? ...
+>> It has already had a description in
+>> Documentation/devicetree/bindings/clock/qoriq-clock.txt
+>>
+>> - clock-frequency: Input system clock frequency (SYSCLK)
+>> - clocks: If clock-frequency is not specified, sysclk may be provided
+>>         as an input clock.  Either clock-frequency or clocks must be
+>>         provided.
+> 
+> [Lu Yangbo-B47093] Or update mmc doc?
+
+Yes, mmc.  This patch has nothing to do with the clockgen node's input
+clock...
+
+-Scott
+
