@@ -1,55 +1,81 @@
 From: Wolfram Sang <wsa@the-dreams.de>
-Subject: Re: [PATCH 0/5] mmc: tmio: make CTL_STATUS handling consistent
-Date: Tue, 26 Apr 2016 18:46:53 +0200
-Message-ID: <20160426164652.GA3444@katana>
-References: <1460650609-2105-1-git-send-email-wsa@the-dreams.de>
- <CAPDyKFrHb3u2CcSGr3dyzPP53UzGCTDAQ6rK8FKBn80wS+znJQ@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="UugvWAfsgieZRqgk"
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from sauhun.de ([89.238.76.85]:51350 "EHLO pokefinder.org"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751829AbcDZQq7 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 26 Apr 2016 12:46:59 -0400
-Content-Disposition: inline
-In-Reply-To: <CAPDyKFrHb3u2CcSGr3dyzPP53UzGCTDAQ6rK8FKBn80wS+znJQ@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Subject: [PATCH v2 2/5] mmc: tmio: use BIT() within defines
+Date: Tue, 26 Apr 2016 18:53:42 +0200
+Message-ID: <1461689625-3693-3-git-send-email-wsa@the-dreams.de>
+References: <1461689625-3693-1-git-send-email-wsa@the-dreams.de>
+Return-path: <linux-renesas-soc-owner@vger.kernel.org>
+In-Reply-To: <1461689625-3693-1-git-send-email-wsa@the-dreams.de>
+Sender: linux-renesas-soc-owner@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: Wolfram Sang <wsa@the-dreams.de>, linux-renesas-soc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, Simon Horman <horms+renesas@verge.net.au>
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, linux-renesas-soc@vger.kernel.org
 
+From: Wolfram Sang <wsa+renesas@sang-engineering.com>
 
---UugvWAfsgieZRqgk
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+BIT() makes it easier to match the bits to the datasheet. This is
+especially important here, since some variants have different names in
+their datasheets (like with Renesas R-Car).
 
+Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+Reviewed-by: Simon Horman <horms+renesas@verge.net.au>
+---
+ drivers/mmc/host/tmio_mmc.h | 44 +++++++++++++++++++++++---------------------
+ 1 file changed, 23 insertions(+), 21 deletions(-)
 
-> I tried to apply this one, but it seems like it need a rebase. Can you
-> please have look and re-spin it.
-
-Huh? Okay will do. Thanks for ultra-fast applying :)
-
-
---UugvWAfsgieZRqgk
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1
-
-iQIcBAEBAgAGBQJXH5t8AAoJEBQN5MwUoCm2YoMP/3Tlc1FTp15S3i6wcZcDFk+/
-UsqTeMkxaZoSuaeyy10GCEyDDKEWYZ/fmg0ZMYsI8gOx23ichFIurnW4i/U+nXXz
-mS5F2EtLvwFP0TxorqhydKMNRa5gFMhRYeRmGfAXoMK/QJNDuUE3R4LCPGmPpmxK
-xuzX9ISRFAsr1+Lcc+Efyhw53c49A8jGBMysXL9BSSp73VBdGS21mu7PvDou9rIe
-vo5JMySSQBWcMsOyA5jCNPnPQfEmNFvK/uVyOuRvv+BRee3fVeXoOih6IpfWbpzb
-jy0DfzUqnEH1mrxYPpwCzToPCF08McrA08zLRMgYnwIkqzfm1eXSa6qQa7a2pxjI
-Hc7g1fCUzTzR6LXSRVD+CqWlI6cUyZrAAzXLWNNhcgBsgIovFSZrknQ9vKZixswR
-NZVCbZl62bpQvH6HL45RD8Vd0sBkGbBYs4KuEf3x9JYX7XhGwFyd9IUJ5dCx8Sp8
-+d0xYxQlzjwGCY9I4GwshXZRcodIZf/fdYfai2PtxO2/e8N0wUXk1RCsoNqvZ1eo
-eh/6J6Rrl7aJdraGWqUCUuSgFbXexVNsyO4GMwx99OSjnNJImAZ3IXcE2my110RC
-CU3avD2+WjRwIQRqWCTDa04uAaf0c2UrvSYUjGc+PRK+4RvKxJTzZUPUyB365eoF
-NzamXmzoGbtQ7f3nm07Y
-=7qna
------END PGP SIGNATURE-----
-
---UugvWAfsgieZRqgk--
+diff --git a/drivers/mmc/host/tmio_mmc.h b/drivers/mmc/host/tmio_mmc.h
+index e75e5ca220bc0a..74945c1a66ce81 100644
+--- a/drivers/mmc/host/tmio_mmc.h
++++ b/drivers/mmc/host/tmio_mmc.h
+@@ -49,27 +49,29 @@
+ #define CTL_RESET_SDIO 0x1e0
+ 
+ /* Definitions for values the CTRL_STATUS register can take. */
+-#define TMIO_STAT_CMDRESPEND    0x00000001
+-#define TMIO_STAT_DATAEND       0x00000004
+-#define TMIO_STAT_CARD_REMOVE   0x00000008
+-#define TMIO_STAT_CARD_INSERT   0x00000010
+-#define TMIO_STAT_SIGSTATE      0x00000020
+-#define TMIO_STAT_WRPROTECT     0x00000080
+-#define TMIO_STAT_CARD_REMOVE_A 0x00000100
+-#define TMIO_STAT_CARD_INSERT_A 0x00000200
+-#define TMIO_STAT_SIGSTATE_A    0x00000400
+-#define TMIO_STAT_CMD_IDX_ERR   0x00010000
+-#define TMIO_STAT_CRCFAIL       0x00020000
+-#define TMIO_STAT_STOPBIT_ERR   0x00040000
+-#define TMIO_STAT_DATATIMEOUT   0x00080000
+-#define TMIO_STAT_RXOVERFLOW    0x00100000
+-#define TMIO_STAT_TXUNDERRUN    0x00200000
+-#define TMIO_STAT_CMDTIMEOUT    0x00400000
+-#define TMIO_STAT_RXRDY         0x01000000
+-#define TMIO_STAT_TXRQ          0x02000000
+-#define TMIO_STAT_ILL_FUNC      0x20000000
+-#define TMIO_STAT_CMD_BUSY      0x40000000
+-#define TMIO_STAT_ILL_ACCESS    0x80000000
++#define TMIO_STAT_CMDRESPEND    BIT(0)
++#define TMIO_STAT_DATAEND       BIT(2)
++#define TMIO_STAT_CARD_REMOVE   BIT(3)
++#define TMIO_STAT_CARD_INSERT   BIT(4)
++#define TMIO_STAT_SIGSTATE      BIT(5)
++#define TMIO_STAT_WRPROTECT     BIT(7)
++#define TMIO_STAT_CARD_REMOVE_A BIT(8)
++#define TMIO_STAT_CARD_INSERT_A BIT(9)
++#define TMIO_STAT_SIGSTATE_A    BIT(10)
++
++/* These belong technically to CTRL_STATUS2, but the driver merges them */
++#define TMIO_STAT_CMD_IDX_ERR   BIT(16)
++#define TMIO_STAT_CRCFAIL       BIT(17)
++#define TMIO_STAT_STOPBIT_ERR   BIT(18)
++#define TMIO_STAT_DATATIMEOUT   BIT(19)
++#define TMIO_STAT_RXOVERFLOW    BIT(20)
++#define TMIO_STAT_TXUNDERRUN    BIT(21)
++#define TMIO_STAT_CMDTIMEOUT    BIT(22)
++#define TMIO_STAT_RXRDY         BIT(24)
++#define TMIO_STAT_TXRQ          BIT(25)
++#define TMIO_STAT_ILL_FUNC      BIT(29)
++#define TMIO_STAT_CMD_BUSY      BIT(30)
++#define TMIO_STAT_ILL_ACCESS    BIT(31)
+ 
+ #define TMIO_STATUS2_DAT0	BIT(7)
+ 
+-- 
+2.7.0
