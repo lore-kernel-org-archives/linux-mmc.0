@@ -1,38 +1,34 @@
-From: Geert Uytterhoeven <geert@linux-m68k.org>
-Subject: Re: [PATCH V2 1/6] mmc: sh_mobile_sdhi: don't use array for DT configs
-Date: Tue, 26 Apr 2016 21:12:45 +0200
-Message-ID: <CAMuHMdVNyeWn0esmetidN2sUMKKiWV6Q_ze8jQLB40VibT2CDw@mail.gmail.com>
-References: <1461686127-3217-1-git-send-email-wsa@the-dreams.de>
-	<1461686127-3217-2-git-send-email-wsa@the-dreams.de>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+From: Wolfram Sang <wsa@the-dreams.de>
+Subject: [PATCH] mmc: sdhi: remove obsolete support for sh7372
+Date: Tue, 26 Apr 2016 22:29:10 +0200
+Message-ID: <1461702550-6773-1-git-send-email-wsa@the-dreams.de>
 Return-path: <linux-renesas-soc-owner@vger.kernel.org>
-In-Reply-To: <1461686127-3217-2-git-send-email-wsa@the-dreams.de>
 Sender: linux-renesas-soc-owner@vger.kernel.org
-To: Wolfram Sang <wsa@the-dreams.de>
-Cc: Linux MMC List <linux-mmc@vger.kernel.org>, linux-renesas-soc@vger.kernel.org, Simon Horman <horms@verge.net.au>, Ulf Hansson <ulf.hansson@linaro.org>
+To: linux-mmc@vger.kernel.org
+Cc: Wolfram Sang <wsa@the-dreams.de>, linux-renesas-soc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, Geert Uytterhoeven <geert+renesas@glider.be>
 List-Id: linux-mmc@vger.kernel.org
 
-Hi Wolfram,
+From: Wolfram Sang <wsa+renesas@sang-engineering.com>
 
-On Tue, Apr 26, 2016 at 5:55 PM, Wolfram Sang <wsa@the-dreams.de> wrote:
-> --- a/drivers/mmc/host/sh_mobile_sdhi.c
-> +++ b/drivers/mmc/host/sh_mobile_sdhi.c
-> @@ -81,9 +79,9 @@ static const struct sh_mobile_sdhi_of_data of_rcar_gen3_compatible = {
->  static const struct of_device_id sh_mobile_sdhi_of_match[] = {
->         { .compatible = "renesas,sdhi-shmobile" },
->         { .compatible = "renesas,sdhi-sh7372" },
+There is no support for this platform in the kernel anymore.
 
-Care to receive bonus points for removing the compatible value for the
-no longer supported sh7372 SoC?
+Reported-by: Geert Uytterhoeven <geert+renesas@glider.be>
+Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+---
+ drivers/mmc/host/sh_mobile_sdhi.c | 1 -
+ 1 file changed, 1 deletion(-)
 
-Gr{oetje,eeting}s,
-
-                        Geert
-
---
-Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
-
-In personal conversations with technical people, I call myself a hacker. But
-when I'm talking to journalists I just say "programmer" or something like that.
-                                -- Linus Torvalds
+diff --git a/drivers/mmc/host/sh_mobile_sdhi.c b/drivers/mmc/host/sh_mobile_sdhi.c
+index e51d7b01d39a3b..0118d9621bebd0 100644
+--- a/drivers/mmc/host/sh_mobile_sdhi.c
++++ b/drivers/mmc/host/sh_mobile_sdhi.c
+@@ -77,7 +77,6 @@ static const struct sh_mobile_sdhi_of_data of_rcar_gen3_compatible = {
+ 
+ static const struct of_device_id sh_mobile_sdhi_of_match[] = {
+ 	{ .compatible = "renesas,sdhi-shmobile" },
+-	{ .compatible = "renesas,sdhi-sh7372" },
+ 	{ .compatible = "renesas,sdhi-sh73a0", .data = &of_default_cfg, },
+ 	{ .compatible = "renesas,sdhi-r8a73a4", .data = &of_default_cfg, },
+ 	{ .compatible = "renesas,sdhi-r8a7740", .data = &of_default_cfg, },
+-- 
+2.7.0
