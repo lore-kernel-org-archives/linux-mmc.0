@@ -1,49 +1,61 @@
-From: Chen-Yu Tsai <wens@csie.org>
-Subject: [PATCH] mmc: sunxi: Disable eMMC HS-DDR (MMC_CAP_1_8V_DDR) for Allwinner A80
-Date: Tue, 26 Apr 2016 23:37:26 +0800
-Message-ID: <1461685046-24798-1-git-send-email-wens@csie.org>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
+From: Wolfram Sang <wsa@the-dreams.de>
+Subject: Re: [PATCH 2/6] mmc: sh_mobile_sdhi: remove obsolete irq_by_name
+ registration
+Date: Tue, 26 Apr 2016 17:47:54 +0200
+Message-ID: <20160426154754.GA2943@katana>
+References: <1459934734-3613-1-git-send-email-wsa@the-dreams.de>
+ <1459934734-3613-3-git-send-email-wsa@the-dreams.de>
+ <CAPDyKFqixO2EGxdx4ERy=DSTR+KBunrYyfR26+AYN0k5_dVHiw@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="RnlQjJ0d97Da+TV1"
+Return-path: <linux-sh-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <CAPDyKFqixO2EGxdx4ERy=DSTR+KBunrYyfR26+AYN0k5_dVHiw@mail.gmail.com>
+Sender: linux-sh-owner@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Chen-Yu Tsai <wens@csie.org>, Maxime Ripard <maxime.ripard@free-electrons.com>, Hans de Goede <hdegoede@redhat.com>, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, linux-renesas-soc@vger.kernel.org, Linux-sh list <linux-sh@vger.kernel.org>, Simon Horman <horms@verge.net.au>, Kuninori Morimoto <kuninori.morimoto.gx@gmail.com>
 List-Id: linux-mmc@vger.kernel.org
 
-eMMC HS-DDR no longer works on the A80, despite it working when support
-for this developed.
 
-Disable it for now.
+--RnlQjJ0d97Da+TV1
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-Signed-off-by: Chen-Yu Tsai <wens@csie.org>
----
 
-Hi,
+> I need and ack from the Superh arch maintainer to apply this one.
+>=20
+> It seems like you didn't include them on "to/cc" list, perhaps repost!?
 
-When i worked on this it was working, but now it isn't. Unfortunately I
-don't have my old tree to do a proper bisect. I probably won't have time
-to dig into this issue before v4.6 release, so it's best to disable it
-on the A80 for now.
+Nothing happened...
 
-Thanks.
+So, I'll repost the series without the removal of the include file and
+not touching SH boards. It will be your realm only then.
 
----
- drivers/mmc/host/sunxi-mmc.c | 5 +++++
- 1 file changed, 5 insertions(+)
+I'll repost the SH relevant parts as a seperate patch to the SH list, so
+this can have then its own timeframe.
 
-diff --git a/drivers/mmc/host/sunxi-mmc.c b/drivers/mmc/host/sunxi-mmc.c
-index 8372a413848c..7fc8b7aa83f0 100644
---- a/drivers/mmc/host/sunxi-mmc.c
-+++ b/drivers/mmc/host/sunxi-mmc.c
-@@ -1129,6 +1129,11 @@ static int sunxi_mmc_probe(struct platform_device *pdev)
- 				  MMC_CAP_1_8V_DDR |
- 				  MMC_CAP_ERASE | MMC_CAP_SDIO_IRQ;
- 
-+	/* TODO MMC DDR is not working on A80 */
-+	if (of_device_is_compatible(pdev->dev.of_node,
-+				    "allwinner,sun9i-a80-mmc"))
-+		mmc->caps &= ~MMC_CAP_1_8V_DDR;
-+
- 	ret = mmc_of_parse(mmc);
- 	if (ret)
- 		goto error_free_dma;
--- 
-2.8.1
+
+--RnlQjJ0d97Da+TV1
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1
+
+iQIcBAEBAgAGBQJXH42qAAoJEBQN5MwUoCm29KUP/3fmryHJgKn3XBqHGuM7jbc6
+A6kdr7ceU9+zL+mVaXGs31STxfXS91fsknx0dyzUZC3jjE95464QcWZL/WEuoqHo
+ioyJndEHhnL0fK6s6ahZc5zD+o1I1rIrTIfs7BQTFwO6EtQS+4m/tmAZy5s8NrGF
+yVMOVkz7p308KJJCidpi4XWs3kxad+v969E4K+doVjVA2yP48ZX5IHGQHEqUITHW
+Rnpw7WP1nkLSGxbtbpBPjsV9Bkxu3vNZQs3ooydoLsZI/jGfvqtmSjPOKr0gjcZg
+NQ9dIzzMGzMftEO9k4tjW5ltpqIRnmNFRRHkPOnHxSzQCoBNL6t/Fg8ET1XHrhUe
+4Sz1gP+DqFiFJkpe6p+radjnRcssSx4IlCRqW14KV/k8PFtyOhNwsfskIv8wGjxZ
+zNmi2QDGf/2UScq2tBHMqnVzsuURgTK7Grw1bpHX3k+KKdHBo6ySZqYUcIDp4nhf
+N28A9SV57Xt/LHENLXRBgQsWGCpYtnxhzPq3I1xsijfOEofP5usOt6fofq6fPIhp
+spusvrG/JBMDWS4aRiPSNvD/SaQQGi1MJwM/iy1snHxO835puV6L3hk9APaATrBC
+O33Ak8pWFXSkmlI3HuJ5U6lP+c7gAbNhqZDS/Kjmqs+/LuFAzNHLK3axDjJirFPG
+VUfRyhqZkXbOSI00MiZx
+=FxlG
+-----END PGP SIGNATURE-----
+
+--RnlQjJ0d97Da+TV1--
