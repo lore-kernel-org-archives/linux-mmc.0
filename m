@@ -1,63 +1,50 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH V2 0/6] mmc: tmio/sdhi: clean up cruft
-Date: Tue, 26 Apr 2016 18:25:22 +0200
-Message-ID: <CAPDyKFqWYQCvM2Q__Km3R7AsUW=QAuaQ6CSD4ztmGt=ZSErhuA@mail.gmail.com>
-References: <1461686127-3217-1-git-send-email-wsa@the-dreams.de>
+Subject: Re: [PATCH 0/5] mmc: tmio: make CTL_STATUS handling consistent
+Date: Tue, 26 Apr 2016 18:25:31 +0200
+Message-ID: <CAPDyKFrHb3u2CcSGr3dyzPP53UzGCTDAQ6rK8FKBn80wS+znJQ@mail.gmail.com>
+References: <1460650609-2105-1-git-send-email-wsa@the-dreams.de>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-renesas-soc-owner@vger.kernel.org>
-In-Reply-To: <1461686127-3217-1-git-send-email-wsa@the-dreams.de>
+In-Reply-To: <1460650609-2105-1-git-send-email-wsa@the-dreams.de>
 Sender: linux-renesas-soc-owner@vger.kernel.org
 To: Wolfram Sang <wsa@the-dreams.de>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, linux-renesas-soc@vger.kernel.org, Simon Horman <horms@verge.net.au>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, linux-renesas-soc@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-On 26 April 2016 at 17:55, Wolfram Sang <wsa@the-dreams.de> wrote:
-> Largely due to DT unification, some parts of the code became obsolete. Let's
-> remove that, the code is complex enough still:
+On 14 April 2016 at 18:16, Wolfram Sang <wsa@the-dreams.de> wrote:
+> It took me a little to discover that CTL_STATUS has a different handling than
+> the other registers. CTL_STATUS and CTL_STATUS2, both u16, are merged into a
+> virtual u32. However, CTL_STATUS2 was also directly accessed.
 >
-> * There are no boards anymore with named interrupt support. Drop support for
->   that (patches 2-4)
-> * No need anymore for a public mmc/tmio.h header file. Merge it into the
->   private one (patch 5)
+> Clean this up, make this consistent, and document this. Making the driver less
+> complex and easier to work with.
 >
-> Patches 1 and 6 are small cleanups found on the way :)
+> Tested on Renesas R-Car Gen2 and Gen3. It is on top of my not-yet applied
+> series "[PATCH 0/6] mmc: tmio/sdhi: clean up cruft". A complete branch is here:
 >
-> Based on latest renesas-drivers which is based on v4.6-rc1 with my sdr50
-> patches on top. Tested on a Renesas Lager board and build bot is happy, too
-> (after finding some issues initially).
->
-> Change since V1:
->
-> * Drop a small cleanup touching SH board files, so we stay in the MMC realm.
->   I will do this as a seperate patch so this series won't get delayed.
->
-> Please test, comment, apply...
+> git://git.kernel.org/pub/scm/linux/kernel/git/wsa/linux.git renesas/sdhi-uhs
 >
 >    Wolfram
 >
+> Wolfram Sang (5):
+>   mmc: tmio: give read32/write32 functions more descriptive names
+>   mmc: tmio: use BIT() within defines
+>   mmc: tmio: use CTL_STATUS consistently
+>   mmc: tmio/sdhi: distinguish between SCLKDIVEN and ILL_FUNC
+>   mmc: tmio: document CTL_STATUS handling
 >
-> Wolfram Sang (6):
->   mmc: sh_mobile_sdhi: don't use array for DT configs
->   mmc: sh_mobile_sdhi: remove obsolete irq_by_name registration
->   mmc: tmio: remove now unneeded seperate irq handlers
->   mmc: tmio: simplify irq handler
->   mmc: tmio: merge distributed include files
->   mmc: sh_mobile_sdhi: simplify code for voltage switching
->
->  drivers/mmc/host/sh_mobile_sdhi.c | 75 ++++++++-------------------------------
->  drivers/mmc/host/tmio_mmc.h       | 59 +++++++++++++++++++++++++++---
->  drivers/mmc/host/tmio_mmc_dma.c   |  1 -
->  drivers/mmc/host/tmio_mmc_pio.c   | 55 ++++++----------------------
->  include/linux/mmc/tmio.h          | 73 -------------------------------------
->  5 files changed, 79 insertions(+), 184 deletions(-)
->  delete mode 100644 include/linux/mmc/tmio.h
+>  drivers/mmc/host/sh_mobile_sdhi.c |  3 ++-
+>  drivers/mmc/host/tmio_mmc.h       | 56 ++++++++++++++++++++-------------------
+>  drivers/mmc/host/tmio_mmc_pio.c   | 24 ++++++++---------
+>  3 files changed, 43 insertions(+), 40 deletions(-)
 >
 > --
 > 2.7.0
 >
 
-Thanks, applied for next!
+I tried to apply this one, but it seems like it need a rebase. Can you
+please have look and re-spin it.
 
 Kind regards
 Uffe
