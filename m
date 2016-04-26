@@ -1,7 +1,7 @@
 From: Wolfram Sang <wsa@the-dreams.de>
-Subject: [PATCH v2 5/5] mmc: tmio: document CTL_STATUS handling
-Date: Tue, 26 Apr 2016 18:53:45 +0200
-Message-ID: <1461689625-3693-6-git-send-email-wsa@the-dreams.de>
+Subject: [PATCH v2 4/5] mmc: tmio/sdhi: distinguish between SCLKDIVEN and ILL_FUNC
+Date: Tue, 26 Apr 2016 18:53:44 +0200
+Message-ID: <1461689625-3693-5-git-send-email-wsa@the-dreams.de>
 References: <1461689625-3693-1-git-send-email-wsa@the-dreams.de>
 Return-path: <linux-renesas-soc-owner@vger.kernel.org>
 In-Reply-To: <1461689625-3693-1-git-send-email-wsa@the-dreams.de>
@@ -12,29 +12,57 @@ List-Id: linux-mmc@vger.kernel.org
 
 From: Wolfram Sang <wsa+renesas@sang-engineering.com>
 
-Now that reading CTL_STATUS is consistent, we can remove CTL_STATUS2 and
-document how this is handled internally.
+This bit has a different meaning in SDHI and original TMIO. Document
+that and use the proper naming.
 
 Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
 Reviewed-by: Simon Horman <horms+renesas@verge.net.au>
 ---
- drivers/mmc/host/tmio_mmc.h | 3 ++-
- 1 file changed, 2 insertions(+), 1 deletion(-)
+ drivers/mmc/host/sh_mobile_sdhi.c | 3 ++-
+ drivers/mmc/host/tmio_mmc.h       | 3 ++-
+ drivers/mmc/host/tmio_mmc_pio.c   | 2 +-
+ 3 files changed, 5 insertions(+), 3 deletions(-)
 
+diff --git a/drivers/mmc/host/sh_mobile_sdhi.c b/drivers/mmc/host/sh_mobile_sdhi.c
+index b85b87eb55009f..5923ce7e0fccb3 100644
+--- a/drivers/mmc/host/sh_mobile_sdhi.c
++++ b/drivers/mmc/host/sh_mobile_sdhi.c
+@@ -244,7 +244,8 @@ static int sh_mobile_sdhi_wait_idle(struct tmio_mmc_host *host)
+ {
+ 	int timeout = 1000;
+ 
+-	while (--timeout && !(sd_ctrl_read16(host, CTL_STATUS2) & (1 << 13)))
++	while (--timeout && !(sd_ctrl_read16_and_16_as_32(host, CTL_STATUS)
++			      & TMIO_STAT_SCLKDIVEN))
+ 		udelay(1);
+ 
+ 	if (!timeout) {
 diff --git a/drivers/mmc/host/tmio_mmc.h b/drivers/mmc/host/tmio_mmc.h
-index 8dd5ea4be0a371..1aac2ad8edf265 100644
+index 55f251fdb78623..8dd5ea4be0a371 100644
 --- a/drivers/mmc/host/tmio_mmc.h
 +++ b/drivers/mmc/host/tmio_mmc.h
-@@ -30,8 +30,9 @@
- #define CTL_STOP_INTERNAL_ACTION 0x08
- #define CTL_XFER_BLK_COUNT 0xa
- #define CTL_RESPONSE 0x0c
-+/* driver merges STATUS and following STATUS2 */
- #define CTL_STATUS 0x1c
--#define CTL_STATUS2 0x1e
-+/* driver merges IRQ_MASK and following IRQ_MASK2 */
- #define CTL_IRQ_MASK 0x20
- #define CTL_SD_CARD_CLK_CTL 0x24
- #define CTL_SD_XFER_LEN 0x26
+@@ -70,7 +70,8 @@
+ #define TMIO_STAT_DAT0		BIT(23)	/* only known on R-Car so far */
+ #define TMIO_STAT_RXRDY         BIT(24)
+ #define TMIO_STAT_TXRQ          BIT(25)
+-#define TMIO_STAT_ILL_FUNC      BIT(29)
++#define TMIO_STAT_ILL_FUNC      BIT(29) /* only when !TMIO_MMC_HAS_IDLE_WAIT */
++#define TMIO_STAT_SCLKDIVEN     BIT(29) /* only when TMIO_MMC_HAS_IDLE_WAIT */
+ #define TMIO_STAT_CMD_BUSY      BIT(30)
+ #define TMIO_STAT_ILL_ACCESS    BIT(31)
+ 
+diff --git a/drivers/mmc/host/tmio_mmc_pio.c b/drivers/mmc/host/tmio_mmc_pio.c
+index f4d8b5a741a875..e9b0271a81742a 100644
+--- a/drivers/mmc/host/tmio_mmc_pio.c
++++ b/drivers/mmc/host/tmio_mmc_pio.c
+@@ -548,7 +548,7 @@ static void tmio_mmc_data_irq(struct tmio_mmc_host *host)
+ 		 * waiting for one more interrupt fixes the problem.
+ 		 */
+ 		if (host->pdata->flags & TMIO_MMC_HAS_IDLE_WAIT) {
+-			if (status & TMIO_STAT_ILL_FUNC)
++			if (status & TMIO_STAT_SCLKDIVEN)
+ 				done = true;
+ 		} else {
+ 			if (!(status & TMIO_STAT_CMD_BUSY))
 -- 
 2.7.0
