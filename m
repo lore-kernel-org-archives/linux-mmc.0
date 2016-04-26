@@ -1,68 +1,64 @@
 From: Wolfram Sang <wsa@the-dreams.de>
-Subject: [PATCH v2 4/5] mmc: tmio/sdhi: distinguish between SCLKDIVEN and ILL_FUNC
-Date: Tue, 26 Apr 2016 18:53:44 +0200
-Message-ID: <1461689625-3693-5-git-send-email-wsa@the-dreams.de>
+Subject: [PATCH v2 3/5] mmc: tmio: use CTL_STATUS consistently
+Date: Tue, 26 Apr 2016 18:53:43 +0200
+Message-ID: <1461689625-3693-4-git-send-email-wsa@the-dreams.de>
 References: <1461689625-3693-1-git-send-email-wsa@the-dreams.de>
-Return-path: <linux-renesas-soc-owner@vger.kernel.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from sauhun.de ([89.238.76.85]:51373 "EHLO pokefinder.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752176AbcDZQx5 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 26 Apr 2016 12:53:57 -0400
 In-Reply-To: <1461689625-3693-1-git-send-email-wsa@the-dreams.de>
-Sender: linux-renesas-soc-owner@vger.kernel.org
+Sender: linux-mmc-owner@vger.kernel.org
+List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org
 Cc: Wolfram Sang <wsa@the-dreams.de>, linux-renesas-soc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, Simon Horman <horms+renesas@verge.net.au>
-List-Id: linux-mmc@vger.kernel.org
 
 From: Wolfram Sang <wsa+renesas@sang-engineering.com>
 
-This bit has a different meaning in SDHI and original TMIO. Document
-that and use the proper naming.
+To prevent confusion, use the virtual u32 CTL_STATUS in card_busy() the
+same way as in other parts of this driver.
 
 Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
 Reviewed-by: Simon Horman <horms+renesas@verge.net.au>
 ---
- drivers/mmc/host/sh_mobile_sdhi.c | 3 ++-
- drivers/mmc/host/tmio_mmc.h       | 3 ++-
- drivers/mmc/host/tmio_mmc_pio.c   | 2 +-
- 3 files changed, 5 insertions(+), 3 deletions(-)
+ drivers/mmc/host/tmio_mmc.h     | 3 +--
+ drivers/mmc/host/tmio_mmc_pio.c | 2 +-
+ 2 files changed, 2 insertions(+), 3 deletions(-)
 
-diff --git a/drivers/mmc/host/sh_mobile_sdhi.c b/drivers/mmc/host/sh_mobile_sdhi.c
-index b85b87eb55009f..5923ce7e0fccb3 100644
---- a/drivers/mmc/host/sh_mobile_sdhi.c
-+++ b/drivers/mmc/host/sh_mobile_sdhi.c
-@@ -244,7 +244,8 @@ static int sh_mobile_sdhi_wait_idle(struct tmio_mmc_host *host)
- {
- 	int timeout = 1000;
- 
--	while (--timeout && !(sd_ctrl_read16(host, CTL_STATUS2) & (1 << 13)))
-+	while (--timeout && !(sd_ctrl_read16_and_16_as_32(host, CTL_STATUS)
-+			      & TMIO_STAT_SCLKDIVEN))
- 		udelay(1);
- 
- 	if (!timeout) {
 diff --git a/drivers/mmc/host/tmio_mmc.h b/drivers/mmc/host/tmio_mmc.h
-index 55f251fdb78623..8dd5ea4be0a371 100644
+index 74945c1a66ce81..55f251fdb78623 100644
 --- a/drivers/mmc/host/tmio_mmc.h
 +++ b/drivers/mmc/host/tmio_mmc.h
-@@ -70,7 +70,8 @@
- #define TMIO_STAT_DAT0		BIT(23)	/* only known on R-Car so far */
+@@ -67,14 +67,13 @@
+ #define TMIO_STAT_RXOVERFLOW    BIT(20)
+ #define TMIO_STAT_TXUNDERRUN    BIT(21)
+ #define TMIO_STAT_CMDTIMEOUT    BIT(22)
++#define TMIO_STAT_DAT0		BIT(23)	/* only known on R-Car so far */
  #define TMIO_STAT_RXRDY         BIT(24)
  #define TMIO_STAT_TXRQ          BIT(25)
--#define TMIO_STAT_ILL_FUNC      BIT(29)
-+#define TMIO_STAT_ILL_FUNC      BIT(29) /* only when !TMIO_MMC_HAS_IDLE_WAIT */
-+#define TMIO_STAT_SCLKDIVEN     BIT(29) /* only when TMIO_MMC_HAS_IDLE_WAIT */
+ #define TMIO_STAT_ILL_FUNC      BIT(29)
  #define TMIO_STAT_CMD_BUSY      BIT(30)
  #define TMIO_STAT_ILL_ACCESS    BIT(31)
  
+-#define TMIO_STATUS2_DAT0	BIT(7)
+-
+ #define	CLK_CTL_DIV_MASK	0xff
+ #define	CLK_CTL_SCLKEN		BIT(8)
+ 
 diff --git a/drivers/mmc/host/tmio_mmc_pio.c b/drivers/mmc/host/tmio_mmc_pio.c
-index f4d8b5a741a875..e9b0271a81742a 100644
+index dad2ebd3dc22b4..f4d8b5a741a875 100644
 --- a/drivers/mmc/host/tmio_mmc_pio.c
 +++ b/drivers/mmc/host/tmio_mmc_pio.c
-@@ -548,7 +548,7 @@ static void tmio_mmc_data_irq(struct tmio_mmc_host *host)
- 		 * waiting for one more interrupt fixes the problem.
- 		 */
- 		if (host->pdata->flags & TMIO_MMC_HAS_IDLE_WAIT) {
--			if (status & TMIO_STAT_ILL_FUNC)
-+			if (status & TMIO_STAT_SCLKDIVEN)
- 				done = true;
- 		} else {
- 			if (!(status & TMIO_STAT_CMD_BUSY))
+@@ -983,7 +983,7 @@ static int tmio_mmc_card_busy(struct mmc_host *mmc)
+ {
+ 	struct tmio_mmc_host *host = mmc_priv(mmc);
+ 
+-	return !(sd_ctrl_read16_and_16_as_32(host, CTL_STATUS2) & TMIO_STATUS2_DAT0);
++	return !(sd_ctrl_read16_and_16_as_32(host, CTL_STATUS) & TMIO_STAT_DAT0);
+ }
+ 
+ static struct mmc_host_ops tmio_mmc_ops = {
 -- 
 2.7.0
+
