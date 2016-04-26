@@ -1,52 +1,108 @@
 From: Wolfram Sang <wsa@the-dreams.de>
-Subject: [PATCH V2 0/6] mmc: tmio/sdhi: clean up cruft
-Date: Tue, 26 Apr 2016 17:55:21 +0200
-Message-ID: <1461686127-3217-1-git-send-email-wsa@the-dreams.de>
-Return-path: <linux-renesas-soc-owner@vger.kernel.org>
-Sender: linux-renesas-soc-owner@vger.kernel.org
+Subject: [PATCH V2 3/6] mmc: tmio: remove now unneeded seperate irq handlers
+Date: Tue, 26 Apr 2016 17:55:24 +0200
+Message-ID: <1461686127-3217-4-git-send-email-wsa@the-dreams.de>
+References: <1461686127-3217-1-git-send-email-wsa@the-dreams.de>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from sauhun.de ([89.238.76.85]:51182 "EHLO pokefinder.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751772AbcDZPzo (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 26 Apr 2016 11:55:44 -0400
+In-Reply-To: <1461686127-3217-1-git-send-email-wsa@the-dreams.de>
+Sender: linux-mmc-owner@vger.kernel.org
+List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org
 Cc: Wolfram Sang <wsa@the-dreams.de>, linux-renesas-soc@vger.kernel.org, Simon Horman <horms@verge.net.au>, Ulf Hansson <ulf.hansson@linaro.org>
-List-Id: linux-mmc@vger.kernel.org
 
-Largely due to DT unification, some parts of the code became obsolete. Let's
-remove that, the code is complex enough still:
+From: Wolfram Sang <wsa+renesas@sang-engineering.com>
 
-* There are no boards anymore with named interrupt support. Drop support for
-  that (patches 2-4)
-* No need anymore for a public mmc/tmio.h header file. Merge it into the
-  private one (patch 5)
+We removed installation of seperate handlers previously, so we can also
+remove the seperate handlers.
 
-Patches 1 and 6 are small cleanups found on the way :)
+Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+---
+ drivers/mmc/host/tmio_mmc.h     |  3 ---
+ drivers/mmc/host/tmio_mmc_pio.c | 31 ++-----------------------------
+ 2 files changed, 2 insertions(+), 32 deletions(-)
 
-Based on latest renesas-drivers which is based on v4.6-rc1 with my sdr50
-patches on top. Tested on a Renesas Lager board and build bot is happy, too
-(after finding some issues initially).
-
-Change since V1:
-
-* Drop a small cleanup touching SH board files, so we stay in the MMC realm.
-  I will do this as a seperate patch so this series won't get delayed.
-
-Please test, comment, apply...
-
-   Wolfram
-
-
-Wolfram Sang (6):
-  mmc: sh_mobile_sdhi: don't use array for DT configs
-  mmc: sh_mobile_sdhi: remove obsolete irq_by_name registration
-  mmc: tmio: remove now unneeded seperate irq handlers
-  mmc: tmio: simplify irq handler
-  mmc: tmio: merge distributed include files
-  mmc: sh_mobile_sdhi: simplify code for voltage switching
-
- drivers/mmc/host/sh_mobile_sdhi.c | 75 ++++++++-------------------------------
- drivers/mmc/host/tmio_mmc.h       | 59 +++++++++++++++++++++++++++---
- drivers/mmc/host/tmio_mmc_dma.c   |  1 -
- drivers/mmc/host/tmio_mmc_pio.c   | 55 ++++++----------------------
- include/linux/mmc/tmio.h          | 73 -------------------------------------
- 5 files changed, 79 insertions(+), 184 deletions(-)
- delete mode 100644 include/linux/mmc/tmio.h
-
+diff --git a/drivers/mmc/host/tmio_mmc.h b/drivers/mmc/host/tmio_mmc.h
+index b1819c74965b47..032188b766defd 100644
+--- a/drivers/mmc/host/tmio_mmc.h
++++ b/drivers/mmc/host/tmio_mmc.h
+@@ -115,9 +115,6 @@ void tmio_mmc_do_data_irq(struct tmio_mmc_host *host);
+ void tmio_mmc_enable_mmc_irqs(struct tmio_mmc_host *host, u32 i);
+ void tmio_mmc_disable_mmc_irqs(struct tmio_mmc_host *host, u32 i);
+ irqreturn_t tmio_mmc_irq(int irq, void *devid);
+-irqreturn_t tmio_mmc_sdcard_irq(int irq, void *devid);
+-irqreturn_t tmio_mmc_card_detect_irq(int irq, void *devid);
+-irqreturn_t tmio_mmc_sdio_irq(int irq, void *devid);
+ 
+ static inline char *tmio_mmc_kmap_atomic(struct scatterlist *sg,
+ 					 unsigned long *flags)
+diff --git a/drivers/mmc/host/tmio_mmc_pio.c b/drivers/mmc/host/tmio_mmc_pio.c
+index 8e2fef7c5e481c..a7250a5fa670c5 100644
+--- a/drivers/mmc/host/tmio_mmc_pio.c
++++ b/drivers/mmc/host/tmio_mmc_pio.c
+@@ -664,18 +664,6 @@ static bool __tmio_mmc_card_detect_irq(struct tmio_mmc_host *host,
+ 	return false;
+ }
+ 
+-irqreturn_t tmio_mmc_card_detect_irq(int irq, void *devid)
+-{
+-	unsigned int ireg, status;
+-	struct tmio_mmc_host *host = devid;
+-
+-	tmio_mmc_card_irq_status(host, &ireg, &status);
+-	__tmio_mmc_card_detect_irq(host, ireg, status);
+-
+-	return IRQ_HANDLED;
+-}
+-EXPORT_SYMBOL(tmio_mmc_card_detect_irq);
+-
+ static bool __tmio_mmc_sdcard_irq(struct tmio_mmc_host *host,
+ 				 int ireg, int status)
+ {
+@@ -705,19 +693,7 @@ static bool __tmio_mmc_sdcard_irq(struct tmio_mmc_host *host,
+ 	return false;
+ }
+ 
+-irqreturn_t tmio_mmc_sdcard_irq(int irq, void *devid)
+-{
+-	unsigned int ireg, status;
+-	struct tmio_mmc_host *host = devid;
+-
+-	tmio_mmc_card_irq_status(host, &ireg, &status);
+-	__tmio_mmc_sdcard_irq(host, ireg, status);
+-
+-	return IRQ_HANDLED;
+-}
+-EXPORT_SYMBOL(tmio_mmc_sdcard_irq);
+-
+-irqreturn_t tmio_mmc_sdio_irq(int irq, void *devid)
++static void tmio_mmc_sdio_irq(int irq, void *devid)
+ {
+ 	struct tmio_mmc_host *host = devid;
+ 	struct mmc_host *mmc = host->mmc;
+@@ -726,7 +702,7 @@ irqreturn_t tmio_mmc_sdio_irq(int irq, void *devid)
+ 	unsigned int sdio_status;
+ 
+ 	if (!(pdata->flags & TMIO_MMC_SDIO_IRQ))
+-		return IRQ_HANDLED;
++		return;
+ 
+ 	status = sd_ctrl_read16(host, CTL_SDIO_STATUS);
+ 	ireg = status & TMIO_SDIO_MASK_ALL & ~host->sdcard_irq_mask;
+@@ -739,10 +715,7 @@ irqreturn_t tmio_mmc_sdio_irq(int irq, void *devid)
+ 
+ 	if (mmc->caps & MMC_CAP_SDIO_IRQ && ireg & TMIO_SDIO_STAT_IOIRQ)
+ 		mmc_signal_sdio_irq(mmc);
+-
+-	return IRQ_HANDLED;
+ }
+-EXPORT_SYMBOL(tmio_mmc_sdio_irq);
+ 
+ irqreturn_t tmio_mmc_irq(int irq, void *devid)
+ {
 -- 
 2.7.0
+
