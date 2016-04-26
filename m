@@ -1,102 +1,51 @@
-From: Ludovic Desroches <ludovic.desroches@atmel.com>
-Subject: Re: [PATCH v3] mmc: sdhci-pci: add Support of Synopsys DWC_MSHC IP
-Date: Tue, 26 Apr 2016 11:05:22 +0200
-Message-ID: <20160426090522.GB8756@odux.rfo.atmel.com>
-References: <705D14B1C7978B40A723277C067CEDE2010A4B12F8@IN01WEMBXB.internal.synopsys.com>
- <20160426085845.GA8756@odux.rfo.atmel.com>
+From: Geert Uytterhoeven <geert@linux-m68k.org>
+Subject: Re: [PATCH v2 2/9] mmc: tmio, sh_mobile_sdhi: Add support for
+ variable input clock frequency
+Date: Tue, 26 Apr 2016 12:18:24 +0200
+Message-ID: <CAMuHMdUccqGDWRqKhoHO7ED7X_uOk7nX8dKGTJDzTGjLZx-7+Q@mail.gmail.com>
+References: <1459525479-20842-1-git-send-email-wsa@the-dreams.de>
+	<1459525479-20842-3-git-send-email-wsa@the-dreams.de>
+	<CAMuHMdWdJ2AoCrwC5K2QEfuf=w=q8=XnJRzoyg99EurJBDwbTg@mail.gmail.com>
+	<1460477978.32355.14.camel@codethink.co.uk>
+	<20160415202803.GA3105@katana>
+	<20160415204156.GB3105@katana>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20160426085845.GA8756@odux.rfo.atmel.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Prabu Thangamuthu <Prabu.T@synopsys.com>, "Ulf Hansson (ulf.hansson@linaro.org)" <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, Bjorn Helgaas <bhelgaas@google.com>, Andrew Morton <akpm@linux-foundation.org>, "David S. Miller" <davem@davemloft.net>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Kalle Valo <kvalo@codeaurora.org>, Mauro Carvalho Chehab <mchehab@osg.samsung.com>, Guenter Roeck <linux@roeck-us.net>, Jiri Slaby <jslaby@suse.com>, Chaotian Jing <chaotian.jing@mediatek.com>, Andrei Pistirica <andrei.pistirica@microchip.com>, Ben Hutchings <ben.hutchings@codethink.co.uk>, Joshua Henderson <joshua.henderson@microchip.com>, Manjunath M Bettegowda <Manjunath.MB@synopsys.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-ig0-f196.google.com ([209.85.213.196]:33497 "EHLO
+	mail-ig0-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751170AbcDZKS0 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 26 Apr 2016 06:18:26 -0400
+In-Reply-To: <20160415204156.GB3105@katana>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Wolfram Sang <wsa@the-dreams.de>
+Cc: Ben Hutchings <ben.hutchings@codethink.co.uk>, Linux MMC List <linux-mmc@vger.kernel.org>, linux-renesas-soc@vger.kernel.org
 
-On Tue, Apr 26, 2016 at 10:58:45AM +0200, Ludovic Desroches wrote:
-> On Wed, Apr 20, 2016 at 12:22:59PM +0000, Prabu Thangamuthu wrote:
-> > Patch for Standard SD Host Controller Interface compliant Synopsys
-> > sdhci-dwc controller driver. This code supports PCI based interface.
-> > 
-> > Signed-off-by: Prabu Thangamuthu <prabu.t@synopsys.com>
-> > ---
-> > Change log v3:
-> > 	-Removed unused code.
-> > 	-Updated review comments.
-> > 
-> > Change log v2:
-> > 	-Removed Synopsys specific PCI device ID's from pci_ids.h.
-> > 	-Updated the PCI device ID's in sdhci-pci-core.c.
-> > 
-> >  MAINTAINERS                       |   7 +
-> >  drivers/mmc/host/Makefile         |   3 +-
-> >  drivers/mmc/host/sdhci-pci-core.c |  14 ++
-> >  drivers/mmc/host/sdhci-pci-dwc.c  | 260 ++++++++++++++++++++++++++++++++++++++
-> >  drivers/mmc/host/sdhci-pci-dwc.h  |  55 ++++++++
-> >  5 files changed, 338 insertions(+), 1 deletion(-)
-> >  create mode 100644 drivers/mmc/host/sdhci-pci-dwc.c
-> >  create mode 100644 drivers/mmc/host/sdhci-pci-dwc.h
-> > 
+Hi Wolfram,
 
-[snip]
+On Fri, Apr 15, 2016 at 10:41 PM, Wolfram Sang <wsa@the-dreams.de> wrote:
+>> > That seems like a bug in the clock driver.  If it doesn't have
+>> > independent dividers for each clock client then it shouldn't allow any
+>> > client to change the frequency.
+>
+> So, we need MSTP clocks which do not use CLK_SET_RATE_PARENT on r8a7740.
+> Probably the best way is to use the "renesas,r8a7740-mstp-clocks"
+> compatible entry to determine the difference? Geert?
 
-> > +static int snps_init_clock(struct sdhci_host *host)
-> > +{
-> > +	int div = 0;
-> > +	int mul = 0;
-> > +	int div_val = 0;
-> > +	int mul_val = 0;
-> > +	int mul_div_val = 0;
-> > +	int reg = 0;
-> > +	u32 mask = 0;
-> > +
-> 
-> Some variables don't need initialization here or you can directly assign
-> the right value: int div = 2, mul = 2, etc.
+To fix this regression in the short term, can we just enable this feature in
+the sh_mobile_sdhi driver on SoCs where we know it's safe to change the clock,
+i.e. on R-Car Gen2 and H3?
 
-div and mul are even useless, they are const. You can directly declare
-mul_val = 1, div_val = 1.
+Thanks!
 
-Regards
+Gr{oetje,eeting}s,
 
-Ludovic
+                        Geert
 
-> 
-> > +	/* Configure the BCLK DRP to get 100 MHZ Clock */
-> > +
-> > +	/*
-> > +	 * To get 100MHz from 100MHz input freq,
-> > +	 * mul=2 and div=2
-> > +	 * Formula: output_clock = (input clock * mul) / div
-> > +	 */
-> > +	mul = 2;
-> > +	div = 2;
-> > +	mul_val = mul - 1;
-> > +	div_val = div - 1;
-> > +	/*
-> > +	 * Program the DCM DRP
-> > +	 * Step 1: Assert DCM Reset
-> > +	 * Step 2: Program the mul and div values in DRP
-> > +	 * Step 3: Read from DRP base 0x00 to restore DCM output as per
-> > +	 * www.xilinx.com/support/documentation/user_guides/ug191.pdf
-> > +	 * Step 4: De-Assert reset to DCM
-> > +	 */
-> > +	mask = SDHC_BCLK_DCM_RST;
-> > +	snps_reset_dcm(host, mask, 1);
-> > +
-> > +	mul_div_val = (mul_val << 8) | div_val;
-> > +	sdhci_writew(host, mul_div_val, BCLK_DCM_MUL_DIV_DRP);
-> > +
-> > +	reg = sdhci_readl(host, BCLK_DCM_DRP_BASE_51);
-> > +
-> > +	snps_reset_dcm(host, mask, 0);
-> > +
-> > +	/*
-> > +	 * By Default Clocks to Controller are OFF.
-> > +	 * Before stack applies reset; we need to turn on the clock
-> > +	 */
-> > +	sdhci_writew(host, SDHCI_CLOCK_INT_EN, SDHCI_CLOCK_CONTROL);
-> > +
-> > +	return 0;
-> > +
-> > +}
+--
+Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
+
+In personal conversations with technical people, I call myself a hacker. But
+when I'm talking to journalists I just say "programmer" or something like that.
+                                -- Linus Torvalds
