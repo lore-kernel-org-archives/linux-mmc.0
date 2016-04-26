@@ -1,61 +1,215 @@
 From: Wolfram Sang <wsa@the-dreams.de>
-Subject: Re: [PATCH 2/6] mmc: sh_mobile_sdhi: remove obsolete irq_by_name
- registration
-Date: Tue, 26 Apr 2016 17:47:54 +0200
-Message-ID: <20160426154754.GA2943@katana>
-References: <1459934734-3613-1-git-send-email-wsa@the-dreams.de>
- <1459934734-3613-3-git-send-email-wsa@the-dreams.de>
- <CAPDyKFqixO2EGxdx4ERy=DSTR+KBunrYyfR26+AYN0k5_dVHiw@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="RnlQjJ0d97Da+TV1"
-Return-path: <linux-sh-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <CAPDyKFqixO2EGxdx4ERy=DSTR+KBunrYyfR26+AYN0k5_dVHiw@mail.gmail.com>
-Sender: linux-sh-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, linux-renesas-soc@vger.kernel.org, Linux-sh list <linux-sh@vger.kernel.org>, Simon Horman <horms@verge.net.au>, Kuninori Morimoto <kuninori.morimoto.gx@gmail.com>
+Subject: [PATCH V2 5/6] mmc: tmio: merge distributed include files
+Date: Tue, 26 Apr 2016 17:55:26 +0200
+Message-ID: <1461686127-3217-6-git-send-email-wsa@the-dreams.de>
+References: <1461686127-3217-1-git-send-email-wsa@the-dreams.de>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from sauhun.de ([89.238.76.85]:51188 "EHLO pokefinder.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752270AbcDZPzq (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 26 Apr 2016 11:55:46 -0400
+In-Reply-To: <1461686127-3217-1-git-send-email-wsa@the-dreams.de>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: Wolfram Sang <wsa@the-dreams.de>, linux-renesas-soc@vger.kernel.org, Simon Horman <horms@verge.net.au>, Ulf Hansson <ulf.hansson@linaro.org>
 
+From: Wolfram Sang <wsa+renesas@sang-engineering.com>
 
---RnlQjJ0d97Da+TV1
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+There is no reason to have a public and private header file. Merge them
+into a private one, so looking up symbols is less confusing.
 
+Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+---
+ drivers/mmc/host/tmio_mmc.h     | 56 ++++++++++++++++++++++++++++++-
+ drivers/mmc/host/tmio_mmc_dma.c |  1 -
+ drivers/mmc/host/tmio_mmc_pio.c |  1 -
+ include/linux/mmc/tmio.h        | 73 -----------------------------------------
+ 4 files changed, 55 insertions(+), 76 deletions(-)
+ delete mode 100644 include/linux/mmc/tmio.h
 
-> I need and ack from the Superh arch maintainer to apply this one.
->=20
-> It seems like you didn't include them on "to/cc" list, perhaps repost!?
+diff --git a/drivers/mmc/host/tmio_mmc.h b/drivers/mmc/host/tmio_mmc.h
+index 032188b766defd..439fdad2bad91d 100644
+--- a/drivers/mmc/host/tmio_mmc.h
++++ b/drivers/mmc/host/tmio_mmc.h
+@@ -1,6 +1,8 @@
+ /*
+  * linux/drivers/mmc/host/tmio_mmc.h
+  *
++ * Copyright (C) 2016 Sang Engineering, Wolfram Sang
++ * Copyright (C) 2015-16 Renesas Electronics Corporation
+  * Copyright (C) 2007 Ian Molton
+  * Copyright (C) 2004 Ian Molton
+  *
+@@ -18,12 +20,64 @@
+ 
+ #include <linux/dmaengine.h>
+ #include <linux/highmem.h>
+-#include <linux/mmc/tmio.h>
+ #include <linux/mutex.h>
+ #include <linux/pagemap.h>
+ #include <linux/scatterlist.h>
+ #include <linux/spinlock.h>
+ 
++#define CTL_SD_CMD 0x00
++#define CTL_ARG_REG 0x04
++#define CTL_STOP_INTERNAL_ACTION 0x08
++#define CTL_XFER_BLK_COUNT 0xa
++#define CTL_RESPONSE 0x0c
++#define CTL_STATUS 0x1c
++#define CTL_STATUS2 0x1e
++#define CTL_IRQ_MASK 0x20
++#define CTL_SD_CARD_CLK_CTL 0x24
++#define CTL_SD_XFER_LEN 0x26
++#define CTL_SD_MEM_CARD_OPT 0x28
++#define CTL_SD_ERROR_DETAIL_STATUS 0x2c
++#define CTL_SD_DATA_PORT 0x30
++#define CTL_TRANSACTION_CTL 0x34
++#define CTL_SDIO_STATUS 0x36
++#define CTL_SDIO_IRQ_MASK 0x38
++#define CTL_DMA_ENABLE 0xd8
++#define CTL_RESET_SD 0xe0
++#define CTL_VERSION 0xe2
++#define CTL_SDIO_REGS 0x100
++#define CTL_CLK_AND_WAIT_CTL 0x138
++#define CTL_RESET_SDIO 0x1e0
++
++/* Definitions for values the CTRL_STATUS register can take. */
++#define TMIO_STAT_CMDRESPEND    0x00000001
++#define TMIO_STAT_DATAEND       0x00000004
++#define TMIO_STAT_CARD_REMOVE   0x00000008
++#define TMIO_STAT_CARD_INSERT   0x00000010
++#define TMIO_STAT_SIGSTATE      0x00000020
++#define TMIO_STAT_WRPROTECT     0x00000080
++#define TMIO_STAT_CARD_REMOVE_A 0x00000100
++#define TMIO_STAT_CARD_INSERT_A 0x00000200
++#define TMIO_STAT_SIGSTATE_A    0x00000400
++#define TMIO_STAT_CMD_IDX_ERR   0x00010000
++#define TMIO_STAT_CRCFAIL       0x00020000
++#define TMIO_STAT_STOPBIT_ERR   0x00040000
++#define TMIO_STAT_DATATIMEOUT   0x00080000
++#define TMIO_STAT_RXOVERFLOW    0x00100000
++#define TMIO_STAT_TXUNDERRUN    0x00200000
++#define TMIO_STAT_CMDTIMEOUT    0x00400000
++#define TMIO_STAT_RXRDY         0x01000000
++#define TMIO_STAT_TXRQ          0x02000000
++#define TMIO_STAT_ILL_FUNC      0x20000000
++#define TMIO_STAT_CMD_BUSY      0x40000000
++#define TMIO_STAT_ILL_ACCESS    0x80000000
++
++#define TMIO_STATUS2_DAT0	BIT(7)
++
++#define	CLK_CTL_DIV_MASK	0xff
++#define	CLK_CTL_SCLKEN		BIT(8)
++
++#define TMIO_BBS		512		/* Boot block size */
++
+ /* Definitions for values the CTRL_SDIO_STATUS register can take. */
+ #define TMIO_SDIO_STAT_IOIRQ	0x0001
+ #define TMIO_SDIO_STAT_EXPUB52	0x4000
+diff --git a/drivers/mmc/host/tmio_mmc_dma.c b/drivers/mmc/host/tmio_mmc_dma.c
+index 67543587382312..d1573687515d2c 100644
+--- a/drivers/mmc/host/tmio_mmc_dma.c
++++ b/drivers/mmc/host/tmio_mmc_dma.c
+@@ -15,7 +15,6 @@
+ #include <linux/dmaengine.h>
+ #include <linux/mfd/tmio.h>
+ #include <linux/mmc/host.h>
+-#include <linux/mmc/tmio.h>
+ #include <linux/pagemap.h>
+ #include <linux/scatterlist.h>
+ 
+diff --git a/drivers/mmc/host/tmio_mmc_pio.c b/drivers/mmc/host/tmio_mmc_pio.c
+index 879e0f5455ef44..15e6f6d5a42337 100644
+--- a/drivers/mmc/host/tmio_mmc_pio.c
++++ b/drivers/mmc/host/tmio_mmc_pio.c
+@@ -39,7 +39,6 @@
+ #include <linux/mmc/host.h>
+ #include <linux/mmc/mmc.h>
+ #include <linux/mmc/slot-gpio.h>
+-#include <linux/mmc/tmio.h>
+ #include <linux/module.h>
+ #include <linux/pagemap.h>
+ #include <linux/platform_device.h>
+diff --git a/include/linux/mmc/tmio.h b/include/linux/mmc/tmio.h
+deleted file mode 100644
+index b2f28e99503383..00000000000000
+--- a/include/linux/mmc/tmio.h
++++ /dev/null
+@@ -1,73 +0,0 @@
+-/*
+- * include/linux/mmc/tmio.h
+- *
+- * Copyright (C) 2016 Sang Engineering, Wolfram Sang
+- * Copyright (C) 2015-16 Renesas Electronics Corporation
+- * Copyright (C) 2007 Ian Molton
+- * Copyright (C) 2004 Ian Molton
+- *
+- * This program is free software; you can redistribute it and/or modify
+- * it under the terms of the GNU General Public License version 2 as
+- * published by the Free Software Foundation.
+- *
+- * Driver for the MMC / SD / SDIO cell found in:
+- *
+- * TC6393XB TC6391XB TC6387XB T7L66XB ASIC3
+- */
+-#ifndef LINUX_MMC_TMIO_H
+-#define LINUX_MMC_TMIO_H
+-
+-#define CTL_SD_CMD 0x00
+-#define CTL_ARG_REG 0x04
+-#define CTL_STOP_INTERNAL_ACTION 0x08
+-#define CTL_XFER_BLK_COUNT 0xa
+-#define CTL_RESPONSE 0x0c
+-#define CTL_STATUS 0x1c
+-#define CTL_STATUS2 0x1e
+-#define CTL_IRQ_MASK 0x20
+-#define CTL_SD_CARD_CLK_CTL 0x24
+-#define CTL_SD_XFER_LEN 0x26
+-#define CTL_SD_MEM_CARD_OPT 0x28
+-#define CTL_SD_ERROR_DETAIL_STATUS 0x2c
+-#define CTL_SD_DATA_PORT 0x30
+-#define CTL_TRANSACTION_CTL 0x34
+-#define CTL_SDIO_STATUS 0x36
+-#define CTL_SDIO_IRQ_MASK 0x38
+-#define CTL_DMA_ENABLE 0xd8
+-#define CTL_RESET_SD 0xe0
+-#define CTL_VERSION 0xe2
+-#define CTL_SDIO_REGS 0x100
+-#define CTL_CLK_AND_WAIT_CTL 0x138
+-#define CTL_RESET_SDIO 0x1e0
+-
+-/* Definitions for values the CTRL_STATUS register can take. */
+-#define TMIO_STAT_CMDRESPEND    0x00000001
+-#define TMIO_STAT_DATAEND       0x00000004
+-#define TMIO_STAT_CARD_REMOVE   0x00000008
+-#define TMIO_STAT_CARD_INSERT   0x00000010
+-#define TMIO_STAT_SIGSTATE      0x00000020
+-#define TMIO_STAT_WRPROTECT     0x00000080
+-#define TMIO_STAT_CARD_REMOVE_A 0x00000100
+-#define TMIO_STAT_CARD_INSERT_A 0x00000200
+-#define TMIO_STAT_SIGSTATE_A    0x00000400
+-#define TMIO_STAT_CMD_IDX_ERR   0x00010000
+-#define TMIO_STAT_CRCFAIL       0x00020000
+-#define TMIO_STAT_STOPBIT_ERR   0x00040000
+-#define TMIO_STAT_DATATIMEOUT   0x00080000
+-#define TMIO_STAT_RXOVERFLOW    0x00100000
+-#define TMIO_STAT_TXUNDERRUN    0x00200000
+-#define TMIO_STAT_CMDTIMEOUT    0x00400000
+-#define TMIO_STAT_RXRDY         0x01000000
+-#define TMIO_STAT_TXRQ          0x02000000
+-#define TMIO_STAT_ILL_FUNC      0x20000000
+-#define TMIO_STAT_CMD_BUSY      0x40000000
+-#define TMIO_STAT_ILL_ACCESS    0x80000000
+-
+-#define TMIO_STATUS2_DAT0	BIT(7)
+-
+-#define	CLK_CTL_DIV_MASK	0xff
+-#define	CLK_CTL_SCLKEN		BIT(8)
+-
+-#define TMIO_BBS		512		/* Boot block size */
+-
+-#endif /* LINUX_MMC_TMIO_H */
+-- 
+2.7.0
 
-Nothing happened...
-
-So, I'll repost the series without the removal of the include file and
-not touching SH boards. It will be your realm only then.
-
-I'll repost the SH relevant parts as a seperate patch to the SH list, so
-this can have then its own timeframe.
-
-
---RnlQjJ0d97Da+TV1
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1
-
-iQIcBAEBAgAGBQJXH42qAAoJEBQN5MwUoCm29KUP/3fmryHJgKn3XBqHGuM7jbc6
-A6kdr7ceU9+zL+mVaXGs31STxfXS91fsknx0dyzUZC3jjE95464QcWZL/WEuoqHo
-ioyJndEHhnL0fK6s6ahZc5zD+o1I1rIrTIfs7BQTFwO6EtQS+4m/tmAZy5s8NrGF
-yVMOVkz7p308KJJCidpi4XWs3kxad+v969E4K+doVjVA2yP48ZX5IHGQHEqUITHW
-Rnpw7WP1nkLSGxbtbpBPjsV9Bkxu3vNZQs3ooydoLsZI/jGfvqtmSjPOKr0gjcZg
-NQ9dIzzMGzMftEO9k4tjW5ltpqIRnmNFRRHkPOnHxSzQCoBNL6t/Fg8ET1XHrhUe
-4Sz1gP+DqFiFJkpe6p+radjnRcssSx4IlCRqW14KV/k8PFtyOhNwsfskIv8wGjxZ
-zNmi2QDGf/2UScq2tBHMqnVzsuURgTK7Grw1bpHX3k+KKdHBo6ySZqYUcIDp4nhf
-N28A9SV57Xt/LHENLXRBgQsWGCpYtnxhzPq3I1xsijfOEofP5usOt6fofq6fPIhp
-spusvrG/JBMDWS4aRiPSNvD/SaQQGi1MJwM/iy1snHxO835puV6L3hk9APaATrBC
-O33Ak8pWFXSkmlI3HuJ5U6lP+c7gAbNhqZDS/Kjmqs+/LuFAzNHLK3axDjJirFPG
-VUfRyhqZkXbOSI00MiZx
-=FxlG
------END PGP SIGNATURE-----
-
---RnlQjJ0d97Da+TV1--
