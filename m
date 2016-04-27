@@ -1,58 +1,47 @@
-From: Krzysztof Kozlowski <k.kozlowski@samsung.com>
-Subject: [PATCH v2 1/3] ARM: dts: exynos: Define vqmmc for SD card and allow
- disabling regulators on Odroid X/X2/U3
-Date: Wed, 27 Apr 2016 16:00:18 +0200
-Message-ID: <1461765620-6833-1-git-send-email-k.kozlowski@samsung.com>
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-Sender: linux-samsung-soc-owner@vger.kernel.org
-To: Kukjin Kim <kgene@kernel.org>, Krzysztof Kozlowski <k.kozlowski@samsung.com>, devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-samsung-soc@vger.kernel.org, linux-kernel@vger.kernel.org, Tobias Jakobi <tjakobi@math.uni-bielefeld.de>, Marek Szyprowski <m.szyprowski@samsung.com>
-Cc: linux-mmc@vger.kernel.org, linux.amoon@gmail.com, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>
+From: Tony Lindgren <tony@atomide.com>
+Subject: Re: [PATCH 1/2] ARM: OMAP2+: n900 needs MMC slot names for legacy
+ user space
+Date: Wed, 27 Apr 2016 07:17:03 -0700
+Message-ID: <20160427141703.GW5995@atomide.com>
+References: <1461714383-9956-1-git-send-email-tony@atomide.com>
+ <1461714383-9956-2-git-send-email-tony@atomide.com>
+ <CAPDyKFokkpF_-yxE+G2_nvC2q3uHkMCxZJHYU7y4KRRDWfvPTQ@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from muru.com ([72.249.23.125]:52409 "EHLO muru.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752171AbcD0ORI (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 27 Apr 2016 10:17:08 -0400
+Content-Disposition: inline
+In-Reply-To: <CAPDyKFokkpF_-yxE+G2_nvC2q3uHkMCxZJHYU7y4KRRDWfvPTQ@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-omap <linux-omap@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Aaro Koskinen <aaro.koskinen@iki.fi>, Ivaylo Dimitrov <ivo.g.dimitrov.75@gmail.com>, Sebastian Reichel <sre@kernel.org>, Pavel Machel <pavel@ucw.cz>, Timo Kokkonen <timo.t.kokkonen@iki.fi>, Kishon Vijay Abraham I <kishon@ti.com>, linux-mmc <linux-mmc@vger.kernel.org>
 
-The SD-card vmmc-supply contained incorrectly two regulators. The second
-one is ignored. Fix this by defining proper vmmc and vqmmc supplies.
-Additionally these regulators do not have to be always on, so allow
-disabling them to reduce energy consumption.
+* Ulf Hansson <ulf.hansson@linaro.org> [160427 01:50]:
+> On 27 April 2016 at 01:46, Tony Lindgren <tony@atomide.com> wrote:
+> > Let's pass the slot names in pdata like the legacy code does.
+> > Once we have a generic DT binding for the slot names we can
+> > switch to that.
+> 
+> I am not sure we ever will get a DT binding accepted for the slot
+> name. It seem far from being a HW description. :-)
 
-Signed-off-by: Krzysztof Kozlowski <k.kozlowski@samsung.com>
+Hmm it does describe where on the the device the MMC is
+located though as in "external" or "internal".
 
----
+> Instead, the long term and proper solution, is to enable userspace to
+> be able to use UUID/PARTID instead.
 
-Changes since v1:
-1. None
----
- arch/arm/boot/dts/exynos4412-odroid-common.dtsi | 5 ++---
- 1 file changed, 2 insertions(+), 3 deletions(-)
+OK.
 
-diff --git a/arch/arm/boot/dts/exynos4412-odroid-common.dtsi b/arch/arm/boot/dts/exynos4412-odroid-common.dtsi
-index cab0f07d7d28..3d0d44581fbd 100644
---- a/arch/arm/boot/dts/exynos4412-odroid-common.dtsi
-+++ b/arch/arm/boot/dts/exynos4412-odroid-common.dtsi
-@@ -249,7 +249,6 @@
- 				regulator-name = "VDDQ_MMC2_2.8V";
- 				regulator-min-microvolt = <2800000>;
- 				regulator-max-microvolt = <2800000>;
--				regulator-always-on;
- 				regulator-boot-on;
- 			};
- 
-@@ -345,7 +344,6 @@
- 				regulator-name = "LDO21_3.3V";
- 				regulator-min-microvolt = <3300000>;
- 				regulator-max-microvolt = <3300000>;
--				regulator-always-on;
- 				regulator-boot-on;
- 			};
- 
-@@ -482,7 +480,8 @@
- 	bus-width = <4>;
- 	pinctrl-0 = <&sd2_clk &sd2_cmd &sd2_cd &sd2_bus4>;
- 	pinctrl-names = "default";
--	vmmc-supply = <&ldo4_reg &ldo21_reg>;
-+	vmmc-supply = <&ldo21_reg>;
-+	vqmmc-supply = <&ldo4_reg>;
- 	cd-gpios = <&gpk2 2 GPIO_ACTIVE_HIGH>;
- 	cd-inverted;
- 	status = "okay";
--- 
-1.9.1
+> Until that happens, I guess this will have to do.
+
+Yeah especially as that has been working with the legacy booting
+for years.
+
+Regards,
+
+Tony
