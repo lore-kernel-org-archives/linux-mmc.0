@@ -1,53 +1,108 @@
-From: Krzysztof Kozlowski <k.kozlowski@samsung.com>
-Subject: [PATCH 3/3] ARM: dts: exynos: Lower SD card interface voltage to 2.8v
- on Odroid X/X2/U3
-Date: Wed, 27 Apr 2016 14:19:13 +0200
-Message-ID: <1461759553-10119-3-git-send-email-k.kozlowski@samsung.com>
-References: <1461759553-10119-1-git-send-email-k.kozlowski@samsung.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH] mmc: mediatek: fix request blocked by cancel_delayed_work
+Date: Wed, 27 Apr 2016 14:33:58 +0200
+Message-ID: <CAPDyKFrhR4P=X9VPoiSgkeQTrjinkp5YFH9MSsXkDwzd441A8w@mail.gmail.com>
+References: <1460963609-16179-1-git-send-email-chaotian.jing@mediatek.com>
+	<CAPDyKFrXVaq85sSQ+ib-U=rgdxB_k2tif0aHQi_0d8kZ2FZDcA@mail.gmail.com>
+	<1461404630.7081.9.camel@mhfsdcap03>
+	<CAPDyKFpO89QWHST8XoBvRO4Y+Fv4Umt43B35E2vhm-z2WmZXSw@mail.gmail.com>
+	<1461758776.20837.7.camel@mhfsdcap03>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-reply-to: <1461759553-10119-1-git-send-email-k.kozlowski@samsung.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Kukjin Kim <kgene@kernel.org>, Krzysztof Kozlowski <k.kozlowski@samsung.com>, devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-samsung-soc@vger.kernel.org, linux-kernel@vger.kernel.org
-Cc: Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>, Anand Moon <linux.amoon@gmail.com>, linux-mmc@vger.kernel.org, Jaehoon Chung <jh80.chung@samsung.com>, Tobias Jakobi <tjakobi@math.uni-bielefeld.de>, Marek Szyprowski <m.szyprowski@samsung.com>
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1461758776.20837.7.camel@mhfsdcap03>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Chaotian Jing <chaotian.jing@mediatek.com>
+Cc: Matthias Brugger <matthias.bgg@gmail.com>, Nicolas Boichat <drinkcat@chromium.org>, Douglas Anderson <dianders@chromium.org>, Geert Uytterhoeven <geert@linux-m68k.org>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, linux-mediatek@lists.infradead.org, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, srv_heupstream <srv_heupstream@mediatek.com>, Sascha Hauer <kernel@pengutronix.de>
 List-Id: linux-mmc@vger.kernel.org
 
-Odroid X/X2/U3 schematics say that SD card vmmc regulator
-(LDO21/TFLASH) operates on 2.8 V. Mainline U-Boot uses that value as
-well. 2.8 V is common on Exynos-based boards. Additionally use some
-descriptive name for this regulator.
+[...]
 
-Signed-off-by: Krzysztof Kozlowski <k.kozlowski@samsung.com>
----
- arch/arm/boot/dts/exynos4412-odroid-common.dtsi | 6 +++---
- 1 file changed, 3 insertions(+), 3 deletions(-)
+>> > Actually, this is a Bug of __mmc_switch(), Per JEDEC Spec, while switch
+>> > speed mode, should not use CMD13 to get card status, as it's response
+>> > cannot reflect that if card was busy now, for this CMD6 switch HS200
+>>
+>> There is a statement applicable to all HS modes, which says it's *not
+>> recommended* but *if* used, CRC errors shall be ignored.
+>>
+> Yes, but if we ignore the CRC error check, how do we know current
+> response is correct or incorrect ? if card is still busy but we get the
+> response of 0x900 caused by latching error, then it still consider that
+> card has already changed to trans state.
 
-diff --git a/arch/arm/boot/dts/exynos4412-odroid-common.dtsi b/arch/arm/boot/dts/exynos4412-odroid-common.dtsi
-index 55d766f28202..563681c39ec2 100644
---- a/arch/arm/boot/dts/exynos4412-odroid-common.dtsi
-+++ b/arch/arm/boot/dts/exynos4412-odroid-common.dtsi
-@@ -341,9 +341,9 @@
- 			};
- 
- 			ldo21_reg: LDO21 {
--				regulator-name = "LDO21_3.3V";
--				regulator-min-microvolt = <3300000>;
--				regulator-max-microvolt = <3300000>;
-+				regulator-name = "TFLASH_2.8V";
-+				regulator-min-microvolt = <2800000>;
-+				regulator-max-microvolt = <2800000>;
- 				regulator-boot-on;
- 			};
- 
--- 
-1.9.1
+That's true. So perhaps we shouldn't ignore CRC errors, but instead
+treat them as card is still busy and send a new CMD13?
+
+Could you please try that and see how it works?
+
+> So, it's better to never use CMD13 when change the speed mode.
+
+Yes, that might be the case. My concern is only that we should avoid
+adding unnecessary time-out for cards that is already working, as it
+might effects the total initialization time of the card.
+
+On the other hand, perhaps these card are working more because of
+"luck" and thus the method to switch to HS mode are fragile and needs
+to be fixed. :-)
+
+>> That's what we have been doing so far, but perhaps that isn't good
+>> enough for HS200/400.
+>>
+>> > case, I tried some Samsung/Sandisk/KSI eMMC, issue CMD13 will always get
+>> > 0x800, even eMMC has already changed to transfer state and DAT0 is high,
+>> > the response of CMD13 is also 0x800, and will never be 0x900.
+>>
+>> What do you mean by never? I assume it would when you extend the timeout?
+>>
+>> Does your host driver make sure to ignore CRC errors in this case?
+>> Just to be sure, that isn't the problem.
+>>
+>> > So, in __mmc_switch(), it's a bug to use CMD13 to know that if card has
+>> > already changed to transfer state.
+>>
+>> Whether it's a bug or not, it seems like we have eMMC cards that we
+>> have issues to support because of the way we have interpreted the
+>> spec. So let's try to fix them!
+>>
+>> > But, Our host do not support MMC_CAP_WAIT_WHILE_BUSY, that's why we hit
+>> > this issue.
+>>
+>> Okay, I see.
+>>
+>> Let's try to change the behaviour in __mmc_switch() to prevent it to
+>> send CMD13 before the cards stops signal busy on DAT0, when switching
+>> to HS200/HS400 mode.
+>> What I have in mind is:
+>>
+>> 1.
+>> When the host controller doesn't support MMC_CAP_WAIT_WHILE_BUSY, we
+>> would then to wait for a fixed timeout, before we send CMD13. In this
+>> case, do you know if the "generic_cmd6_time" is working for your eMMC
+>> devices that you had issues with?
+>>
+> In general, generic_cmd6_time is enough, unless the card has firmware
+> issue itself,
+
+Okay, so let's use that timeout value!
+
+If another value is needed for a specific card, that would have to be
+handled through a card quirk.
+
+>> 2.
+>> In additional to the above solution, we can for those hosts that
+>> supports the ->card_busy() ops, but not MMC_CAP_WAIT_WHILE_BUSY,
+>> invoke the ->card_busy() in a polling manner. Of course the above
+>> timeout should also be considered as we need to stop polling at some
+>> point.
+>>
+> this is what I want to do it, use the ops->card_busy() to check DAT0
+> status. if a host do not support MMC_CAP_WAIT_WHILE_BUSY and there is
+> no ops->card_busy(), then the only way is wait a fixed
+> timeout(generic_cmd6_time).
+
+Okay, great!
+
+[...]
+
+Kind regards
+Uffe
