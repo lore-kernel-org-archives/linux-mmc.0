@@ -1,57 +1,58 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: mmcif: remove obsolete support for sh7372
-Date: Wed, 27 Apr 2016 10:31:20 +0200
-Message-ID: <CAPDyKFoPzUs3t00Yhrwdrc6Eeb-rpnh8ONb03vBk5fMAQCs47g@mail.gmail.com>
-References: <1461702886-6873-1-git-send-email-wsa@the-dreams.de>
+Subject: Re: [PATCH v2 0/5] mmc: tmio: make CTL_STATUS handling consistent
+Date: Wed, 27 Apr 2016 10:31:35 +0200
+Message-ID: <CAPDyKFoWdzG91o7FtZTc1FBZ3qKnVg2Q8KWo+aQkq-1Ziqbn+Q@mail.gmail.com>
+References: <1461689625-3693-1-git-send-email-wsa@the-dreams.de>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wm0-f53.google.com ([74.125.82.53]:37246 "EHLO
-	mail-wm0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752784AbcD0IbW (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 27 Apr 2016 04:31:22 -0400
-Received: by mail-wm0-f53.google.com with SMTP id a17so5715366wme.0
-        for <linux-mmc@vger.kernel.org>; Wed, 27 Apr 2016 01:31:21 -0700 (PDT)
-In-Reply-To: <1461702886-6873-1-git-send-email-wsa@the-dreams.de>
+Received: from mail-wm0-f41.google.com ([74.125.82.41]:35998 "EHLO
+	mail-wm0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751871AbcD0Ibh (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 27 Apr 2016 04:31:37 -0400
+Received: by mail-wm0-f41.google.com with SMTP id n129so16306883wmn.1
+        for <linux-mmc@vger.kernel.org>; Wed, 27 Apr 2016 01:31:36 -0700 (PDT)
+In-Reply-To: <1461689625-3693-1-git-send-email-wsa@the-dreams.de>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Wolfram Sang <wsa@the-dreams.de>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, linux-renesas-soc@vger.kernel.org, Geert Uytterhoeven <geert+renesas@glider.be>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, linux-renesas-soc@vger.kernel.org
 
-On 26 April 2016 at 22:34, Wolfram Sang <wsa@the-dreams.de> wrote:
-> From: Wolfram Sang <wsa+renesas@sang-engineering.com>
+On 26 April 2016 at 18:53, Wolfram Sang <wsa@the-dreams.de> wrote:
+> It took me a little to discover that CTL_STATUS has a different handling than
+> the other registers. CTL_STATUS and CTL_STATUS2, both u16, are merged into a
+> virtual u32. However, CTL_STATUS2 was also directly accessed.
 >
-> There is no support for this platform in the kernel anymore. Make the
-> Kconfig text more generic, so it won't get stale anymore.
+> Clean this up, make this consistent, and document this. Making the driver less
+> complex and easier to work with.
 >
-> Reported-by: Geert Uytterhoeven <geert+renesas@glider.be>
-> Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
-
-Thanks, applied for next!
-
-Kind regards
-Uffe
-
-> ---
->  drivers/mmc/host/Kconfig | 4 ++--
->  1 file changed, 2 insertions(+), 2 deletions(-)
+> Tested on Renesas R-Car Gen2 and Gen3.
 >
-> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
-> index 04feea8354cba7..f5be219274329d 100644
-> --- a/drivers/mmc/host/Kconfig
-> +++ b/drivers/mmc/host/Kconfig
-> @@ -676,9 +676,9 @@ config MMC_SH_MMCIF
->         depends on HAS_DMA
->         depends on SUPERH || ARCH_RENESAS || COMPILE_TEST
->         help
-> -         This selects the MMC Host Interface controller (MMCIF).
-> +         This selects the MMC Host Interface controller (MMCIF) found in various
-> +         Renesas SoCs for SH and ARM architectures.
+> Changes since V1:
 >
-> -         This driver supports MMCIF in sh7724/sh7757/sh7372.
+> * rebased
+> * added simons review tags
 >
->  config MMC_JZ4740
->         tristate "JZ4740 SD/Multimedia Card Interface support"
+>
+> Wolfram Sang (5):
+>   mmc: tmio: give read32/write32 functions more descriptive names
+>   mmc: tmio: use BIT() within defines
+>   mmc: tmio: use CTL_STATUS consistently
+>   mmc: tmio/sdhi: distinguish between SCLKDIVEN and ILL_FUNC
+>   mmc: tmio: document CTL_STATUS handling
+>
+>  drivers/mmc/host/sh_mobile_sdhi.c |  3 ++-
+>  drivers/mmc/host/tmio_mmc.h       | 56 ++++++++++++++++++++-------------------
+>  drivers/mmc/host/tmio_mmc_pio.c   | 24 ++++++++---------
+>  3 files changed, 43 insertions(+), 40 deletions(-)
+>
 > --
 > 2.7.0
 >
+
+They still don't apply, sorry.
+
+Are you re-basing towards my mmc tree's next branch?
+
+Kind regards
+Uffe
