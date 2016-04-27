@@ -1,106 +1,37 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH 07/23] mmc: sdhci: check SDHCI_QUIRK2_NO_1_8_V when do
- voltage switch
-Date: Wed, 27 Apr 2016 23:27:07 +0300
-Message-ID: <5721209B.7000707@intel.com>
-References: <1460741387-23815-1-git-send-email-aisheng.dong@nxp.com>
- <1460741387-23815-8-git-send-email-aisheng.dong@nxp.com>
- <571A1970.7010800@intel.com>
- <CAA+hA=S4yy8=z3EXS9ZO5V6+WQDV7K0d29vUpcFkB5q6f+Eo8g@mail.gmail.com>
+From: Javier Martinez Canillas <javier@osg.samsung.com>
+Subject: Re: [PATCH v2 1/3] ARM: dts: exynos: Define vqmmc for SD card and
+ allow disabling regulators on Odroid X/X2/U3
+Date: Wed, 27 Apr 2016 17:09:38 -0400
+Message-ID: <ba632ed9-6e6f-8a5d-5708-9c039e14056e@osg.samsung.com>
+References: <1461765620-6833-1-git-send-email-k.kozlowski@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Type: text/plain; charset=windows-1252
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga02.intel.com ([134.134.136.20]:30722 "EHLO mga02.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752362AbcD0U1M (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 27 Apr 2016 16:27:12 -0400
-In-Reply-To: <CAA+hA=S4yy8=z3EXS9ZO5V6+WQDV7K0d29vUpcFkB5q6f+Eo8g@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+In-Reply-To: <1461765620-6833-1-git-send-email-k.kozlowski@samsung.com>
+Sender: linux-samsung-soc-owner@vger.kernel.org
+To: Krzysztof Kozlowski <k.kozlowski@samsung.com>, Kukjin Kim <kgene@kernel.org>, devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-samsung-soc@vger.kernel.org, linux-kernel@vger.kernel.org, Tobias Jakobi <tjakobi@math.uni-bielefeld.de>, Marek Szyprowski <m.szyprowski@samsung.com>
+Cc: linux-mmc@vger.kernel.org, linux.amoon@gmail.com, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Dong Aisheng <dongas86@gmail.com>
-Cc: Dong Aisheng <aisheng.dong@nxp.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, Chris Ball <chris@printf.net>, Shawn Guo <shawnguo@kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, haibo.chen@nxp.com
 
-On 24/04/2016 12:56 p.m., Dong Aisheng wrote:
-> On Fri, Apr 22, 2016 at 8:30 PM, Adrian Hunter <adrian.hunter@intel.com> wrote:
->> On 15/04/16 20:29, Dong Aisheng wrote:
->>> Currently when card type supports EXT_CSD_CARD_TYPE_DDR_1_8V
->>> which means it can work on DDR mode with either 3.3v IO or 1.8v
->>> IO voltage. MMC core will first try 1.8v then 3.3v if host claims
->>> MMC_CAP_1_8V_DDR support.
->>> However the host driver voltage switch code does not check NO_1_8_V
->>> quirk which may set a wrong 1.8v and causes the card fixed to 3.3v
->>> VIO un-work.
->>>
->>> Checking 1.8V quirk before setting it to avoid such issue.
->>
->> We need to look forward to when SDHCI_QUIRK2_NO_1_8_V doesn't exist.
->>
->
-> Yes, i did try to clean up SDHCI_QUIRK2_NO_1_8_V.
-> However, it seems not that simply.
-> Currently we may still need it before we got a better way.
->
-> My point is whether we should stop fixing the exist issue in SDHCI driver
-> just caused by we want to clean up it later?
+Hello Krzysztof,
 
-If you want a fix for stable kernels, then I guess it is OK.  In that case
-it is better to have a fix that applies cleanly to older kernels
-i.e. not on top of re-factoring
+On 04/27/2016 10:00 AM, Krzysztof Kozlowski wrote:
+> The SD-card vmmc-supply contained incorrectly two regulators. The second
+> one is ignored. Fix this by defining proper vmmc and vqmmc supplies.
+> Additionally these regulators do not have to be always on, so allow
+> disabling them to reduce energy consumption.
+> 
+> Signed-off-by: Krzysztof Kozlowski <k.kozlowski@samsung.com>
+> 
+> ---
 
->
->> There are two possibilities:
->>
->> 1. Add MMC_CAP_3_3V_DDR and support to core and use that instead of
->> MMC_CAP_1_8V_DDR.  You'll need Ulf's feedback on that.
->>
->
-> Yes, we can do it.
-> But the point is for DDR50/SD3.0/SDIO3.0/HS200/HS400 cards we have
-> the same situation and still need QUIRK2_NO_1_8_V.
->
-> And i somehow a bit wonder whether we should retrieve the speed mode
-> support from device tree since it's actually controller capability.
-> IO range capability is another thing.
->
-> Probably we may start another topic to discuss it specificly.
->
->> 2. Replace ->start_signal_voltage_switch() i.e.
->>
->> host->mmc_host_ops.start_signal_voltage_switch =
->> esdhci_start_signal_voltage_switch;
->>
->> You will also need to change all calls to
->> sdhci_start_signal_voltage_switch() with
->> host->mmc->ops->start_signal_voltage_switch(), but that needs to be done anyway.
->>
->
-> esdhc can fully use the common sdhci_start_signal_voltag_switch.
-> Since it's already support QUIRK_NO_1_8_V, we don't want to
-> invent imx voltage swith currently, but fix and use it first.
->
-> Regards
-> Dong Aisheng
->
->>>
->>> CC: stable <stable@vger.kernel.org>
->>> Signed-off-by: Dong Aisheng <aisheng.dong@nxp.com>
->>> ---
->>>   drivers/mmc/host/sdhci.c | 2 ++
->>>   1 file changed, 2 insertions(+)
->>>
->>> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
->>> index 2338aab..96ccb15 100644
->>> --- a/drivers/mmc/host/sdhci.c
->>> +++ b/drivers/mmc/host/sdhci.c
->>> @@ -1683,6 +1683,8 @@ static int sdhci_do_signal_voltage_switch(struct sdhci_host *host,
->>>
->>>                return -EAGAIN;
->>>        case MMC_SIGNAL_VOLTAGE_180:
->>> +             if (host->quirks2 & SDHCI_QUIRK2_NO_1_8_V)
->>> +                     return -EINVAL;
->>>                /*
->>>                 * Enable 1.8V Signal Enable in the Host Control2
->>>                 * register
->>>
->>
+Patch looks good to me.
+
+Reviewed-by: Javier Martinez Canillas <javier@osg.samsung.com>
+
+Best regards,
+-- 
+Javier Martinez Canillas
+Open Source Group
+Samsung Research America
