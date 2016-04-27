@@ -1,129 +1,428 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: mediatek: fix request blocked by cancel_delayed_work
-Date: Wed, 27 Apr 2016 12:02:52 +0200
-Message-ID: <CAPDyKFpO89QWHST8XoBvRO4Y+Fv4Umt43B35E2vhm-z2WmZXSw@mail.gmail.com>
-References: <1460963609-16179-1-git-send-email-chaotian.jing@mediatek.com>
-	<CAPDyKFrXVaq85sSQ+ib-U=rgdxB_k2tif0aHQi_0d8kZ2FZDcA@mail.gmail.com>
-	<1461404630.7081.9.camel@mhfsdcap03>
+From: Prabu Thangamuthu <Prabu.T@synopsys.com>
+Subject: [PATCH v4] mmc: sdhci-pci: add Support of Synopsys DWC_MSHC IP
+Date: Wed, 27 Apr 2016 11:51:36 +0000
+Message-ID: <705D14B1C7978B40A723277C067CEDE2010A4B4DB3@IN01WEMBXB.internal.synopsys.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wm0-f53.google.com ([74.125.82.53]:37659 "EHLO
-	mail-wm0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752161AbcD0KCy (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 27 Apr 2016 06:02:54 -0400
-Received: by mail-wm0-f53.google.com with SMTP id a17so8882233wme.0
-        for <linux-mmc@vger.kernel.org>; Wed, 27 Apr 2016 03:02:53 -0700 (PDT)
-In-Reply-To: <1461404630.7081.9.camel@mhfsdcap03>
+Received: from us01smtprelay-2.synopsys.com ([198.182.60.111]:39559 "EHLO
+	smtprelay.synopsys.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752440AbcD0Lvo convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 27 Apr 2016 07:51:44 -0400
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chaotian Jing <chaotian.jing@mediatek.com>
-Cc: Matthias Brugger <matthias.bgg@gmail.com>, Nicolas Boichat <drinkcat@chromium.org>, Douglas Anderson <dianders@chromium.org>, Geert Uytterhoeven <geert@linux-m68k.org>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, linux-mediatek@lists.infradead.org, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, srv_heupstream <srv_heupstream@mediatek.com>, Sascha Hauer <kernel@pengutronix.de>
+To: "Ulf Hansson (ulf.hansson@linaro.org)" <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, Bjorn Helgaas <bhelgaas@google.com>, Andrew Morton <akpm@linux-foundation.org>, "David S. Miller" <davem@davemloft.net>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Kalle Valo <kvalo@codeaurora.org>, Mauro Carvalho Chehab <mchehab@osg.samsung.com>, Guenter Roeck <linux@roeck-us.net>, Jiri Slaby <jslaby@suse.com>, Chaotian Jing <chaotian.jing@mediatek.com>, Andrei Pistirica <andrei.pistirica@microchip.com>, Ben Hutchings <ben.hutchings@codethink.co.uk>, Joshua Henderson <joshua.henderson@microchip.com>, Ludovic Desroches <ludovic.desroches@atmel.com>
+Cc: "prabu.t@synopsys.com" <prabu.t@synopsys.com>, Manjunath M Bettegowda <Manjunath.MB@synopsys.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 
-On 23 April 2016 at 11:43, Chaotian Jing <chaotian.jing@mediatek.com> wrote:
-> Hi,
-> On Fri, 2016-04-22 at 14:24 +0200, Ulf Hansson wrote:
->> On 18 April 2016 at 09:13, Chaotian Jing <chaotian.jing@mediatek.com> wrote:
->> > there are 2 points will cause could not call mmc_request_done()
->> > and eventually cause the caller thread blocked.
->> >
->> > A. if card was busy, cancel_delayed_work() will return false because
->> > the delay work has not been scheduled, in this case, need put
->> > mod_delayed_work() in front of msdc_cmd_is_ready()
->> >
->> > B. if a request really need more than 5s(Some Sandisk TF card), it will
->> > use cancel_delayed_work() to cancel itself, and also return false, so use
->> > in_interrupt() to avoid this case
->> >
->> > Signed-off-by: Chaotian Jing <chaotian.jing@mediatek.com>
->> > ---
->> >  drivers/mmc/host/mtk-sd.c | 11 ++++++++---
->> >  1 file changed, 8 insertions(+), 3 deletions(-)
->> >
->> > diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
->> > index b17f30d..1511b1b 100644
->> > --- a/drivers/mmc/host/mtk-sd.c
->> > +++ b/drivers/mmc/host/mtk-sd.c
->> > @@ -724,7 +724,7 @@ static void msdc_request_done(struct msdc_host *host, struct mmc_request *mrq)
->> >         bool ret;
->> >
->> >         ret = cancel_delayed_work(&host->req_timeout);
->> > -       if (!ret) {
->> > +       if (!ret && in_interrupt()) {
->> >                 /* delay work already running */
->> >                 return;
->> >         }
->> > @@ -824,7 +824,12 @@ static inline bool msdc_cmd_is_ready(struct msdc_host *host,
->> >         }
->> >
->> >         if (mmc_resp_type(cmd) == MMC_RSP_R1B || cmd->data) {
->> > -               tmo = jiffies + msecs_to_jiffies(20);
->> > +               /*
->> > +                * 2550ms is from EXT_CSD[248], after switch to hs200,
->> > +                * using CMD13 to polling card status, it will get response
->> > +                * of 0x800, but EMMC still pull-low DAT0.
->> > +                */
->>
->> Seems like you are solving a eMMC specific issue on your driver?
->>
->> Perhaps we should try to use a card quirk instead?
->
-> Actually, this is a Bug of __mmc_switch(), Per JEDEC Spec, while switch
-> speed mode, should not use CMD13 to get card status, as it's response
-> cannot reflect that if card was busy now, for this CMD6 switch HS200
+Patch for Standard SD Host Controller Interface compliant Synopsys
+sdhci-dwc controller driver. This code supports PCI based interface.
 
-There is a statement applicable to all HS modes, which says it's *not
-recommended* but *if* used, CRC errors shall be ignored.
+Signed-off-by: Prabu Thangamuthu <prabu.t@synopsys.com>
+---
+Change log v4:
+	-Updated review comments to optimize the code.
 
-That's what we have been doing so far, but perhaps that isn't good
-enough for HS200/400.
+Change log v3:
+	-Removed unused code.
+	-Updated review comments.
 
-> case, I tried some Samsung/Sandisk/KSI eMMC, issue CMD13 will always get
-> 0x800, even eMMC has already changed to transfer state and DAT0 is high,
-> the response of CMD13 is also 0x800, and will never be 0x900.
+Change log v2:
+	-Removed Synopsys specific PCI device ID's from pci_ids.h.
+	-Updated the PCI device ID's in sdhci-pci-core.c.
 
-What do you mean by never? I assume it would when you extend the timeout?
+ MAINTAINERS                       |   7 ++
+ drivers/mmc/host/Makefile         |   3 +-
+ drivers/mmc/host/sdhci-pci-core.c |  14 +++
+ drivers/mmc/host/sdhci-pci-dwc.c  | 244 ++++++++++++++++++++++++++++++++++++++
+ drivers/mmc/host/sdhci-pci-dwc.h  |  55 +++++++++
+ 5 files changed, 322 insertions(+), 1 deletion(-)
+ create mode 100644 drivers/mmc/host/sdhci-pci-dwc.c
+ create mode 100644 drivers/mmc/host/sdhci-pci-dwc.h
 
-Does your host driver make sure to ignore CRC errors in this case?
-Just to be sure, that isn't the problem.
+diff --git a/MAINTAINERS b/MAINTAINERS
+index 8491336..c98bdb1 100644
+--- a/MAINTAINERS
++++ b/MAINTAINERS
+@@ -9751,6 +9751,13 @@ S:	Maintained
+ F:	include/linux/mmc/dw_mmc.h
+ F:	drivers/mmc/host/dw_mmc*
+ 
++SYNOPSYS SDHCI COMPLIANT DWC MSHC DRIVER
++M:	Prabu Thangamuthu <prabu.t@synopsys.com>
++M:	Manjunath M B <manjumb@synopsys.com>
++L:	linux-mmc@vger.kernel.org
++S:	Maintained
++F:	drivers/mmc/host/sdhci-pci-dwc*
++
+ SYSTEM TRACE MODULE CLASS
+ M:	Alexander Shishkin <alexander.shishkin@linux.intel.com>
+ S:	Maintained
+diff --git a/drivers/mmc/host/Makefile b/drivers/mmc/host/Makefile
+index af918d2..092a746 100644
+--- a/drivers/mmc/host/Makefile
++++ b/drivers/mmc/host/Makefile
+@@ -9,7 +9,8 @@ obj-$(CONFIG_MMC_MXC)		+= mxcmmc.o
+ obj-$(CONFIG_MMC_MXS)		+= mxs-mmc.o
+ obj-$(CONFIG_MMC_SDHCI)		+= sdhci.o
+ obj-$(CONFIG_MMC_SDHCI_PCI)	+= sdhci-pci.o
+-sdhci-pci-y			+= sdhci-pci-core.o sdhci-pci-o2micro.o
++sdhci-pci-y			+= sdhci-pci-core.o sdhci-pci-o2micro.o \
++				   sdhci-pci-dwc.o
+ obj-$(subst m,y,$(CONFIG_MMC_SDHCI_PCI))	+= sdhci-pci-data.o
+ obj-$(CONFIG_MMC_SDHCI_ACPI)	+= sdhci-acpi.o
+ obj-$(CONFIG_MMC_SDHCI_PXAV3)	+= sdhci-pxav3.o
+diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-pci-core.c
+index 79e1901..4a7769c 100644
+--- a/drivers/mmc/host/sdhci-pci-core.c
++++ b/drivers/mmc/host/sdhci-pci-core.c
+@@ -31,6 +31,7 @@
+ #include "sdhci.h"
+ #include "sdhci-pci.h"
+ #include "sdhci-pci-o2micro.h"
++#include "sdhci-pci-dwc.h"
+ 
+ /*****************************************************************************\
+  *                                                                           *
+@@ -70,6 +71,11 @@ static int ricoh_mmc_resume(struct sdhci_pci_chip *chip)
+ 	msleep(500);
+ 	return 0;
+ }
++/* Synopsys SDHCI compliant Controller */
++static const struct sdhci_pci_fixes sdhci_snps = {
++	.probe_slot	= sdhci_pci_probe_slot_snps,
++	.quirks2	= SDHCI_QUIRK2_PRESET_VALUE_BROKEN,
++};
+ 
+ static const struct sdhci_pci_fixes sdhci_ricoh = {
+ 	.probe		= ricoh_probe,
+@@ -797,6 +803,14 @@ static const struct sdhci_pci_fixes sdhci_amd = {
+ 
+ static const struct pci_device_id pci_ids[] = {
+ 	{
++		.vendor		= PCI_VENDOR_ID_SYNOPSYS,
++		.device		= 0xc201, /* Device ID of sdhci-dwc on Haps51 */
++		.subvendor	= PCI_ANY_ID,
++		.subdevice	= PCI_ANY_ID,
++		.driver_data	= (kernel_ulong_t)&sdhci_snps,
++	},
++
++	{
+ 		.vendor		= PCI_VENDOR_ID_RICOH,
+ 		.device		= PCI_DEVICE_ID_RICOH_R5C822,
+ 		.subvendor	= PCI_ANY_ID,
+diff --git a/drivers/mmc/host/sdhci-pci-dwc.c b/drivers/mmc/host/sdhci-pci-dwc.c
+new file mode 100644
+index 0000000..3a2fcac
+--- /dev/null
++++ b/drivers/mmc/host/sdhci-pci-dwc.c
+@@ -0,0 +1,244 @@
++/*
++ * Copyright (C) 2016 Synopsys, Inc.
++ *
++ * Author: Manjunath M B <manjumb@synopsys.com>
++ *	   Prabu Thangamuthu <prabu.t@synopsys.com>
++ *
++ * This software is licensed under the terms of the GNU General Public
++ * License version 2, as published by the Free Software Foundation, and
++ * may be copied, distributed, and modified under those terms.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ *
++ */
++
++#include <linux/pci.h>
++#include <linux/delay.h>
++#include <linux/module.h>
++#include <linux/moduleparam.h>
++
++#include "sdhci.h"
++#include "sdhci-pci.h"
++#include "sdhci-pci-dwc.h"
++
++/*****************************************************************************\
++ *                                                                           *
++ * Hardware specific clock handling                                          *
++ *                                                                           *
++\*****************************************************************************/
++
++static void snps_reset_dcm(struct sdhci_host *host, u32 mask, u8 reset)
++{
++	u16 vendor_ptr;
++	u32 reg;
++
++	vendor_ptr = sdhci_readw(host, SDHCI_UHS2_VENDOR);
++
++	reg = sdhci_readl(host, (SDHC_GPIO_OUT + vendor_ptr));
++
++	if (reset == 1)
++		reg |= mask;
++	else
++		reg &= ~mask;
++
++	sdhci_writel(host, reg, (SDHC_GPIO_OUT + vendor_ptr));
++}
++
++static void sdhci_set_clock_snps(struct sdhci_host *host, u32 clock)
++{
++	u8 div;
++	u8 mul;
++	u8 div_val;
++	u8 mul_val;
++	u8 timeout;
++	u16 clk;
++	u16 vendor_ptr;
++	u16 mul_div_val;
++	u32 reg;
++
++	/*
++	 * if clock is less than 25MHz, divided clock is used.
++	 * For divided clock, we can use the standard sdhci_set_clock().
++	 * For clock above 25MHz, DRP clock is used
++	 * Here, we cannot use sdhci_set_clock(), we need to program
++	 * TX RX CLOCK DCM DRP for appropriate clock
++	 */
++
++	if (clock <= 25000000) {
++		/* Then call standard set_clock */
++		sdhci_set_clock(host, clock);
++	} else {
++
++		host->mmc->actual_clock = 0;
++		vendor_ptr = sdhci_readw(host, SDHCI_UHS2_VENDOR);
++
++		/* Select un-phase shifted clock before reset Tx Tuning DCM*/
++		reg = sdhci_readl(host, (SDHC_GPIO_OUT + vendor_ptr));
++		reg &= ~SDHC_TX_CLK_SEL_TUNED;
++		sdhci_writel(host, reg, (SDHC_GPIO_OUT + vendor_ptr));
++		mdelay(10);
++
++		sdhci_writew(host, 0, SDHCI_CLOCK_CONTROL);
++
++		/* Lets chose the Mulitplier value to be 0x2 */
++		mul = 0x2;
++		for (div = 1; div <= 32; div++) {
++			if (((host->max_clk * mul) / div)
++					<= clock)
++				break;
++		}
++		/*
++		 * Set Programmable Clock Mode in the Clock
++		 * Control register.
++		 */
++		div_val = div - 1;
++		mul_val = mul - 1;
++
++		host->mmc->actual_clock = (host->max_clk * mul) / div;
++		/*
++		 * Program the DCM DRP
++		 * Step 1: Assert DCM Reset
++		 * Step 2: Program the mul and div values in DRP
++		 * Step 3: Read from DRP base 0x00 to restore DCM output as per
++		 * www.xilinx.com/support/documentation/user_guides/ug191.pdf
++		 * Step 4: De-Assert reset to DCM
++		 */
++
++		snps_reset_dcm(host, SDHC_CARD_TX_CLK_DCM_RST, 1);
++
++		mul_div_val = (mul_val << 8) | div_val;
++		sdhci_writew(host, mul_div_val, TXRX_CLK_DCM_MUL_DIV_DRP);
++		sdhci_readl(host, TXRX_CLK_DCM_DRP_BASE_51);
++
++		snps_reset_dcm(host, SDHC_CARD_TX_CLK_DCM_RST, 0);
++
++		clk = SDHCI_PROG_CLOCK_MODE | SDHCI_CLOCK_INT_EN;
++		sdhci_writew(host, clk, SDHCI_CLOCK_CONTROL);
++
++		/* Wait max 20 ms */
++		timeout = 20;
++		while (!((clk = sdhci_readw(host, SDHCI_CLOCK_CONTROL))
++					& SDHCI_CLOCK_INT_STABLE)) {
++			if (timeout == 0) {
++				pr_err("%s: Internal clock never stabilised\n",
++						mmc_hostname(host->mmc));
++				return;
++			}
++			timeout--;
++			mdelay(1);
++		}
++
++		clk |= SDHCI_CLOCK_CARD_EN;
++		sdhci_writew(host, clk, SDHCI_CLOCK_CONTROL);
++
++		/*
++		 * This Clock might have affected the TX CLOCK DCM and RX CLOCK
++		 * DCM which are used for Phase control; Reset these DCM's
++		 * for proper clock output
++		 *
++		 * Step 1: Reset the DCM
++		 * Step 2: De-Assert reset to DCM
++		 */
++
++		snps_reset_dcm(host, SDHC_TUNING_TX_CLK_DCM_RST |
++					SDHC_TUNING_RX_CLK_DCM_RST, 1);
++		mdelay(10);
++		snps_reset_dcm(host, SDHC_TUNING_TX_CLK_DCM_RST |
++					SDHC_TUNING_RX_CLK_DCM_RST, 0);
++
++		/* Select working phase value if clock is <= 50MHz */
++		if (clock <= 50000000) {
++			/*Change the Tx Phase value here */
++			reg = sdhci_readl(host, (SDHC_GPIO_OUT + vendor_ptr));
++			reg |= (SDHC_TUNING_TX_CLK_SEL_MASK &
++					(SDHC_DEF_TX_CLK_PH_VAL <<
++						SDHC_TUNING_TX_CLK_SEL_SHIFT));
++
++			sdhci_writel(host, reg, (SDHC_GPIO_OUT + vendor_ptr));
++			mdelay(10);
++
++			/* Program to select phase shifted clock */
++			reg |= SDHC_TX_CLK_SEL_TUNED;
++			sdhci_writel(host, reg, (SDHC_GPIO_OUT + vendor_ptr));
++
++			/*
++			 * For 50Mhz, tuning is not possible.
++			 * Lets fix the sampling Phase of Rx Clock here.
++			 */
++			reg = sdhci_readl(host, (SDHC_DBOUNCE + vendor_ptr));
++			reg &= ~SDHC_TUNING_RX_CLK_SEL_MASK;
++			reg |= (SDHC_TUNING_RX_CLK_SEL_MASK &
++					SDHC_DEF_RX_CLK_PH_VAL);
++			sdhci_writel(host, reg, (SDHC_DBOUNCE + vendor_ptr));
++		}
++		mdelay(10);
++	}
++}
++
++static int snps_init_clock(struct sdhci_host *host)
++{
++	u16 mul_div_val;
++
++	/*
++	 * Configure the BCLK DRP to get 100 MHZ Clock
++	 * To get 100MHz from 100MHz input freq,
++	 * mul=1 and div=1
++	 * Formula: output_clock = (input clock * mul) / div
++	 *
++	 * Program the DCM DRP
++	 * Step 1: Assert DCM Reset
++	 * Step 2: Program the mul and div values in DRP
++	 * Step 3: Read from DRP base 0x00 to restore DCM output as per
++	 * www.xilinx.com/support/documentation/user_guides/ug191.pdf
++	 * Step 4: De-Assert reset to DCM
++	 */
++	snps_reset_dcm(host, SDHC_BCLK_DCM_RST, 1);
++
++	mul_div_val = 0x0101;
++	sdhci_writew(host, mul_div_val, BCLK_DCM_MUL_DIV_DRP);
++	sdhci_readl(host, BCLK_DCM_DRP_BASE_51);
++
++	snps_reset_dcm(host, SDHC_BCLK_DCM_RST, 0);
++
++	/*
++	 * By Default Clocks to Controller are OFF.
++	 * Before stack applies reset; we need to turn on the clock
++	 */
++	sdhci_writew(host, SDHCI_CLOCK_INT_EN, SDHCI_CLOCK_CONTROL);
++
++	return 0;
++
++}
++static struct sdhci_ops sdhci_pci_ops_snps = {
++	.set_clock	= sdhci_set_clock_snps,
++};
++
++int sdhci_pci_probe_slot_snps(struct sdhci_pci_slot *slot)
++{
++	int ret = 0;
++	struct sdhci_host *host;
++	const struct sdhci_ops *sdhci_pci_ops;	/* Low level hw interface */
++
++	host = slot->host;
++	sdhci_pci_ops = host->ops;
++
++	sdhci_pci_ops_snps.enable_dma		= sdhci_pci_ops->enable_dma;
++	sdhci_pci_ops_snps.set_bus_width	= sdhci_pci_ops->set_bus_width;
++	sdhci_pci_ops_snps.reset		= sdhci_pci_ops->reset;
++	sdhci_pci_ops_snps.set_uhs_signaling	=
++					sdhci_pci_ops->set_uhs_signaling;
++	sdhci_pci_ops_snps.hw_reset		= sdhci_pci_ops->hw_reset;
++	sdhci_pci_ops_snps.select_drive_strength =
++					sdhci_pci_ops->select_drive_strength;
++
++	host->ops = &sdhci_pci_ops_snps;
++
++	/* Board specific clock initialization */
++	ret = snps_init_clock(host);
++
++	return ret;
++}
++EXPORT_SYMBOL_GPL(sdhci_pci_probe_slot_snps);
+diff --git a/drivers/mmc/host/sdhci-pci-dwc.h b/drivers/mmc/host/sdhci-pci-dwc.h
+new file mode 100644
+index 0000000..02e2213
+--- /dev/null
++++ b/drivers/mmc/host/sdhci-pci-dwc.h
+@@ -0,0 +1,55 @@
++/*
++ * Copyright (C) 2016 Synopsys, Inc.
++ *
++ * Author: Manjunath M B <manjumb@synopsys.com>
++ *
++ * This software is licensed under the terms of the GNU General Public
++ * License version 2, as published by the Free Software Foundation, and
++ * may be copied, distributed, and modified under those terms.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ *
++ */
++
++#ifndef __SDHCI_DWC_MSHC_PCI_H__
++#define __SDHCI_DWC_MSHC_PCI_H__
++
++#include "sdhci-pci.h"
++
++#define SDHCI_UHS2_VENDOR	0xE8
++
++#define DRIVER_NAME "sdhci-pci-dwc"
++#define SDHC_DEF_TX_CLK_PH_VAL  4
++#define SDHC_DEF_RX_CLK_PH_VAL  4
++
++/* Synopsys Vendor Specific Registers */
++#define SDHC_DBOUNCE                           0x08
++#define SDHC_TUNING_RX_CLK_SEL_MASK            0x000000FF
++#define SDHC_GPIO_OUT                          0x34
++/* HAPS 51 Based implementation */
++#define SDHC_BCLK_DCM_RST                      0x00000001
++#define SDHC_CARD_TX_CLK_DCM_RST               0x00000002
++#define SDHC_TUNING_RX_CLK_DCM_RST             0x00000004
++#define SDHC_TUNING_TX_CLK_DCM_RST             0x00000008
++#define SDHC_TUNING_TX_CLK_SEL_MASK            0x00000070
++#define SDHC_TUNING_TX_CLK_SEL_SHIFT           4
++#define SDHC_TX_CLK_SEL_TUNED                  0x00000080
++
++/* Offset of BCLK DCM DRP Attributes */
++/* Every attribute is of 16 bit wide */
++#define BCLK_DCM_DRP_BASE_51                   0x1000
++
++#define BCLK_DCM_MUL_DIV_DRP                   0x1050
++#define MUL_MASK_DRP                           0xFF00
++#define DIV_MASK_DRP                           0x00FF
++
++/* Offset of TX and RX CLK DCM DRP */
++#define TXRX_CLK_DCM_DRP_BASE_51               0x2000
++#define TXRX_CLK_DCM_MUL_DIV_DRP               0x2050
++
++int sdhci_pci_probe_slot_snps(struct sdhci_pci_slot *slot);
++
++#endif
+-- 
+1.9.1
 
-> So, in __mmc_switch(), it's a bug to use CMD13 to know that if card has
-> already changed to transfer state.
-
-Whether it's a bug or not, it seems like we have eMMC cards that we
-have issues to support because of the way we have interpreted the
-spec. So let's try to fix them!
-
-> But, Our host do not support MMC_CAP_WAIT_WHILE_BUSY, that's why we hit
-> this issue.
-
-Okay, I see.
-
-Let's try to change the behaviour in __mmc_switch() to prevent it to
-send CMD13 before the cards stops signal busy on DAT0, when switching
-to HS200/HS400 mode.
-
-What I have in mind is:
-
-1.
-When the host controller doesn't support MMC_CAP_WAIT_WHILE_BUSY, we
-would then to wait for a fixed timeout, before we send CMD13. In this
-case, do you know if the "generic_cmd6_time" is working for your eMMC
-devices that you had issues with?
-
-2.
-In additional to the above solution, we can for those hosts that
-supports the ->card_busy() ops, but not MMC_CAP_WAIT_WHILE_BUSY,
-invoke the ->card_busy() in a polling manner. Of course the above
-timeout should also be considered as we need to stop polling at some
-point.
-
-So I noticed the Mediatek mmc host driver supports the ->card_busy()
-ops. So I think you can try 1) first, then extend it to 2).
-
-Does it makes sense?
-
-[...]
-
-Kind regards
-Uffe
