@@ -1,74 +1,125 @@
-From: Enric Balletbo i Serra <enric.balletbo@collabora.com>
-Subject: Re: [RESEND PATCH v2 0/1] mmc: dw_mmc: Fix UHS tuning on some brand
- of cards.
-Date: Wed, 27 Apr 2016 10:53:20 +0200
-Message-ID: <57207E00.8070704@collabora.com>
-References: <1461657838-25484-1-git-send-email-enric.balletbo@collabora.com> <572079BE.9000006@samsung.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <572079BE.9000006@samsung.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+From: Baolin <baolin.wang@linaro.org>
+Subject: [RFC v2] mmc: Change the max discard sectors and erase response if mmc host supports busy signalling
+Date: Wed, 27 Apr 2016 17:31:00 +0800
+Message-ID: <97683368d0c597ef6311e19233ff864c8e5bb6d9.1461749371.git.baolin.wang@linaro.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-pa0-f50.google.com ([209.85.220.50]:34097 "EHLO
+	mail-pa0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752346AbcD0Jbg (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 27 Apr 2016 05:31:36 -0400
+Received: by mail-pa0-f50.google.com with SMTP id r5so17414309pag.1
+        for <linux-mmc@vger.kernel.org>; Wed, 27 Apr 2016 02:31:36 -0700 (PDT)
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: ulf.hansson@linaro.org
+Cc: adrian.hunter@intel.com, rmk+kernel@arm.linux.org.uk, shawn.lin@rock-chips.com, dianders@chromium.org, heiko@sntech.de, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, broonie@kernel.org, linus.walleij@linaro.org, baolin.wang@linaro.org
 
+From: Baolin Wang <baolin.wang@linaro.org>
 
+When mmc host HW supports busy signalling (using R1B as response), We
+shouldn't use 'host->max_busy_timeout' as the limitation when deciding
+the max discard sectors that we tell the generic BLOCK layer about.
+Instead, we should pick one preferred erase size as the max discard
+sectors.
 
-On 27/04/16 10:35, Jaehoon Chung wrote:
-> On 04/26/2016 05:03 PM, Enric Balletbo i Serra wrote:
->> Hi,
->>
->> I introduced the cover letter to give some background about this.
->>
->> I have been investigating a problem related to at least one specific sdcard when
->> UHS-I is set. The card is not detected due the tuning phase reports a
->> failure. Since the problem is only reproduced with a single model of a single
->> brand of card, it is probably a card firmware issue, but the card works fine
->> on my laptop.
-> 
-> I think you have analyzed many case..of course..it was successful to switch voltage, right?
-> Maybe this patch too old..so can you remember which specific sdcard is produced?
-> 
+If the host controller supports busy signalling and the timeout for
+the erase operation does not exceed the max_busy_timeout, we should
+use R1B response. Or we need to prevent the host from doing hw busy
+detection, which is done by converting to a R1 response instead.
 
-Yes it was successful to switch voltage. The specific card is an UNIREX 16GB Class 10
-SD card (Compatible with UHS-1)
+Changes since v1:
+  - Remove the 'MMC_CAP_WAIT_WHILE_BUSY' flag checking when deciding
+  the max discard sectors.
 
->>
->> The first attempt to fix this was a patch sent by Doug Anderson [1], but Alim
->> Akhtar found that this produced randomly a hung task on Peach-pi. I can confirm
->> that it's easy to reproduce the hung task, either, with cold boots or suspend to
->> ram tests.
-> 
-> Yep..I have already tested and checked for this.
-> 
->>
->> I tried to fix both problems (the original issue and the one introduced by the
->> patch) in different ways, but I ended thinking that this second proposal is the
->> most simple that solves both issues. So let's try to fix this by handling the
->> response CRC error slightly differently when tuning command is happening.
->>
->> I tested the patch on both platforms, on exynos and on rockhip. I did lots of
->> tests and at the moment the patch seems to fix the rockchip issue and don't
->> hung on exynos. I'll continue testing meanwhile we discuss about it.
->>
->> I think the patch, at least, needs the Doug's approval (as he dig into the issue
->> before) and the Tested-by Alim. So will be good if you have a slot of time to
->> look a bit into this.
->>
->> Thanks in advance.
->>  Enric
->>
->> [1] https://lkml.org/lkml/2015/5/18/495
->>
->> Changelog since v1:
->> - Fix the issue found by Alim with exynos letting the data transfer
->>   take place only when MMC_SEND_TUNING_BLOCK is issued.
->>
->> Doug Anderson (1):
->>   mmc: dw_mmc: Wait for data transfer after response errors.
->>
->>  drivers/mmc/host/dw_mmc.c | 27 +++++++++++++++++++++++++++
->>  1 file changed, 27 insertions(+)
->>
-> 
+Signed-off-by: Baolin Wang <baolin.wang@linaro.org>
+---
+ drivers/mmc/core/core.c |   47 +++++++++++++++++++++++++++++++++++++++--------
+ 1 file changed, 39 insertions(+), 8 deletions(-)
+
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index 3f1362a..97935b7 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -2008,7 +2008,7 @@ static int mmc_do_erase(struct mmc_card *card, unsigned int from,
+ 			unsigned int to, unsigned int arg)
+ {
+ 	struct mmc_command cmd = {0};
+-	unsigned int qty = 0;
++	unsigned int qty = 0, busy_timeout = 0;
+ 	unsigned long timeout;
+ 	int err;
+ 
+@@ -2076,8 +2076,23 @@ static int mmc_do_erase(struct mmc_card *card, unsigned int from,
+ 	memset(&cmd, 0, sizeof(struct mmc_command));
+ 	cmd.opcode = MMC_ERASE;
+ 	cmd.arg = arg;
+-	cmd.flags = MMC_RSP_SPI_R1B | MMC_RSP_R1B | MMC_CMD_AC;
+-	cmd.busy_timeout = mmc_erase_timeout(card, arg, qty);
++	busy_timeout = mmc_erase_timeout(card, arg, qty);
++	/*
++	 * If the host controller supports busy signalling and the timeout for
++	 * the erase operation does not exceed the max_busy_timeout, we should
++	 * use R1B response. Or we need to prevent the host from doing hw busy
++	 * detection, which is done by converting to a R1 response instead.
++	 */
++	if ((card->host->max_busy_timeout &&
++	    busy_timeout > card->host->max_busy_timeout) ||
++	    !(card->host->caps & MMC_CAP_WAIT_WHILE_BUSY)) {
++		cmd.flags = MMC_RSP_SPI_R1 | MMC_RSP_R1 | MMC_CMD_AC;
++		cmd.busy_timeout = 0;
++	} else {
++		cmd.flags = MMC_RSP_SPI_R1B | MMC_RSP_R1B | MMC_CMD_AC;
++		cmd.busy_timeout = busy_timeout;
++	}
++
+ 	err = mmc_wait_for_cmd(card->host, &cmd, 0);
+ 	if (err) {
+ 		pr_err("mmc_erase: erase error %d, status %#x\n",
+@@ -2269,23 +2284,39 @@ static unsigned int mmc_do_calc_max_discard(struct mmc_card *card,
+ 					    unsigned int arg)
+ {
+ 	struct mmc_host *host = card->host;
+-	unsigned int max_discard, x, y, qty = 0, max_qty, timeout;
++	unsigned int max_discard, x, y, qty = 0, max_qty, min_qty, timeout;
+ 	unsigned int last_timeout = 0;
+ 
+-	if (card->erase_shift)
++	if (card->erase_shift) {
+ 		max_qty = UINT_MAX >> card->erase_shift;
+-	else if (mmc_card_sd(card))
++		min_qty = card->pref_erase >> card->erase_shift;
++	} else if (mmc_card_sd(card)) {
+ 		max_qty = UINT_MAX;
+-	else
++		min_qty = card->pref_erase;
++	} else {
+ 		max_qty = UINT_MAX / card->erase_size;
++		min_qty = card->pref_erase / card->erase_size;
++	}
+ 
+ 	/* Find the largest qty with an OK timeout */
+ 	do {
+ 		y = 0;
+ 		for (x = 1; x && x <= max_qty && max_qty - x >= qty; x <<= 1) {
+ 			timeout = mmc_erase_timeout(card, arg, qty + x);
+-			if (timeout > host->max_busy_timeout)
++			/*
++			 * We should not only use 'host->max_busy_timeout' as
++			 * the limitation when deciding the max discard sectors.
++			 * We should set a balance value to improve the erase
++			 * speed, and it can not get too long timeout at the
++			 * same time.
++			 *
++			 * Here we set 'card->pref_erase' as the minimal discard
++			 * sectors when deciding the max discard sectors.
++			 */
++			if (qty + x > min_qty &&
++			    timeout > host->max_busy_timeout)
+ 				break;
++
+ 			if (timeout < last_timeout)
+ 				break;
+ 			last_timeout = timeout;
+-- 
+1.7.9.5
+
