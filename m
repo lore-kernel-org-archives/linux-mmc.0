@@ -1,81 +1,74 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 2/2] mmc: omap_hsmmc: Check if MMC slot name is passed in pdata
-Date: Wed, 27 Apr 2016 10:52:00 +0200
-Message-ID: <CAPDyKFqCMfBx=VFy05MNDhO5ZpLw9x=Xmdst9JR0zHy+GHYJyQ@mail.gmail.com>
-References: <1461714383-9956-1-git-send-email-tony@atomide.com>
-	<1461714383-9956-3-git-send-email-tony@atomide.com>
+From: Enric Balletbo i Serra <enric.balletbo@collabora.com>
+Subject: Re: [RESEND PATCH v2 0/1] mmc: dw_mmc: Fix UHS tuning on some brand
+ of cards.
+Date: Wed, 27 Apr 2016 10:53:20 +0200
+Message-ID: <57207E00.8070704@collabora.com>
+References: <1461657838-25484-1-git-send-email-enric.balletbo@collabora.com> <572079BE.9000006@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wm0-f41.google.com ([74.125.82.41]:37573 "EHLO
-	mail-wm0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752608AbcD0IwD (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 27 Apr 2016 04:52:03 -0400
-Received: by mail-wm0-f41.google.com with SMTP id a17so6425324wme.0
-        for <linux-mmc@vger.kernel.org>; Wed, 27 Apr 2016 01:52:01 -0700 (PDT)
-In-Reply-To: <1461714383-9956-3-git-send-email-tony@atomide.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <572079BE.9000006@samsung.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Jaehoon Chung <jh80.chung@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Tony Lindgren <tony@atomide.com>
-Cc: linux-omap <linux-omap@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Aaro Koskinen <aaro.koskinen@iki.fi>, Ivaylo Dimitrov <ivo.g.dimitrov.75@gmail.com>, Sebastian Reichel <sre@kernel.org>, Pavel Machel <pavel@ucw.cz>, Timo Kokkonen <timo.t.kokkonen@iki.fi>, Kishon Vijay Abraham I <kishon@ti.com>, linux-mmc <linux-mmc@vger.kernel.org>
 
-On 27 April 2016 at 01:46, Tony Lindgren <tony@atomide.com> wrote:
-> The legacy user space for n900 relies on the MMC slot names.
-> Let's check if those are passed in pdata and use them.
->
-> Then when we have a generic MMC slot name binding we can
-> switch to use that assuming it works for the n900 legacy
-> user space too.
 
-I dropped this section, because I don't think it will happen.
 
->
-> As this makes the DT booting compatible with legacy booting,
-> we should be able to start dropping omap3 legacy booting
-> support in v4.8.
->
-> Cc: Ulf Hansson <ulf.hansson@linaro.org>
-> Cc: Kishon Vijay Abraham I <kishon@ti.com>
-> Cc: linux-mmc@vger.kernel.org
-> Signed-off-by: Tony Lindgren <tony@atomide.com>
+On 27/04/16 10:35, Jaehoon Chung wrote:
+> On 04/26/2016 05:03 PM, Enric Balletbo i Serra wrote:
+>> Hi,
+>>
+>> I introduced the cover letter to give some background about this.
+>>
+>> I have been investigating a problem related to at least one specific sdcard when
+>> UHS-I is set. The card is not detected due the tuning phase reports a
+>> failure. Since the problem is only reproduced with a single model of a single
+>> brand of card, it is probably a card firmware issue, but the card works fine
+>> on my laptop.
+> 
+> I think you have analyzed many case..of course..it was successful to switch voltage, right?
+> Maybe this patch too old..so can you remember which specific sdcard is produced?
+> 
 
-Thanks, applied for next!
+Yes it was successful to switch voltage. The specific card is an UNIREX 16GB Class 10
+SD card (Compatible with UHS-1)
 
-Kind regards
-Uffe
-
-> ---
->
-> Ulf, this is safe to pick separately to the MMC tree if it looks
-> acceptable to you.
->
->
->  drivers/mmc/host/omap_hsmmc.c | 6 +++++-
->  1 file changed, 5 insertions(+), 1 deletion(-)
->
-> diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-> index e9d75c6..3563321 100644
-> --- a/drivers/mmc/host/omap_hsmmc.c
-> +++ b/drivers/mmc/host/omap_hsmmc.c
-> @@ -1946,13 +1946,17 @@ MODULE_DEVICE_TABLE(of, omap_mmc_of_match);
->
->  static struct omap_hsmmc_platform_data *of_get_hsmmc_pdata(struct device *dev)
->  {
-> -       struct omap_hsmmc_platform_data *pdata;
-> +       struct omap_hsmmc_platform_data *pdata, *legacy;
->         struct device_node *np = dev->of_node;
->
->         pdata = devm_kzalloc(dev, sizeof(*pdata), GFP_KERNEL);
->         if (!pdata)
->                 return ERR_PTR(-ENOMEM); /* out of memory */
->
-> +       legacy = dev_get_platdata(dev);
-> +       if (legacy && legacy->name)
-> +               pdata->name = legacy->name;
-> +
->         if (of_find_property(np, "ti,dual-volt", NULL))
->                 pdata->controller_flags |= OMAP_HSMMC_SUPPORTS_DUAL_VOLT;
->
-> --
-> 2.8.1
->
+>>
+>> The first attempt to fix this was a patch sent by Doug Anderson [1], but Alim
+>> Akhtar found that this produced randomly a hung task on Peach-pi. I can confirm
+>> that it's easy to reproduce the hung task, either, with cold boots or suspend to
+>> ram tests.
+> 
+> Yep..I have already tested and checked for this.
+> 
+>>
+>> I tried to fix both problems (the original issue and the one introduced by the
+>> patch) in different ways, but I ended thinking that this second proposal is the
+>> most simple that solves both issues. So let's try to fix this by handling the
+>> response CRC error slightly differently when tuning command is happening.
+>>
+>> I tested the patch on both platforms, on exynos and on rockhip. I did lots of
+>> tests and at the moment the patch seems to fix the rockchip issue and don't
+>> hung on exynos. I'll continue testing meanwhile we discuss about it.
+>>
+>> I think the patch, at least, needs the Doug's approval (as he dig into the issue
+>> before) and the Tested-by Alim. So will be good if you have a slot of time to
+>> look a bit into this.
+>>
+>> Thanks in advance.
+>>  Enric
+>>
+>> [1] https://lkml.org/lkml/2015/5/18/495
+>>
+>> Changelog since v1:
+>> - Fix the issue found by Alim with exynos letting the data transfer
+>>   take place only when MMC_SEND_TUNING_BLOCK is issued.
+>>
+>> Doug Anderson (1):
+>>   mmc: dw_mmc: Wait for data transfer after response errors.
+>>
+>>  drivers/mmc/host/dw_mmc.c | 27 +++++++++++++++++++++++++++
+>>  1 file changed, 27 insertions(+)
+>>
+> 
