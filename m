@@ -1,58 +1,71 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v2 0/5] mmc: tmio: make CTL_STATUS handling consistent
-Date: Wed, 27 Apr 2016 10:31:35 +0200
-Message-ID: <CAPDyKFoWdzG91o7FtZTc1FBZ3qKnVg2Q8KWo+aQkq-1Ziqbn+Q@mail.gmail.com>
-References: <1461689625-3693-1-git-send-email-wsa@the-dreams.de>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: Re: [RESEND PATCH v2 0/1] mmc: dw_mmc: Fix UHS tuning on some brand of
+ cards.
+Date: Wed, 27 Apr 2016 17:35:10 +0900
+Message-ID: <572079BE.9000006@samsung.com>
+References: <1461657838-25484-1-git-send-email-enric.balletbo@collabora.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wm0-f41.google.com ([74.125.82.41]:35998 "EHLO
-	mail-wm0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751871AbcD0Ibh (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 27 Apr 2016 04:31:37 -0400
-Received: by mail-wm0-f41.google.com with SMTP id n129so16306883wmn.1
-        for <linux-mmc@vger.kernel.org>; Wed, 27 Apr 2016 01:31:36 -0700 (PDT)
-In-Reply-To: <1461689625-3693-1-git-send-email-wsa@the-dreams.de>
+Received: from mailout3.samsung.com ([203.254.224.33]:53424 "EHLO
+	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752189AbcD0IfN (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 27 Apr 2016 04:35:13 -0400
+In-reply-to: <1461657838-25484-1-git-send-email-enric.balletbo@collabora.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Wolfram Sang <wsa@the-dreams.de>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, linux-renesas-soc@vger.kernel.org
+To: Enric Balletbo i Serra <enric.balletbo@collabora.com>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 
-On 26 April 2016 at 18:53, Wolfram Sang <wsa@the-dreams.de> wrote:
-> It took me a little to discover that CTL_STATUS has a different handling than
-> the other registers. CTL_STATUS and CTL_STATUS2, both u16, are merged into a
-> virtual u32. However, CTL_STATUS2 was also directly accessed.
->
-> Clean this up, make this consistent, and document this. Making the driver less
-> complex and easier to work with.
->
-> Tested on Renesas R-Car Gen2 and Gen3.
->
-> Changes since V1:
->
-> * rebased
-> * added simons review tags
->
->
-> Wolfram Sang (5):
->   mmc: tmio: give read32/write32 functions more descriptive names
->   mmc: tmio: use BIT() within defines
->   mmc: tmio: use CTL_STATUS consistently
->   mmc: tmio/sdhi: distinguish between SCLKDIVEN and ILL_FUNC
->   mmc: tmio: document CTL_STATUS handling
->
->  drivers/mmc/host/sh_mobile_sdhi.c |  3 ++-
->  drivers/mmc/host/tmio_mmc.h       | 56 ++++++++++++++++++++-------------------
->  drivers/mmc/host/tmio_mmc_pio.c   | 24 ++++++++---------
->  3 files changed, 43 insertions(+), 40 deletions(-)
->
-> --
-> 2.7.0
->
+On 04/26/2016 05:03 PM, Enric Balletbo i Serra wrote:
+> Hi,
+> 
+> I introduced the cover letter to give some background about this.
+> 
+> I have been investigating a problem related to at least one specific sdcard when
+> UHS-I is set. The card is not detected due the tuning phase reports a
+> failure. Since the problem is only reproduced with a single model of a single
+> brand of card, it is probably a card firmware issue, but the card works fine
+> on my laptop.
 
-They still don't apply, sorry.
+I think you have analyzed many case..of course..it was successful to switch voltage, right?
+Maybe this patch too old..so can you remember which specific sdcard is produced?
 
-Are you re-basing towards my mmc tree's next branch?
+> 
+> The first attempt to fix this was a patch sent by Doug Anderson [1], but Alim
+> Akhtar found that this produced randomly a hung task on Peach-pi. I can confirm
+> that it's easy to reproduce the hung task, either, with cold boots or suspend to
+> ram tests.
 
-Kind regards
-Uffe
+Yep..I have already tested and checked for this.
+
+> 
+> I tried to fix both problems (the original issue and the one introduced by the
+> patch) in different ways, but I ended thinking that this second proposal is the
+> most simple that solves both issues. So let's try to fix this by handling the
+> response CRC error slightly differently when tuning command is happening.
+> 
+> I tested the patch on both platforms, on exynos and on rockhip. I did lots of
+> tests and at the moment the patch seems to fix the rockchip issue and don't
+> hung on exynos. I'll continue testing meanwhile we discuss about it.
+> 
+> I think the patch, at least, needs the Doug's approval (as he dig into the issue
+> before) and the Tested-by Alim. So will be good if you have a slot of time to
+> look a bit into this.
+> 
+> Thanks in advance.
+>  Enric
+> 
+> [1] https://lkml.org/lkml/2015/5/18/495
+> 
+> Changelog since v1:
+> - Fix the issue found by Alim with exynos letting the data transfer
+>   take place only when MMC_SEND_TUNING_BLOCK is issued.
+> 
+> Doug Anderson (1):
+>   mmc: dw_mmc: Wait for data transfer after response errors.
+> 
+>  drivers/mmc/host/dw_mmc.c | 27 +++++++++++++++++++++++++++
+>  1 file changed, 27 insertions(+)
+> 
+
