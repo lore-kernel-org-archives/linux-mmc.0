@@ -1,49 +1,89 @@
 From: Douglas Anderson <dianders@chromium.org>
-Subject: [PATCH 3/3] mmc: use SD/MMC host ID for block device name ID
-Date: Thu, 28 Apr 2016 16:06:45 -0700
-Message-ID: <1461884805-29466-4-git-send-email-dianders@chromium.org>
+Subject: [PATCH 2/3] mmc: read mmc alias from device tree
+Date: Thu, 28 Apr 2016 16:06:44 -0700
+Message-ID: <1461884805-29466-3-git-send-email-dianders@chromium.org>
 References: <1461884805-29466-1-git-send-email-dianders@chromium.org>
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-pf0-f182.google.com ([209.85.192.182]:33758 "EHLO
+	mail-pf0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751722AbcD1XHe (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 28 Apr 2016 19:07:34 -0400
+Received: by mail-pf0-f182.google.com with SMTP id 206so39970232pfu.0
+        for <linux-mmc@vger.kernel.org>; Thu, 28 Apr 2016 16:07:34 -0700 (PDT)
 In-Reply-To: <1461884805-29466-1-git-send-email-dianders@chromium.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: ulf.hansson@linaro.org, jh80.chung@samsung.com
-Cc: shawn.lin@rock-chips.com, adrian.hunter@intel.com, stefan@agner.ch, linux-mmc@vger.kernel.org, computersforpeace@gmail.com, dmitry.torokhov@gmail.com, Douglas Anderson <dianders@chromium.org>, justin.wang@spreadtrum.com, huangtao@rock-chips.com, lporzio@micron.com, ksumrall@android.com, jonathanh@nvidia.com, chuanxiao.dong@intel.com, linux-kernel@vger.kernel.org
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: ulf.hansson@linaro.org, jh80.chung@samsung.com
+Cc: shawn.lin@rock-chips.com, adrian.hunter@intel.com, stefan@agner.ch, linux-mmc@vger.kernel.org, computersforpeace@gmail.com, dmitry.torokhov@gmail.com, Dmitry Torokhov <dtor@chromium.org>, Douglas Anderson <dianders@chromium.org>, vbyravarasu@nvidia.com, huangtao@rock-chips.com, lars@metafoo.de, sergei.shtylyov@cogentembedded.com, linux-kernel@vger.kernel.org
 
 From: Stefan Agner <stefan@agner.ch>
 
-By using the SD/MMC host device ID as a starting point for block
-device numbering, one can reliably predict the first block device
-name (at least for the first controller). This is especially useful
-for SoCs with multiple SD/MMC host controller, where the controller
-with index 0 is connected to a eMMC device.
+To get the SD/MMC host device ID, read the alias from the device
+tree.
 
-Usually the first controller gets the first block device name ID,
-however this is not guaranteed. Also if the first controller is
-aliased as second controller and visa-versa (using device tree
-aliases), the block device name ID assignation is not ordered by
-the SD/MMC host device ID (since mmc_rescan is called in order of
-the memory mapped pheripherial addresses).
+This is useful in case a SoC has multipe SD/MMC host controllers while
+the second controller should logically be the first device (e.g. if
+the second controller is connected to an internal eMMC). Combined
+with block device numbering using MMC/SD host device ID, this
+results in predictable name assignment of the internal eMMC block
+device.
 
 Signed-off-by: Stefan Agner <stefan@agner.ch>
+Signed-off-by: Dmitry Torokhov <dtor@chromium.org>
+[dianders: rebase + roll in http://crosreview.com/259916]
 Signed-off-by: Douglas Anderson <dianders@chromium.org>
 ---
- drivers/mmc/card/block.c | 3 ++-
- 1 file changed, 2 insertions(+), 1 deletion(-)
+ drivers/mmc/core/host.c | 25 ++++++++++++++++++++-----
+ 1 file changed, 20 insertions(+), 5 deletions(-)
 
-diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
-index 9fef7f04c4e6..bcf4fdbb5221 100644
---- a/drivers/mmc/card/block.c
-+++ b/drivers/mmc/card/block.c
-@@ -2215,7 +2215,8 @@ static struct mmc_blk_data *mmc_blk_alloc_req(struct mmc_card *card,
- 	 * index anymore so we keep track of a name index.
- 	 */
- 	if (!subname) {
--		md->name_idx = find_first_zero_bit(name_use, max_devices);
-+		md->name_idx = find_next_zero_bit(name_use, max_devices,
-+				card->host->index);
- 		__set_bit(md->name_idx, name_use);
- 	} else
- 		md->name_idx = ((struct mmc_blk_data *)
+diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
+index 71bb2372f71d..7ecb6a6351b3 100644
+--- a/drivers/mmc/core/host.c
++++ b/drivers/mmc/core/host.c
+@@ -321,8 +321,8 @@ EXPORT_SYMBOL(mmc_of_parse);
+  */
+ struct mmc_host *mmc_alloc_host(int extra, struct device *dev)
+ {
+-	int err;
+ 	struct mmc_host *host;
++	int of_id = -1, id = -1;
+ 
+ 	host = kzalloc(sizeof(struct mmc_host) + extra, GFP_KERNEL);
+ 	if (!host)
+@@ -330,14 +330,29 @@ struct mmc_host *mmc_alloc_host(int extra, struct device *dev)
+ 
+ 	/* scanning will be enabled when we're ready */
+ 	host->rescan_disable = 1;
++
++	if (dev->of_node)
++		of_id = of_alias_get_id(dev->of_node, "mmc");
++
+ 	idr_preload(GFP_KERNEL);
+ 	spin_lock(&mmc_host_lock);
+-	err = idr_alloc(&mmc_host_idr, host, 0, 0, GFP_NOWAIT);
+-	if (err >= 0)
+-		host->index = err;
++
++	if (of_id >= 0) {
++		id = idr_alloc(&mmc_host_idr, host, of_id, of_id + 1,
++			       GFP_NOWAIT);
++		if (id < 0)
++			dev_warn(dev, "/aliases ID %d not available\n", of_id);
++	}
++
++	if (id < 0)
++		id = idr_alloc(&mmc_host_idr, host, 0, 0, GFP_NOWAIT);
++
++	if (id >= 0)
++		host->index = id;
++
+ 	spin_unlock(&mmc_host_lock);
+ 	idr_preload_end();
+-	if (err < 0) {
++	if (id < 0) {
+ 		kfree(host);
+ 		return NULL;
+ 	}
 -- 
 2.8.0.rc3.226.g39d4020
+
