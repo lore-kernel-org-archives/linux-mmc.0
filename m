@@ -1,80 +1,71 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v2] mmc: sdhci-of-arasan: fix set_clock when a phy is supported
-Date: Thu, 28 Apr 2016 12:38:36 +0200
-Message-ID: <CAPDyKFp8GmNjU_G9p5u3KFPB8h-BcqL9s6FUAUnAABt8g4Bw0w@mail.gmail.com>
-References: <1461832731-28422-1-git-send-email-shawn.lin@rock-chips.com>
+Subject: Re: [PATCH] mmc: sunxi: Disable eMMC HS-DDR (MMC_CAP_1_8V_DDR) for
+ Allwinner A80
+Date: Thu, 28 Apr 2016 12:38:28 +0200
+Message-ID: <CAPDyKFo4xBpS=4nQzeaRs8HsBRSBsrQEuSvRPjgoQVvPUFK7jA@mail.gmail.com>
+References: <1461685046-24798-1-git-send-email-wens@csie.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1461832731-28422-1-git-send-email-shawn.lin@rock-chips.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Shawn Lin <shawn.lin@rock-chips.com>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, Michal Simek <michal.simek@xilinx.com>, =?UTF-8?Q?S=C3=B6ren_Brinkmann?= <soren.brinkmann@xilinx.com>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Doug Anderson <dianders@chromium.org>, Heiko Stuebner <heiko@sntech.de>, "open list:ARM/Rockchip SoC..." <linux-rockchip@lists.infradead.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <1461685046-24798-1-git-send-email-wens@csie.org>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Chen-Yu Tsai <wens@csie.org>
+Cc: Hans de Goede <hdegoede@redhat.com>, Maxime Ripard <maxime.ripard@free-electrons.com>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On 28 April 2016 at 10:38, Shawn Lin <shawn.lin@rock-chips.com> wrote:
-> commit 61b914eb81f8 ("mmc: sdhci-of-arasan: add phy support for
-> sdhci-of-arasan") introduce phy support for arasan. According to
-> the vendor's databook, we should make sure the phy is in poweroff
-> status before we configure the clk stuff. Otherwise it may cause
-> some IO sample timing issues from the test. And we don't need this
-> extra operation while running in low performance mode since phy
-> doesn't trigger sampling block.
+On 26 April 2016 at 17:37, Chen-Yu Tsai <wens@csie.org> wrote:
+> eMMC HS-DDR no longer works on the A80, despite it working when support
+> for this developed.
 >
-> Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
+> Disable it for now.
+>
+> Signed-off-by: Chen-Yu Tsai <wens@csie.org>
 
-Thanks, applied for next!
+Thanks, applied for fixes!
 
 Kind regards
 Uffe
 
->
 > ---
 >
-> Changes in v2:
-> - change commit msg title to indicate it's a fix
-> - fix a typo in commmit msg
+> Hi,
 >
->  drivers/mmc/host/sdhci-of-arasan.c | 20 +++++++++++++++++++-
->  1 file changed, 19 insertions(+), 1 deletion(-)
+> When i worked on this it was working, but now it isn't. Unfortunately I
+> don't have my old tree to do a proper bisect. I probably won't have time
+> to dig into this issue before v4.6 release, so it's best to disable it
+> on the A80 for now.
 >
-> diff --git a/drivers/mmc/host/sdhci-of-arasan.c b/drivers/mmc/host/sdhci-of-arasan.c
-> index 2e482b1..20b859e 100644
-> --- a/drivers/mmc/host/sdhci-of-arasan.c
-> +++ b/drivers/mmc/host/sdhci-of-arasan.c
-> @@ -55,8 +55,26 @@ static unsigned int sdhci_arasan_get_timeout_clock(struct sdhci_host *host)
->         return freq;
->  }
+> Thanks.
 >
-> +static void sdhci_arasan_set_clock(struct sdhci_host *host, unsigned int clock)
-> +{
-> +       struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> +       struct sdhci_arasan_data *sdhci_arasan = sdhci_pltfm_priv(pltfm_host);
-> +       bool ctrl_phy = false;
+> ---
+>  drivers/mmc/host/sunxi-mmc.c | 5 +++++
+>  1 file changed, 5 insertions(+)
+>
+> diff --git a/drivers/mmc/host/sunxi-mmc.c b/drivers/mmc/host/sunxi-mmc.c
+> index 8372a413848c..7fc8b7aa83f0 100644
+> --- a/drivers/mmc/host/sunxi-mmc.c
+> +++ b/drivers/mmc/host/sunxi-mmc.c
+> @@ -1129,6 +1129,11 @@ static int sunxi_mmc_probe(struct platform_device *pdev)
+>                                   MMC_CAP_1_8V_DDR |
+>                                   MMC_CAP_ERASE | MMC_CAP_SDIO_IRQ;
+>
+> +       /* TODO MMC DDR is not working on A80 */
+> +       if (of_device_is_compatible(pdev->dev.of_node,
+> +                                   "allwinner,sun9i-a80-mmc"))
+> +               mmc->caps &= ~MMC_CAP_1_8V_DDR;
 > +
-> +       if (clock > MMC_HIGH_52_MAX_DTR && (!IS_ERR(sdhci_arasan->phy)))
-> +               ctrl_phy = true;
-> +
-> +       if (ctrl_phy)
-> +               phy_power_off(sdhci_arasan->phy);
-> +
-> +       sdhci_set_clock(host, clock);
-> +
-> +       if (ctrl_phy)
-> +               phy_power_on(sdhci_arasan->phy);
-> +}
-> +
->  static struct sdhci_ops sdhci_arasan_ops = {
-> -       .set_clock = sdhci_set_clock,
-> +       .set_clock = sdhci_arasan_set_clock,
->         .get_max_clock = sdhci_pltfm_clk_get_max_clock,
->         .get_timeout_clock = sdhci_arasan_get_timeout_clock,
->         .set_bus_width = sdhci_set_bus_width,
+>         ret = mmc_of_parse(mmc);
+>         if (ret)
+>                 goto error_free_dma;
 > --
-> 2.3.7
+> 2.8.1
 >
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
