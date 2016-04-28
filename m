@@ -1,83 +1,108 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH RFC 3/3] mmc: block: Fix tuning (by avoiding it) for RPMB
-Date: Thu, 28 Apr 2016 13:46:59 +0200
-Message-ID: <CAPDyKFpm4qAqCiY6+RGNg53gTjVS4Kq13YbNLEeUUZNjw3GFpQ@mail.gmail.com>
-References: <1461245314-6282-1-git-send-email-adrian.hunter@intel.com>
-	<1461245314-6282-4-git-send-email-adrian.hunter@intel.com>
-	<CAPDyKFqpvZr3c8Skmc=pnE0m9EQFt=C98P-Vo5TKjONDHtxBaA@mail.gmail.com>
-	<5721EDDD.6060902@intel.com>
+From: Dong Aisheng <dongas86@gmail.com>
+Subject: Re: support for fixed 1.8V eMMC interface
+Date: Thu, 28 Apr 2016 20:15:17 +0800
+Message-ID: <CAA+hA=RxSkCH1XiYUpB5c=2h4GpM2aOND6fdmizeBWu8F_A4zQ@mail.gmail.com>
+References: <VI1PR05MB15338BD748ACE3938D3E4B339B640@VI1PR05MB1533.eurprd05.prod.outlook.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wm0-f53.google.com ([74.125.82.53]:36940 "EHLO
-	mail-wm0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751435AbcD1LrB (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 28 Apr 2016 07:47:01 -0400
-Received: by mail-wm0-f53.google.com with SMTP id a17so60679694wme.0
-        for <linux-mmc@vger.kernel.org>; Thu, 28 Apr 2016 04:47:00 -0700 (PDT)
-In-Reply-To: <5721EDDD.6060902@intel.com>
+Received: from mail-qg0-f65.google.com ([209.85.192.65]:33617 "EHLO
+	mail-qg0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753282AbcD1MPS convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 28 Apr 2016 08:15:18 -0400
+Received: by mail-qg0-f65.google.com with SMTP id 7so2200606qgj.0
+        for <linux-mmc@vger.kernel.org>; Thu, 28 Apr 2016 05:15:18 -0700 (PDT)
+In-Reply-To: <VI1PR05MB15338BD748ACE3938D3E4B339B640@VI1PR05MB1533.eurprd05.prod.outlook.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Tomas Winkler <tomas.winkler@intel.com>
+To: Raul Benet <Raul.Benet@lightblueoptics.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-On 28 April 2016 at 13:02, Adrian Hunter <adrian.hunter@intel.com> wrote:
-> On 28/04/16 13:34, Ulf Hansson wrote:
->> On 21 April 2016 at 15:28, Adrian Hunter <adrian.hunter@intel.com> wrote:
->>> The RPMB partition only allows certain commands.  In particular,
->>> the tuning command (CMD21) is not allowed -  refer JEDEC eMMC
->>> standard v5.1 section 6.2.2 Command restrictions.
->>>
->>> To avoid tuning for RPMB, switch to High Speed mode from HS200
->>> or HS400 mode if re-tuning has been enabled.  And switch back
->>> when leaving RPMB.
->>
->> I would rather just disable re-tuning during this period, instead of
->> changing the speed mode.
->> The primary reason to why, is because the latency it would introduce
->> to first switch to HS speed then back to HS200/400.
+On Wed, Apr 27, 2016 at 7:44 PM, Raul Benet
+<Raul.Benet@lightblueoptics.com> wrote:
+> Hi,
 >
-> I wouldn't expect RPMB accesses to be frequent enough for the latency to matter.
+> I am currently working on a design using i.MX6SL and Linux Kernel 3.14.52. Though I believe may question still applies to latest MMC code.
+> Our design uses an eMMC as boot device and main storage (ie: it contains u-boot, kernel, dtb and rootfs).
 >
->>
->> My concern is not the throughput as I expect read/writes request to an
->> RPMB partition is rather small.
->>
->> Of course I realize that we need to take care when disable re-tuning.
->> Perhaps we can solve that by a re-try mechanism if the RPMB request
->> fails, and thus perform the re-tuning as part of the re-try?
+> The eMMC I/O rail is fixed in hardware to 1.8Volts.
+> The Processor SDIO I/O rail is controlled by the MMC driver.
 >
-> The interdependent nature of RPMB commands suggests that re-trying is not
-> possible.  It seems to me that you would have to make up a new set of
-> commands and start again. i.e. return an error to the user so that they can
-> start again.
-
-Ok.
-
-So perhaps returning -EAGAIN could work!?
-
+> In 3.14.52, the MMC driver sets processor SDIO rail to 3v3 per default, and only when using HS DDR modes (which do not apply in our case) would it set it to 1.8V.
 >
-> Another dependency is that we always need to re-tune after host runtime
-> suspend, which is why we always hit this problem when RPMB is accessed.  So
+> I have seen that starting on 3.16, the function power_up() in drivers/mmc/core/core.c attempts at setting the regulator to 3v3, failing that it tries 1v8, failing that it tries 1v2.
+>
+> So I patched my kernel with that, and defined a fixed regulator with 1v8 in my dts, and set the vqmmc-supply to point to it.
+> But that doesn't work, because power_up() ultimately tries to call set_voltage() on the vqmmc regulator, which doesn't seem to exist for "regulator-fixed" type of regulators, and hence it fails in setting all the rails, which ultimately means that it sets it to 3v3 ('cause that is the default/initial value of the field in the ios struct)
+>
 
-Just to make sure I understand correctly; I would imagine you hit the
-problem *only* when the RPMB partition was already selected, right?
+It seems the 3.6 kernel you tried may still not support set voltage
+for fixed regulator.
+But i tried the latest kernel already supports it.
 
-Because that would then skip the switch command, and you will
-therefore try to re-tune after the partition has already been switched
-to?
+> So my question is: how am I supposed to setup the MMC driver in my scenario (I/O at 1.8V always) ?
+> (I know I can go and force the rail to 1.8V by hacking drivers/mmc/host/sdhci-esdhc-imx.c, but I would very much prefer to avoid that)
+>
 
-> to avoid errors you would either need to disable runtime PM when the RPMB
-> partition is selected (which might be a long time if we don't get an access
-> to another partition), or always switch back to the main partition (not sure
-> if that would mess up the RPMB command sequence though).
+Pls try the option 2 as Ulf pointed.
 
-I wouldn't mind that we switch back to the main partition when we have
-served an RPMB IOCTL request. Of course not in between every mmc
-request, in case of using the MULTI IOCTL.
+You can refer to this patch:
+commit c00dc359e5e0b10de993651d8e73e60c41bf29cd
+Author: Bjorn Andersson <bjorn@kryo.se>
+Date:   Wed Feb 5 12:30:26 2014 -0800
 
-That would prevent the next regular mmc request on the main partition
-to not have to switch partition and thus get decreased latency.
+    regulator: core: Allow regulator_set_voltage for fixed regulators
 
-Kind regards
-Uffe
+    Make it okay to call regulator_set_voltage on regulators with fixed
+    voltage if the requested range overlaps the current/configured voltage.
+
+    Signed-off-by: Bjorn Andersson <bjorn.andersson@sonymobile.com>
+    Signed-off-by: Mark Brown <broonie@linaro.org>
+
+diff --git a/drivers/regulator/core.c b/drivers/regulator/core.c
+index b38a6b669e8c..0cd1a3b8e589 100644
+--- a/drivers/regulator/core.c
++++ b/drivers/regulator/core.c
+@@ -2395,6 +2395,7 @@ int regulator_set_voltage(struct regulator
+*regulator, int min_uV, int max_uV)
+        struct regulator_dev *rdev = regulator->rdev;
+        int ret = 0;
+        int old_min_uV, old_max_uV;
++       int current_uV;
+
+        mutex_lock(&rdev->mutex);
+
+@@ -2405,6 +2406,19 @@ int regulator_set_voltage(struct regulator
+*regulator, int min_uV, int max_uV)
+        if (regulator->min_uV == min_uV && regulator->max_uV == max_uV)
+                goto out;
+
++       /* If we're trying to set a range that overlaps the current voltage,
++        * return succesfully even though the regulator does not support
++        * changing the voltage.
++        */
++       if (!(rdev->constraints->valid_ops_mask & REGULATOR_CHANGE_VOLTAGE)) {
++               current_uV = _regulator_get_voltage(rdev);
++               if (min_uV <= current_uV && current_uV <= max_uV) {
++                       regulator->min_uV = min_uV;
++                       regulator->max_uV = max_uV;
++                       goto out;
++               }
++       }
++
+        /* sanity check */
+        if (!rdev->desc->ops->set_voltage &&
+            !rdev->desc->ops->set_voltage_sel) {
+
+Regards
+Dong Aisheng
+
+> Thanks ,
+> Raul.
+>
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
