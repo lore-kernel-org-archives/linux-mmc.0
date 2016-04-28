@@ -1,119 +1,93 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH] mmc: core: Remove redundant rescan_disable flag
-Date: Thu, 28 Apr 2016 15:44:15 +0300
-Message-ID: <5722059F.5040703@intel.com>
-References: <1461840951-4401-1-git-send-email-ulf.hansson@linaro.org>
+From: Ludovic Desroches <ludovic.desroches@atmel.com>
+Subject: [PATCH v2] mmc: sdhci-of-at91: add presets setup
+Date: Thu, 28 Apr 2016 14:59:26 +0200
+Message-ID: <1461848366-32562-1-git-send-email-ludovic.desroches@atmel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga02.intel.com ([134.134.136.20]:44730 "EHLO mga02.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750809AbcD1MsF (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 28 Apr 2016 08:48:05 -0400
-In-Reply-To: <1461840951-4401-1-git-send-email-ulf.hansson@linaro.org>
+Received: from eusmtp01.atmel.com ([212.144.249.243]:40114 "EHLO
+	eusmtp01.atmel.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751094AbcD1M65 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 28 Apr 2016 08:58:57 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org
-Cc: Jaehoon Chung <jh80.chung@samsung.com>
+To: adrian.hunter@intel.com, ulf.hansson@linaro.org
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, nicolas.ferre@atmel.com, Ludovic Desroches <ludovic.desroches@atmel.com>
 
-On 28/04/16 13:55, Ulf Hansson wrote:
-> As cancel_delayed_work_sync() prevents an executing work for re-scheduling
-> itself, the rescan_disable flag is redundant.
+The controller claims to support SDR104. In fact, it only supports a
+degraded SDR104 since the maximum frequency of the SD clock is 120 MHz
+instead of 208 MHz.
+The sdhci core is unaware of it and will compute a wrong clock divider.
+We can deal with this specific case by using presets.
 
-Are you sure rescan_disable is not needed for mmc_pm_notify()?
+Signed-off-by: Ludovic Desroches <ludovic.desroches@atmel.com>
+---
 
-> 
-> Morover, during host registration phase, it's anyway not safe to schedule a
-> detect work until mmc_start_host() has been invoked. Therfore, there's no
-> need to use the rescan_disable flag to protect a rescan work from being
-> executed in-between mmc_alloc_host() and mmc_start_host().
-> 
-> For these reasons, let's remove the rescan_disable flag.
-> 
-> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
-> ---
->  drivers/mmc/core/core.c  | 12 ------------
->  drivers/mmc/core/host.c  |  3 ---
->  include/linux/mmc/host.h |  1 -
->  3 files changed, 16 deletions(-)
-> 
-> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-> index 99275e4..b8c6a11 100644
-> --- a/drivers/mmc/core/core.c
-> +++ b/drivers/mmc/core/core.c
-> @@ -2580,9 +2580,6 @@ void mmc_rescan(struct work_struct *work)
->  		container_of(work, struct mmc_host, detect.work);
->  	int i;
->  
-> -	if (host->rescan_disable)
-> -		return;
-> -
->  	/* If there is a non-removable card registered, only scan once */
->  	if (!mmc_card_is_removable(host) && host->rescan_entered)
->  		return;
-> @@ -2649,7 +2646,6 @@ void mmc_rescan(struct work_struct *work)
->  void mmc_start_host(struct mmc_host *host)
->  {
->  	host->f_init = max(freqs[0], host->f_min);
-> -	host->rescan_disable = 0;
->  	host->ios.power_mode = MMC_POWER_UNDEFINED;
->  
->  	mmc_claim_host(host);
-> @@ -2674,7 +2670,6 @@ void mmc_stop_host(struct mmc_host *host)
->  	if (host->slot.cd_irq >= 0)
->  		disable_irq(host->slot.cd_irq);
->  
-> -	host->rescan_disable = 1;
->  	cancel_delayed_work_sync(&host->detect);
->  
->  	/* clear pm flags now and let card drivers set them as needed */
-> @@ -2788,9 +2783,6 @@ static int mmc_pm_notify(struct notifier_block *notify_block,
->  	case PM_HIBERNATION_PREPARE:
->  	case PM_SUSPEND_PREPARE:
->  	case PM_RESTORE_PREPARE:
-> -		spin_lock_irqsave(&host->lock, flags);
-> -		host->rescan_disable = 1;
-> -		spin_unlock_irqrestore(&host->lock, flags);
->  		cancel_delayed_work_sync(&host->detect);
->  
->  		if (!host->bus_ops)
-> @@ -2814,10 +2806,6 @@ static int mmc_pm_notify(struct notifier_block *notify_block,
->  	case PM_POST_SUSPEND:
->  	case PM_POST_HIBERNATION:
->  	case PM_POST_RESTORE:
-> -
-> -		spin_lock_irqsave(&host->lock, flags);
-> -		host->rescan_disable = 0;
-> -		spin_unlock_irqrestore(&host->lock, flags);
->  		_mmc_detect_change(host, 0, false);
->  
->  	}
-> diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
-> index e0a3ee1..e972489 100644
-> --- a/drivers/mmc/core/host.c
-> +++ b/drivers/mmc/core/host.c
-> @@ -319,9 +319,6 @@ struct mmc_host *mmc_alloc_host(int extra, struct device *dev)
->  	if (!host)
->  		return NULL;
->  
-> -	/* scanning will be enabled when we're ready */
-> -	host->rescan_disable = 1;
-> -
->  again:
->  	if (!ida_pre_get(&mmc_host_ida, GFP_KERNEL)) {
->  		kfree(host);
-> diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-> index 85800b4..7fbe5c0 100644
-> --- a/include/linux/mmc/host.h
-> +++ b/include/linux/mmc/host.h
-> @@ -330,7 +330,6 @@ struct mmc_host {
->  	unsigned int		doing_retune:1;	/* re-tuning in progress */
->  	unsigned int		retune_now:1;	/* do re-tuning at next req */
->  
-> -	int			rescan_disable;	/* disable card detection */
->  	int			rescan_entered;	/* used with nonremovable devices */
->  
->  	int			need_retune;	/* re-tuning is needed */
-> 
+Changes:
+- v2:
+  - use a define for preset_common since it's a constant
+
+ drivers/mmc/host/sdhci-of-at91.c | 26 ++++++++++++++++++++++++++
+ 1 file changed, 26 insertions(+)
+
+diff --git a/drivers/mmc/host/sdhci-of-at91.c b/drivers/mmc/host/sdhci-of-at91.c
+index c1923c0..25f779e 100644
+--- a/drivers/mmc/host/sdhci-of-at91.c
++++ b/drivers/mmc/host/sdhci-of-at91.c
+@@ -18,6 +18,7 @@
+ #include <linux/delay.h>
+ #include <linux/err.h>
+ #include <linux/io.h>
++#include <linux/kernel.h>
+ #include <linux/mmc/host.h>
+ #include <linux/mmc/slot-gpio.h>
+ #include <linux/module.h>
+@@ -32,6 +33,8 @@
+ #define		SDMMC_CACR_CAPWREN	BIT(0)
+ #define		SDMMC_CACR_KEY		(0x46 << 8)
+ 
++#define SDHCI_AT91_PRESET_COMMON_CONF	0x400 /* drv type B, programmable clock mode */
++
+ struct sdhci_at91_priv {
+ 	struct clk *hclock;
+ 	struct clk *gck;
+@@ -163,6 +166,7 @@ static int sdhci_at91_probe(struct platform_device *pdev)
+ 	unsigned int			clk_base, clk_mul;
+ 	unsigned int			gck_rate, real_gck_rate;
+ 	int				ret;
++	unsigned int			preset_div;
+ 
+ 	match = of_match_device(sdhci_at91_dt_match, &pdev->dev);
+ 	if (!match)
+@@ -230,6 +234,28 @@ static int sdhci_at91_probe(struct platform_device *pdev)
+ 			 clk_mul, real_gck_rate);
+ 	}
+ 
++	/*
++	 * We have to set preset values because it depends on the clk_mul
++	 * value. Moreover, SDR104 is supported in a degraded mode since the
++	 * maximum sd clock value is 120 MHz instead of 208 MHz. For that
++	 * reason, we need to use presets to support SDR104.
++	 */
++	preset_div = DIV_ROUND_UP(real_gck_rate, 24000000) - 1;
++	writew(SDHCI_AT91_PRESET_COMMON_CONF | preset_div,
++	       host->ioaddr + SDHCI_PRESET_FOR_SDR12);
++	preset_div = DIV_ROUND_UP(real_gck_rate, 50000000) - 1;
++	writew(SDHCI_AT91_PRESET_COMMON_CONF | preset_div,
++	       host->ioaddr + SDHCI_PRESET_FOR_SDR25);
++	preset_div = DIV_ROUND_UP(real_gck_rate, 100000000) - 1;
++	writew(SDHCI_AT91_PRESET_COMMON_CONF | preset_div,
++	       host->ioaddr + SDHCI_PRESET_FOR_SDR50);
++	preset_div = DIV_ROUND_UP(real_gck_rate, 120000000) - 1;
++	writew(SDHCI_AT91_PRESET_COMMON_CONF | preset_div,
++	       host->ioaddr + SDHCI_PRESET_FOR_SDR104);
++	preset_div = DIV_ROUND_UP(real_gck_rate, 50000000) - 1;
++	writew(SDHCI_AT91_PRESET_COMMON_CONF | preset_div,
++	       host->ioaddr + SDHCI_PRESET_FOR_DDR50);
++
+ 	clk_prepare_enable(priv->mainck);
+ 	clk_prepare_enable(priv->gck);
+ 
+-- 
+2.5.0
 
