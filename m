@@ -1,168 +1,168 @@
-From: Javier Martinez Canillas <javier@dowhile0.org>
-Subject: Re: [PATCH v2 2/3] ARM: dts: exynos: Define vqmmc for eMMC card on
- Odroid X/X2/U3
-Date: Thu, 28 Apr 2016 02:21:40 -0400
-Message-ID: <CABxcv=mGMyjr=Gj8srdL+h5JruvRxYuybBRohBSNnRfykDdaDg@mail.gmail.com>
-References: <1461765620-6833-1-git-send-email-k.kozlowski@samsung.com>
-	<1461765620-6833-2-git-send-email-k.kozlowski@samsung.com>
-	<bca8c1c9-41ac-c7e8-9313-ff96058376be@osg.samsung.com>
-	<5721A49A.1020401@samsung.com>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH 04/23] mmc: sdhci: re-factor sdhci_start_signal_voltage()
+Date: Thu, 28 Apr 2016 09:39:54 +0300
+Message-ID: <5721B03A.5030006@intel.com>
+References: <1460741387-23815-1-git-send-email-aisheng.dong@nxp.com>
+ <1460741387-23815-5-git-send-email-aisheng.dong@nxp.com>
+ <571A0E5E.4090904@intel.com>
+ <CAA+hA=SygBBr+-C_r4Geodni+hj2Mg71o+ecVq_AD8vv22=UPA@mail.gmail.com>
+ <5721208C.2090509@intel.com>
+ <20160428030941.GA23362@shlinux2.ap.freescale.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ig0-f180.google.com ([209.85.213.180]:37139 "EHLO
-	mail-ig0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752049AbcD1GVm (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 28 Apr 2016 02:21:42 -0400
-Received: by mail-ig0-f180.google.com with SMTP id s8so13016476ign.0
-        for <linux-mmc@vger.kernel.org>; Wed, 27 Apr 2016 23:21:41 -0700 (PDT)
-In-Reply-To: <5721A49A.1020401@samsung.com>
+Received: from mga11.intel.com ([192.55.52.93]:24956 "EHLO mga11.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1750943AbcD1Gno (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 28 Apr 2016 02:43:44 -0400
+In-Reply-To: <20160428030941.GA23362@shlinux2.ap.freescale.net>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Krzysztof Kozlowski <k.kozlowski@samsung.com>
-Cc: Javier Martinez Canillas <javier@osg.samsung.com>, Kukjin Kim <kgene@kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-samsung-soc@vger.kernel.org" <linux-samsung-soc@vger.kernel.org>, Linux Kernel <linux-kernel@vger.kernel.org>, Tobias Jakobi <tjakobi@math.uni-bielefeld.de>, Marek Szyprowski <m.szyprowski@samsung.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Anand Moon <linux.amoon@gmail.com>, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>
+To: Dong Aisheng <dongas86@gmail.com>
+Cc: Dong Aisheng <aisheng.dong@nxp.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, Chris Ball <chris@printf.net>, Shawn Guo <shawnguo@kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, haibo.chen@nxp.com
 
-Hello Krzysztof,
-
-On Thu, Apr 28, 2016 at 1:50 AM, Krzysztof Kozlowski
-<k.kozlowski@samsung.com> wrote:
-> On 04/27/2016 11:29 PM, Javier Martinez Canillas wrote:
->> Hello Krzysztof,
+On 28/04/16 06:09, Dong Aisheng wrote:
+> On Wed, Apr 27, 2016 at 11:26:52PM +0300, Adrian Hunter wrote:
+>> On 24/04/2016 12:14 p.m., Dong Aisheng wrote:
+>>> Hi Adrian,
+>>>
+>>> Thanks for the review first.
+>>>
+>>> On Fri, Apr 22, 2016 at 7:43 PM, Adrian Hunter <adrian.hunter@intel.com> wrote:
+>>>> On 15/04/16 20:29, Dong Aisheng wrote:
+>>>>> Handle host and regulator signal voltage switch separately.
+>>>>> Move host signal voltage switch code into a separated function
+>>>>> sdhci_do_signal_voltage_switch() first, the following patches will
+>>>>> remove the regulator voltage switch code and use the common
+>>>>> mmc_regulator_set_vqmmc() instead.
+>>>>
+>>>> You have changed the order that things are done.
+>>>
+>>> Yes, the oder changes a bit that we always do controller voltage switch first.
+>>> I suppose the order is irrelevant here since i don't recall any
+>>> requirement from card.
+>>>
+>>> Actually the original order is also a bit mass.
+>>> e.g.
+>>> For MMC_SIGNAL_VOLTAGE_330, switch controller first, then vqmmc.
+>>> But for MMC_SIGNAL_VOLTAGE_180, switch vqmmc first, then controller.
+>>> It looks to us the original one also order irrelevant.
+>>>
+>>>> There is no way to know
+>>>> what that will break, so let's not do that.  What about just changing
+>>>> regulator_set_voltage() to mmc_regulator_set_vqmmc()?
+>>>>
+>>>
+>>> Currently what i can think out VIO switch using are three cases: (Pls
+>>> help add if any)
+>>> 1) Both host IO and card IO use external vqmmc to do switch
+>>> (e.g eMMC 1.8V DDR/HS200/HS400 mode)
+>>>
+>>> eMMC has no IO voltage switch protocol and requirement, so usually
+>>> board designed
+>>> using fixed 1.8V for eMMC and host IO.
+>>> Event it's switchable, it should be done in the first mmc_power_up().
+>>> Dynamical switch later may cause eMMC unable to work properly.
+>>> (We have been confirmed about this issue by many eMMC vendors
+>>> like Micron and Sandisk. I'm not sure if any exceptions in the community
+>>> still doing VIO dynamical switch for eMMC, if yes, please help share
+>>> the experience!).
+>>>
+>>> Event some people still do dynamical IO switch for eMMC, since eMMC
+>>> spec has no requirement, so the order should also not care.
+>>>
+>>> 2) Host using controller IO switch while card using standard CMD (SD/SDIO3.0)
+>>>
+>>> SD/SDIO 3.0 spec defines the standard IO switch process and using it's internal
+>>> regulator to do card IO voltage switch. It does not use external vqmmc
+>>> regulator.
+>>> So order irrelevant too.
+>>>
+>>> 3) Host using controller IO switch while card using external vqmmc
+>>> (special SDIO3.0 or eMMC)
+>>> I have met some special SDIO3.0 card like Broadcom WiFi which does not follow
+>>> the spec and using external regulator for card IO voltage.
+>>> Usually it's required to fix to 1.8v and also not order irrelevant.
+>>>
+>>> For eMMC, refer to case 1), it should be fixed to 1.8v at power up.
+>>>
+>>> So it looks all cases seems are not order required.
 >>
->> On 04/27/2016 10:00 AM, Krzysztof Kozlowski wrote:
->>> The eMMC card vmmc-supply contained incorrectly two regulators: LDO20
->>> and buck8. The second one is ignored. Additionally the buck8 is a vqmmc
->>> supply only on X and X2. On U3 the buck8 is providing power to the LAN
->>> (SMSC95xx) so instead the LDO22 should be used.
->>>
->>> Fix this by defining proper vmmc and vqmmc supplies for respective
->>> boards.
->>>
->>> Signed-off-by: Krzysztof Kozlowski <k.kozlowski@samsung.com>
->>>
->>> ---
->>>
->>> Changes since v1:
->>> 1. buck8 is used on X/X2 so differentiate the configuration (hint by
->>>    Tobias Jakobi).
->>> ---
->>>  arch/arm/boot/dts/exynos4412-odroid-common.dtsi | 13 ++++++++++---
->>>  arch/arm/boot/dts/exynos4412-odroidu3.dts       | 18 ++++++++++++++++++
->>>  arch/arm/boot/dts/exynos4412-odroidx.dts        | 11 +++++++++++
->>>  arch/arm/boot/dts/exynos4412-odroidx2.dts       | 11 +++++++++++
->>>  4 files changed, 50 insertions(+), 3 deletions(-)
->>>
->>> diff --git a/arch/arm/boot/dts/exynos4412-odroid-common.dtsi b/arch/arm/boot/dts/exynos4412-odroid-common.dtsi
->>> index 3d0d44581fbd..34a5b3daced0 100644
->>> --- a/arch/arm/boot/dts/exynos4412-odroid-common.dtsi
->>> +++ b/arch/arm/boot/dts/exynos4412-odroid-common.dtsi
->>> @@ -347,6 +347,13 @@
->>>                              regulator-boot-on;
->>>                      };
->>>
->>> +                    ldo22_reg: LDO22 {
->>> +                            regulator-name = "LDO22";
->>> +                            regulator-min-microvolt = <800000>;
->>> +                            regulator-max-microvolt = <3950000>;
->>> +                            regulator-boot-on;
->>> +                    };
->>> +
+>> I don't agree that there is any way to know that other host controllers
+>> are not affected.  I don't want a repeat of sdhci_set_power().
 >>
->> I don't have a datasheet for the max77686 but I guess these min and max
->> values are the actual voltage range that the ldo22 regulator can support?
->
-> Yes.
->
->> If that's the case, then I don't think setting these are correct since the
->> DT binding says that the regulator-{min,max}-microvolt properties describe
->> the voltage range that consumers may set. I've seen Mark mention this many
->> times, the last one I remember is at [0].
->
-> For LDO22 there is no consumer so these are the constraints. Leaving
+> 
+> Can you share some more info about sdhci_set_power() issue?
+> I'd like to see if we are same the issue.
 
-That was my point, there's no consumers for X/X2 and there is only a
-consumer in U3 (vqmmc-supply for mshc_0) added by $SUBJECT. That's why
-I thought that it should be defined in odroidu3.dts and removed from
-the .dtsi.
+Not the same issue, but the same concept.  People changing the code under
+the impression that their way was correct, and then breaking other people's
+drivers.  Check the git history and mailing list.
 
-> them undefined (here and in DTS for X/X2) would result in the same
-> effect. The point is that these values are valid constraints. Please
-> have in mind that the binding describe this as "smallest/largest voltage
-> consumer may set" which is true for the code above.
->
->>
->> Probably would be better to leave the ldo22_reg definition to odroidu3.dts
->> to avoid setting these constraint in a .dtsi file.
->
-> What about X/X2?
->
+	http://marc.info/?l=linux-mmc&m=145880454106474&w=2
 
-Mmm, I see what you mean. If the regulators are not defined then these
-for example won't be turned off by the regulator subsystem if were
-enabled by the bootloader. Then I guess your change makes sense.
+> 
+> BTW, IMHO i don't think we should stop keep moving only afraid of potential
+> break if it's correct way. Because .start_signal_voltage_switch() interface
+> seems shouldn't be order dependant.
+> If it is, then it should be fixed and handled in high layer like MMC core
+> rather than in host driver. Right?
 
->>>                      ldo25_reg: LDO25 {
->>>                              regulator-name = "VDDQ_LCD_1.8V";
->>>                              regulator-min-microvolt = <1800000>;
->>> @@ -411,8 +418,8 @@
->>>
->>>                      buck8_reg: BUCK8 {
->>>                              regulator-name = "BUCK8_2.8V";
->>> -                            regulator-min-microvolt = <2800000>;
->>> -                            regulator-max-microvolt = <2800000>;
->>> +                            regulator-min-microvolt = <750000>;
->>> +                            regulator-max-microvolt = <3900000>;
->>
->> Same here, since not all boards have the same constraint for this regulator,
->> it would be better to remove it from the .dtsi and let each dts to define it.
->
-> Since all of the boards define them, it does not bring any difference
-> having it here... so I can remove them.
->
->
+The SDHCI spec. does not define how to use external regulators, so there is
+no "correct way".
 
-Ok. I don't have a strong opinion on this though now that I realized
-that not defining some regulators could lead to unused ones not being
-disabled on boot.
+We have to move forward *and* avoid potential breakage.
 
->>>                      };
->>>              };
->>>      };
->>> @@ -456,7 +463,7 @@
->>>  &mshc_0 {
->>>      pinctrl-0 = <&sd4_clk &sd4_cmd &sd4_bus4 &sd4_bus8>;
->>>      pinctrl-names = "default";
->>> -    vmmc-supply = <&ldo20_reg &buck8_reg>;
->>> +    vmmc-supply = <&ldo20_reg>;
->>>      mmc-pwrseq = <&emmc_pwrseq>;
->>>      status = "okay";
->>>
->>> diff --git a/arch/arm/boot/dts/exynos4412-odroidu3.dts b/arch/arm/boot/dts/exynos4412-odroidu3.dts
->>> index dd89f7b37c9f..d73aa6c58fe3 100644
->>> --- a/arch/arm/boot/dts/exynos4412-odroidu3.dts
->>> +++ b/arch/arm/boot/dts/exynos4412-odroidu3.dts
->>> @@ -69,6 +69,24 @@
->>>      };
->>>  };
->>>
->>> +/* Supply for LAN9730/SMSC95xx */
->>> +&buck8_reg {
->>> +    regulator-name = "BUCK8_P3V3";
->>
->> I think it would be better to name it "BUCK8_3.3V" for consistency.
->
-> Consistency of naming is nice but in the same time we want the regulator
-> names to match the hardware because it is easier to read the code and
-> check the schematics. On the schematics this is unfortunately called
-> P3V3. :)
->
+In this case it seems me that the risk of breakage outweighs the value of
+prettier code.
 
-oh, I missed that. It's pity but I agree with you that matching the
-schematics is more important that naming consistency.
+By the way, there are ways to get rid of the ugliness - such as pushing it down
+into individual drivers.
 
-Thanks a lot for your explanations, the patch looks good to me as it is now:
+> 
+>> Please instead send a patch for just using mmc_regulator_set_vqmmc()
+>> in place of regulator_set_voltage().
+> 
+> Just using mmc_regulator_set_vqmmc() also changes the order which
+> is the same situation.
 
-Reviewed-by: Javier Martinez Canillas <javier@osg.samsung.com>
+How so?  It looks like a drop-in replacement to me:
 
-Best regards,
-Javier
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 94cffa77490a..69b4d48aff87 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -1757,8 +1757,7 @@ static int sdhci_do_start_signal_voltage_switch(struct sdhci_host *host,
+ 		sdhci_writew(host, ctrl, SDHCI_HOST_CONTROL2);
+ 
+ 		if (!IS_ERR(mmc->supply.vqmmc)) {
+-			ret = regulator_set_voltage(mmc->supply.vqmmc, 2700000,
+-						    3600000);
++			ret = mmc_regulator_set_vqmmc(mmc, ios);
+ 			if (ret) {
+ 				pr_warn("%s: Switching to 3.3V signalling voltage failed\n",
+ 					mmc_hostname(mmc));
+@@ -1779,8 +1778,7 @@ static int sdhci_do_start_signal_voltage_switch(struct sdhci_host *host,
+ 		return -EAGAIN;
+ 	case MMC_SIGNAL_VOLTAGE_180:
+ 		if (!IS_ERR(mmc->supply.vqmmc)) {
+-			ret = regulator_set_voltage(mmc->supply.vqmmc,
+-					1700000, 1950000);
++			ret = mmc_regulator_set_vqmmc(mmc, ios);
+ 			if (ret) {
+ 				pr_warn("%s: Switching to 1.8V signalling voltage failed\n",
+ 					mmc_hostname(mmc));
+@@ -1810,8 +1808,7 @@ static int sdhci_do_start_signal_voltage_switch(struct sdhci_host *host,
+ 		return -EAGAIN;
+ 	case MMC_SIGNAL_VOLTAGE_120:
+ 		if (!IS_ERR(mmc->supply.vqmmc)) {
+-			ret = regulator_set_voltage(mmc->supply.vqmmc, 1100000,
+-						    1300000);
++			ret = mmc_regulator_set_vqmmc(mmc, ios);
+ 			if (ret) {
+ 				pr_warn("%s: Switching to 1.2V signalling voltage failed\n",
+ 					mmc_hostname(mmc));
+
+
+
