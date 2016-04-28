@@ -1,87 +1,72 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 1/3] mmc: core: fix using wrong io voltage if
- mmc_select_hs200 fails
-Date: Thu, 28 Apr 2016 11:26:13 +0200
-Message-ID: <CAPDyKFrZW=FVd-5CNrkH4=PgHRxUkT3Vic3vDuuho0NACmziww@mail.gmail.com>
-References: <1461171092-30631-1-git-send-email-aisheng.dong@nxp.com>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH v2] mmc: sdhci-of-arasan: fix set_clock when a phy is
+ supported
+Date: Thu, 28 Apr 2016 13:10:42 +0300
+Message-ID: <5721E1A2.8060103@intel.com>
+References: <1461832731-28422-1-git-send-email-shawn.lin@rock-chips.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wm0-f46.google.com ([74.125.82.46]:33505 "EHLO
-	mail-wm0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752756AbcD1J0O (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 28 Apr 2016 05:26:14 -0400
-Received: by mail-wm0-f46.google.com with SMTP id g17so3499546wme.0
-        for <linux-mmc@vger.kernel.org>; Thu, 28 Apr 2016 02:26:14 -0700 (PDT)
-In-Reply-To: <1461171092-30631-1-git-send-email-aisheng.dong@nxp.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1461832731-28422-1-git-send-email-shawn.lin@rock-chips.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Shawn Lin <shawn.lin@rock-chips.com>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Michal Simek <michal.simek@xilinx.com>, soren.brinkmann@xilinx.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Doug Anderson <dianders@chromium.org>, Heiko Stuebner <heiko@sntech.de>, linux-rockchip@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
-To: Dong Aisheng <aisheng.dong@nxp.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, Shawn Guo <shawnguo@kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Haibo Chen <haibo.chen@nxp.com>, Dong Aisheng <dongas86@gmail.com>
 
-On 20 April 2016 at 18:51, Dong Aisheng <aisheng.dong@nxp.com> wrote:
-> Currently MMC core will keep going if HS200/HS timing switch failed
-> with -EBADMSG error by the assumption that the old timing is still valid.
->
-> However, for mmc_select_hs200 case, the signal voltage may have already
-> been switched. If the timing switch failed, we should fall back to
-> the old voltage in case the card is continue run with legacy timing.
->
-> If fall back signal voltage failed, we explicitly report an EIO error
-> to force retry during the next power cycle.
->
-> Signed-off-by: Dong Aisheng <aisheng.dong@nxp.com>
+On 28/04/16 11:38, Shawn Lin wrote:
+> commit 61b914eb81f8 ("mmc: sdhci-of-arasan: add phy support for
+> sdhci-of-arasan") introduce phy support for arasan. According to
+> the vendor's databook, we should make sure the phy is in poweroff
+> status before we configure the clk stuff. Otherwise it may cause
+> some IO sample timing issues from the test. And we don't need this
+> extra operation while running in low performance mode since phy
+> doesn't trigger sampling block.
+> 
+> Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
+
+Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+
+> 
 > ---
->  drivers/mmc/core/mmc.c | 11 +++++++++--
->  1 file changed, 9 insertions(+), 2 deletions(-)
->
-> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-> index b8aa12c..f6683a9 100644
-> --- a/drivers/mmc/core/mmc.c
-> +++ b/drivers/mmc/core/mmc.c
-> @@ -1245,9 +1245,11 @@ static int mmc_select_hs200(struct mmc_card *card)
->         struct mmc_host *host = card->host;
->         bool send_status = true;
->         unsigned int old_timing;
-> +       unsigned int old_signal_voltage;
-
-Nitpick; you can merge this change into the line above.
-
->         int err = -EINVAL;
->         u8 val;
->
-> +       old_signal_voltage = host->ios.signal_voltage;
->         if (card->mmc_avail_type & EXT_CSD_CARD_TYPE_HS200_1_2V)
->                 err = __mmc_set_signal_voltage(host, MMC_SIGNAL_VOLTAGE_120);
->
-> @@ -1256,7 +1258,7 @@ static int mmc_select_hs200(struct mmc_card *card)
->
->         /* If fails try again during next card power cycle */
->         if (err)
-> -               goto err;
-> +               return err;
->
->         mmc_select_driver_type(card);
->
-> @@ -1290,9 +1292,14 @@ static int mmc_select_hs200(struct mmc_card *card)
->                 }
->         }
->  err:
-> -       if (err)
-> +       if (err) {
-> +               /* fall back to the old signal voltage, if fails report error */
-> +               if (__mmc_set_signal_voltage(host, old_signal_voltage))
-> +                       err = -EIO;
-> +
->                 pr_err("%s: %s failed, error %d\n", mmc_hostname(card->host),
->                        __func__, err);
-> +       }
->         return err;
+> 
+> Changes in v2:
+> - change commit msg title to indicate it's a fix
+> - fix a typo in commmit msg
+> 
+>  drivers/mmc/host/sdhci-of-arasan.c | 20 +++++++++++++++++++-
+>  1 file changed, 19 insertions(+), 1 deletion(-)
+> 
+> diff --git a/drivers/mmc/host/sdhci-of-arasan.c b/drivers/mmc/host/sdhci-of-arasan.c
+> index 2e482b1..20b859e 100644
+> --- a/drivers/mmc/host/sdhci-of-arasan.c
+> +++ b/drivers/mmc/host/sdhci-of-arasan.c
+> @@ -55,8 +55,26 @@ static unsigned int sdhci_arasan_get_timeout_clock(struct sdhci_host *host)
+>  	return freq;
 >  }
->
-> --
-> 1.9.1
->
-
-Kind regards
-Uffe
+>  
+> +static void sdhci_arasan_set_clock(struct sdhci_host *host, unsigned int clock)
+> +{
+> +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+> +	struct sdhci_arasan_data *sdhci_arasan = sdhci_pltfm_priv(pltfm_host);
+> +	bool ctrl_phy = false;
+> +
+> +	if (clock > MMC_HIGH_52_MAX_DTR && (!IS_ERR(sdhci_arasan->phy)))
+> +		ctrl_phy = true;
+> +
+> +	if (ctrl_phy)
+> +		phy_power_off(sdhci_arasan->phy);
+> +
+> +	sdhci_set_clock(host, clock);
+> +
+> +	if (ctrl_phy)
+> +		phy_power_on(sdhci_arasan->phy);
+> +}
+> +
+>  static struct sdhci_ops sdhci_arasan_ops = {
+> -	.set_clock = sdhci_set_clock,
+> +	.set_clock = sdhci_arasan_set_clock,
+>  	.get_max_clock = sdhci_pltfm_clk_get_max_clock,
+>  	.get_timeout_clock = sdhci_arasan_get_timeout_clock,
+>  	.set_bus_width = sdhci_set_bus_width,
+> 
