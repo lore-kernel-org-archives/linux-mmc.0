@@ -1,128 +1,116 @@
 From: Dong Aisheng <dongas86@gmail.com>
-Subject: Re: [PATCH 10/23] mmc: core: disable auto retune during card
- detection process
-Date: Thu, 28 Apr 2016 21:22:49 +0800
-Message-ID: <20160428132249.GB27560@shlinux2.ap.freescale.net>
+Subject: Re: [PATCH 07/23] mmc: sdhci: check SDHCI_QUIRK2_NO_1_8_V when do
+ voltage switch
+Date: Thu, 28 Apr 2016 21:24:37 +0800
+Message-ID: <20160428132437.GC27560@shlinux2.ap.freescale.net>
 References: <1460741387-23815-1-git-send-email-aisheng.dong@nxp.com>
- <1460741387-23815-11-git-send-email-aisheng.dong@nxp.com>
- <571A1D85.3020200@intel.com>
- <CAA+hA=R9JfV4ScuM=OZ3VHdSiQiMO9io8mQQDNXfkTwNv7RVvg@mail.gmail.com>
- <5721B602.6010306@intel.com>
+ <1460741387-23815-8-git-send-email-aisheng.dong@nxp.com>
+ <571A1970.7010800@intel.com>
+ <CAA+hA=S4yy8=z3EXS9ZO5V6+WQDV7K0d29vUpcFkB5q6f+Eo8g@mail.gmail.com>
+ <5721209B.7000707@intel.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pa0-f66.google.com ([209.85.220.66]:33512 "EHLO
+Received: from mail-pa0-f66.google.com ([209.85.220.66]:34422 "EHLO
 	mail-pa0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750847AbcD1Nam (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 28 Apr 2016 09:30:42 -0400
-Received: by mail-pa0-f66.google.com with SMTP id vv3so10875157pab.0
-        for <linux-mmc@vger.kernel.org>; Thu, 28 Apr 2016 06:30:42 -0700 (PDT)
+	with ESMTP id S1752358AbcD1Ncf (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 28 Apr 2016 09:32:35 -0400
+Received: by mail-pa0-f66.google.com with SMTP id yl2so9393518pac.1
+        for <linux-mmc@vger.kernel.org>; Thu, 28 Apr 2016 06:32:30 -0700 (PDT)
 Content-Disposition: inline
-In-Reply-To: <5721B602.6010306@intel.com>
+In-Reply-To: <5721209B.7000707@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Adrian Hunter <adrian.hunter@intel.com>
 Cc: Dong Aisheng <aisheng.dong@nxp.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, Chris Ball <chris@printf.net>, Shawn Guo <shawnguo@kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, haibo.chen@nxp.com
 
-On Thu, Apr 28, 2016 at 10:04:34AM +0300, Adrian Hunter wrote:
-> On 24/04/16 13:47, Dong Aisheng wrote:
-> > On Fri, Apr 22, 2016 at 8:48 PM, Adrian Hunter <adrian.hunter@intel.com> wrote:
-> >> On 15/04/16 20:29, Dong Aisheng wrote:
-> >>> During card detection process, mmc core may sends commands
-> >>> to detect if card is still exist in mmc_rescan for removable
-> >>> card which may trigger mmc retuning process after a bit time
-> >>> of runtime pm suspend.
-> >>> Obviously this retuning process is meaningless for card remove
-> >>> case, so we disable mmc_retune in mmc_detect_change() for it.
-> >>> For card insert case, the mmc_retune will be enabled normally
-> >>> in its card initialization process later in mmc_execute_tuning().
-> >>> So disable it at first has no side effection.
+On Wed, Apr 27, 2016 at 11:27:07PM +0300, Adrian Hunter wrote:
+> On 24/04/2016 12:56 p.m., Dong Aisheng wrote:
+> >On Fri, Apr 22, 2016 at 8:30 PM, Adrian Hunter <adrian.hunter@intel.com> wrote:
+> >>On 15/04/16 20:29, Dong Aisheng wrote:
+> >>>Currently when card type supports EXT_CSD_CARD_TYPE_DDR_1_8V
+> >>>which means it can work on DDR mode with either 3.3v IO or 1.8v
+> >>>IO voltage. MMC core will first try 1.8v then 3.3v if host claims
+> >>>MMC_CAP_1_8V_DDR support.
+> >>>However the host driver voltage switch code does not check NO_1_8_V
+> >>>quirk which may set a wrong 1.8v and causes the card fixed to 3.3v
+> >>>VIO un-work.
+> >>>
+> >>>Checking 1.8V quirk before setting it to avoid such issue.
 > >>
-> >> We don't assume that the card has been removed, which is why we send
-> >> commands to find out if it is still there.  If it is still there, this
-> >> change will have incorrectly disabled re-tuning.
+> >>We need to look forward to when SDHCI_QUIRK2_NO_1_8_V doesn't exist.
 > >>
-> > 
-> > Do you mean the 'fake' card remove interrupt like caused by glitch?
+> >
+> >Yes, i did try to clean up SDHCI_QUIRK2_NO_1_8_V.
+> >However, it seems not that simply.
+> >Currently we may still need it before we got a better way.
+> >
+> >My point is whether we should stop fixing the exist issue in SDHCI driver
+> >just caused by we want to clean up it later?
 > 
-> Sure
-> 
-> > Yes, if that the card is still exist and re-tuning is wrongly disabled.
-> > 
-> > So we could re-enable re-tuning for this special case?
-> > Something like:
-> > diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-> > index 41b1e76..e1990a8 100644
-> > --- a/drivers/mmc/core/core.c
-> > +++ b/drivers/mmc/core/core.c
-> > @@ -2607,6 +2607,8 @@ void mmc_rescan(struct work_struct *work)
-> > 
-> >         /* if there still is a card present, stop here */
-> >         if (host->bus_ops != NULL) {
-> > +               if (tuning_is_enabled_before())
-> > +                       mmc_retune_enable(host);
-> >                 mmc_bus_put(host);
-> >                 goto out;
-> >         }
-> > 
-> > 
-> >> Do you have an actual problem with the way it works now?
-> >>
-> > 
-> > No actual problems now.
-> 
-> So let's not spend time on it.
-> 
-> > I just observe a lot tuning commands keep sending although the card is already
-> > removed which seems a bit meaningless.
-> > And most tuning execution process is executed with sin_lock_irqsave, i'm not
-> > sure if the mass tuning commands may affect the system when CPU is busy.
-> > What do you think?
-> 
-> sdhci spin lock is unlocked while waiting for tuning commands.
+> If you want a fix for stable kernels, then I guess it is OK.  In that case
+> it is better to have a fix that applies cleanly to older kernels
+> i.e. not on top of re-factoring
 > 
 
-It's 40 commands continuously and only cmd transfer time is unlocked.
-
-Hmm.. I can't sure it's no affection.
-e.g we did have customers reporting cd plug in/out causing jitters
-when system is busy playing audio or video.
-Maybe we need to do those tests.
-
-Anyway, what's your point to keep sending tuning commands after card
-is already removed?
+Okay, i would think more about how to remove SDHCI_QUIRK2_NO_1_8_V first.
 
 Regards
 Dong Aisheng
 
-> > 
-> > Regards
-> > Dong Aisheng
-> > 
+> >
+> >>There are two possibilities:
+> >>
+> >>1. Add MMC_CAP_3_3V_DDR and support to core and use that instead of
+> >>MMC_CAP_1_8V_DDR.  You'll need Ulf's feedback on that.
+> >>
+> >
+> >Yes, we can do it.
+> >But the point is for DDR50/SD3.0/SDIO3.0/HS200/HS400 cards we have
+> >the same situation and still need QUIRK2_NO_1_8_V.
+> >
+> >And i somehow a bit wonder whether we should retrieve the speed mode
+> >support from device tree since it's actually controller capability.
+> >IO range capability is another thing.
+> >
+> >Probably we may start another topic to discuss it specificly.
+> >
+> >>2. Replace ->start_signal_voltage_switch() i.e.
+> >>
+> >>host->mmc_host_ops.start_signal_voltage_switch =
+> >>esdhci_start_signal_voltage_switch;
+> >>
+> >>You will also need to change all calls to
+> >>sdhci_start_signal_voltage_switch() with
+> >>host->mmc->ops->start_signal_voltage_switch(), but that needs to be done anyway.
+> >>
+> >
+> >esdhc can fully use the common sdhci_start_signal_voltag_switch.
+> >Since it's already support QUIRK_NO_1_8_V, we don't want to
+> >invent imx voltage swith currently, but fix and use it first.
+> >
+> >Regards
+> >Dong Aisheng
+> >
 > >>>
-> >>> CC: stable <stable@vger.kernel.org>
-> >>> Signed-off-by: Dong Aisheng <aisheng.dong@nxp.com>
-> >>> ---
-> >>>  drivers/mmc/core/core.c | 1 +
-> >>>  1 file changed, 1 insertion(+)
+> >>>CC: stable <stable@vger.kernel.org>
+> >>>Signed-off-by: Dong Aisheng <aisheng.dong@nxp.com>
+> >>>---
+> >>>  drivers/mmc/host/sdhci.c | 2 ++
+> >>>  1 file changed, 2 insertions(+)
 > >>>
-> >>> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-> >>> index 52bfaf0..76d0802 100644
-> >>> --- a/drivers/mmc/core/core.c
-> >>> +++ b/drivers/mmc/core/core.c
-> >>> @@ -1888,6 +1888,7 @@ static void _mmc_detect_change(struct mmc_host *host, unsigned long delay,
-> >>>               pm_wakeup_event(mmc_dev(host), 5000);
+> >>>diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> >>>index 2338aab..96ccb15 100644
+> >>>--- a/drivers/mmc/host/sdhci.c
+> >>>+++ b/drivers/mmc/host/sdhci.c
+> >>>@@ -1683,6 +1683,8 @@ static int sdhci_do_signal_voltage_switch(struct sdhci_host *host,
 > >>>
-> >>>       host->detect_change = 1;
-> >>> +     mmc_retune_disable(host);
-> >>>       mmc_schedule_delayed_work(&host->detect, delay);
-> >>>  }
-> >>>
+> >>>               return -EAGAIN;
+> >>>       case MMC_SIGNAL_VOLTAGE_180:
+> >>>+             if (host->quirks2 & SDHCI_QUIRK2_NO_1_8_V)
+> >>>+                     return -EINVAL;
+> >>>               /*
+> >>>                * Enable 1.8V Signal Enable in the Host Control2
+> >>>                * register
 > >>>
 > >>
-> > 
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
