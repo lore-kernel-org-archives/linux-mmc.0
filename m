@@ -1,94 +1,128 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH v2] mmc: sdhci-of-at91: add presets setup
-Date: Thu, 28 Apr 2016 16:20:02 +0300
-Message-ID: <57220E02.7020001@intel.com>
-References: <1461848366-32562-1-git-send-email-ludovic.desroches@atmel.com>
+From: Dong Aisheng <dongas86@gmail.com>
+Subject: Re: [PATCH 10/23] mmc: core: disable auto retune during card
+ detection process
+Date: Thu, 28 Apr 2016 21:22:49 +0800
+Message-ID: <20160428132249.GB27560@shlinux2.ap.freescale.net>
+References: <1460741387-23815-1-git-send-email-aisheng.dong@nxp.com>
+ <1460741387-23815-11-git-send-email-aisheng.dong@nxp.com>
+ <571A1D85.3020200@intel.com>
+ <CAA+hA=R9JfV4ScuM=OZ3VHdSiQiMO9io8mQQDNXfkTwNv7RVvg@mail.gmail.com>
+ <5721B602.6010306@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1461848366-32562-1-git-send-email-ludovic.desroches@atmel.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Ludovic Desroches <ludovic.desroches@atmel.com>, ulf.hansson@linaro.org
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, nicolas.ferre@atmel.com
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-pa0-f66.google.com ([209.85.220.66]:33512 "EHLO
+	mail-pa0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750847AbcD1Nam (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 28 Apr 2016 09:30:42 -0400
+Received: by mail-pa0-f66.google.com with SMTP id vv3so10875157pab.0
+        for <linux-mmc@vger.kernel.org>; Thu, 28 Apr 2016 06:30:42 -0700 (PDT)
+Content-Disposition: inline
+In-Reply-To: <5721B602.6010306@intel.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Adrian Hunter <adrian.hunter@intel.com>
+Cc: Dong Aisheng <aisheng.dong@nxp.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, Chris Ball <chris@printf.net>, Shawn Guo <shawnguo@kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, haibo.chen@nxp.com
 
-On 28/04/16 15:59, Ludovic Desroches wrote:
-> The controller claims to support SDR104. In fact, it only supports a
-> degraded SDR104 since the maximum frequency of the SD clock is 120 MHz
-> instead of 208 MHz.
-> The sdhci core is unaware of it and will compute a wrong clock divider.
-> We can deal with this specific case by using presets.
+On Thu, Apr 28, 2016 at 10:04:34AM +0300, Adrian Hunter wrote:
+> On 24/04/16 13:47, Dong Aisheng wrote:
+> > On Fri, Apr 22, 2016 at 8:48 PM, Adrian Hunter <adrian.hunter@intel.com> wrote:
+> >> On 15/04/16 20:29, Dong Aisheng wrote:
+> >>> During card detection process, mmc core may sends commands
+> >>> to detect if card is still exist in mmc_rescan for removable
+> >>> card which may trigger mmc retuning process after a bit time
+> >>> of runtime pm suspend.
+> >>> Obviously this retuning process is meaningless for card remove
+> >>> case, so we disable mmc_retune in mmc_detect_change() for it.
+> >>> For card insert case, the mmc_retune will be enabled normally
+> >>> in its card initialization process later in mmc_execute_tuning().
+> >>> So disable it at first has no side effection.
+> >>
+> >> We don't assume that the card has been removed, which is why we send
+> >> commands to find out if it is still there.  If it is still there, this
+> >> change will have incorrectly disabled re-tuning.
+> >>
+> > 
+> > Do you mean the 'fake' card remove interrupt like caused by glitch?
 > 
-> Signed-off-by: Ludovic Desroches <ludovic.desroches@atmel.com>
+> Sure
+> 
+> > Yes, if that the card is still exist and re-tuning is wrongly disabled.
+> > 
+> > So we could re-enable re-tuning for this special case?
+> > Something like:
+> > diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+> > index 41b1e76..e1990a8 100644
+> > --- a/drivers/mmc/core/core.c
+> > +++ b/drivers/mmc/core/core.c
+> > @@ -2607,6 +2607,8 @@ void mmc_rescan(struct work_struct *work)
+> > 
+> >         /* if there still is a card present, stop here */
+> >         if (host->bus_ops != NULL) {
+> > +               if (tuning_is_enabled_before())
+> > +                       mmc_retune_enable(host);
+> >                 mmc_bus_put(host);
+> >                 goto out;
+> >         }
+> > 
+> > 
+> >> Do you have an actual problem with the way it works now?
+> >>
+> > 
+> > No actual problems now.
+> 
+> So let's not spend time on it.
+> 
+> > I just observe a lot tuning commands keep sending although the card is already
+> > removed which seems a bit meaningless.
+> > And most tuning execution process is executed with sin_lock_irqsave, i'm not
+> > sure if the mass tuning commands may affect the system when CPU is busy.
+> > What do you think?
+> 
+> sdhci spin lock is unlocked while waiting for tuning commands.
+> 
 
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+It's 40 commands continuously and only cmd transfer time is unlocked.
 
-> ---
+Hmm.. I can't sure it's no affection.
+e.g we did have customers reporting cd plug in/out causing jitters
+when system is busy playing audio or video.
+Maybe we need to do those tests.
+
+Anyway, what's your point to keep sending tuning commands after card
+is already removed?
+
+Regards
+Dong Aisheng
+
+> > 
+> > Regards
+> > Dong Aisheng
+> > 
+> >>>
+> >>> CC: stable <stable@vger.kernel.org>
+> >>> Signed-off-by: Dong Aisheng <aisheng.dong@nxp.com>
+> >>> ---
+> >>>  drivers/mmc/core/core.c | 1 +
+> >>>  1 file changed, 1 insertion(+)
+> >>>
+> >>> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+> >>> index 52bfaf0..76d0802 100644
+> >>> --- a/drivers/mmc/core/core.c
+> >>> +++ b/drivers/mmc/core/core.c
+> >>> @@ -1888,6 +1888,7 @@ static void _mmc_detect_change(struct mmc_host *host, unsigned long delay,
+> >>>               pm_wakeup_event(mmc_dev(host), 5000);
+> >>>
+> >>>       host->detect_change = 1;
+> >>> +     mmc_retune_disable(host);
+> >>>       mmc_schedule_delayed_work(&host->detect, delay);
+> >>>  }
+> >>>
+> >>>
+> >>
+> > 
 > 
-> Changes:
-> - v2:
->   - use a define for preset_common since it's a constant
-> 
->  drivers/mmc/host/sdhci-of-at91.c | 26 ++++++++++++++++++++++++++
->  1 file changed, 26 insertions(+)
-> 
-> diff --git a/drivers/mmc/host/sdhci-of-at91.c b/drivers/mmc/host/sdhci-of-at91.c
-> index c1923c0..25f779e 100644
-> --- a/drivers/mmc/host/sdhci-of-at91.c
-> +++ b/drivers/mmc/host/sdhci-of-at91.c
-> @@ -18,6 +18,7 @@
->  #include <linux/delay.h>
->  #include <linux/err.h>
->  #include <linux/io.h>
-> +#include <linux/kernel.h>
->  #include <linux/mmc/host.h>
->  #include <linux/mmc/slot-gpio.h>
->  #include <linux/module.h>
-> @@ -32,6 +33,8 @@
->  #define		SDMMC_CACR_CAPWREN	BIT(0)
->  #define		SDMMC_CACR_KEY		(0x46 << 8)
->  
-> +#define SDHCI_AT91_PRESET_COMMON_CONF	0x400 /* drv type B, programmable clock mode */
-> +
->  struct sdhci_at91_priv {
->  	struct clk *hclock;
->  	struct clk *gck;
-> @@ -163,6 +166,7 @@ static int sdhci_at91_probe(struct platform_device *pdev)
->  	unsigned int			clk_base, clk_mul;
->  	unsigned int			gck_rate, real_gck_rate;
->  	int				ret;
-> +	unsigned int			preset_div;
->  
->  	match = of_match_device(sdhci_at91_dt_match, &pdev->dev);
->  	if (!match)
-> @@ -230,6 +234,28 @@ static int sdhci_at91_probe(struct platform_device *pdev)
->  			 clk_mul, real_gck_rate);
->  	}
->  
-> +	/*
-> +	 * We have to set preset values because it depends on the clk_mul
-> +	 * value. Moreover, SDR104 is supported in a degraded mode since the
-> +	 * maximum sd clock value is 120 MHz instead of 208 MHz. For that
-> +	 * reason, we need to use presets to support SDR104.
-> +	 */
-> +	preset_div = DIV_ROUND_UP(real_gck_rate, 24000000) - 1;
-> +	writew(SDHCI_AT91_PRESET_COMMON_CONF | preset_div,
-> +	       host->ioaddr + SDHCI_PRESET_FOR_SDR12);
-> +	preset_div = DIV_ROUND_UP(real_gck_rate, 50000000) - 1;
-> +	writew(SDHCI_AT91_PRESET_COMMON_CONF | preset_div,
-> +	       host->ioaddr + SDHCI_PRESET_FOR_SDR25);
-> +	preset_div = DIV_ROUND_UP(real_gck_rate, 100000000) - 1;
-> +	writew(SDHCI_AT91_PRESET_COMMON_CONF | preset_div,
-> +	       host->ioaddr + SDHCI_PRESET_FOR_SDR50);
-> +	preset_div = DIV_ROUND_UP(real_gck_rate, 120000000) - 1;
-> +	writew(SDHCI_AT91_PRESET_COMMON_CONF | preset_div,
-> +	       host->ioaddr + SDHCI_PRESET_FOR_SDR104);
-> +	preset_div = DIV_ROUND_UP(real_gck_rate, 50000000) - 1;
-> +	writew(SDHCI_AT91_PRESET_COMMON_CONF | preset_div,
-> +	       host->ioaddr + SDHCI_PRESET_FOR_DDR50);
-> +
->  	clk_prepare_enable(priv->mainck);
->  	clk_prepare_enable(priv->gck);
->  
-> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
