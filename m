@@ -1,241 +1,282 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH 04/23] mmc: sdhci: re-factor sdhci_start_signal_voltage()
-Date: Thu, 28 Apr 2016 17:30:11 +0900
-Message-ID: <5721CA13.4080001@samsung.com>
-References: <1460741387-23815-1-git-send-email-aisheng.dong@nxp.com>
- <1460741387-23815-5-git-send-email-aisheng.dong@nxp.com>
- <571A0E5E.4090904@intel.com>
- <CAA+hA=SygBBr+-C_r4Geodni+hj2Mg71o+ecVq_AD8vv22=UPA@mail.gmail.com>
- <5721208C.2090509@intel.com>
- <20160428030941.GA23362@shlinux2.ap.freescale.net>
- <5721B03A.5030006@intel.com> <5721B89A.8000408@samsung.com>
- <5721BF54.1000802@intel.com>
+From: Prabu Thangamuthu <Prabu.T@synopsys.com>
+Subject: RE: [PATCH v4] mmc: sdhci-pci: add Support of Synopsys DWC_MSHC IP
+Date: Thu, 28 Apr 2016 08:35:34 +0000
+Message-ID: <705D14B1C7978B40A723277C067CEDE2010A4B4FA0@IN01WEMBXB.internal.synopsys.com>
+References: <705D14B1C7978B40A723277C067CEDE2010A4B4DB3@IN01WEMBXB.internal.synopsys.com>
+ <CAHp75VfHrX-mH=edkuj-Vvq_=-hFgA2Kay79e9h4P9ew-KNqAg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout2.samsung.com ([203.254.224.25]:44125 "EHLO
-	mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752616AbcD1IaT (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 28 Apr 2016 04:30:19 -0400
-Received: from epcpsbgr4.samsung.com
- (u144.gpu120.samsung.co.kr [203.254.230.144])
- by mailout2.samsung.com (Oracle Communications Messaging Server 7.0.5.31.0
- 64bit (built May  5 2014))
- with ESMTP id <0O6C02X4U4YBND10@mailout2.samsung.com> for
- linux-mmc@vger.kernel.org; Thu, 28 Apr 2016 17:30:11 +0900 (KST)
-In-reply-to: <5721BF54.1000802@intel.com>
+Received: from smtprelay.synopsys.com ([198.182.47.9]:48174 "EHLO
+	smtprelay.synopsys.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750867AbcD1Ifm (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 28 Apr 2016 04:35:42 -0400
+In-Reply-To: <CAHp75VfHrX-mH=edkuj-Vvq_=-hFgA2Kay79e9h4P9ew-KNqAg@mail.gmail.com>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>, Dong Aisheng <dongas86@gmail.com>
-Cc: Dong Aisheng <aisheng.dong@nxp.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, Chris Ball <chris@printf.net>, Shawn Guo <shawnguo@kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, haibo.chen@nxp.com, CPGS <cpgs@samsung.com>
+To: Andy Shevchenko <andy.shevchenko@gmail.com>, Prabu Thangamuthu <Prabu.T@synopsys.com>
+Cc: "Ulf Hansson (ulf.hansson@linaro.org)" <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, Bjorn Helgaas <bhelgaas@google.com>, Andrew Morton <akpm@linux-foundation.org>, "David S. Miller" <davem@davemloft.net>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Kalle Valo <kvalo@codeaurora.org>, Mauro Carvalho Chehab <mchehab@osg.samsung.com>, Guenter Roeck <linux@roeck-us.net>, Jiri Slaby <jslaby@suse.com>, Chaotian Jing <chaotian.jing@mediatek.com>, Andrei Pistirica <andrei.pistirica@microchip.com>, Ben Hutchings <ben.hutchings@codethink.co.uk>, Joshua Henderson <joshua.henderson@microchip.com>, Ludovic Desroches <ludovic.desroches@atmel.com>, Manjunath M Bettegowda <Manjunath.MB@synopsys.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 
-On 04/28/2016 04:44 PM, Adrian Hunter wrote:
-> On 28/04/16 10:15, Jaehoon Chung wrote:
->> Hi Adrian,
->>
->> On 04/28/2016 03:39 PM, Adrian Hunter wrote:
->>> On 28/04/16 06:09, Dong Aisheng wrote:
->>>> On Wed, Apr 27, 2016 at 11:26:52PM +0300, Adrian Hunter wrote:
->>>>> On 24/04/2016 12:14 p.m., Dong Aisheng wrote:
->>>>>> Hi Adrian,
->>>>>>
->>>>>> Thanks for the review first.
->>>>>>
->>>>>> On Fri, Apr 22, 2016 at 7:43 PM, Adrian Hunter <adrian.hunter@intel.com> wrote:
->>>>>>> On 15/04/16 20:29, Dong Aisheng wrote:
->>>>>>>> Handle host and regulator signal voltage switch separately.
->>>>>>>> Move host signal voltage switch code into a separated function
->>>>>>>> sdhci_do_signal_voltage_switch() first, the following patches will
->>>>>>>> remove the regulator voltage switch code and use the common
->>>>>>>> mmc_regulator_set_vqmmc() instead.
->>>>>>>
->>>>>>> You have changed the order that things are done.
->>>>>>
->>>>>> Yes, the oder changes a bit that we always do controller voltage switch first.
->>>>>> I suppose the order is irrelevant here since i don't recall any
->>>>>> requirement from card.
->>>>>>
->>>>>> Actually the original order is also a bit mass.
->>>>>> e.g.
->>>>>> For MMC_SIGNAL_VOLTAGE_330, switch controller first, then vqmmc.
->>>>>> But for MMC_SIGNAL_VOLTAGE_180, switch vqmmc first, then controller.
->>>>>> It looks to us the original one also order irrelevant.
->>>>>>
->>>>>>> There is no way to know
->>>>>>> what that will break, so let's not do that.  What about just changing
->>>>>>> regulator_set_voltage() to mmc_regulator_set_vqmmc()?
->>>>>>>
->>>>>>
->>>>>> Currently what i can think out VIO switch using are three cases: (Pls
->>>>>> help add if any)
->>>>>> 1) Both host IO and card IO use external vqmmc to do switch
->>>>>> (e.g eMMC 1.8V DDR/HS200/HS400 mode)
->>>>>>
->>>>>> eMMC has no IO voltage switch protocol and requirement, so usually
->>>>>> board designed
->>>>>> using fixed 1.8V for eMMC and host IO.
->>>>>> Event it's switchable, it should be done in the first mmc_power_up().
->>>>>> Dynamical switch later may cause eMMC unable to work properly.
->>>>>> (We have been confirmed about this issue by many eMMC vendors
->>>>>> like Micron and Sandisk. I'm not sure if any exceptions in the community
->>>>>> still doing VIO dynamical switch for eMMC, if yes, please help share
->>>>>> the experience!).
->>>>>>
->>>>>> Event some people still do dynamical IO switch for eMMC, since eMMC
->>>>>> spec has no requirement, so the order should also not care.
->>>>>>
->>>>>> 2) Host using controller IO switch while card using standard CMD (SD/SDIO3.0)
->>>>>>
->>>>>> SD/SDIO 3.0 spec defines the standard IO switch process and using it's internal
->>>>>> regulator to do card IO voltage switch. It does not use external vqmmc
->>>>>> regulator.
->>>>>> So order irrelevant too.
->>>>>>
->>>>>> 3) Host using controller IO switch while card using external vqmmc
->>>>>> (special SDIO3.0 or eMMC)
->>>>>> I have met some special SDIO3.0 card like Broadcom WiFi which does not follow
->>>>>> the spec and using external regulator for card IO voltage.
->>>>>> Usually it's required to fix to 1.8v and also not order irrelevant.
->>>>>>
->>>>>> For eMMC, refer to case 1), it should be fixed to 1.8v at power up.
->>>>>>
->>>>>> So it looks all cases seems are not order required.
->>>>>
->>>>> I don't agree that there is any way to know that other host controllers
->>>>> are not affected.  I don't want a repeat of sdhci_set_power().
->>>>>
->>>>
->>>> Can you share some more info about sdhci_set_power() issue?
->>>> I'd like to see if we are same the issue.
->>>
->>> Not the same issue, but the same concept.  People changing the code under
->>> the impression that their way was correct, and then breaking other people's
->>> drivers.  Check the git history and mailing list.
->>>
->>> 	http://marc.info/?l=linux-mmc&m=145880454106474&w=2
->>>
->>>>
->>>> BTW, IMHO i don't think we should stop keep moving only afraid of potential
->>>> break if it's correct way. Because .start_signal_voltage_switch() interface
->>>> seems shouldn't be order dependant.
->>>> If it is, then it should be fixed and handled in high layer like MMC core
->>>> rather than in host driver. Right?
->>>
->>> The SDHCI spec. does not define how to use external regulators, so there is
->>> no "correct way".
->>>
->>> We have to move forward *and* avoid potential breakage.
->>>
->>> In this case it seems me that the risk of breakage outweighs the value of
->>> prettier code.
->>>
->>> By the way, there are ways to get rid of the ugliness - such as pushing it down
->>> into individual drivers.
->>>
->>>>
->>>>> Please instead send a patch for just using mmc_regulator_set_vqmmc()
->>>>> in place of regulator_set_voltage().
->>>>
->>>> Just using mmc_regulator_set_vqmmc() also changes the order which
->>>> is the same situation.
->>>
->>> How so?  It looks like a drop-in replacement to me:
->>
->> maybe.. this question should not be related with this discussion..
->> But i have one question..sdhci_do_start_signal_voltage_switch() returned 0 or EAGAIN, when IS_ERR(mmc->supply.vqmmc) is ture.
->> It there any problem?
-> 
-> Not that I am aware of.
-> 
->>
->> I'm also checking on core side. but just wondering this.
->> (Because i'm fixing dwmmc controller for this.)
-> 
-> What is the problem?
-
-It should be difference with dwmmc controller.
-if mmc->supply.vqmmc is not assigned, it didn't change the voltage..
-(I'm not sure that HOST_CONTROL2 register can internally change the voltage..because i didn't have SDHC 3.0 spec.)
-
-__mmc_set_signal_voltage()
--> host->ops->start_signal_voltage_switch()
--> host controller just set the bits for v1.8 or v3.3..(if vqmmc didn't use.)
-	if return -EAGAIN or 0 , the bits that was set for v1.8 or v3.3 should be maintained.
-
-And do mmc_power_cycle() -> mmc_power_off and mmc_set_initial_state()
-
-But host controller didn't initialize.
-
-That is dwmmc controller's side..
-
-As my understanding, if voltage switch(UHS-I mode) is failed, it should be set to HS mode.
-but dwmmc controller didn't work this case..so i will fix.
-(Some parts are code bugs in dwmmc controller.)
-
-I don't know sdhci is working fine or not..just wondering. :)
-
-I'm going to analyze the sequence and other thing..so i may miss something.
-
-Best Regards,
-Jaehoon Chung
-
-> 
->>
->> Best Regards,
->> Jaehoon Chung
->>
->>>
->>> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
->>> index 94cffa77490a..69b4d48aff87 100644
->>> --- a/drivers/mmc/host/sdhci.c
->>> +++ b/drivers/mmc/host/sdhci.c
->>> @@ -1757,8 +1757,7 @@ static int sdhci_do_start_signal_voltage_switch(struct sdhci_host *host,
->>>  		sdhci_writew(host, ctrl, SDHCI_HOST_CONTROL2);
->>>  
->>>  		if (!IS_ERR(mmc->supply.vqmmc)) {
->>> -			ret = regulator_set_voltage(mmc->supply.vqmmc, 2700000,
->>> -						    3600000);
->>> +			ret = mmc_regulator_set_vqmmc(mmc, ios);
->>>  			if (ret) {
->>>  				pr_warn("%s: Switching to 3.3V signalling voltage failed\n",
->>>  					mmc_hostname(mmc));
->>> @@ -1779,8 +1778,7 @@ static int sdhci_do_start_signal_voltage_switch(struct sdhci_host *host,
->>>  		return -EAGAIN;
->>>  	case MMC_SIGNAL_VOLTAGE_180:
->>>  		if (!IS_ERR(mmc->supply.vqmmc)) {
->>> -			ret = regulator_set_voltage(mmc->supply.vqmmc,
->>> -					1700000, 1950000);
->>> +			ret = mmc_regulator_set_vqmmc(mmc, ios);
->>>  			if (ret) {
->>>  				pr_warn("%s: Switching to 1.8V signalling voltage failed\n",
->>>  					mmc_hostname(mmc));
->>> @@ -1810,8 +1808,7 @@ static int sdhci_do_start_signal_voltage_switch(struct sdhci_host *host,
->>>  		return -EAGAIN;
->>>  	case MMC_SIGNAL_VOLTAGE_120:
->>>  		if (!IS_ERR(mmc->supply.vqmmc)) {
->>> -			ret = regulator_set_voltage(mmc->supply.vqmmc, 1100000,
->>> -						    1300000);
->>> +			ret = mmc_regulator_set_vqmmc(mmc, ios);
->>>  			if (ret) {
->>>  				pr_warn("%s: Switching to 1.2V signalling voltage failed\n",
->>>  					mmc_hostname(mmc));
->>>
->>>
->>>
->>> --
->>> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
->>> the body of a message to majordomo@vger.kernel.org
->>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>>
->>>
->>
->>
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
-
+SGkgQW5keSBTaGV2Y2hlbmtvLA0KDQpPbiAwNC8yNy8yMDE2IDc6MDkgUE0sIEFuZHkgU2hldmNo
+ZW5rbyB3cm90ZToNCj4gDQo+IE9uIFdlZCwgQXByIDI3LCAyMDE2IGF0IDI6NTEgUE0sIFByYWJ1
+IFRoYW5nYW11dGh1DQo+IDxQcmFidS5UQHN5bm9wc3lzLmNvbT4gd3JvdGU6DQo+ID4gUGF0Y2gg
+Zm9yIFN0YW5kYXJkIFNEIEhvc3QgQ29udHJvbGxlciBJbnRlcmZhY2UgY29tcGxpYW50IFN5bm9w
+c3lzDQo+ID4gc2RoY2ktZHdjIGNvbnRyb2xsZXIgZHJpdmVyLiBUaGlzIGNvZGUgc3VwcG9ydHMg
+UENJIGJhc2VkIGludGVyZmFjZS4NCj4gDQo+ID4gQEAgLTAsMCArMSwyNDQgQEANCj4gPiArLyoN
+Cj4gPiArICogQ29weXJpZ2h0IChDKSAyMDE2IFN5bm9wc3lzLCBJbmMuDQo+ID4gKyAqDQo+ID4g
+KyAqIEF1dGhvcjogTWFuanVuYXRoIE0gQiA8bWFuanVtYkBzeW5vcHN5cy5jb20+DQo+IA0KPiBB
+dXRob3JzDQo+IA0KPiA+ICsgKiAgICAgICAgUHJhYnUgVGhhbmdhbXV0aHUgPHByYWJ1LnRAc3lu
+b3BzeXMuY29tPg0KPiA+ICsgKg0KPiA+ICsgKiBUaGlzIHNvZnR3YXJlIGlzIGxpY2Vuc2VkIHVu
+ZGVyIHRoZSB0ZXJtcyBvZiB0aGUgR05VIEdlbmVyYWwNCj4gPiArIFB1YmxpYw0KPiA+ICsgKiBM
+aWNlbnNlIHZlcnNpb24gMiwgYXMgcHVibGlzaGVkIGJ5IHRoZSBGcmVlIFNvZnR3YXJlIEZvdW5k
+YXRpb24sDQo+ID4gKyBhbmQNCj4gPiArICogbWF5IGJlIGNvcGllZCwgZGlzdHJpYnV0ZWQsIGFu
+ZCBtb2RpZmllZCB1bmRlciB0aG9zZSB0ZXJtcy4NCj4gPiArICoNCj4gPiArICogVGhpcyBwcm9n
+cmFtIGlzIGRpc3RyaWJ1dGVkIGluIHRoZSBob3BlIHRoYXQgaXQgd2lsbCBiZSB1c2VmdWwsDQo+
+ID4gKyAqIGJ1dCBXSVRIT1VUIEFOWSBXQVJSQU5UWTsgd2l0aG91dCBldmVuIHRoZSBpbXBsaWVk
+IHdhcnJhbnR5IG9mDQo+ID4gKyAqIE1FUkNIQU5UQUJJTElUWSBvciBGSVRORVNTIEZPUiBBIFBB
+UlRJQ1VMQVIgUFVSUE9TRS4gIFNlZSB0aGUNCj4gPiArICogR05VIEdlbmVyYWwgUHVibGljIExp
+Y2Vuc2UgZm9yIG1vcmUgZGV0YWlscy4NCj4gPiArICoNCj4gPiArICovDQo+IA0KPiANCj4gPg0K
+PiArLyoqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioq
+KioqKg0KPiAqKioqKioqKioqKioqKioqKioqKlwNCj4gPiArICogICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAq
+DQo+ID4gKyAqIEhhcmR3YXJlIHNwZWNpZmljIGNsb2NrIGhhbmRsaW5nICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgKg0KPiA+ICsgKiAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICoN
+Cj4gPg0KPiArXCoqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioqKioq
+KioqKioqKioqKg0KPiAqKioqKioqKioqKg0KPiA+ICsqKioqKioqKiovDQo+IA0KPiBNb3N0IG9m
+IHRoZSBsaW5lcyBhcmUgbm9uLWluZm9ybWF0aXZlLg0KPiANCj4gPiArc3RhdGljIHZvaWQgc25w
+c19yZXNldF9kY20oc3RydWN0IHNkaGNpX2hvc3QgKmhvc3QsIHUzMiBtYXNrLCB1OA0KPiA+ICty
+ZXNldCkgew0KPiA+ICsgICAgICAgdTE2IHZlbmRvcl9wdHI7DQo+ID4gKyAgICAgICB1MzIgcmVn
+Ow0KPiA+ICsNCj4gPiArICAgICAgIHZlbmRvcl9wdHIgPSBzZGhjaV9yZWFkdyhob3N0LCBTREhD
+SV9VSFMyX1ZFTkRPUik7DQo+ID4gKw0KPiA+ICsgICAgICAgcmVnID0gc2RoY2lfcmVhZGwoaG9z
+dCwgKFNESENfR1BJT19PVVQgKyB2ZW5kb3JfcHRyKSk7DQo+ID4gKw0KPiA+ICsgICAgICAgaWYg
+KHJlc2V0ID09IDEpDQo+ID4gKyAgICAgICAgICAgICAgIHJlZyB8PSBtYXNrOw0KPiA+ICsgICAg
+ICAgZWxzZQ0KPiA+ICsgICAgICAgICAgICAgICByZWcgJj0gfm1hc2s7DQo+ID4gKw0KPiA+ICsg
+ICAgICAgc2RoY2lfd3JpdGVsKGhvc3QsIHJlZywgKFNESENfR1BJT19PVVQgKyB2ZW5kb3JfcHRy
+KSk7IH0NCj4gPiArDQo+ID4gK3N0YXRpYyB2b2lkIHNkaGNpX3NldF9jbG9ja19zbnBzKHN0cnVj
+dCBzZGhjaV9ob3N0ICpob3N0LCB1MzIgY2xvY2spDQo+ID4gK3sNCj4gPiArICAgICAgIHU4IGRp
+djsNCj4gPiArICAgICAgIHU4IG11bDsNCj4gDQo+IEkgdW5kZXJzdGFuZCB0aGF0IENvZGluZ1N0
+eWxlIHJlY29tbWVuZHMgdG8ga2VlcCBvbmUgdmFyaWFibGUgYnkgbGluZSwgYnV0DQo+IGhlcmUg
+bWlnaHQgYmUgdXNlZnVsIHRvIGNvbWJpbmUgcmVsYXRlZCB2YXJpYWJsZXMNCj4gDQo+IHU4IG11
+bCwgZGl2Ow0KPiANCj4gPiArICAgICAgIHU4IGRpdl92YWw7DQo+ID4gKyAgICAgICB1OCBtdWxf
+dmFsOw0KPiANCj4gdTggbXVsX3ZhbCwgZGl2X3ZhbDsNCj4gDQo+IFVwIHRvIHlvdSBhbmQgdG8g
+bWFpbnRhaW5lcnMuDQo+IA0KPiA+ICsgICAgICAgdTggdGltZW91dDsNCj4gPiArICAgICAgIHUx
+NiBjbGs7DQo+ID4gKyAgICAgICB1MTYgdmVuZG9yX3B0cjsNCj4gPiArICAgICAgIHUxNiBtdWxf
+ZGl2X3ZhbDsNCj4gPiArICAgICAgIHUzMiByZWc7DQo+ID4gKw0KPiA+ICsgICAgICAgLyoNCj4g
+PiArICAgICAgICAqIGlmIGNsb2NrIGlzIGxlc3MgdGhhbiAyNU1IeiwgZGl2aWRlZCBjbG9jayBp
+cyB1c2VkLg0KPiANCj4gaWYgLT4gSWYNCj4gDQo+ID4gKyAgICAgICAgKiBGb3IgZGl2aWRlZCBj
+bG9jaywgd2UgY2FuIHVzZSB0aGUgc3RhbmRhcmQgc2RoY2lfc2V0X2Nsb2NrKCkuDQo+ID4gKyAg
+ICAgICAgKiBGb3IgY2xvY2sgYWJvdmUgMjVNSHosIERSUCBjbG9jayBpcyB1c2VkDQo+IA0KPiBE
+b3QuDQo+IA0KPiA+ICsgICAgICAgICogSGVyZSwgd2UgY2Fubm90IHVzZSBzZGhjaV9zZXRfY2xv
+Y2soKSwgd2UgbmVlZCB0byBwcm9ncmFtDQo+ID4gKyAgICAgICAgKiBUWCBSWCBDTE9DSyBEQ00g
+RFJQIGZvciBhcHByb3ByaWF0ZSBjbG9jaw0KPiANCj4gRGl0dG8uDQo+IA0KPiA+ICsgICAgICAg
+ICovDQo+IA0KPiA+ICsNCj4gDQo+IFJlZHVuZGFudC4NCj4NCj4gPiArICAgICAgIGlmIChjbG9j
+ayA8PSAyNTAwMDAwMCkgew0KPiA+ICsgICAgICAgICAgICAgICAvKiBUaGVuIGNhbGwgc3RhbmRh
+cmQgc2V0X2Nsb2NrICovDQo+ID4gKyAgICAgICAgICAgICAgIHNkaGNpX3NldF9jbG9jayhob3N0
+LCBjbG9jayk7DQo+IA0KPiA+ICsgICAgICAgfSBlbHNlIHsNCj4gDQo+IFlvdSBtYXkgc2F2ZSBp
+bmRlbnRhdGlvbiBpZiB5b3UgcmV0dXJuIGRpcmVjdGx5IGluIHBvc2l0aXZlIGJyYW5jaC4NCj4g
+PiArDQo+ID4gKyAgICAgICAgICAgICAgIGhvc3QtPm1tYy0+YWN0dWFsX2Nsb2NrID0gMDsNCj4g
+PiArICAgICAgICAgICAgICAgdmVuZG9yX3B0ciA9IHNkaGNpX3JlYWR3KGhvc3QsIFNESENJX1VI
+UzJfVkVORE9SKTsNCj4gPiArDQo+ID4gKyAgICAgICAgICAgICAgIC8qIFNlbGVjdCB1bi1waGFz
+ZSBzaGlmdGVkIGNsb2NrIGJlZm9yZSByZXNldCBUeA0KPiA+ICsgVHVuaW5nIERDTSovDQo+IA0K
+PiBTcGFjZSBpcyBtaXNzZWQNCj4gDQo+ID4gKyAgICAgICAgICAgICAgIHJlZyA9IHNkaGNpX3Jl
+YWRsKGhvc3QsIChTREhDX0dQSU9fT1VUICsgdmVuZG9yX3B0cikpOw0KPiA+ICsgICAgICAgICAg
+ICAgICByZWcgJj0gflNESENfVFhfQ0xLX1NFTF9UVU5FRDsNCj4gPiArICAgICAgICAgICAgICAg
+c2RoY2lfd3JpdGVsKGhvc3QsIHJlZywgKFNESENfR1BJT19PVVQgKyB2ZW5kb3JfcHRyKSk7DQo+
+IA0KPiA+ICsgICAgICAgICAgICAgICBtZGVsYXkoMTApOw0KPiANCj4gV2h5PyEgRXhwbGFuYXRp
+b24gaXMgbmVlZGVkLg0KPiANCj4gPiArDQo+ID4gKyAgICAgICAgICAgICAgIHNkaGNpX3dyaXRl
+dyhob3N0LCAwLCBTREhDSV9DTE9DS19DT05UUk9MKTsNCj4gPiArDQo+ID4gKyAgICAgICAgICAg
+ICAgIC8qIExldHMgY2hvc2UgdGhlIE11bGl0cGxpZXIgdmFsdWUgdG8gYmUgMHgyICovDQo+IA0K
+PiBMZXRzIC0+IExldCdzDQo+IA0KPiBObyBleHBsYW5hdGlvbiB3aHkgc28/DQo+IA0KPiA+ICsg
+ICAgICAgICAgICAgICBtdWwgPSAweDI7DQo+ID4gKyAgICAgICAgICAgICAgIGZvciAoZGl2ID0g
+MTsgZGl2IDw9IDMyOyBkaXYrKykgew0KPiA+ICsgICAgICAgICAgICAgICAgICAgICAgIGlmICgo
+KGhvc3QtPm1heF9jbGsgKiBtdWwpIC8gZGl2KQ0KPiA+ICsgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICA8PSBjbG9jaykNCj4gDQo+IFRvbyBtYW55IHBhcmVucy4NCj4gDQo+
+ID4gKyAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBicmVhazsNCj4gPiArICAgICAgICAg
+ICAgICAgfQ0KPiANCj4gU28sIHlvdSB3b3VsZCBsaWtlIHRvIGZpbmQgYSBtaW5pbXVtIGRpdmlk
+ZXIgdGhhdCBndWFyYW50ZWVzIHRoZSAgY2xvY2sgPg0KPiBtYXhfY2xrICogbXVsIC8gZGl2Lg0K
+PiANCj4gVGhpcyBpcyBjb21wbGV0ZWx5IGxvbmcgd2F5IHRvIGFjaGlldmUuDQoNClRoaXMgZm9y
+IGxvb3AgaXMgZXhhY3RseSB0YWtlbiBmcm9tIGRyaXZlcnMvbW1jL2hvc3Qvc2RoY2kuYw0KV2Ug
+d2FudCB0byBtYWludGFpbiB0aGUgY29uc2lzdGVuY3kgYmV0d2VlbiBvdXIgZmlsZSBhbmQgc2Ro
+Y2kuYw0KDQo+IA0KPiBXaGF0IGFib3V0DQo+IGRpdiA9IERJVl9ST1VORF9VUChtYXhfY2xrICog
+bXVsIC8gY2xvY2spDQo+IA0KPiBkaXZfdmFsID0gbWF4KGRpdiwgMzIpOw0KPiANCj4gDQo+ID4g
+KyAgICAgICAgICAgICAgIC8qDQo+ID4gKyAgICAgICAgICAgICAgICAqIFNldCBQcm9ncmFtbWFi
+bGUgQ2xvY2sgTW9kZSBpbiB0aGUgQ2xvY2sNCj4gPiArICAgICAgICAgICAgICAgICogQ29udHJv
+bCByZWdpc3Rlci4NCj4gPiArICAgICAgICAgICAgICAgICovDQo+IA0KPiBJIHN1cHBvc2Ugb25l
+IGxpbmUgYWZ0ZXIgZml4aW5nIGluZGVudGF0aW9uLg0KPiANCj4gPiArICAgICAgICAgICAgICAg
+ZGl2X3ZhbCA9IGRpdiAtIDE7DQo+ID4gKyAgICAgICAgICAgICAgIG11bF92YWwgPSBtdWwgLSAx
+Ow0KPiA+ICsNCj4gPiArICAgICAgICAgICAgICAgaG9zdC0+bW1jLT5hY3R1YWxfY2xvY2sgPSAo
+aG9zdC0+bWF4X2NsayAqIG11bCkgLyBkaXY7DQo+ID4gKyAgICAgICAgICAgICAgIC8qDQo+ID4g
+KyAgICAgICAgICAgICAgICAqIFByb2dyYW0gdGhlIERDTSBEUlANCj4gPiArICAgICAgICAgICAg
+ICAgICogU3RlcCAxOiBBc3NlcnQgRENNIFJlc2V0DQo+ID4gKyAgICAgICAgICAgICAgICAqIFN0
+ZXAgMjogUHJvZ3JhbSB0aGUgbXVsIGFuZCBkaXYgdmFsdWVzIGluIERSUA0KPiA+ICsgICAgICAg
+ICAgICAgICAgKiBTdGVwIDM6IFJlYWQgZnJvbSBEUlAgYmFzZSAweDAwIHRvIHJlc3RvcmUgRENN
+IG91dHB1dCBhcyBwZXINCj4gPiArICAgICAgICAgICAgICAgICoNCj4gd3d3LnhpbGlueC5jb20v
+c3VwcG9ydC9kb2N1bWVudGF0aW9uL3VzZXJfZ3VpZGVzL3VnMTkxLnBkZg0KPiA+ICsgICAgICAg
+ICAgICAgICAgKiBTdGVwIDQ6IERlLUFzc2VydCByZXNldCB0byBEQ00NCj4gPiArICAgICAgICAg
+ICAgICAgICovDQo+ID4gKw0KPiA+ICsgICAgICAgICAgICAgICBzbnBzX3Jlc2V0X2RjbShob3N0
+LCBTREhDX0NBUkRfVFhfQ0xLX0RDTV9SU1QsIDEpOw0KPiA+ICsNCj4gPiArICAgICAgICAgICAg
+ICAgbXVsX2Rpdl92YWwgPSAobXVsX3ZhbCA8PCA4KSB8IGRpdl92YWw7DQo+ID4gKyAgICAgICAg
+ICAgICAgIHNkaGNpX3dyaXRldyhob3N0LCBtdWxfZGl2X3ZhbCwNCj4gVFhSWF9DTEtfRENNX01V
+TF9ESVZfRFJQKTsNCj4gPiArICAgICAgICAgICAgICAgc2RoY2lfcmVhZGwoaG9zdCwgVFhSWF9D
+TEtfRENNX0RSUF9CQVNFXzUxKTsNCj4gPiArDQo+ID4gKyAgICAgICAgICAgICAgIHNucHNfcmVz
+ZXRfZGNtKGhvc3QsIFNESENfQ0FSRF9UWF9DTEtfRENNX1JTVCwgMCk7DQo+ID4gKw0KPiA+ICsg
+ICAgICAgICAgICAgICBjbGsgPSBTREhDSV9QUk9HX0NMT0NLX01PREUgfCBTREhDSV9DTE9DS19J
+TlRfRU47DQo+ID4gKyAgICAgICAgICAgICAgIHNkaGNpX3dyaXRldyhob3N0LCBjbGssIFNESENJ
+X0NMT0NLX0NPTlRST0wpOw0KPiA+ICsNCj4gPiArICAgICAgICAgICAgICAgLyogV2FpdCBtYXgg
+MjAgbXMgKi8NCj4gPiArICAgICAgICAgICAgICAgdGltZW91dCA9IDIwOw0KPiA+ICsgICAgICAg
+ICAgICAgICB3aGlsZSAoISgoY2xrID0gc2RoY2lfcmVhZHcoaG9zdCwgU0RIQ0lfQ0xPQ0tfQ09O
+VFJPTCkpDQo+ID4gKyAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICYgU0RI
+Q0lfQ0xPQ0tfSU5UX1NUQUJMRSkpIHsNCj4gPiArICAgICAgICAgICAgICAgICAgICAgICBpZiAo
+dGltZW91dCA9PSAwKSB7DQo+IA0KPiBUaGlzIGlzIGludmFyaWFudCB0byB0aGUgbG9vcC4gQ2hl
+Y2sgaG93IGl0J3MgZG9uZSBpbiBvdGhlciBkcml2ZXJzLg0KDQpUaGlzIHdoaWxlIGxvb3AgYWxz
+byBleGFjdGx5IHRha2VuIGZyb20gZHJpdmVycy9tbWMvaG9zdC9zZGhjaS5jIChmdW5jdGlvbiBu
+YW1lIHNkaGNpX3NldF9jbG9jaykuDQpXZSB3YW50IHRvIG1haW50YWluIHRoZSBjb25zaXN0ZW5j
+eSBiZXR3ZWVuIG91ciBmaWxlIGFuZCBzZGhjaS5jIGZvciBlYXN5IHJlYWRhYmlsaXR5Lg0KDQo+
+IA0KPiBTb21ldGhpbmcgbGlrZQ0KPiANCj4gd2hpbGUgKGNvbmRpdGlvbiAmJiAtLXRpbWVvdXQp
+IHsNCj4gLi4uDQo+IH0NCj4gaWYgKCF0aW1lb3V0KSB7DQo+IC4uLg0KPiB9DQo+IA0KPiA+ICsg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgcHJfZXJyKCIlczogSW50ZXJuYWwgY2xvY2sg
+bmV2ZXIgc3RhYmlsaXNlZFxuIiwNCj4gPiArDQo+ID4gKyBtbWNfaG9zdG5hbWUoaG9zdC0+bW1j
+KSk7DQo+IA0KPiBkZXZfZXJyKCkgPw0KPiANCj4gPiArICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgIHJldHVybjsNCj4gPiArICAgICAgICAgICAgICAgICAgICAgICB9DQo+ID4gKyAgICAg
+ICAgICAgICAgICAgICAgICAgdGltZW91dC0tOw0KPiA+ICsgICAgICAgICAgICAgICAgICAgICAg
+IG1kZWxheSgxKTsNCj4gPiArICAgICAgICAgICAgICAgfQ0KPiA+ICsNCj4gPiArICAgICAgICAg
+ICAgICAgY2xrIHw9IFNESENJX0NMT0NLX0NBUkRfRU47DQo+ID4gKyAgICAgICAgICAgICAgIHNk
+aGNpX3dyaXRldyhob3N0LCBjbGssIFNESENJX0NMT0NLX0NPTlRST0wpOw0KPiA+ICsNCj4gPiAr
+ICAgICAgICAgICAgICAgLyoNCj4gPiArICAgICAgICAgICAgICAgICogVGhpcyBDbG9jayBtaWdo
+dCBoYXZlIGFmZmVjdGVkIHRoZSBUWCBDTE9DSyBEQ00gYW5kIFJYIENMT0NLDQo+ID4gKyAgICAg
+ICAgICAgICAgICAqIERDTSB3aGljaCBhcmUgdXNlZCBmb3IgUGhhc2UgY29udHJvbDsgUmVzZXQg
+dGhlc2UgRENNJ3MNCj4gPiArICAgICAgICAgICAgICAgICogZm9yIHByb3BlciBjbG9jayBvdXRw
+dXQNCj4gPiArICAgICAgICAgICAgICAgICoNCj4gPiArICAgICAgICAgICAgICAgICogU3RlcCAx
+OiBSZXNldCB0aGUgRENNDQo+ID4gKyAgICAgICAgICAgICAgICAqIFN0ZXAgMjogRGUtQXNzZXJ0
+IHJlc2V0IHRvIERDTQ0KPiA+ICsgICAgICAgICAgICAgICAgKi8NCj4gPiArDQo+ID4gKyAgICAg
+ICAgICAgICAgIHNucHNfcmVzZXRfZGNtKGhvc3QsIFNESENfVFVOSU5HX1RYX0NMS19EQ01fUlNU
+IHwNCj4gPiArICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgU0RIQ19UVU5J
+TkdfUlhfQ0xLX0RDTV9SU1QsIDEpOw0KPiA+ICsgICAgICAgICAgICAgICBtZGVsYXkoMTApOw0K
+PiA+ICsgICAgICAgICAgICAgICBzbnBzX3Jlc2V0X2RjbShob3N0LCBTREhDX1RVTklOR19UWF9D
+TEtfRENNX1JTVCB8DQo+ID4gKyAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+IFNESENfVFVOSU5HX1JYX0NMS19EQ01fUlNULA0KPiA+ICsgMCk7DQo+ID4gKw0KPiA+ICsgICAg
+ICAgICAgICAgICAvKiBTZWxlY3Qgd29ya2luZyBwaGFzZSB2YWx1ZSBpZiBjbG9jayBpcyA8PSA1
+ME1IeiAqLw0KPiA+ICsgICAgICAgICAgICAgICBpZiAoY2xvY2sgPD0gNTAwMDAwMDApIHsNCj4g
+PiArICAgICAgICAgICAgICAgICAgICAgICAvKkNoYW5nZSB0aGUgVHggUGhhc2UgdmFsdWUgaGVy
+ZSAqLw0KPiANCj4gU3BhY2UNCg0KSSBkaWRuJ3QgZ2V0IGFueSB3YXJuaW5nL2Vycm9yIHdoZW4g
+SSByYW4gc2NyaXB0cy9jaGVja3BhdGNoLnBsIGFnYWluc3QgbXkgcGF0Y2guDQpEaWQgeW91IGZp
+bmQgdGhpcyAiU3BhY2UiIGlzc3VlIGJ5IG1hbnVhbCBjaGVjayBvciBieSBydW5uaW5nIGFueSBz
+Y3JpcHRzPw0KDQo+IA0KPiA+ICsgICAgICAgICAgICAgICAgICAgICAgIHJlZyA9IHNkaGNpX3Jl
+YWRsKGhvc3QsIChTREhDX0dQSU9fT1VUICsgdmVuZG9yX3B0cikpOw0KPiA+ICsgICAgICAgICAg
+ICAgICAgICAgICAgIHJlZyB8PSAoU0RIQ19UVU5JTkdfVFhfQ0xLX1NFTF9NQVNLICYNCj4gPiAr
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgKFNESENfREVGX1RYX0NMS19Q
+SF9WQUwgPDwNCj4gPiArDQo+ID4gKyBTREhDX1RVTklOR19UWF9DTEtfU0VMX1NISUZUKSk7DQo+
+ID4gKw0KPiA+ICsgICAgICAgICAgICAgICAgICAgICAgIHNkaGNpX3dyaXRlbChob3N0LCByZWcs
+IChTREhDX0dQSU9fT1VUICsNCj4gPiArIHZlbmRvcl9wdHIpKTsNCj4gDQo+ID4gKyAgICAgICAg
+ICAgICAgICAgICAgICAgbWRlbGF5KDEwKTsNCj4gDQo+IFdoeT8hDQo+IA0KPiA+ICsNCj4gPiAr
+ICAgICAgICAgICAgICAgICAgICAgICAvKiBQcm9ncmFtIHRvIHNlbGVjdCBwaGFzZSBzaGlmdGVk
+IGNsb2NrICovDQo+ID4gKyAgICAgICAgICAgICAgICAgICAgICAgcmVnIHw9IFNESENfVFhfQ0xL
+X1NFTF9UVU5FRDsNCj4gPiArICAgICAgICAgICAgICAgICAgICAgICBzZGhjaV93cml0ZWwoaG9z
+dCwgcmVnLCAoU0RIQ19HUElPX09VVCArDQo+ID4gKyB2ZW5kb3JfcHRyKSk7DQo+ID4gKw0KPiA+
+ICsgICAgICAgICAgICAgICAgICAgICAgIC8qDQo+ID4gKyAgICAgICAgICAgICAgICAgICAgICAg
+ICogRm9yIDUwTWh6LCB0dW5pbmcgaXMgbm90IHBvc3NpYmxlLg0KPiA+ICsgICAgICAgICAgICAg
+ICAgICAgICAgICAqIExldHMgZml4IHRoZSBzYW1wbGluZyBQaGFzZSBvZiBSeCBDbG9jayBoZXJl
+Lg0KPiA+ICsgICAgICAgICAgICAgICAgICAgICAgICAqLw0KPiA+ICsgICAgICAgICAgICAgICAg
+ICAgICAgIHJlZyA9IHNkaGNpX3JlYWRsKGhvc3QsIChTREhDX0RCT1VOQ0UgKyB2ZW5kb3JfcHRy
+KSk7DQo+ID4gKyAgICAgICAgICAgICAgICAgICAgICAgcmVnICY9IH5TREhDX1RVTklOR19SWF9D
+TEtfU0VMX01BU0s7DQo+ID4gKyAgICAgICAgICAgICAgICAgICAgICAgcmVnIHw9IChTREhDX1RV
+TklOR19SWF9DTEtfU0VMX01BU0sgJg0KPiA+ICsgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICBTREhDX0RFRl9SWF9DTEtfUEhfVkFMKTsNCj4gPiArICAgICAgICAgICAgICAg
+ICAgICAgICBzZGhjaV93cml0ZWwoaG9zdCwgcmVnLCAoU0RIQ19EQk9VTkNFICsgdmVuZG9yX3B0
+cikpOw0KPiA+ICsgICAgICAgICAgICAgICB9DQo+ID4gKyAgICAgICAgICAgICAgIG1kZWxheSgx
+MCk7DQo+IA0KPiBEaXR0by4NCj4gDQo+ID4gKyAgICAgICB9DQo+ID4gK30NCj4gDQo+IERvbid0
+IGhhdmUgdGltZSB0byBnbyBmdXJ0aGVyLiBDaGVjayB5b3VyIGNvZGUgZnVsbHkgYW5kIGNhcmVm
+dWxseS4NCj4gDQo+ID4gKw0KPiA+ICtzdGF0aWMgaW50IHNucHNfaW5pdF9jbG9jayhzdHJ1Y3Qg
+c2RoY2lfaG9zdCAqaG9zdCkgew0KPiA+ICsgICAgICAgdTE2IG11bF9kaXZfdmFsOw0KPiA+ICsN
+Cj4gPiArICAgICAgIC8qDQo+ID4gKyAgICAgICAgKiBDb25maWd1cmUgdGhlIEJDTEsgRFJQIHRv
+IGdldCAxMDAgTUhaIENsb2NrDQo+ID4gKyAgICAgICAgKiBUbyBnZXQgMTAwTUh6IGZyb20gMTAw
+TUh6IGlucHV0IGZyZXEsDQo+ID4gKyAgICAgICAgKiBtdWw9MSBhbmQgZGl2PTENCj4gPiArICAg
+ICAgICAqIEZvcm11bGE6IG91dHB1dF9jbG9jayA9IChpbnB1dCBjbG9jayAqIG11bCkgLyBkaXYN
+Cj4gPiArICAgICAgICAqDQo+ID4gKyAgICAgICAgKiBQcm9ncmFtIHRoZSBEQ00gRFJQDQo+ID4g
+KyAgICAgICAgKiBTdGVwIDE6IEFzc2VydCBEQ00gUmVzZXQNCj4gPiArICAgICAgICAqIFN0ZXAg
+MjogUHJvZ3JhbSB0aGUgbXVsIGFuZCBkaXYgdmFsdWVzIGluIERSUA0KPiA+ICsgICAgICAgICog
+U3RlcCAzOiBSZWFkIGZyb20gRFJQIGJhc2UgMHgwMCB0byByZXN0b3JlIERDTSBvdXRwdXQgYXMg
+cGVyDQo+ID4gKyAgICAgICAgKiB3d3cueGlsaW54LmNvbS9zdXBwb3J0L2RvY3VtZW50YXRpb24v
+dXNlcl9ndWlkZXMvdWcxOTEucGRmDQo+ID4gKyAgICAgICAgKiBTdGVwIDQ6IERlLUFzc2VydCBy
+ZXNldCB0byBEQ00NCj4gPiArICAgICAgICAqLw0KPiA+ICsgICAgICAgc25wc19yZXNldF9kY20o
+aG9zdCwgU0RIQ19CQ0xLX0RDTV9SU1QsIDEpOw0KPiA+ICsNCj4gPiArICAgICAgIG11bF9kaXZf
+dmFsID0gMHgwMTAxOw0KPiA+ICsgICAgICAgc2RoY2lfd3JpdGV3KGhvc3QsIG11bF9kaXZfdmFs
+LCBCQ0xLX0RDTV9NVUxfRElWX0RSUCk7DQo+ID4gKyAgICAgICBzZGhjaV9yZWFkbChob3N0LCBC
+Q0xLX0RDTV9EUlBfQkFTRV81MSk7DQo+ID4gKw0KPiA+ICsgICAgICAgc25wc19yZXNldF9kY20o
+aG9zdCwgU0RIQ19CQ0xLX0RDTV9SU1QsIDApOw0KPiA+ICsNCj4gPiArICAgICAgIC8qDQo+ID4g
+KyAgICAgICAgKiBCeSBEZWZhdWx0IENsb2NrcyB0byBDb250cm9sbGVyIGFyZSBPRkYuDQo+ID4g
+KyAgICAgICAgKiBCZWZvcmUgc3RhY2sgYXBwbGllcyByZXNldDsgd2UgbmVlZCB0byB0dXJuIG9u
+IHRoZSBjbG9jaw0KPiA+ICsgICAgICAgICovDQo+ID4gKyAgICAgICBzZGhjaV93cml0ZXcoaG9z
+dCwgU0RIQ0lfQ0xPQ0tfSU5UX0VOLCBTREhDSV9DTE9DS19DT05UUk9MKTsNCj4gPiArDQo+ID4g
+KyAgICAgICByZXR1cm4gMDsNCj4gPiArDQo+ID4gK30NCj4gPiArc3RhdGljIHN0cnVjdCBzZGhj
+aV9vcHMgc2RoY2lfcGNpX29wc19zbnBzID0gew0KPiA+ICsgICAgICAgLnNldF9jbG9jayAgICAg
+ID0gc2RoY2lfc2V0X2Nsb2NrX3NucHMsDQo+ID4gK307DQo+ID4gKw0KPiA+ICtpbnQgc2RoY2lf
+cGNpX3Byb2JlX3Nsb3Rfc25wcyhzdHJ1Y3Qgc2RoY2lfcGNpX3Nsb3QgKnNsb3QpIHsNCj4gPiAr
+ICAgICAgIGludCByZXQgPSAwOw0KPiA+ICsgICAgICAgc3RydWN0IHNkaGNpX2hvc3QgKmhvc3Q7
+DQo+ID4gKyAgICAgICBjb25zdCBzdHJ1Y3Qgc2RoY2lfb3BzICpzZGhjaV9wY2lfb3BzOyAgLyog
+TG93IGxldmVsIGh3DQo+ID4gK2ludGVyZmFjZSAqLw0KPiA+ICsNCj4gPiArICAgICAgIGhvc3Qg
+PSBzbG90LT5ob3N0Ow0KPiA+ICsgICAgICAgc2RoY2lfcGNpX29wcyA9IGhvc3QtPm9wczsNCj4g
+PiArDQo+ID4gKyAgICAgICBzZGhjaV9wY2lfb3BzX3NucHMuZW5hYmxlX2RtYSAgICAgICAgICAg
+PSBzZGhjaV9wY2lfb3BzLT5lbmFibGVfZG1hOw0KPiA+ICsgICAgICAgc2RoY2lfcGNpX29wc19z
+bnBzLnNldF9idXNfd2lkdGggICAgICAgID0gc2RoY2lfcGNpX29wcy0NCj4gPnNldF9idXNfd2lk
+dGg7DQo+ID4gKyAgICAgICBzZGhjaV9wY2lfb3BzX3NucHMucmVzZXQgICAgICAgICAgICAgICAg
+PSBzZGhjaV9wY2lfb3BzLT5yZXNldDsNCj4gPiArICAgICAgIHNkaGNpX3BjaV9vcHNfc25wcy5z
+ZXRfdWhzX3NpZ25hbGluZyAgICA9DQo+ID4gKyAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgIHNkaGNpX3BjaV9vcHMtPnNldF91aHNfc2lnbmFsaW5nOw0KPiA+ICsgICAgICAg
+c2RoY2lfcGNpX29wc19zbnBzLmh3X3Jlc2V0ICAgICAgICAgICAgID0gc2RoY2lfcGNpX29wcy0+
+aHdfcmVzZXQ7DQo+ID4gKyAgICAgICBzZGhjaV9wY2lfb3BzX3NucHMuc2VsZWN0X2RyaXZlX3N0
+cmVuZ3RoID0NCj4gPiArDQo+ID4gKyBzZGhjaV9wY2lfb3BzLT5zZWxlY3RfZHJpdmVfc3RyZW5n
+dGg7DQo+ID4gKw0KPiA+ICsgICAgICAgaG9zdC0+b3BzID0gJnNkaGNpX3BjaV9vcHNfc25wczsN
+Cj4gPiArDQo+ID4gKyAgICAgICAvKiBCb2FyZCBzcGVjaWZpYyBjbG9jayBpbml0aWFsaXphdGlv
+biAqLw0KPiA+ICsgICAgICAgcmV0ID0gc25wc19pbml0X2Nsb2NrKGhvc3QpOw0KPiA+ICsNCj4g
+PiArICAgICAgIHJldHVybiByZXQ7DQo+ID4gK30NCj4gPiArRVhQT1JUX1NZTUJPTF9HUEwoc2Ro
+Y2lfcGNpX3Byb2JlX3Nsb3Rfc25wcyk7DQo+ID4gZGlmZiAtLWdpdCBhL2RyaXZlcnMvbW1jL2hv
+c3Qvc2RoY2ktcGNpLWR3Yy5oDQo+ID4gYi9kcml2ZXJzL21tYy9ob3N0L3NkaGNpLXBjaS1kd2Mu
+aA0KPiA+IG5ldyBmaWxlIG1vZGUgMTAwNjQ0DQo+ID4gaW5kZXggMDAwMDAwMC4uMDJlMjIxMw0K
+PiA+IC0tLSAvZGV2L251bGwNCj4gPiArKysgYi9kcml2ZXJzL21tYy9ob3N0L3NkaGNpLXBjaS1k
+d2MuaA0KPiA+IEBAIC0wLDAgKzEsNTUgQEANCj4gPiArLyoNCj4gPiArICogQ29weXJpZ2h0IChD
+KSAyMDE2IFN5bm9wc3lzLCBJbmMuDQo+ID4gKyAqDQo+ID4gKyAqIEF1dGhvcjogTWFuanVuYXRo
+IE0gQiA8bWFuanVtYkBzeW5vcHN5cy5jb20+DQo+ID4gKyAqDQo+ID4gKyAqIFRoaXMgc29mdHdh
+cmUgaXMgbGljZW5zZWQgdW5kZXIgdGhlIHRlcm1zIG9mIHRoZSBHTlUgR2VuZXJhbA0KPiA+ICtQ
+dWJsaWMNCj4gPiArICogTGljZW5zZSB2ZXJzaW9uIDIsIGFzIHB1Ymxpc2hlZCBieSB0aGUgRnJl
+ZSBTb2Z0d2FyZSBGb3VuZGF0aW9uLA0KPiA+ICthbmQNCj4gPiArICogbWF5IGJlIGNvcGllZCwg
+ZGlzdHJpYnV0ZWQsIGFuZCBtb2RpZmllZCB1bmRlciB0aG9zZSB0ZXJtcy4NCj4gPiArICoNCj4g
+PiArICogVGhpcyBwcm9ncmFtIGlzIGRpc3RyaWJ1dGVkIGluIHRoZSBob3BlIHRoYXQgaXQgd2ls
+bCBiZSB1c2VmdWwsDQo+ID4gKyAqIGJ1dCBXSVRIT1VUIEFOWSBXQVJSQU5UWTsgd2l0aG91dCBl
+dmVuIHRoZSBpbXBsaWVkIHdhcnJhbnR5IG9mDQo+ID4gKyAqIE1FUkNIQU5UQUJJTElUWSBvciBG
+SVRORVNTIEZPUiBBIFBBUlRJQ1VMQVIgUFVSUE9TRS4gIFNlZSB0aGUNCj4gPiArICogR05VIEdl
+bmVyYWwgUHVibGljIExpY2Vuc2UgZm9yIG1vcmUgZGV0YWlscy4NCj4gPiArICoNCj4gPiArICov
+DQo+ID4gKw0KPiA+ICsjaWZuZGVmIF9fU0RIQ0lfRFdDX01TSENfUENJX0hfXw0KPiA+ICsjZGVm
+aW5lIF9fU0RIQ0lfRFdDX01TSENfUENJX0hfXw0KPiA+ICsNCj4gPiArI2luY2x1ZGUgInNkaGNp
+LXBjaS5oIg0KPiA+ICsNCj4gPiArI2RlZmluZSBTREhDSV9VSFMyX1ZFTkRPUiAgICAgIDB4RTgN
+Cj4gPiArDQo+ID4gKyNkZWZpbmUgRFJJVkVSX05BTUUgInNkaGNpLXBjaS1kd2MiDQo+ID4gKyNk
+ZWZpbmUgU0RIQ19ERUZfVFhfQ0xLX1BIX1ZBTCAgNA0KPiA+ICsjZGVmaW5lIFNESENfREVGX1JY
+X0NMS19QSF9WQUwgIDQNCj4gPiArDQo+ID4gKy8qIFN5bm9wc3lzIFZlbmRvciBTcGVjaWZpYyBS
+ZWdpc3RlcnMgKi8NCj4gPiArI2RlZmluZSBTREhDX0RCT1VOQ0UgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAweDA4DQo+ID4gKyNkZWZpbmUgU0RIQ19UVU5JTkdfUlhfQ0xLX1NFTF9NQVNLICAg
+ICAgICAgICAgMHgwMDAwMDBGRg0KPiA+ICsjZGVmaW5lIFNESENfR1BJT19PVVQgICAgICAgICAg
+ICAgICAgICAgICAgICAgIDB4MzQNCj4gPiArLyogSEFQUyA1MSBCYXNlZCBpbXBsZW1lbnRhdGlv
+biAqLw0KPiA+ICsjZGVmaW5lIFNESENfQkNMS19EQ01fUlNUICAgICAgICAgICAgICAgICAgICAg
+IDB4MDAwMDAwMDENCj4gPiArI2RlZmluZSBTREhDX0NBUkRfVFhfQ0xLX0RDTV9SU1QgICAgICAg
+ICAgICAgICAweDAwMDAwMDAyDQo+ID4gKyNkZWZpbmUgU0RIQ19UVU5JTkdfUlhfQ0xLX0RDTV9S
+U1QgICAgICAgICAgICAgMHgwMDAwMDAwNA0KPiA+ICsjZGVmaW5lIFNESENfVFVOSU5HX1RYX0NM
+S19EQ01fUlNUICAgICAgICAgICAgIDB4MDAwMDAwMDgNCj4gPiArI2RlZmluZSBTREhDX1RVTklO
+R19UWF9DTEtfU0VMX01BU0sgICAgICAgICAgICAweDAwMDAwMDcwDQo+ID4gKyNkZWZpbmUgU0RI
+Q19UVU5JTkdfVFhfQ0xLX1NFTF9TSElGVCAgICAgICAgICAgNA0KPiA+ICsjZGVmaW5lIFNESENf
+VFhfQ0xLX1NFTF9UVU5FRCAgICAgICAgICAgICAgICAgIDB4MDAwMDAwODANCj4gPiArDQo+ID4g
+Ky8qIE9mZnNldCBvZiBCQ0xLIERDTSBEUlAgQXR0cmlidXRlcyAqLw0KPiA+ICsvKiBFdmVyeSBh
+dHRyaWJ1dGUgaXMgb2YgMTYgYml0IHdpZGUgKi8NCj4gPiArI2RlZmluZSBCQ0xLX0RDTV9EUlBf
+QkFTRV81MSAgICAgICAgICAgICAgICAgICAweDEwMDANCj4gPiArDQo+ID4gKyNkZWZpbmUgQkNM
+S19EQ01fTVVMX0RJVl9EUlAgICAgICAgICAgICAgICAgICAgMHgxMDUwDQo+ID4gKyNkZWZpbmUg
+TVVMX01BU0tfRFJQICAgICAgICAgICAgICAgICAgICAgICAgICAgMHhGRjAwDQo+ID4gKyNkZWZp
+bmUgRElWX01BU0tfRFJQICAgICAgICAgICAgICAgICAgICAgICAgICAgMHgwMEZGDQo+ID4gKw0K
+PiA+ICsvKiBPZmZzZXQgb2YgVFggYW5kIFJYIENMSyBEQ00gRFJQICovDQo+ID4gKyNkZWZpbmUg
+VFhSWF9DTEtfRENNX0RSUF9CQVNFXzUxICAgICAgICAgICAgICAgMHgyMDAwDQo+ID4gKyNkZWZp
+bmUgVFhSWF9DTEtfRENNX01VTF9ESVZfRFJQICAgICAgICAgICAgICAgMHgyMDUwDQo+ID4gKw0K
+PiA+ICtpbnQgc2RoY2lfcGNpX3Byb2JlX3Nsb3Rfc25wcyhzdHJ1Y3Qgc2RoY2lfcGNpX3Nsb3Qg
+KnNsb3QpOw0KPiA+ICsNCj4gPiArI2VuZGlmDQo+ID4gLS0NCj4gPiAxLjkuMQ0KPiA+DQoNClRo
+YW5rcyBmb3IgYWJvdmUgcG9pbnRzLiBXZSB3aWxsIHVwZGF0ZSBpdC4NCg0KUmVnYXJkcywNClBy
+YWJ1IFRoYW5nYW11dGh1Lg0KDQoNCg==
