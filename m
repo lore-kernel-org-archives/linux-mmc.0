@@ -1,69 +1,125 @@
-From: Shawn Lin <shawn.lin@rock-chips.com>
-Subject: [PATCH v2] mmc: sdhci-of-arasan: fix set_clock when a phy is supported
-Date: Thu, 28 Apr 2016 16:38:51 +0800
-Message-ID: <1461832731-28422-1-git-send-email-shawn.lin@rock-chips.com>
+From: Andy Shevchenko <andy.shevchenko@gmail.com>
+Subject: Re: [PATCH v4] mmc: sdhci-pci: add Support of Synopsys DWC_MSHC IP
+Date: Thu, 28 Apr 2016 12:19:28 +0300
+Message-ID: <CAHp75Vfi_fMQ3-v+9GDoKbPX9crVNd6bbdfm84asu+QObA6FKQ@mail.gmail.com>
+References: <705D14B1C7978B40A723277C067CEDE2010A4B4DB3@IN01WEMBXB.internal.synopsys.com>
+	<CAHp75VfHrX-mH=edkuj-Vvq_=-hFgA2Kay79e9h4P9ew-KNqAg@mail.gmail.com>
+	<705D14B1C7978B40A723277C067CEDE2010A4B4FA0@IN01WEMBXB.internal.synopsys.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from lucky1.263xmail.com ([211.157.147.132]:54126 "EHLO
-	lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750867AbcD1Ijy (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 28 Apr 2016 04:39:54 -0400
+Received: from mail-oi0-f41.google.com ([209.85.218.41]:36824 "EHLO
+	mail-oi0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753407AbcD1JT3 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 28 Apr 2016 05:19:29 -0400
+In-Reply-To: <705D14B1C7978B40A723277C067CEDE2010A4B4FA0@IN01WEMBXB.internal.synopsys.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Michal Simek <michal.simek@xilinx.com>, soren.brinkmann@xilinx.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Doug Anderson <dianders@chromium.org>, Heiko Stuebner <heiko@sntech.de>, linux-rockchip@lists.infradead.org, Shawn Lin <shawn.lin@rock-chips.com>
+To: Prabu Thangamuthu <Prabu.T@synopsys.com>
+Cc: "Ulf Hansson (ulf.hansson@linaro.org)" <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, Bjorn Helgaas <bhelgaas@google.com>, Andrew Morton <akpm@linux-foundation.org>, "David S. Miller" <davem@davemloft.net>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Kalle Valo <kvalo@codeaurora.org>, Mauro Carvalho Chehab <mchehab@osg.samsung.com>, Guenter Roeck <linux@roeck-us.net>, Jiri Slaby <jslaby@suse.com>, Chaotian Jing <chaotian.jing@mediatek.com>, Andrei Pistirica <andrei.pistirica@microchip.com>, Ben Hutchings <ben.hutchings@codethink.co.uk>, Joshua Henderson <joshua.henderson@microchip.com>, Ludovic Desroches <ludovic.desroches@atmel.com>, Manjunath M Bettegowda <Manjunath.MB@synopsys.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 
-commit 61b914eb81f8 ("mmc: sdhci-of-arasan: add phy support for
-sdhci-of-arasan") introduce phy support for arasan. According to
-the vendor's databook, we should make sure the phy is in poweroff
-status before we configure the clk stuff. Otherwise it may cause
-some IO sample timing issues from the test. And we don't need this
-extra operation while running in low performance mode since phy
-doesn't trigger sampling block.
+On Thu, Apr 28, 2016 at 11:35 AM, Prabu Thangamuthu
+<Prabu.T@synopsys.com> wrote:
 
-Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
+>> > +               mul = 0x2;
+>> > +               for (div = 1; div <= 32; div++) {
+>> > +                       if (((host->max_clk * mul) / div)
+>> > +                                       <= clock)
+>>
+>> Too many parens.
+>>
+>> > +                               break;
+>> > +               }
+>>
+>> So, you would like to find a minimum divider that guarantees the  clock >
+>> max_clk * mul / div.
+>>
+>> This is completely long way to achieve.
+>
+> This for loop is exactly taken from drivers/mmc/host/sdhci.c
+> We want to maintain the consistency between our file and sdhci.c
 
----
+Any strong argument to do so? For now it's not an excuse, sorry.
 
-Changes in v2:
-- change commit msg title to indicate it's a fix
-- fix a typo in commmit msg
+>> What about
+>> div = DIV_ROUND_UP(max_clk * mul / clock)
+>>
+>> div_val = max(div, 32);
 
- drivers/mmc/host/sdhci-of-arasan.c | 20 +++++++++++++++++++-
- 1 file changed, 19 insertions(+), 1 deletion(-)
 
-diff --git a/drivers/mmc/host/sdhci-of-arasan.c b/drivers/mmc/host/sdhci-of-arasan.c
-index 2e482b1..20b859e 100644
---- a/drivers/mmc/host/sdhci-of-arasan.c
-+++ b/drivers/mmc/host/sdhci-of-arasan.c
-@@ -55,8 +55,26 @@ static unsigned int sdhci_arasan_get_timeout_clock(struct sdhci_host *host)
- 	return freq;
- }
- 
-+static void sdhci_arasan_set_clock(struct sdhci_host *host, unsigned int clock)
-+{
-+	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-+	struct sdhci_arasan_data *sdhci_arasan = sdhci_pltfm_priv(pltfm_host);
-+	bool ctrl_phy = false;
-+
-+	if (clock > MMC_HIGH_52_MAX_DTR && (!IS_ERR(sdhci_arasan->phy)))
-+		ctrl_phy = true;
-+
-+	if (ctrl_phy)
-+		phy_power_off(sdhci_arasan->phy);
-+
-+	sdhci_set_clock(host, clock);
-+
-+	if (ctrl_phy)
-+		phy_power_on(sdhci_arasan->phy);
-+}
-+
- static struct sdhci_ops sdhci_arasan_ops = {
--	.set_clock = sdhci_set_clock,
-+	.set_clock = sdhci_arasan_set_clock,
- 	.get_max_clock = sdhci_pltfm_clk_get_max_clock,
- 	.get_timeout_clock = sdhci_arasan_get_timeout_clock,
- 	.set_bus_width = sdhci_set_bus_width,
+>> > +               timeout = 20;
+>> > +               while (!((clk = sdhci_readw(host, SDHCI_CLOCK_CONTROL))
+>> > +                                       & SDHCI_CLOCK_INT_STABLE)) {
+>> > +                       if (timeout == 0) {
+>>
+>> This is invariant to the loop. Check how it's done in other drivers.
+>
+> This while loop also exactly taken from drivers/mmc/host/sdhci.c (function name sdhci_set_clock).
+> We want to maintain the consistency between our file and sdhci.c for easy readability.
+
+Ditto.
+
+>> Something like
+>>
+>> while (condition && --timeout) {
+>> ...
+>> }
+>> if (!timeout) {
+>> ...
+>> }
+
+>> > +               if (clock <= 50000000) {
+>> > +                       /*Change the Tx Phase value here */
+>>
+>> Space
+>
+> I didn't get any warning/error when I ran scripts/checkpatch.pl against my patch.
+> Did you find this "Space" issue by manual check or by running any scripts?
+
+I just noticed this like one above during manual review.
+
+>> > +#define SDHCI_UHS2_VENDOR      0xE8
+>> > +
+>> > +#define DRIVER_NAME "sdhci-pci-dwc"
+>> > +#define SDHC_DEF_TX_CLK_PH_VAL  4
+>> > +#define SDHC_DEF_RX_CLK_PH_VAL  4
+>> > +
+>> > +/* Synopsys Vendor Specific Registers */
+>> > +#define SDHC_DBOUNCE                           0x08
+>> > +#define SDHC_TUNING_RX_CLK_SEL_MASK            0x000000FF
+
+GENMASK() ?
+
+>> > +#define SDHC_GPIO_OUT                          0x34
+>> > +/* HAPS 51 Based implementation */
+>> > +#define SDHC_BCLK_DCM_RST                      0x00000001
+
+BIT() ?
+
+>> > +#define SDHC_CARD_TX_CLK_DCM_RST               0x00000002
+>> > +#define SDHC_TUNING_RX_CLK_DCM_RST             0x00000004
+>> > +#define SDHC_TUNING_TX_CLK_DCM_RST             0x00000008
+
+Ditto.
+
+>> > +#define SDHC_TUNING_TX_CLK_SEL_MASK            0x00000070
+
+GENMASK() ?
+
+>> > +#define SDHC_TUNING_TX_CLK_SEL_SHIFT           4
+>> > +#define SDHC_TX_CLK_SEL_TUNED                  0x00000080
+>> > +
+>> > +/* Offset of BCLK DCM DRP Attributes */
+>> > +/* Every attribute is of 16 bit wide */
+>> > +#define BCLK_DCM_DRP_BASE_51                   0x1000
+>> > +
+>> > +#define BCLK_DCM_MUL_DIV_DRP                   0x1050
+
+>> > +#define MUL_MASK_DRP                           0xFF00
+>> > +#define DIV_MASK_DRP                           0x00FF
+
+Ditto.
+
 -- 
-2.3.7
-
-
+With Best Regards,
+Andy Shevchenko
