@@ -1,97 +1,201 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH RFC 3/3] mmc: block: Fix tuning (by avoiding it) for RPMB
-Date: Thu, 28 Apr 2016 16:02:03 +0300
-Message-ID: <572209CB.6080606@intel.com>
-References: <1461245314-6282-1-git-send-email-adrian.hunter@intel.com>
- <1461245314-6282-4-git-send-email-adrian.hunter@intel.com>
- <CAPDyKFqpvZr3c8Skmc=pnE0m9EQFt=C98P-Vo5TKjONDHtxBaA@mail.gmail.com>
- <5721EDDD.6060902@intel.com>
- <CAPDyKFpm4qAqCiY6+RGNg53gTjVS4Kq13YbNLEeUUZNjw3GFpQ@mail.gmail.com>
+From: Dong Aisheng <dongas86@gmail.com>
+Subject: Re: [PATCH 04/23] mmc: sdhci: re-factor sdhci_start_signal_voltage()
+Date: Thu, 28 Apr 2016 21:14:51 +0800
+Message-ID: <20160428131451.GA27560@shlinux2.ap.freescale.net>
+References: <1460741387-23815-1-git-send-email-aisheng.dong@nxp.com>
+ <1460741387-23815-5-git-send-email-aisheng.dong@nxp.com>
+ <571A0E5E.4090904@intel.com>
+ <CAA+hA=SygBBr+-C_r4Geodni+hj2Mg71o+ecVq_AD8vv22=UPA@mail.gmail.com>
+ <5721208C.2090509@intel.com>
+ <20160428030941.GA23362@shlinux2.ap.freescale.net>
+ <5721B03A.5030006@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga11.intel.com ([192.55.52.93]:56531 "EHLO mga11.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750845AbcD1NFx (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 28 Apr 2016 09:05:53 -0400
-In-Reply-To: <CAPDyKFpm4qAqCiY6+RGNg53gTjVS4Kq13YbNLEeUUZNjw3GFpQ@mail.gmail.com>
+Received: from mail-pf0-f195.google.com ([209.85.192.195]:33811 "EHLO
+	mail-pf0-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751865AbcD1NWr (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 28 Apr 2016 09:22:47 -0400
+Received: by mail-pf0-f195.google.com with SMTP id 145so9429999pfz.1
+        for <linux-mmc@vger.kernel.org>; Thu, 28 Apr 2016 06:22:47 -0700 (PDT)
+Content-Disposition: inline
+In-Reply-To: <5721B03A.5030006@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Tomas Winkler <tomas.winkler@intel.com>
+To: Adrian Hunter <adrian.hunter@intel.com>
+Cc: Dong Aisheng <aisheng.dong@nxp.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, Chris Ball <chris@printf.net>, Shawn Guo <shawnguo@kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, haibo.chen@nxp.com
 
-On 28/04/16 14:46, Ulf Hansson wrote:
-> On 28 April 2016 at 13:02, Adrian Hunter <adrian.hunter@intel.com> wrote:
->> On 28/04/16 13:34, Ulf Hansson wrote:
->>> On 21 April 2016 at 15:28, Adrian Hunter <adrian.hunter@intel.com> wrote:
->>>> The RPMB partition only allows certain commands.  In particular,
->>>> the tuning command (CMD21) is not allowed -  refer JEDEC eMMC
->>>> standard v5.1 section 6.2.2 Command restrictions.
->>>>
->>>> To avoid tuning for RPMB, switch to High Speed mode from HS200
->>>> or HS400 mode if re-tuning has been enabled.  And switch back
->>>> when leaving RPMB.
->>>
->>> I would rather just disable re-tuning during this period, instead of
->>> changing the speed mode.
->>> The primary reason to why, is because the latency it would introduce
->>> to first switch to HS speed then back to HS200/400.
->>
->> I wouldn't expect RPMB accesses to be frequent enough for the latency to matter.
->>
->>>
->>> My concern is not the throughput as I expect read/writes request to an
->>> RPMB partition is rather small.
->>>
->>> Of course I realize that we need to take care when disable re-tuning.
->>> Perhaps we can solve that by a re-try mechanism if the RPMB request
->>> fails, and thus perform the re-tuning as part of the re-try?
->>
->> The interdependent nature of RPMB commands suggests that re-trying is not
->> possible.  It seems to me that you would have to make up a new set of
->> commands and start again. i.e. return an error to the user so that they can
->> start again.
+On Thu, Apr 28, 2016 at 09:39:54AM +0300, Adrian Hunter wrote:
+> On 28/04/16 06:09, Dong Aisheng wrote:
+> > On Wed, Apr 27, 2016 at 11:26:52PM +0300, Adrian Hunter wrote:
+> >> On 24/04/2016 12:14 p.m., Dong Aisheng wrote:
+> >>> Hi Adrian,
+> >>>
+> >>> Thanks for the review first.
+> >>>
+> >>> On Fri, Apr 22, 2016 at 7:43 PM, Adrian Hunter <adrian.hunter@intel.com> wrote:
+> >>>> On 15/04/16 20:29, Dong Aisheng wrote:
+> >>>>> Handle host and regulator signal voltage switch separately.
+> >>>>> Move host signal voltage switch code into a separated function
+> >>>>> sdhci_do_signal_voltage_switch() first, the following patches will
+> >>>>> remove the regulator voltage switch code and use the common
+> >>>>> mmc_regulator_set_vqmmc() instead.
+> >>>>
+> >>>> You have changed the order that things are done.
+> >>>
+> >>> Yes, the oder changes a bit that we always do controller voltage switch first.
+> >>> I suppose the order is irrelevant here since i don't recall any
+> >>> requirement from card.
+> >>>
+> >>> Actually the original order is also a bit mass.
+> >>> e.g.
+> >>> For MMC_SIGNAL_VOLTAGE_330, switch controller first, then vqmmc.
+> >>> But for MMC_SIGNAL_VOLTAGE_180, switch vqmmc first, then controller.
+> >>> It looks to us the original one also order irrelevant.
+> >>>
+> >>>> There is no way to know
+> >>>> what that will break, so let's not do that.  What about just changing
+> >>>> regulator_set_voltage() to mmc_regulator_set_vqmmc()?
+> >>>>
+> >>>
+> >>> Currently what i can think out VIO switch using are three cases: (Pls
+> >>> help add if any)
+> >>> 1) Both host IO and card IO use external vqmmc to do switch
+> >>> (e.g eMMC 1.8V DDR/HS200/HS400 mode)
+> >>>
+> >>> eMMC has no IO voltage switch protocol and requirement, so usually
+> >>> board designed
+> >>> using fixed 1.8V for eMMC and host IO.
+> >>> Event it's switchable, it should be done in the first mmc_power_up().
+> >>> Dynamical switch later may cause eMMC unable to work properly.
+> >>> (We have been confirmed about this issue by many eMMC vendors
+> >>> like Micron and Sandisk. I'm not sure if any exceptions in the community
+> >>> still doing VIO dynamical switch for eMMC, if yes, please help share
+> >>> the experience!).
+> >>>
+> >>> Event some people still do dynamical IO switch for eMMC, since eMMC
+> >>> spec has no requirement, so the order should also not care.
+> >>>
+> >>> 2) Host using controller IO switch while card using standard CMD (SD/SDIO3.0)
+> >>>
+> >>> SD/SDIO 3.0 spec defines the standard IO switch process and using it's internal
+> >>> regulator to do card IO voltage switch. It does not use external vqmmc
+> >>> regulator.
+> >>> So order irrelevant too.
+> >>>
+> >>> 3) Host using controller IO switch while card using external vqmmc
+> >>> (special SDIO3.0 or eMMC)
+> >>> I have met some special SDIO3.0 card like Broadcom WiFi which does not follow
+> >>> the spec and using external regulator for card IO voltage.
+> >>> Usually it's required to fix to 1.8v and also not order irrelevant.
+> >>>
+> >>> For eMMC, refer to case 1), it should be fixed to 1.8v at power up.
+> >>>
+> >>> So it looks all cases seems are not order required.
+> >>
+> >> I don't agree that there is any way to know that other host controllers
+> >> are not affected.  I don't want a repeat of sdhci_set_power().
+> >>
+> > 
+> > Can you share some more info about sdhci_set_power() issue?
+> > I'd like to see if we are same the issue.
 > 
-> Ok.
+> Not the same issue, but the same concept.  People changing the code under
+> the impression that their way was correct, and then breaking other people's
+> drivers.  Check the git history and mailing list.
 > 
-> So perhaps returning -EAGAIN could work!?
-
-I don't think existing code would expect that.  Doesn't seem like level of
-service I would expect from the kernel.
-
-And the concern is, that being an error path, it gets overlooked.
-
+> 	http://marc.info/?l=linux-mmc&m=145880454106474&w=2
 > 
->>
->> Another dependency is that we always need to re-tune after host runtime
->> suspend, which is why we always hit this problem when RPMB is accessed.  So
+
+Yes, now i understand your concern.
+
+> > 
+> > BTW, IMHO i don't think we should stop keep moving only afraid of potential
+> > break if it's correct way. Because .start_signal_voltage_switch() interface
+> > seems shouldn't be order dependant.
+> > If it is, then it should be fixed and handled in high layer like MMC core
+> > rather than in host driver. Right?
 > 
-> Just to make sure I understand correctly; I would imagine you hit the
-> problem *only* when the RPMB partition was already selected, right?
-
-Yes
-
+> The SDHCI spec. does not define how to use external regulators, so there is
+> no "correct way".
 > 
-> Because that would then skip the switch command, and you will
-> therefore try to re-tune after the partition has already been switched
-> to?
 
-Yes
+The "correct way" i mean here is .start_signal_voltage_switch() shouldn't be
+order dependant, would you agree?
 
+> We have to move forward *and* avoid potential breakage.
 > 
->> to avoid errors you would either need to disable runtime PM when the RPMB
->> partition is selected (which might be a long time if we don't get an access
->> to another partition), or always switch back to the main partition (not sure
->> if that would mess up the RPMB command sequence though).
-> 
-> I wouldn't mind that we switch back to the main partition when we have
-> served an RPMB IOCTL request. Of course not in between every mmc
-> request, in case of using the MULTI IOCTL.
-> 
-> That would prevent the next regular mmc request on the main partition
-> to not have to switch partition and thus get decreased latency.
 
-Doesn't stop us getting CRC errors because the eMMC needs tuning while in
-the RPMB partition though.
+If really break happens, fix platform driver, not common SDHCI.
+That's the same thing you done for sdhci_set_power().
 
+> In this case it seems me that the risk of breakage outweighs the value of
+> prettier code.
+> 
+
+Actually my main purpose is patch 6: using mmc_regulator_set_vqmmc()
+which is worth and it does improve the stability and eliminate the
+potential signal issue.
+However it's not the same way as you proposed.
+See below.
+
+> By the way, there are ways to get rid of the ugliness - such as pushing it down
+> into individual drivers.
+> 
+> > 
+> >> Please instead send a patch for just using mmc_regulator_set_vqmmc()
+> >> in place of regulator_set_voltage().
+> > 
+> > Just using mmc_regulator_set_vqmmc() also changes the order which
+> > is the same situation.
+> 
+> How so?  It looks like a drop-in replacement to me:
+> 
+
+Sorry, i did not get that you want to change like below.
+However, it looks that it does not make too much sense to call
+mmc_regulator_set_vqmmc() for each VOLTAGE type like 3.3v/1.8v/1.2v
+which introduces ugliness because mmc_regulator_set_vqmmc()
+already handles it internally, right?
+Only because we want to keep an "ASSUMED" order as before?
+
+Regards
+Dong Aisheng
+
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index 94cffa77490a..69b4d48aff87 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -1757,8 +1757,7 @@ static int sdhci_do_start_signal_voltage_switch(struct sdhci_host *host,
+>  		sdhci_writew(host, ctrl, SDHCI_HOST_CONTROL2);
+>  
+>  		if (!IS_ERR(mmc->supply.vqmmc)) {
+> -			ret = regulator_set_voltage(mmc->supply.vqmmc, 2700000,
+> -						    3600000);
+> +			ret = mmc_regulator_set_vqmmc(mmc, ios);
+>  			if (ret) {
+>  				pr_warn("%s: Switching to 3.3V signalling voltage failed\n",
+>  					mmc_hostname(mmc));
+> @@ -1779,8 +1778,7 @@ static int sdhci_do_start_signal_voltage_switch(struct sdhci_host *host,
+>  		return -EAGAIN;
+>  	case MMC_SIGNAL_VOLTAGE_180:
+>  		if (!IS_ERR(mmc->supply.vqmmc)) {
+> -			ret = regulator_set_voltage(mmc->supply.vqmmc,
+> -					1700000, 1950000);
+> +			ret = mmc_regulator_set_vqmmc(mmc, ios);
+>  			if (ret) {
+>  				pr_warn("%s: Switching to 1.8V signalling voltage failed\n",
+>  					mmc_hostname(mmc));
+> @@ -1810,8 +1808,7 @@ static int sdhci_do_start_signal_voltage_switch(struct sdhci_host *host,
+>  		return -EAGAIN;
+>  	case MMC_SIGNAL_VOLTAGE_120:
+>  		if (!IS_ERR(mmc->supply.vqmmc)) {
+> -			ret = regulator_set_voltage(mmc->supply.vqmmc, 1100000,
+> -						    1300000);
+> +			ret = mmc_regulator_set_vqmmc(mmc, ios);
+>  			if (ret) {
+>  				pr_warn("%s: Switching to 1.2V signalling voltage failed\n",
+>  					mmc_hostname(mmc));
+> 
+> 
+> 
