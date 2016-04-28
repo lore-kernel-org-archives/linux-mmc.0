@@ -1,45 +1,37 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: [PATCH] mmc: core: Attempt to flush cache before reset
-Date: Thu, 28 Apr 2016 10:48:59 +0300
-Message-ID: <1461829739-19772-1-git-send-email-adrian.hunter@intel.com>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga04.intel.com ([192.55.52.120]:63757 "EHLO mga04.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751191AbcD1HxJ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 28 Apr 2016 03:53:09 -0400
-Sender: linux-mmc-owner@vger.kernel.org
+From: Geert Uytterhoeven <geert@linux-m68k.org>
+Subject: Re: [PATCH 2/6] mmc: sh_mobile_sdhi: remove obsolete irq_by_name registration
+Date: Thu, 28 Apr 2016 10:03:05 +0200
+Message-ID: <CAMuHMdW=CRZ-EY0+2aq90JYKkYyfLhWt8o=Anpjb9JxD5TDkpw@mail.gmail.com>
+References: <1459934734-3613-1-git-send-email-wsa@the-dreams.de>
+	<1459934734-3613-3-git-send-email-wsa@the-dreams.de>
+	<CAPDyKFqixO2EGxdx4ERy=DSTR+KBunrYyfR26+AYN0k5_dVHiw@mail.gmail.com>
+	<20160419093713.GC1521@katana>
+	<20160427225457.GV21636@brightrain.aerifal.cx>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-renesas-soc-owner@vger.kernel.org>
+In-Reply-To: <20160427225457.GV21636@brightrain.aerifal.cx>
+Sender: linux-renesas-soc-owner@vger.kernel.org
+To: Rich Felker <dalias@libc.org>
+Cc: Wolfram Sang <wsa@the-dreams.de>, Ulf Hansson <ulf.hansson@linaro.org>, Yoshinori Sato <ysato@users.sourceforge.jp>, linux-mmc <linux-mmc@vger.kernel.org>, linux-renesas-soc@vger.kernel.org, Linux-sh list <linux-sh@vger.kernel.org>, Simon Horman <horms@verge.net.au>, Kuninori Morimoto <kuninori.morimoto.gx@gmail.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>
 
-CMD0 or hardware reset may invalidate the cache, so it needs to be
-flushed before reset.
+Hi Rich,
 
-In the case of recovery, we can't expect flushing the cache to work
-always, but have a go and ignore errors.
+On Thu, Apr 28, 2016 at 12:54 AM, Rich Felker <dalias@libc.org> wrote:
+> Hi! Sorry I didn't notice this before. I saw sh_mobile in the subject
+> lines and guessed it was not making changes in arch/sh.
 
-Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
----
- drivers/mmc/core/core.c | 6 ++++++
- 1 file changed, 6 insertions(+)
+Yeah, it's confusing that "SH-Mobile" was used for both SH (only) and
+ARM (+SH ;-) SoCs.
 
-diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index 99275e40bf2f..1b4e0ccb0885 100644
---- a/drivers/mmc/core/core.c
-+++ b/drivers/mmc/core/core.c
-@@ -2453,6 +2453,12 @@ int mmc_hw_reset(struct mmc_host *host)
- 		return -EOPNOTSUPP;
- 	}
- 
-+	/*
-+	 * In the case of recovery, we can't expect flushing the cache to work
-+	 * always, but we have a go and ignore errors.
-+	 */
-+	mmc_flush_cache(host->card);
-+
- 	ret = host->bus_ops->reset(host);
- 	mmc_bus_put(host);
- 
--- 
-1.9.1
+Gr{oetje,eeting}s,
 
+                        Geert
+
+--
+Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
+
+In personal conversations with technical people, I call myself a hacker. But
+when I'm talking to journalists I just say "programmer" or something like that.
+                                -- Linus Torvalds
