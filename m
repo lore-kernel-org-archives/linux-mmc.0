@@ -1,262 +1,117 @@
-From: Rich Felker <dalias@libc.org>
-Subject: Re: [PATCH 2/6] mmc: sh_mobile_sdhi: remove obsolete irq_by_name
- registration
-Date: Wed, 27 Apr 2016 18:54:57 -0400
-Message-ID: <20160427225457.GV21636@brightrain.aerifal.cx>
-References: <1459934734-3613-1-git-send-email-wsa@the-dreams.de>
- <1459934734-3613-3-git-send-email-wsa@the-dreams.de>
- <CAPDyKFqixO2EGxdx4ERy=DSTR+KBunrYyfR26+AYN0k5_dVHiw@mail.gmail.com>
- <20160419093713.GC1521@katana>
+From: Dong Aisheng <dongas86@gmail.com>
+Subject: Re: [PATCH 04/23] mmc: sdhci: re-factor sdhci_start_signal_voltage()
+Date: Thu, 28 Apr 2016 11:09:41 +0800
+Message-ID: <20160428030941.GA23362@shlinux2.ap.freescale.net>
+References: <1460741387-23815-1-git-send-email-aisheng.dong@nxp.com>
+ <1460741387-23815-5-git-send-email-aisheng.dong@nxp.com>
+ <571A0E5E.4090904@intel.com>
+ <CAA+hA=SygBBr+-C_r4Geodni+hj2Mg71o+ecVq_AD8vv22=UPA@mail.gmail.com>
+ <5721208C.2090509@intel.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-sh-owner@vger.kernel.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-pf0-f194.google.com ([209.85.192.194]:34708 "EHLO
+	mail-pf0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751103AbcD1DRg (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 27 Apr 2016 23:17:36 -0400
+Received: by mail-pf0-f194.google.com with SMTP id 145so7147960pfz.1
+        for <linux-mmc@vger.kernel.org>; Wed, 27 Apr 2016 20:17:36 -0700 (PDT)
 Content-Disposition: inline
-In-Reply-To: <20160419093713.GC1521@katana>
-Sender: linux-sh-owner@vger.kernel.org
-To: Wolfram Sang <wsa@the-dreams.de>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Yoshinori Sato <ysato@users.sourceforge.jp>, linux-mmc <linux-mmc@vger.kernel.org>, linux-renesas-soc@vger.kernel.org, Linux-sh list <linux-sh@vger.kernel.org>, Simon Horman <horms@verge.net.au>, Kuninori Morimoto <kuninori.morimoto.gx@gmail.com>
+In-Reply-To: <5721208C.2090509@intel.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Adrian Hunter <adrian.hunter@intel.com>
+Cc: Dong Aisheng <aisheng.dong@nxp.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, Chris Ball <chris@printf.net>, Shawn Guo <shawnguo@kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, haibo.chen@nxp.com
 
-On Tue, Apr 19, 2016 at 11:37:13AM +0200, Wolfram Sang wrote:
-> On Mon, Apr 18, 2016 at 10:21:41AM +0200, Ulf Hansson wrote:
-> > On 6 April 2016 at 11:25, Wolfram Sang <wsa@the-dreams.de> wrote:
-> > > From: Wolfram Sang <wsa+renesas@sang-engineering.com>
-> > >
-> > > There is no user left in the kernel, so this code can be removed.
-> > > (Legacy, non-DT sh_mobile boards have been removed a while ago.) The
-> > > diff looks more complicated than it is: The if-block for multiplexed isr
-> > > is now the main code path, the rest is removed. A number of sh boards
-> > > included the now deleted include file without needing it. Remove that,
-> > > too.
-> > >
-> > > Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
-> > > ---
-> > >  arch/sh/boards/board-sh7757lcr.c     |  1 -
-> > >  arch/sh/boards/mach-ap325rxa/setup.c |  1 -
-> > >  arch/sh/boards/mach-ecovec24/setup.c |  1 -
-> > >  arch/sh/boards/mach-kfr2r09/setup.c  |  1 -
-> > >  arch/sh/boards/mach-migor/setup.c    |  1 -
-> > >  arch/sh/boards/mach-se/7724/setup.c  |  1 -
-> > >  drivers/mmc/host/sh_mobile_sdhi.c    | 57 +++++-------------------------------
-> > >  include/linux/mmc/sh_mobile_sdhi.h   | 10 -------
-> > >  8 files changed, 8 insertions(+), 65 deletions(-)
-> > >  delete mode 100644 include/linux/mmc/sh_mobile_sdhi.h
-> > 
-> > Hi Wolfram,
-> > 
-> > I need and ack from the Superh arch maintainer to apply this one.
-> > 
-> > It seems like you didn't include them on "to/cc" list, perhaps repost!?
+On Wed, Apr 27, 2016 at 11:26:52PM +0300, Adrian Hunter wrote:
+> On 24/04/2016 12:14 p.m., Dong Aisheng wrote:
+> >Hi Adrian,
+> >
+> >Thanks for the review first.
+> >
+> >On Fri, Apr 22, 2016 at 7:43 PM, Adrian Hunter <adrian.hunter@intel.com> wrote:
+> >>On 15/04/16 20:29, Dong Aisheng wrote:
+> >>>Handle host and regulator signal voltage switch separately.
+> >>>Move host signal voltage switch code into a separated function
+> >>>sdhci_do_signal_voltage_switch() first, the following patches will
+> >>>remove the regulator voltage switch code and use the common
+> >>>mmc_regulator_set_vqmmc() instead.
+> >>
+> >>You have changed the order that things are done.
+> >
+> >Yes, the oder changes a bit that we always do controller voltage switch first.
+> >I suppose the order is irrelevant here since i don't recall any
+> >requirement from card.
+> >
+> >Actually the original order is also a bit mass.
+> >e.g.
+> >For MMC_SIGNAL_VOLTAGE_330, switch controller first, then vqmmc.
+> >But for MMC_SIGNAL_VOLTAGE_180, switch vqmmc first, then controller.
+> >It looks to us the original one also order irrelevant.
+> >
+> >>There is no way to know
+> >>what that will break, so let's not do that.  What about just changing
+> >>regulator_set_voltage() to mmc_regulator_set_vqmmc()?
+> >>
+> >
+> >Currently what i can think out VIO switch using are three cases: (Pls
+> >help add if any)
+> >1) Both host IO and card IO use external vqmmc to do switch
+> >(e.g eMMC 1.8V DDR/HS200/HS400 mode)
+> >
+> >eMMC has no IO voltage switch protocol and requirement, so usually
+> >board designed
+> >using fixed 1.8V for eMMC and host IO.
+> >Event it's switchable, it should be done in the first mmc_power_up().
+> >Dynamical switch later may cause eMMC unable to work properly.
+> >(We have been confirmed about this issue by many eMMC vendors
+> >like Micron and Sandisk. I'm not sure if any exceptions in the community
+> >still doing VIO dynamical switch for eMMC, if yes, please help share
+> >the experience!).
+> >
+> >Event some people still do dynamical IO switch for eMMC, since eMMC
+> >spec has no requirement, so the order should also not care.
+> >
+> >2) Host using controller IO switch while card using standard CMD (SD/SDIO3.0)
+> >
+> >SD/SDIO 3.0 spec defines the standard IO switch process and using it's internal
+> >regulator to do card IO voltage switch. It does not use external vqmmc
+> >regulator.
+> >So order irrelevant too.
+> >
+> >3) Host using controller IO switch while card using external vqmmc
+> >(special SDIO3.0 or eMMC)
+> >I have met some special SDIO3.0 card like Broadcom WiFi which does not follow
+> >the spec and using external regulator for card IO voltage.
+> >Usually it's required to fix to 1.8v and also not order irrelevant.
+> >
+> >For eMMC, refer to case 1), it should be fixed to 1.8v at power up.
+> >
+> >So it looks all cases seems are not order required.
 > 
-> I hoped adding the sh-list will be enough. Adding them to this mail
-> explicitly now, maybe this will do?
+> I don't agree that there is any way to know that other host controllers
+> are not affected.  I don't want a repeat of sdhci_set_power().
 > 
-> @SH-maintainers: some SH board files include a file with platform_data
-> they are not really using. Since I want to remove the platform_data
-> file, I remove inclusion of this file. That's all to it. Build bot was
-> happy, too.
 
-Hi! Sorry I didn't notice this before. I saw sh_mobile in the subject
-lines and guessed it was not making changes in arch/sh.
+Can you share some more info about sdhci_set_power() issue?
+I'd like to see if we are same the issue.
 
-I don't have any of the affected boards to test, but as long as
-they're not actually using the include file you're removing, I don't
-see any harm. It's my intent to remove all of these board files full
-of platform devices as soon as we get working device tree bindings for
-everything, anyway. So,
+BTW, IMHO i don't think we should stop keep moving only afraid of potential
+break if it's correct way. Because .start_signal_voltage_switch() interface
+seems shouldn't be order dependant.
+If it is, then it should be fixed and handled in high layer like MMC core
+rather than in host driver. Right?
 
-Acked-by: Rich Felker <dalias@libc.org>
+> Please instead send a patch for just using mmc_regulator_set_vqmmc()
+> in place of regulator_set_voltage().
 
-Sato-san, do you have any objections?
+Just using mmc_regulator_set_vqmmc() also changes the order which
+is the same situation.
 
-Rich
+Regards
+Dong Aisheng
 
-
-> > > diff --git a/arch/sh/boards/board-sh7757lcr.c b/arch/sh/boards/board-sh7757lcr.c
-> > > index 324599bfad1420..0104c8199c48fe 100644
-> > > --- a/arch/sh/boards/board-sh7757lcr.c
-> > > +++ b/arch/sh/boards/board-sh7757lcr.c
-> > > @@ -20,7 +20,6 @@
-> > >  #include <linux/mfd/tmio.h>
-> > >  #include <linux/mmc/host.h>
-> > >  #include <linux/mmc/sh_mmcif.h>
-> > > -#include <linux/mmc/sh_mobile_sdhi.h>
-> > >  #include <linux/sh_eth.h>
-> > >  #include <linux/sh_intc.h>
-> > >  #include <linux/usb/renesas_usbhs.h>
-> > > diff --git a/arch/sh/boards/mach-ap325rxa/setup.c b/arch/sh/boards/mach-ap325rxa/setup.c
-> > > index 62c3b81300ed28..de8393cb7313bc 100644
-> > > --- a/arch/sh/boards/mach-ap325rxa/setup.c
-> > > +++ b/arch/sh/boards/mach-ap325rxa/setup.c
-> > > @@ -15,7 +15,6 @@
-> > >  #include <linux/interrupt.h>
-> > >  #include <linux/platform_device.h>
-> > >  #include <linux/mmc/host.h>
-> > > -#include <linux/mmc/sh_mobile_sdhi.h>
-> > >  #include <linux/mtd/physmap.h>
-> > >  #include <linux/mtd/sh_flctl.h>
-> > >  #include <linux/mfd/tmio.h>
-> > > diff --git a/arch/sh/boards/mach-ecovec24/setup.c b/arch/sh/boards/mach-ecovec24/setup.c
-> > > index a9c0c07386fddd..6d612792f6b8ec 100644
-> > > --- a/arch/sh/boards/mach-ecovec24/setup.c
-> > > +++ b/arch/sh/boards/mach-ecovec24/setup.c
-> > > @@ -13,7 +13,6 @@
-> > >  #include <linux/platform_device.h>
-> > >  #include <linux/mmc/host.h>
-> > >  #include <linux/mmc/sh_mmcif.h>
-> > > -#include <linux/mmc/sh_mobile_sdhi.h>
-> > >  #include <linux/mtd/physmap.h>
-> > >  #include <linux/mfd/tmio.h>
-> > >  #include <linux/gpio.h>
-> > > diff --git a/arch/sh/boards/mach-kfr2r09/setup.c b/arch/sh/boards/mach-kfr2r09/setup.c
-> > > index 6bd9230e64e300..5deb2d82f19f78 100644
-> > > --- a/arch/sh/boards/mach-kfr2r09/setup.c
-> > > +++ b/arch/sh/boards/mach-kfr2r09/setup.c
-> > > @@ -11,7 +11,6 @@
-> > >  #include <linux/platform_device.h>
-> > >  #include <linux/interrupt.h>
-> > >  #include <linux/mmc/host.h>
-> > > -#include <linux/mmc/sh_mobile_sdhi.h>
-> > >  #include <linux/mfd/tmio.h>
-> > >  #include <linux/mtd/physmap.h>
-> > >  #include <linux/mtd/onenand.h>
-> > > diff --git a/arch/sh/boards/mach-migor/setup.c b/arch/sh/boards/mach-migor/setup.c
-> > > index 7a04da3efce402..5de60a77eaa1ab 100644
-> > > --- a/arch/sh/boards/mach-migor/setup.c
-> > > +++ b/arch/sh/boards/mach-migor/setup.c
-> > > @@ -13,7 +13,6 @@
-> > >  #include <linux/input.h>
-> > >  #include <linux/input/sh_keysc.h>
-> > >  #include <linux/mmc/host.h>
-> > > -#include <linux/mmc/sh_mobile_sdhi.h>
-> > >  #include <linux/mtd/physmap.h>
-> > >  #include <linux/mfd/tmio.h>
-> > >  #include <linux/mtd/nand.h>
-> > > diff --git a/arch/sh/boards/mach-se/7724/setup.c b/arch/sh/boards/mach-se/7724/setup.c
-> > > index e0e1df136642cd..f1fecd395679ae 100644
-> > > --- a/arch/sh/boards/mach-se/7724/setup.c
-> > > +++ b/arch/sh/boards/mach-se/7724/setup.c
-> > > @@ -15,7 +15,6 @@
-> > >  #include <linux/interrupt.h>
-> > >  #include <linux/platform_device.h>
-> > >  #include <linux/mmc/host.h>
-> > > -#include <linux/mmc/sh_mobile_sdhi.h>
-> > >  #include <linux/mfd/tmio.h>
-> > >  #include <linux/mtd/physmap.h>
-> > >  #include <linux/delay.h>
-> > > diff --git a/drivers/mmc/host/sh_mobile_sdhi.c b/drivers/mmc/host/sh_mobile_sdhi.c
-> > > index 9beee48d2e280d..51d8dbd5b06a3e 100644
-> > > --- a/drivers/mmc/host/sh_mobile_sdhi.c
-> > > +++ b/drivers/mmc/host/sh_mobile_sdhi.c
-> > > @@ -28,7 +28,6 @@
-> > >  #include <linux/of_device.h>
-> > >  #include <linux/platform_device.h>
-> > >  #include <linux/mmc/host.h>
-> > > -#include <linux/mmc/sh_mobile_sdhi.h>
-> > >  #include <linux/mfd/tmio.h>
-> > >  #include <linux/sh_dma.h>
-> > >  #include <linux/delay.h>
-> > > @@ -315,7 +314,6 @@ static int sh_mobile_sdhi_probe(struct platform_device *pdev)
-> > >         struct tmio_mmc_host *host;
-> > >         struct resource *res;
-> > >         int irq, ret, i = 0;
-> > > -       bool multiplexed_isr = true;
-> > >         struct tmio_mmc_dma *dma_priv;
-> > >
-> > >         res = platform_get_resource(pdev, IORESOURCE_MEM, 0);
-> > > @@ -405,62 +403,23 @@ static int sh_mobile_sdhi_probe(struct platform_device *pdev)
-> > >         if (ret < 0)
-> > >                 goto efree;
-> > >
-> > > -       /*
-> > > -        * Allow one or more specific (named) ISRs or
-> > > -        * one or more multiplexed (un-named) ISRs.
-> > > -        */
-> > > -
-> > > -       irq = platform_get_irq_byname(pdev, SH_MOBILE_SDHI_IRQ_CARD_DETECT);
-> > > -       if (irq >= 0) {
-> > > -               multiplexed_isr = false;
-> > > -               ret = devm_request_irq(&pdev->dev, irq, tmio_mmc_card_detect_irq, 0,
-> > > +       while (1) {
-> > > +               irq = platform_get_irq(pdev, i);
-> > > +               if (irq < 0)
-> > > +                       break;
-> > > +               i++;
-> > > +               ret = devm_request_irq(&pdev->dev, irq, tmio_mmc_irq, 0,
-> > >                                   dev_name(&pdev->dev), host);
-> > >                 if (ret)
-> > >                         goto eirq;
-> > >         }
-> > >
-> > > -       irq = platform_get_irq_byname(pdev, SH_MOBILE_SDHI_IRQ_SDIO);
-> > > -       if (irq >= 0) {
-> > > -               multiplexed_isr = false;
-> > > -               ret = devm_request_irq(&pdev->dev, irq, tmio_mmc_sdio_irq, 0,
-> > > -                                 dev_name(&pdev->dev), host);
-> > > -               if (ret)
-> > > -                       goto eirq;
-> > > -       }
-> > > -
-> > > -       irq = platform_get_irq_byname(pdev, SH_MOBILE_SDHI_IRQ_SDCARD);
-> > > -       if (irq >= 0) {
-> > > -               multiplexed_isr = false;
-> > > -               ret = devm_request_irq(&pdev->dev, irq, tmio_mmc_sdcard_irq, 0,
-> > > -                                 dev_name(&pdev->dev), host);
-> > > -               if (ret)
-> > > -                       goto eirq;
-> > > -       } else if (!multiplexed_isr) {
-> > > -               dev_err(&pdev->dev,
-> > > -                       "Principal SD-card IRQ is missing among named interrupts\n");
-> > > +       /* There must be at least one IRQ source */
-> > > +       if (!i) {
-> > >                 ret = irq;
-> > >                 goto eirq;
-> > >         }
-> > >
-> > > -       if (multiplexed_isr) {
-> > > -               while (1) {
-> > > -                       irq = platform_get_irq(pdev, i);
-> > > -                       if (irq < 0)
-> > > -                               break;
-> > > -                       i++;
-> > > -                       ret = devm_request_irq(&pdev->dev, irq, tmio_mmc_irq, 0,
-> > > -                                         dev_name(&pdev->dev), host);
-> > > -                       if (ret)
-> > > -                               goto eirq;
-> > > -               }
-> > > -
-> > > -               /* There must be at least one IRQ source */
-> > > -               if (!i) {
-> > > -                       ret = irq;
-> > > -                       goto eirq;
-> > > -               }
-> > > -       }
-> > > -
-> > >         dev_info(&pdev->dev, "%s base at 0x%08lx max clock rate %u MHz\n",
-> > >                  mmc_hostname(host->mmc), (unsigned long)
-> > >                  (platform_get_resource(pdev, IORESOURCE_MEM, 0)->start),
-> > > diff --git a/include/linux/mmc/sh_mobile_sdhi.h b/include/linux/mmc/sh_mobile_sdhi.h
-> > > deleted file mode 100644
-> > > index 95d6f0314a7ded..00000000000000
-> > > --- a/include/linux/mmc/sh_mobile_sdhi.h
-> > > +++ /dev/null
-> > > @@ -1,10 +0,0 @@
-> > > -#ifndef LINUX_MMC_SH_MOBILE_SDHI_H
-> > > -#define LINUX_MMC_SH_MOBILE_SDHI_H
-> > > -
-> > > -#include <linux/types.h>
-> > > -
-> > > -#define SH_MOBILE_SDHI_IRQ_CARD_DETECT "card_detect"
-> > > -#define SH_MOBILE_SDHI_IRQ_SDCARD      "sdcard"
-> > > -#define SH_MOBILE_SDHI_IRQ_SDIO                "sdio"
-> > > -
-> > > -#endif /* LINUX_MMC_SH_MOBILE_SDHI_H */
-> > > --
-> > > 2.7.0
-> > >
-> > > --
-> > > To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> > > the body of a message to majordomo@vger.kernel.org
-> > > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-
-
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
