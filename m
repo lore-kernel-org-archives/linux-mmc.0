@@ -1,31 +1,28 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
+From: Adrian Hunter <adrian.hunter@intel.com>
 Subject: Re: [PATCH] mmc: core: Remove redundant rescan_disable flag
-Date: Thu, 28 Apr 2016 21:29:00 +0900
-Message-ID: <5722020C.3010302@samsung.com>
+Date: Thu, 28 Apr 2016 15:44:15 +0300
+Message-ID: <5722059F.5040703@intel.com>
 References: <1461840951-4401-1-git-send-email-ulf.hansson@linaro.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=windows-1252
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout4.samsung.com ([203.254.224.34]:38983 "EHLO
-	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751435AbcD1M3D (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 28 Apr 2016 08:29:03 -0400
-Received: from epcpsbgr2.samsung.com
- (u142.gpu120.samsung.co.kr [203.254.230.142])
- by mailout4.samsung.com (Oracle Communications Messaging Server 7.0.5.31.0
- 64bit (built May  5 2014))
- with ESMTP id <0O6C01GAPG0C2T30@mailout4.samsung.com> for
- linux-mmc@vger.kernel.org; Thu, 28 Apr 2016 21:29:00 +0900 (KST)
-In-reply-to: <1461840951-4401-1-git-send-email-ulf.hansson@linaro.org>
+Received: from mga02.intel.com ([134.134.136.20]:44730 "EHLO mga02.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1750809AbcD1MsF (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 28 Apr 2016 08:48:05 -0400
+In-Reply-To: <1461840951-4401-1-git-send-email-ulf.hansson@linaro.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org
-Cc: Adrian Hunter <adrian.hunter@intel.com>
+Cc: Jaehoon Chung <jh80.chung@samsung.com>
 
-On 04/28/2016 07:55 PM, Ulf Hansson wrote:
+On 28/04/16 13:55, Ulf Hansson wrote:
 > As cancel_delayed_work_sync() prevents an executing work for re-scheduling
 > itself, the rescan_disable flag is redundant.
+
+Are you sure rescan_disable is not needed for mmc_pm_notify()?
+
 > 
 > Morover, during host registration phase, it's anyway not safe to schedule a
 > detect work until mmc_start_host() has been invoked. Therfore, there's no
@@ -79,12 +76,6 @@ On 04/28/2016 07:55 PM, Ulf Hansson wrote:
 > -		host->rescan_disable = 1;
 > -		spin_unlock_irqrestore(&host->lock, flags);
 >  		cancel_delayed_work_sync(&host->detect);
-
-Maybe you can remove the defined "flags" variable.
-
-Best Regards,
-Jaehoon Chung
-
 >  
 >  		if (!host->bus_ops)
 > @@ -2814,10 +2806,6 @@ static int mmc_pm_notify(struct notifier_block *notify_block,
