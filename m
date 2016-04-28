@@ -1,85 +1,69 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH] mmc: sdhci-of-at91: add presets setup
-Date: Thu, 28 Apr 2016 11:32:50 +0300
-Message-ID: <5721CAB2.5000207@intel.com>
-References: <1461246846-30925-1-git-send-email-ludovic.desroches@atmel.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 7bit
+From: Shawn Lin <shawn.lin@rock-chips.com>
+Subject: [PATCH v2] mmc: sdhci-of-arasan: fix set_clock when a phy is supported
+Date: Thu, 28 Apr 2016 16:38:51 +0800
+Message-ID: <1461832731-28422-1-git-send-email-shawn.lin@rock-chips.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga03.intel.com ([134.134.136.65]:56954 "EHLO mga03.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753037AbcD1Igk (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 28 Apr 2016 04:36:40 -0400
-In-Reply-To: <1461246846-30925-1-git-send-email-ludovic.desroches@atmel.com>
+Received: from lucky1.263xmail.com ([211.157.147.132]:54126 "EHLO
+	lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750867AbcD1Ijy (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 28 Apr 2016 04:39:54 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ludovic Desroches <ludovic.desroches@atmel.com>, ulf.hansson@linaro.org
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, nicolas.ferre@atmel.com
+To: Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Michal Simek <michal.simek@xilinx.com>, soren.brinkmann@xilinx.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Doug Anderson <dianders@chromium.org>, Heiko Stuebner <heiko@sntech.de>, linux-rockchip@lists.infradead.org, Shawn Lin <shawn.lin@rock-chips.com>
 
-On 21/04/16 16:54, Ludovic Desroches wrote:
-> The controller claims to support SDR104. In fact, it only supports a
-> degraded SDR104 since the maximum frequency of the SD clock is 120 MHz
-> instead of 208 MHz.
-> The sdhci core is unaware of it and will compute a wrong clock divider.
-> We can deal with this specific case by using presets.
-> 
-> Signed-off-by: Ludovic Desroches <ludovic.desroches@atmel.com>
-> ---
->  drivers/mmc/host/sdhci-of-at91.c | 24 ++++++++++++++++++++++++
->  1 file changed, 24 insertions(+)
-> 
-> diff --git a/drivers/mmc/host/sdhci-of-at91.c b/drivers/mmc/host/sdhci-of-at91.c
-> index c1923c0..76308b1 100644
-> --- a/drivers/mmc/host/sdhci-of-at91.c
-> +++ b/drivers/mmc/host/sdhci-of-at91.c
-> @@ -18,6 +18,7 @@
->  #include <linux/delay.h>
->  #include <linux/err.h>
->  #include <linux/io.h>
-> +#include <linux/kernel.h>
->  #include <linux/mmc/host.h>
->  #include <linux/mmc/slot-gpio.h>
->  #include <linux/module.h>
-> @@ -163,6 +164,7 @@ static int sdhci_at91_probe(struct platform_device *pdev)
->  	unsigned int			clk_base, clk_mul;
->  	unsigned int			gck_rate, real_gck_rate;
->  	int				ret;
-> +	unsigned int			preset_div, preset_common = 0x400; /* drv type B, programmable clock mode */
+commit 61b914eb81f8 ("mmc: sdhci-of-arasan: add phy support for
+sdhci-of-arasan") introduce phy support for arasan. According to
+the vendor's databook, we should make sure the phy is in poweroff
+status before we configure the clk stuff. Otherwise it may cause
+some IO sample timing issues from the test. And we don't need this
+extra operation while running in low performance mode since phy
+doesn't trigger sampling block.
 
-preset_common is a constant, so why not #define it?
+Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
 
->  
->  	match = of_match_device(sdhci_at91_dt_match, &pdev->dev);
->  	if (!match)
-> @@ -230,6 +232,28 @@ static int sdhci_at91_probe(struct platform_device *pdev)
->  			 clk_mul, real_gck_rate);
->  	}
->  
-> +	/*
-> +	 * We have to set preset values because it depends on the clk_mul
-> +	 * value. Moreover, SDR104 is supported in a degraded mode since the
-> +	 * maximum sd clock value is 120 MHz instead of 208 MHz. For that
-> +	 * reason, we need to use presets to support SDR104.
-> +	 */
-> +	preset_div = DIV_ROUND_UP(real_gck_rate, 24000000) - 1;
-> +	writew(preset_common | preset_div,
-> +	       host->ioaddr + SDHCI_PRESET_FOR_SDR12);
-> +	preset_div = DIV_ROUND_UP(real_gck_rate, 50000000) - 1;
-> +	writew(preset_common | preset_div,
-> +	       host->ioaddr + SDHCI_PRESET_FOR_SDR25);
-> +	preset_div = DIV_ROUND_UP(real_gck_rate, 100000000) - 1;
-> +	writew(preset_common | preset_div,
-> +	       host->ioaddr + SDHCI_PRESET_FOR_SDR50);
-> +	preset_div = DIV_ROUND_UP(real_gck_rate, 120000000) - 1;
-> +	writew(preset_common | preset_div,
-> +	       host->ioaddr + SDHCI_PRESET_FOR_SDR104);
-> +	preset_div = DIV_ROUND_UP(real_gck_rate, 50000000) - 1;
-> +	writew(preset_common | preset_div,
-> +	       host->ioaddr + SDHCI_PRESET_FOR_DDR50);
-> +
->  	clk_prepare_enable(priv->mainck);
->  	clk_prepare_enable(priv->gck);
->  
-> 
+---
+
+Changes in v2:
+- change commit msg title to indicate it's a fix
+- fix a typo in commmit msg
+
+ drivers/mmc/host/sdhci-of-arasan.c | 20 +++++++++++++++++++-
+ 1 file changed, 19 insertions(+), 1 deletion(-)
+
+diff --git a/drivers/mmc/host/sdhci-of-arasan.c b/drivers/mmc/host/sdhci-of-arasan.c
+index 2e482b1..20b859e 100644
+--- a/drivers/mmc/host/sdhci-of-arasan.c
++++ b/drivers/mmc/host/sdhci-of-arasan.c
+@@ -55,8 +55,26 @@ static unsigned int sdhci_arasan_get_timeout_clock(struct sdhci_host *host)
+ 	return freq;
+ }
+ 
++static void sdhci_arasan_set_clock(struct sdhci_host *host, unsigned int clock)
++{
++	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
++	struct sdhci_arasan_data *sdhci_arasan = sdhci_pltfm_priv(pltfm_host);
++	bool ctrl_phy = false;
++
++	if (clock > MMC_HIGH_52_MAX_DTR && (!IS_ERR(sdhci_arasan->phy)))
++		ctrl_phy = true;
++
++	if (ctrl_phy)
++		phy_power_off(sdhci_arasan->phy);
++
++	sdhci_set_clock(host, clock);
++
++	if (ctrl_phy)
++		phy_power_on(sdhci_arasan->phy);
++}
++
+ static struct sdhci_ops sdhci_arasan_ops = {
+-	.set_clock = sdhci_set_clock,
++	.set_clock = sdhci_arasan_set_clock,
+ 	.get_max_clock = sdhci_pltfm_clk_get_max_clock,
+ 	.get_timeout_clock = sdhci_arasan_get_timeout_clock,
+ 	.set_bus_width = sdhci_set_bus_width,
+-- 
+2.3.7
+
 
