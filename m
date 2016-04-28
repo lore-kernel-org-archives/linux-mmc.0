@@ -1,132 +1,113 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: sh_mobile_sdhi: remove obsolete include file
-Date: Thu, 28 Apr 2016 12:38:17 +0200
-Message-ID: <CAPDyKFqYYfA7NBqzNbiOZ8TEnabn9552Qy3eC8OE3mz6oie47A@mail.gmail.com>
-References: <1461824291-2672-1-git-send-email-wsa@the-dreams.de>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-renesas-soc-owner@vger.kernel.org>
-In-Reply-To: <1461824291-2672-1-git-send-email-wsa@the-dreams.de>
-Sender: linux-renesas-soc-owner@vger.kernel.org
-To: Wolfram Sang <wsa@the-dreams.de>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Linux-sh list <linux-sh@vger.kernel.org>, linux-renesas-soc@vger.kernel.org, Rich Felker <dalias@libc.org>, Yoshinori Sato <ysato@users.sourceforge.jp>
+Subject: [PATCH] mmc: core: Remove redundant rescan_disable flag
+Date: Thu, 28 Apr 2016 12:55:51 +0200
+Message-ID: <1461840951-4401-1-git-send-email-ulf.hansson@linaro.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-lf0-f46.google.com ([209.85.215.46]:33547 "EHLO
+	mail-lf0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751112AbcD1Kz5 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 28 Apr 2016 06:55:57 -0400
+Received: by mail-lf0-f46.google.com with SMTP id y84so79684827lfc.0
+        for <linux-mmc@vger.kernel.org>; Thu, 28 Apr 2016 03:55:56 -0700 (PDT)
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Jaehoon Chung <jh80.chung@samsung.com>, Adrian Hunter <adrian.hunter@intel.com>
 
-On 28 April 2016 at 08:18, Wolfram Sang <wsa@the-dreams.de> wrote:
-> From: Wolfram Sang <wsa+renesas@sang-engineering.com>
->
-> A few SH boards include the file but don't make use of it (no named
-> interrupts). The SDHI code removed support for this feature as well.
-> So, drop the references and ultimately remove the unneeded file.
->
-> Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
-> Acked-by: Rich Felker <dalias@libc.org>
-> Acked-by: Yoshinori Sato <ysato@users.sourceforge.jp>
+As cancel_delayed_work_sync() prevents an executing work for re-scheduling
+itself, the rescan_disable flag is redundant.
 
-Thanks, applied for next!
+Morover, during host registration phase, it's anyway not safe to schedule a
+detect work until mmc_start_host() has been invoked. Therfore, there's no
+need to use the rescan_disable flag to protect a rescan work from being
+executed in-between mmc_alloc_host() and mmc_start_host().
 
-Kind regards
-Uffe
+For these reasons, let's remove the rescan_disable flag.
 
-> ---
->  arch/sh/boards/board-sh7757lcr.c     |  1 -
->  arch/sh/boards/mach-ap325rxa/setup.c |  1 -
->  arch/sh/boards/mach-ecovec24/setup.c |  1 -
->  arch/sh/boards/mach-kfr2r09/setup.c  |  1 -
->  arch/sh/boards/mach-migor/setup.c    |  1 -
->  arch/sh/boards/mach-se/7724/setup.c  |  1 -
->  include/linux/mmc/sh_mobile_sdhi.h   | 10 ----------
->  7 files changed, 16 deletions(-)
->  delete mode 100644 include/linux/mmc/sh_mobile_sdhi.h
->
-> diff --git a/arch/sh/boards/board-sh7757lcr.c b/arch/sh/boards/board-sh7757lcr.c
-> index 324599bfad1420..0104c8199c48fe 100644
-> --- a/arch/sh/boards/board-sh7757lcr.c
-> +++ b/arch/sh/boards/board-sh7757lcr.c
-> @@ -20,7 +20,6 @@
->  #include <linux/mfd/tmio.h>
->  #include <linux/mmc/host.h>
->  #include <linux/mmc/sh_mmcif.h>
-> -#include <linux/mmc/sh_mobile_sdhi.h>
->  #include <linux/sh_eth.h>
->  #include <linux/sh_intc.h>
->  #include <linux/usb/renesas_usbhs.h>
-> diff --git a/arch/sh/boards/mach-ap325rxa/setup.c b/arch/sh/boards/mach-ap325rxa/setup.c
-> index 62c3b81300ed28..de8393cb7313bc 100644
-> --- a/arch/sh/boards/mach-ap325rxa/setup.c
-> +++ b/arch/sh/boards/mach-ap325rxa/setup.c
-> @@ -15,7 +15,6 @@
->  #include <linux/interrupt.h>
->  #include <linux/platform_device.h>
->  #include <linux/mmc/host.h>
-> -#include <linux/mmc/sh_mobile_sdhi.h>
->  #include <linux/mtd/physmap.h>
->  #include <linux/mtd/sh_flctl.h>
->  #include <linux/mfd/tmio.h>
-> diff --git a/arch/sh/boards/mach-ecovec24/setup.c b/arch/sh/boards/mach-ecovec24/setup.c
-> index a9c0c07386fddd..6d612792f6b8ec 100644
-> --- a/arch/sh/boards/mach-ecovec24/setup.c
-> +++ b/arch/sh/boards/mach-ecovec24/setup.c
-> @@ -13,7 +13,6 @@
->  #include <linux/platform_device.h>
->  #include <linux/mmc/host.h>
->  #include <linux/mmc/sh_mmcif.h>
-> -#include <linux/mmc/sh_mobile_sdhi.h>
->  #include <linux/mtd/physmap.h>
->  #include <linux/mfd/tmio.h>
->  #include <linux/gpio.h>
-> diff --git a/arch/sh/boards/mach-kfr2r09/setup.c b/arch/sh/boards/mach-kfr2r09/setup.c
-> index 6bd9230e64e300..5deb2d82f19f78 100644
-> --- a/arch/sh/boards/mach-kfr2r09/setup.c
-> +++ b/arch/sh/boards/mach-kfr2r09/setup.c
-> @@ -11,7 +11,6 @@
->  #include <linux/platform_device.h>
->  #include <linux/interrupt.h>
->  #include <linux/mmc/host.h>
-> -#include <linux/mmc/sh_mobile_sdhi.h>
->  #include <linux/mfd/tmio.h>
->  #include <linux/mtd/physmap.h>
->  #include <linux/mtd/onenand.h>
-> diff --git a/arch/sh/boards/mach-migor/setup.c b/arch/sh/boards/mach-migor/setup.c
-> index 7a04da3efce402..5de60a77eaa1ab 100644
-> --- a/arch/sh/boards/mach-migor/setup.c
-> +++ b/arch/sh/boards/mach-migor/setup.c
-> @@ -13,7 +13,6 @@
->  #include <linux/input.h>
->  #include <linux/input/sh_keysc.h>
->  #include <linux/mmc/host.h>
-> -#include <linux/mmc/sh_mobile_sdhi.h>
->  #include <linux/mtd/physmap.h>
->  #include <linux/mfd/tmio.h>
->  #include <linux/mtd/nand.h>
-> diff --git a/arch/sh/boards/mach-se/7724/setup.c b/arch/sh/boards/mach-se/7724/setup.c
-> index e0e1df136642cd..f1fecd395679ae 100644
-> --- a/arch/sh/boards/mach-se/7724/setup.c
-> +++ b/arch/sh/boards/mach-se/7724/setup.c
-> @@ -15,7 +15,6 @@
->  #include <linux/interrupt.h>
->  #include <linux/platform_device.h>
->  #include <linux/mmc/host.h>
-> -#include <linux/mmc/sh_mobile_sdhi.h>
->  #include <linux/mfd/tmio.h>
->  #include <linux/mtd/physmap.h>
->  #include <linux/delay.h>
-> diff --git a/include/linux/mmc/sh_mobile_sdhi.h b/include/linux/mmc/sh_mobile_sdhi.h
-> deleted file mode 100644
-> index 95d6f0314a7ded..00000000000000
-> --- a/include/linux/mmc/sh_mobile_sdhi.h
-> +++ /dev/null
-> @@ -1,10 +0,0 @@
-> -#ifndef LINUX_MMC_SH_MOBILE_SDHI_H
-> -#define LINUX_MMC_SH_MOBILE_SDHI_H
-> -
-> -#include <linux/types.h>
-> -
-> -#define SH_MOBILE_SDHI_IRQ_CARD_DETECT "card_detect"
-> -#define SH_MOBILE_SDHI_IRQ_SDCARD      "sdcard"
-> -#define SH_MOBILE_SDHI_IRQ_SDIO                "sdio"
-> -
-> -#endif /* LINUX_MMC_SH_MOBILE_SDHI_H */
-> --
-> 2.7.0
->
+Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+---
+ drivers/mmc/core/core.c  | 12 ------------
+ drivers/mmc/core/host.c  |  3 ---
+ include/linux/mmc/host.h |  1 -
+ 3 files changed, 16 deletions(-)
+
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index 99275e4..b8c6a11 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -2580,9 +2580,6 @@ void mmc_rescan(struct work_struct *work)
+ 		container_of(work, struct mmc_host, detect.work);
+ 	int i;
+ 
+-	if (host->rescan_disable)
+-		return;
+-
+ 	/* If there is a non-removable card registered, only scan once */
+ 	if (!mmc_card_is_removable(host) && host->rescan_entered)
+ 		return;
+@@ -2649,7 +2646,6 @@ void mmc_rescan(struct work_struct *work)
+ void mmc_start_host(struct mmc_host *host)
+ {
+ 	host->f_init = max(freqs[0], host->f_min);
+-	host->rescan_disable = 0;
+ 	host->ios.power_mode = MMC_POWER_UNDEFINED;
+ 
+ 	mmc_claim_host(host);
+@@ -2674,7 +2670,6 @@ void mmc_stop_host(struct mmc_host *host)
+ 	if (host->slot.cd_irq >= 0)
+ 		disable_irq(host->slot.cd_irq);
+ 
+-	host->rescan_disable = 1;
+ 	cancel_delayed_work_sync(&host->detect);
+ 
+ 	/* clear pm flags now and let card drivers set them as needed */
+@@ -2788,9 +2783,6 @@ static int mmc_pm_notify(struct notifier_block *notify_block,
+ 	case PM_HIBERNATION_PREPARE:
+ 	case PM_SUSPEND_PREPARE:
+ 	case PM_RESTORE_PREPARE:
+-		spin_lock_irqsave(&host->lock, flags);
+-		host->rescan_disable = 1;
+-		spin_unlock_irqrestore(&host->lock, flags);
+ 		cancel_delayed_work_sync(&host->detect);
+ 
+ 		if (!host->bus_ops)
+@@ -2814,10 +2806,6 @@ static int mmc_pm_notify(struct notifier_block *notify_block,
+ 	case PM_POST_SUSPEND:
+ 	case PM_POST_HIBERNATION:
+ 	case PM_POST_RESTORE:
+-
+-		spin_lock_irqsave(&host->lock, flags);
+-		host->rescan_disable = 0;
+-		spin_unlock_irqrestore(&host->lock, flags);
+ 		_mmc_detect_change(host, 0, false);
+ 
+ 	}
+diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
+index e0a3ee1..e972489 100644
+--- a/drivers/mmc/core/host.c
++++ b/drivers/mmc/core/host.c
+@@ -319,9 +319,6 @@ struct mmc_host *mmc_alloc_host(int extra, struct device *dev)
+ 	if (!host)
+ 		return NULL;
+ 
+-	/* scanning will be enabled when we're ready */
+-	host->rescan_disable = 1;
+-
+ again:
+ 	if (!ida_pre_get(&mmc_host_ida, GFP_KERNEL)) {
+ 		kfree(host);
+diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+index 85800b4..7fbe5c0 100644
+--- a/include/linux/mmc/host.h
++++ b/include/linux/mmc/host.h
+@@ -330,7 +330,6 @@ struct mmc_host {
+ 	unsigned int		doing_retune:1;	/* re-tuning in progress */
+ 	unsigned int		retune_now:1;	/* do re-tuning at next req */
+ 
+-	int			rescan_disable;	/* disable card detection */
+ 	int			rescan_entered;	/* used with nonremovable devices */
+ 
+ 	int			need_retune;	/* re-tuning is needed */
+-- 
+1.9.1
+
