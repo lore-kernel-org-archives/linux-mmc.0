@@ -1,52 +1,30 @@
-From: Ivaylo Dimitrov <ivo.g.dimitrov.75@gmail.com>
-Subject: Re: [PATCH 0/2] Pass n900 MMC slot names in pdata for legacy user
- space
-Date: Thu, 28 Apr 2016 23:33:38 +0300
-Message-ID: <572273A2.4050104@gmail.com>
-References: <1461714383-9956-1-git-send-email-tony@atomide.com>
+From: Rob Herring <robh@kernel.org>
+Subject: Re: [PATCH v5 1/4] mmc: dt: usdhi6rol0: add optional pinctrl binding
+Date: Thu, 28 Apr 2016 16:40:38 -0500
+Message-ID: <20160428214038.GA32220@rob-hp-laptop>
+References: <cover.1461770066.git.larper@axis.com>
+ <a96281244b55d55e36b72a40cd061d7ffd70b88e.1461770066.git.larper@axis.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wm0-f65.google.com ([74.125.82.65]:35318 "EHLO
-	mail-wm0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753335AbcD1Udm (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 28 Apr 2016 16:33:42 -0400
-In-Reply-To: <1461714383-9956-1-git-send-email-tony@atomide.com>
+Received: from mail.kernel.org ([198.145.29.136]:60419 "EHLO mail.kernel.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753330AbcD1Vko (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 28 Apr 2016 17:40:44 -0400
+Content-Disposition: inline
+In-Reply-To: <a96281244b55d55e36b72a40cd061d7ffd70b88e.1461770066.git.larper@axis.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Tony Lindgren <tony@atomide.com>, linux-omap@vger.kernel.org
-Cc: linux-arm-kernel@lists.infradead.org, Aaro Koskinen <aaro.koskinen@iki.fi>, Sebastian Reichel <sre@kernel.org>, Pavel Machel <pavel@ucw.cz>, Timo Kokkonen <timo.t.kokkonen@iki.fi>, Kishon Vijay Abraham I <kishon@ti.com>, linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
+To: Lars Persson <lars.persson@axis.com>
+Cc: linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, g.liakhovetski@gmx.de, ulf.hansson@linaro.org, pawel.moll@arm.com, mark.rutland@arm.com, ijc+devicetree@hellion.org.uk, galak@codeaurora.org, Lars Persson <larper@axis.com>
 
-Hi,
+On Wed, Apr 27, 2016 at 05:21:26PM +0200, Lars Persson wrote:
+> Add a pinctrl binding to specify different pin settings for high speed
+> modes and UHS modes.
+> 
+> Signed-off-by: Lars Persson <larper@axis.com>
+> ---
+>  Documentation/devicetree/bindings/mmc/usdhi6rol0.txt | 6 ++++++
+>  1 file changed, 6 insertions(+)
 
-On 27.04.2016 02:46, Tony Lindgren wrote:
-> Hi all,
->
-> N900 needs the MMC slot names to work. Let's pass them in pdata
-> for now to remove the last remaining blocker for removing omap3
-> legacy booting support for v4.8.
->
-> Then when we have a generic DT binding for the slot names, we
-> can use that assuming it will work for the n900 legacy user space.
->
-> Regards,
->
-> Tony
->
->
-> Tony Lindgren (2):
->    ARM: OMAP2+: n900 needs MMC slot names for legacy user space
->    mmc: omap_hsmmc: Check if MMC slot name is passed in pdata
->
->   arch/arm/mach-omap2/pdata-quirks.c | 7 +++++++
->   drivers/mmc/host/omap_hsmmc.c      | 6 +++++-
->   2 files changed, 12 insertions(+), 1 deletion(-)
->
-
-For both patches, you may add:
-
-Tested-by: Ivaylo Dimitrov <ivo.g.dimitrov.75@gmail.com>
-
-Thanks,
-Ivo
+Acked-by: Rob Herring <robh@kernel.org>
