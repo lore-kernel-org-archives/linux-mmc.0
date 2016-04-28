@@ -1,108 +1,90 @@
-From: Dong Aisheng <dongas86@gmail.com>
-Subject: Re: support for fixed 1.8V eMMC interface
-Date: Thu, 28 Apr 2016 20:15:17 +0800
-Message-ID: <CAA+hA=RxSkCH1XiYUpB5c=2h4GpM2aOND6fdmizeBWu8F_A4zQ@mail.gmail.com>
-References: <VI1PR05MB15338BD748ACE3938D3E4B339B640@VI1PR05MB1533.eurprd05.prod.outlook.com>
+From: Ludovic Desroches <ludovic.desroches@atmel.com>
+Subject: Re: [PATCH] mmc: sdhci-of-at91: add presets setup
+Date: Thu, 28 Apr 2016 14:23:19 +0200
+Message-ID: <20160428122319.GB3891@odux.rfo.atmel.com>
+References: <1461246846-30925-1-git-send-email-ludovic.desroches@atmel.com>
+ <5721CAB2.5000207@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset="us-ascii"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qg0-f65.google.com ([209.85.192.65]:33617 "EHLO
-	mail-qg0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753282AbcD1MPS convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 28 Apr 2016 08:15:18 -0400
-Received: by mail-qg0-f65.google.com with SMTP id 7so2200606qgj.0
-        for <linux-mmc@vger.kernel.org>; Thu, 28 Apr 2016 05:15:18 -0700 (PDT)
-In-Reply-To: <VI1PR05MB15338BD748ACE3938D3E4B339B640@VI1PR05MB1533.eurprd05.prod.outlook.com>
+Received: from eusmtp01.atmel.com ([212.144.249.242]:12913 "EHLO
+	eusmtp01.atmel.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752774AbcD1MYk (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 28 Apr 2016 08:24:40 -0400
+Content-Disposition: inline
+In-Reply-To: <5721CAB2.5000207@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Raul Benet <Raul.Benet@lightblueoptics.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+To: Adrian Hunter <adrian.hunter@intel.com>
+Cc: Ludovic Desroches <ludovic.desroches@atmel.com>, ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, nicolas.ferre@atmel.com
 
-On Wed, Apr 27, 2016 at 7:44 PM, Raul Benet
-<Raul.Benet@lightblueoptics.com> wrote:
-> Hi,
->
-> I am currently working on a design using i.MX6SL and Linux Kernel 3.14.52. Though I believe may question still applies to latest MMC code.
-> Our design uses an eMMC as boot device and main storage (ie: it contains u-boot, kernel, dtb and rootfs).
->
-> The eMMC I/O rail is fixed in hardware to 1.8Volts.
-> The Processor SDIO I/O rail is controlled by the MMC driver.
->
-> In 3.14.52, the MMC driver sets processor SDIO rail to 3v3 per default, and only when using HS DDR modes (which do not apply in our case) would it set it to 1.8V.
->
-> I have seen that starting on 3.16, the function power_up() in drivers/mmc/core/core.c attempts at setting the regulator to 3v3, failing that it tries 1v8, failing that it tries 1v2.
->
-> So I patched my kernel with that, and defined a fixed regulator with 1v8 in my dts, and set the vqmmc-supply to point to it.
-> But that doesn't work, because power_up() ultimately tries to call set_voltage() on the vqmmc regulator, which doesn't seem to exist for "regulator-fixed" type of regulators, and hence it fails in setting all the rails, which ultimately means that it sets it to 3v3 ('cause that is the default/initial value of the field in the ios struct)
->
+On Thu, Apr 28, 2016 at 11:32:50AM +0300, Adrian Hunter wrote:
+> On 21/04/16 16:54, Ludovic Desroches wrote:
+> > The controller claims to support SDR104. In fact, it only supports a
+> > degraded SDR104 since the maximum frequency of the SD clock is 120 MHz
+> > instead of 208 MHz.
+> > The sdhci core is unaware of it and will compute a wrong clock divider.
+> > We can deal with this specific case by using presets.
+> > 
+> > Signed-off-by: Ludovic Desroches <ludovic.desroches@atmel.com>
+> > ---
+> >  drivers/mmc/host/sdhci-of-at91.c | 24 ++++++++++++++++++++++++
+> >  1 file changed, 24 insertions(+)
+> > 
+> > diff --git a/drivers/mmc/host/sdhci-of-at91.c b/drivers/mmc/host/sdhci-of-at91.c
+> > index c1923c0..76308b1 100644
+> > --- a/drivers/mmc/host/sdhci-of-at91.c
+> > +++ b/drivers/mmc/host/sdhci-of-at91.c
+> > @@ -18,6 +18,7 @@
+> >  #include <linux/delay.h>
+> >  #include <linux/err.h>
+> >  #include <linux/io.h>
+> > +#include <linux/kernel.h>
+> >  #include <linux/mmc/host.h>
+> >  #include <linux/mmc/slot-gpio.h>
+> >  #include <linux/module.h>
+> > @@ -163,6 +164,7 @@ static int sdhci_at91_probe(struct platform_device *pdev)
+> >  	unsigned int			clk_base, clk_mul;
+> >  	unsigned int			gck_rate, real_gck_rate;
+> >  	int				ret;
+> > +	unsigned int			preset_div, preset_common = 0x400; /* drv type B, programmable clock mode */
+> 
+> preset_common is a constant, so why not #define it?
 
-It seems the 3.6 kernel you tried may still not support set voltage
-for fixed regulator.
-But i tried the latest kernel already supports it.
+No reason, a mistake, I'll fix it.
 
-> So my question is: how am I supposed to setup the MMC driver in my scenario (I/O at 1.8V always) ?
-> (I know I can go and force the rail to 1.8V by hacking drivers/mmc/host/sdhci-esdhc-imx.c, but I would very much prefer to avoid that)
->
-
-Pls try the option 2 as Ulf pointed.
-
-You can refer to this patch:
-commit c00dc359e5e0b10de993651d8e73e60c41bf29cd
-Author: Bjorn Andersson <bjorn@kryo.se>
-Date:   Wed Feb 5 12:30:26 2014 -0800
-
-    regulator: core: Allow regulator_set_voltage for fixed regulators
-
-    Make it okay to call regulator_set_voltage on regulators with fixed
-    voltage if the requested range overlaps the current/configured voltage.
-
-    Signed-off-by: Bjorn Andersson <bjorn.andersson@sonymobile.com>
-    Signed-off-by: Mark Brown <broonie@linaro.org>
-
-diff --git a/drivers/regulator/core.c b/drivers/regulator/core.c
-index b38a6b669e8c..0cd1a3b8e589 100644
---- a/drivers/regulator/core.c
-+++ b/drivers/regulator/core.c
-@@ -2395,6 +2395,7 @@ int regulator_set_voltage(struct regulator
-*regulator, int min_uV, int max_uV)
-        struct regulator_dev *rdev = regulator->rdev;
-        int ret = 0;
-        int old_min_uV, old_max_uV;
-+       int current_uV;
-
-        mutex_lock(&rdev->mutex);
-
-@@ -2405,6 +2406,19 @@ int regulator_set_voltage(struct regulator
-*regulator, int min_uV, int max_uV)
-        if (regulator->min_uV == min_uV && regulator->max_uV == max_uV)
-                goto out;
-
-+       /* If we're trying to set a range that overlaps the current voltage,
-+        * return succesfully even though the regulator does not support
-+        * changing the voltage.
-+        */
-+       if (!(rdev->constraints->valid_ops_mask & REGULATOR_CHANGE_VOLTAGE)) {
-+               current_uV = _regulator_get_voltage(rdev);
-+               if (min_uV <= current_uV && current_uV <= max_uV) {
-+                       regulator->min_uV = min_uV;
-+                       regulator->max_uV = max_uV;
-+                       goto out;
-+               }
-+       }
-+
-        /* sanity check */
-        if (!rdev->desc->ops->set_voltage &&
-            !rdev->desc->ops->set_voltage_sel) {
-
-Regards
-Dong Aisheng
-
-> Thanks ,
-> Raul.
->
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> >  
+> >  	match = of_match_device(sdhci_at91_dt_match, &pdev->dev);
+> >  	if (!match)
+> > @@ -230,6 +232,28 @@ static int sdhci_at91_probe(struct platform_device *pdev)
+> >  			 clk_mul, real_gck_rate);
+> >  	}
+> >  
+> > +	/*
+> > +	 * We have to set preset values because it depends on the clk_mul
+> > +	 * value. Moreover, SDR104 is supported in a degraded mode since the
+> > +	 * maximum sd clock value is 120 MHz instead of 208 MHz. For that
+> > +	 * reason, we need to use presets to support SDR104.
+> > +	 */
+> > +	preset_div = DIV_ROUND_UP(real_gck_rate, 24000000) - 1;
+> > +	writew(preset_common | preset_div,
+> > +	       host->ioaddr + SDHCI_PRESET_FOR_SDR12);
+> > +	preset_div = DIV_ROUND_UP(real_gck_rate, 50000000) - 1;
+> > +	writew(preset_common | preset_div,
+> > +	       host->ioaddr + SDHCI_PRESET_FOR_SDR25);
+> > +	preset_div = DIV_ROUND_UP(real_gck_rate, 100000000) - 1;
+> > +	writew(preset_common | preset_div,
+> > +	       host->ioaddr + SDHCI_PRESET_FOR_SDR50);
+> > +	preset_div = DIV_ROUND_UP(real_gck_rate, 120000000) - 1;
+> > +	writew(preset_common | preset_div,
+> > +	       host->ioaddr + SDHCI_PRESET_FOR_SDR104);
+> > +	preset_div = DIV_ROUND_UP(real_gck_rate, 50000000) - 1;
+> > +	writew(preset_common | preset_div,
+> > +	       host->ioaddr + SDHCI_PRESET_FOR_DDR50);
+> > +
+> >  	clk_prepare_enable(priv->mainck);
+> >  	clk_prepare_enable(priv->gck);
+> >  
+> > 
+> 
