@@ -1,120 +1,65 @@
 From: Wolfram Sang <wsa@the-dreams.de>
-Subject: [PATCH] mmc: sh_mobile_sdhi: remove obsolete include file
-Date: Thu, 28 Apr 2016 08:18:11 +0200
-Message-ID: <1461824291-2672-1-git-send-email-wsa@the-dreams.de>
-Return-path: <linux-renesas-soc-owner@vger.kernel.org>
-Sender: linux-renesas-soc-owner@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: Wolfram Sang <wsa@the-dreams.de>, linux-sh@vger.kernel.org, linux-renesas-soc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, Rich Felker <dalias@libc.org>, Yoshinori Sato <ysato@users.sourceforge.jp>
+Subject: Re: [PATCH 2/6] mmc: sh_mobile_sdhi: remove obsolete irq_by_name
+ registration
+Date: Thu, 28 Apr 2016 08:19:35 +0200
+Message-ID: <20160428061935.GA1613@katana>
+References: <1459934734-3613-1-git-send-email-wsa@the-dreams.de>
+ <1459934734-3613-3-git-send-email-wsa@the-dreams.de>
+ <CAPDyKFqixO2EGxdx4ERy=DSTR+KBunrYyfR26+AYN0k5_dVHiw@mail.gmail.com>
+ <20160419093713.GC1521@katana>
+ <20160427225457.GV21636@brightrain.aerifal.cx>
+Mime-Version: 1.0
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="C7zPtVaVf+AK4Oqc"
+Return-path: <linux-sh-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <20160427225457.GV21636@brightrain.aerifal.cx>
+Sender: linux-sh-owner@vger.kernel.org
+To: Rich Felker <dalias@libc.org>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Yoshinori Sato <ysato@users.sourceforge.jp>, linux-mmc <linux-mmc@vger.kernel.org>, linux-renesas-soc@vger.kernel.org, Linux-sh list <linux-sh@vger.kernel.org>, Simon Horman <horms@verge.net.au>, Kuninori Morimoto <kuninori.morimoto.gx@gmail.com>
 List-Id: linux-mmc@vger.kernel.org
 
-From: Wolfram Sang <wsa+renesas@sang-engineering.com>
 
-A few SH boards include the file but don't make use of it (no named
-interrupts). The SDHI code removed support for this feature as well.
-So, drop the references and ultimately remove the unneeded file.
+--C7zPtVaVf+AK4Oqc
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
-Acked-by: Rich Felker <dalias@libc.org>
-Acked-by: Yoshinori Sato <ysato@users.sourceforge.jp>
----
- arch/sh/boards/board-sh7757lcr.c     |  1 -
- arch/sh/boards/mach-ap325rxa/setup.c |  1 -
- arch/sh/boards/mach-ecovec24/setup.c |  1 -
- arch/sh/boards/mach-kfr2r09/setup.c  |  1 -
- arch/sh/boards/mach-migor/setup.c    |  1 -
- arch/sh/boards/mach-se/7724/setup.c  |  1 -
- include/linux/mmc/sh_mobile_sdhi.h   | 10 ----------
- 7 files changed, 16 deletions(-)
- delete mode 100644 include/linux/mmc/sh_mobile_sdhi.h
 
-diff --git a/arch/sh/boards/board-sh7757lcr.c b/arch/sh/boards/board-sh7757lcr.c
-index 324599bfad1420..0104c8199c48fe 100644
---- a/arch/sh/boards/board-sh7757lcr.c
-+++ b/arch/sh/boards/board-sh7757lcr.c
-@@ -20,7 +20,6 @@
- #include <linux/mfd/tmio.h>
- #include <linux/mmc/host.h>
- #include <linux/mmc/sh_mmcif.h>
--#include <linux/mmc/sh_mobile_sdhi.h>
- #include <linux/sh_eth.h>
- #include <linux/sh_intc.h>
- #include <linux/usb/renesas_usbhs.h>
-diff --git a/arch/sh/boards/mach-ap325rxa/setup.c b/arch/sh/boards/mach-ap325rxa/setup.c
-index 62c3b81300ed28..de8393cb7313bc 100644
---- a/arch/sh/boards/mach-ap325rxa/setup.c
-+++ b/arch/sh/boards/mach-ap325rxa/setup.c
-@@ -15,7 +15,6 @@
- #include <linux/interrupt.h>
- #include <linux/platform_device.h>
- #include <linux/mmc/host.h>
--#include <linux/mmc/sh_mobile_sdhi.h>
- #include <linux/mtd/physmap.h>
- #include <linux/mtd/sh_flctl.h>
- #include <linux/mfd/tmio.h>
-diff --git a/arch/sh/boards/mach-ecovec24/setup.c b/arch/sh/boards/mach-ecovec24/setup.c
-index a9c0c07386fddd..6d612792f6b8ec 100644
---- a/arch/sh/boards/mach-ecovec24/setup.c
-+++ b/arch/sh/boards/mach-ecovec24/setup.c
-@@ -13,7 +13,6 @@
- #include <linux/platform_device.h>
- #include <linux/mmc/host.h>
- #include <linux/mmc/sh_mmcif.h>
--#include <linux/mmc/sh_mobile_sdhi.h>
- #include <linux/mtd/physmap.h>
- #include <linux/mfd/tmio.h>
- #include <linux/gpio.h>
-diff --git a/arch/sh/boards/mach-kfr2r09/setup.c b/arch/sh/boards/mach-kfr2r09/setup.c
-index 6bd9230e64e300..5deb2d82f19f78 100644
---- a/arch/sh/boards/mach-kfr2r09/setup.c
-+++ b/arch/sh/boards/mach-kfr2r09/setup.c
-@@ -11,7 +11,6 @@
- #include <linux/platform_device.h>
- #include <linux/interrupt.h>
- #include <linux/mmc/host.h>
--#include <linux/mmc/sh_mobile_sdhi.h>
- #include <linux/mfd/tmio.h>
- #include <linux/mtd/physmap.h>
- #include <linux/mtd/onenand.h>
-diff --git a/arch/sh/boards/mach-migor/setup.c b/arch/sh/boards/mach-migor/setup.c
-index 7a04da3efce402..5de60a77eaa1ab 100644
---- a/arch/sh/boards/mach-migor/setup.c
-+++ b/arch/sh/boards/mach-migor/setup.c
-@@ -13,7 +13,6 @@
- #include <linux/input.h>
- #include <linux/input/sh_keysc.h>
- #include <linux/mmc/host.h>
--#include <linux/mmc/sh_mobile_sdhi.h>
- #include <linux/mtd/physmap.h>
- #include <linux/mfd/tmio.h>
- #include <linux/mtd/nand.h>
-diff --git a/arch/sh/boards/mach-se/7724/setup.c b/arch/sh/boards/mach-se/7724/setup.c
-index e0e1df136642cd..f1fecd395679ae 100644
---- a/arch/sh/boards/mach-se/7724/setup.c
-+++ b/arch/sh/boards/mach-se/7724/setup.c
-@@ -15,7 +15,6 @@
- #include <linux/interrupt.h>
- #include <linux/platform_device.h>
- #include <linux/mmc/host.h>
--#include <linux/mmc/sh_mobile_sdhi.h>
- #include <linux/mfd/tmio.h>
- #include <linux/mtd/physmap.h>
- #include <linux/delay.h>
-diff --git a/include/linux/mmc/sh_mobile_sdhi.h b/include/linux/mmc/sh_mobile_sdhi.h
-deleted file mode 100644
-index 95d6f0314a7ded..00000000000000
---- a/include/linux/mmc/sh_mobile_sdhi.h
-+++ /dev/null
-@@ -1,10 +0,0 @@
--#ifndef LINUX_MMC_SH_MOBILE_SDHI_H
--#define LINUX_MMC_SH_MOBILE_SDHI_H
--
--#include <linux/types.h>
--
--#define SH_MOBILE_SDHI_IRQ_CARD_DETECT	"card_detect"
--#define SH_MOBILE_SDHI_IRQ_SDCARD	"sdcard"
--#define SH_MOBILE_SDHI_IRQ_SDIO		"sdio"
--
--#endif /* LINUX_MMC_SH_MOBILE_SDHI_H */
--- 
-2.7.0
+> I don't have any of the affected boards to test, but as long as
+> they're not actually using the include file you're removing, I don't
+> see any harm. It's my intent to remove all of these board files full
+> of platform devices as soon as we get working device tree bindings for
+> everything, anyway. So,
+>=20
+> Acked-by: Rich Felker <dalias@libc.org>
+
+Thanks! Ulf already applied a version with the SH specific bits factored
+out. I'll send out a seperate patch for this right now. To make things
+easier for all, I assume your acks will extend to this new patch as well.
+
+Thanks again...
+
+
+--C7zPtVaVf+AK4Oqc
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1
+
+iQIcBAEBAgAGBQJXIat3AAoJEBQN5MwUoCm209YP/3Ax2ueLgbhybn6pYhjCYfuO
+qx8xYVvIbhrWNlKCxMqrTvWqLpo+3/w0+vpNQHIr9EwENrSUCaZVpXk5B49oShl5
+79QHGwpKi9ZsdQwcsLqat9ueIDJDuIKP33hBzN4kl6ztFXJN0hhHEjkcjVm9CSC+
+Of2yrTG25ciBNEuq4fAjfaJnVBQgrqXqsZaUMzPzYUaxmNYBp3f3ycfc796w+Jbr
+kuuIVbZxxoBmS5xulJVBQo2B5fxF9/Kl12pKHjCcIOjGlMCdUmd7cEfmoCai6Vfn
+/9TKACSUEQRPDcHbF/vj35QNBlDWtb4PNniOZ8Uy4U9c9ZwAaOz2rZiJPJZCEV+J
+tnG6LxPTWhf10dsq8/KIgsBk6IwHM7T7Ey7ZjnF/7kO1G8VlvZFml8iXUPfsPaua
+cb+eGN9AMBwrp8yaiQszM8gWWByDnl3hvzCTOuGapds0ZNPEfmNQerSwggZoKSvE
+vcMDEz6XfRq/6TjIesZAZlWVmJ9BvTk9oUV1iVG3PTBksAJvkwI63g5xaHQiq3sV
+80CHt+5EwltlztUXVehbpCapAXzk66ka8llqvhMxS26rwur5y4KjzRcaYGMRtTG4
+wuJldtqxFz12eTlFjVCXqTNNAXGGystNsl8z4M+MkzOO9MmCz4C2/WyDceGFjuQb
+JY7uJXL37Nl7fk0i6wAH
+=G8F9
+-----END PGP SIGNATURE-----
+
+--C7zPtVaVf+AK4Oqc--
