@@ -1,57 +1,132 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v5 0/4] mmc: usdhi6rol0: UHS support
-Date: Thu, 28 Apr 2016 12:38:23 +0200
-Message-ID: <CAPDyKFq=U1YC4OELrD0zb1=2hHHzWomuei2LYDKBYo36v-Fa3A@mail.gmail.com>
-References: <cover.1461770066.git.larper@axis.com>
+Subject: Re: [PATCH] mmc: sh_mobile_sdhi: remove obsolete include file
+Date: Thu, 28 Apr 2016 12:38:17 +0200
+Message-ID: <CAPDyKFqYYfA7NBqzNbiOZ8TEnabn9552Qy3eC8OE3mz6oie47A@mail.gmail.com>
+References: <1461824291-2672-1-git-send-email-wsa@the-dreams.de>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wm0-f51.google.com ([74.125.82.51]:37532 "EHLO
-	mail-wm0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752665AbcD1Kia (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 28 Apr 2016 06:38:30 -0400
-Received: by mail-wm0-f51.google.com with SMTP id a17so57789770wme.0
-        for <linux-mmc@vger.kernel.org>; Thu, 28 Apr 2016 03:38:23 -0700 (PDT)
-In-Reply-To: <cover.1461770066.git.larper@axis.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-renesas-soc-owner@vger.kernel.org>
+In-Reply-To: <1461824291-2672-1-git-send-email-wsa@the-dreams.de>
+Sender: linux-renesas-soc-owner@vger.kernel.org
+To: Wolfram Sang <wsa@the-dreams.de>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Linux-sh list <linux-sh@vger.kernel.org>, linux-renesas-soc@vger.kernel.org, Rich Felker <dalias@libc.org>, Yoshinori Sato <ysato@users.sourceforge.jp>
 List-Id: linux-mmc@vger.kernel.org
-To: Lars Persson <lars.persson@axis.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Rob Herring <robh+dt@kernel.org>, =?UTF-8?Q?Pawe=C5=82_Moll?= <pawel.moll@arm.com>, Mark Rutland <mark.rutland@arm.com>, Ian Campbell <ijc+devicetree@hellion.org.uk>, Kumar Gala <galak@codeaurora.org>, Lars Persson <larper@axis.com>
 
-On 27 April 2016 at 17:21, Lars Persson <lars.persson@axis.com> wrote:
-> This patch set adds UHS support to the usdhi6rol0 driver, with control of the
-> regulator and pin state settings.
+On 28 April 2016 at 08:18, Wolfram Sang <wsa@the-dreams.de> wrote:
+> From: Wolfram Sang <wsa+renesas@sang-engineering.com>
 >
-> Changes since v4:
-> - Add a fix patch to remove UHS capabilities that were announced without
->   actual driver support.
+> A few SH boards include the file but don't make use of it (no named
+> interrupts). The SDHI code removed support for this feature as well.
+> So, drop the references and ultimately remove the unneeded file.
 >
-> Changes since v3:
-> - No error print for failure of mmc_regulator_set_vqmmc().
-> - Do not set UHS caps if the vqmmc regulator is missing.
-> - No not set UHS caps if the no-1-8-v property is set.
->
-> Changes since v2:
-> - dt: renamed pins_uhs to state_uhs.
-> - dt: made default optional in pinctrl-names.
-> - dt: document that use of state_uhs also requires a default pin state.
-> - add error handling for missing pin states.
->
-> Changes since v1:
-> - Use mmc_regulator_set_vqmmc().
->
-> Lars Persson (4):
->   mmc: dt: usdhi6rol0: add optional pinctrl binding
->   mmc: usdhi6rol0: do not announce UHS capabilities
->   mmc: usdhi6rol0: add support for UHS modes
->   mmc: usdhi6rol0: add pinctrl to set pin drive strength
->
->  .../devicetree/bindings/mmc/usdhi6rol0.txt         |  6 +++
->  drivers/mmc/host/usdhi6rol0.c                      | 60 +++++++++++++++++++++-
->  2 files changed, 65 insertions(+), 1 deletion(-)
->
+> Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+> Acked-by: Rich Felker <dalias@libc.org>
+> Acked-by: Yoshinori Sato <ysato@users.sourceforge.jp>
 
 Thanks, applied for next!
 
 Kind regards
 Uffe
+
+> ---
+>  arch/sh/boards/board-sh7757lcr.c     |  1 -
+>  arch/sh/boards/mach-ap325rxa/setup.c |  1 -
+>  arch/sh/boards/mach-ecovec24/setup.c |  1 -
+>  arch/sh/boards/mach-kfr2r09/setup.c  |  1 -
+>  arch/sh/boards/mach-migor/setup.c    |  1 -
+>  arch/sh/boards/mach-se/7724/setup.c  |  1 -
+>  include/linux/mmc/sh_mobile_sdhi.h   | 10 ----------
+>  7 files changed, 16 deletions(-)
+>  delete mode 100644 include/linux/mmc/sh_mobile_sdhi.h
+>
+> diff --git a/arch/sh/boards/board-sh7757lcr.c b/arch/sh/boards/board-sh7757lcr.c
+> index 324599bfad1420..0104c8199c48fe 100644
+> --- a/arch/sh/boards/board-sh7757lcr.c
+> +++ b/arch/sh/boards/board-sh7757lcr.c
+> @@ -20,7 +20,6 @@
+>  #include <linux/mfd/tmio.h>
+>  #include <linux/mmc/host.h>
+>  #include <linux/mmc/sh_mmcif.h>
+> -#include <linux/mmc/sh_mobile_sdhi.h>
+>  #include <linux/sh_eth.h>
+>  #include <linux/sh_intc.h>
+>  #include <linux/usb/renesas_usbhs.h>
+> diff --git a/arch/sh/boards/mach-ap325rxa/setup.c b/arch/sh/boards/mach-ap325rxa/setup.c
+> index 62c3b81300ed28..de8393cb7313bc 100644
+> --- a/arch/sh/boards/mach-ap325rxa/setup.c
+> +++ b/arch/sh/boards/mach-ap325rxa/setup.c
+> @@ -15,7 +15,6 @@
+>  #include <linux/interrupt.h>
+>  #include <linux/platform_device.h>
+>  #include <linux/mmc/host.h>
+> -#include <linux/mmc/sh_mobile_sdhi.h>
+>  #include <linux/mtd/physmap.h>
+>  #include <linux/mtd/sh_flctl.h>
+>  #include <linux/mfd/tmio.h>
+> diff --git a/arch/sh/boards/mach-ecovec24/setup.c b/arch/sh/boards/mach-ecovec24/setup.c
+> index a9c0c07386fddd..6d612792f6b8ec 100644
+> --- a/arch/sh/boards/mach-ecovec24/setup.c
+> +++ b/arch/sh/boards/mach-ecovec24/setup.c
+> @@ -13,7 +13,6 @@
+>  #include <linux/platform_device.h>
+>  #include <linux/mmc/host.h>
+>  #include <linux/mmc/sh_mmcif.h>
+> -#include <linux/mmc/sh_mobile_sdhi.h>
+>  #include <linux/mtd/physmap.h>
+>  #include <linux/mfd/tmio.h>
+>  #include <linux/gpio.h>
+> diff --git a/arch/sh/boards/mach-kfr2r09/setup.c b/arch/sh/boards/mach-kfr2r09/setup.c
+> index 6bd9230e64e300..5deb2d82f19f78 100644
+> --- a/arch/sh/boards/mach-kfr2r09/setup.c
+> +++ b/arch/sh/boards/mach-kfr2r09/setup.c
+> @@ -11,7 +11,6 @@
+>  #include <linux/platform_device.h>
+>  #include <linux/interrupt.h>
+>  #include <linux/mmc/host.h>
+> -#include <linux/mmc/sh_mobile_sdhi.h>
+>  #include <linux/mfd/tmio.h>
+>  #include <linux/mtd/physmap.h>
+>  #include <linux/mtd/onenand.h>
+> diff --git a/arch/sh/boards/mach-migor/setup.c b/arch/sh/boards/mach-migor/setup.c
+> index 7a04da3efce402..5de60a77eaa1ab 100644
+> --- a/arch/sh/boards/mach-migor/setup.c
+> +++ b/arch/sh/boards/mach-migor/setup.c
+> @@ -13,7 +13,6 @@
+>  #include <linux/input.h>
+>  #include <linux/input/sh_keysc.h>
+>  #include <linux/mmc/host.h>
+> -#include <linux/mmc/sh_mobile_sdhi.h>
+>  #include <linux/mtd/physmap.h>
+>  #include <linux/mfd/tmio.h>
+>  #include <linux/mtd/nand.h>
+> diff --git a/arch/sh/boards/mach-se/7724/setup.c b/arch/sh/boards/mach-se/7724/setup.c
+> index e0e1df136642cd..f1fecd395679ae 100644
+> --- a/arch/sh/boards/mach-se/7724/setup.c
+> +++ b/arch/sh/boards/mach-se/7724/setup.c
+> @@ -15,7 +15,6 @@
+>  #include <linux/interrupt.h>
+>  #include <linux/platform_device.h>
+>  #include <linux/mmc/host.h>
+> -#include <linux/mmc/sh_mobile_sdhi.h>
+>  #include <linux/mfd/tmio.h>
+>  #include <linux/mtd/physmap.h>
+>  #include <linux/delay.h>
+> diff --git a/include/linux/mmc/sh_mobile_sdhi.h b/include/linux/mmc/sh_mobile_sdhi.h
+> deleted file mode 100644
+> index 95d6f0314a7ded..00000000000000
+> --- a/include/linux/mmc/sh_mobile_sdhi.h
+> +++ /dev/null
+> @@ -1,10 +0,0 @@
+> -#ifndef LINUX_MMC_SH_MOBILE_SDHI_H
+> -#define LINUX_MMC_SH_MOBILE_SDHI_H
+> -
+> -#include <linux/types.h>
+> -
+> -#define SH_MOBILE_SDHI_IRQ_CARD_DETECT "card_detect"
+> -#define SH_MOBILE_SDHI_IRQ_SDCARD      "sdcard"
+> -#define SH_MOBILE_SDHI_IRQ_SDIO                "sdio"
+> -
+> -#endif /* LINUX_MMC_SH_MOBILE_SDHI_H */
+> --
+> 2.7.0
+>
