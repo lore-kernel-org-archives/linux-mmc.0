@@ -1,71 +1,57 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: sunxi: Disable eMMC HS-DDR (MMC_CAP_1_8V_DDR) for
- Allwinner A80
-Date: Thu, 28 Apr 2016 12:38:28 +0200
-Message-ID: <CAPDyKFo4xBpS=4nQzeaRs8HsBRSBsrQEuSvRPjgoQVvPUFK7jA@mail.gmail.com>
-References: <1461685046-24798-1-git-send-email-wens@csie.org>
+Subject: Re: [PATCH v5 0/4] mmc: usdhi6rol0: UHS support
+Date: Thu, 28 Apr 2016 12:38:23 +0200
+Message-ID: <CAPDyKFq=U1YC4OELrD0zb1=2hHHzWomuei2LYDKBYo36v-Fa3A@mail.gmail.com>
+References: <cover.1461770066.git.larper@axis.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <1461685046-24798-1-git-send-email-wens@csie.org>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Chen-Yu Tsai <wens@csie.org>
-Cc: Hans de Goede <hdegoede@redhat.com>, Maxime Ripard <maxime.ripard@free-electrons.com>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-wm0-f51.google.com ([74.125.82.51]:37532 "EHLO
+	mail-wm0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752665AbcD1Kia (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 28 Apr 2016 06:38:30 -0400
+Received: by mail-wm0-f51.google.com with SMTP id a17so57789770wme.0
+        for <linux-mmc@vger.kernel.org>; Thu, 28 Apr 2016 03:38:23 -0700 (PDT)
+In-Reply-To: <cover.1461770066.git.larper@axis.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Lars Persson <lars.persson@axis.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, Guennadi Liakhovetski <g.liakhovetski@gmx.de>, Rob Herring <robh+dt@kernel.org>, =?UTF-8?Q?Pawe=C5=82_Moll?= <pawel.moll@arm.com>, Mark Rutland <mark.rutland@arm.com>, Ian Campbell <ijc+devicetree@hellion.org.uk>, Kumar Gala <galak@codeaurora.org>, Lars Persson <larper@axis.com>
 
-On 26 April 2016 at 17:37, Chen-Yu Tsai <wens@csie.org> wrote:
-> eMMC HS-DDR no longer works on the A80, despite it working when support
-> for this developed.
+On 27 April 2016 at 17:21, Lars Persson <lars.persson@axis.com> wrote:
+> This patch set adds UHS support to the usdhi6rol0 driver, with control of the
+> regulator and pin state settings.
 >
-> Disable it for now.
+> Changes since v4:
+> - Add a fix patch to remove UHS capabilities that were announced without
+>   actual driver support.
 >
-> Signed-off-by: Chen-Yu Tsai <wens@csie.org>
+> Changes since v3:
+> - No error print for failure of mmc_regulator_set_vqmmc().
+> - Do not set UHS caps if the vqmmc regulator is missing.
+> - No not set UHS caps if the no-1-8-v property is set.
+>
+> Changes since v2:
+> - dt: renamed pins_uhs to state_uhs.
+> - dt: made default optional in pinctrl-names.
+> - dt: document that use of state_uhs also requires a default pin state.
+> - add error handling for missing pin states.
+>
+> Changes since v1:
+> - Use mmc_regulator_set_vqmmc().
+>
+> Lars Persson (4):
+>   mmc: dt: usdhi6rol0: add optional pinctrl binding
+>   mmc: usdhi6rol0: do not announce UHS capabilities
+>   mmc: usdhi6rol0: add support for UHS modes
+>   mmc: usdhi6rol0: add pinctrl to set pin drive strength
+>
+>  .../devicetree/bindings/mmc/usdhi6rol0.txt         |  6 +++
+>  drivers/mmc/host/usdhi6rol0.c                      | 60 +++++++++++++++++++++-
+>  2 files changed, 65 insertions(+), 1 deletion(-)
+>
 
-Thanks, applied for fixes!
+Thanks, applied for next!
 
 Kind regards
 Uffe
-
-> ---
->
-> Hi,
->
-> When i worked on this it was working, but now it isn't. Unfortunately I
-> don't have my old tree to do a proper bisect. I probably won't have time
-> to dig into this issue before v4.6 release, so it's best to disable it
-> on the A80 for now.
->
-> Thanks.
->
-> ---
->  drivers/mmc/host/sunxi-mmc.c | 5 +++++
->  1 file changed, 5 insertions(+)
->
-> diff --git a/drivers/mmc/host/sunxi-mmc.c b/drivers/mmc/host/sunxi-mmc.c
-> index 8372a413848c..7fc8b7aa83f0 100644
-> --- a/drivers/mmc/host/sunxi-mmc.c
-> +++ b/drivers/mmc/host/sunxi-mmc.c
-> @@ -1129,6 +1129,11 @@ static int sunxi_mmc_probe(struct platform_device *pdev)
->                                   MMC_CAP_1_8V_DDR |
->                                   MMC_CAP_ERASE | MMC_CAP_SDIO_IRQ;
->
-> +       /* TODO MMC DDR is not working on A80 */
-> +       if (of_device_is_compatible(pdev->dev.of_node,
-> +                                   "allwinner,sun9i-a80-mmc"))
-> +               mmc->caps &= ~MMC_CAP_1_8V_DDR;
-> +
->         ret = mmc_of_parse(mmc);
->         if (ret)
->                 goto error_free_dma;
-> --
-> 2.8.1
->
