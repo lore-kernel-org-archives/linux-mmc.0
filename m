@@ -1,8 +1,8 @@
-From: Doug Anderson <dianders@chromium.org>
+From: Javier Martinez Canillas <javier@dowhile0.org>
 Subject: Re: [PATCH v2 0/4] Patches to allow consistent mmc / mmcblk numbering
  w/ device tree
-Date: Fri, 29 Apr 2016 15:22:50 -0700
-Message-ID: <CAD=FV=WzgGFzzpeYAPrOpMS684_G=XRoSRjTegK-vre=fX=kpw@mail.gmail.com>
+Date: Fri, 29 Apr 2016 18:42:35 -0400
+Message-ID: <CABxcv==4C+RrEV1Fd+DkbMdGrLyObw36vsmo3wTGdxO=UnAa8w@mail.gmail.com>
 References: <20160429181248.GW19428@n2100.arm.linux.org.uk>
 	<CAD=FV=VMxBYXOYOyHPeqcaWX7oU8pVrdLHOsWOWUgq-q5FshAw@mail.gmail.com>
 	<20160429195741.GY19428@n2100.arm.linux.org.uk>
@@ -16,22 +16,16 @@ References: <20160429181248.GW19428@n2100.arm.linux.org.uk>
 	<20160429221606.GE19428@n2100.arm.linux.org.uk>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-yw0-f177.google.com ([209.85.161.177]:33795 "EHLO
-	mail-yw0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751829AbcD2WWv (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 29 Apr 2016 18:22:51 -0400
-Received: by mail-yw0-f177.google.com with SMTP id j74so185366678ywg.1
-        for <linux-mmc@vger.kernel.org>; Fri, 29 Apr 2016 15:22:51 -0700 (PDT)
+Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <20160429221606.GE19428@n2100.arm.linux.org.uk>
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Sender: linux-kernel-owner@vger.kernel.org
 To: Russell King - ARM Linux <linux@arm.linux.org.uk>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Jaehoon Chung <jh80.chung@samsung.com>, Shawn Lin <shawn.lin@rock-chips.com>, Adrian Hunter <adrian.hunter@intel.com>, Stefan Agner <stefan@agner.ch>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Brian Norris <computersforpeace@gmail.com>, Dmitry Torokhov <dmitry.torokhov@gmail.com>, Heiko Stuebner <heiko@sntech.de>, Jisheng Zhang <jszhang@marvell.com>, "open list:ARM/Rockchip SoC..." <linux-rockchip@lists.infradead.org>, devicetree-spec@vger.kernel.org, Mark Rutland <mark.rutland@arm.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Venu Byravarasu <vbyravarasu@nvidia.com>, Lars-Peter Clausen <lars@metafoo.de>, Jon Hunter <jonathanh@nvidia.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>Pawel Moll <p>
+Cc: Doug Anderson <dianders@chromium.org>, Ulf Hansson <ulf.hansson@linaro.org>, Jaehoon Chung <jh80.chung@samsung.com>, Shawn Lin <shawn.lin@rock-chips.com>, Adrian Hunter <adrian.hunter@intel.com>, Stefan Agner <stefan@agner.ch>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Brian Norris <computersforpeace@gmail.com>, Dmitry Torokhov <dmitry.torokhov@gmail.com>, Heiko Stuebner <heiko@sntech.de>, Jisheng Zhang <jszhang@marvell.com>, "open list:ARM/Rockchip SoC..." <linux-rockchip@lists.infradead.org>, devicetree-spec@vger.kernel.org, Mark Rutland <mark.rutland@arm.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Venu Byravarasu <vbyravarasu@nvidia.com>, Lars-Peter Clausen <lars@metafoo.de>, Jon Hunter <jonathanh@nvidia.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>"devicetree@vger.kernel.org" <dev>
+List-Id: linux-mmc@vger.kernel.org
 
-Hi,
+Hello Russell,
 
-On Fri, Apr 29, 2016 at 3:16 PM, Russell King - ARM Linux
+On Fri, Apr 29, 2016 at 6:16 PM, Russell King - ARM Linux
 <linux@arm.linux.org.uk> wrote:
 > On Fri, Apr 29, 2016 at 02:56:38PM -0700, Doug Anderson wrote:
 >> Russell,
@@ -63,21 +57,26 @@ On Fri, Apr 29, 2016 at 3:16 PM, Russell King - ARM Linux
 > systems running Linux, and you treat me with contempt.
 >
 > What are you going to do to resolve this?
+>
 
-As I tried to indicate in earlier emails, I don't actually care how
-grub works in this case.  It was originally meant to illustrate the
-other people's workflows and mine are not the same.  If they have a
-solution that works for them, that's great.
+Maybe a third opinion could make this conversation constructive again.
 
-I want my MMC and MMCBLK device numbers to be sane and consistent to
-help me parse through dmesg and sysfs.  If it happens to also make it
-easy / possible to specify a root filesystem using "mmcblkN" that's
-great and I'll probably take advantage of that.
+I think Doug's point is that using a UUID or labels for consistency is
+orthogonal to having a deterministic numbering for MMC devices. And I
+agree with his point of view for what is worth.
 
-I'm very sorry if those using SATA and ATA disks don't have a way to
-get sane and consistent device number ordering.  I really am.  ...but
-just because they don't have a well defined ordering doesn't mean
-those of us using MMC should have to suffer.  ...and I don't think
-giving a sane ordering to MMC devices hurts anyone, does it?
+I understand that this not true for other systems and peripherals but
+in the specific case of MMC, the changes are minimal as Doug's patches
+have shown and even the technical manual of SoCs has an enumeration to
+refer each SD/MMC slot.
 
--Doug
+So I think is fair to say that SD/MMC is different than say USB mass
+storage devices as you mentioned, and having a consistent numbering is
+very helpful for diagnostics and debugging purposes IMHO.
+
+BTW, I use labels in all my systems because as you said it's nice to
+be able to swap cards and not change the bootloader env vars, but I
+see how having a deterministic numbering could be useful to others.
+
+Best regards,
+Javier
