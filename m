@@ -1,34 +1,131 @@
-From: Russell King - ARM Linux <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>
-Subject: Re: [PATCH v2 0/4] Patches to allow consistent mmc / mmcblk
- numbering w/ device tree
-Date: Fri, 29 Apr 2016 19:12:48 +0100
-Message-ID: <20160429181248.GW19428@n2100.arm.linux.org.uk>
-References: <1461951139-6109-1-git-send-email-dianders@chromium.org>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH v2] mmc: core: Remove redundant rescan_disable flag
+Date: Fri, 29 Apr 2016 21:40:43 +0300
+Message-ID: <5723AAAB.60109@intel.com>
+References: <1461868156-5734-1-git-send-email-ulf.hansson@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <devicetree-spec-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <1461951139-6109-1-git-send-email-dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
-Sender: devicetree-spec-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Douglas Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
-Cc: ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org, shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org, adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, stefan-XLVq0VzYD2Y@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, computersforpeace-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org, dmitry.torokhov-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org, Heiko Stuebner <heiko-4mtYJXux2i+zQB+pC5nmwQ@public.gmane.org>, jszhang-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org, linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, devicetree-spec-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, vbyravarasu-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org, lars-Qo5EllUWu/uELgA04lAiVw@public.gmane.org, jonathanh-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, pawel.moll-5wv7dgnIgG8@public.gmane.org, ijc+devicetree-KcIKpvwj1kUDXYZnReoRVg@public.gmane.org, grundler-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org, galak-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, lporzio-AL4WhLSQfzjQT0dZR+AlfA@public.gmane.org, robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, chaotian.jing-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org, sergei.shtylyov-M4DtvfQ/ZS1MRgGoP+s0PdBPR1lH4CV8@public.gmane.org, sudeep.holla-5wv7dgnIgG8@public.gmane.org, zhonghui.fu-VuQAYsv1563Yd54FQh9/CA@public.gmane.org, kirill.shutemov-VuQAYsv1563Yd54FQh9/CA@public.gmane.org
+Content-Type: text/plain; charset=windows-1252; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mga03.intel.com ([134.134.136.65]:41633 "EHLO mga03.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751980AbcD2Skq (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 29 Apr 2016 14:40:46 -0400
+In-Reply-To: <1461868156-5734-1-git-send-email-ulf.hansson@linaro.org>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org
+Cc: Jaehoon Chung <jh80.chung@samsung.com>
 
-On Fri, Apr 29, 2016 at 10:32:15AM -0700, Douglas Anderson wrote:
-> This series picks patches from various different places to produce what
-> I consider the best solution to getting consistent mmc and mmcblk
-> ordering.
-> 
-> Why consistent ordering and why not just use UUIDs?  IMHO consistent
-> ordering solves a few different problems:
+On 28/04/2016 9:29 p.m., Ulf Hansson wrote:
+> For the reasons explained below, it's safe to remove the rescan_disable
+> flag.
+>
+> 1)
+> cancel_delayed_work_sync() prevents an executing work from re-scheduling
+> itself.
+>
+> 2)
+> We are using the system_freezable_wq for the rescan works. As that queue
+> becomes frozen when userspace becomes frozen during system PM, we don't
+> need to disable the rescan works in the PM_SUSPEND_PREPARE phase.
 
-NAK.  Really.  Use UUIDs, that's the proper solution here.
+What about the case when a SDIO card has to be removed?  Seems like a rescan
+could theoretically get scheduled and run before the workqueue is frozen.
 
-Exactly the same issue arises if you have more than one ATA or SCSI
-adapter in your PC - things can be probed out of order and end up
-in different /dev/sd* slots.
-
--- 
-RMK's Patch system: http://www.arm.linux.org.uk/developer/patches/
-FTTC broadband for 0.8mile line: currently at 9.6Mbps down 400kbps up
-according to speedtest.net.
+>
+> 3)
+> At host registration it's not safe to schedule a detect work until
+> mmc_start_host() is invoked. Trying to use the rescan_disable flag to
+> prevent a rescan work from being executed isn't helping.
+>
+> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+> ---
+>
+> Changes in v2:
+> 	Updated changelog to better reflect why rescan_flag is redundant.
+>
+> ---
+>   drivers/mmc/core/core.c  | 12 ------------
+>   drivers/mmc/core/host.c  |  3 ---
+>   include/linux/mmc/host.h |  1 -
+>   3 files changed, 16 deletions(-)
+>
+> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+> index 99275e4..b8c6a11 100644
+> --- a/drivers/mmc/core/core.c
+> +++ b/drivers/mmc/core/core.c
+> @@ -2580,9 +2580,6 @@ void mmc_rescan(struct work_struct *work)
+>   		container_of(work, struct mmc_host, detect.work);
+>   	int i;
+>
+> -	if (host->rescan_disable)
+> -		return;
+> -
+>   	/* If there is a non-removable card registered, only scan once */
+>   	if (!mmc_card_is_removable(host) && host->rescan_entered)
+>   		return;
+> @@ -2649,7 +2646,6 @@ void mmc_rescan(struct work_struct *work)
+>   void mmc_start_host(struct mmc_host *host)
+>   {
+>   	host->f_init = max(freqs[0], host->f_min);
+> -	host->rescan_disable = 0;
+>   	host->ios.power_mode = MMC_POWER_UNDEFINED;
+>
+>   	mmc_claim_host(host);
+> @@ -2674,7 +2670,6 @@ void mmc_stop_host(struct mmc_host *host)
+>   	if (host->slot.cd_irq >= 0)
+>   		disable_irq(host->slot.cd_irq);
+>
+> -	host->rescan_disable = 1;
+>   	cancel_delayed_work_sync(&host->detect);
+>
+>   	/* clear pm flags now and let card drivers set them as needed */
+> @@ -2788,9 +2783,6 @@ static int mmc_pm_notify(struct notifier_block *notify_block,
+>   	case PM_HIBERNATION_PREPARE:
+>   	case PM_SUSPEND_PREPARE:
+>   	case PM_RESTORE_PREPARE:
+> -		spin_lock_irqsave(&host->lock, flags);
+> -		host->rescan_disable = 1;
+> -		spin_unlock_irqrestore(&host->lock, flags);
+>   		cancel_delayed_work_sync(&host->detect);
+>
+>   		if (!host->bus_ops)
+> @@ -2814,10 +2806,6 @@ static int mmc_pm_notify(struct notifier_block *notify_block,
+>   	case PM_POST_SUSPEND:
+>   	case PM_POST_HIBERNATION:
+>   	case PM_POST_RESTORE:
+> -
+> -		spin_lock_irqsave(&host->lock, flags);
+> -		host->rescan_disable = 0;
+> -		spin_unlock_irqrestore(&host->lock, flags);
+>   		_mmc_detect_change(host, 0, false);
+>
+>   	}
+> diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
+> index e0a3ee1..e972489 100644
+> --- a/drivers/mmc/core/host.c
+> +++ b/drivers/mmc/core/host.c
+> @@ -319,9 +319,6 @@ struct mmc_host *mmc_alloc_host(int extra, struct device *dev)
+>   	if (!host)
+>   		return NULL;
+>
+> -	/* scanning will be enabled when we're ready */
+> -	host->rescan_disable = 1;
+> -
+>   again:
+>   	if (!ida_pre_get(&mmc_host_ida, GFP_KERNEL)) {
+>   		kfree(host);
+> diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+> index 85800b4..7fbe5c0 100644
+> --- a/include/linux/mmc/host.h
+> +++ b/include/linux/mmc/host.h
+> @@ -330,7 +330,6 @@ struct mmc_host {
+>   	unsigned int		doing_retune:1;	/* re-tuning in progress */
+>   	unsigned int		retune_now:1;	/* do re-tuning at next req */
+>
+> -	int			rescan_disable;	/* disable card detection */
+>   	int			rescan_entered;	/* used with nonremovable devices */
+>
+>   	int			need_retune;	/* re-tuning is needed */
+>
