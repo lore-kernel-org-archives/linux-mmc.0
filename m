@@ -1,99 +1,97 @@
-From: Peter Ujfalusi <peter.ujfalusi@ti.com>
-Subject: [PATCH] mmc: omap: Use dma_request_chan() for requesting DMA channel
-Date: Fri, 29 Apr 2016 16:06:37 +0300
-Message-ID: <1461935197-28664-1-git-send-email-peter.ujfalusi@ti.com>
+From: Raul Benet <Raul.Benet@lightblueoptics.com>
+Subject: RE: support for fixed 1.8V eMMC interface
+Date: Fri, 29 Apr 2016 13:24:51 +0000
+Message-ID: <VI1PR05MB15338CB753D1C4C14E9E51809B660@VI1PR05MB1533.eurprd05.prod.outlook.com>
+References: <VI1PR05MB15338BD748ACE3938D3E4B339B640@VI1PR05MB1533.eurprd05.prod.outlook.com>
+ <CAA+hA=RxSkCH1XiYUpB5c=2h4GpM2aOND6fdmizeBWu8F_A4zQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: ulf.hansson@linaro.org, kishon@ti.com
-Cc: tony@atomide.com, rogerq@ti.com, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, linux-kernel@vger.kernel.org
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-db3on0070.outbound.protection.outlook.com ([157.55.234.70]:3100
+	"EHLO emea01-db3-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1752964AbcD2NY6 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 29 Apr 2016 09:24:58 -0400
+In-Reply-To: <CAA+hA=RxSkCH1XiYUpB5c=2h4GpM2aOND6fdmizeBWu8F_A4zQ@mail.gmail.com>
+Content-Language: en-US
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Dong Aisheng <dongas86@gmail.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-With the new dma_request_chan() the client driver does not need to look for
-the DMA resource and it does not need to pass filter_fn anymore.
-By switching to the new API the driver can now support deferred probing
-against DMA.
-
-Signed-off-by: Peter Ujfalusi <peter.ujfalusi@ti.com>
-CC: Ulf Hansson <ulf.hansson@linaro.org>
-CC: Jarkko Nikula <jarkko.nikula@bitmer.com>
----
- drivers/mmc/host/omap.c | 45 ++++++++++++++++++++++-----------------------
- 1 file changed, 22 insertions(+), 23 deletions(-)
-
-diff --git a/drivers/mmc/host/omap.c b/drivers/mmc/host/omap.c
-index b9958a123594..a8d9228657b2 100644
---- a/drivers/mmc/host/omap.c
-+++ b/drivers/mmc/host/omap.c
-@@ -23,7 +23,6 @@
- #include <linux/spinlock.h>
- #include <linux/timer.h>
- #include <linux/of.h>
--#include <linux/omap-dma.h>
- #include <linux/mmc/host.h>
- #include <linux/mmc/card.h>
- #include <linux/mmc/mmc.h>
-@@ -1321,8 +1320,6 @@ static int mmc_omap_probe(struct platform_device *pdev)
- 	struct omap_mmc_platform_data *pdata = pdev->dev.platform_data;
- 	struct mmc_omap_host *host = NULL;
- 	struct resource *res;
--	dma_cap_mask_t mask;
--	unsigned sig = 0;
- 	int i, ret = 0;
- 	int irq;
- 
-@@ -1382,29 +1379,31 @@ static int mmc_omap_probe(struct platform_device *pdev)
- 		goto err_free_iclk;
- 	}
- 
--	dma_cap_zero(mask);
--	dma_cap_set(DMA_SLAVE, mask);
--
- 	host->dma_tx_burst = -1;
- 	host->dma_rx_burst = -1;
- 
--	res = platform_get_resource_byname(pdev, IORESOURCE_DMA, "tx");
--	if (res)
--		sig = res->start;
--	host->dma_tx = dma_request_slave_channel_compat(mask,
--				omap_dma_filter_fn, &sig, &pdev->dev, "tx");
--	if (!host->dma_tx)
--		dev_warn(host->dev, "unable to obtain TX DMA engine channel %u\n",
--			sig);
--
--	res = platform_get_resource_byname(pdev, IORESOURCE_DMA, "rx");
--	if (res)
--		sig = res->start;
--	host->dma_rx = dma_request_slave_channel_compat(mask,
--				omap_dma_filter_fn, &sig, &pdev->dev, "rx");
--	if (!host->dma_rx)
--		dev_warn(host->dev, "unable to obtain RX DMA engine channel %u\n",
--			sig);
-+	host->dma_tx = dma_request_chan(&pdev->dev, "tx");
-+	if (IS_ERR(host->dma_tx)) {
-+		ret = PTR_ERR(host->dma_tx);
-+		if (ret == -EPROBE_DEFER)
-+			goto err_free_iclk;
-+
-+		host->dma_tx = NULL;
-+		dev_warn(host->dev, "TX DMA channel request failed\n");
-+	}
-+
-+	host->dma_rx = dma_request_chan(&pdev->dev, "rx");
-+	if (IS_ERR(host->dma_rx)) {
-+		ret = PTR_ERR(host->dma_rx);
-+		if (ret == -EPROBE_DEFER) {
-+			dma_release_channel(host->dma_tx);
-+			clk_put(host->fclk);
-+			goto err_free_iclk;
-+		}
-+
-+		host->dma_rx = NULL;
-+		dev_warn(host->dev, "RX DMA channel request failed\n");
-+	}
- 
- 	ret = request_irq(host->irq, mmc_omap_irq, 0, DRIVER_NAME, host);
- 	if (ret)
--- 
-2.8.1
+RG9uZywgVWxmLA0KVGhhbmtzIGZvciB5b3VyIGFkdmljZS4NCkkgd2lsbCBwdXJzdWUgeW91ciBz
+dWdnZXN0aW9ucy4NCg0KUmVnYXJkcywNClJhdWwgQmVuZXQuDQoNCi0tLS0tT3JpZ2luYWwgTWVz
+c2FnZS0tLS0tDQpGcm9tOiBEb25nIEFpc2hlbmcgW21haWx0bzpkb25nYXM4NkBnbWFpbC5jb21d
+IA0KU2VudDogMjggQXByaWwgMjAxNiAxMzoxNQ0KVG86IFJhdWwgQmVuZXQgPFJhdWwuQmVuZXRA
+bGlnaHRibHVlb3B0aWNzLmNvbT4NCkNjOiBsaW51eC1tbWNAdmdlci5rZXJuZWwub3JnDQpTdWJq
+ZWN0OiBSZTogc3VwcG9ydCBmb3IgZml4ZWQgMS44ViBlTU1DIGludGVyZmFjZQ0KDQpPbiBXZWQs
+IEFwciAyNywgMjAxNiBhdCA3OjQ0IFBNLCBSYXVsIEJlbmV0IDxSYXVsLkJlbmV0QGxpZ2h0Ymx1
+ZW9wdGljcy5jb20+IHdyb3RlOg0KPiBIaSwNCj4NCj4gSSBhbSBjdXJyZW50bHkgd29ya2luZyBv
+biBhIGRlc2lnbiB1c2luZyBpLk1YNlNMIGFuZCBMaW51eCBLZXJuZWwgMy4xNC41Mi4gVGhvdWdo
+IEkgYmVsaWV2ZSBtYXkgcXVlc3Rpb24gc3RpbGwgYXBwbGllcyB0byBsYXRlc3QgTU1DIGNvZGUu
+DQo+IE91ciBkZXNpZ24gdXNlcyBhbiBlTU1DIGFzIGJvb3QgZGV2aWNlIGFuZCBtYWluIHN0b3Jh
+Z2UgKGllOiBpdCBjb250YWlucyB1LWJvb3QsIGtlcm5lbCwgZHRiIGFuZCByb290ZnMpLg0KPg0K
+PiBUaGUgZU1NQyBJL08gcmFpbCBpcyBmaXhlZCBpbiBoYXJkd2FyZSB0byAxLjhWb2x0cy4NCj4g
+VGhlIFByb2Nlc3NvciBTRElPIEkvTyByYWlsIGlzIGNvbnRyb2xsZWQgYnkgdGhlIE1NQyBkcml2
+ZXIuDQo+DQo+IEluIDMuMTQuNTIsIHRoZSBNTUMgZHJpdmVyIHNldHMgcHJvY2Vzc29yIFNESU8g
+cmFpbCB0byAzdjMgcGVyIGRlZmF1bHQsIGFuZCBvbmx5IHdoZW4gdXNpbmcgSFMgRERSIG1vZGVz
+ICh3aGljaCBkbyBub3QgYXBwbHkgaW4gb3VyIGNhc2UpIHdvdWxkIGl0IHNldCBpdCB0byAxLjhW
+Lg0KPg0KPiBJIGhhdmUgc2VlbiB0aGF0IHN0YXJ0aW5nIG9uIDMuMTYsIHRoZSBmdW5jdGlvbiBw
+b3dlcl91cCgpIGluIGRyaXZlcnMvbW1jL2NvcmUvY29yZS5jIGF0dGVtcHRzIGF0IHNldHRpbmcg
+dGhlIHJlZ3VsYXRvciB0byAzdjMsIGZhaWxpbmcgdGhhdCBpdCB0cmllcyAxdjgsIGZhaWxpbmcg
+dGhhdCBpdCB0cmllcyAxdjIuDQo+DQo+IFNvIEkgcGF0Y2hlZCBteSBrZXJuZWwgd2l0aCB0aGF0
+LCBhbmQgZGVmaW5lZCBhIGZpeGVkIHJlZ3VsYXRvciB3aXRoIDF2OCBpbiBteSBkdHMsIGFuZCBz
+ZXQgdGhlIHZxbW1jLXN1cHBseSB0byBwb2ludCB0byBpdC4NCj4gQnV0IHRoYXQgZG9lc24ndCB3
+b3JrLCBiZWNhdXNlIHBvd2VyX3VwKCkgdWx0aW1hdGVseSB0cmllcyB0byBjYWxsIA0KPiBzZXRf
+dm9sdGFnZSgpIG9uIHRoZSB2cW1tYyByZWd1bGF0b3IsIHdoaWNoIGRvZXNuJ3Qgc2VlbSB0byBl
+eGlzdCBmb3IgDQo+ICJyZWd1bGF0b3ItZml4ZWQiIHR5cGUgb2YgcmVndWxhdG9ycywgYW5kIGhl
+bmNlIGl0IGZhaWxzIGluIHNldHRpbmcgDQo+IGFsbCB0aGUgcmFpbHMsIHdoaWNoIHVsdGltYXRl
+bHkgbWVhbnMgdGhhdCBpdCBzZXRzIGl0IHRvIDN2MyAoJ2NhdXNlIA0KPiB0aGF0IGlzIHRoZSBk
+ZWZhdWx0L2luaXRpYWwgdmFsdWUgb2YgdGhlIGZpZWxkIGluIHRoZSBpb3Mgc3RydWN0KQ0KPg0K
+DQpJdCBzZWVtcyB0aGUgMy42IGtlcm5lbCB5b3UgdHJpZWQgbWF5IHN0aWxsIG5vdCBzdXBwb3J0
+IHNldCB2b2x0YWdlIGZvciBmaXhlZCByZWd1bGF0b3IuDQpCdXQgaSB0cmllZCB0aGUgbGF0ZXN0
+IGtlcm5lbCBhbHJlYWR5IHN1cHBvcnRzIGl0Lg0KDQo+IFNvIG15IHF1ZXN0aW9uIGlzOiBob3cg
+YW0gSSBzdXBwb3NlZCB0byBzZXR1cCB0aGUgTU1DIGRyaXZlciBpbiBteSBzY2VuYXJpbyAoSS9P
+IGF0IDEuOFYgYWx3YXlzKSA/DQo+IChJIGtub3cgSSBjYW4gZ28gYW5kIGZvcmNlIHRoZSByYWls
+IHRvIDEuOFYgYnkgaGFja2luZyANCj4gZHJpdmVycy9tbWMvaG9zdC9zZGhjaS1lc2RoYy1pbXgu
+YywgYnV0IEkgd291bGQgdmVyeSBtdWNoIHByZWZlciB0byANCj4gYXZvaWQgdGhhdCkNCj4NCg0K
+UGxzIHRyeSB0aGUgb3B0aW9uIDIgYXMgVWxmIHBvaW50ZWQuDQoNCllvdSBjYW4gcmVmZXIgdG8g
+dGhpcyBwYXRjaDoNCmNvbW1pdCBjMDBkYzM1OWU1ZTBiMTBkZTk5MzY1MWQ4ZTczZTYwYzQxYmYy
+OWNkDQpBdXRob3I6IEJqb3JuIEFuZGVyc3NvbiA8Ympvcm5Aa3J5by5zZT4NCkRhdGU6ICAgV2Vk
+IEZlYiA1IDEyOjMwOjI2IDIwMTQgLTA4MDANCg0KICAgIHJlZ3VsYXRvcjogY29yZTogQWxsb3cg
+cmVndWxhdG9yX3NldF92b2x0YWdlIGZvciBmaXhlZCByZWd1bGF0b3JzDQoNCiAgICBNYWtlIGl0
+IG9rYXkgdG8gY2FsbCByZWd1bGF0b3Jfc2V0X3ZvbHRhZ2Ugb24gcmVndWxhdG9ycyB3aXRoIGZp
+eGVkDQogICAgdm9sdGFnZSBpZiB0aGUgcmVxdWVzdGVkIHJhbmdlIG92ZXJsYXBzIHRoZSBjdXJy
+ZW50L2NvbmZpZ3VyZWQgdm9sdGFnZS4NCg0KICAgIFNpZ25lZC1vZmYtYnk6IEJqb3JuIEFuZGVy
+c3NvbiA8Ympvcm4uYW5kZXJzc29uQHNvbnltb2JpbGUuY29tPg0KICAgIFNpZ25lZC1vZmYtYnk6
+IE1hcmsgQnJvd24gPGJyb29uaWVAbGluYXJvLm9yZz4NCg0KZGlmZiAtLWdpdCBhL2RyaXZlcnMv
+cmVndWxhdG9yL2NvcmUuYyBiL2RyaXZlcnMvcmVndWxhdG9yL2NvcmUuYyBpbmRleCBiMzhhNmI2
+NjllOGMuLjBjZDFhM2I4ZTU4OSAxMDA2NDQNCi0tLSBhL2RyaXZlcnMvcmVndWxhdG9yL2NvcmUu
+Yw0KKysrIGIvZHJpdmVycy9yZWd1bGF0b3IvY29yZS5jDQpAQCAtMjM5NSw2ICsyMzk1LDcgQEAg
+aW50IHJlZ3VsYXRvcl9zZXRfdm9sdGFnZShzdHJ1Y3QgcmVndWxhdG9yICpyZWd1bGF0b3IsIGlu
+dCBtaW5fdVYsIGludCBtYXhfdVYpDQogICAgICAgIHN0cnVjdCByZWd1bGF0b3JfZGV2ICpyZGV2
+ID0gcmVndWxhdG9yLT5yZGV2Ow0KICAgICAgICBpbnQgcmV0ID0gMDsNCiAgICAgICAgaW50IG9s
+ZF9taW5fdVYsIG9sZF9tYXhfdVY7DQorICAgICAgIGludCBjdXJyZW50X3VWOw0KDQogICAgICAg
+IG11dGV4X2xvY2soJnJkZXYtPm11dGV4KTsNCg0KQEAgLTI0MDUsNiArMjQwNiwxOSBAQCBpbnQg
+cmVndWxhdG9yX3NldF92b2x0YWdlKHN0cnVjdCByZWd1bGF0b3IgKnJlZ3VsYXRvciwgaW50IG1p
+bl91ViwgaW50IG1heF91VikNCiAgICAgICAgaWYgKHJlZ3VsYXRvci0+bWluX3VWID09IG1pbl91
+ViAmJiByZWd1bGF0b3ItPm1heF91ViA9PSBtYXhfdVYpDQogICAgICAgICAgICAgICAgZ290byBv
+dXQ7DQoNCisgICAgICAgLyogSWYgd2UncmUgdHJ5aW5nIHRvIHNldCBhIHJhbmdlIHRoYXQgb3Zl
+cmxhcHMgdGhlIGN1cnJlbnQgdm9sdGFnZSwNCisgICAgICAgICogcmV0dXJuIHN1Y2Nlc2Z1bGx5
+IGV2ZW4gdGhvdWdoIHRoZSByZWd1bGF0b3IgZG9lcyBub3Qgc3VwcG9ydA0KKyAgICAgICAgKiBj
+aGFuZ2luZyB0aGUgdm9sdGFnZS4NCisgICAgICAgICovDQorICAgICAgIGlmICghKHJkZXYtPmNv
+bnN0cmFpbnRzLT52YWxpZF9vcHNfbWFzayAmIFJFR1VMQVRPUl9DSEFOR0VfVk9MVEFHRSkpIHsN
+CisgICAgICAgICAgICAgICBjdXJyZW50X3VWID0gX3JlZ3VsYXRvcl9nZXRfdm9sdGFnZShyZGV2
+KTsNCisgICAgICAgICAgICAgICBpZiAobWluX3VWIDw9IGN1cnJlbnRfdVYgJiYgY3VycmVudF91
+ViA8PSBtYXhfdVYpIHsNCisgICAgICAgICAgICAgICAgICAgICAgIHJlZ3VsYXRvci0+bWluX3VW
+ID0gbWluX3VWOw0KKyAgICAgICAgICAgICAgICAgICAgICAgcmVndWxhdG9yLT5tYXhfdVYgPSBt
+YXhfdVY7DQorICAgICAgICAgICAgICAgICAgICAgICBnb3RvIG91dDsNCisgICAgICAgICAgICAg
+ICB9DQorICAgICAgIH0NCisNCiAgICAgICAgLyogc2FuaXR5IGNoZWNrICovDQogICAgICAgIGlm
+ICghcmRldi0+ZGVzYy0+b3BzLT5zZXRfdm9sdGFnZSAmJg0KICAgICAgICAgICAgIXJkZXYtPmRl
+c2MtPm9wcy0+c2V0X3ZvbHRhZ2Vfc2VsKSB7DQoNClJlZ2FyZHMNCkRvbmcgQWlzaGVuZw0KDQo+
+IFRoYW5rcyAsDQo+IFJhdWwuDQo+DQo+DQo+IC0tDQo+IFRvIHVuc3Vic2NyaWJlIGZyb20gdGhp
+cyBsaXN0OiBzZW5kIHRoZSBsaW5lICJ1bnN1YnNjcmliZSBsaW51eC1tbWMiIA0KPiBpbiB0aGUg
+Ym9keSBvZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZnZXIua2VybmVsLm9yZyBNb3JlIG1ham9y
+ZG9tbyANCj4gaW5mbyBhdCAgaHR0cDovL3ZnZXIua2VybmVsLm9yZy9tYWpvcmRvbW8taW5mby5o
+dG1sDQo=
