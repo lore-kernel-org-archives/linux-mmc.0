@@ -1,70 +1,99 @@
-From: Jisheng Zhang <jszhang-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>
-Subject: Re: [PATCH 0/3] Patches to allow consistent mmc / mmcblk numbering
-Date: Fri, 29 Apr 2016 10:18:36 +0800
-Message-ID: <20160429101836.060ad087@xhacker>
-References: <1461884805-29466-1-git-send-email-dianders@chromium.org>
+From: Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
+Subject: [PATCH v2 0/6] Add enhanced strobe support for emmc version 5.1 or
+ later
+Date: Fri, 29 Apr 2016 10:42:31 +0800
+Message-ID: <1461897751-28810-1-git-send-email-shawn.lin@rock-chips.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="US-ASCII"
+Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1461884805-29466-1-git-send-email-dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Douglas Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org
-Cc: shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org, adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, stefan-XLVq0VzYD2Y@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, computersforpeace-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org, dmitry.torokhov-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, vbyravarasu-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org, justin.wang-lxIno14LUO0EEoCn2XhGlw@public.gmane.org, ksumrall-z5hGa2qSFaRBDgjK7y7TUQ@public.gmane.org, lars-Qo5EllUWu/uELgA04lAiVw@public.gmane.org, dtor-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org, jonathanh-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org, huangtao-TNX95d0MmH7DzftRWevZcw@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, pawel.moll-5wv7dgnIgG8@public.gmane.org, ijc+devicetree-KcIKpvwj1kUDXYZnReoRVg@public.gmane.org, galak-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, lporzio-AL4WhLSQfzjQT0dZR+AlfA@public.gmane.org, robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, chuanxiao.dong-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, chaotian.jing-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org, sergei.shtylyov-M4DtvfQ/ZS1MRgGoP+s0PdBPR1lH4CV8@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, sudeep.holla-5wv7dgnIgG8@public.gmane.org
+Return-path: <linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-rockchip>,
+ <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-rockchip/>
+List-Post: <mailto:linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+List-Help: <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-rockchip>,
+ <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
+Sender: "Linux-rockchip" <linux-rockchip-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+Errors-To: linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+To: Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Doug Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, Heiko Stuebner <heiko-4mtYJXux2i+zQB+pC5nmwQ@public.gmane.org>, Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Michal Simek <michal.simek-gjFFaj9aHVfQT0dZR+AlfA@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Jaehoon Chung <jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, soren.brinkmann-gjFFaj9aHVfQT0dZR+AlfA@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
 
-Dear Douglas,
 
-On Thu, 28 Apr 2016 16:06:42 -0700 Douglas Anderson wrote:
+Hello Ulf and Adrian,
 
-> This series picks patches from various different places to produce what
-> I consider the best solution to getting consistent mmc and mmcblk
-> ordering.
-> 
-> Why consistent ordering and why not just use UUIDs?  IMHO consistent
-> ordering solves a few different problems:
-> 
-> 1. For poor, feeble-minded humans like me, have sane numbering for
->    devices helps a lot.  When grepping through dmesg it's terribly handy
->    if a given SDMMC device has a consistent number.  I know that I can
->    do "dmesg | grep mmc0" or "dmesg | grep mmcblk0" to find info about
->    the eMMC.  I know that I can do "dmesg | grep mmc1" to find info
->    about the SD card slot.  I don't want it to matter which one probed
->    first, I don't want it to matter if I'm working on a variant of the
->    hardware that has the SD card slot disabled, and I don't want to care
->    what my boot device was.  Worrying about what device number I got
->    increases my cognitive load.
-> 
-> 2. There are cases where it's not trivially easy during development to
->    use the UUID.  Specifically I work a lot with coreboot / depthcharge
->    as a BIOS.  When configured properly, that BIOS has a nice feature to
->    allow you to fetch the kernel and kernel command line from TFTP by
->    pressing Ctrl-N.  In this particular case the BIOS doesn't actually
->    know which disk I'd like for my root filesystem, so it's not so easy
->    for it to put the right UUID into the command line.  For this
->    purpose, knowing that "mmcblk0" will always refer to eMMC is handy.
-> 
-> 
-> Jaehoon Chung (1):
->   Documentation: mmc: Document mmc aliases
-> 
-> Stefan Agner (2):
->   mmc: read mmc alias from device tree
->   mmc: use SD/MMC host ID for block device name ID
+This patch is going to support enhanced strobe function
+for emmc version 5.1+ introduced by JEDEC recently.
 
-We also need this feature.
+Enchanced strobe is a optional function, so we add a new cap* for drivers to
+decide whether to use it.
 
-Thanks so much for upstreaming the series.
-Jisheng
+When introduing hs400 mode, JEDEC asks controllers to use data strobe line
+to latch the data from emmc devives. But for cmd-reponse, not mentioned yet.
+Since emmc version 5.1 published, JEDEC adds enhanced strobe function to deal
+with cmd-response the same way as data-read. This feature is optional.
 
-> 
->  Documentation/devicetree/bindings/mmc/mmc.txt | 11 +++++++++++
->  drivers/mmc/card/block.c                      |  3 ++-
->  drivers/mmc/core/host.c                       | 25 ++++++++++++++++++++-----
->  3 files changed, 33 insertions(+), 6 deletions(-)
-> 
+>From the spec(section 6.6.2.3), the standard scenario to select HS400 enhanced
+strobe mode illustrated like this:
+(1) set HS_TIMIMG (Highspeed)
+(2) Host change freq to <= 52Mhz
+(3) set the bus width to Enhanced strobe and DDR8Bit(CMD6), EXT_CSD[183] = 0x86
+instead of 0x80
+(4) set HS_TIMING to 0x3 (HS400)
+(5) Host change freq to <= 200Mhz
+(6) Host select HS400 enhanced strobe complete
 
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+I can't find a upstreamed controller claimed to support it, as well as the
+mmc stack. But my "arasan,sdhci-5.1" actually supports this function. So I decide
+to work for this part.
+
+By looking into the SDHCI spec, I find there isn't any registers to enable the
+enhanced strobe function. But from my "arasan,sdhci-5.1" databook, it describes a
+register called VENDOR_REGISTER(0x78) to trigger this mode. So I guess other sdhci
+variant drivers may also need s vendor specific register to deal with it.
+
+If we are sure that our controller supports enhanced strobe mode, just add
+mmc-hs400-enhanced-strobe in DT. Once emmc devices claims to support this mode,
+we enable it automatically. Of course, other sdhci*/non-sdhci drivers should
+implement/overwrite the prepare_enhanced_strobe by themselves. I believe all of the
+platforms which need to support this mode should do some basic preparation for their
+controllers. Currently I just limit the callback within ths scope of arasan,sdhci-5.1,
+but I prone to believe arasan will use VENDOR_REGISTER to tirgger this mode from now on
+because I do believe vendor will consider the registers' compatibility.
+
+With this patchset applied, we can successfully run in HS400 enhanced strobe mode on
+RK3399 platform with Samsung eMMC KLMBG2JENB-B041(v5.1, 16GB).
+
+mmc1: new HS400 Enhanced strobe MMC card at address 0001
+mmcblk0: mmc1:0001 AJNB4R 14.6 GiB
+mmcblk0boot0: mmc1:0001 AJNB4R partition 1 4.00 MiB
+mmcblk0boot1: mmc1:0001 AJNB4R partition 2 4.00 MiB
+mmcblk0rpmb: mmc1:0001 AJNB4R partition 3 4.00 MiB
+
+
+Changes in v2:
+- switch to HS400ES from Highspeed mode directly
+
+Shawn Lin (6):
+  Documentation: mmc: add mmc-hs400-enhanced-strobe
+  mmc: core: add mmc-hs400-enhanced-strobe support
+  mmc: core: implement enhanced strobe support
+  mmc: debugfs: add HS400 enhanced strobe description
+  mmc: sdhci: implement enhanced strobe callback
+  mmc: sdhci-of-arasan: overwrite enhanced strobe callback
+
+ Documentation/devicetree/bindings/mmc/mmc.txt |  1 +
+ drivers/mmc/core/bus.c                        |  3 +-
+ drivers/mmc/core/debugfs.c                    |  4 +-
+ drivers/mmc/core/host.c                       |  2 +
+ drivers/mmc/core/mmc.c                        | 77 ++++++++++++++++++++++++---
+ drivers/mmc/host/sdhci-of-arasan.c            | 22 ++++++++
+ drivers/mmc/host/sdhci.c                      | 11 ++++
+ include/linux/mmc/card.h                      |  1 +
+ include/linux/mmc/host.h                      | 18 +++++++
+ include/linux/mmc/mmc.h                       |  3 ++
+ 10 files changed, 134 insertions(+), 8 deletions(-)
+
+-- 
+2.3.7
