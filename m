@@ -1,69 +1,274 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 0/3] Patches to allow consistent mmc / mmcblk numbering
-Date: Fri, 29 Apr 2016 09:21:19 +0200
-Message-ID: <CAPDyKFrip0M_hqVxqnTN=-UF7PnL6peEVR2o1dJRjYkHVMR-1Q@mail.gmail.com>
-References: <1461884805-29466-1-git-send-email-dianders@chromium.org>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH 04/23] mmc: sdhci: re-factor sdhci_start_signal_voltage()
+Date: Fri, 29 Apr 2016 10:32:36 +0300
+Message-ID: <57230E14.7060704@intel.com>
+References: <1460741387-23815-1-git-send-email-aisheng.dong@nxp.com>
+ <1460741387-23815-5-git-send-email-aisheng.dong@nxp.com>
+ <571A0E5E.4090904@intel.com>
+ <CAA+hA=SygBBr+-C_r4Geodni+hj2Mg71o+ecVq_AD8vv22=UPA@mail.gmail.com>
+ <5721208C.2090509@intel.com>
+ <20160428030941.GA23362@shlinux2.ap.freescale.net>
+ <5721B03A.5030006@intel.com>
+ <20160428131451.GA27560@shlinux2.ap.freescale.net>
+ <572211D9.5010605@intel.com>
+ <20160428142843.GE27560@shlinux2.ap.freescale.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1461884805-29466-1-git-send-email-dianders@chromium.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Douglas Anderson <dianders@chromium.org>
-Cc: Jaehoon Chung <jh80.chung@samsung.com>, Shawn Lin <shawn.lin@rock-chips.com>, Adrian Hunter <adrian.hunter@intel.com>, Stefan Agner <stefan@agner.ch>, linux-mmc <linux-mmc@vger.kernel.org>, Brian Norris <computersforpeace@gmail.com>, Dmitry Torokhov <dmitry.torokhov@gmail.com>, Mark Rutland <mark.rutland@arm.com>, Venu Byravarasu <vbyravarasu@nvidia.com>, =?UTF-8?B?SnVzdGluIFdhbmcgKOeOi+S4gSk=?= <justin.wang@spreadtrum.com>, ksumrall@android.com, Lars-Peter Clausen <lars@metafoo.de>, Dmitry Torokhov <dtor@chromium.org>, Jon Hunter <jonathanh@nvidia.com>, Tao Huang <huangtao@rock-chips.com>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, =?UTF-8?Q?Pawe=C5=82_Moll?= <pawel.moll@arm.com>, Ian Campbell <ijc+devicetree@hellion.org.uk>, Kumar Gala <galak@codeaurora.org>, "Luca Porzio (lporzio)" <lporzio@micron.com>, Rob Herring <robh+dt@kernel.org>, Dong,
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mga04.intel.com ([192.55.52.120]:11685 "EHLO mga04.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1750719AbcD2Hg1 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 29 Apr 2016 03:36:27 -0400
+In-Reply-To: <20160428142843.GE27560@shlinux2.ap.freescale.net>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Dong Aisheng <dongas86@gmail.com>
+Cc: Dong Aisheng <aisheng.dong@nxp.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, Chris Ball <chris@printf.net>, Shawn Guo <shawnguo@kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, haibo.chen@nxp.com
 
-On 29 April 2016 at 01:06, Douglas Anderson <dianders@chromium.org> wrote:
-> This series picks patches from various different places to produce what
-> I consider the best solution to getting consistent mmc and mmcblk
-> ordering.
->
-> Why consistent ordering and why not just use UUIDs?  IMHO consistent
-> ordering solves a few different problems:
->
-> 1. For poor, feeble-minded humans like me, have sane numbering for
->    devices helps a lot.  When grepping through dmesg it's terribly handy
->    if a given SDMMC device has a consistent number.  I know that I can
->    do "dmesg | grep mmc0" or "dmesg | grep mmcblk0" to find info about
->    the eMMC.  I know that I can do "dmesg | grep mmc1" to find info
->    about the SD card slot.  I don't want it to matter which one probed
->    first, I don't want it to matter if I'm working on a variant of the
->    hardware that has the SD card slot disabled, and I don't want to care
->    what my boot device was.  Worrying about what device number I got
->    increases my cognitive load.
->
-> 2. There are cases where it's not trivially easy during development to
->    use the UUID.  Specifically I work a lot with coreboot / depthcharge
->    as a BIOS.  When configured properly, that BIOS has a nice feature to
->    allow you to fetch the kernel and kernel command line from TFTP by
->    pressing Ctrl-N.  In this particular case the BIOS doesn't actually
->    know which disk I'd like for my root filesystem, so it's not so easy
->    for it to put the right UUID into the command line.  For this
->    purpose, knowing that "mmcblk0" will always refer to eMMC is handy.
->
->
-> Jaehoon Chung (1):
->   Documentation: mmc: Document mmc aliases
->
-> Stefan Agner (2):
->   mmc: read mmc alias from device tree
->   mmc: use SD/MMC host ID for block device name ID
->
->  Documentation/devicetree/bindings/mmc/mmc.txt | 11 +++++++++++
->  drivers/mmc/card/block.c                      |  3 ++-
->  drivers/mmc/core/host.c                       | 25 ++++++++++++++++++++-----
->  3 files changed, 33 insertions(+), 6 deletions(-)
->
-> --
-> 2.8.0.rc3.226.g39d4020
->
+On 28/04/16 17:28, Dong Aisheng wrote:
+> On Thu, Apr 28, 2016 at 04:36:25PM +0300, Adrian Hunter wrote:
+>> On 28/04/16 16:14, Dong Aisheng wrote:
+>>> On Thu, Apr 28, 2016 at 09:39:54AM +0300, Adrian Hunter wrote:
+>>>> On 28/04/16 06:09, Dong Aisheng wrote:
+>>>>> On Wed, Apr 27, 2016 at 11:26:52PM +0300, Adrian Hunter wrote:
+>>>>>> On 24/04/2016 12:14 p.m., Dong Aisheng wrote:
+>>>>>>> Hi Adrian,
+>>>>>>>
+>>>>>>> Thanks for the review first.
+>>>>>>>
+>>>>>>> On Fri, Apr 22, 2016 at 7:43 PM, Adrian Hunter <adrian.hunter@intel.com> wrote:
+>>>>>>>> On 15/04/16 20:29, Dong Aisheng wrote:
+>>>>>>>>> Handle host and regulator signal voltage switch separately.
+>>>>>>>>> Move host signal voltage switch code into a separated function
+>>>>>>>>> sdhci_do_signal_voltage_switch() first, the following patches will
+>>>>>>>>> remove the regulator voltage switch code and use the common
+>>>>>>>>> mmc_regulator_set_vqmmc() instead.
+>>>>>>>>
+>>>>>>>> You have changed the order that things are done.
+>>>>>>>
+>>>>>>> Yes, the oder changes a bit that we always do controller voltage switch first.
+>>>>>>> I suppose the order is irrelevant here since i don't recall any
+>>>>>>> requirement from card.
+>>>>>>>
+>>>>>>> Actually the original order is also a bit mass.
+>>>>>>> e.g.
+>>>>>>> For MMC_SIGNAL_VOLTAGE_330, switch controller first, then vqmmc.
+>>>>>>> But for MMC_SIGNAL_VOLTAGE_180, switch vqmmc first, then controller.
+>>>>>>> It looks to us the original one also order irrelevant.
+>>>>>>>
+>>>>>>>> There is no way to know
+>>>>>>>> what that will break, so let's not do that.  What about just changing
+>>>>>>>> regulator_set_voltage() to mmc_regulator_set_vqmmc()?
+>>>>>>>>
+>>>>>>>
+>>>>>>> Currently what i can think out VIO switch using are three cases: (Pls
+>>>>>>> help add if any)
+>>>>>>> 1) Both host IO and card IO use external vqmmc to do switch
+>>>>>>> (e.g eMMC 1.8V DDR/HS200/HS400 mode)
+>>>>>>>
+>>>>>>> eMMC has no IO voltage switch protocol and requirement, so usually
+>>>>>>> board designed
+>>>>>>> using fixed 1.8V for eMMC and host IO.
+>>>>>>> Event it's switchable, it should be done in the first mmc_power_up().
+>>>>>>> Dynamical switch later may cause eMMC unable to work properly.
+>>>>>>> (We have been confirmed about this issue by many eMMC vendors
+>>>>>>> like Micron and Sandisk. I'm not sure if any exceptions in the community
+>>>>>>> still doing VIO dynamical switch for eMMC, if yes, please help share
+>>>>>>> the experience!).
+>>>>>>>
+>>>>>>> Event some people still do dynamical IO switch for eMMC, since eMMC
+>>>>>>> spec has no requirement, so the order should also not care.
+>>>>>>>
+>>>>>>> 2) Host using controller IO switch while card using standard CMD (SD/SDIO3.0)
+>>>>>>>
+>>>>>>> SD/SDIO 3.0 spec defines the standard IO switch process and using it's internal
+>>>>>>> regulator to do card IO voltage switch. It does not use external vqmmc
+>>>>>>> regulator.
+>>>>>>> So order irrelevant too.
+>>>>>>>
+>>>>>>> 3) Host using controller IO switch while card using external vqmmc
+>>>>>>> (special SDIO3.0 or eMMC)
+>>>>>>> I have met some special SDIO3.0 card like Broadcom WiFi which does not follow
+>>>>>>> the spec and using external regulator for card IO voltage.
+>>>>>>> Usually it's required to fix to 1.8v and also not order irrelevant.
+>>>>>>>
+>>>>>>> For eMMC, refer to case 1), it should be fixed to 1.8v at power up.
+>>>>>>>
+>>>>>>> So it looks all cases seems are not order required.
+>>>>>>
+>>>>>> I don't agree that there is any way to know that other host controllers
+>>>>>> are not affected.  I don't want a repeat of sdhci_set_power().
+>>>>>>
+>>>>>
+>>>>> Can you share some more info about sdhci_set_power() issue?
+>>>>> I'd like to see if we are same the issue.
+>>>>
+>>>> Not the same issue, but the same concept.  People changing the code under
+>>>> the impression that their way was correct, and then breaking other people's
+>>>> drivers.  Check the git history and mailing list.
+>>>>
+>>>> 	http://marc.info/?l=linux-mmc&m=145880454106474&w=2
+>>>>
+>>>
+>>> Yes, now i understand your concern.
+>>>
+>>>>>
+>>>>> BTW, IMHO i don't think we should stop keep moving only afraid of potential
+>>>>> break if it's correct way. Because .start_signal_voltage_switch() interface
+>>>>> seems shouldn't be order dependant.
+>>>>> If it is, then it should be fixed and handled in high layer like MMC core
+>>>>> rather than in host driver. Right?
+>>>>
+>>>> The SDHCI spec. does not define how to use external regulators, so there is
+>>>> no "correct way".
+>>>>
+>>>
+>>> The "correct way" i mean here is .start_signal_voltage_switch() shouldn't be
+>>> order dependant, would you agree?
+>>
+>> No.  There is no way to know if the regulator must be switched before or
+>> after the host controller register is changed.
+>>
+> 
+> Hmm... If there is no way to know the correct order, how can we
+> assume the exist order is correct?
 
-I believe you need to re-base this patchset as things have changed.
+There is no correct order.  This is outside the SDHCI spec. and so belongs
+to individual drivers.
 
-Currently the mmc host index that gets picked at host registration
-point, will also be given to the corresponding mmc block device index.
-That's probably solving most of your concerns, but I am open to extend
-this to cover aliases as well, as to allow it to be *really*
-deterministic.
+If it mattered we could push the ugly code down onto the drivers, and then
+driver maintainers could opt to use the new pretty code.  However at the
+moment there is a lot more important work, so I would want to avoid that
+code churn.
 
-Kind regards
-Uffe
+> And i already pointed out, the exist order is also confused that
+> it switch controller first then vqmmc for 3.3v and switch vqmmc
+> first, then controller for 1.8v
+> 
+> If we can't sure the exist order is correct, why do we block
+> the changing to correctly use mmc_regulator_set_vqmmc() to
+> improve the driver stability?
+
+Not sure what you mean here.  I have already showed how we can use
+mmc_regulator_set_vqmmc().
+
+> 
+> And actually the change is not made arbitrarily, i already list
+> all possibilities based on my knowledge. People can raise more
+> if any.
+
+You are assuming every driver has a maintainer and every maintainer is
+following this thread, and understands how it might affect all the
+different versions of their hardware.  That is extremely unlikely.
+
+> The target is correct that we make start_signal_voltage_switch()
+> order independant.
+> It's worth a try even there's a potential very low possibility
+> break IMHO.
+
+And so we disagree.
+
+Aren't your needs met by changing to use mmc_regulator_set_vqmmc() the way I
+suggested?
+
+> 
+> Or else if we can find a better way to switch to
+> mmc_regulator_set_vqmmc i would also love to try.
+>  
+> Maybe we need more people's thought on it!
+> 
+> Ulf,
+> Would you give some inputs?
+> 
+> Regards
+> Dong Aisheng
+> 
+>>>
+>>>> We have to move forward *and* avoid potential breakage.
+>>>>
+>>>
+>>> If really break happens, fix platform driver, not common SDHCI.
+>>> That's the same thing you done for sdhci_set_power().
+>>
+>> In that case the original behaviour was kept in the common SDHCI code and
+>> the driver had to provide its own way.
+>>
+>>>
+>>>> In this case it seems me that the risk of breakage outweighs the value of
+>>>> prettier code.
+>>>>
+>>>
+>>> Actually my main purpose is patch 6: using mmc_regulator_set_vqmmc()
+>>> which is worth and it does improve the stability and eliminate the
+>>> potential signal issue.
+>>> However it's not the same way as you proposed.
+>>> See below.
+>>>
+>>>> By the way, there are ways to get rid of the ugliness - such as pushing it down
+>>>> into individual drivers.
+>>>>
+>>>>>
+>>>>>> Please instead send a patch for just using mmc_regulator_set_vqmmc()
+>>>>>> in place of regulator_set_voltage().
+>>>>>
+>>>>> Just using mmc_regulator_set_vqmmc() also changes the order which
+>>>>> is the same situation.
+>>>>
+>>>> How so?  It looks like a drop-in replacement to me:
+>>>>
+>>>
+>>> Sorry, i did not get that you want to change like below.
+>>> However, it looks that it does not make too much sense to call
+>>> mmc_regulator_set_vqmmc() for each VOLTAGE type like 3.3v/1.8v/1.2v
+>>> which introduces ugliness because mmc_regulator_set_vqmmc()
+>>> already handles it internally, right?
+>>> Only because we want to keep an "ASSUMED" order as before?
+>>
+>> Yes
+>>
+>>>
+>>> Regards
+>>> Dong Aisheng
+>>>
+>>>> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+>>>> index 94cffa77490a..69b4d48aff87 100644
+>>>> --- a/drivers/mmc/host/sdhci.c
+>>>> +++ b/drivers/mmc/host/sdhci.c
+>>>> @@ -1757,8 +1757,7 @@ static int sdhci_do_start_signal_voltage_switch(struct sdhci_host *host,
+>>>>  		sdhci_writew(host, ctrl, SDHCI_HOST_CONTROL2);
+>>>>  
+>>>>  		if (!IS_ERR(mmc->supply.vqmmc)) {
+>>>> -			ret = regulator_set_voltage(mmc->supply.vqmmc, 2700000,
+>>>> -						    3600000);
+>>>> +			ret = mmc_regulator_set_vqmmc(mmc, ios);
+>>>>  			if (ret) {
+>>>>  				pr_warn("%s: Switching to 3.3V signalling voltage failed\n",
+>>>>  					mmc_hostname(mmc));
+>>>> @@ -1779,8 +1778,7 @@ static int sdhci_do_start_signal_voltage_switch(struct sdhci_host *host,
+>>>>  		return -EAGAIN;
+>>>>  	case MMC_SIGNAL_VOLTAGE_180:
+>>>>  		if (!IS_ERR(mmc->supply.vqmmc)) {
+>>>> -			ret = regulator_set_voltage(mmc->supply.vqmmc,
+>>>> -					1700000, 1950000);
+>>>> +			ret = mmc_regulator_set_vqmmc(mmc, ios);
+>>>>  			if (ret) {
+>>>>  				pr_warn("%s: Switching to 1.8V signalling voltage failed\n",
+>>>>  					mmc_hostname(mmc));
+>>>> @@ -1810,8 +1808,7 @@ static int sdhci_do_start_signal_voltage_switch(struct sdhci_host *host,
+>>>>  		return -EAGAIN;
+>>>>  	case MMC_SIGNAL_VOLTAGE_120:
+>>>>  		if (!IS_ERR(mmc->supply.vqmmc)) {
+>>>> -			ret = regulator_set_voltage(mmc->supply.vqmmc, 1100000,
+>>>> -						    1300000);
+>>>> +			ret = mmc_regulator_set_vqmmc(mmc, ios);
+>>>>  			if (ret) {
+>>>>  				pr_warn("%s: Switching to 1.2V signalling voltage failed\n",
+>>>>  					mmc_hostname(mmc));
+>>>>
+>>>>
+>>>>
+>>>
+>>
+> 
+
