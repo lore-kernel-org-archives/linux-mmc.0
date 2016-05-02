@@ -1,130 +1,201 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH RFC 3/3] mmc: block: Fix tuning (by avoiding it) for RPMB
-Date: Mon, 2 May 2016 12:31:52 +0300
-Message-ID: <57271E88.5000805@intel.com>
-References: <1461245314-6282-1-git-send-email-adrian.hunter@intel.com>
- <1461245314-6282-4-git-send-email-adrian.hunter@intel.com>
- <CAPDyKFqpvZr3c8Skmc=pnE0m9EQFt=C98P-Vo5TKjONDHtxBaA@mail.gmail.com>
- <5721EDDD.6060902@intel.com>
- <CAPDyKFpm4qAqCiY6+RGNg53gTjVS4Kq13YbNLEeUUZNjw3GFpQ@mail.gmail.com>
- <572209CB.6080606@intel.com>
- <CAPDyKFrw1N+vScGiScp3_uxHiA6XD2gDSY3cdRuWV59wtDHXOQ@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga04.intel.com ([192.55.52.120]:43420 "EHLO mga04.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752459AbcEBJfn (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 2 May 2016 05:35:43 -0400
-In-Reply-To: <CAPDyKFrw1N+vScGiScp3_uxHiA6XD2gDSY3cdRuWV59wtDHXOQ@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+From: Mark Brown <broonie@kernel.org>
+Subject: Applied "spi: davinci: Use dma_request_chan() for requesting DMA channel" to the spi tree
+Date: Mon, 02 May 2016 12:04:04 +0100
+Message-ID: <E1axBe0-0001mJ-5g@debutante>
+References: <1448891145-10766-12-git-send-email-peter.ujfalusi@ti.com>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1448891145-10766-12-git-send-email-peter.ujfalusi@ti.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Peter Ujfalusi <peter.ujfalusi@ti.com>
+Cc: Mark Brown <broonie@kernel.org>, vinod.koul@intel.com, arnd@arndb.de, andy.shevchenko@gmail.com, linux-kernel@vger.kernel.org, dmaengine@vger.kernel.org, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, nsekhar@ti.com, linux-spi@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Tomas Winkler <tomas.winkler@intel.com>
 
-On 02/05/16 11:24, Ulf Hansson wrote:
-> On 28 April 2016 at 15:02, Adrian Hunter <adrian.hunter@intel.com> wrote:
->> On 28/04/16 14:46, Ulf Hansson wrote:
->>> On 28 April 2016 at 13:02, Adrian Hunter <adrian.hunter@intel.com> wrote:
->>>> On 28/04/16 13:34, Ulf Hansson wrote:
->>>>> On 21 April 2016 at 15:28, Adrian Hunter <adrian.hunter@intel.com> wrote:
->>>>>> The RPMB partition only allows certain commands.  In particular,
->>>>>> the tuning command (CMD21) is not allowed -  refer JEDEC eMMC
->>>>>> standard v5.1 section 6.2.2 Command restrictions.
->>>>>>
->>>>>> To avoid tuning for RPMB, switch to High Speed mode from HS200
->>>>>> or HS400 mode if re-tuning has been enabled.  And switch back
->>>>>> when leaving RPMB.
->>>>>
->>>>> I would rather just disable re-tuning during this period, instead of
->>>>> changing the speed mode.
->>>>> The primary reason to why, is because the latency it would introduce
->>>>> to first switch to HS speed then back to HS200/400.
->>>>
->>>> I wouldn't expect RPMB accesses to be frequent enough for the latency to matter.
->>>>
->>>>>
->>>>> My concern is not the throughput as I expect read/writes request to an
->>>>> RPMB partition is rather small.
->>>>>
->>>>> Of course I realize that we need to take care when disable re-tuning.
->>>>> Perhaps we can solve that by a re-try mechanism if the RPMB request
->>>>> fails, and thus perform the re-tuning as part of the re-try?
->>>>
->>>> The interdependent nature of RPMB commands suggests that re-trying is not
->>>> possible.  It seems to me that you would have to make up a new set of
->>>> commands and start again. i.e. return an error to the user so that they can
->>>> start again.
->>>
->>> Ok.
->>>
->>> So perhaps returning -EAGAIN could work!?
->>
->> I don't think existing code would expect that.  Doesn't seem like level of
->> service I would expect from the kernel.
->>
->> And the concern is, that being an error path, it gets overlooked.
-> 
-> I guess you are right.
-> 
->>
->>>
->>>>
->>>> Another dependency is that we always need to re-tune after host runtime
->>>> suspend, which is why we always hit this problem when RPMB is accessed.  So
->>>
->>> Just to make sure I understand correctly; I would imagine you hit the
->>> problem *only* when the RPMB partition was already selected, right?
->>
->> Yes
->>
->>>
->>> Because that would then skip the switch command, and you will
->>> therefore try to re-tune after the partition has already been switched
->>> to?
->>
->> Yes
->>
->>>
->>>> to avoid errors you would either need to disable runtime PM when the RPMB
->>>> partition is selected (which might be a long time if we don't get an access
->>>> to another partition), or always switch back to the main partition (not sure
->>>> if that would mess up the RPMB command sequence though).
->>>
->>> I wouldn't mind that we switch back to the main partition when we have
->>> served an RPMB IOCTL request. Of course not in between every mmc
->>> request, in case of using the MULTI IOCTL.
->>>
->>> That would prevent the next regular mmc request on the main partition
->>> to not have to switch partition and thus get decreased latency.
->>
->> Doesn't stop us getting CRC errors because the eMMC needs tuning while in
->> the RPMB partition though.
-> 
-> That's true. My idea was that we should return -EAGAIN as error code
-> to user space for these scenarios, but I guess it's not a good idea.
-> 
-> I have given your suggested approach some more thinking. Besides the
-> latency impact, don't you think it's rather risky to switch speed
-> modes back an forth?
-> We don't know whether cards+controllers are really able to cope with
-> that, even if they should?
+The patch
 
-Yes there is some risk, although that is what we already have to do for
-re-tuning in the HS400 case.  Also I would expect it to fail straight away
-if it was going to i.e. people testing their systems would know.  Given that
-we don't have a solution at all at the moment, that seemed acceptable.
+   spi: davinci: Use dma_request_chan() for requesting DMA channel
 
-> 
-> Perhaps we could instead force a re-tune to be done before switching
-> to the RPMB partition and thus also before each RPMB request? That
-> decreases/removes the probability of getting a CRC errors because of a
-> needed re-tune, right?
+has been applied to the spi tree at
 
-Yes re-tuning beforehand should work.  I would suggest switching straight
-back afterwards as well to avoid the possibility of going out of tune while
-still switched to RPMB.
+   git://git.kernel.org/pub/scm/linux/kernel/git/broonie/spi.git 
 
-I am happy to implement that, if you agree.
+All being well this means that it will be integrated into the linux-next
+tree (usually sometime in the next 24 hours) and sent to Linus during
+the next merge window (or sooner if it is a bug fix), however if
+problems are discovered then the patch may be dropped or reverted.  
 
+You may get further e-mails resulting from automated or manual testing
+and review of the tree, please engage with people reporting problems and
+send followup patches addressing any issues that are reported if needed.
+
+If any updates are required or you are submitting further changes they
+should be sent as incremental updates against current git, existing
+patches will not be replaced.
+
+Please add any relevant lists and maintainers to the CCs when replying
+to this mail.
+
+Thanks,
+Mark
+
+>From fe5fd2540947a6c584e70f1249007dd636e62d78 Mon Sep 17 00:00:00 2001
+From: Peter Ujfalusi <peter.ujfalusi@ti.com>
+Date: Fri, 29 Apr 2016 16:10:22 +0300
+Subject: [PATCH] spi: davinci: Use dma_request_chan() for requesting DMA
+ channel
+
+With the new dma_request_chan() the client driver does not need to look for
+the DMA resource and it does not need to pass filter_fn anymore.
+By switching to the new API the driver can now support deferred probing
+against DMA.
+
+Signed-off-by: Peter Ujfalusi <peter.ujfalusi@ti.com>
+Signed-off-by: Mark Brown <broonie@kernel.org>
+---
+ drivers/spi/spi-davinci.c | 76 +++++++++++++++--------------------------------
+ 1 file changed, 24 insertions(+), 52 deletions(-)
+
+diff --git a/drivers/spi/spi-davinci.c b/drivers/spi/spi-davinci.c
+index fddb7a3be322..d36c11b73a35 100644
+--- a/drivers/spi/spi-davinci.c
++++ b/drivers/spi/spi-davinci.c
+@@ -23,7 +23,6 @@
+ #include <linux/clk.h>
+ #include <linux/dmaengine.h>
+ #include <linux/dma-mapping.h>
+-#include <linux/edma.h>
+ #include <linux/of.h>
+ #include <linux/of_device.h>
+ #include <linux/of_gpio.h>
+@@ -33,8 +32,6 @@
+ 
+ #include <linux/platform_data/spi-davinci.h>
+ 
+-#define SPI_NO_RESOURCE		((resource_size_t)-1)
+-
+ #define CS_DEFAULT	0xFF
+ 
+ #define SPIFMT_PHASE_MASK	BIT(16)
+@@ -130,8 +127,6 @@ struct davinci_spi {
+ 
+ 	struct dma_chan		*dma_rx;
+ 	struct dma_chan		*dma_tx;
+-	int			dma_rx_chnum;
+-	int			dma_tx_chnum;
+ 
+ 	struct davinci_spi_platform_data pdata;
+ 
+@@ -797,35 +792,19 @@ static irqreturn_t davinci_spi_irq(s32 irq, void *data)
+ 
+ static int davinci_spi_request_dma(struct davinci_spi *dspi)
+ {
+-	dma_cap_mask_t mask;
+ 	struct device *sdev = dspi->bitbang.master->dev.parent;
+-	int r;
+-
+-	dma_cap_zero(mask);
+-	dma_cap_set(DMA_SLAVE, mask);
+ 
+-	dspi->dma_rx = dma_request_channel(mask, edma_filter_fn,
+-					   &dspi->dma_rx_chnum);
+-	if (!dspi->dma_rx) {
+-		dev_err(sdev, "request RX DMA channel failed\n");
+-		r = -ENODEV;
+-		goto rx_dma_failed;
+-	}
++	dspi->dma_rx = dma_request_chan(sdev, "rx");
++	if (IS_ERR(dspi->dma_rx))
++		return PTR_ERR(dspi->dma_rx);
+ 
+-	dspi->dma_tx = dma_request_channel(mask, edma_filter_fn,
+-					   &dspi->dma_tx_chnum);
+-	if (!dspi->dma_tx) {
+-		dev_err(sdev, "request TX DMA channel failed\n");
+-		r = -ENODEV;
+-		goto tx_dma_failed;
++	dspi->dma_tx = dma_request_chan(sdev, "tx");
++	if (IS_ERR(dspi->dma_tx)) {
++		dma_release_channel(dspi->dma_rx);
++		return PTR_ERR(dspi->dma_tx);
+ 	}
+ 
+ 	return 0;
+-
+-tx_dma_failed:
+-	dma_release_channel(dspi->dma_rx);
+-rx_dma_failed:
+-	return r;
+ }
+ 
+ #if defined(CONFIG_OF)
+@@ -936,8 +915,6 @@ static int davinci_spi_probe(struct platform_device *pdev)
+ 	struct davinci_spi *dspi;
+ 	struct davinci_spi_platform_data *pdata;
+ 	struct resource *r;
+-	resource_size_t dma_rx_chan = SPI_NO_RESOURCE;
+-	resource_size_t	dma_tx_chan = SPI_NO_RESOURCE;
+ 	int ret = 0;
+ 	u32 spipc0;
+ 
+@@ -1044,27 +1021,15 @@ static int davinci_spi_probe(struct platform_device *pdev)
+ 		}
+ 	}
+ 
+-	r = platform_get_resource(pdev, IORESOURCE_DMA, 0);
+-	if (r)
+-		dma_rx_chan = r->start;
+-	r = platform_get_resource(pdev, IORESOURCE_DMA, 1);
+-	if (r)
+-		dma_tx_chan = r->start;
+-
+ 	dspi->bitbang.txrx_bufs = davinci_spi_bufs;
+-	if (dma_rx_chan != SPI_NO_RESOURCE &&
+-	    dma_tx_chan != SPI_NO_RESOURCE) {
+-		dspi->dma_rx_chnum = dma_rx_chan;
+-		dspi->dma_tx_chnum = dma_tx_chan;
+-
+-		ret = davinci_spi_request_dma(dspi);
+-		if (ret)
+-			goto free_clk;
+-
+-		dev_info(&pdev->dev, "DMA: supported\n");
+-		dev_info(&pdev->dev, "DMA: RX channel: %pa, TX channel: %pa, event queue: %d\n",
+-				&dma_rx_chan, &dma_tx_chan,
+-				pdata->dma_event_q);
++
++	ret = davinci_spi_request_dma(dspi);
++	if (ret == -EPROBE_DEFER) {
++		goto free_clk;
++	} else if (ret) {
++		dev_info(&pdev->dev, "DMA is not supported (%d)\n", ret);
++		dspi->dma_rx = NULL;
++		dspi->dma_tx = NULL;
+ 	}
+ 
+ 	dspi->get_rx = davinci_spi_rx_buf_u8;
+@@ -1102,8 +1067,10 @@ static int davinci_spi_probe(struct platform_device *pdev)
+ 	return ret;
+ 
+ free_dma:
+-	dma_release_channel(dspi->dma_rx);
+-	dma_release_channel(dspi->dma_tx);
++	if (dspi->dma_rx) {
++		dma_release_channel(dspi->dma_rx);
++		dma_release_channel(dspi->dma_tx);
++	}
+ free_clk:
+ 	clk_disable_unprepare(dspi->clk);
+ free_master:
+@@ -1134,6 +1101,11 @@ static int davinci_spi_remove(struct platform_device *pdev)
+ 	clk_disable_unprepare(dspi->clk);
+ 	spi_master_put(master);
+ 
++	if (dspi->dma_rx) {
++		dma_release_channel(dspi->dma_rx);
++		dma_release_channel(dspi->dma_tx);
++	}
++
+ 	return 0;
+ }
+ 
+-- 
+2.8.1
