@@ -1,105 +1,74 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v2] mmc: sdhci-of-at91: add presets setup
-Date: Mon, 2 May 2016 10:40:27 +0200
-Message-ID: <CAPDyKFoQ5eADXMAm25h7AjfgqkCL9DHDC+fcHr1aTMEy-1HLfg@mail.gmail.com>
-References: <1461848366-32562-1-git-send-email-ludovic.desroches@atmel.com>
+Subject: Re: mmc_spi broken?
+Date: Mon, 2 May 2016 10:47:11 +0200
+Message-ID: <CAPDyKFoXmAbvZz61QRX1nBDXXKaXJgSEHVu8+Xa4oaN=qnw=kw@mail.gmail.com>
+References: <1461400625.27953.5.camel@gmx.at>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wm0-f47.google.com ([74.125.82.47]:36166 "EHLO
-	mail-wm0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753421AbcEBIk3 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 2 May 2016 04:40:29 -0400
-Received: by mail-wm0-f47.google.com with SMTP id n129so98501382wmn.1
-        for <linux-mmc@vger.kernel.org>; Mon, 02 May 2016 01:40:28 -0700 (PDT)
-In-Reply-To: <1461848366-32562-1-git-send-email-ludovic.desroches@atmel.com>
+Received: from mail-wm0-f50.google.com ([74.125.82.50]:37699 "EHLO
+	mail-wm0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753243AbcEBIrM (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 2 May 2016 04:47:12 -0400
+Received: by mail-wm0-f50.google.com with SMTP id a17so131200916wme.0
+        for <linux-mmc@vger.kernel.org>; Mon, 02 May 2016 01:47:11 -0700 (PDT)
+In-Reply-To: <1461400625.27953.5.camel@gmx.at>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ludovic Desroches <ludovic.desroches@atmel.com>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Nicolas Ferre <nicolas.ferre@atmel.com>
+To: Franz <flash86@gmx.at>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>
 
-On 28 April 2016 at 14:59, Ludovic Desroches
-<ludovic.desroches@atmel.com> wrote:
-> The controller claims to support SDR104. In fact, it only supports a
-> degraded SDR104 since the maximum frequency of the SD clock is 120 MHz
-> instead of 208 MHz.
-> The sdhci core is unaware of it and will compute a wrong clock divider.
-> We can deal with this specific case by using presets.
+On 23 April 2016 at 10:37, Franz <flash86@gmx.at> wrote:
+> I am trying to get an SD Card to work via SPI interface. I am using a
+> RaspberryPI Compute Module with kernel Version 4.4, but I can't get it
+> to work properly. I've tried it with the native spi interface as well as
+> with the spi aux interface and also with a gpio bitbang spi interface.
+> It's always the same error:
 >
-> Signed-off-by: Ludovic Desroches <ludovic.desroches@atmel.com>
+> [ 2639.558282] mmc1: new SD card on SPI
+> [ 2639.566325] mmcblk1: mmc1:0000 SD256 243 MiB
+> [ 2639.646120]  mmcblk1: p1 < >
+> [ 2639.833759] mmcblk1: error -38 sending status command, retrying
+> [ 2639.839973] mmcblk1: error -38 sending status command, retrying
+> [ 2639.846170] mmcblk1: error -38 sending status command, aborting
+> [ 2639.853406] mmc1: SPI card removed
+> [ 2640.240223] mmc1: host does not support reading read-only switch,
+> assuming write-enable
+> [ 2640.248328] mmc1: new SD card on SPI
+> [ 2640.256373] mmcblk1: mmc1:0000 SD256 243 MiB
+> [ 2640.336068]  mmcblk1: p1 < >
+> [ 2640.523545] mmcblk1: error -38 sending status command, retrying
+> [ 2640.529757] mmcblk1: error -38 sending status command, retrying
+> [ 2640.535893] mmcblk1: error -38 sending status command, aborting
+> [ 2640.543129] mmc1: SPI card removed
+> [ 2640.930176] mmc1: host does not support reading read-only switch,
+> assuming write-enable
+> [ 2640.938313] mmc1: new SD card on SPI
+> [ 2640.946679] mmcblk1: mmc1:0000 SD256 243 MiB
+> [ 2641.026395]  mmcblk1: p1 < >
+> [ 2641.213996] mmcblk1: error -38 sending status command, retrying
+> [ 2641.220208] mmcblk1: error -38 sending status command, retrying
+> [ 2641.226344] mmcblk1: error -38 sending status command, aborting
+> [ 2641.233435] mmc1: SPI card removed
+> [ 2641.620177] mmc1: host does not support reading read-only switch,
+> assuming write-enable
+> [ 2641.628277] mmc1: new SD card on SPI
+> [ 2641.636530] mmcblk1: mmc1:0000 SD256 243 MiB
+> [ 2641.716114]  mmcblk1: p1 < >
+> [ 2641.903636] mmcblk1: error -38 sending status command, retrying
+> [ 2641.909852] mmcblk1: error -38 sending status command, retrying
+> [ 2641.915987] mmcblk1: error -38 sending status command, aborting
+> [ 2641.923056] mmc1: SPI card removed
+>
+> I don't have any RO or CD pins configured, just plain SPI interface
+> directly to the SD Card. I've tried it with different SD cards with
+> differen capacities. It's always the same error. The above messages
+> appear in a endless loop.The last time I've used the mmc_spi driver was
+> kernel 3.8 I think with this version everything worked without any
+> problems.  Does anyone know how to fix this?
 
-Thanks, applied for next!
+So it seems to be a regression. I would try a bisect and see if it can
+pin-point us to a certain commit that causes the issue.
 
 Kind regards
 Uffe
-
-> ---
->
-> Changes:
-> - v2:
->   - use a define for preset_common since it's a constant
->
->  drivers/mmc/host/sdhci-of-at91.c | 26 ++++++++++++++++++++++++++
->  1 file changed, 26 insertions(+)
->
-> diff --git a/drivers/mmc/host/sdhci-of-at91.c b/drivers/mmc/host/sdhci-of-at91.c
-> index c1923c0..25f779e 100644
-> --- a/drivers/mmc/host/sdhci-of-at91.c
-> +++ b/drivers/mmc/host/sdhci-of-at91.c
-> @@ -18,6 +18,7 @@
->  #include <linux/delay.h>
->  #include <linux/err.h>
->  #include <linux/io.h>
-> +#include <linux/kernel.h>
->  #include <linux/mmc/host.h>
->  #include <linux/mmc/slot-gpio.h>
->  #include <linux/module.h>
-> @@ -32,6 +33,8 @@
->  #define                SDMMC_CACR_CAPWREN      BIT(0)
->  #define                SDMMC_CACR_KEY          (0x46 << 8)
->
-> +#define SDHCI_AT91_PRESET_COMMON_CONF  0x400 /* drv type B, programmable clock mode */
-> +
->  struct sdhci_at91_priv {
->         struct clk *hclock;
->         struct clk *gck;
-> @@ -163,6 +166,7 @@ static int sdhci_at91_probe(struct platform_device *pdev)
->         unsigned int                    clk_base, clk_mul;
->         unsigned int                    gck_rate, real_gck_rate;
->         int                             ret;
-> +       unsigned int                    preset_div;
->
->         match = of_match_device(sdhci_at91_dt_match, &pdev->dev);
->         if (!match)
-> @@ -230,6 +234,28 @@ static int sdhci_at91_probe(struct platform_device *pdev)
->                          clk_mul, real_gck_rate);
->         }
->
-> +       /*
-> +        * We have to set preset values because it depends on the clk_mul
-> +        * value. Moreover, SDR104 is supported in a degraded mode since the
-> +        * maximum sd clock value is 120 MHz instead of 208 MHz. For that
-> +        * reason, we need to use presets to support SDR104.
-> +        */
-> +       preset_div = DIV_ROUND_UP(real_gck_rate, 24000000) - 1;
-> +       writew(SDHCI_AT91_PRESET_COMMON_CONF | preset_div,
-> +              host->ioaddr + SDHCI_PRESET_FOR_SDR12);
-> +       preset_div = DIV_ROUND_UP(real_gck_rate, 50000000) - 1;
-> +       writew(SDHCI_AT91_PRESET_COMMON_CONF | preset_div,
-> +              host->ioaddr + SDHCI_PRESET_FOR_SDR25);
-> +       preset_div = DIV_ROUND_UP(real_gck_rate, 100000000) - 1;
-> +       writew(SDHCI_AT91_PRESET_COMMON_CONF | preset_div,
-> +              host->ioaddr + SDHCI_PRESET_FOR_SDR50);
-> +       preset_div = DIV_ROUND_UP(real_gck_rate, 120000000) - 1;
-> +       writew(SDHCI_AT91_PRESET_COMMON_CONF | preset_div,
-> +              host->ioaddr + SDHCI_PRESET_FOR_SDR104);
-> +       preset_div = DIV_ROUND_UP(real_gck_rate, 50000000) - 1;
-> +       writew(SDHCI_AT91_PRESET_COMMON_CONF | preset_div,
-> +              host->ioaddr + SDHCI_PRESET_FOR_DDR50);
-> +
->         clk_prepare_enable(priv->mainck);
->         clk_prepare_enable(priv->gck);
->
-> --
-> 2.5.0
->
