@@ -1,74 +1,154 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: mmc_spi broken?
-Date: Mon, 2 May 2016 10:47:11 +0200
-Message-ID: <CAPDyKFoXmAbvZz61QRX1nBDXXKaXJgSEHVu8+Xa4oaN=qnw=kw@mail.gmail.com>
-References: <1461400625.27953.5.camel@gmx.at>
+Subject: Re: Unstable mmc operation on armada38x
+Date: Mon, 2 May 2016 10:59:12 +0200
+Message-ID: <CAPDyKFpH2CLxxgf+fWSkkmyAnc1Ge+Eg0zRHykJEiM3zQYTc4Q@mail.gmail.com>
+References: <1461930531.2784.21.camel@openproducts.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wm0-f50.google.com ([74.125.82.50]:37699 "EHLO
-	mail-wm0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753243AbcEBIrM (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 2 May 2016 04:47:12 -0400
-Received: by mail-wm0-f50.google.com with SMTP id a17so131200916wme.0
-        for <linux-mmc@vger.kernel.org>; Mon, 02 May 2016 01:47:11 -0700 (PDT)
-In-Reply-To: <1461400625.27953.5.camel@gmx.at>
+Received: from mail-wm0-f49.google.com ([74.125.82.49]:37380 "EHLO
+	mail-wm0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752231AbcEBI7O (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 2 May 2016 04:59:14 -0400
+Received: by mail-wm0-f49.google.com with SMTP id a17so131660401wme.0
+        for <linux-mmc@vger.kernel.org>; Mon, 02 May 2016 01:59:13 -0700 (PDT)
+In-Reply-To: <1461930531.2784.21.camel@openproducts.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Franz <flash86@gmx.at>
+To: Tor Krill <tor@openproducts.com>
 Cc: linux-mmc <linux-mmc@vger.kernel.org>
 
-On 23 April 2016 at 10:37, Franz <flash86@gmx.at> wrote:
-> I am trying to get an SD Card to work via SPI interface. I am using a
-> RaspberryPI Compute Module with kernel Version 4.4, but I can't get it
-> to work properly. I've tried it with the native spi interface as well as
-> with the spi aux interface and also with a gpio bitbang spi interface.
-> It's always the same error:
+On 29 April 2016 at 13:48, Tor Krill <tor@openproducts.com> wrote:
+> Hi,
 >
-> [ 2639.558282] mmc1: new SD card on SPI
-> [ 2639.566325] mmcblk1: mmc1:0000 SD256 243 MiB
-> [ 2639.646120]  mmcblk1: p1 < >
-> [ 2639.833759] mmcblk1: error -38 sending status command, retrying
-> [ 2639.839973] mmcblk1: error -38 sending status command, retrying
-> [ 2639.846170] mmcblk1: error -38 sending status command, aborting
-> [ 2639.853406] mmc1: SPI card removed
-> [ 2640.240223] mmc1: host does not support reading read-only switch,
-> assuming write-enable
-> [ 2640.248328] mmc1: new SD card on SPI
-> [ 2640.256373] mmcblk1: mmc1:0000 SD256 243 MiB
-> [ 2640.336068]  mmcblk1: p1 < >
-> [ 2640.523545] mmcblk1: error -38 sending status command, retrying
-> [ 2640.529757] mmcblk1: error -38 sending status command, retrying
-> [ 2640.535893] mmcblk1: error -38 sending status command, aborting
-> [ 2640.543129] mmc1: SPI card removed
-> [ 2640.930176] mmc1: host does not support reading read-only switch,
-> assuming write-enable
-> [ 2640.938313] mmc1: new SD card on SPI
-> [ 2640.946679] mmcblk1: mmc1:0000 SD256 243 MiB
-> [ 2641.026395]  mmcblk1: p1 < >
-> [ 2641.213996] mmcblk1: error -38 sending status command, retrying
-> [ 2641.220208] mmcblk1: error -38 sending status command, retrying
-> [ 2641.226344] mmcblk1: error -38 sending status command, aborting
-> [ 2641.233435] mmc1: SPI card removed
-> [ 2641.620177] mmc1: host does not support reading read-only switch,
-> assuming write-enable
-> [ 2641.628277] mmc1: new SD card on SPI
-> [ 2641.636530] mmcblk1: mmc1:0000 SD256 243 MiB
-> [ 2641.716114]  mmcblk1: p1 < >
-> [ 2641.903636] mmcblk1: error -38 sending status command, retrying
-> [ 2641.909852] mmcblk1: error -38 sending status command, retrying
-> [ 2641.915987] mmcblk1: error -38 sending status command, aborting
-> [ 2641.923056] mmc1: SPI card removed
+> I work on a custom setup using the Solid-run ClearFog Pro that uses the
+> Marvell 88F6828. I use this with a SOM that is equipped with on board
+> eMMC.
 >
-> I don't have any RO or CD pins configured, just plain SPI interface
-> directly to the SD Card. I've tried it with different SD cards with
-> differen capacities. It's always the same error. The above messages
-> appear in a endless loop.The last time I've used the mmc_spi driver was
-> kernel 3.8 I think with this version everything worked without any
-> problems.  Does anyone know how to fix this?
+> When using the provided Marvell based kernel fork operation works
+> nicely.
+>
+> But when i however try using either stable kernel.org, i.e. 4.5.2, or
+> the latest mmc-next the system malfunctions on the mmc-operation
+> resulting in the root-filesystem remount read only and the system
+> becomes unusable. (I still use the Marvell/Solid-run u-boot to boot the
+> board)
+>
+> When doing this i get:
+>
+> mmcblk0: error -110 sending status command, retrying
+> mmcblk0: error -110 sending status command, retrying
+> mmcblk0: error -110 sending status command, aborting
+>
+> Thus it seems like the mmc doesn't answer the status request?
+>
+> I have tried debug this further by enable debug on sdhci-pxav3 and
+> mmc_core. When doing so i unfortunately can't reproduce the problem. I
+> do log on a slow serial port which might be the reason for affecting
+> operation since i get a lot of debug messages when doing this.
 
-So it seems to be a regression. I would try a bisect and see if it can
-pin-point us to a certain commit that causes the issue.
+We recently added mmc specific TRACE support to the MMC core. That
+allows you to trace each command/request being send to the card, if
+you don't want to affect the timing etc. I suggest you give it a try.
+
+You could also try a bisect, as it seems like it might be a regression
+and can thus help to pin-point at what commit it broke.
+
+On the other hand, the problem seems timing related, so it might be
+that the problem been around for a while but was just triggered by an
+unrelated change.
 
 Kind regards
 Uffe
+
+>
+> I get the impression that this _seems_ to happen during writes to the
+> emmc card.
+>
+> My question is how to proceed investigating this matter?
+>
+> I also intercepted the error condition in drivers/mmc/card/block.c end
+> using BUG() to trigger a backtrace, also available here
+>
+> http://pastebin.com/jeRZ7zqS
+>
+> [   41.866257] ------------[ cut here ]------------
+> [   41.870883] Kernel BUG at c04c4834 [verbose debug info unavailable]
+> [   41.877163] Internal error: Oops - BUG: 0 [#1] SMP ARM
+> [   41.882310] Modules linked in: marvell_cesa des_generic
+> [   41.887580] CPU: 0 PID: 1187 Comm: mmcqd/0 Not tainted 4.6.0-rc4
+> -00084-gb941a0e-dirty #1
+> [   41.895687] Hardware name: Marvell Armada 380/385 (Device Tree)
+> [   41.901619] task: ef20b000 ti: ef2ae000 task.ti: ef2ae000
+> [   41.907031] PC is at mmc_blk_err_check+0x46c/0x4f8
+> [   41.911831] LR is at mmc_blk_err_check+0x46c/0x4f8
+> [   41.916632] pc : [<c04c4834>]    lr : [<c04c4834>]    psr: 60070013
+> [   41.916632] sp : ef2afde0  ip : 00000007  fp : ee84e034
+> [   41.928135] r10: ef2afed4  r9 : ee84e260  r8 : eea10b1c
+> [   41.933370] r7 : 00000000  r6 : ee6e4380  r5 : ee84f000  r4 :
+> ee84e140
+> [   41.939910] r3 : 00000006  r2 : 00000007  r1 : 00000000  r0 :
+> 0000000c
+> [   41.946452] Flags: nZCv  IRQs on  FIQs on  Mode SVC_32  ISA ARM
+>  Segment none
+> [   41.953602] Control: 10c5387d  Table: 2ea3004a  DAC: 00000051
+> [   41.959359] Process mmcqd/0 (pid: 1187, stack limit = 0xef2ae220)
+> [   41.965464] Stack: (0xef2afde0 to 0xef2b0000)
+> [   41.969831] fde0: c0a00018 ef7d2200 ef20b000 c0a06300 00000000
+> ee4a0e00 2ee88000 00000000
+> [   41.978027] fe00: ef2afe4c c067269c 00000001 ee84e218 c0a07ce4
+> 00000000 ef14d010 eea03000
+> [   41.986222] fe20: c0672a48 00000000 00000000 ef2ae000 ef2afe64
+> eea10b10 ee84e140 eea10800
+> [   41.994418] fe40: ee84e090 eea10b10 ee84e140 eea10b1c ee84e260
+> ef2afed4 ee84e034 c04b47d0
+> [   42.002614] fe60: ee84e008 00000000 ef20b000 c0152dfc ef2afe70
+> ef2afe70 ee6e4110 ee84e154
+> [   42.010810] fe80: ee6e4c70 ee84e008 ee84f000 ee84e000 ee84e150
+> 00000000 ee6e4c70 c04c21f4
+> [   42.019006] fea0: 00000000 00000000 ee84e000 00000000 00000000
+> 00000000 ee6e4c70 eeb48ed8
+> [   42.027203] fec0: eeb48ed8 ee6e4c70 ef3bd600 00000001 ee84e010
+> 24590001 00000000 ee84e008
+> [   42.035399] fee0: ee84f000 ee6e4c70 00000000 ee84e000 ee84e000
+> 24590001 24590001 c04c2e78
+> [   42.043594] ff00: 00002b24 eea019b0 ef3beb00 eea10800 00000000
+> 00000001 ee84e010 24590001
+> [   42.051791] ff20: eea019b0 ee84e008 eea019b0 ef2ae000 00000000
+> 00000001 ee84e010 24590001
+> [   42.059986] ff40: 00000000 c04c4abc 00000000 ef3bea40 ee84e008
+> c04c49fc 00000000 00000000
+> [   42.068182] ff60: 00000000 c0138570 ef3bad38 00000000 00000001
+> ee84e008 00000000 00000000
+> [   42.076378] ff80: ef2aff80 ef2aff80 00000000 00000000 ef2aff90
+> ef2aff90 ef2affac ef3bea40
+> [   42.084574] ffa0: c0138494 00000000 00000000 c0107778 00000000
+> 00000000 00000000 00000000
+> [   42.092770] ffc0: 00000000 00000000 00000000 00000000 00000000
+> 00000000 00000000 00000000
+> [   42.100965] ffe0: 00000000 00000000 00000000 00000000 00000013
+> 00000000 ffffffff ffffffff
+> [   42.109168] [<c04c4834>] (mmc_blk_err_check) from [<c04b47d0>]
+> (mmc_start_req+0xe0/0x3d4)
+> [   42.117365] [<c04b47d0>] (mmc_start_req) from [<c04c21f4>]
+> (mmc_blk_issue_rw_rq+0xa8/0xae4)
+> [   42.125736] [<c04c21f4>] (mmc_blk_issue_rw_rq) from [<c04c2e78>]
+> (mmc_blk_issue_rq+0x248/0x4e8)
+> [   42.134453] [<c04c2e78>] (mmc_blk_issue_rq) from [<c04c4abc>]
+> (mmc_queue_thread+0xc0/0x188)
+> [   42.142825] [<c04c4abc>] (mmc_queue_thread) from [<c0138570>]
+> (kthread+0xdc/0xf4)
+> [   42.150327] [<c0138570>] (kthread) from [<c0107778>]
+> (ret_from_fork+0x14/0x3c)
+> [   42.157566] Code: ebf34b80 e305038c e34c0084 ebf34b7d (e7f001f2)
+> [   42.163673] ---[ end trace 9d3b8f108853e09b ]---
+>
+> Best Regards
+>
+> /Tor
+>
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
