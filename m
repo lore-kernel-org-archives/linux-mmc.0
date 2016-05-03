@@ -1,49 +1,121 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [RFC 0/4] mmc: tmio/sdhi: prevent regressions when setting clock
-Date: Tue, 3 May 2016 10:49:02 +0200
-Message-ID: <CAPDyKFp_PuTBn1iD4CpMUvDciccKr1oBGmnG8rVAcvp41k=FPg@mail.gmail.com>
-References: <1462220742-4426-1-git-send-email-wsa@the-dreams.de>
+Subject: Re: [PATCH] mmc: omap_hsmmc: Use dma_request_chan() for requesting
+ DMA channel
+Date: Tue, 3 May 2016 10:49:10 +0200
+Message-ID: <CAPDyKFqOc2c7uM6QeecYcrfO0rXF6eJqX5eJCx-XEEq=B9Dtiw@mail.gmail.com>
+References: <1461935178-28617-1-git-send-email-peter.ujfalusi@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-renesas-soc-owner@vger.kernel.org>
-In-Reply-To: <1462220742-4426-1-git-send-email-wsa@the-dreams.de>
-Sender: linux-renesas-soc-owner@vger.kernel.org
-To: Wolfram Sang <wsa@the-dreams.de>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, linux-renesas-soc@vger.kernel.org, Geert Uytterhoeven <geert@linux-m68k.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1461935178-28617-1-git-send-email-peter.ujfalusi@ti.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Peter Ujfalusi <peter.ujfalusi@ti.com>
+Cc: Kishon <kishon@ti.com>, Tony Lindgren <tony@atomide.com>, Roger Quadros <rogerq@ti.com>, linux-mmc <linux-mmc@vger.kernel.org>, linux-omap <linux-omap@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On 2 May 2016 at 22:25, Wolfram Sang <wsa@the-dreams.de> wrote:
-> Here is a small refactoring series for setting the clock for SDHI cores. This
-> is to prevent regression on platforms where this feature has not been tested.
-> One such regression is known on r8a7740 (patches 2+3). Patch 4 fixes an
-> oversight and patch 1 is a small cleanup.
+On 29 April 2016 at 15:06, Peter Ujfalusi <peter.ujfalusi@ti.com> wrote:
+> With the new dma_request_chan() the client driver does not need to look for
+> the DMA resource and it does not need to pass filter_fn anymore.
+> By switching to the new API the driver can now support deferred probing
+> against DMA.
 >
-> RFC for now since I can't test these patches on my hardware currently. Will do
-> so on Wednesday, probably. Posting now since because Geert may already want to
-> test on r8a7740. Branch is here:
->
-> git://git.kernel.org/pub/scm/linux/kernel/git/wsa/linux.git sdhi-for-ulf
->
-> Thanks,
->
->    Wolfram
->
-> Wolfram Sang (4):
->   mmc: sh_mobile_sdhi: make clk_update function more compact
->   mmc: tmio/sdhi: introduce flag for RCar 2+ specific features
->   mmc: sh_mobile_sdhi: only change the clock on RCar Gen2+
->   mmc: sh_mobile_sdhi: check return value when changing clk
->
->  drivers/mmc/host/sh_mobile_sdhi.c | 17 +++++++++--------
->  drivers/mmc/host/tmio_mmc_pio.c   |  6 +++---
->  include/linux/mfd/tmio.h          |  4 ++--
->  3 files changed, 14 insertions(+), 13 deletions(-)
->
-> --
-> 2.6.2
->
+> Signed-off-by: Peter Ujfalusi <peter.ujfalusi@ti.com>
 
-This looks good to me, so thanks, applied for next!
+Thanks, applied for next!
 
 Kind regards
 Uffe
+
+> ---
+>  drivers/mmc/host/omap_hsmmc.c | 50 +++++++++----------------------------------
+>  1 file changed, 10 insertions(+), 40 deletions(-)
+>
+> diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
+> index e9d75c6dd516..06a167292820 100644
+> --- a/drivers/mmc/host/omap_hsmmc.c
+> +++ b/drivers/mmc/host/omap_hsmmc.c
+> @@ -32,7 +32,6 @@
+>  #include <linux/of_irq.h>
+>  #include <linux/of_gpio.h>
+>  #include <linux/of_device.h>
+> -#include <linux/omap-dmaengine.h>
+>  #include <linux/mmc/host.h>
+>  #include <linux/mmc/core.h>
+>  #include <linux/mmc/mmc.h>
+> @@ -1989,8 +1988,6 @@ static int omap_hsmmc_probe(struct platform_device *pdev)
+>         struct resource *res;
+>         int ret, irq;
+>         const struct of_device_id *match;
+> -       dma_cap_mask_t mask;
+> -       unsigned tx_req, rx_req;
+>         const struct omap_mmc_of_data *data;
+>         void __iomem *base;
+>
+> @@ -2120,44 +2117,17 @@ static int omap_hsmmc_probe(struct platform_device *pdev)
+>
+>         omap_hsmmc_conf_bus_power(host);
+>
+> -       if (!pdev->dev.of_node) {
+> -               res = platform_get_resource_byname(pdev, IORESOURCE_DMA, "tx");
+> -               if (!res) {
+> -                       dev_err(mmc_dev(host->mmc), "cannot get DMA TX channel\n");
+> -                       ret = -ENXIO;
+> -                       goto err_irq;
+> -               }
+> -               tx_req = res->start;
+> -
+> -               res = platform_get_resource_byname(pdev, IORESOURCE_DMA, "rx");
+> -               if (!res) {
+> -                       dev_err(mmc_dev(host->mmc), "cannot get DMA RX channel\n");
+> -                       ret = -ENXIO;
+> -                       goto err_irq;
+> -               }
+> -               rx_req = res->start;
+> -       }
+> -
+> -       dma_cap_zero(mask);
+> -       dma_cap_set(DMA_SLAVE, mask);
+> -
+> -       host->rx_chan =
+> -               dma_request_slave_channel_compat(mask, omap_dma_filter_fn,
+> -                                                &rx_req, &pdev->dev, "rx");
+> -
+> -       if (!host->rx_chan) {
+> -               dev_err(mmc_dev(host->mmc), "unable to obtain RX DMA engine channel\n");
+> -               ret = -ENXIO;
+> +       host->rx_chan = dma_request_chan(&pdev->dev, "rx");
+> +       if (IS_ERR(host->rx_chan)) {
+> +               dev_err(mmc_dev(host->mmc), "RX DMA channel request failed\n");
+> +               ret = PTR_ERR(host->rx_chan);
+>                 goto err_irq;
+>         }
+>
+> -       host->tx_chan =
+> -               dma_request_slave_channel_compat(mask, omap_dma_filter_fn,
+> -                                                &tx_req, &pdev->dev, "tx");
+> -
+> -       if (!host->tx_chan) {
+> -               dev_err(mmc_dev(host->mmc), "unable to obtain TX DMA engine channel\n");
+> -               ret = -ENXIO;
+> +       host->tx_chan = dma_request_chan(&pdev->dev, "tx");
+> +       if (IS_ERR(host->tx_chan)) {
+> +               dev_err(mmc_dev(host->mmc), "TX DMA channel request failed\n");
+> +               ret = PTR_ERR(host->tx_chan);
+>                 goto err_irq;
+>         }
+>
+> @@ -2215,9 +2185,9 @@ err_slot_name:
+>         mmc_remove_host(mmc);
+>  err_irq:
+>         device_init_wakeup(&pdev->dev, false);
+> -       if (host->tx_chan)
+> +       if (!IS_ERR_OR_NULL(host->tx_chan))
+>                 dma_release_channel(host->tx_chan);
+> -       if (host->rx_chan)
+> +       if (!IS_ERR_OR_NULL(host->rx_chan))
+>                 dma_release_channel(host->rx_chan);
+>         pm_runtime_dont_use_autosuspend(host->dev);
+>         pm_runtime_put_sync(host->dev);
+> --
+> 2.8.1
+>
