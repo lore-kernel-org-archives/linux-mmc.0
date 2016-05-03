@@ -1,85 +1,45 @@
-From: "Winkler, Tomas" <tomas.winkler@intel.com>
-Subject: RE: [PATCH RFC 0/3] mmc: block: Fix tuning (by avoiding it) for RPMB
-Date: Mon, 2 May 2016 21:19:10 +0000
-Message-ID: <5B8DA87D05A7694D9FA63FD143655C1B54256819@hasmsx108.ger.corp.intel.com>
-References: <1461245314-6282-1-git-send-email-adrian.hunter@intel.com>
- <5721B9F7.509@intel.com>
+From: Geert Uytterhoeven <geert@linux-m68k.org>
+Subject: Re: [RFC 0/4] mmc: tmio/sdhi: prevent regressions when setting clock
+Date: Tue, 3 May 2016 09:30:28 +0200
+Message-ID: <CAMuHMdXWuBqwLo+SRmnQ=gfH1YkQ-xPrxNWR4gnDdgQPvC05pQ@mail.gmail.com>
+References: <1462220742-4426-1-git-send-email-wsa@the-dreams.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga02.intel.com ([134.134.136.20]:30946 "EHLO mga02.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1755025AbcEBVTj convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 2 May 2016 17:19:39 -0400
-In-Reply-To: <5721B9F7.509@intel.com>
-Content-Language: en-US
+Received: from mail-io0-f195.google.com ([209.85.223.195]:34441 "EHLO
+	mail-io0-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932315AbcECHa3 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 3 May 2016 03:30:29 -0400
+In-Reply-To: <1462220742-4426-1-git-send-email-wsa@the-dreams.de>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "Hunter, Adrian" <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Roman Pen <r.peniaev@gmail.com>, Ben Gardiner <bengardiner@nanometrics.ca>
+To: Wolfram Sang <wsa@the-dreams.de>
+Cc: Linux MMC List <linux-mmc@vger.kernel.org>, linux-renesas-soc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
 
+Hi Wolfram,
 
-> 
-> cc a couple more people
-> 
-> On 21/04/16 16:28, Adrian Hunter wrote:
-> > Hi
-> >
-> > The RPMB partition only allows certain commands.  In particular, the
-> > tuning command (CMD21) is not allowed -  refer JEDEC eMMC standard
-> > v5.1 section 6.2.2 Command restrictions.
-> >
-> > That means commands will begin failing if re-tuning is needed while
-> > switched to the RPMB partition.
-> >
-> > Here are 4 options to fix the problem:
-> >
-> >
-> > 1. The approach taken by this patch set:
-> >
-> > To avoid tuning for RPMB, switch to High Speed mode from HS200 or
-> > HS400 mode if re-tuning has been enabled.  And switch back when
-> > leaving RPMB.
-> >
-> > Advantages: Directly does what needs to be done.
-> >
-> > Disadvantages: Assumes the mode switching will work.
-> >
-> >
-> > 2. Same as 1 but disable the tuning modes by removing them from
-> > card->mmc_avail_type and doing a full mmc_reset().
-> >
-> > Advantages: Simpler to program
-> >
-> > Disadvantages: Doing a full reset is slower.  Doing a full reset is
-> > not an expected consequence of accessing RPMB.
-> >
-> >
-> > 3. Simply disable re-tuning and attempt to recover from any errors.
-> >
-> > Disadvantages: Due to the interdependent nature of RPMB reads/writes
-> > it might not be possible to recover without returning an error to the
-> > RPMB user.  Also it would be difficult to test if the recovery
-> > actually worked in all cases.
-> >
-> >
-> > 4. Do a partiton switch as part of re-tuning.
-> >
-> > Disadvantages: Makes re-tuning more complicated.  Would require moving
-> > the control of partition switching into the core.  CRC errors arising
-> > from the need to re-tune might break the interdependent nature of RPMB
-> > operations.
-> >
-> >
-> > As a final note, if a solution is found then we might be able to
-> > revert commit 4e93b9a6abc0 ("mmc: card: Don't access RPMB partitions
-> > for normal read/write").
-> >
-This still doesn't bring us to that point, mostly for writing as each transaction has to have  a valid MAC computed. 
-There is another layer required I hope matching the RPMB sybsystem as we suggested. 
-I would prefer it won't be attached to block layer as is, yet we already have legacy SW stack so I see it painfull. 
+On Mon, May 2, 2016 at 10:25 PM, Wolfram Sang <wsa@the-dreams.de> wrote:
+> Here is a small refactoring series for setting the clock for SDHI cores. This
+> is to prevent regression on platforms where this feature has not been tested.
+> One such regression is known on r8a7740 (patches 2+3). Patch 4 fixes an
+> oversight and patch 1 is a small cleanup.
+>
+> RFC for now since I can't test these patches on my hardware currently. Will do
+> so on Wednesday, probably. Posting now since because Geert may already want to
+> test on r8a7740. Branch is here:
 
-Thanks
-Tomas 
+Thanks, I can confirm the HP clock is back to 99 MHz (from 12.375 MHz)
+on r8a7740/armadillo, so
 
+Tested-by: Geert Uytterhoeven <geert+renesas@glider.be>
+
+Gr{oetje,eeting}s,
+
+                        Geert
+
+--
+Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
+
+In personal conversations with technical people, I call myself a hacker. But
+when I'm talking to journalists I just say "programmer" or something like that.
+                                -- Linus Torvalds
