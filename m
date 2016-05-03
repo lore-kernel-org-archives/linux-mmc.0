@@ -1,157 +1,125 @@
-From: Peter Ujfalusi <peter.ujfalusi@ti.com>
-Subject: Re: [PATCH] mmc: omap: Use dma_request_chan() for requesting DMA
- channel
-Date: Tue, 3 May 2016 23:00:47 +0300
-Message-ID: <a7e34ffa-19d4-48fb-8d13-a151fbafd842@ti.com>
-References: <1461935197-28664-1-git-send-email-peter.ujfalusi@ti.com>
- <CAPDyKFqTsJ3gcDGVWpbmQ4rzM8TQK7km3NTT=d0D9Dt7ydUafg@mail.gmail.com>
+From: Leo Li <pku.leo@gmail.com>
+Subject: Re: [v8, 6/7] MAINTAINERS: add entry for Freescale SoC specific driver
+Date: Tue, 3 May 2016 15:05:33 -0500
+Message-ID: <CADRPPNQaLVHp_HnEcHvZE7ebcmhYKf4K8CeWHErRk-0Xv8cU3A@mail.gmail.com>
+References: <1461306464-19521-1-git-send-email-yangbo.lu@nxp.com>
+	<1461306464-19521-7-git-send-email-yangbo.lu@nxp.com>
+	<1461367352.32510.218.camel@buserror.net>
+	<HE1PR04MB088907CD90586FC83D058003F8630@HE1PR04MB0889.eurprd04.prod.outlook.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from arroyo.ext.ti.com ([192.94.94.40]:44992 "EHLO arroyo.ext.ti.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752195AbcECUAy (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 3 May 2016 16:00:54 -0400
-In-Reply-To: <CAPDyKFqTsJ3gcDGVWpbmQ4rzM8TQK7km3NTT=d0D9Dt7ydUafg@mail.gmail.com>
+Received: from mail-wm0-f66.google.com ([74.125.82.66]:34279 "EHLO
+	mail-wm0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755374AbcECUFf (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 3 May 2016 16:05:35 -0400
+In-Reply-To: <HE1PR04MB088907CD90586FC83D058003F8630@HE1PR04MB0889.eurprd04.prod.outlook.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Kishon <kishon@ti.com>, Tony Lindgren <tony@atomide.com>, Roger Quadros <rogerq@ti.com>, linux-mmc <linux-mmc@vger.kernel.org>, linux-omap <linux-omap@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+To: Yangbo Lu <yangbo.lu@nxp.com>
+Cc: Scott Wood <oss@buserror.net>, Yang-Leo Li <leoyang.li@nxp.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linuxppc-dev@lists.ozlabs.org" <linuxppc-dev@lists.ozlabs.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>, Zhao Qiang <qiang.zhao@freescale.com>, Russell King <linux@arm.linux.org.uk>, Bhupesh Sharma <bhupesh.sharma@freescale.com>, Xiaobo Xie <xiaobo.xie@nxp.com>, Scott Wood <scott.wood@nxp.com>, Claudiu Manoil <claudiu.manoil@freescale.com>, Kumar Gala <galak@codeaurora.org>
 
-On 05/03/16 11:46, Ulf Hansson wrote:
-> On 29 April 2016 at 15:06, Peter Ujfalusi <peter.ujfalusi@ti.com> wro=
-te:
->> With the new dma_request_chan() the client driver does not need to l=
-ook for
->> the DMA resource and it does not need to pass filter_fn anymore.
->> By switching to the new API the driver can now support deferred prob=
-ing
->> against DMA.
+On Mon, Apr 25, 2016 at 10:12 PM, Yangbo Lu <yangbo.lu@nxp.com> wrote:
+> Hi Scott and Leo,
+>
+>
+>> -----Original Message-----
+>> From: linux-mmc-owner@vger.kernel.org [mailto:linux-mmc-
+>> owner@vger.kernel.org] On Behalf Of Scott Wood
+>> Sent: Saturday, April 23, 2016 7:23 AM
+>> To: Yangbo Lu; linux-mmc@vger.kernel.org; linuxppc-dev@lists.ozlabs.org;
+>> linux-arm-kernel@lists.infradead.org; linux-kernel@vger.kernel.org
+>> Cc: ulf.hansson@linaro.org; Zhao Qiang; Russell King; Bhupesh Sharma;
+>> Scott Wood; Claudiu Manoil; Kumar Gala; Yang-Leo Li; Xiaobo Xie; Michael
+>> Ellerman
+>> Subject: Re: [v8, 6/7] MAINTAINERS: add entry for Freescale SoC specific
+>> driver
 >>
->> Signed-off-by: Peter Ujfalusi <peter.ujfalusi@ti.com>
->> CC: Ulf Hansson <ulf.hansson@linaro.org>
->> CC: Jarkko Nikula <jarkko.nikula@bitmer.com>
->> ---
->>  drivers/mmc/host/omap.c | 45 ++++++++++++++++++++++----------------=
--------
->>  1 file changed, 22 insertions(+), 23 deletions(-)
+>> On Fri, 2016-04-22 at 14:27 +0800, Yangbo Lu wrote:
+>> > Add maintainer entry for Freescale SoC specific driver including the
+>> > QE library and the GUTS driver. Also add entry for GUTS driver and add
+>> > maintainer for QE library.
+>> >
+>> > Signed-off-by: Yangbo Lu <yangbo.lu@nxp.com>
+>> > ---
+>> > Changes for v8:
+>> >     - Added this patch
+>> > ---
+>> >  MAINTAINERS | 16 +++++++++++++++-
+>> >  1 file changed, 15 insertions(+), 1 deletion(-)
+>> >
+>> > diff --git a/MAINTAINERS b/MAINTAINERS index 1d5b4be..d20aeb6 100644
+>> > --- a/MAINTAINERS
+>> > +++ b/MAINTAINERS
+>> > @@ -4622,13 +4622,27 @@ F:  drivers/net/ethernet/freescale/fec_ptp.c
+>> >  F: drivers/net/ethernet/freescale/fec.h
+>> >  F: Documentation/devicetree/bindings/net/fsl-fec.txt
+>> >
+>> > +FREESCALE SOC SPECIFIC DRIVER
 >>
->> diff --git a/drivers/mmc/host/omap.c b/drivers/mmc/host/omap.c
->> index b9958a123594..a8d9228657b2 100644
->> --- a/drivers/mmc/host/omap.c
->> +++ b/drivers/mmc/host/omap.c
->> @@ -23,7 +23,6 @@
->>  #include <linux/spinlock.h>
->>  #include <linux/timer.h>
->>  #include <linux/of.h>
->> -#include <linux/omap-dma.h>
->>  #include <linux/mmc/host.h>
->>  #include <linux/mmc/card.h>
->>  #include <linux/mmc/mmc.h>
->> @@ -1321,8 +1320,6 @@ static int mmc_omap_probe(struct platform_devi=
-ce *pdev)
->>         struct omap_mmc_platform_data *pdata =3D pdev->dev.platform_=
-data;
->>         struct mmc_omap_host *host =3D NULL;
->>         struct resource *res;
->> -       dma_cap_mask_t mask;
->> -       unsigned sig =3D 0;
->>         int i, ret =3D 0;
->>         int irq;
+>> FREESCALE SOC DRIVERS
+>
+> [Lu Yangbo-B47093] Ok, will change it to 'FREESCALE SOC DRIVERS'.
+>
 >>
->> @@ -1382,29 +1379,31 @@ static int mmc_omap_probe(struct platform_de=
-vice *pdev)
->>                 goto err_free_iclk;
->>         }
+>> > +M: Scott Wood <oss@buserror.net>
 >>
->> -       dma_cap_zero(mask);
->> -       dma_cap_set(DMA_SLAVE, mask);
->> -
->>         host->dma_tx_burst =3D -1;
->>         host->dma_rx_burst =3D -1;
+>> Please CC me at this address, not the NXP address that you sent this to...
+>
+> [Lu Yangbo-B47093] Sorry for mistaking your email. Will send the one you said.
+>
 >>
->> -       res =3D platform_get_resource_byname(pdev, IORESOURCE_DMA, "=
-tx");
->> -       if (res)
->> -               sig =3D res->start;
->> -       host->dma_tx =3D dma_request_slave_channel_compat(mask,
->> -                               omap_dma_filter_fn, &sig, &pdev->dev=
-, "tx");
->> -       if (!host->dma_tx)
->> -               dev_warn(host->dev, "unable to obtain TX DMA engine =
-channel %u\n",
->> -                       sig);
->> -
->> -       res =3D platform_get_resource_byname(pdev, IORESOURCE_DMA, "=
-rx");
->> -       if (res)
->> -               sig =3D res->start;
->> -       host->dma_rx =3D dma_request_slave_channel_compat(mask,
->> -                               omap_dma_filter_fn, &sig, &pdev->dev=
-, "rx");
->> -       if (!host->dma_rx)
->> -               dev_warn(host->dev, "unable to obtain RX DMA engine =
-channel %u\n",
->> -                       sig);
->> +       host->dma_tx =3D dma_request_chan(&pdev->dev, "tx");
->> +       if (IS_ERR(host->dma_tx)) {
->> +               ret =3D PTR_ERR(host->dma_tx);
->> +               if (ret =3D=3D -EPROBE_DEFER)
->> +                       goto err_free_iclk;
-
-and one clk_put(host->fclk) is missing from here.
-
->> +
->> +               host->dma_tx =3D NULL;
->=20
-> Instead of setting this to NULL, let's keep its value and later check
-> it with IS_ERR() when needed.
-
-I thought about it, but decided against without need to have changes in=
- other
-places in the driver.
-
->=20
->> +               dev_warn(host->dev, "TX DMA channel request failed\n=
-");
->> +       }
->> +
->> +       host->dma_rx =3D dma_request_chan(&pdev->dev, "rx");
->> +       if (IS_ERR(host->dma_rx)) {
->> +               ret =3D PTR_ERR(host->dma_rx);
->> +               if (ret =3D=3D -EPROBE_DEFER) {
->> +                       dma_release_channel(host->dma_tx);
->=20
-> host->dma_tx can be NULL here, so this isn't safe.
-
-Oh, true.
-
->=20
->> +                       clk_put(host->fclk);
->> +                       goto err_free_iclk;
->> +               }
->> +
->> +               host->dma_rx =3D NULL;
->=20
-> Instead of setting this to NULL, let's keep its value and later check
-> it with IS_ERR() when needed.
->=20
->> +               dev_warn(host->dev, "RX DMA channel request failed\n=
-");
->> +       }
+>> > +L: linuxppc-dev@lists.ozlabs.org
+>> > +S: Maintained
+>> > +F: drivers/soc/fsl/
+>> > +F: include/linux/fsl/
 >>
->>         ret =3D request_irq(host->irq, mmc_omap_irq, 0, DRIVER_NAME,=
- host);
->>         if (ret)
+>> This directory will contain drivers that work on PPC and ARM... I'm not
+>> sure what to put here in terms of mailing lists (we could put both, but
+>> people probably shouldn't spam both lists if only one arch is relevant to
+>> the patch), and whom to make pull requests to.
+>
+> [Lu Yangbo-B47093] But sooner or later we need to do this for files in fsl/ ...
+> :)
+>
+> Hi Leo, do you have any idea?
+
+I think it would be ok to put both linuxppc and linux-arm mailing
+lists here.  Driver doesn't fall into any of the functional based
+sub-systems would very likely be platform stuff.  And if patch author
+has the knowledge that a patch only impacts one arch, he can remove
+the other list to reduce the spam.
+
+>
+>
+>>
+>> > +FREESCALE GUTS DRIVER
+>> > +M: Yangbo Lu <yangbo.lu@nxp.com>
+>> > +L: linuxppc-dev@lists.ozlabs.org
+>> > +S: Maintained
+>> > +F: drivers/soc/fsl/guts.c
+>>
+>> What about the header?
+>>
+>> Does guts really need a separate maintainer from drivers/soc/fsl?
+>
+> [Lu Yangbo-B47093] I was hesitating to add the maintainer...
+> And I was not so familiar with it. Let me leave it to the fsl/ directory and remove this...
+>
+>>
+>> -Scott
+>>
+>>
 >> --
->> 2.8.1
->>
->=20
-> Kind regards
-> Uffe
->=20
+>> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+>> the body of a message to majordomo@vger.kernel.org More majordomo info at
+>> http://vger.kernel.org/majordomo-info.html
+> _______________________________________________
+> Linuxppc-dev mailing list
+> Linuxppc-dev@lists.ozlabs.org
+> https://lists.ozlabs.org/listinfo/linuxppc-dev
 
 
---=20
-P=C3=A9ter
+
+-- 
+- Leo
