@@ -1,121 +1,63 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: omap_hsmmc: Use dma_request_chan() for requesting
- DMA channel
-Date: Tue, 3 May 2016 10:49:10 +0200
-Message-ID: <CAPDyKFqOc2c7uM6QeecYcrfO0rXF6eJqX5eJCx-XEEq=B9Dtiw@mail.gmail.com>
-References: <1461935178-28617-1-git-send-email-peter.ujfalusi@ti.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1461935178-28617-1-git-send-email-peter.ujfalusi@ti.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Peter Ujfalusi <peter.ujfalusi@ti.com>
-Cc: Kishon <kishon@ti.com>, Tony Lindgren <tony@atomide.com>, Roger Quadros <rogerq@ti.com>, linux-mmc <linux-mmc@vger.kernel.org>, linux-omap <linux-omap@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+From: Ulrich Hecht <ulrich.hecht+renesas@gmail.com>
+Subject: [PATCH v4] ARM: dts: r8a7793: Add MMCIF0
+Date: Tue,  3 May 2016 14:40:42 +0200
+Message-ID: <1462279242-3475-1-git-send-email-ulrich.hecht+renesas@gmail.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-io0-f196.google.com ([209.85.223.196]:34577 "EHLO
+	mail-io0-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932825AbcECMku (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 3 May 2016 08:40:50 -0400
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: horms@verge.net.au, geert@linux-m68k.org
+Cc: linux-renesas-soc@vger.kernel.org, linux-mmc@vger.kernel.org, sergei.shtylyov@cogentembedded.com, magnus.damm@gmail.com, Ulrich Hecht <ulrich.hecht+renesas@gmail.com>
 
-On 29 April 2016 at 15:06, Peter Ujfalusi <peter.ujfalusi@ti.com> wrote:
-> With the new dma_request_chan() the client driver does not need to look for
-> the DMA resource and it does not need to pass filter_fn anymore.
-> By switching to the new API the driver can now support deferred probing
-> against DMA.
->
-> Signed-off-by: Peter Ujfalusi <peter.ujfalusi@ti.com>
+Same as on r8a7791.
 
-Thanks, applied for next!
+Signed-off-by: Ulrich Hecht <ulrich.hecht+renesas@gmail.com>
+---
+This revision updates the power-domains node.
 
-Kind regards
-Uffe
+CU
+Uli
 
-> ---
->  drivers/mmc/host/omap_hsmmc.c | 50 +++++++++----------------------------------
->  1 file changed, 10 insertions(+), 40 deletions(-)
->
-> diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-> index e9d75c6dd516..06a167292820 100644
-> --- a/drivers/mmc/host/omap_hsmmc.c
-> +++ b/drivers/mmc/host/omap_hsmmc.c
-> @@ -32,7 +32,6 @@
->  #include <linux/of_irq.h>
->  #include <linux/of_gpio.h>
->  #include <linux/of_device.h>
-> -#include <linux/omap-dmaengine.h>
->  #include <linux/mmc/host.h>
->  #include <linux/mmc/core.h>
->  #include <linux/mmc/mmc.h>
-> @@ -1989,8 +1988,6 @@ static int omap_hsmmc_probe(struct platform_device *pdev)
->         struct resource *res;
->         int ret, irq;
->         const struct of_device_id *match;
-> -       dma_cap_mask_t mask;
-> -       unsigned tx_req, rx_req;
->         const struct omap_mmc_of_data *data;
->         void __iomem *base;
->
-> @@ -2120,44 +2117,17 @@ static int omap_hsmmc_probe(struct platform_device *pdev)
->
->         omap_hsmmc_conf_bus_power(host);
->
-> -       if (!pdev->dev.of_node) {
-> -               res = platform_get_resource_byname(pdev, IORESOURCE_DMA, "tx");
-> -               if (!res) {
-> -                       dev_err(mmc_dev(host->mmc), "cannot get DMA TX channel\n");
-> -                       ret = -ENXIO;
-> -                       goto err_irq;
-> -               }
-> -               tx_req = res->start;
-> -
-> -               res = platform_get_resource_byname(pdev, IORESOURCE_DMA, "rx");
-> -               if (!res) {
-> -                       dev_err(mmc_dev(host->mmc), "cannot get DMA RX channel\n");
-> -                       ret = -ENXIO;
-> -                       goto err_irq;
-> -               }
-> -               rx_req = res->start;
-> -       }
-> -
-> -       dma_cap_zero(mask);
-> -       dma_cap_set(DMA_SLAVE, mask);
-> -
-> -       host->rx_chan =
-> -               dma_request_slave_channel_compat(mask, omap_dma_filter_fn,
-> -                                                &rx_req, &pdev->dev, "rx");
-> -
-> -       if (!host->rx_chan) {
-> -               dev_err(mmc_dev(host->mmc), "unable to obtain RX DMA engine channel\n");
-> -               ret = -ENXIO;
-> +       host->rx_chan = dma_request_chan(&pdev->dev, "rx");
-> +       if (IS_ERR(host->rx_chan)) {
-> +               dev_err(mmc_dev(host->mmc), "RX DMA channel request failed\n");
-> +               ret = PTR_ERR(host->rx_chan);
->                 goto err_irq;
->         }
->
-> -       host->tx_chan =
-> -               dma_request_slave_channel_compat(mask, omap_dma_filter_fn,
-> -                                                &tx_req, &pdev->dev, "tx");
-> -
-> -       if (!host->tx_chan) {
-> -               dev_err(mmc_dev(host->mmc), "unable to obtain TX DMA engine channel\n");
-> -               ret = -ENXIO;
-> +       host->tx_chan = dma_request_chan(&pdev->dev, "tx");
-> +       if (IS_ERR(host->tx_chan)) {
-> +               dev_err(mmc_dev(host->mmc), "TX DMA channel request failed\n");
-> +               ret = PTR_ERR(host->tx_chan);
->                 goto err_irq;
->         }
->
-> @@ -2215,9 +2185,9 @@ err_slot_name:
->         mmc_remove_host(mmc);
->  err_irq:
->         device_init_wakeup(&pdev->dev, false);
-> -       if (host->tx_chan)
-> +       if (!IS_ERR_OR_NULL(host->tx_chan))
->                 dma_release_channel(host->tx_chan);
-> -       if (host->rx_chan)
-> +       if (!IS_ERR_OR_NULL(host->rx_chan))
->                 dma_release_channel(host->rx_chan);
->         pm_runtime_dont_use_autosuspend(host->dev);
->         pm_runtime_put_sync(host->dev);
-> --
-> 2.8.1
->
+
+Changes since v3:
+- set power-domains = <&sysc R8A7793_PD_ALWAYS_ON>
+
+Changes since v2:
+- change back to one DMA controller
+- use GIC_SPI
+- add max-frequency
+
+
+ arch/arm/boot/dts/r8a7793.dtsi | 13 +++++++++++++
+ 1 file changed, 13 insertions(+)
+
+diff --git a/arch/arm/boot/dts/r8a7793.dtsi b/arch/arm/boot/dts/r8a7793.dtsi
+index 1dd6d20..44c01a5 100644
+--- a/arch/arm/boot/dts/r8a7793.dtsi
++++ b/arch/arm/boot/dts/r8a7793.dtsi
+@@ -543,6 +543,19 @@
+ 		status = "disabled";
+ 	};
+ 
++	mmcif0: mmcif@ee200000 {
++		compatible = "renesas,mmcif-r8a7793", "renesas,sh-mmcif";
++		reg = <0 0xee200000 0 0x80>;
++		interrupts = <GIC_SPI 169 IRQ_TYPE_LEVEL_HIGH>;
++		clocks = <&mstp3_clks R8A7793_CLK_MMCIF0>;
++		dmas = <&dmac0 0xd1>, <&dmac0 0xd2>;
++		dma-names = "tx", "rx";
++		power-domains = <&sysc R8A7793_PD_ALWAYS_ON>;
++		reg-io-width = <4>;
++		status = "disabled";
++		max-frequency = <97500000>;
++	};
++
+ 	scifa0: serial@e6c40000 {
+ 		compatible = "renesas,scifa-r8a7793",
+ 			     "renesas,rcar-gen2-scifa", "renesas,scifa";
+-- 
+2.7.4
+
