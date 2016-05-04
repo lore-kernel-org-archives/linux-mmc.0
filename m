@@ -1,59 +1,65 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: [PATCH V2] mmc: mmc: Attempt to flush cache before reset
-Date: Wed, 4 May 2016 10:38:21 +0300
-Message-ID: <5729A6ED.4010009@intel.com>
-References: <1461829739-19772-1-git-send-email-adrian.hunter@intel.com>
- <CAPDyKFrzfoR9xDVvSnVuwMFQRABh3jfgRGbjPp=754F3hn8bZQ@mail.gmail.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [v9, 6/7] MAINTAINERS: add entry for Freescale SoC driver
+Date: Wed, 4 May 2016 09:43:38 +0200
+Message-ID: <CAPDyKFoh7mfmMYxVxjG6jrRr6CuGKkuxdeON4yxX3yXFEamikg@mail.gmail.com>
+References: <1462332274-13744-1-git-send-email-yangbo.lu@nxp.com>
+	<1462332274-13744-7-git-send-email-yangbo.lu@nxp.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga03.intel.com ([134.134.136.65]:26315 "EHLO mga03.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751256AbcEDHmN (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 4 May 2016 03:42:13 -0400
-In-Reply-To: <CAPDyKFrzfoR9xDVvSnVuwMFQRABh3jfgRGbjPp=754F3hn8bZQ@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-i2c-owner@vger.kernel.org>
+In-Reply-To: <1462332274-13744-7-git-send-email-yangbo.lu@nxp.com>
+Sender: linux-i2c-owner@vger.kernel.org
+To: Yangbo Lu <yangbo.lu@nxp.com>, Scott Wood <oss@buserror.net>, Qiang Zhao <qiang.zhao@nxp.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, "linuxppc-dev@lists.ozlabs.org" <linuxppc-dev@lists.ozlabs.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-clk <linux-clk@vger.kernel.org>, "linux-i2c@vger.kernel.org" <linux-i2c@vger.kernel.org>, iommu@lists.linux-foundation.org, netdev@vger.kernel.org, Mark Rutland <mark.rutland@arm.com>, Rob Herring <robh+dt@kernel.org>, Russell King <linux@arm.linux.org.uk>, Jochen Friedrich <jochen@scram.de>, Joerg Roedel <joro@8bytes.org>, Claudiu Manoil <claudiu.manoil@freescale.com>, Bhupesh Sharma <bhupesh.sharma@freescale.com>, Kumar Gala <galak@codeaurora.org>, Santosh Shilimkar <ssantosh@kernel.org>, Yang-Leo Li <leoyang.li@nxp.com>, Xiaobo Xie <xiaobo.xie@nxp.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>
 
-CMD0 or hardware reset may invalidate the cache, so it needs to be
-flushed before reset.
+On 4 May 2016 at 05:24, Yangbo Lu <yangbo.lu@nxp.com> wrote:
+> Add maintainer entry for Freescale SoC driver including
+> the QE library and the GUTS driver now. Also add maintainer
+> for QE library.
+>
+> Signed-off-by: Yangbo Lu <yangbo.lu@nxp.com>
 
-In the case of recovery, we can't expect flushing the cache to work
-always, but have a go and ignore errors.
+So I need an ack from Scott and Qiang for this one, then I intend to
+queue up the series.
 
-Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
----
+Kind regards
+Uffe
 
-
-Changes in V2:
-
-	Do flush in mmc_reset() instead of mmc_hw_reset()
-
-
- drivers/mmc/core/mmc.c | 6 ++++++
- 1 file changed, 6 insertions(+)
-
-diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-index 0cf42af33d0f..d4d1b77c1c1e 100644
---- a/drivers/mmc/core/mmc.c
-+++ b/drivers/mmc/core/mmc.c
-@@ -1965,6 +1965,12 @@ static int mmc_reset(struct mmc_host *host)
- {
- 	struct mmc_card *card = host->card;
- 
-+	/*
-+	 * In the case of recovery, we can't expect flushing the cache to work
-+	 * always, but we have a go and ignore errors.
-+	 */
-+	mmc_flush_cache(host->card);
-+
- 	if ((host->caps & MMC_CAP_HW_RESET) && host->ops->hw_reset &&
- 	     mmc_can_reset(card)) {
- 		/* If the card accept RST_n signal, send it. */
--- 
-1.9.1
-
-
+> ---
+> Changes for v8:
+>         - Added this patch
+> Changes for v9:
+>         - Added linux-arm mail list
+>         - Removed GUTS driver entry
+> ---
+>  MAINTAINERS | 11 ++++++++++-
+>  1 file changed, 10 insertions(+), 1 deletion(-)
+>
+> diff --git a/MAINTAINERS b/MAINTAINERS
+> index 42e65d1..ce91db7 100644
+> --- a/MAINTAINERS
+> +++ b/MAINTAINERS
+> @@ -4622,9 +4622,18 @@ F:       drivers/net/ethernet/freescale/fec_ptp.c
+>  F:     drivers/net/ethernet/freescale/fec.h
+>  F:     Documentation/devicetree/bindings/net/fsl-fec.txt
+>
+> +FREESCALE SOC DRIVER
+> +M:     Scott Wood <oss@buserror.net>
+> +L:     linuxppc-dev@lists.ozlabs.org
+> +L:     linux-arm-kernel@lists.infradead.org
+> +S:     Maintained
+> +F:     drivers/soc/fsl/
+> +F:     include/linux/fsl/
+> +
+>  FREESCALE QUICC ENGINE LIBRARY
+> +M:     Qiang Zhao <qiang.zhao@nxp.com>
+>  L:     linuxppc-dev@lists.ozlabs.org
+> -S:     Orphan
+> +S:     Maintained
+>  F:     drivers/soc/fsl/qe/
+>  F:     include/soc/fsl/*qe*.h
+>  F:     include/soc/fsl/*ucc*.h
+> --
+> 2.1.0.27.g96db324
+>
