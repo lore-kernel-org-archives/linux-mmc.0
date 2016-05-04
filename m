@@ -1,62 +1,49 @@
-From: Pavel Machek <pavel@ucw.cz>
-Subject: Re: [PATCH v2 0/4] Patches to allow consistent mmc / mmcblk
- numbering w/ device tree
-Date: Wed, 4 May 2016 14:46:53 +0200
-Message-ID: <20160504124653.GA23838@amd>
-References: <1461951139-6109-1-git-send-email-dianders@chromium.org>
- <20160429181248.GW19428@n2100.arm.linux.org.uk>
- <20160504071801.GA17045@amd>
- <CAL_JsqJ4Pzuip9VUpwryy_xK6XSZ6E+kus3wD=T4wcTHav=9iA@mail.gmail.com>
+From: Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Subject: Re: [PATCH v2 3/6] mmc: core: implement enhanced strobe support
+Date: Wed, 4 May 2016 15:07:01 +0300
+Message-ID: <5729E5E5.6000409@intel.com>
+References: <1461897751-28810-1-git-send-email-shawn.lin@rock-chips.com>
+ <1461898029-28944-1-git-send-email-shawn.lin@rock-chips.com>
+ <CAPDyKFogNjwNs+fKPaah_X=AfSgtXUwefzon+ZQ2a2Va5Om5Nw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from atrey.karlin.mff.cuni.cz ([195.113.26.193]:56498 "EHLO
-	atrey.karlin.mff.cuni.cz" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750709AbcEDMq5 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 4 May 2016 08:46:57 -0400
-Content-Disposition: inline
-In-Reply-To: <CAL_JsqJ4Pzuip9VUpwryy_xK6XSZ6E+kus3wD=T4wcTHav=9iA@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+In-Reply-To: <CAPDyKFogNjwNs+fKPaah_X=AfSgtXUwefzon+ZQ2a2Va5Om5Nw-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-rockchip>,
+ <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-rockchip/>
+List-Post: <mailto:linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+List-Help: <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-rockchip>,
+ <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
+Sender: "Linux-rockchip" <linux-rockchip-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+Errors-To: linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+To: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
+Cc: "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Doug Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, Heiko Stuebner <heiko-4mtYJXux2i+zQB+pC5nmwQ@public.gmane.org>, linux-mmc <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Michal Simek <michal.simek-gjFFaj9aHVfQT0dZR+AlfA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Jaehoon Chung <jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, "open list:ARM/Rockchip SoC..." <linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, =?UTF-8?Q?S=c3=b6ren_Brinkmann?= <soren.brinkmann-gjFFaj9aHVfQT0dZR+AlfA@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Rob Herring <robh+dt@kernel.org>
-Cc: Russell King - ARM Linux <linux@arm.linux.org.uk>, Douglas Anderson <dianders@chromium.org>, Ulf Hansson <ulf.hansson@linaro.org>, Jaehoon Chung <jh80.chung@samsung.com>, Shawn Lin <shawn.lin@rock-chips.com>, Adrian Hunter <adrian.hunter@intel.com>, Stefan Agner <stefan@agner.ch>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Brian Norris <computersforpeace@gmail.com>, Dmitry Torokhov <dmitry.torokhov@gmail.com>, Heiko Stuebner <heiko@sntech.de>, Jisheng Zhang <jszhang@marvell.com>, "open list:ARM/Rockchip SoC..." <linux-rockchip@lists.infradead.org>, "devicetree-spec@vger.kernel.org" <devicetree-spec@vger.kernel.org>, Mark Rutland <mark.rutland@arm.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Venu Byravarasu <vbyravarasu@nvidia.com>, Lars-Peter Clausen <lars@metafoo.de>, Jon Hunter <jonathanh@nvidia.com>, linux-arm-kernel@lists.
 
-On Wed 2016-05-04 07:25:42, Rob Herring wrote:
-> On Wed, May 4, 2016 at 2:18 AM, Pavel Machek <pavel@ucw.cz> wrote:
-> > On Fri 2016-04-29 19:12:48, Russell King - ARM Linux wrote:
-> >> On Fri, Apr 29, 2016 at 10:32:15AM -0700, Douglas Anderson wrote:
-> >> > This series picks patches from various different places to produce what
-> >> > I consider the best solution to getting consistent mmc and mmcblk
-> >> > ordering.
-> >> >
-> >> > Why consistent ordering and why not just use UUIDs?  IMHO consistent
-> >> > ordering solves a few different problems:
-> >>
-> >> NAK.  Really.  Use UUIDs, that's the proper solution here.
-> >
-> > Except that UUIDs do not solve the problem.
-> >
-> > You have just booted of nfsroot, and you want to format u-SD card in
-> > the external slot. How do you do that?
+>> diff --git a/drivers/mmc/core/bus.c b/drivers/mmc/core/bus.c
+>> index 4bc48f1..7e94b9d 100644
+>> --- a/drivers/mmc/core/bus.c
+>> +++ b/drivers/mmc/core/bus.c
+>> @@ -332,12 +332,13 @@ int mmc_add_card(struct mmc_card *card)
+>>                         mmc_card_ddr52(card) ? "DDR " : "",
+>>                         type);
+>>         } else {
+>> -               pr_info("%s: new %s%s%s%s%s card at address %04x\n",
+>> +               pr_info("%s: new %s%s%s%s%s%s card at address %04x\n",
+>>                         mmc_hostname(card->host),
+>>                         mmc_card_uhs(card) ? "ultra high speed " :
+>>                         (mmc_card_hs(card) ? "high speed " : ""),
+>>                         mmc_card_hs400(card) ? "HS400 " :
+>>                         (mmc_card_hs200(card) ? "HS200 " : ""),
+>> +                       mmc_card_hs400es(card) ? "Enhanced strobe" : "",
 > 
-> The same way you format a USB stick when you insert it.
+> I am not sure this informations should be printed. It's still and
+> HS400 card, there is no performance impact, right?
 
-Well, and that actually brings related question "how do you format the
-right USB stick if you have 5 of them connected". PCs don't have good
-solution, but that does not mean it can't be solved.
-
-And no, its not really the same. At least in N900 case, I'm not really
-sure if you are expected to manipulate the u-SD card while the system
-is on. It is under battery cover.
-
-> If you have built-in versus removable, then we should expose that
-> information to userspace rather than some arbitrary encoding in DT
-> that 0 means built-in and 1 means removable. Or if you have multiple
-> slots, then use "label" to provide meaningful slot names.
-
-Yes, labels would be nice. Plus the slot numbers should be stable, so
-that booting does not randomly break.
-									Pavel
--- 
-(english) http://www.livejournal.com/~pavelmachek
-(cesky, pictures) http://atrey.karlin.mff.cuni.cz/~pavel/picture/horses/blog.html
+I actually asked for that I think.  HS400ES does not need re-tuning so there
+is a performance and behavioural change which I think it is very useful to
+know.  Kernels which don't support HS400ES will show "HS400" whereas kernels
+which do support it will show something different.
