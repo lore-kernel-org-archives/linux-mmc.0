@@ -1,121 +1,85 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v2] mmc: omap: Use dma_request_chan() for requesting DMA channel
-Date: Wed, 4 May 2016 13:14:14 +0200
-Message-ID: <CAPDyKFr9G6hjEy0B-xdjzoVUPycL4JocOZ90reQUT4r0TWvrNQ@mail.gmail.com>
-References: <1462350188-16248-1-git-send-email-peter.ujfalusi@ti.com>
+Subject: Re: [PATCH v3] mmc: sdhci-of-arasan: fix set_clock when a phy is supported
+Date: Wed, 4 May 2016 13:14:41 +0200
+Message-ID: <CAPDyKFqDZ+V62fDa_MiZTKq-PjCnUMNr6OMHEbYt5y6B+r=qVg@mail.gmail.com>
+References: <1462326204-5090-1-git-send-email-shawn.lin@rock-chips.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1462350188-16248-1-git-send-email-peter.ujfalusi@ti.com>
+In-Reply-To: <1462326204-5090-1-git-send-email-shawn.lin@rock-chips.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Peter Ujfalusi <peter.ujfalusi@ti.com>
-Cc: Kishon <kishon@ti.com>, Tony Lindgren <tony@atomide.com>, Roger Quadros <rogerq@ti.com>, linux-mmc <linux-mmc@vger.kernel.org>, linux-omap <linux-omap@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Jarkko Nikula <jarkko.nikula@bitmer.com>
+To: Shawn Lin <shawn.lin@rock-chips.com>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, Michal Simek <michal.simek@xilinx.com>, =?UTF-8?Q?S=C3=B6ren_Brinkmann?= <soren.brinkmann@xilinx.com>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Doug Anderson <dianders@chromium.org>, Heiko Stuebner <heiko@sntech.de>, "open list:ARM/Rockchip SoC..." <linux-rockchip@lists.infradead.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On 4 May 2016 at 10:23, Peter Ujfalusi <peter.ujfalusi@ti.com> wrote:
-> With the new dma_request_chan() the client driver does not need to look for
-> the DMA resource and it does not need to pass filter_fn anymore.
-> By switching to the new API the driver can now support deferred probing
-> against DMA.
+On 4 May 2016 at 03:43, Shawn Lin <shawn.lin@rock-chips.com> wrote:
+> commit 61b914eb81f8 ("mmc: sdhci-of-arasan: add phy support for
+> sdhci-of-arasan") introduce phy support for arasan. According to
+> the vendor's databook, we should make sure the phy is in poweroff
+> status before we configure the clk stuff. Otherwise it may cause
+> some IO sample timing issues from the test. And we don't need this
+> extra operation while running in low performance mode since phy
+> doesn't trigger sampling block.
 >
-> Signed-off-by: Peter Ujfalusi <peter.ujfalusi@ti.com>
-> CC: Ulf Hansson <ulf.hansson@linaro.org>
-> CC: Jarkko Nikula <jarkko.nikula@bitmer.com>
+> Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
 
 Thanks, applied for next!
 
 Kind regards
 Uffe
 
+>
 > ---
-> Hi,
 >
-> Changes since v1:
-> - clk_put(host->fclk); added when deferred probing is required for tx channel
-> - Check host->dma_tx before trying to release the channel
+> Changes in v3:
+> - avoid use sleep function with the scope of spinlock because
+> phy APIs call mutex.
 >
-> Regards,
-> Peter
+> Changes in v2:
+> - Rename commit msg title to indicate it's a fix
 >
->  drivers/mmc/host/omap.c | 48 +++++++++++++++++++++++++-----------------------
->  1 file changed, 25 insertions(+), 23 deletions(-)
+>  drivers/mmc/host/sdhci-of-arasan.c | 26 +++++++++++++++++++++++++-
+>  1 file changed, 25 insertions(+), 1 deletion(-)
 >
-> diff --git a/drivers/mmc/host/omap.c b/drivers/mmc/host/omap.c
-> index b9958a123594..f23d65eb070d 100644
-> --- a/drivers/mmc/host/omap.c
-> +++ b/drivers/mmc/host/omap.c
-> @@ -23,7 +23,6 @@
->  #include <linux/spinlock.h>
->  #include <linux/timer.h>
->  #include <linux/of.h>
-> -#include <linux/omap-dma.h>
->  #include <linux/mmc/host.h>
->  #include <linux/mmc/card.h>
->  #include <linux/mmc/mmc.h>
-> @@ -1321,8 +1320,6 @@ static int mmc_omap_probe(struct platform_device *pdev)
->         struct omap_mmc_platform_data *pdata = pdev->dev.platform_data;
->         struct mmc_omap_host *host = NULL;
->         struct resource *res;
-> -       dma_cap_mask_t mask;
-> -       unsigned sig = 0;
->         int i, ret = 0;
->         int irq;
+> diff --git a/drivers/mmc/host/sdhci-of-arasan.c b/drivers/mmc/host/sdhci-of-arasan.c
+> index 2e482b1..b6f4c1d 100644
+> --- a/drivers/mmc/host/sdhci-of-arasan.c
+> +++ b/drivers/mmc/host/sdhci-of-arasan.c
+> @@ -55,8 +55,32 @@ static unsigned int sdhci_arasan_get_timeout_clock(struct sdhci_host *host)
+>         return freq;
+>  }
 >
-> @@ -1382,29 +1379,34 @@ static int mmc_omap_probe(struct platform_device *pdev)
->                 goto err_free_iclk;
->         }
->
-> -       dma_cap_zero(mask);
-> -       dma_cap_set(DMA_SLAVE, mask);
-> -
->         host->dma_tx_burst = -1;
->         host->dma_rx_burst = -1;
->
-> -       res = platform_get_resource_byname(pdev, IORESOURCE_DMA, "tx");
-> -       if (res)
-> -               sig = res->start;
-> -       host->dma_tx = dma_request_slave_channel_compat(mask,
-> -                               omap_dma_filter_fn, &sig, &pdev->dev, "tx");
-> -       if (!host->dma_tx)
-> -               dev_warn(host->dev, "unable to obtain TX DMA engine channel %u\n",
-> -                       sig);
-> -
-> -       res = platform_get_resource_byname(pdev, IORESOURCE_DMA, "rx");
-> -       if (res)
-> -               sig = res->start;
-> -       host->dma_rx = dma_request_slave_channel_compat(mask,
-> -                               omap_dma_filter_fn, &sig, &pdev->dev, "rx");
-> -       if (!host->dma_rx)
-> -               dev_warn(host->dev, "unable to obtain RX DMA engine channel %u\n",
-> -                       sig);
-> +       host->dma_tx = dma_request_chan(&pdev->dev, "tx");
-> +       if (IS_ERR(host->dma_tx)) {
-> +               ret = PTR_ERR(host->dma_tx);
-> +               if (ret == -EPROBE_DEFER) {
-> +                       clk_put(host->fclk);
-> +                       goto err_free_iclk;
-> +               }
+> +static void sdhci_arasan_set_clock(struct sdhci_host *host, unsigned int clock)
+> +{
+> +       struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+> +       struct sdhci_arasan_data *sdhci_arasan = sdhci_pltfm_priv(pltfm_host);
+> +       bool ctrl_phy = false;
 > +
-> +               host->dma_tx = NULL;
-> +               dev_warn(host->dev, "TX DMA channel request failed\n");
+> +       if (clock > MMC_HIGH_52_MAX_DTR && (!IS_ERR(sdhci_arasan->phy)))
+> +               ctrl_phy = true;
+> +
+> +       if (ctrl_phy) {
+> +               spin_unlock_irq(&host->lock);
+> +               phy_power_off(sdhci_arasan->phy);
+> +               spin_lock_irq(&host->lock);
 > +       }
 > +
-> +       host->dma_rx = dma_request_chan(&pdev->dev, "rx");
-> +       if (IS_ERR(host->dma_rx)) {
-> +               ret = PTR_ERR(host->dma_rx);
-> +               if (ret == -EPROBE_DEFER) {
-> +                       if (host->dma_tx)
-> +                               dma_release_channel(host->dma_tx);
-> +                       clk_put(host->fclk);
-> +                       goto err_free_iclk;
-> +               }
+> +       sdhci_set_clock(host, clock);
 > +
-> +               host->dma_rx = NULL;
-> +               dev_warn(host->dev, "RX DMA channel request failed\n");
+> +       if (ctrl_phy) {
+> +               spin_unlock_irq(&host->lock);
+> +               phy_power_on(sdhci_arasan->phy);
+> +               spin_lock_irq(&host->lock);
 > +       }
->
->         ret = request_irq(host->irq, mmc_omap_irq, 0, DRIVER_NAME, host);
->         if (ret)
+> +}
+> +
+>  static struct sdhci_ops sdhci_arasan_ops = {
+> -       .set_clock = sdhci_set_clock,
+> +       .set_clock = sdhci_arasan_set_clock,
+>         .get_max_clock = sdhci_pltfm_clk_get_max_clock,
+>         .get_timeout_clock = sdhci_arasan_get_timeout_clock,
+>         .set_bus_width = sdhci_set_bus_width,
 > --
-> 2.8.1
+> 2.3.7
+>
 >
