@@ -1,111 +1,124 @@
-From: Peter Ujfalusi <peter.ujfalusi@ti.com>
-Subject: [PATCH v2] mmc: omap: Use dma_request_chan() for requesting DMA channel
-Date: Wed, 4 May 2016 11:23:08 +0300
-Message-ID: <1462350188-16248-1-git-send-email-peter.ujfalusi@ti.com>
+From: Heiko Stuebner <heiko@sntech.de>
+Subject: Re: [PATCH v2] mmc: sdhci-of-arasan: fix set_clock when a phy is supported
+Date: Wed, 04 May 2016 10:35:21 +0200
+Message-ID: <1879484.KeYGv3HTkz@phil>
+References: <1461832731-28422-1-git-send-email-shawn.lin@rock-chips.com> <CAPDyKFp8GmNjU_G9p5u3KFPB8h-BcqL9s6FUAUnAABt8g4Bw0w@mail.gmail.com> <1d3a9de8-9092-add5-078e-66ce4ce5f6f3@rock-chips.com>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: ulf.hansson@linaro.org, kishon@ti.com
-Cc: tony@atomide.com, rogerq@ti.com, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, linux-kernel@vger.kernel.org, jarkko.nikula@bitmer.com
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from gloria.sntech.de ([95.129.55.99]:41182 "EHLO gloria.sntech.de"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1757601AbcEDIft convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 4 May 2016 04:35:49 -0400
+In-Reply-To: <1d3a9de8-9092-add5-078e-66ce4ce5f6f3@rock-chips.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Shawn Lin <shawn.lin@rock-chips.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, Michal Simek <michal.simek@xilinx.com>, =?ISO-8859-1?Q?S=F6ren?= Brinkmann <soren.brinkmann@xilinx.com>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Doug Anderson <dianders@chromium.org>, "open list:ARM/Rockchip SoC..." <linux-rockchip@lists.infradead.org>
 
-With the new dma_request_chan() the client driver does not need to look for
-the DMA resource and it does not need to pass filter_fn anymore.
-By switching to the new API the driver can now support deferred probing
-against DMA.
+Am Mittwoch, 4. Mai 2016, 09:48:55 schrieb Shawn Lin:
+> =E5=9C=A8 2016/4/28 18:38, Ulf Hansson =E5=86=99=E9=81=93:
+> > On 28 April 2016 at 10:38, Shawn Lin <shawn.lin@rock-chips.com> wro=
+te:
+> >> commit 61b914eb81f8 ("mmc: sdhci-of-arasan: add phy support for
+> >> sdhci-of-arasan") introduce phy support for arasan. According to
+> >> the vendor's databook, we should make sure the phy is in poweroff
+> >> status before we configure the clk stuff. Otherwise it may cause
+> >> some IO sample timing issues from the test. And we don't need this
+> >> extra operation while running in low performance mode since phy
+> >> doesn't trigger sampling block.
+> >>=20
+> >> Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
+> >=20
+> > Thanks, applied for next!
+>=20
+> Thanks for applying v2 but, could you please drop it and applied v3
+> I just send :) .
+> Because v2 introduces a bug. Set_clock callback will be
+> called under the protection of spinlock in sdhci_do_set_ios. However
+> PHY APIs need mutex which fails the kernel's debug check
+>=20
+> BUG: sleeping function called from invalid context at
+> kernel/locking/mutex.c
 
-Signed-off-by: Peter Ujfalusi <peter.ujfalusi@ti.com>
-CC: Ulf Hansson <ulf.hansson@linaro.org>
-CC: Jarkko Nikula <jarkko.nikula@bitmer.com>
----
-Hi,
+I think in general you will need to provide a follow-up patch instead o=
+f=20
+replacing the old version, as Ulf might not want to restructure an alre=
+ady=20
+published branch (depends on the maintainer), especially as already oth=
+er=20
+stuff is on top of your patch [0].
 
-Changes since v1:
-- clk_put(host->fclk); added when deferred probing is required for tx channel
-- Check host->dma_tx before trying to release the channel
 
-Regards,
-Peter
+Heiko
 
- drivers/mmc/host/omap.c | 48 +++++++++++++++++++++++++-----------------------
- 1 file changed, 25 insertions(+), 23 deletions(-)
+[0]=20
+https://git.linaro.org/people/ulf.hansson/mmc.git/shortlog/refs/heads/n=
+ext
 
-diff --git a/drivers/mmc/host/omap.c b/drivers/mmc/host/omap.c
-index b9958a123594..f23d65eb070d 100644
---- a/drivers/mmc/host/omap.c
-+++ b/drivers/mmc/host/omap.c
-@@ -23,7 +23,6 @@
- #include <linux/spinlock.h>
- #include <linux/timer.h>
- #include <linux/of.h>
--#include <linux/omap-dma.h>
- #include <linux/mmc/host.h>
- #include <linux/mmc/card.h>
- #include <linux/mmc/mmc.h>
-@@ -1321,8 +1320,6 @@ static int mmc_omap_probe(struct platform_device *pdev)
- 	struct omap_mmc_platform_data *pdata = pdev->dev.platform_data;
- 	struct mmc_omap_host *host = NULL;
- 	struct resource *res;
--	dma_cap_mask_t mask;
--	unsigned sig = 0;
- 	int i, ret = 0;
- 	int irq;
- 
-@@ -1382,29 +1379,34 @@ static int mmc_omap_probe(struct platform_device *pdev)
- 		goto err_free_iclk;
- 	}
- 
--	dma_cap_zero(mask);
--	dma_cap_set(DMA_SLAVE, mask);
--
- 	host->dma_tx_burst = -1;
- 	host->dma_rx_burst = -1;
- 
--	res = platform_get_resource_byname(pdev, IORESOURCE_DMA, "tx");
--	if (res)
--		sig = res->start;
--	host->dma_tx = dma_request_slave_channel_compat(mask,
--				omap_dma_filter_fn, &sig, &pdev->dev, "tx");
--	if (!host->dma_tx)
--		dev_warn(host->dev, "unable to obtain TX DMA engine channel %u\n",
--			sig);
--
--	res = platform_get_resource_byname(pdev, IORESOURCE_DMA, "rx");
--	if (res)
--		sig = res->start;
--	host->dma_rx = dma_request_slave_channel_compat(mask,
--				omap_dma_filter_fn, &sig, &pdev->dev, "rx");
--	if (!host->dma_rx)
--		dev_warn(host->dev, "unable to obtain RX DMA engine channel %u\n",
--			sig);
-+	host->dma_tx = dma_request_chan(&pdev->dev, "tx");
-+	if (IS_ERR(host->dma_tx)) {
-+		ret = PTR_ERR(host->dma_tx);
-+		if (ret == -EPROBE_DEFER) {
-+			clk_put(host->fclk);
-+			goto err_free_iclk;
-+		}
-+
-+		host->dma_tx = NULL;
-+		dev_warn(host->dev, "TX DMA channel request failed\n");
-+	}
-+
-+	host->dma_rx = dma_request_chan(&pdev->dev, "rx");
-+	if (IS_ERR(host->dma_rx)) {
-+		ret = PTR_ERR(host->dma_rx);
-+		if (ret == -EPROBE_DEFER) {
-+			if (host->dma_tx)
-+				dma_release_channel(host->dma_tx);
-+			clk_put(host->fclk);
-+			goto err_free_iclk;
-+		}
-+
-+		host->dma_rx = NULL;
-+		dev_warn(host->dev, "RX DMA channel request failed\n");
-+	}
- 
- 	ret = request_irq(host->irq, mmc_omap_irq, 0, DRIVER_NAME, host);
- 	if (ret)
--- 
-2.8.1
+
+
+
+> > Kind regards
+> > Uffe
+> >=20
+> >> ---
+> >>=20
+> >> Changes in v2:
+> >> - change commit msg title to indicate it's a fix
+> >> - fix a typo in commmit msg
+> >>=20
+> >>  drivers/mmc/host/sdhci-of-arasan.c | 20 +++++++++++++++++++-
+> >>  1 file changed, 19 insertions(+), 1 deletion(-)
+> >>=20
+> >> diff --git a/drivers/mmc/host/sdhci-of-arasan.c
+> >> b/drivers/mmc/host/sdhci-of-arasan.c index 2e482b1..20b859e 100644
+> >> --- a/drivers/mmc/host/sdhci-of-arasan.c
+> >> +++ b/drivers/mmc/host/sdhci-of-arasan.c
+> >> @@ -55,8 +55,26 @@ static unsigned int
+> >> sdhci_arasan_get_timeout_clock(struct sdhci_host *host)>>=20
+> >>         return freq;
+> >> =20
+> >>  }
+> >>=20
+> >> +static void sdhci_arasan_set_clock(struct sdhci_host *host, unsig=
+ned
+> >> int clock) +{
+> >> +       struct sdhci_pltfm_host *pltfm_host =3D sdhci_priv(host);
+> >> +       struct sdhci_arasan_data *sdhci_arasan =3D
+> >> sdhci_pltfm_priv(pltfm_host); +       bool ctrl_phy =3D false;
+> >> +
+> >> +       if (clock > MMC_HIGH_52_MAX_DTR &&
+> >> (!IS_ERR(sdhci_arasan->phy)))
+> >> +               ctrl_phy =3D true;
+> >> +
+> >> +       if (ctrl_phy)
+> >> +               phy_power_off(sdhci_arasan->phy);
+> >> +
+> >> +       sdhci_set_clock(host, clock);
+> >> +
+> >> +       if (ctrl_phy)
+> >> +               phy_power_on(sdhci_arasan->phy);
+> >> +}
+> >> +
+> >>=20
+> >>  static struct sdhci_ops sdhci_arasan_ops =3D {
+> >>=20
+> >> -       .set_clock =3D sdhci_set_clock,
+> >> +       .set_clock =3D sdhci_arasan_set_clock,
+> >>=20
+> >>         .get_max_clock =3D sdhci_pltfm_clk_get_max_clock,
+> >>         .get_timeout_clock =3D sdhci_arasan_get_timeout_clock,
+> >>         .set_bus_width =3D sdhci_set_bus_width,
+> >>=20
+> >> --
+> >> 2.3.7
+> >>=20
+> >>=20
+> >> --
+> >> To unsubscribe from this list: send the line "unsubscribe linux-mm=
+c" in
+> >> the body of a message to majordomo@vger.kernel.org
+> >> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
