@@ -1,65 +1,78 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [v9, 6/7] MAINTAINERS: add entry for Freescale SoC driver
-Date: Wed, 4 May 2016 09:43:38 +0200
-Message-ID: <CAPDyKFoh7mfmMYxVxjG6jrRr6CuGKkuxdeON4yxX3yXFEamikg@mail.gmail.com>
-References: <1462332274-13744-1-git-send-email-yangbo.lu@nxp.com>
-	<1462332274-13744-7-git-send-email-yangbo.lu@nxp.com>
+Subject: Re: [PATCH v2 2/6] mmc: core: add mmc-hs400-enhanced-strobe support
+Date: Wed, 4 May 2016 10:12:01 +0200
+Message-ID: <CAPDyKFrPhBKA3g+_NMBGfw4kqonpgQzbdTSo-A5sRwqio268xw@mail.gmail.com>
+References: <1461897751-28810-1-git-send-email-shawn.lin@rock-chips.com>
+	<1461897995-28903-1-git-send-email-shawn.lin@rock-chips.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-i2c-owner@vger.kernel.org>
-In-Reply-To: <1462332274-13744-7-git-send-email-yangbo.lu@nxp.com>
-Sender: linux-i2c-owner@vger.kernel.org
-To: Yangbo Lu <yangbo.lu@nxp.com>, Scott Wood <oss@buserror.net>, Qiang Zhao <qiang.zhao@nxp.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, "linuxppc-dev@lists.ozlabs.org" <linuxppc-dev@lists.ozlabs.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-clk <linux-clk@vger.kernel.org>, "linux-i2c@vger.kernel.org" <linux-i2c@vger.kernel.org>, iommu@lists.linux-foundation.org, netdev@vger.kernel.org, Mark Rutland <mark.rutland@arm.com>, Rob Herring <robh+dt@kernel.org>, Russell King <linux@arm.linux.org.uk>, Jochen Friedrich <jochen@scram.de>, Joerg Roedel <joro@8bytes.org>, Claudiu Manoil <claudiu.manoil@freescale.com>, Bhupesh Sharma <bhupesh.sharma@freescale.com>, Kumar Gala <galak@codeaurora.org>, Santosh Shilimkar <ssantosh@kernel.org>, Yang-Leo Li <leoyang.li@nxp.com>, Xiaobo Xie <xiaobo.xie@nxp.com>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1461897995-28903-1-git-send-email-shawn.lin@rock-chips.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Shawn Lin <shawn.lin@rock-chips.com>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, Jaehoon Chung <jh80.chung@samsung.com>, Michal Simek <michal.simek@xilinx.com>, =?UTF-8?Q?S=C3=B6ren_Brinkmann?= <soren.brinkmann@xilinx.com>, Rob Herring <robh+dt@kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Doug Anderson <dianders@chromium.org>, Heiko Stuebner <heiko@sntech.de>, "open list:ARM/Rockchip SoC..." <linux-rockchip@lists.infradead.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On 4 May 2016 at 05:24, Yangbo Lu <yangbo.lu@nxp.com> wrote:
-> Add maintainer entry for Freescale SoC driver including
-> the QE library and the GUTS driver now. Also add maintainer
-> for QE library.
+On 29 April 2016 at 04:46, Shawn Lin <shawn.lin@rock-chips.com> wrote:
+> This patch introduce mmc-hs400-enhanced-strobe for platforms
+> which want to enable enhanced strobe function from DT if the
+> mmc host controller claims to support enhanced strobe.
 >
-> Signed-off-by: Yangbo Lu <yangbo.lu@nxp.com>
+> Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
+>
+> ---
+>
+> Changes in v2:
+> - switch to HS400ES from Highspeed mode directly
+>
+>  drivers/mmc/core/host.c  | 2 ++
+>  include/linux/mmc/host.h | 6 ++++++
+>  2 files changed, 8 insertions(+)
+>
+> diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
+> index e0a3ee1..eb1530a 100644
+> --- a/drivers/mmc/core/host.c
+> +++ b/drivers/mmc/core/host.c
+> @@ -289,6 +289,8 @@ int mmc_of_parse(struct mmc_host *host)
+>                 host->caps2 |= MMC_CAP2_HS400_1_8V | MMC_CAP2_HS200_1_8V_SDR;
+>         if (of_property_read_bool(np, "mmc-hs400-1_2v"))
+>                 host->caps2 |= MMC_CAP2_HS400_1_2V | MMC_CAP2_HS200_1_2V_SDR;
+> +       if (of_property_read_bool(np, "mmc-hs400-enhanced-strobe"))
+> +               host->caps2 |= MMC_CAP2_HS400_ENHANCED_STROBE;
 
-So I need an ack from Scott and Qiang for this one, then I intend to
-queue up the series.
+How about MMC_CAP2_HS400_ES instead?
+
+>
+>         host->dsr_req = !of_property_read_u32(np, "dsr", &host->dsr);
+>         if (host->dsr_req && (host->dsr & ~0xffff)) {
+> diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+> index 85800b4..11e89d3 100644
+> --- a/include/linux/mmc/host.h
+> +++ b/include/linux/mmc/host.h
+> @@ -302,6 +302,7 @@ struct mmc_host {
+>  #define MMC_CAP2_SDIO_IRQ_NOTHREAD (1 << 17)
+>  #define MMC_CAP2_NO_WRITE_PROTECT (1 << 18)    /* No physical write protect pin, assume that card is always read-write */
+>  #define MMC_CAP2_NO_SDIO       (1 << 19)       /* Do not send SDIO commands during initialization */
+> +#define MMC_CAP2_HS400_ENHANCED_STROBE (1 << 20) /* Host supports enhanced strobe */
+>
+>         mmc_pm_flag_t           pm_caps;        /* supported pm features */
+>
+> @@ -480,6 +481,11 @@ static inline int mmc_host_uhs(struct mmc_host *host)
+>                  MMC_CAP_UHS_DDR50);
+>  }
+>
+> +static inline int mmc_host_hs400_enhanced_strobe(struct mmc_host *host)
+> +{
+> +       return host->caps2 & MMC_CAP2_HS400_ENHANCED_STROBE;
+> +}
+> +
+
+This helper function is to me a bit unnecessary, can you please just
+check the MMC_CAP2_* when needed instead!?
+
+>  static inline int mmc_host_packed_wr(struct mmc_host *host)
+>  {
+>         return host->caps2 & MMC_CAP2_PACKED_WR;
 
 Kind regards
 Uffe
-
-> ---
-> Changes for v8:
->         - Added this patch
-> Changes for v9:
->         - Added linux-arm mail list
->         - Removed GUTS driver entry
-> ---
->  MAINTAINERS | 11 ++++++++++-
->  1 file changed, 10 insertions(+), 1 deletion(-)
->
-> diff --git a/MAINTAINERS b/MAINTAINERS
-> index 42e65d1..ce91db7 100644
-> --- a/MAINTAINERS
-> +++ b/MAINTAINERS
-> @@ -4622,9 +4622,18 @@ F:       drivers/net/ethernet/freescale/fec_ptp.c
->  F:     drivers/net/ethernet/freescale/fec.h
->  F:     Documentation/devicetree/bindings/net/fsl-fec.txt
->
-> +FREESCALE SOC DRIVER
-> +M:     Scott Wood <oss@buserror.net>
-> +L:     linuxppc-dev@lists.ozlabs.org
-> +L:     linux-arm-kernel@lists.infradead.org
-> +S:     Maintained
-> +F:     drivers/soc/fsl/
-> +F:     include/linux/fsl/
-> +
->  FREESCALE QUICC ENGINE LIBRARY
-> +M:     Qiang Zhao <qiang.zhao@nxp.com>
->  L:     linuxppc-dev@lists.ozlabs.org
-> -S:     Orphan
-> +S:     Maintained
->  F:     drivers/soc/fsl/qe/
->  F:     include/soc/fsl/*qe*.h
->  F:     include/soc/fsl/*ucc*.h
-> --
-> 2.1.0.27.g96db324
->
