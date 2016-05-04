@@ -1,78 +1,111 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v2 2/6] mmc: core: add mmc-hs400-enhanced-strobe support
-Date: Wed, 4 May 2016 10:12:01 +0200
-Message-ID: <CAPDyKFrPhBKA3g+_NMBGfw4kqonpgQzbdTSo-A5sRwqio268xw@mail.gmail.com>
-References: <1461897751-28810-1-git-send-email-shawn.lin@rock-chips.com>
-	<1461897995-28903-1-git-send-email-shawn.lin@rock-chips.com>
+From: Peter Ujfalusi <peter.ujfalusi@ti.com>
+Subject: [PATCH v2] mmc: omap: Use dma_request_chan() for requesting DMA channel
+Date: Wed, 4 May 2016 11:23:08 +0300
+Message-ID: <1462350188-16248-1-git-send-email-peter.ujfalusi@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1461897995-28903-1-git-send-email-shawn.lin@rock-chips.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Shawn Lin <shawn.lin@rock-chips.com>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, Jaehoon Chung <jh80.chung@samsung.com>, Michal Simek <michal.simek@xilinx.com>, =?UTF-8?Q?S=C3=B6ren_Brinkmann?= <soren.brinkmann@xilinx.com>, Rob Herring <robh+dt@kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Doug Anderson <dianders@chromium.org>, Heiko Stuebner <heiko@sntech.de>, "open list:ARM/Rockchip SoC..." <linux-rockchip@lists.infradead.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>
+To: ulf.hansson@linaro.org, kishon@ti.com
+Cc: tony@atomide.com, rogerq@ti.com, linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org, linux-kernel@vger.kernel.org, jarkko.nikula@bitmer.com
 List-Id: linux-mmc@vger.kernel.org
 
-On 29 April 2016 at 04:46, Shawn Lin <shawn.lin@rock-chips.com> wrote:
-> This patch introduce mmc-hs400-enhanced-strobe for platforms
-> which want to enable enhanced strobe function from DT if the
-> mmc host controller claims to support enhanced strobe.
->
-> Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
->
-> ---
->
-> Changes in v2:
-> - switch to HS400ES from Highspeed mode directly
->
->  drivers/mmc/core/host.c  | 2 ++
->  include/linux/mmc/host.h | 6 ++++++
->  2 files changed, 8 insertions(+)
->
-> diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
-> index e0a3ee1..eb1530a 100644
-> --- a/drivers/mmc/core/host.c
-> +++ b/drivers/mmc/core/host.c
-> @@ -289,6 +289,8 @@ int mmc_of_parse(struct mmc_host *host)
->                 host->caps2 |= MMC_CAP2_HS400_1_8V | MMC_CAP2_HS200_1_8V_SDR;
->         if (of_property_read_bool(np, "mmc-hs400-1_2v"))
->                 host->caps2 |= MMC_CAP2_HS400_1_2V | MMC_CAP2_HS200_1_2V_SDR;
-> +       if (of_property_read_bool(np, "mmc-hs400-enhanced-strobe"))
-> +               host->caps2 |= MMC_CAP2_HS400_ENHANCED_STROBE;
+With the new dma_request_chan() the client driver does not need to look for
+the DMA resource and it does not need to pass filter_fn anymore.
+By switching to the new API the driver can now support deferred probing
+against DMA.
 
-How about MMC_CAP2_HS400_ES instead?
+Signed-off-by: Peter Ujfalusi <peter.ujfalusi@ti.com>
+CC: Ulf Hansson <ulf.hansson@linaro.org>
+CC: Jarkko Nikula <jarkko.nikula@bitmer.com>
+---
+Hi,
 
->
->         host->dsr_req = !of_property_read_u32(np, "dsr", &host->dsr);
->         if (host->dsr_req && (host->dsr & ~0xffff)) {
-> diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-> index 85800b4..11e89d3 100644
-> --- a/include/linux/mmc/host.h
-> +++ b/include/linux/mmc/host.h
-> @@ -302,6 +302,7 @@ struct mmc_host {
->  #define MMC_CAP2_SDIO_IRQ_NOTHREAD (1 << 17)
->  #define MMC_CAP2_NO_WRITE_PROTECT (1 << 18)    /* No physical write protect pin, assume that card is always read-write */
->  #define MMC_CAP2_NO_SDIO       (1 << 19)       /* Do not send SDIO commands during initialization */
-> +#define MMC_CAP2_HS400_ENHANCED_STROBE (1 << 20) /* Host supports enhanced strobe */
->
->         mmc_pm_flag_t           pm_caps;        /* supported pm features */
->
-> @@ -480,6 +481,11 @@ static inline int mmc_host_uhs(struct mmc_host *host)
->                  MMC_CAP_UHS_DDR50);
->  }
->
-> +static inline int mmc_host_hs400_enhanced_strobe(struct mmc_host *host)
-> +{
-> +       return host->caps2 & MMC_CAP2_HS400_ENHANCED_STROBE;
-> +}
-> +
+Changes since v1:
+- clk_put(host->fclk); added when deferred probing is required for tx channel
+- Check host->dma_tx before trying to release the channel
 
-This helper function is to me a bit unnecessary, can you please just
-check the MMC_CAP2_* when needed instead!?
+Regards,
+Peter
 
->  static inline int mmc_host_packed_wr(struct mmc_host *host)
->  {
->         return host->caps2 & MMC_CAP2_PACKED_WR;
+ drivers/mmc/host/omap.c | 48 +++++++++++++++++++++++++-----------------------
+ 1 file changed, 25 insertions(+), 23 deletions(-)
 
-Kind regards
-Uffe
+diff --git a/drivers/mmc/host/omap.c b/drivers/mmc/host/omap.c
+index b9958a123594..f23d65eb070d 100644
+--- a/drivers/mmc/host/omap.c
++++ b/drivers/mmc/host/omap.c
+@@ -23,7 +23,6 @@
+ #include <linux/spinlock.h>
+ #include <linux/timer.h>
+ #include <linux/of.h>
+-#include <linux/omap-dma.h>
+ #include <linux/mmc/host.h>
+ #include <linux/mmc/card.h>
+ #include <linux/mmc/mmc.h>
+@@ -1321,8 +1320,6 @@ static int mmc_omap_probe(struct platform_device *pdev)
+ 	struct omap_mmc_platform_data *pdata = pdev->dev.platform_data;
+ 	struct mmc_omap_host *host = NULL;
+ 	struct resource *res;
+-	dma_cap_mask_t mask;
+-	unsigned sig = 0;
+ 	int i, ret = 0;
+ 	int irq;
+ 
+@@ -1382,29 +1379,34 @@ static int mmc_omap_probe(struct platform_device *pdev)
+ 		goto err_free_iclk;
+ 	}
+ 
+-	dma_cap_zero(mask);
+-	dma_cap_set(DMA_SLAVE, mask);
+-
+ 	host->dma_tx_burst = -1;
+ 	host->dma_rx_burst = -1;
+ 
+-	res = platform_get_resource_byname(pdev, IORESOURCE_DMA, "tx");
+-	if (res)
+-		sig = res->start;
+-	host->dma_tx = dma_request_slave_channel_compat(mask,
+-				omap_dma_filter_fn, &sig, &pdev->dev, "tx");
+-	if (!host->dma_tx)
+-		dev_warn(host->dev, "unable to obtain TX DMA engine channel %u\n",
+-			sig);
+-
+-	res = platform_get_resource_byname(pdev, IORESOURCE_DMA, "rx");
+-	if (res)
+-		sig = res->start;
+-	host->dma_rx = dma_request_slave_channel_compat(mask,
+-				omap_dma_filter_fn, &sig, &pdev->dev, "rx");
+-	if (!host->dma_rx)
+-		dev_warn(host->dev, "unable to obtain RX DMA engine channel %u\n",
+-			sig);
++	host->dma_tx = dma_request_chan(&pdev->dev, "tx");
++	if (IS_ERR(host->dma_tx)) {
++		ret = PTR_ERR(host->dma_tx);
++		if (ret == -EPROBE_DEFER) {
++			clk_put(host->fclk);
++			goto err_free_iclk;
++		}
++
++		host->dma_tx = NULL;
++		dev_warn(host->dev, "TX DMA channel request failed\n");
++	}
++
++	host->dma_rx = dma_request_chan(&pdev->dev, "rx");
++	if (IS_ERR(host->dma_rx)) {
++		ret = PTR_ERR(host->dma_rx);
++		if (ret == -EPROBE_DEFER) {
++			if (host->dma_tx)
++				dma_release_channel(host->dma_tx);
++			clk_put(host->fclk);
++			goto err_free_iclk;
++		}
++
++		host->dma_rx = NULL;
++		dev_warn(host->dev, "RX DMA channel request failed\n");
++	}
+ 
+ 	ret = request_irq(host->irq, mmc_omap_irq, 0, DRIVER_NAME, host);
+ 	if (ret)
+-- 
+2.8.1
