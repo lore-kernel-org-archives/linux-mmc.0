@@ -1,70 +1,104 @@
-From: Shawn Lin <shawn.lin@rock-chips.com>
-Subject: Re: [PATCH] mmc: dw_mmc: fix the wrong max_blk_size
-Date: Wed, 4 May 2016 10:55:00 +0800
-Message-ID: <9ca328f2-7ab7-3c28-e70e-cb3b22523f94@rock-chips.com>
-References: <1462328654-5165-1-git-send-email-jh80.chung@samsung.com>
+From: Yangbo Lu <yangbo.lu@nxp.com>
+Subject: RE: [v8, 6/7] MAINTAINERS: add entry for Freescale SoC specific
+ driver
+Date: Wed, 4 May 2016 03:24:02 +0000
+Message-ID: <HE1PR04MB0889087BDB60357796424CAAF87B0@HE1PR04MB0889.eurprd04.prod.outlook.com>
+References: <1461306464-19521-1-git-send-email-yangbo.lu@nxp.com>
+	<1461306464-19521-7-git-send-email-yangbo.lu@nxp.com>
+	<1461367352.32510.218.camel@buserror.net>
+	<HE1PR04MB088907CD90586FC83D058003F8630@HE1PR04MB0889.eurprd04.prod.outlook.com>
+ <CADRPPNQaLVHp_HnEcHvZE7ebcmhYKf4K8CeWHErRk-0Xv8cU3A@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=gbk; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from lucky1.263xmail.com ([211.157.147.133]:57240 "EHLO
-	lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751372AbcEDCzb (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 3 May 2016 22:55:31 -0400
-In-Reply-To: <1462328654-5165-1-git-send-email-jh80.chung@samsung.com>
+Received: from mail-am1on0069.outbound.protection.outlook.com ([157.56.112.69]:33216
+	"EHLO emea01-am1-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1752008AbcEDDYI (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 3 May 2016 23:24:08 -0400
+In-Reply-To: <CADRPPNQaLVHp_HnEcHvZE7ebcmhYKf4K8CeWHErRk-0Xv8cU3A@mail.gmail.com>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>, linux-mmc@vger.kernel.org
-Cc: shawn.lin@rock-chips.com, ulf.hansson@linaro.org
+To: Leo Li <pku.leo@gmail.com>, Scott Wood <oss@buserror.net>
+Cc: Yang-Leo Li <leoyang.li@nxp.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linuxppc-dev@lists.ozlabs.org" <linuxppc-dev@lists.ozlabs.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>, Zhao Qiang <qiang.zhao@freescale.com>, Russell King <linux@arm.linux.org.uk>, Bhupesh Sharma <bhupesh.sharma@freescale.com>, Xiaobo Xie <xiaobo.xie@nxp.com>, Scott Wood <scott.wood@nxp.com>, Claudiu Manoil <claudiu.manoil@freescale.com>, Kumar Gala <galak@codeaurora.org>
 
-On 2016/5/4 10:24, Jaehoon Chung wrote:
-> According to DesignWare TRM, BLKSIZ is 16bits.
-> Then it's correct that max_blk_size should be 0xFFFF, not 0x10000.
->
-
-Seems a long pre-existing mistake.
-
-Reviewed-by: Shawn Lin <shawn.lin@rock-chips.com>
-
-
-> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
-> ---
->  drivers/mmc/host/dw_mmc.c | 6 +++---
->  1 file changed, 3 insertions(+), 3 deletions(-)
->
-> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-> index 9dd1bd3..829a6ee 100644
-> --- a/drivers/mmc/host/dw_mmc.c
-> +++ b/drivers/mmc/host/dw_mmc.c
-> @@ -2595,13 +2595,13 @@ static int dw_mci_init_slot(struct dw_mci *host, unsigned int id)
->  	/* Useful defaults if platform data is unset. */
->  	if (host->use_dma == TRANS_MODE_IDMAC) {
->  		mmc->max_segs = host->ring_size;
-> -		mmc->max_blk_size = 65536;
-> +		mmc->max_blk_size = 65535;
->  		mmc->max_seg_size = 0x1000;
->  		mmc->max_req_size = mmc->max_seg_size * host->ring_size;
->  		mmc->max_blk_count = mmc->max_req_size / 512;
->  	} else if (host->use_dma == TRANS_MODE_EDMAC) {
->  		mmc->max_segs = 64;
-> -		mmc->max_blk_size = 65536;
-> +		mmc->max_blk_size = 65535;
->  		mmc->max_blk_count = 65535;
->  		mmc->max_req_size =
->  				mmc->max_blk_size * mmc->max_blk_count;
-> @@ -2609,7 +2609,7 @@ static int dw_mci_init_slot(struct dw_mci *host, unsigned int id)
->  	} else {
->  		/* TRANS_MODE_PIO */
->  		mmc->max_segs = 64;
-> -		mmc->max_blk_size = 65536; /* BLKSIZ is 16 bits */
-> +		mmc->max_blk_size = 65535; /* BLKSIZ is 16 bits */
->  		mmc->max_blk_count = 512;
->  		mmc->max_req_size = mmc->max_blk_size *
->  				    mmc->max_blk_count;
->
-
-
--- 
-Best Regards
-Shawn Lin
-
+SGkgTGVvIGFuZCBTY290dCwNCg0KPiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9t
+OiBMZW8gTGkgW21haWx0bzpwa3UubGVvQGdtYWlsLmNvbV0NCj4gU2VudDogV2VkbmVzZGF5LCBN
+YXkgMDQsIDIwMTYgNDowNiBBTQ0KPiBUbzogWWFuZ2JvIEx1DQo+IENjOiBTY290dCBXb29kOyBZ
+YW5nLUxlbyBMaTsgbGludXgtbW1jQHZnZXIua2VybmVsLm9yZzsgbGludXhwcGMtDQo+IGRldkBs
+aXN0cy5vemxhYnMub3JnOyBsaW51eC1hcm0ta2VybmVsQGxpc3RzLmluZnJhZGVhZC5vcmc7IGxp
+bnV4LQ0KPiBrZXJuZWxAdmdlci5rZXJuZWwub3JnOyB1bGYuaGFuc3NvbkBsaW5hcm8ub3JnOyBa
+aGFvIFFpYW5nOyBSdXNzZWxsIEtpbmc7DQo+IEJodXBlc2ggU2hhcm1hOyBYaWFvYm8gWGllOyBT
+Y290dCBXb29kOyBDbGF1ZGl1IE1hbm9pbDsgS3VtYXIgR2FsYQ0KPiBTdWJqZWN0OiBSZTogW3Y4
+LCA2LzddIE1BSU5UQUlORVJTOiBhZGQgZW50cnkgZm9yIEZyZWVzY2FsZSBTb0Mgc3BlY2lmaWMN
+Cj4gZHJpdmVyDQo+IA0KPiBPbiBNb24sIEFwciAyNSwgMjAxNiBhdCAxMDoxMiBQTSwgWWFuZ2Jv
+IEx1IDx5YW5nYm8ubHVAbnhwLmNvbT4gd3JvdGU6DQo+ID4gSGkgU2NvdHQgYW5kIExlbywNCj4g
+Pg0KPiA+DQo+ID4+IC0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQo+ID4+IEZyb206IGxpbnV4
+LW1tYy1vd25lckB2Z2VyLmtlcm5lbC5vcmcgW21haWx0bzpsaW51eC1tbWMtDQo+ID4+IG93bmVy
+QHZnZXIua2VybmVsLm9yZ10gT24gQmVoYWxmIE9mIFNjb3R0IFdvb2QNCj4gPj4gU2VudDogU2F0
+dXJkYXksIEFwcmlsIDIzLCAyMDE2IDc6MjMgQU0NCj4gPj4gVG86IFlhbmdibyBMdTsgbGludXgt
+bW1jQHZnZXIua2VybmVsLm9yZzsNCj4gPj4gbGludXhwcGMtZGV2QGxpc3RzLm96bGFicy5vcmc7
+IGxpbnV4LWFybS1rZXJuZWxAbGlzdHMuaW5mcmFkZWFkLm9yZzsNCj4gPj4gbGludXgta2VybmVs
+QHZnZXIua2VybmVsLm9yZw0KPiA+PiBDYzogdWxmLmhhbnNzb25AbGluYXJvLm9yZzsgWmhhbyBR
+aWFuZzsgUnVzc2VsbCBLaW5nOyBCaHVwZXNoIFNoYXJtYTsNCj4gPj4gU2NvdHQgV29vZDsgQ2xh
+dWRpdSBNYW5vaWw7IEt1bWFyIEdhbGE7IFlhbmctTGVvIExpOyBYaWFvYm8gWGllOw0KPiA+PiBN
+aWNoYWVsIEVsbGVybWFuDQo+ID4+IFN1YmplY3Q6IFJlOiBbdjgsIDYvN10gTUFJTlRBSU5FUlM6
+IGFkZCBlbnRyeSBmb3IgRnJlZXNjYWxlIFNvQw0KPiA+PiBzcGVjaWZpYyBkcml2ZXINCj4gPj4N
+Cj4gPj4gT24gRnJpLCAyMDE2LTA0LTIyIGF0IDE0OjI3ICswODAwLCBZYW5nYm8gTHUgd3JvdGU6
+DQo+ID4+ID4gQWRkIG1haW50YWluZXIgZW50cnkgZm9yIEZyZWVzY2FsZSBTb0Mgc3BlY2lmaWMg
+ZHJpdmVyIGluY2x1ZGluZw0KPiA+PiA+IHRoZSBRRSBsaWJyYXJ5IGFuZCB0aGUgR1VUUyBkcml2
+ZXIuIEFsc28gYWRkIGVudHJ5IGZvciBHVVRTIGRyaXZlcg0KPiA+PiA+IGFuZCBhZGQgbWFpbnRh
+aW5lciBmb3IgUUUgbGlicmFyeS4NCj4gPj4gPg0KPiA+PiA+IFNpZ25lZC1vZmYtYnk6IFlhbmdi
+byBMdSA8eWFuZ2JvLmx1QG54cC5jb20+DQo+ID4+ID4gLS0tDQo+ID4+ID4gQ2hhbmdlcyBmb3Ig
+djg6DQo+ID4+ID4gICAgIC0gQWRkZWQgdGhpcyBwYXRjaA0KPiA+PiA+IC0tLQ0KPiA+PiA+ICBN
+QUlOVEFJTkVSUyB8IDE2ICsrKysrKysrKysrKysrKy0NCj4gPj4gPiAgMSBmaWxlIGNoYW5nZWQs
+IDE1IGluc2VydGlvbnMoKyksIDEgZGVsZXRpb24oLSkNCj4gPj4gPg0KPiA+PiA+IGRpZmYgLS1n
+aXQgYS9NQUlOVEFJTkVSUyBiL01BSU5UQUlORVJTIGluZGV4IDFkNWI0YmUuLmQyMGFlYjYNCj4g
+Pj4gPiAxMDA2NDQNCj4gPj4gPiAtLS0gYS9NQUlOVEFJTkVSUw0KPiA+PiA+ICsrKyBiL01BSU5U
+QUlORVJTDQo+ID4+ID4gQEAgLTQ2MjIsMTMgKzQ2MjIsMjcgQEAgRjoNCj4gPj4gPiBkcml2ZXJz
+L25ldC9ldGhlcm5ldC9mcmVlc2NhbGUvZmVjX3B0cC5jDQo+ID4+ID4gIEY6IGRyaXZlcnMvbmV0
+L2V0aGVybmV0L2ZyZWVzY2FsZS9mZWMuaA0KPiA+PiA+ICBGOiBEb2N1bWVudGF0aW9uL2Rldmlj
+ZXRyZWUvYmluZGluZ3MvbmV0L2ZzbC1mZWMudHh0DQo+ID4+ID4NCj4gPj4gPiArRlJFRVNDQUxF
+IFNPQyBTUEVDSUZJQyBEUklWRVINCj4gPj4NCj4gPj4gRlJFRVNDQUxFIFNPQyBEUklWRVJTDQo+
+ID4NCj4gPiBbTHUgWWFuZ2JvLUI0NzA5M10gT2ssIHdpbGwgY2hhbmdlIGl0IHRvICdGUkVFU0NB
+TEUgU09DIERSSVZFUlMnLg0KPiA+DQo+ID4+DQo+ID4+ID4gK006IFNjb3R0IFdvb2QgPG9zc0Bi
+dXNlcnJvci5uZXQ+DQo+ID4+DQo+ID4+IFBsZWFzZSBDQyBtZSBhdCB0aGlzIGFkZHJlc3MsIG5v
+dCB0aGUgTlhQIGFkZHJlc3MgdGhhdCB5b3Ugc2VudCB0aGlzDQo+IHRvLi4uDQo+ID4NCj4gPiBb
+THUgWWFuZ2JvLUI0NzA5M10gU29ycnkgZm9yIG1pc3Rha2luZyB5b3VyIGVtYWlsLiBXaWxsIHNl
+bmQgdGhlIG9uZQ0KPiB5b3Ugc2FpZC4NCj4gPg0KPiA+Pg0KPiA+PiA+ICtMOiBsaW51eHBwYy1k
+ZXZAbGlzdHMub3psYWJzLm9yZw0KPiA+PiA+ICtTOiBNYWludGFpbmVkDQo+ID4+ID4gK0Y6IGRy
+aXZlcnMvc29jL2ZzbC8NCj4gPj4gPiArRjogaW5jbHVkZS9saW51eC9mc2wvDQo+ID4+DQo+ID4+
+IFRoaXMgZGlyZWN0b3J5IHdpbGwgY29udGFpbiBkcml2ZXJzIHRoYXQgd29yayBvbiBQUEMgYW5k
+IEFSTS4uLiBJJ20NCj4gPj4gbm90IHN1cmUgd2hhdCB0byBwdXQgaGVyZSBpbiB0ZXJtcyBvZiBt
+YWlsaW5nIGxpc3RzICh3ZSBjb3VsZCBwdXQNCj4gPj4gYm90aCwgYnV0IHBlb3BsZSBwcm9iYWJs
+eSBzaG91bGRuJ3Qgc3BhbSBib3RoIGxpc3RzIGlmIG9ubHkgb25lIGFyY2gNCj4gPj4gaXMgcmVs
+ZXZhbnQgdG8gdGhlIHBhdGNoKSwgYW5kIHdob20gdG8gbWFrZSBwdWxsIHJlcXVlc3RzIHRvLg0K
+PiA+DQo+ID4gW0x1IFlhbmdiby1CNDcwOTNdIEJ1dCBzb29uZXIgb3IgbGF0ZXIgd2UgbmVlZCB0
+byBkbyB0aGlzIGZvciBmaWxlcyBpbg0KPiBmc2wvIC4uLg0KPiA+IDopDQo+ID4NCj4gPiBIaSBM
+ZW8sIGRvIHlvdSBoYXZlIGFueSBpZGVhPw0KPiANCj4gSSB0aGluayBpdCB3b3VsZCBiZSBvayB0
+byBwdXQgYm90aCBsaW51eHBwYyBhbmQgbGludXgtYXJtIG1haWxpbmcgbGlzdHMNCj4gaGVyZS4g
+IERyaXZlciBkb2Vzbid0IGZhbGwgaW50byBhbnkgb2YgdGhlIGZ1bmN0aW9uYWwgYmFzZWQgc3Vi
+LXN5c3RlbXMNCj4gd291bGQgdmVyeSBsaWtlbHkgYmUgcGxhdGZvcm0gc3R1ZmYuICBBbmQgaWYg
+cGF0Y2ggYXV0aG9yIGhhcyB0aGUNCj4ga25vd2xlZGdlIHRoYXQgYSBwYXRjaCBvbmx5IGltcGFj
+dHMgb25lIGFyY2gsIGhlIGNhbiByZW1vdmUgdGhlIG90aGVyDQo+IGxpc3QgdG8gcmVkdWNlIHRo
+ZSBzcGFtLg0KPiANCg0KW0x1IFlhbmdiby1CNDcwOTNdIFRoYW5rcyBhIGxvdC4gSSB3aWxsIHVw
+ZGF0ZSB0aGUgcGF0Y2hzZXQgbGF0ZXIgYWRkaW5nIHRoZSB0d28gbWFpbGluZyBsaXN0cy4NCg0K
+PiA+DQo+ID4NCj4gPj4NCj4gPj4gPiArRlJFRVNDQUxFIEdVVFMgRFJJVkVSDQo+ID4+ID4gK006
+IFlhbmdibyBMdSA8eWFuZ2JvLmx1QG54cC5jb20+DQo+ID4+ID4gK0w6IGxpbnV4cHBjLWRldkBs
+aXN0cy5vemxhYnMub3JnDQo+ID4+ID4gK1M6IE1haW50YWluZWQNCj4gPj4gPiArRjogZHJpdmVy
+cy9zb2MvZnNsL2d1dHMuYw0KPiA+Pg0KPiA+PiBXaGF0IGFib3V0IHRoZSBoZWFkZXI/DQo+ID4+
+DQo+ID4+IERvZXMgZ3V0cyByZWFsbHkgbmVlZCBhIHNlcGFyYXRlIG1haW50YWluZXIgZnJvbSBk
+cml2ZXJzL3NvYy9mc2w/DQo+ID4NCj4gPiBbTHUgWWFuZ2JvLUI0NzA5M10gSSB3YXMgaGVzaXRh
+dGluZyB0byBhZGQgdGhlIG1haW50YWluZXIuLi4NCj4gPiBBbmQgSSB3YXMgbm90IHNvIGZhbWls
+aWFyIHdpdGggaXQuIExldCBtZSBsZWF2ZSBpdCB0byB0aGUgZnNsLw0KPiBkaXJlY3RvcnkgYW5k
+IHJlbW92ZSB0aGlzLi4uDQo+ID4NCj4gPj4NCj4gPj4gLVNjb3R0DQo+ID4+DQo+ID4+DQo+ID4+
+IC0tDQo+ID4+IFRvIHVuc3Vic2NyaWJlIGZyb20gdGhpcyBsaXN0OiBzZW5kIHRoZSBsaW5lICJ1
+bnN1YnNjcmliZSBsaW51eC1tbWMiDQo+ID4+IGluIHRoZSBib2R5IG9mIGEgbWVzc2FnZSB0byBt
+YWpvcmRvbW9Admdlci5rZXJuZWwub3JnIE1vcmUgbWFqb3Jkb21vDQo+ID4+IGluZm8gYXQgaHR0
+cDovL3ZnZXIua2VybmVsLm9yZy9tYWpvcmRvbW8taW5mby5odG1sDQo+ID4gX19fX19fX19fX19f
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18NCj4gPiBMaW51eHBwYy1kZXYgbWFp
+bGluZyBsaXN0DQo+ID4gTGludXhwcGMtZGV2QGxpc3RzLm96bGFicy5vcmcNCj4gPiBodHRwczov
+L2xpc3RzLm96bGFicy5vcmcvbGlzdGluZm8vbGludXhwcGMtZGV2DQo+IA0KPiANCj4gDQo+IC0t
+DQo+IC0gTGVvDQo=
