@@ -1,8 +1,8 @@
 From: Krzysztof Kozlowski <k.kozlowski@samsung.com>
-Subject: [RFC v2 09/13] power: pwrseq: Add support for USB hubs with external
- power
-Date: Thu, 05 May 2016 14:34:22 +0200
-Message-ID: <1462451666-17945-10-git-send-email-k.kozlowski@samsung.com>
+Subject: [RFC v2 07/13] power: pwrseq: simple: Add support for toggling
+ regulator
+Date: Thu, 05 May 2016 14:34:20 +0200
+Message-ID: <1462451666-17945-8-git-send-email-k.kozlowski@samsung.com>
 References: <1462451666-17945-1-git-send-email-k.kozlowski@samsung.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
@@ -22,108 +22,129 @@ To: devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@l
 Cc: hverkuil@xs4all.nl, tjakobi@math.uni-bielefeld.de, Krzysztof Kozlowski <k.kozlowski@samsung.com>, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>, m.szyprowski@samsung.com
 List-Id: linux-mmc@vger.kernel.org
 
-Some USB devices on embedded boards have external power supply which has
-to be reset in certain conditions. Add pwrseq interface for this.
+Some devices need real hard-reset by cutting the power.  During power
+sequence turn off and on the regulator, if it is provided.
 
 Signed-off-by: Krzysztof Kozlowski <k.kozlowski@samsung.com>
 ---
- drivers/power/pwrseq/pwrseq.c | 44 +++++++++++++++++++++++++++++++++++++++++++
- include/linux/pwrseq.h        |  8 ++++++++
+ .../devicetree/bindings/mmc/mmc-pwrseq-simple.txt  |  2 +
+ drivers/power/pwrseq/pwrseq_simple.c               | 50 ++++++++++++++++++++++
  2 files changed, 52 insertions(+)
 
-diff --git a/drivers/power/pwrseq/pwrseq.c b/drivers/power/pwrseq/pwrseq.c
-index 495a19d3c30b..306265f55a10 100644
---- a/drivers/power/pwrseq/pwrseq.c
-+++ b/drivers/power/pwrseq/pwrseq.c
-@@ -52,6 +52,43 @@ int mmc_pwrseq_alloc(struct mmc_host *host)
- }
- EXPORT_SYMBOL_GPL(mmc_pwrseq_alloc);
+diff --git a/Documentation/devicetree/bindings/mmc/mmc-pwrseq-simple.txt b/Documentation/devicetree/bindings/mmc/mmc-pwrseq-simple.txt
+index ce0e76749671..176ff831e7f1 100644
+--- a/Documentation/devicetree/bindings/mmc/mmc-pwrseq-simple.txt
++++ b/Documentation/devicetree/bindings/mmc/mmc-pwrseq-simple.txt
+@@ -16,6 +16,7 @@ Optional properties:
+   See ../clocks/clock-bindings.txt for details.
+ - clock-names : Must include the following entry:
+   "ext_clock" (External clock provided to the card).
++- ext-supply : External regulator supply
  
-+struct pwrseq *pwrseq_alloc(struct device *dev)
-+{
-+	struct device_node *np;
-+	struct pwrseq *p, *ret = NULL;
+ Example:
+ 
+@@ -24,4 +25,5 @@ Example:
+ 		reset-gpios = <&gpio1 12 GPIO_ACTIVE_LOW>;
+ 		clocks = <&clk_32768_ck>;
+ 		clock-names = "ext_clock";
++		ext-supply = <&buck8>;
+ 	}
+diff --git a/drivers/power/pwrseq/pwrseq_simple.c b/drivers/power/pwrseq/pwrseq_simple.c
+index ab0098412690..4d5ea53d3ead 100644
+--- a/drivers/power/pwrseq/pwrseq_simple.c
++++ b/drivers/power/pwrseq/pwrseq_simple.c
+@@ -16,7 +16,9 @@
+ #include <linux/device.h>
+ #include <linux/err.h>
+ #include <linux/gpio/consumer.h>
++#include <linux/regulator/consumer.h>
+ #include <linux/pwrseq.h>
++#include <linux/delay.h>
+ 
+ #include <linux/mmc/host.h>
+ 
+@@ -25,6 +27,7 @@ struct mmc_pwrseq_simple {
+ 	bool clk_enabled;
+ 	struct clk *ext_clk;
+ 	struct gpio_descs *reset_gpios;
++	struct regulator *ext_reg;
+ };
+ 
+ #define to_pwrseq_simple(p) container_of(p, struct mmc_pwrseq_simple, pwrseq)
+@@ -62,6 +65,13 @@ static void mmc_pwrseq_simple_post_power_on(struct pwrseq *_pwrseq)
+ {
+ 	struct mmc_pwrseq_simple *pwrseq = to_pwrseq_simple(_pwrseq);
+ 
++	if (pwrseq->ext_reg) {
++		int err;
 +
-+	np = of_parse_phandle(dev->of_node, "usb-pwrseq", 0);
-+	if (!np)
-+		return NULL;
-+
-+	mutex_lock(&pwrseq_list_mutex);
-+	list_for_each_entry(p, &pwrseq_list, pwrseq_node) {
-+		if (p->dev->of_node == np) {
-+			if (!try_module_get(p->owner))
-+				dev_err(dev,
-+					"increasing module refcount failed\n");
-+			else
-+				ret = p;
-+
-+			break;
-+		}
++		err = regulator_enable(pwrseq->ext_reg);
++		WARN_ON_ONCE(err);
 +	}
 +
-+	of_node_put(np);
-+	mutex_unlock(&pwrseq_list_mutex);
+ 	mmc_pwrseq_simple_set_gpios_value(pwrseq, 0);
+ }
+ 
+@@ -75,6 +85,13 @@ static void mmc_pwrseq_simple_power_off(struct pwrseq *_pwrseq)
+ 		clk_disable_unprepare(pwrseq->ext_clk);
+ 		pwrseq->clk_enabled = false;
+ 	}
 +
-+	/* FIXME: this path can be simplified... */
-+	if (!ret) {
-+		dev_info(dev, "usb-pwrseq defer\n");
-+		return ERR_PTR(-EPROBE_DEFER);
++	if (pwrseq->ext_reg) {
++		int err;
++
++		err = regulator_disable(pwrseq->ext_reg);
++		WARN_ON_ONCE(err);
++	}
+ }
+ 
+ static const struct pwrseq_ops mmc_pwrseq_simple_ops = {
+@@ -102,6 +119,32 @@ static int mmc_pwrseq_simple_probe(struct platform_device *pdev)
+ 	if (IS_ERR(pwrseq->ext_clk) && PTR_ERR(pwrseq->ext_clk) != -ENOENT)
+ 		return PTR_ERR(pwrseq->ext_clk);
+ 
++	/* FIXME: regulator_get_exclusive? */
++	pwrseq->ext_reg = devm_regulator_get_optional(dev, "ext");
++	if (IS_ERR(pwrseq->ext_reg)) {
++		if (PTR_ERR(pwrseq->ext_reg) == -ENODEV)
++			pwrseq->ext_reg = NULL;
++		else
++			return PTR_ERR(pwrseq->ext_reg);
++	} else {
++		int err;
++		/*
++		 * Be sure that regulator is off, before the driver will start
++		 * power sequence. It is likely that regulator is on by default
++		 * and it without toggling it here, it would be disabled much
++		 * later by the core.
++		 */
++
++		err = regulator_enable(pwrseq->ext_reg);
++		WARN_ON_ONCE(err);
++
++		/* FIXME: handle this in a more sensible way */
++		mdelay(10);
++
++		err = regulator_disable(pwrseq->ext_reg);
++		WARN_ON_ONCE(err);
 +	}
 +
-+	dev_info(dev, "allocated usb-pwrseq\n");
+ 	pwrseq->reset_gpios = devm_gpiod_get_array(dev, "reset",
+ 							GPIOD_OUT_HIGH);
+ 	if (IS_ERR(pwrseq->reset_gpios) &&
+@@ -124,6 +167,13 @@ static int mmc_pwrseq_simple_remove(struct platform_device *pdev)
+ 
+ 	pwrseq_unregister(&pwrseq->pwrseq);
+ 
++	if (pwrseq->ext_reg) {
++		int err;
 +
-+	return ret;
-+}
-+EXPORT_SYMBOL_GPL(pwrseq_alloc);
++		err = regulator_disable(pwrseq->ext_reg);
++		WARN_ON_ONCE(err);
++	}
 +
- void pwrseq_pre_power_on(struct pwrseq *pwrseq)
- {
- 	if (pwrseq && pwrseq->ops->pre_power_on)
-@@ -84,6 +121,13 @@ void mmc_pwrseq_free(struct mmc_host *host)
+ 	return 0;
  }
- EXPORT_SYMBOL_GPL(mmc_pwrseq_free);
  
-+void pwrseq_free(const struct pwrseq *pwrseq)
-+{
-+	if (pwrseq)
-+		module_put(pwrseq->owner);
-+}
-+EXPORT_SYMBOL_GPL(pwrseq_free);
-+
- int pwrseq_register(struct pwrseq *pwrseq)
- {
- 	if (!pwrseq || !pwrseq->ops || !pwrseq->dev)
-diff --git a/include/linux/pwrseq.h b/include/linux/pwrseq.h
-index fcc8fd855d4c..c3c91f50e4cb 100644
---- a/include/linux/pwrseq.h
-+++ b/include/linux/pwrseq.h
-@@ -31,9 +31,13 @@ void pwrseq_unregister(struct pwrseq *pwrseq);
- void pwrseq_pre_power_on(struct pwrseq *pwrseq);
- void pwrseq_post_power_on(struct pwrseq *pwrseq);
- void pwrseq_power_off(struct pwrseq *pwrseq);
-+
- int mmc_pwrseq_alloc(struct mmc_host *host);
- void mmc_pwrseq_free(struct mmc_host *host);
- 
-+struct pwrseq *pwrseq_alloc(struct device *dev);
-+void pwrseq_free(const struct pwrseq *pwrseq);
-+
- #else /* CONFIG_POWER_SEQ */
- 
- static inline int pwrseq_register(struct pwrseq *pwrseq)
-@@ -44,9 +48,13 @@ static inline void pwrseq_unregister(struct pwrseq *pwrseq) {}
- static inline void pwrseq_pre_power_on(struct pwrseq *pwrseq) {}
- static inline void pwrseq_post_power_on(struct pwrseq *pwrseq) {}
- static inline void pwrseq_power_off(struct pwrseq *pwrseq) {}
-+
- static inline int mmc_pwrseq_alloc(struct mmc_host *host) { return 0; }
- static inline void mmc_pwrseq_free(struct mmc_host *host) {}
- 
-+static inline struct pwrseq *pwrseq_alloc(struct device *dev) { return NULL; }
-+static inline void pwrseq_free(const struct pwrseq *pwrseq) {}
-+
- #endif /* CONFIG_POWER_SEQ */
- 
- #endif /* _LINUX_PWRSEQ_H */
 -- 
 1.9.1
