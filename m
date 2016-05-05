@@ -1,76 +1,50 @@
-From: Yangbo Lu <yangbo.lu-3arQi8VN3Tc@public.gmane.org>
-Subject: RE: [v10, 7/7] mmc: sdhci-of-esdhc: fix host version for
-	T4240-R1.0-R2.0
-Date: Thu, 5 May 2016 09:41:32 +0000
-Message-ID: <HE1PR04MB0889B52134A43C0E7A452B7BF87C0@HE1PR04MB0889.eurprd04.prod.outlook.com>
-References: <1462417950-46796-1-git-send-email-yangbo.lu@nxp.com>
-	<1462417950-46796-8-git-send-email-yangbo.lu@nxp.com>
-	<4448030.Zs8fVnr3nm@wuerfel>
+From: Amitkumar Karwar <akarwar@marvell.com>
+Subject: RE: [PATCH] mmc: add API for data write using scatter gather DMA
+Date: Thu, 5 May 2016 10:59:06 +0000
+Message-ID: <29cd9bbb3e3944f3bb1ac571b427bc4c@SC-EXCH04.marvell.com>
+References: <1459256261-22492-1-git-send-email-akarwar@marvell.com>
+ <CAPDyKFpDyBtGKxqhuo2NnioXfXcn8ZKB=EbyoaFkZ1LX34ZzkQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
-In-Reply-To: <4448030.Zs8fVnr3nm@wuerfel>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mx0b-0016f401.pphosted.com ([67.231.156.173]:15011 "EHLO
+	mx0b-0016f401.pphosted.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1756226AbcEELCc (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 5 May 2016 07:02:32 -0400
+In-Reply-To: <CAPDyKFpDyBtGKxqhuo2NnioXfXcn8ZKB=EbyoaFkZ1LX34ZzkQ@mail.gmail.com>
 Content-Language: en-US
-List-Unsubscribe: <https://lists.linuxfoundation.org/mailman/options/iommu>,
-	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.linuxfoundation.org/pipermail/iommu/>
-List-Post: <mailto:iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
-List-Help: <mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=help>
-List-Subscribe: <https://lists.linuxfoundation.org/mailman/listinfo/iommu>,
-	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=subscribe>
-Sender: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
-Errors-To: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
-To: Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Scott Wood <oss-fOR+EgIDQEHk1uMJSBkQmQ@public.gmane.org>, "linuxppc-dev-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org" <linuxppc-dev-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
-Cc: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org" <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Russell King <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, Bhupesh Sharma <bhupesh.sharma-KZfg59tc24xl57MIdRCFDg@public.gmane.org>, "netdev-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <netdev-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Kumar Gala <galak-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Yang-Leo Li <leoyang.li-3arQi8VN3Tc@public.gmane.org>, "iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org" <iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, "linux-i2c-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-i2c-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Claudiu Manoil <claudiu.manoil-KZfg59tc24xl57MIdRCFDg@public.gmane.org>, Santosh Shilimkar <ssantosh-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Xiaobo Xie <xiaobo.xie-3arQi8VN3Tc@public.gmane.org>, "linux-clk-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-clk-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWMP3drIcvDWNA@public.gmane.org>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: "linux-wireless@vger.kernel.org" <linux-wireless@vger.kernel.org>, Nishant Sarmukadam <nishants@marvell.com>, linux-mmc <linux-mmc@vger.kernel.org>, Bing Zhao <bin9zha0@gmail.com>, Cathy Luo <cluo@marvell.com>, Xinming Hu <huxm@marvell.com>, Wei-Ning Huang <wnhuang@chromium.org>
 
-Hi Arnd,
-
-
-> -----Original Message-----
-> From: Arnd Bergmann [mailto:arnd-r2nGTMty4D4@public.gmane.org]
-> Sent: Thursday, May 05, 2016 4:32 PM
-> To: linuxppc-dev-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org
-> Cc: Yangbo Lu; linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org; devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org;
-> linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org; linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org;
-> linux-clk-u79uwXL29TY76Z2rM5mHXA@public.gmane.org; linux-i2c-u79uwXL29TY76Z2rM5mHXA@public.gmane.org; iommu-cunTk1MwBs/ROKNJybVBZg@public.gmane.org
-> foundation.org; netdev-u79uwXL29TY76Z2rM5mHXA@public.gmane.org; Mark Rutland;
-> ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org; Russell King; Bhupesh Sharma; Joerg Roedel;
-> Santosh Shilimkar; Yang-Leo Li; Scott Wood; Rob Herring; Claudiu Manoil;
-> Kumar Gala; Xiaobo Xie; Qiang Zhao
-> Subject: Re: [v10, 7/7] mmc: sdhci-of-esdhc: fix host version for T4240-
-> R1.0-R2.0
-> 
-> On Thursday 05 May 2016 11:12:30 Yangbo Lu wrote:
-> >
-> > +       fsl_guts_init();
-> > +       svr = fsl_guts_get_svr();
-> > +       if (svr) {
-> > +               esdhc->soc_ver = SVR_SOC_VER(svr);
-> > +               esdhc->soc_rev = SVR_REV(svr);
-> > +       } else {
-> > +               dev_err(&pdev->dev, "Failed to get SVR value!\n");
-> > +       }
-> > +
-> >
-> 
-> 
-> Sorry for jumping in again after not participating in the discussion for
-> the past few versions.
-> 
-> What happened to my suggestion of making this a platform-independent
-> interface to avoid the link time dependency?
-> 
-> Specifically, why not add an exported function to drivers/base/soc.c that
-> uses glob_match() for comparing a string in the device driver to the ID
-> of the SoC that is set by whatever SoC identifying driver the platform
-> has?
-> 
-> 	Arnd
-
-[Lu Yangbo-B47093] I think this has been discussed in v6.
-You can find Scott's comments about this in below link.
-https://patchwork.kernel.org/patch/8544501/
-
-Thanks.
+SGkgVWxmLA0KDQo+IEZyb206IGxpbnV4LXdpcmVsZXNzLW93bmVyQHZnZXIua2VybmVsLm9yZyBb
+bWFpbHRvOmxpbnV4LXdpcmVsZXNzLQ0KPiBvd25lckB2Z2VyLmtlcm5lbC5vcmddIE9uIEJlaGFs
+ZiBPZiBVbGYgSGFuc3Nvbg0KPiBTZW50OiBGcmlkYXksIEFwcmlsIDIyLCAyMDE2IDc6NDggUE0N
+Cj4gVG86IEFtaXRrdW1hciBLYXJ3YXINCj4gQ2M6IGxpbnV4LXdpcmVsZXNzQHZnZXIua2VybmVs
+Lm9yZzsgTmlzaGFudCBTYXJtdWthZGFtOyBsaW51eC1tbWM7IEJpbmcNCj4gWmhhbzsgQ2F0aHkg
+THVvOyBCaW5nIFpoYW87IFhpbm1pbmcgSHUNCj4gU3ViamVjdDogUmU6IFtQQVRDSF0gbW1jOiBh
+ZGQgQVBJIGZvciBkYXRhIHdyaXRlIHVzaW5nIHNjYXR0ZXIgZ2F0aGVyDQo+IERNQQ0KPiANCj4g
+T24gMjkgTWFyY2ggMjAxNiBhdCAxNDo1NywgQW1pdGt1bWFyIEthcndhciA8YWthcndhckBtYXJ2
+ZWxsLmNvbT4gd3JvdGU6DQo+ID4gRnJvbTogQmluZyBaaGFvIDxiemhhb0BtYXJ2ZWxsLmNvbT4N
+Cj4gPg0KPiA+IFRoaXMgcGF0Y2ggYWRkcyBuZXcgQVBJIGZvciBTRElPIHNjYXR0ZXIgZ2F0aGVy
+Lg0KPiA+DQo+ID4gRXhpc3RpbmcgbW1jX2lvX3J3X2V4dGVuZGVkKCkgQVBJIGV4cGVjdHMgY2Fs
+bGVyIHRvIHBhc3Mgc2luZ2xlDQo+ID4gY29udGlndW91cyBidWZmZXIuIEl0IHdpbGwgYmUgc3Bs
+aXQgaWYgaXQgZXhjZWVkcyBzZWdtZW50IHNpemUsIFNHDQo+ID4gdGFibGUgaXMgcHJlcGFyZWQg
+YW5kIHVzZWQgaXQgZm9yIHJlYWRpbmcvd3JpdGluZyB0aGUgZGF0YS4NCj4gPg0KPiA+IE91ciBp
+bnRlbnRpb24gZm9yIGRlZmluaW5nIG5ldyBBUEkgaGVyZSBpcyB0byBmYWNpbGl0YXRlIGNhbGxl
+ciB0bw0KPiA+IHByb3ZpZGUgcmVhZHkgU0cgdGFibGUoc2NhdHRlcmVkIGJ1ZmZlciBsaXN0KS4g
+SXQgd2lsbCBiZSB1c2VmdWwgZm9yDQo+ID4gdGhlIGRyaXZlcnMgd2hpY2ggaW50ZW5kIHRvIGhh
+bmRsZSBTRElPIFNHIGludGVybmFsbHkuDQo+ID4NCj4gPiBTaWduZWQtb2ZmLWJ5OiBCaW5nIFpo
+YW8gPGJ6aGFvQG1hcnZlbGwuY29tPg0KPiA+IFNpZ25lZC1vZmYtYnk6IFhpbm1pbmcgSHUgPGh1
+eG1AbWFydmVsbC5jb20+DQo+ID4gU2lnbmVkLW9mZi1ieTogQW1pdGt1bWFyIEthcndhciA8YWth
+cndhckBtYXJ2ZWxsLmNvbT4NCj4gPiAtLS0NCj4gDQo+IFNvIHRoaXMgaGFzIGJlZW4gcG9zdGVk
+IGFuZCBkaXNjdXNzZWQgZWFybGllci4gSW4gdXBjb21pbmcgcmV2aXNpb25zLA0KPiBwbGVhc2Ug
+YXR0YWNoIHRoYXQgaGlzdG9yeSBzbyBwZW9wbGUga25vdyB3aGVuIHJldmlld2luZy4NCj4gDQo+
+IE1vcmVvdmVyLCBpZiB5b3UgaGF2ZSBiZWVuIHVzaW5nIHRoaXMgQVBJIHRvIGltcHJvdmUgdGhy
+b3VnaHB1dCwgcGVyaGFwcw0KPiB5b3UgY2FuIHByb3ZpZGUgdXMgd2l0aCBzb21lIG51bWJlcnMg
+YXMgd2VsbCE/DQo+IA0KDQpUaGFua3MgZm9yIHlvdXIgY29tbWVudHMuDQpXZSBhcmUgd29ya2lu
+ZyBvbiB0aGUgdXBkYXRlZCB2ZXJzaW9uIHRvIHJlc29sdmUgdGhlbS4gV2Ugd2lsbCBpbmNsdWRl
+IHRoZSBjaGFuZ2VsaXN0IGhpc3RvcnkgYW5kIHNoYXJlIHRoZSB0aHJvdWdocHV0IGltcHJvdmVt
+ZW50IG51bWJlcnMuDQoNClJlZ2FyZHMsDQpBbWl0a3VtYXINCg==
