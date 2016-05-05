@@ -1,37 +1,64 @@
-From: Javier Martinez Canillas <javier@osg.samsung.com>
-Subject: Re: [RFC v2 08/13] usb: hub: Handle deferred probe
-Date: Thu, 5 May 2016 15:33:38 -0400
-Message-ID: <0a751690-a506-34b8-9435-289cf016b756@osg.samsung.com>
+From: Javier Martinez Canillas <javier-JPH+aEBZ4P+UEJcrhfAQsw@public.gmane.org>
+Subject: Re: [RFC v2 09/13] power: pwrseq: Add support for USB hubs with
+ external power
+Date: Thu, 5 May 2016 15:52:11 -0400
+Message-ID: <3bdf7888-5ed1-2a55-6607-ee8be70e25e7@osg.samsung.com>
 References: <1462451666-17945-1-git-send-email-k.kozlowski@samsung.com>
- <1462451666-17945-9-git-send-email-k.kozlowski@samsung.com>
+ <1462451666-17945-10-git-send-email-k.kozlowski@samsung.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=windows-1252
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from lists.s-osg.org ([54.187.51.154]:51395 "EHLO lists.s-osg.org"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1755880AbcEETd4 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 5 May 2016 15:33:56 -0400
-In-Reply-To: <1462451666-17945-9-git-send-email-k.kozlowski@samsung.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-usb-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1462451666-17945-10-git-send-email-k.kozlowski-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>
+Sender: linux-usb-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Krzysztof Kozlowski <k.kozlowski-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-samsung-soc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-pm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-usb-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Sebastian Reichel <sre-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Dmitry Eremin-Solenikov <dbaryshkov-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, David Woodhouse <dwmw2-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org>, Greg Kroah-Hartman <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>, Mark Brown <broonie-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+Cc: tjakobi-o02PS0xoJP9W0yFyLvAVXMxlOr/tl8fh@public.gmane.org, m.szyprowski-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org, hverkuil-qWit8jRvyhVmR6Xm/wNWPw@public.gmane.org, Bartlomiej Zolnierkiewicz <b.zolnierkie-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Krzysztof Kozlowski <k.kozlowski@samsung.com>, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-samsung-soc@vger.kernel.org, linux-mmc@vger.kernel.org, linux-pm@vger.kernel.org, linux-usb@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, Sebastian Reichel <sre@kernel.org>, Dmitry Eremin-Solenikov <dbaryshkov@gmail.com>, David Woodhouse <dwmw2@infradead.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Mark Brown <broonie@kernel.org>
-Cc: tjakobi@math.uni-bielefeld.de, m.szyprowski@samsung.com, hverkuil@xs4all.nl, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>
 
 Hello Krzysztof,
 
 On 05/05/2016 08:34 AM, Krzysztof Kozlowski wrote:
-> Add support for deferred probing to the usb hub. Currently EPROBE_DEFER
-> does not exist in usb hub path but future patches will add it on the
-> port level.
+> Some USB devices on embedded boards have external power supply which has
+> to be reset in certain conditions. Add pwrseq interface for this.
 > 
-> Signed-off-by: Krzysztof Kozlowski <k.kozlowski@samsung.com>
+> Signed-off-by: Krzysztof Kozlowski <k.kozlowski-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>
 > ---
+>  drivers/power/pwrseq/pwrseq.c | 44 +++++++++++++++++++++++++++++++++++++++++++
+>  include/linux/pwrseq.h        |  8 ++++++++
+>  2 files changed, 52 insertions(+)
+> 
+> diff --git a/drivers/power/pwrseq/pwrseq.c b/drivers/power/pwrseq/pwrseq.c
+> index 495a19d3c30b..306265f55a10 100644
+> --- a/drivers/power/pwrseq/pwrseq.c
+> +++ b/drivers/power/pwrseq/pwrseq.c
+> @@ -52,6 +52,43 @@ int mmc_pwrseq_alloc(struct mmc_host *host)
+>  }
+>  EXPORT_SYMBOL_GPL(mmc_pwrseq_alloc);
+>  
+> +struct pwrseq *pwrseq_alloc(struct device *dev)
+> +{
 
-Reviewed-by: Javier Martinez Canillas <javier@osg.samsung.com>
+This function is USB specific so better to call it usb_pwrseq_alloc() instead.
+
+Although, this function has a lot of duplicated code from mmc_pwrseq_alloc()
+so I think is better to keep the name generic and factorize the common code.
+
+I expect other devices are also needing some kind of power seq in the future
+so having a single alloc function instead of each for device type makes sense.
+
+> +	struct device_node *np;
+> +	struct pwrseq *p, *ret = NULL;
+> +
+> +	np = of_parse_phandle(dev->of_node, "usb-pwrseq", 0);
+
+I know this is just an RFC but you should really add DT bindings for this.
 
 Best regards,
 -- 
 Javier Martinez Canillas
 Open Source Group
 Samsung Research America
+--
+To unsubscribe from this list: send the line "unsubscribe linux-usb" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
