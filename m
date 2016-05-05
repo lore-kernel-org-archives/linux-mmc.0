@@ -1,67 +1,89 @@
-From: Ulrich Hecht <ulrich.hecht+renesas@gmail.com>
-Subject: [PATCH v5] ARM: dts: r8a7793: Add MMCIF0
-Date: Thu,  5 May 2016 17:31:45 +0200
-Message-ID: <1462462305-27890-1-git-send-email-ulrich.hecht+renesas@gmail.com>
+From: Krzysztof Kozlowski <k.kozlowski@samsung.com>
+Subject: Re: [RFC v2 10/13] usb: hub: Power sequence the ports on activation
+Date: Thu, 5 May 2016 19:37:03 +0200
+Message-ID: <20160505173703.GA3034@kozik-lap>
+References: <1462451666-17945-11-git-send-email-k.kozlowski@samsung.com>
+ <Pine.LNX.4.44L0.1605051007040.2008-100000@iolanthe.rowland.org>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=utf-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wm0-f52.google.com ([74.125.82.52]:36806 "EHLO
-	mail-wm0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753786AbcEEPcA (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 5 May 2016 11:32:00 -0400
+Received: from mail-lf0-f45.google.com ([209.85.215.45]:34323 "EHLO
+	mail-lf0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750888AbcEERhK (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 5 May 2016 13:37:10 -0400
+Content-Disposition: inline
+In-Reply-To: <Pine.LNX.4.44L0.1605051007040.2008-100000@iolanthe.rowland.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: horms@verge.net.au, geert@linux-m68k.org
-Cc: linux-renesas-soc@vger.kernel.org, linux-mmc@vger.kernel.org, sergei.shtylyov@cogentembedded.com, magnus.damm@gmail.com, Ulrich Hecht <ulrich.hecht+renesas@gmail.com>
+To: Alan Stern <stern@rowland.harvard.edu>
+Cc: Krzysztof Kozlowski <k.kozlowski@samsung.com>, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-samsung-soc@vger.kernel.org, linux-mmc@vger.kernel.org, linux-pm@vger.kernel.org, linux-usb@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, Sebastian Reichel <sre@kernel.org>, Dmitry Eremin-Solenikov <dbaryshkov@gmail.com>, David Woodhouse <dwmw2@infradead.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Mark Brown <broonie@kernel.org>, tjakobi@math.uni-bielefeld.de, m.szyprowski@samsung.com, hverkuil@xs4all.nl, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>
 
-Same as on r8a7791.
+On Thu, May 05, 2016 at 10:09:47AM -0400, Alan Stern wrote:
+> On Thu, 5 May 2016, Krzysztof Kozlowski wrote:
+> 
+> > The autodetection of attached USB device might not work on certain
+> > boards where the power is delivered externally. These devices also might
+> > require a hard reset. Use pwrseq for that in USB hub.
+> > 
+> > Signed-off-by: Krzysztof Kozlowski <k.kozlowski@samsung.com>
+> > ---
+> >  drivers/usb/core/hub.c | 11 +++++++++++
+> >  1 file changed, 11 insertions(+)
+> > 
+> > diff --git a/drivers/usb/core/hub.c b/drivers/usb/core/hub.c
+> > index 1c82fcc448f5..0fddaacc62bf 100644
+> > --- a/drivers/usb/core/hub.c
+> > +++ b/drivers/usb/core/hub.c
+> > @@ -26,6 +26,7 @@
+> >  #include <linux/mutex.h>
+> >  #include <linux/random.h>
+> >  #include <linux/pm_qos.h>
+> > +#include <linux/pwrseq.h>
+> >  
+> >  #include <asm/uaccess.h>
+> >  #include <asm/byteorder.h>
+> > @@ -1661,7 +1662,17 @@ static int hub_configure(struct usb_hub *hub,
+> >  
+> >  	usb_hub_adjust_deviceremovable(hdev, hub->descriptor);
+> >  
+> > +	/* FIXME: When do the pre-power-on? */
+> 
+> It's hard to answer this without knowing what pre-power-on involves.
 
-Signed-off-by: Ulrich Hecht <ulrich.hecht+renesas@gmail.com>
-Acked-by: Geert Uytterhoeven <geert+renesas@glider.be>
----
-Now with enhanced ePAPR compliance and Acked-by.
+In my particular case, I want to achieve a full reset through regulator (off
+and on) because the bootloader left it in initialized state. I assume
+that if bootloader did not configure the device, the reset won't be
+harmful.
 
-CU
-Uli
+In a MMC case, this pre-power-on on is setting the 'reset' GPIO (thus
+triggering the reset) and post-power-on is clearing the 'reset'.
 
+> Why not create a pwrseq_power_on() routine that does pre_power_on 
+> followed by post_power_on?
 
-Changes since v4:
-- ePAPR compliance
+For my purpose it seems sensible.
 
-Changes since v3:
-- set power-domains = <&sysc R8A7793_PD_ALWAYS_ON>
+> 
+> > +	/*
+> > +	for (i = 0; i < maxchild; i++)
+> > +		pwrseq_pre_power_on(hub->ports[i]->pwrseq);
+> > +	*/
+> > +
+> > +	for (i = 0; i < maxchild; i++)
+> > +		pwrseq_post_power_on(hub->ports[i]->pwrseq);
+> 
+> This is patch 10/13.  hub->ports[i]->pwrseq doesn't get added until 
+> 11/13.  Obviously you never tried compiling each patch in the series.
 
-Changes since v2:
-- change back to one DMA controller
-- use GIC_SPI
-- add max-frequency
+Ahh yes, I forgot to reorder them. Thanks for spotting this.
 
+> 
+> > +
+> >  	hub_activate(hub, HUB_INIT);
+> > +
+> 
+> Unnecessary blank line added.
 
- arch/arm/boot/dts/r8a7793.dtsi | 13 +++++++++++++
- 1 file changed, 13 insertions(+)
-
-diff --git a/arch/arm/boot/dts/r8a7793.dtsi b/arch/arm/boot/dts/r8a7793.dtsi
-index 1dd6d20..76c8435 100644
---- a/arch/arm/boot/dts/r8a7793.dtsi
-+++ b/arch/arm/boot/dts/r8a7793.dtsi
-@@ -543,6 +543,19 @@
- 		status = "disabled";
- 	};
- 
-+	mmcif0: mmc@ee200000 {
-+		compatible = "renesas,mmcif-r8a7793", "renesas,sh-mmcif";
-+		reg = <0 0xee200000 0 0x80>;
-+		interrupts = <GIC_SPI 169 IRQ_TYPE_LEVEL_HIGH>;
-+		clocks = <&mstp3_clks R8A7793_CLK_MMCIF0>;
-+		dmas = <&dmac0 0xd1>, <&dmac0 0xd2>;
-+		dma-names = "tx", "rx";
-+		power-domains = <&sysc R8A7793_PD_ALWAYS_ON>;
-+		reg-io-width = <4>;
-+		status = "disabled";
-+		max-frequency = <97500000>;
-+	};
-+
- 	scifa0: serial@e6c40000 {
- 		compatible = "renesas,scifa-r8a7793",
- 			     "renesas,rcar-gen2-scifa", "renesas,scifa";
--- 
-2.7.4
+Thanks for feedback,
+Krzysztof
 
