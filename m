@@ -1,89 +1,107 @@
-From: Krzysztof Kozlowski <k.kozlowski@samsung.com>
-Subject: Re: [RFC v2 10/13] usb: hub: Power sequence the ports on activation
-Date: Thu, 5 May 2016 19:37:03 +0200
-Message-ID: <20160505173703.GA3034@kozik-lap>
-References: <1462451666-17945-11-git-send-email-k.kozlowski@samsung.com>
- <Pine.LNX.4.44L0.1605051007040.2008-100000@iolanthe.rowland.org>
+From: Javier Martinez Canillas <javier@osg.samsung.com>
+Subject: Re: [RFC v2 01/13] usb: misc: usb3503: Clean up on driver unbind
+Date: Thu, 5 May 2016 14:32:16 -0400
+Message-ID: <d78e8151-ee37-a003-2f8f-bc5431906512@osg.samsung.com>
+References: <1462451666-17945-1-git-send-email-k.kozlowski@samsung.com>
+ <1462451666-17945-2-git-send-email-k.kozlowski@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-lf0-f45.google.com ([209.85.215.45]:34323 "EHLO
-	mail-lf0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750888AbcEERhK (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 5 May 2016 13:37:10 -0400
-Content-Disposition: inline
-In-Reply-To: <Pine.LNX.4.44L0.1605051007040.2008-100000@iolanthe.rowland.org>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-pm-owner@vger.kernel.org>
+In-Reply-To: <1462451666-17945-2-git-send-email-k.kozlowski@samsung.com>
+Sender: linux-pm-owner@vger.kernel.org
+To: Krzysztof Kozlowski <k.kozlowski@samsung.com>, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-samsung-soc@vger.kernel.org, linux-mmc@vger.kernel.org, linux-pm@vger.kernel.org, linux-usb@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, Sebastian Reichel <sre@kernel.org>, Dmitry Eremin-Solenikov <dbaryshkov@gmail.com>, David Woodhouse <dwmw2@infradead.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Mark Brown <broonie@kernel.org>
+Cc: tjakobi@math.uni-bielefeld.de, m.szyprowski@samsung.com, hverkuil@xs4all.nl, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Alan Stern <stern@rowland.harvard.edu>
-Cc: Krzysztof Kozlowski <k.kozlowski@samsung.com>, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-samsung-soc@vger.kernel.org, linux-mmc@vger.kernel.org, linux-pm@vger.kernel.org, linux-usb@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, Sebastian Reichel <sre@kernel.org>, Dmitry Eremin-Solenikov <dbaryshkov@gmail.com>, David Woodhouse <dwmw2@infradead.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Mark Brown <broonie@kernel.org>, tjakobi@math.uni-bielefeld.de, m.szyprowski@samsung.com, hverkuil@xs4all.nl, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>
 
-On Thu, May 05, 2016 at 10:09:47AM -0400, Alan Stern wrote:
-> On Thu, 5 May 2016, Krzysztof Kozlowski wrote:
+Hello Krzysztof
+
+Patch looks good to me, I just have a trivial comment below.
+
+On 05/05/2016 08:34 AM, Krzysztof Kozlowski wrote:
+> The driver should clean up after itself by unpreparing the clock when it
+> is unbound.
 > 
-> > The autodetection of attached USB device might not work on certain
-> > boards where the power is delivered externally. These devices also might
-> > require a hard reset. Use pwrseq for that in USB hub.
-> > 
-> > Signed-off-by: Krzysztof Kozlowski <k.kozlowski@samsung.com>
-> > ---
-> >  drivers/usb/core/hub.c | 11 +++++++++++
-> >  1 file changed, 11 insertions(+)
-> > 
-> > diff --git a/drivers/usb/core/hub.c b/drivers/usb/core/hub.c
-> > index 1c82fcc448f5..0fddaacc62bf 100644
-> > --- a/drivers/usb/core/hub.c
-> > +++ b/drivers/usb/core/hub.c
-> > @@ -26,6 +26,7 @@
-> >  #include <linux/mutex.h>
-> >  #include <linux/random.h>
-> >  #include <linux/pm_qos.h>
-> > +#include <linux/pwrseq.h>
-> >  
-> >  #include <asm/uaccess.h>
-> >  #include <asm/byteorder.h>
-> > @@ -1661,7 +1662,17 @@ static int hub_configure(struct usb_hub *hub,
-> >  
-> >  	usb_hub_adjust_deviceremovable(hdev, hub->descriptor);
-> >  
-> > +	/* FIXME: When do the pre-power-on? */
+> Signed-off-by: Krzysztof Kozlowski <k.kozlowski@samsung.com>
+> ---
+>  drivers/usb/misc/usb3503.c | 28 ++++++++++++++++++++++++++++
+>  1 file changed, 28 insertions(+)
 > 
-> It's hard to answer this without knowing what pre-power-on involves.
+> diff --git a/drivers/usb/misc/usb3503.c b/drivers/usb/misc/usb3503.c
+> index b45cb77c0744..a464636675a6 100644
+> --- a/drivers/usb/misc/usb3503.c
+> +++ b/drivers/usb/misc/usb3503.c
+> @@ -330,6 +330,19 @@ static int usb3503_i2c_probe(struct i2c_client *i2c,
+>  	return usb3503_probe(hub);
+>  }
+>  
+> +static int usb3503_i2c_remove(struct i2c_client *i2c)
+> +{
+> +	struct usb3503 *hub;
+> +
+> +	hub = i2c_get_clientdata(i2c);
+> +	if (hub) {
+> +		if (hub->clk)
+> +			clk_disable_unprepare(hub->clk);
+> +	}
 
-In my particular case, I want to achieve a full reset through regulator (off
-and on) because the bootloader left it in initialized state. I assume
-that if bootloader did not configure the device, the reset won't be
-harmful.
+I think the following is simpler and easier to read:
 
-In a MMC case, this pre-power-on on is setting the 'reset' GPIO (thus
-triggering the reset) and post-power-on is clearing the 'reset'.
+if (hub && hub->clk)
+	clk_disable_unprepare(hub->clk);
 
-> Why not create a pwrseq_power_on() routine that does pre_power_on 
-> followed by post_power_on?
+> +
+> +	return 0;
+> +}
+> +
+>  static int usb3503_platform_probe(struct platform_device *pdev)
+>  {
+>  	struct usb3503 *hub;
+> @@ -342,6 +355,19 @@ static int usb3503_platform_probe(struct platform_device *pdev)
+>  	return usb3503_probe(hub);
+>  }
+>  
+> +static int usb3503_platform_remove(struct platform_device *pdev)
+> +{
+> +	struct usb3503 *hub;
+> +
+> +	hub = platform_get_drvdata(pdev);
+> +	if (hub) {
+> +		if (hub->clk)
+> +			clk_disable_unprepare(hub->clk);
+> +	}
+> +
 
-For my purpose it seems sensible.
+Ditto.
 
+> +	return 0;
+> +}
+> +
+>  #ifdef CONFIG_PM_SLEEP
+>  static int usb3503_i2c_suspend(struct device *dev)
+>  {
+> @@ -395,6 +421,7 @@ static struct i2c_driver usb3503_i2c_driver = {
+>  		.of_match_table = of_match_ptr(usb3503_of_match),
+>  	},
+>  	.probe		= usb3503_i2c_probe,
+> +	.remove		= usb3503_i2c_remove,
+>  	.id_table	= usb3503_id,
+>  };
+>  
+> @@ -404,6 +431,7 @@ static struct platform_driver usb3503_platform_driver = {
+>  		.of_match_table = of_match_ptr(usb3503_of_match),
+>  	},
+>  	.probe		= usb3503_platform_probe,
+> +	.remove		= usb3503_platform_remove,
+>  };
+>  
+>  static int __init usb3503_init(void)
 > 
-> > +	/*
-> > +	for (i = 0; i < maxchild; i++)
-> > +		pwrseq_pre_power_on(hub->ports[i]->pwrseq);
-> > +	*/
-> > +
-> > +	for (i = 0; i < maxchild; i++)
-> > +		pwrseq_post_power_on(hub->ports[i]->pwrseq);
-> 
-> This is patch 10/13.  hub->ports[i]->pwrseq doesn't get added until 
-> 11/13.  Obviously you never tried compiling each patch in the series.
 
-Ahh yes, I forgot to reorder them. Thanks for spotting this.
+Reviewed-by: Javier Martinez Canillas <javier@osg.samsung.com>
 
-> 
-> > +
-> >  	hub_activate(hub, HUB_INIT);
-> > +
-> 
-> Unnecessary blank line added.
-
-Thanks for feedback,
-Krzysztof
-
+Best regards,
+-- 
+Javier Martinez Canillas
+Open Source Group
+Samsung Research America
