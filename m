@@ -1,68 +1,53 @@
 From: Krzysztof Kozlowski <k.kozlowski@samsung.com>
-Subject: [RFC v2 13/13] ARM: dts: exynos: Fix LAN and HUB after bootloader
- initialization on Odroid U3
-Date: Thu, 05 May 2016 14:34:26 +0200
-Message-ID: <1462451666-17945-14-git-send-email-k.kozlowski@samsung.com>
+Subject: [RFC v2 10/13] usb: hub: Power sequence the ports on activation
+Date: Thu, 05 May 2016 14:34:23 +0200
+Message-ID: <1462451666-17945-11-git-send-email-k.kozlowski@samsung.com>
 References: <1462451666-17945-1-git-send-email-k.kozlowski@samsung.com>
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
 In-reply-to: <1462451666-17945-1-git-send-email-k.kozlowski@samsung.com>
-Sender: linux-samsung-soc-owner@vger.kernel.org
+Sender: linux-kernel-owner@vger.kernel.org
 To: devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-samsung-soc@vger.kernel.org, linux-mmc@vger.kernel.org, linux-pm@vger.kernel.org, linux-usb@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, Sebastian Reichel <sre@kernel.org>, Dmitry Eremin-Solenikov <dbaryshkov@gmail.com>, David Woodhouse <dwmw2@infradead.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Mark Brown <broonie@kernel.org>
 Cc: tjakobi@math.uni-bielefeld.de, m.szyprowski@samsung.com, hverkuil@xs4all.nl, Krzysztof Kozlowski <k.kozlowski@samsung.com>, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On Odroid U3 (Exynos4412-based) board if USB was initialized by
-bootloader (in U-Boot "usb start" before tftpboot), the HUB (usb3503)
-and LAN (smsc95xx) after after successful probing were not visible in the
-system ("lsusb").
-
-In such case the devices had to be fully reset before configuring.
-Reset by GPIO (called RESET_N pin) and by RESET field in STCD register
-in usb3503 HUB are not sufficient. Instead full reset has to be done by
-disabling and enabling regulator.
+The autodetection of attached USB device might not work on certain
+boards where the power is delivered externally. These devices also might
+require a hard reset. Use pwrseq for that in USB hub.
 
 Signed-off-by: Krzysztof Kozlowski <k.kozlowski@samsung.com>
 ---
- arch/arm/boot/dts/exynos4412-odroid-common.dtsi | 2 +-
- arch/arm/boot/dts/exynos4412-odroidu3.dts       | 6 ++++++
- 2 files changed, 7 insertions(+), 1 deletion(-)
+ drivers/usb/core/hub.c | 11 +++++++++++
+ 1 file changed, 11 insertions(+)
 
-diff --git a/arch/arm/boot/dts/exynos4412-odroid-common.dtsi b/arch/arm/boot/dts/exynos4412-odroid-common.dtsi
-index 14e653e32e0f..efa204a85c83 100644
---- a/arch/arm/boot/dts/exynos4412-odroid-common.dtsi
-+++ b/arch/arm/boot/dts/exynos4412-odroid-common.dtsi
-@@ -67,7 +67,7 @@
- 		};
- 	};
+diff --git a/drivers/usb/core/hub.c b/drivers/usb/core/hub.c
+index 1c82fcc448f5..0fddaacc62bf 100644
+--- a/drivers/usb/core/hub.c
++++ b/drivers/usb/core/hub.c
+@@ -26,6 +26,7 @@
+ #include <linux/mutex.h>
+ #include <linux/random.h>
+ #include <linux/pm_qos.h>
++#include <linux/pwrseq.h>
  
--	emmc_pwrseq: pwrseq {
-+	emmc_pwrseq: pwrseq1 {
- 		pinctrl-0 = <&sd1_cd>;
- 		pinctrl-names = "default";
- 		compatible = "mmc-pwrseq-emmc";
-diff --git a/arch/arm/boot/dts/exynos4412-odroidu3.dts b/arch/arm/boot/dts/exynos4412-odroidu3.dts
-index 31cdc036fda4..3da0e6b3c32a 100644
---- a/arch/arm/boot/dts/exynos4412-odroidu3.dts
-+++ b/arch/arm/boot/dts/exynos4412-odroidu3.dts
-@@ -41,6 +41,11 @@
- 		cooling-levels = <0 102 170 230>;
- 	};
+ #include <asm/uaccess.h>
+ #include <asm/byteorder.h>
+@@ -1661,7 +1662,17 @@ static int hub_configure(struct usb_hub *hub,
  
-+	lan_pwrseq: pwrseq2 {
-+		compatible = "mmc-pwrseq-simple";
-+		ext-supply = <&buck8_reg>;
-+	};
+ 	usb_hub_adjust_deviceremovable(hdev, hub->descriptor);
+ 
++	/* FIXME: When do the pre-power-on? */
++	/*
++	for (i = 0; i < maxchild; i++)
++		pwrseq_pre_power_on(hub->ports[i]->pwrseq);
++	*/
 +
- 	thermal-zones {
- 		cpu_thermal: cpu-thermal {
- 			cooling-maps {
-@@ -104,6 +109,7 @@
- &ehci {
- 	port@1 {
- 		status = "okay";
-+		usb-pwrseq = <&lan_pwrseq>;
- 	};
- 	port@2 {
- 		status = "okay";
++	for (i = 0; i < maxchild; i++)
++		pwrseq_post_power_on(hub->ports[i]->pwrseq);
++
+ 	hub_activate(hub, HUB_INIT);
++
+ 	return 0;
+ 
+ fail:
 -- 
 1.9.1
