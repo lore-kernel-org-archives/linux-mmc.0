@@ -1,8 +1,7 @@
 From: Krzysztof Kozlowski <k.kozlowski-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>
-Subject: [RFC v2 12/13] ARM: dts: exynos: Switch the buck8 to GPIO mode on
- Odroid U3
-Date: Thu, 05 May 2016 14:34:25 +0200
-Message-ID: <1462451666-17945-13-git-send-email-k.kozlowski@samsung.com>
+Subject: [RFC v2 04/13] power: pwrseq: Enable COMPILE_TEST for drivers
+Date: Thu, 05 May 2016 14:34:17 +0200
+Message-ID: <1462451666-17945-5-git-send-email-k.kozlowski@samsung.com>
 References: <1462451666-17945-1-git-send-email-k.kozlowski@samsung.com>
 Return-path: <linux-usb-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 In-reply-to: <1462451666-17945-1-git-send-email-k.kozlowski-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>
@@ -11,27 +10,35 @@ To: devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY
 Cc: tjakobi-o02PS0xoJP9W0yFyLvAVXMxlOr/tl8fh@public.gmane.org, m.szyprowski-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org, hverkuil-qWit8jRvyhVmR6Xm/wNWPw@public.gmane.org, Krzysztof Kozlowski <k.kozlowski-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, Bartlomiej Zolnierkiewicz <b.zolnierkie-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-Switch the control of buck8 to GPIO mode. It is faster than I2C/register
-mode and it is the easiest way to disable it (regulator state is a
-logical OR state of GPIO and register value).
+Allow build testing for power sequence drivers.
 
 Signed-off-by: Krzysztof Kozlowski <k.kozlowski-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>
 ---
- arch/arm/boot/dts/exynos4412-odroidu3.dts | 1 +
- 1 file changed, 1 insertion(+)
+ drivers/power/pwrseq/Kconfig | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
 
-diff --git a/arch/arm/boot/dts/exynos4412-odroidu3.dts b/arch/arm/boot/dts/exynos4412-odroidu3.dts
-index d73aa6c58fe3..31cdc036fda4 100644
---- a/arch/arm/boot/dts/exynos4412-odroidu3.dts
-+++ b/arch/arm/boot/dts/exynos4412-odroidu3.dts
-@@ -74,6 +74,7 @@
- 	regulator-name = "BUCK8_P3V3";
- 	regulator-min-microvolt = <3300000>;
- 	regulator-max-microvolt = <3300000>;
-+	maxim,ena-gpios = <&gpa1 1 GPIO_ACTIVE_HIGH>;
- };
- 
- /* VDDQ for MSHC (eMMC card) */
+diff --git a/drivers/power/pwrseq/Kconfig b/drivers/power/pwrseq/Kconfig
+index b5d2d6c65f28..4731ba01a958 100644
+--- a/drivers/power/pwrseq/Kconfig
++++ b/drivers/power/pwrseq/Kconfig
+@@ -9,7 +9,7 @@ if POWER_SEQ
+ config POWER_SEQ_EMMC
+ 	tristate "HW reset support for eMMC"
+ 	default y
+-	depends on OF
++	depends on OF || COMPILE_TEST
+ 	help
+ 	  This selects Hardware reset support aka pwrseq-emmc for eMMC
+ 	  devices. By default this option is set to y.
+@@ -20,7 +20,7 @@ config POWER_SEQ_EMMC
+ config POWER_SEQ_SIMPLE
+ 	tristate "Simple HW reset support for MMC"
+ 	default y
+-	depends on OF
++	depends on OF || COMPILE_TEST
+ 	help
+ 	  This selects simple hardware reset support aka pwrseq-simple for MMC
+ 	  devices. By default this option is set to y.
 -- 
 1.9.1
 
