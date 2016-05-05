@@ -1,59 +1,34 @@
-From: Javier Martinez Canillas <javier@osg.samsung.com>
-Subject: Re: [RFC v2 13/13] ARM: dts: exynos: Fix LAN and HUB after bootloader
- initialization on Odroid U3
-Date: Thu, 5 May 2016 16:16:20 -0400
-Message-ID: <9dff13ae-5863-2b45-0e6a-00b345a19019@osg.samsung.com>
-References: <1462451666-17945-1-git-send-email-k.kozlowski@samsung.com>
- <1462451666-17945-14-git-send-email-k.kozlowski@samsung.com>
+From: Rob Herring <robh@kernel.org>
+Subject: Re: [v10, 1/7] Documentation: DT: update Freescale DCFG compatible
+Date: Thu, 5 May 2016 17:25:21 -0500
+Message-ID: <20160505222521.GA18377@rob-hp-laptop>
+References: <1462417950-46796-1-git-send-email-yangbo.lu@nxp.com>
+ <1462417950-46796-2-git-send-email-yangbo.lu@nxp.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from lists.s-osg.org ([54.187.51.154]:52518 "EHLO lists.s-osg.org"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1755422AbcEEUQe (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 5 May 2016 16:16:34 -0400
-In-Reply-To: <1462451666-17945-14-git-send-email-k.kozlowski@samsung.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-i2c-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <1462417950-46796-2-git-send-email-yangbo.lu@nxp.com>
+Sender: linux-i2c-owner@vger.kernel.org
+To: Yangbo Lu <yangbo.lu@nxp.com>
+Cc: linux-mmc@vger.kernel.org, linuxppc-dev@lists.ozlabs.org, devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, linux-clk@vger.kernel.org, linux-i2c@vger.kernel.org, iommu@lists.linux-foundation.org, netdev@vger.kernel.org, ulf.hansson@linaro.org, Scott Wood <oss@buserror.net>, Mark Rutland <mark.rutland@arm.com>, Russell King <linux@arm.linux.org.uk>, Jochen Friedrich <jochen@scram.de>, Joerg Roedel <joro@8bytes.org>, Claudiu Manoil <claudiu.manoil@freescale.com>, Bhupesh Sharma <bhupesh.sharma@freescale.com>, Qiang Zhao <qiang.zhao@nxp.com>, Kumar Gala <galak@codeaurora.org>, Santosh Shilimkar <ssantosh@kernel.org>, leoyang.li@nxp.com, xiaobo.xie@nxp.com
 List-Id: linux-mmc@vger.kernel.org
-To: Krzysztof Kozlowski <k.kozlowski@samsung.com>, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-samsung-soc@vger.kernel.org, linux-mmc@vger.kernel.org, linux-pm@vger.kernel.org, linux-usb@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, Sebastian Reichel <sre@kernel.org>, Dmitry Eremin-Solenikov <dbaryshkov@gmail.com>, David Woodhouse <dwmw2@infradead.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Mark Brown <broonie@kernel.org>
-Cc: tjakobi@math.uni-bielefeld.de, m.szyprowski@samsung.com, hverkuil@xs4all.nl, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>
 
-Hello Krzysztof,
-
-On 05/05/2016 08:34 AM, Krzysztof Kozlowski wrote:
-> On Odroid U3 (Exynos4412-based) board if USB was initialized by
-> bootloader (in U-Boot "usb start" before tftpboot), the HUB (usb3503)
-> and LAN (smsc95xx) after after successful probing were not visible in the
-> system ("lsusb").
+On Thu, May 05, 2016 at 11:12:24AM +0800, Yangbo Lu wrote:
+> Update Freescale DCFG compatible with 'fsl,<chip>-dcfg' instead
+> of 'fsl,ls1021a-dcfg' to include more chips such as ls1021a,
+> ls1043a, and ls2080a.
 > 
-> In such case the devices had to be fully reset before configuring.
-> Reset by GPIO (called RESET_N pin) and by RESET field in STCD register
-> in usb3503 HUB are not sufficient. Instead full reset has to be done by
-> disabling and enabling regulator.
-> 
-> Signed-off-by: Krzysztof Kozlowski <k.kozlowski@samsung.com>
+> Signed-off-by: Yangbo Lu <yangbo.lu@nxp.com>
 > ---
+> Changes for v8:
+> 	- Added this patch
+> Changes for v9:
+> 	- Added a list for the possible compatibles
+> Changes for v10:
+> 	- None
+> ---
+>  Documentation/devicetree/bindings/arm/fsl.txt | 6 +++++-
+>  1 file changed, 5 insertions(+), 1 deletion(-)
 
-[snip]
-
->  
-> +	lan_pwrseq: pwrseq2 {
-> +		compatible = "mmc-pwrseq-simple";
-
-It feels strange to have a "mmc-pwrseq-simple" compatible for a USB power
-sequence provider. As I mentioned in the other patch, I think there should
-either be a DT binding for the USB pwrseq-simple with a "usb-pwrseq-simple"
-compatible that binds to the same pwrseq-simple driver or maybe having a
-generic DT binding for any device with a new "pwrseq-simple" compatible.
-
-Patch looks good to me though, so after having a DT binding and changing
-the compatible string:
-
-Reviewed-by: Javier Martinez Canillas <javier@osg.samsung.com>
-
-Best regards,
--- 
-Javier Martinez Canillas
-Open Source Group
-Samsung Research America
+Acked-by: Rob Herring <robh@kernel.org>
