@@ -1,87 +1,63 @@
-From: Qiang Zhao <qiang.zhao@nxp.com>
+From: Yangbo Lu <yangbo.lu@nxp.com>
 Subject: RE: [v9, 6/7] MAINTAINERS: add entry for Freescale SoC driver
-Date: Thu, 5 May 2016 02:31:27 +0000
-Message-ID: <AM3PR04MB1185B5352C395FE8951CA5A5917C0@AM3PR04MB1185.eurprd04.prod.outlook.com>
+Date: Thu, 5 May 2016 03:21:04 +0000
+Message-ID: <HE1PR04MB0889AA66ABC718111D7EF41FF87C0@HE1PR04MB0889.eurprd04.prod.outlook.com>
 References: <1462332274-13744-1-git-send-email-yangbo.lu@nxp.com>
- <1462332274-13744-7-git-send-email-yangbo.lu@nxp.com>
+	 <1462332274-13744-7-git-send-email-yangbo.lu@nxp.com>
+ <1462383308.16584.43.camel@buserror.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <1462332274-13744-7-git-send-email-yangbo.lu@nxp.com>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <linux-clk-owner@vger.kernel.org>
+In-Reply-To: <1462383308.16584.43.camel@buserror.net>
 Content-Language: en-US
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linuxppc-dev@lists.ozlabs.org" <linuxppc-dev@lists.ozlabs.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-clk@vger.kernel.org" <linux-clk@vger.kernel.org>, "linux-i2c@vger.kernel.org" <linux-i2c@vger.kernel.org>, "iommu@lists.linux-foundation.org" <iommu@lists.linux-foundation.org>, "netdev@vger.kernel.org" <netdev@vger.kernel.org>
-Cc: Mark Rutland <mark.rutland@arm.com>, "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>, Russell King <linux@arm.linux.org.uk>, Yangbo Lu <yangbo.lu@nxp.com>, Bhupesh Sharma <bhupesh.sharma@freescale.com>, Joerg Roedel <joro@8bytes.org>, Santosh Shilimkar <ssantosh@kernel.org>, Jochen Friedrich <jochen@scram.de>, Yang-Leo Li <leoyang.li@nxp.com>, Scott Wood <oss@buserror.net>, Rob Herring <robh+dt@kernel.org>, Claudiu Manoil <claudiu.manoil@freescale.com>, Kumar Gala <galak@codeaurora.org>, Xiaobo Xie <xiaobo.xie@nxp.com>
+Sender: linux-clk-owner@vger.kernel.org
+To: Scott Wood <oss@buserror.net>, Qiang Zhao <qiang.zhao@nxp.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linuxppc-dev@lists.ozlabs.org" <linuxppc-dev@lists.ozlabs.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-clk@vger.kernel.org" <linux-clk@vger.kernel.org>, "linux-i2c@vger.kernel.org" <linux-i2c@vger.kernel.org>, "iommu@lists.linux-foundation.org" <iommu@lists.linux-foundation.org>, "netdev@vger.kernel.org" <netdev@vger.kernel.org>
+Cc: "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>, Mark Rutland <mark.rutland@arm.com>, Rob Herring <robh+dt@kernel.org>, Russell King <linux@arm.linux.org.uk>, Jochen Friedrich <jochen@scram.de>, Joerg Roedel <joro@8bytes.org>, Claudiu Manoil <claudiu.manoil@freescale.com>, Bhupesh Sharma <bhupesh.sharma@freescale.com>, Kumar Gala <galak@codeaurora.org>, Santosh Shilimkar <ssantosh@kernel.org>, Yang-Leo Li <leoyang.li@nxp.com>, Xiaobo Xie <xiaobo.xie@nxp.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On Wed, 2016-05-04 at 11:24 +0800, Yangbo Lu wrote:
-> -----Original Message-----
-> From: Yangbo Lu [mailto:yangbo.lu@nxp.com]
-> Sent: Wednesday, May 04, 2016 11:25 AM
-> To: linux-mmc@vger.kernel.org; linuxppc-dev@lists.ozlabs.org;
-> devicetree@vger.kernel.org; linux-arm-kernel@lists.infradead.org; linux-
-> kernel@vger.kernel.org; linux-clk@vger.kernel.org; linux-i2c@vger.kernel.org;
-> iommu@lists.linux-foundation.org; netdev@vger.kernel.org
-> Cc: ulf.hansson@linaro.org; Scott Wood <oss@buserror.net>; Mark Rutland
-> <mark.rutland@arm.com>; Rob Herring <robh+dt@kernel.org>; Russell King
-> <linux@arm.linux.org.uk>; Jochen Friedrich <jochen@scram.de>; Joerg Roedel
-> <joro@8bytes.org>; Claudiu Manoil <claudiu.manoil@freescale.com>; Bhupesh
-> Sharma <bhupesh.sharma@freescale.com>; Qiang Zhao
-> <qiang.zhao@nxp.com>; Kumar Gala <galak@codeaurora.org>; Santosh
-> Shilimkar <ssantosh@kernel.org>; Yang-Leo Li <leoyang.li@nxp.com>; Xiaobo
-> Xie <xiaobo.xie@nxp.com>; Yangbo Lu <yangbo.lu@nxp.com>
-> Subject: [v9, 6/7] MAINTAINERS: add entry for Freescale SoC driver
-> 
-> Add maintainer entry for Freescale SoC driver including the QE library and the
-> GUTS driver now. Also add maintainer for QE library.
-> 
-> Signed-off-by: Yangbo Lu <yangbo.lu@nxp.com>
-> ---
-> Changes for v8:
-> 	- Added this patch
-> Changes for v9:
-> 	- Added linux-arm mail list
-> 	- Removed GUTS driver entry
-> ---
->  MAINTAINERS | 11 ++++++++++-
->  1 file changed, 10 insertions(+), 1 deletion(-)
-> 
-> diff --git a/MAINTAINERS b/MAINTAINERS
-> index 42e65d1..ce91db7 100644
-> --- a/MAINTAINERS
-> +++ b/MAINTAINERS
-> @@ -4622,9 +4622,18 @@ F:	drivers/net/ethernet/freescale/fec_ptp.c
->  F:	drivers/net/ethernet/freescale/fec.h
->  F:	Documentation/devicetree/bindings/net/fsl-fec.txt
-> 
-> +FREESCALE SOC DRIVER
-> +M:	Scott Wood <oss@buserror.net>
-> +L:	linuxppc-dev@lists.ozlabs.org
-> +L:	linux-arm-kernel@lists.infradead.org
-> +S:	Maintained
-> +F:	drivers/soc/fsl/
-> +F:	include/linux/fsl/
-> +
->  FREESCALE QUICC ENGINE LIBRARY
-> +M:	Qiang Zhao <qiang.zhao@nxp.com>
->  L:	linuxppc-dev@lists.ozlabs.org
-> -S:	Orphan
-> +S:	Maintained
->  F:	drivers/soc/fsl/qe/
->  F:	include/soc/fsl/*qe*.h
->  F:	include/soc/fsl/*ucc*.h
-> --
-> 2.1.0.27.g96db324
-
-I am ok!
-
--Zhao Qiang
+VGhhbmtzIGEgbG90LCBTY290dCBhbmQgUWlhbmcuDQpXaWxsIGNoYW5nZSAnRFJJVkVSJyB0byAn
+RFJJVkVSUycgYW5kIHVwZGF0ZSB0aGUgcGF0Y2hzZXQgd2l0aCB5b3VyIGFjdHMuDQoNCg0KQmVz
+dCByZWdhcmRzLA0KWWFuZ2JvIEx1DQoNCj4gLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4g
+RnJvbTogbGludXgtbW1jLW93bmVyQHZnZXIua2VybmVsLm9yZyBbbWFpbHRvOmxpbnV4LW1tYy0N
+Cj4gb3duZXJAdmdlci5rZXJuZWwub3JnXSBPbiBCZWhhbGYgT2YgU2NvdHQgV29vZA0KPiBTZW50
+OiBUaHVyc2RheSwgTWF5IDA1LCAyMDE2IDE6MzUgQU0NCj4gVG86IFlhbmdibyBMdTsgbGludXgt
+bW1jQHZnZXIua2VybmVsLm9yZzsgbGludXhwcGMtZGV2QGxpc3RzLm96bGFicy5vcmc7DQo+IGRl
+dmljZXRyZWVAdmdlci5rZXJuZWwub3JnOyBsaW51eC1hcm0ta2VybmVsQGxpc3RzLmluZnJhZGVh
+ZC5vcmc7IGxpbnV4LQ0KPiBrZXJuZWxAdmdlci5rZXJuZWwub3JnOyBsaW51eC1jbGtAdmdlci5r
+ZXJuZWwub3JnOyBsaW51eC0NCj4gaTJjQHZnZXIua2VybmVsLm9yZzsgaW9tbXVAbGlzdHMubGlu
+dXgtZm91bmRhdGlvbi5vcmc7DQo+IG5ldGRldkB2Z2VyLmtlcm5lbC5vcmcNCj4gQ2M6IHVsZi5o
+YW5zc29uQGxpbmFyby5vcmc7IE1hcmsgUnV0bGFuZDsgUm9iIEhlcnJpbmc7IFJ1c3NlbGwgS2lu
+ZzsNCj4gSm9jaGVuIEZyaWVkcmljaDsgSm9lcmcgUm9lZGVsOyBDbGF1ZGl1IE1hbm9pbDsgQmh1
+cGVzaCBTaGFybWE7IFFpYW5nDQo+IFpoYW87IEt1bWFyIEdhbGE7IFNhbnRvc2ggU2hpbGlta2Fy
+OyBZYW5nLUxlbyBMaTsgWGlhb2JvIFhpZQ0KPiBTdWJqZWN0OiBSZTogW3Y5LCA2LzddIE1BSU5U
+QUlORVJTOiBhZGQgZW50cnkgZm9yIEZyZWVzY2FsZSBTb0MgZHJpdmVyDQo+IA0KPiBPbiBXZWQs
+IDIwMTYtMDUtMDQgYXQgMTE6MjQgKzA4MDAsIFlhbmdibyBMdSB3cm90ZToNCj4gPiBBZGQgbWFp
+bnRhaW5lciBlbnRyeSBmb3IgRnJlZXNjYWxlIFNvQyBkcml2ZXIgaW5jbHVkaW5nIHRoZSBRRSBs
+aWJyYXJ5DQo+ID4gYW5kIHRoZSBHVVRTIGRyaXZlciBub3cuIEFsc28gYWRkIG1haW50YWluZXIg
+Zm9yIFFFIGxpYnJhcnkuDQo+ID4NCj4gPiBTaWduZWQtb2ZmLWJ5OiBZYW5nYm8gTHUgPHlhbmdi
+by5sdUBueHAuY29tPg0KPiA+IC0tLQ0KPiA+IENoYW5nZXMgZm9yIHY4Og0KPiA+IAktIEFkZGVk
+IHRoaXMgcGF0Y2gNCj4gPiBDaGFuZ2VzIGZvciB2OToNCj4gPiAJLSBBZGRlZCBsaW51eC1hcm0g
+bWFpbCBsaXN0DQo+ID4gCS0gUmVtb3ZlZCBHVVRTIGRyaXZlciBlbnRyeQ0KPiA+IC0tLQ0KPiA+
+ICBNQUlOVEFJTkVSUyB8IDExICsrKysrKysrKystDQo+ID4gIDEgZmlsZSBjaGFuZ2VkLCAxMCBp
+bnNlcnRpb25zKCspLCAxIGRlbGV0aW9uKC0pDQo+ID4NCj4gPiBkaWZmIC0tZ2l0IGEvTUFJTlRB
+SU5FUlMgYi9NQUlOVEFJTkVSUyBpbmRleCA0MmU2NWQxLi5jZTkxZGI3IDEwMDY0NA0KPiA+IC0t
+LSBhL01BSU5UQUlORVJTDQo+ID4gKysrIGIvTUFJTlRBSU5FUlMNCj4gPiBAQCAtNDYyMiw5ICs0
+NjIyLDE4IEBAIEY6CWRyaXZlcnMvbmV0L2V0aGVybmV0L2ZyZWVzY2FsZS9mZWNfcHRwLmMNCj4g
+PiAgRjoJZHJpdmVycy9uZXQvZXRoZXJuZXQvZnJlZXNjYWxlL2ZlYy5oDQo+ID4gIEY6CURvY3Vt
+ZW50YXRpb24vZGV2aWNldHJlZS9iaW5kaW5ncy9uZXQvZnNsLWZlYy50eHQNCj4gPg0KPiA+ICtG
+UkVFU0NBTEUgU09DIERSSVZFUg0KPiA+ICtNOglTY290dCBXb29kIDxvc3NAYnVzZXJyb3IubmV0
+Pg0KPiA+ICtMOglsaW51eHBwYy1kZXZAbGlzdHMub3psYWJzLm9yZw0KPiA+ICtMOglsaW51eC1h
+cm0ta2VybmVsQGxpc3RzLmluZnJhZGVhZC5vcmcNCj4gPiArUzoJTWFpbnRhaW5lZA0KPiA+ICtG
+Oglkcml2ZXJzL3NvYy9mc2wvDQo+ID4gK0Y6CWluY2x1ZGUvbGludXgvZnNsLw0KPiA+ICsNCj4g
+PiAgRlJFRVNDQUxFIFFVSUNDIEVOR0lORSBMSUJSQVJZDQo+ID4gK006CVFpYW5nIFpoYW8gPHFp
+YW5nLnpoYW9AbnhwLmNvbT4NCj4gPiAgTDoJbGludXhwcGMtZGV2QGxpc3RzLm96bGFicy5vcmcN
+Cj4gPiAtUzoJT3JwaGFuDQo+ID4gK1M6CU1haW50YWluZWQNCj4gPiAgRjoJZHJpdmVycy9zb2Mv
+ZnNsL3FlLw0KPiA+ICBGOglpbmNsdWRlL3NvYy9mc2wvKnFlKi5oDQo+ID4gIEY6CWluY2x1ZGUv
+c29jL2ZzbC8qdWNjKi5oDQo+IA0KPiBzL0RSSVZFUi9EUklWRVJTLw0KPiANCj4gVGhlcmUncyBt
+b3JlIHRoYW4gb25lLg0KPiANCj4gT3RoZXJ3aXNlOg0KPiBBY2tlZC1ieTogU2NvdHQgV29vZCA8
+b3NzQGJ1c2Vycm9yLm5ldD4NCj4gDQo+IC1TY290dA0KPiANCj4gPg0KPiAtLQ0KPiBUbyB1bnN1
+YnNjcmliZSBmcm9tIHRoaXMgbGlzdDogc2VuZCB0aGUgbGluZSAidW5zdWJzY3JpYmUgbGludXgt
+bW1jIiBpbg0KPiB0aGUgYm9keSBvZiBhIG1lc3NhZ2UgdG8gbWFqb3Jkb21vQHZnZXIua2VybmVs
+Lm9yZyBNb3JlIG1ham9yZG9tbyBpbmZvIGF0DQo+IGh0dHA6Ly92Z2VyLmtlcm5lbC5vcmcvbWFq
+b3Jkb21vLWluZm8uaHRtbA0K
