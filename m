@@ -1,64 +1,51 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: [PATCH] mmc: mmc: Fix partition switch timeout for some eMMCs
-Date: Thu,  5 May 2016 08:12:28 +0300
-Message-ID: <1462425148-18167-1-git-send-email-adrian.hunter@intel.com>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga01.intel.com ([192.55.52.88]:3996 "EHLO mga01.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751226AbcEEFQU (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 5 May 2016 01:16:20 -0400
-Sender: linux-mmc-owner@vger.kernel.org
+From: Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>
+Subject: Re: [v10,
+	7/7] mmc: sdhci-of-esdhc: fix host version for T4240-R1.0-R2.0
+Date: Thu, 05 May 2016 10:31:36 +0200
+Message-ID: <4448030.Zs8fVnr3nm@wuerfel>
+References: <1462417950-46796-1-git-send-email-yangbo.lu@nxp.com>
+	<1462417950-46796-8-git-send-email-yangbo.lu@nxp.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
+In-Reply-To: <1462417950-46796-8-git-send-email-yangbo.lu-3arQi8VN3Tc@public.gmane.org>
+List-Unsubscribe: <https://lists.linuxfoundation.org/mailman/options/iommu>,
+	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.linuxfoundation.org/pipermail/iommu/>
+List-Post: <mailto:iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
+List-Help: <mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=help>
+List-Subscribe: <https://lists.linuxfoundation.org/mailman/listinfo/iommu>,
+	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=subscribe>
+Sender: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
+Errors-To: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
+To: linuxppc-dev-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org
+Cc: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, xiaobo.xie-3arQi8VN3Tc@public.gmane.org, linux-i2c-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-clk-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Qiang Zhao <qiang.zhao-3arQi8VN3Tc@public.gmane.org>, Russell King <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, Bhupesh Sharma <bhupesh.sharma-KZfg59tc24xl57MIdRCFDg@public.gmane.org>, Claudiu Manoil <claudiu.manoil-KZfg59tc24xl57MIdRCFDg@public.gmane.org>, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Kumar Gala <galak-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, Scott Wood <oss-fOR+EgIDQEHk1uMJSBkQmQ@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Santosh Shilimkar <ssantosh-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, netdev-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, leoyang.li-3arQi8VN3Tc@public.gmane.org, iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org, Yangbo Lu <yangbo.lu-3arQi8VN3Tc@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>
 
-Some eMMCs set the partition switch timeout too low.
+On Thursday 05 May 2016 11:12:30 Yangbo Lu wrote:
+> 
+> +       fsl_guts_init();
+> +       svr = fsl_guts_get_svr();
+> +       if (svr) {
+> +               esdhc->soc_ver = SVR_SOC_VER(svr);
+> +               esdhc->soc_rev = SVR_REV(svr);
+> +       } else {
+> +               dev_err(&pdev->dev, "Failed to get SVR value!\n");
+> +       }
+> +
+> 
 
-Now typically eMMCs are considered a critical component (e.g. because
-they store the root file system) and consequently are expected to be
-reliable.  Thus we can neglect the use case where eMMCs can't switch
-reliably and we might want a lower timeout to facilitate speedy
-recovery.
 
-Although we could employ a quirk for the cards that are affected (if
-we could identify them all), as described above, there is little
-benefit to having a low timeout, so instead simply set a minimum
-timeout.
+Sorry for jumping in again after not participating in the discussion for the
+past few versions.
 
-The minimum is set to 300ms somewhat arbitrarily - the examples that
-have been seen had a timeout of 10ms but were sometimes taking 60-70ms.
+What happened to my suggestion of making this a platform-independent interface
+to avoid the link time dependency?
 
-Cc: stable@vger.kernel.org
-Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
----
- drivers/mmc/core/mmc.c | 7 +++++++
- 1 file changed, 7 insertions(+)
+Specifically, why not add an exported function to drivers/base/soc.c that
+uses glob_match() for comparing a string in the device driver to the ID
+of the SoC that is set by whatever SoC identifying driver the platform
+has?
 
-diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-index f99c47e003fe..d4d1b77c1c1e 100644
---- a/drivers/mmc/core/mmc.c
-+++ b/drivers/mmc/core/mmc.c
-@@ -333,6 +333,9 @@ static void mmc_manage_gp_partitions(struct mmc_card *card, u8 *ext_csd)
- 	}
- }
- 
-+/* Minimum partition switch timeout in milliseconds */
-+#define MMC_MIN_PART_SWITCH_TIME	300
-+
- /*
-  * Decode extended CSD.
-  */
-@@ -397,6 +400,10 @@ static int mmc_decode_ext_csd(struct mmc_card *card, u8 *ext_csd)
- 
- 		/* EXT_CSD value is in units of 10ms, but we store in ms */
- 		card->ext_csd.part_time = 10 * ext_csd[EXT_CSD_PART_SWITCH_TIME];
-+		/* Some eMMC set the value too low so set a minimum */
-+		if (card->ext_csd.part_time &&
-+		    card->ext_csd.part_time < MMC_MIN_PART_SWITCH_TIME)
-+			card->ext_csd.part_time = MMC_MIN_PART_SWITCH_TIME;
- 
- 		/* Sleep / awake timeout in 100ns units */
- 		if (sa_shift > 0 && sa_shift <= 0x17)
--- 
-1.9.1
-
+	Arnd
