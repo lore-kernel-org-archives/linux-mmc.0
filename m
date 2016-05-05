@@ -1,135 +1,106 @@
-From: Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>
-Subject: Re: [v10,
-	7/7] mmc: sdhci-of-esdhc: fix host version for T4240-R1.0-R2.0
-Date: Thu, 05 May 2016 13:10:31 +0200
-Message-ID: <5159406.HOFrj7pRfW@wuerfel>
-References: <1462417950-46796-1-git-send-email-yangbo.lu@nxp.com>
-	<4448030.Zs8fVnr3nm@wuerfel>
-	<HE1PR04MB0889B52134A43C0E7A452B7BF87C0@HE1PR04MB0889.eurprd04.prod.outlook.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
-In-Reply-To: <HE1PR04MB0889B52134A43C0E7A452B7BF87C0-6LN7OEpIatX1kPMWxTxe+c9NdZoXdze2vxpqHgZTriW3zl9H0oFU5g@public.gmane.org>
-List-Unsubscribe: <https://lists.linuxfoundation.org/mailman/options/iommu>,
-	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.linuxfoundation.org/pipermail/iommu/>
-List-Post: <mailto:iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
-List-Help: <mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=help>
-List-Subscribe: <https://lists.linuxfoundation.org/mailman/listinfo/iommu>,
-	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=subscribe>
-Sender: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
-Errors-To: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
-To: linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
-Cc: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, "ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org" <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Xiaobo Xie <xiaobo.xie-3arQi8VN3Tc@public.gmane.org>, "linux-i2c-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-i2c-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-clk-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-clk-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Qiang Zhao <qiang.zhao-3arQi8VN3Tc@public.gmane.org>, Russell King <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, Bhupesh Sharma <bhupesh.sharma-KZfg59tc24xl57MIdRCFDg@public.gmane.org>, Claudiu Manoil <claudiu.manoil-KZfg59tc24xl57MIdRCFDg@public.gmane.org>, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Yangbo Lu <yangbo.lu-3arQi8VN3Tc@public.gmane.org>, Scott Wood <oss-fOR+EgIDQEHk1uMJSBkQmQ@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Santosh Shilimkar <ssantosh-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, "netdev-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <netdev-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Yang-Leo Li <leoyang.li-3arQi8VN3Tc@public.gmane.org>, "iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org" <iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>, Kumar
+From: Krzysztof Kozlowski <k.kozlowski-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>
+Subject: [RFC v2 00/13] usb/mmc/power: Fix USB/LAN when TFTP booting
+Date: Thu, 05 May 2016 14:34:13 +0200
+Message-ID: <1462451666-17945-1-git-send-email-k.kozlowski@samsung.com>
+Return-path: <linux-usb-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Sender: linux-usb-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-samsung-soc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-pm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-usb-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Sebastian Reichel <sre-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Dmitry Eremin-Solenikov <dbaryshkov-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, David Woodhouse <dwmw2-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org>, Greg Kroah-Hartman <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>, Mark Brown <broonie-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+Cc: tjakobi-o02PS0xoJP9W0yFyLvAVXMxlOr/tl8fh@public.gmane.org, m.szyprowski-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org, hverkuil-qWit8jRvyhVmR6Xm/wNWPw@public.gmane.org, Krzysztof Kozlowski <k.kozlowski-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, Bartlomiej Zolnierkiewicz <b.zolnierkie-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Thursday 05 May 2016 09:41:32 Yangbo Lu wrote:
-> > -----Original Message-----
-> > From: Arnd Bergmann [mailto:arnd-r2nGTMty4D4@public.gmane.org]
-> > Sent: Thursday, May 05, 2016 4:32 PM
-> > To: linuxppc-dev-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org
-> > Cc: Yangbo Lu; linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org; devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org;
-> > linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org; linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org;
-> > linux-clk-u79uwXL29TY76Z2rM5mHXA@public.gmane.org; linux-i2c-u79uwXL29TY76Z2rM5mHXA@public.gmane.org; iommu-cunTk1MwBs/ROKNJybVBZg@public.gmane.org
-> > foundation.org; netdev-u79uwXL29TY76Z2rM5mHXA@public.gmane.org; Mark Rutland;
-> > ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org; Russell King; Bhupesh Sharma; Joerg Roedel;
-> > Santosh Shilimkar; Yang-Leo Li; Scott Wood; Rob Herring; Claudiu Manoil;
-> > Kumar Gala; Xiaobo Xie; Qiang Zhao
-> > Subject: Re: [v10, 7/7] mmc: sdhci-of-esdhc: fix host version for T4240-
-> > R1.0-R2.0
-> > 
-> > On Thursday 05 May 2016 11:12:30 Yangbo Lu wrote:
-> > >
-> > > +       fsl_guts_init();
-> > > +       svr = fsl_guts_get_svr();
-> > > +       if (svr) {
-> > > +               esdhc->soc_ver = SVR_SOC_VER(svr);
-> > > +               esdhc->soc_rev = SVR_REV(svr);
-> > > +       } else {
-> > > +               dev_err(&pdev->dev, "Failed to get SVR value!\n");
-> > > +       }
-> > > +
-> > >
-> > 
-> > 
-> > Sorry for jumping in again after not participating in the discussion for
-> > the past few versions.
-> > 
-> > What happened to my suggestion of making this a platform-independent
-> > interface to avoid the link time dependency?
-> > 
-> > Specifically, why not add an exported function to drivers/base/soc.c that
-> > uses glob_match() for comparing a string in the device driver to the ID
-> > of the SoC that is set by whatever SoC identifying driver the platform
-> > has?
-> 
-> [Lu Yangbo-B47093] I think this has been discussed in v6.
-> You can find Scott's comments about this in below link.
-> https://patchwork.kernel.org/patch/8544501/
+Hi,
 
-Ah, thanks for bearing with me and digging this out again. Let me follow
-up on Scott's older replies here then:
+This is a different, second try to fix usb3503+lan on Odroid U3 board
+if it was initialized by bootloader (e.g. for TFTP boot).
 
-> >> IIRC, it is the same IP block as i.MX and Arnd's point is this won't
-> >> even compile on !PPC. It is things like this that prevent sharing the
-> >> driver.
-> 
-> The whole point of using the MMIO SVR instead of the PPC SPR is so that
-> it will work on ARM...  The guts driver should build on any platform as
-> long as OF is enabled, and if it doesn't find a node to bind to it will
-> return 0 for SVR, and the eSDHC driver will continue (after printing an
-> error that should be removed) without the ability to test for errata
-> based on SVR.
+First version:
+http://www.spinics.net/lists/linux-usb/msg140042.html
 
-It feels like a bad design to have to come up with a different
-method for each SoC type here when they all do the same thing
-and want to identify some variant of the chip to do device
-specific quirks.
 
-As far as I'm concerned, every driver in drivers/soc that needs to
-export a symbol to be used by a device driver is an indication that
-we don't have the right set of abstractions yet. There are cases
-that are not worth abstracting because the functionality is rather
-obscure and only a couple of drivers for one particular chip
-ever need it.
+Problem
+=======
+When Odroid U3 (usb3503 + smsc95xx + max77686) boots from network (TFTP),
+the usb3503 and LAN smsc95xx do not show up in "lsusb". Hard-reset
+is required, e.g. by suspend to RAM. The actual TFTP boot does
+not have to happen. Just "usb start" from U-Boot is sufficient.
 
-Finding out the version of the SoC does not look like this case.
+>From the schematics, the regulator is a supply only to LAN, however
+without toggling it off/on, the usb3503 hub won appear neither.
 
-> > I think the first four patches take care of building for ARM,
-> > but the problem remains if you want to enable COMPILE_TEST as
-> > we need for certain automated checking.
-> 
-> What specific problem is there with COMPILE_TEST?
 
-COMPILE_TEST is solvable here and the way it is implemented in this
-case (selecting FSL_GUTS from the driver) indeed looks like it works
-correctly, but it's still awkward that this means building the
-SoC specific ID stuff into the vmlinux binary for any driver that
-uses something like that for a particular SoC.
+Solution
+========
+This is very similar to the MMC pwrseq behavior so the idea is to:
+1. Move MMC pwrseq drivers to generic place,
+2. Extend the pwrseq-simple with regulator toggling,
+3. Add support to USB hub and port core for pwrseq,
+4. Toggle the regulator when needed.
 
-> >> Dealing with Si revs is a common problem. We should have a
-> >> common solution. There is soc_device for this purpose.
-> > 
-> > Exactly. The last time this came up, I think we agreed to implement a
-> > helper using glob_match() on the soc_device strings. Unfortunately
-> > this hasn't happened then, but I'd still prefer that over yet another
-> > vendor-specific way of dealing with the generic issue.
-> 
-> soc_device would require encoding the SVR as a string and then decoding
-> the string, which is more complicated and error prone than having
-> platform-specific code test a platform-specific number. 
 
-You already need to encode it as a string to register the soc_device,
-and the driver just needs to pass a glob string, so the only part that
-is missing is the generic function that takes the string from the
-driver and passes that to glob_match for the soc_device.
+Issues
+======
+I am not familiar with USB subsystem, so please kindly guide me
+where USB related code should be placed.
 
-> And when would it get registered on arm64, which doesn't have
-> platform code?
+In the code there are still some issues to solve (FIXME/TODO notes).
+If the approach is okay, I will improve the patchset. However at this
+point - IT WORKS, which is nice. :)
 
-Whenever the soc driver is loaded, as is the case now. The match
-function can return -EPROBE_DEFER if no SoC device is registered
-yet.
 
-	Arnd
+Best regards,
+Krzysztof
+
+Krzysztof Kozlowski (13):
+  usb: misc: usb3503: Clean up on driver unbind
+  power/mmc: Move pwrseq drivers to power/pwrseq
+  MAINTAINERS: Retain Ulf Hansson as the same maintainer of pwrseq
+  power: pwrseq: Enable COMPILE_TEST for drivers
+  power: pwrseq: Remove mmc prefix from mmc_pwrseq
+  power: pwrseq: Generalize mmc_pwrseq operations by removing mmc prefix
+  power: pwrseq: simple: Add support for toggling regulator
+  usb: hub: Handle deferred probe
+  power: pwrseq: Add support for USB hubs with external power
+  usb: hub: Power sequence the ports on activation
+  usb: port: Parse pwrseq phandle from Device Tree
+  ARM: dts: exynos: Switch the buck8 to GPIO mode on Odroid U3
+  ARM: dts: exynos: Fix LAN and HUB after bootloader initialization on
+    Odroid U3
+
+ .../devicetree/bindings/mmc/mmc-pwrseq-simple.txt  |  2 +
+ MAINTAINERS                                        |  8 +++
+ arch/arm/boot/dts/exynos4412-odroid-common.dtsi    |  2 +-
+ arch/arm/boot/dts/exynos4412-odroidu3.dts          |  7 ++
+ drivers/mmc/Kconfig                                |  2 -
+ drivers/mmc/core/Makefile                          |  3 -
+ drivers/mmc/core/core.c                            |  8 +--
+ drivers/mmc/core/host.c                            |  2 +-
+ drivers/mmc/core/pwrseq.h                          | 52 --------------
+ drivers/power/Kconfig                              |  1 +
+ drivers/power/Makefile                             |  1 +
+ drivers/{mmc/core => power/pwrseq}/Kconfig         | 21 ++++--
+ drivers/power/pwrseq/Makefile                      |  3 +
+ drivers/{mmc/core => power/pwrseq}/pwrseq.c        | 80 +++++++++++++++++-----
+ drivers/{mmc/core => power/pwrseq}/pwrseq_emmc.c   | 15 ++--
+ drivers/{mmc/core => power/pwrseq}/pwrseq_simple.c | 73 ++++++++++++++++----
+ drivers/usb/core/hub.c                             | 17 ++++-
+ drivers/usb/core/hub.h                             |  3 +
+ drivers/usb/core/port.c                            | 15 ++++
+ drivers/usb/misc/usb3503.c                         | 28 ++++++++
+ include/linux/mmc/host.h                           |  4 +-
+ include/linux/pwrseq.h                             | 60 ++++++++++++++++
+ 22 files changed, 294 insertions(+), 113 deletions(-)
+ delete mode 100644 drivers/mmc/core/pwrseq.h
+ rename drivers/{mmc/core => power/pwrseq}/Kconfig (65%)
+ create mode 100644 drivers/power/pwrseq/Makefile
+ rename drivers/{mmc/core => power/pwrseq}/pwrseq.c (50%)
+ rename drivers/{mmc/core => power/pwrseq}/pwrseq_emmc.c (89%)
+ rename drivers/{mmc/core => power/pwrseq}/pwrseq_simple.c (64%)
+ create mode 100644 include/linux/pwrseq.h
+
+-- 
+1.9.1
+
+--
+To unsubscribe from this list: send the line "unsubscribe linux-usb" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
