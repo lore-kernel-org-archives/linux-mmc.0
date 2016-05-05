@@ -1,53 +1,53 @@
 From: Krzysztof Kozlowski <k.kozlowski@samsung.com>
-Subject: [RFC v2 10/13] usb: hub: Power sequence the ports on activation
-Date: Thu, 05 May 2016 14:34:23 +0200
-Message-ID: <1462451666-17945-11-git-send-email-k.kozlowski@samsung.com>
+Subject: [RFC v2 03/13] MAINTAINERS: Retain Ulf Hansson as the same maintainer
+ of pwrseq
+Date: Thu, 05 May 2016 14:34:16 +0200
+Message-ID: <1462451666-17945-4-git-send-email-k.kozlowski@samsung.com>
 References: <1462451666-17945-1-git-send-email-k.kozlowski@samsung.com>
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
 In-reply-to: <1462451666-17945-1-git-send-email-k.kozlowski@samsung.com>
-Sender: linux-kernel-owner@vger.kernel.org
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
 To: devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-samsung-soc@vger.kernel.org, linux-mmc@vger.kernel.org, linux-pm@vger.kernel.org, linux-usb@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, Sebastian Reichel <sre@kernel.org>, Dmitry Eremin-Solenikov <dbaryshkov@gmail.com>, David Woodhouse <dwmw2@infradead.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Mark Brown <broonie@kernel.org>
-Cc: tjakobi@math.uni-bielefeld.de, m.szyprowski@samsung.com, hverkuil@xs4all.nl, Krzysztof Kozlowski <k.kozlowski@samsung.com>, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>
+Cc: hverkuil@xs4all.nl, tjakobi@math.uni-bielefeld.de, Krzysztof Kozlowski <k.kozlowski@samsung.com>, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>, m.szyprowski@samsung.com
 List-Id: linux-mmc@vger.kernel.org
 
-The autodetection of attached USB device might not work on certain
-boards where the power is delivered externally. These devices also might
-require a hard reset. Use pwrseq for that in USB hub.
+Before moving pwrseq drivers from drivers/mmc/core/ to drivers/power/,
+they were maintained by Ulf Hansson.
 
 Signed-off-by: Krzysztof Kozlowski <k.kozlowski@samsung.com>
 ---
- drivers/usb/core/hub.c | 11 +++++++++++
- 1 file changed, 11 insertions(+)
+ MAINTAINERS | 8 ++++++++
+ 1 file changed, 8 insertions(+)
 
-diff --git a/drivers/usb/core/hub.c b/drivers/usb/core/hub.c
-index 1c82fcc448f5..0fddaacc62bf 100644
---- a/drivers/usb/core/hub.c
-+++ b/drivers/usb/core/hub.c
-@@ -26,6 +26,7 @@
- #include <linux/mutex.h>
- #include <linux/random.h>
- #include <linux/pm_qos.h>
-+#include <linux/pwrseq.h>
+diff --git a/MAINTAINERS b/MAINTAINERS
+index b016f447c6c9..2c501b795d18 100644
+--- a/MAINTAINERS
++++ b/MAINTAINERS
+@@ -8874,6 +8874,14 @@ F:	include/linux/power_supply.h
+ F:	drivers/power/
+ X:	drivers/power/avs/
  
- #include <asm/uaccess.h>
- #include <asm/byteorder.h>
-@@ -1661,7 +1662,17 @@ static int hub_configure(struct usb_hub *hub,
- 
- 	usb_hub_adjust_deviceremovable(hdev, hub->descriptor);
- 
-+	/* FIXME: When do the pre-power-on? */
-+	/*
-+	for (i = 0; i < maxchild; i++)
-+		pwrseq_pre_power_on(hub->ports[i]->pwrseq);
-+	*/
++POWER SEQ CORE and DRIVERS
++M:	Ulf Hansson <ulf.hansson@linaro.org>
++L:	linux-mmc@vger.kernel.org
++T:	git git://git.linaro.org/people/ulf.hansson/mmc.git
++S:	Maintained
++F:	drivers/power/pwrseq/
++F:	include/linux/pwrseq.h
 +
-+	for (i = 0; i < maxchild; i++)
-+		pwrseq_post_power_on(hub->ports[i]->pwrseq);
-+
- 	hub_activate(hub, HUB_INIT);
-+
- 	return 0;
- 
- fail:
+ POWER STATE COORDINATION INTERFACE (PSCI)
+ M:	Mark Rutland <mark.rutland@arm.com>
+ M:	Lorenzo Pieralisi <lorenzo.pieralisi@arm.com>
 -- 
 1.9.1
