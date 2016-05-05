@@ -1,87 +1,92 @@
-From: Krzysztof Kozlowski <k.kozlowski@samsung.com>
-Subject: [RFC v2 01/13] usb: misc: usb3503: Clean up on driver unbind
-Date: Thu, 05 May 2016 14:34:14 +0200
-Message-ID: <1462451666-17945-2-git-send-email-k.kozlowski@samsung.com>
+From: Krzysztof Kozlowski <k.kozlowski-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>
+Subject: [RFC v2 11/13] usb: port: Parse pwrseq phandle from Device Tree
+Date: Thu, 05 May 2016 14:34:24 +0200
+Message-ID: <1462451666-17945-12-git-send-email-k.kozlowski@samsung.com>
 References: <1462451666-17945-1-git-send-email-k.kozlowski@samsung.com>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout2.w1.samsung.com ([210.118.77.12]:27229 "EHLO
-	mailout2.w1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753746AbcEEMe5 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 5 May 2016 08:34:57 -0400
-In-reply-to: <1462451666-17945-1-git-send-email-k.kozlowski@samsung.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-usb-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-reply-to: <1462451666-17945-1-git-send-email-k.kozlowski-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>
+Sender: linux-usb-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-samsung-soc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-pm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-usb-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Sebastian Reichel <sre-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Dmitry Eremin-Solenikov <dbaryshkov-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, David Woodhouse <dwmw2-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org>, Greg Kroah-Hartman <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>, Mark Brown <broonie-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+Cc: tjakobi-o02PS0xoJP9W0yFyLvAVXMxlOr/tl8fh@public.gmane.org, m.szyprowski-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org, hverkuil-qWit8jRvyhVmR6Xm/wNWPw@public.gmane.org, Krzysztof Kozlowski <k.kozlowski-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, Bartlomiej Zolnierkiewicz <b.zolnierkie-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-samsung-soc@vger.kernel.org, linux-mmc@vger.kernel.org, linux-pm@vger.kernel.org, linux-usb@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, Sebastian Reichel <sre@kernel.org>, Dmitry Eremin-Solenikov <dbaryshkov@gmail.com>, David Woodhouse <dwmw2@infradead.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Mark Brown <broonie@kernel.org>
-Cc: tjakobi@math.uni-bielefeld.de, m.szyprowski@samsung.com, hverkuil@xs4all.nl, Krzysztof Kozlowski <k.kozlowski@samsung.com>, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>
 
-The driver should clean up after itself by unpreparing the clock when it
-is unbound.
+Parse usb-pwrseq property from Device Tree to get the phandle to pwrseq
+device. The pwrseq device will be used by USB hub to cycle the power
+before activating ports.
 
-Signed-off-by: Krzysztof Kozlowski <k.kozlowski@samsung.com>
+Signed-off-by: Krzysztof Kozlowski <k.kozlowski-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>
 ---
- drivers/usb/misc/usb3503.c | 28 ++++++++++++++++++++++++++++
- 1 file changed, 28 insertions(+)
+ drivers/usb/core/hub.h  |  3 +++
+ drivers/usb/core/port.c | 15 +++++++++++++++
+ 2 files changed, 18 insertions(+)
 
-diff --git a/drivers/usb/misc/usb3503.c b/drivers/usb/misc/usb3503.c
-index b45cb77c0744..a464636675a6 100644
---- a/drivers/usb/misc/usb3503.c
-+++ b/drivers/usb/misc/usb3503.c
-@@ -330,6 +330,19 @@ static int usb3503_i2c_probe(struct i2c_client *i2c,
- 	return usb3503_probe(hub);
- }
+diff --git a/drivers/usb/core/hub.h b/drivers/usb/core/hub.h
+index 34c1a7e22aae..68ca89780d26 100644
+--- a/drivers/usb/core/hub.h
++++ b/drivers/usb/core/hub.h
+@@ -24,6 +24,8 @@
+ #include <linux/usb/hcd.h>
+ #include "usb.h"
  
-+static int usb3503_i2c_remove(struct i2c_client *i2c)
-+{
-+	struct usb3503 *hub;
++struct pwrseq;
 +
-+	hub = i2c_get_clientdata(i2c);
-+	if (hub) {
-+		if (hub->clk)
-+			clk_disable_unprepare(hub->clk);
+ struct usb_hub {
+ 	struct device		*intfdev;	/* the "interface" device */
+ 	struct usb_device	*hdev;
+@@ -101,6 +103,7 @@ struct usb_port {
+ 	struct usb_dev_state *port_owner;
+ 	struct usb_port *peer;
+ 	struct dev_pm_qos_request *req;
++	struct pwrseq *pwrseq;
+ 	enum usb_port_connect_type connect_type;
+ 	usb_port_location_t location;
+ 	struct mutex status_lock;
+diff --git a/drivers/usb/core/port.c b/drivers/usb/core/port.c
+index 14718a9ffcfb..a875bd342452 100644
+--- a/drivers/usb/core/port.c
++++ b/drivers/usb/core/port.c
+@@ -18,6 +18,8 @@
+ 
+ #include <linux/slab.h>
+ #include <linux/pm_qos.h>
++#include <linux/pwrseq.h>
++#include <linux/usb/of.h>
+ 
+ #include "hub.h"
+ 
+@@ -532,6 +534,14 @@ int usb_hub_create_port_device(struct usb_hub *hub, int port1)
+ 		return retval;
+ 	}
+ 
++	port_dev->dev.of_node = usb_of_get_child_node(hub->hdev->dev.of_node, port1);
++	port_dev->pwrseq = pwrseq_alloc(&port_dev->dev);
++	if (IS_ERR(port_dev->pwrseq)) {
++		device_unregister(&port_dev->dev);
++		/* TODO: what about EPROBE_DEFER? */
++		return PTR_ERR(port_dev->pwrseq);
 +	}
 +
-+	return 0;
-+}
+ 	find_and_link_peer(hub, port1);
+ 
+ 	/*
+@@ -573,8 +583,13 @@ void usb_hub_remove_port_device(struct usb_hub *hub, int port1)
+ 	struct usb_port *port_dev = hub->ports[port1 - 1];
+ 	struct usb_port *peer;
+ 
++	pwrseq_power_off(port_dev->pwrseq);
 +
- static int usb3503_platform_probe(struct platform_device *pdev)
- {
- 	struct usb3503 *hub;
-@@ -342,6 +355,19 @@ static int usb3503_platform_probe(struct platform_device *pdev)
- 	return usb3503_probe(hub);
+ 	peer = port_dev->peer;
+ 	if (peer)
+ 		unlink_peers(port_dev, peer);
++
++	pwrseq_free(port_dev->pwrseq);
++	port_dev->pwrseq = NULL;
+ 	device_unregister(&port_dev->dev);
  }
- 
-+static int usb3503_platform_remove(struct platform_device *pdev)
-+{
-+	struct usb3503 *hub;
-+
-+	hub = platform_get_drvdata(pdev);
-+	if (hub) {
-+		if (hub->clk)
-+			clk_disable_unprepare(hub->clk);
-+	}
-+
-+	return 0;
-+}
-+
- #ifdef CONFIG_PM_SLEEP
- static int usb3503_i2c_suspend(struct device *dev)
- {
-@@ -395,6 +421,7 @@ static struct i2c_driver usb3503_i2c_driver = {
- 		.of_match_table = of_match_ptr(usb3503_of_match),
- 	},
- 	.probe		= usb3503_i2c_probe,
-+	.remove		= usb3503_i2c_remove,
- 	.id_table	= usb3503_id,
- };
- 
-@@ -404,6 +431,7 @@ static struct platform_driver usb3503_platform_driver = {
- 		.of_match_table = of_match_ptr(usb3503_of_match),
- 	},
- 	.probe		= usb3503_platform_probe,
-+	.remove		= usb3503_platform_remove,
- };
- 
- static int __init usb3503_init(void)
 -- 
 1.9.1
 
+--
+To unsubscribe from this list: send the line "unsubscribe linux-usb" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
