@@ -1,74 +1,110 @@
-From: Rob Herring <robh@kernel.org>
-Subject: Re: [RFC v2 00/13] usb/mmc/power: Fix USB/LAN when TFTP booting
-Date: Fri, 6 May 2016 08:01:54 -0500
-Message-ID: <CAL_JsqJ_J=xFH8DfBwXv8Xd2HYYWX-FvCr4zO9sFhY=3keCdtw@mail.gmail.com>
-References: <1462451666-17945-1-git-send-email-k.kozlowski@samsung.com>
- <20160505224240.GA31429@rob-hp-laptop> <572C355E.7090008@samsung.com>
+From: Doug Anderson <dianders@chromium.org>
+Subject: Re: [PATCH 2/2] dt-bindings: rockchip-dw-mshc: add rockchip,default-drv-phase
+Date: Fri, 6 May 2016 10:26:34 -0700
+Message-ID: <CAD=FV=WSkBwBjVsRoDsfjD+sNfR70mKGRA0khjPKKW0zS2=PTw@mail.gmail.com>
+References: <1462527648-24443-1-git-send-email-shawn.lin@rock-chips.com>
+	<1462527673-24711-1-git-send-email-shawn.lin@rock-chips.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-In-Reply-To: <572C355E.7090008@samsung.com>
-Sender: linux-samsung-soc-owner@vger.kernel.org
-To: Krzysztof Kozlowski <k.kozlowski@samsung.com>
-Cc: Peter Chen <hzpeterchen@gmail.com>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-samsung-soc@vger.kernel.org" <linux-samsung-soc@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-pm@vger.kernel.org" <linux-pm@vger.kernel.org>, Linux USB List <linux-usb@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, Sebastian Reichel <sre@kernel.org>, Dmitry Eremin-Solenikov <dbaryshkov@gmail.com>, David Woodhouse <dwmw2@infradead.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Mark Brown <broonie@kernel.org>, Hans Verkuil <hverkuil@xs4all.nl>, tjakobi@math.uni-bielefeld.de, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>, Marek Szyprowski <m.szyprowski@samsung.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-qk0-f176.google.com ([209.85.220.176]:36806 "EHLO
+	mail-qk0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1758517AbcEFR0f (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 6 May 2016 13:26:35 -0400
+Received: by mail-qk0-f176.google.com with SMTP id x7so63795416qkd.3
+        for <linux-mmc@vger.kernel.org>; Fri, 06 May 2016 10:26:35 -0700 (PDT)
+In-Reply-To: <1462527673-24711-1-git-send-email-shawn.lin@rock-chips.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Shawn Lin <shawn.lin@rock-chips.com>
+Cc: Jaehoon Chung <jh80.chung@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Brian Norris <briannorris@chromium.org>, Heiko Stuebner <heiko@sntech.de>, "open list:ARM/Rockchip SoC..." <linux-rockchip@lists.infradead.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>
 
-On Fri, May 6, 2016 at 1:10 AM, Krzysztof Kozlowski
-<k.kozlowski@samsung.com> wrote:
-> On 05/06/2016 12:42 AM, Rob Herring wrote:
->> On Thu, May 05, 2016 at 02:34:13PM +0200, Krzysztof Kozlowski wrote:
->>> Hi,
->>>
->>> This is a different, second try to fix usb3503+lan on Odroid U3 board
->>> if it was initialized by bootloader (e.g. for TFTP boot).
->>>
->>> First version:
->>> http://www.spinics.net/lists/linux-usb/msg140042.html
->>>
->>>
->>> Problem
->>> =======
->>> When Odroid U3 (usb3503 + smsc95xx + max77686) boots from network (TFTP),
->>> the usb3503 and LAN smsc95xx do not show up in "lsusb". Hard-reset
->>> is required, e.g. by suspend to RAM. The actual TFTP boot does
->>> not have to happen. Just "usb start" from U-Boot is sufficient.
->>>
->>> From the schematics, the regulator is a supply only to LAN, however
->>> without toggling it off/on, the usb3503 hub won appear neither.
->>>
->>>
->>> Solution
->>> ========
->>> This is very similar to the MMC pwrseq behavior so the idea is to:
->>> 1. Move MMC pwrseq drivers to generic place,
->>
->> You can do that, but I'm going to NAK any use of pwrseq bindings outside
->> of MMC. I think it is the wrong way to do things. The DT should describe
->> the devices. If they happen to be "simple" then the core can walk the
->> tree and do any setup. For example, look for "reset-gpios" and toggle
->> that GPIO. There is no need for a special node.
+Shawn,
+
+On Fri, May 6, 2016 at 2:41 AM, Shawn Lin <shawn.lin@rock-chips.com> wrote:
+> rockchip,default-drv-phase is used to set the default drv degrees.
+> drv phases will decide the write timing of mmc controller.
+
+Device tree bindings should probably have been patch 1/2, then the
+code patch 2/2.
+
+
+> Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
+> ---
 >
-> Okay, I got it, no node for pwrseq but parse device properties. In case
-> of reset-gpios it seems quite obvious but also actively used:
-> $ git grep reset-gpios arch/arm/boot/dts | wc -l
-> 142
+>  Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.txt | 3 +++
+>  1 file changed, 3 insertions(+)
 >
-> Definitely pwrseq shouldn't add itself to all of these devices.
+> diff --git a/Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.txt b/Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.txt
+> index ea5614b..c48dba6 100644
+> --- a/Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.txt
+> +++ b/Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.txt
+> @@ -29,6 +29,9 @@ Optional Properties:
+>    probing, low speeds or in case where all phases work at tuning time.
+>    If not specified 0 deg will be used.
 >
-> My questions would be then:
-> 1. An additional pwrseq compatible for device is acceptable?
+> +* rockchip,default-drv-phase: The default phase to set ciu_drv at probing
+> +  for host to write data to devices. If not specified 180 deg will be used.
 
-Perhaps. The issue is whether common or driver specific code handles
-this may change over time. In other words, it is purely a kernel
-decision. It could move in either direction. It may be better to just
-have a whitelist of devices (though it would need to be board specific
-somehow).
+This is probably not right for a few reasons.
 
-> 2. How would you name the regulator? We shouldn't toggle off/on every
-> regulator but probably only some specific ones.
+1. Specifying a single number for this property in terms of "degrees"
+is probably not right.  The whole point of setting the "drive phase"
+is to meet hold times, which are specified in the spec in terms of ns
+in the spec and also specified differently for different SD/MMC speed
+modes.  Note also that "phase" translates to very different delays (in
+terms of ns) depending on the clock rate:
 
-I'd argue the generic case is just enable all the ones defined. If you
-only need to deal with some of them or need a specific sequence, then
-it is not generic.
+At 400 kHz, period is 2.5 us, so 90 degree phase offset is a delay of 625 ns
+At 25 MHz, period is 40 ns, so a 90 degree phase offset represents a
+delay of 10 ns.
+At 50 MHz, period is 20 ns, so a 90 degree phase offset represents a
+delay of 5 ns.
+At 200 MHz, period is period is 5 ns, so a 90 degree phase offset
+represents a delay of 1.25 ns.
 
-Rob
+
+2. As I understand it, the value needed for the drive phase is not
+board specific unless you've got super crazy layout on a board (where
+the clock line takes a very different path than everything else).
+It's also not even terribly SoC-specific unless you've got some very
+strange incarnation of dw_mmc that has very different internal delays
+than everyone else.  Said another way, until we see an instance of an
+SoC/board that really needs to do things special I'd say that we
+should just implement this all in code (no device tree bindings).
+
+
+
+3. If this property was actually board specific and actually needed to
+be tuned board-by-board, you'd have a bug because your new device tree
+bindings are not backward compatible and you'd probably be breaking
+old boards.  Specifically you're changing the definition of what
+happens when "rockchip,default-drv-phase" is not specified.  Old
+behavior was to leave the value that was setup by the firmware (or
+perhaps the hardware default if the firmware didn't touch this).
+
+---
+
+OK, so what should we do?
+
+We could certainly do lots of crazy math to come up with the ideal
+hold time for all different speed modes and all different types of
+cards.  With my reading of the Designware Databook this would mean
+that somewhere we'd want to specify which delay method we're using
+(phase shift vs. delay line) and how long all the delays timings all
+are on your particular SoC.  That all sounds quite difficult, though.
+
+Probably you could just add a simple function that looked at the clock
+and speed mode and always chose an offset of 90 or 180 degrees.  At
+least on Rockchip devices you can be certain that you can make 90 and
+180 degrees using phase shifts and thus the timings should be
+consistent.  By default you could just always choose 180.  The
+Designware databook has some examples where it picked 90 degrees
+(SDR50, DDR50, SDR25, MMC High Speed), but I'm not enough of an MMC
+expert to know if there is some benefit to choosing 90.  Would we
+violate any specs if we just chose 180 degrees all the time everywhere
+on all Rockchip devices?
+
+
+
+-Doug
