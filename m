@@ -1,59 +1,117 @@
 From: Krzysztof Kozlowski <k.kozlowski@samsung.com>
-Subject: Re: [RFC v2 00/13] usb/mmc/power: Fix USB/LAN when TFTP booting
-Date: Fri, 06 May 2016 08:12:24 +0200
-Message-ID: <572C35C8.9080709@samsung.com>
+Subject: Re: [RFC v2 01/13] usb: misc: usb3503: Clean up on driver unbind
+Date: Fri, 06 May 2016 08:13:28 +0200
+Message-ID: <572C3608.9060600@samsung.com>
 References: <1462451666-17945-1-git-send-email-k.kozlowski@samsung.com>
- <20160505224240.GA31429@rob-hp-laptop>
- <20160506054459.GA32359@shlinux2.ap.freescale.net>
+ <1462451666-17945-2-git-send-email-k.kozlowski@samsung.com>
+ <d78e8151-ee37-a003-2f8f-bc5431906512@osg.samsung.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=windows-1252
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-pm-owner@vger.kernel.org>
-In-reply-to: <20160506054459.GA32359@shlinux2.ap.freescale.net>
-Sender: linux-pm-owner@vger.kernel.org
-To: Peter Chen <hzpeterchen@gmail.com>, Rob Herring <robh@kernel.org>
-Cc: devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-samsung-soc@vger.kernel.org, linux-mmc@vger.kernel.org, linux-pm@vger.kernel.org, linux-usb@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, Sebastian Reichel <sre@kernel.org>, Dmitry Eremin-Solenikov <dbaryshkov@gmail.com>, David Woodhouse <dwmw2@infradead.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Mark Brown <broonie@kernel.org>, hverkuil@xs4all.nl, tjakobi@math.uni-bielefeld.de, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>, m.szyprowski@samsung.com
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mailout3.w1.samsung.com ([210.118.77.13]:23253 "EHLO
+	mailout3.w1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751028AbcEFGNf (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 6 May 2016 02:13:35 -0400
+In-reply-to: <d78e8151-ee37-a003-2f8f-bc5431906512@osg.samsung.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Javier Martinez Canillas <javier@osg.samsung.com>, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-samsung-soc@vger.kernel.org, linux-mmc@vger.kernel.org, linux-pm@vger.kernel.org, linux-usb@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, Sebastian Reichel <sre@kernel.org>, Dmitry Eremin-Solenikov <dbaryshkov@gmail.com>, David Woodhouse <dwmw2@infradead.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Mark Brown <broonie@kernel.org>
+Cc: tjakobi@math.uni-bielefeld.de, m.szyprowski@samsung.com, hverkuil@xs4all.nl, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>
 
-On 05/06/2016 07:44 AM, Peter Chen wrote:
-> On Thu, May 05, 2016 at 05:42:40PM -0500, Rob Herring wrote:
->> On Thu, May 05, 2016 at 02:34:13PM +0200, Krzysztof Kozlowski wrote:
->>> Hi,
->>>
->>> This is a different, second try to fix usb3503+lan on Odroid U3 board
->>> if it was initialized by bootloader (e.g. for TFTP boot).
->>>
->>> First version:
->>> http://www.spinics.net/lists/linux-usb/msg140042.html
->>>
->>>
->>> Problem
->>> =======
->>> When Odroid U3 (usb3503 + smsc95xx + max77686) boots from network (TFTP),
->>> the usb3503 and LAN smsc95xx do not show up in "lsusb". Hard-reset
->>> is required, e.g. by suspend to RAM. The actual TFTP boot does
->>> not have to happen. Just "usb start" from U-Boot is sufficient.
->>>
->>> From the schematics, the regulator is a supply only to LAN, however
->>> without toggling it off/on, the usb3503 hub won appear neither.
->>>
->>>
->>> Solution
->>> ========
->>> This is very similar to the MMC pwrseq behavior so the idea is to:
->>> 1. Move MMC pwrseq drivers to generic place,
->>
->> You can do that, but I'm going to NAK any use of pwrseq bindings outside 
->> of MMC. I think it is the wrong way to do things. The DT should describe 
->> the devices. If they happen to be "simple" then the core can walk the 
->> tree and do any setup. For example, look for "reset-gpios" and toggle 
->> that GPIO. There is no need for a special node.
->>
+On 05/05/2016 08:32 PM, Javier Martinez Canillas wrote:
+> Hello Krzysztof
 > 
-> Oh, I am doing the same thing like this patch set doing.
+> Patch looks good to me, I just have a trivial comment below.
+> 
+> On 05/05/2016 08:34 AM, Krzysztof Kozlowski wrote:
+>> The driver should clean up after itself by unpreparing the clock when it
+>> is unbound.
+>>
+>> Signed-off-by: Krzysztof Kozlowski <k.kozlowski@samsung.com>
+>> ---
+>>  drivers/usb/misc/usb3503.c | 28 ++++++++++++++++++++++++++++
+>>  1 file changed, 28 insertions(+)
+>>
+>> diff --git a/drivers/usb/misc/usb3503.c b/drivers/usb/misc/usb3503.c
+>> index b45cb77c0744..a464636675a6 100644
+>> --- a/drivers/usb/misc/usb3503.c
+>> +++ b/drivers/usb/misc/usb3503.c
+>> @@ -330,6 +330,19 @@ static int usb3503_i2c_probe(struct i2c_client *i2c,
+>>  	return usb3503_probe(hub);
+>>  }
+>>  
+>> +static int usb3503_i2c_remove(struct i2c_client *i2c)
+>> +{
+>> +	struct usb3503 *hub;
+>> +
+>> +	hub = i2c_get_clientdata(i2c);
+>> +	if (hub) {
+>> +		if (hub->clk)
+>> +			clk_disable_unprepare(hub->clk);
+>> +	}
+> 
+> I think the following is simpler and easier to read:
+> 
+> if (hub && hub->clk)
+> 	clk_disable_unprepare(hub->clk);
+> 
 
-Shame on me that I did not use Google before starting the work. I could
-just extend your patchset. I think we can combine our efforts.
+Sure, thanks.
 
 Best regards,
 Krzysztof
+
+>> +
+>> +	return 0;
+>> +}
+>> +
+>>  static int usb3503_platform_probe(struct platform_device *pdev)
+>>  {
+>>  	struct usb3503 *hub;
+>> @@ -342,6 +355,19 @@ static int usb3503_platform_probe(struct platform_device *pdev)
+>>  	return usb3503_probe(hub);
+>>  }
+>>  
+>> +static int usb3503_platform_remove(struct platform_device *pdev)
+>> +{
+>> +	struct usb3503 *hub;
+>> +
+>> +	hub = platform_get_drvdata(pdev);
+>> +	if (hub) {
+>> +		if (hub->clk)
+>> +			clk_disable_unprepare(hub->clk);
+>> +	}
+>> +
+> 
+> Ditto.
+> 
+>> +	return 0;
+>> +}
+>> +
+>>  #ifdef CONFIG_PM_SLEEP
+>>  static int usb3503_i2c_suspend(struct device *dev)
+>>  {
+>> @@ -395,6 +421,7 @@ static struct i2c_driver usb3503_i2c_driver = {
+>>  		.of_match_table = of_match_ptr(usb3503_of_match),
+>>  	},
+>>  	.probe		= usb3503_i2c_probe,
+>> +	.remove		= usb3503_i2c_remove,
+>>  	.id_table	= usb3503_id,
+>>  };
+>>  
+>> @@ -404,6 +431,7 @@ static struct platform_driver usb3503_platform_driver = {
+>>  		.of_match_table = of_match_ptr(usb3503_of_match),
+>>  	},
+>>  	.probe		= usb3503_platform_probe,
+>> +	.remove		= usb3503_platform_remove,
+>>  };
+>>  
+>>  static int __init usb3503_init(void)
+>>
+> 
+> Reviewed-by: Javier Martinez Canillas <javier@osg.samsung.com>
+> 
+> Best regards,
+> 
+
