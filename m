@@ -1,11 +1,14 @@
 From: Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
-Subject: [PATCH 1/2] mmc: dw_mmc-rockchip: add default drv phase support
-Date: Fri,  6 May 2016 17:40:48 +0800
-Message-ID: <1462527648-24443-1-git-send-email-shawn.lin@rock-chips.com>
+Subject: [PATCH 2/2] dt-bindings: rockchip-dw-mshc: add rockchip,
+ default-drv-phase
+Date: Fri,  6 May 2016 17:41:13 +0800
+Message-ID: <1462527673-24711-1-git-send-email-shawn.lin@rock-chips.com>
+References: <1462527648-24443-1-git-send-email-shawn.lin@rock-chips.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+In-Reply-To: <1462527648-24443-1-git-send-email-shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
 List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-rockchip>,
  <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
 List-Archive: <http://lists.infradead.org/pipermail/linux-rockchip/>
@@ -19,48 +22,28 @@ To: Jaehoon Chung <jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>
 Cc: devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Heiko Stuebner <heiko-4mtYJXux2i+zQB+pC5nmwQ@public.gmane.org>, Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>, Brian Norris <briannorris-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Doug Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-This patch introduces default drv phase exposed to dts for
-users to set drv phase. If default-drv-phase is not assigned,
-let's set it to 180 degrees.
+rockchip,default-drv-phase is used to set the default drv degrees.
+drv phases will decide the write timing of mmc controller.
 
 Signed-off-by: Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
 ---
 
- drivers/mmc/host/dw_mmc-rockchip.c | 8 ++++++++
- 1 file changed, 8 insertions(+)
+ Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.txt | 3 +++
+ 1 file changed, 3 insertions(+)
 
-diff --git a/drivers/mmc/host/dw_mmc-rockchip.c b/drivers/mmc/host/dw_mmc-rockchip.c
-index 8c20b81..482eff1 100644
---- a/drivers/mmc/host/dw_mmc-rockchip.c
-+++ b/drivers/mmc/host/dw_mmc-rockchip.c
-@@ -24,6 +24,7 @@ struct dw_mci_rockchip_priv_data {
- 	struct clk		*drv_clk;
- 	struct clk		*sample_clk;
- 	int			default_sample_phase;
-+	int			default_drv_phase;
- };
+diff --git a/Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.txt b/Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.txt
+index ea5614b..c48dba6 100644
+--- a/Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.txt
++++ b/Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.txt
+@@ -29,6 +29,9 @@ Optional Properties:
+   probing, low speeds or in case where all phases work at tuning time.
+   If not specified 0 deg will be used.
  
- static void dw_mci_rk3288_set_ios(struct dw_mci *host, struct mmc_ios *ios)
-@@ -66,6 +67,9 @@ static void dw_mci_rk3288_set_ios(struct dw_mci *host, struct mmc_ios *ios)
- 	/* Make sure we use phases which we can enumerate with */
- 	if (!IS_ERR(priv->sample_clk))
- 		clk_set_phase(priv->sample_clk, priv->default_sample_phase);
++* rockchip,default-drv-phase: The default phase to set ciu_drv at probing
++  for host to write data to devices. If not specified 180 deg will be used.
 +
-+	if (!IS_ERR(priv->drv_clk))
-+		clk_set_phase(priv->drv_clk, priv->default_drv_phase);
- }
+ Example:
  
- #define NUM_PHASES			360
-@@ -203,6 +207,10 @@ static int dw_mci_rk3288_parse_dt(struct dw_mci *host)
- 					&priv->default_sample_phase))
- 		priv->default_sample_phase = 0;
- 
-+	if (of_property_read_u32(np, "rockchip,default-drv-phase",
-+					&priv->default_drv_phase))
-+		priv->default_drv_phase = 180;
-+
- 	priv->drv_clk = devm_clk_get(host->dev, "ciu-drive");
- 	if (IS_ERR(priv->drv_clk))
- 		dev_dbg(host->dev, "ciu_drv not available\n");
+ 	rkdwmmc0@12200000 {
 -- 
 2.3.7
