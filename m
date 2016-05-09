@@ -1,81 +1,49 @@
-From: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [RFC v2 00/13] usb/mmc/power: Fix USB/LAN when TFTP booting
-Date: Mon, 9 May 2016 09:46:40 +0200
-Message-ID: <CAPDyKFqpoi03Egfuvd8qJXnn_+FBgPXAb7S4UvkxVs8BA+zwnA@mail.gmail.com>
-References: <1462451666-17945-1-git-send-email-k.kozlowski@samsung.com>
-	<20160505224240.GA31429@rob-hp-laptop>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-usb-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20160505224240.GA31429@rob-hp-laptop>
-Sender: linux-usb-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Rob Herring <robh-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-Cc: Krzysztof Kozlowski <k.kozlowski-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, linux-samsung-soc <linux-samsung-soc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-mmc <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-pm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-pm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-usb-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Sebastian Reichel <sre-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Dmitry Eremin-Solenikov <dbaryshkov-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, David Woodhouse <dwmw2-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org>, Greg Kroah-Hartman <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>, Mark Brown <broonie-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, hverkuil-qWit8jRvyhVmR6Xm/wNWPw@public.gmane.org, tjakobi-o02PS0xoJP9W0yFyLvAVXMxlOr/tl8fh@public.gmane.org, Bartlomiej Zolnierkiewicz <b.zolnierkie-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, Marek Szyprowski <m.szyprowski-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>
+From: Wolfram Sang <wsa@the-dreams.de>
+Subject: [PATCH] mmc: sdio: fall back to SDIO 1.0 for broken 1.1 cards
+Date: Mon,  9 May 2016 09:59:59 +0200
+Message-ID: <1462780799-5366-1-git-send-email-wsa@the-dreams.de>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from sauhun.de ([89.238.76.85]:47676 "EHLO pokefinder.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752332AbcEIIAR (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 9 May 2016 04:00:17 -0400
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: Wolfram Sang <wsa@the-dreams.de>, linux-renesas-soc@vger.kernel.org
 
-On 6 May 2016 at 00:42, Rob Herring <robh-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org> wrote:
-> On Thu, May 05, 2016 at 02:34:13PM +0200, Krzysztof Kozlowski wrote:
->> Hi,
->>
->> This is a different, second try to fix usb3503+lan on Odroid U3 board
->> if it was initialized by bootloader (e.g. for TFTP boot).
->>
->> First version:
->> http://www.spinics.net/lists/linux-usb/msg140042.html
->>
->>
->> Problem
->> =======
->> When Odroid U3 (usb3503 + smsc95xx + max77686) boots from network (TFTP),
->> the usb3503 and LAN smsc95xx do not show up in "lsusb". Hard-reset
->> is required, e.g. by suspend to RAM. The actual TFTP boot does
->> not have to happen. Just "usb start" from U-Boot is sufficient.
->>
->> From the schematics, the regulator is a supply only to LAN, however
->> without toggling it off/on, the usb3503 hub won appear neither.
->>
->>
->> Solution
->> ========
->> This is very similar to the MMC pwrseq behavior so the idea is to:
->> 1. Move MMC pwrseq drivers to generic place,
->
-> You can do that, but I'm going to NAK any use of pwrseq bindings outside
-> of MMC. I think it is the wrong way to do things. The DT should describe
+From: Wolfram Sang <wsa+renesas@sang-engineering.com>
 
-Huh, I didn't know that was your view of the mmc pwrseq bindings. Why
-didn't you NAK them before?
+I have two SDIO WLAN cards which specify being SDIO Rev. 1.1 cards but
+their FUNCE tuple reports the smaller size of a Rev 1.0 card. So,
+enforce 1.0 on these cards to avoid reading the not present registers.
+They are not really used anyhow. My cards initialize properly after this
+patch.
 
-> the devices. If they happen to be "simple" then the core can walk the
-> tree and do any setup. For example, look for "reset-gpios" and toggle
-> that GPIO. There is no need for a special node.
->
->> 2. Extend the pwrseq-simple with regulator toggling,
->> 3. Add support to USB hub and port core for pwrseq,
->
-> We discussed this for USB already[1] and is why we defined how to add
-> USB child devices. The idea is not to add pwrseq to that.
+Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+---
+ drivers/mmc/core/sdio_cis.c | 7 ++++++-
+ 1 file changed, 6 insertions(+), 1 deletion(-)
 
-I am not familiar with the USB discussion.
+diff --git a/drivers/mmc/core/sdio_cis.c b/drivers/mmc/core/sdio_cis.c
+index 6f6fc527a26338..dcb3dee59fa5f2 100644
+--- a/drivers/mmc/core/sdio_cis.c
++++ b/drivers/mmc/core/sdio_cis.c
+@@ -177,8 +177,13 @@ static int cistpl_funce_func(struct mmc_card *card, struct sdio_func *func,
+ 	vsn = func->card->cccr.sdio_vsn;
+ 	min_size = (vsn == SDIO_SDIO_REV_1_00) ? 28 : 42;
+ 
+-	if (size < min_size)
++	if (size == 28 && vsn == SDIO_SDIO_REV_1_10) {
++		pr_warn("%s: card has broken SDIO 1.1 CIS, forcing SDIO 1.0\n",
++			mmc_hostname(card->host));
++		vsn = SDIO_SDIO_REV_1_00;
++	} else if (size < min_size) {
+ 		return -EINVAL;
++	}
+ 
+ 	/* TPLFE_MAX_BLK_SIZE */
+ 	func->max_blksize = buf[12] | (buf[13] << 8);
+-- 
+2.7.0
 
-Still, let me give you some more background to the mmc pwrseq. The
-idea from the mmc pwrseq bindings comes from the power-domain DT
-bindings, as I thought these things were a bit related.
-In both cases they are not directly a property of the device, but more
-describing a HW dependency to allow the device to work.
-
-One could probably use a child node instead of a phandle, but that
-wasn't chosen back then. Of course you are the DT expert, but could
-you perhaps tell me why a child node is better for cases like this?
-
->
-> Rob
->
-> [1] http://www.spinics.net/lists/linux-usb/msg134082.html
-
-Kind regards
-Uffe
---
-To unsubscribe from this list: send the line "unsubscribe linux-usb" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
