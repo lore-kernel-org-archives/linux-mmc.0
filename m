@@ -1,49 +1,58 @@
 From: Wolfram Sang <wsa@the-dreams.de>
-Subject: [PATCH] mmc: sdio: fall back to SDIO 1.0 for broken 1.1 cards
-Date: Mon,  9 May 2016 09:59:59 +0200
-Message-ID: <1462780799-5366-1-git-send-email-wsa@the-dreams.de>
+Subject: [PATCH] MAINTAINERS: update entry for TMIO MMC driver
+Date: Mon,  9 May 2016 10:26:58 +0200
+Message-ID: <1462782418-5908-1-git-send-email-wsa@the-dreams.de>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from sauhun.de ([89.238.76.85]:47676 "EHLO pokefinder.org"
+Received: from sauhun.de ([89.238.76.85]:47813 "EHLO pokefinder.org"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752332AbcEIIAR (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 9 May 2016 04:00:17 -0400
+	id S1750864AbcEII1H (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 9 May 2016 04:27:07 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org
-Cc: Wolfram Sang <wsa@the-dreams.de>, linux-renesas-soc@vger.kernel.org
+Cc: Wolfram Sang <wsa@the-dreams.de>, linux-renesas-soc@vger.kernel.org, Ian Molton <ian@mnementh.co.uk>
 
 From: Wolfram Sang <wsa+renesas@sang-engineering.com>
 
-I have two SDIO WLAN cards which specify being SDIO Rev. 1.1 cards but
-their FUNCE tuple reports the smaller size of a Rev 1.0 card. So,
-enforce 1.0 on these cards to avoid reading the not present registers.
-They are not really used anyhow. My cards initialize properly after this
-patch.
+I have some more additions planned for this driver, so I'd like to get
+notified of other changes and coordinate them. Drop Ian as maintainer
+because he hasn't been involved in development for a while. Thanks for
+all the initial work, of course! Also, reflect the recent changes to
+the include file layout.
 
 Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+Cc: Ian Molton <ian@mnementh.co.uk>
 ---
- drivers/mmc/core/sdio_cis.c | 7 ++++++-
- 1 file changed, 6 insertions(+), 1 deletion(-)
 
-diff --git a/drivers/mmc/core/sdio_cis.c b/drivers/mmc/core/sdio_cis.c
-index 6f6fc527a26338..dcb3dee59fa5f2 100644
---- a/drivers/mmc/core/sdio_cis.c
-+++ b/drivers/mmc/core/sdio_cis.c
-@@ -177,8 +177,13 @@ static int cistpl_funce_func(struct mmc_card *card, struct sdio_func *func,
- 	vsn = func->card->cccr.sdio_vsn;
- 	min_size = (vsn == SDIO_SDIO_REV_1_00) ? 28 : 42;
+Ian: If you'd like to stay involved, please speak up and I'll change my patch
+accordingly.
+
+ MAINTAINERS | 9 ++++-----
+ 1 file changed, 4 insertions(+), 5 deletions(-)
+
+diff --git a/MAINTAINERS b/MAINTAINERS
+index 42e65d128d015e..d22540c44b534b 100644
+--- a/MAINTAINERS
++++ b/MAINTAINERS
+@@ -11245,14 +11245,13 @@ S:	Maintained
+ F:	drivers/media/i2c/tc358743*
+ F:	include/media/i2c/tc358743.h
  
--	if (size < min_size)
-+	if (size == 28 && vsn == SDIO_SDIO_REV_1_10) {
-+		pr_warn("%s: card has broken SDIO 1.1 CIS, forcing SDIO 1.0\n",
-+			mmc_hostname(card->host));
-+		vsn = SDIO_SDIO_REV_1_00;
-+	} else if (size < min_size) {
- 		return -EINVAL;
-+	}
+-TMIO MMC DRIVER
+-M:	Ian Molton <ian@mnementh.co.uk>
++TMIO/SDHI MMC DRIVER
++M:	Wolfram Sang <wsa+renesas@sang-engineering.com>
+ L:	linux-mmc@vger.kernel.org
+-S:	Maintained
++S:	Supported
+ F:	drivers/mmc/host/tmio_mmc*
+ F:	drivers/mmc/host/sh_mobile_sdhi.c
+-F:	include/linux/mmc/tmio.h
+-F:	include/linux/mmc/sh_mobile_sdhi.h
++F:	include/linux/mfd/tmio.h
  
- 	/* TPLFE_MAX_BLK_SIZE */
- 	func->max_blksize = buf[12] | (buf[13] << 8);
+ TMP401 HARDWARE MONITOR DRIVER
+ M:	Guenter Roeck <linux@roeck-us.net>
 -- 
 2.7.0
 
