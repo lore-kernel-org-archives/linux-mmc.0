@@ -1,76 +1,62 @@
-From: Stephen Warren <swarren@wwwdotorg.org>
+From: Jon Hunter <jonathanh@nvidia.com>
 Subject: Re: [PATCH] mmc: tegra: Disable UHS-I modes for tegra30
-Date: Tue, 10 May 2016 10:34:48 -0600
-Message-ID: <57320DA8.1090809@wwwdotorg.org>
+Date: Tue, 10 May 2016 18:16:08 +0100
+Message-ID: <57321758.5020308@nvidia.com>
 References: <1462806903-13860-1-git-send-email-jonathanh@nvidia.com>
- <573208AD.4090506@nvidia.com>
+ <573208AD.4090506@nvidia.com> <57320DA8.1090809@wwwdotorg.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252; format=flowed
+Content-Type: text/plain; charset="windows-1252"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <573208AD.4090506@nvidia.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Jon Hunter <jonathanh@nvidia.com>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, Thierry Reding <thierry.reding@gmail.com>, Alexandre Courbot <gnurou@gmail.com>, linux-mmc@vger.kernel.org, linux-tegra@vger.kernel.org, linux-kernel@vger.kernel.org, Lucas Stach <dev@lynxeye.de>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from hqemgate14.nvidia.com ([216.228.121.143]:13854 "EHLO
+	hqemgate14.nvidia.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751049AbcEJRQO (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 10 May 2016 13:16:14 -0400
+In-Reply-To: <57320DA8.1090809@wwwdotorg.org>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Stephen Warren <swarren@wwwdotorg.org>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, Thierry Reding <thierry.reding@gmail.com>, Alexandre Courbot <gnurou@gmail.com>, linux-mmc@vger.kernel.org, linux-tegra@vger.kernel.org, linux-kernel@vger.kernel.org, Lucas Stach <dev@lynxeye.de>
 
-On 05/10/2016 10:13 AM, Jon Hunter wrote:
->
-> On 09/05/16 16:15, Jon Hunter wrote:
->> Support for SD cards is not working on the Tegra30 Beaver board and on
->> boot the following error message is seen if an SD card is present:
->>
->>   mmc0: error -110 whilst initialising SD card
->>
->> In addition to this, Tegra30 is also randomly hanging during system
->> suspend when entering and is caused by the Tegra SDHCI driver. Similar
->> issues have been seen on the Tegra124 Jetson TK1 and are linked to the
->> UHS-I tuning sequence. Disabling the UHS-I modes for Tegra30 fixes SD
->> card support and prevents any hangs from occurring when entering system
->> suspend. Therefore, disable the UHS-I modes for Tegra30 for now until
->> we can correct the tuning sequence for Tegra.
->>
->> Signed-off-by: Jon Hunter <jonathanh@nvidia.com>
->> ---
->>   drivers/mmc/host/sdhci-tegra.c | 4 ----
->>   1 file changed, 4 deletions(-)
->>
->> diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
->> index bcc0de47fe7e..24c33aee8e7c 100644
->> --- a/drivers/mmc/host/sdhci-tegra.c
->> +++ b/drivers/mmc/host/sdhci-tegra.c
->> @@ -347,10 +347,6 @@ static const struct sdhci_pltfm_data sdhci_tegra30_pdata = {
->>
->>   static const struct sdhci_tegra_soc_data soc_data_tegra30 = {
->>   	.pdata = &sdhci_tegra30_pdata,
->> -	.nvquirks = NVQUIRK_ENABLE_SDHCI_SPEC_300 |
->
-> Ugh ... looks like I may have been a bit trigger happy with sending this
-> patch. I should not have removed the above line. However, it seems that
-> if I don't then the problem with the SD not initialising persists. So
-> this implies that something else is going on here with this particular
-> SD card. Furthermore, I have seen that another tegra30-beaver is
-> initialising the SD card fine on kernelci.org and it seems this is
-> working for Lucas too.
->
-> Plus in suspend I have not seen the mmc timeout warning that I was
-> seeing on tegra114/124 when they were failing. That also implies a
-> different problem.
->
-> Stephen, for your u-boot testing, do you are set the bit in the vendor
-> misc register to enable version 3.0 support for sdhci on tegra30? This
-> is what the above quirk is doing (and has done so for a very long time).
 
-I don't see anything in the U-Boot driver that is equivalent to the 
-kernel's NVQUIRK_ENABLE_SDHCI_SPEC_300. I assume that means the 
-controller advertises an early spec version when in U-Boot, which simply 
-means U-Boot doesn't know to take advantage of any faster transfer modes 
-enabled by later specification versions, but I'm not entirely sure what 
-effect the following kernel code has on the HW:
+On 10/05/16 17:34, Stephen Warren wrote:
+> On 05/10/2016 10:13 AM, Jon Hunter wrote:
 
-> 	/* Erratum: Enable SDHCI spec v3.00 support */
-> 	if (soc_data->nvquirks & NVQUIRK_ENABLE_SDHCI_SPEC_300)
-> 		misc_ctrl |= SDHCI_MISC_CTRL_ENABLE_SDHCI_SPEC_300;
+[snip]
 
-Perhaps the kernel driver should pulse the controller's CAR reset signal 
-in probe() to ensure that the HW is in a known state?
+>> Stephen, for your u-boot testing, do you are set the bit in the vendor
+>> misc register to enable version 3.0 support for sdhci on tegra30? This
+>> is what the above quirk is doing (and has done so for a very long time).
+> 
+> I don't see anything in the U-Boot driver that is equivalent to the
+> kernel's NVQUIRK_ENABLE_SDHCI_SPEC_300. I assume that means the
+> controller advertises an early spec version when in U-Boot, which simply
+> means U-Boot doesn't know to take advantage of any faster transfer modes
+> enabled by later specification versions, but I'm not entirely sure what
+> effect the following kernel code has on the HW:
+> 
+>>     /* Erratum: Enable SDHCI spec v3.00 support */
+>>     if (soc_data->nvquirks & NVQUIRK_ENABLE_SDHCI_SPEC_300)
+>>         misc_ctrl |= SDHCI_MISC_CTRL_ENABLE_SDHCI_SPEC_300;
+
+Do you see it touch the SDHCI_TEGRA_VENDOR_MISC_CTRL register?
+
+The TRM states ...
+
+"SDMMC_SPARE0[4] : When set, SD3.0 support is advertised in
+SDMMC_SLOT_INTERRUPT_STATUS_0_SPECIFICATION_VERSION_NUMBER Otherwise,
+only SD2.0 support is advertised"
+
+So I *believe* this means that the sdhci version will now appear as 3.0
+and so the host->version == SDHCI_SPEC_300. There are many places in the
+sdhci driver where it is checking ...
+
+ if (host->version >= SDHCI_SPEC_300)
+	 ...
+
+> Perhaps the kernel driver should pulse the controller's CAR reset signal
+> in probe() to ensure that the HW is in a known state?
+
+I will take a look.
+
+Jon
