@@ -1,49 +1,64 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH v2] mmc: core: Remove redundant rescan_disable flag
-Date: Tue, 10 May 2016 12:07:52 +0300
-Message-ID: <5731A4E8.5080608@intel.com>
-References: <1461868156-5734-1-git-send-email-ulf.hansson@linaro.org>
- <5723AAAB.60109@intel.com>
- <CAPDyKFqXEmrAtADNLrEUmF=6oc4-guNTGA=r0UFye3Ox8qO-2w@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+From: Amit Pundir <amit.pundir@linaro.org>
+Subject: [PATCH v2] mmc: block: improve logging of handling emmc timeouts
+Date: Tue, 10 May 2016 14:53:13 +0530
+Message-ID: <1462872193-6213-1-git-send-email-amit.pundir@linaro.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga03.intel.com ([134.134.136.65]:49943 "EHLO mga03.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751036AbcEJJSq (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 10 May 2016 05:18:46 -0400
-In-Reply-To: <CAPDyKFqXEmrAtADNLrEUmF=6oc4-guNTGA=r0UFye3Ox8qO-2w@mail.gmail.com>
+Received: from mail-pf0-f179.google.com ([209.85.192.179]:33701 "EHLO
+	mail-pf0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750984AbcEJJXW (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 10 May 2016 05:23:22 -0400
+Received: by mail-pf0-f179.google.com with SMTP id 206so3870949pfu.0
+        for <linux-mmc@vger.kernel.org>; Tue, 10 May 2016 02:23:22 -0700 (PDT)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Jaehoon Chung <jh80.chung@samsung.com>
+To: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, ulf.hansson@linaro.org
+Cc: ksumrall@android.com, adrian.hunter@intel.com, shawn.lin@rock-chips.com, jonathanh@nvidia.com, grundler@chromium.org, lporzio@micron.com, kernel-team@android.com, sumit.semwal@linaro.org, john.stultz@linaro.org
 
-On 10/05/16 12:01, Ulf Hansson wrote:
-> On 29 April 2016 at 20:40, Adrian Hunter <adrian.hunter@intel.com> wrote:
->> On 28/04/2016 9:29 p.m., Ulf Hansson wrote:
->>>
->>> For the reasons explained below, it's safe to remove the rescan_disable
->>> flag.
->>>
->>> 1)
->>> cancel_delayed_work_sync() prevents an executing work from re-scheduling
->>> itself.
->>>
->>> 2)
->>> We are using the system_freezable_wq for the rescan works. As that queue
->>> becomes frozen when userspace becomes frozen during system PM, we don't
->>> need to disable the rescan works in the PM_SUSPEND_PREPARE phase.
->>
->>
->> What about the case when a SDIO card has to be removed?  Seems like a rescan
->> could theoretically get scheduled and run before the workqueue is frozen.
-> 
-> When the queue gets frozen, it means currently running works will be
-> synced. Works that are scheduled (or becomes scheduled) will be put on
-> hold and not allowed to run before the workqueue becomes un-frozen.
+From: Ken Sumrall <ksumrall@android.com>
 
-In the pm_notifier the workqueue is not frozen, so new work could be queued
-and run, which would potentially race with the "host->bus_ops->remove(host)"
-a few lines further on.
+Add some logging to make it clear just how the emmc timeout
+was handled.
+
+Signed-off-by: Ken Sumrall <ksumrall@android.com>
+[AmitP: cherry-picked this Android patch from aosp
+        common kernel android-4.4]
+Signed-off-by: Amit Pundir <amit.pundir@linaro.org>
+---
+v1...v2:
+  Removed CC list from the commit log and skipped one print statement.
+ 
+ drivers/mmc/card/block.c | 10 ++++++++--
+ 1 file changed, 8 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+index 9c69e21..ddc9620 100644
+--- a/drivers/mmc/card/block.c
++++ b/drivers/mmc/card/block.c
+@@ -948,16 +948,22 @@ static int mmc_blk_cmd_error(struct request *req, const char *name, int error,
+ 			req->rq_disk->disk_name, "timed out", name, status);
+ 
+ 		/* If the status cmd initially failed, retry the r/w cmd */
+-		if (!status_valid)
++		if (!status_valid) {
++			pr_err("%s: status not valid, retrying timeout\n",
++				req->rq_disk->disk_name);
+ 			return ERR_RETRY;
++		}
+ 
+ 		/*
+ 		 * If it was a r/w cmd crc error, or illegal command
+ 		 * (eg, issued in wrong state) then retry - we should
+ 		 * have corrected the state problem above.
+ 		 */
+-		if (status & (R1_COM_CRC_ERROR | R1_ILLEGAL_COMMAND))
++		if (status & (R1_COM_CRC_ERROR | R1_ILLEGAL_COMMAND)) {
++			pr_err("%s: command error, retrying timeout\n",
++				req->rq_disk->disk_name);
+ 			return ERR_RETRY;
++		}
+ 
+ 		/* Otherwise abort the command */
+ 		return ERR_ABORT;
+-- 
+2.7.4
 
