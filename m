@@ -1,91 +1,44 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: block: improve logging of handling emmc timeouts
-Date: Tue, 10 May 2016 08:58:21 +0200
-Message-ID: <CAPDyKFqRXS8rn8_e356o2ujKm-eZxQY2WwaxkP+cZ9D0TVmLYg@mail.gmail.com>
-References: <1462353220-5196-1-git-send-email-amit.pundir@linaro.org>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH 10/23] mmc: core: disable auto retune during card
+ detection process
+Date: Tue, 10 May 2016 09:55:56 +0300
+Message-ID: <573185FC.5060506@intel.com>
+References: <1460741387-23815-1-git-send-email-aisheng.dong@nxp.com>
+ <1460741387-23815-11-git-send-email-aisheng.dong@nxp.com>
+ <571A1D85.3020200@intel.com>
+ <CAA+hA=R9JfV4ScuM=OZ3VHdSiQiMO9io8mQQDNXfkTwNv7RVvg@mail.gmail.com>
+ <5721B602.6010306@intel.com>
+ <20160428132249.GB27560@shlinux2.ap.freescale.net>
+ <57230515.9030602@intel.com>
+ <20160429074258.GA28427@shlinux2.ap.freescale.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wm0-f45.google.com ([74.125.82.45]:34234 "EHLO
-	mail-wm0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750922AbcEJG6X (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 10 May 2016 02:58:23 -0400
-Received: by mail-wm0-f45.google.com with SMTP id v200so25325189wmv.1
-        for <linux-mmc@vger.kernel.org>; Mon, 09 May 2016 23:58:22 -0700 (PDT)
-In-Reply-To: <1462353220-5196-1-git-send-email-amit.pundir@linaro.org>
+Received: from mga03.intel.com ([134.134.136.65]:34818 "EHLO mga03.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1750955AbcEJG7w (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 10 May 2016 02:59:52 -0400
+In-Reply-To: <20160429074258.GA28427@shlinux2.ap.freescale.net>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Amit Pundir <amit.pundir@linaro.org>
-Cc: "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>, Ken Sumrall <ksumrall@android.com>, Adrian Hunter <adrian.hunter@intel.com>, Shawn Lin <shawn.lin@rock-chips.com>, Jon Hunter <jonathanh@nvidia.com>, Grant Grundler <grundler@chromium.org>, Luca Porzio <lporzio@micron.com>, Android Kernel Team <kernel-team@android.com>, Sumit Semwal <sumit.semwal@linaro.org>, John Stultz <john.stultz@linaro.org>
+To: Dong Aisheng <dongas86@gmail.com>
+Cc: Dong Aisheng <aisheng.dong@nxp.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, Chris Ball <chris@printf.net>, Shawn Guo <shawnguo@kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, haibo.chen@nxp.com
 
-On 4 May 2016 at 11:13, Amit Pundir <amit.pundir@linaro.org> wrote:
-> From: Ken Sumrall <ksumrall@android.com>
->
-> Add some logging to make it clear just how the emmc timeout
-> was handled.
->
-> Cc: Ulf Hansson <ulf.hansson@linaro.org>
-> Cc: Adrian Hunter <adrian.hunter@intel.com>
-> Cc: Shawn Lin <shawn.lin@rock-chips.com>
-> Cc: Jon Hunter <jonathanh@nvidia.com>
-> Cc: Grant Grundler <grundler@chromium.org>
-> Cc: Luca Porzio <lporzio@micron.com>
-> Cc: Android Kernel Team <kernel-team@android.com>
-> Cc: Sumit Semwal <sumit.semwal@linaro.org>
-> Cc: John Stultz <john.stultz@linaro.org>
+On 29/04/16 10:42, Dong Aisheng wrote:
+> And IMX6DL ARD is even worser due to it's using common
+> mmc_send_tuning() function.
+> root@imx6qdlsolo:~# 
+> root@imx6qdlsolo:~# [  129.462564] sysrq: SysRq : Changing Loglevel
+> [  129.466902] sysrq: Loglevel set to 8
+> [  131.616078] sdhci-esdhc-imx 2198000.usdhc: desired SD clock: 198000000, actual: 198000000
+> [  131.625311] sdhci-esdhc-imx 2198000.usdhc: change pinctrl state for uhs 6
+> [  131.632133] sdhci-esdhc-imx 2198000.usdhc: desired SD clock: 198000000, actual: 198000000
+> [  131.642121] mmc0: starting CMD13 arg 59b40000 flags 00000195
+> [  131.648925] sdhci-esdhc-imx 2198000.usdhc: tunning with delay 0x0 ESDHC_TUNE_CTRL_STATUS 0x0
+> [  131.657818] mmc0: starting CMD19 arg 00000000 flags 00000035
+> [  131.663518] mmc0:     blksz 64 blocks 1 flags 00000200 tsac 150 ms nsac 0
+> [  131.670835] mmc0: req done (CMD19): -123: 00000000 00000000 00000000 00000000
 
-I would prefer if you could remove the above cc:s, as I don't think
-it's of relevance to have all these people here.
+You should stop here because -123 is -ENOMEDIUM
 
-> Signed-off-by: Ken Sumrall <ksumrall@android.com>
-> [AmitP: cherry-picked this Android patch from aosp common kernel android-4.4]
-> Signed-off-by: Amit Pundir <amit.pundir@linaro.org>
-> ---
->  drivers/mmc/card/block.c | 11 +++++++++--
->  1 file changed, 9 insertions(+), 2 deletions(-)
->
-> diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
-> index 9c69e21..e737c81 100644
-> --- a/drivers/mmc/card/block.c
-> +++ b/drivers/mmc/card/block.c
-> @@ -948,18 +948,25 @@ static int mmc_blk_cmd_error(struct request *req, const char *name, int error,
->                         req->rq_disk->disk_name, "timed out", name, status);
->
->                 /* If the status cmd initially failed, retry the r/w cmd */
-> -               if (!status_valid)
-> +               if (!status_valid) {
-> +                       pr_err("%s: status not valid, retrying timeout\n",
-> +                               req->rq_disk->disk_name);
->                         return ERR_RETRY;
-> +               }
->
->                 /*
->                  * If it was a r/w cmd crc error, or illegal command
->                  * (eg, issued in wrong state) then retry - we should
->                  * have corrected the state problem above.
->                  */
-> -               if (status & (R1_COM_CRC_ERROR | R1_ILLEGAL_COMMAND))
-> +               if (status & (R1_COM_CRC_ERROR | R1_ILLEGAL_COMMAND)) {
-> +                       pr_err("%s: command error, retrying timeout\n",
-> +                               req->rq_disk->disk_name);
->                         return ERR_RETRY;
-> +               }
->
->                 /* Otherwise abort the command */
-> +               pr_err("%s: not retrying timeout\n", req->rq_disk->disk_name);
-
-There's already a print done a couple of lines above. Even if it's not
-telling about the "re-try" it becomes implicit, as nothing else gets
-printed in this path.
-
-Would you mind removing this?
-
->                 return ERR_ABORT;
->
->         default:
-> --
-> 2.7.4
->
-
-Kind regards
-Uffe
