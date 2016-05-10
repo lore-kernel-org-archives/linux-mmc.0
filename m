@@ -1,111 +1,57 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH 22/23] mmc: sdhci-esdhc-imx: move tuning static
- configuration into hwinit function
-Date: Tue, 10 May 2016 16:07:53 +0300
-Message-ID: <5731DD29.3020307@intel.com>
+Subject: Re: [PATCH 23/23] mmc: sdhci-esdhc-imx: clear tuning bits during
+ hwinit
+Date: Tue, 10 May 2016 16:10:38 +0300
+Message-ID: <5731DDCE.7020102@intel.com>
 References: <1460741387-23815-1-git-send-email-aisheng.dong@nxp.com>
- <1460741387-23815-23-git-send-email-aisheng.dong@nxp.com>
+ <1460741387-23815-24-git-send-email-aisheng.dong@nxp.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga03.intel.com ([134.134.136.65]:59724 "EHLO mga03.intel.com"
+Received: from mga14.intel.com ([192.55.52.115]:52709 "EHLO mga14.intel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751705AbcEJNMM (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 10 May 2016 09:12:12 -0400
-In-Reply-To: <1460741387-23815-23-git-send-email-aisheng.dong@nxp.com>
+	id S1751972AbcEJNPE (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 10 May 2016 09:15:04 -0400
+In-Reply-To: <1460741387-23815-24-git-send-email-aisheng.dong@nxp.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Dong Aisheng <aisheng.dong@nxp.com>, linux-mmc@vger.kernel.org
 Cc: ulf.hansson@linaro.org, chris@printf.net, shawnguo@kernel.org, linux-arm-kernel@lists.infradead.org, haibo.chen@nxp.com, dongas86@gmail.com
 
 On 15/04/16 20:29, Dong Aisheng wrote:
-> Move tuning static configuration into hwinit function.
-> Tuning configuration may also be lost in low power mode,
-> so need restore in hwinit().
+> The tuning bits like FBCLK_SEL, SMP_CLK_SEL and DLY_CELL which affects
+> timing may have already been set by ROM if booting from SD3.0 mode like
+> SDR104. Let's clear it first during hw initialization before do the
+> new card enumeration.
+> 
+> For system resume case, it's safe to clear them too since the following
+> card re-initialization in mmc_xx_init_card() will do retuning and set
+> correct value again.
 > 
 > Signed-off-by: Dong Aisheng <aisheng.dong@nxp.com>
 
 Acked-by: Adrian Hunter <adrian.hunter@intel.com>
 
 > ---
->  drivers/mmc/host/sdhci-esdhc-imx.c | 36 ++++++++++++++++++------------------
->  1 file changed, 18 insertions(+), 18 deletions(-)
+>  drivers/mmc/host/sdhci-esdhc-imx.c | 5 +++++
+>  1 file changed, 5 insertions(+)
 > 
 > diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
-> index 95f3632..98aa6b5 100644
+> index 98aa6b5..6a699d1 100644
 > --- a/drivers/mmc/host/sdhci-esdhc-imx.c
 > +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
-> @@ -483,7 +483,6 @@ static void esdhc_writew_le(struct sdhci_host *host, u16 val, int reg)
->  		} else if (imx_data->socdata->flags & ESDHC_FLAG_STD_TUNING) {
->  			u32 v = readl(host->ioaddr + SDHCI_ACMD12_ERR);
->  			u32 m = readl(host->ioaddr + ESDHC_MIX_CTRL);
-> -			u32 tuning_ctrl;
->  			if (val & SDHCI_CTRL_TUNED_CLK) {
->  				v |= ESDHC_MIX_CTRL_SMPCLK_SEL;
->  			} else {
-> @@ -496,18 +495,6 @@ static void esdhc_writew_le(struct sdhci_host *host, u16 val, int reg)
->  				v |= ESDHC_MIX_CTRL_EXE_TUNE;
->  				m |= ESDHC_MIX_CTRL_FBCLK_SEL;
->  				m |= ESDHC_MIX_CTRL_AUTO_TUNE_EN;
-> -				tuning_ctrl = readl(host->ioaddr + ESDHC_TUNING_CTRL);
-> -				tuning_ctrl |= ESDHC_STD_TUNING_EN | ESDHC_TUNING_START_TAP_DEFAULT;
-> -				if (imx_data->boarddata.tuning_start_tap) {
-> -					tuning_ctrl &= ~ESDHC_TUNING_START_TAP_MASK;
-> -					tuning_ctrl |= imx_data->boarddata.tuning_start_tap;
-> -				}
-> -
-> -				if (imx_data->boarddata.tuning_step) {
-> -					tuning_ctrl &= ~ESDHC_TUNING_STEP_MASK;
-> -					tuning_ctrl |= imx_data->boarddata.tuning_step << ESDHC_TUNING_STEP_SHIFT;
-> -				}
-> -				writel(tuning_ctrl, host->ioaddr + ESDHC_TUNING_CTRL);
->  			} else {
->  				v &= ~ESDHC_MIX_CTRL_EXE_TUNE;
+> @@ -1018,6 +1018,11 @@ static void sdhci_esdhc_imx_hwinit(struct sdhci_host *host)
 >  			}
-> @@ -982,6 +969,7 @@ static void sdhci_esdhc_imx_hwinit(struct sdhci_host *host)
->  {
->  	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
->  	struct pltfm_imx_data *imx_data = sdhci_pltfm_priv(pltfm_host);
-> +	int tmp;
->  
->  	if (esdhc_is_usdhc(imx_data)) {
->  		/*
-> @@ -1013,6 +1001,23 @@ static void sdhci_esdhc_imx_hwinit(struct sdhci_host *host)
->  
->  		/* disable DLL_CTRL delay line settings */
->  		writel(0x0, host->ioaddr + ESDHC_DLL_CTRL);
+>  			writel(tmp, host->ioaddr + ESDHC_TUNING_CTRL);
+>  		}
 > +
-> +		if (imx_data->socdata->flags & ESDHC_FLAG_STD_TUNING) {
-> +			tmp = readl(host->ioaddr + ESDHC_TUNING_CTRL);
-> +			tmp |= ESDHC_STD_TUNING_EN |
-> +				ESDHC_TUNING_START_TAP_DEFAULT;
-> +			if (imx_data->boarddata.tuning_start_tap) {
-> +				tmp &= ~ESDHC_TUNING_START_TAP_MASK;
-> +				tmp |= imx_data->boarddata.tuning_start_tap;
-> +			}
-> +
-> +			if (imx_data->boarddata.tuning_step) {
-> +				tmp &= ~ESDHC_TUNING_STEP_MASK;
-> +				tmp |= imx_data->boarddata.tuning_step
-> +					<< ESDHC_TUNING_STEP_SHIFT;
-> +			}
-> +			writel(tmp, host->ioaddr + ESDHC_TUNING_CTRL);
-> +		}
+> +		/* clear tuning bits in case ROM has set it already */
+> +		writel(0x0, host->ioaddr + ESDHC_MIX_CTRL);
+> +		writel(0x0, host->ioaddr + SDHCI_ACMD12_ERR);
+> +		writel(0x0, host->ioaddr + ESDHC_TUNE_CTRL_STATUS);
 >  	}
 >  }
->  
-> @@ -1226,11 +1231,6 @@ static int sdhci_esdhc_imx_probe(struct platform_device *pdev)
->  		sdhci_esdhc_ops.platform_execute_tuning =
->  					esdhc_executing_tuning;
->  
-> -	if (imx_data->socdata->flags & ESDHC_FLAG_STD_TUNING)
-> -		writel(readl(host->ioaddr + ESDHC_TUNING_CTRL) |
-> -			ESDHC_STD_TUNING_EN | ESDHC_TUNING_START_TAP_DEFAULT,
-> -			host->ioaddr + ESDHC_TUNING_CTRL);
-> -
->  	if (imx_data->socdata->flags & ESDHC_FLAG_ERR004536)
->  		host->quirks |= SDHCI_QUIRK_BROKEN_ADMA;
 >  
 > 
 
