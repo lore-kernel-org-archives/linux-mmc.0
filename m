@@ -1,69 +1,106 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH 1/2] mmc: dw_mmc: retry to switch voltage when failed
-Date: Tue, 10 May 2016 10:55:21 +0900
-Message-ID: <57313F89.2020808@samsung.com>
-References: <1462346074-19113-1-git-send-email-jh80.chung@samsung.com>
- <96613140-e5f9-1ffd-a9d3-84f3133913be@rock-chips.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=gbk
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout1.samsung.com ([203.254.224.24]:32997 "EHLO
-	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752576AbcEJBzX (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 9 May 2016 21:55:23 -0400
-Received: from epcpsbgr2.samsung.com
- (u142.gpu120.samsung.co.kr [203.254.230.142])
- by mailout1.samsung.com (Oracle Communications Messaging Server 7.0.5.31.0
- 64bit (built May  5 2014))
- with ESMTP id <0O6X00L1OUO9XPC0@mailout1.samsung.com> for
- linux-mmc@vger.kernel.org; Tue, 10 May 2016 10:55:21 +0900 (KST)
-In-reply-to: <96613140-e5f9-1ffd-a9d3-84f3133913be@rock-chips.com>
-Sender: linux-mmc-owner@vger.kernel.org
+From: Simon Horman <horms+renesas@verge.net.au>
+Subject: [PATCH/RFC 0/3] UHS-I SDR-104 support for sh_mobile_sdhi
+Date: Tue, 10 May 2016 14:52:01 +0900
+Message-ID: <1462859524-28522-1-git-send-email-horms+renesas@verge.net.au>
+Return-path: <linux-renesas-soc-owner@vger.kernel.org>
+Sender: linux-renesas-soc-owner@vger.kernel.org
+To: Ian Molton <ian@mnementh.co.uk>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, Magnus Damm <magnus.damm@gmail.com>, linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org, Ben Hutchings <ben.hutchings@codethink.co.uk>
 List-Id: linux-mmc@vger.kernel.org
-To: Shawn Lin <shawn.lin@rock-chips.com>, linux-mmc@vger.kernel.org
-Cc: ulf.hansson@linaro.org
 
-Hi Shawn,
+Hi,
 
-On 05/04/2016 07:41 PM, Shawn Lin wrote:
-> =D4=DA 2016/5/4 15:14, Jaehoon Chung =D0=B4=B5=C0:
->> If vqmmc is used and failed to switch voltage, then retry to switch
->> voltage. MMC core is providing the retrying scheame.
->>
->> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
->> ---
->>  drivers/mmc/host/dw_mmc.c | 2 +-
->>  1 file changed, 1 insertion(+), 1 deletion(-)
->>
->> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
->> index 9dd1bd3..28602cc 100644
->> --- a/drivers/mmc/host/dw_mmc.c
->> +++ b/drivers/mmc/host/dw_mmc.c
->> @@ -1416,7 +1416,7 @@ static int dw_mci_switch_voltage(struct mmc_ho=
-st *mmc, struct mmc_ios *ios)
->>              dev_dbg(&mmc->class_dev,
->>                       "Regulator set error %d - %s V\n",
->>                       ret, uhs & v18 ? "1.8" : "3.3");
->> -            return ret;
->> +            return -EAGAIN;
->>          }
->>      }
->=20
-> If not vqmmc is assigned, dw_mci_switch_voltage still returns success=
- to
-> mmc core?
+this series is based on work by Ai Kyuse to add UHS-I SDR-104 support for
+sh_mobile_sdhi. It builds on work by Shinobu Uehara, Rob Taylor, William
+Towle and Ian Molton, Ben Hutchings, Wolfram Sang and others to add UHS-I
+SDR-50 support to the same driver.
 
-There is comment in dw_mci_switch_voltage().. In some SoC, it's not har=
-mful to switch voltage.
-But we can decide this condition whether try to set both or not.=20
+This series enables UHS-I SDR-104 on the r8a7790/Lager where
+UHS-I SDR-50 is already enabled.
 
-Best Regards,
-Jaehoon Chung
+It is based on a merge of:
+* The next branch of the mmc tree
+* The renesas-next-20160427v2-v4.6-rc1 tag of the renesas tree
+* The sh-pfc-for-v4.7-tag1 tag of the renesas-drivers tree
 
->=20
->>      mci_writel(host, UHS_REG, uhs);
->>
->=20
->=20
+The first two mmc driver patches are targeted at the next branch of the mmc
+tree. The last DT patch is targeted at the devel branch of the renesas tree.
 
+To aid review this series is provided in the _temporary_ topic/sdr104 branch
+of the renesas tree.
+
+A description of testing performed follows:
+
+* Environment
+
+  SoC/Board: r8a7790/Lager
+  SanDisk Card: SanDisk Ultra 64Gb microSDXC UHS-1
+                Identifier on Packaging: SDSQUNC-064G-GN6MA
+  Samsung Card: Samsung 32Gb microSDHC Card Class 10 UHS-1 U3
+                ModelCode: MB-MG32EA/FFP
+
+* Wit these patches (topic/sdr104 branch)
+
+  # mount -t debugfs none /sys/kernel/debug
+  # cat /sys/kernel/debug/mmc1/ios
+
+  clock:          195000000 Hz
+  vdd:            21 (3.3 ~ 3.4 V)
+  bus mode:       2 (push-pull)
+  chip select:    0 (don't care)
+  power mode:     2 (on)
+  bus width:      2 (4 bits)
+  timing spec:    6 (sd uhs SDR104)
+  signal voltage: 1 (1.80 V)
+  driver type:    0 (driver type B)
+
+  SanDisk Card:
+  # dd bs=1M count=512 iflag=direct if=/dev/mmcblk1 of=/dev/null
+  536870912 bytes (537 MB) copied, 13.6713 s, 39.3 MB/s
+
+  Samsung Card:
+  # dd bs=1M count=512 iflag=direct if=/dev/mmcblk1 of=/dev/null
+  536870912 bytes (537 MB) copied, 16.4952 s, 32.5 MB/s
+
+
+* Without these patches (base of topic/sdr104 branch)
+
+  # mount -t debugfs none /sys/kernel/debug
+  # cat /sys/kernel/debug/mmc1/ios
+
+  clock:          100000000 Hz
+  vdd:            21 (3.3 ~ 3.4 V)
+  bus mode:       2 (push-pull)
+  chip select:    0 (don't care)
+  power mode:     2 (on)
+  bus width:      2 (4 bits)
+  timing spec:    5 (sd uhs SDR50)
+  signal voltage: 1 (1.80 V)
+  driver type:    0 (driver type B)
+
+  SanDisk Card:
+  # dd bs=1M count=512 iflag=direct if=/dev/mmcblk1 of=/dev/null
+  536870912 bytes (537 MB) copied, 17.7253 s, 30.3 MB/s
+
+  Samsung Card:
+  # dd bs=1M count=512 iflag=direct if=/dev/mmcblk1 of=/dev/null
+  536870912 bytes (537 MB) copied, 20.7866 s, 25.8 MB/s
+
+
+
+Ai Kyuse (2):
+  mmc: tmio: Add tuning support
+  mmc: sh_mobile_sdhi: Add tuning support
+
+Simon Horman (1):
+  ARM: dts: r8a7790: lager: Enable UHS-I SDR-104
+
+ arch/arm/boot/dts/r8a7790-lager.dts |   1 +
+ drivers/mmc/host/sh_mobile_sdhi.c   | 264 +++++++++++++++++++++++++++++++++++-
+ drivers/mmc/host/tmio_mmc.h         |  10 ++
+ drivers/mmc/host/tmio_mmc_pio.c     | 249 ++++++++++++++++++++++++++++++++--
+ include/linux/mfd/tmio.h            |   3 +
+ 5 files changed, 518 insertions(+), 9 deletions(-)
+
+-- 
+2.1.4
