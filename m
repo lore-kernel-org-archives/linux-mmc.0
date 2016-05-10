@@ -1,33 +1,29 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: sdio: fall back to SDIO 1.0 for broken 1.1 cards
-Date: Tue, 10 May 2016 12:28:29 +0200
-Message-ID: <CAPDyKFqCwxzkc1EeTE7jDBkfDXRznKphdcAH85YVYOHrNKjk6Q@mail.gmail.com>
-References: <1462780799-5366-1-git-send-email-wsa@the-dreams.de>
+Subject: Re: [PATCH] mmc: sdhci-st: correct name of sd-uhs-sdr50 property
+Date: Tue, 10 May 2016 12:28:39 +0200
+Message-ID: <CAPDyKFovKxGDnnyKAWjpjTN=7XB5sbTe+gyh2OTSRQ=bmnJTFQ@mail.gmail.com>
+References: <1462839264-13300-1-git-send-email-horms+renesas@verge.net.au>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wm0-f51.google.com ([74.125.82.51]:37401 "EHLO
-	mail-wm0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751329AbcEJK2b (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 10 May 2016 06:28:31 -0400
-Received: by mail-wm0-f51.google.com with SMTP id a17so19172543wme.0
-        for <linux-mmc@vger.kernel.org>; Tue, 10 May 2016 03:28:30 -0700 (PDT)
-In-Reply-To: <1462780799-5366-1-git-send-email-wsa@the-dreams.de>
+Received: from mail-wm0-f50.google.com ([74.125.82.50]:37565 "EHLO
+	mail-wm0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751329AbcEJK2l (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 10 May 2016 06:28:41 -0400
+Received: by mail-wm0-f50.google.com with SMTP id a17so19179491wme.0
+        for <linux-mmc@vger.kernel.org>; Tue, 10 May 2016 03:28:40 -0700 (PDT)
+In-Reply-To: <1462839264-13300-1-git-send-email-horms+renesas@verge.net.au>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Wolfram Sang <wsa@the-dreams.de>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, linux-renesas-soc@vger.kernel.org
+To: Simon Horman <horms+renesas@verge.net.au>
+Cc: Srinivas Kandagatla <srinivas.kandagatla@gmail.com>, Maxime Coquelin <maxime.coquelin@st.com>, Patrice Chotard <patrice.chotard@st.com>, Adrian Hunter <adrian.hunter@intel.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, kernel@stlinux.com, linux-mmc <linux-mmc@vger.kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>
 
-On 9 May 2016 at 09:59, Wolfram Sang <wsa@the-dreams.de> wrote:
-> From: Wolfram Sang <wsa+renesas@sang-engineering.com>
+On 10 May 2016 at 02:14, Simon Horman <horms+renesas@verge.net.au> wrote:
+> Correct what appears to be a typo in the name of the sd-uhs-sdr50.
 >
-> I have two SDIO WLAN cards which specify being SDIO Rev. 1.1 cards but
-> their FUNCE tuple reports the smaller size of a Rev 1.0 card. So,
-> enforce 1.0 on these cards to avoid reading the not present registers.
-> They are not really used anyhow. My cards initialize properly after this
-> patch.
+> Also fix mixed tab/space indentation.
 >
-> Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+> Signed-off-by: Simon Horman <horms+renesas@verge.net.au>
 
 Thanks, applied for next!
 
@@ -35,32 +31,31 @@ Kind regards
 Uffe
 
 > ---
->  drivers/mmc/core/sdio_cis.c | 7 ++++++-
->  1 file changed, 6 insertions(+), 1 deletion(-)
+>  Documentation/devicetree/bindings/mmc/sdhci-st.txt | 4 ++--
+>  1 file changed, 2 insertions(+), 2 deletions(-)
 >
-> diff --git a/drivers/mmc/core/sdio_cis.c b/drivers/mmc/core/sdio_cis.c
-> index 6f6fc527a26338..dcb3dee59fa5f2 100644
-> --- a/drivers/mmc/core/sdio_cis.c
-> +++ b/drivers/mmc/core/sdio_cis.c
-> @@ -177,8 +177,13 @@ static int cistpl_funce_func(struct mmc_card *card, struct sdio_func *func,
->         vsn = func->card->cccr.sdio_vsn;
->         min_size = (vsn == SDIO_SDIO_REV_1_00) ? 28 : 42;
+> diff --git a/Documentation/devicetree/bindings/mmc/sdhci-st.txt b/Documentation/devicetree/bindings/mmc/sdhci-st.txt
+> index 18d950df2749..88faa91125bf 100644
+> --- a/Documentation/devicetree/bindings/mmc/sdhci-st.txt
+> +++ b/Documentation/devicetree/bindings/mmc/sdhci-st.txt
+> @@ -38,7 +38,7 @@ Optional properties:
+>  - bus-width:           Number of data lines.
+>                         See:  Documentation/devicetree/bindings/mmc/mmc.txt.
 >
-> -       if (size < min_size)
-> +       if (size == 28 && vsn == SDIO_SDIO_REV_1_10) {
-> +               pr_warn("%s: card has broken SDIO 1.1 CIS, forcing SDIO 1.0\n",
-> +                       mmc_hostname(card->host));
-> +               vsn = SDIO_SDIO_REV_1_00;
-> +       } else if (size < min_size) {
->                 return -EINVAL;
-> +       }
+> -- max-frequency:       Can be 200MHz, 100Mz or 50MHz (default) and used for
+> +- max-frequency:       Can be 200MHz, 100Mz or 50MHz (default) and used for
+>                         configuring the CCONFIG3 in the mmcss.
+>                         See:  Documentation/devicetree/bindings/mmc/mmc.txt.
 >
->         /* TPLFE_MAX_BLK_SIZE */
->         func->max_blksize = buf[12] | (buf[13] << 8);
+> @@ -48,7 +48,7 @@ Optional properties:
+>  - vqmmc-supply:                Phandle to the regulator dt node, mentioned as the vcc/vdd
+>                         supply in eMMC/SD specs.
+>
+> -- sd-uhs--sdr50:       To enable the SDR50 in the mmcss.
+> +- sd-uhs-sdr50:        To enable the SDR50 in the mmcss.
+>                         See:  Documentation/devicetree/bindings/mmc/mmc.txt.
+>
+>  - sd-uhs-sdr104:       To enable the SDR104 in the mmcss.
 > --
-> 2.7.0
+> 2.1.4
 >
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
