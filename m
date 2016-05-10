@@ -1,456 +1,379 @@
 From: Simon Horman <horms+renesas@verge.net.au>
-Subject: [PATCH/RFC 1/3] mmc: tmio: Add tuning support
-Date: Tue, 10 May 2016 14:52:02 +0900
-Message-ID: <1462859524-28522-2-git-send-email-horms+renesas@verge.net.au>
+Subject: [PATCH/RFC 2/3] mmc: sh_mobile_sdhi: Add tuning support
+Date: Tue, 10 May 2016 14:52:03 +0900
+Message-ID: <1462859524-28522-3-git-send-email-horms+renesas@verge.net.au>
 References: <1462859524-28522-1-git-send-email-horms+renesas@verge.net.au>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from kirsty.vergenet.net ([202.4.237.240]:58429 "EHLO
-	kirsty.vergenet.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751152AbcEJFwI (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 10 May 2016 01:52:08 -0400
+Return-path: <linux-renesas-soc-owner@vger.kernel.org>
 In-Reply-To: <1462859524-28522-1-git-send-email-horms+renesas@verge.net.au>
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Sender: linux-renesas-soc-owner@vger.kernel.org
 To: Ian Molton <ian@mnementh.co.uk>, Ulf Hansson <ulf.hansson@linaro.org>
 Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, Magnus Damm <magnus.damm@gmail.com>, linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org, Ben Hutchings <ben.hutchings@codethink.co.uk>
+List-Id: linux-mmc@vger.kernel.org
 
 From: Ai Kyuse <ai.kyuse.uw@renesas.com>
 
 Add tuning support for use with SDR104 mode
+This includes adding support for the sampling clock controller (SCC).
 
 Signed-off-by: Ai Kyuse <ai.kyuse.uw@renesas.com>
 Signed-off-by: Simon Horman <horms+renesas@verge.net.au>
 ---
 v1 [Simon Horman]
-* Omit start_signal_voltage_switch and tmio_mmc_card_busy changes which are
-  already present in mainline in a different form
-* Return num from init_tuning rather than passing an extra parameter
-  to hold the return value
-* Only call host->init_tuning if it is non-NULL
-* Place tmio_mmc_execute_tuning() such that no new forward declarations are
-  required
-* Remove unused TMIO_MMC_HAS_UHS_SCC define
+* Rebase
+* Always use value of 0x8 for TAPNUM field of DTCNTL register
+  rather than reading value from DT property. There does not
+  seem to be a need to expose this in DT at this point.
+* Do not include tmio_mmc_start_signal_voltage_switch changes which
+  are already in mainline in a different form
+* Do not add renesas,clk-rate property as the max-frequency property, which
+  is now present in mainline, seems to provide the needed rate
+* Omit Gen3 specific changes
+* Do not provide renesas,mmc-scc-tappos DT property.
+  Instead, always use taps provided in driver.
+* Do not parse sd-uhs-sdr50 and sd-uhs-sdr104 properties.
+  This is handled by the core.
 
 v0 [Ai Kyuse]
 ---
- drivers/mmc/host/tmio_mmc.h     |  10 ++
- drivers/mmc/host/tmio_mmc_pio.c | 249 ++++++++++++++++++++++++++++++++++++++--
- include/linux/mfd/tmio.h        |   3 +
- 3 files changed, 254 insertions(+), 8 deletions(-)
+ drivers/mmc/host/sh_mobile_sdhi.c | 264 +++++++++++++++++++++++++++++++++++++-
+ 1 file changed, 263 insertions(+), 1 deletion(-)
 
-diff --git a/drivers/mmc/host/tmio_mmc.h b/drivers/mmc/host/tmio_mmc.h
-index 1aac2ad8edf2..cacc64c87fa0 100644
---- a/drivers/mmc/host/tmio_mmc.h
-+++ b/drivers/mmc/host/tmio_mmc.h
-@@ -19,6 +19,7 @@
- #define TMIO_MMC_H
+diff --git a/drivers/mmc/host/sh_mobile_sdhi.c b/drivers/mmc/host/sh_mobile_sdhi.c
+index 5309c73be1f0..e74bbdad05f4 100644
+--- a/drivers/mmc/host/sh_mobile_sdhi.c
++++ b/drivers/mmc/host/sh_mobile_sdhi.c
+@@ -41,6 +41,11 @@
  
- #include <linux/dmaengine.h>
-+#include <linux/completion.h>
- #include <linux/highmem.h>
- #include <linux/mutex.h>
- #include <linux/pagemap.h>
-@@ -150,6 +151,9 @@ struct tmio_mmc_host {
- 	struct mutex		ios_lock;	/* protect set_ios() context */
- 	bool			native_hotplug;
- 	bool			sdio_irq_enabled;
-+	u32			scc_tappos;
-+	bool			done_tuning;
-+	struct completion	completion;
+ #define host_to_priv(host) container_of((host)->pdata, struct sh_mobile_sdhi, mmc_data)
  
- 	int (*write16_hook)(struct tmio_mmc_host *host, int addr);
- 	int (*clk_enable)(struct tmio_mmc_host *host);
-@@ -160,6 +164,12 @@ struct tmio_mmc_host {
- 			      unsigned int direction, int blk_size);
- 	int (*start_signal_voltage_switch)(struct mmc_host *mmc,
- 					   struct mmc_ios *ios);
-+	bool (*inquiry_tuning)(struct tmio_mmc_host *host);
-+	unsigned int (*init_tuning)(struct tmio_mmc_host *host);
-+	int (*prepare_tuning)(struct tmio_mmc_host *host, unsigned long tap);
-+	int (*select_tuning)(struct tmio_mmc_host *host, unsigned long *tap);
-+	bool (*retuning)(struct tmio_mmc_host *host);
-+	void (*hw_reset)(struct tmio_mmc_host *host);
++struct sh_mobile_sdhi_scc {
++	unsigned long clk;	/* clock for SDR104 */
++	u32 tap;		/* sampling clock position for SDR104 */
++};
++
+ struct sh_mobile_sdhi_of_data {
+ 	unsigned long tmio_flags;
+ 	unsigned long capabilities;
+@@ -48,6 +53,9 @@ struct sh_mobile_sdhi_of_data {
+ 	enum dma_slave_buswidth dma_buswidth;
+ 	dma_addr_t dma_rx_offset;
+ 	unsigned bus_shift;
++	int scc_offset;
++	struct sh_mobile_sdhi_scc *taps;
++	int taps_num;
  };
  
- struct tmio_mmc_host *tmio_mmc_host_alloc(struct platform_device *pdev);
-diff --git a/drivers/mmc/host/tmio_mmc_pio.c b/drivers/mmc/host/tmio_mmc_pio.c
-index f44e2ab7aea2..4e6d80ad7bac 100644
---- a/drivers/mmc/host/tmio_mmc_pio.c
-+++ b/drivers/mmc/host/tmio_mmc_pio.c
-@@ -36,6 +36,7 @@
- #include <linux/io.h>
- #include <linux/irq.h>
- #include <linux/mfd/tmio.h>
-+#include <linux/mmc/card.h>
- #include <linux/mmc/host.h>
- #include <linux/mmc/mmc.h>
- #include <linux/mmc/slot-gpio.h>
-@@ -277,6 +278,8 @@ static void tmio_mmc_finish_request(struct tmio_mmc_host *host)
- {
- 	struct mmc_request *mrq;
- 	unsigned long flags;
-+	bool result;
-+	struct mmc_command *cmd = host->cmd;
- 
- 	spin_lock_irqsave(&host->lock, flags);
- 
-@@ -290,7 +293,9 @@ static void tmio_mmc_finish_request(struct tmio_mmc_host *host)
- 	host->data = NULL;
- 	host->force_pio = false;
- 
--	cancel_delayed_work(&host->delayed_reset_work);
-+	if (!(host->inquiry_tuning && host->inquiry_tuning(host) &&
-+	      !host->done_tuning) || cmd != mrq->sbc)
-+		cancel_delayed_work(&host->delayed_reset_work);
- 
- 	host->mrq = NULL;
- 	spin_unlock_irqrestore(&host->lock, flags);
-@@ -298,6 +303,29 @@ static void tmio_mmc_finish_request(struct tmio_mmc_host *host)
- 	if (mrq->cmd->error || (mrq->data && mrq->data->error))
- 		tmio_mmc_abort_dma(host);
- 
-+	if (host->inquiry_tuning && host->inquiry_tuning(host) &&
-+	     !host->done_tuning) {
-+		/* call retuning() to clear SCC error bit */
-+		if (host->retuning)
-+			host->retuning(host);
-+		/* finish processing tuning request */
-+		complete(&host->completion);
-+		return;
-+	}
-+
-+	/* Check retuning */
-+	if (host->retuning && host->done_tuning) {
-+		result = host->retuning(host);
-+		if (result || (mrq->cmd->error == -EILSEQ))
-+			host->done_tuning = false;
-+	}
-+
-+	if (cmd == mrq->sbc) {
-+		/* finish SET_BLOCK_COUNT request */
-+		complete(&host->completion);
-+		return;
-+	}
-+
- 	mmc_request_done(host->mmc, mrq);
- }
- 
-@@ -363,7 +391,8 @@ static int tmio_mmc_start_command(struct tmio_mmc_host *host, struct mmc_command
- 			 * multiple block transfer
- 			 */
- 			if ((host->pdata->flags & TMIO_MMC_HAVE_CMD12_CTRL) &&
--			    (cmd->opcode == SD_IO_RW_EXTENDED))
-+			    ((cmd->opcode == SD_IO_RW_EXTENDED) ||
-+			     host->mrq->sbc))
- 				c |= NO_CMD12_ISSUE;
- 		}
- 		if (data->flags & MMC_DATA_READ)
-@@ -520,7 +549,7 @@ void tmio_mmc_do_data_irq(struct tmio_mmc_host *host)
- 	schedule_work(&host->done);
- }
- 
--static void tmio_mmc_data_irq(struct tmio_mmc_host *host)
-+static void tmio_mmc_data_irq(struct tmio_mmc_host *host, unsigned int stat)
- {
- 	struct mmc_data *data;
- 	spin_lock(&host->lock);
-@@ -529,6 +558,9 @@ static void tmio_mmc_data_irq(struct tmio_mmc_host *host)
- 	if (!data)
- 		goto out;
- 
-+	if (stat & TMIO_STAT_CRCFAIL || stat & TMIO_STAT_STOPBIT_ERR ||
-+	    stat & TMIO_STAT_TXUNDERRUN)
-+		data->error = -EILSEQ;
- 	if (host->chan_tx && (data->flags & MMC_DATA_WRITE) && !host->force_pio) {
- 		u32 status = sd_ctrl_read16_and_16_as_32(host, CTL_STATUS);
- 		bool done = false;
-@@ -577,8 +609,6 @@ static void tmio_mmc_cmd_irq(struct tmio_mmc_host *host,
- 		goto out;
- 	}
- 
--	host->cmd = NULL;
--
- 	/* This controller is sicker than the PXA one. Not only do we need to
- 	 * drop the top 8 bits of the first response word, we also need to
- 	 * modify the order of the response for short response command types.
-@@ -598,14 +628,16 @@ static void tmio_mmc_cmd_irq(struct tmio_mmc_host *host,
- 
- 	if (stat & TMIO_STAT_CMDTIMEOUT)
- 		cmd->error = -ETIMEDOUT;
--	else if (stat & TMIO_STAT_CRCFAIL && cmd->flags & MMC_RSP_CRC)
-+	else if ((stat & TMIO_STAT_CRCFAIL && cmd->flags & MMC_RSP_CRC) ||
-+		 stat & TMIO_STAT_STOPBIT_ERR ||
-+		 stat & TMIO_STAT_CMD_IDX_ERR)
- 		cmd->error = -EILSEQ;
- 
- 	/* If there is data to handle we enable data IRQs here, and
- 	 * we will ultimatley finish the request in the data_end handler.
- 	 * If theres no data or we encountered an error, finish now.
- 	 */
--	if (host->data && !cmd->error) {
-+	if (host->data && (!cmd->error || cmd->error == -EILSEQ)) {
- 		if (host->data->flags & MMC_DATA_READ) {
- 			if (host->force_pio || !host->chan_rx)
- 				tmio_mmc_enable_mmc_irqs(host, TMIO_MASK_READOP);
-@@ -666,7 +698,7 @@ static bool __tmio_mmc_sdcard_irq(struct tmio_mmc_host *host,
- 	/* Data transfer completion */
- 	if (ireg & TMIO_STAT_DATAEND) {
- 		tmio_mmc_ack_mmc_irqs(host, TMIO_STAT_DATAEND);
--		tmio_mmc_data_irq(host);
-+		tmio_mmc_data_irq(host, status);
- 		return true;
- 	}
- 
-@@ -753,6 +785,157 @@ static int tmio_mmc_start_data(struct tmio_mmc_host *host,
- 	return 0;
- }
- 
-+#define TMIO_MMC_MAX_TUNING_LOOP 40
-+
-+static int tmio_mmc_execute_tuning(struct mmc_host *mmc, u32 opcode)
-+{
-+	struct tmio_mmc_host *host = mmc_priv(mmc);
-+	struct mmc_ios *ios = &mmc->ios;
-+
-+	unsigned long timeout, val;
-+	unsigned long *tap;
-+	int tuning_loop_counter = TMIO_MMC_MAX_TUNING_LOOP;
-+	int ret, timeleft;
-+
-+	struct mmc_request mrq = {NULL};
-+	struct mmc_command cmd = {0};
-+	struct mmc_data data = {0};
-+	struct scatterlist sg;
-+	u8 *data_buf;
-+	unsigned int num, tm = CMDREQ_TIMEOUT;
-+	unsigned long flags;
-+
-+	if ((ios->timing != MMC_TIMING_UHS_SDR50 &&
-+	     ios->timing != MMC_TIMING_UHS_SDR104) ||
-+	    (host->inquiry_tuning && !host->inquiry_tuning(host)) ||
-+	    host->done_tuning || !host->init_tuning)
-+		return 0;
-+
-+	num = host->init_tuning(host);
-+
-+	tap = kmalloc(num * 2, GFP_KERNEL);
-+	if (tap == NULL) {
-+		ret = -ENOMEM;
-+		goto err_tap;
-+	}
-+
-+	data_buf = kmalloc(64, GFP_KERNEL);
-+	if (data_buf == NULL) {
-+		ret = -ENOMEM;
-+		goto err_data;
-+	}
-+
-+	val = 0;
-+
-+	/*
-+	 * Issue CMD19 repeatedly till Execute Tuning is set to 0 or the number
-+	 * of loops reaches 40 times or a timeout of 150ms occurs.
-+	 */
-+	timeout = 150;
-+	do {
-+		if (host->prepare_tuning)
-+			host->prepare_tuning(host, val % num);
-+
-+		if (!tuning_loop_counter && !timeout)
-+			break;
-+
-+		/*
-+		 * In response to CMD19, the card sends 64 bytes of tuning
-+		 * block to the Host Controller. So we set the block size
-+		 * to 64 here.
-+		 */
-+
-+		spin_lock_irqsave(&host->lock, flags);
-+		init_completion(&host->completion);
-+		mrq.cmd = &cmd;
-+		mrq.data = &data;
-+
-+		cmd.opcode = opcode;
-+		cmd.arg = 0;
-+		cmd.flags = MMC_RSP_R1 | MMC_CMD_ADTC;
-+		cmd.retries = 0;
-+		cmd.error = 0;
-+
-+		data.blksz = 64;
-+		data.blocks = 1;
-+		data.flags = MMC_DATA_READ;
-+		data.sg = &sg;
-+		data.sg_len = 1;
-+		data.error = 0;
-+
-+		sg_init_one(&sg, data_buf, 64);
-+
-+		host->mrq = &mrq;
-+
-+		spin_unlock_irqrestore(&host->lock, flags);
-+
-+		ret = tmio_mmc_start_data(host, mrq.data);
-+		if (ret)
-+			goto out;
-+
-+		ret = tmio_mmc_start_command(host, mrq.cmd);
-+		if (ret)
-+			goto out;
-+
-+		timeleft = wait_for_completion_timeout(&host->completion,
-+						       msecs_to_jiffies(tm));
-+		if (timeleft < 0) {
-+			ret = timeleft;
-+			goto out;
-+		}
-+
-+		if (!timeleft) {
-+			ret = -ETIMEDOUT;
-+			goto out;
-+		}
-+
-+		/* Check CRC error */
-+		if (cmd.error && cmd.error != -EILSEQ) {
-+			ret = cmd.error;
-+			goto out;
-+		}
-+		if (data.error && data.error != -EILSEQ) {
-+			ret = data.error;
-+			goto out;
-+		}
-+
-+		tap[val] = (cmd.error | data.error);
-+
-+		val++;
-+		tuning_loop_counter--;
-+		timeout--;
-+		mdelay(1);
-+	} while ((val < (num * 2)) && (tuning_loop_counter || timeout));
-+
-+	/*
-+	 * The Host Driver has exhausted the maximum number of loops allowed,
-+	 * so use fixed sampling frequency.
-+	 */
-+	if (tuning_loop_counter || timeout) {
-+		if (host->select_tuning) {
-+			ret = host->select_tuning(host, tap);
-+			if (ret < 0)
-+				goto out;
-+		}
-+		host->done_tuning = true;
-+	} else {
-+		dev_warn(&host->pdev->dev, ": Tuning procedure failed\n");
-+		ret = -EIO;
-+		goto out;
-+	}
-+
-+out:
-+	kfree(data_buf);
-+err_data:
-+	kfree(tap);
-+err_tap:
-+	if (ret < 0 && host->hw_reset)
-+		host->hw_reset(host);
-+
-+	return ret;
-+
-+}
-+
- /* Process requests from the MMC layer */
- static void tmio_mmc_request(struct mmc_host *mmc, struct mmc_request *mrq)
- {
-@@ -778,6 +961,43 @@ static void tmio_mmc_request(struct mmc_host *mmc, struct mmc_request *mrq)
- 
- 	spin_unlock_irqrestore(&host->lock, flags);
- 
-+	if (host->inquiry_tuning && host->inquiry_tuning(host) &&
-+	    !host->done_tuning) {
-+		/* Start retuning */
-+		ret = tmio_mmc_execute_tuning(mmc, MMC_SEND_TUNING_BLOCK);
-+		if (ret)
-+			goto fail;
-+		/* Restore request */
-+		host->mrq = mrq;
-+	}
-+
-+	if (mrq->sbc) {
-+		init_completion(&host->completion);
-+		ret = tmio_mmc_start_command(host, mrq->sbc);
-+		if (ret)
-+			goto fail;
-+		ret = wait_for_completion_timeout(&host->completion,
-+					msecs_to_jiffies(CMDREQ_TIMEOUT));
-+		if (ret < 0)
-+			goto fail;
-+		if (!ret) {
-+			ret = -ETIMEDOUT;
-+			goto fail;
-+		}
-+		host->last_req_ts = jiffies;
-+		host->mrq = mrq;
-+		if (host->inquiry_tuning && host->inquiry_tuning(host) &&
-+		    !host->done_tuning) {
-+			/* Start retuning */
-+			ret = tmio_mmc_execute_tuning(mmc,
-+						      MMC_SEND_TUNING_BLOCK);
-+			if (ret)
-+				goto fail;
-+			/* Restore request */
-+			host->mrq = mrq;
-+		}
-+	}
-+
- 	if (mrq->data) {
- 		ret = tmio_mmc_start_data(host, mrq->data);
- 		if (ret)
-@@ -967,6 +1187,16 @@ static int tmio_mmc_card_busy(struct mmc_host *mmc)
- 	return !(sd_ctrl_read16_and_16_as_32(host, CTL_STATUS) & TMIO_STAT_DAT0);
- }
- 
-+static void tmio_mmc_hw_reset(struct mmc_host *mmc)
-+{
-+	struct tmio_mmc_host *host = mmc_priv(mmc);
-+
-+	if (host->hw_reset)
-+		host->hw_reset(host);
-+
-+	host->done_tuning = false;
-+}
-+
- static struct mmc_host_ops tmio_mmc_ops = {
- 	.request	= tmio_mmc_request,
- 	.set_ios	= tmio_mmc_set_ios,
-@@ -975,6 +1205,8 @@ static struct mmc_host_ops tmio_mmc_ops = {
- 	.enable_sdio_irq = tmio_mmc_enable_sdio_irq,
- 	.card_busy	= tmio_mmc_card_busy,
- 	.multi_io_quirk	= tmio_multi_io_quirk,
-+	.execute_tuning = tmio_mmc_execute_tuning,
-+	.hw_reset	= tmio_mmc_hw_reset,
+ static const struct sh_mobile_sdhi_of_data of_default_cfg = {
+@@ -60,12 +68,27 @@ static const struct sh_mobile_sdhi_of_data of_rcar_gen1_compatible = {
+ 	.capabilities	= MMC_CAP_SD_HIGHSPEED | MMC_CAP_SDIO_IRQ,
  };
  
- static int tmio_mmc_init_ocr(struct tmio_mmc_host *host)
-@@ -1084,6 +1316,7 @@ int tmio_mmc_host_probe(struct tmio_mmc_host *_host,
- 	mmc->max_req_size = mmc->max_blk_size * mmc->max_blk_count;
- 	mmc->max_seg_size = mmc->max_req_size;
- 
-+	_host->done_tuning = false;
- 	_host->native_hotplug = !(pdata->flags & TMIO_MMC_USE_GPIO_CD ||
- 				  mmc->caps & MMC_CAP_NEEDS_POLL ||
- 				  mmc->caps & MMC_CAP_NONREMOVABLE ||
-diff --git a/include/linux/mfd/tmio.h b/include/linux/mfd/tmio.h
-index 7a26286db895..6c22b21f2d73 100644
---- a/include/linux/mfd/tmio.h
-+++ b/include/linux/mfd/tmio.h
-@@ -104,6 +104,9 @@
-  */
- #define TMIO_MMC_CLK_ACTUAL		(1 << 10)
- 
-+/* Some controllers have UHS-I sampling clock controller */
-+#define TMIO_MMC_HAS_UHS_SCC		(1 << 11)
++/* Definitions for sampling clocks */
++static struct sh_mobile_sdhi_scc rcar_gen2_scc_taps[] = {
++	{
++		.clk = 156000000,
++		.tap = 0x00000703,
++	},
++	{
++		.clk = 0,
++		.tap = 0x00000300,
++	},
++};
 +
- int tmio_core_mmc_enable(void __iomem *cnf, int shift, unsigned long base);
- int tmio_core_mmc_resume(void __iomem *cnf, int shift, unsigned long base);
- void tmio_core_mmc_pwr(void __iomem *cnf, int shift, int state);
+ static const struct sh_mobile_sdhi_of_data of_rcar_gen2_compatible = {
+ 	.tmio_flags	= TMIO_MMC_HAS_IDLE_WAIT | TMIO_MMC_WRPROTECT_DISABLE |
+ 			  TMIO_MMC_CLK_ACTUAL | TMIO_MMC_MIN_RCAR2,
+ 	.capabilities	= MMC_CAP_SD_HIGHSPEED | MMC_CAP_SDIO_IRQ,
+ 	.dma_buswidth	= DMA_SLAVE_BUSWIDTH_4_BYTES,
+ 	.dma_rx_offset	= 0x2000,
++	.scc_offset	= 0x0300,
++	.taps		= rcar_gen2_scc_taps,
++	.taps_num	= ARRAY_SIZE(rcar_gen2_scc_taps),
+ };
+ 
+ static const struct sh_mobile_sdhi_of_data of_rcar_gen3_compatible = {
+@@ -207,6 +230,18 @@ static void sh_mobile_sdhi_clk_disable(struct tmio_mmc_host *host)
+ 	clk_disable_unprepare(priv->clk);
+ }
+ 
++static void sh_mobile_sdhi_set_clk_div(struct platform_device *pdev, int state)
++{
++	struct mmc_host *mmc = platform_get_drvdata(pdev);
++	struct tmio_mmc_host *host = mmc_priv(mmc);
++
++	if (state) {
++		sd_ctrl_write16(host, CTL_SD_CARD_CLK_CTL, ~0x0100 &
++				sd_ctrl_read16(host, CTL_SD_CARD_CLK_CTL));
++		sd_ctrl_write16(host, CTL_SD_CARD_CLK_CTL, 0x00ff);
++	}
++}
++
+ static int sh_mobile_sdhi_start_signal_voltage_switch(struct mmc_host *mmc,
+ 						      struct mmc_ios *ios)
+ {
+@@ -241,6 +276,202 @@ static int sh_mobile_sdhi_start_signal_voltage_switch(struct mmc_host *mmc,
+ 	return pinctrl_select_state(priv->pinctrl, pin_state);
+ }
+ 
++/* SCC registers */
++#define SH_MOBILE_SDHI_SCC_DTCNTL	0x000
++#define SH_MOBILE_SDHI_SCC_TAPSET	0x002
++#define SH_MOBILE_SDHI_SCC_DT2FF	0x004
++#define SH_MOBILE_SDHI_SCC_CKSEL	0x006
++#define SH_MOBILE_SDHI_SCC_RVSCNTL	0x008
++#define SH_MOBILE_SDHI_SCC_RVSREQ	0x00A
++
++/* Definitions for values the SH_MOBILE_SDHI_SCC_DTCNTL register */
++#define SH_MOBILE_SDHI_SCC_DTCNTL_TAPEN		BIT(0)
++#define SH_MOBILE_SDHI_SCC_DTCNTL_TAPNUM_SHIFT	16
++#define SH_MOBILE_SDHI_SCC_DTCNTL_TAPNUM_MASK	0xff
++
++/* Definitions for values the SH_MOBILE_SDHI_SCC_CKSEL register */
++#define SH_MOBILE_SDHI_SCC_CKSEL_DTSEL		BIT(0)
++/* Definitions for values the SH_MOBILE_SDHI_SCC_RVSCNTL register */
++#define SH_MOBILE_SDHI_SCC_RVSCNTL_RVSEN	BIT(1)
++/* Definitions for values the SH_MOBILE_SDHI_SCC_RVSREQ register */
++#define SH_MOBILE_SDHI_SCC_RVSREQ_RVSERR	BIT(2)
++
++static inline u32 sd_scc_read32(struct tmio_mmc_host *host, int addr)
++{
++	struct platform_device *pdev = host->pdev;
++	const struct of_device_id *of_id =
++		of_match_device(sh_mobile_sdhi_of_match, &pdev->dev);
++	const struct sh_mobile_sdhi_of_data *of_data = of_id->data;
++
++	return readl(host->ctl + of_data->scc_offset +
++		     (addr << host->bus_shift));
++}
++
++static inline void sd_scc_write32(struct tmio_mmc_host *host, int addr,
++				  u32 val)
++{
++	struct platform_device *pdev = host->pdev;
++	const struct of_device_id *of_id =
++		of_match_device(sh_mobile_sdhi_of_match, &pdev->dev);
++	const struct sh_mobile_sdhi_of_data *of_data = of_id->data;
++
++	writel(val, host->ctl + of_data->scc_offset +
++	       (addr << host->bus_shift));
++}
++
++static bool sh_mobile_sdhi_inquiry_tuning(struct tmio_mmc_host *host)
++{
++	/* SDHI should be tuning only SDR104 */
++	if (host->mmc->ios.timing == MMC_TIMING_UHS_SDR104)
++		return true;
++	else
++		return false;
++}
++
++static unsigned int sh_mobile_sdhi_init_tuning(struct tmio_mmc_host *host)
++{
++	/* set sampling clock selection range */
++	sd_scc_write32(host, SH_MOBILE_SDHI_SCC_DTCNTL,
++			0x8 << SH_MOBILE_SDHI_SCC_DTCNTL_TAPNUM_SHIFT);
++
++	/* Initialize SCC */
++	sd_ctrl_write32_as_16_and_16(host, CTL_STATUS, 0x00000000);
++
++	sd_scc_write32(host, SH_MOBILE_SDHI_SCC_DTCNTL,
++		SH_MOBILE_SDHI_SCC_DTCNTL_TAPEN |
++		sd_scc_read32(host, SH_MOBILE_SDHI_SCC_DTCNTL));
++
++	sd_ctrl_write16(host, CTL_SD_CARD_CLK_CTL, ~0x0100 &
++		sd_ctrl_read16(host, CTL_SD_CARD_CLK_CTL));
++
++	sd_scc_write32(host, SH_MOBILE_SDHI_SCC_CKSEL,
++		SH_MOBILE_SDHI_SCC_CKSEL_DTSEL |
++		sd_scc_read32(host, SH_MOBILE_SDHI_SCC_CKSEL));
++
++	sd_ctrl_write16(host, CTL_SD_CARD_CLK_CTL, 0x0100 |
++		sd_ctrl_read16(host, CTL_SD_CARD_CLK_CTL));
++
++	sd_scc_write32(host, SH_MOBILE_SDHI_SCC_RVSCNTL,
++		~SH_MOBILE_SDHI_SCC_RVSCNTL_RVSEN &
++		sd_scc_read32(host, SH_MOBILE_SDHI_SCC_RVSCNTL));
++
++	sd_scc_write32(host, SH_MOBILE_SDHI_SCC_DT2FF, host->scc_tappos);
++
++	/* Read TAPNUM */
++	return (sd_scc_read32(host, SH_MOBILE_SDHI_SCC_DTCNTL) >>
++		SH_MOBILE_SDHI_SCC_DTCNTL_TAPNUM_SHIFT) &
++		SH_MOBILE_SDHI_SCC_DTCNTL_TAPNUM_MASK;
++}
++
++static int sh_mobile_sdhi_prepare_tuning(struct tmio_mmc_host *host,
++					 unsigned long tap)
++{
++	/* Set sampling clock position */
++	sd_scc_write32(host, SH_MOBILE_SDHI_SCC_TAPSET, tap);
++
++	return 0;
++}
++
++#define SH_MOBILE_SDHI_MAX_TAP	3
++
++static int sh_mobile_sdhi_select_tuning(struct tmio_mmc_host *host,
++					unsigned long *tap)
++{
++	unsigned long tap_num;	/* total number of taps */
++	unsigned long tap_cnt;	/* counter of tuning success */
++	unsigned long tap_set;	/* tap position */
++	unsigned long tap_start;	/* start position of tuning success */
++	unsigned long tap_end;	/* end position of tuning success */
++	unsigned long ntap;	/* temporary counter of tuning success */
++	unsigned long i;
++
++	/* Clear SCC_RVSREQ */
++	sd_scc_write32(host, SH_MOBILE_SDHI_SCC_RVSREQ, 0);
++
++	/* Select SCC */
++	tap_num = (sd_scc_read32(host, SH_MOBILE_SDHI_SCC_DTCNTL) >>
++		   SH_MOBILE_SDHI_SCC_DTCNTL_TAPNUM_SHIFT) &
++		SH_MOBILE_SDHI_SCC_DTCNTL_TAPNUM_MASK;
++
++	tap_cnt = 0;
++	ntap = 0;
++	tap_start = 0;
++	tap_end = 0;
++	for (i = 0; i < tap_num * 2; i++) {
++		if (tap[i] == 0)
++			ntap++;
++		else {
++			if (ntap > tap_cnt) {
++				tap_start = i - ntap;
++				tap_end = i - 1;
++				tap_cnt = ntap;
++			}
++			ntap = 0;
++		}
++	}
++
++	if (ntap > tap_cnt) {
++		tap_start = i - ntap;
++		tap_end = i - 1;
++		tap_cnt = ntap;
++	}
++
++	if (tap_cnt >= SH_MOBILE_SDHI_MAX_TAP)
++		tap_set = (tap_start + tap_end) / 2 % tap_num;
++	else
++		return -EIO;
++
++	/* Set SCC */
++	sd_scc_write32(host, SH_MOBILE_SDHI_SCC_TAPSET, tap_set);
++
++	/* Enable auto re-tuning */
++	sd_scc_write32(host, SH_MOBILE_SDHI_SCC_RVSCNTL,
++		SH_MOBILE_SDHI_SCC_RVSCNTL_RVSEN |
++		sd_scc_read32(host, SH_MOBILE_SDHI_SCC_RVSCNTL));
++
++	return 0;
++}
++
++static bool sh_mobile_sdhi_retuning(struct tmio_mmc_host *host)
++{
++	/* Check SCC error */
++	if (sd_scc_read32(host, SH_MOBILE_SDHI_SCC_RVSCNTL) &
++	    SH_MOBILE_SDHI_SCC_RVSCNTL_RVSEN &&
++	    sd_scc_read32(host, SH_MOBILE_SDHI_SCC_RVSREQ) &
++	    SH_MOBILE_SDHI_SCC_RVSREQ_RVSERR) {
++		/* Clear SCC error */
++		sd_scc_write32(host, SH_MOBILE_SDHI_SCC_RVSREQ, 0);
++		return true;
++	}
++	return false;
++}
++
++static void sh_mobile_sdhi_hw_reset(struct tmio_mmc_host *host)
++{
++	struct tmio_mmc_data *pdata = host->pdata;
++
++	if (pdata->flags & TMIO_MMC_HAS_UHS_SCC) {
++		/* Reset SCC */
++		sd_ctrl_write16(host, CTL_SD_CARD_CLK_CTL, ~0x0100 &
++			sd_ctrl_read16(host, CTL_SD_CARD_CLK_CTL));
++
++		sd_scc_write32(host, SH_MOBILE_SDHI_SCC_CKSEL,
++			~SH_MOBILE_SDHI_SCC_CKSEL_DTSEL &
++			sd_scc_read32(host, SH_MOBILE_SDHI_SCC_CKSEL));
++
++		sd_ctrl_write16(host, CTL_SD_CARD_CLK_CTL, 0x0100 |
++			sd_ctrl_read16(host, CTL_SD_CARD_CLK_CTL));
++
++		sd_scc_write32(host, SH_MOBILE_SDHI_SCC_RVSCNTL,
++			~SH_MOBILE_SDHI_SCC_RVSCNTL_RVSEN &
++			sd_scc_read32(host, SH_MOBILE_SDHI_SCC_RVSCNTL));
++
++		sd_scc_write32(host, SH_MOBILE_SDHI_SCC_RVSCNTL,
++			~SH_MOBILE_SDHI_SCC_RVSCNTL_RVSEN &
++			sd_scc_read32(host, SH_MOBILE_SDHI_SCC_RVSCNTL));
++	}
++}
++
+ static int sh_mobile_sdhi_wait_idle(struct tmio_mmc_host *host)
+ {
+ 	int timeout = 1000;
+@@ -311,7 +542,7 @@ static int sh_mobile_sdhi_probe(struct platform_device *pdev)
+ 	struct tmio_mmc_data *mmd = pdev->dev.platform_data;
+ 	struct tmio_mmc_host *host;
+ 	struct resource *res;
+-	int irq, ret, i = 0;
++	int irq, ret, i;
+ 	struct tmio_mmc_dma *dma_priv;
+ 
+ 	res = platform_get_resource(pdev, IORESOURCE_MEM, 0);
+@@ -357,6 +588,7 @@ static int sh_mobile_sdhi_probe(struct platform_device *pdev)
+ 		host->bus_shift = of_data->bus_shift;
+ 	}
+ 
++	host->set_clk_div	= sh_mobile_sdhi_set_clk_div;
+ 	host->dma		= dma_priv;
+ 	host->write16_hook	= sh_mobile_sdhi_write16_hook;
+ 	host->clk_enable	= sh_mobile_sdhi_clk_enable;
+@@ -364,6 +596,12 @@ static int sh_mobile_sdhi_probe(struct platform_device *pdev)
+ 	host->clk_disable	= sh_mobile_sdhi_clk_disable;
+ 	host->multi_io_quirk	= sh_mobile_sdhi_multi_io_quirk;
+ 	host->start_signal_voltage_switch = sh_mobile_sdhi_start_signal_voltage_switch;
++	host->inquiry_tuning	= sh_mobile_sdhi_inquiry_tuning;
++	host->init_tuning	= sh_mobile_sdhi_init_tuning;
++	host->prepare_tuning	= sh_mobile_sdhi_prepare_tuning;
++	host->select_tuning	= sh_mobile_sdhi_select_tuning;
++	host->retuning		= sh_mobile_sdhi_retuning;
++	host->hw_reset		= sh_mobile_sdhi_hw_reset;
+ 
+ 	/* Orginally registers were 16 bit apart, could be 32 or 64 nowadays */
+ 	if (!host->bus_shift && resource_size(res) > 0x100) /* old way to determine the shift */
+@@ -403,6 +641,30 @@ static int sh_mobile_sdhi_probe(struct platform_device *pdev)
+ 	if (ret < 0)
+ 		goto efree;
+ 
++	if (mmc_data->capabilities & MMC_CAP_UHS_SDR104) {
++		mmc_data->capabilities |= MMC_CAP_HW_RESET;
++		mmc_data->flags |= TMIO_MMC_HAS_UHS_SCC;
++	}
++
++	if (of_id && of_id->data) {
++		const struct sh_mobile_sdhi_of_data *of_data = of_id->data;
++		const struct sh_mobile_sdhi_scc *taps = of_data->taps;
++		bool hit = false;
++
++		for (i = 0; i < of_data->taps_num; i++) {
++			if (taps[i].clk == 0 ||
++			    taps[i].clk == host->mmc->f_max) {
++				host->scc_tappos = taps->tap;
++				hit = true;
++				break;
++			}
++		}
++
++		if (!hit)
++			dev_warn(&host->pdev->dev, "Unknown clock rate for SDR104 and HS200\n");
++	}
++
++	i = 0;
+ 	while (1) {
+ 		irq = platform_get_irq(pdev, i);
+ 		if (irq < 0)
 -- 
 2.1.4
-
