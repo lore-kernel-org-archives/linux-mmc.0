@@ -1,44 +1,65 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH 10/23] mmc: core: disable auto retune during card
- detection process
-Date: Tue, 10 May 2016 09:55:56 +0300
-Message-ID: <573185FC.5060506@intel.com>
-References: <1460741387-23815-1-git-send-email-aisheng.dong@nxp.com>
- <1460741387-23815-11-git-send-email-aisheng.dong@nxp.com>
- <571A1D85.3020200@intel.com>
- <CAA+hA=R9JfV4ScuM=OZ3VHdSiQiMO9io8mQQDNXfkTwNv7RVvg@mail.gmail.com>
- <5721B602.6010306@intel.com>
- <20160428132249.GB27560@shlinux2.ap.freescale.net>
- <57230515.9030602@intel.com>
- <20160429074258.GA28427@shlinux2.ap.freescale.net>
+From: Lucas Stach <dev-8ppwABl0HbeELgA04lAiVw@public.gmane.org>
+Subject: Re: [PATCH] mmc: tegra: Disable UHS-I modes for tegra30
+Date: Tue, 10 May 2016 09:09:53 +0200
+Message-ID: <1462864193.13327.2.camel@lynxeye.de>
+References: <1462806903-13860-1-git-send-email-jonathanh@nvidia.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga03.intel.com ([134.134.136.65]:34818 "EHLO mga03.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750955AbcEJG7w (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 10 May 2016 02:59:52 -0400
-In-Reply-To: <20160429074258.GA28427@shlinux2.ap.freescale.net>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1462806903-13860-1-git-send-email-jonathanh-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
+Sender: linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Jon Hunter <jonathanh-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>, Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Stephen Warren <swarren-3lzwWm7+Weoh9ZMKESR00Q@public.gmane.org>, Thierry Reding <thierry.reding-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Alexandre Courbot <gnurou-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Cc: linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
-To: Dong Aisheng <dongas86@gmail.com>
-Cc: Dong Aisheng <aisheng.dong@nxp.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, Chris Ball <chris@printf.net>, Shawn Guo <shawnguo@kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, haibo.chen@nxp.com
 
-On 29/04/16 10:42, Dong Aisheng wrote:
-> And IMX6DL ARD is even worser due to it's using common
-> mmc_send_tuning() function.
-> root@imx6qdlsolo:~# 
-> root@imx6qdlsolo:~# [  129.462564] sysrq: SysRq : Changing Loglevel
-> [  129.466902] sysrq: Loglevel set to 8
-> [  131.616078] sdhci-esdhc-imx 2198000.usdhc: desired SD clock: 198000000, actual: 198000000
-> [  131.625311] sdhci-esdhc-imx 2198000.usdhc: change pinctrl state for uhs 6
-> [  131.632133] sdhci-esdhc-imx 2198000.usdhc: desired SD clock: 198000000, actual: 198000000
-> [  131.642121] mmc0: starting CMD13 arg 59b40000 flags 00000195
-> [  131.648925] sdhci-esdhc-imx 2198000.usdhc: tunning with delay 0x0 ESDHC_TUNE_CTRL_STATUS 0x0
-> [  131.657818] mmc0: starting CMD19 arg 00000000 flags 00000035
-> [  131.663518] mmc0:     blksz 64 blocks 1 flags 00000200 tsac 150 ms nsac 0
-> [  131.670835] mmc0: req done (CMD19): -123: 00000000 00000000 00000000 00000000
+Hi Jon,
 
-You should stop here because -123 is -ENOMEDIUM
+Am Montag, den 09.05.2016, 16:15 +0100 schrieb Jon Hunter:
+> Support for SD cards is not working on the Tegra30 Beaver board and
+> on
+> boot the following error message is seen if an SD card is present:
+>=20
+> =C2=A0mmc0: error -110 whilst initialising SD card
+>=20
+Can you please tell me what kind of SD card you used and at which point
+in the initialization it is hanging? I've tested this change on Beaver
+and haven't seen any failures after I implemented the memcomppad
+calibration.
 
+> In addition to this, Tegra30 is also randomly hanging during system
+> suspend when entering and is caused by the Tegra SDHCI driver.=20
+
+I'll have a look at this soonish.
+
+> Similar
+> issues have been seen on the Tegra124 Jetson TK1 and are linked to
+> the
+> UHS-I tuning sequence. Disabling the UHS-I modes for Tegra30 fixes SD
+> card support and prevents any hangs from occurring when entering
+> system
+> suspend. Therefore, disable the UHS-I modes for Tegra30 for now until
+> we can correct the tuning sequence for Tegra.
+>=20
+> Signed-off-by: Jon Hunter <jonathanh-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
+> ---
+> =C2=A0drivers/mmc/host/sdhci-tegra.c | 4 ----
+> =C2=A01 file changed, 4 deletions(-)
+>=20
+> diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-
+> tegra.c
+> index bcc0de47fe7e..24c33aee8e7c 100644
+> --- a/drivers/mmc/host/sdhci-tegra.c
+> +++ b/drivers/mmc/host/sdhci-tegra.c
+> @@ -347,10 +347,6 @@ static const struct sdhci_pltfm_data
+> sdhci_tegra30_pdata =3D {
+> =C2=A0
+> =C2=A0static const struct sdhci_tegra_soc_data soc_data_tegra30 =3D {
+> =C2=A0	.pdata =3D &sdhci_tegra30_pdata,
+> -	.nvquirks =3D NVQUIRK_ENABLE_SDHCI_SPEC_300 |
+> -		=C2=A0=C2=A0=C2=A0=C2=A0NVQUIRK_ENABLE_SDR50 |
+> -		=C2=A0=C2=A0=C2=A0=C2=A0NVQUIRK_ENABLE_SDR104 |
+> -		=C2=A0=C2=A0=C2=A0=C2=A0NVQUIRK_HAS_PADCALIB,
+> =C2=A0};
+> =C2=A0
+> =C2=A0static const struct sdhci_ops tegra114_sdhci_ops =3D {
