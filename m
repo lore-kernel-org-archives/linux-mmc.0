@@ -1,61 +1,68 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: sdhci-st: correct name of sd-uhs-sdr50 property
-Date: Tue, 10 May 2016 12:28:39 +0200
-Message-ID: <CAPDyKFovKxGDnnyKAWjpjTN=7XB5sbTe+gyh2OTSRQ=bmnJTFQ@mail.gmail.com>
-References: <1462839264-13300-1-git-send-email-horms+renesas@verge.net.au>
+Subject: Re: [PATCH V2 0/3] mmc: block: Fix tuning (by avoiding it) for RPMB
+Date: Tue, 10 May 2016 12:28:47 +0200
+Message-ID: <CAPDyKFouAZyBKM0-5jAtE0AJ92jZ5Z-YM3_Jxtnmp+1vfPF1gQ@mail.gmail.com>
+References: <1462361893-11897-1-git-send-email-adrian.hunter@intel.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wm0-f50.google.com ([74.125.82.50]:37565 "EHLO
-	mail-wm0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751329AbcEJK2l (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 10 May 2016 06:28:41 -0400
-Received: by mail-wm0-f50.google.com with SMTP id a17so19179491wme.0
-        for <linux-mmc@vger.kernel.org>; Tue, 10 May 2016 03:28:40 -0700 (PDT)
-In-Reply-To: <1462839264-13300-1-git-send-email-horms+renesas@verge.net.au>
+Received: from mail-wm0-f45.google.com ([74.125.82.45]:38568 "EHLO
+	mail-wm0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751682AbcEJK2s (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 10 May 2016 06:28:48 -0400
+Received: by mail-wm0-f45.google.com with SMTP id g17so19138549wme.1
+        for <linux-mmc@vger.kernel.org>; Tue, 10 May 2016 03:28:48 -0700 (PDT)
+In-Reply-To: <1462361893-11897-1-git-send-email-adrian.hunter@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Simon Horman <horms+renesas@verge.net.au>
-Cc: Srinivas Kandagatla <srinivas.kandagatla@gmail.com>, Maxime Coquelin <maxime.coquelin@st.com>, Patrice Chotard <patrice.chotard@st.com>, Adrian Hunter <adrian.hunter@intel.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, kernel@stlinux.com, linux-mmc <linux-mmc@vger.kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>
+To: Adrian Hunter <adrian.hunter@intel.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Tomas Winkler <tomas.winkler@intel.com>
 
-On 10 May 2016 at 02:14, Simon Horman <horms+renesas@verge.net.au> wrote:
-> Correct what appears to be a typo in the name of the sd-uhs-sdr50.
+On 4 May 2016 at 13:38, Adrian Hunter <adrian.hunter@intel.com> wrote:
+> Hi
 >
-> Also fix mixed tab/space indentation.
+> The RPMB partition only allows certain commands.  In particular,
+> the tuning command (CMD21) is not allowed -  refer JEDEC eMMC
+> standard v5.1 section 6.2.2 Command restrictions.
 >
-> Signed-off-by: Simon Horman <horms+renesas@verge.net.au>
+> That means commands will begin failing if re-tuning is needed
+> while switched to the RPMB partition.
+>
+> As we discussed here:
+>
+>         http://marc.info/?l=linux-mmc&m=146218765801869
+>
+> this patch set takes a new approach which is:
+>
+>         Re-tune before switching to the RPMB partition
+>         Don't allow re-tuning while switched to RPMB
+>         Switch back from the RPMB partition immediately
+>
+> I gave it a brief test with a HS400 eMMC and using mmc utils
+> to access RPMB.  Despite all the partition switches and
+> re-tuning in between, all RPMB operations were successful.
+>
+>
+> Changes in V2:
+>
+>         New approach entirely
+>
+>
+> Adrian Hunter (3):
+>       mmc: core: Add a facility to "pause" re-tuning
+>       mmc: block: Always switch back to main area after RPMB access
+>       mmc: block: Pause re-tuning while switched to the RPMB partition
+>
+>  drivers/mmc/card/block.c | 19 ++++++++++++++++++-
+>  drivers/mmc/core/host.c  | 22 ++++++++++++++++++++++
+>  include/linux/mmc/host.h |  4 ++++
+>  3 files changed, 44 insertions(+), 1 deletion(-)
+>
+>
+> Regards
+> Adrian
 
 Thanks, applied for next!
 
 Kind regards
 Uffe
-
-> ---
->  Documentation/devicetree/bindings/mmc/sdhci-st.txt | 4 ++--
->  1 file changed, 2 insertions(+), 2 deletions(-)
->
-> diff --git a/Documentation/devicetree/bindings/mmc/sdhci-st.txt b/Documentation/devicetree/bindings/mmc/sdhci-st.txt
-> index 18d950df2749..88faa91125bf 100644
-> --- a/Documentation/devicetree/bindings/mmc/sdhci-st.txt
-> +++ b/Documentation/devicetree/bindings/mmc/sdhci-st.txt
-> @@ -38,7 +38,7 @@ Optional properties:
->  - bus-width:           Number of data lines.
->                         See:  Documentation/devicetree/bindings/mmc/mmc.txt.
->
-> -- max-frequency:       Can be 200MHz, 100Mz or 50MHz (default) and used for
-> +- max-frequency:       Can be 200MHz, 100Mz or 50MHz (default) and used for
->                         configuring the CCONFIG3 in the mmcss.
->                         See:  Documentation/devicetree/bindings/mmc/mmc.txt.
->
-> @@ -48,7 +48,7 @@ Optional properties:
->  - vqmmc-supply:                Phandle to the regulator dt node, mentioned as the vcc/vdd
->                         supply in eMMC/SD specs.
->
-> -- sd-uhs--sdr50:       To enable the SDR50 in the mmcss.
-> +- sd-uhs-sdr50:        To enable the SDR50 in the mmcss.
->                         See:  Documentation/devicetree/bindings/mmc/mmc.txt.
->
->  - sd-uhs-sdr104:       To enable the SDR104 in the mmcss.
-> --
-> 2.1.4
->
