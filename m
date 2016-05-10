@@ -1,38 +1,57 @@
-From: Simon Horman <horms+renesas@verge.net.au>
-Subject: [PATCH/RFC 3/3] ARM: dts: r8a7790: lager: Enable UHS-I SDR-104
-Date: Tue, 10 May 2016 14:52:04 +0900
-Message-ID: <1462859524-28522-4-git-send-email-horms+renesas@verge.net.au>
-References: <1462859524-28522-1-git-send-email-horms+renesas@verge.net.au>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from kirsty.vergenet.net ([202.4.237.240]:58429 "EHLO
-	kirsty.vergenet.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751228AbcEJFwK (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 10 May 2016 01:52:10 -0400
-In-Reply-To: <1462859524-28522-1-git-send-email-horms+renesas@verge.net.au>
-Sender: linux-mmc-owner@vger.kernel.org
+From: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: Re: [PATCH] mmc: tegra: Disable UHS-I modes for tegra30
+Date: Tue, 10 May 2016 08:25:28 +0200
+Message-ID: <CAPDyKFpJAdwkWzC0yqdv5mdzBQiMf=8JXYc9r8kCdXCOQsgmXw@mail.gmail.com>
+References: <1462806903-13860-1-git-send-email-jonathanh@nvidia.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1462806903-13860-1-git-send-email-jonathanh-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
+Sender: linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Jon Hunter <jonathanh-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
+Cc: Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Stephen Warren <swarren-3lzwWm7+Weoh9ZMKESR00Q@public.gmane.org>, Thierry Reding <thierry.reding-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Alexandre Courbot <gnurou-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, linux-mmc <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Ian Molton <ian@mnementh.co.uk>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, Magnus Damm <magnus.damm@gmail.com>, linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org, Ben Hutchings <ben.hutchings@codethink.co.uk>
 
-Add the sd-uhs-sdr104 property to SDHI0.
+On 9 May 2016 at 17:15, Jon Hunter <jonathanh-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org> wrote:
+> Support for SD cards is not working on the Tegra30 Beaver board and on
+> boot the following error message is seen if an SD card is present:
+>
+>  mmc0: error -110 whilst initialising SD card
+>
+> In addition to this, Tegra30 is also randomly hanging during system
+> suspend when entering and is caused by the Tegra SDHCI driver. Similar
+> issues have been seen on the Tegra124 Jetson TK1 and are linked to the
+> UHS-I tuning sequence. Disabling the UHS-I modes for Tegra30 fixes SD
+> card support and prevents any hangs from occurring when entering system
+> suspend. Therefore, disable the UHS-I modes for Tegra30 for now until
+> we can correct the tuning sequence for Tegra.
+>
+> Signed-off-by: Jon Hunter <jonathanh-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
 
-Signed-off-by: Simon Horman <horms+renesas@verge.net.au>
----
- arch/arm/boot/dts/r8a7790-lager.dts | 1 +
- 1 file changed, 1 insertion(+)
+Perhaps we should add a fixes/stable tag as well?
 
-diff --git a/arch/arm/boot/dts/r8a7790-lager.dts b/arch/arm/boot/dts/r8a7790-lager.dts
-index 749ba02b6a53..05d1ff7acee2 100644
---- a/arch/arm/boot/dts/r8a7790-lager.dts
-+++ b/arch/arm/boot/dts/r8a7790-lager.dts
-@@ -559,6 +559,7 @@
- 	vqmmc-supply = <&vccq_sdhi0>;
- 	cd-gpios = <&gpio3 6 GPIO_ACTIVE_LOW>;
- 	sd-uhs-sdr50;
-+	sd-uhs-sdr104;
- 	status = "okay";
- };
- 
--- 
-2.1.4
+Kind regards
+Uffe
 
+> ---
+>  drivers/mmc/host/sdhci-tegra.c | 4 ----
+>  1 file changed, 4 deletions(-)
+>
+> diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
+> index bcc0de47fe7e..24c33aee8e7c 100644
+> --- a/drivers/mmc/host/sdhci-tegra.c
+> +++ b/drivers/mmc/host/sdhci-tegra.c
+> @@ -347,10 +347,6 @@ static const struct sdhci_pltfm_data sdhci_tegra30_pdata = {
+>
+>  static const struct sdhci_tegra_soc_data soc_data_tegra30 = {
+>         .pdata = &sdhci_tegra30_pdata,
+> -       .nvquirks = NVQUIRK_ENABLE_SDHCI_SPEC_300 |
+> -                   NVQUIRK_ENABLE_SDR50 |
+> -                   NVQUIRK_ENABLE_SDR104 |
+> -                   NVQUIRK_HAS_PADCALIB,
+>  };
+>
+>  static const struct sdhci_ops tegra114_sdhci_ops = {
+> --
+> 2.1.4
+>
