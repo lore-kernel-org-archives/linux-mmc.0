@@ -1,195 +1,249 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 01/23] mmc: sdhci: removed unneeded function wrappers
-Date: Tue, 10 May 2016 11:46:58 +0200
-Message-ID: <CAPDyKFrr2753H=6kUOSxVJdUczsFufhhySKTpsk6VTSLy5_ULw@mail.gmail.com>
-References: <1460741387-23815-1-git-send-email-aisheng.dong@nxp.com>
-	<1460741387-23815-2-git-send-email-aisheng.dong@nxp.com>
+From: Shawn Lin <shawn.lin@rock-chips.com>
+Subject: Re: [PATCH 2/2] dt-bindings: rockchip-dw-mshc: add
+ rockchip,default-drv-phase
+Date: Tue, 10 May 2016 18:19:49 +0800
+Message-ID: <1f2f43c7-2672-e448-eddb-2d613bb8dc48@rock-chips.com>
+References: <1462527648-24443-1-git-send-email-shawn.lin@rock-chips.com>
+ <1462527673-24711-1-git-send-email-shawn.lin@rock-chips.com>
+ <CAD=FV=WSkBwBjVsRoDsfjD+sNfR70mKGRA0khjPKKW0zS2=PTw@mail.gmail.com>
+ <b15dcb4f-1584-8219-2fe0-97eecb0c64a6@rock-chips.com>
+ <CAD=FV=XToSzqSh=SShHuQU9W_m7gfyQn8wRXkLy79t+tnqZknA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wm0-f46.google.com ([74.125.82.46]:38671 "EHLO
-	mail-wm0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751409AbcEJJrA (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 10 May 2016 05:47:00 -0400
-Received: by mail-wm0-f46.google.com with SMTP id g17so17154542wme.1
-        for <linux-mmc@vger.kernel.org>; Tue, 10 May 2016 02:46:59 -0700 (PDT)
-In-Reply-To: <1460741387-23815-2-git-send-email-aisheng.dong@nxp.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=utf-8;
+	format=flowed
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <CAD=FV=XToSzqSh=SShHuQU9W_m7gfyQn8wRXkLy79t+tnqZknA@mail.gmail.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Doug Anderson <dianders@chromium.org>
+Cc: shawn.lin@rock-chips.com, Jaehoon Chung <jh80.chung@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Brian Norris <briannorris@chromium.org>, Heiko Stuebner <heiko@sntech.de>, "open list:ARM/Rockchip SoC..." <linux-rockchip@lists.infradead.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Dong Aisheng <aisheng.dong@nxp.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, Shawn Guo <shawnguo@kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Haibo Chen <haibo.chen@nxp.com>, Dong Aisheng <dongas86@gmail.com>
 
-On 15 April 2016 at 19:29, Dong Aisheng <aisheng.dong@nxp.com> wrote:
-> After commit d6463f170cf0 ("mmc: sdhci: Remove redundant runtime PM calls"),
-> some of original sdhci_do_xx() function wrappers becomes meaningless,
-> so remove them.
+=E5=9C=A8 2016/5/10 0:31, Doug Anderson =E5=86=99=E9=81=93:
+> Hi,
 >
-> Signed-off-by: Dong Aisheng <aisheng.dong@nxp.com>
+> On Mon, May 9, 2016 at 4:12 AM, Shawn Lin <shawn.lin@rock-chips.com> =
+wrote:
+>>> 1. Specifying a single number for this property in terms of "degree=
+s"
+>>> is probably not right.  The whole point of setting the "drive phase=
+"
+>>> is to meet hold times, which are specified in the spec in terms of =
+ns
+>>> in the spec and also specified differently for different SD/MMC spe=
+ed
+>>> modes.  Note also that "phase" translates to very different delays =
+(in
+>>> terms of ns) depending on the clock rate:
+>>>
+>>> At 400 kHz, period is 2.5 us, so 90 degree phase offset is a delay =
+of 625
+>>> ns
+>>> At 25 MHz, period is 40 ns, so a 90 degree phase offset represents =
+a
+>>> delay of 10 ns.
+>>> At 50 MHz, period is 20 ns, so a 90 degree phase offset represents =
+a
+>>> delay of 5 ns.
+>>> At 200 MHz, period is period is 5 ns, so a 90 degree phase offset
+>>> represents a delay of 1.25 ns.
+>>
+>>
+>> yes, if we use degrees only(0/90/180/270), the timing is always righ=
+t.
+>> But considering the delay number, we need to do some crazy calculati=
+on
+>> in the set_ios callback.
+>
+> Great, so let's limit it to 0/90/180/270 for the drive phase offset.
+> We don't need lots of precision for the drive phase offset (right?)
+> and accuracy is more important.
 
-Thanks, applied for next!
+yes.
 
-Kind regards
-Uffe
+>
+>
+>>> 2. As I understand it, the value needed for the drive phase is not
+>>> board specific unless you've got super crazy layout on a board (whe=
+re
+>>> the clock line takes a very different path than everything else).
+>>> It's also not even terribly SoC-specific unless you've got some ver=
+y
+>>> strange incarnation of dw_mmc that has very different internal dela=
+ys
+>>> than everyone else.  Said another way, until we see an instance of =
+an
+>>> SoC/board that really needs to do things special I'd say that we
+>>> should just implement this all in code (no device tree bindings).
+>>>
+>>
+>> I'm prone to think it should be Soc specific if making sure the layo=
+ut
+>> for data lines is in equal length.
+>
+> Sure, it can be SoC specific.  ...though at the moment, I'd bet that
+> you can come up with a single rule for the drive phase offset that
+> will work for every Rockchip SoC produced so far, especially if you
+> are using only 0/90/180/270.  I'd imagine that they all have similar
+> enough internal delays.
 
-> ---
->  drivers/mmc/host/sdhci.c | 60 ++++++++++++------------------------------------
->  1 file changed, 15 insertions(+), 45 deletions(-)
+=46or a specific Soc, it's the basic rule to make sure the internal del=
+ays
+is the same(nearly the same) for all of the lines.
+
 >
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index 8e74e75..be52a3a 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -53,7 +53,7 @@ static void sdhci_finish_data(struct sdhci_host *);
->  static void sdhci_finish_command(struct sdhci_host *);
->  static int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode);
->  static void sdhci_enable_preset_value(struct sdhci_host *host, bool enable);
-> -static int sdhci_do_get_cd(struct sdhci_host *host);
-> +static int sdhci_get_cd(struct mmc_host *mmc);
 >
->  #ifdef CONFIG_PM
->  static void sdhci_runtime_pm_bus_on(struct sdhci_host *host);
-> @@ -194,7 +194,7 @@ EXPORT_SYMBOL_GPL(sdhci_reset);
->  static void sdhci_do_reset(struct sdhci_host *host, u8 mask)
->  {
->         if (host->quirks & SDHCI_QUIRK_NO_CARD_NO_RESET) {
-> -               if (!sdhci_do_get_cd(host))
-> +               if (!sdhci_get_cd(host->mmc))
->                         return;
->         }
+>>> 3. If this property was actually board specific and actually needed=
+ to
+>>> be tuned board-by-board, you'd have a bug because your new device t=
+ree
+>>> bindings are not backward compatible and you'd probably be breaking
+>>> old boards.  Specifically you're changing the definition of what
+>>> happens when "rockchip,default-drv-phase" is not specified.  Old
+>>> behavior was to leave the value that was setup by the firmware (or
+>>> perhaps the hardware default if the firmware didn't touch this).
+>>
+>>
+>> drv_phase is for all the data lines instead of tuning the lines
+>> one-by-one. So this patch can't save the terrible board layout.
+>> But I agree that it will break the compatibility backward if firware
+>> touch this value.
+>>
+>>>
+>>> ---
+>>>
+>>> OK, so what should we do?
+>>>
+>>> We could certainly do lots of crazy math to come up with the ideal
+>>> hold time for all different speed modes and all different types of
+>>> cards.  With my reading of the Designware Databook this would mean
+>>> that somewhere we'd want to specify which delay method we're using
+>>> (phase shift vs. delay line) and how long all the delays timings al=
+l
+>>> are on your particular SoC.  That all sounds quite difficult, thoug=
+h.
+>>
+>>
+>> delay line is diff from chip to chip, soc-to-soc, board-to-board. Fo=
+r
+>> sample-phase we have tuning process and re-tune, but not for drv-pha=
+se.
+>> So We bascially should avoid to use it for drv-phase. Another
+>> consideration is the temperature drift of delay line.
+>>
+>> Maybe we should do some tricky limitation on clk-mmc-phase to only
+>> support fixed degrees?
 >
-> @@ -1393,11 +1393,11 @@ void sdhci_set_uhs_signaling(struct sdhci_host *host, unsigned timing)
->  }
->  EXPORT_SYMBOL_GPL(sdhci_set_uhs_signaling);
+> As per above, let's not use delay line for drive delay.  On all
+> Rockchip SoCs that I have seen it's possible to make 0/90/180/270 ver=
+y
+> accurately.  That means no board-to-board differences.  Current
+> mainline Linux kernel source code will always make 0/90/180/270 using
+> phase offset (not delay line).
+
+yes, 0/90/180/270 is very accurate and mainline kernel use phase offset
+for these four phase.
+
 >
-> -static void sdhci_do_set_ios(struct sdhci_host *host, struct mmc_ios *ios)
-> +static void sdhci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
->  {
-> +       struct sdhci_host *host = mmc_priv(mmc);
->         unsigned long flags;
->         u8 ctrl;
-> -       struct mmc_host *mmc = host->mmc;
+> For sampling we use tuning and using the delay elements makes some
+> sense (since 90 degrees is not quite accurate enough to fully tune
+> UHS).  ...but for driving where the only requirement is hold times we
+> don't need delay elements.
+
+Right. We care hold time here.
+
 >
->         spin_lock_irqsave(&host->lock, flags);
 >
-> @@ -1551,16 +1551,10 @@ static void sdhci_do_set_ios(struct sdhci_host *host, struct mmc_ios *ios)
->         spin_unlock_irqrestore(&host->lock, flags);
->  }
+>>> Probably you could just add a simple function that looked at the cl=
+ock
+>>> and speed mode and always chose an offset of 90 or 180 degrees.  At
+>>> least on Rockchip devices you can be certain that you can make 90 a=
+nd
+>>> 180 degrees using phase shifts and thus the timings should be
+>>> consistent.  By default you could just always choose 180.  The
+>>> Designware databook has some examples where it picked 90 degrees
+>>> (SDR50, DDR50, SDR25, MMC High Speed), but I'm not enough of an MMC
+>>> expert to know if there is some benefit to choosing 90.  Would we
+>>> violate any specs if we just chose 180 degrees all the time everywh=
+ere
+>>> on all Rockchip devices?
+>>
+>>
+>> It needs more waveform test to see how things going. But most of
+>> rockchip platforms in the pass years didn't touch drv-phase stuff no=
+t
+>> only in kernel but also in firmware, then we still cannot see the
+>> violation against the spec when using defalut reset value, namely 18=
+0, for
+>> drv-phase.
 >
-> -static void sdhci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
-> +static int sdhci_get_cd(struct mmc_host *mmc)
->  {
->         struct sdhci_host *host = mmc_priv(mmc);
-> -
-> -       sdhci_do_set_ios(host, ios);
-> -}
-> -
-> -static int sdhci_do_get_cd(struct sdhci_host *host)
-> -{
-> -       int gpio_cd = mmc_gpio_get_cd(host->mmc);
-> +       int gpio_cd = mmc_gpio_get_cd(mmc);
+> Right, most Rockchip platforms simply don't touch this and it works
+> OK.  ...but I don't think it defaults to 180.  Grepping through on my
+> veyron (rk3288) device shows
 >
->         if (host->flags & SDHCI_DEVICE_DEAD)
->                 return 0;
-> @@ -1584,13 +1578,6 @@ static int sdhci_do_get_cd(struct sdhci_host *host)
->         return !!(sdhci_readl(host, SDHCI_PRESENT_STATE) & SDHCI_CARD_PRESENT);
->  }
+>        sdio1_drv - 90
+>        sdio0_drv - 90
+>        sdmmc_drv - 90
+>        emmc_drv -180
 >
-> -static int sdhci_get_cd(struct mmc_host *mmc)
-> -{
-> -       struct sdhci_host *host = mmc_priv(mmc);
-> -
-> -       return sdhci_do_get_cd(host);
-> -}
-> -
->  static int sdhci_check_ro(struct sdhci_host *host)
->  {
->         unsigned long flags;
-> @@ -1615,8 +1602,9 @@ static int sdhci_check_ro(struct sdhci_host *host)
+> ...and, as we've seen, these values appear to be 270 on some other So=
+Cs.
 >
->  #define SAMPLE_COUNT   5
+
+Have your code touched them? I check the TRM and find it should be 180
+always.
+
+Also for rk3036/3368/3399/3228.... the reset vaule is 180...
+
 >
-> -static int sdhci_do_get_ro(struct sdhci_host *host)
-> +static int sdhci_get_ro(struct mmc_host *mmc)
->  {
-> +       struct sdhci_host *host = mmc_priv(mmc);
->         int i, ro_count;
+> The claim from the Designware Databook says that SDR104 and SDR12, an=
+d
+> identification mode need 180 degrees to work properly.  It would be
+> interesting to hook up rk3288 to a signal analyzer and see hold times
+> are OK or if we need to move up to 180 degrees for those modes.
 >
->         if (!(host->quirks & SDHCI_QUIRK_UNSTABLE_RO_DETECT))
-> @@ -1641,13 +1629,6 @@ static void sdhci_hw_reset(struct mmc_host *mmc)
->                 host->ops->hw_reset(host);
->  }
+> Note that the Designware Databook assumes "Delay_O" of 1.4ns.  If
+> yours is shorter then maybe 90 degrees is OK for those modes?
 >
-> -static int sdhci_get_ro(struct mmc_host *mmc)
-> -{
-> -       struct sdhci_host *host = mmc_priv(mmc);
-> -
-> -       return sdhci_do_get_ro(host);
-> -}
-> -
->  static void sdhci_enable_sdio_irq_nolock(struct sdhci_host *host, int enable)
->  {
->         if (!(host->flags & SDHCI_DEVICE_DEAD)) {
-> @@ -1677,10 +1658,10 @@ static void sdhci_enable_sdio_irq(struct mmc_host *mmc, int enable)
->         spin_unlock_irqrestore(&host->lock, flags);
->  }
+
+maybe. But I think 180(downside) is the better.
+
 >
-> -static int sdhci_do_start_signal_voltage_switch(struct sdhci_host *host,
-> -                                               struct mmc_ios *ios)
-> +static int sdhci_start_signal_voltage_switch(struct mmc_host *mmc,
-> +                                            struct mmc_ios *ios)
->  {
-> -       struct mmc_host *mmc = host->mmc;
-> +       struct sdhci_host *host = mmc_priv(mmc);
->         u16 ctrl;
->         int ret;
+> Also: I still haven't heard whether there is any downside to using 18=
+0
+> degrees for modes that only require 90 degrees.  Does it cause
+> problems to just always use 180 degrees?  If not, we could possibly
+> use 180 degrees everywhere and just hardcode it?
+
+ From tons of test on rockchip products which always use 180, I didn't
+see failure. Hardcoding it doesn't look so decent maybe... but anyway
+it works.
+
 >
-> @@ -1768,17 +1749,6 @@ static int sdhci_do_start_signal_voltage_switch(struct sdhci_host *host,
->         }
->  }
 >
-> -static int sdhci_start_signal_voltage_switch(struct mmc_host *mmc,
-> -       struct mmc_ios *ios)
-> -{
-> -       struct sdhci_host *host = mmc_priv(mmc);
-> -
-> -       if (host->version < SDHCI_SPEC_300)
-> -               return 0;
-> -
-> -       return sdhci_do_start_signal_voltage_switch(host, ios);
-> -}
-> -
->  static int sdhci_card_busy(struct mmc_host *mmc)
->  {
->         struct sdhci_host *host = mmc_priv(mmc);
-> @@ -2070,7 +2040,7 @@ static void sdhci_card_event(struct mmc_host *mmc)
->         if (host->ops->card_event)
->                 host->ops->card_event(host);
+> ...but if 180 is ideal everywhere, can you answer:
 >
-> -       present = sdhci_do_get_cd(host);
-> +       present = sdhci_get_cd(host->mmc);
+> * Why does dw_mmc manual spend so much time talking about it?  It
+> could just say "set to 180 degrees".
+
+I'm sure all the rockchip Socs defaultly use 180 for drv_phase if I got
+the right TRMs these years.
+
+Anyway let me check it with my ASIC team and I will let you know
+the result.
+
+
+Thanks.
+
 >
->         spin_lock_irqsave(&host->lock, flags);
+> * Why do Rockchip SoCs default to values that are not 180 degrees?
 >
-> @@ -2643,7 +2613,7 @@ int sdhci_resume_host(struct sdhci_host *host)
->                 sdhci_init(host, 0);
->                 host->pwr = 0;
->                 host->clock = 0;
-> -               sdhci_do_set_ios(host, &host->mmc->ios);
-> +               sdhci_set_ios(host->mmc, &host->mmc->ios);
->         } else {
->                 sdhci_init(host, (host->mmc->pm_flags & MMC_PM_KEEP_POWER));
->                 mmiowb();
-> @@ -2721,8 +2691,8 @@ int sdhci_runtime_resume_host(struct sdhci_host *host)
->         /* Force clock and power re-program */
->         host->pwr = 0;
->         host->clock = 0;
-> -       sdhci_do_start_signal_voltage_switch(host, &host->mmc->ios);
-> -       sdhci_do_set_ios(host, &host->mmc->ios);
-> +       sdhci_start_signal_voltage_switch(host->mmc, &host->mmc->ios);
-> +       sdhci_set_ios(host->mmc, &host->mmc->ios);
+> -Doug
 >
->         if ((host_flags & SDHCI_PV_ENABLED) &&
->                 !(host->quirks2 & SDHCI_QUIRK2_PRESET_VALUE_BROKEN)) {
-> --
-> 1.9.1
 >
+>
+
+
+--=20
+Best Regards
+Shawn Lin
