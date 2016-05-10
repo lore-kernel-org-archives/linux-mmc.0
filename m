@@ -1,63 +1,48 @@
-From: Simon Horman <horms@verge.net.au>
-Subject: Re: [PATCH] MAINTAINERS: update entry for TMIO MMC driver
-Date: Tue, 10 May 2016 09:02:46 +0900
-Message-ID: <20160510000246.GB4530@verge.net.au>
-References: <1462782418-5908-1-git-send-email-wsa@the-dreams.de>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-renesas-soc-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <1462782418-5908-1-git-send-email-wsa@the-dreams.de>
-Sender: linux-renesas-soc-owner@vger.kernel.org
-To: Wolfram Sang <wsa@the-dreams.de>
-Cc: linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org, Ian Molton <ian@mnementh.co.uk>
+From: Simon Horman <horms+renesas-/R6kz+dDXgpPR4JQBCEnsQ@public.gmane.org>
+Subject: [PATCH] mmc: sdhci-st: correct name of sd-uhs-sdr50 property
+Date: Tue, 10 May 2016 09:14:24 +0900
+Message-ID: <1462839264-13300-1-git-send-email-horms+renesas@verge.net.au>
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Srinivas Kandagatla <srinivas.kandagatla-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Maxime Coquelin <maxime.coquelin-qxv4g6HH51o@public.gmane.org>, Patrice Chotard <patrice.chotard-qxv4g6HH51o@public.gmane.org>, Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, kernel-F5mvAk5X5gdBDgjK7y7TUQ@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Simon Horman <horms+renesas-/R6kz+dDXgpPR4JQBCEnsQ@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Mon, May 09, 2016 at 10:26:58AM +0200, Wolfram Sang wrote:
-> From: Wolfram Sang <wsa+renesas@sang-engineering.com>
-> 
-> I have some more additions planned for this driver, so I'd like to get
-> notified of other changes and coordinate them. Drop Ian as maintainer
-> because he hasn't been involved in development for a while. Thanks for
-> all the initial work, of course! Also, reflect the recent changes to
-> the include file layout.
-> 
-> Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
-> Cc: Ian Molton <ian@mnementh.co.uk>
+Correct what appears to be a typo in the name of the sd-uhs-sdr50.
 
-Acked-by: Simon Horman <horms+renesas@verge.net.au>
+Also fix mixed tab/space indentation.
 
-> ---
-> 
-> Ian: If you'd like to stay involved, please speak up and I'll change my patch
-> accordingly.
-> 
->  MAINTAINERS | 9 ++++-----
->  1 file changed, 4 insertions(+), 5 deletions(-)
-> 
-> diff --git a/MAINTAINERS b/MAINTAINERS
-> index 42e65d128d015e..d22540c44b534b 100644
-> --- a/MAINTAINERS
-> +++ b/MAINTAINERS
-> @@ -11245,14 +11245,13 @@ S:	Maintained
->  F:	drivers/media/i2c/tc358743*
->  F:	include/media/i2c/tc358743.h
->  
-> -TMIO MMC DRIVER
-> -M:	Ian Molton <ian@mnementh.co.uk>
-> +TMIO/SDHI MMC DRIVER
-> +M:	Wolfram Sang <wsa+renesas@sang-engineering.com>
->  L:	linux-mmc@vger.kernel.org
-> -S:	Maintained
-> +S:	Supported
->  F:	drivers/mmc/host/tmio_mmc*
->  F:	drivers/mmc/host/sh_mobile_sdhi.c
-> -F:	include/linux/mmc/tmio.h
-> -F:	include/linux/mmc/sh_mobile_sdhi.h
-> +F:	include/linux/mfd/tmio.h
->  
->  TMP401 HARDWARE MONITOR DRIVER
->  M:	Guenter Roeck <linux@roeck-us.net>
-> -- 
-> 2.7.0
-> 
+Signed-off-by: Simon Horman <horms+renesas-/R6kz+dDXgpPR4JQBCEnsQ@public.gmane.org>
+---
+ Documentation/devicetree/bindings/mmc/sdhci-st.txt | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/Documentation/devicetree/bindings/mmc/sdhci-st.txt b/Documentation/devicetree/bindings/mmc/sdhci-st.txt
+index 18d950df2749..88faa91125bf 100644
+--- a/Documentation/devicetree/bindings/mmc/sdhci-st.txt
++++ b/Documentation/devicetree/bindings/mmc/sdhci-st.txt
+@@ -38,7 +38,7 @@ Optional properties:
+ - bus-width:		Number of data lines.
+ 			See:  Documentation/devicetree/bindings/mmc/mmc.txt.
+ 
+-- max-frequency: 	Can be 200MHz, 100Mz or 50MHz (default) and used for
++- max-frequency:	Can be 200MHz, 100Mz or 50MHz (default) and used for
+ 			configuring the CCONFIG3 in the mmcss.
+ 			See:  Documentation/devicetree/bindings/mmc/mmc.txt.
+ 
+@@ -48,7 +48,7 @@ Optional properties:
+ - vqmmc-supply:		Phandle to the regulator dt node, mentioned as the vcc/vdd
+ 			supply in eMMC/SD specs.
+ 
+-- sd-uhs--sdr50:	To enable the SDR50 in the mmcss.
++- sd-uhs-sdr50:	To enable the SDR50 in the mmcss.
+ 			See:  Documentation/devicetree/bindings/mmc/mmc.txt.
+ 
+ - sd-uhs-sdr104:	To enable the SDR104 in the mmcss.
+-- 
+2.1.4
+
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
