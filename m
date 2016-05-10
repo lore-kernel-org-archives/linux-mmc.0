@@ -1,28 +1,19 @@
 From: Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
-Subject: [PATCH v3 4/5] mmc: debugfs: add HS400 enhanced strobe description
-Date: Tue, 10 May 2016 17:09:59 +0800
-Message-ID: <1462871399-32525-1-git-send-email-shawn.lin@rock-chips.com>
+Subject: [PATCH v3 5/5] mmc: sdhci-of-arasan: implement enhanced strobe callback
+Date: Tue, 10 May 2016 17:10:07 +0800
+Message-ID: <1462871407-32566-1-git-send-email-shawn.lin@rock-chips.com>
 References: <1462871343-32361-1-git-send-email-shawn.lin@rock-chips.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 In-Reply-To: <1462871343-32361-1-git-send-email-shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-rockchip>,
- <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-rockchip/>
-List-Post: <mailto:linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-List-Help: <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-rockchip>,
- <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
-Sender: "Linux-rockchip" <linux-rockchip-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-Errors-To: linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 To: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Heiko Stuebner <heiko-4mtYJXux2i+zQB+pC5nmwQ@public.gmane.org>, Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+Cc: Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Heiko Stuebner <heiko-4mtYJXux2i+zQB+pC5nmwQ@public.gmane.org>, linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-We introduce HS400 with enhanced strobe function, so we need
-to add it for debug show.
+Currently sdhci-arasan 5.1 can support enhanced strobe function,
+and we now limit it just for "arasan,sdhci-5.1". Add
+mmc-hs400-enhanced-strobe in DT to enable the function if we'r sure
+our controller can support it.
 
 Signed-off-by: Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
 ---
@@ -30,23 +21,60 @@ Signed-off-by: Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
 Changes in v3: None
 Changes in v2: None
 
- drivers/mmc/core/debugfs.c | 4 +++-
- 1 file changed, 3 insertions(+), 1 deletion(-)
+ drivers/mmc/host/sdhci-of-arasan.c | 20 ++++++++++++++++++++
+ 1 file changed, 20 insertions(+)
 
-diff --git a/drivers/mmc/core/debugfs.c b/drivers/mmc/core/debugfs.c
-index 9382a57..51d7c38 100644
---- a/drivers/mmc/core/debugfs.c
-+++ b/drivers/mmc/core/debugfs.c
-@@ -148,7 +148,9 @@ static int mmc_ios_show(struct seq_file *s, void *data)
- 		str = "mmc HS200";
- 		break;
- 	case MMC_TIMING_MMC_HS400:
--		str = "mmc HS400";
-+		mmc_card_hs400es(host->card) ?
-+			(str = "mmc HS400 enhanced strobe") :
-+			(str = "mmc HS400");
- 		break;
- 	default:
- 		str = "invalid";
+diff --git a/drivers/mmc/host/sdhci-of-arasan.c b/drivers/mmc/host/sdhci-of-arasan.c
+index b6f4c1d..8e5cb06 100644
+--- a/drivers/mmc/host/sdhci-of-arasan.c
++++ b/drivers/mmc/host/sdhci-of-arasan.c
+@@ -25,7 +25,9 @@
+ #include "sdhci-pltfm.h"
+ 
+ #define SDHCI_ARASAN_CLK_CTRL_OFFSET	0x2c
++#define SDHCI_ARASAN_VENDOR_REGISTER	0x78
+ 
++#define VENDOR_ENHANCED_STROBE		BIT(0)
+ #define CLK_CTRL_TIMEOUT_SHIFT		16
+ #define CLK_CTRL_TIMEOUT_MASK		(0xf << CLK_CTRL_TIMEOUT_SHIFT)
+ #define CLK_CTRL_TIMEOUT_MIN_EXP	13
+@@ -79,6 +81,21 @@ static void sdhci_arasan_set_clock(struct sdhci_host *host, unsigned int clock)
+ 	}
+ }
+ 
++static void sdhci_arasan_hs400_enhanced_strobe(struct mmc_host *mmc,
++					struct mmc_ios *ios)
++{
++	u32 vendor;
++	struct sdhci_host *host = mmc_priv(mmc);
++
++	vendor = readl(host->ioaddr + SDHCI_ARASAN_VENDOR_REGISTER);
++	if (ios->enhanced_strobe)
++		vendor |= VENDOR_ENHANCED_STROBE;
++	else
++		vendor &= (~VENDOR_ENHANCED_STROBE);
++
++	writel(vendor, host->ioaddr + SDHCI_ARASAN_VENDOR_REGISTER);
++}
++
+ static struct sdhci_ops sdhci_arasan_ops = {
+ 	.set_clock = sdhci_arasan_set_clock,
+ 	.get_max_clock = sdhci_pltfm_clk_get_max_clock,
+@@ -245,6 +262,9 @@ static int sdhci_arasan_probe(struct platform_device *pdev)
+ 			dev_err(&pdev->dev, "phy_power_on err.\n");
+ 			goto err_phy_power;
+ 		}
++
++		host->mmc_host_ops.hs400_enhanced_strobe =
++					sdhci_arasan_hs400_enhanced_strobe;
+ 	}
+ 
+ 	ret = sdhci_add_host(host);
 -- 
 2.3.7
+
+
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
