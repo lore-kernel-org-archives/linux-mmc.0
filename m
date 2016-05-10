@@ -1,80 +1,53 @@
-From: Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
-Subject: [PATCH v3 5/5] mmc: sdhci-of-arasan: implement enhanced strobe callback
-Date: Tue, 10 May 2016 17:10:07 +0800
-Message-ID: <1462871407-32566-1-git-send-email-shawn.lin@rock-chips.com>
-References: <1462871343-32361-1-git-send-email-shawn.lin@rock-chips.com>
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1462871343-32361-1-git-send-email-shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Heiko Stuebner <heiko-4mtYJXux2i+zQB+pC5nmwQ@public.gmane.org>, linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
+From: Magnus Damm <magnus.damm@gmail.com>
+Subject: Re: [PATCH/RFC 3/3] ARM: dts: r8a7790: lager: Enable UHS-I SDR-104
+Date: Tue, 10 May 2016 18:13:55 +0900
+Message-ID: <CANqRtoRjZjC=uEBvJsWYwu0EMEZwO3zS0JWNwVoBR8zjakMpnA@mail.gmail.com>
+References: <1462859524-28522-1-git-send-email-horms+renesas@verge.net.au>
+	<1462859524-28522-4-git-send-email-horms+renesas@verge.net.au>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-renesas-soc-owner@vger.kernel.org>
+In-Reply-To: <1462859524-28522-4-git-send-email-horms+renesas@verge.net.au>
+Sender: linux-renesas-soc-owner@vger.kernel.org
+To: Simon Horman <horms+renesas@verge.net.au>
+Cc: Ian Molton <ian@mnementh.co.uk>, Ulf Hansson <ulf.hansson@linaro.org>, Wolfram Sang <wsa+renesas@sang-engineering.com>, linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org, Ben Hutchings <ben.hutchings@codethink.co.uk>
 List-Id: linux-mmc@vger.kernel.org
 
-Currently sdhci-arasan 5.1 can support enhanced strobe function,
-and we now limit it just for "arasan,sdhci-5.1". Add
-mmc-hs400-enhanced-strobe in DT to enable the function if we'r sure
-our controller can support it.
+On Tue, May 10, 2016 at 2:52 PM, Simon Horman
+<horms+renesas@verge.net.au> wrote:
+> Add the sd-uhs-sdr104 property to SDHI0.
+>
+> Signed-off-by: Simon Horman <horms+renesas@verge.net.au>
+> ---
+>  arch/arm/boot/dts/r8a7790-lager.dts | 1 +
+>  1 file changed, 1 insertion(+)
+>
+> diff --git a/arch/arm/boot/dts/r8a7790-lager.dts b/arch/arm/boot/dts/r8a7790-lager.dts
+> index 749ba02b6a53..05d1ff7acee2 100644
+> --- a/arch/arm/boot/dts/r8a7790-lager.dts
+> +++ b/arch/arm/boot/dts/r8a7790-lager.dts
+> @@ -559,6 +559,7 @@
+>         vqmmc-supply = <&vccq_sdhi0>;
+>         cd-gpios = <&gpio3 6 GPIO_ACTIVE_LOW>;
+>         sd-uhs-sdr50;
+> +       sd-uhs-sdr104;
+>         status = "okay";
 
-Signed-off-by: Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
----
+Hi Simon,
 
-Changes in v3: None
-Changes in v2: None
+Thanks for this - interesting to see!! From what I can tell this code
+is targeting r8a7790 Lager, and based on the data sheet and the DTS
+there are four SDHI channels for the r8a7790 SoC. All R-Car Gen2 SDHI
+channels are not identical, so on r8a7790 it looks like SDHI0 and
+SDHI1 have extended capabilities for the clocks (and probably support
+SDR104) while SDHI2 and SDHI3 do not have this hardware feature. How
+is this difference handled today? In my mind it would make sense to
+have different compat strings, but I think we differentiate with
+resource size today?
 
- drivers/mmc/host/sdhci-of-arasan.c | 20 ++++++++++++++++++++
- 1 file changed, 20 insertions(+)
+So with this patches I can see that you enable SDR104 on SDHI0 on
+Lager which makes sense, but is SDHI2 support still OK?
 
-diff --git a/drivers/mmc/host/sdhci-of-arasan.c b/drivers/mmc/host/sdhci-of-arasan.c
-index b6f4c1d..8e5cb06 100644
---- a/drivers/mmc/host/sdhci-of-arasan.c
-+++ b/drivers/mmc/host/sdhci-of-arasan.c
-@@ -25,7 +25,9 @@
- #include "sdhci-pltfm.h"
- 
- #define SDHCI_ARASAN_CLK_CTRL_OFFSET	0x2c
-+#define SDHCI_ARASAN_VENDOR_REGISTER	0x78
- 
-+#define VENDOR_ENHANCED_STROBE		BIT(0)
- #define CLK_CTRL_TIMEOUT_SHIFT		16
- #define CLK_CTRL_TIMEOUT_MASK		(0xf << CLK_CTRL_TIMEOUT_SHIFT)
- #define CLK_CTRL_TIMEOUT_MIN_EXP	13
-@@ -79,6 +81,21 @@ static void sdhci_arasan_set_clock(struct sdhci_host *host, unsigned int clock)
- 	}
- }
- 
-+static void sdhci_arasan_hs400_enhanced_strobe(struct mmc_host *mmc,
-+					struct mmc_ios *ios)
-+{
-+	u32 vendor;
-+	struct sdhci_host *host = mmc_priv(mmc);
-+
-+	vendor = readl(host->ioaddr + SDHCI_ARASAN_VENDOR_REGISTER);
-+	if (ios->enhanced_strobe)
-+		vendor |= VENDOR_ENHANCED_STROBE;
-+	else
-+		vendor &= (~VENDOR_ENHANCED_STROBE);
-+
-+	writel(vendor, host->ioaddr + SDHCI_ARASAN_VENDOR_REGISTER);
-+}
-+
- static struct sdhci_ops sdhci_arasan_ops = {
- 	.set_clock = sdhci_arasan_set_clock,
- 	.get_max_clock = sdhci_pltfm_clk_get_max_clock,
-@@ -245,6 +262,9 @@ static int sdhci_arasan_probe(struct platform_device *pdev)
- 			dev_err(&pdev->dev, "phy_power_on err.\n");
- 			goto err_phy_power;
- 		}
-+
-+		host->mmc_host_ops.hs400_enhanced_strobe =
-+					sdhci_arasan_hs400_enhanced_strobe;
- 	}
- 
- 	ret = sdhci_add_host(host);
--- 
-2.3.7
+Cheers,
 
-
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+/ magnus
