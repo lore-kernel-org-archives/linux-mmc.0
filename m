@@ -1,60 +1,56 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v2] mmc: core: Remove redundant rescan_disable flag
-Date: Tue, 10 May 2016 11:44:28 +0200
-Message-ID: <CAPDyKFq4GUN33jQ2nc4FPHtSG26UgkcaCnAXemx0nKLp6P7acg@mail.gmail.com>
-References: <1461868156-5734-1-git-send-email-ulf.hansson@linaro.org>
-	<5723AAAB.60109@intel.com>
-	<CAPDyKFqXEmrAtADNLrEUmF=6oc4-guNTGA=r0UFye3Ox8qO-2w@mail.gmail.com>
-	<5731A4E8.5080608@intel.com>
+Subject: Re: [PATCH 1/3] mmc: core: fix using wrong io voltage if
+ mmc_select_hs200 fails
+Date: Tue, 10 May 2016 11:46:40 +0200
+Message-ID: <CAPDyKFogfeCKTW030MN-yA2xSiTOjGOoVvU2x3QHsWq6brjvYw@mail.gmail.com>
+References: <1461171092-30631-1-git-send-email-aisheng.dong@nxp.com>
+	<CAPDyKFrZW=FVd-5CNrkH4=PgHRxUkT3Vic3vDuuho0NACmziww@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wm0-f42.google.com ([74.125.82.42]:37217 "EHLO
-	mail-wm0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751096AbcEJJoa (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 10 May 2016 05:44:30 -0400
-Received: by mail-wm0-f42.google.com with SMTP id a17so17087690wme.0
-        for <linux-mmc@vger.kernel.org>; Tue, 10 May 2016 02:44:29 -0700 (PDT)
-In-Reply-To: <5731A4E8.5080608@intel.com>
+Received: from mail-wm0-f51.google.com ([74.125.82.51]:32831 "EHLO
+	mail-wm0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751246AbcEJJqm (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 10 May 2016 05:46:42 -0400
+Received: by mail-wm0-f51.google.com with SMTP id g17so26293679wme.0
+        for <linux-mmc@vger.kernel.org>; Tue, 10 May 2016 02:46:41 -0700 (PDT)
+In-Reply-To: <CAPDyKFrZW=FVd-5CNrkH4=PgHRxUkT3Vic3vDuuho0NACmziww@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Jaehoon Chung <jh80.chung@samsung.com>
+To: Dong Aisheng <aisheng.dong@nxp.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, Shawn Guo <shawnguo@kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Haibo Chen <haibo.chen@nxp.com>, Dong Aisheng <dongas86@gmail.com>
 
-On 10 May 2016 at 11:07, Adrian Hunter <adrian.hunter@intel.com> wrote:
-> On 10/05/16 12:01, Ulf Hansson wrote:
->> On 29 April 2016 at 20:40, Adrian Hunter <adrian.hunter@intel.com> wrote:
->>> On 28/04/2016 9:29 p.m., Ulf Hansson wrote:
->>>>
->>>> For the reasons explained below, it's safe to remove the rescan_disable
->>>> flag.
->>>>
->>>> 1)
->>>> cancel_delayed_work_sync() prevents an executing work from re-scheduling
->>>> itself.
->>>>
->>>> 2)
->>>> We are using the system_freezable_wq for the rescan works. As that queue
->>>> becomes frozen when userspace becomes frozen during system PM, we don't
->>>> need to disable the rescan works in the PM_SUSPEND_PREPARE phase.
->>>
->>>
->>> What about the case when a SDIO card has to be removed?  Seems like a rescan
->>> could theoretically get scheduled and run before the workqueue is frozen.
+On 28 April 2016 at 11:26, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+> On 20 April 2016 at 18:51, Dong Aisheng <aisheng.dong@nxp.com> wrote:
+>> Currently MMC core will keep going if HS200/HS timing switch failed
+>> with -EBADMSG error by the assumption that the old timing is still valid.
 >>
->> When the queue gets frozen, it means currently running works will be
->> synced. Works that are scheduled (or becomes scheduled) will be put on
->> hold and not allowed to run before the workqueue becomes un-frozen.
+>> However, for mmc_select_hs200 case, the signal voltage may have already
+>> been switched. If the timing switch failed, we should fall back to
+>> the old voltage in case the card is continue run with legacy timing.
+>>
+>> If fall back signal voltage failed, we explicitly report an EIO error
+>> to force retry during the next power cycle.
+>>
+>> Signed-off-by: Dong Aisheng <aisheng.dong@nxp.com>
+>> ---
+>>  drivers/mmc/core/mmc.c | 11 +++++++++--
+>>  1 file changed, 9 insertions(+), 2 deletions(-)
+>>
+>> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+>> index b8aa12c..f6683a9 100644
+>> --- a/drivers/mmc/core/mmc.c
+>> +++ b/drivers/mmc/core/mmc.c
+>> @@ -1245,9 +1245,11 @@ static int mmc_select_hs200(struct mmc_card *card)
+>>         struct mmc_host *host = card->host;
+>>         bool send_status = true;
+>>         unsigned int old_timing;
+>> +       unsigned int old_signal_voltage;
 >
-> In the pm_notifier the workqueue is not frozen, so new work could be queued
-> and run, which would potentially race with the "host->bus_ops->remove(host)"
-> a few lines further on.
+> Nitpick; you can merge this change into the line above.
+>
 
-You are right, I will put this patch on hold! Thanks!
-
-I need to change the validation for this special SDIO case first. We
-shouldn't need to detach the bus and thus also remove the card in
-these cases, but instead only remove the SDIO func devices.
+Applied for next with a minor change dealing with the nitpick above, thanks!
 
 Kind regards
 Uffe
