@@ -1,56 +1,162 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 1/3] mmc: core: fix using wrong io voltage if
- mmc_select_hs200 fails
-Date: Tue, 10 May 2016 11:46:40 +0200
-Message-ID: <CAPDyKFogfeCKTW030MN-yA2xSiTOjGOoVvU2x3QHsWq6brjvYw@mail.gmail.com>
+Subject: Re: [PATCH 2/3] mmc: core: remove the invalid message in mmc_select_timing
+Date: Tue, 10 May 2016 11:46:45 +0200
+Message-ID: <CAPDyKFq-nTYtqMChTVXsCd9oZyE10p4nO67b_u-tbq_e5HGV2g@mail.gmail.com>
 References: <1461171092-30631-1-git-send-email-aisheng.dong@nxp.com>
-	<CAPDyKFrZW=FVd-5CNrkH4=PgHRxUkT3Vic3vDuuho0NACmziww@mail.gmail.com>
+	<1461171092-30631-2-git-send-email-aisheng.dong@nxp.com>
+	<CAPDyKFqvXTtbZsaWJ1gr7gm-jTpWwL0hAYxDje+LsC4ScyF2bQ@mail.gmail.com>
+	<20160428145806.GF27560@shlinux2.ap.freescale.net>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wm0-f51.google.com ([74.125.82.51]:32831 "EHLO
-	mail-wm0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751246AbcEJJqm (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 10 May 2016 05:46:42 -0400
-Received: by mail-wm0-f51.google.com with SMTP id g17so26293679wme.0
-        for <linux-mmc@vger.kernel.org>; Tue, 10 May 2016 02:46:41 -0700 (PDT)
-In-Reply-To: <CAPDyKFrZW=FVd-5CNrkH4=PgHRxUkT3Vic3vDuuho0NACmziww@mail.gmail.com>
+Received: from mail-wm0-f52.google.com ([74.125.82.52]:38443 "EHLO
+	mail-wm0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750741AbcEJJqr (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 10 May 2016 05:46:47 -0400
+Received: by mail-wm0-f52.google.com with SMTP id g17so17144818wme.1
+        for <linux-mmc@vger.kernel.org>; Tue, 10 May 2016 02:46:46 -0700 (PDT)
+In-Reply-To: <20160428145806.GF27560@shlinux2.ap.freescale.net>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Dong Aisheng <aisheng.dong@nxp.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, Shawn Guo <shawnguo@kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Haibo Chen <haibo.chen@nxp.com>, Dong Aisheng <dongas86@gmail.com>
+To: Dong Aisheng <dongas86@gmail.com>
+Cc: Dong Aisheng <aisheng.dong@nxp.com>, linux-mmc <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, Shawn Guo <shawnguo@kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Haibo Chen <haibo.chen@nxp.com>
 
-On 28 April 2016 at 11:26, Ulf Hansson <ulf.hansson@linaro.org> wrote:
-> On 20 April 2016 at 18:51, Dong Aisheng <aisheng.dong@nxp.com> wrote:
->> Currently MMC core will keep going if HS200/HS timing switch failed
->> with -EBADMSG error by the assumption that the old timing is still valid.
+On 28 April 2016 at 16:58, Dong Aisheng <dongas86@gmail.com> wrote:
+> On Thu, Apr 28, 2016 at 11:24:07AM +0200, Ulf Hansson wrote:
+>> On 20 April 2016 at 18:51, Dong Aisheng <aisheng.dong@nxp.com> wrote:
+>> > mmc_select_hs200() and mmc_select_hs() will keep the timing
+>> > as before if switch fails. So it's meaningless to print the
+>> > failed switched mode outside based on the current host timing.
+>> >
+>> > Furthermore, the original print is wrong, it should be:
+>> > pr_warn("%s: switch to %s failed\n",
+>> >         mmc_hostname(card->host),
+>> >         mmc_card_hs(card) ? "high-speed" :
+>> >         (mmc_card_hs200(card) ? "hs200" : ""));
+>> >
+>> > Since we already have error message in mmc_select_hs200(),
+>> > simply remove it outside.
+>> >
+>> > Signed-off-by: Dong Aisheng <aisheng.dong@nxp.com>
+>> > ---
+>> >  drivers/mmc/core/mmc.c | 10 +---------
+>> >  1 file changed, 1 insertion(+), 9 deletions(-)
+>> >
+>> > diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+>> > index f6683a9..55c8201 100644
+>> > --- a/drivers/mmc/core/mmc.c
+>> > +++ b/drivers/mmc/core/mmc.c
+>> > @@ -1321,21 +1321,13 @@ static int mmc_select_timing(struct mmc_card *card)
+>> >         if (err && err != -EBADMSG)
+>> >                 return err;
+>> >
+>> > -       if (err) {
+>> > -               pr_warn("%s: switch to %s failed\n",
+>> > -                       mmc_card_hs(card) ? "high-speed" :
+>> > -                       (mmc_card_hs200(card) ? "hs200" : ""),
+>> > -                       mmc_hostname(card->host));
+>> > -               err = 0;
+>> > -       }
+>> > -
 >>
->> However, for mmc_select_hs200 case, the signal voltage may have already
->> been switched. If the timing switch failed, we should fall back to
->> the old voltage in case the card is continue run with legacy timing.
+>> No, this is not correct.
 >>
->> If fall back signal voltage failed, we explicitly report an EIO error
->> to force retry during the next power cycle.
+>> First, in patch1/3, you change to return an error code immediately
+>> when __mmc_set_signal_voltage() fails, instead of using the "goto
+>> err". Thus there will be no error printed for this case any more.
 >>
->> Signed-off-by: Dong Aisheng <aisheng.dong@nxp.com>
->> ---
->>  drivers/mmc/core/mmc.c | 11 +++++++++--
->>  1 file changed, 9 insertions(+), 2 deletions(-)
->>
->> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
->> index b8aa12c..f6683a9 100644
->> --- a/drivers/mmc/core/mmc.c
->> +++ b/drivers/mmc/core/mmc.c
->> @@ -1245,9 +1245,11 @@ static int mmc_select_hs200(struct mmc_card *card)
->>         struct mmc_host *host = card->host;
->>         bool send_status = true;
->>         unsigned int old_timing;
->> +       unsigned int old_signal_voltage;
 >
-> Nitpick; you can merge this change into the line above.
+> I noticed this issue when i made up this patch.
+> Why i simply return is because i want to avoid write the following code:
+> static int mmc_select_hs200(struct mmc_card *card)
+> {
+> ...
+>         err = voltage_switch();
+>         /* If fails try again during next card power cycle */
+>         if (err)
+>                 goto err;
+> ....
+>                 /* swith HS TIMING */
+>                 err = __mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
+>                                    EXT_CSD_HS_TIMING, val,
+>                                    card->ext_csd.generic_cmd6_time,
+>                                    true, send_status, true);
+>                 if (err)
+>                         goto err2;
+> ..........
 >
+> err2:
+>         if (err) {
+>                 /* fall back to the old signal voltage, if fails report error */
+>                 if (__mmc_set_signal_voltage(host, old_signal_voltage))
+>                         err = -EIO;
+>         }
+>
+> err:
+>         if (err)
+>                 pr_err("%s: %s failed, error %d\n", mmc_hostname(card->host),
+>                        __func__, err);
+>
+>         return err;
+> }
+>
+> Because if first signal switch fails, we don't need fall back to original
+> voltage. But HS timing switch needs.
+>
+> goto err makes the code a bit ugly.
+> So i choose to avoid it and simply return since it's not so important
+> and most host driver may already implement their debug IO switch debug info.
+>
+> Do you think if we can accept it?
 
-Applied for next with a minor change dealing with the nitpick above, thanks!
+Okay.
+
+>
+>> Second, mmc_select_hs() may fail and there is no print done within
+>> that function which is why above print is also needed.
+>>
+>
+> The same as above, i think this print is not so important.
+> And __mmc_switch already has a err warn.
+>
+> And the most important reason is the original print outside is
+> meaningless because it intends to print out the speed mode it
+> wants to switch, however,it actually prints out the restored
+> original speed mode.
+>
+>> On the other hand I agree with you, it doesn't seems necessary to
+>> print two messages when mmc_select_hs200() fails. One should be
+>> enough. Can we change this so *only* mmc_select_timing() will deal
+>> with the print at all errors?
+>>
+>
+> Yes, i agree with your idea.
+> I also thought about it before, but it seems after patch 3,
+> it may not be so necessary.
+> Can you help check it?
+>
+>> >  bus_speed:
+>> >         /*
+>> >          * Set the bus speed to the selected bus timing.
+>> >          * If timing is not selected, backward compatible is the default.
+>> >          */
+>> >         mmc_set_bus_speed(card);
+>> > -       return err;
+>> > +       return 0;
+>> >  }
+>> >
+>> >  /*
+>> > --
+>> > 1.9.1
+>> >
+>>
+>> Kind regards
+>> Uffe
+>
+> Regards
+> Dong Aisheng
+
+I decided to apply this as is for next. Thanks!
 
 Kind regards
 Uffe
