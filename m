@@ -1,77 +1,99 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: mmc: Fix partition switch timeout for some eMMCs
-Date: Tue, 10 May 2016 12:28:53 +0200
-Message-ID: <CAPDyKFoW3jie9GGHUbMZYEbU5McmLzihJHJkoByVhctkRVD9+Q@mail.gmail.com>
-References: <1462425148-18167-1-git-send-email-adrian.hunter@intel.com>
+Subject: Re: [RFC v2 00/13] usb/mmc/power: Fix USB/LAN when TFTP booting
+Date: Tue, 10 May 2016 13:02:08 +0200
+Message-ID: <CAPDyKFq2=mqujFjvJSYxg2nVmK=OrBKLtFfb-ErNJO3Zr_LMVw@mail.gmail.com>
+References: <1462451666-17945-1-git-send-email-k.kozlowski@samsung.com>
+	<20160505224240.GA31429@rob-hp-laptop>
+	<CAPDyKFqpoi03Egfuvd8qJXnn_+FBgPXAb7S4UvkxVs8BA+zwnA@mail.gmail.com>
+	<20160509181829.GA19687@rob-hp-laptop>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wm0-f47.google.com ([74.125.82.47]:37787 "EHLO
-	mail-wm0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752309AbcEJK2y (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 10 May 2016 06:28:54 -0400
-Received: by mail-wm0-f47.google.com with SMTP id a17so19188969wme.0
-        for <linux-mmc@vger.kernel.org>; Tue, 10 May 2016 03:28:54 -0700 (PDT)
-In-Reply-To: <1462425148-18167-1-git-send-email-adrian.hunter@intel.com>
+Received: from mail-wm0-f52.google.com ([74.125.82.52]:38078 "EHLO
+	mail-wm0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751261AbcEJLCK (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 10 May 2016 07:02:10 -0400
+Received: by mail-wm0-f52.google.com with SMTP id g17so20672953wme.1
+        for <linux-mmc@vger.kernel.org>; Tue, 10 May 2016 04:02:09 -0700 (PDT)
+In-Reply-To: <20160509181829.GA19687@rob-hp-laptop>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>
+To: Rob Herring <robh@kernel.org>
+Cc: Krzysztof Kozlowski <k.kozlowski@samsung.com>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, linux-samsung-soc <linux-samsung-soc@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-pm@vger.kernel.org" <linux-pm@vger.kernel.org>, linux-usb@vger.kernel.org, Sebastian Reichel <sre@kernel.org>, Dmitry Eremin-Solenikov <dbaryshkov@gmail.com>, David Woodhouse <dwmw2@infradead.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Mark Brown <broonie@kernel.org>, hverkuil@xs4all.nl, tjakobi@math.uni-bielefeld.de, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>, Marek Szyprowski <m.szyprowski@samsung.com>, Arnd Bergmann <arnd@arndb.de>
 
-On 5 May 2016 at 07:12, Adrian Hunter <adrian.hunter@intel.com> wrote:
-> Some eMMCs set the partition switch timeout too low.
->
-> Now typically eMMCs are considered a critical component (e.g. because
-> they store the root file system) and consequently are expected to be
-> reliable.  Thus we can neglect the use case where eMMCs can't switch
-> reliably and we might want a lower timeout to facilitate speedy
-> recovery.
->
-> Although we could employ a quirk for the cards that are affected (if
-> we could identify them all), as described above, there is little
-> benefit to having a low timeout, so instead simply set a minimum
-> timeout.
->
-> The minimum is set to 300ms somewhat arbitrarily - the examples that
-> have been seen had a timeout of 10ms but were sometimes taking 60-70ms.
->
-> Cc: stable@vger.kernel.org
-> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
++ Arnd
 
-Thanks, applied for next!
+[...]
+
+>> >> Solution
+>> >> ========
+>> >> This is very similar to the MMC pwrseq behavior so the idea is to:
+>> >> 1. Move MMC pwrseq drivers to generic place,
+>> >
+>> > You can do that, but I'm going to NAK any use of pwrseq bindings outside
+>> > of MMC. I think it is the wrong way to do things. The DT should describe
+>>
+>> Huh, I didn't know that was your view of the mmc pwrseq bindings. Why
+>> didn't you NAK them before?
+>
+> Unfortunately, either I missed it or it was a time I couldn't spend much
+> time on reviews.
+
+Okay, I guess it's common issue among maintainers. The problem with DT
+is that it gets really hard to be fixed up later. :-)
+
+>
+>> > the devices. If they happen to be "simple" then the core can walk the
+>> > tree and do any setup. For example, look for "reset-gpios" and toggle
+>> > that GPIO. There is no need for a special node.
+>> >
+>> >> 2. Extend the pwrseq-simple with regulator toggling,
+>> >> 3. Add support to USB hub and port core for pwrseq,
+>> >
+>> > We discussed this for USB already[1] and is why we defined how to add
+>> > USB child devices. The idea is not to add pwrseq to that.
+>>
+>> I am not familiar with the USB discussion.
+>>
+>> Still, let me give you some more background to the mmc pwrseq. The
+>> idea from the mmc pwrseq bindings comes from the power-domain DT
+>> bindings, as I thought these things were a bit related.
+>> In both cases they are not directly a property of the device, but more
+>> describing a HW dependency to allow the device to work.
+>
+> I could see this as a board level power domain. However the difference
+> is we are not generally exposing internal SOC details the same way as
+> board level components. Perhaps we could extend power domains to board
+> level, but that is not what was done here.
+>
+>> One could probably use a child node instead of a phandle, but that
+>> wasn't chosen back then. Of course you are the DT expert, but could
+>> you perhaps tell me why a child node is better for cases like this?
+>
+> If there is a control path hierarchy, then we try to model that in DT
+> with child nodes. In cases of SDIO and USB, there is a clear hierarchy.
+> Ignoring the discovery ordering problem, we already have defined ways to
+> describe GPIO connections, regulators, etc. to devices. Describing those
+> things separately from the device to solve a particular issue that is
+> really a kernel limitation is what I don't like.
+
+Okay, I see.
+
+To move forward in trying to make mmc pwrseq a generic pwrseq, could
+we perhaps allow both cases?
+
+In the mmc case, there are already deployed bindings so we need to
+cope with these by using the phandle option, but for USB etc we could
+force the child node option.
+As long as we agree that we keep using a compatible string for the
+child node as well, both options should be able to co-exist and we
+should probably be able to managed them both from a common pwrseq
+driver framework.
+
+Although, I do remember from an older conversations around some of
+mine submission for the mmc pwrseq code, that some people (maybe
+Arnd?) wasn't keen on adding a new framework for this. Perhaps that
+has changed?
 
 Kind regards
 Uffe
-
-> ---
->  drivers/mmc/core/mmc.c | 7 +++++++
->  1 file changed, 7 insertions(+)
->
-> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-> index f99c47e003fe..d4d1b77c1c1e 100644
-> --- a/drivers/mmc/core/mmc.c
-> +++ b/drivers/mmc/core/mmc.c
-> @@ -333,6 +333,9 @@ static void mmc_manage_gp_partitions(struct mmc_card *card, u8 *ext_csd)
->         }
->  }
->
-> +/* Minimum partition switch timeout in milliseconds */
-> +#define MMC_MIN_PART_SWITCH_TIME       300
-> +
->  /*
->   * Decode extended CSD.
->   */
-> @@ -397,6 +400,10 @@ static int mmc_decode_ext_csd(struct mmc_card *card, u8 *ext_csd)
->
->                 /* EXT_CSD value is in units of 10ms, but we store in ms */
->                 card->ext_csd.part_time = 10 * ext_csd[EXT_CSD_PART_SWITCH_TIME];
-> +               /* Some eMMC set the value too low so set a minimum */
-> +               if (card->ext_csd.part_time &&
-> +                   card->ext_csd.part_time < MMC_MIN_PART_SWITCH_TIME)
-> +                       card->ext_csd.part_time = MMC_MIN_PART_SWITCH_TIME;
->
->                 /* Sleep / awake timeout in 100ns units */
->                 if (sa_shift > 0 && sa_shift <= 0x17)
-> --
-> 1.9.1
->
