@@ -1,65 +1,60 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH 12/23] mmc: sdhci-esdhc-imx: add esdhc specific suspend
- resume callback
-Date: Tue, 10 May 2016 12:35:44 +0300
-Message-ID: <5731AB70.30009@intel.com>
-References: <1460741387-23815-1-git-send-email-aisheng.dong@nxp.com>
- <1460741387-23815-13-git-send-email-aisheng.dong@nxp.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH v2] mmc: core: Remove redundant rescan_disable flag
+Date: Tue, 10 May 2016 11:44:28 +0200
+Message-ID: <CAPDyKFq4GUN33jQ2nc4FPHtSG26UgkcaCnAXemx0nKLp6P7acg@mail.gmail.com>
+References: <1461868156-5734-1-git-send-email-ulf.hansson@linaro.org>
+	<5723AAAB.60109@intel.com>
+	<CAPDyKFqXEmrAtADNLrEUmF=6oc4-guNTGA=r0UFye3Ox8qO-2w@mail.gmail.com>
+	<5731A4E8.5080608@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga04.intel.com ([192.55.52.120]:19270 "EHLO mga04.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751501AbcEJJjj (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 10 May 2016 05:39:39 -0400
-In-Reply-To: <1460741387-23815-13-git-send-email-aisheng.dong@nxp.com>
+Received: from mail-wm0-f42.google.com ([74.125.82.42]:37217 "EHLO
+	mail-wm0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751096AbcEJJoa (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 10 May 2016 05:44:30 -0400
+Received: by mail-wm0-f42.google.com with SMTP id a17so17087690wme.0
+        for <linux-mmc@vger.kernel.org>; Tue, 10 May 2016 02:44:29 -0700 (PDT)
+In-Reply-To: <5731A4E8.5080608@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Dong Aisheng <aisheng.dong@nxp.com>, linux-mmc@vger.kernel.org
-Cc: ulf.hansson@linaro.org, chris@printf.net, shawnguo@kernel.org, linux-arm-kernel@lists.infradead.org, haibo.chen@nxp.com, dongas86@gmail.com
+To: Adrian Hunter <adrian.hunter@intel.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Jaehoon Chung <jh80.chung@samsung.com>
 
-On 15/04/16 20:29, Dong Aisheng wrote:
-> It will be used for platform specific suspend/resume state save/restore
-> work for some low power mode like Mega/Fast or LPSR mode.
-> 
-> Signed-off-by: Dong Aisheng <aisheng.dong@nxp.com>
+On 10 May 2016 at 11:07, Adrian Hunter <adrian.hunter@intel.com> wrote:
+> On 10/05/16 12:01, Ulf Hansson wrote:
+>> On 29 April 2016 at 20:40, Adrian Hunter <adrian.hunter@intel.com> wrote:
+>>> On 28/04/2016 9:29 p.m., Ulf Hansson wrote:
+>>>>
+>>>> For the reasons explained below, it's safe to remove the rescan_disable
+>>>> flag.
+>>>>
+>>>> 1)
+>>>> cancel_delayed_work_sync() prevents an executing work from re-scheduling
+>>>> itself.
+>>>>
+>>>> 2)
+>>>> We are using the system_freezable_wq for the rescan works. As that queue
+>>>> becomes frozen when userspace becomes frozen during system PM, we don't
+>>>> need to disable the rescan works in the PM_SUSPEND_PREPARE phase.
+>>>
+>>>
+>>> What about the case when a SDIO card has to be removed?  Seems like a rescan
+>>> could theoretically get scheduled and run before the workqueue is frozen.
+>>
+>> When the queue gets frozen, it means currently running works will be
+>> synced. Works that are scheduled (or becomes scheduled) will be put on
+>> hold and not allowed to run before the workqueue becomes un-frozen.
+>
+> In the pm_notifier the workqueue is not frozen, so new work could be queued
+> and run, which would potentially race with the "host->bus_ops->remove(host)"
+> a few lines further on.
 
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+You are right, I will put this patch on hold! Thanks!
 
-> ---
->  drivers/mmc/host/sdhci-esdhc-imx.c | 12 +++++++++++-
->  1 file changed, 11 insertions(+), 1 deletion(-)
-> 
-> diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
-> index 03980db..6fef6bc 100644
-> --- a/drivers/mmc/host/sdhci-esdhc-imx.c
-> +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
-> @@ -1254,6 +1254,16 @@ static int sdhci_esdhc_imx_remove(struct platform_device *pdev)
->  }
->  
->  #ifdef CONFIG_PM
-> +static int sdhci_esdhc_suspend(struct device *dev)
-> +{
-> +	return sdhci_pltfm_suspend(dev);
-> +}
-> +
-> +static int sdhci_esdhc_resume(struct device *dev)
-> +{
-> +	return sdhci_pltfm_resume(dev);
-> +}
-> +
->  static int sdhci_esdhc_runtime_suspend(struct device *dev)
->  {
->  	struct sdhci_host *host = dev_get_drvdata(dev);
-> @@ -1289,7 +1299,7 @@ static int sdhci_esdhc_runtime_resume(struct device *dev)
->  #endif
->  
->  static const struct dev_pm_ops sdhci_esdhc_pmops = {
-> -	SET_SYSTEM_SLEEP_PM_OPS(sdhci_pltfm_suspend, sdhci_pltfm_resume)
-> +	SET_SYSTEM_SLEEP_PM_OPS(sdhci_esdhc_suspend, sdhci_esdhc_resume)
->  	SET_RUNTIME_PM_OPS(sdhci_esdhc_runtime_suspend,
->  				sdhci_esdhc_runtime_resume, NULL)
->  };
-> 
+I need to change the validation for this special SDIO case first. We
+shouldn't need to detach the bus and thus also remove the card in
+these cases, but instead only remove the SDIO func devices.
 
+Kind regards
+Uffe
