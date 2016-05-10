@@ -1,80 +1,59 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 0/3] Patches to allow consistent mmc / mmcblk numbering
-Date: Tue, 10 May 2016 13:09:12 +0200
-Message-ID: <CAPDyKFqqxoczDH5B5Pmf0RH5uSC06UyKtEYvddO3tAsiqgoXig@mail.gmail.com>
-References: <1461884805-29466-1-git-send-email-dianders@chromium.org>
-	<1659435.FBgTBXnguZ@wuerfel>
+From: Jon Hunter <jonathanh-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
+Subject: Re: [PATCH] mmc: tegra: Disable UHS-I modes for tegra30
+Date: Tue, 10 May 2016 12:15:26 +0100
+Message-ID: <5731C2CE.2030007@nvidia.com>
+References: <1462806903-13860-1-git-send-email-jonathanh@nvidia.com>
+ <1462864193.13327.2.camel@lynxeye.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wm0-f49.google.com ([74.125.82.49]:38294 "EHLO
-	mail-wm0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750983AbcEJLJO (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 10 May 2016 07:09:14 -0400
-Received: by mail-wm0-f49.google.com with SMTP id g17so21009580wme.1
-        for <linux-mmc@vger.kernel.org>; Tue, 10 May 2016 04:09:13 -0700 (PDT)
-In-Reply-To: <1659435.FBgTBXnguZ@wuerfel>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1462864193.13327.2.camel-8ppwABl0HbeELgA04lAiVw@public.gmane.org>
+Sender: linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Lucas Stach <dev-8ppwABl0HbeELgA04lAiVw@public.gmane.org>, Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Stephen Warren <swarren-3lzwWm7+Weoh9ZMKESR00Q@public.gmane.org>, Thierry Reding <thierry.reding-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Alexandre Courbot <gnurou-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Cc: linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
-To: Arnd Bergmann <arnd@arndb.de>
-Cc: Douglas Anderson <dianders@chromium.org>, Jaehoon Chung <jh80.chung@samsung.com>, Shawn Lin <shawn.lin@rock-chips.com>, Adrian Hunter <adrian.hunter@intel.com>, Stefan Agner <stefan@agner.ch>, linux-mmc <linux-mmc@vger.kernel.org>, Brian Norris <computersforpeace@gmail.com>, Dmitry Torokhov <dmitry.torokhov@gmail.com>, Mark Rutland <mark.rutland@arm.com>, Venu Byravarasu <vbyravarasu@nvidia.com>, =?UTF-8?B?SnVzdGluIFdhbmcgKOeOi+S4gSk=?= <justin.wang@spreadtrum.com>, Ken Sumrall <ksumrall@android.com>, Lars-Peter Clausen <lars@metafoo.de>, Dmitry Torokhov <dtor@chromium.org>, Jon Hunter <jonathanh@nvidia.com>, Tao Huang <huangtao@rock-chips.com>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, =?UTF-8?Q?Pawe=C5=82_Moll?= <pawel.moll@arm.com>, Ian Campbell <ijc+devicetree@hellion.org.uk>, Kumar Gala <galak@codeaurora.org>, "Luca Porzio (lporzio)" <lporzi>
 
-On 29 April 2016 at 19:39, Arnd Bergmann <arnd@arndb.de> wrote:
-> On Thursday 28 April 2016 16:06:42 Douglas Anderson wrote:
->> This series picks patches from various different places to produce what
->> I consider the best solution to getting consistent mmc and mmcblk
->> ordering.
->>
->> Why consistent ordering and why not just use UUIDs?  IMHO consistent
->> ordering solves a few different problems:
->>
->> 1. For poor, feeble-minded humans like me, have sane numbering for
->>    devices helps a lot.  When grepping through dmesg it's terribly handy
->>    if a given SDMMC device has a consistent number.  I know that I can
->>    do "dmesg | grep mmc0" or "dmesg | grep mmcblk0" to find info about
->>    the eMMC.  I know that I can do "dmesg | grep mmc1" to find info
->>    about the SD card slot.  I don't want it to matter which one probed
->>    first, I don't want it to matter if I'm working on a variant of the
->>    hardware that has the SD card slot disabled, and I don't want to care
->>    what my boot device was.  Worrying about what device number I got
->>    increases my cognitive load.
->>
->> 2. There are cases where it's not trivially easy during development to
->>    use the UUID.  Specifically I work a lot with coreboot / depthcharge
->>    as a BIOS.  When configured properly, that BIOS has a nice feature to
->>    allow you to fetch the kernel and kernel command line from TFTP by
->>    pressing Ctrl-N.  In this particular case the BIOS doesn't actually
->>    know which disk I'd like for my root filesystem, so it's not so easy
->>    for it to put the right UUID into the command line.  For this
->>    purpose, knowing that "mmcblk0" will always refer to eMMC is handy.
->>
->>
->> Jaehoon Chung (1):
->>   Documentation: mmc: Document mmc aliases
->>
->> Stefan Agner (2):
->>   mmc: read mmc alias from device tree
->>   mmc: use SD/MMC host ID for block device name ID
->>
->>  Documentation/devicetree/bindings/mmc/mmc.txt | 11 +++++++++++
->>  drivers/mmc/card/block.c                      |  3 ++-
->>  drivers/mmc/core/host.c                       | 25 ++++++++++++++++++++-----
->>  3 files changed, 33 insertions(+), 6 deletions(-)
->
->
-> Does this mean we can revert 9aaf343 ("mmc: block: Use the mmc host
-> device index as the mmcblk device index") for now and wait until this
-> is in as well?
 
-No, as that one fixes an issue for a widely deployed product (family).
+On 10/05/16 08:09, Lucas Stach wrote:
+> Hi Jon,
+> 
+> Am Montag, den 09.05.2016, 16:15 +0100 schrieb Jon Hunter:
+>> Support for SD cards is not working on the Tegra30 Beaver board and
+>> on
+>> boot the following error message is seen if an SD card is present:
+>>
+>>  mmc0: error -110 whilst initialising SD card
+>>
+> Can you please tell me what kind of SD card you used and at which point
+> in the initialization it is hanging? I've tested this change on Beaver
+> and haven't seen any failures after I implemented the memcomppad
+> calibration.
 
->
-> The commit I mention here breaks a significant number of boots
-> on Olof's test build setup, and it would be nice to avoid breaking
-> them again when we get yet another device numbering system.
+Yes it is an SDHC 4GB I believe. The board is remote and so I have not
+seen the exact card. However, here are some more details from sysfs:
 
-They don't have to break *again*. He just have to convert *once* to
-use UUID/PARTID which is really what most should be doing.
+root@(none):/# cat /sys/class/mmc_host/mmc0/mmc0\:aaaa/name
+SS04G
+root@(none):/# cat /sys/class/mmc_host/mmc0/mmc0\:aaaa/csd
+400e00325b5900001d8a7f800a404000
+root@(none):/# cat /sys/class/mmc_host/mmc0/mmc0\:aaaa/cid
+03534453533034478029b1301800f900
+root@(none):/# cat /sys/class/mmc_host/mmc0/mmc0\:aaaa/oemid
+0x5344
+root@(none):/# cat /sys/class/mmc_host/mmc0/mmc0\:aaaa/manfid
+0x000003
+ 
+>> In addition to this, Tegra30 is also randomly hanging during system
+>> suspend when entering and is caused by the Tegra SDHCI driver. 
+> 
+> I'll have a look at this soonish.
 
-Kind regards
-Uffe
+Thanks. I think I have mentioned this before, but I run a loop test
+for example ...
+
+count=0; while [ $count -lt 100 ]; do rtcwake -d rtc0 -m mem -s 3; echo
+Suspend iteration $count; count=`expr $count + 1`; done
+
+Cheers
+Jon
