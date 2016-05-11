@@ -1,97 +1,88 @@
-From: Douglas Anderson <dianders@chromium.org>
-Subject: [PATCH] mmc: dw_mmc: rockchip: Set the drive phase to 180 degrees
-Date: Tue, 10 May 2016 11:16:35 -0700
-Message-ID: <1462904195-18229-1-git-send-email-dianders@chromium.org>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pf0-f175.google.com ([209.85.192.175]:33595 "EHLO
-	mail-pf0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751337AbcEJSRJ (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 10 May 2016 14:17:09 -0400
-Received: by mail-pf0-f175.google.com with SMTP id 206so8566173pfu.0
-        for <linux-mmc@vger.kernel.org>; Tue, 10 May 2016 11:17:08 -0700 (PDT)
-Sender: linux-mmc-owner@vger.kernel.org
+From: Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
+Subject: Re: [PATCH 2/2] dt-bindings: rockchip-dw-mshc: add
+ rockchip,default-drv-phase
+Date: Wed, 11 May 2016 10:50:17 +0800
+Message-ID: <e202f663-88d7-693b-a765-c130e68d1c2d@rock-chips.com>
+References: <1462527648-24443-1-git-send-email-shawn.lin@rock-chips.com>
+ <1462527673-24711-1-git-send-email-shawn.lin@rock-chips.com>
+ <CAD=FV=WSkBwBjVsRoDsfjD+sNfR70mKGRA0khjPKKW0zS2=PTw@mail.gmail.com>
+ <b15dcb4f-1584-8219-2fe0-97eecb0c64a6@rock-chips.com>
+ <CAD=FV=XToSzqSh=SShHuQU9W_m7gfyQn8wRXkLy79t+tnqZknA@mail.gmail.com>
+ <1f2f43c7-2672-e448-eddb-2d613bb8dc48@rock-chips.com>
+ <CAD=FV=UGbrJRyUbbgzbcYf9GjPG+Fh_gpQ3rX2G=wi2w5Lw=Sg@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <CAD=FV=UGbrJRyUbbgzbcYf9GjPG+Fh_gpQ3rX2G=wi2w5Lw=Sg-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Doug Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
+Cc: shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org, Jaehoon Chung <jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Brian Norris <briannorris-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, Heiko Stuebner <heiko-4mtYJXux2i+zQB+pC5nmwQ@public.gmane.org>, "open list:ARM/Rockchip SoC..." <linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: jh80.chung@samsung.com, Ulf Hansson <ulf.hansson@linaro.org>, Heiko Stuebner <heiko@sntech.de>, shawn.lin@rock-chips.com
-Cc: linux-rockchip@lists.infradead.org, briannorris@chromium.org, Douglas Anderson <dianders@chromium.org>, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org
 
-Historically for Rockchip devices we've relied on the power-on
-default (or perhaps the firmware setting) to get the correct drive
-phase for dw_mmc devices.  This worked OK for the most part, but:
+On 2016/5/10 23:57, Doug Anderson wrote:
+> (again, but not HTML)
+>
 
-* Relying on the setting just "being right" is a bit fragile.
+------8<------------------
 
-* As soon as there is an instance where the power on default is wrong or
-  where the firmware didn't configure this properly then we'll get a
-  mysterious failure.
+>
+> I have less faith than you in the TRM.  The TRM is full of minor
+> errors and is often wrong about the default state of things.  IMHO the
+> only true way to find out is to boot up some SoCs and check.
+>
 
-Let's explicitly set this phase in the kernel.
+Okay, I should not have too much confidence on my TRM maybe :).
 
-You might notice that this patch is currently very dumb and just always
-sets this phase to 180 degrees.  As far as I can tell this is actually a
-sane thing to do.  From reading through the Designware Databook it
-appears that there are instances where you could still meet hold time
-requirements and set this phase to 90 degrees, but nothing I've read
-indicates that 180 degrees is not OK also.
+Again, We SHOULD refer to the Mobile Storage Host section (Variable
+Delay/Clock Generation) instead of CRU section, otherwise even you will
+see inconsistent decription of mmc_clock->shift.
 
-As indicated above, adding a delay to the drive is used to achieve
-proper hold times.  For a given speed mode hold times are listed in the
-spec in terms of nanoseconds.  The hold times are different for
-different speed modes.  The actual hold time achieved is actually a
-function of Delay_O (an internal delay in dw_mmc, which could vary from
-SoC model to SoC model), pad delays, and the drive delay (which we're
-setting here).  Note also that by setting the drive delay as a phase we
-will get a different number of nanoseconds of delay depending on the
-input clock.
 
-Note that, as far as I can tell, this _does_ change the behavior of
-rk3288 devices.  On devices I tested, which use coreboot/depthcharge as
-BIOS, the SDMMC/SDIO0/SDIO1 drive phase used to be 90 degrees.  Now it
-will be 180 degrees.  With my understanding from the Designware Databook
-the 180 degrees ought to be more correct and should increase
-compatibility.
 
-I have tested this by inserting my collection of uSD cards (mostly UHS,
-though a few not) into a veyron_minnie and confirmed that they still
-seem to enumerate properly.  For a subset of them I tried putting a
-filesystem on them and also tried running mmc_test.
+> As far as whether code touches these values:
+>
 
-Signed-off-by: Douglas Anderson <dianders@chromium.org>
----
- drivers/mmc/host/dw_mmc-rockchip.c | 21 +++++++++++++++++++++
- 1 file changed, 21 insertions(+)
+---------8<-----------------
 
-diff --git a/drivers/mmc/host/dw_mmc-rockchip.c b/drivers/mmc/host/dw_mmc-rockchip.c
-index 8c20b81cafd8..62cbd33a07cd 100644
---- a/drivers/mmc/host/dw_mmc-rockchip.c
-+++ b/drivers/mmc/host/dw_mmc-rockchip.c
-@@ -66,6 +66,27 @@ static void dw_mci_rk3288_set_ios(struct dw_mci *host, struct mmc_ios *ios)
- 	/* Make sure we use phases which we can enumerate with */
- 	if (!IS_ERR(priv->sample_clk))
- 		clk_set_phase(priv->sample_clk, priv->default_sample_phase);
-+
-+	/*
-+	 * Set the drive phase to 180 degrees.  This helps us achieve proper
-+	 * hold times.
-+	 *
-+	 * Note that this is _not_ a value that is tuned and is also _not_ a
-+	 * value that will vary from board to board.  It is a value that
-+	 * _could_ vary between different SoC models (could be different on
-+	 * rk3066 vs. rk3288 for instance).  It is also a value that _could_
-+	 * need to be adjusted based on our clock frequency and speed mode
-+	 * since different speed modes have different hold time requirements
-+	 * and hold time requirements are in "ns" (a phase offset adds a
-+	 * different "ns" delay for different input clocks).
-+	 *
-+	 * Despite these theoretical needs, it has been observed that 180
-+	 * degrees gives us good signaling across all tested SoCs and all
-+	 * tested speed modes.  If when we find someone that needs 90 degrees
-+	 * here we can add a table based on speed mode / SoC compatible ID.
-+	 */
-+	if (!IS_ERR(priv->drv_clk))
-+		clk_set_phase(priv->drv_clk, 180);
- }
- 
- #define NUM_PHASES			360
+>>
+>> maybe. But I think 180(downside) is the better.
+
+NAK my previous comments here. Downside is better for SRD, but won't
+work for DDR mode. When running in DDR mode, we should use 90 instead.
+
+So let me elaborate a bit more here.
+For DDR mode, one single clk cycle should sending two data bits outside
+to the devices. We need a hold time for both. If 180 is used, the first
+bit occurs around the downside area, which won't be sampled by devices
+on the upside.  So on the upside, the devices will see a zero bit if you
+actually send a one-bit, which makes the devices  generate CRC finally.
+
+
+For this above, 180 for all SDR mode is ok, but 90 should be deployed
+for DDR mode. So simply checking the timing to hardcode it should be
+fine.
+
+>
+> I'm OK with using 180 always as long as SD cards continue to work OK.
+> Best would be if someone could actually run a protocol analyzer for
+> all the different speed modes.
+>
+>
+>>> Also: I still haven't heard whether there is any downside to using 180
+>>> degrees for modes that only require 90 degrees.  Does it cause
+>>> problems to just always use 180 degrees?  If not, we could possibly
+>>> use 180 degrees everywhere and just hardcode it?
+>>
+>>
+
+
+
 -- 
-2.8.0.rc3.226.g39d4020
+Best Regards
+Shawn Lin
 
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
