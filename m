@@ -1,53 +1,58 @@
 From: Wolfram Sang <wsa@the-dreams.de>
-Subject: Re: [PATCH/RFC 3/3] ARM: dts: r8a7790: lager: Enable UHS-I SDR-104
-Date: Wed, 11 May 2016 14:44:41 +0200
-Message-ID: <20160511124441.GA1716@katana>
-References: <1462859524-28522-1-git-send-email-horms+renesas@verge.net.au>
- <1462859524-28522-4-git-send-email-horms+renesas@verge.net.au>
- <CANqRtoRjZjC=uEBvJsWYwu0EMEZwO3zS0JWNwVoBR8zjakMpnA@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="qDbXVdCdHGoSgWSk"
+Subject: [PATCH] mmc: sh_mobile_sdhi: properly document R-Car versions
+Date: Wed, 11 May 2016 14:46:00 +0200
+Message-ID: <1462970760-3471-1-git-send-email-wsa@the-dreams.de>
 Return-path: <linux-renesas-soc-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <CANqRtoRjZjC=uEBvJsWYwu0EMEZwO3zS0JWNwVoBR8zjakMpnA@mail.gmail.com>
 Sender: linux-renesas-soc-owner@vger.kernel.org
-To: Magnus Damm <magnus.damm@gmail.com>
-Cc: Simon Horman <horms+renesas@verge.net.au>, Ian Molton <ian@mnementh.co.uk>, Ulf Hansson <ulf.hansson@linaro.org>, Wolfram Sang <wsa+renesas@sang-engineering.com>, linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org, Ben Hutchings <ben.hutchings@codethink.co.uk>
+To: linux-mmc@vger.kernel.org
+Cc: Wolfram Sang <wsa@the-dreams.de>, linux-renesas-soc@vger.kernel.org, Simon Horman <horms@verge.net.au>, Magnus Damm <magnus.damm@gmail.com>
 List-Id: linux-mmc@vger.kernel.org
 
+From: Wolfram Sang <wsa+renesas@sang-engineering.com>
 
---qDbXVdCdHGoSgWSk
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+Replace hardcoded values with meaningful names and document what we
+know.
 
+Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+---
+ drivers/mmc/host/sh_mobile_sdhi.c | 14 ++++++++++----
+ 1 file changed, 10 insertions(+), 4 deletions(-)
 
-> SDR104) while SDHI2 and SDHI3 do not have this hardware feature. How
-> is this difference handled today?
-
-We read out the version register. (That reminds me I have a
-documentation patch for that lying around...)
-
-
---qDbXVdCdHGoSgWSk
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1
-
-iQIcBAEBAgAGBQJXMyk5AAoJEBQN5MwUoCm2zq0QAIflxIOZEgBIfYon9caqhpx/
-ROD/21QtUzTm7ufS6E1rFBzjpmJDjib3Y6kl+TzvIF7+8nZOt1s1oHxzGXNwWdAS
-+fue08X4j+5UDqCLTCjVWNpbZcuIXXRvRr9t8BWXQ2XNaSZ2B+MiLiyPGH+wLAEx
-Tu0F/6yqfp8n5QqzQZmewWChKV7c3BzatEsEXts2iNYqa6sItYJYlFPkZmn7OKHW
-KEgSVVMJPYniilo8YUAvHjZA2Cu475JhvcE/u4gCUxrGuRttjyUypumsCWmW355s
-6g27ZiQtHsWA1ZUD3mnknLPv9B+QZhwYl0l54JlhazPbUv/GjSuM2lt7rin+f1DV
-fNw/PUcPJlP5eM5L3SbLfzMpTeyE35qo0OZn9jgU6m2TR1hBzP5w9DSgVSoHDd8r
-/3qKevXoT9PClNpL/5iKuXcStmWRpfN1j+91sM325trUbA14nFcvNtciGu3k2bR2
-cr1fGUYf2mWRbcgleZThq2loI8vFRouGGNENe/XQnoeCEs5/Mzqs3ce6RKVKWLMo
-WNnpt7BfACU9yqcbwLG4+HvIyglMzQiNlHgIlYRvgil7ObdnqTEVHM3euzs4lkOG
-FxrlUurCyapj+z7LtUaFSSGpPudx7XK96q0DtRzzZkwYcQ5U4lz7l+hcOjKQ6zK4
-NR+1AEu6zxaLtM0yP4hV
-=MKzX
------END PGP SIGNATURE-----
-
---qDbXVdCdHGoSgWSk--
+diff --git a/drivers/mmc/host/sh_mobile_sdhi.c b/drivers/mmc/host/sh_mobile_sdhi.c
+index f750f9494410b0..c3b651bf89cb4a 100644
+--- a/drivers/mmc/host/sh_mobile_sdhi.c
++++ b/drivers/mmc/host/sh_mobile_sdhi.c
+@@ -39,6 +39,12 @@
+ 
+ #define EXT_ACC           0xe4
+ 
++#define SDHI_VER_GEN2_SDR50	0x490c
++/* very old datasheets said 0x490c for SDR104, too. They are wrong! */
++#define SDHI_VER_GEN2_SDR104	0xcb0d
++#define SDHI_VER_GEN3_SD	0xcc10
++#define SDHI_VER_GEN3_SDMMC	0xcd10
++
+ #define host_to_priv(host) container_of((host)->pdata, struct sh_mobile_sdhi, mmc_data)
+ 
+ struct sh_mobile_sdhi_of_data {
+@@ -109,14 +115,14 @@ static void sh_mobile_sdhi_sdbuf_width(struct tmio_mmc_host *host, int width)
+ 	 *	sh_mobile_sdhi_of_data :: dma_buswidth
+ 	 */
+ 	switch (sd_ctrl_read16(host, CTL_VERSION)) {
+-	case 0x490C:
++	case SDHI_VER_GEN2_SDR50:
+ 		val = (width == 32) ? 0x0001 : 0x0000;
+ 		break;
+-	case 0xCB0D:
++	case SDHI_VER_GEN2_SDR104:
+ 		val = (width == 32) ? 0x0000 : 0x0001;
+ 		break;
+-	case 0xCC10: /* Gen3, SD only */
+-	case 0xCD10: /* Gen3, SD + MMC */
++	case SDHI_VER_GEN3_SD:
++	case SDHI_VER_GEN3_SDMMC:
+ 		if (width == 64)
+ 			val = 0x0000;
+ 		else if (width == 32)
+-- 
+2.8.1
