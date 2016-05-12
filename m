@@ -1,156 +1,50 @@
-From: Douglas Anderson <dianders@chromium.org>
-Subject: [PATCH v3] mmc: dw_mmc: rockchip: Set the drive phase properly
-Date: Thu, 12 May 2016 11:31:50 -0700
-Message-ID: <1463077910-25914-1-git-send-email-dianders@chromium.org>
+From: Heiko Stuebner <heiko@sntech.de>
+Subject: Re: [PATCH v3] mmc: dw_mmc: rockchip: Set the drive phase properly
+Date: Fri, 13 May 2016 00:52:51 +0200
+Message-ID: <2865073.LogD6IIKLp@phil>
+References: <1463077910-25914-1-git-send-email-dianders@chromium.org>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7Bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pf0-f171.google.com ([209.85.192.171]:36394 "EHLO
-	mail-pf0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752386AbcELScV (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 12 May 2016 14:32:21 -0400
-Received: by mail-pf0-f171.google.com with SMTP id c189so34588229pfb.3
-        for <linux-mmc@vger.kernel.org>; Thu, 12 May 2016 11:32:21 -0700 (PDT)
+Received: from gloria.sntech.de ([95.129.55.99]:34368 "EHLO gloria.sntech.de"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1750929AbcELWxI (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 12 May 2016 18:53:08 -0400
+In-Reply-To: <1463077910-25914-1-git-send-email-dianders@chromium.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: jh80.chung@samsung.com, Ulf Hansson <ulf.hansson@linaro.org>, Heiko Stuebner <heiko@sntech.de>, shawn.lin@rock-chips.com
-Cc: linux-rockchip@lists.infradead.org, briannorris@chromium.org, Douglas Anderson <dianders@chromium.org>, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org
+To: Douglas Anderson <dianders@chromium.org>
+Cc: jh80.chung@samsung.com, Ulf Hansson <ulf.hansson@linaro.org>, shawn.lin@rock-chips.com, linux-rockchip@lists.infradead.org, briannorris@chromium.org, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org
 
-Historically for Rockchip devices we've relied on the power-on
-default (or perhaps the firmware setting) to get the correct drive
-phase for dw_mmc devices.  This worked OK for the most part, but:
+Am Donnerstag, 12. Mai 2016, 11:31:50 schrieb Douglas Anderson:
 
-* Relying on the setting just "being right" is a bit fragile.
+[...]
 
-* As soon as there is an instance where the power on default is wrong or
-  where the firmware didn't configure this properly then we'll get a
-  mysterious failure.
+> In commit 7a03fe6f48f3 ("clk: rockchip: reset init state before mmc card
+> initialization") we actually started setting this explicitly in the
+> kernel, but that commit wasn't quite right and also wasn't quite
+> enough.  See <https://patchwork.kernel.org/patch/9085311/> for some
+> details.
+> 
+> Let's explicitly set this phase in dw_mmc.
 
-In commit 7a03fe6f48f3 ("clk: rockchip: reset init state before mmc card
-initialization") we actually started setting this explicitly in the
-kernel, but that commit wasn't quite right and also wasn't quite
-enough.  See <https://patchwork.kernel.org/patch/9085311/> for some
-details.
+[...]
 
-Let's explicitly set this phase in dw_mmc.
+> Fixes: 7a03fe6f48f3 ("clk: rockchip: reset init state before mmc card
+> initialization") Signed-off-by: Douglas Anderson <dianders@chromium.org>
+> Reviewed-by: Shawn Lin <shawn.lin@rock-chips.com>
 
-The comments inside this patch try to explain the situation quite
-throughly, but the high level overview of this is:
+I've tested this patch together with the two clock patches linked above on a 
+rk3288-firefly and a rk3288-veyron-jerry. On the firefly tuning still does not 
+work (probably really some regulator issue) and on veyron tuning still works 
+as expected, so
 
-Before this patch on rk3288 devices tested (after revert of the clock
-patch described above):
-* eMMC: 180 degrees
-* SDMMC/SDIO0/SDIO1: 90 degrees
+Tested-by: Heiko Stuebner <heiko@sntech.de>
 
-After this patch:
-* Use 90 degree phase offset usually.
-* Use 180 degree phase offset for MMC_DDR52, SDR104, HS200.
+Doug's explanations both in the commit message and the code look sane to me, 
+but I don't feel confident enough in my understanding of the matter to 
+transform that into a Reviewed-by tag.
 
-That means we are _changing_ behavior for those devices in this way:
 
-* If we have HS200 eMMC or DDR52 eMMC, we'll run ID mode at 90
-  degrees (vs 180) but otherwise have no change.
-
-* For any non-HS200 / non-DDR52 eMMC devices we'll now _always_ run at
-  90 degrees (vs 180).  It seems fairly unlikely that building modern
-  hardware is using an eMMC that isn't using DDR52 or HS200, of course.
-
-* For SDR104 cards we'll now run with 180 degree phase offset (vs 90).
-  It's expected that 90 degree phase offset would have worked OK, but
-  this gives us extra margin.
-
-I have tested this by inserting my collection of uSD cards (mostly UHS,
-though a few not) into a veyron_minnie and confirmed that they still
-seem to enumerate properly.  For a subset of them I tried putting a
-filesystem on them and also tried running mmc_test.
-
-Fixes: 7a03fe6f48f3 ("clk: rockchip: reset init state before mmc card initialization")
-Signed-off-by: Douglas Anderson <dianders@chromium.org>
-Reviewed-by: Shawn Lin <shawn.lin@rock-chips.com>
----
-Changes in v3:
-- Fixed minor typo; point that this really fixes something in desc.
-- Add Shawn's Reviewed-by
-
-Changes in v2:
-- Now use 90 degrees for some modes; updated comments to say why.
-
- drivers/mmc/host/dw_mmc-rockchip.c | 64 ++++++++++++++++++++++++++++++++++++++
- 1 file changed, 64 insertions(+)
-
-diff --git a/drivers/mmc/host/dw_mmc-rockchip.c b/drivers/mmc/host/dw_mmc-rockchip.c
-index 8c20b81cafd8..b9e4fe5a2393 100644
---- a/drivers/mmc/host/dw_mmc-rockchip.c
-+++ b/drivers/mmc/host/dw_mmc-rockchip.c
-@@ -66,6 +66,70 @@ static void dw_mci_rk3288_set_ios(struct dw_mci *host, struct mmc_ios *ios)
- 	/* Make sure we use phases which we can enumerate with */
- 	if (!IS_ERR(priv->sample_clk))
- 		clk_set_phase(priv->sample_clk, priv->default_sample_phase);
-+
-+	/*
-+	 * Set the drive phase offset based on speed mode to achieve hold times.
-+	 *
-+	 * NOTE: this is _not_ a value that is dynamically tuned and is also
-+	 * _not_ a value that will vary from board to board.  It is a value
-+	 * that could vary between different SoC models if they had massively
-+	 * different output clock delays inside their dw_mmc IP block (delay_o),
-+	 * but since it's OK to overshoot a little we don't need to do complex
-+	 * calculations and can pick values that will just work for everyone.
-+	 *
-+	 * When picking values we'll stick with picking 0/90/180/270 since
-+	 * those can be made very accurately on all known Rockchip SoCs.
-+	 *
-+	 * Note that these values match values from the DesignWare Databook
-+	 * tables for the most part except for SDR12 and "ID mode".  For those
-+	 * two modes the databook calculations assume a clock in of 50MHz.  As
-+	 * seen above, we always use a clock in rate that is exactly the
-+	 * card's input clock (times RK3288_CLKGEN_DIV, but that gets divided
-+	 * back out before the controller sees it).
-+	 *
-+	 * From measurement of a single device, it appears that delay_o is
-+	 * about .5 ns.  Since we try to leave a bit of margin, it's expected
-+	 * that numbers here will be fine even with much larger delay_o
-+	 * (the 1.4 ns assumed by the DesignWare Databook would result in the
-+	 * same results, for instance).
-+	 */
-+	if (!IS_ERR(priv->drv_clk)) {
-+		int phase;
-+
-+		/*
-+		 * In almost all cases a 90 degree phase offset will provide
-+		 * sufficient hold times across all valid input clock rates
-+		 * assuming delay_o is not absurd for a given SoC.  We'll use
-+		 * that as a default.
-+		 */
-+		phase = 90;
-+
-+		switch (ios->timing) {
-+		case MMC_TIMING_MMC_DDR52:
-+			/*
-+			 * Since clock in rate with MMC_DDR52 is doubled when
-+			 * bus width is 8 we need to double the phase offset
-+			 * to get the same timings.
-+			 */
-+			if (ios->bus_width == MMC_BUS_WIDTH_8)
-+				phase = 180;
-+			break;
-+		case MMC_TIMING_UHS_SDR104:
-+		case MMC_TIMING_MMC_HS200:
-+			/*
-+			 * In the case of 150 MHz clock (typical max for
-+			 * Rockchip SoCs), 90 degree offset will add a delay
-+			 * of 1.67 ns.  That will meet min hold time of .8 ns
-+			 * as long as clock output delay is < .87 ns.  On
-+			 * SoCs measured this seems to be OK, but it doesn't
-+			 * hurt to give margin here, so we use 180.
-+			 */
-+			phase = 180;
-+			break;
-+		}
-+
-+		clk_set_phase(priv->drv_clk, phase);
-+	}
- }
- 
- #define NUM_PHASES			360
--- 
-2.8.0.rc3.226.g39d4020
-
+Heiko
