@@ -1,162 +1,113 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH V2 1/3] mmc: core: Add a facility to "pause" re-tuning
-Date: Thu, 12 May 2016 16:19:57 +0300
-Message-ID: <573482FD.6040906@intel.com>
-References: <1462361893-11897-1-git-send-email-adrian.hunter@intel.com>
- <1462361893-11897-2-git-send-email-adrian.hunter@intel.com>
- <CAPDyKFrg3Fe8ypdzrbxD5DxHBNs7-6yVma-7X7NY4JfNzVzGPQ@mail.gmail.com>
- <5731DC12.4090906@intel.com>
- <CAPDyKFozyrzAPcw3v=XUEkMevLxxZ_AgHWXkwkYPN=AJkTAgXQ@mail.gmail.com>
- <5732F498.6090203@intel.com> <57341F2D.1020703@intel.com>
- <CAPDyKFqGo_MgBo=Xc74O6yi_rpZUWyK00wnBi7Ebdda0ejrwcA@mail.gmail.com>
+From: Wolfram Sang <wsa@the-dreams.de>
+Subject: Re: [PATCH/RFC 2/3] mmc: sh_mobile_sdhi: Add tuning support
+Date: Thu, 12 May 2016 18:50:13 +0200
+Message-ID: <20160512165013.GD13121@katana>
+References: <1462859524-28522-1-git-send-email-horms+renesas@verge.net.au>
+ <1462859524-28522-3-git-send-email-horms+renesas@verge.net.au>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga14.intel.com ([192.55.52.115]:6115 "EHLO mga14.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751923AbcELNXv (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 12 May 2016 09:23:51 -0400
-In-Reply-To: <CAPDyKFqGo_MgBo=Xc74O6yi_rpZUWyK00wnBi7Ebdda0ejrwcA@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="NklN7DEeGtkPCoo3"
+Return-path: <linux-renesas-soc-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <1462859524-28522-3-git-send-email-horms+renesas@verge.net.au>
+Sender: linux-renesas-soc-owner@vger.kernel.org
+To: Simon Horman <horms+renesas@verge.net.au>
+Cc: Ian Molton <ian@mnementh.co.uk>, Ulf Hansson <ulf.hansson@linaro.org>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Magnus Damm <magnus.damm@gmail.com>, linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org, Ben Hutchings <ben.hutchings@codethink.co.uk>
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Tomas Winkler <tomas.winkler@intel.com>
 
-On 12/05/16 16:20, Ulf Hansson wrote:
-> On 12 May 2016 at 08:14, Adrian Hunter <adrian.hunter@intel.com> wrote:
->> On 11/05/16 12:00, Adrian Hunter wrote:
->>> On 11/05/16 09:48, Ulf Hansson wrote:
->>>> On 10 May 2016 at 15:03, Adrian Hunter <adrian.hunter@intel.com> wrote:
->>>>> On 10/05/16 15:24, Ulf Hansson wrote:
->>>>>> On 4 May 2016 at 13:38, Adrian Hunter <adrian.hunter@intel.com> wrote:
->>>>>>> Re-tuning is not possible when switched to the RPMB
->>>>>>> partition.  However re-tuning should not be needed
->>>>>>> if re-tuning is done immediately before switching,
->>>>>>> a small set of operations is done, and then we
->>>>>>> immediately switch back to the main partition.
->>>>>>>
->>>>>>> To ensure that re-tuning can't be done for a short
->>>>>>> while, add a facility to "pause" re-tuning.
->>>>>>>
->>>>>>> The existing facility to hold / release re-tuning
->>>>>>> is used but it also flags re-tuning as needed to cause
->>>>>>> re-tuning before the next command (which will be the
->>>>>>> switch to RPMB).
->>>>>>>
->>>>>>> We also need to "unpause" in the recovery path, which
->>>>>>> is catered for by adding it to mmc_retune_disable().
->>>>>>>
->>>>>>> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
->>>>>>> ---
->>>>>>>  drivers/mmc/core/host.c  | 22 ++++++++++++++++++++++
->>>>>>>  include/linux/mmc/host.h |  4 ++++
->>>>>>>  2 files changed, 26 insertions(+)
->>>>>>>
->>>>>>> diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
->>>>>>> index e0a3ee16c0d3..302e5858755a 100644
->>>>>>> --- a/drivers/mmc/core/host.c
->>>>>>> +++ b/drivers/mmc/core/host.c
->>>>>>> @@ -68,8 +68,30 @@ void mmc_retune_enable(struct mmc_host *host)
->>>>>>>                           jiffies + host->retune_period * HZ);
->>>>>>>  }
->>>>>>>
->>>>>>> +/*
->>>>>>> + * Pause re-tuning for a small set of operations.  The pause begins after the
->>>>>>> + * next command and after first doing re-tuning.
->>>>>>> + */
->>>>>>> +void mmc_retune_pause(struct mmc_host *host)
->>>>>>> +{
->>>>>>> +       if (!host->retune_paused) {
->>>>>>> +               host->retune_paused = 1;
->>>>>>> +               mmc_retune_needed(host);
->>>>>>> +               mmc_retune_hold(host);
->>>>>>> +       }
->>>>>>> +}
->>>>>>> +
->>>>>>
->>>>>> When the mmc block device driver is built as a module, this doesn't
->>>>>> build. I will drop the series from my next branch to sort this out.
->>>>>
->>>>> Oops. Sorry!
->>>>>
->>>>>> Should we export these via EXPORT_SYMBOL_GPL, or implement them as
->>>>>> inline functions?
->>>>>
->>>>> They need to be exported.  I tend to go with what else is in the same file
->>>>> i.e. host.c is exporting using EXPORT_SYMBOL()
->>>>
->>>> Yes, okay!
->>>>
->>>>>
->>>>>>
->>>>>> This also made me think about the SDIO/WLAN driver issue, during
->>>>>> system PM suspend/resume, which also needed temporary to disable
->>>>>> re-tuning.
->>>>>>
->>>>>> *If* we are going to export these, I want to make it works for the
->>>>>> SDIO case well...
->>>>>
->>>>> SDIO case is slightly different, and SDIO uses its own header file sdio_func.h.
->>>>
->>>> I what way is it different?
->>>
->>> In the RPMB case there are 3 things to do:
->>>       1. Do re-tuning at next command
->>>       2. Hold re-tuning
->>>       3. Release re-tuning
->>>
->>> In the SDIO case there are 3 things to do:
->>>       1. Prevent re-tuning at next command
->>>       2. Hold re-tuning
->>>       3. Release re-tuning
->>>
->>> So the first thing is different.
->>>
->>>>
->>>> Regarding the header file, my point is that I want to keep the numbers
->>>> of exported functions to a minimum.
->>>>
->>>> Do you think there is way to combine these two use cases, such only
->>>> one pair of new functions would be needed?
->>>
->>> To make them the same we would need to add a parameter to mmc_retune_pause()
->>> i.e. something like
->>>
->>> void mmc_retune_pause(struct mmc_host *host, bool retune_now)
->>> {
->>>       if (!host->retune_paused) {
->>>               host->retune_paused = 1;
->>>               mmc_retune_hold(host);
->>>               if (retune_now)
->>>                       mmc_retune_needed(host);
->>>               else
->>>                       host->retune_now = 0;
->>>       }
->>> }
->>>
->>> For SDIO we would need to put the function declarations in sdio_func.h as
->>> well as host.h.
->>>
->>> Shall I make a V3 of these patches like that?
-> 
-> No.
-> 
->>
->> I looked again at sdio_func.h and it seems to have its own paradigm i.e. it
->> is a completely separate set of functions that take the SDIO function as a
->> parameter, and that hide and encapsulate core and host functions.
->>
->> It would be inconsistent with that paradigm to expose mmc_retune_pause() and
->> mmc_retune_unpause() there.  Is that what you want to do?
-> 
-> I agree, we shouldn't mess up the SDIO API with these functions.
-> 
-> Instead, let's keep it simple and just leave out the SDIO case for
-> now. So do EXPORT_SYMBOL for those APIs you added in $subject patch,
-> without further changes.
-> 
-> Okay?
 
-Yes please :-)
+--NklN7DEeGtkPCoo3
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
+
+> +struct sh_mobile_sdhi_scc {
+> +	unsigned long clk;	/* clock for SDR104 */
+
+'clk_rate' please. clk is too often used with struct clk *.
+
+> +static void sh_mobile_sdhi_set_clk_div(struct platform_device *pdev, int=
+ state)
+> +{
+> +	struct mmc_host *mmc =3D platform_get_drvdata(pdev);
+> +	struct tmio_mmc_host *host =3D mmc_priv(mmc);
+> +
+> +	if (state) {
+> +		sd_ctrl_write16(host, CTL_SD_CARD_CLK_CTL, ~0x0100 &
+> +				sd_ctrl_read16(host, CTL_SD_CARD_CLK_CTL));
+> +		sd_ctrl_write16(host, CTL_SD_CARD_CLK_CTL, 0x00ff);
+> +	}
+> +}
+
+Left over? Doesn't seemt to get used in patch 1?
+
+> +static inline u32 sd_scc_read32(struct tmio_mmc_host *host, int addr)
+> +{
+> +	struct platform_device *pdev =3D host->pdev;
+> +	const struct of_device_id *of_id =3D
+> +		of_match_device(sh_mobile_sdhi_of_match, &pdev->dev);
+> +	const struct sh_mobile_sdhi_of_data *of_data =3D of_id->data;
+> +
+> +	return readl(host->ctl + of_data->scc_offset +
+> +		     (addr << host->bus_shift));
+> +}
+> +
+> +static inline void sd_scc_write32(struct tmio_mmc_host *host, int addr,
+> +				  u32 val)
+> +{
+> +	struct platform_device *pdev =3D host->pdev;
+> +	const struct of_device_id *of_id =3D
+> +		of_match_device(sh_mobile_sdhi_of_match, &pdev->dev);
+> +	const struct sh_mobile_sdhi_of_data *of_data =3D of_id->data;
+> +
+> +	writel(val, host->ctl + of_data->scc_offset +
+> +	       (addr << host->bus_shift));
+
+It probably makes sense to store the SCC base pointer somewhere to
+prevent all these lookups with every read/write.
+
+> +static bool sh_mobile_sdhi_inquiry_tuning(struct tmio_mmc_host *host)
+> +{
+> +	/* SDHI should be tuning only SDR104 */
+> +	if (host->mmc->ios.timing =3D=3D MMC_TIMING_UHS_SDR104)
+> +		return true;
+> +	else
+> +		return false;
+> +}
+
+Really needed? See patch 1.
+
+>  	res =3D platform_get_resource(pdev, IORESOURCE_MEM, 0);
+> @@ -357,6 +588,7 @@ static int sh_mobile_sdhi_probe(struct platform_devic=
+e *pdev)
+>  		host->bus_shift =3D of_data->bus_shift;
+>  	}
+> =20
+> +	host->set_clk_div	=3D sh_mobile_sdhi_set_clk_div;
+
+Left over?
+
+
+--NklN7DEeGtkPCoo3
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1
+
+iQIcBAEBAgAGBQJXNLRFAAoJEBQN5MwUoCm26HkP/A4FSJZzL57zp3FM6k4qw6Dh
+ChtFUJd8Sc4cXWfOvJ1HfmyQYUKaVvUt5LVpKFaYgorsh2ZGkhhw8sFTWpWtiJq5
+QO3w4wyfaAryH1S9oR2Ca2K4SHdj8ClTBalNM8OxoHHJpqWehuMHQM4LF00p3zOn
+xm2Ra7L1dLcmpOJuu32vQsjUyFE1hh3FdVU3ngC9wSGFsD94W/YSetqzqGtgOTzp
+T2HQLwYAssF5sbaZVaCzJ3DkcfytPGzBIGZUM2oXBIx/9a76XZM1+EWZWe4Eg3t6
+SlE9WnLi4t6tgfMlSvfT4bzbGdqneQcg8DSCErITzTllJaMP7VNPb78juvmv6iqY
+LMPSIqUKtx36oxhv9XVIw/6VlyTjlpRVxackI6lrhvpnEkOqCkSL3FpaGLkAxC+d
+qUr2HMtDE6OvC2XTF4QTMrecoxyCL8aZb2iyzfRxD/pKTID+ht90/aWp2rzjXIo1
+RJIzd1AFBPh+UYL1J0hiynTFKEgXtv5+GGV0OEYC50JAZLbC1zZfU4gQQkG9e7Tp
+v9jP4CRHJaO3+D1xXCUnwKfOiqFuazstZDLQQVGPCkb7xcvz6/CAnk2kofwDSAfa
+VwaLl79Vl5G3OWl22VLoTx7l5xdBvg08CFrD5BsWNr3CbmJJQfnG4+cMjLzqsBOU
+KiSIyh61b16A32iK+klv
+=qocS
+-----END PGP SIGNATURE-----
+
+--NklN7DEeGtkPCoo3--
