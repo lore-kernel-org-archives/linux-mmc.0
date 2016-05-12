@@ -1,63 +1,96 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH] mmc: mmc: do not use CMD13 to get status after speed mode
- switch
-Date: Thu, 12 May 2016 13:29:40 +0300
-Message-ID: <57345B14.7030308@intel.com>
-References: <1462344872-6448-1-git-send-email-chaotian.jing@mediatek.com>
- <5732E43E.8070800@intel.com> <1463036431.11653.3.camel@mhfsdcap03>
+From: Stefan Christ <s.christ@phytec.de>
+Subject: [PATCH] mmc: sdhci-esdhc-imx: implement reset quirks for i.MX6 DualLite/Solo
+Date: Thu, 12 May 2016 13:52:48 +0200
+Message-ID: <1463053968-11598-1-git-send-email-s.christ@phytec.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga02.intel.com ([134.134.136.20]:20235 "EHLO mga02.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752703AbcELKdg (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 12 May 2016 06:33:36 -0400
-In-Reply-To: <1463036431.11653.3.camel@mhfsdcap03>
+Received: from mail.visioncatalog.de ([217.6.246.34]:54277 "EHLO
+	root.phytec.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751781AbcELMA3 convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 12 May 2016 08:00:29 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chaotian Jing <chaotian.jing@mediatek.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Matthias Brugger <matthias.bgg@gmail.com>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>, Masahiro Yamada <yamada.masahiro@socionext.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mediatek@lists.infradead.org, srv_heupstream@mediatek.com, Sascha Hauer <kernel@pengutronix.de>
+To: adrian.hunter@intel.com, linux-mmc@vger.kernel.org
+Cc: aisheng.dong@freescale.com, festevam@gmail.com
 
-On 12/05/16 10:00, Chaotian Jing wrote:
-> On Wed, 2016-05-11 at 10:50 +0300, Adrian Hunter wrote:
->> On 04/05/16 09:54, Chaotian Jing wrote:
->>> Per JEDEC spec, it is not recommended to use CMD13 to get card status
->>> after speed mode switch. below are two reason about this:
->>> 1. CMD13 cannot be guaranteed due to the asynchronous operation.
->>> Therefore it is not recommended to use CMD13 to check busy completion
->>> of the timing change indication.
->>> 2. After switch to HS200, CMD13 will get response of 0x800, and even the
->>> busy signal gets de-asserted, the response of CMD13 is aslo 0x800.
->>>
->>> this patch drops CMD13 when doing speed mode switch, if host do not
->>> support MMC_CAP_WAIT_WHILE_BUSY and there is no ops->card_busy(),
->>> then the only way is to wait a fixed timeout.
->>
->> This looks like it should be 3 patches:
->> 	1. Change __mmc_switch
->> 	2. Change HS200 and HS400 selection
->> 	3. Change HS selection
->>
->> However there is another problem: card_busy is not the same as busy signal -
->> see below.  So that needs to be sorted out first.
->>
-> We should make that card_busy() is the same with busy signal asserted.
-> as you know, if card was not in busy state, all data pins should be high
-> level as it is pull-up by default. so that's no conflict to check card
-> busy signal by DAT0 or DAT0 ~ DAT3.
+The ROM Code of i.MX6 Quad/Dual uses the MMC interfaces differently tha=
+n
+the i.MX6 Solo/DualLite when it loads the bootloader from the interface=
+:
 
-Potentially SDIO uses DAT1 for card interrupt, so that is a conflict right
-there.
+                Register DLL_CTRL(0x60)  Bit 25 FBCLK_SEL (0x48)
+    Quad:       0x0                      0
+    DualLite:   0x01000021               1
 
-Also SDHCI does it backwards (don't ask me why) and considers 0000 to be
-busy, so there's another conflict.
+Since the linux kernel or bootloader driver doesn't reset all registers=
+,
+the MMC interface is in an inconsistent state, which leads to boot
+failures for some eMMC devices on the i.MX6 DualLite SoC. The errors
+look like:
 
-Some of the language in the SD and SDHCI specifications seems to indicate
-that checking all 4 DAT lines during voltage switch is optional i.e. only 1
-of the lines must be checked.  If that is true then we could change all the
-drivers over to check just DAT0, and expect that to work for both busy
-signalling and SD voltage switch checks.
+    mmcblk1: error -84 transferring data, sector 0, nr 8, cmd response =
+0x900, card status 0xb00
+    mmcblk1: retrying using single block read
+    mmcblk1: error -84 transferring data, sector 2, nr 6, cmd response =
+0x900, card status 0x0
+    blk_update_request: I/O error, dev mmcblk1, sector 2
+    mmcblk1: error -84 transferring data, sector 3, nr 5, cmd response =
+0x900, card status 0x0
+    blk_update_request: I/O error, dev mmcblk1, sector 3
 
-So it seems to me card_busy still needs to be sorted out first.
+The register DLL_CTRL is already reset. Reset also the bit FBCLK_SEL.
+
+Signed-off-by: Stefan Christ <s.christ@phytec.de>
+---
+Hi,
+
+this patch is a follow up to
+
+    http://www.spinics.net/lists/linux-mmc/msg36331.html
+
+    mmc: sdhci-esdhci-imx: disable DLL delay line settings explicitly
+
+    Disable DLL delay line settings explicitly during driver initializa=
+tion
+    in case ROM/uBoot had set an invalid delay.
+    e.g. MX6DL ROM has set the default delay line(DLLCTRL) to 0x1000021=
+,
+    the uSDHC clock timing will become marginal when works on DDR mode
+    due to default delay and will possibly see CRC errors in case the b=
+oard
+    is not perfectly designed on the eMMC chip layout.
+   =20
+    Signed-off-by: Dong Aisheng <aisheng.dong@xxxxxxx>
+
+It doesn't apply cleanly on Linus master branch, since the above patch =
+is
+missing.
+
+Mit freundlichen Gr=C3=BC=C3=9Fen / Kind regards,
+        Stefan Christ
+---
+ drivers/mmc/host/sdhci-esdhc-imx.c | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhc=
+i-esdhc-imx.c
+index 4490808..9101556 100644
+--- a/drivers/mmc/host/sdhci-esdhc-imx.c
++++ b/drivers/mmc/host/sdhci-esdhc-imx.c
+@@ -1191,6 +1191,10 @@ static int sdhci_esdhc_imx_probe(struct platform=
+_device *pdev)
+=20
+ 		/* disable DLL_CTRL delay line settings */
+ 		writel(0x0, host->ioaddr + ESDHC_DLL_CTRL);
++
++		/* reset bit FBCLK_SEL for i.MX6 Solo/DualLite ROM code */
++		writel(readl(host->ioaddr + ESDHC_MIX_CTRL) & ~BIT(25),
++			host->ioaddr + ESDHC_MIX_CTRL);
+ 	}
+=20
+ 	if (imx_data->socdata->flags & ESDHC_FLAG_MAN_TUNING)
+--=20
+1.9.1
 
