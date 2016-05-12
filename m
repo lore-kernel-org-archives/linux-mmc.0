@@ -1,162 +1,162 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
+From: Adrian Hunter <adrian.hunter@intel.com>
 Subject: Re: [PATCH V2 1/3] mmc: core: Add a facility to "pause" re-tuning
-Date: Thu, 12 May 2016 15:20:41 +0200
-Message-ID: <CAPDyKFqGo_MgBo=Xc74O6yi_rpZUWyK00wnBi7Ebdda0ejrwcA@mail.gmail.com>
+Date: Thu, 12 May 2016 16:19:57 +0300
+Message-ID: <573482FD.6040906@intel.com>
 References: <1462361893-11897-1-git-send-email-adrian.hunter@intel.com>
-	<1462361893-11897-2-git-send-email-adrian.hunter@intel.com>
-	<CAPDyKFrg3Fe8ypdzrbxD5DxHBNs7-6yVma-7X7NY4JfNzVzGPQ@mail.gmail.com>
-	<5731DC12.4090906@intel.com>
-	<CAPDyKFozyrzAPcw3v=XUEkMevLxxZ_AgHWXkwkYPN=AJkTAgXQ@mail.gmail.com>
-	<5732F498.6090203@intel.com>
-	<57341F2D.1020703@intel.com>
+ <1462361893-11897-2-git-send-email-adrian.hunter@intel.com>
+ <CAPDyKFrg3Fe8ypdzrbxD5DxHBNs7-6yVma-7X7NY4JfNzVzGPQ@mail.gmail.com>
+ <5731DC12.4090906@intel.com>
+ <CAPDyKFozyrzAPcw3v=XUEkMevLxxZ_AgHWXkwkYPN=AJkTAgXQ@mail.gmail.com>
+ <5732F498.6090203@intel.com> <57341F2D.1020703@intel.com>
+ <CAPDyKFqGo_MgBo=Xc74O6yi_rpZUWyK00wnBi7Ebdda0ejrwcA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wm0-f45.google.com ([74.125.82.45]:37380 "EHLO
-	mail-wm0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751552AbcELNUn (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 12 May 2016 09:20:43 -0400
-Received: by mail-wm0-f45.google.com with SMTP id a17so135830676wme.0
-        for <linux-mmc@vger.kernel.org>; Thu, 12 May 2016 06:20:42 -0700 (PDT)
-In-Reply-To: <57341F2D.1020703@intel.com>
+Received: from mga14.intel.com ([192.55.52.115]:6115 "EHLO mga14.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751923AbcELNXv (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 12 May 2016 09:23:51 -0400
+In-Reply-To: <CAPDyKFqGo_MgBo=Xc74O6yi_rpZUWyK00wnBi7Ebdda0ejrwcA@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>
+To: Ulf Hansson <ulf.hansson@linaro.org>
 Cc: linux-mmc <linux-mmc@vger.kernel.org>, Tomas Winkler <tomas.winkler@intel.com>
 
-On 12 May 2016 at 08:14, Adrian Hunter <adrian.hunter@intel.com> wrote:
-> On 11/05/16 12:00, Adrian Hunter wrote:
->> On 11/05/16 09:48, Ulf Hansson wrote:
->>> On 10 May 2016 at 15:03, Adrian Hunter <adrian.hunter@intel.com> wrote:
->>>> On 10/05/16 15:24, Ulf Hansson wrote:
->>>>> On 4 May 2016 at 13:38, Adrian Hunter <adrian.hunter@intel.com> wrote:
->>>>>> Re-tuning is not possible when switched to the RPMB
->>>>>> partition.  However re-tuning should not be needed
->>>>>> if re-tuning is done immediately before switching,
->>>>>> a small set of operations is done, and then we
->>>>>> immediately switch back to the main partition.
+On 12/05/16 16:20, Ulf Hansson wrote:
+> On 12 May 2016 at 08:14, Adrian Hunter <adrian.hunter@intel.com> wrote:
+>> On 11/05/16 12:00, Adrian Hunter wrote:
+>>> On 11/05/16 09:48, Ulf Hansson wrote:
+>>>> On 10 May 2016 at 15:03, Adrian Hunter <adrian.hunter@intel.com> wrote:
+>>>>> On 10/05/16 15:24, Ulf Hansson wrote:
+>>>>>> On 4 May 2016 at 13:38, Adrian Hunter <adrian.hunter@intel.com> wrote:
+>>>>>>> Re-tuning is not possible when switched to the RPMB
+>>>>>>> partition.  However re-tuning should not be needed
+>>>>>>> if re-tuning is done immediately before switching,
+>>>>>>> a small set of operations is done, and then we
+>>>>>>> immediately switch back to the main partition.
+>>>>>>>
+>>>>>>> To ensure that re-tuning can't be done for a short
+>>>>>>> while, add a facility to "pause" re-tuning.
+>>>>>>>
+>>>>>>> The existing facility to hold / release re-tuning
+>>>>>>> is used but it also flags re-tuning as needed to cause
+>>>>>>> re-tuning before the next command (which will be the
+>>>>>>> switch to RPMB).
+>>>>>>>
+>>>>>>> We also need to "unpause" in the recovery path, which
+>>>>>>> is catered for by adding it to mmc_retune_disable().
+>>>>>>>
+>>>>>>> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
+>>>>>>> ---
+>>>>>>>  drivers/mmc/core/host.c  | 22 ++++++++++++++++++++++
+>>>>>>>  include/linux/mmc/host.h |  4 ++++
+>>>>>>>  2 files changed, 26 insertions(+)
+>>>>>>>
+>>>>>>> diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
+>>>>>>> index e0a3ee16c0d3..302e5858755a 100644
+>>>>>>> --- a/drivers/mmc/core/host.c
+>>>>>>> +++ b/drivers/mmc/core/host.c
+>>>>>>> @@ -68,8 +68,30 @@ void mmc_retune_enable(struct mmc_host *host)
+>>>>>>>                           jiffies + host->retune_period * HZ);
+>>>>>>>  }
+>>>>>>>
+>>>>>>> +/*
+>>>>>>> + * Pause re-tuning for a small set of operations.  The pause begins after the
+>>>>>>> + * next command and after first doing re-tuning.
+>>>>>>> + */
+>>>>>>> +void mmc_retune_pause(struct mmc_host *host)
+>>>>>>> +{
+>>>>>>> +       if (!host->retune_paused) {
+>>>>>>> +               host->retune_paused = 1;
+>>>>>>> +               mmc_retune_needed(host);
+>>>>>>> +               mmc_retune_hold(host);
+>>>>>>> +       }
+>>>>>>> +}
+>>>>>>> +
 >>>>>>
->>>>>> To ensure that re-tuning can't be done for a short
->>>>>> while, add a facility to "pause" re-tuning.
->>>>>>
->>>>>> The existing facility to hold / release re-tuning
->>>>>> is used but it also flags re-tuning as needed to cause
->>>>>> re-tuning before the next command (which will be the
->>>>>> switch to RPMB).
->>>>>>
->>>>>> We also need to "unpause" in the recovery path, which
->>>>>> is catered for by adding it to mmc_retune_disable().
->>>>>>
->>>>>> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
->>>>>> ---
->>>>>>  drivers/mmc/core/host.c  | 22 ++++++++++++++++++++++
->>>>>>  include/linux/mmc/host.h |  4 ++++
->>>>>>  2 files changed, 26 insertions(+)
->>>>>>
->>>>>> diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
->>>>>> index e0a3ee16c0d3..302e5858755a 100644
->>>>>> --- a/drivers/mmc/core/host.c
->>>>>> +++ b/drivers/mmc/core/host.c
->>>>>> @@ -68,8 +68,30 @@ void mmc_retune_enable(struct mmc_host *host)
->>>>>>                           jiffies + host->retune_period * HZ);
->>>>>>  }
->>>>>>
->>>>>> +/*
->>>>>> + * Pause re-tuning for a small set of operations.  The pause begins after the
->>>>>> + * next command and after first doing re-tuning.
->>>>>> + */
->>>>>> +void mmc_retune_pause(struct mmc_host *host)
->>>>>> +{
->>>>>> +       if (!host->retune_paused) {
->>>>>> +               host->retune_paused = 1;
->>>>>> +               mmc_retune_needed(host);
->>>>>> +               mmc_retune_hold(host);
->>>>>> +       }
->>>>>> +}
->>>>>> +
+>>>>>> When the mmc block device driver is built as a module, this doesn't
+>>>>>> build. I will drop the series from my next branch to sort this out.
 >>>>>
->>>>> When the mmc block device driver is built as a module, this doesn't
->>>>> build. I will drop the series from my next branch to sort this out.
+>>>>> Oops. Sorry!
+>>>>>
+>>>>>> Should we export these via EXPORT_SYMBOL_GPL, or implement them as
+>>>>>> inline functions?
+>>>>>
+>>>>> They need to be exported.  I tend to go with what else is in the same file
+>>>>> i.e. host.c is exporting using EXPORT_SYMBOL()
 >>>>
->>>> Oops. Sorry!
->>>>
->>>>> Should we export these via EXPORT_SYMBOL_GPL, or implement them as
->>>>> inline functions?
->>>>
->>>> They need to be exported.  I tend to go with what else is in the same file
->>>> i.e. host.c is exporting using EXPORT_SYMBOL()
->>>
->>> Yes, okay!
->>>
+>>>> Yes, okay!
 >>>>
 >>>>>
->>>>> This also made me think about the SDIO/WLAN driver issue, during
->>>>> system PM suspend/resume, which also needed temporary to disable
->>>>> re-tuning.
+>>>>>>
+>>>>>> This also made me think about the SDIO/WLAN driver issue, during
+>>>>>> system PM suspend/resume, which also needed temporary to disable
+>>>>>> re-tuning.
+>>>>>>
+>>>>>> *If* we are going to export these, I want to make it works for the
+>>>>>> SDIO case well...
 >>>>>
->>>>> *If* we are going to export these, I want to make it works for the
->>>>> SDIO case well...
+>>>>> SDIO case is slightly different, and SDIO uses its own header file sdio_func.h.
 >>>>
->>>> SDIO case is slightly different, and SDIO uses its own header file sdio_func.h.
+>>>> I what way is it different?
 >>>
->>> I what way is it different?
->>
->> In the RPMB case there are 3 things to do:
->>       1. Do re-tuning at next command
->>       2. Hold re-tuning
->>       3. Release re-tuning
->>
->> In the SDIO case there are 3 things to do:
->>       1. Prevent re-tuning at next command
->>       2. Hold re-tuning
->>       3. Release re-tuning
->>
->> So the first thing is different.
->>
+>>> In the RPMB case there are 3 things to do:
+>>>       1. Do re-tuning at next command
+>>>       2. Hold re-tuning
+>>>       3. Release re-tuning
 >>>
->>> Regarding the header file, my point is that I want to keep the numbers
->>> of exported functions to a minimum.
+>>> In the SDIO case there are 3 things to do:
+>>>       1. Prevent re-tuning at next command
+>>>       2. Hold re-tuning
+>>>       3. Release re-tuning
 >>>
->>> Do you think there is way to combine these two use cases, such only
->>> one pair of new functions would be needed?
+>>> So the first thing is different.
+>>>
+>>>>
+>>>> Regarding the header file, my point is that I want to keep the numbers
+>>>> of exported functions to a minimum.
+>>>>
+>>>> Do you think there is way to combine these two use cases, such only
+>>>> one pair of new functions would be needed?
+>>>
+>>> To make them the same we would need to add a parameter to mmc_retune_pause()
+>>> i.e. something like
+>>>
+>>> void mmc_retune_pause(struct mmc_host *host, bool retune_now)
+>>> {
+>>>       if (!host->retune_paused) {
+>>>               host->retune_paused = 1;
+>>>               mmc_retune_hold(host);
+>>>               if (retune_now)
+>>>                       mmc_retune_needed(host);
+>>>               else
+>>>                       host->retune_now = 0;
+>>>       }
+>>> }
+>>>
+>>> For SDIO we would need to put the function declarations in sdio_func.h as
+>>> well as host.h.
+>>>
+>>> Shall I make a V3 of these patches like that?
+> 
+> No.
+> 
 >>
->> To make them the same we would need to add a parameter to mmc_retune_pause()
->> i.e. something like
+>> I looked again at sdio_func.h and it seems to have its own paradigm i.e. it
+>> is a completely separate set of functions that take the SDIO function as a
+>> parameter, and that hide and encapsulate core and host functions.
 >>
->> void mmc_retune_pause(struct mmc_host *host, bool retune_now)
->> {
->>       if (!host->retune_paused) {
->>               host->retune_paused = 1;
->>               mmc_retune_hold(host);
->>               if (retune_now)
->>                       mmc_retune_needed(host);
->>               else
->>                       host->retune_now = 0;
->>       }
->> }
->>
->> For SDIO we would need to put the function declarations in sdio_func.h as
->> well as host.h.
->>
->> Shall I make a V3 of these patches like that?
+>> It would be inconsistent with that paradigm to expose mmc_retune_pause() and
+>> mmc_retune_unpause() there.  Is that what you want to do?
+> 
+> I agree, we shouldn't mess up the SDIO API with these functions.
+> 
+> Instead, let's keep it simple and just leave out the SDIO case for
+> now. So do EXPORT_SYMBOL for those APIs you added in $subject patch,
+> without further changes.
+> 
+> Okay?
 
-No.
+Yes please :-)
 
->
-> I looked again at sdio_func.h and it seems to have its own paradigm i.e. it
-> is a completely separate set of functions that take the SDIO function as a
-> parameter, and that hide and encapsulate core and host functions.
->
-> It would be inconsistent with that paradigm to expose mmc_retune_pause() and
-> mmc_retune_unpause() there.  Is that what you want to do?
-
-I agree, we shouldn't mess up the SDIO API with these functions.
-
-Instead, let's keep it simple and just leave out the SDIO case for
-now. So do EXPORT_SYMBOL for those APIs you added in $subject patch,
-without further changes.
-
-Okay?
-
-Kind regards
-Uffe
