@@ -1,207 +1,146 @@
-From: Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
-Subject: RE: [PATCH/RFC 1/3] mmc: tmio: Add tuning support
-Date: Thu, 12 May 2016 06:12:44 +0000
-Message-ID: <SG2PR06MB091980ABDB9B697B47A1AE98D8730@SG2PR06MB0919.apcprd06.prod.outlook.com>
-References: <1462859524-28522-1-git-send-email-horms+renesas@verge.net.au>
- <1462859524-28522-2-git-send-email-horms+renesas@verge.net.au>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH V2 1/3] mmc: core: Add a facility to "pause" re-tuning
+Date: Thu, 12 May 2016 09:14:05 +0300
+Message-ID: <57341F2D.1020703@intel.com>
+References: <1462361893-11897-1-git-send-email-adrian.hunter@intel.com>
+ <1462361893-11897-2-git-send-email-adrian.hunter@intel.com>
+ <CAPDyKFrg3Fe8ypdzrbxD5DxHBNs7-6yVma-7X7NY4JfNzVzGPQ@mail.gmail.com>
+ <5731DC12.4090906@intel.com>
+ <CAPDyKFozyrzAPcw3v=XUEkMevLxxZ_AgHWXkwkYPN=AJkTAgXQ@mail.gmail.com>
+ <5732F498.6090203@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
-Return-path: <linux-renesas-soc-owner@vger.kernel.org>
-In-Reply-To: <1462859524-28522-2-git-send-email-horms+renesas@verge.net.au>
-Content-Language: ja-JP
-Sender: linux-renesas-soc-owner@vger.kernel.org
-To: Simon Horman <horms+renesas@verge.net.au>
-Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, Magnus Damm <magnus.damm@gmail.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-renesas-soc@vger.kernel.org" <linux-renesas-soc@vger.kernel.org>, Ben Hutchings <ben.hutchings@codethink.co.uk>, Ian Molton <ian@mnementh.co.uk>, Ulf Hansson <ulf.hansson@linaro.org>
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mga03.intel.com ([134.134.136.65]:9903 "EHLO mga03.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751407AbcELGSK (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 12 May 2016 02:18:10 -0400
+In-Reply-To: <5732F498.6090203@intel.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Tomas Winkler <tomas.winkler@intel.com>
 
-Hi Simon-san,
-
-> From: Behalf Of Simon Horman
-> Sent: Tuesday, May 10, 2016 2:52 PM
+On 11/05/16 12:00, Adrian Hunter wrote:
+> On 11/05/16 09:48, Ulf Hansson wrote:
+>> On 10 May 2016 at 15:03, Adrian Hunter <adrian.hunter@intel.com> wrote:
+>>> On 10/05/16 15:24, Ulf Hansson wrote:
+>>>> On 4 May 2016 at 13:38, Adrian Hunter <adrian.hunter@intel.com> wrote:
+>>>>> Re-tuning is not possible when switched to the RPMB
+>>>>> partition.  However re-tuning should not be needed
+>>>>> if re-tuning is done immediately before switching,
+>>>>> a small set of operations is done, and then we
+>>>>> immediately switch back to the main partition.
+>>>>>
+>>>>> To ensure that re-tuning can't be done for a short
+>>>>> while, add a facility to "pause" re-tuning.
+>>>>>
+>>>>> The existing facility to hold / release re-tuning
+>>>>> is used but it also flags re-tuning as needed to cause
+>>>>> re-tuning before the next command (which will be the
+>>>>> switch to RPMB).
+>>>>>
+>>>>> We also need to "unpause" in the recovery path, which
+>>>>> is catered for by adding it to mmc_retune_disable().
+>>>>>
+>>>>> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
+>>>>> ---
+>>>>>  drivers/mmc/core/host.c  | 22 ++++++++++++++++++++++
+>>>>>  include/linux/mmc/host.h |  4 ++++
+>>>>>  2 files changed, 26 insertions(+)
+>>>>>
+>>>>> diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
+>>>>> index e0a3ee16c0d3..302e5858755a 100644
+>>>>> --- a/drivers/mmc/core/host.c
+>>>>> +++ b/drivers/mmc/core/host.c
+>>>>> @@ -68,8 +68,30 @@ void mmc_retune_enable(struct mmc_host *host)
+>>>>>                           jiffies + host->retune_period * HZ);
+>>>>>  }
+>>>>>
+>>>>> +/*
+>>>>> + * Pause re-tuning for a small set of operations.  The pause begins after the
+>>>>> + * next command and after first doing re-tuning.
+>>>>> + */
+>>>>> +void mmc_retune_pause(struct mmc_host *host)
+>>>>> +{
+>>>>> +       if (!host->retune_paused) {
+>>>>> +               host->retune_paused = 1;
+>>>>> +               mmc_retune_needed(host);
+>>>>> +               mmc_retune_hold(host);
+>>>>> +       }
+>>>>> +}
+>>>>> +
+>>>>
+>>>> When the mmc block device driver is built as a module, this doesn't
+>>>> build. I will drop the series from my next branch to sort this out.
+>>>
+>>> Oops. Sorry!
+>>>
+>>>> Should we export these via EXPORT_SYMBOL_GPL, or implement them as
+>>>> inline functions?
+>>>
+>>> They need to be exported.  I tend to go with what else is in the same file
+>>> i.e. host.c is exporting using EXPORT_SYMBOL()
+>>
+>> Yes, okay!
+>>
+>>>
+>>>>
+>>>> This also made me think about the SDIO/WLAN driver issue, during
+>>>> system PM suspend/resume, which also needed temporary to disable
+>>>> re-tuning.
+>>>>
+>>>> *If* we are going to export these, I want to make it works for the
+>>>> SDIO case well...
+>>>
+>>> SDIO case is slightly different, and SDIO uses its own header file sdio_func.h.
+>>
+>> I what way is it different?
 > 
-> From: Ai Kyuse <ai.kyuse.uw@renesas.com>
+> In the RPMB case there are 3 things to do:
+> 	1. Do re-tuning at next command
+> 	2. Hold re-tuning
+> 	3. Release re-tuning
 > 
-> Add tuning support for use with SDR104 mode
+> In the SDIO case there are 3 things to do:
+> 	1. Prevent re-tuning at next command
+> 	2. Hold re-tuning
+> 	3. Release re-tuning
 > 
-> Signed-off-by: Ai Kyuse <ai.kyuse.uw@renesas.com>
-> Signed-off-by: Simon Horman <horms+renesas@verge.net.au>
-
-I have some minor comments :)
-
-< snip >
-> @@ -753,6 +785,157 @@ static int tmio_mmc_start_data(struct tmio_mmc_host *host,
->  	return 0;
->  }
+> So the first thing is different.
 > 
-> +#define TMIO_MMC_MAX_TUNING_LOOP 40
-> +
-> +static int tmio_mmc_execute_tuning(struct mmc_host *mmc, u32 opcode)
-> +{
-> +	struct tmio_mmc_host *host = mmc_priv(mmc);
-> +	struct mmc_ios *ios = &mmc->ios;
-> +
-> +	unsigned long timeout, val;
-> +	unsigned long *tap;
-> +	int tuning_loop_counter = TMIO_MMC_MAX_TUNING_LOOP;
-< snip >
-> +	/*
-> +	 * Issue CMD19 repeatedly till Execute Tuning is set to 0 or the number
-> +	 * of loops reaches 40 times or a timeout of 150ms occurs.
-> +	 */
-> +	timeout = 150;
-
-The tuning_loop_counter is 40 and timeout is 150.
-However,
-
-> +	do {
-> +		if (host->prepare_tuning)
-> +			host->prepare_tuning(host, val % num);
-> +
-> +		if (!tuning_loop_counter && !timeout)
-> +			break;
-
-< snip >
-
-> +		tuning_loop_counter--;
-> +		timeout--;
-> +		mdelay(1);
-> +	} while ((val < (num * 2)) && (tuning_loop_counter || timeout));
-
-They will be decreased by 1. So, I think we don't need either variable.
-
-> +	/*
-> +	 * The Host Driver has exhausted the maximum number of loops allowed,
-> +	 * so use fixed sampling frequency.
-> +	 */
-> +	if (tuning_loop_counter || timeout) {
-> +		if (host->select_tuning) {
-> +			ret = host->select_tuning(host, tap);
-> +			if (ret < 0)
-> +				goto out;
-> +		}
-> +		host->done_tuning = true;
-> +	} else {
-> +		dev_warn(&host->pdev->dev, ": Tuning procedure failed\n");
-
-The first 2 charactors ": " is strange to me.
-
-> +		ret = -EIO;
-> +		goto out;
-> +	}
-> +
-> +out:
-> +	kfree(data_buf);
-> +err_data:
-> +	kfree(tap);
-> +err_tap:
-> +	if (ret < 0 && host->hw_reset)
-> +		host->hw_reset(host);
-
-We can use tmio_mmc_hw_reset() of this patch.
-Then, we can remove the condition of "host->hw_reset".
-
-Best regards,
-Yoshihiro Shimoda
-
-> +	return ret;
-> +
-> +}
-> +
->  /* Process requests from the MMC layer */
->  static void tmio_mmc_request(struct mmc_host *mmc, struct mmc_request *mrq)
->  {
-> @@ -778,6 +961,43 @@ static void tmio_mmc_request(struct mmc_host *mmc, struct mmc_request *mrq)
+>>
+>> Regarding the header file, my point is that I want to keep the numbers
+>> of exported functions to a minimum.
+>>
+>> Do you think there is way to combine these two use cases, such only
+>> one pair of new functions would be needed?
 > 
->  	spin_unlock_irqrestore(&host->lock, flags);
+> To make them the same we would need to add a parameter to mmc_retune_pause()
+> i.e. something like
 > 
-> +	if (host->inquiry_tuning && host->inquiry_tuning(host) &&
-> +	    !host->done_tuning) {
-> +		/* Start retuning */
-> +		ret = tmio_mmc_execute_tuning(mmc, MMC_SEND_TUNING_BLOCK);
-> +		if (ret)
-> +			goto fail;
-> +		/* Restore request */
-> +		host->mrq = mrq;
-> +	}
-> +
-> +	if (mrq->sbc) {
-> +		init_completion(&host->completion);
-> +		ret = tmio_mmc_start_command(host, mrq->sbc);
-> +		if (ret)
-> +			goto fail;
-> +		ret = wait_for_completion_timeout(&host->completion,
-> +					msecs_to_jiffies(CMDREQ_TIMEOUT));
-> +		if (ret < 0)
-> +			goto fail;
-> +		if (!ret) {
-> +			ret = -ETIMEDOUT;
-> +			goto fail;
-> +		}
-> +		host->last_req_ts = jiffies;
-> +		host->mrq = mrq;
-> +		if (host->inquiry_tuning && host->inquiry_tuning(host) &&
-> +		    !host->done_tuning) {
-> +			/* Start retuning */
-> +			ret = tmio_mmc_execute_tuning(mmc,
-> +						      MMC_SEND_TUNING_BLOCK);
-> +			if (ret)
-> +				goto fail;
-> +			/* Restore request */
-> +			host->mrq = mrq;
-> +		}
-> +	}
-> +
->  	if (mrq->data) {
->  		ret = tmio_mmc_start_data(host, mrq->data);
->  		if (ret)
-> @@ -967,6 +1187,16 @@ static int tmio_mmc_card_busy(struct mmc_host *mmc)
->  	return !(sd_ctrl_read16_and_16_as_32(host, CTL_STATUS) & TMIO_STAT_DAT0);
->  }
+> void mmc_retune_pause(struct mmc_host *host, bool retune_now)
+> {
+> 	if (!host->retune_paused) {
+> 		host->retune_paused = 1;
+> 		mmc_retune_hold(host);
+> 		if (retune_now)
+> 			mmc_retune_needed(host);
+> 		else
+> 			host->retune_now = 0;
+> 	}
+> }
 > 
-> +static void tmio_mmc_hw_reset(struct mmc_host *mmc)
-> +{
-> +	struct tmio_mmc_host *host = mmc_priv(mmc);
-> +
-> +	if (host->hw_reset)
-> +		host->hw_reset(host);
-> +
-> +	host->done_tuning = false;
-> +}
-> +
->  static struct mmc_host_ops tmio_mmc_ops = {
->  	.request	= tmio_mmc_request,
->  	.set_ios	= tmio_mmc_set_ios,
-> @@ -975,6 +1205,8 @@ static struct mmc_host_ops tmio_mmc_ops = {
->  	.enable_sdio_irq = tmio_mmc_enable_sdio_irq,
->  	.card_busy	= tmio_mmc_card_busy,
->  	.multi_io_quirk	= tmio_multi_io_quirk,
-> +	.execute_tuning = tmio_mmc_execute_tuning,
-> +	.hw_reset	= tmio_mmc_hw_reset,
->  };
+> For SDIO we would need to put the function declarations in sdio_func.h as
+> well as host.h.
 > 
->  static int tmio_mmc_init_ocr(struct tmio_mmc_host *host)
-> @@ -1084,6 +1316,7 @@ int tmio_mmc_host_probe(struct tmio_mmc_host *_host,
->  	mmc->max_req_size = mmc->max_blk_size * mmc->max_blk_count;
->  	mmc->max_seg_size = mmc->max_req_size;
-> 
-> +	_host->done_tuning = false;
->  	_host->native_hotplug = !(pdata->flags & TMIO_MMC_USE_GPIO_CD ||
->  				  mmc->caps & MMC_CAP_NEEDS_POLL ||
->  				  mmc->caps & MMC_CAP_NONREMOVABLE ||
-> diff --git a/include/linux/mfd/tmio.h b/include/linux/mfd/tmio.h
-> index 7a26286db895..6c22b21f2d73 100644
-> --- a/include/linux/mfd/tmio.h
-> +++ b/include/linux/mfd/tmio.h
-> @@ -104,6 +104,9 @@
->   */
->  #define TMIO_MMC_CLK_ACTUAL		(1 << 10)
-> 
-> +/* Some controllers have UHS-I sampling clock controller */
-> +#define TMIO_MMC_HAS_UHS_SCC		(1 << 11)
-> +
->  int tmio_core_mmc_enable(void __iomem *cnf, int shift, unsigned long base);
->  int tmio_core_mmc_resume(void __iomem *cnf, int shift, unsigned long base);
->  void tmio_core_mmc_pwr(void __iomem *cnf, int shift, int state);
-> --
-> 2.1.4
+> Shall I make a V3 of these patches like that?
+
+I looked again at sdio_func.h and it seems to have its own paradigm i.e. it
+is a completely separate set of functions that take the SDIO function as a
+parameter, and that hide and encapsulate core and host functions.
+
+It would be inconsistent with that paradigm to expose mmc_retune_pause() and
+mmc_retune_unpause() there.  Is that what you want to do?
+
