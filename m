@@ -1,151 +1,75 @@
-From: Shawn Lin <shawn.lin@rock-chips.com>
-Subject: Re: [PATCH v2] mmc: dw_mmc: rockchip: Set the drive phase properly
-Date: Thu, 12 May 2016 11:13:54 +0800
-Message-ID: <4ea71cf9-873f-960a-67cb-54da603fd628@rock-chips.com>
-References: <1463002848-580-1-git-send-email-dianders@chromium.org>
+From: Simon Horman <horms@verge.net.au>
+Subject: Re: [PATCH] mmc: sh_mobile_sdhi: properly document R-Car versions
+Date: Thu, 12 May 2016 13:52:58 +0900
+Message-ID: <20160512045257.GE10868@verge.net.au>
+References: <1462970760-3471-1-git-send-email-wsa@the-dreams.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=gbk; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1463002848-580-1-git-send-email-dianders@chromium.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Douglas Anderson <dianders@chromium.org>, jh80.chung@samsung.com, Ulf Hansson <ulf.hansson@linaro.org>, Heiko Stuebner <heiko@sntech.de>
-Cc: shawn.lin@rock-chips.com, shawn.lin@kernel-upstream.org, linux-rockchip@lists.infradead.org, briannorris@chromium.org, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from kirsty.vergenet.net ([202.4.237.240]:44823 "EHLO
+	kirsty.vergenet.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751105AbcELExC (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 12 May 2016 00:53:02 -0400
+Content-Disposition: inline
+In-Reply-To: <1462970760-3471-1-git-send-email-wsa@the-dreams.de>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Wolfram Sang <wsa@the-dreams.de>
+Cc: linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org, Magnus Damm <magnus.damm@gmail.com>
 
-On 2016/5/12 5:40, Douglas Anderson wrote:
-> Historically for Rockchip devices we've relied on the power-on
-> default (or perhaps the firmware setting) to get the correct drive
-> phase for dw_mmc devices.  This worked OK for the most part, but:
->
-> * Relying on the setting just "being right" is a bit fragile.
->
-> * As soon as there is an instance where the power on default is wrong or
->   where the firmware didn't configure this properly then we'll get a
->   mysterious failure.
->
-> Let's explicitly set this phase in the kernel.
->
-> The comments inside this patch try to explain the situation quite
-> throughly, but the high level overview of this is:
->
-> Before this patch on rk3288 devices tested:
-> * eMMC: 180 degrees
-> * SDMMC/SDIO0/SDIO1: 90 degrees
->
-> After this patch:
-> * Use 90 degree phase offset usually.
-> * Use 180 degree phase offset for MMC_DDR52, SDR104, HS200.
+On Wed, May 11, 2016 at 02:46:00PM +0200, Wolfram Sang wrote:
+> From: Wolfram Sang <wsa+renesas@sang-engineering.com>
+> 
+> Replace hardcoded values with meaningful names and document what we
+> know.
+> 
+> Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
 
-Thanks for doing this.
+Reviewed-by: Simon Horman <horms+renesas@verge.net.au>
 
-Reviewed-by: Shawn Lin<shawn.lin@rock-chips.com>
+This looks good for all the R-Car Gen 2 and Gen 3 SoCs supported in mainline
+as well as the R-Car Gen 3 M3-W (r8a7796).
 
->
-> That means we are _changing_ behavior for those devices in this way:
->
-> * If we have HS200 eMMC or DDR52 eMMC, we'll run ID mode at 90
->   degrees (vs 180) but otherwise have no change.
->
-> * For any non-HS200 / non-DDR52 eMMC devices we'll now _always_ run at
->   90 degrees (vs 180).  It seems fairly unlikely that building modern
->   hardware is using an eMMC that isn't using DDR52 or HS200, of course.
->
-> * For SDR104 cards we'll now run with 180 degree phase offset (vs 90).
->   It's expected that 90 degree phase offset would have worked OK, but
->   this gives us extra margin.
->
-> I have tested this by inserting my collection of uSD cards (mostly UHS,
-> though a few not) into a veyron_minnie and confirmed that they still
-> seem to enumerate properly.  For a subset of them I tried putting a
-> filesystem on them and also tried running mmc_test.
->
-> Signed-off-by: Douglas Anderson <dianders@chromium.org>
 > ---
-> Changes in v2:
-> - Now use 90 degrees for some modes; updated comments to say why.
->
->  drivers/mmc/host/dw_mmc-rockchip.c | 64 ++++++++++++++++++++++++++++++++++++++
->  1 file changed, 64 insertions(+)
->
-> diff --git a/drivers/mmc/host/dw_mmc-rockchip.c b/drivers/mmc/host/dw_mmc-rockchip.c
-> index 8c20b81cafd8..8068fa887db8 100644
-> --- a/drivers/mmc/host/dw_mmc-rockchip.c
-> +++ b/drivers/mmc/host/dw_mmc-rockchip.c
-> @@ -66,6 +66,70 @@ static void dw_mci_rk3288_set_ios(struct dw_mci *host, struct mmc_ios *ios)
->  	/* Make sure we use phases which we can enumerate with */
->  	if (!IS_ERR(priv->sample_clk))
->  		clk_set_phase(priv->sample_clk, priv->default_sample_phase);
+>  drivers/mmc/host/sh_mobile_sdhi.c | 14 ++++++++++----
+>  1 file changed, 10 insertions(+), 4 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/sh_mobile_sdhi.c b/drivers/mmc/host/sh_mobile_sdhi.c
+> index f750f9494410b0..c3b651bf89cb4a 100644
+> --- a/drivers/mmc/host/sh_mobile_sdhi.c
+> +++ b/drivers/mmc/host/sh_mobile_sdhi.c
+> @@ -39,6 +39,12 @@
+>  
+>  #define EXT_ACC           0xe4
+>  
+> +#define SDHI_VER_GEN2_SDR50	0x490c
+> +/* very old datasheets said 0x490c for SDR104, too. They are wrong! */
+> +#define SDHI_VER_GEN2_SDR104	0xcb0d
+> +#define SDHI_VER_GEN3_SD	0xcc10
+> +#define SDHI_VER_GEN3_SDMMC	0xcd10
 > +
-> +	/*
-> +	 * Set the drive phase offset based on speed mode to achieve hold times.
-> +	 *
-> +	 * That this is _not_ a value that is dynamically tuned and is also
-> +	 * _not_ a value that will vary from board to board.  It is a value
-> +	 * that could vary between different SoC models if they had massively
-> +	 * different output clock delays inside their dw_mmc IP block (delay_o),
-> +	 * but since it's OK to overshoot a little we don't need to do complex
-> +	 * calculations and can pick values that will just work for everyone.
-> +	 *
-> +	 * When picking values we'll stick with picking 0/90/180/270 since
-> +	 * those can be made very accurately on all known Rockchip SoCs.
-> +	 *
-> +	 * Note that these values match values from the DesignWare Databook
-> +	 * tables for the most part except for SDR12 and "ID mode".  For those
-> +	 * two modes the databook calculations assume a clock in of 50MHz.  As
-> +	 * seen above, we always use a clock in rate that is exactly the
-> +	 * card's input clock (times RK3288_CLKGEN_DIV, but that gets divided
-> +	 * back out before the controller sees it).
-> +	 *
-> +	 * From measurement of a single device, it appears that delay_o is
-> +	 * about .5 ns.  Since we try to leave a bit of margin, it's expected
-> +	 * that numbers here will be fine even with much larger delay_o
-> +	 * (the 1.4 ns assumed by the DesignWare Databook would result in the
-> +	 * same results, for instance).
-> +	 */
-> +	if (!IS_ERR(priv->drv_clk)) {
-> +		int phase;
-> +
-> +		/*
-> +		 * In almost all cases a 90 degree phase offset will provide
-> +		 * sufficient hold times across all valid input clock rates
-> +		 * assuming delay_o is not absurd for a given SoC.  We'll use
-> +		 * that as a default.
-> +		 */
-> +		phase = 90;
-> +
-> +		switch (ios->timing) {
-> +		case MMC_TIMING_MMC_DDR52:
-> +			/*
-> +			 * Since clock in rate with MMC_DDR52 is doubled when
-> +			 * bus width is 8 we need to double the phase offset
-> +			 * to get the same timings.
-> +			 */
-> +			if (ios->bus_width == MMC_BUS_WIDTH_8)
-> +				phase = 180;
-> +			break;
-> +		case MMC_TIMING_UHS_SDR104:
-> +		case MMC_TIMING_MMC_HS200:
-> +			/*
-> +			 * In the case of 150 MHz clock (typical max for
-> +			 * Rockchip SoCs), 90 degree offset will add a delay
-> +			 * of 1.67 ns.  That will meet min hold time of .8 ns
-> +			 * as long as clock output delay is < .87 ns.  On
-> +			 * SoCs measured this seems to be OK, but it doesn't
-> +			 * hurt to give margin here, so we use 180.
-> +			 */
-> +			phase = 180;
-> +			break;
-> +		}
-> +
-> +		clk_set_phase(priv->drv_clk, phase);
-> +	}
->  }
->
->  #define NUM_PHASES			360
->
-
-
--- 
-Best Regards
-Shawn Lin
+>  #define host_to_priv(host) container_of((host)->pdata, struct sh_mobile_sdhi, mmc_data)
+>  
+>  struct sh_mobile_sdhi_of_data {
+> @@ -109,14 +115,14 @@ static void sh_mobile_sdhi_sdbuf_width(struct tmio_mmc_host *host, int width)
+>  	 *	sh_mobile_sdhi_of_data :: dma_buswidth
+>  	 */
+>  	switch (sd_ctrl_read16(host, CTL_VERSION)) {
+> -	case 0x490C:
+> +	case SDHI_VER_GEN2_SDR50:
+>  		val = (width == 32) ? 0x0001 : 0x0000;
+>  		break;
+> -	case 0xCB0D:
+> +	case SDHI_VER_GEN2_SDR104:
+>  		val = (width == 32) ? 0x0000 : 0x0001;
+>  		break;
+> -	case 0xCC10: /* Gen3, SD only */
+> -	case 0xCD10: /* Gen3, SD + MMC */
+> +	case SDHI_VER_GEN3_SD:
+> +	case SDHI_VER_GEN3_SDMMC:
+>  		if (width == 64)
+>  			val = 0x0000;
+>  		else if (width == 32)
+> -- 
+> 2.8.1
+> 
