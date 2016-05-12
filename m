@@ -1,43 +1,162 @@
-From: Geert Uytterhoeven <geert@linux-m68k.org>
-Subject: Re: [PATCH/RFC 0/3] UHS-I SDR-104 support for sh_mobile_sdhi
-Date: Thu, 12 May 2016 14:53:46 +0200
-Message-ID: <CAMuHMdWP3d20+gQ8Ma78FOk3B1vnwaTcQHHuHDiQs_m6jOF6vg@mail.gmail.com>
-References: <1462859524-28522-1-git-send-email-horms+renesas@verge.net.au>
-	<SG2PR06MB09190A986DDC6D2220603AA6D8730@SG2PR06MB0919.apcprd06.prod.outlook.com>
-	<CAMuHMdWKu7wLDthh2QXKJBS_a7yz38HFbi4wSLMnWV0Y5qbbbQ@mail.gmail.com>
-	<SG2PR06MB0919A06B80C8231816200645D8730@SG2PR06MB0919.apcprd06.prod.outlook.com>
-	<CAMuHMdVmA7t3k+56yP9n++WGRqLy1pkbtmpe+SmJRaDJmU04zA@mail.gmail.com>
-	<SG2PR06MB0919E39A668AD2ECA9DEE018D8730@SG2PR06MB0919.apcprd06.prod.outlook.com>
-	<CAMuHMdWaZ-sbx3JXc2h59R6OzkiKnmbmPDaSKZ+4aRie0YMYuA@mail.gmail.com>
-	<SG2PR06MB0919824AFCAE20C395E50738D8730@SG2PR06MB0919.apcprd06.prod.outlook.com>
-	<CAMuHMdW_VkpjoLyXOvbdwwm=h5L8A8JrGKf_P6ig_pBqM-tGtw@mail.gmail.com>
-	<20160512124139.GC1638@katana>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH V2 1/3] mmc: core: Add a facility to "pause" re-tuning
+Date: Thu, 12 May 2016 15:20:41 +0200
+Message-ID: <CAPDyKFqGo_MgBo=Xc74O6yi_rpZUWyK00wnBi7Ebdda0ejrwcA@mail.gmail.com>
+References: <1462361893-11897-1-git-send-email-adrian.hunter@intel.com>
+	<1462361893-11897-2-git-send-email-adrian.hunter@intel.com>
+	<CAPDyKFrg3Fe8ypdzrbxD5DxHBNs7-6yVma-7X7NY4JfNzVzGPQ@mail.gmail.com>
+	<5731DC12.4090906@intel.com>
+	<CAPDyKFozyrzAPcw3v=XUEkMevLxxZ_AgHWXkwkYPN=AJkTAgXQ@mail.gmail.com>
+	<5732F498.6090203@intel.com>
+	<57341F2D.1020703@intel.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-renesas-soc-owner@vger.kernel.org>
-In-Reply-To: <20160512124139.GC1638@katana>
-Sender: linux-renesas-soc-owner@vger.kernel.org
-To: Wolfram Sang <wsa@the-dreams.de>
-Cc: Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>, Simon Horman <horms+renesas@verge.net.au>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Magnus Damm <magnus.damm@gmail.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-renesas-soc@vger.kernel.org" <linux-renesas-soc@vger.kernel.org>, Ben Hutchings <ben.hutchings@codethink.co.uk>, Ian Molton <ian@mnementh.co.uk>, Ulf Hansson <ulf.hansson@linaro.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-wm0-f45.google.com ([74.125.82.45]:37380 "EHLO
+	mail-wm0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751552AbcELNUn (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 12 May 2016 09:20:43 -0400
+Received: by mail-wm0-f45.google.com with SMTP id a17so135830676wme.0
+        for <linux-mmc@vger.kernel.org>; Thu, 12 May 2016 06:20:42 -0700 (PDT)
+In-Reply-To: <57341F2D.1020703@intel.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Adrian Hunter <adrian.hunter@intel.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Tomas Winkler <tomas.winkler@intel.com>
 
-Hi Wolfram,
+On 12 May 2016 at 08:14, Adrian Hunter <adrian.hunter@intel.com> wrote:
+> On 11/05/16 12:00, Adrian Hunter wrote:
+>> On 11/05/16 09:48, Ulf Hansson wrote:
+>>> On 10 May 2016 at 15:03, Adrian Hunter <adrian.hunter@intel.com> wrote:
+>>>> On 10/05/16 15:24, Ulf Hansson wrote:
+>>>>> On 4 May 2016 at 13:38, Adrian Hunter <adrian.hunter@intel.com> wrote:
+>>>>>> Re-tuning is not possible when switched to the RPMB
+>>>>>> partition.  However re-tuning should not be needed
+>>>>>> if re-tuning is done immediately before switching,
+>>>>>> a small set of operations is done, and then we
+>>>>>> immediately switch back to the main partition.
+>>>>>>
+>>>>>> To ensure that re-tuning can't be done for a short
+>>>>>> while, add a facility to "pause" re-tuning.
+>>>>>>
+>>>>>> The existing facility to hold / release re-tuning
+>>>>>> is used but it also flags re-tuning as needed to cause
+>>>>>> re-tuning before the next command (which will be the
+>>>>>> switch to RPMB).
+>>>>>>
+>>>>>> We also need to "unpause" in the recovery path, which
+>>>>>> is catered for by adding it to mmc_retune_disable().
+>>>>>>
+>>>>>> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
+>>>>>> ---
+>>>>>>  drivers/mmc/core/host.c  | 22 ++++++++++++++++++++++
+>>>>>>  include/linux/mmc/host.h |  4 ++++
+>>>>>>  2 files changed, 26 insertions(+)
+>>>>>>
+>>>>>> diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
+>>>>>> index e0a3ee16c0d3..302e5858755a 100644
+>>>>>> --- a/drivers/mmc/core/host.c
+>>>>>> +++ b/drivers/mmc/core/host.c
+>>>>>> @@ -68,8 +68,30 @@ void mmc_retune_enable(struct mmc_host *host)
+>>>>>>                           jiffies + host->retune_period * HZ);
+>>>>>>  }
+>>>>>>
+>>>>>> +/*
+>>>>>> + * Pause re-tuning for a small set of operations.  The pause begins after the
+>>>>>> + * next command and after first doing re-tuning.
+>>>>>> + */
+>>>>>> +void mmc_retune_pause(struct mmc_host *host)
+>>>>>> +{
+>>>>>> +       if (!host->retune_paused) {
+>>>>>> +               host->retune_paused = 1;
+>>>>>> +               mmc_retune_needed(host);
+>>>>>> +               mmc_retune_hold(host);
+>>>>>> +       }
+>>>>>> +}
+>>>>>> +
+>>>>>
+>>>>> When the mmc block device driver is built as a module, this doesn't
+>>>>> build. I will drop the series from my next branch to sort this out.
+>>>>
+>>>> Oops. Sorry!
+>>>>
+>>>>> Should we export these via EXPORT_SYMBOL_GPL, or implement them as
+>>>>> inline functions?
+>>>>
+>>>> They need to be exported.  I tend to go with what else is in the same file
+>>>> i.e. host.c is exporting using EXPORT_SYMBOL()
+>>>
+>>> Yes, okay!
+>>>
+>>>>
+>>>>>
+>>>>> This also made me think about the SDIO/WLAN driver issue, during
+>>>>> system PM suspend/resume, which also needed temporary to disable
+>>>>> re-tuning.
+>>>>>
+>>>>> *If* we are going to export these, I want to make it works for the
+>>>>> SDIO case well...
+>>>>
+>>>> SDIO case is slightly different, and SDIO uses its own header file sdio_func.h.
+>>>
+>>> I what way is it different?
+>>
+>> In the RPMB case there are 3 things to do:
+>>       1. Do re-tuning at next command
+>>       2. Hold re-tuning
+>>       3. Release re-tuning
+>>
+>> In the SDIO case there are 3 things to do:
+>>       1. Prevent re-tuning at next command
+>>       2. Hold re-tuning
+>>       3. Release re-tuning
+>>
+>> So the first thing is different.
+>>
+>>>
+>>> Regarding the header file, my point is that I want to keep the numbers
+>>> of exported functions to a minimum.
+>>>
+>>> Do you think there is way to combine these two use cases, such only
+>>> one pair of new functions would be needed?
+>>
+>> To make them the same we would need to add a parameter to mmc_retune_pause()
+>> i.e. something like
+>>
+>> void mmc_retune_pause(struct mmc_host *host, bool retune_now)
+>> {
+>>       if (!host->retune_paused) {
+>>               host->retune_paused = 1;
+>>               mmc_retune_hold(host);
+>>               if (retune_now)
+>>                       mmc_retune_needed(host);
+>>               else
+>>                       host->retune_now = 0;
+>>       }
+>> }
+>>
+>> For SDIO we would need to put the function declarations in sdio_func.h as
+>> well as host.h.
+>>
+>> Shall I make a V3 of these patches like that?
 
-On Thu, May 12, 2016 at 2:41 PM, Wolfram Sang <wsa@the-dreams.de> wrote:
->> As the sdhi0 MSTP clock is still enabled, there must be an unknown clock that's
->> needed for proper operation, but that's currently not controlled by software.
+No.
+
 >
-> I'd guess the SCC needs a seperate clock?
+> I looked again at sdio_func.h and it seems to have its own paradigm i.e. it
+> is a completely separate set of functions that take the SDIO function as a
+> parameter, and that hide and encapsulate core and host functions.
+>
+> It would be inconsistent with that paradigm to expose mmc_retune_pause() and
+> mmc_retune_unpause() there.  Is that what you want to do?
 
-Probably, but this is not documented in the datasheet.
+I agree, we shouldn't mess up the SDIO API with these functions.
 
-Gr{oetje,eeting}s,
+Instead, let's keep it simple and just leave out the SDIO case for
+now. So do EXPORT_SYMBOL for those APIs you added in $subject patch,
+without further changes.
 
-                        Geert
+Okay?
 
---
-Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
-
-In personal conversations with technical people, I call myself a hacker. But
-when I'm talking to journalists I just say "programmer" or something like that.
-                                -- Linus Torvalds
+Kind regards
+Uffe
