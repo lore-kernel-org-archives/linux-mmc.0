@@ -1,45 +1,39 @@
-From: Simon Horman <horms@verge.net.au>
-Subject: Re: [PATCH/RFC 1/3] mmc: tmio: Add tuning support
-Date: Fri, 13 May 2016 12:31:57 +0900
-Message-ID: <20160513033156.GG24529@verge.net.au>
-References: <1462859524-28522-1-git-send-email-horms+renesas@verge.net.au>
- <1462859524-28522-2-git-send-email-horms+renesas@verge.net.au>
- <20160512165005.GC13121@katana>
- <20160513022809.GD24529@verge.net.au>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-renesas-soc-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20160513022809.GD24529@verge.net.au>
-Sender: linux-renesas-soc-owner@vger.kernel.org
-To: Wolfram Sang <wsa@the-dreams.de>
-Cc: Ian Molton <ian@mnementh.co.uk>, Ulf Hansson <ulf.hansson@linaro.org>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Magnus Damm <magnus.damm@gmail.com>, linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org, Ben Hutchings <ben.hutchings@codethink.co.uk>
+From: Simon Horman <horms+renesas@verge.net.au>
+Subject: [PATCH] mmc: sdhci: remove comment regarding timeout during tuning
+Date: Fri, 13 May 2016 13:24:31 +0900
+Message-ID: <1463113471-14350-1-git-send-email-horms+renesas@verge.net.au>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from kirsty.vergenet.net ([202.4.237.240]:35116 "EHLO
+	kirsty.vergenet.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750816AbcEMEYj (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 13 May 2016 00:24:39 -0400
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc@vger.kernel.org, Simon Horman <horms+renesas@verge.net.au>
 
-On Fri, May 13, 2016 at 11:28:11AM +0900, Simon Horman wrote:
-> On Thu, May 12, 2016 at 06:50:05PM +0200, Wolfram Sang wrote:
-> > Hi Simon,
-> > 
-> > nice you got it working with upstream! Thanks. It still looks a bit too
-> > much like BSP code, though, so we need to clean it up. I found 'git log
-> > --grep=tuning drivers/mmc/host' to be useful to get an idea of current
-> > best practices.
-> > 
-> > > +	bool (*inquiry_tuning)(struct tmio_mmc_host *host);
-> > 
-> > Do we really need this? I'd think the core will check that tuning only
-> > gets called when needed.
-> 
-> Thanks, I'll look into that and in general updating the approach taken
-> to tuning to reflect that currently taken in mainline.
+Since commit 7ce45e950624 ("mmc: sdhci: SD tuning is broken for some
+controllers") sdhci_execute_tuning() no longer includes a timeout in its
+loop counter(s) so remove portion of the comment regarding this.
 
-[...]
+Signed-off-by: Simon Horman <horms+renesas@verge.net.au>
+---
+ drivers/mmc/host/sdhci.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-> > Note to self: this is copied from sdhci.c
-> 
-> It also seems to be copied from an old version of sdhci.c.
-> So at the very least there seem some updates to be incorporated. 
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index e010ea4eb6f5..b7f9d4c5c925 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -1909,7 +1909,7 @@ static int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode)
+ 
+ 	/*
+ 	 * Issue CMD19 repeatedly till Execute Tuning is set to 0 or the number
+-	 * of loops reaches 40 times or a timeout of 150ms occurs.
++	 * of loops reaches 40 times.
+ 	 */
+ 	do {
+ 		struct mmc_command cmd = {0};
+-- 
+2.1.4
 
-On closer inspection I don't think that the loop in sdhci_execute_tuning()
-implements the correct logic for the R-Car SCC. I'll look into reworking
-it accordingly.
