@@ -1,39 +1,50 @@
-From: Simon Horman <horms+renesas@verge.net.au>
-Subject: [PATCH] mmc: sdhci: remove comment regarding timeout during tuning
-Date: Fri, 13 May 2016 13:24:31 +0900
-Message-ID: <1463113471-14350-1-git-send-email-horms+renesas@verge.net.au>
+From: "Yuan, Juntao" <juntao.yuan@intel.com>
+Subject: [PATCH] mmc: block: correct 4KB alignment check
+Date: Fri, 13 May 2016 07:59:24 +0000
+Message-ID: <588D8A7789B2934A9950BF189ED6F50A2007FF09@shsmsx102.ccr.corp.intel.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from kirsty.vergenet.net ([202.4.237.240]:35116 "EHLO
-	kirsty.vergenet.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750816AbcEMEYj (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 13 May 2016 00:24:39 -0400
+Received: from mga09.intel.com ([134.134.136.24]:3000 "EHLO mga09.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752689AbcEMH7n convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 13 May 2016 03:59:43 -0400
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc@vger.kernel.org, Simon Horman <horms+renesas@verge.net.au>
+To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-Since commit 7ce45e950624 ("mmc: sdhci: SD tuning is broken for some
-controllers") sdhci_execute_tuning() no longer includes a timeout in its
-loop counter(s) so remove portion of the comment regarding this.
 
-Signed-off-by: Simon Horman <horms+renesas@verge.net.au>
+In sectors alignment check, brq->data.blocks means sectors of the
+previous mqrq since data.blocks for mqrq_cur hasn't been updated yet.
+data.blocks will be updated later in mmc_blk_packed_hdr_wrq_prep or
+mmc_blk_rw_rq_prep.
+
+static int mmc_blk_issue_rw_rq(struct mmc_queue *mq, ......
+        ......
+    struct mmc_blk_request *brq = &mq->mqrq_cur->brq;
+
+Signed-off-by: Yuan Juntao <juntao.yuan@intel.com>
 ---
- drivers/mmc/host/sdhci.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+ drivers/mmc/card/block.c |    4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
 
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index e010ea4eb6f5..b7f9d4c5c925 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -1909,7 +1909,7 @@ static int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode)
- 
- 	/*
- 	 * Issue CMD19 repeatedly till Execute Tuning is set to 0 or the number
--	 * of loops reaches 40 times or a timeout of 150ms occurs.
-+	 * of loops reaches 40 times.
- 	 */
- 	do {
- 		struct mmc_command cmd = {0};
--- 
-2.1.4
+diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+index 3bdbe50..cc0189f 100644
+--- a/drivers/mmc/card/block.c
++++ b/drivers/mmc/card/block.c
+@@ -1950,8 +1950,8 @@ static int mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *rqc)
+             * When 4KB native sector is enabled, only 8 blocks
+             * multiple read or write is allowed
+             */
+-           if ((brq->data.blocks & 0x07) &&
+-               (card->ext_csd.data_sector_size == 4096)) {
++           if (mmc_large_sector(card) &&
++               !IS_ALIGNED(blk_rq_sectors(rqc), 8)) {
+                pr_err("%s: Transfer size is not 4KB sector size aligned\n",
+                    req->rq_disk->disk_name);
+                mq_rq = mq->mqrq_cur;
+--
+1.7.9.5
 
