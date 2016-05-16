@@ -1,123 +1,113 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 3/3] mmc: core: support hs speed mode if hs200 mode fails
-Date: Mon, 16 May 2016 11:32:41 +0200
-Message-ID: <CAPDyKFqyZRYbSoRMcJuMks+GMWAH9wDpusY+cvcH=GfVCNwSeg@mail.gmail.com>
-References: <1461171092-30631-1-git-send-email-aisheng.dong@nxp.com>
-	<1461171092-30631-3-git-send-email-aisheng.dong@nxp.com>
-	<1463130397.3151.13.camel@toradex.com>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH] mmc: block: Use the mmc host device index as the mmcblk
+ device index
+Date: Mon, 16 May 2016 14:43:29 +0300
+Message-ID: <5739B261.2010009@intel.com>
+References: <1460015861-14004-1-git-send-email-ulf.hansson@linaro.org>
+ <CA+7w51h=A4vVjkJTEvNoRG=GRt-GPSwqN4N4P3k-OqnubPo+kg@mail.gmail.com>
+ <CAPDyKFp8pfZ1iY7HsAZL1f2qgTuLcimDL_f1k59RMcUq5f-iRQ@mail.gmail.com>
+ <570B9C8D.2000600@intel.com>
+ <CA+7w51iP3Th-m8kqdx_iObEs+kYJruNd62f5n2OfD0XaeGw=9w@mail.gmail.com>
+ <570E2B2D.1080507@intel.com>
+ <CA+7w51gUcPz+z8eD8A3dtB7r_Pvr8yO1AjymXC14eq9RgN6skQ@mail.gmail.com>
+ <CAPDyKFq=B0PAxCLJgATSzO9zDHR_L7qOVn7PZ0seekbAb0YRPw@mail.gmail.com>
+ <57398F0A.7070600@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wm0-f46.google.com ([74.125.82.46]:34184 "EHLO
-	mail-wm0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753575AbcEPJcn (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 16 May 2016 05:32:43 -0400
-Received: by mail-wm0-f46.google.com with SMTP id v200so14007022wmv.1
-        for <linux-mmc@vger.kernel.org>; Mon, 16 May 2016 02:32:42 -0700 (PDT)
-In-Reply-To: <1463130397.3151.13.camel@toradex.com>
+Received: from mga11.intel.com ([192.55.52.93]:13708 "EHLO mga11.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1750923AbcEPLrZ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 16 May 2016 07:47:25 -0400
+In-Reply-To: <57398F0A.7070600@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Marcel Ziswiler <marcel.ziswiler@toradex.com>, "aisheng.dong@nxp.com" <aisheng.dong@nxp.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "jonathanh@nvidia.com" <jonathanh@nvidia.com>, "dev@lynxeye.de" <dev@lynxeye.de>, "chris@printf.net" <chris@printf.net>, "shawnguo@kernel.org" <shawnguo@kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "haibo.chen@nxp.com" <haibo.chen@nxp.com>, "linux-tegra@vger.kernel.org" <linux-tegra@vger.kernel.org>, "adrian.hunter@intel.com" <adrian.hunter@intel.com>, "dongas86@gmail.com" <dongas86@gmail.com>
+To: Laszlo Fiat <laszlo.fiat@gmail.com>, Nick Krause <xerofoify@gmail.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>
 
-On 13 May 2016 at 11:06, Marcel Ziswiler <marcel.ziswiler@toradex.com> wrote:
-> On Thu, 2016-04-21 at 00:51 +0800, Dong Aisheng wrote:
->> Currently if mmc_select_hs200 mode switch fails, MMC core
->> can only use legacy mode to run the card.
->> Let's retry HS speed mode if HS200 fails.
+On 16/05/16 12:12, Adrian Hunter wrote:
+> On 16/05/16 11:47, Ulf Hansson wrote:
+>> + Nicholas Krause
 >>
->> Before the fix:
->> mmc0: mmc_select_hs200 failed, error -74
->> : switch to mmc0 failed
->> mmc0: new MMC card at address 0001
->> mmcblk0: mmc0:0001 Q2J55L 7.12 GiB
->> mmcblk0boot0: mmc0:0001 Q2J55L partition 1 2.00 MiB
->> mmcblk0boot1: mmc0:0001 Q2J55L partition 2 2.00 MiB
->> mmcblk0rpmb: mmc0:0001 Q2J55L partition 3 4.00 MiB
->>  mmcblk0: p1 p2
+>> On 13 April 2016 at 20:19, Laszlo Fiat <laszlo.fiat@gmail.com> wrote:
+>>> Adrian, Ulf,
+>>>
+>>> Here are the two v4.6-rc3 kernel dmesg with mmc-debug option, both
+>>> without additional patches, one working case [1], one failing case
+>>> [2], the working case has patch [3] reverted.
+>>>
+>>> I also uploaded the acpidump [4] for Teclast X80h Baytrail-T tablet.
+>>>
+>>> [1]: https://bugzilla.kernel.org/show_bug.cgi?id=112571#c11
+>>> [2]: https://bugzilla.kernel.org/show_bug.cgi?id=112571#c10
+>>> [3]: patch 520bd7a8b4152aacfbd34eb7f7a447354b631039 ("mmc: core:
+>>> Optimize boot time by detecting cards simultaneously")
+>>> [4]: https://bugzilla.kernel.org/show_bug.cgi?id=112571#c12
+>>>
 >>
->> After the fix:
->> mmc0: mmc_select_hs200 failed, error -74
->> mmc0: new DDR MMC card at address 0001
->> mmcblk0: mmc0:0001 Q2J55L 7.12 GiB
->> mmcblk0boot0: mmc0:0001 Q2J55L partition 1 2.00 MiB
->> mmcblk0boot1: mmc0:0001 Q2J55L partition 2 2.00 MiB
->> mmcblk0rpmb: mmc0:0001 Q2J55L partition 3 4.00 MiB
->>  mmcblk0: p1 p2
+>> Adrian, did you manage to get some time to look into the debug data
+>> from this issue?
+> 
+> Not yet.
+> 
+>> I understand if you have been busy and no worries, although I don't
+>> know who else to ping about this.
+> 
+> I will have a look today.
+> 
 >>
->> Signed-off-by: Dong Aisheng <aisheng.dong@nxp.com>
->> ---
->>  drivers/mmc/core/mmc.c | 3 ++-
->>  1 file changed, 2 insertions(+), 1 deletion(-)
->>
->> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
->> index 55c8201..b573dc7 100644
->> --- a/drivers/mmc/core/mmc.c
->> +++ b/drivers/mmc/core/mmc.c
->> @@ -1315,7 +1315,8 @@ static int mmc_select_timing(struct mmc_card
->> *card)
->>
->>       if (card->mmc_avail_type & EXT_CSD_CARD_TYPE_HS200)
->>               err = mmc_select_hs200(card);
->> -     else if (card->mmc_avail_type & EXT_CSD_CARD_TYPE_HS)
->> +
->> +     if (err && (card->mmc_avail_type & EXT_CSD_CARD_TYPE_HS))
->>               err = mmc_select_hs(card);
->>
->>       if (err && err != -EBADMSG)
->
->
-> This seems to break on TK1 where eMMC so far was detected as an 8-bit
-> high speed MMC card. With this patch it reverts to detecting a 1-bit only
-> MMC card! This has been observed both on a NVIDIA's Jetson TK1 as well as
-> our new Toradex Apalis TK1 (CC Tegra mailing list, Jon Hunter and Lucas
-> Stach as well). So far T30 is not affected as there we are still doing
-> full HS200 with whatever issues that has.
->
-> Before:
-> [    3.726894] sdhci: Secure Digital Host Controller Interface driver
-> [    3.733081] sdhci: Copyright(c) Pierre Ossman
-> [    3.737462] sdhci-pltfm: SDHCI platform and OF driver helper
-> [    3.753411] mmc0: Unknown controller version (3). You may experience
->  problems.
-> [    3.768345] mmc0: Invalid maximum block size, assuming 512 bytes
-> [    3.814896] mmc0: SDHCI controller on 700b0600.sdhci [700b0600.sdhci]
->  using ADMA 64-bit
-> [    3.892088] mmc0: new high speed MMC card at address 0001
-> [    3.899194] mmcblk0: mmc0:0001 SEM16G 14.7 GiB
-> [    3.904217] mmcblk0boot0: mmc0:0001 SEM16G partition 1 4.00 MiB
-> [    3.910645] mmcblk0boot1: mmc0:0001 SEM16G partition 2 4.00 MiB
-> [    3.917119] mmcblk0rpmb: mmc0:0001 SEM16G partition 3 4.00 MiB
-> [    3.926006]  mmcblk0: p1 p2 p3 p4 p5 p6 p7 p8 p9
-> root@jetson_tk1:~# cat /sys/kernel/debug/mmc0/ios
-> clock:          52000000 Hz
-> actual clock:   51000000 Hz
-> vdd:            21 (3.3 ~ 3.4 V)
-> bus mode:       2 (push-pull)
-> chip select:    0 (don't care)
-> power mode:     2 (on)
-> bus width:      3 (8 bits)
-> timing spec:    1 (mmc high-speed)
-> signal voltage: 0 (3.30 V)
-> driver type:    0 (driver type B)
->
-> After:
-> [    3.899918] mmc0: new MMC card at address 0001
-> root@jetson_tk1:~# cat /sys/kernel/debug/mmc0/ios
-> clock:          25000000 Hz
-> actual clock:   24727273 Hz
-> vdd:            21 (3.3 ~ 3.4 V)
-> bus mode:       2 (push-pull)
-> chip select:    0 (don't care)
-> power mode:     2 (on)
-> bus width:      0 (1 bits)
-> timing spec:    0 (legacy)
-> signal voltage: 0 (3.30 V)
-> driver type:    0 (driver type B)
->
+>> I don't want to us revert 520bd7a8b4152aacfbd34eb7f7a447354b631039,
+>> because I believe it will just hide the problem in sdhci(-acpi).
+>> Instead, I intend to wait for a proper fix, does that sounds
+>> reasonable to you as well?
+> 
+> Sure
 
-Thanks for testing and reporting. I have dropped this patch from my
-next branch for now.
+Here is a patch that might help:
 
-Kind regards
-Uffe
+From: Adrian Hunter <adrian.hunter@intel.com>
+Date: Mon, 16 May 2016 14:29:51 +0300
+Subject: [PATCH] mmc: sdhci-acpi: Ensure connected devices are powered on
+ before probing
+
+Some devices connected to the SDHCI controller may have
+separate enabling lines that are controlled through GPIO.
+These devices need to be powered on and enabled before
+probing. This is to ensure all devices connected can be
+seen by the controller.
+
+Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
+---
+ drivers/mmc/host/sdhci-acpi.c | 7 ++++++-
+ 1 file changed, 6 insertions(+), 1 deletion(-)
+
+diff --git a/drivers/mmc/host/sdhci-acpi.c b/drivers/mmc/host/sdhci-acpi.c
+index b2d70ba6caa7..2d1c4870c285 100644
+--- a/drivers/mmc/host/sdhci-acpi.c
++++ b/drivers/mmc/host/sdhci-acpi.c
+@@ -378,7 +378,7 @@ static int sdhci_acpi_probe(struct platform_device *pdev)
+ {
+ 	struct device *dev = &pdev->dev;
+ 	acpi_handle handle = ACPI_HANDLE(dev);
+-	struct acpi_device *device;
++	struct acpi_device *device, *child;
+ 	struct sdhci_acpi_host *c;
+ 	struct sdhci_host *host;
+ 	struct resource *iomem;
+@@ -390,6 +390,11 @@ static int sdhci_acpi_probe(struct platform_device *pdev)
+ 	if (acpi_bus_get_device(handle, &device))
+ 		return -ENODEV;
+ 
++	/* Power on the SDHCI controller and its children */
++	acpi_device_fix_up_power(device);
++	list_for_each_entry(child, &device->children, node)
++		acpi_device_fix_up_power(child);
++
+ 	if (acpi_bus_get_status(device) || !device->status.present)
+ 		return -ENODEV;
+ 
+-- 
+1.9.1
+
+
