@@ -1,148 +1,136 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH 09/23] mmc: sdhci: fix incorrect get data interrupt during
- no data transfer
-Date: Tue, 17 May 2016 08:58:59 +0300
-Message-ID: <573AB323.1080207@intel.com>
-References: <1460741387-23815-1-git-send-email-aisheng.dong@nxp.com>
- <1460741387-23815-10-git-send-email-aisheng.dong@nxp.com>
- <573184F3.50201@intel.com>
- <CALk7dXpDXS2R0RJ9KNTaMFxBC+VVvrJ+U1X5Z_kZJNxwxrC6iQ@mail.gmail.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH V3 1/3] mmc: core: Add a facility to "pause" re-tuning
+Date: Tue, 17 May 2016 17:06:08 +0200
+Message-ID: <CAPDyKFpjoWHXp=H0R6pPM9pvF5BuP49MhwVzBQgr+01SXGGYQg@mail.gmail.com>
+References: <1462361893-11897-1-git-send-email-adrian.hunter@intel.com>
+	<1462361893-11897-2-git-send-email-adrian.hunter@intel.com>
+	<CAPDyKFrg3Fe8ypdzrbxD5DxHBNs7-6yVma-7X7NY4JfNzVzGPQ@mail.gmail.com>
+	<5731DC12.4090906@intel.com>
+	<CAPDyKFozyrzAPcw3v=XUEkMevLxxZ_AgHWXkwkYPN=AJkTAgXQ@mail.gmail.com>
+	<5732F498.6090203@intel.com>
+	<57341F2D.1020703@intel.com>
+	<CAPDyKFqGo_MgBo=Xc74O6yi_rpZUWyK00wnBi7Ebdda0ejrwcA@mail.gmail.com>
+	<573482FD.6040906@intel.com>
+	<5739BE8C.3010403@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga01.intel.com ([192.55.52.88]:11775 "EHLO mga01.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S932561AbcEQGC4 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 17 May 2016 02:02:56 -0400
-In-Reply-To: <CALk7dXpDXS2R0RJ9KNTaMFxBC+VVvrJ+U1X5Z_kZJNxwxrC6iQ@mail.gmail.com>
+Received: from mail-wm0-f43.google.com ([74.125.82.43]:38603 "EHLO
+	mail-wm0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752785AbcEQPGK (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 17 May 2016 11:06:10 -0400
+Received: by mail-wm0-f43.google.com with SMTP id g17so36290898wme.1
+        for <linux-mmc@vger.kernel.org>; Tue, 17 May 2016 08:06:09 -0700 (PDT)
+In-Reply-To: <5739BE8C.3010403@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ritesh Harjani <ritesh.list@gmail.com>
-Cc: Dong Aisheng <aisheng.dong@nxp.com>, linux-mmc <linux-mmc@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, chris@printf.net, shawnguo@kernel.org, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, haibo.chen@nxp.com, dongas86@gmail.com
+To: Adrian Hunter <adrian.hunter@intel.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Tomas Winkler <tomas.winkler@intel.com>
 
-On 17/05/16 07:31, Ritesh Harjani wrote:
-> On Tue, May 10, 2016 at 12:21 PM, Adrian Hunter <adrian.hunter@intel.com> wrote:
->> On 15/04/16 20:29, Dong Aisheng wrote:
->>> Current code will report the wrong data interrupt got when no
->>> data operation in progress assumed by getting !host->data in
->>> sdhci_data_irq().
->>>
->>> For a data command handling process, the driver will call
->>> sdhci_finish_data() and clear host->data in case any data error,
->>> then card finish_tasklet will do the rest controller reset work.
->>>
->>> Before the tasklet got run, however, controllers may report the
->>> TC(Transfer Complete) interrupt (SDHCI_INT_DATA_END) a bit later
->>> than data CRC error and data end bit error interrupts for single
->>> block transfer or the last block of multiblock transfer.
-> 
-> What if the controller generates Transfer complete interrupt bit more slower
-> and the tasklet do get a chance to run. In that case even host->mrq
-> will become NULL.
-> Actually if that happens it's even more worse since the driver may
-> start issuing other commands to controller.
-> 
-> Are we covering that case here? Do you think that this case is possible?
+On 16 May 2016 at 14:35, Adrian Hunter <adrian.hunter@intel.com> wrote:
+> Re-tuning is not possible when switched to the RPMB
+> partition.  However re-tuning should not be needed
+> if re-tuning is done immediately before switching,
+> a small set of operations is done, and then we
+> immediately switch back to the main partition.
+>
+> To ensure that re-tuning can't be done for a short
+> while, add a facility to "pause" re-tuning.
+>
+> The existing facility to hold / release re-tuning
+> is used but it also flags re-tuning as needed to cause
+> re-tuning before the next command (which will be the
+> switch to RPMB).
+>
+> We also need to "unpause" in the recovery path, which
+> is catered for by adding it to mmc_retune_disable().
+>
+> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
+> ---
 
-After data error, the host driver resets the controller so there will be no
-more interrupts relating to that mrq.
+Thanks, re-applied the series with this v3 version of patch 1/3.
 
-This patch is avoiding unnecessary warnings until that happens.
+If the tests from kernelci and in linux-next works out okay, I intend
+to send this as fixes for 4.7 rc1.
 
-> 
-> 
->>>
->>> Controller usually detects and generates data CRC/end bit error
->>> interrupts once one block on the bus is transferred completely.
->>> For single block transfer, since there's only one bock to transfer,
->>> the controller will report transfer complete interrupt as well,
->>> but until the data in controller FIFO has been successfully
->>> transferred to memory. The time gap of TC and CRC interrupt depends on
->>> the system busy state at that point and memory bus access speed.
->>>
->>> So it is possible when TC interrupt generated, host->data is already
->>> equal to NULL due to cleared by former CRC/Data End Bit error which
->>> is reasonable.
->>>
->>> Thus we DO NOT report the weird data interrupt event for this case.
->>>
->>> Else we may easily see warning below during SD3.0 card manually tuning
->>> process (calling mmc_send_tuning() which is a single block transfer)
->>> mmc0: Got data interrupt 0x00000002 even though no data operation was in progress
->>>
->>> The detailed command log is as follows:
->>> [ 1657.920983] mmc0: starting CMD19 arg 00000000 flags 00000035
->>> [ 1657.921009] mmc0:     blksz 64 blocks 1 flags 00000200 tsac 150 ms nsac 0
->>> [ 1657.921085] sdhci [sdhci_irq()]: *** mmc0 got interrupt: 0x00200001
->>> [ 1657.921112] sdhci [sdhci_irq()]: *** mmc0 got interrupt: 0x00000002
->>> [ 1657.921131] mmc0: Got data interrupt 0x00000002 even though no data operation was in progress.
->>> [ 1657.929761] sdhci: =========== REGISTER DUMP (mmc0)===========
->>> [ 1657.929780] sdhci: Sys addr: 0x3d5d6380 | Version:  0x00000002
->>> [ 1657.929796] sdhci: Blk size: 0x00000040 | Blk cnt:  0x00000001
->>> [ 1657.929814] sdhci: Argument: 0x00000000 | Trn mode: 0x00000013
->>> [ 1657.929831] sdhci: Present:  0x01fd8008 | Host ctl: 0x00000023
->>> [ 1657.929847] sdhci: Power:    0x00000002 | Blk gap:  0x00000080
->>> [ 1657.929863] sdhci: Wake-up:  0x00000008 | Clock:    0x0000000f
->>> [ 1657.929879] sdhci: Timeout:  0x0000000f | Int stat: 0x00000000
->>> [ 1657.929896] sdhci: Int enab: 0x107f008b | Sig enab: 0x107f008b
->>> [ 1657.929914] sdhci: AC12 err: 0x00000000 | Slot int: 0x00000003
->>> [ 1657.929932] sdhci: Caps:     0x07eb0000 | Caps_1:   0x00002007
->>> [ 1657.929949] sdhci: Cmd:      0x0000133a | Max curr: 0x00ffffff
->>> [ 1657.929965] sdhci: Host ctl2: 0x000000c8
->>> [ 1657.929981] sdhci: ADMA Err: 0x00000000 | ADMA Ptr: 0x8f042208
->>> [ 1657.929995] sdhci: ===========================================
->>> [ 1657.930156] mmc0: req done (CMD19): 0: 00000900 00000000 00000000 00000000
->>> [ 1657.930179] mmc0:     0 bytes transferred: -84
->>>
->>> It shows we first have a data CRC error interrupt then a data transfer
->>> complete interrupt.
->>> Then we got the !host->data case in sdhci_data_irq().
->>>
->>> CC: stable <stable@vger.kernel.org>
->>> Signed-off-by: Dong Aisheng <aisheng.dong@nxp.com>
->>> ---
->>>  drivers/mmc/host/sdhci.c | 11 +++++++++++
->>>  1 file changed, 11 insertions(+)
->>>
->>> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
->>> index 40e3551..2eb0e34 100644
->>> --- a/drivers/mmc/host/sdhci.c
->>> +++ b/drivers/mmc/host/sdhci.c
->>> @@ -2325,6 +2325,17 @@ static void sdhci_data_irq(struct sdhci_host *host, u32 intmask)
->>>                       }
->>>               }
->>>
->>> +             /*
->>> +              * The "data complete" interrupt is possible to happen a bit
->>> +              * later than CRC error and data end bit error interrupts
->>> +              * separately for single block transfer or the last block of
->>> +              * multiblock transfer. For this case, we DO NOT report the
->>> +              * weird data interrupt event.
->>> +              */
->>> +             if ((intmask & SDHCI_INT_DATA_END) &&
->>> +                 (host->mrq && host->mrq->data && host->mrq->data->error))
->>> +                     return;
->>
->> This could be generalized a bit more i.e. what about:
->>
->>                 /*
->>                  * After an error and before the the data circuit is reset in
->>                  * sdhci_tasklet_finish, we could get more interrupts, but we
->>                  * already have an error, so ignore them.
->>                  */
->>                 if (host->mrq && host->mrq->data && host->mrq->data->error)
->>                         return;
->>
->>> +
->>>               pr_err("%s: Got data interrupt 0x%08x even though no data operation was in progress.\n",
->>>                      mmc_hostname(host->mmc), (unsigned)intmask);
->>>               sdhci_dumpregs(host);
->>>
->>
->> --
->> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
+Kind regards
+Uffe
 
+>
+>
+> Changes in V3:
+>
+>         Added:
+>                 EXPORT_SYMBOL(mmc_retune_pause);
+>                 EXPORT_SYMBOL(mmc_retune_unpause);
+>
+> Changes in V2:
+>
+>         New approach entirely
+>
+>
+>  drivers/mmc/core/host.c  | 24 ++++++++++++++++++++++++
+>  include/linux/mmc/host.h |  4 ++++
+>  2 files changed, 28 insertions(+)
+>
+> diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
+> index e0a3ee16c0d3..1be42fab1a30 100644
+> --- a/drivers/mmc/core/host.c
+> +++ b/drivers/mmc/core/host.c
+> @@ -68,8 +68,32 @@ void mmc_retune_enable(struct mmc_host *host)
+>                           jiffies + host->retune_period * HZ);
+>  }
+>
+> +/*
+> + * Pause re-tuning for a small set of operations.  The pause begins after the
+> + * next command and after first doing re-tuning.
+> + */
+> +void mmc_retune_pause(struct mmc_host *host)
+> +{
+> +       if (!host->retune_paused) {
+> +               host->retune_paused = 1;
+> +               mmc_retune_needed(host);
+> +               mmc_retune_hold(host);
+> +       }
+> +}
+> +EXPORT_SYMBOL(mmc_retune_pause);
+> +
+> +void mmc_retune_unpause(struct mmc_host *host)
+> +{
+> +       if (host->retune_paused) {
+> +               host->retune_paused = 0;
+> +               mmc_retune_release(host);
+> +       }
+> +}
+> +EXPORT_SYMBOL(mmc_retune_unpause);
+> +
+>  void mmc_retune_disable(struct mmc_host *host)
+>  {
+> +       mmc_retune_unpause(host);
+>         host->can_retune = 0;
+>         del_timer_sync(&host->retune_timer);
+>         host->retune_now = 0;
+> diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+> index 85800b48241f..45cde8cd39f2 100644
+> --- a/include/linux/mmc/host.h
+> +++ b/include/linux/mmc/host.h
+> @@ -329,6 +329,7 @@ struct mmc_host {
+>         unsigned int            can_retune:1;   /* re-tuning can be used */
+>         unsigned int            doing_retune:1; /* re-tuning in progress */
+>         unsigned int            retune_now:1;   /* do re-tuning at next req */
+> +       unsigned int            retune_paused:1; /* re-tuning is temporarily disabled */
+>
+>         int                     rescan_disable; /* disable card detection */
+>         int                     rescan_entered; /* used with nonremovable devices */
+> @@ -526,4 +527,7 @@ static inline void mmc_retune_recheck(struct mmc_host *host)
+>                 host->retune_now = 1;
+>  }
+>
+> +void mmc_retune_pause(struct mmc_host *host);
+> +void mmc_retune_unpause(struct mmc_host *host);
+> +
+>  #endif /* LINUX_MMC_HOST_H */
+> --
+> 1.9.1
+>
+>
