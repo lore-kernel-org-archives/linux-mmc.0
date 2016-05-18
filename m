@@ -1,213 +1,132 @@
-From: Peter Ujfalusi <peter.ujfalusi@ti.com>
-Subject: Re: [RFC PATCH 2/3] mmc: host: omap_hsmmc: Enable ADMA2
-Date: Wed, 18 May 2016 14:07:57 +0300
-Message-ID: <5a9e0163-1fbb-e0a6-95ff-0b720ba5c110@ti.com>
-References: <1463561115-31798-1-git-send-email-kishon@ti.com>
- <1463561115-31798-3-git-send-email-kishon@ti.com>
+From: Doug Anderson <dianders@chromium.org>
+Subject: Re: [PATCH] mmc: dw_mmc: Consider HLE errors to be data and command errors
+Date: Wed, 18 May 2016 10:37:52 -0700
+Message-ID: <CAD=FV=UoT2GRYWJWXEn_ccvKGgC+PzQM_BCtLHAa7jxzbaQ9SA@mail.gmail.com>
+References: <1426002490-2014-1-git-send-email-dianders@chromium.org>
+ <5502CA4E.9060401@samsung.com> <CAD=FV=VX3ix-j4y95W1q8b-aVuVEN+4xsd8WLx2xcE7KPNJwRw@mail.gmail.com>
+ <5506707D.40708@samsung.com> <55189F04.8000404@samsung.com>
+ <CAD=FV=WFAZqAsXOqunt0fxw87M-FruwUrxuzW0MJsG6UvfSjzA@mail.gmail.com>
+ <CAD=FV=UJGcwa_biSCGhD=kS-T+fppCniBFfOHb5ohnwSwSwMMA@mail.gmail.com>
+ <573BCC8D.5090606@kernel-upstream.org> <CAD=FV=VneQR3wurjezBkRhtQiH+q-FfhDN8=Ym=XqtZpVmsdUw@mail.gmail.com>
+ <573C3283.1040606@rock-chips.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from bear.ext.ti.com ([198.47.19.11]:54337 "EHLO bear.ext.ti.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750790AbcERLJB (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 18 May 2016 07:09:01 -0400
-In-Reply-To: <1463561115-31798-3-git-send-email-kishon@ti.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <573C3283.1040606@rock-chips.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Shawn Lin <shawn.lin@rock-chips.com>
+Cc: Jaehoon Chung <jh80.chung@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>, Alim Akhtar <alim.akhtar@samsung.com>, Sonny Rao <sonnyrao@chromium.org>, Heiko Stuebner <heiko@sntech.de>, Alexandru Stan <amstan@chromium.org>, "open list:ARM/Rockchip SoC..." <linux-rockchip@lists.infradead.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Kishon Vijay Abraham I <kishon@ti.com>, linux-kernel@vger.kernel.org, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, afenkart@gmail.com, ulf.hansson@linaro.org, linux@armlinux.org.uk, tony@atomide.com
-Cc: rogerq@ti.com, bcousson@baylibre.com, galak@codeaurora.org, ijc+devicetree@hellion.org.uk, mark.rutland@arm.com, pawel.moll@arm.com, robh+dt@kernel.org, nsekhar@ti.com
 
-On 05/18/16 11:45, Kishon Vijay Abraham I wrote:
+Hi,
 
-> +static int omap_hsmmc_dma_init(struct omap_hsmmc_host *host)
-> +{
-> +	dma_cap_mask_t mask;
-> +	unsigned int tx_req, rx_req;
-> +	struct resource *res;
-> +	struct platform_device *pdev =3D to_platform_device(host->dev);
-> +
-> +	dma_cap_zero(mask);
-> +	dma_cap_set(DMA_SLAVE, mask);
-> +
-> +	if (!pdev->dev.of_node) {
-> +		res =3D platform_get_resource_byname(pdev, IORESOURCE_DMA, "tx");
-> +		if (!res) {
-> +			dev_err(mmc_dev(host->mmc), "cannot get DMA TX channel\n");
-> +			return -ENXIO;
-> +		}
-> +		tx_req =3D res->start;
-> +
-> +		res =3D platform_get_resource_byname(pdev, IORESOURCE_DMA, "rx");
-> +		if (!res) {
-> +			dev_err(mmc_dev(host->mmc), "cannot get DMA RX channel\n");
-> +			return -ENXIO;
-> +		}
-> +		rx_req =3D res->start;
-> +	}
-> +
-> +	host->rx_chan =3D
-> +		dma_request_slave_channel_compat(mask, omap_dma_filter_fn,
-> +						 &rx_req, &pdev->dev, "rx");
-> +
-> +	if (!host->rx_chan) {
-> +		dev_err(mmc_dev(host->mmc), "unable to obtain RX DMA engine channe=
-l\n");
-> +		return -ENXIO;
-> +	}
-> +
-> +	host->tx_chan =3D
-> +		dma_request_slave_channel_compat(mask, omap_dma_filter_fn,
-> +						 &tx_req, &pdev->dev, "tx");
-> +
-> +	if (!host->tx_chan) {
-> +		dev_err(mmc_dev(host->mmc), "unable to obtain TX DMA engine channe=
-l\n");
-> +		return -ENXIO;
+On Wed, May 18, 2016 at 2:14 AM, Shawn Lin <shawn.lin@rock-chips.com> wrote:
+> Hi
+>
+>
+> On 2016-5-18 12:12, Doug Anderson wrote:
+>>
+>> Hi,
+>>
+>> On Tue, May 17, 2016 at 6:59 PM, Shawn Lin
+>> <shawn.lin@kernel-upstream.org> wrote:
+>>>
+>>> Could you try this patch to see if you can still find HLE?
+>>>
+>>> @@ -2356,12 +2356,22 @@ static void dw_mci_cmd_interrupt(struct dw_mci
+>>> *host, u32 status)
+>>>   static void dw_mci_handle_cd(struct dw_mci *host)
+>>>   {
+>>>          int i;
+>>> +       int present;
+>>>
+>>>          for (i = 0; i < host->num_slots; i++) {
+>>>                  struct dw_mci_slot *slot = host->slot[i];
+>>>
+>>>                  if (!slot)
+>>>                          continue;
+>>>
+>>> +               present = !(mci_readl(slot->host, CDETECT) & (1 <<
+>>> slot->id));
+>>> +               if (present)
+>>> +                       set_bit(DW_MMC_CARD_PRESENT, &slot->flags);
+>>> +               else
+>>> +                       clear_bit(DW_MMC_CARD_PRESENT, &slot->flags);
+>>
+>>
+>> No, because we don't use the builtin card detect on veyron.  ;)
+>>
+>> We use GPIO card detect because we didn't like the way JTAG and SD
+>> interacted.  Also on rk3288 the builtin card detect line had the wrong
+>> voltage domain (you couldn't detect a card when the IO lines were
+>> powered off).  The builtin card detect line is always driven low on
+>> veyron.
+>
+>
+> Okay, I see.
+>
+>>
+>>
+>> I'm nearly certain that the root cause of my HLE errors is actually
+>> related to the same problem addressed by the commit 7c5209c315ea
+>> ("mmc: core: Increase delay for voltage to stabilize from 3.3V to
+>> 1.8V").  I think that on minnie we're still on the hairy edge and
+>> sometimes the line doesn't transition fast enough.
+>
+>
+> Things are not so simple from your details.
+>
+> I was not enabling SD3.0 support, then I also found HLE sometimes.
+> So it seems commit 7c5209c315ea does not contibute to this phenomenon.
 
-upstream moved to use dma_request_chan() so this part needs to be chang=
-ed.
-
-> +	}
-> +
-> +	return 0;
-> +}
-> +
-> +static void omap_hsmmc_dma_exit(struct omap_hsmmc_host *host)
-> +{
-> +	if (host->tx_chan)
-> +		dma_release_channel(host->tx_chan);
-> +	if (host->rx_chan)
-> +		dma_release_channel(host->rx_chan);
-> +}
-> +
->  static int omap_hsmmc_probe(struct platform_device *pdev)
->  {
->  	struct omap_hsmmc_platform_data *pdata =3D pdev->dev.platform_data;
-> @@ -2000,8 +2219,6 @@ static int omap_hsmmc_probe(struct platform_dev=
-ice *pdev)
->  	struct resource *res;
->  	int ret, irq;
->  	const struct of_device_id *match;
-> -	dma_cap_mask_t mask;
-> -	unsigned tx_req, rx_req;
->  	const struct omap_mmc_of_data *data;
->  	void __iomem *base;
-> =20
-> @@ -2114,7 +2331,10 @@ static int omap_hsmmc_probe(struct platform_de=
-vice *pdev)
->  	mmc->max_blk_size =3D 512;       /* Block Length at max can be 1024=
- */
->  	mmc->max_blk_count =3D 0xFFFF;    /* No. of Blocks is 16 bits */
->  	mmc->max_req_size =3D mmc->max_blk_size * mmc->max_blk_count;
-> -	mmc->max_seg_size =3D mmc->max_req_size;
-> +	if (host->pdata->controller_flags & OMAP_HSMMC_USE_ADMA)
-> +		mmc->max_seg_size =3D ADMA_MAX_LEN;
-> +	else
-> +		mmc->max_seg_size =3D mmc->max_req_size;
-> =20
->  	mmc->caps |=3D MMC_CAP_MMC_HIGHSPEED | MMC_CAP_SD_HIGHSPEED |
->  		     MMC_CAP_WAIT_WHILE_BUSY | MMC_CAP_ERASE;
-> @@ -2130,46 +2350,12 @@ static int omap_hsmmc_probe(struct platform_d=
-evice *pdev)
-> =20
->  	omap_hsmmc_conf_bus_power(host);
-> =20
-> -	if (!pdev->dev.of_node) {
-> -		res =3D platform_get_resource_byname(pdev, IORESOURCE_DMA, "tx");
-> -		if (!res) {
-> -			dev_err(mmc_dev(host->mmc), "cannot get DMA TX channel\n");
-> -			ret =3D -ENXIO;
-> -			goto err_irq;
-> -		}
-> -		tx_req =3D res->start;
-> -
-> -		res =3D platform_get_resource_byname(pdev, IORESOURCE_DMA, "rx");
-> -		if (!res) {
-> -			dev_err(mmc_dev(host->mmc), "cannot get DMA RX channel\n");
-> -			ret =3D -ENXIO;
-> -			goto err_irq;
-> -		}
-> -		rx_req =3D res->start;
-> -	}
-> -
-> -	dma_cap_zero(mask);
-> -	dma_cap_set(DMA_SLAVE, mask);
-> -
-> -	host->rx_chan =3D
-> -		dma_request_slave_channel_compat(mask, omap_dma_filter_fn,
-> -						 &rx_req, &pdev->dev, "rx");
-> -
-> -	if (!host->rx_chan) {
-> -		dev_err(mmc_dev(host->mmc), "unable to obtain RX DMA engine channe=
-l\n");
-> -		ret =3D -ENXIO;
-> -		goto err_irq;
-> -	}
-> -
-> -	host->tx_chan =3D
-> -		dma_request_slave_channel_compat(mask, omap_dma_filter_fn,
-> -						 &tx_req, &pdev->dev, "tx");
-> -
-> -	if (!host->tx_chan) {
-> -		dev_err(mmc_dev(host->mmc), "unable to obtain TX DMA engine channe=
-l\n");
-> -		ret =3D -ENXIO;
-> +	if (host->pdata->controller_flags & OMAP_HSMMC_USE_ADMA)
-> +		ret =3D omap_hsmmc_adma_init(host);
-> +	else
-> +		ret =3D omap_hsmmc_dma_init(host);
-> +	if (ret)
->  		goto err_irq;
-> -	}
-> =20
->  	/* Request IRQ for MMC operations */
->  	ret =3D devm_request_irq(&pdev->dev, host->irq, omap_hsmmc_irq, 0,
-> @@ -2225,11 +2411,11 @@ err_slot_name:
->  	mmc_remove_host(mmc);
->  err_irq:
->  	device_init_wakeup(&pdev->dev, false);
-> -	if (host->tx_chan)
-> -		dma_release_channel(host->tx_chan);
-> -	if (host->rx_chan)
-> -		dma_release_channel(host->rx_chan);
->  	pm_runtime_dont_use_autosuspend(host->dev);
-> +	if (host->pdata->controller_flags & OMAP_HSMMC_USE_ADMA)
-> +		omap_hsmmc_adma_exit(host);
-> +	else
-> +		omap_hsmmc_dma_exit(host);
->  	pm_runtime_put_sync(host->dev);
->  	pm_runtime_disable(host->dev);
->  	if (host->dbclk)
-> @@ -2248,8 +2434,10 @@ static int omap_hsmmc_remove(struct platform_d=
-evice *pdev)
->  	pm_runtime_get_sync(host->dev);
->  	mmc_remove_host(host->mmc);
-> =20
-> -	dma_release_channel(host->tx_chan);
-> -	dma_release_channel(host->rx_chan);
-> +	if (host->pdata->controller_flags & OMAP_HSMMC_USE_ADMA)
-> +		omap_hsmmc_adma_exit(host);
-> +	else
-> +		omap_hsmmc_dma_exit(host);
-> =20
->  	pm_runtime_dont_use_autosuspend(host->dev);
->  	pm_runtime_put_sync(host->dev);
-> diff --git a/include/linux/platform_data/hsmmc-omap.h b/include/linux=
-/platform_data/hsmmc-omap.h
-> index 8e981be..e26013d 100644
-> --- a/include/linux/platform_data/hsmmc-omap.h
-> +++ b/include/linux/platform_data/hsmmc-omap.h
-> @@ -27,6 +27,7 @@
->  #define OMAP_HSMMC_SUPPORTS_DUAL_VOLT		BIT(0)
->  #define OMAP_HSMMC_BROKEN_MULTIBLOCK_READ	BIT(1)
->  #define OMAP_HSMMC_SWAKEUP_MISSING		BIT(2)
-> +#define OMAP_HSMMC_USE_ADMA			BIT(3)
-> =20
->  struct omap_hsmmc_dev_attr {
->  	u8 flags;
->=20
+Just to clarify, in my case commit 7c5209c315ea didn't make the
+problem worse, but made it better.  Just not better enough.  ;)
 
 
---=20
-P=E9ter
+> The scenario looks like:
+> remove sd-card -> mmc_sd_detect -> send status(CMD13) ->power_off ->
+> set_ios -> setup_bus -> disabled clk , then HLE irq storm coming
+>
+> From the code of dw_mci_prepare_command:
+> SDMMC_CMD_PRV_DAT_WAIT will not be used for CMD13, so we don't
+> wait_busy here, then cmd code is loding into queue of dw_mmc but
+> still failing send out because it's in busy?
+>
+> With my patch, things go well:
+> remove sd-card -> clear bit of DW_MMC_CARD_PRESENT  -> send
+> status(CMD13) return directly -> power_off -> set_ios -> setup_bus ->
+> disable clk
+>
+> So why should we allow inquiry of card status if we sure the card is
+> removed? I mean no any further cmds should be delivered.
+
+Quite honestly just dealing with the HLE error (my patch or
+equivalent) might be a sane solution for the problem you describe.
+
+dw_mmc needs to be able to work with an external card detect GPIO.
+It's been part of the dw_mmc driver for a long time and is (in fact)
+in use upstream at least by rk3288-veyron.  Any solution that only
+works for internal card detect is not enough.  Just handling the HLE
+error to deal with the interrupt storm and then letting Linux remove
+the card (because of the card detect interrupt) seems totally OK to
+me.
+
+Note: I'd be very curious if your problems get better if you disable
+the "grf_force_jtag" bit in the GRF.  If you're using the builtin card
+detect and you use the boot default of "grf_force_jtag" then your pins
+will be unmuxed behind your back when the card is ejected.  This could
+be causing the dw_mmc controller to get confused.
+
+
+> And another question: should we wait busy for cmd13?
+
+I don't think so.  As I understand it CMD13 uses only the CMD line for
+communication and it should be appropriate to send this when the bus
+is "busy" (which means that the DATA lines are low).
+
+Also: it seems odd that the HLE IRQ storm didn't come right after the
+CMD 13 in your description above.  Are you sure it was the CMD 13 that
+caused the HLEs, or could it has been something else?
+
+
+-Doug
