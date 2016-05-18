@@ -1,56 +1,41 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH V3 1/3] mmc: core: Add a facility to "pause" re-tuning
-Date: Wed, 18 May 2016 09:44:32 +0300
-Message-ID: <573C0F50.7020608@intel.com>
-References: <1462361893-11897-1-git-send-email-adrian.hunter@intel.com>
- <1462361893-11897-2-git-send-email-adrian.hunter@intel.com>
- <CAPDyKFrg3Fe8ypdzrbxD5DxHBNs7-6yVma-7X7NY4JfNzVzGPQ@mail.gmail.com>
- <5731DC12.4090906@intel.com>
- <CAPDyKFozyrzAPcw3v=XUEkMevLxxZ_AgHWXkwkYPN=AJkTAgXQ@mail.gmail.com>
- <5732F498.6090203@intel.com> <57341F2D.1020703@intel.com>
- <CAPDyKFqGo_MgBo=Xc74O6yi_rpZUWyK00wnBi7Ebdda0ejrwcA@mail.gmail.com>
- <573482FD.6040906@intel.com> <5739BE8C.3010403@intel.com>
- <CAPDyKFpjoWHXp=H0R6pPM9pvF5BuP49MhwVzBQgr+01SXGGYQg@mail.gmail.com>
+From: Kishon Vijay Abraham I <kishon@ti.com>
+Subject: [RFC PATCH 0/3] dra7/omap4/omap5: Enable ADMA2
+Date: Wed, 18 May 2016 14:15:12 +0530
+Message-ID: <1463561115-31798-1-git-send-email-kishon@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga01.intel.com ([192.55.52.88]:36000 "EHLO mga01.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750912AbcERGs2 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 18 May 2016 02:48:28 -0400
-In-Reply-To: <CAPDyKFpjoWHXp=H0R6pPM9pvF5BuP49MhwVzBQgr+01SXGGYQg@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: linux-kernel@vger.kernel.org, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, afenkart@gmail.com, ulf.hansson@linaro.org, linux@armlinux.org.uk, tony@atomide.com
+Cc: rogerq@ti.com, peter.ujfalusi@ti.com, bcousson@baylibre.com, galak@codeaurora.org, ijc+devicetree@hellion.org.uk, mark.rutland@arm.com, pawel.moll@arm.com, robh+dt@kernel.org, nsekhar@ti.com, kishon@ti.com
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Tomas Winkler <tomas.winkler@intel.com>
 
-On 17/05/16 18:06, Ulf Hansson wrote:
-> On 16 May 2016 at 14:35, Adrian Hunter <adrian.hunter@intel.com> wrote:
->> Re-tuning is not possible when switched to the RPMB
->> partition.  However re-tuning should not be needed
->> if re-tuning is done immediately before switching,
->> a small set of operations is done, and then we
->> immediately switch back to the main partition.
->>
->> To ensure that re-tuning can't be done for a short
->> while, add a facility to "pause" re-tuning.
->>
->> The existing facility to hold / release re-tuning
->> is used but it also flags re-tuning as needed to cause
->> re-tuning before the next command (which will be the
->> switch to RPMB).
->>
->> We also need to "unpause" in the recovery path, which
->> is catered for by adding it to mmc_retune_disable().
->>
->> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
->> ---
-> 
-> Thanks, re-applied the series with this v3 version of patch 1/3.
-> 
-> If the tests from kernelci and in linux-next works out okay, I intend
-> to send this as fixes for 4.7 rc1.
+Add ADMA2 support in omap hsmmc driver. It's not added as
+a dma engine since ADMA2 is only implemented in HSMMC.
 
-Thank you!
+Though this doesn't improve the throughput with high speed
+cards, around 25% improvement is seen with HS200 card.
 
+HS200 support is not yet added in OMAP HSMMC since
+it has dependency with IODelay driver which is not yet
+upstreamed.
+
+Tested MMC1 and MMC2 in DRA7 (dra72-evm, dra7-evm) and OMAP5
+(omap5-uevm).
+Also tested having rootfs in MMC1 in DRA7, OMAP5, OMAP4 and OMAP3.
+
+Kishon Vijay Abraham I (3):
+  mmc: host: omap_hsmmc: remove *use_dma* member
+  mmc: host: omap_hsmmc: Enable ADMA2
+  ARM: dts: dra7/omap4/omap5: Enable ADMA2
+
+ .../devicetree/bindings/mmc/ti-omap-hsmmc.txt      |    1 +
+ arch/arm/boot/dts/dra7.dtsi                        |    4 +
+ arch/arm/boot/dts/omap4.dtsi                       |    2 +
+ arch/arm/boot/dts/omap5.dtsi                       |    4 +
+ drivers/mmc/host/omap_hsmmc.c                      |  332 +++++++++++++++-----
+ include/linux/platform_data/hsmmc-omap.h           |    1 +
+ 6 files changed, 269 insertions(+), 75 deletions(-)
+
+-- 
+1.7.9.5
