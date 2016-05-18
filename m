@@ -1,68 +1,48 @@
-From: Laszlo Fiat <laszlo.fiat@gmail.com>
-Subject: Re: [PATCH] mmc: block: Use the mmc host device index as the mmcblk
- device index
-Date: Tue, 17 May 2016 20:11:22 +0200
-Message-ID: <CA+7w51inLtQSr656bJvOjGG9oQWKYPXH+xxDPJKbeJ=CcrkS9Q@mail.gmail.com>
-References: <1460015861-14004-1-git-send-email-ulf.hansson@linaro.org>
-	<CA+7w51h=A4vVjkJTEvNoRG=GRt-GPSwqN4N4P3k-OqnubPo+kg@mail.gmail.com>
-	<CAPDyKFp8pfZ1iY7HsAZL1f2qgTuLcimDL_f1k59RMcUq5f-iRQ@mail.gmail.com>
-	<570B9C8D.2000600@intel.com>
-	<CA+7w51iP3Th-m8kqdx_iObEs+kYJruNd62f5n2OfD0XaeGw=9w@mail.gmail.com>
-	<570E2B2D.1080507@intel.com>
-	<CA+7w51gUcPz+z8eD8A3dtB7r_Pvr8yO1AjymXC14eq9RgN6skQ@mail.gmail.com>
-	<CAPDyKFq=B0PAxCLJgATSzO9zDHR_L7qOVn7PZ0seekbAb0YRPw@mail.gmail.com>
-	<57398F0A.7070600@intel.com>
-	<5739B261.2010009@intel.com>
-	<5739F7C1.707@gmail.com>
-	<CA+7w51gbn+nbsk2j-V2sVzupVbkN=7gt9uXeK8ZQdjdOjSSZsA@mail.gmail.com>
-	<CA+7w51guSQ6+XHnRwc+B1wwEV=-K=EOPrqPi5hcJc2b+xh+wuA@mail.gmail.com>
-	<CAPDyKFpyehaX9rrZq+0JEvHnwOALv8NbvwVpDQEdAKK_XiJaaA@mail.gmail.com>
+From: Doug Anderson <dianders@chromium.org>
+Subject: Re: [PATCH] mmc: dw_mmc: Consider HLE errors to be data and command errors
+Date: Tue, 17 May 2016 17:47:34 -0700
+Message-ID: <CAD=FV=UJGcwa_biSCGhD=kS-T+fppCniBFfOHb5ohnwSwSwMMA@mail.gmail.com>
+References: <1426002490-2014-1-git-send-email-dianders@chromium.org>
+ <5502CA4E.9060401@samsung.com> <CAD=FV=VX3ix-j4y95W1q8b-aVuVEN+4xsd8WLx2xcE7KPNJwRw@mail.gmail.com>
+ <5506707D.40708@samsung.com> <55189F04.8000404@samsung.com> <CAD=FV=WFAZqAsXOqunt0fxw87M-FruwUrxuzW0MJsG6UvfSjzA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wm0-f68.google.com ([74.125.82.68]:35389 "EHLO
-	mail-wm0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751179AbcEQSLY (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 17 May 2016 14:11:24 -0400
-Received: by mail-wm0-f68.google.com with SMTP id g17so165995wme.2
-        for <linux-mmc@vger.kernel.org>; Tue, 17 May 2016 11:11:23 -0700 (PDT)
-In-Reply-To: <CAPDyKFpyehaX9rrZq+0JEvHnwOALv8NbvwVpDQEdAKK_XiJaaA@mail.gmail.com>
+Received: from mail-vk0-f42.google.com ([209.85.213.42]:36163 "EHLO
+	mail-vk0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753409AbcERArg (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 17 May 2016 20:47:36 -0400
+Received: by mail-vk0-f42.google.com with SMTP id s184so41971267vkb.3
+        for <linux-mmc@vger.kernel.org>; Tue, 17 May 2016 17:47:35 -0700 (PDT)
+In-Reply-To: <CAD=FV=WFAZqAsXOqunt0fxw87M-FruwUrxuzW0MJsG6UvfSjzA@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: nick <xerofoify@gmail.com>, Adrian Hunter <adrian.hunter@intel.com>, linux-mmc <linux-mmc@vger.kernel.org>
+To: Jaehoon Chung <jh80.chung@samsung.com>
+Cc: Seungwon Jeon <tgih.jun@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>, Alim Akhtar <alim.akhtar@samsung.com>, Sonny Rao <sonnyrao@chromium.org>, Heiko Stuebner <heiko@sntech.de>, Alexandru Stan <amstan@chromium.org>, Javier Martinez Canillas <javier.martinez@collabora.co.uk>, "open list:ARM/Rockchip SoC..." <linux-rockchip@lists.infradead.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Chris Ball <chris@printf.net>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Shawn Lin <shawn.lin@rock-chips.com>
 
-On Mon, May 16, 2016 at 11:45 PM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
-> On 16 May 2016 at 22:30, Laszlo Fiat <laszlo.fiat@gmail.com> wrote:
->> I ran into a problem with the kernel compilation using Adrian's patch:
->> ERROR: "acpi_device_fix_up_power" [drivers/mmc/host/sdhci-acpi.ko] undefined!
->> scripts/Makefile.modpost:91: recipe for target '__modpost' failed
->> make[1]: *** [__modpost] Error 1
->> Makefile:1142: recipe for target 'modules' failed
->> make: *** [modules] Error 2
->>
->> The acpi_device_fix_up_power routine is in drivers/acpi/device_pm.c,
->> but I don't know how can I make it to find it.
->>
->> Any help is appreciated.
+Jaehoon,
+
+On Mon, Mar 30, 2015 at 8:47 AM, Doug Anderson <dianders@chromium.org> wrote:
+> Jaehoon,
 >
-> In drivers/acpi/device_pm.c, after the function implementation, add:
-> EXPORT_SYMBOL_GPL(acpi_device_fix_up_power);
+> On Sun, Mar 29, 2015 at 5:55 PM, Jaehoon Chung <jh80.chung@samsung.com> wrote:
+>> Dear Doug,
+>>
+>> I'm considering to control HLE error..So holding this patch.
+>> If this is absolutely necessary patch, let me know, plz.
+>>
+>> Best Regards,
+>> Jaehoon Chung
 >
-> Kind regards
-> Uffe
+> Sounds OK.  I have certainly applied this locally and the driver isn't
+> robust against insertions / removals without it, but once the card is
+> inserted things are OK so it's probably not urgent that it be applied
+> upstream.  Hopefully we can figure out a better solution...
 
- Hello,
+I'm now testing a nice new rebased kernel and I'm hitting this again.
 
-The patch Adrian posted in this thread is working fine, my Teclast
-X80h tablet finds all it's SD devices with it. You just have to add
-the EXPORT_SYMBOL Uffe wrote above to be able to compile with the
-patch.
+Of course I'll just pick my same patch to my new kernel tree, but
+since it's been a year and nobody has done anything better, would you
+consider landing my patch?  It is certainly better than nothing.
 
-Tested-by: Laszlo Fiat <laszlo.fiat@gmail.com>
-
-Thank you for working on and fixing this problem.
-
-Bye,
-
-Laszlo Fiat
+-Doug
