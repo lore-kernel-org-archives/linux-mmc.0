@@ -1,54 +1,40 @@
-From: "Rafael J. Wysocki" <rafael@kernel.org>
-Subject: Re: [PATCH 1/2] ACPI / PM: Export acpi_device_fix_up_power()
-Date: Thu, 19 May 2016 15:52:18 +0200
-Message-ID: <CAJZ5v0hNGiZWG55RHZt7m0Spg-cOEXpxYaCuF4rBc1NYsoSY3g@mail.gmail.com>
-References: <1463664342-19209-1-git-send-email-ulf.hansson@linaro.org>
+From: Tony Lindgren <tony@atomide.com>
+Subject: Re: [RFC PATCH 2/3] mmc: host: omap_hsmmc: Enable ADMA2
+Date: Thu, 19 May 2016 07:57:46 -0700
+Message-ID: <20160519145745.GU5995@atomide.com>
+References: <1463561115-31798-1-git-send-email-kishon@ti.com>
+ <1463561115-31798-3-git-send-email-kishon@ti.com>
+ <b66f678a-be74-d5f7-f2ef-93b5c9f29b92@ti.com>
+ <20160518193028.GT5995@atomide.com>
+ <0d463add-9fa5-a768-2ba6-34c4126c7817@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <stable-owner@vger.kernel.org>
-In-Reply-To: <1463664342-19209-1-git-send-email-ulf.hansson@linaro.org>
-Sender: stable-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc@vger.kernel.org, Adrian Hunter <adrian.hunter@intel.com>, "Rafael J. Wysocki" <rjw@rjwysocki.net>, Len Brown <lenb@kernel.org>, ACPI Devel Maling List <linux-acpi@vger.kernel.org>, Laszlo Fiat <laszlo.fiat@gmail.com>, Nicholas Krause <xerofoify@gmail.com>, Stable <stable@vger.kernel.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <0d463add-9fa5-a768-2ba6-34c4126c7817@ti.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Peter Ujfalusi <peter.ujfalusi@ti.com>
+Cc: Kishon Vijay Abraham I <kishon@ti.com>, linux-kernel@vger.kernel.org, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, afenkart@gmail.com, ulf.hansson@linaro.org, linux@armlinux.org.uk, rogerq@ti.com, bcousson@baylibre.com, galak@codeaurora.org, ijc+devicetree@hellion.org.uk, mark.rutland@arm.com, pawel.moll@arm.com, robh+dt@kernel.org, nsekhar@ti.com, Felipe Balbi <balbi@kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Thu, May 19, 2016 at 3:25 PM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
-> Drivers that needs acpi_device_fix_up_power(), allow them to be built as
-> modules by exporting this function.
->
-> Cc: <stable@vger.kernel.org> # 4.5+
-> Tested-by: Laszlo Fiat <laszlo.fiat@gmail.com>
-> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
-> ---
->
-> Rafael/Len, if you are okay with using acpi_device_fix_up_power() as a fix
-> for an issue in patch 2/2, then I would like to request an ack so I can take
-> both these patches via my MMC tree.
+* Peter Ujfalusi <peter.ujfalusi@ti.com> [160519 01:10]:
+> On 05/18/2016 10:30 PM, Tony Lindgren wrote:
+> > Ideally the adma support would be a separate loadable module,
+> > similar how the cppi41dma is a child of the OTG controller.
+> 
+> The Master DMA is part of the hsmmc IP block. If the same ADMA module is
+> present on other IPs it might be beneficial to have a helper library to handle
+> it (allocating the descriptor pool, wrinting, updating descriptors, etc).
 
-Yeah, should be fine.
+OK. Yeah if it's part of the MMC controller it makes no sense to
+separate it. So then the conecrns are using alternate DMA
+implementations and keeping PM runtime working :)
 
-Acked-by: Rafael J. Wysocki <rafael.j.wysocki@intel.com>
+BTW, Felipe mentioned that the best thing to do in the long run would
+be to set up sdhci-omap.c operating in ADMA mode.
 
-> ---
->  drivers/acpi/device_pm.c | 1 +
->  1 file changed, 1 insertion(+)
->
-> diff --git a/drivers/acpi/device_pm.c b/drivers/acpi/device_pm.c
-> index cd2c3d6..993fd31 100644
-> --- a/drivers/acpi/device_pm.c
-> +++ b/drivers/acpi/device_pm.c
-> @@ -319,6 +319,7 @@ int acpi_device_fix_up_power(struct acpi_device *device)
->
->         return ret;
->  }
-> +EXPORT_SYMBOL_GPL(acpi_device_fix_up_power);
->
->  int acpi_device_update_power(struct acpi_device *device, int *state_p)
->  {
-> --
-> 1.9.1
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-acpi" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Felipe, care to summarize what you had in mind?
+
+Regards,
+
+Tony
