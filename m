@@ -1,29 +1,28 @@
-From: Kishon Vijay Abraham I <kishon@ti.com>
+From: Peter Ujfalusi <peter.ujfalusi@ti.com>
 Subject: Re: [RFC PATCH 2/3] mmc: host: omap_hsmmc: Enable ADMA2
-Date: Thu, 19 May 2016 11:44:16 +0530
-Message-ID: <573D59B8.7050701@ti.com>
+Date: Thu, 19 May 2016 11:02:43 +0300
+Message-ID: <2d328902-d59e-4497-38fa-5bc3ec98180f@ti.com>
 References: <1463561115-31798-1-git-send-email-kishon@ti.com>
  <1463561115-31798-3-git-send-email-kishon@ti.com>
- <b66f678a-be74-d5f7-f2ef-93b5c9f29b92@ti.com>
- <20160518193028.GT5995@atomide.com>
+ <b66f678a-be74-d5f7-f2ef-93b5c9f29b92@ti.com> <573D57DA.20900@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="windows-1252"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from devils.ext.ti.com ([198.47.26.153]:39568 "EHLO
+Received: from devils.ext.ti.com ([198.47.26.153]:43654 "EHLO
 	devils.ext.ti.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750764AbcESGPG (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 19 May 2016 02:15:06 -0400
-In-Reply-To: <20160518193028.GT5995@atomide.com>
+	with ESMTP id S1751362AbcESIE5 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 19 May 2016 04:04:57 -0400
+In-Reply-To: <573D57DA.20900@ti.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Tony Lindgren <tony@atomide.com>, Peter Ujfalusi <peter.ujfalusi@ti.com>
-Cc: linux-kernel@vger.kernel.org, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, afenkart@gmail.com, ulf.hansson@linaro.org, linux@armlinux.org.uk, rogerq@ti.com, bcousson@baylibre.com, galak@codeaurora.org, ijc+devicetree@hellion.org.uk, mark.rutland@arm.com, pawel.moll@arm.com, robh+dt@kernel.org, nsekhar@ti.com
+To: Kishon Vijay Abraham I <kishon@ti.com>, linux-kernel@vger.kernel.org, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, afenkart@gmail.com, ulf.hansson@linaro.org, linux@armlinux.org.uk, tony@atomide.com
+Cc: rogerq@ti.com, bcousson@baylibre.com, galak@codeaurora.org, ijc+devicetree@hellion.org.uk, mark.rutland@arm.com, pawel.moll@arm.com, robh+dt@kernel.org, nsekhar@ti.com
 
-Hi Tony,
-
-On Thursday 19 May 2016 01:00 AM, Tony Lindgren wrote:
-> * Peter Ujfalusi <peter.ujfalusi@ti.com> [160518 03:26]:
+On 05/19/2016 09:06 AM, Kishon Vijay Abraham I wrote:
+> Hi Peter,
+>=20
+> On Wednesday 18 May 2016 03:54 PM, Peter Ujfalusi wrote:
 >> On 05/18/16 11:45, Kishon Vijay Abraham I wrote:
 >>> omap hsmmc host controller has ADMA2 feature. Enable it here
 >>> for better read and write throughput. Add a new dt binding
@@ -32,11 +31,13 @@ On Thursday 19 May 2016 01:00 AM, Tony Lindgren wrote:
 >>> Signed-off-by: Kishon Vijay Abraham I <kishon@ti.com>
 >>> ---
 >>>  .../devicetree/bindings/mmc/ti-omap-hsmmc.txt      |    1 +
->>>  drivers/mmc/host/omap_hsmmc.c                      |  320 ++++++++++++++++----
+>>>  drivers/mmc/host/omap_hsmmc.c                      |  320 ++++++++=
+++++++++----
 >>>  include/linux/platform_data/hsmmc-omap.h           |    1 +
 >>>  3 files changed, 256 insertions(+), 66 deletions(-)
 >>>
->>> diff --git a/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt b/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt
+>>> diff --git a/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.tx=
+t b/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt
 >>> index 74166a0..eb5ceec2 100644
 >>> --- a/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt
 >>> +++ b/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt
@@ -46,32 +47,34 @@ On Thursday 19 May 2016 01:00 AM, Tony Lindgren wrote:
 >>>  to be "rx" and "tx" for RX and TX DMA requests, respectively.
 >>> +ti,use_adma: enable adma2 feature
 >>
->> Do we have use case when you want to fall back to generic DMA instead of aDMA2?
-> 
-> Yes my guess is that PM runtime breaks with these currently..
-
-pm_runtime_get is invoked during omap_hsmmc_request and pm_runtime_put is
-invoked during omap_hsmmc_request_done. Both these calls are outside DMA API's.
-So it shouldn't break anything w.r.t PM runtime no?
-> 
->> IMHO if the driver supports aDMA2, it is going to use it instead of the
+>> Do we have use case when you want to fall back to generic DMA instea=
+d of aDMA2?
+>> IMHO if the driver supports aDMA2, it is going to use it instead of =
+the
 >> generic s/eDMA.
 >> What I mean is:
 >> the driver implements the aDMA2 support.
->> if the IP has support for aDMA2, then it is going to use it, otherwise it will
+>> if the IP has support for aDMA2, then it is going to use it, otherwi=
+se it will
 >> use the generic DMA.
-> 
-> Ideally the adma support would be a separate loadable module,
-> similar how the cppi41dma is a child of the OTG controller.
-> 
-> That way the systems wanting to use adma can just specify it
-> in the binding, and adma PM runtime support can be added later
-> on.
-> 
-> Of course this won't work if the adma registers are sprinkled
-> within the MMC controller registers..
+>=20
+> hmm.. how will the driver know if the IP has support for aDMA2. Using=
+ dt
+> binding is one way. Using MMCHS_HL_HWINFO is another way but then the=
+ register
+> offsets in omap_hsmmc driver has to be modified for omap4+.
 
-right, adma registers are within the MMC controller register space.
+I remember Felipe saying that MMCHS_HL_HWINFO is not reliable for some =
+reason?
+But in any case it would be better IMHO if we query the HW for Master D=
+MA
+support and if it is available we will use it.
 
-Thanks
-Kishon
+If it is really the case that MMCHS_HL_HWINFO is not reliable, then pro=
+bably
+have a flag for the MMC/SD phandle saying that ti,master_dma_supported =
+to
+indicate that it is capable has ADMA support also.
+
+--=20
+P=E9ter
