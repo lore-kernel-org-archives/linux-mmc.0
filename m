@@ -1,77 +1,57 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: [PATCH 1/3] mmc: longer timeout for long read time quirk
-Date: Fri, 20 May 2016 10:33:46 +0300
-Message-ID: <1463729628-3517-2-git-send-email-adrian.hunter@intel.com>
+Subject: [PATCH 2/3] mmc: sdhci-pci: Remove MMC_CAP_BUS_WIDTH_TEST for Intel controllers
+Date: Fri, 20 May 2016 10:33:47 +0300
+Message-ID: <1463729628-3517-3-git-send-email-adrian.hunter@intel.com>
 References: <1463729628-3517-1-git-send-email-adrian.hunter@intel.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
 Received: from mga02.intel.com ([134.134.136.20]:45641 "EHLO mga02.intel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751667AbcETHhq (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 20 May 2016 03:37:46 -0400
+	id S1752075AbcETHhu (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 20 May 2016 03:37:50 -0400
 In-Reply-To: <1463729628-3517-1-git-send-email-adrian.hunter@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>
 Cc: linux-mmc <linux-mmc@vger.kernel.org>
 
-From: Matt Gumbel <matthew.k.gumbel@intel.com>
+The CMD19/CMD14 bus width test has been found to be unreliable in
+some cases.  It is not essential, so simply remove it.
 
-008GE0 Toshiba mmc in some Intel Baytrail tablets responds to
-MMC_SEND_EXT_CSD in 450-600ms.
-
-This patch will...
-
-() Increase the long read time quirk timeout from 300ms to 600ms. Original
-   author of that quirk says 300ms was only a guess and that the number
-   may need to be raised in the future.
-
-() Add this specific MMC to the quirk
-
-Signed-off-by: Matt Gumbel <matthew.k.gumbel@intel.com>
 Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
 Cc: stable@vger.kernel.org
 ---
- drivers/mmc/card/block.c | 5 +++--
- drivers/mmc/core/core.c  | 4 ++--
- 2 files changed, 5 insertions(+), 4 deletions(-)
+ drivers/mmc/host/sdhci-pci-core.c | 5 +----
+ 1 file changed, 1 insertion(+), 4 deletions(-)
 
-diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
-index 33b98595d8d7..a92d183907ed 100644
---- a/drivers/mmc/card/block.c
-+++ b/drivers/mmc/card/block.c
-@@ -2536,11 +2536,12 @@ static const struct mmc_fixup blk_fixups[] =
- 		  MMC_QUIRK_BLK_NO_CMD23),
+diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-pci-core.c
+index 97d4eebd6bf5..a4dbf7421edc 100644
+--- a/drivers/mmc/host/sdhci-pci-core.c
++++ b/drivers/mmc/host/sdhci-pci-core.c
+@@ -356,7 +356,6 @@ static int byt_emmc_probe_slot(struct sdhci_pci_slot *slot)
+ {
+ 	slot->host->mmc->caps |= MMC_CAP_8_BIT_DATA | MMC_CAP_NONREMOVABLE |
+ 				 MMC_CAP_HW_RESET | MMC_CAP_1_8V_DDR |
+-				 MMC_CAP_BUS_WIDTH_TEST |
+ 				 MMC_CAP_WAIT_WHILE_BUSY;
+ 	slot->host->mmc->caps2 |= MMC_CAP2_HC_ERASE_SZ;
+ 	slot->hw_reset = sdhci_pci_int_hw_reset;
+@@ -372,15 +371,13 @@ static int byt_emmc_probe_slot(struct sdhci_pci_slot *slot)
+ static int byt_sdio_probe_slot(struct sdhci_pci_slot *slot)
+ {
+ 	slot->host->mmc->caps |= MMC_CAP_POWER_OFF_CARD | MMC_CAP_NONREMOVABLE |
+-				 MMC_CAP_BUS_WIDTH_TEST |
+ 				 MMC_CAP_WAIT_WHILE_BUSY;
+ 	return 0;
+ }
  
- 	/*
--	 * Some Micron MMC cards needs longer data read timeout than
--	 * indicated in CSD.
-+	 * Some MMC cards need longer data read timeout than indicated in CSD.
- 	 */
- 	MMC_FIXUP(CID_NAME_ANY, CID_MANFID_MICRON, 0x200, add_quirk_mmc,
- 		  MMC_QUIRK_LONG_READ_TIME),
-+	MMC_FIXUP("008GE0", CID_MANFID_TOSHIBA, CID_OEMID_ANY, add_quirk_mmc,
-+		  MMC_QUIRK_LONG_READ_TIME),
- 
- 	/*
- 	 * On these Samsung MoviNAND parts, performing secure erase or
-diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index 99275e40bf2f..8b4dfd45433b 100644
---- a/drivers/mmc/core/core.c
-+++ b/drivers/mmc/core/core.c
-@@ -875,11 +875,11 @@ void mmc_set_data_timeout(struct mmc_data *data, const struct mmc_card *card)
- 	/*
- 	 * Some cards require longer data read timeout than indicated in CSD.
- 	 * Address this by setting the read timeout to a "reasonably high"
--	 * value. For the cards tested, 300ms has proven enough. If necessary,
-+	 * value. For the cards tested, 600ms has proven enough. If necessary,
- 	 * this value can be increased if other problematic cards require this.
- 	 */
- 	if (mmc_card_long_read_time(card) && data->flags & MMC_DATA_READ) {
--		data->timeout_ns = 300000000;
-+		data->timeout_ns = 600000000;
- 		data->timeout_clks = 0;
- 	}
- 
+ static int byt_sd_probe_slot(struct sdhci_pci_slot *slot)
+ {
+-	slot->host->mmc->caps |= MMC_CAP_BUS_WIDTH_TEST |
+-				 MMC_CAP_WAIT_WHILE_BUSY;
++	slot->host->mmc->caps |= MMC_CAP_WAIT_WHILE_BUSY;
+ 	slot->cd_con_id = NULL;
+ 	slot->cd_idx = 0;
+ 	slot->cd_override_level = true;
 -- 
 1.9.1
 
