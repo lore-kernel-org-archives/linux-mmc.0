@@ -1,46 +1,295 @@
-From: Doug Anderson <dianders@chromium.org>
+From: Jaehoon Chung <jh80.chung@samsung.com>
 Subject: Re: [PATCH v3 3/5] mmc: core: implement enhanced strobe support
-Date: Thu, 19 May 2016 19:19:55 -0700
-Message-ID: <CAD=FV=VYsBO21iLZfQkXdFpPy5v-t+k6wP_jD3NZaCz=pEFVww@mail.gmail.com>
+Date: Fri, 20 May 2016 11:45:59 +0900
+Message-ID: <573E7A67.6050508@samsung.com>
 References: <1462871343-32361-1-git-send-email-shawn.lin@rock-chips.com>
  <1462871391-32484-1-git-send-email-shawn.lin@rock-chips.com>
- <CAD=FV=Xv-c2owh+dDT1EJYPrKsahxOoQUhJiZFprtk4FxHAK1A@mail.gmail.com> <573E6CD4.4010806@rock-chips.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-vk0-f50.google.com ([209.85.213.50]:36152 "EHLO
-	mail-vk0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753693AbcETCT5 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 19 May 2016 22:19:57 -0400
-Received: by mail-vk0-f50.google.com with SMTP id y2so56251313vka.3
-        for <linux-mmc@vger.kernel.org>; Thu, 19 May 2016 19:19:57 -0700 (PDT)
-In-Reply-To: <573E6CD4.4010806@rock-chips.com>
+Received: from mailout2.samsung.com ([203.254.224.25]:53698 "EHLO
+	mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755589AbcETCqL (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 19 May 2016 22:46:11 -0400
+In-reply-to: <1462871391-32484-1-git-send-email-shawn.lin@rock-chips.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Shawn Lin <shawn.lin@rock-chips.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, Rob Herring <robh+dt@kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Heiko Stuebner <heiko@sntech.de>, "open list:ARM/Rockchip SoC..." <linux-rockchip@lists.infradead.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>
+To: Shawn Lin <shawn.lin@rock-chips.com>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, Rob Herring <robh+dt@kernel.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Heiko Stuebner <heiko@sntech.de>, linux-rockchip@lists.infradead.org, devicetree@vger.kernel.org
 
-Shawn,
+On 05/10/2016 06:09 PM, Shawn Lin wrote:
+> Controllers use data strobe line to latch data from devices
+> under hs400 mode, but not for cmd line. So since emmc 5.1, JEDEC
+> introduces enhanced strobe mode for latching cmd response from
+> emmc devices to host controllers. This new feature is optional,
+> so it depends both on device's cap and host's cap to decide
+> whether to use it or not.
+> 
+> Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
+> ---
+> 
+> Changes in v3: None
+> Changes in v2: None
+> 
+>  drivers/mmc/core/bus.c   |  3 +-
+>  drivers/mmc/core/core.c  |  8 +++++
+>  drivers/mmc/core/mmc.c   | 79 ++++++++++++++++++++++++++++++++++++++++++++++--
+>  include/linux/mmc/card.h |  1 +
+>  include/linux/mmc/host.h | 11 +++++++
+>  include/linux/mmc/mmc.h  |  3 ++
+>  6 files changed, 102 insertions(+), 3 deletions(-)
+> 
+> diff --git a/drivers/mmc/core/bus.c b/drivers/mmc/core/bus.c
+> index 4bc48f1..7e94b9d 100644
+> --- a/drivers/mmc/core/bus.c
+> +++ b/drivers/mmc/core/bus.c
+> @@ -332,12 +332,13 @@ int mmc_add_card(struct mmc_card *card)
+>  			mmc_card_ddr52(card) ? "DDR " : "",
+>  			type);
+>  	} else {
+> -		pr_info("%s: new %s%s%s%s%s card at address %04x\n",
+> +		pr_info("%s: new %s%s%s%s%s%s card at address %04x\n",
+>  			mmc_hostname(card->host),
+>  			mmc_card_uhs(card) ? "ultra high speed " :
+>  			(mmc_card_hs(card) ? "high speed " : ""),
+>  			mmc_card_hs400(card) ? "HS400 " :
+>  			(mmc_card_hs200(card) ? "HS200 " : ""),
+> +			mmc_card_hs400es(card) ? "Enhanced strobe" : "",
+>  			mmc_card_ddr52(card) ? "DDR " : "",
+>  			uhs_bus_speed_mode, type, card->rca);
+>  	}
+> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+> index 99275e4..a559501 100644
+> --- a/drivers/mmc/core/core.c
+> +++ b/drivers/mmc/core/core.c
+> @@ -1127,6 +1127,14 @@ void mmc_set_initial_state(struct mmc_host *host)
+>  	host->ios.bus_width = MMC_BUS_WIDTH_1;
+>  	host->ios.timing = MMC_TIMING_LEGACY;
+>  	host->ios.drv_type = 0;
+> +	host->ios.enhanced_strobe = false;
+> +
+> +	/*
+> +	 * Make sure we are in non-enhanced strobe mode before we
+> +	 * actually enable it in ext_csd.
+> +	 */
+> +	if (host->ops->hs400_enhanced_strobe)
+> +		host->ops->hs400_enhanced_strobe(host, &host->ios);
+>  
+>  	mmc_set_ios(host);
+>  }
+> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+> index f99c47e..c2d1981 100644
+> --- a/drivers/mmc/core/mmc.c
+> +++ b/drivers/mmc/core/mmc.c
+> @@ -235,6 +235,11 @@ static void mmc_select_card_type(struct mmc_card *card)
+>  		avail_type |= EXT_CSD_CARD_TYPE_HS400_1_2V;
+>  	}
+>  
+> +	if ((caps2 & MMC_CAP2_HS400_ES) &&
+> +	    card->ext_csd.strobe_support &&
+> +	    (card_type & EXT_CSD_CARD_TYPE_HS400))
+> +		avail_type |= EXT_CSD_CARD_TYPE_HS400ES;
 
-On Thu, May 19, 2016 at 6:48 PM, Shawn Lin <shawn.lin@rock-chips.com> wrote:
->>>   #define EXT_CSD_BUS_WIDTH_1    0       /* Card is in 1 bit mode */
->>>   #define EXT_CSD_BUS_WIDTH_4    1       /* Card is in 4 bit mode */
->>>   #define EXT_CSD_BUS_WIDTH_8    2       /* Card is in 8 bit mode */
->>>   #define EXT_CSD_DDR_BUS_WIDTH_4        5       /* Card is in 4 bit DDR
->>> mode */
->>>   #define EXT_CSD_DDR_BUS_WIDTH_8        6       /* Card is in 8 bit DDR
->>> mode */
->>> +#define EXT_CSD_BUS_WIDTH_STROBE BIT(7)        /* Enhanced strobe mode
->>> */
->>
->>
->> nit: while your code should be OK, it seems better to be BIT(3), since
->> above is really:
->>
->
-> I don't unstand here. EXT_CSD_BUS_WIDTH_STROBE is the MSB of
-> BUS_WIDTH[183] which is a 8-bit reg.
+Does it need to check whether support HS400_1.8V/1.2V or not?
+It should be more stable than now.
 
-I totally misunderstood.  You are correct.
+if (avail_type & (EXT_CSD_CARD_TYPE_HS400_1.8V | EXT_CSD_CARD_TYPE_HS400_1.2V)) {
+	if ((cap2 & MMC_CAP2_HS400_ES) && ...
+}
 
--Doug
+how about this?
+
+Best Regards,
+Jaehoon Chung
+
+> +
+>  	card->ext_csd.hs_max_dtr = hs_max_dtr;
+>  	card->ext_csd.hs200_max_dtr = hs200_max_dtr;
+>  	card->mmc_avail_type = avail_type;
+> @@ -383,6 +388,7 @@ static int mmc_decode_ext_csd(struct mmc_card *card, u8 *ext_csd)
+>  			mmc_card_set_blockaddr(card);
+>  	}
+>  
+> +	card->ext_csd.strobe_support = ext_csd[EXT_CSD_STROBE_SUPPORT];
+>  	card->ext_csd.raw_card_type = ext_csd[EXT_CSD_CARD_TYPE];
+>  	mmc_select_card_type(card);
+>  
+> @@ -1216,6 +1222,73 @@ out_err:
+>  	return err;
+>  }
+>  
+> +static int mmc_select_hs400es(struct mmc_card *card)
+> +{
+> +	struct mmc_host *host = card->host;
+> +	int err = 0;
+> +	u8 val;
+> +
+> +	err = mmc_select_bus_width(card);
+> +	if (IS_ERR_VALUE(err))
+> +		goto out_err;
+> +
+> +	/* Switch card to HS mode */
+> +	err = mmc_select_hs(card);
+> +	if (err) {
+> +		pr_err("%s: switch to high-speed failed, err:%d\n",
+> +			mmc_hostname(host), err);
+> +		goto out_err;
+> +	}
+> +
+> +	err = mmc_switch_status(card);
+> +	if (err)
+> +		goto out_err;
+> +
+> +	/* Switch card to DDR with strobe bit */
+> +	val = EXT_CSD_DDR_BUS_WIDTH_8 | EXT_CSD_BUS_WIDTH_STROBE;
+> +	err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
+> +			 EXT_CSD_BUS_WIDTH,
+> +			 val,
+> +			 card->ext_csd.generic_cmd6_time);
+> +	if (err) {
+> +		pr_err("%s: switch to bus width for hs400es failed, err:%d\n",
+> +			mmc_hostname(host), err);
+> +		goto out_err;
+> +	}
+> +
+> +	/* Switch card to HS400 */
+> +	val = EXT_CSD_TIMING_HS400 |
+> +	      card->drive_strength << EXT_CSD_DRV_STR_SHIFT;
+> +	err = __mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
+> +			   EXT_CSD_HS_TIMING, val,
+> +			   card->ext_csd.generic_cmd6_time,
+> +			   true, false, true);
+> +	if (err) {
+> +		pr_err("%s: switch to hs400es failed, err:%d\n",
+> +			mmc_hostname(host), err);
+> +		goto out_err;
+> +	}
+> +
+> +	/* Set host controller to HS400 timing and frequency */
+> +	mmc_set_timing(host, MMC_TIMING_MMC_HS400);
+> +
+> +	/* Controller enable enhanced strobe function */
+> +	host->ios.enhanced_strobe = true;
+> +	if (host->ops->hs400_enhanced_strobe)
+> +		host->ops->hs400_enhanced_strobe(host, &host->ios);
+> +
+> +	err = mmc_switch_status(card);
+> +	if (err)
+> +		goto out_err;
+> +
+> +	return 0;
+> +
+> +out_err:
+> +	pr_err("%s: %s failed, error %d\n", mmc_hostname(card->host),
+> +	       __func__, err);
+> +	return err;
+> +}
+> +
+>  static void mmc_select_driver_type(struct mmc_card *card)
+>  {
+>  	int card_drv_type, drive_strength, drv_type;
+> @@ -1297,7 +1370,7 @@ err:
+>  }
+>  
+>  /*
+> - * Activate High Speed or HS200 mode if supported.
+> + * Activate High Speed, HS200 or HS400ES mode if supported.
+>   */
+>  static int mmc_select_timing(struct mmc_card *card)
+>  {
+> @@ -1306,7 +1379,9 @@ static int mmc_select_timing(struct mmc_card *card)
+>  	if (!mmc_can_ext_csd(card))
+>  		goto bus_speed;
+>  
+> -	if (card->mmc_avail_type & EXT_CSD_CARD_TYPE_HS200)
+> +	if (card->mmc_avail_type & EXT_CSD_CARD_TYPE_HS400ES)
+> +		err = mmc_select_hs400es(card);
+> +	else if (card->mmc_avail_type & EXT_CSD_CARD_TYPE_HS200)
+>  		err = mmc_select_hs200(card);
+>  	else if (card->mmc_avail_type & EXT_CSD_CARD_TYPE_HS)
+>  		err = mmc_select_hs(card);
+> diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
+> index eb0151b..22defc2 100644
+> --- a/include/linux/mmc/card.h
+> +++ b/include/linux/mmc/card.h
+> @@ -95,6 +95,7 @@ struct mmc_ext_csd {
+>  	u8			raw_partition_support;	/* 160 */
+>  	u8			raw_rpmb_size_mult;	/* 168 */
+>  	u8			raw_erased_mem_count;	/* 181 */
+> +	u8			strobe_support;		/* 184 */
+>  	u8			raw_ext_csd_structure;	/* 194 */
+>  	u8			raw_card_type;		/* 196 */
+>  	u8			raw_driver_strength;	/* 197 */
+> diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+> index 2a06fb0..f98bd0e 100644
+> --- a/include/linux/mmc/host.h
+> +++ b/include/linux/mmc/host.h
+> @@ -19,6 +19,7 @@
+>  
+>  #include <linux/mmc/core.h>
+>  #include <linux/mmc/card.h>
+> +#include <linux/mmc/mmc.h>
+>  #include <linux/mmc/pm.h>
+>  
+>  struct mmc_ios {
+> @@ -77,6 +78,8 @@ struct mmc_ios {
+>  #define MMC_SET_DRIVER_TYPE_A	1
+>  #define MMC_SET_DRIVER_TYPE_C	2
+>  #define MMC_SET_DRIVER_TYPE_D	3
+> +
+> +	bool enhanced_strobe;			/* hs400es selection */
+>  };
+>  
+>  struct mmc_host_ops {
+> @@ -143,6 +146,9 @@ struct mmc_host_ops {
+>  
+>  	/* Prepare HS400 target operating frequency depending host driver */
+>  	int	(*prepare_hs400_tuning)(struct mmc_host *host, struct mmc_ios *ios);
+> +	/* Prepare enhanced strobe depending host driver */
+> +	void	(*hs400_enhanced_strobe)(struct mmc_host *host,
+> +					 struct mmc_ios *ios);
+>  	int	(*select_drive_strength)(struct mmc_card *card,
+>  					 unsigned int max_dtr, int host_drv,
+>  					 int card_drv, int *drv_type);
+> @@ -513,6 +519,11 @@ static inline bool mmc_card_hs400(struct mmc_card *card)
+>  	return card->host->ios.timing == MMC_TIMING_MMC_HS400;
+>  }
+>  
+> +static inline bool mmc_card_hs400es(struct mmc_card *card)
+> +{
+> +	return card->host->ios.enhanced_strobe == true;
+> +}
+> +
+>  void mmc_retune_timer_stop(struct mmc_host *host);
+>  
+>  static inline void mmc_retune_needed(struct mmc_host *host)
+> diff --git a/include/linux/mmc/mmc.h b/include/linux/mmc/mmc.h
+> index 15f2c4a..c376209 100644
+> --- a/include/linux/mmc/mmc.h
+> +++ b/include/linux/mmc/mmc.h
+> @@ -297,6 +297,7 @@ struct _mmc_csd {
+>  #define EXT_CSD_PART_CONFIG		179	/* R/W */
+>  #define EXT_CSD_ERASED_MEM_CONT		181	/* RO */
+>  #define EXT_CSD_BUS_WIDTH		183	/* R/W */
+> +#define EXT_CSD_STROBE_SUPPORT		184	/* RO */
+>  #define EXT_CSD_HS_TIMING		185	/* R/W */
+>  #define EXT_CSD_POWER_CLASS		187	/* R/W */
+>  #define EXT_CSD_REV			192	/* RO */
+> @@ -380,12 +381,14 @@ struct _mmc_csd {
+>  #define EXT_CSD_CARD_TYPE_HS400_1_2V	(1<<7)	/* Card can run at 200MHz DDR, 1.2V */
+>  #define EXT_CSD_CARD_TYPE_HS400		(EXT_CSD_CARD_TYPE_HS400_1_8V | \
+>  					 EXT_CSD_CARD_TYPE_HS400_1_2V)
+> +#define EXT_CSD_CARD_TYPE_HS400ES	(1<<8)	/* Card can run at HS400ES */
+>  
+>  #define EXT_CSD_BUS_WIDTH_1	0	/* Card is in 1 bit mode */
+>  #define EXT_CSD_BUS_WIDTH_4	1	/* Card is in 4 bit mode */
+>  #define EXT_CSD_BUS_WIDTH_8	2	/* Card is in 8 bit mode */
+>  #define EXT_CSD_DDR_BUS_WIDTH_4	5	/* Card is in 4 bit DDR mode */
+>  #define EXT_CSD_DDR_BUS_WIDTH_8	6	/* Card is in 8 bit DDR mode */
+> +#define EXT_CSD_BUS_WIDTH_STROBE BIT(7)	/* Enhanced strobe mode */
+>  
+>  #define EXT_CSD_TIMING_BC	0	/* Backwards compatility */
+>  #define EXT_CSD_TIMING_HS	1	/* High speed */
+> 
+
