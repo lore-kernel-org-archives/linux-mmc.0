@@ -1,363 +1,176 @@
-From: Shawn Lin <shawn.lin@rock-chips.com>
-Subject: Re: [PATCH v3 3/5] mmc: core: implement enhanced strobe support
-Date: Fri, 20 May 2016 12:15:46 +0800
-Message-ID: <573E8F72.3000407@rock-chips.com>
-References: <1462871343-32361-1-git-send-email-shawn.lin@rock-chips.com>
- <1462871391-32484-1-git-send-email-shawn.lin@rock-chips.com>
- <573E7A67.6050508@samsung.com> <573E815C.5080204@rock-chips.com>
- <573E8A7D.3040308@samsung.com>
+From: Yangbo Lu <yangbo.lu-3arQi8VN3Tc@public.gmane.org>
+Subject: RE: [v10, 7/7] mmc: sdhci-of-esdhc: fix host version for
+	T4240-R1.0-R2.0
+Date: Fri, 20 May 2016 06:05:45 +0000
+Message-ID: <HE1PR04MB08891B37898C97E1800D701EF84B0@HE1PR04MB0889.eurprd04.prod.outlook.com>
+References: <1462417950-46796-1-git-send-email-yangbo.lu@nxp.com>
+	<4448030.Zs8fVnr3nm@wuerfel>
+	<HE1PR04MB0889B52134A43C0E7A452B7BF87C0@HE1PR04MB0889.eurprd04.prod.outlook.com>
+	<5159406.HOFrj7pRfW@wuerfel> <1462937186.16584.77.camel@buserror.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8;
-	format=flowed
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from lucky1.263xmail.com ([211.157.147.135]:37886 "EHLO
-	lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753145AbcETERI (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 20 May 2016 00:17:08 -0400
-In-Reply-To: <573E8A7D.3040308@samsung.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
+In-Reply-To: <1462937186.16584.77.camel-fOR+EgIDQEHk1uMJSBkQmQ@public.gmane.org>
+Content-Language: en-US
+List-Unsubscribe: <https://lists.linuxfoundation.org/mailman/options/iommu>,
+	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.linuxfoundation.org/pipermail/iommu/>
+List-Post: <mailto:iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
+List-Help: <mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=help>
+List-Subscribe: <https://lists.linuxfoundation.org/mailman/listinfo/iommu>,
+	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=subscribe>
+Sender: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
+Errors-To: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
+To: Scott Wood <oss-fOR+EgIDQEHk1uMJSBkQmQ@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+Cc: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org" <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Russell King <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, Bhupesh Sharma <bhupesh.sharma-KZfg59tc24xl57MIdRCFDg@public.gmane.org>, "netdev-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <netdev-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Santosh Shilimkar <ssantosh-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Yang-Leo Li <leoyang.li-3arQi8VN3Tc@public.gmane.org>, "iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org" <iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, "linux-i2c-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-i2c-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Claudiu Manoil <claudiu.manoil-KZfg59tc24xl57MIdRCFDg@public.gmane.org>, Kumar Gala <galak-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, "linuxppc-dev-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org" <linuxppc-dev-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>, "linux-clk-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-clk-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Xiaobo Xie <xiaobo.xie-3arQi8VN3Tc@public.gmane.org>Q
 List-Id: linux-mmc@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: shawn.lin@rock-chips.com, Adrian Hunter <adrian.hunter@intel.com>, Rob Herring <robh+dt@kernel.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Heiko Stuebner <heiko@sntech.de>, linux-rockchip@lists.infradead.org, devicetree@vger.kernel.org
 
-Hi
+Hi Arnd,
 
-=E5=9C=A8 2016-5-20 11:54, Jaehoon Chung =E5=86=99=E9=81=93:
-> On 05/20/2016 12:15 PM, Shawn Lin wrote:
->> Hi
->>
->> =E5=9C=A8 2016-5-20 10:45, Jaehoon Chung =E5=86=99=E9=81=93:
->>> On 05/10/2016 06:09 PM, Shawn Lin wrote:
->>>> Controllers use data strobe line to latch data from devices
->>>> under hs400 mode, but not for cmd line. So since emmc 5.1, JEDEC
->>>> introduces enhanced strobe mode for latching cmd response from
->>>> emmc devices to host controllers. This new feature is optional,
->>>> so it depends both on device's cap and host's cap to decide
->>>> whether to use it or not.
->>>>
->>>> Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
->>>> ---
->>>>
->>>> Changes in v3: None
->>>> Changes in v2: None
->>>>
->>>>    drivers/mmc/core/bus.c   |  3 +-
->>>>    drivers/mmc/core/core.c  |  8 +++++
->>>>    drivers/mmc/core/mmc.c   | 79 +++++++++++++++++++++++++++++++++=
-+++++++++++++--
->>>>    include/linux/mmc/card.h |  1 +
->>>>    include/linux/mmc/host.h | 11 +++++++
->>>>    include/linux/mmc/mmc.h  |  3 ++
->>>>    6 files changed, 102 insertions(+), 3 deletions(-)
->>>>
->>>> diff --git a/drivers/mmc/core/bus.c b/drivers/mmc/core/bus.c
->>>> index 4bc48f1..7e94b9d 100644
->>>> --- a/drivers/mmc/core/bus.c
->>>> +++ b/drivers/mmc/core/bus.c
->>>> @@ -332,12 +332,13 @@ int mmc_add_card(struct mmc_card *card)
->>>>                mmc_card_ddr52(card) ? "DDR " : "",
->>>>                type);
->>>>        } else {
->>>> -        pr_info("%s: new %s%s%s%s%s card at address %04x\n",
->>>> +        pr_info("%s: new %s%s%s%s%s%s card at address %04x\n",
->>>>                mmc_hostname(card->host),
->>>>                mmc_card_uhs(card) ? "ultra high speed " :
->>>>                (mmc_card_hs(card) ? "high speed " : ""),
->>>>                mmc_card_hs400(card) ? "HS400 " :
->>>>                (mmc_card_hs200(card) ? "HS200 " : ""),
->>>> +            mmc_card_hs400es(card) ? "Enhanced strobe" : "",
->>>>                mmc_card_ddr52(card) ? "DDR " : "",
->>>>                uhs_bus_speed_mode, type, card->rca);
->>>>        }
->>>> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
->>>> index 99275e4..a559501 100644
->>>> --- a/drivers/mmc/core/core.c
->>>> +++ b/drivers/mmc/core/core.c
->>>> @@ -1127,6 +1127,14 @@ void mmc_set_initial_state(struct mmc_host =
-*host)
->>>>        host->ios.bus_width =3D MMC_BUS_WIDTH_1;
->>>>        host->ios.timing =3D MMC_TIMING_LEGACY;
->>>>        host->ios.drv_type =3D 0;
->>>> +    host->ios.enhanced_strobe =3D false;
->>>> +
->>>> +    /*
->>>> +     * Make sure we are in non-enhanced strobe mode before we
->>>> +     * actually enable it in ext_csd.
->>>> +     */
->>>> +    if (host->ops->hs400_enhanced_strobe)
->>>> +        host->ops->hs400_enhanced_strobe(host, &host->ios);
->>>>
->>>>        mmc_set_ios(host);
->>>>    }
->>>> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
->>>> index f99c47e..c2d1981 100644
->>>> --- a/drivers/mmc/core/mmc.c
->>>> +++ b/drivers/mmc/core/mmc.c
->>>> @@ -235,6 +235,11 @@ static void mmc_select_card_type(struct mmc_c=
-ard *card)
->>>>            avail_type |=3D EXT_CSD_CARD_TYPE_HS400_1_2V;
->>>>        }
->>>>
->>>> +    if ((caps2 & MMC_CAP2_HS400_ES) &&
->>>> +        card->ext_csd.strobe_support &&
->>>> +        (card_type & EXT_CSD_CARD_TYPE_HS400))
->>>> +        avail_type |=3D EXT_CSD_CARD_TYPE_HS400ES;
->>>
->>> Does it need to check whether support HS400_1.8V/1.2V or not?
->>> It should be more stable than now.
->>>
->>
->> Ahh, right.
->> I need to add "avail_type & EXT_CSD_CARD_TYPE_HS400" instead of
->> "card_type & EXT_CSD_CARD_TYPE_HS400"... because if "avail_type &
->> EXT_CSD_CARD_TYPE_HS400" is true, it implies that "card_type & EXT_C=
-SD_CARD_TYPE_HS400" must be true.
->
-> Otherwise, you can check or add the capabilities in the parse_of_mmc(=
-).
-> It can choose according to your preference. :)
->
-> Anyway, i have tested your patches..If you send the patch V4, i will =
-also test.
+Any comments? 
+Please reply when you see the email since we want this eSDHC issue to be fixed soon.
 
-Thanks for testing. I will cc you when pushing V4.
+All the patches are Freescale-specific and is to fix the eSDHC driver.
+Could we let them merged first if you were talking about a new way of abstracting getting SoC version.
 
->
-> Best Regards,
-> Jaehoon Chung
->
->>
->>
->> Thansk for catching this!
->>
->>
->>> if (avail_type & (EXT_CSD_CARD_TYPE_HS400_1.8V | EXT_CSD_CARD_TYPE_=
-HS400_1.2V)) {
->>>      if ((cap2 & MMC_CAP2_HS400_ES) && ...
->>> }
->>>
->>> how about this?
->>>
->>> Best Regards,
->>> Jaehoon Chung
->>>
->>>> +
->>>>        card->ext_csd.hs_max_dtr =3D hs_max_dtr;
->>>>        card->ext_csd.hs200_max_dtr =3D hs200_max_dtr;
->>>>        card->mmc_avail_type =3D avail_type;
->>>> @@ -383,6 +388,7 @@ static int mmc_decode_ext_csd(struct mmc_card =
-*card, u8 *ext_csd)
->>>>                mmc_card_set_blockaddr(card);
->>>>        }
->>>>
->>>> +    card->ext_csd.strobe_support =3D ext_csd[EXT_CSD_STROBE_SUPPO=
-RT];
->>>>        card->ext_csd.raw_card_type =3D ext_csd[EXT_CSD_CARD_TYPE];
->>>>        mmc_select_card_type(card);
->>>>
->>>> @@ -1216,6 +1222,73 @@ out_err:
->>>>        return err;
->>>>    }
->>>>
->>>> +static int mmc_select_hs400es(struct mmc_card *card)
->>>> +{
->>>> +    struct mmc_host *host =3D card->host;
->>>> +    int err =3D 0;
->>>> +    u8 val;
->>>> +
->>>> +    err =3D mmc_select_bus_width(card);
->>>> +    if (IS_ERR_VALUE(err))
->>>> +        goto out_err;
->>>> +
->>>> +    /* Switch card to HS mode */
->>>> +    err =3D mmc_select_hs(card);
->>>> +    if (err) {
->>>> +        pr_err("%s: switch to high-speed failed, err:%d\n",
->>>> +            mmc_hostname(host), err);
->>>> +        goto out_err;
->>>> +    }
->>>> +
->>>> +    err =3D mmc_switch_status(card);
->>>> +    if (err)
->>>> +        goto out_err;
->>>> +
->>>> +    /* Switch card to DDR with strobe bit */
->>>> +    val =3D EXT_CSD_DDR_BUS_WIDTH_8 | EXT_CSD_BUS_WIDTH_STROBE;
->>>> +    err =3D mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
->>>> +             EXT_CSD_BUS_WIDTH,
->>>> +             val,
->>>> +             card->ext_csd.generic_cmd6_time);
->>>> +    if (err) {
->>>> +        pr_err("%s: switch to bus width for hs400es failed, err:%=
-d\n",
->>>> +            mmc_hostname(host), err);
->>>> +        goto out_err;
->>>> +    }
->>>> +
->>>> +    /* Switch card to HS400 */
->>>> +    val =3D EXT_CSD_TIMING_HS400 |
->>>> +          card->drive_strength << EXT_CSD_DRV_STR_SHIFT;
->>>> +    err =3D __mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
->>>> +               EXT_CSD_HS_TIMING, val,
->>>> +               card->ext_csd.generic_cmd6_time,
->>>> +               true, false, true);
->>>> +    if (err) {
->>>> +        pr_err("%s: switch to hs400es failed, err:%d\n",
->>>> +            mmc_hostname(host), err);
->>>> +        goto out_err;
->>>> +    }
->>>> +
->>>> +    /* Set host controller to HS400 timing and frequency */
->>>> +    mmc_set_timing(host, MMC_TIMING_MMC_HS400);
->>>> +
->>>> +    /* Controller enable enhanced strobe function */
->>>> +    host->ios.enhanced_strobe =3D true;
->>>> +    if (host->ops->hs400_enhanced_strobe)
->>>> +        host->ops->hs400_enhanced_strobe(host, &host->ios);
->>>> +
->>>> +    err =3D mmc_switch_status(card);
->>>> +    if (err)
->>>> +        goto out_err;
->>>> +
->>>> +    return 0;
->>>> +
->>>> +out_err:
->>>> +    pr_err("%s: %s failed, error %d\n", mmc_hostname(card->host),
->>>> +           __func__, err);
->>>> +    return err;
->>>> +}
->>>> +
->>>>    static void mmc_select_driver_type(struct mmc_card *card)
->>>>    {
->>>>        int card_drv_type, drive_strength, drv_type;
->>>> @@ -1297,7 +1370,7 @@ err:
->>>>    }
->>>>
->>>>    /*
->>>> - * Activate High Speed or HS200 mode if supported.
->>>> + * Activate High Speed, HS200 or HS400ES mode if supported.
->>>>     */
->>>>    static int mmc_select_timing(struct mmc_card *card)
->>>>    {
->>>> @@ -1306,7 +1379,9 @@ static int mmc_select_timing(struct mmc_card=
- *card)
->>>>        if (!mmc_can_ext_csd(card))
->>>>            goto bus_speed;
->>>>
->>>> -    if (card->mmc_avail_type & EXT_CSD_CARD_TYPE_HS200)
->>>> +    if (card->mmc_avail_type & EXT_CSD_CARD_TYPE_HS400ES)
->>>> +        err =3D mmc_select_hs400es(card);
->>>> +    else if (card->mmc_avail_type & EXT_CSD_CARD_TYPE_HS200)
->>>>            err =3D mmc_select_hs200(card);
->>>>        else if (card->mmc_avail_type & EXT_CSD_CARD_TYPE_HS)
->>>>            err =3D mmc_select_hs(card);
->>>> diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
->>>> index eb0151b..22defc2 100644
->>>> --- a/include/linux/mmc/card.h
->>>> +++ b/include/linux/mmc/card.h
->>>> @@ -95,6 +95,7 @@ struct mmc_ext_csd {
->>>>        u8            raw_partition_support;    /* 160 */
->>>>        u8            raw_rpmb_size_mult;    /* 168 */
->>>>        u8            raw_erased_mem_count;    /* 181 */
->>>> +    u8            strobe_support;        /* 184 */
->>>>        u8            raw_ext_csd_structure;    /* 194 */
->>>>        u8            raw_card_type;        /* 196 */
->>>>        u8            raw_driver_strength;    /* 197 */
->>>> diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
->>>> index 2a06fb0..f98bd0e 100644
->>>> --- a/include/linux/mmc/host.h
->>>> +++ b/include/linux/mmc/host.h
->>>> @@ -19,6 +19,7 @@
->>>>
->>>>    #include <linux/mmc/core.h>
->>>>    #include <linux/mmc/card.h>
->>>> +#include <linux/mmc/mmc.h>
->>>>    #include <linux/mmc/pm.h>
->>>>
->>>>    struct mmc_ios {
->>>> @@ -77,6 +78,8 @@ struct mmc_ios {
->>>>    #define MMC_SET_DRIVER_TYPE_A    1
->>>>    #define MMC_SET_DRIVER_TYPE_C    2
->>>>    #define MMC_SET_DRIVER_TYPE_D    3
->>>> +
->>>> +    bool enhanced_strobe;            /* hs400es selection */
->>>>    };
->>>>
->>>>    struct mmc_host_ops {
->>>> @@ -143,6 +146,9 @@ struct mmc_host_ops {
->>>>
->>>>        /* Prepare HS400 target operating frequency depending host =
-driver */
->>>>        int    (*prepare_hs400_tuning)(struct mmc_host *host, struc=
-t mmc_ios *ios);
->>>> +    /* Prepare enhanced strobe depending host driver */
->>>> +    void    (*hs400_enhanced_strobe)(struct mmc_host *host,
->>>> +                     struct mmc_ios *ios);
->>>>        int    (*select_drive_strength)(struct mmc_card *card,
->>>>                         unsigned int max_dtr, int host_drv,
->>>>                         int card_drv, int *drv_type);
->>>> @@ -513,6 +519,11 @@ static inline bool mmc_card_hs400(struct mmc_=
-card *card)
->>>>        return card->host->ios.timing =3D=3D MMC_TIMING_MMC_HS400;
->>>>    }
->>>>
->>>> +static inline bool mmc_card_hs400es(struct mmc_card *card)
->>>> +{
->>>> +    return card->host->ios.enhanced_strobe =3D=3D true;
->>>> +}
->>>> +
->>>>    void mmc_retune_timer_stop(struct mmc_host *host);
->>>>
->>>>    static inline void mmc_retune_needed(struct mmc_host *host)
->>>> diff --git a/include/linux/mmc/mmc.h b/include/linux/mmc/mmc.h
->>>> index 15f2c4a..c376209 100644
->>>> --- a/include/linux/mmc/mmc.h
->>>> +++ b/include/linux/mmc/mmc.h
->>>> @@ -297,6 +297,7 @@ struct _mmc_csd {
->>>>    #define EXT_CSD_PART_CONFIG        179    /* R/W */
->>>>    #define EXT_CSD_ERASED_MEM_CONT        181    /* RO */
->>>>    #define EXT_CSD_BUS_WIDTH        183    /* R/W */
->>>> +#define EXT_CSD_STROBE_SUPPORT        184    /* RO */
->>>>    #define EXT_CSD_HS_TIMING        185    /* R/W */
->>>>    #define EXT_CSD_POWER_CLASS        187    /* R/W */
->>>>    #define EXT_CSD_REV            192    /* RO */
->>>> @@ -380,12 +381,14 @@ struct _mmc_csd {
->>>>    #define EXT_CSD_CARD_TYPE_HS400_1_2V    (1<<7)    /* Card can r=
-un at 200MHz DDR, 1.2V */
->>>>    #define EXT_CSD_CARD_TYPE_HS400        (EXT_CSD_CARD_TYPE_HS400=
-_1_8V | \
->>>>                         EXT_CSD_CARD_TYPE_HS400_1_2V)
->>>> +#define EXT_CSD_CARD_TYPE_HS400ES    (1<<8)    /* Card can run at=
- HS400ES */
->>>>
->>>>    #define EXT_CSD_BUS_WIDTH_1    0    /* Card is in 1 bit mode */
->>>>    #define EXT_CSD_BUS_WIDTH_4    1    /* Card is in 4 bit mode */
->>>>    #define EXT_CSD_BUS_WIDTH_8    2    /* Card is in 8 bit mode */
->>>>    #define EXT_CSD_DDR_BUS_WIDTH_4    5    /* Card is in 4 bit DDR=
- mode */
->>>>    #define EXT_CSD_DDR_BUS_WIDTH_8    6    /* Card is in 8 bit DDR=
- mode */
->>>> +#define EXT_CSD_BUS_WIDTH_STROBE BIT(7)    /* Enhanced strobe mod=
-e */
->>>>
->>>>    #define EXT_CSD_TIMING_BC    0    /* Backwards compatility */
->>>>    #define EXT_CSD_TIMING_HS    1    /* High speed */
->>>>
->>>
->>>
->>>
->>>
->>
->> --
->> To unsubscribe from this list: send the line "unsubscribe linux-mmc"=
- in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>
->>
->
->
->
->
 
+Thanks :)
+
+
+Best regards,
+Yangbo Lu
+
+> -----Original Message-----
+> From: Scott Wood [mailto:oss-fOR+EgIDQEHk1uMJSBkQmQ@public.gmane.org]
+> Sent: Wednesday, May 11, 2016 11:26 AM
+> To: Arnd Bergmann; linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+> Cc: Yangbo Lu; linuxppc-dev-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org; Mark Rutland;
+> devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org; ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org; Russell King; Bhupesh
+> Sharma; netdev-u79uwXL29TY76Z2rM5mHXA@public.gmane.org; Joerg Roedel; Kumar Gala; linux-
+> mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org; linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org; Yang-Leo Li;
+> iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org; Rob Herring; linux-i2c-u79uwXL29TY76Z2rM5mHXA@public.gmane.org;
+> Claudiu Manoil; Santosh Shilimkar; Xiaobo Xie; linux-clk-u79uwXL29TY76Z2rM5mHXA@public.gmane.org;
+> Qiang Zhao
+> Subject: Re: [v10, 7/7] mmc: sdhci-of-esdhc: fix host version for T4240-
+> R1.0-R2.0
+> 
+> On Thu, 2016-05-05 at 13:10 +0200, Arnd Bergmann wrote:
+> > On Thursday 05 May 2016 09:41:32 Yangbo Lu wrote:
+> > > > -----Original Message-----
+> > > > From: Arnd Bergmann [mailto:arnd-r2nGTMty4D4@public.gmane.org]
+> > > > Sent: Thursday, May 05, 2016 4:32 PM
+> > > > To: linuxppc-dev-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org
+> > > > Cc: Yangbo Lu; linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org;
+> > > > devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org; linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org;
+> > > > linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org; linux-clk-u79uwXL29TY76Z2rM5mHXA@public.gmane.org;
+> > > > linux-i2c-u79uwXL29TY76Z2rM5mHXA@public.gmane.org; iommu-cunTk1MwBs/ROKNJybVBZg@public.gmane.org foundation.org;
+> > > > netdev-u79uwXL29TY76Z2rM5mHXA@public.gmane.org; Mark Rutland; ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org;
+> > > > Russell King; Bhupesh Sharma; Joerg Roedel; Santosh Shilimkar;
+> > > > Yang-Leo Li; Scott Wood; Rob Herring; Claudiu Manoil; Kumar Gala;
+> > > > Xiaobo Xie; Qiang Zhao
+> > > > Subject: Re: [v10, 7/7] mmc: sdhci-of-esdhc: fix host version for
+> > > > T4240-
+> > > > R1.0-R2.0
+> > > >
+> > > > On Thursday 05 May 2016 11:12:30 Yangbo Lu wrote:
+> > > > > IIRC, it is the same IP block as i.MX and Arnd's point is this
+> > > > > won't even compile on !PPC. It is things like this that prevent
+> > > > > sharing the driver.
+> > >
+> > > The whole point of using the MMIO SVR instead of the PPC SPR is so
+> > > that it will work on ARM...  The guts driver should build on any
+> > > platform as long as OF is enabled, and if it doesn't find a node to
+> > > bind to it will return 0 for SVR, and the eSDHC driver will continue
+> > > (after printing an error that should be removed) without the ability
+> > > to test for errata based on SVR.
+> >
+> > It feels like a bad design to have to come up with a different method
+> > for each SoC type here when they all do the same thing and want to
+> > identify some variant of the chip to do device specific quirks.
+> >
+> > As far as I'm concerned, every driver in drivers/soc that needs to
+> > export a symbol to be used by a device driver is an indication that we
+> > don't have the right set of abstractions yet. There are cases that are
+> > not worth abstracting because the functionality is rather obscure and
+> > only a couple of drivers for one particular chip ever need it.
+> >
+> > Finding out the version of the SoC does not look like this case.
+> 
+> I'm open to new ways of abstracting this, but can that please be
+> discussed after these patches are merged?  This patchset is fixing a
+> problem, the existing abstraction is unappealing and not widely adopted,
+> a new abstraction is not ready, and we're only touching code for our
+> hardware.
+> 
+> Oh, and the existing abstraction isn't even "existing".  I don't see any
+> examples where soc_device is being used like this -- or even any way for
+> a driver (the one consuming the information, not the soc "driver") to get
+> a reference to the soc_device that's been registered short of searching
+> for the device object by name -- and you're asking for new functionality
+> in drivers/base/soc.c.
+> 
+> > > > I think the first four patches take care of building for ARM, but
+> > > > the problem remains if you want to enable COMPILE_TEST as we need
+> > > > for certain automated checking.
+> > >
+> > > What specific problem is there with COMPILE_TEST?
+> >
+> > COMPILE_TEST is solvable here and the way it is implemented in this
+> > case (selecting FSL_GUTS from the driver) indeed looks like it works
+> > correctly, but it's still awkward that this means building the SoC
+> > specific ID stuff into the vmlinux binary for any driver that uses
+> > something like that for a particular SoC.
+> 
+> Please keep in mind that this is a Freescale-specific driver... it's not
+> as if we're attaching this dependency to common SDHCI code.
+> 
+> >
+> > > > > Dealing with Si revs is a common problem. We should have a
+> > > > > common solution. There is soc_device for this purpose.
+> > > >
+> > > > Exactly. The last time this came up, I think we agreed to
+> > > > implement a helper using glob_match() on the soc_device strings.
+> > > > Unfortunately this hasn't happened then, but I'd still prefer that
+> > > > over yet another vendor-specific way of dealing with the generic
+> issue.
+> > >
+> > > soc_device would require encoding the SVR as a string and then
+> > > decoding the string, which is more complicated and error prone than
+> > > having platform-specific code test a platform-specific number.
+> >
+> > You already need to encode it as a string to register the soc_device,
+> 
+> No we don't, because we don't already register a soc_device on arm64 or
+> ppc (and it looks like whatever does get registered on at least some
+> relevant
+> arm32 chips is not particularly useful).
+> 
+> > and the driver just needs to pass a glob string, so the only part that
+> > is missing is the generic function that takes the string from the
+> > driver and passes that to glob_match for the soc_device.
+> 
+> "just"
+> 
+> And what would the glob look like?
+> 
+> I'd rather not write kernel code as if it were a shell/Perl script.
+> 
+> > > And when would it get registered on arm64, which doesn't have
+> > > platform code?
+> >
+> > Whenever the soc driver is loaded, as is the case now. The match
+> > function can return -EPROBE_DEFER if no SoC device is registered yet.
+> 
+> That's too late for some places where we need access to SVR, e.g. clock
+> drivers (which use CLK_OF_DECLARE and are initialized very early, not as
+> part of the driver model and thus can't defer).  Currently we have an
+> #ifdef CONFIG_PPC for this in drivers/clk/clk-qoriq.c... Maybe we should
+> have done that here as well, and saved some grief. :-)  At least until an
+> erratum pops up on an ARM-based chip.
+> 
+> And what happens if we're running on arm32, and thus the arch code
+> already registered an soc_device with a different (and less useful)
+> encoding?
+> 
+> -Scott
