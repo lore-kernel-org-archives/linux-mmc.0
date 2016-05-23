@@ -1,67 +1,116 @@
-From: Kishon Vijay Abraham I <kishon@ti.com>
-Subject: Re: [RFC PATCH 2/3] mmc: host: omap_hsmmc: Enable ADMA2
-Date: Mon, 23 May 2016 11:52:01 +0530
-Message-ID: <5742A189.4060803@ti.com>
-References: <1463561115-31798-1-git-send-email-kishon@ti.com>
- <1463561115-31798-3-git-send-email-kishon@ti.com>
- <b66f678a-be74-d5f7-f2ef-93b5c9f29b92@ti.com>
- <20160518193028.GT5995@atomide.com>
- <0d463add-9fa5-a768-2ba6-34c4126c7817@ti.com>
- <20160519145745.GU5995@atomide.com> <87shxdlws6.fsf@linux.intel.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="windows-1252"
-Content-Transfer-Encoding: 7bit
+From: Baolin Wang <baolin.wang@linaro.org>
+Subject: [RESEND RFC v2] mmc: Change the max discard sectors and erase response if mmc host supports busy signalling
+Date: Mon, 23 May 2016 14:49:28 +0800
+Message-ID: <bd39dffc72c8e92ccc65fffbc965176798652693.1463985735.git.baolin.wang@spreadtrum.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <87shxdlws6.fsf@linux.intel.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Felipe Balbi <balbi@kernel.org>, Tony Lindgren <tony@atomide.com>, Peter Ujfalusi <peter.ujfalusi@ti.com>
-Cc: linux-kernel@vger.kernel.org, linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, afenkart@gmail.com, ulf.hansson@linaro.org, linux@armlinux.org.uk, rogerq@ti.com, bcousson@baylibre.com, galak@codeaurora.org, ijc+devicetree@hellion.org.uk, mark.rutland@arm.com, pawel.moll@arm.com, robh+dt@kernel.org, nsekhar@ti.com
+To: ulf.hansson@linaro.org
+Cc: adrian.hunter@intel.com, rmk+kernel@arm.linux.org.uk, shawn.lin@rock-chips.com, dianders@chromium.org, heiko@sntech.de, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, broonie@kernel.org, linus.walleij@linaro.org, baolin.wang@linaro.org
 List-Id: linux-mmc@vger.kernel.org
 
-Hi Felipe,
+When mmc host HW supports busy signalling (using R1B as response), We
+shouldn't use 'host->max_busy_timeout' as the limitation when deciding
+the max discard sectors that we tell the generic BLOCK layer about.
+Instead, we should pick one preferred erase size as the max discard
+sectors.
 
-On Friday 20 May 2016 12:06 AM, Felipe Balbi wrote:
-> 
-> Hi,
-> 
-> Tony Lindgren <tony@atomide.com> writes:
->> * Peter Ujfalusi <peter.ujfalusi@ti.com> [160519 01:10]:
->>> On 05/18/2016 10:30 PM, Tony Lindgren wrote:
->>>> Ideally the adma support would be a separate loadable module,
->>>> similar how the cppi41dma is a child of the OTG controller.
->>>
->>> The Master DMA is part of the hsmmc IP block. If the same ADMA module is
->>> present on other IPs it might be beneficial to have a helper library to handle
->>> it (allocating the descriptor pool, wrinting, updating descriptors, etc).
->>
->> OK. Yeah if it's part of the MMC controller it makes no sense to
->> separate it. So then the conecrns are using alternate DMA
->> implementations and keeping PM runtime working :)
->>
->> BTW, Felipe mentioned that the best thing to do in the long run would
->> be to set up sdhci-omap.c operating in ADMA mode.
->>
->> Felipe, care to summarize what you had in mind?
-> 
-> yeah, just write a new sdhci-omap.c to start moving away from
-> omap-hsmmc.c, just like it was done for 8250-omap.
-> 
-> At the beginning, it could be just the bare minimum to get it working
-> and slowly move over stuff like pm runtime, dmaengine, PIO. Move more
-> platforms over to that driver and, eventually, get rid of omap-hsmmc.c
-> altogether.
-> 
-> That way, development can be focussed on generic layers (SDHCI) to which
-> OMAP MMC controller is compliant (apart from the VERSION register
-> quirk).
+If the host controller supports busy signalling and the timeout for
+the erase operation does not exceed the max_busy_timeout, we should
+use R1B response. Or we need to prevent the host from doing hw busy
+detection, which is done by converting to a R1 response instead.
 
-About an year back, when I tried using SDHCI for OMAP I ran into issues and was
-not able to get it working. IIRC SDHCI_PRESENT_STATE (or OMAP_HSMMC_PSTATE) was
-not showing the correct state for card present and is unable to raise an
-interrupt when a card is inserted. I didn't debug this further.
+Changes since v1:
+  - Remove the 'MMC_CAP_WAIT_WHILE_BUSY' flag checking when deciding
+    the max discard sectors.
 
-It also kept me wondering why gpio interrupt was always used for card detect
-instead of using mmci_sdcd line of the controller.
+Signed-off-by: Baolin Wang <baolin.wang@linaro.org>
+---
+ drivers/mmc/core/core.c |   47 +++++++++++++++++++++++++++++++++++++++--------
+ 1 file changed, 39 insertions(+), 8 deletions(-)
 
-Thanks
-Kishon
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index 99275e4..0df40fa 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -2060,7 +2060,7 @@ static int mmc_do_erase(struct mmc_card *card, unsigned int from,
+ 			unsigned int to, unsigned int arg)
+ {
+ 	struct mmc_command cmd = {0};
+-	unsigned int qty = 0;
++	unsigned int qty = 0, busy_timeout = 0;
+ 	unsigned long timeout;
+ 	int err;
+ 
+@@ -2128,8 +2128,23 @@ static int mmc_do_erase(struct mmc_card *card, unsigned int from,
+ 	memset(&cmd, 0, sizeof(struct mmc_command));
+ 	cmd.opcode = MMC_ERASE;
+ 	cmd.arg = arg;
+-	cmd.flags = MMC_RSP_SPI_R1B | MMC_RSP_R1B | MMC_CMD_AC;
+-	cmd.busy_timeout = mmc_erase_timeout(card, arg, qty);
++	busy_timeout = mmc_erase_timeout(card, arg, qty);
++	/*
++	 * If the host controller supports busy signalling and the timeout for
++	 * the erase operation does not exceed the max_busy_timeout, we should
++	 * use R1B response. Or we need to prevent the host from doing hw busy
++	 * detection, which is done by converting to a R1 response instead.
++	 */
++	if ((card->host->max_busy_timeout &&
++	    busy_timeout > card->host->max_busy_timeout) ||
++	    !(card->host->caps & MMC_CAP_WAIT_WHILE_BUSY)) {
++		cmd.flags = MMC_RSP_SPI_R1 | MMC_RSP_R1 | MMC_CMD_AC;
++		cmd.busy_timeout = 0;
++	} else {
++		cmd.flags = MMC_RSP_SPI_R1B | MMC_RSP_R1B | MMC_CMD_AC;
++		cmd.busy_timeout = busy_timeout;
++	}
++
+ 	err = mmc_wait_for_cmd(card->host, &cmd, 0);
+ 	if (err) {
+ 		pr_err("mmc_erase: erase error %d, status %#x\n",
+@@ -2321,23 +2336,39 @@ static unsigned int mmc_do_calc_max_discard(struct mmc_card *card,
+ 					    unsigned int arg)
+ {
+ 	struct mmc_host *host = card->host;
+-	unsigned int max_discard, x, y, qty = 0, max_qty, timeout;
++	unsigned int max_discard, x, y, qty = 0, max_qty, min_qty, timeout;
+ 	unsigned int last_timeout = 0;
+ 
+-	if (card->erase_shift)
++	if (card->erase_shift) {
+ 		max_qty = UINT_MAX >> card->erase_shift;
+-	else if (mmc_card_sd(card))
++		min_qty = card->pref_erase >> card->erase_shift;
++	} else if (mmc_card_sd(card)) {
+ 		max_qty = UINT_MAX;
+-	else
++		min_qty = card->pref_erase;
++	} else {
+ 		max_qty = UINT_MAX / card->erase_size;
++		min_qty = card->pref_erase / card->erase_size;
++	}
+ 
+ 	/* Find the largest qty with an OK timeout */
+ 	do {
+ 		y = 0;
+ 		for (x = 1; x && x <= max_qty && max_qty - x >= qty; x <<= 1) {
+ 			timeout = mmc_erase_timeout(card, arg, qty + x);
+-			if (timeout > host->max_busy_timeout)
++			/*
++			 * We should not only use 'host->max_busy_timeout' as
++			 * the limitation when deciding the max discard sectors.
++			 * We should set a balance value to improve the erase
++			 * speed, and it can not get too long timeout at the
++			 * same time.
++			 *
++			 * Here we set 'card->pref_erase' as the minimal discard
++			 * sectors when deciding the max discard sectors.
++			 */
++			if (qty + x > min_qty &&
++			    timeout > host->max_busy_timeout)
+ 				break;
++
+ 			if (timeout < last_timeout)
+ 				break;
+ 			last_timeout = timeout;
+-- 
+1.7.9.5
