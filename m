@@ -1,85 +1,34 @@
-From: Haibo Chen <haibo.chen@nxp.com>
-Subject: RE: [PATCH] mmc: sdhci-esdhc-imx: implement reset quirks for i.MX6
- DualLite/Solo
-Date: Mon, 23 May 2016 09:57:00 +0000
-Message-ID: <HE1PR0401MB1801712347A13DD827ED1880904E0@HE1PR0401MB1801.eurprd04.prod.outlook.com>
-References: <1463053968-11598-1-git-send-email-s.christ@phytec.de>
+From: Doug Anderson <dianders@chromium.org>
+Subject: Re: [PATCH v5 1/5] Documentation: mmc: add mmc-hs400-enhanced-strobe
+Date: Mon, 23 May 2016 13:53:20 -0700
+Message-ID: <CAD=FV=XzP_r1BAz_EXieXSuVY3h5uSYkQhrEo+Ro9sX5aYrw4w@mail.gmail.com>
+References: <1463976789-29618-1-git-send-email-shawn.lin@rock-chips.com> <1463976812-29698-1-git-send-email-shawn.lin@rock-chips.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-am1on0075.outbound.protection.outlook.com ([157.56.112.75]:33617
-	"EHLO emea01-am1-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1752692AbcEWN3U (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 23 May 2016 09:29:20 -0400
-In-Reply-To: <1463053968-11598-1-git-send-email-s.christ@phytec.de>
-Content-Language: en-US
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1463976812-29698-1-git-send-email-shawn.lin@rock-chips.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Shawn Lin <shawn.lin@rock-chips.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, Jaehoon Chung <jh80.chung@samsung.com>, Michal Simek <michal.simek@xilinx.com>, soren.brinkmann@xilinx.com, Rob Herring <robh+dt@kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Brian Norris <briannorris@chromium.org>, Heiko Stuebner <heiko@sntech.de>, "open list:ARM/Rockchip SoC..." <linux-rockchip@lists.infradead.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Stefan Christ <s.christ@phytec.de>, "adrian.hunter@intel.com" <adrian.hunter@intel.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
-Cc: "aisheng.dong@freescale.com" <aisheng.dong@freescale.com>, "festevam@gmail.com" <festevam@gmail.com>, Aisheng Dong <aisheng.dong@nxp.com>
 
-DQoNCg0KPiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBsaW51eC1tbWMtb3du
-ZXJAdmdlci5rZXJuZWwub3JnIFttYWlsdG86bGludXgtbW1jLQ0KPiBvd25lckB2Z2VyLmtlcm5l
-bC5vcmddIE9uIEJlaGFsZiBPZiBTdGVmYW4gQ2hyaXN0DQo+IFNlbnQ6IFRodXJzZGF5LCBNYXkg
-MTIsIDIwMTYgNzo1MyBQTQ0KPiBUbzogYWRyaWFuLmh1bnRlckBpbnRlbC5jb207IGxpbnV4LW1t
-Y0B2Z2VyLmtlcm5lbC5vcmcNCj4gQ2M6IGFpc2hlbmcuZG9uZ0BmcmVlc2NhbGUuY29tOyBmZXN0
-ZXZhbUBnbWFpbC5jb20NCj4gU3ViamVjdDogW1BBVENIXSBtbWM6IHNkaGNpLWVzZGhjLWlteDog
-aW1wbGVtZW50IHJlc2V0IHF1aXJrcyBmb3IgaS5NWDYNCj4gRHVhbExpdGUvU29sbw0KPiANCj4g
-VGhlIFJPTSBDb2RlIG9mIGkuTVg2IFF1YWQvRHVhbCB1c2VzIHRoZSBNTUMgaW50ZXJmYWNlcyBk
-aWZmZXJlbnRseSB0aGFuDQo+IHRoZSBpLk1YNiBTb2xvL0R1YWxMaXRlIHdoZW4gaXQgbG9hZHMg
-dGhlIGJvb3Rsb2FkZXIgZnJvbSB0aGUgaW50ZXJmYWNlOg0KPiANCj4gICAgICAgICAgICAgICAg
-IFJlZ2lzdGVyIERMTF9DVFJMKDB4NjApICBCaXQgMjUgRkJDTEtfU0VMICgweDQ4KQ0KPiAgICAg
-UXVhZDogICAgICAgMHgwICAgICAgICAgICAgICAgICAgICAgIDANCj4gICAgIER1YWxMaXRlOiAg
-IDB4MDEwMDAwMjEgICAgICAgICAgICAgICAxDQo+IA0KPiBTaW5jZSB0aGUgbGludXgga2VybmVs
-IG9yIGJvb3Rsb2FkZXIgZHJpdmVyIGRvZXNuJ3QgcmVzZXQgYWxsIHJlZ2lzdGVycywgdGhlIE1N
-Qw0KPiBpbnRlcmZhY2UgaXMgaW4gYW4gaW5jb25zaXN0ZW50IHN0YXRlLCB3aGljaCBsZWFkcyB0
-byBib290IGZhaWx1cmVzIGZvciBzb21lDQo+IGVNTUMgZGV2aWNlcyBvbiB0aGUgaS5NWDYgRHVh
-bExpdGUgU29DLiBUaGUgZXJyb3JzIGxvb2sgbGlrZToNCj4gDQo+ICAgICBtbWNibGsxOiBlcnJv
-ciAtODQgdHJhbnNmZXJyaW5nIGRhdGEsIHNlY3RvciAwLCBuciA4LCBjbWQgcmVzcG9uc2UgMHg5
-MDAsIGNhcmQNCj4gc3RhdHVzIDB4YjAwDQo+ICAgICBtbWNibGsxOiByZXRyeWluZyB1c2luZyBz
-aW5nbGUgYmxvY2sgcmVhZA0KPiAgICAgbW1jYmxrMTogZXJyb3IgLTg0IHRyYW5zZmVycmluZyBk
-YXRhLCBzZWN0b3IgMiwgbnIgNiwgY21kIHJlc3BvbnNlIDB4OTAwLCBjYXJkDQo+IHN0YXR1cyAw
-eDANCj4gICAgIGJsa191cGRhdGVfcmVxdWVzdDogSS9PIGVycm9yLCBkZXYgbW1jYmxrMSwgc2Vj
-dG9yIDINCj4gICAgIG1tY2JsazE6IGVycm9yIC04NCB0cmFuc2ZlcnJpbmcgZGF0YSwgc2VjdG9y
-IDMsIG5yIDUsIGNtZCByZXNwb25zZSAweDkwMCwgY2FyZA0KPiBzdGF0dXMgMHgwDQo+ICAgICBi
-bGtfdXBkYXRlX3JlcXVlc3Q6IEkvTyBlcnJvciwgZGV2IG1tY2JsazEsIHNlY3RvciAzDQo+IA0K
-PiBUaGUgcmVnaXN0ZXIgRExMX0NUUkwgaXMgYWxyZWFkeSByZXNldC4gUmVzZXQgYWxzbyB0aGUg
-Yml0IEZCQ0xLX1NFTC4NCj4gDQo+IFNpZ25lZC1vZmYtYnk6IFN0ZWZhbiBDaHJpc3QgPHMuY2hy
-aXN0QHBoeXRlYy5kZT4NCj4gLS0tDQo+IEhpLA0KPiANCj4gdGhpcyBwYXRjaCBpcyBhIGZvbGxv
-dyB1cCB0bw0KPiANCj4gICAgIGh0dHA6Ly93d3cuc3Bpbmljcy5uZXQvbGlzdHMvbGludXgtbW1j
-L21zZzM2MzMxLmh0bWwNCg0KSGkgU3RlZmFuLCANCkFpc2hlbmcgYWxzbyB0YWtlIHRoaXMgaW50
-byBjb25zaWRlcmF0aW9uLCBwbGVhc2UgcmVmZXIgdG8NCg0KICAgIGh0dHA6Ly93d3cuc3Bpbmlj
-cy5uZXQvbGlzdHMvbGludXgtbW1jL21zZzM2OTQwLmh0bWwNCg0KU2VlbXMgdGhpcyBwYXRjaCBz
-dGlsbCBub3QgYmUgaW4gVWxmJ3MgYnJhbmNoLiANCg0KUmVnYXJkcywNCkhhaWJvDQo+IA0KPiAg
-ICAgbW1jOiBzZGhjaS1lc2RoY2ktaW14OiBkaXNhYmxlIERMTCBkZWxheSBsaW5lIHNldHRpbmdz
-IGV4cGxpY2l0bHkNCj4gDQo+ICAgICBEaXNhYmxlIERMTCBkZWxheSBsaW5lIHNldHRpbmdzIGV4
-cGxpY2l0bHkgZHVyaW5nIGRyaXZlciBpbml0aWFsaXphdGlvbg0KPiAgICAgaW4gY2FzZSBST00v
-dUJvb3QgaGFkIHNldCBhbiBpbnZhbGlkIGRlbGF5Lg0KPiAgICAgZS5nLiBNWDZETCBST00gaGFz
-IHNldCB0aGUgZGVmYXVsdCBkZWxheSBsaW5lKERMTENUUkwpIHRvIDB4MTAwMDAyMSwNCj4gICAg
-IHRoZSB1U0RIQyBjbG9jayB0aW1pbmcgd2lsbCBiZWNvbWUgbWFyZ2luYWwgd2hlbiB3b3JrcyBv
-biBERFIgbW9kZQ0KPiAgICAgZHVlIHRvIGRlZmF1bHQgZGVsYXkgYW5kIHdpbGwgcG9zc2libHkg
-c2VlIENSQyBlcnJvcnMgaW4gY2FzZSB0aGUgYm9hcmQNCj4gICAgIGlzIG5vdCBwZXJmZWN0bHkg
-ZGVzaWduZWQgb24gdGhlIGVNTUMgY2hpcCBsYXlvdXQuDQo+IA0KPiAgICAgU2lnbmVkLW9mZi1i
-eTogRG9uZyBBaXNoZW5nIDxhaXNoZW5nLmRvbmdAeHh4eHh4eD4NCj4gDQo+IEl0IGRvZXNuJ3Qg
-YXBwbHkgY2xlYW5seSBvbiBMaW51cyBtYXN0ZXIgYnJhbmNoLCBzaW5jZSB0aGUgYWJvdmUgcGF0
-Y2ggaXMgbWlzc2luZy4NCj4gDQo+IE1pdCBmcmV1bmRsaWNoZW4gR3LDvMOfZW4gLyBLaW5kIHJl
-Z2FyZHMsDQo+ICAgICAgICAgU3RlZmFuIENocmlzdA0KPiAtLS0NCj4gIGRyaXZlcnMvbW1jL2hv
-c3Qvc2RoY2ktZXNkaGMtaW14LmMgfCA0ICsrKysNCj4gIDEgZmlsZSBjaGFuZ2VkLCA0IGluc2Vy
-dGlvbnMoKykNCj4gDQo+IGRpZmYgLS1naXQgYS9kcml2ZXJzL21tYy9ob3N0L3NkaGNpLWVzZGhj
-LWlteC5jIGIvZHJpdmVycy9tbWMvaG9zdC9zZGhjaS0NCj4gZXNkaGMtaW14LmMNCj4gaW5kZXgg
-NDQ5MDgwOC4uOTEwMTU1NiAxMDA2NDQNCj4gLS0tIGEvZHJpdmVycy9tbWMvaG9zdC9zZGhjaS1l
-c2RoYy1pbXguYw0KPiArKysgYi9kcml2ZXJzL21tYy9ob3N0L3NkaGNpLWVzZGhjLWlteC5jDQo+
-IEBAIC0xMTkxLDYgKzExOTEsMTAgQEAgc3RhdGljIGludCBzZGhjaV9lc2RoY19pbXhfcHJvYmUo
-c3RydWN0DQo+IHBsYXRmb3JtX2RldmljZSAqcGRldikNCj4gDQo+ICAJCS8qIGRpc2FibGUgRExM
-X0NUUkwgZGVsYXkgbGluZSBzZXR0aW5ncyAqLw0KPiAgCQl3cml0ZWwoMHgwLCBob3N0LT5pb2Fk
-ZHIgKyBFU0RIQ19ETExfQ1RSTCk7DQo+ICsNCj4gKwkJLyogcmVzZXQgYml0IEZCQ0xLX1NFTCBm
-b3IgaS5NWDYgU29sby9EdWFsTGl0ZSBST00gY29kZSAqLw0KPiArCQl3cml0ZWwocmVhZGwoaG9z
-dC0+aW9hZGRyICsgRVNESENfTUlYX0NUUkwpICYgfkJJVCgyNSksDQo+ICsJCQlob3N0LT5pb2Fk
-ZHIgKyBFU0RIQ19NSVhfQ1RSTCk7DQo+ICAJfQ0KPiANCj4gIAlpZiAoaW14X2RhdGEtPnNvY2Rh
-dGEtPmZsYWdzICYgRVNESENfRkxBR19NQU5fVFVOSU5HKQ0KPiAtLQ0KPiAxLjkuMQ0KPiANCj4g
-LS0NCj4gVG8gdW5zdWJzY3JpYmUgZnJvbSB0aGlzIGxpc3Q6IHNlbmQgdGhlIGxpbmUgInVuc3Vi
-c2NyaWJlIGxpbnV4LW1tYyIgaW4gdGhlDQo+IGJvZHkgb2YgYSBtZXNzYWdlIHRvIG1ham9yZG9t
-b0B2Z2VyLmtlcm5lbC5vcmcgTW9yZSBtYWpvcmRvbW8gaW5mbyBhdA0KPiBodHRwOi8vdmdlci5r
-ZXJuZWwub3JnL21ham9yZG9tby1pbmZvLmh0bWwNCg==
+Shawn,
+
+On Sun, May 22, 2016 at 9:13 PM, Shawn Lin <shawn.lin@rock-chips.com> wrote:
+> mmc-hs400-enhanced-strobe is used to claim that the
+> host can support hs400 mode with enhanced strobe
+> introduced by emmc 5.1 spec.
+>
+> Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
+> Acked-by: Rob Herring <robh@kernel.org>
+> ---
+>
+> Changes in v5: None
+> Changes in v4: None
+> Changes in v3: None
+> Changes in v2: None
+>
+>  Documentation/devicetree/bindings/mmc/mmc.txt | 1 +
+>  1 file changed, 1 insertion(+)
+
+Reviewed-by: Douglas Anderson <dianders@chromium.org>
