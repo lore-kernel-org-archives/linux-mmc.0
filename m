@@ -1,112 +1,70 @@
 From: Simon Horman <horms@verge.net.au>
-Subject: Re: [PATCH/RFC v2 1/3] mmc: tmio: Add tuning support
-Date: Mon, 23 May 2016 10:33:08 +0900
-Message-ID: <20160523013308.GF25562@verge.net.au>
+Subject: Re: [PATCH/RFC v2 2/3] mmc: sh_mobile_sdhi: Add tuning support
+Date: Mon, 23 May 2016 10:34:27 +0900
+Message-ID: <20160523013427.GG25562@verge.net.au>
 References: <1463727743-7567-1-git-send-email-horms+renesas@verge.net.au>
- <1463727743-7567-2-git-send-email-horms+renesas@verge.net.au>
- <87fut9siq8.wl%kuninori.morimoto.gx@renesas.com>
+ <1463727743-7567-3-git-send-email-horms+renesas@verge.net.au>
+ <87eg8tsijz.wl%kuninori.morimoto.gx@renesas.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-renesas-soc-owner@vger.kernel.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from kirsty.vergenet.net ([202.4.237.240]:39638 "EHLO
+	kirsty.vergenet.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752694AbcEWBe3 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 22 May 2016 21:34:29 -0400
 Content-Disposition: inline
-In-Reply-To: <87fut9siq8.wl%kuninori.morimoto.gx@renesas.com>
-Sender: linux-renesas-soc-owner@vger.kernel.org
+In-Reply-To: <87eg8tsijz.wl%kuninori.morimoto.gx@renesas.com>
+Sender: linux-mmc-owner@vger.kernel.org
+List-Id: linux-mmc@vger.kernel.org
 To: Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>
 Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, Ulf Hansson <ulf.hansson@linaro.org>, Magnus Damm <magnus.damm@gmail.com>, linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org, Ai Kyuse <ai.kyuse.uw@renesas.com>
-List-Id: linux-mmc@vger.kernel.org
 
-On Mon, May 23, 2016 at 12:53:59AM +0000, Kuninori Morimoto wrote:
+On Mon, May 23, 2016 at 12:57:41AM +0000, Kuninori Morimoto wrote:
 > 
 > Hi Simon
 > 
-> Thank you for your patch.
-> Picky comment from me :)
-
-Thanks for noticing these things and sorry for not having
-done so myself.
-
 > > From: Ai Kyuse <ai.kyuse.uw@renesas.com>
 > > 
 > > Add tuning support for use with SDR104 mode
+> > This includes adding support for the sampling clock controller (SCC).
 > > 
 > > Signed-off-by: Ai Kyuse <ai.kyuse.uw@renesas.com>
 > > Signed-off-by: Simon Horman <horms+renesas@verge.net.au>
 > > ---
 > (snip)
-> > @@ -160,6 +161,11 @@ struct tmio_mmc_host {
-> >  			      unsigned int direction, int blk_size);
-> >  	int (*start_signal_voltage_switch)(struct mmc_host *mmc,
-> >  					   struct mmc_ios *ios);
-> > +	unsigned int (*init_tuning)(struct tmio_mmc_host *host);
-> > +	int (*prepare_tuning)(struct tmio_mmc_host *host, unsigned long tap);
-> > +	int (*select_tuning)(struct tmio_mmc_host *host, bool *tap);
-> > +	bool (*retuning)(struct tmio_mmc_host *host);
-> > +	void (*hw_reset)(struct tmio_mmc_host *host);
-> >  };
-> 
-> There is no (*retuning) code ?
-
-Thanks, I think returning should simply be removed.
-
-> > +static int tmio_mmc_execute_tuning(struct mmc_host *mmc, u32 opcode)
+> > +static int sh_mobile_sdhi_select_tuning(struct tmio_mmc_host *host, bool *tap)
 > > +{
-> > +	struct tmio_mmc_host *host = mmc_priv(mmc);
-> > +	unsigned int num = 0;
-> > +	int i, ret = 0;
-> > +	bool *tap;
+> > +	unsigned long tap_num, i;
+> > +	int ok_count;
 > > +
-> > +	if (host->init_tuning)
-> > +		num = host->init_tuning(host);
-> > +	if (!num) {
-> > +		/* Tuning is not supported */
-> > +		ret = 0;
-> > +		goto out;
-> > +	}
+> > +	/* Clear SCC_RVSREQ */
+> > +	sd_scc_write32(host, SH_MOBILE_SDHI_SCC_RVSREQ, 0);
 > > +
-> > +	tap = kmalloc(num * 2, GFP_KERNEL);
-> > +	if (tap == NULL) {
-> > +		ret = -ENOMEM;
-> > +		goto out;
-> > +	}
-> 
-> 	if (!tap) {
-> 		...
-> 	}
-
-ok
-
+> > +	/* Select SCC */
+> > +	tap_num = (sd_scc_read32(host, SH_MOBILE_SDHI_SCC_DTCNTL) >>
+> > +		   SH_MOBILE_SDHI_SCC_DTCNTL_TAPNUM_SHIFT) &
+> > +		SH_MOBILE_SDHI_SCC_DTCNTL_TAPNUM_MASK;
+> > +
 > > +	/*
-> > +	 * Issue CMD19 twice for each tap
+> > +	 * Select clock where three consecutive bock reads succeeded.
+> > +	 *
+> > +	 * There may be multiple occurrences of three successive reads
+> > +	 * and selecting any of them is correct. Here the first one is
+> > +	 * selected.
 > > +	 */
-> > +	for (i = 0; i < 2 * num; i++) {
-> > +		int err;
-> > +
-> > +		if (host->prepare_tuning)
-> > +			host->prepare_tuning(host, i);
-> 
-> you want to check return value here ?
-> 	int (*prepare_tuning)(xxx);
-
-The implementation of prepare_tuning doesn't seem to ever return an error.
-Perhaps it would be best to just change the type to:
-
-	void (*prepare_tuning)(xxx);
-
-> > +		err = mmc_send_tuning(host->mmc, opcode, NULL);
-> > +		if (err && err != -EILSEQ) {
-> > +			ret = err;
-> > +			goto err_free;
-> > +		}
-> > +		tap[i] = (err == 0);
-> > +
-> > +		mdelay(1);
+> > +	ok_count = 0;
+> > +	for (i = 0; i < 2 * tap_num; i++) {
+> > +		if (tap[i])
+> > +			ok_count++;
+> > +		else
+> > +			ok_count = 0;
+> > +		if (ok_count == 3)
+> > +			break;
 > > +	}
-> > +
-> > +	if (host->select_tuning)
-> > +		ret = host->select_tuning(host, tap);
 > 
-> Here, "tap" was alloc:ed array, but there is no array_size parameter.
-> A littile bit strange for me..., but I'm not sure
+> As I pointed on [1/3] patch, having "tap_array_size" on this function,
+> and check tap_num <-> tap_array_size is nice idea IMO.
 
-Right. I think its safe. But its not very clean.
-I will add a size parameter.
+We could also provide the array parameter and
+not read tap_num using sd_scc_read32() here at all.
+Which do you feel is best?
