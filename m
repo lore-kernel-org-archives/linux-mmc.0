@@ -1,69 +1,64 @@
-From: Shawn Lin <shawn.lin@rock-chips.com>
-Subject: Re: [PATCH v5 5/5] mmc: sdhci-of-arasan: implement enhanced strobe
- callback
-Date: Tue, 24 May 2016 09:55:05 +0800
-Message-ID: <e22866dd-c2d2-e210-e240-9f649cda3e3f@rock-chips.com>
-References: <1463976789-29618-1-git-send-email-shawn.lin@rock-chips.com>
- <1463976853-29862-1-git-send-email-shawn.lin@rock-chips.com>
- <CAD=FV=X5os7fsCrOh7pDLAt7CSyRw3Q76sFgh-NJhDni02sXdA@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8;
-	format=flowed
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from lucky1.263xmail.com ([211.157.147.134]:53018 "EHLO
-	lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751790AbcEXBzR (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 23 May 2016 21:55:17 -0400
-In-Reply-To: <CAD=FV=X5os7fsCrOh7pDLAt7CSyRw3Q76sFgh-NJhDni02sXdA@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+From: Simon Horman <horms+renesas@verge.net.au>
+Subject: [PATCH v3 0/4] UHS-I SDR-104 support for sh_mobile_sdhi
+Date: Tue, 24 May 2016 11:43:13 +0900
+Message-ID: <1464057797-29951-1-git-send-email-horms+renesas@verge.net.au>
+Return-path: <linux-renesas-soc-owner@vger.kernel.org>
+Sender: linux-renesas-soc-owner@vger.kernel.org
+To: Wolfram Sang <wsa+renesas@sang-engineering.com>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Magnus Damm <magnus.damm@gmail.com>, linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org, Simon Horman <horms+renesas@verge.net.au>
 List-Id: linux-mmc@vger.kernel.org
-To: Doug Anderson <dianders@chromium.org>
-Cc: shawn.lin@rock-chips.com, Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, Jaehoon Chung <jh80.chung@samsung.com>, Michal Simek <michal.simek@xilinx.com>, soren.brinkmann@xilinx.com, Rob Herring <robh+dt@kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Brian Norris <briannorris@chromium.org>, Heiko Stuebner <heiko@sntech.de>, "open list:ARM/Rockchip SoC..." <linux-rockchip@lists.infradead.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>
-
-=E5=9C=A8 2016/5/24 5:00, Doug Anderson =E5=86=99=E9=81=93:
-> Shawn,
->
-> On Sun, May 22, 2016 at 9:14 PM, Shawn Lin <shawn.lin@rock-chips.com>=
- wrote:
->> Currently sdhci-arasan 5.1 can support enhanced strobe function,
->> and we now limit it just for "arasan,sdhci-5.1". Add
->> mmc-hs400-enhanced-strobe in DT to enable the function if we're
->> sure our controller can support it.
->>
->> Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
->> Acked-by: Adrian Hunter <adrian.hunter@intel.com>
->> Reviewed-by: Doug Anderson <dianders@chromium.org>
->> ---
->>
->> Changes in v5: None
->> Changes in v4: None
->
-> Again, minor, but you did have changes...
-
-yes, it did. I moved all the change-log into the
-cover-letter but it seems better to keep them seperately
-for each patch. I will do it for the next version if
-needed. Thanks.
-
->
->> Changes in v3: None
->> Changes in v2: None
->>
->>  drivers/mmc/host/sdhci-of-arasan.c | 20 ++++++++++++++++++++
->>  1 file changed, 20 insertions(+)
->
-> I've tested this patch and it appears to work (not that I've hooked a
-> scope up, but since it's not doing tuning I think it would be pretty
-> obvious if it didn't work).
->
-> Tested-by: Douglas Anderson <dianders@chromium.org>
->
->
->
 
 
---=20
-Best Regards
-Shawn Lin
+Hi,
 
+this series is based on work by Ai Kyuse to add UHS-I SDR-104 support for
+sh_mobile_sdhi. It builds on work by Shinobu Uehara, Rob Taylor, William
+Towle and Ian Molton, Ben Hutchings, Wolfram Sang and others to add UHS-I
+SDR-50 support to the same driver.
+
+This series enables UHS-I SDR-104 on the r8a7790/Lager where
+UHS-I SDR-50 is already enabled.
+
+It is based on a merge of:
+* The next branch of the mmc tree
+* The renesas-next-20160427v2-v4.6-rc1 tag of the renesas tree
+* The sh-pfc-for-v4.7-tag1 tag of the renesas-drivers tree
+
+The first two mmc driver patches are targeted at the next branch of the mmc
+tree. The last DT patch is targeted at the devel branch of the renesas tree.
+
+To aid review this series is provided in the _temporary_ topic/sdr104-v3 branch
+of the renesas tree.
+
+
+Changes since v1 and v2 are described in individual patches.
+
+
+Please see http://elinux.org/Tests:SD-SDHI-SDR104 for indicative tests
+results. Highlights follow:
+
+* Currently I am seeing speeds of up to 48MB/s with these patches and
+  30MB/s without using a SanDisk Extreme Pro 8Gb microSDHC UHS-1 card.
+  I have not previously reported results for this card.
+
+* I am also seeing 45MB/s with these patches and 34MB/s without using
+  a SanDisk Ultra 64Gb microSDXC UHS-1 card.  In conjunction with v1 of
+  this patchset I reported a speed of 39MB/s for this card with those patches.
+
+
+Ai Kyuse (3):
+  mmc: tmio: enhance illegal sequence handling
+  mmc: tmio: Add tuning support
+  mmc: sh_mobile_sdhi: Add tuning support
+
+Simon Horman (1):
+  ARM: dts: r8a7790: lager: Enable UHS-I SDR-104
+
+ arch/arm/boot/dts/r8a7790-lager.dts |   1 +
+ drivers/mmc/host/sh_mobile_sdhi.c   | 203 +++++++++++++++++++++++++++++++++++-
+ drivers/mmc/host/tmio_mmc.h         |   6 ++
+ drivers/mmc/host/tmio_mmc_pio.c     | 100 ++++++++++++++++--
+ 4 files changed, 302 insertions(+), 8 deletions(-)
+
+-- 
+2.1.4
