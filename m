@@ -1,222 +1,70 @@
-From: Simon Horman <horms+renesas@verge.net.au>
-Subject: [PATCH v3 2/4] mmc: tmio: Add tuning support
-Date: Tue, 24 May 2016 11:43:15 +0900
-Message-ID: <1464057797-29951-3-git-send-email-horms+renesas@verge.net.au>
-References: <1464057797-29951-1-git-send-email-horms+renesas@verge.net.au>
+From: Timo Teras <timo.teras@iki.fi>
+Subject: error -110 sending stop command
+Date: Tue, 24 May 2016 09:37:46 +0300
+Message-ID: <20160524093747.12bfe046@vostro.util.wtbts.net>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from kirsty.vergenet.net ([202.4.237.240]:35212 "EHLO
-	kirsty.vergenet.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750892AbcEXCn0 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 23 May 2016 22:43:26 -0400
-In-Reply-To: <1464057797-29951-1-git-send-email-horms+renesas@verge.net.au>
+Received: from mail-lf0-f52.google.com ([209.85.215.52]:36354 "EHLO
+	mail-lf0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751614AbcEXGhz (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 24 May 2016 02:37:55 -0400
+Received: by mail-lf0-f52.google.com with SMTP id e130so2417853lfe.3
+        for <linux-mmc@vger.kernel.org>; Mon, 23 May 2016 23:37:54 -0700 (PDT)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Wolfram Sang <wsa+renesas@sang-engineering.com>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Magnus Damm <magnus.damm@gmail.com>, linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org, Ai Kyuse <ai.kyuse.uw@renesas.com>, Simon Horman <horms+renesas@verge.net.au>
+To: linux-mmc@vger.kernel.org
+Cc: Richard Ash <richardashaudacity@googlemail.com>, Tor Krill <tor@openproducts.com>
 
-From: Ai Kyuse <ai.kyuse.uw@renesas.com>
+Hi,
 
-Add tuning support for use with SDR104 mode
+I'm having the following errors on my SD-card when writing to them:
 
-Signed-off-by: Ai Kyuse <ai.kyuse.uw@renesas.com>
-Signed-off-by: Simon Horman <horms+renesas@verge.net.au>
----
-v3 [Simon Horman]
-* As suggested by Kuninori Morimoto:
-  - Do not add unused retuning callback to struct tmio_mmc_host
-  - Change return type of prepare_tuning callback to void
-  - Add tap_size parameter to select_tuning callback
+mmc0: Timeout waiting for hardware interrupt.
+mmcblk0: error -110 sending stop command, original cmd response 0x900,
+card status 0x400e00
 
-v2 [Simon Horman]
-* As suggested by Kuninori Morimoto:
-  - Actually remove unnecessary TMIO_MMC_HAS_UHS_SCC define
-* As suggested by Wolfram Sang:
-  - Rely on core to call tuning. This simplifies things somewhat.
-  - Use mmc_send_tuning()
-    - A side affect of this appears to be that we now see some recoverable
-      errors logged during tuning. These are typically corrected by
-      subsequent tuning. It is the logging that is the apparent side effect
-      of this change.
-      e.g.
-      sh_mobile_sdhi ee100000.sd: timeout waiting for hardware interrupt (CMD19)
-      sh_mobile_sdhi ee100000.sd: Tuning procedure failed
-* Use bool rather than unsigned long to pass test status
-  to select_tuning() callback
-* Do not retune if init_tuning callback is not present or
-  indicates that there are no taps present
-* Retune on hardware reset
+Basically this happens when writing to the SD, and after this the
+SD-card becomes unusable.
 
-v1 [Simon Horman]
-* Omit start_signal_voltage_switch and tmio_mmc_card_busy changes which are
-  already present in mainline in a different form
-* Return num from init_tuning rather than passing an extra parameter
-  to hold the return value
-* Only call host->init_tuning if it is non-NULL
-* Place tmio_mmc_execute_tuning() such that no new forward declarations are
-  required
-* Remove unused TMIO_MMC_HAS_UHS_SCC define
+After this, the kernel [mmcqd/0] task is hogging CPU, and mmc0
+interrupts are coming in at very fast pace (seems 10k+ interrupts
+per second). Waiting long enough the following messages appear too:
 
-v0 [Ai Kyuse]
----
- drivers/mmc/host/tmio_mmc.h     |  6 +++
- drivers/mmc/host/tmio_mmc_pio.c | 85 ++++++++++++++++++++++++++++++++++++++++-
- 2 files changed, 90 insertions(+), 1 deletion(-)
+[  896.871617] mmc0: Card stuck in programming state! mmcblk0 card_busy_detect
+[  898.235070] mmc0: card never left busy state
+[  898.235078] mmc0: tried to reset card
+[  898.235087] blk_update_request: I/O error, dev mmcblk0, sector 16384
+[  898.235098] Buffer I/O error on dev mmcblk0p1, logical block 8192, lost async page write
+[  898.235107] blk_update_request: I/O error, dev mmcblk0, sector 16385
+[  898.235114] Buffer I/O error on dev mmcblk0p1, logical block 8193, lost async page write
+[  898.237103] mmcblk0: error -110 sending status command, retrying
+[  898.238069] mmcblk0: error -110 sending status command, retrying
+[  898.239057] mmcblk0: error -110 sending status command, aborting
 
-diff --git a/drivers/mmc/host/tmio_mmc.h b/drivers/mmc/host/tmio_mmc.h
-index 1aac2ad8edf2..7d1174c78921 100644
---- a/drivers/mmc/host/tmio_mmc.h
-+++ b/drivers/mmc/host/tmio_mmc.h
-@@ -150,6 +150,7 @@ struct tmio_mmc_host {
- 	struct mutex		ios_lock;	/* protect set_ios() context */
- 	bool			native_hotplug;
- 	bool			sdio_irq_enabled;
-+	u32			scc_tappos;
- 
- 	int (*write16_hook)(struct tmio_mmc_host *host, int addr);
- 	int (*clk_enable)(struct tmio_mmc_host *host);
-@@ -160,6 +161,11 @@ struct tmio_mmc_host {
- 			      unsigned int direction, int blk_size);
- 	int (*start_signal_voltage_switch)(struct mmc_host *mmc,
- 					   struct mmc_ios *ios);
-+	unsigned int (*init_tuning)(struct tmio_mmc_host *host);
-+	void (*prepare_tuning)(struct tmio_mmc_host *host, unsigned long tap);
-+	int (*select_tuning)(struct tmio_mmc_host *host, bool *tap,
-+			     int tap_size);
-+	void (*hw_reset)(struct tmio_mmc_host *host);
- };
- 
- struct tmio_mmc_host *tmio_mmc_host_alloc(struct platform_device *pdev);
-diff --git a/drivers/mmc/host/tmio_mmc_pio.c b/drivers/mmc/host/tmio_mmc_pio.c
-index 12dc0440a487..235546e9bbfc 100644
---- a/drivers/mmc/host/tmio_mmc_pio.c
-+++ b/drivers/mmc/host/tmio_mmc_pio.c
-@@ -36,6 +36,7 @@
- #include <linux/io.h>
- #include <linux/irq.h>
- #include <linux/mfd/tmio.h>
-+#include <linux/mmc/card.h>
- #include <linux/mmc/host.h>
- #include <linux/mmc/mmc.h>
- #include <linux/mmc/slot-gpio.h>
-@@ -363,7 +364,8 @@ static int tmio_mmc_start_command(struct tmio_mmc_host *host, struct mmc_command
- 			 * multiple block transfer
- 			 */
- 			if ((host->pdata->flags & TMIO_MMC_HAVE_CMD12_CTRL) &&
--			    (cmd->opcode == SD_IO_RW_EXTENDED))
-+			    ((cmd->opcode == SD_IO_RW_EXTENDED) ||
-+			     host->mrq->sbc))
- 				c |= NO_CMD12_ISSUE;
- 		}
- 		if (data->flags & MMC_DATA_READ)
-@@ -756,6 +758,74 @@ static int tmio_mmc_start_data(struct tmio_mmc_host *host,
- 	return 0;
- }
- 
-+static void tmio_mmc_hw_reset(struct mmc_host *mmc)
-+{
-+	struct tmio_mmc_host *host = mmc_priv(mmc);
-+
-+	if (host->hw_reset)
-+		host->hw_reset(host);
-+
-+	mmc_retune_timer_stop(host->mmc);
-+	mmc_retune_needed(host->mmc);
-+}
-+
-+static int tmio_mmc_execute_tuning(struct mmc_host *mmc, u32 opcode)
-+{
-+	struct tmio_mmc_host *host = mmc_priv(mmc);
-+	unsigned int num = 0;
-+	int i, ret = 0;
-+	bool *tap;
-+
-+	if (host->init_tuning)
-+		num = host->init_tuning(host);
-+	if (!num) {
-+		/* Tuning is not supported */
-+		ret = 0;
-+		goto out;
-+	}
-+
-+	tap = kmalloc(num * 2, GFP_KERNEL);
-+	if (!tap) {
-+		ret = -ENOMEM;
-+		goto out;
-+	}
-+
-+	/*
-+	 * Issue CMD19 twice for each tap
-+	 */
-+	for (i = 0; i < 2 * num; i++) {
-+		int err;
-+
-+		if (host->prepare_tuning)
-+			host->prepare_tuning(host, i);
-+
-+		err = mmc_send_tuning(host->mmc, opcode, NULL);
-+		if (err && err != -EILSEQ) {
-+			ret = err;
-+			goto err_free;
-+		}
-+		tap[i] = (err == 0);
-+
-+		mdelay(1);
-+	}
-+
-+	if (host->select_tuning)
-+		ret = host->select_tuning(host, tap, num * 2);
-+
-+err_free:
-+	kfree(tap);
-+out:
-+	if (ret < 0) {
-+		dev_warn(&host->pdev->dev, "Tuning procedure failed\n");
-+		tmio_mmc_hw_reset(mmc);
-+	} else {
-+		host->mmc->retune_period = 0;
-+	}
-+
-+	return ret;
-+
-+}
-+
- /* Process requests from the MMC layer */
- static void tmio_mmc_request(struct mmc_host *mmc, struct mmc_request *mrq)
- {
-@@ -781,6 +851,14 @@ static void tmio_mmc_request(struct mmc_host *mmc, struct mmc_request *mrq)
- 
- 	spin_unlock_irqrestore(&host->lock, flags);
- 
-+	if (mrq->sbc) {
-+		ret = tmio_mmc_start_command(host, mrq->sbc);
-+		if (ret)
-+			goto fail;
-+		host->last_req_ts = jiffies;
-+		host->mrq = mrq;
-+	}
-+
- 	if (mrq->data) {
- 		ret = tmio_mmc_start_data(host, mrq->data);
- 		if (ret)
-@@ -978,6 +1056,8 @@ static struct mmc_host_ops tmio_mmc_ops = {
- 	.enable_sdio_irq = tmio_mmc_enable_sdio_irq,
- 	.card_busy	= tmio_mmc_card_busy,
- 	.multi_io_quirk	= tmio_multi_io_quirk,
-+	.execute_tuning = tmio_mmc_execute_tuning,
-+	.hw_reset	= tmio_mmc_hw_reset,
- };
- 
- static int tmio_mmc_init_ocr(struct tmio_mmc_host *host)
-@@ -1202,6 +1282,9 @@ int tmio_mmc_host_runtime_suspend(struct device *dev)
- 	struct mmc_host *mmc = dev_get_drvdata(dev);
- 	struct tmio_mmc_host *host = mmc_priv(mmc);
- 
-+	mmc_retune_timer_stop(host->mmc);
-+	mmc_retune_needed(host->mmc);
-+
- 	tmio_mmc_disable_mmc_irqs(host, TMIO_MASK_ALL);
- 
- 	if (host->clk_cache)
--- 
-2.1.4
+After which the SD does not work at all until reboot.
 
+This is pretty much what Richard Ash described in the thread 'error -110
+sending stop command' on Zynq platform. Also the thread 'Unstable mmc
+operation on armada38x' from Tor Krill looks the same issue.
+
+The hardware I have is http://www.pcengines.ch/apu2c4.htm and on bootup
+dmesg says:
+[    3.082221] sdhci: Secure Digital Host Controller Interface driver
+[    3.082228] sdhci: Copyright(c) Pierre Ossman
+[    3.083135] sdhci-pci 0000:00:14.7: SDHCI controller found [1022:7813] (rev 1)
+[    3.083495] sdhci-pci 0000:00:14.7: No vmmc regulator found
+[    3.083503] sdhci-pci 0000:00:14.7: No vqmmc regulator found
+[    3.084994] mmc0: SDHCI controller on PCI [0000:00:14.7] using ADMA 64-bit
+[    3.156461] mmc0: new high speed SDHC card at address 0007
+[    3.347692] mmcblk0: mmc0:0007 SD04G 3.71 GiB 
+[    3.349924]  mmcblk0: p1
+
+I have verified that this issues exist in 4.1.20 and 4.4.10.
+
+Any suggestions how to debug this further? Perhaps some quirks to test?
+Or already committed patches/fixes that might resolve this issue?
+
+Thanks,
+Timo
