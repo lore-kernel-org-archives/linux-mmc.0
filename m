@@ -1,70 +1,63 @@
-From: Timo Teras <timo.teras@iki.fi>
-Subject: error -110 sending stop command
-Date: Tue, 24 May 2016 09:37:46 +0300
-Message-ID: <20160524093747.12bfe046@vostro.util.wtbts.net>
+From: =?UTF-8?B?7J6l66+87Jqw?= <huskey27@gmail.com>
+Subject: use default speed of the eMMC
+Date: Tue, 24 May 2016 18:07:06 +0900
+Message-ID: <CA+pahgdUP3Zam-cSeW8fJR9AmiUo2_Ok_uDHqWTgwvzCGC58+g@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-lf0-f52.google.com ([209.85.215.52]:36354 "EHLO
-	mail-lf0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751614AbcEXGhz (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 24 May 2016 02:37:55 -0400
-Received: by mail-lf0-f52.google.com with SMTP id e130so2417853lfe.3
-        for <linux-mmc@vger.kernel.org>; Mon, 23 May 2016 23:37:54 -0700 (PDT)
+Received: from mail-vk0-f67.google.com ([209.85.213.67]:34242 "EHLO
+	mail-vk0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753837AbcEXJHH (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 24 May 2016 05:07:07 -0400
+Received: by mail-vk0-f67.google.com with SMTP id k1so1725888vka.1
+        for <linux-mmc@vger.kernel.org>; Tue, 24 May 2016 02:07:07 -0700 (PDT)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org
-Cc: Richard Ash <richardashaudacity@googlemail.com>, Tor Krill <tor@openproducts.com>
 
-Hi,
+Dear linux-mmc.
 
-I'm having the following errors on my SD-card when writing to them:
+Hello, I'm Minwoo Jang.
 
-mmc0: Timeout waiting for hardware interrupt.
-mmcblk0: error -110 sending stop command, original cmd response 0x900,
-card status 0x400e00
+I have a question about using default speed of the eMMC.
 
-Basically this happens when writing to the SD, and after this the
-SD-card becomes unusable.
+When default speed is used, mmc_select_bus_width() is never called.
 
-After this, the kernel [mmcqd/0] task is hogging CPU, and mmc0
-interrupts are coming in at very fast pace (seems 10k+ interrupts
-per second). Waiting long enough the following messages appear too:
+So, eMMC can not be set 4 bit or 8 bit bus width, I think.
 
-[  896.871617] mmc0: Card stuck in programming state! mmcblk0 card_busy_detect
-[  898.235070] mmc0: card never left busy state
-[  898.235078] mmc0: tried to reset card
-[  898.235087] blk_update_request: I/O error, dev mmcblk0, sector 16384
-[  898.235098] Buffer I/O error on dev mmcblk0p1, logical block 8192, lost async page write
-[  898.235107] blk_update_request: I/O error, dev mmcblk0, sector 16385
-[  898.235114] Buffer I/O error on dev mmcblk0p1, logical block 8193, lost async page write
-[  898.237103] mmcblk0: error -110 sending status command, retrying
-[  898.238069] mmcblk0: error -110 sending status command, retrying
-[  898.239057] mmcblk0: error -110 sending status command, aborting
+Please, give me your opinions on the following diff codes.
 
-After which the SD does not work at all until reboot.
+Thank you.
 
-This is pretty much what Richard Ash described in the thread 'error -110
-sending stop command' on Zynq platform. Also the thread 'Unstable mmc
-operation on armada38x' from Tor Krill looks the same issue.
+=====================================================
 
-The hardware I have is http://www.pcengines.ch/apu2c4.htm and on bootup
-dmesg says:
-[    3.082221] sdhci: Secure Digital Host Controller Interface driver
-[    3.082228] sdhci: Copyright(c) Pierre Ossman
-[    3.083135] sdhci-pci 0000:00:14.7: SDHCI controller found [1022:7813] (rev 1)
-[    3.083495] sdhci-pci 0000:00:14.7: No vmmc regulator found
-[    3.083503] sdhci-pci 0000:00:14.7: No vqmmc regulator found
-[    3.084994] mmc0: SDHCI controller on PCI [0000:00:14.7] using ADMA 64-bit
-[    3.156461] mmc0: new high speed SDHC card at address 0007
-[    3.347692] mmcblk0: mmc0:0007 SD04G 3.71 GiB 
-[    3.349924]  mmcblk0: p1
+diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+index 94b4462..3b1cc4d 100644
+--- a/drivers/mmc/core/mmc.c
++++ b/drivers/mmc/core/mmc.c
+@@ -952,6 +952,8 @@ static int mmc_select_bus_width(struct mmc_card *card)
 
-I have verified that this issues exist in 4.1.20 and 4.4.10.
+                if (!err) {
+                        err = bus_width;
++                       pr_warn("%s: switch to bus width %d\n",
++                               mmc_hostname(host), (1 << bus_width));
+                        break;
+                } else {
+                        pr_warn("%s: switch to bus width %d failed\n",
+@@ -1500,6 +1502,14 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
+                        if (err)
+                                goto err;
+                }
++       } else {
++               /* Select the bus width for normal speed mode */
++               err = mmc_select_bus_width(card);
++               if (IS_ERR_VALUE(err)) {
++                       pr_warn("%s: Selecting bus width failed\n",
++                               mmc_hostname(card->host));
++                       goto err;
++               }
+        }
 
-Any suggestions how to debug this further? Perhaps some quirks to test?
-Or already committed patches/fixes that might resolve this issue?
+Best regards,
 
-Thanks,
-Timo
+MW Jang.
