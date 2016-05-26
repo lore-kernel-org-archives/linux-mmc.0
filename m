@@ -1,77 +1,86 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [v10, 7/7] mmc: sdhci-of-esdhc: fix host version for T4240-R1.0-R2.0
-Date: Thu, 26 May 2016 09:44:10 +0200
-Message-ID: <CAPDyKFqx2JMLzXoDxGCKFYMFV47+SegnkuWFXKvsQHK7L5w-1g@mail.gmail.com>
-References: <1462417950-46796-1-git-send-email-yangbo.lu@nxp.com>
-	<4448030.Zs8fVnr3nm@wuerfel>
-	<HE1PR04MB0889B52134A43C0E7A452B7BF87C0@HE1PR04MB0889.eurprd04.prod.outlook.com>
-	<5159406.HOFrj7pRfW@wuerfel>
-	<1462937186.16584.77.camel@buserror.net>
-	<HE1PR04MB0889852B7809A1CCFF8922ACF8410@HE1PR04MB0889.eurprd04.prod.outlook.com>
+Subject: [GIT PULL] MMC fixes for v.4.7 rc1
+Date: Thu, 26 May 2016 10:11:18 +0200
+Message-ID: <CAPDyKFpEhDLrme8miCFWqbWF87zYShNhtATGPBk88hyQ4c89Fg@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wm0-f54.google.com ([74.125.82.54]:37341 "EHLO
-	mail-wm0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751134AbcEZHoM (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 26 May 2016 03:44:12 -0400
-Received: by mail-wm0-f54.google.com with SMTP id z87so88218156wmh.0
-        for <linux-mmc@vger.kernel.org>; Thu, 26 May 2016 00:44:11 -0700 (PDT)
-In-Reply-To: <HE1PR04MB0889852B7809A1CCFF8922ACF8410@HE1PR04MB0889.eurprd04.prod.outlook.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Linus Torvalds <torvalds@linux-foundation.org>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+Cc: Jaehoon Chung <jh80.chung@samsung.com>, Adrian Hunter <adrian.hunter@intel.com>, "Rafael J. Wysocki" <rjw@rjwysocki.net>
 List-Id: linux-mmc@vger.kernel.org
-To: Yangbo Lu <yangbo.lu@nxp.com>
-Cc: Scott Wood <oss@buserror.net>, Arnd Bergmann <arnd@arndb.de>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linuxppc-dev@lists.ozlabs.org" <linuxppc-dev@lists.ozlabs.org>, Mark Rutland <mark.rutland@arm.com>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, Russell King <linux@arm.linux.org.uk>, Bhupesh Sharma <bhupesh.sharma@freescale.com>, "netdev@vger.kernel.org" <netdev@vger.kernel.org>, Joerg Roedel <joro@8bytes.org>, Kumar Gala <galak@codeaurora.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Yang-Leo Li <leoyang.li@nxp.com>, "iommu@lists.linux-foundation.org" <iommu@lists.linux-foundation.org>, Rob Herring <robh+dt@kernel.org>, "linux-i2c@vger.kernel.org" <linux-i2c@vger.kernel.org>, Claudiu Manoil <claudiu.manoil@freescale.com>, Santosh
 
-On 26 May 2016 at 06:05, Yangbo Lu <yangbo.lu@nxp.com> wrote:
-> Hi Uffe,
->
-> Could we merge this patchset? ...
-> It has been a long time to wait for Arnd's response...
->
-> Thanks a lot.
->
->
+Hi Linus,
 
-As we are still in the merge window I won't queue anything but fixes.
-Let's give Arnd another week or so to respond.
+Here are some mmc fixes intended for v4.7 rc1. They are based on a
+commit earlier in the merge window and have been tested in linux-next
+for a while.
+
+Details are as usual found in the signed tag. Please pull this in!
 
 Kind regards
-Uffe
+Ulf Hansson
 
-> Best regards,
-> Yangbo Lu
->
->
->> -----Original Message-----
->> From: Yangbo Lu
->> Sent: Friday, May 20, 2016 2:06 PM
->> To: 'Scott Wood'; Arnd Bergmann; linux-arm-kernel@lists.infradead.org
->> Cc: linuxppc-dev@lists.ozlabs.org; Mark Rutland;
->> devicetree@vger.kernel.org; ulf.hansson@linaro.org; Russell King; Bhupesh
->> Sharma; netdev@vger.kernel.org; Joerg Roedel; Kumar Gala; linux-
->> mmc@vger.kernel.org; linux-kernel@vger.kernel.org; Yang-Leo Li;
->> iommu@lists.linux-foundation.org; Rob Herring; linux-i2c@vger.kernel.org;
->> Claudiu Manoil; Santosh Shilimkar; Xiaobo Xie; linux-clk@vger.kernel.org;
->> Qiang Zhao
->> Subject: RE: [v10, 7/7] mmc: sdhci-of-esdhc: fix host version for T4240-
->> R1.0-R2.0
->>
->> Hi Arnd,
->>
->> Any comments?
->> Please reply when you see the email since we want this eSDHC issue to be
->> fixed soon.
->>
->> All the patches are Freescale-specific and is to fix the eSDHC driver.
->> Could we let them merged first if you were talking about a new way of
->> abstracting getting SoC version.
->>
->>
->> Thanks :)
->>
->>
->> Best regards,
->> Yangbo Lu
->>
->
+
+The following changes since commit 16490980e396fac079248b23b1dd81e7d48bebf3:
+
+  Merge tag 'device-properties-4.7-rc1' of
+git://git.kernel.org/pub/scm/linux/kernel/git/rafael/linux-pm
+(2016-05-16 19:51:04 -0700)
+
+are available in the git repository at:
+
+
+  git://git.linaro.org/people/ulf.hansson/mmc.git tags/mmc-v4.7-rc1
+
+for you to fetch changes up to 265984b36ce82fec67957d452dd2b22e010611e4:
+
+  mmc: sdhci-acpi: Remove MMC_CAP_BUS_WIDTH_TEST for Intel controllers
+(2016-05-23 11:52:41 +0200)
+
+----------------------------------------------------------------
+MMC core:
+ - Prevent re-tuning while serving requests for RPMB partitions
+ - Extend timeout for long read time quirk to support more eMMCs
+
+MMC host:
+ - sdhci-acpi: Ensure connected devices are powered when probing
+ - sdhci-pci|acpi: Remove unreliable MMC_CAP_BUS_WIDTH_TEST for Intel HWs
+ - dw_mmc: Correct the assigning of max_blk_size
+ - dw_mmc-rockchip: Allow RPMB partitions to be created
+ - dw_mmc-rockchip: Set the drive phase properly
+
+----------------------------------------------------------------
+Adrian Hunter (6):
+      mmc: core: Add a facility to "pause" re-tuning
+      mmc: block: Always switch back to main area after RPMB access
+      mmc: block: Pause re-tuning while switched to the RPMB partition
+      mmc: sdhci-acpi: Ensure connected devices are powered when probing
+      mmc: sdhci-pci: Remove MMC_CAP_BUS_WIDTH_TEST for Intel controllers
+      mmc: sdhci-acpi: Remove MMC_CAP_BUS_WIDTH_TEST for Intel controllers
+
+Douglas Anderson (1):
+      mmc: dw_mmc: rockchip: Set the drive phase properly
+
+Jaehoon Chung (1):
+      mmc: dw_mmc: fix the wrong max_blk_size
+
+Matt Gumbel (1):
+      mmc: longer timeout for long read time quirk
+
+Shawn Lin (1):
+      mmc: dw_mmc-rockchip: add MMC_CAP_CMD23 capabilities
+
+Ulf Hansson (1):
+      ACPI / PM: Export acpi_device_fix_up_power()
+
+ drivers/acpi/device_pm.c           |  1 +
+ drivers/mmc/card/block.c           | 24 +++++++++++--
+ drivers/mmc/core/core.c            |  4 +--
+ drivers/mmc/core/host.c            | 24 +++++++++++++
+ drivers/mmc/host/dw_mmc-rockchip.c | 72 +++++++++++++++++++++++++++++++++++---
+ drivers/mmc/host/dw_mmc.c          |  6 ++--
+ drivers/mmc/host/sdhci-acpi.c      | 13 ++++---
+ drivers/mmc/host/sdhci-pci-core.c  |  5 +--
+ include/linux/mmc/host.h           |  4 +++
+ 9 files changed, 133 insertions(+), 20 deletions(-)
