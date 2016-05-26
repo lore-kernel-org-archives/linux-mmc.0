@@ -1,160 +1,77 @@
-From: =?UTF-8?B?7J6l66+87Jqw?= <huskey27@gmail.com>
-Subject: Re: use default speed of the eMMC
-Date: Thu, 26 May 2016 15:34:44 +0900
-Message-ID: <CA+pahgeqi4js3uspbHA3uYUqjx12xyeSZDVHvyz_NqCVGgNEEA@mail.gmail.com>
-References: <CGME20160524090753epcas1p125c06a036988b476840c79048cb45428@epcas1p1.samsung.com>
-	<CA+pahgdUP3Zam-cSeW8fJR9AmiUo2_Ok_uDHqWTgwvzCGC58+g@mail.gmail.com>
-	<574421CE.4080503@samsung.com>
-	<CA+pahgf-gfB9YBNgvSCP8wexhXxnuxgpUx3fDhStK3pPcoYxKw@mail.gmail.com>
-	<57468E5D.8040606@samsung.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [v10, 7/7] mmc: sdhci-of-esdhc: fix host version for T4240-R1.0-R2.0
+Date: Thu, 26 May 2016 09:44:10 +0200
+Message-ID: <CAPDyKFqx2JMLzXoDxGCKFYMFV47+SegnkuWFXKvsQHK7L5w-1g@mail.gmail.com>
+References: <1462417950-46796-1-git-send-email-yangbo.lu@nxp.com>
+	<4448030.Zs8fVnr3nm@wuerfel>
+	<HE1PR04MB0889B52134A43C0E7A452B7BF87C0@HE1PR04MB0889.eurprd04.prod.outlook.com>
+	<5159406.HOFrj7pRfW@wuerfel>
+	<1462937186.16584.77.camel@buserror.net>
+	<HE1PR04MB0889852B7809A1CCFF8922ACF8410@HE1PR04MB0889.eurprd04.prod.outlook.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-vk0-f67.google.com ([209.85.213.67]:33876 "EHLO
-	mail-vk0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752542AbcEZGep convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 26 May 2016 02:34:45 -0400
-Received: by mail-vk0-f67.google.com with SMTP id k1so1433613vka.1
-        for <linux-mmc@vger.kernel.org>; Wed, 25 May 2016 23:34:44 -0700 (PDT)
-In-Reply-To: <57468E5D.8040606@samsung.com>
+Received: from mail-wm0-f54.google.com ([74.125.82.54]:37341 "EHLO
+	mail-wm0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751134AbcEZHoM (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 26 May 2016 03:44:12 -0400
+Received: by mail-wm0-f54.google.com with SMTP id z87so88218156wmh.0
+        for <linux-mmc@vger.kernel.org>; Thu, 26 May 2016 00:44:11 -0700 (PDT)
+In-Reply-To: <HE1PR04MB0889852B7809A1CCFF8922ACF8410@HE1PR04MB0889.eurprd04.prod.outlook.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>
-Cc: linux-mmc@vger.kernel.org
+To: Yangbo Lu <yangbo.lu@nxp.com>
+Cc: Scott Wood <oss@buserror.net>, Arnd Bergmann <arnd@arndb.de>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linuxppc-dev@lists.ozlabs.org" <linuxppc-dev@lists.ozlabs.org>, Mark Rutland <mark.rutland@arm.com>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, Russell King <linux@arm.linux.org.uk>, Bhupesh Sharma <bhupesh.sharma@freescale.com>, "netdev@vger.kernel.org" <netdev@vger.kernel.org>, Joerg Roedel <joro@8bytes.org>, Kumar Gala <galak@codeaurora.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Yang-Leo Li <leoyang.li@nxp.com>, "iommu@lists.linux-foundation.org" <iommu@lists.linux-foundation.org>, Rob Herring <robh+dt@kernel.org>, "linux-i2c@vger.kernel.org" <linux-i2c@vger.kernel.org>, Claudiu Manoil <claudiu.manoil@freescale.com>, Santosh
 
-Yes, "default speed mode" what I mentioned is using below 26MHz clock
-(not in high speed mode).
-
-While eMMC card is on the initializing step, it uses below 400KHz not 2=
-6MHz.
-
-I just want to use below 26MHz, because some customers want to use low
-hertz clock.
-
-So, eMMC versions and environments have nothing to do with "default spe=
-ed mode".
-
-If there is a misunderstanding, please let me know.
-
-Thank you.
-
-Best Regards,
-Minwoo Jang
-
-
-2016-05-26 14:49 GMT+09:00 Jaehoon Chung <jh80.chung@samsung.com>:
-> On 05/26/2016 02:16 PM, =EC=9E=A5=EB=AF=BC=EC=9A=B0 wrote:
->> Hello, Jaehoon Chung.
->>
->> I mentioned "default speed mode" not hs200, hs400, ddr and hs mode.
+On 26 May 2016 at 06:05, Yangbo Lu <yangbo.lu@nxp.com> wrote:
+> Hi Uffe,
 >
-> Yes, default speed mode is not HS400, HS400, DDR..
-> You mean "default speed mode" is 26MHz?
+> Could we merge this patchset? ...
+> It has been a long time to wait for Arnd's response...
 >
-> As i know, default speed is 26MHz. and it used for initializing card.
+> Thanks a lot.
 >
->>
->> I think If "default speed mode" is set, there is no bus width change=
-=2E
 >
-> There is DEVICE_TYPE[196] at ext_csd register.
-> Device type should be selected one of them. (You can see the currentl=
-y valid value.)
+
+As we are still in the merge window I won't queue anything but fixes.
+Let's give Arnd another week or so to respond.
+
+Kind regards
+Uffe
+
+> Best regards,
+> Yangbo Lu
 >
-> I don't know exactly what your purpose.
-> If i missed something, let me know in more detail about default speed=
-, eMMC version, your environment.
 >
-> Best Regards,
-> Jaehoon Chung
->
+>> -----Original Message-----
+>> From: Yangbo Lu
+>> Sent: Friday, May 20, 2016 2:06 PM
+>> To: 'Scott Wood'; Arnd Bergmann; linux-arm-kernel@lists.infradead.org
+>> Cc: linuxppc-dev@lists.ozlabs.org; Mark Rutland;
+>> devicetree@vger.kernel.org; ulf.hansson@linaro.org; Russell King; Bhupesh
+>> Sharma; netdev@vger.kernel.org; Joerg Roedel; Kumar Gala; linux-
+>> mmc@vger.kernel.org; linux-kernel@vger.kernel.org; Yang-Leo Li;
+>> iommu@lists.linux-foundation.org; Rob Herring; linux-i2c@vger.kernel.org;
+>> Claudiu Manoil; Santosh Shilimkar; Xiaobo Xie; linux-clk@vger.kernel.org;
+>> Qiang Zhao
+>> Subject: RE: [v10, 7/7] mmc: sdhci-of-esdhc: fix host version for T4240-
+>> R1.0-R2.0
 >>
->> If you have any advice to use "default speed mode" of the eMMC. plea=
-se
->> let me know.
+>> Hi Arnd,
 >>
->> Thank you.
+>> Any comments?
+>> Please reply when you see the email since we want this eSDHC issue to be
+>> fixed soon.
 >>
->> Best Regards,
->> Minwoo Jang.
->>
->> 2016-05-24 18:41 GMT+09:00 Jaehoon Chung <jh80.chung@samsung.com>:
->>> Hi,
->>>
->>> On 05/24/2016 06:07 PM, =EC=9E=A5=EB=AF=BC=EC=9A=B0 wrote:
->>>> Dear linux-mmc.
->>>>
->>>> Hello, I'm Minwoo Jang.
->>>>
->>>> I have a question about using default speed of the eMMC.
->>>>
->>>> When default speed is used, mmc_select_bus_width() is never called=
-=2E
->>>>
->>>> So, eMMC can not be set 4 bit or 8 bit bus width, I think.
->>>>
->>>> Please, give me your opinions on the following diff codes.
->>>
->>> In mmc_select_timing(), timing should be set to MMC_TIMING_HS or ot=
-hers.
->>> Then mmc_select_bus_width() should be entered.
->>>
->>> Best Regards,
->>> Jaehoon Chung
->>>
->>>>
->>>> Thank you.
->>>>
->>>> =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D
->>>>
->>>> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
->>>> index 94b4462..3b1cc4d 100644
->>>> --- a/drivers/mmc/core/mmc.c
->>>> +++ b/drivers/mmc/core/mmc.c
->>>> @@ -952,6 +952,8 @@ static int mmc_select_bus_width(struct mmc_car=
-d *card)
->>>>
->>>>                 if (!err) {
->>>>                         err =3D bus_width;
->>>> +                       pr_warn("%s: switch to bus width %d\n",
->>>> +                               mmc_hostname(host), (1 << bus_widt=
-h));
->>>>                         break;
->>>>                 } else {
->>>>                         pr_warn("%s: switch to bus width %d failed=
-\n",
->>>> @@ -1500,6 +1502,14 @@ static int mmc_init_card(struct mmc_host *h=
-ost, u32 ocr,
->>>>                         if (err)
->>>>                                 goto err;
->>>>                 }
->>>> +       } else {
->>>> +               /* Select the bus width for normal speed mode */
->>>> +               err =3D mmc_select_bus_width(card);
->>>> +               if (IS_ERR_VALUE(err)) {
->>>> +                       pr_warn("%s: Selecting bus width failed\n"=
-,
->>>> +                               mmc_hostname(card->host));
->>>> +                       goto err;
->>>> +               }
->>>>         }
->>>>
->>>> Best regards,
->>>>
->>>> MW Jang.
->>>> --
->>>> To unsubscribe from this list: send the line "unsubscribe linux-mm=
-c" in
->>>> the body of a message to majordomo@vger.kernel.org
->>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>>>
->>>>
->>>>
->>>
+>> All the patches are Freescale-specific and is to fix the eSDHC driver.
+>> Could we let them merged first if you were talking about a new way of
+>> abstracting getting SoC version.
 >>
 >>
+>> Thanks :)
+>>
+>>
+>> Best regards,
+>> Yangbo Lu
 >>
 >
