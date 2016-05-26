@@ -1,314 +1,122 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH v6 3/5] mmc: core: implement enhanced strobe support
-Date: Thu, 26 May 2016 14:04:52 +0300
-Message-ID: <5746D854.1020200@intel.com>
-References: <1464227707-30616-1-git-send-email-shawn.lin@rock-chips.com>
- <1464227782-31296-1-git-send-email-shawn.lin@rock-chips.com>
+From: Dong Aisheng <dongas86-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Subject: Re: [PATCH 3/3] mmc: core: support hs speed mode if hs200 mode fails
+Date: Thu, 26 May 2016 19:27:18 +0800
+Message-ID: <CAA+hA=SZQSjSU73_8sityJ_FZHngqaHZwspyg-iMBRzr_z7vRA@mail.gmail.com>
+References: <1461171092-30631-1-git-send-email-aisheng.dong@nxp.com>
+	<1461171092-30631-3-git-send-email-aisheng.dong@nxp.com>
+	<1463130397.3151.13.camel@toradex.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga11.intel.com ([192.55.52.93]:13414 "EHLO mga11.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751634AbcEZLIx (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 26 May 2016 07:08:53 -0400
-In-Reply-To: <1464227782-31296-1-git-send-email-shawn.lin@rock-chips.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1463130397.3151.13.camel-2KBjVHiyJgBBDgjK7y7TUQ@public.gmane.org>
+Sender: linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Marcel Ziswiler <marcel.ziswiler-2KBjVHiyJgBBDgjK7y7TUQ@public.gmane.org>
+Cc: "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "aisheng.dong-3arQi8VN3Tc@public.gmane.org" <aisheng.dong-3arQi8VN3Tc@public.gmane.org>, "jonathanh-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org" <jonathanh-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>, "dev-8ppwABl0HbeELgA04lAiVw@public.gmane.org" <dev-8ppwABl0HbeELgA04lAiVw@public.gmane.org>, "chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org" <chris-OsFVWbfNK3isTnJN9+BGXg@public.gmane.org>, "shawnguo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org" <shawnguo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "haibo.chen-3arQi8VN3Tc@public.gmane.org" <haibo.chen-3arQi8VN3Tc@public.gmane.org>, "ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org" <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org" <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Shawn Lin <shawn.lin@rock-chips.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Jaehoon Chung <jh80.chung@samsung.com>, Michal Simek <michal.simek@xilinx.com>, soren.brinkmann@xilinx.com, Rob Herring <robh+dt@kernel.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Doug Anderson <dianders@chromium.org>, Brian Norris <briannorris@chromium.org>, Heiko Stuebner <heiko@sntech.de>, linux-rockchip@lists.infradead.org, devicetree@vger.kernel.org
 
-On 26/05/16 04:56, Shawn Lin wrote:
-> Controllers use data strobe line to latch data from devices
-> under hs400 mode, but not for cmd line. So since emmc 5.1, JEDEC
-> introduces enhanced strobe mode for latching cmd response from
-> emmc devices to host controllers. This new feature is optional,
-> so it depends both on device's cap and host's cap to decide
-> whether to use it or not.
-> 
-> Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
+On Fri, May 13, 2016 at 5:06 PM, Marcel Ziswiler
+<marcel.ziswiler-2KBjVHiyJgBBDgjK7y7TUQ@public.gmane.org> wrote:
+> On Thu, 2016-04-21 at 00:51 +0800, Dong Aisheng wrote:
+>> Currently if mmc_select_hs200 mode switch fails, MMC core
+>> can only use legacy mode to run the card.
+>> Let's retry HS speed mode if HS200 fails.
+>>
+>> Before the fix:
+>> mmc0: mmc_select_hs200 failed, error -74
+>> : switch to mmc0 failed
+>> mmc0: new MMC card at address 0001
+>> mmcblk0: mmc0:0001 Q2J55L 7.12 GiB
+>> mmcblk0boot0: mmc0:0001 Q2J55L partition 1 2.00 MiB
+>> mmcblk0boot1: mmc0:0001 Q2J55L partition 2 2.00 MiB
+>> mmcblk0rpmb: mmc0:0001 Q2J55L partition 3 4.00 MiB
+>>  mmcblk0: p1 p2
+>>
+>> After the fix:
+>> mmc0: mmc_select_hs200 failed, error -74
+>> mmc0: new DDR MMC card at address 0001
+>> mmcblk0: mmc0:0001 Q2J55L 7.12 GiB
+>> mmcblk0boot0: mmc0:0001 Q2J55L partition 1 2.00 MiB
+>> mmcblk0boot1: mmc0:0001 Q2J55L partition 2 2.00 MiB
+>> mmcblk0rpmb: mmc0:0001 Q2J55L partition 3 4.00 MiB
+>>  mmcblk0: p1 p2
+>>
+>> Signed-off-by: Dong Aisheng <aisheng.dong-3arQi8VN3Tc@public.gmane.org>
+>> ---
+>>  drivers/mmc/core/mmc.c | 3 ++-
+>>  1 file changed, 2 insertions(+), 1 deletion(-)
+>>
+>> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+>> index 55c8201..b573dc7 100644
+>> --- a/drivers/mmc/core/mmc.c
+>> +++ b/drivers/mmc/core/mmc.c
+>> @@ -1315,7 +1315,8 @@ static int mmc_select_timing(struct mmc_card
+>> *card)
+>>
+>>       if (card->mmc_avail_type & EXT_CSD_CARD_TYPE_HS200)
+>>               err = mmc_select_hs200(card);
+>> -     else if (card->mmc_avail_type & EXT_CSD_CARD_TYPE_HS)
+>> +
+>> +     if (err && (card->mmc_avail_type & EXT_CSD_CARD_TYPE_HS))
+>>               err = mmc_select_hs(card);
+>>
+>>       if (err && err != -EBADMSG)
+>
+>
+> This seems to break on TK1 where eMMC so far was detected as an 8-bit
+> high speed MMC card. With this patch it reverts to detecting a 1-bit only
+> MMC card! This has been observed both on a NVIDIA's Jetson TK1 as well as
+> our new Toradex Apalis TK1 (CC Tegra mailing list, Jon Hunter and Lucas
+> Stach as well). So far T30 is not affected as there we are still doing
+> full HS200 with whatever issues that has.
+>
 
-I have a couple of comments below, but they don't necessarily require any
-action, so:
+Oh, sorry, just found there's a logic error in the patch.
+It may wrongly bypass the HS mode select for non hs200 mode eMMCs
+due to the 'err' condition.
 
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+Will send a fixed version.
 
-> 
-> Reviewed-by: Jaehoon Chung <jh80.chung@samsung.com>
-> Tested-by: Douglas Anderson <dianders@chromium.org>
-> Tested-by: Jaehoon Chung <jh80.chung@samsung.com>
-> ---
-> 
-> Changes in v6:
-> - add Doug's test-tag and Jaehoon's review-test-tag
-> 
-> Changes in v5: None
-> Changes in v4: None
-> Changes in v3: None
-> Changes in v2: None
-> 
->  drivers/mmc/core/bus.c   |  3 +-
->  drivers/mmc/core/core.c  |  9 ++++++
->  drivers/mmc/core/mmc.c   | 84 ++++++++++++++++++++++++++++++++++++++++++++++--
->  include/linux/mmc/card.h |  1 +
->  include/linux/mmc/host.h | 11 +++++++
->  include/linux/mmc/mmc.h  |  3 ++
->  6 files changed, 108 insertions(+), 3 deletions(-)
-> 
-> diff --git a/drivers/mmc/core/bus.c b/drivers/mmc/core/bus.c
-> index 4bc48f1..c64266f 100644
-> --- a/drivers/mmc/core/bus.c
-> +++ b/drivers/mmc/core/bus.c
-> @@ -332,12 +332,13 @@ int mmc_add_card(struct mmc_card *card)
->  			mmc_card_ddr52(card) ? "DDR " : "",
->  			type);
->  	} else {
-> -		pr_info("%s: new %s%s%s%s%s card at address %04x\n",
-> +		pr_info("%s: new %s%s%s%s%s%s card at address %04x\n",
->  			mmc_hostname(card->host),
->  			mmc_card_uhs(card) ? "ultra high speed " :
->  			(mmc_card_hs(card) ? "high speed " : ""),
->  			mmc_card_hs400(card) ? "HS400 " :
->  			(mmc_card_hs200(card) ? "HS200 " : ""),
-> +			mmc_card_hs400es(card) ? "Enhanced strobe " : "",
->  			mmc_card_ddr52(card) ? "DDR " : "",
->  			uhs_bus_speed_mode, type, card->rca);
->  	}
-> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-> index 99275e4..b0c1f07 100644
-> --- a/drivers/mmc/core/core.c
-> +++ b/drivers/mmc/core/core.c
-> @@ -1127,6 +1127,15 @@ void mmc_set_initial_state(struct mmc_host *host)
->  	host->ios.bus_width = MMC_BUS_WIDTH_1;
->  	host->ios.timing = MMC_TIMING_LEGACY;
->  	host->ios.drv_type = 0;
-> +	host->ios.enhanced_strobe = false;
-> +
-> +	/*
-> +	 * Make sure we are in non-enhanced strobe mode before we
-> +	 * actually enable it in ext_csd.
-> +	 */
-> +	if ((host->caps2 & MMC_CAP2_HS400_ES) &&
-> +	     host->ops->hs400_enhanced_strobe)
-> +		host->ops->hs400_enhanced_strobe(host, &host->ios);
->  
->  	mmc_set_ios(host);
->  }
-> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-> index f99c47e..9dc91ba 100644
-> --- a/drivers/mmc/core/mmc.c
-> +++ b/drivers/mmc/core/mmc.c
-> @@ -235,6 +235,11 @@ static void mmc_select_card_type(struct mmc_card *card)
->  		avail_type |= EXT_CSD_CARD_TYPE_HS400_1_2V;
->  	}
->  
-> +	if ((caps2 & MMC_CAP2_HS400_ES) &&
-> +	    card->ext_csd.strobe_support &&
-> +	    (avail_type & EXT_CSD_CARD_TYPE_HS400))
-> +		avail_type |= EXT_CSD_CARD_TYPE_HS400ES;
-> +
->  	card->ext_csd.hs_max_dtr = hs_max_dtr;
->  	card->ext_csd.hs200_max_dtr = hs200_max_dtr;
->  	card->mmc_avail_type = avail_type;
-> @@ -383,6 +388,7 @@ static int mmc_decode_ext_csd(struct mmc_card *card, u8 *ext_csd)
->  			mmc_card_set_blockaddr(card);
->  	}
->  
-> +	card->ext_csd.strobe_support = ext_csd[EXT_CSD_STROBE_SUPPORT];
->  	card->ext_csd.raw_card_type = ext_csd[EXT_CSD_CARD_TYPE];
->  	mmc_select_card_type(card);
->  
-> @@ -1216,6 +1222,78 @@ out_err:
->  	return err;
->  }
->  
-> +static int mmc_select_hs400es(struct mmc_card *card)
-> +{
-> +	struct mmc_host *host = card->host;
-> +	int err = 0;
-> +	u8 val;
-> +
-> +	if (!(host->caps & MMC_CAP_8_BIT_DATA)) {
-> +		err = -ENOTSUPP;
-> +		goto out_err;
-> +	}
-> +
-> +	err = mmc_select_bus_width(card);
-> +	if (IS_ERR_VALUE(err))
-> +		goto out_err;
-> +
-> +	/* Switch card to HS mode */
-> +	err = mmc_select_hs(card);
-> +	if (err) {
-> +		pr_err("%s: switch to high-speed failed, err:%d\n",
-> +			mmc_hostname(host), err);
-> +		goto out_err;
-> +	}
-> +
-> +	err = mmc_switch_status(card);
-> +	if (err)
-> +		goto out_err;
+Regards
+Dong Aisheng
 
-The spec. says "switch to High Speed mode and then set the clock frequency
-to a value not greater than 52 MHz" which would tend to imply changing to
-the High Speed frequency here. It shouldn't make any difference, so I don't
-know if it is worth doing.
-
-> +
-> +	/* Switch card to DDR with strobe bit */
-> +	val = EXT_CSD_DDR_BUS_WIDTH_8 | EXT_CSD_BUS_WIDTH_STROBE;
-> +	err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
-> +			 EXT_CSD_BUS_WIDTH,
-> +			 val,
-> +			 card->ext_csd.generic_cmd6_time);
-> +	if (err) {
-> +		pr_err("%s: switch to bus width for hs400es failed, err:%d\n",
-> +			mmc_hostname(host), err);
-> +		goto out_err;
-> +	}
-> +
-> +	/* Switch card to HS400 */
-> +	val = EXT_CSD_TIMING_HS400 |
-> +	      card->drive_strength << EXT_CSD_DRV_STR_SHIFT;
-> +	err = __mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
-> +			   EXT_CSD_HS_TIMING, val,
-> +			   card->ext_csd.generic_cmd6_time,
-> +			   true, false, true);
-> +	if (err) {
-> +		pr_err("%s: switch to hs400es failed, err:%d\n",
-> +			mmc_hostname(host), err);
-> +		goto out_err;
-> +	}
-> +
-> +	/* Set host controller to HS400 timing and frequency */
-> +	mmc_set_timing(host, MMC_TIMING_MMC_HS400);
-> +
-> +	/* Controller enable enhanced strobe function */
-> +	host->ios.enhanced_strobe = true;
-> +	if (host->ops->hs400_enhanced_strobe)
-> +		host->ops->hs400_enhanced_strobe(host, &host->ios);
-> +
-
-And again here, if we followed the spec. exactly we would change to the
-HS400 frequency here rather than after sending CMD13. Again, it shouldn't
-make any difference, so I don't if it is worth doing.
-
-> +	err = mmc_switch_status(card);
-> +	if (err)
-> +		goto out_err;
-> +
-> +	return 0;
-> +
-> +out_err:
-> +	pr_err("%s: %s failed, error %d\n", mmc_hostname(card->host),
-> +	       __func__, err);
-> +	return err;
-> +}
-> +
->  static void mmc_select_driver_type(struct mmc_card *card)
->  {
->  	int card_drv_type, drive_strength, drv_type;
-> @@ -1297,7 +1375,7 @@ err:
->  }
->  
->  /*
-> - * Activate High Speed or HS200 mode if supported.
-> + * Activate High Speed, HS200 or HS400ES mode if supported.
->   */
->  static int mmc_select_timing(struct mmc_card *card)
->  {
-> @@ -1306,7 +1384,9 @@ static int mmc_select_timing(struct mmc_card *card)
->  	if (!mmc_can_ext_csd(card))
->  		goto bus_speed;
->  
-> -	if (card->mmc_avail_type & EXT_CSD_CARD_TYPE_HS200)
-> +	if (card->mmc_avail_type & EXT_CSD_CARD_TYPE_HS400ES)
-> +		err = mmc_select_hs400es(card);
-> +	else if (card->mmc_avail_type & EXT_CSD_CARD_TYPE_HS200)
->  		err = mmc_select_hs200(card);
->  	else if (card->mmc_avail_type & EXT_CSD_CARD_TYPE_HS)
->  		err = mmc_select_hs(card);
-> diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
-> index eb0151b..22defc2 100644
-> --- a/include/linux/mmc/card.h
-> +++ b/include/linux/mmc/card.h
-> @@ -95,6 +95,7 @@ struct mmc_ext_csd {
->  	u8			raw_partition_support;	/* 160 */
->  	u8			raw_rpmb_size_mult;	/* 168 */
->  	u8			raw_erased_mem_count;	/* 181 */
-> +	u8			strobe_support;		/* 184 */
->  	u8			raw_ext_csd_structure;	/* 194 */
->  	u8			raw_card_type;		/* 196 */
->  	u8			raw_driver_strength;	/* 197 */
-> diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-> index 2a06fb0..0eabb72 100644
-> --- a/include/linux/mmc/host.h
-> +++ b/include/linux/mmc/host.h
-> @@ -19,6 +19,7 @@
->  
->  #include <linux/mmc/core.h>
->  #include <linux/mmc/card.h>
-> +#include <linux/mmc/mmc.h>
->  #include <linux/mmc/pm.h>
->  
->  struct mmc_ios {
-> @@ -77,6 +78,8 @@ struct mmc_ios {
->  #define MMC_SET_DRIVER_TYPE_A	1
->  #define MMC_SET_DRIVER_TYPE_C	2
->  #define MMC_SET_DRIVER_TYPE_D	3
-> +
-> +	bool enhanced_strobe;			/* hs400es selection */
->  };
->  
->  struct mmc_host_ops {
-> @@ -143,6 +146,9 @@ struct mmc_host_ops {
->  
->  	/* Prepare HS400 target operating frequency depending host driver */
->  	int	(*prepare_hs400_tuning)(struct mmc_host *host, struct mmc_ios *ios);
-> +	/* Prepare enhanced strobe depending host driver */
-> +	void	(*hs400_enhanced_strobe)(struct mmc_host *host,
-> +					 struct mmc_ios *ios);
->  	int	(*select_drive_strength)(struct mmc_card *card,
->  					 unsigned int max_dtr, int host_drv,
->  					 int card_drv, int *drv_type);
-> @@ -513,6 +519,11 @@ static inline bool mmc_card_hs400(struct mmc_card *card)
->  	return card->host->ios.timing == MMC_TIMING_MMC_HS400;
->  }
->  
-> +static inline bool mmc_card_hs400es(struct mmc_card *card)
-> +{
-> +	return card->host->ios.enhanced_strobe;
-> +}
-> +
->  void mmc_retune_timer_stop(struct mmc_host *host);
->  
->  static inline void mmc_retune_needed(struct mmc_host *host)
-> diff --git a/include/linux/mmc/mmc.h b/include/linux/mmc/mmc.h
-> index 15f2c4a..c376209 100644
-> --- a/include/linux/mmc/mmc.h
-> +++ b/include/linux/mmc/mmc.h
-> @@ -297,6 +297,7 @@ struct _mmc_csd {
->  #define EXT_CSD_PART_CONFIG		179	/* R/W */
->  #define EXT_CSD_ERASED_MEM_CONT		181	/* RO */
->  #define EXT_CSD_BUS_WIDTH		183	/* R/W */
-> +#define EXT_CSD_STROBE_SUPPORT		184	/* RO */
->  #define EXT_CSD_HS_TIMING		185	/* R/W */
->  #define EXT_CSD_POWER_CLASS		187	/* R/W */
->  #define EXT_CSD_REV			192	/* RO */
-> @@ -380,12 +381,14 @@ struct _mmc_csd {
->  #define EXT_CSD_CARD_TYPE_HS400_1_2V	(1<<7)	/* Card can run at 200MHz DDR, 1.2V */
->  #define EXT_CSD_CARD_TYPE_HS400		(EXT_CSD_CARD_TYPE_HS400_1_8V | \
->  					 EXT_CSD_CARD_TYPE_HS400_1_2V)
-> +#define EXT_CSD_CARD_TYPE_HS400ES	(1<<8)	/* Card can run at HS400ES */
->  
->  #define EXT_CSD_BUS_WIDTH_1	0	/* Card is in 1 bit mode */
->  #define EXT_CSD_BUS_WIDTH_4	1	/* Card is in 4 bit mode */
->  #define EXT_CSD_BUS_WIDTH_8	2	/* Card is in 8 bit mode */
->  #define EXT_CSD_DDR_BUS_WIDTH_4	5	/* Card is in 4 bit DDR mode */
->  #define EXT_CSD_DDR_BUS_WIDTH_8	6	/* Card is in 8 bit DDR mode */
-> +#define EXT_CSD_BUS_WIDTH_STROBE BIT(7)	/* Enhanced strobe mode */
->  
->  #define EXT_CSD_TIMING_BC	0	/* Backwards compatility */
->  #define EXT_CSD_TIMING_HS	1	/* High speed */
-> 
-
+> Before:
+> [    3.726894] sdhci: Secure Digital Host Controller Interface driver
+> [    3.733081] sdhci: Copyright(c) Pierre Ossman
+> [    3.737462] sdhci-pltfm: SDHCI platform and OF driver helper
+> [    3.753411] mmc0: Unknown controller version (3). You may experience
+>  problems.
+> [    3.768345] mmc0: Invalid maximum block size, assuming 512 bytes
+> [    3.814896] mmc0: SDHCI controller on 700b0600.sdhci [700b0600.sdhci]
+>  using ADMA 64-bit
+> [    3.892088] mmc0: new high speed MMC card at address 0001
+> [    3.899194] mmcblk0: mmc0:0001 SEM16G 14.7 GiB
+> [    3.904217] mmcblk0boot0: mmc0:0001 SEM16G partition 1 4.00 MiB
+> [    3.910645] mmcblk0boot1: mmc0:0001 SEM16G partition 2 4.00 MiB
+> [    3.917119] mmcblk0rpmb: mmc0:0001 SEM16G partition 3 4.00 MiB
+> [    3.926006]  mmcblk0: p1 p2 p3 p4 p5 p6 p7 p8 p9
+> root@jetson_tk1:~# cat /sys/kernel/debug/mmc0/ios
+> clock:          52000000 Hz
+> actual clock:   51000000 Hz
+> vdd:            21 (3.3 ~ 3.4 V)
+> bus mode:       2 (push-pull)
+> chip select:    0 (don't care)
+> power mode:     2 (on)
+> bus width:      3 (8 bits)
+> timing spec:    1 (mmc high-speed)
+> signal voltage: 0 (3.30 V)
+> driver type:    0 (driver type B)
+>
+> After:
+> [    3.899918] mmc0: new MMC card at address 0001
+> root@jetson_tk1:~# cat /sys/kernel/debug/mmc0/ios
+> clock:          25000000 Hz
+> actual clock:   24727273 Hz
+> vdd:            21 (3.3 ~ 3.4 V)
+> bus mode:       2 (push-pull)
+> chip select:    0 (don't care)
+> power mode:     2 (on)
+> bus width:      0 (1 bits)
+> timing spec:    0 (legacy)
+> signal voltage: 0 (3.30 V)
+> driver type:    0 (driver type B)
+>
