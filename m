@@ -1,299 +1,268 @@
-From: Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
-Subject: [PATCH v6 3/5] mmc: core: implement enhanced strobe support
-Date: Thu, 26 May 2016 09:56:22 +0800
-Message-ID: <1464227782-31296-1-git-send-email-shawn.lin@rock-chips.com>
-References: <1464227707-30616-1-git-send-email-shawn.lin@rock-chips.com>
+From: Shawn Lin <shawn.lin@rock-chips.com>
+Subject: Re: [PATCH] mmc: dw_mmc: Consider HLE errors to be data and command
+ errors
+Date: Thu, 26 May 2016 10:23:39 +0800
+Message-ID: <4d8f3992-a1d3-6010-4964-8ca13cddc1c5@rock-chips.com>
+References: <1426002490-2014-1-git-send-email-dianders@chromium.org>
+ <5502CA4E.9060401@samsung.com>
+ <CAD=FV=VX3ix-j4y95W1q8b-aVuVEN+4xsd8WLx2xcE7KPNJwRw@mail.gmail.com>
+ <5506707D.40708@samsung.com> <55189F04.8000404@samsung.com>
+ <CAD=FV=WFAZqAsXOqunt0fxw87M-FruwUrxuzW0MJsG6UvfSjzA@mail.gmail.com>
+ <CAD=FV=UJGcwa_biSCGhD=kS-T+fppCniBFfOHb5ohnwSwSwMMA@mail.gmail.com>
+ <573BCC8D.5090606@kernel-upstream.org>
+ <CAD=FV=VneQR3wurjezBkRhtQiH+q-FfhDN8=Ym=XqtZpVmsdUw@mail.gmail.com>
+ <573C3283.1040606@rock-chips.com>
+ <CAD=FV=UoT2GRYWJWXEn_ccvKGgC+PzQM_BCtLHAa7jxzbaQ9SA@mail.gmail.com>
+ <10b3dc0e-aebf-664b-b36b-c54692cd9983@rock-chips.com>
+ <573DBAA5.2070706@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-In-Reply-To: <1464227707-30616-1-git-send-email-shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-rockchip>,
- <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-rockchip/>
-List-Post: <mailto:linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-List-Help: <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-rockchip>,
- <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
-Sender: "Linux-rockchip" <linux-rockchip-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-Errors-To: linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
-To: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Doug Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, Heiko Stuebner <heiko-4mtYJXux2i+zQB+pC5nmwQ@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>, Brian Norris <briannorris-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Michal Simek <michal.simek-gjFFaj9aHVfQT0dZR+AlfA@public.gmane.org>, Jaehoon Chung <jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, soren.brinkmann-gjFFaj9aHVfQT0dZR+AlfA@public.gmane.org
+Content-Type: text/plain; charset=utf-8;
+	format=flowed
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from lucky1.263xmail.com ([211.157.147.131]:40592 "EHLO smtp.263.net"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1752718AbcEZCYC (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 25 May 2016 22:24:02 -0400
+In-Reply-To: <573DBAA5.2070706@samsung.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Jaehoon Chung <jh80.chung@samsung.com>
+Cc: Doug Anderson <dianders@chromium.org>, shawn.lin@rock-chips.com, Ulf Hansson <ulf.hansson@linaro.org>, Alim Akhtar <alim.akhtar@samsung.com>, Sonny Rao <sonnyrao@chromium.org>, Heiko Stuebner <heiko@sntech.de>, Alexandru Stan <amstan@chromium.org>, "open list:ARM/Rockchip SoC..." <linux-rockchip@lists.infradead.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 
-Controllers use data strobe line to latch data from devices
-under hs400 mode, but not for cmd line. So since emmc 5.1, JEDEC
-introduces enhanced strobe mode for latching cmd response from
-emmc devices to host controllers. This new feature is optional,
-so it depends both on device's cap and host's cap to decide
-whether to use it or not.
+Hi Jaehoon,
 
-Signed-off-by: Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
+On 2016/5/19 21:07, Jaehoon Chung wrote:
+> On 05/19/2016 08:31 PM, Shawn Lin wrote:
+>> Hi,
+>>
+>> On 2016/5/19 1:37, Doug Anderson wrote:
+>>> Hi,
+>>>
+>>> On Wed, May 18, 2016 at 2:14 AM, Shawn Lin <shawn.lin@rock-chips.co=
+m> wrote:
+>>>> Hi
+>>>>
+>>>>
+>>>> On 2016-5-18 12:12, Doug Anderson wrote:
+>>>>>
+>>>>> Hi,
+>>>>>
+>>>>> On Tue, May 17, 2016 at 6:59 PM, Shawn Lin
+>>>>> <shawn.lin@kernel-upstream.org> wrote:
+>>>>>>
+>>>>>> Could you try this patch to see if you can still find HLE?
+>>>>>>
+>>>>>> @@ -2356,12 +2356,22 @@ static void dw_mci_cmd_interrupt(struct =
+dw_mci
+>>>>>> *host, u32 status)
+>>>>>>   static void dw_mci_handle_cd(struct dw_mci *host)
+>>>>>>   {
+>>>>>>          int i;
+>>>>>> +       int present;
+>>>>>>
+>>>>>>          for (i =3D 0; i < host->num_slots; i++) {
+>>>>>>                  struct dw_mci_slot *slot =3D host->slot[i];
+>>>>>>
+>>>>>>                  if (!slot)
+>>>>>>                          continue;
+>>>>>>
+>>>>>> +               present =3D !(mci_readl(slot->host, CDETECT) & (=
+1 <<
+>>>>>> slot->id));
+>>>>>> +               if (present)
+>>>>>> +                       set_bit(DW_MMC_CARD_PRESENT, &slot->flag=
+s);
+>>>>>> +               else
+>>>>>> +                       clear_bit(DW_MMC_CARD_PRESENT, &slot->fl=
+ags);
+>>>>>
+>>>>>
+>>>>> No, because we don't use the builtin card detect on veyron.  ;)
+>>>>>
+>>>>> We use GPIO card detect because we didn't like the way JTAG and S=
+D
+>>>>> interacted.  Also on rk3288 the builtin card detect line had the =
+wrong
+>>>>> voltage domain (you couldn't detect a card when the IO lines were
+>>>>> powered off).  The builtin card detect line is always driven low =
+on
+>>>>> veyron.
+>>>>
+>>>>
+>>>> Okay, I see.
+>>>>
+>>>>>
+>>>>>
+>>>>> I'm nearly certain that the root cause of my HLE errors is actual=
+ly
+>>>>> related to the same problem addressed by the commit 7c5209c315ea
+>>>>> ("mmc: core: Increase delay for voltage to stabilize from 3.3V to
+>>>>> 1.8V").  I think that on minnie we're still on the hairy edge and
+>>>>> sometimes the line doesn't transition fast enough.
+>>>>
+>>>>
+>>>> Things are not so simple from your details.
+>>>>
+>>>> I was not enabling SD3.0 support, then I also found HLE sometimes.
+>>>> So it seems commit 7c5209c315ea does not contibute to this phenome=
+non.
+>>>
+>>> Just to clarify, in my case commit 7c5209c315ea didn't make the
+>>> problem worse, but made it better.  Just not better enough.  ;)
+>>>
+>>>
+>>>> The scenario looks like:
+>>>> remove sd-card -> mmc_sd_detect -> send status(CMD13) ->power_off =
+->
+>>>> set_ios -> setup_bus -> disabled clk , then HLE irq storm coming
+>>>>
+>>>> From the code of dw_mci_prepare_command:
+>>>> SDMMC_CMD_PRV_DAT_WAIT will not be used for CMD13, so we don't
+>>>> wait_busy here, then cmd code is loding into queue of dw_mmc but
+>>>> still failing send out because it's in busy?
+>>>>
+>>>> With my patch, things go well:
+>>>> remove sd-card -> clear bit of DW_MMC_CARD_PRESENT  -> send
+>>>> status(CMD13) return directly -> power_off -> set_ios -> setup_bus=
+ ->
+>>>> disable clk
+>>>>
+>>>> So why should we allow inquiry of card status if we sure the card =
+is
+>>>> removed? I mean no any further cmds should be delivered.
+>>>
+>>> Quite honestly just dealing with the HLE error (my patch or
+>>> equivalent) might be a sane solution for the problem you describe.
+>>
+>> Yes, your patch looks good to me, so it should be merged firstly. :)
+>> Then let's push it a bit further more that when HLEs are coming,
+>> somethings must be wrong(currently I don't see a obvious clue from
+>> the code itself although, I'm prone to think it belongs to the
+>> software issue).
+>
+> We don't know what's main cause for HLE..But i also think it's releva=
+nt to SW issue.
+> But we need to consider all possibilities..
+>
+>>
+>>
+>>>
+>>> dw_mmc needs to be able to work with an external card detect GPIO.
+>>> It's been part of the dw_mmc driver for a long time and is (in fact=
+)
+>>> in use upstream at least by rk3288-veyron.  Any solution that only
+>>> works for internal card detect is not enough.  Just handling the HL=
+E
+>>> error to deal with the interrupt storm and then letting Linux remov=
+e
+>>> the card (because of the card detect interrupt) seems totally OK to
+>>> me.
+>>>
+>>
+>> Sure, some of rockchip Socs use gpio for CD because they don't
+>> have a internal CD, such as RK3036, right?
+>>
+>>> Note: I'd be very curious if your problems get better if you disabl=
+e
+>>
+>> Not at all.
+>>
+>>> the "grf_force_jtag" bit in the GRF.  If you're using the builtin c=
+ard
+>>> detect and you use the boot default of "grf_force_jtag" then your p=
+ins
+>>> will be unmuxed behind your back when the card is ejected.  This co=
+uld
+>>> be causing the dw_mmc controller to get confused.
+>>
+>> Right, grf_force_jtag is also not a friend of mine. :)
+>> So I had disabled this function before I was debugging it.
+>>
+>>>
+>>>
+>>>> And another question: should we wait busy for cmd13?
+>>>
+>>> I don't think so.  As I understand it CMD13 uses only the CMD line =
+for
+>>> communication and it should be appropriate to send this when the bu=
+s
+>>> is "busy" (which means that the DATA lines are low).
+>>
+>> Ahh... take back my question.. I was just considering a wired situat=
+ion
+>> that pins are unmuxed on the background(cmd line as well) when cmd13=
+ is
+>> delivering....
+>>
+>>
+>>>
+>>> Also: it seems odd that the HLE IRQ storm didn't come right after t=
+he
+>>> CMD 13 in your description above.  Are you sure it was the CMD 13 t=
+hat
+>>> caused the HLEs, or could it has been something else?
+>>
+>> Actually no. Any cmds be issued can trigger HLEs, I think, after sd =
+card is removed When I hacked mmc_sd_detecd to send other cmds intead
+>> of cmd13.
+>>
+>> From dw_mmc databook v270a(7.2.3 Clock Programming) we can see:
+>> The DWC_mobile_storage loads each of these registers only when the
+>> start_cmd bit and the Update_clk_regs_only bit in the CMD register a=
+re
+>> set. When a command is successfully loaded, the DWC_mobile_storage
+>> clears this bit, unless the DWC_mobile_storage already has another
+>> command in the queue, at which point it gives an HLE (Hardware Locke=
+d
+>> Error); for details on HLEs, refer to =E2=80=9CError Handling=E2=80=9D=
+ on page 233.
+>> Software should look for the start_cmd and the Update_clk_regs_only
+>> bits, and should also set the wait_prvdata_complete bit to ensure th=
+at
+>> clock parameters do not change during data transfer.
+>>
+>> Maybe the cmd is trying to load(or somethings wrong with the
+>> controller?) when we disable the clk? That may explain my observatio=
+n
+>> that HLEs came after disabling clk.
+>
+> I agreed.
+>
+> To Disable clock, it sends cmd with update_clk_regs_only and wait_prv=
+data_complete bit.
+> I think it's problem..(waiting for prvdata..)
+>
+> If there are ongoing some data(read/write), then before disabling clo=
+ck, waiting for completing previous data.
+> (But card was already removed, and it couldn't do anything.)
+> It's difficult to analyze the HLE..So After applying first, then we c=
+an solve this problem, step by step.
+>
 
-Reviewed-by: Jaehoon Chung <jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>
-Tested-by: Douglas Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
-Tested-by: Jaehoon Chung <jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>
----
+I saw you send a PR for v4.7-fix to Ulf which didn't include this one.
+Do you plan to add it into 4.8 materials? :)
 
-Changes in v6:
-- add Doug's test-tag and Jaehoon's review-test-tag
+> Best Regards,
+> Jaehoon Chung
+>
+>>
+>>
+>>>
+>>>
+>>> -Doug
+>>>
+>>>
+>>>
+>>
+>>
+>
+>
+>
+>
 
-Changes in v5: None
-Changes in v4: None
-Changes in v3: None
-Changes in v2: None
 
- drivers/mmc/core/bus.c   |  3 +-
- drivers/mmc/core/core.c  |  9 ++++++
- drivers/mmc/core/mmc.c   | 84 ++++++++++++++++++++++++++++++++++++++++++++++--
- include/linux/mmc/card.h |  1 +
- include/linux/mmc/host.h | 11 +++++++
- include/linux/mmc/mmc.h  |  3 ++
- 6 files changed, 108 insertions(+), 3 deletions(-)
+--=20
+Best Regards
+Shawn Lin
 
-diff --git a/drivers/mmc/core/bus.c b/drivers/mmc/core/bus.c
-index 4bc48f1..c64266f 100644
---- a/drivers/mmc/core/bus.c
-+++ b/drivers/mmc/core/bus.c
-@@ -332,12 +332,13 @@ int mmc_add_card(struct mmc_card *card)
- 			mmc_card_ddr52(card) ? "DDR " : "",
- 			type);
- 	} else {
--		pr_info("%s: new %s%s%s%s%s card at address %04x\n",
-+		pr_info("%s: new %s%s%s%s%s%s card at address %04x\n",
- 			mmc_hostname(card->host),
- 			mmc_card_uhs(card) ? "ultra high speed " :
- 			(mmc_card_hs(card) ? "high speed " : ""),
- 			mmc_card_hs400(card) ? "HS400 " :
- 			(mmc_card_hs200(card) ? "HS200 " : ""),
-+			mmc_card_hs400es(card) ? "Enhanced strobe " : "",
- 			mmc_card_ddr52(card) ? "DDR " : "",
- 			uhs_bus_speed_mode, type, card->rca);
- 	}
-diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index 99275e4..b0c1f07 100644
---- a/drivers/mmc/core/core.c
-+++ b/drivers/mmc/core/core.c
-@@ -1127,6 +1127,15 @@ void mmc_set_initial_state(struct mmc_host *host)
- 	host->ios.bus_width = MMC_BUS_WIDTH_1;
- 	host->ios.timing = MMC_TIMING_LEGACY;
- 	host->ios.drv_type = 0;
-+	host->ios.enhanced_strobe = false;
-+
-+	/*
-+	 * Make sure we are in non-enhanced strobe mode before we
-+	 * actually enable it in ext_csd.
-+	 */
-+	if ((host->caps2 & MMC_CAP2_HS400_ES) &&
-+	     host->ops->hs400_enhanced_strobe)
-+		host->ops->hs400_enhanced_strobe(host, &host->ios);
- 
- 	mmc_set_ios(host);
- }
-diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-index f99c47e..9dc91ba 100644
---- a/drivers/mmc/core/mmc.c
-+++ b/drivers/mmc/core/mmc.c
-@@ -235,6 +235,11 @@ static void mmc_select_card_type(struct mmc_card *card)
- 		avail_type |= EXT_CSD_CARD_TYPE_HS400_1_2V;
- 	}
- 
-+	if ((caps2 & MMC_CAP2_HS400_ES) &&
-+	    card->ext_csd.strobe_support &&
-+	    (avail_type & EXT_CSD_CARD_TYPE_HS400))
-+		avail_type |= EXT_CSD_CARD_TYPE_HS400ES;
-+
- 	card->ext_csd.hs_max_dtr = hs_max_dtr;
- 	card->ext_csd.hs200_max_dtr = hs200_max_dtr;
- 	card->mmc_avail_type = avail_type;
-@@ -383,6 +388,7 @@ static int mmc_decode_ext_csd(struct mmc_card *card, u8 *ext_csd)
- 			mmc_card_set_blockaddr(card);
- 	}
- 
-+	card->ext_csd.strobe_support = ext_csd[EXT_CSD_STROBE_SUPPORT];
- 	card->ext_csd.raw_card_type = ext_csd[EXT_CSD_CARD_TYPE];
- 	mmc_select_card_type(card);
- 
-@@ -1216,6 +1222,78 @@ out_err:
- 	return err;
- }
- 
-+static int mmc_select_hs400es(struct mmc_card *card)
-+{
-+	struct mmc_host *host = card->host;
-+	int err = 0;
-+	u8 val;
-+
-+	if (!(host->caps & MMC_CAP_8_BIT_DATA)) {
-+		err = -ENOTSUPP;
-+		goto out_err;
-+	}
-+
-+	err = mmc_select_bus_width(card);
-+	if (IS_ERR_VALUE(err))
-+		goto out_err;
-+
-+	/* Switch card to HS mode */
-+	err = mmc_select_hs(card);
-+	if (err) {
-+		pr_err("%s: switch to high-speed failed, err:%d\n",
-+			mmc_hostname(host), err);
-+		goto out_err;
-+	}
-+
-+	err = mmc_switch_status(card);
-+	if (err)
-+		goto out_err;
-+
-+	/* Switch card to DDR with strobe bit */
-+	val = EXT_CSD_DDR_BUS_WIDTH_8 | EXT_CSD_BUS_WIDTH_STROBE;
-+	err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
-+			 EXT_CSD_BUS_WIDTH,
-+			 val,
-+			 card->ext_csd.generic_cmd6_time);
-+	if (err) {
-+		pr_err("%s: switch to bus width for hs400es failed, err:%d\n",
-+			mmc_hostname(host), err);
-+		goto out_err;
-+	}
-+
-+	/* Switch card to HS400 */
-+	val = EXT_CSD_TIMING_HS400 |
-+	      card->drive_strength << EXT_CSD_DRV_STR_SHIFT;
-+	err = __mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
-+			   EXT_CSD_HS_TIMING, val,
-+			   card->ext_csd.generic_cmd6_time,
-+			   true, false, true);
-+	if (err) {
-+		pr_err("%s: switch to hs400es failed, err:%d\n",
-+			mmc_hostname(host), err);
-+		goto out_err;
-+	}
-+
-+	/* Set host controller to HS400 timing and frequency */
-+	mmc_set_timing(host, MMC_TIMING_MMC_HS400);
-+
-+	/* Controller enable enhanced strobe function */
-+	host->ios.enhanced_strobe = true;
-+	if (host->ops->hs400_enhanced_strobe)
-+		host->ops->hs400_enhanced_strobe(host, &host->ios);
-+
-+	err = mmc_switch_status(card);
-+	if (err)
-+		goto out_err;
-+
-+	return 0;
-+
-+out_err:
-+	pr_err("%s: %s failed, error %d\n", mmc_hostname(card->host),
-+	       __func__, err);
-+	return err;
-+}
-+
- static void mmc_select_driver_type(struct mmc_card *card)
- {
- 	int card_drv_type, drive_strength, drv_type;
-@@ -1297,7 +1375,7 @@ err:
- }
- 
- /*
-- * Activate High Speed or HS200 mode if supported.
-+ * Activate High Speed, HS200 or HS400ES mode if supported.
-  */
- static int mmc_select_timing(struct mmc_card *card)
- {
-@@ -1306,7 +1384,9 @@ static int mmc_select_timing(struct mmc_card *card)
- 	if (!mmc_can_ext_csd(card))
- 		goto bus_speed;
- 
--	if (card->mmc_avail_type & EXT_CSD_CARD_TYPE_HS200)
-+	if (card->mmc_avail_type & EXT_CSD_CARD_TYPE_HS400ES)
-+		err = mmc_select_hs400es(card);
-+	else if (card->mmc_avail_type & EXT_CSD_CARD_TYPE_HS200)
- 		err = mmc_select_hs200(card);
- 	else if (card->mmc_avail_type & EXT_CSD_CARD_TYPE_HS)
- 		err = mmc_select_hs(card);
-diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
-index eb0151b..22defc2 100644
---- a/include/linux/mmc/card.h
-+++ b/include/linux/mmc/card.h
-@@ -95,6 +95,7 @@ struct mmc_ext_csd {
- 	u8			raw_partition_support;	/* 160 */
- 	u8			raw_rpmb_size_mult;	/* 168 */
- 	u8			raw_erased_mem_count;	/* 181 */
-+	u8			strobe_support;		/* 184 */
- 	u8			raw_ext_csd_structure;	/* 194 */
- 	u8			raw_card_type;		/* 196 */
- 	u8			raw_driver_strength;	/* 197 */
-diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-index 2a06fb0..0eabb72 100644
---- a/include/linux/mmc/host.h
-+++ b/include/linux/mmc/host.h
-@@ -19,6 +19,7 @@
- 
- #include <linux/mmc/core.h>
- #include <linux/mmc/card.h>
-+#include <linux/mmc/mmc.h>
- #include <linux/mmc/pm.h>
- 
- struct mmc_ios {
-@@ -77,6 +78,8 @@ struct mmc_ios {
- #define MMC_SET_DRIVER_TYPE_A	1
- #define MMC_SET_DRIVER_TYPE_C	2
- #define MMC_SET_DRIVER_TYPE_D	3
-+
-+	bool enhanced_strobe;			/* hs400es selection */
- };
- 
- struct mmc_host_ops {
-@@ -143,6 +146,9 @@ struct mmc_host_ops {
- 
- 	/* Prepare HS400 target operating frequency depending host driver */
- 	int	(*prepare_hs400_tuning)(struct mmc_host *host, struct mmc_ios *ios);
-+	/* Prepare enhanced strobe depending host driver */
-+	void	(*hs400_enhanced_strobe)(struct mmc_host *host,
-+					 struct mmc_ios *ios);
- 	int	(*select_drive_strength)(struct mmc_card *card,
- 					 unsigned int max_dtr, int host_drv,
- 					 int card_drv, int *drv_type);
-@@ -513,6 +519,11 @@ static inline bool mmc_card_hs400(struct mmc_card *card)
- 	return card->host->ios.timing == MMC_TIMING_MMC_HS400;
- }
- 
-+static inline bool mmc_card_hs400es(struct mmc_card *card)
-+{
-+	return card->host->ios.enhanced_strobe;
-+}
-+
- void mmc_retune_timer_stop(struct mmc_host *host);
- 
- static inline void mmc_retune_needed(struct mmc_host *host)
-diff --git a/include/linux/mmc/mmc.h b/include/linux/mmc/mmc.h
-index 15f2c4a..c376209 100644
---- a/include/linux/mmc/mmc.h
-+++ b/include/linux/mmc/mmc.h
-@@ -297,6 +297,7 @@ struct _mmc_csd {
- #define EXT_CSD_PART_CONFIG		179	/* R/W */
- #define EXT_CSD_ERASED_MEM_CONT		181	/* RO */
- #define EXT_CSD_BUS_WIDTH		183	/* R/W */
-+#define EXT_CSD_STROBE_SUPPORT		184	/* RO */
- #define EXT_CSD_HS_TIMING		185	/* R/W */
- #define EXT_CSD_POWER_CLASS		187	/* R/W */
- #define EXT_CSD_REV			192	/* RO */
-@@ -380,12 +381,14 @@ struct _mmc_csd {
- #define EXT_CSD_CARD_TYPE_HS400_1_2V	(1<<7)	/* Card can run at 200MHz DDR, 1.2V */
- #define EXT_CSD_CARD_TYPE_HS400		(EXT_CSD_CARD_TYPE_HS400_1_8V | \
- 					 EXT_CSD_CARD_TYPE_HS400_1_2V)
-+#define EXT_CSD_CARD_TYPE_HS400ES	(1<<8)	/* Card can run at HS400ES */
- 
- #define EXT_CSD_BUS_WIDTH_1	0	/* Card is in 1 bit mode */
- #define EXT_CSD_BUS_WIDTH_4	1	/* Card is in 4 bit mode */
- #define EXT_CSD_BUS_WIDTH_8	2	/* Card is in 8 bit mode */
- #define EXT_CSD_DDR_BUS_WIDTH_4	5	/* Card is in 4 bit DDR mode */
- #define EXT_CSD_DDR_BUS_WIDTH_8	6	/* Card is in 8 bit DDR mode */
-+#define EXT_CSD_BUS_WIDTH_STROBE BIT(7)	/* Enhanced strobe mode */
- 
- #define EXT_CSD_TIMING_BC	0	/* Backwards compatility */
- #define EXT_CSD_TIMING_HS	1	/* High speed */
--- 
-2.3.7
