@@ -1,46 +1,63 @@
 From: Shawn Lin <shawn.lin@rock-chips.com>
-Subject: [PATCH v2 1/2] mmc: dw_mmc: remove redundant of set_bit and clear_bit
-Date: Fri, 27 May 2016 14:36:40 +0800
-Message-ID: <1464331000-16230-1-git-send-email-shawn.lin@rock-chips.com>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from lucky1.263xmail.com ([211.157.147.135]:40280 "EHLO
-	lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753966AbcE0GhJ (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 27 May 2016 02:37:09 -0400
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Subject: [PATCH v2 2/2] mmc: dw_mmc: check card present before starting request
+Date: Fri, 27 May 2016 14:37:05 +0800
+Message-ID: <1464331025-16275-1-git-send-email-shawn.lin@rock-chips.com>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
 To: Jaehoon Chung <jh80.chung@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>
 Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Doug Anderson <dianders@chromium.org>, linux-rockchip@lists.infradead.org, Shawn Lin <shawn.lin@rock-chips.com>
+List-Id: linux-mmc@vger.kernel.org
 
-dw_mci_get_cd have already dealt with these for
-both of internal card-detect and gpio card-detect.
+The main reason to add this check is to avoid unnecessary
+mmc_request like the on-going cmd and the corresponding sbc
+if the card is removed. Although we have already checked this in
+dw_mci_handle_cd for runtime usage of sd card and dw_mci_init_slot
+for noremovable devices, but there is a timing gap before it really
+calls dw_mci_get_cd as mmc_detect_change needs some delay here.
+
+Another gain here is that we could save some checkings of card status
+after sd card been removed.
 
 Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
 
 ---
 
-Changes in v2: None
+Changes in v2:
+- hold lock before dw_mci_queue_request
 
- drivers/mmc/host/dw_mmc.c | 5 +----
- 1 file changed, 1 insertion(+), 4 deletions(-)
+ drivers/mmc/host/dw_mmc.c | 7 ++++---
+ 1 file changed, 4 insertions(+), 3 deletions(-)
 
 diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index 829a6ee..cb30e91 100644
+index cb30e91..2b4b3df 100644
 --- a/drivers/mmc/host/dw_mmc.c
 +++ b/drivers/mmc/host/dw_mmc.c
-@@ -2616,10 +2616,7 @@ static int dw_mci_init_slot(struct dw_mci *host, unsigned int id)
- 		mmc->max_seg_size = mmc->max_req_size;
+@@ -105,6 +105,7 @@ struct idmac_desc {
+ static bool dw_mci_reset(struct dw_mci *host);
+ static bool dw_mci_ctrl_reset(struct dw_mci *host, u32 reset);
+ static int dw_mci_card_busy(struct mmc_host *mmc);
++static int dw_mci_get_cd(struct mmc_host *mmc);
+ 
+ #if defined(CONFIG_DEBUG_FS)
+ static int dw_mci_req_show(struct seq_file *s, void *v)
+@@ -1253,15 +1254,15 @@ static void dw_mci_request(struct mmc_host *mmc, struct mmc_request *mrq)
+ 	 * atomic, otherwise the card could be removed in between and the
+ 	 * request wouldn't fail until another card was inserted.
+ 	 */
+-	spin_lock_bh(&host->lock);
+ 
+-	if (!test_bit(DW_MMC_CARD_PRESENT, &slot->flags)) {
+-		spin_unlock_bh(&host->lock);
++	if (!dw_mci_get_cd(mmc)) {
+ 		mrq->cmd->error = -ENOMEDIUM;
+ 		mmc_request_done(mmc, mrq);
+ 		return;
  	}
  
--	if (dw_mci_get_cd(mmc))
--		set_bit(DW_MMC_CARD_PRESENT, &slot->flags);
--	else
--		clear_bit(DW_MMC_CARD_PRESENT, &slot->flags);
-+	dw_mci_get_cd(mmc);
++	spin_lock_bh(&host->lock);
++
+ 	dw_mci_queue_request(host, slot, mrq);
  
- 	ret = mmc_add_host(mmc);
- 	if (ret)
+ 	spin_unlock_bh(&host->lock);
 -- 
 2.3.7
-
-
