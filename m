@@ -1,111 +1,96 @@
-From: Peter Chen <hzpeterchen-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: Re: [RFC v2 00/13] usb/mmc/power: Fix USB/LAN when TFTP booting
-Date: Sat, 28 May 2016 11:36:13 +0800
-Message-ID: <20160528033613.GA3291@shlinux2>
-References: <1462451666-17945-1-git-send-email-k.kozlowski@samsung.com>
- <20160505224240.GA31429@rob-hp-laptop>
- <CAPDyKFqpoi03Egfuvd8qJXnn_+FBgPXAb7S4UvkxVs8BA+zwnA@mail.gmail.com>
- <20160509181829.GA19687@rob-hp-laptop>
- <CAPDyKFq2=mqujFjvJSYxg2nVmK=OrBKLtFfb-ErNJO3Zr_LMVw@mail.gmail.com>
+From: Shawn Lin <shawn.lin@rock-chips.com>
+Subject: Re: Fw:Re: [RFC PATCH 0/4] Command Queueing Support in eMMC
+Date: Sat, 28 May 2016 20:54:38 +0800
+Message-ID: <2745a917-c7d5-cf9b-8846-c49c945a0be4@rock-chips.com>
+References: <593930816.1359719.1464439518694.JavaMail.xmail@wmthree-4>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-usb-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <CAPDyKFq2=mqujFjvJSYxg2nVmK=OrBKLtFfb-ErNJO3Zr_LMVw-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-Sender: linux-usb-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: Rob Herring <robh-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Krzysztof Kozlowski <k.kozlowski-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, linux-samsung-soc <linux-samsung-soc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-mmc <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-pm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-pm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-usb-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Sebastian Reichel <sre-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Dmitry Eremin-Solenikov <dbaryshkov-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, David Woodhouse <dwmw2-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org>, Greg Kroah-Hartman <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>, Mark Brown <broonie-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, hverkuil-qWit8jRvyhVmR6Xm/wNWPw@public.gmane.org, tjakobi-o02PS0xoJP9W0yFyLvAVXMxlOr/tl8fh@public.gmane.org, Bartlomiej Zolnierkiewicz <b.zolnierkie-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, Marek Szyprowski <m.szyprowski-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-msm-owner@vger.kernel.org>
+In-Reply-To: <593930816.1359719.1464439518694.JavaMail.xmail@wmthree-4>
+Sender: linux-arm-msm-owner@vger.kernel.org
+To: Asutosh Das <asutoshd@codeaurora.org>
+Cc: shawn.lin@rock-chips.com, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-arm-msm <linux-arm-msm@vger.kernel.org>, Dong Aisheng <dongas86@gmail.com>, Doug Anderson <dianders@google.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On Tue, May 10, 2016 at 01:02:08PM +0200, Ulf Hansson wrote:
-> + Arnd
-> 
-> [...]
-> 
-> >> >> Solution
-> >> >> ========
-> >> >> This is very similar to the MMC pwrseq behavior so the idea is to:
-> >> >> 1. Move MMC pwrseq drivers to generic place,
-> >> >
-> >> > You can do that, but I'm going to NAK any use of pwrseq bindings outside
-> >> > of MMC. I think it is the wrong way to do things. The DT should describe
-> >>
-> >> Huh, I didn't know that was your view of the mmc pwrseq bindings. Why
-> >> didn't you NAK them before?
-> >
-> > Unfortunately, either I missed it or it was a time I couldn't spend much
-> > time on reviews.
-> 
-> Okay, I guess it's common issue among maintainers. The problem with DT
-> is that it gets really hard to be fixed up later. :-)
-> 
-> >
-> >> > the devices. If they happen to be "simple" then the core can walk the
-> >> > tree and do any setup. For example, look for "reset-gpios" and toggle
-> >> > that GPIO. There is no need for a special node.
-> >> >
-> >> >> 2. Extend the pwrseq-simple with regulator toggling,
-> >> >> 3. Add support to USB hub and port core for pwrseq,
-> >> >
-> >> > We discussed this for USB already[1] and is why we defined how to add
-> >> > USB child devices. The idea is not to add pwrseq to that.
-> >>
-> >> I am not familiar with the USB discussion.
-> >>
-> >> Still, let me give you some more background to the mmc pwrseq. The
-> >> idea from the mmc pwrseq bindings comes from the power-domain DT
-> >> bindings, as I thought these things were a bit related.
-> >> In both cases they are not directly a property of the device, but more
-> >> describing a HW dependency to allow the device to work.
-> >
-> > I could see this as a board level power domain. However the difference
-> > is we are not generally exposing internal SOC details the same way as
-> > board level components. Perhaps we could extend power domains to board
-> > level, but that is not what was done here.
-> >
-> >> One could probably use a child node instead of a phandle, but that
-> >> wasn't chosen back then. Of course you are the DT expert, but could
-> >> you perhaps tell me why a child node is better for cases like this?
-> >
-> > If there is a control path hierarchy, then we try to model that in DT
-> > with child nodes. In cases of SDIO and USB, there is a clear hierarchy.
-> > Ignoring the discovery ordering problem, we already have defined ways to
-> > describe GPIO connections, regulators, etc. to devices. Describing those
-> > things separately from the device to solve a particular issue that is
-> > really a kernel limitation is what I don't like.
-> 
-> Okay, I see.
-> 
-> To move forward in trying to make mmc pwrseq a generic pwrseq, could
-> we perhaps allow both cases?
-> 
-> In the mmc case, there are already deployed bindings so we need to
-> cope with these by using the phandle option, but for USB etc we could
-> force the child node option.
-> As long as we agree that we keep using a compatible string for the
-> child node as well, both options should be able to co-exist and we
-> should probably be able to managed them both from a common pwrseq
-> driver framework.
-> 
-> Although, I do remember from an older conversations around some of
-> mine submission for the mmc pwrseq code, that some people (maybe
-> Arnd?) wasn't keen on adding a new framework for this. Perhaps that
-> has changed?
-> 
+Hi,
 
-All, how we move on for this?
+> On Tue, Dec 2, 2014 at 7:53 PM, Asutosh Das <asutoshd@codeaurora.org> wrote:
+>> In this patch series, we propose a method to add support for
+>> Command Queueing(CQ) feature added to eMMC-5.1 specification.
 
-1. Using a generic driver to manage both mmc and USB (and further
-subsystem), USB and further subsystem do not use pwrseq node in dts.
-2. USB creates the similar driver under drivers/usb for its own use. 
+Is anyone still pushing it forward?
+I have been trying to rebase it to 4.7 for testing but I think
+it should be better to ping this thread firstly to see if you guys have
+already done it. :)
 
-Which one do you prefer, thanks.
+>> This feature includes new commands for issuing tasks to the
+>> device and orders the execution of tasks to the device. It
+>> also has task management functions.
+>>
+>> The initialization of CQ is decided based on the underlying
+>> driver capability and the capability advertised by the card
+>> through ext_csd.
+>>
+>> We have selectively adopted the scsi design of pulling in
+>> requests from kernel block layer.
+>>
+>> In order to support queueing of multiple requests, we have
+>> added a new issue function to mmc-queue. This selectively
+>> pulls the requests and prepares and issues it to the underlying
+>> driver. We have used the inherent tagging mechanism of kernel
+>> block layer to keep track and map tags to the slots of underlying
+>> driver. The current design doesn't block for the request to
+>> complete. We have separated the issuing and completion path
+>> of the request and tracking is done using the tag assigned to
+>> the request.
+>>
+>> We have introduced a number of APIs to mmc block layer to
+>> facilitate servicing of requests.
+>>
+>> The completion of requests is handled in a softirq registered
+>> with the kernel block layer during initialization. The error
+>> handling however would be done using a workqueue and is under
+>> development.
+>>
+>> We have separated the legacy eMMC code from CQ code, so as to
+>> make it more manageable.
+>>
+>> A new layer has been introduced to serve the CQ compliant drivers.
+>> This layer (cq_hci) has all the standard functionality implemented.
+>> It also has necessary hooks for convenience of platform drivers.
+>>
+>> Asutosh Das (4):
+>>   mmc: queue: initialization of command-queue support
+>>   mmc: card: Add eMMC command queuing support in mmc block layer
+>>   mmc: cmdq: support for command queue enabled host
+>>   mmc: sdhci: add command queue support to sdhci
+>>
+>> Sujit Reddy Thumma (1):
+>>   mmc: core: Add support to read command queue parameters
+>>
+>>  drivers/mmc/card/block.c   | 378
+> ++++++++++++++++++++++++++++++++++++++++++++-
+>>  drivers/mmc/card/queue.c   | 160 ++++++++++++++++++-
+>>  drivers/mmc/card/queue.h   |   9 +-
+>>  drivers/mmc/core/core.c    |  87 +++++++++++
+>>  drivers/mmc/core/mmc.c     |  19 +++
+>>  drivers/mmc/core/mmc_ops.c |  45 ++++--
+>>  drivers/mmc/host/Kconfig   |  12 ++
+>>  drivers/mmc/host/Makefile  |   1 +
+>>  drivers/mmc/host/sdhci.c   |  89 +++++++++++
+>>  drivers/mmc/host/sdhci.h   |   2 +
+>>  include/linux/mmc/card.h   |  10 +-
+>>  include/linux/mmc/core.h   |  14 ++
+>>  include/linux/mmc/host.h   |  72 +++++++++
+>>  include/linux/mmc/mmc.h    |   9 ++
+>>  include/linux/mmc/sdhci.h  |   1 +
+>>  15 files changed, 887 insertions(+), 21 deletions(-)
+>>
+>
+
+
 
 -- 
-
-Best Regards,
-Peter Chen
---
-To unsubscribe from this list: send the line "unsubscribe linux-usb" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Best Regards
+Shawn Lin
