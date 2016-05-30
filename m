@@ -1,67 +1,66 @@
-From: Shawn Lin <shawn.lin@kernel-upstream.org>
-Subject: Re: [PATCH] mmc: core: fix the wrong error control
-Date: Mon, 30 May 2016 17:45:28 +0800
-Message-ID: <6ad3f39a-9ff6-6992-d9d4-8bc411128219@kernel-upstream.org>
-References: <1464594014-31934-1-git-send-email-jh80.chung@samsung.com>
+From: Hans de Goede <hdegoede@redhat.com>
+Subject: Re: [PATCH 2/3] mmc: sunxi: Fix DDR MMC timings for A80
+Date: Mon, 30 May 2016 13:34:42 +0200
+Message-ID: <99d78ff3-db4d-45cc-024a-d94583b56f35@redhat.com>
+References: <1464505484-3661-1-git-send-email-wens@csie.org>
+ <1464505484-3661-3-git-send-email-wens@csie.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=gbk;
-	format=flowed
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from m199-177.yeah.net ([123.58.177.199]:40221 "EHLO
-	m199-177.yeah.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752561AbcE3Jpi (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 30 May 2016 05:45:38 -0400
-In-Reply-To: <1464594014-31934-1-git-send-email-jh80.chung@samsung.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=windows-1252; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1464505484-3661-3-git-send-email-wens@csie.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Chen-Yu Tsai <wens@csie.org>, Ulf Hansson <ulf.hansson@linaro.org>, Maxime Ripard <maxime.ripard@free-electrons.com>
+Cc: linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
-Cc: shawn.lin@rock-chips.com, ulf.hansson@linaro.org, arnd@arndb.de, a.hajda@samsung.com, akpm@linux-foundation.org, torvalds@linux-foundation.org, k.kozlowski@samsung.com
 
 Hi,
 
-=D4=DA 2016/5/30 15:40, Jaehoon Chung =D0=B4=B5=C0:
-> After applied "remove lots of IS_ERR_VALUE abuses", it shoold be
-> misoperation. (commit 287980e49)
-> If mmc_bus_test is successful, it returned the bus-witdh bit.
+On 29-05-16 09:04, Chen-Yu Tsai wrote:
+> The MMC clock timings were incorrectly calculated, when the conversion
+> from delay value to delay phase was done.
 >
-> The below log is error log
-> [    2.542260] mmc0: mmc_select_hs200 failed, error 3
-> [    2.542275] mmc0: error 3 whilst initialising MMC card
+> The 50M DDR and 50M DDR 8bit timings are off, and make eMMC DDR
+> unusable. Unfortunately it seems different controllers on the same SoC
+> have different timings. The new settings are taken from mmc2, which is
+> commonly used with eMMC.
+
+Hmm, I'm not really all that familiar with mmc, but can't an external
+sdcard connected to mmc0 use DDR too ? Assuming the answer is yes, then
+we really need to update the driver to use the right per controller
+timings.
+
+> The settings for the slower timing modes seem to work despite being
+> wrong, so leave them be.
+
+If you're sure the timings are wrong, please fix them. Sometimes wrong
+timings do seem to work, but lead to unreliable communication, or turn
+out to work on some boards and not on others due to routing differences.
+
+Thanks & Regards,
+
+Hans
+
+
 >
-
-The same as this patch[0]?
-
-[0]https://patchwork.kernel.org/patch/9139673/
-
-> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+> Signed-off-by: Chen-Yu Tsai <wens@csie.org>
 > ---
->  drivers/mmc/core/mmc.c | 4 ++--
+>  drivers/mmc/host/sunxi-mmc.c | 4 ++--
 >  1 file changed, 2 insertions(+), 2 deletions(-)
 >
-> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-> index c984321..aafb73d 100644
-> --- a/drivers/mmc/core/mmc.c
-> +++ b/drivers/mmc/core/mmc.c
-> @@ -1276,7 +1276,7 @@ static int mmc_select_hs200(struct mmc_card *ca=
-rd)
->  	 * switch to HS200 mode if bus width is set successfully.
->  	 */
->  	err =3D mmc_select_bus_width(card);
-> -	if (!err) {
-> +	if (err > 0) {
->  		val =3D EXT_CSD_TIMING_HS200 |
->  		      card->drive_strength << EXT_CSD_DRV_STR_SHIFT;
->  		err =3D __mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
-> @@ -1583,7 +1583,7 @@ static int mmc_init_card(struct mmc_host *host,=
- u32 ocr,
->  	} else if (mmc_card_hs(card)) {
->  		/* Select the desired bus width optionally */
->  		err =3D mmc_select_bus_width(card);
-> -		if (!err) {
-> +		if (err > 0) {
->  			err =3D mmc_select_hs_ddr(card);
->  			if (err)
->  				goto free_card;
+> diff --git a/drivers/mmc/host/sunxi-mmc.c b/drivers/mmc/host/sunxi-mmc.c
+> index 7fc8b7aa83f0..5873dc344ab2 100644
+> --- a/drivers/mmc/host/sunxi-mmc.c
+> +++ b/drivers/mmc/host/sunxi-mmc.c
+> @@ -970,8 +970,8 @@ static const struct sunxi_mmc_clk_delay sun9i_mmc_clk_delays[] = {
+>  	[SDXC_CLK_400K]		= { .output = 180, .sample = 180 },
+>  	[SDXC_CLK_25M]		= { .output = 180, .sample =  75 },
+>  	[SDXC_CLK_50M]		= { .output = 150, .sample = 120 },
+> -	[SDXC_CLK_50M_DDR]	= { .output =  90, .sample = 120 },
+> -	[SDXC_CLK_50M_DDR_8BIT]	= { .output =  90, .sample = 120 },
+> +	[SDXC_CLK_50M_DDR]	= { .output =  54, .sample =  36 },
+> +	[SDXC_CLK_50M_DDR_8BIT]	= { .output =  72, .sample =  72 },
+>  };
 >
-
+>  static int sunxi_mmc_resource_request(struct sunxi_mmc_host *host,
+>
