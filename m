@@ -1,68 +1,67 @@
-From: Arnd Bergmann <arnd@arndb.de>
-Subject: Re: [PATCH] mmc: sdhci: use udelay instead of mdelay
-Date: Mon, 30 May 2016 10:00:42 +0200
-Message-ID: <6616684.XTKejIxGbJ@wuerfel>
-References: <CC22646CC0522A488A20F7A66BFD619308D47B@irsmsx105.ger.corp.intel.com>
+From: Shawn Lin <shawn.lin@kernel-upstream.org>
+Subject: Re: [PATCH] mmc: core: fix the wrong error control
+Date: Mon, 30 May 2016 17:45:28 +0800
+Message-ID: <6ad3f39a-9ff6-6992-d9d4-8bc411128219@kernel-upstream.org>
+References: <1464594014-31934-1-git-send-email-jh80.chung@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7Bit
+Content-Type: text/plain; charset=gbk;
+	format=flowed
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mout.kundenserver.de ([212.227.17.13]:54010 "EHLO
-	mout.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1161091AbcE3IAY (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 30 May 2016 04:00:24 -0400
-In-Reply-To: <CC22646CC0522A488A20F7A66BFD619308D47B@irsmsx105.ger.corp.intel.com>
+Received: from m199-177.yeah.net ([123.58.177.199]:40221 "EHLO
+	m199-177.yeah.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752561AbcE3Jpi (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 30 May 2016 05:45:38 -0400
+In-Reply-To: <1464594014-31934-1-git-send-email-jh80.chung@samsung.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "Baranowska, BeataX" <beatax.baranowska@intel.com>
-Cc: "Hunter, Adrian" <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "Dong, Chuanxiao" <chuanxiao.dong@intel.com>, "Jarosz, SebastianX" <sebastianx.jarosz@intel.com>
+To: Jaehoon Chung <jh80.chung@samsung.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Cc: shawn.lin@rock-chips.com, ulf.hansson@linaro.org, arnd@arndb.de, a.hajda@samsung.com, akpm@linux-foundation.org, torvalds@linux-foundation.org, k.kozlowski@samsung.com
 
-On Monday, May 30, 2016 7:55:55 AM CEST Baranowska, BeataX wrote:
-> From: Chuanxiao Dong <chuanxiao.dong@intel.com>
-> 
-> This patch will use udelay instead of mdelay when waiting for
-> SDHCI hardware to be stable. udelay can help to reduce the waiting
-> time when is in critical region which is protected by spinlock.
-> 
-> With this patch, __sdhci_set_ios only take a few microseconds to be
-> done.
-> 
-> Signed-off-by: Chuanxiao Dong <chuanxiao.dong@intel.com>
+Hi,
+
+=D4=DA 2016/5/30 15:40, Jaehoon Chung =D0=B4=B5=C0:
+> After applied "remove lots of IS_ERR_VALUE abuses", it shoold be
+> misoperation. (commit 287980e49)
+> If mmc_bus_test is successful, it returned the bus-witdh bit.
+>
+> The below log is error log
+> [    2.542260] mmc0: mmc_select_hs200 failed, error 3
+> [    2.542275] mmc0: error 3 whilst initialising MMC card
+>
+
+The same as this patch[0]?
+
+[0]https://patchwork.kernel.org/patch/9139673/
+
+> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
 > ---
-> drivers/mmc/host/sdhci.c | 18 +++++++++---------
->  1 file changed, 9 insertions(+), 9 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index e010ea4eb6f5..56d2c7567d97 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -173,8 +173,8 @@ void sdhci_reset(struct sdhci_host *host, u8 mask)
->                         sdhci_runtime_pm_bus_off(host);
->         }
-> 
-> -       /* Wait max 100 ms */
-> -       timeout = 100;
-> +       /* Wait max 10000 ms */
-> +       timeout = 10000;
-> 
->         /* hw clears the bit when it's done */
->         while (sdhci_readb(host, SDHCI_SOFTWARE_RESET) & mask) {
-> @@ -185,7 +185,7 @@ void sdhci_reset(struct sdhci_host *host, u8 mask)
->                         return;
->                 }
->                 timeout--;
-> -               mdelay(1);
-> +               udelay(10);
->         }
->  }
->  EXPORT_SYMBOL_GPL(sdhci_reset);
+>  drivers/mmc/core/mmc.c | 4 ++--
+>  1 file changed, 2 insertions(+), 2 deletions(-)
+>
+> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+> index c984321..aafb73d 100644
+> --- a/drivers/mmc/core/mmc.c
+> +++ b/drivers/mmc/core/mmc.c
+> @@ -1276,7 +1276,7 @@ static int mmc_select_hs200(struct mmc_card *ca=
+rd)
+>  	 * switch to HS200 mode if bus width is set successfully.
+>  	 */
+>  	err =3D mmc_select_bus_width(card);
+> -	if (!err) {
+> +	if (err > 0) {
+>  		val =3D EXT_CSD_TIMING_HS200 |
+>  		      card->drive_strength << EXT_CSD_DRV_STR_SHIFT;
+>  		err =3D __mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
+> @@ -1583,7 +1583,7 @@ static int mmc_init_card(struct mmc_host *host,=
+ u32 ocr,
+>  	} else if (mmc_card_hs(card)) {
+>  		/* Select the desired bus width optionally */
+>  		err =3D mmc_select_bus_width(card);
+> -		if (!err) {
+> +		if (err > 0) {
+>  			err =3D mmc_select_hs_ddr(card);
+>  			if (err)
+>  				goto free_card;
+>
 
-This can significantly increase the timeout length. I think you should
-instead use time_before() to see how many jiffies have passed since
-the start.
-
-However, the real question is why the reset function gets called under
-a spinlock in the first place. Can you try to rearrange the code so
-it doesn't need the lock at all and you can just use msleep() instead?
-
-	Arnd
