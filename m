@@ -1,79 +1,47 @@
 From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH v2 2/2] mmc: dw_mmc: check card present before starting
- request
-Date: Mon, 30 May 2016 08:18:48 +0900
-Message-ID: <574B78D8.50903@samsung.com>
-References: <CGME20160527063809epcas1p37bab24c0ce09ace502a3dc8cea023887@epcas1p3.samsung.com>
- <1464331025-16275-1-git-send-email-shawn.lin@rock-chips.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 7bit
+Subject: [PATCH] mmc: core: fix the wrong error control
+Date: Mon, 30 May 2016 16:40:14 +0900
+Message-ID: <1464594014-31934-1-git-send-email-jh80.chung@samsung.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-reply-to: <1464331025-16275-1-git-send-email-shawn.lin@rock-chips.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Shawn Lin <shawn.lin@rock-chips.com>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Doug Anderson <dianders@chromium.org>, linux-rockchip@lists.infradead.org
+To: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Cc: ulf.hansson@linaro.org, arnd@arndb.de, a.hajda@samsung.com, akpm@linux-foundation.org, torvalds@linux-foundation.org, k.kozlowski@samsung.com, Jaehoon Chung <jh80.chung@samsung.com>
 List-Id: linux-mmc@vger.kernel.org
 
-Hi Shawn,
+After applied "remove lots of IS_ERR_VALUE abuses", it shoold be
+misoperation. (commit 287980e49)
+If mmc_bus_test is successful, it returned the bus-witdh bit.
 
-On 05/27/2016 03:37 PM, Shawn Lin wrote:
-> The main reason to add this check is to avoid unnecessary
-> mmc_request like the on-going cmd and the corresponding sbc
-> if the card is removed. Although we have already checked this in
-> dw_mci_handle_cd for runtime usage of sd card and dw_mci_init_slot
-> for noremovable devices, but there is a timing gap before it really
-> calls dw_mci_get_cd as mmc_detect_change needs some delay here.
-> 
-> Another gain here is that we could save some checkings of card status
-> after sd card been removed.
-> 
-> Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
+The below log is error log
+[    2.542260] mmc0: mmc_select_hs200 failed, error 3
+[    2.542275] mmc0: error 3 whilst initialising MMC card
 
-Applied on my repository.
-Thanks!
+Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+---
+ drivers/mmc/core/mmc.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
 
-Best Regards,
-Jaehoon Chung
-
-> 
-> ---
-> 
-> Changes in v2:
-> - hold lock before dw_mci_queue_request
-> 
->  drivers/mmc/host/dw_mmc.c | 7 ++++---
->  1 file changed, 4 insertions(+), 3 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-> index cb30e91..2b4b3df 100644
-> --- a/drivers/mmc/host/dw_mmc.c
-> +++ b/drivers/mmc/host/dw_mmc.c
-> @@ -105,6 +105,7 @@ struct idmac_desc {
->  static bool dw_mci_reset(struct dw_mci *host);
->  static bool dw_mci_ctrl_reset(struct dw_mci *host, u32 reset);
->  static int dw_mci_card_busy(struct mmc_host *mmc);
-> +static int dw_mci_get_cd(struct mmc_host *mmc);
->  
->  #if defined(CONFIG_DEBUG_FS)
->  static int dw_mci_req_show(struct seq_file *s, void *v)
-> @@ -1253,15 +1254,15 @@ static void dw_mci_request(struct mmc_host *mmc, struct mmc_request *mrq)
->  	 * atomic, otherwise the card could be removed in between and the
->  	 * request wouldn't fail until another card was inserted.
->  	 */
-> -	spin_lock_bh(&host->lock);
->  
-> -	if (!test_bit(DW_MMC_CARD_PRESENT, &slot->flags)) {
-> -		spin_unlock_bh(&host->lock);
-> +	if (!dw_mci_get_cd(mmc)) {
->  		mrq->cmd->error = -ENOMEDIUM;
->  		mmc_request_done(mmc, mrq);
->  		return;
->  	}
->  
-> +	spin_lock_bh(&host->lock);
-> +
->  	dw_mci_queue_request(host, slot, mrq);
->  
->  	spin_unlock_bh(&host->lock);
-> 
+diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+index c984321..aafb73d 100644
+--- a/drivers/mmc/core/mmc.c
++++ b/drivers/mmc/core/mmc.c
+@@ -1276,7 +1276,7 @@ static int mmc_select_hs200(struct mmc_card *card)
+ 	 * switch to HS200 mode if bus width is set successfully.
+ 	 */
+ 	err = mmc_select_bus_width(card);
+-	if (!err) {
++	if (err > 0) {
+ 		val = EXT_CSD_TIMING_HS200 |
+ 		      card->drive_strength << EXT_CSD_DRV_STR_SHIFT;
+ 		err = __mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
+@@ -1583,7 +1583,7 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
+ 	} else if (mmc_card_hs(card)) {
+ 		/* Select the desired bus width optionally */
+ 		err = mmc_select_bus_width(card);
+-		if (!err) {
++		if (err > 0) {
+ 			err = mmc_select_hs_ddr(card);
+ 			if (err)
+ 				goto free_card;
+-- 
+1.9.1
