@@ -1,20 +1,28 @@
-From: Chen-Yu Tsai <wens@csie.org>
+From: Hans de Goede <hdegoede@redhat.com>
 Subject: Re: [PATCH 2/3] mmc: sunxi: Fix DDR MMC timings for A80
-Date: Mon, 30 May 2016 23:38:37 +0800
-Message-ID: <CAGb2v64qo=kY=ekhbzJUWM_6p9oUupsE+YASD6g9beZS7eg9NQ@mail.gmail.com>
+Date: Mon, 30 May 2016 20:05:29 +0200
+Message-ID: <822dc3f1-9afe-f356-e0e7-89073586d401@redhat.com>
 References: <1464505484-3661-1-git-send-email-wens@csie.org>
- <1464505484-3661-3-git-send-email-wens@csie.org> <99d78ff3-db4d-45cc-024a-d94583b56f35@redhat.com>
+ <1464505484-3661-3-git-send-email-wens@csie.org>
+ <99d78ff3-db4d-45cc-024a-d94583b56f35@redhat.com>
  <CAGb2v65=ZM+deSmTmMnT6XFJv8PuY+Kba3kJGKrk_46hxxRyHA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mx1.redhat.com ([209.132.183.28]:57913 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1161249AbcE3SFf (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 30 May 2016 14:05:35 -0400
 In-Reply-To: <CAGb2v65=ZM+deSmTmMnT6XFJv8PuY+Kba3kJGKrk_46hxxRyHA@mail.gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Chen-Yu Tsai <wens@csie.org>
-Cc: Hans de Goede <hdegoede@redhat.com>, Ulf Hansson <ulf.hansson@linaro.org>, Maxime Ripard <maxime.ripard@free-electrons.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-arm-kernel <linux-arm-kernel@lists.infradead.org>, linux-kernel <linux-kernel@vger.kernel.org>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Chen-Yu Tsai <wens@csie.org>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Maxime Ripard <maxime.ripard@free-electrons.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-arm-kernel <linux-arm-kernel@lists.infradead.org>, linux-kernel <linux-kernel@vger.kernel.org>
 
-On Mon, May 30, 2016 at 8:59 PM, Chen-Yu Tsai <wens@csie.org> wrote:
+Hi,
+
+On 30-05-16 14:59, Chen-Yu Tsai wrote:
 > On Mon, May 30, 2016 at 7:34 PM, Hans de Goede <hdegoede@redhat.com> wrote:
 >> Hi,
 >>
@@ -40,14 +48,7 @@ On Mon, May 30, 2016 at 8:59 PM, Chen-Yu Tsai <wens@csie.org> wrote:
 > voltage rail for mmc pins.
 >
 > Until then, I wouldn't worry that much.
-
-P.S. I also tried the settings from mmc0 in Allwinner sources. They gave
-horrible results ( < 5 MB/s read ) on my CC-A80, while my Optimus wasn't
-really affected. I wonder if there's some kind of auto-retry mechanism
-in the MMC controller, or driver?
-
-ChenYu
-
+>
 >>> The settings for the slower timing modes seem to work despite being
 >>> wrong, so leave them be.
 >>
@@ -65,37 +66,12 @@ ChenYu
 > it.
 >
 > Hope this answers your questions.
->
-> Regards
-> ChenYu
->
->> Thanks & Regards,
->>
->> Hans
->>
->>
->>
->>>
->>> Signed-off-by: Chen-Yu Tsai <wens@csie.org>
->>> ---
->>>  drivers/mmc/host/sunxi-mmc.c | 4 ++--
->>>  1 file changed, 2 insertions(+), 2 deletions(-)
->>>
->>> diff --git a/drivers/mmc/host/sunxi-mmc.c b/drivers/mmc/host/sunxi-mmc.c
->>> index 7fc8b7aa83f0..5873dc344ab2 100644
->>> --- a/drivers/mmc/host/sunxi-mmc.c
->>> +++ b/drivers/mmc/host/sunxi-mmc.c
->>> @@ -970,8 +970,8 @@ static const struct sunxi_mmc_clk_delay
->>> sun9i_mmc_clk_delays[] = {
->>>         [SDXC_CLK_400K]         = { .output = 180, .sample = 180 },
->>>         [SDXC_CLK_25M]          = { .output = 180, .sample =  75 },
->>>         [SDXC_CLK_50M]          = { .output = 150, .sample = 120 },
->>> -       [SDXC_CLK_50M_DDR]      = { .output =  90, .sample = 120 },
->>> -       [SDXC_CLK_50M_DDR_8BIT] = { .output =  90, .sample = 120 },
->>> +       [SDXC_CLK_50M_DDR]      = { .output =  54, .sample =  36 },
->>> +       [SDXC_CLK_50M_DDR_8BIT] = { .output =  72, .sample =  72 },
->>>  };
->>>
->>>  static int sunxi_mmc_resource_request(struct sunxi_mmc_host *host,
->>>
->>
+
+Yes that answers my questions, and with my questions answered, this series is:
+
+Acked-by: Hans de Goede <hdegoede@redhat.com>
+
+Regards,
+
+Hans
+
