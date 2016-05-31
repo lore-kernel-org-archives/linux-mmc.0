@@ -1,80 +1,84 @@
-From: Dong Aisheng <dongas86@gmail.com>
-Subject: Re: [PATCH 13/23] mmc: sdhci-esdhc-imx: restore watermark level
- setting after resume
-Date: Tue, 31 May 2016 15:18:37 +0800
-Message-ID: <20160531071837.GA4096@shlinux2>
-References: <1460741387-23815-1-git-send-email-aisheng.dong@nxp.com>
- <1460741387-23815-14-git-send-email-aisheng.dong@nxp.com>
- <5731AA28.9030304@intel.com>
+From: "Baranowska, BeataX" <beatax.baranowska@intel.com>
+Subject: RE: [PATCH] mmc: sdhci: use udelay instead of mdelay
+Date: Tue, 31 May 2016 08:53:18 +0000
+Message-ID: <CC22646CC0522A488A20F7A66BFD619308D5D7@irsmsx105.ger.corp.intel.com>
+References: <CC22646CC0522A488A20F7A66BFD619308D47B@irsmsx105.ger.corp.intel.com>
+ <6616684.XTKejIxGbJ@wuerfel>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pf0-f195.google.com ([209.85.192.195]:35128 "EHLO
-	mail-pf0-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751316AbcEaHYE (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 31 May 2016 03:24:04 -0400
-Received: by mail-pf0-f195.google.com with SMTP id f144so18006427pfa.2
-        for <linux-mmc@vger.kernel.org>; Tue, 31 May 2016 00:24:04 -0700 (PDT)
-Content-Disposition: inline
-In-Reply-To: <5731AA28.9030304@intel.com>
+Received: from mga14.intel.com ([192.55.52.115]:13694 "EHLO mga14.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1755409AbcEaIx1 convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 31 May 2016 04:53:27 -0400
+In-Reply-To: <6616684.XTKejIxGbJ@wuerfel>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: Dong Aisheng <aisheng.dong@nxp.com>, linux-mmc@vger.kernel.org, ulf.hansson@linaro.org, chris@printf.net, shawnguo@kernel.org, linux-arm-kernel@lists.infradead.org, haibo.chen@nxp.com
+To: Arnd Bergmann <arnd@arndb.de>
+Cc: "Hunter, Adrian" <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "Dong, Chuanxiao" <chuanxiao.dong@intel.com>, "Jarosz, SebastianX" <sebastianx.jarosz@intel.com>
 
-On Tue, May 10, 2016 at 12:30:16PM +0300, Adrian Hunter wrote:
-> On 15/04/16 20:29, Dong Aisheng wrote:
-> > Currently, we config the watermark_level register only in probe.
-> > This will cause the mmc write operation timeout issue after system
-> > resume back in LPSR mode. Because in LPSR mode, after system resume
-> > back, the watermark_level register(0x44) changes to 0x08000880, which
-> > set the write watermark level as 0, and set the read watermark level
-> > as 128. This value is incorrect.
-> > 
-> > This patch restores the setting of watermark level register after
-> > system resume back.
+> -----Original Message-----
+> From: Arnd Bergmann [mailto:arnd@arndb.de]
+> Sent: Monday, May 30, 2016 10:01 AM
+> To: Baranowska, BeataX <beatax.baranowska@intel.com>
+> Cc: Hunter, Adrian <adrian.hunter@intel.com>; Ulf Hansson
+> <ulf.hansson@linaro.org>; linux-mmc@vger.kernel.org; linux-
+> kernel@vger.kernel.org; Dong, Chuanxiao <chuanxiao.dong@intel.com>;
+> Jarosz, SebastianX <sebastianx.jarosz@intel.com>
+> Subject: Re: [PATCH] mmc: sdhci: use udelay instead of mdelay
 > 
-> In sdhci_esdhc_imx_probe() the watermark setting is conditional on
-> esdhc_is_usdhc(imx_data), but in the resume it is not.  Is that intended?
-> If so, maybe explain that in the commit message.
-> 
-
-Good catch!
-I think we'd probably better keep that condition check.
-Will update it in V2.
-
-
-> Might be worth pulling out the constant 0x10401040 and #defining it since it
-> is used in more than one place too.
-> 
-
-Good point!
-Will do it.
-
-Regards
-Dong Aisheng
-
-> > 
-> > Signed-off-by: Dong Aisheng <aisheng.dong@nxp.com>
+> On Monday, May 30, 2016 7:55:55 AM CEST Baranowska, BeataX wrote:
+> > From: Chuanxiao Dong <chuanxiao.dong@intel.com>
+> >
+> > This patch will use udelay instead of mdelay when waiting for SDHCI
+> > hardware to be stable. udelay can help to reduce the waiting time when
+> > is in critical region which is protected by spinlock.
+> >
+> > With this patch, __sdhci_set_ios only take a few microseconds to be
+> > done.
+> >
+> > Signed-off-by: Chuanxiao Dong <chuanxiao.dong@intel.com>
 > > ---
-> >  drivers/mmc/host/sdhci-esdhc-imx.c | 5 +++++
-> >  1 file changed, 5 insertions(+)
-> > 
-> > diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
-> > index 6fef6bc..4c28fbb 100644
-> > --- a/drivers/mmc/host/sdhci-esdhc-imx.c
-> > +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
-> > @@ -1261,6 +1261,11 @@ static int sdhci_esdhc_suspend(struct device *dev)
-> >  
-> >  static int sdhci_esdhc_resume(struct device *dev)
-> >  {
-> > +	struct sdhci_host *host = dev_get_drvdata(dev);
-> > +
-> > +	/* restore watermark setting in case it's lost in low power mode */
-> > +	writel(0x10401040, host->ioaddr + ESDHC_WTMK_LVL);
-> > +
-> >  	return sdhci_pltfm_resume(dev);
+> > drivers/mmc/host/sdhci.c | 18 +++++++++---------
+> >  1 file changed, 9 insertions(+), 9 deletions(-)
+> >
+> > diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c index
+> > e010ea4eb6f5..56d2c7567d97 100644
+> > --- a/drivers/mmc/host/sdhci.c
+> > +++ b/drivers/mmc/host/sdhci.c
+> > @@ -173,8 +173,8 @@ void sdhci_reset(struct sdhci_host *host, u8 mask)
+> >                         sdhci_runtime_pm_bus_off(host);
+> >         }
+> >
+> > -       /* Wait max 100 ms */
+> > -       timeout = 100;
+> > +       /* Wait max 10000 ms */
+> > +       timeout = 10000;
+> >
+> >         /* hw clears the bit when it's done */
+> >         while (sdhci_readb(host, SDHCI_SOFTWARE_RESET) & mask) { @@
+> > -185,7 +185,7 @@ void sdhci_reset(struct sdhci_host *host, u8 mask)
+> >                         return;
+> >                 }
+> >                 timeout--;
+> > -               mdelay(1);
+> > +               udelay(10);
+> >         }
 > >  }
-> >  
-> > 
+> >  EXPORT_SYMBOL_GPL(sdhci_reset);
 > 
+> This can significantly increase the timeout length. I think you should instead
+> use time_before() to see how many jiffies have passed since the start.
+> 
+> However, the real question is why the reset function gets called under a
+> spinlock in the first place. Can you try to rearrange the code so it doesn't
+> need the lock at all and you can just use msleep() instead?
+> 
+> 	Arnd
+
+Thank you for your quick reply.
+Could you please clarify what do you mean is called under a spinlock? Any is not used here?
+
+Beata Baranowska
