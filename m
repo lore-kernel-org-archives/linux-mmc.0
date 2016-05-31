@@ -1,62 +1,49 @@
-From: Geert Uytterhoeven <geert@linux-m68k.org>
-Subject: Re: [PATCH v3 3/4] mmc: sh_mobile_sdhi: Add tuning support
-Date: Tue, 31 May 2016 12:39:58 +0200
-Message-ID: <CAMuHMdWs2cFgy8PtAUaYdfqnm+LU5cB9sn5WNnKsqRqza=nW6w@mail.gmail.com>
-References: <1464057797-29951-1-git-send-email-horms+renesas@verge.net.au>
-	<1464057797-29951-4-git-send-email-horms+renesas@verge.net.au>
+From: Krzysztof Kozlowski <k.kozlowski@samsung.com>
+Subject: Re: [RFC v2 00/13] usb/mmc/power: Fix USB/LAN when TFTP booting
+Date: Tue, 31 May 2016 13:54:31 +0200
+Message-ID: <574D7B77.4000606@samsung.com>
+References: <1462451666-17945-1-git-send-email-k.kozlowski@samsung.com>
+ <20160505224240.GA31429@rob-hp-laptop>
+ <CAPDyKFqpoi03Egfuvd8qJXnn_+FBgPXAb7S4UvkxVs8BA+zwnA@mail.gmail.com>
+ <20160509181829.GA19687@rob-hp-laptop>
+ <CAPDyKFq2=mqujFjvJSYxg2nVmK=OrBKLtFfb-ErNJO3Zr_LMVw@mail.gmail.com>
+ <20160528033613.GA3291@shlinux2> <20160531005808.GA7913@shlinux2>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-renesas-soc-owner@vger.kernel.org>
-In-Reply-To: <1464057797-29951-4-git-send-email-horms+renesas@verge.net.au>
-Sender: linux-renesas-soc-owner@vger.kernel.org
-To: Simon Horman <horms+renesas@verge.net.au>
-Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, Ulf Hansson <ulf.hansson@linaro.org>, Magnus Damm <magnus.damm@gmail.com>, Linux MMC List <linux-mmc@vger.kernel.org>, linux-renesas-soc@vger.kernel.org, Ai Kyuse <ai.kyuse.uw@renesas.com>
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-reply-to: <20160531005808.GA7913@shlinux2>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Peter Chen <hzpeterchen@gmail.com>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Rob Herring <robh@kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, linux-samsung-soc <linux-samsung-soc@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-pm@vger.kernel.org" <linux-pm@vger.kernel.org>, linux-usb@vger.kernel.org, Sebastian Reichel <sre@kernel.org>, Dmitry Eremin-Solenikov <dbaryshkov@gmail.com>, David Woodhouse <dwmw2@infradead.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Mark Brown <broonie@kernel.org>, hverkuil@xs4all.nl, tjakobi@math.uni-bielefeld.de, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>, Marek Szyprowski <m.szyprowski@samsung.com>, Arnd Bergmann <arnd@arndb.de>
 List-Id: linux-mmc@vger.kernel.org
 
-Hi Simon,
+On 05/31/2016 02:58 AM, Peter Chen wrote:
+> On Sat, May 28, 2016 at 11:36:13AM +0800, Peter Chen wrote:
+>> All, how we move on for this?
+>>
+>> 1. Using a generic driver to manage both mmc and USB (and further
+>> subsystem), USB and further subsystem do not use pwrseq node in dts.
+>> 2. USB creates the similar driver under drivers/usb for its own use. 
+>>
+>> Which one do you prefer, thanks.
+>>
+> 
+> Hi Krzysztof Kozlowski,
+> 
+> I think option 1 may be better according to Rob and Ulf's comment.
 
-On Tue, May 24, 2016 at 4:43 AM, Simon Horman
-<horms+renesas@verge.net.au> wrote:
-> --- a/drivers/mmc/host/sh_mobile_sdhi.c
-> +++ b/drivers/mmc/host/sh_mobile_sdhi.c
+Hi,
 
-> @@ -403,6 +580,30 @@ static int sh_mobile_sdhi_probe(struct platform_device *pdev)
->         if (ret < 0)
->                 goto efree;
->
-> +       if (host->mmc->caps & MMC_CAP_UHS_SDR104)
-> +               host->mmc->caps |= MMC_CAP_HW_RESET;
-> +
-> +       if (of_id && of_id->data) {
-> +               const struct sh_mobile_sdhi_of_data *of_data = of_id->data;
-> +               const struct sh_mobile_sdhi_scc *taps = of_data->taps;
-> +               bool hit = false;
-> +
-> +               for (i = 0; i < of_data->taps_num; i++) {
-> +                       if (taps[i].clk_rate == 0 ||
-> +                           taps[i].clk_rate == host->mmc->f_max) {
-> +                               host->scc_tappos = taps->tap;
-> +                               hit = true;
-> +                               break;
-> +                       }
-> +               }
-> +
-> +               if (!hit)
-> +                       dev_warn(&host->pdev->dev, "Unknown clock rate for SDR104 and HS200\n");
+I like the option #1 as well. The generic driver should rely and parse
+existing bindings like 'reset-gpios'. Still additional property (e.g.
+"do-the-power-sequence") seems needed as we do not want to play with all
+reset-gpios in DTB.
 
-This warning triggers on sh7a0/kzm9g, r8a73a4/ape6evm, and
-r8a7740/armadillo.
+> Would you like going on your patch set? You can work on generic pwrseq
+> driver, I will do USB stuffs based on generic pwrseq driver?
 
-Perhaps the tap code should check if MMC_CAP_UHS_SDR104 is
-enabled?
+Great, that sounds good! I'll start the work.
 
-Gr{oetje,eeting}s,
-
-                        Geert
-
---
-Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
-
-In personal conversations with technical people, I call myself a hacker. But
-when I'm talking to journalists I just say "programmer" or something like that.
-                                -- Linus Torvalds
+Best regards,
+Krzysztof
