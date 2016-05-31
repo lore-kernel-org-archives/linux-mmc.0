@@ -1,84 +1,120 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH] mmc: core: fix the wrong error control
-Date: Tue, 31 May 2016 10:00:23 +0900
-Message-ID: <574CE227.6070109@samsung.com>
-References: <1464594014-31934-1-git-send-email-jh80.chung@samsung.com>
- <CGME20160530094556epcas1p2926ef1050f9b6becfc92615e63bf688a@epcas1p2.samsung.com>
- <6ad3f39a-9ff6-6992-d9d4-8bc411128219@kernel-upstream.org>
+From: Peter Chen <hzpeterchen@gmail.com>
+Subject: Re: [RFC v2 00/13] usb/mmc/power: Fix USB/LAN when TFTP booting
+Date: Tue, 31 May 2016 08:58:08 +0800
+Message-ID: <20160531005808.GA7913@shlinux2>
+References: <1462451666-17945-1-git-send-email-k.kozlowski@samsung.com>
+ <20160505224240.GA31429@rob-hp-laptop>
+ <CAPDyKFqpoi03Egfuvd8qJXnn_+FBgPXAb7S4UvkxVs8BA+zwnA@mail.gmail.com>
+ <20160509181829.GA19687@rob-hp-laptop>
+ <CAPDyKFq2=mqujFjvJSYxg2nVmK=OrBKLtFfb-ErNJO3Zr_LMVw@mail.gmail.com>
+ <20160528033613.GA3291@shlinux2>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=gbk
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout4.samsung.com ([203.254.224.34]:37765 "EHLO
-	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1162278AbcEaBAa (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 30 May 2016 21:00:30 -0400
-In-reply-to: <6ad3f39a-9ff6-6992-d9d4-8bc411128219@kernel-upstream.org>
+Received: from mail-pf0-f194.google.com ([209.85.192.194]:34654 "EHLO
+	mail-pf0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1161729AbcEaBDe (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 30 May 2016 21:03:34 -0400
+Content-Disposition: inline
+In-Reply-To: <20160528033613.GA3291@shlinux2>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Shawn Lin <shawn.lin@kernel-upstream.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
-Cc: shawn.lin@rock-chips.com, ulf.hansson@linaro.org, arnd@arndb.de, a.hajda@samsung.com, akpm@linux-foundation.org, torvalds@linux-foundation.org, k.kozlowski@samsung.com
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Rob Herring <robh@kernel.org>, Krzysztof Kozlowski <k.kozlowski@samsung.com>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, linux-samsung-soc <linux-samsung-soc@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-pm@vger.kernel.org" <linux-pm@vger.kernel.org>, linux-usb@vger.kernel.org, Sebastian Reichel <sre@kernel.org>, Dmitry Eremin-Solenikov <dbaryshkov@gmail.com>, David Woodhouse <dwmw2@infradead.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Mark Brown <broonie@kernel.org>, hverkuil@xs4all.nl, tjakobi@math.uni-bielefeld.de, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>, Marek Szyprowski <m.szyprowski@samsung.com>, Arnd Bergmann <arnd@arndb.de>
 
-On 05/30/2016 06:45 PM, Shawn Lin wrote:
-> Hi,
->=20
-> =D4=DA 2016/5/30 15:40, Jaehoon Chung =D0=B4=B5=C0:
->> After applied "remove lots of IS_ERR_VALUE abuses", it shoold be
->> misoperation. (commit 287980e49)
->> If mmc_bus_test is successful, it returned the bus-witdh bit.
->>
->> The below log is error log
->> [    2.542260] mmc0: mmc_select_hs200 failed, error 3
->> [    2.542275] mmc0: error 3 whilst initialising MMC card
->>
->=20
-> The same as this patch[0]?
+On Sat, May 28, 2016 at 11:36:13AM +0800, Peter Chen wrote:
+> On Tue, May 10, 2016 at 01:02:08PM +0200, Ulf Hansson wrote:
+> > + Arnd
+> > 
+> > [...]
+> > 
+> > >> >> Solution
+> > >> >> ========
+> > >> >> This is very similar to the MMC pwrseq behavior so the idea is to:
+> > >> >> 1. Move MMC pwrseq drivers to generic place,
+> > >> >
+> > >> > You can do that, but I'm going to NAK any use of pwrseq bindings outside
+> > >> > of MMC. I think it is the wrong way to do things. The DT should describe
+> > >>
+> > >> Huh, I didn't know that was your view of the mmc pwrseq bindings. Why
+> > >> didn't you NAK them before?
+> > >
+> > > Unfortunately, either I missed it or it was a time I couldn't spend much
+> > > time on reviews.
+> > 
+> > Okay, I guess it's common issue among maintainers. The problem with DT
+> > is that it gets really hard to be fixed up later. :-)
+> > 
+> > >
+> > >> > the devices. If they happen to be "simple" then the core can walk the
+> > >> > tree and do any setup. For example, look for "reset-gpios" and toggle
+> > >> > that GPIO. There is no need for a special node.
+> > >> >
+> > >> >> 2. Extend the pwrseq-simple with regulator toggling,
+> > >> >> 3. Add support to USB hub and port core for pwrseq,
+> > >> >
+> > >> > We discussed this for USB already[1] and is why we defined how to add
+> > >> > USB child devices. The idea is not to add pwrseq to that.
+> > >>
+> > >> I am not familiar with the USB discussion.
+> > >>
+> > >> Still, let me give you some more background to the mmc pwrseq. The
+> > >> idea from the mmc pwrseq bindings comes from the power-domain DT
+> > >> bindings, as I thought these things were a bit related.
+> > >> In both cases they are not directly a property of the device, but more
+> > >> describing a HW dependency to allow the device to work.
+> > >
+> > > I could see this as a board level power domain. However the difference
+> > > is we are not generally exposing internal SOC details the same way as
+> > > board level components. Perhaps we could extend power domains to board
+> > > level, but that is not what was done here.
+> > >
+> > >> One could probably use a child node instead of a phandle, but that
+> > >> wasn't chosen back then. Of course you are the DT expert, but could
+> > >> you perhaps tell me why a child node is better for cases like this?
+> > >
+> > > If there is a control path hierarchy, then we try to model that in DT
+> > > with child nodes. In cases of SDIO and USB, there is a clear hierarchy.
+> > > Ignoring the discovery ordering problem, we already have defined ways to
+> > > describe GPIO connections, regulators, etc. to devices. Describing those
+> > > things separately from the device to solve a particular issue that is
+> > > really a kernel limitation is what I don't like.
+> > 
+> > Okay, I see.
+> > 
+> > To move forward in trying to make mmc pwrseq a generic pwrseq, could
+> > we perhaps allow both cases?
+> > 
+> > In the mmc case, there are already deployed bindings so we need to
+> > cope with these by using the phandle option, but for USB etc we could
+> > force the child node option.
+> > As long as we agree that we keep using a compatible string for the
+> > child node as well, both options should be able to co-exist and we
+> > should probably be able to managed them both from a common pwrseq
+> > driver framework.
+> > 
+> > Although, I do remember from an older conversations around some of
+> > mine submission for the mmc pwrseq code, that some people (maybe
+> > Arnd?) wasn't keen on adding a new framework for this. Perhaps that
+> > has changed?
+> > 
+> 
+> All, how we move on for this?
+> 
+> 1. Using a generic driver to manage both mmc and USB (and further
+> subsystem), USB and further subsystem do not use pwrseq node in dts.
+> 2. USB creates the similar driver under drivers/usb for its own use. 
+> 
+> Which one do you prefer, thanks.
+> 
 
-Yes, discard this patch. Thanks for noticing this.
+Hi Krzysztof Kozlowski,
+
+I think option 1 may be better according to Rob and Ulf's comment.
+Would you like going on your patch set? You can work on generic pwrseq
+driver, I will do USB stuffs based on generic pwrseq driver?
+
+-- 
 
 Best Regards,
-Jaehoon Chung
-
->=20
-> [0]https://patchwork.kernel.org/patch/9139673/
->=20
->> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
->> ---
->>  drivers/mmc/core/mmc.c | 4 ++--
->>  1 file changed, 2 insertions(+), 2 deletions(-)
->>
->> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
->> index c984321..aafb73d 100644
->> --- a/drivers/mmc/core/mmc.c
->> +++ b/drivers/mmc/core/mmc.c
->> @@ -1276,7 +1276,7 @@ static int mmc_select_hs200(struct mmc_card *c=
-ard)
->>       * switch to HS200 mode if bus width is set successfully.
->>       */
->>      err =3D mmc_select_bus_width(card);
->> -    if (!err) {
->> +    if (err > 0) {
->>          val =3D EXT_CSD_TIMING_HS200 |
->>                card->drive_strength << EXT_CSD_DRV_STR_SHIFT;
->>          err =3D __mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
->> @@ -1583,7 +1583,7 @@ static int mmc_init_card(struct mmc_host *host=
-, u32 ocr,
->>      } else if (mmc_card_hs(card)) {
->>          /* Select the desired bus width optionally */
->>          err =3D mmc_select_bus_width(card);
->> -        if (!err) {
->> +        if (err > 0) {
->>              err =3D mmc_select_hs_ddr(card);
->>              if (err)
->>                  goto free_card;
->>
->=20
-> --=20
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" =
-in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->=20
->=20
->=20
-
+Peter Chen
