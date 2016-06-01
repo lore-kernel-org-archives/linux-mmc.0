@@ -1,7 +1,8 @@
 From: Krzysztof Kozlowski <k.kozlowski@samsung.com>
-Subject: [PATCH v3 03/12] power: pwrseq: Enable COMPILE_TEST for drivers
-Date: Wed, 01 Jun 2016 10:02:12 +0200
-Message-ID: <1464768141-25420-4-git-send-email-k.kozlowski@samsung.com>
+Subject: [PATCH v3 07/12] power: pwrseq: Add support for USB hubs with external
+ power
+Date: Wed, 01 Jun 2016 10:02:16 +0200
+Message-ID: <1464768141-25420-8-git-send-email-k.kozlowski@samsung.com>
 References: <1464768141-25420-1-git-send-email-k.kozlowski@samsung.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
@@ -21,35 +22,121 @@ To: hzpeterchen@gmail.com, Ulf Hansson <ulf.hansson@linaro.org>, Sebastian Reich
 Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>
 List-Id: linux-mmc@vger.kernel.org
 
-Allow build testing for power sequence drivers.
+Some USB devices on embedded boards have external power supply which has
+to be reset in certain conditions. Add pwrseq interface for this.
 
 Signed-off-by: Krzysztof Kozlowski <k.kozlowski@samsung.com>
-Reviewed-by: Javier Martinez Canillas <javier@osg.samsung.com>
 ---
- drivers/power/pwrseq/Kconfig | 4 ++--
- 1 file changed, 2 insertions(+), 2 deletions(-)
+ drivers/power/pwrseq/pwrseq.c | 47 ++++++++++++++++++++++++++++++++++++++++++-
+ include/linux/pwrseq.h        | 11 ++++++++++
+ 2 files changed, 57 insertions(+), 1 deletion(-)
 
-diff --git a/drivers/power/pwrseq/Kconfig b/drivers/power/pwrseq/Kconfig
-index 7ecd66ab61f3..c7e9271fd94f 100644
---- a/drivers/power/pwrseq/Kconfig
-+++ b/drivers/power/pwrseq/Kconfig
-@@ -10,7 +10,7 @@ if POWER_SEQ
- config POWER_SEQ_EMMC
- 	tristate "HW reset support for eMMC"
- 	default y
--	depends on OF
-+	depends on OF || COMPILE_TEST
- 	help
- 	  This selects Hardware reset support aka pwrseq-emmc for eMMC
- 	  devices. By default this option is set to y.
-@@ -21,7 +21,7 @@ config POWER_SEQ_EMMC
- config POWER_SEQ_SIMPLE
- 	tristate "Simple HW reset support for MMC"
- 	default y
--	depends on OF
-+	depends on OF || COMPILE_TEST
- 	help
- 	  This selects simple hardware reset support aka pwrseq-simple for MMC
- 	  devices. By default this option is set to y.
+diff --git a/drivers/power/pwrseq/pwrseq.c b/drivers/power/pwrseq/pwrseq.c
+index 495a19d3c30b..722aff4f740f 100644
+--- a/drivers/power/pwrseq/pwrseq.c
++++ b/drivers/power/pwrseq/pwrseq.c
+@@ -1,7 +1,9 @@
+ /*
+- *  Copyright (C) 2014 Linaro Ltd
++ * Copyright (C) 2014 Linaro Ltd
++ * Copyright (C) 2016 Samsung Electronics
+  *
+  * Author: Ulf Hansson <ulf.hansson@linaro.org>
++ *         Krzysztof Kozlowski <k.kozlowski@samsung.com>
+  *
+  * License terms: GNU General Public License (GPL) version 2
+  *
+@@ -52,6 +54,42 @@ int mmc_pwrseq_alloc(struct mmc_host *host)
+ }
+ EXPORT_SYMBOL_GPL(mmc_pwrseq_alloc);
+ 
++struct pwrseq *pwrseq_alloc(struct device *dev, const char *phandle_name)
++{
++	struct device_node *np;
++	struct pwrseq *p, *ret = NULL;
++
++	np = of_parse_phandle(dev->of_node, phandle_name, 0);
++	if (!np)
++		return NULL;
++
++	mutex_lock(&pwrseq_list_mutex);
++	list_for_each_entry(p, &pwrseq_list, pwrseq_node) {
++		if (p->dev->of_node == np) {
++			if (!try_module_get(p->owner))
++				dev_err(dev,
++					"increasing module refcount failed\n");
++			else
++				ret = p;
++
++			break;
++		}
++	}
++
++	of_node_put(np);
++	mutex_unlock(&pwrseq_list_mutex);
++
++	if (!ret) {
++		dev_dbg(dev, "%s defer probe\n", phandle_name);
++		return ERR_PTR(-EPROBE_DEFER);
++	}
++
++	dev_info(dev, "allocated usb-pwrseq\n");
++
++	return ret;
++}
++EXPORT_SYMBOL_GPL(pwrseq_alloc);
++
+ void pwrseq_pre_power_on(struct pwrseq *pwrseq)
+ {
+ 	if (pwrseq && pwrseq->ops->pre_power_on)
+@@ -84,6 +122,13 @@ void mmc_pwrseq_free(struct mmc_host *host)
+ }
+ EXPORT_SYMBOL_GPL(mmc_pwrseq_free);
+ 
++void pwrseq_free(const struct pwrseq *pwrseq)
++{
++	if (pwrseq)
++		module_put(pwrseq->owner);
++}
++EXPORT_SYMBOL_GPL(pwrseq_free);
++
+ int pwrseq_register(struct pwrseq *pwrseq)
+ {
+ 	if (!pwrseq || !pwrseq->ops || !pwrseq->dev)
+diff --git a/include/linux/pwrseq.h b/include/linux/pwrseq.h
+index fcc8fd855d4c..6215b3d6350d 100644
+--- a/include/linux/pwrseq.h
++++ b/include/linux/pwrseq.h
+@@ -31,9 +31,13 @@ void pwrseq_unregister(struct pwrseq *pwrseq);
+ void pwrseq_pre_power_on(struct pwrseq *pwrseq);
+ void pwrseq_post_power_on(struct pwrseq *pwrseq);
+ void pwrseq_power_off(struct pwrseq *pwrseq);
++
+ int mmc_pwrseq_alloc(struct mmc_host *host);
+ void mmc_pwrseq_free(struct mmc_host *host);
+ 
++struct pwrseq *pwrseq_alloc(struct device *dev, const char *phandle_name);
++void pwrseq_free(const struct pwrseq *pwrseq);
++
+ #else /* CONFIG_POWER_SEQ */
+ 
+ static inline int pwrseq_register(struct pwrseq *pwrseq)
+@@ -44,9 +48,16 @@ static inline void pwrseq_unregister(struct pwrseq *pwrseq) {}
+ static inline void pwrseq_pre_power_on(struct pwrseq *pwrseq) {}
+ static inline void pwrseq_post_power_on(struct pwrseq *pwrseq) {}
+ static inline void pwrseq_power_off(struct pwrseq *pwrseq) {}
++
+ static inline int mmc_pwrseq_alloc(struct mmc_host *host) { return 0; }
+ static inline void mmc_pwrseq_free(struct mmc_host *host) {}
+ 
++static inline struct pwrseq *pwrseq_alloc(struct device *dev, const char *phandle_name)
++{
++	return NULL;
++}
++static inline void pwrseq_free(const struct pwrseq *pwrseq) {}
++
+ #endif /* CONFIG_POWER_SEQ */
+ 
+ #endif /* _LINUX_PWRSEQ_H */
 -- 
 1.9.1
