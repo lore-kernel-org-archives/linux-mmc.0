@@ -1,67 +1,35 @@
-From: Shawn Lin <shawn.lin@rock-chips.com>
-Subject: Re: [PATCH 1/3] mmc: fix mmc mode selection for HS-DDR and higher
-Date: Wed, 1 Jun 2016 10:36:51 +0800
-Message-ID: <472b6b94-a773-e4cd-07c0-4b184a840f87@rock-chips.com>
-References: <1464505484-3661-1-git-send-email-wens@csie.org>
- <1464505484-3661-2-git-send-email-wens@csie.org>
+From: "Baranowska, BeataX" <beatax.baranowska@intel.com>
+Subject: RE: [PATCH] mmc: host: use pr_err for sdhci_dumpregs
+Date: Wed, 1 Jun 2016 05:12:59 +0000
+Message-ID: <CC22646CC0522A488A20F7A66BFD619308D8DB@irsmsx105.ger.corp.intel.com>
+References: <CC22646CC0522A488A20F7A66BFD619308D491@irsmsx105.ger.corp.intel.com>
+ <CAHp75Veem2Dkrni8nYq7q-8h2GPUVQ-q7JOF_0OxDO6GGpSxCg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=gbk; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from lucky1.263xmail.com ([211.157.147.131]:52290 "EHLO
-	lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757055AbcFAChk (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 31 May 2016 22:37:40 -0400
-In-Reply-To: <1464505484-3661-2-git-send-email-wens@csie.org>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <CAHp75Veem2Dkrni8nYq7q-8h2GPUVQ-q7JOF_0OxDO6GGpSxCg@mail.gmail.com>
+Content-Language: en-US
+Sender: linux-kernel-owner@vger.kernel.org
+To: Andy Shevchenko <andy.shevchenko@gmail.com>
+Cc: "Hunter, Adrian" <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "Dong, Chuanxiao" <chuanxiao.dong@intel.com>, "Jarosz, SebastianX" <sebastianx.jarosz@intel.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Chen-Yu Tsai <wens@csie.org>, Ulf Hansson <ulf.hansson@linaro.org>, Maxime Ripard <maxime.ripard@free-electrons.com>
-Cc: shawn.lin@rock-chips.com, Hans de Goede <hdegoede@redhat.com>, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, Arnd Bergmann <arnd@arndb.de>
 
-On 2016/5/29 15:04, Chen-Yu Tsai wrote:
-> When IS_ERR_VALUE was removed from the mmc core code, it was replaced
-> with a simple not-zero check. This does not work, as the value checked
-> is the return value for mmc_select_bus_width, which returns the set
-> bit width on success. This made eMMC modes higher than HS-DDR unusable.
->
-> Fix this by checking for a positive return value instead.
-
-Reviewed-by: Shawn Lin <shawn.lin@rock-chips.com>
-
->
-> Fixes: 287980e49ffc ("remove lots of IS_ERR_VALUE abuses")
-> Cc: Arnd Bergmann <arnd@arndb.de>
-> Signed-off-by: Chen-Yu Tsai <wens@csie.org>
-> ---
->  drivers/mmc/core/mmc.c | 4 ++--
->  1 file changed, 2 insertions(+), 2 deletions(-)
->
-> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-> index c984321d1881..aafb73d080ca 100644
-> --- a/drivers/mmc/core/mmc.c
-> +++ b/drivers/mmc/core/mmc.c
-> @@ -1276,7 +1276,7 @@ static int mmc_select_hs200(struct mmc_card *card)
->  	 * switch to HS200 mode if bus width is set successfully.
->  	 */
->  	err = mmc_select_bus_width(card);
-> -	if (!err) {
-> +	if (err > 0) {
->  		val = EXT_CSD_TIMING_HS200 |
->  		      card->drive_strength << EXT_CSD_DRV_STR_SHIFT;
->  		err = __mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
-> @@ -1583,7 +1583,7 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
->  	} else if (mmc_card_hs(card)) {
->  		/* Select the desired bus width optionally */
->  		err = mmc_select_bus_width(card);
-> -		if (!err) {
-> +		if (err > 0) {
->  			err = mmc_select_hs_ddr(card);
->  			if (err)
->  				goto free_card;
->
-
-
--- 
-Best Regards
-Shawn Lin
-
+PiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBBbmR5IFNoZXZjaGVua28gW21h
+aWx0bzphbmR5LnNoZXZjaGVua29AZ21haWwuY29tXQ0KPiBTZW50OiBUdWVzZGF5LCBNYXkgMzEs
+IDIwMTYgNTo0NyBQTQ0KPiBUbzogQmFyYW5vd3NrYSwgQmVhdGFYIDxiZWF0YXguYmFyYW5vd3Nr
+YUBpbnRlbC5jb20+DQo+IENjOiBIdW50ZXIsIEFkcmlhbiA8YWRyaWFuLmh1bnRlckBpbnRlbC5j
+b20+OyBVbGYgSGFuc3Nvbg0KPiA8dWxmLmhhbnNzb25AbGluYXJvLm9yZz47IGxpbnV4LW1tY0B2
+Z2VyLmtlcm5lbC5vcmc7IGxpbnV4LQ0KPiBrZXJuZWxAdmdlci5rZXJuZWwub3JnOyBEb25nLCBD
+aHVhbnhpYW8gPGNodWFueGlhby5kb25nQGludGVsLmNvbT47DQo+IEphcm9zeiwgU2ViYXN0aWFu
+WCA8c2ViYXN0aWFueC5qYXJvc3pAaW50ZWwuY29tPg0KPiBTdWJqZWN0OiBSZTogW1BBVENIXSBt
+bWM6IGhvc3Q6IHVzZSBwcl9lcnIgZm9yIHNkaGNpX2R1bXByZWdzDQo+IA0KPiBPbiBNb24sIE1h
+eSAzMCwgMjAxNiBhdCAxMDo1OSBBTSwgQmFyYW5vd3NrYSwgQmVhdGFYDQo+IDxiZWF0YXguYmFy
+YW5vd3NrYUBpbnRlbC5jb20+IHdyb3RlOg0KPiA+IEZyb206IENodWFueGlhbyBEb25nIDxjaHVh
+bnhpYW8uZG9uZ0BpbnRlbC5jb20+DQo+ID4NCj4gPiBzZGhjaV9kdW1wcmVncyBpcyB1c2VkIHRv
+IGR1bXAgcmVnaXN0ZXJzIHdoZW4gZXJyb3IgaGFwcGVucy4gVGh1cyBpdA0KPiA+IHNob3VsZCB1
+c2UgcHJfZXJyIGluc3RlYWQgb2YgcHJfZGVidWcgdG8gc2hvdyBtb3JlIGluZm9ybWF0aW9uIGFi
+b3V0DQo+IHRoZSBoYXJkd2FyZS4NCj4gPg0KPiANCj4gV291bGRuJ3QgYmUgdG9vIG5vaXN5Pw0K
+PiANCj4gLS0NCj4gV2l0aCBCZXN0IFJlZ2FyZHMsDQo+IEFuZHkgU2hldmNoZW5rbw0KDQpJdCBp
+cyB3aGVuIGVycm9yIGhhcHBlbnMgc28gSU1ITyBpdCBzaG91bGQgYmUgd2VsbCB2aXNpYmxlLg0K
+DQpSZWdhcmRzLA0KQmVhdGEgQmFyYW5vd3NrYQ0KDQo=
