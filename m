@@ -1,66 +1,85 @@
 From: Gerd Hoffmann <kraxel@redhat.com>
-Subject: [PATCH 32/32] mmc: bcm2835: Import bcm2835-mmc and switch to it
-Date: Wed,  1 Jun 2016 23:43:41 +0200
-Message-ID: <1464817421-8519-33-git-send-email-kraxel@redhat.com>
+Subject: [PATCH 21/32] mmc: bcm2835-sdhost: Add new driver for the internal SD controller.
+Date: Wed,  1 Jun 2016 23:43:30 +0200
+Message-ID: <1464817421-8519-22-git-send-email-kraxel@redhat.com>
 References: <1464817421-8519-1-git-send-email-kraxel@redhat.com>
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mx1.redhat.com ([209.132.183.28]:41123 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752005AbcFAVn5 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 1 Jun 2016 17:43:57 -0400
 In-Reply-To: <1464817421-8519-1-git-send-email-kraxel@redhat.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: linux-rpi-kernel@lists.infradead.org
-Cc: Eric Anholt <eric@anholt.net>, Rob Herring <robh+dt@kernel.org>, Pawel Moll <pawel.moll@arm.com>, Mark Rutland <mark.rutland@arm.com>, Ian Campbell <ijc+devicetree@hellion.org.uk>, Kumar Gala <galak@codeaurora.org>, Russell King <linux@armlinux.org.uk>, Ulf Hansson <ulf.hansson@linaro.org>, Stephen Warren <swarren@wwwdotorg.org>, Lee Jones <lee@kernel.org>, "open list:OPEN FIRMWARE AND FLATTENED
-	DEVICE TREE BINDINGS" <devicetree@vger.kernel.org>, "moderated list:ARM PORT" <linux-arm-kernel@lists.infradead.org>, open list <linux-kernel@vger.kernel.org>, "open list:MULTIMEDIA CARD MMC, SECURE
-	DIGITAL SD AND..." <linux-mmc@vger.kernel.org>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-rpi-kernel@lists.infradead.org
+Cc: Eric Anholt <eric@anholt.net>, Ulf Hansson <ulf.hansson@linaro.org>, Stephen Warren <swarren@wwwdotorg.org>, Lee Jones <lee@kernel.org>, open list <linux-kernel@vger.kernel.org>, "open list:MULTIMEDIA CARD MMC, SECURE
+	DIGITAL SD AND..." <linux-mmc@vger.kernel.org>, "moderated list:BROADCOM BCM2835
+	ARM ARCHITECTURE" <linux-arm-kernel@lists.infradead.org>
 
 From: Eric Anholt <eric@anholt.net>
 
-With this we can get wifi (brcmfmac) to probe.  Without it we're stuck
-with timeouts from sdio.c when it tries to set the bus width to 4.
----
- arch/arm/boot/dts/bcm283x.dtsi |    2 +-
- drivers/mmc/host/Makefile      |    1 +
- drivers/mmc/host/bcm2835-mmc.c | 1559 ++++++++++++++++++++++++++++++++++++++++
- 3 files changed, 1561 insertions(+), 1 deletion(-)
- create mode 100644 drivers/mmc/host/bcm2835-mmc.c
+The 2835 has two SD controllers: The Arasan SDHCI controller that we
+currently use, and a custom SD controller.  The custom one runs faster
 
-diff --git a/arch/arm/boot/dts/bcm283x.dtsi b/arch/arm/boot/dts/bcm283x.dtsi
-index f186ef9..2d8ca87 100644
---- a/arch/arm/boot/dts/bcm283x.dtsi
-+++ b/arch/arm/boot/dts/bcm283x.dtsi
-@@ -423,7 +423,7 @@
- 		};
+The code was originally written by Phil Elwell in the downstream
+Rasbperry Pi tree, and I did a major cleanup on it (+319, -707 lines
+out of the original 2055) for inclusion.
+
+Signed-off-by: Eric Anholt <eric@anholt.net>
+---
+ drivers/mmc/host/Kconfig          |    9 +
+ drivers/mmc/host/Makefile         |    1 +
+ drivers/mmc/host/bcm2835-sdhost.c | 1666 +++++++++++++++++++++++++++++++++++++
+ 3 files changed, 1676 insertions(+)
+ create mode 100644 drivers/mmc/host/bcm2835-sdhost.c
+
+diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+index 0aa484c..67efe28 100644
+--- a/drivers/mmc/host/Kconfig
++++ b/drivers/mmc/host/Kconfig
+@@ -779,6 +779,15 @@ config MMC_TOSHIBA_PCI
+ 	depends on PCI
+ 	help
  
- 		sdhci: sdhci@7e300000 {
--			compatible = "brcm,bcm2835-sdhci";
-+			compatible = "brcm,bcm2835-mmc";
- 			reg = <0x7e300000 0x100>;
- 			interrupts = <2 30>;
- 			clocks = <&clocks BCM2835_CLOCK_EMMC>;
++config MMC_BCM2835_SDHOST
++	tristate "platform support for the BCM2835 SDHOST MMC Controller"
++	depends on ARCH_BCM2835 || COMPILE_TEST
++	help
++	  This selects the BCM2835 SDHOST MMC controller. If you have a BCM2835
++	  platform with SD or MMC devices, say Y or M here.
++
++	  If unsure, say N.
++
+ config MMC_MTK
+ 	tristate "MediaTek SD/MMC Card Interface support"
+ 	depends on HAS_DMA
 diff --git a/drivers/mmc/host/Makefile b/drivers/mmc/host/Makefile
-index 1e1b42b..3e666d0 100644
+index af918d2..1e1b42b 100644
 --- a/drivers/mmc/host/Makefile
 +++ b/drivers/mmc/host/Makefile
-@@ -58,6 +58,7 @@ obj-$(CONFIG_MMC_SUNXI)		+= sunxi-mmc.o
+@@ -57,6 +57,7 @@ obj-$(CONFIG_MMC_MOXART)	+= moxart-mmc.o
+ obj-$(CONFIG_MMC_SUNXI)		+= sunxi-mmc.o
  obj-$(CONFIG_MMC_USDHI6ROL0)	+= usdhi6rol0.o
  obj-$(CONFIG_MMC_TOSHIBA_PCI)	+= toshsd.o
- obj-$(CONFIG_MMC_BCM2835_SDHOST)	+= bcm2835-sdhost.o
-+obj-$(CONFIG_MMC_BCM2835_SDHOST)	+= bcm2835-mmc.o
++obj-$(CONFIG_MMC_BCM2835_SDHOST)	+= bcm2835-sdhost.o
  
  obj-$(CONFIG_MMC_REALTEK_PCI)	+= rtsx_pci_sdmmc.o
  obj-$(CONFIG_MMC_REALTEK_USB)	+= rtsx_usb_sdmmc.o
-diff --git a/drivers/mmc/host/bcm2835-mmc.c b/drivers/mmc/host/bcm2835-mmc.c
+diff --git a/drivers/mmc/host/bcm2835-sdhost.c b/drivers/mmc/host/bcm2835-sdhost.c
 new file mode 100644
-index 0000000..db6617d
+index 0000000..cafe6ad
 --- /dev/null
-+++ b/drivers/mmc/host/bcm2835-mmc.c
-@@ -0,0 +1,1559 @@
++++ b/drivers/mmc/host/bcm2835-sdhost.c
+@@ -0,0 +1,1666 @@
 +/*
-+ * BCM2835 MMC host driver.
++ * BCM2835 SD host driver.
 + *
-+ * Author:      Gellert Weisz <gellert@raspberrypi.org>
-+ *              Copyright 2014
++ * Author:      Phil Elwell <phil@raspberrypi.org>
++ *              Copyright (C) 2015-2016 Raspberry Pi (Trading) Ltd.
 + *
 + * Based on
++ *  mmc-bcm2835.c by Gellert Weisz
++ * which is, in turn, based on
 + *  sdhci-bcm2708.c by Broadcom
 + *  sdhci-bcm2835.c by Stephen Warren and Oleksandr Tymoshenko
 + *  sdhci.c and sdhci-pci.c by Pierre Ossman
@@ -94,469 +113,550 @@ index 0000000..db6617d
 +#include <linux/dmaengine.h>
 +#include <linux/dma-mapping.h>
 +#include <linux/of_dma.h>
++#include <linux/time.h>
++#include <linux/workqueue.h>
 +
-+#include "sdhci.h"
++#define SDCMD  0x00 /* Command to SD card              - 16 R/W */
++#define SDARG  0x04 /* Argument to SD card             - 32 R/W */
++#define SDTOUT 0x08 /* Start value for timeout counter - 32 R/W */
++#define SDCDIV 0x0c /* Start value for clock divider   - 11 R/W */
++#define SDRSP0 0x10 /* SD card response (31:0)         - 32 R   */
++#define SDRSP1 0x14 /* SD card response (63:32)        - 32 R   */
++#define SDRSP2 0x18 /* SD card response (95:64)        - 32 R   */
++#define SDRSP3 0x1c /* SD card response (127:96)       - 32 R   */
++#define SDHSTS 0x20 /* SD host status                  - 11 R   */
++#define SDVDD  0x30 /* SD card power control           -  1 R/W */
++#define SDEDM  0x34 /* Emergency Debug Mode            - 13 R/W */
++#define SDHCFG 0x38 /* Host configuration              -  2 R/W */
++#define SDHBCT 0x3c /* Host byte count (debug)         - 32 R/W */
++#define SDDATA 0x40 /* Data to/from SD card            - 32 R/W */
++#define SDHBLC 0x50 /* Host block count (SDIO/SDHC)    -  9 R/W */
 +
++#define SDCMD_NEW_FLAG                  0x8000
++#define SDCMD_FAIL_FLAG                 0x4000
++#define SDCMD_BUSYWAIT                  0x800
++#define SDCMD_NO_RESPONSE               0x400
++#define SDCMD_LONG_RESPONSE             0x200
++#define SDCMD_WRITE_CMD                 0x80
++#define SDCMD_READ_CMD                  0x40
++#define SDCMD_CMD_MASK                  0x3f
 +
-+#define DRIVER_NAME "mmc-bcm2835"
++#define SDCDIV_MAX_CDIV                 0x7ff
 +
-+#define DBG(f, x...) \
-+pr_debug(DRIVER_NAME " [%s()]: " f, __func__, ## x)
++#define SDHSTS_BUSY_IRPT                0x400
++#define SDHSTS_BLOCK_IRPT               0x200
++#define SDHSTS_SDIO_IRPT                0x100
++#define SDHSTS_REW_TIME_OUT             0x80
++#define SDHSTS_CMD_TIME_OUT             0x40
++#define SDHSTS_CRC16_ERROR              0x20
++#define SDHSTS_CRC7_ERROR               0x10
++#define SDHSTS_FIFO_ERROR               0x08
++/* Reserved */
++/* Reserved */
++#define SDHSTS_DATA_FLAG                0x01
 +
-+#ifndef CONFIG_MMC_BCM2835_DMA
-+ #define FORCE_PIO
-+#endif
++#define SDHSTS_TRANSFER_ERROR_MASK      (SDHSTS_CRC7_ERROR | \
++					 SDHSTS_CRC16_ERROR | \
++					 SDHSTS_REW_TIME_OUT | \
++					 SDHSTS_FIFO_ERROR)
 +
++#define SDHSTS_ERROR_MASK               (SDHSTS_CMD_TIME_OUT | \
++					 SDHSTS_TRANSFER_ERROR_MASK)
 +
-+/* the inclusive limit in bytes under which PIO will be used instead of DMA */
-+#ifdef CONFIG_MMC_BCM2835_PIO_DMA_BARRIER
-+#define PIO_DMA_BARRIER CONFIG_MMC_BCM2835_PIO_DMA_BARRIER
-+#else
-+#define PIO_DMA_BARRIER 00
-+#endif
++#define SDHCFG_BUSY_IRPT_EN     BIT(10)
++#define SDHCFG_BLOCK_IRPT_EN    BIT(8)
++#define SDHCFG_SDIO_IRPT_EN     BIT(5)
++#define SDHCFG_DATA_IRPT_EN     BIT(4)
++#define SDHCFG_SLOW_CARD        BIT(3)
++#define SDHCFG_WIDE_EXT_BUS     BIT(2)
++#define SDHCFG_WIDE_INT_BUS     BIT(1)
++#define SDHCFG_REL_CMD_LINE     BIT(0)
 +
-+#define MIN_FREQ 400000
-+#define TIMEOUT_VAL 0xE
-+#define BCM2835_SDHCI_WRITE_DELAY(f)	(((2 * 1000000) / f) + 1)
++#define SDEDM_FORCE_DATA_MODE   BIT(19)
++#define SDEDM_CLOCK_PULSE       BIT(20)
++#define SDEDM_BYPASS            BIT(21)
 +
-+#ifndef BCM2708_PERI_BASE
-+ #define BCM2708_PERI_BASE 0x20000000
-+#endif
++#define SDEDM_WRITE_THRESHOLD_SHIFT 9
++#define SDEDM_READ_THRESHOLD_SHIFT 14
++#define SDEDM_THRESHOLD_MASK     0x1f
 +
-+/* FIXME: Needs IOMMU support */
-+#define BCM2835_VCMMU_SHIFT		(0x7E000000 - BCM2708_PERI_BASE)
++#define SDEDM_FSM_MASK           0xf
++#define SDEDM_FSM_IDENTMODE      0x0
++#define SDEDM_FSM_DATAMODE       0x1
++#define SDEDM_FSM_READDATA       0x2
++#define SDEDM_FSM_WRITEDATA      0x3
++#define SDEDM_FSM_READWAIT       0x4
++#define SDEDM_FSM_READCRC        0x5
++#define SDEDM_FSM_WRITECRC       0x6
++#define SDEDM_FSM_WRITEWAIT1     0x7
++#define SDEDM_FSM_POWERDOWN      0x8
++#define SDEDM_FSM_POWERUP        0x9
++#define SDEDM_FSM_WRITESTART1    0xa
++#define SDEDM_FSM_WRITESTART2    0xb
++#define SDEDM_FSM_GENPULSES      0xc
++#define SDEDM_FSM_WRITEWAIT2     0xd
++#define SDEDM_FSM_STARTPOWDOWN   0xf
 +
++#define SDDATA_FIFO_WORDS        16
 +
-+unsigned mmc_debug;
-+unsigned mmc_debug2;
++#define FIFO_READ_THRESHOLD     4
++#define FIFO_WRITE_THRESHOLD    4
++#define SDDATA_FIFO_PIO_BURST   8
++#define CMD_DALLY_US            1
 +
 +struct bcm2835_host {
-+	spinlock_t				lock;
++	spinlock_t		lock;
 +
-+	void __iomem			*ioaddr;
-+	u32						phys_addr;
++	void __iomem		*ioaddr;
++	u32			phys_addr;
 +
-+	struct mmc_host			*mmc;
++	struct mmc_host		*mmc;
 +
-+	u32						timeout;
++	u32			pio_timeout;	/* In jiffies */
 +
-+	int						clock;	/* Current clock speed */
-+	u8						pwr;	/* Current voltage */
++	int			clock;		/* Current clock speed */
 +
-+	unsigned int			max_clk;		/* Max possible freq */
-+	unsigned int			timeout_clk;	/* Timeout freq (KHz) */
-+	unsigned int			clk_mul;		/* Clock Muliplier value */
++	unsigned int		max_clk;	/* Max possible freq */
 +
-+	struct tasklet_struct	finish_tasklet;		/* Tasklet structures */
++	struct tasklet_struct	finish_tasklet;	/* Tasklet structures */
 +
-+	struct timer_list		timer;			/* Timer for timeouts */
++	struct work_struct	cmd_wait_wq;	/* Workqueue function */
 +
-+	struct sg_mapping_iter	sg_miter;		/* SG state for PIO */
-+	unsigned int			blocks;			/* remaining PIO blocks */
++	struct timer_list	timer;		/* Timer for timeouts */
 +
-+	int						irq;			/* Device IRQ */
++	struct sg_mapping_iter	sg_miter;	/* SG state for PIO */
++	unsigned int		blocks;		/* remaining PIO blocks */
 +
++	int			irq;		/* Device IRQ */
 +
-+	u32						ier;			/* cached registers */
++	u32			cmd_quick_poll_retries;
++	u32			ns_per_fifo_word;
 +
-+	struct mmc_request		*mrq;			/* Current request */
-+	struct mmc_command		*cmd;			/* Current command */
-+	struct mmc_data			*data;			/* Current data request */
-+	unsigned int			data_early:1;		/* Data finished before cmd */
++	/* cached registers */
++	u32			hcfg;
++	u32			cdiv;
 +
-+	wait_queue_head_t		buf_ready_int;		/* Waitqueue for Buffer Read Ready interrupt */
-+
-+	u32						thread_isr;
-+
-+	u32						shadow;
++	/* Current request */
++	struct mmc_request		*mrq;
++	/* Current command */
++	struct mmc_command		*cmd;
++	/* Current data request */
++	struct mmc_data			*data;
++	/* Data finished before cmd */
++	bool				data_complete:1;
++	/* Drain the fifo when finishing */
++	bool				flush_fifo:1;
++	/* Wait for busy interrupt */
++	bool				use_busy:1;
++	/* Send CMD23 */
++	bool				use_sbc:1;
 +
 +	/*DMA part*/
-+	struct dma_chan			*dma_chan_rx;		/* DMA channel for reads */
-+	struct dma_chan			*dma_chan_tx;		/* DMA channel for writes */
-+	struct dma_async_tx_descriptor	*tx_desc;	/* descriptor */
++	struct dma_chan			*dma_chan_rx;
++	struct dma_chan			*dma_chan_tx;
++	/* Channel in use */
++	struct dma_chan			*dma_chan;
++	struct dma_async_tx_descriptor	*dma_desc;
++	u32				dma_dir;
++	u32				drain_words;
++	struct page			*drain_page;
++	u32				drain_offset;
 +
-+	bool					have_dma;
-+	bool					use_dma;
++	bool				use_dma;
 +	/*end of DMA part*/
-+
-+	int						max_delay;	/* maximum length of time spent waiting */
-+
-+	int						flags;				/* Host attributes */
-+#define SDHCI_REQ_USE_DMA	(1<<2)	/* Use DMA for this req. */
-+#define SDHCI_DEVICE_DEAD	(1<<3)	/* Device unresponsive */
-+#define SDHCI_AUTO_CMD12	(1<<6)	/* Auto CMD12 support */
-+#define SDHCI_AUTO_CMD23	(1<<7)	/* Auto CMD23 support */
-+#define SDHCI_SDIO_IRQ_ENABLED	(1<<9)	/* SDIO irq enabled */
-+
-+	u32				overclock_50;	/* frequency to use when 50MHz is requested (in MHz) */
-+	u32				max_overclock;	/* Highest reported */
++	/* maximum length of time spent waiting */
++	int				max_delay;
++	/* Maximum block count for PIO (0 = always DMA) */
++	u32				pio_limit;
 +};
 +
-+
-+static inline void bcm2835_mmc_writel(struct bcm2835_host *host, u32 val, int reg, int from)
++static inline void bcm2835_sdhost_write(struct bcm2835_host *host,
++					u32 val, int reg)
 +{
-+	unsigned delay;
-+	lockdep_assert_held_once(&host->lock);
 +	writel(val, host->ioaddr + reg);
-+	udelay(BCM2835_SDHCI_WRITE_DELAY(max(host->clock, MIN_FREQ)));
-+
-+	delay = ((mmc_debug >> 16) & 0xf) << ((mmc_debug >> 20) & 0xf);
-+	if (delay && !((1<<from) & mmc_debug2))
-+		udelay(delay);
 +}
 +
-+static inline void mmc_raw_writel(struct bcm2835_host *host, u32 val, int reg)
++static inline u32 bcm2835_sdhost_read(struct bcm2835_host *host, int reg)
 +{
-+	unsigned delay;
-+	lockdep_assert_held_once(&host->lock);
-+	writel(val, host->ioaddr + reg);
-+
-+	delay = ((mmc_debug >> 24) & 0xf) << ((mmc_debug >> 28) & 0xf);
-+	if (delay)
-+		udelay(delay);
-+}
-+
-+static inline u32 bcm2835_mmc_readl(struct bcm2835_host *host, int reg)
-+{
-+	lockdep_assert_held_once(&host->lock);
 +	return readl(host->ioaddr + reg);
 +}
 +
-+static inline void bcm2835_mmc_writew(struct bcm2835_host *host, u16 val, int reg)
++static inline u32 bcm2835_sdhost_read_relaxed(struct bcm2835_host *host,
++					      int reg)
 +{
-+	u32 oldval = (reg == SDHCI_COMMAND) ? host->shadow :
-+		bcm2835_mmc_readl(host, reg & ~3);
-+	u32 word_num = (reg >> 1) & 1;
-+	u32 word_shift = word_num * 16;
-+	u32 mask = 0xffff << word_shift;
-+	u32 newval = (oldval & ~mask) | (val << word_shift);
-+
-+	if (reg == SDHCI_TRANSFER_MODE)
-+		host->shadow = newval;
-+	else
-+		bcm2835_mmc_writel(host, newval, reg & ~3, 0);
-+
++	return readl_relaxed(host->ioaddr + reg);
 +}
 +
-+static inline void bcm2835_mmc_writeb(struct bcm2835_host *host, u8 val, int reg)
++static void bcm2835_sdhost_dumpcmd(struct bcm2835_host *host,
++				   struct mmc_command *cmd,
++				   const char *label)
 +{
-+	u32 oldval = bcm2835_mmc_readl(host, reg & ~3);
-+	u32 byte_num = reg & 3;
-+	u32 byte_shift = byte_num * 8;
-+	u32 mask = 0xff << byte_shift;
-+	u32 newval = (oldval & ~mask) | (val << byte_shift);
++	if (!cmd)
++		return;
 +
-+	bcm2835_mmc_writel(host, newval, reg & ~3, 1);
++	pr_err("%s:%c%s op %d arg 0x%x flags 0x%x - resp %08x %08x %08x %08x, err %d\n",
++	       mmc_hostname(host->mmc),
++	       (cmd == host->cmd) ? '>' : ' ',
++	       label, cmd->opcode, cmd->arg, cmd->flags,
++	       cmd->resp[0], cmd->resp[1], cmd->resp[2], cmd->resp[3],
++	       cmd->error);
 +}
 +
-+
-+static inline u16 bcm2835_mmc_readw(struct bcm2835_host *host, int reg)
++static void bcm2835_sdhost_dumpregs(struct bcm2835_host *host)
 +{
-+	u32 val = bcm2835_mmc_readl(host, (reg & ~3));
-+	u32 word_num = (reg >> 1) & 1;
-+	u32 word_shift = word_num * 16;
-+	u32 word = (val >> word_shift) & 0xffff;
-+
-+	return word;
-+}
-+
-+static inline u8 bcm2835_mmc_readb(struct bcm2835_host *host, int reg)
-+{
-+	u32 val = bcm2835_mmc_readl(host, (reg & ~3));
-+	u32 byte_num = reg & 3;
-+	u32 byte_shift = byte_num * 8;
-+	u32 byte = (val >> byte_shift) & 0xff;
-+
-+	return byte;
-+}
-+
-+static void bcm2835_mmc_unsignal_irqs(struct bcm2835_host *host, u32 clear)
-+{
-+	u32 ier;
-+
-+	ier = bcm2835_mmc_readl(host, SDHCI_SIGNAL_ENABLE);
-+	ier &= ~clear;
-+	/* change which requests generate IRQs - makes no difference to
-+	   the content of SDHCI_INT_STATUS, or the need to acknowledge IRQs */
-+	bcm2835_mmc_writel(host, ier, SDHCI_SIGNAL_ENABLE, 2);
-+}
-+
-+
-+static void bcm2835_mmc_dumpregs(struct bcm2835_host *host)
-+{
-+	pr_debug(DRIVER_NAME ": =========== REGISTER DUMP (%s)===========\n",
-+		mmc_hostname(host->mmc));
-+
-+	pr_debug(DRIVER_NAME ": Sys addr: 0x%08x | Version:  0x%08x\n",
-+		bcm2835_mmc_readl(host, SDHCI_DMA_ADDRESS),
-+		bcm2835_mmc_readw(host, SDHCI_HOST_VERSION));
-+	pr_debug(DRIVER_NAME ": Blk size: 0x%08x | Blk cnt:  0x%08x\n",
-+		bcm2835_mmc_readw(host, SDHCI_BLOCK_SIZE),
-+		bcm2835_mmc_readw(host, SDHCI_BLOCK_COUNT));
-+	pr_debug(DRIVER_NAME ": Argument: 0x%08x | Trn mode: 0x%08x\n",
-+		bcm2835_mmc_readl(host, SDHCI_ARGUMENT),
-+		bcm2835_mmc_readw(host, SDHCI_TRANSFER_MODE));
-+	pr_debug(DRIVER_NAME ": Present:  0x%08x | Host ctl: 0x%08x\n",
-+		bcm2835_mmc_readl(host, SDHCI_PRESENT_STATE),
-+		bcm2835_mmc_readb(host, SDHCI_HOST_CONTROL));
-+	pr_debug(DRIVER_NAME ": Power:    0x%08x | Blk gap:  0x%08x\n",
-+		bcm2835_mmc_readb(host, SDHCI_POWER_CONTROL),
-+		bcm2835_mmc_readb(host, SDHCI_BLOCK_GAP_CONTROL));
-+	pr_debug(DRIVER_NAME ": Wake-up:  0x%08x | Clock:    0x%08x\n",
-+		bcm2835_mmc_readb(host, SDHCI_WAKE_UP_CONTROL),
-+		bcm2835_mmc_readw(host, SDHCI_CLOCK_CONTROL));
-+	pr_debug(DRIVER_NAME ": Timeout:  0x%08x | Int stat: 0x%08x\n",
-+		bcm2835_mmc_readb(host, SDHCI_TIMEOUT_CONTROL),
-+		bcm2835_mmc_readl(host, SDHCI_INT_STATUS));
-+	pr_debug(DRIVER_NAME ": Int enab: 0x%08x | Sig enab: 0x%08x\n",
-+		bcm2835_mmc_readl(host, SDHCI_INT_ENABLE),
-+		bcm2835_mmc_readl(host, SDHCI_SIGNAL_ENABLE));
-+	pr_debug(DRIVER_NAME ": AC12 err: 0x%08x | Slot int: 0x%08x\n",
-+		bcm2835_mmc_readw(host, SDHCI_ACMD12_ERR),
-+		bcm2835_mmc_readw(host, SDHCI_SLOT_INT_STATUS));
-+	pr_debug(DRIVER_NAME ": Caps:     0x%08x | Caps_1:   0x%08x\n",
-+		bcm2835_mmc_readl(host, SDHCI_CAPABILITIES),
-+		bcm2835_mmc_readl(host, SDHCI_CAPABILITIES_1));
-+	pr_debug(DRIVER_NAME ": Cmd:      0x%08x | Max curr: 0x%08x\n",
-+		bcm2835_mmc_readw(host, SDHCI_COMMAND),
-+		bcm2835_mmc_readl(host, SDHCI_MAX_CURRENT));
-+	pr_debug(DRIVER_NAME ": Host ctl2: 0x%08x\n",
-+		bcm2835_mmc_readw(host, SDHCI_HOST_CONTROL2));
-+
-+	pr_debug(DRIVER_NAME ": ===========================================\n");
-+}
-+
-+
-+static void bcm2835_mmc_reset(struct bcm2835_host *host, u8 mask)
-+{
-+	unsigned long timeout;
-+	unsigned long flags;
-+
-+	spin_lock_irqsave(&host->lock, flags);
-+	bcm2835_mmc_writeb(host, mask, SDHCI_SOFTWARE_RESET);
-+
-+	if (mask & SDHCI_RESET_ALL)
-+		host->clock = 0;
-+
-+	/* Wait max 100 ms */
-+	timeout = 100;
-+
-+	/* hw clears the bit when it's done */
-+	while (bcm2835_mmc_readb(host, SDHCI_SOFTWARE_RESET) & mask) {
-+		if (timeout == 0) {
-+			pr_err("%s: Reset 0x%x never completed.\n",
-+				mmc_hostname(host->mmc), (int)mask);
-+			bcm2835_mmc_dumpregs(host);
-+			return;
++	if (host->mrq) {
++		bcm2835_sdhost_dumpcmd(host, host->mrq->sbc, "sbc");
++		bcm2835_sdhost_dumpcmd(host, host->mrq->cmd, "cmd");
++		if (host->mrq->data) {
++			pr_err("%s: data blocks %x blksz %x - err %d\n",
++			       mmc_hostname(host->mmc),
++			       host->mrq->data->blocks,
++			       host->mrq->data->blksz,
++			       host->mrq->data->error);
 +		}
-+		timeout--;
-+		spin_unlock_irqrestore(&host->lock, flags);
-+		mdelay(1);
-+		spin_lock_irqsave(&host->lock, flags);
++		bcm2835_sdhost_dumpcmd(host, host->mrq->stop, "stop");
 +	}
 +
-+	if (100-timeout > 10 && 100-timeout > host->max_delay) {
-+		host->max_delay = 100-timeout;
-+		pr_warning("Warning: MMC controller hung for %d ms\n", host->max_delay);
-+	}
++	pr_err("%s: =========== REGISTER DUMP ===========\n",
++	       mmc_hostname(host->mmc));
++
++	pr_err("%s: SDCMD  0x%08x\n",
++	       mmc_hostname(host->mmc),
++	       bcm2835_sdhost_read(host, SDCMD));
++	pr_err("%s: SDARG  0x%08x\n",
++	       mmc_hostname(host->mmc),
++	       bcm2835_sdhost_read(host, SDARG));
++	pr_err("%s: SDTOUT 0x%08x\n",
++	       mmc_hostname(host->mmc),
++	       bcm2835_sdhost_read(host, SDTOUT));
++	pr_err("%s: SDCDIV 0x%08x\n",
++	       mmc_hostname(host->mmc),
++	       bcm2835_sdhost_read(host, SDCDIV));
++	pr_err("%s: SDRSP0 0x%08x\n",
++	       mmc_hostname(host->mmc),
++	       bcm2835_sdhost_read(host, SDRSP0));
++	pr_err("%s: SDRSP1 0x%08x\n",
++	       mmc_hostname(host->mmc),
++	       bcm2835_sdhost_read(host, SDRSP1));
++	pr_err("%s: SDRSP2 0x%08x\n",
++	       mmc_hostname(host->mmc),
++	       bcm2835_sdhost_read(host, SDRSP2));
++	pr_err("%s: SDRSP3 0x%08x\n",
++	       mmc_hostname(host->mmc),
++	       bcm2835_sdhost_read(host, SDRSP3));
++	pr_err("%s: SDHSTS 0x%08x\n",
++	       mmc_hostname(host->mmc),
++	       bcm2835_sdhost_read(host, SDHSTS));
++	pr_err("%s: SDVDD  0x%08x\n",
++	       mmc_hostname(host->mmc),
++	       bcm2835_sdhost_read(host, SDVDD));
++	pr_err("%s: SDEDM  0x%08x\n",
++	       mmc_hostname(host->mmc),
++	       bcm2835_sdhost_read(host, SDEDM));
++	pr_err("%s: SDHCFG 0x%08x\n",
++	       mmc_hostname(host->mmc),
++	       bcm2835_sdhost_read(host, SDHCFG));
++	pr_err("%s: SDHBCT 0x%08x\n",
++	       mmc_hostname(host->mmc),
++	       bcm2835_sdhost_read(host, SDHBCT));
++	pr_err("%s: SDHBLC 0x%08x\n",
++	       mmc_hostname(host->mmc),
++	       bcm2835_sdhost_read(host, SDHBLC));
++
++	pr_err("%s: ===========================================\n",
++	       mmc_hostname(host->mmc));
++}
++
++static void bcm2835_sdhost_set_power(struct bcm2835_host *host, bool on)
++{
++	bcm2835_sdhost_write(host, on ? 1 : 0, SDVDD);
++}
++
++static void bcm2835_sdhost_reset_internal(struct bcm2835_host *host)
++{
++	u32 temp;
++
++	bcm2835_sdhost_set_power(host, false);
++
++	bcm2835_sdhost_write(host, 0, SDCMD);
++	bcm2835_sdhost_write(host, 0, SDARG);
++	bcm2835_sdhost_write(host, 0xf00000, SDTOUT);
++	bcm2835_sdhost_write(host, 0, SDCDIV);
++	bcm2835_sdhost_write(host, 0x7f8, SDHSTS); /* Write 1s to clear */
++	bcm2835_sdhost_write(host, 0, SDHCFG);
++	bcm2835_sdhost_write(host, 0, SDHBCT);
++	bcm2835_sdhost_write(host, 0, SDHBLC);
++
++	/* Limit fifo usage due to silicon bug */
++	temp = bcm2835_sdhost_read(host, SDEDM);
++	temp &= ~((SDEDM_THRESHOLD_MASK << SDEDM_READ_THRESHOLD_SHIFT) |
++		  (SDEDM_THRESHOLD_MASK << SDEDM_WRITE_THRESHOLD_SHIFT));
++	temp |= (FIFO_READ_THRESHOLD << SDEDM_READ_THRESHOLD_SHIFT) |
++		(FIFO_WRITE_THRESHOLD << SDEDM_WRITE_THRESHOLD_SHIFT);
++	bcm2835_sdhost_write(host, temp, SDEDM);
++	mdelay(10);
++	bcm2835_sdhost_set_power(host, true);
++	mdelay(10);
++	host->clock = 0;
++	bcm2835_sdhost_write(host, host->hcfg, SDHCFG);
++	bcm2835_sdhost_write(host, host->cdiv, SDCDIV);
++	mmiowb();
++}
++
++static void bcm2835_sdhost_reset(struct mmc_host *mmc)
++{
++	struct bcm2835_host *host = mmc_priv(mmc);
++	unsigned long flags;
++
++	spin_lock_irqsave(&host->lock, flags);
++	bcm2835_sdhost_reset_internal(host);
 +	spin_unlock_irqrestore(&host->lock, flags);
 +}
 +
-+static void bcm2835_mmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios);
++static void bcm2835_sdhost_set_ios(struct mmc_host *mmc, struct mmc_ios *ios);
 +
-+static void bcm2835_mmc_init(struct bcm2835_host *host, int soft)
++static void bcm2835_sdhost_init(struct bcm2835_host *host, int soft)
 +{
-+	unsigned long flags;
-+	if (soft)
-+		bcm2835_mmc_reset(host, SDHCI_RESET_CMD|SDHCI_RESET_DATA);
-+	else
-+		bcm2835_mmc_reset(host, SDHCI_RESET_ALL);
++	pr_debug("bcm2835_sdhost_init(%d)\n", soft);
 +
-+	host->ier = SDHCI_INT_BUS_POWER | SDHCI_INT_DATA_END_BIT |
-+		    SDHCI_INT_DATA_CRC | SDHCI_INT_DATA_TIMEOUT |
-+		    SDHCI_INT_INDEX | SDHCI_INT_END_BIT | SDHCI_INT_CRC |
-+		    SDHCI_INT_TIMEOUT | SDHCI_INT_DATA_END |
-+		    SDHCI_INT_RESPONSE;
++	/* Set interrupt enables */
++	host->hcfg = SDHCFG_BUSY_IRPT_EN;
 +
-+	spin_lock_irqsave(&host->lock, flags);
-+	bcm2835_mmc_writel(host, host->ier, SDHCI_INT_ENABLE, 3);
-+	bcm2835_mmc_writel(host, host->ier, SDHCI_SIGNAL_ENABLE, 3);
-+	spin_unlock_irqrestore(&host->lock, flags);
++	bcm2835_sdhost_reset_internal(host);
 +
 +	if (soft) {
 +		/* force clock reconfiguration */
 +		host->clock = 0;
-+		bcm2835_mmc_set_ios(host->mmc, &host->mmc->ios);
++		bcm2835_sdhost_set_ios(host->mmc, &host->mmc->ios);
 +	}
 +}
 +
++static void bcm2835_sdhost_wait_transfer_complete(struct bcm2835_host *host)
++{
++	int timediff;
++	u32 alternate_idle;
++	u32 edm;
 +
++	alternate_idle = (host->mrq->data->flags & MMC_DATA_READ) ?
++		SDEDM_FSM_READWAIT : SDEDM_FSM_WRITESTART1;
 +
-+static void bcm2835_mmc_finish_data(struct bcm2835_host *host);
++	edm = bcm2835_sdhost_read(host, SDEDM);
 +
-+static void bcm2835_mmc_dma_complete(void *param)
++	timediff = 0;
++
++	while (1) {
++		u32 fsm = edm & SDEDM_FSM_MASK;
++
++		if ((fsm == SDEDM_FSM_IDENTMODE) ||
++		    (fsm == SDEDM_FSM_DATAMODE))
++			break;
++		if (fsm == alternate_idle) {
++			bcm2835_sdhost_write(host,
++					     edm | SDEDM_FORCE_DATA_MODE,
++					     SDEDM);
++			break;
++		}
++
++		timediff++;
++		if (timediff == 100000) {
++			pr_err("%s: wait_transfer_complete - still waiting after %d retries\n",
++			       mmc_hostname(host->mmc),
++			       timediff);
++			bcm2835_sdhost_dumpregs(host);
++			host->mrq->data->error = -ETIMEDOUT;
++			return;
++		}
++		cpu_relax();
++		edm = bcm2835_sdhost_read(host, SDEDM);
++	}
++}
++
++static void bcm2835_sdhost_finish_data(struct bcm2835_host *host);
++
++static void bcm2835_sdhost_dma_complete(void *param)
 +{
 +	struct bcm2835_host *host = param;
-+	struct dma_chan *dma_chan;
++	struct mmc_data *data = host->data;
 +	unsigned long flags;
-+	u32 dir_data;
 +
 +	spin_lock_irqsave(&host->lock, flags);
 +
-+	if (host->data && !(host->data->flags & MMC_DATA_WRITE)) {
-+		/* otherwise handled in SDHCI IRQ */
-+		dma_chan = host->dma_chan_rx;
-+		dir_data = DMA_FROM_DEVICE;
++	if (host->dma_chan) {
++		dma_unmap_sg(host->dma_chan->device->dev,
++			     data->sg, data->sg_len,
++			     host->dma_dir);
 +
-+		dma_unmap_sg(dma_chan->device->dev,
-+		     host->data->sg, host->data->sg_len,
-+		     dir_data);
-+
-+		bcm2835_mmc_finish_data(host);
++		host->dma_chan = NULL;
 +	}
++
++	if (host->drain_words) {
++		void *page;
++		u32 *buf;
++
++		page = kmap_atomic(host->drain_page);
++		buf = page + host->drain_offset;
++
++		while (host->drain_words) {
++			u32 edm = bcm2835_sdhost_read(host, SDEDM);
++
++			if ((edm >> 4) & 0x1f)
++				*(buf++) = bcm2835_sdhost_read(host,
++							       SDDATA);
++			host->drain_words--;
++		}
++
++		kunmap_atomic(page);
++	}
++
++	bcm2835_sdhost_finish_data(host);
 +
 +	spin_unlock_irqrestore(&host->lock, flags);
 +}
 +
-+static void bcm2835_bcm2835_mmc_read_block_pio(struct bcm2835_host *host)
++static void bcm2835_sdhost_transfer_block_pio(struct bcm2835_host *host,
++					      bool is_read)
 +{
 +	unsigned long flags;
-+	size_t blksize, len, chunk;
-+
-+	u32 uninitialized_var(scratch);
-+	u8 *buf;
++	size_t blksize, len;
++	u32 *buf;
++	unsigned long wait_max;
 +
 +	blksize = host->data->blksz;
-+	chunk = 0;
++
++	wait_max = jiffies + msecs_to_jiffies(host->pio_timeout);
 +
 +	local_irq_save(flags);
 +
 +	while (blksize) {
-+		if (!sg_miter_next(&host->sg_miter))
-+			BUG();
++		int copy_words;
++		u32 hsts = 0;
 +
-+		len = min(host->sg_miter.length, blksize);
-+
-+		blksize -= len;
-+		host->sg_miter.consumed = len;
-+
-+		buf = host->sg_miter.addr;
-+
-+		while (len) {
-+			if (chunk == 0) {
-+				scratch = bcm2835_mmc_readl(host, SDHCI_BUFFER);
-+				chunk = 4;
-+			}
-+
-+			*buf = scratch & 0xFF;
-+
-+			buf++;
-+			scratch >>= 8;
-+			chunk--;
-+			len--;
-+		}
-+	}
-+
-+	sg_miter_stop(&host->sg_miter);
-+
-+	local_irq_restore(flags);
-+}
-+
-+static void bcm2835_bcm2835_mmc_write_block_pio(struct bcm2835_host *host)
-+{
-+	unsigned long flags;
-+	size_t blksize, len, chunk;
-+	u32 scratch;
-+	u8 *buf;
-+
-+	blksize = host->data->blksz;
-+	chunk = 0;
-+	chunk = 0;
-+	scratch = 0;
-+
-+	local_irq_save(flags);
-+
-+	while (blksize) {
-+		if (!sg_miter_next(&host->sg_miter))
-+			BUG();
-+
-+		len = min(host->sg_miter.length, blksize);
-+
-+		blksize -= len;
-+		host->sg_miter.consumed = len;
-+
-+		buf = host->sg_miter.addr;
-+
-+		while (len) {
-+			scratch |= (u32)*buf << (chunk * 8);
-+
-+			buf++;
-+			chunk++;
-+			len--;
-+
-+			if ((chunk == 4) || ((len == 0) && (blksize == 0))) {
-+				mmc_raw_writel(host, scratch, SDHCI_BUFFER);
-+				chunk = 0;
-+				scratch = 0;
-+			}
-+		}
-+	}
-+
-+	sg_miter_stop(&host->sg_miter);
-+
-+	local_irq_restore(flags);
-+}
-+
-+
-+static void bcm2835_mmc_transfer_pio(struct bcm2835_host *host)
-+{
-+	u32 mask;
-+
-+	BUG_ON(!host->data);
-+
-+	if (host->blocks == 0)
-+		return;
-+
-+	if (host->data->flags & MMC_DATA_READ)
-+		mask = SDHCI_DATA_AVAILABLE;
-+	else
-+		mask = SDHCI_SPACE_AVAILABLE;
-+
-+	while (bcm2835_mmc_readl(host, SDHCI_PRESENT_STATE) & mask) {
-+
-+		if (host->data->flags & MMC_DATA_READ)
-+			bcm2835_bcm2835_mmc_read_block_pio(host);
-+		else
-+			bcm2835_bcm2835_mmc_write_block_pio(host);
-+
-+		host->blocks--;
-+
-+		/* QUIRK used in sdhci.c removes the 'if' */
-+		/* but it seems this is unnecessary */
-+		if (host->blocks == 0)
++		if (!sg_miter_next(&host->sg_miter)) {
++			host->data->error = -EINVAL;
 +			break;
++		}
 +
++		len = min(host->sg_miter.length, blksize);
++		if (len % 4) {
++			host->data->error = -EINVAL;
++			break;
++		}
 +
++		blksize -= len;
++		host->sg_miter.consumed = len;
++
++		buf = (u32 *)host->sg_miter.addr;
++
++		copy_words = len / 4;
++
++		while (copy_words) {
++			int burst_words, words;
++			u32 edm;
++
++			burst_words = SDDATA_FIFO_PIO_BURST;
++			if (burst_words > copy_words)
++				burst_words = copy_words;
++			edm = bcm2835_sdhost_read(host, SDEDM);
++			if (is_read)
++				words = ((edm >> 4) & 0x1f);
++			else
++				words = SDDATA_FIFO_WORDS - ((edm >> 4) & 0x1f);
++
++			if (words < burst_words) {
++				int fsm_state = (edm & SDEDM_FSM_MASK);
++
++				if ((is_read &&
++				     (fsm_state != SDEDM_FSM_READDATA &&
++				      fsm_state != SDEDM_FSM_READWAIT &&
++				      fsm_state != SDEDM_FSM_READCRC)) ||
++				    (!is_read &&
++				     (fsm_state != SDEDM_FSM_WRITEDATA &&
++				      fsm_state != SDEDM_FSM_WRITESTART1 &&
++				      fsm_state != SDEDM_FSM_WRITESTART2))) {
++					hsts = bcm2835_sdhost_read(host,
++								   SDHSTS);
++					pr_err("%s: fsm %x, hsts %x\n",
++					       mmc_hostname(host->mmc),
++					       fsm_state, hsts);
++					if (hsts & SDHSTS_ERROR_MASK)
++						break;
++				}
++
++				if (time_after(jiffies, wait_max)) {
++					pr_err("%s: PIO %s timeout - EDM %x\n",
++					       is_read ? "read" : "write",
++					       mmc_hostname(host->mmc),
++					       edm);
++					hsts = SDHSTS_REW_TIME_OUT;
++					break;
++				}
++				ndelay((burst_words - words) *
++				       host->ns_per_fifo_word);
++				continue;
++			} else if (words > copy_words) {
++				words = copy_words;
++			}
++
++			copy_words -= words;
++
++			while (words) {
++				if (is_read) {
++					*(buf++) = bcm2835_sdhost_read(host,
++								       SDDATA);
++				} else {
++					bcm2835_sdhost_write(host, *(buf++),
++							     SDDATA);
++				}
++				words--;
++			}
++		}
++
++		if (hsts & SDHSTS_ERROR_MASK)
++			break;
++	}
++
++	sg_miter_stop(&host->sg_miter);
++
++	local_irq_restore(flags);
++}
++
++static void bcm2835_sdhost_transfer_pio(struct bcm2835_host *host)
++{
++	u32 sdhsts;
++	bool is_read;
++
++	is_read = (host->data->flags & MMC_DATA_READ) != 0;
++	bcm2835_sdhost_transfer_block_pio(host, is_read);
++
++	sdhsts = bcm2835_sdhost_read(host, SDHSTS);
++	if (sdhsts & (SDHSTS_CRC16_ERROR |
++		      SDHSTS_CRC7_ERROR |
++		      SDHSTS_FIFO_ERROR)) {
++		pr_err("%s: %s transfer error - HSTS %x\n",
++		       mmc_hostname(host->mmc),
++		       is_read ? "read" : "write",
++		       sdhsts);
++		host->data->error = -EILSEQ;
++	} else if ((sdhsts & (SDHSTS_CMD_TIME_OUT |
++			      SDHSTS_REW_TIME_OUT))) {
++		pr_err("%s: %s timeout error - HSTS %x\n",
++		       mmc_hostname(host->mmc),
++		       is_read ? "read" : "write",
++		       sdhsts);
++		host->data->error = -ETIMEDOUT;
 +	}
 +}
 +
-+
-+static void bcm2835_mmc_transfer_dma(struct bcm2835_host *host)
++static void bcm2835_sdhost_prepare_dma(struct bcm2835_host *host,
++				       struct mmc_data *data)
 +{
-+	u32 len, dir_data, dir_slave;
++	int len, dir_data, dir_slave;
 +	struct dma_async_tx_descriptor *desc = NULL;
 +	struct dma_chan *dma_chan;
 +
++	pr_debug("bcm2835_sdhost_prepare_dma()\n");
 +
-+	WARN_ON(!host->data);
-+
-+	if (!host->data)
-+		return;
-+
-+	if (host->blocks == 0)
-+		return;
-+
-+	if (host->data->flags & MMC_DATA_READ) {
++	if (data->flags & MMC_DATA_READ) {
 +		dma_chan = host->dma_chan_rx;
 +		dir_data = DMA_FROM_DEVICE;
 +		dir_slave = DMA_DEV_TO_MEM;
@@ -566,81 +666,100 @@ index 0000000..db6617d
 +		dir_slave = DMA_MEM_TO_DEV;
 +	}
 +
-+	BUG_ON(!dma_chan->device);
-+	BUG_ON(!dma_chan->device->dev);
-+	BUG_ON(!host->data->sg);
++	/* The block doesn't manage the FIFO DREQs properly for
++	 * multi-block transfers, so don't attempt to DMA the final
++	 * few words.  Unfortunately this requires the final sg entry
++	 * to be trimmed.  N.B. This code demands that the overspill
++	 * is contained in a single sg entry.
++	 */
 +
-+	len = dma_map_sg(dma_chan->device->dev, host->data->sg,
-+			 host->data->sg_len, dir_data);
++	host->drain_words = 0;
++	if ((data->blocks > 1) && (dir_data == DMA_FROM_DEVICE)) {
++		struct scatterlist *sg;
++		u32 len;
++		int i;
++
++		len = min((u32)(FIFO_READ_THRESHOLD - 1) * 4,
++			  (u32)data->blocks * data->blksz);
++
++		for_each_sg(data->sg, sg, data->sg_len, i) {
++			if (sg_is_last(sg)) {
++				WARN_ON(sg->length < len);
++				sg->length -= len;
++				host->drain_page = (struct page *)sg->page_link;
++				host->drain_offset = sg->offset + sg->length;
++			}
++		}
++		host->drain_words = len / 4;
++	}
++
++	len = dma_map_sg(dma_chan->device->dev, data->sg, data->sg_len,
++			 dir_data);
++
 +	if (len > 0) {
-+		desc = dmaengine_prep_slave_sg(dma_chan, host->data->sg,
++		desc = dmaengine_prep_slave_sg(dma_chan, data->sg,
 +					       len, dir_slave,
-+					       DMA_PREP_INTERRUPT | DMA_CTRL_ACK);
-+	} else {
-+		dev_err(mmc_dev(host->mmc), "dma_map_sg returned zero length\n");
++					       DMA_PREP_INTERRUPT |
++					       DMA_CTRL_ACK);
 +	}
++
 +	if (desc) {
-+		unsigned long flags;
-+		spin_lock_irqsave(&host->lock, flags);
-+		bcm2835_mmc_unsignal_irqs(host, SDHCI_INT_DATA_AVAIL |
-+						    SDHCI_INT_SPACE_AVAIL);
-+		host->tx_desc = desc;
-+		desc->callback = bcm2835_mmc_dma_complete;
++		desc->callback = bcm2835_sdhost_dma_complete;
 +		desc->callback_param = host;
-+		spin_unlock_irqrestore(&host->lock, flags);
-+		dmaengine_submit(desc);
-+		dma_async_issue_pending(dma_chan);
++		host->dma_desc = desc;
++		host->dma_chan = dma_chan;
++		host->dma_dir = dir_data;
++	}
++}
++
++static void bcm2835_sdhost_start_dma(struct bcm2835_host *host)
++{
++	dmaengine_submit(host->dma_desc);
++	dma_async_issue_pending(host->dma_chan);
++}
++
++static void bcm2835_sdhost_set_transfer_irqs(struct bcm2835_host *host)
++{
++	u32 all_irqs = SDHCFG_DATA_IRPT_EN | SDHCFG_BLOCK_IRPT_EN |
++		SDHCFG_BUSY_IRPT_EN;
++
++	if (host->dma_desc) {
++		host->hcfg = (host->hcfg & ~all_irqs) |
++			SDHCFG_BUSY_IRPT_EN;
++	} else {
++		host->hcfg = (host->hcfg & ~all_irqs) |
++			SDHCFG_DATA_IRPT_EN |
++			SDHCFG_BUSY_IRPT_EN;
 +	}
 +
++	bcm2835_sdhost_write(host, host->hcfg, SDHCFG);
 +}
 +
-+
-+
-+static void bcm2835_mmc_set_transfer_irqs(struct bcm2835_host *host)
++static void bcm2835_sdhost_prepare_data(struct bcm2835_host *host,
++					struct mmc_command *cmd)
 +{
-+	u32 pio_irqs = SDHCI_INT_DATA_AVAIL | SDHCI_INT_SPACE_AVAIL;
-+	u32 dma_irqs = SDHCI_INT_DMA_END | SDHCI_INT_ADMA_ERROR;
-+
-+	if (host->use_dma)
-+		host->ier = (host->ier & ~pio_irqs) | dma_irqs;
-+	else
-+		host->ier = (host->ier & ~dma_irqs) | pio_irqs;
-+
-+	bcm2835_mmc_writel(host, host->ier, SDHCI_INT_ENABLE, 4);
-+	bcm2835_mmc_writel(host, host->ier, SDHCI_SIGNAL_ENABLE, 4);
-+}
-+
-+
-+static void bcm2835_mmc_prepare_data(struct bcm2835_host *host, struct mmc_command *cmd)
-+{
-+	u8 count;
 +	struct mmc_data *data = cmd->data;
 +
 +	WARN_ON(host->data);
 +
-+	if (data || (cmd->flags & MMC_RSP_BUSY)) {
-+		count = TIMEOUT_VAL;
-+		bcm2835_mmc_writeb(host, count, SDHCI_TIMEOUT_CONTROL);
-+	}
-+
++	host->data = data;
 +	if (!data)
 +		return;
 +
 +	/* Sanity checks */
-+	BUG_ON(data->blksz * data->blocks > 524288);
-+	BUG_ON(data->blksz > host->mmc->max_blk_size);
-+	BUG_ON(data->blocks > 65535);
++	WARN_ON(data->blksz * data->blocks > 524288);
++	WARN_ON(data->blksz > host->mmc->max_blk_size);
++	WARN_ON(data->blocks > 65535);
 +
-+	host->data = data;
-+	host->data_early = 0;
++	host->data_complete = false;
++	host->flush_fifo = false;
 +	host->data->bytes_xfered = 0;
 +
++	if (!host->dma_desc) {
++		/* Use PIO */
++		int flags = SG_MITER_ATOMIC;
 +
-+	if (!(host->flags & SDHCI_REQ_USE_DMA)) {
-+		int flags;
-+
-+		flags = SG_MITER_ATOMIC;
-+		if (host->data->flags & MMC_DATA_READ)
++		if (data->flags & MMC_DATA_READ)
 +			flags |= SG_MITER_TO_SG;
 +		else
 +			flags |= SG_MITER_FROM_SG;
@@ -648,228 +767,321 @@ index 0000000..db6617d
 +		host->blocks = data->blocks;
 +	}
 +
-+	host->use_dma = host->have_dma && data->blocks > PIO_DMA_BARRIER;
++	bcm2835_sdhost_set_transfer_irqs(host);
 +
-+	bcm2835_mmc_set_transfer_irqs(host);
-+
-+	/* Set the DMA boundary value and block size */
-+	bcm2835_mmc_writew(host, SDHCI_MAKE_BLKSZ(SDHCI_DEFAULT_BOUNDARY_ARG,
-+		data->blksz), SDHCI_BLOCK_SIZE);
-+	bcm2835_mmc_writew(host, data->blocks, SDHCI_BLOCK_COUNT);
-+
-+	BUG_ON(!host->data);
++	bcm2835_sdhost_write(host, data->blksz, SDHBCT);
++	bcm2835_sdhost_write(host, data->blocks, SDHBLC);
 +}
 +
-+static void bcm2835_mmc_set_transfer_mode(struct bcm2835_host *host,
-+	struct mmc_command *cmd)
++bool bcm2835_sdhost_send_command(struct bcm2835_host *host,
++				 struct mmc_command *cmd)
 +{
-+	u16 mode;
-+	struct mmc_data *data = cmd->data;
-+
-+	if (data == NULL) {
-+		/* clear Auto CMD settings for no data CMDs */
-+		mode = bcm2835_mmc_readw(host, SDHCI_TRANSFER_MODE);
-+		bcm2835_mmc_writew(host, mode & ~(SDHCI_TRNS_AUTO_CMD12 |
-+				SDHCI_TRNS_AUTO_CMD23), SDHCI_TRANSFER_MODE);
-+		return;
-+	}
-+
-+	WARN_ON(!host->data);
-+
-+	mode = SDHCI_TRNS_BLK_CNT_EN;
-+
-+	if ((mmc_op_multi(cmd->opcode) || data->blocks > 1)) {
-+		mode |= SDHCI_TRNS_MULTI;
-+
-+		/*
-+		 * If we are sending CMD23, CMD12 never gets sent
-+		 * on successful completion (so no Auto-CMD12).
-+		 */
-+		if (!host->mrq->sbc && (host->flags & SDHCI_AUTO_CMD12))
-+			mode |= SDHCI_TRNS_AUTO_CMD12;
-+		else if (host->mrq->sbc && (host->flags & SDHCI_AUTO_CMD23)) {
-+			mode |= SDHCI_TRNS_AUTO_CMD23;
-+			bcm2835_mmc_writel(host, host->mrq->sbc->arg, SDHCI_ARGUMENT2, 5);
-+		}
-+	}
-+
-+	if (data->flags & MMC_DATA_READ)
-+		mode |= SDHCI_TRNS_READ;
-+	if (host->flags & SDHCI_REQ_USE_DMA)
-+		mode |= SDHCI_TRNS_DMA;
-+
-+	bcm2835_mmc_writew(host, mode, SDHCI_TRANSFER_MODE);
-+}
-+
-+void bcm2835_mmc_send_command(struct bcm2835_host *host, struct mmc_command *cmd)
-+{
-+	int flags;
-+	u32 mask;
++	u32 sdcmd, sdhsts;
 +	unsigned long timeout;
++	int delay;
 +
 +	WARN_ON(host->cmd);
 +
-+	/* Wait max 10 ms */
-+	timeout = 1000;
++	if (cmd->data) {
++		pr_debug("%s: send_command %d 0x%x (flags 0x%x) - %s %d*%d\n",
++			 mmc_hostname(host->mmc),
++			 cmd->opcode, cmd->arg, cmd->flags,
++			 (cmd->data->flags & MMC_DATA_READ) ?
++			 "read" : "write", cmd->data->blocks,
++			 cmd->data->blksz);
++	} else {
++		pr_debug("%s: send_command %d 0x%x (flags 0x%x)\n",
++			 mmc_hostname(host->mmc),
++			 cmd->opcode, cmd->arg, cmd->flags);
++	}
 +
-+	mask = SDHCI_CMD_INHIBIT;
-+	if ((cmd->data != NULL) || (cmd->flags & MMC_RSP_BUSY))
-+		mask |= SDHCI_DATA_INHIBIT;
++	/* Wait max 100 ms */
++	timeout = 10000;
 +
-+	/* We shouldn't wait for data inihibit for stop commands, even
-+	   though they might use busy signaling */
-+	if (host->mrq->data && (cmd == host->mrq->data->stop))
-+		mask &= ~SDHCI_DATA_INHIBIT;
-+
-+	while (bcm2835_mmc_readl(host, SDHCI_PRESENT_STATE) & mask) {
++	while (bcm2835_sdhost_read(host, SDCMD) & SDCMD_NEW_FLAG) {
 +		if (timeout == 0) {
-+			pr_err("%s: Controller never released inhibit bit(s).\n",
-+				mmc_hostname(host->mmc));
-+			bcm2835_mmc_dumpregs(host);
-+			cmd->error = -EIO;
++			pr_err("%s: previous command never completed.\n",
++			       mmc_hostname(host->mmc));
++			bcm2835_sdhost_dumpregs(host);
++			cmd->error = -EILSEQ;
 +			tasklet_schedule(&host->finish_tasklet);
-+			return;
++			return false;
 +		}
 +		timeout--;
 +		udelay(10);
 +	}
 +
-+	if ((1000-timeout)/100 > 1 && (1000-timeout)/100 > host->max_delay) {
-+		host->max_delay = (1000-timeout)/100;
-+		pr_warning("Warning: MMC controller hung for %d ms\n", host->max_delay);
++	delay = (10000 - timeout) / 100;
++	if (delay > host->max_delay) {
++		host->max_delay = delay;
++		pr_warn("%s: controller hung for %d ms\n",
++			mmc_hostname(host->mmc),
++			host->max_delay);
 +	}
 +
 +	timeout = jiffies;
-+#ifdef CONFIG_ARCH_BCM2835
 +	if (!cmd->data && cmd->busy_timeout > 9000)
 +		timeout += DIV_ROUND_UP(cmd->busy_timeout, 1000) * HZ + HZ;
 +	else
-+#endif
-+	timeout += 10 * HZ;
++		timeout += 10 * HZ;
 +	mod_timer(&host->timer, timeout);
 +
 +	host->cmd = cmd;
 +
-+	bcm2835_mmc_prepare_data(host, cmd);
-+
-+	bcm2835_mmc_writel(host, cmd->arg, SDHCI_ARGUMENT, 6);
-+
-+	bcm2835_mmc_set_transfer_mode(host, cmd);
++	/* Clear any error flags */
++	sdhsts = bcm2835_sdhost_read(host, SDHSTS);
++	if (sdhsts & SDHSTS_ERROR_MASK)
++		bcm2835_sdhost_write(host, sdhsts, SDHSTS);
 +
 +	if ((cmd->flags & MMC_RSP_136) && (cmd->flags & MMC_RSP_BUSY)) {
-+		pr_err("%s: Unsupported response type!\n",
-+			mmc_hostname(host->mmc));
++		pr_err("%s: unsupported response type!\n",
++		       mmc_hostname(host->mmc));
 +		cmd->error = -EINVAL;
 +		tasklet_schedule(&host->finish_tasklet);
-+		return;
++		return false;
 +	}
 +
-+	if (!(cmd->flags & MMC_RSP_PRESENT))
-+		flags = SDHCI_CMD_RESP_NONE;
-+	else if (cmd->flags & MMC_RSP_136)
-+		flags = SDHCI_CMD_RESP_LONG;
-+	else if (cmd->flags & MMC_RSP_BUSY)
-+		flags = SDHCI_CMD_RESP_SHORT_BUSY;
-+	else
-+		flags = SDHCI_CMD_RESP_SHORT;
++	bcm2835_sdhost_prepare_data(host, cmd);
 +
-+	if (cmd->flags & MMC_RSP_CRC)
-+		flags |= SDHCI_CMD_CRC;
-+	if (cmd->flags & MMC_RSP_OPCODE)
-+		flags |= SDHCI_CMD_INDEX;
++	bcm2835_sdhost_write(host, cmd->arg, SDARG);
 +
-+	if (cmd->data)
-+		flags |= SDHCI_CMD_DATA;
++	sdcmd = cmd->opcode & SDCMD_CMD_MASK;
 +
-+	bcm2835_mmc_writew(host, SDHCI_MAKE_CMD(cmd->opcode, flags), SDHCI_COMMAND);
++	host->use_busy = false;
++	if (!(cmd->flags & MMC_RSP_PRESENT)) {
++		sdcmd |= SDCMD_NO_RESPONSE;
++	} else {
++		if (cmd->flags & MMC_RSP_136)
++			sdcmd |= SDCMD_LONG_RESPONSE;
++		if (cmd->flags & MMC_RSP_BUSY) {
++			sdcmd |= SDCMD_BUSYWAIT;
++			host->use_busy = true;
++		}
++	}
++
++	if (cmd->data) {
++		if (cmd->data->flags & MMC_DATA_WRITE)
++			sdcmd |= SDCMD_WRITE_CMD;
++		if (cmd->data->flags & MMC_DATA_READ)
++			sdcmd |= SDCMD_READ_CMD;
++	}
++
++	bcm2835_sdhost_write(host, sdcmd | SDCMD_NEW_FLAG, SDCMD);
++
++	return true;
 +}
 +
++static void bcm2835_sdhost_finish_command(struct bcm2835_host *host,
++					  unsigned long *irq_flags);
 +
-+static void bcm2835_mmc_finish_data(struct bcm2835_host *host)
++static void bcm2835_sdhost_transfer_complete(struct bcm2835_host *host)
 +{
 +	struct mmc_data *data;
 +
-+	BUG_ON(!host->data);
++	WARN_ON(!host->data_complete);
 +
 +	data = host->data;
 +	host->data = NULL;
 +
-+	if (data->error)
-+		data->bytes_xfered = 0;
-+	else
-+		data->bytes_xfered = data->blksz * data->blocks;
++	pr_debug("transfer_complete(error %d, stop %d)\n",
++		 data->error, data->stop ? 1 : 0);
 +
-+	/*
-+	 * Need to send CMD12 if -
++	/* Need to send CMD12 if -
 +	 * a) open-ended multiblock transfer (no CMD23)
 +	 * b) error in multiblock transfer
 +	 */
-+	if (data->stop &&
-+	    (data->error ||
-+	     !host->mrq->sbc)) {
-+
-+		/*
-+		 * The controller needs a reset of internal state machines
-+		 * upon error conditions.
-+		 */
-+		if (data->error) {
-+			bcm2835_mmc_reset(host, SDHCI_RESET_CMD);
-+			bcm2835_mmc_reset(host, SDHCI_RESET_DATA);
++	if (host->mrq->stop && (data->error || !host->use_sbc)) {
++		if (bcm2835_sdhost_send_command(host, host->mrq->stop)) {
++			/* No busy, so poll for completion */
++			if (!host->use_busy)
++				bcm2835_sdhost_finish_command(host, NULL);
 +		}
-+
-+		bcm2835_mmc_send_command(host, data->stop);
-+	} else
++	} else {
++		bcm2835_sdhost_wait_transfer_complete(host);
 +		tasklet_schedule(&host->finish_tasklet);
++	}
 +}
 +
-+static void bcm2835_mmc_finish_command(struct bcm2835_host *host)
++static void bcm2835_sdhost_finish_data(struct bcm2835_host *host)
 +{
-+	int i;
++	struct mmc_data *data;
 +
-+	BUG_ON(host->cmd == NULL);
++	data = host->data;
++
++	pr_debug("finish_data(error %d, stop %d, sbc %d)\n",
++		 data->error, data->stop ? 1 : 0,
++		 host->mrq->sbc ? 1 : 0);
++
++	host->hcfg &= ~(SDHCFG_DATA_IRPT_EN | SDHCFG_BLOCK_IRPT_EN);
++	bcm2835_sdhost_write(host, host->hcfg, SDHCFG);
++
++	data->bytes_xfered = data->error ? 0 : (data->blksz * data->blocks);
++
++	host->data_complete = true;
++
++	if (host->cmd) {
++		/* Data managed to finish before the
++		 * command completed. Make sure we do
++		 * things in the proper order.
++		 */
++		pr_debug("Finished early - HSTS %x\n",
++			 bcm2835_sdhost_read(host, SDHSTS));
++	} else {
++		bcm2835_sdhost_transfer_complete(host);
++	}
++}
++
++/* If irq_flags is valid, the caller is in a thread context and is
++ * allowed to sleep
++ */
++static void bcm2835_sdhost_finish_command(struct bcm2835_host *host,
++					  unsigned long *irq_flags)
++{
++	u32 sdcmd;
++	u32 retries;
++
++	pr_debug("finish_command(%x)\n", bcm2835_sdhost_read(host, SDCMD));
++
++	/* Poll quickly at first */
++
++	retries = host->cmd_quick_poll_retries;
++	if (!retries) {
++		/* Work out how many polls take 1us by timing 10us */
++		struct timeval start, now;
++		int us_diff;
++
++		retries = 1;
++		do {
++			int i;
++
++			retries *= 2;
++
++			do_gettimeofday(&start);
++
++			for (i = 0; i < retries; i++) {
++				cpu_relax();
++				sdcmd = bcm2835_sdhost_read(host, SDCMD);
++			}
++
++			do_gettimeofday(&now);
++			us_diff = (now.tv_sec - start.tv_sec) * 1000000 +
++				(now.tv_usec - start.tv_usec);
++		} while (us_diff < 10);
++
++		host->cmd_quick_poll_retries =
++			((retries * us_diff + 9) * CMD_DALLY_US) / 10 + 1;
++		retries = 1; /* We've already waited long enough this time */
++	}
++
++	retries = host->cmd_quick_poll_retries;
++	for (sdcmd = bcm2835_sdhost_read(host, SDCMD);
++	     (sdcmd & SDCMD_NEW_FLAG) && !(sdcmd & SDCMD_FAIL_FLAG) && retries;
++	     retries--) {
++		cpu_relax();
++		sdcmd = bcm2835_sdhost_read(host, SDCMD);
++	}
++
++	if (!retries) {
++		unsigned long wait_max;
++
++		if (!irq_flags) {
++			/* Schedule the work */
++			schedule_work(&host->cmd_wait_wq);
++			return;
++		}
++
++		/* Wait max 100 ms */
++		wait_max = jiffies + msecs_to_jiffies(100);
++		while (time_before(jiffies, wait_max)) {
++			spin_unlock_irqrestore(&host->lock, *irq_flags);
++			usleep_range(1, 10);
++			spin_lock_irqsave(&host->lock, *irq_flags);
++			sdcmd = bcm2835_sdhost_read(host, SDCMD);
++			if (!(sdcmd & SDCMD_NEW_FLAG) ||
++			    (sdcmd & SDCMD_FAIL_FLAG))
++				break;
++		}
++	}
++
++	/* Check for errors */
++	if (sdcmd & SDCMD_NEW_FLAG) {
++		pr_err("%s: command never completed.\n",
++		       mmc_hostname(host->mmc));
++		bcm2835_sdhost_dumpregs(host);
++		host->cmd->error = -EIO;
++		tasklet_schedule(&host->finish_tasklet);
++		return;
++	} else if (sdcmd & SDCMD_FAIL_FLAG) {
++		u32 sdhsts = bcm2835_sdhost_read(host, SDHSTS);
++
++		/* Clear the errors */
++		bcm2835_sdhost_write(host, SDHSTS_ERROR_MASK, SDHSTS);
++
++		if (!(sdhsts & SDHSTS_CRC7_ERROR) ||
++		    (host->cmd->opcode != 1)) {
++			if (sdhsts & SDHSTS_CMD_TIME_OUT) {
++				host->cmd->error = -ETIMEDOUT;
++			} else {
++				pr_err("%s: unexpected command %d error\n",
++				       mmc_hostname(host->mmc),
++				       host->cmd->opcode);
++				bcm2835_sdhost_dumpregs(host);
++				host->cmd->error = -EILSEQ;
++			}
++			tasklet_schedule(&host->finish_tasklet);
++			return;
++		}
++	}
 +
 +	if (host->cmd->flags & MMC_RSP_PRESENT) {
 +		if (host->cmd->flags & MMC_RSP_136) {
-+			/* CRC is stripped so we need to do some shifting. */
++			int i;
++
 +			for (i = 0; i < 4; i++) {
-+				host->cmd->resp[i] = bcm2835_mmc_readl(host,
-+					SDHCI_RESPONSE + (3-i)*4) << 8;
-+				if (i != 3)
-+					host->cmd->resp[i] |=
-+						bcm2835_mmc_readb(host,
-+						SDHCI_RESPONSE + (3-i)*4-1);
++				host->cmd->resp[3 - i] =
++					bcm2835_sdhost_read(host,
++							    SDRSP0 + i * 4);
 +			}
++
++			pr_debug("%s: finish_command %08x %08x %08x %08x\n",
++				 mmc_hostname(host->mmc),
++				 host->cmd->resp[0], host->cmd->resp[1],
++				 host->cmd->resp[2], host->cmd->resp[3]);
 +		} else {
-+			host->cmd->resp[0] = bcm2835_mmc_readl(host, SDHCI_RESPONSE);
++			host->cmd->resp[0] = bcm2835_sdhost_read(host, SDRSP0);
++			pr_debug("%s: finish_command %08x\n",
++				 mmc_hostname(host->mmc),
++				 host->cmd->resp[0]);
 +		}
 +	}
 +
-+	host->cmd->error = 0;
-+
-+	/* Finished CMD23, now send actual command. */
 +	if (host->cmd == host->mrq->sbc) {
++		/* Finished CMD23, now send actual command. */
 +		host->cmd = NULL;
-+		bcm2835_mmc_send_command(host, host->mrq->cmd);
++		if (bcm2835_sdhost_send_command(host, host->mrq->cmd)) {
++			if (host->data && host->dma_desc)
++				/* DMA transfer starts now, PIO starts
++				 * after irq
++				 */
++				bcm2835_sdhost_start_dma(host);
 +
-+		if (host->mrq->cmd->data && host->use_dma) {
-+			/* DMA transfer starts now, PIO starts after interrupt */
-+			bcm2835_mmc_transfer_dma(host);
++			if (!host->use_busy)
++				bcm2835_sdhost_finish_command(host, NULL);
 +		}
++	} else if (host->cmd == host->mrq->stop) {
++		/* Finished CMD12 */
++		tasklet_schedule(&host->finish_tasklet);
 +	} else {
-+
 +		/* Processed actual command. */
-+		if (host->data && host->data_early)
-+			bcm2835_mmc_finish_data(host);
-+
-+		if (!host->cmd->data)
-+			tasklet_schedule(&host->finish_tasklet);
-+
 +		host->cmd = NULL;
++		if (!host->data)
++			tasklet_schedule(&host->finish_tasklet);
++		else if (host->data_complete)
++			bcm2835_sdhost_transfer_complete(host);
 +	}
 +}
 +
-+
-+static void bcm2835_mmc_timeout_timer(unsigned long data)
++static void bcm2835_sdhost_timeout(unsigned long data)
 +{
 +	struct bcm2835_host *host;
 +	unsigned long flags;
@@ -879,19 +1091,20 @@ index 0000000..db6617d
 +	spin_lock_irqsave(&host->lock, flags);
 +
 +	if (host->mrq) {
-+		pr_err("%s: Timeout waiting for hardware interrupt.\n",
-+			mmc_hostname(host->mmc));
-+		bcm2835_mmc_dumpregs(host);
++		pr_err("%s: timeout waiting for hardware interrupt.\n",
++		       mmc_hostname(host->mmc));
++		bcm2835_sdhost_dumpregs(host);
 +
 +		if (host->data) {
 +			host->data->error = -ETIMEDOUT;
-+			bcm2835_mmc_finish_data(host);
++			bcm2835_sdhost_finish_data(host);
 +		} else {
 +			if (host->cmd)
 +				host->cmd->error = -ETIMEDOUT;
 +			else
 +				host->mrq->cmd->error = -ETIMEDOUT;
 +
++			pr_debug("timeout_timer tasklet_schedule\n");
 +			tasklet_schedule(&host->finish_tasklet);
 +		}
 +	}
@@ -900,428 +1113,366 @@ index 0000000..db6617d
 +	spin_unlock_irqrestore(&host->lock, flags);
 +}
 +
-+
-+static void bcm2835_mmc_enable_sdio_irq_nolock(struct bcm2835_host *host, int enable)
++static void bcm2835_sdhost_busy_irq(struct bcm2835_host *host, u32 intmask)
 +{
-+	if (!(host->flags & SDHCI_DEVICE_DEAD)) {
-+		if (enable)
-+			host->ier |= SDHCI_INT_CARD_INT;
-+		else
-+			host->ier &= ~SDHCI_INT_CARD_INT;
-+
-+		bcm2835_mmc_writel(host, host->ier, SDHCI_INT_ENABLE, 7);
-+		bcm2835_mmc_writel(host, host->ier, SDHCI_SIGNAL_ENABLE, 7);
-+		mmiowb();
-+	}
-+}
-+
-+static void bcm2835_mmc_enable_sdio_irq(struct mmc_host *mmc, int enable)
-+{
-+	struct bcm2835_host *host = mmc_priv(mmc);
-+	unsigned long flags;
-+
-+	spin_lock_irqsave(&host->lock, flags);
-+	if (enable)
-+		host->flags |= SDHCI_SDIO_IRQ_ENABLED;
-+	else
-+		host->flags &= ~SDHCI_SDIO_IRQ_ENABLED;
-+
-+	bcm2835_mmc_enable_sdio_irq_nolock(host, enable);
-+	spin_unlock_irqrestore(&host->lock, flags);
-+}
-+
-+static void bcm2835_mmc_cmd_irq(struct bcm2835_host *host, u32 intmask)
-+{
-+
-+	BUG_ON(intmask == 0);
-+
 +	if (!host->cmd) {
-+		pr_err("%s: Got command interrupt 0x%08x even "
-+			"though no command operation was in progress.\n",
-+			mmc_hostname(host->mmc), (unsigned)intmask);
-+		bcm2835_mmc_dumpregs(host);
++		pr_err("%s: got command busy interrupt 0x%08x even though no command operation was in progress.\n",
++		       mmc_hostname(host->mmc), (unsigned)intmask);
++		bcm2835_sdhost_dumpregs(host);
 +		return;
 +	}
 +
-+	if (intmask & SDHCI_INT_TIMEOUT)
-+		host->cmd->error = -ETIMEDOUT;
-+	else if (intmask & (SDHCI_INT_CRC | SDHCI_INT_END_BIT |
-+			SDHCI_INT_INDEX)) {
++	if (!host->use_busy) {
++		pr_err("%s: got command busy interrupt 0x%08x even though not expecting one.\n",
++		       mmc_hostname(host->mmc), (unsigned)intmask);
++		bcm2835_sdhost_dumpregs(host);
++		return;
++	}
++	host->use_busy = false;
++
++	if (intmask & SDHSTS_ERROR_MASK) {
++		pr_err("sdhost_busy_irq: intmask %x, data %p\n",
++		       intmask, host->mrq->data);
++		if (intmask & SDHSTS_CRC7_ERROR) {
 +			host->cmd->error = -EILSEQ;
-+	}
-+
-+	if (host->cmd->error) {
-+		tasklet_schedule(&host->finish_tasklet);
-+		return;
-+	}
-+
-+	if (intmask & SDHCI_INT_RESPONSE)
-+		bcm2835_mmc_finish_command(host);
-+
-+}
-+
-+static void bcm2835_mmc_data_irq(struct bcm2835_host *host, u32 intmask)
-+{
-+	struct dma_chan *dma_chan;
-+	u32 dir_data;
-+
-+	BUG_ON(intmask == 0);
-+
-+	if (!host->data) {
-+		/*
-+		 * The "data complete" interrupt is also used to
-+		 * indicate that a busy state has ended. See comment
-+		 * above in sdhci_cmd_irq().
-+		 */
-+		if (host->cmd && (host->cmd->flags & MMC_RSP_BUSY)) {
-+			if (intmask & SDHCI_INT_DATA_END) {
-+				bcm2835_mmc_finish_command(host);
-+				return;
-+			}
++		} else if (intmask & (SDHSTS_CRC16_ERROR |
++				    SDHSTS_FIFO_ERROR)) {
++			if (host->mrq->data)
++				host->mrq->data->error = -EILSEQ;
++			else
++				host->cmd->error = -EILSEQ;
++		} else if (intmask & SDHSTS_REW_TIME_OUT) {
++			if (host->mrq->data)
++				host->mrq->data->error = -ETIMEDOUT;
++			else
++				host->cmd->error = -ETIMEDOUT;
++		} else if (intmask & SDHSTS_CMD_TIME_OUT) {
++			host->cmd->error = -ETIMEDOUT;
 +		}
 +
-+		pr_debug("%s: Got data interrupt 0x%08x even "
-+			"though no data operation was in progress.\n",
-+			mmc_hostname(host->mmc), (unsigned)intmask);
-+		bcm2835_mmc_dumpregs(host);
-+
-+		return;
-+	}
-+
-+	if (intmask & SDHCI_INT_DATA_TIMEOUT)
-+		host->data->error = -ETIMEDOUT;
-+	else if (intmask & SDHCI_INT_DATA_END_BIT)
-+		host->data->error = -EILSEQ;
-+	else if ((intmask & SDHCI_INT_DATA_CRC) &&
-+		SDHCI_GET_CMD(bcm2835_mmc_readw(host, SDHCI_COMMAND))
-+			!= MMC_BUS_TEST_R)
-+		host->data->error = -EILSEQ;
-+
-+	if (host->use_dma) {
-+		if  (host->data->flags & MMC_DATA_WRITE) {
-+			/* IRQ handled here */
-+
-+			dma_chan = host->dma_chan_tx;
-+			dir_data = DMA_TO_DEVICE;
-+			dma_unmap_sg(dma_chan->device->dev,
-+				 host->data->sg, host->data->sg_len,
-+				 dir_data);
-+
-+			bcm2835_mmc_finish_data(host);
-+		}
-+
++		bcm2835_sdhost_dumpregs(host);
 +	} else {
-+		if (host->data->error)
-+			bcm2835_mmc_finish_data(host);
-+		else {
-+			if (intmask & (SDHCI_INT_DATA_AVAIL | SDHCI_INT_SPACE_AVAIL))
-+				bcm2835_mmc_transfer_pio(host);
-+
-+			if (intmask & SDHCI_INT_DATA_END) {
-+				if (host->cmd) {
-+					/*
-+					 * Data managed to finish before the
-+					 * command completed. Make sure we do
-+					 * things in the proper order.
-+					 */
-+					host->data_early = 1;
-+				} else {
-+					bcm2835_mmc_finish_data(host);
-+				}
-+			}
-+		}
++		bcm2835_sdhost_finish_command(host, NULL);
 +	}
 +}
 +
++static void bcm2835_sdhost_data_irq(struct bcm2835_host *host, u32 intmask)
++{
++	/* There are no dedicated data/space available interrupt
++	 * status bits, so it is necessary to use the single shared
++	 * data/space available FIFO status bits. It is therefore not
++	 * an error to get here when there is no data transfer in
++	 * progress.
++	 */
++	if (!host->data)
++		return;
 +
-+static irqreturn_t bcm2835_mmc_irq(int irq, void *dev_id)
++	if (intmask & (SDHSTS_CRC16_ERROR |
++		       SDHSTS_FIFO_ERROR |
++		       SDHSTS_REW_TIME_OUT)) {
++		if (intmask & (SDHSTS_CRC16_ERROR |
++			       SDHSTS_FIFO_ERROR))
++			host->data->error = -EILSEQ;
++		else
++			host->data->error = -ETIMEDOUT;
++	}
++
++	if (host->data->error) {
++		bcm2835_sdhost_finish_data(host);
++	} else if (host->data->flags & MMC_DATA_WRITE) {
++		/* Use the block interrupt for writes after the first block */
++		host->hcfg &= ~(SDHCFG_DATA_IRPT_EN);
++		host->hcfg |= SDHCFG_BLOCK_IRPT_EN;
++		bcm2835_sdhost_write(host, host->hcfg, SDHCFG);
++		bcm2835_sdhost_transfer_pio(host);
++	} else {
++		bcm2835_sdhost_transfer_pio(host);
++		host->blocks--;
++		if ((host->blocks == 0) || host->data->error)
++			bcm2835_sdhost_finish_data(host);
++	}
++}
++
++static void bcm2835_sdhost_block_irq(struct bcm2835_host *host, u32 intmask)
++{
++	if (!host->data) {
++		pr_err("%s: got block interrupt 0x%08x even though no data operation was in progress.\n",
++		       mmc_hostname(host->mmc), (unsigned)intmask);
++		bcm2835_sdhost_dumpregs(host);
++		return;
++	}
++
++	if (intmask & (SDHSTS_CRC16_ERROR |
++		       SDHSTS_FIFO_ERROR |
++		       SDHSTS_REW_TIME_OUT)) {
++		if (intmask & (SDHSTS_CRC16_ERROR |
++			       SDHSTS_FIFO_ERROR))
++			host->data->error = -EILSEQ;
++		else
++			host->data->error = -ETIMEDOUT;
++	}
++
++	if (!host->dma_desc) {
++		WARN_ON(!host->blocks);
++		if (host->data->error || (--host->blocks == 0))
++			bcm2835_sdhost_finish_data(host);
++		else
++			bcm2835_sdhost_transfer_pio(host);
++	} else if (host->data->flags & MMC_DATA_WRITE) {
++		bcm2835_sdhost_finish_data(host);
++	}
++}
++
++static irqreturn_t bcm2835_sdhost_irq(int irq, void *dev_id)
 +{
 +	irqreturn_t result = IRQ_NONE;
 +	struct bcm2835_host *host = dev_id;
-+	u32 intmask, mask, unexpected = 0;
-+	int max_loops = 16;
-+#ifndef CONFIG_ARCH_BCM2835
-+	int cardint = 0;
-+#endif
++	u32 intmask;
 +
 +	spin_lock(&host->lock);
 +
-+	intmask = bcm2835_mmc_readl(host, SDHCI_INT_STATUS);
++	intmask = bcm2835_sdhost_read(host, SDHSTS);
 +
-+	if (!intmask || intmask == 0xffffffff) {
-+		result = IRQ_NONE;
-+		goto out;
++	bcm2835_sdhost_write(host,
++			     SDHSTS_BUSY_IRPT |
++			     SDHSTS_BLOCK_IRPT |
++			     SDHSTS_SDIO_IRPT |
++			     SDHSTS_DATA_FLAG,
++			     SDHSTS);
++
++	if (intmask & SDHSTS_BLOCK_IRPT) {
++		bcm2835_sdhost_block_irq(host, intmask);
++		result = IRQ_HANDLED;
 +	}
 +
-+	do {
-+		/* Clear selected interrupts. */
-+		mask = intmask & (SDHCI_INT_CMD_MASK | SDHCI_INT_DATA_MASK |
-+				  SDHCI_INT_BUS_POWER);
-+		bcm2835_mmc_writel(host, mask, SDHCI_INT_STATUS, 8);
++	if (intmask & SDHSTS_BUSY_IRPT) {
++		bcm2835_sdhost_busy_irq(host, intmask);
++		result = IRQ_HANDLED;
++	}
 +
++	/* There is no true data interrupt status bit, so it is
++	 * necessary to qualify the data flag with the interrupt
++	 * enable bit.
++	 */
++	if ((intmask & SDHSTS_DATA_FLAG) &&
++	    (host->hcfg & SDHCFG_DATA_IRPT_EN)) {
++		bcm2835_sdhost_data_irq(host, intmask);
++		result = IRQ_HANDLED;
++	}
 +
-+		if (intmask & SDHCI_INT_CMD_MASK)
-+			bcm2835_mmc_cmd_irq(host, intmask & SDHCI_INT_CMD_MASK);
++	mmiowb();
 +
-+		if (intmask & SDHCI_INT_DATA_MASK)
-+			bcm2835_mmc_data_irq(host, intmask & SDHCI_INT_DATA_MASK);
-+
-+		if (intmask & SDHCI_INT_BUS_POWER)
-+			pr_err("%s: Card is consuming too much power!\n",
-+				mmc_hostname(host->mmc));
-+
-+		if (intmask & SDHCI_INT_CARD_INT) {
-+#ifndef CONFIG_ARCH_BCM2835
-+			cardint = 1;
-+#else
-+			bcm2835_mmc_enable_sdio_irq_nolock(host, false);
-+			host->thread_isr |= SDHCI_INT_CARD_INT;
-+			result = IRQ_WAKE_THREAD;
-+#endif
-+		}
-+
-+		intmask &= ~(SDHCI_INT_CARD_INSERT | SDHCI_INT_CARD_REMOVE |
-+			     SDHCI_INT_CMD_MASK | SDHCI_INT_DATA_MASK |
-+			     SDHCI_INT_ERROR | SDHCI_INT_BUS_POWER |
-+			     SDHCI_INT_CARD_INT);
-+
-+		if (intmask) {
-+			unexpected |= intmask;
-+			bcm2835_mmc_writel(host, intmask, SDHCI_INT_STATUS, 9);
-+		}
-+
-+		if (result == IRQ_NONE)
-+			result = IRQ_HANDLED;
-+
-+		intmask = bcm2835_mmc_readl(host, SDHCI_INT_STATUS);
-+	} while (intmask && --max_loops);
-+out:
 +	spin_unlock(&host->lock);
-+
-+	if (unexpected) {
-+		pr_err("%s: Unexpected interrupt 0x%08x.\n",
-+			   mmc_hostname(host->mmc), unexpected);
-+		bcm2835_mmc_dumpregs(host);
-+	}
-+
-+#ifndef CONFIG_ARCH_BCM2835
-+	if (cardint)
-+		mmc_signal_sdio_irq(host->mmc);
-+#endif
 +
 +	return result;
 +}
 +
-+#ifdef CONFIG_ARCH_BCM2835
-+static irqreturn_t bcm2835_mmc_thread_irq(int irq, void *dev_id)
-+{
-+	struct bcm2835_host *host = dev_id;
-+	unsigned long flags;
-+	u32 isr;
-+
-+	spin_lock_irqsave(&host->lock, flags);
-+	isr = host->thread_isr;
-+	host->thread_isr = 0;
-+	spin_unlock_irqrestore(&host->lock, flags);
-+
-+	if (isr & SDHCI_INT_CARD_INT) {
-+		sdio_run_irqs(host->mmc);
-+
-+		spin_lock_irqsave(&host->lock, flags);
-+		if (host->flags & SDHCI_SDIO_IRQ_ENABLED)
-+			bcm2835_mmc_enable_sdio_irq_nolock(host, true);
-+		spin_unlock_irqrestore(&host->lock, flags);
-+	}
-+
-+	return isr ? IRQ_HANDLED : IRQ_NONE;
-+}
-+#endif
-+
-+
-+
-+void bcm2835_mmc_set_clock(struct bcm2835_host *host, unsigned int clock)
++void bcm2835_sdhost_set_clock(struct bcm2835_host *host, unsigned int clock)
 +{
 +	int div = 0; /* Initialized for compiler warning */
-+	int real_div = div, clk_mul = 1;
-+	u16 clk = 0;
-+	unsigned long timeout;
-+	unsigned int input_clock = clock;
 +
-+	if (host->overclock_50 && (clock == 50000000))
-+		clock = host->overclock_50 * 1000000 + 999999;
++	/* The SDCDIV register has 11 bits, and holds (div - 2).  But
++	 * in data mode the max is 50MHz wihout a minimum, and only
++	 * the bottom 3 bits are used. Since the switch over is
++	 * automatic (unless we have marked the card as slow...),
++	 * chosen values have to make sense in both modes.  Ident mode
++	 * must be 100-400KHz, so can range check the requested
++	 * clock. CMD15 must be used to return to data mode, so this
++	 * can be monitored.
++	 *
++	 * clock 250MHz -> 0->125MHz, 1->83.3MHz, 2->62.5MHz, 3->50.0MHz
++	 *                 4->41.7MHz, 5->35.7MHz, 6->31.3MHz, 7->27.8MHz
++	 *
++	 *		 623->400KHz/27.8MHz
++	 *		 reset value (507)->491159/50MHz
++	 *
++	 * BUT, the 3-bit clock divisor in data mode is too small if
++	 * the core clock is higher than 250MHz, so instead use the
++	 * SLOW_CARD configuration bit to force the use of the ident
++	 * clock divisor at all times.
++	 */
 +
 +	host->mmc->actual_clock = 0;
 +
-+	bcm2835_mmc_writew(host, 0, SDHCI_CLOCK_CONTROL);
-+
-+	if (clock == 0)
++	if (clock < 100000) {
++		/* Can't stop the clock, but make it as slow as possible
++		 * to show willing
++		 */
++		host->cdiv = SDCDIV_MAX_CDIV;
++		bcm2835_sdhost_write(host, host->cdiv, SDCDIV);
 +		return;
-+
-+	/* Version 3.00 divisors must be a multiple of 2. */
-+	if (host->max_clk <= clock)
-+		div = 1;
-+	else {
-+		for (div = 2; div < SDHCI_MAX_DIV_SPEC_300;
-+			 div += 2) {
-+			if ((host->max_clk / div) <= clock)
-+				break;
-+		}
 +	}
 +
-+	real_div = div;
-+	div >>= 1;
++	div = host->max_clk / clock;
++	if (div < 2)
++		div = 2;
++	if ((host->max_clk / div) > clock)
++		div++;
++	div -= 2;
 +
-+	if (real_div)
-+		clock = (host->max_clk * clk_mul) / real_div;
++	if (div > SDCDIV_MAX_CDIV)
++		div = SDCDIV_MAX_CDIV;
++
++	clock = host->max_clk / (div + 2);
 +	host->mmc->actual_clock = clock;
 +
-+	if ((clock > input_clock) && (clock > host->max_overclock)) {
-+		pr_warn("%s: Overclocking to %dHz\n",
-+			mmc_hostname(host->mmc), clock);
-+		host->max_overclock = clock;
-+	}
++	/* Calibrate some delays */
 +
-+	clk |= (div & SDHCI_DIV_MASK) << SDHCI_DIVIDER_SHIFT;
-+	clk |= ((div & SDHCI_DIV_HI_MASK) >> SDHCI_DIV_MASK_LEN)
-+		<< SDHCI_DIVIDER_HI_SHIFT;
-+	clk |= SDHCI_CLOCK_INT_EN;
-+	bcm2835_mmc_writew(host, clk, SDHCI_CLOCK_CONTROL);
++	host->ns_per_fifo_word = (1000000000 / clock) *
++		((host->mmc->caps & MMC_CAP_4_BIT_DATA) ? 8 : 32);
 +
-+	/* Wait max 20 ms */
-+	timeout = 20;
-+	while (!((clk = bcm2835_mmc_readw(host, SDHCI_CLOCK_CONTROL))
-+		& SDHCI_CLOCK_INT_STABLE)) {
-+		if (timeout == 0) {
-+			pr_err("%s: Internal clock never "
-+				"stabilised.\n", mmc_hostname(host->mmc));
-+			bcm2835_mmc_dumpregs(host);
-+			return;
-+		}
-+		timeout--;
-+		mdelay(1);
-+	}
++	host->cdiv = div;
++	bcm2835_sdhost_write(host, host->cdiv, SDCDIV);
 +
-+	if (20-timeout > 10 && 20-timeout > host->max_delay) {
-+		host->max_delay = 20-timeout;
-+		pr_warning("Warning: MMC controller hung for %d ms\n", host->max_delay);
-+	}
-+
-+	clk |= SDHCI_CLOCK_CARD_EN;
-+	bcm2835_mmc_writew(host, clk, SDHCI_CLOCK_CONTROL);
++	/* Set the timeout to 500ms */
++	bcm2835_sdhost_write(host, host->mmc->actual_clock / 2, SDTOUT);
 +}
 +
-+static void bcm2835_mmc_request(struct mmc_host *mmc, struct mmc_request *mrq)
++static void bcm2835_sdhost_request(struct mmc_host *mmc,
++				   struct mmc_request *mrq)
 +{
 +	struct bcm2835_host *host;
 +	unsigned long flags;
++	u32 edm, fsm;
 +
 +	host = mmc_priv(mmc);
 +
++	/* Reset the error statuses in case this is a retry */
++	if (mrq->sbc)
++		mrq->sbc->error = 0;
++	if (mrq->cmd)
++		mrq->cmd->error = 0;
++	if (mrq->data)
++		mrq->data->error = 0;
++	if (mrq->stop)
++		mrq->stop->error = 0;
++
++	if (mrq->data && !is_power_of_2(mrq->data->blksz)) {
++		pr_err("%s: unsupported block size (%d bytes)\n",
++		       mmc_hostname(mmc), mrq->data->blksz);
++		mrq->cmd->error = -EINVAL;
++		mmc_request_done(mmc, mrq);
++		return;
++	}
++
++	if (host->use_dma && mrq->data &&
++	    (mrq->data->blocks > host->pio_limit))
++		bcm2835_sdhost_prepare_dma(host, mrq->data);
++
 +	spin_lock_irqsave(&host->lock, flags);
 +
-+	WARN_ON(host->mrq != NULL);
-+
++	WARN_ON(host->mrq);
 +	host->mrq = mrq;
 +
-+	if (mrq->sbc && !(host->flags & SDHCI_AUTO_CMD23))
-+		bcm2835_mmc_send_command(host, mrq->sbc);
-+	else
-+		bcm2835_mmc_send_command(host, mrq->cmd);
++	edm = bcm2835_sdhost_read(host, SDEDM);
++	fsm = edm & SDEDM_FSM_MASK;
++
++	if ((fsm != SDEDM_FSM_IDENTMODE) &&
++	    (fsm != SDEDM_FSM_DATAMODE)) {
++		pr_err("%s: previous command (%d) not complete (EDM %x)\n",
++		       mmc_hostname(host->mmc),
++		       bcm2835_sdhost_read(host, SDCMD) & SDCMD_CMD_MASK,
++		       edm);
++		bcm2835_sdhost_dumpregs(host);
++		mrq->cmd->error = -EILSEQ;
++		tasklet_schedule(&host->finish_tasklet);
++		mmiowb();
++		spin_unlock_irqrestore(&host->lock, flags);
++		return;
++	}
++
++	host->use_sbc = !!mrq->sbc && (host->mrq->data->flags & MMC_DATA_READ);
++	if (host->use_sbc) {
++		if (bcm2835_sdhost_send_command(host, mrq->sbc)) {
++			if (!host->use_busy)
++				bcm2835_sdhost_finish_command(host, &flags);
++		}
++	} else if (bcm2835_sdhost_send_command(host, mrq->cmd)) {
++		if (host->data && host->dma_desc) {
++			/* DMA transfer starts now, PIO starts after irq */
++			bcm2835_sdhost_start_dma(host);
++		}
++
++		if (!host->use_busy)
++			bcm2835_sdhost_finish_command(host, &flags);
++	}
 +
 +	mmiowb();
-+	spin_unlock_irqrestore(&host->lock, flags);
 +
-+	if (!(mrq->sbc && !(host->flags & SDHCI_AUTO_CMD23)) && mrq->cmd->data && host->use_dma) {
-+		/* DMA transfer starts now, PIO starts after interrupt */
-+		bcm2835_mmc_transfer_dma(host);
-+	}
++	spin_unlock_irqrestore(&host->lock, flags);
 +}
 +
-+
-+static void bcm2835_mmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
++static void bcm2835_sdhost_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
 +{
-+
 +	struct bcm2835_host *host = mmc_priv(mmc);
 +	unsigned long flags;
-+	u8 ctrl;
-+	u16 clk, ctrl_2;
-+
-+	pr_debug("bcm2835_mmc_set_ios: clock %d, pwr %d, bus_width %d, timing %d, vdd %d, drv_type %d\n",
-+		 ios->clock, ios->power_mode, ios->bus_width,
-+		 ios->timing, ios->signal_voltage, ios->drv_type);
 +
 +	spin_lock_irqsave(&host->lock, flags);
 +
 +	if (!ios->clock || ios->clock != host->clock) {
-+		bcm2835_mmc_set_clock(host, ios->clock);
++		bcm2835_sdhost_set_clock(host, ios->clock);
 +		host->clock = ios->clock;
 +	}
 +
-+	if (host->pwr != SDHCI_POWER_330) {
-+		host->pwr = SDHCI_POWER_330;
-+		bcm2835_mmc_writeb(host, SDHCI_POWER_330 | SDHCI_POWER_ON, SDHCI_POWER_CONTROL);
-+	}
-+
-+	ctrl = bcm2835_mmc_readb(host, SDHCI_HOST_CONTROL);
-+
 +	/* set bus width */
-+	ctrl &= ~SDHCI_CTRL_8BITBUS;
++	host->hcfg &= ~SDHCFG_WIDE_EXT_BUS;
 +	if (ios->bus_width == MMC_BUS_WIDTH_4)
-+		ctrl |= SDHCI_CTRL_4BITBUS;
-+	else
-+		ctrl &= ~SDHCI_CTRL_4BITBUS;
++		host->hcfg |= SDHCFG_WIDE_EXT_BUS;
 +
-+	ctrl &= ~SDHCI_CTRL_HISPD; /* NO_HISPD_BIT */
++	host->hcfg |= SDHCFG_WIDE_INT_BUS;
 +
++	/* Disable clever clock switching, to cope with fast core clocks */
++	host->hcfg |= SDHCFG_SLOW_CARD;
 +
-+	bcm2835_mmc_writeb(host, ctrl, SDHCI_HOST_CONTROL);
-+	/*
-+	 * We only need to set Driver Strength if the
-+	 * preset value enable is not set.
-+	 */
-+	ctrl_2 = bcm2835_mmc_readw(host, SDHCI_HOST_CONTROL2);
-+	ctrl_2 &= ~SDHCI_CTRL_DRV_TYPE_MASK;
-+	if (ios->drv_type == MMC_SET_DRIVER_TYPE_A)
-+		ctrl_2 |= SDHCI_CTRL_DRV_TYPE_A;
-+	else if (ios->drv_type == MMC_SET_DRIVER_TYPE_C)
-+		ctrl_2 |= SDHCI_CTRL_DRV_TYPE_C;
-+
-+	bcm2835_mmc_writew(host, ctrl_2, SDHCI_HOST_CONTROL2);
-+
-+	/* Reset SD Clock Enable */
-+	clk = bcm2835_mmc_readw(host, SDHCI_CLOCK_CONTROL);
-+	clk &= ~SDHCI_CLOCK_CARD_EN;
-+	bcm2835_mmc_writew(host, clk, SDHCI_CLOCK_CONTROL);
-+
-+	/* Re-enable SD Clock */
-+	bcm2835_mmc_set_clock(host, host->clock);
-+	bcm2835_mmc_writeb(host, ctrl, SDHCI_HOST_CONTROL);
++	bcm2835_sdhost_write(host, host->hcfg, SDHCFG);
 +
 +	mmiowb();
 +
 +	spin_unlock_irqrestore(&host->lock, flags);
 +}
 +
-+
-+static struct mmc_host_ops bcm2835_ops = {
-+	.request = bcm2835_mmc_request,
-+	.set_ios = bcm2835_mmc_set_ios,
-+	.enable_sdio_irq = bcm2835_mmc_enable_sdio_irq,
++static struct mmc_host_ops bcm2835_sdhost_ops = {
++	.request = bcm2835_sdhost_request,
++	.set_ios = bcm2835_sdhost_set_ios,
++	.hw_reset = bcm2835_sdhost_reset,
 +};
 +
++static void bcm2835_sdhost_cmd_wait_work(struct work_struct *work)
++{
++	struct bcm2835_host *host;
++	unsigned long flags;
 +
-+static void bcm2835_mmc_tasklet_finish(unsigned long param)
++	host = container_of(work, struct bcm2835_host, cmd_wait_wq);
++
++	spin_lock_irqsave(&host->lock, flags);
++
++	/* If this tasklet gets rescheduled while running, it will
++	 * be run again afterwards but without any active request.
++	 */
++	if (!host->mrq) {
++		spin_unlock_irqrestore(&host->lock, flags);
++		return;
++	}
++
++	bcm2835_sdhost_finish_command(host, &flags);
++
++	mmiowb();
++
++	spin_unlock_irqrestore(&host->lock, flags);
++}
++
++static void bcm2835_sdhost_tasklet_finish(unsigned long param)
 +{
 +	struct bcm2835_host *host;
 +	unsigned long flags;
 +	struct mmc_request *mrq;
++	struct dma_chan *terminate_chan = NULL;
 +
 +	host = (struct bcm2835_host *)param;
 +
 +	spin_lock_irqsave(&host->lock, flags);
 +
-+	/*
-+	 * If this tasklet gets rescheduled while running, it will
++	/* If this tasklet gets rescheduled while running, it will
 +	 * be run again afterwards but without any active request.
 +	 */
 +	if (!host->mrq) {
@@ -1333,91 +1484,83 @@ index 0000000..db6617d
 +
 +	mrq = host->mrq;
 +
-+	/*
-+	 * The controller needs a reset of internal state machines
-+	 * upon error conditions.
-+	 */
-+	if (!(host->flags & SDHCI_DEVICE_DEAD) &&
-+	    ((mrq->cmd && mrq->cmd->error) ||
-+		 (mrq->data && (mrq->data->error ||
-+		  (mrq->data->stop && mrq->data->stop->error))))) {
-+
-+		spin_unlock_irqrestore(&host->lock, flags);
-+		bcm2835_mmc_reset(host, SDHCI_RESET_CMD);
-+		bcm2835_mmc_reset(host, SDHCI_RESET_DATA);
-+		spin_lock_irqsave(&host->lock, flags);
-+	}
-+
 +	host->mrq = NULL;
 +	host->cmd = NULL;
 +	host->data = NULL;
 +
 +	mmiowb();
 +
++	host->dma_desc = NULL;
++	terminate_chan = host->dma_chan;
++	host->dma_chan = NULL;
++
 +	spin_unlock_irqrestore(&host->lock, flags);
++
++	if (terminate_chan) {
++		int err = dmaengine_terminate_all(terminate_chan);
++
++		if (err)
++			pr_err("%s: failed to terminate DMA (%d)\n",
++			       mmc_hostname(host->mmc), err);
++	}
++
 +	mmc_request_done(host->mmc, mrq);
 +}
 +
-+
-+
-+static int bcm2835_mmc_add_host(struct bcm2835_host *host)
++int bcm2835_sdhost_add_host(struct bcm2835_host *host)
 +{
-+	struct mmc_host *mmc = host->mmc;
-+	struct device *dev = mmc->parent;
-+#ifndef FORCE_PIO
++	struct mmc_host *mmc;
 +	struct dma_slave_config cfg;
-+#endif
++	char pio_limit_string[20];
 +	int ret;
 +
-+	bcm2835_mmc_reset(host, SDHCI_RESET_ALL);
++	mmc = host->mmc;
 +
-+	host->clk_mul = 0;
++	bcm2835_sdhost_reset_internal(host);
 +
 +	mmc->f_max = host->max_clk;
-+	mmc->f_max = host->max_clk;
-+	mmc->f_min = host->max_clk / SDHCI_MAX_DIV_SPEC_300;
++	mmc->f_min = host->max_clk / SDCDIV_MAX_CDIV;
 +
-+	/* SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK */
-+	host->timeout_clk = mmc->f_max / 1000;
-+#ifdef CONFIG_ARCH_BCM2835
-+	mmc->max_busy_timeout = (1 << 27) / host->timeout_clk;
-+#endif
++	mmc->max_busy_timeout = ~0 / (mmc->f_max / 1000);
++
++	pr_debug("f_max %d, f_min %d, max_busy_timeout %d\n",
++		 mmc->f_max, mmc->f_min, mmc->max_busy_timeout);
++
 +	/* host controller capabilities */
-+	mmc->caps |= MMC_CAP_CMD23 | MMC_CAP_ERASE | MMC_CAP_NEEDS_POLL |
-+		MMC_CAP_SDIO_IRQ | MMC_CAP_SD_HIGHSPEED |
-+		MMC_CAP_MMC_HIGHSPEED;
++	mmc->caps |=
++		MMC_CAP_SD_HIGHSPEED | MMC_CAP_MMC_HIGHSPEED |
++		MMC_CAP_NEEDS_POLL | MMC_CAP_HW_RESET | MMC_CAP_ERASE |
++		MMC_CAP_CMD23;
 +
-+	host->flags = SDHCI_AUTO_CMD23;
++	spin_lock_init(&host->lock);
 +
-+	dev_info(dev, "mmc_debug:%x mmc_debug2:%x\n", mmc_debug, mmc_debug2);
-+#ifdef FORCE_PIO
-+	dev_info(dev, "Forcing PIO mode\n");
-+	host->have_dma = false;
-+#else
 +	if (IS_ERR_OR_NULL(host->dma_chan_tx) ||
 +	    IS_ERR_OR_NULL(host->dma_chan_rx)) {
-+		dev_err(dev, "%s: Unable to initialise DMA channels. Falling back to PIO\n",
-+			DRIVER_NAME);
-+		host->have_dma = false;
++		pr_err("%s: unable to initialise DMA channels. Falling back to PIO\n",
++		       mmc_hostname(mmc));
++		host->use_dma = false;
 +	} else {
-+		dev_info(dev, "DMA channels allocated");
-+		host->have_dma = true;
++		host->use_dma = true;
 +
 +		cfg.src_addr_width = DMA_SLAVE_BUSWIDTH_4_BYTES;
 +		cfg.dst_addr_width = DMA_SLAVE_BUSWIDTH_4_BYTES;
-+		cfg.slave_id = 11;		/* DREQ channel */
++		cfg.slave_id = 13;		/* DREQ channel */
 +
 +		cfg.direction = DMA_MEM_TO_DEV;
 +		cfg.src_addr = 0;
-+		cfg.dst_addr = host->phys_addr + SDHCI_BUFFER;
++		cfg.dst_addr = host->phys_addr + SDDATA;
 +		ret = dmaengine_slave_config(host->dma_chan_tx, &cfg);
++		if (ret)
++			host->use_dma = false;
 +
 +		cfg.direction = DMA_DEV_TO_MEM;
-+		cfg.src_addr = host->phys_addr + SDHCI_BUFFER;
++		cfg.src_addr = host->phys_addr + SDDATA;
 +		cfg.dst_addr = 0;
 +		ret = dmaengine_slave_config(host->dma_chan_rx, &cfg);
++		if (ret)
++			host->use_dma = false;
 +	}
-+#endif
++
 +	mmc->max_segs = 128;
 +	mmc->max_req_size = 524288;
 +	mmc->max_seg_size = mmc->max_req_size;
@@ -1428,27 +1571,33 @@ index 0000000..db6617d
 +	mmc->ocr_avail = MMC_VDD_32_33 | MMC_VDD_33_34;
 +
 +	tasklet_init(&host->finish_tasklet,
-+		bcm2835_mmc_tasklet_finish, (unsigned long)host);
++		     bcm2835_sdhost_tasklet_finish, (unsigned long)host);
 +
-+	setup_timer(&host->timer, bcm2835_mmc_timeout_timer, (unsigned long)host);
-+	init_waitqueue_head(&host->buf_ready_int);
++	INIT_WORK(&host->cmd_wait_wq, bcm2835_sdhost_cmd_wait_work);
 +
-+	bcm2835_mmc_init(host, 0);
-+#ifndef CONFIG_ARCH_BCM2835
-+	ret = devm_request_irq(dev, host->irq, bcm2835_mmc_irq, 0,
-+			       mmc_hostname(mmc), host);
-+#else
-+	ret = devm_request_threaded_irq(dev, host->irq, bcm2835_mmc_irq,
-+					bcm2835_mmc_thread_irq, IRQF_SHARED,
-+					mmc_hostname(mmc), host);
-+#endif
++	setup_timer(&host->timer, bcm2835_sdhost_timeout,
++		    (unsigned long)host);
++
++	bcm2835_sdhost_init(host, 0);
++
++	ret = request_irq(host->irq, bcm2835_sdhost_irq, 0 /*IRQF_SHARED*/,
++			  mmc_hostname(mmc), host);
 +	if (ret) {
-+		dev_err(dev, "Failed to request IRQ %d: %d\n", host->irq, ret);
++		pr_err("%s: failed to request IRQ %d: %d\n",
++		       mmc_hostname(mmc), host->irq, ret);
 +		goto untasklet;
 +	}
 +
 +	mmiowb();
 +	mmc_add_host(mmc);
++
++	pio_limit_string[0] = '\0';
++	if (host->use_dma && (host->pio_limit > 0))
++		sprintf(pio_limit_string, " (>%d)", host->pio_limit);
++	pr_info("%s: loaded - DMA %s%s\n",
++		mmc_hostname(mmc),
++		host->use_dma ? "enabled" : "disabled",
++		pio_limit_string);
 +
 +	return 0;
 +
@@ -1458,24 +1607,27 @@ index 0000000..db6617d
 +	return ret;
 +}
 +
-+static int bcm2835_mmc_probe(struct platform_device *pdev)
++static int bcm2835_sdhost_probe(struct platform_device *pdev)
 +{
 +	struct device *dev = &pdev->dev;
-+	struct device_node *node = dev->of_node;
 +	struct clk *clk;
 +	struct resource *iomem;
 +	struct bcm2835_host *host;
 +	struct mmc_host *mmc;
 +	int ret;
 +
++	pr_debug("bcm2835_sdhost_probe\n");
 +	mmc = mmc_alloc_host(sizeof(*host), dev);
 +	if (!mmc)
 +		return -ENOMEM;
 +
-+	mmc->ops = &bcm2835_ops;
++	mmc->ops = &bcm2835_sdhost_ops;
 +	host = mmc_priv(mmc);
 +	host->mmc = mmc;
-+	host->timeout = msecs_to_jiffies(1000);
++	host->cmd_quick_poll_retries = 0;
++	host->pio_timeout = msecs_to_jiffies(500);
++	host->pio_limit = 1;
++	host->max_delay = 1; /* Warn if over 1ms */
 +	spin_lock_init(&host->lock);
 +
 +	iomem = platform_get_resource(pdev, IORESOURCE_MEM, 0);
@@ -1485,26 +1637,28 @@ index 0000000..db6617d
 +		goto err;
 +	}
 +
-+	host->phys_addr = iomem->start + BCM2835_VCMMU_SHIFT;
++	/* Parse OF address directly to get the physical address for
++	 * DMA to our registers.
++	 */
++	host->phys_addr = be32_to_cpup(of_get_address(pdev->dev.of_node, 0,
++						      NULL, NULL));
 +
-+#ifndef FORCE_PIO
-+	if (node) {
-+		host->dma_chan_tx = dma_request_slave_channel(dev, "tx");
-+		host->dma_chan_rx = dma_request_slave_channel(dev, "rx");
-+	} else {
-+		dma_cap_mask_t mask;
++	pr_debug(" - ioaddr %lx, iomem->start %lx, phys_addr %lx\n",
++		 (unsigned long)host->ioaddr,
++		 (unsigned long)iomem->start,
++		 (unsigned long)host->phys_addr);
 +
-+		dma_cap_zero(mask);
-+		/* we don't care about the channel, any would work */
-+		dma_cap_set(DMA_SLAVE, mask);
-+		host->dma_chan_tx = dma_request_channel(mask, NULL, NULL);
-+		host->dma_chan_rx = dma_request_channel(mask, NULL, NULL);
-+	}
-+#endif
++	host->dma_chan = NULL;
++	host->dma_desc = NULL;
++
++	host->dma_chan_tx = dma_request_slave_channel(dev, "tx");
++	host->dma_chan_rx = dma_request_slave_channel(dev, "rx");
++
 +	clk = devm_clk_get(dev, NULL);
 +	if (IS_ERR(clk)) {
-+		dev_err(dev, "could not get clk\n");
 +		ret = PTR_ERR(clk);
++		if (ret != -EPROBE_DEFER)
++			dev_err(dev, "could not get clk: %d\n", ret);
 +		goto err;
 +	}
 +
@@ -1517,63 +1671,38 @@ index 0000000..db6617d
 +		goto err;
 +	}
 +
-+	if (node) {
-+		mmc_of_parse(mmc);
++	pr_debug(" - max_clk %lx, irq %d\n",
++		 (unsigned long)host->max_clk,
++		 (int)host->irq);
 +
-+		/* Read any custom properties */
-+		of_property_read_u32(node,
-+				     "brcm,overclock-50",
-+				     &host->overclock_50);
-+	} else {
-+		mmc->caps |= MMC_CAP_4_BIT_DATA;
-+	}
++	mmc_of_parse(mmc);
 +
-+	ret = bcm2835_mmc_add_host(host);
++	ret = bcm2835_sdhost_add_host(host);
 +	if (ret)
 +		goto err;
 +
 +	platform_set_drvdata(pdev, host);
 +
++	pr_debug("bcm2835_sdhost_probe -> OK\n");
++
 +	return 0;
++
 +err:
++	pr_debug("bcm2835_sdhost_probe -> err %d\n", ret);
 +	mmc_free_host(mmc);
 +
 +	return ret;
 +}
 +
-+static int bcm2835_mmc_remove(struct platform_device *pdev)
++static int bcm2835_sdhost_remove(struct platform_device *pdev)
 +{
 +	struct bcm2835_host *host = platform_get_drvdata(pdev);
-+	unsigned long flags;
-+	int dead;
-+	u32 scratch;
 +
-+	dead = 0;
-+	scratch = bcm2835_mmc_readl(host, SDHCI_INT_STATUS);
-+	if (scratch == (u32)-1)
-+		dead = 1;
-+
-+
-+	if (dead) {
-+		spin_lock_irqsave(&host->lock, flags);
-+
-+		host->flags |= SDHCI_DEVICE_DEAD;
-+
-+		if (host->mrq) {
-+			pr_err("%s: Controller removed during "
-+				" transfer!\n", mmc_hostname(host->mmc));
-+
-+			host->mrq->cmd->error = -ENOMEDIUM;
-+			tasklet_schedule(&host->finish_tasklet);
-+		}
-+
-+		spin_unlock_irqrestore(&host->lock, flags);
-+	}
++	pr_debug("bcm2835_sdhost_remove\n");
 +
 +	mmc_remove_host(host->mmc);
 +
-+	if (!dead)
-+		bcm2835_mmc_reset(host, SDHCI_RESET_ALL);
++	bcm2835_sdhost_set_power(host, false);
 +
 +	free_irq(host->irq, host);
 +
@@ -1584,34 +1713,30 @@ index 0000000..db6617d
 +	mmc_free_host(host->mmc);
 +	platform_set_drvdata(pdev, NULL);
 +
++	pr_debug("bcm2835_sdhost_remove - OK\n");
 +	return 0;
 +}
 +
-+
-+static const struct of_device_id bcm2835_mmc_match[] = {
-+	{ .compatible = "brcm,bcm2835-mmc" },
++static const struct of_device_id bcm2835_sdhost_match[] = {
++	{ .compatible = "brcm,bcm2835-sdhost" },
 +	{ }
 +};
-+MODULE_DEVICE_TABLE(of, bcm2835_mmc_match);
++MODULE_DEVICE_TABLE(of, bcm2835_sdhost_match);
 +
-+
-+
-+static struct platform_driver bcm2835_mmc_driver = {
-+	.probe      = bcm2835_mmc_probe,
-+	.remove     = bcm2835_mmc_remove,
++static struct platform_driver bcm2835_sdhost_driver = {
++	.probe      = bcm2835_sdhost_probe,
++	.remove     = bcm2835_sdhost_remove,
 +	.driver     = {
-+		.name		= DRIVER_NAME,
-+		.owner		= THIS_MODULE,
-+		.of_match_table	= bcm2835_mmc_match,
++		.name		= "sdhost-bcm2835",
++		.of_match_table	= bcm2835_sdhost_match,
 +	},
 +};
-+module_platform_driver(bcm2835_mmc_driver);
++module_platform_driver(bcm2835_sdhost_driver);
 +
-+module_param(mmc_debug, uint, 0644);
-+module_param(mmc_debug2, uint, 0644);
-+MODULE_ALIAS("platform:mmc-bcm2835");
-+MODULE_DESCRIPTION("BCM2835 SDHCI driver");
++MODULE_ALIAS("platform:sdhost-bcm2835");
++MODULE_DESCRIPTION("BCM2835 SDHost driver");
 +MODULE_LICENSE("GPL v2");
-+MODULE_AUTHOR("Gellert Weisz");
++MODULE_AUTHOR("Phil Elwell");
 -- 
 1.8.3.1
+
