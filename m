@@ -1,72 +1,69 @@
-From: Krzysztof Kozlowski <k.kozlowski@samsung.com>
-Subject: Re: [PATCH v3 09/12] EXAMPLE CODE: usb: port: Parse pwrseq phandle
- from Device Tree
-Date: Wed, 01 Jun 2016 11:06:46 +0200
-Message-ID: <574EA5A6.3090102@samsung.com>
-References: <1464768141-25420-1-git-send-email-k.kozlowski@samsung.com>
- <1464768141-25420-10-git-send-email-k.kozlowski@samsung.com>
- <146477144362.1485.3331887341591876278@sboyd-linaro>
+From: Marcel Ziswiler <marcel@ziswiler.com>
+Subject: Re: [PATCH 1/3] mmc: fix mmc mode selection for HS-DDR and higher
+Date: Wed, 01 Jun 2016 11:19:06 +0200
+Message-ID: <1464772746.3079.4.camel@ziswiler.com>
+References: <1464505484-3661-1-git-send-email-wens@csie.org>
+	 <1464505484-3661-2-git-send-email-wens@csie.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-reply-to: <146477144362.1485.3331887341591876278@sboyd-linaro>
+In-Reply-To: <1464505484-3661-2-git-send-email-wens@csie.org>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Stephen Boyd <stephen.boyd@linaro.org>
-Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>, hzpeterchen@gmail.com, Ulf Hansson <ulf.hansson@linaro.org>, Sebastian Reichel <sre@kernel.org>, Dmitry Eremin-Solenikov <dbaryshkov@gmail.com>, David Woodhouse <dwmw2@infradead.org>, Javier Martinez Canillas <javier@osg.samsung.com>, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, linux-pm@vger.kernel.or, Alan Stern <stern@rowland.harvard.edu>, linux-usb@vger.kernel.org, Rob Herring <robh+dt@kernel.org>, Pawel Moll <pawel.moll@arm.com>, Mark Rutland <mark.rutland@arm.com>, Ian Campbell <ijc+devicetree@hellion.org.uk>, Kumar Gala <galak@codeaurora.org>, Kukjin Kim <kgene@kernel.org>, devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-samsung-soc@vger.kernel.org
+To: Chen-Yu Tsai <wens@csie.org>, Ulf Hansson <ulf.hansson@linaro.org>, Maxime Ripard <maxime.ripard@free-electrons.com>
+Cc: Hans de Goede <hdegoede@redhat.com>, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, Arnd Bergmann <arnd@arndb.de>, linux-tegra@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-On 06/01/2016 10:57 AM, Stephen Boyd wrote:
-> Quoting Krzysztof Kozlowski (2016-06-01 01:02:18)
->> Parse usb-pwrseq property from Device Tree to get the phandle to pwrseq
->> device.  The pwrseq device will be used by USB hub to cycle the power
->> before activating ports.
->>
->> Signed-off-by: Krzysztof Kozlowski <k.kozlowski@samsung.com>
-> 
-> Drive by review comment.
-> 
-> I was hoping this would help me with a problem I'm having where I have a
-> hub (smsc4604) that needs to be taken out of reset before my HSIC
-> controller sends a USB reset to it, but it seems this is more about
-> doing some sort of power on sequence after enumeration?
+On Sun, 2016-05-29 at 15:04 +0800, Chen-Yu Tsai wrote:
+> When IS_ERR_VALUE was removed from the mmc core code, it was replaced
+> with a simple not-zero check. This does not work, as the value
+> checked
+> is the return value for mmc_select_bus_width, which returns the set
+> bit width on success. This made eMMC modes higher than HS-DDR
+> unusable.
+>=20
+> Fix this by checking for a positive return value instead.
+>=20
+> Fixes: 287980e49ffc ("remove lots of IS_ERR_VALUE abuses")
+> Cc: Arnd Bergmann <arnd@arndb.de>
+> Signed-off-by: Chen-Yu Tsai <wens@csie.org>
 
-This example is not finished but from what you wrote, it might suit your
-needs as well. The power sequence is done before enumeration because
-without it, the device won't enumerate.
+This fixes the following eMMC issue as experienced on Apalis T30 as
+well:
 
-The exact power sequence for USB devices has to be still developed.
-Comments are welcomed.
+[=C2=A0=C2=A0=C2=A0=C2=A07.194625] mmc1: mmc_select_hs200 failed, error=
+ 3
+[=C2=A0=C2=A0=C2=A0=C2=A07.201549] mmc1: error 3 whilst initialising MM=
+C card
 
->> diff --git a/drivers/usb/core/port.c b/drivers/usb/core/port.c
->> index 460c855be0d0..89b9bdfc7061 100644
->> --- a/drivers/usb/core/port.c
->> +++ b/drivers/usb/core/port.c
->> @@ -18,6 +18,8 @@
->>  
->>  #include <linux/slab.h>
->>  #include <linux/pm_qos.h>
->> +#include <linux/pwrseq.h>
->> +#include <linux/usb/of.h>
->>  
->>  #include "hub.h"
->>  
->> @@ -526,6 +528,14 @@ int usb_hub_create_port_device(struct usb_hub *hub, int port1)
->>                 return retval;
->>         }
->>  
->> +       port_dev->dev.of_node = usb_of_get_child_node(hdev->dev.parent->of_node,
->> +                                                     port1);
->> +       port_dev->pwrseq = pwrseq_alloc(&port_dev->dev, "usb-pwrseq");
->> +       if (IS_ERR(port_dev->pwrseq)) {
->> +               device_unregister(&port_dev->dev);
->> +               return PTR_ERR(port_dev->pwrseq);
-> 
-> Are we certain that port_dev hasn't been freed at this point? We just
-> called device_unregister() on it, so it seems safer to save away the
-> return value before calling device_unregister() here.
+Tested-by: Marcel Ziswiler <marcel.ziswiler@toradex.com>
 
-Right, good point. Thanks for feedback.
-
-Best regards,
-Krzysztof
+> ---
+> =C2=A0drivers/mmc/core/mmc.c | 4 ++--
+> =C2=A01 file changed, 2 insertions(+), 2 deletions(-)
+>=20
+> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+> index c984321d1881..aafb73d080ca 100644
+> --- a/drivers/mmc/core/mmc.c
+> +++ b/drivers/mmc/core/mmc.c
+> @@ -1276,7 +1276,7 @@ static int mmc_select_hs200(struct mmc_card
+> *card)
+> =C2=A0	=C2=A0* switch to HS200 mode if bus width is set successfully.
+> =C2=A0	=C2=A0*/
+> =C2=A0	err =3D mmc_select_bus_width(card);
+> -	if (!err) {
+> +	if (err > 0) {
+> =C2=A0		val =3D EXT_CSD_TIMING_HS200 |
+> =C2=A0		=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0card->drive_strength << E=
+XT_CSD_DRV_STR_SHIFT;
+> =C2=A0		err =3D __mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
+> @@ -1583,7 +1583,7 @@ static int mmc_init_card(struct mmc_host *host,
+> u32 ocr,
+> =C2=A0	} else if (mmc_card_hs(card)) {
+> =C2=A0		/* Select the desired bus width optionally */
+> =C2=A0		err =3D mmc_select_bus_width(card);
+> -		if (!err) {
+> +		if (err > 0) {
+> =C2=A0			err =3D mmc_select_hs_ddr(card);
+> =C2=A0			if (err)
+> =C2=A0				goto free_card;
