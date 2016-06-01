@@ -1,62 +1,72 @@
-From: Stephen Boyd <stephen.boyd-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH v3 09/12] EXAMPLE CODE: usb: port: Parse pwrseq phandle from
- Device Tree
-Date: Wed, 01 Jun 2016 01:57:23 -0700
-Message-ID: <146477144362.1485.3331887341591876278@sboyd-linaro>
+From: Krzysztof Kozlowski <k.kozlowski@samsung.com>
+Subject: Re: [PATCH v3 09/12] EXAMPLE CODE: usb: port: Parse pwrseq phandle
+ from Device Tree
+Date: Wed, 01 Jun 2016 11:06:46 +0200
+Message-ID: <574EA5A6.3090102@samsung.com>
 References: <1464768141-25420-1-git-send-email-k.kozlowski@samsung.com>
  <1464768141-25420-10-git-send-email-k.kozlowski@samsung.com>
+ <146477144362.1485.3331887341591876278@sboyd-linaro>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 8BIT
-Return-path: <linux-usb-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1464768141-25420-10-git-send-email-k.kozlowski-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>
-Sender: linux-usb-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-Cc: Greg Kroah-Hartman <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>, Bartlomiej Zolnierkiewicz <b.zolnierkie-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, hzpeterchen-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Sebastian Reichel <sre-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Dmitry Eremin-Solenikov <dbaryshkov-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, David Woodhouse <dwmw2-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org>, Krzysztof Kozlowski <k.kozlowski-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, Javier Martinez Canillas <javier-JPH+aEBZ4P+UEJcrhfAQsw@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-pm-u79uwXL29TaqPxH82wqD4g@public.gmane.org, Alan Stern <stern-nwvwT67g6+6dFdvTe/nMLpVzexx5G7lz@public.gmane.org>, linux-usb-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Pawel Moll <pawel.moll-5wv7dgnIgG8@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Ian Campbell <ijc+devicetree-KcIKpvwj1kUDXYZnReoRVg@public.gmane.org>, Kumar Gala <galak-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, Kukjin Kim <kgene-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-samsung-soc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-reply-to: <146477144362.1485.3331887341591876278@sboyd-linaro>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Stephen Boyd <stephen.boyd@linaro.org>
+Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>, hzpeterchen@gmail.com, Ulf Hansson <ulf.hansson@linaro.org>, Sebastian Reichel <sre@kernel.org>, Dmitry Eremin-Solenikov <dbaryshkov@gmail.com>, David Woodhouse <dwmw2@infradead.org>, Javier Martinez Canillas <javier@osg.samsung.com>, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, linux-pm@vger.kernel.or, Alan Stern <stern@rowland.harvard.edu>, linux-usb@vger.kernel.org, Rob Herring <robh+dt@kernel.org>, Pawel Moll <pawel.moll@arm.com>, Mark Rutland <mark.rutland@arm.com>, Ian Campbell <ijc+devicetree@hellion.org.uk>, Kumar Gala <galak@codeaurora.org>, Kukjin Kim <kgene@kernel.org>, devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-samsung-soc@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-Quoting Krzysztof Kozlowski (2016-06-01 01:02:18)
-> Parse usb-pwrseq property from Device Tree to get the phandle to pwrseq
-> device.  The pwrseq device will be used by USB hub to cycle the power
-> before activating ports.
+On 06/01/2016 10:57 AM, Stephen Boyd wrote:
+> Quoting Krzysztof Kozlowski (2016-06-01 01:02:18)
+>> Parse usb-pwrseq property from Device Tree to get the phandle to pwrseq
+>> device.  The pwrseq device will be used by USB hub to cycle the power
+>> before activating ports.
+>>
+>> Signed-off-by: Krzysztof Kozlowski <k.kozlowski@samsung.com>
 > 
-> Signed-off-by: Krzysztof Kozlowski <k.kozlowski-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>
+> Drive by review comment.
+> 
+> I was hoping this would help me with a problem I'm having where I have a
+> hub (smsc4604) that needs to be taken out of reset before my HSIC
+> controller sends a USB reset to it, but it seems this is more about
+> doing some sort of power on sequence after enumeration?
 
-Drive by review comment.
+This example is not finished but from what you wrote, it might suit your
+needs as well. The power sequence is done before enumeration because
+without it, the device won't enumerate.
 
-I was hoping this would help me with a problem I'm having where I have a
-hub (smsc4604) that needs to be taken out of reset before my HSIC
-controller sends a USB reset to it, but it seems this is more about
-doing some sort of power on sequence after enumeration?
+The exact power sequence for USB devices has to be still developed.
+Comments are welcomed.
 
-> diff --git a/drivers/usb/core/port.c b/drivers/usb/core/port.c
-> index 460c855be0d0..89b9bdfc7061 100644
-> --- a/drivers/usb/core/port.c
-> +++ b/drivers/usb/core/port.c
-> @@ -18,6 +18,8 @@
->  
->  #include <linux/slab.h>
->  #include <linux/pm_qos.h>
-> +#include <linux/pwrseq.h>
-> +#include <linux/usb/of.h>
->  
->  #include "hub.h"
->  
-> @@ -526,6 +528,14 @@ int usb_hub_create_port_device(struct usb_hub *hub, int port1)
->                 return retval;
->         }
->  
-> +       port_dev->dev.of_node = usb_of_get_child_node(hdev->dev.parent->of_node,
-> +                                                     port1);
-> +       port_dev->pwrseq = pwrseq_alloc(&port_dev->dev, "usb-pwrseq");
-> +       if (IS_ERR(port_dev->pwrseq)) {
-> +               device_unregister(&port_dev->dev);
-> +               return PTR_ERR(port_dev->pwrseq);
+>> diff --git a/drivers/usb/core/port.c b/drivers/usb/core/port.c
+>> index 460c855be0d0..89b9bdfc7061 100644
+>> --- a/drivers/usb/core/port.c
+>> +++ b/drivers/usb/core/port.c
+>> @@ -18,6 +18,8 @@
+>>  
+>>  #include <linux/slab.h>
+>>  #include <linux/pm_qos.h>
+>> +#include <linux/pwrseq.h>
+>> +#include <linux/usb/of.h>
+>>  
+>>  #include "hub.h"
+>>  
+>> @@ -526,6 +528,14 @@ int usb_hub_create_port_device(struct usb_hub *hub, int port1)
+>>                 return retval;
+>>         }
+>>  
+>> +       port_dev->dev.of_node = usb_of_get_child_node(hdev->dev.parent->of_node,
+>> +                                                     port1);
+>> +       port_dev->pwrseq = pwrseq_alloc(&port_dev->dev, "usb-pwrseq");
+>> +       if (IS_ERR(port_dev->pwrseq)) {
+>> +               device_unregister(&port_dev->dev);
+>> +               return PTR_ERR(port_dev->pwrseq);
+> 
+> Are we certain that port_dev hasn't been freed at this point? We just
+> called device_unregister() on it, so it seems safer to save away the
+> return value before calling device_unregister() here.
 
-Are we certain that port_dev hasn't been freed at this point? We just
-called device_unregister() on it, so it seems safer to save away the
-return value before calling device_unregister() here.
+Right, good point. Thanks for feedback.
 
---
-To unsubscribe from this list: send the line "unsubscribe linux-usb" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Best regards,
+Krzysztof
