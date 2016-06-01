@@ -1,45 +1,41 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
+From: Shawn Lin <shawn.lin@rock-chips.com>
 Subject: Re: [PATCH 1/3] mmc: fix mmc mode selection for HS-DDR and higher
-Date: Wed, 01 Jun 2016 10:25:05 +0900
-Message-ID: <574E3971.30202@samsung.com>
+Date: Wed, 1 Jun 2016 10:36:51 +0800
+Message-ID: <472b6b94-a773-e4cd-07c0-4b184a840f87@rock-chips.com>
 References: <1464505484-3661-1-git-send-email-wens@csie.org>
- <CGME20160529070454epcas1p4cf3be0deda6773296b516e7d25a4188e@epcas1p4.samsung.com>
  <1464505484-3661-2-git-send-email-wens@csie.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
+Content-Type: text/plain; charset=gbk; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout3.samsung.com ([203.254.224.33]:54500 "EHLO
-	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751375AbcFABZI (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 31 May 2016 21:25:08 -0400
-In-reply-to: <1464505484-3661-2-git-send-email-wens@csie.org>
+Received: from lucky1.263xmail.com ([211.157.147.131]:52290 "EHLO
+	lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1757055AbcFAChk (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 31 May 2016 22:37:40 -0400
+In-Reply-To: <1464505484-3661-2-git-send-email-wens@csie.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Chen-Yu Tsai <wens@csie.org>, Ulf Hansson <ulf.hansson@linaro.org>, Maxime Ripard <maxime.ripard@free-electrons.com>
-Cc: Hans de Goede <hdegoede@redhat.com>, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, Arnd Bergmann <arnd@arndb.de>
+Cc: shawn.lin@rock-chips.com, Hans de Goede <hdegoede@redhat.com>, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, Arnd Bergmann <arnd@arndb.de>
 
-On 05/29/2016 04:04 PM, Chen-Yu Tsai wrote:
+On 2016/5/29 15:04, Chen-Yu Tsai wrote:
 > When IS_ERR_VALUE was removed from the mmc core code, it was replaced
 > with a simple not-zero check. This does not work, as the value checked
 > is the return value for mmc_select_bus_width, which returns the set
 > bit width on success. This made eMMC modes higher than HS-DDR unusable.
-> 
+>
 > Fix this by checking for a positive return value instead.
-> 
+
+Reviewed-by: Shawn Lin <shawn.lin@rock-chips.com>
+
+>
 > Fixes: 287980e49ffc ("remove lots of IS_ERR_VALUE abuses")
 > Cc: Arnd Bergmann <arnd@arndb.de>
 > Signed-off-by: Chen-Yu Tsai <wens@csie.org>
-
-Acked-by: Jaehoon Chung <jh80.chung@samsung.com>
-
-Best Regards,
-Jaehoon Chung
-
 > ---
 >  drivers/mmc/core/mmc.c | 4 ++--
 >  1 file changed, 2 insertions(+), 2 deletions(-)
-> 
+>
 > diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
 > index c984321d1881..aafb73d080ca 100644
 > --- a/drivers/mmc/core/mmc.c
@@ -62,5 +58,10 @@ Jaehoon Chung
 >  			err = mmc_select_hs_ddr(card);
 >  			if (err)
 >  				goto free_card;
-> 
+>
+
+
+-- 
+Best Regards
+Shawn Lin
 
