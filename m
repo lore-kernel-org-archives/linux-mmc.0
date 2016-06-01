@@ -1,39 +1,91 @@
-From: Bjorn Andersson <bjorn.andersson@linaro.org>
-Subject: Re: [PATCH 1/3] mmc: fix mmc mode selection for HS-DDR and higher
-Date: Wed, 1 Jun 2016 11:58:34 -0700
-Message-ID: <CAOCOHw7aHvSUUoxkrDkGwNrTGNbZm-3RSuhJF3CCvRUiK5tDgg@mail.gmail.com>
-References: <1464505484-3661-1-git-send-email-wens@csie.org>
-	<1464505484-3661-2-git-send-email-wens@csie.org>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-it0-f44.google.com ([209.85.214.44]:34945 "EHLO
-	mail-it0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751212AbcFAS6f (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 1 Jun 2016 14:58:35 -0400
-Received: by mail-it0-f44.google.com with SMTP id z189so89342803itg.0
-        for <linux-mmc@vger.kernel.org>; Wed, 01 Jun 2016 11:58:35 -0700 (PDT)
-In-Reply-To: <1464505484-3661-2-git-send-email-wens@csie.org>
-Sender: linux-mmc-owner@vger.kernel.org
+From: Tomas Winkler <tomas.winkler@intel.com>
+Subject: [PATCH v4 0/8] Replay Protected Memory Block (RPMB) subsystem
+Date: Wed,  1 Jun 2016 17:41:24 -0400
+Message-ID: <1464817292-5407-1-git-send-email-tomas.winkler@intel.com>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, James Bottomley <James.Bottomley@HansenPartnership.com>, "Martin K. Petersen" <martin.petersen@oracle.com>, Vinayak Holikatti <vinholikatti@gmail.com>, Andy Lutomirski <luto@kernel.org>, =?UTF-8?q?Arve=20Hj=C3=B8nnev=C3=A5g?= <arve@android.com>, Michael Ryleev <gmar@google.com>, Joao Pinto <Joao.Pinto@synopsys.com>, Christoph Hellwig <hch@lst.de>, Yaniv Gardi <ygardi@codeaurora.org>
+Cc: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, linux-scsi@vger.kernel.org, Tomas Winkler <tomas.winkler@intel.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Chen-Yu Tsai <wens@csie.org>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Maxime Ripard <maxime.ripard@free-electrons.com>, Hans de Goede <hdegoede@redhat.com>, linux-mmc <linux-mmc@vger.kernel.org>, linux-arm-kernel@lists.infradead.org, lkml <linux-kernel@vger.kernel.org>, Arnd Bergmann <arnd@arndb.de>
 
-On Sun, May 29, 2016 at 12:04 AM, Chen-Yu Tsai <wens@csie.org> wrote:
-> When IS_ERR_VALUE was removed from the mmc core code, it was replaced
-> with a simple not-zero check. This does not work, as the value checked
-> is the return value for mmc_select_bus_width, which returns the set
-> bit width on success. This made eMMC modes higher than HS-DDR unusable.
->
-> Fix this by checking for a positive return value instead.
+Few storage technology such is EMMC, UFS, and NVMe support RPMB
+hardware partition with common protocol and frame layout.
+The RPMB partition cannot be accessed via standard block layer, but
+by a set of specific commands: WRITE, READ, GET_WRITE_COUNTER, and
+PROGRAM_KEY.
+Such a partition provides authenticated and replay protected access,
+hence suitable as a secure storage.
 
-mmc_select_bus_width() can return 0 on "success" as well and the
-previous check was !IS_ERR_VALUE(err), which coverts that. So I
-believe these checks should be for err >= 0 rather than just > 0.
+A storage device registers its RPMB hardware (emmc) partition or
+RPMB W-LUN (ufs) with the RPMB layer providing an implementation for
+send_rpmb_req() handler.
+There is as well simulation platform device. This is handy as an RPMB
+key can be programmed only once at storage device lifetime.
 
+The RPMB layer aims to provide in-kernel API for Trusted Execution
+Environment (TEE) devices that are capable to securely compute block
+frame signature. In case a TEE device wish to store a replay protected
+data, it creates an RPMB frame with requested data and computes HMAC of
+the frame, then it requests the storage device via RPMB layer to store
+the data.
+A TEE driver can claim rpmb interface, for example,
+via  class_interface_register ().
 
-Either way this fixes the boot failures seen on my Qualcomm based
-boards with v4.7-rc1.
+A parallel user space API is provided via /dev/rpmbX character
+device with a single IOCTL command similar to the one provided by
+mmc/ioctl. h
+This API may help applications such as 
+https://android.googlesource.com/trusty/app/storage/
+To be obliviose to the underlaying HW storage technology.
 
-Regards,
-Bjorn
+There is a sample tool under tools/rpmb/ directory that exercises
+this interface.
+
+Tomas Winkler (8):
+  rpmb: add Replay Protected Memory Block (RPMB) subsystem
+  char: rpmb: add sysfs-class ABI documentation
+  char: rpmb: add device attributes
+  char: rpmb: provide user space interface
+  char: rpmb: add RPMB simulation device
+  tools rpmb: add RPBM access tool
+  mmc: block: register RPMB partition with the RPMB subsystem
+  scsi: ufs: connect to RPMB subsystem
+
+ Documentation/ABI/testing/sysfs-class-rpmb |  44 ++
+ Documentation/ioctl/ioctl-number.txt       |   1 +
+ MAINTAINERS                                |  10 +
+ drivers/char/Kconfig                       |   2 +
+ drivers/char/Makefile                      |   1 +
+ drivers/char/rpmb/Kconfig                  |  25 +
+ drivers/char/rpmb/Makefile                 |   6 +
+ drivers/char/rpmb/cdev.c                   | 207 +++++++
+ drivers/char/rpmb/core.c                   | 408 ++++++++++++++
+ drivers/char/rpmb/rpmb-cdev.h              |  31 ++
+ drivers/char/rpmb/rpmb_sim.c               | 589 ++++++++++++++++++++
+ drivers/mmc/card/Kconfig                   |   1 +
+ drivers/mmc/card/block.c                   | 292 ++++++++++
+ drivers/scsi/ufs/Kconfig                   |   1 +
+ drivers/scsi/ufs/ufshcd.c                  | 219 ++++++++
+ drivers/scsi/ufs/ufshcd.h                  |   2 +
+ include/linux/rpmb.h                       | 138 +++++
+ include/uapi/linux/rpmb.h                  | 120 ++++
+ tools/Makefile                             |  14 +-
+ tools/rpmb/.gitignore                      |   2 +
+ tools/rpmb/Makefile                        |  32 ++
+ tools/rpmb/rpmb.c                          | 862 +++++++++++++++++++++++++++++
+ 22 files changed, 3002 insertions(+), 5 deletions(-)
+ create mode 100644 Documentation/ABI/testing/sysfs-class-rpmb
+ create mode 100644 drivers/char/rpmb/Kconfig
+ create mode 100644 drivers/char/rpmb/Makefile
+ create mode 100644 drivers/char/rpmb/cdev.c
+ create mode 100644 drivers/char/rpmb/core.c
+ create mode 100644 drivers/char/rpmb/rpmb-cdev.h
+ create mode 100644 drivers/char/rpmb/rpmb_sim.c
+ create mode 100644 include/linux/rpmb.h
+ create mode 100644 include/uapi/linux/rpmb.h
+ create mode 100644 tools/rpmb/.gitignore
+ create mode 100644 tools/rpmb/Makefile
+ create mode 100644 tools/rpmb/rpmb.c
+
+-- 
+2.5.5
