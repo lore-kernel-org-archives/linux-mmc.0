@@ -1,8 +1,7 @@
 From: Krzysztof Kozlowski <k.kozlowski@samsung.com>
-Subject: [PATCH v3 07/12] power: pwrseq: Add support for USB hubs with external
- power
-Date: Wed, 01 Jun 2016 10:02:16 +0200
-Message-ID: <1464768141-25420-8-git-send-email-k.kozlowski@samsung.com>
+Subject: [PATCH v3 08/12] usb: hub: Handle deferred probe
+Date: Wed, 01 Jun 2016 10:02:17 +0200
+Message-ID: <1464768141-25420-9-git-send-email-k.kozlowski@samsung.com>
 References: <1464768141-25420-1-git-send-email-k.kozlowski@samsung.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
@@ -22,121 +21,42 @@ To: hzpeterchen@gmail.com, Ulf Hansson <ulf.hansson@linaro.org>, Sebastian Reich
 Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>
 List-Id: linux-mmc@vger.kernel.org
 
-Some USB devices on embedded boards have external power supply which has
-to be reset in certain conditions. Add pwrseq interface for this.
+Add support for deferred probing to the usb hub.  Currently EPROBE_DEFER
+does not exist in usb hub path but future patches will add it on the
+port level.
 
 Signed-off-by: Krzysztof Kozlowski <k.kozlowski@samsung.com>
+Reviewed-by: Javier Martinez Canillas <javier@osg.samsung.com>
 ---
- drivers/power/pwrseq/pwrseq.c | 47 ++++++++++++++++++++++++++++++++++++++++++-
- include/linux/pwrseq.h        | 11 ++++++++++
- 2 files changed, 57 insertions(+), 1 deletion(-)
+ drivers/usb/core/hub.c | 6 ++++--
+ 1 file changed, 4 insertions(+), 2 deletions(-)
 
-diff --git a/drivers/power/pwrseq/pwrseq.c b/drivers/power/pwrseq/pwrseq.c
-index 495a19d3c30b..722aff4f740f 100644
---- a/drivers/power/pwrseq/pwrseq.c
-+++ b/drivers/power/pwrseq/pwrseq.c
-@@ -1,7 +1,9 @@
- /*
-- *  Copyright (C) 2014 Linaro Ltd
-+ * Copyright (C) 2014 Linaro Ltd
-+ * Copyright (C) 2016 Samsung Electronics
-  *
-  * Author: Ulf Hansson <ulf.hansson@linaro.org>
-+ *         Krzysztof Kozlowski <k.kozlowski@samsung.com>
-  *
-  * License terms: GNU General Public License (GPL) version 2
-  *
-@@ -52,6 +54,42 @@ int mmc_pwrseq_alloc(struct mmc_host *host)
- }
- EXPORT_SYMBOL_GPL(mmc_pwrseq_alloc);
+diff --git a/drivers/usb/core/hub.c b/drivers/usb/core/hub.c
+index bee13517676f..c421745b84aa 100644
+--- a/drivers/usb/core/hub.c
++++ b/drivers/usb/core/hub.c
+@@ -1733,6 +1733,7 @@ static int hub_probe(struct usb_interface *intf, const struct usb_device_id *id)
+ 	struct usb_endpoint_descriptor *endpoint;
+ 	struct usb_device *hdev;
+ 	struct usb_hub *hub;
++	int ret;
  
-+struct pwrseq *pwrseq_alloc(struct device *dev, const char *phandle_name)
-+{
-+	struct device_node *np;
-+	struct pwrseq *p, *ret = NULL;
-+
-+	np = of_parse_phandle(dev->of_node, phandle_name, 0);
-+	if (!np)
-+		return NULL;
-+
-+	mutex_lock(&pwrseq_list_mutex);
-+	list_for_each_entry(p, &pwrseq_list, pwrseq_node) {
-+		if (p->dev->of_node == np) {
-+			if (!try_module_get(p->owner))
-+				dev_err(dev,
-+					"increasing module refcount failed\n");
-+			else
-+				ret = p;
-+
-+			break;
-+		}
-+	}
-+
-+	of_node_put(np);
-+	mutex_unlock(&pwrseq_list_mutex);
-+
-+	if (!ret) {
-+		dev_dbg(dev, "%s defer probe\n", phandle_name);
-+		return ERR_PTR(-EPROBE_DEFER);
-+	}
-+
-+	dev_info(dev, "allocated usb-pwrseq\n");
-+
+ 	desc = intf->cur_altsetting;
+ 	hdev = interface_to_usbdev(intf);
+@@ -1852,11 +1853,12 @@ descriptor_error:
+ 	if (id->driver_info & HUB_QUIRK_CHECK_PORT_AUTOSUSPEND)
+ 		hub->quirk_check_port_auto_suspend = 1;
+ 
+-	if (hub_configure(hub, endpoint) >= 0)
++	ret = hub_configure(hub, endpoint);
++	if (ret >= 0)
+ 		return 0;
+ 
+ 	hub_disconnect(intf);
+-	return -ENODEV;
 +	return ret;
-+}
-+EXPORT_SYMBOL_GPL(pwrseq_alloc);
-+
- void pwrseq_pre_power_on(struct pwrseq *pwrseq)
- {
- 	if (pwrseq && pwrseq->ops->pre_power_on)
-@@ -84,6 +122,13 @@ void mmc_pwrseq_free(struct mmc_host *host)
  }
- EXPORT_SYMBOL_GPL(mmc_pwrseq_free);
  
-+void pwrseq_free(const struct pwrseq *pwrseq)
-+{
-+	if (pwrseq)
-+		module_put(pwrseq->owner);
-+}
-+EXPORT_SYMBOL_GPL(pwrseq_free);
-+
- int pwrseq_register(struct pwrseq *pwrseq)
- {
- 	if (!pwrseq || !pwrseq->ops || !pwrseq->dev)
-diff --git a/include/linux/pwrseq.h b/include/linux/pwrseq.h
-index fcc8fd855d4c..6215b3d6350d 100644
---- a/include/linux/pwrseq.h
-+++ b/include/linux/pwrseq.h
-@@ -31,9 +31,13 @@ void pwrseq_unregister(struct pwrseq *pwrseq);
- void pwrseq_pre_power_on(struct pwrseq *pwrseq);
- void pwrseq_post_power_on(struct pwrseq *pwrseq);
- void pwrseq_power_off(struct pwrseq *pwrseq);
-+
- int mmc_pwrseq_alloc(struct mmc_host *host);
- void mmc_pwrseq_free(struct mmc_host *host);
- 
-+struct pwrseq *pwrseq_alloc(struct device *dev, const char *phandle_name);
-+void pwrseq_free(const struct pwrseq *pwrseq);
-+
- #else /* CONFIG_POWER_SEQ */
- 
- static inline int pwrseq_register(struct pwrseq *pwrseq)
-@@ -44,9 +48,16 @@ static inline void pwrseq_unregister(struct pwrseq *pwrseq) {}
- static inline void pwrseq_pre_power_on(struct pwrseq *pwrseq) {}
- static inline void pwrseq_post_power_on(struct pwrseq *pwrseq) {}
- static inline void pwrseq_power_off(struct pwrseq *pwrseq) {}
-+
- static inline int mmc_pwrseq_alloc(struct mmc_host *host) { return 0; }
- static inline void mmc_pwrseq_free(struct mmc_host *host) {}
- 
-+static inline struct pwrseq *pwrseq_alloc(struct device *dev, const char *phandle_name)
-+{
-+	return NULL;
-+}
-+static inline void pwrseq_free(const struct pwrseq *pwrseq) {}
-+
- #endif /* CONFIG_POWER_SEQ */
- 
- #endif /* _LINUX_PWRSEQ_H */
+ static int
 -- 
 1.9.1
