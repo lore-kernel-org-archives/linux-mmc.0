@@ -1,8 +1,8 @@
 From: Krzysztof Kozlowski <k.kozlowski@samsung.com>
-Subject: [PATCH v3 10/12] EXAMPLE CODE: usb: hub: Power sequence the ports on
- activation
-Date: Wed, 01 Jun 2016 10:02:19 +0200
-Message-ID: <1464768141-25420-11-git-send-email-k.kozlowski@samsung.com>
+Subject: [PATCH v3 11/12] ARM: dts: exynos: Switch the buck8 to GPIO mode on
+ Odroid U3
+Date: Wed, 01 Jun 2016 10:02:20 +0200
+Message-ID: <1464768141-25420-12-git-send-email-k.kozlowski@samsung.com>
 References: <1464768141-25420-1-git-send-email-k.kozlowski@samsung.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
@@ -22,42 +22,27 @@ To: hzpeterchen@gmail.com, Ulf Hansson <ulf.hansson@linaro.org>, Sebastian Reich
 Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>
 List-Id: linux-mmc@vger.kernel.org
 
-The autodetection of attached USB device might not work on certain
-boards where the power is delivered externally.  These devices also might
-require a hard reset.  Use pwrseq for that in USB hub.
+Switch the control of buck8 to GPIO mode. It is faster than I2C/register
+mode and it is the easiest way to disable it (regulator state is a
+logical OR state of GPIO and register value).
 
 Signed-off-by: Krzysztof Kozlowski <k.kozlowski@samsung.com>
+Reviewed-by: Javier Martinez Canillas <javier@osg.samsung.com>
 ---
- drivers/usb/core/hub.c | 10 ++++++++++
- 1 file changed, 10 insertions(+)
+ arch/arm/boot/dts/exynos4412-odroidu3.dts | 1 +
+ 1 file changed, 1 insertion(+)
 
-diff --git a/drivers/usb/core/hub.c b/drivers/usb/core/hub.c
-index c421745b84aa..46d9f9aedacc 100644
---- a/drivers/usb/core/hub.c
-+++ b/drivers/usb/core/hub.c
-@@ -26,6 +26,7 @@
- #include <linux/mutex.h>
- #include <linux/random.h>
- #include <linux/pm_qos.h>
-+#include <linux/pwrseq.h>
+diff --git a/arch/arm/boot/dts/exynos4412-odroidu3.dts b/arch/arm/boot/dts/exynos4412-odroidu3.dts
+index d73aa6c58fe3..31cdc036fda4 100644
+--- a/arch/arm/boot/dts/exynos4412-odroidu3.dts
++++ b/arch/arm/boot/dts/exynos4412-odroidu3.dts
+@@ -74,6 +74,7 @@
+ 	regulator-name = "BUCK8_P3V3";
+ 	regulator-min-microvolt = <3300000>;
+ 	regulator-max-microvolt = <3300000>;
++	maxim,ena-gpios = <&gpa1 1 GPIO_ACTIVE_HIGH>;
+ };
  
- #include <asm/uaccess.h>
- #include <asm/byteorder.h>
-@@ -1663,6 +1664,15 @@ static int hub_configure(struct usb_hub *hub,
- 
- 	usb_hub_adjust_deviceremovable(hdev, hub->descriptor);
- 
-+	/* FIXME: When do the pre-power-on? */
-+	/*
-+	for (i = 0; i < maxchild; i++)
-+		pwrseq_pre_power_on(hub->ports[i]->pwrseq);
-+	*/
-+
-+	for (i = 0; i < maxchild; i++)
-+		pwrseq_post_power_on(hub->ports[i]->pwrseq);
-+
- 	hub_activate(hub, HUB_INIT);
- 	return 0;
- 
+ /* VDDQ for MSHC (eMMC card) */
 -- 
 1.9.1
