@@ -1,67 +1,52 @@
-From: Dan O'Donovan <dan@emutex.com>
-Subject: Re: [PATCH] mmc: mmc: fix check on mmc_select_bus_width return value
-Date: Wed, 1 Jun 2016 13:54:21 +0100
-Message-ID: <574EDAFD.2040406@emutex.com>
-References: <CGME20160601121538epcas1p1dbeabd6d68d9ca32e1a24705aee0f07a@epcas1p1.samsung.com>
- <1464783435-19338-1-git-send-email-dan@emutex.com>
- <574ED886.4090902@samsung.com>
+From: Michal Kadlic <michal.kadlic@spinet.sk>
+Subject: mmc-moxart: CMD6 locks up the controller
+Date: Wed, 1 Jun 2016 15:10:20 +0200
+Message-ID: <298c9ee5-37c7-6120-196d-860ec8eb0f9c@spinet.sk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
+Content-Type: text/plain; charset=utf-8; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from bert.emutex.com ([91.103.1.109]:60629 "EHLO bert.emutex.com"
+Received: from mail.spinet.sk ([212.89.230.194]:34107 "EHLO mail.spinet.sk"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752157AbcFAMyZ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 1 Jun 2016 08:54:25 -0400
-In-Reply-To: <574ED886.4090902@samsung.com>
+	id S1758158AbcFANQb (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 1 Jun 2016 09:16:31 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>, ulf.hansson@linaro.org
-Cc: linux-mmc@vger.kernel.org, arnd@arndb.de
+To: linux-mmc@vger.kernel.org
+Cc: Jonas Jensen <jonas.jensen@gmail.com>
 
+Hello,
 
+newbie here, please bear with me...
 
-On 06/01/2016 01:43 PM, Jaehoon Chung wrote:
-> On 06/01/2016 09:17 PM, Dan O'Donovan wrote:
->> This fixes a bug introduced by commit 287980e49ffc ("remove lots of
->> IS_ERR_VALUE abuses").  mmc_select_bus_width can return positive
->> integer values upon success, so the (!err) check is incorrect here.
->> This causes mmc initialisation failure, and subsequently boot
->> failure, on some platforms.
-> Refer to below patch.
->
-> https://patchwork.kernel.org/patch/9139673/
->
-> Best Regards,
-> Jaehoon Chung
-Ah, sorry I missed that.  Glad to see a fix is on the way already.  Please disregard my patch.  Thanks!
->
->> Signed-off-by: Dan O'Donovan <dan@emutex.com>
->> ---
->>  drivers/mmc/core/mmc.c | 4 ++--
->>  1 file changed, 2 insertions(+), 2 deletions(-)
->>
->> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
->> index c984321..5d438ad 100644
->> --- a/drivers/mmc/core/mmc.c
->> +++ b/drivers/mmc/core/mmc.c
->> @@ -1276,7 +1276,7 @@ static int mmc_select_hs200(struct mmc_card *card)
->>  	 * switch to HS200 mode if bus width is set successfully.
->>  	 */
->>  	err = mmc_select_bus_width(card);
->> -	if (!err) {
->> +	if (err >= 0) {
->>  		val = EXT_CSD_TIMING_HS200 |
->>  		      card->drive_strength << EXT_CSD_DRV_STR_SHIFT;
->>  		err = __mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
->> @@ -1583,7 +1583,7 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
->>  	} else if (mmc_card_hs(card)) {
->>  		/* Select the desired bus width optionally */
->>  		err = mmc_select_bus_width(card);
->> -		if (!err) {
->> +		if (err >= 0) {
->>  			err = mmc_select_hs_ddr(card);
->>  			if (err)
->>  				goto free_card;
->>
+It seems that CMD6/SD_SWITCH request locks up the mmc-moxart controller. 
+It does not respond to any command after CMD6.
+The fix suggested by Mr. Jonas Jensen <jonas.jensen@gmail.com>  is to 
+ignore the SD_SWITCH request in moxart_request()
+My question is - looking at mmc_read_switch() in drivers/mmc/core/sd.c - 
+would be -EINVAL a proper response in this case?
 
+This diff is against kernel 4.6.
+
+Best regards,
+Michal Kadlic
+---
+
+diff -purN a/drivers/mmc/host/moxart-mmc.c b/drivers/mmc/host/moxart-mmc.c
+--- a/drivers/mmc/host/moxart-mmc.c     2016-06-01 14:23:01.000000000 +0200
++++ b/drivers/mmc/host/moxart-mmc.c     2016-06-01 14:37:08.856296102 +0200
+@@ -411,6 +411,14 @@ static void moxart_request(struct mmc_ho
+                 mrq->cmd->error = -ETIMEDOUT;
+                 goto request_done;
+         }
++
++       if (mrq->cmd->opcode == SD_SWITCH) {
++
++                /* CMD6 (at least in mode 0) locks up the controller
++                 * so we have to ignore this request */
++                mrq->cmd->error = -EINVAL;
++                goto request_done;
++        }
+
+         moxart_prepare_data(host);
+         moxart_send_command(host, host->mrq->cmd)
