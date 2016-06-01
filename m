@@ -1,107 +1,227 @@
 From: Krzysztof Kozlowski <k.kozlowski@samsung.com>
-Subject: [PATCH v3 00/12] usb/mmc/power: Generic power sequence (and fix
- USB/LAN when TFTP booting)
-Date: Wed, 01 Jun 2016 10:02:09 +0200
-Message-ID: <1464768141-25420-1-git-send-email-k.kozlowski@samsung.com>
+Subject: [PATCH v3 05/12] power: pwrseq: Generalize mmc_pwrseq operations by
+ removing mmc prefix
+Date: Wed, 01 Jun 2016 10:02:14 +0200
+Message-ID: <1464768141-25420-6-git-send-email-k.kozlowski@samsung.com>
+References: <1464768141-25420-1-git-send-email-k.kozlowski@samsung.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
+In-reply-to: <1464768141-25420-1-git-send-email-k.kozlowski@samsung.com>
 Sender: linux-kernel-owner@vger.kernel.org
 To: hzpeterchen@gmail.com, Ulf Hansson <ulf.hansson@linaro.org>, Sebastian Reichel <sre@kernel.org>, Dmitry Eremin-Solenikov <dbaryshkov@gmail.com>, David Woodhouse <dwmw2@infradead.org>, Krzysztof Kozlowski <k.kozlowski@samsung.com>, Javier Martinez Canillas <javier@osg.samsung.com>, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, linux-pm@vger.kernel.or, Alan Stern <stern@rowland.harvard.edu>, linux-usb@vger.kernel.org, Rob Herring <robh+dt@kernel.org>, Pawel Moll <pawel.moll@arm.com>, Mark Rutland <mark.rutland@arm.com>, Ian Campbell <ijc+devicetree@hellion.org.uk>, Kumar Gala <galak@codeaurora.org>, Kukjin Kim <kgene@kernel.org>, devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-samsung-soc@vger.kernel.org
 Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>
 List-Id: linux-mmc@vger.kernel.org
 
-Hi,
+The power sequence hooks (mmc_pwrseq_pre_power_on(),
+mmc_pwrseq_post_power_on() and mmc_pwrseq_power_off()) can be made more
+generic to allow re-use in other subsystems. They do not need to take
+pointer to struct mmc_host but instead the struct pwrseq should be
+sufficient.
 
+Remove the "mmc" prefix and use the pointer to struct pwrseq as
+argument.
 
-My third approach for a USB power sequence which fixes usb3503+lan
-on Odroid U3 board if it was initialized by bootloader
-(e.g. for TFTP boot).
+Signed-off-by: Krzysztof Kozlowski <k.kozlowski@samsung.com>
+Reviewed-by: Javier Martinez Canillas <javier@osg.samsung.com>
+---
+ drivers/mmc/core/core.c              |  6 +++---
+ drivers/power/pwrseq/pwrseq.c        | 24 +++++++++---------------
+ drivers/power/pwrseq/pwrseq_emmc.c   |  6 ++----
+ drivers/power/pwrseq/pwrseq_simple.c | 14 ++++++--------
+ include/linux/pwrseq.h               | 18 +++++++++---------
+ 5 files changed, 29 insertions(+), 39 deletions(-)
 
-
-Changes since v2
-================
-1. Add Javier's reviewed-by tags. Address some comments.
-2. Re-use existing properties for GPIOs etc by pwrseq-simple
-   driver.  New property is still added: "power-sequence".
-   I tried to address and do according to Rob's comments.
-
-   Please look at patch 6/12 ("power: pwrseq: simple: Add support
-   for regulator and generic property") for bindings and the
-   new code around matching "power-sequence" property.
-
-3. I marked the usb code as "EXAMPLE" because that part
-   is left to Peter Chen.
-
-
-Problem
-=======
-When Odroid U3 (usb3503 + smsc95xx + max77686) boots from network (TFTP),
-the usb3503 and LAN smsc95xx do not show up in "lsusb". Hard-reset
-is required, e.g. by suspend to RAM. The actual TFTP boot does
-not have to happen. Just "usb start" from U-Boot is sufficient.
-
->From the schematics, the regulator is a supply only to LAN, however
-without toggling it off/on, the usb3503 hub won appear neither.
-
-
-Solution
-========
-This is very similar to the MMC pwrseq behavior so the idea is to:
-1. Move MMC pwrseq drivers to generic place,
-2. Extend the pwrseq-simple with regulator toggling,
-3. Add support to USB hub and port core for pwrseq,
-4. Toggle the regulator when needed.
-
-Best regards,
-Krzysztof
-
-Krzysztof Kozlowski (12):
-  power/mmc: Move pwrseq drivers to power/pwrseq
-  MAINTAINERS: Retain Ulf Hansson as the same maintainer of pwrseq
-  power: pwrseq: Enable COMPILE_TEST for drivers
-  power: pwrseq: Remove mmc prefix from mmc_pwrseq
-  power: pwrseq: Generalize mmc_pwrseq operations by removing mmc prefix
-  power: pwrseq: simple: Add support for regulator and generic property
-  power: pwrseq: Add support for USB hubs with external power
-  usb: hub: Handle deferred probe
-  EXAMPLE CODE: usb: port: Parse pwrseq phandle from Device Tree
-  EXAMPLE CODE: usb: hub: Power sequence the ports on activation
-  ARM: dts: exynos: Switch the buck8 to GPIO mode on Odroid U3
-  ARM: dts: exynos: Fix LAN and HUB after bootloader initialization on
-    Odroid U3
-
- .../pwrseq/pwrseq-emmc.txt}                        |   0
- .../pwrseq/pwrseq-simple.txt}                      |  29 +++-
- MAINTAINERS                                        |   9 ++
- arch/arm/boot/dts/exynos4412-odroidu3.dts          |   5 +
- drivers/mmc/Kconfig                                |   2 -
- drivers/mmc/core/Makefile                          |   3 -
- drivers/mmc/core/core.c                            |   8 +-
- drivers/mmc/core/host.c                            |   2 +-
- drivers/mmc/core/pwrseq.c                          | 110 ---------------
- drivers/mmc/core/pwrseq.h                          |  52 -------
- drivers/power/Kconfig                              |   1 +
- drivers/power/Makefile                             |   1 +
- drivers/{mmc/core => power/pwrseq}/Kconfig         |  22 ++-
- drivers/power/pwrseq/Makefile                      |   3 +
- drivers/power/pwrseq/pwrseq.c                      | 153 +++++++++++++++++++++
- drivers/{mmc/core => power/pwrseq}/pwrseq_emmc.c   |  17 +--
- drivers/{mmc/core => power/pwrseq}/pwrseq_simple.c | 110 ++++++++++++---
- drivers/usb/core/hub.c                             |  16 ++-
- drivers/usb/core/hub.h                             |   3 +
- drivers/usb/core/port.c                            |  15 ++
- include/linux/mmc/host.h                           |   4 +-
- include/linux/pwrseq.h                             |  63 +++++++++
- 22 files changed, 414 insertions(+), 214 deletions(-)
- rename Documentation/devicetree/bindings/{mmc/mmc-pwrseq-emmc.txt => power/pwrseq/pwrseq-emmc.txt} (100%)
- rename Documentation/devicetree/bindings/{mmc/mmc-pwrseq-simple.txt => power/pwrseq/pwrseq-simple.txt} (53%)
- delete mode 100644 drivers/mmc/core/pwrseq.c
- delete mode 100644 drivers/mmc/core/pwrseq.h
- rename drivers/{mmc/core => power/pwrseq}/Kconfig (60%)
- create mode 100644 drivers/power/pwrseq/Makefile
- create mode 100644 drivers/power/pwrseq/pwrseq.c
- rename drivers/{mmc/core => power/pwrseq}/pwrseq_emmc.c (88%)
- rename drivers/{mmc/core => power/pwrseq}/pwrseq_simple.c (52%)
- create mode 100644 include/linux/pwrseq.h
-
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index edefc3fbebe6..09a4722f9037 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -1719,7 +1719,7 @@ void mmc_power_up(struct mmc_host *host, u32 ocr)
+ 	if (host->ios.power_mode == MMC_POWER_ON)
+ 		return;
+ 
+-	mmc_pwrseq_pre_power_on(host);
++	pwrseq_pre_power_on(host->pwrseq);
+ 
+ 	host->ios.vdd = fls(ocr) - 1;
+ 	host->ios.power_mode = MMC_POWER_UP;
+@@ -1740,7 +1740,7 @@ void mmc_power_up(struct mmc_host *host, u32 ocr)
+ 	 */
+ 	mmc_delay(10);
+ 
+-	mmc_pwrseq_post_power_on(host);
++	pwrseq_post_power_on(host->pwrseq);
+ 
+ 	host->ios.clock = host->f_init;
+ 
+@@ -1759,7 +1759,7 @@ void mmc_power_off(struct mmc_host *host)
+ 	if (host->ios.power_mode == MMC_POWER_OFF)
+ 		return;
+ 
+-	mmc_pwrseq_power_off(host);
++	pwrseq_power_off(host->pwrseq);
+ 
+ 	host->ios.clock = 0;
+ 	host->ios.vdd = 0;
+diff --git a/drivers/power/pwrseq/pwrseq.c b/drivers/power/pwrseq/pwrseq.c
+index 9c665821f890..495a19d3c30b 100644
+--- a/drivers/power/pwrseq/pwrseq.c
++++ b/drivers/power/pwrseq/pwrseq.c
+@@ -52,32 +52,26 @@ int mmc_pwrseq_alloc(struct mmc_host *host)
+ }
+ EXPORT_SYMBOL_GPL(mmc_pwrseq_alloc);
+ 
+-void mmc_pwrseq_pre_power_on(struct mmc_host *host)
++void pwrseq_pre_power_on(struct pwrseq *pwrseq)
+ {
+-	struct pwrseq *pwrseq = host->pwrseq;
+-
+ 	if (pwrseq && pwrseq->ops->pre_power_on)
+-		pwrseq->ops->pre_power_on(host);
++		pwrseq->ops->pre_power_on(pwrseq);
+ }
+-EXPORT_SYMBOL_GPL(mmc_pwrseq_pre_power_on);
++EXPORT_SYMBOL_GPL(pwrseq_pre_power_on);
+ 
+-void mmc_pwrseq_post_power_on(struct mmc_host *host)
++void pwrseq_post_power_on(struct pwrseq *pwrseq)
+ {
+-	struct pwrseq *pwrseq = host->pwrseq;
+-
+ 	if (pwrseq && pwrseq->ops->post_power_on)
+-		pwrseq->ops->post_power_on(host);
++		pwrseq->ops->post_power_on(pwrseq);
+ }
+-EXPORT_SYMBOL_GPL(mmc_pwrseq_post_power_on);
++EXPORT_SYMBOL_GPL(pwrseq_post_power_on);
+ 
+-void mmc_pwrseq_power_off(struct mmc_host *host)
++void pwrseq_power_off(struct pwrseq *pwrseq)
+ {
+-	struct pwrseq *pwrseq = host->pwrseq;
+-
+ 	if (pwrseq && pwrseq->ops->power_off)
+-		pwrseq->ops->power_off(host);
++		pwrseq->ops->power_off(pwrseq);
+ }
+-EXPORT_SYMBOL_GPL(mmc_pwrseq_power_off);
++EXPORT_SYMBOL_GPL(pwrseq_power_off);
+ 
+ void mmc_pwrseq_free(struct mmc_host *host)
+ {
+diff --git a/drivers/power/pwrseq/pwrseq_emmc.c b/drivers/power/pwrseq/pwrseq_emmc.c
+index a68ac9a68e04..dbb7e753beb2 100644
+--- a/drivers/power/pwrseq/pwrseq_emmc.c
++++ b/drivers/power/pwrseq/pwrseq_emmc.c
+@@ -19,8 +19,6 @@
+ #include <linux/reboot.h>
+ #include <linux/pwrseq.h>
+ 
+-#include <linux/mmc/host.h>
+-
+ struct mmc_pwrseq_emmc {
+ 	struct pwrseq pwrseq;
+ 	struct notifier_block reset_nb;
+@@ -37,9 +35,9 @@ static void __mmc_pwrseq_emmc_reset(struct mmc_pwrseq_emmc *pwrseq)
+ 	udelay(200);
+ }
+ 
+-static void mmc_pwrseq_emmc_reset(struct mmc_host *host)
++static void mmc_pwrseq_emmc_reset(struct pwrseq *_pwrseq)
+ {
+-	struct mmc_pwrseq_emmc *pwrseq =  to_pwrseq_emmc(host->pwrseq);
++	struct mmc_pwrseq_emmc *pwrseq = to_pwrseq_emmc(_pwrseq);
+ 
+ 	__mmc_pwrseq_emmc_reset(pwrseq);
+ }
+diff --git a/drivers/power/pwrseq/pwrseq_simple.c b/drivers/power/pwrseq/pwrseq_simple.c
+index d5fbd653153e..93807a6ef162 100644
+--- a/drivers/power/pwrseq/pwrseq_simple.c
++++ b/drivers/power/pwrseq/pwrseq_simple.c
+@@ -18,8 +18,6 @@
+ #include <linux/gpio/consumer.h>
+ #include <linux/pwrseq.h>
+ 
+-#include <linux/mmc/host.h>
+-
+ struct mmc_pwrseq_simple {
+ 	struct pwrseq pwrseq;
+ 	bool clk_enabled;
+@@ -46,9 +44,9 @@ static void mmc_pwrseq_simple_set_gpios_value(struct mmc_pwrseq_simple *pwrseq,
+ 	}
+ }
+ 
+-static void mmc_pwrseq_simple_pre_power_on(struct mmc_host *host)
++static void mmc_pwrseq_simple_pre_power_on(struct pwrseq *_pwrseq)
+ {
+-	struct mmc_pwrseq_simple *pwrseq = to_pwrseq_simple(host->pwrseq);
++	struct mmc_pwrseq_simple *pwrseq = to_pwrseq_simple(_pwrseq);
+ 
+ 	if (!IS_ERR(pwrseq->ext_clk) && !pwrseq->clk_enabled) {
+ 		clk_prepare_enable(pwrseq->ext_clk);
+@@ -58,16 +56,16 @@ static void mmc_pwrseq_simple_pre_power_on(struct mmc_host *host)
+ 	mmc_pwrseq_simple_set_gpios_value(pwrseq, 1);
+ }
+ 
+-static void mmc_pwrseq_simple_post_power_on(struct mmc_host *host)
++static void mmc_pwrseq_simple_post_power_on(struct pwrseq *_pwrseq)
+ {
+-	struct mmc_pwrseq_simple *pwrseq = to_pwrseq_simple(host->pwrseq);
++	struct mmc_pwrseq_simple *pwrseq = to_pwrseq_simple(_pwrseq);
+ 
+ 	mmc_pwrseq_simple_set_gpios_value(pwrseq, 0);
+ }
+ 
+-static void mmc_pwrseq_simple_power_off(struct mmc_host *host)
++static void mmc_pwrseq_simple_power_off(struct pwrseq *_pwrseq)
+ {
+-	struct mmc_pwrseq_simple *pwrseq = to_pwrseq_simple(host->pwrseq);
++	struct mmc_pwrseq_simple *pwrseq = to_pwrseq_simple(_pwrseq);
+ 
+ 	mmc_pwrseq_simple_set_gpios_value(pwrseq, 1);
+ 
+diff --git a/include/linux/pwrseq.h b/include/linux/pwrseq.h
+index 6d2d2a44ad35..fcc8fd855d4c 100644
+--- a/include/linux/pwrseq.h
++++ b/include/linux/pwrseq.h
+@@ -11,9 +11,9 @@
+ #include <linux/mmc/host.h>
+ 
+ struct pwrseq_ops {
+-	void (*pre_power_on)(struct mmc_host *host);
+-	void (*post_power_on)(struct mmc_host *host);
+-	void (*power_off)(struct mmc_host *host);
++	void (*pre_power_on)(struct pwrseq *pwrseq);
++	void (*post_power_on)(struct pwrseq *pwrseq);
++	void (*power_off)(struct pwrseq *pwrseq);
+ };
+ 
+ struct pwrseq {
+@@ -28,10 +28,10 @@ struct pwrseq {
+ int pwrseq_register(struct pwrseq *pwrseq);
+ void pwrseq_unregister(struct pwrseq *pwrseq);
+ 
++void pwrseq_pre_power_on(struct pwrseq *pwrseq);
++void pwrseq_post_power_on(struct pwrseq *pwrseq);
++void pwrseq_power_off(struct pwrseq *pwrseq);
+ int mmc_pwrseq_alloc(struct mmc_host *host);
+-void mmc_pwrseq_pre_power_on(struct mmc_host *host);
+-void mmc_pwrseq_post_power_on(struct mmc_host *host);
+-void mmc_pwrseq_power_off(struct mmc_host *host);
+ void mmc_pwrseq_free(struct mmc_host *host);
+ 
+ #else /* CONFIG_POWER_SEQ */
+@@ -41,10 +41,10 @@ static inline int pwrseq_register(struct pwrseq *pwrseq)
+ 	return -ENOSYS;
+ }
+ static inline void pwrseq_unregister(struct pwrseq *pwrseq) {}
++static inline void pwrseq_pre_power_on(struct pwrseq *pwrseq) {}
++static inline void pwrseq_post_power_on(struct pwrseq *pwrseq) {}
++static inline void pwrseq_power_off(struct pwrseq *pwrseq) {}
+ static inline int mmc_pwrseq_alloc(struct mmc_host *host) { return 0; }
+-static inline void mmc_pwrseq_pre_power_on(struct mmc_host *host) {}
+-static inline void mmc_pwrseq_post_power_on(struct mmc_host *host) {}
+-static inline void mmc_pwrseq_power_off(struct mmc_host *host) {}
+ static inline void mmc_pwrseq_free(struct mmc_host *host) {}
+ 
+ #endif /* CONFIG_POWER_SEQ */
 -- 
 1.9.1
