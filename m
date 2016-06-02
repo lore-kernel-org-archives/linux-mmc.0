@@ -1,33 +1,137 @@
-From: Borislav Petkov <bp@alien8.de>
-Subject: Re: [PATCH 01/20] x86, intel: Introduce macros for Intel family
- numbers
-Date: Thu, 2 Jun 2016 08:57:15 +0200
-Message-ID: <20160602065715.GA10803@pd.tnic>
-References: <20160602001157.D8BE59D7@viggo.jf.intel.com>
+From: Krzysztof Kozlowski <k.kozlowski@samsung.com>
+Subject: Re: [PATCH v3 12/12] ARM: dts: exynos: Fix LAN and HUB after
+ bootloader initialization on Odroid U3
+Date: Thu, 02 Jun 2016 09:26:57 +0200
+Message-ID: <574FDFC1.5050209@samsung.com>
+References: <1464768141-25420-1-git-send-email-k.kozlowski@samsung.com>
+ <1464768141-25420-13-git-send-email-k.kozlowski@samsung.com>
+ <20160601115929.GA16740@shlinux2>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20160602001157.D8BE59D7@viggo.jf.intel.com>
+In-reply-to: <20160601115929.GA16740@shlinux2>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Dave Hansen <dave@sr71.net>
-Cc: linux-kernel@vger.kernel.org, x86@kernel.org, dave.hansen@linux.intel.com, adrian.hunter@intel.com, ak@linux.intel.com, luto@kernel.org, dvhart@infradead.org, dougthompson@xmission.com, edubezval@gmail.com, hpa@zytor.com, mingo@redhat.com, jacob.jun.pan@linux.intel.com, kan.liang@intel.com, lenb@kernel.org, linux-acpi@vger.kernel.org, linux-edac@vger.kernel.org, linux-mmc@vger.kernel.org, linux-pm@vger.kernel.org, mchehab@osg.samsung.com, peterz@infradead.org, platform-driver-x86@vger.kernel.org, rafael.j.wysocki@intel.com, rajneesh.bhardwaj@intel.com, souvik.k.chakravarty@intel.com, srinivas.pandruvada@linux.intel.com, eranian@google.com, tglx@linutronix.de, tony.luck@intel.com, ulf.hansson@linaro.org, viresh.kumar@linaro.org, vishwanath.somayaji@intel.com, zheng.z.yan@intel.com, rui.zhang@intel.com
+To: Peter Chen <hzpeterchen@gmail.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Sebastian Reichel <sre@kernel.org>, Dmitry Eremin-Solenikov <dbaryshkov@gmail.com>, David Woodhouse <dwmw2@infradead.org>, Javier Martinez Canillas <javier@osg.samsung.com>, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, linux-pm@vger.kernel.or, Alan Stern <stern@rowland.harvard.edu>, linux-usb@vger.kernel.org, Rob Herring <robh+dt@kernel.org>, Pawel Moll <pawel.moll@arm.com>, Mark Rutland <mark.rutland@arm.com>, Ian Campbell <ijc+devicetree@hellion.org.uk>, Kumar Gala <galak@codeaurora.org>, Kukjin Kim <kgene@kernel.org>, devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-samsung-soc@vger.kernel.org, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On Wed, Jun 01, 2016 at 05:11:57PM -0700, Dave Hansen wrote:
-> +#define INTEL_FAM6_MODEL_CORE_YONAH		0x0E
-> +#define INTEL_FAM6_MODEL_CORE2_MEROM		0x0F
+On 06/01/2016 01:59 PM, Peter Chen wrote:
+> On Wed, Jun 01, 2016 at 10:02:21AM +0200, Krzysztof Kozlowski wrote:
+>> On Odroid U3 (Exynos4412-based) board if USB was initialized by
+>> bootloader (in U-Boot "usb start" before tftpboot), the HUB (usb3503)
+>> and LAN (smsc95xx) after after successful probing were not visible in the
+>> system ("lsusb").
+>>
+>> In such case the devices had to be fully reset before configuring.
+>> Reset by GPIO (called RESET_N pin) and by RESET field in STCD register
+>> in usb3503 HUB are not sufficient. Instead full reset has to be done by
+>> disabling and enabling regulator.
+>>
+>> Signed-off-by: Krzysztof Kozlowski <k.kozlowski@samsung.com>
+>> ---
+>>  arch/arm/boot/dts/exynos4412-odroidu3.dts | 4 ++++
+>>  1 file changed, 4 insertions(+)
+>>
+>> diff --git a/arch/arm/boot/dts/exynos4412-odroidu3.dts b/arch/arm/boot/dts/exynos4412-odroidu3.dts
+>> index 31cdc036fda4..23e30e4609df 100644
+>> --- a/arch/arm/boot/dts/exynos4412-odroidu3.dts
+>> +++ b/arch/arm/boot/dts/exynos4412-odroidu3.dts
+>> @@ -99,11 +99,15 @@
+>>  	clock-names = "refclk";
+>>  	clocks = <&pmu_system_controller 0>;
+>>  	refclk-frequency = <24000000>;
+>> +
+>> +	power-sequence;
+>> +	ext-supply = <&buck8_reg>;
+>>  };
+>>  
+>>  &ehci {
+>>  	port@1 {
+>>  		status = "okay";
+>> +		usb-pwrseq = <&usb3503>;
+>>  	};
+>>  	port@2 {
+>>  		status = "okay";
+>> -- 
+>> 1.9.1
+>>
+> 
+> The hub is under the port1, you may need to describe it
+> under the port@1, see below:
+> Documentation/devicetree/bindings/usb/usb-device.txt
 
-That "MODEL_" part looks redundant too IMO - you could simply do
+My configuration is a little bit different than yours.
 
-INTEL_FAM6_NEHALEM and
-INTEL_FAM6_SKYLAKE_DESKTOP
-...
+In my case I have a USB hub (usb3503) which is also a a i2c device
+because it has to be configured through I2C.
 
-and so on and it is still clear what it is.
+I can add the power-sequence properties to the I2C node or as you
+pointed under port using the vendor-product-id compatible. In the first
+option: not many USB changes are needed. It works for me, at least as a
+proof of concept.
 
--- 
-Regards/Gruss,
-    Boris.
+The second solution: currently it does not work because the USB device
+does not get enumerated before the power sequence begins. It would be
+great if you could implement this on USB side.
 
-ECO tip #101: Trim your mails when you reply.
+> 
+> If I get Rob's comments correctly, you may need to consider 
+> below MMC and USB device tree description together, it seems
+> hard for USB to use pwrseq driver, sorry for confusing you.
+> 
+> If rob can accept below USB device description, we have to
+> do it under USB. In future, if there is some suitable framework,
+> we can move it.
+> 
+> 1. MMC device:
+> 	usdhc3_pwrseq: usdhc3_pwrseq {
+> 		compatible = "mmc-pwrseq-simple";
+> 		reset-gpios = <&gpio4 5 GPIO_ACTIVE_LOW>, 	/* WL_REG_ON */
+> 			      <&gpio4 7 GPIO_ACTIVE_LOW>, 	/* WL_HOSTWAKE */
+> 			      <&gpio3 25 GPIO_ACTIVE_LOW>, 	/* BT_REG_ON */
+> 			      <&gpio3 27 GPIO_ACTIVE_LOW>,	/* BT_HOSTWAKE */
+> 			      <&gpio4 4 GPIO_ACTIVE_LOW>, 	/* BT_WAKE */
+> 			      <&gpio4 6 GPIO_ACTIVE_LOW>; 	/* BT_RST_N */
+> 	};
+> 
+> &usdhc3 {
+> 	pinctrl-names = "default", "state_100mhz", "state_200mhz";
+> 	pinctrl-0 = <&pinctrl_usdhc3>;
+> 	pinctrl-1 = <&pinctrl_usdhc3_100mhz>;
+> 	pinctrl-2 = <&pinctrl_usdhc3_200mhz>;
+> 	bus-width = <4>;
+> 	non-removable;
+> 	keep-power-in-suspend;
+> 	wakeup-source;
+> 	mmc-pwrseq = <&usdhc3_pwrseq>;
+> 	status = "okay";
+> };
+> 
+> 2. USB device 
+> 
+> &usbotg1 {
+> 	vbus-supply = <&reg_usb_otg1_vbus>;
+> 	pinctrl-names = "default";
+> 	pinctrl-0 = <&pinctrl_usb_otg1_id>;
+> 	status = "okay";
+> 
+> 	#address-cells = <1>;
+> 	#size-cells = <0>;
+> 	hub: genesys@1 {
+> 		compatible = "usb5e3,608";
+> 		reg = <1>;
+> 		reset-gpios = <&gpio4 5 GPIO_ACTIVE_LOW>; /* hub reset pin */
+> 		reset-duration-us = <10>;
+> 		clocks = <&clks IMX6SX_CLK_CKO>;
+> 	};
+
+Yes, that looks like what Rob wanted... Do you plan to work on it? The
+power sequence is needed before device is enumerated.
+
+BTW, if you would like to play with the patchset, it is here:
+repo:   https://github.com/krzk/linux
+branch: for-next/odroid-u3-usb3503-lan-boot-fixes-v3
+
+Best regards,
+Krzysztof
