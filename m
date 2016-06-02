@@ -1,99 +1,74 @@
-From: Krzysztof Kozlowski <k.kozlowski@samsung.com>
-Subject: Re: [PATCH 1/3] mmc: fix mmc mode selection for HS-DDR and higher
-Date: Thu, 2 Jun 2016 11:35:24 +0200
-Message-ID: <CAJKOXPeH_hNutpqzsDWZ09ZrsP_r9A=3p2S63cjJ94VJT_513Q@mail.gmail.com>
-References: <1464505484-3661-1-git-send-email-wens@csie.org>
-	<1464505484-3661-2-git-send-email-wens@csie.org>
-	<CAPDyKFriC7i1DtF5d8eoY0baRoZ2VTfhWJznw9SvOnPNYksU5w@mail.gmail.com>
+From: Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>
+Subject: Re: [PATCH 4/4] Revert "powerpc/fsl: Move fsl_guts.h out of
+	arch/powerpc"
+Date: Thu, 02 Jun 2016 11:01:45 +0200
+Message-ID: <3225846.9EJ0sHv0XK@wuerfel>
+References: <1462417950-46796-1-git-send-email-yangbo.lu@nxp.com>
+	<5513501.AmZs7h1vI2@wuerfel>
+	<1464830660.22191.6.camel@buserror.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-oi0-f68.google.com ([209.85.218.68]:35607 "EHLO
-	mail-oi0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932204AbcFBJfZ convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 2 Jun 2016 05:35:25 -0400
-In-Reply-To: <CAPDyKFriC7i1DtF5d8eoY0baRoZ2VTfhWJznw9SvOnPNYksU5w@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
+In-Reply-To: <1464830660.22191.6.camel-fOR+EgIDQEHk1uMJSBkQmQ@public.gmane.org>
+List-Unsubscribe: <https://lists.linuxfoundation.org/mailman/options/iommu>,
+	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.linuxfoundation.org/pipermail/iommu/>
+List-Post: <mailto:iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
+List-Help: <mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=help>
+List-Subscribe: <https://lists.linuxfoundation.org/mailman/listinfo/iommu>,
+	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=subscribe>
+Sender: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
+Errors-To: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
+To: Scott Wood <oss-fOR+EgIDQEHk1uMJSBkQmQ@public.gmane.org>
+Cc: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-i2c-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-i2c-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-clk-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-clk-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Qiang Zhao <qiang.zhao-3arQi8VN3Tc@public.gmane.org>, Russell King <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, Bhupesh Sharma <bhupesh.sharma-KZfg59tc24xl57MIdRCFDg@public.gmane.org>, Claudiu Manoil <claudiu.manoil-KZfg59tc24xl57MIdRCFDg@public.gmane.org>, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Kumar Gala <galak-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Santosh Shilimkar <ssantosh-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "netdev-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <netdev-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Xiaobo Xie <xiaobo.xie-3arQi8VN3Tc@public.gmane.org>, Yang-Leo Li <leoyang.li-3arQi8VN3Tc@public.gmane.org>, "iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org" <iomm>
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Chen-Yu Tsai <wens@csie.org>, Arnd Bergmann <arnd@arndb.de>, Maxime Ripard <maxime.ripard@free-electrons.com>, Hans de Goede <hdegoede@redhat.com>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Linus Torvalds <torvalds@linux-foundation.org>
 
-On Thu, Jun 2, 2016 at 10:31 AM, Ulf Hansson <ulf.hansson@linaro.org> w=
-rote:
-> + Linus
->
-> On 29 May 2016 at 09:04, Chen-Yu Tsai <wens@csie.org> wrote:
->> When IS_ERR_VALUE was removed from the mmc core code, it was replace=
-d
->> with a simple not-zero check. This does not work, as the value check=
-ed
->> is the return value for mmc_select_bus_width, which returns the set
->> bit width on success. This made eMMC modes higher than HS-DDR unusab=
-le.
->>
->> Fix this by checking for a positive return value instead.
->>
->> Fixes: 287980e49ffc ("remove lots of IS_ERR_VALUE abuses")
->> Cc: Arnd Bergmann <arnd@arndb.de>
->> Signed-off-by: Chen-Yu Tsai <wens@csie.org>
->> ---
->>  drivers/mmc/core/mmc.c | 4 ++--
->>  1 file changed, 2 insertions(+), 2 deletions(-)
->>
->> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
->> index c984321d1881..aafb73d080ca 100644
->> --- a/drivers/mmc/core/mmc.c
->> +++ b/drivers/mmc/core/mmc.c
->> @@ -1276,7 +1276,7 @@ static int mmc_select_hs200(struct mmc_card *c=
-ard)
->>          * switch to HS200 mode if bus width is set successfully.
->>          */
->>         err =3D mmc_select_bus_width(card);
->> -       if (!err) {
->> +       if (err > 0) {
->>                 val =3D EXT_CSD_TIMING_HS200 |
->>                       card->drive_strength << EXT_CSD_DRV_STR_SHIFT;
->>                 err =3D __mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
->> @@ -1583,7 +1583,7 @@ static int mmc_init_card(struct mmc_host *host=
-, u32 ocr,
->>         } else if (mmc_card_hs(card)) {
->>                 /* Select the desired bus width optionally */
->>                 err =3D mmc_select_bus_width(card);
->> -               if (!err) {
->> +               if (err > 0) {
->
-> As pointed out in the review by Bj=C3=B6rn, to restore the old behavi=
-our we
-> should check for "err >=3D 0".
-> No need to send a new patch, I can amend the current version.
->
->>                         err =3D mmc_select_hs_ddr(card);
->>                         if (err)
->>                                 goto free_card;
->> --
->> 2.8.1
->>
->
-> Finally, I am a little concerned about the commit 287980e49ffc
-> ("remove lots of IS_ERR_VALUE abuses") which introduced this
-> regression.
->
-> Surprisingly the IS_ERR_VALUE():s aren't being replaced by equivalent
-> checks, so perhaps there a more regressions. Moreover, I wonder why I
-> wasn't being on cc/to list when this patch was submitted a few days
-> ago, perhaps my review could prevented the regression from even
-> happen.
->
-> Anyway, let's fix this now! I will pick up $subject patch as fix asap=
-=2E..
->
-> and Arnd, can you please double-check that the commit 287980e49ffc
-> doesn=E2=80=99t seems to regress anything else!?
+On Wednesday, June 1, 2016 8:24:20 PM CEST Scott Wood wrote:
+> On Mon, 2016-05-30 at 15:18 +0200, Arnd Bergmann wrote:
+> > All users of this driver are PowerPC specific and the header file
+> > has no business in the global include/linux/ hierarchy, so move
+> > it back before anyone starts using it on ARM.
+> > 
+> > This reverts commit 948486544713492f00ac8a9572909101ea892cb0.
+> > 
+> > Signed-off-by: Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>
+> > ---
+> > This part of the series is not required for the eSDHC quirk,
+> > but it restores the asm/fsl_guts.h header so it doesn't accidentally
+> > get abused for this in the future. I found two drivers outside of
+> > arch/powerpc that already accessed the registers directly, but the
+> > functions look fairly contained, and can be easily hidden in an
+> > #ifdef CONFIG_PPC
+> 
+> NACK
+> 
+> Besides adding ifdef pollution for no good reason, this register block is used
+> on some ARM chips as well.  Why is it a problem if "anyone starts using it on
+> ARM"?
 
-If only the 287980e49ffc could sit in linux-next for few days before
-reaching v4.7-rc1... Could you please pick up the fix soon? Maybe
-directly by Linus?
+It's just not a good interface when it's defined as "this is the layout of
+a register area that any driver can ioremap() if they can figure out the
+device node". It's not uncommon to have register areas like that, but
+normally you have at the minimum a 'syscon' device to handle locking
+between drivers accessing the same registers and to avoid having to map
+the same area multiple times.
 
-Best regards,
-Krzysztof
+If we need to use 'guts' registers on ARM, we can find a way to abstract
+them properly for the given use cases, using a syscon or a driver with
+exported functions, but just making a PowerPC platform specific header
+global to all Linux drivers by putting it into include/linux doesn't seem
+right.
+
+Note that the header file uses a structure definition rather than the more
+common macros with register offsets, which is fine for a driver that has
+its own registers and abstracts them, but it doesn't really work with
+the regmap interface, so if we want to use it with syscon, it also needs to
+be rewritten.
+
+> BTW, of all the mailing lists you included on this CC, you seem to have left
+> off the PPC list (I've added it).
+
+Sorry, my mistake.
+
+	Arnd
