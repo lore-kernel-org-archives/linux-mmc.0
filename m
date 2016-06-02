@@ -1,51 +1,95 @@
-From: Dave Hansen <dave@sr71.net>
-Subject: [PATCH 17/20] x86, mmc: use Intel family name macros for mmc driver
-Date: Wed, 01 Jun 2016 17:12:21 -0700
-Message-ID: <20160602001221.85C6DEC6@viggo.jf.intel.com>
-References: <20160602001157.D8BE59D7@viggo.jf.intel.com>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga04.intel.com ([192.55.52.120]:18121 "EHLO mga04.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752103AbcFBAMW (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 1 Jun 2016 20:12:22 -0400
-In-Reply-To: <20160602001157.D8BE59D7@viggo.jf.intel.com>
-Sender: linux-mmc-owner@vger.kernel.org
+From: Scott Wood <oss@buserror.net>
+Subject: Re: [PATCH 3/4] mmc: sdhci-of-esdhc: fix host version for
+ T4240-R1.0-R2.0
+Date: Wed, 01 Jun 2016 20:11:14 -0500
+Message-ID: <1464829874.16584.163.camel@buserror.net>
+References: <1462417950-46796-1-git-send-email-yangbo.lu@nxp.com>
+	 <HE1PR04MB0889852B7809A1CCFF8922ACF8410@HE1PR04MB0889.eurprd04.prod.outlook.com>
+	 <CAPDyKFqx2JMLzXoDxGCKFYMFV47+SegnkuWFXKvsQHK7L5w-1g@mail.gmail.com>
+	 <6110875.0k1HlSKhzn@wuerfel>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
+Return-path: <netdev-owner@vger.kernel.org>
+In-Reply-To: <6110875.0k1HlSKhzn@wuerfel>
+Sender: netdev-owner@vger.kernel.org
+To: Arnd Bergmann <arnd@arndb.de>, linuxppc-dev@lists.ozlabs.org
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Yangbo Lu <yangbo.lu@nxp.com>, Mark Rutland <mark.rutland@arm.com>, Xiaobo Xie <xiaobo.xie@nxp.com>, "linux-i2c@vger.kernel.org" <linux-i2c@vger.kernel.org>, "linux-clk@vger.kernel.org" <linux-clk@vger.kernel.org>, Qiang Zhao <qiang.zhao@nxp.com>, Russell King <linux@arm.linux.org.uk>, Bhupesh Sharma <bhupesh.sharma@freescale.com>, Joerg Roedel <joro@8bytes.org>, Claudiu Manoil <claudiu.manoil@freescale.com>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, Rob Herring <robh+dt@kernel.org>, Santosh Shilimkar <ssantosh@kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "netdev@vger.kernel.org" <netdev@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Yang-Leo Li <leoyang.li@nxp.com>, iommu
 List-Id: linux-mmc@vger.kernel.org
-To: linux-kernel@vger.kernel.org
-Cc: x86@kernel.org, Dave Hansen <dave@sr71.net>, dave.hansen@linux.intel.com, adrian.hunter@intel.com, ulf.hansson@linaro.org, linux-mmc@vger.kernel.org
 
+On Mon, 2016-05-30 at 15:16 +0200, Arnd Bergmann wrote:
+> This is a rewrite of an earlier patch from Yangbo Lu, adding a quirk
+> for the NXP QorIQ T4240 in the detection of the host device version.
+> 
+> Unfortunately, this device cannot be detected using the compatible
+> string, as we have to support existing DTS files that use the generic
+> "fsl,t4240-esdhc" identifier but that have other host versions that
+> are correctly detected.
+> 
+> Signed-off-by: Arnd Bergmann <arnd@arndb.de>
+> 
+> diff --git a/drivers/mmc/host/sdhci-of-esdhc.c b/drivers/mmc/host/sdhci-of
+> -esdhc.c
+> index 3f34d354f1fc..1d4814fe4cb2 100644
+> --- a/drivers/mmc/host/sdhci-of-esdhc.c
+> +++ b/drivers/mmc/host/sdhci-of-esdhc.c
+> @@ -73,14 +73,16 @@ static u32 esdhc_readl_fixup(struct sdhci_host *host,
+>  static u16 esdhc_readw_fixup(struct sdhci_host *host,
+>  				     int spec_reg, u32 value)
+>  {
+> +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+> +	struct sdhci_esdhc *esdhc = sdhci_pltfm_priv(pltfm_host);
+>  	u16 ret;
+>  	int shift = (spec_reg & 0x2) * 8;
+>  
+>  	if (spec_reg == SDHCI_HOST_VERSION)
+> -		ret = value & 0xffff;
+> -	else
+> -		ret = (value >> shift) & 0xffff;
+> -	return ret;
+> +		return esdhc->vendor_ver << SDHCI_VENDOR_VER_SHIFT |
+> +		       esdhc->spec_ver;
+> +
+> +	return (value >> shift) & 0xffff;
+>  }
+>  
+>  static u8 esdhc_readb_fixup(struct sdhci_host *host,
+> @@ -562,16 +564,32 @@ static const struct sdhci_pltfm_data
+> sdhci_esdhc_le_pdata = {
+>  	.ops = &sdhci_esdhc_le_ops,
+>  };
+>  
+> +#define T4240_HOST_VER ((VENDOR_V_23 << SDHCI_VENDOR_VER_SHIFT) |
+> SDHCI_SPEC_200)
+> +static const struct soc_device_attribute esdhc_t4240_quirk = {
+> +	/* T4240 revision < 0x20 uses vendor version 23, SDHCI version 200
+> */
+> +	{ .soc_id = "T4*(0x824000)", .revision = "0x[01]?",
+> +	  .data = (void *)(uintptr_t)(T4240_HOST_VER) },
 
-From: Dave Hansen <dave.hansen@linux.intel.com>
+Why should this code need to care that the string begins with "T4"?  This
+creates dual maintenance if that were to change.  It's also broken because
+T4240 has compatible = "fsl,t4240-device-config", "fsl,qoriq-device-config
+-2.0" and thus with these patches it would incorrectly show up as "P series
+(0x824000)".  The compatible string of this node was never meant to be a key
+for choosing a string to describe the system to userspace.
 
-Another straightforward replacement of magic numbers.
+0x824000 is a magic number which should be represented symbolically.
 
-Signed-off-by: Dave Hansen <dave.hansen@linux.intel.com>
-Cc: Adrian Hunter <adrian.hunter@intel.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc@vger.kernel.org
----
+If T4240 is affected, then so are the reduced-core variants T4160 and T4080,
+but 0x824000 doesn't match them (Yangbo's patch had the same problem).  And
+please don't respond with "0x824*"
 
- b/drivers/mmc/host/sdhci-acpi.c |    3 ++-
- 1 file changed, 2 insertions(+), 1 deletion(-)
+You also didn't strip out the E bit of SVR which indicates encryption
+capability and nothing else (Yangbo's patch did not have this problem because
+it used SVR_SOC_VER).
 
-diff -puN drivers/mmc/host/sdhci-acpi.c~x86-intel-families-sdhci-acpi drivers/mmc/host/sdhci-acpi.c
---- a/drivers/mmc/host/sdhci-acpi.c~x86-intel-families-sdhci-acpi	2016-06-01 15:45:09.826201501 -0700
-+++ b/drivers/mmc/host/sdhci-acpi.c	2016-06-01 15:45:09.830201683 -0700
-@@ -43,6 +43,7 @@
- 
- #ifdef CONFIG_X86
- #include <asm/cpu_device_id.h>
-+#include <asm/intel-family.h>
- #include <asm/iosf_mbi.h>
- #endif
- 
-@@ -126,7 +127,7 @@ static const struct sdhci_acpi_chip sdhc
- static bool sdhci_acpi_byt(void)
- {
- 	static const struct x86_cpu_id byt[] = {
--		{ X86_VENDOR_INTEL, 6, 0x37 },
-+		{ X86_VENDOR_INTEL, 6, INTEL_FAM6_MODEL_ATOM_SILVERMONT1 },
- 		{}
- 	};
- 
-_
+What happens if the revision condition is more complicated, such as <= 0x20
+with 0x21 being fine?  Multiple quirk entries where before we had as simple
+comparison?
+
+I fail to see how this approach is an improvement (much less one that needs to
+hold up a patchset that is fixing a problem and is not touching any generic
+code).  Why does this need to be a string?
+
+-Scott
