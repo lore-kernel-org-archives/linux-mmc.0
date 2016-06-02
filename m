@@ -1,134 +1,64 @@
-From: "Harjani, Ritesh" <riteshh@codeaurora.org>
-Subject: Re: Fw:Re: [RFC PATCH 0/4] Command Queueing Support in eMMC
-Date: Thu, 2 Jun 2016 07:53:02 +0530
-Message-ID: <31a90598-599c-3d37-fcc6-9651378c966e@codeaurora.org>
-References: <593930816.1359719.1464439518694.JavaMail.xmail@wmthree-4>
- <2745a917-c7d5-cf9b-8846-c49c945a0be4@rock-chips.com>
- <52bdfce3-0f55-317a-024f-ddabbcb2bea4@codeaurora.org>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH 17/20] x86, mmc: use Intel family name macros for mmc
+ driver
+Date: Thu, 2 Jun 2016 09:08:28 +0300
+Message-ID: <574FCD5C.90000@intel.com>
+References: <20160602001157.D8BE59D7@viggo.jf.intel.com>
+ <20160602001221.85C6DEC6@viggo.jf.intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Type: text/plain; charset=windows-1252
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp.codeaurora.org ([198.145.29.96]:50451 "EHLO
-	smtp.codeaurora.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752056AbcFBCXO (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 1 Jun 2016 22:23:14 -0400
-In-Reply-To: <52bdfce3-0f55-317a-024f-ddabbcb2bea4@codeaurora.org>
+Received: from mga11.intel.com ([192.55.52.93]:8706 "EHLO mga11.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1750731AbcFBGMd (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 2 Jun 2016 02:12:33 -0400
+In-Reply-To: <20160602001221.85C6DEC6@viggo.jf.intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "linux-arm-msm <linux-arm-msm@vger.kernel.org>;
-	linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Asutosh Das <asutoshd@codeaurora.org>
-Cc: Shawn Lin <shawn.lin@rock-chips.com>, linux-arm-msm <linux-arm-msm@vger.kernel.org>, Dong Aisheng <dongas86@gmail.com>, Doug Anderson <dianders@google.com>
+To: Dave Hansen <dave@sr71.net>
+Cc: linux-kernel@vger.kernel.org, x86@kernel.org, dave.hansen@linux.intel.com, ulf.hansson@linaro.org, linux-mmc@vger.kernel.org
 
-re-posting the email to mailing list, since it got rejected due to 
-format issue - Sorry about the noise.
+On 02/06/16 03:12, Dave Hansen wrote:
+> 
+> From: Dave Hansen <dave.hansen@linux.intel.com>
+> 
+> Another straightforward replacement of magic numbers.
+> 
+> Signed-off-by: Dave Hansen <dave.hansen@linux.intel.com>
+> Cc: Adrian Hunter <adrian.hunter@intel.com>
+> Cc: Ulf Hansson <ulf.hansson@linaro.org>
+> Cc: linux-mmc@vger.kernel.org
 
-Will be re-basing this(HW CMDQ) patch series soon.
+
+Acked-by: Adrian Hunter <adrian.hunter@intel.com>
 
 
-On 5/28/2016 6:32 PM, Harjani, Ritesh wrote:
->
-> Hi Shawn,
->
->
-> On 5/28/2016 6:24 PM, Shawn Lin wrote:
->> Hi,
->>
->>> On Tue, Dec 2, 2014 at 7:53 PM, Asutosh Das 
->>> <asutoshd@codeaurora.org> wrote:
->>>> In this patch series, we propose a method to add support for
->>>> Command Queueing(CQ) feature added to eMMC-5.1 specification.
->>
->> Is anyone still pushing it forward?
->> I have been trying to rebase it to 4.7 for testing but I think
->> it should be better to ping this thread firstly to see if you guys have
->> already done it. :)
-> Yes, I will be re-basing this patch series soon. Will post in coming week.
-> Would be looking forward to review comments :)
->
->
->>
->>>> This feature includes new commands for issuing tasks to the
->>>> device and orders the execution of tasks to the device. It
->>>> also has task management functions.
->>>>
->>>> The initialization of CQ is decided based on the underlying
->>>> driver capability and the capability advertised by the card
->>>> through ext_csd.
->>>>
->>>> We have selectively adopted the scsi design of pulling in
->>>> requests from kernel block layer.
->>>>
->>>> In order to support queueing of multiple requests, we have
->>>> added a new issue function to mmc-queue. This selectively
->>>> pulls the requests and prepares and issues it to the underlying
->>>> driver. We have used the inherent tagging mechanism of kernel
->>>> block layer to keep track and map tags to the slots of underlying
->>>> driver. The current design doesn't block for the request to
->>>> complete. We have separated the issuing and completion path
->>>> of the request and tracking is done using the tag assigned to
->>>> the request.
->>>>
->>>> We have introduced a number of APIs to mmc block layer to
->>>> facilitate servicing of requests.
->>>>
->>>> The completion of requests is handled in a softirq registered
->>>> with the kernel block layer during initialization. The error
->>>> handling however would be done using a workqueue and is under
->>>> development.
->>>>
->>>> We have separated the legacy eMMC code from CQ code, so as to
->>>> make it more manageable.
->>>>
->>>> A new layer has been introduced to serve the CQ compliant drivers.
->>>> This layer (cq_hci) has all the standard functionality implemented.
->>>> It also has necessary hooks for convenience of platform drivers.
->>>>
->>>> Asutosh Das (4):
->>>>   mmc: queue: initialization of command-queue support
->>>>   mmc: card: Add eMMC command queuing support in mmc block layer
->>>>   mmc: cmdq: support for command queue enabled host
->>>>   mmc: sdhci: add command queue support to sdhci
->>>>
->>>> Sujit Reddy Thumma (1):
->>>>   mmc: core: Add support to read command queue parameters
->>>>
->>>>  drivers/mmc/card/block.c   | 378
->>> ++++++++++++++++++++++++++++++++++++++++++++-
->>>>  drivers/mmc/card/queue.c   | 160 ++++++++++++++++++-
->>>>  drivers/mmc/card/queue.h   |   9 +-
->>>>  drivers/mmc/core/core.c    |  87 +++++++++++
->>>>  drivers/mmc/core/mmc.c     |  19 +++
->>>>  drivers/mmc/core/mmc_ops.c |  45 ++++--
->>>>  drivers/mmc/host/Kconfig   |  12 ++
->>>>  drivers/mmc/host/Makefile  |   1 +
->>>>  drivers/mmc/host/sdhci.c   |  89 +++++++++++
->>>>  drivers/mmc/host/sdhci.h   |   2 +
->>>>  include/linux/mmc/card.h   |  10 +-
->>>>  include/linux/mmc/core.h   |  14 ++
->>>>  include/linux/mmc/host.h   |  72 +++++++++
->>>>  include/linux/mmc/mmc.h    |   9 ++
->>>>  include/linux/mmc/sdhci.h  |   1 +
->>>>  15 files changed, 887 insertions(+), 21 deletions(-)
->>>>
->>>
->>
->>
->>
->
-> --
-> Regards
-> Ritesh Harjani (rh)
->
-> -- 
-> The Qualcomm Innovation Center, Inc. is a member of the Code Aurora Forum,
-> a Linux Foundation Collaborative Project
-
---
-Regards
-Ritesh Harjani (rh)
-
--- 
-The Qualcomm Innovation Center, Inc. is a member of the Code Aurora Forum,
-a Linux Foundation Collaborative Project
+> ---
+> 
+>  b/drivers/mmc/host/sdhci-acpi.c |    3 ++-
+>  1 file changed, 2 insertions(+), 1 deletion(-)
+> 
+> diff -puN drivers/mmc/host/sdhci-acpi.c~x86-intel-families-sdhci-acpi drivers/mmc/host/sdhci-acpi.c
+> --- a/drivers/mmc/host/sdhci-acpi.c~x86-intel-families-sdhci-acpi	2016-06-01 15:45:09.826201501 -0700
+> +++ b/drivers/mmc/host/sdhci-acpi.c	2016-06-01 15:45:09.830201683 -0700
+> @@ -43,6 +43,7 @@
+>  
+>  #ifdef CONFIG_X86
+>  #include <asm/cpu_device_id.h>
+> +#include <asm/intel-family.h>
+>  #include <asm/iosf_mbi.h>
+>  #endif
+>  
+> @@ -126,7 +127,7 @@ static const struct sdhci_acpi_chip sdhc
+>  static bool sdhci_acpi_byt(void)
+>  {
+>  	static const struct x86_cpu_id byt[] = {
+> -		{ X86_VENDOR_INTEL, 6, 0x37 },
+> +		{ X86_VENDOR_INTEL, 6, INTEL_FAM6_MODEL_ATOM_SILVERMONT1 },
+>  		{}
+>  	};
+>  
+> _
+> 
 
