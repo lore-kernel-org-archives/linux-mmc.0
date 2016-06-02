@@ -1,61 +1,135 @@
-From: Darren Hart <dvhart@infradead.org>
-Subject: Re: [PATCH 01/20] x86, intel: Introduce macros for Intel family
- numbers
-Date: Thu, 2 Jun 2016 14:45:57 -0700
-Message-ID: <20160602214557.GB1975@f23x64.localdomain>
-References: <20160602001157.D8BE59D7@viggo.jf.intel.com>
+From: =?UTF-8?B?QXJ2ZSBIasO4bm5ldsOlZw==?= <arve@android.com>
+Subject: Re: [PATCH v4 0/8] Replay Protected Memory Block (RPMB) subsystem
+Date: Thu, 2 Jun 2016 15:35:40 -0700
+Message-ID: <CAMP5XgeqtSXjFZ4o5nSjDRxde=jUSxci=ugJtSFFqvcm7McP8Q@mail.gmail.com>
+References: <1464817292-5407-1-git-send-email-tomas.winkler@intel.com>
+	<CAMP5Xgfo-4h3DYki0VWhQFjBtAE9=f9dqCZQV8VDvfJ3Rc_2UQ@mail.gmail.com>
+	<5B8DA87D05A7694D9FA63FD143655C1B5427E98E@hasmsx108.ger.corp.intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-acpi-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20160602001157.D8BE59D7@viggo.jf.intel.com>
-Sender: linux-acpi-owner@vger.kernel.org
-To: Dave Hansen <dave@sr71.net>
-Cc: linux-kernel@vger.kernel.org, x86@kernel.org, dave.hansen@linux.intel.com, adrian.hunter@intel.com, ak@linux.intel.com, luto@kernel.org, bp@alien8.de, dougthompson@xmission.com, edubezval@gmail.com, hpa@zytor.com, mingo@redhat.com, jacob.jun.pan@linux.intel.com, kan.liang@intel.com, lenb@kernel.org, linux-acpi@vger.kernel.org, linux-edac@vger.kernel.org, linux-mmc@vger.kernel.org, linux-pm@vger.kernel.org, mchehab@osg.samsung.com, peterz@infradead.org, platform-driver-x86@vger.kernel.org, rafael.j.wysocki@intel.com, rajneesh.bhardwaj@intel.com, souvik.k.chakravarty@intel.com, srinivas.pandruvada@linux.intel.com, eranian@google.com, tglx@linutronix.de, tony.luck@intel.com, ulf.hansson@linaro.org, viresh.kumar@linaro.org, vishwanath.somayaji@intel.com, zheng.z.yan@intel.com, rui.zhang@intel.com
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <5B8DA87D05A7694D9FA63FD143655C1B5427E98E@hasmsx108.ger.corp.intel.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: "Winkler, Tomas" <tomas.winkler@intel.com>
+Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Ulf Hansson <ulf.hansson@linaro.org>, "Hunter, Adrian" <adrian.hunter@intel.com>, James Bottomley <James.Bottomley@hansenpartnership.com>, "Martin K. Petersen" <martin.petersen@oracle.com>, Vinayak Holikatti <vinholikatti@gmail.com>, Andy Lutomirski <luto@kernel.org>, Michael Ryleev <gmar@google.com>, Joao Pinto <Joao.Pinto@synopsys.com>, Christoph Hellwig <hch@lst.de>, Yaniv Gardi <ygardi@codeaurora.org>, LKML <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-scsi@vger.kernel.org" <linux-scsi@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Wed, Jun 01, 2016 at 05:11:57PM -0700, Dave Hansen wrote:
-> 
-> From: Dave Hansen <dave.hansen@linux.intel.com>
-> 
-> If you are cc'd on this code, please check _your_ code vs. the
-> model list in "intel-family.h".  Please make sure you have all
-> the models listed that you intend to.
-> 
-> Problem:
-> 
-> We have a boatload of open-coded family-6 model numbers.  Half of
-> them have these model numbers in hex and the other half in
-> decimal.  This makes grepping for them tons of fun, if you were
-> to try.
-> 
-> Solution:
-> 
-> Consolidate all the magic numbers.  Put all the definitions in
-> one header.
-> 
-> The names here are closely derived from the comments describing
-> the models from arch/x86/events/intel/core.c.  We could easily
-> make them shorter by doing things like s/SANDYBRIDGE/SNB/, but
-> they seemed fine even with the longer versions to me.
-> 
-> Do not take any of these names too literally, like "DESKTOP"
-> or "MOBILE".  These are all colloquial names and not precise
-> descriptions of everywhere a given model will show up.
-> 
-> Signed-off-by: Dave Hansen <dave.hansen@linux.intel.com>
-> Cc: Adrian Hunter <adrian.hunter@intel.com>
-> Cc: Andi Kleen <ak@linux.intel.com>
-> Cc: Andy Lutomirski <luto@kernel.org>
-> Cc: Borislav Petkov <bp@alien8.de>
-> Cc: Darren Hart <dvhart@infradead.org>
+On Thu, Jun 2, 2016 at 6:17 AM, Winkler, Tomas <tomas.winkler@intel.com=
+> wrote:
+>>
+>> On Wed, Jun 1, 2016 at 2:41 PM, Tomas Winkler <tomas.winkler@intel.c=
+om>
+>> wrote:
+>> > Few storage technology such is EMMC, UFS, and NVMe support RPMB
+>> >hardware partition with common protocol and frame layout.
+>> > The RPMB partition cannot be accessed via standard block layer, bu=
+t
+>> >by a set of specific commands: WRITE, READ, GET_WRITE_COUNTER, and
+>> >PROGRAM_KEY.
+>> >...
+>>
+>> If the same protocol is used by all these standards, why not export =
+it directly
+>> (including the RESULT_READ command or not even knowing the command
+>> types)?
+> The protocol is the  same, but the wrapping of the packets is storage=
+ type specific so
+> I believe that the best abstraction is on those  4 operations level. =
+I'm not sure if the code would
+> be simpler if it would be exposed on a lower level.
 
-For platform/drivers/x86:
+I disagree. With the two storage types you support, the packets are
+identical. The only difference is the low level commands you use to
+send and receive them.
 
-Magic number to macro mapping verified.
+> RESULT_READ  is  a command to be issued for getting preceeding write =
+operation status, it's a kind of work around about the fact that you ha=
+ve to issue a read operation
+> in order to retrieve data in this case a  write operation result.  It=
+ can be successfully hidden and final result of the operation is delive=
+red
+> to the user.
+>
 
-Acked-by: Darren Hart <dvhart@linux.intel.com>
+Yes, it is possible to hide the result read command, but that does not
+mean you should. The rpmb protocol is designed to let two endpoints
+communicate in a way that lets them detect tampering. While the packet
+you inject does not contain any protected data, you can still view it
+as a form of tampering. If a future rpmb protocol version adds
+features, you could loose the ability to inject packets.
 
--- 
-Darren Hart
-Intel Open Source Technology Center
+>> While I would prefer an rpmb specific interface over the existing ra=
+w
+>> mmc command interface, all I need is an rpmb operation that lets me =
+send
+>> and receive buffers without interruption.
+>
+> I currently don't see an obstacle on doing the same with proposed int=
+erface, what is the issue are seeing.
+>
+
+The main issue is that you are injecting commands, so code that
+follows the mmc spec will not work.
+
+>> You can find our exiting user-space code here at
+>> https://android.googlesource.com/platform/system/core/+/master/trust=
+y/s
+>> torage/proxy/rpmb.c.
+>> If you use an interface more similar to this, I think your emmc and =
+ufs
+>> specific code would be simpler. Also, if you don't need the in-kerne=
+l
+>> interface, the kernel would not need to know the details of the rpmb
+>> protocol at all.
+>
+> My major interest is the in-kernel protocol the user space API was mo=
+re intended for debug, but I found it would be even more useful.
+> The store type  access is very RPMB specific  for both MMC and UFS an=
+d needs to do special operations for RPMB so I don't see how this aware=
+ness can be removed or I'm not reading your proposal correctly.
+
+The interface we use specifies reliable-write, write and read
+operations on an rpmb partition. I don't think you need to know more
+than this in either mmc or ufs. I have not seen the ufs spec, but
+based on your code it looks like reliable-write and write can map to
+the same command there.
+
+> Accessing RPMB is a multiple stepsoperation, the steps can be driven =
+from the user space as done in EMMC ioctl but hidning would reduce the =
+number of system calls and amount of data passed,
+> in some sense the same as in the  new mmc  MMC_IOC_MULTI_CMD is tryin=
+g ot achive.
+>
+The main purpose of using the MMC_IOC_MULTI_CMD is not to reduce the
+number of syscalls. It is to prevent other mmc operations from getting
+interleaved with the rpmb packets. Some emmc chips will only respond
+error packet if any other partitions are read from between the write
+and read operation on the rpmb partition.
+
+>> I have not tested your code, but it looks like we would have to modi=
+fy the
+>> storage proxy to interpret the data it currently passes through and =
+remove all
+>> RESULT_READ packets.
+> Your proxy driver just sends ioctls so this wouldn't be much differen=
+ce and the rpmb code on the trusty w need rewrite just rpmb_send () fun=
+ction,
+> actually removing one set of buffer size. I will try to make that mod=
+ification if it helps?
+>
+
+No I don't want you to modify the code that runs in the secure OS.
+This would require additional code in boot loaders and proxy servers
+using the existing MMC_IOC_MULTI_CMD command as they too would have to
+interpret the packets to inject RESULT_READ packets.
+
+> Thanks for interest and your review.
+> Tomas
+>
+>
+
+
+
+--=20
+Arve Hj=C3=B8nnev=C3=A5g
