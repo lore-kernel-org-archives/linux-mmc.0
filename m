@@ -1,42 +1,61 @@
-From: "Rafael J. Wysocki" <rjw@rjwysocki.net>
-Subject: Re: [PATCH 01/20] x86, intel: Introduce macros for Intel family numbers
-Date: Thu, 02 Jun 2016 23:49 +0200
-Message-ID: <2025489.OPKq8WOssX@vostro.rjw.lan>
-References: <20160602001157.D8BE59D7@viggo.jf.intel.com> <20160602065715.GA10803@pd.tnic>
+From: Darren Hart <dvhart@infradead.org>
+Subject: Re: [PATCH 01/20] x86, intel: Introduce macros for Intel family
+ numbers
+Date: Thu, 2 Jun 2016 14:45:57 -0700
+Message-ID: <20160602214557.GB1975@f23x64.localdomain>
+References: <20160602001157.D8BE59D7@viggo.jf.intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7Bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from cloudserver094114.home.net.pl ([79.96.170.134]:52277 "HELO
-	cloudserver094114.home.net.pl" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with SMTP id S932462AbcFBVpJ (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 2 Jun 2016 17:45:09 -0400
-In-Reply-To: <20160602065715.GA10803@pd.tnic>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-acpi-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <20160602001157.D8BE59D7@viggo.jf.intel.com>
+Sender: linux-acpi-owner@vger.kernel.org
+To: Dave Hansen <dave@sr71.net>
+Cc: linux-kernel@vger.kernel.org, x86@kernel.org, dave.hansen@linux.intel.com, adrian.hunter@intel.com, ak@linux.intel.com, luto@kernel.org, bp@alien8.de, dougthompson@xmission.com, edubezval@gmail.com, hpa@zytor.com, mingo@redhat.com, jacob.jun.pan@linux.intel.com, kan.liang@intel.com, lenb@kernel.org, linux-acpi@vger.kernel.org, linux-edac@vger.kernel.org, linux-mmc@vger.kernel.org, linux-pm@vger.kernel.org, mchehab@osg.samsung.com, peterz@infradead.org, platform-driver-x86@vger.kernel.org, rafael.j.wysocki@intel.com, rajneesh.bhardwaj@intel.com, souvik.k.chakravarty@intel.com, srinivas.pandruvada@linux.intel.com, eranian@google.com, tglx@linutronix.de, tony.luck@intel.com, ulf.hansson@linaro.org, viresh.kumar@linaro.org, vishwanath.somayaji@intel.com, zheng.z.yan@intel.com, rui.zhang@intel.com
 List-Id: linux-mmc@vger.kernel.org
-To: Borislav Petkov <bp@alien8.de>, Dave Hansen <dave@sr71.net>
-Cc: linux-kernel@vger.kernel.org, x86@kernel.org, dave.hansen@linux.intel.com, adrian.hunter@intel.com, ak@linux.intel.com, luto@kernel.org, dvhart@infradead.org, dougthompson@xmission.com, edubezval@gmail.com, hpa@zytor.com, mingo@redhat.com, jacob.jun.pan@linux.intel.com, kan.liang@intel.com, lenb@kernel.org, linux-acpi@vger.kernel.org, linux-edac@vger.kernel.org, linux-mmc@vger.kernel.org, linux-pm@vger.kernel.org, mchehab@osg.samsung.com, peterz@infradead.org, platform-driver-x86@vger.kernel.org, rafael.j.wysocki@intel.com, rajneesh.bhardwaj@intel.com, souvik.k.chakravarty@intel.com, srinivas.pandruvada@linux.intel.com, eranian@google.com, tglx@linutronix.de, tony.luck@intel.com, ulf.hansson@linaro.org, viresh.kumar@linaro.org, vishwanath.somayaji@intel.com, zheng.z.yan@intel.com, rui.zhang@intel.com
 
-On Thursday, June 02, 2016 08:57:15 AM Borislav Petkov wrote:
-> On Wed, Jun 01, 2016 at 05:11:57PM -0700, Dave Hansen wrote:
-> > +#define INTEL_FAM6_MODEL_CORE_YONAH		0x0E
-> > +#define INTEL_FAM6_MODEL_CORE2_MEROM		0x0F
+On Wed, Jun 01, 2016 at 05:11:57PM -0700, Dave Hansen wrote:
 > 
-> That "MODEL_" part looks redundant too IMO - you could simply do
+> From: Dave Hansen <dave.hansen@linux.intel.com>
 > 
-> INTEL_FAM6_NEHALEM and
-> INTEL_FAM6_SKYLAKE_DESKTOP
-> ...
+> If you are cc'd on this code, please check _your_ code vs. the
+> model list in "intel-family.h".  Please make sure you have all
+> the models listed that you intend to.
 > 
-> and so on and it is still clear what it is.
+> Problem:
+> 
+> We have a boatload of open-coded family-6 model numbers.  Half of
+> them have these model numbers in hex and the other half in
+> decimal.  This makes grepping for them tons of fun, if you were
+> to try.
+> 
+> Solution:
+> 
+> Consolidate all the magic numbers.  Put all the definitions in
+> one header.
+> 
+> The names here are closely derived from the comments describing
+> the models from arch/x86/events/intel/core.c.  We could easily
+> make them shorter by doing things like s/SANDYBRIDGE/SNB/, but
+> they seemed fine even with the longer versions to me.
+> 
+> Do not take any of these names too literally, like "DESKTOP"
+> or "MOBILE".  These are all colloquial names and not precise
+> descriptions of everywhere a given model will show up.
+> 
+> Signed-off-by: Dave Hansen <dave.hansen@linux.intel.com>
+> Cc: Adrian Hunter <adrian.hunter@intel.com>
+> Cc: Andi Kleen <ak@linux.intel.com>
+> Cc: Andy Lutomirski <luto@kernel.org>
+> Cc: Borislav Petkov <bp@alien8.de>
+> Cc: Darren Hart <dvhart@infradead.org>
 
-I'm with you on that, but that's rather minor and the changes in this series
-are generally fine by me, so Dave please feel free to add
+For platform/drivers/x86:
 
-Acked-by: Rafael J. Wysocki <rafael.j.wysocki@intel.com>
+Magic number to macro mapping verified.
 
-to all of it.
+Acked-by: Darren Hart <dvhart@linux.intel.com>
 
-Thanks,
-Rafael
-
+-- 
+Darren Hart
+Intel Open Source Technology Center
