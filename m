@@ -1,75 +1,42 @@
-From: Eric Anholt <eric@anholt.net>
-Subject: Re: [PATCH 32/32] mmc: bcm2835: Import bcm2835-mmc and switch to it
-Date: Thu, 02 Jun 2016 14:40:13 -0700
-Message-ID: <87d1nze0ci.fsf@eliezer.anholt.net>
-References: <1464817421-8519-1-git-send-email-kraxel@redhat.com> <1464817421-8519-33-git-send-email-kraxel@redhat.com> <e16936ee-3b0d-3798-72e0-8969c2c1a309@i2se.com> <87oa7j314j.fsf@eliezer.anholt.net> <2100811505.238666.65d5fa25-985a-4a30-86e2-3a7bebb5caaf.open-xchange@email.1und1.de>
+From: "Rafael J. Wysocki" <rjw@rjwysocki.net>
+Subject: Re: [PATCH 01/20] x86, intel: Introduce macros for Intel family numbers
+Date: Thu, 02 Jun 2016 23:49 +0200
+Message-ID: <2025489.OPKq8WOssX@vostro.rjw.lan>
+References: <20160602001157.D8BE59D7@viggo.jf.intel.com> <20160602065715.GA10803@pd.tnic>
 Mime-Version: 1.0
-Content-Type: multipart/signed; boundary="=-=-=";
-	micalg=pgp-sha512; protocol="application/pgp-signature"
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7Bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from anholt.net ([50.246.234.109]:38041 "EHLO anholt.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1160998AbcFBVkk (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 2 Jun 2016 17:40:40 -0400
-In-Reply-To: <2100811505.238666.65d5fa25-985a-4a30-86e2-3a7bebb5caaf.open-xchange@email.1und1.de>
+Received: from cloudserver094114.home.net.pl ([79.96.170.134]:52277 "HELO
+	cloudserver094114.home.net.pl" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with SMTP id S932462AbcFBVpJ (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 2 Jun 2016 17:45:09 -0400
+In-Reply-To: <20160602065715.GA10803@pd.tnic>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Stefan Wahren <stefan.wahren@i2se.com>, Gerd Hoffmann <kraxel@redhat.com>
-Cc: Russell King <linux@armlinux.org.uk>, Lee Jones <lee@kernel.org>, Pawel Moll <pawel.moll@arm.com>, Kumar Gala <galak@codeaurora.org>, Rob Herring <robh+dt@kernel.org>, Ian Campbell <ijc+devicetree@hellion.org.uk>, "moderated list:ARM PORT" <linux-arm-kernel@lists.infradead.org>, Ulf Hansson <ulf.hansson@linaro.org>, open list <linux-kernel@vger.kernel.org>, "open list:MULTIMEDIA CARD MMC, SECURE DIGITAL SD AND..." <linux-mmc@vger.kernel.org>, Stephen Warren <swarren@wwwdotorg.org>, linux-rpi-kernel@lists.infradead.org, Mark Rutland <mark.rutland@arm.com>, "open list:OPEN FIRMWARE AND FLATTENED DEVICE TREE BINDINGS" <devicetree@vger.kernel.org>
+To: Borislav Petkov <bp@alien8.de>, Dave Hansen <dave@sr71.net>
+Cc: linux-kernel@vger.kernel.org, x86@kernel.org, dave.hansen@linux.intel.com, adrian.hunter@intel.com, ak@linux.intel.com, luto@kernel.org, dvhart@infradead.org, dougthompson@xmission.com, edubezval@gmail.com, hpa@zytor.com, mingo@redhat.com, jacob.jun.pan@linux.intel.com, kan.liang@intel.com, lenb@kernel.org, linux-acpi@vger.kernel.org, linux-edac@vger.kernel.org, linux-mmc@vger.kernel.org, linux-pm@vger.kernel.org, mchehab@osg.samsung.com, peterz@infradead.org, platform-driver-x86@vger.kernel.org, rafael.j.wysocki@intel.com, rajneesh.bhardwaj@intel.com, souvik.k.chakravarty@intel.com, srinivas.pandruvada@linux.intel.com, eranian@google.com, tglx@linutronix.de, tony.luck@intel.com, ulf.hansson@linaro.org, viresh.kumar@linaro.org, vishwanath.somayaji@intel.com, zheng.z.yan@intel.com, rui.zhang@intel.com
 
---=-=-=
-Content-Type: text/plain
-Content-Transfer-Encoding: quoted-printable
+On Thursday, June 02, 2016 08:57:15 AM Borislav Petkov wrote:
+> On Wed, Jun 01, 2016 at 05:11:57PM -0700, Dave Hansen wrote:
+> > +#define INTEL_FAM6_MODEL_CORE_YONAH		0x0E
+> > +#define INTEL_FAM6_MODEL_CORE2_MEROM		0x0F
+> 
+> That "MODEL_" part looks redundant too IMO - you could simply do
+> 
+> INTEL_FAM6_NEHALEM and
+> INTEL_FAM6_SKYLAKE_DESKTOP
+> ...
+> 
+> and so on and it is still clear what it is.
 
-Stefan Wahren <stefan.wahren@i2se.com> writes:
+I'm with you on that, but that's rather minor and the changes in this series
+are generally fine by me, so Dave please feel free to add
 
-> Hi Eric,
->
->> Eric Anholt <eric@anholt.net> hat am 2. Juni 2016 um 20:18 geschrieben:
->>=20
->>=20
->> Stefan Wahren <stefan.wahren@i2se.com> writes:
->>=20
->> > Hi Gerd,
->> >
->> > Am 01.06.2016 um 23:43 schrieb Gerd Hoffmann:
->> >> From: Eric Anholt <eric@anholt.net>
->> >>
->> >> With this we can get wifi (brcmfmac) to probe.  Without it we're stuck
->> >> with timeouts from sdio.c when it tries to set the bus width to 4.
->> >
->> > adding a new MMC driver to fix a wifi issue is really weird.
->> >
->> > Beside that there are already two MMC drivers (sdhci-bcm2835.c and
->> > sdhci-iproc.c) in the Kernel which are compatible to BCM2835. Why shou=
-ld
->> > we add two new ones?
->>=20
->> Despite the fact that this is my commit, I don't think it should be
->> merged.  We should figure out why sdhci-iproc.c isn't working, instead.
->
-> so it doesn't work with sdhci-bcm2835 on RPi 3, too?
+Acked-by: Rafael J. Wysocki <rafael.j.wysocki@intel.com>
 
-Correct.
+to all of it.
 
---=-=-=
-Content-Type: application/pgp-signature; name="signature.asc"
+Thanks,
+Rafael
 
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1
-
-iQIcBAEBCgAGBQJXUKe9AAoJELXWKTbR/J7ofNkP/1Qezzdo8bwkjlhqFVq/PRs8
-3PKczEw38J71lAWDoFJz8Mjm+QIZ4cB4sbdGN+5FTYDS9E7pzDmr+xNrfJMsuUio
-qxs8SUdanAEGFFQz3bojQhn0zYhKNIFgPmXu0h9TccQ5g6hJLzxe1qk09X3DPfug
-GdMRi+29HSram8C2Ux5NYNHlBjs5BkbqZwnQ2VfzoGea2bmUUMPTzx7IZCtEfQK1
-RZhQ+O2buyCjmG/DAfvYu8FQg240IrD2kZkzB5UERow0f9az2Xy95af0kQDF7igO
-JMVVAafVDtchM5OQOqOjSCLkOJThatU7gje/P0v51jTy7lCXPOHnYS+ibzsPFASl
-DtfT3g4uXUpaDh8NRh5JCNG4kNh0JK/BiOuXMCBFaujHrOtDoyyjWUFSEksVmu39
-twp6WfsAjEdMpX69TU2oX0XVVTy63kGJ8TeOhnY4ERUBWCkKuKFY9IeeUOWrxPJB
-eOEnzQaytTMpLQLMLumQriNy3AYGA5+rDTAD8AR64WKgwk/w1n5ZGKOkELOYecmh
-OfZUUkIomZlfI+yOV6tomKIsv/5aKCEw+5bPUf/J7eb3apE/jhY4tWHdoDE4COwn
-HyHxW/kamOidKg4huqiPt1DQ+eFQuZ/qcLVF6J68PCMQAYKLfGH+hxICFzNe5Ez/
-rcwrhTCScZY5x3UpMUfw
-=Yi0S
------END PGP SIGNATURE-----
---=-=-=--
