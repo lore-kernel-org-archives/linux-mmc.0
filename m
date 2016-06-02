@@ -1,70 +1,99 @@
-From: Arnd Bergmann <arnd@arndb.de>
-Subject: Re: [PATCH 3/4] mmc: sdhci-of-esdhc: fix host version for T4240-R1.0-R2.0
-Date: Thu, 02 Jun 2016 10:52:48 +0200
-Message-ID: <3851136.KiJNtFycNm@wuerfel>
-References: <1462417950-46796-1-git-send-email-yangbo.lu@nxp.com> <6110875.0k1HlSKhzn@wuerfel> <1464829874.16584.163.camel@buserror.net>
+From: Krzysztof Kozlowski <k.kozlowski@samsung.com>
+Subject: Re: [PATCH 1/3] mmc: fix mmc mode selection for HS-DDR and higher
+Date: Thu, 2 Jun 2016 11:35:24 +0200
+Message-ID: <CAJKOXPeH_hNutpqzsDWZ09ZrsP_r9A=3p2S63cjJ94VJT_513Q@mail.gmail.com>
+References: <1464505484-3661-1-git-send-email-wens@csie.org>
+	<1464505484-3661-2-git-send-email-wens@csie.org>
+	<CAPDyKFriC7i1DtF5d8eoY0baRoZ2VTfhWJznw9SvOnPNYksU5w@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7Bit
-Return-path: <linux-clk-owner@vger.kernel.org>
-In-Reply-To: <1464829874.16584.163.camel@buserror.net>
-Sender: linux-clk-owner@vger.kernel.org
-To: linuxppc-dev@lists.ozlabs.org
-Cc: Scott Wood <oss@buserror.net>, Mark Rutland <mark.rutland@arm.com>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, Russell King <linux@arm.linux.org.uk>, Bhupesh Sharma <bhupesh.sharma@freescale.com>, "netdev@vger.kernel.org" <netdev@vger.kernel.org>, Joerg Roedel <joro@8bytes.org>, Santosh Shilimkar <ssantosh@kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Xiaobo Xie <xiaobo.xie@nxp.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "iommu@lists.linux-foundation.org" <iommu@lists.linux-foundation.org>, Rob Herring <robh+dt@kernel.org>, "linux-i2c@vger.kernel.org" <linux-i2c@vger.kernel.org>, Claudiu Manoil <claudiu.manoil@freescale.com>, Yangbo Lu <yangbo.lu@nxp.com>, Kumar Gala <galak@codeaurora.org>, Yang-Leo Li <leoyang.li@nxp.com>, "linux-clk@vger.kernel.org" <linux-clk@vg>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-oi0-f68.google.com ([209.85.218.68]:35607 "EHLO
+	mail-oi0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932204AbcFBJfZ convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 2 Jun 2016 05:35:25 -0400
+In-Reply-To: <CAPDyKFriC7i1DtF5d8eoY0baRoZ2VTfhWJznw9SvOnPNYksU5w@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Chen-Yu Tsai <wens@csie.org>, Arnd Bergmann <arnd@arndb.de>, Maxime Ripard <maxime.ripard@free-electrons.com>, Hans de Goede <hdegoede@redhat.com>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Linus Torvalds <torvalds@linux-foundation.org>
 
-On Wednesday, June 1, 2016 8:11:14 PM CEST Scott Wood wrote:
-> > +#define T4240_HOST_VER ((VENDOR_V_23 << SDHCI_VENDOR_VER_SHIFT) |
-> > SDHCI_SPEC_200)
-> > +static const struct soc_device_attribute esdhc_t4240_quirk = {
-> > +     /* T4240 revision < 0x20 uses vendor version 23, SDHCI version 200
-> > */
-> > +     { .soc_id = "T4*(0x824000)", .revision = "0x[01]?",
-> > +       .data = (void *)(uintptr_t)(T4240_HOST_VER) },
-> 
-> Why should this code need to care that the string begins with "T4"?  This
-> creates dual maintenance if that were to change.  It's also broken because
-> T4240 has compatible = "fsl,t4240-device-config", "fsl,qoriq-device-config
-> -2.0" and thus with these patches it would incorrectly show up as "P series
-> (0x824000)".  The compatible string of this node was never meant to be a key
-> for choosing a string to describe the system to userspace.
+On Thu, Jun 2, 2016 at 10:31 AM, Ulf Hansson <ulf.hansson@linaro.org> w=
+rote:
+> + Linus
+>
+> On 29 May 2016 at 09:04, Chen-Yu Tsai <wens@csie.org> wrote:
+>> When IS_ERR_VALUE was removed from the mmc core code, it was replace=
+d
+>> with a simple not-zero check. This does not work, as the value check=
+ed
+>> is the return value for mmc_select_bus_width, which returns the set
+>> bit width on success. This made eMMC modes higher than HS-DDR unusab=
+le.
+>>
+>> Fix this by checking for a positive return value instead.
+>>
+>> Fixes: 287980e49ffc ("remove lots of IS_ERR_VALUE abuses")
+>> Cc: Arnd Bergmann <arnd@arndb.de>
+>> Signed-off-by: Chen-Yu Tsai <wens@csie.org>
+>> ---
+>>  drivers/mmc/core/mmc.c | 4 ++--
+>>  1 file changed, 2 insertions(+), 2 deletions(-)
+>>
+>> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+>> index c984321d1881..aafb73d080ca 100644
+>> --- a/drivers/mmc/core/mmc.c
+>> +++ b/drivers/mmc/core/mmc.c
+>> @@ -1276,7 +1276,7 @@ static int mmc_select_hs200(struct mmc_card *c=
+ard)
+>>          * switch to HS200 mode if bus width is set successfully.
+>>          */
+>>         err =3D mmc_select_bus_width(card);
+>> -       if (!err) {
+>> +       if (err > 0) {
+>>                 val =3D EXT_CSD_TIMING_HS200 |
+>>                       card->drive_strength << EXT_CSD_DRV_STR_SHIFT;
+>>                 err =3D __mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
+>> @@ -1583,7 +1583,7 @@ static int mmc_init_card(struct mmc_host *host=
+, u32 ocr,
+>>         } else if (mmc_card_hs(card)) {
+>>                 /* Select the desired bus width optionally */
+>>                 err =3D mmc_select_bus_width(card);
+>> -               if (!err) {
+>> +               if (err > 0) {
+>
+> As pointed out in the review by Bj=C3=B6rn, to restore the old behavi=
+our we
+> should check for "err >=3D 0".
+> No need to send a new patch, I can amend the current version.
+>
+>>                         err =3D mmc_select_hs_ddr(card);
+>>                         if (err)
+>>                                 goto free_card;
+>> --
+>> 2.8.1
+>>
+>
+> Finally, I am a little concerned about the commit 287980e49ffc
+> ("remove lots of IS_ERR_VALUE abuses") which introduced this
+> regression.
+>
+> Surprisingly the IS_ERR_VALUE():s aren't being replaced by equivalent
+> checks, so perhaps there a more regressions. Moreover, I wonder why I
+> wasn't being on cc/to list when this patch was submitted a few days
+> ago, perhaps my review could prevented the regression from even
+> happen.
+>
+> Anyway, let's fix this now! I will pick up $subject patch as fix asap=
+=2E..
+>
+> and Arnd, can you please double-check that the commit 287980e49ffc
+> doesn=E2=80=99t seems to regress anything else!?
 
-This is an artifact of not knowing the specific SoC name, and we can change
-that by looking up the name from the SVR value in the soc_device driver.
- 
-> 0x824000 is a magic number which should be represented symbolically.
+If only the 287980e49ffc could sit in linux-next for few days before
+reaching v4.7-rc1... Could you please pick up the fix soon? Maybe
+directly by Linus?
 
-Sure, feel free to change the format of the soc_device string in any
-name, I just converted the information I had available in the comments.
-The only thing that is important here is that the string matches what
-the soc_device driver calls it.
-
-> If T4240 is affected, then so are the reduced-core variants T4160 and T4080,
-> but 0x824000 doesn't match them (Yangbo's patch had the same problem).  And
-> please don't respond with "0x824*"
-> 
-> You also didn't strip out the E bit of SVR which indicates encryption
-> capability and nothing else (Yangbo's patch did not have this problem because
-> it used SVR_SOC_VER).
-
-Ok, that should be easy enough to fix in the soc_device driver.
-
-> What happens if the revision condition is more complicated, such as <= 0x20
-> with 0x21 being fine?  Multiple quirk entries where before we had as simple
-> comparison?
-
-I guess yes. I would really hope that there is no need to use this interface
-pervasively, it's really just to work around the cases where there is no
-way to pass the information in DT otherwise.
-
-> I fail to see how this approach is an improvement (much less one that needs to
-> hold up a patchset that is fixing a problem and is not touching any generic
-> code).  Why does this need to be a string?
-
-A string is what user space gets in /sys/devices/soc/*, and we already have
-code that does the same things there to work around quirks, here we just
-use the same interface in a completely generic way. Note that not every
-SoC family uses numbers in the same way, some have multiple subrevisions,
-some have names etc.
-
-	Arnd
+Best regards,
+Krzysztof
