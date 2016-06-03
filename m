@@ -1,43 +1,49 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v2] mmc: sdhci: fix wakeup configuration
-Date: Fri, 3 Jun 2016 10:33:35 +0200
-Message-ID: <CAPDyKFogriRL64YmO-mTCHaYg647ms7BU79scDXZ+rxQY9Jk3w@mail.gmail.com>
-References: <1463145362-7773-1-git-send-email-ludovic.desroches@atmel.com>
- <573EF90B.7000109@intel.com> <CAPDyKFoqG6pYujivi6Rop4orVLViN7Feq+iB7LXkbx6zURZ=Qw@mail.gmail.com>
- <573F5768.2070708@intel.com> <20160526123009.GA6744@odux.rfo.atmel.com>
+Subject: Re: [PATCH 31/54] MAINTAINERS: Add file patterns for mmc device tree bindings
+Date: Fri, 3 Jun 2016 10:33:42 +0200
+Message-ID: <CAPDyKFrhEm1djhfUnTnFfbFz-VoyAEm+rkV31CbND+CtoMs=dg@mail.gmail.com>
+References: <1463907991-7916-1-git-send-email-geert@linux-m68k.org> <1463907991-7916-32-git-send-email-geert@linux-m68k.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20160526123009.GA6744@odux.rfo.atmel.com>
+In-Reply-To: <1463907991-7916-32-git-send-email-geert@linux-m68k.org>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Nicolas Ferre <nicolas.ferre@atmel.com>, Kevin Liu <kliu5@marvell.com>, Jialing Fu <jlfu@marvell.com>, Jisheng Zhang <jszhang@marvell.com>
-Cc: Ludovic Desroches <ludovic.desroches@atmel.com>
+To: Geert Uytterhoeven <geert@linux-m68k.org>
+Cc: "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On 26 May 2016 at 14:30, Ludovic Desroches <ludovic.desroches@atmel.com> wrote:
-> On Fri, May 20, 2016 at 09:28:56PM +0300, Adrian Hunter wrote:
->> On 20/05/2016 4:39 p.m., Ulf Hansson wrote:
->> > On 20 May 2016 at 13:46, Adrian Hunter <adrian.hunter@intel.com> wrote:
->> > > On 13/05/16 16:16, Ludovic Desroches wrote:
->> > > > Activating wakeup event is not enough to get a wakeup signal. The
->> > > > corresponding events have to be enabled in the Interrupt Status Enable
->> > > > Register too. It follows the specification and is needed at least by
->> > > > sdhci-of-at91.
->> > > >
->> > > > Signed-off-by: Ludovic Desroches <ludovic.desroches@atmel.com>
->> > >
->> > > Acked-by: Adrian Hunter <adrian.hunter@intel.com>
->> >
->> > Is this material for stable and as a fix for 4.6?
->>
->> Not as far as I know.
->>
+On 22 May 2016 at 11:06, Geert Uytterhoeven <geert@linux-m68k.org> wrote:
+> Submitters of device tree binding documentation may forget to CC
+> the subsystem maintainer if this is missing.
 >
-> System PM code for the Atmel SDHCI has not been submitted yet so no need
-> to take it as a fix.
->
+> Signed-off-by: Geert Uytterhoeven <geert@linux-m68k.org>
+> Cc: Ulf Hansson <ulf.hansson@linaro.org>
+> Cc: linux-mmc@vger.kernel.org
 
 Thanks, applied for next!
 
 Kind regards
 Uffe
+
+> ---
+> Please apply this patch directly if you want to be involved in device
+> tree binding documentation for your subsystem.
+> ---
+>  MAINTAINERS | 1 +
+>  1 file changed, 1 insertion(+)
+>
+> diff --git a/MAINTAINERS b/MAINTAINERS
+> index c1e413b2c61a9746..f296a5763fef0431 100644
+> --- a/MAINTAINERS
+> +++ b/MAINTAINERS
+> @@ -7739,6 +7739,7 @@ M:        Ulf Hansson <ulf.hansson@linaro.org>
+>  L:     linux-mmc@vger.kernel.org
+>  T:     git git://git.linaro.org/people/ulf.hansson/mmc.git
+>  S:     Maintained
+> +F:     Documentation/devicetree/bindings/mmc/
+>  F:     drivers/mmc/
+>  F:     include/linux/mmc/
+>  F:     include/uapi/linux/mmc/
+> --
+> 1.9.1
+>
