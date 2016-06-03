@@ -1,38 +1,95 @@
-From: "Rafael J. Wysocki" <rjw@rjwysocki.net>
-Subject: Re: [PATCH 01/20] [v2] x86, intel: Introduce macros for Intel family numbers
-Date: Fri, 03 Jun 2016 02:38:59 +0200
-Message-ID: <3618590.bN2s1CDUs5@vostro.rjw.lan>
-References: <20160603001927.F2A7D828@viggo.jf.intel.com>
+From: Rob Herring <robh@kernel.org>
+Subject: Re: [PATCH v3 06/12] power: pwrseq: simple: Add support for
+ regulator and generic property
+Date: Thu, 2 Jun 2016 21:02:18 -0500
+Message-ID: <20160603020218.GA19436@rob-hp-laptop>
+References: <1464768141-25420-1-git-send-email-k.kozlowski@samsung.com>
+ <1464768141-25420-7-git-send-email-k.kozlowski@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7Bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from cloudserver094114.home.net.pl ([79.96.170.134]:59540 "HELO
-	cloudserver094114.home.net.pl" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with SMTP id S1750833AbcFCAfJ (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 2 Jun 2016 20:35:09 -0400
-In-Reply-To: <20160603001927.F2A7D828@viggo.jf.intel.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <1464768141-25420-7-git-send-email-k.kozlowski@samsung.com>
+Sender: linux-samsung-soc-owner@vger.kernel.org
+To: Krzysztof Kozlowski <k.kozlowski@samsung.com>
+Cc: hzpeterchen@gmail.com, Ulf Hansson <ulf.hansson@linaro.org>, Sebastian Reichel <sre@kernel.org>, Dmitry Eremin-Solenikov <dbaryshkov@gmail.com>, David Woodhouse <dwmw2@infradead.org>, Javier Martinez Canillas <javier@osg.samsung.com>, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, linux-pm@vger.kernel.or, Alan Stern <stern@rowland.harvard.edu>, linux-usb@vger.kernel.org, Pawel Moll <pawel.moll@arm.com>, Mark Rutland <mark.rutland@arm.com>, Ian Campbell <ijc+devicetree@hellion.org.uk>, Kumar Gala <galak@codeaurora.org>, Kukjin Kim <kgene@kernel.org>, devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-samsung-soc@vger.kernel.org, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Dave Hansen <dave@sr71.net>
-Cc: linux-kernel@vger.kernel.org, x86@kernel.org, jacob.jun.pan@intel.com, dave.hansen@linux.intel.com, adrian.hunter@intel.com, ak@linux.intel.com, luto@kernel.org, bp@alien8.de, dvhart@infradead.org, dougthompson@xmission.com, edubezval@gmail.com, hpa@zytor.com, mingo@redhat.com, jacob.jun.pan@linux.intel.com, kan.liang@intel.com, lenb@kernel.org, linux-acpi@vger.kernel.org, linux-edac@vger.kernel.org, linux-mmc@vger.kernel.org, linux-pm@vger.kernel.org, mchehab@osg.samsung.com, peterz@infradead.org, platform-driver-x86@vger.kernel.org, rafael.j.wysocki@intel.com, rajneesh.bhardwaj@intel.com, souvik.k.chakravarty@intel.com, srinivas.pandruvada@linux.intel.com, eranian@google.com, tglx@linutronix.de, tony.luck@intel.com, ulf.hansson@linaro.org, viresh.kumar@linaro.org, vishwanath.somayaji@intel.com, rui.zhang@intel.com
 
-On Thursday, June 02, 2016 05:19:27 PM Dave Hansen wrote:
+On Wed, Jun 01, 2016 at 10:02:15AM +0200, Krzysztof Kozlowski wrote:
+> Some devices need real hard-reset by cutting the power.  During power
+> sequence turn off and on the regulator, if it is provided.
 > 
-> Changes from v1:
->  * added acks from a few folks
->  * Took the redundant "MODEL_" out of the macro names (Suggested
->    by Borislav Petkov and acked by others)
+> Additionally add support for instantiating the pwrseq-simple device on a
+> generic property 'power-sequence'.  The device will attach itself to the
+> node containing the property and parse the node's properties like
+> reset-gpios, ext-supply etc.
 > 
-> From: Dave Hansen <dave.hansen@linux.intel.com>
+> Signed-off-by: Krzysztof Kozlowski <k.kozlowski@samsung.com>
+> ---
+>  .../bindings/power/pwrseq/pwrseq-simple.txt        | 29 +++++++-
+>  drivers/power/pwrseq/pwrseq_simple.c               | 85 +++++++++++++++++++++-
+>  2 files changed, 107 insertions(+), 7 deletions(-)
 > 
-> If you are cc'd on this code, please check _your_ code vs. the
-> model list in "intel-family.h".  Please make sure you have all
-> the models listed that you intend to.
-> 
-> Also, rather than trickling these in via all the various
-> maintainers, should these just get pulled in to the x86 tree in
-> one go?
+> diff --git a/Documentation/devicetree/bindings/power/pwrseq/pwrseq-simple.txt b/Documentation/devicetree/bindings/power/pwrseq/pwrseq-simple.txt
+> index ce0e76749671..a8c3f13ee83f 100644
+> --- a/Documentation/devicetree/bindings/power/pwrseq/pwrseq-simple.txt
+> +++ b/Documentation/devicetree/bindings/power/pwrseq/pwrseq-simple.txt
+> @@ -1,11 +1,17 @@
+> -* The simple MMC power sequence provider
+> +* The simple power sequence provider
+>  
+> -The purpose of the simple MMC power sequence provider is to supports a set of
+> +The purpose of the simple power sequence provider is to supports a set of
+>  common properties between various SOC designs. It thus enables us to use the
+>  same provider for several SOC designs.
+>  
+> -Required properties:
+> -- compatible : contains "mmc-pwrseq-simple".
+> +The driver supports two types of bindings:
+> +1. Separate node
+> +   Required properties:
+> +   - compatible : contains "mmc-pwrseq-simple".
 
-Yes, please.
+Please note that this is not recommended for new users.
 
+> +
+> +2. Property for any node
+> +   Required properties:
+> +   - power-sequence
+>  
+>  Optional properties:
+>  - reset-gpios : contains a list of GPIO specifiers. The reset GPIOs are asserted
+> @@ -16,6 +22,7 @@ Optional properties:
+>    See ../clocks/clock-bindings.txt for details.
+>  - clock-names : Must include the following entry:
+>    "ext_clock" (External clock provided to the card).
+> +- ext-supply : External regulator supply
+
+What happens when there are 2 supplies?
+
+I'd prefer the name not be genericish and use the real supply names. 
+Then the power seq code should just turn on all supplies it finds. If 
+the order or timing to turn on matters, then sorry, no generic sequence.
+
+>  
+>  Example:
+>  
+> @@ -24,4 +31,18 @@ Example:
+>  		reset-gpios = <&gpio1 12 GPIO_ACTIVE_LOW>;
+>  		clocks = <&clk_32768_ck>;
+>  		clock-names = "ext_clock";
+> +		ext-supply = <&buck8>;
+>  	}
+> +
+> +	usb3503@08 {
+> +		compatible = "smsc,usb3503";
+> +		reg = <0x08>;
+> +
+> +		intn-gpios = <&gpx3 0 GPIO_ACTIVE_HIGH>;
+> +		connect-gpios = <&gpx3 4 GPIO_ACTIVE_HIGH>;
+> +		reset-gpios = <&gpx3 5 GPIO_ACTIVE_HIGH>;
+> +		initial-mode = <1>;
+> +
+> +		power-sequence;
+> +		ext-supply = <&buck8_reg>;
+> +	};
