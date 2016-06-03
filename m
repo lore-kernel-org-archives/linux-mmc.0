@@ -1,24 +1,29 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: sh_mobile_sdhi: properly document R-Car versions
-Date: Fri, 3 Jun 2016 10:32:47 +0200
-Message-ID: <CAPDyKFrs9RaRAp8n7QWx+dtK3sAJZG4Xckxueip=-qXbJc3kpQ@mail.gmail.com>
-References: <1462970760-3471-1-git-send-email-wsa@the-dreams.de>
+Subject: Re: [PATCH] mmc: sdhci: remove comment regarding timeout during tuning
+Date: Fri, 3 Jun 2016 10:32:54 +0200
+Message-ID: <CAPDyKFqNJZXRm5LuO7KjdqQ7nUibJ33cohPFYTyrJhmckDynDA@mail.gmail.com>
+References: <1463113471-14350-1-git-send-email-horms+renesas@verge.net.au>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-renesas-soc-owner@vger.kernel.org>
-In-Reply-To: <1462970760-3471-1-git-send-email-wsa@the-dreams.de>
-Sender: linux-renesas-soc-owner@vger.kernel.org
-To: Wolfram Sang <wsa@the-dreams.de>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, linux-renesas-soc@vger.kernel.org, Simon Horman <horms@verge.net.au>, Magnus Damm <magnus.damm@gmail.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-wm0-f48.google.com ([74.125.82.48]:38796 "EHLO
+	mail-wm0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751544AbcFCIc4 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 3 Jun 2016 04:32:56 -0400
+Received: by mail-wm0-f48.google.com with SMTP id a20so96611368wma.1
+        for <linux-mmc@vger.kernel.org>; Fri, 03 Jun 2016 01:32:56 -0700 (PDT)
+In-Reply-To: <1463113471-14350-1-git-send-email-horms+renesas@verge.net.au>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Simon Horman <horms+renesas@verge.net.au>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, linux-mmc <linux-mmc@vger.kernel.org>
 
-On 11 May 2016 at 14:46, Wolfram Sang <wsa@the-dreams.de> wrote:
-> From: Wolfram Sang <wsa+renesas@sang-engineering.com>
+On 13 May 2016 at 06:24, Simon Horman <horms+renesas@verge.net.au> wrote:
+> Since commit 7ce45e950624 ("mmc: sdhci: SD tuning is broken for some
+> controllers") sdhci_execute_tuning() no longer includes a timeout in its
+> loop counter(s) so remove portion of the comment regarding this.
 >
-> Replace hardcoded values with meaningful names and document what we
-> know.
->
-> Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+> Signed-off-by: Simon Horman <horms+renesas@verge.net.au>
 
 Thanks, applied for next!
 
@@ -26,49 +31,22 @@ Kind regards
 Uffe
 
 > ---
->  drivers/mmc/host/sh_mobile_sdhi.c | 14 ++++++++++----
->  1 file changed, 10 insertions(+), 4 deletions(-)
+>  drivers/mmc/host/sdhci.c | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
 >
-> diff --git a/drivers/mmc/host/sh_mobile_sdhi.c b/drivers/mmc/host/sh_mobile_sdhi.c
-> index f750f9494410b0..c3b651bf89cb4a 100644
-> --- a/drivers/mmc/host/sh_mobile_sdhi.c
-> +++ b/drivers/mmc/host/sh_mobile_sdhi.c
-> @@ -39,6 +39,12 @@
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index e010ea4eb6f5..b7f9d4c5c925 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -1909,7 +1909,7 @@ static int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode)
 >
->  #define EXT_ACC           0xe4
->
-> +#define SDHI_VER_GEN2_SDR50    0x490c
-> +/* very old datasheets said 0x490c for SDR104, too. They are wrong! */
-> +#define SDHI_VER_GEN2_SDR104   0xcb0d
-> +#define SDHI_VER_GEN3_SD       0xcc10
-> +#define SDHI_VER_GEN3_SDMMC    0xcd10
-> +
->  #define host_to_priv(host) container_of((host)->pdata, struct sh_mobile_sdhi, mmc_data)
->
->  struct sh_mobile_sdhi_of_data {
-> @@ -109,14 +115,14 @@ static void sh_mobile_sdhi_sdbuf_width(struct tmio_mmc_host *host, int width)
->          *      sh_mobile_sdhi_of_data :: dma_buswidth
+>         /*
+>          * Issue CMD19 repeatedly till Execute Tuning is set to 0 or the number
+> -        * of loops reaches 40 times or a timeout of 150ms occurs.
+> +        * of loops reaches 40 times.
 >          */
->         switch (sd_ctrl_read16(host, CTL_VERSION)) {
-> -       case 0x490C:
-> +       case SDHI_VER_GEN2_SDR50:
->                 val = (width == 32) ? 0x0001 : 0x0000;
->                 break;
-> -       case 0xCB0D:
-> +       case SDHI_VER_GEN2_SDR104:
->                 val = (width == 32) ? 0x0000 : 0x0001;
->                 break;
-> -       case 0xCC10: /* Gen3, SD only */
-> -       case 0xCD10: /* Gen3, SD + MMC */
-> +       case SDHI_VER_GEN3_SD:
-> +       case SDHI_VER_GEN3_SDMMC:
->                 if (width == 64)
->                         val = 0x0000;
->                 else if (width == 32)
+>         do {
+>                 struct mmc_command cmd = {0};
 > --
-> 2.8.1
+> 2.1.4
 >
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
