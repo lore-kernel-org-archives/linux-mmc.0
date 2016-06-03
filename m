@@ -1,64 +1,43 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: block: correct 4KB alignment check
-Date: Fri, 3 Jun 2016 10:33:25 +0200
-Message-ID: <CAPDyKFp-pPo0TTt_QR+YkWi6WUAKX97sbTHP5g-UkBcFxY8FuA@mail.gmail.com>
-References: <588D8A7789B2934A9950BF189ED6F50A2007FF09@shsmsx102.ccr.corp.intel.com>
+Subject: Re: [PATCH v2] mmc: sdhci: fix wakeup configuration
+Date: Fri, 3 Jun 2016 10:33:35 +0200
+Message-ID: <CAPDyKFogriRL64YmO-mTCHaYg647ms7BU79scDXZ+rxQY9Jk3w@mail.gmail.com>
+References: <1463145362-7773-1-git-send-email-ludovic.desroches@atmel.com>
+ <573EF90B.7000109@intel.com> <CAPDyKFoqG6pYujivi6Rop4orVLViN7Feq+iB7LXkbx6zURZ=Qw@mail.gmail.com>
+ <573F5768.2070708@intel.com> <20160526123009.GA6744@odux.rfo.atmel.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wm0-f41.google.com ([74.125.82.41]:38131 "EHLO
-	mail-wm0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751544AbcFCId2 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 3 Jun 2016 04:33:28 -0400
-Received: by mail-wm0-f41.google.com with SMTP id a20so96627859wma.1
-        for <linux-mmc@vger.kernel.org>; Fri, 03 Jun 2016 01:33:27 -0700 (PDT)
-In-Reply-To: <588D8A7789B2934A9950BF189ED6F50A2007FF09@shsmsx102.ccr.corp.intel.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20160526123009.GA6744@odux.rfo.atmel.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Nicolas Ferre <nicolas.ferre@atmel.com>, Kevin Liu <kliu5@marvell.com>, Jialing Fu <jlfu@marvell.com>, Jisheng Zhang <jszhang@marvell.com>
+Cc: Ludovic Desroches <ludovic.desroches@atmel.com>
 List-Id: linux-mmc@vger.kernel.org
-To: "Yuan, Juntao" <juntao.yuan@intel.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-On 13 May 2016 at 09:59, Yuan, Juntao <juntao.yuan@intel.com> wrote:
+On 26 May 2016 at 14:30, Ludovic Desroches <ludovic.desroches@atmel.com> wrote:
+> On Fri, May 20, 2016 at 09:28:56PM +0300, Adrian Hunter wrote:
+>> On 20/05/2016 4:39 p.m., Ulf Hansson wrote:
+>> > On 20 May 2016 at 13:46, Adrian Hunter <adrian.hunter@intel.com> wrote:
+>> > > On 13/05/16 16:16, Ludovic Desroches wrote:
+>> > > > Activating wakeup event is not enough to get a wakeup signal. The
+>> > > > corresponding events have to be enabled in the Interrupt Status Enable
+>> > > > Register too. It follows the specification and is needed at least by
+>> > > > sdhci-of-at91.
+>> > > >
+>> > > > Signed-off-by: Ludovic Desroches <ludovic.desroches@atmel.com>
+>> > >
+>> > > Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+>> >
+>> > Is this material for stable and as a fix for 4.6?
+>>
+>> Not as far as I know.
+>>
 >
-> In sectors alignment check, brq->data.blocks means sectors of the
-> previous mqrq since data.blocks for mqrq_cur hasn't been updated yet.
-> data.blocks will be updated later in mmc_blk_packed_hdr_wrq_prep or
-> mmc_blk_rw_rq_prep.
+> System PM code for the Atmel SDHCI has not been submitted yet so no need
+> to take it as a fix.
 >
-> static int mmc_blk_issue_rw_rq(struct mmc_queue *mq, ......
->         ......
->     struct mmc_blk_request *brq = &mq->mqrq_cur->brq;
->
-> Signed-off-by: Yuan Juntao <juntao.yuan@intel.com>
 
 Thanks, applied for next!
 
 Kind regards
 Uffe
-
-> ---
->  drivers/mmc/card/block.c |    4 ++--
->  1 file changed, 2 insertions(+), 2 deletions(-)
->
-> diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
-> index 3bdbe50..cc0189f 100644
-> --- a/drivers/mmc/card/block.c
-> +++ b/drivers/mmc/card/block.c
-> @@ -1950,8 +1950,8 @@ static int mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *rqc)
->              * When 4KB native sector is enabled, only 8 blocks
->              * multiple read or write is allowed
->              */
-> -           if ((brq->data.blocks & 0x07) &&
-> -               (card->ext_csd.data_sector_size == 4096)) {
-> +           if (mmc_large_sector(card) &&
-> +               !IS_ALIGNED(blk_rq_sectors(rqc), 8)) {
->                 pr_err("%s: Transfer size is not 4KB sector size aligned\n",
->                     req->rq_disk->disk_name);
->                 mq_rq = mq->mqrq_cur;
-> --
-> 1.7.9.5
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
