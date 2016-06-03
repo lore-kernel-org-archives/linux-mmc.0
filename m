@@ -1,47 +1,53 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: tmio: make a cast explicit
-Date: Fri, 3 Jun 2016 10:34:07 +0200
-Message-ID: <CAPDyKFreujWc2YNO-xr+pZr2beKJegCsK_eSOQXTwHXRwEzAKw@mail.gmail.com>
-References: <1464351029-6863-1-git-send-email-wsa@the-dreams.de>
+From: Arnd Bergmann <arnd@arndb.de>
+Subject: Re: [PATCH 21/32] mmc: bcm2835-sdhost: Add new driver for the internal SD controller.
+Date: Fri, 03 Jun 2016 10:42:59 +0200
+Message-ID: <5371567.ZLhe0cdM9e@wuerfel>
+References: <1464817421-8519-1-git-send-email-kraxel@redhat.com> <4715245.LFBOAeJdHc@wuerfel> <87vb1ra295.fsf@eliezer.anholt.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-renesas-soc-owner@vger.kernel.org>
-In-Reply-To: <1464351029-6863-1-git-send-email-wsa@the-dreams.de>
-Sender: linux-renesas-soc-owner@vger.kernel.org
-To: Wolfram Sang <wsa@the-dreams.de>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, linux-renesas-soc@vger.kernel.org, Simon Horman <horms@verge.net.au>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7Bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mout.kundenserver.de ([212.227.17.10]:61404 "EHLO
+	mout.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751544AbcFCImz (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 3 Jun 2016 04:42:55 -0400
+In-Reply-To: <87vb1ra295.fsf@eliezer.anholt.net>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Eric Anholt <eric@anholt.net>
+Cc: Gerd Hoffmann <kraxel@redhat.com>, linux-rpi-kernel@lists.infradead.org, Ulf Hansson <ulf.hansson@linaro.org>, Stephen Warren <swarren@wwwdotorg.org>, Lee Jones <lee@kernel.org>, open list <linux-kernel@vger.kernel.org>, "open list:MULTIMEDIA CARD (MMC), SECURE DIGITAL (SD) AND..." <linux-mmc@vger.kernel.org>, "moderated list:BROADCOM BCM2835 ARM ARCHITECTURE" <linux-arm-kernel@lists.infradead.org>
 
-On 27 May 2016 at 14:10, Wolfram Sang <wsa@the-dreams.de> wrote:
-> From: Wolfram Sang <wsa+renesas@sang-engineering.com>
->
-> Sparse complains about the implicit cast. Making it explicit is indeed
-> better coding style.
->
-> Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+On Thursday, June 2, 2016 11:12:38 AM CEST Eric Anholt wrote:
+> Arnd Bergmann <arnd@arndb.de> writes:
+> 
+> > On Wednesday, June 1, 2016 11:43:30 PM CEST Gerd Hoffmann wrote:
+> >> +    /* Parse OF address directly to get the physical address for
+> >> +     * DMA to our registers.
+> >> +     */
+> >> +    host->phys_addr = be32_to_cpup(of_get_address(pdev->dev.of_node, 0,
+> >> +                                                  NULL, NULL));
+> >
+> > This looks broken on 64-bit systems when #address-cells=<2>, or if there
+> > is an intermediate bus with a non-empty ranges property.
+> >
+> > What's wrong with platform_get_resource(pdev, IORESOURCE_MEM, 0)?
+> 
+> I'll get to the rest of the review later, but this is a weird pattern
+> that we have in several bcm2835-related drivers.
+> 
+> We need the address as seen by the DMA controller, not the address from
+> the ARM's perspective (which is offset by the dma-ranges DT property).
+> This is the way that people have figured out to get that address.
 
-Thanks, applied for next!
+I see. This is indeed a bit tricky, as there is no easy way to know
+how the dmaengine is wired up to the slave. A correct solution is
+probably to follow the 'dma-ranges' up from the master to the common
+parent and then follow the 'ranges' back to the slave, but that
+requires coming up with a new exported function.
 
-Kind regards
-Uffe
+It's perhaps good enough in the meantime to read out the address from
+the slave directly, but you should not assume that the first
+cell has the complete information and instead should at least
+evaluate #address-cells.
 
-> ---
->  drivers/mmc/host/tmio_mmc.h | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
->
-> diff --git a/drivers/mmc/host/tmio_mmc.h b/drivers/mmc/host/tmio_mmc.h
-> index 7d1174c789219a..5f2919ceced12d 100644
-> --- a/drivers/mmc/host/tmio_mmc.h
-> +++ b/drivers/mmc/host/tmio_mmc.h
-> @@ -265,7 +265,7 @@ static inline void sd_ctrl_write16_rep(struct tmio_mmc_host *host, int addr,
->
->  static inline void sd_ctrl_write32_as_16_and_16(struct tmio_mmc_host *host, int addr, u32 val)
->  {
-> -       writew(val, host->ctl + (addr << host->bus_shift));
-> +       writew(val & 0xffff, host->ctl + (addr << host->bus_shift));
->         writew(val >> 16, host->ctl + ((addr + 2) << host->bus_shift));
->  }
->
-> --
-> 2.8.1
->
+	Arnd
