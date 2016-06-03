@@ -1,71 +1,38 @@
-From: Gwendal Grignou <gwendal@chromium.org>
-Subject: [PATCH v2] mmc: Set pref erase size based on size.
-Date: Thu,  2 Jun 2016 17:27:18 -0700
-Message-ID: <1464913638-5283-1-git-send-email-gwendal@chromium.org>
-References: <1464908184-20153-1-git-send-email-gwendal@chromium.org>
+From: "Rafael J. Wysocki" <rjw@rjwysocki.net>
+Subject: Re: [PATCH 01/20] [v2] x86, intel: Introduce macros for Intel family numbers
+Date: Fri, 03 Jun 2016 02:38:59 +0200
+Message-ID: <3618590.bN2s1CDUs5@vostro.rjw.lan>
+References: <20160603001927.F2A7D828@viggo.jf.intel.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7Bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pf0-f180.google.com ([209.85.192.180]:36377 "EHLO
-	mail-pf0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753093AbcFCA13 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 2 Jun 2016 20:27:29 -0400
-Received: by mail-pf0-f180.google.com with SMTP id f144so37300919pfa.3
-        for <linux-mmc@vger.kernel.org>; Thu, 02 Jun 2016 17:27:28 -0700 (PDT)
-In-Reply-To: <1464908184-20153-1-git-send-email-gwendal@chromium.org>
+Received: from cloudserver094114.home.net.pl ([79.96.170.134]:59540 "HELO
+	cloudserver094114.home.net.pl" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with SMTP id S1750833AbcFCAfJ (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 2 Jun 2016 20:35:09 -0400
+In-Reply-To: <20160603001927.F2A7D828@viggo.jf.intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: ulf.hansson@linaro.org
-Cc: grundler@chromium.org, axboe@kernel.dk, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+To: Dave Hansen <dave@sr71.net>
+Cc: linux-kernel@vger.kernel.org, x86@kernel.org, jacob.jun.pan@intel.com, dave.hansen@linux.intel.com, adrian.hunter@intel.com, ak@linux.intel.com, luto@kernel.org, bp@alien8.de, dvhart@infradead.org, dougthompson@xmission.com, edubezval@gmail.com, hpa@zytor.com, mingo@redhat.com, jacob.jun.pan@linux.intel.com, kan.liang@intel.com, lenb@kernel.org, linux-acpi@vger.kernel.org, linux-edac@vger.kernel.org, linux-mmc@vger.kernel.org, linux-pm@vger.kernel.org, mchehab@osg.samsung.com, peterz@infradead.org, platform-driver-x86@vger.kernel.org, rafael.j.wysocki@intel.com, rajneesh.bhardwaj@intel.com, souvik.k.chakravarty@intel.com, srinivas.pandruvada@linux.intel.com, eranian@google.com, tglx@linutronix.de, tony.luck@intel.com, ulf.hansson@linaro.org, viresh.kumar@linaro.org, vishwanath.somayaji@intel.com, rui.zhang@intel.com
 
-If available, eMMC stack uses HC_ERASE_GRP_SIZE as preferred erase size.
-However, that size is the minimal size we must use, not the optimal size.
-Calculate the optimal size based on whole device size and fall back to
-HC_ERASE_GRP_SIZE if too small.
+On Thursday, June 02, 2016 05:19:27 PM Dave Hansen wrote:
+> 
+> Changes from v1:
+>  * added acks from a few folks
+>  * Took the redundant "MODEL_" out of the macro names (Suggested
+>    by Borislav Petkov and acked by others)
+> 
+> From: Dave Hansen <dave.hansen@linux.intel.com>
+> 
+> If you are cc'd on this code, please check _your_ code vs. the
+> model list in "intel-family.h".  Please make sure you have all
+> the models listed that you intend to.
+> 
+> Also, rather than trickling these in via all the various
+> maintainers, should these just get pulled in to the x86 tree in
+> one go?
 
-Signed-off-by: Gwendal Grignou <gwendal@chromium.org>
----
- v2: fix comments
-
- drivers/mmc/core/core.c | 16 +++++++++-------
- 1 file changed, 9 insertions(+), 7 deletions(-)
-
-diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index ef76b1c..b858907 100644
---- a/drivers/mmc/core/core.c
-+++ b/drivers/mmc/core/core.c
-@@ -1987,17 +1987,17 @@ void mmc_init_erase(struct mmc_card *card)
- 	 * to that size and alignment.
- 	 *
- 	 * For SD cards that define Allocation Unit size, limit erases to one
--	 * Allocation Unit at a time.  For MMC cards that define High Capacity
--	 * Erase Size, whether it is switched on or not, limit to that size.
--	 * Otherwise just have a stab at a good value.  For modern cards it
--	 * will end up being 4MiB.  Note that if the value is too small, it
--	 * can end up taking longer to erase.
-+	 * Allocation Unit at a time.
-+	 * For MMC, have a stab at a good value.  For modern cards it
-+	 * will end up being 4MiB.
-+	 * Be sure the size is at least the High Capacity Erase Size, as long
-+	 * as it is defined, even if not used.
-+	 * Note that if the value is too small, it can end up taking longer to
-+	 * erase.
- 	 */
- 	if (mmc_card_sd(card) && card->ssr.au) {
- 		card->pref_erase = card->ssr.au;
- 		card->erase_shift = ffs(card->ssr.au) - 1;
--	} else if (card->ext_csd.hc_erase_size) {
--		card->pref_erase = card->ext_csd.hc_erase_size;
- 	} else if (card->erase_size) {
- 		sz = (card->csd.capacity << (card->csd.read_blkbits - 9)) >> 11;
- 		if (sz < 128)
-@@ -2015,6 +2015,8 @@ void mmc_init_erase(struct mmc_card *card)
- 			if (sz)
- 				card->pref_erase += card->erase_size - sz;
- 		}
-+		if (card->ext_csd.hc_erase_size > card->pref_erase)
-+			card->pref_erase = card->ext_csd.hc_erase_size;
- 	} else
- 		card->pref_erase = 0;
- }
--- 
-2.8.0.rc3.226.g39d4020
+Yes, please.
 
