@@ -1,59 +1,74 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 17/20] x86, mmc: use Intel family name macros for mmc driver
-Date: Fri, 3 Jun 2016 09:42:37 +0200
-Message-ID: <CAPDyKFqtfNW0WZwZKNcv5Pzei+q+3Ad15z9+a_jgob0-+M4RwQ@mail.gmail.com>
-References: <20160602001157.D8BE59D7@viggo.jf.intel.com> <20160602001221.85C6DEC6@viggo.jf.intel.com>
+Subject: Re: [PATCH] mmc: sh_mobile_sdhi: properly document R-Car versions
+Date: Fri, 3 Jun 2016 10:32:47 +0200
+Message-ID: <CAPDyKFrs9RaRAp8n7QWx+dtK3sAJZG4Xckxueip=-qXbJc3kpQ@mail.gmail.com>
+References: <1462970760-3471-1-git-send-email-wsa@the-dreams.de>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20160602001221.85C6DEC6@viggo.jf.intel.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Dave Hansen <dave@sr71.net>
-Cc: "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, x86@kernel.org, dave.hansen@linux.intel.com, Adrian Hunter <adrian.hunter@intel.com>, linux-mmc <linux-mmc@vger.kernel.org>
+Return-path: <linux-renesas-soc-owner@vger.kernel.org>
+In-Reply-To: <1462970760-3471-1-git-send-email-wsa@the-dreams.de>
+Sender: linux-renesas-soc-owner@vger.kernel.org
+To: Wolfram Sang <wsa@the-dreams.de>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, linux-renesas-soc@vger.kernel.org, Simon Horman <horms@verge.net.au>, Magnus Damm <magnus.damm@gmail.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On 2 June 2016 at 02:12, Dave Hansen <dave@sr71.net> wrote:
+On 11 May 2016 at 14:46, Wolfram Sang <wsa@the-dreams.de> wrote:
+> From: Wolfram Sang <wsa+renesas@sang-engineering.com>
 >
-> From: Dave Hansen <dave.hansen@linux.intel.com>
+> Replace hardcoded values with meaningful names and document what we
+> know.
 >
-> Another straightforward replacement of magic numbers.
->
-> Signed-off-by: Dave Hansen <dave.hansen@linux.intel.com>
-> Cc: Adrian Hunter <adrian.hunter@intel.com>
-> Cc: Ulf Hansson <ulf.hansson@linaro.org>
-> Cc: linux-mmc@vger.kernel.org
+> Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
 
-Acked-by: Ulf Hansson <ulf.hansson@linaro.org>
-
-I assume you are going to queue this via the x86 tree or whatever tree
-that makes sense!?
+Thanks, applied for next!
 
 Kind regards
 Uffe
 
 > ---
+>  drivers/mmc/host/sh_mobile_sdhi.c | 14 ++++++++++----
+>  1 file changed, 10 insertions(+), 4 deletions(-)
 >
->  b/drivers/mmc/host/sdhci-acpi.c |    3 ++-
->  1 file changed, 2 insertions(+), 1 deletion(-)
+> diff --git a/drivers/mmc/host/sh_mobile_sdhi.c b/drivers/mmc/host/sh_mobile_sdhi.c
+> index f750f9494410b0..c3b651bf89cb4a 100644
+> --- a/drivers/mmc/host/sh_mobile_sdhi.c
+> +++ b/drivers/mmc/host/sh_mobile_sdhi.c
+> @@ -39,6 +39,12 @@
 >
-> diff -puN drivers/mmc/host/sdhci-acpi.c~x86-intel-families-sdhci-acpi drivers/mmc/host/sdhci-acpi.c
-> --- a/drivers/mmc/host/sdhci-acpi.c~x86-intel-families-sdhci-acpi       2016-06-01 15:45:09.826201501 -0700
-> +++ b/drivers/mmc/host/sdhci-acpi.c     2016-06-01 15:45:09.830201683 -0700
-> @@ -43,6 +43,7 @@
+>  #define EXT_ACC           0xe4
 >
->  #ifdef CONFIG_X86
->  #include <asm/cpu_device_id.h>
-> +#include <asm/intel-family.h>
->  #include <asm/iosf_mbi.h>
->  #endif
+> +#define SDHI_VER_GEN2_SDR50    0x490c
+> +/* very old datasheets said 0x490c for SDR104, too. They are wrong! */
+> +#define SDHI_VER_GEN2_SDR104   0xcb0d
+> +#define SDHI_VER_GEN3_SD       0xcc10
+> +#define SDHI_VER_GEN3_SDMMC    0xcd10
+> +
+>  #define host_to_priv(host) container_of((host)->pdata, struct sh_mobile_sdhi, mmc_data)
 >
-> @@ -126,7 +127,7 @@ static const struct sdhci_acpi_chip sdhc
->  static bool sdhci_acpi_byt(void)
->  {
->         static const struct x86_cpu_id byt[] = {
-> -               { X86_VENDOR_INTEL, 6, 0x37 },
-> +               { X86_VENDOR_INTEL, 6, INTEL_FAM6_MODEL_ATOM_SILVERMONT1 },
->                 {}
->         };
+>  struct sh_mobile_sdhi_of_data {
+> @@ -109,14 +115,14 @@ static void sh_mobile_sdhi_sdbuf_width(struct tmio_mmc_host *host, int width)
+>          *      sh_mobile_sdhi_of_data :: dma_buswidth
+>          */
+>         switch (sd_ctrl_read16(host, CTL_VERSION)) {
+> -       case 0x490C:
+> +       case SDHI_VER_GEN2_SDR50:
+>                 val = (width == 32) ? 0x0001 : 0x0000;
+>                 break;
+> -       case 0xCB0D:
+> +       case SDHI_VER_GEN2_SDR104:
+>                 val = (width == 32) ? 0x0000 : 0x0001;
+>                 break;
+> -       case 0xCC10: /* Gen3, SD only */
+> -       case 0xCD10: /* Gen3, SD + MMC */
+> +       case SDHI_VER_GEN3_SD:
+> +       case SDHI_VER_GEN3_SDMMC:
+>                 if (width == 64)
+>                         val = 0x0000;
+>                 else if (width == 32)
+> --
+> 2.8.1
 >
-> _
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
