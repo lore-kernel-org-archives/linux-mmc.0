@@ -1,75 +1,84 @@
-From: Eric Anholt <eric@anholt.net>
-Subject: Re: [PATCH 2/2] mmc: sdhci-bcm2835: remove driver
-Date: Fri, 03 Jun 2016 17:02:16 -0700
-Message-ID: <87inxp7ref.fsf@eliezer.anholt.net>
-References: <1464983233-27001-1-git-send-email-stefan.wahren@i2se.com>
- <1464983233-27001-3-git-send-email-stefan.wahren@i2se.com>
+From: Jean-Francois Moine <moinejf-GANU6spQydw@public.gmane.org>
+Subject: [PATCH] mmc: sunxi: Add support to the Allwinner A83T
+Date: Sat, 4 Jun 2016 12:01:17 +0200
+Message-ID: <5752a74a.d4ae1c0a.f99fb.5132SMTPIN_ADDED_MISSING@gmr-mx.google.com>
+Reply-To: moinejf-GANU6spQydw@public.gmane.org
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="===============2655772443303433652=="
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <1464983233-27001-3-git-send-email-stefan.wahren@i2se.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, Stephen Warren <swarren@wwwdotorg.org>, Lee Jones <lee@kernel.org>, Rob Herring <robh+dt@kernel.org>, Pawel Moll <pawel.moll@arm.com>, Mark Rutland <mark.rutland@arm.com>
-Cc: Stefan Wahren <stefan.wahren@i2se.com>, devicetree@vger.kernel.org, linux-mmc@vger.kernel.org, linux-rpi-kernel@lists.infradead.org, linux-arm-kernel@lists.infradead.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-sunxi+bncBCV6DL6LYMNBBSWOZK5AKGQEALR5Q3Y-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+Sender: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
+List-Post: <https://groups.google.com/group/linux-sunxi/post>, <mailto:linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Help: <https://groups.google.com/support/>, <mailto:linux-sunxi+help-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Archive: <https://groups.google.com/group/linux-sunxi
+List-Subscribe: <https://groups.google.com/group/linux-sunxi/subscribe>, <mailto:linux-sunxi+subscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Unsubscribe: <mailto:googlegroups-manage+1076902468213+unsubscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>,
+ <https://groups.google.com/group/linux-sunxi/subscribe>
+To: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>, Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org>
+Cc: linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
 
---===============2655772443303433652==
-Content-Type: multipart/signed; boundary="=-=-=";
-	micalg=pgp-sha512; protocol="application/pgp-signature"
+The A83T has different clock delays.
+The values have been adapted from the Banana Pi M3 driver.
 
---=-=-=
-Content-Type: text/plain
+Signed-off-by: Jean-Francois Moine <moinejf-GANU6spQydw@public.gmane.org>
+---
+ Documentation/devicetree/bindings/mmc/sunxi-mmc.txt |  3 ++-
+ drivers/mmc/host/sunxi-mmc.c                        | 12 +++++++++++-
+ 2 files changed, 13 insertions(+), 2 deletions(-)
 
-Stefan Wahren <stefan.wahren@i2se.com> writes:
-
-> The sdhci-bcm2835 is no more needed since it has been replaced
-> by sdhci-iproc.
-
-We've had a cycle to catch regressions from the merged driver, so I'm
-happy to see the old one go.  Thanks Stefan!
-
-Acked-by: Eric Anholt <eric@anholt.net>
-
---=-=-=
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1
-
-iQIcBAEBCgAGBQJXUhqJAAoJELXWKTbR/J7oOzQQALoMi7JZzb8/kN3oVJt5UJwK
-mmoPQnOpd946Y1Gm/eyjdPG9S+W+9gBGQctubhTVddthMsZWYcfylud70Bsral6S
-N+dS7o7QLKCmk9fPOdN8MlYpfncHBOQbNMaEY2WEcHnd58uAV+CMME2p1WtTLJbd
-tdWrDpN8qrrc+nsLB32bjTADExhSY5krSoGj+AeBB7okHvhFM6HTIwnDWjhnkOiC
-KjXJadqbisUCWBPhW5vhWmNhLnFEt3IV/QtKGp9rm9IG6yCJp8MtzkcSlTt5s4qq
-OhWKggyLM74fm8vByiXqqnR6xzQlTi4fKg+mimZnyzgYap4vdgynGhbmGr+8Kbpu
-XraUWdbGG1X4Yr8v0W3j3mShtYEHK7JckNc5/90d9q/PNKhCSSCbCKGu0fjmsqZu
-wP2h/xKwZQZn1R63Gks3cYRk1e7gwObmQ1GQQmpOxniB+d/Xwp+glETMnqu7YRP2
-9xMUrEBlogZs/fC4BLKTfXH5U5Ggvpa8ZRfxxdGTt/4LFPCkLjAdd+VJZax92F2x
-ljSx8IpJX5UmsHzxhHSO279Xi60DwhBPy48zy8KX+Nv+Y1JO/MzIFY5gD16lUT3B
-gyMXXooIxjFv51JVZGS87FeREx5flLZvYvap0hf/DseeTkpME1568EjsB+JXDytt
-SHwV+9r0r7vhCNNkKX1x
-=CbU3
------END PGP SIGNATURE-----
---=-=-=--
-
-
---===============2655772443303433652==
-Content-Type: text/plain; charset="us-ascii"
-MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Content-Disposition: inline
-
-_______________________________________________
-linux-arm-kernel mailing list
-linux-arm-kernel@lists.infradead.org
-http://lists.infradead.org/mailman/listinfo/linux-arm-kernel
-
---===============2655772443303433652==--
+diff --git a/Documentation/devicetree/bindings/mmc/sunxi-mmc.txt b/Documentation/devicetree/bindings/mmc/sunxi-mmc.txt
+index 4bf41d8..45b8520 100644
+--- a/Documentation/devicetree/bindings/mmc/sunxi-mmc.txt
++++ b/Documentation/devicetree/bindings/mmc/sunxi-mmc.txt
+@@ -8,7 +8,8 @@ as the speed of SD standard 3.0.
+ Absolute maximum transfer rate is 200MB/s
+ 
+ Required properties:
+- - compatible : "allwinner,sun4i-a10-mmc" or "allwinner,sun5i-a13-mmc"
++ - compatible : "allwinner,sun4i-a10-mmc", "allwinner,sun5i-a13-mmc",
++	"allwinner,sun8i-a83t-mmc" or "allwinner,sun9i-a80-mmc"
+  - reg : mmc controller base registers
+  - clocks : a list with 4 phandle + clock specifier pairs
+  - clock-names : must contain "ahb", "mmc", "output" and "sample"
+diff --git a/drivers/mmc/host/sunxi-mmc.c b/drivers/mmc/host/sunxi-mmc.c
+index 7fc8b7a..707e705 100644
+--- a/drivers/mmc/host/sunxi-mmc.c
++++ b/drivers/mmc/host/sunxi-mmc.c
+@@ -941,6 +941,7 @@ static int sunxi_mmc_card_busy(struct mmc_host *mmc)
+ static const struct of_device_id sunxi_mmc_of_match[] = {
+ 	{ .compatible = "allwinner,sun4i-a10-mmc", },
+ 	{ .compatible = "allwinner,sun5i-a13-mmc", },
++	{ .compatible = "allwinner,sun8i-a83t-mmc", },
+ 	{ .compatible = "allwinner,sun9i-a80-mmc", },
+ 	{ /* sentinel */ }
+ };
+@@ -962,10 +963,17 @@ static const struct sunxi_mmc_clk_delay sunxi_mmc_clk_delays[] = {
+ 	[SDXC_CLK_25M]		= { .output = 180, .sample =  75 },
+ 	[SDXC_CLK_50M]		= { .output =  90, .sample = 120 },
+ 	[SDXC_CLK_50M_DDR]	= { .output =  60, .sample = 120 },
+-	/* Value from A83T "new timing mode". Works but might not be right. */
+ 	[SDXC_CLK_50M_DDR_8BIT]	= { .output =  90, .sample = 180 },
+ };
+ 
++static const struct sunxi_mmc_clk_delay sun8i_a83t_mmc_clk_delays[] = {
++	[SDXC_CLK_400K]		= { .output = 180, .sample = 180 },
++	[SDXC_CLK_25M]		= { .output = 180, .sample =  50 },
++	[SDXC_CLK_50M]		= { .output =  60, .sample =  50 },
++	[SDXC_CLK_50M_DDR]	= { .output =  180, .sample = 90 },
++	[SDXC_CLK_50M_DDR_8BIT]	= { .output =  180, .sample = 90 },
++};
++
+ static const struct sunxi_mmc_clk_delay sun9i_mmc_clk_delays[] = {
+ 	[SDXC_CLK_400K]		= { .output = 180, .sample = 180 },
+ 	[SDXC_CLK_25M]		= { .output = 180, .sample =  75 },
+@@ -987,6 +995,8 @@ static int sunxi_mmc_resource_request(struct sunxi_mmc_host *host,
+ 
+ 	if (of_device_is_compatible(np, "allwinner,sun9i-a80-mmc"))
+ 		host->clk_delays = sun9i_mmc_clk_delays;
++	else if (of_device_is_compatible(np, "allwinner,sun8i-a83t-mmc"))
++		host->clk_delays = sun8i_a83t_mmc_clk_delays;
+ 	else
+ 		host->clk_delays = sunxi_mmc_clk_delays;
+ 
+-- 
+2.8.3
