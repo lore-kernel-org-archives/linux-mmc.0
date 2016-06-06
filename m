@@ -1,121 +1,88 @@
-From: Peter Chen <hzpeterchen@gmail.com>
-Subject: Re: [PATCH v3 06/12] power: pwrseq: simple: Add support for
- regulator and generic property
-Date: Mon, 6 Jun 2016 11:22:40 +0800
-Message-ID: <20160606032239.GC16012@shlinux2>
-References: <1464768141-25420-1-git-send-email-k.kozlowski@samsung.com>
- <1464768141-25420-7-git-send-email-k.kozlowski@samsung.com>
- <20160603020218.GA19436@rob-hp-laptop>
- <5751797C.3020607@samsung.com>
+From: Jean-Francois Moine <moinejf-GANU6spQydw@public.gmane.org>
+Subject: Re: [PATCH] mmc: sunxi: Add support to the Allwinner A83T
+Date: Mon, 6 Jun 2016 11:13:59 +0200
+Message-ID: <20160606111359.2f5a391dfa7b1bfce2d82d70@free.fr>
+References: <20160604100253.7141B2DE7D@muse.csie.ntu.edu.tw>
+	<CAGb2v66JbDjOQdMGDnzsToiXK9ub91m0i4dbkoXtVf0MwURWOQ@mail.gmail.com>
+Reply-To: moinejf-GANU6spQydw@public.gmane.org
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pf0-f195.google.com ([209.85.192.195]:33514 "EHLO
-	mail-pf0-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750811AbcFFD20 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 5 Jun 2016 23:28:26 -0400
-Content-Disposition: inline
-In-Reply-To: <5751797C.3020607@samsung.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: quoted-printable
+Return-path: <linux-sunxi+bncBCV6DL6LYMNBBWX52S5AKGQE2KXCWGI-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+Sender: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
+In-Reply-To: <CAGb2v66JbDjOQdMGDnzsToiXK9ub91m0i4dbkoXtVf0MwURWOQ-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+List-Post: <https://groups.google.com/group/linux-sunxi/post>, <mailto:linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Help: <https://groups.google.com/support/>, <mailto:linux-sunxi+help-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Archive: <https://groups.google.com/group/linux-sunxi
+List-Subscribe: <https://groups.google.com/group/linux-sunxi/subscribe>, <mailto:linux-sunxi+subscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Unsubscribe: <mailto:googlegroups-manage+1076902468213+unsubscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>,
+ <https://groups.google.com/group/linux-sunxi/subscribe>
+To: Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org>
+Cc: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>, linux-arm-kernel <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-sunxi <linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Krzysztof Kozlowski <k.kozlowski@samsung.com>
-Cc: Rob Herring <robh@kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, Sebastian Reichel <sre@kernel.org>, Dmitry Eremin-Solenikov <dbaryshkov@gmail.com>, David Woodhouse <dwmw2@infradead.org>, Javier Martinez Canillas <javier@osg.samsung.com>, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, linux-pm@vger.kernel.or, Alan Stern <stern@rowland.harvard.edu>, linux-usb@vger.kernel.org, Pawel Moll <pawel.moll@arm.com>, Mark Rutland <mark.rutland@arm.com>, Ian Campbell <ijc+devicetree@hellion.org.uk>, Kumar Gala <galak@codeaurora.org>, Kukjin Kim <kgene@kernel.org>, devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-samsung-soc@vger.kernel.org, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>
 
-On Fri, Jun 03, 2016 at 02:35:08PM +0200, Krzysztof Kozlowski wrote:
-> On 06/03/2016 04:02 AM, Rob Herring wrote:
-> > On Wed, Jun 01, 2016 at 10:02:15AM +0200, Krzysztof Kozlowski wrote:
-> >> Some devices need real hard-reset by cutting the power.  During power
-> >> sequence turn off and on the regulator, if it is provided.
-> >>
-> >> Additionally add support for instantiating the pwrseq-simple device on a
-> >> generic property 'power-sequence'.  The device will attach itself to the
-> >> node containing the property and parse the node's properties like
-> >> reset-gpios, ext-supply etc.
-> >>
-> >> Signed-off-by: Krzysztof Kozlowski <k.kozlowski@samsung.com>
-> >> ---
-> >>  .../bindings/power/pwrseq/pwrseq-simple.txt        | 29 +++++++-
-> >>  drivers/power/pwrseq/pwrseq_simple.c               | 85 +++++++++++++++++++++-
-> >>  2 files changed, 107 insertions(+), 7 deletions(-)
-> >>
-> >> diff --git a/Documentation/devicetree/bindings/power/pwrseq/pwrseq-simple.txt b/Documentation/devicetree/bindings/power/pwrseq/pwrseq-simple.txt
-> >> index ce0e76749671..a8c3f13ee83f 100644
-> >> --- a/Documentation/devicetree/bindings/power/pwrseq/pwrseq-simple.txt
-> >> +++ b/Documentation/devicetree/bindings/power/pwrseq/pwrseq-simple.txt
-> >> @@ -1,11 +1,17 @@
-> >> -* The simple MMC power sequence provider
-> >> +* The simple power sequence provider
-> >>  
-> >> -The purpose of the simple MMC power sequence provider is to supports a set of
-> >> +The purpose of the simple power sequence provider is to supports a set of
-> >>  common properties between various SOC designs. It thus enables us to use the
-> >>  same provider for several SOC designs.
-> >>  
-> >> -Required properties:
-> >> -- compatible : contains "mmc-pwrseq-simple".
-> >> +The driver supports two types of bindings:
-> >> +1. Separate node
-> >> +   Required properties:
-> >> +   - compatible : contains "mmc-pwrseq-simple".
-> > 
-> > Please note that this is not recommended for new users.
-> 
-> Sure.
-> 
-> > 
-> >> +
-> >> +2. Property for any node
-> >> +   Required properties:
-> >> +   - power-sequence
-> >>  
-> >>  Optional properties:
-> >>  - reset-gpios : contains a list of GPIO specifiers. The reset GPIOs are asserted
-> >> @@ -16,6 +22,7 @@ Optional properties:
-> >>    See ../clocks/clock-bindings.txt for details.
-> >>  - clock-names : Must include the following entry:
-> >>    "ext_clock" (External clock provided to the card).
-> >> +- ext-supply : External regulator supply
-> > 
-> > What happens when there are 2 supplies?
-> > 
-> > I'd prefer the name not be genericish and use the real supply names. 
-> > Then the power seq code should just turn on all supplies it finds. If 
-> > the order or timing to turn on matters, then sorry, no generic sequence.
-> 
-> Understood. I'll change the code to use any supply.
-> 
-> As for the genericness of this approach, Sylwester Nawrocki pointed an
-> old thread:
-> [PATCH v6 0/4] Runtime Interpreted Power Sequences
-> https://lkml.org/lkml/2012/9/12/127
-> 
-> How do you like that approach?
-> 
+On Sun, 5 Jun 2016 20:58:42 +0800
+Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org> wrote:
 
-Rob, I am trying to implement the dts layout you suggested (see below),
-but I find it is very hard to it due to the device is still not created,
-without device, it is hard to manage the resources under this device (
-Eg, de-initialization for probe deferral case). So, a common driver
-is suitable for this power sequence case.
+> > +static const struct sunxi_mmc_clk_delay sun8i_a83t_mmc_clk_delays[] =
+=3D {
+> > +       [SDXC_CLK_400K]         =3D { .output =3D 180, .sample =3D 180 =
+},
+> > +       [SDXC_CLK_25M]          =3D { .output =3D 180, .sample =3D  50 =
+},
+> > +       [SDXC_CLK_50M]          =3D { .output =3D  60, .sample =3D  50 =
+},
+>=20
+> These 2 don't look right.
+>=20
+> > +       [SDXC_CLK_50M_DDR]      =3D { .output =3D  180, .sample =3D 90 =
+},
+> > +       [SDXC_CLK_50M_DDR_8BIT] =3D { .output =3D  180, .sample =3D 90 =
+},
+>=20
+> Nor does this one. As explained in the comment from the clock driver:
+>=20
+>     We can only outphase the clocks by multiple of the PLL's period.
+>=20
+>     Since the MMC clock in only a divider, and the formula to get the
+>     outphasing in degrees is deg =3D 360 * delta / period
+>=20
+> Now, for the fishy ones I mentioned, MMC clock =3D card clock (or card * =
+2
+> for DDR 8 bit), and parent clock is PLL6 @ 600 MHz. A step would be 15,
+> 30 or 60 degrees. Thus you cannot get an outphasing of 50 degrees, or 90
+> degrees for 50M DDR 8bit.
+>=20
+> Could you provide a link to the original driver? Or perhaps just the
+> original delay values?
+>=20
+> The values do work better on my Cubietruck plus, giving a throughput
+> of 36 MB/s read, instead of 17 MB/s with the original values. However
+> that is still only half of what it should be capable of. I will test
+> my BPI M3 tomorrow.
 
-&usbotg1 {
-        vbus-supply = <&reg_usb_otg1_vbus>;
-        pinctrl-names = "default";
-        pinctrl-0 = <&pinctrl_usb_otg1_id>;
-        status = "okay";
+Hi,
 
-        #address-cells = <1>;
-        #size-cells = <0>;
-        hub: genesys@1 {
-                compatible = "usb5e3,608";
-                reg = <1>;
-                reset-gpios = <&gpio4 5 GPIO_ACTIVE_LOW>; /* hub reset pin */
-                reset-duration-us = <10>;
-                clocks = <&clks IMX6SX_CLK_CKO>;
-        };
-};
+Yes, you are right, my values are wrong. Please, forget about this patch.
+I did not look far enough in the clock code.
 
--- 
+Anyway, I had timeouts in accessing the MMC because the BPI-M3 legacy
+u-boot sets the pll-periph rate to 1.2GHz.
+Then, according to the comment in the BPI-M3 original driver
+(https://github.com/BPI-SINOVOIP/BPI-M3-bsp/blob/master/linux-sunxi/drivers=
+/mmc/host/sunxi-mci.c),
+if "//in 1.2GHz pll_periph only [MMC_CLK-50M] is correct",
+setting the clock delays to 6 and 7 would be, for us:
 
-Best Regards,
-Peter Chen
+	[SDXC_CLK_50M]          =3D { .output =3D  90, .sample =3D  105 },
+
+--=20
+Ken ar c'henta=C3=B1	|	      ** Breizh ha Linux atav! **
+Jef		|		http://moinejf.free.fr/
+
+--=20
+You received this message because you are subscribed to the Google Groups "=
+linux-sunxi" group.
+To unsubscribe from this group and stop receiving emails from it, send an e=
+mail to linux-sunxi+unsubscribe-/JYPxA39Uh5TLH3MbocFF+G/Ez6ZCGd0@public.gmane.org
+For more options, visit https://groups.google.com/d/optout.
