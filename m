@@ -1,88 +1,107 @@
-From: Jean-Francois Moine <moinejf-GANU6spQydw@public.gmane.org>
-Subject: Re: [PATCH] mmc: sunxi: Add support to the Allwinner A83T
-Date: Mon, 6 Jun 2016 11:13:59 +0200
-Message-ID: <20160606111359.2f5a391dfa7b1bfce2d82d70@free.fr>
-References: <20160604100253.7141B2DE7D@muse.csie.ntu.edu.tw>
-	<CAGb2v66JbDjOQdMGDnzsToiXK9ub91m0i4dbkoXtVf0MwURWOQ@mail.gmail.com>
-Reply-To: moinejf-GANU6spQydw@public.gmane.org
+From: Amitkumar Karwar <akarwar@marvell.com>
+Subject: [PATCH v3 1/2] mmc: API for accessing host supported maximum segment count and size
+Date: Mon, 6 Jun 2016 04:53:08 -0700
+Message-ID: <1465213989-32218-1-git-send-email-akarwar@marvell.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: quoted-printable
-Return-path: <linux-sunxi+bncBCV6DL6LYMNBBWX52S5AKGQE2KXCWGI-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-Sender: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
-In-Reply-To: <CAGb2v66JbDjOQdMGDnzsToiXK9ub91m0i4dbkoXtVf0MwURWOQ-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-List-Post: <https://groups.google.com/group/linux-sunxi/post>, <mailto:linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Help: <https://groups.google.com/support/>, <mailto:linux-sunxi+help-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Archive: <https://groups.google.com/group/linux-sunxi
-List-Subscribe: <https://groups.google.com/group/linux-sunxi/subscribe>, <mailto:linux-sunxi+subscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Unsubscribe: <mailto:googlegroups-manage+1076902468213+unsubscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>,
- <https://groups.google.com/group/linux-sunxi/subscribe>
-To: Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org>
-Cc: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>, linux-arm-kernel <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-sunxi <linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+Content-Type: text/plain
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mx0b-0016f401.pphosted.com ([67.231.156.173]:52234 "EHLO
+	mx0b-0016f401.pphosted.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751039AbcFFLxu (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 6 Jun 2016 07:53:50 -0400
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-wireless@vger.kernel.org
+Cc: Nishant Sarmukadam <nishants@marvell.com>, Wei-Ning Huang <wnhuang@chromium.org>, linux-mmc@vger.kernel.org, Cathy Luo <cluo@marvell.com>, Xinming Hu <huxm@marvell.com>, Amitkumar Karwar <akarwar@marvell.com>
 
-On Sun, 5 Jun 2016 20:58:42 +0800
-Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org> wrote:
+From: Xinming Hu <huxm@marvell.com>
 
-> > +static const struct sunxi_mmc_clk_delay sun8i_a83t_mmc_clk_delays[] =
-=3D {
-> > +       [SDXC_CLK_400K]         =3D { .output =3D 180, .sample =3D 180 =
-},
-> > +       [SDXC_CLK_25M]          =3D { .output =3D 180, .sample =3D  50 =
-},
-> > +       [SDXC_CLK_50M]          =3D { .output =3D  60, .sample =3D  50 =
-},
->=20
-> These 2 don't look right.
->=20
-> > +       [SDXC_CLK_50M_DDR]      =3D { .output =3D  180, .sample =3D 90 =
-},
-> > +       [SDXC_CLK_50M_DDR_8BIT] =3D { .output =3D  180, .sample =3D 90 =
-},
->=20
-> Nor does this one. As explained in the comment from the clock driver:
->=20
->     We can only outphase the clocks by multiple of the PLL's period.
->=20
->     Since the MMC clock in only a divider, and the formula to get the
->     outphasing in degrees is deg =3D 360 * delta / period
->=20
-> Now, for the fishy ones I mentioned, MMC clock =3D card clock (or card * =
-2
-> for DDR 8 bit), and parent clock is PLL6 @ 600 MHz. A step would be 15,
-> 30 or 60 degrees. Thus you cannot get an outphasing of 50 degrees, or 90
-> degrees for 50M DDR 8bit.
->=20
-> Could you provide a link to the original driver? Or perhaps just the
-> original delay values?
->=20
-> The values do work better on my Cubietruck plus, giving a throughput
-> of 36 MB/s read, instead of 17 MB/s with the original values. However
-> that is still only half of what it should be capable of. I will test
-> my BPI M3 tomorrow.
+sdio device drivers need be able to get the host supported max_segs
+and max_seg_size, so that they know the buffer size to allocate while
+utilizing the scatter/gather DMA buffer list.
 
-Hi,
+This patch provides API for this purpose.
 
-Yes, you are right, my values are wrong. Please, forget about this patch.
-I did not look far enough in the clock code.
+Signed-off-by: Xinming Hu <huxm@marvell.com>
+Signed-off-by: Amitkumar Karwar <akarwar@marvell.com>
+---
+v2: v2 was submitted with minor improvement like replacing BUG_ON() with WARN_ON()
+v3: Addressed below review comments from Ulf Hansson
+    a) In v3, patch has been split into two separate patches.
+    b) Patch 1/2 introduces an API to fetch max_seg_size and max_segs
+    c) Replaced WARN_ON() with proper error code when sg_ptr->length is invalid
+    d) Instead of duplicating the code in mmc_io_rw_extended(), extra bool parameter
+       has been added to this function and used it in new APIs for SG.
+---
+ drivers/mmc/core/sdio_io.c                         | 27 ++++++++++++++++++++++
+ .../wireless/broadcom/brcm80211/brcmfmac/bcmsdh.c  |  6 ++---
+ include/linux/mmc/sdio_func.h                      |  3 +++
+ 3 files changed, 33 insertions(+), 3 deletions(-)
 
-Anyway, I had timeouts in accessing the MMC because the BPI-M3 legacy
-u-boot sets the pll-periph rate to 1.2GHz.
-Then, according to the comment in the BPI-M3 original driver
-(https://github.com/BPI-SINOVOIP/BPI-M3-bsp/blob/master/linux-sunxi/drivers=
-/mmc/host/sunxi-mci.c),
-if "//in 1.2GHz pll_periph only [MMC_CLK-50M] is correct",
-setting the clock delays to 6 and 7 would be, for us:
+diff --git a/drivers/mmc/core/sdio_io.c b/drivers/mmc/core/sdio_io.c
+index 78cb4d5..a546c89 100644
+--- a/drivers/mmc/core/sdio_io.c
++++ b/drivers/mmc/core/sdio_io.c
+@@ -720,3 +720,30 @@ int sdio_set_host_pm_flags(struct sdio_func *func, mmc_pm_flag_t flags)
+ 	return 0;
+ }
+ EXPORT_SYMBOL_GPL(sdio_set_host_pm_flags);
++
++/**
++ *	sdio_get_host_max_seg_size - get host maximum segment size
++ *	@func: SDIO function attached to host
++ */
++unsigned int sdio_get_host_max_seg_size(struct sdio_func *func)
++{
++	WARN_ON(!func);
++	WARN_ON(!func->card);
++
++	return func->card->host->max_seg_size;
++}
++EXPORT_SYMBOL_GPL(sdio_get_host_max_seg_size);
++
++/**
++ *	sdio_get_host_max_seg_count - get host maximum segment count
++ *	@func: SDIO function attached to host
++ */
++unsigned short sdio_get_host_max_seg_count(struct sdio_func *func)
++{
++	WARN_ON(!func);
++	WARN_ON(!func->card);
++
++	return func->card->host->max_segs;
++}
++EXPORT_SYMBOL_GPL(sdio_get_host_max_seg_count);
++
+diff --git a/drivers/net/wireless/broadcom/brcm80211/brcmfmac/bcmsdh.c b/drivers/net/wireless/broadcom/brcm80211/brcmfmac/bcmsdh.c
+index c4b89d2..ba579f4 100644
+--- a/drivers/net/wireless/broadcom/brcm80211/brcmfmac/bcmsdh.c
++++ b/drivers/net/wireless/broadcom/brcm80211/brcmfmac/bcmsdh.c
+@@ -896,9 +896,9 @@ void brcmf_sdiod_sgtable_alloc(struct brcmf_sdio_dev *sdiodev)
+ 	max_blocks = min_t(uint, host->max_blk_count, 511u);
+ 	sdiodev->max_request_size = min_t(uint, host->max_req_size,
+ 					  max_blocks * func->cur_blksize);
+-	sdiodev->max_segment_count = min_t(uint, host->max_segs,
+-					   SG_MAX_SINGLE_ALLOC);
+-	sdiodev->max_segment_size = host->max_seg_size;
++	sdiodev->max_segment_count = min_t(uint, SG_MAX_SINGLE_ALLOC,
++					   sdio_get_host_max_seg_count(func));
++	sdiodev->max_segment_size = sdio_get_host_max_seg_size(func);
+ 
+ 	if (!sdiodev->sg_support)
+ 		return;
+diff --git a/include/linux/mmc/sdio_func.h b/include/linux/mmc/sdio_func.h
+index aab032a..b2b91df 100644
+--- a/include/linux/mmc/sdio_func.h
++++ b/include/linux/mmc/sdio_func.h
+@@ -159,4 +159,7 @@ extern void sdio_f0_writeb(struct sdio_func *func, unsigned char b,
+ extern mmc_pm_flag_t sdio_get_host_pm_caps(struct sdio_func *func);
+ extern int sdio_set_host_pm_flags(struct sdio_func *func, mmc_pm_flag_t flags);
+ 
++unsigned short sdio_get_host_max_seg_count(struct sdio_func *func);
++unsigned int sdio_get_host_max_seg_size(struct sdio_func *func);
++
+ #endif /* LINUX_MMC_SDIO_FUNC_H */
+-- 
+1.9.1
 
-	[SDXC_CLK_50M]          =3D { .output =3D  90, .sample =3D  105 },
-
---=20
-Ken ar c'henta=C3=B1	|	      ** Breizh ha Linux atav! **
-Jef		|		http://moinejf.free.fr/
-
---=20
-You received this message because you are subscribed to the Google Groups "=
-linux-sunxi" group.
-To unsubscribe from this group and stop receiving emails from it, send an e=
-mail to linux-sunxi+unsubscribe-/JYPxA39Uh5TLH3MbocFF+G/Ez6ZCGd0@public.gmane.org
-For more options, visit https://groups.google.com/d/optout.
