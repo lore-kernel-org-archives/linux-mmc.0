@@ -1,231 +1,131 @@
-From: Amitkumar Karwar <akarwar-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>
-Subject: [PATCH v3 2/2] mmc: sdio support external scatter gather list
-Date: Mon, 6 Jun 2016 04:53:09 -0700
-Message-ID: <1465213989-32218-2-git-send-email-akarwar@marvell.com>
-References: <1465213989-32218-1-git-send-email-akarwar@marvell.com>
+From: Heiko =?ISO-8859-1?Q?St=FCbner?= <heiko@sntech.de>
+Subject: Re: [PATCH v3 00/12] usb/mmc/power: Generic power sequence (and fix USB/LAN when TFTP booting)
+Date: Mon, 06 Jun 2016 22:43:30 +0200
+Message-ID: <2034186.JKeBi87zYl@diego>
+References: <1464768141-25420-1-git-send-email-k.kozlowski@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1465213989-32218-1-git-send-email-akarwar-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>
-Sender: linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-Cc: Nishant Sarmukadam <nishants-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, Wei-Ning Huang <wnhuang-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Cathy Luo <cluo-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, Xinming Hu <huxm-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, Amitkumar Karwar <akarwar-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7Bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from gloria.sntech.de ([95.129.55.99]:43174 "EHLO gloria.sntech.de"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752750AbcFFUoK (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Mon, 6 Jun 2016 16:44:10 -0400
+In-Reply-To: <1464768141-25420-1-git-send-email-k.kozlowski@samsung.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Krzysztof Kozlowski <k.kozlowski@samsung.com>
+Cc: hzpeterchen@gmail.com, Ulf Hansson <ulf.hansson@linaro.org>, Sebastian Reichel <sre@kernel.org>, Dmitry Eremin-Solenikov <dbaryshkov@gmail.com>, David Woodhouse <dwmw2@infradead.org>, Javier Martinez Canillas <javier@osg.samsung.com>, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, linux-pm@vger.kernel.or, Alan Stern <stern@rowland.harvard.edu>, linux-usb@vger.kernel.org, Rob Herring <robh+dt@kernel.org>, Pawel Moll <pawel.moll@arm.com>, Mark Rutland <mark.rutland@arm.com>, Ian Campbell <ijc+devicetree@hellion.org.uk>, Kumar Gala <galak@codeaurora.org>, Kukjin Kim <kgene@kernel.org>, devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-samsung-soc@vger.kernel.org, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>
 
-From: Xinming Hu <huxm-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>
+Hi,
 
-Currently sdio device drivers need to prepare a big continuous
-physical memory for large data transfer. mmc stack will construct
-scatter/gather buffer list to make use of ADMA2.
+Am Mittwoch, 1. Juni 2016, 10:02:09 schrieb Krzysztof Kozlowski:
+> My third approach for a USB power sequence which fixes usb3503+lan
+> on Odroid U3 board if it was initialized by bootloader
+> (e.g. for TFTP boot).
 
-According to the sdio host controller specification version 4.00
-chapter 1.13.2, sdio device drivers have the ability to construct
-scatter/gather DMA buffer list. In this way, they do not need to allocate
-big memory.
+I was just tackling a similar bringup problem regarding an embedded usb hub 
+and usb-sata bridge and stumbled upon this series.
 
-This patch refactors current sdio command 53 wrapper mmc_io_rw_extended,
-so that it can accept external scatter/gather buffer list from its caller,
-such as the sdio device driver. This patch is very useful on some embedded
-systems where large memory allocation fails sometimes. It gives 10 to 15%
-better throughput performance compared to a case in which small single
-data transfers are done.
+While on my (rockchip-)boards it's always "just" a reset pin that needs 
+handling, this series looks like it would solve exactly that problem in a very 
+nice way.
 
-Signed-off-by: Xinming Hu <huxm-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>
-Signed-off-by: Amitkumar Karwar <akarwar-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>
----
- drivers/mmc/core/sdio_io.c    | 22 ++++++++++++++++--
- drivers/mmc/core/sdio_ops.c   | 53 +++++++++++++++++++++++++++++++++++++++----
- drivers/mmc/core/sdio_ops.h   |  3 ++-
- include/linux/mmc/sdio_func.h |  6 +++++
- 4 files changed, 76 insertions(+), 8 deletions(-)
+So while I cannot provide any meaningful insight right now, it would be cool 
+if you could keep me in the loop, as I'm really looking forward to this series 
+progressing.
 
-diff --git a/drivers/mmc/core/sdio_io.c b/drivers/mmc/core/sdio_io.c
-index a546c89..8505c4d 100644
---- a/drivers/mmc/core/sdio_io.c
-+++ b/drivers/mmc/core/sdio_io.c
-@@ -322,7 +322,7 @@ static int sdio_io_rw_ext_helper(struct sdio_func *func, int write,
- 			size = blocks * func->cur_blksize;
- 
- 			ret = mmc_io_rw_extended(func->card, write,
--				func->num, addr, incr_addr, buf,
-+				func->num, addr, incr_addr, false, buf,
- 				blocks, func->cur_blksize);
- 			if (ret)
- 				return ret;
-@@ -340,7 +340,7 @@ static int sdio_io_rw_ext_helper(struct sdio_func *func, int write,
- 
- 		/* Indicate byte mode by setting "blocks" = 0 */
- 		ret = mmc_io_rw_extended(func->card, write, func->num, addr,
--			 incr_addr, buf, 0, size);
-+			 incr_addr, false, buf, 0, size);
- 		if (ret)
- 			return ret;
- 
-@@ -504,6 +504,24 @@ int sdio_writesb(struct sdio_func *func, unsigned int addr, void *src,
- }
- EXPORT_SYMBOL_GPL(sdio_writesb);
- 
-+int sdio_readsb_sg_enh(struct sdio_func *func, unsigned int addr,
-+		       struct sg_table *dst)
-+{
-+	return mmc_io_rw_extended(func->card, 0, func->num,
-+				  addr, 0, true,
-+				  dst, 0, func->cur_blksize);
-+}
-+EXPORT_SYMBOL_GPL(sdio_readsb_sg_enh);
-+
-+int sdio_writesb_sg_enh(struct sdio_func *func, unsigned int addr,
-+			struct sg_table *src)
-+{
-+	return mmc_io_rw_extended(func->card, 1, func->num,
-+				  addr, 0, true,
-+				  src, 0, func->cur_blksize);
-+}
-+EXPORT_SYMBOL_GPL(sdio_writesb_sg_enh);
-+
- /**
-  *	sdio_readw - read a 16 bit integer from a SDIO function
-  *	@func: SDIO function to access
-diff --git a/drivers/mmc/core/sdio_ops.c b/drivers/mmc/core/sdio_ops.c
-index 34f6e80..c44f65e 100644
---- a/drivers/mmc/core/sdio_ops.c
-+++ b/drivers/mmc/core/sdio_ops.c
-@@ -118,16 +118,39 @@ int mmc_io_rw_direct(struct mmc_card *card, int write, unsigned fn,
- 	return mmc_io_rw_direct_host(card->host, write, fn, addr, in, out);
- }
- 
-+/**
-+ *     mmc_io_rw_extended - wrapper for sdio command 53 read/write operation
-+ *     @card: destination device for read/write
-+ *     @write: zero indcate read, non-zero indicate write.
-+ *     @fn: SDIO function to access
-+ *     @addr: address of (single byte) FIFO
-+ *     @incr_addr: set to 1 indicate read or write multiple bytes
-+		of data to/from an IO register address that
-+		increment by 1 after each operation.
-+ *     @sg_enhance: if set true, the caller of this function will
-+		prepare scatter gather dma buffer list.
-+ *     @buf: buffer that contains the data to write. if sg_enhance
-+		is set, it point to SG dma buffer list.
-+ *     @blocks: number of blocks of data transfer.
-+		if set zero, indicate byte mode
-+		if set non-zero, indicate block mode
-+		if sg_enhance is set, this parameter will not be used.
-+ *     @blksz: block size for block mode data transfer.
-+ *
-+ */
- int mmc_io_rw_extended(struct mmc_card *card, int write, unsigned fn,
--	unsigned addr, int incr_addr, u8 *buf, unsigned blocks, unsigned blksz)
-+		       unsigned int addr, int incr_addr, bool sg_enhance,
-+		       void *buf, unsigned int blocks, unsigned int blksz)
- {
- 	struct mmc_request mrq = {NULL};
- 	struct mmc_command cmd = {0};
- 	struct mmc_data data = {0};
- 	struct scatterlist sg, *sg_ptr;
- 	struct sg_table sgtable;
-+	struct sg_table *sgtable_external;
- 	unsigned int nents, left_size, i;
- 	unsigned int seg_size = card->host->max_seg_size;
-+	unsigned int sg_blocks = 0;
- 
- 	BUG_ON(!card);
- 	BUG_ON(fn > 7);
-@@ -145,16 +168,35 @@ int mmc_io_rw_extended(struct mmc_card *card, int write, unsigned fn,
- 	cmd.arg |= fn << 28;
- 	cmd.arg |= incr_addr ? 0x04000000 : 0x00000000;
- 	cmd.arg |= addr << 9;
-+	cmd.flags = MMC_RSP_SPI_R5 | MMC_RSP_R5 | MMC_CMD_ADTC;
-+
-+	data.flags = write ? MMC_DATA_WRITE : MMC_DATA_READ;
-+	data.blksz = blksz;
-+
-+	if (sg_enhance) {
-+		sgtable_external = buf;
-+
-+		for_each_sg(sgtable_external->sgl, sg_ptr,
-+			    sgtable_external->nents, i) {
-+			if (sg_ptr->length > card->host->max_seg_size)
-+				return -EINVAL;
-+			sg_blocks += DIV_ROUND_UP(sg_ptr->length, blksz);
-+		}
-+
-+		cmd.arg |= 0x08000000 | sg_blocks;
-+		data.blocks = sg_blocks;
-+		data.sg = sgtable_external->sgl;
-+		data.sg_len = sgtable_external->nents;
-+		goto mmc_data_req;
-+	}
-+
- 	if (blocks == 0)
- 		cmd.arg |= (blksz == 512) ? 0 : blksz;	/* byte mode */
- 	else
- 		cmd.arg |= 0x08000000 | blocks;		/* block mode */
--	cmd.flags = MMC_RSP_SPI_R5 | MMC_RSP_R5 | MMC_CMD_ADTC;
- 
--	data.blksz = blksz;
- 	/* Code in host drivers/fwk assumes that "blocks" always is >=1 */
- 	data.blocks = blocks ? blocks : 1;
--	data.flags = write ? MMC_DATA_WRITE : MMC_DATA_READ;
- 
- 	left_size = data.blksz * data.blocks;
- 	nents = (left_size - 1) / seg_size + 1;
-@@ -178,11 +220,12 @@ int mmc_io_rw_extended(struct mmc_card *card, int write, unsigned fn,
- 		sg_init_one(&sg, buf, left_size);
- 	}
- 
-+mmc_data_req:
- 	mmc_set_data_timeout(&data, card);
- 
- 	mmc_wait_for_req(card->host, &mrq);
- 
--	if (nents > 1)
-+	if (!sg_enhance && nents > 1)
- 		sg_free_table(&sgtable);
- 
- 	if (cmd.error)
-diff --git a/drivers/mmc/core/sdio_ops.h b/drivers/mmc/core/sdio_ops.h
-index 5660c7f..a8b8e0c 100644
---- a/drivers/mmc/core/sdio_ops.h
-+++ b/drivers/mmc/core/sdio_ops.h
-@@ -18,7 +18,8 @@ int mmc_send_io_op_cond(struct mmc_host *host, u32 ocr, u32 *rocr);
- int mmc_io_rw_direct(struct mmc_card *card, int write, unsigned fn,
- 	unsigned addr, u8 in, u8* out);
- int mmc_io_rw_extended(struct mmc_card *card, int write, unsigned fn,
--	unsigned addr, int incr_addr, u8 *buf, unsigned blocks, unsigned blksz);
-+		       unsigned int addr, int incr_addr, bool sg_enhance,
-+		       void *buf, unsigned int blocks, unsigned int blksz);
- int sdio_reset(struct mmc_host *host);
- 
- static inline bool mmc_is_io_op(u32 opcode)
-diff --git a/include/linux/mmc/sdio_func.h b/include/linux/mmc/sdio_func.h
-index b2b91df..ba8f392 100644
---- a/include/linux/mmc/sdio_func.h
-+++ b/include/linux/mmc/sdio_func.h
-@@ -14,6 +14,7 @@
- 
- #include <linux/device.h>
- #include <linux/mod_devicetable.h>
-+#include <linux/scatterlist.h>
- 
- #include <linux/mmc/pm.h>
- 
-@@ -136,6 +137,11 @@ extern int sdio_memcpy_fromio(struct sdio_func *func, void *dst,
- extern int sdio_readsb(struct sdio_func *func, void *dst,
- 	unsigned int addr, int count);
- 
-+int sdio_readsb_sg_enh(struct sdio_func *func, unsigned int addr,
-+		       struct sg_table *dst);
-+int sdio_writesb_sg_enh(struct sdio_func *func, unsigned int addr,
-+			struct sg_table *src);
-+
- extern void sdio_writeb(struct sdio_func *func, u8 b,
- 	unsigned int addr, int *err_ret);
- extern void sdio_writew(struct sdio_func *func, u16 b,
--- 
-1.9.1
 
---
-To unsubscribe from this list: send the line "unsubscribe linux-wireless" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Thanks
+Heiko
+
+
+> Changes since v2
+> ================
+> 1. Add Javier's reviewed-by tags. Address some comments.
+> 2. Re-use existing properties for GPIOs etc by pwrseq-simple
+>    driver.  New property is still added: "power-sequence".
+>    I tried to address and do according to Rob's comments.
+> 
+>    Please look at patch 6/12 ("power: pwrseq: simple: Add support
+>    for regulator and generic property") for bindings and the
+>    new code around matching "power-sequence" property.
+> 
+> 3. I marked the usb code as "EXAMPLE" because that part
+>    is left to Peter Chen.
+> 
+> 
+> Problem
+> =======
+> When Odroid U3 (usb3503 + smsc95xx + max77686) boots from network (TFTP),
+> the usb3503 and LAN smsc95xx do not show up in "lsusb". Hard-reset
+> is required, e.g. by suspend to RAM. The actual TFTP boot does
+> not have to happen. Just "usb start" from U-Boot is sufficient.
+> 
+> From the schematics, the regulator is a supply only to LAN, however
+> without toggling it off/on, the usb3503 hub won appear neither.
+> 
+> 
+> Solution
+> ========
+> This is very similar to the MMC pwrseq behavior so the idea is to:
+> 1. Move MMC pwrseq drivers to generic place,
+> 2. Extend the pwrseq-simple with regulator toggling,
+> 3. Add support to USB hub and port core for pwrseq,
+> 4. Toggle the regulator when needed.
+> 
+> Best regards,
+> Krzysztof
+> 
+> Krzysztof Kozlowski (12):
+>   power/mmc: Move pwrseq drivers to power/pwrseq
+>   MAINTAINERS: Retain Ulf Hansson as the same maintainer of pwrseq
+>   power: pwrseq: Enable COMPILE_TEST for drivers
+>   power: pwrseq: Remove mmc prefix from mmc_pwrseq
+>   power: pwrseq: Generalize mmc_pwrseq operations by removing mmc prefix
+>   power: pwrseq: simple: Add support for regulator and generic property
+>   power: pwrseq: Add support for USB hubs with external power
+>   usb: hub: Handle deferred probe
+>   EXAMPLE CODE: usb: port: Parse pwrseq phandle from Device Tree
+>   EXAMPLE CODE: usb: hub: Power sequence the ports on activation
+>   ARM: dts: exynos: Switch the buck8 to GPIO mode on Odroid U3
+>   ARM: dts: exynos: Fix LAN and HUB after bootloader initialization on
+>     Odroid U3
+> 
+>  .../pwrseq/pwrseq-emmc.txt}                        |   0
+>  .../pwrseq/pwrseq-simple.txt}                      |  29 +++-
+>  MAINTAINERS                                        |   9 ++
+>  arch/arm/boot/dts/exynos4412-odroidu3.dts          |   5 +
+>  drivers/mmc/Kconfig                                |   2 -
+>  drivers/mmc/core/Makefile                          |   3 -
+>  drivers/mmc/core/core.c                            |   8 +-
+>  drivers/mmc/core/host.c                            |   2 +-
+>  drivers/mmc/core/pwrseq.c                          | 110 ---------------
+>  drivers/mmc/core/pwrseq.h                          |  52 -------
+>  drivers/power/Kconfig                              |   1 +
+>  drivers/power/Makefile                             |   1 +
+>  drivers/{mmc/core => power/pwrseq}/Kconfig         |  22 ++-
+>  drivers/power/pwrseq/Makefile                      |   3 +
+>  drivers/power/pwrseq/pwrseq.c                      | 153
+> +++++++++++++++++++++ drivers/{mmc/core => power/pwrseq}/pwrseq_emmc.c   | 
+> 17 +--
+>  drivers/{mmc/core => power/pwrseq}/pwrseq_simple.c | 110 ++++++++++++---
+>  drivers/usb/core/hub.c                             |  16 ++-
+>  drivers/usb/core/hub.h                             |   3 +
+>  drivers/usb/core/port.c                            |  15 ++
+>  include/linux/mmc/host.h                           |   4 +-
+>  include/linux/pwrseq.h                             |  63 +++++++++
+>  22 files changed, 414 insertions(+), 214 deletions(-)
+>  rename Documentation/devicetree/bindings/{mmc/mmc-pwrseq-emmc.txt =>
+> power/pwrseq/pwrseq-emmc.txt} (100%) rename
+> Documentation/devicetree/bindings/{mmc/mmc-pwrseq-simple.txt =>
+> power/pwrseq/pwrseq-simple.txt} (53%) delete mode 100644
+> drivers/mmc/core/pwrseq.c
+>  delete mode 100644 drivers/mmc/core/pwrseq.h
+>  rename drivers/{mmc/core => power/pwrseq}/Kconfig (60%)
+>  create mode 100644 drivers/power/pwrseq/Makefile
+>  create mode 100644 drivers/power/pwrseq/pwrseq.c
+>  rename drivers/{mmc/core => power/pwrseq}/pwrseq_emmc.c (88%)
+>  rename drivers/{mmc/core => power/pwrseq}/pwrseq_simple.c (52%)
+>  create mode 100644 include/linux/pwrseq.h
+
