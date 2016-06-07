@@ -1,129 +1,69 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: core: Fix mmc_select_hs200() regression in v4.7-rc.
-Date: Tue, 7 Jun 2016 23:58:17 +0200
-Message-ID: <CAPDyKFrvuDrNwUmZQw2UN+Ke-DFyW9eCNc+nhQ7cmpYWdn+rMw@mail.gmail.com>
-References: <1465304543-23988-1-git-send-email-peter.griffin@linaro.org>
- <20160607133839.GH18047@dell> <20160607135702.GA19771@griffinp-ThinkPad-X1-Carbon-2nd>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+From: Douglas Anderson <dianders@chromium.org>
+Subject: [PATCH 0/11] Changes to support 150 MHz eMMC on rk3399
+Date: Tue,  7 Jun 2016 15:44:33 -0700
+Message-ID: <1465339484-969-1-git-send-email-dianders@chromium.org>
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20160607135702.GA19771@griffinp-ThinkPad-X1-Carbon-2nd>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Peter Griffin <peter.griffin@linaro.org>, Lee Jones <lee.jones@linaro.org>
-Cc: "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, kernel@stlinux.com, Adrian Hunter <adrian.hunter@intel.com>, linux-mmc <linux-mmc@vger.kernel.org>, Arnd Bergmann <arnd@arndb.de>
+To: ulf.hansson@linaro.org, kishon@ti.com, Heiko Stuebner <heiko@sntech.de>, robh+dt@kernel.org
+Cc: shawn.lin@rock-chips.com, xzy.xu@rock-chips.com, briannorris@chromium.org, adrian.hunter@intel.com, linux-rockchip@lists.infradead.org, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, Douglas Anderson <dianders@chromium.org>, mark.rutland@arm.com, catalin.marinas@arm.com, will.deacon@arm.com, zhengxing@rock-chips.com, michal.simek@xilinx.com, linux-arm-kernel@lists.infradead.org, jay.xu@rock-chips.com, wxt@rock-chips.com, pawel.moll@arm.com, ijc+devicetree@hellion.org.uk, soren.brinkmann@xilinx.com, linux-kernel@vger.kernel.org, galak@codeaurora.org
 List-Id: linux-mmc@vger.kernel.org
 
-On 7 June 2016 at 15:57, Peter Griffin <peter.griffin@linaro.org> wrote:
-> Hi Lee,
->
-> On Tue, 07 Jun 2016, Lee Jones wrote:
->
->> On Tue, 07 Jun 2016, Peter Griffin wrote:
->>
->> > mmc_select_bus_width() returns bus width (4 or 8) on success or
->> > zero if unsupported. If bus width is set successfully we then wish
->> > to switch to HS200 mode.
->> >
->> > This avoids the following error message in v4.70-rc2
->> >
->> > [    2.523674] mmc0: mmc_select_hs200 failed, error 3
->> > [    2.528516] mmc0: error 3 whilst initialising MMC card
->> >
->> > With this patch card is enumerated correctly
->> >
->> > [    2.468065] mmc0: new HS200 MMC card at address 0001
->> > [    2.468335] mmcblk0: mmc0:0001 P1XXXX 7.20 GiB
->> > [    2.468441] mmcblk0boot0: mmc0:0001 P1XXXX partition 1 2.00 MiB
->> > [    2.468552] mmcblk0boot1: mmc0:0001 P1XXXX partition 2 2.00 MiB
->> > [    2.468651] mmcblk0rpmb: mmc0:0001 P1XXXX partition 3 128 KiB
->> > [    2.469269]  mmcblk0: p1
->> >
->> > Fixes: 287980e (remove lots of IS_ERR_VALUE abuses)
->> > Signed-off-by: Peter Griffin <peter.griffin@linaro.org>
->> > Cc: Arnd Bergmann <arnd@arndb.de>
->> > ---
->> >  drivers/mmc/core/mmc.c | 4 ++--
->> >  1 file changed, 2 insertions(+), 2 deletions(-)
->> >
->> > diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
->> > index c984321..aafb73d 100644
->> > --- a/drivers/mmc/core/mmc.c
->> > +++ b/drivers/mmc/core/mmc.c
->> > @@ -1276,7 +1276,7 @@ static int mmc_select_hs200(struct mmc_card *card)
->> >      * switch to HS200 mode if bus width is set successfully.
->> >      */
->> >     err = mmc_select_bus_width(card);
->> > -   if (!err) {
->> > +   if (err > 0) {
->> >             val = EXT_CSD_TIMING_HS200 |
->> >                   card->drive_strength << EXT_CSD_DRV_STR_SHIFT;
->> >             err = __mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
->> > @@ -1583,7 +1583,7 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
->> >     } else if (mmc_card_hs(card)) {
->> >             /* Select the desired bus width optionally */
->> >             err = mmc_select_bus_width(card);
->> > -           if (!err) {
->> > +           if (err > 0) {
->> >                     err = mmc_select_hs_ddr(card);
->> >                     if (err)
->> >                             goto free_card;
->>
->> Looks like this has already been 'fixed' in -rc2.
->
-> Ah, it seems I was on -rc1, not -rc2
->
->>
->> Although, this patch does not work for me.
->>     mmc: fix mmc mode selection for HS-DDR and higher
->>
->>     When IS_ERR_VALUE was removed from the mmc core code, it was replaced
->>     with a simple not-zero check. This does not work, as the value checked
->>     is the return value for mmc_select_bus_width, which returns the set
->>     bit width on success. This made eMMC modes higher than HS-DDR unusable.
->>
->>     Fix this by checking for a positive return value instead.
->>
->>     Fixes: 287980e49ffc ("remove lots of IS_ERR_VALUE abuses")
->>     Cc: Arnd Bergmann <arnd@arndb.de>
->>     Signed-off-by: Chen-Yu Tsai <wens@csie.org>
->>     Acked-by: Hans de Goede <hdegoede@redhat.com>
->>     Reviewed-by: Krzysztof Kozlowski <k.kozlowski@samsung.com>
->>     Acked-by: Jaehoon Chung <jh80.chung@samsung.com>
->>     Reviewed-by: Shawn Lin <shawn.lin@rock-chips.com>
->>     Tested-by: Marcel Ziswiler <marcel.ziswiler@toradex.com>
->>     Tested-by: Bjorn Andersson <bjorn.andersson@linaro.org>
->>     Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
->>
->> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
->> index c984321..5d438ad 100644
->> --- a/drivers/mmc/core/mmc.c
->> +++ b/drivers/mmc/core/mmc.c
->> @@ -1276,7 +1276,7 @@ static int mmc_select_hs200(struct mmc_card *card)
->>        * switch to HS200 mode if bus width is set successfully.
->>        */
->>       err = mmc_select_bus_width(card);
->> -     if (!err) {
->> +     if (err >= 0) {
->
->
-> This patch looks wrong to me, as if zero is returned by mmc_select_bus_width() it
-> means setting the bus width failed, and you most likely don't want to switch to
-> hs200 mode.
->
-> Ulf - what is your opinion?
->
-> regards,
->
-> Peter.>
+The theme of this series of patches is to try to allow running the eMMC
+at 150 MHz on the rk3399 SoC, though the changes should still be correct
+and have merit on their own.  The motivation for running at 150 MHz is
+that doing so improves signal integrity and (with some eMMC devices)
+doesn't affect throughput.
 
-The commit above (mmc: fix mmc mode selection for HS-DDR and higher),
-simply restored the old behaviour and that was sufficient to solve the
-regressions.
+These patches have been structured to keep things as separate as
+possible, but nevertheless there are still some dependencies between
+patches.  It probably makes the most sense for all of the non-device
+tree patches to go through a single tree.  If others agree, perhaps the
+most sane would be to get Acks from PHY maintainers and then to land the
+patches in the MMC tree.  Device tree patches should be able to be
+landed separately and the worst what would happen is a warning in the
+kernel log if you have the code without the device tree.
 
-Nevertheless I agree, that if mmc_select_bus_width() returns 0, that
-should likely mean that we shouldn't try to switch to hs200. If we
-want to change that, let's do that in a separate patch on top.
-So, do you see a problem in rc2?
+The code patches are based on Ulf's mmc-next, then 4 patches that are
+outstanding / ready to land.  Specifically:
+- https://patchwork.kernel.org/patch/9086501/
+  phy: rockchip-emmc: give DLL some extra time to be ready
+- https://patchwork.kernel.org/patch/9093681/
+  phy: rockchip-emmc: configure frequency range and drive impedance
+- https://patchwork.kernel.org/patch/9086511/
+  phy: rockchip-emmc: configure default output tap delay
+- https://patchwork.kernel.org/patch/9086531/
+  phy: rockchip-emmc: reindent the register definitions
 
-Kind regards
-Uffe
+The device tree patches are based on Heiko's v4.8-armsoc/dts64.
+
+If requested, I could repost my series with the outstanding code patches
+or I could try folding those patches into mine.  Since those patches
+aren't in 4.7-rc1 presumably they would also make sense to take through
+the MMC tree if others agree.
+
+
+Douglas Anderson (11):
+  phy: rockchip-emmc: Increase lock time allowance
+  mmc: sdhci-of-arasan: Always power the PHY off/on when clock changes
+  Documentation: mmc: sdhci-of-arasan: Add soc-ctl-syscon for corecfg
+    regs
+  mmc: sdhci-of-arasan: Properly set corecfg_baseclkfreq on rk3399
+  arm64: dts: rockchip: Add soc-ctl-syscon to sdhci for rk3399
+  Documentation: mmc: sdhci-of-arasan: Add ability to export card clock
+  mmc: sdhci-of-arasan: Add ability to export card clock
+  Documentation: phy: Let the rockchip eMMC PHY get an exported card
+    clock
+  phy: rockchip-emmc: Set phyctrl_frqsel based on card clock
+  phy: rockchip-emmc: Minor code cleanup in
+    rockchip_emmc_phy_power_off()
+  arm64: dts: rockchip: Provide emmcclk to PHY for rk3399
+
+ .../devicetree/bindings/mmc/arasan,sdhci.txt       |  35 ++-
+ .../devicetree/bindings/phy/rockchip-emmc-phy.txt  |   7 +
+ arch/arm64/boot/dts/rockchip/rk3399.dtsi           |   5 +
+ drivers/mmc/host/sdhci-of-arasan.c                 | 333 +++++++++++++++++++--
+ drivers/phy/phy-rockchip-emmc.c                    | 107 +++++--
+ 5 files changed, 427 insertions(+), 60 deletions(-)
+
+-- 
+2.8.0.rc3.226.g39d4020
