@@ -1,103 +1,92 @@
 From: Michal Kadlic <michal.kadlic@spinet.sk>
-Subject: Re: mmc-moxart: CMD6 locks up the controller
-Date: Tue, 7 Jun 2016 10:39:54 +0200
-Message-ID: <c01db803-6a52-51c1-78e0-50cff4ce488c@spinet.sk>
-References: <298c9ee5-37c7-6120-196d-860ec8eb0f9c@spinet.sk>
- <CAPDyKFrFzGZpO1SQwpCUJOZAD3izPgubAmhhWDxeO+jETQgvgQ@mail.gmail.com>
+Subject: [PATCH] mmc: moxart-mmc: Fix APP_CMD flag set on non-application
+ commands
+Date: Tue, 7 Jun 2016 10:53:01 +0200
+Message-ID: <734d328a-56ec-34bb-30ab-0a502041af2d@spinet.sk>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail.spinet.sk ([212.89.230.194]:46944 "EHLO mail.spinet.sk"
+Received: from mail.spinet.sk ([212.89.230.194]:47350 "EHLO mail.spinet.sk"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754375AbcFGIkB (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 7 Jun 2016 04:40:01 -0400
-In-Reply-To: <CAPDyKFrFzGZpO1SQwpCUJOZAD3izPgubAmhhWDxeO+jETQgvgQ@mail.gmail.com>
+	id S1752958AbcFGIxE (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 7 Jun 2016 04:53:04 -0400
+Received: from mail.spinet.sk (localhost [127.0.0.1])
+	by smtp.spinet.sk (Postfix) with ESMTP id 753723336A
+	for <linux-mmc@vger.kernel.org>; Tue,  7 Jun 2016 10:53:01 +0200 (CEST)
+Received: from [10.1.1.4] (unknown [10.1.1.4])
+	(Authenticated sender: michal.kadlic@spinet.sk)
+	by mail.spinet.sk (Postfix) with ESMTPSA id 677EC33369
+	for <linux-mmc@vger.kernel.org>; Tue,  7 Jun 2016 10:53:01 +0200 (CEST)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Jonas Jensen <jonas.jensen@gmail.com>
+To: linux-mmc@vger.kernel.org
 
-On 3. 6. 2016 10:49, Ulf Hansson wrote:
-> On 1 June 2016 at 15:10, Michal Kadlic <michal.kadlic@spinet.sk> wrote:
->> Hello,
->>
->> newbie here, please bear with me...
->>
->> It seems that CMD6/SD_SWITCH request locks up the mmc-moxart controller. It
->> does not respond to any command after CMD6.
->> The fix suggested by Mr. Jonas Jensen <jonas.jensen@gmail.com>  is to ignore
->> the SD_SWITCH request in moxart_request()
->> My question is - looking at mmc_read_switch() in drivers/mmc/core/sd.c -
->> would be -EINVAL a proper response in this case?
-> No, this seems like a bad solution to the problem.
->
-> If the SD_SWITCH command isn't working, then it's better to find out
-> *why* instead of only disable it. That's because it would mean to also
-> disable all higher speed modes for the cards.
->
-> BTW, under what circumstances does the lock up happens? In all cases
-> when trying to detect an inserted card?
->
-> Kind regards
-> Uffe
->
-It seems that the lockup happens no matter what mode 0 query is sent to 
-the controller.
-I found a bug that sets APP_CMD flag even on regular commands , which 
-did affect CMD6, but fixing the bug did not fix CMD6.
-I will try to repeat the lockup with different SD card, but so far the 
-sequence that leads up to this lockup is following:
+Moxart MMC host controller has an APP_CMD flag, that's set when sending 
+an ACMD. This was set by checking command opcode instead of CMD55->ACMDx 
+sequence, which could lead to regular commands like CMD6,CMD13,CMD23 and 
+CMD42 flagged as application commands.
 
-[   62.270000] mmc0: starting CMD0 arg 00000000 flags 000000c0
-[   62.280000] mmc0: req done (CMD0): 0: 00000000 00000000 00000000 00000000
-[   62.290000] mmc0: clock 400000Hz busmode 2 powermode 2 cs 0 Vdd 23 
-width 0 timing 0
-[   62.310000] mmc0: starting CMD8 arg 000001aa flags 000002f5
-[   62.310000] mmc0: req done (CMD8): 0: 000001aa 00000000 00000000 00000000
-[   62.320000] mmc0: starting CMD55 arg 00000000 flags 000000f5
-[   62.330000] mmc0: req done (CMD55): 0: 00000120 00000000 00000000 
-00000000
-[   62.340000] mmc0: starting CMD41 arg 40800000 flags 000000e1
-[   62.340000] moxart-mmc: Sending command with APP_CMD_flag
-[   62.350000] mmc0: req done (CMD41): 0: 00ff8000 00000000 00000000 
-00000000
-[   62.380000] mmc0: starting CMD55 arg 00000000 flags 000000f5
-[   62.380000] mmc0: req done (CMD55): 0: 00000120 00000000 00000000 
-00000000
-[   62.390000] mmc0: starting CMD41 arg 40800000 flags 000000e1
-[   62.400000] moxart-mmc: Sending command with APP_CMD_flag
-[   62.400000] mmc0: req done (CMD41): 0: c0ff8000 00000000 00000000 
-00000000
-[   62.420000] mmc0: starting CMD2 arg 00000000 flags 00000067
-[   62.420000] mmc0: req done (CMD2): 0: 1d414453 44202020 02b01154 0100e9fb
-[   62.430000] mmc0: starting CMD3 arg 00000000 flags 00000075
-[   62.440000] mmc0: req done (CMD3): 0: 59b40520 00000000 00000000 00000000
-[   62.450000] mmc0: starting CMD9 arg 59b40000 flags 00000007
-[   62.460000] mmc0: req done (CMD9): 0: 400e0032 5b590000 39bd7f80 0a400045
-[   62.460000] mmc0: starting CMD7 arg 59b40000 flags 00000015
-[   62.470000] mmc0: req done (CMD7): 0: 00000700 00000000 00000000 00000000
-[   62.480000] mmc0: starting CMD55 arg 59b40000 flags 00000095
-[   62.490000] mmc0: req done (CMD55): 0: 00000920 00000000 00000000 
-00000000
-[   62.500000] mmc0: starting CMD51 arg 00000000 flags 000000b5
-[   62.500000] mmc0:     blksz 8 blocks 1 flags 00000200 tsac 100 ms nsac 0
-[   62.520000] moxart-mmc: Sending command with APP_CMD_flag
-[   62.520000] mmc0: req done (CMD51): 0: 00000920 00000000 00000000 
-00000000
-[   62.530000] mmc0:     8 bytes transferred: 0
-[   62.540000] mmc0: starting CMD55 arg 59b40000 flags 00000095
-[   62.540000] mmc0: req done (CMD55): 0: 00000920 00000000 00000000 
-00000000
-[   62.560000] mmc0: starting CMD13 arg 00000000 flags 000001b5
-[   62.560000] mmc0:     blksz 64 blocks 1 flags 00000200 tsac 100 ms nsac 0
-[   62.570000] moxart-mmc: Sending command with APP_CMD_flag
-[   62.580000] mmc0: req done (CMD13): 0: 00000920 00000000 00000000 
-00000000
-[   62.590000] mmc0:     64 bytes transferred: 0
-[   62.590000] mmc0: starting CMD6 arg 00fffff0 flags 000000b5
-[   62.600000] mmc0:     blksz 64 blocks 1 flags 00000200 tsac 100 ms nsac 0
-[   63.610000] mmc-moxart 98e00000.mmc: timed out waiting for status
-[   66.350000] mmc0: req done (CMD6): 0: 00000900 00000000 00000000 00000000
-[   66.350000] mmc0:     64 bytes transferred: -110
-[   66.360000] mmc0: error -110 whilst initialising SD card
+Patch is against kernel version 4.6
+
+Signed-off-by: Michal Kadlic <michal.kadlic@spinet.sk>
+
+---
+
+diff -purN a/drivers/mmc/host/moxart-mmc.c b/drivers/mmc/host/moxart-mmc.c
+--- a/drivers/mmc/host/moxart-mmc.c     2016-06-01 14:39:12.000000000 +0200
++++ b/drivers/mmc/host/moxart-mmc.c     2016-06-07 10:12:38.428539771 +0200
+@@ -60,6 +60,7 @@
+  #define CMD_LONG_RSP           BIT(7)
+  #define CMD_NEED_RSP           BIT(6)
+  #define CMD_IDX_MASK           0x3f
++#define CMD_MMC_APP_CMD        55
+
+  /* REG_RESPONSE_COMMAND */
+  #define RSP_CMD_APP            BIT(6)
+@@ -146,6 +147,7 @@ struct moxart_host {
+
+         bool                            have_dma;
+         bool                            is_removed;
++       bool                            app_cmd_flag;
+  };
+
+  static inline void moxart_init_sg(struct moxart_host *host,
+@@ -211,10 +213,11 @@ static void moxart_send_command(struct m
+         writel(cmd->arg, host->base + REG_ARGUMENT);
+
+         cmdctrl = cmd->opcode & CMD_IDX_MASK;
+-       if (cmdctrl == SD_APP_SET_BUS_WIDTH    || cmdctrl == 
+SD_APP_OP_COND   ||
+-           cmdctrl == SD_APP_SEND_SCR         || cmdctrl == 
+SD_APP_SD_STATUS ||
+-           cmdctrl == SD_APP_SEND_NUM_WR_BLKS)
++
++       // If previous command was CMD55 set APP_CMD flag, except for 
+CMD0(Reset)
++       if ((host->app_cmd_flag) && cmd->opcode)
+                 cmdctrl |= CMD_APP_CMD;
++       host->app_cmd_flag = false;
+
+         if (cmd->flags & MMC_RSP_PRESENT)
+                 cmdctrl |= CMD_NEED_RSP;
+@@ -244,6 +248,11 @@ static void moxart_send_command(struct m
+                 } else {
+                         cmd->resp[0] = readl(host->base + REG_RESPONSE0);
+                 }
++
++               // CMD55 sent sucessfully - next command will be 
+interpreted as ACMD
++               if ((!cmd->error) && (cmd->opcode==CMD_MMC_APP_CMD)) {
++                       host->app_cmd_flag = true;
++               }
+         }
+  }
+
+@@ -611,6 +621,7 @@ static int moxart_probe(struct platform_
+         host->fifo_width = readl(host->base + REG_FEATURE) << 2;
+         host->dma_chan_tx = dma_request_slave_channel_reason(dev, "tx");
+         host->dma_chan_rx = dma_request_slave_channel_reason(dev, "rx");
++       host->app_cmd_flag=false;
+
+         spin_lock_init(&host->lock);
