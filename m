@@ -1,51 +1,91 @@
-From: Krzysztof Kozlowski <k.kozlowski-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>
-Subject: Re: [PATCH v3 06/12] power: pwrseq: simple: Add support for regulator
- and generic property
-Date: Tue, 07 Jun 2016 11:29:02 +0200
-Message-ID: <575693DE.2010603@samsung.com>
-References: <1464768141-25420-1-git-send-email-k.kozlowski@samsung.com>
- <1464768141-25420-7-git-send-email-k.kozlowski@samsung.com>
- <20160603020218.GA19436@rob-hp-laptop>
+From: Michal Kadlic <michal.kadlic@spinet.sk>
+Subject: [PATCH v2] mmc: moxart-mmc: Fix APP_CMD flag set on non-application
+ commands
+Date: Tue, 7 Jun 2016 11:33:01 +0200
+Message-ID: <3da4c01c-cce4-0803-700f-963479e6a110@spinet.sk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
+Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-reply-to: <20160603020218.GA19436@rob-hp-laptop>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Rob Herring <robh-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-Cc: hzpeterchen-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Sebastian Reichel <sre-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Dmitry Eremin-Solenikov <dbaryshkov-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, David Woodhouse <dwmw2-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org>, Javier Martinez Canillas <javier-JPH+aEBZ4P+UEJcrhfAQsw@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-pm-u79uwXL29TaqPxH82wqD4g@public.gmane.org, Alan Stern <stern-nwvwT67g6+6dFdvTe/nMLpVzexx5G7lz@public.gmane.org>, linux-usb-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Pawel Moll <pawel.moll-5wv7dgnIgG8@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Ian Campbell <ijc+devicetree-KcIKpvwj1kUDXYZnReoRVg@public.gmane.org>, Kumar Gala <galak-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, Kukjin Kim <kgene-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-samsung-soc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Greg Kroah-Hartman <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>, Bartlomiej Zolnierkiewicz <b.zolnierkie-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail.spinet.sk ([212.89.230.194]:48583 "EHLO mail.spinet.sk"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751181AbcFGJdI (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 7 Jun 2016 05:33:08 -0400
+Received: from mail.spinet.sk (localhost [127.0.0.1])
+	by smtp.spinet.sk (Postfix) with ESMTP id 27A7D3336A
+	for <linux-mmc@vger.kernel.org>; Tue,  7 Jun 2016 11:33:02 +0200 (CEST)
+Received: from [10.1.1.4] (unknown [10.1.1.4])
+	(Authenticated sender: michal.kadlic@spinet.sk)
+	by mail.spinet.sk (Postfix) with ESMTPSA id 238B033369
+	for <linux-mmc@vger.kernel.org>; Tue,  7 Jun 2016 11:33:02 +0200 (CEST)
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc <linux-mmc@vger.kernel.org>
 
-On 06/03/2016 04:02 AM, Rob Herring wrote:
->>  Optional properties:
->>  - reset-gpios : contains a list of GPIO specifiers. The reset GPIOs are asserted
->> @@ -16,6 +22,7 @@ Optional properties:
->>    See ../clocks/clock-bindings.txt for details.
->>  - clock-names : Must include the following entry:
->>    "ext_clock" (External clock provided to the card).
->> +- ext-supply : External regulator supply
-> 
-> What happens when there are 2 supplies?
-> 
-> I'd prefer the name not be genericish and use the real supply names. 
-> Then the power seq code should just turn on all supplies it finds. If 
-> the order or timing to turn on matters, then sorry, no generic sequence.
+Resending with correct formatting this time, at least I hope so
 
-I think the generic part for regulators might be a problem. Regulator
-API requires a name for the supply... it cannot get "something" or
-"everything".
+Moxart MMC host controller has an APP_CMD flag, that's set when sending 
+an ACMD. This was set by checking command opcode instead of CMD55->ACMDx 
+sequence, which could lead to regular commands like CMD6,CMD13,CMD23 and 
+CMD42 flagged as application commands.
 
-The driver could attach itself to any kind of node (where power-sequence
-property exists) so the supply name depends on the bindings of device
-(not bindings of power sequence driver).
+Patch is against kernel version 4.6 -
+the original code was lifted unchanged from 2007 Moxa code so it applies to older versions as well.
 
-The power sequence driver could however iterate over child properties
-and get the names of all supplies. It is a little bit ugly...
+Signed-off-by: Michal Kadlic <michal.kadlic@spinet.sk>
 
-Best regards,
-Krzysztof
+---
 
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+diff -purN a/drivers/mmc/host/moxart-mmc.c b/drivers/mmc/host/moxart-mmc.c
+--- a/drivers/mmc/host/moxart-mmc.c     2016-06-01 14:39:12.000000000 +0200
++++ b/drivers/mmc/host/moxart-mmc.c     2016-06-07 10:12:38.428539771 +0200
+@@ -60,6 +60,7 @@
+ #define CMD_LONG_RSP           BIT(7)
+ #define CMD_NEED_RSP           BIT(6)
+ #define CMD_IDX_MASK           0x3f
++#define CMD_MMC_APP_CMD        55
+
+ /* REG_RESPONSE_COMMAND */
+ #define RSP_CMD_APP            BIT(6)
+@@ -146,6 +147,7 @@ struct moxart_host {
+
+        bool                            have_dma;
+        bool                            is_removed;
++       bool                            app_cmd_flag;
+ };
+
+  static inline void moxart_init_sg(struct moxart_host *host,
+@@ -211,10 +213,11 @@ static void moxart_send_command(struct m
+        writel(cmd->arg, host->base + REG_ARGUMENT);
+
+        cmdctrl = cmd->opcode & CMD_IDX_MASK;
+-       if (cmdctrl == SD_APP_SET_BUS_WIDTH    || cmdctrl == SD_APP_OP_COND   ||
+-           cmdctrl == SD_APP_SEND_SCR         || cmdctrl == SD_APP_SD_STATUS ||
+-           cmdctrl == SD_APP_SEND_NUM_WR_BLKS)
++
++       /* If previous command was CMD55 set APP_CMD flag, except for CMD0(Reset) */
++       if ((host->app_cmd_flag) && cmd->opcode)
+                cmdctrl |= CMD_APP_CMD;
++       host->app_cmd_flag = false;
+
+        if (cmd->flags & MMC_RSP_PRESENT)
+                cmdctrl |= CMD_NEED_RSP;
+@@ -244,6 +248,11 @@ static void moxart_send_command(struct m
+                 } else {
+                         cmd->resp[0] = readl(host->base + REG_RESPONSE0);
+                 }
++
++ /* If CMD55 is sent sucessfully - next command will be interpreted as ACMD */
++               if ((!cmd->error) && (cmd->opcode==CMD_MMC_APP_CMD)) {
++                       host->app_cmd_flag = true;
++               }
+        }
+ }
+
+@@ -611,6 +621,7 @@ static int moxart_probe(struct platform_
+        host->fifo_width = readl(host->base + REG_FEATURE) << 2;
+        host->dma_chan_tx = dma_request_slave_channel_reason(dev, "tx");
+        host->dma_chan_rx = dma_request_slave_channel_reason(dev, "rx");
++       host->app_cmd_flag=false;
+
+        spin_lock_init(&host->lock);
