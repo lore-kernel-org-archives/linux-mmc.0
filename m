@@ -1,51 +1,80 @@
-From: Douglas Anderson <dianders@chromium.org>
-Subject: [PATCH 06/11] Documentation: mmc: sdhci-of-arasan: Add ability to export card clock
-Date: Tue,  7 Jun 2016 15:44:39 -0700
-Message-ID: <1465339484-969-7-git-send-email-dianders@chromium.org>
+From: Douglas Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
+Subject: [PATCH 08/11] Documentation: phy: Let the rockchip eMMC PHY get an
+ exported card clock
+Date: Tue,  7 Jun 2016 15:44:41 -0700
+Message-ID: <1465339484-969-9-git-send-email-dianders@chromium.org>
 References: <1465339484-969-1-git-send-email-dianders@chromium.org>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1465339484-969-1-git-send-email-dianders@chromium.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: ulf.hansson@linaro.org, kishon@ti.com, Heiko Stuebner <heiko@sntech.de>, robh+dt@kernel.org
-Cc: shawn.lin@rock-chips.com, xzy.xu@rock-chips.com, briannorris@chromium.org, adrian.hunter@intel.com, linux-rockchip@lists.infradead.org, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, Douglas Anderson <dianders@chromium.org>, pawel.moll@arm.com, mark.rutland@arm.com, ijc+devicetree@hellion.org.uk, galak@codeaurora.org, linux-kernel@vger.kernel.org
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+In-Reply-To: <1465339484-969-1-git-send-email-dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-rockchip>,
+ <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-rockchip/>
+List-Post: <mailto:linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+List-Help: <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-rockchip>,
+ <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
+Sender: "Linux-rockchip" <linux-rockchip-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+Errors-To: linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+To: ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, kishon-l0cyMroinI0@public.gmane.org, Heiko Stuebner <heiko-4mtYJXux2i+zQB+pC5nmwQ@public.gmane.org>, robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org
+Cc: mark.rutland-5wv7dgnIgG8@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, xzy.xu-TNX95d0MmH7DzftRWevZcw@public.gmane.org, pawel.moll-5wv7dgnIgG8@public.gmane.org, ijc+devicetree-KcIKpvwj1kUDXYZnReoRVg@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org, briannorris-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, Douglas Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, galak-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
 
-Some SD/eMMC PHYs (like the PHY from Arasan that is designed to work
-with arasan,sdhci-5.1) need to know the card clock in order to function
-properly.  Let's expose this clock using a standard device tree
-mechanism so that the PHY can get access to and query the card clock.
+As of an earlier change in this series ("Documentation: mmc:
+sdhci-of-arasan: Add ability to export card clock") the SDHCI driver
+used on Rockchip SoCs can now expose its clock.  Let's now specify that
+the PHY can use it.
 
-Signed-off-by: Douglas Anderson <dianders@chromium.org>
+Letting the PHY get access to this clock means it can adjust
+phyctrl_frqsel field appropriately.  Although the Rockchip PHY appears
+slightly different than the reference Arasan one, you can see that the
+Arasan datasheet [1] had it defined as:
+  Select the frequency range of DLL operation:
+  3b'000 => 200MHz to 170 MHz
+  3b'001 => 170MHz to 140 MHz
+  3b'010 => 140MHz to 110 MHz
+  3b'011 => 110MHz to 80MHz
+  3b'100 => 80MHz to 50 MHz
+  3b'101 => 275Mhz to 250MHz
+  3b'110 => 250MHz to 225MHz
+  3b'111 => 225MHz to 200MHz
+
+On the Rockchip version of the PHY we have less granularity but the idea
+is the same.
+
+[1]: https://arasan.com/wp-content/media/eMMC-5-1-Total-Solution_Rev-1-3.pdf
+
+Signed-off-by: Douglas Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
 ---
- Documentation/devicetree/bindings/mmc/arasan,sdhci.txt | 8 ++++++++
- 1 file changed, 8 insertions(+)
+ Documentation/devicetree/bindings/phy/rockchip-emmc-phy.txt | 7 +++++++
+ 1 file changed, 7 insertions(+)
 
-diff --git a/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt b/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
-index b67e623ca1ff..074d03e630ec 100644
---- a/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
-+++ b/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
-@@ -30,6 +30,12 @@ Optional Properties:
-   - arasan,soc-ctl-syscon: A phandle to a syscon device (see ../mfd/syscon.txt)
-     used to access core corecfg registers.  Offsets of registers in this
-     syscon are determined based on the main compatible string for the device.
-+  - clock-output-names: If specified, this will be the name of the card clock
-+    which will be exposed by this device.  Required if #clock-cells is
-+    specified.
-+  - #clock-cells: If specified this should be the value <0>.  With this property
-+    in place we will export a clock representing the Card Clock.  This clock
-+    is expected to be consumed by our PHY.  You must also specify
+diff --git a/Documentation/devicetree/bindings/phy/rockchip-emmc-phy.txt b/Documentation/devicetree/bindings/phy/rockchip-emmc-phy.txt
+index 555cb0f40690..fd118b071e5e 100644
+--- a/Documentation/devicetree/bindings/phy/rockchip-emmc-phy.txt
++++ b/Documentation/devicetree/bindings/phy/rockchip-emmc-phy.txt
+@@ -7,6 +7,11 @@ Required properties:
+  - reg: PHY register address offset and length in "general
+    register files"
  
++Optional clocks (see ../clock/clock-bindings.txt), specified by name:
++ - emmcclk: The card clock exported by the SDHCI driver.  Although this is
++	    listed as optional (because most boards can get basic functionality
++	    without having access to it), it is strongly suggested.
++
  Example:
- 	sdhci@e0100000 {
-@@ -61,7 +67,9 @@ Example:
- 		arasan,soc-ctl-syscon = <&grf>;
- 		assigned-clocks = <&cru SCLK_EMMC>;
- 		assigned-clock-rates = <200000000>;
-+		clock-output-names = "emmc_cardclock";
- 		phys = <&emmc_phy>;
- 		phy-names = "phy_arasan";
-+		#clock-cells = <0>;
- 		status = "disabled";
+ 
+ 
+@@ -20,6 +25,8 @@ grf: syscon@ff770000 {
+ 	emmcphy: phy@f780 {
+ 		compatible = "rockchip,rk3399-emmc-phy";
+ 		reg = <0xf780 0x20>;
++		clocks = <&sdhci>;
++		clock-names = "emmcclk";
+ 		#phy-cells = <0>;
  	};
+ };
 -- 
 2.8.0.rc3.226.g39d4020
