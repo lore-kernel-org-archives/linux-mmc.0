@@ -1,50 +1,68 @@
-From: Oliver Neukum <oneukum@suse.de>
-Subject: card detection incomplete with rtsx_pci in v4.7-rc1
-Date: Wed, 08 Jun 2016 12:41:28 +0200
-Message-ID: <1465382488.5421.8.camel@suse.de>
+From: Ingo Molnar <mingo@kernel.org>
+Subject: Re: [PATCH 01/20] [v2] x86, intel: Introduce macros for Intel family
+ numbers
+Date: Wed, 8 Jun 2016 13:01:47 +0200
+Message-ID: <20160608110147.GA32077@gmail.com>
+References: <20160603001927.F2A7D828@viggo.jf.intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mx2.suse.de ([195.135.220.15]:50527 "EHLO mx2.suse.de"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1161079AbcFHKpR (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 8 Jun 2016 06:45:17 -0400
-Received: from relay2.suse.de (charybdis-ext.suse.de [195.135.220.254])
-	by mx2.suse.de (Postfix) with ESMTP id 48EC2ABA5
-	for <linux-mmc@vger.kernel.org>; Wed,  8 Jun 2016 10:45:16 +0000 (UTC)
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <20160603001927.F2A7D828@viggo.jf.intel.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Dave Hansen <dave@sr71.net>
+Cc: linux-kernel@vger.kernel.org, x86@kernel.org, jacob.jun.pan@intel.com, dave.hansen@linux.intel.com, adrian.hunter@intel.com, ak@linux.intel.com, luto@kernel.org, bp@alien8.de, dvhart@infradead.org, dougthompson@xmission.com, edubezval@gmail.com, hpa@zytor.com, mingo@redhat.com, jacob.jun.pan@linux.intel.com, kan.liang@intel.com, lenb@kernel.org, linux-acpi@vger.kernel.org, linux-edac@vger.kernel.org, linux-mmc@vger.kernel.org, linux-pm@vger.kernel.org, mchehab@osg.samsung.com, peterz@infradead.org, platform-driver-x86@vger.kernel.org, rafael.j.wysocki@intel.com, rajneesh.bhardwaj@intel.com, souvik.k.chakravarty@intel.com, srinivas.pandruvada@linux.intel.com, eranian@google.com, tglx@linutronix.de, tony.luck@intel.com, ulf.hansson@linaro.org, viresh.kumar@linaro.org, vishwanath.somayaji@intel.com, rui.zhang@intel.com
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-
-Hi,
-
-I am seeing a regression (unfortunately the latest working version
-I tried it with is v3.17. I am seeing an event but it is not
-reported up:
-
-Jun 08 12:39:41 linux-dtbq.site kernel: rtsx_pci 0000:5d:00.0: --> rtsx_pci_card_detect
-Jun 08 12:39:41 linux-dtbq.site kernel: rtsx_pci 0000:5d:00.0: irq_status: 0x00010000
-Jun 08 12:39:41 linux-dtbq.site kernel: rtsx_pci 0000:5d:00.0: card_inserted: 0x10000, card_removed: 0x0
-
-But that's it.
-
-5d:00.0 Unassigned class [ff00]: Realtek Semiconductor Co., Ltd. RTS5249 PCI Express Card Reader [10ec:5249] (rev 01)
-        Subsystem: Hewlett-Packard Company Device [103c:190a]
-        Physical Slot: 7
-        Flags: bus master, fast devsel, latency 0, IRQ 30
-        Memory at cc800000 (32-bit, non-prefetchable) [size=4K]
-        Capabilities: [40] Power Management version 3
-        Capabilities: [50] MSI: Enable+ Count=1/1 Maskable- 64bit+
-        Capabilities: [70] Express Endpoint, MSI 00
-        Capabilities: [100] Advanced Error Reporting
-        Capabilities: [148] Device Serial Number 00-00-00-01-00-4c-e0-00
-        Capabilities: [158] Latency Tolerance Reporting
-        Capabilities: [160] L1 PM Substates
-        Kernel driver in use: rtsx_pci
-        Kernel modules: rtsx_pci
-
-	Regards
-		Oliver
 
 
+* Dave Hansen <dave@sr71.net> wrote:
+
+> 
+> Changes from v1:
+>  * added acks from a few folks
+>  * Took the redundant "MODEL_" out of the macro names (Suggested
+>    by Borislav Petkov and acked by others)
+> 
+> From: Dave Hansen <dave.hansen@linux.intel.com>
+> 
+> If you are cc'd on this code, please check _your_ code vs. the
+> model list in "intel-family.h".  Please make sure you have all
+> the models listed that you intend to.
+> 
+> Also, rather than trickling these in via all the various
+> maintainers, should these just get pulled in to the x86 tree in
+> one go?
+> 
+> Problem:
+> 
+> We have a boatload of open-coded family-6 model numbers.  Half of
+> them have these model numbers in hex and the other half in
+> decimal.  This makes grepping for them tons of fun, if you were
+> to try.
+> 
+> Solution:
+> 
+> Consolidate all the magic numbers.  Put all the definitions in
+> one header.
+> 
+> The names here are closely derived from the comments describing
+> the models from arch/x86/events/intel/core.c.  We could easily
+> make them shorter by doing things like s/SANDYBRIDGE/SNB/, but
+> they seemed fine even with the longer versions to me.
+> 
+> Do not take any of these names too literally, like "DESKTOP"
+> or "MOBILE".  These are all colloquial names and not precise
+> descriptions of everywhere a given model will show up.
+> 
+> These have all been compile-tested.  I also made a stab at
+> dumping .o files and looking for unexpected deltas when I was
+> just replacing magic numbers with equivalent macros.
+
+So I've picked up this series and restructured it: I've created a single patch 
+that creates intel-family.h and have put it into x86/urgent. This eliminated 
+dependencies and allowed some of the patches to be queued in their natural trees, 
+in particular the 7 perf patches.
+
+Thanks,
+
+	Ingo
