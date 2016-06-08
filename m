@@ -1,32 +1,41 @@
-From: Rob Herring <robh@kernel.org>
-Subject: Re: [RFC PATCH 1/4] Documentation: mmc: add description for new caps
-Date: Wed, 8 Jun 2016 15:48:48 -0500
-Message-ID: <20160608204848.GA3368@rob-hp-laptop>
-References: <1465373996-2485-1-git-send-email-shawn.lin@rock-chips.com>
- <1465374021-2526-1-git-send-email-shawn.lin@rock-chips.com>
+From: Doug Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
+Subject: Re: [PATCH 06/11] Documentation: mmc: sdhci-of-arasan: Add ability to
+ export card clock
+Date: Wed, 8 Jun 2016 13:52:20 -0700
+Message-ID: <CAD=FV=WX_bu-dmALkSmPPrWeatfjJND3M59GJoVEr6bv0vLq9Q@mail.gmail.com>
+References: <1465339484-969-1-git-send-email-dianders@chromium.org>
+ <1465339484-969-7-git-send-email-dianders@chromium.org> <20160608201923.GA20683@rob-hp-laptop>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-oi0-f48.google.com ([209.85.218.48]:36263 "EHLO
-	mail-oi0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1424670AbcFHUsu (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 8 Jun 2016 16:48:50 -0400
-Content-Disposition: inline
-In-Reply-To: <1465374021-2526-1-git-send-email-shawn.lin@rock-chips.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <20160608201923.GA20683@rob-hp-laptop>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Rob Herring <robh-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+Cc: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Kishon Vijay Abraham I <kishon-l0cyMroinI0@public.gmane.org>, Heiko Stuebner <heiko-4mtYJXux2i+zQB+pC5nmwQ@public.gmane.org>, Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>, Ziyuan Xu <xzy.xu-TNX95d0MmH7DzftRWevZcw@public.gmane.org>, Brian Norris <briannorris-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "open list:ARM/Rockchip SoC..." <linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Pawel Moll <pawel.moll-5wv7dgnIgG8@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Ian Campbell <ijc+devicetree-KcIKpvwj1kUDXYZnReoRVg@public.gmane.org>, Kumar Gala <galak-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Shawn Lin <shawn.lin@rock-chips.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Jaehoon Chung <jh80.chung@samsung.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Doug Anderson <dianders@chromium.org>, linux-rockchip@lists.infradead.org, devicetree@vger.kernel.org
 
-On Wed, Jun 08, 2016 at 04:20:21PM +0800, Shawn Lin wrote:
-> Let's add some basic description for cap-no-sdio,
-> cap-no-sd and cap-no-mmc.
+Rob,
 
-This doesn't say why.
+On Wed, Jun 8, 2016 at 1:19 PM, Rob Herring <robh-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org> wrote:
+> On Tue, Jun 07, 2016 at 03:44:39PM -0700, Douglas Anderson wrote:
+>> Some SD/eMMC PHYs (like the PHY from Arasan that is designed to work
+>> with arasan,sdhci-5.1) need to know the card clock in order to function
+>> properly.  Let's expose this clock using a standard device tree
+>> mechanism so that the PHY can get access to and query the card clock.
+>
+> Need to know the clock freq or need the clock? The former doesn't need
+> to be in DT.
 
-If you know what is there, then there's a better way to do this. Look at 
-the child nodes because chances are if you have something soldered down 
-like SDIO or eMMC, then you have a child node already for resets, 
-regulators, etc.
+The PHY needs to know the card clock frequency.  This clock clock
+frequency is known nowhere else in the system except the SDHCI driver
+since the SDHCI component takes its input clock and applies some
+dividers to get the card clock.  In silicon, the SDHCI component and
+the PHY are separate and there is a physical clock signal going from
+the SDHCI component to the PHY component, so modeling this as a clock
+in in the device tree seems sane, doesn't it?
 
-Rob
+-Doug
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
