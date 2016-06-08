@@ -1,59 +1,60 @@
 From: Rob Herring <robh@kernel.org>
-Subject: Re: [PATCH v3 06/12] power: pwrseq: simple: Add support for
- regulator and generic property
-Date: Wed, 8 Jun 2016 14:03:33 -0500
-Message-ID: <20160608190333.GA5126@rob-hp-laptop>
-References: <1464768141-25420-1-git-send-email-k.kozlowski@samsung.com>
- <1464768141-25420-7-git-send-email-k.kozlowski@samsung.com>
- <20160603020218.GA19436@rob-hp-laptop>
- <575693DE.2010603@samsung.com>
+Subject: Re: [PATCH 03/11] Documentation: mmc: sdhci-of-arasan: Add
+ soc-ctl-syscon for corecfg regs
+Date: Wed, 8 Jun 2016 15:17:29 -0500
+Message-ID: <20160608201729.GA17782@rob-hp-laptop>
+References: <1465339484-969-1-git-send-email-dianders@chromium.org>
+ <1465339484-969-4-git-send-email-dianders@chromium.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-oi0-f67.google.com ([209.85.218.67]:34870 "EHLO
+	mail-oi0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751592AbcFHURb (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 8 Jun 2016 16:17:31 -0400
 Content-Disposition: inline
-In-Reply-To: <575693DE.2010603@samsung.com>
-Sender: linux-samsung-soc-owner@vger.kernel.org
-To: Krzysztof Kozlowski <k.kozlowski@samsung.com>
-Cc: hzpeterchen@gmail.com, Ulf Hansson <ulf.hansson@linaro.org>, Sebastian Reichel <sre@kernel.org>, Dmitry Eremin-Solenikov <dbaryshkov@gmail.com>, David Woodhouse <dwmw2@infradead.org>, Javier Martinez Canillas <javier@osg.samsung.com>, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, linux-pm@vger.kernel.or, Alan Stern <stern@rowland.harvard.edu>, linux-usb@vger.kernel.org, Pawel Moll <pawel.moll@arm.com>, Mark Rutland <mark.rutland@arm.com>, Ian Campbell <ijc+devicetree@hellion.org.uk>, Kumar Gala <galak@codeaurora.org>, Kukjin Kim <kgene@kernel.org>, devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-samsung-soc@vger.kernel.org, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>
+In-Reply-To: <1465339484-969-4-git-send-email-dianders@chromium.org>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Douglas Anderson <dianders@chromium.org>
+Cc: ulf.hansson@linaro.org, kishon@ti.com, Heiko Stuebner <heiko@sntech.de>, shawn.lin@rock-chips.com, xzy.xu@rock-chips.com, briannorris@chromium.org, adrian.hunter@intel.com, linux-rockchip@lists.infradead.org, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, pawel.moll@arm.com, mark.rutland@arm.com, ijc+devicetree@hellion.org.uk, galak@codeaurora.org, linux-kernel@vger.kernel.org
 
-On Tue, Jun 07, 2016 at 11:29:02AM +0200, Krzysztof Kozlowski wrote:
-> On 06/03/2016 04:02 AM, Rob Herring wrote:
-> >>  Optional properties:
-> >>  - reset-gpios : contains a list of GPIO specifiers. The reset GPIOs are asserted
-> >> @@ -16,6 +22,7 @@ Optional properties:
-> >>    See ../clocks/clock-bindings.txt for details.
-> >>  - clock-names : Must include the following entry:
-> >>    "ext_clock" (External clock provided to the card).
-> >> +- ext-supply : External regulator supply
-> > 
-> > What happens when there are 2 supplies?
-> > 
-> > I'd prefer the name not be genericish and use the real supply names. 
-> > Then the power seq code should just turn on all supplies it finds. If 
-> > the order or timing to turn on matters, then sorry, no generic sequence.
+On Tue, Jun 07, 2016 at 03:44:36PM -0700, Douglas Anderson wrote:
+> As can be seen in Arasan's datasheet [1] there are several "corecfg"
+> settings in their SDHCI IP Block that are supposed to be controlled by
+> software.  Although the datasheet referenced is a bit vague about how to
+> access corecfg, in Figure 5 you can see that for Arasan's PHY (a
+> separate component than their SDHCI component) they describe the
+> "phyctrl" registers as being "FROM SOC CTL REG", implying that it's up
+> to the licensee of the Arasan IP block to implement these registers.  It
+> seems sane to assume that the "corecfg" registers in their SDHCI IP
+> block works in a similar way for all licensees of the IP Block.
 > 
-> I think the generic part for regulators might be a problem. Regulator
-> API requires a name for the supply... it cannot get "something" or
-> "everything".
-
-That's the downside of variable property names...
-
-> The driver could attach itself to any kind of node (where power-sequence
-> property exists) so the supply name depends on the bindings of device
-> (not bindings of power sequence driver).
+> Device tree has a model that allows a device to get a reference to
+> random registers located elsewhere in the SoC: sysctl.  Let's leverage
+> this model and allow adding a sysctl reference to access the control
+> registers for the Arasan SDHCI PHYs.
 > 
-> The power sequence driver could however iterate over child properties
-> and get the names of all supplies. It is a little bit ugly...
+> Having a reference to the control registers doesn't do much for us on
+> its own since the Arasan spec doesn't specify how these corecfg values
+> are laid out in memory.  In the SDHCI driver we'll need a map detailing
+> where each corecfg can be found in each implementation.  This map can be
+> found using the primary compatible string of the SDHCI device.  In that
+> spirit, document that existing rk3399 device trees already have a
+> specific compatible string, though up to now they've always been relying
+> on the driver supporting the generic.
+> 
+> Note that since existing devices seem to work fairly well as-is, we'll
+> list the syscon reference as "optional", but it's likely that we'll run
+> into much fewer problems if we can actually set the proper values in the
+> syscon, so it is strongly suggested that any SoCs where we have a map to
+> set the corecfg also include a reference to the syscon.
+> 
+> [1]: https://arasan.com/wp-content/media/eMMC-5-1-Total-Solution_Rev-1-3.pdf
+> 
+> Signed-off-by: Douglas Anderson <dianders@chromium.org>
+> ---
+>  .../devicetree/bindings/mmc/arasan,sdhci.txt       | 27 ++++++++++++++++++++--
+>  1 file changed, 25 insertions(+), 2 deletions(-)
 
-Yes. Like this, right?
-
-for_each_property_of_node(np, pp) {
-	if (!strstr(pp->name, "-supply"))
-		continue;
-	// found supply
-}
-
-The uglyness can always be improved with a function to do this parsing.
-
-Rob
+Acked-by: Rob Herring <robh@kernel.org>
