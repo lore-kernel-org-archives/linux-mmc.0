@@ -1,60 +1,50 @@
-From: Peter Griffin <peter.griffin@linaro.org>
-Subject: [PATCH v2] mmc: core: Only change mode if mmc_select_bus_width() is successful.
-Date: Wed,  8 Jun 2016 11:27:52 +0100
-Message-ID: <1465381672-9772-1-git-send-email-peter.griffin@linaro.org>
+From: Oliver Neukum <oneukum@suse.de>
+Subject: card detection incomplete with rtsx_pci in v4.7-rc1
+Date: Wed, 08 Jun 2016 12:41:28 +0200
+Message-ID: <1465382488.5421.8.camel@suse.de>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wm0-f44.google.com ([74.125.82.44]:37813 "EHLO
-	mail-wm0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1423210AbcFHK17 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 8 Jun 2016 06:27:59 -0400
-Received: by mail-wm0-f44.google.com with SMTP id k204so10226133wmk.0
-        for <linux-mmc@vger.kernel.org>; Wed, 08 Jun 2016 03:27:58 -0700 (PDT)
+Received: from mx2.suse.de ([195.135.220.15]:50527 "EHLO mx2.suse.de"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1161079AbcFHKpR (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 8 Jun 2016 06:45:17 -0400
+Received: from relay2.suse.de (charybdis-ext.suse.de [195.135.220.254])
+	by mx2.suse.de (Postfix) with ESMTP id 48EC2ABA5
+	for <linux-mmc@vger.kernel.org>; Wed,  8 Jun 2016 10:45:16 +0000 (UTC)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, kernel@stlinux.com, ulf.hansson@linaro.org, adrian.hunter@intel.com
-Cc: peter.griffin@linaro.org, lee.jones@linaro.org, linux-mmc@vger.kernel.org, Chen-Yu Tsai <wens@csie.org>, Arnd Bergmann <arnd@arndb.de>
+To: linux-mmc@vger.kernel.org
 
-mmc_select_bus_width() returns bus width (4 or 8) on success or
-zero if unsupported. So only change mode if setting the bus width
-is successful.
+Hi,
 
-Fixes f741494 mmc: fix mmc mode selection for HS-DDR and higher
-Fixes: 287980e (remove lots of IS_ERR_VALUE abuses)
+I am seeing a regression (unfortunately the latest working version
+I tried it with is v3.17. I am seeing an event but it is not
+reported up:
 
-Signed-off-by: Peter Griffin <peter.griffin@linaro.org>
-Cc: Chen-Yu Tsai <wens@csie.org>
-Cc: Arnd Bergmann <arnd@arndb.de>
+Jun 08 12:39:41 linux-dtbq.site kernel: rtsx_pci 0000:5d:00.0: --> rtsx_pci_card_detect
+Jun 08 12:39:41 linux-dtbq.site kernel: rtsx_pci 0000:5d:00.0: irq_status: 0x00010000
+Jun 08 12:39:41 linux-dtbq.site kernel: rtsx_pci 0000:5d:00.0: card_inserted: 0x10000, card_removed: 0x0
 
----
+But that's it.
 
-v2: Rebase on v4.7-rc2 which includes a fix from Chen-Yu and update
-    commit message.
----
- drivers/mmc/core/mmc.c | 4 ++--
- 1 file changed, 2 insertions(+), 2 deletions(-)
+5d:00.0 Unassigned class [ff00]: Realtek Semiconductor Co., Ltd. RTS5249 PCI Express Card Reader [10ec:5249] (rev 01)
+        Subsystem: Hewlett-Packard Company Device [103c:190a]
+        Physical Slot: 7
+        Flags: bus master, fast devsel, latency 0, IRQ 30
+        Memory at cc800000 (32-bit, non-prefetchable) [size=4K]
+        Capabilities: [40] Power Management version 3
+        Capabilities: [50] MSI: Enable+ Count=1/1 Maskable- 64bit+
+        Capabilities: [70] Express Endpoint, MSI 00
+        Capabilities: [100] Advanced Error Reporting
+        Capabilities: [148] Device Serial Number 00-00-00-01-00-4c-e0-00
+        Capabilities: [158] Latency Tolerance Reporting
+        Capabilities: [160] L1 PM Substates
+        Kernel driver in use: rtsx_pci
+        Kernel modules: rtsx_pci
 
-diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-index 5d438ad..aafb73d 100644
---- a/drivers/mmc/core/mmc.c
-+++ b/drivers/mmc/core/mmc.c
-@@ -1276,7 +1276,7 @@ static int mmc_select_hs200(struct mmc_card *card)
- 	 * switch to HS200 mode if bus width is set successfully.
- 	 */
- 	err = mmc_select_bus_width(card);
--	if (err >= 0) {
-+	if (err > 0) {
- 		val = EXT_CSD_TIMING_HS200 |
- 		      card->drive_strength << EXT_CSD_DRV_STR_SHIFT;
- 		err = __mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
-@@ -1583,7 +1583,7 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
- 	} else if (mmc_card_hs(card)) {
- 		/* Select the desired bus width optionally */
- 		err = mmc_select_bus_width(card);
--		if (err >= 0) {
-+		if (err > 0) {
- 			err = mmc_select_hs_ddr(card);
- 			if (err)
- 				goto free_card;
--- 
-1.9.1
+	Regards
+		Oliver
+
 
