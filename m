@@ -1,89 +1,70 @@
-From: Seung-Woo Kim <sw0312.kim@samsung.com>
-Subject: [PATCH] mmc: dw_mmc: remove UBSAN warning in dw_mci_setup_bus()
-Date: Wed, 08 Jun 2016 13:07:20 +0900
-Message-ID: <1465358840-22826-1-git-send-email-sw0312.kim@samsung.com>
+From: Shawn Lin <shawn.lin@rock-chips.com>
+Subject: [RFC PATCH 0/4] Introduce new caps to improve the card's init sequence
+Date: Wed,  8 Jun 2016 16:19:56 +0800
+Message-ID: <1465373996-2485-1-git-send-email-shawn.lin@rock-chips.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout3.samsung.com ([203.254.224.33]:41552 "EHLO
-	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751194AbcFHEG5 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 8 Jun 2016 00:06:57 -0400
+Received: from lucky1.263xmail.com ([211.157.147.134]:48686 "EHLO
+	lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756384AbcFHIUX (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 8 Jun 2016 04:20:23 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: jh80.chung@samsung.com, ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, sw0312.kim@samsung.com
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Jaehoon Chung <jh80.chung@samsung.com>, Rob Herring <robh+dt@kernel.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Doug Anderson <dianders@chromium.org>, linux-rockchip@lists.infradead.org, devicetree@vger.kernel.org, Shawn Lin <shawn.lin@rock-chips.com>
 
-This patch removes following UBSAN warnings in dw_mci_setup_bus().
-The warnings are caused because of shift with more than 31 on 32
-bit variable, so this patch fixes to shift only for less than 32.
 
-  UBSAN: Undefined behaviour in drivers/mmc/host/dw_mmc.c:1102:14
-  shift exponent 250 is too large for 32-bit type 'unsigned int'
-  Call trace:
-  [<ffffff90080908a8>] dump_backtrace+0x0/0x380
-  [<ffffff9008090c3c>] show_stack+0x14/0x20
-  [<ffffff90087457b8>] dump_stack+0xe0/0x120
-  [<ffffff90087b1360>] ubsan_epilogue+0x18/0x68
-  [<ffffff90087b1a94>] __ubsan_handle_shift_out_of_bounds+0x18c/0x1bc
-  [<ffffff9008d89cb8>] dw_mci_setup_bus+0x3a0/0x438
-  [...]
+Hi all,
 
-  UBSAN: Undefined behaviour in drivers/mmc/host/dw_mmc.c:1132:27
-  shift exponent 250 is too large for 32-bit type 'unsigned int'
-  Call trace:
-  [<ffffff90080908a8>] dump_backtrace+0x0/0x380
-  [<ffffff9008090c3c>] show_stack+0x14/0x20
-  [<ffffff90087457b8>] dump_stack+0xe0/0x120
-  [<ffffff90087b1360>] ubsan_epilogue+0x18/0x68
-  [<ffffff90087b1a94>] __ubsan_handle_shift_out_of_bounds+0x18c/0x1bc
-  [<ffffff9008d89c9c>] dw_mci_setup_bus+0x384/0x438
-  [<ffffff9008d89ed4>] dw_mci_set_ios+0x184/0x798
-  [<ffffff9008d550ac>] mmc_power_up+0x11c/0x260
-  [<ffffff9008d56b78>] mmc_start_host+0x88/0x100
-  [<ffffff9008d583f4>] mmc_add_host+0x6c/0x128
-  [<ffffff9008d88f90>] dw_mci_probe+0x1088/0x1750
-  [<ffffff9008d8caa8>] dw_mci_pltfm_register+0x108/0x178
-  [<ffffff9008d8dae4>] dw_mci_exynos_probe+0x4c/0x88
-  [<ffffff9008a03838>] platform_drv_probe+0x78/0x180
-  [<ffffff90089fe9fc>] driver_probe_device+0x144/0x460
-  [<ffffff90089fee0c>] __driver_attach+0xf4/0x140
-  [<ffffff90089fad98>] bus_for_each_dev+0xf0/0x160
-  [<ffffff90089fdc9c>] driver_attach+0x34/0x58
-  [<ffffff90089fd3e0>] bus_add_driver+0x2c0/0x398
-  [<ffffff9008a00924>] driver_register+0xbc/0x1e0
-  [<ffffff9008a02a94>] __platform_driver_register+0x84/0xa8
-  [<ffffff9009dd5730>] dw_mci_exynos_pltfm_driver_init+0x18/0x20
-  [<ffffff9008082df8>] do_one_initcall+0xa0/0x2c8
-  [<ffffff9009d81780>] kernel_init_freeable+0x52c/0x5dc
-  [<ffffff9009519844>] kernel_init+0x1c/0xf8
-  [<ffffff9008086e10>] ret_from_fork+0x10/0x40
+This patchset is gonna improve the card's init sequence
+by exposing some caps to DT.
 
-Signed-off-by: Seung-Woo Kim <sw0312.kim@samsung.com>
----
- drivers/mmc/host/dw_mmc.c |    5 +++--
- 1 files changed, 3 insertions(+), 2 deletions(-)
+The basic idea is to skip sending specific init cmd inspired
+by Carlo Caione's commit[0].
 
-diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index 2cc6123..dff045e 100644
---- a/drivers/mmc/host/dw_mmc.c
-+++ b/drivers/mmc/host/dw_mmc.c
-@@ -1099,7 +1099,8 @@ static void dw_mci_setup_bus(struct dw_mci_slot *slot, bool force_clkinit)
- 
- 		div = (host->bus_hz != clock) ? DIV_ROUND_UP(div, 2) : 0;
- 
--		if ((clock << div) != slot->__clk_old || force_clkinit)
-+		if (((div < 32) ? (clock << div) : 0) != slot->__clk_old ||
-+		    force_clkinit)
- 			dev_info(&slot->mmc->class_dev,
- 				 "Bus speed (slot %d) = %dHz (slot req %dHz, actual %dHZ div = %d)\n",
- 				 slot->id, host->bus_hz, clock,
-@@ -1129,7 +1130,7 @@ static void dw_mci_setup_bus(struct dw_mci_slot *slot, bool force_clkinit)
- 		mci_send_cmd(slot, sdmmc_cmd_bits, 0);
- 
- 		/* keep the clock with reflecting clock dividor */
--		slot->__clk_old = clock << div;
-+		slot->__clk_old = (div < 32) ? (clock << div) : 0;
- 	}
- 
- 	host->current_speed = clock;
+To make it possible, I firstly expose Carlo's MMC_CAP2_NO_SDIO
+to DT and extend two new caps for similar usage of sd and mmc.
+We probably need it because for most of the boards, each of the
+slots should have a specific function when designed. It's impossible
+for one slot which can either to be used as eMMC or a SD card for a
+given board. The same for SDIO case.
+
+We could have two ways to improve it
+A) Skip sending specific commands if knowing we don't support
+the specific card type.
+B) Allow sending specific commands if knowing we do support
+the specific card type.
+
+A) and B) shouldn't have difference, but I take A) as the final
+one as it looks more consistent with Carlo's way, which does not
+seem to break anything as possible.
+
+The only roadblock for this patchset to be landed should be the
+improvement we gain from it. Theoretically sdio-card doesn't get
+improvment as it's already in the first place to be attached.
+But considering the sd and (e)MMC case, we should gain more benifit
+from it.
+
+>From the test, we can save nearly 2ms for attaching emmc against the
+original 8ms. And we gain more than 30us improvement for sd card for
+each insert.
+
+[0]: http://permalink.gmane.org/gmane.linux.kernel.mmc/34774
+
+
+
+Shawn Lin (4):
+  Documentation: mmc: add description for new caps
+  mmc: core: expose MMC_CAP2_NO_SDIO to dt-binding
+  mmc: core: add cap-no-sd and cap-no-mmc properties
+  mmc: core: improve initialization flow
+
+ Documentation/devicetree/bindings/mmc/mmc.txt |  3 +++
+ drivers/mmc/core/core.c                       | 10 +++++-----
+ drivers/mmc/core/host.c                       |  6 ++++++
+ include/linux/mmc/host.h                      |  2 ++
+ 4 files changed, 16 insertions(+), 5 deletions(-)
+
 -- 
-1.7.4.1
+2.3.7
+
 
