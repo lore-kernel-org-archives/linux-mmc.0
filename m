@@ -1,125 +1,89 @@
-From: Shawn Lin <shawn.lin@rock-chips.com>
-Subject: Re: [PATCH v3 1/2] mmc: API for accessing host supported maximum
- segment count and size
-Date: Wed, 8 Jun 2016 10:01:19 +0800
-Message-ID: <589930e6-f253-58cf-f0fd-91d0c80a11bf@rock-chips.com>
-References: <1465213989-32218-1-git-send-email-akarwar@marvell.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=gbk; format=flowed
-Content-Transfer-Encoding: 7bit
+From: Seung-Woo Kim <sw0312.kim@samsung.com>
+Subject: [PATCH] mmc: dw_mmc: remove UBSAN warning in dw_mci_setup_bus()
+Date: Wed, 08 Jun 2016 13:07:20 +0900
+Message-ID: <1465358840-22826-1-git-send-email-sw0312.kim@samsung.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from lucky1.263xmail.com ([211.157.147.131]:46183 "EHLO
-	lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752341AbcFHCCc (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 7 Jun 2016 22:02:32 -0400
-In-Reply-To: <1465213989-32218-1-git-send-email-akarwar@marvell.com>
+Received: from mailout3.samsung.com ([203.254.224.33]:41552 "EHLO
+	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751194AbcFHEG5 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 8 Jun 2016 00:06:57 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Amitkumar Karwar <akarwar@marvell.com>, linux-wireless@vger.kernel.org
-Cc: Nishant Sarmukadam <nishants@marvell.com>, Wei-Ning Huang <wnhuang@chromium.org>, linux-mmc@vger.kernel.org, Cathy Luo <cluo@marvell.com>, Xinming Hu <huxm@marvell.com>, shawn.lin@rock-chips.com
+To: jh80.chung@samsung.com, ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, sw0312.kim@samsung.com
 
-Hi
+This patch removes following UBSAN warnings in dw_mci_setup_bus().
+The warnings are caused because of shift with more than 31 on 32
+bit variable, so this patch fixes to shift only for less than 32.
 
-On 2016-6-6 19:53, Amitkumar Karwar wrote:
-> From: Xinming Hu <huxm@marvell.com>
->
-> sdio device drivers need be able to get the host supported max_segs
-> and max_seg_size, so that they know the buffer size to allocate while
-> utilizing the scatter/gather DMA buffer list.
->
-> This patch provides API for this purpose.
->
-> Signed-off-by: Xinming Hu <huxm@marvell.com>
-> Signed-off-by: Amitkumar Karwar <akarwar@marvell.com>
-> ---
-> v2: v2 was submitted with minor improvement like replacing BUG_ON() with WARN_ON()
-> v3: Addressed below review comments from Ulf Hansson
->      a) In v3, patch has been split into two separate patches.
->      b) Patch 1/2 introduces an API to fetch max_seg_size and max_segs
->      c) Replaced WARN_ON() with proper error code when sg_ptr->length is invalid
->      d) Instead of duplicating the code in mmc_io_rw_extended(), extra bool parameter
->         has been added to this function and used it in new APIs for SG.
-> ---
->   drivers/mmc/core/sdio_io.c                         | 27 ++++++++++++++++++++++
->   .../wireless/broadcom/brcm80211/brcmfmac/bcmsdh.c  |  6 ++---
->   include/linux/mmc/sdio_func.h                      |  3 +++
->   3 files changed, 33 insertions(+), 3 deletions(-)
->
-> diff --git a/drivers/mmc/core/sdio_io.c b/drivers/mmc/core/sdio_io.c
-> index 78cb4d5..a546c89 100644
-> --- a/drivers/mmc/core/sdio_io.c
-> +++ b/drivers/mmc/core/sdio_io.c
-> @@ -720,3 +720,30 @@ int sdio_set_host_pm_flags(struct sdio_func *func, mmc_pm_flag_t flags)
->   	return 0;
->   }
->   EXPORT_SYMBOL_GPL(sdio_set_host_pm_flags);
-> +
-> +/**
-> + *	sdio_get_host_max_seg_size - get host maximum segment size
-> + *	@func: SDIO function attached to host
-> + */
-> +unsigned int sdio_get_host_max_seg_size(struct sdio_func *func)
-> +{
-> +	WARN_ON(!func);
-> +	WARN_ON(!func->card);
-> +
-> +	return func->card->host->max_seg_size;
-> +}
-> +EXPORT_SYMBOL_GPL(sdio_get_host_max_seg_size);
-> +
-> +/**
-> + *	sdio_get_host_max_seg_count - get host maximum segment count
-> + *	@func: SDIO function attached to host
-> + */
-> +unsigned short sdio_get_host_max_seg_count(struct sdio_func *func)
-> +{
-> +	WARN_ON(!func);
-> +	WARN_ON(!func->card);
-> +
+  UBSAN: Undefined behaviour in drivers/mmc/host/dw_mmc.c:1102:14
+  shift exponent 250 is too large for 32-bit type 'unsigned int'
+  Call trace:
+  [<ffffff90080908a8>] dump_backtrace+0x0/0x380
+  [<ffffff9008090c3c>] show_stack+0x14/0x20
+  [<ffffff90087457b8>] dump_stack+0xe0/0x120
+  [<ffffff90087b1360>] ubsan_epilogue+0x18/0x68
+  [<ffffff90087b1a94>] __ubsan_handle_shift_out_of_bounds+0x18c/0x1bc
+  [<ffffff9008d89cb8>] dw_mci_setup_bus+0x3a0/0x438
+  [...]
 
-I believe these two WARN_ON may be called too late because ...
+  UBSAN: Undefined behaviour in drivers/mmc/host/dw_mmc.c:1132:27
+  shift exponent 250 is too large for 32-bit type 'unsigned int'
+  Call trace:
+  [<ffffff90080908a8>] dump_backtrace+0x0/0x380
+  [<ffffff9008090c3c>] show_stack+0x14/0x20
+  [<ffffff90087457b8>] dump_stack+0xe0/0x120
+  [<ffffff90087b1360>] ubsan_epilogue+0x18/0x68
+  [<ffffff90087b1a94>] __ubsan_handle_shift_out_of_bounds+0x18c/0x1bc
+  [<ffffff9008d89c9c>] dw_mci_setup_bus+0x384/0x438
+  [<ffffff9008d89ed4>] dw_mci_set_ios+0x184/0x798
+  [<ffffff9008d550ac>] mmc_power_up+0x11c/0x260
+  [<ffffff9008d56b78>] mmc_start_host+0x88/0x100
+  [<ffffff9008d583f4>] mmc_add_host+0x6c/0x128
+  [<ffffff9008d88f90>] dw_mci_probe+0x1088/0x1750
+  [<ffffff9008d8caa8>] dw_mci_pltfm_register+0x108/0x178
+  [<ffffff9008d8dae4>] dw_mci_exynos_probe+0x4c/0x88
+  [<ffffff9008a03838>] platform_drv_probe+0x78/0x180
+  [<ffffff90089fe9fc>] driver_probe_device+0x144/0x460
+  [<ffffff90089fee0c>] __driver_attach+0xf4/0x140
+  [<ffffff90089fad98>] bus_for_each_dev+0xf0/0x160
+  [<ffffff90089fdc9c>] driver_attach+0x34/0x58
+  [<ffffff90089fd3e0>] bus_add_driver+0x2c0/0x398
+  [<ffffff9008a00924>] driver_register+0xbc/0x1e0
+  [<ffffff9008a02a94>] __platform_driver_register+0x84/0xa8
+  [<ffffff9009dd5730>] dw_mci_exynos_pltfm_driver_init+0x18/0x20
+  [<ffffff9008082df8>] do_one_initcall+0xa0/0x2c8
+  [<ffffff9009d81780>] kernel_init_freeable+0x52c/0x5dc
+  [<ffffff9009519844>] kernel_init+0x1c/0xf8
+  [<ffffff9008086e10>] ret_from_fork+0x10/0x40
 
-drivers/net/wireless/broadcom/brcm80211/brcmfmac/bcmsdh.c
+Signed-off-by: Seung-Woo Kim <sw0312.kim@samsung.com>
+---
+ drivers/mmc/host/dw_mmc.c |    5 +++--
+ 1 files changed, 3 insertions(+), 2 deletions(-)
 
-void brcmf_sdiod_sgtable_alloc(struct brcmf_sdio_dev *sdiodev)
-
-func = sdiodev->func[2];
-host = func->card->host;
-
-you have unconditionally thought it should be ready.
-
-> +	return func->card->host->max_segs;
-> +}
-> +EXPORT_SYMBOL_GPL(sdio_get_host_max_seg_count);
-> +
-> diff --git a/drivers/net/wireless/broadcom/brcm80211/brcmfmac/bcmsdh.c b/drivers/net/wireless/broadcom/brcm80211/brcmfmac/bcmsdh.c
-> index c4b89d2..ba579f4 100644
-> --- a/drivers/net/wireless/broadcom/brcm80211/brcmfmac/bcmsdh.c
-> +++ b/drivers/net/wireless/broadcom/brcm80211/brcmfmac/bcmsdh.c
-> @@ -896,9 +896,9 @@ void brcmf_sdiod_sgtable_alloc(struct brcmf_sdio_dev *sdiodev)
->   	max_blocks = min_t(uint, host->max_blk_count, 511u);
->   	sdiodev->max_request_size = min_t(uint, host->max_req_size,
->   					  max_blocks * func->cur_blksize);
-> -	sdiodev->max_segment_count = min_t(uint, host->max_segs,
-> -					   SG_MAX_SINGLE_ALLOC);
-> -	sdiodev->max_segment_size = host->max_seg_size;
-> +	sdiodev->max_segment_count = min_t(uint, SG_MAX_SINGLE_ALLOC,
-> +					   sdio_get_host_max_seg_count(func));
-> +	sdiodev->max_segment_size = sdio_get_host_max_seg_size(func);
->   
->   	if (!sdiodev->sg_support)
->   		return;
-> diff --git a/include/linux/mmc/sdio_func.h b/include/linux/mmc/sdio_func.h
-> index aab032a..b2b91df 100644
-> --- a/include/linux/mmc/sdio_func.h
-> +++ b/include/linux/mmc/sdio_func.h
-> @@ -159,4 +159,7 @@ extern void sdio_f0_writeb(struct sdio_func *func, unsigned char b,
->   extern mmc_pm_flag_t sdio_get_host_pm_caps(struct sdio_func *func);
->   extern int sdio_set_host_pm_flags(struct sdio_func *func, mmc_pm_flag_t flags);
->   
-> +unsigned short sdio_get_host_max_seg_count(struct sdio_func *func);
-> +unsigned int sdio_get_host_max_seg_size(struct sdio_func *func);
-> +
->   #endif /* LINUX_MMC_SDIO_FUNC_H */
-
+diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+index 2cc6123..dff045e 100644
+--- a/drivers/mmc/host/dw_mmc.c
++++ b/drivers/mmc/host/dw_mmc.c
+@@ -1099,7 +1099,8 @@ static void dw_mci_setup_bus(struct dw_mci_slot *slot, bool force_clkinit)
+ 
+ 		div = (host->bus_hz != clock) ? DIV_ROUND_UP(div, 2) : 0;
+ 
+-		if ((clock << div) != slot->__clk_old || force_clkinit)
++		if (((div < 32) ? (clock << div) : 0) != slot->__clk_old ||
++		    force_clkinit)
+ 			dev_info(&slot->mmc->class_dev,
+ 				 "Bus speed (slot %d) = %dHz (slot req %dHz, actual %dHZ div = %d)\n",
+ 				 slot->id, host->bus_hz, clock,
+@@ -1129,7 +1130,7 @@ static void dw_mci_setup_bus(struct dw_mci_slot *slot, bool force_clkinit)
+ 		mci_send_cmd(slot, sdmmc_cmd_bits, 0);
+ 
+ 		/* keep the clock with reflecting clock dividor */
+-		slot->__clk_old = clock << div;
++		slot->__clk_old = (div < 32) ? (clock << div) : 0;
+ 	}
+ 
+ 	host->current_speed = clock;
+-- 
+1.7.4.1
 
