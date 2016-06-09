@@ -1,319 +1,83 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: [PATCH RFC 41/46] mmc: block: Introduce queue semantics
-Date: Thu,  9 Jun 2016 14:52:41 +0300
-Message-ID: <1465473166-22532-42-git-send-email-adrian.hunter@intel.com>
-References: <1465473166-22532-1-git-send-email-adrian.hunter@intel.com>
+From: Gregory CLEMENT <gregory.clement@free-electrons.com>
+Subject: Re: [PATCH 03/12] mmc: tegra: restrict the voltage_switch() callback to the 1.8V case
+Date: Thu, 09 Jun 2016 14:27:16 +0200
+Message-ID: <8737omo8d7.fsf@free-electrons.com>
+References: <1465456218-28354-1-git-send-email-gregory.clement@free-electrons.com>
+	<1465456218-28354-4-git-send-email-gregory.clement@free-electrons.com>
+	<1465466097.18807.7.camel@lynxeye.de>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga01.intel.com ([192.55.52.88]:48207 "EHLO mga01.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751613AbcFIL7b (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 9 Jun 2016 07:59:31 -0400
-In-Reply-To: <1465473166-22532-1-git-send-email-adrian.hunter@intel.com>
+Received: from down.free-electrons.com ([37.187.137.238]:55041 "EHLO
+	mail.free-electrons.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1751322AbcFIM1Y convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 9 Jun 2016 08:27:24 -0400
+In-Reply-To: <1465466097.18807.7.camel@lynxeye.de> (Lucas Stach's message of
+	"Thu, 09 Jun 2016 11:54:57 +0200")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Sujit Reddy Thumma <sthumma@codeaurora.org>, Dorfman Konstantin <kdorfman@codeaurora.org>, David Griego <david.griego@linaro.org>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>
+To: Lucas Stach <dev@lynxeye.de>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, linux-mmc@vger.kernel.org, Rob Herring <robh+dt@kernel.org>, devicetree@vger.kernel.org, Jason Cooper <jason@lakedaemon.net>, Andrew Lunn <andrew@lunn.ch>, Sebastian Hesselbarth <sebastian.hesselbarth@gmail.com>, Thomas Petazzoni <thomas.petazzoni@free-electrons.com>, linux-arm-kernel@lists.infradead.org, Nadav Haklai <nadavh@marvell.com>, Victor Gu <xigu@marvell.com>, Romain Perier <romain.perier@free-electrons.com>, Omri Itach <omrii@marvell.com>, Marcin Wojtas <mw@semihalf.com>, Wilson Ding <dingwei@marvell.com>, Shadi Ammouri <shadi@marvell.com>
 
-Change from viewing the requests in progress as 'current' and 'previous',
-to viewing them as a queue. The current request is allocated to the first
-free slot. The presence of incomplete requests is determined from the
-count (mq->qcnt) of entries in the queue. Non-read-write requests (i.e.
-discards and flushes) are not added to the queue at all and require no
-special handling. Also no special handling is needed for the
-MMC_BLK_NEW_REQUEST case.
+Hi Lucas,
+=20
+ On jeu., juin 09 2016, Lucas Stach <dev@lynxeye.de> wrote:
 
-As well as allowing an arbitrarily sized queue, the queue thread function
-is significantly simpler.
+> Am Donnerstag, den 09.06.2016, 09:10 +0200 schrieb Gregory CLEMENT:
+>> Given its name the voltage_switch() should be called for any
+>> voltage. However currently it is only called for the 1.8V case.
+>>=20
+>> That means that the current implementation of the callback could hav=
+e
+>> made this assumption. In order to not adding a regression when the
+>> voltage_switch() function will be called for the other voltage
+>> targets,
+>> this patch ensure that the code of the current callback won't be
+>> executed
+>> for the other case than 1.8V.
+>>=20
+> This isn't necessary, it's fine to re-execute the pad calibration for
+> any voltage switch.
 
-Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
----
- drivers/mmc/card/block.c | 40 +++++++++++++------------
- drivers/mmc/card/queue.c | 76 ++++++++++++++++++++++++++++++------------------
- drivers/mmc/card/queue.h | 10 +++++--
- 3 files changed, 77 insertions(+), 49 deletions(-)
+Thanks for your feedback, so I can remove this patch from the series.
 
-diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
-index 1cb823a4dc76..215cfa359a3f 100644
---- a/drivers/mmc/card/block.c
-+++ b/drivers/mmc/card/block.c
-@@ -1989,14 +1989,23 @@ static int mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *rqc)
- 	struct mmc_blk_request *brq;
- 	int ret = 1, disable_multi = 0, retry = 0, type, retune_retry_done = 0;
- 	enum mmc_blk_status status;
--	struct mmc_queue_req *mqrq_cur = mq->mqrq_cur;
-+	struct mmc_queue_req *mqrq_cur = NULL;
- 	struct mmc_queue_req *mq_rq;
- 	struct request *req;
- 	struct mmc_async_req *areq;
- 	const u8 packed_nr = 2;
- 	u8 reqs = 0;
- 
--	if (!rqc && !mq->mqrq_prev->req)
-+	if (rqc) {
-+		mqrq_cur = mmc_queue_req_find(mq, rqc);
-+		if (!mqrq_cur) {
-+			WARN_ON(1);
-+			mmc_blk_requeue(mq->queue, rqc);
-+			rqc = NULL;
-+		}
-+	}
-+
-+	if (!mq->qcnt)
- 		return 0;
- 
- 	if (mqrq_cur)
-@@ -2027,11 +2036,8 @@ static int mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *rqc)
- 		} else
- 			areq = NULL;
- 		areq = mmc_start_req(card->host, areq, (int *) &status);
--		if (!areq) {
--			if (status == MMC_BLK_NEW_REQUEST)
--				mq->flags |= MMC_QUEUE_NEW_REQUEST;
-+		if (!areq)
- 			return 0;
--		}
- 
- 		mq_rq = container_of(areq, struct mmc_queue_req, mmc_active);
- 		brq = &mq_rq->brq;
-@@ -2143,6 +2149,8 @@ static int mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *rqc)
- 		}
- 	} while (ret);
- 
-+	mmc_queue_req_free(mq, mq_rq);
-+
- 	return 1;
- 
-  cmd_abort:
-@@ -2161,6 +2169,7 @@ static int mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *rqc)
- 		if (mmc_card_removed(card)) {
- 			rqc->cmd_flags |= REQ_QUIET;
- 			blk_end_request_all(rqc, -EIO);
-+			mmc_queue_req_free(mq, mqrq_cur);
- 		} else {
- 			/*
- 			 * If current request is packed, it needs to put back.
-@@ -2174,6 +2183,8 @@ static int mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *rqc)
- 		}
- 	}
- 
-+	mmc_queue_req_free(mq, mq_rq);
-+
- 	return 0;
- }
- 
-@@ -2184,7 +2195,7 @@ static int mmc_blk_issue_rq(struct mmc_queue *mq, struct request *req)
- 	struct mmc_card *card = md->queue.card;
- 	unsigned int cmd_flags = req ? req->cmd_flags : 0;
- 
--	if (req && !mq->mqrq_prev->req)
-+	if (req && !mq->qcnt)
- 		/* claim host only for the first request */
- 		mmc_get_card(card);
- 
-@@ -2197,10 +2208,9 @@ static int mmc_blk_issue_rq(struct mmc_queue *mq, struct request *req)
- 		goto out;
- 	}
- 
--	mq->flags &= ~MMC_QUEUE_NEW_REQUEST;
- 	if (cmd_flags & REQ_DISCARD) {
- 		/* complete ongoing async transfer before issuing discard */
--		if (card->host->areq)
-+		if (mq->qcnt)
- 			mmc_blk_issue_rw_rq(mq, NULL);
- 		if (req->cmd_flags & REQ_SECURE)
- 			ret = mmc_blk_issue_secdiscard_rq(mq, req);
-@@ -2208,7 +2218,7 @@ static int mmc_blk_issue_rq(struct mmc_queue *mq, struct request *req)
- 			ret = mmc_blk_issue_discard_rq(mq, req);
- 	} else if (cmd_flags & REQ_FLUSH) {
- 		/* complete ongoing async transfer before issuing flush */
--		if (card->host->areq)
-+		if (mq->qcnt)
- 			mmc_blk_issue_rw_rq(mq, NULL);
- 		ret = mmc_blk_issue_flush(mq, req);
- 	} else {
-@@ -2216,14 +2226,8 @@ static int mmc_blk_issue_rq(struct mmc_queue *mq, struct request *req)
- 	}
- 
- out:
--	if ((!req && !(mq->flags & MMC_QUEUE_NEW_REQUEST)) ||
--	     (cmd_flags & MMC_REQ_SPECIAL_MASK))
--		/*
--		 * Release host when there are no more requests
--		 * and after special request(discard, flush) is done.
--		 * In case sepecial request, there is no reentry to
--		 * the 'mmc_blk_issue_rq' with 'mqrq_prev->req'.
--		 */
-+	/* Release host when there are no more requests */
-+	if (!mq->qcnt)
- 		mmc_put_card(card);
- 	return ret;
- }
-diff --git a/drivers/mmc/card/queue.c b/drivers/mmc/card/queue.c
-index 4463d33094e4..4e134884a183 100644
---- a/drivers/mmc/card/queue.c
-+++ b/drivers/mmc/card/queue.c
-@@ -46,6 +46,35 @@ static int mmc_prep_request(struct request_queue *q, struct request *req)
- 	return BLKPREP_OK;
- }
- 
-+struct mmc_queue_req *mmc_queue_req_find(struct mmc_queue *mq,
-+					 struct request *req)
-+{
-+	struct mmc_queue_req *mqrq;
-+	int i = ffz(mq->qslots);
-+
-+	if (i >= mq->qdepth)
-+		return NULL;
-+
-+	mqrq = &mq->mqrq[i];
-+	WARN_ON(mqrq->req || mq->qcnt >= mq->qdepth ||
-+		test_bit(mqrq->task_id, &mq->qslots));
-+	mqrq->req = req;
-+	mq->qcnt += 1;
-+	__set_bit(mqrq->task_id, &mq->qslots);
-+
-+	return mqrq;
-+}
-+
-+void mmc_queue_req_free(struct mmc_queue *mq,
-+			struct mmc_queue_req *mqrq)
-+{
-+	WARN_ON(!mqrq->req || mq->qcnt < 1 ||
-+		!test_bit(mqrq->task_id, &mq->qslots));
-+	mqrq->req = NULL;
-+	mq->qcnt -= 1;
-+	__clear_bit(mqrq->task_id, &mq->qslots);
-+}
-+
- static int mmc_queue_thread(void *d)
- {
- 	struct mmc_queue *mq = d;
-@@ -56,8 +85,7 @@ static int mmc_queue_thread(void *d)
- 
- 	down(&mq->thread_sem);
- 	do {
--		struct request *req = NULL;
--		unsigned int cmd_flags = 0;
-+		struct request *req;
- 
- 		spin_lock_irq(q->queue_lock);
- 		set_current_state(TASK_INTERRUPTIBLE);
-@@ -70,37 +98,17 @@ static int mmc_queue_thread(void *d)
- 			 * Dispatch queue is empty so set flags for
- 			 * mmc_request_fn() to wake us up.
- 			 */
--			if (mq->mqrq_prev->req)
-+			if (mq->qcnt)
- 				cntx->is_waiting_last_req = true;
- 			else
- 				mq->asleep = true;
- 		}
--		mq->mqrq_cur->req = req;
- 		spin_unlock_irq(q->queue_lock);
- 
--		if (req || mq->mqrq_prev->req) {
-+		if (req || mq->qcnt) {
- 			set_current_state(TASK_RUNNING);
--			cmd_flags = req ? req->cmd_flags : 0;
- 			mq->issue_fn(mq, req);
- 			cond_resched();
--			if (mq->flags & MMC_QUEUE_NEW_REQUEST) {
--				mq->flags &= ~MMC_QUEUE_NEW_REQUEST;
--				continue; /* fetch again */
--			}
+Gregory
+
+>
+> Regards,
+> Lucas
+>
+>> Cc: Lucas Stach <dev@lynxeye.de>
+>> Signed-off-by: Gregory CLEMENT <gregory.clement@free-electrons.com>
+>> ---
+>> =C2=A0drivers/mmc/host/sdhci-tegra.c | 4 ++++
+>> =C2=A01 file changed, 4 insertions(+)
+>>=20
+>> diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci=
 -
--			/*
--			 * Current request becomes previous request
--			 * and vice versa.
--			 * In case of special requests, current request
--			 * has been finished. Do not assign it to previous
--			 * request.
--			 */
--			if (cmd_flags & MMC_REQ_SPECIAL_MASK)
--				mq->mqrq_cur->req = NULL;
--
--			mq->mqrq_prev->brq.mrq.data = NULL;
--			mq->mqrq_prev->req = NULL;
--			swap(mq->mqrq_prev, mq->mqrq_cur);
- 		} else {
- 			if (kthread_should_stop()) {
- 				set_current_state(TASK_RUNNING);
-@@ -183,6 +191,21 @@ static void mmc_queue_setup_discard(struct request_queue *q,
- 		queue_flag_set_unlocked(QUEUE_FLAG_SECDISCARD, q);
- }
- 
-+static struct mmc_queue_req *mmc_queue_alloc_mqrqs(struct mmc_queue *mq,
-+						   int qdepth)
-+{
-+	struct mmc_queue_req *mqrq;
-+	int i;
-+
-+	mqrq = kcalloc(qdepth, sizeof(*mqrq), GFP_KERNEL);
-+	if (mqrq) {
-+		for (i = 0; i < mq->qdepth; i++)
-+			mqrq[i].task_id = i;
-+	}
-+
-+	return mqrq;
-+}
-+
- static bool mmc_queue_alloc_bounce_bufs(struct mmc_queue *mq,
- 					unsigned int bouncesz)
- {
-@@ -283,12 +306,9 @@ int mmc_init_queue(struct mmc_queue *mq, struct mmc_card *card,
- 		return -ENOMEM;
- 
- 	mq->qdepth = 2;
--	mq->mqrq = kcalloc(mq->qdepth, sizeof(struct mmc_queue_req),
--			   GFP_KERNEL);
-+	mq->mqrq = mmc_queue_alloc_mqrqs(mq, mq->qdepth);
- 	if (!mq->mqrq)
- 		goto cleanup_queue;
--	mq->mqrq_cur = &mq->mqrq[0];
--	mq->mqrq_prev = &mq->mqrq[1];
- 	mq->queue->queuedata = mq;
- 
- 	blk_queue_prep_rq(mq->queue, mmc_prep_request);
-diff --git a/drivers/mmc/card/queue.h b/drivers/mmc/card/queue.h
-index bb8dad281f72..1afd5dafd46d 100644
---- a/drivers/mmc/card/queue.h
-+++ b/drivers/mmc/card/queue.h
-@@ -42,6 +42,7 @@ struct mmc_queue_req {
- 	struct mmc_async_req	mmc_active;
- 	enum mmc_packed_type	cmd_type;
- 	struct mmc_packed	*packed;
-+	int			task_id;
- };
- 
- struct mmc_queue {
-@@ -50,16 +51,15 @@ struct mmc_queue {
- 	struct semaphore	thread_sem;
- 	unsigned int		flags;
- #define MMC_QUEUE_SUSPENDED	(1 << 0)
--#define MMC_QUEUE_NEW_REQUEST	(1 << 1)
- 	bool			asleep;
- 
- 	int			(*issue_fn)(struct mmc_queue *, struct request *);
- 	void			*data;
- 	struct request_queue	*queue;
- 	struct mmc_queue_req	*mqrq;
--	struct mmc_queue_req	*mqrq_cur;
--	struct mmc_queue_req	*mqrq_prev;
- 	int			qdepth;
-+	int			qcnt;
-+	unsigned long		qslots;
- };
- 
- extern int mmc_init_queue(struct mmc_queue *, struct mmc_card *, spinlock_t *,
-@@ -78,4 +78,8 @@ extern void mmc_packed_clean(struct mmc_queue *);
- 
- extern int mmc_access_rpmb(struct mmc_queue *);
- 
-+extern struct mmc_queue_req *mmc_queue_req_find(struct mmc_queue *,
-+						struct request *);
-+extern void mmc_queue_req_free(struct mmc_queue *, struct mmc_queue_req *);
-+
- #endif
--- 
-1.9.1
+>> tegra.c
+>> index bcc0de47fe7e..01f58296125e 100644
+>> --- a/drivers/mmc/host/sdhci-tegra.c
+>> +++ b/drivers/mmc/host/sdhci-tegra.c
+>> @@ -302,6 +302,10 @@ static void tegra_sdhci_voltage_switch(struct
+>> sdhci_host *host)
+>> =C2=A0	struct sdhci_tegra *tegra_host =3D
+>> sdhci_pltfm_priv(pltfm_host);
+>> =C2=A0	const struct sdhci_tegra_soc_data *soc_data =3D tegra_host-
+>> >soc_data;
+>> =C2=A0
+>> +	/* initially this function was called only for the 1.8V case
+>> */
+>> +	if (host->mmc->ios.signal_voltage !=3D MMC_SIGNAL_VOLTAGE_180)
+>> +		return;
+>> +
+>> =C2=A0	if (soc_data->nvquirks & NVQUIRK_HAS_PADCALIB)
+>> =C2=A0		tegra_host->pad_calib_required =3D true;
+>> =C2=A0}
 
+--=20
+Gregory Clement, Free Electrons
+Kernel, drivers, real-time and embedded Linux
+development, consulting, training and support.
+http://free-electrons.com
