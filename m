@@ -1,89 +1,59 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: [PATCH RFC 42/46] mmc: queue: Add a function to control wake-up on new requests
-Date: Thu,  9 Jun 2016 14:52:42 +0300
-Message-ID: <1465473166-22532-43-git-send-email-adrian.hunter@intel.com>
+Subject: [PATCH RFC 40/46] mmc: block: Pass mqrq to mmc_blk_prep_packed_list()
+Date: Thu,  9 Jun 2016 14:52:40 +0300
+Message-ID: <1465473166-22532-41-git-send-email-adrian.hunter@intel.com>
 References: <1465473166-22532-1-git-send-email-adrian.hunter@intel.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
 Received: from mga01.intel.com ([192.55.52.88]:48207 "EHLO mga01.intel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751861AbcFIL7e (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 9 Jun 2016 07:59:34 -0400
+	id S1751507AbcFIL70 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 9 Jun 2016 07:59:26 -0400
 In-Reply-To: <1465473166-22532-1-git-send-email-adrian.hunter@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>
 Cc: linux-mmc <linux-mmc@vger.kernel.org>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Sujit Reddy Thumma <sthumma@codeaurora.org>, Dorfman Konstantin <kdorfman@codeaurora.org>, David Griego <david.griego@linaro.org>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>
 
-Add a function to control wake-up on new requests. This will enable
-Software Command Queuing to choose whether or not to queue new
-requests immediately or wait for the current task to complete.
+A subsequent patch will remove 'mq->mqrq_cur'. Prepare for that by
+passing mqrq to mmc_blk_prep_packed_list().
 
 Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
 ---
- drivers/mmc/card/queue.c | 16 ++++++++++++++++
- drivers/mmc/card/queue.h |  2 ++
- 2 files changed, 18 insertions(+)
+ drivers/mmc/card/block.c | 9 +++++----
+ 1 file changed, 5 insertions(+), 4 deletions(-)
 
-diff --git a/drivers/mmc/card/queue.c b/drivers/mmc/card/queue.c
-index 4e134884a183..0781578fc8b6 100644
---- a/drivers/mmc/card/queue.c
-+++ b/drivers/mmc/card/queue.c
-@@ -94,6 +94,7 @@ static int mmc_queue_thread(void *d)
- 		cntx->is_waiting_last_req = false;
- 		cntx->is_new_req = false;
- 		if (!req) {
-+			mq->is_new_req = false;
- 			/*
- 			 * Dispatch queue is empty so set flags for
- 			 * mmc_request_fn() to wake us up.
-@@ -144,6 +145,8 @@ static void mmc_request_fn(struct request_queue *q)
- 		return;
- 	}
- 
-+	mq->is_new_req = true;
-+
- 	cntx = &mq->card->host->context_info;
- 
- 	if (cntx->is_waiting_last_req) {
-@@ -155,6 +158,19 @@ static void mmc_request_fn(struct request_queue *q)
- 		wake_up_process(mq->thread);
+diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+index db28274a7624..1cb823a4dc76 100644
+--- a/drivers/mmc/card/block.c
++++ b/drivers/mmc/card/block.c
+@@ -1693,13 +1693,14 @@ static inline u8 mmc_calc_packed_hdr_segs(struct request_queue *q,
+ 	return nr_segs;
  }
  
-+void mmc_queue_set_wake(struct mmc_queue *mq, bool wake_me)
-+{
-+	struct mmc_context_info *cntx = &mq->card->host->context_info;
-+	struct request_queue *q = mq->queue;
-+
-+	if (cntx->is_waiting_last_req != wake_me) {
-+		spin_lock_irq(q->queue_lock);
-+		cntx->is_waiting_last_req = wake_me;
-+		cntx->is_new_req = wake_me && mq->is_new_req;
-+		spin_unlock_irq(q->queue_lock);
-+	}
-+}
-+
- static struct scatterlist *mmc_alloc_sg(int sg_len, int *err)
+-static u8 mmc_blk_prep_packed_list(struct mmc_queue *mq, struct request *req)
++static u8 mmc_blk_prep_packed_list(struct mmc_queue *mq,
++				   struct mmc_queue_req *mqrq)
  {
- 	struct scatterlist *sg;
-diff --git a/drivers/mmc/card/queue.h b/drivers/mmc/card/queue.h
-index 1afd5dafd46d..a6d5b0f94662 100644
---- a/drivers/mmc/card/queue.h
-+++ b/drivers/mmc/card/queue.h
-@@ -52,6 +52,7 @@ struct mmc_queue {
- 	unsigned int		flags;
- #define MMC_QUEUE_SUSPENDED	(1 << 0)
- 	bool			asleep;
-+	bool			is_new_req;
+ 	struct request_queue *q = mq->queue;
+ 	struct mmc_card *card = mq->card;
++	struct request *req = mqrq->req;
+ 	struct request *cur = req, *next = NULL;
+ 	struct mmc_blk_data *md = mq->data;
+-	struct mmc_queue_req *mqrq = mq->mqrq_cur;
+ 	bool en_rel_wr = card->ext_csd.rel_param & EXT_CSD_WR_REL_PARAM_EN;
+ 	unsigned int req_sectors = 0, phys_segments = 0;
+ 	unsigned int max_blk_count, max_phys_segs;
+@@ -1998,8 +1999,8 @@ static int mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *rqc)
+ 	if (!rqc && !mq->mqrq_prev->req)
+ 		return 0;
  
- 	int			(*issue_fn)(struct mmc_queue *, struct request *);
- 	void			*data;
-@@ -81,5 +82,6 @@ extern int mmc_access_rpmb(struct mmc_queue *);
- extern struct mmc_queue_req *mmc_queue_req_find(struct mmc_queue *,
- 						struct request *);
- extern void mmc_queue_req_free(struct mmc_queue *, struct mmc_queue_req *);
-+extern void mmc_queue_set_wake(struct mmc_queue *, bool);
+-	if (rqc)
+-		reqs = mmc_blk_prep_packed_list(mq, rqc);
++	if (mqrq_cur)
++		reqs = mmc_blk_prep_packed_list(mq, mqrq_cur);
  
- #endif
+ 	do {
+ 		if (rqc) {
 -- 
 1.9.1
 
