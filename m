@@ -1,86 +1,111 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: [PATCH RFC 33/46] mmc: mmc_test: Disable Command Queue while mmc_test is used
-Date: Thu,  9 Jun 2016 14:52:33 +0300
-Message-ID: <1465473166-22532-34-git-send-email-adrian.hunter@intel.com>
+Subject: [PATCH RFC 34/46] mmc: block: Disable Command Queue while RPMB is used
+Date: Thu,  9 Jun 2016 14:52:34 +0300
+Message-ID: <1465473166-22532-35-git-send-email-adrian.hunter@intel.com>
 References: <1465473166-22532-1-git-send-email-adrian.hunter@intel.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
 Received: from mga01.intel.com ([192.55.52.88]:48207 "EHLO mga01.intel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750870AbcFIL67 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 9 Jun 2016 07:58:59 -0400
+	id S1750917AbcFIL7D (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 9 Jun 2016 07:59:03 -0400
 In-Reply-To: <1465473166-22532-1-git-send-email-adrian.hunter@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>
 Cc: linux-mmc <linux-mmc@vger.kernel.org>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Sujit Reddy Thumma <sthumma@codeaurora.org>, Dorfman Konstantin <kdorfman@codeaurora.org>, David Griego <david.griego@linaro.org>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>
 
-Normal read and write commands may not be used while the command queue is
-enabled. Disable the Command Queue when mmc_test is probed and re-enable it
-when it is removed.
+RPMB does not allow Command Queue commands. Disable and re-enable the
+Command Queue when switching.
+
+Note that the driver only switches partitions when the queue is empty.
 
 Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
 ---
- drivers/mmc/card/mmc_test.c | 8 ++++++++
- drivers/mmc/core/mmc.c      | 7 +++++++
- include/linux/mmc/card.h    | 1 +
- 3 files changed, 16 insertions(+)
+ drivers/mmc/card/block.c | 46 ++++++++++++++++++++++++++++++++++++++--------
+ 1 file changed, 38 insertions(+), 8 deletions(-)
 
-diff --git a/drivers/mmc/card/mmc_test.c b/drivers/mmc/card/mmc_test.c
-index 5a8dc5a76e0d..d6566747dd0a 100644
---- a/drivers/mmc/card/mmc_test.c
-+++ b/drivers/mmc/card/mmc_test.c
-@@ -3240,6 +3240,12 @@ static int mmc_test_probe(struct mmc_card *card)
- 	if (ret)
- 		return ret;
+diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+index 7e69dceaf645..4bd431999a1f 100644
+--- a/drivers/mmc/card/block.c
++++ b/drivers/mmc/card/block.c
+@@ -744,10 +744,41 @@ static const struct block_device_operations mmc_bdops = {
+ #endif
+ };
  
-+	if (card->ext_csd.cmdq_en) {
-+		ret = mmc_cmdq_disable(card);
-+		if (ret)
-+			return ret;
++static int mmc_blk_part_switch_pre(struct mmc_card *card,
++				   unsigned int part_type)
++{
++	int ret;
++
++	if (part_type == EXT_CSD_PART_CONFIG_ACC_RPMB) {
++		if (card->ext_csd.cmdq_en) {
++			ret = mmc_cmdq_disable(card);
++			if (ret)
++				return ret;
++		}
++		mmc_retune_pause(card->host);
 +	}
 +
- 	dev_info(&card->dev, "Card claimed for testing.\n");
- 
- 	return 0;
-@@ -3247,6 +3253,8 @@ static int mmc_test_probe(struct mmc_card *card)
- 
- static void mmc_test_remove(struct mmc_card *card)
++	return 0;
++}
++
++static int mmc_blk_part_switch_post(struct mmc_card *card,
++				    unsigned int part_type)
++{
++	int ret = 0;
++
++	if (part_type == EXT_CSD_PART_CONFIG_ACC_RPMB) {
++		mmc_retune_unpause(card->host);
++		if (card->reenable_cmdq && !card->ext_csd.cmdq_en)
++			ret = mmc_cmdq_enable(card);
++	}
++
++	return ret;
++}
++
+ static inline int mmc_blk_part_switch(struct mmc_card *card,
+ 				      struct mmc_blk_data *md)
  {
-+	if (card->reenable_cmdq)
-+		mmc_cmdq_enable(card);
- 	mmc_test_free_result(card);
- 	mmc_test_free_dbgfs_file(card);
- }
-diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-index eb1781b066f3..2e54daa237f6 100644
---- a/drivers/mmc/core/mmc.c
-+++ b/drivers/mmc/core/mmc.c
-@@ -1736,6 +1736,13 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
+-	int ret;
++	int ret = 0;
+ 	struct mmc_blk_data *main_md = dev_get_drvdata(&card->dev);
+ 
+ 	if (main_md->part_curr == md->part_type)
+@@ -756,8 +787,9 @@ static inline int mmc_blk_part_switch(struct mmc_card *card,
+ 	if (mmc_card_mmc(card)) {
+ 		u8 part_config = card->ext_csd.part_config;
+ 
+-		if (md->part_type == EXT_CSD_PART_CONFIG_ACC_RPMB)
+-			mmc_retune_pause(card->host);
++		ret = mmc_blk_part_switch_pre(card, md->part_type);
++		if (ret)
++			return ret;
+ 
+ 		part_config &= ~EXT_CSD_PART_CONFIG_ACC_MASK;
+ 		part_config |= md->part_type;
+@@ -766,19 +798,17 @@ static inline int mmc_blk_part_switch(struct mmc_card *card,
+ 				 EXT_CSD_PART_CONFIG, part_config,
+ 				 card->ext_csd.part_time);
+ 		if (ret) {
+-			if (md->part_type == EXT_CSD_PART_CONFIG_ACC_RPMB)
+-				mmc_retune_unpause(card->host);
++			mmc_blk_part_switch_post(card, md->part_type);
+ 			return ret;
+ 		}
+ 
+ 		card->ext_csd.part_config = part_config;
+ 
+-		if (main_md->part_curr == EXT_CSD_PART_CONFIG_ACC_RPMB)
+-			mmc_retune_unpause(card->host);
++		ret = mmc_blk_part_switch_post(card, main_md->part_curr);
  	}
  
- 	/*
-+	 * In some cases (e.g. RPMB or mmc_test), the Command Queue must be
-+	 * disabled for a time, so a flag is needed to indicate to re-enable the
-+	 * Command Queue.
-+	 */
-+	card->reenable_cmdq = card->ext_csd.cmdq_en;
-+
-+	/*
- 	 * The mandatory minimum values are defined for packed command.
- 	 * read: 5, write: 3
- 	 */
-diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
-index 1c380271038f..2abcedc1e9e9 100644
---- a/include/linux/mmc/card.h
-+++ b/include/linux/mmc/card.h
-@@ -284,6 +284,7 @@ struct mmc_card {
- #define MMC_QUIRK_BROKEN_IRQ_POLLING	(1<<11)	/* Polling SDIO_CCCR_INTx could create a fake interrupt */
- #define MMC_QUIRK_TRIM_BROKEN	(1<<12)		/* Skip trim */
+ 	main_md->part_curr = md->part_type;
+-	return 0;
++	return ret;
+ }
  
-+	bool			reenable_cmdq;	/* Re-enable Command Queue */
- 
- 	unsigned int		erase_size;	/* erase size in sectors */
-  	unsigned int		erase_shift;	/* if erase unit is power 2 */
+ static u32 mmc_sd_num_wr_blocks(struct mmc_card *card)
 -- 
 1.9.1
 
