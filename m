@@ -1,80 +1,160 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: [PATCH RFC 20/46] mmc: sdhci: Support cap_cmd_during_tfr requests
-Date: Thu,  9 Jun 2016 14:52:20 +0300
-Message-ID: <1465473166-22532-21-git-send-email-adrian.hunter@intel.com>
+Subject: [PATCH RFC 16/46] mmc: sdhci: Separate timer timeout for command and data requests
+Date: Thu,  9 Jun 2016 14:52:16 +0300
+Message-ID: <1465473166-22532-17-git-send-email-adrian.hunter@intel.com>
 References: <1465473166-22532-1-git-send-email-adrian.hunter@intel.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga01.intel.com ([192.55.52.88]:48207 "EHLO mga01.intel.com"
+Received: from mga01.intel.com ([192.55.52.88]:61477 "EHLO mga01.intel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751279AbcFIL6J (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 9 Jun 2016 07:58:09 -0400
+	id S1751506AbcFIL56 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 9 Jun 2016 07:57:58 -0400
 In-Reply-To: <1465473166-22532-1-git-send-email-adrian.hunter@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>
 Cc: linux-mmc <linux-mmc@vger.kernel.org>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Sujit Reddy Thumma <sthumma@codeaurora.org>, Dorfman Konstantin <kdorfman@codeaurora.org>, David Griego <david.griego@linaro.org>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>
 
-Now SDHCI supports commands during transfer, enable support for the core
-API.
-
-There are 3 small changes needed:
-
-First, auto-CMD12 cannot be used with a cap_cmd_during_tfr request because
-the host controller cannot expect the command line to be available.
-
-Secondly, a cap_cmd_during_tfr request must not send a stop command, again
-because the host controller cannot expect the command line to be available.
-
-Thirdly, when a cap_cmd_during_tfr command completes, use
-mmc_command_complete() to notify the upper layers that the command line is
-now available for further commands.
+In order to support commands during data transfer, there will have to be up
+to two active requests (mrqs) at a time, instead of just one. Provide two
+timers instead of just one. One of the timers is for requests that do not
+use the data lines, and the other one is for requests that do.
 
 Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
 ---
- drivers/mmc/host/sdhci.c | 16 ++++++++++++++--
- 1 file changed, 14 insertions(+), 2 deletions(-)
+ drivers/mmc/host/sdhci.c | 62 ++++++++++++++++++++++++++++++++++++++++--------
+ drivers/mmc/host/sdhci.h |  1 +
+ 2 files changed, 53 insertions(+), 10 deletions(-)
 
 diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index e9eb71861764..aa2aa16386b9 100644
+index 90180d0d752c..f04df6f42f35 100644
 --- a/drivers/mmc/host/sdhci.c
 +++ b/drivers/mmc/host/sdhci.c
-@@ -884,7 +884,8 @@ static void sdhci_prepare_data(struct sdhci_host *host, struct mmc_command *cmd)
- static inline bool sdhci_auto_cmd12(struct sdhci_host *host,
- 				    struct mmc_request *mrq)
- {
--	return !mrq->sbc && (host->flags & SDHCI_AUTO_CMD12);
-+	return !mrq->sbc && (host->flags & SDHCI_AUTO_CMD12) &&
-+	       !mrq->cap_cmd_during_tfr;
+@@ -1003,6 +1003,23 @@ static void sdhci_finish_data(struct sdhci_host *host)
+ 	}
  }
  
- static void sdhci_set_transfer_mode(struct sdhci_host *host,
-@@ -1027,7 +1028,15 @@ static void sdhci_finish_data(struct sdhci_host *host)
- 			sdhci_do_reset(host, SDHCI_RESET_DATA);
- 		}
++static void sdhci_mod_timer(struct sdhci_host *host, struct mmc_request *mrq,
++			    unsigned long timeout)
++{
++	if (sdhci_data_line_cmd(mrq->cmd))
++		mod_timer(&host->data_timer, timeout);
++	else
++		mod_timer(&host->timer, timeout);
++}
++
++static void sdhci_del_timer(struct sdhci_host *host, struct mmc_request *mrq)
++{
++	if (sdhci_data_line_cmd(mrq->cmd))
++		del_timer(&host->data_timer);
++	else
++		del_timer(&host->timer);
++}
++
+ void sdhci_send_command(struct sdhci_host *host, struct mmc_command *cmd)
+ {
+ 	int flags;
+@@ -1044,7 +1061,7 @@ void sdhci_send_command(struct sdhci_host *host, struct mmc_command *cmd)
+ 		timeout += DIV_ROUND_UP(cmd->busy_timeout, 1000) * HZ + HZ;
+ 	else
+ 		timeout += 10 * HZ;
+-	mod_timer(&host->timer, timeout);
++	sdhci_mod_timer(host, cmd->mrq, timeout);
  
--		sdhci_send_command(host, data->stop);
-+		/*
-+		 * 'cap_cmd_during_tfr' request must not use the command line
-+		 * after mmc_command_done() has been called. It is upper layer's
-+		 * responsibility to send the stop command if required.
-+		 */
-+		if (data->mrq->cap_cmd_during_tfr)
-+			sdhci_finish_mrq(host, data->mrq);
-+		else
-+			sdhci_send_command(host, data->stop);
- 	} else {
- 		sdhci_finish_mrq(host, data->mrq);
- 	}
-@@ -1159,6 +1168,9 @@ static void sdhci_finish_command(struct sdhci_host *host)
- 		}
+ 	host->cmd = cmd;
+ 	if (sdhci_data_line_cmd(cmd)) {
+@@ -2226,10 +2243,10 @@ static void sdhci_tasklet_finish(unsigned long param)
+ 		return;
  	}
  
-+	if (cmd->mrq->cap_cmd_during_tfr && cmd == cmd->mrq->cmd)
-+		mmc_command_done(host->mmc, cmd->mrq);
+-	del_timer(&host->timer);
+-
+ 	mrq = host->mrq;
+ 
++	sdhci_del_timer(host, mrq);
 +
  	/*
- 	 * The host can send and interrupt when the busy state has
- 	 * ended, allowing us to wait without wasting CPU cycles.
+ 	 * Always unmap the data buffers if they were mapped by
+ 	 * sdhci_prepare_data() whenever we finish with a request.
+@@ -2283,7 +2300,30 @@ static void sdhci_timeout_timer(unsigned long data)
+ 
+ 	spin_lock_irqsave(&host->lock, flags);
+ 
+-	if (host->mrq) {
++	if (host->cmd && !sdhci_data_line_cmd(host->cmd)) {
++		pr_err("%s: Timeout waiting for hardware cmd interrupt.\n",
++		       mmc_hostname(host->mmc));
++		sdhci_dumpregs(host);
++
++		host->cmd->error = -ETIMEDOUT;
++		sdhci_finish_mrq(host, host->cmd->mrq);
++	}
++
++	mmiowb();
++	spin_unlock_irqrestore(&host->lock, flags);
++}
++
++static void sdhci_timeout_data_timer(unsigned long data)
++{
++	struct sdhci_host *host;
++	unsigned long flags;
++
++	host = (struct sdhci_host *)data;
++
++	spin_lock_irqsave(&host->lock, flags);
++
++	if (host->data || host->data_cmd ||
++	    (host->cmd && sdhci_data_line_cmd(host->cmd))) {
+ 		pr_err("%s: Timeout waiting for hardware interrupt.\n",
+ 		       mmc_hostname(host->mmc));
+ 		sdhci_dumpregs(host);
+@@ -2291,13 +2331,12 @@ static void sdhci_timeout_timer(unsigned long data)
+ 		if (host->data) {
+ 			host->data->error = -ETIMEDOUT;
+ 			sdhci_finish_data(host);
++		} else if (host->data_cmd) {
++			host->data_cmd->error = -ETIMEDOUT;
++			sdhci_finish_mrq(host, host->data_cmd->mrq);
+ 		} else {
+-			if (host->cmd)
+-				host->cmd->error = -ETIMEDOUT;
+-			else
+-				host->mrq->cmd->error = -ETIMEDOUT;
+-
+-			sdhci_finish_mrq(host, host->mrq);
++			host->cmd->error = -ETIMEDOUT;
++			sdhci_finish_mrq(host, host->cmd->mrq);
+ 		}
+ 	}
+ 
+@@ -3372,6 +3411,8 @@ int sdhci_add_host(struct sdhci_host *host)
+ 		sdhci_tasklet_finish, (unsigned long)host);
+ 
+ 	setup_timer(&host->timer, sdhci_timeout_timer, (unsigned long)host);
++	setup_timer(&host->data_timer, sdhci_timeout_data_timer,
++		    (unsigned long)host);
+ 
+ 	init_waitqueue_head(&host->buf_ready_int);
+ 
+@@ -3470,6 +3511,7 @@ void sdhci_remove_host(struct sdhci_host *host, int dead)
+ 	free_irq(host->irq, host);
+ 
+ 	del_timer_sync(&host->timer);
++	del_timer_sync(&host->data_timer);
+ 
+ 	tasklet_kill(&host->finish_tasklet);
+ 
+diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+index 331a72b417ef..10f835f785f7 100644
+--- a/drivers/mmc/host/sdhci.h
++++ b/drivers/mmc/host/sdhci.h
+@@ -487,6 +487,7 @@ struct sdhci_host {
+ 	struct tasklet_struct finish_tasklet;	/* Tasklet structures */
+ 
+ 	struct timer_list timer;	/* Timer for timeouts */
++	struct timer_list data_timer;	/* Timer for data timeouts */
+ 
+ 	u32 caps;		/* Alternative CAPABILITY_0 */
+ 	u32 caps1;		/* Alternative CAPABILITY_1 */
 -- 
 1.9.1
 
