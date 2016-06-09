@@ -1,80 +1,309 @@
-From: Krzysztof Kozlowski <k.kozlowski@samsung.com>
-Subject: Re: [RFC v4 01/14] regulator: of: Add helper for getting all supplies
-Date: Thu, 09 Jun 2016 13:42:02 +0200
-Message-ID: <5759560A.70107@samsung.com>
-References: <1465465471-28740-1-git-send-email-k.kozlowski@samsung.com>
- <1465465471-28740-2-git-send-email-k.kozlowski@samsung.com>
- <20160609102925.GS7510@sirena.org.uk>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 7bit
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: [PATCH RFC 01/46] mmc: core: Add support for sending commands during data transfer
+Date: Thu,  9 Jun 2016 14:52:01 +0300
+Message-ID: <1465473166-22532-2-git-send-email-adrian.hunter@intel.com>
+References: <1465473166-22532-1-git-send-email-adrian.hunter@intel.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout1.w1.samsung.com ([210.118.77.11]:8426 "EHLO
-	mailout1.w1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751112AbcFILmJ (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 9 Jun 2016 07:42:09 -0400
-In-reply-to: <20160609102925.GS7510@sirena.org.uk>
+Received: from mga14.intel.com ([192.55.52.115]:21493 "EHLO mga14.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751356AbcFIL44 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 9 Jun 2016 07:56:56 -0400
+In-Reply-To: <1465473166-22532-1-git-send-email-adrian.hunter@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Mark Brown <broonie@kernel.org>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>, Pawel Moll <pawel.moll@arm.com>, Mark Rutland <mark.rutland@arm.com>, Ian Campbell <ijc+devicetree@hellion.org.uk>, Kumar Gala <galak@codeaurora.org>, Sebastian Reichel <sre@kernel.org>, Dmitry Eremin-Solenikov <dbaryshkov@gmail.com>, David Woodhouse <dwmw2@infradead.org>, Liam Girdwood <lgirdwood@gmail.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Hans de Goede <hdegoede@redhat.com>, Jean-Christophe Plagniol-Villard <plagnioj@jcrosoft.com>, Tomi Valkeinen <tomi.valkeinen@ti.com>, Heiko Stuebner <heiko@sntech.de>, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-samsung-soc@vger.kernel.org, linux-pm@vger.kernel.org, linux-usb@vger.kernel.org, linux-fbdev@vger.kernel.org, hzpeterchen@gmail.com, Bartlomiej
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Sujit Reddy Thumma <sthumma@codeaurora.org>, Dorfman Konstantin <kdorfman@codeaurora.org>, David Griego <david.griego@linaro.org>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>
 
-On 06/09/2016 12:29 PM, Mark Brown wrote:
-> On Thu, Jun 09, 2016 at 11:44:18AM +0200, Krzysztof Kozlowski wrote:
->> Few drivers have a need of getting regulator supplies without knowing
->> their names:
->> 1. The Simple Framebuffer driver works on setup provided by bootloader
->>    (outside of scope of kernel);
->> 2. Generic power sequence driver may be attached to any device node.
->>
->> Add a Device Tree helper for parsing "-supply" properties and returning
->> allocated bulk regulator consumers.
-> 
-> I'm still very concerned that this is just an invitation to people to
-> write half baked regulator consumers and half baked DTs to go along with
-> it, making it a standard API that doesn't have big red flags on it that
-> will flag up when "normal" drivers use it is not good.  Right now this
-> just looks like a standard API and people are going to just start using
-> it.  If we are going to do this perhaps we need a separate header or
-> something to help flag this up.
+A host controller driver exposes its capability using caps flag
+MMC_CAP_CMD_DURING_TFR. A driver with that capability can accept requests
+that are marked mrq->cap_cmd_during_tfr = true. Then the driver informs the
+upper layers when the command line is available for further commands by
+calling mmc_command_done(). Because of that, the driver will not then
+automatically send STOP commands, and it is the responsibility of the upper
+layer to send a STOP command if it is required.
 
-No problem, I can move it to a special header.  Actually, if you dislike
-this as an API, it does not have to be in header at all.  I can just
-duplicate the simplefb code.
+For requests submitted through the mmc_wait_for_req() interface, the caller
+sets mrq->cap_cmd_during_tfr = true which causes mmc_wait_for_req() in fact
+not to wait. The caller can then send commands that do not use the data
+lines. Finally the caller can wait for the transfer to complete by calling
+mmc_wait_for_req_done() which is now exported.
 
-> In the case of power sequences I'd expect the sequences to perform
-> operations on named supplies - the core shouldn't know what the supplies
-> are but the thing specifying the sequence should.
+For requests submitted through the mmc_start_req() interface, the caller
+again sets mrq->cap_cmd_during_tfr = true, but mmc_start_req() anyway does
+not wait. The caller can then send commands that do not use the data
+lines. Finally the caller can wait for the transfer to complete in the
+normal way i.e. calling mmc_start_req() again.
 
-Hm, so maybe passing names like:
+Irrespective of how a cap_cmd_during_tfr request is started,
+mmc_is_req_done() can be called if the upper layer needs to determine if
+the request is done. However the appropriate waiting function (either
+mmc_wait_for_req_done() or mmc_start_req()) must still be called.
 
-usb3503@08 {
-	reset-gpios = <&gpx3 5 GPIO_ACTIVE_HIGH>;
-	initial-mode = <1>;
-	vdd-supply = <&buck8_reg>;
-	foo-supply = <&buck9_reg>;
+The implementation consists primarily of a new completion
+mrq->cmd_completion which notifies when the command line is available for
+further commands. That completion is completed by mmc_command_done().
+When there is an ongoing data transfer, calls to mmc_wait_for_req() will
+automatically wait on that completion, so the caller does not have to do
+anything special.
 
-        power-sequence;
-	power-sequence-supplies = "vdd", "foo";
-};
+Note, in the case of errors, the driver may call mmc_request_done() without
+calling mmc_command_done() because mmc_request_done() always calls
+mmc_command_done().
 
-but this is getting against initial idea of not adding any
-power-sequence properties.
+Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
+---
+ drivers/mmc/core/core.c  | 95 +++++++++++++++++++++++++++++++++++++++++++++---
+ include/linux/mmc/core.h |  7 ++++
+ include/linux/mmc/host.h |  5 +++
+ 3 files changed, 101 insertions(+), 6 deletions(-)
 
-> 
->>  drivers/regulator/of_regulator.c       | 86 ++++++++++++++++++++++++++++++++++
->>  include/linux/regulator/of_regulator.h | 13 +++++
->>  2 files changed, 99 insertions(+)
-> 
-> The external interface shouldn't be DT specific, the Intel people are
-> busy importing all of DT into ACPI so they'll doubtless want an ACPI
-> version.
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index e8641873dee7..8563dc9e1519 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -117,6 +117,24 @@ static inline void mmc_should_fail_request(struct mmc_host *host,
+ 
+ #endif /* CONFIG_FAIL_MMC_REQUEST */
+ 
++static inline void mmc_complete_cmd(struct mmc_request *mrq)
++{
++	if (mrq->cap_cmd_during_tfr && !completion_done(&mrq->cmd_completion))
++		complete_all(&mrq->cmd_completion);
++}
++
++void mmc_command_done(struct mmc_host *host, struct mmc_request *mrq)
++{
++	if (!mrq->cap_cmd_during_tfr)
++		return;
++
++	mmc_complete_cmd(mrq);
++
++	pr_debug("%s: cmd done, tfr ongoing (CMD%u)\n",
++		 mmc_hostname(host), mrq->cmd->opcode);
++}
++EXPORT_SYMBOL(mmc_command_done);
++
+ /**
+  *	mmc_request_done - finish processing an MMC request
+  *	@host: MMC host which completed request
+@@ -143,6 +161,11 @@ void mmc_request_done(struct mmc_host *host, struct mmc_request *mrq)
+ 			cmd->retries = 0;
+ 	}
+ 
++	if (host->ongoing_mrq == mrq)
++		host->ongoing_mrq = NULL;
++
++	mmc_complete_cmd(mrq);
++
+ 	trace_mmc_request_done(host, mrq);
+ 
+ 	if (err && cmd->retries && !mmc_card_removed(host->card)) {
+@@ -155,7 +178,8 @@ void mmc_request_done(struct mmc_host *host, struct mmc_request *mrq)
+ 	} else {
+ 		mmc_should_fail_request(host, mrq);
+ 
+-		led_trigger_event(host->led, LED_OFF);
++		if (!host->ongoing_mrq)
++			led_trigger_event(host->led, LED_OFF);
+ 
+ 		if (mrq->sbc) {
+ 			pr_debug("%s: req done <CMD%u>: %d: %08x %08x %08x %08x\n",
+@@ -220,6 +244,15 @@ static void __mmc_start_request(struct mmc_host *host, struct mmc_request *mrq)
+ 		}
+ 	}
+ 
++	if (mrq->cap_cmd_during_tfr) {
++		host->ongoing_mrq = mrq;
++		/*
++		 * Retry path could come through here without having waiting on
++		 * cmd_completion, so ensure it is reinitialised.
++		 */
++		reinit_completion(&mrq->cmd_completion);
++	}
++
+ 	trace_mmc_request_start(host, mrq);
+ 
+ 	host->ops->request(host, mrq);
+@@ -386,6 +419,18 @@ static void mmc_wait_done(struct mmc_request *mrq)
+ 	complete(&mrq->completion);
+ }
+ 
++static inline void mmc_wait_ongoing_tfr_cmd(struct mmc_host *host)
++{
++	struct mmc_request *ongoing_mrq = READ_ONCE(host->ongoing_mrq);
++
++	/*
++	 * If there is an ongoing transfer, wait for the command line to become
++	 * available.
++	 */
++	if (ongoing_mrq && !completion_done(&ongoing_mrq->cmd_completion))
++		wait_for_completion(&ongoing_mrq->cmd_completion);
++}
++
+ /*
+  *__mmc_start_data_req() - starts data request
+  * @host: MMC host to start the request
+@@ -393,17 +438,24 @@ static void mmc_wait_done(struct mmc_request *mrq)
+  *
+  * Sets the done callback to be called when request is completed by the card.
+  * Starts data mmc request execution
++ * If an ongoing transfer is already in progress, wait for the command line
++ * to become available before sending another command.
+  */
+ static int __mmc_start_data_req(struct mmc_host *host, struct mmc_request *mrq)
+ {
+ 	int err;
+ 
++	mmc_wait_ongoing_tfr_cmd(host);
++
+ 	mrq->done = mmc_wait_data_done;
+ 	mrq->host = host;
+ 
++	init_completion(&mrq->cmd_completion);
++
+ 	err = mmc_start_request(host, mrq);
+ 	if (err) {
+ 		mrq->cmd->error = err;
++		mmc_complete_cmd(mrq);
+ 		mmc_wait_data_done(mrq);
+ 	}
+ 
+@@ -414,12 +466,17 @@ static int __mmc_start_req(struct mmc_host *host, struct mmc_request *mrq)
+ {
+ 	int err;
+ 
++	mmc_wait_ongoing_tfr_cmd(host);
++
+ 	init_completion(&mrq->completion);
+ 	mrq->done = mmc_wait_done;
+ 
++	init_completion(&mrq->cmd_completion);
++
+ 	err = mmc_start_request(host, mrq);
+ 	if (err) {
+ 		mrq->cmd->error = err;
++		mmc_complete_cmd(mrq);
+ 		complete(&mrq->completion);
+ 	}
+ 
+@@ -483,8 +540,7 @@ static int mmc_wait_for_data_req_done(struct mmc_host *host,
+ 	return err;
+ }
+ 
+-static void mmc_wait_for_req_done(struct mmc_host *host,
+-				  struct mmc_request *mrq)
++void mmc_wait_for_req_done(struct mmc_host *host, struct mmc_request *mrq)
+ {
+ 	struct mmc_command *cmd;
+ 
+@@ -525,6 +581,28 @@ static void mmc_wait_for_req_done(struct mmc_host *host,
+ 
+ 	mmc_retune_release(host);
+ }
++EXPORT_SYMBOL(mmc_wait_for_req_done);
++
++/**
++ *	mmc_is_req_done - Determine if a 'cap_cmd_during_tfr' request is done
++ *	@host: MMC host
++ *	@mrq: MMC request
++ *
++ *	mmc_is_req_done() is used with requests that have
++ *	mrq->cap_cmd_during_tfr = true. mmc_is_req_done() must be called after
++ *	starting a request and before waiting for it to complete. That is,
++ *	either in between calls to mmc_start_req(), or after mmc_wait_for_req()
++ *	and before mmc_wait_for_req_done(). If it is called at other times the
++ *	result is not meaningful.
++ */
++bool mmc_is_req_done(struct mmc_host *host, struct mmc_request *mrq)
++{
++	if (host->areq)
++		return host->context_info.is_done_rcv;
++	else
++		return completion_done(&mrq->completion);
++}
++EXPORT_SYMBOL(mmc_is_req_done);
+ 
+ /**
+  *	mmc_pre_req - Prepare for a new request
+@@ -645,13 +723,18 @@ EXPORT_SYMBOL(mmc_start_req);
+  *	@mrq: MMC request to start
+  *
+  *	Start a new MMC custom command request for a host, and wait
+- *	for the command to complete. Does not attempt to parse the
+- *	response.
++ *	for the command to complete. In the case of 'cap_cmd_during_tfr'
++ *	requests, the transfer is ongoing and the caller can issue further
++ *	commands that do not use the data lines, and then wait by calling
++ *	mmc_wait_for_req_done().
++ *	Does not attempt to parse the response.
+  */
+ void mmc_wait_for_req(struct mmc_host *host, struct mmc_request *mrq)
+ {
+ 	__mmc_start_req(host, mrq);
+-	mmc_wait_for_req_done(host, mrq);
++
++	if (!mrq->cap_cmd_during_tfr)
++		mmc_wait_for_req_done(host, mrq);
+ }
+ EXPORT_SYMBOL(mmc_wait_for_req);
+ 
+diff --git a/include/linux/mmc/core.h b/include/linux/mmc/core.h
+index b01e77de1a74..368bed70aa9d 100644
+--- a/include/linux/mmc/core.h
++++ b/include/linux/mmc/core.h
+@@ -133,8 +133,12 @@ struct mmc_request {
+ 	struct mmc_command	*stop;
+ 
+ 	struct completion	completion;
++	struct completion	cmd_completion;
+ 	void			(*done)(struct mmc_request *);/* completion function */
+ 	struct mmc_host		*host;
++
++	/* Allow other commands during this ongoing data transfer or busy wait */
++	bool			cap_cmd_during_tfr;
+ };
+ 
+ struct mmc_card;
+@@ -146,6 +150,9 @@ extern struct mmc_async_req *mmc_start_req(struct mmc_host *,
+ 					   struct mmc_async_req *, int *);
+ extern int mmc_interrupt_hpi(struct mmc_card *);
+ extern void mmc_wait_for_req(struct mmc_host *, struct mmc_request *);
++extern void mmc_wait_for_req_done(struct mmc_host *host,
++				  struct mmc_request *mrq);
++extern bool mmc_is_req_done(struct mmc_host *host, struct mmc_request *mrq);
+ extern int mmc_wait_for_cmd(struct mmc_host *, struct mmc_command *, int);
+ extern int mmc_app_cmd(struct mmc_host *, struct mmc_card *);
+ extern int mmc_wait_for_app_cmd(struct mmc_host *, struct mmc_card *,
+diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+index d72c0c34c21d..af247e4c75d5 100644
+--- a/include/linux/mmc/host.h
++++ b/include/linux/mmc/host.h
+@@ -281,6 +281,7 @@ struct mmc_host {
+ #define MMC_CAP_DRIVER_TYPE_A	(1 << 23)	/* Host supports Driver Type A */
+ #define MMC_CAP_DRIVER_TYPE_C	(1 << 24)	/* Host supports Driver Type C */
+ #define MMC_CAP_DRIVER_TYPE_D	(1 << 25)	/* Host supports Driver Type D */
++#define MMC_CAP_CMD_DURING_TFR	(1 << 29)	/* Commands during data transfer */
+ #define MMC_CAP_CMD23		(1 << 30)	/* CMD23 supported. */
+ #define MMC_CAP_HW_RESET	(1 << 31)	/* Hardware reset */
+ 
+@@ -380,6 +381,9 @@ struct mmc_host {
+ 	struct mmc_async_req	*areq;		/* active async req */
+ 	struct mmc_context_info	context_info;	/* async synchronization info */
+ 
++	/* Ongoing data transfer that allows commands during transfer */
++	struct mmc_request	*ongoing_mrq;
++
+ #ifdef CONFIG_FAIL_MMC_REQUEST
+ 	struct fault_attr	fail_mmc_request;
+ #endif
+@@ -416,6 +420,7 @@ int mmc_power_restore_host(struct mmc_host *host);
+ 
+ void mmc_detect_change(struct mmc_host *, unsigned long delay);
+ void mmc_request_done(struct mmc_host *, struct mmc_request *);
++void mmc_command_done(struct mmc_host *host, struct mmc_request *mrq);
+ 
+ static inline void mmc_signal_sdio_irq(struct mmc_host *host)
+ {
+-- 
+1.9.1
 
-Sure, I'll add it if this approach is acceptable.  At this moment this
-is not necessary to show my idea so I prefer to avoid doing work which
-might be discarded very fast by review.
-
-Thanks for feedback!
-
-Best regards,
-Krzysztof
