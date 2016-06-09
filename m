@@ -1,53 +1,57 @@
-From: Stefan Wahren <stefan.wahren@i2se.com>
-Subject: Re: [PATCH 1/2] DT: bindings: remove bcm2835-sdhci
-Date: Thu, 9 Jun 2016 20:11:50 +0200 (CEST)
-Message-ID: <1995060523.43076.c268f06d-da3c-427e-800f-fbc65895c323.open-xchange@email.1und1.de>
-References: <1464983233-27001-1-git-send-email-stefan.wahren@i2se.com>
- <1464983233-27001-2-git-send-email-stefan.wahren@i2se.com>
- <5751E1F1.5020202@wwwdotorg.org>
+From: Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>
+Subject: Re: [PATCH 09/12] mmc: sdhci-xenon: add initial Xenon eMMC driver
+Date: Thu, 09 Jun 2016 23:49:36 +0200
+Message-ID: <7218454.U6xIsxs3Lc@wuerfel>
+References: <201606092223.3kHMu0m3%fengguang.wu@intel.com> <87r3c6mmyp.fsf@free-electrons.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <5751E1F1.5020202@wwwdotorg.org>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Stephen Warren <swarren@wwwdotorg.org>
-Cc: Mark Rutland <mark.rutland@arm.com>, devicetree@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, Pawel Moll <pawel.moll@arm.com>, Lee Jones <lee@kernel.org>, linux-mmc@vger.kernel.org, Adrian Hunter <adrian.hunter@intel.com>, Eric Anholt <eric@anholt.net>, Rob Herring <robh+dt@kernel.org>, linux-rpi-kernel@lists.infradead.org, linux-arm-kernel@lists.infradead.org
+Content-Transfer-Encoding: 7Bit
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <87r3c6mmyp.fsf-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Gregory CLEMENT <gregory.clement-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>
+Cc: kbuild test robot <lkp-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, kbuild-all-JC7UmRfGjtg@public.gmane.org, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Jason Cooper <jason-NLaQJdtUoK4Be96aLqz0jA@public.gmane.org>, Andrew Lunn <andrew-g2DYL2Zd6BY@public.gmane.org>, Sebastian Hesselbarth <sebastian.hesselbarth-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Thomas Petazzoni <thomas.petazzoni-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, Nadav Haklai <nadavh-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, Victor Gu <xigu-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, Romain Perier <romain.perier-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>, Omri Itach <omrii-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, Marcin Wojtas <mw-nYOzD4b6Jr9Wk0Htik3J/w@public.gmane.org>, Wilson Ding <dingwei-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, Shadi Ammouri <shadi-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-Hi Stephen,
-
-> Stephen Warren <swarren@wwwdotorg.org> hat am 3. Juni 2016 um 22:00
-> geschrieben:
+On Thursday, June 9, 2016 4:54:54 PM CEST Gregory CLEMENT wrote:
+> >
+> >    drivers/built-in.o: In function `sdhci_xenon_remove':
+> >>> sdhci-xenon.c:(.text+0x311234): undefined reference to `sdhci_remove_host'
+> >>> sdhci-xenon.c:(.text+0x31123c): undefined reference to `sdhci_pltfm_free'
+> >    drivers/built-in.o: In function `sdhci_xenon_delay_adj_test':
+> >>> sdhci-xenon.c:(.text+0x31213b): undefined reference to `card_alive'
+> >    drivers/built-in.o: In function `sdhci_xenon_set_uhs_signaling':
+> >>> sdhci-xenon.c:(.text+0x312456): undefined reference to `sdhci_set_uhs_signaling'
+> >    drivers/built-in.o: In function `sdhci_xenon_probe':
+> >>> sdhci-xenon.c:(.text+0x31258c): undefined reference to `sdhci_pltfm_init'
+> >>> sdhci-xenon.c:(.text+0x3125d3): undefined reference to `mmc_of_parse'
+> >>> sdhci-xenon.c:(.text+0x312651): undefined reference to `sdhci_get_of_property'
+> >>> sdhci-xenon.c:(.text+0x312840): undefined reference to `sdhci_add_host'
+> >    sdhci-xenon.c:(.text+0x312904): undefined reference to `sdhci_pltfm_free'
+> >    drivers/built-in.o: In function `sdhci_xenon_reset':
+> >>> sdhci-xenon.c:(.text+0x313c11): undefined reference to `sdhci_reset'
+> >>> drivers/built-in.o:(.data+0x1d7df0): undefined reference to `sdhci_pltfm_pmops'
+> >>> drivers/built-in.o:(.data+0x1d7eb0): undefined reference to `sdhci_set_clock'
+> >>> drivers/built-in.o:(.data+0x1d7ef0): undefined reference to `sdhci_set_bus_width'
 > 
+> These symbols are part of the drivers/mmc/host/sdhci.c which is build
+> when CONFIG_MMC_SDHCI is enabled. However CONFIG_MMC_XENON_SDHCI depends
+> on CONFIG_MMC_SDHCI_PLTFM which depends on CONFIG_MMC_SDHCI.
 > 
-> On 06/03/2016 01:47 PM, Stefan Wahren wrote:
-> > The sdhci-iproc also supports bcm2835. So this binding is obsolete.
+> So I wonder how we can have a sition with sdhci-xenon.c built but not
+> sdhci.c.
 > 
-> sdhci-iproc supports this binding, so I don't believe the binding is 
-> obsolete. The duplicate implementations (drivers) can possibly be 
-> removed, but not the binding doc, which is (or at least could be) still 
-> in use.
-
-sorry for my late reply.
-
-So the brcm,bcm2835-sdhci.txt must be kept, even if the compatible string
-"brcm,bcm2835-sdhci" has been added to brcm,sdhci-iproc.txt?
-
-Do i need to send a new version of this series?
-
-Stefan
-
+> Any idea?
 > 
-> _______________________________________________
-> linux-arm-kernel mailing list
-> linux-arm-kernel@lists.infradead.org
-> http://lists.infradead.org/mailman/listinfo/linux-arm-kernel
+
+CONFIG_MMC_SDHCI is built as a module, but CONFIG_MMC_XENON_SDHCI is
+a "bool" option, so it can only be built-in.
+
+It should work if you make it a 'tristate' instead, so that Kconfig
+can handle the dependency correctly.
+
+	Arnd
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
