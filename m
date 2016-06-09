@@ -1,63 +1,75 @@
-From: Chen-Yu Tsai <wens@csie.org>
+From: Krzysztof Kozlowski <k.kozlowski-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>
 Subject: Re: [PATCH v3 06/12] power: pwrseq: simple: Add support for regulator
  and generic property
-Date: Thu, 9 Jun 2016 10:34:06 +0800
-Message-ID: <CAGb2v66OO0QJ75=hLnRukhXWdX7HgSy0LDakdZ_jxFRCHTUuJw@mail.gmail.com>
+Date: Thu, 09 Jun 2016 07:11:32 +0200
+Message-ID: <5758FA84.3050909@samsung.com>
 References: <1464768141-25420-1-git-send-email-k.kozlowski@samsung.com>
  <1464768141-25420-7-git-send-email-k.kozlowski@samsung.com>
- <20160603020218.GA19436@rob-hp-laptop> <575693DE.2010603@samsung.com> <20160608190333.GA5126@rob-hp-laptop>
+ <20160603020218.GA19436@rob-hp-laptop> <575693DE.2010603@samsung.com>
+ <20160608190333.GA5126@rob-hp-laptop>
+ <CAGb2v66OO0QJ75=hLnRukhXWdX7HgSy0LDakdZ_jxFRCHTUuJw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20160608190333.GA5126@rob-hp-laptop>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Rob Herring <robh@kernel.org>
-Cc: Krzysztof Kozlowski <k.kozlowski@samsung.com>, Mark Rutland <mark.rutland@arm.com>, devicetree <devicetree@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, linux-samsung-soc@vger.kernel.org, Pawel Moll <pawel.moll@arm.com>, Ian Campbell <ijc+devicetree@hellion.org.uk>, Dmitry Eremin-Solenikov <dbaryshkov@gmail.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, linux-usb <linux-usb@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Sebastian Reichel <sre@kernel.org>, linux-kernel <linux-kernel@vger.kernel.org>, Javier Martinez Canillas <javier@osg.samsung.com>, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>, Kukjin Kim <kgene@kernel.org>, Alan Stern <stern@rowland.harvard.edu>, linux-arm-kernel <linux-arm-kernel@lists.infradead.org>, Kumar Gala <galak@codeaurora.org>, David Woodhouse <dwmw2@infradead.org>, hzpeterchen@gmail.co
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-usb-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-reply-to: <CAGb2v66OO0QJ75=hLnRukhXWdX7HgSy0LDakdZ_jxFRCHTUuJw-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+Sender: linux-usb-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org>, Rob Herring <robh-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+Cc: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, devicetree <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-samsung-soc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Pawel Moll <pawel.moll-5wv7dgnIgG8@public.gmane.org>, Ian Campbell <ijc+devicetree-KcIKpvwj1kUDXYZnReoRVg@public.gmane.org>, Dmitry Eremin-Solenikov <dbaryshkov-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Greg Kroah-Hartman <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>, linux-usb <linux-usb-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Sebastian Reichel <sre-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, linux-kernel <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Javier Martinez Canillas <javier-JPH+aEBZ4P+UEJcrhfAQsw@public.gmane.org>, Bartlomiej Zolnierkiewicz <b.zolnierkie-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, Kukjin Kim <kgene-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Alan Stern <stern-nwvwT67g6+6dFdvTe/nMLpVzexx5G7lz@public.gmane.org>, linux-arm-kernel <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Kumar Gala <galak-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, David Woodhouse <dwmw2-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org>, hzpeterchen-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org, linux-pm-u79uwXL29TaqPxH82wqD4g@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
 
-Hi
-
-On Thu, Jun 9, 2016 at 3:03 AM, Rob Herring <robh@kernel.org> wrote:
-> On Tue, Jun 07, 2016 at 11:29:02AM +0200, Krzysztof Kozlowski wrote:
->> On 06/03/2016 04:02 AM, Rob Herring wrote:
->> >>  Optional properties:
->> >>  - reset-gpios : contains a list of GPIO specifiers. The reset GPIOs are asserted
->> >> @@ -16,6 +22,7 @@ Optional properties:
->> >>    See ../clocks/clock-bindings.txt for details.
->> >>  - clock-names : Must include the following entry:
->> >>    "ext_clock" (External clock provided to the card).
->> >> +- ext-supply : External regulator supply
->> >
->> > What happens when there are 2 supplies?
->> >
->> > I'd prefer the name not be genericish and use the real supply names.
->> > Then the power seq code should just turn on all supplies it finds. If
->> > the order or timing to turn on matters, then sorry, no generic sequence.
+On 06/09/2016 04:34 AM, Chen-Yu Tsai wrote:
+> Hi
+> 
+> On Thu, Jun 9, 2016 at 3:03 AM, Rob Herring <robh-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org> wrote:
+>> On Tue, Jun 07, 2016 at 11:29:02AM +0200, Krzysztof Kozlowski wrote:
+>>> On 06/03/2016 04:02 AM, Rob Herring wrote:
+>>>>>  Optional properties:
+>>>>>  - reset-gpios : contains a list of GPIO specifiers. The reset GPIOs are asserted
+>>>>> @@ -16,6 +22,7 @@ Optional properties:
+>>>>>    See ../clocks/clock-bindings.txt for details.
+>>>>>  - clock-names : Must include the following entry:
+>>>>>    "ext_clock" (External clock provided to the card).
+>>>>> +- ext-supply : External regulator supply
+>>>>
+>>>> What happens when there are 2 supplies?
+>>>>
+>>>> I'd prefer the name not be genericish and use the real supply names.
+>>>> Then the power seq code should just turn on all supplies it finds. If
+>>>> the order or timing to turn on matters, then sorry, no generic sequence.
+>>>
+>>> I think the generic part for regulators might be a problem. Regulator
+>>> API requires a name for the supply... it cannot get "something" or
+>>> "everything".
 >>
->> I think the generic part for regulators might be a problem. Regulator
->> API requires a name for the supply... it cannot get "something" or
->> "everything".
->
-> That's the downside of variable property names...
->
->> The driver could attach itself to any kind of node (where power-sequence
->> property exists) so the supply name depends on the bindings of device
->> (not bindings of power sequence driver).
+>> That's the downside of variable property names...
 >>
->> The power sequence driver could however iterate over child properties
->> and get the names of all supplies. It is a little bit ugly...
->
-> Yes. Like this, right?
->
-> for_each_property_of_node(np, pp) {
->         if (!strstr(pp->name, "-supply"))
->                 continue;
->         // found supply
-> }
->
-> The uglyness can always be improved with a function to do this parsing.
+>>> The driver could attach itself to any kind of node (where power-sequence
+>>> property exists) so the supply name depends on the bindings of device
+>>> (not bindings of power sequence driver).
+>>>
+>>> The power sequence driver could however iterate over child properties
+>>> and get the names of all supplies. It is a little bit ugly...
+>>
+>> Yes. Like this, right?
+>>
+>> for_each_property_of_node(np, pp) {
+>>         if (!strstr(pp->name, "-supply"))
+>>                 continue;
+>>         // found supply
+>> }
+>>
+>> The uglyness can always be improved with a function to do this parsing.
+> 
+> There's already a version of this in simplefb. Maybe it's time to move
+> this to a common function?
 
-There's already a version of this in simplefb. Maybe it's time to move
-this to a common function?
+Thanks, I'll make a generic one and let's see how Mark will respond to it.
 
-ChenYu
+Best regards,
+Krzysztof
+
+--
+To unsubscribe from this list: send the line "unsubscribe linux-usb" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
