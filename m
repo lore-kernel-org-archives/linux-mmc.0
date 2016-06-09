@@ -1,12 +1,12 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: [PATCH RFC 16/46] mmc: sdhci: Separate timer timeout for command and data requests
-Date: Thu,  9 Jun 2016 14:52:16 +0300
-Message-ID: <1465473166-22532-17-git-send-email-adrian.hunter@intel.com>
+Subject: [PATCH RFC 14/46] mmc: sdhci: Ensure all requests get errored out
+Date: Thu,  9 Jun 2016 14:52:14 +0300
+Message-ID: <1465473166-22532-15-git-send-email-adrian.hunter@intel.com>
 References: <1465473166-22532-1-git-send-email-adrian.hunter@intel.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga01.intel.com ([192.55.52.88]:61477 "EHLO mga01.intel.com"
+Received: from mga01.intel.com ([192.55.52.88]:63235 "EHLO mga01.intel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751506AbcFIL56 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	id S1750881AbcFIL56 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
 	Thu, 9 Jun 2016 07:57:58 -0400
 In-Reply-To: <1465473166-22532-1-git-send-email-adrian.hunter@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
@@ -15,146 +15,80 @@ To: Ulf Hansson <ulf.hansson@linaro.org>
 Cc: linux-mmc <linux-mmc@vger.kernel.org>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Sujit Reddy Thumma <sthumma@codeaurora.org>, Dorfman Konstantin <kdorfman@codeaurora.org>, David Griego <david.griego@linaro.org>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>
 
 In order to support commands during data transfer, there will have to be up
-to two active requests (mrqs) at a time, instead of just one. Provide two
-timers instead of just one. One of the timers is for requests that do not
-use the data lines, and the other one is for requests that do.
+to two active requests (mrqs) at a time, instead of just one. That means
+ensuring that all requests get errored out in the cases of card or driver
+removal.
 
 Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
 ---
- drivers/mmc/host/sdhci.c | 62 ++++++++++++++++++++++++++++++++++++++++--------
- drivers/mmc/host/sdhci.h |  1 +
- 2 files changed, 53 insertions(+), 10 deletions(-)
+ drivers/mmc/host/sdhci.c | 31 +++++++++++++++++++++++--------
+ 1 file changed, 23 insertions(+), 8 deletions(-)
 
 diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 90180d0d752c..f04df6f42f35 100644
+index 4361c3829106..e124dc632cac 100644
 --- a/drivers/mmc/host/sdhci.c
 +++ b/drivers/mmc/host/sdhci.c
-@@ -1003,6 +1003,23 @@ static void sdhci_finish_data(struct sdhci_host *host)
- 	}
+@@ -2131,6 +2131,24 @@ static void sdhci_pre_req(struct mmc_host *mmc, struct mmc_request *mrq,
+ 		sdhci_pre_dma_transfer(host, mrq->data, COOKIE_PRE_MAPPED);
  }
  
-+static void sdhci_mod_timer(struct sdhci_host *host, struct mmc_request *mrq,
-+			    unsigned long timeout)
++static inline bool sdhci_has_requests(struct sdhci_host *host)
 +{
-+	if (sdhci_data_line_cmd(mrq->cmd))
-+		mod_timer(&host->data_timer, timeout);
-+	else
-+		mod_timer(&host->timer, timeout);
++	return host->cmd || host->data_cmd;
 +}
 +
-+static void sdhci_del_timer(struct sdhci_host *host, struct mmc_request *mrq)
++static void sdhci_error_out_mrqs(struct sdhci_host *host, int err)
 +{
-+	if (sdhci_data_line_cmd(mrq->cmd))
-+		del_timer(&host->data_timer);
-+	else
-+		del_timer(&host->timer);
++	if (host->data_cmd) {
++		host->data_cmd->error = err;
++		sdhci_finish_mrq(host, host->data_cmd->mrq);
++	}
++
++	if (host->cmd) {
++		host->cmd->error = err;
++		sdhci_finish_mrq(host, host->cmd->mrq);
++	}
 +}
 +
- void sdhci_send_command(struct sdhci_host *host, struct mmc_command *cmd)
+ static void sdhci_card_event(struct mmc_host *mmc)
  {
- 	int flags;
-@@ -1044,7 +1061,7 @@ void sdhci_send_command(struct sdhci_host *host, struct mmc_command *cmd)
- 		timeout += DIV_ROUND_UP(cmd->busy_timeout, 1000) * HZ + HZ;
- 	else
- 		timeout += 10 * HZ;
--	mod_timer(&host->timer, timeout);
-+	sdhci_mod_timer(host, cmd->mrq, timeout);
- 
- 	host->cmd = cmd;
- 	if (sdhci_data_line_cmd(cmd)) {
-@@ -2226,10 +2243,10 @@ static void sdhci_tasklet_finish(unsigned long param)
- 		return;
- 	}
- 
--	del_timer(&host->timer);
--
- 	mrq = host->mrq;
- 
-+	sdhci_del_timer(host, mrq);
-+
- 	/*
- 	 * Always unmap the data buffers if they were mapped by
- 	 * sdhci_prepare_data() whenever we finish with a request.
-@@ -2283,7 +2300,30 @@ static void sdhci_timeout_timer(unsigned long data)
+ 	struct sdhci_host *host = mmc_priv(mmc);
+@@ -2145,8 +2163,8 @@ static void sdhci_card_event(struct mmc_host *mmc)
  
  	spin_lock_irqsave(&host->lock, flags);
  
--	if (host->mrq) {
-+	if (host->cmd && !sdhci_data_line_cmd(host->cmd)) {
-+		pr_err("%s: Timeout waiting for hardware cmd interrupt.\n",
-+		       mmc_hostname(host->mmc));
-+		sdhci_dumpregs(host);
-+
-+		host->cmd->error = -ETIMEDOUT;
-+		sdhci_finish_mrq(host, host->cmd->mrq);
-+	}
-+
-+	mmiowb();
-+	spin_unlock_irqrestore(&host->lock, flags);
-+}
-+
-+static void sdhci_timeout_data_timer(unsigned long data)
-+{
-+	struct sdhci_host *host;
-+	unsigned long flags;
-+
-+	host = (struct sdhci_host *)data;
-+
-+	spin_lock_irqsave(&host->lock, flags);
-+
-+	if (host->data || host->data_cmd ||
-+	    (host->cmd && sdhci_data_line_cmd(host->cmd))) {
- 		pr_err("%s: Timeout waiting for hardware interrupt.\n",
- 		       mmc_hostname(host->mmc));
- 		sdhci_dumpregs(host);
-@@ -2291,13 +2331,12 @@ static void sdhci_timeout_timer(unsigned long data)
- 		if (host->data) {
- 			host->data->error = -ETIMEDOUT;
- 			sdhci_finish_data(host);
-+		} else if (host->data_cmd) {
-+			host->data_cmd->error = -ETIMEDOUT;
-+			sdhci_finish_mrq(host, host->data_cmd->mrq);
- 		} else {
--			if (host->cmd)
--				host->cmd->error = -ETIMEDOUT;
--			else
--				host->mrq->cmd->error = -ETIMEDOUT;
--
--			sdhci_finish_mrq(host, host->mrq);
-+			host->cmd->error = -ETIMEDOUT;
-+			sdhci_finish_mrq(host, host->cmd->mrq);
- 		}
+-	/* Check host->mrq first in case we are runtime suspended */
+-	if (host->mrq && !present) {
++	/* Check sdhci_has_requests() first in case we are runtime suspended */
++	if (sdhci_has_requests(host) && !present) {
+ 		pr_err("%s: Card removed during transfer!\n",
+ 			mmc_hostname(host->mmc));
+ 		pr_err("%s: Resetting controller.\n",
+@@ -2155,8 +2173,7 @@ static void sdhci_card_event(struct mmc_host *mmc)
+ 		sdhci_do_reset(host, SDHCI_RESET_CMD);
+ 		sdhci_do_reset(host, SDHCI_RESET_DATA);
+ 
+-		host->mrq->cmd->error = -ENOMEDIUM;
+-		sdhci_finish_mrq(host, host->mrq);
++		sdhci_error_out_mrqs(host, -ENOMEDIUM);
  	}
  
-@@ -3372,6 +3411,8 @@ int sdhci_add_host(struct sdhci_host *host)
- 		sdhci_tasklet_finish, (unsigned long)host);
+ 	spin_unlock_irqrestore(&host->lock, flags);
+@@ -3425,12 +3442,10 @@ void sdhci_remove_host(struct sdhci_host *host, int dead)
  
- 	setup_timer(&host->timer, sdhci_timeout_timer, (unsigned long)host);
-+	setup_timer(&host->data_timer, sdhci_timeout_data_timer,
-+		    (unsigned long)host);
+ 		host->flags |= SDHCI_DEVICE_DEAD;
  
- 	init_waitqueue_head(&host->buf_ready_int);
+-		if (host->mrq) {
++		if (sdhci_has_requests(host)) {
+ 			pr_err("%s: Controller removed during "
+ 				" transfer!\n", mmc_hostname(mmc));
+-
+-			host->mrq->cmd->error = -ENOMEDIUM;
+-			sdhci_finish_mrq(host, host->mrq);
++			sdhci_error_out_mrqs(host, -ENOMEDIUM);
+ 		}
  
-@@ -3470,6 +3511,7 @@ void sdhci_remove_host(struct sdhci_host *host, int dead)
- 	free_irq(host->irq, host);
- 
- 	del_timer_sync(&host->timer);
-+	del_timer_sync(&host->data_timer);
- 
- 	tasklet_kill(&host->finish_tasklet);
- 
-diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-index 331a72b417ef..10f835f785f7 100644
---- a/drivers/mmc/host/sdhci.h
-+++ b/drivers/mmc/host/sdhci.h
-@@ -487,6 +487,7 @@ struct sdhci_host {
- 	struct tasklet_struct finish_tasklet;	/* Tasklet structures */
- 
- 	struct timer_list timer;	/* Timer for timeouts */
-+	struct timer_list data_timer;	/* Timer for data timeouts */
- 
- 	u32 caps;		/* Alternative CAPABILITY_0 */
- 	u32 caps1;		/* Alternative CAPABILITY_1 */
+ 		spin_unlock_irqrestore(&host->lock, flags);
 -- 
 1.9.1
 
