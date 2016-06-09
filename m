@@ -1,57 +1,216 @@
-From: Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>
-Subject: Re: [PATCH 09/12] mmc: sdhci-xenon: add initial Xenon eMMC driver
-Date: Thu, 09 Jun 2016 23:49:36 +0200
-Message-ID: <7218454.U6xIsxs3Lc@wuerfel>
-References: <201606092223.3kHMu0m3%fengguang.wu@intel.com> <87r3c6mmyp.fsf@free-electrons.com>
+From: "George G. Davis" <george_davis@mentor.com>
+Subject: [RFC][PATCH] mmc: core: Disable HPI for certain Hynix eMMC cards
+Date: Thu, 9 Jun 2016 18:09:31 -0400
+Message-ID: <1465510172-11314-1-git-send-email-george_davis@mentor.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7Bit
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <87r3c6mmyp.fsf-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Gregory CLEMENT <gregory.clement-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>
-Cc: kbuild test robot <lkp-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, kbuild-all-JC7UmRfGjtg@public.gmane.org, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Jason Cooper <jason-NLaQJdtUoK4Be96aLqz0jA@public.gmane.org>, Andrew Lunn <andrew-g2DYL2Zd6BY@public.gmane.org>, Sebastian Hesselbarth <sebastian.hesselbarth-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Thomas Petazzoni <thomas.petazzoni-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, Nadav Haklai <nadavh-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, Victor Gu <xigu-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, Romain Perier <romain.perier-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>, Omri Itach <omrii-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, Marcin Wojtas <mw-nYOzD4b6Jr9Wk0Htik3J/w@public.gmane.org>, Wilson Ding <dingwei-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, Shadi Ammouri <shadi-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>
+Content-Type: text/plain
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, "George G. Davis" <george_davis@mentor.com>, Adrian Hunter <adrian.hunter@intel.com>, Vladimir Zapolskiy <vladimir_zapolskiy@mentor.com>, Luca Porzio <lporzio@micron.com>, Harish Jenny K N <harish_kandiga@mentor.com>, Tomas Winkler <tomas.winkler@intel.com>, Ding Wang <justin.wang@spreadtrum.com>, Matt Gumbel <matthew.k.gumbel@intel.com>, Pratibhasagar V <pratibha@codeaurora.org>, Seungwon Jeon <tgih.jun@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, Balasubramani Vivekanandan <balasubramani_vivekanandan@mentor.com>, Dirk Behme <dirk.behme@de.bosch.com>, Subhash Jadavani <subhashj@codeaurora.org>, "open list:MULTIMEDIA CARD (...), linux-kernel@vger.kernel.org (open
+	list)" <linux-mmc@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Thursday, June 9, 2016 4:54:54 PM CEST Gregory CLEMENT wrote:
-> >
-> >    drivers/built-in.o: In function `sdhci_xenon_remove':
-> >>> sdhci-xenon.c:(.text+0x311234): undefined reference to `sdhci_remove_host'
-> >>> sdhci-xenon.c:(.text+0x31123c): undefined reference to `sdhci_pltfm_free'
-> >    drivers/built-in.o: In function `sdhci_xenon_delay_adj_test':
-> >>> sdhci-xenon.c:(.text+0x31213b): undefined reference to `card_alive'
-> >    drivers/built-in.o: In function `sdhci_xenon_set_uhs_signaling':
-> >>> sdhci-xenon.c:(.text+0x312456): undefined reference to `sdhci_set_uhs_signaling'
-> >    drivers/built-in.o: In function `sdhci_xenon_probe':
-> >>> sdhci-xenon.c:(.text+0x31258c): undefined reference to `sdhci_pltfm_init'
-> >>> sdhci-xenon.c:(.text+0x3125d3): undefined reference to `mmc_of_parse'
-> >>> sdhci-xenon.c:(.text+0x312651): undefined reference to `sdhci_get_of_property'
-> >>> sdhci-xenon.c:(.text+0x312840): undefined reference to `sdhci_add_host'
-> >    sdhci-xenon.c:(.text+0x312904): undefined reference to `sdhci_pltfm_free'
-> >    drivers/built-in.o: In function `sdhci_xenon_reset':
-> >>> sdhci-xenon.c:(.text+0x313c11): undefined reference to `sdhci_reset'
-> >>> drivers/built-in.o:(.data+0x1d7df0): undefined reference to `sdhci_pltfm_pmops'
-> >>> drivers/built-in.o:(.data+0x1d7eb0): undefined reference to `sdhci_set_clock'
-> >>> drivers/built-in.o:(.data+0x1d7ef0): undefined reference to `sdhci_set_bus_width'
-> 
-> These symbols are part of the drivers/mmc/host/sdhci.c which is build
-> when CONFIG_MMC_SDHCI is enabled. However CONFIG_MMC_XENON_SDHCI depends
-> on CONFIG_MMC_SDHCI_PLTFM which depends on CONFIG_MMC_SDHCI.
-> 
-> So I wonder how we can have a sition with sdhci-xenon.c built but not
-> sdhci.c.
-> 
-> Any idea?
-> 
+From: Pratibhasagar V <pratibha@codeaurora.org>
 
-CONFIG_MMC_SDHCI is built as a module, but CONFIG_MMC_XENON_SDHCI is
-a "bool" option, so it can only be built-in.
+Certain Hynix eMMC 4.41 cards might get broken when HPI feature is used
+and hence this patch disables the HPI feature for such buggy cards.
 
-It should work if you make it a 'tristate' instead, so that Kconfig
-can handle the dependency correctly.
+As some of the other features like BKOPs/Cache/Sanitize are dependent on
+HPI feature, those features would also get disabled if HPI is disabled.
 
-	Arnd
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Signed-off-by: Pratibhasagar V <pratibha@codeaurora.org>
+Signed-off-by: Subhash Jadavani <subhashj@codeaurora.org>
+[gdavis: Forward port and cleanup https://gitlab.com/k2wl/g2_kernel/commit/84af3731019921a28d595dbf6cbf00539706a42c]
+Signed-off-by: George G. Davis <george_davis@mentor.com>
+---
+ drivers/mmc/card/block.c  |  6 ------
+ drivers/mmc/core/mmc.c    | 23 ++++++++++++++++++++---
+ drivers/mmc/core/quirks.c |  2 ++
+ include/linux/mmc/card.h  | 35 ++++++++++++++++++++++++++++++-----
+ 4 files changed, 52 insertions(+), 14 deletions(-)
+
+diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+index e62fde3..bb6e525 100644
+--- a/drivers/mmc/card/block.c
++++ b/drivers/mmc/card/block.c
+@@ -2497,12 +2497,6 @@ force_ro_fail:
+ 	return ret;
+ }
+ 
+-#define CID_MANFID_SANDISK	0x2
+-#define CID_MANFID_TOSHIBA	0x11
+-#define CID_MANFID_MICRON	0x13
+-#define CID_MANFID_SAMSUNG	0x15
+-#define CID_MANFID_KINGSTON	0x70
+-
+ static const struct mmc_fixup blk_fixups[] =
+ {
+ 	MMC_FIXUP("SEM02G", CID_MANFID_SANDISK, 0x100, add_quirk,
+diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+index 5d438ad..aede5a5 100644
+--- a/drivers/mmc/core/mmc.c
++++ b/drivers/mmc/core/mmc.c
+@@ -45,6 +45,17 @@ static const unsigned int tacc_mant[] = {
+ 	35,	40,	45,	50,	55,	60,	70,	80,
+ };
+ 
++static const struct mmc_fixup mmc_ext_csd_fixups[] = {
++	/*
++	 * Certain Hynix eMMC 4.41 cards might get broken when HPI feature
++	 * is used so disable the HPI feature for such buggy cards.
++	 */
++	MMC_FIXUP_EXT_CSD_REV(CID_NAME_ANY, CID_MANFID_HYNIX,
++			      0x014a, add_quirk, MMC_QUIRK_BROKEN_HPI, 5),
++
++	END_FIXUP
++};
++
+ #define UNSTUFF_BITS(resp,start,size)					\
+ 	({								\
+ 		const int __size = size;				\
+@@ -370,6 +381,9 @@ static int mmc_decode_ext_csd(struct mmc_card *card, u8 *ext_csd)
+ 	 */
+ 	card->ext_csd.rev = ext_csd[EXT_CSD_REV];
+ 
++	/* fixup device after ext_csd revision field is updated */
++	mmc_fixup_device(card, mmc_ext_csd_fixups);
++
+ 	card->ext_csd.raw_sectors[0] = ext_csd[EXT_CSD_SEC_CNT + 0];
+ 	card->ext_csd.raw_sectors[1] = ext_csd[EXT_CSD_SEC_CNT + 1];
+ 	card->ext_csd.raw_sectors[2] = ext_csd[EXT_CSD_SEC_CNT + 2];
+@@ -500,7 +514,8 @@ static int mmc_decode_ext_csd(struct mmc_card *card, u8 *ext_csd)
+ 			card->cid.year += 16;
+ 
+ 		/* check whether the eMMC card supports BKOPS */
+-		if (ext_csd[EXT_CSD_BKOPS_SUPPORT] & 0x1) {
++		if (!mmc_card_broken_hpi(card) &&
++		    ext_csd[EXT_CSD_BKOPS_SUPPORT] & 0x1) {
+ 			card->ext_csd.bkops = 1;
+ 			card->ext_csd.man_bkops_en =
+ 					(ext_csd[EXT_CSD_BKOPS_EN] &
+@@ -513,7 +528,8 @@ static int mmc_decode_ext_csd(struct mmc_card *card, u8 *ext_csd)
+ 		}
+ 
+ 		/* check whether the eMMC card supports HPI */
+-		if (!broken_hpi && (ext_csd[EXT_CSD_HPI_FEATURES] & 0x1)) {
++		if (!mmc_card_broken_hpi(card) &&
++		    !broken_hpi && (ext_csd[EXT_CSD_HPI_FEATURES] & 0x1)) {
+ 			card->ext_csd.hpi = 1;
+ 			if (ext_csd[EXT_CSD_HPI_FEATURES] & 0x2)
+ 				card->ext_csd.hpi_cmd =	MMC_STOP_TRANSMISSION;
+@@ -1616,7 +1632,8 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
+ 	 * If cache size is higher than 0, this indicates
+ 	 * the existence of cache and it can be turned on.
+ 	 */
+-	if (card->ext_csd.cache_size > 0) {
++	if (!mmc_card_broken_hpi(card) &&
++	    card->ext_csd.cache_size > 0) {
+ 		err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
+ 				EXT_CSD_CACHE_CTRL, 1,
+ 				card->ext_csd.generic_cmd6_time);
+diff --git a/drivers/mmc/core/quirks.c b/drivers/mmc/core/quirks.c
+index fad660b..ca9cade 100644
+--- a/drivers/mmc/core/quirks.c
++++ b/drivers/mmc/core/quirks.c
+@@ -72,6 +72,8 @@ void mmc_fixup_device(struct mmc_card *card, const struct mmc_fixup *table)
+ 		     f->cis_vendor == (u16) SDIO_ANY_ID) &&
+ 		    (f->cis_device == card->cis.device ||
+ 		     f->cis_device == (u16) SDIO_ANY_ID) &&
++		    (f->ext_csd_rev == EXT_CSD_REV_ANY ||
++		     f->ext_csd_rev == card->ext_csd.rev) &&
+ 		    rev >= f->rev_start && rev <= f->rev_end) {
+ 			dev_dbg(&card->dev, "calling %pf\n", f->vendor_fixup);
+ 			f->vendor_fixup(card, f->data);
+diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
+index eb0151b..5a2db5e 100644
+--- a/include/linux/mmc/card.h
++++ b/include/linux/mmc/card.h
+@@ -279,6 +279,7 @@ struct mmc_card {
+ #define MMC_QUIRK_SEC_ERASE_TRIM_BROKEN (1<<10)	/* Skip secure for erase/trim */
+ #define MMC_QUIRK_BROKEN_IRQ_POLLING	(1<<11)	/* Polling SDIO_CCCR_INTx could create a fake interrupt */
+ #define MMC_QUIRK_TRIM_BROKEN	(1<<12)		/* Skip trim */
++#define MMC_QUIRK_BROKEN_HPI	(1<<13)		/* Disable broken HPI support */
+ 
+ 
+ 	unsigned int		erase_size;	/* erase size in sectors */
+@@ -353,6 +354,9 @@ struct mmc_fixup {
+ 	/* SDIO-specfic fields. You can use SDIO_ANY_ID here of course */
+ 	u16 cis_vendor, cis_device;
+ 
++	/* for MMC cards */
++	unsigned int ext_csd_rev;
++
+ 	void (*vendor_fixup)(struct mmc_card *card, int data);
+ 	int data;
+ };
+@@ -361,11 +365,20 @@ struct mmc_fixup {
+ #define CID_OEMID_ANY ((unsigned short) -1)
+ #define CID_NAME_ANY (NULL)
+ 
++#define EXT_CSD_REV_ANY (-1u)
++
++#define CID_MANFID_SANDISK      0x2
++#define CID_MANFID_TOSHIBA      0x11
++#define CID_MANFID_MICRON       0x13
++#define CID_MANFID_SAMSUNG      0x15
++#define CID_MANFID_KINGSTON     0x70
++#define CID_MANFID_HYNIX	0x90
++
+ #define END_FIXUP { NULL }
+ 
+ #define _FIXUP_EXT(_name, _manfid, _oemid, _rev_start, _rev_end,	\
+ 		   _cis_vendor, _cis_device,				\
+-		   _fixup, _data)					\
++		   _fixup, _data, _ext_csd_rev)				\
+ 	{						   \
+ 		.name = (_name),			   \
+ 		.manfid = (_manfid),			   \
+@@ -376,23 +389,30 @@ struct mmc_fixup {
+ 		.cis_device = (_cis_device),		   \
+ 		.vendor_fixup = (_fixup),		   \
+ 		.data = (_data),			   \
++		.ext_csd_rev = (_ext_csd_rev),		   \
+ 	 }
+ 
+ #define MMC_FIXUP_REV(_name, _manfid, _oemid, _rev_start, _rev_end,	\
+-		      _fixup, _data)					\
++		      _fixup, _data, _ext_csd_rev)			\
+ 	_FIXUP_EXT(_name, _manfid,					\
+ 		   _oemid, _rev_start, _rev_end,			\
+ 		   SDIO_ANY_ID, SDIO_ANY_ID,				\
+-		   _fixup, _data)					\
++		   _fixup, _data, _ext_csd_rev)				\
+ 
+ #define MMC_FIXUP(_name, _manfid, _oemid, _fixup, _data) \
+-	MMC_FIXUP_REV(_name, _manfid, _oemid, 0, -1ull, _fixup, _data)
++	MMC_FIXUP_REV(_name, _manfid, _oemid, 0, -1ull, _fixup, _data,	\
++		      EXT_CSD_REV_ANY)
++
++#define MMC_FIXUP_EXT_CSD_REV(_name, _manfid, _oemid, _fixup, _data,	\
++			      _ext_csd_rev)				\
++	MMC_FIXUP_REV(_name, _manfid, _oemid, 0, -1ull, _fixup, _data,	\
++		      _ext_csd_rev)
+ 
+ #define SDIO_FIXUP(_vendor, _device, _fixup, _data)			\
+ 	_FIXUP_EXT(CID_NAME_ANY, CID_MANFID_ANY,			\
+ 		    CID_OEMID_ANY, 0, -1ull,				\
+ 		   _vendor, _device,					\
+-		   _fixup, _data)					\
++		   _fixup, _data, EXT_CSD_REV_ANY)			\
+ 
+ #define cid_rev(hwrev, fwrev, year, month)	\
+ 	(((u64) hwrev) << 40 |                  \
+@@ -511,6 +531,11 @@ static inline int mmc_card_broken_irq_polling(const struct mmc_card *c)
+ 	return c->quirks & MMC_QUIRK_BROKEN_IRQ_POLLING;
+ }
+ 
++static inline int mmc_card_broken_hpi(const struct mmc_card *c)
++{
++	return c->quirks & MMC_QUIRK_BROKEN_HPI;
++}
++
+ #define mmc_card_name(c)	((c)->cid.prod_name)
+ #define mmc_card_id(c)		(dev_name(&(c)->dev))
+ 
+-- 
+1.9.3
