@@ -1,85 +1,120 @@
-From: Gregory CLEMENT <gregory.clement@free-electrons.com>
-Subject: Re: [PATCH 09/12] mmc: sdhci-xenon: add initial Xenon eMMC driver
-Date: Thu, 09 Jun 2016 16:54:54 +0200
-Message-ID: <87r3c6mmyp.fsf@free-electrons.com>
-References: <201606092223.3kHMu0m3%fengguang.wu@intel.com>
+From: Amitkumar Karwar <akarwar-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>
+Subject: RE: [PATCH v3 1/2] mmc: API for accessing host supported maximum
+ segment count and size
+Date: Thu, 9 Jun 2016 15:44:51 +0000
+Message-ID: <25b49010bda247bd9a96f7a57a35e71e@SC-EXCH04.marvell.com>
+References: <1465213989-32218-1-git-send-email-akarwar@marvell.com>
+ <589930e6-f253-58cf-f0fd-91d0c80a11bf@rock-chips.com>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from down.free-electrons.com ([37.187.137.238]:58448 "EHLO
-	mail.free-electrons.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1752152AbcFIOy5 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 9 Jun 2016 10:54:57 -0400
-In-Reply-To: <201606092223.3kHMu0m3%fengguang.wu@intel.com> (kbuild test
-	robot's message of "Thu, 9 Jun 2016 22:20:45 +0800")
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
+Return-path: <linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <589930e6-f253-58cf-f0fd-91d0c80a11bf-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
+Content-Language: en-US
+Sender: linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>, "linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Cc: Nishant Sarmukadam <nishants-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, Wei-Ning Huang <wnhuang-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Cathy Luo <cluo-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, Xinming Hu <huxm-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: kbuild test robot <lkp@intel.com>
-Cc: Arnd Bergmann <arnd@arndb.de>, kbuild-all@01.org, Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, linux-mmc@vger.kernel.org, Rob Herring <robh+dt@kernel.org>, devicetree@vger.kernel.org, Jason Cooper <jason@lakedaemon.net>, Andrew Lunn <andrew@lunn.ch>, Sebastian Hesselbarth <sebastian.hesselbarth@gmail.com>, Thomas Petazzoni <thomas.petazzoni@free-electrons.com>, linux-arm-kernel@lists.infradead.org, Nadav Haklai <nadavh@marvell.com>, Victor Gu <xigu@marvell.com>, Romain Perier <romain.perier@free-electrons.com>, Omri Itach <omrii@marvell.com>, Marcin Wojtas <mw@semihalf.com>, Wilson Ding <dingwei@marvell.com>, Shadi Ammouri <shadi@marvell.com>
 
-Hi,
+Hi Shawn,
 
-I added Arnd because he seems to have a good knoweldge of the Kconfig
-stuff.
+> From: Shawn Lin [mailto:shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org]
+> Sent: Wednesday, June 08, 2016 7:31 AM
+> To: Amitkumar Karwar; linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+> Cc: Nishant Sarmukadam; Wei-Ning Huang; linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org; Cathy
+> Luo; Xinming Hu; shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org
+> Subject: Re: [PATCH v3 1/2] mmc: API for accessing host supported
+> maximum segment count and size
+> 
+> Hi
+> 
+> On 2016-6-6 19:53, Amitkumar Karwar wrote:
+> > From: Xinming Hu <huxm-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>
+> >
+> > sdio device drivers need be able to get the host supported max_segs
+> > and max_seg_size, so that they know the buffer size to allocate while
+> > utilizing the scatter/gather DMA buffer list.
+> >
+> > This patch provides API for this purpose.
+> >
+> > Signed-off-by: Xinming Hu <huxm-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>
+> > Signed-off-by: Amitkumar Karwar <akarwar-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>
+> > ---
+> > v2: v2 was submitted with minor improvement like replacing BUG_ON()
+> > with WARN_ON()
+> > v3: Addressed below review comments from Ulf Hansson
+> >      a) In v3, patch has been split into two separate patches.
+> >      b) Patch 1/2 introduces an API to fetch max_seg_size and max_segs
+> >      c) Replaced WARN_ON() with proper error code when sg_ptr->length
+> is invalid
+> >      d) Instead of duplicating the code in mmc_io_rw_extended(), extra
+> bool parameter
+> >         has been added to this function and used it in new APIs for
+> SG.
+> > ---
+> >   drivers/mmc/core/sdio_io.c                         | 27
+> ++++++++++++++++++++++
+> >   .../wireless/broadcom/brcm80211/brcmfmac/bcmsdh.c  |  6 ++---
+> >   include/linux/mmc/sdio_func.h                      |  3 +++
+> >   3 files changed, 33 insertions(+), 3 deletions(-)
+> >
+> > diff --git a/drivers/mmc/core/sdio_io.c b/drivers/mmc/core/sdio_io.c
+> > index 78cb4d5..a546c89 100644
+> > --- a/drivers/mmc/core/sdio_io.c
+> > +++ b/drivers/mmc/core/sdio_io.c
+> > @@ -720,3 +720,30 @@ int sdio_set_host_pm_flags(struct sdio_func
+> *func, mmc_pm_flag_t flags)
+> >   	return 0;
+> >   }
+> >   EXPORT_SYMBOL_GPL(sdio_set_host_pm_flags);
+> > +
+> > +/**
+> > + *	sdio_get_host_max_seg_size - get host maximum segment size
+> > + *	@func: SDIO function attached to host
+> > + */
+> > +unsigned int sdio_get_host_max_seg_size(struct sdio_func *func) {
+> > +	WARN_ON(!func);
+> > +	WARN_ON(!func->card);
+> > +
+> > +	return func->card->host->max_seg_size; }
+> > +EXPORT_SYMBOL_GPL(sdio_get_host_max_seg_size);
+> > +
+> > +/**
+> > + *	sdio_get_host_max_seg_count - get host maximum segment count
+> > + *	@func: SDIO function attached to host
+> > + */
+> > +unsigned short sdio_get_host_max_seg_count(struct sdio_func *func) {
+> > +	WARN_ON(!func);
+> > +	WARN_ON(!func->card);
+> > +
+> 
+> I believe these two WARN_ON may be called too late because ...
+> 
+> drivers/net/wireless/broadcom/brcm80211/brcmfmac/bcmsdh.c
+> 
+> void brcmf_sdiod_sgtable_alloc(struct brcmf_sdio_dev *sdiodev)
+> 
+> func = sdiodev->func[2];
+> host = func->card->host;
+> 
+> you have unconditionally thought it should be ready.
+> 
 
- On jeu., juin 09 2016, kbuild test robot <lkp@intel.com> wrote:
+Yes. The WARN_ONs in this patch are redundant. We will remove them and submit updated version.
 
-> Hi,
->
-> [auto build test ERROR on ulf.hansson-mmc/next]
-> [also build test ERROR on v4.7-rc2 next-20160609]
-> [if your patch is applied to the wrong git tree, please drop us a note to help improve the system]
->
-> url:    https://github.com/0day-ci/linux/commits/Gregory-CLEMENT/Add-SDHCI-Xenon-driver/20160609-151403
-> base:   https://git.linaro.org/people/ulf.hansson/mmc next
-> config: x86_64-allmodconfig (attached as .config)
-> compiler: gcc-6 (Debian 6.1.1-1) 6.1.1 20160430
-> reproduce:
->         # save the attached .config to linux build tree
->         make ARCH=x86_64 
->
-> All errors (new ones prefixed by >>):
->
->    drivers/built-in.o: In function `sdhci_xenon_remove':
->>> sdhci-xenon.c:(.text+0x311234): undefined reference to `sdhci_remove_host'
->>> sdhci-xenon.c:(.text+0x31123c): undefined reference to `sdhci_pltfm_free'
->    drivers/built-in.o: In function `sdhci_xenon_delay_adj_test':
->>> sdhci-xenon.c:(.text+0x31213b): undefined reference to `card_alive'
->    drivers/built-in.o: In function `sdhci_xenon_set_uhs_signaling':
->>> sdhci-xenon.c:(.text+0x312456): undefined reference to `sdhci_set_uhs_signaling'
->    drivers/built-in.o: In function `sdhci_xenon_probe':
->>> sdhci-xenon.c:(.text+0x31258c): undefined reference to `sdhci_pltfm_init'
->>> sdhci-xenon.c:(.text+0x3125d3): undefined reference to `mmc_of_parse'
->>> sdhci-xenon.c:(.text+0x312651): undefined reference to `sdhci_get_of_property'
->>> sdhci-xenon.c:(.text+0x312840): undefined reference to `sdhci_add_host'
->    sdhci-xenon.c:(.text+0x312904): undefined reference to `sdhci_pltfm_free'
->    drivers/built-in.o: In function `sdhci_xenon_reset':
->>> sdhci-xenon.c:(.text+0x313c11): undefined reference to `sdhci_reset'
->>> drivers/built-in.o:(.data+0x1d7df0): undefined reference to `sdhci_pltfm_pmops'
->>> drivers/built-in.o:(.data+0x1d7eb0): undefined reference to `sdhci_set_clock'
->>> drivers/built-in.o:(.data+0x1d7ef0): undefined reference to `sdhci_set_bus_width'
+Below is the function call flow.
 
-These symbols are part of the drivers/mmc/host/sdhci.c which is build
-when CONFIG_MMC_SDHCI is enabled. However CONFIG_MMC_XENON_SDHCI depends
-on CONFIG_MMC_SDHCI_PLTFM which depends on CONFIG_MMC_SDHCI.
+brcmf_sdio_probe() -> brcmf_sdio_probe_attach() -> brcmf_sdiod_sgtable_alloc()
 
-So I wonder how we can have a sition with sdhci-xenon.c built but not
-sdhci.c.
+Looks like is sdiodev->func[2] is ready in brcmf_sdio_probe() itself.
 
-Any idea?
+It contains below line.
 
-Thanks,
+        bus->blocksize = bus->sdiodev->func[2]->cur_blksize;
 
-Gregory
-
->
-> ---
-> 0-DAY kernel test infrastructure                Open Source Technology Center
-> https://lists.01.org/pipermail/kbuild-all                   Intel Corporation
->
-
--- 
-Gregory Clement, Free Electrons
-Kernel, drivers, real-time and embedded Linux
-development, consulting, training and support.
-http://free-electrons.com
+Regards,
+Amitkumar
+--
+To unsubscribe from this list: send the line "unsubscribe linux-wireless" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
