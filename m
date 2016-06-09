@@ -1,120 +1,61 @@
-From: Amitkumar Karwar <akarwar-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>
-Subject: RE: [PATCH v3 1/2] mmc: API for accessing host supported maximum
- segment count and size
-Date: Thu, 9 Jun 2016 15:44:51 +0000
-Message-ID: <25b49010bda247bd9a96f7a57a35e71e@SC-EXCH04.marvell.com>
-References: <1465213989-32218-1-git-send-email-akarwar@marvell.com>
- <589930e6-f253-58cf-f0fd-91d0c80a11bf@rock-chips.com>
+From: Mark Brown <broonie-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+Subject: Re: [RFC v4 01/14] regulator: of: Add helper for getting all supplies
+Date: Thu, 9 Jun 2016 16:57:46 +0100
+Message-ID: <20160609155746.GZ7510@sirena.org.uk>
+References: <1465465471-28740-1-git-send-email-k.kozlowski@samsung.com>
+ <1465465471-28740-2-git-send-email-k.kozlowski@samsung.com>
+ <20160609102925.GS7510@sirena.org.uk>
+ <CAJZ5v0hiyyOhU7AjOEjFHjTKhT+pqWZheUG77c6u2HV9dNQ0Gg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
-Return-path: <linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <589930e6-f253-58cf-f0fd-91d0c80a11bf-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
-Content-Language: en-US
-Sender: linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>, "linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Cc: Nishant Sarmukadam <nishants-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, Wei-Ning Huang <wnhuang-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Cathy Luo <cluo-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, Xinming Hu <huxm-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>
+Content-Type: multipart/signed; micalg=pgp-sha256;
+	protocol="application/pgp-signature"; boundary="OCeUrMLoh2ht7f6S"
+Return-path: <linux-usb-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <CAJZ5v0hiyyOhU7AjOEjFHjTKhT+pqWZheUG77c6u2HV9dNQ0Gg-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+Sender: linux-usb-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: "Rafael J. Wysocki" <rafael-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+Cc: Krzysztof Kozlowski <k.kozlowski-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Pawel Moll <pawel.moll-5wv7dgnIgG8@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Ian Campbell <ijc+devicetree-KcIKpvwj1kUDXYZnReoRVg@public.gmane.org>, Kumar Gala <galak-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, Sebastian Reichel <sre-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Dmitry Eremin-Solenikov <dbaryshkov-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, David Woodhouse <dwmw2-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org>, Liam Girdwood <lgirdwood-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Greg Kroah-Hartman <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>, Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Jean-Christophe Plagniol-Villard <plagnioj-sclMFOaUSTBWk0Htik3J/w@public.gmane.org>, Tomi Valkeinen <tomi.valkeinen-l0cyMroinI0@public.gmane.org>, Heiko Stuebner <heiko-4mtYJXux2i+zQB+pC5nmwQ@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>linu
 List-Id: linux-mmc@vger.kernel.org
 
-Hi Shawn,
 
-> From: Shawn Lin [mailto:shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org]
-> Sent: Wednesday, June 08, 2016 7:31 AM
-> To: Amitkumar Karwar; linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-> Cc: Nishant Sarmukadam; Wei-Ning Huang; linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org; Cathy
-> Luo; Xinming Hu; shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org
-> Subject: Re: [PATCH v3 1/2] mmc: API for accessing host supported
-> maximum segment count and size
-> 
-> Hi
-> 
-> On 2016-6-6 19:53, Amitkumar Karwar wrote:
-> > From: Xinming Hu <huxm-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>
-> >
-> > sdio device drivers need be able to get the host supported max_segs
-> > and max_seg_size, so that they know the buffer size to allocate while
-> > utilizing the scatter/gather DMA buffer list.
-> >
-> > This patch provides API for this purpose.
-> >
-> > Signed-off-by: Xinming Hu <huxm-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>
-> > Signed-off-by: Amitkumar Karwar <akarwar-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>
-> > ---
-> > v2: v2 was submitted with minor improvement like replacing BUG_ON()
-> > with WARN_ON()
-> > v3: Addressed below review comments from Ulf Hansson
-> >      a) In v3, patch has been split into two separate patches.
-> >      b) Patch 1/2 introduces an API to fetch max_seg_size and max_segs
-> >      c) Replaced WARN_ON() with proper error code when sg_ptr->length
-> is invalid
-> >      d) Instead of duplicating the code in mmc_io_rw_extended(), extra
-> bool parameter
-> >         has been added to this function and used it in new APIs for
-> SG.
-> > ---
-> >   drivers/mmc/core/sdio_io.c                         | 27
-> ++++++++++++++++++++++
-> >   .../wireless/broadcom/brcm80211/brcmfmac/bcmsdh.c  |  6 ++---
-> >   include/linux/mmc/sdio_func.h                      |  3 +++
-> >   3 files changed, 33 insertions(+), 3 deletions(-)
-> >
-> > diff --git a/drivers/mmc/core/sdio_io.c b/drivers/mmc/core/sdio_io.c
-> > index 78cb4d5..a546c89 100644
-> > --- a/drivers/mmc/core/sdio_io.c
-> > +++ b/drivers/mmc/core/sdio_io.c
-> > @@ -720,3 +720,30 @@ int sdio_set_host_pm_flags(struct sdio_func
-> *func, mmc_pm_flag_t flags)
-> >   	return 0;
-> >   }
-> >   EXPORT_SYMBOL_GPL(sdio_set_host_pm_flags);
-> > +
-> > +/**
-> > + *	sdio_get_host_max_seg_size - get host maximum segment size
-> > + *	@func: SDIO function attached to host
-> > + */
-> > +unsigned int sdio_get_host_max_seg_size(struct sdio_func *func) {
-> > +	WARN_ON(!func);
-> > +	WARN_ON(!func->card);
-> > +
-> > +	return func->card->host->max_seg_size; }
-> > +EXPORT_SYMBOL_GPL(sdio_get_host_max_seg_size);
-> > +
-> > +/**
-> > + *	sdio_get_host_max_seg_count - get host maximum segment count
-> > + *	@func: SDIO function attached to host
-> > + */
-> > +unsigned short sdio_get_host_max_seg_count(struct sdio_func *func) {
-> > +	WARN_ON(!func);
-> > +	WARN_ON(!func->card);
-> > +
-> 
-> I believe these two WARN_ON may be called too late because ...
-> 
-> drivers/net/wireless/broadcom/brcm80211/brcmfmac/bcmsdh.c
-> 
-> void brcmf_sdiod_sgtable_alloc(struct brcmf_sdio_dev *sdiodev)
-> 
-> func = sdiodev->func[2];
-> host = func->card->host;
-> 
-> you have unconditionally thought it should be ready.
-> 
+--OCeUrMLoh2ht7f6S
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 
-Yes. The WARN_ONs in this patch are redundant. We will remove them and submit updated version.
+On Thu, Jun 09, 2016 at 02:50:26PM +0200, Rafael J. Wysocki wrote:
+> On Thu, Jun 9, 2016 at 12:29 PM, Mark Brown <broonie-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org> wrote:
 
-Below is the function call flow.
+> > The external interface shouldn't be DT specific, the Intel people are
+> > busy importing all of DT into ACPI
 
-brcmf_sdio_probe() -> brcmf_sdio_probe_attach() -> brcmf_sdiod_sgtable_alloc()
+> Well, not really.
 
-Looks like is sdiodev->func[2] is ready in brcmf_sdio_probe() itself.
+> If you are referring to the pinctrl proposal discussed recently, that
+> was a proposal from one group at Intel and AFAICS it has been
+> abandoned.
 
-It contains below line.
+Well, it was that, it was the device properties stuff in general and the
+overlays stuff - plus just the fact that with the Minnowboard style use
+case people have and the desire to use ACPI it seems like that's going
+to be something you need.
 
-        bus->blocksize = bus->sdiodev->func[2]->cur_blksize;
+--OCeUrMLoh2ht7f6S
+Content-Type: application/pgp-signature; name="signature.asc"
 
-Regards,
-Amitkumar
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2
+
+iQEcBAEBCAAGBQJXWZH5AAoJECTWi3JdVIfQvS4H/i9Q+NK3qFJ20x5n4tnU3Kqb
+R5CadVol9AxuB5DmzVxduAAdc4YGDBs+cxJXQVJ0kjNNETE0V/5g6AhHf1frJe5c
+yctigVuTXIeHXHQOS1NfpmjVKQwIFMJ5xvHy+XRAcAeNlmkKEGR+Ayma3sFk3XY7
+MfUWd7652D2mejDNXLp6V3UhgfDX8u5qMuYazGor98EVDaiidh4k1AqK7LyfMQQm
+5f8El3h6+LOCHyxPBF+hopBJwoKg1FLoYiXzBWAzbXajTmpBkQdXLa0QaoKYu/2j
+vzrTjqjb2zvvbvQbEnDz4ZjXcrfK2Aa2qjfrohDSp+hO4uqtnU1URD/19EfObuA=
+=tIVl
+-----END PGP SIGNATURE-----
+
+--OCeUrMLoh2ht7f6S--
 --
-To unsubscribe from this list: send the line "unsubscribe linux-wireless" in
+To unsubscribe from this list: send the line "unsubscribe linux-usb" in
 the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 More majordomo info at  http://vger.kernel.org/majordomo-info.html
