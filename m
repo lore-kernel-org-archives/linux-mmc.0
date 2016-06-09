@@ -1,761 +1,319 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: [PATCH RFC 43/46] mmc: block: Add Software Command Queuing
-Date: Thu,  9 Jun 2016 14:52:43 +0300
-Message-ID: <1465473166-22532-44-git-send-email-adrian.hunter@intel.com>
+Subject: [PATCH RFC 41/46] mmc: block: Introduce queue semantics
+Date: Thu,  9 Jun 2016 14:52:41 +0300
+Message-ID: <1465473166-22532-42-git-send-email-adrian.hunter@intel.com>
 References: <1465473166-22532-1-git-send-email-adrian.hunter@intel.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
 Received: from mga01.intel.com ([192.55.52.88]:48207 "EHLO mga01.intel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751764AbcFIL7i (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 9 Jun 2016 07:59:38 -0400
+	id S1751613AbcFIL7b (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 9 Jun 2016 07:59:31 -0400
 In-Reply-To: <1465473166-22532-1-git-send-email-adrian.hunter@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>
 Cc: linux-mmc <linux-mmc@vger.kernel.org>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Sujit Reddy Thumma <sthumma@codeaurora.org>, Dorfman Konstantin <kdorfman@codeaurora.org>, David Griego <david.griego@linaro.org>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>
 
-eMMC Command Queuing is a feature added in version 5.1.  The card maintains
-a queue of up to 32 data transfers.  Commands CMD45/CMD45 are sent to queue
-up transfers in advance, and then one of the transfers is selected to
-"execute" by CMD46/CMD47 at which point data transfer actually begins.
+Change from viewing the requests in progress as 'current' and 'previous',
+to viewing them as a queue. The current request is allocated to the first
+free slot. The presence of incomplete requests is determined from the
+count (mq->qcnt) of entries in the queue. Non-read-write requests (i.e.
+discards and flushes) are not added to the queue at all and require no
+special handling. Also no special handling is needed for the
+MMC_BLK_NEW_REQUEST case.
 
-The advantage of command queuing is that the card can prepare for transfers
-in advance. That makes a big difference in the case of random reads because
-the card can start reading into its cache in advance.
-
-A v5.1 host controller can manage the command queue itself, but it is also
-possible for software to manage the queue using an non-v5.1 host controller
-- that is what Software Command Queuing is.
-
-Refer to the JEDEC (http://www.jedec.org/) eMMC v5.1 Specification for more
-information about Command Queuing.
-
-Two important aspects of Command Queuing that affect the implementation
-are:
- - only read/write requests are queued
- - the queue must be empty to send other commands, including re-tuning
-
-To support Software Command Queuing a separate function is provided to
-issue read/write requests (i.e. mmc_swcmdq_issue_rw_rq()) and the
-mmc_blk_request structure amended to cater for additional commands CMD44
-and CMD45. There is a separate function (mmc_swcmdq_prep()) to prepare the
-needed commands, but transfers are started by mmc_start_req() like normal.
-
-mmc_swcmdq_issue_rw_rq() enqueues the new request and then executes tasks
-until the queue is empty or mmc_swcmdq_execute() asks for a new request.
-This puts mmc_swcmdq_execute() in control of the decision whether to queue
-more requests or wait for the active one.
-
-Recovery is invoked if anything goes wrong. Recovery has 2 options:
- 1. Discard the queue and re-queue all requests. If that fails, fall back
-    to option 2.
- 2. Reset and re-queue all requests. If that fails, error out all the
-    requests.
-In either case, re-tuning will be done if needed after the queue becomes
-empty because re-tuning is released at that point.
+As well as allowing an arbitrarily sized queue, the queue thread function
+is significantly simpler.
 
 Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
 ---
- drivers/mmc/card/block.c | 595 ++++++++++++++++++++++++++++++++++++++++++++++-
- drivers/mmc/card/queue.c |   6 +-
- drivers/mmc/card/queue.h |  11 +-
- include/linux/mmc/card.h |   1 +
- 4 files changed, 610 insertions(+), 3 deletions(-)
+ drivers/mmc/card/block.c | 40 +++++++++++++------------
+ drivers/mmc/card/queue.c | 76 ++++++++++++++++++++++++++++++------------------
+ drivers/mmc/card/queue.h | 10 +++++--
+ 3 files changed, 77 insertions(+), 49 deletions(-)
 
 diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
-index 215cfa359a3f..b954516739be 100644
+index 1cb823a4dc76..215cfa359a3f 100644
 --- a/drivers/mmc/card/block.c
 +++ b/drivers/mmc/card/block.c
-@@ -110,6 +110,7 @@ struct mmc_blk_data {
- #define MMC_BLK_WRITE		BIT(1)
- #define MMC_BLK_DISCARD		BIT(2)
- #define MMC_BLK_SECDISCARD	BIT(3)
-+#define MMC_BLK_SWCMDQ		BIT(4)
+@@ -1989,14 +1989,23 @@ static int mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *rqc)
+ 	struct mmc_blk_request *brq;
+ 	int ret = 1, disable_multi = 0, retry = 0, type, retune_retry_done = 0;
+ 	enum mmc_blk_status status;
+-	struct mmc_queue_req *mqrq_cur = mq->mqrq_cur;
++	struct mmc_queue_req *mqrq_cur = NULL;
+ 	struct mmc_queue_req *mq_rq;
+ 	struct request *req;
+ 	struct mmc_async_req *areq;
+ 	const u8 packed_nr = 2;
+ 	u8 reqs = 0;
  
- 	/*
- 	 * Only set in main mmc_blk_data associated
-@@ -1982,7 +1983,588 @@ static void mmc_blk_revert_packed_req(struct mmc_queue *mq,
- 	mmc_blk_clear_packed(mq_rq);
+-	if (!rqc && !mq->mqrq_prev->req)
++	if (rqc) {
++		mqrq_cur = mmc_queue_req_find(mq, rqc);
++		if (!mqrq_cur) {
++			WARN_ON(1);
++			mmc_blk_requeue(mq->queue, rqc);
++			rqc = NULL;
++		}
++	}
++
++	if (!mq->qcnt)
+ 		return 0;
+ 
+ 	if (mqrq_cur)
+@@ -2027,11 +2036,8 @@ static int mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *rqc)
+ 		} else
+ 			areq = NULL;
+ 		areq = mmc_start_req(card->host, areq, (int *) &status);
+-		if (!areq) {
+-			if (status == MMC_BLK_NEW_REQUEST)
+-				mq->flags |= MMC_QUEUE_NEW_REQUEST;
++		if (!areq)
+ 			return 0;
+-		}
+ 
+ 		mq_rq = container_of(areq, struct mmc_queue_req, mmc_active);
+ 		brq = &mq_rq->brq;
+@@ -2143,6 +2149,8 @@ static int mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *rqc)
+ 		}
+ 	} while (ret);
+ 
++	mmc_queue_req_free(mq, mq_rq);
++
+ 	return 1;
+ 
+  cmd_abort:
+@@ -2161,6 +2169,7 @@ static int mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *rqc)
+ 		if (mmc_card_removed(card)) {
+ 			rqc->cmd_flags |= REQ_QUIET;
+ 			blk_end_request_all(rqc, -EIO);
++			mmc_queue_req_free(mq, mqrq_cur);
+ 		} else {
+ 			/*
+ 			 * If current request is packed, it needs to put back.
+@@ -2174,6 +2183,8 @@ static int mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *rqc)
+ 		}
+ 	}
+ 
++	mmc_queue_req_free(mq, mq_rq);
++
+ 	return 0;
  }
  
--static int mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *rqc)
-+static int mmc_swcmdq_err_check(struct mmc_card *card,
-+				struct mmc_async_req *areq)
-+{
-+	struct mmc_queue_req *mqrq = container_of(areq, struct mmc_queue_req,
-+						  mmc_active);
-+	struct mmc_blk_request *brq = &mqrq->brq;
-+	struct request *req = mqrq->req;
-+	int err;
-+
-+	err = brq->data.error;
-+	/* In the case of data errors, send stop */
-+	if (err)
-+		mmc_wait_for_cmd(card->host, &brq->stop, 0);
-+	else
-+		err = brq->cmd.error;
-+
-+	/* In the case of CRC errors when re-tuning is needed, retry */
-+	if (err == -EILSEQ && card->host->need_retune)
-+		return MMC_BLK_RETRY;
-+
-+	/* For other errors abort */
-+	if (err)
-+		return MMC_BLK_ABORT;
-+
-+	if (blk_rq_bytes(req) != brq->data.bytes_xfered)
-+		return MMC_BLK_PARTIAL;
-+
-+	return MMC_BLK_SUCCESS;
-+}
-+
-+static void mmc_swcmdq_prep(struct mmc_queue *mq, struct mmc_queue_req *mqrq)
-+{
-+	struct mmc_blk_data *md = mq->data;
-+	struct mmc_card *card = md->queue.card;
-+	struct mmc_blk_request *brq = &mqrq->brq;
-+	struct request *req = mqrq->req;
-+	bool do_data_tag;
-+
-+	/*
-+	 * Reliable writes are used to implement Forced Unit Access and
-+	 * are supported only on MMCs.
-+	 */
-+	bool do_rel_wr = (req->cmd_flags & REQ_FUA) &&
-+		(rq_data_dir(req) == WRITE) &&
-+		(md->flags & MMC_BLK_REL_WR);
-+
-+	memset(brq, 0, sizeof(struct mmc_blk_request));
-+	brq->mrq.cmd = &brq->cmd;
-+	brq->mrq.data = &brq->data;
-+	brq->mrq.cap_cmd_during_tfr = true;
-+
-+	if (rq_data_dir(req) == READ) {
-+		brq->cmd.opcode = MMC_EXECUTE_READ_TASK;
-+		brq->data.flags = MMC_DATA_READ;
-+		brq->stop.flags = MMC_RSP_R1 | MMC_CMD_AC;
-+	} else {
-+		brq->cmd.opcode = MMC_EXECUTE_WRITE_TASK;
-+		brq->data.flags = MMC_DATA_WRITE;
-+		brq->stop.flags = MMC_RSP_R1B | MMC_CMD_AC;
-+	}
-+	brq->cmd.arg = mqrq->task_id << 16;
-+	brq->cmd.flags = MMC_RSP_R1 | MMC_CMD_ADTC;
-+
-+	brq->data.blksz = 512;
-+	brq->data.blocks = blk_rq_sectors(req);
-+
-+	brq->stop.opcode = MMC_STOP_TRANSMISSION;
-+	brq->stop.arg = 0;
-+
-+	/*
-+	 * The block layer doesn't support all sector count
-+	 * restrictions, so we need to be prepared for too big
-+	 * requests.
-+	 */
-+	if (brq->data.blocks > card->host->max_blk_count)
-+		brq->data.blocks = card->host->max_blk_count;
-+
-+	if (do_rel_wr)
-+		mmc_apply_rel_rw(brq, card, req);
-+
-+	/*
-+	 * Data tag is used only during writing meta data to speed
-+	 * up write and any subsequent read of this meta data
-+	 */
-+	do_data_tag = (card->ext_csd.data_tag_unit_size) &&
-+		(req->cmd_flags & REQ_META) &&
-+		(rq_data_dir(req) == WRITE) &&
-+		((brq->data.blocks * brq->data.blksz) >=
-+		 card->ext_csd.data_tag_unit_size);
-+
-+	brq->cmd44.opcode = MMC_QUE_TASK_PARAMS;
-+	brq->cmd44.arg = brq->data.blocks |
-+			 (do_rel_wr ? (1 << 31) : 0) |
-+			 ((rq_data_dir(req) == READ) ? (1 << 30) : 0) |
-+			 (do_data_tag ? (1 << 29) : 0) |
-+			 mqrq->task_id << 16;
-+	brq->cmd44.flags = MMC_RSP_R1 | MMC_CMD_AC;
-+
-+	brq->cmd45.opcode = MMC_QUE_TASK_ADDR;
-+	brq->cmd45.arg = blk_rq_pos(req);
-+
-+	mmc_set_data_timeout(&brq->data, card);
-+
-+	brq->data.sg = mqrq->sg;
-+	brq->data.sg_len = mmc_queue_map_sg(mq, mqrq);
-+
-+	/*
-+	 * Adjust the sg list so it is the same size as the
-+	 * request.
-+	 */
-+	if (brq->data.blocks != blk_rq_sectors(req)) {
-+		int i, data_size = brq->data.blocks << 9;
-+		struct scatterlist *sg;
-+
-+		for_each_sg(brq->data.sg, sg, brq->data.sg_len, i) {
-+			data_size -= sg->length;
-+			if (data_size <= 0) {
-+				sg->length += data_size;
-+				i++;
-+				break;
-+			}
-+		}
-+		brq->data.sg_len = i;
-+	}
-+
-+	mqrq->mmc_active.mrq = &brq->mrq;
-+	mqrq->mmc_active.err_check = mmc_swcmdq_err_check;
-+
-+	mmc_queue_bounce_pre(mqrq);
-+}
-+
-+static int mmc_swcmdq_blk_err(struct mmc_card *card, int err)
-+{
-+	/* Re-try after CRC errors when re-tuning is needed */
-+	if (err == -EILSEQ && card->host->need_retune)
-+		return MMC_BLK_RETRY;
-+
-+	if (err)
-+		return MMC_BLK_ABORT;
-+
-+	return 0;
-+}
-+
-+#define SWCMDQ_ENQUEUE_ERR (	\
-+	R1_OUT_OF_RANGE |	\
-+	R1_ADDRESS_ERROR |	\
-+	R1_BLOCK_LEN_ERROR |	\
-+	R1_WP_VIOLATION |	\
-+	R1_CC_ERROR |		\
-+	R1_ERROR |		\
-+	R1_COM_CRC_ERROR |	\
-+	R1_ILLEGAL_COMMAND)
-+
-+static int __mmc_swcmdq_enqueue(struct mmc_queue *mq,
-+				struct mmc_queue_req *mqrq)
-+{
-+	struct mmc_card *card = mq->card;
-+	int err;
-+
-+	mmc_swcmdq_prep(mq, mqrq);
-+
-+	err = mmc_wait_for_cmd(card->host, &mqrq->brq.cmd44, 0);
-+	if (err)
-+		goto out;
-+
-+	err = mmc_wait_for_cmd(card->host, &mqrq->brq.cmd45, 0);
-+	if (err)
-+		goto out;
-+
-+	/*
-+	 * Don't assume the task is queued if there are any error bits set in
-+	 * the response.
-+	 */
-+	if (mqrq->brq.cmd45.resp[0] & SWCMDQ_ENQUEUE_ERR)
-+		return MMC_BLK_ABORT;
-+out:
-+	return mmc_swcmdq_blk_err(card, err);
-+}
-+
-+static int mmc_swcmdq_enqueue(struct mmc_queue *mq, struct request *req)
+@@ -2184,7 +2195,7 @@ static int mmc_blk_issue_rq(struct mmc_queue *mq, struct request *req)
+ 	struct mmc_card *card = md->queue.card;
+ 	unsigned int cmd_flags = req ? req->cmd_flags : 0;
+ 
+-	if (req && !mq->mqrq_prev->req)
++	if (req && !mq->qcnt)
+ 		/* claim host only for the first request */
+ 		mmc_get_card(card);
+ 
+@@ -2197,10 +2208,9 @@ static int mmc_blk_issue_rq(struct mmc_queue *mq, struct request *req)
+ 		goto out;
+ 	}
+ 
+-	mq->flags &= ~MMC_QUEUE_NEW_REQUEST;
+ 	if (cmd_flags & REQ_DISCARD) {
+ 		/* complete ongoing async transfer before issuing discard */
+-		if (card->host->areq)
++		if (mq->qcnt)
+ 			mmc_blk_issue_rw_rq(mq, NULL);
+ 		if (req->cmd_flags & REQ_SECURE)
+ 			ret = mmc_blk_issue_secdiscard_rq(mq, req);
+@@ -2208,7 +2218,7 @@ static int mmc_blk_issue_rq(struct mmc_queue *mq, struct request *req)
+ 			ret = mmc_blk_issue_discard_rq(mq, req);
+ 	} else if (cmd_flags & REQ_FLUSH) {
+ 		/* complete ongoing async transfer before issuing flush */
+-		if (card->host->areq)
++		if (mq->qcnt)
+ 			mmc_blk_issue_rw_rq(mq, NULL);
+ 		ret = mmc_blk_issue_flush(mq, req);
+ 	} else {
+@@ -2216,14 +2226,8 @@ static int mmc_blk_issue_rq(struct mmc_queue *mq, struct request *req)
+ 	}
+ 
+ out:
+-	if ((!req && !(mq->flags & MMC_QUEUE_NEW_REQUEST)) ||
+-	     (cmd_flags & MMC_REQ_SPECIAL_MASK))
+-		/*
+-		 * Release host when there are no more requests
+-		 * and after special request(discard, flush) is done.
+-		 * In case sepecial request, there is no reentry to
+-		 * the 'mmc_blk_issue_rq' with 'mqrq_prev->req'.
+-		 */
++	/* Release host when there are no more requests */
++	if (!mq->qcnt)
+ 		mmc_put_card(card);
+ 	return ret;
+ }
+diff --git a/drivers/mmc/card/queue.c b/drivers/mmc/card/queue.c
+index 4463d33094e4..4e134884a183 100644
+--- a/drivers/mmc/card/queue.c
++++ b/drivers/mmc/card/queue.c
+@@ -46,6 +46,35 @@ static int mmc_prep_request(struct request_queue *q, struct request *req)
+ 	return BLKPREP_OK;
+ }
+ 
++struct mmc_queue_req *mmc_queue_req_find(struct mmc_queue *mq,
++					 struct request *req)
 +{
 +	struct mmc_queue_req *mqrq;
-+
-+	mqrq = mmc_queue_req_find(mq, req);
-+	if (!mqrq) {
-+		WARN_ON(1);
-+		mmc_blk_requeue(mq->queue, req);
-+		return 0;
-+	}
-+
-+	/* Need to hold re-tuning so long as the queue is not empty */
-+	if (mq->qcnt == 1)
-+		mmc_retune_hold(mq->card->host);
-+
-+	return __mmc_swcmdq_enqueue(mq, mqrq);
-+}
-+
-+static struct mmc_async_req *mmc_swcmdq_next(struct mmc_queue *mq)
-+{
-+	int i = __ffs(mq->qsr);
-+
-+	__clear_bit(i, &mq->qsr);
++	int i = ffz(mq->qslots);
 +
 +	if (i >= mq->qdepth)
 +		return NULL;
 +
-+	return &mq->mqrq[i].mmc_active;
++	mqrq = &mq->mqrq[i];
++	WARN_ON(mqrq->req || mq->qcnt >= mq->qdepth ||
++		test_bit(mqrq->task_id, &mq->qslots));
++	mqrq->req = req;
++	mq->qcnt += 1;
++	__set_bit(mqrq->task_id, &mq->qslots);
++
++	return mqrq;
 +}
 +
-+static int mmc_get_qsr(struct mmc_card *card, u32 *qsr)
++void mmc_queue_req_free(struct mmc_queue *mq,
++			struct mmc_queue_req *mqrq)
 +{
-+	struct mmc_command cmd = {0};
-+	int err, retries = 3;
-+
-+	cmd.opcode = MMC_SEND_STATUS;
-+	cmd.arg = card->rca << 16 | 1 << 15;
-+	cmd.flags = MMC_RSP_R1 | MMC_CMD_AC;
-+	err = mmc_wait_for_cmd(card->host, &cmd, retries);
-+	if (err)
-+		return err;
-+
-+	*qsr = cmd.resp[0];
-+
-+	return 0;
++	WARN_ON(!mqrq->req || mq->qcnt < 1 ||
++		!test_bit(mqrq->task_id, &mq->qslots));
++	mqrq->req = NULL;
++	mq->qcnt -= 1;
++	__clear_bit(mqrq->task_id, &mq->qslots);
 +}
 +
-+static int mmc_await_qsr(struct mmc_card *card, u32 *qsr)
-+{
-+	unsigned long timeout;
-+	u32 status = 0;
-+	int err;
-+
-+	timeout = jiffies + msecs_to_jiffies(10 * 1000);
-+	while (!status) {
-+		err = mmc_get_qsr(card, &status);
-+		if (err)
-+			return err;
-+		if (time_after(jiffies, timeout)) {
-+			pr_err("%s: Card stuck with queued tasks\n",
-+			       mmc_hostname(card->host));
-+			return -ETIMEDOUT;
-+		}
-+	}
-+
-+	*qsr = status;
-+
-+	return 0;
-+}
-+
-+static int mmc_swcmdq_await_qsr(struct mmc_queue *mq, struct mmc_card *card,
-+				bool wait)
-+{
-+	struct mmc_queue_req *mqrq;
-+	u32 qsr;
-+	int err;
-+
-+	if (wait)
-+		err = mmc_await_qsr(card, &qsr);
-+	else
-+		err = mmc_get_qsr(card, &qsr);
-+	if (err)
-+		goto out_err;
-+
-+	mq->qsr = qsr;
-+
-+	if (card->host->areq) {
-+		/*
-+		 * The active request remains in the QSR until completed. Remove
-+		 * it so that mq->qsr only contains ones that are ready but not
-+		 * executed.
-+		 */
-+		mqrq = container_of(card->host->areq, struct mmc_queue_req,
-+				    mmc_active);
-+		__clear_bit(mqrq->task_id, &mq->qsr);
-+	}
-+
-+	if (mq->qsr)
-+		mq->qsr_err = false;
-+out_err:
-+	if (err) {
-+		/* Don't repeatedly retry if no progress is made */
-+		if (mq->qsr_err)
-+			return MMC_BLK_ABORT;
-+		mq->qsr_err = true;
-+	}
-+
-+	return mmc_swcmdq_blk_err(card, err);
-+}
-+
-+static int mmc_swcmdq_execute(struct mmc_queue *mq, bool flush, bool requeuing,
-+			      bool new_req)
-+{
-+	struct mmc_card *card = mq->card;
-+	struct mmc_async_req *next = NULL, *prev;
-+	struct mmc_blk_request *brq;
-+	struct mmc_queue_req *mqrq;
-+	enum mmc_blk_status status;
-+	struct request *req;
-+	int active = card->host->areq ? 1 : 0;
-+	int ret;
-+
-+	if (mq->prepared_areq) {
-+		/*
-+		 * A request that has been prepared before (i.e. passed to
-+		 * mmc_start_req()) but not started because another new request
-+		 * turned up.
-+		 */
-+		next = mq->prepared_areq;
-+	} else if (requeuing) {
-+		/* Just finish the active request */
-+		next = NULL;
-+	} else if (mq->qsr) {
-+		/* Get the next task from the Queue Status Register */
-+		next = mmc_swcmdq_next(mq);
-+	} else if (mq->qcnt > active) {
-+		/*
-+		 * There are queued tasks so read the Queue Status Register to
-+		 * see if any are ready. Wait for a ready task only if there is
-+		 * no active request and no new request.
-+		 */
-+		ret = mmc_swcmdq_await_qsr(mq, card, !active && !new_req);
-+		if (ret)
-+			return ret;
-+		if (mq->qsr)
-+			next = mmc_swcmdq_next(mq);
-+	}
-+
-+	if (next) {
-+		/*
-+		 * Don't wake for a new request when waiting for the active
-+		 * request if there is another request ready to start.
-+		 */
-+		if (active)
-+			mmc_queue_set_wake(mq, false);
-+	} else {
-+		if (!active)
-+			return 0;
-+		/*
-+		 * Don't wake for a new request when flushing or the queue is
-+		 * full.
-+		 */
-+		if (flush || mq->qcnt == mq->qdepth)
-+			mmc_queue_set_wake(mq, false);
-+		else
-+			mmc_queue_set_wake(mq, true);
-+	}
-+
-+	prev = mmc_start_req(card->host, next, (int *)&status);
-+
-+	if (status == MMC_BLK_NEW_REQUEST) {
-+		mq->prepared_areq = next;
-+		return status;
-+	}
-+
-+	mq->prepared_areq = NULL;
-+
-+	if (!prev)
-+		return 0;
-+
-+	mqrq = container_of(prev, struct mmc_queue_req, mmc_active);
-+	brq = &mqrq->brq;
-+	req = mqrq->req;
-+
-+	mmc_queue_bounce_post(mqrq);
-+
-+	switch (status) {
-+	case MMC_BLK_SUCCESS:
-+	case MMC_BLK_PARTIAL:
-+	case MMC_BLK_SUCCESS_ERR:
-+		mmc_blk_reset_success(mq->data, MMC_BLK_SWCMDQ);
-+		ret = blk_end_request(req, 0, brq->data.bytes_xfered);
-+		if (ret) {
-+			if (!requeuing)
-+				return __mmc_swcmdq_enqueue(mq, mqrq);
-+			return 0;
-+		}
-+		break;
-+	case MMC_BLK_NEW_REQUEST:
-+		return status;
-+	default:
-+		if (mqrq->retry_cnt++) {
-+			blk_end_request_all(req, -EIO);
-+			break;
-+		}
-+		return status;
-+	}
-+
-+	mmc_queue_req_free(mq, mqrq);
-+
-+	/* Release re-tuning when queue is empty */
-+	if (!mq->qcnt)
-+		mmc_retune_release(card->host);
-+
-+	return 0;
-+}
-+
-+static int mmc_swcmdq_requeue_check(struct mmc_card *card,
-+				    struct mmc_async_req *areq)
-+{
-+	int ret = mmc_swcmdq_err_check(card, areq);
-+
-+	/*
-+	 * In the case of success, prevent mmc_start_req() from starting
-+	 * another request by returning MMC_BLK_SUCCESS_ERR.
-+	 */
-+	return ret == MMC_BLK_SUCCESS ? MMC_BLK_SUCCESS_ERR : ret;
-+}
-+
-+static int mmc_swcmdq_await_active(struct mmc_queue *mq)
-+{
-+	struct mmc_async_req *areq = mq->card->host->areq;
-+	int err;
-+
-+	if (!areq)
-+		return 0;
-+
-+	areq->err_check = mmc_swcmdq_requeue_check;
-+
-+	err = mmc_swcmdq_execute(mq, true, true, false);
-+
-+	/* The request will be requeued anyway, so ignore 'retry' */
-+	if (err == MMC_BLK_RETRY)
-+		err = 0;
-+
-+	return err;
-+}
-+
-+static int mmc_swcmdq_discard_queue(struct mmc_queue *mq)
-+{
-+	struct mmc_card *card = mq->card;
-+	struct mmc_command cmd = {0};
-+	int err;
-+
-+	if (!mq->qcnt)
-+		return 0;
-+
-+	cmd.opcode = MMC_CMDQ_TASK_MGMT;
-+	cmd.arg = 1; /* Discard entire queue */
-+	cmd.flags = MMC_RSP_R1B | MMC_CMD_AC;
-+	/* This is for recovery and the response is not needed, so ignore CRC */
-+	cmd.flags &= ~MMC_RSP_CRC;
-+
-+	err = mmc_wait_for_cmd(mq->card->host, &cmd, 0);
-+
-+	mq->qsr = 0;
-+
-+	/* Release re-tuning when queue is empty */
-+	mmc_retune_release(card->host);
-+
-+	return err;
-+}
-+
-+static int __mmc_swcmdq_requeue(struct mmc_queue *mq)
-+{
-+	unsigned long i, qslots = mq->qslots;
-+	int err;
-+
-+	if (qslots)
-+		mmc_retune_hold(mq->card->host);
-+
-+	while (qslots) {
-+		i = __ffs(qslots);
-+		err = __mmc_swcmdq_enqueue(mq, &mq->mqrq[i]);
-+		if (err)
-+			return err;
-+		__clear_bit(i, &qslots);
-+	}
-+
-+	return 0;
-+}
-+
-+static void __mmc_swcmdq_error_out(struct mmc_queue *mq)
-+{
-+	unsigned long i, qslots = mq->qslots;
-+	struct request *req;
-+
-+	if (qslots)
-+		mmc_retune_release(mq->card->host);
-+
-+	while (qslots) {
-+		i = __ffs(qslots);
-+		req = mq->mqrq[i].req;
-+		blk_end_request_cur(req, -EIO);
-+		mq->mqrq[i].req = NULL;
-+		__clear_bit(i, &qslots);
-+	}
-+
-+	mq->qslots = 0;
-+	mq->qcnt = 0;
-+}
-+
-+static int mmc_swcmdq_requeue(struct mmc_queue *mq)
-+{
-+	int err;
-+
-+	/* Wait for active request */
-+	err = mmc_swcmdq_await_active(mq);
-+	if (err)
-+		return err;
-+
-+	err = mmc_swcmdq_discard_queue(mq);
-+	if (err)
-+		return err;
-+
-+	return __mmc_swcmdq_requeue(mq);
-+}
-+
-+static void mmc_swcmdq_reset(struct mmc_queue *mq)
-+{
-+	/* Wait for active request ignoring errors */
-+	mmc_swcmdq_await_active(mq);
-+
-+	/* Ensure the queue is discarded */
-+	mmc_swcmdq_discard_queue(mq);
-+
-+	/* Reset and requeue else error out all requests */
-+	if (mmc_blk_reset(mq->data, mq->card->host, MMC_BLK_SWCMDQ) ||
-+	    __mmc_swcmdq_requeue(mq))
-+		__mmc_swcmdq_error_out(mq);
-+}
-+
-+/*
-+ * Recovery has 2 options:
-+ * 1. Discard the queue and re-queue all requests. If that fails, fall back to
-+ *    option 2.
-+ * 2. Reset and re-queue all requests. If that fails, error out all the
-+ *    requests.
-+ * In either case, re-tuning will be done if needed after the queue becomes
-+ * empty because re-tuning is released at that point.
-+ */
-+static void mmc_swcmdq_recovery(struct mmc_queue *mq, int err)
-+{
-+	switch (err) {
-+	case MMC_BLK_RETRY:
-+		err = mmc_swcmdq_requeue(mq);
-+		if (!err)
-+			break;
-+		/* Fall through */
-+	default:
-+		mmc_swcmdq_reset(mq);
-+	}
-+}
-+
-+static int mmc_swcmdq_issue_rw_rq(struct mmc_queue *mq, struct request *req)
-+{
-+	struct mmc_context_info *cntx = &mq->card->host->context_info;
-+	bool flush = !req && !cntx->is_waiting_last_req;
-+	int err;
-+
-+	/* Enqueue new requests */
-+	if (req) {
-+		err = mmc_swcmdq_enqueue(mq, req);
-+		if (err)
-+			mmc_swcmdq_recovery(mq, err);
-+	}
-+
-+	/*
-+	 * Keep executing queued requests until the queue is empty or
-+	 * mmc_swcmdq_execute() asks for new requests by returning
-+	 * MMC_BLK_NEW_REQUEST.
-+	 */
-+	while (mq->qcnt) {
-+		/*
-+		 * Re-tuning can only be done when the queue is empty. Recovery
-+		 * for MMC_BLK_RETRY will discard the queue and re-queue all
-+		 * requests. At the point the queue is empty, re-tuning is
-+		 * released and will be done automatically before the next
-+		 * mmc_request.
-+		 */
-+		if (mq->card->host->need_retune)
-+			mmc_swcmdq_recovery(mq, MMC_BLK_RETRY);
-+		err = mmc_swcmdq_execute(mq, flush, false, !!req);
-+		if (err == MMC_BLK_NEW_REQUEST)
-+			return 0;
-+		if (err)
-+			mmc_swcmdq_recovery(mq, err);
-+	}
-+
-+	return 0;
-+}
-+
-+static int __mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *rqc)
+ static int mmc_queue_thread(void *d)
  {
- 	struct mmc_blk_data *md = mq->data;
- 	struct mmc_card *card = md->queue.card;
-@@ -2188,6 +2770,17 @@ static int mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *rqc)
- 	return 0;
+ 	struct mmc_queue *mq = d;
+@@ -56,8 +85,7 @@ static int mmc_queue_thread(void *d)
+ 
+ 	down(&mq->thread_sem);
+ 	do {
+-		struct request *req = NULL;
+-		unsigned int cmd_flags = 0;
++		struct request *req;
+ 
+ 		spin_lock_irq(q->queue_lock);
+ 		set_current_state(TASK_INTERRUPTIBLE);
+@@ -70,37 +98,17 @@ static int mmc_queue_thread(void *d)
+ 			 * Dispatch queue is empty so set flags for
+ 			 * mmc_request_fn() to wake us up.
+ 			 */
+-			if (mq->mqrq_prev->req)
++			if (mq->qcnt)
+ 				cntx->is_waiting_last_req = true;
+ 			else
+ 				mq->asleep = true;
+ 		}
+-		mq->mqrq_cur->req = req;
+ 		spin_unlock_irq(q->queue_lock);
+ 
+-		if (req || mq->mqrq_prev->req) {
++		if (req || mq->qcnt) {
+ 			set_current_state(TASK_RUNNING);
+-			cmd_flags = req ? req->cmd_flags : 0;
+ 			mq->issue_fn(mq, req);
+ 			cond_resched();
+-			if (mq->flags & MMC_QUEUE_NEW_REQUEST) {
+-				mq->flags &= ~MMC_QUEUE_NEW_REQUEST;
+-				continue; /* fetch again */
+-			}
+-
+-			/*
+-			 * Current request becomes previous request
+-			 * and vice versa.
+-			 * In case of special requests, current request
+-			 * has been finished. Do not assign it to previous
+-			 * request.
+-			 */
+-			if (cmd_flags & MMC_REQ_SPECIAL_MASK)
+-				mq->mqrq_cur->req = NULL;
+-
+-			mq->mqrq_prev->brq.mrq.data = NULL;
+-			mq->mqrq_prev->req = NULL;
+-			swap(mq->mqrq_prev, mq->mqrq_cur);
+ 		} else {
+ 			if (kthread_should_stop()) {
+ 				set_current_state(TASK_RUNNING);
+@@ -183,6 +191,21 @@ static void mmc_queue_setup_discard(struct request_queue *q,
+ 		queue_flag_set_unlocked(QUEUE_FLAG_SECDISCARD, q);
  }
  
-+static int mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *req)
++static struct mmc_queue_req *mmc_queue_alloc_mqrqs(struct mmc_queue *mq,
++						   int qdepth)
 +{
-+	struct mmc_blk_data *md = mq->data;
-+	struct mmc_card *card = md->queue.card;
++	struct mmc_queue_req *mqrq;
++	int i;
 +
-+	if (card->ext_csd.cmdq_en)
-+		return mmc_swcmdq_issue_rw_rq(mq, req);
-+	else
-+		return __mmc_blk_issue_rw_rq(mq, req);
++	mqrq = kcalloc(qdepth, sizeof(*mqrq), GFP_KERNEL);
++	if (mqrq) {
++		for (i = 0; i < mq->qdepth; i++)
++			mqrq[i].task_id = i;
++	}
++
++	return mqrq;
 +}
 +
- static int mmc_blk_issue_rq(struct mmc_queue *mq, struct request *req)
+ static bool mmc_queue_alloc_bounce_bufs(struct mmc_queue *mq,
+ 					unsigned int bouncesz)
  {
- 	int ret;
-diff --git a/drivers/mmc/card/queue.c b/drivers/mmc/card/queue.c
-index 0781578fc8b6..10d67ec67944 100644
---- a/drivers/mmc/card/queue.c
-+++ b/drivers/mmc/card/queue.c
-@@ -61,6 +61,7 @@ struct mmc_queue_req *mmc_queue_req_find(struct mmc_queue *mq,
- 	mqrq->req = req;
- 	mq->qcnt += 1;
- 	__set_bit(mqrq->task_id, &mq->qslots);
-+	mqrq->retry_cnt = 0;
- 
- 	return mqrq;
- }
-@@ -321,7 +322,10 @@ int mmc_init_queue(struct mmc_queue *mq, struct mmc_card *card,
- 	if (!mq->queue)
+@@ -283,12 +306,9 @@ int mmc_init_queue(struct mmc_queue *mq, struct mmc_card *card,
  		return -ENOMEM;
  
--	mq->qdepth = 2;
-+	if (card->ext_csd.cmdq_en)
-+		mq->qdepth = card->ext_csd.cmdq_depth;
-+	else
-+		mq->qdepth = 2;
- 	mq->mqrq = mmc_queue_alloc_mqrqs(mq, mq->qdepth);
+ 	mq->qdepth = 2;
+-	mq->mqrq = kcalloc(mq->qdepth, sizeof(struct mmc_queue_req),
+-			   GFP_KERNEL);
++	mq->mqrq = mmc_queue_alloc_mqrqs(mq, mq->qdepth);
  	if (!mq->mqrq)
  		goto cleanup_queue;
+-	mq->mqrq_cur = &mq->mqrq[0];
+-	mq->mqrq_prev = &mq->mqrq[1];
+ 	mq->queue->queuedata = mq;
+ 
+ 	blk_queue_prep_rq(mq->queue, mmc_prep_request);
 diff --git a/drivers/mmc/card/queue.h b/drivers/mmc/card/queue.h
-index a6d5b0f94662..72c47adf5f9f 100644
+index bb8dad281f72..1afd5dafd46d 100644
 --- a/drivers/mmc/card/queue.h
 +++ b/drivers/mmc/card/queue.h
-@@ -8,9 +8,13 @@ struct task_struct;
- 
- struct mmc_blk_request {
- 	struct mmc_request	mrq;
--	struct mmc_command	sbc;
-+	union {
-+		struct mmc_command	sbc;
-+		struct mmc_command	cmd44;
-+	};
- 	struct mmc_command	cmd;
- 	struct mmc_command	stop;
-+	struct mmc_command	cmd45;
- 	struct mmc_data		data;
- 	int			retune_retry_done;
- };
-@@ -43,6 +47,7 @@ struct mmc_queue_req {
+@@ -42,6 +42,7 @@ struct mmc_queue_req {
+ 	struct mmc_async_req	mmc_active;
  	enum mmc_packed_type	cmd_type;
  	struct mmc_packed	*packed;
- 	int			task_id;
-+	unsigned int		retry_cnt;
++	int			task_id;
  };
  
  struct mmc_queue {
-@@ -61,6 +66,10 @@ struct mmc_queue {
+@@ -50,16 +51,15 @@ struct mmc_queue {
+ 	struct semaphore	thread_sem;
+ 	unsigned int		flags;
+ #define MMC_QUEUE_SUSPENDED	(1 << 0)
+-#define MMC_QUEUE_NEW_REQUEST	(1 << 1)
+ 	bool			asleep;
+ 
+ 	int			(*issue_fn)(struct mmc_queue *, struct request *);
+ 	void			*data;
+ 	struct request_queue	*queue;
+ 	struct mmc_queue_req	*mqrq;
+-	struct mmc_queue_req	*mqrq_cur;
+-	struct mmc_queue_req	*mqrq_prev;
  	int			qdepth;
- 	int			qcnt;
- 	unsigned long		qslots;
-+	/* Following are defined for Software Command Queuing */
-+	unsigned long		qsr;
-+	struct mmc_async_req	*prepared_areq;
-+	bool			qsr_err;
++	int			qcnt;
++	unsigned long		qslots;
  };
  
  extern int mmc_init_queue(struct mmc_queue *, struct mmc_card *, spinlock_t *,
-diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
-index 2abcedc1e9e9..6e56ef23a94d 100644
---- a/include/linux/mmc/card.h
-+++ b/include/linux/mmc/card.h
-@@ -220,6 +220,7 @@ enum mmc_blk_status {
- 	MMC_BLK_ECC_ERR,
- 	MMC_BLK_NOMEDIUM,
- 	MMC_BLK_NEW_REQUEST,
-+	MMC_BLK_SUCCESS_ERR, /* Success but prevent starting another request */
- };
+@@ -78,4 +78,8 @@ extern void mmc_packed_clean(struct mmc_queue *);
  
- /* The number of MMC physical partitions.  These consist of:
+ extern int mmc_access_rpmb(struct mmc_queue *);
+ 
++extern struct mmc_queue_req *mmc_queue_req_find(struct mmc_queue *,
++						struct request *);
++extern void mmc_queue_req_free(struct mmc_queue *, struct mmc_queue_req *);
++
+ #endif
 -- 
 1.9.1
 
