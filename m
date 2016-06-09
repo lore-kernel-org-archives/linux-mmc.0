@@ -1,65 +1,67 @@
-From: Gregory CLEMENT <gregory.clement-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>
-Subject: [PATCH 10/12] arm64: dts: marvell: add eMMC support for Armada 37xx
-Date: Thu,  9 Jun 2016 09:10:16 +0200
-Message-ID: <1465456218-28354-11-git-send-email-gregory.clement@free-electrons.com>
+From: Gregory CLEMENT <gregory.clement@free-electrons.com>
+Subject: [PATCH 05/12] mmc: sdhci: add a pre voltage switch callback function
+Date: Thu,  9 Jun 2016 09:10:11 +0200
+Message-ID: <1465456218-28354-6-git-send-email-gregory.clement@free-electrons.com>
 References: <1465456218-28354-1-git-send-email-gregory.clement@free-electrons.com>
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1465456218-28354-1-git-send-email-gregory.clement-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-Cc: Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Jason Cooper <jason-NLaQJdtUoK4Be96aLqz0jA@public.gmane.org>, Andrew Lunn <andrew-g2DYL2Zd6BY@public.gmane.org>, Sebastian Hesselbarth <sebastian.hesselbarth-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Gregory CLEMENT <gregory.clement-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>, Thomas Petazzoni <thomas.petazzoni-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, Nadav Haklai <nadavh-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, Victor Gu <xigu-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, Romain Perier <romain.perier-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>, Omri Itach <omrii-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, Marcin Wojtas <mw-nYOzD4b6Jr9Wk0Htik3J/w@public.gmane.org>, Wilson Ding <dingwei-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, Shadi Ammouri <shadi-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from down.free-electrons.com ([37.187.137.238]:46280 "EHLO
+	mail.free-electrons.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1161269AbcFIHLa (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 9 Jun 2016 03:11:30 -0400
+In-Reply-To: <1465456218-28354-1-git-send-email-gregory.clement@free-electrons.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, linux-mmc@vger.kernel.org
+Cc: Rob Herring <robh+dt@kernel.org>, devicetree@vger.kernel.org, Jason Cooper <jason@lakedaemon.net>, Andrew Lunn <andrew@lunn.ch>, Sebastian Hesselbarth <sebastian.hesselbarth@gmail.com>, Gregory CLEMENT <gregory.clement@free-electrons.com>, Thomas Petazzoni <thomas.petazzoni@free-electrons.com>, linux-arm-kernel@lists.infradead.org, Nadav Haklai <nadavh@marvell.com>, Victor Gu <xigu@marvell.com>, Romain Perier <romain.perier@free-electrons.com>, Omri Itach <omrii@marvell.com>, Marcin Wojtas <mw@semihalf.com>, Wilson Ding <dingwei@marvell.com>, Shadi Ammouri <shadi@marvell.com>
 
-Add the eMMC support for Armada 37xx SoC and enable it in the Armada 3720
-DB board.
+From: Victor Gu <xigu@marvell.com>
 
-Signed-off-by: Gregory CLEMENT <gregory.clement-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>
+Some host controller such as Xenon needs additional setting when
+switching signal voltage in eMMC mode. They also need to re-enable
+internal clock before a voltage switch.
+
+This commit adds a callback routine "voltage_switch_pre" in the struct
+sdhci_ops, which is used by some host controllers which need re-enable
+the internal clock before a voltage switch.
+
+[gregory.clement@free-electrons.com: split the initial commit and
+reformulate the log]
+
+Signed-off-by: Victor Gu <xigu@marvell.com>
+Signed-off-by: Marcin Wojtas <mw@semihalf.com>
+Signed-off-by: Gregory CLEMENT <gregory.clement@free-electrons.com>
 ---
- arch/arm64/boot/dts/marvell/armada-3720-db.dts | 6 ++++++
- arch/arm64/boot/dts/marvell/armada-37xx.dtsi   | 9 +++++++++
- 2 files changed, 15 insertions(+)
+ drivers/mmc/host/sdhci.c | 4 ++++
+ drivers/mmc/host/sdhci.h | 1 +
+ 2 files changed, 5 insertions(+)
 
-diff --git a/arch/arm64/boot/dts/marvell/armada-3720-db.dts b/arch/arm64/boot/dts/marvell/armada-3720-db.dts
-index 86110a6ae330..569756924e3e 100644
---- a/arch/arm64/boot/dts/marvell/armada-3720-db.dts
-+++ b/arch/arm64/boot/dts/marvell/armada-3720-db.dts
-@@ -72,6 +72,12 @@
- 	status = "okay";
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index b07219426d39..cad03ffa9d9b 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -1729,6 +1729,10 @@ static int sdhci_start_signal_voltage_switch(struct mmc_host *mmc,
+ 	if (host->version < SDHCI_SPEC_300)
+ 		return 0;
+ 
++	/* Some controller need to do more before switching */
++	if (host->ops->voltage_switch_pre)
++		host->ops->voltage_switch_pre(host);
++
+ 	ctrl = sdhci_readw(host, SDHCI_HOST_CONTROL2);
+ 
+ 	switch (ios->signal_voltage) {
+diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+index 49c6c5b0e33b..6bec1b0368d2 100644
+--- a/drivers/mmc/host/sdhci.h
++++ b/drivers/mmc/host/sdhci.h
+@@ -550,6 +550,7 @@ struct sdhci_ops {
+ 					 unsigned int max_dtr, int host_drv,
+ 					 int card_drv, int *drv_type);
+ 	void	(*init_card)(struct sdhci_host *host, struct mmc_card *card);
++	void	(*voltage_switch_pre)(struct sdhci_host *host);
  };
  
-+&sdhci0 {
-+	non-removable;
-+	bus-width = <8>;
-+	status = "okay";
-+};
-+
- /* CON31 */
- &usb3 {
- 	status = "okay";
-diff --git a/arch/arm64/boot/dts/marvell/armada-37xx.dtsi b/arch/arm64/boot/dts/marvell/armada-37xx.dtsi
-index 9e2efb882983..5cc8b3f5ef51 100644
---- a/arch/arm64/boot/dts/marvell/armada-37xx.dtsi
-+++ b/arch/arm64/boot/dts/marvell/armada-37xx.dtsi
-@@ -126,6 +126,15 @@
- 				};
- 			};
- 
-+			sdhci0: sdhci@d8000 {
-+				compatible = "marvell,xenon-sdhci";
-+				reg = <0xd8000 0x300>;
-+				interrupts = <GIC_SPI 26 IRQ_TYPE_LEVEL_HIGH>;
-+
-+				auto-cmd12;
-+				status = "disabled";
-+			};
-+
- 			sata: sata@e0000 {
- 				compatible = "marvell,armada-3700-ahci";
- 				reg = <0xe0000 0x2000>;
+ #ifdef CONFIG_MMC_SDHCI_IO_ACCESSORS
 -- 
 2.5.0
 
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
