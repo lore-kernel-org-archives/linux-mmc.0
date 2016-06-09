@@ -1,8 +1,8 @@
 From: Krzysztof Kozlowski <k.kozlowski@samsung.com>
-Subject: [RFC v4 07/14] power: pwrseq: Generalize mmc_pwrseq operations by
- removing mmc prefix
-Date: Thu, 09 Jun 2016 11:44:24 +0200
-Message-ID: <1465465471-28740-8-git-send-email-k.kozlowski@samsung.com>
+Subject: [RFC v4 08/14] power: pwrseq: simple: Add support for regulators and
+ generic property
+Date: Thu, 09 Jun 2016 11:44:25 +0200
+Message-ID: <1465465471-28740-9-git-send-email-k.kozlowski@samsung.com>
 References: <1465465471-28740-1-git-send-email-k.kozlowski@samsung.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
@@ -22,217 +22,260 @@ To: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>, Pawe
 Cc: Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>
 List-Id: linux-mmc@vger.kernel.org
 
-The power sequence hooks (mmc_pwrseq_pre_power_on(),
-mmc_pwrseq_post_power_on() and mmc_pwrseq_power_off()) can be made more
-generic to allow re-use in other subsystems. They do not need to take
-pointer to struct mmc_host but instead the struct pwrseq should be
-sufficient.
+Some devices need real hard-reset by cutting the power.  During power
+sequence turn off and on all of provided regulators.
 
-Remove the "mmc" prefix and use the pointer to struct pwrseq as
-argument.
+Additionally add support for instantiating the pwrseq-simple device on a
+generic property 'power-sequence'.  The device will attach itself to the
+node containing the property and parse the node's properties like
+reset-gpios, supplies etc.
 
 Signed-off-by: Krzysztof Kozlowski <k.kozlowski@samsung.com>
-Reviewed-by: Javier Martinez Canillas <javier@osg.samsung.com>
 ---
- drivers/mmc/core/core.c              |  6 +++---
- drivers/power/pwrseq/pwrseq.c        | 24 +++++++++---------------
- drivers/power/pwrseq/pwrseq_emmc.c   |  6 ++----
- drivers/power/pwrseq/pwrseq_simple.c | 14 ++++++--------
- include/linux/pwrseq.h               | 18 +++++++++---------
- 5 files changed, 29 insertions(+), 39 deletions(-)
+ .../bindings/power/pwrseq/pwrseq-simple.txt        |  30 +++++-
+ drivers/power/pwrseq/pwrseq_simple.c               | 113 ++++++++++++++++++++-
+ 2 files changed, 136 insertions(+), 7 deletions(-)
 
-diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index edefc3fbebe6..09a4722f9037 100644
---- a/drivers/mmc/core/core.c
-+++ b/drivers/mmc/core/core.c
-@@ -1719,7 +1719,7 @@ void mmc_power_up(struct mmc_host *host, u32 ocr)
- 	if (host->ios.power_mode == MMC_POWER_ON)
- 		return;
+diff --git a/Documentation/devicetree/bindings/power/pwrseq/pwrseq-simple.txt b/Documentation/devicetree/bindings/power/pwrseq/pwrseq-simple.txt
+index ce0e76749671..7e5a414a67fc 100644
+--- a/Documentation/devicetree/bindings/power/pwrseq/pwrseq-simple.txt
++++ b/Documentation/devicetree/bindings/power/pwrseq/pwrseq-simple.txt
+@@ -1,11 +1,18 @@
+-* The simple MMC power sequence provider
++* The simple power sequence provider
  
--	mmc_pwrseq_pre_power_on(host);
-+	pwrseq_pre_power_on(host->pwrseq);
+-The purpose of the simple MMC power sequence provider is to supports a set of
++The purpose of the simple power sequence provider is to supports a set of
+ common properties between various SOC designs. It thus enables us to use the
+ same provider for several SOC designs.
  
- 	host->ios.vdd = fls(ocr) - 1;
- 	host->ios.power_mode = MMC_POWER_UP;
-@@ -1740,7 +1740,7 @@ void mmc_power_up(struct mmc_host *host, u32 ocr)
- 	 */
- 	mmc_delay(10);
+-Required properties:
+-- compatible : contains "mmc-pwrseq-simple".
++The driver supports two types of bindings:
++1. Property for any node
++   Required properties:
++   - power-sequence
++
++2. Separate node (not recommended for new users)
++   Required properties:
++   - compatible : contains "mmc-pwrseq-simple".
++
  
--	mmc_pwrseq_post_power_on(host);
-+	pwrseq_post_power_on(host->pwrseq);
+ Optional properties:
+ - reset-gpios : contains a list of GPIO specifiers. The reset GPIOs are asserted
+@@ -16,6 +23,8 @@ Optional properties:
+   See ../clocks/clock-bindings.txt for details.
+ - clock-names : Must include the following entry:
+   "ext_clock" (External clock provided to the card).
++- *-supply : If supplies are provided, the driver will enable and disable
++             them during power sequence.
  
- 	host->ios.clock = host->f_init;
+ Example:
  
-@@ -1759,7 +1759,7 @@ void mmc_power_off(struct mmc_host *host)
- 	if (host->ios.power_mode == MMC_POWER_OFF)
- 		return;
- 
--	mmc_pwrseq_power_off(host);
-+	pwrseq_power_off(host->pwrseq);
- 
- 	host->ios.clock = 0;
- 	host->ios.vdd = 0;
-diff --git a/drivers/power/pwrseq/pwrseq.c b/drivers/power/pwrseq/pwrseq.c
-index 9c665821f890..495a19d3c30b 100644
---- a/drivers/power/pwrseq/pwrseq.c
-+++ b/drivers/power/pwrseq/pwrseq.c
-@@ -52,32 +52,26 @@ int mmc_pwrseq_alloc(struct mmc_host *host)
- }
- EXPORT_SYMBOL_GPL(mmc_pwrseq_alloc);
- 
--void mmc_pwrseq_pre_power_on(struct mmc_host *host)
-+void pwrseq_pre_power_on(struct pwrseq *pwrseq)
- {
--	struct pwrseq *pwrseq = host->pwrseq;
--
- 	if (pwrseq && pwrseq->ops->pre_power_on)
--		pwrseq->ops->pre_power_on(host);
-+		pwrseq->ops->pre_power_on(pwrseq);
- }
--EXPORT_SYMBOL_GPL(mmc_pwrseq_pre_power_on);
-+EXPORT_SYMBOL_GPL(pwrseq_pre_power_on);
- 
--void mmc_pwrseq_post_power_on(struct mmc_host *host)
-+void pwrseq_post_power_on(struct pwrseq *pwrseq)
- {
--	struct pwrseq *pwrseq = host->pwrseq;
--
- 	if (pwrseq && pwrseq->ops->post_power_on)
--		pwrseq->ops->post_power_on(host);
-+		pwrseq->ops->post_power_on(pwrseq);
- }
--EXPORT_SYMBOL_GPL(mmc_pwrseq_post_power_on);
-+EXPORT_SYMBOL_GPL(pwrseq_post_power_on);
- 
--void mmc_pwrseq_power_off(struct mmc_host *host)
-+void pwrseq_power_off(struct pwrseq *pwrseq)
- {
--	struct pwrseq *pwrseq = host->pwrseq;
--
- 	if (pwrseq && pwrseq->ops->power_off)
--		pwrseq->ops->power_off(host);
-+		pwrseq->ops->power_off(pwrseq);
- }
--EXPORT_SYMBOL_GPL(mmc_pwrseq_power_off);
-+EXPORT_SYMBOL_GPL(pwrseq_power_off);
- 
- void mmc_pwrseq_free(struct mmc_host *host)
- {
-diff --git a/drivers/power/pwrseq/pwrseq_emmc.c b/drivers/power/pwrseq/pwrseq_emmc.c
-index a68ac9a68e04..dbb7e753beb2 100644
---- a/drivers/power/pwrseq/pwrseq_emmc.c
-+++ b/drivers/power/pwrseq/pwrseq_emmc.c
-@@ -19,8 +19,6 @@
- #include <linux/reboot.h>
- #include <linux/pwrseq.h>
- 
--#include <linux/mmc/host.h>
--
- struct mmc_pwrseq_emmc {
- 	struct pwrseq pwrseq;
- 	struct notifier_block reset_nb;
-@@ -37,9 +35,9 @@ static void __mmc_pwrseq_emmc_reset(struct mmc_pwrseq_emmc *pwrseq)
- 	udelay(200);
- }
- 
--static void mmc_pwrseq_emmc_reset(struct mmc_host *host)
-+static void mmc_pwrseq_emmc_reset(struct pwrseq *_pwrseq)
- {
--	struct mmc_pwrseq_emmc *pwrseq =  to_pwrseq_emmc(host->pwrseq);
-+	struct mmc_pwrseq_emmc *pwrseq = to_pwrseq_emmc(_pwrseq);
- 
- 	__mmc_pwrseq_emmc_reset(pwrseq);
- }
+@@ -25,3 +34,16 @@ Example:
+ 		clocks = <&clk_32768_ck>;
+ 		clock-names = "ext_clock";
+ 	}
++
++	usb3503@08 {
++		compatible = "smsc,usb3503";
++		reg = <0x08>;
++
++		intn-gpios = <&gpx3 0 GPIO_ACTIVE_HIGH>;
++		connect-gpios = <&gpx3 4 GPIO_ACTIVE_HIGH>;
++		reset-gpios = <&gpx3 5 GPIO_ACTIVE_HIGH>;
++		initial-mode = <1>;
++
++		power-sequence;
++		vdd-supply = <&buck8_reg>;
++	};
 diff --git a/drivers/power/pwrseq/pwrseq_simple.c b/drivers/power/pwrseq/pwrseq_simple.c
-index d5fbd653153e..93807a6ef162 100644
+index 93807a6ef162..f70e207f994b 100644
 --- a/drivers/power/pwrseq/pwrseq_simple.c
 +++ b/drivers/power/pwrseq/pwrseq_simple.c
-@@ -18,8 +18,6 @@
+@@ -1,12 +1,15 @@
+ /*
+- *  Copyright (C) 2014 Linaro Ltd
++ * Copyright (C) 2014 Linaro Ltd
++ * Copyright (C) 2016 Samsung Electronics
+  *
+  * Author: Ulf Hansson <ulf.hansson@linaro.org>
++ *         Krzysztof Kozlowski <k.kozlowski@samsung.com>
+  *
+  * License terms: GNU General Public License (GPL) version 2
+  *
+  *  Simple MMC power sequence management
+  */
++#include <linux/of.h>
+ #include <linux/clk.h>
+ #include <linux/init.h>
+ #include <linux/kernel.h>
+@@ -16,13 +19,25 @@
+ #include <linux/device.h>
+ #include <linux/err.h>
  #include <linux/gpio/consumer.h>
++#include <linux/regulator/consumer.h>
++#include <linux/regulator/of_regulator.h>
  #include <linux/pwrseq.h>
++#include <linux/delay.h>
++
++static LIST_HEAD(mmc_pwrseq_devs);
++
++struct mmc_pwrseq_dev {
++	struct platform_device *pdev;
++	struct list_head entry;
++};
  
--#include <linux/mmc/host.h>
--
  struct mmc_pwrseq_simple {
  	struct pwrseq pwrseq;
  	bool clk_enabled;
-@@ -46,9 +44,9 @@ static void mmc_pwrseq_simple_set_gpios_value(struct mmc_pwrseq_simple *pwrseq,
- 	}
- }
+ 	struct clk *ext_clk;
+ 	struct gpio_descs *reset_gpios;
++	unsigned int regulator_count;
++	struct regulator_bulk_data *regulators;
+ };
  
--static void mmc_pwrseq_simple_pre_power_on(struct mmc_host *host)
-+static void mmc_pwrseq_simple_pre_power_on(struct pwrseq *_pwrseq)
+ #define to_pwrseq_simple(p) container_of(p, struct mmc_pwrseq_simple, pwrseq)
+@@ -60,6 +75,14 @@ static void mmc_pwrseq_simple_post_power_on(struct pwrseq *_pwrseq)
  {
--	struct mmc_pwrseq_simple *pwrseq = to_pwrseq_simple(host->pwrseq);
-+	struct mmc_pwrseq_simple *pwrseq = to_pwrseq_simple(_pwrseq);
+ 	struct mmc_pwrseq_simple *pwrseq = to_pwrseq_simple(_pwrseq);
  
- 	if (!IS_ERR(pwrseq->ext_clk) && !pwrseq->clk_enabled) {
- 		clk_prepare_enable(pwrseq->ext_clk);
-@@ -58,16 +56,16 @@ static void mmc_pwrseq_simple_pre_power_on(struct mmc_host *host)
- 	mmc_pwrseq_simple_set_gpios_value(pwrseq, 1);
- }
- 
--static void mmc_pwrseq_simple_post_power_on(struct mmc_host *host)
-+static void mmc_pwrseq_simple_post_power_on(struct pwrseq *_pwrseq)
- {
--	struct mmc_pwrseq_simple *pwrseq = to_pwrseq_simple(host->pwrseq);
-+	struct mmc_pwrseq_simple *pwrseq = to_pwrseq_simple(_pwrseq);
- 
++	if (pwrseq->regulators) {
++		int err;
++
++		err = regulator_bulk_enable(pwrseq->regulator_count,
++					    pwrseq->regulators);
++		WARN_ON_ONCE(err);
++	}
++
  	mmc_pwrseq_simple_set_gpios_value(pwrseq, 0);
  }
  
--static void mmc_pwrseq_simple_power_off(struct mmc_host *host)
-+static void mmc_pwrseq_simple_power_off(struct pwrseq *_pwrseq)
+@@ -73,6 +96,14 @@ static void mmc_pwrseq_simple_power_off(struct pwrseq *_pwrseq)
+ 		clk_disable_unprepare(pwrseq->ext_clk);
+ 		pwrseq->clk_enabled = false;
+ 	}
++
++	if (pwrseq->regulators) {
++		int err;
++
++		err = regulator_bulk_disable(pwrseq->regulator_count,
++					     pwrseq->regulators);
++		WARN_ON_ONCE(err);
++	}
+ }
+ 
+ static const struct pwrseq_ops mmc_pwrseq_simple_ops = {
+@@ -91,6 +122,7 @@ static int mmc_pwrseq_simple_probe(struct platform_device *pdev)
  {
--	struct mmc_pwrseq_simple *pwrseq = to_pwrseq_simple(host->pwrseq);
-+	struct mmc_pwrseq_simple *pwrseq = to_pwrseq_simple(_pwrseq);
+ 	struct mmc_pwrseq_simple *pwrseq;
+ 	struct device *dev = &pdev->dev;
++	int err;
  
- 	mmc_pwrseq_simple_set_gpios_value(pwrseq, 1);
+ 	pwrseq = devm_kzalloc(dev, sizeof(*pwrseq), GFP_KERNEL);
+ 	if (!pwrseq)
+@@ -100,12 +132,39 @@ static int mmc_pwrseq_simple_probe(struct platform_device *pdev)
+ 	if (IS_ERR(pwrseq->ext_clk) && PTR_ERR(pwrseq->ext_clk) != -ENOENT)
+ 		return PTR_ERR(pwrseq->ext_clk);
  
-diff --git a/include/linux/pwrseq.h b/include/linux/pwrseq.h
-index 6d2d2a44ad35..fcc8fd855d4c 100644
---- a/include/linux/pwrseq.h
-+++ b/include/linux/pwrseq.h
-@@ -11,9 +11,9 @@
- #include <linux/mmc/host.h>
++	err = devm_of_regulator_all_get(dev, &pwrseq->regulator_count,
++					&pwrseq->regulators);
++	if (err)
++		return err;
++
++	if (pwrseq->regulators) {
++		/*
++		 * Be sure that regulator is off, before the driver will start
++		 * power sequence. It is likely that regulator is on by default
++		 * and it without toggling it here, it would be disabled much
++		 * later by the core.
++		 */
++		err = regulator_bulk_enable(pwrseq->regulator_count,
++					    pwrseq->regulators);
++		WARN_ON_ONCE(err);
++
++		err = regulator_bulk_disable(pwrseq->regulator_count,
++					     pwrseq->regulators);
++		WARN_ON_ONCE(err);
++	}
++
+ 	pwrseq->reset_gpios = devm_gpiod_get_array(dev, "reset",
+ 							GPIOD_OUT_HIGH);
+ 	if (IS_ERR(pwrseq->reset_gpios) &&
+ 	    PTR_ERR(pwrseq->reset_gpios) != -ENOENT &&
+ 	    PTR_ERR(pwrseq->reset_gpios) != -ENOSYS) {
+-		return PTR_ERR(pwrseq->reset_gpios);
++		/*
++		 * Don't care about errors. If this pwrseq device was added
++		 * to node with existing reset-gpios, then the GPIO reset will
++		 * be handled by other device.
++		 */
++		dev_warn(dev, "Cannot get reset gpio: %ld\n",
++			 PTR_ERR(pwrseq->reset_gpios));
+ 	}
  
- struct pwrseq_ops {
--	void (*pre_power_on)(struct mmc_host *host);
--	void (*post_power_on)(struct mmc_host *host);
--	void (*power_off)(struct mmc_host *host);
-+	void (*pre_power_on)(struct pwrseq *pwrseq);
-+	void (*post_power_on)(struct pwrseq *pwrseq);
-+	void (*power_off)(struct pwrseq *pwrseq);
+ 	pwrseq->pwrseq.dev = dev;
+@@ -122,6 +181,14 @@ static int mmc_pwrseq_simple_remove(struct platform_device *pdev)
+ 
+ 	pwrseq_unregister(&pwrseq->pwrseq);
+ 
++	if (pwrseq->regulators) {
++		int err;
++
++		err = regulator_bulk_disable(pwrseq->regulator_count,
++					     pwrseq->regulators);
++		WARN_ON_ONCE(err);
++	}
++
+ 	return 0;
+ }
+ 
+@@ -134,5 +201,45 @@ static struct platform_driver mmc_pwrseq_simple_driver = {
+ 	},
  };
  
- struct pwrseq {
-@@ -28,10 +28,10 @@ struct pwrseq {
- int pwrseq_register(struct pwrseq *pwrseq);
- void pwrseq_unregister(struct pwrseq *pwrseq);
- 
-+void pwrseq_pre_power_on(struct pwrseq *pwrseq);
-+void pwrseq_post_power_on(struct pwrseq *pwrseq);
-+void pwrseq_power_off(struct pwrseq *pwrseq);
- int mmc_pwrseq_alloc(struct mmc_host *host);
--void mmc_pwrseq_pre_power_on(struct mmc_host *host);
--void mmc_pwrseq_post_power_on(struct mmc_host *host);
--void mmc_pwrseq_power_off(struct mmc_host *host);
- void mmc_pwrseq_free(struct mmc_host *host);
- 
- #else /* CONFIG_POWER_SEQ */
-@@ -41,10 +41,10 @@ static inline int pwrseq_register(struct pwrseq *pwrseq)
- 	return -ENOSYS;
- }
- static inline void pwrseq_unregister(struct pwrseq *pwrseq) {}
-+static inline void pwrseq_pre_power_on(struct pwrseq *pwrseq) {}
-+static inline void pwrseq_post_power_on(struct pwrseq *pwrseq) {}
-+static inline void pwrseq_power_off(struct pwrseq *pwrseq) {}
- static inline int mmc_pwrseq_alloc(struct mmc_host *host) { return 0; }
--static inline void mmc_pwrseq_pre_power_on(struct mmc_host *host) {}
--static inline void mmc_pwrseq_post_power_on(struct mmc_host *host) {}
--static inline void mmc_pwrseq_power_off(struct mmc_host *host) {}
- static inline void mmc_pwrseq_free(struct mmc_host *host) {}
- 
- #endif /* CONFIG_POWER_SEQ */
+-module_platform_driver(mmc_pwrseq_simple_driver);
++static int __init mmc_pwrseq_simple_driver_init(void)
++{
++	struct mmc_pwrseq_dev *pwrseq_dev;
++	struct platform_device *pdev;
++	struct device_node *np;
++
++	for_each_node_with_property(np, "power-sequence") {
++		pdev = platform_device_register_simple("pwrseq_simple",
++						       PLATFORM_DEVID_AUTO,
++						       NULL, 0);
++		if (IS_ERR(pdev))
++			continue;
++
++		pwrseq_dev = kzalloc(sizeof(*pwrseq_dev), GFP_KERNEL);
++		if (!pwrseq_dev)
++			continue;
++
++		of_node_get(np);
++		pdev->dev.of_node = np;
++		pwrseq_dev->pdev = pdev;
++		list_add(&pwrseq_dev->entry, &mmc_pwrseq_devs);
++	}
++
++	return platform_driver_register(&mmc_pwrseq_simple_driver);
++}
++module_init(mmc_pwrseq_simple_driver_init);
++
++static void __exit mmc_pwrseq_simple_driver_exit(void)
++{
++	struct mmc_pwrseq_dev *pwrseq_dev, *tmp;
++
++	list_for_each_entry_safe(pwrseq_dev, tmp, &mmc_pwrseq_devs, entry) {
++		list_del(&pwrseq_dev->entry);
++		of_node_put(pwrseq_dev->pdev->dev.of_node);
++		platform_device_unregister(pwrseq_dev->pdev);
++		kfree(pwrseq_dev);
++	}
++
++	platform_driver_unregister(&mmc_pwrseq_simple_driver);
++}
++module_exit(mmc_pwrseq_simple_driver_exit);
+ MODULE_LICENSE("GPL v2");
 -- 
 1.9.1
