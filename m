@@ -1,61 +1,89 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: [PATCH RFC 38/46] mmc: block: Fix 4K native sector check
-Date: Thu,  9 Jun 2016 14:52:38 +0300
-Message-ID: <1465473166-22532-39-git-send-email-adrian.hunter@intel.com>
+Subject: [PATCH RFC 42/46] mmc: queue: Add a function to control wake-up on new requests
+Date: Thu,  9 Jun 2016 14:52:42 +0300
+Message-ID: <1465473166-22532-43-git-send-email-adrian.hunter@intel.com>
 References: <1465473166-22532-1-git-send-email-adrian.hunter@intel.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
 Received: from mga01.intel.com ([192.55.52.88]:48207 "EHLO mga01.intel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751058AbcFIL7T (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 9 Jun 2016 07:59:19 -0400
+	id S1751861AbcFIL7e (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 9 Jun 2016 07:59:34 -0400
 In-Reply-To: <1465473166-22532-1-git-send-email-adrian.hunter@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>
 Cc: linux-mmc <linux-mmc@vger.kernel.org>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Sujit Reddy Thumma <sthumma@codeaurora.org>, Dorfman Konstantin <kdorfman@codeaurora.org>, David Griego <david.griego@linaro.org>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>
 
-The 4K native sector check does not allow for the 'do' loop nor the
-variables used after the 'cmd_abort' label.
-
-'brq' and 'req' get reassigned in the 'do' loop, so the check must not
-assume what their values are. After the 'cmd_abort' label, 'mq_rq' and
-'req' are used, but 'rqc' must be NULL otherwise it can be started again.
+Add a function to control wake-up on new requests. This will enable
+Software Command Queuing to choose whether or not to queue new
+requests immediately or wait for the current task to complete.
 
 Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
 ---
- drivers/mmc/card/block.c | 8 +++++---
- 1 file changed, 5 insertions(+), 3 deletions(-)
+ drivers/mmc/card/queue.c | 16 ++++++++++++++++
+ drivers/mmc/card/queue.h |  2 ++
+ 2 files changed, 18 insertions(+)
 
-diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
-index b3daa7ffc7ec..b42318ce0ad7 100644
---- a/drivers/mmc/card/block.c
-+++ b/drivers/mmc/card/block.c
-@@ -1985,11 +1985,11 @@ static int mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *rqc)
- {
- 	struct mmc_blk_data *md = mq->data;
- 	struct mmc_card *card = md->queue.card;
--	struct mmc_blk_request *brq = &mq->mqrq_cur->brq;
-+	struct mmc_blk_request *brq;
- 	int ret = 1, disable_multi = 0, retry = 0, type, retune_retry_done = 0;
- 	enum mmc_blk_status status;
- 	struct mmc_queue_req *mq_rq;
--	struct request *req = rqc;
-+	struct request *req;
- 	struct mmc_async_req *areq;
- 	const u8 packed_nr = 2;
- 	u8 reqs = 0;
-@@ -2009,8 +2009,10 @@ static int mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *rqc)
- 			if (mmc_large_sector(card) &&
- 				!IS_ALIGNED(blk_rq_sectors(rqc), 8)) {
- 				pr_err("%s: Transfer size is not 4KB sector size aligned\n",
--					req->rq_disk->disk_name);
-+					rqc->rq_disk->disk_name);
- 				mq_rq = mq->mqrq_cur;
-+				req = rqc;
-+				rqc = NULL;
- 				goto cmd_abort;
- 			}
+diff --git a/drivers/mmc/card/queue.c b/drivers/mmc/card/queue.c
+index 4e134884a183..0781578fc8b6 100644
+--- a/drivers/mmc/card/queue.c
++++ b/drivers/mmc/card/queue.c
+@@ -94,6 +94,7 @@ static int mmc_queue_thread(void *d)
+ 		cntx->is_waiting_last_req = false;
+ 		cntx->is_new_req = false;
+ 		if (!req) {
++			mq->is_new_req = false;
+ 			/*
+ 			 * Dispatch queue is empty so set flags for
+ 			 * mmc_request_fn() to wake us up.
+@@ -144,6 +145,8 @@ static void mmc_request_fn(struct request_queue *q)
+ 		return;
+ 	}
  
++	mq->is_new_req = true;
++
+ 	cntx = &mq->card->host->context_info;
+ 
+ 	if (cntx->is_waiting_last_req) {
+@@ -155,6 +158,19 @@ static void mmc_request_fn(struct request_queue *q)
+ 		wake_up_process(mq->thread);
+ }
+ 
++void mmc_queue_set_wake(struct mmc_queue *mq, bool wake_me)
++{
++	struct mmc_context_info *cntx = &mq->card->host->context_info;
++	struct request_queue *q = mq->queue;
++
++	if (cntx->is_waiting_last_req != wake_me) {
++		spin_lock_irq(q->queue_lock);
++		cntx->is_waiting_last_req = wake_me;
++		cntx->is_new_req = wake_me && mq->is_new_req;
++		spin_unlock_irq(q->queue_lock);
++	}
++}
++
+ static struct scatterlist *mmc_alloc_sg(int sg_len, int *err)
+ {
+ 	struct scatterlist *sg;
+diff --git a/drivers/mmc/card/queue.h b/drivers/mmc/card/queue.h
+index 1afd5dafd46d..a6d5b0f94662 100644
+--- a/drivers/mmc/card/queue.h
++++ b/drivers/mmc/card/queue.h
+@@ -52,6 +52,7 @@ struct mmc_queue {
+ 	unsigned int		flags;
+ #define MMC_QUEUE_SUSPENDED	(1 << 0)
+ 	bool			asleep;
++	bool			is_new_req;
+ 
+ 	int			(*issue_fn)(struct mmc_queue *, struct request *);
+ 	void			*data;
+@@ -81,5 +82,6 @@ extern int mmc_access_rpmb(struct mmc_queue *);
+ extern struct mmc_queue_req *mmc_queue_req_find(struct mmc_queue *,
+ 						struct request *);
+ extern void mmc_queue_req_free(struct mmc_queue *, struct mmc_queue_req *);
++extern void mmc_queue_set_wake(struct mmc_queue *, bool);
+ 
+ #endif
 -- 
 1.9.1
 
