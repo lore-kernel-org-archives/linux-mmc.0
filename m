@@ -1,77 +1,79 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: [PATCH RFC 36/46] mmc: core: Export mmc_retune_hold() and mmc_retune_release()
-Date: Thu,  9 Jun 2016 14:52:36 +0300
-Message-ID: <1465473166-22532-37-git-send-email-adrian.hunter@intel.com>
+Subject: [PATCH RFC 39/46] mmc: block: Use local var for mqrq_cur
+Date: Thu,  9 Jun 2016 14:52:39 +0300
+Message-ID: <1465473166-22532-40-git-send-email-adrian.hunter@intel.com>
 References: <1465473166-22532-1-git-send-email-adrian.hunter@intel.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
 Received: from mga01.intel.com ([192.55.52.88]:48207 "EHLO mga01.intel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750917AbcFIL7K (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 9 Jun 2016 07:59:10 -0400
+	id S1750917AbcFIL7X (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 9 Jun 2016 07:59:23 -0400
 In-Reply-To: <1465473166-22532-1-git-send-email-adrian.hunter@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>
 Cc: linux-mmc <linux-mmc@vger.kernel.org>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Sujit Reddy Thumma <sthumma@codeaurora.org>, Dorfman Konstantin <kdorfman@codeaurora.org>, David Griego <david.griego@linaro.org>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>
 
-Re-tuning can only be done when the Command Queue is empty, when means
-holding and releasing re-tuning from the block driver, so export those
-functions.
+A subsequent patch will remove 'mq->mqrq_cur'. Prepare for that by
+assigning it to a local variable.
 
 Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
 ---
- drivers/mmc/core/host.c  | 2 ++
- drivers/mmc/core/host.h  | 2 --
- include/linux/mmc/core.h | 3 +++
- 3 files changed, 5 insertions(+), 2 deletions(-)
+ drivers/mmc/card/block.c | 17 +++++++++--------
+ 1 file changed, 9 insertions(+), 8 deletions(-)
 
-diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
-index d7e86f9b3dab..946692cc0a06 100644
---- a/drivers/mmc/core/host.c
-+++ b/drivers/mmc/core/host.c
-@@ -112,6 +112,7 @@ void mmc_retune_hold(struct mmc_host *host)
- 		host->retune_now = 1;
- 	host->hold_retune += 1;
- }
-+EXPORT_SYMBOL(mmc_retune_hold);
+diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+index b42318ce0ad7..db28274a7624 100644
+--- a/drivers/mmc/card/block.c
++++ b/drivers/mmc/card/block.c
+@@ -1988,6 +1988,7 @@ static int mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *rqc)
+ 	struct mmc_blk_request *brq;
+ 	int ret = 1, disable_multi = 0, retry = 0, type, retune_retry_done = 0;
+ 	enum mmc_blk_status status;
++	struct mmc_queue_req *mqrq_cur = mq->mqrq_cur;
+ 	struct mmc_queue_req *mq_rq;
+ 	struct request *req;
+ 	struct mmc_async_req *areq;
+@@ -2010,18 +2011,18 @@ static int mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *rqc)
+ 				!IS_ALIGNED(blk_rq_sectors(rqc), 8)) {
+ 				pr_err("%s: Transfer size is not 4KB sector size aligned\n",
+ 					rqc->rq_disk->disk_name);
+-				mq_rq = mq->mqrq_cur;
++				mq_rq = mqrq_cur;
+ 				req = rqc;
+ 				rqc = NULL;
+ 				goto cmd_abort;
+ 			}
  
- void mmc_retune_release(struct mmc_host *host)
- {
-@@ -120,6 +121,7 @@ void mmc_retune_release(struct mmc_host *host)
- 	else
- 		WARN_ON(1);
- }
-+EXPORT_SYMBOL(mmc_retune_release);
+ 			if (reqs >= packed_nr)
+-				mmc_blk_packed_hdr_wrq_prep(mq->mqrq_cur,
++				mmc_blk_packed_hdr_wrq_prep(mqrq_cur,
+ 							    card, mq);
+ 			else
+-				mmc_blk_rw_rq_prep(mq->mqrq_cur, card, 0, mq);
+-			areq = &mq->mqrq_cur->mmc_active;
++				mmc_blk_rw_rq_prep(mqrq_cur, card, 0, mq);
++			areq = &mqrq_cur->mmc_active;
+ 		} else
+ 			areq = NULL;
+ 		areq = mmc_start_req(card->host, areq, (int *) &status);
+@@ -2163,12 +2164,12 @@ static int mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *rqc)
+ 			/*
+ 			 * If current request is packed, it needs to put back.
+ 			 */
+-			if (mmc_packed_cmd(mq->mqrq_cur->cmd_type))
+-				mmc_blk_revert_packed_req(mq, mq->mqrq_cur);
++			if (mmc_packed_cmd(mqrq_cur->cmd_type))
++				mmc_blk_revert_packed_req(mq, mqrq_cur);
  
- int mmc_retune(struct mmc_host *host)
- {
-diff --git a/drivers/mmc/core/host.h b/drivers/mmc/core/host.h
-index 992bf5397633..0787b3002481 100644
---- a/drivers/mmc/core/host.h
-+++ b/drivers/mmc/core/host.h
-@@ -17,8 +17,6 @@ void mmc_unregister_host_class(void);
+-			mmc_blk_rw_rq_prep(mq->mqrq_cur, card, 0, mq);
++			mmc_blk_rw_rq_prep(mqrq_cur, card, 0, mq);
+ 			mmc_start_req(card->host,
+-				      &mq->mqrq_cur->mmc_active, NULL);
++				      &mqrq_cur->mmc_active, NULL);
+ 		}
+ 	}
  
- void mmc_retune_enable(struct mmc_host *host);
- void mmc_retune_disable(struct mmc_host *host);
--void mmc_retune_hold(struct mmc_host *host);
--void mmc_retune_release(struct mmc_host *host);
- int mmc_retune(struct mmc_host *host);
- 
- #endif
-diff --git a/include/linux/mmc/core.h b/include/linux/mmc/core.h
-index 63dc01257852..4c6d131cafc2 100644
---- a/include/linux/mmc/core.h
-+++ b/include/linux/mmc/core.h
-@@ -204,6 +204,9 @@ extern int mmc_flush_cache(struct mmc_card *);
- 
- extern int mmc_detect_card_removed(struct mmc_host *host);
- 
-+extern void mmc_retune_hold(struct mmc_host *host);
-+extern void mmc_retune_release(struct mmc_host *host);
-+
- /**
-  *	mmc_claim_host - exclusively claim a host
-  *	@host: mmc host to claim
 -- 
 1.9.1
 
