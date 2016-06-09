@@ -1,63 +1,150 @@
-From: Gregory CLEMENT <gregory.clement@free-electrons.com>
-Subject: [PATCH 06/12] mmc: sdhci: add delay adjust feature including phy reset
-Date: Thu,  9 Jun 2016 09:10:12 +0200
-Message-ID: <1465456218-28354-7-git-send-email-gregory.clement@free-electrons.com>
-References: <1465456218-28354-1-git-send-email-gregory.clement@free-electrons.com>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from down.free-electrons.com ([37.187.137.238]:46281 "EHLO
-	mail.free-electrons.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1162054AbcFIHLa (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 9 Jun 2016 03:11:30 -0400
-In-Reply-To: <1465456218-28354-1-git-send-email-gregory.clement@free-electrons.com>
-Sender: linux-mmc-owner@vger.kernel.org
+From: Krzysztof Kozlowski <k.kozlowski@samsung.com>
+Subject: [RFC v4 02/14] simplefb: Use new devm_of_regulator_all_get helper and
+ bulk API
+Date: Thu, 09 Jun 2016 11:44:19 +0200
+Message-ID: <1465465471-28740-3-git-send-email-k.kozlowski@samsung.com>
+References: <1465465471-28740-1-git-send-email-k.kozlowski@samsung.com>
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+In-reply-to: <1465465471-28740-1-git-send-email-k.kozlowski@samsung.com>
+Sender: linux-samsung-soc-owner@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>, Pawel Moll <pawel.moll@arm.com>, Mark Rutland <mark.rutland@arm.com>, Ian Campbell <ijc+devicetree@hellion.org.uk>, Kumar Gala <galak@codeaurora.org>, Krzysztof Kozlowski <k.kozlowski@samsung.com>, Sebastian Reichel <sre@kernel.org>, Dmitry Eremin-Solenikov <dbaryshkov@gmail.com>, David Woodhouse <dwmw2@infradead.org>, Liam Girdwood <lgirdwood@gmail.com>, Mark Brown <broonie@kernel.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Hans de Goede <hdegoede@redhat.com>, Jean-Christophe Plagniol-Villard <plagnioj@jcrosoft.com>, Tomi Valkeinen <tomi.valkeinen@ti.com>, Heiko Stuebner <heiko@sntech.de>, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-samsung-soc@vger.kernel.org, linux-pm@vger.kernel.org, linux-usb@v
+Cc: Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, linux-mmc@vger.kernel.org
-Cc: Rob Herring <robh+dt@kernel.org>, devicetree@vger.kernel.org, Jason Cooper <jason@lakedaemon.net>, Andrew Lunn <andrew@lunn.ch>, Sebastian Hesselbarth <sebastian.hesselbarth@gmail.com>, Gregory CLEMENT <gregory.clement@free-electrons.com>, Thomas Petazzoni <thomas.petazzoni@free-electrons.com>, linux-arm-kernel@lists.infradead.org, Nadav Haklai <nadavh@marvell.com>, Victor Gu <xigu@marvell.com>, Romain Perier <romain.perier@free-electrons.com>, Omri Itach <omrii@marvell.com>, Marcin Wojtas <mw@semihalf.com>, Wilson Ding <dingwei@marvell.com>, Shadi Ammouri <shadi@marvell.com>
 
-From: Victor Gu <xigu@marvell.com>
+Switch from manual way of getting all regulators to usage of
+devm_of_regulator_all_get().  Additionally use the regulator bulk API
+which changes the logic in case of failure of regulator enable.  Before
+if regulator_enable() returned error for one regulator, rest of them
+were still enabled.  The bulk API does everything atomically.
 
-Tuning is only available in HS200 mode. However, some host controllers,
-such as the Xenon one, need to adjust delay for other modes and even
-adjust the delay before tuning.
+Signed-off-by: Krzysztof Kozlowski <k.kozlowski@samsung.com>
 
-This commit adds a callback routine "delay_adj" in the struct sdhci_ops.
-
-[gregory.clement@free-electrons.com: split the initial commit and
-reformulate the log]
-
-Signed-off-by: Victor Gu <xigu@marvell.com>
-Signed-off-by: Gregory CLEMENT <gregory.clement@free-electrons.com>
 ---
- drivers/mmc/host/sdhci.c | 3 +++
- drivers/mmc/host/sdhci.h | 1 +
- 2 files changed, 4 insertions(+)
 
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index cad03ffa9d9b..2acae2b3b2d3 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -1606,6 +1606,9 @@ static void sdhci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+Not tested.
+---
+ drivers/video/fbdev/simplefb.c | 71 +++++++++---------------------------------
+ 1 file changed, 14 insertions(+), 57 deletions(-)
+
+diff --git a/drivers/video/fbdev/simplefb.c b/drivers/video/fbdev/simplefb.c
+index e9cf19977285..897b95efa40d 100644
+--- a/drivers/video/fbdev/simplefb.c
++++ b/drivers/video/fbdev/simplefb.c
+@@ -32,6 +32,7 @@
+ #include <linux/of_platform.h>
+ #include <linux/parser.h>
+ #include <linux/regulator/consumer.h>
++#include <linux/regulator/of_regulator.h>
  
- 	mmiowb();
- 	spin_unlock_irqrestore(&host->lock, flags);
-+
-+	if (host->ops->delay_adj)
-+		host->ops->delay_adj(host, ios);
- }
- 
- static int sdhci_get_cd(struct mmc_host *mmc)
-diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-index 6bec1b0368d2..f88f72782a8d 100644
---- a/drivers/mmc/host/sdhci.h
-+++ b/drivers/mmc/host/sdhci.h
-@@ -551,6 +551,7 @@ struct sdhci_ops {
- 					 int card_drv, int *drv_type);
- 	void	(*init_card)(struct sdhci_host *host, struct mmc_card *card);
- 	void	(*voltage_switch_pre)(struct sdhci_host *host);
-+	int	(*delay_adj)(struct sdhci_host *host, struct mmc_ios *ios);
+ static struct fb_fix_screeninfo simplefb_fix = {
+ 	.id		= "simple",
+@@ -178,8 +179,8 @@ struct simplefb_par {
+ 	struct clk **clks;
+ #endif
+ #if defined CONFIG_OF && defined CONFIG_REGULATOR
+-	u32 regulator_count;
+-	struct regulator **regulators;
++	unsigned int regulator_count;
++	struct regulator_bulk_data *regulators;
+ #endif
  };
  
- #ifdef CONFIG_MMC_SDHCI_IO_ACCESSORS
+@@ -278,8 +279,6 @@ static void simplefb_clocks_destroy(struct simplefb_par *par) { }
+ 
+ #if defined CONFIG_OF && defined CONFIG_REGULATOR
+ 
+-#define SUPPLY_SUFFIX "-supply"
+-
+ /*
+  * Regulator handling code.
+  *
+@@ -303,61 +302,23 @@ static int simplefb_regulators_init(struct simplefb_par *par,
+ 	struct platform_device *pdev)
+ {
+ 	struct device_node *np = pdev->dev.of_node;
+-	struct property *prop;
+-	struct regulator *regulator;
+-	const char *p;
+-	int count = 0, i = 0, ret;
++	int ret;
+ 
+ 	if (dev_get_platdata(&pdev->dev) || !np)
+ 		return 0;
+ 
+-	/* Count the number of regulator supplies */
+-	for_each_property_of_node(np, prop) {
+-		p = strstr(prop->name, SUPPLY_SUFFIX);
+-		if (p && p != prop->name)
+-			count++;
+-	}
+-
+-	if (!count)
++	ret = devm_of_regulator_all_get(&pdev->dev, &par->regulator_count, &par->regulators);
++	if (ret)
++		return ret;
++	else if (!par->regulator_count)
+ 		return 0;
+ 
+-	par->regulators = devm_kcalloc(&pdev->dev, count,
+-				       sizeof(struct regulator *), GFP_KERNEL);
+-	if (!par->regulators)
+-		return -ENOMEM;
+-
+-	/* Get all the regulators */
+-	for_each_property_of_node(np, prop) {
+-		char name[32]; /* 32 is max size of property name */
+-
+-		p = strstr(prop->name, SUPPLY_SUFFIX);
+-		if (!p || p == prop->name)
+-			continue;
+-
+-		strlcpy(name, prop->name,
+-			strlen(prop->name) - strlen(SUPPLY_SUFFIX) + 1);
+-		regulator = devm_regulator_get_optional(&pdev->dev, name);
+-		if (IS_ERR(regulator)) {
+-			if (PTR_ERR(regulator) == -EPROBE_DEFER)
+-				return -EPROBE_DEFER;
+-			dev_err(&pdev->dev, "regulator %s not found: %ld\n",
+-				name, PTR_ERR(regulator));
+-			continue;
+-		}
+-		par->regulators[i++] = regulator;
+-	}
+-	par->regulator_count = i;
+-
+ 	/* Enable all the regulators */
+-	for (i = 0; i < par->regulator_count; i++) {
+-		ret = regulator_enable(par->regulators[i]);
+-		if (ret) {
+-			dev_err(&pdev->dev,
+-				"failed to enable regulator %d: %d\n",
+-				i, ret);
+-			devm_regulator_put(par->regulators[i]);
+-			par->regulators[i] = NULL;
+-		}
++	ret = regulator_bulk_enable(par->regulator_count, par->regulators);
++	if (ret) {
++		dev_err(&pdev->dev,
++			"failed to enable regulators: %d\n", ret);
++		return ret;
+ 	}
+ 
+ 	return 0;
+@@ -365,14 +326,10 @@ static int simplefb_regulators_init(struct simplefb_par *par,
+ 
+ static void simplefb_regulators_destroy(struct simplefb_par *par)
+ {
+-	int i;
+-
+ 	if (!par->regulators)
+ 		return;
+ 
+-	for (i = 0; i < par->regulator_count; i++)
+-		if (par->regulators[i])
+-			regulator_disable(par->regulators[i]);
++	regulator_bulk_disable(par->regulator_count, par->regulators);
+ }
+ #else
+ static int simplefb_regulators_init(struct simplefb_par *par,
 -- 
-2.5.0
-
+1.9.1
