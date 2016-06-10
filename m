@@ -1,44 +1,53 @@
-From: Rob Herring <robh@kernel.org>
-Subject: Re: [PATCH 06/11] Documentation: mmc: sdhci-of-arasan: Add ability
- to export card clock
-Date: Fri, 10 Jun 2016 08:10:52 -0500
-Message-ID: <20160610131052.GA9351@rob-hp-laptop>
-References: <1465339484-969-1-git-send-email-dianders@chromium.org>
- <1465339484-969-7-git-send-email-dianders@chromium.org>
- <20160608201923.GA20683@rob-hp-laptop>
- <CAD=FV=WX_bu-dmALkSmPPrWeatfjJND3M59GJoVEr6bv0vLq9Q@mail.gmail.com>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: [PATCH] mmc: block: Fix tag condition with packed writes
+Date: Fri, 10 Jun 2016 16:22:16 +0300
+Message-ID: <575ABF08.4010102@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <CAD=FV=WX_bu-dmALkSmPPrWeatfjJND3M59GJoVEr6bv0vLq9Q@mail.gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Doug Anderson <dianders@chromium.org>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Kishon Vijay Abraham I <kishon@ti.com>, Heiko Stuebner <heiko@sntech.de>, Shawn Lin <shawn.lin@rock-chips.com>, Ziyuan Xu <xzy.xu@rock-chips.com>, Brian Norris <briannorris@chromium.org>, Adrian Hunter <adrian.hunter@intel.com>, "open list:ARM/Rockchip SoC..." <linux-rockchip@lists.infradead.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, Pawel Moll <pawel.moll@arm.com>, Mark Rutland <mark.rutland@arm.com>, Ian Campbell <ijc+devicetree@hellion.org.uk>, Kumar Gala <galak@codeaurora.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mga11.intel.com ([192.55.52.93]:38385 "EHLO mga11.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S932734AbcFJN0W (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 10 Jun 2016 09:26:22 -0400
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>
 
-On Wed, Jun 08, 2016 at 01:52:20PM -0700, Doug Anderson wrote:
-> Rob,
-> 
-> On Wed, Jun 8, 2016 at 1:19 PM, Rob Herring <robh@kernel.org> wrote:
-> > On Tue, Jun 07, 2016 at 03:44:39PM -0700, Douglas Anderson wrote:
-> >> Some SD/eMMC PHYs (like the PHY from Arasan that is designed to work
-> >> with arasan,sdhci-5.1) need to know the card clock in order to function
-> >> properly.  Let's expose this clock using a standard device tree
-> >> mechanism so that the PHY can get access to and query the card clock.
-> >
-> > Need to know the clock freq or need the clock? The former doesn't need
-> > to be in DT.
-> 
-> The PHY needs to know the card clock frequency.  This clock clock
-> frequency is known nowhere else in the system except the SDHCI driver
-> since the SDHCI component takes its input clock and applies some
-> dividers to get the card clock.  In silicon, the SDHCI component and
-> the PHY are separate and there is a physical clock signal going from
-> the SDHCI component to the PHY component, so modeling this as a clock
-> in in the device tree seems sane, doesn't it?
+Apparently a cut-and-paste error, 'do_data_tag' is using 'brq' for data
+size even though 'brq' has not been set up. Instead use blk_rq_sectors().
 
-Yes, please just re-word it to make it clear there is a connection. With 
-that,
+Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
+---
 
-Acked-by: Rob Herring <robh@kernel.org>
+
+Hi
+
+I don't know if anyone is actually using packed writes, but this is
+something I noticed.
+
+Regards
+Adrian
+
+
+ drivers/mmc/card/block.c | 3 +--
+ 1 file changed, 1 insertion(+), 2 deletions(-)
+
+diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+index b954516739be..aa5cfaf1fdf0 100644
+--- a/drivers/mmc/card/block.c
++++ b/drivers/mmc/card/block.c
+@@ -1834,8 +1834,7 @@ static void mmc_blk_packed_hdr_wrq_prep(struct mmc_queue_req *mqrq,
+ 		do_data_tag = (card->ext_csd.data_tag_unit_size) &&
+ 			(prq->cmd_flags & REQ_META) &&
+ 			(rq_data_dir(prq) == WRITE) &&
+-			((brq->data.blocks * brq->data.blksz) >=
+-			 card->ext_csd.data_tag_unit_size);
++			blk_rq_bytes(prq) >= card->ext_csd.data_tag_unit_size;
+ 		/* Argument of CMD23 */
+ 		packed_cmd_hdr[(i * 2)] =
+ 			(do_rel_wr ? MMC_CMD23_ARG_REL_WR : 0) |
+-- 
+1.9.1
+
