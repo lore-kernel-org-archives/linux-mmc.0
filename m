@@ -1,71 +1,44 @@
-From: Venu Byravarasu <vbyravarasu@nvidia.com>
-Subject: RE: [PATCH RFC V2 33/46] mmc: mmc_test: Disable Command Queue while
- mmc_test is used
-Date: Fri, 10 Jun 2016 12:03:13 +0000
-Message-ID: <f102a5312fa44bf1b345478f9bffcf1d@bgmail103.nvidia.com>
-References: <1465473166-22532-1-git-send-email-adrian.hunter@intel.com>
- <1465473166-22532-34-git-send-email-adrian.hunter@intel.com>
- <575A9A1E.7010906@intel.com>
- <e9d4f5ef1cd542c3bd9b0397baa26576@bgmail103.nvidia.com>
- <575AA657.9030800@intel.com>
+From: Rob Herring <robh@kernel.org>
+Subject: Re: [PATCH 06/11] Documentation: mmc: sdhci-of-arasan: Add ability
+ to export card clock
+Date: Fri, 10 Jun 2016 08:10:52 -0500
+Message-ID: <20160610131052.GA9351@rob-hp-laptop>
+References: <1465339484-969-1-git-send-email-dianders@chromium.org>
+ <1465339484-969-7-git-send-email-dianders@chromium.org>
+ <20160608201923.GA20683@rob-hp-laptop>
+ <CAD=FV=WX_bu-dmALkSmPPrWeatfjJND3M59GJoVEr6bv0vLq9Q@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from hqemgate15.nvidia.com ([216.228.121.64]:1394 "EHLO
-	hqemgate15.nvidia.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751419AbcFJMDT convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 10 Jun 2016 08:03:19 -0400
-In-Reply-To: <575AA657.9030800@intel.com>
-Content-Language: en-US
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <CAD=FV=WX_bu-dmALkSmPPrWeatfjJND3M59GJoVEr6bv0vLq9Q@mail.gmail.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Doug Anderson <dianders@chromium.org>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Kishon Vijay Abraham I <kishon@ti.com>, Heiko Stuebner <heiko@sntech.de>, Shawn Lin <shawn.lin@rock-chips.com>, Ziyuan Xu <xzy.xu@rock-chips.com>, Brian Norris <briannorris@chromium.org>, Adrian Hunter <adrian.hunter@intel.com>, "open list:ARM/Rockchip SoC..." <linux-rockchip@lists.infradead.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, Pawel Moll <pawel.moll@arm.com>, Mark Rutland <mark.rutland@arm.com>, Ian Campbell <ijc+devicetree@hellion.org.uk>, Kumar Gala <galak@codeaurora.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Dorfman Konstantin <kdorfman@codeaurora.org>, David Griego <david.griego@linaro.org>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>
 
-
-
-> -----Original Message-----
-> From: Adrian Hunter [mailto:adrian.hunter@intel.com]
-> Sent: Friday, June 10, 2016 5:07 PM
-> To: Venu Byravarasu; Ulf Hansson
-> Cc: linux-mmc; Alex Lemberg; Mateusz Nowak; Yuliy Izrailov; Jaehoon Chung;
-> Dong Aisheng; Das Asutosh; Zhangfei Gao; Dorfman Konstantin; David
-> Griego; Sahitya Tummala; Harjani Ritesh
-> Subject: Re: [PATCH RFC V2 33/46] mmc: mmc_test: Disable Command
-> Queue while mmc_test is used
+On Wed, Jun 08, 2016 at 01:52:20PM -0700, Doug Anderson wrote:
+> Rob,
 > 
-> On 10/06/16 13:59, Venu Byravarasu wrote:
-> >> -----Original Message-----
-> >> From: linux-mmc-owner@vger.kernel.org [mailto:linux-mmc-
-> >> owner@vger.kernel.org] On Behalf Of Adrian Hunter
-> >> Sent: Friday, June 10, 2016 4:15 PM
-> >> To: Ulf Hansson
-> >> Cc: linux-mmc; Alex Lemberg; Mateusz Nowak; Yuliy Izrailov; Jaehoon
-> >> Chung; Dong Aisheng; Das Asutosh; Zhangfei Gao; Sujit Reddy Thumma;
-> >> Dorfman Konstantin; David Griego; Sahitya Tummala; Harjani Ritesh
-> >> Subject: [PATCH RFC V2 33/46] mmc: mmc_test: Disable Command Queue
-> >> while mmc_test is used
-> >>
-> >> Normal read and write commands may not be used while the command
-> >> queue is enabled.
+> On Wed, Jun 8, 2016 at 1:19 PM, Rob Herring <robh@kernel.org> wrote:
+> > On Tue, Jun 07, 2016 at 03:44:39PM -0700, Douglas Anderson wrote:
+> >> Some SD/eMMC PHYs (like the PHY from Arasan that is designed to work
+> >> with arasan,sdhci-5.1) need to know the card clock in order to function
+> >> properly.  Let's expose this clock using a standard device tree
+> >> mechanism so that the PHY can get access to and query the card clock.
 > >
-> > CQ may not be efficient when single rd/wr commands get issued with
-> variable delays in between.
-> > In such situations, CQ preparation for individual rd/wr cmds would be an
-> unnecessary overhead.
-> > Hence even when CQ is supported, prefer CQ only when more than 1 data
-> cmds are to be issued to device.
+> > Need to know the clock freq or need the clock? The former doesn't need
+> > to be in DT.
 > 
-> So you are suggesting toggling CQ on/off depending on whether there is
-> more than 1 data request?
+> The PHY needs to know the card clock frequency.  This clock clock
+> frequency is known nowhere else in the system except the SDHCI driver
+> since the SDHCI component takes its input clock and applies some
+> dividers to get the card clock.  In silicon, the SDHCI component and
+> the PHY are separate and there is a physical clock signal going from
+> the SDHCI component to the PHY component, so modeling this as a clock
+> in in the device tree seems sane, doesn't it?
 
-I didn't go thro' your implementation part for CQ yet & my comment was generic.
+Yes, please just re-word it to make it clear there is a connection. With 
+that,
 
-If preparation of CQ is taking N more operations than non-CQ command, then by not opting for CQ, you might save those N operations.
------------------------------------------------------------------------------------
-This email message is for the sole use of the intended recipient(s) and may contain
-confidential information.  Any unauthorized review, use, disclosure or distribution
-is prohibited.  If you are not the intended recipient, please contact the sender by
-reply email and destroy all copies of the original message.
------------------------------------------------------------------------------------
+Acked-by: Rob Herring <robh@kernel.org>
