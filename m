@@ -1,87 +1,80 @@
-From: Rob Herring <robh@kernel.org>
-Subject: Re: [PATCH 08/12] dt-bindings: mmc: Add Xenon description
-Date: Fri, 10 Jun 2016 09:16:03 -0500
-Message-ID: <20160610141603.GA7827@rob-hp-laptop>
-References: <1465456218-28354-1-git-send-email-gregory.clement@free-electrons.com>
- <1465456218-28354-9-git-send-email-gregory.clement@free-electrons.com>
+From: Grant Grundler <grundler@chromium.org>
+Subject: Re: [PATCH v2] mmc: Set pref erase size based on size.
+Date: Fri, 10 Jun 2016 10:02:43 -0700
+Message-ID: <CANEJEGtbnhh=Bru5T2+o2VFrpeZ2KRAK6FJfFEH4FpaUJM1Jkw@mail.gmail.com>
+References: <1464908184-20153-1-git-send-email-gwendal@chromium.org> <1464913638-5283-1-git-send-email-gwendal@chromium.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-oi0-f66.google.com ([209.85.218.66]:36279 "EHLO
-	mail-oi0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750848AbcFJOQG (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 10 Jun 2016 10:16:06 -0400
-Content-Disposition: inline
-In-Reply-To: <1465456218-28354-9-git-send-email-gregory.clement@free-electrons.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1464913638-5283-1-git-send-email-gwendal@chromium.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>, Jens Axboe <axboe@kernel.dk>
+Cc: Grant Grundler <grundler@chromium.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, LKML <linux-kernel@vger.kernel.org>, Gwendal Grignou <gwendal@chromium.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Gregory CLEMENT <gregory.clement@free-electrons.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, Jason Cooper <jason@lakedaemon.net>, Andrew Lunn <andrew@lunn.ch>, Sebastian Hesselbarth <sebastian.hesselbarth@gmail.com>, Thomas Petazzoni <thomas.petazzoni@free-electrons.com>, linux-arm-kernel@lists.infradead.org, Nadav Haklai <nadavh@marvell.com>, Victor Gu <xigu@marvell.com>, Romain Perier <romain.perier@free-electrons.com>, Omri Itach <omrii@marvell.com>, Marcin Wojtas <mw@semihalf.com>, Wilson Ding <dingwei@marvell.com>, Shadi Ammouri <shadi@marvell.com>
 
-On Thu, Jun 09, 2016 at 09:10:14AM +0200, Gregory CLEMENT wrote:
-> This patch documents the Xenon SDHCI controller that we can find in the
-> Armada 37xx and the Armada 7K and 8K SoCs.
-> 
-> Signed-off-by: Gregory CLEMENT <gregory.clement@free-electrons.com>
+On Thu, Jun 2, 2016 at 5:27 PM, Gwendal Grignou <gwendal@chromium.org> wrote:
+> If available, eMMC stack uses HC_ERASE_GRP_SIZE as preferred erase size.
+> However, that size is the minimal size we must use, not the optimal size.
+> Calculate the optimal size based on whole device size and fall back to
+> HC_ERASE_GRP_SIZE if too small.
+>
+> Signed-off-by: Gwendal Grignou <gwendal@chromium.org>
 > ---
->  .../devicetree/bindings/mmc/sdhci-xenon.txt        | 27 ++++++++++++++++++++++
->  1 file changed, 27 insertions(+)
->  create mode 100644 Documentation/devicetree/bindings/mmc/sdhci-xenon.txt
-> 
-> diff --git a/Documentation/devicetree/bindings/mmc/sdhci-xenon.txt b/Documentation/devicetree/bindings/mmc/sdhci-xenon.txt
-> new file mode 100644
-> index 000000000000..e8d49fda5f12
-> --- /dev/null
-> +++ b/Documentation/devicetree/bindings/mmc/sdhci-xenon.txt
-> @@ -0,0 +1,27 @@
-> +* Marvell sdhci-xenon controller
-> +
-> +This file documents differences between the core properties in mmc.txt
-> +and the properties used by the sdhci-xenon drivers.
+>  v2: fix comments
+>
+>  drivers/mmc/core/core.c | 16 +++++++++-------
+>  1 file changed, 9 insertions(+), 7 deletions(-)
+>
+> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+> index ef76b1c..b858907 100644
+> --- a/drivers/mmc/core/core.c
+> +++ b/drivers/mmc/core/core.c
+> @@ -1987,17 +1987,17 @@ void mmc_init_erase(struct mmc_card *card)
+>          * to that size and alignment.
+>          *
+>          * For SD cards that define Allocation Unit size, limit erases to one
+> -        * Allocation Unit at a time.  For MMC cards that define High Capacity
+> -        * Erase Size, whether it is switched on or not, limit to that size.
+> -        * Otherwise just have a stab at a good value.  For modern cards it
+> -        * will end up being 4MiB.  Note that if the value is too small, it
+> -        * can end up taking longer to erase.
+> +        * Allocation Unit at a time.
+> +        * For MMC, have a stab at a good value.  For modern cards it
+> +        * will end up being 4MiB.
+> +        * Be sure the size is at least the High Capacity Erase Size, as long
+> +        * as it is defined, even if not used.
+> +        * Note that if the value is too small, it can end up taking longer to
+> +        * erase.
 
-Bindings don't document drivers...
+The last sentence is a key point.
 
-> +
-> +Required properties:
-> +- compatible: Should be "marvell,xenon-sdhci".
+I want to point out the difference in erasing ~23GB of a 32GB device
+as specified by the number of secure erase commands sent:
+   ~44K commands (default: single erase block): ~30 minutes
+   ~700 commands (32MB chunks) : ~90 seconds
+   1 command: < 6 seconds
 
-SoC specific compatible strings please. This one can be fallback.
+cheers,
+grant
 
-> +- reg:
-> +  one register area for the SDHCI registers.
-> +- interrupts-extended: interrupt number and attributes
-
-Just use interrupts unless you really have a need for 
-interrupts-extended. Really, either is valid for any binding, but I 
-prefer to just have bindings documented one way.
-
-> +- clocks: array of clocks required for SDHCI.
-
-Missing from the exmaple, and how many clocks and in what order?
-
-> +- bus-width: max bus width in unit of bit, normally should be 1 bit, 4 bits or 8 bits
-
-Isn't this one standard? Just refer back to the common binding.
-
-> +
-> +Optional properties:
-> +- non-removable: whether card is non-removable.
-> +- auto-cmd12: whether cmd12 is sent automatically.
-
-Seems strange this would be optional for a specific controller. I'd 
-expect either the xenon controller needs this or not.
-
-> +Example:
-> +
-> +sdhci0: sdhci@D8000 {
-> +	compatible = "marvell,xenon-sdhci";
-> +	reg = <0xD8000 0x300>;
-> +	interrupts-extended = <&gic GIC_SPI 26 IRQ_TYPE_LEVEL_HIGH>;
-> +	non-removable;
-> +	bus-width = <8>;
-> +	auto-cmd12;
-> +	status = "disabled";
-> +};
-> -- 
-> 2.5.0
-> 
+>          */
+>         if (mmc_card_sd(card) && card->ssr.au) {
+>                 card->pref_erase = card->ssr.au;
+>                 card->erase_shift = ffs(card->ssr.au) - 1;
+> -       } else if (card->ext_csd.hc_erase_size) {
+> -               card->pref_erase = card->ext_csd.hc_erase_size;
+>         } else if (card->erase_size) {
+>                 sz = (card->csd.capacity << (card->csd.read_blkbits - 9)) >> 11;
+>                 if (sz < 128)
+> @@ -2015,6 +2015,8 @@ void mmc_init_erase(struct mmc_card *card)
+>                         if (sz)
+>                                 card->pref_erase += card->erase_size - sz;
+>                 }
+> +               if (card->ext_csd.hc_erase_size > card->pref_erase)
+> +                       card->pref_erase = card->ext_csd.hc_erase_size;
+>         } else
+>                 card->pref_erase = 0;
+>  }
+> --
+> 2.8.0.rc3.226.g39d4020
+>
