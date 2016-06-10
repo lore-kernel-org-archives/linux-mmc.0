@@ -1,160 +1,241 @@
-From: Seung-Woo Kim <sw0312.kim@samsung.com>
-Subject: Re: [PATCH] mmc: dw_mmc: remove UBSAN warning in dw_mci_setup_bus()
-Date: Fri, 10 Jun 2016 10:29:25 +0900
-Message-ID: <575A17F5.1050609@samsung.com>
-References: <CGME20160608040654epcas1p2be228e3e02e35a640cb1e65228df79ad@epcas1p2.samsung.com>
- <1465358840-22826-1-git-send-email-sw0312.kim@samsung.com>
- <5759633E.7090706@samsung.com>
-Reply-To: sw0312.kim@samsung.com
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: Re: [RFC][PATCH] mmc: core: Disable HPI for certain Hynix eMMC cards
+Date: Fri, 10 Jun 2016 11:14:46 +0900
+Message-ID: <575A2296.5010906@samsung.com>
+References: <CGME20160609221315epcas1p3cb83b247228b3f86df2c2f5469fb7ba3@epcas1p3.samsung.com>
+ <1465510172-11314-1-git-send-email-george_davis@mentor.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-reply-to: <5759633E.7090706@samsung.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>
-Cc: ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Seung-Woo Kim <sw0312.kim@samsung.com>
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mailout1.samsung.com ([203.254.224.24]:52747 "EHLO
+	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751917AbcFJCOu (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 9 Jun 2016 22:14:50 -0400
+Received: from epcpsbgr4.samsung.com
+ (u144.gpu120.samsung.co.kr [203.254.230.144])
+ by mailout1.samsung.com (Oracle Communications Messaging Server 7.0.5.31.0
+ 64bit (built May  5 2014))
+ with ESMTP id <0O8J02RXUA8N8GA0@mailout1.samsung.com> for
+ linux-mmc@vger.kernel.org; Fri, 10 Jun 2016 11:14:47 +0900 (KST)
+In-reply-to: <1465510172-11314-1-git-send-email-george_davis@mentor.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: "George G. Davis" <george_davis@mentor.com>, Chris Ball <chris@printf.net>, Ulf Hansson <ulf.hansson@linaro.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Adrian Hunter <adrian.hunter@intel.com>, Vladimir Zapolskiy <vladimir_zapolskiy@mentor.com>, Luca Porzio <lporzio@micron.com>, Harish Jenny K N <harish_kandiga@mentor.com>, Tomas Winkler <tomas.winkler@intel.com>, Ding Wang <justin.wang@spreadtrum.com>, Matt Gumbel <matthew.k.gumbel@intel.com>, Pratibhasagar V <pratibha@codeaurora.org>, Balasubramani Vivekanandan <balasubramani_vivekanandan@mentor.com>, Dirk Behme <dirk.behme@de.bosch.com>, Subhash Jadavani <subhashj@codeaurora.org>, "open list:MULTIMEDIA CARD (...), linux-kernel@vger.kernel.org (open
+	list)" <linux-mmc@vger.kernel.org>, CPGS <cpgs@samsung.com>
 
-Hi Jaehoon,
+On 06/10/2016 07:09 AM, George G. Davis wrote:
+> From: Pratibhasagar V <pratibha@codeaurora.org>
+> 
+> Certain Hynix eMMC 4.41 cards might get broken when HPI feature is used
+> and hence this patch disables the HPI feature for such buggy cards.
 
-On 2016=EB=85=84 06=EC=9B=94 09=EC=9D=BC 21:38, Jaehoon Chung wrote:
-> Hi Seung-Woo,
->=20
-> On 06/08/2016 01:07 PM, Seung-Woo Kim wrote:
->> This patch removes following UBSAN warnings in dw_mci_setup_bus().
->> The warnings are caused because of shift with more than 31 on 32
->> bit variable, so this patch fixes to shift only for less than 32.
->>
->>   UBSAN: Undefined behaviour in drivers/mmc/host/dw_mmc.c:1102:14
->>   shift exponent 250 is too large for 32-bit type 'unsigned int'
->>   Call trace:
->>   [<ffffff90080908a8>] dump_backtrace+0x0/0x380
->>   [<ffffff9008090c3c>] show_stack+0x14/0x20
->>   [<ffffff90087457b8>] dump_stack+0xe0/0x120
->>   [<ffffff90087b1360>] ubsan_epilogue+0x18/0x68
->>   [<ffffff90087b1a94>] __ubsan_handle_shift_out_of_bounds+0x18c/0x1b=
-c
->>   [<ffffff9008d89cb8>] dw_mci_setup_bus+0x3a0/0x438
->>   [...]
->>
->>   UBSAN: Undefined behaviour in drivers/mmc/host/dw_mmc.c:1132:27
->>   shift exponent 250 is too large for 32-bit type 'unsigned int'
->>   Call trace:
->>   [<ffffff90080908a8>] dump_backtrace+0x0/0x380
->>   [<ffffff9008090c3c>] show_stack+0x14/0x20
->>   [<ffffff90087457b8>] dump_stack+0xe0/0x120
->>   [<ffffff90087b1360>] ubsan_epilogue+0x18/0x68
->>   [<ffffff90087b1a94>] __ubsan_handle_shift_out_of_bounds+0x18c/0x1b=
-c
->>   [<ffffff9008d89c9c>] dw_mci_setup_bus+0x384/0x438
->=20
-> The below message can be discarded.
+Did you use the property of "broken-hpi"?
 
-You are right, like above message, below part can be replaced as [...].
+> 
+> As some of the other features like BKOPs/Cache/Sanitize are dependent on
+> HPI feature, those features would also get disabled if HPI is disabled.
 
->=20
->>   [<ffffff9008d89ed4>] dw_mci_set_ios+0x184/0x798
->>   [<ffffff9008d550ac>] mmc_power_up+0x11c/0x260
->>   [<ffffff9008d56b78>] mmc_start_host+0x88/0x100
->>   [<ffffff9008d583f4>] mmc_add_host+0x6c/0x128
->>   [<ffffff9008d88f90>] dw_mci_probe+0x1088/0x1750
->>   [<ffffff9008d8caa8>] dw_mci_pltfm_register+0x108/0x178
->>   [<ffffff9008d8dae4>] dw_mci_exynos_probe+0x4c/0x88
->>   [<ffffff9008a03838>] platform_drv_probe+0x78/0x180
->>   [<ffffff90089fe9fc>] driver_probe_device+0x144/0x460
->>   [<ffffff90089fee0c>] __driver_attach+0xf4/0x140
->>   [<ffffff90089fad98>] bus_for_each_dev+0xf0/0x160
->>   [<ffffff90089fdc9c>] driver_attach+0x34/0x58
->>   [<ffffff90089fd3e0>] bus_add_driver+0x2c0/0x398
->>   [<ffffff9008a00924>] driver_register+0xbc/0x1e0
->>   [<ffffff9008a02a94>] __platform_driver_register+0x84/0xa8
->>   [<ffffff9009dd5730>] dw_mci_exynos_pltfm_driver_init+0x18/0x20
->>   [<ffffff9008082df8>] do_one_initcall+0xa0/0x2c8
->>   [<ffffff9009d81780>] kernel_init_freeable+0x52c/0x5dc
->>   [<ffffff9009519844>] kernel_init+0x1c/0xf8
->>   [<ffffff9008086e10>] ret_from_fork+0x10/0x40
->>
->> Signed-off-by: Seung-Woo Kim <sw0312.kim@samsung.com>
->> ---
->>  drivers/mmc/host/dw_mmc.c |    5 +++--
->>  1 files changed, 3 insertions(+), 2 deletions(-)
->>
->> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
->> index 2cc6123..dff045e 100644
->> --- a/drivers/mmc/host/dw_mmc.c
->> +++ b/drivers/mmc/host/dw_mmc.c
->> @@ -1099,7 +1099,8 @@ static void dw_mci_setup_bus(struct dw_mci_slo=
-t *slot, bool force_clkinit)
->> =20
->>  		div =3D (host->bus_hz !=3D clock) ? DIV_ROUND_UP(div, 2) : 0;
->> =20
->> -		if ((clock << div) !=3D slot->__clk_old || force_clkinit)
->> +		if (((div < 32) ? (clock << div) : 0) !=3D slot->__clk_old ||
->=20
-> Well, we don't expect that clock is 0.
-> if clock is 0, it should be passed to " if (!clock)"..
->=20
-> During initializing card, clock is 400KHz or less..I understood what =
-you want to fix.
-> But I taught this is not correct.
+If HPI feature doesn't enable, then BKOPs/Cache/Sanitize should be waiting for completing, not stop during running, doesn't?
+As my understanding, it's not mandatory. (I didn't check the latest TRM.)
 
-It seems slot->__clk_old is not really clock but a kind of value to
-store both clock and div in one variable. And at least, my compiler
-calculates right shift with more than 32 as 0. I am not sure there is
-other proper value for the case.
+Best Regards,
+Jaehoon Chung
 
-By the way, in my test environment, clock is calculated as like
-following steps:
-mmc_host mmc0: Bus speed (slot 0) =3D 200000000Hz (slot req 400000Hz,
-actual 400000HZ div =3D 250)
-mmc_host mmc0: Bus speed (slot 0) =3D 200000000Hz (slot req 200000000Hz=
-,
-actual 200000000HZ div =3D 0)
-mmc_host mmc0: Bus speed (slot 0) =3D 200000000Hz (slot req 52000000Hz,
-actual 50000000HZ div =3D 2)
-mmc_host mmc0: Bus speed (slot 0) =3D 400000000Hz (slot req 52000000Hz,
-actual 50000000HZ div =3D 4)
-mmc_host mmc0: Bus speed (slot 0) =3D 400000000Hz (slot req 200000000Hz=
-,
-actual 200000000HZ div =3D 1)
+> 
+> Signed-off-by: Pratibhasagar V <pratibha@codeaurora.org>
+> Signed-off-by: Subhash Jadavani <subhashj@codeaurora.org>
+> [gdavis: Forward port and cleanup https://gitlab.com/k2wl/g2_kernel/commit/84af3731019921a28d595dbf6cbf00539706a42c]
+> Signed-off-by: George G. Davis <george_davis@mentor.com>
+> ---
+>  drivers/mmc/card/block.c  |  6 ------
+>  drivers/mmc/core/mmc.c    | 23 ++++++++++++++++++++---
+>  drivers/mmc/core/quirks.c |  2 ++
+>  include/linux/mmc/card.h  | 35 ++++++++++++++++++++++++++++++-----
+>  4 files changed, 52 insertions(+), 14 deletions(-)
+> 
+> diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+> index e62fde3..bb6e525 100644
+> --- a/drivers/mmc/card/block.c
+> +++ b/drivers/mmc/card/block.c
+> @@ -2497,12 +2497,6 @@ force_ro_fail:
+>  	return ret;
+>  }
+>  
+> -#define CID_MANFID_SANDISK	0x2
+> -#define CID_MANFID_TOSHIBA	0x11
+> -#define CID_MANFID_MICRON	0x13
+> -#define CID_MANFID_SAMSUNG	0x15
+> -#define CID_MANFID_KINGSTON	0x70
+> -
+>  static const struct mmc_fixup blk_fixups[] =
+>  {
+>  	MMC_FIXUP("SEM02G", CID_MANFID_SANDISK, 0x100, add_quirk,
+> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+> index 5d438ad..aede5a5 100644
+> --- a/drivers/mmc/core/mmc.c
+> +++ b/drivers/mmc/core/mmc.c
+> @@ -45,6 +45,17 @@ static const unsigned int tacc_mant[] = {
+>  	35,	40,	45,	50,	55,	60,	70,	80,
+>  };
+>  
+> +static const struct mmc_fixup mmc_ext_csd_fixups[] = {
+> +	/*
+> +	 * Certain Hynix eMMC 4.41 cards might get broken when HPI feature
+> +	 * is used so disable the HPI feature for such buggy cards.
+> +	 */
+> +	MMC_FIXUP_EXT_CSD_REV(CID_NAME_ANY, CID_MANFID_HYNIX,
+> +			      0x014a, add_quirk, MMC_QUIRK_BROKEN_HPI, 5),
+> +
+> +	END_FIXUP
+> +};
+> +
+>  #define UNSTUFF_BITS(resp,start,size)					\
+>  	({								\
+>  		const int __size = size;				\
+> @@ -370,6 +381,9 @@ static int mmc_decode_ext_csd(struct mmc_card *card, u8 *ext_csd)
+>  	 */
+>  	card->ext_csd.rev = ext_csd[EXT_CSD_REV];
+>  
+> +	/* fixup device after ext_csd revision field is updated */
+> +	mmc_fixup_device(card, mmc_ext_csd_fixups);
+> +
+>  	card->ext_csd.raw_sectors[0] = ext_csd[EXT_CSD_SEC_CNT + 0];
+>  	card->ext_csd.raw_sectors[1] = ext_csd[EXT_CSD_SEC_CNT + 1];
+>  	card->ext_csd.raw_sectors[2] = ext_csd[EXT_CSD_SEC_CNT + 2];
+> @@ -500,7 +514,8 @@ static int mmc_decode_ext_csd(struct mmc_card *card, u8 *ext_csd)
+>  			card->cid.year += 16;
+>  
+>  		/* check whether the eMMC card supports BKOPS */
+> -		if (ext_csd[EXT_CSD_BKOPS_SUPPORT] & 0x1) {
+> +		if (!mmc_card_broken_hpi(card) &&
+> +		    ext_csd[EXT_CSD_BKOPS_SUPPORT] & 0x1) {
+>  			card->ext_csd.bkops = 1;
+>  			card->ext_csd.man_bkops_en =
+>  					(ext_csd[EXT_CSD_BKOPS_EN] &
+> @@ -513,7 +528,8 @@ static int mmc_decode_ext_csd(struct mmc_card *card, u8 *ext_csd)
+>  		}
+>  
+>  		/* check whether the eMMC card supports HPI */
+> -		if (!broken_hpi && (ext_csd[EXT_CSD_HPI_FEATURES] & 0x1)) {
+> +		if (!mmc_card_broken_hpi(card) &&
+> +		    !broken_hpi && (ext_csd[EXT_CSD_HPI_FEATURES] & 0x1)) {
+>  			card->ext_csd.hpi = 1;
+>  			if (ext_csd[EXT_CSD_HPI_FEATURES] & 0x2)
+>  				card->ext_csd.hpi_cmd =	MMC_STOP_TRANSMISSION;
+> @@ -1616,7 +1632,8 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
+>  	 * If cache size is higher than 0, this indicates
+>  	 * the existence of cache and it can be turned on.
+>  	 */
+> -	if (card->ext_csd.cache_size > 0) {
+> +	if (!mmc_card_broken_hpi(card) &&
+> +	    card->ext_csd.cache_size > 0) {
+>  		err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
+>  				EXT_CSD_CACHE_CTRL, 1,
+>  				card->ext_csd.generic_cmd6_time);
+> diff --git a/drivers/mmc/core/quirks.c b/drivers/mmc/core/quirks.c
+> index fad660b..ca9cade 100644
+> --- a/drivers/mmc/core/quirks.c
+> +++ b/drivers/mmc/core/quirks.c
+> @@ -72,6 +72,8 @@ void mmc_fixup_device(struct mmc_card *card, const struct mmc_fixup *table)
+>  		     f->cis_vendor == (u16) SDIO_ANY_ID) &&
+>  		    (f->cis_device == card->cis.device ||
+>  		     f->cis_device == (u16) SDIO_ANY_ID) &&
+> +		    (f->ext_csd_rev == EXT_CSD_REV_ANY ||
+> +		     f->ext_csd_rev == card->ext_csd.rev) &&
+>  		    rev >= f->rev_start && rev <= f->rev_end) {
+>  			dev_dbg(&card->dev, "calling %pf\n", f->vendor_fixup);
+>  			f->vendor_fixup(card, f->data);
+> diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
+> index eb0151b..5a2db5e 100644
+> --- a/include/linux/mmc/card.h
+> +++ b/include/linux/mmc/card.h
+> @@ -279,6 +279,7 @@ struct mmc_card {
+>  #define MMC_QUIRK_SEC_ERASE_TRIM_BROKEN (1<<10)	/* Skip secure for erase/trim */
+>  #define MMC_QUIRK_BROKEN_IRQ_POLLING	(1<<11)	/* Polling SDIO_CCCR_INTx could create a fake interrupt */
+>  #define MMC_QUIRK_TRIM_BROKEN	(1<<12)		/* Skip trim */
+> +#define MMC_QUIRK_BROKEN_HPI	(1<<13)		/* Disable broken HPI support */
+>  
+>  
+>  	unsigned int		erase_size;	/* erase size in sectors */
+> @@ -353,6 +354,9 @@ struct mmc_fixup {
+>  	/* SDIO-specfic fields. You can use SDIO_ANY_ID here of course */
+>  	u16 cis_vendor, cis_device;
+>  
+> +	/* for MMC cards */
+> +	unsigned int ext_csd_rev;
+> +
+>  	void (*vendor_fixup)(struct mmc_card *card, int data);
+>  	int data;
+>  };
+> @@ -361,11 +365,20 @@ struct mmc_fixup {
+>  #define CID_OEMID_ANY ((unsigned short) -1)
+>  #define CID_NAME_ANY (NULL)
+>  
+> +#define EXT_CSD_REV_ANY (-1u)
+> +
+> +#define CID_MANFID_SANDISK      0x2
+> +#define CID_MANFID_TOSHIBA      0x11
+> +#define CID_MANFID_MICRON       0x13
+> +#define CID_MANFID_SAMSUNG      0x15
+> +#define CID_MANFID_KINGSTON     0x70
+> +#define CID_MANFID_HYNIX	0x90
+> +
+>  #define END_FIXUP { NULL }
+>  
+>  #define _FIXUP_EXT(_name, _manfid, _oemid, _rev_start, _rev_end,	\
+>  		   _cis_vendor, _cis_device,				\
+> -		   _fixup, _data)					\
+> +		   _fixup, _data, _ext_csd_rev)				\
+>  	{						   \
+>  		.name = (_name),			   \
+>  		.manfid = (_manfid),			   \
+> @@ -376,23 +389,30 @@ struct mmc_fixup {
+>  		.cis_device = (_cis_device),		   \
+>  		.vendor_fixup = (_fixup),		   \
+>  		.data = (_data),			   \
+> +		.ext_csd_rev = (_ext_csd_rev),		   \
+>  	 }
+>  
+>  #define MMC_FIXUP_REV(_name, _manfid, _oemid, _rev_start, _rev_end,	\
+> -		      _fixup, _data)					\
+> +		      _fixup, _data, _ext_csd_rev)			\
+>  	_FIXUP_EXT(_name, _manfid,					\
+>  		   _oemid, _rev_start, _rev_end,			\
+>  		   SDIO_ANY_ID, SDIO_ANY_ID,				\
+> -		   _fixup, _data)					\
+> +		   _fixup, _data, _ext_csd_rev)				\
+>  
+>  #define MMC_FIXUP(_name, _manfid, _oemid, _fixup, _data) \
+> -	MMC_FIXUP_REV(_name, _manfid, _oemid, 0, -1ull, _fixup, _data)
+> +	MMC_FIXUP_REV(_name, _manfid, _oemid, 0, -1ull, _fixup, _data,	\
+> +		      EXT_CSD_REV_ANY)
+> +
+> +#define MMC_FIXUP_EXT_CSD_REV(_name, _manfid, _oemid, _fixup, _data,	\
+> +			      _ext_csd_rev)				\
+> +	MMC_FIXUP_REV(_name, _manfid, _oemid, 0, -1ull, _fixup, _data,	\
+> +		      _ext_csd_rev)
+>  
+>  #define SDIO_FIXUP(_vendor, _device, _fixup, _data)			\
+>  	_FIXUP_EXT(CID_NAME_ANY, CID_MANFID_ANY,			\
+>  		    CID_OEMID_ANY, 0, -1ull,				\
+>  		   _vendor, _device,					\
+> -		   _fixup, _data)					\
+> +		   _fixup, _data, EXT_CSD_REV_ANY)			\
+>  
+>  #define cid_rev(hwrev, fwrev, year, month)	\
+>  	(((u64) hwrev) << 40 |                  \
+> @@ -511,6 +531,11 @@ static inline int mmc_card_broken_irq_polling(const struct mmc_card *c)
+>  	return c->quirks & MMC_QUIRK_BROKEN_IRQ_POLLING;
+>  }
+>  
+> +static inline int mmc_card_broken_hpi(const struct mmc_card *c)
+> +{
+> +	return c->quirks & MMC_QUIRK_BROKEN_HPI;
+> +}
+> +
+>  #define mmc_card_name(c)	((c)->cid.prod_name)
+>  #define mmc_card_id(c)		(dev_name(&(c)->dev))
+>  
+> 
 
-and only the first case is reported as the warning. If you let me know
-any proper value, then I will fix with the value.
-
-Thanks,
-- Seung-Woo Kim
-
-
->=20
->=20
->> +		    force_clkinit)
->>  			dev_info(&slot->mmc->class_dev,
->>  				 "Bus speed (slot %d) =3D %dHz (slot req %dHz, actual %dHZ div =
-=3D %d)\n",
->>  				 slot->id, host->bus_hz, clock,
->> @@ -1129,7 +1130,7 @@ static void dw_mci_setup_bus(struct dw_mci_slo=
-t *slot, bool force_clkinit)
->>  		mci_send_cmd(slot, sdmmc_cmd_bits, 0);
->> =20
->>  		/* keep the clock with reflecting clock dividor */
->> -		slot->__clk_old =3D clock << div;
->> +		slot->__clk_old =3D (div < 32) ? (clock << div) : 0;
->=20
-> Also, clock is not 0..
->=20
->=20
-> Best Regards,
-> Jaehoon Chung
->=20
->>  	}
->> =20
->>  	host->current_speed =3D clock;
->>
->=20
->=20
->=20
-
---=20
-Seung-Woo Kim
-Samsung Software R&D Center
