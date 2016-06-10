@@ -1,72 +1,101 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: [PATCH] mmc-utils: Add Command Queue fields to Extended CSD
-Date: Fri, 10 Jun 2016 11:28:59 +0300
-Message-ID: <1465547339-10557-1-git-send-email-adrian.hunter@intel.com>
+Subject: [PATCH RFC V2 33/46] mmc: mmc_test: Disable Command Queue while
+ mmc_test is used
+Date: Fri, 10 Jun 2016 13:44:46 +0300
+Message-ID: <575A9A1E.7010906@intel.com>
+References: <1465473166-22532-1-git-send-email-adrian.hunter@intel.com>
+ <1465473166-22532-34-git-send-email-adrian.hunter@intel.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga04.intel.com ([192.55.52.120]:62608 "EHLO mga04.intel.com"
+Received: from mga11.intel.com ([192.55.52.93]:28183 "EHLO mga11.intel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752101AbcFJIdD (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 10 Jun 2016 04:33:03 -0400
+	id S1751419AbcFJKsv (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 10 Jun 2016 06:48:51 -0400
+In-Reply-To: <1465473166-22532-34-git-send-email-adrian.hunter@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Ball <chris@printf.net>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Sujit Reddy Thumma <sthumma@codeaurora.org>, Dorfman Konstantin <kdorfman@codeaurora.org>, David Griego <david.griego@linaro.org>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>
 
-Display Command Queue information when printing Extended CSD
-Example:
-
-	# mmc extcsd read /dev/mmcblk0 | grep CMDQ
-	Command Queue Support [CMDQ_SUPPORT]: 0x01
-	Command Queue Depth [CMDQ_DEPTH]: 16
-	Command Enabled [CMDQ_MODE_EN]: 0x01
+Normal read and write commands may not be used while the command queue is
+enabled. Disable the Command Queue when mmc_test is probed and re-enable it
+when it is removed.
 
 Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
 ---
- mmc.h      | 3 +++
- mmc_cmds.c | 9 +++++++++
- 2 files changed, 12 insertions(+)
 
-diff --git a/mmc.h b/mmc.h
-index 8c77fd5572eb..a3d732c7215c 100644
---- a/mmc.h
-+++ b/mmc.h
-@@ -55,6 +55,8 @@
- #define EXT_CSD_FFU_ARG_2		489	/* RO */
- #define EXT_CSD_FFU_ARG_1		488	/* RO */
- #define EXT_CSD_FFU_ARG_0		487	/* RO */
-+#define EXT_CSD_CMDQ_DEPTH		307	/* RO */
-+#define EXT_CSD_CMDQ_SUPPORT		308	/* RO */
- #define EXT_CSD_NUM_OF_FW_SEC_PROG_3	305	/* RO */
- #define EXT_CSD_NUM_OF_FW_SEC_PROG_2	304	/* RO */
- #define EXT_CSD_NUM_OF_FW_SEC_PROG_1	303	/* RO */
-@@ -119,6 +121,7 @@
- #define EXT_CSD_MODE_CONFIG		30
- #define EXT_CSD_MODE_OPERATION_CODES	29	/* W */
- #define EXT_CSD_FFU_STATUS		26	/* R */
-+#define EXT_CSD_CMDQ_MODE_EN		15	/* R/W */
+
+V2: Claim / release the host when enabling / disabling CMDQ
+
+
+ drivers/mmc/card/mmc_test.c | 13 +++++++++++++
+ drivers/mmc/core/mmc.c      |  7 +++++++
+ include/linux/mmc/card.h    |  1 +
+ 3 files changed, 21 insertions(+)
+
+diff --git a/drivers/mmc/card/mmc_test.c b/drivers/mmc/card/mmc_test.c
+index 5a8dc5a76e0d..7dee9e5a8cfb 100644
+--- a/drivers/mmc/card/mmc_test.c
++++ b/drivers/mmc/card/mmc_test.c
+@@ -3240,6 +3240,14 @@ static int mmc_test_probe(struct mmc_card *card)
+ 	if (ret)
+ 		return ret;
  
- /*
-  * WR_REL_PARAM field definitions
-diff --git a/mmc_cmds.c b/mmc_cmds.c
-index 36276106b7bf..295d50541dee 100644
---- a/mmc_cmds.c
-+++ b/mmc_cmds.c
-@@ -1723,6 +1723,15 @@ int do_read_extcsd(int nargs, char **argv)
- 		printf("eMMC Firmware Version: %s\n",
- 			(char*)&ext_csd[EXT_CSD_FIRMWARE_VERSION]);
- 	}
-+
-+	if (ext_csd_rev >= 8) {
-+		printf("Command Queue Support [CMDQ_SUPPORT]: 0x%02x\n",
-+		       ext_csd[EXT_CSD_CMDQ_SUPPORT]);
-+		printf("Command Queue Depth [CMDQ_DEPTH]: %u\n",
-+		       (ext_csd[EXT_CSD_CMDQ_DEPTH] & 0x1f) + 1);
-+		printf("Command Enabled [CMDQ_MODE_EN]: 0x%02x\n",
-+		       ext_csd[EXT_CSD_CMDQ_MODE_EN]);
++	if (card->ext_csd.cmdq_en) {
++		mmc_claim_host(card->host);
++		ret = mmc_cmdq_disable(card);
++		mmc_release_host(card->host);
++		if (ret)
++			return ret;
 +	}
- out_free:
- 	return ret;
++
+ 	dev_info(&card->dev, "Card claimed for testing.\n");
+ 
+ 	return 0;
+@@ -3247,6 +3255,11 @@ static int mmc_test_probe(struct mmc_card *card)
+ 
+ static void mmc_test_remove(struct mmc_card *card)
+ {
++	if (card->reenable_cmdq) {
++		mmc_claim_host(card->host);
++		mmc_cmdq_enable(card);
++		mmc_release_host(card->host);
++	}
+ 	mmc_test_free_result(card);
+ 	mmc_test_free_dbgfs_file(card);
  }
+diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+index eb1781b066f3..2e54daa237f6 100644
+--- a/drivers/mmc/core/mmc.c
++++ b/drivers/mmc/core/mmc.c
+@@ -1736,6 +1736,13 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
+ 	}
+ 
+ 	/*
++	 * In some cases (e.g. RPMB or mmc_test), the Command Queue must be
++	 * disabled for a time, so a flag is needed to indicate to re-enable the
++	 * Command Queue.
++	 */
++	card->reenable_cmdq = card->ext_csd.cmdq_en;
++
++	/*
+ 	 * The mandatory minimum values are defined for packed command.
+ 	 * read: 5, write: 3
+ 	 */
+diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
+index 1c380271038f..2abcedc1e9e9 100644
+--- a/include/linux/mmc/card.h
++++ b/include/linux/mmc/card.h
+@@ -284,6 +284,7 @@ struct mmc_card {
+ #define MMC_QUIRK_BROKEN_IRQ_POLLING	(1<<11)	/* Polling SDIO_CCCR_INTx could create a fake interrupt */
+ #define MMC_QUIRK_TRIM_BROKEN	(1<<12)		/* Skip trim */
+ 
++	bool			reenable_cmdq;	/* Re-enable Command Queue */
+ 
+ 	unsigned int		erase_size;	/* erase size in sectors */
+  	unsigned int		erase_shift;	/* if erase unit is power 2 */
 -- 
 1.9.1
 
