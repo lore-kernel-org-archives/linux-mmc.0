@@ -1,79 +1,87 @@
 From: Rob Herring <robh@kernel.org>
-Subject: Re: [PATCH 08/11] Documentation: phy: Let the rockchip eMMC PHY get
- an exported card clock
-Date: Fri, 10 Jun 2016 08:36:31 -0500
-Message-ID: <20160610133631.GA10634@rob-hp-laptop>
-References: <1465339484-969-1-git-send-email-dianders@chromium.org>
- <1465339484-969-9-git-send-email-dianders@chromium.org>
+Subject: Re: [PATCH 08/12] dt-bindings: mmc: Add Xenon description
+Date: Fri, 10 Jun 2016 09:16:03 -0500
+Message-ID: <20160610141603.GA7827@rob-hp-laptop>
+References: <1465456218-28354-1-git-send-email-gregory.clement@free-electrons.com>
+ <1465456218-28354-9-git-send-email-gregory.clement@free-electrons.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-oi0-f66.google.com ([209.85.218.66]:36279 "EHLO
+	mail-oi0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750848AbcFJOQG (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 10 Jun 2016 10:16:06 -0400
 Content-Disposition: inline
-In-Reply-To: <1465339484-969-9-git-send-email-dianders@chromium.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Douglas Anderson <dianders@chromium.org>
-Cc: ulf.hansson@linaro.org, kishon@ti.com, Heiko Stuebner <heiko@sntech.de>, shawn.lin@rock-chips.com, xzy.xu@rock-chips.com, briannorris@chromium.org, adrian.hunter@intel.com, linux-rockchip@lists.infradead.org, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, pawel.moll@arm.com, mark.rutland@arm.com, ijc+devicetree@hellion.org.uk, galak@codeaurora.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org
+In-Reply-To: <1465456218-28354-9-git-send-email-gregory.clement@free-electrons.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Gregory CLEMENT <gregory.clement@free-electrons.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, Jason Cooper <jason@lakedaemon.net>, Andrew Lunn <andrew@lunn.ch>, Sebastian Hesselbarth <sebastian.hesselbarth@gmail.com>, Thomas Petazzoni <thomas.petazzoni@free-electrons.com>, linux-arm-kernel@lists.infradead.org, Nadav Haklai <nadavh@marvell.com>, Victor Gu <xigu@marvell.com>, Romain Perier <romain.perier@free-electrons.com>, Omri Itach <omrii@marvell.com>, Marcin Wojtas <mw@semihalf.com>, Wilson Ding <dingwei@marvell.com>, Shadi Ammouri <shadi@marvell.com>
 
-On Tue, Jun 07, 2016 at 03:44:41PM -0700, Douglas Anderson wrote:
-> As of an earlier change in this series ("Documentation: mmc:
-> sdhci-of-arasan: Add ability to export card clock") the SDHCI driver
-> used on Rockchip SoCs can now expose its clock.  Let's now specify that
-> the PHY can use it.
+On Thu, Jun 09, 2016 at 09:10:14AM +0200, Gregory CLEMENT wrote:
+> This patch documents the Xenon SDHCI controller that we can find in the
+> Armada 37xx and the Armada 7K and 8K SoCs.
 > 
-> Letting the PHY get access to this clock means it can adjust
-> phyctrl_frqsel field appropriately.  Although the Rockchip PHY appears
-> slightly different than the reference Arasan one, you can see that the
-> Arasan datasheet [1] had it defined as:
->   Select the frequency range of DLL operation:
->   3b'000 => 200MHz to 170 MHz
->   3b'001 => 170MHz to 140 MHz
->   3b'010 => 140MHz to 110 MHz
->   3b'011 => 110MHz to 80MHz
->   3b'100 => 80MHz to 50 MHz
->   3b'101 => 275Mhz to 250MHz
->   3b'110 => 250MHz to 225MHz
->   3b'111 => 225MHz to 200MHz
-> 
-> On the Rockchip version of the PHY we have less granularity but the idea
-> is the same.
-> 
-> [1]: https://arasan.com/wp-content/media/eMMC-5-1-Total-Solution_Rev-1-3.pdf
-> 
-> Signed-off-by: Douglas Anderson <dianders@chromium.org>
+> Signed-off-by: Gregory CLEMENT <gregory.clement@free-electrons.com>
 > ---
->  Documentation/devicetree/bindings/phy/rockchip-emmc-phy.txt | 7 +++++++
->  1 file changed, 7 insertions(+)
+>  .../devicetree/bindings/mmc/sdhci-xenon.txt        | 27 ++++++++++++++++++++++
+>  1 file changed, 27 insertions(+)
+>  create mode 100644 Documentation/devicetree/bindings/mmc/sdhci-xenon.txt
 > 
-> diff --git a/Documentation/devicetree/bindings/phy/rockchip-emmc-phy.txt b/Documentation/devicetree/bindings/phy/rockchip-emmc-phy.txt
-> index 555cb0f40690..fd118b071e5e 100644
-> --- a/Documentation/devicetree/bindings/phy/rockchip-emmc-phy.txt
-> +++ b/Documentation/devicetree/bindings/phy/rockchip-emmc-phy.txt
-> @@ -7,6 +7,11 @@ Required properties:
->   - reg: PHY register address offset and length in "general
->     register files"
->  
-> +Optional clocks (see ../clock/clock-bindings.txt), specified by name:
-> + - emmcclk: The card clock exported by the SDHCI driver.  Although this is
-
-This reads like emmcclk is the property. You need to list out clocks and 
-clock-names.
-
-> +	    listed as optional (because most boards can get basic functionality
-> +	    without having access to it), it is strongly suggested.
+> diff --git a/Documentation/devicetree/bindings/mmc/sdhci-xenon.txt b/Documentation/devicetree/bindings/mmc/sdhci-xenon.txt
+> new file mode 100644
+> index 000000000000..e8d49fda5f12
+> --- /dev/null
+> +++ b/Documentation/devicetree/bindings/mmc/sdhci-xenon.txt
+> @@ -0,0 +1,27 @@
+> +* Marvell sdhci-xenon controller
 > +
->  Example:
->  
->  
-> @@ -20,6 +25,8 @@ grf: syscon@ff770000 {
->  	emmcphy: phy@f780 {
->  		compatible = "rockchip,rk3399-emmc-phy";
->  		reg = <0xf780 0x20>;
-> +		clocks = <&sdhci>;
-> +		clock-names = "emmcclk";
->  		#phy-cells = <0>;
->  	};
->  };
+> +This file documents differences between the core properties in mmc.txt
+> +and the properties used by the sdhci-xenon drivers.
+
+Bindings don't document drivers...
+
+> +
+> +Required properties:
+> +- compatible: Should be "marvell,xenon-sdhci".
+
+SoC specific compatible strings please. This one can be fallback.
+
+> +- reg:
+> +  one register area for the SDHCI registers.
+> +- interrupts-extended: interrupt number and attributes
+
+Just use interrupts unless you really have a need for 
+interrupts-extended. Really, either is valid for any binding, but I 
+prefer to just have bindings documented one way.
+
+> +- clocks: array of clocks required for SDHCI.
+
+Missing from the exmaple, and how many clocks and in what order?
+
+> +- bus-width: max bus width in unit of bit, normally should be 1 bit, 4 bits or 8 bits
+
+Isn't this one standard? Just refer back to the common binding.
+
+> +
+> +Optional properties:
+> +- non-removable: whether card is non-removable.
+> +- auto-cmd12: whether cmd12 is sent automatically.
+
+Seems strange this would be optional for a specific controller. I'd 
+expect either the xenon controller needs this or not.
+
+> +Example:
+> +
+> +sdhci0: sdhci@D8000 {
+> +	compatible = "marvell,xenon-sdhci";
+> +	reg = <0xD8000 0x300>;
+> +	interrupts-extended = <&gic GIC_SPI 26 IRQ_TYPE_LEVEL_HIGH>;
+> +	non-removable;
+> +	bus-width = <8>;
+> +	auto-cmd12;
+> +	status = "disabled";
+> +};
 > -- 
-> 2.8.0.rc3.226.g39d4020
+> 2.5.0
 > 
