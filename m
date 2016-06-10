@@ -1,80 +1,63 @@
-From: Grant Grundler <grundler@chromium.org>
-Subject: Re: [PATCH v2] mmc: Set pref erase size based on size.
-Date: Fri, 10 Jun 2016 10:02:43 -0700
-Message-ID: <CANEJEGtbnhh=Bru5T2+o2VFrpeZ2KRAK6FJfFEH4FpaUJM1Jkw@mail.gmail.com>
-References: <1464908184-20153-1-git-send-email-gwendal@chromium.org> <1464913638-5283-1-git-send-email-gwendal@chromium.org>
+From: Rob Herring <robh@kernel.org>
+Subject: Re: [RFC v4 01/14] regulator: of: Add helper for getting all supplies
+Date: Fri, 10 Jun 2016 12:30:56 -0500
+Message-ID: <20160610173056.GA16503@rob-hp-laptop>
+References: <1465465471-28740-1-git-send-email-k.kozlowski@samsung.com>
+ <1465465471-28740-2-git-send-email-k.kozlowski@samsung.com>
+ <20160609102925.GS7510@sirena.org.uk>
+ <5759560A.70107@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1464913638-5283-1-git-send-email-gwendal@chromium.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>, Jens Axboe <axboe@kernel.dk>
-Cc: Grant Grundler <grundler@chromium.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, LKML <linux-kernel@vger.kernel.org>, Gwendal Grignou <gwendal@chromium.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-pm-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <5759560A.70107@samsung.com>
+Sender: linux-pm-owner@vger.kernel.org
+To: Krzysztof Kozlowski <k.kozlowski@samsung.com>
+Cc: Mark Brown <broonie@kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, Pawel Moll <pawel.moll@arm.com>, Mark Rutland <mark.rutland@arm.com>, Ian Campbell <ijc+devicetree@hellion.org.uk>, Kumar Gala <galak@codeaurora.org>, Sebastian Reichel <sre@kernel.org>, Dmitry Eremin-Solenikov <dbaryshkov@gmail.com>, David Woodhouse <dwmw2@infradead.org>, Liam Girdwood <lgirdwood@gmail.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Hans de Goede <hdegoede@redhat.com>, Jean-Christophe Plagniol-Villard <plagnioj@jcrosoft.com>, Tomi Valkeinen <tomi.valkeinen@ti.com>, Heiko Stuebner <heiko@sntech.de>, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-samsung-soc@vger.kernel.org, linux-pm@vger.kernel.org, linux-usb@vger.kernel.org, linux-fbdev@vger.kernel.org, hzpeterchen@gmail.com, Bartlomiej
 List-Id: linux-mmc@vger.kernel.org
 
-On Thu, Jun 2, 2016 at 5:27 PM, Gwendal Grignou <gwendal@chromium.org> wrote:
-> If available, eMMC stack uses HC_ERASE_GRP_SIZE as preferred erase size.
-> However, that size is the minimal size we must use, not the optimal size.
-> Calculate the optimal size based on whole device size and fall back to
-> HC_ERASE_GRP_SIZE if too small.
->
-> Signed-off-by: Gwendal Grignou <gwendal@chromium.org>
-> ---
->  v2: fix comments
->
->  drivers/mmc/core/core.c | 16 +++++++++-------
->  1 file changed, 9 insertions(+), 7 deletions(-)
->
-> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-> index ef76b1c..b858907 100644
-> --- a/drivers/mmc/core/core.c
-> +++ b/drivers/mmc/core/core.c
-> @@ -1987,17 +1987,17 @@ void mmc_init_erase(struct mmc_card *card)
->          * to that size and alignment.
->          *
->          * For SD cards that define Allocation Unit size, limit erases to one
-> -        * Allocation Unit at a time.  For MMC cards that define High Capacity
-> -        * Erase Size, whether it is switched on or not, limit to that size.
-> -        * Otherwise just have a stab at a good value.  For modern cards it
-> -        * will end up being 4MiB.  Note that if the value is too small, it
-> -        * can end up taking longer to erase.
-> +        * Allocation Unit at a time.
-> +        * For MMC, have a stab at a good value.  For modern cards it
-> +        * will end up being 4MiB.
-> +        * Be sure the size is at least the High Capacity Erase Size, as long
-> +        * as it is defined, even if not used.
-> +        * Note that if the value is too small, it can end up taking longer to
-> +        * erase.
+On Thu, Jun 09, 2016 at 01:42:02PM +0200, Krzysztof Kozlowski wrote:
+> On 06/09/2016 12:29 PM, Mark Brown wrote:
+> > On Thu, Jun 09, 2016 at 11:44:18AM +0200, Krzysztof Kozlowski wrote:
+> >> Few drivers have a need of getting regulator supplies without knowing
+> >> their names:
+> >> 1. The Simple Framebuffer driver works on setup provided by bootloader
+> >>    (outside of scope of kernel);
+> >> 2. Generic power sequence driver may be attached to any device node.
+> >>
+> >> Add a Device Tree helper for parsing "-supply" properties and returning
+> >> allocated bulk regulator consumers.
+> > 
+> > I'm still very concerned that this is just an invitation to people to
+> > write half baked regulator consumers and half baked DTs to go along with
+> > it, making it a standard API that doesn't have big red flags on it that
+> > will flag up when "normal" drivers use it is not good.  Right now this
+> > just looks like a standard API and people are going to just start using
+> > it.  If we are going to do this perhaps we need a separate header or
+> > something to help flag this up.
+> 
+> No problem, I can move it to a special header.  Actually, if you dislike
+> this as an API, it does not have to be in header at all.  I can just
+> duplicate the simplefb code.
+> 
+> > In the case of power sequences I'd expect the sequences to perform
+> > operations on named supplies - the core shouldn't know what the supplies
+> > are but the thing specifying the sequence should.
+> 
+> Hm, so maybe passing names like:
+> 
+> usb3503@08 {
+> 	reset-gpios = <&gpx3 5 GPIO_ACTIVE_HIGH>;
+> 	initial-mode = <1>;
+> 	vdd-supply = <&buck8_reg>;
+> 	foo-supply = <&buck9_reg>;
+> 
+>         power-sequence;
+> 	power-sequence-supplies = "vdd", "foo";
 
-The last sentence is a key point.
+This alone would be fine as it is just one property, but then what's 
+next? power-sequence-delay, power-sequence-clocks, etc. What if you 
+need to express ordering relationship of supplies, clocks, gpios? We end 
+up with a scripting language in DT and we don't want to have that.
 
-I want to point out the difference in erasing ~23GB of a 32GB device
-as specified by the number of secure erase commands sent:
-   ~44K commands (default: single erase block): ~30 minutes
-   ~700 commands (32MB chunks) : ~90 seconds
-   1 command: < 6 seconds
-
-cheers,
-grant
-
->          */
->         if (mmc_card_sd(card) && card->ssr.au) {
->                 card->pref_erase = card->ssr.au;
->                 card->erase_shift = ffs(card->ssr.au) - 1;
-> -       } else if (card->ext_csd.hc_erase_size) {
-> -               card->pref_erase = card->ext_csd.hc_erase_size;
->         } else if (card->erase_size) {
->                 sz = (card->csd.capacity << (card->csd.read_blkbits - 9)) >> 11;
->                 if (sz < 128)
-> @@ -2015,6 +2015,8 @@ void mmc_init_erase(struct mmc_card *card)
->                         if (sz)
->                                 card->pref_erase += card->erase_size - sz;
->                 }
-> +               if (card->ext_csd.hc_erase_size > card->pref_erase)
-> +                       card->pref_erase = card->ext_csd.hc_erase_size;
->         } else
->                 card->pref_erase = 0;
->  }
-> --
-> 2.8.0.rc3.226.g39d4020
->
+Rob
