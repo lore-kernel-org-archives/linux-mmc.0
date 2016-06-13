@@ -1,80 +1,42 @@
-From: Ziji Hu <huziji-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>
-Subject: Re: [PATCH 05/12] mmc: sdhci: add a pre voltage switch callback
- function
-Date: Mon, 13 Jun 2016 14:04:28 +0000
-Message-ID: <D7CF8A19-9181-4A97-90AF-AC5A6517CE2B@marvell.com>
-References: <1465456218-28354-1-git-send-email-gregory.clement@free-electrons.com>
- <1465456218-28354-6-git-send-email-gregory.clement@free-electrons.com>,<575E72DC.5090604@intel.com>
+From: "Andrew F. Davis" <afd@ti.com>
+Subject: [PATCH 07/12] auxdisplay: Only descend into directory when
+ CONFIG_AUXDISPLAY is set
+Date: Mon, 13 Jun 2016 15:02:06 -0500
+Message-ID: <20160613200211.14790-8-afd@ti.com>
+References: <20160613200211.14790-1-afd@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="gb2312"
+Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: base64
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <575E72DC.5090604-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Content-Language: zh-CN
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Cc: Gregory CLEMENT <gregory.clement-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Jason Cooper <jason-NLaQJdtUoK4Be96aLqz0jA@public.gmane.org>, Andrew Lunn <andrew-g2DYL2Zd6BY@public.gmane.org>, Sebastian Hesselbarth <sebastian.hesselbarth-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Thomas Petazzoni <thomas.petazzoni-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Nadav Haklai <nadavh-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, Victor Gu <xigu-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, Romain Perier <romain.perier-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>, Omri Itach <omrii-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, Marcin Wojtas <mw-nYOzD4b6Jr9Wk0Htik3J/w@public.gmane.org>, Wilson Ding <dingwei-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, Shadi Ammouri <shadi-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, Jisheng Zhang <jszhang-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, "Wei(SOCP) Liu" <liuw-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>
+Return-path: <linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org>
+In-Reply-To: <20160613200211.14790-1-afd@ti.com>
+List-Unsubscribe: <https://lists.ozlabs.org/options/linuxppc-dev>,
+ <mailto:linuxppc-dev-request@lists.ozlabs.org?subject=unsubscribe>
+List-Archive: <http://lists.ozlabs.org/pipermail/linuxppc-dev/>
+List-Post: <mailto:linuxppc-dev@lists.ozlabs.org>
+List-Help: <mailto:linuxppc-dev-request@lists.ozlabs.org?subject=help>
+List-Subscribe: <https://lists.ozlabs.org/listinfo/linuxppc-dev>,
+ <mailto:linuxppc-dev-request@lists.ozlabs.org?subject=subscribe>
+Errors-To: linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org
+Sender: "Linuxppc-dev"
+ <linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org>
+To: Russell King <linux@armlinux.org.uk>, Miguel Ojeda Sandonis <miguel.ojeda.sandonis@gmail.com>, Linus Walleij <linus.walleij@linaro.org>, Sebastian Reichel <sre@kernel.org>, Wolfram Sang <wsa@the-dreams.de>, Richard Purdie <rpurdie@rpsys.net>, Jacek Anaszewski <j.anaszewski@samsung.com>, Rusty Russell <rusty@rustcorp.com.au>, Benjamin Herrenschmidt <benh@kernel.crashing.org>, Mauro Carvalho Chehab <mchehab@osg.samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>, Lauro Ramos Venancio <lauro.venancio@openbossa.org>, Aloisio Almeida Jr <aloisio.almeida@openbossa.org>, Samuel Ortiz <sameo@linux.intel.com>, Ingo Molnar <mingo@kernel.org>
+Cc: linux-pwm@vger.kernel.org, lguest@lists.ozlabs.org, linux-wireless@vger.kernel.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, "Andrew F .
+ Davis" <afd@ti.com>, linux-gpio@vger.kernel.org, linux-i2c@vger.kernel.org, linuxppc-dev@lists.ozlabs.org, linux-leds@vger.kernel.org, linux-media@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-SGkgQWRyaWFuLA0KDQogIFRoYW5rcyBhIGxvdCBmb3IgdGhlIHN1Z2dlc3Rpb24uIEknbSBmcm9t
-IE1hcnZlbGwgWGVub24gU0RIQyB0ZWFtLg0KICBNb3N0IG9mIHNkaGNpIGhvc3Qgb3BzIGFyZSBz
-dGlsbCB1c2VkIGluIG91ciBkcml2ZXIuIFdlIGp1c3QgY2hhbmdlIG9yIGFkZCBmZXcgb3BzLiBU
-aHVzLCBpZiB3ZSBjcmVhdGUgb3VyIG93biBtbWNfaG9zdF9vcHMsIG1hbnkgc3RhdGljIHNkaGNp
-IGhvc3Qgb3BzIHdpbGwgYmUgZXhwb3J0ZWQuIEkgd291bGQgbGlrZSB0byBrbm93IHdoZXRoZXIg
-c3VjaCBhIG1vZGlmaWNhdGlvbiBjYW4gYmUgYWNjZXB0ZWQgb3Igbm90Lg0KDQogICBJIG5vdGlj
-ZSB0aGF0IGNvbW11bml0eSBpcyBpbXByb3Zpbmcgc2RoY2kuIFRodXMgYWxsIHRoZSBzdGF0aWMg
-c2RoY2kgb3BzIGNhbGxlZCBvdXRzaWRlIHRoZSBzZGhjaS5jIHdpbGwgYmUgZXhwb3J0ZWQuIElz
-IG15IHVuZGVyc3RhbmRpbmcgY29ycmVjdD8NCiAgIFRoYW5rIHlvdS4NCg0KQmVzdCByZWdhcmRz
-LA0KSHUgWmlqaQ0KDQo+PiDU2iAyMDE2xOo21MIxM8jVo6wxNjo1MqOsQWRyaWFuIEh1bnRlciA8
-YWRyaWFuLmh1bnRlckBpbnRlbC5jb20+INC0tcCjug0KPj4gDQo+PiBPbiAwOS8wNi8xNiAxMDox
-MCwgR3JlZ29yeSBDTEVNRU5UIHdyb3RlOg0KPj4gRnJvbTogVmljdG9yIEd1IDx4aWd1QG1hcnZl
-bGwuY29tPg0KPj4gDQo+PiBTb21lIGhvc3QgY29udHJvbGxlciBzdWNoIGFzIFhlbm9uIG5lZWRz
-IGFkZGl0aW9uYWwgc2V0dGluZyB3aGVuDQo+PiBzd2l0Y2hpbmcgc2lnbmFsIHZvbHRhZ2UgaW4g
-ZU1NQyBtb2RlLiBUaGV5IGFsc28gbmVlZCB0byByZS1lbmFibGUNCj4+IGludGVybmFsIGNsb2Nr
-IGJlZm9yZSBhIHZvbHRhZ2Ugc3dpdGNoLg0KPj4gDQo+PiBUaGlzIGNvbW1pdCBhZGRzIGEgY2Fs
-bGJhY2sgcm91dGluZSAidm9sdGFnZV9zd2l0Y2hfcHJlIiBpbiB0aGUgc3RydWN0DQo+PiBzZGhj
-aV9vcHMsIHdoaWNoIGlzIHVzZWQgYnkgc29tZSBob3N0IGNvbnRyb2xsZXJzIHdoaWNoIG5lZWQg
-cmUtZW5hYmxlDQo+PiB0aGUgaW50ZXJuYWwgY2xvY2sgYmVmb3JlIGEgdm9sdGFnZSBzd2l0Y2gu
-DQo+IA0KPiBEb24ndCB3YW50IHRvIGFkZCBzZGhjaSBob3N0IG9wcyBmb3IgdGhlICJkbyBzb21l
-dGhpbmcgYmVmb3JlIGEgbW1jIGhvc3Qgb3AiDQo+IGNhc2UuDQo+IA0KPiBJbnN0ZWFkLCBleHBv
-cnQgc2RoY2lfc3RhcnRfc2lnbmFsX3ZvbHRhZ2Vfc3dpdGNoKCkgYW5kICBob29rDQo+IGhvc3Qt
-Pm1tY19ob3N0X29wcy5zdGFydF9zaWduYWxfdm9sdGFnZV9zd2l0Y2guIFRoZW4gaW4gc2RoY2kt
-eGVub24uYzoNCj4gDQo+IGludCB4ZW5vbl9fc3RhcnRfc2lnbmFsX3ZvbHRhZ2Vfc3dpdGNoKHN0
-cnVjdCBtbWNfaG9zdCAqbW1jLA0KPiAgICAgICAgICAgICAgICAgICAgICBzdHJ1Y3QgbW1jX2lv
-cyAqaW9zKQ0KPiB7DQo+ICAgYmxhaCBibGFoDQo+ICAgcmV0dXJuIHNkaGNpX3N0YXJ0X3NpZ25h
-bF92b2x0YWdlX3N3aXRjaChtbWMsIGlvcyk7DQo+IH0NCj4gDQo+IA0KPj4gDQo+PiBbZ3JlZ29y
-eS5jbGVtZW50QGZyZWUtZWxlY3Ryb25zLmNvbTogc3BsaXQgdGhlIGluaXRpYWwgY29tbWl0IGFu
-ZA0KPj4gcmVmb3JtdWxhdGUgdGhlIGxvZ10NCj4+IA0KPj4gU2lnbmVkLW9mZi1ieTogVmljdG9y
-IEd1IDx4aWd1QG1hcnZlbGwuY29tPg0KPj4gU2lnbmVkLW9mZi1ieTogTWFyY2luIFdvanRhcyA8
-bXdAc2VtaWhhbGYuY29tPg0KPj4gU2lnbmVkLW9mZi1ieTogR3JlZ29yeSBDTEVNRU5UIDxncmVn
-b3J5LmNsZW1lbnRAZnJlZS1lbGVjdHJvbnMuY29tPg0KPj4gLS0tDQo+PiBkcml2ZXJzL21tYy9o
-b3N0L3NkaGNpLmMgfCA0ICsrKysNCj4+IGRyaXZlcnMvbW1jL2hvc3Qvc2RoY2kuaCB8IDEgKw0K
-Pj4gMiBmaWxlcyBjaGFuZ2VkLCA1IGluc2VydGlvbnMoKykNCj4+IA0KPj4gZGlmZiAtLWdpdCBh
-L2RyaXZlcnMvbW1jL2hvc3Qvc2RoY2kuYyBiL2RyaXZlcnMvbW1jL2hvc3Qvc2RoY2kuYw0KPj4g
-aW5kZXggYjA3MjE5NDI2ZDM5Li5jYWQwM2ZmYTlkOWIgMTAwNjQ0DQo+PiAtLS0gYS9kcml2ZXJz
-L21tYy9ob3N0L3NkaGNpLmMNCj4+ICsrKyBiL2RyaXZlcnMvbW1jL2hvc3Qvc2RoY2kuYw0KPj4g
-QEAgLTE3MjksNiArMTcyOSwxMCBAQCBzdGF0aWMgaW50IHNkaGNpX3N0YXJ0X3NpZ25hbF92b2x0
-YWdlX3N3aXRjaChzdHJ1Y3QgbW1jX2hvc3QgKm1tYywNCj4+ICAgaWYgKGhvc3QtPnZlcnNpb24g
-PCBTREhDSV9TUEVDXzMwMCkNCj4+ICAgICAgIHJldHVybiAwOw0KPj4gDQo+PiArICAgIC8qIFNv
-bWUgY29udHJvbGxlciBuZWVkIHRvIGRvIG1vcmUgYmVmb3JlIHN3aXRjaGluZyAqLw0KPj4gKyAg
-ICBpZiAoaG9zdC0+b3BzLT52b2x0YWdlX3N3aXRjaF9wcmUpDQo+PiArICAgICAgICBob3N0LT5v
-cHMtPnZvbHRhZ2Vfc3dpdGNoX3ByZShob3N0KTsNCj4+ICsNCj4+ICAgY3RybCA9IHNkaGNpX3Jl
-YWR3KGhvc3QsIFNESENJX0hPU1RfQ09OVFJPTDIpOw0KPj4gDQo+PiAgIHN3aXRjaCAoaW9zLT5z
-aWduYWxfdm9sdGFnZSkgew0KPj4gZGlmZiAtLWdpdCBhL2RyaXZlcnMvbW1jL2hvc3Qvc2RoY2ku
-aCBiL2RyaXZlcnMvbW1jL2hvc3Qvc2RoY2kuaA0KPj4gaW5kZXggNDljNmM1YjBlMzNiLi42YmVj
-MWIwMzY4ZDIgMTAwNjQ0DQo+PiAtLS0gYS9kcml2ZXJzL21tYy9ob3N0L3NkaGNpLmgNCj4+ICsr
-KyBiL2RyaXZlcnMvbW1jL2hvc3Qvc2RoY2kuaA0KPj4gQEAgLTU1MCw2ICs1NTAsNyBAQCBzdHJ1
-Y3Qgc2RoY2lfb3BzIHsNCj4+ICAgICAgICAgICAgICAgICAgICB1bnNpZ25lZCBpbnQgbWF4X2R0
-ciwgaW50IGhvc3RfZHJ2LA0KPj4gICAgICAgICAgICAgICAgICAgIGludCBjYXJkX2RydiwgaW50
-ICpkcnZfdHlwZSk7DQo+PiAgIHZvaWQgICAgKCppbml0X2NhcmQpKHN0cnVjdCBzZGhjaV9ob3N0
-ICpob3N0LCBzdHJ1Y3QgbW1jX2NhcmQgKmNhcmQpOw0KPj4gKyAgICB2b2lkICAgICgqdm9sdGFn
-ZV9zd2l0Y2hfcHJlKShzdHJ1Y3Qgc2RoY2lfaG9zdCAqaG9zdCk7DQo+PiB9Ow0KPj4gDQo+PiAj
-aWZkZWYgQ09ORklHX01NQ19TREhDSV9JT19BQ0NFU1NPUlMNCj4gDQo+IC0tDQo+IFRvIHVuc3Vi
-c2NyaWJlIGZyb20gdGhpcyBsaXN0OiBzZW5kIHRoZSBsaW5lICJ1bnN1YnNjcmliZSBsaW51eC1t
-bWMiIGluDQo+IHRoZSBib2R5IG9mIGEgbWVzc2FnZSB0byBtYWpvcmRvbW9Admdlci5rZXJuZWwu
-b3JnDQo+IE1vcmUgbWFqb3Jkb21vIGluZm8gYXQgIGh0dHA6Ly92Z2VyLmtlcm5lbC5vcmcvbWFq
-b3Jkb21vLWluZm8uaHRtbA0K
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+V2hlbiBDT05GSUdfQVVYRElTUExBWSBpcyBub3Qgc2V0IG1ha2Ugd2lsbCBzdGlsbCBkZXNjZW5k
+IGludG8gdGhlCmF1eGRpc3BsYXkgZGlyZWN0b3J5IGJ1dCBub3RoaW5nIHdpbGwgYmUgYnVpbHQu
+IFRoaXMgcHJvZHVjZXMgdW5uZWVkZWQKYnVpbGQgYXJ0aWZhY3RzIGFuZCBtZXNzYWdlcyBpbiBh
+ZGRpdGlvbiB0byBzbG93aW5nIHRoZSBidWlsZC4KRml4IHRoaXMgaGVyZS4KClNpZ25lZC1vZmYt
+Ynk6IEFuZHJldyBGLiBEYXZpcyA8YWZkQHRpLmNvbT4KLS0tCiBkcml2ZXJzL01ha2VmaWxlIHwg
+MiArLQogMSBmaWxlIGNoYW5nZWQsIDEgaW5zZXJ0aW9uKCspLCAxIGRlbGV0aW9uKC0pCgpkaWZm
+IC0tZ2l0IGEvZHJpdmVycy9NYWtlZmlsZSBiL2RyaXZlcnMvTWFrZWZpbGUKaW5kZXggNzgxNjJi
+YS4uYjQyMDJkMCAxMDA2NDQKLS0tIGEvZHJpdmVycy9NYWtlZmlsZQorKysgYi9kcml2ZXJzL01h
+a2VmaWxlCkBAIC05MCw3ICs5MCw3IEBAIG9iai15CQkJCSs9IGZpcmV3aXJlLwogb2JqLSQoQ09O
+RklHX1VJTykJCSs9IHVpby8KIG9iai0kKENPTkZJR19WRklPKQkJKz0gdmZpby8KIG9iai15CQkJ
+CSs9IGNkcm9tLwotb2JqLXkJCQkJKz0gYXV4ZGlzcGxheS8KK29iai0kKENPTkZJR19BVVhESVNQ
+TEFZKQkrPSBhdXhkaXNwbGF5Lwogb2JqLSQoQ09ORklHX1BDQ0FSRCkJCSs9IHBjbWNpYS8KIG9i
+ai0kKENPTkZJR19ESU8pCQkrPSBkaW8vCiBvYmotJChDT05GSUdfU0JVUykJCSs9IHNidXMvCi0t
+IAoyLjguMwoKX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18K
+TGludXhwcGMtZGV2IG1haWxpbmcgbGlzdApMaW51eHBwYy1kZXZAbGlzdHMub3psYWJzLm9yZwpo
+dHRwczovL2xpc3RzLm96bGFicy5vcmcvbGlzdGluZm8vbGludXhwcGMtZGV2
