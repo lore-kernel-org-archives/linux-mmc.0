@@ -1,217 +1,158 @@
-From: Doug Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
-Subject: Re: [PATCH 04/11] mmc: sdhci-of-arasan: Properly set
- corecfg_baseclkfreq on rk3399
-Date: Mon, 13 Jun 2016 16:06:21 -0700
-Message-ID: <CAD=FV=UzGZmwGTthqqO5Skxj5f0wsS5VKr4gYP2i9SUyGqvbjg@mail.gmail.com>
+From: Doug Anderson <dianders@chromium.org>
+Subject: Re: [PATCH 02/11] mmc: sdhci-of-arasan: Always power the PHY off/on
+ when clock changes
+Date: Mon, 13 Jun 2016 16:06:47 -0700
+Message-ID: <CAD=FV=V8GumWP0aKQdCyXBEdUcjg7c5BKLu5smUYuZW3C5DHmA@mail.gmail.com>
 References: <1465339484-969-1-git-send-email-dianders@chromium.org>
- <1465339484-969-5-git-send-email-dianders@chromium.org> <f5dcc018-bd60-87a7-798b-efc261e443dd@rock-chips.com>
+ <1465339484-969-3-git-send-email-dianders@chromium.org> <ae4409b0-48a5-e30f-a244-7a28bd7a9daa@rock-chips.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <f5dcc018-bd60-87a7-798b-efc261e443dd-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
-Cc: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Kishon Vijay Abraham I <kishon-l0cyMroinI0@public.gmane.org>, Heiko Stuebner <heiko-4mtYJXux2i+zQB+pC5nmwQ@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Ziyuan Xu <xzy.xu-TNX95d0MmH7DzftRWevZcw@public.gmane.org>, Brian Norris <briannorris-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "open list:ARM/Rockchip SoC..." <linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Michal Simek <michal.simek-gjFFaj9aHVfQT0dZR+AlfA@public.gmane.org>, soren.brinkmann-gjFFaj9aHVfQT0dZR+AlfA@public.gmane.org, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <ae4409b0-48a5-e30f-a244-7a28bd7a9daa@rock-chips.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Shawn Lin <shawn.lin@rock-chips.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Kishon Vijay Abraham I <kishon@ti.com>, Heiko Stuebner <heiko@sntech.de>, Rob Herring <robh+dt@kernel.org>, Ziyuan Xu <xzy.xu@rock-chips.com>, Brian Norris <briannorris@chromium.org>, Adrian Hunter <adrian.hunter@intel.com>, "open list:ARM/Rockchip SoC..." <linux-rockchip@lists.infradead.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, Michal Simek <michal.simek@xilinx.com>, soren.brinkmann@xilinx.com, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-Shawn,
+Hi,
 
-On Mon, Jun 13, 2016 at 1:36 AM, Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org> w=
+On Mon, Jun 13, 2016 at 1:08 AM, Shawn Lin <shawn.lin@rock-chips.com> w=
 rote:
 > =E5=9C=A8 2016/6/8 6:44, Douglas Anderson =E5=86=99=E9=81=93:
 >>
->> In the the earlier change in this series ("Documentation: mmc:
->> sdhci-of-arasan: Add soc-ctl-syscon for corecfg regs") we can see th=
+>> In commit 802ac39a5566 ("mmc: sdhci-of-arasan: fix set_clock when a =
+phy
+>> is supported") we added code to power the PHY off and on whenever th=
 e
->> mechansim for specifying a syscon to properly set corecfg registers =
-in
->> sdhci-of-arasan.  Now let's use this mechanism to properly set
->> corecfg_baseclkfreq on rk3399.
+>> clock was changed but we avoided doing the power cycle code when the
+>> clock was low speed.  Let's now do it always.
 >>
->>> From [1] the corecfg_baseclkfreq is supposed to be set to:
+>> Although there may be other reasons for power cycling the PHY when t=
+he
+>> clock changes, one of the main reasons is that we need to give the D=
+LL a
+>> chance to re-lock with the new clock.
 >>
->>   Base Clock Frequency for SD Clock.
->>   This is the frequency of the xin_clk.
+>> One of the things that the DLL is for is tuning the Receive Clock in
+>> HS200 mode and STRB in HS400 mode.  Thus it is clear that we should =
+make
+>> sure we power cycle the PHY (and wait for the DLL to lock) when we k=
+now
+>> we'll be in one of these two speed modes.  That's what the original =
+code
+>> did, though it used the clock rate rather than the speed mode.  Howe=
+ver,
+>> even in speed modes other than HS200,/HS400 the DLL is used for
+>> something since it can be clearly observed that the PHY doesn't func=
+tion
+>> properly if you leave the DLL off.
 >>
->> This is a relatively easy thing to do.  Note that we assume that xin=
-_clk
->> is not dynamic and we can check the clock at probe time.  If any rea=
-l
->> devices have a dynamic xin_clk future patches could register for
->> notifiers for the clock.
+>> Although it appears less important to power cycle the PHY and wait f=
+or
+>> the DLL to lock when not in HS200/HS400 modes (no bugs were reported=
+),
+>> it still seems wise to let the locking always happen nevertheless.
 >>
->> At the moment, setting corecfg_baseclkfreq is only supported for rk3=
-399
->> since we need a specific map for each implementation.  The code is
->> written in a generic way that should make this easy to extend to oth=
-er
->> SoCs.  Note that a specific compatible string for rk3399 is already =
-in
->> use and so we add that to the table to match rk3399.
+>
+> From the design doc, there is no need to off/on phy when not in
+> HS200/400, but maybe someone will limit the clk freq by assigning
+> max-frequency in DT when in HS200/400, which will make things worse.
+>
+> So your patch looks sane.
+>
+>
+>> Note: as part of this, we make sure that we never try to turn the PH=
+Y on
+>> when the clock is off (when the clock rate is 0).  The PHY cannot wo=
+rk
+>> when the clock is off since its DLL can't lock.
 >>
->> [1]:
->> https://arasan.com/wp-content/media/eMMC-5-1-Total-Solution_Rev-1-3.=
-pdf
+>> This change requires ("phy: rockchip-emmc: Increase lock time
+>> allowance") and will cause problems if picked without that change.
 >>
->> Signed-off-by: Douglas Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
+>> Signed-off-by: Douglas Anderson <dianders@chromium.org>
 >> ---
->>  drivers/mmc/host/sdhci-of-arasan.c | 189
->> ++++++++++++++++++++++++++++++++++---
->>  1 file changed, 178 insertions(+), 11 deletions(-)
+>>  drivers/mmc/host/sdhci-of-arasan.c | 23 ++++++++---------------
+>>  1 file changed, 8 insertions(+), 15 deletions(-)
 >>
 >> diff --git a/drivers/mmc/host/sdhci-of-arasan.c
 >> b/drivers/mmc/host/sdhci-of-arasan.c
->> index 3ff1711077c2..859ea1b21215 100644
+>> index 533e2bcb10bc..3ff1711077c2 100644
 >> --- a/drivers/mmc/host/sdhci-of-arasan.c
 >> +++ b/drivers/mmc/host/sdhci-of-arasan.c
->> @@ -22,6 +22,8 @@
->>  #include <linux/module.h>
->>  #include <linux/of_device.h>
->>  #include <linux/phy/phy.h>
->> +#include <linux/regmap.h>
->> +#include <linux/mfd/syscon.h>
->
->
-> alphabetical order
-
-It was, but with a different definition of alphabetical order.  ;)
-"syscon" (s) comes after "regmap" (r).  ...but your way is better,
-you're right.
-
-
->> +/**
->> + * sdhci_arasan_update_baseclkfreq - Set corecfg_baseclkfreq
->> + *
->> + * The corecfg_baseclkfreq is supposed to contain the MHz of clk_xi=
-n.
->> This
->> + * function can be used to make that happen.
->> + *
->> + * NOTES:
->> + * - Many existing devices don't seem to do this and work fine.  To=
- keep
->> + *   compatibility for old hardware where the device tree doesn't p=
-rovide
->> a
->> + *   register map, this function is a noop if a soc_ctl_map hasn't =
-been
->> provided
->> + *   for this platform.
->> + * - It's assumed that clk_xin is not dynamic and that we use the S=
-DHCI
->> divider
->> + *   to achieve lower clock rates.  That means that this function i=
-s
->> called once
->> + *   at probe time and never called again.
->> + *
->> + * @host:              The sdhci_host
->> + */
->> +static void sdhci_arasan_update_baseclkfreq(struct sdhci_host *host=
-)
->> +{
->> +       struct sdhci_pltfm_host *pltfm_host =3D sdhci_priv(host);
->> +       struct sdhci_arasan_data *sdhci_arasan =3D
->> sdhci_pltfm_priv(pltfm_host);
->> +       const struct sdhci_arasan_soc_ctl_map *soc_ctl_map =3D
->> +               sdhci_arasan->soc_ctl_map;
->> +       u32 mhz =3D DIV_ROUND_CLOSEST(clk_get_rate(pltfm_host->clk),
->> 1000000);
->> +
->
->
-> It's broken when reading capabilities reg on RK3399 platform
-> which means you should get it via clk framework. But you should consi=
-der
-> the non-broken case.
-
-I'm afraid I don't understand.  Can you elaborate?  Are you saying if
-things weren't broken then we wouldn't have to ask the common clock
-framework for this?  Where would we get this value?
-
-=2E..or are you suggesting that in other SoCs you wouldn't need to set
-corecfg_baseclkfreq because it would be somehow automatic?  If that's
-so then those SoCs should just set -1 for "shift" in their map and
-this function will be a no-op.
-
-
->> +       /* Having a map is optional */
->> +       if (!soc_ctl_map)
->> +               return;
->> +
->> +       /* If we have a map, we expect to have a syscon */
->> +       if (!sdhci_arasan->soc_ctl_base) {
->> +               pr_warn("%s: Have regmap, but no soc-ctl-syscon\n",
->> +                       mmc_hostname(host->mmc));
->> +               return;
->> +       }
->> +
->> +       sdhci_arasan_syscon_write(host, &soc_ctl_map->baseclkfreq, m=
-hz);
->
->
-> should we check the return value, and if not -EINVAL, we should give
-> another try?
-
-I don't see a reason to check the return code here.  Specifically:
-
-* If this is a SoC where you don't need to write corecfg_baseclkfreq
-then we need do nothing about this error.
-
-* If the regmap write failed (which would be terribly unexpected for a
-memory mapped register) then we've already printed an error (in
-sdhci_arasan_syscon_write).  Best course of action seems to keep going
-and try anyway.
-
-
-I don't think a retry is likely to help anything.
-
-
->> +}
->> +
->>  static int sdhci_arasan_probe(struct platform_device *pdev)
+>> @@ -35,11 +35,13 @@
+>>  /**
+>>   * struct sdhci_arasan_data
+>>   * @clk_ahb:   Pointer to the AHB clock
+>> - * @phy: Pointer to the generic phy
+>> + * @phy:       Pointer to the generic phy
+>> + * @phy_on:    True if the PHY is turned on.
+>>   */
+>>  struct sdhci_arasan_data {
+>>         struct clk      *clk_ahb;
+>>         struct phy      *phy;
+>> +       bool            phy_on;
+>>  };
+>>
+>>  static unsigned int sdhci_arasan_get_timeout_clock(struct sdhci_hos=
+t
+>> *host)
+>> @@ -61,12 +63,10 @@ static void sdhci_arasan_set_clock(struct sdhci_=
+host
+>> *host, unsigned int clock)
 >>  {
->>         int ret;
->> +       const struct of_device_id *match;
->> +       struct device_node *node;
->>         struct clk *clk_xin;
->>         struct sdhci_host *host;
->>         struct sdhci_pltfm_host *pltfm_host;
->> @@ -207,6 +363,23 @@ static int sdhci_arasan_probe(struct platform_d=
+>>         struct sdhci_pltfm_host *pltfm_host =3D sdhci_priv(host);
+>>         struct sdhci_arasan_data *sdhci_arasan =3D
+>> sdhci_pltfm_priv(pltfm_host);
+>> -       bool ctrl_phy =3D false;
+>>
+>> -       if (clock > MMC_HIGH_52_MAX_DTR && (!IS_ERR(sdhci_arasan->ph=
+y)))
+>> -               ctrl_phy =3D true;
+>> +       if (sdhci_arasan->phy_on && !IS_ERR(sdhci_arasan->phy)) {
+>> +               sdhci_arasan->phy_on =3D false;
+>>
+>> -       if (ctrl_phy) {
+>>                 spin_unlock_irq(&host->lock);
+>>                 phy_power_off(sdhci_arasan->phy);
+>>                 spin_lock_irq(&host->lock);
+>> @@ -74,7 +74,9 @@ static void sdhci_arasan_set_clock(struct sdhci_ho=
+st
+>> *host, unsigned int clock)
+>>
+>>         sdhci_set_clock(host, clock);
+>>
+>> -       if (ctrl_phy) {
+>> +       if (host->mmc->actual_clock && !IS_ERR(sdhci_arasan->phy)) {
+>> +               sdhci_arasan->phy_on =3D true;
+>> +
+>>                 spin_unlock_irq(&host->lock);
+>>                 phy_power_on(sdhci_arasan->phy);
+>>                 spin_lock_irq(&host->lock);
+>> @@ -257,12 +259,6 @@ static int sdhci_arasan_probe(struct platform_d=
 evice
 >> *pdev)
->>         pltfm_host =3D sdhci_priv(host);
->>         sdhci_arasan =3D sdhci_pltfm_priv(pltfm_host);
+>>                         goto clk_disable_all;
+>>                 }
 >>
->> +       match =3D of_match_node(sdhci_arasan_of_match, pdev->dev.of_=
-node);
->> +       sdhci_arasan->soc_ctl_map =3D match->data;
->> +
->> +       node =3D of_parse_phandle(pdev->dev.of_node,
->> "arasan,soc-ctl-syscon", 0);
+>> -               ret =3D phy_power_on(sdhci_arasan->phy);
+>> -               if (ret < 0) {
+>> -                       dev_err(&pdev->dev, "phy_power_on err.\n");
+>> -                       goto err_phy_power;
+>> -               }
+>> -
 >
 >
-> should it be within the scope of arasan,sdhci-5.1 or
-> rockchip,rk3399-sdhci-5.1?
+> Because there is too much dependency between phy and controller, so
+> previous solution is to setup clk by firmware. The same case for
+> suspend and resume.
+>
+> Look really good to do it more legit.
 
-IMHO it doesn't hurt to do this for all SoCs.  This will help
-facilitate other SoCs adding their own syscon so that they can
-properly modify corecfg registers.
-
-I can't say that I know anything about the other Arasan PHYs, but
-presumably they also have corecfg registers.  If/when maps are added
-for SoCs including those PHYs then this would be useful for them.
-
-If you want I could change the code to only call of_parse_phandle if
-"sdhci_arasan->soc_ctl_map" was non-NULL, but that should have no
-functional change since we'll never actually use the syscon if we have
-no map.
+Thanks!  I don't see a Reviewed-by tag so I'm not adding it.  If you'd
+like your tag added, please let me know and I will add it if I send
+out another version.
 
 
 -Doug
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" i=
-n
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
