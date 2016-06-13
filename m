@@ -1,98 +1,105 @@
-From: Doug Anderson <dianders@chromium.org>
-Subject: Re: [PATCH 03/11] Documentation: mmc: sdhci-of-arasan: Add
- soc-ctl-syscon for corecfg regs
-Date: Mon, 13 Jun 2016 16:07:02 -0700
-Message-ID: <CAD=FV=U48jiDHAxw6045UEptGoruUTdGVD_h7QtH2xqXPhY+5g@mail.gmail.com>
+From: Doug Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
+Subject: Re: [PATCH 01/11] phy: rockchip-emmc: Increase lock time allowance
+Date: Mon, 13 Jun 2016 16:07:13 -0700
+Message-ID: <CAD=FV=X-318tAquybtdKz6Uqs0ZCMEzP5ZB9zrFUa8qSF8+_Eg@mail.gmail.com>
 References: <1465339484-969-1-git-send-email-dianders@chromium.org>
- <1465339484-969-4-git-send-email-dianders@chromium.org> <45a7e8c7-5bd4-8c40-004a-b8906eff881a@rock-chips.com>
+ <1465339484-969-2-git-send-email-dianders@chromium.org> <3e19ff54-ee4a-c208-e137-1c0f8022f6b3@rock-chips.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <45a7e8c7-5bd4-8c40-004a-b8906eff881a@rock-chips.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Shawn Lin <shawn.lin@rock-chips.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Kishon Vijay Abraham I <kishon@ti.com>, Heiko Stuebner <heiko@sntech.de>, Rob Herring <robh+dt@kernel.org>, Ziyuan Xu <xzy.xu@rock-chips.com>, Brian Norris <briannorris@chromium.org>, Adrian Hunter <adrian.hunter@intel.com>, "open list:ARM/Rockchip SoC..." <linux-rockchip@lists.infradead.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, Pawel Moll <pawel.moll@arm.com>, Mark Rutland <mark.rutland@arm.com>, Ian Campbell <ijc+devicetree@hellion.org.uk>, Kumar Gala <galak@codeaurora.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <3e19ff54-ee4a-c208-e137-1c0f8022f6b3-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
+Cc: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Kishon Vijay Abraham I <kishon-l0cyMroinI0@public.gmane.org>, Heiko Stuebner <heiko-4mtYJXux2i+zQB+pC5nmwQ@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Ziyuan Xu <xzy.xu-TNX95d0MmH7DzftRWevZcw@public.gmane.org>, Brian Norris <briannorris-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "open list:ARM/Rockchip SoC..." <linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-Hi,
+Shawn,
 
-On Mon, Jun 13, 2016 at 1:18 AM, Shawn Lin <shawn.lin@rock-chips.com> wrote:
+On Mon, Jun 13, 2016 at 12:58 AM, Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org> wrote:
 > On 2016/6/8 6:44, Douglas Anderson wrote:
 >>
->> As can be seen in Arasan's datasheet [1] there are several "corecfg"
->> settings in their SDHCI IP Block that are supposed to be controlled by
->> software.  Although the datasheet referenced is a bit vague about how to
->> access corecfg, in Figure 5 you can see that for Arasan's PHY (a
->> separate component than their SDHCI component) they describe the
->> "phyctrl" registers as being "FROM SOC CTL REG", implying that it's up
->> to the licensee of the Arasan IP block to implement these registers.  It
->> seems sane to assume that the "corecfg" registers in their SDHCI IP
->> block works in a similar way for all licensees of the IP Block.
+>> Previous PHY code waited a fixed amount of time for the DLL to lock at
+>> power on time.  Unfortunately, the time for the DLL to lock is actually
+>> a bit more dynamic and can be longer if the card clock is slower.
 >>
->> Device tree has a model that allows a device to get a reference to
->> random registers located elsewhere in the SoC: sysctl.  Let's leverage
->> this model and allow adding a sysctl reference to access the control
->> registers for the Arasan SDHCI PHYs.
+>> Instead of waiting a fixed 30 us, let's now dynamically wait until the
+>> lock bit gets set.  We'll wait up to 10 ms which should be OK even if
+>> the card clock is at the super slow 100 kHz.
 >>
->> Having a reference to the control registers doesn't do much for us on
->> its own since the Arasan spec doesn't specify how these corecfg values
->> are laid out in memory.  In the SDHCI driver we'll need a map detailing
->> where each corecfg can be found in each implementation.  This map can be
->> found using the primary compatible string of the SDHCI device.  In that
->> spirit, document that existing rk3399 device trees already have a
->> specific compatible string, though up to now they've always been relying
->> on the driver supporting the generic.
->>
->> Note that since existing devices seem to work fairly well as-is, we'll
->> list the syscon reference as "optional", but it's likely that we'll run
->> into much fewer problems if we can actually set the proper values in the
->> syscon, so it is strongly suggested that any SoCs where we have a map to
->> set the corecfg also include a reference to the syscon.
 >
->
-> yes, the interaction of phy and controller should be more explicitly
-> now. Why not make it mandatory for arasan,sdhci-5.1.
->
+> mmc stack limit the min freq to 200k when initializing the card.
+
+Are you certain?  In "drivers/mmc/core/core.c" I see:
+
+static const unsigned freqs[] = { 400000, 300000, 200000, 100000 };
+
+In ID mode if 400kHz, 300kHz, 200kHz all fail then it will try 100kHz.
+
+
+> So 5ms is enough, but it's ok to set the max timeout to 10ms as we
+> can break out if locked.
+
+Right, it's OK to error on the long side since it is really a pretty
+serious error if the DLL doesn't lock and delaying tens of
+milliseconds in this case is not a huge deal.
+
+
+>> On its own, this change makes the PHY power on code a little more
+>> robust.  Before this change the PHY was relying on the eMMC code to make
+>> sure the PHY was only powered on when the card clock was set to at least
+>> 50 MHz before, though this reliance wasn't documented anywhere.
 >>
->> [1]:
->> https://arasan.com/wp-content/media/eMMC-5-1-Total-Solution_Rev-1-3.pdf
+>> This change will be even more useful in future changes where we actually
+>> need to be able to wait for a DLL lock at slower clock speeds.
 >>
->> Signed-off-by: Douglas Anderson <dianders@chromium.org>
+>> Signed-off-by: Douglas Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
 >> ---
->>  .../devicetree/bindings/mmc/arasan,sdhci.txt       | 27
->> ++++++++++++++++++++--
->>  1 file changed, 25 insertions(+), 2 deletions(-)
+>>  drivers/phy/phy-rockchip-emmc.c | 27 +++++++++++++++++++--------
+>>  1 file changed, 19 insertions(+), 8 deletions(-)
 >>
->> diff --git a/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
->> b/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
->> index 31b35c3a5e47..b67e623ca1ff 100644
->> --- a/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
->> +++ b/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
->> @@ -9,8 +9,12 @@ Device Tree Bindings for the Arasan SDHCI Controller
->>    [4] Documentation/devicetree/bindings/phy/phy-bindings.txt
+>> diff --git a/drivers/phy/phy-rockchip-emmc.c
+>> b/drivers/phy/phy-rockchip-emmc.c
+>> index a69f53630e67..8336053aea5c 100644
+>> --- a/drivers/phy/phy-rockchip-emmc.c
+>> +++ b/drivers/phy/phy-rockchip-emmc.c
+>> @@ -85,6 +85,7 @@ static int rockchip_emmc_phy_power(struct
+>> rockchip_emmc_phy *rk_phy,
+>>  {
+>>         unsigned int caldone;
+>>         unsigned int dllrdy;
+>> +       unsigned long timeout;
 >>
->>  Required Properties:
->> -  - compatible: Compatibility string. Must be 'arasan,sdhci-8.9a' or
->> -                'arasan,sdhci-4.9a' or 'arasan,sdhci-5.1'
->> +  - compatible: Compatibility string.  One of:
->> +    - "arasan,sdhci-8.9a"
->> +    - "arasan,sdhci-4.9a"
->> +    - "arasan,sdhci-5.1"
->> +    - "rockchip,rk3399-sdhci-5.1", "arasan,sdhci-5.1": The PHY in rk3399.
+>>         /*
+>>          * Keep phyctrl_pdb and phyctrl_endll low to allow
+>> @@ -137,15 +138,25 @@ static int rockchip_emmc_phy_power(struct
+>> rockchip_emmc_phy *rk_phy,
+>>                                    PHYCTRL_ENDLL_MASK,
+>>                                    PHYCTRL_ENDLL_SHIFT));
+>>         /*
+>> -        * After enable analog DLL circuits, we need an extra 10.2us
+>> -        * for dll to be ready for work. But according to testing, we
+>> -        * find some chips need more than 25us.
+>> +        * After enabling analog DLL circuits docs say that we need 10.2
+>> us if
+>> +        * our source clock is at 50 MHz and that lock time scales
+>> linearly
+>> +        * with clock speed.  If we are powering on the PHY and the card
+>> clock
+>> +        * is super slow (like 100 kHZ) this could take as long as 5.1 ms.
 >
 >
-> The PHY in rk3399?
+> 5.1ms is by calculation or test?
 
-I presume that you found the above confusing?  I changed it to:
+By calculation.
 
-  - compatible: Compatibility string.  One of:
-    - "arasan,sdhci-8.9a": generic Arasan SDHCI 8.9a PHY
-    - "arasan,sdhci-4.9a": generic Arasan SDHCI 4.9a PHY
-    - "arasan,sdhci-5.1": generic Arasan SDHCI 5.1 PHY
-    - "rockchip,rk3399-sdhci-5.1", "arasan,sdhci-5.1": rk3399 eMMC PHY
-      For this device it is strongly suggested to include arasan,soc-ctl-syscon.
+>>> 10.2 us * (50000000 Hz / 100000 Hz)
+5100.0 us, or 5.1 ms
 
-I kept Rob's Ack since those changes didn't seem too major.  I will
-remove it if requested.
+I'll add clarification to the comment.
+
 
 -Doug
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
