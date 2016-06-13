@@ -1,97 +1,47 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH] mmc: block: Fix tag condition with packed writes
-Date: Mon, 13 Jun 2016 09:26:48 +0300
-Message-ID: <575E5228.3030802@intel.com>
-References: <575ABF08.4010102@intel.com>
- <7b6b85e2-4439-f091-3319-9f5ceeb72e82@rock-chips.com>
+Subject: Re: [PATCH] mmc: core: add auto bkops support
+Date: Mon, 13 Jun 2016 09:29:00 +0300
+Message-ID: <575E52AC.6000902@intel.com>
+References: <1465182439-27963-1-git-send-email-shawn.lin@rock-chips.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=windows-1252
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga14.intel.com ([192.55.52.115]:64123 "EHLO mga14.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S933353AbcFMGaw (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 13 Jun 2016 02:30:52 -0400
-In-Reply-To: <7b6b85e2-4439-f091-3319-9f5ceeb72e82@rock-chips.com>
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1465182439-27963-1-git-send-email-shawn.lin@rock-chips.com>
+Sender: linux-kernel-owner@vger.kernel.org
 To: Shawn Lin <shawn.lin@rock-chips.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Jaehoon Chung <jh80.chung@samsung.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Doug Anderson <dianders@chromium.org>, linux-rockchip@lists.infradead.org, Alex Lemberg <alex.lemberg@sandisk.com>
+List-Id: linux-mmc@vger.kernel.org
 
-On 13/06/16 05:42, Shawn Lin wrote:
-> Hi Adrian,
+On 06/06/16 06:07, Shawn Lin wrote:
+> JEDEC eMMC v5.1 introduce an autonomously initiated method
+> for background operations.
 > 
-> On 2016/6/10 21:22, Adrian Hunter wrote:
->> Apparently a cut-and-paste error, 'do_data_tag' is using 'brq' for data
->> size even though 'brq' has not been set up. Instead use blk_rq_sectors().
->>
->> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
->> ---
->>
->>
->> Hi
->>
->> I don't know if anyone is actually using packed writes, but this is
->> something I noticed.
+> Host that wants to enable the device to perform background
+> operations during device idle time, should signal the device
+> by setting AUTO_EN in BKOPS_EN field EXT_CSD[163] to 1b. When
+> this bit is set, the device may start or stop background operations
+> whenever it sees fit, without any notification to the host.
 > 
+> When AUTO_EN bit is set, the host should keep the device power
+> active. The host may set or clear this bit at any time based on
+> its power constraints or other considerations.
 > 
-> I think if brq has not been set up, the we could meet another problem
-> of checking the case of whether 4KB native sector is enabled.
-> When fetching blk req from the queue, mmc_blk_issue_rw_rq already
-> use brq there which is the same from your case, namely
-> mq->mqrq_cur->brq, right?
-
-Looks like that was that fixed by:
-
-commit 3a6db10d86902491b759103ee97b2539175dd1dd
-Author: Yuan, Juntao <juntao.yuan@intel.com>
-Date:   Fri May 13 07:59:24 2016 +0000
-
-    mmc: block: correct 4KB alignment check
-
-    In sectors alignment check, brq->data.blocks means sectors of the
-    previous mqrq since data.blocks for mqrq_cur hasn't been updated yet.
-    data.blocks will be updated later in mmc_blk_packed_hdr_wrq_prep or
-    mmc_blk_rw_rq_prep.
-
-    static int mmc_blk_issue_rw_rq(struct mmc_queue *mq, ......
-            ......
-        struct mmc_blk_request *brq = &mq->mqrq_cur->brq;
-
-    Signed-off-by: Yuan Juntao <juntao.yuan@intel.com>
-    Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
-
-There is also another fix in the SWCMDQ changes:
-
-	http://marc.info/?l=linux-mmc&m=146547356109940
-
+> Currently the manual bkops is only be used under the async req
+> circumstances and it's a bit complicated to be controlled as the
+> perfect method is that we should do some idle monitor just as rpm
+> and send HPI each time if receiving rd/wr req. But it will impact
+> performance significantly, especially for random iops since the
+> weight of executing HPI against r/w small piece of LBAs is
+> nonnegligible.
 > 
-> 
-> 
->>
->> Regards
->> Adrian
->>
->>
->>  drivers/mmc/card/block.c | 3 +--
->>  1 file changed, 1 insertion(+), 2 deletions(-)
->>
->> diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
->> index b954516739be..aa5cfaf1fdf0 100644
->> --- a/drivers/mmc/card/block.c
->> +++ b/drivers/mmc/card/block.c
->> @@ -1834,8 +1834,7 @@ static void mmc_blk_packed_hdr_wrq_prep(struct
->> mmc_queue_req *mqrq,
->>          do_data_tag = (card->ext_csd.data_tag_unit_size) &&
->>              (prq->cmd_flags & REQ_META) &&
->>              (rq_data_dir(prq) == WRITE) &&
->> -            ((brq->data.blocks * brq->data.blksz) >=
->> -             card->ext_csd.data_tag_unit_size);
->> +            blk_rq_bytes(prq) >= card->ext_csd.data_tag_unit_size;
->>          /* Argument of CMD23 */
->>          packed_cmd_hdr[(i * 2)] =
->>              (do_rel_wr ? MMC_CMD23_ARG_REL_WR : 0) |
->>
-> 
-> 
+> So we now prefer to select the auto one unconditionally if supported
+> which makes it as simple as possible. It should really good enough
+> for devices to manage its internal policy for bkops rather than the
+> host, which makes us believe that we could achieve the best
+> performance for all the devices implementing auto bkops and the only
+> thing we should do is to disable it when cutting off the power.
 
+Do you know if there is really a requirement to do that? Because then, what
+is the point of power off notification? And why is AUTO_EN persistent across
+power failure?
