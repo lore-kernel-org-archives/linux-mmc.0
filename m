@@ -1,95 +1,64 @@
-From: Shawn Lin <shawn.lin@rock-chips.com>
-Subject: Re: [PATCH] mmc: core: add auto bkops support
-Date: Mon, 13 Jun 2016 16:58:54 +0800
-Message-ID: <b22ae70d-5128-639d-eef0-8ac9cdd2b8e4@rock-chips.com>
-References: <1465182439-27963-1-git-send-email-shawn.lin@rock-chips.com>
- <575E52AC.6000902@intel.com>
- <8bbb3f13-efb3-e963-e53f-cf2ca796f319@rock-chips.com>
- <575E6C11.8060709@intel.com>
+From: Heiko =?ISO-8859-1?Q?St=FCbner?= <heiko-4mtYJXux2i+zQB+pC5nmwQ@public.gmane.org>
+Subject: Re: [PATCH 03/11] Documentation: mmc: sdhci-of-arasan: Add soc-ctl-syscon for corecfg regs
+Date: Mon, 13 Jun 2016 11:32:18 +0200
+Message-ID: <1678454.YQFjtBiLV1@diego>
+References: <1465339484-969-1-git-send-email-dianders@chromium.org> <1465339484-969-4-git-send-email-dianders@chromium.org> <45a7e8c7-5bd4-8c40-004a-b8906eff881a@rock-chips.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8;
-	format=flowed
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from lucky1.263xmail.com ([211.157.147.134]:54038 "EHLO
-	lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S933300AbcFMI7E (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 13 Jun 2016 04:59:04 -0400
-In-Reply-To: <575E6C11.8060709@intel.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7Bit
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <45a7e8c7-5bd4-8c40-004a-b8906eff881a-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
+Cc: Douglas Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, kishon-l0cyMroinI0@public.gmane.org, robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, xzy.xu-TNX95d0MmH7DzftRWevZcw@public.gmane.org, briannorris-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org, adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, pawel.moll-5wv7dgnIgG8@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, ijc+devicetree-KcIKpvwj1kUDXYZnReoRVg@public.gmane.org, galak-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: shawn.lin@rock-chips.com, Ulf Hansson <ulf.hansson@linaro.org>, Jaehoon Chung <jh80.chung@samsung.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Doug Anderson <dianders@chromium.org>, linux-rockchip@lists.infradead.org, Alex Lemberg <alex.lemberg@sandisk.com>
 
-=E5=9C=A8 2016/6/13 16:17, Adrian Hunter =E5=86=99=E9=81=93:
-> On 13/06/16 10:48, Shawn Lin wrote:
->> On 2016/6/13 14:29, Adrian Hunter wrote:
->>> On 06/06/16 06:07, Shawn Lin wrote:
->>>> JEDEC eMMC v5.1 introduce an autonomously initiated method
->>>> for background operations.
->>>>
->>>> Host that wants to enable the device to perform background
->>>> operations during device idle time, should signal the device
->>>> by setting AUTO_EN in BKOPS_EN field EXT_CSD[163] to 1b. When
->>>> this bit is set, the device may start or stop background operation=
-s
->>>> whenever it sees fit, without any notification to the host.
->>>>
->>>> When AUTO_EN bit is set, the host should keep the device power
->>>> active. The host may set or clear this bit at any time based on
->>>> its power constraints or other considerations.
->>>>
->>>> Currently the manual bkops is only be used under the async req
->>>> circumstances and it's a bit complicated to be controlled as the
->>>> perfect method is that we should do some idle monitor just as rpm
->>>> and send HPI each time if receiving rd/wr req. But it will impact
->>>> performance significantly, especially for random iops since the
->>>> weight of executing HPI against r/w small piece of LBAs is
->>>> nonnegligible.
->>>>
->>>> So we now prefer to select the auto one unconditionally if support=
-ed
->>>> which makes it as simple as possible. It should really good enough
->>>> for devices to manage its internal policy for bkops rather than th=
-e
->>>> host, which makes us believe that we could achieve the best
->>>> performance for all the devices implementing auto bkops and the on=
-ly
->>>> thing we should do is to disable it when cutting off the power.
->>>
->>> Do you know if there is really a requirement to do that?
->>
->> Even without bkops enable, no matter for manual or auto one, FTL sho=
-uld
->> always do bkops like GC internally when needed to guarantee the
->> performance and balance the wear leveling. What I thought to do is t=
-o
->> make it more explicitly.
->>
->> Because then, what
->>> is the point of power off notification?
->>
->> When power off notification is sent, bkops will be stopped
->> in _mmc_suspend. So I don't undertand your point here?
->
-> I am trying to understand why we need to do anything for auto bkops.
-> Since AUTO_EN is persistent, we can leave the decision whether to tur=
-n it on
-> to whomever provisions the device. Then we just leave it alone.
->
+Am Montag, 13. Juni 2016, 16:18:24 schrieb Shawn Lin:
+> On 2016/6/8 6:44, Douglas Anderson wrote:
+> > As can be seen in Arasan's datasheet [1] there are several "corecfg"
+> > settings in their SDHCI IP Block that are supposed to be controlled by
+> > software.  Although the datasheet referenced is a bit vague about how to
+> > access corecfg, in Figure 5 you can see that for Arasan's PHY (a
+> > separate component than their SDHCI component) they describe the
+> > "phyctrl" registers as being "FROM SOC CTL REG", implying that it's up
+> > to the licensee of the Arasan IP block to implement these registers.  It
+> > seems sane to assume that the "corecfg" registers in their SDHCI IP
+> > block works in a similar way for all licensees of the IP Block.
+> > 
+> > Device tree has a model that allows a device to get a reference to
+> > random registers located elsewhere in the SoC: sysctl.  Let's leverage
+> > this model and allow adding a sysctl reference to access the control
+> > registers for the Arasan SDHCI PHYs.
+> > 
+> > Having a reference to the control registers doesn't do much for us on
+> > its own since the Arasan spec doesn't specify how these corecfg values
+> > are laid out in memory.  In the SDHCI driver we'll need a map detailing
+> > where each corecfg can be found in each implementation.  This map can be
+> > found using the primary compatible string of the SDHCI device.  In that
+> > spirit, document that existing rk3399 device trees already have a
+> > specific compatible string, though up to now they've always been relying
+> > on the driver supporting the generic.
+> > 
+> > Note that since existing devices seem to work fairly well as-is, we'll
+> > list the syscon reference as "optional", but it's likely that we'll run
+> > into much fewer problems if we can actually set the proper values in the
+> > syscon, so it is strongly suggested that any SoCs where we have a map to
+> > set the corecfg also include a reference to the syscon.
+> 
+> yes, the interaction of phy and controller should be more explicitly
+> now. Why not make it mandatory for arasan,sdhci-5.1.
 
-Hrm..
+The omnipresent backwards-compatiblity :-) .
 
-one possible way is to control it by mmc-utils on
-user space?  So we should add a cmd for mmc-utils
-there?
+The binding did not require any of this in the past, so the driver should 
+always also work with devicetrees created according to this old binding.
 
->
->
->
+And obviously it was working without that before as well, as Doug stated.
 
 
---=20
-Best Regards
-Shawn Lin
+Heiko
 
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
