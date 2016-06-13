@@ -1,85 +1,80 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH] mmc: core: add auto bkops support
-Date: Mon, 13 Jun 2016 15:25:53 +0300
-Message-ID: <575EA651.7060606@intel.com>
-References: <1465182439-27963-1-git-send-email-shawn.lin@rock-chips.com>
- <575E52AC.6000902@intel.com>
- <8bbb3f13-efb3-e963-e53f-cf2ca796f319@rock-chips.com>
- <575E6C11.8060709@intel.com>
- <b22ae70d-5128-639d-eef0-8ac9cdd2b8e4@rock-chips.com>
+From: Ziji Hu <huziji-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>
+Subject: Re: [PATCH 05/12] mmc: sdhci: add a pre voltage switch callback
+ function
+Date: Mon, 13 Jun 2016 14:04:28 +0000
+Message-ID: <D7CF8A19-9181-4A97-90AF-AC5A6517CE2B@marvell.com>
+References: <1465456218-28354-1-git-send-email-gregory.clement@free-electrons.com>
+ <1465456218-28354-6-git-send-email-gregory.clement@free-electrons.com>,<575E72DC.5090604@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <b22ae70d-5128-639d-eef0-8ac9cdd2b8e4@rock-chips.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Shawn Lin <shawn.lin@rock-chips.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Jaehoon Chung <jh80.chung@samsung.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Doug Anderson <dianders@chromium.org>, linux-rockchip@lists.infradead.org, Alex Lemberg <alex.lemberg@sandisk.com>
+Content-Type: text/plain; charset="gb2312"
+Content-Transfer-Encoding: base64
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <575E72DC.5090604-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Content-Language: zh-CN
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Cc: Gregory CLEMENT <gregory.clement-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Jason Cooper <jason-NLaQJdtUoK4Be96aLqz0jA@public.gmane.org>, Andrew Lunn <andrew-g2DYL2Zd6BY@public.gmane.org>, Sebastian Hesselbarth <sebastian.hesselbarth-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Thomas Petazzoni <thomas.petazzoni-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Nadav Haklai <nadavh-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, Victor Gu <xigu-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, Romain Perier <romain.perier-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>, Omri Itach <omrii-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, Marcin Wojtas <mw-nYOzD4b6Jr9Wk0Htik3J/w@public.gmane.org>, Wilson Ding <dingwei-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, Shadi Ammouri <shadi-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, Jisheng Zhang <jszhang-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, "Wei(SOCP) Liu" <liuw-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On 13/06/16 11:58, Shawn Lin wrote:
-> =E5=9C=A8 2016/6/13 16:17, Adrian Hunter =E5=86=99=E9=81=93:
->> On 13/06/16 10:48, Shawn Lin wrote:
->>> On 2016/6/13 14:29, Adrian Hunter wrote:
->>>> On 06/06/16 06:07, Shawn Lin wrote:
->>>>> JEDEC eMMC v5.1 introduce an autonomously initiated method
->>>>> for background operations.
->>>>>
->>>>> Host that wants to enable the device to perform background
->>>>> operations during device idle time, should signal the device
->>>>> by setting AUTO_EN in BKOPS_EN field EXT_CSD[163] to 1b. When
->>>>> this bit is set, the device may start or stop background operatio=
-ns
->>>>> whenever it sees fit, without any notification to the host.
->>>>>
->>>>> When AUTO_EN bit is set, the host should keep the device power
->>>>> active. The host may set or clear this bit at any time based on
->>>>> its power constraints or other considerations.
->>>>>
->>>>> Currently the manual bkops is only be used under the async req
->>>>> circumstances and it's a bit complicated to be controlled as the
->>>>> perfect method is that we should do some idle monitor just as rpm
->>>>> and send HPI each time if receiving rd/wr req. But it will impact
->>>>> performance significantly, especially for random iops since the
->>>>> weight of executing HPI against r/w small piece of LBAs is
->>>>> nonnegligible.
->>>>>
->>>>> So we now prefer to select the auto one unconditionally if suppor=
-ted
->>>>> which makes it as simple as possible. It should really good enoug=
-h
->>>>> for devices to manage its internal policy for bkops rather than t=
-he
->>>>> host, which makes us believe that we could achieve the best
->>>>> performance for all the devices implementing auto bkops and the o=
-nly
->>>>> thing we should do is to disable it when cutting off the power.
->>>>
->>>> Do you know if there is really a requirement to do that?
->>>
->>> Even without bkops enable, no matter for manual or auto one, FTL sh=
-ould
->>> always do bkops like GC internally when needed to guarantee the
->>> performance and balance the wear leveling. What I thought to do is =
-to
->>> make it more explicitly.
->>>
->>> Because then, what
->>>> is the point of power off notification?
->>>
->>> When power off notification is sent, bkops will be stopped
->>> in _mmc_suspend. So I don't undertand your point here?
->>
->> I am trying to understand why we need to do anything for auto bkops.
->> Since AUTO_EN is persistent, we can leave the decision whether to tu=
-rn it on
->> to whomever provisions the device. Then we just leave it alone.
->>
->=20
-> Hrm..
->=20
-> one possible way is to control it by mmc-utils on
-> user space?  So we should add a cmd for mmc-utils
-> there?
-
-That would be consistent with manual bkops.
+SGkgQWRyaWFuLA0KDQogIFRoYW5rcyBhIGxvdCBmb3IgdGhlIHN1Z2dlc3Rpb24uIEknbSBmcm9t
+IE1hcnZlbGwgWGVub24gU0RIQyB0ZWFtLg0KICBNb3N0IG9mIHNkaGNpIGhvc3Qgb3BzIGFyZSBz
+dGlsbCB1c2VkIGluIG91ciBkcml2ZXIuIFdlIGp1c3QgY2hhbmdlIG9yIGFkZCBmZXcgb3BzLiBU
+aHVzLCBpZiB3ZSBjcmVhdGUgb3VyIG93biBtbWNfaG9zdF9vcHMsIG1hbnkgc3RhdGljIHNkaGNp
+IGhvc3Qgb3BzIHdpbGwgYmUgZXhwb3J0ZWQuIEkgd291bGQgbGlrZSB0byBrbm93IHdoZXRoZXIg
+c3VjaCBhIG1vZGlmaWNhdGlvbiBjYW4gYmUgYWNjZXB0ZWQgb3Igbm90Lg0KDQogICBJIG5vdGlj
+ZSB0aGF0IGNvbW11bml0eSBpcyBpbXByb3Zpbmcgc2RoY2kuIFRodXMgYWxsIHRoZSBzdGF0aWMg
+c2RoY2kgb3BzIGNhbGxlZCBvdXRzaWRlIHRoZSBzZGhjaS5jIHdpbGwgYmUgZXhwb3J0ZWQuIElz
+IG15IHVuZGVyc3RhbmRpbmcgY29ycmVjdD8NCiAgIFRoYW5rIHlvdS4NCg0KQmVzdCByZWdhcmRz
+LA0KSHUgWmlqaQ0KDQo+PiDU2iAyMDE2xOo21MIxM8jVo6wxNjo1MqOsQWRyaWFuIEh1bnRlciA8
+YWRyaWFuLmh1bnRlckBpbnRlbC5jb20+INC0tcCjug0KPj4gDQo+PiBPbiAwOS8wNi8xNiAxMDox
+MCwgR3JlZ29yeSBDTEVNRU5UIHdyb3RlOg0KPj4gRnJvbTogVmljdG9yIEd1IDx4aWd1QG1hcnZl
+bGwuY29tPg0KPj4gDQo+PiBTb21lIGhvc3QgY29udHJvbGxlciBzdWNoIGFzIFhlbm9uIG5lZWRz
+IGFkZGl0aW9uYWwgc2V0dGluZyB3aGVuDQo+PiBzd2l0Y2hpbmcgc2lnbmFsIHZvbHRhZ2UgaW4g
+ZU1NQyBtb2RlLiBUaGV5IGFsc28gbmVlZCB0byByZS1lbmFibGUNCj4+IGludGVybmFsIGNsb2Nr
+IGJlZm9yZSBhIHZvbHRhZ2Ugc3dpdGNoLg0KPj4gDQo+PiBUaGlzIGNvbW1pdCBhZGRzIGEgY2Fs
+bGJhY2sgcm91dGluZSAidm9sdGFnZV9zd2l0Y2hfcHJlIiBpbiB0aGUgc3RydWN0DQo+PiBzZGhj
+aV9vcHMsIHdoaWNoIGlzIHVzZWQgYnkgc29tZSBob3N0IGNvbnRyb2xsZXJzIHdoaWNoIG5lZWQg
+cmUtZW5hYmxlDQo+PiB0aGUgaW50ZXJuYWwgY2xvY2sgYmVmb3JlIGEgdm9sdGFnZSBzd2l0Y2gu
+DQo+IA0KPiBEb24ndCB3YW50IHRvIGFkZCBzZGhjaSBob3N0IG9wcyBmb3IgdGhlICJkbyBzb21l
+dGhpbmcgYmVmb3JlIGEgbW1jIGhvc3Qgb3AiDQo+IGNhc2UuDQo+IA0KPiBJbnN0ZWFkLCBleHBv
+cnQgc2RoY2lfc3RhcnRfc2lnbmFsX3ZvbHRhZ2Vfc3dpdGNoKCkgYW5kICBob29rDQo+IGhvc3Qt
+Pm1tY19ob3N0X29wcy5zdGFydF9zaWduYWxfdm9sdGFnZV9zd2l0Y2guIFRoZW4gaW4gc2RoY2kt
+eGVub24uYzoNCj4gDQo+IGludCB4ZW5vbl9fc3RhcnRfc2lnbmFsX3ZvbHRhZ2Vfc3dpdGNoKHN0
+cnVjdCBtbWNfaG9zdCAqbW1jLA0KPiAgICAgICAgICAgICAgICAgICAgICBzdHJ1Y3QgbW1jX2lv
+cyAqaW9zKQ0KPiB7DQo+ICAgYmxhaCBibGFoDQo+ICAgcmV0dXJuIHNkaGNpX3N0YXJ0X3NpZ25h
+bF92b2x0YWdlX3N3aXRjaChtbWMsIGlvcyk7DQo+IH0NCj4gDQo+IA0KPj4gDQo+PiBbZ3JlZ29y
+eS5jbGVtZW50QGZyZWUtZWxlY3Ryb25zLmNvbTogc3BsaXQgdGhlIGluaXRpYWwgY29tbWl0IGFu
+ZA0KPj4gcmVmb3JtdWxhdGUgdGhlIGxvZ10NCj4+IA0KPj4gU2lnbmVkLW9mZi1ieTogVmljdG9y
+IEd1IDx4aWd1QG1hcnZlbGwuY29tPg0KPj4gU2lnbmVkLW9mZi1ieTogTWFyY2luIFdvanRhcyA8
+bXdAc2VtaWhhbGYuY29tPg0KPj4gU2lnbmVkLW9mZi1ieTogR3JlZ29yeSBDTEVNRU5UIDxncmVn
+b3J5LmNsZW1lbnRAZnJlZS1lbGVjdHJvbnMuY29tPg0KPj4gLS0tDQo+PiBkcml2ZXJzL21tYy9o
+b3N0L3NkaGNpLmMgfCA0ICsrKysNCj4+IGRyaXZlcnMvbW1jL2hvc3Qvc2RoY2kuaCB8IDEgKw0K
+Pj4gMiBmaWxlcyBjaGFuZ2VkLCA1IGluc2VydGlvbnMoKykNCj4+IA0KPj4gZGlmZiAtLWdpdCBh
+L2RyaXZlcnMvbW1jL2hvc3Qvc2RoY2kuYyBiL2RyaXZlcnMvbW1jL2hvc3Qvc2RoY2kuYw0KPj4g
+aW5kZXggYjA3MjE5NDI2ZDM5Li5jYWQwM2ZmYTlkOWIgMTAwNjQ0DQo+PiAtLS0gYS9kcml2ZXJz
+L21tYy9ob3N0L3NkaGNpLmMNCj4+ICsrKyBiL2RyaXZlcnMvbW1jL2hvc3Qvc2RoY2kuYw0KPj4g
+QEAgLTE3MjksNiArMTcyOSwxMCBAQCBzdGF0aWMgaW50IHNkaGNpX3N0YXJ0X3NpZ25hbF92b2x0
+YWdlX3N3aXRjaChzdHJ1Y3QgbW1jX2hvc3QgKm1tYywNCj4+ICAgaWYgKGhvc3QtPnZlcnNpb24g
+PCBTREhDSV9TUEVDXzMwMCkNCj4+ICAgICAgIHJldHVybiAwOw0KPj4gDQo+PiArICAgIC8qIFNv
+bWUgY29udHJvbGxlciBuZWVkIHRvIGRvIG1vcmUgYmVmb3JlIHN3aXRjaGluZyAqLw0KPj4gKyAg
+ICBpZiAoaG9zdC0+b3BzLT52b2x0YWdlX3N3aXRjaF9wcmUpDQo+PiArICAgICAgICBob3N0LT5v
+cHMtPnZvbHRhZ2Vfc3dpdGNoX3ByZShob3N0KTsNCj4+ICsNCj4+ICAgY3RybCA9IHNkaGNpX3Jl
+YWR3KGhvc3QsIFNESENJX0hPU1RfQ09OVFJPTDIpOw0KPj4gDQo+PiAgIHN3aXRjaCAoaW9zLT5z
+aWduYWxfdm9sdGFnZSkgew0KPj4gZGlmZiAtLWdpdCBhL2RyaXZlcnMvbW1jL2hvc3Qvc2RoY2ku
+aCBiL2RyaXZlcnMvbW1jL2hvc3Qvc2RoY2kuaA0KPj4gaW5kZXggNDljNmM1YjBlMzNiLi42YmVj
+MWIwMzY4ZDIgMTAwNjQ0DQo+PiAtLS0gYS9kcml2ZXJzL21tYy9ob3N0L3NkaGNpLmgNCj4+ICsr
+KyBiL2RyaXZlcnMvbW1jL2hvc3Qvc2RoY2kuaA0KPj4gQEAgLTU1MCw2ICs1NTAsNyBAQCBzdHJ1
+Y3Qgc2RoY2lfb3BzIHsNCj4+ICAgICAgICAgICAgICAgICAgICB1bnNpZ25lZCBpbnQgbWF4X2R0
+ciwgaW50IGhvc3RfZHJ2LA0KPj4gICAgICAgICAgICAgICAgICAgIGludCBjYXJkX2RydiwgaW50
+ICpkcnZfdHlwZSk7DQo+PiAgIHZvaWQgICAgKCppbml0X2NhcmQpKHN0cnVjdCBzZGhjaV9ob3N0
+ICpob3N0LCBzdHJ1Y3QgbW1jX2NhcmQgKmNhcmQpOw0KPj4gKyAgICB2b2lkICAgICgqdm9sdGFn
+ZV9zd2l0Y2hfcHJlKShzdHJ1Y3Qgc2RoY2lfaG9zdCAqaG9zdCk7DQo+PiB9Ow0KPj4gDQo+PiAj
+aWZkZWYgQ09ORklHX01NQ19TREhDSV9JT19BQ0NFU1NPUlMNCj4gDQo+IC0tDQo+IFRvIHVuc3Vi
+c2NyaWJlIGZyb20gdGhpcyBsaXN0OiBzZW5kIHRoZSBsaW5lICJ1bnN1YnNjcmliZSBsaW51eC1t
+bWMiIGluDQo+IHRoZSBib2R5IG9mIGEgbWVzc2FnZSB0byBtYWpvcmRvbW9Admdlci5rZXJuZWwu
+b3JnDQo+IE1vcmUgbWFqb3Jkb21vIGluZm8gYXQgIGh0dHA6Ly92Z2VyLmtlcm5lbC5vcmcvbWFq
+b3Jkb21vLWluZm8uaHRtbA0K
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
