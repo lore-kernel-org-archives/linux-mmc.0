@@ -1,64 +1,222 @@
-From: Heiko =?ISO-8859-1?Q?St=FCbner?= <heiko-4mtYJXux2i+zQB+pC5nmwQ@public.gmane.org>
-Subject: Re: [PATCH 03/11] Documentation: mmc: sdhci-of-arasan: Add soc-ctl-syscon for corecfg regs
-Date: Mon, 13 Jun 2016 11:32:18 +0200
-Message-ID: <1678454.YQFjtBiLV1@diego>
-References: <1465339484-969-1-git-send-email-dianders@chromium.org> <1465339484-969-4-git-send-email-dianders@chromium.org> <45a7e8c7-5bd4-8c40-004a-b8906eff881a@rock-chips.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7Bit
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <45a7e8c7-5bd4-8c40-004a-b8906eff881a-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
-Cc: Douglas Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, kishon-l0cyMroinI0@public.gmane.org, robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, xzy.xu-TNX95d0MmH7DzftRWevZcw@public.gmane.org, briannorris-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org, adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, pawel.moll-5wv7dgnIgG8@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, ijc+devicetree-KcIKpvwj1kUDXYZnReoRVg@public.gmane.org, galak-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+From: Al Cooper <alcooperx@gmail.com>
+Subject: [RESEND PATCH V5 1/2] mmc: sdhci-brcmstb: Add driver for Broadcom BRCMSTB SoCs
+Date: Mon, 13 Jun 2016 08:18:59 -0400
+Message-ID: <1465820340-16722-2-git-send-email-alcooperx@gmail.com>
+References: <1465820340-16722-1-git-send-email-alcooperx@gmail.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-pa0-f66.google.com ([209.85.220.66]:36393 "EHLO
+	mail-pa0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S965049AbcFMMTg (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 13 Jun 2016 08:19:36 -0400
+Received: by mail-pa0-f66.google.com with SMTP id fg1so10432924pad.3
+        for <linux-mmc@vger.kernel.org>; Mon, 13 Jun 2016 05:19:36 -0700 (PDT)
+In-Reply-To: <1465820340-16722-1-git-send-email-alcooperx@gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: ulf.hansson@linaro.org, adrian.hunter@intel.com, linux-mmc@vger.kernel.org, bcm-kernel-feedback-list@broadcom.com
+Cc: Al Cooper <alcooperx@gmail.com>
 
-Am Montag, 13. Juni 2016, 16:18:24 schrieb Shawn Lin:
-> On 2016/6/8 6:44, Douglas Anderson wrote:
-> > As can be seen in Arasan's datasheet [1] there are several "corecfg"
-> > settings in their SDHCI IP Block that are supposed to be controlled by
-> > software.  Although the datasheet referenced is a bit vague about how to
-> > access corecfg, in Figure 5 you can see that for Arasan's PHY (a
-> > separate component than their SDHCI component) they describe the
-> > "phyctrl" registers as being "FROM SOC CTL REG", implying that it's up
-> > to the licensee of the Arasan IP block to implement these registers.  It
-> > seems sane to assume that the "corecfg" registers in their SDHCI IP
-> > block works in a similar way for all licensees of the IP Block.
-> > 
-> > Device tree has a model that allows a device to get a reference to
-> > random registers located elsewhere in the SoC: sysctl.  Let's leverage
-> > this model and allow adding a sysctl reference to access the control
-> > registers for the Arasan SDHCI PHYs.
-> > 
-> > Having a reference to the control registers doesn't do much for us on
-> > its own since the Arasan spec doesn't specify how these corecfg values
-> > are laid out in memory.  In the SDHCI driver we'll need a map detailing
-> > where each corecfg can be found in each implementation.  This map can be
-> > found using the primary compatible string of the SDHCI device.  In that
-> > spirit, document that existing rk3399 device trees already have a
-> > specific compatible string, though up to now they've always been relying
-> > on the driver supporting the generic.
-> > 
-> > Note that since existing devices seem to work fairly well as-is, we'll
-> > list the syscon reference as "optional", but it's likely that we'll run
-> > into much fewer problems if we can actually set the proper values in the
-> > syscon, so it is strongly suggested that any SoCs where we have a map to
-> > set the corecfg also include a reference to the syscon.
-> 
-> yes, the interaction of phy and controller should be more explicitly
-> now. Why not make it mandatory for arasan,sdhci-5.1.
+Signed-off-by: Al Cooper <alcooperx@gmail.com>
+---
+ MAINTAINERS                      |   7 ++
+ drivers/mmc/host/Kconfig         |  11 ++++
+ drivers/mmc/host/Makefile        |   1 +
+ drivers/mmc/host/sdhci-brcmstb.c | 137 +++++++++++++++++++++++++++++++++++++++
+ 4 files changed, 156 insertions(+)
+ create mode 100644 drivers/mmc/host/sdhci-brcmstb.c
 
-The omnipresent backwards-compatiblity :-) .
+diff --git a/MAINTAINERS b/MAINTAINERS
+index 7304d2e..e5528cf 100644
+--- a/MAINTAINERS
++++ b/MAINTAINERS
+@@ -10187,6 +10187,13 @@ F:	tools/testing/selftests/seccomp/*
+ K:	\bsecure_computing
+ K:	\bTIF_SECCOMP\b
+ 
++SECURE DIGITAL HOST CONTROLLER INTERFACE (SDHCI) Broadcom BRCMSTB DRIVER
++M:	Al Cooper <alcooperx@gmail.com>
++L:	linux-mmc@vger.kernel.org
++L:	bcm-kernel-feedback-list@broadcom.com
++S:	Maintained
++F:	drivers/mmc/host/sdhci-brcmstb*
++
+ SECURE DIGITAL HOST CONTROLLER INTERFACE (SDHCI) SAMSUNG DRIVER
+ M:	Ben Dooks <ben-linux@fluff.org>
+ M:	Jaehoon Chung <jh80.chung@samsung.com>
+diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+index 0aa484c..1038c9a 100644
+--- a/drivers/mmc/host/Kconfig
++++ b/drivers/mmc/host/Kconfig
+@@ -798,3 +798,14 @@ config MMC_SDHCI_MICROCHIP_PIC32
+           If you have a controller with this interface, say Y or M here.
+ 
+           If unsure, say N.
++config MMC_SDHCI_BRCMSTB
++	tristate "Broadcom SDIO/SD/MMC support"
++	depends on ARCH_BRCMSTB || BMIPS_GENERIC
++	depends on MMC_SDHCI_PLTFM
++	default y
++	select MMC_SDHCI_IO_ACCESSORS
++	help
++	  This selects support for the SDIO/SD/MMC Host Controller on
++	  Broadcom STB SoCs.
++
++	  If unsure, say Y.
+diff --git a/drivers/mmc/host/Makefile b/drivers/mmc/host/Makefile
+index af918d2..2075c11 100644
+--- a/drivers/mmc/host/Makefile
++++ b/drivers/mmc/host/Makefile
+@@ -76,6 +76,7 @@ obj-$(CONFIG_MMC_SDHCI_IPROC)		+= sdhci-iproc.o
+ obj-$(CONFIG_MMC_SDHCI_MSM)		+= sdhci-msm.o
+ obj-$(CONFIG_MMC_SDHCI_ST)		+= sdhci-st.o
+ obj-$(CONFIG_MMC_SDHCI_MICROCHIP_PIC32)	+= sdhci-pic32.o
++obj-$(CONFIG_MMC_SDHCI_BRCMSTB)		+= sdhci-brcmstb.o
+ 
+ ifeq ($(CONFIG_CB710_DEBUG),y)
+ 	CFLAGS-cb710-mmc	+= -DDEBUG
+diff --git a/drivers/mmc/host/sdhci-brcmstb.c b/drivers/mmc/host/sdhci-brcmstb.c
+new file mode 100644
+index 0000000..38882ef
+--- /dev/null
++++ b/drivers/mmc/host/sdhci-brcmstb.c
+@@ -0,0 +1,137 @@
++/*
++ * sdhci-brcmstb.c Support for SDHCI on Broadcom BRCMSTB SoC's
++ *
++ * Copyright (C) 2015 Broadcom Corporation
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License version 2 as
++ * published by the Free Software Foundation.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ *
++ */
++
++#include <linux/io.h>
++#include <linux/mmc/host.h>
++#include <linux/module.h>
++#include <linux/of.h>
++
++#include "sdhci-pltfm.h"
++
++#ifdef CONFIG_PM_SLEEP
++
++static int sdhci_brcmstb_suspend(struct device *dev)
++{
++	struct sdhci_host *host = dev_get_drvdata(dev);
++	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
++	int res;
++
++	res = sdhci_suspend_host(host);
++	if (res)
++		return res;
++	clk_disable_unprepare(pltfm_host->clk);
++	return res;
++}
++
++static int sdhci_brcmstb_resume(struct device *dev)
++{
++	struct sdhci_host *host = dev_get_drvdata(dev);
++	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
++	int err;
++
++	err = clk_prepare_enable(pltfm_host->clk);
++	if (err)
++		return err;
++	return sdhci_resume_host(host);
++}
++
++#endif /* CONFIG_PM_SLEEP */
++
++static SIMPLE_DEV_PM_OPS(sdhci_brcmstb_pmops, sdhci_brcmstb_suspend,
++			sdhci_brcmstb_resume);
++
++static const struct sdhci_ops sdhci_brcmstb_ops = {
++	.set_clock = sdhci_set_clock,
++	.set_bus_width = sdhci_set_bus_width,
++	.reset = sdhci_reset,
++	.set_uhs_signaling = sdhci_set_uhs_signaling,
++};
++
++static struct sdhci_pltfm_data sdhci_brcmstb_pdata = {
++	.ops = &sdhci_brcmstb_ops,
++};
++
++static int sdhci_brcmstb_probe(struct platform_device *pdev)
++{
++	struct sdhci_host *host;
++	struct sdhci_pltfm_host *pltfm_host;
++	struct clk *clk;
++	int res;
++
++	clk = devm_clk_get(&pdev->dev, NULL);
++	if (IS_ERR(clk)) {
++		dev_err(&pdev->dev, "Clock not found in Device Tree\n");
++		clk = NULL;
++	}
++	res = clk_prepare_enable(clk);
++	if (res)
++		return res;
++
++	host = sdhci_pltfm_init(pdev, &sdhci_brcmstb_pdata, 0);
++	if (IS_ERR(host))
++		return PTR_ERR(host);
++
++	/* Enable MMC_CAP2_HC_ERASE_SZ for better max discard calculations */
++	host->mmc->caps2 |= MMC_CAP2_HC_ERASE_SZ;
++
++	sdhci_get_of_property(pdev);
++	mmc_of_parse(host->mmc);
++
++	/*
++	 * Supply the existing CAPS, but clear the UHS modes. This
++	 * will allow these modes to be specified by device tree
++	 * properties through mmc_of_parse().
++	 */
++	host->caps = sdhci_readl(host, SDHCI_CAPABILITIES);
++	host->caps1 = sdhci_readl(host, SDHCI_CAPABILITIES_1);
++	host->caps1 &= ~(SDHCI_SUPPORT_SDR50 | SDHCI_SUPPORT_SDR104 |
++			SDHCI_SUPPORT_DDR50);
++	host->quirks |= SDHCI_QUIRK_MISSING_CAPS |
++		SDHCI_QUIRK_BROKEN_TIMEOUT_VAL;
++
++	res = sdhci_add_host(host);
++	if (res) {
++		sdhci_pltfm_free(pdev);
++		return res;
++	}
++
++	pltfm_host = sdhci_priv(host);
++	pltfm_host->clk = clk;
++	return res;
++}
++
++static const struct of_device_id sdhci_brcm_of_match[] = {
++	{ .compatible = "brcm,bcm7425-sdhci" },
++	{},
++};
++MODULE_DEVICE_TABLE(of, sdhci_brcm_of_match);
++
++static struct platform_driver sdhci_brcmstb_driver = {
++	.driver		= {
++		.name	= "sdhci-brcmstb",
++		.owner	= THIS_MODULE,
++		.pm	= &sdhci_brcmstb_pmops,
++		.of_match_table = of_match_ptr(sdhci_brcm_of_match),
++	},
++	.probe		= sdhci_brcmstb_probe,
++	.remove		= sdhci_pltfm_unregister,
++};
++
++module_platform_driver(sdhci_brcmstb_driver);
++
++MODULE_DESCRIPTION("SDHCI driver for Broadcom BRCMSTB SoCs");
++MODULE_AUTHOR("Broadcom");
++MODULE_LICENSE("GPL v2");
+-- 
+1.9.0.138.g2de3478
 
-The binding did not require any of this in the past, so the driver should 
-always also work with devicetrees created according to this old binding.
-
-And obviously it was working without that before as well, as Doug stated.
-
-
-Heiko
-
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
