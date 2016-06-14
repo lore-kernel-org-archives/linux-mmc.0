@@ -1,104 +1,106 @@
-From: Gregory CLEMENT <gregory.clement@free-electrons.com>
-Subject: Re: [PATCH 05/12] mmc: sdhci: add a pre voltage switch callback function
-Date: Tue, 14 Jun 2016 09:59:52 +0200
-Message-ID: <87h9cwci9z.fsf@free-electrons.com>
+From: Gregory CLEMENT <gregory.clement-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>
+Subject: Re: [PATCH 08/12] dt-bindings: mmc: Add Xenon description
+Date: Tue, 14 Jun 2016 10:02:47 +0200
+Message-ID: <87d1nkci54.fsf@free-electrons.com>
 References: <1465456218-28354-1-git-send-email-gregory.clement@free-electrons.com>
-	<1465456218-28354-6-git-send-email-gregory.clement@free-electrons.com>
-	<575E72DC.5090604@intel.com>
+	<1465456218-28354-9-git-send-email-gregory.clement@free-electrons.com>
+	<20160610141603.GA7827@rob-hp-laptop>
 Mime-Version: 1.0
 Content-Type: text/plain
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from down.free-electrons.com ([37.187.137.238]:57688 "EHLO
-	mail.free-electrons.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1750789AbcFNIAE (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 14 Jun 2016 04:00:04 -0400
-In-Reply-To: <575E72DC.5090604@intel.com> (Adrian Hunter's message of "Mon, 13
-	Jun 2016 11:46:20 +0300")
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <20160610141603.GA7827@rob-hp-laptop> (Rob Herring's message of
+	"Fri, 10 Jun 2016 09:16:03 -0500")
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Rob Herring <robh-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+Cc: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Jason Cooper <jason-NLaQJdtUoK4Be96aLqz0jA@public.gmane.org>, Andrew Lunn <andrew-g2DYL2Zd6BY@public.gmane.org>, Sebastian Hesselbarth <sebastian.hesselbarth-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Thomas Petazzoni <thomas.petazzoni-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, Nadav Haklai <nadavh-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, Victor Gu <xigu-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, Romain Perier <romain.perier-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>, Omri Itach <omrii-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, Marcin Wojtas <mw-nYOzD4b6Jr9Wk0Htik3J/w@public.gmane.org>, Wilson Ding <dingwei-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, Shadi Ammouri <shadi-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, Rob Herring <robh+dt@kernel.org>, devicetree@vger.kernel.org, Jason Cooper <jason@lakedaemon.net>, Andrew Lunn <andrew@lunn.ch>, Sebastian Hesselbarth <sebastian.hesselbarth@gmail.com>, Thomas Petazzoni <thomas.petazzoni@free-electrons.com>, linux-arm-kernel@lists.infradead.org, Nadav Haklai <nadavh@marvell.com>, Victor Gu <xigu@marvell.com>, Romain Perier <romain.perier@free-electrons.com>, Omri Itach <omrii@marvell.com>, Marcin Wojtas <mw@semihalf.com>, Wilson Ding <dingwei@marvell.com>, Shadi Ammouri <shadi@marvell.com>
 
-Hi Adrian,
+Hi Rob,
  
- On lun., juin 13 2016, Adrian Hunter <adrian.hunter@intel.com> wrote:
+ On ven., juin 10 2016, Rob Herring <robh-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org> wrote:
 
-> On 09/06/16 10:10, Gregory CLEMENT wrote:
->> From: Victor Gu <xigu@marvell.com>
+> On Thu, Jun 09, 2016 at 09:10:14AM +0200, Gregory CLEMENT wrote:
+>> This patch documents the Xenon SDHCI controller that we can find in the
+>> Armada 37xx and the Armada 7K and 8K SoCs.
 >> 
->> Some host controller such as Xenon needs additional setting when
->> switching signal voltage in eMMC mode. They also need to re-enable
->> internal clock before a voltage switch.
+>> Signed-off-by: Gregory CLEMENT <gregory.clement-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>
+>> ---
+>>  .../devicetree/bindings/mmc/sdhci-xenon.txt        | 27 ++++++++++++++++++++++
+>>  1 file changed, 27 insertions(+)
+>>  create mode 100644 Documentation/devicetree/bindings/mmc/sdhci-xenon.txt
 >> 
->> This commit adds a callback routine "voltage_switch_pre" in the struct
->> sdhci_ops, which is used by some host controllers which need re-enable
->> the internal clock before a voltage switch.
+>> diff --git a/Documentation/devicetree/bindings/mmc/sdhci-xenon.txt b/Documentation/devicetree/bindings/mmc/sdhci-xenon.txt
+>> new file mode 100644
+>> index 000000000000..e8d49fda5f12
+>> --- /dev/null
+>> +++ b/Documentation/devicetree/bindings/mmc/sdhci-xenon.txt
+>> @@ -0,0 +1,27 @@
+>> +* Marvell sdhci-xenon controller
+>> +
+>> +This file documents differences between the core properties in mmc.txt
+>> +and the properties used by the sdhci-xenon drivers.
 >
-> Don't want to add sdhci host ops for the "do something before a mmc host op"
-> case.
->
-> Instead, export sdhci_start_signal_voltage_switch() and  hook
-> host->mmc_host_ops.start_signal_voltage_switch. Then in sdhci-xenon.c:
->
-> int xenon__start_signal_voltage_switch(struct mmc_host *mmc,
-> 				       struct mmc_ios *ios)
-> {
-> 	blah blah
-> 	return sdhci_start_signal_voltage_switch(mmc, ios);
-> }
+> Bindings don't document drivers...
 
-OK I see your point.
+Sure I missed this one.
 
-Thanks,
+
+>
+>> +
+>> +Required properties:
+>> +- compatible: Should be "marvell,xenon-sdhci".
+>
+> SoC specific compatible strings please. This one can be fallback.
+
+OK
+
+>
+>> +- reg:
+>> +  one register area for the SDHCI registers.
+>> +- interrupts-extended: interrupt number and attributes
+>
+> Just use interrupts unless you really have a need for 
+> interrupts-extended. Really, either is valid for any binding, but I 
+> prefer to just have bindings documented one way.
+
+OK
+
+>
+>> +- clocks: array of clocks required for SDHCI.
+>
+> Missing from the exmaple, and how many clocks and in what order?
+
+
+I need to figure out it.
+
+>
+>> +- bus-width: max bus width in unit of bit, normally should be 1 bit, 4 bits or 8 bits
+>
+> Isn't this one standard? Just refer back to the common binding.
+
+OK it will simplify the binding dcumentation.
+
+>
+>> +
+>> +Optional properties:
+>> +- non-removable: whether card is non-removable.
+>> +- auto-cmd12: whether cmd12 is sent automatically.
+>
+> Seems strange this would be optional for a specific controller. I'd 
+> expect either the xenon controller needs this or not.
+
+I have to check it.
+
+Thanks for the review,
 
 Gregory
-
->
->
->> 
->> [gregory.clement@free-electrons.com: split the initial commit and
->> reformulate the log]
->> 
->> Signed-off-by: Victor Gu <xigu@marvell.com>
->> Signed-off-by: Marcin Wojtas <mw@semihalf.com>
->> Signed-off-by: Gregory CLEMENT <gregory.clement@free-electrons.com>
->> ---
->>  drivers/mmc/host/sdhci.c | 4 ++++
->>  drivers/mmc/host/sdhci.h | 1 +
->>  2 files changed, 5 insertions(+)
->> 
->> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
->> index b07219426d39..cad03ffa9d9b 100644
->> --- a/drivers/mmc/host/sdhci.c
->> +++ b/drivers/mmc/host/sdhci.c
->> @@ -1729,6 +1729,10 @@ static int sdhci_start_signal_voltage_switch(struct mmc_host *mmc,
->>  	if (host->version < SDHCI_SPEC_300)
->>  		return 0;
->>  
->> +	/* Some controller need to do more before switching */
->> +	if (host->ops->voltage_switch_pre)
->> +		host->ops->voltage_switch_pre(host);
->> +
->>  	ctrl = sdhci_readw(host, SDHCI_HOST_CONTROL2);
->>  
->>  	switch (ios->signal_voltage) {
->> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
->> index 49c6c5b0e33b..6bec1b0368d2 100644
->> --- a/drivers/mmc/host/sdhci.h
->> +++ b/drivers/mmc/host/sdhci.h
->> @@ -550,6 +550,7 @@ struct sdhci_ops {
->>  					 unsigned int max_dtr, int host_drv,
->>  					 int card_drv, int *drv_type);
->>  	void	(*init_card)(struct sdhci_host *host, struct mmc_card *card);
->> +	void	(*voltage_switch_pre)(struct sdhci_host *host);
->>  };
->>  
->>  #ifdef CONFIG_MMC_SDHCI_IO_ACCESSORS
->> 
->
 
 -- 
 Gregory Clement, Free Electrons
 Kernel, drivers, real-time and embedded Linux
 development, consulting, training and support.
 http://free-electrons.com
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
