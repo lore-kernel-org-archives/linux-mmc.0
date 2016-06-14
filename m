@@ -1,102 +1,101 @@
 From: Gregory CLEMENT <gregory.clement@free-electrons.com>
-Subject: Re: [PATCH 01/12] mmc: sdhci: add init_card callback to sdhci
-Date: Tue, 14 Jun 2016 09:58:12 +0200
-Message-ID: <87lh28cicr.fsf@free-electrons.com>
+Subject: Re: [PATCH 05/12] mmc: sdhci: add a pre voltage switch callback function
+Date: Tue, 14 Jun 2016 09:59:52 +0200
+Message-ID: <87h9cwci9z.fsf@free-electrons.com>
 References: <1465456218-28354-1-git-send-email-gregory.clement@free-electrons.com>
-	<1465456218-28354-2-git-send-email-gregory.clement@free-electrons.com>
-	<575E6F92.6090305@intel.com>
+	<1465456218-28354-6-git-send-email-gregory.clement@free-electrons.com>
+	<575E72DC.5090604@intel.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from down.free-electrons.com ([37.187.137.238]:57621 "EHLO
+Received: from down.free-electrons.com ([37.187.137.238]:57688 "EHLO
 	mail.free-electrons.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1750712AbcFNH60 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 14 Jun 2016 03:58:26 -0400
-In-Reply-To: <575E6F92.6090305@intel.com> (Adrian Hunter's message of "Mon, 13
-	Jun 2016 11:32:18 +0300")
+	with ESMTP id S1750789AbcFNIAE (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 14 Jun 2016 04:00:04 -0400
+In-Reply-To: <575E72DC.5090604@intel.com> (Adrian Hunter's message of "Mon, 13
+	Jun 2016 11:46:20 +0300")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: Thomas Petazzoni <thomas.petazzoni@free-electrons.com>, devicetree@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, Romain Perier <romain.perier@free-electrons.com>, Jason Cooper <jason@lakedaemon.net>, Andrew Lunn <andrew@lunn.ch>, Omri Itach <omrii@marvell.com>, linux-mmc@vger.kernel.org, Nadav Haklai <nadavh@marvell.com>, Rob Herring <robh+dt@kernel.org>, Shadi Ammouri <shadi@marvell.com>, Victor Gu <xigu@marvell.com>, Marcin Wojtas <mw@semihalf.com>, Wilson Ding <dingwei@marvell.com>, linux-arm-kernel@lists.infradead.org, Sebastian Hesselbarth <sebastian.hesselbarth@gmail.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, Rob Herring <robh+dt@kernel.org>, devicetree@vger.kernel.org, Jason Cooper <jason@lakedaemon.net>, Andrew Lunn <andrew@lunn.ch>, Sebastian Hesselbarth <sebastian.hesselbarth@gmail.com>, Thomas Petazzoni <thomas.petazzoni@free-electrons.com>, linux-arm-kernel@lists.infradead.org, Nadav Haklai <nadavh@marvell.com>, Victor Gu <xigu@marvell.com>, Romain Perier <romain.perier@free-electrons.com>, Omri Itach <omrii@marvell.com>, Marcin Wojtas <mw@semihalf.com>, Wilson Ding <dingwei@marvell.com>, Shadi Ammouri <shadi@marvell.com>
 
 Hi Adrian,
  
  On lun., juin 13 2016, Adrian Hunter <adrian.hunter@intel.com> wrote:
 
 > On 09/06/16 10:10, Gregory CLEMENT wrote:
->> From: Marcin Wojtas <mw@semihalf.com>
+>> From: Victor Gu <xigu@marvell.com>
 >> 
->> Some sdhci hosts may require handling quirks during card initialization
->> at the time when its type is already known. Hence a new callback
->> (init_card) is added in sdhci_ops.
+>> Some host controller such as Xenon needs additional setting when
+>> switching signal voltage in eMMC mode. They also need to re-enable
+>> internal clock before a voltage switch.
+>> 
+>> This commit adds a callback routine "voltage_switch_pre" in the struct
+>> sdhci_ops, which is used by some host controllers which need re-enable
+>> the internal clock before a voltage switch.
 >
-> I plan to remove init_card and other host ops that sdhci doesn't use (like
-> sdhci_select_drive_strength).  The driver must provide the mmc op instead.
-> e.g. in sdhci-xenon.c
+> Don't want to add sdhci host ops for the "do something before a mmc host op"
+> case.
 >
-> 	host->mmc_host_ops.init_card = sdhci_xenon_init_card
+> Instead, export sdhci_start_signal_voltage_switch() and  hook
+> host->mmc_host_ops.start_signal_voltage_switch. Then in sdhci-xenon.c:
+>
+> int xenon__start_signal_voltage_switch(struct mmc_host *mmc,
+> 				       struct mmc_ios *ios)
+> {
+> 	blah blah
+> 	return sdhci_start_signal_voltage_switch(mmc, ios);
+> }
 
-OK I will do this.
+OK I see your point.
 
-Thanks for your review.
+Thanks,
 
 Gregory
 
 >
+>
 >> 
+>> [gregory.clement@free-electrons.com: split the initial commit and
+>> reformulate the log]
+>> 
+>> Signed-off-by: Victor Gu <xigu@marvell.com>
 >> Signed-off-by: Marcin Wojtas <mw@semihalf.com>
 >> Signed-off-by: Gregory CLEMENT <gregory.clement@free-electrons.com>
 >> ---
->>  drivers/mmc/host/sdhci.c | 9 +++++++++
+>>  drivers/mmc/host/sdhci.c | 4 ++++
 >>  drivers/mmc/host/sdhci.h | 1 +
->>  2 files changed, 10 insertions(+)
+>>  2 files changed, 5 insertions(+)
 >> 
 >> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
->> index 0e3d7c056cb1..fd4e9a84f739 100644
+>> index b07219426d39..cad03ffa9d9b 100644
 >> --- a/drivers/mmc/host/sdhci.c
 >> +++ b/drivers/mmc/host/sdhci.c
->> @@ -2117,6 +2117,14 @@ static void sdhci_card_event(struct mmc_host *mmc)
->>  	spin_unlock_irqrestore(&host->lock, flags);
->>  }
+>> @@ -1729,6 +1729,10 @@ static int sdhci_start_signal_voltage_switch(struct mmc_host *mmc,
+>>  	if (host->version < SDHCI_SPEC_300)
+>>  		return 0;
 >>  
->> +static void sdhci_init_card(struct mmc_host *mmc, struct mmc_card *card)
->> +{
->> +	struct sdhci_host *host = mmc_priv(mmc);
+>> +	/* Some controller need to do more before switching */
+>> +	if (host->ops->voltage_switch_pre)
+>> +		host->ops->voltage_switch_pre(host);
 >> +
->> +	if (host->ops->init_card)
->> +		host->ops->init_card(host, card);
->> +}
->> +
->>  static const struct mmc_host_ops sdhci_ops = {
->>  	.request	= sdhci_request,
->>  	.post_req	= sdhci_post_req,
->> @@ -2132,6 +2140,7 @@ static const struct mmc_host_ops sdhci_ops = {
->>  	.select_drive_strength		= sdhci_select_drive_strength,
->>  	.card_event			= sdhci_card_event,
->>  	.card_busy	= sdhci_card_busy,
->> +	.init_card	= sdhci_init_card,
->>  };
+>>  	ctrl = sdhci_readw(host, SDHCI_HOST_CONTROL2);
 >>  
->>  /*****************************************************************************\
+>>  	switch (ios->signal_voltage) {
 >> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
->> index 609f87ca536b..49c6c5b0e33b 100644
+>> index 49c6c5b0e33b..6bec1b0368d2 100644
 >> --- a/drivers/mmc/host/sdhci.h
 >> +++ b/drivers/mmc/host/sdhci.h
->> @@ -549,6 +549,7 @@ struct sdhci_ops {
->>  					 struct mmc_card *card,
+>> @@ -550,6 +550,7 @@ struct sdhci_ops {
 >>  					 unsigned int max_dtr, int host_drv,
 >>  					 int card_drv, int *drv_type);
->> +	void	(*init_card)(struct sdhci_host *host, struct mmc_card *card);
+>>  	void	(*init_card)(struct sdhci_host *host, struct mmc_card *card);
+>> +	void	(*voltage_switch_pre)(struct sdhci_host *host);
 >>  };
 >>  
 >>  #ifdef CONFIG_MMC_SDHCI_IO_ACCESSORS
 >> 
 >
->
-> _______________________________________________
-> linux-arm-kernel mailing list
-> linux-arm-kernel@lists.infradead.org
-> http://lists.infradead.org/mailman/listinfo/linux-arm-kernel
 
 -- 
 Gregory Clement, Free Electrons
