@@ -1,235 +1,114 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [RESEND PATCH V5 1/2] mmc: sdhci-brcmstb: Add driver for Broadcom
- BRCMSTB SoCs
-Date: Tue, 14 Jun 2016 11:10:43 +0300
-Message-ID: <575FBC03.4060704@intel.com>
-References: <1465820340-16722-1-git-send-email-alcooperx@gmail.com>
- <1465820340-16722-2-git-send-email-alcooperx@gmail.com>
+From: Gregory CLEMENT <gregory.clement@free-electrons.com>
+Subject: Re: [PATCH 09/12] mmc: sdhci-xenon: add initial Xenon eMMC driver
+Date: Tue, 14 Jun 2016 10:19:12 +0200
+Message-ID: <878ty8chdr.fsf@free-electrons.com>
+References: <1465456218-28354-1-git-send-email-gregory.clement@free-electrons.com>
+	<1465456218-28354-10-git-send-email-gregory.clement@free-electrons.com>
+	<575FA9BF.6070703@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga04.intel.com ([192.55.52.120]:2725 "EHLO mga04.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751583AbcFNIOs (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 14 Jun 2016 04:14:48 -0400
-In-Reply-To: <1465820340-16722-2-git-send-email-alcooperx@gmail.com>
+Received: from down.free-electrons.com ([37.187.137.238]:58349 "EHLO
+	mail.free-electrons.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1751551AbcFNITY (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 14 Jun 2016 04:19:24 -0400
+In-Reply-To: <575FA9BF.6070703@intel.com> (Adrian Hunter's message of "Tue, 14
+	Jun 2016 09:52:47 +0300")
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Al Cooper <alcooperx@gmail.com>, ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, bcm-kernel-feedback-list@broadcom.com
+To: Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc@vger.kernel.org, Rob Herring <robh+dt@kernel.org>, devicetree@vger.kernel.org, Jason Cooper <jason@lakedaemon.net>, Andrew Lunn <andrew@lunn.ch>, Sebastian Hesselbarth <sebastian.hesselbarth@gmail.com>, Thomas Petazzoni <thomas.petazzoni@free-electrons.com>, linux-arm-kernel@lists.infradead.org, Nadav Haklai <nadavh@marvell.com>, Victor Gu <xigu@marvell.com>, Romain Perier <romain.perier@free-electrons.com>, Omri Itach <omrii@marvell.com>, Marcin Wojtas <mw@semihalf.com>, Wilson Ding <dingwei@marvell.com>, Shadi Ammouri <shadi@marvell.com>
 
-On 13/06/16 15:18, Al Cooper wrote:
-> Signed-off-by: Al Cooper <alcooperx@gmail.com>
+Hi Adrian,
+ 
+ On mar., juin 14 2016, Adrian Hunter <adrian.hunter@intel.com> wrote:
 
-The absence of a commit message is a red flag to some people.  You could
-write, for example, whether the driver is missing any features that still
-need to be added.
+> On 09/06/16 10:10, Gregory CLEMENT wrote:
+>> From: Victor Gu <xigu@marvell.com>
+>> 
+>> This path adds the driver for the Marvell Xenon eMMC host controller
+>> which supports eMMC 5.1, SD 3.0.
+>> 
+>> However this driver supports only up to eMMC 5.0 since the command queue
+>> feature is not included (yet) in the driver.
+>> 
+>> [gregory.clement@free-electrons.com:
+>>  - reformulate commit log
+>>  - overload the sdhci_set_uhs_signaling function instead of using a quirk
+>>  - fix a kconfig dependency
+>>  - remove dead code]
+>> 
+>> Signed-off-by: Victor Gu <xigu@marvell.com>
+>> Signed-off-by: Gregory CLEMENT <gregory.clement@free-electrons.com>
+>> ---
+>>  drivers/mmc/host/Kconfig       |   10 +
+>>  drivers/mmc/host/Makefile      |    1 +
+>>  drivers/mmc/host/sdhci-xenon.c | 1164 ++++++++++++++++++++++++++++++++++++++++
+>>  3 files changed, 1175 insertions(+)
+>>  create mode 100644 drivers/mmc/host/sdhci-xenon.c
+>> 
+>
+> <SNIP>
+>
+>> diff --git a/drivers/mmc/host/sdhci-xenon.c b/drivers/mmc/host/sdhci-xenon.c
+>> new file mode 100644
+>> index 000000000000..43c06db95872
+>> --- /dev/null
+>> +++ b/drivers/mmc/host/sdhci-xenon.c
+>
+> <SNIP>
+>
+>> +static int sdhci_xenon_delay_adj_test(struct sdhci_host *host,
+>> +		struct mmc_card *card, unsigned int delay,
+>> +		bool invert, bool phase)
+>> +{
+>> +	int ret;
+>> +	struct mmc_card *oldcard;
+>> +
+>> +	sdhci_xenon_set_fix_delay(host, delay, invert, phase);
+>> +
+>> +	/*
+>> +	 * If the card is not yet associated to the host, we
+>> +	 * temporally do it
+>> +	 */
+>> +	oldcard = card->host->card;
+>> +	if (!oldcard)
+>> +		card->host->card = card;
+>> +	ret =  card_alive(card);
+>
+> This looks like an abuse of bus_ops->alive().  You will need to get
+> agreement with Ulf how to handle this.  I will wait for Ulf's comments
+> before reviewing this patch set further.
 
-> ---
->  MAINTAINERS                      |   7 ++
->  drivers/mmc/host/Kconfig         |  11 ++++
->  drivers/mmc/host/Makefile        |   1 +
->  drivers/mmc/host/sdhci-brcmstb.c | 137 +++++++++++++++++++++++++++++++++++++++
->  4 files changed, 156 insertions(+)
->  create mode 100644 drivers/mmc/host/sdhci-brcmstb.c
-> 
-> diff --git a/MAINTAINERS b/MAINTAINERS
-> index 7304d2e..e5528cf 100644
-> --- a/MAINTAINERS
-> +++ b/MAINTAINERS
-> @@ -10187,6 +10187,13 @@ F:	tools/testing/selftests/seccomp/*
->  K:	\bsecure_computing
->  K:	\bTIF_SECCOMP\b
->  
-> +SECURE DIGITAL HOST CONTROLLER INTERFACE (SDHCI) Broadcom BRCMSTB DRIVER
-> +M:	Al Cooper <alcooperx@gmail.com>
-> +L:	linux-mmc@vger.kernel.org
-> +L:	bcm-kernel-feedback-list@broadcom.com
-> +S:	Maintained
-> +F:	drivers/mmc/host/sdhci-brcmstb*
-> +
->  SECURE DIGITAL HOST CONTROLLER INTERFACE (SDHCI) SAMSUNG DRIVER
->  M:	Ben Dooks <ben-linux@fluff.org>
->  M:	Jaehoon Chung <jh80.chung@samsung.com>
-> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
-> index 0aa484c..1038c9a 100644
-> --- a/drivers/mmc/host/Kconfig
-> +++ b/drivers/mmc/host/Kconfig
-> @@ -798,3 +798,14 @@ config MMC_SDHCI_MICROCHIP_PIC32
->            If you have a controller with this interface, say Y or M here.
->  
->            If unsure, say N.
-> +config MMC_SDHCI_BRCMSTB
-> +	tristate "Broadcom SDIO/SD/MMC support"
-> +	depends on ARCH_BRCMSTB || BMIPS_GENERIC
-> +	depends on MMC_SDHCI_PLTFM
-> +	default y
-> +	select MMC_SDHCI_IO_ACCESSORS
-> +	help
-> +	  This selects support for the SDIO/SD/MMC Host Controller on
-> +	  Broadcom STB SoCs.
-> +
-> +	  If unsure, say Y.
-> diff --git a/drivers/mmc/host/Makefile b/drivers/mmc/host/Makefile
-> index af918d2..2075c11 100644
-> --- a/drivers/mmc/host/Makefile
-> +++ b/drivers/mmc/host/Makefile
-> @@ -76,6 +76,7 @@ obj-$(CONFIG_MMC_SDHCI_IPROC)		+= sdhci-iproc.o
->  obj-$(CONFIG_MMC_SDHCI_MSM)		+= sdhci-msm.o
->  obj-$(CONFIG_MMC_SDHCI_ST)		+= sdhci-st.o
->  obj-$(CONFIG_MMC_SDHCI_MICROCHIP_PIC32)	+= sdhci-pic32.o
-> +obj-$(CONFIG_MMC_SDHCI_BRCMSTB)		+= sdhci-brcmstb.o
->  
->  ifeq ($(CONFIG_CB710_DEBUG),y)
->  	CFLAGS-cb710-mmc	+= -DDEBUG
-> diff --git a/drivers/mmc/host/sdhci-brcmstb.c b/drivers/mmc/host/sdhci-brcmstb.c
-> new file mode 100644
-> index 0000000..38882ef
-> --- /dev/null
-> +++ b/drivers/mmc/host/sdhci-brcmstb.c
-> @@ -0,0 +1,137 @@
-> +/*
-> + * sdhci-brcmstb.c Support for SDHCI on Broadcom BRCMSTB SoC's
-> + *
-> + * Copyright (C) 2015 Broadcom Corporation
-> + *
-> + * This program is free software; you can redistribute it and/or modify
-> + * it under the terms of the GNU General Public License version 2 as
-> + * published by the Free Software Foundation.
-> + *
-> + * This program is distributed in the hope that it will be useful,
-> + * but WITHOUT ANY WARRANTY; without even the implied warranty of
-> + * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-> + * GNU General Public License for more details.
-> + *
-> + */
-> +
-> +#include <linux/io.h>
-> +#include <linux/mmc/host.h>
-> +#include <linux/module.h>
-> +#include <linux/of.h>
-> +
-> +#include "sdhci-pltfm.h"
-> +
-> +#ifdef CONFIG_PM_SLEEP
-> +
-> +static int sdhci_brcmstb_suspend(struct device *dev)
-> +{
-> +	struct sdhci_host *host = dev_get_drvdata(dev);
-> +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> +	int res;
-> +
-> +	res = sdhci_suspend_host(host);
-> +	if (res)
-> +		return res;
-> +	clk_disable_unprepare(pltfm_host->clk);
-> +	return res;
-> +}
-> +
-> +static int sdhci_brcmstb_resume(struct device *dev)
-> +{
-> +	struct sdhci_host *host = dev_get_drvdata(dev);
-> +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> +	int err;
-> +
-> +	err = clk_prepare_enable(pltfm_host->clk);
-> +	if (err)
-> +		return err;
-> +	return sdhci_resume_host(host);
-> +}
-> +
-> +#endif /* CONFIG_PM_SLEEP */
-> +
-> +static SIMPLE_DEV_PM_OPS(sdhci_brcmstb_pmops, sdhci_brcmstb_suspend,
-> +			sdhci_brcmstb_resume);
-> +
-> +static const struct sdhci_ops sdhci_brcmstb_ops = {
-> +	.set_clock = sdhci_set_clock,
-> +	.set_bus_width = sdhci_set_bus_width,
-> +	.reset = sdhci_reset,
-> +	.set_uhs_signaling = sdhci_set_uhs_signaling,
-> +};
-> +
-> +static struct sdhci_pltfm_data sdhci_brcmstb_pdata = {
-> +	.ops = &sdhci_brcmstb_ops,
-> +};
-> +
-> +static int sdhci_brcmstb_probe(struct platform_device *pdev)
-> +{
-> +	struct sdhci_host *host;
-> +	struct sdhci_pltfm_host *pltfm_host;
-> +	struct clk *clk;
-> +	int res;
-> +
-> +	clk = devm_clk_get(&pdev->dev, NULL);
-> +	if (IS_ERR(clk)) {
-> +		dev_err(&pdev->dev, "Clock not found in Device Tree\n");
-> +		clk = NULL;
-> +	}
-> +	res = clk_prepare_enable(clk);
-> +	if (res)
-> +		return res;
-> +
-> +	host = sdhci_pltfm_init(pdev, &sdhci_brcmstb_pdata, 0);
-> +	if (IS_ERR(host))
+Actually I modified this part of the driver to use
+bus_ops->alive(). Initially, the alive() code was more or less copied
+and paste from the mmc core with ugly include from mmc_ops.h and
+sdio_ops.h to make it work. I find it cleaner to directly access the
+alive() function.
 
-Don't you need clk_disable_unprepare(clk) here.
+Could you explain why it is an abuse of  bus_ops->alive()?
 
-> +		return PTR_ERR(host);
-> +
-> +	/* Enable MMC_CAP2_HC_ERASE_SZ for better max discard calculations */
-> +	host->mmc->caps2 |= MMC_CAP2_HC_ERASE_SZ;
-> +
-> +	sdhci_get_of_property(pdev);
-> +	mmc_of_parse(host->mmc);
-> +
-> +	/*
-> +	 * Supply the existing CAPS, but clear the UHS modes. This
-> +	 * will allow these modes to be specified by device tree
-> +	 * properties through mmc_of_parse().
-> +	 */
-> +	host->caps = sdhci_readl(host, SDHCI_CAPABILITIES);
-> +	host->caps1 = sdhci_readl(host, SDHCI_CAPABILITIES_1);
-> +	host->caps1 &= ~(SDHCI_SUPPORT_SDR50 | SDHCI_SUPPORT_SDR104 |
-> +			SDHCI_SUPPORT_DDR50);
-> +	host->quirks |= SDHCI_QUIRK_MISSING_CAPS |
-> +		SDHCI_QUIRK_BROKEN_TIMEOUT_VAL;
-> +
-> +	res = sdhci_add_host(host);
-> +	if (res) {
+Thanks,
 
-And here
+Gregory
 
-> +		sdhci_pltfm_free(pdev);
-> +		return res;
-> +	}
-> +
-> +	pltfm_host = sdhci_priv(host);
-> +	pltfm_host->clk = clk;
-> +	return res;
-> +}
-> +
-> +static const struct of_device_id sdhci_brcm_of_match[] = {
-> +	{ .compatible = "brcm,bcm7425-sdhci" },
-> +	{},
-> +};
-> +MODULE_DEVICE_TABLE(of, sdhci_brcm_of_match);
-> +
-> +static struct platform_driver sdhci_brcmstb_driver = {
-> +	.driver		= {
-> +		.name	= "sdhci-brcmstb",
-> +		.owner	= THIS_MODULE,
-> +		.pm	= &sdhci_brcmstb_pmops,
-> +		.of_match_table = of_match_ptr(sdhci_brcm_of_match),
-> +	},
-> +	.probe		= sdhci_brcmstb_probe,
-> +	.remove		= sdhci_pltfm_unregister,
-> +};
-> +
-> +module_platform_driver(sdhci_brcmstb_driver);
-> +
-> +MODULE_DESCRIPTION("SDHCI driver for Broadcom BRCMSTB SoCs");
-> +MODULE_AUTHOR("Broadcom");
-> +MODULE_LICENSE("GPL v2");
-> 
 
+>> +	card->host->card = oldcard;
+>> +	if (ret) {
+>> +		pr_debug("Xenon failed when sampling fix delay %d, inverted %d, phase %d\n",
+>> +			 delay, invert, phase);
+>> +		return -EIO;
+>> +	}
+>> +
+>> +	pr_debug("Xenon succeeded when sampling fixed delay %d, inverted %d, phase %d\n",
+>> +		 delay, invert, phase);
+>> +	return 0;
+>> +}
+>
+>
+
+-- 
+Gregory Clement, Free Electrons
+Kernel, drivers, real-time and embedded Linux
+development, consulting, training and support.
+http://free-electrons.com
