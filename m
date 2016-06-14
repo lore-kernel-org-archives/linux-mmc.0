@@ -1,35 +1,44 @@
-From: Alan Cooper <alcooperx@gmail.com>
-Subject: Re: [RESEND PATCH V5 1/2] mmc: sdhci-brcmstb: Add driver for Broadcom
- BRCMSTB SoCs
-Date: Tue, 14 Jun 2016 11:21:02 -0400
-Message-ID: <CAOGqxeVNSxiT2sP+XMLoseFJ84MevhDJQ1kPBFg4Tryopt1zgw@mail.gmail.com>
-References: <1465820340-16722-1-git-send-email-alcooperx@gmail.com>
- <1465820340-16722-2-git-send-email-alcooperx@gmail.com> <575FBC03.4060704@intel.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+From: Al Cooper <alcooperx@gmail.com>
+Subject: [PATCH V6 0/2] Add SDHCI driver for Broadcom BRCMSTB/BMIPS Soc's
+Date: Tue, 14 Jun 2016 11:37:14 -0400
+Message-ID: <1465918636-21034-1-git-send-email-alcooperx@gmail.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-qt0-f193.google.com ([209.85.216.193]:35335 "EHLO
-	mail-qt0-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750832AbcFNPVF (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 14 Jun 2016 11:21:05 -0400
-Received: by mail-qt0-f193.google.com with SMTP id 37so6560189qtc.2
-        for <linux-mmc@vger.kernel.org>; Tue, 14 Jun 2016 08:21:04 -0700 (PDT)
-In-Reply-To: <575FBC03.4060704@intel.com>
+Received: from mail-pa0-f67.google.com ([209.85.220.67]:32961 "EHLO
+	mail-pa0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751842AbcFNPiF (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 14 Jun 2016 11:38:05 -0400
+Received: by mail-pa0-f67.google.com with SMTP id ts6so5845582pac.0
+        for <linux-mmc@vger.kernel.org>; Tue, 14 Jun 2016 08:38:04 -0700 (PDT)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, bcm-kernel-feedback-list@broadcom.com
+To: ulf.hansson@linaro.org, adrian.hunter@intel.com, linux-mmc@vger.kernel.org, bcm-kernel-feedback-list@broadcom.com
+Cc: Al Cooper <alcooperx@gmail.com>
 
-On Tue, Jun 14, 2016 at 4:10 AM, Adrian Hunter <adrian.hunter@intel.com> wrote:
-> The absence of a commit message is a red flag to some people.  You could
-> write, for example, whether the driver is missing any features that still
-> need to be added.
+V6 - Call clk_disable_unprepare() on errors in probe function.
+     Improve commit message.
+V5 - Don't create new device tree properties to disable broken UHS
+     modes. Use devm_clk_get() to get clk and change
+     clk_enable/clk_disable to clk_prepare_enable/clk_disable_unprepare
+V4 - Change the DT compatible property to "brcm,bcm7425-sdhci".
+     Add "clocks" property to DT bindings document.
+V3 - Don't add new QUIRKS to workaround Host Controller issues.
+     It turns out that all the issues could be solved by using
+     SDHCI_QUIRK_MISSING_CAPS to supply modified "caps" and "caps1"
+     Host Controller registers.
 
-I'll improve my commit messages.
+Al Cooper (2):
+  mmc: sdhci-brcmstb: Add driver for Broadcom BRCMSTB SoCs
+  mmc: DT: sdhci-brcmstb: Add device tree bindings
 
-> Don't you need clk_disable_unprepare(clk) here.
+ .../devicetree/bindings/mmc/brcm,bcm7425-sdhci.txt |  36 ++++++
+ MAINTAINERS                                        |   7 +
+ drivers/mmc/host/Kconfig                           |  11 ++
+ drivers/mmc/host/Makefile                          |   1 +
+ drivers/mmc/host/sdhci-brcmstb.c                   | 143 +++++++++++++++++++++
+ 5 files changed, 198 insertions(+)
+ create mode 100644 Documentation/devicetree/bindings/mmc/brcm,bcm7425-sdhci.txt
+ create mode 100644 drivers/mmc/host/sdhci-brcmstb.c
 
-Yes, I'll add this to the error paths that need it.
+-- 
+1.9.0.138.g2de3478
 
-Thanks Adrian
-Al
