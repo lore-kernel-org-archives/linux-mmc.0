@@ -1,72 +1,65 @@
-From: Wolfram Sang <wsa@the-dreams.de>
-Subject: Re: [PATCH] mmc: Change the enhanced area related sysfs output format
-Date: Tue, 14 Jun 2016 14:41:00 +0200
-Message-ID: <20160614124100.GA1608@katana>
-References: <1465893186-6399-1-git-send-email-beatax.baranowska@intel.com>
- <20160614101242.GA1603@katana>
- <575FDE1B.2090206@intel.com>
+From: Ben Hutchings <ben.hutchings@codethink.co.uk>
+Subject: Re: [Linux-kernel] [PATCH] mmc: mmci: add missing include of
+ mmci_qcom_dml.h
+Date: Tue, 14 Jun 2016 14:44:33 +0100
+Message-ID: <1465911873.26723.3.camel@codethink.co.uk>
+References: <201606100156.EWHSQe2w%fengguang.wu@intel.com>
+	 <49d030df-f0b5-6bed-7f4c-a101b6e15752@codethink.co.uk>
+	 <a2843535-fbea-927b-226b-e51e49f2761d@codethink.co.uk>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="5mCyUwZo2JvN/JJP"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <575FDE1B.2090206@intel.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: Beata Baranowska <beatax.baranowska@intel.com>, ulf.hansson@linaro.org, aisheng.dong@nxp.com, wsa+renesas@sang-engineering.com, gwendal@chromium.org, chaotian.jing@mediatek.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, sebastianx.jarosz@intel.com, Chuanxiao Dong <chuanxiao.dong@intel.com>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from ducie-dc1.codethink.co.uk ([185.25.241.215]:55562 "EHLO
+	ducie-dc1.codethink.co.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752234AbcFNNol (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 14 Jun 2016 09:44:41 -0400
+In-Reply-To: <a2843535-fbea-927b-226b-e51e49f2761d@codethink.co.uk>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ben Dooks <ben.dooks@codethink.co.uk>
+Cc: kbuild test robot <lkp@intel.com>, linux-kernel@lists.codethink.co.uk, linux-arm-kernel@lists.infadead.org, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, kbuild-all@01.org
+
+On Thu, 2016-06-09 at 18:45 +0100, Ben Dooks wrote:
+[...]
+> After looking at the build, it looks like this is broken
+> for the case of building mmci as a module. I think this is
+> the right fix.
+> 
+> commit be3bf8f3b56d9cfb2fcba88e638ec853d0484cbb
+> Author: Ben Dooks <ben.dooks@codethink.co.uk>
+> Date:   Thu Jun 9 18:42:53 2016 +0100
+> 
+>     mmci: fixup module build with new mmci_qcom_dml
+> 
+>     Fix the module build for the mmci code if it is built as
+>     a module and the MMC_QCOM_DML option is also set. If so
+>     then we need to build a composite module of the two files
+>     to ensure they link properly.
+> 
+>     Signed-off-by: Ben Dooks <ben.dooks@codethink.co.uk>
+> 
+> diff --git a/drivers/mmc/host/Makefile b/drivers/mmc/host/Makefile
+> index af918d2..b57db76 100644
+> --- a/drivers/mmc/host/Makefile
+> +++ b/drivers/mmc/host/Makefile
+> @@ -3,7 +3,8 @@
+>  #
+> 
+>  obj-$(CONFIG_MMC_ARMMMCI)      += mmci.o
+> -obj-$(CONFIG_MMC_QCOM_DML)     += mmci_qcom_dml.o
+> +mmci-y                         += mmci_core.o
+> +mmci-$(subst m,y,$(CONFIG_MMC_QCOM_DML)) += mmci_qcom_dml.o
+[...]
+
+If mmci_core.o and mmci_qcom_dml.o will always be linked together then
+MMC_QCOM_DML should be a boolean and you don't need any substitution
+here.
+
+Ben.
+
+-- 
+Ben Hutchings
+Software Developer, Codethink Ltd.
 
 
---5mCyUwZo2JvN/JJP
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
-
-On Tue, Jun 14, 2016 at 01:36:11PM +0300, Adrian Hunter wrote:
-> On 14/06/16 13:12, Wolfram Sang wrote:
-> > On Tue, Jun 14, 2016 at 10:33:06AM +0200, Beata Baranowska wrote:
-> >> From: Chuanxiao Dong <chuanxiao.dong@intel.com>
-> >>
-> >> When the enhanced area feature was not enabled, the related sysfs will=
-=20
-> >> have -EINVAL(-22) value, so change the sysfs output format to display=
-=20
-> >> the correct value.
-> >>
-> >> Signed-off-by: Chuanxiao Dong <chuanxiao.dong@intel.com>
-> >=20
-> > What about introducing attribute_group an use the is_visible callback
-> > there, so they won't get displayed at all?
-> >=20
->=20
-> Except that it is an ABI:
->=20
-> 	Documentation/ABI/testing/sysfs-devices-mmc
-
-And broken ever since if this patch is needed... that being said, I
-don't really have a strong opinion on my suggestion. I see the file is
-out there for >5 years.
-
-
---5mCyUwZo2JvN/JJP
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1
-
-iQIcBAEBAgAGBQJXX/tcAAoJEBQN5MwUoCm2bgAQAKNl0V+RQGHtHW9kWR3aH+Wr
-X0v4D/P/k2Y3f8N9861Ior/Xbf5nufGi0HzLNCaj9f8UIGCRkf8V58wZkJ9aOLy8
-+UzoQqbu4kx/9FVak9EBKaxE8Q+cq26V3QU0ucK2zPeZtlMXoGsvPCJTFgIjxL1f
-8UIhrHPmsQ86dLdbDVnW0+xWnhShQn5DMyfFV6XPPEZi5JBCjn3TN6SyPUE+p+wN
-wWnMftu68lrIDRK6YoKgdZvQbDMAxBLY1vuHCFENh2hOu4Kc1Ze5Y/ZpMbFcBZ1y
-CRdyDAtAUmOn950MedT0zH7PlBNuyDrhUUvrbWWLzNOE/QK+iA3hY5icBTttoS72
-X148Gb7AQzvkIa8CC5cNI6s2pBlM9FNqodr9n9O4yGPTMy2qpTb4cWpH7N2csGv2
-huz7DAfMD2z85biFvjX3cr1TZ9n8O5nC4pJStzeJxTIKIGPAvGwUZU2ICyuDHpoe
-fSMNWNdTdYthY+HZtsQ87vujyTr+DSRTtfW1Ow3UVXGPUCSdoEq/ERaXlFjk/PVD
-Im2tbhhtKUSsjuMDYILoVPDepylpakhjRZ5r1CwaROt9N/WoDO+zwi32iEGqS2LU
-fwJMBB85HF8rjom1A0nG0DDBJ4NqpU5I38x9uXpkT0aZsBU4MHlea9PShUT99Ivx
-7wSj99Pk9Z3M8HGl6vIZ
-=SzUg
------END PGP SIGNATURE-----
-
---5mCyUwZo2JvN/JJP--
