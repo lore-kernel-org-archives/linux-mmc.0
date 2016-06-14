@@ -1,89 +1,91 @@
-From: Doug Anderson <dianders@chromium.org>
-Subject: Re: [PATCH 04/11] mmc: sdhci-of-arasan: Properly set
- corecfg_baseclkfreq on rk3399
-Date: Mon, 13 Jun 2016 19:13:43 -0700
-Message-ID: <CAD=FV=WGwiQqRNMSSX9OR6nAOwuu7CbULuz7BcNp-S=duqpLLQ@mail.gmail.com>
-References: <1465339484-969-1-git-send-email-dianders@chromium.org>
- <1465339484-969-5-git-send-email-dianders@chromium.org> <f5dcc018-bd60-87a7-798b-efc261e443dd@rock-chips.com>
- <CAD=FV=UzGZmwGTthqqO5Skxj5f0wsS5VKr4gYP2i9SUyGqvbjg@mail.gmail.com>
- <47a2dcd9-9c3c-8fde-2be0-40e305c25e8d@rock-chips.com> <CAD=FV=UL5tU8RWtHF=-pE8SA0jUcBsqQDOU0BrruXOF7yGh5xg@mail.gmail.com>
- <da1c9ae9-71d9-6e9d-7b9f-08485ee9178e@rock-chips.com>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH 09/12] mmc: sdhci-xenon: add initial Xenon eMMC driver
+Date: Tue, 14 Jun 2016 09:52:47 +0300
+Message-ID: <575FA9BF.6070703@intel.com>
+References: <1465456218-28354-1-git-send-email-gregory.clement@free-electrons.com>
+ <1465456218-28354-10-git-send-email-gregory.clement@free-electrons.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-vk0-f42.google.com ([209.85.213.42]:34124 "EHLO
-	mail-vk0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1423021AbcFNCNp (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 13 Jun 2016 22:13:45 -0400
-Received: by mail-vk0-f42.google.com with SMTP id t129so75293309vka.1
-        for <linux-mmc@vger.kernel.org>; Mon, 13 Jun 2016 19:13:44 -0700 (PDT)
-In-Reply-To: <da1c9ae9-71d9-6e9d-7b9f-08485ee9178e@rock-chips.com>
+Received: from mga11.intel.com ([192.55.52.93]:7925 "EHLO mga11.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751578AbcFNG5A (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 14 Jun 2016 02:57:00 -0400
+In-Reply-To: <1465456218-28354-10-git-send-email-gregory.clement@free-electrons.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Shawn Lin <shawn.lin@rock-chips.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Kishon Vijay Abraham I <kishon@ti.com>, Heiko Stuebner <heiko@sntech.de>, Rob Herring <robh+dt@kernel.org>, Ziyuan Xu <xzy.xu@rock-chips.com>, Brian Norris <briannorris@chromium.org>, Adrian Hunter <adrian.hunter@intel.com>, "open list:ARM/Rockchip SoC..." <linux-rockchip@lists.infradead.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, Michal Simek <michal.simek@xilinx.com>, soren.brinkmann@xilinx.com, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+To: Gregory CLEMENT <gregory.clement@free-electrons.com>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org
+Cc: Rob Herring <robh+dt@kernel.org>, devicetree@vger.kernel.org, Jason Cooper <jason@lakedaemon.net>, Andrew Lunn <andrew@lunn.ch>, Sebastian Hesselbarth <sebastian.hesselbarth@gmail.com>, Thomas Petazzoni <thomas.petazzoni@free-electrons.com>, linux-arm-kernel@lists.infradead.org, Nadav Haklai <nadavh@marvell.com>, Victor Gu <xigu@marvell.com>, Romain Perier <romain.perier@free-electrons.com>, Omri Itach <omrii@marvell.com>, Marcin Wojtas <mw@semihalf.com>, Wilson Ding <dingwei@marvell.com>, Shadi Ammouri <shadi@marvell.com>
 
-Shawn,
+On 09/06/16 10:10, Gregory CLEMENT wrote:
+> From: Victor Gu <xigu@marvell.com>
+> 
+> This path adds the driver for the Marvell Xenon eMMC host controller
+> which supports eMMC 5.1, SD 3.0.
+> 
+> However this driver supports only up to eMMC 5.0 since the command queue
+> feature is not included (yet) in the driver.
+> 
+> [gregory.clement@free-electrons.com:
+>  - reformulate commit log
+>  - overload the sdhci_set_uhs_signaling function instead of using a quirk
+>  - fix a kconfig dependency
+>  - remove dead code]
+> 
+> Signed-off-by: Victor Gu <xigu@marvell.com>
+> Signed-off-by: Gregory CLEMENT <gregory.clement@free-electrons.com>
+> ---
+>  drivers/mmc/host/Kconfig       |   10 +
+>  drivers/mmc/host/Makefile      |    1 +
+>  drivers/mmc/host/sdhci-xenon.c | 1164 ++++++++++++++++++++++++++++++++++++++++
+>  3 files changed, 1175 insertions(+)
+>  create mode 100644 drivers/mmc/host/sdhci-xenon.c
+> 
 
-On Mon, Jun 13, 2016 at 5:59 PM, Shawn Lin <shawn.lin@rock-chips.com> wrote:
->> Even in the case that an SoC designer didn't put a value into
->> corecfg_baseclkfreq that matched register[15:8], it seems very likely
->> that the rate returned from the clk_get_rate() would match.
->>
->> I guess what I'm saying is that, to me, it seems like my patch isn't
->> broken in any real systems.  If we ever find a system that needs this
->> behavior in the future, we can add it.  Until then, it seems like my
->> patch would be fine.  Do you agree?
->
->
-> I agree. But from the code itself, we should still use
-> SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN to see if we could get
-> it from internal register in case of some platforms don't
-> provide the clk stuff.. Sounds sane? :)
+<SNIP>
 
-Could we wait until there exists a SoC that needs to provide
-baseclkfreq in its sdhci_arasan_soc_ctl_map table and that needs this
-value copied from register[15:8]?
+> diff --git a/drivers/mmc/host/sdhci-xenon.c b/drivers/mmc/host/sdhci-xenon.c
+> new file mode 100644
+> index 000000000000..43c06db95872
+> --- /dev/null
+> +++ b/drivers/mmc/host/sdhci-xenon.c
 
-AKA:
+<SNIP>
 
-A) If you have a SoC where clk_get_rate() is right and software needs
-to set baseclkfreq manualy, then you should include "baseclkfreq" in
-your sdhci_arasan_soc_ctl_map table.  This is like rk3399.  Note that
-if _both_ clk_get_rate() and register[15:8] are right, that's fine.
-We can still use clk_get_rate() since it will be exactly the same as
-register[15:8].
+> +static int sdhci_xenon_delay_adj_test(struct sdhci_host *host,
+> +		struct mmc_card *card, unsigned int delay,
+> +		bool invert, bool phase)
+> +{
+> +	int ret;
+> +	struct mmc_card *oldcard;
+> +
+> +	sdhci_xenon_set_fix_delay(host, delay, invert, phase);
+> +
+> +	/*
+> +	 * If the card is not yet associated to the host, we
+> +	 * temporally do it
+> +	 */
+> +	oldcard = card->host->card;
+> +	if (!oldcard)
+> +		card->host->card = card;
+> +	ret =  card_alive(card);
 
-B) If you have a SoC that doesn't even expose corecfg_baseclkfreq to
-software control, just don't include "baseclkfreq" in your
-sdhci_arasan_soc_ctl_map table.  Easy.  This is how my patch treats
-anyone using the current "generic" bindings, but you could easily just
-specify an offset of "-1" for baseclkfreq if you didn't want to use
-the generic bindings but couldn't control baseclkfreq.
-
-C) If you have a SoC that provides a valid value in register[15:8] and
-clk_get_rate() is wrong and software is required to copy the value
-from register[15:8] to baseclkfreq, technically we should fix
-clk_get_rate() anyway.  It's good when common clock framework provides
-correct values.  NOTE: It seems very unlikely to me that
-register[15:8] would be right AND that software would be required to
-copy this value to baseclkfreq, but I suppose there are some pretty
-crazy hardware designs out there.
-
-D) If you have a SoC that provides a valid value in register[15:8] and
-clk_get_rate() is wrong and can't be fixed (REALLY?) and software is
-required to copy the value from register[15:8] to baseclkfreq, we will
-need to add new code.  My assertion is that such a SoC doesn't exist
-and is unlikely to ever exist, so I am hesitant to add extra code to
-support this SoC.
-
-
-With my patch, A) and B) are certainly handled.  I think C) is
-unlikely to exist, but if it did exist then I'd say we should fix
-clk_get_rate().  I think D) is VERY unlikely to exist.  If I'm shown
-proof of D) existing, I'm happy to submit a patch for it.  Until we
-see proof of D)'s existence, I don't think we should clutter the code
-with support for it.
+This looks like an abuse of bus_ops->alive().  You will need to get
+agreement with Ulf how to handle this.  I will wait for Ulf's comments
+before reviewing this patch set further.
 
 
--Doug
+> +	card->host->card = oldcard;
+> +	if (ret) {
+> +		pr_debug("Xenon failed when sampling fix delay %d, inverted %d, phase %d\n",
+> +			 delay, invert, phase);
+> +		return -EIO;
+> +	}
+> +
+> +	pr_debug("Xenon succeeded when sampling fixed delay %d, inverted %d, phase %d\n",
+> +		 delay, invert, phase);
+> +	return 0;
+> +}
+
+
