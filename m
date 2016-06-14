@@ -1,65 +1,35 @@
-From: Ben Hutchings <ben.hutchings@codethink.co.uk>
-Subject: Re: [Linux-kernel] [PATCH] mmc: mmci: add missing include of
- mmci_qcom_dml.h
-Date: Tue, 14 Jun 2016 14:44:33 +0100
-Message-ID: <1465911873.26723.3.camel@codethink.co.uk>
-References: <201606100156.EWHSQe2w%fengguang.wu@intel.com>
-	 <49d030df-f0b5-6bed-7f4c-a101b6e15752@codethink.co.uk>
-	 <a2843535-fbea-927b-226b-e51e49f2761d@codethink.co.uk>
+From: Alan Cooper <alcooperx@gmail.com>
+Subject: Re: [RESEND PATCH V5 1/2] mmc: sdhci-brcmstb: Add driver for Broadcom
+ BRCMSTB SoCs
+Date: Tue, 14 Jun 2016 11:21:02 -0400
+Message-ID: <CAOGqxeVNSxiT2sP+XMLoseFJ84MevhDJQ1kPBFg4Tryopt1zgw@mail.gmail.com>
+References: <1465820340-16722-1-git-send-email-alcooperx@gmail.com>
+ <1465820340-16722-2-git-send-email-alcooperx@gmail.com> <575FBC03.4060704@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from ducie-dc1.codethink.co.uk ([185.25.241.215]:55562 "EHLO
-	ducie-dc1.codethink.co.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752234AbcFNNol (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 14 Jun 2016 09:44:41 -0400
-In-Reply-To: <a2843535-fbea-927b-226b-e51e49f2761d@codethink.co.uk>
+Received: from mail-qt0-f193.google.com ([209.85.216.193]:35335 "EHLO
+	mail-qt0-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750832AbcFNPVF (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 14 Jun 2016 11:21:05 -0400
+Received: by mail-qt0-f193.google.com with SMTP id 37so6560189qtc.2
+        for <linux-mmc@vger.kernel.org>; Tue, 14 Jun 2016 08:21:04 -0700 (PDT)
+In-Reply-To: <575FBC03.4060704@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ben Dooks <ben.dooks@codethink.co.uk>
-Cc: kbuild test robot <lkp@intel.com>, linux-kernel@lists.codethink.co.uk, linux-arm-kernel@lists.infadead.org, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, kbuild-all@01.org
+To: Adrian Hunter <adrian.hunter@intel.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, bcm-kernel-feedback-list@broadcom.com
 
-On Thu, 2016-06-09 at 18:45 +0100, Ben Dooks wrote:
-[...]
-> After looking at the build, it looks like this is broken
-> for the case of building mmci as a module. I think this is
-> the right fix.
-> 
-> commit be3bf8f3b56d9cfb2fcba88e638ec853d0484cbb
-> Author: Ben Dooks <ben.dooks@codethink.co.uk>
-> Date:   Thu Jun 9 18:42:53 2016 +0100
-> 
->     mmci: fixup module build with new mmci_qcom_dml
-> 
->     Fix the module build for the mmci code if it is built as
->     a module and the MMC_QCOM_DML option is also set. If so
->     then we need to build a composite module of the two files
->     to ensure they link properly.
-> 
->     Signed-off-by: Ben Dooks <ben.dooks@codethink.co.uk>
-> 
-> diff --git a/drivers/mmc/host/Makefile b/drivers/mmc/host/Makefile
-> index af918d2..b57db76 100644
-> --- a/drivers/mmc/host/Makefile
-> +++ b/drivers/mmc/host/Makefile
-> @@ -3,7 +3,8 @@
->  #
-> 
->  obj-$(CONFIG_MMC_ARMMMCI)      += mmci.o
-> -obj-$(CONFIG_MMC_QCOM_DML)     += mmci_qcom_dml.o
-> +mmci-y                         += mmci_core.o
-> +mmci-$(subst m,y,$(CONFIG_MMC_QCOM_DML)) += mmci_qcom_dml.o
-[...]
+On Tue, Jun 14, 2016 at 4:10 AM, Adrian Hunter <adrian.hunter@intel.com> wrote:
+> The absence of a commit message is a red flag to some people.  You could
+> write, for example, whether the driver is missing any features that still
+> need to be added.
 
-If mmci_core.o and mmci_qcom_dml.o will always be linked together then
-MMC_QCOM_DML should be a boolean and you don't need any substitution
-here.
+I'll improve my commit messages.
 
-Ben.
+> Don't you need clk_disable_unprepare(clk) here.
 
--- 
-Ben Hutchings
-Software Developer, Codethink Ltd.
+Yes, I'll add this to the error paths that need it.
 
-
+Thanks Adrian
+Al
