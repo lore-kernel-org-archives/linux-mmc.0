@@ -1,157 +1,371 @@
 From: Ritesh Harjani <riteshh@codeaurora.org>
-Subject: [PATCH RFC 00/10] mmc: Add HW Command Queuing Support
-Date: Wed, 15 Jun 2016 18:31:04 +0530
-Message-ID: <1465995674-15816-1-git-send-email-riteshh@codeaurora.org>
+Subject: [PATCH RFC 02/10] mmc: queue: initialization of command queue
+Date: Wed, 15 Jun 2016 18:31:06 +0530
+Message-ID: <1465995674-15816-3-git-send-email-riteshh@codeaurora.org>
+References: <1465995674-15816-1-git-send-email-riteshh@codeaurora.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp.codeaurora.org ([198.145.29.96]:43574 "EHLO
+Received: from smtp.codeaurora.org ([198.145.29.96]:43620 "EHLO
 	smtp.codeaurora.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753671AbcFONCD (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 15 Jun 2016 09:02:03 -0400
+	with ESMTP id S1751903AbcFONCU (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 15 Jun 2016 09:02:20 -0400
+In-Reply-To: <1465995674-15816-1-git-send-email-riteshh@codeaurora.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: ulf.hansson@linaro.org, linux-mmc@vger.kernel.org
-Cc: adrian.hunter@intel.com, alex.lemberg@sandisk.com, mateusz.nowak@intel.com, Yuliy.Izrailov@sandisk.com, jh80.chung@samsung.com, dongas86@gmail.com, asutoshd@codeaurora.org, zhangfei.gao@gmail.com, sthumma@codeaurora.org, kdorfman@codeaurora.org, david.griego@linaro.org, stummala@codeaurora.org, venkatg@codeaurora.org, Ritesh Harjani <riteshh@codeaurora.org>
+Cc: adrian.hunter@intel.com, alex.lemberg@sandisk.com, mateusz.nowak@intel.com, Yuliy.Izrailov@sandisk.com, jh80.chung@samsung.com, dongas86@gmail.com, asutoshd@codeaurora.org, zhangfei.gao@gmail.com, sthumma@codeaurora.org, kdorfman@codeaurora.org, david.griego@linaro.org, stummala@codeaurora.org, venkatg@codeaurora.org, Subhash Jadavani <subhashj@codeaurora.org>, Ritesh Harjani <riteshh@codeaurora.org>
 
+From: Asutosh Das <asutoshd@codeaurora.org>
 
-Hi All, 
+Command Queueing (CQ) feature is introduced to eMMC
+standard in revision 5.1. CQ includes new commands
+for issuing tasks to the device, for ordering the
+execution of previously issued tasks and for
+additional task management functions.
 
-This patch series refreshes the older patch series sent a
-while ago by Asutosh Das[1].
+The idea is to keep the legacy and CQ code as discrete
+as possible. Hence, a separate queue is created for CQ.
+The issuing path is non-blocking since several requests
+(max. 32) can be queued at a time.
 
-Current set of patch series is only introducing the basic CMDQ
-driver to get more review comments. Based on the reviews, will
-add other features as well to the patch list.
+Signed-off-by: Asutosh Das <asutoshd@codeaurora.org>
+Signed-off-by: Venkat Gopalakrishnan <venkatg@codeaurora.org>
+[subhashj@codeaurora.org: fixed trivial merge conflicts & compilation
+error]
+Signed-off-by: Subhash Jadavani <subhashj@codeaurora.org>
+Signed-off-by: Ritesh Harjani <riteshh@codeaurora.org>
+---
+ drivers/mmc/card/block.c |   2 +-
+ drivers/mmc/card/queue.c | 189 ++++++++++++++++++++++++++++++++++++++++++++++-
+ drivers/mmc/card/queue.h |  10 ++-
+ include/linux/mmc/host.h |  19 +++++
+ 4 files changed, 216 insertions(+), 4 deletions(-)
 
-Below paras describes about the CMDQ feature and a brief
-implementaion details of HW CMDQ :-
-
-In this patch series, we propose a method to add support for
-Command Queueing(CQ) feature added to eMMC-5.1 specification.
-This feature includes new commands for issuing tasks to the
-device and orders the execution of tasks to the device. It
-also has task management functions.
-
-Working of CQ with HW CQ support :-
-Both card and controller(HC) maintains a queue where tasks can be
-queued for execution. SW pulls the requests from block layer,
-prepares request's task/transfer descriptors and issues
-(by ringing the doorbell) it to CMDQ HC. CMDQ HC then queues this
-task to the card queue (can queue while data transfer is in progress)
-by preparing and sending CMD44 followed by CMD45.
-
-While SW driver can issues the tasks asynchronously to CMDQ HC,
-until the queue is full, HC can in parallel, send SQS
-(send queue status) to card to read QSR (queue status register),
-to know which tasks are ready for execution in card.
-Based on the QSR, HC can send CMD46/47 (read/write) for the
-task which was ready for execution in card.
-
-Main advantage of CQ comes for Random requests and thus
-we see that in below performance table that it's mainly
-the random requests that gets most of the benefit.
-
-Brief on implementation details :-
-The initialization of CQ is decided based on the underlying
-driver capability and the capability advertised by the card
-through ext_csd.
-
-In order to support queueing of multiple requests, we have
-added a new issue function to mmc-queue. This selectively
-pulls the requests and prepares and issues it to the underlying
-driver. We have used the inherent tagging mechanism of kernel
-block layer to keep track and map tags to the slots of underlying
-driver. The current design doesn't block for the request to
-complete. We have separated the issuing and completion path
-of the request and tracking is done using the tag assigned to
-the request.
-
-We have introduced a number of APIs to mmc block layer to
-facilitate servicing of requests.
-
-The completion of requests is handled in a softirq registered
-with the kernel block layer during initialization.
-
-A new layer has been introduced to serve the CQ compliant drivers.
-This layer (cq_hci) has all the standard functionality implemented.
-It also has necessary hooks for convenience of platform drivers.
-
-
-Performance Data :-
-|------------------------------------
-|Androbench	| CQ	|  Legacy  |
-|---------------|-------|----------|
-|Seq Read(MBps)	| 227.41|  216.97  |	
-|---------------|-------|----------|
-|Seq Write(MBps)| 56.6	|  56.44   |
-|---------------|-------|----------|
-|Rand.Read(IOPs)| 7144	|  4554    |
-|---------------|-------|----------|
-|Rand.Write(IOPS| 2374  |  1629	   |
-|----------------------------------|
-
-
-Patch Description in brief:-
-Patch 1/10 - Reads ext_csd to know whether the card supports
-CMDQ or not.
-
-Patch 2/10 - Adds support for a seperate queue and
-mmc_cmdq_thread for pulling and issuing the requests.
-Since this patch series adds a seperate queue for HW CMDQ
-support, this should not conflict with SW CMDQ series,
-except in places where we are (initializing/enabling? and)
-defining CMDQ definitions for card.
-
-Patch 3/10 - Adds initialization and enabling of CMDQ in
-card and controller if both supports it.
-
-Patch 4-5,8,9/10 - Add read/write/flush/halt support to CMDQ
-
-Patch 6/10 - This change does not relate to CMDQ in general,
-but only w.r.t. SDMA & ADMA.
-
-Patch 7/10 - Add CMDQ_HCI file for host controllers that support
-CMDQ.
-
-Patch 10/10 - Add CQ support to sdhci.
-
-[1]:- http://www.spinics.net/lists/linux-arm-msm/msg12692.html
-
-Asutosh Das (7):
-  mmc: core: Add support to read command queue parameters
-  mmc: queue: initialization of command queue
-  mmc: core: Add command queue initialzation support
-  mmc: core: add flush request support to command queue
-  mmc: core: Add halt support
-  mmc: cmdq-host: add halt support to command queue host
-  mmc: sdhci: add command queue support to sdhci
-
-Subhash Jadavani (1):
-  mmc: host: sdhci: don't set SDMA buffer boundary in ADMA mode
-
-Venkat Gopalakrishnan (2):
-  mmc: card: add read/write support in command queue mode
-  mmc: cmdq: support for command queue enabled host
-
- drivers/mmc/card/block.c    | 316 +++++++++++++++++++-
- drivers/mmc/card/queue.c    | 193 ++++++++++++-
- drivers/mmc/card/queue.h    |  11 +-
- drivers/mmc/core/core.c     |  98 +++++++
- drivers/mmc/core/mmc.c      |  68 +++++
- drivers/mmc/core/mmc_ops.c  |  47 ++-
- drivers/mmc/host/Kconfig    |  13 +
- drivers/mmc/host/Makefile   |   1 +
- drivers/mmc/host/cmdq_hci.c | 691 ++++++++++++++++++++++++++++++++++++++++++++
- drivers/mmc/host/cmdq_hci.h | 211 ++++++++++++++
- drivers/mmc/host/sdhci.c    | 169 ++++++++++-
- drivers/mmc/host/sdhci.h    |   6 +
- include/linux/mmc/card.h    |  11 +-
- include/linux/mmc/core.h    |  13 +
- include/linux/mmc/host.h    |  77 +++++
- include/linux/mmc/mmc.h     |   4 +
- 16 files changed, 1905 insertions(+), 24 deletions(-)
- create mode 100644 drivers/mmc/host/cmdq_hci.c
- create mode 100644 drivers/mmc/host/cmdq_hci.h
-
+diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+index 8a0147d..1b69424 100644
+--- a/drivers/mmc/card/block.c
++++ b/drivers/mmc/card/block.c
+@@ -2218,7 +2218,7 @@ static struct mmc_blk_data *mmc_blk_alloc_req(struct mmc_card *card,
+ 	INIT_LIST_HEAD(&md->part);
+ 	md->usage = 1;
+ 
+-	ret = mmc_init_queue(&md->queue, card, &md->lock, subname);
++	ret = mmc_init_queue(&md->queue, card, &md->lock, subname, area_type);
+ 	if (ret)
+ 		goto err_putdisk;
+ 
+diff --git a/drivers/mmc/card/queue.c b/drivers/mmc/card/queue.c
+index 6f4323c..d4deab5 100644
+--- a/drivers/mmc/card/queue.c
++++ b/drivers/mmc/card/queue.c
+@@ -46,6 +46,70 @@ static int mmc_prep_request(struct request_queue *q, struct request *req)
+ 	return BLKPREP_OK;
+ }
+ 
++static inline bool mmc_cmdq_should_pull_reqs(struct mmc_host *host,
++					struct mmc_cmdq_context_info *ctx)
++{
++	if (test_bit(CMDQ_STATE_ERR, &ctx->curr_state)) {
++		pr_debug("%s: %s: skip pulling reqs: state: %lu\n",
++			 mmc_hostname(host), __func__, ctx->curr_state);
++		return false;
++	} else {
++		return true;
++	}
++}
++
++static int mmc_cmdq_thread(void *d)
++{
++	struct mmc_queue *mq = d;
++	struct request_queue *q = mq->queue;
++	struct mmc_card *card = mq->card;
++
++	struct request *req;
++	struct mmc_host *host = card->host;
++	struct mmc_cmdq_context_info *ctx = &host->cmdq_ctx;
++	unsigned long flags;
++
++	current->flags |= PF_MEMALLOC;
++
++	while (1) {
++		int ret = 0;
++
++		if (!mmc_cmdq_should_pull_reqs(host, ctx)) {
++			test_and_set_bit(0, &ctx->req_starved);
++			schedule();
++		}
++
++		spin_lock_irqsave(q->queue_lock, flags);
++		req = blk_peek_request(q);
++		if (req) {
++			ret = blk_queue_start_tag(q, req);
++			spin_unlock_irqrestore(q->queue_lock, flags);
++			if (ret) {
++				test_and_set_bit(0, &ctx->req_starved);
++				schedule();
++			} else {
++				ret = mq->cmdq_issue_fn(mq, req);
++				if (ret) {
++					pr_err("%s: failed (%d) to issue req, requeue\n",
++					       mmc_hostname(host), ret);
++					spin_lock_irqsave(q->queue_lock, flags);
++					blk_requeue_request(q, req);
++					spin_unlock_irqrestore(q->queue_lock,
++							       flags);
++				}
++			}
++		} else {
++			spin_unlock_irqrestore(q->queue_lock, flags);
++			if (kthread_should_stop()) {
++				set_current_state(TASK_RUNNING);
++				break;
++			}
++			schedule();
++		}
++	} /* loop */
++	return 0;
++}
++
+ static int mmc_queue_thread(void *d)
+ {
+ 	struct mmc_queue *mq = d;
+@@ -102,6 +166,13 @@ static int mmc_queue_thread(void *d)
+ 	return 0;
+ }
+ 
++static void mmc_cmdq_dispatch_req(struct request_queue *q)
++{
++	struct mmc_queue *mq = q->queuedata;
++
++	wake_up_process(mq->thread);
++}
++
+ /*
+  * Generic MMC request handler.  This is called for any queue on a
+  * particular host.  When the host is not busy, we look for a request
+@@ -177,6 +248,29 @@ static void mmc_queue_setup_discard(struct request_queue *q,
+ }
+ 
+ /**
++ * mmc_blk_cmdq_setup_queue
++ * @mq: mmc queue
++ * @card: card to attach to this queue
++ *
++ * Setup queue for CMDQ supporting MMC card
++ */
++void mmc_cmdq_setup_queue(struct mmc_queue *mq, struct mmc_card *card)
++{
++	u64 limit = BLK_BOUNCE_HIGH;
++	struct mmc_host *host = card->host;
++
++	queue_flag_set_unlocked(QUEUE_FLAG_NONROT, mq->queue);
++	if (mmc_can_erase(card))
++		mmc_queue_setup_discard(mq->queue, card);
++
++	blk_queue_bounce_limit(mq->queue, limit);
++	blk_queue_max_hw_sectors(mq->queue, min(host->max_blk_count,
++						host->max_req_size / 512));
++	blk_queue_max_segment_size(mq->queue, host->max_seg_size);
++	blk_queue_max_segments(mq->queue, host->max_segs);
++}
++
++/**
+  * mmc_init_queue - initialise a queue structure.
+  * @mq: mmc queue
+  * @card: mmc card to attach this queue
+@@ -186,7 +280,7 @@ static void mmc_queue_setup_discard(struct request_queue *q,
+  * Initialise a MMC card request queue.
+  */
+ int mmc_init_queue(struct mmc_queue *mq, struct mmc_card *card,
+-		   spinlock_t *lock, const char *subname)
++		   spinlock_t *lock, const char *subname, int area_type)
+ {
+ 	struct mmc_host *host = card->host;
+ 	u64 limit = BLK_BOUNCE_HIGH;
+@@ -198,6 +292,28 @@ int mmc_init_queue(struct mmc_queue *mq, struct mmc_card *card,
+ 		limit = (u64)dma_max_pfn(mmc_dev(host)) << PAGE_SHIFT;
+ 
+ 	mq->card = card;
++	if (card->ext_csd.cmdq_support &&
++	    (area_type == MMC_BLK_DATA_AREA_MAIN)) {
++		mq->queue = blk_init_queue(mmc_cmdq_dispatch_req, lock);
++		if (!mq->queue)
++			return -ENOMEM;
++		mmc_cmdq_setup_queue(mq, card);
++		ret = mmc_cmdq_init(mq, card);
++		if (ret) {
++			pr_err("%s: %d: cmdq: unable to set-up\n",
++			       mmc_hostname(card->host), ret);
++			blk_cleanup_queue(mq->queue);
++		} else {
++			mq->queue->queuedata = mq;
++			mq->thread = kthread_run(mmc_cmdq_thread, mq,
++						 "mmc-cmdqd/%d%s",
++						 host->index,
++						 subname ? subname : "");
++
++			return ret;
++		}
++	}
++
+ 	mq->queue = blk_init_queue(mmc_request_fn, lock);
+ 	if (!mq->queue)
+ 		return -ENOMEM;
+@@ -402,6 +518,77 @@ void mmc_packed_clean(struct mmc_queue *mq)
+ 	mqrq_prev->packed = NULL;
+ }
+ 
++static void mmc_cmdq_softirq_done(struct request *rq)
++{
++	struct mmc_queue *mq = rq->q->queuedata;
++	mq->cmdq_complete_fn(rq);
++}
++
++int mmc_cmdq_init(struct mmc_queue *mq, struct mmc_card *card)
++{
++	int i, ret = 0;
++	/* one slot is reserved for dcmd requests */
++	int q_depth = card->ext_csd.cmdq_depth - 1;
++
++	if (!(card->host->caps2 & MMC_CAP2_CMD_QUEUE)) {
++		ret = -ENOTSUPP;
++		goto out;
++	}
++
++	mq->mqrq_cmdq = kzalloc(
++			sizeof(struct mmc_queue_req) * q_depth, GFP_KERNEL);
++	if (!mq->mqrq_cmdq) {
++		pr_warn("%s: unable to allocate mqrq's for q_depth %d\n",
++			mmc_card_name(card), q_depth);
++		ret = -ENOMEM;
++		goto out;
++	}
++
++	/* sg is allocated for data request slots only */
++	for (i = 0; i < q_depth; i++) {
++		mq->mqrq_cmdq[i].sg = mmc_alloc_sg(card->host->max_segs, &ret);
++		if (ret) {
++			pr_warn("%s: unable to allocate cmdq sg of size %d\n",
++				mmc_card_name(card),
++				card->host->max_segs);
++			goto free_mqrq_sg;
++		}
++	}
++
++	ret = blk_queue_init_tags(mq->queue, q_depth, NULL, BLK_TAG_ALLOC_FIFO);
++	if (ret) {
++		pr_warn("%s: unable to allocate cmdq tags %d\n",
++				mmc_card_name(card), q_depth);
++		goto free_mqrq_sg;
++	}
++
++	blk_queue_softirq_done(mq->queue, mmc_cmdq_softirq_done);
++	goto out;
++
++free_mqrq_sg:
++	for (i = 0; i < q_depth; i++)
++		kfree(mq->mqrq_cmdq[i].sg);
++	kfree(mq->mqrq_cmdq);
++	mq->mqrq_cmdq = NULL;
++out:
++	return ret;
++}
++
++void mmc_cmdq_clean(struct mmc_queue *mq, struct mmc_card *card)
++{
++	int i;
++	int q_depth = card->ext_csd.cmdq_depth - 1;
++
++	blk_free_tags(mq->queue->queue_tags);
++	mq->queue->queue_tags = NULL;
++	blk_queue_free_tags(mq->queue);
++
++	for (i = 0; i < q_depth; i++)
++		kfree(mq->mqrq_cmdq[i].sg);
++	kfree(mq->mqrq_cmdq);
++	mq->mqrq_cmdq = NULL;
++}
++
+ /**
+  * mmc_queue_suspend - suspend a MMC request queue
+  * @mq: MMC queue to suspend
+diff --git a/drivers/mmc/card/queue.h b/drivers/mmc/card/queue.h
+index 36cddab..4c7e39d2 100644
+--- a/drivers/mmc/card/queue.h
++++ b/drivers/mmc/card/queue.h
+@@ -52,16 +52,20 @@ struct mmc_queue {
+ #define MMC_QUEUE_SUSPENDED	(1 << 0)
+ #define MMC_QUEUE_NEW_REQUEST	(1 << 1)
+ 
+-	int			(*issue_fn)(struct mmc_queue *, struct request *);
++	int (*issue_fn)(struct mmc_queue *, struct request *);
++	int (*cmdq_issue_fn)(struct mmc_queue *,
++			     struct request *);
++	void (*cmdq_complete_fn)(struct request *);
+ 	void			*data;
+ 	struct request_queue	*queue;
+ 	struct mmc_queue_req	mqrq[2];
+ 	struct mmc_queue_req	*mqrq_cur;
+ 	struct mmc_queue_req	*mqrq_prev;
++	struct mmc_queue_req	*mqrq_cmdq;
+ };
+ 
+ extern int mmc_init_queue(struct mmc_queue *, struct mmc_card *, spinlock_t *,
+-			  const char *);
++			  const char *, int);
+ extern void mmc_cleanup_queue(struct mmc_queue *);
+ extern void mmc_queue_suspend(struct mmc_queue *);
+ extern void mmc_queue_resume(struct mmc_queue *);
+@@ -76,4 +80,6 @@ extern void mmc_packed_clean(struct mmc_queue *);
+ 
+ extern int mmc_access_rpmb(struct mmc_queue *);
+ 
++extern int mmc_cmdq_init(struct mmc_queue *mq, struct mmc_card *card);
++extern void mmc_cmdq_clean(struct mmc_queue *mq, struct mmc_card *card);
+ #endif
+diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+index 8dd4d29..23accc3 100644
+--- a/include/linux/mmc/host.h
++++ b/include/linux/mmc/host.h
+@@ -175,6 +175,23 @@ struct mmc_slot {
+ 	void *handler_priv;
+ };
+ 
++
++/**
++ * mmc_cmdq_context_info - describes the contexts of cmdq
++ * @active_reqs		requests being processed
++ * @curr_state		state of cmdq engine
++ * @req_starved		completion should invoke the request_fn since
++ *			no tags were available
++ * @cmdq_ctx_lock	acquire this before accessing this structure
++ */
++struct mmc_cmdq_context_info {
++	unsigned long	active_reqs; /* in-flight requests */
++	unsigned long	curr_state;
++#define	CMDQ_STATE_ERR 0
++	/* no free tag available */
++	unsigned long	req_starved;
++};
++
+ /**
+  * mmc_context_info - synchronization details for mmc context
+  * @is_done_rcv		wake up reason was done request
+@@ -291,6 +308,7 @@ struct mmc_host {
+ #define MMC_CAP2_SDIO_IRQ_NOTHREAD (1 << 17)
+ #define MMC_CAP2_NO_WRITE_PROTECT (1 << 18)	/* No physical write protect pin, assume that card is always read-write */
+ #define MMC_CAP2_NO_SDIO	(1 << 19)	/* Do not send SDIO commands during initialization */
++#define MMC_CAP2_CMD_QUEUE	(1 << 20)	/* support eMMC command queue */
+ 
+ 	mmc_pm_flag_t		pm_caps;	/* supported pm features */
+ 
+@@ -372,6 +390,7 @@ struct mmc_host {
+ 	int			dsr_req;	/* DSR value is valid */
+ 	u32			dsr;	/* optional driver stage (DSR) value */
+ 
++	struct mmc_cmdq_context_info	cmdq_ctx;
+ 	unsigned long		private[0] ____cacheline_aligned;
+ };
+ 
 -- 
 The Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum, 
 a Linux Foundation Collaborative Project.
