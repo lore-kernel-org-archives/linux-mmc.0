@@ -1,116 +1,67 @@
-From: Pramod Gurav <pramod.gurav@linaro.org>
-Subject: [PATCH] mmc: sdhci-msm: Add pm_runtime and system PM support
-Date: Thu, 16 Jun 2016 18:05:09 +0530
-Message-ID: <1466080509-24015-1-git-send-email-pramod.gurav@linaro.org>
+From: Ben Dooks <ben.dooks@codethink.co.uk>
+Subject: Re: [Linux-kernel] [PATCH] mmc: mmci: add missing include of
+ mmci_qcom_dml.h
+Date: Thu, 16 Jun 2016 16:17:43 +0100
+Message-ID: <05d6c5c7-830c-7f00-7ab7-96ed5aa7a44d@codethink.co.uk>
+References: <201606100156.EWHSQe2w%fengguang.wu@intel.com>
+ <49d030df-f0b5-6bed-7f4c-a101b6e15752@codethink.co.uk>
+ <a2843535-fbea-927b-226b-e51e49f2761d@codethink.co.uk>
+ <1465911873.26723.3.camel@codethink.co.uk>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pf0-f170.google.com ([209.85.192.170]:35520 "EHLO
-	mail-pf0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754282AbcFPMfV (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 16 Jun 2016 08:35:21 -0400
-Received: by mail-pf0-f170.google.com with SMTP id c2so19817918pfa.2
-        for <linux-mmc@vger.kernel.org>; Thu, 16 Jun 2016 05:35:21 -0700 (PDT)
+Received: from ducie-dc1.codethink.co.uk ([185.25.241.215]:48667 "EHLO
+	ducie-dc1.codethink.co.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754457AbcFPPRs (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 16 Jun 2016 11:17:48 -0400
+In-Reply-To: <1465911873.26723.3.camel@codethink.co.uk>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: adrian.hunter@intel.com, ulf.hansson@linaro.org
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Pramod Gurav <pramod.gurav@linaro.org>
+To: Ben Hutchings <ben.hutchings@codethink.co.uk>
+Cc: kbuild test robot <lkp@intel.com>, linux-kernel@lists.codethink.co.uk, linux-arm-kernel@lists.infadead.org, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, kbuild-all@01.org
 
-Provides runtime PM callbacks to enable and disable clock resources
-when idle. Also support system PM callbacks to be called during system
-suspend and resume.
+On 14/06/16 14:44, Ben Hutchings wrote:
+> On Thu, 2016-06-09 at 18:45 +0100, Ben Dooks wrote:
+> [...]
+>> After looking at the build, it looks like this is broken
+>> for the case of building mmci as a module. I think this is
+>> the right fix.
+>>
+>> commit be3bf8f3b56d9cfb2fcba88e638ec853d0484cbb
+>> Author: Ben Dooks <ben.dooks@codethink.co.uk>
+>> Date:   Thu Jun 9 18:42:53 2016 +0100
+>>
+>>     mmci: fixup module build with new mmci_qcom_dml
+>>
+>>     Fix the module build for the mmci code if it is built as
+>>     a module and the MMC_QCOM_DML option is also set. If so
+>>     then we need to build a composite module of the two files
+>>     to ensure they link properly.
+>>
+>>     Signed-off-by: Ben Dooks <ben.dooks@codethink.co.uk>
+>>
+>> diff --git a/drivers/mmc/host/Makefile b/drivers/mmc/host/Makefile
+>> index af918d2..b57db76 100644
+>> --- a/drivers/mmc/host/Makefile
+>> +++ b/drivers/mmc/host/Makefile
+>> @@ -3,7 +3,8 @@
+>>  #
+>>
+>>  obj-$(CONFIG_MMC_ARMMMCI)      += mmci.o
+>> -obj-$(CONFIG_MMC_QCOM_DML)     += mmci_qcom_dml.o
+>> +mmci-y                         += mmci_core.o
+>> +mmci-$(subst m,y,$(CONFIG_MMC_QCOM_DML)) += mmci_qcom_dml.o
+> [...]
+> 
+> If mmci_core.o and mmci_qcom_dml.o will always be linked together then
+> MMC_QCOM_DML should be a boolean and you don't need any substitution
+> here.
 
-Signed-off-by: Pramod Gurav <pramod.gurav@linaro.org>
----
- drivers/mmc/host/sdhci-msm.c | 57 ++++++++++++++++++++++++++++++++++++++++++++
- 1 file changed, 57 insertions(+)
+I'll try and check later, I somehow thought mmci-y and mmci-m wouldn't
+build together.
 
-diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
-index 0653fe7..f4394c8 100644
---- a/drivers/mmc/host/sdhci-msm.c
-+++ b/drivers/mmc/host/sdhci-msm.c
-@@ -18,6 +18,7 @@
- #include <linux/of_device.h>
- #include <linux/delay.h>
- #include <linux/mmc/mmc.h>
-+#include <linux/pm_runtime.h>
- #include <linux/slab.h>
- 
- #include "sdhci-pltfm.h"
-@@ -549,6 +550,11 @@ static int sdhci_msm_probe(struct platform_device *pdev)
- 	if (ret)
- 		goto clk_disable;
- 
-+	platform_set_drvdata(pdev, msm_host);
-+
-+	pm_runtime_set_active(&pdev->dev);
-+	pm_runtime_enable(&pdev->dev);
-+
- 	return 0;
- 
- clk_disable:
-@@ -580,12 +586,63 @@ static int sdhci_msm_remove(struct platform_device *pdev)
- 	return 0;
- }
- 
-+static int sdhci_msm_runtime_suspend(struct device *dev)
-+{
-+	struct sdhci_msm_host *msm_host = dev_get_drvdata(dev);
-+
-+	clk_disable_unprepare(msm_host->clk);
-+	clk_disable_unprepare(msm_host->pclk);
-+
-+	return 0;
-+}
-+
-+static int sdhci_msm_runtime_resume(struct device *dev)
-+{
-+	struct sdhci_msm_host *msm_host = dev_get_drvdata(dev);
-+	int ret;
-+
-+	ret = clk_prepare_enable(msm_host->clk);
-+	if (ret) {
-+		dev_err(dev, "clk_enable failed: %d\n", ret);
-+		return ret;
-+	}
-+	ret = clk_prepare_enable(msm_host->pclk);
-+	if (ret) {
-+		dev_err(dev, "clk_enable failed: %d\n", ret);
-+		clk_disable_unprepare(msm_host->clk);
-+		return ret;
-+	}
-+
-+	return 0;
-+}
-+
-+static int sdhci_msm_suspend(struct device *dev)
-+{
-+	pm_runtime_force_suspend(dev);
-+
-+	return 0;
-+}
-+
-+static int sdhci_msm_resume(struct device *dev)
-+{
-+	pm_runtime_force_resume(dev);
-+
-+	return 0;
-+}
-+
-+static const struct dev_pm_ops sdhci_msm_pm_ops = {
-+	SET_LATE_SYSTEM_SLEEP_PM_OPS(sdhci_msm_suspend, sdhci_msm_resume)
-+	SET_RUNTIME_PM_OPS(sdhci_msm_runtime_suspend, sdhci_msm_runtime_resume,
-+				NULL)
-+};
-+
- static struct platform_driver sdhci_msm_driver = {
- 	.probe = sdhci_msm_probe,
- 	.remove = sdhci_msm_remove,
- 	.driver = {
- 		   .name = "sdhci_msm",
- 		   .of_match_table = sdhci_msm_dt_match,
-+		   .pm = &sdhci_msm_pm_ops,
- 	},
- };
- 
+
 -- 
-1.8.2.1
-
+Ben Dooks				http://www.codethink.co.uk/
+Senior Engineer				Codethink - Providing Genius
