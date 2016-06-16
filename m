@@ -1,51 +1,91 @@
-From: Rob Herring <robh@kernel.org>
-Subject: Re: [PATCH v2 08/11] Documentation: phy: Let the rockchip eMMC PHY
- get an exported card clock
-Date: Thu, 16 Jun 2016 13:42:30 -0500
-Message-ID: <20160616184230.GA18869@rob-hp-laptop>
-References: <1465859076-4868-1-git-send-email-dianders@chromium.org>
- <1465859076-4868-9-git-send-email-dianders@chromium.org>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <1465859076-4868-9-git-send-email-dianders@chromium.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Douglas Anderson <dianders@chromium.org>
-Cc: ulf.hansson@linaro.org, kishon@ti.com, Heiko Stuebner <heiko@sntech.de>, shawn.lin@rock-chips.com, xzy.xu@rock-chips.com, briannorris@chromium.org, adrian.hunter@intel.com, linux-rockchip@lists.infradead.org, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, pawel.moll@arm.com, mark.rutland@arm.com, ijc+devicetree@hellion.org.uk, galak@codeaurora.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org
+From: Ben Dooks <ben.dooks@codethink.co.uk>
+Subject: [PATCH] [V3] mmc: mmci: add missing include of mmci_qcom_dml.h
+Date: Thu, 16 Jun 2016 19:47:32 +0100
+Message-ID: <1466102852-10063-1-git-send-email-ben.dooks@codethink.co.uk>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from 82-70-136-246.dsl.in-addr.zen.co.uk ([82.70.136.246]:57104 "EHLO
+	rainbowdash.ducie.codethink.co.uk" rhost-flags-OK-OK-OK-FAIL)
+	by vger.kernel.org with ESMTP id S1753966AbcFPSrh (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 16 Jun 2016 14:47:37 -0400
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-kernel@lists.codethink.co.uk
+Cc: Ben Dooks <ben.dooks@codethink.co.uk>, Srinivas Kandagatla <srinivas.kandagatla@linaro.org>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 
-On Mon, Jun 13, 2016 at 04:04:32PM -0700, Douglas Anderson wrote:
-> As of an earlier change in this series ("Documentation: mmc:
-> sdhci-of-arasan: Add ability to export card clock") the SDHCI driver
-> used on Rockchip SoCs can now expose its clock.  Let's now specify that
-> the PHY can use it.
-> 
-> Letting the PHY get access to this clock means it can adjust
-> phyctrl_frqsel field appropriately.  Although the Rockchip PHY appears
-> slightly different than the reference Arasan one, you can see that the
-> Arasan datasheet [1] had it defined as:
->   Select the frequency range of DLL operation:
->   3b'000 => 200MHz to 170 MHz
->   3b'001 => 170MHz to 140 MHz
->   3b'010 => 140MHz to 110 MHz
->   3b'011 => 110MHz to 80MHz
->   3b'100 => 80MHz to 50 MHz
->   3b'101 => 275Mhz to 250MHz
->   3b'110 => 250MHz to 225MHz
->   3b'111 => 225MHz to 200MHz
-> 
-> On the Rockchip version of the PHY we have less granularity but the idea
-> is the same.
-> 
-> [1]: https://arasan.com/wp-content/media/eMMC-5-1-Total-Solution_Rev-1-3.pdf
-> 
-> Signed-off-by: Douglas Anderson <dianders@chromium.org>
-> ---
-> Changes in v2:
-> - List out clocks and clock names (Rob)
-> 
->  Documentation/devicetree/bindings/phy/rockchip-emmc-phy.txt | 9 +++++++++
->  1 file changed, 9 insertions(+)
+Fix the missing declarations of dml_start_xfer() and
+dml_hw_init() by including mmci_qcom_dml.h to fix the
+following warnings:
 
-Acked-by: Rob Herring <robh@kernel.org>
+drivers/mmc/host/mmci_qcom_dml.c:57:6: warning: symbol 'dml_start_xfer' was not declared. Should it be static?
+drivers/mmc/host/mmci_qcom_dml.c:122:5: warning: symbol 'dml_hw_init' was not declared. Should it be static?
+
+Since the module build doesn't export symbols, also
+export the symbols from the mmci_qcom_dml.c file as
+otherwise the module link process won't work.
+
+It is possible this also fixes up module loading when
+both drivers are built as modules and not inserted in
+the correct order.
+
+Note, since this is a very small addition to the mmci
+module, it would better to build it into the main mmci
+driver (either by direct copy, or multiple linked
+module)
+
+Signed-off-by: Ben Dooks <ben.dooks@codethink.co.uk>
+---
+V1..V2:
+  - deal with module build errors
+V2..V3:
+  - add original authour and update list of recipients
+---
+Cc: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc@vger.kernel.org
+Cc: linux-arm-kernel@lists.infradead.org
+---
+ drivers/mmc/host/mmci_qcom_dml.c | 3 +++
+ drivers/mmc/host/mmci_qcom_dml.h | 2 +-
+ 2 files changed, 4 insertions(+), 1 deletion(-)
+
+diff --git a/drivers/mmc/host/mmci_qcom_dml.c b/drivers/mmc/host/mmci_qcom_dml.c
+index 2b7fc37..06858bd 100644
+--- a/drivers/mmc/host/mmci_qcom_dml.c
++++ b/drivers/mmc/host/mmci_qcom_dml.c
+@@ -18,6 +18,7 @@
+ #include <linux/mmc/host.h>
+ #include <linux/mmc/card.h>
+ #include "mmci.h"
++#include "mmci_qcom_dml.h"
+ 
+ /* Registers */
+ #define DML_CONFIG			0x00
+@@ -97,6 +98,7 @@ void dml_start_xfer(struct mmci_host *host, struct mmc_data *data)
+ 	/* make sure the dml is configured before dma is triggered */
+ 	wmb();
+ }
++EXPORT_SYMBOL_GPL(dml_start_xfer);
+ 
+ static int of_get_dml_pipe_index(struct device_node *np, const char *name)
+ {
+@@ -175,3 +177,4 @@ int dml_hw_init(struct mmci_host *host, struct device_node *np)
+ 
+ 	return 0;
+ }
++EXPORT_SYMBOL_GPL(dml_hw_init);
+diff --git a/drivers/mmc/host/mmci_qcom_dml.h b/drivers/mmc/host/mmci_qcom_dml.h
+index 6e405d0..d77873d 100644
+--- a/drivers/mmc/host/mmci_qcom_dml.h
++++ b/drivers/mmc/host/mmci_qcom_dml.h
+@@ -15,7 +15,7 @@
+ #ifndef __MMC_QCOM_DML_H__
+ #define __MMC_QCOM_DML_H__
+ 
+-#ifdef CONFIG_MMC_QCOM_DML
++#if defined(CONFIG_MMC_QCOM_DML) || defined(CONFIG_MMC_QCOM_DML_MODULE)
+ int dml_hw_init(struct mmci_host *host, struct device_node *np);
+ void dml_start_xfer(struct mmci_host *host, struct mmc_data *data);
+ #else
+-- 
+2.8.1
+
