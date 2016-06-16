@@ -1,225 +1,103 @@
-From: Shawn Lin <shawn.lin@rock-chips.com>
-Subject: Re: [PATCH RFC 03/10] mmc: core: Add command queue initialzation
- support
-Date: Thu, 16 Jun 2016 17:01:57 +0800
-Message-ID: <eb2b5cd1-c023-b1d1-4148-a57433ba9547@rock-chips.com>
-References: <1465995674-15816-1-git-send-email-riteshh@codeaurora.org>
- <1465995674-15816-4-git-send-email-riteshh@codeaurora.org>
+From: Amitkumar Karwar <akarwar-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>
+Subject: [PATCH v4 1/2] mmc: API for accessing host supported maximum segment count and size
+Date: Thu, 16 Jun 2016 14:53:25 +0530
+Message-ID: <1466069006-10757-1-git-send-email-akarwar@marvell.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=gbk;
-	format=flowed
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from lucky1.263xmail.com ([211.157.147.130]:40025 "EHLO
-	lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751562AbcFPJCI (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 16 Jun 2016 05:02:08 -0400
-In-Reply-To: <1465995674-15816-4-git-send-email-riteshh@codeaurora.org>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain
+Return-path: <linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Sender: linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: Nishant Sarmukadam <nishants-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, Wei-Ning Huang <wnhuang-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Cathy Luo <cluo-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, Xinming Hu <huxm-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>, Amitkumar Karwar <akarwar-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Ritesh Harjani <riteshh@codeaurora.org>, ulf.hansson@linaro.org, linux-mmc@vger.kernel.org
-Cc: shawn.lin@rock-chips.com, adrian.hunter@intel.com, alex.lemberg@sandisk.com, mateusz.nowak@intel.com, Yuliy.Izrailov@sandisk.com, jh80.chung@samsung.com, dongas86@gmail.com, asutoshd@codeaurora.org, zhangfei.gao@gmail.com, sthumma@codeaurora.org, kdorfman@codeaurora.org, david.griego@linaro.org, stummala@codeaurora.org, venkatg@codeaurora.org, Subhash Jadavani <subhashj@codeaurora.org>
 
-=D4=DA 2016/6/15 21:01, Ritesh Harjani =D0=B4=B5=C0:
-> From: Asutosh Das <asutoshd@codeaurora.org>
->
-> Command Queueing (CQ) feature is introduced to eMMC
-> standard in revision 5.1. CQ includes new commands
-> for issuing tasks to the device, for ordering the
-> execution of previously issued tasks and for
-> additional task management functions.
->
-> This patch adds initialization and enabling of command
-> queue in the card and controller. If the card and the
-> controller support CQ, then it is enabled.
->
-> Signed-off-by: Asutosh Das <asutoshd@codeaurora.org>
-> Signed-off-by: Venkat Gopalakrishnan <venkatg@codeaurora.org>
-> [subhashj@codeaurora.org: fixed trivial merge conflicts]
-> Signed-off-by: Subhash Jadavani <subhashj@codeaurora.org>
-> [riteshh@codeaurora.org: fixed trivial merge conflicts]
-> Signed-off-by: Ritesh Harjani <riteshh@codeaurora.org>
-> ---
->  drivers/mmc/core/mmc.c   | 50 ++++++++++++++++++++++++++++++++++++++=
-++++++++++
->  include/linux/mmc/card.h |  6 ++++++
->  include/linux/mmc/host.h |  6 ++++++
->  include/linux/mmc/mmc.h  |  1 +
->  4 files changed, 63 insertions(+)
->
-> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-> index ff560e9..47f8d09 100644
-> --- a/drivers/mmc/core/mmc.c
-> +++ b/drivers/mmc/core/mmc.c
-> @@ -1369,6 +1369,43 @@ static int mmc_hs200_tuning(struct mmc_card *c=
-ard)
->  	return mmc_execute_tuning(card);
->  }
->
-> +static int mmc_select_cmdq(struct mmc_card *card)
-> +{
-> +	struct mmc_host *host =3D card->host;
-> +	int ret =3D 0;
-> +
-> +	if (!host->cmdq_ops) {
-> +		pr_err("%s: host controller doesn't support CMDQ\n",
-> +		       mmc_hostname(host));
-> +		return 0;
-> +	}
-> +
-> +	ret =3D mmc_set_blocklen(card, MMC_CARD_CMDQ_BLK_SIZE);
-> +	if (ret)
-> +		goto out;
-> +
-> +	ret =3D mmc_switch(card, EXT_CSD_CMD_SET_NORMAL, EXT_CSD_CMDQ, 1,
-> +			 card->ext_csd.generic_cmd6_time);
-> +	if (ret)
-> +		goto out;
-> +
-> +	mmc_card_set_cmdq(card);
-> +	ret =3D host->cmdq_ops->enable(card->host);
-> +	if (ret) {
-> +		pr_err("%s: failed (%d) enabling CMDQ on host\n",
-> +			mmc_hostname(host), ret);
-> +		mmc_card_clr_cmdq(card);
-> +		ret =3D mmc_switch(card, EXT_CSD_CMD_SET_NORMAL, EXT_CSD_CMDQ, 0,
-> +				 card->ext_csd.generic_cmd6_time);
-> +		if (ret)
-> +			goto out;
-> +	}
-> +
-> +	pr_info("%s: CMDQ enabled on card\n", mmc_hostname(host));
+From: Xinming Hu <huxm-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>
 
-pr_debug?
+sdio device drivers need be able to get the host supported max_segs
+and max_seg_size, so that they know the buffer size to allocate while
+utilizing the scatter/gather DMA buffer list.
 
-> +out:
-> +	return ret;
-> +}
-> +
->  /*
->   * Handle the detection and initialisation of a card.
->   *
-> @@ -1397,6 +1434,7 @@ static int mmc_init_card(struct mmc_host *host,=
- u32 ocr,
->  	 * respond.
->  	 * mmc_go_idle is needed for eMMC that are asleep
->  	 */
-> +reinit:
->  	mmc_go_idle(host);
->
->  	/* The extra bit indicates that we support high capacity */
-> @@ -1674,6 +1712,18 @@ static int mmc_init_card(struct mmc_host *host=
-, u32 ocr,
->  	if (!oldcard)
->  		host->card =3D card;
->
-> +	if (card->ext_csd.cmdq_support && (card->host->caps2 &
-> +					   MMC_CAP2_CMD_QUEUE)) {
-> +		err =3D mmc_select_cmdq(card);
-> +		if (err) {
-> +			pr_err("%s: selecting CMDQ mode: failed: %d\n",
-> +					   mmc_hostname(card->host), err);
-> +			card->ext_csd.cmdq_support =3D 0;
-> +			oldcard =3D card;
-> +			goto reinit;
+This patch provides API for this purpose.
 
-Shouldn't the orign code already retry the init sequence agian?
+Signed-off-by: Xinming Hu <huxm-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>
+Signed-off-by: Amitkumar Karwar <akarwar-eYqpPyKDWXRBDgjK7y7TUQ@public.gmane.org>
+---
+v2: v2 was submitted with minor improvement like replacing BUG_ON() with WARN_ON()
+v3: Addressed below review comments from Ulf Hansson
+    a) In v3, patch has been split into two separate patches.
+    b) Patch 1/2 introduces an API to fetch max_seg_size and max_segs
+    c) Replaced WARN_ON() with proper error code when sg_ptr->length is invalid
+    d) Instead of duplicating the code in mmc_io_rw_extended(), extra bool parameter
+       has been added to this function and used it in new APIs for SG.
+v4: Removed WARN_ON() calls in newly added APIs. It's gets called in probe handler.
+    Caller already takes care of it(Shawn Lin).
+---
+ drivers/mmc/core/sdio_io.c                          | 21 +++++++++++++++++++++
+ .../wireless/broadcom/brcm80211/brcmfmac/bcmsdh.c   |  6 +++---
+ include/linux/mmc/sdio_func.h                       |  3 +++
+ 3 files changed, 27 insertions(+), 3 deletions(-)
 
-> +		}
-> +	}
-> +
->  	return 0;
->
->  free_card:
-> diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
-> index f74db84..85a0d8d 100644
-> --- a/include/linux/mmc/card.h
-> +++ b/include/linux/mmc/card.h
-> @@ -14,6 +14,8 @@
->  #include <linux/mmc/core.h>
->  #include <linux/mod_devicetable.h>
->
-> +#define MMC_CARD_CMDQ_BLK_SIZE 512
-> +
->  struct mmc_cid {
->  	unsigned int		manfid;
->  	char			prod_name[8];
-> @@ -265,6 +267,7 @@ struct mmc_card {
->  #define MMC_CARD_REMOVED	(1<<4)		/* card has been removed */
->  #define MMC_STATE_DOING_BKOPS	(1<<5)		/* card is doing BKOPS */
->  #define MMC_STATE_SUSPENDED	(1<<6)		/* card is suspended */
-> +#define MMC_STATE_CMDQ		(1<<12)         /* card is in cmd queue mode=
- */
->  	unsigned int		quirks; 	/* card quirks */
->  #define MMC_QUIRK_LENIENT_FN0	(1<<0)		/* allow SDIO FN0 writes outsi=
-de of the VS CCCR range */
->  #define MMC_QUIRK_BLKSZ_FOR_BYTE_MODE (1<<1)	/* use func->cur_blksiz=
-e */
-> @@ -433,6 +436,7 @@ static inline void __maybe_unused remove_quirk(st=
-ruct mmc_card *card, int data)
->  #define mmc_card_removed(c)	((c) && ((c)->state & MMC_CARD_REMOVED))
->  #define mmc_card_doing_bkops(c)	((c)->state & MMC_STATE_DOING_BKOPS)
->  #define mmc_card_suspended(c)	((c)->state & MMC_STATE_SUSPENDED)
-> +#define mmc_card_cmdq(c)       ((c)->state & MMC_STATE_CMDQ)
->
->  #define mmc_card_set_present(c)	((c)->state |=3D MMC_STATE_PRESENT)
->  #define mmc_card_set_readonly(c) ((c)->state |=3D MMC_STATE_READONLY=
-)
-> @@ -443,6 +447,8 @@ static inline void __maybe_unused remove_quirk(st=
-ruct mmc_card *card, int data)
->  #define mmc_card_clr_doing_bkops(c)	((c)->state &=3D ~MMC_STATE_DOIN=
-G_BKOPS)
->  #define mmc_card_set_suspended(c) ((c)->state |=3D MMC_STATE_SUSPEND=
-ED)
->  #define mmc_card_clr_suspended(c) ((c)->state &=3D ~MMC_STATE_SUSPEN=
-DED)
-> +#define mmc_card_set_cmdq(c)           ((c)->state |=3D MMC_STATE_CM=
-DQ)
-> +#define mmc_card_clr_cmdq(c)           ((c)->state &=3D ~MMC_STATE_C=
-MDQ)
->
->  /*
->   * Quirk add/remove for MMC products.
-> diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-> index 23accc3..96654d5 100644
-> --- a/include/linux/mmc/host.h
-> +++ b/include/linux/mmc/host.h
-> @@ -79,6 +79,11 @@ struct mmc_ios {
->  #define MMC_SET_DRIVER_TYPE_D	3
->  };
->
-> +struct mmc_cmdq_host_ops {
-> +	int (*enable)(struct mmc_host *host);
-> +	void (*disable)(struct mmc_host *host, bool soft);
-> +};
-> +
->  struct mmc_host_ops {
->  	/*
->  	 * It is optional for the host to implement pre_req and post_req in
-> @@ -221,6 +226,7 @@ struct mmc_host {
->  	struct device		class_dev;
->  	int			index;
->  	const struct mmc_host_ops *ops;
-> +	const struct mmc_cmdq_host_ops *cmdq_ops;
->  	struct mmc_pwrseq	*pwrseq;
->  	unsigned int		f_min;
->  	unsigned int		f_max;
-> diff --git a/include/linux/mmc/mmc.h b/include/linux/mmc/mmc.h
-> index 1c0ae75..c59c9df 100644
-> --- a/include/linux/mmc/mmc.h
-> +++ b/include/linux/mmc/mmc.h
-> @@ -272,6 +272,7 @@ struct _mmc_csd {
->   * EXT_CSD fields
->   */
->
-> +#define EXT_CSD_CMDQ			15	/* R/W */
->  #define EXT_CSD_FLUSH_CACHE		32      /* W */
->  #define EXT_CSD_CACHE_CTRL		33      /* R/W */
->  #define EXT_CSD_POWER_OFF_NOTIFICATION	34	/* R/W */
->
+diff --git a/drivers/mmc/core/sdio_io.c b/drivers/mmc/core/sdio_io.c
+index 78cb4d5..b1ecacc 100644
+--- a/drivers/mmc/core/sdio_io.c
++++ b/drivers/mmc/core/sdio_io.c
+@@ -720,3 +720,24 @@ int sdio_set_host_pm_flags(struct sdio_func *func, mmc_pm_flag_t flags)
+ 	return 0;
+ }
+ EXPORT_SYMBOL_GPL(sdio_set_host_pm_flags);
++
++/**
++ *	sdio_get_host_max_seg_size - get host maximum segment size
++ *	@func: SDIO function attached to host
++ */
++unsigned int sdio_get_host_max_seg_size(struct sdio_func *func)
++{
++	return func->card->host->max_seg_size;
++}
++EXPORT_SYMBOL_GPL(sdio_get_host_max_seg_size);
++
++/**
++ *	sdio_get_host_max_seg_count - get host maximum segment count
++ *	@func: SDIO function attached to host
++ */
++unsigned short sdio_get_host_max_seg_count(struct sdio_func *func)
++{
++	return func->card->host->max_segs;
++}
++EXPORT_SYMBOL_GPL(sdio_get_host_max_seg_count);
++
+diff --git a/drivers/net/wireless/broadcom/brcm80211/brcmfmac/bcmsdh.c b/drivers/net/wireless/broadcom/brcm80211/brcmfmac/bcmsdh.c
+index c4b89d2..ba579f4 100644
+--- a/drivers/net/wireless/broadcom/brcm80211/brcmfmac/bcmsdh.c
++++ b/drivers/net/wireless/broadcom/brcm80211/brcmfmac/bcmsdh.c
+@@ -896,9 +896,9 @@ void brcmf_sdiod_sgtable_alloc(struct brcmf_sdio_dev *sdiodev)
+ 	max_blocks = min_t(uint, host->max_blk_count, 511u);
+ 	sdiodev->max_request_size = min_t(uint, host->max_req_size,
+ 					  max_blocks * func->cur_blksize);
+-	sdiodev->max_segment_count = min_t(uint, host->max_segs,
+-					   SG_MAX_SINGLE_ALLOC);
+-	sdiodev->max_segment_size = host->max_seg_size;
++	sdiodev->max_segment_count = min_t(uint, SG_MAX_SINGLE_ALLOC,
++					   sdio_get_host_max_seg_count(func));
++	sdiodev->max_segment_size = sdio_get_host_max_seg_size(func);
+ 
+ 	if (!sdiodev->sg_support)
+ 		return;
+diff --git a/include/linux/mmc/sdio_func.h b/include/linux/mmc/sdio_func.h
+index aab032a..b2b91df 100644
+--- a/include/linux/mmc/sdio_func.h
++++ b/include/linux/mmc/sdio_func.h
+@@ -159,4 +159,7 @@ extern void sdio_f0_writeb(struct sdio_func *func, unsigned char b,
+ extern mmc_pm_flag_t sdio_get_host_pm_caps(struct sdio_func *func);
+ extern int sdio_set_host_pm_flags(struct sdio_func *func, mmc_pm_flag_t flags);
+ 
++unsigned short sdio_get_host_max_seg_count(struct sdio_func *func);
++unsigned int sdio_get_host_max_seg_size(struct sdio_func *func);
++
+ #endif /* LINUX_MMC_SDIO_FUNC_H */
+-- 
+1.9.1
 
-
---=20
-Best Regards
-Shawn Lin
-
+--
+To unsubscribe from this list: send the line "unsubscribe linux-wireless" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
