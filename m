@@ -1,108 +1,116 @@
 From: Shawn Lin <shawn.lin@rock-chips.com>
-Subject: Re: [PATCH 04/11] mmc: sdhci-of-arasan: Properly set
- corecfg_baseclkfreq on rk3399
-Date: Thu, 16 Jun 2016 09:06:14 +0800
-Message-ID: <15960cce-354b-5eb6-79b0-19f55e840b0d@rock-chips.com>
-References: <1465339484-969-1-git-send-email-dianders@chromium.org>
- <1465339484-969-5-git-send-email-dianders@chromium.org>
- <f5dcc018-bd60-87a7-798b-efc261e443dd@rock-chips.com>
- <CAD=FV=UzGZmwGTthqqO5Skxj5f0wsS5VKr4gYP2i9SUyGqvbjg@mail.gmail.com>
- <47a2dcd9-9c3c-8fde-2be0-40e305c25e8d@rock-chips.com>
- <CAD=FV=UL5tU8RWtHF=-pE8SA0jUcBsqQDOU0BrruXOF7yGh5xg@mail.gmail.com>
- <da1c9ae9-71d9-6e9d-7b9f-08485ee9178e@rock-chips.com>
- <CAD=FV=WGwiQqRNMSSX9OR6nAOwuu7CbULuz7BcNp-S=duqpLLQ@mail.gmail.com>
+Subject: Re: [PATCH RFC 01/10] mmc: core: Add support to read command queue
+ parameters
+Date: Thu, 16 Jun 2016 16:12:39 +0800
+Message-ID: <00b85d36-baf1-5bc3-db99-ac6c2cc0b975@rock-chips.com>
+References: <1465995674-15816-1-git-send-email-riteshh@codeaurora.org>
+ <1465995674-15816-2-git-send-email-riteshh@codeaurora.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Type: text/plain; charset=gbk; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from lucky1.263xmail.com ([211.157.147.132]:51947 "EHLO
+Received: from lucky1.263xmail.com ([211.157.147.135]:52993 "EHLO
 	lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932078AbcFPBGb (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 15 Jun 2016 21:06:31 -0400
-In-Reply-To: <CAD=FV=WGwiQqRNMSSX9OR6nAOwuu7CbULuz7BcNp-S=duqpLLQ@mail.gmail.com>
+	with ESMTP id S1751276AbcFPIMv (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 16 Jun 2016 04:12:51 -0400
+In-Reply-To: <1465995674-15816-2-git-send-email-riteshh@codeaurora.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Doug Anderson <dianders@chromium.org>
-Cc: shawn.lin@rock-chips.com, Ulf Hansson <ulf.hansson@linaro.org>, Kishon Vijay Abraham I <kishon@ti.com>, Heiko Stuebner <heiko@sntech.de>, Rob Herring <robh+dt@kernel.org>, Ziyuan Xu <xzy.xu@rock-chips.com>, Brian Norris <briannorris@chromium.org>, Adrian Hunter <adrian.hunter@intel.com>, "open list:ARM/Rockchip SoC..." <linux-rockchip@lists.infradead.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, Michal Simek <michal.simek@xilinx.com>, soren.brinkmann@xilinx.com, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+To: Ritesh Harjani <riteshh@codeaurora.org>, ulf.hansson@linaro.org, linux-mmc@vger.kernel.org
+Cc: shawn.lin@rock-chips.com, adrian.hunter@intel.com, alex.lemberg@sandisk.com, mateusz.nowak@intel.com, Yuliy.Izrailov@sandisk.com, jh80.chung@samsung.com, dongas86@gmail.com, asutoshd@codeaurora.org, zhangfei.gao@gmail.com, sthumma@codeaurora.org, kdorfman@codeaurora.org, david.griego@linaro.org, stummala@codeaurora.org, venkatg@codeaurora.org, Subhash Jadavani <subhashj@codeaurora.org>
 
-On 2016/6/14 10:13, Doug Anderson wrote:
-> Shawn,
+On 2016/6/15 21:01, Ritesh Harjani wrote:
+> From: Asutosh Das <asutoshd@codeaurora.org>
 >
-> On Mon, Jun 13, 2016 at 5:59 PM, Shawn Lin <shawn.lin@rock-chips.com> wrote:
->>> Even in the case that an SoC designer didn't put a value into
->>> corecfg_baseclkfreq that matched register[15:8], it seems very likely
->>> that the rate returned from the clk_get_rate() would match.
->>>
->>> I guess what I'm saying is that, to me, it seems like my patch isn't
->>> broken in any real systems.  If we ever find a system that needs this
->>> behavior in the future, we can add it.  Until then, it seems like my
->>> patch would be fine.  Do you agree?
->>
->>
->> I agree. But from the code itself, we should still use
->> SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN to see if we could get
->> it from internal register in case of some platforms don't
->> provide the clk stuff.. Sounds sane? :)
+> eMMC cards with EXT_CSD version >= 7, optionally support command
+> queuing feature as defined by JEDEC eMMC5.1. Add support for probing
+> command queue feature for such type of cards.
 >
-> Could we wait until there exists a SoC that needs to provide
-> baseclkfreq in its sdhci_arasan_soc_ctl_map table and that needs this
-> value copied from register[15:8]?
+> Signed-off-by: Sujit Reddy Thumma <sthumma@codeaurora.org>
+> Signed-off-by: Asutosh Das <asutoshd@codeaurora.org>
+> Signed-off-by: Venkat Gopalakrishnan <venkatg@codeaurora.org>
+> [subhashj@codeaurora.org: fixed trivial merge conflicts]
+> Signed-off-by: Subhash Jadavani <subhashj@codeaurora.org>
+> ---
+>  drivers/mmc/core/mmc.c   | 18 ++++++++++++++++++
+>  include/linux/mmc/card.h |  2 ++
+>  include/linux/mmc/mmc.h  |  3 +++
+>  3 files changed, 23 insertions(+)
+>
+> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+> index 4dbe3df..ff560e9 100644
+> --- a/drivers/mmc/core/mmc.c
+> +++ b/drivers/mmc/core/mmc.c
+> @@ -578,6 +578,24 @@ static int mmc_decode_ext_csd(struct mmc_card *card, u8 *ext_csd)
+>  		card->ext_csd.data_sector_size = 512;
+>  	}
+>
+> +	if (card->ext_csd.rev >= 7) {
 
-yes, I think the base clk got from clk framework shouldn't
-make any difference with that from register[15:8] if implemented. And
-we now decide how to get base clk in a certain variant driver which
-menas we know that this variant would never implement register[15:8], so
-it looks fine for your patch with only a nit that we should make sure
-we toggle up the COMMON_CLK. I saw your v2.1 to deal with it, so I think
-it's okay now to add
+Do you ever find one device claiming to support it with
+ext_csd.rev to be 7?
 
-Reviewed-by: Shawn Lin <shawn.lin@rock-chips.com>
+I believe it should be 8 as 7 is for 5.0 and 5.01 which don't support
+hw-cmdq.
 
+> +		card->ext_csd.cmdq_support = ext_csd[EXT_CSD_CMDQ_SUPPORT];
+> +		if (card->ext_csd.cmdq_support) {
+> +			/*
+> +			 * Queue Depth = N + 1,
+> +			 * see JEDEC JESD84-B51 section 7.4.19
+> +			 */
+> +			card->ext_csd.cmdq_depth =
+> +				ext_csd[EXT_CSD_CMDQ_DEPTH] + 1;
+> +			pr_info("%s: CMDQ supported: depth: %d\n",
+> +				mmc_hostname(card->host),
+> +				card->ext_csd.cmdq_depth);
+
+pr_debug may be more appropriate?
+
+> +		}
+> +	} else {
+> +		card->ext_csd.cmdq_support = 0;
+> +		card->ext_csd.cmdq_depth = 0;
+> +	}
+
+if the code fallback to here, card->ext_csd.cmdq_support must be
+zero already, and the ext_csd is already set to zero which also
+means you not need to zero it again here.
+
+> +
+>  	/* eMMC v5 or later */
+>  	if (card->ext_csd.rev >= 7) {
+>  		memcpy(card->ext_csd.fwrev, &ext_csd[EXT_CSD_FIRMWARE_VERSION],
+> diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
+> index eb0151b..f74db84 100644
+> --- a/include/linux/mmc/card.h
+> +++ b/include/linux/mmc/card.h
+> @@ -118,6 +118,8 @@ struct mmc_ext_csd {
+>  	u8			raw_pwr_cl_ddr_200_360;	/* 253 */
+>  	u8			raw_bkops_status;	/* 246 */
+>  	u8			raw_sectors[4];		/* 212 - 4 bytes */
+> +	u8			cmdq_depth;		/* 307 */
+> +	u8			cmdq_support;		/* 308 */
 >
-> AKA:
->
-> A) If you have a SoC where clk_get_rate() is right and software needs
-> to set baseclkfreq manualy, then you should include "baseclkfreq" in
-> your sdhci_arasan_soc_ctl_map table.  This is like rk3399.  Note that
-> if _both_ clk_get_rate() and register[15:8] are right, that's fine.
-> We can still use clk_get_rate() since it will be exactly the same as
-> register[15:8].
->
-> B) If you have a SoC that doesn't even expose corecfg_baseclkfreq to
-> software control, just don't include "baseclkfreq" in your
-> sdhci_arasan_soc_ctl_map table.  Easy.  This is how my patch treats
-> anyone using the current "generic" bindings, but you could easily just
-> specify an offset of "-1" for baseclkfreq if you didn't want to use
-> the generic bindings but couldn't control baseclkfreq.
->
-> C) If you have a SoC that provides a valid value in register[15:8] and
-> clk_get_rate() is wrong and software is required to copy the value
-> from register[15:8] to baseclkfreq, technically we should fix
-> clk_get_rate() anyway.  It's good when common clock framework provides
-> correct values.  NOTE: It seems very unlikely to me that
-> register[15:8] would be right AND that software would be required to
-> copy this value to baseclkfreq, but I suppose there are some pretty
-> crazy hardware designs out there.
->
-> D) If you have a SoC that provides a valid value in register[15:8] and
-> clk_get_rate() is wrong and can't be fixed (REALLY?) and software is
-> required to copy the value from register[15:8] to baseclkfreq, we will
-> need to add new code.  My assertion is that such a SoC doesn't exist
-> and is unlikely to ever exist, so I am hesitant to add extra code to
-> support this SoC.
->
->
-> With my patch, A) and B) are certainly handled.  I think C) is
-> unlikely to exist, but if it did exist then I'd say we should fix
-> clk_get_rate().  I think D) is VERY unlikely to exist.  If I'm shown
-> proof of D) existing, I'm happy to submit a patch for it.  Until we
-> see proof of D)'s existence, I don't think we should clutter the code
-> with support for it.
->
->
-> -Doug
->
->
+>  	unsigned int            feature_support;
+>  #define MMC_DISCARD_FEATURE	BIT(0)                  /* CMD38 feature */
+> diff --git a/include/linux/mmc/mmc.h b/include/linux/mmc/mmc.h
+> index 15f2c4a..1c0ae75 100644
+> --- a/include/linux/mmc/mmc.h
+> +++ b/include/linux/mmc/mmc.h
+> @@ -330,6 +330,9 @@ struct _mmc_csd {
+>  #define EXT_CSD_CACHE_SIZE		249	/* RO, 4 bytes */
+>  #define EXT_CSD_PWR_CL_DDR_200_360	253	/* RO */
+>  #define EXT_CSD_FIRMWARE_VERSION	254	/* RO, 8 bytes */
+> +#define EXT_CSD_CMDQ_DEPTH		307	/* RO */
+> +#define EXT_CSD_CMDQ_SUPPORT		308	/* RO */
+> + #define EXT_CSD_TAG_UNIT_SIZE		498	/* RO */
+
+an invalid space here
+
+>  #define EXT_CSD_SUPPORTED_MODE		493	/* RO */
+>  #define EXT_CSD_TAG_UNIT_SIZE		498	/* RO */
+>  #define EXT_CSD_DATA_TAG_SUPPORT	499	/* RO */
 >
 
 
