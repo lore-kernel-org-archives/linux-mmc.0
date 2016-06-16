@@ -1,42 +1,51 @@
-From: Ben Dooks <ben.dooks@codethink.co.uk>
-Subject: Re: [PATCH] [V2] mmc: mmci: add missing include of mmci_qcom_dml.h
-Date: Thu, 16 Jun 2016 19:35:06 +0100
-Message-ID: <b0ac5e58-3875-f949-2f29-5cf7812cbd55@codethink.co.uk>
-References: <1466101965-25568-1-git-send-email-ben.dooks@codethink.co.uk>
+From: Rob Herring <robh@kernel.org>
+Subject: Re: [PATCH v2 08/11] Documentation: phy: Let the rockchip eMMC PHY
+ get an exported card clock
+Date: Thu, 16 Jun 2016 13:42:30 -0500
+Message-ID: <20160616184230.GA18869@rob-hp-laptop>
+References: <1465859076-4868-1-git-send-email-dianders@chromium.org>
+ <1465859076-4868-9-git-send-email-dianders@chromium.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from ducie-dc1.codethink.co.uk ([185.25.241.215]:54490 "EHLO
-	ducie-dc1.codethink.co.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752512AbcFPSfL (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 16 Jun 2016 14:35:11 -0400
-In-Reply-To: <1466101965-25568-1-git-send-email-ben.dooks@codethink.co.uk>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <1465859076-4868-9-git-send-email-dianders@chromium.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Douglas Anderson <dianders@chromium.org>
+Cc: ulf.hansson@linaro.org, kishon@ti.com, Heiko Stuebner <heiko@sntech.de>, shawn.lin@rock-chips.com, xzy.xu@rock-chips.com, briannorris@chromium.org, adrian.hunter@intel.com, linux-rockchip@lists.infradead.org, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, pawel.moll@arm.com, mark.rutland@arm.com, ijc+devicetree@hellion.org.uk, galak@codeaurora.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-kernel@lists.codethink.co.uk
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infadead.org
 
-On 16/06/16 19:32, Ben Dooks wrote:
-> Fix the missing declarations of dml_start_xfer() and
-> dml_hw_init() by including mmci_qcom_dml.h to fix the
-> following warnings:
+On Mon, Jun 13, 2016 at 04:04:32PM -0700, Douglas Anderson wrote:
+> As of an earlier change in this series ("Documentation: mmc:
+> sdhci-of-arasan: Add ability to export card clock") the SDHCI driver
+> used on Rockchip SoCs can now expose its clock.  Let's now specify that
+> the PHY can use it.
 > 
-> drivers/mmc/host/mmci_qcom_dml.c:57:6: warning: symbol 'dml_start_xfer' was not declared. Should it be static?
-> drivers/mmc/host/mmci_qcom_dml.c:122:5: warning: symbol 'dml_hw_init' was not declared. Should it be static?
+> Letting the PHY get access to this clock means it can adjust
+> phyctrl_frqsel field appropriately.  Although the Rockchip PHY appears
+> slightly different than the reference Arasan one, you can see that the
+> Arasan datasheet [1] had it defined as:
+>   Select the frequency range of DLL operation:
+>   3b'000 => 200MHz to 170 MHz
+>   3b'001 => 170MHz to 140 MHz
+>   3b'010 => 140MHz to 110 MHz
+>   3b'011 => 110MHz to 80MHz
+>   3b'100 => 80MHz to 50 MHz
+>   3b'101 => 275Mhz to 250MHz
+>   3b'110 => 250MHz to 225MHz
+>   3b'111 => 225MHz to 200MHz
 > 
-> Since the module build doesn't export symbols, also
-> export the symbols from the mmci_qcom_dml.c file as
-> otherwise the module link process won't work.
+> On the Rockchip version of the PHY we have less granularity but the idea
+> is the same.
 > 
-> Note, since this is a very small addition to the mmci
-> module, it would better to build it into the main mmci
-> driver (either by direct copy, or multiple linked
-> module)
+> [1]: https://arasan.com/wp-content/media/eMMC-5-1-Total-Solution_Rev-1-3.pdf
+> 
+> Signed-off-by: Douglas Anderson <dianders@chromium.org>
+> ---
+> Changes in v2:
+> - List out clocks and clock names (Rob)
+> 
+>  Documentation/devicetree/bindings/phy/rockchip-emmc-phy.txt | 9 +++++++++
+>  1 file changed, 9 insertions(+)
 
-I've also noted the driver doesn't have any MODULE_LICENSE or
-MODULE_AUTHOR fields in it.
-
--- 
-Ben Dooks				http://www.codethink.co.uk/
-Senior Engineer				Codethink - Providing Genius
+Acked-by: Rob Herring <robh@kernel.org>
