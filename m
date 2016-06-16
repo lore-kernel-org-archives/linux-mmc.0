@@ -1,105 +1,40 @@
-From: Ben Dooks <ben.dooks@codethink.co.uk>
-Subject: Re: [PATCH] [V3] mmc: mmci: add missing include of mmci_qcom_dml.h
-Date: Thu, 16 Jun 2016 19:50:04 +0100
-Message-ID: <6725990b-f731-6f07-035d-cf79fa4341bf@codethink.co.uk>
-References: <1466102852-10063-1-git-send-email-ben.dooks@codethink.co.uk>
+From: Heiko Stuebner <heiko@sntech.de>
+Subject: Re: [PATCH v2 0/11] Changes to support 150 MHz eMMC on rk3399
+Date: Fri, 17 Jun 2016 01:39:55 +0200
+Message-ID: <2340840.IUG4rtlpvT@phil>
+References: <1465859076-4868-1-git-send-email-dianders@chromium.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7Bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from ducie-dc1.codethink.co.uk ([185.25.241.215]:54877 "EHLO
-	ducie-dc1.codethink.co.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751620AbcFPSuJ (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 16 Jun 2016 14:50:09 -0400
-In-Reply-To: <1466102852-10063-1-git-send-email-ben.dooks@codethink.co.uk>
+Received: from gloria.sntech.de ([95.129.55.99]:50413 "EHLO gloria.sntech.de"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752665AbcFPXk0 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 16 Jun 2016 19:40:26 -0400
+In-Reply-To: <1465859076-4868-1-git-send-email-dianders@chromium.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-kernel@lists.codethink.co.uk
-Cc: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+To: Douglas Anderson <dianders@chromium.org>
+Cc: ulf.hansson@linaro.org, kishon@ti.com, robh+dt@kernel.org, shawn.lin@rock-chips.com, xzy.xu@rock-chips.com, briannorris@chromium.org, adrian.hunter@intel.com, linux-rockchip@lists.infradead.org, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, mark.rutland@arm.com, catalin.marinas@arm.com, will.deacon@arm.com, zhengxing@rock-chips.com, michal.simek@xilinx.com, linux-arm-kernel@lists.infradead.org, jay.xu@rock-chips.com, wxt@rock-chips.com, pawel.moll@arm.com, ijc+devicetree@hellion.org.uk, soren.brinkmann@xilinx.com, linux-kernel@vger.kernel.org, galak@codeaurora.org
 
-On 16/06/16 19:47, Ben Dooks wrote:
-> Fix the missing declarations of dml_start_xfer() and
-> dml_hw_init() by including mmci_qcom_dml.h to fix the
-> following warnings:
+Am Montag, 13. Juni 2016, 16:04:24 schrieb Douglas Anderson:
+> The theme of this series of patches is to try to allow running the eMMC
+> at 150 MHz on the rk3399 SoC, though the changes should still be correct
+> and have merit on their own.  The motivation for running at 150 MHz is
+> that doing so improves signal integrity and (with some eMMC devices)
+> doesn't affect throughput.
 > 
-> drivers/mmc/host/mmci_qcom_dml.c:57:6: warning: symbol 'dml_start_xfer' was not declared. Should it be static?
-> drivers/mmc/host/mmci_qcom_dml.c:122:5: warning: symbol 'dml_hw_init' was not declared. Should it be static?
-> 
-> Since the module build doesn't export symbols, also
-> export the symbols from the mmci_qcom_dml.c file as
-> otherwise the module link process won't work.
-> 
-> It is possible this also fixes up module loading when
-> both drivers are built as modules and not inserted in
-> the correct order.
-> 
-> Note, since this is a very small addition to the mmci
-> module, it would better to build it into the main mmci
-> driver (either by direct copy, or multiple linked
-> module)
-> 
-> Signed-off-by: Ben Dooks <ben.dooks@codethink.co.uk>
-> ---
-> V1..V2:
->   - deal with module build errors
-> V2..V3:
->   - add original authour and update list of recipients
-> ---
+> These patches have been structured to keep things as separate as
+> possible, but nevertheless there are still some dependencies between
+> patches.  It probably makes the most sense for all of the non-device
+> tree patches to go through a single tree.  If others agree, perhaps the
+> most sane would be to get Acks from PHY maintainers and then to land the
+> patches in the MMC tree.  Device tree patches should be able to be
+> landed separately and the worst what would happen is a warning in the
+> kernel log if you have the code without the device tree.
 
-I'm now wondering if I should split it into fixup the
-module issues and fix the include once those are fixed.
-Anyone want to comment?
+while my evaluation board does not seem to have an enhanced strobe emmc, it 
+nevertheless still runs fine with these patches applied, for the series 
+(including the separate v2.1) on a rk3399-evb:
 
-> Cc: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
-> Cc: Ulf Hansson <ulf.hansson@linaro.org>
-> Cc: linux-mmc@vger.kernel.org
-> Cc: linux-arm-kernel@lists.infradead.org
-> ---
->  drivers/mmc/host/mmci_qcom_dml.c | 3 +++
->  drivers/mmc/host/mmci_qcom_dml.h | 2 +-
->  2 files changed, 4 insertions(+), 1 deletion(-)
-> 
-> diff --git a/drivers/mmc/host/mmci_qcom_dml.c b/drivers/mmc/host/mmci_qcom_dml.c
-> index 2b7fc37..06858bd 100644
-> --- a/drivers/mmc/host/mmci_qcom_dml.c
-> +++ b/drivers/mmc/host/mmci_qcom_dml.c
-> @@ -18,6 +18,7 @@
->  #include <linux/mmc/host.h>
->  #include <linux/mmc/card.h>
->  #include "mmci.h"
-> +#include "mmci_qcom_dml.h"
->  
->  /* Registers */
->  #define DML_CONFIG			0x00
-> @@ -97,6 +98,7 @@ void dml_start_xfer(struct mmci_host *host, struct mmc_data *data)
->  	/* make sure the dml is configured before dma is triggered */
->  	wmb();
->  }
-> +EXPORT_SYMBOL_GPL(dml_start_xfer);
->  
->  static int of_get_dml_pipe_index(struct device_node *np, const char *name)
->  {
-> @@ -175,3 +177,4 @@ int dml_hw_init(struct mmci_host *host, struct device_node *np)
->  
->  	return 0;
->  }
-> +EXPORT_SYMBOL_GPL(dml_hw_init);
-> diff --git a/drivers/mmc/host/mmci_qcom_dml.h b/drivers/mmc/host/mmci_qcom_dml.h
-> index 6e405d0..d77873d 100644
-> --- a/drivers/mmc/host/mmci_qcom_dml.h
-> +++ b/drivers/mmc/host/mmci_qcom_dml.h
-> @@ -15,7 +15,7 @@
->  #ifndef __MMC_QCOM_DML_H__
->  #define __MMC_QCOM_DML_H__
->  
-> -#ifdef CONFIG_MMC_QCOM_DML
-> +#if defined(CONFIG_MMC_QCOM_DML) || defined(CONFIG_MMC_QCOM_DML_MODULE)
->  int dml_hw_init(struct mmci_host *host, struct device_node *np);
->  void dml_start_xfer(struct mmci_host *host, struct mmc_data *data);
->  #else
-> 
-
-
--- 
-Ben Dooks				http://www.codethink.co.uk/
-Senior Engineer				Codethink - Providing Genius
+Tested-by: Heiko Stuebner <heiko@sntech.de>
