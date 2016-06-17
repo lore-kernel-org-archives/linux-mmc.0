@@ -1,58 +1,48 @@
-From: Rob Herring <robh+dt@kernel.org>
-Subject: Re: [PATCH 08/12] doc: binding: pwrseq-usb-generic: add binding doc
- for generic usb power sequence driver
-Date: Fri, 17 Jun 2016 12:16:48 -0500
-Message-ID: <CAL_JsqLvs0s2TyfqPM5vtmyY81_X84VjCGjsGYbTgT4syOfp9Q@mail.gmail.com>
-References: <1466158165-9380-1-git-send-email-peter.chen@nxp.com> <1466158165-9380-9-git-send-email-peter.chen@nxp.com>
+From: Stephen Warren <swarren@wwwdotorg.org>
+Subject: Re: [PATCH 1/2] DT: bindings: remove bcm2835-sdhci
+Date: Fri, 17 Jun 2016 12:59:36 -0600
+Message-ID: <57644898.60402@wwwdotorg.org>
+References: <1464983233-27001-1-git-send-email-stefan.wahren@i2se.com>
+ <1464983233-27001-2-git-send-email-stefan.wahren@i2se.com>
+ <5751E1F1.5020202@wwwdotorg.org>
+ <1995060523.43076.c268f06d-da3c-427e-800f-fbc65895c323.open-xchange@email.1und1.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=windows-1252; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail.kernel.org ([198.145.29.136]:44284 "EHLO mail.kernel.org"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S933704AbcFQRRM (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 17 Jun 2016 13:17:12 -0400
-In-Reply-To: <1466158165-9380-9-git-send-email-peter.chen@nxp.com>
+Received: from avon.wwwdotorg.org ([70.85.31.133]:45150 "EHLO
+	avon.wwwdotorg.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752021AbcFQS7n (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 17 Jun 2016 14:59:43 -0400
+In-Reply-To: <1995060523.43076.c268f06d-da3c-427e-800f-fbc65895c323.open-xchange@email.1und1.de>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Peter Chen <peter.chen@nxp.com>
-Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Alan Stern <stern@rowland.harvard.edu>, Ulf Hansson <ulf.hansson@linaro.org>, Mark Brown <broonie@kernel.org>, Sebastian Reichel <sre@kernel.org>, Mark Rutland <mark.rutland@arm.com>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, =?UTF-8?Q?Krzysztof_Koz=C5=82owski?= <k.kozlowski@samsung.com>, Stephen Boyd <stephen.boyd@linaro.org>, oscar@naiandei.net, Arnd Bergmann <arnd@arndb.de>, Pawel Moll <pawel.moll@arm.com>, "linux-pm@vger.kernel.org" <linux-pm@vger.kernel.org>, Sascha Hauer <s.hauer@pengutronix.de>, Linux USB List <linux-usb@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "Maciej S. Szmigiero" <mail@maciej.szmigiero.name>, troy.kisky@boundarydevices.com, Javier Martinez Canillas <javier@osg.samsung.com>, Philipp Zabel <p.zabel@pengutronix.de>, Fabio Estevam <festevam@gmai>
+To: Stefan Wahren <stefan.wahren@i2se.com>
+Cc: Mark Rutland <mark.rutland@arm.com>, devicetree@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, Pawel Moll <pawel.moll@arm.com>, Lee Jones <lee@kernel.org>, linux-mmc@vger.kernel.org, Adrian Hunter <adrian.hunter@intel.com>, Eric Anholt <eric@anholt.net>, Rob Herring <robh+dt@kernel.org>, linux-rpi-kernel@lists.infradead.org, linux-arm-kernel@lists.infradead.org
 
-On Fri, Jun 17, 2016 at 5:09 AM, Peter Chen <peter.chen@nxp.com> wrote:
-> Add binding doc for generic usb power sequence driver, and update
-> generic usb device binding-doc accordingly.
+On 06/09/2016 12:11 PM, Stefan Wahren wrote:
+> Hi Stephen,
 >
-> Signed-off-by: Peter Chen <peter.chen@nxp.com>
-> ---
->  .../bindings/power/pwrseq/pwrseq-usb-generic.txt   | 31 ++++++++++++++++++++++
->  .../devicetree/bindings/usb/usb-device.txt         |  2 ++
->  2 files changed, 33 insertions(+)
->  create mode 100644 Documentation/devicetree/bindings/power/pwrseq/pwrseq-usb-generic.txt
+>> Stephen Warren <swarren@wwwdotorg.org> hat am 3. Juni 2016 um 22:00
+>> geschrieben:
+>>
+>>
+>> On 06/03/2016 01:47 PM, Stefan Wahren wrote:
+>>> The sdhci-iproc also supports bcm2835. So this binding is obsolete.
+>>
+>> sdhci-iproc supports this binding, so I don't believe the binding is
+>> obsolete. The duplicate implementations (drivers) can possibly be
+>> removed, but not the binding doc, which is (or at least could be) still
+>> in use.
 >
-> diff --git a/Documentation/devicetree/bindings/power/pwrseq/pwrseq-usb-generic.txt b/Documentation/devicetree/bindings/power/pwrseq/pwrseq-usb-generic.txt
-> new file mode 100644
-> index 0000000..8ad98382
-> --- /dev/null
-> +++ b/Documentation/devicetree/bindings/power/pwrseq/pwrseq-usb-generic.txt
-> @@ -0,0 +1,31 @@
-> +The power sequence for generic USB Devices
-> +
-> +Some hard-wired USB devices need to do power sequence to let the
-> +device work normally, the typical power sequence like: enable USB
-> +PHY clock, toggle reset pin, etc. But current Linux USB driver
-> +lacks of such code to do it, it may cause some hard-wired USB devices
-> +works abnormal or can't be recognized by controller at all. The
-> +power sequence will be done before this device can be found at USB
-> +bus.
-> +
-> +Required properties:
-> +- compatible : contains "usb-pwrseq-generic".
+> sorry for my late reply.
+>
+> So the brcm,bcm2835-sdhci.txt must be kept, even if the compatible string
+> "brcm,bcm2835-sdhci" has been added to brcm,sdhci-iproc.txt?
 
-In case I have not been clear, no.
+Sorry for the slow reply; I was on vacation.
 
-I am not going to accept anything along the lines of the current mmc
-pwrseq. I am basically okay with Krzysztof's proposal as it is *only*
-an added property and not a duplication of information. I'd suggest
-you figure out how to make the kernel work with that rather than
-trying to work-around whatever kernel limitations there are.
-
-Rob
+So, if the binding documentation has been collapsed into the other 
+binding document, then it's OK to remove this one. I took a look at the 
+iproc binding doc and it looks completely compatible with this removed 
+binding doc, so I think this patch is OK.
