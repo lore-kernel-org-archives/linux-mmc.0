@@ -1,48 +1,72 @@
-From: Stephen Warren <swarren@wwwdotorg.org>
-Subject: Re: [PATCH 1/2] DT: bindings: remove bcm2835-sdhci
-Date: Fri, 17 Jun 2016 12:59:36 -0600
-Message-ID: <57644898.60402@wwwdotorg.org>
-References: <1464983233-27001-1-git-send-email-stefan.wahren@i2se.com>
- <1464983233-27001-2-git-send-email-stefan.wahren@i2se.com>
- <5751E1F1.5020202@wwwdotorg.org>
- <1995060523.43076.c268f06d-da3c-427e-800f-fbc65895c323.open-xchange@email.1und1.de>
+From: "Andrew F. Davis" <afd@ti.com>
+Subject: Re: [PATCH 12/12] leds: Only descend into leds directory when
+ CONFIG_NEW_LEDS is set
+Date: Fri, 17 Jun 2016 17:46:21 -0500
+Message-ID: <57647DBD.2010406@ti.com>
+References: <20160613200211.14790-1-afd@ti.com>
+ <20160613200211.14790-13-afd@ti.com> <5760FA52.7010806@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252; format=flowed
+Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from avon.wwwdotorg.org ([70.85.31.133]:45150 "EHLO
-	avon.wwwdotorg.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752021AbcFQS7n (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 17 Jun 2016 14:59:43 -0400
-In-Reply-To: <1995060523.43076.c268f06d-da3c-427e-800f-fbc65895c323.open-xchange@email.1und1.de>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-leds-owner@vger.kernel.org>
+In-Reply-To: <5760FA52.7010806@samsung.com>
+Sender: linux-leds-owner@vger.kernel.org
+To: Jacek Anaszewski <j.anaszewski@samsung.com>
+Cc: Russell King <linux@armlinux.org.uk>, Miguel Ojeda Sandonis <miguel.ojeda.sandonis@gmail.com>, Linus Walleij <linus.walleij@linaro.org>, Sebastian Reichel <sre@kernel.org>, Wolfram Sang <wsa@the-dreams.de>, Richard Purdie <rpurdie@rpsys.net>, Rusty Russell <rusty@rustcorp.com.au>, Benjamin Herrenschmidt <benh@kernel.crashing.org>, Mauro Carvalho Chehab <mchehab@osg.samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>, Lauro Ramos Venancio <lauro.venancio@openbossa.org>, Aloisio Almeida Jr <aloisio.almeida@openbossa.org>, Samuel Ortiz <sameo@linux.intel.com>, Ingo Molnar <mingo@kernel.org>, linux-pwm@vger.kernel.org, lguest@lists.ozlabs.org, linux-wireless@vger.kernel.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-gpio@vger.kernel.org, linux-i2c@vger.kernel.org, linuxppc-dev@lists.ozlabs.org, linux-leds@vger.kernel.org, linux-med
 List-Id: linux-mmc@vger.kernel.org
-To: Stefan Wahren <stefan.wahren@i2se.com>
-Cc: Mark Rutland <mark.rutland@arm.com>, devicetree@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, Pawel Moll <pawel.moll@arm.com>, Lee Jones <lee@kernel.org>, linux-mmc@vger.kernel.org, Adrian Hunter <adrian.hunter@intel.com>, Eric Anholt <eric@anholt.net>, Rob Herring <robh+dt@kernel.org>, linux-rpi-kernel@lists.infradead.org, linux-arm-kernel@lists.infradead.org
 
-On 06/09/2016 12:11 PM, Stefan Wahren wrote:
-> Hi Stephen,
->
->> Stephen Warren <swarren@wwwdotorg.org> hat am 3. Juni 2016 um 22:00
->> geschrieben:
->>
->>
->> On 06/03/2016 01:47 PM, Stefan Wahren wrote:
->>> The sdhci-iproc also supports bcm2835. So this binding is obsolete.
->>
->> sdhci-iproc supports this binding, so I don't believe the binding is
->> obsolete. The duplicate implementations (drivers) can possibly be
->> removed, but not the binding doc, which is (or at least could be) still
->> in use.
->
-> sorry for my late reply.
->
-> So the brcm,bcm2835-sdhci.txt must be kept, even if the compatible string
-> "brcm,bcm2835-sdhci" has been added to brcm,sdhci-iproc.txt?
+On 06/15/2016 01:48 AM, Jacek Anaszewski wrote:
+> Hi Andrew,
+> 
+> Thanks for the patch.
+> 
+> Please address the issue [1] raised by test bot and resubmit.
+> 
+> Thanks,
+> Jacek Anaszewski
+> 
+> [1] https://lkml.org/lkml/2016/6/13/1091
+> 
 
-Sorry for the slow reply; I was on vacation.
+It looks like some systems use 'gpio_led_register_device' to make an
+in-memory copy of their LED device table so the original can be removed
+as .init.rodata. This doesn't necessarily depend on the LED subsystem
+but it kind of seems useless when the rest of the subsystem is disabled.
 
-So, if the binding documentation has been collapsed into the other 
-binding document, then it's OK to remove this one. I took a look at the 
-iproc binding doc and it looks completely compatible with this removed 
-binding doc, so I think this patch is OK.
+One solution could be to use a dummy 'gpio_led_register_device' when the
+subsystem is not enabled. Another is just to remove the five or so uses
+of 'gpio_led_register_device' and have those systems register LED device
+tables like other systems do.
+
+If nether of these are acceptable then this patch can be dropped from
+this series for now.
+
+Thanks,
+Andrew
+
+> On 06/13/2016 10:02 PM, Andrew F. Davis wrote:
+>> When CONFIG_NEW_LEDS is not set make will still descend into the leds
+>> directory but nothing will be built. This produces unneeded build
+>> artifacts and messages in addition to slowing the build. Fix this here.
+>>
+>> Signed-off-by: Andrew F. Davis <afd@ti.com>
+>> ---
+>>   drivers/Makefile | 2 +-
+>>   1 file changed, 1 insertion(+), 1 deletion(-)
+>>
+>> diff --git a/drivers/Makefile b/drivers/Makefile
+>> index 567e32c..fa514d5 100644
+>> --- a/drivers/Makefile
+>> +++ b/drivers/Makefile
+>> @@ -127,7 +127,7 @@ obj-$(CONFIG_CPU_FREQ)        += cpufreq/
+>>   obj-$(CONFIG_CPU_IDLE)        += cpuidle/
+>>   obj-$(CONFIG_MMC)        += mmc/
+>>   obj-$(CONFIG_MEMSTICK)        += memstick/
+>> -obj-y                += leds/
+>> +obj-$(CONFIG_NEW_LEDS)        += leds/
+>>   obj-$(CONFIG_INFINIBAND)    += infiniband/
+>>   obj-$(CONFIG_SGI_SN)        += sn/
+>>   obj-y                += firmware/
+>>
+> 
+> 
