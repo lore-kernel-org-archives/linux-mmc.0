@@ -1,178 +1,136 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
+From: Seung-Woo Kim <sw0312.kim@samsung.com>
 Subject: Re: [PATCH] mmc: dw_mmc: remove UBSAN warning in dw_mci_setup_bus()
-Date: Fri, 17 Jun 2016 10:30:50 +0900
-Message-ID: <576352CA.3080605@samsung.com>
+Date: Fri, 17 Jun 2016 13:07:25 +0900
+Message-ID: <5763777D.8040601@samsung.com>
 References: <CGME20160608040654epcas1p2be228e3e02e35a640cb1e65228df79ad@epcas1p2.samsung.com>
  <1465358840-22826-1-git-send-email-sw0312.kim@samsung.com>
  <5759633E.7090706@samsung.com> <575A17F5.1050609@samsung.com>
+ <576352CA.3080605@samsung.com>
+Reply-To: sw0312.kim@samsung.com
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-reply-to: <575A17F5.1050609@samsung.com>
+In-reply-to: <576352CA.3080605@samsung.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: sw0312.kim@samsung.com
-Cc: ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+To: Jaehoon Chung <jh80.chung@samsung.com>
+Cc: ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Seung-Woo Kim <sw0312.kim@samsung.com>
 List-Id: linux-mmc@vger.kernel.org
 
-Hi Seung-Woo,
+Hello Jaehoon,
 
-On 06/10/2016 10:29 AM, Seung-Woo Kim wrote:
-> Hi Jaehoon,
+On 2016=EB=85=84 06=EC=9B=94 17=EC=9D=BC 10:30, Jaehoon Chung wrote:
+> Hi Seung-Woo,
 >=20
-> On 2016=EB=85=84 06=EC=9B=94 09=EC=9D=BC 21:38, Jaehoon Chung wrote:
->> Hi Seung-Woo,
+> On 06/10/2016 10:29 AM, Seung-Woo Kim wrote:
+>> Hi Jaehoon,
 >>
->> On 06/08/2016 01:07 PM, Seung-Woo Kim wrote:
->>> This patch removes following UBSAN warnings in dw_mci_setup_bus().
->>> The warnings are caused because of shift with more than 31 on 32
->>> bit variable, so this patch fixes to shift only for less than 32.
+>> On 2016=EB=85=84 06=EC=9B=94 09=EC=9D=BC 21:38, Jaehoon Chung wrote:
+>>> Hi Seung-Woo,
 >>>
->>>   UBSAN: Undefined behaviour in drivers/mmc/host/dw_mmc.c:1102:14
->>>   shift exponent 250 is too large for 32-bit type 'unsigned int'
->>>   Call trace:
->>>   [<ffffff90080908a8>] dump_backtrace+0x0/0x380
->>>   [<ffffff9008090c3c>] show_stack+0x14/0x20
->>>   [<ffffff90087457b8>] dump_stack+0xe0/0x120
->>>   [<ffffff90087b1360>] ubsan_epilogue+0x18/0x68
->>>   [<ffffff90087b1a94>] __ubsan_handle_shift_out_of_bounds+0x18c/0x1=
-bc
->>>   [<ffffff9008d89cb8>] dw_mci_setup_bus+0x3a0/0x438
->>>   [...]
+>>> On 06/08/2016 01:07 PM, Seung-Woo Kim wrote:
+>>>> This patch removes following UBSAN warnings in dw_mci_setup_bus().
+>>>> The warnings are caused because of shift with more than 31 on 32
+>>>> bit variable, so this patch fixes to shift only for less than 32.
+>>>>
+
+<snip.>
+
+>>>>
+>>>> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+>>>> index 2cc6123..dff045e 100644
+>>>> --- a/drivers/mmc/host/dw_mmc.c
+>>>> +++ b/drivers/mmc/host/dw_mmc.c
+>>>> @@ -1099,7 +1099,8 @@ static void dw_mci_setup_bus(struct dw_mci_s=
+lot *slot, bool force_clkinit)
+>>>> =20
+>>>>  		div =3D (host->bus_hz !=3D clock) ? DIV_ROUND_UP(div, 2) : 0;
+>>>> =20
+>>>> -		if ((clock << div) !=3D slot->__clk_old || force_clkinit)
+>>>> +		if (((div < 32) ? (clock << div) : 0) !=3D slot->__clk_old ||
 >>>
->>>   UBSAN: Undefined behaviour in drivers/mmc/host/dw_mmc.c:1132:27
->>>   shift exponent 250 is too large for 32-bit type 'unsigned int'
->>>   Call trace:
->>>   [<ffffff90080908a8>] dump_backtrace+0x0/0x380
->>>   [<ffffff9008090c3c>] show_stack+0x14/0x20
->>>   [<ffffff90087457b8>] dump_stack+0xe0/0x120
->>>   [<ffffff90087b1360>] ubsan_epilogue+0x18/0x68
->>>   [<ffffff90087b1a94>] __ubsan_handle_shift_out_of_bounds+0x18c/0x1=
-bc
->>>   [<ffffff9008d89c9c>] dw_mci_setup_bus+0x384/0x438
->>
->> The below message can be discarded.
->=20
-> You are right, like above message, below part can be replaced as [...=
-].
->=20
->>
->>>   [<ffffff9008d89ed4>] dw_mci_set_ios+0x184/0x798
->>>   [<ffffff9008d550ac>] mmc_power_up+0x11c/0x260
->>>   [<ffffff9008d56b78>] mmc_start_host+0x88/0x100
->>>   [<ffffff9008d583f4>] mmc_add_host+0x6c/0x128
->>>   [<ffffff9008d88f90>] dw_mci_probe+0x1088/0x1750
->>>   [<ffffff9008d8caa8>] dw_mci_pltfm_register+0x108/0x178
->>>   [<ffffff9008d8dae4>] dw_mci_exynos_probe+0x4c/0x88
->>>   [<ffffff9008a03838>] platform_drv_probe+0x78/0x180
->>>   [<ffffff90089fe9fc>] driver_probe_device+0x144/0x460
->>>   [<ffffff90089fee0c>] __driver_attach+0xf4/0x140
->>>   [<ffffff90089fad98>] bus_for_each_dev+0xf0/0x160
->>>   [<ffffff90089fdc9c>] driver_attach+0x34/0x58
->>>   [<ffffff90089fd3e0>] bus_add_driver+0x2c0/0x398
->>>   [<ffffff9008a00924>] driver_register+0xbc/0x1e0
->>>   [<ffffff9008a02a94>] __platform_driver_register+0x84/0xa8
->>>   [<ffffff9009dd5730>] dw_mci_exynos_pltfm_driver_init+0x18/0x20
->>>   [<ffffff9008082df8>] do_one_initcall+0xa0/0x2c8
->>>   [<ffffff9009d81780>] kernel_init_freeable+0x52c/0x5dc
->>>   [<ffffff9009519844>] kernel_init+0x1c/0xf8
->>>   [<ffffff9008086e10>] ret_from_fork+0x10/0x40
+>>> Well, we don't expect that clock is 0.
+>>> if clock is 0, it should be passed to " if (!clock)"..
 >>>
->>> Signed-off-by: Seung-Woo Kim <sw0312.kim@samsung.com>
->>> ---
->>>  drivers/mmc/host/dw_mmc.c |    5 +++--
->>>  1 files changed, 3 insertions(+), 2 deletions(-)
->>>
->>> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
->>> index 2cc6123..dff045e 100644
->>> --- a/drivers/mmc/host/dw_mmc.c
->>> +++ b/drivers/mmc/host/dw_mmc.c
->>> @@ -1099,7 +1099,8 @@ static void dw_mci_setup_bus(struct dw_mci_sl=
-ot *slot, bool force_clkinit)
->>> =20
->>>  		div =3D (host->bus_hz !=3D clock) ? DIV_ROUND_UP(div, 2) : 0;
->>> =20
->>> -		if ((clock << div) !=3D slot->__clk_old || force_clkinit)
->>> +		if (((div < 32) ? (clock << div) : 0) !=3D slot->__clk_old ||
+>>> During initializing card, clock is 400KHz or less..I understood wha=
+t you want to fix.
+>>> But I taught this is not correct.
 >>
->> Well, we don't expect that clock is 0.
->> if clock is 0, it should be passed to " if (!clock)"..
+>> It seems slot->__clk_old is not really clock but a kind of value to
+>> store both clock and div in one variable. And at least, my compiler
+>> calculates right shift with more than 32 as 0. I am not sure there i=
+s
+>> other proper value for the case.
 >>
->> During initializing card, clock is 400KHz or less..I understood what=
- you want to fix.
->> But I taught this is not correct.
->=20
-> It seems slot->__clk_old is not really clock but a kind of value to
-> store both clock and div in one variable. And at least, my compiler
-> calculates right shift with more than 32 as 0. I am not sure there is
-> other proper value for the case.
->=20
-> By the way, in my test environment, clock is calculated as like
-> following steps:
-> mmc_host mmc0: Bus speed (slot 0) =3D 200000000Hz (slot req 400000Hz,
-> actual 400000HZ div =3D 250)
-> mmc_host mmc0: Bus speed (slot 0) =3D 200000000Hz (slot req 200000000=
+>> By the way, in my test environment, clock is calculated as like
+>> following steps:
+>> mmc_host mmc0: Bus speed (slot 0) =3D 200000000Hz (slot req 400000Hz=
+,
+>> actual 400000HZ div =3D 250)
+>> mmc_host mmc0: Bus speed (slot 0) =3D 200000000Hz (slot req 20000000=
+0Hz,
+>> actual 200000000HZ div =3D 0)
+>> mmc_host mmc0: Bus speed (slot 0) =3D 200000000Hz (slot req 52000000=
 Hz,
-> actual 200000000HZ div =3D 0)
-> mmc_host mmc0: Bus speed (slot 0) =3D 200000000Hz (slot req 52000000H=
-z,
-> actual 50000000HZ div =3D 2)
-> mmc_host mmc0: Bus speed (slot 0) =3D 400000000Hz (slot req 52000000H=
-z,
-> actual 50000000HZ div =3D 4)
-> mmc_host mmc0: Bus speed (slot 0) =3D 400000000Hz (slot req 200000000=
+>> actual 50000000HZ div =3D 2)
+>> mmc_host mmc0: Bus speed (slot 0) =3D 400000000Hz (slot req 52000000=
 Hz,
-> actual 200000000HZ div =3D 1)
+>> actual 50000000HZ div =3D 4)
+>> mmc_host mmc0: Bus speed (slot 0) =3D 400000000Hz (slot req 20000000=
+0Hz,
+>> actual 200000000HZ div =3D 1)
+>>
+>> and only the first case is reported as the warning. If you let me kn=
+ow
+>> any proper value, then I will fix with the value.
 >=20
-> and only the first case is reported as the warning. If you let me kno=
-w
-> any proper value, then I will fix with the value.
+> I think that "clock << div" and__old_clock are used for checking whet=
+her clock is changed.
+> So it doesn't need to rotate with div.
+>=20
+> Could you check the below codes?
+>=20
+> if ((clock !=3D slot->clk_old) || force_clkinit)
+> ...
+>=20
+> slot->__clk_old =3D clock;
 
-I think that "clock << div" and__old_clock are used for checking whethe=
-r clock is changed.
-So it doesn't need to rotate with div.
+=46rom the comment about alignment of slot->__clk_old, it says that "ke=
+ep
+the clock with reflecting clock dividor". So to me, it is better also
+adding slot->__dlv with your suggestion. I will send patch like it, soo=
+n.
 
-Could you check the below codes?
-
-if ((clock !=3D slot->clk_old) || force_clkinit)
-=2E..
-
-slot->__clk_old =3D clock;
-
-Best Regards,
-Jaehoon Chung
+Regards,
+- Seung-Woo Kim
 
 >=20
-> Thanks,
-> - Seung-Woo Kim
+> Best Regards,
+> Jaehoon Chung
 >=20
->=20
+>>
+>> Thanks,
+>> - Seung-Woo Kim
 >>
 >>
->>> +		    force_clkinit)
->>>  			dev_info(&slot->mmc->class_dev,
->>>  				 "Bus speed (slot %d) =3D %dHz (slot req %dHz, actual %dHZ div=
- =3D %d)\n",
->>>  				 slot->id, host->bus_hz, clock,
->>> @@ -1129,7 +1130,7 @@ static void dw_mci_setup_bus(struct dw_mci_sl=
-ot *slot, bool force_clkinit)
->>>  		mci_send_cmd(slot, sdmmc_cmd_bits, 0);
->>> =20
->>>  		/* keep the clock with reflecting clock dividor */
->>> -		slot->__clk_old =3D clock << div;
->>> +		slot->__clk_old =3D (div < 32) ? (clock << div) : 0;
->>
->> Also, clock is not 0..
->>
->>
->> Best Regards,
->> Jaehoon Chung
->>
->>>  	}
->>> =20
->>>  	host->current_speed =3D clock;
 >>>
->>
->>
->>
->=20
+>>>
+>>>> +		    force_clkinit)
+>>>>  			dev_info(&slot->mmc->class_dev,
+>>>>  				 "Bus speed (slot %d) =3D %dHz (slot req %dHz, actual %dHZ di=
+v =3D %d)\n",
+>>>>  				 slot->id, host->bus_hz, clock,
+>>>> @@ -1129,7 +1130,7 @@ static void dw_mci_setup_bus(struct dw_mci_s=
+lot *slot, bool force_clkinit)
+>>>>  		mci_send_cmd(slot, sdmmc_cmd_bits, 0);
+>>>> =20
+>>>>  		/* keep the clock with reflecting clock dividor */
+>>>> -		slot->__clk_old =3D clock << div;
+>>>> +		slot->__clk_old =3D (div < 32) ? (clock << div) : 0;
+
+<snip.>
+
+--=20
+Seung-Woo Kim
+Samsung Software R&D Center
+--
