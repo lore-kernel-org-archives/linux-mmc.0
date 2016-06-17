@@ -1,36 +1,178 @@
-From: Heiko Stuebner <heiko@sntech.de>
-Subject: Re: [PATCH v2.1 07/11] mmc: sdhci-of-arasan: Add ability to export card clock
-Date: Fri, 17 Jun 2016 01:54:54 +0200
-Message-ID: <2078624.p3pqVZlzC3@phil>
-References: <1466008675-9357-8-git-send-email-dianders@chromium.org>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: Re: [PATCH] mmc: dw_mmc: remove UBSAN warning in dw_mci_setup_bus()
+Date: Fri, 17 Jun 2016 10:30:50 +0900
+Message-ID: <576352CA.3080605@samsung.com>
+References: <CGME20160608040654epcas1p2be228e3e02e35a640cb1e65228df79ad@epcas1p2.samsung.com>
+ <1465358840-22826-1-git-send-email-sw0312.kim@samsung.com>
+ <5759633E.7090706@samsung.com> <575A17F5.1050609@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7Bit
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1466008675-9357-8-git-send-email-dianders@chromium.org>
+In-reply-to: <575A17F5.1050609@samsung.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Douglas Anderson <dianders@chromium.org>
-Cc: ulf.hansson@linaro.org, kishon@ti.com, robh+dt@kernel.org, shawn.lin@rock-chips.com, xzy.xu@rock-chips.com, briannorris@chromium.org, adrian.hunter@intel.com, linux-rockchip@lists.infradead.org, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, groeck@chromium.org, michal.simek@xilinx.com, soren.brinkmann@xilinx.com, geert@linux-m68k.org, wsa+renesas@sang-engineering.com, swarren@wwwdotorg.org, stefan.wahren@i2se.com, luisbg@osg.samsung.com, andrei.pistirica@microchip.com, chaotian.jing@mediatek.com, ludovic.desroches@atmel.com, yangbo.lu@freescale.com, horms+renesas@verge.net.au, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+To: sw0312.kim@samsung.com
+Cc: ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-Am Mittwoch, 15. Juni 2016, 09:37:51 schrieb Douglas Anderson:
-> Some SD/eMMC PHYs (like the PHY from Arasan that is designed to work
-> with arasan,sdhci-5.1) need to know the card clock in order to function
-> properly.  Let's add the ability to expose this clock.  Any PHY that
-> needs to know the clock rate can add a reference and query the clock
-> rate.
-> 
-> At the moment we register a CLK_GET_RATE_NOCACHE clock that simply
-> allows querying the clock.  This allows us to be less intrusive with
-> regards to the main SDHCI driver, which has complex logic for adjusting
-> the SD clock.  Right now we always fully power cycle the PHY when the
-> clock changes and that gives the PHY a good chance to query our clock.
-> 
-> Signed-off-by: Douglas Anderson <dianders@chromium.org>
+Hi Seung-Woo,
 
-for me this looks very nice implementation-wise and I also didn't spot 
-glaring things, so
-Reviewed-by: Heiko Stuebner <heiko@sntech.de>
+On 06/10/2016 10:29 AM, Seung-Woo Kim wrote:
+> Hi Jaehoon,
+>=20
+> On 2016=EB=85=84 06=EC=9B=94 09=EC=9D=BC 21:38, Jaehoon Chung wrote:
+>> Hi Seung-Woo,
+>>
+>> On 06/08/2016 01:07 PM, Seung-Woo Kim wrote:
+>>> This patch removes following UBSAN warnings in dw_mci_setup_bus().
+>>> The warnings are caused because of shift with more than 31 on 32
+>>> bit variable, so this patch fixes to shift only for less than 32.
+>>>
+>>>   UBSAN: Undefined behaviour in drivers/mmc/host/dw_mmc.c:1102:14
+>>>   shift exponent 250 is too large for 32-bit type 'unsigned int'
+>>>   Call trace:
+>>>   [<ffffff90080908a8>] dump_backtrace+0x0/0x380
+>>>   [<ffffff9008090c3c>] show_stack+0x14/0x20
+>>>   [<ffffff90087457b8>] dump_stack+0xe0/0x120
+>>>   [<ffffff90087b1360>] ubsan_epilogue+0x18/0x68
+>>>   [<ffffff90087b1a94>] __ubsan_handle_shift_out_of_bounds+0x18c/0x1=
+bc
+>>>   [<ffffff9008d89cb8>] dw_mci_setup_bus+0x3a0/0x438
+>>>   [...]
+>>>
+>>>   UBSAN: Undefined behaviour in drivers/mmc/host/dw_mmc.c:1132:27
+>>>   shift exponent 250 is too large for 32-bit type 'unsigned int'
+>>>   Call trace:
+>>>   [<ffffff90080908a8>] dump_backtrace+0x0/0x380
+>>>   [<ffffff9008090c3c>] show_stack+0x14/0x20
+>>>   [<ffffff90087457b8>] dump_stack+0xe0/0x120
+>>>   [<ffffff90087b1360>] ubsan_epilogue+0x18/0x68
+>>>   [<ffffff90087b1a94>] __ubsan_handle_shift_out_of_bounds+0x18c/0x1=
+bc
+>>>   [<ffffff9008d89c9c>] dw_mci_setup_bus+0x384/0x438
+>>
+>> The below message can be discarded.
+>=20
+> You are right, like above message, below part can be replaced as [...=
+].
+>=20
+>>
+>>>   [<ffffff9008d89ed4>] dw_mci_set_ios+0x184/0x798
+>>>   [<ffffff9008d550ac>] mmc_power_up+0x11c/0x260
+>>>   [<ffffff9008d56b78>] mmc_start_host+0x88/0x100
+>>>   [<ffffff9008d583f4>] mmc_add_host+0x6c/0x128
+>>>   [<ffffff9008d88f90>] dw_mci_probe+0x1088/0x1750
+>>>   [<ffffff9008d8caa8>] dw_mci_pltfm_register+0x108/0x178
+>>>   [<ffffff9008d8dae4>] dw_mci_exynos_probe+0x4c/0x88
+>>>   [<ffffff9008a03838>] platform_drv_probe+0x78/0x180
+>>>   [<ffffff90089fe9fc>] driver_probe_device+0x144/0x460
+>>>   [<ffffff90089fee0c>] __driver_attach+0xf4/0x140
+>>>   [<ffffff90089fad98>] bus_for_each_dev+0xf0/0x160
+>>>   [<ffffff90089fdc9c>] driver_attach+0x34/0x58
+>>>   [<ffffff90089fd3e0>] bus_add_driver+0x2c0/0x398
+>>>   [<ffffff9008a00924>] driver_register+0xbc/0x1e0
+>>>   [<ffffff9008a02a94>] __platform_driver_register+0x84/0xa8
+>>>   [<ffffff9009dd5730>] dw_mci_exynos_pltfm_driver_init+0x18/0x20
+>>>   [<ffffff9008082df8>] do_one_initcall+0xa0/0x2c8
+>>>   [<ffffff9009d81780>] kernel_init_freeable+0x52c/0x5dc
+>>>   [<ffffff9009519844>] kernel_init+0x1c/0xf8
+>>>   [<ffffff9008086e10>] ret_from_fork+0x10/0x40
+>>>
+>>> Signed-off-by: Seung-Woo Kim <sw0312.kim@samsung.com>
+>>> ---
+>>>  drivers/mmc/host/dw_mmc.c |    5 +++--
+>>>  1 files changed, 3 insertions(+), 2 deletions(-)
+>>>
+>>> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+>>> index 2cc6123..dff045e 100644
+>>> --- a/drivers/mmc/host/dw_mmc.c
+>>> +++ b/drivers/mmc/host/dw_mmc.c
+>>> @@ -1099,7 +1099,8 @@ static void dw_mci_setup_bus(struct dw_mci_sl=
+ot *slot, bool force_clkinit)
+>>> =20
+>>>  		div =3D (host->bus_hz !=3D clock) ? DIV_ROUND_UP(div, 2) : 0;
+>>> =20
+>>> -		if ((clock << div) !=3D slot->__clk_old || force_clkinit)
+>>> +		if (((div < 32) ? (clock << div) : 0) !=3D slot->__clk_old ||
+>>
+>> Well, we don't expect that clock is 0.
+>> if clock is 0, it should be passed to " if (!clock)"..
+>>
+>> During initializing card, clock is 400KHz or less..I understood what=
+ you want to fix.
+>> But I taught this is not correct.
+>=20
+> It seems slot->__clk_old is not really clock but a kind of value to
+> store both clock and div in one variable. And at least, my compiler
+> calculates right shift with more than 32 as 0. I am not sure there is
+> other proper value for the case.
+>=20
+> By the way, in my test environment, clock is calculated as like
+> following steps:
+> mmc_host mmc0: Bus speed (slot 0) =3D 200000000Hz (slot req 400000Hz,
+> actual 400000HZ div =3D 250)
+> mmc_host mmc0: Bus speed (slot 0) =3D 200000000Hz (slot req 200000000=
+Hz,
+> actual 200000000HZ div =3D 0)
+> mmc_host mmc0: Bus speed (slot 0) =3D 200000000Hz (slot req 52000000H=
+z,
+> actual 50000000HZ div =3D 2)
+> mmc_host mmc0: Bus speed (slot 0) =3D 400000000Hz (slot req 52000000H=
+z,
+> actual 50000000HZ div =3D 4)
+> mmc_host mmc0: Bus speed (slot 0) =3D 400000000Hz (slot req 200000000=
+Hz,
+> actual 200000000HZ div =3D 1)
+>=20
+> and only the first case is reported as the warning. If you let me kno=
+w
+> any proper value, then I will fix with the value.
 
-and as states in the original series, on a rk3399-evb
-Tested-by: Heiko Stuebner <heiko@sntech.de>
+I think that "clock << div" and__old_clock are used for checking whethe=
+r clock is changed.
+So it doesn't need to rotate with div.
+
+Could you check the below codes?
+
+if ((clock !=3D slot->clk_old) || force_clkinit)
+=2E..
+
+slot->__clk_old =3D clock;
+
+Best Regards,
+Jaehoon Chung
+
+>=20
+> Thanks,
+> - Seung-Woo Kim
+>=20
+>=20
+>>
+>>
+>>> +		    force_clkinit)
+>>>  			dev_info(&slot->mmc->class_dev,
+>>>  				 "Bus speed (slot %d) =3D %dHz (slot req %dHz, actual %dHZ div=
+ =3D %d)\n",
+>>>  				 slot->id, host->bus_hz, clock,
+>>> @@ -1129,7 +1130,7 @@ static void dw_mci_setup_bus(struct dw_mci_sl=
+ot *slot, bool force_clkinit)
+>>>  		mci_send_cmd(slot, sdmmc_cmd_bits, 0);
+>>> =20
+>>>  		/* keep the clock with reflecting clock dividor */
+>>> -		slot->__clk_old =3D clock << div;
+>>> +		slot->__clk_old =3D (div < 32) ? (clock << div) : 0;
+>>
+>> Also, clock is not 0..
+>>
+>>
+>> Best Regards,
+>> Jaehoon Chung
+>>
+>>>  	}
+>>> =20
+>>>  	host->current_speed =3D clock;
+>>>
+>>
+>>
+>>
+>=20
