@@ -1,16 +1,16 @@
 From: Peter Chen <peter.chen@nxp.com>
-Subject: [PATCH 02/12] MAINTAINERS: Retain Ulf Hansson as the same maintainer of pwrseq
-Date: Fri, 17 Jun 2016 18:09:15 +0800
-Message-ID: <1466158165-9380-3-git-send-email-peter.chen@nxp.com>
+Subject: [PATCH 03/12] power: pwrseq: Enable COMPILE_TEST for drivers
+Date: Fri, 17 Jun 2016 18:09:16 +0800
+Message-ID: <1466158165-9380-4-git-send-email-peter.chen@nxp.com>
 References: <1466158165-9380-1-git-send-email-peter.chen@nxp.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-by2on0084.outbound.protection.outlook.com ([207.46.100.84]:54240
-	"EHLO na01-by2-obe.outbound.protection.outlook.com"
+Received: from mail-bl2on0055.outbound.protection.outlook.com ([65.55.169.55]:30439
+	"EHLO na01-bl2-obe.outbound.protection.outlook.com"
 	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1755394AbcFQKQG (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 17 Jun 2016 06:16:06 -0400
+	id S932139AbcFQKQM (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 17 Jun 2016 06:16:12 -0400
 In-Reply-To: <1466158165-9380-1-git-send-email-peter.chen@nxp.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
@@ -19,35 +19,36 @@ Cc: k.kozlowski@samsung.com, linux-arm-kernel@lists.infradead.org, p.zabel@pengu
 
 From: Krzysztof Kozlowski <k.kozlowski@samsung.com>
 
-Before moving pwrseq drivers from drivers/mmc/core/ to drivers/power/,
-they were maintained by Ulf Hansson.
+Allow build testing for power sequence drivers.
 
 Signed-off-by: Krzysztof Kozlowski <k.kozlowski@samsung.com>
 Reviewed-by: Javier Martinez Canillas <javier@osg.samsung.com>
 ---
- MAINTAINERS | 9 +++++++++
- 1 file changed, 9 insertions(+)
+ drivers/power/pwrseq/Kconfig | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
 
-diff --git a/MAINTAINERS b/MAINTAINERS
-index ed42cb6..0bc1821 100644
---- a/MAINTAINERS
-+++ b/MAINTAINERS
-@@ -9072,6 +9072,15 @@ F:	include/linux/power_supply.h
- F:	drivers/power/
- X:	drivers/power/avs/
- 
-+POWER SEQ CORE and DRIVERS
-+M:	Ulf Hansson <ulf.hansson@linaro.org>
-+L:	linux-mmc@vger.kernel.org
-+T:	git git://git.linaro.org/people/ulf.hansson/mmc.git
-+S:	Maintained
-+F:	drivers/power/pwrseq/
-+F:	include/linux/pwrseq.h
-+F:	Documentation/devicetree/bindings/power/pwrseq/
-+
- POWER STATE COORDINATION INTERFACE (PSCI)
- M:	Mark Rutland <mark.rutland@arm.com>
- M:	Lorenzo Pieralisi <lorenzo.pieralisi@arm.com>
+diff --git a/drivers/power/pwrseq/Kconfig b/drivers/power/pwrseq/Kconfig
+index 7ecd66a..c7e9271 100644
+--- a/drivers/power/pwrseq/Kconfig
++++ b/drivers/power/pwrseq/Kconfig
+@@ -10,7 +10,7 @@ if POWER_SEQ
+ config POWER_SEQ_EMMC
+ 	tristate "HW reset support for eMMC"
+ 	default y
+-	depends on OF
++	depends on OF || COMPILE_TEST
+ 	help
+ 	  This selects Hardware reset support aka pwrseq-emmc for eMMC
+ 	  devices. By default this option is set to y.
+@@ -21,7 +21,7 @@ config POWER_SEQ_EMMC
+ config POWER_SEQ_SIMPLE
+ 	tristate "Simple HW reset support for MMC"
+ 	default y
+-	depends on OF
++	depends on OF || COMPILE_TEST
+ 	help
+ 	  This selects simple hardware reset support aka pwrseq-simple for MMC
+ 	  devices. By default this option is set to y.
 -- 
 1.9.1
 
