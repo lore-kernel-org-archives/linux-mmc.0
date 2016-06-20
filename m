@@ -1,106 +1,36 @@
-From: Doug Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
-Subject: Re: [PATCH v2 10/11] phy: rockchip-emmc: Set phyctrl_frqsel based on
- card clock
-Date: Mon, 20 Jun 2016 09:48:45 -0700
-Message-ID: <CAD=FV=WFeAK_1yM_aVtz4nGLrQ6DgDB6hm_aZB42aEiuQsSbug@mail.gmail.com>
-References: <1465859076-4868-1-git-send-email-dianders@chromium.org>
- <1465859076-4868-11-git-send-email-dianders@chromium.org>
- <1814673.npx1FlT4Pz@diego>
+From: Brian Norris <briannorris@chromium.org>
+Subject: Re: [PATCH 1/4] phy: rockchip-emmc: give DLL some extra time to be
+ ready
+Date: Mon, 20 Jun 2016 09:50:19 -0700
+Message-ID: <20160620165019.GA37207@google.com>
+References: <1463092986-61777-1-git-send-email-briannorris@chromium.org>
+ <5767EB7E.3040606@ti.com>
+ <20160620161908.GA30459@google.com>
+ <CAD=FV=X73R759Rum3AEUfD_yjswoD8iXQqrow_gpCu=6XJs7Sg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-In-Reply-To: <1814673.npx1FlT4Pz@diego>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-rockchip>,
- <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-rockchip/>
-List-Post: <mailto:linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-List-Help: <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-rockchip>,
- <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
-Sender: "Linux-rockchip" <linux-rockchip-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-Errors-To: linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
-To: =?UTF-8?Q?Heiko_St=C3=BCbner?= <heiko-4mtYJXux2i+zQB+pC5nmwQ@public.gmane.org>
-Cc: "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Ziyuan Xu <xzy.xu-TNX95d0MmH7DzftRWevZcw@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>, Brian Norris <briannorris-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Kishon Vijay Abraham I <kishon-l0cyMroinI0@public.gmane.org>, "open list:ARM/Rockchip SoC..." <linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <CAD=FV=X73R759Rum3AEUfD_yjswoD8iXQqrow_gpCu=6XJs7Sg@mail.gmail.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Doug Anderson <dianders@chromium.org>
+Cc: Kishon Vijay Abraham I <kishon@ti.com>, Ulf Hansson <ulf.hansson@linaro.org>, Heiko Stuebner <heiko@sntech.de>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "open list:ARM/Rockchip SoC..." <linux-rockchip@lists.infradead.org>, Shawn Lin <shawn.lin@rock-chips.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Brian Norris <computersforpeace@gmail.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-SGVpa28sCgpPbiBTYXQsIEp1biAxOCwgMjAxNiBhdCA1OjIwIEFNLCBIZWlrbyBTdMO8Ym5lciA8
-aGVpa29Ac250ZWNoLmRlPiB3cm90ZToKPiBBbSBNb250YWcsIDEzLiBKdW5pIDIwMTYsIDE2OjA0
-OjM0IHNjaHJpZWIgRG91Z2xhcyBBbmRlcnNvbjoKPj4gVGhlICJwaHljdHJsX2ZycXNlbCIgaXMg
-ZGVzY3JpYmVkIGluIHRoZSBBcmFzYW4gZGF0YXNoZWV0IFsxXSBhcyAidGhlCj4+IGZyZXF1ZW5j
-eSByYW5nZSBvZiBETEwgb3BlcmF0aW9uIi4gIEFsdGhvdWdoIHRoZSBSb2NrY2hpcCB2YXJpYW50
-IG9mCj4+IHRoaXMgUEhZIGhhcyBkaWZmZXJlbnQgcmFuZ2VzIHRoYW4gdGhlIHJlZmVyZW5jZSBB
-cmFzYW4gUEhZIGl0IGFwcGVhcnMKPj4gYXMgaWYgdGhlIGZ1bmN0aW9uYWxpdHkgaXMgc2ltaWxh
-ci4gIFdlIHNob3VsZCBzZXQgdGhpcyBwaHljdHJsIGZpZWxkCj4+IHByb3Blcmx5Lgo+Pgo+PiBO
-b3RlOiBhcyBwZXIgUm9ja2NoaXAgZW5naW5lZXJzLCBhcHBhcmVudGx5IHRoZSAicGh5Y3RybF9m
-cnFzZWwiIGlzCj4+IGFjdHVhbGx5IG9ubHkgdXNlZnVsIGluIEhTMjAwIC8gSFM0MDAgbW9kZXMg
-ZXZlbiB0aG91Z2ggdGhlIERMTCBpdHNlbGYKPj4gaXQgdXNlZCBmb3Igc29tZSBwdXJwb3NlcyBp
-biBhbGwgbW9kZXMuICBTZWUgdGhlIGRpc2N1c3Npb24gaW4gdGhlCj4+IGVhcmxpZXIgY2hhbmdl
-IGluIHRoaXMgc2VyaWVzOiAoIm1tYzogc2RoY2ktb2YtYXJhc2FuOiBBbHdheXMgcG93ZXIgdGhl
-Cj4+IFBIWSBvZmYvb24gd2hlbiBjbG9jayBjaGFuZ2VzIikuICBJbiBhbnkgY2FzZSwgaXQgc2hv
-dWxkbid0IGh1cnQgdG8gc2V0Cj4+IHRoaXMgYWx3YXlzLgo+Pgo+PiBOb3RlIHRoYXQgdGhpcyBj
-aGFuZ2Ugc2hvdWxkIGFsbG93IGJvYXJkcyB0byBydW4gYXQgSFMyMDAgLyBIUzQwMCBzcGVlZAo+
-PiBtb2RlcyB3aGlsZSBydW5uaW5nIGF0IDEwMCBNSHogb3IgMTUwIE1Iei4gIEluIGZhY3QsIHJ1
-bm5pbmcgSFM0MDAgYXQKPj4gMTUwIE1IeiAoZ2l2aW5nIDMwMCBNQi9zKSBpcyB0aGUgbWFpbiBt
-b3RpdmF0aW9uIG9mIHRoaXMgc2VyaWVzLCBzaW5jZQo+PiBwZXJmb3JtYW5jZSBpcyBzdGlsbCBn
-b29kIGJ1dCBzaWduYWwgaW50ZWdyaXR5IHByb2JsZW1zIGFyZSBsZXNzCj4+IHByZXZlbGFudCBh
-dCAxNTAgTUh6Lgo+Pgo+PiBbMV06IGh0dHBzOi8vYXJhc2FuLmNvbS93cC1jb250ZW50L21lZGlh
-L2VNTUMtNS0xLVRvdGFsLVNvbHV0aW9uX1Jldi0xLTMucGRmCj4+Cj4+IFNpZ25lZC1vZmYtYnk6
-IERvdWdsYXMgQW5kZXJzb24gPGRpYW5kZXJzQGNocm9taXVtLm9yZz4KPj4gLS0tCj4+IENoYW5n
-ZXMgaW4gdjI6Cj4+IC0gV2FybiBpZiB3ZSdyZSBtb3JlIHRoYW4gMTUgTUh6IGZyb20gaWRlYWwg
-cmF0ZSAoU2hhd24pCj4+IC0gTW92ZSBjb2RlIGNsZWFudXAgYmVmb3JlIHNldCBwaHljdHJsX2Zy
-cXNlbCBiYXNlZCBvbiBjYXJkIGNsb2NrIChTaGF3bikKPj4gLSBGaXggdHlwbyBVU0IgPT4gU0RI
-Q0kgKFNoYXduKQo+Pgo+PiAgZHJpdmVycy9waHkvcGh5LXJvY2tjaGlwLWVtbWMuYyB8IDgyCj4+
-ICsrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKystLS0tLS0tIDEgZmlsZSBjaGFuZ2Vk
-LCA2OSBpbnNlcnRpb25zKCspLAo+PiAxMyBkZWxldGlvbnMoLSkKPj4KPj4gZGlmZiAtLWdpdCBh
-L2RyaXZlcnMvcGh5L3BoeS1yb2NrY2hpcC1lbW1jLmMKPj4gYi9kcml2ZXJzL3BoeS9waHktcm9j
-a2NoaXAtZW1tYy5jIGluZGV4IDIzZmU1MDg2NDUyNi4uNTFkZGQ1NDNmZDA0IDEwMDY0NAo+PiAt
-LS0gYS9kcml2ZXJzL3BoeS9waHktcm9ja2NoaXAtZW1tYy5jCj4+ICsrKyBiL2RyaXZlcnMvcGh5
-L3BoeS1yb2NrY2hpcC1lbW1jLmMKPj4gQEAgLTE0LDYgKzE0LDcgQEAKPj4gICAqIEdOVSBHZW5l
-cmFsIFB1YmxpYyBMaWNlbnNlIGZvciBtb3JlIGRldGFpbHMuCj4+ICAgKi8KPj4KPj4gKyNpbmNs
-dWRlIDxsaW51eC9jbGsuaD4KPj4gICNpbmNsdWRlIDxsaW51eC9kZWxheS5oPgo+PiAgI2luY2x1
-ZGUgPGxpbnV4L21mZC9zeXNjb24uaD4KPj4gICNpbmNsdWRlIDxsaW51eC9tb2R1bGUuaD4KPj4g
-QEAgLTc4LDE2ICs3OSw3MyBAQAo+PiAgc3RydWN0IHJvY2tjaGlwX2VtbWNfcGh5IHsKPj4gICAg
-ICAgdW5zaWduZWQgaW50ICAgIHJlZ19vZmZzZXQ7Cj4+ICAgICAgIHN0cnVjdCByZWdtYXAgICAq
-cmVnX2Jhc2U7Cj4+ICsgICAgIHN0cnVjdCBjbGsgICAgICAqZW1tY2NsazsKPj4gIH07Cj4+Cj4+
-IC1zdGF0aWMgaW50IHJvY2tjaGlwX2VtbWNfcGh5X3Bvd2VyKHN0cnVjdCByb2NrY2hpcF9lbW1j
-X3BoeSAqcmtfcGh5LAo+PiAtICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBib29sIG9u
-X29mZikKPj4gK3N0YXRpYyBpbnQgcm9ja2NoaXBfZW1tY19waHlfcG93ZXIoc3RydWN0IHBoeSAq
-cGh5LCBib29sIG9uX29mZikKPj4gIHsKPj4gKyAgICAgc3RydWN0IHJvY2tjaGlwX2VtbWNfcGh5
-ICpya19waHkgPSBwaHlfZ2V0X2RydmRhdGEocGh5KTsKPj4gICAgICAgdW5zaWduZWQgaW50IGNh
-bGRvbmU7Cj4+ICAgICAgIHVuc2lnbmVkIGludCBkbGxyZHk7Cj4+ICsgICAgIHVuc2lnbmVkIGlu
-dCBmcmVxc2VsID0gUEhZQ1RSTF9GUkVRU0VMXzIwME07Cj4+ICAgICAgIHVuc2lnbmVkIGxvbmcg
-dGltZW91dDsKPj4KPj4gICAgICAgLyoKPj4gKyAgICAgICogV2UgcHVycG9zZWx5IGdldCB0aGUg
-Y2xvY2sgaGVyZSBhbmQgbm90IGluIHByb2JlIHRvIGF2b2lkIHRoZQo+PiArICAgICAgKiBjaXJj
-dWxhciBkZXBlbmRlbmN5IHByb2JsZW0uICBXZSBleHBlY3Q6Cj4+ICsgICAgICAqIC0gUEhZIGRy
-aXZlciB0byBwcm9iZQo+PiArICAgICAgKiAtIFNESENJIGRyaXZlciB0byBzdGFydCBwcm9iZQo+
-PiArICAgICAgKiAtIFNESENJIGRyaXZlciB0byByZWdpc3RlciBpdCdzIGNsb2NrCj4+ICsgICAg
-ICAqIC0gU0RIQ0kgZHJpdmVyIHRvIGdldCB0aGUgUEhZCj4+ICsgICAgICAqIC0gU0RIQ0kgZHJp
-dmVyIHRvIHBvd2VyIG9uIHRoZSBQSFkKPj4gKyAgICAgICovCj4KPiBEb2Vzbid0IHRoYXQgbGVh
-dmUgb3BlbiB0aGUgdW5iaW5kIC8gcmVtb3ZhbCBjYXNlIHdpdGggdGhhdCBzYW1lIGNpcmN1bGFy
-Cj4gZGVwZW5kZW5jeT8gV2hpbGUgdHJ1ZSB0aGF0IHRoZSBjbG9jay1mcmFtZXdvcmsgZG9lcyBz
-b21lIHNwZWNpYWwgaGFuZGxpbmcgb24KPiBjbGtfdW5yZWdpc3RlciwgSSBkb24ndCB0aGluayB0
-aGlzIHdvdWxkIGNhdGNoIG11bHRpcGxlIHVuYmluZC9iaW5kIGFjdGlvbnMuCj4KPiBUaGUgZW1t
-Yy1waHkgd291bGQgc3RpbGwgaG9sZCBvbiB0byB0aGUgb2xkIGNsb2NrLWluc3RhbmNlIHdpdGgg
-dGhlIGVtcHR5IGNsay0KPiBvcHMgdGhlIGNjZiBhc3NpZ25zLCBldmVuIHdoZW4gdGhlIHJlYmlu
-ZCBvZiB0aGUgYXJhc2FuLXNkaGNpIHdvdWxkIGNyZWF0ZSBhCj4gbmV3IGNsb2NrLgo+Cj4gSG93
-IGFib3V0IHVzaW5nIHBoeS1pbml0IC8gcGh5LWV4aXQgY2FsbGJhY2tzIGZvciB0aGF0IGluc3Rl
-YWQ/IChBa2EgY2xrX2dldAo+IGFuZCBjbGtfcHV0IHRoZSBlbW1jIGNsb2NrIGluIHRoZXJlIGlu
-c3RlYWQgb2YgdXNpbmcgdGhlIGRldm0gdmFyaWFudCkKClVzaW5nIHBoeS1pbml0IGFuZCBwaHkt
-ZXhpdCBpcyBwZXJmZWN0LiAgSSdsbCBzcGluIHNob3J0bHkuCgo+PiArICAgICBpZiAoIXJrX3Bo
-eS0+ZW1tY2Nsaykgewo+PiArICAgICAgICAgICAgIHJrX3BoeS0+ZW1tY2NsayA9IGRldm1fY2xr
-X2dldCgmcGh5LT5kZXYsICJlbW1jY2xrIik7Cj4+ICsKPj4gKyAgICAgICAgICAgICAvKiBEb24n
-dCBleHBlY3QgZGVmZXIgYXQgdGhpcyBwb2ludDsgdHJ5IG5leHQgdGltZSAqLwo+PiArICAgICAg
-ICAgICAgIGlmIChQVFJfRVJSKHJrX3BoeS0+ZW1tY2NsaykgPT0gLUVQUk9CRV9ERUZFUikgewo+
-PiArICAgICAgICAgICAgICAgICAgICAgZGV2X3dhcm4oJnBoeS0+ZGV2LCAiVW5leHBlY3RlZCBl
-bW1jY2xrIGRlZmVyXG4iKTsKPj4gKyAgICAgICAgICAgICAgICAgICAgIHJrX3BoeS0+ZW1tY2Ns
-ayA9IE5VTEw7Cj4+ICsgICAgICAgICAgICAgfQo+PiArICAgICB9Cj4+ICsKPj4gKyAgICAgaWYg
-KCFJU19FUlJfT1JfTlVMTChya19waHktPmVtbWNjbGspKSB7Cj4KPiB5b3UganVzdCBtYWRlIGl0
-IE5VTEwgaW4gdGhlIGVycm9yIGNhc2UgYWJvdmU/CgpZZWFoLiAgVGhlIGlkZWEgd2FzIHRoZSBp
-ZiB3ZSBoYXBwZW5lZCB0byBnZXQgYSBFUFJPQkVfREVGRVIgKHNob3VsZApuZXZlciBoYXBwZW4p
-IHdlIHdvdWxkIGNvbnRpbnVlIG9uIGFuZCBqdXN0IHNraXAgdGhpcyBwYXJ0LiAgSW4gYW55CmNh
-c2UsIHNob3VsZCBiZSBhIG1vb3QgcG9pbnQgd2l0aCB0aGUgbmV3IHZlcnNpb24sIHdoaWNoIEkn
-bGwgc2VuZCBvdXQKc29vbi4KCi1Eb3VnCgpfX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
-X19fX19fX19fX19fX19fXwpMaW51eC1yb2NrY2hpcCBtYWlsaW5nIGxpc3QKTGludXgtcm9ja2No
-aXBAbGlzdHMuaW5mcmFkZWFkLm9yZwpodHRwOi8vbGlzdHMuaW5mcmFkZWFkLm9yZy9tYWlsbWFu
-L2xpc3RpbmZvL2xpbnV4LXJvY2tjaGlwCg==
+On Mon, Jun 20, 2016 at 09:25:18AM -0700, Doug Anderson wrote:
+> On Mon, Jun 20, 2016 at 9:19 AM, Brian Norris <briannorris@chromium.org> wrote:
+> > Ulf,
+> >
+> > I see I didn't CC you or linux-mmc on this patch series. Please let me
+> > know if I should resend, or if you can pick these up off of LKML -- Doug
+> > gave nice patchwork links in his linked series. NB: patch 2 has a
+> > version 2, while the others were left unmodified.
+> 
+> I actually need to spin my series to address a small bit of feedback
+> from Heiko.  Since Brian's original patches weren't on linux-mmc, I'll
+> include them in my series (along with collected tags) to make it easy.
+> Hope this is OK.
+
+Fine with me. Thanks.
+
+Brian
