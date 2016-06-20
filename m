@@ -1,71 +1,66 @@
-From: Mark Brown <broonie-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH 08/12] doc: binding: pwrseq-usb-generic: add binding doc
- for generic usb power sequence driver
-Date: Mon, 20 Jun 2016 18:06:10 +0100
-Message-ID: <20160620170609.GA26099@sirena.org.uk>
-References: <1466158165-9380-1-git-send-email-peter.chen@nxp.com>
- <1466158165-9380-9-git-send-email-peter.chen@nxp.com>
- <CAL_JsqLvs0s2TyfqPM5vtmyY81_X84VjCGjsGYbTgT4syOfp9Q@mail.gmail.com>
- <20160620112651.GA26936@shlinux2>
- <20160620161607.GA11427@rob-hp-laptop>
+From: Douglas Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
+Subject: [PATCH v3 01/15] phy: rockchip-emmc: give DLL some extra time to be
+ ready
+Date: Mon, 20 Jun 2016 10:56:40 -0700
+Message-ID: <1466445414-11974-2-git-send-email-dianders@chromium.org>
+References: <1466445414-11974-1-git-send-email-dianders@chromium.org>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha256;
-	protocol="application/pgp-signature"; boundary="fKtH0JUtvN5p2ETH"
-Return-path: <linux-usb-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <20160620161607.GA11427@rob-hp-laptop>
-Sender: linux-usb-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Rob Herring <robh-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-Cc: Peter Chen <hzpeterchen-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Peter Chen <peter.chen-3arQi8VN3Tc@public.gmane.org>, Greg Kroah-Hartman <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>, Alan Stern <stern-nwvwT67g6+6dFdvTe/nMLpVzexx5G7lz@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Sebastian Reichel <sre-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Krzysztof =?utf-8?Q?Koz=C5=82owski?= <k.kozlowski-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, Stephen Boyd <stephen.boyd-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, oscar-Bdbr4918Nnnk1uMJSBkQmQ@public.gmane.org, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Pawel Moll <pawel.moll-5wv7dgnIgG8@public.gmane.org>, "linux-pm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-pm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Sascha Hauer <s.hauer-bIcnvbaLZ9MEGnE8C9+IrQ@public.gmane.org>, Linux USB List <linux-usb-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "Maciej S. Szmigiero" <mail-APzI5cXaD1zVlRWJc41N0YvC60bnQu0Y@public.gmane.org>, troy.kisky-Q5RJGjKts06CY9SHAMCTRUEOCMrvLtNR@public.gmane.org, Javier Martinez Canillas <javier-JPH+aEBZ4P+UEJcrhfAQsw@public.gmane.org>, Philipp Zabel <p.zabel@pengutron>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+In-Reply-To: <1466445414-11974-1-git-send-email-dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-rockchip>,
+ <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-rockchip/>
+List-Post: <mailto:linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+List-Help: <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-rockchip>,
+ <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
+Sender: "Linux-rockchip" <linux-rockchip-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+Errors-To: linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+To: ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, Heiko Stuebner <heiko-4mtYJXux2i+zQB+pC5nmwQ@public.gmane.org>
+Cc: Douglas Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, xzy.xu-TNX95d0MmH7DzftRWevZcw@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org, briannorris-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, kishon-l0cyMroinI0@public.gmane.org, linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, groeck-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
 
+From: Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
 
---fKtH0JUtvN5p2ETH
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+According to the databook, 10.2us is the max time for dll to be ready to
+work. However in testing, some chips need 20us for dll to be ready. This
+patch adds some extra margin for dllrdy to be ready, fixing our
+-ETIMEDOUT issues.
 
-On Mon, Jun 20, 2016 at 11:16:07AM -0500, Rob Herring wrote:
-> On Mon, Jun 20, 2016 at 07:26:51PM +0800, Peter Chen wrote:
+Signed-off-by: Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
+Signed-off-by: Brian Norris <briannorris-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
+Signed-off-by: Douglas Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
+Acked-by: Kishon Vijay Abraham I <kishon-l0cyMroinI0@public.gmane.org>
+Tested-by: Heiko Stuebner <heiko-4mtYJXux2i+zQB+pC5nmwQ@public.gmane.org>
+---
+Changes in v3:
+- Add Brian's PHY patches into my series
 
-> > If the node has property "power-sequence", the pwrseq core will create
-> > related platform device, and the driver under pwrseq driver will handle
-> > power sequence stuffs.=20
+Changes in v2: None
 
-> This I have issue with. If you are creating a platform device here, you=
-=20
-> are trying to work-around limitations in the linux driver model. Either=
-=20
-> we need some sort of pre-probe hook to the drivers to call or each=20
-> parent node driver is responsible for checking and calling pwr-seq=20
-> functions for child nodes. e.g. The host controller calls pwr-seq for=20
-> the hub, the hub driver calls the power seq for the asix chip. Soon as=20
-> we have a case too complex for the generic pwr-seq, we're going to need=
-=20
-> the pre-probe hook as I don't want to see a continual expansion of=20
-> generic pwr-seq binding for ever more complex cases.
+ drivers/phy/phy-rockchip-emmc.c | 7 ++++---
+ 1 file changed, 4 insertions(+), 3 deletions(-)
 
-I think it's fairly clear that we need one or both of these mechanisms
-for enumerable buses in embedded contexts - it's something that keeps
-croping up.
-
---fKtH0JUtvN5p2ETH
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2
-
-iQEcBAEBCAAGBQJXaCKAAAoJECTWi3JdVIfQSx0H/A8CgWBIxx6BRObIJtvZqknF
-Q3EiIP60kb6FR1CxObdWXAf7bx9gFZYaOQ4nyh1lS40woh55wStbDlsAfe3/xRVe
-ZgnwYlWgL2DVeyG0nqd3VFE+gTCVWgFZM0PMJrcNTUsVUItoRHeZHTPnskwuGa8i
-uVCBvvOjJ9vKenPNCpv9S8sqk51d1sQ/e9Z6ydy15xmQVNkTczSVpJW4H6N3mqYA
-IEugYPm3AzJ8fOFMrU84f2vwL7xPfnsZjseczRVobCebL1iJub0b+3WxlUUy1aiE
-oJ9uAVSYl0TOgo6HoWO3t4KFNU6MFNTlAwCRVmBzIIMhH9GYDOrZDOsP6awOEVE=
-=aFUu
------END PGP SIGNATURE-----
-
---fKtH0JUtvN5p2ETH--
---
-To unsubscribe from this list: send the line "unsubscribe linux-usb" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+diff --git a/drivers/phy/phy-rockchip-emmc.c b/drivers/phy/phy-rockchip-emmc.c
+index 6ebcf3e41c46..48cbe691a889 100644
+--- a/drivers/phy/phy-rockchip-emmc.c
++++ b/drivers/phy/phy-rockchip-emmc.c
+@@ -119,10 +119,11 @@ static int rockchip_emmc_phy_power(struct rockchip_emmc_phy *rk_phy,
+ 				   PHYCTRL_ENDLL_MASK,
+ 				   PHYCTRL_ENDLL_SHIFT));
+ 	/*
+-	 * After enable analog DLL circuits, we need extra 10.2us
+-	 * for dll to be ready for work.
++	 * After enable analog DLL circuits, we need an extra 10.2us
++	 * for dll to be ready for work. But according to testing, we
++	 * find some chips need more than 25us.
+ 	 */
+-	udelay(11);
++	udelay(30);
+ 	regmap_read(rk_phy->reg_base,
+ 		    rk_phy->reg_offset + GRF_EMMCPHY_STATUS,
+ 		    &dllrdy);
+-- 
+2.8.0.rc3.226.g39d4020
