@@ -1,125 +1,97 @@
 From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: [PATCH 2/3] mmc: dw_mmc: add the card write threshold for HS400 mode
-Date: Mon, 20 Jun 2016 13:25:49 +0900
-Message-ID: <1466396749-29456-1-git-send-email-jh80.chung@samsung.com>
+Subject: [PATCH 3/3] mmc: dw_mmc: prevent to set the wrong value
+Date: Mon, 20 Jun 2016 13:26:01 +0900
+Message-ID: <1466396761-29503-1-git-send-email-jh80.chung@samsung.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout4.samsung.com ([203.254.224.34]:55688 "EHLO
-	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751559AbcFTE0v (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 20 Jun 2016 00:26:51 -0400
-Received: from epcpsbgr2.samsung.com
- (u142.gpu120.samsung.co.kr [203.254.230.142])
- by mailout4.samsung.com (Oracle Communications Messaging Server 7.0.5.31.0
+Received: from mailout1.samsung.com ([203.254.224.24]:34874 "EHLO
+	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750835AbcFTEib (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 20 Jun 2016 00:38:31 -0400
+Received: from epcpsbgr3.samsung.com
+ (u143.gpu120.samsung.co.kr [203.254.230.143])
+ by mailout1.samsung.com (Oracle Communications Messaging Server 7.0.5.31.0
  64bit (built May  5 2014))
- with ESMTP id <0O9102VFIYZ3KSC0@mailout4.samsung.com> for
- linux-mmc@vger.kernel.org; Mon, 20 Jun 2016 13:25:51 +0900 (KST)
+ with ESMTP id <0O9102XA7YZFGQD0@mailout1.samsung.com> for
+ linux-mmc@vger.kernel.org; Mon, 20 Jun 2016 13:26:03 +0900 (KST)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org
 Cc: ulf.hansson@linaro.org, shawn.lin@rock-chips.com, Jaehoon Chung <jh80.chung@samsung.com>
 
-Since v2.80a, dwmmc controller introduced the card write threshold for
-HS400 mode. So CardThrCtl can be supported during write operation, not
-only read operation.
-(Note: Only use the write threshold when mode is HS400.)
+If there ins no vqmmc, voltage should not be changed.
+Then it nees to maintain the previous status for USH_REG register.
+To use the standard spec, it should be returned error when voltage can't switch.
 
-To use more compatible, removed "_rd_" from function name.
+Note:
+Dwmmc controller will not make any exception case.(like exynos.)
+If card isn't working well after appling this patch, it needs to check
+the regulator side.
 
 Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
 ---
- drivers/mmc/host/dw_mmc.c | 31 +++++++++++++++++++++----------
- drivers/mmc/host/dw_mmc.h |  5 ++++-
- 2 files changed, 25 insertions(+), 11 deletions(-)
+ drivers/mmc/host/dw_mmc.c | 40 ++++++++++++++++++++++------------------
+ 1 file changed, 22 insertions(+), 18 deletions(-)
 
 diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index 5cf143b..6efda0b 100644
+index 6efda0b..16e0793 100644
 --- a/drivers/mmc/host/dw_mmc.c
 +++ b/drivers/mmc/host/dw_mmc.c
-@@ -899,13 +899,12 @@ done:
- 	mci_writel(host, FIFOTH, fifoth_val);
- }
+@@ -1403,33 +1403,37 @@ static int dw_mci_switch_voltage(struct mmc_host *mmc, struct mmc_ios *ios)
+ 	struct dw_mci_slot *slot = mmc_priv(mmc);
+ 	struct dw_mci *host = slot->host;
+ 	const struct dw_mci_drv_data *drv_data = host->drv_data;
+-	u32 uhs;
++	u32 uhs = 0;
+ 	u32 v18 = SDMMC_UHS_18V << slot->id;
+ 	int ret;
  
--static void dw_mci_ctrl_rd_thld(struct dw_mci *host, struct mmc_data *data)
-+static void dw_mci_ctrl_thld(struct dw_mci *host, struct mmc_data *data)
- {
- 	unsigned int blksz = data->blksz;
- 	u32 blksz_depth, fifo_depth;
- 	u16 thld_size;
+ 	if (drv_data && drv_data->switch_voltage)
+ 		return drv_data->switch_voltage(mmc, ios);
+ 
+-	/*
+-	 * Program the voltage.  Note that some instances of dw_mmc may use
+-	 * the UHS_REG for this.  For other instances (like exynos) the UHS_REG
+-	 * does no harm but you need to set the regulator directly.  Try both.
+-	 */
++	if (IS_ERR(mmc->supply.vqmmc)) {
++		dev_dbg(&mmc->class_dev,
++			"vqmmc not avaiable.(Skip the switching voltage)\n");
++		return -EINVAL;
++	}
++
++	ret = mmc_regulator_set_vqmmc(mmc, ios);
++	if (ret) {
++		dev_err(&mmc->class_dev,
++				 "Regulator set error %d - %s V\n",
++				 ret, uhs & v18 ? "1.8" : "3.3");
++		return ret;
++	}
++
+ 	uhs = mci_readl(host, UHS_REG);
+-	if (ios->signal_voltage == MMC_SIGNAL_VOLTAGE_330)
++	switch(ios->signal_voltage) {
++	case MMC_SIGNAL_VOLTAGE_330:
+ 		uhs &= ~v18;
+-	else
++		break;
++	case MMC_SIGNAL_VOLTAGE_180:
+ 		uhs |= v18;
 -
--	WARN_ON(!(data->flags & MMC_DATA_READ));
-+	u8 enable;
+-	if (!IS_ERR(mmc->supply.vqmmc)) {
+-		ret = mmc_regulator_set_vqmmc(mmc, ios);
+-
+-		if (ret) {
+-			dev_dbg(&mmc->class_dev,
+-					 "Regulator set error %d - %s V\n",
+-					 ret, uhs & v18 ? "1.8" : "3.3");
+-			return ret;
+-		}
++		break;
++	default:
++		uhs &= ~v18;
+ 	}
+ 	mci_writel(host, UHS_REG, uhs);
  
- 	/*
- 	 * CDTHRCTL doesn't exist prior to 240A (in fact that register offset is
-@@ -914,8 +913,20 @@ static void dw_mci_ctrl_rd_thld(struct dw_mci *host, struct mmc_data *data)
- 	if (host->verid < DW_MMC_240A)
- 		return;
- 
-+	/*
-+	 * Card write Threshold is introduced since 2.80a
-+	 * It's used when HS400 mode is enabled.
-+	 */
-+	if (data->flags & MMC_DATA_WRITE &&
-+		!(host->timing != MMC_TIMING_MMC_HS400))
-+		return;
-+
-+	if (data->flags & MMC_DATA_WRITE)
-+		enable = SDMMC_CARD_WR_THR_EN;
-+	else
-+		enable = SDMMC_CARD_RD_THR_EN;
-+
- 	if (host->timing != MMC_TIMING_MMC_HS200 &&
--	    host->timing != MMC_TIMING_MMC_HS400 &&
- 	    host->timing != MMC_TIMING_UHS_SDR104)
- 		goto disable;
- 
-@@ -931,11 +942,11 @@ static void dw_mci_ctrl_rd_thld(struct dw_mci *host, struct mmc_data *data)
- 	 * Currently just choose blksz.
- 	 */
- 	thld_size = blksz;
--	mci_writel(host, CDTHRCTL, SDMMC_SET_RD_THLD(thld_size, 1));
-+	mci_writel(host, CDTHRCTL, SDMMC_SET_THLD(thld_size, enable));
- 	return;
- 
- disable:
--	mci_writel(host, CDTHRCTL, SDMMC_SET_RD_THLD(0, 0));
-+	mci_writel(host, CDTHRCTL, 0);
- }
- 
- static int dw_mci_submit_data_dma(struct dw_mci *host, struct mmc_data *data)
-@@ -1006,12 +1017,12 @@ static void dw_mci_submit_data(struct dw_mci *host, struct mmc_data *data)
- 	host->sg = NULL;
- 	host->data = data;
- 
--	if (data->flags & MMC_DATA_READ) {
-+	if (data->flags & MMC_DATA_READ)
- 		host->dir_status = DW_MCI_RECV_STATUS;
--		dw_mci_ctrl_rd_thld(host, data);
--	} else {
-+	else
- 		host->dir_status = DW_MCI_SEND_STATUS;
--	}
-+
-+	dw_mci_ctrl_thld(host, data);
- 
- 	if (dw_mci_submit_data_dma(host, data)) {
- 		if (host->data->flags & MMC_DATA_READ)
-diff --git a/drivers/mmc/host/dw_mmc.h b/drivers/mmc/host/dw_mmc.h
-index 1e8d838..2bf7464 100644
---- a/drivers/mmc/host/dw_mmc.h
-+++ b/drivers/mmc/host/dw_mmc.h
-@@ -175,7 +175,10 @@
- /* Version ID register define */
- #define SDMMC_GET_VERID(x)		((x) & 0xFFFF)
- /* Card read threshold */
--#define SDMMC_SET_RD_THLD(v, x)		(((v) & 0xFFF) << 16 | (x))
-+#define SDMMC_SET_THLD(v, x)		(((v) & 0xFFF) << 16 | (x))
-+#define SDMMC_CARD_WR_THR_EN		BIT(2)
-+#define SDMMC_CARD_RD_THR_EN		BIT(0)
-+/* UHS-1 register defines */
- #define SDMMC_UHS_18V			BIT(0)
- /* All ctrl reset bits */
- #define SDMMC_CTRL_ALL_RESET_FLAGS \
 -- 
 1.9.1
 
