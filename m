@@ -1,99 +1,146 @@
-From: Seung-Woo Kim <sw0312.kim@samsung.com>
-Subject: mmc: dw_mmc: warning with CONFIG_DMA_API_DEBUG
-Date: Mon, 20 Jun 2016 17:34:48 +0900
-Message-ID: <001501d1cace$9b8f2b60$d2ad8220$@samsung.com>
+From: Shawn Lin <shawn.lin@rock-chips.com>
+Subject: Re: [PATCH 1/3] mmc: dw_mmc: remove the quirks flags
+Date: Mon, 20 Jun 2016 16:14:21 +0800
+Message-ID: <8795c689-dcbf-399f-a6c0-6cfee2b3c4a4@rock-chips.com>
+References: <1466396737-29410-1-git-send-email-jh80.chung@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=gbk; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout3.samsung.com ([203.254.224.33]:59875 "EHLO
-	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753104AbcFTIeu (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 20 Jun 2016 04:34:50 -0400
-Content-language: ko
+Received: from lucky1.263xmail.com ([211.157.147.130]:37606 "EHLO
+	lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751672AbcFTIkJ (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 20 Jun 2016 04:40:09 -0400
+In-Reply-To: <1466396737-29410-1-git-send-email-jh80.chung@samsung.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: jh80.chung@samsung.com, ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, sw0312.kim@samsung.com
+To: Jaehoon Chung <jh80.chung@samsung.com>, linux-mmc@vger.kernel.org
+Cc: shawn.lin@rock-chips.com, ulf.hansson@linaro.org
 
-Hi folks,
+On 2016/6/20 12:25, Jaehoon Chung wrote:
+> Remove the quirks flag. (DW_MCI_QUIRK_BROKEN_DTO)
+> For removing this, enabled the dto_timer by defaults.
+> It doesn't see any I/O performance degression.
+> In future, dwmmc controller should not use the quirks flag.
 
-During booting test on my Exynos5422 based Odroid-XU3, kernel compiled
-with CONFIG_DMA_API_DEBUG reported following warning:
+Looks very nice to remove this quirk.
 
-------------[ cut here ]------------
-WARNING: CPU: 0 PID: 0 at lib/dma-debug.c:1096 check_unmap+0x7bc/0xb38
-dwmmc_exynos 12200000.mmc: DMA-API: device driver tries to free DMA memory it has not allocated [device address=0x000000006d9d2200]
-[size=128 bytes]
-Modules linked in:
-CPU: 0 PID: 0 Comm: swapper/0 Not tainted 4.7.0-rc4 #26
-Hardware name: SAMSUNG EXYNOS (Flattened Device Tree)
-[<c0112b4c>] (unwind_backtrace) from [<c010d888>] (show_stack+0x20/0x24)
-[<c010d888>] (show_stack) from [<c03fab0c>] (dump_stack+0x80/0x94)
-[<c03fab0c>] (dump_stack) from [<c0123548>] (__warn+0xf8/0x110)
-[<c0123548>] (__warn) from [<c01235a8>] (warn_slowpath_fmt+0x48/0x50)
-[<c01235a8>] (warn_slowpath_fmt) from [<c042ac90>] (check_unmap+0x7bc/0xb38)
-[<c042ac90>] (check_unmap) from [<c042b25c>] (debug_dma_unmap_sg+0x118/0x148)
-[<c042b25c>] (debug_dma_unmap_sg) from [<c077512c>] (dw_mci_dma_cleanup+0x7c/0xb8)
-[<c077512c>] (dw_mci_dma_cleanup) from [<c0773f24>] (dw_mci_stop_dma+0x40/0x50)
-[<c0773f24>] (dw_mci_stop_dma) from [<c0777d04>] (dw_mci_tasklet_func+0x130/0x3b4)
-[<c0777d04>] (dw_mci_tasklet_func) from [<c0129760>] (tasklet_action+0xb4/0x150)
-[<c0129760>] (tasklet_action) from [<c0101674>] (__do_softirq+0xe4/0x3cc)
-[<c0101674>] (__do_softirq) from [<c0129030>] (irq_exit+0xd0/0x10c)
-[<c0129030>] (irq_exit) from [<c01778a0>] (__handle_domain_irq+0x90/0xfc)
-[<c01778a0>] (__handle_domain_irq) from [<c0101548>] (gic_handle_irq+0x64/0xa8)
-[<c0101548>] (gic_handle_irq) from [<c010e3d4>] (__irq_svc+0x54/0x90)
-Exception stack(0xc1101ef8 to 0xc1101f40)
-1ee0:                                                       00000001 00000000
-1f00: 00000000 c011b600 c1100000 c110753c 00000000 c11c3984 c11074d4 c1107548
-1f20: 00000000 c1101f54 c1101f58 c1101f48 c010a1fc c010a200 60000013 ffffffff
-[<c010e3d4>] (__irq_svc) from [<c010a200>] (arch_cpu_idle+0x48/0x4c)
-[<c010a200>] (arch_cpu_idle) from [<c01669d8>] (default_idle_call+0x30/0x3c)
-[<c01669d8>] (default_idle_call) from [<c0166d3c>] (cpu_startup_entry+0x358/0x3b4)
-[<c0166d3c>] (cpu_startup_entry) from [<c0aa6ab8>] (rest_init+0x94/0x98)
-[<c0aa6ab8>] (rest_init) from [<c1000d58>] (start_kernel+0x3a4/0x3b0)
-[<c1000d58>] (start_kernel) from [<4000807c>] (0x4000807c)
----[ end trace 256f83eed365daf0 ]---
+Reviewed-by: Shawn Lin <shawn.lin@rock-chips.com>
 
-The warning occurs because after complete callback function,
-dw_mci_dmac_complete_dma() is called, then dw_mci_stop_dma() is called
-again. So it causes dma_unmap_sg() is called twice for same sg. It
-occurs during clock setting at booting time.
+>
+> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+> ---
+>  drivers/mmc/host/dw_mmc-rockchip.c |  3 ---
+>  drivers/mmc/host/dw_mmc.c          | 16 +++++-----------
+>  include/linux/mmc/dw_mmc.h         |  9 ---------
+>  3 files changed, 5 insertions(+), 23 deletions(-)
+>
+> diff --git a/drivers/mmc/host/dw_mmc-rockchip.c b/drivers/mmc/host/dw_mmc-rockchip.c
+> index 358b0dc..d3cf1f1 100644
+> --- a/drivers/mmc/host/dw_mmc-rockchip.c
+> +++ b/drivers/mmc/host/dw_mmc-rockchip.c
+> @@ -285,9 +285,6 @@ static int dw_mci_rockchip_init(struct dw_mci *host)
+>  	/* It is slot 8 on Rockchip SoCs */
+>  	host->sdio_id0 = 8;
+>
+> -	/* It needs this quirk on all Rockchip SoCs */
+> -	host->pdata->quirks |= DW_MCI_QUIRK_BROKEN_DTO;
+> -
+>  	if (of_device_is_compatible(host->dev->of_node,
+>  				    "rockchip,rk3288-dw-mshc"))
+>  		host->bus_hz /= RK3288_CLKGEN_DIV;
+> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+> index 87f8529..5cf143b 100644
+> --- a/drivers/mmc/host/dw_mmc.c
+> +++ b/drivers/mmc/host/dw_mmc.c
+> @@ -1802,8 +1802,7 @@ static void dw_mci_tasklet_func(unsigned long priv)
+>  				 * If all data-related interrupts don't come
+>  				 * within the given time in reading data state.
+>  				 */
+> -				if ((host->quirks & DW_MCI_QUIRK_BROKEN_DTO) &&
+> -				    (host->dir_status == DW_MCI_RECV_STATUS))
+> +				if (host->dir_status == DW_MCI_RECV_STATUS)
+>  					dw_mci_set_drto(host);
+>  				break;
+>  			}
+> @@ -1845,8 +1844,7 @@ static void dw_mci_tasklet_func(unsigned long priv)
+>  				 * interrupt doesn't come within the given time.
+>  				 * in reading data state.
+>  				 */
+> -				if ((host->quirks & DW_MCI_QUIRK_BROKEN_DTO) &&
+> -				    (host->dir_status == DW_MCI_RECV_STATUS))
+> +				if (host->dir_status == DW_MCI_RECV_STATUS)
+>  					dw_mci_set_drto(host);
+>  				break;
+>  			}
+> @@ -2412,8 +2410,7 @@ static irqreturn_t dw_mci_interrupt(int irq, void *dev_id)
+>  		}
+>
+>  		if (pending & SDMMC_INT_DATA_OVER) {
+> -			if (host->quirks & DW_MCI_QUIRK_BROKEN_DTO)
+> -				del_timer(&host->dto_timer);
+> +			del_timer(&host->dto_timer);
+>
+>  			mci_writel(host, RINTSTS, SDMMC_INT_DATA_OVER);
+>  			if (!host->data_status)
+> @@ -3004,11 +3001,8 @@ int dw_mci_probe(struct dw_mci *host)
+>  	setup_timer(&host->cmd11_timer,
+>  		    dw_mci_cmd11_timer, (unsigned long)host);
+>
+> -	host->quirks = host->pdata->quirks;
+> -
+> -	if (host->quirks & DW_MCI_QUIRK_BROKEN_DTO)
+> -		setup_timer(&host->dto_timer,
+> -			    dw_mci_dto_timer, (unsigned long)host);
+> +	setup_timer(&host->dto_timer,
+> +		    dw_mci_dto_timer, (unsigned long)host);
+>
+>  	spin_lock_init(&host->lock);
+>  	spin_lock_init(&host->irq_lock);
+> diff --git a/include/linux/mmc/dw_mmc.h b/include/linux/mmc/dw_mmc.h
+> index f7ed271..83b0edfc 100644
+> --- a/include/linux/mmc/dw_mmc.h
+> +++ b/include/linux/mmc/dw_mmc.h
+> @@ -112,7 +112,6 @@ struct dw_mci_dma_slave {
+>   * @part_buf: Simple buffer for partial fifo reads/writes.
+>   * @push_data: Pointer to FIFO push function.
+>   * @pull_data: Pointer to FIFO pull function.
+> - * @quirks: Set of quirks that apply to specific versions of the IP.
+>   * @vqmmc_enabled: Status of vqmmc, should be true or false.
+>   * @irq_flags: The flags to be passed to request_irq.
+>   * @irq: The irq value to be passed to request_irq.
+> @@ -218,9 +217,6 @@ struct dw_mci {
+>  	void (*push_data)(struct dw_mci *host, void *buf, int cnt);
+>  	void (*pull_data)(struct dw_mci *host, void *buf, int cnt);
+>
+> -	/* Workaround flags */
+> -	u32			quirks;
+> -
+>  	bool			vqmmc_enabled;
+>  	unsigned long		irq_flags; /* IRQ flags */
+>  	int			irq;
+> @@ -242,17 +238,12 @@ struct dw_mci_dma_ops {
+>  	void (*exit)(struct dw_mci *host);
+>  };
+>
+> -/* IP Quirks/flags. */
+> -/* Timer for broken data transfer over scheme */
+> -#define DW_MCI_QUIRK_BROKEN_DTO			BIT(0)
+> -
+>  struct dma_pdata;
+>
+>  /* Board platform data */
+>  struct dw_mci_board {
+>  	u32 num_slots;
+>
+> -	u32 quirks; /* Workaround / Quirk flags */
+>  	unsigned int bus_hz; /* Clock speed at the cclk_in pad */
+>
+>  	u32 caps;	/* Capabilities */
+>
 
-Simply, clearing host->using_dma flag on dw_mci_dmac_complete_dma() and
-dw_mci_stop_dma() like following fixes the issue, but I am not sure
-this approach is proper.
----
-diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index 2cc6123..a71c94b 100644
---- a/drivers/mmc/host/dw_mmc.c
-+++ b/drivers/mmc/host/dw_mmc.c
-@@ -388,6 +388,7 @@ static void dw_mci_stop_dma(struct dw_mci *host)
- 	if (host->using_dma) {
- 		host->dma_ops->stop(host);
- 		host->dma_ops->cleanup(host);
-+		host->using_dma = 0;
- 	}
- 
- 	/* Data transfer was stopped by the interrupt handler */
-@@ -455,6 +456,7 @@ static void dw_mci_dmac_complete_dma(void *arg)
- 				    DMA_FROM_DEVICE);
- 
- 	host->dma_ops->cleanup(host);
-+	host->using_dma = 0;
- 
- 	/*
- 	 * If the card was removed, data will be NULL. No point in trying to
-@@ -943,8 +945,6 @@ static int dw_mci_submit_data_dma(struct dw_mci *host, struct mmc_data *data)
- 	int sg_len;
- 	u32 temp;
- 
--	host->using_dma = 0;
--
- 	/* If we don't have a channel, we can't do DMA */
- 	if (!host->use_dma)
- 		return -ENODEV;
----
 
-Best Regards,
-- Seung-Woo Kim
+-- 
+Best Regards
+Shawn Lin
 
