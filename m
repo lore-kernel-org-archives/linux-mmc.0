@@ -1,149 +1,67 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: [PATCH] mmc: host: use the defined function to check whether card is
- removable
-Date: Mon, 20 Jun 2016 15:35:39 +0900
-Message-ID: <1466404539-25156-1-git-send-email-jh80.chung@samsung.com>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout4.samsung.com ([203.254.224.34]:38048 "EHLO
-	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751139AbcFTGfs (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 20 Jun 2016 02:35:48 -0400
-Received: from epcpsbgr1.samsung.com
- (u141.gpu120.samsung.co.kr [203.254.230.141])
- by mailout4.samsung.com (Oracle Communications Messaging Server 7.0.5.31.0
- 64bit (built May  5 2014))
- with ESMTP id <0O9201K6G4ZL3BA0@mailout4.samsung.com> for
- linux-mmc@vger.kernel.org; Mon, 20 Jun 2016 15:35:45 +0900 (KST)
-Sender: linux-mmc-owner@vger.kernel.org
+From: Jacek Anaszewski <j.anaszewski@samsung.com>
+Subject: Re: [PATCH 12/12] leds: Only descend into leds directory when
+ CONFIG_NEW_LEDS is set
+Date: Mon, 20 Jun 2016 09:41:44 +0200
+Message-ID: <57679E38.3080901@samsung.com>
+References: <20160613200211.14790-1-afd@ti.com>
+ <20160613200211.14790-13-afd@ti.com> <5760FA52.7010806@samsung.com>
+ <57647DBD.2010406@ti.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="utf-8"; Format="flowed"
+Content-Transfer-Encoding: base64
+Return-path: <linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org>
+In-reply-to: <57647DBD.2010406@ti.com>
+List-Unsubscribe: <https://lists.ozlabs.org/options/linuxppc-dev>,
+ <mailto:linuxppc-dev-request@lists.ozlabs.org?subject=unsubscribe>
+List-Archive: <http://lists.ozlabs.org/pipermail/linuxppc-dev/>
+List-Post: <mailto:linuxppc-dev@lists.ozlabs.org>
+List-Help: <mailto:linuxppc-dev-request@lists.ozlabs.org?subject=help>
+List-Subscribe: <https://lists.ozlabs.org/listinfo/linuxppc-dev>,
+ <mailto:linuxppc-dev-request@lists.ozlabs.org?subject=subscribe>
+Errors-To: linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org
+Sender: "Linuxppc-dev"
+ <linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org>
+To: "Andrew F. Davis" <afd@ti.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Wolfram Sang <wsa@the-dreams.de>, Linus Walleij <linus.walleij@linaro.org>, Sebastian Reichel <sre@kernel.org>, linux-i2c@vger.kernel.org, Ingo Molnar <mingo@kernel.org>, Aloisio Almeida Jr <aloisio.almeida@openbossa.org>, lguest@lists.ozlabs.org, Samuel Ortiz <sameo@linux.intel.com>, Russell King <linux@armlinux.org.uk>, linux-leds@vger.kernel.org, linux-mmc@vger.kernel.org, linux-media@vger.kernel.org, linux-pwm@vger.kernel.org, Mauro Carvalho Chehab <mchehab@osg.samsung.com>, Rusty Russell <rusty@rustcorp.com.au>, linux-gpio@vger.kernel.org, linux-wireless@vger.kernel.org, linux-kernel@vger.kernel.org, Lauro Ramos Venancio <lauro.venancio@openbossa.org>, Miguel Ojeda Sandonis <miguel.ojeda.sandonis@gmail.com>, Richard Purdie <rpurdie@rpsys.net>, linuxppc-dev@lists.ozlabs.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: ulf.hansson@linaro.org, adrian.hunter@intel.com, shawn.lin@rock-chips.com, Wolfram Sang <wsa+renesas@sang-engineering.com>, Jaehoon Chung <jh80.chung@samsung.com>
 
-In linux/mmc/host.h, mmc_card_is_removable() is already defined.
-It should be maintainted more easier than now.
-
-Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
----
- drivers/mmc/host/dw_mmc.c         | 3 +--
- drivers/mmc/host/mxcmmc.c         | 2 +-
- drivers/mmc/host/sdhci-bcm-kona.c | 6 +++---
- drivers/mmc/host/sdhci-st.c       | 2 +-
- drivers/mmc/host/sdhci.c          | 6 +++---
- drivers/mmc/host/tmio_mmc_pio.c   | 2 +-
- 6 files changed, 10 insertions(+), 11 deletions(-)
-
-diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index 2cc6123..8012858 100644
---- a/drivers/mmc/host/dw_mmc.c
-+++ b/drivers/mmc/host/dw_mmc.c
-@@ -1451,8 +1451,7 @@ static int dw_mci_get_cd(struct mmc_host *mmc)
- 	int gpio_cd = mmc_gpio_get_cd(mmc);
- 
- 	/* Use platform get_cd function, else try onboard card detect */
--	if ((mmc->caps & MMC_CAP_NEEDS_POLL) ||
--	    (mmc->caps & MMC_CAP_NONREMOVABLE))
-+	if ((mmc->caps & MMC_CAP_NEEDS_POLL) || !mmc_card_is_removable(mmc))
- 		present = 1;
- 	else if (gpio_cd >= 0)
- 		present = gpio_cd;
-diff --git a/drivers/mmc/host/mxcmmc.c b/drivers/mmc/host/mxcmmc.c
-index 3d1ea5e..fb3ca82 100644
---- a/drivers/mmc/host/mxcmmc.c
-+++ b/drivers/mmc/host/mxcmmc.c
-@@ -1065,7 +1065,7 @@ static int mxcmci_probe(struct platform_device *pdev)
- 
- 	if (pdata)
- 		dat3_card_detect = pdata->dat3_card_detect;
--	else if (!(mmc->caps & MMC_CAP_NONREMOVABLE)
-+	else if (mmc_card_is_removable(mmc)
- 			&& !of_property_read_bool(pdev->dev.of_node, "cd-gpios"))
- 		dat3_card_detect = true;
- 
-diff --git a/drivers/mmc/host/sdhci-bcm-kona.c b/drivers/mmc/host/sdhci-bcm-kona.c
-index 00a8a40..1d64712 100644
---- a/drivers/mmc/host/sdhci-bcm-kona.c
-+++ b/drivers/mmc/host/sdhci-bcm-kona.c
-@@ -264,12 +264,12 @@ static int sdhci_bcm_kona_probe(struct platform_device *pdev)
- 	}
- 
- 	dev_dbg(dev, "non-removable=%c\n",
--		(host->mmc->caps & MMC_CAP_NONREMOVABLE) ? 'Y' : 'N');
-+		mmc_card_is_removable(host->mmc) ? 'N' : 'Y');
- 	dev_dbg(dev, "cd_gpio %c, wp_gpio %c\n",
- 		(mmc_gpio_get_cd(host->mmc) != -ENOSYS) ? 'Y' : 'N',
- 		(mmc_gpio_get_ro(host->mmc) != -ENOSYS) ? 'Y' : 'N');
- 
--	if (host->mmc->caps & MMC_CAP_NONREMOVABLE)
-+	if (!mmc_card_is_removable(host->mmc))
- 		host->quirks |= SDHCI_QUIRK_BROKEN_CARD_DETECTION;
- 
- 	dev_dbg(dev, "is_8bit=%c\n",
-@@ -288,7 +288,7 @@ static int sdhci_bcm_kona_probe(struct platform_device *pdev)
- 	}
- 
- 	/* if device is eMMC, emulate card insert right here */
--	if (host->mmc->caps & MMC_CAP_NONREMOVABLE) {
-+	if (!mmc_card_is_removable(host->mmc)) {
- 		ret = sdhci_bcm_kona_sd_card_emulate(host, 1);
- 		if (ret) {
- 			dev_err(dev,
-diff --git a/drivers/mmc/host/sdhci-st.c b/drivers/mmc/host/sdhci-st.c
-index 320e1c2..c95ba83 100644
---- a/drivers/mmc/host/sdhci-st.c
-+++ b/drivers/mmc/host/sdhci-st.c
-@@ -183,7 +183,7 @@ static void st_mmcss_cconfig(struct device_node *np, struct sdhci_host *host)
- 
- 	writel_relaxed(cconf2, host->ioaddr + ST_MMC_CCONFIG_REG_2);
- 
--	if (mhost->caps & MMC_CAP_NONREMOVABLE)
-+	if (!mmc_card_is_removable(mhost))
- 		cconf3 |= ST_MMC_CCONFIG_EMMC_SLOT_TYPE;
- 	else
- 		/* CARD _D ET_CTRL */
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 040af1b..b965461 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -117,7 +117,7 @@ static void sdhci_set_card_detection(struct sdhci_host *host, bool enable)
- 	u32 present;
- 
- 	if ((host->quirks & SDHCI_QUIRK_BROKEN_CARD_DETECTION) ||
--	    (host->mmc->caps & MMC_CAP_NONREMOVABLE))
-+	    !mmc_card_is_removable(host->mmc))
- 		return;
- 
- 	if (enable) {
-@@ -1617,7 +1617,7 @@ static int sdhci_get_cd(struct mmc_host *mmc)
- 		return 0;
- 
- 	/* If nonremovable, assume that the card is always present. */
--	if (host->mmc->caps & MMC_CAP_NONREMOVABLE)
-+	if (!mmc_card_is_removable(host->mmc))
- 		return 1;
- 
- 	/*
-@@ -3089,7 +3089,7 @@ int sdhci_add_host(struct sdhci_host *host)
- 		mmc->caps |= MMC_CAP_SD_HIGHSPEED | MMC_CAP_MMC_HIGHSPEED;
- 
- 	if ((host->quirks & SDHCI_QUIRK_BROKEN_CARD_DETECTION) &&
--	    !(mmc->caps & MMC_CAP_NONREMOVABLE) &&
-+	    mmc_card_is_removable(mmc) &&
- 	    mmc_gpio_get_cd(host->mmc) < 0)
- 		mmc->caps |= MMC_CAP_NEEDS_POLL;
- 
-diff --git a/drivers/mmc/host/tmio_mmc_pio.c b/drivers/mmc/host/tmio_mmc_pio.c
-index f44e2ab..92467ef 100644
---- a/drivers/mmc/host/tmio_mmc_pio.c
-+++ b/drivers/mmc/host/tmio_mmc_pio.c
-@@ -1086,7 +1086,7 @@ int tmio_mmc_host_probe(struct tmio_mmc_host *_host,
- 
- 	_host->native_hotplug = !(pdata->flags & TMIO_MMC_USE_GPIO_CD ||
- 				  mmc->caps & MMC_CAP_NEEDS_POLL ||
--				  mmc->caps & MMC_CAP_NONREMOVABLE ||
-+				  !mmc_card_is_removable(mmc) ||
- 				  mmc->slot.cd_irq >= 0);
- 
- 	if (tmio_mmc_clk_enable(_host) < 0) {
--- 
-1.9.1
-
+T24gMDYvMTgvMjAxNiAxMjo0NiBBTSwgQW5kcmV3IEYuIERhdmlzIHdyb3RlOgo+IE9uIDA2LzE1
+LzIwMTYgMDE6NDggQU0sIEphY2VrIEFuYXN6ZXdza2kgd3JvdGU6Cj4+IEhpIEFuZHJldywKPj4K
+Pj4gVGhhbmtzIGZvciB0aGUgcGF0Y2guCj4+Cj4+IFBsZWFzZSBhZGRyZXNzIHRoZSBpc3N1ZSBb
+MV0gcmFpc2VkIGJ5IHRlc3QgYm90IGFuZCByZXN1Ym1pdC4KPj4KPj4gVGhhbmtzLAo+PiBKYWNl
+ayBBbmFzemV3c2tpCj4+Cj4+IFsxXSBodHRwczovL2xrbWwub3JnL2xrbWwvMjAxNi82LzEzLzEw
+OTEKPj4KPgo+IEl0IGxvb2tzIGxpa2Ugc29tZSBzeXN0ZW1zIHVzZSAnZ3Bpb19sZWRfcmVnaXN0
+ZXJfZGV2aWNlJyB0byBtYWtlIGFuCj4gaW4tbWVtb3J5IGNvcHkgb2YgdGhlaXIgTEVEIGRldmlj
+ZSB0YWJsZSBzbyB0aGUgb3JpZ2luYWwgY2FuIGJlIHJlbW92ZWQKPiBhcyAuaW5pdC5yb2RhdGEu
+IFRoaXMgZG9lc24ndCBuZWNlc3NhcmlseSBkZXBlbmQgb24gdGhlIExFRCBzdWJzeXN0ZW0KPiBi
+dXQgaXQga2luZCBvZiBzZWVtcyB1c2VsZXNzIHdoZW4gdGhlIHJlc3Qgb2YgdGhlIHN1YnN5c3Rl
+bSBpcyBkaXNhYmxlZC4KPgo+IE9uZSBzb2x1dGlvbiBjb3VsZCBiZSB0byB1c2UgYSBkdW1teSAn
+Z3Bpb19sZWRfcmVnaXN0ZXJfZGV2aWNlJyB3aGVuIHRoZQo+IHN1YnN5c3RlbSBpcyBub3QgZW5h
+YmxlZC4KCkl0IHNvdW5kcyBnb29kLiBQbGVhc2UgYWRkIGEgbm8tb3AgdmVyc2lvbiBvZiBncGlv
+X2xlZF9yZWdpc3Rlcl9kZXZpY2UoKQp0byBpbmNsdWRlL2xlZHMuaCwgaW4gYSBzZXBhcmF0ZSBw
+YXRjaC4KClRoYW5rcywKSmFjZWsgQW5hc3pld3NraQoKPiBBbm90aGVyIGlzIGp1c3QgdG8gcmVt
+b3ZlIHRoZSBmaXZlIG9yIHNvIHVzZXMKPiBvZiAnZ3Bpb19sZWRfcmVnaXN0ZXJfZGV2aWNlJyBh
+bmQgaGF2ZSB0aG9zZSBzeXN0ZW1zIHJlZ2lzdGVyIExFRCBkZXZpY2UKPiB0YWJsZXMgbGlrZSBv
+dGhlciBzeXN0ZW1zIGRvLgo+Cj4gSWYgbmV0aGVyIG9mIHRoZXNlIGFyZSBhY2NlcHRhYmxlIHRo
+ZW4gdGhpcyBwYXRjaCBjYW4gYmUgZHJvcHBlZCBmcm9tCj4gdGhpcyBzZXJpZXMgZm9yIG5vdy4K
+Pgo+IFRoYW5rcywKPiBBbmRyZXcKPgo+PiBPbiAwNi8xMy8yMDE2IDEwOjAyIFBNLCBBbmRyZXcg
+Ri4gRGF2aXMgd3JvdGU6Cj4+PiBXaGVuIENPTkZJR19ORVdfTEVEUyBpcyBub3Qgc2V0IG1ha2Ug
+d2lsbCBzdGlsbCBkZXNjZW5kIGludG8gdGhlIGxlZHMKPj4+IGRpcmVjdG9yeSBidXQgbm90aGlu
+ZyB3aWxsIGJlIGJ1aWx0LiBUaGlzIHByb2R1Y2VzIHVubmVlZGVkIGJ1aWxkCj4+PiBhcnRpZmFj
+dHMgYW5kIG1lc3NhZ2VzIGluIGFkZGl0aW9uIHRvIHNsb3dpbmcgdGhlIGJ1aWxkLiBGaXggdGhp
+cyBoZXJlLgo+Pj4KPj4+IFNpZ25lZC1vZmYtYnk6IEFuZHJldyBGLiBEYXZpcyA8YWZkQHRpLmNv
+bT4KPj4+IC0tLQo+Pj4gICAgZHJpdmVycy9NYWtlZmlsZSB8IDIgKy0KPj4+ICAgIDEgZmlsZSBj
+aGFuZ2VkLCAxIGluc2VydGlvbigrKSwgMSBkZWxldGlvbigtKQo+Pj4KPj4+IGRpZmYgLS1naXQg
+YS9kcml2ZXJzL01ha2VmaWxlIGIvZHJpdmVycy9NYWtlZmlsZQo+Pj4gaW5kZXggNTY3ZTMyYy4u
+ZmE1MTRkNSAxMDA2NDQKPj4+IC0tLSBhL2RyaXZlcnMvTWFrZWZpbGUKPj4+ICsrKyBiL2RyaXZl
+cnMvTWFrZWZpbGUKPj4+IEBAIC0xMjcsNyArMTI3LDcgQEAgb2JqLSQoQ09ORklHX0NQVV9GUkVR
+KSAgICAgICAgKz0gY3B1ZnJlcS8KPj4+ICAgIG9iai0kKENPTkZJR19DUFVfSURMRSkgICAgICAg
+ICs9IGNwdWlkbGUvCj4+PiAgICBvYmotJChDT05GSUdfTU1DKSAgICAgICAgKz0gbW1jLwo+Pj4g
+ICAgb2JqLSQoQ09ORklHX01FTVNUSUNLKSAgICAgICAgKz0gbWVtc3RpY2svCj4+PiAtb2JqLXkg
+ICAgICAgICAgICAgICAgKz0gbGVkcy8KPj4+ICtvYmotJChDT05GSUdfTkVXX0xFRFMpICAgICAg
+ICArPSBsZWRzLwo+Pj4gICAgb2JqLSQoQ09ORklHX0lORklOSUJBTkQpICAgICs9IGluZmluaWJh
+bmQvCj4+PiAgICBvYmotJChDT05GSUdfU0dJX1NOKSAgICAgICAgKz0gc24vCj4+PiAgICBvYmot
+eSAgICAgICAgICAgICAgICArPSBmaXJtd2FyZS8KPj4+Cj4+Cj4+Cj4KPgoKX19fX19fX19fX19f
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18KTGludXhwcGMtZGV2IG1haWxpbmcg
+bGlzdApMaW51eHBwYy1kZXZAbGlzdHMub3psYWJzLm9yZwpodHRwczovL2xpc3RzLm96bGFicy5v
+cmcvbGlzdGluZm8vbGludXhwcGMtZGV2
