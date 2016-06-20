@@ -1,47 +1,73 @@
-From: Heiko =?ISO-8859-1?Q?St=FCbner?= <heiko@sntech.de>
-Subject: Re: [PATCH v3 0/15] Changes to support 150 MHz eMMC on rk3399
-Date: Mon, 20 Jun 2016 20:17:02 +0200
-Message-ID: <1805593.i4NJUkPJQz@diego>
+From: Guenter Roeck <groeck-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>
+Subject: Re: [PATCH v3 01/15] phy: rockchip-emmc: give DLL some extra time to
+ be ready
+Date: Mon, 20 Jun 2016 12:23:59 -0700
+Message-ID: <CABXOdTeQhOSUeX+-as_6S5H1mnVnyBsEDU9ZsiC97Yb+qWiFew@mail.gmail.com>
 References: <1466445414-11974-1-git-send-email-dianders@chromium.org>
+ <1466445414-11974-2-git-send-email-dianders@chromium.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7Bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from gloria.sntech.de ([95.129.55.99]:40532 "EHLO gloria.sntech.de"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752049AbcFTSRS (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 20 Jun 2016 14:17:18 -0400
-In-Reply-To: <1466445414-11974-1-git-send-email-dianders@chromium.org>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+In-Reply-To: <1466445414-11974-2-git-send-email-dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-rockchip>,
+ <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-rockchip/>
+List-Post: <mailto:linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+List-Help: <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-rockchip>,
+ <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
+Sender: "Linux-rockchip" <linux-rockchip-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+Errors-To: linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+To: Douglas Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
+Cc: devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, Brian Norris <briannorris-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, Heiko Stuebner <heiko-4mtYJXux2i+zQB+pC5nmwQ@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org, Ziyuan Xu <xzy.xu-TNX95d0MmH7DzftRWevZcw@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, Kishon Vijay Abraham I <kishon-l0cyMroinI0@public.gmane.org>, linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, Guenter Roeck <groeck-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
-To: Douglas Anderson <dianders@chromium.org>
-Cc: ulf.hansson@linaro.org, kishon@ti.com, robh+dt@kernel.org, shawn.lin@rock-chips.com, xzy.xu@rock-chips.com, briannorris@chromium.org, adrian.hunter@intel.com, linux-rockchip@lists.infradead.org, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, groeck@chromium.org, mark.rutland@arm.com, catalin.marinas@arm.com, linus.walleij@linaro.org, will.deacon@arm.com, linux-kernel@vger.kernel.org, wsa+renesas@sang-engineering.com, stefan.wahren@i2se.com, zhengxing@rock-chips.com, michal.simek@xilinx.com, geert@linux-m68k.org, linux-arm-kernel@lists.infradead.org, jay.xu@rock-chips.com, wxt@rock-chips.com, pawel.moll@arm.com, ijc+devicetree@hellion.org.uk, horms+renesas@verge.net.au, soren.brinkmann@xilinx.com, andrei.pistirica@microchip.com, ludovic.desroches@atmel.com, galak@codeaurora.org, yangbo.lu@freescale.com
 
-Am Montag, 20. Juni 2016, 10:56:39 schrieb Douglas Anderson:
-> The theme of this series of patches is to try to allow running the eMMC
-> at 150 MHz on the rk3399 SoC, though the changes should still be correct
-> and have merit on their own.  The motivation for running at 150 MHz is
-> that doing so improves signal integrity and (with some eMMC devices)
-> doesn't affect throughput.
-> 
-> These patches have been structured to keep things as separate as
-> possible, but nevertheless there are still some dependencies between
-> patches.  It probably makes the most sense for all of the non-device
-> tree patches to go through a single tree.  PHY patches now have Acks
-> from Kishon so that means things should be clear for all non-DTS patches
-> to go through the MMC tree if Ulf agrees.  Device tree patches should be
-> able to be landed separately and the worst what would happen is a
-> warning in the kernel log if you have the code without the device tree.
-> 
-> The code patches are based on Ulf's mmc-next.  In v3 of the series I've
-> pulled in the latest version of a previous PHY series posted by Brian
-> Norris.
-> 
-> The device tree patches are based on Heiko's v4.8-armsoc/dts64.
+On Mon, Jun 20, 2016 at 10:56 AM, Douglas Anderson
+<dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org> wrote:
+> From: Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
+>
+> According to the databook, 10.2us is the max time for dll to be ready to
+> work. However in testing, some chips need 20us for dll to be ready. This
 
-just so it doesn't get lost from v2->v3, I plan on picking up the dts patches 
-9 and 15 after the rest landed in the mmc tree - as they will only apply on 
-top of my general dts branch.
+Nitpick, but description (20uS) and code (more than 25 uS) don't match.
 
-
-Heiko
+> patch adds some extra margin for dllrdy to be ready, fixing our
+> -ETIMEDOUT issues.
+>
+> Signed-off-by: Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
+> Signed-off-by: Brian Norris <briannorris-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
+> Signed-off-by: Douglas Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
+> Acked-by: Kishon Vijay Abraham I <kishon-l0cyMroinI0@public.gmane.org>
+> Tested-by: Heiko Stuebner <heiko-4mtYJXux2i+zQB+pC5nmwQ@public.gmane.org>
+> ---
+> Changes in v3:
+> - Add Brian's PHY patches into my series
+>
+> Changes in v2: None
+>
+>  drivers/phy/phy-rockchip-emmc.c | 7 ++++---
+>  1 file changed, 4 insertions(+), 3 deletions(-)
+>
+> diff --git a/drivers/phy/phy-rockchip-emmc.c b/drivers/phy/phy-rockchip-emmc.c
+> index 6ebcf3e41c46..48cbe691a889 100644
+> --- a/drivers/phy/phy-rockchip-emmc.c
+> +++ b/drivers/phy/phy-rockchip-emmc.c
+> @@ -119,10 +119,11 @@ static int rockchip_emmc_phy_power(struct rockchip_emmc_phy *rk_phy,
+>                                    PHYCTRL_ENDLL_MASK,
+>                                    PHYCTRL_ENDLL_SHIFT));
+>         /*
+> -        * After enable analog DLL circuits, we need extra 10.2us
+> -        * for dll to be ready for work.
+> +        * After enable analog DLL circuits, we need an extra 10.2us
+> +        * for dll to be ready for work. But according to testing, we
+> +        * find some chips need more than 25us.
+>          */
+> -       udelay(11);
+> +       udelay(30);
+>         regmap_read(rk_phy->reg_base,
+>                     rk_phy->reg_offset + GRF_EMMCPHY_STATUS,
+>                     &dllrdy);
+> --
+> 2.8.0.rc3.226.g39d4020
+>
