@@ -1,58 +1,101 @@
-From: Krzysztof Kozlowski <k.kozlowski@samsung.com>
-Subject: Re: [PATCH 07/12] power: pwrseq: rename file name for generic driver
-Date: Mon, 20 Jun 2016 14:48:20 +0200
-Message-ID: <5767E614.5030002@samsung.com>
-References: <1466158165-9380-1-git-send-email-peter.chen@nxp.com>
- <1466158165-9380-8-git-send-email-peter.chen@nxp.com>
+From: Kishon Vijay Abraham I <kishon-l0cyMroinI0@public.gmane.org>
+Subject: Re: [PATCH v2 01/11] phy: rockchip-emmc: Increase lock time allowance
+Date: Mon, 20 Jun 2016 18:33:37 +0530
+Message-ID: <5767E9A9.5090308@ti.com>
+References: <1465859076-4868-1-git-send-email-dianders@chromium.org>
+ <1465859076-4868-2-git-send-email-dianders@chromium.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-reply-to: <1466158165-9380-8-git-send-email-peter.chen@nxp.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Peter Chen <peter.chen@nxp.com>, gregkh@linuxfoundation.org, stern@rowland.harvard.edu, ulf.hansson@linaro.org, broonie@kernel.org, sre@kernel.org, robh+dt@kernel.org
-Cc: mark.rutland@arm.com, devicetree@vger.kernel.org, mail@maciej.szmigiero.name, stephen.boyd@linaro.org, oscar@naiandei.net, arnd@arndb.de, pawel.moll@arm.com, linux-pm@vger.kernel.org, s.hauer@pengutronix.de, linux-usb@vger.kernel.org, linux-mmc@vger.kernel.org, troy.kisky@boundarydevices.com, javier@osg.samsung.com, p.zabel@pengutronix.de, festevam@gmail.com, linux-arm-kernel@lists.infradead.org
+Return-path: <linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+In-Reply-To: <1465859076-4868-2-git-send-email-dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-rockchip>,
+ <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-rockchip/>
+List-Post: <mailto:linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+List-Help: <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-rockchip>,
+ <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
+Sender: "Linux-rockchip" <linux-rockchip-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+Errors-To: linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+To: Douglas Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, Heiko Stuebner <heiko-4mtYJXux2i+zQB+pC5nmwQ@public.gmane.org>, robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org
+Cc: devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, xzy.xu-TNX95d0MmH7DzftRWevZcw@public.gmane.org, shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org, briannorris-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
 
-On 06/17/2016 12:09 PM, Peter Chen wrote:
-> The individual driver file name is better to contain module name.
+
+
+On Tuesday 14 June 2016 04:34 AM, Douglas Anderson wrote:
+> Previous PHY code waited a fixed amount of time for the DLL to lock at
+> power on time.  Unfortunately, the time for the DLL to lock is actually
+> a bit more dynamic and can be longer if the card clock is slower.
 > 
-> Signed-off-by: Peter Chen <peter.chen@nxp.com>
+> Instead of waiting a fixed 30 us, let's now dynamically wait until the
+> lock bit gets set.  We'll wait up to 10 ms which should be OK even if
+> the card clock is at the super slow 100 kHz.
+> 
+> On its own, this change makes the PHY power on code a little more
+> robust.  Before this change the PHY was relying on the eMMC code to make
+> sure the PHY was only powered on when the card clock was set to at least
+> 50 MHz before, though this reliance wasn't documented anywhere.
+> 
+> This change will be even more useful in future changes where we actually
+> need to be able to wait for a DLL lock at slower clock speeds.
+> 
+> Signed-off-by: Douglas Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
+
+Acked-by: Kishon Vijay Abraham I <kishon-l0cyMroinI0@public.gmane.org>
 > ---
->  .../power/pwrseq/{pwrseq-simple.txt => mmc-pwrseq-simple.txt}         | 0
->  drivers/power/pwrseq/Makefile                                         | 4 ++--
->  drivers/power/pwrseq/{pwrseq.c => core.c}                             | 0
->  drivers/power/pwrseq/{pwrseq_simple.c => pwrseq_mmc_simple.c}         | 0
->  4 files changed, 2 insertions(+), 2 deletions(-)
->  rename Documentation/devicetree/bindings/power/pwrseq/{pwrseq-simple.txt => mmc-pwrseq-simple.txt} (100%)
->  rename drivers/power/pwrseq/{pwrseq.c => core.c} (100%)
->  rename drivers/power/pwrseq/{pwrseq_simple.c => pwrseq_mmc_simple.c} (100%)
+> Changes in v2:
+> - Indicate that 5.1 ms is calculated (Shawn).
 > 
-> diff --git a/Documentation/devicetree/bindings/power/pwrseq/pwrseq-simple.txt b/Documentation/devicetree/bindings/power/pwrseq/mmc-pwrseq-simple.txt
-> similarity index 100%
-> rename from Documentation/devicetree/bindings/power/pwrseq/pwrseq-simple.txt
-> rename to Documentation/devicetree/bindings/power/pwrseq/mmc-pwrseq-simple.txt
-> diff --git a/drivers/power/pwrseq/Makefile b/drivers/power/pwrseq/Makefile
-> index 9e40e4b..d475e01 100644
-> --- a/drivers/power/pwrseq/Makefile
-> +++ b/drivers/power/pwrseq/Makefile
-> @@ -1,3 +1,3 @@
-> -obj-$(CONFIG_POWER_SEQ)		+= pwrseq.o
-> -obj-$(CONFIG_POWER_SEQ_SIMPLE)	+= pwrseq_simple.o
-> +obj-$(CONFIG_POWER_SEQ)		+= core.o
-> +obj-$(CONFIG_POWER_SEQ_SIMPLE)	+= pwrseq_mmc_simple.o
-
-Although the driver was developed for MMC but it is quite generic (or
-rather - mmc independent). The name of the driver is just
-"pwrseq_simple" so I think MMC prefix is not needed.
-
-Best regards,
-Krzysztof
+>  drivers/phy/phy-rockchip-emmc.c | 28 ++++++++++++++++++++--------
+>  1 file changed, 20 insertions(+), 8 deletions(-)
+> 
+> diff --git a/drivers/phy/phy-rockchip-emmc.c b/drivers/phy/phy-rockchip-emmc.c
+> index a69f53630e67..2d059c046978 100644
+> --- a/drivers/phy/phy-rockchip-emmc.c
+> +++ b/drivers/phy/phy-rockchip-emmc.c
+> @@ -85,6 +85,7 @@ static int rockchip_emmc_phy_power(struct rockchip_emmc_phy *rk_phy,
+>  {
+>  	unsigned int caldone;
+>  	unsigned int dllrdy;
+> +	unsigned long timeout;
+>  
+>  	/*
+>  	 * Keep phyctrl_pdb and phyctrl_endll low to allow
+> @@ -137,15 +138,26 @@ static int rockchip_emmc_phy_power(struct rockchip_emmc_phy *rk_phy,
+>  				   PHYCTRL_ENDLL_MASK,
+>  				   PHYCTRL_ENDLL_SHIFT));
+>  	/*
+> -	 * After enable analog DLL circuits, we need an extra 10.2us
+> -	 * for dll to be ready for work. But according to testing, we
+> -	 * find some chips need more than 25us.
+> +	 * After enabling analog DLL circuits docs say that we need 10.2 us if
+> +	 * our source clock is at 50 MHz and that lock time scales linearly
+> +	 * with clock speed.  If we are powering on the PHY and the card clock
+> +	 * is super slow (like 100 kHZ) this could take as long as 5.1 ms as
+> +	 * per the math: 10.2 us * (50000000 Hz / 100000 Hz) => 5.1 ms
+> +	 * Hopefully we won't be running at 100 kHz, but we should still make
+> +	 * sure we wait long enough.
+>  	 */
+> -	udelay(30);
+> -	regmap_read(rk_phy->reg_base,
+> -		    rk_phy->reg_offset + GRF_EMMCPHY_STATUS,
+> -		    &dllrdy);
+> -	dllrdy = (dllrdy >> PHYCTRL_DLLRDY_SHIFT) & PHYCTRL_DLLRDY_MASK;
+> +	timeout = jiffies + msecs_to_jiffies(10);
+> +	do {
+> +		udelay(1);
+> +
+> +		regmap_read(rk_phy->reg_base,
+> +			rk_phy->reg_offset + GRF_EMMCPHY_STATUS,
+> +			&dllrdy);
+> +		dllrdy = (dllrdy >> PHYCTRL_DLLRDY_SHIFT) & PHYCTRL_DLLRDY_MASK;
+> +		if (dllrdy == PHYCTRL_DLLRDY_DONE)
+> +			break;
+> +	} while (!time_after(jiffies, timeout));
+> +
+>  	if (dllrdy != PHYCTRL_DLLRDY_DONE) {
+>  		pr_err("rockchip_emmc_phy_power: dllrdy timeout.\n");
+>  		return -ETIMEDOUT;
+> 
