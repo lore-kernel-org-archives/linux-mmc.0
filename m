@@ -1,14 +1,15 @@
 From: Kishon Vijay Abraham I <kishon-l0cyMroinI0@public.gmane.org>
-Subject: Re: [PATCH v2 01/11] phy: rockchip-emmc: Increase lock time allowance
-Date: Mon, 20 Jun 2016 18:33:37 +0530
-Message-ID: <5767E9A9.5090308@ti.com>
+Subject: Re: [PATCH v2 09/11] phy: rockchip-emmc: Minor code cleanup in
+ rockchip_emmc_phy_power_on/off()
+Date: Mon, 20 Jun 2016 18:34:19 +0530
+Message-ID: <5767E9D3.7080407@ti.com>
 References: <1465859076-4868-1-git-send-email-dianders@chromium.org>
- <1465859076-4868-2-git-send-email-dianders@chromium.org>
+ <1465859076-4868-10-git-send-email-dianders@chromium.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-In-Reply-To: <1465859076-4868-2-git-send-email-dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
+In-Reply-To: <1465859076-4868-10-git-send-email-dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
 List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-rockchip>,
  <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
 List-Archive: <http://lists.infradead.org/pipermail/linux-rockchip/>
@@ -25,77 +26,56 @@ List-Id: linux-mmc@vger.kernel.org
 
 
 On Tuesday 14 June 2016 04:34 AM, Douglas Anderson wrote:
-> Previous PHY code waited a fixed amount of time for the DLL to lock at
-> power on time.  Unfortunately, the time for the DLL to lock is actually
-> a bit more dynamic and can be longer if the card clock is slower.
-> 
-> Instead of waiting a fixed 30 us, let's now dynamically wait until the
-> lock bit gets set.  We'll wait up to 10 ms which should be OK even if
-> the card clock is at the super slow 100 kHz.
-> 
-> On its own, this change makes the PHY power on code a little more
-> robust.  Before this change the PHY was relying on the eMMC code to make
-> sure the PHY was only powered on when the card clock was set to at least
-> 50 MHz before, though this reliance wasn't documented anywhere.
-> 
-> This change will be even more useful in future changes where we actually
-> need to be able to wait for a DLL lock at slower clock speeds.
+> There's no reason to store the return value of rockchip_emmc_phy_power()
+> in a variable nor to check it.  Just return it.
 > 
 > Signed-off-by: Douglas Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
 
 Acked-by: Kishon Vijay Abraham I <kishon-l0cyMroinI0@public.gmane.org>
 > ---
 > Changes in v2:
-> - Indicate that 5.1 ms is calculated (Shawn).
+> - Move code cleanup before set phyctrl_frqsel based on card clock (Shawn)
 > 
->  drivers/phy/phy-rockchip-emmc.c | 28 ++++++++++++++++++++--------
->  1 file changed, 20 insertions(+), 8 deletions(-)
+>  drivers/phy/phy-rockchip-emmc.c | 14 ++------------
+>  1 file changed, 2 insertions(+), 12 deletions(-)
 > 
 > diff --git a/drivers/phy/phy-rockchip-emmc.c b/drivers/phy/phy-rockchip-emmc.c
-> index a69f53630e67..2d059c046978 100644
+> index 2d059c046978..23fe50864526 100644
 > --- a/drivers/phy/phy-rockchip-emmc.c
 > +++ b/drivers/phy/phy-rockchip-emmc.c
-> @@ -85,6 +85,7 @@ static int rockchip_emmc_phy_power(struct rockchip_emmc_phy *rk_phy,
+> @@ -169,20 +169,14 @@ static int rockchip_emmc_phy_power(struct rockchip_emmc_phy *rk_phy,
+>  static int rockchip_emmc_phy_power_off(struct phy *phy)
 >  {
->  	unsigned int caldone;
->  	unsigned int dllrdy;
-> +	unsigned long timeout;
+>  	struct rockchip_emmc_phy *rk_phy = phy_get_drvdata(phy);
+> -	int ret = 0;
 >  
->  	/*
->  	 * Keep phyctrl_pdb and phyctrl_endll low to allow
-> @@ -137,15 +138,26 @@ static int rockchip_emmc_phy_power(struct rockchip_emmc_phy *rk_phy,
->  				   PHYCTRL_ENDLL_MASK,
->  				   PHYCTRL_ENDLL_SHIFT));
->  	/*
-> -	 * After enable analog DLL circuits, we need an extra 10.2us
-> -	 * for dll to be ready for work. But according to testing, we
-> -	 * find some chips need more than 25us.
-> +	 * After enabling analog DLL circuits docs say that we need 10.2 us if
-> +	 * our source clock is at 50 MHz and that lock time scales linearly
-> +	 * with clock speed.  If we are powering on the PHY and the card clock
-> +	 * is super slow (like 100 kHZ) this could take as long as 5.1 ms as
-> +	 * per the math: 10.2 us * (50000000 Hz / 100000 Hz) => 5.1 ms
-> +	 * Hopefully we won't be running at 100 kHz, but we should still make
-> +	 * sure we wait long enough.
->  	 */
-> -	udelay(30);
-> -	regmap_read(rk_phy->reg_base,
-> -		    rk_phy->reg_offset + GRF_EMMCPHY_STATUS,
-> -		    &dllrdy);
-> -	dllrdy = (dllrdy >> PHYCTRL_DLLRDY_SHIFT) & PHYCTRL_DLLRDY_MASK;
-> +	timeout = jiffies + msecs_to_jiffies(10);
-> +	do {
-> +		udelay(1);
-> +
-> +		regmap_read(rk_phy->reg_base,
-> +			rk_phy->reg_offset + GRF_EMMCPHY_STATUS,
-> +			&dllrdy);
-> +		dllrdy = (dllrdy >> PHYCTRL_DLLRDY_SHIFT) & PHYCTRL_DLLRDY_MASK;
-> +		if (dllrdy == PHYCTRL_DLLRDY_DONE)
-> +			break;
-> +	} while (!time_after(jiffies, timeout));
-> +
->  	if (dllrdy != PHYCTRL_DLLRDY_DONE) {
->  		pr_err("rockchip_emmc_phy_power: dllrdy timeout.\n");
->  		return -ETIMEDOUT;
+>  	/* Power down emmc phy analog blocks */
+> -	ret = rockchip_emmc_phy_power(rk_phy, PHYCTRL_PDB_PWR_OFF);
+> -	if (ret)
+> -		return ret;
+> -
+> -	return 0;
+> +	return rockchip_emmc_phy_power(rk_phy, PHYCTRL_PDB_PWR_OFF);
+>  }
+>  
+>  static int rockchip_emmc_phy_power_on(struct phy *phy)
+>  {
+>  	struct rockchip_emmc_phy *rk_phy = phy_get_drvdata(phy);
+> -	int ret = 0;
+>  
+>  	/* DLL operation: 200 MHz */
+>  	regmap_write(rk_phy->reg_base,
+> @@ -213,11 +207,7 @@ static int rockchip_emmc_phy_power_on(struct phy *phy)
+>  				   PHYCTRL_OTAPDLYSEL_SHIFT));
+>  
+>  	/* Power up emmc phy analog blocks */
+> -	ret = rockchip_emmc_phy_power(rk_phy, PHYCTRL_PDB_PWR_ON);
+> -	if (ret)
+> -		return ret;
+> -
+> -	return 0;
+> +	return rockchip_emmc_phy_power(rk_phy, PHYCTRL_PDB_PWR_ON);
+>  }
+>  
+>  static const struct phy_ops ops = {
 > 
