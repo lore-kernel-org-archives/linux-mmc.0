@@ -1,135 +1,99 @@
-From: Shawn Lin <shawn.lin@rock-chips.com>
-Subject: Re: [PATCH 2/3] mmc: dw_mmc: add the card write threshold for HS400
- mode
-Date: Mon, 20 Jun 2016 16:21:08 +0800
-Message-ID: <1bedbc35-dd60-b554-356c-9ef42edb64a3@rock-chips.com>
-References: <1466396749-29456-1-git-send-email-jh80.chung@samsung.com>
+From: Seung-Woo Kim <sw0312.kim@samsung.com>
+Subject: mmc: dw_mmc: warning with CONFIG_DMA_API_DEBUG
+Date: Mon, 20 Jun 2016 17:34:48 +0900
+Message-ID: <001501d1cace$9b8f2b60$d2ad8220$@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=gbk; format=flowed
+Content-Type: text/plain; charset=us-ascii
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from lucky1.263xmail.com ([211.157.147.132]:49658 "EHLO
-	lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752103AbcFTIeF (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 20 Jun 2016 04:34:05 -0400
-In-Reply-To: <1466396749-29456-1-git-send-email-jh80.chung@samsung.com>
+Received: from mailout3.samsung.com ([203.254.224.33]:59875 "EHLO
+	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753104AbcFTIeu (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 20 Jun 2016 04:34:50 -0400
+Content-language: ko
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>, linux-mmc@vger.kernel.org
-Cc: shawn.lin@rock-chips.com, ulf.hansson@linaro.org
+To: jh80.chung@samsung.com, ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, sw0312.kim@samsung.com
 
-On 2016/6/20 12:25, Jaehoon Chung wrote:
-> Since v2.80a, dwmmc controller introduced the card write threshold for
-> HS400 mode. So CardThrCtl can be supported during write operation, not
-> only read operation.
-> (Note: Only use the write threshold when mode is HS400.)
->
-> To use more compatible, removed "_rd_" from function name.
->
-> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
-> ---
->  drivers/mmc/host/dw_mmc.c | 31 +++++++++++++++++++++----------
->  drivers/mmc/host/dw_mmc.h |  5 ++++-
->  2 files changed, 25 insertions(+), 11 deletions(-)
->
-> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-> index 5cf143b..6efda0b 100644
-> --- a/drivers/mmc/host/dw_mmc.c
-> +++ b/drivers/mmc/host/dw_mmc.c
-> @@ -899,13 +899,12 @@ done:
->  	mci_writel(host, FIFOTH, fifoth_val);
->  }
->
-> -static void dw_mci_ctrl_rd_thld(struct dw_mci *host, struct mmc_data *data)
-> +static void dw_mci_ctrl_thld(struct dw_mci *host, struct mmc_data *data)
->  {
->  	unsigned int blksz = data->blksz;
->  	u32 blksz_depth, fifo_depth;
->  	u16 thld_size;
-> -
-> -	WARN_ON(!(data->flags & MMC_DATA_READ));
+Hi folks,
 
-before v2.80a, we still only allow it for READ, so
-shouldn't we need to check both the host->verid and
-data->flags rather than drop it directly?
+During booting test on my Exynos5422 based Odroid-XU3, kernel compiled
+with CONFIG_DMA_API_DEBUG reported following warning:
 
-> +	u8 enable;
->
->  	/*
->  	 * CDTHRCTL doesn't exist prior to 240A (in fact that register offset is
-> @@ -914,8 +913,20 @@ static void dw_mci_ctrl_rd_thld(struct dw_mci *host, struct mmc_data *data)
->  	if (host->verid < DW_MMC_240A)
->  		return;
->
-> +	/*
-> +	 * Card write Threshold is introduced since 2.80a
-> +	 * It's used when HS400 mode is enabled.
-> +	 */
-> +	if (data->flags & MMC_DATA_WRITE &&
-> +		!(host->timing != MMC_TIMING_MMC_HS400))
-> +		return;
-> +
-> +	if (data->flags & MMC_DATA_WRITE)
-> +		enable = SDMMC_CARD_WR_THR_EN;
-> +	else
-> +		enable = SDMMC_CARD_RD_THR_EN;
-> +
->  	if (host->timing != MMC_TIMING_MMC_HS200 &&
-> -	    host->timing != MMC_TIMING_MMC_HS400 &&
->  	    host->timing != MMC_TIMING_UHS_SDR104)
->  		goto disable;
->
-> @@ -931,11 +942,11 @@ static void dw_mci_ctrl_rd_thld(struct dw_mci *host, struct mmc_data *data)
->  	 * Currently just choose blksz.
->  	 */
->  	thld_size = blksz;
-> -	mci_writel(host, CDTHRCTL, SDMMC_SET_RD_THLD(thld_size, 1));
-> +	mci_writel(host, CDTHRCTL, SDMMC_SET_THLD(thld_size, enable));
->  	return;
->
->  disable:
-> -	mci_writel(host, CDTHRCTL, SDMMC_SET_RD_THLD(0, 0));
-> +	mci_writel(host, CDTHRCTL, 0);
->  }
->
->  static int dw_mci_submit_data_dma(struct dw_mci *host, struct mmc_data *data)
-> @@ -1006,12 +1017,12 @@ static void dw_mci_submit_data(struct dw_mci *host, struct mmc_data *data)
->  	host->sg = NULL;
->  	host->data = data;
->
-> -	if (data->flags & MMC_DATA_READ) {
-> +	if (data->flags & MMC_DATA_READ)
->  		host->dir_status = DW_MCI_RECV_STATUS;
-> -		dw_mci_ctrl_rd_thld(host, data);
-> -	} else {
-> +	else
->  		host->dir_status = DW_MCI_SEND_STATUS;
-> -	}
-> +
-> +	dw_mci_ctrl_thld(host, data);
->
->  	if (dw_mci_submit_data_dma(host, data)) {
->  		if (host->data->flags & MMC_DATA_READ)
-> diff --git a/drivers/mmc/host/dw_mmc.h b/drivers/mmc/host/dw_mmc.h
-> index 1e8d838..2bf7464 100644
-> --- a/drivers/mmc/host/dw_mmc.h
-> +++ b/drivers/mmc/host/dw_mmc.h
-> @@ -175,7 +175,10 @@
->  /* Version ID register define */
->  #define SDMMC_GET_VERID(x)		((x) & 0xFFFF)
->  /* Card read threshold */
-> -#define SDMMC_SET_RD_THLD(v, x)		(((v) & 0xFFF) << 16 | (x))
-> +#define SDMMC_SET_THLD(v, x)		(((v) & 0xFFF) << 16 | (x))
-> +#define SDMMC_CARD_WR_THR_EN		BIT(2)
-> +#define SDMMC_CARD_RD_THR_EN		BIT(0)
-> +/* UHS-1 register defines */
->  #define SDMMC_UHS_18V			BIT(0)
->  /* All ctrl reset bits */
->  #define SDMMC_CTRL_ALL_RESET_FLAGS \
->
+------------[ cut here ]------------
+WARNING: CPU: 0 PID: 0 at lib/dma-debug.c:1096 check_unmap+0x7bc/0xb38
+dwmmc_exynos 12200000.mmc: DMA-API: device driver tries to free DMA memory it has not allocated [device address=0x000000006d9d2200]
+[size=128 bytes]
+Modules linked in:
+CPU: 0 PID: 0 Comm: swapper/0 Not tainted 4.7.0-rc4 #26
+Hardware name: SAMSUNG EXYNOS (Flattened Device Tree)
+[<c0112b4c>] (unwind_backtrace) from [<c010d888>] (show_stack+0x20/0x24)
+[<c010d888>] (show_stack) from [<c03fab0c>] (dump_stack+0x80/0x94)
+[<c03fab0c>] (dump_stack) from [<c0123548>] (__warn+0xf8/0x110)
+[<c0123548>] (__warn) from [<c01235a8>] (warn_slowpath_fmt+0x48/0x50)
+[<c01235a8>] (warn_slowpath_fmt) from [<c042ac90>] (check_unmap+0x7bc/0xb38)
+[<c042ac90>] (check_unmap) from [<c042b25c>] (debug_dma_unmap_sg+0x118/0x148)
+[<c042b25c>] (debug_dma_unmap_sg) from [<c077512c>] (dw_mci_dma_cleanup+0x7c/0xb8)
+[<c077512c>] (dw_mci_dma_cleanup) from [<c0773f24>] (dw_mci_stop_dma+0x40/0x50)
+[<c0773f24>] (dw_mci_stop_dma) from [<c0777d04>] (dw_mci_tasklet_func+0x130/0x3b4)
+[<c0777d04>] (dw_mci_tasklet_func) from [<c0129760>] (tasklet_action+0xb4/0x150)
+[<c0129760>] (tasklet_action) from [<c0101674>] (__do_softirq+0xe4/0x3cc)
+[<c0101674>] (__do_softirq) from [<c0129030>] (irq_exit+0xd0/0x10c)
+[<c0129030>] (irq_exit) from [<c01778a0>] (__handle_domain_irq+0x90/0xfc)
+[<c01778a0>] (__handle_domain_irq) from [<c0101548>] (gic_handle_irq+0x64/0xa8)
+[<c0101548>] (gic_handle_irq) from [<c010e3d4>] (__irq_svc+0x54/0x90)
+Exception stack(0xc1101ef8 to 0xc1101f40)
+1ee0:                                                       00000001 00000000
+1f00: 00000000 c011b600 c1100000 c110753c 00000000 c11c3984 c11074d4 c1107548
+1f20: 00000000 c1101f54 c1101f58 c1101f48 c010a1fc c010a200 60000013 ffffffff
+[<c010e3d4>] (__irq_svc) from [<c010a200>] (arch_cpu_idle+0x48/0x4c)
+[<c010a200>] (arch_cpu_idle) from [<c01669d8>] (default_idle_call+0x30/0x3c)
+[<c01669d8>] (default_idle_call) from [<c0166d3c>] (cpu_startup_entry+0x358/0x3b4)
+[<c0166d3c>] (cpu_startup_entry) from [<c0aa6ab8>] (rest_init+0x94/0x98)
+[<c0aa6ab8>] (rest_init) from [<c1000d58>] (start_kernel+0x3a4/0x3b0)
+[<c1000d58>] (start_kernel) from [<4000807c>] (0x4000807c)
+---[ end trace 256f83eed365daf0 ]---
 
+The warning occurs because after complete callback function,
+dw_mci_dmac_complete_dma() is called, then dw_mci_stop_dma() is called
+again. So it causes dma_unmap_sg() is called twice for same sg. It
+occurs during clock setting at booting time.
 
--- 
-Best Regards
-Shawn Lin
+Simply, clearing host->using_dma flag on dw_mci_dmac_complete_dma() and
+dw_mci_stop_dma() like following fixes the issue, but I am not sure
+this approach is proper.
+---
+diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+index 2cc6123..a71c94b 100644
+--- a/drivers/mmc/host/dw_mmc.c
++++ b/drivers/mmc/host/dw_mmc.c
+@@ -388,6 +388,7 @@ static void dw_mci_stop_dma(struct dw_mci *host)
+ 	if (host->using_dma) {
+ 		host->dma_ops->stop(host);
+ 		host->dma_ops->cleanup(host);
++		host->using_dma = 0;
+ 	}
+ 
+ 	/* Data transfer was stopped by the interrupt handler */
+@@ -455,6 +456,7 @@ static void dw_mci_dmac_complete_dma(void *arg)
+ 				    DMA_FROM_DEVICE);
+ 
+ 	host->dma_ops->cleanup(host);
++	host->using_dma = 0;
+ 
+ 	/*
+ 	 * If the card was removed, data will be NULL. No point in trying to
+@@ -943,8 +945,6 @@ static int dw_mci_submit_data_dma(struct dw_mci *host, struct mmc_data *data)
+ 	int sg_len;
+ 	u32 temp;
+ 
+-	host->using_dma = 0;
+-
+ 	/* If we don't have a channel, we can't do DMA */
+ 	if (!host->use_dma)
+ 		return -ENODEV;
+---
+
+Best Regards,
+- Seung-Woo Kim
 
