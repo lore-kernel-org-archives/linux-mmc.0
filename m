@@ -1,60 +1,49 @@
-From: Doug Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
-Subject: Re: [PATCH v3 01/15] phy: rockchip-emmc: give DLL some extra time to
- be ready
-Date: Mon, 20 Jun 2016 12:38:37 -0700
-Message-ID: <CAD=FV=XLExFZEoDbj+CMvkWkf_Tp2MLCo20X8RWQQPFzPxAXWg@mail.gmail.com>
-References: <1466445414-11974-1-git-send-email-dianders@chromium.org>
- <1466445414-11974-2-git-send-email-dianders@chromium.org>
- <CABXOdTeQhOSUeX+-as_6S5H1mnVnyBsEDU9ZsiC97Yb+qWiFew@mail.gmail.com>
- <CAD=FV=UMFEDzKT0VkVYxmzxKkFVKREhhXhm+McmdQDriHKhPKg@mail.gmail.com>
- <CABXOdTccLMbspfprfLP9CTkD9YbfJsPKOXV7RsVKfU94zPLhNg@mail.gmail.com>
+From: "Andrew F. Davis" <afd@ti.com>
+Subject: [PATCH] leds: Add no-op gpio_led_register_device when LED subsystem
+ is disabled
+Date: Mon, 20 Jun 2016 17:13:40 -0500
+Message-ID: <57686A94.2010704@ti.com>
+References: <20160613200211.14790-1-afd@ti.com>
+ <20160613200211.14790-13-afd@ti.com> <5760FA52.7010806@samsung.com>
+ <57647DBD.2010406@ti.com> <57679E38.3080901@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-In-Reply-To: <CABXOdTccLMbspfprfLP9CTkD9YbfJsPKOXV7RsVKfU94zPLhNg-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-rockchip>,
- <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-rockchip/>
-List-Post: <mailto:linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-List-Help: <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-rockchip>,
- <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
-Sender: "Linux-rockchip" <linux-rockchip-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-Errors-To: linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
-To: Guenter Roeck <groeck-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>
-Cc: "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Ziyuan Xu <xzy.xu-TNX95d0MmH7DzftRWevZcw@public.gmane.org>, Heiko Stuebner <heiko-4mtYJXux2i+zQB+pC5nmwQ@public.gmane.org>, Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>, Brian Norris <briannorris-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "open list:ARM/Rockchip SoC..." <linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Guenter Roeck <groeck-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, Kishon Vijay Abraham I <kishon-l0cyMroinI0@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org>
+In-Reply-To: <57679E38.3080901@samsung.com>
+List-Unsubscribe: <https://lists.ozlabs.org/options/linuxppc-dev>,
+ <mailto:linuxppc-dev-request@lists.ozlabs.org?subject=unsubscribe>
+List-Archive: <http://lists.ozlabs.org/pipermail/linuxppc-dev/>
+List-Post: <mailto:linuxppc-dev@lists.ozlabs.org>
+List-Help: <mailto:linuxppc-dev-request@lists.ozlabs.org?subject=help>
+List-Subscribe: <https://lists.ozlabs.org/listinfo/linuxppc-dev>,
+ <mailto:linuxppc-dev-request@lists.ozlabs.org?subject=subscribe>
+Errors-To: linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org
+Sender: "Linuxppc-dev"
+ <linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org>
+To: Jacek Anaszewski <j.anaszewski@samsung.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Wolfram Sang <wsa@the-dreams.de>, Linus Walleij <linus.walleij@linaro.org>, Sebastian Reichel <sre@kernel.org>, linux-i2c@vger.kernel.org, Ingo Molnar <mingo@kernel.org>, Aloisio Almeida Jr <aloisio.almeida@openbossa.org>, lguest@lists.ozlabs.org, Samuel Ortiz <sameo@linux.intel.com>, Russell King <linux@armlinux.org.uk>, linux-leds@vger.kernel.org, linux-mmc@vger.kernel.org, linux-media@vger.kernel.org, linux-pwm@vger.kernel.org, Mauro Carvalho Chehab <mchehab@osg.samsung.com>, Rusty Russell <rusty@rustcorp.com.au>, linux-gpio@vger.kernel.org, linux-wireless@vger.kernel.org, linux-kernel@vger.kernel.org, Lauro Ramos Venancio <lauro.venancio@openbossa.org>, Miguel Ojeda Sandonis <miguel.ojeda.sandonis@gmail.com>, Richard Purdie <rpurdie@rpsys.net>, linuxppc-dev@lists.ozlabs.org
 List-Id: linux-mmc@vger.kernel.org
 
-Hi,
-
-On Mon, Jun 20, 2016 at 12:36 PM, Guenter Roeck <groeck-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org> wrote:
-> On Mon, Jun 20, 2016 at 12:30 PM, Doug Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org> wrote:
->> Hi,
->>
->> On Mon, Jun 20, 2016 at 12:23 PM, Guenter Roeck <groeck-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org> wrote:
->>> On Mon, Jun 20, 2016 at 10:56 AM, Douglas Anderson
->>> <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org> wrote:
->>>> From: Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
->>>>
->>>> According to the databook, 10.2us is the max time for dll to be ready to
->>>> work. However in testing, some chips need 20us for dll to be ready. This
->>>
->>> Nitpick, but description (20uS) and code (more than 25 uS) don't match.
->>
->> Good catch.  If I spin the series I'll fix this, otherwise I'll assume
->> that the person applying this (Ulf?) can fix the description at their
->> discretion.
->>
->
-> Not that it matters much, as the code is replaced in a later patch
-> anyway. It might make more sense to merge the two patches into one.
-
-Yes.  At the time I wrote it it was unclear what the status of the
-original patch was (whether it would be applied sooner vs. later).  At
-this point it seemed expedient to continue to keep the patches
-separate since they had been reviewed and tested separately.  Earlier
-I made the offer to combine and re-spin and I'm happy to do that if
-requested.
-
--Doug
+U29tZSBzeXN0ZW1zIHVzZSAnZ3Bpb19sZWRfcmVnaXN0ZXJfZGV2aWNlJyB0byBtYWtlIGFuIGlu
+LW1lbW9yeSBjb3B5IG9mCnRoZWlyIExFRCBkZXZpY2UgdGFibGUgc28gdGhlIG9yaWdpbmFsIGNh
+biBiZSByZW1vdmVkIGFzIC5pbml0LnJvZGF0YS4KV2hlbiB0aGUgTEVEIHN1YnN5c3RlbSBpcyBu
+b3QgZW5hYmxlZCBzb3VyY2UgaW4gdGhlIGxlZCBkaXJlY3RvcnkgaXMgbm90CmJ1aWx0IGFuZCBz
+byB0aGlzIGZ1bmN0aW9uIG1heSBiZSB1bmRlZmluZWQuIEZpeCB0aGlzIGhlcmUuCgpTaWduZWQt
+b2ZmLWJ5OiBBbmRyZXcgRi4gRGF2aXMgPGFmZEB0aS5jb20+Ci0tLQogaW5jbHVkZS9saW51eC9s
+ZWRzLmggfCA4ICsrKysrKysrCiAxIGZpbGUgY2hhbmdlZCwgOCBpbnNlcnRpb25zKCspCgpkaWZm
+IC0tZ2l0IGEvaW5jbHVkZS9saW51eC9sZWRzLmggYi9pbmNsdWRlL2xpbnV4L2xlZHMuaAppbmRl
+eCBkMmIxMzA2Li5hNGEzZGE2IDEwMDY0NAotLS0gYS9pbmNsdWRlL2xpbnV4L2xlZHMuaAorKysg
+Yi9pbmNsdWRlL2xpbnV4L2xlZHMuaApAQCAtMzg2LDggKzM4NiwxNiBAQCBzdHJ1Y3QgZ3Bpb19s
+ZWRfcGxhdGZvcm1fZGF0YSB7CiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICB1bnNpZ25lZCBsb25nICpkZWxheV9vZmYpOwogfTsKCisjaWZkZWYgQ09ORklHX05FV19MRURT
+CiBzdHJ1Y3QgcGxhdGZvcm1fZGV2aWNlICpncGlvX2xlZF9yZWdpc3Rlcl9kZXZpY2UoCiAgICAg
+ICAgICAgICAgICBpbnQgaWQsIGNvbnN0IHN0cnVjdCBncGlvX2xlZF9wbGF0Zm9ybV9kYXRhICpw
+ZGF0YSk7CisjZWxzZQorc3RhdGljIGlubGluZSBzdHJ1Y3QgcGxhdGZvcm1fZGV2aWNlICpncGlv
+X2xlZF9yZWdpc3Rlcl9kZXZpY2UoCisgICAgICAgICAgICAgICBpbnQgaWQsIGNvbnN0IHN0cnVj
+dCBncGlvX2xlZF9wbGF0Zm9ybV9kYXRhICpwZGF0YSkKK3sKKyAgICAgICByZXR1cm4gMDsKK30K
+KyNlbmRpZgoKIGVudW0gY3B1X2xlZF9ldmVudCB7CiAgICAgICAgQ1BVX0xFRF9JRExFX1NUQVJU
+LCAgICAgLyogQ1BVIGVudGVycyBpZGxlICovCi0tIAoyLjkuMApfX19fX19fX19fX19fX19fX19f
+X19fX19fX19fX19fX19fX19fX19fX19fX19fXwpMaW51eHBwYy1kZXYgbWFpbGluZyBsaXN0Ckxp
+bnV4cHBjLWRldkBsaXN0cy5vemxhYnMub3JnCmh0dHBzOi8vbGlzdHMub3psYWJzLm9yZy9saXN0
+aW5mby9saW51eHBwYy1kZXY=
