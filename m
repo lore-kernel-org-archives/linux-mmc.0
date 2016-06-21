@@ -1,240 +1,103 @@
 From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: mmc: dw_mmc: warning with CONFIG_DMA_API_DEBUG
-Date: Tue, 21 Jun 2016 14:32:56 +0900
-Message-ID: <5768D188.3080508@samsung.com>
-References: <001501d1cace$9b8f2b60$d2ad8220$@samsung.com>
- <CGME20160621015228epcas1p450d93158cd5028d3c8ab4f7e352ccaff@epcas1p4.samsung.com>
- <a50cabe9-2e41-92be-b886-103e2bb4edba@rock-chips.com>
- <000801d1cb64$070dfb60$1529f220$@samsung.com>
- <c4589cb4-b3b6-6f97-d994-cb311591e5b2@rock-chips.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 7bit
+Subject: [PATCH v2 3/3] mmc: dw_mmc: prevent to set the wrong value
+Date: Tue, 21 Jun 2016 14:35:39 +0900
+Message-ID: <1466487339-13211-3-git-send-email-jh80.chung@samsung.com>
+References: <1466487339-13211-1-git-send-email-jh80.chung@samsung.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout1.samsung.com ([203.254.224.24]:38068 "EHLO
-	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752465AbcFUFdA (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 21 Jun 2016 01:33:00 -0400
-In-reply-to: <c4589cb4-b3b6-6f97-d994-cb311591e5b2@rock-chips.com>
+Received: from mailout2.samsung.com ([203.254.224.25]:44134 "EHLO
+	mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752385AbcFUFqq (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 21 Jun 2016 01:46:46 -0400
+Received: from epcpsbgr2.samsung.com
+ (u142.gpu120.samsung.co.kr [203.254.230.142])
+ by mailout2.samsung.com (Oracle Communications Messaging Server 7.0.5.31.0
+ 64bit (built May  5 2014))
+ with ESMTP id <0O9301SKTWVKTUB0@mailout2.samsung.com> for
+ linux-mmc@vger.kernel.org; Tue, 21 Jun 2016 14:35:44 +0900 (KST)
+In-reply-to: <1466487339-13211-1-git-send-email-jh80.chung@samsung.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Shawn Lin <shawn.lin@rock-chips.com>, Seung-Woo Kim <sw0312.kim@samsung.com>, ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: ulf.hansson@linaro.org, shawn.lin@rock-chips.com, Jaehoon Chung <jh80.chung@samsung.com>
 
-Hi guys,
+If there ins no vqmmc, voltage should not be changed.
+Then it nees to maintain the previous status for USH_REG register.
+To use the standard spec, it should be returned error when voltage
+can't switch.
 
-On 06/21/2016 11:31 AM, Shawn Lin wrote:
-> On 2016/6/21 10:24, Seung-Woo Kim wrote:
->> Hello Shawn,
->>
->>> -----Original Message-----
->>> From: Shawn Lin [mailto:shawn.lin@rock-chips.com]
->>> Sent: Tuesday, June 21, 2016 10:52 AM
->>> To: Seung-Woo Kim; jh80.chung@samsung.com; ulf.hansson@linaro.org; linux-mmc@vger.kernel.org; linux-
->>> kernel@vger.kernel.org
->>> Cc: shawn.lin@rock-chips.com
->>> Subject: Re: mmc: dw_mmc: warning with CONFIG_DMA_API_DEBUG
->>>
->>> On 2016/6/20 16:34, Seung-Woo Kim wrote:
->>>> Hi folks,
->>>>
->>>> During booting test on my Exynos5422 based Odroid-XU3, kernel compiled
->>>> with CONFIG_DMA_API_DEBUG reported following warning:
->>>>
->>>> ------------[ cut here ]------------
->>>> WARNING: CPU: 0 PID: 0 at lib/dma-debug.c:1096 check_unmap+0x7bc/0xb38
->>>> dwmmc_exynos 12200000.mmc: DMA-API: device driver tries to free DMA memory it has not allocated [device
->>> address=0x000000006d9d2200]
->>>
->>> Thanks for this report and fix.
->>>
->>> DTO(the same as IDMAC-RI/TI) interrupts may or may not come together
->>> with DATA_ERR. If DATA_ERR occur without geting DTO, we should issue
->>> CMD12 manually to generate DTO. It's a ugly deisgn for dwmmc but from
->>> the vendor's ask.
->>>
->>> So you should never think we complete the xfer without
->>> checking DATA_ERR. This way you got the warning.
+Note:
+Dwmmc controller will not make any exception case.(like exynos.)
+If card isn't working well after appling this patch, it needs to check
+the regulator side.
 
-Well, EVENT_DATA_ERR is already checked in tasklet_func..and cleared that flags.
+Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+---
+Changelog V2:
+	-Fix the typo
 
->>>
->>> So could you try this one:
->>
->> With your patch, there is no more the DMA API waring in my environment.
-> 
-> Nice to hear that.  Thanks for testing, Seung-Woo.
+ drivers/mmc/host/dw_mmc.c | 40 ++++++++++++++++++++++------------------
+ 1 file changed, 22 insertions(+), 18 deletions(-)
 
-Really? It's not solution..When send tuning command, it should be returned CRC error.
-Then it called the dw_mci_stop_dma() and also dma_ops->complete().
-
-When i applied you suggestion, also produced.. :)
-
-[    2.469916] [<c010d6f0>] (unwind_backtrace) from [<c010a478>] (show_stack+0x10/0x14)
-[    2.469934] [<c010a478>] (show_stack) from [<c031b324>] (dump_stack+0x74/0x94)
-[    2.469949] [<c031b324>] (dump_stack) from [<c011b5ac>] (__warn+0xd4/0x100)
-[    2.469961] [<c011b5ac>] (__warn) from [<c011b678>] (warn_slowpath_fmt+0x38/0x48)
-[    2.469975] [<c011b678>] (warn_slowpath_fmt) from [<c033ee20>] (check_unmap+0x828/0x8a8)
-[    2.469991] [<c033ee20>] (check_unmap) from [<c033f7c0>] (debug_dma_unmap_sg+0x5c/0x13c)
-[    2.470012] [<c033f7c0>] (debug_dma_unmap_sg) from [<c051e6a4>] (dw_mci_dma_cleanup+0x68/0xa4)
-[    2.470029] [<c051e6a4>] (dw_mci_dma_cleanup) from [<c0553bf4>] (dw_mci_stop_dma+0x30/0x40)
-[    2.470045] [<c0553bf4>] (dw_mci_stop_dma) from [<c0521b30>] (dw_mci_tasklet_func+0x340/0x3b4)
-[    2.470063] [<c0521b30>] (dw_mci_tasklet_func) from [<c011fcb0>] (tasklet_action+0x84/0x12c)
-[    2.470076] [<c011fcb0>] (tasklet_action) from [<c011f35c>] (__do_softirq+0xec/0x244)
-[    2.470089] [<c011f35c>] (__do_softirq) from [<c011f750>] (irq_exit+0xb4/0xf8)
-[    2.470109] [<c011f750>] (irq_exit) from [<c015d004>] (__handle_domain_irq+0x70/0xe4)
-[    2.470123] [<c015d004>] (__handle_domain_irq) from [<c0101470>] (gic_handle_irq+0x50/0x9c)
-[    2.470135] [<c0101470>] (gic_handle_irq) from [<c010af14>] (__irq_svc+0x54/0x90)
-[    2.470141] Exception stack(0xee3d3c58 to 0xee3d3ca0)
-[    2.470148] 3c40:                                                       c0b1ef0c 0000000a
-[    2.470159] 3c60: 00000001 0000005c 0000016d 00000000 c0b4f7a4 00000006 00000000 0000005c
-[    2.470170] 3c80: 00000006 c0b671e8 60000013 ee3d3ca8 c0398e08 c015b830 60000013 ffffffff
-[    2.470183] [<c010af14>] (__irq_svc) from [<c015b830>] (console_unlock+0x560/0x628)
-[    2.470196] [<c015b830>] (console_unlock) from [<c015c1b0>] (vprintk_emit+0x1fc/0x508)
-[    2.470211] [<c015c1b0>] (vprintk_emit) from [<c03ed21c>] (dev_vprintk_emit+0xf8/0x198)
-[    2.470224] [<c03ed21c>] (dev_vprintk_emit) from [<c03ed2d8>] (dev_printk_emit+0x1c/0x2c)
-[    2.470235] [<c03ed2d8>] (dev_printk_emit) from [<c03ed334>] (__dev_printk+0x4c/0x70)
-[    2.470246] [<c03ed334>] (__dev_printk) from [<c03ed390>] (_dev_info+0x38/0x48)
-[    2.470258] [<c03ed390>] (_dev_info) from [<c045a7a4>] (usb_new_device+0xe8/0x3d0)
-[    2.470270] [<c045a7a4>] (usb_new_device) from [<c045bc20>] (hub_event+0x760/0xff4)
-[    2.470289] [<c045bc20>] (hub_event) from [<c012ff68>] (process_one_work+0x120/0x328)
-[    2.470304] [<c012ff68>] (process_one_work) from [<c01301d4>] (worker_thread+0x2c/0x4ac)
-[    2.470321] [<c01301d4>] (worker_thread) from [<c01353a4>] (kthread+0xd8/0xf4)
-[    2.470335] [<c01353a4>] (kthread) from [<c0107978
-
-I'm checking this..
-
-Best Regards,
-Jaehoon Chung
-
-> 
-> Hi Jaehoon,
-> 
-> How about this?
-> 
->>
->> Best Regards,
->> - Seung-Woo Kim
->>
->>>
->>> --- a/drivers/mmc/host/dw_mmc.c
->>> +++ b/drivers/mmc/host/dw_mmc.c
->>> @@ -2474,7 +2474,8 @@ static irqreturn_t dw_mci_interrupt(int irq, void
->>> *dev_id)
->>>                          mci_writel(host, IDSTS64, SDMMC_IDMAC_INT_TI |
->>>
->>> SDMMC_IDMAC_INT_RI);
->>>                          mci_writel(host, IDSTS64, SDMMC_IDMAC_INT_NI);
->>> -                       host->dma_ops->complete((void *)host);
->>> +                       if (!test_bit(EVENT_DATA_ERROR,
->>> &host->pending_events))
->>> +                               host->dma_ops->complete((void *)host);
->>>                  }
->>>          } else {
->>>                  pending = mci_readl(host, IDSTS);
->>> @@ -2482,7 +2483,8 @@ static irqreturn_t dw_mci_interrupt(int irq, void
->>> *dev_id)
->>>                          mci_writel(host, IDSTS, SDMMC_IDMAC_INT_TI |
->>>
->>> SDMMC_IDMAC_INT_RI);
->>>                          mci_writel(host, IDSTS, SDMMC_IDMAC_INT_NI);
->>> -                       host->dma_ops->complete((void *)host);
->>> +                       if (!test_bit(EVENT_DATA_ERROR,
->>> &host->pending_events))
->>> +                               host->dma_ops->complete((void *)host);
->>>                  }
->>>          }
->>>
->>>
->>>> [size=128 bytes]
->>>> Modules linked in:
->>>> CPU: 0 PID: 0 Comm: swapper/0 Not tainted 4.7.0-rc4 #26
->>>> Hardware name: SAMSUNG EXYNOS (Flattened Device Tree)
->>>> [<c0112b4c>] (unwind_backtrace) from [<c010d888>] (show_stack+0x20/0x24)
->>>> [<c010d888>] (show_stack) from [<c03fab0c>] (dump_stack+0x80/0x94)
->>>> [<c03fab0c>] (dump_stack) from [<c0123548>] (__warn+0xf8/0x110)
->>>> [<c0123548>] (__warn) from [<c01235a8>] (warn_slowpath_fmt+0x48/0x50)
->>>> [<c01235a8>] (warn_slowpath_fmt) from [<c042ac90>] (check_unmap+0x7bc/0xb38)
->>>> [<c042ac90>] (check_unmap) from [<c042b25c>] (debug_dma_unmap_sg+0x118/0x148)
->>>> [<c042b25c>] (debug_dma_unmap_sg) from [<c077512c>] (dw_mci_dma_cleanup+0x7c/0xb8)
->>>> [<c077512c>] (dw_mci_dma_cleanup) from [<c0773f24>] (dw_mci_stop_dma+0x40/0x50)
->>>> [<c0773f24>] (dw_mci_stop_dma) from [<c0777d04>] (dw_mci_tasklet_func+0x130/0x3b4)
->>>> [<c0777d04>] (dw_mci_tasklet_func) from [<c0129760>] (tasklet_action+0xb4/0x150)
->>>> [<c0129760>] (tasklet_action) from [<c0101674>] (__do_softirq+0xe4/0x3cc)
->>>> [<c0101674>] (__do_softirq) from [<c0129030>] (irq_exit+0xd0/0x10c)
->>>> [<c0129030>] (irq_exit) from [<c01778a0>] (__handle_domain_irq+0x90/0xfc)
->>>> [<c01778a0>] (__handle_domain_irq) from [<c0101548>] (gic_handle_irq+0x64/0xa8)
->>>> [<c0101548>] (gic_handle_irq) from [<c010e3d4>] (__irq_svc+0x54/0x90)
->>>> Exception stack(0xc1101ef8 to 0xc1101f40)
->>>> 1ee0:                                                       00000001 00000000
->>>> 1f00: 00000000 c011b600 c1100000 c110753c 00000000 c11c3984 c11074d4 c1107548
->>>> 1f20: 00000000 c1101f54 c1101f58 c1101f48 c010a1fc c010a200 60000013 ffffffff
->>>> [<c010e3d4>] (__irq_svc) from [<c010a200>] (arch_cpu_idle+0x48/0x4c)
->>>> [<c010a200>] (arch_cpu_idle) from [<c01669d8>] (default_idle_call+0x30/0x3c)
->>>> [<c01669d8>] (default_idle_call) from [<c0166d3c>] (cpu_startup_entry+0x358/0x3b4)
->>>> [<c0166d3c>] (cpu_startup_entry) from [<c0aa6ab8>] (rest_init+0x94/0x98)
->>>> [<c0aa6ab8>] (rest_init) from [<c1000d58>] (start_kernel+0x3a4/0x3b0)
->>>> [<c1000d58>] (start_kernel) from [<4000807c>] (0x4000807c)
->>>> ---[ end trace 256f83eed365daf0 ]---
->>>>
->>>> The warning occurs because after complete callback function,
->>>> dw_mci_dmac_complete_dma() is called, then dw_mci_stop_dma() is called
->>>> again. So it causes dma_unmap_sg() is called twice for same sg. It
->>>> occurs during clock setting at booting time.
->>>>
->>>> Simply, clearing host->using_dma flag on dw_mci_dmac_complete_dma() and
->>>> dw_mci_stop_dma() like following fixes the issue, but I am not sure
->>>> this approach is proper.
->>>> ---
->>>> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
->>>> index 2cc6123..a71c94b 100644
->>>> --- a/drivers/mmc/host/dw_mmc.c
->>>> +++ b/drivers/mmc/host/dw_mmc.c
->>>> @@ -388,6 +388,7 @@ static void dw_mci_stop_dma(struct dw_mci *host)
->>>>      if (host->using_dma) {
->>>>          host->dma_ops->stop(host);
->>>>          host->dma_ops->cleanup(host);
->>>> +        host->using_dma = 0;
->>>>      }
->>>>
->>>>      /* Data transfer was stopped by the interrupt handler */
->>>> @@ -455,6 +456,7 @@ static void dw_mci_dmac_complete_dma(void *arg)
->>>>                      DMA_FROM_DEVICE);
->>>>
->>>>      host->dma_ops->cleanup(host);
->>>> +    host->using_dma = 0;
->>>>
->>>>      /*
->>>>       * If the card was removed, data will be NULL. No point in trying to
->>>> @@ -943,8 +945,6 @@ static int dw_mci_submit_data_dma(struct dw_mci *host, struct mmc_data *data)
->>>>      int sg_len;
->>>>      u32 temp;
->>>>
->>>> -    host->using_dma = 0;
->>>> -
->>>>      /* If we don't have a channel, we can't do DMA */
->>>>      if (!host->use_dma)
->>>>          return -ENODEV;
->>>> ---
->>>>
->>>> Best Regards,
->>>> - Seung-Woo Kim
->>>>
->>>> -- 
->>>> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
->>>> the body of a message to majordomo@vger.kernel.org
->>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>>>
->>>
->>>
->>> -- 
->>> Best Regards
->>> Shawn Lin
->>>
->>
->>
->>
->>
->>
-> 
-> 
+diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+index ec3f0a8..56c48fb 100644
+--- a/drivers/mmc/host/dw_mmc.c
++++ b/drivers/mmc/host/dw_mmc.c
+@@ -1404,33 +1404,37 @@ static int dw_mci_switch_voltage(struct mmc_host *mmc, struct mmc_ios *ios)
+ 	struct dw_mci_slot *slot = mmc_priv(mmc);
+ 	struct dw_mci *host = slot->host;
+ 	const struct dw_mci_drv_data *drv_data = host->drv_data;
+-	u32 uhs;
++	u32 uhs = 0;
+ 	u32 v18 = SDMMC_UHS_18V << slot->id;
+ 	int ret;
+ 
+ 	if (drv_data && drv_data->switch_voltage)
+ 		return drv_data->switch_voltage(mmc, ios);
+ 
+-	/*
+-	 * Program the voltage.  Note that some instances of dw_mmc may use
+-	 * the UHS_REG for this.  For other instances (like exynos) the UHS_REG
+-	 * does no harm but you need to set the regulator directly.  Try both.
+-	 */
++	if (IS_ERR(mmc->supply.vqmmc)) {
++		dev_dbg(&mmc->class_dev,
++			"vqmmc not available.(Skip the switching voltage)\n");
++		return -EINVAL;
++	}
++
++	ret = mmc_regulator_set_vqmmc(mmc, ios);
++	if (ret) {
++		dev_err(&mmc->class_dev,
++				 "Regulator set error %d - %s V\n",
++				 ret, uhs & v18 ? "1.8" : "3.3");
++		return ret;
++	}
++
+ 	uhs = mci_readl(host, UHS_REG);
+-	if (ios->signal_voltage == MMC_SIGNAL_VOLTAGE_330)
++	switch (ios->signal_voltage) {
++	case MMC_SIGNAL_VOLTAGE_330:
+ 		uhs &= ~v18;
+-	else
++		break;
++	case MMC_SIGNAL_VOLTAGE_180:
+ 		uhs |= v18;
+-
+-	if (!IS_ERR(mmc->supply.vqmmc)) {
+-		ret = mmc_regulator_set_vqmmc(mmc, ios);
+-
+-		if (ret) {
+-			dev_dbg(&mmc->class_dev,
+-					 "Regulator set error %d - %s V\n",
+-					 ret, uhs & v18 ? "1.8" : "3.3");
+-			return ret;
+-		}
++		break;
++	default:
++		uhs &= ~v18;
+ 	}
+ 	mci_writel(host, UHS_REG, uhs);
+ 
+-- 
+1.9.1
 
