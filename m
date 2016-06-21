@@ -1,57 +1,151 @@
-From: Jacek Anaszewski <j.anaszewski@samsung.com>
-Subject: Re: [PATCH] leds: Add no-op gpio_led_register_device when LED
- subsystem is disabled
-Date: Tue, 21 Jun 2016 09:09:09 +0200
-Message-ID: <5768E815.5080706@samsung.com>
-References: <20160613200211.14790-1-afd@ti.com>
- <20160613200211.14790-13-afd@ti.com> <5760FA52.7010806@samsung.com>
- <57647DBD.2010406@ti.com> <57679E38.3080901@samsung.com>
- <57686A94.2010704@ti.com>
+From: Shawn Lin <shawn.lin@rock-chips.com>
+Subject: Re: [PATCH v2 2/3] mmc: dw_mmc: add the card write threshold for
+ HS400 mode
+Date: Tue, 21 Jun 2016 16:05:40 +0800
+Message-ID: <dabbd1ce-5783-c4ac-5782-553b2c5acc87@rock-chips.com>
+References: <1466487339-13211-1-git-send-email-jh80.chung@samsung.com>
+ <1466487339-13211-2-git-send-email-jh80.chung@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"; Format="flowed"
-Content-Transfer-Encoding: base64
-Return-path: <linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org>
-In-reply-to: <57686A94.2010704@ti.com>
-List-Unsubscribe: <https://lists.ozlabs.org/options/linuxppc-dev>,
- <mailto:linuxppc-dev-request@lists.ozlabs.org?subject=unsubscribe>
-List-Archive: <http://lists.ozlabs.org/pipermail/linuxppc-dev/>
-List-Post: <mailto:linuxppc-dev@lists.ozlabs.org>
-List-Help: <mailto:linuxppc-dev-request@lists.ozlabs.org?subject=help>
-List-Subscribe: <https://lists.ozlabs.org/listinfo/linuxppc-dev>,
- <mailto:linuxppc-dev-request@lists.ozlabs.org?subject=subscribe>
-Errors-To: linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org
-Sender: "Linuxppc-dev"
- <linuxppc-dev-bounces+glppe-linuxppc-embedded-2=m.gmane.org@lists.ozlabs.org>
-To: "Andrew F. Davis" <afd@ti.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Wolfram Sang <wsa@the-dreams.de>, Linus Walleij <linus.walleij@linaro.org>, Sebastian Reichel <sre@kernel.org>, linux-i2c@vger.kernel.org, Ingo Molnar <mingo@kernel.org>, Aloisio Almeida Jr <aloisio.almeida@openbossa.org>, lguest@lists.ozlabs.org, Samuel Ortiz <sameo@linux.intel.com>, Russell King <linux@armlinux.org.uk>, linux-leds@vger.kernel.org, linux-mmc@vger.kernel.org, linux-media@vger.kernel.org, linux-pwm@vger.kernel.org, Mauro Carvalho Chehab <mchehab@osg.samsung.com>, Rusty Russell <rusty@rustcorp.com.au>, linux-gpio@vger.kernel.org, linux-wireless@vger.kernel.org, linux-kernel@vger.kernel.org, Lauro Ramos Venancio <lauro.venancio@openbossa.org>, Miguel Ojeda Sandonis <miguel.ojeda.sandonis@gmail.com>, Richard Purdie <rpurdie@rpsys.net>, linuxppc-dev@lists.ozlabs.org
+Content-Type: text/plain; charset=gbk; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from lucky1.263xmail.com ([211.157.147.130]:34634 "EHLO
+	lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932856AbcFUIFt (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 21 Jun 2016 04:05:49 -0400
+In-Reply-To: <1466487339-13211-2-git-send-email-jh80.chung@samsung.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Jaehoon Chung <jh80.chung@samsung.com>, linux-mmc@vger.kernel.org
+Cc: shawn.lin@rock-chips.com, ulf.hansson@linaro.org
 
-SGkgQW5kcmV3LAoKVGhpcyBwYXRjaCBkb2Vzbid0IGFwcGx5LCBwbGVhc2UgcmViYXNlIG9udG8g
-cmVjZW50IExFRCB0cmVlLgoKT24gMDYvMjEvMjAxNiAxMjoxMyBBTSwgQW5kcmV3IEYuIERhdmlz
-IHdyb3RlOgo+IFNvbWUgc3lzdGVtcyB1c2UgJ2dwaW9fbGVkX3JlZ2lzdGVyX2RldmljZScgdG8g
-bWFrZSBhbiBpbi1tZW1vcnkgY29weSBvZgo+IHRoZWlyIExFRCBkZXZpY2UgdGFibGUgc28gdGhl
-IG9yaWdpbmFsIGNhbiBiZSByZW1vdmVkIGFzIC5pbml0LnJvZGF0YS4KPiBXaGVuIHRoZSBMRUQg
-c3Vic3lzdGVtIGlzIG5vdCBlbmFibGVkIHNvdXJjZSBpbiB0aGUgbGVkIGRpcmVjdG9yeSBpcyBu
-b3QKPiBidWlsdCBhbmQgc28gdGhpcyBmdW5jdGlvbiBtYXkgYmUgdW5kZWZpbmVkLiBGaXggdGhp
-cyBoZXJlLgo+Cj4gU2lnbmVkLW9mZi1ieTogQW5kcmV3IEYuIERhdmlzIDxhZmRAdGkuY29tPgo+
-IC0tLQo+ICAgaW5jbHVkZS9saW51eC9sZWRzLmggfCA4ICsrKysrKysrCj4gICAxIGZpbGUgY2hh
-bmdlZCwgOCBpbnNlcnRpb25zKCspCj4KPiBkaWZmIC0tZ2l0IGEvaW5jbHVkZS9saW51eC9sZWRz
-LmggYi9pbmNsdWRlL2xpbnV4L2xlZHMuaAo+IGluZGV4IGQyYjEzMDYuLmE0YTNkYTYgMTAwNjQ0
-Cj4gLS0tIGEvaW5jbHVkZS9saW51eC9sZWRzLmgKPiArKysgYi9pbmNsdWRlL2xpbnV4L2xlZHMu
-aAo+IEBAIC0zODYsOCArMzg2LDE2IEBAIHN0cnVjdCBncGlvX2xlZF9wbGF0Zm9ybV9kYXRhIHsK
-PiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHVuc2lnbmVkIGxvbmcg
-KmRlbGF5X29mZik7CgpDdXJyZW50bHkgdGhlcmUgaXMgc29tZSBzdHVmZiBoZXJlLCBhbmQgaW4g
-ZmFjdCBpdCBoYXMgYmVlbiBmb3IKYSBsb25nIHRpbWUuCgpQYXRjaCAiW1BBVENIIDEyLzEyXSBs
-ZWRzOiBPbmx5IGRlc2NlbmQgaW50byBsZWRzIGRpcmVjdG9yeSB3aGVuCkNPTkZJR19ORVdfTEVE
-UyBpcyBzZXQiIGFsc28gZG9lc24ndCBhcHBseS4KV2hhdCByZXBvc2l0b3J5IGFyZSB5b3UgdXNp
-bmc/Cgo+ICAgfTsKPgo+ICsjaWZkZWYgQ09ORklHX05FV19MRURTCj4gICBzdHJ1Y3QgcGxhdGZv
-cm1fZGV2aWNlICpncGlvX2xlZF9yZWdpc3Rlcl9kZXZpY2UoCj4gICAgICAgICAgICAgICAgICBp
-bnQgaWQsIGNvbnN0IHN0cnVjdCBncGlvX2xlZF9wbGF0Zm9ybV9kYXRhICpwZGF0YSk7Cj4gKyNl
-bHNlCj4gK3N0YXRpYyBpbmxpbmUgc3RydWN0IHBsYXRmb3JtX2RldmljZSAqZ3Bpb19sZWRfcmVn
-aXN0ZXJfZGV2aWNlKAo+ICsgICAgICAgICAgICAgICBpbnQgaWQsIGNvbnN0IHN0cnVjdCBncGlv
-X2xlZF9wbGF0Zm9ybV9kYXRhICpwZGF0YSkKPiArewo+ICsgICAgICAgcmV0dXJuIDA7Cj4gK30K
-PiArI2VuZGlmCj4KPiAgIGVudW0gY3B1X2xlZF9ldmVudCB7Cj4gICAgICAgICAgQ1BVX0xFRF9J
-RExFX1NUQVJULCAgICAgLyogQ1BVIGVudGVycyBpZGxlICovCj4KCgotLSAKQmVzdCByZWdhcmRz
-LApKYWNlayBBbmFzemV3c2tpCl9fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
-X19fX19fX19fCkxpbnV4cHBjLWRldiBtYWlsaW5nIGxpc3QKTGludXhwcGMtZGV2QGxpc3RzLm96
-bGFicy5vcmcKaHR0cHM6Ly9saXN0cy5vemxhYnMub3JnL2xpc3RpbmZvL2xpbnV4cHBjLWRldg==
+On 2016/6/21 13:35, Jaehoon Chung wrote:
+> Since v2.80a, dwmmc controller introduced the card write threshold for
+> HS400 mode. So CardThrCtl can be supported during write operation, not
+> only read operation.
+> (Note: Only use the write threshold when mode is HS400.)
+>
+> To use more compatible, removed "_rd_" from function name.
+>
+> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+> ---
+> Changelog V2:
+> 	- Add the DW_MMC_280A for checking IP-version.
+> 	- Applied the Shawn's suggestion.
+>
+>  drivers/mmc/host/dw_mmc.c | 34 +++++++++++++++++++++++-----------
+>  drivers/mmc/host/dw_mmc.h |  6 +++++-
+>  2 files changed, 28 insertions(+), 12 deletions(-)
+>
+
+Looks good to me,
+
+Reviewed-by: Shawn Lin <shawn.lin@rock-chips.com>
+
+> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+> index 5cf143b..ec3f0a8 100644
+> --- a/drivers/mmc/host/dw_mmc.c
+> +++ b/drivers/mmc/host/dw_mmc.c
+> @@ -899,23 +899,35 @@ done:
+>  	mci_writel(host, FIFOTH, fifoth_val);
+>  }
+>
+> -static void dw_mci_ctrl_rd_thld(struct dw_mci *host, struct mmc_data *data)
+> +static void dw_mci_ctrl_thld(struct dw_mci *host, struct mmc_data *data)
+>  {
+>  	unsigned int blksz = data->blksz;
+>  	u32 blksz_depth, fifo_depth;
+>  	u16 thld_size;
+> -
+> -	WARN_ON(!(data->flags & MMC_DATA_READ));
+> +	u8 enable;
+>
+>  	/*
+>  	 * CDTHRCTL doesn't exist prior to 240A (in fact that register offset is
+>  	 * in the FIFO region, so we really shouldn't access it).
+>  	 */
+> -	if (host->verid < DW_MMC_240A)
+> +	if (host->verid < DW_MMC_240A ||
+> +		(host->verid < DW_MMC_280A && data->flags & MMC_DATA_WRITE))
+>  		return;
+>
+> +	/*
+> +	 * Card write Threshold is introduced since 2.80a
+> +	 * It's used when HS400 mode is enabled.
+> +	 */
+> +	if (data->flags & MMC_DATA_WRITE &&
+> +		!(host->timing != MMC_TIMING_MMC_HS400))
+> +		return;
+> +
+> +	if (data->flags & MMC_DATA_WRITE)
+> +		enable = SDMMC_CARD_WR_THR_EN;
+> +	else
+> +		enable = SDMMC_CARD_RD_THR_EN;
+> +
+>  	if (host->timing != MMC_TIMING_MMC_HS200 &&
+> -	    host->timing != MMC_TIMING_MMC_HS400 &&
+>  	    host->timing != MMC_TIMING_UHS_SDR104)
+>  		goto disable;
+>
+> @@ -931,11 +943,11 @@ static void dw_mci_ctrl_rd_thld(struct dw_mci *host, struct mmc_data *data)
+>  	 * Currently just choose blksz.
+>  	 */
+>  	thld_size = blksz;
+> -	mci_writel(host, CDTHRCTL, SDMMC_SET_RD_THLD(thld_size, 1));
+> +	mci_writel(host, CDTHRCTL, SDMMC_SET_THLD(thld_size, enable));
+>  	return;
+>
+>  disable:
+> -	mci_writel(host, CDTHRCTL, SDMMC_SET_RD_THLD(0, 0));
+> +	mci_writel(host, CDTHRCTL, 0);
+>  }
+>
+>  static int dw_mci_submit_data_dma(struct dw_mci *host, struct mmc_data *data)
+> @@ -1006,12 +1018,12 @@ static void dw_mci_submit_data(struct dw_mci *host, struct mmc_data *data)
+>  	host->sg = NULL;
+>  	host->data = data;
+>
+> -	if (data->flags & MMC_DATA_READ) {
+> +	if (data->flags & MMC_DATA_READ)
+>  		host->dir_status = DW_MCI_RECV_STATUS;
+> -		dw_mci_ctrl_rd_thld(host, data);
+> -	} else {
+> +	else
+>  		host->dir_status = DW_MCI_SEND_STATUS;
+> -	}
+> +
+> +	dw_mci_ctrl_thld(host, data);
+>
+>  	if (dw_mci_submit_data_dma(host, data)) {
+>  		if (host->data->flags & MMC_DATA_READ)
+> diff --git a/drivers/mmc/host/dw_mmc.h b/drivers/mmc/host/dw_mmc.h
+> index 1e8d838..a186d4b 100644
+> --- a/drivers/mmc/host/dw_mmc.h
+> +++ b/drivers/mmc/host/dw_mmc.h
+> @@ -15,6 +15,7 @@
+>  #define _DW_MMC_H_
+>
+>  #define DW_MMC_240A		0x240a
+> +#define DW_MMC_280A		0x280a
+>
+>  #define SDMMC_CTRL		0x000
+>  #define SDMMC_PWREN		0x004
+> @@ -175,7 +176,10 @@
+>  /* Version ID register define */
+>  #define SDMMC_GET_VERID(x)		((x) & 0xFFFF)
+>  /* Card read threshold */
+> -#define SDMMC_SET_RD_THLD(v, x)		(((v) & 0xFFF) << 16 | (x))
+> +#define SDMMC_SET_THLD(v, x)		(((v) & 0xFFF) << 16 | (x))
+> +#define SDMMC_CARD_WR_THR_EN		BIT(2)
+> +#define SDMMC_CARD_RD_THR_EN		BIT(0)
+> +/* UHS-1 register defines */
+>  #define SDMMC_UHS_18V			BIT(0)
+>  /* All ctrl reset bits */
+>  #define SDMMC_CTRL_ALL_RESET_FLAGS \
+>
+
+
+-- 
+Best Regards
+Shawn Lin
+
