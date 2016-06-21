@@ -1,131 +1,110 @@
-From: Enric Balletbo Serra <eballetbo@gmail.com>
-Subject: Re: [RESEND PATCH v2 1/1] mmc: dw_mmc: Wait for data transfer after
- response errors.
-Date: Tue, 21 Jun 2016 18:30:01 +0200
-Message-ID: <CAFqH_50ki3no8yfk29OBMpHSUQJyKKUz=2RLS5XTpRSyhKZ9eg@mail.gmail.com>
-References: <1461657838-25484-1-git-send-email-enric.balletbo@collabora.com>
- <1461657838-25484-2-git-send-email-enric.balletbo@collabora.com> <5767C1EA.10101@samsung.com>
+From: Rob Herring <robh@kernel.org>
+Subject: Re: [PATCH 08/12] doc: binding: pwrseq-usb-generic: add binding doc
+ for generic usb power sequence driver
+Date: Tue, 21 Jun 2016 16:26:53 -0500
+Message-ID: <20160621212653.GA22764@rob-hp-laptop>
+References: <1466158165-9380-1-git-send-email-peter.chen@nxp.com>
+ <1466158165-9380-9-git-send-email-peter.chen@nxp.com>
+ <CAL_JsqLvs0s2TyfqPM5vtmyY81_X84VjCGjsGYbTgT4syOfp9Q@mail.gmail.com>
+ <20160620112651.GA26936@shlinux2>
+ <20160620161607.GA11427@rob-hp-laptop>
+ <20160621021117.GD26936@shlinux2>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <5767C1EA.10101@samsung.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>
-Cc: Enric Balletbo i Serra <enric.balletbo@collabora.com>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Doug Anderson <dianders@chromium.org>, Alim Akhtar <alim.akhtar@gmail.com>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-oi0-f48.google.com ([209.85.218.48]:33343 "EHLO
+	mail-oi0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751189AbcFUV1A (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 21 Jun 2016 17:27:00 -0400
+Content-Disposition: inline
+In-Reply-To: <20160621021117.GD26936@shlinux2>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Peter Chen <hzpeterchen@gmail.com>
+Cc: Peter Chen <peter.chen@nxp.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Alan Stern <stern@rowland.harvard.edu>, Ulf Hansson <ulf.hansson@linaro.org>, Mark Brown <broonie@kernel.org>, Sebastian Reichel <sre@kernel.org>, Mark Rutland <mark.rutland@arm.com>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, Krzysztof =?utf-8?Q?Koz=C5=82owski?= <k.kozlowski@samsung.com>, Stephen Boyd <stephen.boyd@linaro.org>, oscar@naiandei.net, Arnd Bergmann <arnd@arndb.de>, Pawel Moll <pawel.moll@arm.com>, "linux-pm@vger.kernel.org" <linux-pm@vger.kernel.org>, Sascha Hauer <s.hauer@pengutronix.de>, Linux USB List <linux-usb@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "Maciej S. Szmigiero" <mail@maciej.szmigiero.name>, troy.kisky@boundarydevices.com, Javier Martinez Canillas <javier@osg.samsung.com>, Philipp Zabel <p.zabel@pengutronix.>
 
-Hi Jaehoon,
+On Tue, Jun 21, 2016 at 10:11:17AM +0800, Peter Chen wrote:
+> On Mon, Jun 20, 2016 at 11:16:07AM -0500, Rob Herring wrote:
+> > On Mon, Jun 20, 2016 at 07:26:51PM +0800, Peter Chen wrote:
+> > > On Fri, Jun 17, 2016 at 12:16:48PM -0500, Rob Herring wrote:
+> > > > On Fri, Jun 17, 2016 at 5:09 AM, Peter Chen <peter.chen@nxp.com> wrote:
+> > > > > Add binding doc for generic usb power sequence driver, and update
+> > > > > generic usb device binding-doc accordingly.
 
-2016-06-20 12:14 GMT+02:00 Jaehoon Chung <jh80.chung@samsung.com>:
-> Hi Enric,
->
-> On 04/26/2016 05:03 PM, Enric Balletbo i Serra wrote:
->> From: Doug Anderson <dianders@chromium.org>
->>
->> According to the DesignWare state machine description, after we get a
->> "response error" or "response CRC error" we move into data transfer
->> mode. That means that we don't necessarily need to special case
->> trying to deal with the failure right away. We can wait until we are
->> notified that the data transfer is complete (with or without errors)
->> and then we can deal with the failure.
->>
->> It may sound strange to defer dealing with a command that we know will
->> fail anyway, but this appears to fix a bug. During tuning (CMD19) on
->> a specific card on an rk3288-based system, we found that we could get
->> a "response CRC error". Sending the stop command after the "response
->> CRC error" would then throw the system into a confused state causing
->> all future tuning phases to report failure.
->
-> I understood this patch what purpose has.
-> Does it need to consider for other tuning cases?
->
+[...]
 
-Not sure, to be honest I only saw this during UHS tuning sequence on
-this brand of cards I never reproduced the issue on other tuning
-cases.
+> > > 		clocks = <&clks IMX6SX_CLK_CKO>;
+> > > 
+> > > 		#address-cells = <1>;
+> > > 		#size-cells = <0>;
+> > > 		ethernet: asix@1 {
+> > > 			compatible = "usbb95,1708";
+> > > 			reg = <1>;
+> > > 
+> > > 			power-sequence;
+> > > 			reset-gpios = <&gpio4 6 GPIO_ACTIVE_LOW>; /* ethernet_rst */
+> > > 			reset-duration-us = <15>;
+> > > 			clocks = <&clks IMX6SX_CLK_IPG>;
+> > > 		};
+> > > 	};
+> > > };
+> > > 
+> > > If the node has property "power-sequence", the pwrseq core will create
+> > > related platform device, and the driver under pwrseq driver will handle
+> > > power sequence stuffs. 
+> > 
+> > This I have issue with. If you are creating a platform device here, you 
+> > are trying to work-around limitations in the linux driver model.
+> 
+> My current solution like below, but it seems you didn't agree with that.
+> I just double confirm here, if you don't, I give up the solution for
+> using generic power sequence framework.
+> 
+> In drivers/usb/core/hub.c
+> 
+> 	for_each_child_of_node(parent->of_node, node) {
+> 		hdev_pwrseq = pwrseq_alloc(node, "usb_pwrseq_generic");
+> 		if (!IS_ERR_OR_NULL(hdev_pwrseq)) {
+> 			pwrseq_node = kzalloc(sizeof(pwrseq_node), GFP_KERNEL);
+> 			if (!pwrseq_node) {
+> 				ret = -ENOMEM;
+> 				goto err1;
+> 			}
+> 			/* power on sequence */
+> 			ret = pwrseq_pre_power_on(hdev_pwrseq);
 
-> Best Regards,
-> Jaehoon Chung
->
->>
->> When in the confused state, the controller would show these (hex codes
->> are interrupt status register):
->>  CMD ERR: 0x00000046 (cmd=19)
->>  CMD ERR: 0x0000004e (cmd=12)
->>  DATA ERR: 0x00000208
->>  DATA ERR: 0x0000020c
->>  CMD ERR: 0x00000104 (cmd=19)
->>  CMD ERR: 0x00000104 (cmd=12)
->>  DATA ERR: 0x00000208
->>  DATA ERR: 0x0000020c
->>  ...
->>  ...
->>
->> It is inherently difficult to deal with the complexity of trying to
->> correctly send a stop command while a data transfer is taking place
->> since you need to deal with different corner cases caused by the fact
->> that the data transfer could complete (with errors or without errors)
->> during various places in sending the stop command (dw_mci_stop_dma,
->> send_stop_abort, etc)
->>
->> Instead of adding a bunch of extra complexity to deal with this, it
->> seems much simpler to just use the more straightforward (and less
->> error-prone) path of letting the data transfer finish. There
->> shouldn't be any huge benefit to sending the stop command slightly
->> earlier, anyway.
->>
->> Signed-off-by: Doug Anderson <dianders@chromium.org>
->> Signed-off-by: Enric Balletbo i Serra <enric.balletbo@collabora.com>
->> Cc: Alim Akhtar <alim.akhtar@gmail.com>
->> ---
->> Changelog since v1:
->> - Fix the issue found by Alim with exynos letting the data transfer
->>   take place only when MMC_SEND_TUNING_BLOCK is issued.
->>
->>  drivers/mmc/host/dw_mmc.c | 27 +++++++++++++++++++++++++++
->>  1 file changed, 27 insertions(+)
->>
->> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
->> index 242f9a0..2ebeea8 100644
->> --- a/drivers/mmc/host/dw_mmc.c
->> +++ b/drivers/mmc/host/dw_mmc.c
->> @@ -1761,6 +1761,33 @@ static void dw_mci_tasklet_func(unsigned long priv)
->>                       }
->>
->>                       if (cmd->data && err) {
->> +                             /*
->> +                              * During UHS tuning sequence, sending the stop
->> +                              * command after the response CRC error would
->> +                              * throw the system into a confused state
->> +                              * causing all future tuning phases to report
->> +                              * failure.
->> +                              *
->> +                              * In such case controller will move into a data
->> +                              * transfer state after a response error or
->> +                              * response CRC error. Let's let that finish
->> +                              * before trying to send a stop, so we'll go to
->> +                              * STATE_SENDING_DATA.
->> +                              *
->> +                              * Although letting the data transfer take place
->> +                              * will waste a bit of time (we already know
->> +                              * the command was bad), it can't cause any
->> +                              * errors since it's possible it would have
->> +                              * taken place anyway if this tasklet got
->> +                              * delayed. Allowing the transfer to take place
->> +                              * avoids races and keeps things simple.
->> +                              */
->> +                             if ((err != -ETIMEDOUT) &&
->> +                                 (cmd->opcode == MMC_SEND_TUNING_BLOCK)) {
->> +                                     state = STATE_SENDING_DATA;
->> +                                     continue;
->> +                             }
->> +
->>                               dw_mci_stop_dma(host);
->>                               send_stop_abort(host, data);
->>                               state = STATE_SENDING_STOP;
->>
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Why does this function need to do anything more than:
+
+- Check if the child has a "power-sequence" property
+- Get the "reset-gpios" GPIO
+- Assert reset for specified/default time
+- Deassert reset
+
+Then continue on as normal. That seems straight-forward to me.
+
+There is no reason you need a platform device in the mix. Perhaps trying 
+to move the MMC pwr-seq code is pointless as it adds needless 
+complexity.
+
+[...]
+
+> > Either 
+> > we need some sort of pre-probe hook to the drivers to call or each 
+> > parent node driver is responsible for checking and calling pwr-seq 
+> > functions for child nodes. e.g. The host controller calls pwr-seq for 
+> > the hub, the hub driver calls the power seq for the asix chip. Soon as 
+> > we have a case too complex for the generic pwr-seq, we're going to need 
+> > the pre-probe hook as I don't want to see a continual expansion of 
+> > generic pwr-seq binding for ever more complex cases.
+> > 
+> 
+> How the driver know what it needs to handle (eg, gpio, clock) if there
+> is no device for it? The most important we need to consider is which
+> device owns there power sequence properties, then the corresponding
+> driver can handle it.
+
+What can be handled by is defined by presence of power-sequence 
+property. There can be 1 driver for the device. That is the USB hub 
+driver in this example. You should not have 2 "devices".
+
+Rob
