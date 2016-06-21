@@ -1,176 +1,60 @@
-From: Shawn Lin <shawn.lin@rock-chips.com>
-Subject: Re: [PATCH v2] mmc: host: use the defined function to check whether
- card is removable
-Date: Tue, 21 Jun 2016 09:29:26 +0800
-Message-ID: <476a9fa4-8e8e-2c86-423a-49da700e9120@rock-chips.com>
-References: <1466471606-3909-1-git-send-email-jh80.chung@samsung.com>
+From: Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
+Subject: Re: [PATCH] mmc: core: add auto bkops support
+Date: Tue, 21 Jun 2016 09:44:39 +0800
+Message-ID: <29966a6f-eb14-0307-08cc-f91a97f50382@rock-chips.com>
+References: <1465182439-27963-1-git-send-email-shawn.lin@rock-chips.com>
+ <F4A75DD4-FE64-4417-AFD4-FA9ABD8EE915@sandisk.com>
+ <d5c75760-e8b4-1784-a7de-3d78eeca1d0e@rock-chips.com>
+ <7078F2B9-63B6-4170-BFA1-5AC370F0D4DD@sandisk.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=gbk; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from lucky1.263xmail.com ([211.157.147.132]:34889 "EHLO
-	lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753480AbcFUB3n (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 20 Jun 2016 21:29:43 -0400
-In-Reply-To: <1466471606-3909-1-git-send-email-jh80.chung@samsung.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="utf-8"; Format="flowed"
+Content-Transfer-Encoding: base64
+Return-path: <linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+In-Reply-To: <7078F2B9-63B6-4170-BFA1-5AC370F0D4DD-XdAiOPVOjttBDgjK7y7TUQ@public.gmane.org>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-rockchip>,
+ <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-rockchip/>
+List-Post: <mailto:linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+List-Help: <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-rockchip>,
+ <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
+Sender: "Linux-rockchip" <linux-rockchip-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+Errors-To: linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+To: Alex Lemberg <Alex.Lemberg-XdAiOPVOjttBDgjK7y7TUQ@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Doug Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Jaehoon Chung <jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, "linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>, linux-mmc@vger.kernel.org
-Cc: shawn.lin@rock-chips.com, ulf.hansson@linaro.org, adrian.hunter@intel.com, wsa+renesas@sang-engineering.com
 
-On 2016/6/21 9:13, Jaehoon Chung wrote:
-> In linux/mmc/host.h, mmc_card_is_removable() is already defined.
-> It should be maintainted more easier than now.
->
-> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
-> ---
-> Changelog V2:
-> 	- Added the missed host controller (sdhci-of-at91.c)
-
-With addressing this one,
-
-Reviewed-by: Shawn Lin <shawn.lin@rock-chips.com>
-
-
->
->  drivers/mmc/host/dw_mmc.c         | 3 +--
->  drivers/mmc/host/mxcmmc.c         | 2 +-
->  drivers/mmc/host/sdhci-bcm-kona.c | 6 +++---
->  drivers/mmc/host/sdhci-of-at91.c  | 2 +-
->  drivers/mmc/host/sdhci-st.c       | 2 +-
->  drivers/mmc/host/sdhci.c          | 6 +++---
->  drivers/mmc/host/tmio_mmc_pio.c   | 2 +-
->  7 files changed, 11 insertions(+), 12 deletions(-)
->
-> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-> index 2cc6123..8012858 100644
-> --- a/drivers/mmc/host/dw_mmc.c
-> +++ b/drivers/mmc/host/dw_mmc.c
-> @@ -1451,8 +1451,7 @@ static int dw_mci_get_cd(struct mmc_host *mmc)
->  	int gpio_cd = mmc_gpio_get_cd(mmc);
->
->  	/* Use platform get_cd function, else try onboard card detect */
-> -	if ((mmc->caps & MMC_CAP_NEEDS_POLL) ||
-> -	    (mmc->caps & MMC_CAP_NONREMOVABLE))
-> +	if ((mmc->caps & MMC_CAP_NEEDS_POLL) || !mmc_card_is_removable(mmc))
->  		present = 1;
->  	else if (gpio_cd >= 0)
->  		present = gpio_cd;
-> diff --git a/drivers/mmc/host/mxcmmc.c b/drivers/mmc/host/mxcmmc.c
-> index 3d1ea5e..fb3ca82 100644
-> --- a/drivers/mmc/host/mxcmmc.c
-> +++ b/drivers/mmc/host/mxcmmc.c
-> @@ -1065,7 +1065,7 @@ static int mxcmci_probe(struct platform_device *pdev)
->
->  	if (pdata)
->  		dat3_card_detect = pdata->dat3_card_detect;
-> -	else if (!(mmc->caps & MMC_CAP_NONREMOVABLE)
-> +	else if (mmc_card_is_removable(mmc)
->  			&& !of_property_read_bool(pdev->dev.of_node, "cd-gpios"))
->  		dat3_card_detect = true;
->
-> diff --git a/drivers/mmc/host/sdhci-bcm-kona.c b/drivers/mmc/host/sdhci-bcm-kona.c
-> index 00a8a40..1d64712 100644
-> --- a/drivers/mmc/host/sdhci-bcm-kona.c
-> +++ b/drivers/mmc/host/sdhci-bcm-kona.c
-> @@ -264,12 +264,12 @@ static int sdhci_bcm_kona_probe(struct platform_device *pdev)
->  	}
->
->  	dev_dbg(dev, "non-removable=%c\n",
-> -		(host->mmc->caps & MMC_CAP_NONREMOVABLE) ? 'Y' : 'N');
-> +		mmc_card_is_removable(host->mmc) ? 'N' : 'Y');
->  	dev_dbg(dev, "cd_gpio %c, wp_gpio %c\n",
->  		(mmc_gpio_get_cd(host->mmc) != -ENOSYS) ? 'Y' : 'N',
->  		(mmc_gpio_get_ro(host->mmc) != -ENOSYS) ? 'Y' : 'N');
->
-> -	if (host->mmc->caps & MMC_CAP_NONREMOVABLE)
-> +	if (!mmc_card_is_removable(host->mmc))
->  		host->quirks |= SDHCI_QUIRK_BROKEN_CARD_DETECTION;
->
->  	dev_dbg(dev, "is_8bit=%c\n",
-> @@ -288,7 +288,7 @@ static int sdhci_bcm_kona_probe(struct platform_device *pdev)
->  	}
->
->  	/* if device is eMMC, emulate card insert right here */
-> -	if (host->mmc->caps & MMC_CAP_NONREMOVABLE) {
-> +	if (!mmc_card_is_removable(host->mmc)) {
->  		ret = sdhci_bcm_kona_sd_card_emulate(host, 1);
->  		if (ret) {
->  			dev_err(dev,
-> diff --git a/drivers/mmc/host/sdhci-of-at91.c b/drivers/mmc/host/sdhci-of-at91.c
-> index d4cef71..a9b7fc0 100644
-> --- a/drivers/mmc/host/sdhci-of-at91.c
-> +++ b/drivers/mmc/host/sdhci-of-at91.c
-> @@ -288,7 +288,7 @@ static int sdhci_at91_probe(struct platform_device *pdev)
->  	 * Disable SDHCI_QUIRK_BROKEN_CARD_DETECTION to be sure nobody tries
->  	 * to enable polling via device tree with broken-cd property.
->  	 */
-> -	if (!(host->mmc->caps & MMC_CAP_NONREMOVABLE) &&
-> +	if (mmc_card_is_removable(host->mmc) &&
->  	    mmc_gpio_get_cd(host->mmc) < 0) {
->  		host->mmc->caps |= MMC_CAP_NEEDS_POLL;
->  		host->quirks &= ~SDHCI_QUIRK_BROKEN_CARD_DETECTION;
-> diff --git a/drivers/mmc/host/sdhci-st.c b/drivers/mmc/host/sdhci-st.c
-> index 320e1c2..c95ba83 100644
-> --- a/drivers/mmc/host/sdhci-st.c
-> +++ b/drivers/mmc/host/sdhci-st.c
-> @@ -183,7 +183,7 @@ static void st_mmcss_cconfig(struct device_node *np, struct sdhci_host *host)
->
->  	writel_relaxed(cconf2, host->ioaddr + ST_MMC_CCONFIG_REG_2);
->
-> -	if (mhost->caps & MMC_CAP_NONREMOVABLE)
-> +	if (!mmc_card_is_removable(mhost))
->  		cconf3 |= ST_MMC_CCONFIG_EMMC_SLOT_TYPE;
->  	else
->  		/* CARD _D ET_CTRL */
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index 040af1b..b965461 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -117,7 +117,7 @@ static void sdhci_set_card_detection(struct sdhci_host *host, bool enable)
->  	u32 present;
->
->  	if ((host->quirks & SDHCI_QUIRK_BROKEN_CARD_DETECTION) ||
-> -	    (host->mmc->caps & MMC_CAP_NONREMOVABLE))
-> +	    !mmc_card_is_removable(host->mmc))
->  		return;
->
->  	if (enable) {
-> @@ -1617,7 +1617,7 @@ static int sdhci_get_cd(struct mmc_host *mmc)
->  		return 0;
->
->  	/* If nonremovable, assume that the card is always present. */
-> -	if (host->mmc->caps & MMC_CAP_NONREMOVABLE)
-> +	if (!mmc_card_is_removable(host->mmc))
->  		return 1;
->
->  	/*
-> @@ -3089,7 +3089,7 @@ int sdhci_add_host(struct sdhci_host *host)
->  		mmc->caps |= MMC_CAP_SD_HIGHSPEED | MMC_CAP_MMC_HIGHSPEED;
->
->  	if ((host->quirks & SDHCI_QUIRK_BROKEN_CARD_DETECTION) &&
-> -	    !(mmc->caps & MMC_CAP_NONREMOVABLE) &&
-> +	    mmc_card_is_removable(mmc) &&
->  	    mmc_gpio_get_cd(host->mmc) < 0)
->  		mmc->caps |= MMC_CAP_NEEDS_POLL;
->
-> diff --git a/drivers/mmc/host/tmio_mmc_pio.c b/drivers/mmc/host/tmio_mmc_pio.c
-> index f44e2ab..92467ef 100644
-> --- a/drivers/mmc/host/tmio_mmc_pio.c
-> +++ b/drivers/mmc/host/tmio_mmc_pio.c
-> @@ -1086,7 +1086,7 @@ int tmio_mmc_host_probe(struct tmio_mmc_host *_host,
->
->  	_host->native_hotplug = !(pdata->flags & TMIO_MMC_USE_GPIO_CD ||
->  				  mmc->caps & MMC_CAP_NEEDS_POLL ||
-> -				  mmc->caps & MMC_CAP_NONREMOVABLE ||
-> +				  !mmc_card_is_removable(mmc) ||
->  				  mmc->slot.cd_irq >= 0);
->
->  	if (tmio_mmc_clk_enable(_host) < 0) {
->
-
-
--- 
-Best Regards
-Shawn Lin
-
+T24gMjAxNi82LzIwIDIxOjMzLCBBbGV4IExlbWJlcmcgd3JvdGU6Cj4gSGkgU2hhd24sCj4KPiBb
+4oCmXQo+Cj4+Pj4gKwo+Pj4+ICtzdGF0aWMgaW50IG1tY19zdG9wX2F1dG9fYmtvcHMoc3RydWN0
+IG1tY19jYXJkICpjYXJkKQo+Pj4+ICt7Cj4+Pj4gKwlpbnQgZXJyID0gMDsKPj4+PiArCj4+Pj4g
+KwlpZiAoIWNhcmQtPmV4dF9jc2QuYXV0b19ia29wc19lbikKPj4+PiArCQlyZXR1cm4gMDsKPj4+
+PiArCj4+Pgo+Pj4gU2hvdWxkbuKAmXQgdGhlIEJLT1BTX1NUQVRVUyBiZSBjaGVja2VkIHByaW9y
+IHRvIGRpc2FibGluZyB0aGUgQktPUFMgYWN0aXZpdHkgb2YgdGhlIGRldmljZT8KPj4+Cj4+Cj4+
+IEhybW0uLiBJIHJlYWQgdGhlIHdob2xlIHNlY3Rpb24gb2Ygc3BlYyBmb3IgaXQsIGFuZCBJIGRp
+ZCBmaW5kIHRoaXMKPj4gcmVxdWlyZW1lbnQgZm9yIG1hbnVsIGJrb3BzIGJ1dCBub3QgZm9yIHRo
+ZSBhdXRvIG9uZS4gU28gd2hhdCBzaG91bGQgd2UKPj4gZG8gaWYgdXNpbmcgdGhlIGF1dG8gb25l
+Pwo+Pgo+Cj4gSW4gY2FzZSBvZiBBVVRPIEJLT1BTLCB0aGUgZU1NQyBEZXZpY2Ugc2hvdWxkIHBl
+cmZvcm0gaW50ZXJuYWwgR0MKPiBpbiB0aGUgc2FtZSB3YXkgYXMgaW4gY2FzZSBvZiBNQU5VQUwg
+QktPUFMuCj4gVGhlIG9ubHkgZGlmZmVyZW5jZSBpcyBhIGhvc3QgYXdhcmVuZXNzLgoKYWdyZWUu
+Cgo+IEFsdGhvdWdoIHRoZXJlIGlzIG5vIHJlcXVpcmVtZW50IGluIHRoZSBzcGVjLCBJIHRoaW5r
+IHRoZSBkcml2ZXIgY2FuCj4gZ2l2ZSBzb21lIHRpbWUgdG8gdGhlIGRldmljZSB0byBwZXJmb3Jt
+L2NvbXBsZXRlIGl0cyBpbnRlcm5hbCBHQyBkdXJpbmcgdGhlIGlkbGUgdGltZS4KPiBUaHVzIEkg
+dGhpbmsgd2UgY2FuIGNoZWNrIHRoZSBCS09QU19TVEFUVVMgb24gUnVudGltZSBzdXNwZW5kLgoK
+V2Ugc2hvdWxkbid0IGRpYWJsZSBia29wcyBvbiAqcnVudGltZSogc3VzcGVuZCBhcyBpdCdzIGp1
+c3QgdGhlIHJpZ2h0CnRpbWUgZm9yIGZpcm13YXJlIHRvIGRvIEdDLiBXZSBjb3VsZCBjb25zaWRl
+ciB0byBjaGVjayBhbmQgd2FpdCBmb3IKdGhlIHN0YXR1cyB3aGVuIGRvaW5nIHBvd2Vyb2ZmLCBh
+bHRob3VnaCBpdCBzZWVtcyBmaXJtd2FyZSBzaG91bGQgYmUKYWJsZSB0byBhY2NlcHQgdGhlIGRp
+c2FibGUgY21kIGFuZCBkZWFsIHRoZSBvbi1nb2luZyB3b3JrIHBlcmZlY3RseQp3aGVuIGRvaW5n
+IGJrb3BzIHdpdGhvdXQgaG9zdCdzIGF3YXJlbmVzcywganVzdCB0aGUgc2FtZSB3YXkgYXMgc3Vk
+ZGVudApwb3dlciBsb3NzIGNhc2VzLgoKQWxzbyBJIGRvbid0IGtub3cgd2hldGhlciB0aGUgZmly
+bXdhcmUgd2lsbCByZWZsZWN0IGl0cyBzdGF0dXMgb24KQktPUFNfU1RBVFVTIG9yIG5vdCB3aGVu
+IGVuYWJsaW5nIHRoZSBhdXRvIG9uZS4gSSB3aWxsIGRvIG1vcmUgdGVzdC4KCkFueXdheSwgdGhh
+bmtzIGZvciBzaGFyaW5nIHlvdXIgdGhvdWdodC4KQWxzbyBBZHJpYW4gcG9pbnQgb3V0IHRoYXQg
+Y3VycmVudGx5IHdlIHRyaWdnZXIgbWFudWFsIGJrb3NwIGZyb20KdXNlcnNwYWNlIHZpYSBtbWMt
+dXRpbHMsIGFuZCBJIGFncmVlZCB3ZSBzaG91bGRuJ3QgZm9yY2Uga2VybmVsIHN0YWNrCnRvIGVu
+YWJsZSBpdCBkZWZhdWx0bHkuIFNvIEknbSBwcm9uZSBub3QgdG8gdXBkYXRlIHRoaXMgJFNVQkpF
+Q1QgYW5kCm1pZ3JhdGUgaXQgdG8gbW1jLXV0aWxzIGxhdGVyLgoKPgo+IFvigKZdCj4KPiBUaGFu
+a3MsCj4gQWxleAo+CgoKLS0gCkJlc3QgUmVnYXJkcwpTaGF3biBMaW4KCgpfX19fX19fX19fX19f
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fXwpMaW51eC1yb2NrY2hpcCBtYWlsaW5n
+IGxpc3QKTGludXgtcm9ja2NoaXBAbGlzdHMuaW5mcmFkZWFkLm9yZwpodHRwOi8vbGlzdHMuaW5m
+cmFkZWFkLm9yZy9tYWlsbWFuL2xpc3RpbmZvL2xpbnV4LXJvY2tjaGlwCg==
