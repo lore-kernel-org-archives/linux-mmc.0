@@ -1,60 +1,155 @@
-From: Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
-Subject: Re: [PATCH] mmc: core: add auto bkops support
-Date: Tue, 21 Jun 2016 09:44:39 +0800
-Message-ID: <29966a6f-eb14-0307-08cc-f91a97f50382@rock-chips.com>
-References: <1465182439-27963-1-git-send-email-shawn.lin@rock-chips.com>
- <F4A75DD4-FE64-4417-AFD4-FA9ABD8EE915@sandisk.com>
- <d5c75760-e8b4-1784-a7de-3d78eeca1d0e@rock-chips.com>
- <7078F2B9-63B6-4170-BFA1-5AC370F0D4DD@sandisk.com>
+From: Shawn Lin <shawn.lin@rock-chips.com>
+Subject: Re: mmc: dw_mmc: warning with CONFIG_DMA_API_DEBUG
+Date: Tue, 21 Jun 2016 09:52:17 +0800
+Message-ID: <a50cabe9-2e41-92be-b886-103e2bb4edba@rock-chips.com>
+References: <001501d1cace$9b8f2b60$d2ad8220$@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"; Format="flowed"
-Content-Transfer-Encoding: base64
-Return-path: <linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-In-Reply-To: <7078F2B9-63B6-4170-BFA1-5AC370F0D4DD-XdAiOPVOjttBDgjK7y7TUQ@public.gmane.org>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-rockchip>,
- <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-rockchip/>
-List-Post: <mailto:linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-List-Help: <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-rockchip>,
- <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
-Sender: "Linux-rockchip" <linux-rockchip-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-Errors-To: linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
-To: Alex Lemberg <Alex.Lemberg-XdAiOPVOjttBDgjK7y7TUQ@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Doug Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Jaehoon Chung <jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, "linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+Content-Type: text/plain; charset=windows-1252; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from lucky1.263xmail.com ([211.157.147.134]:53523 "EHLO
+	lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751235AbcFUBw2 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 20 Jun 2016 21:52:28 -0400
+In-Reply-To: <001501d1cace$9b8f2b60$d2ad8220$@samsung.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Seung-Woo Kim <sw0312.kim@samsung.com>, jh80.chung@samsung.com, ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Cc: shawn.lin@rock-chips.com
 
-T24gMjAxNi82LzIwIDIxOjMzLCBBbGV4IExlbWJlcmcgd3JvdGU6Cj4gSGkgU2hhd24sCj4KPiBb
-4oCmXQo+Cj4+Pj4gKwo+Pj4+ICtzdGF0aWMgaW50IG1tY19zdG9wX2F1dG9fYmtvcHMoc3RydWN0
-IG1tY19jYXJkICpjYXJkKQo+Pj4+ICt7Cj4+Pj4gKwlpbnQgZXJyID0gMDsKPj4+PiArCj4+Pj4g
-KwlpZiAoIWNhcmQtPmV4dF9jc2QuYXV0b19ia29wc19lbikKPj4+PiArCQlyZXR1cm4gMDsKPj4+
-PiArCj4+Pgo+Pj4gU2hvdWxkbuKAmXQgdGhlIEJLT1BTX1NUQVRVUyBiZSBjaGVja2VkIHByaW9y
-IHRvIGRpc2FibGluZyB0aGUgQktPUFMgYWN0aXZpdHkgb2YgdGhlIGRldmljZT8KPj4+Cj4+Cj4+
-IEhybW0uLiBJIHJlYWQgdGhlIHdob2xlIHNlY3Rpb24gb2Ygc3BlYyBmb3IgaXQsIGFuZCBJIGRp
-ZCBmaW5kIHRoaXMKPj4gcmVxdWlyZW1lbnQgZm9yIG1hbnVsIGJrb3BzIGJ1dCBub3QgZm9yIHRo
-ZSBhdXRvIG9uZS4gU28gd2hhdCBzaG91bGQgd2UKPj4gZG8gaWYgdXNpbmcgdGhlIGF1dG8gb25l
-Pwo+Pgo+Cj4gSW4gY2FzZSBvZiBBVVRPIEJLT1BTLCB0aGUgZU1NQyBEZXZpY2Ugc2hvdWxkIHBl
-cmZvcm0gaW50ZXJuYWwgR0MKPiBpbiB0aGUgc2FtZSB3YXkgYXMgaW4gY2FzZSBvZiBNQU5VQUwg
-QktPUFMuCj4gVGhlIG9ubHkgZGlmZmVyZW5jZSBpcyBhIGhvc3QgYXdhcmVuZXNzLgoKYWdyZWUu
-Cgo+IEFsdGhvdWdoIHRoZXJlIGlzIG5vIHJlcXVpcmVtZW50IGluIHRoZSBzcGVjLCBJIHRoaW5r
-IHRoZSBkcml2ZXIgY2FuCj4gZ2l2ZSBzb21lIHRpbWUgdG8gdGhlIGRldmljZSB0byBwZXJmb3Jt
-L2NvbXBsZXRlIGl0cyBpbnRlcm5hbCBHQyBkdXJpbmcgdGhlIGlkbGUgdGltZS4KPiBUaHVzIEkg
-dGhpbmsgd2UgY2FuIGNoZWNrIHRoZSBCS09QU19TVEFUVVMgb24gUnVudGltZSBzdXNwZW5kLgoK
-V2Ugc2hvdWxkbid0IGRpYWJsZSBia29wcyBvbiAqcnVudGltZSogc3VzcGVuZCBhcyBpdCdzIGp1
-c3QgdGhlIHJpZ2h0CnRpbWUgZm9yIGZpcm13YXJlIHRvIGRvIEdDLiBXZSBjb3VsZCBjb25zaWRl
-ciB0byBjaGVjayBhbmQgd2FpdCBmb3IKdGhlIHN0YXR1cyB3aGVuIGRvaW5nIHBvd2Vyb2ZmLCBh
-bHRob3VnaCBpdCBzZWVtcyBmaXJtd2FyZSBzaG91bGQgYmUKYWJsZSB0byBhY2NlcHQgdGhlIGRp
-c2FibGUgY21kIGFuZCBkZWFsIHRoZSBvbi1nb2luZyB3b3JrIHBlcmZlY3RseQp3aGVuIGRvaW5n
-IGJrb3BzIHdpdGhvdXQgaG9zdCdzIGF3YXJlbmVzcywganVzdCB0aGUgc2FtZSB3YXkgYXMgc3Vk
-ZGVudApwb3dlciBsb3NzIGNhc2VzLgoKQWxzbyBJIGRvbid0IGtub3cgd2hldGhlciB0aGUgZmly
-bXdhcmUgd2lsbCByZWZsZWN0IGl0cyBzdGF0dXMgb24KQktPUFNfU1RBVFVTIG9yIG5vdCB3aGVu
-IGVuYWJsaW5nIHRoZSBhdXRvIG9uZS4gSSB3aWxsIGRvIG1vcmUgdGVzdC4KCkFueXdheSwgdGhh
-bmtzIGZvciBzaGFyaW5nIHlvdXIgdGhvdWdodC4KQWxzbyBBZHJpYW4gcG9pbnQgb3V0IHRoYXQg
-Y3VycmVudGx5IHdlIHRyaWdnZXIgbWFudWFsIGJrb3NwIGZyb20KdXNlcnNwYWNlIHZpYSBtbWMt
-dXRpbHMsIGFuZCBJIGFncmVlZCB3ZSBzaG91bGRuJ3QgZm9yY2Uga2VybmVsIHN0YWNrCnRvIGVu
-YWJsZSBpdCBkZWZhdWx0bHkuIFNvIEknbSBwcm9uZSBub3QgdG8gdXBkYXRlIHRoaXMgJFNVQkpF
-Q1QgYW5kCm1pZ3JhdGUgaXQgdG8gbW1jLXV0aWxzIGxhdGVyLgoKPgo+IFvigKZdCj4KPiBUaGFu
-a3MsCj4gQWxleAo+CgoKLS0gCkJlc3QgUmVnYXJkcwpTaGF3biBMaW4KCgpfX19fX19fX19fX19f
-X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fXwpMaW51eC1yb2NrY2hpcCBtYWlsaW5n
-IGxpc3QKTGludXgtcm9ja2NoaXBAbGlzdHMuaW5mcmFkZWFkLm9yZwpodHRwOi8vbGlzdHMuaW5m
-cmFkZWFkLm9yZy9tYWlsbWFuL2xpc3RpbmZvL2xpbnV4LXJvY2tjaGlwCg==
+On 2016/6/20 16:34, Seung-Woo Kim wrote:
+> Hi folks,
+>
+> During booting test on my Exynos5422 based Odroid-XU3, kernel compiled
+> with CONFIG_DMA_API_DEBUG reported following warning:
+>
+> ------------[ cut here ]------------
+> WARNING: CPU: 0 PID: 0 at lib/dma-debug.c:1096 check_unmap+0x7bc/0xb38
+> dwmmc_exynos 12200000.mmc: DMA-API: device driver tries to free DMA memory it has not allocated [device address=0x000000006d9d2200]
+
+Thanks for this report and fix.
+
+DTO(the same as IDMAC-RI/TI) interrupts may or may not come together 
+with DATA_ERR. If DATA_ERR occur without geting DTO, we should issue
+CMD12 manually to generate DTO. It's a ugly deisgn for dwmmc but from
+the vendor's ask.
+
+So you should never think we complete the xfer without
+checking DATA_ERR. This way you got the warning.
+
+So could you try this one:
+
+--- a/drivers/mmc/host/dw_mmc.c
++++ b/drivers/mmc/host/dw_mmc.c
+@@ -2474,7 +2474,8 @@ static irqreturn_t dw_mci_interrupt(int irq, void 
+*dev_id)
+                         mci_writel(host, IDSTS64, SDMMC_IDMAC_INT_TI |
+ 
+SDMMC_IDMAC_INT_RI);
+                         mci_writel(host, IDSTS64, SDMMC_IDMAC_INT_NI);
+-                       host->dma_ops->complete((void *)host);
++                       if (!test_bit(EVENT_DATA_ERROR, 
+&host->pending_events))
++                               host->dma_ops->complete((void *)host);
+                 }
+         } else {
+                 pending = mci_readl(host, IDSTS);
+@@ -2482,7 +2483,8 @@ static irqreturn_t dw_mci_interrupt(int irq, void 
+*dev_id)
+                         mci_writel(host, IDSTS, SDMMC_IDMAC_INT_TI |
+ 
+SDMMC_IDMAC_INT_RI);
+                         mci_writel(host, IDSTS, SDMMC_IDMAC_INT_NI);
+-                       host->dma_ops->complete((void *)host);
++                       if (!test_bit(EVENT_DATA_ERROR, 
+&host->pending_events))
++                               host->dma_ops->complete((void *)host);
+                 }
+         }
+
+
+> [size=128 bytes]
+> Modules linked in:
+> CPU: 0 PID: 0 Comm: swapper/0 Not tainted 4.7.0-rc4 #26
+> Hardware name: SAMSUNG EXYNOS (Flattened Device Tree)
+> [<c0112b4c>] (unwind_backtrace) from [<c010d888>] (show_stack+0x20/0x24)
+> [<c010d888>] (show_stack) from [<c03fab0c>] (dump_stack+0x80/0x94)
+> [<c03fab0c>] (dump_stack) from [<c0123548>] (__warn+0xf8/0x110)
+> [<c0123548>] (__warn) from [<c01235a8>] (warn_slowpath_fmt+0x48/0x50)
+> [<c01235a8>] (warn_slowpath_fmt) from [<c042ac90>] (check_unmap+0x7bc/0xb38)
+> [<c042ac90>] (check_unmap) from [<c042b25c>] (debug_dma_unmap_sg+0x118/0x148)
+> [<c042b25c>] (debug_dma_unmap_sg) from [<c077512c>] (dw_mci_dma_cleanup+0x7c/0xb8)
+> [<c077512c>] (dw_mci_dma_cleanup) from [<c0773f24>] (dw_mci_stop_dma+0x40/0x50)
+> [<c0773f24>] (dw_mci_stop_dma) from [<c0777d04>] (dw_mci_tasklet_func+0x130/0x3b4)
+> [<c0777d04>] (dw_mci_tasklet_func) from [<c0129760>] (tasklet_action+0xb4/0x150)
+> [<c0129760>] (tasklet_action) from [<c0101674>] (__do_softirq+0xe4/0x3cc)
+> [<c0101674>] (__do_softirq) from [<c0129030>] (irq_exit+0xd0/0x10c)
+> [<c0129030>] (irq_exit) from [<c01778a0>] (__handle_domain_irq+0x90/0xfc)
+> [<c01778a0>] (__handle_domain_irq) from [<c0101548>] (gic_handle_irq+0x64/0xa8)
+> [<c0101548>] (gic_handle_irq) from [<c010e3d4>] (__irq_svc+0x54/0x90)
+> Exception stack(0xc1101ef8 to 0xc1101f40)
+> 1ee0:                                                       00000001 00000000
+> 1f00: 00000000 c011b600 c1100000 c110753c 00000000 c11c3984 c11074d4 c1107548
+> 1f20: 00000000 c1101f54 c1101f58 c1101f48 c010a1fc c010a200 60000013 ffffffff
+> [<c010e3d4>] (__irq_svc) from [<c010a200>] (arch_cpu_idle+0x48/0x4c)
+> [<c010a200>] (arch_cpu_idle) from [<c01669d8>] (default_idle_call+0x30/0x3c)
+> [<c01669d8>] (default_idle_call) from [<c0166d3c>] (cpu_startup_entry+0x358/0x3b4)
+> [<c0166d3c>] (cpu_startup_entry) from [<c0aa6ab8>] (rest_init+0x94/0x98)
+> [<c0aa6ab8>] (rest_init) from [<c1000d58>] (start_kernel+0x3a4/0x3b0)
+> [<c1000d58>] (start_kernel) from [<4000807c>] (0x4000807c)
+> ---[ end trace 256f83eed365daf0 ]---
+>
+> The warning occurs because after complete callback function,
+> dw_mci_dmac_complete_dma() is called, then dw_mci_stop_dma() is called
+> again. So it causes dma_unmap_sg() is called twice for same sg. It
+> occurs during clock setting at booting time.
+>
+> Simply, clearing host->using_dma flag on dw_mci_dmac_complete_dma() and
+> dw_mci_stop_dma() like following fixes the issue, but I am not sure
+> this approach is proper.
+> ---
+> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+> index 2cc6123..a71c94b 100644
+> --- a/drivers/mmc/host/dw_mmc.c
+> +++ b/drivers/mmc/host/dw_mmc.c
+> @@ -388,6 +388,7 @@ static void dw_mci_stop_dma(struct dw_mci *host)
+>  	if (host->using_dma) {
+>  		host->dma_ops->stop(host);
+>  		host->dma_ops->cleanup(host);
+> +		host->using_dma = 0;
+>  	}
+>
+>  	/* Data transfer was stopped by the interrupt handler */
+> @@ -455,6 +456,7 @@ static void dw_mci_dmac_complete_dma(void *arg)
+>  				    DMA_FROM_DEVICE);
+>
+>  	host->dma_ops->cleanup(host);
+> +	host->using_dma = 0;
+>
+>  	/*
+>  	 * If the card was removed, data will be NULL. No point in trying to
+> @@ -943,8 +945,6 @@ static int dw_mci_submit_data_dma(struct dw_mci *host, struct mmc_data *data)
+>  	int sg_len;
+>  	u32 temp;
+>
+> -	host->using_dma = 0;
+> -
+>  	/* If we don't have a channel, we can't do DMA */
+>  	if (!host->use_dma)
+>  		return -ENODEV;
+> ---
+>
+> Best Regards,
+> - Seung-Woo Kim
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
+
+
+-- 
+Best Regards
+Shawn Lin
+
