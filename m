@@ -1,155 +1,189 @@
-From: Shawn Lin <shawn.lin@rock-chips.com>
-Subject: Re: mmc: dw_mmc: warning with CONFIG_DMA_API_DEBUG
-Date: Tue, 21 Jun 2016 09:52:17 +0800
-Message-ID: <a50cabe9-2e41-92be-b886-103e2bb4edba@rock-chips.com>
-References: <001501d1cace$9b8f2b60$d2ad8220$@samsung.com>
+From: Peter Chen <hzpeterchen@gmail.com>
+Subject: Re: [PATCH 08/12] doc: binding: pwrseq-usb-generic: add binding doc
+ for generic usb power sequence driver
+Date: Tue, 21 Jun 2016 10:11:17 +0800
+Message-ID: <20160621021117.GD26936@shlinux2>
+References: <1466158165-9380-1-git-send-email-peter.chen@nxp.com>
+ <1466158165-9380-9-git-send-email-peter.chen@nxp.com>
+ <CAL_JsqLvs0s2TyfqPM5vtmyY81_X84VjCGjsGYbTgT4syOfp9Q@mail.gmail.com>
+ <20160620112651.GA26936@shlinux2>
+ <20160620161607.GA11427@rob-hp-laptop>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from lucky1.263xmail.com ([211.157.147.134]:53523 "EHLO
-	lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751235AbcFUBw2 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 20 Jun 2016 21:52:28 -0400
-In-Reply-To: <001501d1cace$9b8f2b60$d2ad8220$@samsung.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-pm-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <20160620161607.GA11427@rob-hp-laptop>
+Sender: linux-pm-owner@vger.kernel.org
+To: Rob Herring <robh@kernel.org>
+Cc: Peter Chen <peter.chen@nxp.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Alan Stern <stern@rowland.harvard.edu>, Ulf Hansson <ulf.hansson@linaro.org>, Mark Brown <broonie@kernel.org>, Sebastian Reichel <sre@kernel.org>, Mark Rutland <mark.rutland@arm.com>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, Krzysztof =?utf-8?Q?Koz=C5=82owski?= <k.kozlowski@samsung.com>, Stephen Boyd <stephen.boyd@linaro.org>, oscar@naiandei.net, Arnd Bergmann <arnd@arndb.de>, Pawel Moll <pawel.moll@arm.com>, "linux-pm@vger.kernel.org" <linux-pm@vger.kernel.org>, Sascha Hauer <s.hauer@pengutronix.de>, Linux USB List <linux-usb@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "Maciej S. Szmigiero" <mail@maciej.szmigiero.name>, troy.kisky@boundarydevices.com, Javier Martinez Canillas <javier@osg.samsung.com>, Philipp Zabel <p.zabel@pengutronix.>
 List-Id: linux-mmc@vger.kernel.org
-To: Seung-Woo Kim <sw0312.kim@samsung.com>, jh80.chung@samsung.com, ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
-Cc: shawn.lin@rock-chips.com
 
-On 2016/6/20 16:34, Seung-Woo Kim wrote:
-> Hi folks,
->
-> During booting test on my Exynos5422 based Odroid-XU3, kernel compiled
-> with CONFIG_DMA_API_DEBUG reported following warning:
->
-> ------------[ cut here ]------------
-> WARNING: CPU: 0 PID: 0 at lib/dma-debug.c:1096 check_unmap+0x7bc/0xb38
-> dwmmc_exynos 12200000.mmc: DMA-API: device driver tries to free DMA memory it has not allocated [device address=0x000000006d9d2200]
+On Mon, Jun 20, 2016 at 11:16:07AM -0500, Rob Herring wrote:
+> On Mon, Jun 20, 2016 at 07:26:51PM +0800, Peter Chen wrote:
+> > On Fri, Jun 17, 2016 at 12:16:48PM -0500, Rob Herring wrote:
+> > > On Fri, Jun 17, 2016 at 5:09 AM, Peter Chen <peter.chen@nxp.com> wrote:
+> > > > Add binding doc for generic usb power sequence driver, and update
+> > > > generic usb device binding-doc accordingly.
+> > > >
+> > > > Signed-off-by: Peter Chen <peter.chen@nxp.com>
+> > > > ---
+> > > >  .../bindings/power/pwrseq/pwrseq-usb-generic.txt   | 31 ++++++++++++++++++++++
+> > > >  .../devicetree/bindings/usb/usb-device.txt         |  2 ++
+> > > >  2 files changed, 33 insertions(+)
+> > > >  create mode 100644 Documentation/devicetree/bindings/power/pwrseq/pwrseq-usb-generic.txt
+> > > >
+> > > > diff --git a/Documentation/devicetree/bindings/power/pwrseq/pwrseq-usb-generic.txt b/Documentation/devicetree/bindings/power/pwrseq/pwrseq-usb-generic.txt
+> > > > new file mode 100644
+> > > > index 0000000..8ad98382
+> > > > --- /dev/null
+> > > > +++ b/Documentation/devicetree/bindings/power/pwrseq/pwrseq-usb-generic.txt
+> > > > @@ -0,0 +1,31 @@
+> > > > +The power sequence for generic USB Devices
+> > > > +
+> > > > +Some hard-wired USB devices need to do power sequence to let the
+> > > > +device work normally, the typical power sequence like: enable USB
+> > > > +PHY clock, toggle reset pin, etc. But current Linux USB driver
+> > > > +lacks of such code to do it, it may cause some hard-wired USB devices
+> > > > +works abnormal or can't be recognized by controller at all. The
+> > > > +power sequence will be done before this device can be found at USB
+> > > > +bus.
+> > > > +
+> > > > +Required properties:
+> > > > +- compatible : contains "usb-pwrseq-generic".
+> > > 
+> > > In case I have not been clear, no.
+> > > 
+> > > I am not going to accept anything along the lines of the current mmc
+> > > pwrseq. I am basically okay with Krzysztof's proposal as it is *only*
+> > > an added property and not a duplication of information. I'd suggest
+> > > you figure out how to make the kernel work with that rather than
+> > > trying to work-around whatever kernel limitations there are.
+> > > 
+> > 
+> > I see.
+> > 
+> > Would you agree with below:
+> 
+> In general, yes. There are some points being discussed in the other 
+> thread.
+> 
+> > &usbotg1 {
+> > 	vbus-supply = <&reg_usb_otg1_vbus>;
+> > 	pinctrl-names = "default";
+> > 	pinctrl-0 = <&pinctrl_usb_otg1_id>;
+> > 	status = "okay";
+> > 
+> > 	#address-cells = <1>;
+> > 	#size-cells = <0>;
+> > 	hub: genesys@1 {
+> > 		compatible = "usb5e3,608";
+> > 		reg = <1>;
+> > 
+> > 		power-sequence;
+> > 		reset-gpios = <&gpio4 5 GPIO_ACTIVE_LOW>; /* hub reset pin */
+> > 		reset-duration-us = <10>;
+> 
+> I wonder if this really needs to be specified. A sufficiently long 
+> default should be good enough for 90 something % of devices.
+> 
 
-Thanks for this report and fix.
+This property is optional, there is a default value in pwrseq driver.
 
-DTO(the same as IDMAC-RI/TI) interrupts may or may not come together 
-with DATA_ERR. If DATA_ERR occur without geting DTO, we should issue
-CMD12 manually to generate DTO. It's a ugly deisgn for dwmmc but from
-the vendor's ask.
+> > 		clocks = <&clks IMX6SX_CLK_CKO>;
+> > 
+> > 		#address-cells = <1>;
+> > 		#size-cells = <0>;
+> > 		ethernet: asix@1 {
+> > 			compatible = "usbb95,1708";
+> > 			reg = <1>;
+> > 
+> > 			power-sequence;
+> > 			reset-gpios = <&gpio4 6 GPIO_ACTIVE_LOW>; /* ethernet_rst */
+> > 			reset-duration-us = <15>;
+> > 			clocks = <&clks IMX6SX_CLK_IPG>;
+> > 		};
+> > 	};
+> > };
+> > 
+> > If the node has property "power-sequence", the pwrseq core will create
+> > related platform device, and the driver under pwrseq driver will handle
+> > power sequence stuffs. 
+> 
+> This I have issue with. If you are creating a platform device here, you 
+> are trying to work-around limitations in the linux driver model.
 
-So you should never think we complete the xfer without
-checking DATA_ERR. This way you got the warning.
+My current solution like below, but it seems you didn't agree with that.
+I just double confirm here, if you don't, I give up the solution for
+using generic power sequence framework.
 
-So could you try this one:
+In drivers/usb/core/hub.c
 
---- a/drivers/mmc/host/dw_mmc.c
-+++ b/drivers/mmc/host/dw_mmc.c
-@@ -2474,7 +2474,8 @@ static irqreturn_t dw_mci_interrupt(int irq, void 
-*dev_id)
-                         mci_writel(host, IDSTS64, SDMMC_IDMAC_INT_TI |
- 
-SDMMC_IDMAC_INT_RI);
-                         mci_writel(host, IDSTS64, SDMMC_IDMAC_INT_NI);
--                       host->dma_ops->complete((void *)host);
-+                       if (!test_bit(EVENT_DATA_ERROR, 
-&host->pending_events))
-+                               host->dma_ops->complete((void *)host);
-                 }
-         } else {
-                 pending = mci_readl(host, IDSTS);
-@@ -2482,7 +2483,8 @@ static irqreturn_t dw_mci_interrupt(int irq, void 
-*dev_id)
-                         mci_writel(host, IDSTS, SDMMC_IDMAC_INT_TI |
- 
-SDMMC_IDMAC_INT_RI);
-                         mci_writel(host, IDSTS, SDMMC_IDMAC_INT_NI);
--                       host->dma_ops->complete((void *)host);
-+                       if (!test_bit(EVENT_DATA_ERROR, 
-&host->pending_events))
-+                               host->dma_ops->complete((void *)host);
-                 }
-         }
+	for_each_child_of_node(parent->of_node, node) {
+		hdev_pwrseq = pwrseq_alloc(node, "usb_pwrseq_generic");
+		if (!IS_ERR_OR_NULL(hdev_pwrseq)) {
+			pwrseq_node = kzalloc(sizeof(pwrseq_node), GFP_KERNEL);
+			if (!pwrseq_node) {
+				ret = -ENOMEM;
+				goto err1;
+			}
+			/* power on sequence */
+			ret = pwrseq_pre_power_on(hdev_pwrseq);
+			if (ret)
+				goto err2;
 
+			pwrseq_node->pwrseq_on = hdev_pwrseq;
+			list_add(&pwrseq_node->list, &hub->pwrseq_list);
+		} else if (IS_ERR(hdev_pwrseq)) {
+			return PTR_ERR(hdev_pwrseq);
+		}
+	}
 
-> [size=128 bytes]
-> Modules linked in:
-> CPU: 0 PID: 0 Comm: swapper/0 Not tainted 4.7.0-rc4 #26
-> Hardware name: SAMSUNG EXYNOS (Flattened Device Tree)
-> [<c0112b4c>] (unwind_backtrace) from [<c010d888>] (show_stack+0x20/0x24)
-> [<c010d888>] (show_stack) from [<c03fab0c>] (dump_stack+0x80/0x94)
-> [<c03fab0c>] (dump_stack) from [<c0123548>] (__warn+0xf8/0x110)
-> [<c0123548>] (__warn) from [<c01235a8>] (warn_slowpath_fmt+0x48/0x50)
-> [<c01235a8>] (warn_slowpath_fmt) from [<c042ac90>] (check_unmap+0x7bc/0xb38)
-> [<c042ac90>] (check_unmap) from [<c042b25c>] (debug_dma_unmap_sg+0x118/0x148)
-> [<c042b25c>] (debug_dma_unmap_sg) from [<c077512c>] (dw_mci_dma_cleanup+0x7c/0xb8)
-> [<c077512c>] (dw_mci_dma_cleanup) from [<c0773f24>] (dw_mci_stop_dma+0x40/0x50)
-> [<c0773f24>] (dw_mci_stop_dma) from [<c0777d04>] (dw_mci_tasklet_func+0x130/0x3b4)
-> [<c0777d04>] (dw_mci_tasklet_func) from [<c0129760>] (tasklet_action+0xb4/0x150)
-> [<c0129760>] (tasklet_action) from [<c0101674>] (__do_softirq+0xe4/0x3cc)
-> [<c0101674>] (__do_softirq) from [<c0129030>] (irq_exit+0xd0/0x10c)
-> [<c0129030>] (irq_exit) from [<c01778a0>] (__handle_domain_irq+0x90/0xfc)
-> [<c01778a0>] (__handle_domain_irq) from [<c0101548>] (gic_handle_irq+0x64/0xa8)
-> [<c0101548>] (gic_handle_irq) from [<c010e3d4>] (__irq_svc+0x54/0x90)
-> Exception stack(0xc1101ef8 to 0xc1101f40)
-> 1ee0:                                                       00000001 00000000
-> 1f00: 00000000 c011b600 c1100000 c110753c 00000000 c11c3984 c11074d4 c1107548
-> 1f20: 00000000 c1101f54 c1101f58 c1101f48 c010a1fc c010a200 60000013 ffffffff
-> [<c010e3d4>] (__irq_svc) from [<c010a200>] (arch_cpu_idle+0x48/0x4c)
-> [<c010a200>] (arch_cpu_idle) from [<c01669d8>] (default_idle_call+0x30/0x3c)
-> [<c01669d8>] (default_idle_call) from [<c0166d3c>] (cpu_startup_entry+0x358/0x3b4)
-> [<c0166d3c>] (cpu_startup_entry) from [<c0aa6ab8>] (rest_init+0x94/0x98)
-> [<c0aa6ab8>] (rest_init) from [<c1000d58>] (start_kernel+0x3a4/0x3b0)
-> [<c1000d58>] (start_kernel) from [<4000807c>] (0x4000807c)
-> ---[ end trace 256f83eed365daf0 ]---
->
-> The warning occurs because after complete callback function,
-> dw_mci_dmac_complete_dma() is called, then dw_mci_stop_dma() is called
-> again. So it causes dma_unmap_sg() is called twice for same sg. It
-> occurs during clock setting at booting time.
->
-> Simply, clearing host->using_dma flag on dw_mci_dmac_complete_dma() and
-> dw_mci_stop_dma() like following fixes the issue, but I am not sure
-> this approach is proper.
-> ---
-> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-> index 2cc6123..a71c94b 100644
-> --- a/drivers/mmc/host/dw_mmc.c
-> +++ b/drivers/mmc/host/dw_mmc.c
-> @@ -388,6 +388,7 @@ static void dw_mci_stop_dma(struct dw_mci *host)
->  	if (host->using_dma) {
->  		host->dma_ops->stop(host);
->  		host->dma_ops->cleanup(host);
-> +		host->using_dma = 0;
->  	}
->
->  	/* Data transfer was stopped by the interrupt handler */
-> @@ -455,6 +456,7 @@ static void dw_mci_dmac_complete_dma(void *arg)
->  				    DMA_FROM_DEVICE);
->
->  	host->dma_ops->cleanup(host);
-> +	host->using_dma = 0;
->
->  	/*
->  	 * If the card was removed, data will be NULL. No point in trying to
-> @@ -943,8 +945,6 @@ static int dw_mci_submit_data_dma(struct dw_mci *host, struct mmc_data *data)
->  	int sg_len;
->  	u32 temp;
->
-> -	host->using_dma = 0;
-> -
->  	/* If we don't have a channel, we can't do DMA */
->  	if (!host->use_dma)
->  		return -ENODEV;
-> ---
->
-> Best Regards,
-> - Seung-Woo Kim
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
+In drivers/power/pwrseq/core.c
 
+struct pwrseq *pwrseq_alloc(struct device_node *np, const char *dev_name)
+{
+	struct pwrseq *p, *pwrseq = NULL;
+	bool created;
+
+	/* If there is no device is associated with this node, create it */
+	if (!of_find_device_by_node(np)) {
+		if (of_platform_device_create(np, dev_name, NULL))
+			created = true;
+		else
+			return ERR_PTR(-ENODEV);
+	}
+
+	mutex_lock(&pwrseq_list_mutex);
+	list_for_each_entry(p, &pwrseq_list, pwrseq_node) {
+		if (p->dev->of_node == np) {
+			if (!try_module_get(p->owner))
+				dev_err(p->dev,
+					"increasing module refcount failed\n");
+			else
+				pwrseq = p;
+			break;
+		}
+	}
+
+And there is a platform driver at drivers/power/pwrseq/pwrseq_usb_generic.c
+to handle these pwrseq properties, see my patch 9/12.
+
+> Either 
+> we need some sort of pre-probe hook to the drivers to call or each 
+> parent node driver is responsible for checking and calling pwr-seq 
+> functions for child nodes. e.g. The host controller calls pwr-seq for 
+> the hub, the hub driver calls the power seq for the asix chip. Soon as 
+> we have a case too complex for the generic pwr-seq, we're going to need 
+> the pre-probe hook as I don't want to see a continual expansion of 
+> generic pwr-seq binding for ever more complex cases.
+> 
+
+How the driver know what it needs to handle (eg, gpio, clock) if there
+is no device for it? The most important we need to consider is which
+device owns there power sequence properties, then the corresponding
+driver can handle it.
 
 -- 
-Best Regards
-Shawn Lin
 
+Best Regards,
+Peter Chen
