@@ -1,53 +1,87 @@
-From: Gerd Hoffmann <kraxel@redhat.com>
-Subject: Re: [PATCH 0/5] mmc: bcm2835-sdhost: Add new driver for the
- internal SD controller.
-Date: Wed, 22 Jun 2016 19:02:07 +0200
-Message-ID: <1466614927.16954.66.camel@redhat.com>
-References: <1466595738-2229-1-git-send-email-kraxel@redhat.com>
-	 <CAPDyKFpak075H7aAH14-LLzKFtE6-n+x5u+k_dvT6Oi5=sgXeQ@mail.gmail.com>
+From: Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: [PATCH] mmc: pwrseq-simple: Add an optional post-power-on-delay
+Date: Wed, 22 Jun 2016 19:59:08 +0200
+Message-ID: <1466618348-32304-1-git-send-email-hdegoede@redhat.com>
+Reply-To: hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 8BIT
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:56759 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750970AbcFVRCL convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 22 Jun 2016 13:02:11 -0400
-In-Reply-To: <CAPDyKFpak075H7aAH14-LLzKFtE6-n+x5u+k_dvT6Oi5=sgXeQ@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-sunxi+bncBDRZXY4CYYORB5VDVO5QKGQE7R2YZYY-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+Sender: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
+List-Post: <https://groups.google.com/group/linux-sunxi/post>, <mailto:linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Help: <https://groups.google.com/support/>, <mailto:linux-sunxi+help-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Archive: <https://groups.google.com/group/linux-sunxi
+List-Subscribe: <https://groups.google.com/group/linux-sunxi/subscribe>, <mailto:linux-sunxi+subscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Unsubscribe: <mailto:googlegroups-manage+1076902468213+unsubscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>,
+ <https://groups.google.com/group/linux-sunxi/subscribe>
+To: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Srinivas Kandagatla <srinivas.kandagatla-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>, Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, devicetree <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-rpi-kernel@lists.infradead.org, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, linux-mmc <linux-mmc@vger.kernel.org>, Eric Anholt <eric@anholt.net>
 
-On Mi, 2016-06-22 at 16:41 +0200, Ulf Hansson wrote:
-> On 22 June 2016 at 13:42, Gerd Hoffmann <kraxel@redhat.com> wrote:
-> >   Hi,
-> >
-> > Here is the bcm2835-sdhost driver.  Patches 1+2 are unmodified from
-> > Eric, patches 3+4 are incremental fixes.  Left them separate for now,
-> > to make it easier to review, should probably squashed in for the final
-> > version.  Patch 5 adds it to the device tree, in disabled state.
-> >
-> > Actually enabling the thing depends on a bunch of changes in the gpio
-> > handling of the device tree.  Leaving that for another day ...
+Some devices need a while to boot their firmware after providing clks /
+de-asserting resets before they are ready to receive sdio commands.
 
-> Why did you post this?
+This commits adds a post-power-on-delay-ms devicetree property to
+mmc-pwrseq-simple for use with such devices.
 
-See patch 2/5:
+Signed-off-by: Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+---
+ Documentation/devicetree/bindings/mmc/mmc-pwrseq-simple.txt | 2 ++
+ drivers/mmc/core/pwrseq_simple.c                            | 9 +++++++++
+ 2 files changed, 11 insertions(+)
 
-<quote>
-The 2835 has two SD controllers: The Arasan SDHCI controller that we
-currently use, and a custom SD controller.  The custom one runs faster
-</quote>
-
-> I think you should be adopting sdhci-iproc - in case there are issues
-> with its bcm2835 support, right!?
-
-sdhci-iproc drives the sdhci controller just fine, the new driver is for
-the custom controller.  On the rpi3 you can even use both in parallel,
-with the sdcard handled via custom sd controller and the wifi handled by
-sdhci-iproc.
-
-cheers,
-  Gerd
-
+diff --git a/Documentation/devicetree/bindings/mmc/mmc-pwrseq-simple.txt b/Documentation/devicetree/bindings/mmc/mmc-pwrseq-simple.txt
+index ce0e767..e254368 100644
+--- a/Documentation/devicetree/bindings/mmc/mmc-pwrseq-simple.txt
++++ b/Documentation/devicetree/bindings/mmc/mmc-pwrseq-simple.txt
+@@ -16,6 +16,8 @@ Optional properties:
+   See ../clocks/clock-bindings.txt for details.
+ - clock-names : Must include the following entry:
+   "ext_clock" (External clock provided to the card).
++- post-power-on-delay-ms : Delay in ms after powering the card and
++	de-asserting the reset-gpios (if any)
+ 
+ Example:
+ 
+diff --git a/drivers/mmc/core/pwrseq_simple.c b/drivers/mmc/core/pwrseq_simple.c
+index 450d907..1304160 100644
+--- a/drivers/mmc/core/pwrseq_simple.c
++++ b/drivers/mmc/core/pwrseq_simple.c
+@@ -16,6 +16,8 @@
+ #include <linux/device.h>
+ #include <linux/err.h>
+ #include <linux/gpio/consumer.h>
++#include <linux/delay.h>
++#include <linux/property.h>
+ 
+ #include <linux/mmc/host.h>
+ 
+@@ -24,6 +26,7 @@
+ struct mmc_pwrseq_simple {
+ 	struct mmc_pwrseq pwrseq;
+ 	bool clk_enabled;
++	u32 post_power_on_delay_ms;
+ 	struct clk *ext_clk;
+ 	struct gpio_descs *reset_gpios;
+ };
+@@ -64,6 +67,9 @@ static void mmc_pwrseq_simple_post_power_on(struct mmc_host *host)
+ 	struct mmc_pwrseq_simple *pwrseq = to_pwrseq_simple(host->pwrseq);
+ 
+ 	mmc_pwrseq_simple_set_gpios_value(pwrseq, 0);
++
++	if (pwrseq->post_power_on_delay_ms)
++		msleep(pwrseq->post_power_on_delay_ms);
+ }
+ 
+ static void mmc_pwrseq_simple_power_off(struct mmc_host *host)
+@@ -111,6 +117,9 @@ static int mmc_pwrseq_simple_probe(struct platform_device *pdev)
+ 		return PTR_ERR(pwrseq->reset_gpios);
+ 	}
+ 
++	device_property_read_u32(dev, "post-power-on-delay-ms",
++				 &pwrseq->post_power_on_delay_ms);
++
+ 	pwrseq->pwrseq.dev = dev;
+ 	pwrseq->pwrseq.ops = &mmc_pwrseq_simple_ops;
+ 	pwrseq->pwrseq.owner = THIS_MODULE;
+-- 
+2.7.4
