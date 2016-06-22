@@ -1,44 +1,73 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 0/2] mmc: remove sdhci-bcm2835
-Date: Wed, 22 Jun 2016 17:22:58 +0200
-Message-ID: <CAPDyKFoMzadox1k0xqprMfvoR6b+tHNpjtZb8pB1FZo6QmKqGg@mail.gmail.com>
-References: <1464983233-27001-1-git-send-email-stefan.wahren@i2se.com>
+Subject: Re: [PATCH v3] CHROMIUM: mmc: Set pref erase size based on size.
+Date: Wed, 22 Jun 2016 17:23:04 +0200
+Message-ID: <CAPDyKFqdBLcqTEC98EvVOj0bN-BM9dcpT7CEd6Q+MyOOKPOx-A@mail.gmail.com>
+References: <1464913638-5283-1-git-send-email-gwendal@chromium.org> <1464970132-26197-1-git-send-email-gwendal@chromium.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wm0-f46.google.com ([74.125.82.46]:37299 "EHLO
-	mail-wm0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752092AbcFVPXB (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 22 Jun 2016 11:23:01 -0400
-Received: by mail-wm0-f46.google.com with SMTP id a66so11087720wme.0
-        for <linux-mmc@vger.kernel.org>; Wed, 22 Jun 2016 08:23:00 -0700 (PDT)
-In-Reply-To: <1464983233-27001-1-git-send-email-stefan.wahren@i2se.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1464970132-26197-1-git-send-email-gwendal@chromium.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Gwendal Grignou <gwendal@chromium.org>
+Cc: Grant Grundler <grundler@chromium.org>, Jens Axboe <axboe@kernel.dk>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Stefan Wahren <stefan.wahren@i2se.com>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, Eric Anholt <eric@anholt.net>, Stephen Warren <swarren@wwwdotorg.org>, Lee Jones <lee@kernel.org>, Rob Herring <robh+dt@kernel.org>, Pawel Moll <pawel.moll@arm.com>, Mark Rutland <mark.rutland@arm.com>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, linux-rpi-kernel@lists.infradead.org, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, linux-mmc <linux-mmc@vger.kernel.org>
 
-On 3 June 2016 at 21:47, Stefan Wahren <stefan.wahren@i2se.com> wrote:
-> The sdhci-bcm2835 is no more needed since it has been replaced
-> by sdhci-iproc.
+On 3 June 2016 at 18:08, Gwendal Grignou <gwendal@chromium.org> wrote:
+> If available, eMMC stack uses HC_ERASE_GRP_SIZE as erase size.
+> The perfererred erase size may need to be bigger to ensure discard
+> operations are not too slow.
+> Some high capacity eMMC (64MB) reports erase size to 512kB, resulting in
+> long discard time.
+> Calculate prefeerred erase size based on eMMC size.
 >
-> Stefan Wahren (2):
->   DT: bindings: remove bcm2835-sdhci
->   mmc: sdhci-bcm2835: remove driver
->
->  .../devicetree/bindings/mmc/brcm,bcm2835-sdhci.txt |   18 --
->  drivers/mmc/host/Kconfig                           |   11 --
->  drivers/mmc/host/Makefile                          |    1 -
->  drivers/mmc/host/sdhci-bcm2835.c                   |  204 --------------------
->  4 files changed, 234 deletions(-)
->  delete mode 100644 Documentation/devicetree/bindings/mmc/brcm,bcm2835-sdhci.txt
->  delete mode 100644 drivers/mmc/host/sdhci-bcm2835.c
->
-> --
-> 1.7.9.5
->
+> Signed-off-by: Gwendal Grignou <gwendal@chromium.org>
 
-Thanks, applied for next!
+Thanks, applied for next! I did update the changelog as well as the
+comment in the code.
+
+Please next time, try to work a bit more on the changelog. It really
+helps when reviewing to understand what the change is all about.
 
 Kind regards
 Uffe
+
+> ---
+>  v2: fix comments
+>  v3: rereading the patch, we should not compare to hc_erase_size again,
+>      it has already been set properly in the caller function.
+>
+>  drivers/mmc/core/core.c | 14 +++++++-------
+>  1 file changed, 7 insertions(+), 7 deletions(-)
+>
+> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+> index ef76b1c..bd881a0 100644
+> --- a/drivers/mmc/core/core.c
+> +++ b/drivers/mmc/core/core.c
+> @@ -1987,17 +1987,17 @@ void mmc_init_erase(struct mmc_card *card)
+>          * to that size and alignment.
+>          *
+>          * For SD cards that define Allocation Unit size, limit erases to one
+> -        * Allocation Unit at a time.  For MMC cards that define High Capacity
+> -        * Erase Size, whether it is switched on or not, limit to that size.
+> -        * Otherwise just have a stab at a good value.  For modern cards it
+> -        * will end up being 4MiB.  Note that if the value is too small, it
+> -        * can end up taking longer to erase.
+> +        * Allocation Unit at a time.
+> +        * For MMC, have a stab at a good value.  For modern cards it
+> +        * will end up being 4MiB.
+> +        * Note that if the value is too small, it can end up taking longer to
+> +        * erase.
+> +        * erase_size is already set to High Capacity Erase Size if available
+> +        * when this function is called.
+>          */
+>         if (mmc_card_sd(card) && card->ssr.au) {
+>                 card->pref_erase = card->ssr.au;
+>                 card->erase_shift = ffs(card->ssr.au) - 1;
+> -       } else if (card->ext_csd.hc_erase_size) {
+> -               card->pref_erase = card->ext_csd.hc_erase_size;
+>         } else if (card->erase_size) {
+>                 sz = (card->csd.capacity << (card->csd.read_blkbits - 9)) >> 11;
+>                 if (sz < 128)
+> --
+> 2.8.0.rc3.226.g39d4020
+>
