@@ -1,56 +1,65 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: [PATCH] mmc: sdhci-pci: Add support for Intel KBP
-Date: Wed, 22 Jun 2016 14:19:13 +0300
-Message-ID: <1466594353-13730-1-git-send-email-adrian.hunter@intel.com>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga11.intel.com ([192.55.52.93]:44121 "EHLO mga11.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751745AbcFVL0x (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 22 Jun 2016 07:26:53 -0400
-Sender: linux-mmc-owner@vger.kernel.org
+From: Gerd Hoffmann <kraxel@redhat.com>
+Subject: [PATCH 4/5] mmc: bcm2835-sdhost: reset tweaks. [fixup]
+Date: Wed, 22 Jun 2016 13:42:17 +0200
+Message-ID: <1466595738-2229-5-git-send-email-kraxel@redhat.com>
+References: <1466595738-2229-1-git-send-email-kraxel@redhat.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <1466595738-2229-1-git-send-email-kraxel@redhat.com>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: linux-rpi-kernel@lists.infradead.org
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Stephen Warren <swarren@wwwdotorg.org>, Lee Jones <lee@kernel.org>, linux-mmc@vger.kernel.org, open list <linux-kernel@vger.kernel.org>, Eric Anholt <eric@anholt.net>, Gerd Hoffmann <kraxel@redhat.com>, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>
 
-Add PCI ID for Intel KBP SD host controller.
+Kill any pending stuff before calling reset_internal(), so there
+shouldn't be any completion callbacks interfering.  This allows
+to call reset_internal without lock, which in turn allows to
+turn the mdelay calls into msleep calls.  Also adjust the time
+from 10ms to 20ms as checkpatch warns about the 10ms.
 
-Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
+Signed-off-by: Gerd Hoffmann <kraxel@redhat.com>
 ---
- drivers/mmc/host/sdhci-pci-core.c | 8 ++++++++
- drivers/mmc/host/sdhci-pci.h      | 1 +
- 2 files changed, 9 insertions(+)
+ drivers/mmc/host/bcm2835-sdhost.c | 9 +++++----
+ 1 file changed, 5 insertions(+), 4 deletions(-)
 
-diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-pci-core.c
-index a4dbf7421edc..5b03a7ecc6c9 100644
---- a/drivers/mmc/host/sdhci-pci-core.c
-+++ b/drivers/mmc/host/sdhci-pci-core.c
-@@ -1215,6 +1215,14 @@ static const struct pci_device_id pci_ids[] = {
- 	},
+diff --git a/drivers/mmc/host/bcm2835-sdhost.c b/drivers/mmc/host/bcm2835-sdhost.c
+index 8a05c02..a895561 100644
+--- a/drivers/mmc/host/bcm2835-sdhost.c
++++ b/drivers/mmc/host/bcm2835-sdhost.c
+@@ -321,9 +321,9 @@ static void bcm2835_sdhost_reset_internal(struct bcm2835_host *host)
+ 	temp |= (FIFO_READ_THRESHOLD << SDEDM_READ_THRESHOLD_SHIFT) |
+ 		(FIFO_WRITE_THRESHOLD << SDEDM_WRITE_THRESHOLD_SHIFT);
+ 	bcm2835_sdhost_write(host, temp, SDEDM);
+-	mdelay(10);
++	msleep(20);
+ 	bcm2835_sdhost_set_power(host, true);
+-	mdelay(10);
++	msleep(20);
+ 	host->clock = 0;
+ 	bcm2835_sdhost_write(host, host->hcfg, SDHCFG);
+ 	bcm2835_sdhost_write(host, host->cdiv, SDCDIV);
+@@ -334,9 +334,10 @@ static void bcm2835_sdhost_reset(struct mmc_host *mmc)
+ 	struct bcm2835_host *host = mmc_priv(mmc);
+ 	unsigned long flags;
  
- 	{
-+		.vendor		= PCI_VENDOR_ID_INTEL,
-+		.device		= PCI_DEVICE_ID_INTEL_KBP_SD,
-+		.subvendor	= PCI_ANY_ID,
-+		.subdevice	= PCI_ANY_ID,
-+		.driver_data	= (kernel_ulong_t)&sdhci_intel_byt_sd,
-+	},
-+
-+	{
- 		.vendor		= PCI_VENDOR_ID_O2,
- 		.device		= PCI_DEVICE_ID_O2_8120,
- 		.subvendor	= PCI_ANY_ID,
-diff --git a/drivers/mmc/host/sdhci-pci.h b/drivers/mmc/host/sdhci-pci.h
-index 89e7151684a1..968b81ed8e4d 100644
---- a/drivers/mmc/host/sdhci-pci.h
-+++ b/drivers/mmc/host/sdhci-pci.h
-@@ -34,6 +34,7 @@
- #define PCI_DEVICE_ID_INTEL_APL_SD	0x5aca
- #define PCI_DEVICE_ID_INTEL_APL_EMMC	0x5acc
- #define PCI_DEVICE_ID_INTEL_APL_SDIO	0x5ad0
-+#define PCI_DEVICE_ID_INTEL_KBP_SD	0xa2f5
+-	spin_lock_irqsave(&host->lock, flags);
++	if (host->dma_chan)
++		dmaengine_terminate_sync(host->dma_chan);
++	tasklet_kill(&host->finish_tasklet);
+ 	bcm2835_sdhost_reset_internal(host);
+-	spin_unlock_irqrestore(&host->lock, flags);
+ }
  
- /*
-  * PCI registers
+ static void bcm2835_sdhost_set_ios(struct mmc_host *mmc, struct mmc_ios *ios);
 -- 
-1.9.1
-
+1.8.3.1
