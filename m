@@ -1,52 +1,44 @@
-From: Doug Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
-Subject: Re: [RFC PATCH 1/4] Documentation: mmc: add description for new caps
-Date: Wed, 22 Jun 2016 08:06:20 -0700
-Message-ID: <CAD=FV=WNaTEDyVNyteLq3O-BL9KxR49W=44jbXogKXd2dkDWDQ@mail.gmail.com>
-References: <1465373996-2485-1-git-send-email-shawn.lin@rock-chips.com> <1465374021-2526-1-git-send-email-shawn.lin@rock-chips.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH 0/2] mmc: remove sdhci-bcm2835
+Date: Wed, 22 Jun 2016 17:22:58 +0200
+Message-ID: <CAPDyKFoMzadox1k0xqprMfvoR6b+tHNpjtZb8pB1FZo6QmKqGg@mail.gmail.com>
+References: <1464983233-27001-1-git-send-email-stefan.wahren@i2se.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1465374021-2526-1-git-send-email-shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
-Cc: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Jaehoon Chung <jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "open list:ARM/Rockchip SoC..." <linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Olof Johansson <olof-nZhT3qVonbNeoWH0uzbU5w@public.gmane.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-wm0-f46.google.com ([74.125.82.46]:37299 "EHLO
+	mail-wm0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752092AbcFVPXB (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 22 Jun 2016 11:23:01 -0400
+Received: by mail-wm0-f46.google.com with SMTP id a66so11087720wme.0
+        for <linux-mmc@vger.kernel.org>; Wed, 22 Jun 2016 08:23:00 -0700 (PDT)
+In-Reply-To: <1464983233-27001-1-git-send-email-stefan.wahren@i2se.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Stefan Wahren <stefan.wahren@i2se.com>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, Eric Anholt <eric@anholt.net>, Stephen Warren <swarren@wwwdotorg.org>, Lee Jones <lee@kernel.org>, Rob Herring <robh+dt@kernel.org>, Pawel Moll <pawel.moll@arm.com>, Mark Rutland <mark.rutland@arm.com>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, linux-rpi-kernel@lists.infradead.org, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, linux-mmc <linux-mmc@vger.kernel.org>
 
-Hi,
-
-On Wed, Jun 8, 2016 at 1:20 AM, Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org> wrote:
-> Let's add some basic description for cap-no-sdio,
-> cap-no-sd and cap-no-mmc.
+On 3 June 2016 at 21:47, Stefan Wahren <stefan.wahren@i2se.com> wrote:
+> The sdhci-bcm2835 is no more needed since it has been replaced
+> by sdhci-iproc.
 >
-> Signed-off-by: Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
+> Stefan Wahren (2):
+>   DT: bindings: remove bcm2835-sdhci
+>   mmc: sdhci-bcm2835: remove driver
 >
-> ---
+>  .../devicetree/bindings/mmc/brcm,bcm2835-sdhci.txt |   18 --
+>  drivers/mmc/host/Kconfig                           |   11 --
+>  drivers/mmc/host/Makefile                          |    1 -
+>  drivers/mmc/host/sdhci-bcm2835.c                   |  204 --------------------
+>  4 files changed, 234 deletions(-)
+>  delete mode 100644 Documentation/devicetree/bindings/mmc/brcm,bcm2835-sdhci.txt
+>  delete mode 100644 drivers/mmc/host/sdhci-bcm2835.c
 >
->  Documentation/devicetree/bindings/mmc/mmc.txt | 3 +++
->  1 file changed, 3 insertions(+)
+> --
+> 1.7.9.5
 >
-> diff --git a/Documentation/devicetree/bindings/mmc/mmc.txt b/Documentation/devicetree/bindings/mmc/mmc.txt
-> index ecc007a..e16d42b 100644
-> --- a/Documentation/devicetree/bindings/mmc/mmc.txt
-> +++ b/Documentation/devicetree/bindings/mmc/mmc.txt
-> @@ -39,6 +39,9 @@ Optional properties:
->  - cap-power-off-card: powering off the card is safe
->  - cap-mmc-hw-reset: eMMC hardware reset is supported
->  - cap-sdio-irq: enable SDIO IRQ signalling on this interface
-> +- cap-no-sdio: skip sending sdio cmd during initialization
-> +- cap-no-sd: skip sending sd cmd during initialization
-> +- cap-no-mmc: skip sending mmc cmd during initialization
 
-In the past it has been determined that the "cap-" prefix is
-unnecessary.  Some properties still have "cap-" because of backward
-compatibility reasons, but as I understand it new properties shouldn't
-start with "cap-".
+Thanks, applied for next!
 
-See <https://lists.ozlabs.org/pipermail/devicetree-discuss/2013-June/034664.html>
-for reference.
-
--Doug
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Kind regards
+Uffe
