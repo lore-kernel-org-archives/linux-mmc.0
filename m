@@ -1,99 +1,91 @@
-From: Alex Lemberg <Alex.Lemberg-XdAiOPVOjttBDgjK7y7TUQ@public.gmane.org>
-Subject: Re: [PATCH] mmc: core: add auto bkops support
-Date: Wed, 22 Jun 2016 14:20:48 +0000
-Message-ID: <B9A5F20C-E8A0-4E81-BA07-79E60017E728@sandisk.com>
-References: <1465182439-27963-1-git-send-email-shawn.lin@rock-chips.com>
- <575E52AC.6000902@intel.com>
- <8bbb3f13-efb3-e963-e53f-cf2ca796f319@rock-chips.com>
- <575E6C11.8060709@intel.com>
- <b22ae70d-5128-639d-eef0-8ac9cdd2b8e4@rock-chips.com>
- <575EA651.7060606@intel.com>
- <CAPDyKFq7Pr1YiacwpeDq3eAYmApydTj8Kbkyh=Cb6+vJC9BV3Q@mail.gmail.com>
+From: Wolfram Sang <wsa@the-dreams.de>
+Subject: Re: [PATCH/RFC 3/4] mmc: renesas_sdhi: rename DMA source file as
+ renesas_sdhi_dma.c
+Date: Wed, 22 Jun 2016 16:21:10 +0200
+Message-ID: <20160622142110.GC1645@katana>
+References: <1465963317-28672-1-git-send-email-horms+renesas@verge.net.au>
+ <1465963317-28672-4-git-send-email-horms+renesas@verge.net.au>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-In-Reply-To: <CAPDyKFq7Pr1YiacwpeDq3eAYmApydTj8Kbkyh=Cb6+vJC9BV3Q-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-Content-Language: en-US
-Content-ID: <4B9096E46DCB874F946D074F155B9F65-GsdMcTDXqN6cE4WynfumptQqCkab/8FMAL8bYrjMMd8@public.gmane.org>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-rockchip>,
- <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-rockchip/>
-List-Post: <mailto:linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-List-Help: <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-rockchip>,
- <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
-Sender: "Linux-rockchip" <linux-rockchip-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-Errors-To: linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
-To: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>, Jaehoon
- Chung <jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>
-Cc: "open list:ARM/Rockchip SoC..." <linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, linux-mmc <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Doug Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="69pVuxX8awAiJ7fD"
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from sauhun.de ([89.238.76.85]:45515 "EHLO pokefinder.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1750910AbcFVOVq (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 22 Jun 2016 10:21:46 -0400
+Content-Disposition: inline
+In-Reply-To: <1465963317-28672-4-git-send-email-horms+renesas@verge.net.au>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Simon Horman <horms+renesas@verge.net.au>
+Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, Ulf Hansson <ulf.hansson@linaro.org>, Magnus Damm <magnus.damm@gmail.com>, linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org, Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
 
-DQoNCk9uIDYvMjIvMTYsIDE6MjEgUE0sICJVbGYgSGFuc3NvbiIgPHVsZi5oYW5zc29uQGxpbmFy
-by5vcmc+IHdyb3RlOg0KDQo+T24gMTMgSnVuZSAyMDE2IGF0IDE0OjI1LCBBZHJpYW4gSHVudGVy
-IDxhZHJpYW4uaHVudGVyQGludGVsLmNvbT4gd3JvdGU6DQo+PiBPbiAxMy8wNi8xNiAxMTo1OCwg
-U2hhd24gTGluIHdyb3RlOg0KPj4+IOWcqCAyMDE2LzYvMTMgMTY6MTcsIEFkcmlhbiBIdW50ZXIg
-5YaZ6YGTOg0KPj4+PiBPbiAxMy8wNi8xNiAxMDo0OCwgU2hhd24gTGluIHdyb3RlOg0KPj4+Pj4g
-T24gMjAxNi82LzEzIDE0OjI5LCBBZHJpYW4gSHVudGVyIHdyb3RlOg0KPj4+Pj4+IE9uIDA2LzA2
-LzE2IDA2OjA3LCBTaGF3biBMaW4gd3JvdGU6DQo+Pj4+Pj4+IEpFREVDIGVNTUMgdjUuMSBpbnRy
-b2R1Y2UgYW4gYXV0b25vbW91c2x5IGluaXRpYXRlZCBtZXRob2QNCj4+Pj4+Pj4gZm9yIGJhY2tn
-cm91bmQgb3BlcmF0aW9ucy4NCj4+Pj4+Pj4NCj4+Pj4+Pj4gSG9zdCB0aGF0IHdhbnRzIHRvIGVu
-YWJsZSB0aGUgZGV2aWNlIHRvIHBlcmZvcm0gYmFja2dyb3VuZA0KPj4+Pj4+PiBvcGVyYXRpb25z
-IGR1cmluZyBkZXZpY2UgaWRsZSB0aW1lLCBzaG91bGQgc2lnbmFsIHRoZSBkZXZpY2UNCj4+Pj4+
-Pj4gYnkgc2V0dGluZyBBVVRPX0VOIGluIEJLT1BTX0VOIGZpZWxkIEVYVF9DU0RbMTYzXSB0byAx
-Yi4gV2hlbg0KPj4+Pj4+PiB0aGlzIGJpdCBpcyBzZXQsIHRoZSBkZXZpY2UgbWF5IHN0YXJ0IG9y
-IHN0b3AgYmFja2dyb3VuZCBvcGVyYXRpb25zDQo+Pj4+Pj4+IHdoZW5ldmVyIGl0IHNlZXMgZml0
-LCB3aXRob3V0IGFueSBub3RpZmljYXRpb24gdG8gdGhlIGhvc3QuDQo+Pj4+Pj4+DQo+Pj4+Pj4+
-IFdoZW4gQVVUT19FTiBiaXQgaXMgc2V0LCB0aGUgaG9zdCBzaG91bGQga2VlcCB0aGUgZGV2aWNl
-IHBvd2VyDQo+Pj4+Pj4+IGFjdGl2ZS4gVGhlIGhvc3QgbWF5IHNldCBvciBjbGVhciB0aGlzIGJp
-dCBhdCBhbnkgdGltZSBiYXNlZCBvbg0KPj4+Pj4+PiBpdHMgcG93ZXIgY29uc3RyYWludHMgb3Ig
-b3RoZXIgY29uc2lkZXJhdGlvbnMuDQo+Pj4+Pj4+DQo+Pj4+Pj4+IEN1cnJlbnRseSB0aGUgbWFu
-dWFsIGJrb3BzIGlzIG9ubHkgYmUgdXNlZCB1bmRlciB0aGUgYXN5bmMgcmVxDQo+Pj4+Pj4+IGNp
-cmN1bXN0YW5jZXMgYW5kIGl0J3MgYSBiaXQgY29tcGxpY2F0ZWQgdG8gYmUgY29udHJvbGxlZCBh
-cyB0aGUNCj4+Pj4+Pj4gcGVyZmVjdCBtZXRob2QgaXMgdGhhdCB3ZSBzaG91bGQgZG8gc29tZSBp
-ZGxlIG1vbml0b3IganVzdCBhcyBycG0NCj4+Pj4+Pj4gYW5kIHNlbmQgSFBJIGVhY2ggdGltZSBp
-ZiByZWNlaXZpbmcgcmQvd3IgcmVxLiBCdXQgaXQgd2lsbCBpbXBhY3QNCj4+Pj4+Pj4gcGVyZm9y
-bWFuY2Ugc2lnbmlmaWNhbnRseSwgZXNwZWNpYWxseSBmb3IgcmFuZG9tIGlvcHMgc2luY2UgdGhl
-DQo+Pj4+Pj4+IHdlaWdodCBvZiBleGVjdXRpbmcgSFBJIGFnYWluc3Qgci93IHNtYWxsIHBpZWNl
-IG9mIExCQXMgaXMNCj4+Pj4+Pj4gbm9ubmVnbGlnaWJsZS4NCj4+Pj4+Pj4NCj4+Pj4+Pj4gU28g
-d2Ugbm93IHByZWZlciB0byBzZWxlY3QgdGhlIGF1dG8gb25lIHVuY29uZGl0aW9uYWxseSBpZiBz
-dXBwb3J0ZWQNCj4+Pj4+Pj4gd2hpY2ggbWFrZXMgaXQgYXMgc2ltcGxlIGFzIHBvc3NpYmxlLiBJ
-dCBzaG91bGQgcmVhbGx5IGdvb2QgZW5vdWdoDQo+Pj4+Pj4+IGZvciBkZXZpY2VzIHRvIG1hbmFn
-ZSBpdHMgaW50ZXJuYWwgcG9saWN5IGZvciBia29wcyByYXRoZXIgdGhhbiB0aGUNCj4+Pj4+Pj4g
-aG9zdCwgd2hpY2ggbWFrZXMgdXMgYmVsaWV2ZSB0aGF0IHdlIGNvdWxkIGFjaGlldmUgdGhlIGJl
-c3QNCj4+Pj4+Pj4gcGVyZm9ybWFuY2UgZm9yIGFsbCB0aGUgZGV2aWNlcyBpbXBsZW1lbnRpbmcg
-YXV0byBia29wcyBhbmQgdGhlIG9ubHkNCj4+Pj4+Pj4gdGhpbmcgd2Ugc2hvdWxkIGRvIGlzIHRv
-IGRpc2FibGUgaXQgd2hlbiBjdXR0aW5nIG9mZiB0aGUgcG93ZXIuDQo+Pj4+Pj4NCj4+Pj4+PiBE
-byB5b3Uga25vdyBpZiB0aGVyZSBpcyByZWFsbHkgYSByZXF1aXJlbWVudCB0byBkbyB0aGF0Pw0K
-Pj4+Pj4NCj4+Pj4+IEV2ZW4gd2l0aG91dCBia29wcyBlbmFibGUsIG5vIG1hdHRlciBmb3IgbWFu
-dWFsIG9yIGF1dG8gb25lLCBGVEwgc2hvdWxkDQo+Pj4+PiBhbHdheXMgZG8gYmtvcHMgbGlrZSBH
-QyBpbnRlcm5hbGx5IHdoZW4gbmVlZGVkIHRvIGd1YXJhbnRlZSB0aGUNCj4+Pj4+IHBlcmZvcm1h
-bmNlIGFuZCBiYWxhbmNlIHRoZSB3ZWFyIGxldmVsaW5nLiBXaGF0IEkgdGhvdWdodCB0byBkbyBp
-cyB0bw0KPj4+Pj4gbWFrZSBpdCBtb3JlIGV4cGxpY2l0bHkuDQo+Pj4+Pg0KPj4+Pj4gQmVjYXVz
-ZSB0aGVuLCB3aGF0DQo+Pj4+Pj4gaXMgdGhlIHBvaW50IG9mIHBvd2VyIG9mZiBub3RpZmljYXRp
-b24/DQo+Pj4+Pg0KPj4+Pj4gV2hlbiBwb3dlciBvZmYgbm90aWZpY2F0aW9uIGlzIHNlbnQsIGJr
-b3BzIHdpbGwgYmUgc3RvcHBlZA0KPj4+Pj4gaW4gX21tY19zdXNwZW5kLiBTbyBJIGRvbid0IHVu
-ZGVydGFuZCB5b3VyIHBvaW50IGhlcmU/DQo+Pj4+DQo+Pj4+IEkgYW0gdHJ5aW5nIHRvIHVuZGVy
-c3RhbmQgd2h5IHdlIG5lZWQgdG8gZG8gYW55dGhpbmcgZm9yIGF1dG8gYmtvcHMuDQo+Pj4+IFNp
-bmNlIEFVVE9fRU4gaXMgcGVyc2lzdGVudCwgd2UgY2FuIGxlYXZlIHRoZSBkZWNpc2lvbiB3aGV0
-aGVyIHRvIHR1cm4gaXQgb24NCj4+Pj4gdG8gd2hvbWV2ZXIgcHJvdmlzaW9ucyB0aGUgZGV2aWNl
-LiBUaGVuIHdlIGp1c3QgbGVhdmUgaXQgYWxvbmUuDQo+Pj4+DQo+Pj4NCj4+PiBIcm0uLg0KPj4+
-DQo+Pj4gb25lIHBvc3NpYmxlIHdheSBpcyB0byBjb250cm9sIGl0IGJ5IG1tYy11dGlscyBvbg0K
-Pj4+IHVzZXIgc3BhY2U/ICBTbyB3ZSBzaG91bGQgYWRkIGEgY21kIGZvciBtbWMtdXRpbHMNCj4+
-PiB0aGVyZT8NCj4+DQo+PiBUaGF0IHdvdWxkIGJlIGNvbnNpc3RlbnQgd2l0aCBtYW51YWwgYmtv
-cHMuDQo+Pg0KPg0KPkZyb20gbXkgZmlyc3QgaW1wcmVzc2lvbiBJIGFncmVlLCBhcyB0aGF0IGlz
-IHRoZSBwb2xpY3kgd2UgaGF2ZSBiZWVuDQo+c3RpY2tpbmcgdG8gd2hlbiB3cml0aW5nIHRvIHBl
-cnNpc3RlbnQgRVhUX0NTRCByZWdpc3RlcnMuDQo+QWx0aG91Z2gsIGluIHRoaXMgY2FzZSwgSSBh
-bSBhY3R1YWxseSB3b25kZXJpbmcgb24gd2hhdCBpcyB0aGUgYmVzdCBhcHByb2FjaC4NCj4NCj5J
-cyB0aGVyZSByZWFsbHkgZXZlciBhIGNhc2Ugd2hlbiB3ZSBkb24ndCB3YW50IGF1dG8gQktPUFMg
-dG8gYmUgZGVmYXVsdCBlbmFibGVkPw0KPkkgdGhpbmsgQktPUFMgaXMgYSBmdW5kYW1lbnRhbCBm
-ZWF0dXJlIG9mIGFuIEZUTCBhbmQgSSBjYW4ndCBzZWUgYQ0KPnJlYXNvbiB0byB3aHkgd2UgbmVl
-ZCB0byBpbnZvbHZlIG1tYy11dGlscy91c2Vyc3BhY2UgdG8gZW5hYmxlIGl0LiBBbQ0KPkkgd3Jv
-bmc/DQoNClRoZSBldmVuIHdvcnN0IGNhc2UgaXMg4oCTIGludm9sdmUgbW1jLXV0aWxzL3VzZXJz
-cGFjZSB0byBESVNBQkxFIGl0Lg0KSSB0aGluayB0aGlzIHJlZ2lzdGVyIG5lZWQgdG8gYmUgc2V0
-IGJ5IHZlbmRvciBhbmQgbm8gbmVlZCB0byBiZSBjaGFuZ2VkIG9uIHJ1bnRpbWUuDQoNCj4NCj5L
-aW5kIHJlZ2FyZHMNCj5VZmZlDQoNCl9fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
-X19fX19fX19fX19fCkxpbnV4LXJvY2tjaGlwIG1haWxpbmcgbGlzdApMaW51eC1yb2NrY2hpcEBs
-aXN0cy5pbmZyYWRlYWQub3JnCmh0dHA6Ly9saXN0cy5pbmZyYWRlYWQub3JnL21haWxtYW4vbGlz
-dGluZm8vbGludXgtcm9ja2NoaXAK
+
+--69pVuxX8awAiJ7fD
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
+
+On Wed, Jun 15, 2016 at 01:01:56PM +0900, Simon Horman wrote:
+> Rename the source file for DMA for Renesas SDHI as a follow-up to attachi=
+ng
+> DMA code to the renesas_sdhi driver rather than the tmio_core driver.
+>=20
+> Signed-off-by: Simon Horman <horms+renesas@verge.net.au>
+> ---
+>  drivers/mmc/host/Makefile                               | 2 +-
+>  drivers/mmc/host/{tmio_mmc_dma.c =3D> renesas_sdhi_dma.c} | 0
+>  2 files changed, 1 insertion(+), 1 deletion(-)
+>  rename drivers/mmc/host/{tmio_mmc_dma.c =3D> renesas_sdhi_dma.c} (100%)
+
+Because of the modularization, I think the rename makes a lot of sense
+here and is worth renaming the functions inside, too. What do you think?
+I think the rename should include the DMA type used, though. Like
+'renesas_sdhi_sysc_dmac.c' here and 'renesas_sdhi_internal_dmac.c' for
+the new one in the next patch?
+
+>=20
+> diff --git a/drivers/mmc/host/Makefile b/drivers/mmc/host/Makefile
+> index 4f7903fbef26..0ea7fb6f3d5e 100644
+> --- a/drivers/mmc/host/Makefile
+> +++ b/drivers/mmc/host/Makefile
+> @@ -38,7 +38,7 @@ obj-$(CONFIG_MMC_TMIO)		+=3D tmio_mmc.o
+>  obj-$(CONFIG_MMC_TMIO_CORE)	+=3D tmio_mmc_core.o
+>  tmio_mmc_core-y			:=3D tmio_mmc_pio.o
+>  obj-$(CONFIG_MMC_SDHI)		+=3D renesas_sdhi.o
+> -renesas_sdhi-$(subst m,y,$(CONFIG_MMC_SDHI_DMA))	+=3D tmio_mmc_dma.o
+> +renesas_sdhi-$(subst m,y,$(CONFIG_MMC_SDHI_DMA))	+=3D renesas_sdhi_dma.o
+>  obj-$(CONFIG_MMC_CB710)		+=3D cb710-mmc.o
+>  obj-$(CONFIG_MMC_VIA_SDMMC)	+=3D via-sdmmc.o
+>  obj-$(CONFIG_SDH_BFIN)		+=3D bfin_sdh.o
+> diff --git a/drivers/mmc/host/tmio_mmc_dma.c b/drivers/mmc/host/renesas_s=
+dhi_dma.c
+> similarity index 100%
+> rename from drivers/mmc/host/tmio_mmc_dma.c
+> rename to drivers/mmc/host/renesas_sdhi_dma.c
+> --=20
+> 2.1.4
+>=20
+
+--69pVuxX8awAiJ7fD
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1
+
+iQIcBAEBAgAGBQJXap7WAAoJEBQN5MwUoCm2uYIP/iLnk9mXdhaVAmiRszM1wNQK
+U5O/eeKMpbntBc5G8qLJ+NtT3KiPpPSERF055fSF7YTKwaWzYaaPGTA2bCyq3r2I
+/UpiKMWmIwlRpxTnDrEx7TVAIPpcwimM/d23lYSVfzOLT0YJr1RdpPtFnrf663qL
+7npo0eKIogVzxxIdzANicXlTJrk8FFwbXWe31NrQVroUX2q35OUcHWw4lhYTFSxm
+nDb6uUqtH3q0pTPmtW7LhaejZA9HpqFoo9Egq8RSKpB8V2IOmuFUlF4mcgI48Hq6
+2A/zJUK9WeEX1UiON005yDIo1PC/LgqItEVG4lUpJ21lwAmN2Kd4lsMTv6Zo7JF+
+qDvxC5KVRRPsz3vXHxk/tlY30yn6Zt13LmJbrZVLmtkumWYeDPwypKUa33TIbx8P
+m+Lax7xy0w4OXk5UfwO0znuqSu/k+CTnPLHo0VQBYQlGE8N5KGBrWpPe8xAHAeGF
+e7U/zFD2EXyrj1/NADbbFZBo4nDtRaOtp7OM9RkQ/Kvue/M9W8SAuIGPVsrtoFl6
+2Co1UV0jXCv+yH0Rja+dV3Gu4MBirIcvqF7KoPEfugY64RNc097DXuu8uC7cWxRm
+Dojix1usAklXyJwt8P159KqhWo/lzgsCD5MzOq458ESYmo6iVLGV5U0C2zT+zOZa
+qzGirB0gkgMF+njI4KpZ
+=tLfm
+-----END PGP SIGNATURE-----
+
+--69pVuxX8awAiJ7fD--
