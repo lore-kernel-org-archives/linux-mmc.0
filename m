@@ -1,153 +1,122 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH v2 1/3] mmc: dw_mmc: remove the quirks flags
-Date: Wed, 22 Jun 2016 13:16:28 +0900
-Message-ID: <576A111C.1040804@samsung.com>
-References: <CGME20160621053541epcas1p3387b723d08d124864a03a3abe082821f@epcas1p3.samsung.com>
- <1466487339-13211-1-git-send-email-jh80.chung@samsung.com>
+From: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: Re: [PATCH 08/12] doc: binding: pwrseq-usb-generic: add binding doc
+ for generic usb power sequence driver
+Date: Wed, 22 Jun 2016 11:09:13 +0200
+Message-ID: <CAPDyKFroH6AGObKGZoZ-6=Sb3Zii6gXdm_wO3fuc2BAx6fpFHg@mail.gmail.com>
+References: <1466158165-9380-1-git-send-email-peter.chen@nxp.com>
+ <1466158165-9380-9-git-send-email-peter.chen@nxp.com> <CAL_JsqLvs0s2TyfqPM5vtmyY81_X84VjCGjsGYbTgT4syOfp9Q@mail.gmail.com>
+ <20160620112651.GA26936@shlinux2> <20160620161607.GA11427@rob-hp-laptop>
+ <20160621021117.GD26936@shlinux2> <20160621212653.GA22764@rob-hp-laptop>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout4.samsung.com ([203.254.224.34]:60953 "EHLO
-	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750718AbcFVE1m (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 22 Jun 2016 00:27:42 -0400
-Received: from epcpsbgr2.samsung.com
- (u142.gpu120.samsung.co.kr [203.254.230.142])
- by mailout4.samsung.com (Oracle Communications Messaging Server 7.0.5.31.0
- 64bit (built May  5 2014))
- with ESMTP id <0O9500Y7VNVHKH90@mailout4.samsung.com> for
- linux-mmc@vger.kernel.org; Wed, 22 Jun 2016 13:16:29 +0900 (KST)
-In-reply-to: <1466487339-13211-1-git-send-email-jh80.chung@samsung.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-usb-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <20160621212653.GA22764@rob-hp-laptop>
+Sender: linux-usb-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Rob Herring <robh-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+Cc: Peter Chen <hzpeterchen-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Peter Chen <peter.chen-3arQi8VN3Tc@public.gmane.org>, Greg Kroah-Hartman <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>, Alan Stern <stern-nwvwT67g6+6dFdvTe/nMLpVzexx5G7lz@public.gmane.org>, Mark Brown <broonie-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Sebastian Reichel <sre-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, =?UTF-8?Q?Krzysztof_Koz=C5=82owski?= <k.kozlowski-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, Stephen Boyd <stephen.boyd-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, oscar-Bdbr4918Nnnk1uMJSBkQmQ@public.gmane.org, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Pawel Moll <pawel.moll-5wv7dgnIgG8@public.gmane.org>, "linux-pm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-pm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Sascha Hauer <s.hauer-bIcnvbaLZ9MEGnE8C9+IrQ@public.gmane.org>, Linux USB List <linux-usb-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "Maciej S. Szmigiero" <mail-APzI5cXaD1zVlRWJc41N0YvC60bnQu0Y@public.gmane.org>, troy.kisky-Q5RJGjKts06CY9SHAMCTRUEOCMrvLtNR@public.gmane.org, Javier Martinez Canillas <javier-JPH+aEBZ4P+UEJcrhfAQsw@public.gmane.org>, Philipp Zabel <p.zabel-bIcnvbaLZ9MEGnE8C9+IrQ@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: ulf.hansson@linaro.org, shawn.lin@rock-chips.com
 
-On 06/21/2016 02:35 PM, Jaehoon Chung wrote:
-> Remove the quirks flag. (DW_MCI_QUIRK_BROKEN_DTO)
-> For removing this, enabled the dto_timer by defaults.
-> It doesn't see any I/O performance degression.
-> In future, dwmmc controller should not use the quirks flag.
-> 
-> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
-> Reviewed-by: Shawn Lin <shawn.lin@rock-chips.com>
+On 21 June 2016 at 23:26, Rob Herring <robh-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org> wrote:
+> On Tue, Jun 21, 2016 at 10:11:17AM +0800, Peter Chen wrote:
+>> On Mon, Jun 20, 2016 at 11:16:07AM -0500, Rob Herring wrote:
+>> > On Mon, Jun 20, 2016 at 07:26:51PM +0800, Peter Chen wrote:
+>> > > On Fri, Jun 17, 2016 at 12:16:48PM -0500, Rob Herring wrote:
+>> > > > On Fri, Jun 17, 2016 at 5:09 AM, Peter Chen <peter.chen-3arQi8VN3Tc@public.gmane.org> wrote:
+>> > > > > Add binding doc for generic usb power sequence driver, and update
+>> > > > > generic usb device binding-doc accordingly.
+>
+> [...]
+>
+>> > >           clocks = <&clks IMX6SX_CLK_CKO>;
+>> > >
+>> > >           #address-cells = <1>;
+>> > >           #size-cells = <0>;
+>> > >           ethernet: asix@1 {
+>> > >                   compatible = "usbb95,1708";
+>> > >                   reg = <1>;
+>> > >
+>> > >                   power-sequence;
+>> > >                   reset-gpios = <&gpio4 6 GPIO_ACTIVE_LOW>; /* ethernet_rst */
+>> > >                   reset-duration-us = <15>;
+>> > >                   clocks = <&clks IMX6SX_CLK_IPG>;
+>> > >           };
+>> > >   };
+>> > > };
+>> > >
+>> > > If the node has property "power-sequence", the pwrseq core will create
+>> > > related platform device, and the driver under pwrseq driver will handle
+>> > > power sequence stuffs.
+>> >
+>> > This I have issue with. If you are creating a platform device here, you
+>> > are trying to work-around limitations in the linux driver model.
 
-Applied this patch on my repository.
+I somewhat understand your point.
 
-Best Regards,
-Jaehoon Chung
+Although, having the option to use a driver (which requires a device)
+has turned out to be quite convenient from many aspects - at least in
+the mmc case.
 
-> ---
-> Changelog V2:
-> 	- Added Shawn's Reviewed-by tag
-> 
->  drivers/mmc/host/dw_mmc-rockchip.c |  3 ---
->  drivers/mmc/host/dw_mmc.c          | 16 +++++-----------
->  include/linux/mmc/dw_mmc.h         |  9 ---------
->  3 files changed, 5 insertions(+), 23 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/dw_mmc-rockchip.c b/drivers/mmc/host/dw_mmc-rockchip.c
-> index 358b0dc..d3cf1f1 100644
-> --- a/drivers/mmc/host/dw_mmc-rockchip.c
-> +++ b/drivers/mmc/host/dw_mmc-rockchip.c
-> @@ -285,9 +285,6 @@ static int dw_mci_rockchip_init(struct dw_mci *host)
->  	/* It is slot 8 on Rockchip SoCs */
->  	host->sdio_id0 = 8;
->  
-> -	/* It needs this quirk on all Rockchip SoCs */
-> -	host->pdata->quirks |= DW_MCI_QUIRK_BROKEN_DTO;
-> -
->  	if (of_device_is_compatible(host->dev->of_node,
->  				    "rockchip,rk3288-dw-mshc"))
->  		host->bus_hz /= RK3288_CLKGEN_DIV;
-> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-> index 87f8529..5cf143b 100644
-> --- a/drivers/mmc/host/dw_mmc.c
-> +++ b/drivers/mmc/host/dw_mmc.c
-> @@ -1802,8 +1802,7 @@ static void dw_mci_tasklet_func(unsigned long priv)
->  				 * If all data-related interrupts don't come
->  				 * within the given time in reading data state.
->  				 */
-> -				if ((host->quirks & DW_MCI_QUIRK_BROKEN_DTO) &&
-> -				    (host->dir_status == DW_MCI_RECV_STATUS))
-> +				if (host->dir_status == DW_MCI_RECV_STATUS)
->  					dw_mci_set_drto(host);
->  				break;
->  			}
-> @@ -1845,8 +1844,7 @@ static void dw_mci_tasklet_func(unsigned long priv)
->  				 * interrupt doesn't come within the given time.
->  				 * in reading data state.
->  				 */
-> -				if ((host->quirks & DW_MCI_QUIRK_BROKEN_DTO) &&
-> -				    (host->dir_status == DW_MCI_RECV_STATUS))
-> +				if (host->dir_status == DW_MCI_RECV_STATUS)
->  					dw_mci_set_drto(host);
->  				break;
->  			}
-> @@ -2412,8 +2410,7 @@ static irqreturn_t dw_mci_interrupt(int irq, void *dev_id)
->  		}
->  
->  		if (pending & SDMMC_INT_DATA_OVER) {
-> -			if (host->quirks & DW_MCI_QUIRK_BROKEN_DTO)
-> -				del_timer(&host->dto_timer);
-> +			del_timer(&host->dto_timer);
->  
->  			mci_writel(host, RINTSTS, SDMMC_INT_DATA_OVER);
->  			if (!host->data_status)
-> @@ -3004,11 +3001,8 @@ int dw_mci_probe(struct dw_mci *host)
->  	setup_timer(&host->cmd11_timer,
->  		    dw_mci_cmd11_timer, (unsigned long)host);
->  
-> -	host->quirks = host->pdata->quirks;
-> -
-> -	if (host->quirks & DW_MCI_QUIRK_BROKEN_DTO)
-> -		setup_timer(&host->dto_timer,
-> -			    dw_mci_dto_timer, (unsigned long)host);
-> +	setup_timer(&host->dto_timer,
-> +		    dw_mci_dto_timer, (unsigned long)host);
->  
->  	spin_lock_init(&host->lock);
->  	spin_lock_init(&host->irq_lock);
-> diff --git a/include/linux/mmc/dw_mmc.h b/include/linux/mmc/dw_mmc.h
-> index f7ed271..83b0edfc 100644
-> --- a/include/linux/mmc/dw_mmc.h
-> +++ b/include/linux/mmc/dw_mmc.h
-> @@ -112,7 +112,6 @@ struct dw_mci_dma_slave {
->   * @part_buf: Simple buffer for partial fifo reads/writes.
->   * @push_data: Pointer to FIFO push function.
->   * @pull_data: Pointer to FIFO pull function.
-> - * @quirks: Set of quirks that apply to specific versions of the IP.
->   * @vqmmc_enabled: Status of vqmmc, should be true or false.
->   * @irq_flags: The flags to be passed to request_irq.
->   * @irq: The irq value to be passed to request_irq.
-> @@ -218,9 +217,6 @@ struct dw_mci {
->  	void (*push_data)(struct dw_mci *host, void *buf, int cnt);
->  	void (*pull_data)(struct dw_mci *host, void *buf, int cnt);
->  
-> -	/* Workaround flags */
-> -	u32			quirks;
-> -
->  	bool			vqmmc_enabled;
->  	unsigned long		irq_flags; /* IRQ flags */
->  	int			irq;
-> @@ -242,17 +238,12 @@ struct dw_mci_dma_ops {
->  	void (*exit)(struct dw_mci *host);
->  };
->  
-> -/* IP Quirks/flags. */
-> -/* Timer for broken data transfer over scheme */
-> -#define DW_MCI_QUIRK_BROKEN_DTO			BIT(0)
-> -
->  struct dma_pdata;
->  
->  /* Board platform data */
->  struct dw_mci_board {
->  	u32 num_slots;
->  
-> -	u32 quirks; /* Workaround / Quirk flags */
->  	unsigned int bus_hz; /* Clock speed at the cclk_in pad */
->  
->  	u32 caps;	/* Capabilities */
-> 
+Certainly one can do without it, but in the end using a driver avoids
+open coding.
 
+>>
+>> My current solution like below, but it seems you didn't agree with that.
+>> I just double confirm here, if you don't, I give up the solution for
+>> using generic power sequence framework.
+>>
+>> In drivers/usb/core/hub.c
+>>
+>>       for_each_child_of_node(parent->of_node, node) {
+>>               hdev_pwrseq = pwrseq_alloc(node, "usb_pwrseq_generic");
+>>               if (!IS_ERR_OR_NULL(hdev_pwrseq)) {
+>>                       pwrseq_node = kzalloc(sizeof(pwrseq_node), GFP_KERNEL);
+>>                       if (!pwrseq_node) {
+>>                               ret = -ENOMEM;
+>>                               goto err1;
+>>                       }
+>>                       /* power on sequence */
+>>                       ret = pwrseq_pre_power_on(hdev_pwrseq);
+>
+> Why does this function need to do anything more than:
+>
+> - Check if the child has a "power-sequence" property
+> - Get the "reset-gpios" GPIO
+> - Assert reset for specified/default time
+> - Deassert reset
+>
+> Then continue on as normal. That seems straight-forward to me.
+>
+> There is no reason you need a platform device in the mix. Perhaps trying
+> to move the MMC pwr-seq code is pointless as it adds needless
+> complexity.
+
+Complexity?
+
+The problem we are tying to solve, is to make the various platform/SoC
+specific power sequences to be able to live in generic drivers.
+
+One could decide to encode the sequences inside the driver code
+itself, but it will soon turn into a mess and more importantly, lots
+of open coding as to support different platforms/SoCs. To most kernel
+hackers I don't think this is an option to consider.
+
+The MMC pwr-seq code/drivers tries to address these issues - in a
+somewhat generic way.
+Initially we have decided to start with only a few flavours of
+supported sequences and so far these have been sufficient.
+
+Finally, I am indeed concerned that it so hard to agree on a solution
+to deal with generic power sequences. There have been many attempts
+throughout the last ~4-5 years, but peoples strong opinions about
+different approaches mad them all fail. Isn't it time to finally just
+pick a solution and stick with it, even if it doesn't meet all peoples
+expectations?
+
+[...]
+
+Kind regards
+Uffe
+--
+To unsubscribe from this list: send the line "unsubscribe linux-usb" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
