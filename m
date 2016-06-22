@@ -1,102 +1,173 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v3 0/15] Changes to support 150 MHz eMMC on rk3399
-Date: Wed, 22 Jun 2016 17:23:44 +0200
-Message-ID: <CAPDyKFpiNu0ASHiDCT1ZXG5Sbb-ei+U3cDins87_PtkvN2g25g@mail.gmail.com>
-References: <1466445414-11974-1-git-send-email-dianders@chromium.org>
+Subject: Re: [PATCH v2] mmc: host: use the defined function to check whether
+ card is removable
+Date: Wed, 22 Jun 2016 17:23:51 +0200
+Message-ID: <CAPDyKFr2ObKLWB7wY_SFqhzycsoDn7uqfN=k74mG1_cAsaw3uA@mail.gmail.com>
+References: <1466471606-3909-1-git-send-email-jh80.chung@samsung.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wm0-f47.google.com ([74.125.82.47]:36619 "EHLO
+Received: from mail-wm0-f47.google.com ([74.125.82.47]:38263 "EHLO
 	mail-wm0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752962AbcFVPXr (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 22 Jun 2016 11:23:47 -0400
-Received: by mail-wm0-f47.google.com with SMTP id f126so92386302wma.1
-        for <linux-mmc@vger.kernel.org>; Wed, 22 Jun 2016 08:23:46 -0700 (PDT)
-In-Reply-To: <1466445414-11974-1-git-send-email-dianders@chromium.org>
+	with ESMTP id S1752969AbcFVPXx (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 22 Jun 2016 11:23:53 -0400
+Received: by mail-wm0-f47.google.com with SMTP id r201so11148471wme.1
+        for <linux-mmc@vger.kernel.org>; Wed, 22 Jun 2016 08:23:53 -0700 (PDT)
+In-Reply-To: <1466471606-3909-1-git-send-email-jh80.chung@samsung.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Douglas Anderson <dianders@chromium.org>
-Cc: Heiko Stuebner <heiko@sntech.de>, Kishon <kishon@ti.com>, Rob Herring <robh+dt@kernel.org>, Shawn Lin <shawn.lin@rock-chips.com>, Ziyuan Xu <xzy.xu@rock-chips.com>, Brian Norris <briannorris@chromium.org>, Adrian Hunter <adrian.hunter@intel.com>, "open list:ARM/Rockchip SoC..." <linux-rockchip@lists.infradead.org>, linux-mmc <linux-mmc@vger.kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, groeck@chromium.org, Mark Rutland <mark.rutland@arm.com>, Catalin Marinas <catalin.marinas@arm.com>, Linus Walleij <linus.walleij@linaro.org>, Will Deacon <will.deacon@arm.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Stefan Wahren <stefan.wahren@i2se.com>, zhengxing@rock-chips.com, Michal Simek <michal.simek@xilinx.com>, Geert Uytterhoeven <geert@linux-m68k.org>, linux-arm-kernel@lists.
+To: Jaehoon Chung <jh80.chung@samsung.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, Shawn Lin <shawn.lin@rock-chips.com>, Wolfram Sang <wsa+renesas@sang-engineering.com>
 
-On 20 June 2016 at 19:56, Douglas Anderson <dianders@chromium.org> wrote:
-> The theme of this series of patches is to try to allow running the eMMC
-> at 150 MHz on the rk3399 SoC, though the changes should still be correct
-> and have merit on their own.  The motivation for running at 150 MHz is
-> that doing so improves signal integrity and (with some eMMC devices)
-> doesn't affect throughput.
+On 21 June 2016 at 03:13, Jaehoon Chung <jh80.chung@samsung.com> wrote:
+> In linux/mmc/host.h, mmc_card_is_removable() is already defined.
+> It should be maintainted more easier than now.
 >
-> These patches have been structured to keep things as separate as
-> possible, but nevertheless there are still some dependencies between
-> patches.  It probably makes the most sense for all of the non-device
-> tree patches to go through a single tree.  PHY patches now have Acks
-> from Kishon so that means things should be clear for all non-DTS patches
-> to go through the MMC tree if Ulf agrees.  Device tree patches should be
-> able to be landed separately and the worst what would happen is a
-> warning in the kernel log if you have the code without the device tree.
->
-> The code patches are based on Ulf's mmc-next.  In v3 of the series I've
-> pulled in the latest version of a previous PHY series posted by Brian
-> Norris.
->
-> The device tree patches are based on Heiko's v4.8-armsoc/dts64.
->
-> Changes in v3:
-> - Add Brian's PHY patches into my series
-> - Add collected tags
-> - Add dependency on COMMON_CLK (actually in v2.1) (Guenter Roeck)
-> - Use phy_init / phy_exit (Heiko)
-> - Add Kishon's Ack
->
-> Changes in v2:
-> - Drop 170 MHz comment (only applicable to a subtly different Arasan PHY)
-> - Indicate that 5.1 ms is calculated (Shawn).
-> - Clean up description of rk3399 PHY (Shawn)
-> - Add Rob Herring's Ack.
-> - Reorder includes (Shawn)
-> - Adjust commit message wording (Rob)
-> - List out clocks and clock names (Rob)
-> - Move code cleanup before set phyctrl_frqsel based on card clock (Shawn)
-> - Warn if we're more than 15 MHz from ideal rate (Shawn)
-> - Fix typo USB => SDHCI (Shawn)
->
-> Brian Norris (2):
->   phy: rockchip-emmc: configure default output tap delay
->   phy: rockchip-emmc: reindent the register definitions
->
-> Douglas Anderson (11):
->   phy: rockchip-emmc: Increase lock time allowance
->   mmc: sdhci-of-arasan: Always power the PHY off/on when clock changes
->   Documentation: mmc: sdhci-of-arasan: Add soc-ctl-syscon for corecfg
->     regs
->   mmc: sdhci-of-arasan: Properly set corecfg_baseclkfreq on rk3399
->   arm64: dts: rockchip: Add soc-ctl-syscon to sdhci for rk3399
->   Documentation: mmc: sdhci-of-arasan: Add ability to export card clock
->   mmc: sdhci-of-arasan: Add ability to export card clock
->   Documentation: phy: Let the rockchip eMMC PHY get an exported card
->     clock
->   phy: rockchip-emmc: Minor code cleanup in
->     rockchip_emmc_phy_power_on/off()
->   phy: rockchip-emmc: Set phyctrl_frqsel based on card clock
->   arm64: dts: rockchip: Provide emmcclk to PHY for rk3399
->
-> Shawn Lin (2):
->   phy: rockchip-emmc: give DLL some extra time to be ready
->   phy: rockchip-emmc: configure frequency range and drive impedance
->
->  .../devicetree/bindings/mmc/arasan,sdhci.txt       |  35 ++-
->  .../devicetree/bindings/phy/rockchip-emmc-phy.txt  |   9 +
->  arch/arm64/boot/dts/rockchip/rk3399.dtsi           |   5 +
->  drivers/mmc/host/Kconfig                           |   1 +
->  drivers/mmc/host/sdhci-of-arasan.c                 | 333 +++++++++++++++++++--
->  drivers/phy/phy-rockchip-emmc.c                    | 216 ++++++++++---
->  6 files changed, 525 insertions(+), 74 deletions(-)
->
-> --
-> 2.8.0.rc3.226.g39d4020
->
+> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
 
-Thanks, applied for next! (Skipped the DTS changes in patch9 and patch
-15, as those will be picked up by Heiko).
+Thanks, applied for next!
 
 Kind regards
 Uffe
+
+> ---
+> Changelog V2:
+>         - Added the missed host controller (sdhci-of-at91.c)
+>
+>  drivers/mmc/host/dw_mmc.c         | 3 +--
+>  drivers/mmc/host/mxcmmc.c         | 2 +-
+>  drivers/mmc/host/sdhci-bcm-kona.c | 6 +++---
+>  drivers/mmc/host/sdhci-of-at91.c  | 2 +-
+>  drivers/mmc/host/sdhci-st.c       | 2 +-
+>  drivers/mmc/host/sdhci.c          | 6 +++---
+>  drivers/mmc/host/tmio_mmc_pio.c   | 2 +-
+>  7 files changed, 11 insertions(+), 12 deletions(-)
+>
+> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+> index 2cc6123..8012858 100644
+> --- a/drivers/mmc/host/dw_mmc.c
+> +++ b/drivers/mmc/host/dw_mmc.c
+> @@ -1451,8 +1451,7 @@ static int dw_mci_get_cd(struct mmc_host *mmc)
+>         int gpio_cd = mmc_gpio_get_cd(mmc);
+>
+>         /* Use platform get_cd function, else try onboard card detect */
+> -       if ((mmc->caps & MMC_CAP_NEEDS_POLL) ||
+> -           (mmc->caps & MMC_CAP_NONREMOVABLE))
+> +       if ((mmc->caps & MMC_CAP_NEEDS_POLL) || !mmc_card_is_removable(mmc))
+>                 present = 1;
+>         else if (gpio_cd >= 0)
+>                 present = gpio_cd;
+> diff --git a/drivers/mmc/host/mxcmmc.c b/drivers/mmc/host/mxcmmc.c
+> index 3d1ea5e..fb3ca82 100644
+> --- a/drivers/mmc/host/mxcmmc.c
+> +++ b/drivers/mmc/host/mxcmmc.c
+> @@ -1065,7 +1065,7 @@ static int mxcmci_probe(struct platform_device *pdev)
+>
+>         if (pdata)
+>                 dat3_card_detect = pdata->dat3_card_detect;
+> -       else if (!(mmc->caps & MMC_CAP_NONREMOVABLE)
+> +       else if (mmc_card_is_removable(mmc)
+>                         && !of_property_read_bool(pdev->dev.of_node, "cd-gpios"))
+>                 dat3_card_detect = true;
+>
+> diff --git a/drivers/mmc/host/sdhci-bcm-kona.c b/drivers/mmc/host/sdhci-bcm-kona.c
+> index 00a8a40..1d64712 100644
+> --- a/drivers/mmc/host/sdhci-bcm-kona.c
+> +++ b/drivers/mmc/host/sdhci-bcm-kona.c
+> @@ -264,12 +264,12 @@ static int sdhci_bcm_kona_probe(struct platform_device *pdev)
+>         }
+>
+>         dev_dbg(dev, "non-removable=%c\n",
+> -               (host->mmc->caps & MMC_CAP_NONREMOVABLE) ? 'Y' : 'N');
+> +               mmc_card_is_removable(host->mmc) ? 'N' : 'Y');
+>         dev_dbg(dev, "cd_gpio %c, wp_gpio %c\n",
+>                 (mmc_gpio_get_cd(host->mmc) != -ENOSYS) ? 'Y' : 'N',
+>                 (mmc_gpio_get_ro(host->mmc) != -ENOSYS) ? 'Y' : 'N');
+>
+> -       if (host->mmc->caps & MMC_CAP_NONREMOVABLE)
+> +       if (!mmc_card_is_removable(host->mmc))
+>                 host->quirks |= SDHCI_QUIRK_BROKEN_CARD_DETECTION;
+>
+>         dev_dbg(dev, "is_8bit=%c\n",
+> @@ -288,7 +288,7 @@ static int sdhci_bcm_kona_probe(struct platform_device *pdev)
+>         }
+>
+>         /* if device is eMMC, emulate card insert right here */
+> -       if (host->mmc->caps & MMC_CAP_NONREMOVABLE) {
+> +       if (!mmc_card_is_removable(host->mmc)) {
+>                 ret = sdhci_bcm_kona_sd_card_emulate(host, 1);
+>                 if (ret) {
+>                         dev_err(dev,
+> diff --git a/drivers/mmc/host/sdhci-of-at91.c b/drivers/mmc/host/sdhci-of-at91.c
+> index d4cef71..a9b7fc0 100644
+> --- a/drivers/mmc/host/sdhci-of-at91.c
+> +++ b/drivers/mmc/host/sdhci-of-at91.c
+> @@ -288,7 +288,7 @@ static int sdhci_at91_probe(struct platform_device *pdev)
+>          * Disable SDHCI_QUIRK_BROKEN_CARD_DETECTION to be sure nobody tries
+>          * to enable polling via device tree with broken-cd property.
+>          */
+> -       if (!(host->mmc->caps & MMC_CAP_NONREMOVABLE) &&
+> +       if (mmc_card_is_removable(host->mmc) &&
+>             mmc_gpio_get_cd(host->mmc) < 0) {
+>                 host->mmc->caps |= MMC_CAP_NEEDS_POLL;
+>                 host->quirks &= ~SDHCI_QUIRK_BROKEN_CARD_DETECTION;
+> diff --git a/drivers/mmc/host/sdhci-st.c b/drivers/mmc/host/sdhci-st.c
+> index 320e1c2..c95ba83 100644
+> --- a/drivers/mmc/host/sdhci-st.c
+> +++ b/drivers/mmc/host/sdhci-st.c
+> @@ -183,7 +183,7 @@ static void st_mmcss_cconfig(struct device_node *np, struct sdhci_host *host)
+>
+>         writel_relaxed(cconf2, host->ioaddr + ST_MMC_CCONFIG_REG_2);
+>
+> -       if (mhost->caps & MMC_CAP_NONREMOVABLE)
+> +       if (!mmc_card_is_removable(mhost))
+>                 cconf3 |= ST_MMC_CCONFIG_EMMC_SLOT_TYPE;
+>         else
+>                 /* CARD _D ET_CTRL */
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index 040af1b..b965461 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -117,7 +117,7 @@ static void sdhci_set_card_detection(struct sdhci_host *host, bool enable)
+>         u32 present;
+>
+>         if ((host->quirks & SDHCI_QUIRK_BROKEN_CARD_DETECTION) ||
+> -           (host->mmc->caps & MMC_CAP_NONREMOVABLE))
+> +           !mmc_card_is_removable(host->mmc))
+>                 return;
+>
+>         if (enable) {
+> @@ -1617,7 +1617,7 @@ static int sdhci_get_cd(struct mmc_host *mmc)
+>                 return 0;
+>
+>         /* If nonremovable, assume that the card is always present. */
+> -       if (host->mmc->caps & MMC_CAP_NONREMOVABLE)
+> +       if (!mmc_card_is_removable(host->mmc))
+>                 return 1;
+>
+>         /*
+> @@ -3089,7 +3089,7 @@ int sdhci_add_host(struct sdhci_host *host)
+>                 mmc->caps |= MMC_CAP_SD_HIGHSPEED | MMC_CAP_MMC_HIGHSPEED;
+>
+>         if ((host->quirks & SDHCI_QUIRK_BROKEN_CARD_DETECTION) &&
+> -           !(mmc->caps & MMC_CAP_NONREMOVABLE) &&
+> +           mmc_card_is_removable(mmc) &&
+>             mmc_gpio_get_cd(host->mmc) < 0)
+>                 mmc->caps |= MMC_CAP_NEEDS_POLL;
+>
+> diff --git a/drivers/mmc/host/tmio_mmc_pio.c b/drivers/mmc/host/tmio_mmc_pio.c
+> index f44e2ab..92467ef 100644
+> --- a/drivers/mmc/host/tmio_mmc_pio.c
+> +++ b/drivers/mmc/host/tmio_mmc_pio.c
+> @@ -1086,7 +1086,7 @@ int tmio_mmc_host_probe(struct tmio_mmc_host *_host,
+>
+>         _host->native_hotplug = !(pdata->flags & TMIO_MMC_USE_GPIO_CD ||
+>                                   mmc->caps & MMC_CAP_NEEDS_POLL ||
+> -                                 mmc->caps & MMC_CAP_NONREMOVABLE ||
+> +                                 !mmc_card_is_removable(mmc) ||
+>                                   mmc->slot.cd_irq >= 0);
+>
+>         if (tmio_mmc_clk_enable(_host) < 0) {
+> --
+> 1.9.1
+>
