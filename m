@@ -1,110 +1,85 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: core: add auto bkops support
-Date: Wed, 22 Jun 2016 12:21:51 +0200
-Message-ID: <CAPDyKFq7Pr1YiacwpeDq3eAYmApydTj8Kbkyh=Cb6+vJC9BV3Q@mail.gmail.com>
-References: <1465182439-27963-1-git-send-email-shawn.lin@rock-chips.com>
- <575E52AC.6000902@intel.com> <8bbb3f13-efb3-e963-e53f-cf2ca796f319@rock-chips.com>
- <575E6C11.8060709@intel.com> <b22ae70d-5128-639d-eef0-8ac9cdd2b8e4@rock-chips.com>
- <575EA651.7060606@intel.com>
+Subject: Re: [PATCH] mmc-utils: Add Command Queue fields to Extended CSD
+Date: Wed, 22 Jun 2016 12:26:26 +0200
+Message-ID: <CAPDyKFopB5c5zzsoxU_+dLZ55kSpNhWA0zEQgusqLP+iVnWsEw@mail.gmail.com>
+References: <1465547339-10557-1-git-send-email-adrian.hunter@intel.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-lf0-f41.google.com ([209.85.215.41]:36220 "EHLO
-	mail-lf0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750799AbcFVKV4 convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 22 Jun 2016 06:21:56 -0400
-Received: by mail-lf0-f41.google.com with SMTP id q132so70358942lfe.3
-        for <linux-mmc@vger.kernel.org>; Wed, 22 Jun 2016 03:21:55 -0700 (PDT)
-In-Reply-To: <575EA651.7060606@intel.com>
+Received: from mail-lb0-f174.google.com ([209.85.217.174]:35678 "EHLO
+	mail-lb0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751209AbcFVKca (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 22 Jun 2016 06:32:30 -0400
+Received: by mail-lb0-f174.google.com with SMTP id o4so19904513lbp.2
+        for <linux-mmc@vger.kernel.org>; Wed, 22 Jun 2016 03:32:29 -0700 (PDT)
+In-Reply-To: <1465547339-10557-1-git-send-email-adrian.hunter@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>, Shawn Lin <shawn.lin@rock-chips.com>, Jaehoon Chung <jh80.chung@samsung.com>, Alex Lemberg <alex.lemberg@sandisk.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Doug Anderson <dianders@chromium.org>, "open list:ARM/Rockchip SoC..." <linux-rockchip@lists.infradead.org>
+To: Adrian Hunter <adrian.hunter@intel.com>
+Cc: Chris Ball <chris@printf.net>, linux-mmc <linux-mmc@vger.kernel.org>
 
-On 13 June 2016 at 14:25, Adrian Hunter <adrian.hunter@intel.com> wrote=
-:
-> On 13/06/16 11:58, Shawn Lin wrote:
->> =E5=9C=A8 2016/6/13 16:17, Adrian Hunter =E5=86=99=E9=81=93:
->>> On 13/06/16 10:48, Shawn Lin wrote:
->>>> On 2016/6/13 14:29, Adrian Hunter wrote:
->>>>> On 06/06/16 06:07, Shawn Lin wrote:
->>>>>> JEDEC eMMC v5.1 introduce an autonomously initiated method
->>>>>> for background operations.
->>>>>>
->>>>>> Host that wants to enable the device to perform background
->>>>>> operations during device idle time, should signal the device
->>>>>> by setting AUTO_EN in BKOPS_EN field EXT_CSD[163] to 1b. When
->>>>>> this bit is set, the device may start or stop background operati=
-ons
->>>>>> whenever it sees fit, without any notification to the host.
->>>>>>
->>>>>> When AUTO_EN bit is set, the host should keep the device power
->>>>>> active. The host may set or clear this bit at any time based on
->>>>>> its power constraints or other considerations.
->>>>>>
->>>>>> Currently the manual bkops is only be used under the async req
->>>>>> circumstances and it's a bit complicated to be controlled as the
->>>>>> perfect method is that we should do some idle monitor just as rp=
-m
->>>>>> and send HPI each time if receiving rd/wr req. But it will impac=
-t
->>>>>> performance significantly, especially for random iops since the
->>>>>> weight of executing HPI against r/w small piece of LBAs is
->>>>>> nonnegligible.
->>>>>>
->>>>>> So we now prefer to select the auto one unconditionally if suppo=
-rted
->>>>>> which makes it as simple as possible. It should really good enou=
-gh
->>>>>> for devices to manage its internal policy for bkops rather than =
-the
->>>>>> host, which makes us believe that we could achieve the best
->>>>>> performance for all the devices implementing auto bkops and the =
-only
->>>>>> thing we should do is to disable it when cutting off the power.
->>>>>
->>>>> Do you know if there is really a requirement to do that?
->>>>
->>>> Even without bkops enable, no matter for manual or auto one, FTL s=
-hould
->>>> always do bkops like GC internally when needed to guarantee the
->>>> performance and balance the wear leveling. What I thought to do is=
- to
->>>> make it more explicitly.
->>>>
->>>> Because then, what
->>>>> is the point of power off notification?
->>>>
->>>> When power off notification is sent, bkops will be stopped
->>>> in _mmc_suspend. So I don't undertand your point here?
->>>
->>> I am trying to understand why we need to do anything for auto bkops=
-=2E
->>> Since AUTO_EN is persistent, we can leave the decision whether to t=
-urn it on
->>> to whomever provisions the device. Then we just leave it alone.
->>>
->>
->> Hrm..
->>
->> one possible way is to control it by mmc-utils on
->> user space?  So we should add a cmd for mmc-utils
->> there?
+On 10 June 2016 at 10:28, Adrian Hunter <adrian.hunter@intel.com> wrote:
+> Display Command Queue information when printing Extended CSD
+> Example:
 >
-> That would be consistent with manual bkops.
+>         # mmc extcsd read /dev/mmcblk0 | grep CMDQ
+>         Command Queue Support [CMDQ_SUPPORT]: 0x01
+>         Command Queue Depth [CMDQ_DEPTH]: 16
+>         Command Enabled [CMDQ_MODE_EN]: 0x01
 >
+> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
 
-=46rom my first impression I agree, as that is the policy we have been
-sticking to when writing to persistent EXT_CSD registers.
-Although, in this case, I am actually wondering on what is the best app=
-roach.
-
-Is there really ever a case when we don't want auto BKOPS to be default=
- enabled?
-I think BKOPS is a fundamental feature of an FTL and I can't see a
-reason to why we need to involve mmc-utils/userspace to enable it. Am
-I wrong?
+Reviewed-by: Ulf Hansson <ulf.hansson@linaro.org>
 
 Kind regards
 Uffe
+
+> ---
+>  mmc.h      | 3 +++
+>  mmc_cmds.c | 9 +++++++++
+>  2 files changed, 12 insertions(+)
+>
+> diff --git a/mmc.h b/mmc.h
+> index 8c77fd5572eb..a3d732c7215c 100644
+> --- a/mmc.h
+> +++ b/mmc.h
+> @@ -55,6 +55,8 @@
+>  #define EXT_CSD_FFU_ARG_2              489     /* RO */
+>  #define EXT_CSD_FFU_ARG_1              488     /* RO */
+>  #define EXT_CSD_FFU_ARG_0              487     /* RO */
+> +#define EXT_CSD_CMDQ_DEPTH             307     /* RO */
+> +#define EXT_CSD_CMDQ_SUPPORT           308     /* RO */
+>  #define EXT_CSD_NUM_OF_FW_SEC_PROG_3   305     /* RO */
+>  #define EXT_CSD_NUM_OF_FW_SEC_PROG_2   304     /* RO */
+>  #define EXT_CSD_NUM_OF_FW_SEC_PROG_1   303     /* RO */
+> @@ -119,6 +121,7 @@
+>  #define EXT_CSD_MODE_CONFIG            30
+>  #define EXT_CSD_MODE_OPERATION_CODES   29      /* W */
+>  #define EXT_CSD_FFU_STATUS             26      /* R */
+> +#define EXT_CSD_CMDQ_MODE_EN           15      /* R/W */
+>
+>  /*
+>   * WR_REL_PARAM field definitions
+> diff --git a/mmc_cmds.c b/mmc_cmds.c
+> index 36276106b7bf..295d50541dee 100644
+> --- a/mmc_cmds.c
+> +++ b/mmc_cmds.c
+> @@ -1723,6 +1723,15 @@ int do_read_extcsd(int nargs, char **argv)
+>                 printf("eMMC Firmware Version: %s\n",
+>                         (char*)&ext_csd[EXT_CSD_FIRMWARE_VERSION]);
+>         }
+> +
+> +       if (ext_csd_rev >= 8) {
+> +               printf("Command Queue Support [CMDQ_SUPPORT]: 0x%02x\n",
+> +                      ext_csd[EXT_CSD_CMDQ_SUPPORT]);
+> +               printf("Command Queue Depth [CMDQ_DEPTH]: %u\n",
+> +                      (ext_csd[EXT_CSD_CMDQ_DEPTH] & 0x1f) + 1);
+> +               printf("Command Enabled [CMDQ_MODE_EN]: 0x%02x\n",
+> +                      ext_csd[EXT_CSD_CMDQ_MODE_EN]);
+> +       }
+>  out_free:
+>         return ret;
+>  }
+> --
+> 1.9.1
+>
