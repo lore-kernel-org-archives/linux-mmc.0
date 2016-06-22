@@ -1,152 +1,31 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH V2] mmc: sdhci: use pr_err for sdhci_dumpregs
-Date: Wed, 22 Jun 2016 17:23:58 +0200
-Message-ID: <CAPDyKFq2HOP-XhqEOu-AgpkLYuFiit-yMKHFbi44TG0BpSPp+Q@mail.gmail.com>
-References: <CC22646CC0522A488A20F7A66BFD619308D491@irsmsx105.ger.corp.intel.com>
- <57613BE9.9060807@intel.com> <576A7911.3040503@intel.com>
+From: Heiko =?ISO-8859-1?Q?St=FCbner?= <heiko-4mtYJXux2i+zQB+pC5nmwQ@public.gmane.org>
+Subject: Re: [PATCH v3 15/15] arm64: dts: rockchip: Provide emmcclk to PHY for rk3399
+Date: Wed, 22 Jun 2016 18:31:09 +0200
+Message-ID: <2700041.i9WYqvILHH@diego>
+References: <1466445414-11974-1-git-send-email-dianders@chromium.org> <1466445414-11974-16-git-send-email-dianders@chromium.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <576A7911.3040503@intel.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "Baranowska, BeataX" <beatax.baranowska@intel.com>, "Dong, Chuanxiao" <chuanxiao.dong@intel.com>, "Jarosz, SebastianX" <sebastianx.jarosz@intel.com>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7Bit
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1466445414-11974-16-git-send-email-dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Douglas Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
+Cc: ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, kishon-l0cyMroinI0@public.gmane.org, robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org, xzy.xu-TNX95d0MmH7DzftRWevZcw@public.gmane.org, briannorris-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org, adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, groeck-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org, pawel.moll-5wv7dgnIgG8@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, ijc+devicetree-KcIKpvwj1kUDXYZnReoRVg@public.gmane.org, galak-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, catalin.marinas-5wv7dgnIgG8@public.gmane.org, will.deacon-5wv7dgnIgG8@public.gmane.org, zhengxing-TNX95d0MmH7DzftRWevZcw@public.gmane.org, wxt-TNX95d0MmH7DzftRWevZcw@public.gmane.org, jay.xu-TNX95d0MmH7DzftRWevZcw@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
 
-On 22 June 2016 at 13:40, Adrian Hunter <adrian.hunter@intel.com> wrote:
-> From: Chuanxiao Dong <chuanxiao.dong@intel.com>
->
-> sdhci_dumpregs is used to dump registers when error happens. Thus it should
-> use pr_err instead of pr_debug to show more information about the hardware.
->
-> Signed-off-by: Chuanxiao Dong <chuanxiao.dong@intel.com>
-> [Fix whitespace and checkpatch warnings]
-> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
+Am Montag, 20. Juni 2016, 10:56:54 schrieb Douglas Anderson:
+> Previous changes in this series allowed exposing the card clock from the
+> rk3399 SDHCI device and allowed consuming the card clock in the rk3399
+> eMMC PHY.  Hook things up in the main rk3399 dtsi file.
+> 
+> Signed-off-by: Douglas Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
+> Tested-by: Heiko Stuebner <heiko-4mtYJXux2i+zQB+pC5nmwQ@public.gmane.org>
 
-Thanks, applied for next!
+applied to my dts64-branch for 4.8
 
-Kind regards
-Uffe
-
-> ---
->
-> Changes in V2:
->
->         Fix whitespace and checkpatch warnings
->         Change subject 'host' -> 'sdhci'
->
->  drivers/mmc/host/sdhci.c | 92 ++++++++++++++++++++++++------------------------
->  1 file changed, 46 insertions(+), 46 deletions(-)
->
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index 040af1b6b412..49800d2c69fa 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -52,58 +52,58 @@ static int sdhci_get_cd(struct mmc_host *mmc);
->
->  static void sdhci_dumpregs(struct sdhci_host *host)
->  {
-> -       pr_debug(DRIVER_NAME ": =========== REGISTER DUMP (%s)===========\n",
-> -               mmc_hostname(host->mmc));
-> -
-> -       pr_debug(DRIVER_NAME ": Sys addr: 0x%08x | Version:  0x%08x\n",
-> -               sdhci_readl(host, SDHCI_DMA_ADDRESS),
-> -               sdhci_readw(host, SDHCI_HOST_VERSION));
-> -       pr_debug(DRIVER_NAME ": Blk size: 0x%08x | Blk cnt:  0x%08x\n",
-> -               sdhci_readw(host, SDHCI_BLOCK_SIZE),
-> -               sdhci_readw(host, SDHCI_BLOCK_COUNT));
-> -       pr_debug(DRIVER_NAME ": Argument: 0x%08x | Trn mode: 0x%08x\n",
-> -               sdhci_readl(host, SDHCI_ARGUMENT),
-> -               sdhci_readw(host, SDHCI_TRANSFER_MODE));
-> -       pr_debug(DRIVER_NAME ": Present:  0x%08x | Host ctl: 0x%08x\n",
-> -               sdhci_readl(host, SDHCI_PRESENT_STATE),
-> -               sdhci_readb(host, SDHCI_HOST_CONTROL));
-> -       pr_debug(DRIVER_NAME ": Power:    0x%08x | Blk gap:  0x%08x\n",
-> -               sdhci_readb(host, SDHCI_POWER_CONTROL),
-> -               sdhci_readb(host, SDHCI_BLOCK_GAP_CONTROL));
-> -       pr_debug(DRIVER_NAME ": Wake-up:  0x%08x | Clock:    0x%08x\n",
-> -               sdhci_readb(host, SDHCI_WAKE_UP_CONTROL),
-> -               sdhci_readw(host, SDHCI_CLOCK_CONTROL));
-> -       pr_debug(DRIVER_NAME ": Timeout:  0x%08x | Int stat: 0x%08x\n",
-> -               sdhci_readb(host, SDHCI_TIMEOUT_CONTROL),
-> -               sdhci_readl(host, SDHCI_INT_STATUS));
-> -       pr_debug(DRIVER_NAME ": Int enab: 0x%08x | Sig enab: 0x%08x\n",
-> -               sdhci_readl(host, SDHCI_INT_ENABLE),
-> -               sdhci_readl(host, SDHCI_SIGNAL_ENABLE));
-> -       pr_debug(DRIVER_NAME ": AC12 err: 0x%08x | Slot int: 0x%08x\n",
-> -               sdhci_readw(host, SDHCI_ACMD12_ERR),
-> -               sdhci_readw(host, SDHCI_SLOT_INT_STATUS));
-> -       pr_debug(DRIVER_NAME ": Caps:     0x%08x | Caps_1:   0x%08x\n",
-> -               sdhci_readl(host, SDHCI_CAPABILITIES),
-> -               sdhci_readl(host, SDHCI_CAPABILITIES_1));
-> -       pr_debug(DRIVER_NAME ": Cmd:      0x%08x | Max curr: 0x%08x\n",
-> -               sdhci_readw(host, SDHCI_COMMAND),
-> -               sdhci_readl(host, SDHCI_MAX_CURRENT));
-> -       pr_debug(DRIVER_NAME ": Host ctl2: 0x%08x\n",
-> -               sdhci_readw(host, SDHCI_HOST_CONTROL2));
-> +       pr_err(DRIVER_NAME ": =========== REGISTER DUMP (%s)===========\n",
-> +              mmc_hostname(host->mmc));
-> +
-> +       pr_err(DRIVER_NAME ": Sys addr: 0x%08x | Version:  0x%08x\n",
-> +              sdhci_readl(host, SDHCI_DMA_ADDRESS),
-> +              sdhci_readw(host, SDHCI_HOST_VERSION));
-> +       pr_err(DRIVER_NAME ": Blk size: 0x%08x | Blk cnt:  0x%08x\n",
-> +              sdhci_readw(host, SDHCI_BLOCK_SIZE),
-> +              sdhci_readw(host, SDHCI_BLOCK_COUNT));
-> +       pr_err(DRIVER_NAME ": Argument: 0x%08x | Trn mode: 0x%08x\n",
-> +              sdhci_readl(host, SDHCI_ARGUMENT),
-> +              sdhci_readw(host, SDHCI_TRANSFER_MODE));
-> +       pr_err(DRIVER_NAME ": Present:  0x%08x | Host ctl: 0x%08x\n",
-> +              sdhci_readl(host, SDHCI_PRESENT_STATE),
-> +              sdhci_readb(host, SDHCI_HOST_CONTROL));
-> +       pr_err(DRIVER_NAME ": Power:    0x%08x | Blk gap:  0x%08x\n",
-> +              sdhci_readb(host, SDHCI_POWER_CONTROL),
-> +              sdhci_readb(host, SDHCI_BLOCK_GAP_CONTROL));
-> +       pr_err(DRIVER_NAME ": Wake-up:  0x%08x | Clock:    0x%08x\n",
-> +              sdhci_readb(host, SDHCI_WAKE_UP_CONTROL),
-> +              sdhci_readw(host, SDHCI_CLOCK_CONTROL));
-> +       pr_err(DRIVER_NAME ": Timeout:  0x%08x | Int stat: 0x%08x\n",
-> +              sdhci_readb(host, SDHCI_TIMEOUT_CONTROL),
-> +              sdhci_readl(host, SDHCI_INT_STATUS));
-> +       pr_err(DRIVER_NAME ": Int enab: 0x%08x | Sig enab: 0x%08x\n",
-> +              sdhci_readl(host, SDHCI_INT_ENABLE),
-> +              sdhci_readl(host, SDHCI_SIGNAL_ENABLE));
-> +       pr_err(DRIVER_NAME ": AC12 err: 0x%08x | Slot int: 0x%08x\n",
-> +              sdhci_readw(host, SDHCI_ACMD12_ERR),
-> +              sdhci_readw(host, SDHCI_SLOT_INT_STATUS));
-> +       pr_err(DRIVER_NAME ": Caps:     0x%08x | Caps_1:   0x%08x\n",
-> +              sdhci_readl(host, SDHCI_CAPABILITIES),
-> +              sdhci_readl(host, SDHCI_CAPABILITIES_1));
-> +       pr_err(DRIVER_NAME ": Cmd:      0x%08x | Max curr: 0x%08x\n",
-> +              sdhci_readw(host, SDHCI_COMMAND),
-> +              sdhci_readl(host, SDHCI_MAX_CURRENT));
-> +       pr_err(DRIVER_NAME ": Host ctl2: 0x%08x\n",
-> +              sdhci_readw(host, SDHCI_HOST_CONTROL2));
->
->         if (host->flags & SDHCI_USE_ADMA) {
->                 if (host->flags & SDHCI_USE_64_BIT_DMA)
-> -                       pr_debug(DRIVER_NAME ": ADMA Err: 0x%08x | ADMA Ptr: 0x%08x%08x\n",
-> -                                readl(host->ioaddr + SDHCI_ADMA_ERROR),
-> -                                readl(host->ioaddr + SDHCI_ADMA_ADDRESS_HI),
-> -                                readl(host->ioaddr + SDHCI_ADMA_ADDRESS));
-> +                       pr_err(DRIVER_NAME ": ADMA Err: 0x%08x | ADMA Ptr: 0x%08x%08x\n",
-> +                              readl(host->ioaddr + SDHCI_ADMA_ERROR),
-> +                              readl(host->ioaddr + SDHCI_ADMA_ADDRESS_HI),
-> +                              readl(host->ioaddr + SDHCI_ADMA_ADDRESS));
->                 else
-> -                       pr_debug(DRIVER_NAME ": ADMA Err: 0x%08x | ADMA Ptr: 0x%08x\n",
-> -                                readl(host->ioaddr + SDHCI_ADMA_ERROR),
-> -                                readl(host->ioaddr + SDHCI_ADMA_ADDRESS));
-> +                       pr_err(DRIVER_NAME ": ADMA Err: 0x%08x | ADMA Ptr: 0x%08x\n",
-> +                              readl(host->ioaddr + SDHCI_ADMA_ERROR),
-> +                              readl(host->ioaddr + SDHCI_ADMA_ADDRESS));
->         }
->
-> -       pr_debug(DRIVER_NAME ": ===========================================\n");
-> +       pr_err(DRIVER_NAME ": ===========================================\n");
->  }
->
->  /*****************************************************************************\
-> --
-> 1.9.1
->
+Thanks
+Heiko
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
