@@ -1,7 +1,7 @@
 From: Gerd Hoffmann <kraxel@redhat.com>
-Subject: [PATCH 4/5] mmc: bcm2835-sdhost: reset tweaks. [fixup]
-Date: Wed, 22 Jun 2016 13:42:17 +0200
-Message-ID: <1466595738-2229-5-git-send-email-kraxel@redhat.com>
+Subject: [PATCH 5/5] mmc: bcm2835-sdhost: add to devicetree
+Date: Wed, 22 Jun 2016 13:42:18 +0200
+Message-ID: <1466595738-2229-6-git-send-email-kraxel@redhat.com>
 References: <1466595738-2229-1-git-send-email-kraxel@redhat.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
@@ -18,48 +18,31 @@ List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
 Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
 Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
 To: linux-rpi-kernel@lists.infradead.org
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Stephen Warren <swarren@wwwdotorg.org>, Lee Jones <lee@kernel.org>, linux-mmc@vger.kernel.org, open list <linux-kernel@vger.kernel.org>, Eric Anholt <eric@anholt.net>, Gerd Hoffmann <kraxel@redhat.com>, linux-arm-kernel@lists.infradead.org
+Cc: Mark Rutland <mark.rutland@arm.com>, "open list:OPEN FIRMWARE AND FLATTENED DEVICE TREE BINDINGS" <devicetree@vger.kernel.org>, linux-mmc@vger.kernel.org, Russell King <linux@armlinux.org.uk>, open list <linux-kernel@vger.kernel.org>, Eric Anholt <eric@anholt.net>, Rob Herring <robh+dt@kernel.org>, Gerd Hoffmann <kraxel@redhat.com>, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
-Kill any pending stuff before calling reset_internal(), so there
-shouldn't be any completion callbacks interfering.  This allows
-to call reset_internal without lock, which in turn allows to
-turn the mdelay calls into msleep calls.  Also adjust the time
-from 10ms to 20ms as checkpatch warns about the 10ms.
-
-Signed-off-by: Gerd Hoffmann <kraxel@redhat.com>
 ---
- drivers/mmc/host/bcm2835-sdhost.c | 9 +++++----
- 1 file changed, 5 insertions(+), 4 deletions(-)
+ arch/arm/boot/dts/bcm283x.dtsi | 8 ++++++++
+ 1 file changed, 8 insertions(+)
 
-diff --git a/drivers/mmc/host/bcm2835-sdhost.c b/drivers/mmc/host/bcm2835-sdhost.c
-index 8a05c02..a895561 100644
---- a/drivers/mmc/host/bcm2835-sdhost.c
-+++ b/drivers/mmc/host/bcm2835-sdhost.c
-@@ -321,9 +321,9 @@ static void bcm2835_sdhost_reset_internal(struct bcm2835_host *host)
- 	temp |= (FIFO_READ_THRESHOLD << SDEDM_READ_THRESHOLD_SHIFT) |
- 		(FIFO_WRITE_THRESHOLD << SDEDM_WRITE_THRESHOLD_SHIFT);
- 	bcm2835_sdhost_write(host, temp, SDEDM);
--	mdelay(10);
-+	msleep(20);
- 	bcm2835_sdhost_set_power(host, true);
--	mdelay(10);
-+	msleep(20);
- 	host->clock = 0;
- 	bcm2835_sdhost_write(host, host->hcfg, SDHCFG);
- 	bcm2835_sdhost_write(host, host->cdiv, SDCDIV);
-@@ -334,9 +334,10 @@ static void bcm2835_sdhost_reset(struct mmc_host *mmc)
- 	struct bcm2835_host *host = mmc_priv(mmc);
- 	unsigned long flags;
+diff --git a/arch/arm/boot/dts/bcm283x.dtsi b/arch/arm/boot/dts/bcm283x.dtsi
+index b982522..b9540d9 100644
+--- a/arch/arm/boot/dts/bcm283x.dtsi
++++ b/arch/arm/boot/dts/bcm283x.dtsi
+@@ -239,6 +239,14 @@
+ 			status = "disabled";
+ 		};
  
--	spin_lock_irqsave(&host->lock, flags);
-+	if (host->dma_chan)
-+		dmaengine_terminate_sync(host->dma_chan);
-+	tasklet_kill(&host->finish_tasklet);
- 	bcm2835_sdhost_reset_internal(host);
--	spin_unlock_irqrestore(&host->lock, flags);
- }
- 
- static void bcm2835_sdhost_set_ios(struct mmc_host *mmc, struct mmc_ios *ios);
++		sdhost: sdhost@7e202000 {
++			compatible = "brcm,bcm2835-sdhost";
++			reg = <0x7e202000 0x100>;
++			interrupts = <2 24>;
++			clocks = <&clocks BCM2835_CLOCK_VPU>;
++			status = "disabled";
++		};
++
+ 		hvs@7e400000 {
+ 			compatible = "brcm,bcm2835-hvs";
+ 			reg = <0x7e400000 0x6000>;
 -- 
 1.8.3.1
