@@ -1,120 +1,151 @@
 From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH v3] mmc: dw_mmc: remove UBSAN warning in dw_mci_setup_bus()
-Date: Wed, 22 Jun 2016 10:27:13 +0900
-Message-ID: <5769E971.3040501@samsung.com>
-References: <1466140609-5773-1-git-send-email-sw0312.kim@samsung.com>
- <CGME20160620040944epcas1p4be8f65e54c9c845cec0f608aa991db07@epcas1p4.samsung.com>
- <1466395785-3715-1-git-send-email-sw0312.kim@samsung.com>
+Subject: Re: [RESEND PATCH v2 1/1] mmc: dw_mmc: Wait for data transfer after
+ response errors.
+Date: Wed, 22 Jun 2016 10:26:23 +0900
+Message-ID: <5769E93F.7020809@samsung.com>
+References: <1461657838-25484-1-git-send-email-enric.balletbo@collabora.com>
+ <1461657838-25484-2-git-send-email-enric.balletbo@collabora.com>
+ <5767C1EA.10101@samsung.com>
+ <CGME20160621163110epcas1p101ef4e24ff680a85630aeb1b2ab6df6e@epcas1p1.samsung.com>
+ <CAFqH_50ki3no8yfk29OBMpHSUQJyKKUz=2RLS5XTpRSyhKZ9eg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
+Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout2.samsung.com ([203.254.224.25]:48220 "EHLO
-	mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751088AbcFVB2B (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 21 Jun 2016 21:28:01 -0400
-In-reply-to: <1466395785-3715-1-git-send-email-sw0312.kim@samsung.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-reply-to: <CAFqH_50ki3no8yfk29OBMpHSUQJyKKUz=2RLS5XTpRSyhKZ9eg@mail.gmail.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Enric Balletbo Serra <eballetbo@gmail.com>
+Cc: Enric Balletbo i Serra <enric.balletbo@collabora.com>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Doug Anderson <dianders@chromium.org>, Alim Akhtar <alim.akhtar@gmail.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Seung-Woo Kim <sw0312.kim@samsung.com>, ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 
-Hi Seung-Woo,
+Hi Enric,
 
-On 06/20/2016 01:09 PM, Seung-Woo Kim wrote:
-> This patch removes following UBSAN warnings in dw_mci_setup_bus().
+On 06/22/2016 01:30 AM, Enric Balletbo Serra wrote:
+> Hi Jaehoon,
 > 
->   UBSAN: Undefined behaviour in drivers/mmc/host/dw_mmc.c:1102:14
->   shift exponent 250 is too large for 32-bit type 'unsigned int'
->   Call trace:
->   [<ffffff90080908a8>] dump_backtrace+0x0/0x380
->   [<ffffff9008090c3c>] show_stack+0x14/0x20
->   [<ffffff90087457b8>] dump_stack+0xe0/0x120
->   [<ffffff90087b1360>] ubsan_epilogue+0x18/0x68
->   [<ffffff90087b1a94>] __ubsan_handle_shift_out_of_bounds+0x18c/0x1bc
->   [<ffffff9008d89cb8>] dw_mci_setup_bus+0x3a0/0x438
->   [...]
+> 2016-06-20 12:14 GMT+02:00 Jaehoon Chung <jh80.chung@samsung.com>:
+>> Hi Enric,
+>>
+>> On 04/26/2016 05:03 PM, Enric Balletbo i Serra wrote:
+>>> From: Doug Anderson <dianders@chromium.org>
+>>>
+>>> According to the DesignWare state machine description, after we get a
+>>> "response error" or "response CRC error" we move into data transfer
+>>> mode. That means that we don't necessarily need to special case
+>>> trying to deal with the failure right away. We can wait until we are
+>>> notified that the data transfer is complete (with or without errors)
+>>> and then we can deal with the failure.
+>>>
+>>> It may sound strange to defer dealing with a command that we know will
+>>> fail anyway, but this appears to fix a bug. During tuning (CMD19) on
+>>> a specific card on an rk3288-based system, we found that we could get
+>>> a "response CRC error". Sending the stop command after the "response
+>>> CRC error" would then throw the system into a confused state causing
+>>> all future tuning phases to report failure.
+>>
+>> I understood this patch what purpose has.
+>> Does it need to consider for other tuning cases?
+>>
 > 
->   UBSAN: Undefined behaviour in drivers/mmc/host/dw_mmc.c:1132:27
->   shift exponent 250 is too large for 32-bit type 'unsigned int'
->   Call trace:
->   [<ffffff90080908a8>] dump_backtrace+0x0/0x380
->   [<ffffff9008090c3c>] show_stack+0x14/0x20
->   [<ffffff90087457b8>] dump_stack+0xe0/0x120
->   [<ffffff90087b1360>] ubsan_epilogue+0x18/0x68
->   [<ffffff90087b1a94>] __ubsan_handle_shift_out_of_bounds+0x18c/0x1bc
->   [<ffffff9008d89c9c>] dw_mci_setup_bus+0x384/0x438
->   [...]
+> Not sure, to be honest I only saw this during UHS tuning sequence on
+> this brand of cards I never reproduced the issue on other tuning
+> cases.
 > 
-> The warnings are caused because of bit shift which is used to
-> filter spamming message for CONFIG_MMC_CLKGATE, but the config is
-> already removed. So this patch just removes the shift.
-> 
-> Signed-off-by: Seung-Woo Kim <sw0312.kim@samsung.com>
+>> Best Regards,
+>> Jaehoon Chung
+>>
+>>>
+>>> When in the confused state, the controller would show these (hex codes
+>>> are interrupt status register):
+>>>  CMD ERR: 0x00000046 (cmd=19)
+>>>  CMD ERR: 0x0000004e (cmd=12)
+>>>  DATA ERR: 0x00000208
+>>>  DATA ERR: 0x0000020c
+>>>  CMD ERR: 0x00000104 (cmd=19)
+>>>  CMD ERR: 0x00000104 (cmd=12)
+>>>  DATA ERR: 0x00000208
+>>>  DATA ERR: 0x0000020c
+>>>  ...
+>>>  ...
+>>>
+>>> It is inherently difficult to deal with the complexity of trying to
+>>> correctly send a stop command while a data transfer is taking place
+>>> since you need to deal with different corner cases caused by the fact
+>>> that the data transfer could complete (with errors or without errors)
+>>> during various places in sending the stop command (dw_mci_stop_dma,
+>>> send_stop_abort, etc)
+>>>
+>>> Instead of adding a bunch of extra complexity to deal with this, it
+>>> seems much simpler to just use the more straightforward (and less
+>>> error-prone) path of letting the data transfer finish. There
+>>> shouldn't be any huge benefit to sending the stop command slightly
+>>> earlier, anyway.
+>>>
+>>> Signed-off-by: Doug Anderson <dianders@chromium.org>
+>>> Signed-off-by: Enric Balletbo i Serra <enric.balletbo@collabora.com>
+>>> Cc: Alim Akhtar <alim.akhtar@gmail.com>
 
-Applied this patch on my repository.
-Thanks!
+Applied this patch on my repository. Thanks!
 
 Best Regards,
 Jaehoon Chung
 
-> ---
->  drivers/mmc/host/dw_mmc.c |   14 +++++---------
->  drivers/mmc/host/dw_mmc.h |    4 ----
->  2 files changed, 5 insertions(+), 13 deletions(-)
+>>> ---
+>>> Changelog since v1:
+>>> - Fix the issue found by Alim with exynos letting the data transfer
+>>>   take place only when MMC_SEND_TUNING_BLOCK is issued.
+>>>
+>>>  drivers/mmc/host/dw_mmc.c | 27 +++++++++++++++++++++++++++
+>>>  1 file changed, 27 insertions(+)
+>>>
+>>> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+>>> index 242f9a0..2ebeea8 100644
+>>> --- a/drivers/mmc/host/dw_mmc.c
+>>> +++ b/drivers/mmc/host/dw_mmc.c
+>>> @@ -1761,6 +1761,33 @@ static void dw_mci_tasklet_func(unsigned long priv)
+>>>                       }
+>>>
+>>>                       if (cmd->data && err) {
+>>> +                             /*
+>>> +                              * During UHS tuning sequence, sending the stop
+>>> +                              * command after the response CRC error would
+>>> +                              * throw the system into a confused state
+>>> +                              * causing all future tuning phases to report
+>>> +                              * failure.
+>>> +                              *
+>>> +                              * In such case controller will move into a data
+>>> +                              * transfer state after a response error or
+>>> +                              * response CRC error. Let's let that finish
+>>> +                              * before trying to send a stop, so we'll go to
+>>> +                              * STATE_SENDING_DATA.
+>>> +                              *
+>>> +                              * Although letting the data transfer take place
+>>> +                              * will waste a bit of time (we already know
+>>> +                              * the command was bad), it can't cause any
+>>> +                              * errors since it's possible it would have
+>>> +                              * taken place anyway if this tasklet got
+>>> +                              * delayed. Allowing the transfer to take place
+>>> +                              * avoids races and keeps things simple.
+>>> +                              */
+>>> +                             if ((err != -ETIMEDOUT) &&
+>>> +                                 (cmd->opcode == MMC_SEND_TUNING_BLOCK)) {
+>>> +                                     state = STATE_SENDING_DATA;
+>>> +                                     continue;
+>>> +                             }
+>>> +
+>>>                               dw_mci_stop_dma(host);
+>>>                               send_stop_abort(host, data);
+>>>                               state = STATE_SENDING_STOP;
+>>>
+>>
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 > 
-> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-> index 2cc6123..bada11e 100644
-> --- a/drivers/mmc/host/dw_mmc.c
-> +++ b/drivers/mmc/host/dw_mmc.c
-> @@ -1099,12 +1099,11 @@ static void dw_mci_setup_bus(struct dw_mci_slot *slot, bool force_clkinit)
->  
->  		div = (host->bus_hz != clock) ? DIV_ROUND_UP(div, 2) : 0;
->  
-> -		if ((clock << div) != slot->__clk_old || force_clkinit)
-> -			dev_info(&slot->mmc->class_dev,
-> -				 "Bus speed (slot %d) = %dHz (slot req %dHz, actual %dHZ div = %d)\n",
-> -				 slot->id, host->bus_hz, clock,
-> -				 div ? ((host->bus_hz / div) >> 1) :
-> -				 host->bus_hz, div);
-> +		dev_info(&slot->mmc->class_dev,
-> +			 "Bus speed (slot %d) = %dHz (slot req %dHz, actual %dHZ div = %d)\n",
-> +			 slot->id, host->bus_hz, clock,
-> +			 div ? ((host->bus_hz / div) >> 1) :
-> +			 host->bus_hz, div);
->  
->  		/* disable clock */
->  		mci_writel(host, CLKENA, 0);
-> @@ -1127,9 +1126,6 @@ static void dw_mci_setup_bus(struct dw_mci_slot *slot, bool force_clkinit)
->  
->  		/* inform CIU */
->  		mci_send_cmd(slot, sdmmc_cmd_bits, 0);
-> -
-> -		/* keep the clock with reflecting clock dividor */
-> -		slot->__clk_old = clock << div;
->  	}
->  
->  	host->current_speed = clock;
-> diff --git a/drivers/mmc/host/dw_mmc.h b/drivers/mmc/host/dw_mmc.h
-> index 1e8d838..5961037 100644
-> --- a/drivers/mmc/host/dw_mmc.h
-> +++ b/drivers/mmc/host/dw_mmc.h
-> @@ -245,9 +245,6 @@ extern int dw_mci_resume(struct dw_mci *host);
->   * @queue_node: List node for placing this node in the @queue list of
->   *	&struct dw_mci.
->   * @clock: Clock rate configured by set_ios(). Protected by host->lock.
-> - * @__clk_old: The last updated clock with reflecting clock divider.
-> - *	Keeping track of this helps us to avoid spamming the console
-> - *	with CONFIG_MMC_CLKGATE.
->   * @flags: Random state bits associated with the slot.
->   * @id: Number of this slot.
->   * @sdio_id: Number of this slot in the SDIO interrupt registers.
-> @@ -262,7 +259,6 @@ struct dw_mci_slot {
->  	struct list_head	queue_node;
->  
->  	unsigned int		clock;
-> -	unsigned int		__clk_old;
->  
->  	unsigned long		flags;
->  #define DW_MMC_CARD_PRESENT	0
 > 
-
+> 
