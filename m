@@ -1,70 +1,108 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 0/5] mmc: bcm2835-sdhost: Add new driver for the internal
- SD controller.
-Date: Wed, 22 Jun 2016 16:41:10 +0200
-Message-ID: <CAPDyKFpak075H7aAH14-LLzKFtE6-n+x5u+k_dvT6Oi5=sgXeQ@mail.gmail.com>
-References: <1466595738-2229-1-git-send-email-kraxel@redhat.com>
+From: Alex Lemberg <Alex.Lemberg@sandisk.com>
+Subject: Re: [PATCH] mmc: core: add auto bkops support
+Date: Wed, 22 Jun 2016 14:57:05 +0000
+Message-ID: <362217AA-5AE7-471A-AF58-985676E261A4@sandisk.com>
+References: <1465182439-27963-1-git-send-email-shawn.lin@rock-chips.com>
+ <575E52AC.6000902@intel.com>
+ <8bbb3f13-efb3-e963-e53f-cf2ca796f319@rock-chips.com>
+ <575E6C11.8060709@intel.com>
+ <b22ae70d-5128-639d-eef0-8ac9cdd2b8e4@rock-chips.com>
+ <575EA651.7060606@intel.com>
+ <CAPDyKFq7Pr1YiacwpeDq3eAYmApydTj8Kbkyh=Cb6+vJC9BV3Q@mail.gmail.com>
+ <B9A5F20C-E8A0-4E81-BA07-79E60017E728@sandisk.com>
+ <CAPDyKFoerO18yQWGA=VBcRW5dy5Qie+m19mFr-FdDch2AckUJg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wm0-f51.google.com ([74.125.82.51]:38715 "EHLO
-	mail-wm0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752578AbcFVOlX (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 22 Jun 2016 10:41:23 -0400
-Received: by mail-wm0-f51.google.com with SMTP id r201so9310173wme.1
-        for <linux-mmc@vger.kernel.org>; Wed, 22 Jun 2016 07:41:12 -0700 (PDT)
-In-Reply-To: <1466595738-2229-1-git-send-email-kraxel@redhat.com>
+Received: from mail-bl2on0095.outbound.protection.outlook.com ([65.55.169.95]:29856
+	"EHLO na01-bl2-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1751355AbcFVO5K (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 22 Jun 2016 10:57:10 -0400
+In-Reply-To: <CAPDyKFoerO18yQWGA=VBcRW5dy5Qie+m19mFr-FdDch2AckUJg@mail.gmail.com>
+Content-Language: en-US
+Content-ID: <1A5BA9262FF17B48B19F8DC2890381D6@namprd02.prod.outlook.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Gerd Hoffmann <kraxel@redhat.com>
-Cc: linux-rpi-kernel@lists.infradead.org, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, linux-mmc <linux-mmc@vger.kernel.org>, Eric Anholt <eric@anholt.net>
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, Shawn Lin <shawn.lin@rock-chips.com>, Jaehoon Chung <jh80.chung@samsung.com>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Doug Anderson <dianders@chromium.org>, "open list:ARM/Rockchip SoC..." <linux-rockchip@lists.infradead.org>
 
-On 22 June 2016 at 13:42, Gerd Hoffmann <kraxel@redhat.com> wrote:
->   Hi,
->
-> Here is the bcm2835-sdhost driver.  Patches 1+2 are unmodified from
-> Eric, patches 3+4 are incremental fixes.  Left them separate for now,
-> to make it easier to review, should probably squashed in for the final
-> version.  Patch 5 adds it to the device tree, in disabled state.
->
-> Actually enabling the thing depends on a bunch of changes in the gpio
-> handling of the device tree.  Leaving that for another day ...
-
-Why did you post this?
-
-I think you should be adopting sdhci-iproc - in case there are issues
-with its bcm2835 support, right!?
-
-Kind regards
-Uffe
-
->
-> cheers,
->   Gerd
->
-> Eric Anholt (2):
->   dt-bindings: Add binding for brcm,bcm2835-sdhost.
->   mmc: bcm2835-sdhost: Add new driver for the internal SD controller.
->
-> Gerd Hoffmann (3):
->   mmc: bcm2835-sdhost: zap mmiowb() [fixup]
->   mmc: bcm2835-sdhost: reset tweaks. [fixup]
->   mmc: bcm2835-sdhost: add to devicetree
->
->  .../devicetree/bindings/mmc/brcm,bcm2835-sdhci.txt |    3 +
->  .../bindings/mmc/brcm,bcm2835-sdhost.txt           |   24 +
->  arch/arm/boot/dts/bcm283x.dtsi                     |    8 +
->  drivers/mmc/host/Kconfig                           |    9 +
->  drivers/mmc/host/Makefile                          |    1 +
->  drivers/mmc/host/bcm2835-sdhost.c                  | 1652 ++++++++++++++++++++
->  6 files changed, 1697 insertions(+)
->  create mode 100644 Documentation/devicetree/bindings/mmc/brcm,bcm2835-sdhost.txt
->  create mode 100644 drivers/mmc/host/bcm2835-sdhost.c
->
-> --
-> 1.8.3.1
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+DQoNCk9uIDYvMjIvMTYsIDU6MjggUE0sICJVbGYgSGFuc3NvbiIgPHVsZi5oYW5zc29uQGxpbmFy
+by5vcmc+IHdyb3RlOg0KDQo+T24gMjIgSnVuZSAyMDE2IGF0IDE2OjIwLCBBbGV4IExlbWJlcmcg
+PEFsZXguTGVtYmVyZ0BzYW5kaXNrLmNvbT4gd3JvdGU6DQo+Pg0KPj4NCj4+IE9uIDYvMjIvMTYs
+IDE6MjEgUE0sICJVbGYgSGFuc3NvbiIgPHVsZi5oYW5zc29uQGxpbmFyby5vcmc+IHdyb3RlOg0K
+Pj4NCj4+Pk9uIDEzIEp1bmUgMjAxNiBhdCAxNDoyNSwgQWRyaWFuIEh1bnRlciA8YWRyaWFuLmh1
+bnRlckBpbnRlbC5jb20+IHdyb3RlOg0KPj4+PiBPbiAxMy8wNi8xNiAxMTo1OCwgU2hhd24gTGlu
+IHdyb3RlOg0KPj4+Pj4g5ZyoIDIwMTYvNi8xMyAxNjoxNywgQWRyaWFuIEh1bnRlciDlhpnpgZM6
+DQo+Pj4+Pj4gT24gMTMvMDYvMTYgMTA6NDgsIFNoYXduIExpbiB3cm90ZToNCj4+Pj4+Pj4gT24g
+MjAxNi82LzEzIDE0OjI5LCBBZHJpYW4gSHVudGVyIHdyb3RlOg0KPj4+Pj4+Pj4gT24gMDYvMDYv
+MTYgMDY6MDcsIFNoYXduIExpbiB3cm90ZToNCj4+Pj4+Pj4+PiBKRURFQyBlTU1DIHY1LjEgaW50
+cm9kdWNlIGFuIGF1dG9ub21vdXNseSBpbml0aWF0ZWQgbWV0aG9kDQo+Pj4+Pj4+Pj4gZm9yIGJh
+Y2tncm91bmQgb3BlcmF0aW9ucy4NCj4+Pj4+Pj4+Pg0KPj4+Pj4+Pj4+IEhvc3QgdGhhdCB3YW50
+cyB0byBlbmFibGUgdGhlIGRldmljZSB0byBwZXJmb3JtIGJhY2tncm91bmQNCj4+Pj4+Pj4+PiBv
+cGVyYXRpb25zIGR1cmluZyBkZXZpY2UgaWRsZSB0aW1lLCBzaG91bGQgc2lnbmFsIHRoZSBkZXZp
+Y2UNCj4+Pj4+Pj4+PiBieSBzZXR0aW5nIEFVVE9fRU4gaW4gQktPUFNfRU4gZmllbGQgRVhUX0NT
+RFsxNjNdIHRvIDFiLiBXaGVuDQo+Pj4+Pj4+Pj4gdGhpcyBiaXQgaXMgc2V0LCB0aGUgZGV2aWNl
+IG1heSBzdGFydCBvciBzdG9wIGJhY2tncm91bmQgb3BlcmF0aW9ucw0KPj4+Pj4+Pj4+IHdoZW5l
+dmVyIGl0IHNlZXMgZml0LCB3aXRob3V0IGFueSBub3RpZmljYXRpb24gdG8gdGhlIGhvc3QuDQo+
+Pj4+Pj4+Pj4NCj4+Pj4+Pj4+PiBXaGVuIEFVVE9fRU4gYml0IGlzIHNldCwgdGhlIGhvc3Qgc2hv
+dWxkIGtlZXAgdGhlIGRldmljZSBwb3dlcg0KPj4+Pj4+Pj4+IGFjdGl2ZS4gVGhlIGhvc3QgbWF5
+IHNldCBvciBjbGVhciB0aGlzIGJpdCBhdCBhbnkgdGltZSBiYXNlZCBvbg0KPj4+Pj4+Pj4+IGl0
+cyBwb3dlciBjb25zdHJhaW50cyBvciBvdGhlciBjb25zaWRlcmF0aW9ucy4NCj4+Pj4+Pj4+Pg0K
+Pj4+Pj4+Pj4+IEN1cnJlbnRseSB0aGUgbWFudWFsIGJrb3BzIGlzIG9ubHkgYmUgdXNlZCB1bmRl
+ciB0aGUgYXN5bmMgcmVxDQo+Pj4+Pj4+Pj4gY2lyY3Vtc3RhbmNlcyBhbmQgaXQncyBhIGJpdCBj
+b21wbGljYXRlZCB0byBiZSBjb250cm9sbGVkIGFzIHRoZQ0KPj4+Pj4+Pj4+IHBlcmZlY3QgbWV0
+aG9kIGlzIHRoYXQgd2Ugc2hvdWxkIGRvIHNvbWUgaWRsZSBtb25pdG9yIGp1c3QgYXMgcnBtDQo+
+Pj4+Pj4+Pj4gYW5kIHNlbmQgSFBJIGVhY2ggdGltZSBpZiByZWNlaXZpbmcgcmQvd3IgcmVxLiBC
+dXQgaXQgd2lsbCBpbXBhY3QNCj4+Pj4+Pj4+PiBwZXJmb3JtYW5jZSBzaWduaWZpY2FudGx5LCBl
+c3BlY2lhbGx5IGZvciByYW5kb20gaW9wcyBzaW5jZSB0aGUNCj4+Pj4+Pj4+PiB3ZWlnaHQgb2Yg
+ZXhlY3V0aW5nIEhQSSBhZ2FpbnN0IHIvdyBzbWFsbCBwaWVjZSBvZiBMQkFzIGlzDQo+Pj4+Pj4+
+Pj4gbm9ubmVnbGlnaWJsZS4NCj4+Pj4+Pj4+Pg0KPj4+Pj4+Pj4+IFNvIHdlIG5vdyBwcmVmZXIg
+dG8gc2VsZWN0IHRoZSBhdXRvIG9uZSB1bmNvbmRpdGlvbmFsbHkgaWYgc3VwcG9ydGVkDQo+Pj4+
+Pj4+Pj4gd2hpY2ggbWFrZXMgaXQgYXMgc2ltcGxlIGFzIHBvc3NpYmxlLiBJdCBzaG91bGQgcmVh
+bGx5IGdvb2QgZW5vdWdoDQo+Pj4+Pj4+Pj4gZm9yIGRldmljZXMgdG8gbWFuYWdlIGl0cyBpbnRl
+cm5hbCBwb2xpY3kgZm9yIGJrb3BzIHJhdGhlciB0aGFuIHRoZQ0KPj4+Pj4+Pj4+IGhvc3QsIHdo
+aWNoIG1ha2VzIHVzIGJlbGlldmUgdGhhdCB3ZSBjb3VsZCBhY2hpZXZlIHRoZSBiZXN0DQo+Pj4+
+Pj4+Pj4gcGVyZm9ybWFuY2UgZm9yIGFsbCB0aGUgZGV2aWNlcyBpbXBsZW1lbnRpbmcgYXV0byBi
+a29wcyBhbmQgdGhlIG9ubHkNCj4+Pj4+Pj4+PiB0aGluZyB3ZSBzaG91bGQgZG8gaXMgdG8gZGlz
+YWJsZSBpdCB3aGVuIGN1dHRpbmcgb2ZmIHRoZSBwb3dlci4NCj4+Pj4+Pj4+DQo+Pj4+Pj4+PiBE
+byB5b3Uga25vdyBpZiB0aGVyZSBpcyByZWFsbHkgYSByZXF1aXJlbWVudCB0byBkbyB0aGF0Pw0K
+Pj4+Pj4+Pg0KPj4+Pj4+PiBFdmVuIHdpdGhvdXQgYmtvcHMgZW5hYmxlLCBubyBtYXR0ZXIgZm9y
+IG1hbnVhbCBvciBhdXRvIG9uZSwgRlRMIHNob3VsZA0KPj4+Pj4+PiBhbHdheXMgZG8gYmtvcHMg
+bGlrZSBHQyBpbnRlcm5hbGx5IHdoZW4gbmVlZGVkIHRvIGd1YXJhbnRlZSB0aGUNCj4+Pj4+Pj4g
+cGVyZm9ybWFuY2UgYW5kIGJhbGFuY2UgdGhlIHdlYXIgbGV2ZWxpbmcuIFdoYXQgSSB0aG91Z2h0
+IHRvIGRvIGlzIHRvDQo+Pj4+Pj4+IG1ha2UgaXQgbW9yZSBleHBsaWNpdGx5Lg0KPj4+Pj4+Pg0K
+Pj4+Pj4+PiBCZWNhdXNlIHRoZW4sIHdoYXQNCj4+Pj4+Pj4+IGlzIHRoZSBwb2ludCBvZiBwb3dl
+ciBvZmYgbm90aWZpY2F0aW9uPw0KPj4+Pj4+Pg0KPj4+Pj4+PiBXaGVuIHBvd2VyIG9mZiBub3Rp
+ZmljYXRpb24gaXMgc2VudCwgYmtvcHMgd2lsbCBiZSBzdG9wcGVkDQo+Pj4+Pj4+IGluIF9tbWNf
+c3VzcGVuZC4gU28gSSBkb24ndCB1bmRlcnRhbmQgeW91ciBwb2ludCBoZXJlPw0KPj4+Pj4+DQo+
+Pj4+Pj4gSSBhbSB0cnlpbmcgdG8gdW5kZXJzdGFuZCB3aHkgd2UgbmVlZCB0byBkbyBhbnl0aGlu
+ZyBmb3IgYXV0byBia29wcy4NCj4+Pj4+PiBTaW5jZSBBVVRPX0VOIGlzIHBlcnNpc3RlbnQsIHdl
+IGNhbiBsZWF2ZSB0aGUgZGVjaXNpb24gd2hldGhlciB0byB0dXJuIGl0IG9uDQo+Pj4+Pj4gdG8g
+d2hvbWV2ZXIgcHJvdmlzaW9ucyB0aGUgZGV2aWNlLiBUaGVuIHdlIGp1c3QgbGVhdmUgaXQgYWxv
+bmUuDQo+Pj4+Pj4NCj4+Pj4+DQo+Pj4+PiBIcm0uLg0KPj4+Pj4NCj4+Pj4+IG9uZSBwb3NzaWJs
+ZSB3YXkgaXMgdG8gY29udHJvbCBpdCBieSBtbWMtdXRpbHMgb24NCj4+Pj4+IHVzZXIgc3BhY2U/
+ICBTbyB3ZSBzaG91bGQgYWRkIGEgY21kIGZvciBtbWMtdXRpbHMNCj4+Pj4+IHRoZXJlPw0KPj4+
+Pg0KPj4+PiBUaGF0IHdvdWxkIGJlIGNvbnNpc3RlbnQgd2l0aCBtYW51YWwgYmtvcHMuDQo+Pj4+
+DQo+Pj4NCj4+ID5Gcm9tIG15IGZpcnN0IGltcHJlc3Npb24gSSBhZ3JlZSwgYXMgdGhhdCBpcyB0
+aGUgcG9saWN5IHdlIGhhdmUgYmVlbg0KPj4+c3RpY2tpbmcgdG8gd2hlbiB3cml0aW5nIHRvIHBl
+cnNpc3RlbnQgRVhUX0NTRCByZWdpc3RlcnMuDQo+Pj5BbHRob3VnaCwgaW4gdGhpcyBjYXNlLCBJ
+IGFtIGFjdHVhbGx5IHdvbmRlcmluZyBvbiB3aGF0IGlzIHRoZSBiZXN0IGFwcHJvYWNoLg0KPj4+
+DQo+Pj5JcyB0aGVyZSByZWFsbHkgZXZlciBhIGNhc2Ugd2hlbiB3ZSBkb24ndCB3YW50IGF1dG8g
+QktPUFMgdG8gYmUgZGVmYXVsdCBlbmFibGVkPw0KPj4+SSB0aGluayBCS09QUyBpcyBhIGZ1bmRh
+bWVudGFsIGZlYXR1cmUgb2YgYW4gRlRMIGFuZCBJIGNhbid0IHNlZSBhDQo+Pj5yZWFzb24gdG8g
+d2h5IHdlIG5lZWQgdG8gaW52b2x2ZSBtbWMtdXRpbHMvdXNlcnNwYWNlIHRvIGVuYWJsZSBpdC4g
+QW0NCj4+Pkkgd3Jvbmc/DQo+Pg0KPj4gVGhlIGV2ZW4gd29yc3QgY2FzZSBpcyDigJMgaW52b2x2
+ZSBtbWMtdXRpbHMvdXNlcnNwYWNlIHRvIERJU0FCTEUgaXQuDQo+PiBJIHRoaW5rIHRoaXMgcmVn
+aXN0ZXIgbmVlZCB0byBiZSBzZXQgYnkgdmVuZG9yIGFuZCBubyBuZWVkIHRvIGJlIGNoYW5nZWQg
+b24gcnVudGltZS4NCj4NCj5JZiBpdCBpcyBzZXQgYnkgdGhlIFZlbmRvciwgdGhhdCdzIG9mIGNv
+dXJzZSB0aGUgYmVzdC4NCg0KSXQgY2FuIGJlIHNldCBieSBTdG9yYWdlIFZlbmRvci4NCkFjY29y
+ZGluZyB0byB0aGUgc3BlYywgdGhlIGRlZmF1bHQgdmFsdWUgb2YgdGhpcyBiaXQgaXMgdmVuZG9y
+IHNwZWNpZmljLg0KDQo+DQo+QXJlIHlvdSBzYXlpbmcgdGhhdCB3ZSBzaG91bGRuJ3QgZW5hYmxl
+IGl0IGR1cmluZyB0aGUgY2FyZCBpbml0DQo+c2VxdWVuY2UgZnJvbSB0aGUga2VybmVsLCBpbiBj
+YXNlIGl0IGlzIGRpc2FibGVkPw0KDQpOby4NCkJ5IHRoZSBzcGVjIOKAkyBhIEhvc3QgdGhhdCB3
+YW50cyB0byBlbmFibGUgdGhlIGRldmljZSB0byBwZXJmb3JtDQpiYWNrZ3JvdW5kIG9wZXJhdGlv
+bnMgZHVyaW5nIGRldmljZSBpZGxlIHRpbWUsIHNob3VsZCBzaWduYWwgdGhlIA0KZGV2aWNlIGJ5
+IHNldHRpbmcgQVVUT19FTiBpbiBCS09QU19FTiBmaWVsZCBbRVhUX0NTRCBieXRlIDE2M10gdG8g
+MWIuDQoNCj4NCj5LaW5kIHJlZ2FyZHMNCj5VZmZlDQoNCg==
