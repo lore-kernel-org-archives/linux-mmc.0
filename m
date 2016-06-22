@@ -1,73 +1,67 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v3] CHROMIUM: mmc: Set pref erase size based on size.
-Date: Wed, 22 Jun 2016 17:23:04 +0200
-Message-ID: <CAPDyKFqdBLcqTEC98EvVOj0bN-BM9dcpT7CEd6Q+MyOOKPOx-A@mail.gmail.com>
-References: <1464913638-5283-1-git-send-email-gwendal@chromium.org> <1464970132-26197-1-git-send-email-gwendal@chromium.org>
+Subject: Re: [PATCH v2] mmc: core: Only change mode if mmc_select_bus_width()
+ is successful.
+Date: Wed, 22 Jun 2016 17:23:12 +0200
+Message-ID: <CAPDyKFoJN0a36wJZyUggQVPYycu2NbpR6S=LfX2qSFD4tm6Uwg@mail.gmail.com>
+References: <1465381672-9772-1-git-send-email-peter.griffin@linaro.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1464970132-26197-1-git-send-email-gwendal@chromium.org>
+In-Reply-To: <1465381672-9772-1-git-send-email-peter.griffin@linaro.org>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Gwendal Grignou <gwendal@chromium.org>
-Cc: Grant Grundler <grundler@chromium.org>, Jens Axboe <axboe@kernel.dk>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+To: Peter Griffin <peter.griffin@linaro.org>
+Cc: "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, kernel@stlinux.com, Adrian Hunter <adrian.hunter@intel.com>, Lee Jones <lee.jones@linaro.org>, linux-mmc <linux-mmc@vger.kernel.org>, Chen-Yu Tsai <wens@csie.org>, Arnd Bergmann <arnd@arndb.de>
 List-Id: linux-mmc@vger.kernel.org
 
-On 3 June 2016 at 18:08, Gwendal Grignou <gwendal@chromium.org> wrote:
-> If available, eMMC stack uses HC_ERASE_GRP_SIZE as erase size.
-> The perfererred erase size may need to be bigger to ensure discard
-> operations are not too slow.
-> Some high capacity eMMC (64MB) reports erase size to 512kB, resulting in
-> long discard time.
-> Calculate prefeerred erase size based on eMMC size.
+On 8 June 2016 at 12:27, Peter Griffin <peter.griffin@linaro.org> wrote:
+> mmc_select_bus_width() returns bus width (4 or 8) on success or
+> zero if unsupported. So only change mode if setting the bus width
+> is successful.
 >
-> Signed-off-by: Gwendal Grignou <gwendal@chromium.org>
+> Fixes f741494 mmc: fix mmc mode selection for HS-DDR and higher
+> Fixes: 287980e (remove lots of IS_ERR_VALUE abuses)
+>
+> Signed-off-by: Peter Griffin <peter.griffin@linaro.org>
+> Cc: Chen-Yu Tsai <wens@csie.org>
+> Cc: Arnd Bergmann <arnd@arndb.de>
+>
 
-Thanks, applied for next! I did update the changelog as well as the
-comment in the code.
-
-Please next time, try to work a bit more on the changelog. It really
-helps when reviewing to understand what the change is all about.
+Thanks, applied for next! Updated the changelog to remove the "fixes"
+tags and the Cc, as those shouldn't be relevant.
 
 Kind regards
 Uffe
 
 > ---
->  v2: fix comments
->  v3: rereading the patch, we should not compare to hc_erase_size again,
->      it has already been set properly in the caller function.
 >
->  drivers/mmc/core/core.c | 14 +++++++-------
->  1 file changed, 7 insertions(+), 7 deletions(-)
+> v2: Rebase on v4.7-rc2 which includes a fix from Chen-Yu and update
+>     commit message.
+> ---
+>  drivers/mmc/core/mmc.c | 4 ++--
+>  1 file changed, 2 insertions(+), 2 deletions(-)
 >
-> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-> index ef76b1c..bd881a0 100644
-> --- a/drivers/mmc/core/core.c
-> +++ b/drivers/mmc/core/core.c
-> @@ -1987,17 +1987,17 @@ void mmc_init_erase(struct mmc_card *card)
->          * to that size and alignment.
->          *
->          * For SD cards that define Allocation Unit size, limit erases to one
-> -        * Allocation Unit at a time.  For MMC cards that define High Capacity
-> -        * Erase Size, whether it is switched on or not, limit to that size.
-> -        * Otherwise just have a stab at a good value.  For modern cards it
-> -        * will end up being 4MiB.  Note that if the value is too small, it
-> -        * can end up taking longer to erase.
-> +        * Allocation Unit at a time.
-> +        * For MMC, have a stab at a good value.  For modern cards it
-> +        * will end up being 4MiB.
-> +        * Note that if the value is too small, it can end up taking longer to
-> +        * erase.
-> +        * erase_size is already set to High Capacity Erase Size if available
-> +        * when this function is called.
+> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+> index 5d438ad..aafb73d 100644
+> --- a/drivers/mmc/core/mmc.c
+> +++ b/drivers/mmc/core/mmc.c
+> @@ -1276,7 +1276,7 @@ static int mmc_select_hs200(struct mmc_card *card)
+>          * switch to HS200 mode if bus width is set successfully.
 >          */
->         if (mmc_card_sd(card) && card->ssr.au) {
->                 card->pref_erase = card->ssr.au;
->                 card->erase_shift = ffs(card->ssr.au) - 1;
-> -       } else if (card->ext_csd.hc_erase_size) {
-> -               card->pref_erase = card->ext_csd.hc_erase_size;
->         } else if (card->erase_size) {
->                 sz = (card->csd.capacity << (card->csd.read_blkbits - 9)) >> 11;
->                 if (sz < 128)
+>         err = mmc_select_bus_width(card);
+> -       if (err >= 0) {
+> +       if (err > 0) {
+>                 val = EXT_CSD_TIMING_HS200 |
+>                       card->drive_strength << EXT_CSD_DRV_STR_SHIFT;
+>                 err = __mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
+> @@ -1583,7 +1583,7 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
+>         } else if (mmc_card_hs(card)) {
+>                 /* Select the desired bus width optionally */
+>                 err = mmc_select_bus_width(card);
+> -               if (err >= 0) {
+> +               if (err > 0) {
+>                         err = mmc_select_hs_ddr(card);
+>                         if (err)
+>                                 goto free_card;
 > --
-> 2.8.0.rc3.226.g39d4020
+> 1.9.1
 >
