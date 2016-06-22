@@ -1,75 +1,110 @@
-From: Alex Lemberg <Alex.Lemberg-XdAiOPVOjttBDgjK7y7TUQ@public.gmane.org>
-Subject: Re: [PATCH] mmc: core: add auto bkops support
-Date: Wed, 22 Jun 2016 14:08:32 +0000
-Message-ID: <B7133967-23A7-46AF-9013-417BD282E005@sandisk.com>
-References: <1465182439-27963-1-git-send-email-shawn.lin@rock-chips.com>
- <F4A75DD4-FE64-4417-AFD4-FA9ABD8EE915@sandisk.com>
- <d5c75760-e8b4-1784-a7de-3d78eeca1d0e@rock-chips.com>
- <7078F2B9-63B6-4170-BFA1-5AC370F0D4DD@sandisk.com>
- <29966a6f-eb14-0307-08cc-f91a97f50382@rock-chips.com>
+From: Wolfram Sang <wsa@the-dreams.de>
+Subject: Re: [PATCH/RFC 1/4] mmc: renesas_sdhi: rename sh_mobile_sdhi as
+ renesas_sdhi
+Date: Wed, 22 Jun 2016 16:11:10 +0200
+Message-ID: <20160622141110.GA1645@katana>
+References: <1465963317-28672-1-git-send-email-horms+renesas@verge.net.au>
+ <1465963317-28672-2-git-send-email-horms+renesas@verge.net.au>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-In-Reply-To: <29966a6f-eb14-0307-08cc-f91a97f50382-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
-Content-Language: en-US
-Content-ID: <289A7F2C1EDA7045AE3248601B04E486-GsdMcTDXqN6cE4WynfumptQqCkab/8FMAL8bYrjMMd8@public.gmane.org>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-rockchip>,
- <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-rockchip/>
-List-Post: <mailto:linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-List-Help: <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-rockchip>,
- <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
-Sender: "Linux-rockchip" <linux-rockchip-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-Errors-To: linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
-To: Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Doug Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Jaehoon Chung <jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, "linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="sdtB3X0nJg68CQEu"
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from sauhun.de ([89.238.76.85]:45484 "EHLO pokefinder.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1750910AbcFVOLX (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 22 Jun 2016 10:11:23 -0400
+Content-Disposition: inline
+In-Reply-To: <1465963317-28672-2-git-send-email-horms+renesas@verge.net.au>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Simon Horman <horms+renesas@verge.net.au>
+Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, Ulf Hansson <ulf.hansson@linaro.org>, Magnus Damm <magnus.damm@gmail.com>, linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org, Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
 
-SEkgU2hhd24sDQoNCk9uIDYvMjEvMTYsIDQ6NDQgQU0sICJTaGF3biBMaW4iIDxzaGF3bi5saW5A
-cm9jay1jaGlwcy5jb20+IHdyb3RlOg0KDQo+T24gMjAxNi82LzIwIDIxOjMzLCBBbGV4IExlbWJl
-cmcgd3JvdGU6DQo+PiBIaSBTaGF3biwNCj4+DQo+PiBb4oCmXQ0KPj4NCj4+Pj4+ICsNCj4+Pj4+
-ICtzdGF0aWMgaW50IG1tY19zdG9wX2F1dG9fYmtvcHMoc3RydWN0IG1tY19jYXJkICpjYXJkKQ0K
-Pj4+Pj4gK3sNCj4+Pj4+ICsJaW50IGVyciA9IDA7DQo+Pj4+PiArDQo+Pj4+PiArCWlmICghY2Fy
-ZC0+ZXh0X2NzZC5hdXRvX2Jrb3BzX2VuKQ0KPj4+Pj4gKwkJcmV0dXJuIDA7DQo+Pj4+PiArDQo+
-Pj4+DQo+Pj4+IFNob3VsZG7igJl0IHRoZSBCS09QU19TVEFUVVMgYmUgY2hlY2tlZCBwcmlvciB0
-byBkaXNhYmxpbmcgdGhlIEJLT1BTIGFjdGl2aXR5IG9mIHRoZSBkZXZpY2U/DQo+Pj4+DQo+Pj4N
-Cj4+PiBIcm1tLi4gSSByZWFkIHRoZSB3aG9sZSBzZWN0aW9uIG9mIHNwZWMgZm9yIGl0LCBhbmQg
-SSBkaWQgZmluZCB0aGlzDQo+Pj4gcmVxdWlyZW1lbnQgZm9yIG1hbnVsIGJrb3BzIGJ1dCBub3Qg
-Zm9yIHRoZSBhdXRvIG9uZS4gU28gd2hhdCBzaG91bGQgd2UNCj4+PiBkbyBpZiB1c2luZyB0aGUg
-YXV0byBvbmU/DQo+Pj4NCj4+DQo+PiBJbiBjYXNlIG9mIEFVVE8gQktPUFMsIHRoZSBlTU1DIERl
-dmljZSBzaG91bGQgcGVyZm9ybSBpbnRlcm5hbCBHQw0KPj4gaW4gdGhlIHNhbWUgd2F5IGFzIGlu
-IGNhc2Ugb2YgTUFOVUFMIEJLT1BTLg0KPj4gVGhlIG9ubHkgZGlmZmVyZW5jZSBpcyBhIGhvc3Qg
-YXdhcmVuZXNzLg0KPg0KPmFncmVlLg0KPg0KPj4gQWx0aG91Z2ggdGhlcmUgaXMgbm8gcmVxdWly
-ZW1lbnQgaW4gdGhlIHNwZWMsIEkgdGhpbmsgdGhlIGRyaXZlciBjYW4NCj4+IGdpdmUgc29tZSB0
-aW1lIHRvIHRoZSBkZXZpY2UgdG8gcGVyZm9ybS9jb21wbGV0ZSBpdHMgaW50ZXJuYWwgR0MgZHVy
-aW5nIHRoZSBpZGxlIHRpbWUuDQo+PiBUaHVzIEkgdGhpbmsgd2UgY2FuIGNoZWNrIHRoZSBCS09Q
-U19TVEFUVVMgb24gUnVudGltZSBzdXNwZW5kLg0KPg0KPldlIHNob3VsZG4ndCBkaWFibGUgYmtv
-cHMgb24gKnJ1bnRpbWUqIHN1c3BlbmQgYXMgaXQncyBqdXN0IHRoZSByaWdodA0KPnRpbWUgZm9y
-IGZpcm13YXJlIHRvIGRvIEdDLiBXZSBjb3VsZCBjb25zaWRlciB0byBjaGVjayBhbmQgd2FpdCBm
-b3INCj50aGUgc3RhdHVzIHdoZW4gZG9pbmcgcG93ZXJvZmYsIGFsdGhvdWdoIGl0IHNlZW1zIGZp
-cm13YXJlIHNob3VsZCBiZQ0KPmFibGUgdG8gYWNjZXB0IHRoZSBkaXNhYmxlIGNtZCBhbmQgZGVh
-bCB0aGUgb24tZ29pbmcgd29yayBwZXJmZWN0bHkNCj53aGVuIGRvaW5nIGJrb3BzIHdpdGhvdXQg
-aG9zdCdzIGF3YXJlbmVzcywganVzdCB0aGUgc2FtZSB3YXkgYXMgc3VkZGVudA0KPnBvd2VyIGxv
-c3MgY2FzZXMuDQoNCklmIEkgYW0gbm90IHdyb25nLCBpbiBjdXJyZW50IGltcGxlbWVudGF0aW9u
-IG9mIHJ1bnRpbWUgc3VzcGVuZCwgDQp0aGUgZHJpdmVyIHN0b3BzIEJLT1BTIChzZW5kIEhQSSkg
-anVzdCBiZWZvcmUgc2VuZGluZyBzbGVlcCBjb21tYW5kLA0Kc2VlIF9tbWNfc3VzcGVuZCgpLCBk
-ZXBlbmRzIG9uIOKAnE1NQ19DQVBfQUdHUkVTU0lWRV9QTeKAnSBmbGFnLg0KSW4gdGhpcyBjYXNl
-LCB0aGUgZU1NQyBkZXZpY2Ugd2lsbCBub3QgaGF2ZSBlbm91Z2ggdGltZSB0byBwZXJmb3JtIGlu
-dGVybmFsIA0KQktPUFMgaW4gYm90aCDigJMgTWFudWFsIGFuZCBBdXRvIEJLT1BTIGNvbmZpZ3Vy
-YXRpb25zLg0KDQpGb3IgdGhlIHBvd2Vyb2ZmLCBpdCBzaG91bGQgYmUgT0sgd2l0aCBhIGN1cnJl
-bnQgaW1wbGVtZW50YXRpb24gb2YgDQpQT04gKG1tY19wb3dlcm9mZl9ub3RpZnkoKSkNCg0KPg0K
-PkFsc28gSSBkb24ndCBrbm93IHdoZXRoZXIgdGhlIGZpcm13YXJlIHdpbGwgcmVmbGVjdCBpdHMg
-c3RhdHVzIG9uDQo+QktPUFNfU1RBVFVTIG9yIG5vdCB3aGVuIGVuYWJsaW5nIHRoZSBhdXRvIG9u
-ZS4gSSB3aWxsIGRvIG1vcmUgdGVzdC4NCj4NCj5Bbnl3YXksIHRoYW5rcyBmb3Igc2hhcmluZyB5
-b3VyIHRob3VnaHQuDQo+QWxzbyBBZHJpYW4gcG9pbnQgb3V0IHRoYXQgY3VycmVudGx5IHdlIHRy
-aWdnZXIgbWFudWFsIGJrb3NwIGZyb20NCj51c2Vyc3BhY2UgdmlhIG1tYy11dGlscywgYW5kIEkg
-YWdyZWVkIHdlIHNob3VsZG4ndCBmb3JjZSBrZXJuZWwgc3RhY2sNCj50byBlbmFibGUgaXQgZGVm
-YXVsdGx5LiBTbyBJJ20gcHJvbmUgbm90IHRvIHVwZGF0ZSB0aGlzICRTVUJKRUNUIGFuZA0KPm1p
-Z3JhdGUgaXQgdG8gbW1jLXV0aWxzIGxhdGVyLg0KPg0KPj4NCj4+IFvigKZdDQo+Pg0KPj4gVGhh
-bmtzLA0KPj4gQWxleA0KPj4NCj4NCj4NCj4tLSANCj5CZXN0IFJlZ2FyZHMNCj5TaGF3biBMaW4N
-Cj4NCg0KX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18KTGlu
-dXgtcm9ja2NoaXAgbWFpbGluZyBsaXN0CkxpbnV4LXJvY2tjaGlwQGxpc3RzLmluZnJhZGVhZC5v
-cmcKaHR0cDovL2xpc3RzLmluZnJhZGVhZC5vcmcvbWFpbG1hbi9saXN0aW5mby9saW51eC1yb2Nr
-Y2hpcAo=
+
+--sdtB3X0nJg68CQEu
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
+
+On Wed, Jun 15, 2016 at 01:01:54PM +0900, Simon Horman wrote:
+> The SDHI driver is applicable to a wider range of SoCs than SH-Mobile,
+> Renesas seems to be a more appropriate name.
+>=20
+> Signed-off-by: Simon Horman <horms+renesas@verge.net.au>
+
+It feels strange to rename the file and leaving all the naming inside
+the file still 'sh_mobile_*'. On the other hand, renaming all those,
+too, is intrusive, so I wonder if we can't keep the filename "for
+historic reasons"?
+
+> ---
+>  drivers/mmc/host/Kconfig                              | 4 ++--
+>  drivers/mmc/host/Makefile                             | 2 +-
+>  drivers/mmc/host/{sh_mobile_sdhi.c =3D> renesas_sdhi.c} | 0
+>  3 files changed, 3 insertions(+), 3 deletions(-)
+>  rename drivers/mmc/host/{sh_mobile_sdhi.c =3D> renesas_sdhi.c} (100%)
+>=20
+> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+> index 0aa484c10c0a..840b17150263 100644
+> --- a/drivers/mmc/host/Kconfig
+> +++ b/drivers/mmc/host/Kconfig
+> @@ -560,13 +560,13 @@ config MMC_TMIO
+>  	  T7L66XB and also HTC ASIC3
+> =20
+>  config MMC_SDHI
+> -	tristate "SH-Mobile SDHI SD/SDIO controller support"
+> +	tristate "Renesas SDHI SD/SDIO controller support"
+>  	depends on SUPERH || ARM || ARM64
+>  	depends on SUPERH || ARCH_RENESAS || COMPILE_TEST
+>  	select MMC_TMIO_CORE
+>  	help
+>  	  This provides support for the SDHI SD/SDIO controller found in
+> -	  SuperH and ARM SH-Mobile SoCs
+> +	  SuperH, and Renesas ARM and arm64 based SoCs.
+> =20
+>  config MMC_CB710
+>  	tristate "ENE CB710 MMC/SD Interface support"
+> diff --git a/drivers/mmc/host/Makefile b/drivers/mmc/host/Makefile
+> index af918d261ff9..206233218781 100644
+> --- a/drivers/mmc/host/Makefile
+> +++ b/drivers/mmc/host/Makefile
+> @@ -38,7 +38,7 @@ obj-$(CONFIG_MMC_TMIO)		+=3D tmio_mmc.o
+>  obj-$(CONFIG_MMC_TMIO_CORE)	+=3D tmio_mmc_core.o
+>  tmio_mmc_core-y			:=3D tmio_mmc_pio.o
+>  tmio_mmc_core-$(subst m,y,$(CONFIG_MMC_SDHI))	+=3D tmio_mmc_dma.o
+> -obj-$(CONFIG_MMC_SDHI)		+=3D sh_mobile_sdhi.o
+> +obj-$(CONFIG_MMC_SDHI)		+=3D renesas_sdhi.o
+>  obj-$(CONFIG_MMC_CB710)		+=3D cb710-mmc.o
+>  obj-$(CONFIG_MMC_VIA_SDMMC)	+=3D via-sdmmc.o
+>  obj-$(CONFIG_SDH_BFIN)		+=3D bfin_sdh.o
+> diff --git a/drivers/mmc/host/sh_mobile_sdhi.c b/drivers/mmc/host/renesas=
+_sdhi.c
+> similarity index 100%
+> rename from drivers/mmc/host/sh_mobile_sdhi.c
+> rename to drivers/mmc/host/renesas_sdhi.c
+> --=20
+> 2.1.4
+>=20
+
+--sdtB3X0nJg68CQEu
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1
+
+iQIcBAEBAgAGBQJXapx+AAoJEBQN5MwUoCm2RR0QALYGGH14CiSQhmPdT6PMguei
+Aq2Pru0V4/k1/qDeCJ+vZGtfx/scQguOc10Q61D6lVqOVDDmyRNNFtcPcO7e41mQ
+QfjOBw0QojEPc+nzIdhR9vEoNuDR7vyzSqgpRmWeKZh6Y5yWIpk9tT20FU5PmWSw
+mzvynP11P5mCmoyHWoXJqU8gViAaIORNlVA6MN5Bz6bxwlM6XgbQzQuBf7Qk4bln
+SBJKjV9cRGs9eIhYxvCSf10JQuEOv+3NpaTrUbzx7KTcPv2ygS0ydcIBCQ5J2a7E
+8DHXBNHXsK/VsV3OvdR+OTkTSpIbgtilnCQQZ49rTNNeZFYL5no6E0RTx2M4osGi
+wAKi1JYSTQE5bdUwnv/ya8iFg3pxJLMn+MX2KjGkRMpqYI/RiHPPh2cbdc3gkJ7h
+6IUei/AUr8X/I3ufERGUQkm8wywr8fwB5xZLZj3awoYk8mbfzI6ZER/7svAWJX+Q
+PL+OZi0w+OlZrbscItJLEjusI5tJpTg7iXv8XQrDhopPDoyUOJjsT+z2CoN9Y/pp
+tkjUdQyeX2U+B4NwM3+l5A2bumZG7y8AFy5JtO/Bge5LZshEq4pxVO2fa5/L8CKQ
+wG17MPc1/j1kWYwr5PNnKRX3TAsUKgVacs2+XfBdoA2Q0zqCpgO0bmmJCMuSQsng
+9UZ1bWF88+vrPfwC5+8+
+=WN1J
+-----END PGP SIGNATURE-----
+
+--sdtB3X0nJg68CQEu--
