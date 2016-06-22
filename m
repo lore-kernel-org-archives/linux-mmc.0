@@ -1,35 +1,75 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH v3 11/15] mmc: sdhci-of-arasan: Add ability to export card
- clock
-Date: Wed, 22 Jun 2016 15:35:06 +0300
-Message-ID: <576A85FA.2000309@intel.com>
-References: <1466445414-11974-1-git-send-email-dianders@chromium.org>
- <1466445414-11974-12-git-send-email-dianders@chromium.org>
+From: Alex Lemberg <Alex.Lemberg-XdAiOPVOjttBDgjK7y7TUQ@public.gmane.org>
+Subject: Re: [PATCH] mmc: core: add auto bkops support
+Date: Wed, 22 Jun 2016 14:08:32 +0000
+Message-ID: <B7133967-23A7-46AF-9013-417BD282E005@sandisk.com>
+References: <1465182439-27963-1-git-send-email-shawn.lin@rock-chips.com>
+ <F4A75DD4-FE64-4417-AFD4-FA9ABD8EE915@sandisk.com>
+ <d5c75760-e8b4-1784-a7de-3d78eeca1d0e@rock-chips.com>
+ <7078F2B9-63B6-4170-BFA1-5AC370F0D4DD@sandisk.com>
+ <29966a6f-eb14-0307-08cc-f91a97f50382@rock-chips.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1466445414-11974-12-git-send-email-dianders@chromium.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Douglas Anderson <dianders@chromium.org>, ulf.hansson@linaro.org, Heiko Stuebner <heiko@sntech.de>
-Cc: kishon@ti.com, robh+dt@kernel.org, shawn.lin@rock-chips.com, xzy.xu@rock-chips.com, briannorris@chromium.org, linux-rockchip@lists.infradead.org, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, groeck@chromium.org, michal.simek@xilinx.com, soren.brinkmann@xilinx.com, geert@linux-m68k.org, wsa+renesas@sang-engineering.com, linus.walleij@linaro.org, horms+renesas@verge.net.au, andrei.pistirica@microchip.com, ludovic.desroches@atmel.com, stefan.wahren@i2se.com, yangbo.lu@freescale.com, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+In-Reply-To: <29966a6f-eb14-0307-08cc-f91a97f50382-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
+Content-Language: en-US
+Content-ID: <289A7F2C1EDA7045AE3248601B04E486-GsdMcTDXqN6cE4WynfumptQqCkab/8FMAL8bYrjMMd8@public.gmane.org>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-rockchip>,
+ <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-rockchip/>
+List-Post: <mailto:linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+List-Help: <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-rockchip>,
+ <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
+Sender: "Linux-rockchip" <linux-rockchip-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+Errors-To: linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+To: Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Doug Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Jaehoon Chung <jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, "linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On 20/06/16 20:56, Douglas Anderson wrote:
-> Some SD/eMMC PHYs (like the PHY from Arasan that is designed to work
-> with arasan,sdhci-5.1) need to know the card clock in order to function
-> properly.  Let's add the ability to expose this clock.  Any PHY that
-> needs to know the clock rate can add a reference and query the clock
-> rate.
-> 
-> At the moment we register a CLK_GET_RATE_NOCACHE clock that simply
-> allows querying the clock.  This allows us to be less intrusive with
-> regards to the main SDHCI driver, which has complex logic for adjusting
-> the SD clock.  Right now we always fully power cycle the PHY when the
-> clock changes and that gives the PHY a good chance to query our clock.
-> 
-> Signed-off-by: Douglas Anderson <dianders@chromium.org>
-> Reviewed-by: Heiko Stuebner <heiko@sntech.de>
-> Tested-by: Heiko Stuebner <heiko@sntech.de>
-
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+SEkgU2hhd24sDQoNCk9uIDYvMjEvMTYsIDQ6NDQgQU0sICJTaGF3biBMaW4iIDxzaGF3bi5saW5A
+cm9jay1jaGlwcy5jb20+IHdyb3RlOg0KDQo+T24gMjAxNi82LzIwIDIxOjMzLCBBbGV4IExlbWJl
+cmcgd3JvdGU6DQo+PiBIaSBTaGF3biwNCj4+DQo+PiBb4oCmXQ0KPj4NCj4+Pj4+ICsNCj4+Pj4+
+ICtzdGF0aWMgaW50IG1tY19zdG9wX2F1dG9fYmtvcHMoc3RydWN0IG1tY19jYXJkICpjYXJkKQ0K
+Pj4+Pj4gK3sNCj4+Pj4+ICsJaW50IGVyciA9IDA7DQo+Pj4+PiArDQo+Pj4+PiArCWlmICghY2Fy
+ZC0+ZXh0X2NzZC5hdXRvX2Jrb3BzX2VuKQ0KPj4+Pj4gKwkJcmV0dXJuIDA7DQo+Pj4+PiArDQo+
+Pj4+DQo+Pj4+IFNob3VsZG7igJl0IHRoZSBCS09QU19TVEFUVVMgYmUgY2hlY2tlZCBwcmlvciB0
+byBkaXNhYmxpbmcgdGhlIEJLT1BTIGFjdGl2aXR5IG9mIHRoZSBkZXZpY2U/DQo+Pj4+DQo+Pj4N
+Cj4+PiBIcm1tLi4gSSByZWFkIHRoZSB3aG9sZSBzZWN0aW9uIG9mIHNwZWMgZm9yIGl0LCBhbmQg
+SSBkaWQgZmluZCB0aGlzDQo+Pj4gcmVxdWlyZW1lbnQgZm9yIG1hbnVsIGJrb3BzIGJ1dCBub3Qg
+Zm9yIHRoZSBhdXRvIG9uZS4gU28gd2hhdCBzaG91bGQgd2UNCj4+PiBkbyBpZiB1c2luZyB0aGUg
+YXV0byBvbmU/DQo+Pj4NCj4+DQo+PiBJbiBjYXNlIG9mIEFVVE8gQktPUFMsIHRoZSBlTU1DIERl
+dmljZSBzaG91bGQgcGVyZm9ybSBpbnRlcm5hbCBHQw0KPj4gaW4gdGhlIHNhbWUgd2F5IGFzIGlu
+IGNhc2Ugb2YgTUFOVUFMIEJLT1BTLg0KPj4gVGhlIG9ubHkgZGlmZmVyZW5jZSBpcyBhIGhvc3Qg
+YXdhcmVuZXNzLg0KPg0KPmFncmVlLg0KPg0KPj4gQWx0aG91Z2ggdGhlcmUgaXMgbm8gcmVxdWly
+ZW1lbnQgaW4gdGhlIHNwZWMsIEkgdGhpbmsgdGhlIGRyaXZlciBjYW4NCj4+IGdpdmUgc29tZSB0
+aW1lIHRvIHRoZSBkZXZpY2UgdG8gcGVyZm9ybS9jb21wbGV0ZSBpdHMgaW50ZXJuYWwgR0MgZHVy
+aW5nIHRoZSBpZGxlIHRpbWUuDQo+PiBUaHVzIEkgdGhpbmsgd2UgY2FuIGNoZWNrIHRoZSBCS09Q
+U19TVEFUVVMgb24gUnVudGltZSBzdXNwZW5kLg0KPg0KPldlIHNob3VsZG4ndCBkaWFibGUgYmtv
+cHMgb24gKnJ1bnRpbWUqIHN1c3BlbmQgYXMgaXQncyBqdXN0IHRoZSByaWdodA0KPnRpbWUgZm9y
+IGZpcm13YXJlIHRvIGRvIEdDLiBXZSBjb3VsZCBjb25zaWRlciB0byBjaGVjayBhbmQgd2FpdCBm
+b3INCj50aGUgc3RhdHVzIHdoZW4gZG9pbmcgcG93ZXJvZmYsIGFsdGhvdWdoIGl0IHNlZW1zIGZp
+cm13YXJlIHNob3VsZCBiZQ0KPmFibGUgdG8gYWNjZXB0IHRoZSBkaXNhYmxlIGNtZCBhbmQgZGVh
+bCB0aGUgb24tZ29pbmcgd29yayBwZXJmZWN0bHkNCj53aGVuIGRvaW5nIGJrb3BzIHdpdGhvdXQg
+aG9zdCdzIGF3YXJlbmVzcywganVzdCB0aGUgc2FtZSB3YXkgYXMgc3VkZGVudA0KPnBvd2VyIGxv
+c3MgY2FzZXMuDQoNCklmIEkgYW0gbm90IHdyb25nLCBpbiBjdXJyZW50IGltcGxlbWVudGF0aW9u
+IG9mIHJ1bnRpbWUgc3VzcGVuZCwgDQp0aGUgZHJpdmVyIHN0b3BzIEJLT1BTIChzZW5kIEhQSSkg
+anVzdCBiZWZvcmUgc2VuZGluZyBzbGVlcCBjb21tYW5kLA0Kc2VlIF9tbWNfc3VzcGVuZCgpLCBk
+ZXBlbmRzIG9uIOKAnE1NQ19DQVBfQUdHUkVTU0lWRV9QTeKAnSBmbGFnLg0KSW4gdGhpcyBjYXNl
+LCB0aGUgZU1NQyBkZXZpY2Ugd2lsbCBub3QgaGF2ZSBlbm91Z2ggdGltZSB0byBwZXJmb3JtIGlu
+dGVybmFsIA0KQktPUFMgaW4gYm90aCDigJMgTWFudWFsIGFuZCBBdXRvIEJLT1BTIGNvbmZpZ3Vy
+YXRpb25zLg0KDQpGb3IgdGhlIHBvd2Vyb2ZmLCBpdCBzaG91bGQgYmUgT0sgd2l0aCBhIGN1cnJl
+bnQgaW1wbGVtZW50YXRpb24gb2YgDQpQT04gKG1tY19wb3dlcm9mZl9ub3RpZnkoKSkNCg0KPg0K
+PkFsc28gSSBkb24ndCBrbm93IHdoZXRoZXIgdGhlIGZpcm13YXJlIHdpbGwgcmVmbGVjdCBpdHMg
+c3RhdHVzIG9uDQo+QktPUFNfU1RBVFVTIG9yIG5vdCB3aGVuIGVuYWJsaW5nIHRoZSBhdXRvIG9u
+ZS4gSSB3aWxsIGRvIG1vcmUgdGVzdC4NCj4NCj5Bbnl3YXksIHRoYW5rcyBmb3Igc2hhcmluZyB5
+b3VyIHRob3VnaHQuDQo+QWxzbyBBZHJpYW4gcG9pbnQgb3V0IHRoYXQgY3VycmVudGx5IHdlIHRy
+aWdnZXIgbWFudWFsIGJrb3NwIGZyb20NCj51c2Vyc3BhY2UgdmlhIG1tYy11dGlscywgYW5kIEkg
+YWdyZWVkIHdlIHNob3VsZG4ndCBmb3JjZSBrZXJuZWwgc3RhY2sNCj50byBlbmFibGUgaXQgZGVm
+YXVsdGx5LiBTbyBJJ20gcHJvbmUgbm90IHRvIHVwZGF0ZSB0aGlzICRTVUJKRUNUIGFuZA0KPm1p
+Z3JhdGUgaXQgdG8gbW1jLXV0aWxzIGxhdGVyLg0KPg0KPj4NCj4+IFvigKZdDQo+Pg0KPj4gVGhh
+bmtzLA0KPj4gQWxleA0KPj4NCj4NCj4NCj4tLSANCj5CZXN0IFJlZ2FyZHMNCj5TaGF3biBMaW4N
+Cj4NCg0KX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18KTGlu
+dXgtcm9ja2NoaXAgbWFpbGluZyBsaXN0CkxpbnV4LXJvY2tjaGlwQGxpc3RzLmluZnJhZGVhZC5v
+cmcKaHR0cDovL2xpc3RzLmluZnJhZGVhZC5vcmcvbWFpbG1hbi9saXN0aW5mby9saW51eC1yb2Nr
+Y2hpcAo=
