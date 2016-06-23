@@ -1,141 +1,215 @@
-From: Shawn Lin <shawn.lin@rock-chips.com>
-Subject: Re: [PATCH] mmc: core: add auto bkops support
-Date: Thu, 23 Jun 2016 10:08:20 +0800
-Message-ID: <64ed1ed2-09ff-659e-01f8-87a1071883d1@rock-chips.com>
-References: <1465182439-27963-1-git-send-email-shawn.lin@rock-chips.com>
- <575E52AC.6000902@intel.com>
- <8bbb3f13-efb3-e963-e53f-cf2ca796f319@rock-chips.com>
- <575E6C11.8060709@intel.com>
- <b22ae70d-5128-639d-eef0-8ac9cdd2b8e4@rock-chips.com>
- <575EA651.7060606@intel.com>
- <CAPDyKFq7Pr1YiacwpeDq3eAYmApydTj8Kbkyh=Cb6+vJC9BV3Q@mail.gmail.com>
+From: Yangbo Lu <yangbo.lu-3arQi8VN3Tc@public.gmane.org>
+Subject: RE: [PATCH 2/4] soc: fsl: add GUTS driver for QorIQ platforms
+Date: Thu, 23 Jun 2016 02:46:10 +0000
+Message-ID: <AM2PR04MB0883C91467E26AF0D52DC2C8F82D0@AM2PR04MB0883.eurprd04.prod.outlook.com>
+References: <1462417950-46796-1-git-send-email-yangbo.lu@nxp.com>
+	<5339448.D8rpq4ofAC@wuerfel> <1464832042.22191.23.camel@buserror.net>
+	<3435609.s5m1DCsoNb@wuerfel> <1465609853.22191.151.camel@buserror.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8;
-	format=flowed
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from lucky1.263xmail.com ([211.157.147.133]:53340 "EHLO
-	lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751379AbcFWCI2 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 22 Jun 2016 22:08:28 -0400
-In-Reply-To: <CAPDyKFq7Pr1YiacwpeDq3eAYmApydTj8Kbkyh=Cb6+vJC9BV3Q@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
+In-Reply-To: <1465609853.22191.151.camel-fOR+EgIDQEHk1uMJSBkQmQ@public.gmane.org>
+Content-Language: en-US
+List-Unsubscribe: <https://lists.linuxfoundation.org/mailman/options/iommu>,
+	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.linuxfoundation.org/pipermail/iommu/>
+List-Post: <mailto:iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
+List-Help: <mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=help>
+List-Subscribe: <https://lists.linuxfoundation.org/mailman/listinfo/iommu>,
+	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=subscribe>
+Sender: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
+Errors-To: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
+To: Scott Wood <oss-fOR+EgIDQEHk1uMJSBkQmQ@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, "linuxppc-dev-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org" <linuxppc-dev-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
+Cc: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Russell King <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, Bhupesh Sharma <bhupesh.sharma-KZfg59tc24xl57MIdRCFDg@public.gmane.org>, "netdev-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <netdev-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Santosh Shilimkar <ssantosh-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Xiaobo Xie <xiaobo.xie-3arQi8VN3Tc@public.gmane.org>, "iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org" <iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, "linux-i2c-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-i2c-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Claudiu Manoil <claudiu.manoil-KZfg59tc24xl57MIdRCFDg@public.gmane.org>, Kumar Gala <galak-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, Yang-Leo Li <leoyang.li-3arQi8VN3Tc@public.gmane.org>, "linux-clk-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-clk-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, Jaehoon Chung <jh80.chung@samsung.com>, Alex Lemberg <alex.lemberg@sandisk.com>
-Cc: shawn.lin@rock-chips.com, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Doug Anderson <dianders@chromium.org>, "open list:ARM/Rockchip SoC..." <linux-rockchip@lists.infradead.org>
 
-=E5=9C=A8 2016/6/22 18:21, Ulf Hansson =E5=86=99=E9=81=93:
-> On 13 June 2016 at 14:25, Adrian Hunter <adrian.hunter@intel.com> wro=
-te:
->> On 13/06/16 11:58, Shawn Lin wrote:
->>> =E5=9C=A8 2016/6/13 16:17, Adrian Hunter =E5=86=99=E9=81=93:
->>>> On 13/06/16 10:48, Shawn Lin wrote:
->>>>> On 2016/6/13 14:29, Adrian Hunter wrote:
->>>>>> On 06/06/16 06:07, Shawn Lin wrote:
->>>>>>> JEDEC eMMC v5.1 introduce an autonomously initiated method
->>>>>>> for background operations.
->>>>>>>
->>>>>>> Host that wants to enable the device to perform background
->>>>>>> operations during device idle time, should signal the device
->>>>>>> by setting AUTO_EN in BKOPS_EN field EXT_CSD[163] to 1b. When
->>>>>>> this bit is set, the device may start or stop background operat=
-ions
->>>>>>> whenever it sees fit, without any notification to the host.
->>>>>>>
->>>>>>> When AUTO_EN bit is set, the host should keep the device power
->>>>>>> active. The host may set or clear this bit at any time based on
->>>>>>> its power constraints or other considerations.
->>>>>>>
->>>>>>> Currently the manual bkops is only be used under the async req
->>>>>>> circumstances and it's a bit complicated to be controlled as th=
-e
->>>>>>> perfect method is that we should do some idle monitor just as r=
-pm
->>>>>>> and send HPI each time if receiving rd/wr req. But it will impa=
-ct
->>>>>>> performance significantly, especially for random iops since the
->>>>>>> weight of executing HPI against r/w small piece of LBAs is
->>>>>>> nonnegligible.
->>>>>>>
->>>>>>> So we now prefer to select the auto one unconditionally if supp=
-orted
->>>>>>> which makes it as simple as possible. It should really good eno=
-ugh
->>>>>>> for devices to manage its internal policy for bkops rather than=
- the
->>>>>>> host, which makes us believe that we could achieve the best
->>>>>>> performance for all the devices implementing auto bkops and the=
- only
->>>>>>> thing we should do is to disable it when cutting off the power.
->>>>>>
->>>>>> Do you know if there is really a requirement to do that?
->>>>>
->>>>> Even without bkops enable, no matter for manual or auto one, FTL =
-should
->>>>> always do bkops like GC internally when needed to guarantee the
->>>>> performance and balance the wear leveling. What I thought to do i=
-s to
->>>>> make it more explicitly.
->>>>>
->>>>> Because then, what
->>>>>> is the point of power off notification?
->>>>>
->>>>> When power off notification is sent, bkops will be stopped
->>>>> in _mmc_suspend. So I don't undertand your point here?
->>>>
->>>> I am trying to understand why we need to do anything for auto bkop=
-s.
->>>> Since AUTO_EN is persistent, we can leave the decision whether to =
-turn it on
->>>> to whomever provisions the device. Then we just leave it alone.
->>>>
->>>
->>> Hrm..
->>>
->>> one possible way is to control it by mmc-utils on
->>> user space?  So we should add a cmd for mmc-utils
->>> there?
->>
->> That would be consistent with manual bkops.
->>
->
->>From my first impression I agree, as that is the policy we have been
-> sticking to when writing to persistent EXT_CSD persistent .
-> Although, in this case, I am actually wondering on what is the best a=
-pproach.
+Hi Arnd,
 
-I don't know what is the real meaning of "persistent". :)
-I don't know should we count auto bkops as the persistent
-registers....HS_TIMING and BUS_WIDTH should also be persistent
-registers as them are always used after initialization if not changing
-them?
-
-IHMO the more reasonable way is that:
-IIRC many settings for  EXT_CSD should be OTP, like hw-reset(162),
-reliable write(167) fw-configure(169)..etc, which are marked as R/W.
-These should be controlled by userpace or even by firmware when
-flashing emmc, like reliable write...
+Could you comment on these?
+Thanks.
 
 
-I'm not sure whether should I updete this $SUBJUCT or migirating it to
-userspace... We need to come to an agreement :)
+Best regards,
+Yangbo Lu
 
 
->
-> Is there really ever a case when we don't want auto BKOPS to be defau=
-lt enabled?
-> I think BKOPS is a fundamental feature of an FTL and I can't see a
-> reason to why we need to involve mmc-utils/userspace to enable it. Am
-> I wrong?
->
-> Kind regards
-> Uffe
->
->
->
-
-
---=20
-Best Regards
-Shawn Lin
-
+> -----Original Message-----
+> From: Scott Wood [mailto:oss-fOR+EgIDQEHk1uMJSBkQmQ@public.gmane.org]
+> Sent: Saturday, June 11, 2016 9:51 AM
+> To: Arnd Bergmann; linuxppc-dev-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org
+> Cc: Mark Rutland; Ulf Hansson; linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org; linux-
+> i2c-u79uwXL29TY76Z2rM5mHXA@public.gmane.org; linux-clk-u79uwXL29TY76Z2rM5mHXA@public.gmane.org; Qiang Zhao; Russell King;
+> Bhupesh Sharma; Joerg Roedel; Claudiu Manoil; devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org;
+> Kumar Gala; Rob Herring; Santosh Shilimkar; linux-arm-
+> kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org; netdev-u79uwXL29TY76Z2rM5mHXA@public.gmane.org; linux-
+> mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org; Xiaobo Xie; Yang-Leo Li; iommu-cunTk1MwBs/ROKNJybVBZg@public.gmane.org
+> foundation.org; Yangbo Lu
+> Subject: Re: [PATCH 2/4] soc: fsl: add GUTS driver for QorIQ platforms
+> 
+> On Thu, 2016-06-02 at 10:43 +0200, Arnd Bergmann wrote:
+> > On Wednesday, June 1, 2016 8:47:22 PM CEST Scott Wood wrote:
+> > > On Mon, 2016-05-30 at 15:15 +0200, Arnd Bergmann wrote:
+> > > > diff --git a/drivers/soc/fsl/guts.c b/drivers/soc/fsl/guts.c new
+> > > > file mode 100644 index 000000000000..2f30698f5bcf
+> > > > --- /dev/null
+> > > > +++ b/drivers/soc/fsl/guts.c
+> > > > @@ -0,0 +1,130 @@
+> > > > +/*
+> > > > + * Freescale QorIQ Platforms GUTS Driver
+> > > > + *
+> > > > + * Copyright (C) 2016 Freescale Semiconductor, Inc.
+> > > > + *
+> > > > + * This program is free software; you can redistribute it and/or
+> > > > +modify
+> > > > + * it under the terms of the GNU General Public License as
+> > > > +published by
+> > > > + * the Free Software Foundation; either version 2 of the License,
+> > > > +or
+> > > > + * (at your option) any later version.
+> > > > + */
+> > > > +
+> > > > +#include <linux/io.h>
+> > > > +#include <linux/platform_device.h> #include <linux/module.h>
+> > > > +#include <linux/slab.h> #include <linux/of_address.h> #include
+> > > > +<linux/of_platform.h> #include <linux/sys_soc.h>
+> > > > +
+> > > > +#define GUTS_PVR	0x0a0
+> > > > +#define GUTS_SVR	0x0a4
+> > > > +
+> > > > +struct guts {
+> > > > +	void __iomem *regs;
+> > >
+> > > We already have a struct to define guts.  Why are you not using it?
+> > > Why do you consider using it to be "abuse"?  What if we want to move
+> > > more guts functionality into this driver?
+> >
+> > This structure was in the original patch, I left it in there, only
+> > removed the inclusion of the powerpc header file, which seemed to be
+> > misplaced.
+> 
+> I'm not refering "struct guts".  I'm referring to changing "struct
+> ccsr_guts __iomem *regs" into "void __iomem *regs".
+> 
+> And it's not a powerpc header file.
+> 
+> > > > +/*
+> > > > + * Table for matching compatible strings, for device tree
+> > > > + * guts node, for Freescale QorIQ SOCs.
+> > > > + */
+> > > > +static const struct of_device_id fsl_guts_of_match[] = {
+> > > > +	/* For T4 & B4 Series SOCs */
+> > > > +	{ .compatible = "fsl,qoriq-device-config-1.0", .data = "T4/B4
+> > > > series" },
+> > > [snip]
+> > > > +	{ .compatible = "fsl,qoriq-device-config-2.0", .data = "P
+> > > > series"
+> > >
+> > > As noted in my comment on patch 3/4, these descriptions are reversed.
+> > >
+> > > They're also incomplete.  t2080 has device config 2.0.  t1040 is
+> > > described as
+> > > 2.0 though it should probably be 2.1 (or better, drop the generic
+> > > compatible altogether).
+> >
+> > Ok. Ideally I think we'd even look up the specific SoC names from the
+> > SVC rather than the compatible string. I just didn't have a good list
+> > for those to put in the driver.
+> 
+> The list is in arch/powerpc/include/asm/mpc85xx.h but I don't know why we
+> need to convert it to a string in the first place.
+> 
+> >
+> > > > +	/*
+> > > > +	 * syscon devices default to little-endian, but on powerpc we
+> > > > have
+> > > > +	 * existing device trees with big-endian maps and an absent
+> > > > endianess
+> > > > +	 * "big-property"
+> > > > +	 */
+> > > > +	if (!IS_ENABLED(CONFIG_POWERPC) &&
+> > > > +	    !of_property_read_bool(dev->of_node, "big-endian"))
+> > > > +		guts->little_endian = true;
+> > >
+> > > This is not a syscon device (Yangbo's patch to add a guts node on
+> > > ls2080 is the only guts node that says "syscon", and that was a
+> > > leftover from earlier revisions and should probably be removed).
+> > > Even if it were, where is it documented that syscon defaults to
+> > > little-endian?
+> >
+> > Documentation/devicetree/bindings/regmap/regmap.txt
+> >
+> > We had a little screwup here, basically regmap (and by consequence,
+> > syscon) always defaulted to little-endian way before that was
+> > documented, so it's too late to change it,
+> 
+> What causes a device node to fall under the jurisdiction of regmap.txt?
+>  Again, these nodes do not claim "syscon" compatibility.
+> 
+> > although I agree it would have made sense to document regmap to
+> > default to big-endian on powerpc.
+> 
+> Please don't.  It's enough of a mess as is; no need to start throwing in
+> architecture ifdefs.
+> 
+> > > Documentation/devicetree/bindings/common-properties.txt says that
+> > > the individual binding specifies the default.  The default for this
+> > > node should be big-endian because that's what existed before there
+> > > was a need to describe the endianness.  And we need an update to the
+> > > guts binding to specify that.
+> >
+> > Good point. This proably means that specifying both the "guts" and
+> "syscon"
+> > compatible strings implies having to also specify the endianess
+> > explicitly both ways, because otherwise we break one of the two
+> bindings.
+> 
+> Yes, but the node should only specify "guts".
+> 
+> >
+> > > > +
+> > > > +	guts->regs = devm_ioremap_resource(dev, 0);
+> > > > +	if (!guts->regs) {
+> > > > +		ret = -ENOMEM;
+> > > > +		kfree(guts);
+> > > > +		goto out;
+> > > > +	}
+> > > > +
+> > > > +	fsl_guts_init(dev, guts);
+> > > > +	ret = 0;
+> > > > +out:
+> > > > +	return ret;
+> > > > +}
+> > > > +
+> > > > +static struct platform_driver fsl_soc_guts = {
+> > > > +	.probe = fsl_guts_probe,
+> > > > +	.driver.of_match_table = fsl_guts_of_match, };
+> > > > +
+> > > > +module_platform_driver(fsl_soc_guts);
+> > >
+> > > Again, this means that the information is not available during early
+> > > boot, such as in the clock driver.  Thus we would not be able to
+> > > convert clk -qoriq's direct mfspr(SPRN_SVR) into an
+> > > soc_device_match() (or anything else that makes use of this file),
+> > > nor would we be able to move its access of the guts RCW registers
+> > > into this driver.
+> >
+> > Correct. Do we have a reason to convert the mfspr() though? I don't
+> > really see an improvement over the current state if we do that,
+> 
+> Then should we drop this patchset and put a similar PPC ifdef in
+> drivers/mmc/host/sdhci-of-esdhc.c?
+> 
+> There's also the RCW access.  You said in the patch 4/4 discussion that
+> you di dn't like any random driver ioremapping the registers...
+> 
+> > and for new devices
+> > that might need the erratum workaround, we could add a DT property
+> > that would be preferred to both.
+> 
+> It's unlikely that we would know the erratum exists at the time the
+> device tree is created.  We also generally don't have separate device
+> trees for each revision of a chip (and if we did, we'd have users that
+> use the wrong one).
+> 
+> -Scott
