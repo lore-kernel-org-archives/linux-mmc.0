@@ -1,61 +1,129 @@
-From: Doug Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
-Subject: Re: [RFC PATCH 1/4] Documentation: mmc: add description for new caps
-Date: Wed, 22 Jun 2016 21:33:35 -0700
-Message-ID: <CAD=FV=UC0V1ALZw-EsJXUQ8eVbFY5OppfOGZxMcexSE3B+1EwQ@mail.gmail.com>
-References: <1465373996-2485-1-git-send-email-shawn.lin@rock-chips.com>
- <1465374021-2526-1-git-send-email-shawn.lin@rock-chips.com>
- <CAD=FV=WNaTEDyVNyteLq3O-BL9KxR49W=44jbXogKXd2dkDWDQ@mail.gmail.com>
- <b479bc81-f72f-b4c0-b9eb-c8fc4dd71fbb@rock-chips.com>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH] mmc: core: add auto bkops support
+Date: Thu, 23 Jun 2016 08:22:25 +0300
+Message-ID: <576B7211.2030208@intel.com>
+References: <1465182439-27963-1-git-send-email-shawn.lin@rock-chips.com>
+ <F4A75DD4-FE64-4417-AFD4-FA9ABD8EE915@sandisk.com>
+ <d5c75760-e8b4-1784-a7de-3d78eeca1d0e@rock-chips.com>
+ <7078F2B9-63B6-4170-BFA1-5AC370F0D4DD@sandisk.com>
+ <29966a6f-eb14-0307-08cc-f91a97f50382@rock-chips.com>
+ <B7133967-23A7-46AF-9013-417BD282E005@sandisk.com>
+ <23729258-7a6b-80ac-6c90-b48eed64e0ea@rock-chips.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-In-Reply-To: <b479bc81-f72f-b4c0-b9eb-c8fc4dd71fbb-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-rockchip>,
- <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-rockchip/>
-List-Post: <mailto:linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-List-Help: <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-rockchip>,
- <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
-Sender: "Linux-rockchip" <linux-rockchip-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-Errors-To: linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
-To: Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
-Cc: "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Jaehoon Chung <jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, "open list:ARM/Rockchip SoC..." <linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Olof Johansson <olof-nZhT3qVonbNeoWH0uzbU5w@public.gmane.org>
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mga02.intel.com ([134.134.136.20]:55580 "EHLO mga02.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1750971AbcFWF0e (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 23 Jun 2016 01:26:34 -0400
+In-Reply-To: <23729258-7a6b-80ac-6c90-b48eed64e0ea@rock-chips.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Shawn Lin <shawn.lin@rock-chips.com>, Alex Lemberg <Alex.Lemberg@sandisk.com>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Jaehoon Chung <jh80.chung@samsung.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Doug Anderson <dianders@chromium.org>, "linux-rockchip@lists.infradead.org" <linux-rockchip@lists.infradead.org>
 
-SGksCgpPbiBXZWQsIEp1biAyMiwgMjAxNiBhdCA2OjI5IFBNLCBTaGF3biBMaW4gPHNoYXduLmxp
-bkByb2NrLWNoaXBzLmNvbT4gd3JvdGU6Cj4g5ZyoIDIwMTYvNi8yMiAyMzowNiwgRG91ZyBBbmRl
-cnNvbiDlhpnpgZM6Cj4+Cj4+IEhpLAo+Pgo+PiBPbiBXZWQsIEp1biA4LCAyMDE2IGF0IDE6MjAg
-QU0sIFNoYXduIExpbiA8c2hhd24ubGluQHJvY2stY2hpcHMuY29tPgo+PiB3cm90ZToKPj4+Cj4+
-PiBMZXQncyBhZGQgc29tZSBiYXNpYyBkZXNjcmlwdGlvbiBmb3IgY2FwLW5vLXNkaW8sCj4+PiBj
-YXAtbm8tc2QgYW5kIGNhcC1uby1tbWMuCj4+Pgo+Pj4gU2lnbmVkLW9mZi1ieTogU2hhd24gTGlu
-IDxzaGF3bi5saW5Acm9jay1jaGlwcy5jb20+Cj4+Pgo+Pj4gLS0tCj4+Pgo+Pj4gIERvY3VtZW50
-YXRpb24vZGV2aWNldHJlZS9iaW5kaW5ncy9tbWMvbW1jLnR4dCB8IDMgKysrCj4+PiAgMSBmaWxl
-IGNoYW5nZWQsIDMgaW5zZXJ0aW9ucygrKQo+Pj4KPj4+IGRpZmYgLS1naXQgYS9Eb2N1bWVudGF0
-aW9uL2RldmljZXRyZWUvYmluZGluZ3MvbW1jL21tYy50eHQKPj4+IGIvRG9jdW1lbnRhdGlvbi9k
-ZXZpY2V0cmVlL2JpbmRpbmdzL21tYy9tbWMudHh0Cj4+PiBpbmRleCBlY2MwMDdhLi5lMTZkNDJi
-IDEwMDY0NAo+Pj4gLS0tIGEvRG9jdW1lbnRhdGlvbi9kZXZpY2V0cmVlL2JpbmRpbmdzL21tYy9t
-bWMudHh0Cj4+PiArKysgYi9Eb2N1bWVudGF0aW9uL2RldmljZXRyZWUvYmluZGluZ3MvbW1jL21t
-Yy50eHQKPj4+IEBAIC0zOSw2ICszOSw5IEBAIE9wdGlvbmFsIHByb3BlcnRpZXM6Cj4+PiAgLSBj
-YXAtcG93ZXItb2ZmLWNhcmQ6IHBvd2VyaW5nIG9mZiB0aGUgY2FyZCBpcyBzYWZlCj4+PiAgLSBj
-YXAtbW1jLWh3LXJlc2V0OiBlTU1DIGhhcmR3YXJlIHJlc2V0IGlzIHN1cHBvcnRlZAo+Pj4gIC0g
-Y2FwLXNkaW8taXJxOiBlbmFibGUgU0RJTyBJUlEgc2lnbmFsbGluZyBvbiB0aGlzIGludGVyZmFj
-ZQo+Pj4gKy0gY2FwLW5vLXNkaW86IHNraXAgc2VuZGluZyBzZGlvIGNtZCBkdXJpbmcgaW5pdGlh
-bGl6YXRpb24KPj4+ICstIGNhcC1uby1zZDogc2tpcCBzZW5kaW5nIHNkIGNtZCBkdXJpbmcgaW5p
-dGlhbGl6YXRpb24KPj4+ICstIGNhcC1uby1tbWM6IHNraXAgc2VuZGluZyBtbWMgY21kIGR1cmlu
-ZyBpbml0aWFsaXphdGlvbgo+Pgo+Pgo+PiBJbiB0aGUgcGFzdCBpdCBoYXMgYmVlbiBkZXRlcm1p
-bmVkIHRoYXQgdGhlICJjYXAtIiBwcmVmaXggaXMKPj4gdW5uZWNlc3NhcnkuICBTb21lIHByb3Bl
-cnRpZXMgc3RpbGwgaGF2ZSAiY2FwLSIgYmVjYXVzZSBvZiBiYWNrd2FyZAo+PiBjb21wYXRpYmls
-aXR5IHJlYXNvbnMsIGJ1dCBhcyBJIHVuZGVyc3RhbmQgaXQgbmV3IHByb3BlcnRpZXMgc2hvdWxk
-bid0Cj4+IHN0YXJ0IHdpdGggImNhcC0iLgo+Pgo+PiBTZWUKPj4gPGh0dHBzOi8vbGlzdHMub3ps
-YWJzLm9yZy9waXBlcm1haWwvZGV2aWNldHJlZS1kaXNjdXNzLzIwMTMtSnVuZS8wMzQ2NjQuaHRt
-bD4KPj4gZm9yIHJlZmVyZW5jZS4KPj4KPgo+IFJlYWxseT8gIHdhcyB0aGF0IHRoZSBmaW5hbCBk
-ZWNpc2lvbj8gSSBqdXN0IHNlZSBPbG9mIGNvbXBsYWluZWQgaXQgYnV0Cj4gZG9uJ3Qgc2VlIG90
-aGVyIGNvbW1lbnRzIGZyb20gZHQgbWFpbnRhaW5lciBvciBmcm9tIG1tYwo+IG1haW50YWluZXIo
-Q2hyaXMgQmFsbCk/Cj4KPiBIaSBVbGYgYW5kIFJvYiwKPgo+IFdoYXQgaXMgeW91ciBvcGluaW9u
-PwoKTm90aWNlIHRoYXQgbW9zdCB0aGluZ3MgYWRkZWQgbGF0ZXIgKGxpa2UgbW1jLWhzMjAwLTFf
-OHYpIGRvbid0IGhhdmUgImNhcC0iCgpfX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
-X19fX19fX19fX19fXwpMaW51eC1yb2NrY2hpcCBtYWlsaW5nIGxpc3QKTGludXgtcm9ja2NoaXBA
-bGlzdHMuaW5mcmFkZWFkLm9yZwpodHRwOi8vbGlzdHMuaW5mcmFkZWFkLm9yZy9tYWlsbWFuL2xp
-c3RpbmZvL2xpbnV4LXJvY2tjaGlwCg==
+On 23/06/16 04:33, Shawn Lin wrote:
+> =E5=9C=A8 2016/6/22 22:08, Alex Lemberg =E5=86=99=E9=81=93:
+>> HI Shawn,
+>>
+>> On 6/21/16, 4:44 AM, "Shawn Lin" <shawn.lin@rock-chips.com> wrote:
+>>
+>>> On 2016/6/20 21:33, Alex Lemberg wrote:
+>>>> Hi Shawn,
+>>>>
+>>>> [=E2=80=A6]
+>>>>
+>>>>>>> +
+>>>>>>> +static int mmc_stop_auto_bkops(struct mmc_card *card)
+>>>>>>> +{
+>>>>>>> +    int err =3D 0;
+>>>>>>> +
+>>>>>>> +    if (!card->ext_csd.auto_bkops_en)
+>>>>>>> +        return 0;
+>>>>>>> +
+>>>>>>
+>>>>>> Shouldn=E2=80=99t the BKOPS_STATUS be checked prior to disabling=
+ the BKOPS
+>>>>>> activity of the device?
+>>>>>>
+>>>>>
+>>>>> Hrmm.. I read the whole section of spec for it, and I did find th=
+is
+>>>>> requirement for manul bkops but not for the auto one. So what sho=
+uld we
+>>>>> do if using the auto one?
+>>>>>
+>>>>
+>>>> In case of AUTO BKOPS, the eMMC Device should perform internal GC
+>>>> in the same way as in case of MANUAL BKOPS.
+>>>> The only difference is a host awareness.
+>>>
+>>> agree.
+>>>
+>>>> Although there is no requirement in the spec, I think the driver c=
+an
+>>>> give some time to the device to perform/complete its internal GC d=
+uring
+>>>> the idle time.
+>>>> Thus I think we can check the BKOPS_STATUS on Runtime suspend.
+>>>
+>>> We shouldn't diable bkops on *runtime* suspend as it's just the rig=
+ht
+>>> time for firmware to do GC. We could consider to check and wait for
+>>> the status when doing poweroff, although it seems firmware should b=
+e
+>>> able to accept the disable cmd and deal the on-going work perfectly
+>>> when doing bkops without host's awareness, just the same way as sud=
+dent
+>>> power loss cases.
+>>
+>> If I am not wrong, in current implementation of runtime suspend,
+>> the driver stops BKOPS (send HPI) just before sending sleep command,
+>> see _mmc_suspend(), depends on =E2=80=9CMMC_CAP_AGGRESSIVE_PM=E2=80=9D=
+ flag.
+>> In this case, the eMMC device will not have enough time to perform i=
+nternal
+>> BKOPS in both =E2=80=93 Manual and Auto BKOPS configurations.
+>>
+>=20
+> ye, so it seems a pre-exiting issue before introducing auto bkops?
+> I think we can push another patch to improve it but not handling
+> it for this $SUBJECT, does it sound ok to you?
+
+Runtime suspend for eMMC has a default auto-suspend delay of 3 seconds
+(refer mmc_blk_probe()).  Isn't that when auto bkops would happen?
+
+>=20
+>> For the poweroff, it should be OK with a current implementation of
+>> PON (mmc_poweroff_notify())
+>>
+>>>
+>>> Also I don't know whether the firmware will reflect its status on
+>>> BKOPS_STATUS or not when enabling the auto one. I will do more test=
+=2E
+>>>
+>>> Anyway, thanks for sharing your thought.
+>>> Also Adrian point out that currently we trigger manual bkosp from
+>>> userspace via mmc-utils, and I agreed we shouldn't force kernel sta=
+ck
+>>> to enable it defaultly. So I'm prone not to update this $SUBJECT an=
+d
+>>> migrate it to mmc-utils later.
+>>>
+>>>>
+>>>> [=E2=80=A6]
+>>>>
+>>>> Thanks,
+>>>> Alex
+>>>>
+>>>
+>>>
+>>> --=20
+>>> Best Regards
+>>> Shawn Lin
+>>>
+>>
+>=20
+>=20
+
