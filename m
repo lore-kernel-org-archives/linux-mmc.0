@@ -1,215 +1,61 @@
-From: Yangbo Lu <yangbo.lu-3arQi8VN3Tc@public.gmane.org>
-Subject: RE: [PATCH 2/4] soc: fsl: add GUTS driver for QorIQ platforms
-Date: Thu, 23 Jun 2016 02:46:10 +0000
-Message-ID: <AM2PR04MB0883C91467E26AF0D52DC2C8F82D0@AM2PR04MB0883.eurprd04.prod.outlook.com>
-References: <1462417950-46796-1-git-send-email-yangbo.lu@nxp.com>
-	<5339448.D8rpq4ofAC@wuerfel> <1464832042.22191.23.camel@buserror.net>
-	<3435609.s5m1DCsoNb@wuerfel> <1465609853.22191.151.camel@buserror.net>
+From: Doug Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
+Subject: Re: [RFC PATCH 1/4] Documentation: mmc: add description for new caps
+Date: Wed, 22 Jun 2016 21:33:35 -0700
+Message-ID: <CAD=FV=UC0V1ALZw-EsJXUQ8eVbFY5OppfOGZxMcexSE3B+1EwQ@mail.gmail.com>
+References: <1465373996-2485-1-git-send-email-shawn.lin@rock-chips.com>
+ <1465374021-2526-1-git-send-email-shawn.lin@rock-chips.com>
+ <CAD=FV=WNaTEDyVNyteLq3O-BL9KxR49W=44jbXogKXd2dkDWDQ@mail.gmail.com>
+ <b479bc81-f72f-b4c0-b9eb-c8fc4dd71fbb@rock-chips.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
-In-Reply-To: <1465609853.22191.151.camel-fOR+EgIDQEHk1uMJSBkQmQ@public.gmane.org>
-Content-Language: en-US
-List-Unsubscribe: <https://lists.linuxfoundation.org/mailman/options/iommu>,
-	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.linuxfoundation.org/pipermail/iommu/>
-List-Post: <mailto:iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
-List-Help: <mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=help>
-List-Subscribe: <https://lists.linuxfoundation.org/mailman/listinfo/iommu>,
-	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=subscribe>
-Sender: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
-Errors-To: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
-To: Scott Wood <oss-fOR+EgIDQEHk1uMJSBkQmQ@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, "linuxppc-dev-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org" <linuxppc-dev-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>
-Cc: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Russell King <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, Bhupesh Sharma <bhupesh.sharma-KZfg59tc24xl57MIdRCFDg@public.gmane.org>, "netdev-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <netdev-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Santosh Shilimkar <ssantosh-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Xiaobo Xie <xiaobo.xie-3arQi8VN3Tc@public.gmane.org>, "iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org" <iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, "linux-i2c-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-i2c-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Claudiu Manoil <claudiu.manoil-KZfg59tc24xl57MIdRCFDg@public.gmane.org>, Kumar Gala <galak-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, Yang-Leo Li <leoyang.li-3arQi8VN3Tc@public.gmane.org>, "linux-clk-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-clk-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+In-Reply-To: <b479bc81-f72f-b4c0-b9eb-c8fc4dd71fbb-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-rockchip>,
+ <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-rockchip/>
+List-Post: <mailto:linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+List-Help: <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-rockchip>,
+ <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
+Sender: "Linux-rockchip" <linux-rockchip-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+Errors-To: linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+To: Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
+Cc: "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Jaehoon Chung <jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, "open list:ARM/Rockchip SoC..." <linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Olof Johansson <olof-nZhT3qVonbNeoWH0uzbU5w@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-Hi Arnd,
-
-Could you comment on these?
-Thanks.
-
-
-Best regards,
-Yangbo Lu
-
-
-> -----Original Message-----
-> From: Scott Wood [mailto:oss-fOR+EgIDQEHk1uMJSBkQmQ@public.gmane.org]
-> Sent: Saturday, June 11, 2016 9:51 AM
-> To: Arnd Bergmann; linuxppc-dev-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org
-> Cc: Mark Rutland; Ulf Hansson; linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org; linux-
-> i2c-u79uwXL29TY76Z2rM5mHXA@public.gmane.org; linux-clk-u79uwXL29TY76Z2rM5mHXA@public.gmane.org; Qiang Zhao; Russell King;
-> Bhupesh Sharma; Joerg Roedel; Claudiu Manoil; devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org;
-> Kumar Gala; Rob Herring; Santosh Shilimkar; linux-arm-
-> kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org; netdev-u79uwXL29TY76Z2rM5mHXA@public.gmane.org; linux-
-> mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org; Xiaobo Xie; Yang-Leo Li; iommu-cunTk1MwBs/ROKNJybVBZg@public.gmane.org
-> foundation.org; Yangbo Lu
-> Subject: Re: [PATCH 2/4] soc: fsl: add GUTS driver for QorIQ platforms
-> 
-> On Thu, 2016-06-02 at 10:43 +0200, Arnd Bergmann wrote:
-> > On Wednesday, June 1, 2016 8:47:22 PM CEST Scott Wood wrote:
-> > > On Mon, 2016-05-30 at 15:15 +0200, Arnd Bergmann wrote:
-> > > > diff --git a/drivers/soc/fsl/guts.c b/drivers/soc/fsl/guts.c new
-> > > > file mode 100644 index 000000000000..2f30698f5bcf
-> > > > --- /dev/null
-> > > > +++ b/drivers/soc/fsl/guts.c
-> > > > @@ -0,0 +1,130 @@
-> > > > +/*
-> > > > + * Freescale QorIQ Platforms GUTS Driver
-> > > > + *
-> > > > + * Copyright (C) 2016 Freescale Semiconductor, Inc.
-> > > > + *
-> > > > + * This program is free software; you can redistribute it and/or
-> > > > +modify
-> > > > + * it under the terms of the GNU General Public License as
-> > > > +published by
-> > > > + * the Free Software Foundation; either version 2 of the License,
-> > > > +or
-> > > > + * (at your option) any later version.
-> > > > + */
-> > > > +
-> > > > +#include <linux/io.h>
-> > > > +#include <linux/platform_device.h> #include <linux/module.h>
-> > > > +#include <linux/slab.h> #include <linux/of_address.h> #include
-> > > > +<linux/of_platform.h> #include <linux/sys_soc.h>
-> > > > +
-> > > > +#define GUTS_PVR	0x0a0
-> > > > +#define GUTS_SVR	0x0a4
-> > > > +
-> > > > +struct guts {
-> > > > +	void __iomem *regs;
-> > >
-> > > We already have a struct to define guts.  Why are you not using it?
-> > > Why do you consider using it to be "abuse"?  What if we want to move
-> > > more guts functionality into this driver?
-> >
-> > This structure was in the original patch, I left it in there, only
-> > removed the inclusion of the powerpc header file, which seemed to be
-> > misplaced.
-> 
-> I'm not refering "struct guts".  I'm referring to changing "struct
-> ccsr_guts __iomem *regs" into "void __iomem *regs".
-> 
-> And it's not a powerpc header file.
-> 
-> > > > +/*
-> > > > + * Table for matching compatible strings, for device tree
-> > > > + * guts node, for Freescale QorIQ SOCs.
-> > > > + */
-> > > > +static const struct of_device_id fsl_guts_of_match[] = {
-> > > > +	/* For T4 & B4 Series SOCs */
-> > > > +	{ .compatible = "fsl,qoriq-device-config-1.0", .data = "T4/B4
-> > > > series" },
-> > > [snip]
-> > > > +	{ .compatible = "fsl,qoriq-device-config-2.0", .data = "P
-> > > > series"
-> > >
-> > > As noted in my comment on patch 3/4, these descriptions are reversed.
-> > >
-> > > They're also incomplete.  t2080 has device config 2.0.  t1040 is
-> > > described as
-> > > 2.0 though it should probably be 2.1 (or better, drop the generic
-> > > compatible altogether).
-> >
-> > Ok. Ideally I think we'd even look up the specific SoC names from the
-> > SVC rather than the compatible string. I just didn't have a good list
-> > for those to put in the driver.
-> 
-> The list is in arch/powerpc/include/asm/mpc85xx.h but I don't know why we
-> need to convert it to a string in the first place.
-> 
-> >
-> > > > +	/*
-> > > > +	 * syscon devices default to little-endian, but on powerpc we
-> > > > have
-> > > > +	 * existing device trees with big-endian maps and an absent
-> > > > endianess
-> > > > +	 * "big-property"
-> > > > +	 */
-> > > > +	if (!IS_ENABLED(CONFIG_POWERPC) &&
-> > > > +	    !of_property_read_bool(dev->of_node, "big-endian"))
-> > > > +		guts->little_endian = true;
-> > >
-> > > This is not a syscon device (Yangbo's patch to add a guts node on
-> > > ls2080 is the only guts node that says "syscon", and that was a
-> > > leftover from earlier revisions and should probably be removed).
-> > > Even if it were, where is it documented that syscon defaults to
-> > > little-endian?
-> >
-> > Documentation/devicetree/bindings/regmap/regmap.txt
-> >
-> > We had a little screwup here, basically regmap (and by consequence,
-> > syscon) always defaulted to little-endian way before that was
-> > documented, so it's too late to change it,
-> 
-> What causes a device node to fall under the jurisdiction of regmap.txt?
->  Again, these nodes do not claim "syscon" compatibility.
-> 
-> > although I agree it would have made sense to document regmap to
-> > default to big-endian on powerpc.
-> 
-> Please don't.  It's enough of a mess as is; no need to start throwing in
-> architecture ifdefs.
-> 
-> > > Documentation/devicetree/bindings/common-properties.txt says that
-> > > the individual binding specifies the default.  The default for this
-> > > node should be big-endian because that's what existed before there
-> > > was a need to describe the endianness.  And we need an update to the
-> > > guts binding to specify that.
-> >
-> > Good point. This proably means that specifying both the "guts" and
-> "syscon"
-> > compatible strings implies having to also specify the endianess
-> > explicitly both ways, because otherwise we break one of the two
-> bindings.
-> 
-> Yes, but the node should only specify "guts".
-> 
-> >
-> > > > +
-> > > > +	guts->regs = devm_ioremap_resource(dev, 0);
-> > > > +	if (!guts->regs) {
-> > > > +		ret = -ENOMEM;
-> > > > +		kfree(guts);
-> > > > +		goto out;
-> > > > +	}
-> > > > +
-> > > > +	fsl_guts_init(dev, guts);
-> > > > +	ret = 0;
-> > > > +out:
-> > > > +	return ret;
-> > > > +}
-> > > > +
-> > > > +static struct platform_driver fsl_soc_guts = {
-> > > > +	.probe = fsl_guts_probe,
-> > > > +	.driver.of_match_table = fsl_guts_of_match, };
-> > > > +
-> > > > +module_platform_driver(fsl_soc_guts);
-> > >
-> > > Again, this means that the information is not available during early
-> > > boot, such as in the clock driver.  Thus we would not be able to
-> > > convert clk -qoriq's direct mfspr(SPRN_SVR) into an
-> > > soc_device_match() (or anything else that makes use of this file),
-> > > nor would we be able to move its access of the guts RCW registers
-> > > into this driver.
-> >
-> > Correct. Do we have a reason to convert the mfspr() though? I don't
-> > really see an improvement over the current state if we do that,
-> 
-> Then should we drop this patchset and put a similar PPC ifdef in
-> drivers/mmc/host/sdhci-of-esdhc.c?
-> 
-> There's also the RCW access.  You said in the patch 4/4 discussion that
-> you di dn't like any random driver ioremapping the registers...
-> 
-> > and for new devices
-> > that might need the erratum workaround, we could add a DT property
-> > that would be preferred to both.
-> 
-> It's unlikely that we would know the erratum exists at the time the
-> device tree is created.  We also generally don't have separate device
-> trees for each revision of a chip (and if we did, we'd have users that
-> use the wrong one).
-> 
-> -Scott
+SGksCgpPbiBXZWQsIEp1biAyMiwgMjAxNiBhdCA2OjI5IFBNLCBTaGF3biBMaW4gPHNoYXduLmxp
+bkByb2NrLWNoaXBzLmNvbT4gd3JvdGU6Cj4g5ZyoIDIwMTYvNi8yMiAyMzowNiwgRG91ZyBBbmRl
+cnNvbiDlhpnpgZM6Cj4+Cj4+IEhpLAo+Pgo+PiBPbiBXZWQsIEp1biA4LCAyMDE2IGF0IDE6MjAg
+QU0sIFNoYXduIExpbiA8c2hhd24ubGluQHJvY2stY2hpcHMuY29tPgo+PiB3cm90ZToKPj4+Cj4+
+PiBMZXQncyBhZGQgc29tZSBiYXNpYyBkZXNjcmlwdGlvbiBmb3IgY2FwLW5vLXNkaW8sCj4+PiBj
+YXAtbm8tc2QgYW5kIGNhcC1uby1tbWMuCj4+Pgo+Pj4gU2lnbmVkLW9mZi1ieTogU2hhd24gTGlu
+IDxzaGF3bi5saW5Acm9jay1jaGlwcy5jb20+Cj4+Pgo+Pj4gLS0tCj4+Pgo+Pj4gIERvY3VtZW50
+YXRpb24vZGV2aWNldHJlZS9iaW5kaW5ncy9tbWMvbW1jLnR4dCB8IDMgKysrCj4+PiAgMSBmaWxl
+IGNoYW5nZWQsIDMgaW5zZXJ0aW9ucygrKQo+Pj4KPj4+IGRpZmYgLS1naXQgYS9Eb2N1bWVudGF0
+aW9uL2RldmljZXRyZWUvYmluZGluZ3MvbW1jL21tYy50eHQKPj4+IGIvRG9jdW1lbnRhdGlvbi9k
+ZXZpY2V0cmVlL2JpbmRpbmdzL21tYy9tbWMudHh0Cj4+PiBpbmRleCBlY2MwMDdhLi5lMTZkNDJi
+IDEwMDY0NAo+Pj4gLS0tIGEvRG9jdW1lbnRhdGlvbi9kZXZpY2V0cmVlL2JpbmRpbmdzL21tYy9t
+bWMudHh0Cj4+PiArKysgYi9Eb2N1bWVudGF0aW9uL2RldmljZXRyZWUvYmluZGluZ3MvbW1jL21t
+Yy50eHQKPj4+IEBAIC0zOSw2ICszOSw5IEBAIE9wdGlvbmFsIHByb3BlcnRpZXM6Cj4+PiAgLSBj
+YXAtcG93ZXItb2ZmLWNhcmQ6IHBvd2VyaW5nIG9mZiB0aGUgY2FyZCBpcyBzYWZlCj4+PiAgLSBj
+YXAtbW1jLWh3LXJlc2V0OiBlTU1DIGhhcmR3YXJlIHJlc2V0IGlzIHN1cHBvcnRlZAo+Pj4gIC0g
+Y2FwLXNkaW8taXJxOiBlbmFibGUgU0RJTyBJUlEgc2lnbmFsbGluZyBvbiB0aGlzIGludGVyZmFj
+ZQo+Pj4gKy0gY2FwLW5vLXNkaW86IHNraXAgc2VuZGluZyBzZGlvIGNtZCBkdXJpbmcgaW5pdGlh
+bGl6YXRpb24KPj4+ICstIGNhcC1uby1zZDogc2tpcCBzZW5kaW5nIHNkIGNtZCBkdXJpbmcgaW5p
+dGlhbGl6YXRpb24KPj4+ICstIGNhcC1uby1tbWM6IHNraXAgc2VuZGluZyBtbWMgY21kIGR1cmlu
+ZyBpbml0aWFsaXphdGlvbgo+Pgo+Pgo+PiBJbiB0aGUgcGFzdCBpdCBoYXMgYmVlbiBkZXRlcm1p
+bmVkIHRoYXQgdGhlICJjYXAtIiBwcmVmaXggaXMKPj4gdW5uZWNlc3NhcnkuICBTb21lIHByb3Bl
+cnRpZXMgc3RpbGwgaGF2ZSAiY2FwLSIgYmVjYXVzZSBvZiBiYWNrd2FyZAo+PiBjb21wYXRpYmls
+aXR5IHJlYXNvbnMsIGJ1dCBhcyBJIHVuZGVyc3RhbmQgaXQgbmV3IHByb3BlcnRpZXMgc2hvdWxk
+bid0Cj4+IHN0YXJ0IHdpdGggImNhcC0iLgo+Pgo+PiBTZWUKPj4gPGh0dHBzOi8vbGlzdHMub3ps
+YWJzLm9yZy9waXBlcm1haWwvZGV2aWNldHJlZS1kaXNjdXNzLzIwMTMtSnVuZS8wMzQ2NjQuaHRt
+bD4KPj4gZm9yIHJlZmVyZW5jZS4KPj4KPgo+IFJlYWxseT8gIHdhcyB0aGF0IHRoZSBmaW5hbCBk
+ZWNpc2lvbj8gSSBqdXN0IHNlZSBPbG9mIGNvbXBsYWluZWQgaXQgYnV0Cj4gZG9uJ3Qgc2VlIG90
+aGVyIGNvbW1lbnRzIGZyb20gZHQgbWFpbnRhaW5lciBvciBmcm9tIG1tYwo+IG1haW50YWluZXIo
+Q2hyaXMgQmFsbCk/Cj4KPiBIaSBVbGYgYW5kIFJvYiwKPgo+IFdoYXQgaXMgeW91ciBvcGluaW9u
+PwoKTm90aWNlIHRoYXQgbW9zdCB0aGluZ3MgYWRkZWQgbGF0ZXIgKGxpa2UgbW1jLWhzMjAwLTFf
+OHYpIGRvbid0IGhhdmUgImNhcC0iCgpfX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
+X19fX19fX19fX19fXwpMaW51eC1yb2NrY2hpcCBtYWlsaW5nIGxpc3QKTGludXgtcm9ja2NoaXBA
+bGlzdHMuaW5mcmFkZWFkLm9yZwpodHRwOi8vbGlzdHMuaW5mcmFkZWFkLm9yZy9tYWlsbWFuL2xp
+c3RpbmZvL2xpbnV4LXJvY2tjaGlwCg==
