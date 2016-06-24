@@ -1,92 +1,421 @@
-From: Shawn Lin <shawn.lin@rock-chips.com>
-Subject: [PATCH] mmc: dw_mmc: fix unmap sg twice when finding data err
-Date: Fri, 24 Jun 2016 15:39:52 +0800
-Message-ID: <1466753992-13727-1-git-send-email-shawn.lin@rock-chips.com>
+From: Prabu Thangamuthu <Prabu.T@synopsys.com>
+Subject: [PATCH v5] mmc: sdhci-pci: add Support of Synopsys DWC_MSHC IP
+Date: Fri, 24 Jun 2016 14:41:20 +0000
+Message-ID: <705D14B1C7978B40A723277C067CEDE2010A4D633F@IN01WEMBXB.internal.synopsys.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from lucky1.263xmail.com ([211.157.147.133]:34701 "EHLO
-	lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750943AbcFXHlU (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 24 Jun 2016 03:41:20 -0400
+Received: from smtprelay2.synopsys.com ([198.182.60.111]:48206 "EHLO
+	smtprelay.synopsys.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751380AbcFXOla convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 24 Jun 2016 10:41:30 -0400
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>
-Cc: Seung-Woo Kim <sw0312.kim@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Shawn Lin <shawn.lin@rock-chips.com>
+To: Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, Andrew Morton <akpm@linux-foundation.org>, Geert Uytterhoeven <geert@linux-m68k.org>, "davem@davemloft.net" <davem@davemloft.net>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Mauro Carvalho Chehab <mchehab@kernel.org>, Jiri Slaby <jslaby@suse.cz>, Guenter Roeck <linux@roeck-us.net>, Eric Anholt <eric@anholt.net>, Ludovic Desroches <ludovic.desroches@atmel.com>, Al Cooper <alcooperx@gmail.com>, Ben Hutchings <ben@decadent.org.uk>, Stefan Wahren <stefan.wahren@i2se.com>, Andrei Pistirica <andrei.pistirica@microchip.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+Cc: "prabu.t@synopsys.com" <prabu.t@synopsys.com>, Manjunath M Bettegowda <Manjunath.MB@synopsys.com>
 
-DATA_OVER(the same for RI/TI of IDMAC) interrupt may come
-up together with data error interrupts. If so, the interrupt
-routine set EVENT_DATA_ERR to the pending_events and schedule
-the tasklet but we may still fallback to the IDMAC interrupt
-case as the tasklet may come up a little late, namely right
-after the IDMAC interrupt checking. This will casue dw_mmc
-unmap sg twice. We can easily see it with CONFIG_DMA_API_DEBUG
-enabled.
+Patch to add Standard SD Host Controller Interface compliant
+Synopsys sdhci-dwc controller driver.
 
-WARNING: CPU: 0 PID: 0 at lib/dma-debug.c:1096 check_unmap+0x7bc/0xb38
-dwmmc_exynos 12200000.mmc: DMA-API: device driver tries to free DMA memory it
-has not allocated [device address=0x000000006d9d2200]
-[size=128 bytes]
-Modules linked in:
-CPU: 0 PID: 0 Comm: swapper/0 Not tainted 4.7.0-rc4 #26
-Hardware name: SAMSUNG EXYNOS (Flattened Device Tree)
-[<c0112b4c>] (unwind_backtrace) from [<c010d888>] (show_stack+0x20/0x24)
-[<c010d888>] (show_stack) from [<c03fab0c>] (dump_stack+0x80/0x94)
-[<c03fab0c>] (dump_stack) from [<c0123548>] (__warn+0xf8/0x110)
-[<c0123548>] (__warn) from [<c01235a8>] (warn_slowpath_fmt+0x48/0x50)
-[<c01235a8>] (warn_slowpath_fmt) from [<c042ac90>] (check_unmap+0x7bc/0xb38)
-[<c042ac90>] (check_unmap) from [<c042b25c>] (debug_dma_unmap_sg+0x118/0x148)
-[<c042b25c>] (debug_dma_unmap_sg) from [<c077512c>] (dw_mci_dma_cleanup+0x7c/0xb8)
-[<c077512c>] (dw_mci_dma_cleanup) from [<c0773f24>] (dw_mci_stop_dma+0x40/0x50)
-[<c0773f24>] (dw_mci_stop_dma) from [<c0777d04>] (dw_mci_tasklet_func+0x130/0x3b4)
-[<c0777d04>] (dw_mci_tasklet_func) from [<c0129760>] (tasklet_action+0xb4/0x150)
-[<c0129760>] (tasklet_action) from [<c0101674>] (__do_softirq+0xe4/0x3cc)
-[<c0101674>] (__do_softirq) from [<c0129030>] (irq_exit+0xd0/0x10c)
-[<c0129030>] (irq_exit) from [<c01778a0>] (__handle_domain_irq+0x90/0xfc)
-[<c01778a0>] (__handle_domain_irq) from [<c0101548>] (gic_handle_irq+0x64/0xa8)
-[<c0101548>] (gic_handle_irq) from [<c010e3d4>] (__irq_svc+0x54/0x90)
-Exception stack(0xc1101ef8 to 0xc1101f40)
-1ee0:                                                       00000001 00000000
-1f00: 00000000 c011b600 c1100000 c110753c 00000000 c11c3984 c11074d4 c1107548
-1f20: 00000000 c1101f54 c1101f58 c1101f48 c010a1fc c010a200 60000013 ffffffff
-[<c010e3d4>] (__irq_svc) from [<c010a200>] (arch_cpu_idle+0x48/0x4c)
-[<c010a200>] (arch_cpu_idle) from [<c01669d8>] (default_idle_call+0x30/0x3c)
-[<c01669d8>] (default_idle_call) from [<c0166d3c>] (cpu_startup_entry+0x358/0x3b4)
-[<c0166d3c>] (cpu_startup_entry) from [<c0aa6ab8>] (rest_init+0x94/0x98)
-[<c0aa6ab8>] (rest_init) from [<c1000d58>] (start_kernel+0x3a4/0x3b0)
-[<c1000d58>] (start_kernel) from [<4000807c>] (0x4000807c)
----[ end trace 256f83eed365daf0 ]---
-
-Reported-by: Seung-Woo Kim <sw0312.kim@samsung.com>
-Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
+Signed-off-by: Prabu Thangamuthu <prabu.t@synopsys.com>
 ---
+Change log v5:
+	-Updated review comments.
 
- drivers/mmc/host/dw_mmc.c | 6 ++++--
- 1 file changed, 4 insertions(+), 2 deletions(-)
+Change log v4:
+	-Updated review comments to optimize the code.
 
-diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index 8012858..7e88541 100644
---- a/drivers/mmc/host/dw_mmc.c
-+++ b/drivers/mmc/host/dw_mmc.c
-@@ -2473,7 +2473,8 @@ static irqreturn_t dw_mci_interrupt(int irq, void *dev_id)
- 			mci_writel(host, IDSTS64, SDMMC_IDMAC_INT_TI |
- 							SDMMC_IDMAC_INT_RI);
- 			mci_writel(host, IDSTS64, SDMMC_IDMAC_INT_NI);
--			host->dma_ops->complete((void *)host);
-+			if (!test_bit(EVENT_DATA_ERROR, &host->pending_events))
-+				host->dma_ops->complete((void *)host);
- 		}
- 	} else {
- 		pending = mci_readl(host, IDSTS);
-@@ -2481,7 +2482,8 @@ static irqreturn_t dw_mci_interrupt(int irq, void *dev_id)
- 			mci_writel(host, IDSTS, SDMMC_IDMAC_INT_TI |
- 							SDMMC_IDMAC_INT_RI);
- 			mci_writel(host, IDSTS, SDMMC_IDMAC_INT_NI);
--			host->dma_ops->complete((void *)host);
-+			if (!test_bit(EVENT_DATA_ERROR, &host->pending_events))
-+				host->dma_ops->complete((void *)host);
- 		}
- 	}
+Change log v3:
+	-Removed unused code.
+	-Updated review comments.
+
+ MAINTAINERS                       |   7 ++
+ drivers/mmc/host/Makefile         |   3 +-
+ drivers/mmc/host/sdhci-pci-core.c |  14 +++
+ drivers/mmc/host/sdhci-pci-dwc.c  | 238 ++++++++++++++++++++++++++++++++++++++
+ drivers/mmc/host/sdhci-pci-dwc.h  |  55 +++++++++
+ 5 files changed, 316 insertions(+), 1 deletion(-)
+ create mode 100644 drivers/mmc/host/sdhci-pci-dwc.c
+ create mode 100644 drivers/mmc/host/sdhci-pci-dwc.h
+
+diff --git a/MAINTAINERS b/MAINTAINERS
+index eff1037..e5c36e8 100644
+--- a/MAINTAINERS
++++ b/MAINTAINERS
+@@ -10162,6 +10162,13 @@ S:	Maintained
+ F:	include/linux/mmc/dw_mmc.h
+ F:	drivers/mmc/host/dw_mmc*
  
++SYNOPSYS SDHCI COMPLIANT DWC MSHC DRIVER
++M:	Prabu Thangamuthu <prabu.t@synopsys.com>
++M:	Manjunath M B <manjumb@synopsys.com>
++L:	linux-mmc@vger.kernel.org
++S:	Maintained
++F:	drivers/mmc/host/sdhci-pci-dwc*
++
+ SYSTEM TRACE MODULE CLASS
+ M:	Alexander Shishkin <alexander.shishkin@linux.intel.com>
+ S:	Maintained
+diff --git a/drivers/mmc/host/Makefile b/drivers/mmc/host/Makefile
+index e2bdaaf..c5331b8 100644
+--- a/drivers/mmc/host/Makefile
++++ b/drivers/mmc/host/Makefile
+@@ -9,7 +9,8 @@ obj-$(CONFIG_MMC_MXC)		+= mxcmmc.o
+ obj-$(CONFIG_MMC_MXS)		+= mxs-mmc.o
+ obj-$(CONFIG_MMC_SDHCI)		+= sdhci.o
+ obj-$(CONFIG_MMC_SDHCI_PCI)	+= sdhci-pci.o
+-sdhci-pci-y			+= sdhci-pci-core.o sdhci-pci-o2micro.o
++sdhci-pci-y			+= sdhci-pci-core.o sdhci-pci-o2micro.o \
++				   sdhci-pci-dwc.o
+ obj-$(subst m,y,$(CONFIG_MMC_SDHCI_PCI))	+= sdhci-pci-data.o
+ obj-$(CONFIG_MMC_SDHCI_ACPI)	+= sdhci-acpi.o
+ obj-$(CONFIG_MMC_SDHCI_PXAV3)	+= sdhci-pxav3.o
+diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-pci-core.c
+index 5b03a7e..fc39ce5 100644
+--- a/drivers/mmc/host/sdhci-pci-core.c
++++ b/drivers/mmc/host/sdhci-pci-core.c
+@@ -31,6 +31,7 @@
+ #include "sdhci.h"
+ #include "sdhci-pci.h"
+ #include "sdhci-pci-o2micro.h"
++#include "sdhci-pci-dwc.h"
+ 
+ /*****************************************************************************\
+  *                                                                           *
+@@ -70,6 +71,11 @@ static int ricoh_mmc_resume(struct sdhci_pci_chip *chip)
+ 	msleep(500);
+ 	return 0;
+ }
++/* Synopsys SDHCI compliant Controller */
++static const struct sdhci_pci_fixes sdhci_snps = {
++	.probe_slot	= sdhci_pci_probe_slot_snps,
++	.quirks2	= SDHCI_QUIRK2_PRESET_VALUE_BROKEN,
++};
+ 
+ static const struct sdhci_pci_fixes sdhci_ricoh = {
+ 	.probe		= ricoh_probe,
+@@ -791,6 +797,14 @@ static const struct sdhci_pci_fixes sdhci_amd = {
+ 
+ static const struct pci_device_id pci_ids[] = {
+ 	{
++		.vendor		= PCI_VENDOR_ID_SYNOPSYS,
++		.device		= 0xc201, /* Device ID of sdhci-dwc on Haps51 */
++		.subvendor	= PCI_ANY_ID,
++		.subdevice	= PCI_ANY_ID,
++		.driver_data	= (kernel_ulong_t)&sdhci_snps,
++	},
++
++	{
+ 		.vendor		= PCI_VENDOR_ID_RICOH,
+ 		.device		= PCI_DEVICE_ID_RICOH_R5C822,
+ 		.subvendor	= PCI_ANY_ID,
+diff --git a/drivers/mmc/host/sdhci-pci-dwc.c b/drivers/mmc/host/sdhci-pci-dwc.c
+new file mode 100644
+index 0000000..374fb8a
+--- /dev/null
++++ b/drivers/mmc/host/sdhci-pci-dwc.c
+@@ -0,0 +1,238 @@
++/*
++ * Copyright (C) 2016 Synopsys, Inc.
++ *
++ * Authors:
++ *	Manjunath M B		<manjumb@synopsys.com>
++ *	Prabu Thangamuthu	<prabu.t@synopsys.com>
++ *
++ * This software is licensed under the terms of the GNU General Public
++ * License version 2, as published by the Free Software Foundation, and
++ * may be copied, distributed, and modified under those terms.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ *
++ */
++
++#include <linux/pci.h>
++#include <linux/delay.h>
++#include <linux/module.h>
++#include <linux/moduleparam.h>
++
++#include "sdhci.h"
++#include "sdhci-pci.h"
++#include "sdhci-pci-dwc.h"
++
++/* Hardware specific clock handling */
++static void snps_reset_dcm(struct sdhci_host *host, u32 mask, u8 reset)
++{
++	u16 vendor_ptr;
++	u32 reg;
++
++	vendor_ptr = sdhci_readw(host, SDHCI_UHS2_VENDOR);
++
++	reg = sdhci_readl(host, (SDHC_GPIO_OUT + vendor_ptr));
++
++	if (reset == 1)
++		reg |= mask;
++	else
++		reg &= ~mask;
++
++	sdhci_writel(host, reg, (SDHC_GPIO_OUT + vendor_ptr));
++}
++
++static void sdhci_set_clock_snps(struct sdhci_host *host, u32 clock)
++{
++	u8 div;
++	u8 mul;
++	u8 timeout;
++	u16 clk;
++	u16 vendor_ptr;
++	u16 mul_div_val;
++	u32 reg;
++
++	/*
++	 * If clock is less than 25MHz, divided clock is used.
++	 * For divided clock, we can use the standard sdhci_set_clock().
++	 * For clock above 25MHz, DRP clock is used.
++	 * Here, we cannot use sdhci_set_clock(), we need to program
++	 * TX RX CLOCK DCM DRP for appropriate clock.
++	 */
++	if (clock <= 25000000) {
++		/* Then call standard set_clock */
++		sdhci_set_clock(host, clock);
++		return;
++	}
++
++	host->mmc->actual_clock = 0;
++	vendor_ptr = sdhci_readw(host, SDHCI_UHS2_VENDOR);
++
++	/* Select un-phase shifted clock before reset Tx Tuning DCM */
++	reg = sdhci_readl(host, (SDHC_GPIO_OUT + vendor_ptr));
++	reg &= ~SDHC_TX_CLK_SEL_TUNED;
++	sdhci_writel(host, reg, (SDHC_GPIO_OUT + vendor_ptr));
++	/* Wait for 10ms to get stable clock output from Mux */
++	mdelay(10);
++
++	sdhci_writew(host, 0, SDHCI_CLOCK_CONTROL);
++
++	/*
++	 * As minimum Multiplier value needed for DRP is 0x1,
++	 * Choose the Mulitplier value to be 0x1.
++	 */
++	mul = 0x1;
++	for (div = 1; div <= 32; div++) {
++		if ((host->max_clk * mul / div)
++				<= clock)
++			break;
++	}
++
++	host->mmc->actual_clock = (host->max_clk * mul) / div;
++	/*
++	 * Program the DCM DRP
++	 * Step 1: Assert DCM Reset
++	 * Step 2: Program the mul and div values in DRP
++	 * Step 3: Read from DRP base 0x00 to restore DCM output as per
++	 * www.xilinx.com/support/documentation/user_guides/ug191.pdf
++	 * Step 4: De-Assert reset to DCM
++	 */
++	snps_reset_dcm(host, SDHC_CARD_TX_CLK_DCM_RST, 1);
++
++	mul_div_val = (mul << 8) | div;
++	sdhci_writew(host, mul_div_val, TXRX_CLK_DCM_MUL_DIV_DRP);
++	sdhci_readl(host, TXRX_CLK_DCM_DRP_BASE_51);
++
++	snps_reset_dcm(host, SDHC_CARD_TX_CLK_DCM_RST, 0);
++
++	/* Set Programmable Clock Mode in the Clock Control register. */
++	clk = SDHCI_PROG_CLOCK_MODE | SDHCI_CLOCK_INT_EN;
++	sdhci_writew(host, clk, SDHCI_CLOCK_CONTROL);
++
++	/* Wait max 20 ms */
++	timeout = 20;
++	while (!((clk = sdhci_readw(host, SDHCI_CLOCK_CONTROL))
++				& SDHCI_CLOCK_INT_STABLE)) {
++		if (timeout == 0) {
++			pr_err("%s: Internal clock never stabilised\n",
++					mmc_hostname(host->mmc));
++			return;
++		}
++		timeout--;
++		mdelay(1);
++	}
++
++	clk |= SDHCI_CLOCK_CARD_EN;
++	sdhci_writew(host, clk, SDHCI_CLOCK_CONTROL);
++
++	/*
++	 * This Clock might have affected the TX CLOCK DCM
++	 * and RX CLOCK DCM which are used for Phase control.
++	 * Reset both DCM's for proper output.
++	 *
++	 * Step 1: Assert reset to DCM.
++	 * Step 2: De-Assert reset to DCM.
++	 */
++	snps_reset_dcm(host, SDHC_TUNING_TX_CLK_DCM_RST |
++			SDHC_TUNING_RX_CLK_DCM_RST, 1);
++
++	/* Wait for 10ms to get stable output from Mux */
++	mdelay(10);
++	snps_reset_dcm(host, SDHC_TUNING_TX_CLK_DCM_RST |
++			SDHC_TUNING_RX_CLK_DCM_RST, 0);
++
++	/* Select working phase value if clock is <= 50MHz */
++	if (clock <= 50000000) {
++		/* Change the Tx Phase value here */
++		reg = sdhci_readl(host, (SDHC_GPIO_OUT + vendor_ptr));
++		reg |= (SDHC_TUNING_TX_CLK_SEL_MASK &
++				(SDHC_DEF_TX_CLK_PH_VAL <<
++				 SDHC_TUNING_TX_CLK_SEL_SHIFT));
++
++		sdhci_writel(host, reg, (SDHC_GPIO_OUT + vendor_ptr));
++		/* Wait for 10ms to get stable clock output from Mux */
++		mdelay(10);
++
++		/* Program to select phase shifted clock */
++		reg |= SDHC_TX_CLK_SEL_TUNED;
++		sdhci_writel(host, reg, (SDHC_GPIO_OUT + vendor_ptr));
++
++		/*
++		 * For 50Mhz, tuning is not possible.
++		 * Let's fix the sampling Phase of Rx Clock here.
++		 */
++		reg = sdhci_readl(host, (SDHC_DBOUNCE + vendor_ptr));
++		reg &= ~SDHC_TUNING_RX_CLK_SEL_MASK;
++		reg |= (SDHC_TUNING_RX_CLK_SEL_MASK &
++				SDHC_DEF_RX_CLK_PH_VAL);
++		sdhci_writel(host, reg, (SDHC_DBOUNCE + vendor_ptr));
++	}
++	/* Wait for 10ms to get stable clock output from Mux */
++	mdelay(10);
++}
++
++static int snps_init_clock(struct sdhci_host *host)
++{
++	u16 mul_div_val;
++
++	/*
++	 * Configure the BCLK DRP to get 100 MHZ Clock
++	 * To get 100MHz from 100MHz input freq,
++	 * mul=1 and div=1
++	 * Formula: output_clock = (input clock * mul) / div
++	 *
++	 * Program the DCM DRP
++	 * Step 1: Assert DCM Reset
++	 * Step 2: Program the mul and div values in DRP
++	 * Step 3: Read from DRP base 0x00 to restore DCM output as per
++	 * www.xilinx.com/support/documentation/user_guides/ug191.pdf
++	 * Step 4: De-Assert reset to DCM
++	 */
++	snps_reset_dcm(host, SDHC_BCLK_DCM_RST, 1);
++
++	mul_div_val = 0x0101;
++	sdhci_writew(host, mul_div_val, BCLK_DCM_MUL_DIV_DRP);
++	sdhci_readl(host, BCLK_DCM_DRP_BASE_51);
++
++	snps_reset_dcm(host, SDHC_BCLK_DCM_RST, 0);
++
++	/*
++	 * By Default Clocks to Controller are OFF.
++	 * Before stack applies reset; we need to turn on the clock
++	 */
++	sdhci_writew(host, SDHCI_CLOCK_INT_EN, SDHCI_CLOCK_CONTROL);
++
++	return 0;
++
++}
++static struct sdhci_ops sdhci_pci_ops_snps = {
++	.set_clock	= sdhci_set_clock_snps,
++};
++
++int sdhci_pci_probe_slot_snps(struct sdhci_pci_slot *slot)
++{
++	int ret = 0;
++	struct sdhci_host *host;
++	const struct sdhci_ops *sdhci_pci_ops;	/* Low level hw interface */
++
++	host = slot->host;
++	sdhci_pci_ops = host->ops;
++
++	sdhci_pci_ops_snps.enable_dma		= sdhci_pci_ops->enable_dma;
++	sdhci_pci_ops_snps.set_bus_width	= sdhci_pci_ops->set_bus_width;
++	sdhci_pci_ops_snps.reset		= sdhci_pci_ops->reset;
++	sdhci_pci_ops_snps.set_uhs_signaling	=
++					sdhci_pci_ops->set_uhs_signaling;
++	sdhci_pci_ops_snps.hw_reset		= sdhci_pci_ops->hw_reset;
++	sdhci_pci_ops_snps.select_drive_strength =
++					sdhci_pci_ops->select_drive_strength;
++
++	host->ops = &sdhci_pci_ops_snps;
++
++	/* Board specific clock initialization */
++	ret = snps_init_clock(host);
++
++	return ret;
++}
++EXPORT_SYMBOL_GPL(sdhci_pci_probe_slot_snps);
+diff --git a/drivers/mmc/host/sdhci-pci-dwc.h b/drivers/mmc/host/sdhci-pci-dwc.h
+new file mode 100644
+index 0000000..02e2213
+--- /dev/null
++++ b/drivers/mmc/host/sdhci-pci-dwc.h
+@@ -0,0 +1,55 @@
++/*
++ * Copyright (C) 2016 Synopsys, Inc.
++ *
++ * Author: Manjunath M B <manjumb@synopsys.com>
++ *
++ * This software is licensed under the terms of the GNU General Public
++ * License version 2, as published by the Free Software Foundation, and
++ * may be copied, distributed, and modified under those terms.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ *
++ */
++
++#ifndef __SDHCI_DWC_MSHC_PCI_H__
++#define __SDHCI_DWC_MSHC_PCI_H__
++
++#include "sdhci-pci.h"
++
++#define SDHCI_UHS2_VENDOR	0xE8
++
++#define DRIVER_NAME "sdhci-pci-dwc"
++#define SDHC_DEF_TX_CLK_PH_VAL  4
++#define SDHC_DEF_RX_CLK_PH_VAL  4
++
++/* Synopsys Vendor Specific Registers */
++#define SDHC_DBOUNCE                           0x08
++#define SDHC_TUNING_RX_CLK_SEL_MASK            0x000000FF
++#define SDHC_GPIO_OUT                          0x34
++/* HAPS 51 Based implementation */
++#define SDHC_BCLK_DCM_RST                      0x00000001
++#define SDHC_CARD_TX_CLK_DCM_RST               0x00000002
++#define SDHC_TUNING_RX_CLK_DCM_RST             0x00000004
++#define SDHC_TUNING_TX_CLK_DCM_RST             0x00000008
++#define SDHC_TUNING_TX_CLK_SEL_MASK            0x00000070
++#define SDHC_TUNING_TX_CLK_SEL_SHIFT           4
++#define SDHC_TX_CLK_SEL_TUNED                  0x00000080
++
++/* Offset of BCLK DCM DRP Attributes */
++/* Every attribute is of 16 bit wide */
++#define BCLK_DCM_DRP_BASE_51                   0x1000
++
++#define BCLK_DCM_MUL_DIV_DRP                   0x1050
++#define MUL_MASK_DRP                           0xFF00
++#define DIV_MASK_DRP                           0x00FF
++
++/* Offset of TX and RX CLK DCM DRP */
++#define TXRX_CLK_DCM_DRP_BASE_51               0x2000
++#define TXRX_CLK_DCM_MUL_DIV_DRP               0x2050
++
++int sdhci_pci_probe_slot_snps(struct sdhci_pci_slot *slot);
++
++#endif
 -- 
-2.3.7
-
+1.9.1
 
