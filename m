@@ -1,124 +1,133 @@
-From: Georgi Djakov <georgi.djakov@linaro.org>
-Subject: [PATCH] mmc: sdhci-msm: Add support for UHS cards
-Date: Fri, 24 Jun 2016 18:07:14 +0300
-Message-ID: <1466780834-1041-1-git-send-email-georgi.djakov@linaro.org>
-Return-path: <linux-arm-msm-owner@vger.kernel.org>
-Sender: linux-arm-msm-owner@vger.kernel.org
-To: ulf.hansson@linaro.org
-Cc: adrian.hunter@intel.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org, georgi.djakov@linaro.org
+From: Rob Herring <robh@kernel.org>
+Subject: Re: [PATCH 08/12] doc: binding: pwrseq-usb-generic: add binding doc
+ for generic usb power sequence driver
+Date: Fri, 24 Jun 2016 10:25:05 -0500
+Message-ID: <CAL_Jsq+1r0r1NONoyeU5=jSJR9tEV=1rN8CidWroqA+a_OrYAw@mail.gmail.com>
+References: <1466158165-9380-1-git-send-email-peter.chen@nxp.com>
+ <1466158165-9380-9-git-send-email-peter.chen@nxp.com> <CAL_JsqLvs0s2TyfqPM5vtmyY81_X84VjCGjsGYbTgT4syOfp9Q@mail.gmail.com>
+ <20160620112651.GA26936@shlinux2> <20160620161607.GA11427@rob-hp-laptop>
+ <20160621021117.GD26936@shlinux2> <20160621212653.GA22764@rob-hp-laptop> <CAPDyKFroH6AGObKGZoZ-6=Sb3Zii6gXdm_wO3fuc2BAx6fpFHg@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-pm-owner@vger.kernel.org>
+In-Reply-To: <CAPDyKFroH6AGObKGZoZ-6=Sb3Zii6gXdm_wO3fuc2BAx6fpFHg@mail.gmail.com>
+Sender: linux-pm-owner@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Peter Chen <hzpeterchen@gmail.com>, Peter Chen <peter.chen@nxp.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Alan Stern <stern@rowland.harvard.edu>, Mark Brown <broonie@kernel.org>, Sebastian Reichel <sre@kernel.org>, Mark Rutland <mark.rutland@arm.com>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, =?UTF-8?Q?Krzysztof_Koz=C5=82owski?= <k.kozlowski@samsung.com>, Stephen Boyd <stephen.boyd@linaro.org>, oscar@naiandei.net, Arnd Bergmann <arnd@arndb.de>, Pawel Moll <pawel.moll@arm.com>, "linux-pm@vger.kernel.org" <linux-pm@vger.kernel.org>, Sascha Hauer <s.hauer@pengutronix.de>, Linux USB List <linux-usb@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "Maciej S. Szmigiero" <mail@maciej.szmigiero.name>, troy.kisky@boundarydevices.com, Javier Martinez Canillas <javier@osg.samsung.com>, Philipp Zabel <p.zabel@pengutronix.de>
 List-Id: linux-mmc@vger.kernel.org
 
-Enabling support for ultra high speed mode cards requires some
-voltage switching and interaction with the PMIC via a special
-power IRQ. Add support for this.
+On Wed, Jun 22, 2016 at 4:09 AM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+> On 21 June 2016 at 23:26, Rob Herring <robh@kernel.org> wrote:
+>> On Tue, Jun 21, 2016 at 10:11:17AM +0800, Peter Chen wrote:
+>>> On Mon, Jun 20, 2016 at 11:16:07AM -0500, Rob Herring wrote:
+>>> > On Mon, Jun 20, 2016 at 07:26:51PM +0800, Peter Chen wrote:
+>>> > > On Fri, Jun 17, 2016 at 12:16:48PM -0500, Rob Herring wrote:
+>>> > > > On Fri, Jun 17, 2016 at 5:09 AM, Peter Chen <peter.chen@nxp.com> wrote:
+>>> > > > > Add binding doc for generic usb power sequence driver, and update
+>>> > > > > generic usb device binding-doc accordingly.
+>>
+>> [...]
+>>
+>>> > >           clocks = <&clks IMX6SX_CLK_CKO>;
+>>> > >
+>>> > >           #address-cells = <1>;
+>>> > >           #size-cells = <0>;
+>>> > >           ethernet: asix@1 {
+>>> > >                   compatible = "usbb95,1708";
+>>> > >                   reg = <1>;
+>>> > >
+>>> > >                   power-sequence;
+>>> > >                   reset-gpios = <&gpio4 6 GPIO_ACTIVE_LOW>; /* ethernet_rst */
+>>> > >                   reset-duration-us = <15>;
+>>> > >                   clocks = <&clks IMX6SX_CLK_IPG>;
+>>> > >           };
+>>> > >   };
+>>> > > };
+>>> > >
+>>> > > If the node has property "power-sequence", the pwrseq core will create
+>>> > > related platform device, and the driver under pwrseq driver will handle
+>>> > > power sequence stuffs.
+>>> >
+>>> > This I have issue with. If you are creating a platform device here, you
+>>> > are trying to work-around limitations in the linux driver model.
+>
+> I somewhat understand your point.
+>
+> Although, having the option to use a driver (which requires a device)
+> has turned out to be quite convenient from many aspects - at least in
+> the mmc case.
+>
+> Certainly one can do without it, but in the end using a driver avoids
+> open coding.
 
-Signed-off-by: Georgi Djakov <georgi.djakov@linaro.org>
----
- drivers/mmc/host/sdhci-msm.c |   66 ++++++++++++++++++++++++++++++++++++++++++
- 1 file changed, 66 insertions(+)
+Why would it be open coded? Just create library functions to parse the
+node and implement the generic pwr-seq steps.
 
-diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
-index 0653fe730150..ac5700233e12 100644
---- a/drivers/mmc/host/sdhci-msm.c
-+++ b/drivers/mmc/host/sdhci-msm.c
-@@ -32,6 +32,21 @@
- #define CORE_POWER		0x0
- #define CORE_SW_RST		BIT(7)
- 
-+#define CORE_PWRCTL_STATUS	0xdc
-+#define CORE_PWRCTL_MASK	0xe0
-+#define CORE_PWRCTL_CLEAR	0xe4
-+#define CORE_PWRCTL_CTL		0xe8
-+#define CORE_PWRCTL_BUS_OFF	BIT(0)
-+#define CORE_PWRCTL_BUS_ON	BIT(1)
-+#define CORE_PWRCTL_IO_LOW	BIT(2)
-+#define CORE_PWRCTL_IO_HIGH	BIT(3)
-+#define CORE_PWRCTL_BUS_SUCCESS BIT(0)
-+#define CORE_PWRCTL_IO_SUCCESS	BIT(2)
-+#define REQ_BUS_OFF		BIT(0)
-+#define REQ_BUS_ON		BIT(1)
-+#define REQ_IO_LOW		BIT(2)
-+#define REQ_IO_HIGH		BIT(3)
-+#define INT_MASK		0xf
- #define MAX_PHASES		16
- #define CORE_DLL_LOCK		BIT(7)
- #define CORE_DLL_EN		BIT(16)
-@@ -56,6 +71,7 @@
- struct sdhci_msm_host {
- 	struct platform_device *pdev;
- 	void __iomem *core_mem;	/* MSM SDCC mapped address */
-+	int pwr_irq;		/* power irq */
- 	struct clk *clk;	/* main SD/MMC bus clock */
- 	struct clk *pclk;	/* SDHC peripheral bus clock */
- 	struct clk *bus_clk;	/* SDHC bus voter clock */
-@@ -410,6 +426,39 @@ retry:
- 	return rc;
- }
- 
-+static void sdhci_msm_voltage_switch(struct sdhci_host *host)
-+{
-+	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-+	struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
-+	u32 irq_status, irq_ack = 0;
-+
-+	irq_status = readl_relaxed(msm_host->core_mem + CORE_PWRCTL_STATUS);
-+	irq_status &= INT_MASK;
-+
-+	writel_relaxed(irq_status, msm_host->core_mem + CORE_PWRCTL_CLEAR);
-+
-+	if (irq_status & (CORE_PWRCTL_BUS_ON | CORE_PWRCTL_BUS_OFF))
-+		irq_ack |= CORE_PWRCTL_BUS_SUCCESS;
-+	if (irq_status & (CORE_PWRCTL_IO_LOW | CORE_PWRCTL_IO_HIGH))
-+		irq_ack |= CORE_PWRCTL_IO_SUCCESS;
-+
-+	/*
-+	 * The driver has to acknowledge the interrupt, switch voltages and
-+	 * report back if it succeded or not to this register. The voltage
-+	 * switches are handled by the sdhci core, so just report success.
-+	 */
-+	writel_relaxed(irq_ack, msm_host->core_mem + CORE_PWRCTL_CTL);
-+}
-+
-+static irqreturn_t sdhci_msm_pwr_irq(int irq, void *data)
-+{
-+	struct sdhci_host *host = (struct sdhci_host *)data;
-+
-+	sdhci_msm_voltage_switch(host);
-+
-+	return IRQ_HANDLED;
-+}
-+
- static const struct of_device_id sdhci_msm_dt_match[] = {
- 	{ .compatible = "qcom,sdhci-msm-v4" },
- 	{},
-@@ -423,6 +472,7 @@ static const struct sdhci_ops sdhci_msm_ops = {
- 	.set_clock = sdhci_set_clock,
- 	.set_bus_width = sdhci_set_bus_width,
- 	.set_uhs_signaling = sdhci_set_uhs_signaling,
-+	.voltage_switch = sdhci_msm_voltage_switch,
- };
- 
- static const struct sdhci_pltfm_data sdhci_msm_pdata = {
-@@ -545,6 +595,22 @@ static int sdhci_msm_probe(struct platform_device *pdev)
- 			       CORE_VENDOR_SPEC_CAPABILITIES0);
- 	}
- 
-+	/* Setup IRQ for handling power/voltage tasks with PMIC */
-+	msm_host->pwr_irq = platform_get_irq_byname(pdev, "pwr_irq");
-+	if (msm_host->pwr_irq < 0) {
-+		dev_err(&pdev->dev, "Get pwr_irq failed (%d)\n",
-+			msm_host->pwr_irq);
-+		goto clk_disable;
-+	}
-+
-+	ret = devm_request_threaded_irq(&pdev->dev, msm_host->pwr_irq, NULL,
-+					sdhci_msm_pwr_irq, IRQF_ONESHOT,
-+					dev_name(&pdev->dev), host);
-+	if (ret) {
-+		dev_err(&pdev->dev, "Request IRQ failed (%d)\n", ret);
-+		goto clk_disable;
-+	}
-+
- 	ret = sdhci_add_host(host);
- 	if (ret)
- 		goto clk_disable;
+>>> My current solution like below, but it seems you didn't agree with that.
+>>> I just double confirm here, if you don't, I give up the solution for
+>>> using generic power sequence framework.
+>>>
+>>> In drivers/usb/core/hub.c
+>>>
+>>>       for_each_child_of_node(parent->of_node, node) {
+>>>               hdev_pwrseq = pwrseq_alloc(node, "usb_pwrseq_generic");
+>>>               if (!IS_ERR_OR_NULL(hdev_pwrseq)) {
+>>>                       pwrseq_node = kzalloc(sizeof(pwrseq_node), GFP_KERNEL);
+>>>                       if (!pwrseq_node) {
+>>>                               ret = -ENOMEM;
+>>>                               goto err1;
+>>>                       }
+>>>                       /* power on sequence */
+>>>                       ret = pwrseq_pre_power_on(hdev_pwrseq);
+>>
+>> Why does this function need to do anything more than:
+>>
+>> - Check if the child has a "power-sequence" property
+>> - Get the "reset-gpios" GPIO
+>> - Assert reset for specified/default time
+>> - Deassert reset
+>>
+>> Then continue on as normal. That seems straight-forward to me.
+>>
+>> There is no reason you need a platform device in the mix. Perhaps trying
+>> to move the MMC pwr-seq code is pointless as it adds needless
+>> complexity.
+>
+> Complexity?
+>
+> The problem we are tying to solve, is to make the various platform/SoC
+> specific power sequences to be able to live in generic drivers.
+>
+> One could decide to encode the sequences inside the driver code
+> itself, but it will soon turn into a mess and more importantly, lots
+> of open coding as to support different platforms/SoCs. To most kernel
+> hackers I don't think this is an option to consider.
+
+I'm not proposing open coding, but having generic library functions.
+I'm not saying the mmc pwr-seq has to change from being a driver
+either. Leave it as is. I'm only talking about Krzysztof's new
+proposal.
+
+> The MMC pwr-seq code/drivers tries to address these issues - in a
+> somewhat generic way.
+> Initially we have decided to start with only a few flavours of
+> supported sequences and so far these have been sufficient.
+
+Only a few because we've pushed back against defining state machines in DT.
+
+> Finally, I am indeed concerned that it so hard to agree on a solution
+> to deal with generic power sequences. There have been many attempts
+> throughout the last ~4-5 years, but peoples strong opinions about
+> different approaches mad them all fail. Isn't it time to finally just
+> pick a solution and stick with it, even if it doesn't meet all peoples
+> expectations?
+
+No. I'm pretty that is not how kernel development works. Features get
+merged when all are happy (or not paying attention).
+
+>From what I recall, all attempts have worked around the problem that
+the driver model has no way to either force probe or provide a
+pre-probe hook on probeable buses. This then leads to the work-around
+defining the DT binding.
+
+Rob
