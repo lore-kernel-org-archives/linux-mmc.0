@@ -1,126 +1,136 @@
 From: Ritesh Harjani <riteshh@codeaurora.org>
-Subject: Re: [PATCH RFC 09/10] mmc: cmdq-host: add halt support to command
- queue host
-Date: Mon, 27 Jun 2016 12:18:18 +0530
-Message-ID: <ec0915fb-e40f-724d-4eaf-7d70f187c9b7@codeaurora.org>
+Subject: Re: [PATCH RFC 01/10] mmc: core: Add support to read command queue
+ parameters
+Date: Mon, 27 Jun 2016 13:29:14 +0530
+Message-ID: <1bca01b3-28ba-d70b-2935-29d2cdb999d4@codeaurora.org>
 References: <1465995674-15816-1-git-send-email-riteshh@codeaurora.org>
- <1465995674-15816-10-git-send-email-riteshh@codeaurora.org>
- <1321eec0-fbd1-1e05-4842-ff80b00a95d6@rock-chips.com>
+ <1465995674-15816-2-git-send-email-riteshh@codeaurora.org>
+ <00b85d36-baf1-5bc3-db99-ac6c2cc0b975@rock-chips.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8;
-	format=flowed
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp.codeaurora.org ([198.145.29.96]:50095 "EHLO
+Received: from smtp.codeaurora.org ([198.145.29.96]:53848 "EHLO
 	smtp.codeaurora.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751873AbcF0Gs1 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 27 Jun 2016 02:48:27 -0400
-In-Reply-To: <1321eec0-fbd1-1e05-4842-ff80b00a95d6@rock-chips.com>
+	with ESMTP id S1751664AbcF0H7Y (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 27 Jun 2016 03:59:24 -0400
+In-Reply-To: <00b85d36-baf1-5bc3-db99-ac6c2cc0b975@rock-chips.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Shawn Lin <shawn.lin@rock-chips.com>, ulf.hansson@linaro.org, linux-mmc@vger.kernel.org
-Cc: adrian.hunter@intel.com, alex.lemberg@sandisk.com, mateusz.nowak@intel.com, Yuliy.Izrailov@sandisk.com, jh80.chung@samsung.com, dongas86@gmail.com, asutoshd@codeaurora.org, zhangfei.gao@gmail.com, sthumma@codeaurora.org, kdorfman@codeaurora.org, david.griego@linaro.org, stummala@codeaurora.org, venkatg@codeaurora.org
+Cc: adrian.hunter@intel.com, alex.lemberg@sandisk.com, mateusz.nowak@intel.com, Yuliy.Izrailov@sandisk.com, jh80.chung@samsung.com, dongas86@gmail.com, asutoshd@codeaurora.org, zhangfei.gao@gmail.com, sthumma@codeaurora.org, kdorfman@codeaurora.org, david.griego@linaro.org, stummala@codeaurora.org, venkatg@codeaurora.org, Subhash Jadavani <subhashj@codeaurora.org>
 
-Hi,
+Hi Shawn,
 
-
-On 6/17/2016 2:21 PM, Shawn Lin wrote:
-> =E5=9C=A8 2016/6/15 21:01, Ritesh Harjani =E5=86=99=E9=81=93:
+On 6/16/2016 1:42 PM, Shawn Lin wrote:
+> On 2016/6/15 21:01, Ritesh Harjani wrote:
 >> From: Asutosh Das <asutoshd@codeaurora.org>
 >>
->> Halt can be used in error cases to get control of the
->> bus. This is used to remove a task from device queue
->> and/or other recovery mechanisms.
->
-> where to ues it? cmdq_irq or sdhci_irq?
-Below cmdq_halt will be used by higher
-layers to get legacy bus control to send legacy commands.
-Like during clock-scaling, we may need to send tuning commands
-for which we may wait for the device queue to be empty and then halt
-the controller to send legacy tuning commands.
+>> eMMC cards with EXT_CSD version >= 7, optionally support command
+will change it here to "8"
 
-
->
+>> queuing feature as defined by JEDEC eMMC5.1. Add support for probing
+>> command queue feature for such type of cards.
 >>
+>> Signed-off-by: Sujit Reddy Thumma <sthumma@codeaurora.org>
 >> Signed-off-by: Asutosh Das <asutoshd@codeaurora.org>
 >> Signed-off-by: Venkat Gopalakrishnan <venkatg@codeaurora.org>
->> [riteshh@codeaurora.org: fixed merge conflicts]
->> Signed-off-by: Ritesh Harjani <riteshh@codeaurora.org>
+>> [subhashj@codeaurora.org: fixed trivial merge conflicts]
+>> Signed-off-by: Subhash Jadavani <subhashj@codeaurora.org>
 >> ---
->>  drivers/mmc/host/cmdq_hci.c | 35 ++++++++++++++++++++++++++++++++++=
-+
->>  1 file changed, 35 insertions(+)
+>>  drivers/mmc/core/mmc.c   | 18 ++++++++++++++++++
+>>  include/linux/mmc/card.h |  2 ++
+>>  include/linux/mmc/mmc.h  |  3 +++
+>>  3 files changed, 23 insertions(+)
 >>
->> diff --git a/drivers/mmc/host/cmdq_hci.c b/drivers/mmc/host/cmdq_hci=
-=2Ec
->> index 68c8e03..64be0ce 100644
->> --- a/drivers/mmc/host/cmdq_hci.c
->> +++ b/drivers/mmc/host/cmdq_hci.c
->> @@ -29,6 +29,9 @@
->>  #define DCMD_SLOT 31
->>  #define NUM_SLOTS 32
->>
->> +/* 1 sec */
->> +#define HALT_TIMEOUT_MS 1000
->> +
->>  static inline u8 *get_desc(struct cmdq_host *cq_host, u8 tag)
->>  {
->>      return cq_host->desc_base + (tag * cq_host->slot_sz);
->> @@ -570,11 +573,42 @@ irqreturn_t cmdq_irq(struct mmc_host *mmc, u32
->> intmask)
->>          cmdq_dumpregs(cq_host);
+>> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+>> index 4dbe3df..ff560e9 100644
+>> --- a/drivers/mmc/core/mmc.c
+>> +++ b/drivers/mmc/core/mmc.c
+>> @@ -578,6 +578,24 @@ static int mmc_decode_ext_csd(struct mmc_card
+>> *card, u8 *ext_csd)
+>>          card->ext_csd.data_sector_size = 512;
 >>      }
 >>
->> +    if (status & CQIS_HAC) {
->> +        /* halt is completed, wakeup waiting thread */
->> +        complete(&cq_host->halt_comp);
->> +    }
->> +
->>  out:
->>      return IRQ_HANDLED;
->>  }
->>  EXPORT_SYMBOL(cmdq_irq);
->>
->> +/* May sleep */
->> +static int cmdq_halt(struct mmc_host *mmc, bool halt)
->> +{
->> +    struct cmdq_host *cq_host =3D (struct cmdq_host
->> *)mmc_cmdq_private(mmc);
->> +    u32 val;
->> +
->> +    if (halt) {
->> +        cmdq_writel(cq_host, cmdq_readl(cq_host, CQCTL) | HALT,
->> +                CQCTL);
->> +        val =3D wait_for_completion_timeout(&cq_host->halt_comp,
->> +                      msecs_to_jiffies(HALT_TIMEOUT_MS));
->> +        /* halt done: re-enable legacy interrupts */
->> +        if (cq_host->ops->clear_set_irqs)
->> +            cq_host->ops->clear_set_irqs(mmc, false);
->> +
->> +        return val ? 0 : -ETIMEDOUT;
+>> +    if (card->ext_csd.rev >= 7) {
+>
+> Do you ever find one device claiming to support it with
+> ext_csd.rev to be 7?
+No, will change it to 8 (for 5.1 revision).
+
+
+>
+> I believe it should be 8 as 7 is for 5.0 and 5.01 which don't support
+> hw-cmdq.
+Yes, thanks for pointing out.
+
+>
+>> +        card->ext_csd.cmdq_support = ext_csd[EXT_CSD_CMDQ_SUPPORT];
+>> +        if (card->ext_csd.cmdq_support) {
+>> +            /*
+>> +             * Queue Depth = N + 1,
+>> +             * see JEDEC JESD84-B51 section 7.4.19
+>> +             */
+>> +            card->ext_csd.cmdq_depth =
+>> +                ext_csd[EXT_CSD_CMDQ_DEPTH] + 1;
+>> +            pr_info("%s: CMDQ supported: depth: %d\n",
+>> +                mmc_hostname(card->host),
+>> +                card->ext_csd.cmdq_depth);
+>
+> pr_debug may be more appropriate?
+Done.
+
+>
+>> +        }
 >> +    } else {
->> +        if (cq_host->ops->clear_set_irqs)
->> +            cq_host->ops->clear_set_irqs(mmc, true);
->> +        cmdq_writel(cq_host, cmdq_readl(cq_host, CQCTL) & ~HALT,
->> +                CQCTL);
+>> +        card->ext_csd.cmdq_support = 0;
+>> +        card->ext_csd.cmdq_depth = 0;
 >> +    }
+>
+> if the code fallback to here, card->ext_csd.cmdq_support must be
+> zero already, and the ext_csd is already set to zero which also
+> means you not need to zero it again here.
+since card->ext_csd is zero for uninitialized variables,
+we can remove these. Sure.
+
+>
 >> +
->> +    return 0;
->> +}
->> +
->>  static void cmdq_post_req(struct mmc_host *host, struct mmc_request
->> *mrq,
->>                int err)
->>  {
->> @@ -597,6 +631,7 @@ static const struct mmc_cmdq_host_ops
->> cmdq_host_ops =3D {
->>      .disable =3D cmdq_disable,
->>      .request =3D cmdq_request,
->>      .post_req =3D cmdq_post_req,
->> +    .halt =3D cmdq_halt,
->>  };
+>>      /* eMMC v5 or later */
+>>      if (card->ext_csd.rev >= 7) {
+>>          memcpy(card->ext_csd.fwrev, &ext_csd[EXT_CSD_FIRMWARE_VERSION],
+>> diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
+>> index eb0151b..f74db84 100644
+>> --- a/include/linux/mmc/card.h
+>> +++ b/include/linux/mmc/card.h
+>> @@ -118,6 +118,8 @@ struct mmc_ext_csd {
+>>      u8            raw_pwr_cl_ddr_200_360;    /* 253 */
+>>      u8            raw_bkops_status;    /* 246 */
+>>      u8            raw_sectors[4];        /* 212 - 4 bytes */
+>> +    u8            cmdq_depth;        /* 307 */
+>> +    u8            cmdq_support;        /* 308 */
 >>
->>  struct cmdq_host *cmdq_pltfm_init(struct platform_device *pdev)
+>>      unsigned int            feature_support;
+>>  #define MMC_DISCARD_FEATURE    BIT(0)                  /* CMD38
+>> feature */
+>> diff --git a/include/linux/mmc/mmc.h b/include/linux/mmc/mmc.h
+>> index 15f2c4a..1c0ae75 100644
+>> --- a/include/linux/mmc/mmc.h
+>> +++ b/include/linux/mmc/mmc.h
+>> @@ -330,6 +330,9 @@ struct _mmc_csd {
+>>  #define EXT_CSD_CACHE_SIZE        249    /* RO, 4 bytes */
+>>  #define EXT_CSD_PWR_CL_DDR_200_360    253    /* RO */
+>>  #define EXT_CSD_FIRMWARE_VERSION    254    /* RO, 8 bytes */
+>> +#define EXT_CSD_CMDQ_DEPTH        307    /* RO */
+>> +#define EXT_CSD_CMDQ_SUPPORT        308    /* RO */
+>> + #define EXT_CSD_TAG_UNIT_SIZE        498    /* RO */
+>
+> an invalid space here
+Done.
+
+>
+>>  #define EXT_CSD_SUPPORTED_MODE        493    /* RO */
+>>  #define EXT_CSD_TAG_UNIT_SIZE        498    /* RO */
+>>  #define EXT_CSD_DATA_TAG_SUPPORT    499    /* RO */
 >>
 >
 >
