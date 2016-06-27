@@ -1,50 +1,33 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 0/5] mmc: sh_mmcif: Various minor improvements
-Date: Mon, 27 Jun 2016 11:22:03 +0200
-Message-ID: <CAPDyKFr=38jCG=G=yTOiqhgXqNHCBvwh7L6FAC5N=KKY-UYfPw@mail.gmail.com>
-References: <1466514770-9462-1-git-send-email-ulf.hansson@linaro.org>
+From: "Winkler, Tomas" <tomas.winkler@intel.com>
+Subject: RE: [PATCH v4 7/8] mmc: block: register RPMB partition with the
+ RPMB subsystem
+Date: Mon, 27 Jun 2016 10:17:25 +0000
+Message-ID: <5B8DA87D05A7694D9FA63FD143655C1B54288DE2@hasmsx108.ger.corp.intel.com>
+References: <1464817292-5407-1-git-send-email-tomas.winkler@intel.com>
+ <1464817292-5407-8-git-send-email-tomas.winkler@intel.com>
+ <576B7F10.2000508@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wm0-f50.google.com ([74.125.82.50]:38440 "EHLO
-	mail-wm0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751738AbcF0JWG (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 27 Jun 2016 05:22:06 -0400
-Received: by mail-wm0-f50.google.com with SMTP id r201so105727296wme.1
-        for <linux-mmc@vger.kernel.org>; Mon, 27 Jun 2016 02:22:05 -0700 (PDT)
-In-Reply-To: <1466514770-9462-1-git-send-email-ulf.hansson@linaro.org>
+Received: from mga09.intel.com ([134.134.136.24]:37509 "EHLO mga09.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1750736AbcF0KRd convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 27 Jun 2016 06:17:33 -0400
+In-Reply-To: <576B7F10.2000508@intel.com>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc <linux-mmc@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>, Geert Uytterhoeven <geert+renesas@glider.be>, Nguyen Viet Dung <nv-dung@jinso.co.jp>, Magnus Damm <magnus.damm@gmail.com>, Simon Horman <horms@verge.net.au>, Baolin Wang <baolin.wang@linaro.org>
+To: "Hunter, Adrian" <adrian.hunter@intel.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Ulf Hansson <ulf.hansson@linaro.org>, James Bottomley <James.Bottomley@HansenPartnership.com>, "Martin K. Petersen" <martin.petersen@oracle.com>, Vinayak Holikatti <vinholikatti@gmail.com>, Andy Lutomirski <luto@kernel.org>, Arve Hj?nnev?g <arve@android.com>, Michael Ryleev <gmar@google.com>, Joao Pinto <Joao.Pinto@synopsys.com>, Christoph Hellwig <hch@lst.de>, Yaniv Gardi <ygardi@codeaurora.org>
+Cc: "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-scsi@vger.kernel.org" <linux-scsi@vger.kernel.org>, "Usyskin, Alexander" <alexander.usyskin@intel.com>
 
-On 21 June 2016 at 15:12, Ulf Hansson <ulf.hansson@linaro.org> wrote:
-> When looking for mmc drivers that has special treatmeant of the ERASE command,
-> the sh_mmcif driver is one of them, I took the opportunity to improve some of
-> that related code.
->
-> This is not tested on HW, so I would appreciate if someone that still cares
-> about this driver can do a quick test of these changes.
->
-> Ulf Hansson (5):
->   mmc: core: Allow hosts to specify non-support for SD commands
->   mmc: sh_mmcif: Enable MMC_CAP2_NO_SD and MMC_CAP2_NO_SDIO
->   mmc: sh_mmcif: Use response type to know when to enable busy detection
->   mmc: sh_mmcif: Inform the mmc core about the max busy timeout
->   mmc: sh_mmcif: Use a 10s timeout in the error recovery path
->
->  drivers/mmc/core/core.c     |  9 +++++---
->  drivers/mmc/host/sh_mmcif.c | 53 ++++++++++-----------------------------------
->  include/linux/mmc/host.h    |  1 +
->  3 files changed, 18 insertions(+), 45 deletions(-)
->
-> --
-> 1.9.1
->
+> 2;
+> 
+> This looks like it does not support 8KB writes added in v5.1 spec.  Can that be
+> supported?
 
-I decided to queue up this series to get it tested in next/kernelci.
+You are right there is not support for 8K packet, but the change should be simple. 
+I will update the patch.
+Thanks
+Tomas 
 
-If any objections, please let me know!
-
-Kind regards
-Uffe
