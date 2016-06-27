@@ -1,48 +1,119 @@
 From: Douglas Anderson <dianders@chromium.org>
-Subject: [PATCH 0/3] mmc: Fixes for 150 MHz Rockchip eMMC series
-Date: Mon, 27 Jun 2016 10:39:24 -0700
-Message-ID: <1467049167-14628-1-git-send-email-dianders@chromium.org>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pa0-f42.google.com ([209.85.220.42]:35715 "EHLO
-	mail-pa0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751827AbcF0Rjx (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 27 Jun 2016 13:39:53 -0400
-Received: by mail-pa0-f42.google.com with SMTP id hl6so60932575pac.2
-        for <linux-mmc@vger.kernel.org>; Mon, 27 Jun 2016 10:39:53 -0700 (PDT)
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Subject: [PATCH 2/3] phy: rockchip-emmc: Be tolerant to card clock of 0 in power on
+Date: Mon, 27 Jun 2016 10:39:26 -0700
+Message-ID: <1467049167-14628-3-git-send-email-dianders@chromium.org>
+References: <1467049167-14628-1-git-send-email-dianders@chromium.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1467049167-14628-1-git-send-email-dianders@chromium.org>
+Sender: linux-kernel-owner@vger.kernel.org
 To: Heiko Stuebner <heiko@sntech.de>, ulf.hansson@linaro.org, kishon@ti.com
-Cc: shawn.lin@rock-chips.com, linux-rockchip@lists.infradead.org, linux-mmc@vger.kernel.org, briannorris@chromium.org, Douglas Anderson <dianders@chromium.org>, linux-kernel@vger.kernel.org, michal.simek@xilinx.com, adrian.hunter@intel.com, soren.brinkmann@xilinx.com, linux-arm-kernel@lists.infradead.org
+Cc: shawn.lin@rock-chips.com, linux-rockchip@lists.infradead.org, linux-mmc@vger.kernel.org, briannorris@chromium.org, Douglas Anderson <dianders@chromium.org>, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+List-Id: linux-mmc@vger.kernel.org
 
-Despite positive testing across a number of machines and a number of
-people, last week I got a report that my 150 MHz series was breaking
-things on a handful of boards.
+It's possible that there are some reasons to turn the PHY on while the
+clock is 0.  In this case we just won't wait for the DLL to lock.
 
-It turns out that reverting the patch to always power cycle across clock
-changes fixes things and reverting that patch also doesn't actually
-cause any known problems (and 150 MHz should even continue to work).
+This is a bit of a stopgap until we figure out exactly when we're
+supposed to wait for the DLL to lock and when we're supposed to power
+cycle the PHY.
 
-Although we really need to get to the bottom of things, it seems
-expedient to revert while we're waiting for a better solution, hence
-this series.  Also in this series is further increase in the time we'll
-wait for the DLL to stabilize (found during reboot stress testing) and a
-fix to the way we handle the card clock being reported as 0 (needed for
-suspend/resume because of the revert we just did).
+Note: this patch should help with suspend/resume where the system will
+try to turn the PHY back on when the clock is 0.
 
-It's expected that this series could go through Ulf's mmc tree (like the
-previous) with Kishon's Ack as appropriate.
+Signed-off-by: Douglas Anderson <dianders@chromium.org>
+---
+ drivers/phy/phy-rockchip-emmc.c | 59 ++++++++++++++++++++++++++---------------
+ 1 file changed, 37 insertions(+), 22 deletions(-)
 
-
-Douglas Anderson (3):
-  mmc: sdhci-of-arasan: Revert: Always power the PHY off/on when clock
-    changes
-  phy: rockchip-emmc: Be tolerant to card clock of 0 in power on
-  phy: rockchip-emmc: Wait even longer for the DLL to lock
-
- drivers/mmc/host/sdhci-of-arasan.c | 21 +++++++----
- drivers/phy/phy-rockchip-emmc.c    | 71 ++++++++++++++++++++++++++------------
- 2 files changed, 62 insertions(+), 30 deletions(-)
-
+diff --git a/drivers/phy/phy-rockchip-emmc.c b/drivers/phy/phy-rockchip-emmc.c
+index 9dce958233a0..a2aa6aca7dec 100644
+--- a/drivers/phy/phy-rockchip-emmc.c
++++ b/drivers/phy/phy-rockchip-emmc.c
+@@ -88,15 +88,36 @@ static int rockchip_emmc_phy_power(struct phy *phy, bool on_off)
+ 	unsigned int caldone;
+ 	unsigned int dllrdy;
+ 	unsigned int freqsel = PHYCTRL_FREQSEL_200M;
++	unsigned long rate;
+ 	unsigned long timeout;
+ 
+-	if (rk_phy->emmcclk != NULL) {
+-		unsigned long rate = clk_get_rate(rk_phy->emmcclk);
++	/*
++	 * Keep phyctrl_pdb and phyctrl_endll low to allow
++	 * initialization of CALIO state M/C DFFs
++	 */
++	regmap_write(rk_phy->reg_base,
++		     rk_phy->reg_offset + GRF_EMMCPHY_CON6,
++		     HIWORD_UPDATE(PHYCTRL_PDB_PWR_OFF,
++				   PHYCTRL_PDB_MASK,
++				   PHYCTRL_PDB_SHIFT));
++	regmap_write(rk_phy->reg_base,
++		     rk_phy->reg_offset + GRF_EMMCPHY_CON6,
++		     HIWORD_UPDATE(PHYCTRL_ENDLL_DISABLE,
++				   PHYCTRL_ENDLL_MASK,
++				   PHYCTRL_ENDLL_SHIFT));
++
++	/* Already finish power_off above */
++	if (on_off == PHYCTRL_PDB_PWR_OFF)
++		return 0;
++
++	rate = clk_get_rate(rk_phy->emmcclk);
++
++	if (rate != 0) {
+ 		unsigned long ideal_rate;
+ 		unsigned long diff;
+ 
+ 		switch (rate) {
+-		case 0 ... 74999999:
++		case 1 ... 74999999:
+ 			ideal_rate = 50000000;
+ 			freqsel = PHYCTRL_FREQSEL_50M;
+ 			break;
+@@ -127,25 +148,6 @@ static int rockchip_emmc_phy_power(struct phy *phy, bool on_off)
+ 	}
+ 
+ 	/*
+-	 * Keep phyctrl_pdb and phyctrl_endll low to allow
+-	 * initialization of CALIO state M/C DFFs
+-	 */
+-	regmap_write(rk_phy->reg_base,
+-		     rk_phy->reg_offset + GRF_EMMCPHY_CON6,
+-		     HIWORD_UPDATE(PHYCTRL_PDB_PWR_OFF,
+-				   PHYCTRL_PDB_MASK,
+-				   PHYCTRL_PDB_SHIFT));
+-	regmap_write(rk_phy->reg_base,
+-		     rk_phy->reg_offset + GRF_EMMCPHY_CON6,
+-		     HIWORD_UPDATE(PHYCTRL_ENDLL_DISABLE,
+-				   PHYCTRL_ENDLL_MASK,
+-				   PHYCTRL_ENDLL_SHIFT));
+-
+-	/* Already finish power_off above */
+-	if (on_off == PHYCTRL_PDB_PWR_OFF)
+-		return 0;
+-
+-	/*
+ 	 * According to the user manual, calpad calibration
+ 	 * cycle takes more than 2us without the minimal recommended
+ 	 * value, so we may need a little margin here
+@@ -183,6 +185,19 @@ static int rockchip_emmc_phy_power(struct phy *phy, bool on_off)
+ 		     HIWORD_UPDATE(PHYCTRL_ENDLL_ENABLE,
+ 				   PHYCTRL_ENDLL_MASK,
+ 				   PHYCTRL_ENDLL_SHIFT));
++
++	/*
++	 * We turned on the DLL even though the rate was 0 because we the
++	 * clock might be turned on later.  ...but we can't wait for the DLL
++	 * to lock when the rate is 0 because it will never lock with no
++	 * input clock.
++	 *
++	 * Technically we should be checking the lock later when the clock
++	 * is turned on, but for now we won't.
++	 */
++	if (rate == 0)
++		return 0;
++
+ 	/*
+ 	 * After enabling analog DLL circuits docs say that we need 10.2 us if
+ 	 * our source clock is at 50 MHz and that lock time scales linearly
 -- 
 2.8.0.rc3.226.g39d4020
-
