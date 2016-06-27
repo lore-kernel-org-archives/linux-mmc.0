@@ -1,160 +1,89 @@
 From: Ritesh Harjani <riteshh@codeaurora.org>
-Subject: [PATCH RFCv2 00/10] mmc: Add HW Command Queuing Support
-Date: Mon, 27 Jun 2016 18:52:27 +0530
-Message-ID: <1467033757-32498-1-git-send-email-riteshh@codeaurora.org>
+Subject: [PATCH RFCv2 01/10] mmc: core: Add support to read command queue parameters
+Date: Mon, 27 Jun 2016 18:52:28 +0530
+Message-ID: <1467033757-32498-2-git-send-email-riteshh@codeaurora.org>
+References: <1467033757-32498-1-git-send-email-riteshh@codeaurora.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp.codeaurora.org ([198.145.29.96]:56138 "EHLO
+Received: from smtp.codeaurora.org ([198.145.29.96]:56173 "EHLO
 	smtp.codeaurora.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751713AbcF0NXK (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 27 Jun 2016 09:23:10 -0400
+	with ESMTP id S1750870AbcF0NXY (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 27 Jun 2016 09:23:24 -0400
+In-Reply-To: <1467033757-32498-1-git-send-email-riteshh@codeaurora.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: ulf.hansson@linaro.org, linux-mmc@vger.kernel.org
-Cc: linux-arm-msm@vger.kernel.org, adrian.hunter@intel.com, alex.lemberg@sandisk.com, mateusz.nowak@intel.com, Yuliy.Izrailov@sandisk.com, jh80.chung@samsung.com, dongas86@gmail.com, asutoshd@codeaurora.org, zhangfei.gao@gmail.com, sthumma@codeaurora.org, kdorfman@codeaurora.org, david.griego@linaro.org, stummala@codeaurora.org, venkatg@codeaurora.org, shawn.lin@rock-chips.com, Ritesh Harjani <riteshh@codeaurora.org>
+Cc: linux-arm-msm@vger.kernel.org, adrian.hunter@intel.com, alex.lemberg@sandisk.com, mateusz.nowak@intel.com, Yuliy.Izrailov@sandisk.com, jh80.chung@samsung.com, dongas86@gmail.com, asutoshd@codeaurora.org, zhangfei.gao@gmail.com, sthumma@codeaurora.org, kdorfman@codeaurora.org, david.griego@linaro.org, stummala@codeaurora.org, venkatg@codeaurora.org, shawn.lin@rock-chips.com, Subhash Jadavani <subhashj@codeaurora.org>, Ritesh Harjani <riteshh@codeaurora.org>
 
-Hi All, 
+From: Asutosh Das <asutoshd@codeaurora.org>
 
-This patch series refreshes the older patch series sent a
-while ago by Asutosh Das[1].
+eMMC cards with EXT_CSD version >= 8, optionally support command
+queuing feature as defined by JEDEC eMMC5.1. Add support for probing
+command queue feature for such type of cards.
 
-Current set of patch series is only introducing the basic CMDQ
-driver to get more review comments. Based on the reviews, will
-add other features as well to the patch list.
+Signed-off-by: Sujit Reddy Thumma <sthumma@codeaurora.org>
+Signed-off-by: Asutosh Das <asutoshd@codeaurora.org>
+Signed-off-by: Venkat Gopalakrishnan <venkatg@codeaurora.org>
+[subhashj@codeaurora.org: fixed trivial merge conflicts]
+Signed-off-by: Subhash Jadavani <subhashj@codeaurora.org>
+Signed-off-by: Ritesh Harjani <riteshh@codeaurora.org>
+---
+ drivers/mmc/core/mmc.c   | 15 +++++++++++++++
+ include/linux/mmc/card.h |  2 ++
+ include/linux/mmc/mmc.h  |  2 ++
+ 3 files changed, 19 insertions(+)
 
-Below paras describes about the CMDQ feature and a brief
-implementaion details of HW CMDQ :-
-
-In this patch series, we propose a method to add support for
-Command Queueing(CQ) feature added to eMMC-5.1 specification.
-This feature includes new commands for issuing tasks to the
-device and orders the execution of tasks to the device. It
-also has task management functions.
-
-Working of CQ with HW CQ support :-
-Both card and controller(HC) maintains a queue where tasks can be
-queued for execution. SW pulls the requests from block layer,
-prepares request's task/transfer descriptors and issues
-(by ringing the doorbell) it to CMDQ HC. CMDQ HC then queues this
-task to the card queue (can queue while data transfer is in progress)
-by preparing and sending CMD44 followed by CMD45.
-
-While SW driver can issues the tasks asynchronously to CMDQ HC,
-until the queue is full, HC can in parallel, send SQS
-(send queue status) to card to read QSR (queue status register),
-to know which tasks are ready for execution in card.
-Based on the QSR, HC can send CMD46/47 (read/write) for the
-task which was ready for execution in card.
-
-Main advantage of CQ comes for Random requests and thus
-we see that in below performance table that it's mainly
-the random requests that gets most of the benefit.
-
-Brief on implementation details :-
-The initialization of CQ is decided based on the underlying
-driver capability and the capability advertised by the card
-through ext_csd.
-
-In order to support queueing of multiple requests, we have
-added a new issue function to mmc-queue. This selectively
-pulls the requests and prepares and issues it to the underlying
-driver. We have used the inherent tagging mechanism of kernel
-block layer to keep track and map tags to the slots of underlying
-driver. The current design doesn't block for the request to
-complete. We have separated the issuing and completion path
-of the request and tracking is done using the tag assigned to
-the request.
-
-We have introduced a number of APIs to mmc block layer to
-facilitate servicing of requests.
-
-The completion of requests is handled in a softirq registered
-with the kernel block layer during initialization.
-
-A new layer has been introduced to serve the CQ compliant drivers.
-This layer (cq_hci) has all the standard functionality implemented.
-It also has necessary hooks for convenience of platform drivers.
-
-
-Performance Data :-
-|------------------------------------
-|Androbench	| CQ	|  Legacy  |
-|---------------|-------|----------|
-|Seq Read(MBps)	| 227.41|  216.97  |	
-|---------------|-------|----------|
-|Seq Write(MBps)| 56.6	|  56.44   |
-|---------------|-------|----------|
-|Rand.Read(IOPs)| 7144	|  4554    |
-|---------------|-------|----------|
-|Rand.Write(IOPS| 2374  |  1629	   |
-|----------------------------------|
-
-
-Patch Description in brief:-
-Patch 1/10 - Reads ext_csd to know whether the card supports
-CMDQ or not.
-
-Patch 2/10 - Adds support for a seperate queue and
-mmc_cmdq_thread for pulling and issuing the requests.
-Since this patch series adds a seperate queue for HW CMDQ
-support, this should not conflict with SW CMDQ series,
-except in places where we are (initializing/enabling? and)
-defining CMDQ definitions for card.
-
-Patch 3/10 - Adds initialization and enabling of CMDQ in
-card and controller if both supports it.
-
-Patch 4-5,8,9/10 - Add read/write/flush/halt support to CMDQ
-
-Patch 6/10 - This change does not relate to CMDQ in general,
-but only w.r.t. SDMA & ADMA.
-
-Patch 7/10 - Add CMDQ_HCI file for host controllers that support
-CMDQ.
-
-Patch 10/10 - Add CQ support to sdhci.
-
-[1]:- http://www.spinics.net/lists/linux-arm-msm/msg12692.html
-
-
-Changes in RFCv2:
-- Addressed comments from Shawn.
-
-Asutosh Das (7):
-  mmc: core: Add support to read command queue parameters
-  mmc: queue: initialization of command queue
-  mmc: core: Add command queue initialzation support
-  mmc: core: add flush request support to command queue
-  mmc: core: Add halt support
-  mmc: cmdq-host: add halt support to command queue host
-  mmc: sdhci: add command queue support to sdhci
-
-Subhash Jadavani (1):
-  mmc: host: sdhci: don't set SDMA buffer boundary in ADMA mode
-
-Venkat Gopalakrishnan (2):
-  mmc: card: add read/write support in command queue mode
-  mmc: cmdq: support for command queue enabled host
-
- drivers/mmc/card/block.c    | 315 ++++++++++++++++++++-
- drivers/mmc/card/queue.c    | 188 ++++++++++++-
- drivers/mmc/card/queue.h    |  10 +-
- drivers/mmc/core/core.c     |  98 +++++++
- drivers/mmc/core/mmc.c      |  65 +++++
- drivers/mmc/core/mmc_ops.c  |  47 +++-
- drivers/mmc/host/Kconfig    |  13 +
- drivers/mmc/host/Makefile   |   1 +
- drivers/mmc/host/cmdq_hci.c | 671 ++++++++++++++++++++++++++++++++++++++++++++
- drivers/mmc/host/cmdq_hci.h | 207 ++++++++++++++
- drivers/mmc/host/sdhci.c    | 169 ++++++++++-
- drivers/mmc/host/sdhci.h    |   6 +
- include/linux/mmc/card.h    |  11 +-
- include/linux/mmc/core.h    |  13 +
- include/linux/mmc/host.h    |  75 +++++
- include/linux/mmc/mmc.h     |   3 +
- 16 files changed, 1868 insertions(+), 24 deletions(-)
- create mode 100644 drivers/mmc/host/cmdq_hci.c
- create mode 100644 drivers/mmc/host/cmdq_hci.h
-
+diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+index 5d438ad..77734c8 100644
+--- a/drivers/mmc/core/mmc.c
++++ b/drivers/mmc/core/mmc.c
+@@ -585,6 +585,21 @@ static int mmc_decode_ext_csd(struct mmc_card *card, u8 *ext_csd)
+ 		card->ext_csd.data_sector_size = 512;
+ 	}
+ 
++	if (card->ext_csd.rev >= 8) {
++		card->ext_csd.cmdq_support = ext_csd[EXT_CSD_CMDQ_SUPPORT];
++		if (card->ext_csd.cmdq_support) {
++			/*
++			 * Queue Depth = N + 1,
++			 * see JEDEC JESD84-B51 section 7.4.19
++			 */
++			card->ext_csd.cmdq_depth =
++				ext_csd[EXT_CSD_CMDQ_DEPTH] + 1;
++			pr_debug("%s: CMDQ supported: depth: %d\n",
++				mmc_hostname(card->host),
++				card->ext_csd.cmdq_depth);
++		}
++	}
++
+ 	/* eMMC v5 or later */
+ 	if (card->ext_csd.rev >= 7) {
+ 		memcpy(card->ext_csd.fwrev, &ext_csd[EXT_CSD_FIRMWARE_VERSION],
+diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
+index eb0151b..f74db84 100644
+--- a/include/linux/mmc/card.h
++++ b/include/linux/mmc/card.h
+@@ -118,6 +118,8 @@ struct mmc_ext_csd {
+ 	u8			raw_pwr_cl_ddr_200_360;	/* 253 */
+ 	u8			raw_bkops_status;	/* 246 */
+ 	u8			raw_sectors[4];		/* 212 - 4 bytes */
++	u8			cmdq_depth;		/* 307 */
++	u8			cmdq_support;		/* 308 */
+ 
+ 	unsigned int            feature_support;
+ #define MMC_DISCARD_FEATURE	BIT(0)                  /* CMD38 feature */
+diff --git a/include/linux/mmc/mmc.h b/include/linux/mmc/mmc.h
+index 15f2c4a..694c189 100644
+--- a/include/linux/mmc/mmc.h
++++ b/include/linux/mmc/mmc.h
+@@ -330,6 +330,8 @@ struct _mmc_csd {
+ #define EXT_CSD_CACHE_SIZE		249	/* RO, 4 bytes */
+ #define EXT_CSD_PWR_CL_DDR_200_360	253	/* RO */
+ #define EXT_CSD_FIRMWARE_VERSION	254	/* RO, 8 bytes */
++#define EXT_CSD_CMDQ_DEPTH		307	/* RO */
++#define EXT_CSD_CMDQ_SUPPORT		308	/* RO */
+ #define EXT_CSD_SUPPORTED_MODE		493	/* RO */
+ #define EXT_CSD_TAG_UNIT_SIZE		498	/* RO */
+ #define EXT_CSD_DATA_TAG_SUPPORT	499	/* RO */
 -- 
 The Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum, 
 a Linux Foundation Collaborative Project.
