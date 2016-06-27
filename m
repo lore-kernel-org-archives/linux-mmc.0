@@ -1,146 +1,260 @@
 From: Ritesh Harjani <riteshh@codeaurora.org>
-Subject: [PATCH RFCv2 08/10] mmc: core: Add halt support
-Date: Mon, 27 Jun 2016 18:52:35 +0530
-Message-ID: <1467033757-32498-9-git-send-email-riteshh@codeaurora.org>
+Subject: [PATCH RFCv2 10/10] mmc: sdhci: add command queue support to sdhci
+Date: Mon, 27 Jun 2016 18:52:37 +0530
+Message-ID: <1467033757-32498-11-git-send-email-riteshh@codeaurora.org>
 References: <1467033757-32498-1-git-send-email-riteshh@codeaurora.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp.codeaurora.org ([198.145.29.96]:56432 "EHLO
+Received: from smtp.codeaurora.org ([198.145.29.96]:56500 "EHLO
 	smtp.codeaurora.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751738AbcF0NYL (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 27 Jun 2016 09:24:11 -0400
+	with ESMTP id S1750869AbcF0NY4 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 27 Jun 2016 09:24:56 -0400
 In-Reply-To: <1467033757-32498-1-git-send-email-riteshh@codeaurora.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: ulf.hansson@linaro.org, linux-mmc@vger.kernel.org
-Cc: linux-arm-msm@vger.kernel.org, adrian.hunter@intel.com, alex.lemberg@sandisk.com, mateusz.nowak@intel.com, Yuliy.Izrailov@sandisk.com, jh80.chung@samsung.com, dongas86@gmail.com, asutoshd@codeaurora.org, zhangfei.gao@gmail.com, sthumma@codeaurora.org, kdorfman@codeaurora.org, david.griego@linaro.org, stummala@codeaurora.org, venkatg@codeaurora.org, shawn.lin@rock-chips.com, Ritesh Harjani <riteshh@codeaurora.org>
+Cc: linux-arm-msm@vger.kernel.org, adrian.hunter@intel.com, alex.lemberg@sandisk.com, mateusz.nowak@intel.com, Yuliy.Izrailov@sandisk.com, jh80.chung@samsung.com, dongas86@gmail.com, asutoshd@codeaurora.org, zhangfei.gao@gmail.com, sthumma@codeaurora.org, kdorfman@codeaurora.org, david.griego@linaro.org, stummala@codeaurora.org, venkatg@codeaurora.org, shawn.lin@rock-chips.com, Subhash Jadavani <subhashj@codeaurora.org>, Ritesh Harjani <riteshh@codeaurora.org>
 
 From: Asutosh Das <asutoshd@codeaurora.org>
 
-Halt is a controller feature that can change the controller mode
-from command-queue to legacy. This feature is very helpful in
-error cases.
+Adds command-queue support to SDHCi compliant drivers.
 
 Signed-off-by: Asutosh Das <asutoshd@codeaurora.org>
+Signed-off-by: Konstantin Dorfman <kdorfman@codeaurora.org>
 Signed-off-by: Venkat Gopalakrishnan <venkatg@codeaurora.org>
+[subhashj@codeaurora.org: fixed trivial merge conflicts and
+compilation error]
+Signed-off-by: Subhash Jadavani <subhashj@codeaurora.org>
 [riteshh@codeaurora.org: fixed merge conflicts]
 Signed-off-by: Ritesh Harjani <riteshh@codeaurora.org>
 ---
- drivers/mmc/card/queue.c |  1 +
- drivers/mmc/core/core.c  | 33 +++++++++++++++++++++++++++++++++
- include/linux/mmc/core.h |  1 +
- include/linux/mmc/host.h | 17 +++++++++++++++++
- 4 files changed, 52 insertions(+)
+ drivers/mmc/host/sdhci.c | 146 +++++++++++++++++++++++++++++++++++++++++++++--
+ drivers/mmc/host/sdhci.h |   6 ++
+ 2 files changed, 148 insertions(+), 4 deletions(-)
 
-diff --git a/drivers/mmc/card/queue.c b/drivers/mmc/card/queue.c
-index 2697529..054a0b3 100644
---- a/drivers/mmc/card/queue.c
-+++ b/drivers/mmc/card/queue.c
-@@ -50,6 +50,7 @@ static inline bool mmc_cmdq_should_pull_reqs(struct mmc_host *host,
- 					struct mmc_cmdq_context_info *ctx)
- {
- 	if (test_bit(CMDQ_STATE_DCMD_ACTIVE, &ctx->curr_state) ||
-+		mmc_host_halt(host) ||
- 		test_bit(CMDQ_STATE_ERR, &ctx->curr_state)) {
- 		pr_debug("%s: %s: skip pulling reqs: state: %lu\n",
- 			 mmc_hostname(host), __func__, ctx->curr_state);
-diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index fdb24cc..ab7f7fa 100644
---- a/drivers/mmc/core/core.c
-+++ b/drivers/mmc/core/core.c
-@@ -603,6 +603,39 @@ void mmc_cmdq_post_req(struct mmc_host *host, struct mmc_request *mrq, int err)
- }
- EXPORT_SYMBOL(mmc_cmdq_post_req);
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 9f5cdaa..0ed9c45 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -32,6 +32,7 @@
+ #include <linux/mmc/slot-gpio.h>
  
-+/**
-+ *	mmc_cmdq_halt - halt/un-halt the command queue engine
-+ *	@host: host instance
-+ *	@halt: true - halt, un-halt otherwise
-+ *
-+ *	Host halts the command queue engine. It should complete
-+ *	the ongoing transfer and release the bus.
-+ *	All legacy commands can be sent upon successful
-+ *	completion of this function.
-+ *	Returns 0 on success, negative otherwise
-+ */
-+int mmc_cmdq_halt(struct mmc_host *host, bool halt)
+ #include "sdhci.h"
++#include "cmdq_hci.h"
+ 
+ #define DRIVER_NAME "sdhci"
+ 
+@@ -2474,6 +2475,20 @@ static void sdhci_data_irq(struct sdhci_host *host, u32 intmask)
+ 	}
+ }
+ 
++#ifdef CONFIG_MMC_CQ_HCI
++static irqreturn_t sdhci_cmdq_irq(struct mmc_host *mmc, u32 intmask)
 +{
-+	int err = 0;
++	return cmdq_irq(mmc, intmask);
++}
 +
-+	if ((halt && mmc_host_halt(host)) ||
-+	    (!halt && !mmc_host_halt(host)))
-+		return -EINVAL;
++#else
++static irqreturn_t sdhci_cmdq_irq(struct mmc_host *mmc, u32 intmask)
++{
++	pr_err("%s: rxd cmdq-irq when disabled !!!!\n", mmc_hostname(mmc));
++	return IRQ_NONE;
++}
++#endif
 +
-+	if (host->cmdq_ops->halt) {
-+		err = host->cmdq_ops->halt(host, halt);
-+		if (!err && halt)
-+			mmc_host_set_halt(host);
-+		else if (!err && !halt)
-+			mmc_host_clr_halt(host);
+ static irqreturn_t sdhci_irq(int irq, void *dev_id)
+ {
+ 	irqreturn_t result = IRQ_NONE;
+@@ -2495,6 +2510,15 @@ static irqreturn_t sdhci_irq(int irq, void *dev_id)
+ 	}
+ 
+ 	do {
++		if (host->mmc->card && mmc_card_cmdq(host->mmc->card) &&
++		    !mmc_host_halt(host->mmc)) {
++			pr_debug("*** %s: cmdq intr: 0x%08x\n",
++					mmc_hostname(host->mmc),
++					intmask);
++			result = sdhci_cmdq_irq(host->mmc, intmask);
++			goto out;
++		}
++
+ 		/* Clear selected interrupts. */
+ 		mask = intmask & (SDHCI_INT_CMD_MASK | SDHCI_INT_DATA_MASK |
+ 				  SDHCI_INT_BUS_POWER);
+@@ -2823,6 +2847,106 @@ static int sdhci_set_dma_mask(struct sdhci_host *host)
+ 	return ret;
+ }
+ 
++#ifdef CONFIG_MMC_CQ_HCI
++static void sdhci_cmdq_clear_set_irqs(struct mmc_host *mmc, bool clear)
++{
++	struct sdhci_host *host = mmc_priv(mmc);
++	u32 ier = 0;
++
++	ier &= ~SDHCI_INT_ALL_MASK;
++
++	if (clear) {
++		ier = SDHCI_INT_CMDQ_EN | SDHCI_INT_ERROR_MASK;
++		sdhci_writel(host, ier, SDHCI_INT_ENABLE);
++		sdhci_writel(host, ier, SDHCI_SIGNAL_ENABLE);
 +	} else {
-+		err = -ENOSYS;
++		ier = SDHCI_INT_BUS_POWER | SDHCI_INT_DATA_END_BIT |
++			     SDHCI_INT_DATA_CRC | SDHCI_INT_DATA_TIMEOUT |
++			     SDHCI_INT_INDEX | SDHCI_INT_END_BIT |
++			     SDHCI_INT_CRC | SDHCI_INT_TIMEOUT |
++			     SDHCI_INT_DATA_END | SDHCI_INT_RESPONSE |
++			     SDHCI_INT_ACMD12ERR;
++		sdhci_writel(host, ier, SDHCI_INT_ENABLE);
++		sdhci_writel(host, ier, SDHCI_SIGNAL_ENABLE);
++	}
++}
++
++static void sdhci_cmdq_set_data_timeout(struct mmc_host *mmc, u32 val)
++{
++	struct sdhci_host *host = mmc_priv(mmc);
++
++	sdhci_writeb(host, val, SDHCI_TIMEOUT_CONTROL);
++}
++
++static void sdhci_cmdq_dump_vendor_regs(struct mmc_host *mmc)
++{
++	struct sdhci_host *host = mmc_priv(mmc);
++
++	sdhci_dumpregs(host);
++}
++
++static int sdhci_cmdq_init(struct sdhci_host *host, struct mmc_host *mmc,
++			   bool dma64)
++{
++	return cmdq_init(host->cq_host, mmc, dma64);
++}
++
++static void sdhci_cmdq_set_block_size(struct mmc_host *mmc)
++{
++	struct sdhci_host *host = mmc_priv(mmc);
++
++	sdhci_set_blk_size_reg(host, 512, 0);
++}
++
++static void sdhci_cmdq_clear_set_dumpregs(struct mmc_host *mmc, bool set)
++{
++	struct sdhci_host *host = mmc_priv(mmc);
++
++	if (host->ops->clear_set_dumpregs)
++		host->ops->clear_set_dumpregs(host, set);
++}
++#else
++static void sdhci_cmdq_clear_set_irqs(struct mmc_host *mmc, bool clear)
++{
++
++}
++
++static void sdhci_cmdq_set_data_timeout(struct mmc_host *mmc, u32 val)
++{
++
++}
++
++static void sdhci_cmdq_dump_vendor_regs(struct mmc_host *mmc)
++{
++
++}
++
++static int sdhci_cmdq_init(struct sdhci_host *host, struct mmc_host *mmc,
++			   bool dma64)
++{
++	return -ENOSYS;
++}
++
++static void sdhci_cmdq_set_block_size(struct mmc_host *mmc)
++{
++
++}
++
++static void sdhci_cmdq_clear_set_dumpregs(struct mmc_host *mmc, bool set)
++{
++
++}
++
++#endif
++
++static const struct cmdq_host_ops sdhci_cmdq_ops = {
++	.clear_set_irqs = sdhci_cmdq_clear_set_irqs,
++	.set_data_timeout = sdhci_cmdq_set_data_timeout,
++	.dump_vendor_regs = sdhci_cmdq_dump_vendor_regs,
++	.set_block_size = sdhci_cmdq_set_block_size,
++	.clear_set_dumpregs = sdhci_cmdq_clear_set_dumpregs,
++};
++
+ int sdhci_add_host(struct sdhci_host *host)
+ {
+ 	struct mmc_host *mmc;
+@@ -3341,11 +3465,25 @@ int sdhci_add_host(struct sdhci_host *host)
+ 	if (ret)
+ 		goto unled;
+ 
+-	pr_info("%s: SDHCI controller on %s [%s] using %s\n",
+-		mmc_hostname(mmc), host->hw_name, dev_name(mmc_dev(mmc)),
++	if (mmc->caps2 &  MMC_CAP2_CMD_QUEUE) {
++		bool dma64 = (host->flags & SDHCI_USE_ADMA_64BIT) ?
++			true : false;
++		ret = sdhci_cmdq_init(host, mmc, dma64);
++		if (ret)
++			pr_err("%s: CMDQ init: failed (%d)\n",
++			       mmc_hostname(host->mmc), ret);
++		else
++			host->cq_host->ops = &sdhci_cmdq_ops;
 +	}
 +
-+	return err;
-+}
-+EXPORT_SYMBOL(mmc_cmdq_halt);
-+
- int mmc_cmdq_start_req(struct mmc_host *host, struct mmc_cmdq_req *cmdq_req)
- {
- 	struct mmc_request *mrq = &cmdq_req->mrq;
-diff --git a/include/linux/mmc/core.h b/include/linux/mmc/core.h
-index 7b3a60c..92aa8cc 100644
---- a/include/linux/mmc/core.h
-+++ b/include/linux/mmc/core.h
-@@ -143,6 +143,7 @@ struct mmc_card;
- struct mmc_async_req;
- struct mmc_cmdq_req;
++	pr_info("%s: SDHCI controller on %s [%s] using %s in %s mode\n",
++	mmc_hostname(mmc), host->hw_name, dev_name(mmc_dev(mmc)),
+ 		(host->flags & SDHCI_USE_ADMA) ?
+-		(host->flags & SDHCI_USE_64_BIT_DMA) ? "ADMA 64-bit" : "ADMA" :
+-		(host->flags & SDHCI_USE_SDMA) ? "DMA" : "PIO");
++		((host->flags & SDHCI_USE_ADMA_64BIT) ?
++		"64-bit ADMA" : "32-bit ADMA") :
++		((host->flags & SDHCI_USE_SDMA) ? "DMA" : "PIO"),
++		((mmc->caps2 &  MMC_CAP2_CMD_QUEUE) && !ret) ?
++		"CMDQ" : "legacy");
  
-+extern int mmc_cmdq_halt(struct mmc_host *host, bool enable);
- extern void mmc_cmdq_post_req(struct mmc_host *host, struct mmc_request *mrq,
- 			      int err);
- extern int mmc_cmdq_start_req(struct mmc_host *host,
-diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-index 41b4e25..7f2ae52 100644
---- a/include/linux/mmc/host.h
-+++ b/include/linux/mmc/host.h
-@@ -85,6 +85,7 @@ struct mmc_cmdq_host_ops {
- 	int (*request)(struct mmc_host *host, struct mmc_request *mrq);
- 	void (*post_req)(struct mmc_host *host, struct mmc_request *mrq,
- 			 int err);
-+	int (*halt)(struct mmc_host *host, bool halt);
+ 	sdhci_enable_card_detection(host);
+ 
+diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+index 609f87c..fccc750 100644
+--- a/drivers/mmc/host/sdhci.h
++++ b/drivers/mmc/host/sdhci.h
+@@ -150,6 +150,8 @@
+ 		SDHCI_INT_DATA_TIMEOUT | SDHCI_INT_DATA_CRC | \
+ 		SDHCI_INT_DATA_END_BIT | SDHCI_INT_ADMA_ERROR | \
+ 		SDHCI_INT_BLK_GAP)
++
++#define SDHCI_INT_CMDQ_EN	(0x1 << 14)
+ #define SDHCI_INT_ALL_MASK	((unsigned int)-1)
+ 
+ #define SDHCI_ACMD12_ERR	0x3C
+@@ -446,6 +448,7 @@ struct sdhci_host {
+ #define SDHCI_PV_ENABLED	(1<<8)	/* Preset value enabled */
+ #define SDHCI_SDIO_IRQ_ENABLED	(1<<9)	/* SDIO irq enabled */
+ #define SDHCI_USE_64_BIT_DMA	(1<<12)	/* Use 64-bit DMA */
++#define SDHCI_USE_ADMA_64BIT	(1<<12)	/* Host is 64-bit ADMA capable */
+ #define SDHCI_HS400_TUNING	(1<<13)	/* Tuning for HS400 */
+ 
+ 	unsigned int version;	/* SDHCI spec. version */
+@@ -509,6 +512,8 @@ struct sdhci_host {
+ 	unsigned int		tuning_mode;	/* Re-tuning mode supported by host */
+ #define SDHCI_TUNING_MODE_1	0
+ 
++	struct cmdq_host *cq_host;
++
+ 	unsigned long private[0] ____cacheline_aligned;
  };
  
- struct mmc_host_ops {
-@@ -225,6 +226,7 @@ struct mmc_cmdq_context_info {
- 	unsigned long	curr_state;
- #define	CMDQ_STATE_ERR 0
- #define	CMDQ_STATE_DCMD_ACTIVE 1
-+#define	CMDQ_STATE_HALT 2
- 	/* no free tag available */
- 	unsigned long	req_starved;
- };
-@@ -544,6 +546,21 @@ static inline int mmc_host_packed_wr(struct mmc_host *host)
- 	return host->caps2 & MMC_CAP2_PACKED_WR;
- }
- 
-+static inline void mmc_host_set_halt(struct mmc_host *host)
-+{
-+	set_bit(CMDQ_STATE_HALT, &host->cmdq_ctx.curr_state);
-+}
-+
-+static inline void mmc_host_clr_halt(struct mmc_host *host)
-+{
-+	clear_bit(CMDQ_STATE_HALT, &host->cmdq_ctx.curr_state);
-+}
-+
-+static inline int mmc_host_halt(struct mmc_host *host)
-+{
-+	return test_bit(CMDQ_STATE_HALT, &host->cmdq_ctx.curr_state);
-+}
-+
- static inline int mmc_card_hs(struct mmc_card *card)
- {
- 	return card->host->ios.timing == MMC_TIMING_SD_HS ||
+@@ -544,6 +549,7 @@ struct sdhci_ops {
+ 	void    (*adma_workaround)(struct sdhci_host *host, u32 intmask);
+ 	void	(*platform_init)(struct sdhci_host *host);
+ 	void    (*card_event)(struct sdhci_host *host);
++	void	(*clear_set_dumpregs)(struct sdhci_host *host, bool set);
+ 	void	(*voltage_switch)(struct sdhci_host *host);
+ 	int	(*select_drive_strength)(struct sdhci_host *host,
+ 					 struct mmc_card *card,
 -- 
 The Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum, 
 a Linux Foundation Collaborative Project.
