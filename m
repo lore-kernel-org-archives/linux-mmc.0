@@ -1,135 +1,48 @@
 From: Douglas Anderson <dianders@chromium.org>
-Subject: [PATCH 1/3] mmc: sdhci-of-arasan: Revert: Always power the PHY off/on when clock changes
-Date: Mon, 27 Jun 2016 10:39:25 -0700
-Message-ID: <1467049167-14628-2-git-send-email-dianders@chromium.org>
+Subject: [PATCH 3/3] phy: rockchip-emmc: Wait even longer for the DLL to lock
+Date: Mon, 27 Jun 2016 10:39:27 -0700
+Message-ID: <1467049167-14628-4-git-send-email-dianders@chromium.org>
 References: <1467049167-14628-1-git-send-email-dianders@chromium.org>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pa0-f43.google.com ([209.85.220.43]:34000 "EHLO
-	mail-pa0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751871AbcF0Rjz (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 27 Jun 2016 13:39:55 -0400
-Received: by mail-pa0-f43.google.com with SMTP id bz2so60987722pad.1
-        for <linux-mmc@vger.kernel.org>; Mon, 27 Jun 2016 10:39:54 -0700 (PDT)
+Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1467049167-14628-1-git-send-email-dianders@chromium.org>
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Sender: linux-kernel-owner@vger.kernel.org
 To: Heiko Stuebner <heiko@sntech.de>, ulf.hansson@linaro.org, kishon@ti.com
-Cc: shawn.lin@rock-chips.com, linux-rockchip@lists.infradead.org, linux-mmc@vger.kernel.org, briannorris@chromium.org, Douglas Anderson <dianders@chromium.org>, michal.simek@xilinx.com, soren.brinkmann@xilinx.com, adrian.hunter@intel.com, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org
+Cc: shawn.lin@rock-chips.com, linux-rockchip@lists.infradead.org, linux-mmc@vger.kernel.org, briannorris@chromium.org, Douglas Anderson <dianders@chromium.org>, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+List-Id: linux-mmc@vger.kernel.org
 
-This reverts commit 4ac0d5f245e1 ("mmc: sdhci-of-arasan: Always power
-the PHY off/on when clock changes"), resolving conflicts with other
-patches that have come after.  It appears that on some boards / with
-some eMMC devices that the patch is causing problems.
-
-Presumably turning the phy off and on again at the wrong time while
-initially setting up the card is confusing the card, the host, or the
-PHY.  We have lots of power cycles while initially setting up the card
-because the main sdhci driver often turns off the clock by clearing
-SDHCI_CLOCK_CARD_EN and then calls host->ops->set_clock() to set the
-clock again.  With all of those, we ended up with lots of power cycles.
-
-Presumably the arguments made in the original patch still hold.  That
-is, whenever the card clock is turned off and on again (or changed) we
-really should wait for the DLL to lock again.  However, perhaps it's
-really not that critical for the lower speeds.
-
-It's possible that the right answer here is:
-* Whenever set_clock() is called we should double-check that the DLL is
-  locked.
-* Whenever set_clock() is called and we're actually changing clocks we
-  should do a power cycle around that.
-* When we're doing a power cycle just because the clock changed, we
-  probably shouldn't do quite as many things (maybe don't need to
-  recalibarate, etc).
-
-Unfortunately the interaction between SDHCI and the PHY is extremely
-limited because of the limited PHY API.  The PHY does have a reference
-to the card clock and could theoretically register for notifications,
-except that our clock is query only (it uses CLK_GET_RATE_NOCACHE) and
-so can't really be notified about updates.  I believe we would need a
-major redesign of clock handling in SDHCI core to do better than that,
-or we would need to make our one fake notifications.  :(
-
-Let's hope that we can eventually get more information from Arasan on
-how all this should be handled before doing tons more work.  Until then,
-let's get back to a known working state.  Note that the rest of the
-patches in the 150 MHz series should still work fine even without this
-one.
+Two times out of 2000 reboots I ran into the error message
+"rockchip_emmc_phy_power: dllrdy timeout".  Presumably there is some
+corner case where the DLL just takes a little longer to timeout.  Let's
+give it even more time to handle these corner cases.
 
 Signed-off-by: Douglas Anderson <dianders@chromium.org>
 ---
- drivers/mmc/host/sdhci-of-arasan.c | 21 ++++++++++++++-------
- 1 file changed, 14 insertions(+), 7 deletions(-)
+ drivers/phy/phy-rockchip-emmc.c | 12 +++++++++++-
+ 1 file changed, 11 insertions(+), 1 deletion(-)
 
-diff --git a/drivers/mmc/host/sdhci-of-arasan.c b/drivers/mmc/host/sdhci-of-arasan.c
-index 678f316702e0..e0f193f7e3e5 100644
---- a/drivers/mmc/host/sdhci-of-arasan.c
-+++ b/drivers/mmc/host/sdhci-of-arasan.c
-@@ -77,7 +77,6 @@ struct sdhci_arasan_soc_ctl_map {
-  * @host:		Pointer to the main SDHCI host structure.
-  * @clk_ahb:		Pointer to the AHB clock
-  * @phy:		Pointer to the generic phy
-- * @phy_on:		True if the PHY is turned on.
-  * @sdcardclk_hw:	Struct for the clock we might provide to a PHY.
-  * @sdcardclk:		Pointer to normal 'struct clock' for sdcardclk_hw.
-  * @soc_ctl_base:	Pointer to regmap for syscon for soc_ctl registers.
-@@ -87,7 +86,6 @@ struct sdhci_arasan_data {
- 	struct sdhci_host *host;
- 	struct clk	*clk_ahb;
- 	struct phy	*phy;
--	bool		phy_on;
+diff --git a/drivers/phy/phy-rockchip-emmc.c b/drivers/phy/phy-rockchip-emmc.c
+index a2aa6aca7dec..fd57345ffed2 100644
+--- a/drivers/phy/phy-rockchip-emmc.c
++++ b/drivers/phy/phy-rockchip-emmc.c
+@@ -206,8 +206,18 @@ static int rockchip_emmc_phy_power(struct phy *phy, bool on_off)
+ 	 * per the math: 10.2 us * (50000000 Hz / 100000 Hz) => 5.1 ms
+ 	 * Hopefully we won't be running at 100 kHz, but we should still make
+ 	 * sure we wait long enough.
++	 *
++	 * NOTE: There appear to be corner cases where the DLL seems to take
++	 * extra long to lock for reasons that aren't understood.  In some
++	 * extreme cases we've seen it take up to over 10ms (!).  We'll be
++	 * generous and give it 50ms.  We still busy wait here because:
++	 * - In most cases it should be super fast.
++	 * - This is not called lots during normal operation so it shouldn't
++	 *   be a power or performance problem to busy wait.  We expect it
++	 *   only at boot / resume.  In both cases, eMMC is probably on the
++	 *   critical path so busy waiting a little extra time should be OK.
+ 	 */
+-	timeout = jiffies + msecs_to_jiffies(10);
++	timeout = jiffies + msecs_to_jiffies(50);
+ 	do {
+ 		udelay(1);
  
- 	struct clk_hw	sdcardclk_hw;
- 	struct clk      *sdcardclk;
-@@ -170,10 +168,12 @@ static void sdhci_arasan_set_clock(struct sdhci_host *host, unsigned int clock)
- {
- 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
- 	struct sdhci_arasan_data *sdhci_arasan = sdhci_pltfm_priv(pltfm_host);
-+	bool ctrl_phy = false;
- 
--	if (sdhci_arasan->phy_on && !IS_ERR(sdhci_arasan->phy)) {
--		sdhci_arasan->phy_on = false;
-+	if (clock > MMC_HIGH_52_MAX_DTR && (!IS_ERR(sdhci_arasan->phy)))
-+		ctrl_phy = true;
- 
-+	if (ctrl_phy) {
- 		spin_unlock_irq(&host->lock);
- 		phy_power_off(sdhci_arasan->phy);
- 		spin_lock_irq(&host->lock);
-@@ -181,9 +181,7 @@ static void sdhci_arasan_set_clock(struct sdhci_host *host, unsigned int clock)
- 
- 	sdhci_set_clock(host, clock);
- 
--	if (host->mmc->actual_clock && !IS_ERR(sdhci_arasan->phy)) {
--		sdhci_arasan->phy_on = true;
--
-+	if (ctrl_phy) {
- 		spin_unlock_irq(&host->lock);
- 		phy_power_on(sdhci_arasan->phy);
- 		spin_lock_irq(&host->lock);
-@@ -549,6 +547,12 @@ static int sdhci_arasan_probe(struct platform_device *pdev)
- 			goto unreg_clk;
- 		}
- 
-+		ret = phy_power_on(sdhci_arasan->phy);
-+		if (ret < 0) {
-+			dev_err(&pdev->dev, "phy_power_on err.\n");
-+			goto err_phy_power;
-+		}
-+
- 		host->mmc_host_ops.hs400_enhanced_strobe =
- 					sdhci_arasan_hs400_enhanced_strobe;
- 	}
-@@ -561,6 +565,9 @@ static int sdhci_arasan_probe(struct platform_device *pdev)
- 
- err_add_host:
- 	if (!IS_ERR(sdhci_arasan->phy))
-+		phy_power_off(sdhci_arasan->phy);
-+err_phy_power:
-+	if (!IS_ERR(sdhci_arasan->phy))
- 		phy_exit(sdhci_arasan->phy);
- unreg_clk:
- 	sdhci_arasan_unregister_sdclk(&pdev->dev);
 -- 
 2.8.0.rc3.226.g39d4020
-
