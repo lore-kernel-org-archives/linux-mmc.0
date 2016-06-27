@@ -1,56 +1,72 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: core: add auto bkops support
-Date: Mon, 27 Jun 2016 11:08:17 +0200
-Message-ID: <CAPDyKFoxTH_-U_Aj0jHWPKbwd+4OoOYBTdOeD-6SpG4XyM=3AA@mail.gmail.com>
-References: <1465182439-27963-1-git-send-email-shawn.lin@rock-chips.com>
- <F4A75DD4-FE64-4417-AFD4-FA9ABD8EE915@sandisk.com> <d5c75760-e8b4-1784-a7de-3d78eeca1d0e@rock-chips.com>
- <7078F2B9-63B6-4170-BFA1-5AC370F0D4DD@sandisk.com> <29966a6f-eb14-0307-08cc-f91a97f50382@rock-chips.com>
- <B7133967-23A7-46AF-9013-417BD282E005@sandisk.com> <23729258-7a6b-80ac-6c90-b48eed64e0ea@rock-chips.com>
- <576B7211.2030208@intel.com>
+Subject: Re: [PATCH] mmc: sdhci: Fix sdhci_card_busy()
+Date: Mon, 27 Jun 2016 11:21:45 +0200
+Message-ID: <CAPDyKFpjJdWnxpJThEXKz53VuG3kp=qQYZXY6ykyMD3bm=B9uw@mail.gmail.com>
+References: <1466679658-18604-1-git-send-email-adrian.hunter@intel.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wm0-f50.google.com ([74.125.82.50]:38193 "EHLO
-	mail-wm0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751511AbcF0JIe convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 27 Jun 2016 05:08:34 -0400
-Received: by mail-wm0-f50.google.com with SMTP id r201so105179778wme.1
-        for <linux-mmc@vger.kernel.org>; Mon, 27 Jun 2016 02:08:20 -0700 (PDT)
-In-Reply-To: <576B7211.2030208@intel.com>
+Received: from mail-wm0-f54.google.com ([74.125.82.54]:35194 "EHLO
+	mail-wm0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751638AbcF0JVs (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 27 Jun 2016 05:21:48 -0400
+Received: by mail-wm0-f54.google.com with SMTP id v199so91710372wmv.0
+        for <linux-mmc@vger.kernel.org>; Mon, 27 Jun 2016 02:21:47 -0700 (PDT)
+In-Reply-To: <1466679658-18604-1-git-send-email-adrian.hunter@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: Shawn Lin <shawn.lin@rock-chips.com>, Alex Lemberg <Alex.Lemberg@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Doug Anderson <dianders@chromium.org>, "linux-rockchip@lists.infradead.org" <linux-rockchip@lists.infradead.org>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>
 
-[...]
-
->>> If I am not wrong, in current implementation of runtime suspend,
->>> the driver stops BKOPS (send HPI) just before sending sleep command=
-,
->>> see _mmc_suspend(), depends on =E2=80=9CMMC_CAP_AGGRESSIVE_PM=E2=80=
-=9D flag.
->>> In this case, the eMMC device will not have enough time to perform =
-internal
->>> BKOPS in both =E2=80=93 Manual and Auto BKOPS configurations.
->>>
->>
->> ye, so it seems a pre-exiting issue before introducing auto bkops?
->> I think we can push another patch to improve it but not handling
->> it for this $SUBJECT, does it sound ok to you?
+On 23 June 2016 at 13:00, Adrian Hunter <adrian.hunter@intel.com> wrote:
+> host->card_busy() was introduced for SD voltage switching which checks all
+> 4 data lines.
 >
-> Runtime suspend for eMMC has a default auto-suspend delay of 3 second=
-s
-> (refer mmc_blk_probe()).  Isn't that when auto bkops would happen?
+> Increasingly, host->card_busy is being used to poll the the busy signal
+> which is only data line 0 (DAT[0]).
+>
+> The current logic in sdhci_card_busy() does not work in that case because
+> it returns false if any of the data lines is high.  It also ignores
+> possibilities:
+>         - data lines 1-3 are not connected and could show at any level
+>         - data lines 1-2 can be used by SDIO for other purposes
+>
+> According to the SD specification, it is OK to check any of the data lines
+> for voltage switching, so change to use DAT[0] only.
+>
+> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
+> ---
+>
+>
+>  It would probably be better for this patch to go before
+>  "mmc: mmc: Use ->card_busy() to detect busy cards in __mmc_switch()"
+>
 
-That's correct.
-
-So perhaps we should extend the default auto-suspend delay?
-
-The SD case actually have the same issue, as I some background
-operations exists there as well.
-
-[...]
-
+Thanks, applied for next and prior the above mentioned patch!
 Kind regards
 Uffe
+
+>
+>  drivers/mmc/host/sdhci.c | 4 ++--
+>  1 file changed, 2 insertions(+), 2 deletions(-)
+>
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index ec14b5d61fc6..15bdbcb99170 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -1811,10 +1811,10 @@ static int sdhci_card_busy(struct mmc_host *mmc)
+>         struct sdhci_host *host = mmc_priv(mmc);
+>         u32 present_state;
+>
+> -       /* Check whether DAT[3:0] is 0000 */
+> +       /* Check whether DAT[0] is 0 */
+>         present_state = sdhci_readl(host, SDHCI_PRESENT_STATE);
+>
+> -       return !(present_state & SDHCI_DATA_LVL_MASK);
+> +       return !(present_state & SDHCI_DATA_0_LVL_MASK);
+>  }
+>
+>  static int sdhci_prepare_hs400_tuning(struct mmc_host *mmc, struct mmc_ios *ios)
+> --
+> 1.9.1
+>
