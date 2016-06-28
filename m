@@ -1,98 +1,126 @@
-From: Beata Baranowska <beatax.baranowska@intel.com>
-Subject: [RFC PATCH] mmc: host: add a new cap to force set power control
-Date: Tue, 28 Jun 2016 11:36:57 +0200
-Message-ID: <1467106617-33219-1-git-send-email-beatax.baranowska@intel.com>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: [PATCH RFC 2/5] mmc: sdhci: Split sdhci_add_host()
+Date: Tue, 28 Jun 2016 16:23:09 +0300
+Message-ID: <1467120192-6479-3-git-send-email-adrian.hunter@intel.com>
+References: <1467120192-6479-1-git-send-email-adrian.hunter@intel.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga01.intel.com ([192.55.52.88]:41361 "EHLO mga01.intel.com"
+Received: from mga14.intel.com ([192.55.52.115]:57962 "EHLO mga14.intel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752054AbcF1Jse (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 28 Jun 2016 05:48:34 -0400
+	id S1752104AbcF1N21 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 28 Jun 2016 09:28:27 -0400
+In-Reply-To: <1467120192-6479-1-git-send-email-adrian.hunter@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: adrian.hunter@intel.com, ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
-Cc: sebastianx.jarosz@intel.com, beatax.baranowska@intel.com, Chuanxiao Dong <chuanxiao.dong@intel.com>
+To: linux-mmc <linux-mmc@vger.kernel.org>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Jon Hunter <jonathanh@nvidia.com>, Dong Aisheng <dongas86@gmail.com>, Dong Aisheng <aisheng.dong@nxp.com>
 
-From: Chuanxiao Dong <chuanxiao.dong@intel.com>
+Split sdhci-add_host() in order to further our objective to make
+sdhci into a library.
 
-Even with a regulator, some host controller still needs to
-set the power control register to make sure the inter logical
-is working
+The split divides code that sets up mmc and sdhci parameters, from
+code that actually activates things - such as tasklet initialization,
+requesting the irq, and adding (and starting) the host.
 
-Signed-off-by: Chuanxiao Dong <chuanxiao.dong@intel.com>
+This gives drivers an opportunity to change various settings before
+committing to start the host.
+
+Drivers can continue to call sdhci_add_host() but drivers that want
+to take advantage of the split instead call sdhci_setup_host() followed
+by __sdhci_add_host().
+
+Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
 ---
- drivers/mmc/host/sdhci-acpi.c |  5 ++++-
- drivers/mmc/host/sdhci.c      | 10 ++++++----
- include/linux/mmc/host.h      |  6 ++++++
- 3 files changed, 16 insertions(+), 5 deletions(-)
+ drivers/mmc/host/sdhci.c | 39 ++++++++++++++++++++++++++++++++++++---
+ drivers/mmc/host/sdhci.h |  2 ++
+ 2 files changed, 38 insertions(+), 3 deletions(-)
 
-diff --git a/drivers/mmc/host/sdhci-acpi.c b/drivers/mmc/host/sdhci-acpi.c
-index 458ffb7637e5..23f436ec5803 100644
---- a/drivers/mmc/host/sdhci-acpi.c
-+++ b/drivers/mmc/host/sdhci-acpi.c
-@@ -275,7 +275,8 @@ static const struct sdhci_acpi_slot sdhci_acpi_slot_int_emmc = {
- 	.caps    = MMC_CAP_8_BIT_DATA | MMC_CAP_NONREMOVABLE |
- 		   MMC_CAP_HW_RESET | MMC_CAP_1_8V_DDR |
- 		   MMC_CAP_WAIT_WHILE_BUSY,
--	.caps2   = MMC_CAP2_HC_ERASE_SZ,
-+	.caps2   = MMC_CAP2_HC_ERASE_SZ |
-+		   MMC_CAP2_FORCE_SET_PWR_CTRL,
- 	.flags   = SDHCI_ACPI_RUNTIME_PM,
- 	.quirks  = SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC,
- 	.quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN |
-@@ -290,6 +291,7 @@ static const struct sdhci_acpi_slot sdhci_acpi_slot_int_sdio = {
- 	.quirks2 = SDHCI_QUIRK2_HOST_OFF_CARD_ON,
- 	.caps    = MMC_CAP_NONREMOVABLE | MMC_CAP_POWER_OFF_CARD |
- 		   MMC_CAP_WAIT_WHILE_BUSY,
-+	.caps2	 = MMC_CAP2_FORCE_SET_PWR_CTRL,
- 	.flags   = SDHCI_ACPI_RUNTIME_PM,
- 	.pm_caps = MMC_PM_KEEP_POWER,
- 	.probe_slot	= sdhci_acpi_sdio_probe_slot,
-@@ -302,6 +304,7 @@ static const struct sdhci_acpi_slot sdhci_acpi_slot_int_sd = {
- 	.quirks2 = SDHCI_QUIRK2_CARD_ON_NEEDS_BUS_ON |
- 		   SDHCI_QUIRK2_STOP_WITH_TC,
- 	.caps    = MMC_CAP_WAIT_WHILE_BUSY,
-+	.caps2	 = MMC_CAP2_FORCE_SET_PWR_CTRL,
- 	.probe_slot	= sdhci_acpi_sd_probe_slot,
- };
- 
 diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 0e3d7c056cb1..9b50648d320f 100644
+index 7009c862ca9b..22061faf7fa4 100644
 --- a/drivers/mmc/host/sdhci.c
 +++ b/drivers/mmc/host/sdhci.c
-@@ -1268,10 +1268,12 @@ static void sdhci_set_power_reg(struct sdhci_host *host, unsigned char mode,
- 	mmc_regulator_set_ocr(mmc, mmc->supply.vmmc, vdd);
- 	spin_lock_irq(&host->lock);
- 
--	if (mode != MMC_POWER_OFF)
--		sdhci_writeb(host, SDHCI_POWER_ON, SDHCI_POWER_CONTROL);
--	else
--		sdhci_writeb(host, 0, SDHCI_POWER_CONTROL);
-+	if (!(mmc->caps2 & MMC_CAP2_FORCE_SET_PWR_CTRL)) {
-+		if (mode != MMC_POWER_OFF)
-+			sdhci_writeb(host, SDHCI_POWER_ON, SDHCI_POWER_CONTROL);
-+		else
-+			sdhci_writeb(host, 0, SDHCI_POWER_CONTROL);
-+	}
+@@ -2833,7 +2833,7 @@ static int sdhci_set_dma_mask(struct sdhci_host *host)
+ 	return ret;
  }
  
- void sdhci_set_power(struct sdhci_host *host, unsigned char mode,
-diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-index 45cde8cd39f2..0eee78d17722 100644
---- a/include/linux/mmc/host.h
-+++ b/include/linux/mmc/host.h
-@@ -303,6 +303,12 @@ struct mmc_host {
- #define MMC_CAP2_NO_WRITE_PROTECT (1 << 18)	/* No physical write protect pin, assume that card is always read-write */
- #define MMC_CAP2_NO_SDIO	(1 << 19)	/* Do not send SDIO commands during initialization */
+-int sdhci_add_host(struct sdhci_host *host)
++int sdhci_setup_host(struct sdhci_host *host)
+ {
+ 	struct mmc_host *mmc;
+ 	u32 caps[2] = {0, 0};
+@@ -3314,6 +3314,28 @@ int sdhci_add_host(struct sdhci_host *host)
+ 	 */
+ 	mmc->max_blk_count = (host->quirks & SDHCI_QUIRK_NO_MULTIBLOCK) ? 1 : 65535;
  
-+/*
-+ * For the host which needs to config its power control
-+ * register even it has regulators
-+ */
-+#define MMC_CAP2_FORCE_SET_PWR_CTRL	(1 << 20)
++	return 0;
 +
- 	mmc_pm_flag_t		pm_caps;	/* supported pm features */
++unreg:
++	if (!IS_ERR(mmc->supply.vqmmc))
++		regulator_disable(mmc->supply.vqmmc);
++undma:
++	if (host->align_buffer)
++		dma_free_coherent(mmc_dev(mmc), host->align_buffer_sz +
++				  host->adma_table_sz, host->align_buffer,
++				  host->align_addr);
++	host->adma_table = NULL;
++	host->align_buffer = NULL;
++
++	return ret;
++}
++EXPORT_SYMBOL_GPL(sdhci_setup_host);
++
++int __sdhci_add_host(struct sdhci_host *host)
++{
++	struct mmc_host *mmc = host->mmc;
++	int ret;
++
+ 	/*
+ 	 * Init tasklets.
+ 	 */
+@@ -3370,10 +3392,10 @@ unirq:
+ 	free_irq(host->irq, host);
+ untasklet:
+ 	tasklet_kill(&host->finish_tasklet);
+-unreg:
++
+ 	if (!IS_ERR(mmc->supply.vqmmc))
+ 		regulator_disable(mmc->supply.vqmmc);
+-undma:
++
+ 	if (host->align_buffer)
+ 		dma_free_coherent(mmc_dev(mmc), host->align_buffer_sz +
+ 				  host->adma_table_sz, host->align_buffer,
+@@ -3383,7 +3405,18 @@ undma:
  
- 	/* host specific block data */
+ 	return ret;
+ }
++EXPORT_SYMBOL_GPL(__sdhci_add_host);
++
++int sdhci_add_host(struct sdhci_host *host)
++{
++	int ret;
++
++	ret = sdhci_setup_host(host);
++	if (ret)
++		return ret;
+ 
++	return __sdhci_add_host(host);
++}
+ EXPORT_SYMBOL_GPL(sdhci_add_host);
+ 
+ void sdhci_remove_host(struct sdhci_host *host, int dead)
+diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+index 609f87ca536b..b16aec2faa2e 100644
+--- a/drivers/mmc/host/sdhci.h
++++ b/drivers/mmc/host/sdhci.h
+@@ -645,6 +645,8 @@ static inline void *sdhci_priv(struct sdhci_host *host)
+ }
+ 
+ extern void sdhci_card_detect(struct sdhci_host *host);
++extern int sdhci_setup_host(struct sdhci_host *host);
++extern int __sdhci_add_host(struct sdhci_host *host);
+ extern int sdhci_add_host(struct sdhci_host *host);
+ extern void sdhci_remove_host(struct sdhci_host *host, int dead);
+ extern void sdhci_send_command(struct sdhci_host *host,
 -- 
 1.9.1
 
