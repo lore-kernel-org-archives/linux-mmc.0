@@ -1,91 +1,79 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: [PATCH V2 41/54] mmc: mmc_test: Disable Command Queue while mmc_test is used
-Date: Wed, 29 Jun 2016 16:24:54 +0300
-Message-ID: <1467206707-30185-42-git-send-email-adrian.hunter@intel.com>
+Subject: [PATCH V2 47/54] mmc: block: Use local var for mqrq_cur
+Date: Wed, 29 Jun 2016 16:25:00 +0300
+Message-ID: <1467206707-30185-48-git-send-email-adrian.hunter@intel.com>
 References: <1467206707-30185-1-git-send-email-adrian.hunter@intel.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
 Received: from mga01.intel.com ([192.55.52.88]:48813 "EHLO mga01.intel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752502AbcF2Ncl (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 29 Jun 2016 09:32:41 -0400
+	id S1751962AbcF2Ncm (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 29 Jun 2016 09:32:42 -0400
 In-Reply-To: <1467206707-30185-1-git-send-email-adrian.hunter@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>
 Cc: linux-mmc <linux-mmc@vger.kernel.org>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Dorfman Konstantin <kdorfman@codeaurora.org>, David Griego <david.griego@linaro.org>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>
 
-Normal read and write commands may not be used while the command queue is
-enabled. Disable the Command Queue when mmc_test is probed and re-enable it
-when it is removed.
+A subsequent patch will remove 'mq->mqrq_cur'. Prepare for that by
+assigning it to a local variable.
 
 Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
 ---
- drivers/mmc/card/mmc_test.c | 13 +++++++++++++
- drivers/mmc/core/mmc.c      |  7 +++++++
- include/linux/mmc/card.h    |  1 +
- 3 files changed, 21 insertions(+)
+ drivers/mmc/card/block.c | 17 +++++++++--------
+ 1 file changed, 9 insertions(+), 8 deletions(-)
 
-diff --git a/drivers/mmc/card/mmc_test.c b/drivers/mmc/card/mmc_test.c
-index 5a8dc5a76e0d..7dee9e5a8cfb 100644
---- a/drivers/mmc/card/mmc_test.c
-+++ b/drivers/mmc/card/mmc_test.c
-@@ -3240,6 +3240,14 @@ static int mmc_test_probe(struct mmc_card *card)
- 	if (ret)
- 		return ret;
+diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+index 9762b8cda444..33179ac890ed 100644
+--- a/drivers/mmc/card/block.c
++++ b/drivers/mmc/card/block.c
+@@ -1987,6 +1987,7 @@ static int mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *rqc)
+ 	struct mmc_blk_request *brq;
+ 	int ret = 1, disable_multi = 0, retry = 0, type, retune_retry_done = 0;
+ 	enum mmc_blk_status status;
++	struct mmc_queue_req *mqrq_cur = mq->mqrq_cur;
+ 	struct mmc_queue_req *mq_rq;
+ 	struct request *req;
+ 	struct mmc_async_req *areq;
+@@ -2009,18 +2010,18 @@ static int mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *rqc)
+ 				!IS_ALIGNED(blk_rq_sectors(rqc), 8)) {
+ 				pr_err("%s: Transfer size is not 4KB sector size aligned\n",
+ 					rqc->rq_disk->disk_name);
+-				mq_rq = mq->mqrq_cur;
++				mq_rq = mqrq_cur;
+ 				req = rqc;
+ 				rqc = NULL;
+ 				goto cmd_abort;
+ 			}
  
-+	if (card->ext_csd.cmdq_en) {
-+		mmc_claim_host(card->host);
-+		ret = mmc_cmdq_disable(card);
-+		mmc_release_host(card->host);
-+		if (ret)
-+			return ret;
-+	}
-+
- 	dev_info(&card->dev, "Card claimed for testing.\n");
+ 			if (reqs >= packed_nr)
+-				mmc_blk_packed_hdr_wrq_prep(mq->mqrq_cur,
++				mmc_blk_packed_hdr_wrq_prep(mqrq_cur,
+ 							    card, mq);
+ 			else
+-				mmc_blk_rw_rq_prep(mq->mqrq_cur, card, 0, mq);
+-			areq = &mq->mqrq_cur->mmc_active;
++				mmc_blk_rw_rq_prep(mqrq_cur, card, 0, mq);
++			areq = &mqrq_cur->mmc_active;
+ 		} else
+ 			areq = NULL;
+ 		areq = mmc_start_req(card->host, areq, (int *) &status);
+@@ -2162,12 +2163,12 @@ static int mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *rqc)
+ 			/*
+ 			 * If current request is packed, it needs to put back.
+ 			 */
+-			if (mmc_packed_cmd(mq->mqrq_cur->cmd_type))
+-				mmc_blk_revert_packed_req(mq, mq->mqrq_cur);
++			if (mmc_packed_cmd(mqrq_cur->cmd_type))
++				mmc_blk_revert_packed_req(mq, mqrq_cur);
  
- 	return 0;
-@@ -3247,6 +3255,11 @@ static int mmc_test_probe(struct mmc_card *card)
- 
- static void mmc_test_remove(struct mmc_card *card)
- {
-+	if (card->reenable_cmdq) {
-+		mmc_claim_host(card->host);
-+		mmc_cmdq_enable(card);
-+		mmc_release_host(card->host);
-+	}
- 	mmc_test_free_result(card);
- 	mmc_test_free_dbgfs_file(card);
- }
-diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-index b5c4cf276b49..bb11797a74b2 100644
---- a/drivers/mmc/core/mmc.c
-+++ b/drivers/mmc/core/mmc.c
-@@ -1732,6 +1732,13 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
+-			mmc_blk_rw_rq_prep(mq->mqrq_cur, card, 0, mq);
++			mmc_blk_rw_rq_prep(mqrq_cur, card, 0, mq);
+ 			mmc_start_req(card->host,
+-				      &mq->mqrq_cur->mmc_active, NULL);
++				      &mqrq_cur->mmc_active, NULL);
+ 		}
  	}
  
- 	/*
-+	 * In some cases (e.g. RPMB or mmc_test), the Command Queue must be
-+	 * disabled for a time, so a flag is needed to indicate to re-enable the
-+	 * Command Queue.
-+	 */
-+	card->reenable_cmdq = card->ext_csd.cmdq_en;
-+
-+	/*
- 	 * The mandatory minimum values are defined for packed command.
- 	 * read: 5, write: 3
- 	 */
-diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
-index 476ccbe3f831..3d7434e48566 100644
---- a/include/linux/mmc/card.h
-+++ b/include/linux/mmc/card.h
-@@ -285,6 +285,7 @@ struct mmc_card {
- #define MMC_QUIRK_TRIM_BROKEN	(1<<12)		/* Skip trim */
- #define MMC_QUIRK_BROKEN_HPI	(1<<13)		/* Disable broken HPI support */
- 
-+	bool			reenable_cmdq;	/* Re-enable Command Queue */
- 
- 	unsigned int		erase_size;	/* erase size in sectors */
-  	unsigned int		erase_shift;	/* if erase unit is power 2 */
 -- 
 1.9.1
 
