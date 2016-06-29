@@ -1,79 +1,102 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: [GIT PULL] Update dw-mmc controller
-Date: Wed, 29 Jun 2016 10:42:55 +0900
-Message-ID: <5773279F.1080003@samsung.com>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH RFCv2 06/10] mmc: host: sdhci: don't set SDMA buffer
+ boundary in ADMA mode
+Date: Wed, 29 Jun 2016 13:55:49 +0300
+Message-ID: <5773A935.7050209@intel.com>
+References: <1467033757-32498-1-git-send-email-riteshh@codeaurora.org>
+ <1467033757-32498-7-git-send-email-riteshh@codeaurora.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout4.samsung.com ([203.254.224.34]:37790 "EHLO
-	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752455AbcF2Bm6 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 28 Jun 2016 21:42:58 -0400
-Received: from epcpsbgr3.samsung.com
- (u143.gpu120.samsung.co.kr [203.254.230.143])
- by mailout4.samsung.com (Oracle Communications Messaging Server 7.0.5.31.0
- 64bit (built May  5 2014))
- with ESMTP id <0O9I02E8CFFJ0G50@mailout4.samsung.com> for
- linux-mmc@vger.kernel.org; Wed, 29 Jun 2016 10:42:55 +0900 (KST)
+Received: from mga11.intel.com ([192.55.52.93]:27814 "EHLO mga11.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751160AbcF2LAF (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 29 Jun 2016 07:00:05 -0400
+In-Reply-To: <1467033757-32498-7-git-send-email-riteshh@codeaurora.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Shawn Lin <shawn.lin@rock-chips.com>, jerome.forissier@linaro.org, "sw0312.kim@samsung.com" <sw0312.kim@samsung.com>, Doug Anderson <dianders@chromium.org>, ben.dooks@codethink.co.uk, Jae hoon Chung <jh80.chung@gmail.com>
+To: Ritesh Harjani <riteshh@codeaurora.org>, ulf.hansson@linaro.org, linux-mmc@vger.kernel.org
+Cc: linux-arm-msm@vger.kernel.org, alex.lemberg@sandisk.com, mateusz.nowak@intel.com, Yuliy.Izrailov@sandisk.com, jh80.chung@samsung.com, dongas86@gmail.com, asutoshd@codeaurora.org, zhangfei.gao@gmail.com, sthumma@codeaurora.org, kdorfman@codeaurora.org, david.griego@linaro.org, stummala@codeaurora.org, venkatg@codeaurora.org, shawn.lin@rock-chips.com, Subhash Jadavani <subhashj@codeaurora.org>
 
-Dear Ulf,
+On 27/06/16 16:22, Ritesh Harjani wrote:
+> From: Subhash Jadavani <subhashj@codeaurora.org>
+> 
+> SDMA buffer boundary size parameter in block size register should only be
+> programmed if host controller DMA is operating in SDMA mode otherwise its
+> better not to set this parameter to avoid any side effect when DMA is
+> operating in ADMA mode operation.
 
-Could you pull these patches into your repository (next branch)?
+Pedantically, the SDHCI specification does not say the SDMA Buffer Boundary
+should not be set in ADMA mode.  All it says is that ADMA does not use it.
+In fact it is impossible to avoid writing to it because it is part of the
+Block Size register.  Unfortunately the value 0 does not mean "not used" but
+instead means the boundary is 4K whereas the value presently being written
+(7 which is the highest) means 512K.
 
-Best Regards,
-Jaehoon Chung
+Given that we have always been writing 7 to it, I don't see any reason to
+change.  Murphy's law says if we do change it, someone else's driver will break.
 
-The following changes since commit 466780648db4aed7722de91e9d9749c6c596=
-9327:
+However I presume you have hardware where value 7 doesn't work.  Can you
+clarify that?
 
-  mmc: sh_mmcif: Use a 10s timeout in the error recovery path (2016-06-=
-27 11:19:29 +0200)
+> 
+> Signed-off-by: Subhash Jadavani <subhashj@codeaurora.org>
+> [venkatg@codeaurora.org: fix trivial merge conflict]
+> Signed-off-by: Venkat Gopalakrishnan <venkatg@codeaurora.org>
+> ---
+>  drivers/mmc/host/sdhci.c | 23 +++++++++++++++--------
+>  1 file changed, 15 insertions(+), 8 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index 0e3d7c0..9f5cdaa 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -742,6 +742,17 @@ static void sdhci_set_timeout(struct sdhci_host *host, struct mmc_command *cmd)
+>  	}
+>  }
+>  
+> +static void sdhci_set_blk_size_reg(struct sdhci_host *host, unsigned int blksz,
+> +				   unsigned int sdma_boundary)
+> +{
+> +	if (host->flags & SDHCI_USE_ADMA)
+> +		sdhci_writew(host, SDHCI_MAKE_BLKSZ(0, blksz),
+> +			     SDHCI_BLOCK_SIZE);
+> +	else
+> +		sdhci_writew(host, SDHCI_MAKE_BLKSZ(sdma_boundary, blksz),
+> +			     SDHCI_BLOCK_SIZE);
+> +}
+> +
+>  static void sdhci_prepare_data(struct sdhci_host *host, struct mmc_command *cmd)
+>  {
+>  	u8 ctrl;
+> @@ -874,8 +885,7 @@ static void sdhci_prepare_data(struct sdhci_host *host, struct mmc_command *cmd)
+>  	sdhci_set_transfer_irqs(host);
+>  
+>  	/* Set the DMA boundary value and block size */
+> -	sdhci_writew(host, SDHCI_MAKE_BLKSZ(SDHCI_DEFAULT_BOUNDARY_ARG,
+> -		data->blksz), SDHCI_BLOCK_SIZE);
+> +	sdhci_set_blk_size_reg(host, data->blksz, SDHCI_DEFAULT_BOUNDARY_ARG);
+>  	sdhci_writew(host, data->blocks, SDHCI_BLOCK_COUNT);
+>  }
+>  
+> @@ -1935,14 +1945,11 @@ static int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode)
+>  		 */
+>  		if (cmd.opcode == MMC_SEND_TUNING_BLOCK_HS200) {
+>  			if (mmc->ios.bus_width == MMC_BUS_WIDTH_8)
+> -				sdhci_writew(host, SDHCI_MAKE_BLKSZ(7, 128),
+> -					     SDHCI_BLOCK_SIZE);
+> +				sdhci_set_blk_size_reg(host, 128, 7);
+>  			else if (mmc->ios.bus_width == MMC_BUS_WIDTH_4)
+> -				sdhci_writew(host, SDHCI_MAKE_BLKSZ(7, 64),
+> -					     SDHCI_BLOCK_SIZE);
+> +				sdhci_set_blk_size_reg(host, 64, 7);
+>  		} else {
+> -			sdhci_writew(host, SDHCI_MAKE_BLKSZ(7, 64),
+> -				     SDHCI_BLOCK_SIZE);
+> +			sdhci_set_blk_size_reg(host, 64, 7);
+>  		}
+>  
+>  		/*
+> 
 
-are available in the git repository at:
-
-  https://github.com/jh80chung/dw-mmc.git for-ulf
-
-for you to fetch changes up to 545585efee538cac5202b415a3d0c12b4556e96f=
-:
-
-  mmc: dw_mmc: fix unmap sg twice when finding data err (2016-06-29 10:=
-39:05 +0900)
-
-----------------------------------------------------------------
-Ben Dooks (1):
-      mmc: dw_mmc: fix 32bit little-endian access of des1 field
-
-Doug Anderson (2):
-      mmc: dw_mmc: Consider HLE errors to be data and command errors
-      mmc: dw_mmc: Wait for data transfer after response errors.
-
-Jaehoon Chung (4):
-      mmc: dw_mmc: exynos: fix the NULL pointer dereference error
-      mmc: dw_mmc: remove the quirks flags
-      mmc: dw_mmc: add the card write threshold for HS400 mode
-      mmc: dw_mmc: prevent to set the wrong value
-
-J=C3=A9r=C3=B4me Forissier (1):
-      mmc: dw_mmc: k3: add MMC_CAP_CMD23
-
-Seung-Woo Kim (1):
-      mmc: dw_mmc: remove UBSAN warning in dw_mci_setup_bus()
-
-Shawn Lin (3):
-      mmc: dw_mmc: remove redundant of set_bit and clear_bit
-      mmc: dw_mmc: check card present before starting request
-      mmc: dw_mmc: fix unmap sg twice when finding data err
-
- drivers/mmc/host/dw_mmc-exynos.c   |   2 +-
- drivers/mmc/host/dw_mmc-k3.c       |   7 ++
- drivers/mmc/host/dw_mmc-rockchip.c |   3 -
- drivers/mmc/host/dw_mmc.c          | 157 ++++++++++++++++++++++-------=
---------
- drivers/mmc/host/dw_mmc.h          |  10 +--
- include/linux/mmc/dw_mmc.h         |   9 ---
- 6 files changed, 108 insertions(+), 80 deletions(-)
