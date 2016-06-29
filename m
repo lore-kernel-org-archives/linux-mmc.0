@@ -1,89 +1,38 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: [PATCH V2 50/54] mmc: queue: Add a function to control wake-up on new requests
-Date: Wed, 29 Jun 2016 16:25:03 +0300
-Message-ID: <1467206707-30185-51-git-send-email-adrian.hunter@intel.com>
+Subject: [PATCH V2 29/54] mmc: sdhci-pci: Set MMC_CAP_CMD_DURING_TFR for Intel eMMC controllers
+Date: Wed, 29 Jun 2016 16:24:42 +0300
+Message-ID: <1467206707-30185-30-git-send-email-adrian.hunter@intel.com>
 References: <1467206707-30185-1-git-send-email-adrian.hunter@intel.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga14.intel.com ([192.55.52.115]:36983 "EHLO mga14.intel.com"
+Received: from mga01.intel.com ([192.55.52.88]:12766 "EHLO mga01.intel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752501AbcF2Nck (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 29 Jun 2016 09:32:40 -0400
+	id S1752013AbcF2Nch (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 29 Jun 2016 09:32:37 -0400
 In-Reply-To: <1467206707-30185-1-git-send-email-adrian.hunter@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>
 Cc: linux-mmc <linux-mmc@vger.kernel.org>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Dorfman Konstantin <kdorfman@codeaurora.org>, David Griego <david.griego@linaro.org>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>
 
-Add a function to control wake-up on new requests. This will enable
-Software Command Queuing to choose whether or not to queue new
-requests immediately or wait for the current task to complete.
+Set MMC_CAP_CMD_DURING_TFR for Intel BYT and related eMMC host controllers.
 
 Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
 ---
- drivers/mmc/card/queue.c | 16 ++++++++++++++++
- drivers/mmc/card/queue.h |  2 ++
- 2 files changed, 18 insertions(+)
+ drivers/mmc/host/sdhci-pci-core.c | 1 +
+ 1 file changed, 1 insertion(+)
 
-diff --git a/drivers/mmc/card/queue.c b/drivers/mmc/card/queue.c
-index 4e134884a183..0781578fc8b6 100644
---- a/drivers/mmc/card/queue.c
-+++ b/drivers/mmc/card/queue.c
-@@ -94,6 +94,7 @@ static int mmc_queue_thread(void *d)
- 		cntx->is_waiting_last_req = false;
- 		cntx->is_new_req = false;
- 		if (!req) {
-+			mq->is_new_req = false;
- 			/*
- 			 * Dispatch queue is empty so set flags for
- 			 * mmc_request_fn() to wake us up.
-@@ -144,6 +145,8 @@ static void mmc_request_fn(struct request_queue *q)
- 		return;
- 	}
- 
-+	mq->is_new_req = true;
-+
- 	cntx = &mq->card->host->context_info;
- 
- 	if (cntx->is_waiting_last_req) {
-@@ -155,6 +158,19 @@ static void mmc_request_fn(struct request_queue *q)
- 		wake_up_process(mq->thread);
- }
- 
-+void mmc_queue_set_wake(struct mmc_queue *mq, bool wake_me)
-+{
-+	struct mmc_context_info *cntx = &mq->card->host->context_info;
-+	struct request_queue *q = mq->queue;
-+
-+	if (cntx->is_waiting_last_req != wake_me) {
-+		spin_lock_irq(q->queue_lock);
-+		cntx->is_waiting_last_req = wake_me;
-+		cntx->is_new_req = wake_me && mq->is_new_req;
-+		spin_unlock_irq(q->queue_lock);
-+	}
-+}
-+
- static struct scatterlist *mmc_alloc_sg(int sg_len, int *err)
+diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-pci-core.c
+index 6fbf7086d0b0..358ac0978cde 100644
+--- a/drivers/mmc/host/sdhci-pci-core.c
++++ b/drivers/mmc/host/sdhci-pci-core.c
+@@ -356,6 +356,7 @@ static int byt_emmc_probe_slot(struct sdhci_pci_slot *slot)
  {
- 	struct scatterlist *sg;
-diff --git a/drivers/mmc/card/queue.h b/drivers/mmc/card/queue.h
-index 1afd5dafd46d..a6d5b0f94662 100644
---- a/drivers/mmc/card/queue.h
-+++ b/drivers/mmc/card/queue.h
-@@ -52,6 +52,7 @@ struct mmc_queue {
- 	unsigned int		flags;
- #define MMC_QUEUE_SUSPENDED	(1 << 0)
- 	bool			asleep;
-+	bool			is_new_req;
- 
- 	int			(*issue_fn)(struct mmc_queue *, struct request *);
- 	void			*data;
-@@ -81,5 +82,6 @@ extern int mmc_access_rpmb(struct mmc_queue *);
- extern struct mmc_queue_req *mmc_queue_req_find(struct mmc_queue *,
- 						struct request *);
- extern void mmc_queue_req_free(struct mmc_queue *, struct mmc_queue_req *);
-+extern void mmc_queue_set_wake(struct mmc_queue *, bool);
- 
- #endif
+ 	slot->host->mmc->caps |= MMC_CAP_8_BIT_DATA | MMC_CAP_NONREMOVABLE |
+ 				 MMC_CAP_HW_RESET | MMC_CAP_1_8V_DDR |
++				 MMC_CAP_CMD_DURING_TFR |
+ 				 MMC_CAP_WAIT_WHILE_BUSY;
+ 	slot->host->mmc->caps2 |= MMC_CAP2_HC_ERASE_SZ;
+ 	slot->hw_reset = sdhci_pci_int_hw_reset;
 -- 
 1.9.1
 
