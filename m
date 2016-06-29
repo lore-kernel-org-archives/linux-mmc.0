@@ -1,67 +1,135 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: [PATCH V2 34/54] mmc: queue: Factor out mmc_queue_alloc_sgs()
-Date: Wed, 29 Jun 2016 16:24:47 +0300
-Message-ID: <1467206707-30185-35-git-send-email-adrian.hunter@intel.com>
+Subject: [PATCH V2 39/54] mmc: mmc: Add Command Queue definitions
+Date: Wed, 29 Jun 2016 16:24:52 +0300
+Message-ID: <1467206707-30185-40-git-send-email-adrian.hunter@intel.com>
 References: <1467206707-30185-1-git-send-email-adrian.hunter@intel.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga01.intel.com ([192.55.52.88]:8141 "EHLO mga01.intel.com"
+Received: from mga01.intel.com ([192.55.52.88]:12766 "EHLO mga01.intel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752013AbcF2Ncj (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 29 Jun 2016 09:32:39 -0400
+	id S1752459AbcF2Nck (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 29 Jun 2016 09:32:40 -0400
 In-Reply-To: <1467206707-30185-1-git-send-email-adrian.hunter@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>
 Cc: linux-mmc <linux-mmc@vger.kernel.org>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Dorfman Konstantin <kdorfman@codeaurora.org>, David Griego <david.griego@linaro.org>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>
 
-In preparation for supporting a queue of requests, factor out
-mmc_queue_alloc_sgs().
+Add definitions relating to Command Queuing.
 
 Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
 ---
- drivers/mmc/card/queue.c | 22 ++++++++++++++++------
- 1 file changed, 16 insertions(+), 6 deletions(-)
+ drivers/mmc/core/mmc.c   | 19 +++++++++++++++++++
+ include/linux/mmc/card.h |  3 +++
+ include/linux/mmc/mmc.h  | 17 +++++++++++++++++
+ 3 files changed, 39 insertions(+)
 
-diff --git a/drivers/mmc/card/queue.c b/drivers/mmc/card/queue.c
-index 9927eda50cbb..3c41bc58510b 100644
---- a/drivers/mmc/card/queue.c
-+++ b/drivers/mmc/card/queue.c
-@@ -232,6 +232,21 @@ static int mmc_queue_alloc_bounce_sgs(struct mmc_queue *mq,
- 	return ret;
- }
- 
-+static int mmc_queue_alloc_sgs(struct mmc_queue *mq, int max_segs)
-+{
-+	struct mmc_queue_req *mqrq_cur = mq->mqrq_cur;
-+	struct mmc_queue_req *mqrq_prev = mq->mqrq_prev;
-+	int ret;
-+
-+	mqrq_cur->sg = mmc_alloc_sg(max_segs, &ret);
-+	if (ret)
-+		return ret;
-+
-+	mqrq_prev->sg = mmc_alloc_sg(max_segs, &ret);
-+
-+	return ret;
-+}
-+
- /**
-  * mmc_init_queue - initialise a queue structure.
-  * @mq: mmc queue
-@@ -304,12 +319,7 @@ int mmc_init_queue(struct mmc_queue *mq, struct mmc_card *card,
- 		blk_queue_max_segments(mq->queue, host->max_segs);
- 		blk_queue_max_segment_size(mq->queue, host->max_seg_size);
- 
--		mqrq_cur->sg = mmc_alloc_sg(host->max_segs, &ret);
--		if (ret)
--			goto cleanup_queue;
--
--
--		mqrq_prev->sg = mmc_alloc_sg(host->max_segs, &ret);
-+		ret = mmc_queue_alloc_sgs(mq, host->max_segs);
- 		if (ret)
- 			goto cleanup_queue;
+diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+index 548504024587..b5c4cf276b49 100644
+--- a/drivers/mmc/core/mmc.c
++++ b/drivers/mmc/core/mmc.c
+@@ -615,6 +615,23 @@ static int mmc_decode_ext_csd(struct mmc_card *card, u8 *ext_csd)
+ 			(ext_csd[EXT_CSD_SUPPORTED_MODE] & 0x1) &&
+ 			!(ext_csd[EXT_CSD_FW_CONFIG] & 0x1);
  	}
++
++	/* eMMC v5.1 or later */
++	if (card->ext_csd.rev >= 8) {
++		card->ext_csd.cmdq_support = ext_csd[EXT_CSD_CMDQ_SUPPORT] &
++					     EXT_CSD_CMDQ_SUPPORTED;
++		card->ext_csd.cmdq_depth = (ext_csd[EXT_CSD_CMDQ_DEPTH] &
++					    EXT_CSD_CMDQ_DEPTH_MASK) + 1;
++		if (card->ext_csd.cmdq_depth <= 2) {
++			card->ext_csd.cmdq_support = false;
++			card->ext_csd.cmdq_depth = 0;
++		}
++		if (card->ext_csd.cmdq_support) {
++			pr_debug("%s: Command Queue supported depth %u\n",
++				 mmc_hostname(card->host),
++				 card->ext_csd.cmdq_depth);
++		}
++	}
+ out:
+ 	return err;
+ }
+@@ -749,6 +766,7 @@ MMC_DEV_ATTR(enhanced_area_offset, "%llu\n",
+ MMC_DEV_ATTR(enhanced_area_size, "%u\n", card->ext_csd.enhanced_area_size);
+ MMC_DEV_ATTR(raw_rpmb_size_mult, "%#x\n", card->ext_csd.raw_rpmb_size_mult);
+ MMC_DEV_ATTR(rel_sectors, "%#x\n", card->ext_csd.rel_sectors);
++MMC_DEV_ATTR(cmdq_en, "%d\n", card->ext_csd.cmdq_en);
+ 
+ static ssize_t mmc_fwrev_show(struct device *dev,
+ 			      struct device_attribute *attr,
+@@ -784,6 +802,7 @@ static struct attribute *mmc_std_attrs[] = {
+ 	&dev_attr_enhanced_area_size.attr,
+ 	&dev_attr_raw_rpmb_size_mult.attr,
+ 	&dev_attr_rel_sectors.attr,
++	&dev_attr_cmdq_en.attr,
+ 	NULL,
+ };
+ ATTRIBUTE_GROUPS(mmc_std);
+diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
+index d8673ca968ba..476ccbe3f831 100644
+--- a/include/linux/mmc/card.h
++++ b/include/linux/mmc/card.h
+@@ -89,6 +89,9 @@ struct mmc_ext_csd {
+ 	unsigned int		boot_ro_lock;		/* ro lock support */
+ 	bool			boot_ro_lockable;
+ 	bool			ffu_capable;	/* Firmware upgrade support */
++	bool			cmdq_en;	/* Command Queue enabled */
++	bool			cmdq_support;	/* Command Queue supported */
++	unsigned int		cmdq_depth;	/* Command Queue depth */
+ #define MMC_FIRMWARE_LEN 8
+ 	u8			fwrev[MMC_FIRMWARE_LEN];  /* FW version */
+ 	u8			raw_exception_status;	/* 54 */
+diff --git a/include/linux/mmc/mmc.h b/include/linux/mmc/mmc.h
+index c376209c70ef..672730acc705 100644
+--- a/include/linux/mmc/mmc.h
++++ b/include/linux/mmc/mmc.h
+@@ -84,6 +84,13 @@
+ #define MMC_APP_CMD              55   /* ac   [31:16] RCA        R1  */
+ #define MMC_GEN_CMD              56   /* adtc [0] RD/WR          R1  */
+ 
++  /* class 11 */
++#define MMC_QUE_TASK_PARAMS      44   /* ac   [20:16] task id    R1  */
++#define MMC_QUE_TASK_ADDR        45   /* ac   [31:0] data addr   R1  */
++#define MMC_EXECUTE_READ_TASK    46   /* adtc [20:16] task id    R1  */
++#define MMC_EXECUTE_WRITE_TASK   47   /* adtc [20:16] task id    R1  */
++#define MMC_CMDQ_TASK_MGMT       48   /* ac   [20:16] task id    R1b */
++
+ static inline bool mmc_op_multi(u32 opcode)
+ {
+ 	return opcode == MMC_WRITE_MULTIPLE_BLOCK ||
+@@ -272,6 +279,7 @@ struct _mmc_csd {
+  * EXT_CSD fields
+  */
+ 
++#define EXT_CSD_CMDQ_MODE_EN		15	/* R/W */
+ #define EXT_CSD_FLUSH_CACHE		32      /* W */
+ #define EXT_CSD_CACHE_CTRL		33      /* R/W */
+ #define EXT_CSD_POWER_OFF_NOTIFICATION	34	/* R/W */
+@@ -331,6 +339,8 @@ struct _mmc_csd {
+ #define EXT_CSD_CACHE_SIZE		249	/* RO, 4 bytes */
+ #define EXT_CSD_PWR_CL_DDR_200_360	253	/* RO */
+ #define EXT_CSD_FIRMWARE_VERSION	254	/* RO, 8 bytes */
++#define EXT_CSD_CMDQ_DEPTH		307	/* RO */
++#define EXT_CSD_CMDQ_SUPPORT		308	/* RO */
+ #define EXT_CSD_SUPPORTED_MODE		493	/* RO */
+ #define EXT_CSD_TAG_UNIT_SIZE		498	/* RO */
+ #define EXT_CSD_DATA_TAG_SUPPORT	499	/* RO */
+@@ -438,6 +448,13 @@ struct _mmc_csd {
+ #define EXT_CSD_MANUAL_BKOPS_MASK	0x01
+ 
+ /*
++ * Command Queue
++ */
++#define EXT_CSD_CMDQ_MODE_ENABLED	BIT(0)
++#define EXT_CSD_CMDQ_DEPTH_MASK		GENMASK(4, 0)
++#define EXT_CSD_CMDQ_SUPPORTED		BIT(0)
++
++/*
+  * MMC_SWITCH access modes
+  */
+ 
 -- 
 1.9.1
 
