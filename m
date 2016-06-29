@@ -1,76 +1,90 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: [PATCH V2 52/54] mmc: mmc: Enable Software Command Queuing
-Date: Wed, 29 Jun 2016 16:25:05 +0300
-Message-ID: <1467206707-30185-53-git-send-email-adrian.hunter@intel.com>
+Subject: [PATCH V2 32/54] mmc: queue: Factor out mmc_queue_alloc_bounce_bufs()
+Date: Wed, 29 Jun 2016 16:24:45 +0300
+Message-ID: <1467206707-30185-33-git-send-email-adrian.hunter@intel.com>
 References: <1467206707-30185-1-git-send-email-adrian.hunter@intel.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga14.intel.com ([192.55.52.115]:47456 "EHLO mga14.intel.com"
+Received: from mga01.intel.com ([192.55.52.88]:48813 "EHLO mga01.intel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752554AbcF2Ncx (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 29 Jun 2016 09:32:53 -0400
+	id S1752138AbcF2Nci (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 29 Jun 2016 09:32:38 -0400
 In-Reply-To: <1467206707-30185-1-git-send-email-adrian.hunter@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>
 Cc: linux-mmc <linux-mmc@vger.kernel.org>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Dorfman Konstantin <kdorfman@codeaurora.org>, David Griego <david.griego@linaro.org>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>
 
-Enable the Command Queue if the host controller supports Software Command
-Queuing. It is not compatible with Packed Commands, so do not enable that
-at the same time.
+In preparation for supporting a queue of requests, factor out
+mmc_queue_alloc_bounce_bufs().
 
 Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
 ---
- drivers/mmc/core/mmc.c   | 17 ++++++++++++++++-
- include/linux/mmc/host.h |  1 +
- 2 files changed, 17 insertions(+), 1 deletion(-)
+ drivers/mmc/card/queue.c | 45 +++++++++++++++++++++++++++------------------
+ 1 file changed, 27 insertions(+), 18 deletions(-)
 
-diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-index bb11797a74b2..08db43409c16 100644
---- a/drivers/mmc/core/mmc.c
-+++ b/drivers/mmc/core/mmc.c
-@@ -1731,6 +1731,20 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
- 		}
- 	}
+diff --git a/drivers/mmc/card/queue.c b/drivers/mmc/card/queue.c
+index 7469d0d99027..5e60216ca7d7 100644
+--- a/drivers/mmc/card/queue.c
++++ b/drivers/mmc/card/queue.c
+@@ -183,6 +183,31 @@ static void mmc_queue_setup_discard(struct request_queue *q,
+ 		queue_flag_set_unlocked(QUEUE_FLAG_SECDISCARD, q);
+ }
  
-+	/* Enable Command Queue if supported */
-+	card->ext_csd.cmdq_en = false;
-+	if (card->ext_csd.cmdq_support && host->caps & MMC_CAP_SWCMDQ) {
-+		err = mmc_cmdq_enable(card);
-+		if (err && err != -EBADMSG)
-+			goto free_card;
-+		if (err) {
-+			pr_warn("%s: Enabling CMDQ failed\n",
-+				mmc_hostname(card->host));
-+			card->ext_csd.cmdq_support = false;
-+			card->ext_csd.cmdq_depth = 0;
-+			err = 0;
-+		}
++static bool mmc_queue_alloc_bounce_bufs(struct mmc_queue *mq,
++					unsigned int bouncesz)
++{
++	struct mmc_queue_req *mqrq_cur = mq->mqrq_cur;
++	struct mmc_queue_req *mqrq_prev = mq->mqrq_prev;
++
++	mqrq_cur->bounce_buf = kmalloc(bouncesz, GFP_KERNEL);
++	if (!mqrq_cur->bounce_buf) {
++		pr_warn("%s: unable to allocate bounce cur buffer\n",
++			mmc_card_name(mq->card));
++		return false;
 +	}
- 	/*
- 	 * In some cases (e.g. RPMB or mmc_test), the Command Queue must be
- 	 * disabled for a time, so a flag is needed to indicate to re-enable the
-@@ -1744,7 +1758,8 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
- 	 */
- 	if (card->ext_csd.max_packed_writes >= 3 &&
- 	    card->ext_csd.max_packed_reads >= 5 &&
--	    host->caps2 & MMC_CAP2_PACKED_CMD) {
-+	    host->caps2 & MMC_CAP2_PACKED_CMD &&
-+	    !card->ext_csd.cmdq_en) {
- 		err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
- 				EXT_CSD_EXP_EVENTS_CTRL,
- 				EXT_CSD_PACKED_EVENT_EN,
-diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-index 426288dc94a2..bd693a2f17ec 100644
---- a/include/linux/mmc/host.h
-+++ b/include/linux/mmc/host.h
-@@ -280,6 +280,7 @@ struct mmc_host {
- #define MMC_CAP_DRIVER_TYPE_A	(1 << 23)	/* Host supports Driver Type A */
- #define MMC_CAP_DRIVER_TYPE_C	(1 << 24)	/* Host supports Driver Type C */
- #define MMC_CAP_DRIVER_TYPE_D	(1 << 25)	/* Host supports Driver Type D */
-+#define MMC_CAP_SWCMDQ		(1 << 28)	/* Software Command Queue */
- #define MMC_CAP_CMD_DURING_TFR	(1 << 29)	/* Commands during data transfer */
- #define MMC_CAP_CMD23		(1 << 30)	/* CMD23 supported. */
- #define MMC_CAP_HW_RESET	(1 << 31)	/* Hardware reset */
++
++	mqrq_prev->bounce_buf = kmalloc(bouncesz, GFP_KERNEL);
++	if (!mqrq_prev->bounce_buf) {
++		pr_warn("%s: unable to allocate bounce prev buffer\n",
++			mmc_card_name(mq->card));
++		kfree(mqrq_cur->bounce_buf);
++		mqrq_cur->bounce_buf = NULL;
++		return false;
++	}
++
++	return true;
++}
++
+ /**
+  * mmc_init_queue - initialise a queue structure.
+  * @mq: mmc queue
+@@ -232,24 +257,8 @@ int mmc_init_queue(struct mmc_queue *mq, struct mmc_card *card,
+ 		if (bouncesz > (host->max_blk_count * 512))
+ 			bouncesz = host->max_blk_count * 512;
+ 
+-		if (bouncesz > 512) {
+-			mqrq_cur->bounce_buf = kmalloc(bouncesz, GFP_KERNEL);
+-			if (!mqrq_cur->bounce_buf) {
+-				pr_warn("%s: unable to allocate bounce cur buffer\n",
+-					mmc_card_name(card));
+-			} else {
+-				mqrq_prev->bounce_buf =
+-						kmalloc(bouncesz, GFP_KERNEL);
+-				if (!mqrq_prev->bounce_buf) {
+-					pr_warn("%s: unable to allocate bounce prev buffer\n",
+-						mmc_card_name(card));
+-					kfree(mqrq_cur->bounce_buf);
+-					mqrq_cur->bounce_buf = NULL;
+-				}
+-			}
+-		}
+-
+-		if (mqrq_cur->bounce_buf && mqrq_prev->bounce_buf) {
++		if (bouncesz > 512 &&
++		    mmc_queue_alloc_bounce_bufs(mq, bouncesz)) {
+ 			blk_queue_bounce_limit(mq->queue, BLK_BOUNCE_ANY);
+ 			blk_queue_max_hw_sectors(mq->queue, bouncesz / 512);
+ 			blk_queue_max_segments(mq->queue, bouncesz / 512);
 -- 
 1.9.1
 
