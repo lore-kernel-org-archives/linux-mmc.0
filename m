@@ -1,59 +1,61 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: [PATCH V2 48/54] mmc: block: Pass mqrq to mmc_blk_prep_packed_list()
-Date: Wed, 29 Jun 2016 16:25:01 +0300
-Message-ID: <1467206707-30185-49-git-send-email-adrian.hunter@intel.com>
+Subject: [PATCH V2 46/54] mmc: block: Fix 4K native sector check
+Date: Wed, 29 Jun 2016 16:24:59 +0300
+Message-ID: <1467206707-30185-47-git-send-email-adrian.hunter@intel.com>
 References: <1467206707-30185-1-git-send-email-adrian.hunter@intel.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga14.intel.com ([192.55.52.115]:36983 "EHLO mga14.intel.com"
+Received: from mga01.intel.com ([192.55.52.88]:8141 "EHLO mga01.intel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752066AbcF2Nci (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 29 Jun 2016 09:32:38 -0400
+	id S1752554AbcF2Ncm (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 29 Jun 2016 09:32:42 -0400
 In-Reply-To: <1467206707-30185-1-git-send-email-adrian.hunter@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>
 Cc: linux-mmc <linux-mmc@vger.kernel.org>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Dorfman Konstantin <kdorfman@codeaurora.org>, David Griego <david.griego@linaro.org>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>
 
-A subsequent patch will remove 'mq->mqrq_cur'. Prepare for that by
-passing mqrq to mmc_blk_prep_packed_list().
+The 4K native sector check does not allow for the 'do' loop nor the
+variables used after the 'cmd_abort' label.
+
+'brq' and 'req' get reassigned in the 'do' loop, so the check must not
+assume what their values are. After the 'cmd_abort' label, 'mq_rq' and
+'req' are used, but 'rqc' must be NULL otherwise it can be started again.
 
 Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
 ---
- drivers/mmc/card/block.c | 9 +++++----
- 1 file changed, 5 insertions(+), 4 deletions(-)
+ drivers/mmc/card/block.c | 8 +++++---
+ 1 file changed, 5 insertions(+), 3 deletions(-)
 
 diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
-index 33179ac890ed..e375a54d011d 100644
+index cbac13f9e082..9762b8cda444 100644
 --- a/drivers/mmc/card/block.c
 +++ b/drivers/mmc/card/block.c
-@@ -1693,13 +1693,14 @@ static inline u8 mmc_calc_packed_hdr_segs(struct request_queue *q,
- 	return nr_segs;
- }
- 
--static u8 mmc_blk_prep_packed_list(struct mmc_queue *mq, struct request *req)
-+static u8 mmc_blk_prep_packed_list(struct mmc_queue *mq,
-+				   struct mmc_queue_req *mqrq)
+@@ -1984,11 +1984,11 @@ static int mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *rqc)
  {
- 	struct request_queue *q = mq->queue;
- 	struct mmc_card *card = mq->card;
-+	struct request *req = mqrq->req;
- 	struct request *cur = req, *next = NULL;
  	struct mmc_blk_data *md = mq->data;
--	struct mmc_queue_req *mqrq = mq->mqrq_cur;
- 	bool en_rel_wr = card->ext_csd.rel_param & EXT_CSD_WR_REL_PARAM_EN;
- 	unsigned int req_sectors = 0, phys_segments = 0;
- 	unsigned int max_blk_count, max_phys_segs;
-@@ -1997,8 +1998,8 @@ static int mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *rqc)
- 	if (!rqc && !mq->mqrq_prev->req)
- 		return 0;
+ 	struct mmc_card *card = md->queue.card;
+-	struct mmc_blk_request *brq = &mq->mqrq_cur->brq;
++	struct mmc_blk_request *brq;
+ 	int ret = 1, disable_multi = 0, retry = 0, type, retune_retry_done = 0;
+ 	enum mmc_blk_status status;
+ 	struct mmc_queue_req *mq_rq;
+-	struct request *req = rqc;
++	struct request *req;
+ 	struct mmc_async_req *areq;
+ 	const u8 packed_nr = 2;
+ 	u8 reqs = 0;
+@@ -2008,8 +2008,10 @@ static int mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *rqc)
+ 			if (mmc_large_sector(card) &&
+ 				!IS_ALIGNED(blk_rq_sectors(rqc), 8)) {
+ 				pr_err("%s: Transfer size is not 4KB sector size aligned\n",
+-					req->rq_disk->disk_name);
++					rqc->rq_disk->disk_name);
+ 				mq_rq = mq->mqrq_cur;
++				req = rqc;
++				rqc = NULL;
+ 				goto cmd_abort;
+ 			}
  
--	if (rqc)
--		reqs = mmc_blk_prep_packed_list(mq, rqc);
-+	if (mqrq_cur)
-+		reqs = mmc_blk_prep_packed_list(mq, mqrq_cur);
- 
- 	do {
- 		if (rqc) {
 -- 
 1.9.1
 
