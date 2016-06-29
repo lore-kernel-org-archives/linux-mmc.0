@@ -1,12 +1,12 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: [PATCH V2 01/54] mmc: sdhci: Do not call implementations of mmc host ops directly
-Date: Wed, 29 Jun 2016 16:24:14 +0300
-Message-ID: <1467206707-30185-2-git-send-email-adrian.hunter@intel.com>
+Subject: [PATCH V2 02/54] mmc: sdhci: Split sdhci_add_host()
+Date: Wed, 29 Jun 2016 16:24:15 +0300
+Message-ID: <1467206707-30185-3-git-send-email-adrian.hunter@intel.com>
 References: <1467206707-30185-1-git-send-email-adrian.hunter@intel.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
 Received: from mga01.intel.com ([192.55.52.88]:13035 "EHLO mga01.intel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751962AbcF2N32 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	id S1751982AbcF2N32 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
 	Wed, 29 Jun 2016 09:29:28 -0400
 In-Reply-To: <1467206707-30185-1-git-send-email-adrian.hunter@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
@@ -14,121 +14,113 @@ List-Id: linux-mmc@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>
 Cc: linux-mmc <linux-mmc@vger.kernel.org>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Dorfman Konstantin <kdorfman@codeaurora.org>, David Griego <david.griego@linaro.org>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>
 
-Drivers must be able to provide their own implementations for mmc host
-operations. Consequently, SDHCI should call those not the default
-implementations. Do that by calling indirectly through the mmc host ops
-function pointers.
+Split sdhci-add_host() in order to further our objective to make
+sdhci into a library.
+
+The split divides code that sets up mmc and sdhci parameters, from
+code that actually activates things - such as tasklet initialization,
+requesting the irq, and adding (and starting) the host.
+
+This gives drivers an opportunity to change various settings before
+committing to start the host.
+
+Drivers can continue to call sdhci_add_host() but drivers that want
+to take advantage of the split instead call sdhci_setup_host() followed
+by __sdhci_add_host().
 
 Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
 ---
- drivers/mmc/host/sdhci.c | 28 ++++++++++++++++------------
- 1 file changed, 16 insertions(+), 12 deletions(-)
+ drivers/mmc/host/sdhci.c | 39 ++++++++++++++++++++++++++++++++++++---
+ drivers/mmc/host/sdhci.h |  2 ++
+ 2 files changed, 38 insertions(+), 3 deletions(-)
 
 diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 15bdbcb99170..7009c862ca9b 100644
+index 7009c862ca9b..22061faf7fa4 100644
 --- a/drivers/mmc/host/sdhci.c
 +++ b/drivers/mmc/host/sdhci.c
-@@ -46,9 +46,7 @@ static unsigned int debug_quirks2;
- static void sdhci_finish_data(struct sdhci_host *);
- 
- static void sdhci_finish_command(struct sdhci_host *);
--static int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode);
- static void sdhci_enable_preset_value(struct sdhci_host *host, bool enable);
--static int sdhci_get_cd(struct mmc_host *mmc);
- 
- static void sdhci_dumpregs(struct sdhci_host *host)
- {
-@@ -193,7 +191,9 @@ EXPORT_SYMBOL_GPL(sdhci_reset);
- static void sdhci_do_reset(struct sdhci_host *host, u8 mask)
- {
- 	if (host->quirks & SDHCI_QUIRK_NO_CARD_NO_RESET) {
--		if (!sdhci_get_cd(host->mmc))
-+		struct mmc_host *mmc = host->mmc;
-+
-+		if (!mmc->ops->get_cd(mmc))
- 			return;
- 	}
- 
-@@ -210,10 +210,10 @@ static void sdhci_do_reset(struct sdhci_host *host, u8 mask)
- 	}
+@@ -2833,7 +2833,7 @@ static int sdhci_set_dma_mask(struct sdhci_host *host)
+ 	return ret;
  }
  
--static void sdhci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios);
--
- static void sdhci_init(struct sdhci_host *host, int soft)
+-int sdhci_add_host(struct sdhci_host *host)
++int sdhci_setup_host(struct sdhci_host *host)
  {
-+	struct mmc_host *mmc = host->mmc;
+ 	struct mmc_host *mmc;
+ 	u32 caps[2] = {0, 0};
+@@ -3314,6 +3314,28 @@ int sdhci_add_host(struct sdhci_host *host)
+ 	 */
+ 	mmc->max_blk_count = (host->quirks & SDHCI_QUIRK_NO_MULTIBLOCK) ? 1 : 65535;
+ 
++	return 0;
 +
- 	if (soft)
- 		sdhci_do_reset(host, SDHCI_RESET_CMD|SDHCI_RESET_DATA);
- 	else
-@@ -231,7 +231,7 @@ static void sdhci_init(struct sdhci_host *host, int soft)
- 	if (soft) {
- 		/* force clock reconfiguration */
- 		host->clock = 0;
--		sdhci_set_ios(host->mmc, &host->mmc->ios);
-+		mmc->ops->set_ios(mmc, &mmc->ios);
- 	}
++unreg:
++	if (!IS_ERR(mmc->supply.vqmmc))
++		regulator_disable(mmc->supply.vqmmc);
++undma:
++	if (host->align_buffer)
++		dma_free_coherent(mmc_dev(mmc), host->align_buffer_sz +
++				  host->adma_table_sz, host->align_buffer,
++				  host->align_addr);
++	host->adma_table = NULL;
++	host->align_buffer = NULL;
++
++	return ret;
++}
++EXPORT_SYMBOL_GPL(sdhci_setup_host);
++
++int __sdhci_add_host(struct sdhci_host *host)
++{
++	struct mmc_host *mmc = host->mmc;
++	int ret;
++
+ 	/*
+ 	 * Init tasklets.
+ 	 */
+@@ -3370,10 +3392,10 @@ unirq:
+ 	free_irq(host->irq, host);
+ untasklet:
+ 	tasklet_kill(&host->finish_tasklet);
+-unreg:
++
+ 	if (!IS_ERR(mmc->supply.vqmmc))
+ 		regulator_disable(mmc->supply.vqmmc);
+-undma:
++
+ 	if (host->align_buffer)
+ 		dma_free_coherent(mmc_dev(mmc), host->align_buffer_sz +
+ 				  host->adma_table_sz, host->align_buffer,
+@@ -3383,7 +3405,18 @@ undma:
+ 
+ 	return ret;
+ }
++EXPORT_SYMBOL_GPL(__sdhci_add_host);
++
++int sdhci_add_host(struct sdhci_host *host)
++{
++	int ret;
++
++	ret = sdhci_setup_host(host);
++	if (ret)
++		return ret;
+ 
++	return __sdhci_add_host(host);
++}
+ EXPORT_SYMBOL_GPL(sdhci_add_host);
+ 
+ void sdhci_remove_host(struct sdhci_host *host, int dead)
+diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+index 609f87ca536b..b16aec2faa2e 100644
+--- a/drivers/mmc/host/sdhci.h
++++ b/drivers/mmc/host/sdhci.h
+@@ -645,6 +645,8 @@ static inline void *sdhci_priv(struct sdhci_host *host)
  }
  
-@@ -2096,7 +2096,7 @@ static void sdhci_card_event(struct mmc_host *mmc)
- 	if (host->ops->card_event)
- 		host->ops->card_event(host);
- 
--	present = sdhci_get_cd(host->mmc);
-+	present = mmc->ops->get_cd(mmc);
- 
- 	spin_lock_irqsave(&host->lock, flags);
- 
-@@ -2582,8 +2582,10 @@ static irqreturn_t sdhci_thread_irq(int irq, void *dev_id)
- 	spin_unlock_irqrestore(&host->lock, flags);
- 
- 	if (isr & (SDHCI_INT_CARD_INSERT | SDHCI_INT_CARD_REMOVE)) {
--		sdhci_card_event(host->mmc);
--		mmc_detect_change(host->mmc, msecs_to_jiffies(200));
-+		struct mmc_host *mmc = host->mmc;
-+
-+		mmc->ops->card_event(mmc);
-+		mmc_detect_change(mmc, msecs_to_jiffies(200));
- 	}
- 
- 	if (isr & SDHCI_INT_CARD_INT) {
-@@ -2667,6 +2669,7 @@ EXPORT_SYMBOL_GPL(sdhci_suspend_host);
- 
- int sdhci_resume_host(struct sdhci_host *host)
- {
-+	struct mmc_host *mmc = host->mmc;
- 	int ret = 0;
- 
- 	if (host->flags & (SDHCI_USE_SDMA | SDHCI_USE_ADMA)) {
-@@ -2680,7 +2683,7 @@ int sdhci_resume_host(struct sdhci_host *host)
- 		sdhci_init(host, 0);
- 		host->pwr = 0;
- 		host->clock = 0;
--		sdhci_set_ios(host->mmc, &host->mmc->ios);
-+		mmc->ops->set_ios(mmc, &mmc->ios);
- 	} else {
- 		sdhci_init(host, (host->mmc->pm_flags & MMC_PM_KEEP_POWER));
- 		mmiowb();
-@@ -2729,6 +2732,7 @@ EXPORT_SYMBOL_GPL(sdhci_runtime_suspend_host);
- 
- int sdhci_runtime_resume_host(struct sdhci_host *host)
- {
-+	struct mmc_host *mmc = host->mmc;
- 	unsigned long flags;
- 	int host_flags = host->flags;
- 
-@@ -2742,8 +2746,8 @@ int sdhci_runtime_resume_host(struct sdhci_host *host)
- 	/* Force clock and power re-program */
- 	host->pwr = 0;
- 	host->clock = 0;
--	sdhci_start_signal_voltage_switch(host->mmc, &host->mmc->ios);
--	sdhci_set_ios(host->mmc, &host->mmc->ios);
-+	mmc->ops->start_signal_voltage_switch(mmc, &mmc->ios);
-+	mmc->ops->set_ios(mmc, &mmc->ios);
- 
- 	if ((host_flags & SDHCI_PV_ENABLED) &&
- 		!(host->quirks2 & SDHCI_QUIRK2_PRESET_VALUE_BROKEN)) {
+ extern void sdhci_card_detect(struct sdhci_host *host);
++extern int sdhci_setup_host(struct sdhci_host *host);
++extern int __sdhci_add_host(struct sdhci_host *host);
+ extern int sdhci_add_host(struct sdhci_host *host);
+ extern void sdhci_remove_host(struct sdhci_host *host, int dead);
+ extern void sdhci_send_command(struct sdhci_host *host,
 -- 
 1.9.1
 
