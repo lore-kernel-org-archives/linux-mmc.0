@@ -1,140 +1,134 @@
-From: Ritesh Harjani <riteshh@codeaurora.org>
-Subject: [PATCH RFC 8/8] mmc: sdhci-msm: Update DLL reset sequence
-Date: Wed, 29 Jun 2016 16:50:33 +0530
-Message-ID: <1467199233-20506-9-git-send-email-riteshh@codeaurora.org>
-References: <1467199233-20506-1-git-send-email-riteshh@codeaurora.org>
-Return-path: <linux-arm-msm-owner@vger.kernel.org>
-In-Reply-To: <1467199233-20506-1-git-send-email-riteshh@codeaurora.org>
-Sender: linux-arm-msm-owner@vger.kernel.org
-To: ulf.hansson@linaro.org, linux-mmc@vger.kernel.org
-Cc: linux-arm-msm@vger.kernel.org, adrian.hunter@intel.com, asutoshd@codeaurora.org, kdorfman@codeaurora.org, david.griego@linaro.org, stummala@codeaurora.org, venkatg@codeaurora.org, Ritesh Harjani <riteshh@codeaurora.org>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: [PATCH V2 01/54] mmc: sdhci: Do not call implementations of mmc host ops directly
+Date: Wed, 29 Jun 2016 16:24:14 +0300
+Message-ID: <1467206707-30185-2-git-send-email-adrian.hunter@intel.com>
+References: <1467206707-30185-1-git-send-email-adrian.hunter@intel.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mga01.intel.com ([192.55.52.88]:13035 "EHLO mga01.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751962AbcF2N32 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 29 Jun 2016 09:29:28 -0400
+In-Reply-To: <1467206707-30185-1-git-send-email-adrian.hunter@intel.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Dorfman Konstantin <kdorfman@codeaurora.org>, David Griego <david.griego@linaro.org>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>
 
-From: Venkat Gopalakrishnan <venkatg@codeaurora.org>
+Drivers must be able to provide their own implementations for mmc host
+operations. Consequently, SDHCI should call those not the default
+implementations. Do that by calling indirectly through the mmc host ops
+function pointers.
 
-The latest version of the SDCC core requires a change in the reset
-sequence for DLL tuning. Make necessary changes as needed.
-
-Signed-off-by: Venkat Gopalakrishnan <venkatg@codeaurora.org>
-Signed-off-by: Ritesh Harjani <riteshh@codeaurora.org>
+Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
 ---
- drivers/mmc/host/sdhci-msm.c | 51 ++++++++++++++++++++++++++++++++++++++++++++
- 1 file changed, 51 insertions(+)
+ drivers/mmc/host/sdhci.c | 28 ++++++++++++++++------------
+ 1 file changed, 16 insertions(+), 12 deletions(-)
 
-diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
-index 912ca6e..4a864cb 100644
---- a/drivers/mmc/host/sdhci-msm.c
-+++ b/drivers/mmc/host/sdhci-msm.c
-@@ -61,6 +61,10 @@
- #define CORE_DLL_CONFIG		0x100
- #define CORE_DLL_STATUS		0x108
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 15bdbcb99170..7009c862ca9b 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -46,9 +46,7 @@ static unsigned int debug_quirks2;
+ static void sdhci_finish_data(struct sdhci_host *);
  
-+#define CORE_DLL_CONFIG_2	0x1b4
-+#define CORE_FLL_CYCLE_CNT	BIT(18)
-+#define CORE_DLL_CLOCK_DISABLE	BIT(21)
-+
- #define CORE_VENDOR_SPEC	0x10c
- #define CORE_CLK_PWRSAVE	BIT(1)
- #define CORE_VENDOR_SPEC_POR_VAL	0xa1c
-@@ -68,6 +72,8 @@
+ static void sdhci_finish_command(struct sdhci_host *);
+-static int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode);
+ static void sdhci_enable_preset_value(struct sdhci_host *host, bool enable);
+-static int sdhci_get_cd(struct mmc_host *mmc);
  
- #define CORE_VENDOR_SPEC_CAPABILITIES0	0x11c
- 
-+#define TCXO_FREQ		19200000
-+
- #define CDR_SELEXT_SHIFT	20
- #define CDR_SELEXT_MASK		(0xf << CDR_SELEXT_SHIFT)
- #define CMUX_SHIFT_PHASE_SHIFT	24
-@@ -131,6 +137,7 @@ struct sdhci_msm_host {
- 	u32 curr_io_level;
- 	struct completion pwr_irq_completion;
- 	spinlock_t pwr_irq_lock;
-+	bool use_updated_dll_reset;
- };
- 
- #define MAX_PROP_SIZE 32
-@@ -878,9 +885,14 @@ static inline void msm_cm_dll_set_freq(struct sdhci_host *host)
- static int msm_init_cm_dll(struct sdhci_host *host)
+ static void sdhci_dumpregs(struct sdhci_host *host)
  {
- 	struct mmc_host *mmc = host->mmc;
-+	struct sdhci_pltfm_host *pltfm_host;
-+	struct sdhci_msm_host *msm_host;
- 	int wait_cnt = 50;
- 	unsigned long flags;
- 
-+	pltfm_host = sdhci_priv(host);
-+	msm_host = sdhci_pltfm_priv(pltfm_host);
+@@ -193,7 +191,9 @@ EXPORT_SYMBOL_GPL(sdhci_reset);
+ static void sdhci_do_reset(struct sdhci_host *host, u8 mask)
+ {
+ 	if (host->quirks & SDHCI_QUIRK_NO_CARD_NO_RESET) {
+-		if (!sdhci_get_cd(host->mmc))
++		struct mmc_host *mmc = host->mmc;
 +
++		if (!mmc->ops->get_cd(mmc))
+ 			return;
+ 	}
+ 
+@@ -210,10 +210,10 @@ static void sdhci_do_reset(struct sdhci_host *host, u8 mask)
+ 	}
+ }
+ 
+-static void sdhci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios);
+-
+ static void sdhci_init(struct sdhci_host *host, int soft)
+ {
++	struct mmc_host *mmc = host->mmc;
++
+ 	if (soft)
+ 		sdhci_do_reset(host, SDHCI_RESET_CMD|SDHCI_RESET_DATA);
+ 	else
+@@ -231,7 +231,7 @@ static void sdhci_init(struct sdhci_host *host, int soft)
+ 	if (soft) {
+ 		/* force clock reconfiguration */
+ 		host->clock = 0;
+-		sdhci_set_ios(host->mmc, &host->mmc->ios);
++		mmc->ops->set_ios(mmc, &mmc->ios);
+ 	}
+ }
+ 
+@@ -2096,7 +2096,7 @@ static void sdhci_card_event(struct mmc_host *mmc)
+ 	if (host->ops->card_event)
+ 		host->ops->card_event(host);
+ 
+-	present = sdhci_get_cd(host->mmc);
++	present = mmc->ops->get_cd(mmc);
+ 
  	spin_lock_irqsave(&host->lock, flags);
  
- 	/*
-@@ -891,6 +903,17 @@ static int msm_init_cm_dll(struct sdhci_host *host)
- 	writel_relaxed((readl_relaxed(host->ioaddr + CORE_VENDOR_SPEC)
- 			& ~CORE_CLK_PWRSAVE), host->ioaddr + CORE_VENDOR_SPEC);
+@@ -2582,8 +2582,10 @@ static irqreturn_t sdhci_thread_irq(int irq, void *dev_id)
+ 	spin_unlock_irqrestore(&host->lock, flags);
  
-+	if (msm_host->use_updated_dll_reset) {
-+		writel_relaxed((readl_relaxed(host->ioaddr + CORE_DLL_CONFIG)
-+				& ~CORE_CK_OUT_EN),
-+				host->ioaddr + CORE_DLL_CONFIG);
+ 	if (isr & (SDHCI_INT_CARD_INSERT | SDHCI_INT_CARD_REMOVE)) {
+-		sdhci_card_event(host->mmc);
+-		mmc_detect_change(host->mmc, msecs_to_jiffies(200));
++		struct mmc_host *mmc = host->mmc;
 +
-+		writel_relaxed((readl_relaxed(host->ioaddr + CORE_DLL_CONFIG_2)
-+				| CORE_DLL_CLOCK_DISABLE),
-+				host->ioaddr + CORE_DLL_CONFIG_2);
-+	}
-+
-+
- 	/* Write 1 to DLL_RST bit of DLL_CONFIG register */
- 	writel_relaxed((readl_relaxed(host->ioaddr + CORE_DLL_CONFIG)
- 			| CORE_DLL_RST), host->ioaddr + CORE_DLL_CONFIG);
-@@ -900,6 +923,23 @@ static int msm_init_cm_dll(struct sdhci_host *host)
- 			| CORE_DLL_PDN), host->ioaddr + CORE_DLL_CONFIG);
- 	msm_cm_dll_set_freq(host);
++		mmc->ops->card_event(mmc);
++		mmc_detect_change(mmc, msecs_to_jiffies(200));
+ 	}
  
-+	if (msm_host->use_updated_dll_reset) {
-+		u32 mclk_freq = 0;
-+
-+		if ((readl_relaxed(host->ioaddr + CORE_DLL_CONFIG_2)
-+					& CORE_FLL_CYCLE_CNT))
-+			mclk_freq = (u32) ((host->clock / TCXO_FREQ) * 8);
-+		else
-+			mclk_freq = (u32) ((host->clock / TCXO_FREQ) * 4);
-+
-+		writel_relaxed(((readl_relaxed(host->ioaddr + CORE_DLL_CONFIG_2)
-+				& ~(0xFF << 10)) | (mclk_freq << 10)),
-+				host->ioaddr + CORE_DLL_CONFIG_2);
-+		/* wait for 5us before enabling DLL clock */
-+		udelay(5);
-+	}
-+
-+
- 	/* Write 0 to DLL_RST bit of DLL_CONFIG register */
- 	writel_relaxed((readl_relaxed(host->ioaddr + CORE_DLL_CONFIG)
- 			& ~CORE_DLL_RST), host->ioaddr + CORE_DLL_CONFIG);
-@@ -908,6 +948,14 @@ static int msm_init_cm_dll(struct sdhci_host *host)
- 	writel_relaxed((readl_relaxed(host->ioaddr + CORE_DLL_CONFIG)
- 			& ~CORE_DLL_PDN), host->ioaddr + CORE_DLL_CONFIG);
+ 	if (isr & SDHCI_INT_CARD_INT) {
+@@ -2667,6 +2669,7 @@ EXPORT_SYMBOL_GPL(sdhci_suspend_host);
  
-+	if (msm_host->use_updated_dll_reset) {
-+		msm_cm_dll_set_freq(host);
-+		/* Enable the DLL clock */
-+		writel_relaxed((readl_relaxed(host->ioaddr + CORE_DLL_CONFIG_2)
-+				& ~CORE_DLL_CLOCK_DISABLE),
-+				host->ioaddr + CORE_DLL_CONFIG_2);
-+	}
-+
- 	/* Set DLL_EN bit to 1. */
- 	writel_relaxed((readl_relaxed(host->ioaddr + CORE_DLL_CONFIG)
- 			| CORE_DLL_EN), host->ioaddr + CORE_DLL_CONFIG);
-@@ -1135,6 +1183,9 @@ static int sdhci_msm_probe(struct platform_device *pdev)
- 	dev_dbg(&pdev->dev, "MCI Version: 0x%08x, major: 0x%04x, minor: 0x%02x\n",
- 		core_version, core_major, core_minor);
+ int sdhci_resume_host(struct sdhci_host *host)
+ {
++	struct mmc_host *mmc = host->mmc;
+ 	int ret = 0;
  
-+	if ((core_major == 1) && (core_minor >= 0x42))
-+		msm_host->use_updated_dll_reset = true;
-+
- 	/*
- 	 * Support for some capabilities is not advertised by newer
- 	 * controller versions and must be explicitly enabled.
+ 	if (host->flags & (SDHCI_USE_SDMA | SDHCI_USE_ADMA)) {
+@@ -2680,7 +2683,7 @@ int sdhci_resume_host(struct sdhci_host *host)
+ 		sdhci_init(host, 0);
+ 		host->pwr = 0;
+ 		host->clock = 0;
+-		sdhci_set_ios(host->mmc, &host->mmc->ios);
++		mmc->ops->set_ios(mmc, &mmc->ios);
+ 	} else {
+ 		sdhci_init(host, (host->mmc->pm_flags & MMC_PM_KEEP_POWER));
+ 		mmiowb();
+@@ -2729,6 +2732,7 @@ EXPORT_SYMBOL_GPL(sdhci_runtime_suspend_host);
+ 
+ int sdhci_runtime_resume_host(struct sdhci_host *host)
+ {
++	struct mmc_host *mmc = host->mmc;
+ 	unsigned long flags;
+ 	int host_flags = host->flags;
+ 
+@@ -2742,8 +2746,8 @@ int sdhci_runtime_resume_host(struct sdhci_host *host)
+ 	/* Force clock and power re-program */
+ 	host->pwr = 0;
+ 	host->clock = 0;
+-	sdhci_start_signal_voltage_switch(host->mmc, &host->mmc->ios);
+-	sdhci_set_ios(host->mmc, &host->mmc->ios);
++	mmc->ops->start_signal_voltage_switch(mmc, &mmc->ios);
++	mmc->ops->set_ios(mmc, &mmc->ios);
+ 
+ 	if ((host_flags & SDHCI_PV_ENABLED) &&
+ 		!(host->quirks2 & SDHCI_QUIRK2_PRESET_VALUE_BROKEN)) {
 -- 
-The Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum, 
-a Linux Foundation Collaborative Project.
+1.9.1
+
