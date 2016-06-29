@@ -1,234 +1,168 @@
-From: Ritesh Harjani <riteshh@codeaurora.org>
-Subject: Re: [PATCH V2 00/54] mmc: mmc: Add Software Command Queuing
-Date: Wed, 29 Jun 2016 19:54:54 +0530
-Message-ID: <e80b0201-3cd3-8c1e-8c44-7ac1db89c5b6@codeaurora.org>
-References: <1467206707-30185-1-git-send-email-adrian.hunter@intel.com>
+From: Doug Anderson <dianders@chromium.org>
+Subject: Re: [PATCH 2/3] phy: rockchip-emmc: Be tolerant to card clock of 0 in
+ power on
+Date: Wed, 29 Jun 2016 08:18:59 -0700
+Message-ID: <CAD=FV=U_-8HJRjWa8ktT=7tmM5RB4OVnDce-Bv2teDibYfbCeA@mail.gmail.com>
+References: <1467049167-14628-1-git-send-email-dianders@chromium.org>
+ <1467049167-14628-3-git-send-email-dianders@chromium.org> <5773D1FD.8020601@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp.codeaurora.org ([198.145.29.96]:58783 "EHLO
-	smtp.codeaurora.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752073AbcF2OZe (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 29 Jun 2016 10:25:34 -0400
-In-Reply-To: <1467206707-30185-1-git-send-email-adrian.hunter@intel.com>
+Received: from mail-vk0-f46.google.com ([209.85.213.46]:34443 "EHLO
+	mail-vk0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752725AbcF2PTF (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 29 Jun 2016 11:19:05 -0400
+Received: by mail-vk0-f46.google.com with SMTP id c2so70525870vkg.1
+        for <linux-mmc@vger.kernel.org>; Wed, 29 Jun 2016 08:19:05 -0700 (PDT)
+In-Reply-To: <5773D1FD.8020601@ti.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Dorfman Konstantin <kdorfman@codeaurora.org>, David Griego <david.griego@linaro.org>, Sahitya Tummala <stummala@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>
+To: Kishon Vijay Abraham I <kishon@ti.com>
+Cc: Heiko Stuebner <heiko@sntech.de>, Ulf Hansson <ulf.hansson@linaro.org>, Shawn Lin <shawn.lin@rock-chips.com>, "open list:ARM/Rockchip SoC..." <linux-rockchip@lists.infradead.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Brian Norris <briannorris@chromium.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
 
-Hi Adrian,
+Kishon,
 
-On 6/29/2016 6:54 PM, Adrian Hunter wrote:
-> Hi
+On Wed, Jun 29, 2016 at 6:49 AM, Kishon Vijay Abraham I <kishon@ti.com> wrote:
+> Hi,
 >
-> Here is an updated version of the Software Command Queuing patches,
-> re-based on the SDHCI patches that I have.
+> On Monday 27 June 2016 11:09 PM, Douglas Anderson wrote:
+>> It's possible that there are some reasons to turn the PHY on while the
+>> clock is 0.  In this case we just won't wait for the DLL to lock.
+>>
+>> This is a bit of a stopgap until we figure out exactly when we're
+>> supposed to wait for the DLL to lock and when we're supposed to power
+>> cycle the PHY.
+>>
+>> Note: this patch should help with suspend/resume where the system will
+>> try to turn the PHY back on when the clock is 0.
+>>
+>> Signed-off-by: Douglas Anderson <dianders@chromium.org>
+>> ---
+>>  drivers/phy/phy-rockchip-emmc.c | 59 ++++++++++++++++++++++++++---------------
+>>  1 file changed, 37 insertions(+), 22 deletions(-)
+>>
+>> diff --git a/drivers/phy/phy-rockchip-emmc.c b/drivers/phy/phy-rockchip-emmc.c
+>> index 9dce958233a0..a2aa6aca7dec 100644
+>> --- a/drivers/phy/phy-rockchip-emmc.c
+>> +++ b/drivers/phy/phy-rockchip-emmc.c
+>> @@ -88,15 +88,36 @@ static int rockchip_emmc_phy_power(struct phy *phy, bool on_off)
+>>       unsigned int caldone;
+>>       unsigned int dllrdy;
+>>       unsigned int freqsel = PHYCTRL_FREQSEL_200M;
+>> +     unsigned long rate;
+>>       unsigned long timeout;
+>>
+>> -     if (rk_phy->emmcclk != NULL) {
+>> -             unsigned long rate = clk_get_rate(rk_phy->emmcclk);
+>> +     /*
+>> +      * Keep phyctrl_pdb and phyctrl_endll low to allow
+>> +      * initialization of CALIO state M/C DFFs
+>> +      */
+>> +     regmap_write(rk_phy->reg_base,
+>> +                  rk_phy->reg_offset + GRF_EMMCPHY_CON6,
+>> +                  HIWORD_UPDATE(PHYCTRL_PDB_PWR_OFF,
+>> +                                PHYCTRL_PDB_MASK,
+>> +                                PHYCTRL_PDB_SHIFT));
+>> +     regmap_write(rk_phy->reg_base,
+>> +                  rk_phy->reg_offset + GRF_EMMCPHY_CON6,
+>> +                  HIWORD_UPDATE(PHYCTRL_ENDLL_DISABLE,
+>> +                                PHYCTRL_ENDLL_MASK,
+>> +                                PHYCTRL_ENDLL_SHIFT));
+>> +
+>> +     /* Already finish power_off above */
+>> +     if (on_off == PHYCTRL_PDB_PWR_OFF)
+>> +             return 0;
+>> +
+>> +     rate = clk_get_rate(rk_phy->emmcclk);
+>> +
+>> +     if (rate != 0) {
+>>               unsigned long ideal_rate;
+>>               unsigned long diff;
+>>
+>>               switch (rate) {
+>> -             case 0 ... 74999999:
+>> +             case 1 ... 74999999:
+>>                       ideal_rate = 50000000;
+>>                       freqsel = PHYCTRL_FREQSEL_50M;
+>>                       break;
+>> @@ -127,25 +148,6 @@ static int rockchip_emmc_phy_power(struct phy *phy, bool on_off)
+>>       }
+>>
+>>       /*
+>> -      * Keep phyctrl_pdb and phyctrl_endll low to allow
+>> -      * initialization of CALIO state M/C DFFs
+>> -      */
+>> -     regmap_write(rk_phy->reg_base,
+>> -                  rk_phy->reg_offset + GRF_EMMCPHY_CON6,
+>> -                  HIWORD_UPDATE(PHYCTRL_PDB_PWR_OFF,
+>> -                                PHYCTRL_PDB_MASK,
+>> -                                PHYCTRL_PDB_SHIFT));
+>> -     regmap_write(rk_phy->reg_base,
+>> -                  rk_phy->reg_offset + GRF_EMMCPHY_CON6,
+>> -                  HIWORD_UPDATE(PHYCTRL_ENDLL_DISABLE,
+>> -                                PHYCTRL_ENDLL_MASK,
+>> -                                PHYCTRL_ENDLL_SHIFT));
+>> -
+>> -     /* Already finish power_off above */
+>> -     if (on_off == PHYCTRL_PDB_PWR_OFF)
+>> -             return 0;
+>> -
+>> -     /*
+>>        * According to the user manual, calpad calibration
+>>        * cycle takes more than 2us without the minimal recommended
+>>        * value, so we may need a little margin here
+>> @@ -183,6 +185,19 @@ static int rockchip_emmc_phy_power(struct phy *phy, bool on_off)
+>>                    HIWORD_UPDATE(PHYCTRL_ENDLL_ENABLE,
+>>                                  PHYCTRL_ENDLL_MASK,
+>>                                  PHYCTRL_ENDLL_SHIFT));
+>> +
+>> +     /*
+>> +      * We turned on the DLL even though the rate was 0 because we the
+>> +      * clock might be turned on later.  ...but we can't wait for the DLL
+>> +      * to lock when the rate is 0 because it will never lock with no
+>> +      * input clock.
+>> +      *
+>> +      * Technically we should be checking the lock later when the clock
+>> +      * is turned on, but for now we won't.
+>> +      */
+>> +     if (rate == 0)
+>> +             return 0;
 >
-> Ulf, there are a lot of patches now and I think it would be worth taking
-> some of them.  For example, the first 25 affect SDHCI only.  If you accept
-> the "Command during Transfer" API introduced in patch 26, then you could
-> take patches 26-30 as well.
-Are these patches affecting anything w.r.t. SW/HW CMDQ solution?
-Although not yet gone through in detail.
-But otherwise do you think it will be worthwhile to check both the 
-solutions before merging any particular design to upstream?
+> Why not return initially from rockchip_emmc_phy_power if the clock rate is '0'.
+> Are there other functions to lock the DLL apart from phy_power?
+
+Yeah, it's a big ugly right now.  This ugliness is really needed
+because of <https://patchwork.kernel.org/patch/9201035/> because:
+
+1. We power on the PHY at probe time and the card clock is in an
+unknown state at that time.  It will be reported as 0 right now, but
+it may or may not actually be 0.
+
+2. We don't have an easy way to call back into the PHY when we
+actually set the clock to a low rate (like 400kHz) for ID mode.
+Before this series I tried to power the PHY off and on for every clock
+change, but apparently that was causing problems.
 
 
-Well actually as you are aware of, HW CMDQ solution separate out itself 
-from legacy w.r.t. pulling/issuing/completing of reqs.
-So mostly it should not affect much here w.r.t. SW CMDQ, but it will be 
-good if we could consider, how both solution will look into upstream 
-going forward.
+As talked about in <https://patchwork.kernel.org/patch/9201035/>, I
+think the right answer is to figure out how to get the common clock
+framework notifications to happen for the card clock and then remove
+the wholesale PHY power off / power on for every clock change.  The
+PHY itself can register for the clock change notifications and figure
+out how much or how little to do on every clock change.
 
->
-> There wasn't much comment on the RFC so there have been few changes.
-> Venu Byravarasu commented that it may be more efficient to use Software
-> Command Queuing only when there is more than 1 request queued - it isn't
-> obvious how well that would work in practice, but it could be added later
-> if it could be shown to be beneficial.
-Agree.
-
->
-> I haven't had a chance to go through the hardware Command Queuing patches
-> in detail yet, but otherwise these patches are ready to go.
-Request you to kindly review HW CMDQ patches as well before we plan to 
-merge both of them to upstream?
-We do as well plan to go through SW CMDQ set of patches.
+Unfortunately, as also discussed in the other patch, it's not trivial
+to do this because I think it requires surgery on the main SDHCI
+driver to change the way it deals with the card clock.  I'm not sure I
+have time for this delicate surgery right now and I'm hoping that
+perhaps Shawn will be able to help figure something out (maybe?) or I
+can try coming back to it later.
 
 
->
-> As noted below, the patches can also be found here:
->
-> 	http://git.infradead.org/users/ahunter/linux-sdhci.git/shortlog/refs/heads/swcmdq
->
->
-> Changes in V2:
->
->   Added 5 patches already sent here:
->
->     http://marc.info/?l=linux-mmc&m=146712062816835
->
->   Added 3 more new patches:
->
->     mmc: sdhci-pci: Do not runtime suspend at the end of sdhci_pci_probe()
->     mmc: sdhci: Avoid STOP cmd triggering warning in sdhci_send_command()
->     mmc: sdhci: sdhci_execute_tuning() must delete timer
->
->   Carried forward the V2 fix to:
->
->     mmc: mmc_test: Disable Command Queue while mmc_test is used
->
->   Also reset the cmd circuit for data timeout if it is processing the data
->   cmd, in patch:
->
->     mmc: sdhci: Do not reset cmd or data circuits that are in use
->
-> Original Cover Letter:
->
-> Chuanxiao Dong sent some patches last year relating to eMMC 5.1 Software
-> Command Queuing.  He did not follow-up but I have contacted him and he says
-> it is OK if I take over upstreaming the patches.
->
-> eMMC Command Queuing is a feature added in version 5.1.  The card maintains
-> a queue of up to 32 data transfers.  Commands CMD45/CMD45 are sent to queue
-> up transfers in advance, and then one of the transfers is selected to
-> "execute" by CMD46/CMD47 at which point data transfer actually begins.
->
-> The advantage of command queuing is that the card can prepare for transfers
-> in advance.  That makes a big difference in the case of random reads because
-> the card can start reading into its cache in advance.
->
-> A v5.1 host controller can manage the command queue itself, but it is also
-> possible for software to manage the queue using an non-v5.1 host controller
-> - that is what Software Command Queuing is.
->
-> Refer to the JEDEC (http://www.jedec.org/) eMMC v5.1 Specification for more
-> information about Command Queuing.
->
-> While these patches are heavily based on Dong's patches, there are some
-> changes:
->
-> SDHCI has been amended to support commands during transfer. That is a
-> generic change added in patches 1 - 30. In principle, that would also
-> support SDIO's CMD52 during data transfer.
->
-> The original approach added multiple commands into the same request for
-> sending CMD44, CMD45 and CMD13. That is not strictly necessary and has
-> been omitted for now.
->
-> The original approach also called blk_end_request() from the mrq->done()
-> function, which means the upper layers learnt of completed requests
-> slightly earlier. That is not strictly related to Software Command Queuing
-> and is something that could potentially be done for all data requests.
-> That has been omitted for now.
->
-> The current block driver supports 2 requests on the go at a time. Patches
-> 31 - 38 make preparations for an arbitrary sized queue. Patches 39 - 42
-> introduce Command Queue definitions and helpers.  Patches 43 - 49
-> complete the job of making the block driver use a queue.  Patches 50 - 52
-> finally add Software Command Queuing, and 53 - 54 enable it for Intel eMMC
-> controllers. Most of the Software Command Queuing functionality is added
-> in patch 51.
->
-> The patches can also be found here:
->
-> 	http://git.infradead.org/users/ahunter/linux-sdhci.git/shortlog/refs/heads/swcmdq
->
-> The patches have only had basic testing so far. Ad-hoc testing shows a
-> degradation in sequential read performance of about 10% but an increase in
-> throughput for mixed workload of multiple processes of about 90%. The
-> reduction in sequential performance is due to the need to read the Queue
-> Status register between each transfer.
->
-> These patches should not conflict with Hardware Command Queuing which
-> handles the queue in a completely different way and thus does not need
-> to share code with Software Command Queuing. The exceptions being the
-> Command Queue definitions and queue allocation which should be able to be
-> used.
->
->
-> Adrian Hunter (54):
->       mmc: sdhci: Do not call implementations of mmc host ops directly
->       mmc: sdhci: Split sdhci_add_host()
->       mmc: sdhci: Make signal voltage support explicit
->       mmc: sdhci: Tidy caps variables in sdhci_setup_host()
->       mmc: sdhci: Add sdhci_read_caps()
->       mmc: sdhci-pci: Do not runtime suspend at the end of sdhci_pci_probe()
->       mmc: sdhci: Move busy signal handling into sdhci_finish_cmd()
->       mmc: sdhci: Get rid of redundant BUG_ONs
->       mmc: sdhci: Simplify sdhci_finish_command() by clearing host->cmd at the start
->       mmc: sdhci: Record what command is using the data lines
->       mmc: sdhci: Get rid of host->busy_handle
->       mmc: sdhci: Reduce the use of host->mrq
->       mmc: sdhci: Move host->data warning
->       mmc: sdhci: Factor out sdhci_finish_mrq()
->       mmc: sdhci: Factor out sdhci_needs_reset()
->       mmc: sdhci: Track whether a reset is pending
->       mmc: sdhci: Clear pointers when a request finishes
->       mmc: sdhci: Ensure all requests get errored out
->       mmc: sdhci: Factor out sdhci_data_line_cmd()
->       mmc: sdhci: Separate timer timeout for command and data requests
->       mmc: sdhci: Allow for finishing multiple requests
->       mmc: sdhci: Factor out sdhci_auto_cmd12()
->       mmc: sdhci: Do not reset cmd or data circuits that are in use
->       mmc: sdhci: Avoid STOP cmd triggering warning in sdhci_send_command()
->       mmc: sdhci: sdhci_execute_tuning() must delete timer
->       mmc: core: Add support for sending commands during data transfer
->       mmc: mmc_test: Add tests for sending commands during transfer
->       mmc: sdhci: Support cap_cmd_during_tfr requests
->       mmc: sdhci-pci: Set MMC_CAP_CMD_DURING_TFR for Intel eMMC controllers
->       mmc: sdhci-acpi: Set MMC_CAP_CMD_DURING_TFR for Intel eMMC controllers
->       mmc: queue: Fix queue thread wake-up
->       mmc: queue: Factor out mmc_queue_alloc_bounce_bufs()
->       mmc: queue: Factor out mmc_queue_alloc_bounce_sgs()
->       mmc: queue: Factor out mmc_queue_alloc_sgs()
->       mmc: queue: Factor out mmc_queue_reqs_free_bufs()
->       mmc: queue: Introduce queue depth
->       mmc: queue: Use queue depth to allocate and free
->       mmc: queue: Allocate queue of size qdepth
->       mmc: mmc: Add Command Queue definitions
->       mmc: mmc: Add functions to enable / disable the Command Queue
->       mmc: mmc_test: Disable Command Queue while mmc_test is used
->       mmc: block: Disable Command Queue while RPMB is used
->       mmc: core: Do not prepare a new request twice
->       mmc: core: Export mmc_retune_hold() and mmc_retune_release()
->       mmc: block: Factor out mmc_blk_requeue()
->       mmc: block: Fix 4K native sector check
->       mmc: block: Use local var for mqrq_cur
->       mmc: block: Pass mqrq to mmc_blk_prep_packed_list()
->       mmc: block: Introduce queue semantics
->       mmc: queue: Add a function to control wake-up on new requests
->       mmc: block: Add Software Command Queuing
->       mmc: mmc: Enable Software Command Queuing
->       mmc: sdhci-pci: Enable Software Command Queuing for some Intel controllers
->       mmc: sdhci-acpi: Enable Software Command Queuing for some Intel controllers
->
->  drivers/mmc/card/block.c          | 738 +++++++++++++++++++++++++++++++++++---
->  drivers/mmc/card/mmc_test.c       | 321 +++++++++++++++++
->  drivers/mmc/card/queue.c          | 296 +++++++++------
->  drivers/mmc/card/queue.h          |  27 +-
->  drivers/mmc/core/core.c           | 113 +++++-
->  drivers/mmc/core/host.c           |   2 +
->  drivers/mmc/core/host.h           |   2 -
->  drivers/mmc/core/mmc.c            |  43 ++-
->  drivers/mmc/core/mmc_ops.c        |  27 ++
->  drivers/mmc/host/sdhci-acpi.c     |   4 +-
->  drivers/mmc/host/sdhci-pci-core.c |   8 +-
->  drivers/mmc/host/sdhci.c          | 602 +++++++++++++++++++++----------
->  drivers/mmc/host/sdhci.h          |  26 +-
->  include/linux/mmc/card.h          |   5 +
->  include/linux/mmc/core.h          |  12 +
->  include/linux/mmc/host.h          |   9 +-
->  include/linux/mmc/mmc.h           |  17 +
->  17 files changed, 1853 insertions(+), 399 deletions(-)
->
->
-> Regards
-> Adrian
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
+In any case, I think a wholesale revert of my previous 150 MHz series
+probably puts us in a worse state than we started with, so I was just
+proposing reverting the one patch.  Once we do that, this PHY patch
+helps keep us in a sane state (keeps suspend/resume working).
+
+
+-Doug
