@@ -1,160 +1,81 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: [PATCH V2 20/54] mmc: sdhci: Separate timer timeout for command and data requests
-Date: Wed, 29 Jun 2016 16:24:33 +0300
-Message-ID: <1467206707-30185-21-git-send-email-adrian.hunter@intel.com>
+Subject: [PATCH V2 11/54] mmc: sdhci: Get rid of host->busy_handle
+Date: Wed, 29 Jun 2016 16:24:24 +0300
+Message-ID: <1467206707-30185-12-git-send-email-adrian.hunter@intel.com>
 References: <1467206707-30185-1-git-send-email-adrian.hunter@intel.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga02.intel.com ([134.134.136.20]:55539 "EHLO mga02.intel.com"
+Received: from mga01.intel.com ([192.55.52.88]:35817 "EHLO mga01.intel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S932087AbcF2Naj (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 29 Jun 2016 09:30:39 -0400
+	id S932075AbcF2NaB (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 29 Jun 2016 09:30:01 -0400
 In-Reply-To: <1467206707-30185-1-git-send-email-adrian.hunter@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>
 Cc: linux-mmc <linux-mmc@vger.kernel.org>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Dorfman Konstantin <kdorfman@codeaurora.org>, David Griego <david.griego@linaro.org>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>
 
-In order to support commands during data transfer, there will have to be up
-to two active requests (mrqs) at a time, instead of just one. Provide two
-timers instead of just one. One of the timers is for requests that do not
-use the data lines, and the other one is for requests that do.
+Now that there is host->data_cmd to record the command for which a data
+interrupt is expected, it is possible to determine whether a command with
+busy signaling has completed without an extra flag. So host->busy_handle
+is not needed. Remove it.
 
 Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
 ---
- drivers/mmc/host/sdhci.c | 62 ++++++++++++++++++++++++++++++++++++++++--------
- drivers/mmc/host/sdhci.h |  1 +
- 2 files changed, 53 insertions(+), 10 deletions(-)
+ drivers/mmc/host/sdhci.c | 14 ++++++--------
+ drivers/mmc/host/sdhci.h |  1 -
+ 2 files changed, 6 insertions(+), 9 deletions(-)
 
 diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index b7b68b31d36d..9580f76caf57 100644
+index c9456bd603a9..1f2c4a71ccec 100644
 --- a/drivers/mmc/host/sdhci.c
 +++ b/drivers/mmc/host/sdhci.c
-@@ -1003,6 +1003,23 @@ static void sdhci_finish_data(struct sdhci_host *host)
- 	}
- }
- 
-+static void sdhci_mod_timer(struct sdhci_host *host, struct mmc_request *mrq,
-+			    unsigned long timeout)
-+{
-+	if (sdhci_data_line_cmd(mrq->cmd))
-+		mod_timer(&host->data_timer, timeout);
-+	else
-+		mod_timer(&host->timer, timeout);
-+}
-+
-+static void sdhci_del_timer(struct sdhci_host *host, struct mmc_request *mrq)
-+{
-+	if (sdhci_data_line_cmd(mrq->cmd))
-+		del_timer(&host->data_timer);
-+	else
-+		del_timer(&host->timer);
-+}
-+
- void sdhci_send_command(struct sdhci_host *host, struct mmc_command *cmd)
- {
- 	int flags;
-@@ -1044,7 +1061,7 @@ void sdhci_send_command(struct sdhci_host *host, struct mmc_command *cmd)
- 		timeout += DIV_ROUND_UP(cmd->busy_timeout, 1000) * HZ + HZ;
- 	else
- 		timeout += 10 * HZ;
--	mod_timer(&host->timer, timeout);
-+	sdhci_mod_timer(host, cmd->mrq, timeout);
+@@ -1014,7 +1014,6 @@ void sdhci_send_command(struct sdhci_host *host, struct mmc_command *cmd)
+ 	mod_timer(&host->timer, timeout);
  
  	host->cmd = cmd;
- 	if (sdhci_data_line_cmd(cmd)) {
-@@ -2232,10 +2249,10 @@ static void sdhci_tasklet_finish(unsigned long param)
- 		return;
- 	}
- 
--	del_timer(&host->timer);
--
- 	mrq = host->mrq;
- 
-+	sdhci_del_timer(host, mrq);
-+
- 	/*
- 	 * Always unmap the data buffers if they were mapped by
- 	 * sdhci_prepare_data() whenever we finish with a request.
-@@ -2289,7 +2306,30 @@ static void sdhci_timeout_timer(unsigned long data)
- 
- 	spin_lock_irqsave(&host->lock, flags);
- 
--	if (host->mrq) {
-+	if (host->cmd && !sdhci_data_line_cmd(host->cmd)) {
-+		pr_err("%s: Timeout waiting for hardware cmd interrupt.\n",
-+		       mmc_hostname(host->mmc));
-+		sdhci_dumpregs(host);
-+
-+		host->cmd->error = -ETIMEDOUT;
-+		sdhci_finish_mrq(host, host->cmd->mrq);
-+	}
-+
-+	mmiowb();
-+	spin_unlock_irqrestore(&host->lock, flags);
-+}
-+
-+static void sdhci_timeout_data_timer(unsigned long data)
-+{
-+	struct sdhci_host *host;
-+	unsigned long flags;
-+
-+	host = (struct sdhci_host *)data;
-+
-+	spin_lock_irqsave(&host->lock, flags);
-+
-+	if (host->data || host->data_cmd ||
-+	    (host->cmd && sdhci_data_line_cmd(host->cmd))) {
- 		pr_err("%s: Timeout waiting for hardware interrupt.\n",
- 		       mmc_hostname(host->mmc));
- 		sdhci_dumpregs(host);
-@@ -2297,13 +2337,12 @@ static void sdhci_timeout_timer(unsigned long data)
- 		if (host->data) {
- 			host->data->error = -ETIMEDOUT;
- 			sdhci_finish_data(host);
-+		} else if (host->data_cmd) {
-+			host->data_cmd->error = -ETIMEDOUT;
-+			sdhci_finish_mrq(host, host->data_cmd->mrq);
- 		} else {
--			if (host->cmd)
--				host->cmd->error = -ETIMEDOUT;
--			else
--				host->mrq->cmd->error = -ETIMEDOUT;
--
--			sdhci_finish_mrq(host, host->mrq);
-+			host->cmd->error = -ETIMEDOUT;
-+			sdhci_finish_mrq(host, host->cmd->mrq);
+-	host->busy_handle = 0;
+ 	if (cmd->data || cmd->flags & MMC_RSP_BUSY) {
+ 		WARN_ON(host->data_cmd);
+ 		host->data_cmd = cmd;
+@@ -1094,9 +1093,8 @@ static void sdhci_finish_command(struct sdhci_host *host)
+ 		if (cmd->data) {
+ 			DBG("Cannot wait for busy signal when also doing a data transfer");
+ 		} else if (!(host->quirks & SDHCI_QUIRK_NO_BUSY_IRQ) &&
+-			   !host->busy_handle) {
+-			/* Mark that command complete before busy is ended */
+-			host->busy_handle = 1;
++			   cmd == host->data_cmd) {
++			/* Command complete before busy is ended */
+ 			return;
  		}
  	}
- 
-@@ -3432,6 +3471,8 @@ int __sdhci_add_host(struct sdhci_host *host)
- 		sdhci_tasklet_finish, (unsigned long)host);
- 
- 	setup_timer(&host->timer, sdhci_timeout_timer, (unsigned long)host);
-+	setup_timer(&host->data_timer, sdhci_timeout_data_timer,
-+		    (unsigned long)host);
- 
- 	init_waitqueue_head(&host->buf_ready_int);
- 
-@@ -3541,6 +3582,7 @@ void sdhci_remove_host(struct sdhci_host *host, int dead)
- 	free_irq(host->irq, host);
- 
- 	del_timer_sync(&host->timer);
-+	del_timer_sync(&host->data_timer);
- 
- 	tasklet_kill(&host->finish_tasklet);
- 
+@@ -2393,10 +2391,10 @@ static void sdhci_data_irq(struct sdhci_host *host, u32 intmask)
+ 				 * before the command completed, so make
+ 				 * sure we do things in the proper order.
+ 				 */
+-				if (host->busy_handle)
+-					tasklet_schedule(&host->finish_tasklet);
+-				else
+-					host->busy_handle = 1;
++				if (host->cmd == data_cmd)
++					return;
++
++				tasklet_schedule(&host->finish_tasklet);
+ 				return;
+ 			}
+ 		}
 diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-index 7301c90f8500..a1de42232439 100644
+index 6e971709c9df..13e0bd6cff5d 100644
 --- a/drivers/mmc/host/sdhci.h
 +++ b/drivers/mmc/host/sdhci.h
-@@ -490,6 +490,7 @@ struct sdhci_host {
- 	struct tasklet_struct finish_tasklet;	/* Tasklet structures */
+@@ -469,7 +469,6 @@ struct sdhci_host {
+ 	struct mmc_command *data_cmd;	/* Current data command */
+ 	struct mmc_data *data;	/* Current data request */
+ 	unsigned int data_early:1;	/* Data finished before cmd */
+-	unsigned int busy_handle:1;	/* Handling the order of Busy-end */
  
- 	struct timer_list timer;	/* Timer for timeouts */
-+	struct timer_list data_timer;	/* Timer for data timeouts */
- 
- 	u32 caps;		/* CAPABILITY_0 */
- 	u32 caps1;		/* CAPABILITY_1 */
+ 	struct sg_mapping_iter sg_miter;	/* SG state for PIO */
+ 	unsigned int blocks;	/* remaining PIO blocks */
 -- 
 1.9.1
 
