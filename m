@@ -1,202 +1,145 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: [PATCH V2 00/54] mmc: mmc: Add Software Command Queuing
-Date: Wed, 29 Jun 2016 16:24:13 +0300
-Message-ID: <1467206707-30185-1-git-send-email-adrian.hunter@intel.com>
+Subject: [PATCH V2 05/54] mmc: sdhci: Add sdhci_read_caps()
+Date: Wed, 29 Jun 2016 16:24:18 +0300
+Message-ID: <1467206707-30185-6-git-send-email-adrian.hunter@intel.com>
+References: <1467206707-30185-1-git-send-email-adrian.hunter@intel.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga01.intel.com ([192.55.52.88]:13035 "EHLO mga01.intel.com"
+Received: from mga01.intel.com ([192.55.52.88]:35817 "EHLO mga01.intel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751962AbcF2N31 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 29 Jun 2016 09:29:27 -0400
+	id S1751982AbcF2N3i (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 29 Jun 2016 09:29:38 -0400
+In-Reply-To: <1467206707-30185-1-git-send-email-adrian.hunter@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>
 Cc: linux-mmc <linux-mmc@vger.kernel.org>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Dorfman Konstantin <kdorfman@codeaurora.org>, David Griego <david.griego@linaro.org>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>
 
-Hi
+Add sdhci_read_caps() and __sdhci_read_caps() to make it easier for drivers
+to fix the version and capabilities registers.
 
-Here is an updated version of the Software Command Queuing patches,
-re-based on the SDHCI patches that I have.
+Pedantically, the SDHCI specification states that the capabilities
+registers are valid when the host controller resets the Software Reset For
+All bit. That requirement has always been satisfied by performing a reset
+at the start of initialization, and consequently that is now part of the
+new functions.
 
-Ulf, there are a lot of patches now and I think it would be worth taking
-some of them.  For example, the first 25 affect SDHCI only.  If you accept
-the "Command during Transfer" API introduced in patch 26, then you could
-take patches 26-30 as well.
+Although the SDHCI_QUIRK_MISSING_CAPS quirk has not yet been removed,
+drivers that want to provide their own caps can now use these functions
+instead of that quirk.
 
-There wasn't much comment on the RFC so there have been few changes.
-Venu Byravarasu commented that it may be more efficient to use Software
-Command Queuing only when there is more than 1 request queued - it isn't
-obvious how well that would work in practice, but it could be added later
-if it could be shown to be beneficial.
+Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
+---
+ drivers/mmc/host/sdhci.c | 48 +++++++++++++++++++++++++++++++++---------------
+ drivers/mmc/host/sdhci.h |  8 ++++++++
+ 2 files changed, 41 insertions(+), 15 deletions(-)
 
-I haven't had a chance to go through the hardware Command Queuing patches
-in detail yet, but otherwise these patches are ready to go.
-
-As noted below, the patches can also be found here:
-
-	http://git.infradead.org/users/ahunter/linux-sdhci.git/shortlog/refs/heads/swcmdq
-
-
-Changes in V2:
-
-  Added 5 patches already sent here:
-
-    http://marc.info/?l=linux-mmc&m=146712062816835
-
-  Added 3 more new patches:
-
-    mmc: sdhci-pci: Do not runtime suspend at the end of sdhci_pci_probe()
-    mmc: sdhci: Avoid STOP cmd triggering warning in sdhci_send_command()
-    mmc: sdhci: sdhci_execute_tuning() must delete timer
-
-  Carried forward the V2 fix to:
-
-    mmc: mmc_test: Disable Command Queue while mmc_test is used
-
-  Also reset the cmd circuit for data timeout if it is processing the data
-  cmd, in patch:
-
-    mmc: sdhci: Do not reset cmd or data circuits that are in use
-
-Original Cover Letter:
-
-Chuanxiao Dong sent some patches last year relating to eMMC 5.1 Software
-Command Queuing.  He did not follow-up but I have contacted him and he says
-it is OK if I take over upstreaming the patches.
-
-eMMC Command Queuing is a feature added in version 5.1.  The card maintains
-a queue of up to 32 data transfers.  Commands CMD45/CMD45 are sent to queue
-up transfers in advance, and then one of the transfers is selected to
-"execute" by CMD46/CMD47 at which point data transfer actually begins.
-
-The advantage of command queuing is that the card can prepare for transfers
-in advance.  That makes a big difference in the case of random reads because
-the card can start reading into its cache in advance.
-
-A v5.1 host controller can manage the command queue itself, but it is also
-possible for software to manage the queue using an non-v5.1 host controller
-- that is what Software Command Queuing is.
-
-Refer to the JEDEC (http://www.jedec.org/) eMMC v5.1 Specification for more
-information about Command Queuing.
-
-While these patches are heavily based on Dong's patches, there are some
-changes:
-
-SDHCI has been amended to support commands during transfer. That is a
-generic change added in patches 1 - 30. In principle, that would also
-support SDIO's CMD52 during data transfer.
-
-The original approach added multiple commands into the same request for
-sending CMD44, CMD45 and CMD13. That is not strictly necessary and has
-been omitted for now.
-
-The original approach also called blk_end_request() from the mrq->done()
-function, which means the upper layers learnt of completed requests
-slightly earlier. That is not strictly related to Software Command Queuing
-and is something that could potentially be done for all data requests.
-That has been omitted for now.
-
-The current block driver supports 2 requests on the go at a time. Patches
-31 - 38 make preparations for an arbitrary sized queue. Patches 39 - 42
-introduce Command Queue definitions and helpers.  Patches 43 - 49
-complete the job of making the block driver use a queue.  Patches 50 - 52
-finally add Software Command Queuing, and 53 - 54 enable it for Intel eMMC
-controllers. Most of the Software Command Queuing functionality is added
-in patch 51.
-
-The patches can also be found here:
-
-	http://git.infradead.org/users/ahunter/linux-sdhci.git/shortlog/refs/heads/swcmdq
-
-The patches have only had basic testing so far. Ad-hoc testing shows a
-degradation in sequential read performance of about 10% but an increase in
-throughput for mixed workload of multiple processes of about 90%. The
-reduction in sequential performance is due to the need to read the Queue
-Status register between each transfer.
-
-These patches should not conflict with Hardware Command Queuing which
-handles the queue in a completely different way and thus does not need
-to share code with Software Command Queuing. The exceptions being the
-Command Queue definitions and queue allocation which should be able to be
-used.
-
-
-Adrian Hunter (54):
-      mmc: sdhci: Do not call implementations of mmc host ops directly
-      mmc: sdhci: Split sdhci_add_host()
-      mmc: sdhci: Make signal voltage support explicit
-      mmc: sdhci: Tidy caps variables in sdhci_setup_host()
-      mmc: sdhci: Add sdhci_read_caps()
-      mmc: sdhci-pci: Do not runtime suspend at the end of sdhci_pci_probe()
-      mmc: sdhci: Move busy signal handling into sdhci_finish_cmd()
-      mmc: sdhci: Get rid of redundant BUG_ONs
-      mmc: sdhci: Simplify sdhci_finish_command() by clearing host->cmd at the start
-      mmc: sdhci: Record what command is using the data lines
-      mmc: sdhci: Get rid of host->busy_handle
-      mmc: sdhci: Reduce the use of host->mrq
-      mmc: sdhci: Move host->data warning
-      mmc: sdhci: Factor out sdhci_finish_mrq()
-      mmc: sdhci: Factor out sdhci_needs_reset()
-      mmc: sdhci: Track whether a reset is pending
-      mmc: sdhci: Clear pointers when a request finishes
-      mmc: sdhci: Ensure all requests get errored out
-      mmc: sdhci: Factor out sdhci_data_line_cmd()
-      mmc: sdhci: Separate timer timeout for command and data requests
-      mmc: sdhci: Allow for finishing multiple requests
-      mmc: sdhci: Factor out sdhci_auto_cmd12()
-      mmc: sdhci: Do not reset cmd or data circuits that are in use
-      mmc: sdhci: Avoid STOP cmd triggering warning in sdhci_send_command()
-      mmc: sdhci: sdhci_execute_tuning() must delete timer
-      mmc: core: Add support for sending commands during data transfer
-      mmc: mmc_test: Add tests for sending commands during transfer
-      mmc: sdhci: Support cap_cmd_during_tfr requests
-      mmc: sdhci-pci: Set MMC_CAP_CMD_DURING_TFR for Intel eMMC controllers
-      mmc: sdhci-acpi: Set MMC_CAP_CMD_DURING_TFR for Intel eMMC controllers
-      mmc: queue: Fix queue thread wake-up
-      mmc: queue: Factor out mmc_queue_alloc_bounce_bufs()
-      mmc: queue: Factor out mmc_queue_alloc_bounce_sgs()
-      mmc: queue: Factor out mmc_queue_alloc_sgs()
-      mmc: queue: Factor out mmc_queue_reqs_free_bufs()
-      mmc: queue: Introduce queue depth
-      mmc: queue: Use queue depth to allocate and free
-      mmc: queue: Allocate queue of size qdepth
-      mmc: mmc: Add Command Queue definitions
-      mmc: mmc: Add functions to enable / disable the Command Queue
-      mmc: mmc_test: Disable Command Queue while mmc_test is used
-      mmc: block: Disable Command Queue while RPMB is used
-      mmc: core: Do not prepare a new request twice
-      mmc: core: Export mmc_retune_hold() and mmc_retune_release()
-      mmc: block: Factor out mmc_blk_requeue()
-      mmc: block: Fix 4K native sector check
-      mmc: block: Use local var for mqrq_cur
-      mmc: block: Pass mqrq to mmc_blk_prep_packed_list()
-      mmc: block: Introduce queue semantics
-      mmc: queue: Add a function to control wake-up on new requests
-      mmc: block: Add Software Command Queuing
-      mmc: mmc: Enable Software Command Queuing
-      mmc: sdhci-pci: Enable Software Command Queuing for some Intel controllers
-      mmc: sdhci-acpi: Enable Software Command Queuing for some Intel controllers
-
- drivers/mmc/card/block.c          | 738 +++++++++++++++++++++++++++++++++++---
- drivers/mmc/card/mmc_test.c       | 321 +++++++++++++++++
- drivers/mmc/card/queue.c          | 296 +++++++++------
- drivers/mmc/card/queue.h          |  27 +-
- drivers/mmc/core/core.c           | 113 +++++-
- drivers/mmc/core/host.c           |   2 +
- drivers/mmc/core/host.h           |   2 -
- drivers/mmc/core/mmc.c            |  43 ++-
- drivers/mmc/core/mmc_ops.c        |  27 ++
- drivers/mmc/host/sdhci-acpi.c     |   4 +-
- drivers/mmc/host/sdhci-pci-core.c |   8 +-
- drivers/mmc/host/sdhci.c          | 602 +++++++++++++++++++++----------
- drivers/mmc/host/sdhci.h          |  26 +-
- include/linux/mmc/card.h          |   5 +
- include/linux/mmc/core.h          |  12 +
- include/linux/mmc/host.h          |   9 +-
- include/linux/mmc/mmc.h           |  17 +
- 17 files changed, 1853 insertions(+), 399 deletions(-)
-
-
-Regards
-Adrian
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 185dbf27689e..44cdb6d035f2 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -2841,6 +2841,38 @@ static int sdhci_set_dma_mask(struct sdhci_host *host)
+ 	return ret;
+ }
+ 
++void __sdhci_read_caps(struct sdhci_host *host, u16 *ver, u32 *caps, u32 *caps1)
++{
++	u16 v;
++
++	if (host->read_caps)
++		return;
++
++	host->read_caps = true;
++
++	if (debug_quirks)
++		host->quirks = debug_quirks;
++
++	if (debug_quirks2)
++		host->quirks2 = debug_quirks2;
++
++	sdhci_do_reset(host, SDHCI_RESET_ALL);
++
++	v = ver ? *ver : sdhci_readw(host, SDHCI_HOST_VERSION);
++	host->version = (v & SDHCI_SPEC_VER_MASK) >> SDHCI_SPEC_VER_SHIFT;
++
++	if (host->quirks & SDHCI_QUIRK_MISSING_CAPS)
++		return;
++
++	host->caps = caps ? *caps : sdhci_readl(host, SDHCI_CAPABILITIES);
++
++	if (host->version < SDHCI_SPEC_300)
++		return;
++
++	host->caps1 = caps1 ? *caps1 : sdhci_readl(host, SDHCI_CAPABILITIES_1);
++}
++EXPORT_SYMBOL_GPL(__sdhci_read_caps);
++
+ int sdhci_setup_host(struct sdhci_host *host)
+ {
+ 	struct mmc_host *mmc;
+@@ -2856,29 +2888,15 @@ int sdhci_setup_host(struct sdhci_host *host)
+ 
+ 	mmc = host->mmc;
+ 
+-	if (debug_quirks)
+-		host->quirks = debug_quirks;
+-	if (debug_quirks2)
+-		host->quirks2 = debug_quirks2;
++	sdhci_read_caps(host);
+ 
+ 	override_timeout_clk = host->timeout_clk;
+ 
+-	sdhci_do_reset(host, SDHCI_RESET_ALL);
+-
+-	host->version = sdhci_readw(host, SDHCI_HOST_VERSION);
+-	host->version = (host->version & SDHCI_SPEC_VER_MASK)
+-				>> SDHCI_SPEC_VER_SHIFT;
+ 	if (host->version > SDHCI_SPEC_300) {
+ 		pr_err("%s: Unknown controller version (%d). You may experience problems.\n",
+ 		       mmc_hostname(mmc), host->version);
+ 	}
+ 
+-	if (!(host->quirks & SDHCI_QUIRK_MISSING_CAPS)) {
+-		host->caps = sdhci_readl(host, SDHCI_CAPABILITIES);
+-		if (host->version >= SDHCI_SPEC_300)
+-			host->caps1 = sdhci_readl(host, SDHCI_CAPABILITIES_1);
+-	}
+-
+ 	if (host->quirks & SDHCI_QUIRK_FORCE_DMA)
+ 		host->flags |= SDHCI_USE_SDMA;
+ 	else if (!(host->caps & SDHCI_CAN_DO_SDMA))
+diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+index 8696c9365ef2..e332e4a40823 100644
+--- a/drivers/mmc/host/sdhci.h
++++ b/drivers/mmc/host/sdhci.h
+@@ -492,6 +492,7 @@ struct sdhci_host {
+ 
+ 	u32 caps;		/* CAPABILITY_0 */
+ 	u32 caps1;		/* CAPABILITY_1 */
++	bool read_caps;		/* Capability flags have been read */
+ 
+ 	unsigned int            ocr_avail_sdio;	/* OCR bit masks */
+ 	unsigned int            ocr_avail_sd;
+@@ -648,6 +649,8 @@ static inline void *sdhci_priv(struct sdhci_host *host)
+ }
+ 
+ extern void sdhci_card_detect(struct sdhci_host *host);
++extern void __sdhci_read_caps(struct sdhci_host *host, u16 *ver, u32 *caps,
++			      u32 *caps1);
+ extern int sdhci_setup_host(struct sdhci_host *host);
+ extern int __sdhci_add_host(struct sdhci_host *host);
+ extern int sdhci_add_host(struct sdhci_host *host);
+@@ -655,6 +658,11 @@ extern void sdhci_remove_host(struct sdhci_host *host, int dead);
+ extern void sdhci_send_command(struct sdhci_host *host,
+ 				struct mmc_command *cmd);
+ 
++static inline void sdhci_read_caps(struct sdhci_host *host)
++{
++	__sdhci_read_caps(host, NULL, NULL, NULL);
++}
++
+ static inline bool sdhci_sdio_irq_enabled(struct sdhci_host *host)
+ {
+ 	return !!(host->flags & SDHCI_SDIO_IRQ_ENABLED);
+-- 
+1.9.1
 
