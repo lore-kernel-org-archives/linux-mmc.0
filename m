@@ -1,75 +1,56 @@
-From: Andy Gross <andy.gross@linaro.org>
-Subject: Re: [PATCH RFC 2/8] mmc: sdhci-msm: Fix the regulator binding name
-Date: Wed, 29 Jun 2016 16:48:09 -0500
-Message-ID: <20160629214809.GC16832@hector.attlocal.net>
-References: <1467199233-20506-1-git-send-email-riteshh@codeaurora.org>
- <1467199233-20506-3-git-send-email-riteshh@codeaurora.org>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ob0-f182.google.com ([209.85.214.182]:34711 "EHLO
-	mail-ob0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751698AbcF2Vz6 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 29 Jun 2016 17:55:58 -0400
-Received: by mail-ob0-f182.google.com with SMTP id ru5so45030342obc.1
-        for <linux-mmc@vger.kernel.org>; Wed, 29 Jun 2016 14:55:44 -0700 (PDT)
-Content-Disposition: inline
-In-Reply-To: <1467199233-20506-3-git-send-email-riteshh@codeaurora.org>
-Sender: linux-mmc-owner@vger.kernel.org
+From: Simon Horman <horms+renesas@verge.net.au>
+Subject: [PATCH/RFC v2 3/5] mmc: tmio: add max_segs and max_blk_count in tmio_mmc_data
+Date: Thu, 30 Jun 2016 00:05:38 +0200
+Message-ID: <1467237940-24388-4-git-send-email-horms+renesas@verge.net.au>
+References: <1467237940-24388-1-git-send-email-horms+renesas@verge.net.au>
+Return-path: <linux-renesas-soc-owner@vger.kernel.org>
+In-Reply-To: <1467237940-24388-1-git-send-email-horms+renesas@verge.net.au>
+Sender: linux-renesas-soc-owner@vger.kernel.org
+To: Wolfram Sang <wsa+renesas@sang-engineering.com>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Magnus Damm <magnus.damm@gmail.com>, linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org, Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>, Ai Kyuse <ai.kyuse.uw@renesas.com>, Simon Horman <horms+renesas@verge.net.au>
 List-Id: linux-mmc@vger.kernel.org
-To: Ritesh Harjani <riteshh@codeaurora.org>
-Cc: ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org, adrian.hunter@intel.com, asutoshd@codeaurora.org, kdorfman@codeaurora.org, david.griego@linaro.org, stummala@codeaurora.org, venkatg@codeaurora.org
 
-On Wed, Jun 29, 2016 at 04:50:27PM +0530, Ritesh Harjani wrote:
-> QUALCOMM sdhci-msm driver follows a pwr_irq method
-> (deviation from regular standard) for any pwr related
-> operations (which also involves regulator settings changes).
-> 
-> vmmc/vqmmc regulator names are used by core layer,
-> so change the names to vdd/vdd-io so that it can
-> be used by sdhci-msm driver alone.
-> 
-> Signed-off-by: Ritesh Harjani <riteshh@codeaurora.org>
-> ---
->  Documentation/devicetree/bindings/mmc/sdhci-msm.txt | 8 ++++----
->  1 file changed, 4 insertions(+), 4 deletions(-)
-> 
-> diff --git a/Documentation/devicetree/bindings/mmc/sdhci-msm.txt b/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
-> index 485483a..851e66d 100644
-> --- a/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
-> +++ b/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
-> @@ -27,8 +27,8 @@ Example:
->  		bus-width = <8>;
->  		non-removable;
->  
-> -		vmmc-supply = <&pm8941_l20>;
-> -		vqmmc-supply = <&pm8941_s3>;
-> +		vdd-supply = <&pm8941_l20>;
-> +		vdd-io-supply = <&pm8941_s3>;
+From: Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
 
-If you are adding supplies, you need to specify them in the required properties.
-And if these properties are required by a specific compat you need to add the
-compat.  Because this binding has consumers, you need to think about them as
-well.
+To change each value from related driver (e.g. sh_mobile_sdhi driver),
+this patch adds these member in the struct tmio_mmc_data.
 
-Is the pwr_irq stuff still part of the v4 controller?  If not and this is a new
-revision, perhaps a new binding/compat is required.  This would make dealing
-with it in the driver easier as well.
+Signed-off-by: Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
+Signed-off-by: Ai Kyuse <ai.kyuse.uw@renesas.com>
+Signed-off-by: Simon Horman <horms+renesas@verge.net.au>
+---
+v2
+* First post
+---
+ drivers/mmc/host/tmio_mmc_pio.c | 2 +-
+ include/linux/mfd/tmio.h        | 2 ++
+ 2 files changed, 3 insertions(+), 1 deletion(-)
 
->  
->  		pinctrl-names = "default";
->  		pinctrl-0 = <&sdc1_clk &sdc1_cmd &sdc1_data>;
-> @@ -44,8 +44,8 @@ Example:
->  		bus-width = <4>;
->  		cd-gpios = <&msmgpio 62 0x1>;
->  
-> -		vmmc-supply = <&pm8941_l21>;
-> -		vqmmc-supply = <&pm8941_l13>;
-> +		vdd-supply = <&pm8941_l21>;
-> +		vdd-io-supply = <&pm8941_l13>;
-
-ditto above
-
->  
->  		pinctrl-names = "default";
->  		pinctrl-0 = <&sdc2_clk &sdc2_cmd &sdc2_data>;
+diff --git a/drivers/mmc/host/tmio_mmc_pio.c b/drivers/mmc/host/tmio_mmc_pio.c
+index c0020c331595..39dd8402e126 100644
+--- a/drivers/mmc/host/tmio_mmc_pio.c
++++ b/drivers/mmc/host/tmio_mmc_pio.c
+@@ -1124,7 +1124,7 @@ int tmio_mmc_host_probe(struct tmio_mmc_host *_host,
+ 
+ 	mmc->caps |= MMC_CAP_4_BIT_DATA | pdata->capabilities;
+ 	mmc->caps2 |= pdata->capabilities2;
+-	mmc->max_segs = 32;
++	mmc->max_segs = pdata->max_segs ? pdata->max_segs : 32;
+ 	mmc->max_blk_size = 512;
+ 	mmc->max_blk_count = (PAGE_SIZE / mmc->max_blk_size) *
+ 		mmc->max_segs;
+diff --git a/include/linux/mfd/tmio.h b/include/linux/mfd/tmio.h
+index 7a26286db895..3b95dc7eb314 100644
+--- a/include/linux/mfd/tmio.h
++++ b/include/linux/mfd/tmio.h
+@@ -125,6 +125,8 @@ struct tmio_mmc_data {
+ 	unsigned int			cd_gpio;
+ 	int				alignment_shift;
+ 	dma_addr_t			dma_rx_offset;
++	unsigned int			max_blk_count;
++	unsigned short			max_segs;
+ 	void (*set_pwr)(struct platform_device *host, int state);
+ 	void (*set_clk_div)(struct platform_device *host, int state);
+ };
+-- 
+2.7.0.rc3.207.g0ac5344
