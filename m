@@ -1,111 +1,89 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: [PATCH V2 42/54] mmc: block: Disable Command Queue while RPMB is used
-Date: Wed, 29 Jun 2016 16:24:55 +0300
-Message-ID: <1467206707-30185-43-git-send-email-adrian.hunter@intel.com>
+Subject: [PATCH V2 50/54] mmc: queue: Add a function to control wake-up on new requests
+Date: Wed, 29 Jun 2016 16:25:03 +0300
+Message-ID: <1467206707-30185-51-git-send-email-adrian.hunter@intel.com>
 References: <1467206707-30185-1-git-send-email-adrian.hunter@intel.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga01.intel.com ([192.55.52.88]:12766 "EHLO mga01.intel.com"
+Received: from mga14.intel.com ([192.55.52.115]:36983 "EHLO mga14.intel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752524AbcF2Ncl (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 29 Jun 2016 09:32:41 -0400
+	id S1752501AbcF2Nck (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 29 Jun 2016 09:32:40 -0400
 In-Reply-To: <1467206707-30185-1-git-send-email-adrian.hunter@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>
 Cc: linux-mmc <linux-mmc@vger.kernel.org>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Dorfman Konstantin <kdorfman@codeaurora.org>, David Griego <david.griego@linaro.org>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>
 
-RPMB does not allow Command Queue commands. Disable and re-enable the
-Command Queue when switching.
-
-Note that the driver only switches partitions when the queue is empty.
+Add a function to control wake-up on new requests. This will enable
+Software Command Queuing to choose whether or not to queue new
+requests immediately or wait for the current task to complete.
 
 Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
 ---
- drivers/mmc/card/block.c | 46 ++++++++++++++++++++++++++++++++++++++--------
- 1 file changed, 38 insertions(+), 8 deletions(-)
+ drivers/mmc/card/queue.c | 16 ++++++++++++++++
+ drivers/mmc/card/queue.h |  2 ++
+ 2 files changed, 18 insertions(+)
 
-diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
-index 48af615f9211..f76716a3acb4 100644
---- a/drivers/mmc/card/block.c
-+++ b/drivers/mmc/card/block.c
-@@ -744,10 +744,41 @@ static const struct block_device_operations mmc_bdops = {
- #endif
- };
- 
-+static int mmc_blk_part_switch_pre(struct mmc_card *card,
-+				   unsigned int part_type)
-+{
-+	int ret;
-+
-+	if (part_type == EXT_CSD_PART_CONFIG_ACC_RPMB) {
-+		if (card->ext_csd.cmdq_en) {
-+			ret = mmc_cmdq_disable(card);
-+			if (ret)
-+				return ret;
-+		}
-+		mmc_retune_pause(card->host);
-+	}
-+
-+	return 0;
-+}
-+
-+static int mmc_blk_part_switch_post(struct mmc_card *card,
-+				    unsigned int part_type)
-+{
-+	int ret = 0;
-+
-+	if (part_type == EXT_CSD_PART_CONFIG_ACC_RPMB) {
-+		mmc_retune_unpause(card->host);
-+		if (card->reenable_cmdq && !card->ext_csd.cmdq_en)
-+			ret = mmc_cmdq_enable(card);
-+	}
-+
-+	return ret;
-+}
-+
- static inline int mmc_blk_part_switch(struct mmc_card *card,
- 				      struct mmc_blk_data *md)
- {
--	int ret;
-+	int ret = 0;
- 	struct mmc_blk_data *main_md = dev_get_drvdata(&card->dev);
- 
- 	if (main_md->part_curr == md->part_type)
-@@ -756,8 +787,9 @@ static inline int mmc_blk_part_switch(struct mmc_card *card,
- 	if (mmc_card_mmc(card)) {
- 		u8 part_config = card->ext_csd.part_config;
- 
--		if (md->part_type == EXT_CSD_PART_CONFIG_ACC_RPMB)
--			mmc_retune_pause(card->host);
-+		ret = mmc_blk_part_switch_pre(card, md->part_type);
-+		if (ret)
-+			return ret;
- 
- 		part_config &= ~EXT_CSD_PART_CONFIG_ACC_MASK;
- 		part_config |= md->part_type;
-@@ -766,19 +798,17 @@ static inline int mmc_blk_part_switch(struct mmc_card *card,
- 				 EXT_CSD_PART_CONFIG, part_config,
- 				 card->ext_csd.part_time);
- 		if (ret) {
--			if (md->part_type == EXT_CSD_PART_CONFIG_ACC_RPMB)
--				mmc_retune_unpause(card->host);
-+			mmc_blk_part_switch_post(card, md->part_type);
- 			return ret;
- 		}
- 
- 		card->ext_csd.part_config = part_config;
- 
--		if (main_md->part_curr == EXT_CSD_PART_CONFIG_ACC_RPMB)
--			mmc_retune_unpause(card->host);
-+		ret = mmc_blk_part_switch_post(card, main_md->part_curr);
+diff --git a/drivers/mmc/card/queue.c b/drivers/mmc/card/queue.c
+index 4e134884a183..0781578fc8b6 100644
+--- a/drivers/mmc/card/queue.c
++++ b/drivers/mmc/card/queue.c
+@@ -94,6 +94,7 @@ static int mmc_queue_thread(void *d)
+ 		cntx->is_waiting_last_req = false;
+ 		cntx->is_new_req = false;
+ 		if (!req) {
++			mq->is_new_req = false;
+ 			/*
+ 			 * Dispatch queue is empty so set flags for
+ 			 * mmc_request_fn() to wake us up.
+@@ -144,6 +145,8 @@ static void mmc_request_fn(struct request_queue *q)
+ 		return;
  	}
  
- 	main_md->part_curr = md->part_type;
--	return 0;
-+	return ret;
++	mq->is_new_req = true;
++
+ 	cntx = &mq->card->host->context_info;
+ 
+ 	if (cntx->is_waiting_last_req) {
+@@ -155,6 +158,19 @@ static void mmc_request_fn(struct request_queue *q)
+ 		wake_up_process(mq->thread);
  }
  
- static u32 mmc_sd_num_wr_blocks(struct mmc_card *card)
++void mmc_queue_set_wake(struct mmc_queue *mq, bool wake_me)
++{
++	struct mmc_context_info *cntx = &mq->card->host->context_info;
++	struct request_queue *q = mq->queue;
++
++	if (cntx->is_waiting_last_req != wake_me) {
++		spin_lock_irq(q->queue_lock);
++		cntx->is_waiting_last_req = wake_me;
++		cntx->is_new_req = wake_me && mq->is_new_req;
++		spin_unlock_irq(q->queue_lock);
++	}
++}
++
+ static struct scatterlist *mmc_alloc_sg(int sg_len, int *err)
+ {
+ 	struct scatterlist *sg;
+diff --git a/drivers/mmc/card/queue.h b/drivers/mmc/card/queue.h
+index 1afd5dafd46d..a6d5b0f94662 100644
+--- a/drivers/mmc/card/queue.h
++++ b/drivers/mmc/card/queue.h
+@@ -52,6 +52,7 @@ struct mmc_queue {
+ 	unsigned int		flags;
+ #define MMC_QUEUE_SUSPENDED	(1 << 0)
+ 	bool			asleep;
++	bool			is_new_req;
+ 
+ 	int			(*issue_fn)(struct mmc_queue *, struct request *);
+ 	void			*data;
+@@ -81,5 +82,6 @@ extern int mmc_access_rpmb(struct mmc_queue *);
+ extern struct mmc_queue_req *mmc_queue_req_find(struct mmc_queue *,
+ 						struct request *);
+ extern void mmc_queue_req_free(struct mmc_queue *, struct mmc_queue_req *);
++extern void mmc_queue_set_wake(struct mmc_queue *, bool);
+ 
+ #endif
 -- 
 1.9.1
 
