@@ -1,126 +1,114 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: [PATCH V2 02/54] mmc: sdhci: Split sdhci_add_host()
-Date: Wed, 29 Jun 2016 16:24:15 +0300
-Message-ID: <1467206707-30185-3-git-send-email-adrian.hunter@intel.com>
+Subject: [PATCH V2 03/54] mmc: sdhci: Make signal voltage support explicit
+Date: Wed, 29 Jun 2016 16:24:16 +0300
+Message-ID: <1467206707-30185-4-git-send-email-adrian.hunter@intel.com>
 References: <1467206707-30185-1-git-send-email-adrian.hunter@intel.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga01.intel.com ([192.55.52.88]:13035 "EHLO mga01.intel.com"
+Received: from mga01.intel.com ([192.55.52.88]:35817 "EHLO mga01.intel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751982AbcF2N32 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 29 Jun 2016 09:29:28 -0400
+	id S1751982AbcF2N3c (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 29 Jun 2016 09:29:32 -0400
 In-Reply-To: <1467206707-30185-1-git-send-email-adrian.hunter@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>
 Cc: linux-mmc <linux-mmc@vger.kernel.org>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Dorfman Konstantin <kdorfman@codeaurora.org>, David Griego <david.griego@linaro.org>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>
 
-Split sdhci-add_host() in order to further our objective to make
-sdhci into a library.
+Signal voltage support is not a quirk, it is a capability. According to the
+SDHCI specification, support for 1.8V signaling is determined by the
+presence of one of the capability bits SDHCI_SUPPORT_SDR50,
+SDHCI_SUPPORT_SDR104, or SDHCI_SUPPORT_DDR50. This is complicated by also
+supporting eMMC which has 1.8V modes and 1.2V modes. It would be possible
+to use the transfer mode to determine signal voltage support, except for
+eMMC DDR52 mode which uses the same capability (MMC_CAP_1_8V_DDR) for 1.8V
+signaling and 3V signaling.
 
-The split divides code that sets up mmc and sdhci parameters, from
-code that actually activates things - such as tasklet initialization,
-requesting the irq, and adding (and starting) the host.
+In addition, the mmc core will fail over from one signaling voltage to the
+next (refer mmc_power_up()) which means SDHCI really needs to validate
+which voltages are actually supported.
 
-This gives drivers an opportunity to change various settings before
-committing to start the host.
-
-Drivers can continue to call sdhci_add_host() but drivers that want
-to take advantage of the split instead call sdhci_setup_host() followed
-by __sdhci_add_host().
+Introduce SDHCI flags for signal voltage support and set them based on the
+supported transfer modes. In general, drivers should prefer to set the
+supported transfer modes correctly rather than change the signal voltage
+capability, except in the case where 3V DDR52 is supported but 1.8V is
+not.
 
 Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
 ---
- drivers/mmc/host/sdhci.c | 39 ++++++++++++++++++++++++++++++++++++---
- drivers/mmc/host/sdhci.h |  2 ++
- 2 files changed, 38 insertions(+), 3 deletions(-)
+ drivers/mmc/host/sdhci.c | 17 +++++++++++++++++
+ drivers/mmc/host/sdhci.h |  3 +++
+ 2 files changed, 20 insertions(+)
 
 diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 7009c862ca9b..22061faf7fa4 100644
+index 22061faf7fa4..8ac5a9df2c01 100644
 --- a/drivers/mmc/host/sdhci.c
 +++ b/drivers/mmc/host/sdhci.c
-@@ -2833,7 +2833,7 @@ static int sdhci_set_dma_mask(struct sdhci_host *host)
- 	return ret;
+@@ -1733,6 +1733,8 @@ static int sdhci_start_signal_voltage_switch(struct mmc_host *mmc,
+ 
+ 	switch (ios->signal_voltage) {
+ 	case MMC_SIGNAL_VOLTAGE_330:
++		if (!(host->flags & SDHCI_SIGNALING_330))
++			return -EINVAL;
+ 		/* Set 1.8V Signal Enable in the Host Control2 register to 0 */
+ 		ctrl &= ~SDHCI_CTRL_VDD_180;
+ 		sdhci_writew(host, ctrl, SDHCI_HOST_CONTROL2);
+@@ -1759,6 +1761,8 @@ static int sdhci_start_signal_voltage_switch(struct mmc_host *mmc,
+ 
+ 		return -EAGAIN;
+ 	case MMC_SIGNAL_VOLTAGE_180:
++		if (!(host->flags & SDHCI_SIGNALING_180))
++			return -EINVAL;
+ 		if (!IS_ERR(mmc->supply.vqmmc)) {
+ 			ret = regulator_set_voltage(mmc->supply.vqmmc,
+ 					1700000, 1950000);
+@@ -1790,6 +1794,8 @@ static int sdhci_start_signal_voltage_switch(struct mmc_host *mmc,
+ 
+ 		return -EAGAIN;
+ 	case MMC_SIGNAL_VOLTAGE_120:
++		if (!(host->flags & SDHCI_SIGNALING_120))
++			return -EINVAL;
+ 		if (!IS_ERR(mmc->supply.vqmmc)) {
+ 			ret = regulator_set_voltage(mmc->supply.vqmmc, 1100000,
+ 						    1300000);
+@@ -2798,6 +2804,8 @@ struct sdhci_host *sdhci_alloc_host(struct device *dev,
+ 	host->mmc_host_ops = sdhci_ops;
+ 	mmc->ops = &host->mmc_host_ops;
+ 
++	host->flags = SDHCI_SIGNALING_330;
++
+ 	return host;
  }
  
--int sdhci_add_host(struct sdhci_host *host)
-+int sdhci_setup_host(struct sdhci_host *host)
- {
- 	struct mmc_host *mmc;
- 	u32 caps[2] = {0, 0};
-@@ -3314,6 +3314,28 @@ int sdhci_add_host(struct sdhci_host *host)
- 	 */
- 	mmc->max_blk_count = (host->quirks & SDHCI_QUIRK_NO_MULTIBLOCK) ? 1 : 65535;
+@@ -3257,6 +3265,15 @@ int sdhci_setup_host(struct sdhci_host *host)
+ 		goto unreg;
+ 	}
  
-+	return 0;
++	if ((mmc->caps & (MMC_CAP_UHS_SDR12 | MMC_CAP_UHS_SDR25 |
++			  MMC_CAP_UHS_SDR50 | MMC_CAP_UHS_SDR104 |
++			  MMC_CAP_UHS_DDR50 | MMC_CAP_1_8V_DDR)) ||
++	    (mmc->caps2 & (MMC_CAP2_HS200_1_8V_SDR | MMC_CAP2_HS400_1_8V)))
++		host->flags |= SDHCI_SIGNALING_180;
 +
-+unreg:
-+	if (!IS_ERR(mmc->supply.vqmmc))
-+		regulator_disable(mmc->supply.vqmmc);
-+undma:
-+	if (host->align_buffer)
-+		dma_free_coherent(mmc_dev(mmc), host->align_buffer_sz +
-+				  host->adma_table_sz, host->align_buffer,
-+				  host->align_addr);
-+	host->adma_table = NULL;
-+	host->align_buffer = NULL;
++	if (mmc->caps2 & MMC_CAP2_HSX00_1_2V)
++		host->flags |= SDHCI_SIGNALING_120;
 +
-+	return ret;
-+}
-+EXPORT_SYMBOL_GPL(sdhci_setup_host);
-+
-+int __sdhci_add_host(struct sdhci_host *host)
-+{
-+	struct mmc_host *mmc = host->mmc;
-+	int ret;
-+
+ 	spin_lock_init(&host->lock);
+ 
  	/*
- 	 * Init tasklets.
- 	 */
-@@ -3370,10 +3392,10 @@ unirq:
- 	free_irq(host->irq, host);
- untasklet:
- 	tasklet_kill(&host->finish_tasklet);
--unreg:
-+
- 	if (!IS_ERR(mmc->supply.vqmmc))
- 		regulator_disable(mmc->supply.vqmmc);
--undma:
-+
- 	if (host->align_buffer)
- 		dma_free_coherent(mmc_dev(mmc), host->align_buffer_sz +
- 				  host->adma_table_sz, host->align_buffer,
-@@ -3383,7 +3405,18 @@ undma:
- 
- 	return ret;
- }
-+EXPORT_SYMBOL_GPL(__sdhci_add_host);
-+
-+int sdhci_add_host(struct sdhci_host *host)
-+{
-+	int ret;
-+
-+	ret = sdhci_setup_host(host);
-+	if (ret)
-+		return ret;
- 
-+	return __sdhci_add_host(host);
-+}
- EXPORT_SYMBOL_GPL(sdhci_add_host);
- 
- void sdhci_remove_host(struct sdhci_host *host, int dead)
 diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-index 609f87ca536b..b16aec2faa2e 100644
+index b16aec2faa2e..419911f107d3 100644
 --- a/drivers/mmc/host/sdhci.h
 +++ b/drivers/mmc/host/sdhci.h
-@@ -645,6 +645,8 @@ static inline void *sdhci_priv(struct sdhci_host *host)
- }
+@@ -447,6 +447,9 @@ struct sdhci_host {
+ #define SDHCI_SDIO_IRQ_ENABLED	(1<<9)	/* SDIO irq enabled */
+ #define SDHCI_USE_64_BIT_DMA	(1<<12)	/* Use 64-bit DMA */
+ #define SDHCI_HS400_TUNING	(1<<13)	/* Tuning for HS400 */
++#define SDHCI_SIGNALING_330	(1<<14)	/* Host is capable of 3.3V signaling */
++#define SDHCI_SIGNALING_180	(1<<15)	/* Host is capable of 1.8V signaling */
++#define SDHCI_SIGNALING_120	(1<<16)	/* Host is capable of 1.2V signaling */
  
- extern void sdhci_card_detect(struct sdhci_host *host);
-+extern int sdhci_setup_host(struct sdhci_host *host);
-+extern int __sdhci_add_host(struct sdhci_host *host);
- extern int sdhci_add_host(struct sdhci_host *host);
- extern void sdhci_remove_host(struct sdhci_host *host, int dead);
- extern void sdhci_send_command(struct sdhci_host *host,
+ 	unsigned int version;	/* SDHCI spec. version */
+ 
 -- 
 1.9.1
 
