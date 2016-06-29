@@ -1,7 +1,7 @@
 From: Ritesh Harjani <riteshh@codeaurora.org>
-Subject: [PATCH RFC 1/8] mmc: sdhci-msm: Reset vendor specific func register on probe
-Date: Wed, 29 Jun 2016 16:50:26 +0530
-Message-ID: <1467199233-20506-2-git-send-email-riteshh@codeaurora.org>
+Subject: [PATCH RFC 2/8] mmc: sdhci-msm: Fix the regulator binding name
+Date: Wed, 29 Jun 2016 16:50:27 +0530
+Message-ID: <1467199233-20506-3-git-send-email-riteshh@codeaurora.org>
 References: <1467199233-20506-1-git-send-email-riteshh@codeaurora.org>
 Return-path: <linux-arm-msm-owner@vger.kernel.org>
 In-Reply-To: <1467199233-20506-1-git-send-email-riteshh@codeaurora.org>
@@ -10,52 +10,45 @@ To: ulf.hansson@linaro.org, linux-mmc@vger.kernel.org
 Cc: linux-arm-msm@vger.kernel.org, adrian.hunter@intel.com, asutoshd@codeaurora.org, kdorfman@codeaurora.org, david.griego@linaro.org, stummala@codeaurora.org, venkatg@codeaurora.org, Ritesh Harjani <riteshh@codeaurora.org>
 List-Id: linux-mmc@vger.kernel.org
 
-From: Venkat Gopalakrishnan <venkatg@codeaurora.org>
+QUALCOMM sdhci-msm driver follows a pwr_irq method
+(deviation from regular standard) for any pwr related
+operations (which also involves regulator settings changes).
 
-The vendor specific func register doesn't get reset when using the
-software reset register. The various bootloader's could leave this
-in an unknown state, hence reset this register to it's power on reset
-value during probe.
+vmmc/vqmmc regulator names are used by core layer,
+so change the names to vdd/vdd-io so that it can
+be used by sdhci-msm driver alone.
 
-Signed-off-by: Venkat Gopalakrishnan <venkatg@codeaurora.org>
 Signed-off-by: Ritesh Harjani <riteshh@codeaurora.org>
 ---
- drivers/mmc/host/sdhci-msm.c | 15 ++++-----------
- 1 file changed, 4 insertions(+), 11 deletions(-)
+ Documentation/devicetree/bindings/mmc/sdhci-msm.txt | 8 ++++----
+ 1 file changed, 4 insertions(+), 4 deletions(-)
 
-diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
-index 0653fe7..6e56f2b 100644
---- a/drivers/mmc/host/sdhci-msm.c
-+++ b/drivers/mmc/host/sdhci-msm.c
-@@ -45,6 +45,7 @@
+diff --git a/Documentation/devicetree/bindings/mmc/sdhci-msm.txt b/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
+index 485483a..851e66d 100644
+--- a/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
++++ b/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
+@@ -27,8 +27,8 @@ Example:
+ 		bus-width = <8>;
+ 		non-removable;
  
- #define CORE_VENDOR_SPEC	0x10c
- #define CORE_CLK_PWRSAVE	BIT(1)
-+#define CORE_VENDOR_SPEC_POR_VAL	0xa1c
+-		vmmc-supply = <&pm8941_l20>;
+-		vqmmc-supply = <&pm8941_s3>;
++		vdd-supply = <&pm8941_l20>;
++		vdd-io-supply = <&pm8941_s3>;
  
- #define CORE_VENDOR_SPEC_CAPABILITIES0	0x11c
+ 		pinctrl-names = "default";
+ 		pinctrl-0 = <&sdc1_clk &sdc1_cmd &sdc1_data>;
+@@ -44,8 +44,8 @@ Example:
+ 		bus-width = <4>;
+ 		cd-gpios = <&msmgpio 62 0x1>;
  
-@@ -507,17 +508,9 @@ static int sdhci_msm_probe(struct platform_device *pdev)
- 		goto clk_disable;
- 	}
+-		vmmc-supply = <&pm8941_l21>;
+-		vqmmc-supply = <&pm8941_l13>;
++		vdd-supply = <&pm8941_l21>;
++		vdd-io-supply = <&pm8941_l13>;
  
--	/* Reset the core and Enable SDHC mode */
--	writel_relaxed(readl_relaxed(msm_host->core_mem + CORE_POWER) |
--		       CORE_SW_RST, msm_host->core_mem + CORE_POWER);
--
--	/* SW reset can take upto 10HCLK + 15MCLK cycles. (min 40us) */
--	usleep_range(1000, 5000);
--	if (readl(msm_host->core_mem + CORE_POWER) & CORE_SW_RST) {
--		dev_err(&pdev->dev, "Stuck in reset\n");
--		ret = -ETIMEDOUT;
--		goto clk_disable;
--	}
-+	/* Reset the vendor spec register to power on reset state. */
-+	writel_relaxed(CORE_VENDOR_SPEC_POR_VAL,
-+			host->ioaddr + CORE_VENDOR_SPEC);
- 
- 	/* Set HC_MODE_EN bit in HC_MODE register */
- 	writel_relaxed(HC_MODE_EN, (msm_host->core_mem + CORE_HC_MODE));
+ 		pinctrl-names = "default";
+ 		pinctrl-0 = <&sdc2_clk &sdc2_cmd &sdc2_data>;
 -- 
 The Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum, 
 a Linux Foundation Collaborative Project.
