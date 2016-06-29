@@ -1,7 +1,7 @@
 From: Ritesh Harjani <riteshh@codeaurora.org>
-Subject: [PATCH RFC 4/8] mmc: sdhci-msm: Add regulator DT props to sdhci-msm bindings
-Date: Wed, 29 Jun 2016 16:50:29 +0530
-Message-ID: <1467199233-20506-5-git-send-email-riteshh@codeaurora.org>
+Subject: [PATCH RFC 7/8] mmc: sdhci-msm: Add check_power_status to sdhci-msm
+Date: Wed, 29 Jun 2016 16:50:32 +0530
+Message-ID: <1467199233-20506-8-git-send-email-riteshh@codeaurora.org>
 References: <1467199233-20506-1-git-send-email-riteshh@codeaurora.org>
 Return-path: <linux-arm-msm-owner@vger.kernel.org>
 In-Reply-To: <1467199233-20506-1-git-send-email-riteshh@codeaurora.org>
@@ -10,61 +10,111 @@ To: ulf.hansson@linaro.org, linux-mmc@vger.kernel.org
 Cc: linux-arm-msm@vger.kernel.org, adrian.hunter@intel.com, asutoshd@codeaurora.org, kdorfman@codeaurora.org, david.griego@linaro.org, stummala@codeaurora.org, venkatg@codeaurora.org, Ritesh Harjani <riteshh@codeaurora.org>
 List-Id: linux-mmc@vger.kernel.org
 
-This patch adds the DT properties for voltage regulator nodes
-for Qualcomm SDHCI driver.
+This adds handler to check whether pwr_irq has
+completed or not by adding sdhci_msm_check_power_status.
 
 Signed-off-by: Ritesh Harjani <riteshh@codeaurora.org>
 ---
- Documentation/devicetree/bindings/mmc/sdhci-msm.txt | 19 +++++++++++++++++++
- 1 file changed, 19 insertions(+)
+ drivers/mmc/host/sdhci-msm.c | 57 ++++++++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 57 insertions(+)
 
-diff --git a/Documentation/devicetree/bindings/mmc/sdhci-msm.txt b/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
-index 851e66d..32cea75 100644
---- a/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
-+++ b/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
-@@ -17,7 +17,15 @@ Required properties:
- 	"iface" - Main peripheral bus clock (PCLK/HCLK - AHB Bus clock) (required)
- 	"core"	- SDC MMC clock (MCLK) (required)
- 	"bus"	- SDCC bus voter clock (optional)
-+- qcom,<supply>-voltage_level - specifies voltage levels for supply. Should be
-+					specified in pairs (min, max), units uV.
-+- qcom,<supply>-current_level - specifies load levels for supply in lpm or
-+					high power mode (hpm). Should be specified in
-+					pairs (lpm, hpm), units uA.
+diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
+index 8badcf8..912ca6e 100644
+--- a/drivers/mmc/host/sdhci-msm.c
++++ b/drivers/mmc/host/sdhci-msm.c
+@@ -129,6 +129,8 @@ struct sdhci_msm_host {
+ 	int pwr_irq;
+ 	u32 curr_pwr_state;
+ 	u32 curr_io_level;
++	struct completion pwr_irq_completion;
++	spinlock_t pwr_irq_lock;
+ };
  
-+Optional Properties:
-+	- qcom,<supply>-always-on - specifies whether supply should be kept "on" always.
-+	- qcom,<supply>-lpm_sup - specifies whether supply can be kept in low power mode (lpm).
- Example:
+ #define MAX_PROP_SIZE 32
+@@ -595,14 +597,62 @@ static irqreturn_t sdhci_msm_pwr_irq(int irq, void *data)
  
- 	sdhc_1: sdhci@f9824900 {
-@@ -28,7 +36,13 @@ Example:
- 		non-removable;
+ 	pr_debug("%s: Handled IRQ(%d), ret=%d, ack=0x%x\n",
+ 		mmc_hostname(msm_host->mmc), irq, ret, irq_ack);
++	spin_lock_irqsave(&msm_host->pwr_irq_lock, flags);
+ 	if (pwr_state)
+ 		msm_host->curr_pwr_state = pwr_state;
+ 	if (io_level)
+ 		msm_host->curr_io_level = io_level;
++	complete(&msm_host->pwr_irq_completion);
++	spin_unlock_irqrestore(&msm_host->pwr_irq_lock, flags);
  
- 		vdd-supply = <&pm8941_l20>;
-+		qcom,vdd-voltage-level = <2950000 2950000>;
-+		qcom,vdd-current-level = <200 570000>;
+ 	return IRQ_HANDLED;
+ }
+ 
++static void sdhci_msm_check_power_status(struct sdhci_host *host, u32 req_type)
++{
++	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
++	struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
++	unsigned long flags;
++	bool locked = false;
++	bool done = false;
 +
- 		vdd-io-supply = <&pm8941_s3>;
-+		qcom,vdd-io-always-on;
-+		qcom,vdd-io-voltage-level = <1800000 1800000>;
-+		qcom,vdd-io-current-level = <110 325000>;
- 
- 		pinctrl-names = "default";
- 		pinctrl-0 = <&sdc1_clk &sdc1_cmd &sdc1_data>;
-@@ -45,7 +59,12 @@ Example:
- 		cd-gpios = <&msmgpio 62 0x1>;
- 
- 		vdd-supply = <&pm8941_l21>;
-+		qcom,vdd-voltage-level = <2950000 2950000>;
-+		qcom,vdd-current-level = <200 800000>;
++	pr_debug("%s: %s: power status before waiting 0x%x\n",
++		mmc_hostname(host->mmc), __func__,
++		readb_relaxed(msm_host->core_mem + CORE_PWRCTL_CTL));
 +
- 		vdd-io-supply = <&pm8941_l13>;
-+		qcom,vdd-io-voltage-level = <1800000 2950000>;
-+		qcom,vdd-io-current-level = <200 22000>;
++	if (spin_is_locked(&host->lock))
++		locked = true;
++
++	spin_lock_irqsave(&msm_host->pwr_irq_lock, flags);
++	pr_debug("%s: %s: request %d curr_pwr_state %x curr_io_level %x\n",
++			mmc_hostname(host->mmc), __func__, req_type,
++			msm_host->curr_pwr_state, msm_host->curr_io_level);
++	if ((req_type & msm_host->curr_pwr_state) ||
++			(req_type & msm_host->curr_io_level))
++		done = true;
++	spin_unlock_irqrestore(&msm_host->pwr_irq_lock, flags);
++
++	if (locked)
++		spin_unlock_irq(&host->lock);
++	/*
++	 * This is needed here to hanlde a case where IRQ gets
++	 * triggered even before this function is called so that
++	 * x->done counter of completion gets reset. Otherwise,
++	 * next call to wait_for_completion returns immediately
++	 * without actually waiting for the IRQ to be handled.
++	 */
++	if (done)
++		init_completion(&msm_host->pwr_irq_completion);
++	else
++		wait_for_completion(&msm_host->pwr_irq_completion);
++
++	if (locked)
++		spin_lock_irq(&host->lock);
++
++	pr_debug("%s: %s: request %d done\n", mmc_hostname(host->mmc),
++			__func__, req_type);
++}
++
+ /* Platform specific tuning */
+ static inline int msm_dll_poll_ck_out_en(struct sdhci_host *host, u8 poll)
+ {
+@@ -964,6 +1014,7 @@ static const struct sdhci_ops sdhci_msm_ops = {
+ 	.set_clock = sdhci_set_clock,
+ 	.set_bus_width = sdhci_set_bus_width,
+ 	.set_uhs_signaling = sdhci_set_uhs_signaling,
++	.check_power_status = sdhci_msm_check_power_status,
+ };
  
- 		pinctrl-names = "default";
- 		pinctrl-0 = <&sdc2_clk &sdc2_cmd &sdc2_data>;
+ static const struct sdhci_pltfm_data sdhci_msm_pdata = {
+@@ -1134,6 +1185,12 @@ static int sdhci_msm_probe(struct platform_device *pdev)
+ 		goto vreg_deinit;
+ 	}
+ 
++	init_completion(&msm_host->pwr_irq_completion);
++	spin_lock_init(&msm_host->pwr_irq_lock);
++
++	/* Enable pwr irq interrupts */
++	writel_relaxed(INT_MASK, (msm_host->core_mem + CORE_PWRCTL_MASK));
++
+ 	ret = sdhci_add_host(host);
+ 	if (ret)
+ 		goto vreg_deinit;
 -- 
 The Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum, 
 a Linux Foundation Collaborative Project.
