@@ -1,247 +1,129 @@
-From: Simon Horman <horms+renesas@verge.net.au>
-Subject: [PATCH/RFC v2 2/5] mmc: sh_mobile_sdhi: rename DMA source file as renesas_sdhi_sysc_dmac.c
-Date: Thu, 30 Jun 2016 00:05:37 +0200
-Message-ID: <1467237940-24388-3-git-send-email-horms+renesas@verge.net.au>
-References: <1467237940-24388-1-git-send-email-horms+renesas@verge.net.au>
-Return-path: <linux-renesas-soc-owner@vger.kernel.org>
-In-Reply-To: <1467237940-24388-1-git-send-email-horms+renesas@verge.net.au>
-Sender: linux-renesas-soc-owner@vger.kernel.org
-To: Wolfram Sang <wsa+renesas@sang-engineering.com>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Magnus Damm <magnus.damm@gmail.com>, linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org, Simon Horman <horms+renesas@verge.net.au>
+From: Fam Zheng <famz@redhat.com>
+Subject: [PATCH v2 00/12] gendisk: Generate uevent after attribute available
+Date: Thu, 30 Jun 2016 09:59:41 +0800
+Message-ID: <20160630015953.6888-1-famz@redhat.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <virtualization-bounces@lists.linux-foundation.org>
+List-Unsubscribe: <https://lists.linuxfoundation.org/mailman/options/virtualization>,
+	<mailto:virtualization-request@lists.linux-foundation.org?subject=unsubscribe>
+List-Archive: <http://lists.linuxfoundation.org/pipermail/virtualization/>
+List-Post: <mailto:virtualization@lists.linux-foundation.org>
+List-Help: <mailto:virtualization-request@lists.linux-foundation.org?subject=help>
+List-Subscribe: <https://lists.linuxfoundation.org/mailman/listinfo/virtualization>,
+	<mailto:virtualization-request@lists.linux-foundation.org?subject=subscribe>
+Sender: virtualization-bounces@lists.linux-foundation.org
+Errors-To: virtualization-bounces@lists.linux-foundation.org
+To: linux-kernel@vger.kernel.org
+Cc: Sergey Senozhatsky <sergey.senozhatsky.work@gmail.com>, "Michael S. Tsirkin" <mst@redhat.com>, Benjamin Herrenschmidt <benh@kernel.crashing.org>, linux-nvme@lists.infradead.org, virtualization@lists.linux-foundation.org, Keith Busch <keith.busch@intel.com>, Paul Mackerras <paulus@samba.org>, Michael Ellerman <mpe@ellerman.id.au>, Christoph Hellwig <hch@infradead.org>, Shaohua Li <shli@kernel.org>, Nitin Gupta <ngupta@vflare.org>, famz@redhat.com, Jiri Kosina <jikos@kernel.org>, linux-block@vger.kernel.org, "Ed L. Cashin" <ed.cashin@acm.org>, Jens Axboe <axboe@kernel.dk>, linux-raid@vger.kernel.org, David Woodhouse <dwmw2@infradead.org>, linux-mmc@vger.kernel.org, Minchan Kim <minchan@kernel.org>, linux-mtd@lists.infradead.org, Brian Norris <computersforpeace@gmail.com>, linuxppc-dev@lists.ozlabs.org
 List-Id: linux-mmc@vger.kernel.org
 
-Rename the source file for DMA for SDHI as a follow-up to attaching
-DMA code to the SDHI driver rather than the tmio_core driver and
-prepartation for allowing more than one DMA provider.
+The race condition is noticed between disk_add() and disk attributes, on
+virtio-blk hotplug.
 
-The name Renesas is chosen as the the SDHI driver is applicable to a wider
-range of SoCs than SH-Mobile, Renesas seems to be a more appropriate name.
-However, the SDHI driver source itself, is left as sh_mobile_sdhi to
-avoid unnecessary churn.
+Userspace listens to the KOBJ_ADD uevent generated in add_disk(). At that
+point we haven't created the serial attribute file, therefore depending
+on how fast udev reacts, the /dev/disk/by-id/ entry doesn't always get
+created.
 
-The name sysc_dmac was chosen to reflect the type of DMA used.
+As pointed out by Christoph Hellwig in the specific fix [1], virtio-blk is not
+the only driver that suffers from this, so we cannot count on every driver to
+send events manually. Moreover as suggested in uevent documentation, it is
+advised to defer the KOBJ_ADD event until all attributes are ready:
 
-Internal symbols have also been renamed to reflect the filename change.
+Documentation/kobject.txt:
+> Use the KOBJ_ADD action for when the kobject is first added to the kernel.
+> This should be done only after any attributes or children of the kobject
+> have been initialized properly, as userspace will instantly start to look
+> for them when this call happens.
 
-Signed-off-by: Simon Horman <horms+renesas@verge.net.au>
----
-v2
-* Use renesas_sdhi_sysc_dmac rather than renesas_sdhi_dmac as file name
-* Rename symbols to reflect filename change
-* Drop bogus use of __initdata
----
- drivers/mmc/host/Makefile                          |  2 +-
- .../{tmio_mmc_dma.c => renesas_sdhi_sysc_dmac.c}   | 57 +++++++++++-----------
- drivers/mmc/host/sh_mobile_sdhi.c                  |  6 +--
- 3 files changed, 33 insertions(+), 32 deletions(-)
- rename drivers/mmc/host/{tmio_mmc_dma.c => renesas_sdhi_sysc_dmac.c} (83%)
+Unfortunately it seems impossible to fix this generally without touching the
+offending callers.  The approach I'm proposing here is adding a flag to
+suppress uevent in add_disk(), which is patch 1, then in later patches, convert
+any caller to only trigger the uevent when attributes are added.
 
-diff --git a/drivers/mmc/host/Makefile b/drivers/mmc/host/Makefile
-index 4ed6f250213a..da5377e3ee4e 100644
---- a/drivers/mmc/host/Makefile
-+++ b/drivers/mmc/host/Makefile
-@@ -39,7 +39,7 @@ obj-$(CONFIG_MMC_TMIO_CORE)	+= tmio_mmc_core.o
- tmio_mmc_core-y			:= tmio_mmc_pio.o
- obj-$(CONFIG_MMC_SDHI)		+= sh_mobile_sdhi.o
- ifeq ($(subst m,y,$(CONFIG_MMC_SDHI_SYSC_DMA)),y)
--obj-$(CONFIG_MMC_SDHI)		+= tmio_mmc_dma.o
-+obj-$(CONFIG_MMC_SDHI)		+= renesas_sdhi_sysc_dmac.o
- endif
- obj-$(CONFIG_MMC_CB710)		+= cb710-mmc.o
- obj-$(CONFIG_MMC_VIA_SDMMC)	+= via-sdmmc.o
-diff --git a/drivers/mmc/host/tmio_mmc_dma.c b/drivers/mmc/host/renesas_sdhi_sysc_dmac.c
-similarity index 83%
-rename from drivers/mmc/host/tmio_mmc_dma.c
-rename to drivers/mmc/host/renesas_sdhi_sysc_dmac.c
-index 381bc40e506b..a73055924c52 100644
---- a/drivers/mmc/host/tmio_mmc_dma.c
-+++ b/drivers/mmc/host/renesas_sdhi_sysc_dmac.c
-@@ -1,5 +1,5 @@
- /*
-- * linux/drivers/mmc/tmio_mmc_dma.c
-+ * linux/drivers/mmc/renesas_sdhi_sysc_dmac_dma.c
-  *
-  * Copyright (C) 2010-2011 Guennadi Liakhovetski
-  *
-@@ -22,7 +22,8 @@
- 
- #define TMIO_MMC_MIN_DMA_LEN 8
- 
--static void tmio_mmc_enable_dma(struct tmio_mmc_host *host, bool enable)
-+static void sdhi_sysc_dmac_enable_dma(struct tmio_mmc_host *host,
-+				      bool enable)
- {
- 	if (!host->chan_tx || !host->chan_rx)
- 		return;
-@@ -31,19 +32,19 @@ static void tmio_mmc_enable_dma(struct tmio_mmc_host *host, bool enable)
- 		host->dma->enable(host, enable);
- }
- 
--static void tmio_mmc_abort_dma(struct tmio_mmc_host *host)
-+static void sdhi_sysc_dmac_abort_dma(struct tmio_mmc_host *host)
- {
--	tmio_mmc_enable_dma(host, false);
-+	sdhi_sysc_dmac_enable_dma(host, false);
- 
- 	if (host->chan_rx)
- 		dmaengine_terminate_all(host->chan_rx);
- 	if (host->chan_tx)
- 		dmaengine_terminate_all(host->chan_tx);
- 
--	tmio_mmc_enable_dma(host, true);
-+	sdhi_sysc_dmac_enable_dma(host, true);
- }
- 
--static void tmio_mmc_start_dma_rx(struct tmio_mmc_host *host)
-+static void sdhi_sysc_dmac_start_dma_rx(struct tmio_mmc_host *host)
- {
- 	struct scatterlist *sg = host->sg_ptr, *sg_tmp;
- 	struct dma_async_tx_descriptor *desc = NULL;
-@@ -97,7 +98,7 @@ static void tmio_mmc_start_dma_rx(struct tmio_mmc_host *host)
- pio:
- 	if (!desc) {
- 		/* DMA failed, fall back to PIO */
--		tmio_mmc_enable_dma(host, false);
-+		sdhi_sysc_dmac_enable_dma(host, false);
- 		if (ret >= 0)
- 			ret = -EIO;
- 		host->chan_rx = NULL;
-@@ -113,7 +114,7 @@ pio:
- 	}
- }
- 
--static void tmio_mmc_start_dma_tx(struct tmio_mmc_host *host)
-+static void sdhi_sysc_dmac_start_dma_tx(struct tmio_mmc_host *host)
- {
- 	struct scatterlist *sg = host->sg_ptr, *sg_tmp;
- 	struct dma_async_tx_descriptor *desc = NULL;
-@@ -171,7 +172,7 @@ static void tmio_mmc_start_dma_tx(struct tmio_mmc_host *host)
- pio:
- 	if (!desc) {
- 		/* DMA failed, fall back to PIO */
--		tmio_mmc_enable_dma(host, false);
-+		sdhi_sysc_dmac_enable_dma(host, false);
- 		if (ret >= 0)
- 			ret = -EIO;
- 		host->chan_tx = NULL;
-@@ -187,19 +188,19 @@ pio:
- 	}
- }
- 
--static void tmio_mmc_start_dma(struct tmio_mmc_host *host,
-+static void sdhi_sysc_dmac_start_dma(struct tmio_mmc_host *host,
- 			       struct mmc_data *data)
- {
- 	if (data->flags & MMC_DATA_READ) {
- 		if (host->chan_rx)
--			tmio_mmc_start_dma_rx(host);
-+			sdhi_sysc_dmac_start_dma_rx(host);
- 	} else {
- 		if (host->chan_tx)
--			tmio_mmc_start_dma_tx(host);
-+			sdhi_sysc_dmac_start_dma_tx(host);
- 	}
- }
- 
--static void tmio_mmc_issue_tasklet_fn(unsigned long priv)
-+static void sdhi_sysc_dmac_issue_tasklet_fn(unsigned long priv)
- {
- 	struct tmio_mmc_host *host = (struct tmio_mmc_host *)priv;
- 	struct dma_chan *chan = NULL;
-@@ -221,7 +222,7 @@ static void tmio_mmc_issue_tasklet_fn(unsigned long priv)
- 		dma_async_issue_pending(chan);
- }
- 
--static void tmio_mmc_tasklet_fn(unsigned long arg)
-+static void sdhi_sysc_dmac_tasklet_fn(unsigned long arg)
- {
- 	struct tmio_mmc_host *host = (struct tmio_mmc_host *)arg;
- 
-@@ -244,8 +245,8 @@ out:
- 	spin_unlock_irq(&host->lock);
- }
- 
--static void tmio_mmc_request_dma(struct tmio_mmc_host *host,
--				 struct tmio_mmc_data *pdata)
-+static void sdhi_sysc_dmac_request_dma(struct tmio_mmc_host *host,
-+				       struct tmio_mmc_data *pdata)
- {
- 	/* We can only either use DMA for both Tx and Rx or not use it at all */
- 	if (!host->dma || (!host->pdev->dev.of_node &&
-@@ -307,11 +308,11 @@ static void tmio_mmc_request_dma(struct tmio_mmc_host *host,
- 		if (!host->bounce_buf)
- 			goto ebouncebuf;
- 
--		tasklet_init(&host->dma_complete, tmio_mmc_tasklet_fn, (unsigned long)host);
--		tasklet_init(&host->dma_issue, tmio_mmc_issue_tasklet_fn, (unsigned long)host);
-+		tasklet_init(&host->dma_complete, sdhi_sysc_dmac_tasklet_fn, (unsigned long)host);
-+		tasklet_init(&host->dma_issue, sdhi_sysc_dmac_issue_tasklet_fn, (unsigned long)host);
- 	}
- 
--	tmio_mmc_enable_dma(host, true);
-+	sdhi_sysc_dmac_enable_dma(host, true);
- 
- 	return;
- 
-@@ -325,7 +326,7 @@ ecfgtx:
- 	host->chan_tx = NULL;
- }
- 
--static void tmio_mmc_release_dma(struct tmio_mmc_host *host)
-+static void sdhi_sysc_dmac_release_dma(struct tmio_mmc_host *host)
- {
- 	if (host->chan_tx) {
- 		struct dma_chan *chan = host->chan_tx;
-@@ -343,17 +344,17 @@ static void tmio_mmc_release_dma(struct tmio_mmc_host *host)
- 	}
- }
- 
--static struct tmio_mmc_dma_ops tmio_mmc_dma_ops __initdata = {
--	.start = tmio_mmc_start_dma,
--	.enable = tmio_mmc_enable_dma,
--	.request = tmio_mmc_request_dma,
--	.release = tmio_mmc_release_dma,
--	.abort = tmio_mmc_abort_dma,
-+static struct tmio_mmc_dma_ops sdhi_sysc_dmac_dma_ops = {
-+	.start = sdhi_sysc_dmac_start_dma,
-+	.enable = sdhi_sysc_dmac_enable_dma,
-+	.request = sdhi_sysc_dmac_request_dma,
-+	.release = sdhi_sysc_dmac_release_dma,
-+	.abort = sdhi_sysc_dmac_abort_dma,
- };
- 
--int tmio_mmc_init_dma(void)
-+int sdhi_sysc_dmac_init_dma(void)
- {
--	tmio_set_dma_ops(&tmio_mmc_dma_ops);
-+	tmio_set_dma_ops(&sdhi_sysc_dmac_dma_ops);
- 
- 	return 0;
- }
-diff --git a/drivers/mmc/host/sh_mobile_sdhi.c b/drivers/mmc/host/sh_mobile_sdhi.c
-index 45543ed37e5f..320059c61c6c 100644
---- a/drivers/mmc/host/sh_mobile_sdhi.c
-+++ b/drivers/mmc/host/sh_mobile_sdhi.c
-@@ -107,9 +107,9 @@ struct sh_mobile_sdhi {
- };
- 
- #if IS_ENABLED(MMC_SDHI_SYSC_DMA)
--int tmio_mmc_init_dma(void);
-+int sdhi_sysc_dmac_init_dma(void);
- #else
--static int tmio_mmc_init_dma(void)
-+static int sdhi_sysc_dmac_init_dma(void)
- {
-        return -EINVAL;
- }
-@@ -372,7 +372,7 @@ static int sh_mobile_sdhi_probe(struct platform_device *pdev)
- 		host->bus_shift = of_data->bus_shift;
- 	}
- 
--	ret = tmio_mmc_init_dma();
-+	ret = sdhi_sysc_dmac_init_dma();
- 	if (ret < 0)
- 		goto efree;
- 
+[1] https://lkml.org/lkml/2016/6/28/550
+
+Fam Zheng (12):
+  genhd: Add "gen_uevent" parameter to add_disk
+  genhd: Honor gen_uevent and add disk_gen_uevents
+  virtio-blk: Generate uevent after attribute available
+  axonrom: Generate uevent after attribute available
+  aoeblk: Generate uevent after attribute available
+  mtip32xx: Generate uevent after attribute available
+  pktcdvd: Generate uevent after attribute available
+  zram: Generate uevent after attribute available
+  md: Generate uevent after attribute available
+  mmc: Generate uevent after attribute available
+  mtd: Generate uevent after attribute available
+  nvme: Generate uevent after attribute available
+
+ arch/m68k/emu/nfblock.c                     |  2 +-
+ arch/powerpc/sysdev/axonram.c               |  3 ++-
+ arch/um/drivers/ubd_kern.c                  |  2 +-
+ arch/xtensa/platforms/iss/simdisk.c         |  2 +-
+ block/genhd.c                               | 26 +++++++++++++++++++++-----
+ drivers/block/DAC960.c                      |  2 +-
+ drivers/block/amiflop.c                     |  2 +-
+ drivers/block/aoe/aoeblk.c                  |  3 ++-
+ drivers/block/ataflop.c                     |  2 +-
+ drivers/block/brd.c                         |  4 ++--
+ drivers/block/cciss.c                       |  2 +-
+ drivers/block/drbd/drbd_main.c              |  2 +-
+ drivers/block/floppy.c                      |  2 +-
+ drivers/block/hd.c                          |  2 +-
+ drivers/block/loop.c                        |  2 +-
+ drivers/block/mg_disk.c                     |  2 +-
+ drivers/block/mtip32xx/mtip32xx.c           |  3 ++-
+ drivers/block/nbd.c                         |  2 +-
+ drivers/block/null_blk.c                    |  2 +-
+ drivers/block/osdblk.c                      |  2 +-
+ drivers/block/paride/pcd.c                  |  2 +-
+ drivers/block/paride/pd.c                   |  2 +-
+ drivers/block/paride/pf.c                   |  2 +-
+ drivers/block/pktcdvd.c                     |  4 +++-
+ drivers/block/ps3disk.c                     |  2 +-
+ drivers/block/ps3vram.c                     |  2 +-
+ drivers/block/rbd.c                         |  2 +-
+ drivers/block/rsxx/dev.c                    |  2 +-
+ drivers/block/skd_main.c                    |  2 +-
+ drivers/block/sunvdc.c                      |  2 +-
+ drivers/block/swim.c                        |  2 +-
+ drivers/block/swim3.c                       |  2 +-
+ drivers/block/sx8.c                         |  2 +-
+ drivers/block/umem.c                        |  2 +-
+ drivers/block/virtio_blk.c                  |  3 ++-
+ drivers/block/xen-blkfront.c                |  2 +-
+ drivers/block/xsysace.c                     |  2 +-
+ drivers/block/z2ram.c                       |  2 +-
+ drivers/block/zram/zram_drv.c               |  3 ++-
+ drivers/cdrom/gdrom.c                       |  2 +-
+ drivers/ide/ide-cd.c                        |  2 +-
+ drivers/ide/ide-gd.c                        |  2 +-
+ drivers/lightnvm/core.c                     |  2 +-
+ drivers/md/bcache/super.c                   |  4 ++--
+ drivers/md/dm.c                             |  2 +-
+ drivers/md/md.c                             |  3 ++-
+ drivers/memstick/core/ms_block.c            |  2 +-
+ drivers/memstick/core/mspro_block.c         |  2 +-
+ drivers/mmc/card/block.c                    |  3 ++-
+ drivers/mtd/mtd_blkdevs.c                   |  3 ++-
+ drivers/mtd/ubi/block.c                     |  2 +-
+ drivers/nvdimm/blk.c                        |  2 +-
+ drivers/nvdimm/btt.c                        |  2 +-
+ drivers/nvdimm/pmem.c                       |  2 +-
+ drivers/nvme/host/core.c                    |  3 ++-
+ drivers/s390/block/dasd_genhd.c             |  2 +-
+ drivers/s390/block/dcssblk.c                |  2 +-
+ drivers/s390/block/scm_blk.c                |  2 +-
+ drivers/s390/block/xpram.c                  |  2 +-
+ drivers/sbus/char/jsflash.c                 |  2 +-
+ drivers/scsi/sd.c                           |  2 +-
+ drivers/scsi/sr.c                           |  2 +-
+ drivers/staging/lustre/lustre/llite/lloop.c |  2 +-
+ include/linux/genhd.h                       |  3 ++-
+ 64 files changed, 98 insertions(+), 70 deletions(-)
+
 -- 
-2.7.0.rc3.207.g0ac5344
+2.9.0
