@@ -1,128 +1,40 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH RFC 5/8] mmc: sdhci: Add check_power_status host operation
-Date: Thu, 30 Jun 2016 09:00:50 +0300
-Message-ID: <5774B592.1080106@intel.com>
-References: <1467199233-20506-1-git-send-email-riteshh@codeaurora.org>
- <1467199233-20506-6-git-send-email-riteshh@codeaurora.org>
+From: Christoph Hellwig <hch@infradead.org>
+Subject: Re: [PATCH v2 00/12] gendisk: Generate uevent after attribute
+	available
+Date: Wed, 29 Jun 2016 23:24:42 -0700
+Message-ID: <20160630062442.GA19761@infradead.org>
+References: <20160630015953.6888-1-famz@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
+Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-msm-owner@vger.kernel.org>
-In-Reply-To: <1467199233-20506-6-git-send-email-riteshh@codeaurora.org>
-Sender: linux-arm-msm-owner@vger.kernel.org
-To: Ritesh Harjani <riteshh@codeaurora.org>, ulf.hansson@linaro.org, linux-mmc@vger.kernel.org
-Cc: linux-arm-msm@vger.kernel.org, asutoshd@codeaurora.org, kdorfman@codeaurora.org, david.griego@linaro.org, stummala@codeaurora.org, venkatg@codeaurora.org
+Return-path: <virtualization-bounces@lists.linux-foundation.org>
+Content-Disposition: inline
+In-Reply-To: <20160630015953.6888-1-famz@redhat.com>
+List-Unsubscribe: <https://lists.linuxfoundation.org/mailman/options/virtualization>,
+	<mailto:virtualization-request@lists.linux-foundation.org?subject=unsubscribe>
+List-Archive: <http://lists.linuxfoundation.org/pipermail/virtualization/>
+List-Post: <mailto:virtualization@lists.linux-foundation.org>
+List-Help: <mailto:virtualization-request@lists.linux-foundation.org?subject=help>
+List-Subscribe: <https://lists.linuxfoundation.org/mailman/listinfo/virtualization>,
+	<mailto:virtualization-request@lists.linux-foundation.org?subject=subscribe>
+Sender: virtualization-bounces@lists.linux-foundation.org
+Errors-To: virtualization-bounces@lists.linux-foundation.org
+To: Fam Zheng <famz@redhat.com>
+Cc: Sergey Senozhatsky <sergey.senozhatsky.work@gmail.com>, "Michael S. Tsirkin" <mst@redhat.com>, Benjamin Herrenschmidt <benh@kernel.crashing.org>, linux-nvme@lists.infradead.org, virtualization@lists.linux-foundation.org, Keith Busch <keith.busch@intel.com>, Paul Mackerras <paulus@samba.org>, Michael Ellerman <mpe@ellerman.id.au>, Shaohua Li <shli@kernel.org>, Nitin Gupta <ngupta@vflare.org>, Jiri Kosina <jikos@kernel.org>, linux-block@vger.kernel.org, dan.j.williams@intel.com, "Ed L. Cashin" <ed.cashin@acm.org>, Jens Axboe <axboe@kernel.dk>, linux-raid@vger.kernel.org, David Woodhouse <dwmw2@infradead.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Minchan Kim <minchan@kernel.org>, linux-mtd@lists.infradead.org, Brian Norris <computersforpeace@gmail.com>, linuxppc-dev@lists.ozlabs.org
 List-Id: linux-mmc@vger.kernel.org
 
-On 29/06/16 14:20, Ritesh Harjani wrote:
-> From: Sahitya Tummala <stummala@codeaurora.org>
+On Thu, Jun 30, 2016 at 09:59:41AM +0800, Fam Zheng wrote:
+> Documentation/kobject.txt:
+> > Use the KOBJ_ADD action for when the kobject is first added to the kernel.
+> > This should be done only after any attributes or children of the kobject
+> > have been initialized properly, as userspace will instantly start to look
+> > for them when this call happens.
 > 
-> MSM SDHCI doesn't control power as specified by the Standard
-> Host Controller 3.0 spec. Writing to power control register/
-> reset register/voltage bit of host control register would
-> trigger an IRQ with appropriate status bits set. Hence, use
-> host op check_power_status after writing to power control
-> register to check the status and wait until the IRQ is handled.
+> Unfortunately it seems impossible to fix this generally without touching the
+> offending callers.  The approach I'm proposing here is adding a flag to
+> suppress uevent in add_disk(), which is patch 1, then in later patches, convert
+> any caller to only trigger the uevent when attributes are added.
 
-Did you consider using the SDHCI I/O Accessors for this? i.e.
-CONFIG_MMC_SDHCI_IO_ACCESSORS
-
-> 
-> Signed-off-by: Sahitya Tummala <stummala@codeaurora.org>
-> Signed-off-by: Ritesh Harjani <riteshh@codeaurora.org>
-> ---
->  drivers/mmc/host/sdhci.c | 24 +++++++++++++++++++++---
->  drivers/mmc/host/sdhci.h |  5 +++++
->  2 files changed, 26 insertions(+), 3 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index 0e3d7c0..12f74bd 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -176,6 +176,10 @@ void sdhci_reset(struct sdhci_host *host, u8 mask)
->  	/* Wait max 100 ms */
->  	timeout = 100;
->  
-> +	if (host->ops->check_power_status && host->pwr &&
-> +	    (mask & SDHCI_RESET_ALL))
-> +		host->ops->check_power_status(host, REQ_BUS_OFF);
-> +
->  	/* hw clears the bit when it's done */
->  	while (sdhci_readb(host, SDHCI_SOFTWARE_RESET) & mask) {
->  		if (timeout == 0) {
-> @@ -1306,6 +1310,8 @@ void sdhci_set_power(struct sdhci_host *host, unsigned char mode,
->  
->  	if (pwr == 0) {
->  		sdhci_writeb(host, 0, SDHCI_POWER_CONTROL);
-> +		if (host->ops->check_power_status)
-> +			host->ops->check_power_status(host, REQ_BUS_OFF);
->  		if (host->quirks2 & SDHCI_QUIRK2_CARD_ON_NEEDS_BUS_ON)
->  			sdhci_runtime_pm_bus_off(host);
->  	} else {
-> @@ -1313,20 +1319,28 @@ void sdhci_set_power(struct sdhci_host *host, unsigned char mode,
->  		 * Spec says that we should clear the power reg before setting
->  		 * a new value. Some controllers don't seem to like this though.
->  		 */
-> -		if (!(host->quirks & SDHCI_QUIRK_SINGLE_POWER_WRITE))
-> +		if (!(host->quirks & SDHCI_QUIRK_SINGLE_POWER_WRITE)) {
->  			sdhci_writeb(host, 0, SDHCI_POWER_CONTROL);
-> -
-> +			if (host->ops->check_power_status)
-> +				host->ops->check_power_status(host,
-> +							REQ_BUS_OFF);
-> +		}
->  		/*
->  		 * At least the Marvell CaFe chip gets confused if we set the
->  		 * voltage and set turn on power at the same time, so set the
->  		 * voltage first.
->  		 */
-> -		if (host->quirks & SDHCI_QUIRK_NO_SIMULT_VDD_AND_POWER)
-> +		if (host->quirks & SDHCI_QUIRK_NO_SIMULT_VDD_AND_POWER) {
->  			sdhci_writeb(host, pwr, SDHCI_POWER_CONTROL);
-> +			if (host->ops->check_power_status)
-> +				host->ops->check_power_status(host, REQ_BUS_ON);
-> +		}
->  
->  		pwr |= SDHCI_POWER_ON;
->  
->  		sdhci_writeb(host, pwr, SDHCI_POWER_CONTROL);
-> +		if (host->ops->check_power_status)
-> +			host->ops->check_power_status(host, REQ_BUS_ON);
->  
->  		if (host->quirks2 & SDHCI_QUIRK2_CARD_ON_NEEDS_BUS_ON)
->  			sdhci_runtime_pm_bus_on(host);
-> @@ -1736,6 +1750,8 @@ static int sdhci_start_signal_voltage_switch(struct mmc_host *mmc,
->  		/* Set 1.8V Signal Enable in the Host Control2 register to 0 */
->  		ctrl &= ~SDHCI_CTRL_VDD_180;
->  		sdhci_writew(host, ctrl, SDHCI_HOST_CONTROL2);
-> +		if (host->ops->check_power_status)
-> +			host->ops->check_power_status(host, REQ_IO_HIGH);
->  
->  		if (!IS_ERR(mmc->supply.vqmmc)) {
->  			ret = regulator_set_voltage(mmc->supply.vqmmc, 2700000,
-> @@ -1775,6 +1791,8 @@ static int sdhci_start_signal_voltage_switch(struct mmc_host *mmc,
->  		 */
->  		ctrl |= SDHCI_CTRL_VDD_180;
->  		sdhci_writew(host, ctrl, SDHCI_HOST_CONTROL2);
-> +		if (host->ops->check_power_status)
-> +			host->ops->check_power_status(host, REQ_IO_LOW);
->  
->  		/* Some controller need to do more when switching */
->  		if (host->ops->voltage_switch)
-> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-> index 609f87c..5758cca 100644
-> --- a/drivers/mmc/host/sdhci.h
-> +++ b/drivers/mmc/host/sdhci.h
-> @@ -549,6 +549,11 @@ struct sdhci_ops {
->  					 struct mmc_card *card,
->  					 unsigned int max_dtr, int host_drv,
->  					 int card_drv, int *drv_type);
-> +#define REQ_BUS_OFF	BIT(0)
-> +#define REQ_BUS_ON	BIT(1)
-> +#define REQ_IO_LOW	BIT(2)
-> +#define REQ_IO_HIGH	BIT(3)
-> +	void    (*check_power_status)(struct sdhci_host *host, u32 req_type);
->  };
->  
->  #ifdef CONFIG_MMC_SDHCI_IO_ACCESSORS
-> 
+We (or rather Dan) is touching most add_disk callers anyway for the
+driverfs_dev removal.  Let's just pass the array of attributes to
+a disk_add variant and solve the issue for real.
