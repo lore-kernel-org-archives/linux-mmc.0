@@ -1,112 +1,141 @@
 From: Ritesh Harjani <riteshh@codeaurora.org>
-Subject: Re: [PATCH RFC 4/8] mmc: sdhci-msm: Add regulator DT props to
- sdhci-msm bindings
-Date: Thu, 30 Jun 2016 19:00:54 +0530
-Message-ID: <2e77ecd7-abd8-cffc-b0ff-f29f68543263@codeaurora.org>
+Subject: Re: [PATCH RFC 5/8] mmc: sdhci: Add check_power_status host operation
+Date: Thu, 30 Jun 2016 19:02:52 +0530
+Message-ID: <eda00fcc-8486-c7df-e536-9474e1e7f0d6@codeaurora.org>
 References: <1467199233-20506-1-git-send-email-riteshh@codeaurora.org>
- <1467199233-20506-5-git-send-email-riteshh@codeaurora.org>
- <20160629215326.GD16832@hector.attlocal.net>
+ <1467199233-20506-6-git-send-email-riteshh@codeaurora.org>
+ <5774B592.1080106@intel.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8; format=flowed
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp.codeaurora.org ([198.145.29.96]:43337 "EHLO
-	smtp.codeaurora.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751951AbcF3NbU (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 30 Jun 2016 09:31:20 -0400
-In-Reply-To: <20160629215326.GD16832@hector.attlocal.net>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-arm-msm-owner@vger.kernel.org>
+In-Reply-To: <5774B592.1080106@intel.com>
+Sender: linux-arm-msm-owner@vger.kernel.org
+To: Adrian Hunter <adrian.hunter@intel.com>, ulf.hansson@linaro.org, linux-mmc@vger.kernel.org
+Cc: linux-arm-msm@vger.kernel.org, asutoshd@codeaurora.org, kdorfman@codeaurora.org, david.griego@linaro.org, stummala@codeaurora.org, venkatg@codeaurora.org
 List-Id: linux-mmc@vger.kernel.org
-To: Andy Gross <andy.gross@linaro.org>
-Cc: ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org, adrian.hunter@intel.com, asutoshd@codeaurora.org, kdorfman@codeaurora.org, david.griego@linaro.org, stummala@codeaurora.org, venkatg@codeaurora.org
 
-Hi Andy,
+Hi Adrian,
 
-On 6/30/2016 3:23 AM, Andy Gross wrote:
-> On Wed, Jun 29, 2016 at 04:50:29PM +0530, Ritesh Harjani wrote:
->> This patch adds the DT properties for voltage regulator nodes
->> for Qualcomm SDHCI driver.
+
+On 6/30/2016 11:30 AM, Adrian Hunter wrote:
+> On 29/06/16 14:20, Ritesh Harjani wrote:
+>> From: Sahitya Tummala <stummala@codeaurora.org>
 >>
+>> MSM SDHCI doesn't control power as specified by the Standard
+>> Host Controller 3.0 spec. Writing to power control register/
+>> reset register/voltage bit of host control register would
+>> trigger an IRQ with appropriate status bits set. Hence, use
+>> host op check_power_status after writing to power control
+>> register to check the status and wait until the IRQ is handled.
+>
+> Did you consider using the SDHCI I/O Accessors for this? i.e.
+> CONFIG_MMC_SDHCI_IO_ACCESSORS
+Thanks for the suggestion. I will check and get back.
+
+>
+>>
+>> Signed-off-by: Sahitya Tummala <stummala@codeaurora.org>
 >> Signed-off-by: Ritesh Harjani <riteshh@codeaurora.org>
 >> ---
->>  Documentation/devicetree/bindings/mmc/sdhci-msm.txt | 19 +++++++++++++++++++
->>  1 file changed, 19 insertions(+)
+>>  drivers/mmc/host/sdhci.c | 24 +++++++++++++++++++++---
+>>  drivers/mmc/host/sdhci.h |  5 +++++
+>>  2 files changed, 26 insertions(+), 3 deletions(-)
 >>
->> diff --git a/Documentation/devicetree/bindings/mmc/sdhci-msm.txt b/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
->> index 851e66d..32cea75 100644
->> --- a/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
->> +++ b/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
->> @@ -17,7 +17,15 @@ Required properties:
->>  	"iface" - Main peripheral bus clock (PCLK/HCLK - AHB Bus clock) (required)
->>  	"core"	- SDC MMC clock (MCLK) (required)
->>  	"bus"	- SDCC bus voter clock (optional)
->> +- qcom,<supply>-voltage_level - specifies voltage levels for supply. Should be
->> +					specified in pairs (min, max), units uV.
->> +- qcom,<supply>-current_level - specifies load levels for supply in lpm or
->> +					high power mode (hpm). Should be specified in
->> +					pairs (lpm, hpm), units uA.
->
-> These seem like OPPs to me.  Why use something non-standard?
->
-> Check out Documentation/devicetree/bindings/opp/opp.txt
-Isn't OPP used w.r.t. DVFS?
-This is voltage/load regulator supplies used to provide vdd/vdd-io to 
-card. We require this to switch the I/O voltage while switching to UHS 
-card mode or to turn on/off the regulators while not in use, (but not 
-tied to voltage switching while different frequency transitions).
-
-This is mentioned in the same way how other drivers uses vmmc/vqmmc, but 
-the deviation in the name is since Qcom follows pwr_irq 
-deviation(different from standard) to switch the I/O voltage, bus on/off.
-
->
+>> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+>> index 0e3d7c0..12f74bd 100644
+>> --- a/drivers/mmc/host/sdhci.c
+>> +++ b/drivers/mmc/host/sdhci.c
+>> @@ -176,6 +176,10 @@ void sdhci_reset(struct sdhci_host *host, u8 mask)
+>>  	/* Wait max 100 ms */
+>>  	timeout = 100;
 >>
->> +Optional Properties:
->> +	- qcom,<supply>-always-on - specifies whether supply should be kept "on" always.
->
-> Would this only be the base if mmc is used on this platform?  You could specify
-> this in the regulator binding itself if this is more of a global thing.
-This could be specific to SDHC nodes, like for emmc - we may need only 
-vdd-io to be on. So we need this per sdhc node.
-
->
->> +	- qcom,<supply>-lpm_sup - specifies whether supply can be kept in low power mode (lpm).
->>  Example:
->>
->>  	sdhc_1: sdhci@f9824900 {
->> @@ -28,7 +36,13 @@ Example:
->>  		non-removable;
->>
->>  		vdd-supply = <&pm8941_l20>;
->> +		qcom,vdd-voltage-level = <2950000 2950000>;
->> +		qcom,vdd-current-level = <200 570000>;
+>> +	if (host->ops->check_power_status && host->pwr &&
+>> +	    (mask & SDHCI_RESET_ALL))
+>> +		host->ops->check_power_status(host, REQ_BUS_OFF);
 >> +
->>  		vdd-io-supply = <&pm8941_s3>;
->> +		qcom,vdd-io-always-on;
->> +		qcom,vdd-io-voltage-level = <1800000 1800000>;
->> +		qcom,vdd-io-current-level = <110 325000>;
+>>  	/* hw clears the bit when it's done */
+>>  	while (sdhci_readb(host, SDHCI_SOFTWARE_RESET) & mask) {
+>>  		if (timeout == 0) {
+>> @@ -1306,6 +1310,8 @@ void sdhci_set_power(struct sdhci_host *host, unsigned char mode,
 >>
->>  		pinctrl-names = "default";
->>  		pinctrl-0 = <&sdc1_clk &sdc1_cmd &sdc1_data>;
->> @@ -45,7 +59,12 @@ Example:
->>  		cd-gpios = <&msmgpio 62 0x1>;
+>>  	if (pwr == 0) {
+>>  		sdhci_writeb(host, 0, SDHCI_POWER_CONTROL);
+>> +		if (host->ops->check_power_status)
+>> +			host->ops->check_power_status(host, REQ_BUS_OFF);
+>>  		if (host->quirks2 & SDHCI_QUIRK2_CARD_ON_NEEDS_BUS_ON)
+>>  			sdhci_runtime_pm_bus_off(host);
+>>  	} else {
+>> @@ -1313,20 +1319,28 @@ void sdhci_set_power(struct sdhci_host *host, unsigned char mode,
+>>  		 * Spec says that we should clear the power reg before setting
+>>  		 * a new value. Some controllers don't seem to like this though.
+>>  		 */
+>> -		if (!(host->quirks & SDHCI_QUIRK_SINGLE_POWER_WRITE))
+>> +		if (!(host->quirks & SDHCI_QUIRK_SINGLE_POWER_WRITE)) {
+>>  			sdhci_writeb(host, 0, SDHCI_POWER_CONTROL);
+>> -
+>> +			if (host->ops->check_power_status)
+>> +				host->ops->check_power_status(host,
+>> +							REQ_BUS_OFF);
+>> +		}
+>>  		/*
+>>  		 * At least the Marvell CaFe chip gets confused if we set the
+>>  		 * voltage and set turn on power at the same time, so set the
+>>  		 * voltage first.
+>>  		 */
+>> -		if (host->quirks & SDHCI_QUIRK_NO_SIMULT_VDD_AND_POWER)
+>> +		if (host->quirks & SDHCI_QUIRK_NO_SIMULT_VDD_AND_POWER) {
+>>  			sdhci_writeb(host, pwr, SDHCI_POWER_CONTROL);
+>> +			if (host->ops->check_power_status)
+>> +				host->ops->check_power_status(host, REQ_BUS_ON);
+>> +		}
 >>
->>  		vdd-supply = <&pm8941_l21>;
->> +		qcom,vdd-voltage-level = <2950000 2950000>;
->> +		qcom,vdd-current-level = <200 800000>;
->> +
->>  		vdd-io-supply = <&pm8941_l13>;
->> +		qcom,vdd-io-voltage-level = <1800000 2950000>;
->> +		qcom,vdd-io-current-level = <200 22000>;
+>>  		pwr |= SDHCI_POWER_ON;
 >>
->>  		pinctrl-names = "default";
->>  		pinctrl-0 = <&sdc2_clk &sdc2_cmd &sdc2_data>;
+>>  		sdhci_writeb(host, pwr, SDHCI_POWER_CONTROL);
+>> +		if (host->ops->check_power_status)
+>> +			host->ops->check_power_status(host, REQ_BUS_ON);
+>>
+>>  		if (host->quirks2 & SDHCI_QUIRK2_CARD_ON_NEEDS_BUS_ON)
+>>  			sdhci_runtime_pm_bus_on(host);
+>> @@ -1736,6 +1750,8 @@ static int sdhci_start_signal_voltage_switch(struct mmc_host *mmc,
+>>  		/* Set 1.8V Signal Enable in the Host Control2 register to 0 */
+>>  		ctrl &= ~SDHCI_CTRL_VDD_180;
+>>  		sdhci_writew(host, ctrl, SDHCI_HOST_CONTROL2);
+>> +		if (host->ops->check_power_status)
+>> +			host->ops->check_power_status(host, REQ_IO_HIGH);
+>>
+>>  		if (!IS_ERR(mmc->supply.vqmmc)) {
+>>  			ret = regulator_set_voltage(mmc->supply.vqmmc, 2700000,
+>> @@ -1775,6 +1791,8 @@ static int sdhci_start_signal_voltage_switch(struct mmc_host *mmc,
+>>  		 */
+>>  		ctrl |= SDHCI_CTRL_VDD_180;
+>>  		sdhci_writew(host, ctrl, SDHCI_HOST_CONTROL2);
+>> +		if (host->ops->check_power_status)
+>> +			host->ops->check_power_status(host, REQ_IO_LOW);
+>>
+>>  		/* Some controller need to do more when switching */
+>>  		if (host->ops->voltage_switch)
+>> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+>> index 609f87c..5758cca 100644
+>> --- a/drivers/mmc/host/sdhci.h
+>> +++ b/drivers/mmc/host/sdhci.h
+>> @@ -549,6 +549,11 @@ struct sdhci_ops {
+>>  					 struct mmc_card *card,
+>>  					 unsigned int max_dtr, int host_drv,
+>>  					 int card_drv, int *drv_type);
+>> +#define REQ_BUS_OFF	BIT(0)
+>> +#define REQ_BUS_ON	BIT(1)
+>> +#define REQ_IO_LOW	BIT(2)
+>> +#define REQ_IO_HIGH	BIT(3)
+>> +	void    (*check_power_status)(struct sdhci_host *host, u32 req_type);
+>>  };
+>>
+>>  #ifdef CONFIG_MMC_SDHCI_IO_ACCESSORS
+>>
 >
-> Regards,
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 >
-> Andy
->
-
---
-Regards
-Ritesh
