@@ -1,42 +1,66 @@
-From: Fam Zheng <famz@redhat.com>
-Subject: [PATCH v2 12/12] nvme: Generate uevent after attribute available
-Date: Thu, 30 Jun 2016 09:59:53 +0800
-Message-ID: <20160630015953.6888-13-famz@redhat.com>
-References: <20160630015953.6888-1-famz@redhat.com>
-Return-path: <linux-raid-owner@vger.kernel.org>
-In-Reply-To: <20160630015953.6888-1-famz@redhat.com>
-Sender: linux-raid-owner@vger.kernel.org
-To: linux-kernel@vger.kernel.org
-Cc: Benjamin Herrenschmidt <benh@kernel.crashing.org>, Paul Mackerras <paulus@samba.org>, Michael Ellerman <mpe@ellerman.id.au>, Jens Axboe <axboe@kernel.dk>, "Ed L. Cashin" <ed.cashin@acm.org>, Jiri Kosina <jikos@kernel.org>, "Michael S. Tsirkin" <mst@redhat.com>, Minchan Kim <minchan@kernel.org>, Nitin Gupta <ngupta@vflare.org>, Sergey Senozhatsky <sergey.senozhatsky.work@gmail.com>, Shaohua Li <shli@kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, David Woodhouse <dwmw2@infradead.org>, Brian Norris <computersforpeace@gmail.com>, Keith Busch <keith.busch@intel.com>, linuxppc-dev@lists.ozlabs.org, linux-block@vger.kernel.org, virtualization@lists.linux-foundation.org, linux-raid@vger.kernel.org, linux-mmc@vger.kernel.org, linux-mtd@lists.infradead.org, linux-nvme@lists.infradead.org, Christoph Hellwig <hch@infradead.org>, famz@redhat.com
+From: Chaotian Jing <chaotian.jing@mediatek.com>
+Subject: [PATCH 1/4] mmc: mediatek: do not tune data for HS400 mode
+Date: Thu, 30 Jun 2016 10:00:58 +0800
+Message-ID: <1467252061-3791-2-git-send-email-chaotian.jing@mediatek.com>
+References: <1467252061-3791-1-git-send-email-chaotian.jing@mediatek.com>
+Mime-Version: 1.0
+Content-Type: text/plain
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mailgw01.mediatek.com ([210.61.82.183]:16210 "EHLO
+	mailgw01.mediatek.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1751671AbcF3CBY (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 29 Jun 2016 22:01:24 -0400
+In-Reply-To: <1467252061-3791-1-git-send-email-chaotian.jing@mediatek.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Matthias Brugger <matthias.bgg@gmail.com>, Chaotian Jing <chaotian.jing@mediatek.com>, Nicolas Boichat <drinkcat@chromium.org>, Douglas Anderson <dianders@chromium.org>, Geert Uytterhoeven <geert@linux-m68k.org>, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mediatek@lists.infradead.org, linux-kernel@vger.kernel.org, srv_heupstream@mediatek.com, Sascha Hauer <kernel@pengutronix.de>, Daniel Kurtz <djkurtz@chromium.org>, Wei-Ning Huang <wnhuang@chromium.org>
 
-It is documented that KOBJ_ADD should be generated after the object's
-attributes and children are ready.  We can achieve this with the new
-disk_gen_uevents interface.
+for hs400 mode, should only tune DS delay, should not
+tune PAD_TUNE for data path.
+if eMMC will run at hs400 mode, do not tune data while
+call ops->execute_tuning().
 
-Signed-off-by: Fam Zheng <famz@redhat.com>
+Signed-off-by: Chaotian Jing <chaotian.jing@mediatek.com>
 ---
- drivers/nvme/host/core.c | 3 ++-
- 1 file changed, 2 insertions(+), 1 deletion(-)
+ drivers/mmc/host/mtk-sd.c | 10 +++++++---
+ 1 file changed, 7 insertions(+), 3 deletions(-)
 
-diff --git a/drivers/nvme/host/core.c b/drivers/nvme/host/core.c
-index fd70894..2655521 100644
---- a/drivers/nvme/host/core.c
-+++ b/drivers/nvme/host/core.c
-@@ -1462,11 +1462,12 @@ static void nvme_alloc_ns(struct nvme_ctrl *ctrl, unsigned nsid)
- 	if (ns->type == NVME_NS_LIGHTNVM)
- 		return;
+diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
+index 5642f71..4d7ce65 100644
+--- a/drivers/mmc/host/mtk-sd.c
++++ b/drivers/mmc/host/mtk-sd.c
+@@ -326,6 +326,7 @@ struct msdc_host {
+ 	unsigned char timing;
+ 	bool vqmmc_enabled;
+ 	u32 hs400_ds_delay;
++	bool hs400_mode;	/* current eMMC will run at hs400 mode */
+ 	struct msdc_save_para save_para; /* used when gate HCLK */
+ };
  
--	add_disk(ns->disk, true);
-+	add_disk(ns->disk, false);
- 	if (sysfs_create_group(&disk_to_dev(ns->disk)->kobj,
- 					&nvme_ns_attr_group))
- 		pr_warn("%s: failed to create sysfs group for identification\n",
- 			ns->disk->disk_name);
-+	disk_gen_uevents(ns->disk);
- 	return;
-  out_free_disk:
- 	kfree(disk);
+@@ -1402,9 +1403,11 @@ static int msdc_execute_tuning(struct mmc_host *mmc, u32 opcode)
+ 		dev_err(host->dev, "Tune response fail!\n");
+ 		return ret;
+ 	}
+-	ret = msdc_tune_data(mmc, opcode);
+-	if (ret == -EIO)
+-		dev_err(host->dev, "Tune data fail!\n");
++	if (host->hs400_mode == false) {
++		ret = msdc_tune_data(mmc, opcode);
++		if (ret == -EIO)
++			dev_err(host->dev, "Tune data fail!\n");
++	}
+ 
+ 	return ret;
+ }
+@@ -1412,6 +1415,7 @@ static int msdc_execute_tuning(struct mmc_host *mmc, u32 opcode)
+ static int msdc_prepare_hs400_tuning(struct mmc_host *mmc, struct mmc_ios *ios)
+ {
+ 	struct msdc_host *host = mmc_priv(mmc);
++	host->hs400_mode = true;
+ 
+ 	writel(host->hs400_ds_delay, host->base + PAD_DS_TUNE);
+ 	return 0;
 -- 
-2.9.0
+1.8.1.1.dirty
 
