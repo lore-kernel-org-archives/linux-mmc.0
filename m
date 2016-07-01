@@ -1,54 +1,112 @@
-From: Dan Williams <dan.j.williams@gmail.com>
-Subject: Re: [PATCH v2 04/12] axonrom: Generate uevent after attribute available
-Date: Thu, 30 Jun 2016 15:10:06 -0700
-Message-ID: <CAA9_cmf0cKZXdQ2N3iSbwVqgLDGJ7TMvVYuZTqjVE-7EqHHcdg@mail.gmail.com>
-References: <20160630015953.6888-1-famz@redhat.com> <20160630015953.6888-5-famz@redhat.com>
+From: Rob Herring <robh-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+Subject: Re: Re: [PATCH] mmc: pwrseq-simple: Add an optional post-power-on-delay
+Date: Thu, 30 Jun 2016 19:47:32 -0500
+Message-ID: <20160701004732.GA20831@rob-hp-laptop>
+References: <1466618348-32304-1-git-send-email-hdegoede@redhat.com>
+ <CAL_JsqJ0XVJb=Q9FT8g_OUTbgZWr-E58xQS0iCR4hv-9EHCcPA@mail.gmail.com>
+ <b056f5c8-e77f-ff90-afa5-cd77e446e2dd@redhat.com>
+Reply-To: robh-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20160630015953.6888-5-famz@redhat.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Fam Zheng <famz@redhat.com>
-Cc: Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Benjamin Herrenschmidt <benh@kernel.crashing.org>, Paul Mackerras <paulus@samba.org>, Michael Ellerman <mpe@ellerman.id.au>, Jens Axboe <axboe@kernel.dk>, "Ed L. Cashin" <ed.cashin@acm.org>, Jiri Kosina <jikos@kernel.org>, "Michael S. Tsirkin" <mst@redhat.com>, Minchan Kim <minchan@kernel.org>, Nitin Gupta <ngupta@vflare.org>, Sergey Senozhatsky <sergey.senozhatsky.work@gmail.com>, Shaohua Li <shli@kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, David Woodhouse <dwmw2@infradead.org>, Brian Norris <computersforpeace@gmail.com>, Keith Busch <keith.busch@intel.com>, linuxppc-dev <linuxppc-dev@lists.ozlabs.org>, linux-block@vger.kernel.org, virtualization@lists.linux-foundation.org, linux-raid <linux-raid@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, linux-mtd@lists.infradead.org
+Return-path: <linux-sunxi+bncBDJIP47K7MERBJ73225QKGQEOASX52Q-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+Sender: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
+Content-Disposition: inline
+In-Reply-To: <b056f5c8-e77f-ff90-afa5-cd77e446e2dd-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+List-Post: <https://groups.google.com/group/linux-sunxi/post>, <mailto:linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Help: <https://groups.google.com/support/>, <mailto:linux-sunxi+help-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Archive: <https://groups.google.com/group/linux-sunxi
+List-Subscribe: <https://groups.google.com/group/linux-sunxi/subscribe>, <mailto:linux-sunxi+subscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Unsubscribe: <mailto:googlegroups-manage+1076902468213+unsubscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>,
+ <https://groups.google.com/group/linux-sunxi/subscribe>
+To: Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Srinivas Kandagatla <srinivas.kandagatla-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>, Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, devicetree <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-sunxi <linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Wed, Jun 29, 2016 at 6:59 PM, Fam Zheng <famz@redhat.com> wrote:
-> It is documented that KOBJ_ADD should be generated after the object's
-> attributes and children are ready.  We can achieve this with the new
-> disk_gen_uevents interface.
->
-> Signed-off-by: Fam Zheng <famz@redhat.com>
-> ---
->  arch/powerpc/sysdev/axonram.c | 3 ++-
->  1 file changed, 2 insertions(+), 1 deletion(-)
->
-> diff --git a/arch/powerpc/sysdev/axonram.c b/arch/powerpc/sysdev/axonram.c
-> index 4efd69b..27e7175 100644
-> --- a/arch/powerpc/sysdev/axonram.c
-> +++ b/arch/powerpc/sysdev/axonram.c
-> @@ -238,7 +238,7 @@ static int axon_ram_probe(struct platform_device *device)
->         set_capacity(bank->disk, bank->size >> AXON_RAM_SECTOR_SHIFT);
->         blk_queue_make_request(bank->disk->queue, axon_ram_make_request);
->         blk_queue_logical_block_size(bank->disk->queue, AXON_RAM_SECTOR_SIZE);
-> -       add_disk(bank->disk, true);
-> +       add_disk(bank->disk, false);
->
->         bank->irq_id = irq_of_parse_and_map(device->dev.of_node, 0);
->         if (bank->irq_id == NO_IRQ) {
-> @@ -262,6 +262,7 @@ static int axon_ram_probe(struct platform_device *device)
->                 rc = -EFAULT;
->                 goto failed;
->         }
-> +       disk_gen_uevents(bank->disk);
+On Thu, Jun 23, 2016 at 11:33:27AM +0200, Hans de Goede wrote:
+> Hi,
+> 
+> On 23-06-16 00:25, Rob Herring wrote:
+> >On Wed, Jun 22, 2016 at 12:59 PM, Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org> wrote:
+> >>Some devices need a while to boot their firmware after providing clks /
+> >>de-asserting resets before they are ready to receive sdio commands.
+> >>
+> >>This commits adds a post-power-on-delay-ms devicetree property to
+> >>mmc-pwrseq-simple for use with such devices.
+> >>
+> >>Signed-off-by: Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+> >>---
+> >> Documentation/devicetree/bindings/mmc/mmc-pwrseq-simple.txt | 2 ++
+> >> drivers/mmc/core/pwrseq_simple.c                            | 9 +++++++++
+> >> 2 files changed, 11 insertions(+)
+> >>
+> >>diff --git a/Documentation/devicetree/bindings/mmc/mmc-pwrseq-simple.txt b/Documentation/devicetree/bindings/mmc/mmc-pwrseq-simple.txt
+> >>index ce0e767..e254368 100644
+> >>--- a/Documentation/devicetree/bindings/mmc/mmc-pwrseq-simple.txt
+> >>+++ b/Documentation/devicetree/bindings/mmc/mmc-pwrseq-simple.txt
+> >>@@ -16,6 +16,8 @@ Optional properties:
+> >>   See ../clocks/clock-bindings.txt for details.
+> >> - clock-names : Must include the following entry:
+> >>   "ext_clock" (External clock provided to the card).
+> >>+- post-power-on-delay-ms : Delay in ms after powering the card and
+> >>+       de-asserting the reset-gpios (if any)
+> >
+> >Presumably you need this delay post any reset, not just after power on
+> 
+> mmc-pwrseq is only about doing power-on / off, not about providing
+> reset functionality.
 
-I assume you are doing this after:
+Yes, but the property (e.g. the delay) is relevant for both and reset is 
+part of the power seq.
 
-   rc = device_create_file(&device->dev, &dev_attr_ecc);
+> >if you are waiting for firmware to boot. So the name is not all that
+> >clear. How about a "reset-timing-ms" property that takes 3 values for
+> >pre-assert time (normally 0), assertion time, post assert time. Of
+> >course, I can still think of ways that breaks like when in this
+> >sequence do clocks need to be turned on.
+> 
+> If you look at bindings/mmc/mmc-pwrseq-simple.txt out side of
+> the diff context it contains:
+> 
+> - reset-gpios : contains a list of GPIO specifiers. The reset GPIOs are asserted
+>         at initialization and prior we start the power up procedure of the card.
+>         They will be de-asserted right after the power has been provided to the
+>         card.
+> - clocks : Must contain an entry for the entry in clock-names.
+>   See ../clocks/clock-bindings.txt for details.
+> - clock-names : Must include the following entry:
+>   "ext_clock" (External clock provided to the card).
+> 
+> Notice how the existing docs talk about a power-up procedure (which matches
+> the pwrseq name and purpose of these bindings).
+> 
+> I actually started with calling the property "post-reset-delay-ms", but then
+> I realized that what we really want is the ability to specify a time to
+> wait (for e.g. firmware to boot) after completing the power-up procedure
+> (and before starting the probe). The power-up procedure currently can
+> also includes enabling external clocks to the sdio device (if any) and
+> enabling regulators, so having a "reset-timing-ms" property does not
+> seem right, as that would suggest it is ok to do the wait after deasserting
+> reset, but before e.g. enabling external clocks. Where what we really
+> want is to enable all necessary resources (or iow complete the powerup
+> procedure) and then wait.
+> 
+> You're right that in some cases more complicated timings may be necessary,
+> but that can get really complicated like e.g.: enable regulator1, wait 10 ms,
+> enable regulator2, wait 15ms, enable external clock1, ...
+> 
+> And such complex timings fall outside of the scope of the mmc-pwrseq-simple
+> binding, the idea being that for complex cases we do a device specific
+> pwrseq binding, and then the smarts are in implementation of that specific
+> pwrseq driver. As you've said yourself before we do not want to turn
+> devicetree into a scripting language.
 
-...so that userspace gets notified of the new attribute, but this
-attribute is on the parent device, not the disk itself.  Instead I
-think this attribute should simply be registered before the call to
-add_disk().  Then the KOBJ_ADD event for the disk comes after the
-attribute is available.  It's still not a clean fit, because userspace
-should not be expecting a child device uevent to signal new attributes
-available on the parent.
+Exactly. The challenge is any single property is hard to push back on 
+that we've crossed that line. I don't want to see this expanded one 
+property at a time without any foresight on additional needs. If we can 
+add a property that is more flexible, but doesn't add to the complexity 
+then that would be better. So this one alone is fine, but the next one 
+I'll be less receptive.
+
+Rob
+
+P.S. I'm on vacation ATM, so I'll be slow responding.
