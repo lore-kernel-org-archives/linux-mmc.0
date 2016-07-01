@@ -1,208 +1,90 @@
 From: Andy Gross <andy.gross@linaro.org>
-Subject: Re: [PATCH RFC 6/8] mmc: sdhci-msm: Add pwr_irq support to sdhci-msm
-Date: Thu, 30 Jun 2016 22:57:55 -0500
-Message-ID: <20160701035755.GA2926@hector.attlocal.net>
+Subject: Re: [PATCH RFC 4/8] mmc: sdhci-msm: Add regulator DT props to
+ sdhci-msm bindings
+Date: Thu, 30 Jun 2016 23:22:13 -0500
+Message-ID: <20160701042213.GB2926@hector.attlocal.net>
 References: <1467199233-20506-1-git-send-email-riteshh@codeaurora.org>
- <1467199233-20506-7-git-send-email-riteshh@codeaurora.org>
+ <1467199233-20506-5-git-send-email-riteshh@codeaurora.org>
+ <20160629215326.GD16832@hector.attlocal.net>
+ <2e77ecd7-abd8-cffc-b0ff-f29f68543263@codeaurora.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-arm-msm-owner@vger.kernel.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-oi0-f51.google.com ([209.85.218.51]:36184 "EHLO
+	mail-oi0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751036AbcGAE3e (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 1 Jul 2016 00:29:34 -0400
+Received: by mail-oi0-f51.google.com with SMTP id f189so95482600oig.3
+        for <linux-mmc@vger.kernel.org>; Thu, 30 Jun 2016 21:29:33 -0700 (PDT)
 Content-Disposition: inline
-In-Reply-To: <1467199233-20506-7-git-send-email-riteshh@codeaurora.org>
-Sender: linux-arm-msm-owner@vger.kernel.org
+In-Reply-To: <2e77ecd7-abd8-cffc-b0ff-f29f68543263@codeaurora.org>
+Sender: linux-mmc-owner@vger.kernel.org
+List-Id: linux-mmc@vger.kernel.org
 To: Ritesh Harjani <riteshh@codeaurora.org>
 Cc: ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org, adrian.hunter@intel.com, asutoshd@codeaurora.org, kdorfman@codeaurora.org, david.griego@linaro.org, stummala@codeaurora.org, venkatg@codeaurora.org
-List-Id: linux-mmc@vger.kernel.org
 
-On Wed, Jun 29, 2016 at 04:50:31PM +0530, Ritesh Harjani wrote:
-> From: Asutosh Das <asutoshd@codeaurora.org>
+On Thu, Jun 30, 2016 at 07:00:54PM +0530, Ritesh Harjani wrote:
+> Hi Andy,
+> 
+> On 6/30/2016 3:23 AM, Andy Gross wrote:
+> >On Wed, Jun 29, 2016 at 04:50:29PM +0530, Ritesh Harjani wrote:
+> >>This patch adds the DT properties for voltage regulator nodes
+> >>for Qualcomm SDHCI driver.
+> >>
+> >>Signed-off-by: Ritesh Harjani <riteshh@codeaurora.org>
+> >>---
+> >> Documentation/devicetree/bindings/mmc/sdhci-msm.txt | 19 +++++++++++++++++++
+> >> 1 file changed, 19 insertions(+)
+> >>
+> >>diff --git a/Documentation/devicetree/bindings/mmc/sdhci-msm.txt b/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
+> >>index 851e66d..32cea75 100644
+> >>--- a/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
+> >>+++ b/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
+> >>@@ -17,7 +17,15 @@ Required properties:
+> >> 	"iface" - Main peripheral bus clock (PCLK/HCLK - AHB Bus clock) (required)
+> >> 	"core"	- SDC MMC clock (MCLK) (required)
+> >> 	"bus"	- SDCC bus voter clock (optional)
+> >>+- qcom,<supply>-voltage_level - specifies voltage levels for supply. Should be
+> >>+					specified in pairs (min, max), units uV.
+> >>+- qcom,<supply>-current_level - specifies load levels for supply in lpm or
+> >>+					high power mode (hpm). Should be specified in
+> >>+					pairs (lpm, hpm), units uA.
+> >
+> >These seem like OPPs to me.  Why use something non-standard?
+> >
+> >Check out Documentation/devicetree/bindings/opp/opp.txt
+> Isn't OPP used w.r.t. DVFS?
+> This is voltage/load regulator supplies used to provide vdd/vdd-io to card.
+> We require this to switch the I/O voltage while switching to UHS card mode
+> or to turn on/off the regulators while not in use, (but not tied to voltage
+> switching while different frequency transitions).
 
-<snip>
+It isn't necessarily tied to DVFS.  Someone else can chime in if I am wrong
+here.
 
-> +static irqreturn_t sdhci_msm_pwr_irq(int irq, void *data)
-> +{
-> +	struct sdhci_host *host = (struct sdhci_host *)data;
-> +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> +	struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
-> +	u8 irq_status = 0;
-> +	u8 irq_ack = 0;
-> +	int ret = 0;
-> +	int pwr_state = 0, io_level = 0;
-> +	unsigned long flags;
-> +
-> +	irq_status = readb_relaxed(msm_host->core_mem + CORE_PWRCTL_STATUS);
-> +	pr_debug("%s: Received IRQ(%d), status=0x%x\n",
-> +		mmc_hostname(msm_host->mmc), irq, irq_status);
-> +
-> +	/* Clear the interrupt */
-> +	writeb_relaxed(irq_status, (msm_host->core_mem + CORE_PWRCTL_CLEAR));
-> +	/*
-> +	 * SDHC has core_mem and hc_mem device memory and these memory
-> +	 * addresses do not fall within 1KB region. Hence, any update to
-> +	 * core_mem address space would require an mb() to ensure this gets
-> +	 * completed before its next update to registers within hc_mem.
-> +	 */
-> +	mb();
+I was expecting these different voltage points to be tied to the speed/mode.  As
+such it would kind of fall under the normal OPP definition.  Same with the load.
 
-mb is a little heavy handed.  In general, these days we don't want to introduce
-_relaxed usage anyway.  I know internally you guys force the use of _relaxed,
-but in mainline we generally don't.  Wouldn't a wmb() suffice?
+> 
+> This is mentioned in the same way how other drivers uses vmmc/vqmmc, but the
+> deviation in the name is since Qcom follows pwr_irq deviation(different from
+> standard) to switch the I/O voltage, bus on/off.
 
-Also this isn't about completing before anything else, this is about enforcing
-order and making sure this writeb doesn't get put behind the following writel.
+Ok.  Fair enough.
 
-Lastly, writeb?  Isn't this a 32 bit wide register?
+> 
+> >
+> >>
+> >>+Optional Properties:
+> >>+	- qcom,<supply>-always-on - specifies whether supply should be kept "on" always.
+> >
+> >Would this only be the base if mmc is used on this platform?  You could specify
+> >this in the regulator binding itself if this is more of a global thing.
+> This could be specific to SDHC nodes, like for emmc - we may need only
+> vdd-io to be on. So we need this per sdhc node.
 
-> +
-> +	/* Handle BUS ON/OFF*/
-> +	if (irq_status & CORE_PWRCTL_BUS_ON) {
-> +		ret = sdhci_msm_setup_vreg(msm_host->pdata, true, false);
-> +		if (!ret) {
-> +			ret = sdhci_msm_set_vdd_io_vol(msm_host->pdata,
-> +					VDD_IO_HIGH, 0);
-> +		}
-> +		if (ret)
-> +			irq_ack |= CORE_PWRCTL_BUS_FAIL;
-> +		else
-> +			irq_ack |= CORE_PWRCTL_BUS_SUCCESS;
-> +
-> +		pwr_state = REQ_BUS_ON;
-> +		io_level = REQ_IO_HIGH;
-> +	}
-> +	if (irq_status & CORE_PWRCTL_BUS_OFF) {
-> +		ret = sdhci_msm_setup_vreg(msm_host->pdata, false, false);
-> +		if (!ret) {
-> +			ret = sdhci_msm_set_vdd_io_vol(msm_host->pdata,
-> +					VDD_IO_LOW, 0);
-> +		}
-> +		if (ret)
-> +			irq_ack |= CORE_PWRCTL_BUS_FAIL;
-> +		else
-> +			irq_ack |= CORE_PWRCTL_BUS_SUCCESS;
-> +
-> +		pwr_state = REQ_BUS_OFF;
-> +		io_level = REQ_IO_LOW;
-> +	}
-> +	/* Handle IO LOW/HIGH */
-> +	if (irq_status & CORE_PWRCTL_IO_LOW) {
-> +		/* Switch voltage Low */
-> +		ret = sdhci_msm_set_vdd_io_vol(msm_host->pdata, VDD_IO_LOW, 0);
-> +		if (ret)
-> +			irq_ack |= CORE_PWRCTL_IO_FAIL;
-> +		else
-> +			irq_ack |= CORE_PWRCTL_IO_SUCCESS;
-> +
-> +		io_level = REQ_IO_LOW;
-> +	}
-> +	if (irq_status & CORE_PWRCTL_IO_HIGH) {
-> +		/* Switch voltage High */
-> +		ret = sdhci_msm_set_vdd_io_vol(msm_host->pdata, VDD_IO_HIGH, 0);
-> +		if (ret)
-> +			irq_ack |= CORE_PWRCTL_IO_FAIL;
-> +		else
-> +			irq_ack |= CORE_PWRCTL_IO_SUCCESS;
-> +
-> +		io_level = REQ_IO_HIGH;
-> +	}
-> +
-> +	/* ACK status to the core */
-> +	writeb_relaxed(irq_ack, (msm_host->core_mem + CORE_PWRCTL_CTL));
-> +	/*
-> +	 * SDHC has core_mem and hc_mem device memory and these memory
-> +	 * addresses do not fall within 1KB region. Hence, any update to
-> +	 * core_mem address space would require an mb() to ensure this gets
-> +	 * completed before its next update to registers within hc_mem.
-> +	 */
-> +	mb();
+Ok.  thanks for the clarification
 
-ditto from above
-
-> +
-> +	if (io_level & REQ_IO_HIGH)
-> +		writel_relaxed((readl_relaxed(host->ioaddr + CORE_VENDOR_SPEC) &
-> +				~CORE_IO_PAD_PWR_SWITCH),
-> +				host->ioaddr + CORE_VENDOR_SPEC);
-> +	else if (io_level & REQ_IO_LOW)
-> +		writel_relaxed((readl_relaxed(host->ioaddr + CORE_VENDOR_SPEC) |
-> +				CORE_IO_PAD_PWR_SWITCH),
-> +				host->ioaddr + CORE_VENDOR_SPEC);
-> +
-> +	/* Ensure before completion that above writes are propagated */
-> +	mb();
-
-ditto.  And to make matters worse, this is a double mb() possibly without
-anything else going on.
-
-> +
-> +	pr_debug("%s: Handled IRQ(%d), ret=%d, ack=0x%x\n",
-> +		mmc_hostname(msm_host->mmc), irq, ret, irq_ack);
-> +	if (pwr_state)
-> +		msm_host->curr_pwr_state = pwr_state;
-> +	if (io_level)
-> +		msm_host->curr_io_level = io_level;
-> +
-> +	return IRQ_HANDLED;
-> +}
-> +
->  /* Platform specific tuning */
->  static inline int msm_dll_poll_ck_out_en(struct sdhci_host *host, u8 poll)
->  {
-> @@ -801,6 +978,7 @@ static int sdhci_msm_probe(struct platform_device *pdev)
->  	struct sdhci_pltfm_host *pltfm_host;
->  	struct sdhci_msm_host *msm_host;
->  	struct resource *core_memres;
-> +	u32 irq_status, irq_ctl;
->  	int ret;
->  	u16 host_version, core_minor;
->  	u32 core_version, caps;
-> @@ -917,6 +1095,45 @@ static int sdhci_msm_probe(struct platform_device *pdev)
->  			       CORE_VENDOR_SPEC_CAPABILITIES0);
->  	}
->  
-> +	/*
-> +	 * POR reset of VENDOR_SPEC/CORE_SW_RST above may trigger power irq
-> +	 * if previous status of PWRCTL was either BUS_ON or IO_HIGH_V.
-> +	 * So before we enable the power irq interrupt in GIC
-> +	 * (by registering the interrupt handler), we need to
-> +	 * ensure that any pending power irq interrupt status is acknowledged
-> +	 * otherwise power irq interrupt handler would be fired prematurely.
-> +	 */
-> +	irq_status = readl_relaxed(msm_host->core_mem + CORE_PWRCTL_STATUS);
-> +	writel_relaxed(irq_status, (msm_host->core_mem + CORE_PWRCTL_CLEAR));
-> +	irq_ctl = readl_relaxed(msm_host->core_mem + CORE_PWRCTL_CTL);
-> +	if (irq_status & (CORE_PWRCTL_BUS_ON | CORE_PWRCTL_BUS_OFF))
-> +		irq_ctl |= CORE_PWRCTL_BUS_SUCCESS;
-> +	if (irq_status & (CORE_PWRCTL_IO_HIGH | CORE_PWRCTL_IO_LOW))
-> +		irq_ctl |= CORE_PWRCTL_IO_SUCCESS;
-> +	writel_relaxed(irq_ctl, (msm_host->core_mem + CORE_PWRCTL_CTL));
-> +
-> +	/*
-> +	 * Ensure that above writes are propogated before interrupt enablement
-> +	 * in GIC.
-> +	 */
-> +	mb();
-
-this comment is better.  but again, wmb?
-
-> +	/* Setup PWRCTL irq */
-> +	msm_host->pwr_irq = platform_get_irq_byname(pdev, "pwr_irq");
-> +	if (msm_host->pwr_irq < 0) {
-> +		dev_err(&pdev->dev, "Failed to get pwr_irq by name (%d)\n",
-> +				msm_host->pwr_irq);
-> +		goto vreg_deinit;
-> +	}
-> +	ret = devm_request_threaded_irq(&pdev->dev, msm_host->pwr_irq, NULL,
-> +					sdhci_msm_pwr_irq, IRQF_ONESHOT,
-> +					dev_name(&pdev->dev), host);
-> +	if (ret) {
-> +		dev_err(&pdev->dev, "Request threaded irq(%d) failed (%d)\n",
-> +				msm_host->pwr_irq, ret);
-> +		goto vreg_deinit;
-> +	}
-> +
->  	ret = sdhci_add_host(host);
->  	if (ret)
->  		goto vreg_deinit;
 
 Regards,
 
