@@ -1,58 +1,57 @@
-From: Stefan Wahren <stefan.wahren@i2se.com>
-Subject: [PATCH 2/2] mmc: sdhci-iproc: Use defines instead of magic numbers
-Date: Sat,  2 Jul 2016 19:23:14 +0000
-Message-ID: <1467487394-28682-3-git-send-email-stefan.wahren@i2se.com>
-References: <1467487394-28682-1-git-send-email-stefan.wahren@i2se.com>
+From: Hans de Goede <hdegoede@redhat.com>
+Subject: sunxi mmc on A10 / A13 does not have a sample clock, cannot do ddr ?
+Date: Sun, 3 Jul 2016 17:20:43 +0200
+Message-ID: <de974dc5-2192-a87f-d727-a8e9e9f4b079@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset=utf-8; format=flowed
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <1467487394-28682-1-git-send-email-stefan.wahren@i2se.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Ray Jui <rjui@broadcom.com>, Scott Branden <sbranden@broadcom.com>, Jon Mason <jonmason@broadcom.com>
-Cc: Stefan Wahren <stefan.wahren@i2se.com>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, Adrian Hunter <adrian.hunter@intel.com>, bcm-kernel-feedback-list@broadcom.com, linux-arm-kernel@lists.infradead.org
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mx1.redhat.com ([209.132.183.28]:60249 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752646AbcGCPUr (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Sun, 3 Jul 2016 11:20:47 -0400
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Chen-Yu Tsai <wens@csie.org>
+Cc: Maxime Ripard <maxime.ripard@free-electrons.com>, linux-mmc@vger.kernel.org
 
-The capabilities in iproc platform data are magic numbers. So
-replace them with the proper capability defines to make it
-readable.
+Hi Chen-Yu,
 
-Signed-off-by: Stefan Wahren <stefan.wahren@i2se.com>
----
- drivers/mmc/host/sdhci-iproc.c |   13 +++++++++++--
- 1 file changed, 11 insertions(+), 2 deletions(-)
+While working on some dts cleanups I tested
+the latest sunxi-next kernel code on my A13
+Utoo P66 tablet and the emmc no longer works.
 
-diff --git a/drivers/mmc/host/sdhci-iproc.c b/drivers/mmc/host/sdhci-iproc.c
-index 1110f73..53abecc 100644
---- a/drivers/mmc/host/sdhci-iproc.c
-+++ b/drivers/mmc/host/sdhci-iproc.c
-@@ -164,8 +164,17 @@ static const struct sdhci_pltfm_data sdhci_iproc_pltfm_data = {
- 
- static const struct sdhci_iproc_data iproc_data = {
- 	.pdata = &sdhci_iproc_pltfm_data,
--	.caps = 0x05E90000,
--	.caps1 = 0x00000064,
-+	.caps = ((0x1 << SDHCI_MAX_BLOCK_SHIFT)
-+			& SDHCI_MAX_BLOCK_MASK) |
-+		SDHCI_CAN_VDD_330 |
-+		SDHCI_CAN_VDD_180 |
-+		SDHCI_CAN_DO_SUSPEND |
-+		SDHCI_CAN_DO_HISPD |
-+		SDHCI_CAN_DO_ADMA2 |
-+		SDHCI_CAN_DO_SDMA,
-+	.caps1 = SDHCI_DRIVER_TYPE_C |
-+		 SDHCI_DRIVER_TYPE_D |
-+		 SDHCI_SUPPORT_DDR50,
- 	.mmc_caps = MMC_CAP_1_8V_DDR,
- };
- 
--- 
-1.7.9.5
+The kernel tries to enable DDR52 mode on it,
+since it apparently can do that and after that
+the kernel can no longer talk to it.
+
+Removing MMC_CAP_1_8V_DDR from sunxi-mmc.c
+fixes this.
+
+Part of the problem likely is that it seems
+that the mmc clock on sun4i / sun5i do
+not have sample / output phase clks.
+
+It does not matter what one writes to
+0x1c20088 / 0x1c20090, bits 8-10 and
+20-22 are always 0.
+
+I've observed this on both sun4i and sun5i,
+and the sun4i / sun5i datasheets
+also do not mention the phase bits
+for register 0x1c20088 / 0x1c20090.
+
+As such I'm thinking that the best way to fix
+this is:
+
+1) In sunxi-mmc.c make the sample clocks
+optional; and if not present then do not
+set MMC_CAP_1_8V_DDR (and do not try to
+set sample clks)
+
+2) Remove the sample clks from the base
+sun4i / sun5i dtsi files
+
+Regards,
+
+Hans
