@@ -1,57 +1,52 @@
-From: Hans de Goede <hdegoede@redhat.com>
-Subject: sunxi mmc on A10 / A13 does not have a sample clock, cannot do ddr ?
-Date: Sun, 3 Jul 2016 17:20:43 +0200
-Message-ID: <de974dc5-2192-a87f-d727-a8e9e9f4b079@redhat.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:60249 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752646AbcGCPUr (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Sun, 3 Jul 2016 11:20:47 -0400
-Sender: linux-mmc-owner@vger.kernel.org
+From: Bojan Prtvar <prtvar.b@gmail.com>
+Subject: [PATCH] mmc: core: Extend sysfs with OCR register
+Date: Mon,  4 Jul 2016 13:56:55 +0200
+Message-ID: <20160704115818.35614-1-prtvar.b@gmail.com>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: Jonathan Corbet <corbet@lwn.net>, Ulf Hansson <ulf.hansson@linaro.org>, Linus Walleij <linus.walleij@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, Dong Aisheng <aisheng.dong@nxp.com>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Gwendal Grignou <gwendal@chromium.org>, Chaotian Jing <chaotian.jing@mediatek.com>, linux-doc@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Chen-Yu Tsai <wens@csie.org>
-Cc: Maxime Ripard <maxime.ripard@free-electrons.com>, linux-mmc@vger.kernel.org
 
-Hi Chen-Yu,
+Make operation conditions register (OCR) easily accessible from user space.
 
-While working on some dts cleanups I tested
-the latest sunxi-next kernel code on my A13
-Utoo P66 tablet and the emmc no longer works.
+Signed-off-by: Bojan Prtvar <prtvar.b@gmail.com>
+---
+ Documentation/mmc/mmc-dev-attrs.txt | 1 +
+ drivers/mmc/core/mmc.c              | 2 ++
+ 2 files changed, 3 insertions(+)
 
-The kernel tries to enable DDR52 mode on it,
-since it apparently can do that and after that
-the kernel can no longer talk to it.
-
-Removing MMC_CAP_1_8V_DDR from sunxi-mmc.c
-fixes this.
-
-Part of the problem likely is that it seems
-that the mmc clock on sun4i / sun5i do
-not have sample / output phase clks.
-
-It does not matter what one writes to
-0x1c20088 / 0x1c20090, bits 8-10 and
-20-22 are always 0.
-
-I've observed this on both sun4i and sun5i,
-and the sun4i / sun5i datasheets
-also do not mention the phase bits
-for register 0x1c20088 / 0x1c20090.
-
-As such I'm thinking that the best way to fix
-this is:
-
-1) In sunxi-mmc.c make the sample clocks
-optional; and if not present then do not
-set MMC_CAP_1_8V_DDR (and do not try to
-set sample clks)
-
-2) Remove the sample clks from the base
-sun4i / sun5i dtsi files
-
-Regards,
-
-Hans
+diff --git a/Documentation/mmc/mmc-dev-attrs.txt b/Documentation/mmc/mmc-dev-attrs.txt
+index caa5557..8163eca 100644
+--- a/Documentation/mmc/mmc-dev-attrs.txt
++++ b/Documentation/mmc/mmc-dev-attrs.txt
+@@ -28,6 +28,7 @@ All attributes are read-only.
+ 	preferred_erase_size	Preferred erase size
+ 	raw_rpmb_size_mult	RPMB partition size
+ 	rel_sectors		Reliable write sector count
++	ocr 			Operation Conditions Register
+ 
+ Note on Erase Size and Preferred Erase Size:
+ 
+diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+index 5d438ad..1848334 100644
+--- a/drivers/mmc/core/mmc.c
++++ b/drivers/mmc/core/mmc.c
+@@ -727,6 +727,7 @@ MMC_DEV_ATTR(enhanced_area_offset, "%llu\n",
+ MMC_DEV_ATTR(enhanced_area_size, "%u\n", card->ext_csd.enhanced_area_size);
+ MMC_DEV_ATTR(raw_rpmb_size_mult, "%#x\n", card->ext_csd.raw_rpmb_size_mult);
+ MMC_DEV_ATTR(rel_sectors, "%#x\n", card->ext_csd.rel_sectors);
++MMC_DEV_ATTR(ocr, "%08x\n", card->ocr);
+ 
+ static ssize_t mmc_fwrev_show(struct device *dev,
+ 			      struct device_attribute *attr,
+@@ -762,6 +763,7 @@ static struct attribute *mmc_std_attrs[] = {
+ 	&dev_attr_enhanced_area_size.attr,
+ 	&dev_attr_raw_rpmb_size_mult.attr,
+ 	&dev_attr_rel_sectors.attr,
++	&dev_attr_ocr.attr,
+ 	NULL,
+ };
+ ATTRIBUTE_GROUPS(mmc_std);
+-- 
+2.8.0.GIT
