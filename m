@@ -1,56 +1,46 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH RFC 2/5] mmc: sdhci: Split sdhci_add_host()
-Date: Tue, 5 Jul 2016 12:21:28 +0300
-Message-ID: <577B7C18.3030702@intel.com>
-References: <1467120192-6479-1-git-send-email-adrian.hunter@intel.com>
- <1467120192-6479-3-git-send-email-adrian.hunter@intel.com>
- <577B77C1.10609@nvidia.com> <577B7A23.5030801@intel.com>
+From: Geert Uytterhoeven <geert@linux-m68k.org>
+Subject: Re: [PATCH/RFC v2 5/5] mmc: renesas_sdhi: add support for R-Car Gen3
+ SDHI DMAC
+Date: Tue, 5 Jul 2016 13:06:04 +0200
+Message-ID: <CAMuHMdXEuZyrZUQbjBB600Fp+skKcHr8=FAzzqLv5_ttSeTmiA@mail.gmail.com>
+References: <1467237940-24388-1-git-send-email-horms+renesas@verge.net.au> <1467237940-24388-6-git-send-email-horms+renesas@verge.net.au>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga09.intel.com ([134.134.136.24]:52143 "EHLO mga09.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751150AbcGEJZm (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 5 Jul 2016 05:25:42 -0400
-In-Reply-To: <577B7A23.5030801@intel.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-renesas-soc-owner@vger.kernel.org>
+In-Reply-To: <1467237940-24388-6-git-send-email-horms+renesas@verge.net.au>
+Sender: linux-renesas-soc-owner@vger.kernel.org
+To: Simon Horman <horms+renesas@verge.net.au>
+Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, Ulf Hansson <ulf.hansson@linaro.org>, Magnus Damm <magnus.damm@gmail.com>, Linux MMC List <linux-mmc@vger.kernel.org>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>, Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>, Ai Kyuse <ai.kyuse.uw@renesas.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>, Jon Hunter <jonathanh@nvidia.com>, linux-mmc <linux-mmc@vger.kernel.org>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Dong Aisheng <dongas86@gmail.com>, Dong Aisheng <aisheng.dong@nxp.com>
 
-On 05/07/16 12:13, Adrian Hunter wrote:
-> On 05/07/16 12:02, Jon Hunter wrote:
->>
->> On 28/06/16 14:23, Adrian Hunter wrote:
->>> Split sdhci-add_host() in order to further our objective to make
->>> sdhci into a library.
->>
->> s/sdhci-add_host/sdhci_add_host
-> 
-> Thanks I'll make that change
-> 
->>
->>> The split divides code that sets up mmc and sdhci parameters, from
->>> code that actually activates things - such as tasklet initialization,
->>> requesting the irq, and adding (and starting) the host.
->>>
->>> This gives drivers an opportunity to change various settings before
->>> committing to start the host.
->>>
->>> Drivers can continue to call sdhci_add_host() but drivers that want
->>> to take advantage of the split instead call sdhci_setup_host() followed
->>> by __sdhci_add_host().
->>
->> If sdhci_setup_host() is successful, but then the subsequent call to
->> __sdhci_add_host() fails, then what should be called to clean-up? Does
->> not look like we can still call sdhci_remove_host() in this case.
-> 
-> Nothing needs to be called because __sdhci_add_host() cleans up for
-> sdhci_setup_host() and itself.
+On Thu, Jun 30, 2016 at 12:05 AM, Simon Horman
+<horms+renesas@verge.net.au> wrote:
+> --- a/drivers/mmc/host/sh_mobile_sdhi.c
+> +++ b/drivers/mmc/host/sh_mobile_sdhi.c
 
-I should have written nothing extra needs to be called because you still
-need to free the host (i.e. call sdhci_free_host()), but that is the same
-whether you use sdhci_add_host() or sdhci_setup_host()+__sdhci_add_host().
+> +static int sh_mobile_sdhi_init_dma(enum tmio_mmc_dmac_type dmac_type)
+> +{
+> +       switch (dmac_type) {
+> +       case TMIO_MMC_INTERNAL_DMAC:
+> +               return sdhi_internal_dmac_init_dma();
+> +
+> +       case TMIO_MMC_SYSC_DMAC:
+> +               return sdhi_sysc_dmac_init_dma();
+> +       }
+> +}
 
+Depending on compiler version and optimization level:
 
+drivers/mmc/host/sh_mobile_sdhi.c:172:1: warning: control reaches end
+of non-void function [-Wreturn-type]
+
+Gr{oetje,eeting}s,
+
+                        Geert
+
+--
+Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
+
+In personal conversations with technical people, I call myself a hacker. But
+when I'm talking to journalists I just say "programmer" or something like that.
+                                -- Linus Torvalds
