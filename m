@@ -1,89 +1,83 @@
-From: Stephen Warren <swarren-3lzwWm7+Weoh9ZMKESR00Q@public.gmane.org>
-Subject: Re: [PATCH] mmc: tegra: Only advertise UHS modes if IO regulator is
- present
-Date: Wed, 6 Jul 2016 08:35:54 -0600
-Message-ID: <577D174A.5070605@wwwdotorg.org>
-References: <1467727665-2709-1-git-send-email-jonathanh@nvidia.com>
- <CAAVeFu+VM+-sL8BAkq12bEa6NaZ8D0pKF54qAgmked=CxQsO9A@mail.gmail.com>
- <577CB73E.7010202@nvidia.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [GIT PULL] Update dw-mmc controller
+Date: Wed, 6 Jul 2016 18:19:25 +0200
+Message-ID: <CAPDyKFrs7c2szMBTrZWpuZzU5LK7rbLdNGq28K82FJeNpdJu_g@mail.gmail.com>
+References: <5773279F.1080003@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <577CB73E.7010202-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
-Sender: linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Jon Hunter <jonathanh-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>, Alexandre Courbot <gnurou-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Cc: Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Thierry Reding <thierry.reding-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, linux-mmc <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-wm0-f41.google.com ([74.125.82.41]:33801 "EHLO
+	mail-wm0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754272AbcGFQTs convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 6 Jul 2016 12:19:48 -0400
+Received: by mail-wm0-f41.google.com with SMTP id 187so33350088wmz.1
+        for <linux-mmc@vger.kernel.org>; Wed, 06 Jul 2016 09:19:27 -0700 (PDT)
+In-Reply-To: <5773279F.1080003@samsung.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Jaehoon Chung <jh80.chung@samsung.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Shawn Lin <shawn.lin@rock-chips.com>, Jerome Forissier <jerome.forissier@linaro.org>, "sw0312.kim@samsung.com" <sw0312.kim@samsung.com>, Doug Anderson <dianders@chromium.org>, Ben Dooks <ben.dooks@codethink.co.uk>, Jae hoon Chung <jh80.chung@gmail.com>
 
-On 07/06/2016 01:46 AM, Jon Hunter wrote:
+On 29 June 2016 at 03:42, Jaehoon Chung <jh80.chung@samsung.com> wrote:
+> Dear Ulf,
 >
-> On 06/07/16 03:14, Alexandre Courbot wrote:
->> On Tue, Jul 5, 2016 at 11:07 PM, Jon Hunter <jonathanh-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org> wrote:
->>> To support UHS modes for Tegra an external regulator must be present
->>> to adjust the IO voltage accordingly. If the regulator is not present
->>> but the host supports the UHS modes and the SD/MMC device supports the
->>> UHS modes, then we will attempt to switch to a high-speed mode.
->>>
->>> Without an external regulator, Tegra will fail to switch to the
->>> high-speed mode. Although this is expected, it has been found that with
->>> some SD cards, once it has been switched to operate at a high-speed
->>> mode and hence a lower IO voltage, if the IO voltage is not changed then
->>> all subsequent commands issues to the card will fail. Furthermore, it
->>> will not be possible to switch back to a non high-speed mode and so
->>> eventually the SD card initialisation will fail.
->>>
->>> The SDHCI core does not require that the host have an external regulator
->>> when switching to UHS modes and therefore, the Tegra SDHCI host
->>> controller should only advertise the UHS modes as being supported if the
->>> regulator for the IO voltage is present. Fortunately, Tegra has a vendor
->>> specific register which can be used to control which modes are
->>> advertised via the SDHCI_CAPABILITIES register and if the controller is
->>> compatible with v3.0 of the SDHCI specification. Hence, if there is no
->>> IO voltage regulator present in device-tree for the Tegra SDHCI host, then
->>> don't advertise the UHS modes or that the controller is SDHCI v3.0
->>> compatible.
->>>
->>> Note that if the SDHCI is compatible with v3.0 of the SDHCI specification
->>> then this will cause the SDHCI core to read the SDHCI_CAPABILITIES_1
->>> register which will enable other UHS modes.
->>>
->>> This fixes commit 7ad2ed1dfcbe ("mmc: tegra: enable UHS-I modes") which
->>> enables UHS mode without checking if the board can support them.
->>>
->>> Fixes: 7ad2ed1dfcbe ("mmc: tegra: enable UHS-I modes")
->>>
->>> Signed-off-by: Jon Hunter <jonathanh-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
->>> ---
->>>
->>> Please note that I have been reviewing the series from Adrian [0] to
->>> make it easier for drivers to set the capabilities. However, given that
->>> we can control the capabilities that are advertised by the CAPS registers
->>> it seems easier to use this feature.
->>>
->>> [0] http://marc.info/?l=linux-mmc&m=146712062816835&w=2
-
->>> diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
-
->>> +
->>> +       /*
->>> +        * If the board does not define a regulator for the SDHCI
->>> +        * IO voltage, then don't advertise support for UHS modes
->>> +        * even if the device supports it because the IO voltage
->>> +        * cannot be configured.
->>> +        */
->>> +       if (of_property_read_bool(dev->of_node, "vqmmc-supply")) {
->>
->> Can't you check whether (!IS_SERR(host->mmc->supply.vqmmc)) instead?
->> The property being present doesn't necessarily guarantee that the
->> regulator has been obtained successfully.
+> Could you pull these patches into your repository (next branch)?
 >
-> The problem is that the regulator is obtained after the reset occurs and
-> so unfortunately that won't work either :-(
+> Best Regards,
+> Jaehoon Chung
 >
-> I wonder if we should request the regulator during the Tegra SDHCI probe
-> before we call sdhci_add_host(). This would allow us to defer the probe
-> if it is missing/not present.
+> The following changes since commit 466780648db4aed7722de91e9d9749c6c5=
+969327:
+>
+>   mmc: sh_mmcif: Use a 10s timeout in the error recovery path (2016-0=
+6-27 11:19:29 +0200)
+>
+> are available in the git repository at:
+>
+>   https://github.com/jh80chung/dw-mmc.git for-ulf
+>
+> for you to fetch changes up to 545585efee538cac5202b415a3d0c12b4556e9=
+6f:
+>
+>   mmc: dw_mmc: fix unmap sg twice when finding data err (2016-06-29 1=
+0:39:05 +0900)
+>
+> ----------------------------------------------------------------
+> Ben Dooks (1):
+>       mmc: dw_mmc: fix 32bit little-endian access of des1 field
+>
+> Doug Anderson (2):
+>       mmc: dw_mmc: Consider HLE errors to be data and command errors
+>       mmc: dw_mmc: Wait for data transfer after response errors.
+>
+> Jaehoon Chung (4):
+>       mmc: dw_mmc: exynos: fix the NULL pointer dereference error
+>       mmc: dw_mmc: remove the quirks flags
+>       mmc: dw_mmc: add the card write threshold for HS400 mode
+>       mmc: dw_mmc: prevent to set the wrong value
+>
+> J=C3=A9r=C3=B4me Forissier (1):
+>       mmc: dw_mmc: k3: add MMC_CAP_CMD23
+>
+> Seung-Woo Kim (1):
+>       mmc: dw_mmc: remove UBSAN warning in dw_mci_setup_bus()
+>
+> Shawn Lin (3):
+>       mmc: dw_mmc: remove redundant of set_bit and clear_bit
+>       mmc: dw_mmc: check card present before starting request
+>       mmc: dw_mmc: fix unmap sg twice when finding data err
+>
+>  drivers/mmc/host/dw_mmc-exynos.c   |   2 +-
+>  drivers/mmc/host/dw_mmc-k3.c       |   7 ++
+>  drivers/mmc/host/dw_mmc-rockchip.c |   3 -
+>  drivers/mmc/host/dw_mmc.c          | 157 ++++++++++++++++++++++-----=
+----------
+>  drivers/mmc/host/dw_mmc.h          |  10 +--
+>  include/linux/mmc/dw_mmc.h         |   9 ---
+>  6 files changed, 108 insertions(+), 80 deletions(-)
 
-Yes, any resource acquisition must happen in probe(). There's no way 
-around that.
+Thanks Jaehoon, pulled into my next branch!
+
+Kind regards
+Uffe
