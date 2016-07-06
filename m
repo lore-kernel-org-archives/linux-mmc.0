@@ -1,64 +1,65 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: s3cmci: Register cpufreq notifier only on S3C24xx
-Date: Wed, 6 Jul 2016 18:21:01 +0200
-Message-ID: <CAPDyKFpO0xdLxC5u3G4gYa0uVMdXRj0-aOpC+wEZ9UP=tkO=qA@mail.gmail.com>
-References: <1467031923-10415-1-git-send-email-k.kozlowski@samsung.com>
+Subject: Re: [PATCH] mmc: core: Extend sysfs with OCR register
+Date: Wed, 6 Jul 2016 18:21:25 +0200
+Message-ID: <CAPDyKFqTSRupW+qWFWP=5xwQMWU79NFWTxipwButc8D_jFw05g@mail.gmail.com>
+References: <20160704115818.35614-1-prtvar.b@gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1467031923-10415-1-git-send-email-k.kozlowski@samsung.com>
+In-Reply-To: <20160704115818.35614-1-prtvar.b@gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Krzysztof Kozlowski <k.kozlowski@samsung.com>
-Cc: Ben Dooks <ben-linux@fluff.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>
+To: Bojan Prtvar <prtvar.b@gmail.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Jonathan Corbet <corbet@lwn.net>, Linus Walleij <linus.walleij@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, Dong Aisheng <aisheng.dong@nxp.com>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Gwendal Grignou <gwendal@chromium.org>, Chaotian Jing <chaotian.jing@mediatek.com>, "linux-doc@vger.kernel.org" <linux-doc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On 27 June 2016 at 14:52, Krzysztof Kozlowski <k.kozlowski@samsung.com> wrote:
-> The driver registered for CPU frequency transitions to recalculate its
-> clock when ARM clock frequency changes (ratio between frequencies of
-> ARM's parent clock (fclk) and clock for peripherals remains fixed).
+On 4 July 2016 at 13:56, Bojan Prtvar <prtvar.b@gmail.com> wrote:
+> Make operation conditions register (OCR) easily accessible from user space.
 >
-> This is needed only on S3C24xx platform when cpufreq driver is enabled
-> so limit the ifdef to respective cpufreq Kconfig.
->
-> Suggested-by: Marek Szyprowski <m.szyprowski@samsung.com>
-> Signed-off-by: Krzysztof Kozlowski <k.kozlowski@samsung.com>
+> Signed-off-by: Bojan Prtvar <prtvar.b@gmail.com>
 
-Thanks, applied for next!
+Thanks, applied for next! Amended the changelog with the explanation
+why this change is wanted.
 
 Kind regards
 Uffe
 
 > ---
->  drivers/mmc/host/s3cmci.c | 2 +-
->  drivers/mmc/host/s3cmci.h | 2 +-
->  2 files changed, 2 insertions(+), 2 deletions(-)
+>  Documentation/mmc/mmc-dev-attrs.txt | 1 +
+>  drivers/mmc/core/mmc.c              | 2 ++
+>  2 files changed, 3 insertions(+)
 >
-> diff --git a/drivers/mmc/host/s3cmci.c b/drivers/mmc/host/s3cmci.c
-> index 39814f3dc96f..c531deef3258 100644
-> --- a/drivers/mmc/host/s3cmci.c
-> +++ b/drivers/mmc/host/s3cmci.c
-> @@ -1365,7 +1365,7 @@ static struct s3c24xx_mci_pdata s3cmci_def_pdata = {
->          .no_detect = 1,
+> diff --git a/Documentation/mmc/mmc-dev-attrs.txt b/Documentation/mmc/mmc-dev-attrs.txt
+> index caa5557..8163eca 100644
+> --- a/Documentation/mmc/mmc-dev-attrs.txt
+> +++ b/Documentation/mmc/mmc-dev-attrs.txt
+> @@ -28,6 +28,7 @@ All attributes are read-only.
+>         preferred_erase_size    Preferred erase size
+>         raw_rpmb_size_mult      RPMB partition size
+>         rel_sectors             Reliable write sector count
+> +       ocr                     Operation Conditions Register
+>
+>  Note on Erase Size and Preferred Erase Size:
+>
+> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+> index 5d438ad..1848334 100644
+> --- a/drivers/mmc/core/mmc.c
+> +++ b/drivers/mmc/core/mmc.c
+> @@ -727,6 +727,7 @@ MMC_DEV_ATTR(enhanced_area_offset, "%llu\n",
+>  MMC_DEV_ATTR(enhanced_area_size, "%u\n", card->ext_csd.enhanced_area_size);
+>  MMC_DEV_ATTR(raw_rpmb_size_mult, "%#x\n", card->ext_csd.raw_rpmb_size_mult);
+>  MMC_DEV_ATTR(rel_sectors, "%#x\n", card->ext_csd.rel_sectors);
+> +MMC_DEV_ATTR(ocr, "%08x\n", card->ocr);
+>
+>  static ssize_t mmc_fwrev_show(struct device *dev,
+>                               struct device_attribute *attr,
+> @@ -762,6 +763,7 @@ static struct attribute *mmc_std_attrs[] = {
+>         &dev_attr_enhanced_area_size.attr,
+>         &dev_attr_raw_rpmb_size_mult.attr,
+>         &dev_attr_rel_sectors.attr,
+> +       &dev_attr_ocr.attr,
+>         NULL,
 >  };
->
-> -#ifdef CONFIG_CPU_FREQ
-> +#ifdef CONFIG_ARM_S3C24XX_CPUFREQ
->
->  static int s3cmci_cpufreq_transition(struct notifier_block *nb,
->                                      unsigned long val, void *data)
-> diff --git a/drivers/mmc/host/s3cmci.h b/drivers/mmc/host/s3cmci.h
-> index cc2e46cb5c64..30c2c0dd1bc8 100644
-> --- a/drivers/mmc/host/s3cmci.h
-> +++ b/drivers/mmc/host/s3cmci.h
-> @@ -74,7 +74,7 @@ struct s3cmci_host {
->         struct dentry           *debug_regs;
->  #endif
->
-> -#ifdef CONFIG_CPU_FREQ
-> +#ifdef CONFIG_ARM_S3C24XX_CPUFREQ
->         struct notifier_block   freq_transition;
->  #endif
->  };
+>  ATTRIBUTE_GROUPS(mmc_std);
 > --
-> 1.9.1
+> 2.8.0.GIT
 >
