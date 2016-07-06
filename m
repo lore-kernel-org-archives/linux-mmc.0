@@ -1,135 +1,35 @@
-From: Alexandre Courbot <gnurou@gmail.com>
-Subject: Re: [PATCH] mmc: tegra: Only advertise UHS modes if IO regulator is present
-Date: Wed, 6 Jul 2016 16:59:55 +0900
-Message-ID: <CAAVeFuJkAc9mUruEbqYbhMycJ2+VRZySct93iSAKv9d5os689g@mail.gmail.com>
-References: <1467727665-2709-1-git-send-email-jonathanh@nvidia.com>
- <CAAVeFu+VM+-sL8BAkq12bEa6NaZ8D0pKF54qAgmked=CxQsO9A@mail.gmail.com> <577CB73E.7010202@nvidia.com>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH RFCv2 10/10] mmc: sdhci: add command queue support to
+ sdhci
+Date: Wed, 6 Jul 2016 13:01:42 +0300
+Message-ID: <577CD706.30105@intel.com>
+References: <1467033757-32498-1-git-send-email-riteshh@codeaurora.org>
+ <1467033757-32498-11-git-send-email-riteshh@codeaurora.org>
+ <577B96E2.5050009@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-it0-f66.google.com ([209.85.214.66]:32978 "EHLO
-	mail-it0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750779AbcGFIAQ (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 6 Jul 2016 04:00:16 -0400
-In-Reply-To: <577CB73E.7010202@nvidia.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-msm-owner@vger.kernel.org>
+In-Reply-To: <577B96E2.5050009@intel.com>
+Sender: linux-arm-msm-owner@vger.kernel.org
+To: Adrian Hunter <adrian.hunter@intel.com>, Ritesh Harjani <riteshh@codeaurora.org>, ulf.hansson@linaro.org, linux-mmc@vger.kernel.org
+Cc: linux-arm-msm@vger.kernel.org, alex.lemberg@sandisk.com, mateusz.nowak@intel.com, Yuliy.Izrailov@sandisk.com, jh80.chung@samsung.com, dongas86@gmail.com, asutoshd@codeaurora.org, zhangfei.gao@gmail.com, kdorfman@codeaurora.org, david.griego@linaro.org, stummala@codeaurora.org, venkatg@codeaurora.org, shawn.lin@rock-chips.com, Subhash Jadavani <subhashj@codeaurora.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Jon Hunter <jonathanh@nvidia.com>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, Stephen Warren <swarren@wwwdotorg.org>, Thierry Reding <thierry.reding@gmail.com>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-tegra@vger.kernel.org" <linux-tegra@vger.kernel.org>
 
-On Wed, Jul 6, 2016 at 4:46 PM, Jon Hunter <jonathanh@nvidia.com> wrote:
->
-> On 06/07/16 03:14, Alexandre Courbot wrote:
->> On Tue, Jul 5, 2016 at 11:07 PM, Jon Hunter <jonathanh@nvidia.com> wrote:
->>> To support UHS modes for Tegra an external regulator must be present
->>> to adjust the IO voltage accordingly. If the regulator is not present
->>> but the host supports the UHS modes and the SD/MMC device supports the
->>> UHS modes, then we will attempt to switch to a high-speed mode.
->>>
->>> Without an external regulator, Tegra will fail to switch to the
->>> high-speed mode. Although this is expected, it has been found that with
->>> some SD cards, once it has been switched to operate at a high-speed
->>> mode and hence a lower IO voltage, if the IO voltage is not changed then
->>> all subsequent commands issues to the card will fail. Furthermore, it
->>> will not be possible to switch back to a non high-speed mode and so
->>> eventually the SD card initialisation will fail.
->>>
->>> The SDHCI core does not require that the host have an external regulator
->>> when switching to UHS modes and therefore, the Tegra SDHCI host
->>> controller should only advertise the UHS modes as being supported if the
->>> regulator for the IO voltage is present. Fortunately, Tegra has a vendor
->>> specific register which can be used to control which modes are
->>> advertised via the SDHCI_CAPABILITIES register and if the controller is
->>> compatible with v3.0 of the SDHCI specification. Hence, if there is no
->>> IO voltage regulator present in device-tree for the Tegra SDHCI host, then
->>> don't advertise the UHS modes or that the controller is SDHCI v3.0
->>> compatible.
->>>
->>> Note that if the SDHCI is compatible with v3.0 of the SDHCI specification
->>> then this will cause the SDHCI core to read the SDHCI_CAPABILITIES_1
->>> register which will enable other UHS modes.
->>>
->>> This fixes commit 7ad2ed1dfcbe ("mmc: tegra: enable UHS-I modes") which
->>> enables UHS mode without checking if the board can support them.
->>>
->>> Fixes: 7ad2ed1dfcbe ("mmc: tegra: enable UHS-I modes")
->>>
->>> Signed-off-by: Jon Hunter <jonathanh@nvidia.com>
->>> ---
->>>
->>> Please note that I have been reviewing the series from Adrian [0] to
->>> make it easier for drivers to set the capabilities. However, given that
->>> we can control the capabilities that are advertised by the CAPS registers
->>> it seems easier to use this feature.
->>>
->>> [0] http://marc.info/?l=linux-mmc&m=146712062816835&w=2
->>>
->>>  drivers/mmc/host/sdhci-tegra.c | 50 +++++++++++++++++++++++++-----------------
->>>  1 file changed, 30 insertions(+), 20 deletions(-)
->>>
->>> diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
->>> index bcc0de47fe7e..c8b51cd71c56 100644
->>> --- a/drivers/mmc/host/sdhci-tegra.c
->>> +++ b/drivers/mmc/host/sdhci-tegra.c
->>> @@ -140,6 +140,7 @@ static void tegra_sdhci_reset(struct sdhci_host *host, u8 mask)
->>>         struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
->>>         struct sdhci_tegra *tegra_host = sdhci_pltfm_priv(pltfm_host);
->>>         const struct sdhci_tegra_soc_data *soc_data = tegra_host->soc_data;
->>> +       struct device *dev = mmc_dev(host->mmc);
->>>         u32 misc_ctrl, clk_ctrl;
->>>
->>>         sdhci_reset(host, mask);
->>> @@ -148,28 +149,37 @@ static void tegra_sdhci_reset(struct sdhci_host *host, u8 mask)
->>>                 return;
->>>
->>>         misc_ctrl = sdhci_readl(host, SDHCI_TEGRA_VENDOR_MISC_CTRL);
->>> -       /* Erratum: Enable SDHCI spec v3.00 support */
->>> -       if (soc_data->nvquirks & NVQUIRK_ENABLE_SDHCI_SPEC_300)
->>> -               misc_ctrl |= SDHCI_MISC_CTRL_ENABLE_SDHCI_SPEC_300;
->>> -       /* Advertise UHS modes as supported by host */
->>> -       if (soc_data->nvquirks & NVQUIRK_ENABLE_SDR50)
->>> -               misc_ctrl |= SDHCI_MISC_CTRL_ENABLE_SDR50;
->>> -       else
->>> -               misc_ctrl &= ~SDHCI_MISC_CTRL_ENABLE_SDR50;
->>> -       if (soc_data->nvquirks & NVQUIRK_ENABLE_DDR50)
->>> -               misc_ctrl |= SDHCI_MISC_CTRL_ENABLE_DDR50;
->>> -       else
->>> -               misc_ctrl &= ~SDHCI_MISC_CTRL_ENABLE_DDR50;
->>> -       if (soc_data->nvquirks & NVQUIRK_ENABLE_SDR104)
->>> -               misc_ctrl |= SDHCI_MISC_CTRL_ENABLE_SDR104;
->>> -       else
->>> -               misc_ctrl &= ~SDHCI_MISC_CTRL_ENABLE_SDR104;
->>> -       sdhci_writel(host, misc_ctrl, SDHCI_TEGRA_VENDOR_MISC_CTRL);
->>> -
->>>         clk_ctrl = sdhci_readl(host, SDHCI_TEGRA_VENDOR_CLOCK_CTRL);
->>> +
->>> +       misc_ctrl &= ~(SDHCI_MISC_CTRL_ENABLE_SDHCI_SPEC_300 |
->>> +                      SDHCI_MISC_CTRL_ENABLE_SDR50 |
->>> +                      SDHCI_MISC_CTRL_ENABLE_DDR50 |
->>> +                      SDHCI_MISC_CTRL_ENABLE_SDR104);
->>> +
->>>         clk_ctrl &= ~SDHCI_CLOCK_CTRL_SPI_MODE_CLKEN_OVERRIDE;
->>> -       if (soc_data->nvquirks & SDHCI_MISC_CTRL_ENABLE_SDR50)
->>> -               clk_ctrl |= SDHCI_CLOCK_CTRL_SDR50_TUNING_OVERRIDE;
->>> +
->>> +       /*
->>> +        * If the board does not define a regulator for the SDHCI
->>> +        * IO voltage, then don't advertise support for UHS modes
->>> +        * even if the device supports it because the IO voltage
->>> +        * cannot be configured.
->>> +        */
->>> +       if (of_property_read_bool(dev->of_node, "vqmmc-supply")) {
->>
->> Can't you check whether (!IS_SERR(host->mmc->supply.vqmmc)) instead?
->> The property being present doesn't necessarily guarantee that the
->> regulator has been obtained successfully.
->
-> The problem is that the regulator is obtained after the reset occurs and
-> so unfortunately that won't work either :-(
->
-> I wonder if we should request the regulator during the Tegra SDHCI probe
-> before we call sdhci_add_host(). This would allow us to defer the probe
-> if it is missing/not present.
+On 05/07/16 14:15, Adrian Hunter wrote:
+> On 27/06/16 16:22, Ritesh Harjani wrote:
 
-That or move the call to regulator_get_supply() before the reset
-happens in sdhci_add_host()?
+<SNIP>
+
+>> +{
+>> +	struct sdhci_host *host = mmc_priv(mmc);
+>> +
+>> +	sdhci_writeb(host, val, SDHCI_TIMEOUT_CONTROL);
+>> +}
+> 
+> We can't expect CQHCI to provide the SDHCI register value.  Ideally we don't
+> want to set the highest value but instead calculate the value based on the
+> maximum sized transfer.
+
+Except cache flush doesn't have a timeout, so we will have to set the
+highest value if we issue cache flush via DCMD.
