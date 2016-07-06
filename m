@@ -1,155 +1,117 @@
-From: Geert Uytterhoeven <geert@linux-m68k.org>
-Subject: Re: [PATCH/RFC v2 1/5] mmc: sh_mobile_sdhi, tmio: make dma more modular
-Date: Tue, 5 Jul 2016 19:05:55 +0200
-Message-ID: <CAMuHMdUtvFW8K=Ggo_nDg_uFKyOZsiqh4rVSNB_HX6So6YfwYg@mail.gmail.com>
-References: <1467237940-24388-1-git-send-email-horms+renesas@verge.net.au> <1467237940-24388-2-git-send-email-horms+renesas@verge.net.au>
+From: Alexandre Courbot <gnurou-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Subject: Re: [PATCH] mmc: tegra: Only advertise UHS modes if IO regulator is present
+Date: Wed, 6 Jul 2016 11:14:36 +0900
+Message-ID: <CAAVeFu+VM+-sL8BAkq12bEa6NaZ8D0pKF54qAgmked=CxQsO9A@mail.gmail.com>
+References: <1467727665-2709-1-git-send-email-jonathanh@nvidia.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-renesas-soc-owner@vger.kernel.org>
-In-Reply-To: <1467237940-24388-2-git-send-email-horms+renesas@verge.net.au>
-Sender: linux-renesas-soc-owner@vger.kernel.org
-To: Simon Horman <horms+renesas@verge.net.au>
-Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, Ulf Hansson <ulf.hansson@linaro.org>, Magnus Damm <magnus.damm@gmail.com>, Linux MMC List <linux-mmc@vger.kernel.org>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>
+Return-path: <linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1467727665-2709-1-git-send-email-jonathanh-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
+Sender: linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Jon Hunter <jonathanh-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
+Cc: Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Stephen Warren <swarren-3lzwWm7+Weoh9ZMKESR00Q@public.gmane.org>, Thierry Reding <thierry.reding-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, linux-mmc <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-Hi Simon,
-
-On Thu, Jun 30, 2016 at 12:05 AM, Simon Horman
-<horms+renesas@verge.net.au> wrote:
-> Refactor DMA support to allow it to be provided by a set of call-backs
-> that are provided by a host driver. The motivation is to allow multiple
-> DMA implementations to be provided and instantiated at run-time.
+On Tue, Jul 5, 2016 at 11:07 PM, Jon Hunter <jonathanh-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org> wrote:
+> To support UHS modes for Tegra an external regulator must be present
+> to adjust the IO voltage accordingly. If the regulator is not present
+> but the host supports the UHS modes and the SD/MMC device supports the
+> UHS modes, then we will attempt to switch to a high-speed mode.
 >
-> Instantiate the existing DMA implementation from the sh_mobile_sdhi driver
-> which appears to match the current use-case. This has the side effect
-> of moving the DMA code from the tmio_core to the sh_mobile_sdhi driver.
+> Without an external regulator, Tegra will fail to switch to the
+> high-speed mode. Although this is expected, it has been found that with
+> some SD cards, once it has been switched to operate at a high-speed
+> mode and hence a lower IO voltage, if the IO voltage is not changed then
+> all subsequent commands issues to the card will fail. Furthermore, it
+> will not be possible to switch back to a non high-speed mode and so
+> eventually the SD card initialisation will fail.
 >
-> A follow-up patch will change the source file for the SDHI DMA
-> implementation accordingly.
+> The SDHCI core does not require that the host have an external regulator
+> when switching to UHS modes and therefore, the Tegra SDHCI host
+> controller should only advertise the UHS modes as being supported if the
+> regulator for the IO voltage is present. Fortunately, Tegra has a vendor
+> specific register which can be used to control which modes are
+> advertised via the SDHCI_CAPABILITIES register and if the controller is
+> compatible with v3.0 of the SDHCI specification. Hence, if there is no
+> IO voltage regulator present in device-tree for the Tegra SDHCI host, then
+> don't advertise the UHS modes or that the controller is SDHCI v3.0
+> compatible.
 >
-> Signed-off-by: Simon Horman <horms+renesas@verge.net.au>
+> Note that if the SDHCI is compatible with v3.0 of the SDHCI specification
+> then this will cause the SDHCI core to read the SDHCI_CAPABILITIES_1
+> register which will enable other UHS modes.
+>
+> This fixes commit 7ad2ed1dfcbe ("mmc: tegra: enable UHS-I modes") which
+> enables UHS mode without checking if the board can support them.
+>
+> Fixes: 7ad2ed1dfcbe ("mmc: tegra: enable UHS-I modes")
+>
+> Signed-off-by: Jon Hunter <jonathanh-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
 > ---
-> v2
-> * Fix compilation issue due to error in Makefile
-> * Use MMC_SDHI_SYSC_DMA rather than MMC_SDHI_DMA as new Kconfig symbole
->   to better reflect revamped file rename in a follow-up patch.
 >
-> Todo: Investigate removing ifdef
-> ---
->  drivers/mmc/host/Kconfig          |  9 ++++++++
->  drivers/mmc/host/Makefile         |  4 +++-
->  drivers/mmc/host/sh_mobile_sdhi.c | 13 +++++++++++
->  drivers/mmc/host/tmio_mmc.h       | 39 ++++++++------------------------
->  drivers/mmc/host/tmio_mmc_dma.c   | 26 +++++++++++++++++-----
->  drivers/mmc/host/tmio_mmc_pio.c   | 47 +++++++++++++++++++++++++++++++++++++++
->  6 files changed, 102 insertions(+), 36 deletions(-)
+> Please note that I have been reviewing the series from Adrian [0] to
+> make it easier for drivers to set the capabilities. However, given that
+> we can control the capabilities that are advertised by the CAPS registers
+> it seems easier to use this feature.
 >
-> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
-> index 5274f503a39a..a0b6c1773e33 100644
-> --- a/drivers/mmc/host/Kconfig
-> +++ b/drivers/mmc/host/Kconfig
-> @@ -554,10 +554,19 @@ config MMC_SDHI
->         depends on SUPERH || ARM || ARM64
->         depends on SUPERH || ARCH_RENESAS || COMPILE_TEST
->         select MMC_TMIO_CORE
-> +       select MMC_SDHI_SYSC_DMA if (SUPERH || ARM)
-
-MMC_SDHI_SYS_DMAC?
-
->         help
->           This provides support for the SDHI SD/SDIO controller found in
->           SuperH and ARM SH-Mobile SoCs
+> [0] http://marc.info/?l=linux-mmc&m=146712062816835&w=2
 >
-> +config MMC_SDHI_SYSC_DMA
-
-MMC_SDHI_SYS_DMAC??
-
-> +       tristate "DMA support use of SYSC DMAC with SDHI SD/SDIO controller"
-
-SYS DMAC
-
-(SYSC is the System Controller for Power Areas)
-
-> +       depends on SUPERH || ARM || COMPILE_TEST
-> +       depends on MMC_SDHI
-> +       help
-> +         This provides DMA support for the SDHI SD/SDIO controller
-> +         found in SuperH and Renesas ARM based SoCs.
+>  drivers/mmc/host/sdhci-tegra.c | 50 +++++++++++++++++++++++++-----------------
+>  1 file changed, 30 insertions(+), 20 deletions(-)
+>
+> diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
+> index bcc0de47fe7e..c8b51cd71c56 100644
+> --- a/drivers/mmc/host/sdhci-tegra.c
+> +++ b/drivers/mmc/host/sdhci-tegra.c
+> @@ -140,6 +140,7 @@ static void tegra_sdhci_reset(struct sdhci_host *host, u8 mask)
+>         struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+>         struct sdhci_tegra *tegra_host = sdhci_pltfm_priv(pltfm_host);
+>         const struct sdhci_tegra_soc_data *soc_data = tegra_host->soc_data;
+> +       struct device *dev = mmc_dev(host->mmc);
+>         u32 misc_ctrl, clk_ctrl;
+>
+>         sdhci_reset(host, mask);
+> @@ -148,28 +149,37 @@ static void tegra_sdhci_reset(struct sdhci_host *host, u8 mask)
+>                 return;
+>
+>         misc_ctrl = sdhci_readl(host, SDHCI_TEGRA_VENDOR_MISC_CTRL);
+> -       /* Erratum: Enable SDHCI spec v3.00 support */
+> -       if (soc_data->nvquirks & NVQUIRK_ENABLE_SDHCI_SPEC_300)
+> -               misc_ctrl |= SDHCI_MISC_CTRL_ENABLE_SDHCI_SPEC_300;
+> -       /* Advertise UHS modes as supported by host */
+> -       if (soc_data->nvquirks & NVQUIRK_ENABLE_SDR50)
+> -               misc_ctrl |= SDHCI_MISC_CTRL_ENABLE_SDR50;
+> -       else
+> -               misc_ctrl &= ~SDHCI_MISC_CTRL_ENABLE_SDR50;
+> -       if (soc_data->nvquirks & NVQUIRK_ENABLE_DDR50)
+> -               misc_ctrl |= SDHCI_MISC_CTRL_ENABLE_DDR50;
+> -       else
+> -               misc_ctrl &= ~SDHCI_MISC_CTRL_ENABLE_DDR50;
+> -       if (soc_data->nvquirks & NVQUIRK_ENABLE_SDR104)
+> -               misc_ctrl |= SDHCI_MISC_CTRL_ENABLE_SDR104;
+> -       else
+> -               misc_ctrl &= ~SDHCI_MISC_CTRL_ENABLE_SDR104;
+> -       sdhci_writel(host, misc_ctrl, SDHCI_TEGRA_VENDOR_MISC_CTRL);
+> -
+>         clk_ctrl = sdhci_readl(host, SDHCI_TEGRA_VENDOR_CLOCK_CTRL);
 > +
->  config MMC_CB710
->         tristate "ENE CB710 MMC/SD Interface support"
->         depends on PCI
-> diff --git a/drivers/mmc/host/Makefile b/drivers/mmc/host/Makefile
-> index e2bdaaf43184..4ed6f250213a 100644
-> --- a/drivers/mmc/host/Makefile
-> +++ b/drivers/mmc/host/Makefile
-> @@ -37,8 +37,10 @@ obj-$(CONFIG_MMC_SDRICOH_CS) += sdricoh_cs.o
->  obj-$(CONFIG_MMC_TMIO)         += tmio_mmc.o
->  obj-$(CONFIG_MMC_TMIO_CORE)    += tmio_mmc_core.o
->  tmio_mmc_core-y                        := tmio_mmc_pio.o
-> -tmio_mmc_core-$(subst m,y,$(CONFIG_MMC_SDHI))  += tmio_mmc_dma.o
->  obj-$(CONFIG_MMC_SDHI)         += sh_mobile_sdhi.o
-> +ifeq ($(subst m,y,$(CONFIG_MMC_SDHI_SYSC_DMA)),y)
-> +obj-$(CONFIG_MMC_SDHI)         += tmio_mmc_dma.o
-> +endif
->  obj-$(CONFIG_MMC_CB710)                += cb710-mmc.o
->  obj-$(CONFIG_MMC_VIA_SDMMC)    += via-sdmmc.o
->  obj-$(CONFIG_SDH_BFIN)         += bfin_sdh.o
-> diff --git a/drivers/mmc/host/sh_mobile_sdhi.c b/drivers/mmc/host/sh_mobile_sdhi.c
-> index c3b651bf89cb..45543ed37e5f 100644
-> --- a/drivers/mmc/host/sh_mobile_sdhi.c
-> +++ b/drivers/mmc/host/sh_mobile_sdhi.c
-> @@ -106,6 +106,15 @@ struct sh_mobile_sdhi {
->         struct pinctrl_state *pins_default, *pins_uhs;
->  };
->
-> +#if IS_ENABLED(MMC_SDHI_SYSC_DMA)
-
-This should be "#if IS_ENABLED(CONFIG_MMC_SDHI_SYSC_DMA)",
-else probing fails on all platforms where SDHI uses the SYS DMAC:
-
-    sh_mobile_sdhi: probe of ee100000.sd failed with error -22
-
-> +int tmio_mmc_init_dma(void);
-> +#else
-> +static int tmio_mmc_init_dma(void)
-> +{
-> +       return -EINVAL;
-
-Still, I don't know if this is the right approach: if CONFIG_MMC_SDHI_SYSC_DMA
-is ever disabled, the driver will just fail during probing, instead of falling
-back to PIO.
-
-> +}
-> +#endif
+> +       misc_ctrl &= ~(SDHCI_MISC_CTRL_ENABLE_SDHCI_SPEC_300 |
+> +                      SDHCI_MISC_CTRL_ENABLE_SDR50 |
+> +                      SDHCI_MISC_CTRL_ENABLE_DDR50 |
+> +                      SDHCI_MISC_CTRL_ENABLE_SDR104);
 > +
+>         clk_ctrl &= ~SDHCI_CLOCK_CTRL_SPI_MODE_CLKEN_OVERRIDE;
+> -       if (soc_data->nvquirks & SDHCI_MISC_CTRL_ENABLE_SDR50)
+> -               clk_ctrl |= SDHCI_CLOCK_CTRL_SDR50_TUNING_OVERRIDE;
+> +
+> +       /*
+> +        * If the board does not define a regulator for the SDHCI
+> +        * IO voltage, then don't advertise support for UHS modes
+> +        * even if the device supports it because the IO voltage
+> +        * cannot be configured.
+> +        */
+> +       if (of_property_read_bool(dev->of_node, "vqmmc-supply")) {
 
-And there's another issue:
-
-    WARNING: modpost: Found 1 section mismatch(es).
-    To see full details build your kernel with:
-    'make CONFIG_DEBUG_SECTION_MISMATCH=y'
-
-Doing that doesn't help much, though:
-
-    WARNING: drivers/built-in.o(.text+0x190f7c): Section mismatch in
-reference from
-    the function tmio_mmc_init_dma() to the (unknown reference)
-    .init.data:(unknown)
-    The function tmio_mmc_init_dma() references
-    the (unknown reference) __initdata (unknown).
-    This is often because tmio_mmc_init_dma lacks a __initdata
-    annotation or the annotation of (unknown) is wrong.
-
-The warning goes away later in the series, though.
-
-Gr{oetje,eeting}s,
-
-                        Geert
-
---
-Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
-
-In personal conversations with technical people, I call myself a hacker. But
-when I'm talking to journalists I just say "programmer" or something like that.
-                                -- Linus Torvalds
+Can't you check whether (!IS_SERR(host->mmc->supply.vqmmc)) instead?
+The property being present doesn't necessarily guarantee that the
+regulator has been obtained successfully.
