@@ -1,172 +1,69 @@
-From: Simon Horman <horms@verge.net.au>
-Subject: Re: [PATCH/RFC v2 1/5] mmc: sh_mobile_sdhi, tmio: make dma more
- modular
-Date: Wed, 6 Jul 2016 21:57:30 +0200
-Message-ID: <20160706195721.GA4845@verge.net.au>
-References: <1467237940-24388-1-git-send-email-horms+renesas@verge.net.au>
- <1467237940-24388-2-git-send-email-horms+renesas@verge.net.au>
- <CAMuHMdUtvFW8K=Ggo_nDg_uFKyOZsiqh4rVSNB_HX6So6YfwYg@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+From: Simon Horman <horms+renesas@verge.net.au>
+Subject: [PATCH/RFC v3 0/6] mmc: renesas_sdhi: add R-Car Gen-3 DMA support
+Date: Wed,  6 Jul 2016 22:23:24 +0200
+Message-ID: <1467836610-18539-1-git-send-email-horms+renesas@verge.net.au>
 Return-path: <linux-renesas-soc-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <CAMuHMdUtvFW8K=Ggo_nDg_uFKyOZsiqh4rVSNB_HX6So6YfwYg@mail.gmail.com>
 Sender: linux-renesas-soc-owner@vger.kernel.org
-To: Geert Uytterhoeven <geert@linux-m68k.org>
-Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, Ulf Hansson <ulf.hansson@linaro.org>, Magnus Damm <magnus.damm@gmail.com>, Linux MMC List <linux-mmc@vger.kernel.org>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>
+To: Wolfram Sang <wsa+renesas@sang-engineering.com>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Magnus Damm <magnus.damm@gmail.com>, linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-On Tue, Jul 05, 2016 at 07:05:55PM +0200, Geert Uytterhoeven wrote:
-> Hi Simon,
-> 
-> On Thu, Jun 30, 2016 at 12:05 AM, Simon Horman
-> <horms+renesas@verge.net.au> wrote:
-> > Refactor DMA support to allow it to be provided by a set of call-backs
-> > that are provided by a host driver. The motivation is to allow multiple
-> > DMA implementations to be provided and instantiated at run-time.
-> >
-> > Instantiate the existing DMA implementation from the sh_mobile_sdhi driver
-> > which appears to match the current use-case. This has the side effect
-> > of moving the DMA code from the tmio_core to the sh_mobile_sdhi driver.
-> >
-> > A follow-up patch will change the source file for the SDHI DMA
-> > implementation accordingly.
-> >
-> > Signed-off-by: Simon Horman <horms+renesas@verge.net.au>
-> > ---
-> > v2
-> > * Fix compilation issue due to error in Makefile
-> > * Use MMC_SDHI_SYSC_DMA rather than MMC_SDHI_DMA as new Kconfig symbole
-> >   to better reflect revamped file rename in a follow-up patch.
-> >
-> > Todo: Investigate removing ifdef
-> > ---
-> >  drivers/mmc/host/Kconfig          |  9 ++++++++
-> >  drivers/mmc/host/Makefile         |  4 +++-
-> >  drivers/mmc/host/sh_mobile_sdhi.c | 13 +++++++++++
-> >  drivers/mmc/host/tmio_mmc.h       | 39 ++++++++------------------------
-> >  drivers/mmc/host/tmio_mmc_dma.c   | 26 +++++++++++++++++-----
-> >  drivers/mmc/host/tmio_mmc_pio.c   | 47 +++++++++++++++++++++++++++++++++++++++
-> >  6 files changed, 102 insertions(+), 36 deletions(-)
-> >
-> > diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
-> > index 5274f503a39a..a0b6c1773e33 100644
-> > --- a/drivers/mmc/host/Kconfig
-> > +++ b/drivers/mmc/host/Kconfig
-> > @@ -554,10 +554,19 @@ config MMC_SDHI
-> >         depends on SUPERH || ARM || ARM64
-> >         depends on SUPERH || ARCH_RENESAS || COMPILE_TEST
-> >         select MMC_TMIO_CORE
-> > +       select MMC_SDHI_SYSC_DMA if (SUPERH || ARM)
-> 
-> MMC_SDHI_SYS_DMAC?
-> 
-> >         help
-> >           This provides support for the SDHI SD/SDIO controller found in
-> >           SuperH and ARM SH-Mobile SoCs
-> >
-> > +config MMC_SDHI_SYSC_DMA
-> 
-> MMC_SDHI_SYS_DMAC??
-> 
-> > +       tristate "DMA support use of SYSC DMAC with SDHI SD/SDIO controller"
-> 
-> SYS DMAC
-> 
-> (SYSC is the System Controller for Power Areas)
+Hi,
 
-Thanks, I will use SYS DMAC (everywhere).
+this short series adds support for R-Car Gen-3 Internal DMAC to the SDHI
+driver.
 
-> > +       depends on SUPERH || ARM || COMPILE_TEST
-> > +       depends on MMC_SDHI
-> > +       help
-> > +         This provides DMA support for the SDHI SD/SDIO controller
-> > +         found in SuperH and Renesas ARM based SoCs.
-> > +
-> >  config MMC_CB710
-> >         tristate "ENE CB710 MMC/SD Interface support"
-> >         depends on PCI
-> > diff --git a/drivers/mmc/host/Makefile b/drivers/mmc/host/Makefile
-> > index e2bdaaf43184..4ed6f250213a 100644
-> > --- a/drivers/mmc/host/Makefile
-> > +++ b/drivers/mmc/host/Makefile
-> > @@ -37,8 +37,10 @@ obj-$(CONFIG_MMC_SDRICOH_CS) += sdricoh_cs.o
-> >  obj-$(CONFIG_MMC_TMIO)         += tmio_mmc.o
-> >  obj-$(CONFIG_MMC_TMIO_CORE)    += tmio_mmc_core.o
-> >  tmio_mmc_core-y                        := tmio_mmc_pio.o
-> > -tmio_mmc_core-$(subst m,y,$(CONFIG_MMC_SDHI))  += tmio_mmc_dma.o
-> >  obj-$(CONFIG_MMC_SDHI)         += sh_mobile_sdhi.o
-> > +ifeq ($(subst m,y,$(CONFIG_MMC_SDHI_SYSC_DMA)),y)
-> > +obj-$(CONFIG_MMC_SDHI)         += tmio_mmc_dma.o
-> > +endif
-> >  obj-$(CONFIG_MMC_CB710)                += cb710-mmc.o
-> >  obj-$(CONFIG_MMC_VIA_SDMMC)    += via-sdmmc.o
-> >  obj-$(CONFIG_SDH_BFIN)         += bfin_sdh.o
-> > diff --git a/drivers/mmc/host/sh_mobile_sdhi.c b/drivers/mmc/host/sh_mobile_sdhi.c
-> > index c3b651bf89cb..45543ed37e5f 100644
-> > --- a/drivers/mmc/host/sh_mobile_sdhi.c
-> > +++ b/drivers/mmc/host/sh_mobile_sdhi.c
-> > @@ -106,6 +106,15 @@ struct sh_mobile_sdhi {
-> >         struct pinctrl_state *pins_default, *pins_uhs;
-> >  };
-> >
-> > +#if IS_ENABLED(MMC_SDHI_SYSC_DMA)
-> 
-> This should be "#if IS_ENABLED(CONFIG_MMC_SDHI_SYSC_DMA)",
-> else probing fails on all platforms where SDHI uses the SYS DMAC:
-> 
->     sh_mobile_sdhi: probe of ee100000.sd failed with error -22
+The approach taken is as follows:
 
-Ooops, I will fix that.
+1. Refactor the TMIO DMA code so that it is provided by a set of callbacks
+   rather than compiled-in function calls; Refactor the DMA SDHI to use
+   this.
+2. Rename tmio_mmc_dma.c as renesas_sdhi_sysc_dmac.c which better reflects
+   what it is is, particularly after step 2.
+3. Add max_segs restriction
+4. Add Gen3 DMA code as a separate set of callbacks
 
-> > +int tmio_mmc_init_dma(void);
-> > +#else
-> > +static int tmio_mmc_init_dma(void)
-> > +{
-> > +       return -EINVAL;
-> 
-> Still, I don't know if this is the right approach: if CONFIG_MMC_SDHI_SYSC_DMA
-> is ever disabled, the driver will just fail during probing, instead of falling
-> back to PIO.
+Changes since v2:
+* Correct discrepancies with BSP v3.2.2 in intermal DMAC implementation.
+* Correctly set mmc->max_blk_count in accordance with max_segs.
+  This appears to boost performance from ~4.7Mb/s to ~11Mb/s.
+* Allow fallback to PIO
+* Correct name of SYS DMAC
 
-I will switch things around to allow fallback to PIO.
+Changes since v1:
+* Cleanup and more renaming as suggested by Wolfram Sang
+* max_segs restriction
 
-> 
-> > +}
-> > +#endif
-> > +
-> 
-> And there's another issue:
-> 
->     WARNING: modpost: Found 1 section mismatch(es).
->     To see full details build your kernel with:
->     'make CONFIG_DEBUG_SECTION_MISMATCH=y'
-> 
-> Doing that doesn't help much, though:
-> 
->     WARNING: drivers/built-in.o(.text+0x190f7c): Section mismatch in
-> reference from
->     the function tmio_mmc_init_dma() to the (unknown reference)
->     .init.data:(unknown)
->     The function tmio_mmc_init_dma() references
->     the (unknown reference) __initdata (unknown).
->     This is often because tmio_mmc_init_dma lacks a __initdata
->     annotation or the annotation of (unknown) is wrong.
-> 
-> The warning goes away later in the series, though.
+Testing:
 
-I think this is due to the __initdata annotation of
-tmio_mmc_dma_ops which is removed later in the series. I will remove it
-here.
+As described on http://elinux.org/Tests:r-car-gen3-sdhi-dma
 
-> Gr{oetje,eeting}s,
-> 
->                         Geert
-> 
-> --
-> Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
-> 
-> In personal conversations with technical people, I call myself a hacker. But
-> when I'm talking to journalists I just say "programmer" or something like that.
->                                 -- Linus Torvalds
-> 
+Previously performance of 4.7Mb/s was reported.
+With this series performance of 11Mb/s has been achieved.
+However, this is still lower than the 20Mb/s I originally expected.
+
+Simon Horman (3):
+  mmc: sh_mobile_sdhi, tmio: make dma more modular
+  mmc: sh_mobile_sdhi: rename DMA source file as renesas_sdhi_sys_dmac.c
+  arm64: defconfig: Enable SDHI SD/SDIO controller
+
+Yoshihiro Shimoda (3):
+  mmc: tmio: add max_segs and max_blk_count in tmio_mmc_data
+  mmc: sh_mobile_sdhi: add some SoC specific data for R-Car Gen3
+  mmc: renesas_sdhi: add support for R-Car Gen3 SDHI DMAC
+
+ arch/arm64/configs/defconfig                       |   1 +
+ drivers/mmc/host/Kconfig                           |  18 ++
+ drivers/mmc/host/Makefile                          |   7 +-
+ drivers/mmc/host/renesas_sdhi_internal_dmac.c      | 196 +++++++++++++++++++++
+ .../{tmio_mmc_dma.c => renesas_sdhi_sys_dmac.c}    |  53 ++++--
+ drivers/mmc/host/sh_mobile_sdhi.c                  |  41 +++++
+ drivers/mmc/host/tmio_mmc.h                        |  39 +---
+ drivers/mmc/host/tmio_mmc_pio.c                    |  53 +++++-
+ include/linux/mfd/tmio.h                           |   2 +
+ 9 files changed, 357 insertions(+), 53 deletions(-)
+ create mode 100644 drivers/mmc/host/renesas_sdhi_internal_dmac.c
+ rename drivers/mmc/host/{tmio_mmc_dma.c => renesas_sdhi_sys_dmac.c} (83%)
+
+-- 
+2.7.0.rc3.207.g0ac5344
