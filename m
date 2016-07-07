@@ -1,41 +1,75 @@
-From: Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>
-Subject: Re: [PATCH 2/4] soc: fsl: add GUTS driver for QorIQ platforms
-Date: Thu, 07 Jul 2016 10:30:29 +0200
-Message-ID: <4094106.qfxJu3tJbO@wuerfel>
-References: <1462417950-46796-1-git-send-email-yangbo.lu@nxp.com>
-	<1465609853.22191.151.camel@buserror.net>
-	<HE1PR04MB0889646206BFAD68046F3473F83B0@HE1PR04MB0889.eurprd04.prod.outlook.com>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH] mmc: sdhci-pci: Add support for Intel KBP
+Date: Thu, 7 Jul 2016 12:04:21 +0300
+Message-ID: <577E1B15.8080503@intel.com>
+References: <1466594353-13730-1-git-send-email-adrian.hunter@intel.com>
+ <CAPDyKFpSMJ-StCwNdk-w8g44tBfZKF8y6Au2mxEiAa7uSjSG_A@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
-In-Reply-To: <HE1PR04MB0889646206BFAD68046F3473F83B0-6LN7OEpIatX1kPMWxTxe+c9NdZoXdze2vxpqHgZTriW3zl9H0oFU5g@public.gmane.org>
-List-Unsubscribe: <https://lists.linuxfoundation.org/mailman/options/iommu>,
-	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.linuxfoundation.org/pipermail/iommu/>
-List-Post: <mailto:iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
-List-Help: <mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=help>
-List-Subscribe: <https://lists.linuxfoundation.org/mailman/listinfo/iommu>,
-	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=subscribe>
-Sender: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
-Errors-To: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
-To: Yangbo Lu <yangbo.lu-3arQi8VN3Tc@public.gmane.org>
-Cc: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Xiaobo Xie <xiaobo.xie-3arQi8VN3Tc@public.gmane.org>, "linux-i2c-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-i2c-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-clk-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-clk-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Qiang Zhao <qiang.zhao-3arQi8VN3Tc@public.gmane.org>, Russell King <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, Bhupesh Sharma <bhupesh.sharma-KZfg59tc24xl57MIdRCFDg@public.gmane.org>, Claudiu Manoil <claudiu.manoil-KZfg59tc24xl57MIdRCFDg@public.gmane.org>, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Scott Wood <oss-fOR+EgIDQEHk1uMJSBkQmQ@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Santosh Shilimkar <ssantosh-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "netdev-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <netdev-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Yang-Leo Li <leoyang.li-3arQi8VN3Tc@public.gmane.org>, "iommu-cunTk1MwBs+mg8Ev75riOw@public.gmane.org
-	x-foundation.org" <iommu@>
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mga04.intel.com ([192.55.52.120]:63544 "EHLO mga04.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1757111AbcGGJJl (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 7 Jul 2016 05:09:41 -0400
+In-Reply-To: <CAPDyKFpSMJ-StCwNdk-w8g44tBfZKF8y6Au2mxEiAa7uSjSG_A@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>
 
-T24gVGh1cnNkYXksIEp1bHkgNywgMjAxNiAyOjM1OjMzIEFNIENFU1QgWWFuZ2JvIEx1IHdyb3Rl
-Ogo+IEhpIEFybmQsCj4gCj4gQ291bGQgeW91IHJlcGx5IHdoZW4geW91IHNlZSB0aGUgZW1haWw/
-Cj4gSWYgeW91ciBtZXRob2QgZG9lc27igJl0IHJlc29sdmUgdGhlIHByb2JsZW0sIHdlIHN0aWxs
-IHdhbnQgdG8gdXNlIG91ciBvbGQgcGF0Y2hzZXQuCj4gCj4gVGhpcyBndXRzIGRyaXZlciBoYWQg
-YmVlbiBkaXNjdXNzZWQgYWJvdXQgb25lIHllYXIgYW5kIGJsb2NrZWQgbWFueSB3b3JrYXJvdW5k
-IHVwc3RyZWFtLgo+IFNvIHBsZWFzZSBoZWxwIHRvIHJldmlldyBhbmQgY29tbWVudCBzb29uLgo+
-IAoKSSBkb24ndCByZWFsbHkgc2VlIGhvdyBtb3JlIGRpc2N1c3Npb24gaXMgZ29pbmcgdG8gaGVs
-cCB1cyBoZXJlLiBJIHRoaW5rCkkndmUgbWFkZSBpdCBwcmV0dHkgY2xlYXIgdGhhdCBJIGRvbid0
-IHdhbnQgdG8gc2VlIGFub3RoZXIgcGxhdGZvcm0Kc3BlY2lmaWMgd2F5IHRvIHJlYWQgYW4gU29D
-IHJldmlzaW9uIGFuZCBJJ3ZlIGV2ZW4gc2VudCBhIHByb29mLW9mLWNvbmNlcHQKcGF0Y2ggdG8g
-c2hvdyBob3cgdGhlIGludGVyZmFjZSBjYW4gd29yaywgbm93IGl0J3MgdXAgdG8geW91IHRvIGZp
-dCB0aGUKZ3V0cyBoYXJkd2FyZSBpbnRvIHRoYXQgYW5kIHNlbmQgYSBuZXcgcGF0Y2ggc2VyaWVz
-LgoKCUFybmQKCl9fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
-CmlvbW11IG1haWxpbmcgbGlzdAppb21tdUBsaXN0cy5saW51eC1mb3VuZGF0aW9uLm9yZwpodHRw
-czovL2xpc3RzLmxpbnV4Zm91bmRhdGlvbi5vcmcvbWFpbG1hbi9saXN0aW5mby9pb21tdQ==
+On 22/06/16 18:24, Ulf Hansson wrote:
+> On 22 June 2016 at 13:19, Adrian Hunter <adrian.hunter@intel.com> wrote:
+>> Add PCI ID for Intel KBP SD host controller.
+>>
+>> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
+> 
+> Thanks, applied for next!
+
+It turns out this ID is wrong!  Can you please drop this patch from next?
+
+> 
+> Kind regards
+> Uffe
+> 
+>> ---
+>>  drivers/mmc/host/sdhci-pci-core.c | 8 ++++++++
+>>  drivers/mmc/host/sdhci-pci.h      | 1 +
+>>  2 files changed, 9 insertions(+)
+>>
+>> diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-pci-core.c
+>> index a4dbf7421edc..5b03a7ecc6c9 100644
+>> --- a/drivers/mmc/host/sdhci-pci-core.c
+>> +++ b/drivers/mmc/host/sdhci-pci-core.c
+>> @@ -1215,6 +1215,14 @@ static const struct pci_device_id pci_ids[] = {
+>>         },
+>>
+>>         {
+>> +               .vendor         = PCI_VENDOR_ID_INTEL,
+>> +               .device         = PCI_DEVICE_ID_INTEL_KBP_SD,
+>> +               .subvendor      = PCI_ANY_ID,
+>> +               .subdevice      = PCI_ANY_ID,
+>> +               .driver_data    = (kernel_ulong_t)&sdhci_intel_byt_sd,
+>> +       },
+>> +
+>> +       {
+>>                 .vendor         = PCI_VENDOR_ID_O2,
+>>                 .device         = PCI_DEVICE_ID_O2_8120,
+>>                 .subvendor      = PCI_ANY_ID,
+>> diff --git a/drivers/mmc/host/sdhci-pci.h b/drivers/mmc/host/sdhci-pci.h
+>> index 89e7151684a1..968b81ed8e4d 100644
+>> --- a/drivers/mmc/host/sdhci-pci.h
+>> +++ b/drivers/mmc/host/sdhci-pci.h
+>> @@ -34,6 +34,7 @@
+>>  #define PCI_DEVICE_ID_INTEL_APL_SD     0x5aca
+>>  #define PCI_DEVICE_ID_INTEL_APL_EMMC   0x5acc
+>>  #define PCI_DEVICE_ID_INTEL_APL_SDIO   0x5ad0
+>> +#define PCI_DEVICE_ID_INTEL_KBP_SD     0xa2f5
+>>
+>>  /*
+>>   * PCI registers
+>> --
+>> 1.9.1
+>>
+> 
+
