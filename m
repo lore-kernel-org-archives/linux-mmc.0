@@ -1,75 +1,44 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH] mmc: sdhci-pci: Add support for Intel KBP
-Date: Thu, 7 Jul 2016 12:04:21 +0300
-Message-ID: <577E1B15.8080503@intel.com>
-References: <1466594353-13730-1-git-send-email-adrian.hunter@intel.com>
- <CAPDyKFpSMJ-StCwNdk-w8g44tBfZKF8y6Au2mxEiAa7uSjSG_A@mail.gmail.com>
+From: Scott Wood <oss@buserror.net>
+Subject: Re: [PATCH 2/4] soc: fsl: add GUTS driver for QorIQ platforms
+Date: Thu, 07 Jul 2016 15:42:54 -0500
+Message-ID: <1467924174.32358.69.camel@buserror.net>
+References: <1462417950-46796-1-git-send-email-yangbo.lu@nxp.com>
+	 <1465609853.22191.151.camel@buserror.net>
+	 <HE1PR04MB0889646206BFAD68046F3473F83B0@HE1PR04MB0889.eurprd04.prod.outlook.com>
+	 <4094106.qfxJu3tJbO@wuerfel>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga04.intel.com ([192.55.52.120]:63544 "EHLO mga04.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1757111AbcGGJJl (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 7 Jul 2016 05:09:41 -0400
-In-Reply-To: <CAPDyKFpSMJ-StCwNdk-w8g44tBfZKF8y6Au2mxEiAa7uSjSG_A@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-i2c-owner@vger.kernel.org>
+In-Reply-To: <4094106.qfxJu3tJbO@wuerfel>
+Sender: linux-i2c-owner@vger.kernel.org
+To: Arnd Bergmann <arnd@arndb.de>, Yangbo Lu <yangbo.lu@nxp.com>
+Cc: "linuxppc-dev@lists.ozlabs.org" <linuxppc-dev@lists.ozlabs.org>, Mark Rutland <mark.rutland@arm.com>, Ulf Hansson <ulf.hansson@linaro.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-i2c@vger.kernel.org" <linux-i2c@vger.kernel.org>, "linux-clk@vger.kernel.org" <linux-clk@vger.kernel.org>, Qiang Zhao <qiang.zhao@nxp.com>, Russell King <linux@arm.linux.org.uk>, Bhupesh Sharma <bhupesh.sharma@freescale.com>, Joerg Roedel <joro@8bytes.org>, Claudiu Manoil <claudiu.manoil@freescale.com>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, Kumar Gala <galak@codeaurora.org>, Rob Herring <robh+dt@kernel.org>, Santosh Shilimkar <ssantosh@kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "netdev@vger.kernel.org" <netdev@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Xiaob
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>
 
-On 22/06/16 18:24, Ulf Hansson wrote:
-> On 22 June 2016 at 13:19, Adrian Hunter <adrian.hunter@intel.com> wrote:
->> Add PCI ID for Intel KBP SD host controller.
->>
->> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
-> 
-> Thanks, applied for next!
+On Thu, 2016-07-07 at 10:30 +0200, Arnd Bergmann wrote:
+> On Thursday, July 7, 2016 2:35:33 AM CEST Yangbo Lu wrote:
+> >=20
+> > Hi Arnd,
+> >=20
+> > Could you reply when you see the email?
+> > If your method doesn=E2=80=99t resolve the problem, we still want t=
+o use our old
+> > patchset.
+> >=20
+> > This guts driver had been discussed about one year and blocked many
+> > workaround upstream.
+> > So please help to review and comment soon.
+> >=20
+> I don't really see how more discussion is going to help us here. I th=
+ink
+> I've made it pretty clear that I don't want to see another platform
+> specific way to read an SoC revision and I've even sent a proof-of-co=
+ncept
+> patch to show how the interface can work, now it's up to you to fit t=
+he
+> guts hardware into that and send a new patch series.
 
-It turns out this ID is wrong!  Can you please drop this patch from next?
+In which relevant maintainership capacity are you NACKing it?
 
-> 
-> Kind regards
-> Uffe
-> 
->> ---
->>  drivers/mmc/host/sdhci-pci-core.c | 8 ++++++++
->>  drivers/mmc/host/sdhci-pci.h      | 1 +
->>  2 files changed, 9 insertions(+)
->>
->> diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-pci-core.c
->> index a4dbf7421edc..5b03a7ecc6c9 100644
->> --- a/drivers/mmc/host/sdhci-pci-core.c
->> +++ b/drivers/mmc/host/sdhci-pci-core.c
->> @@ -1215,6 +1215,14 @@ static const struct pci_device_id pci_ids[] = {
->>         },
->>
->>         {
->> +               .vendor         = PCI_VENDOR_ID_INTEL,
->> +               .device         = PCI_DEVICE_ID_INTEL_KBP_SD,
->> +               .subvendor      = PCI_ANY_ID,
->> +               .subdevice      = PCI_ANY_ID,
->> +               .driver_data    = (kernel_ulong_t)&sdhci_intel_byt_sd,
->> +       },
->> +
->> +       {
->>                 .vendor         = PCI_VENDOR_ID_O2,
->>                 .device         = PCI_DEVICE_ID_O2_8120,
->>                 .subvendor      = PCI_ANY_ID,
->> diff --git a/drivers/mmc/host/sdhci-pci.h b/drivers/mmc/host/sdhci-pci.h
->> index 89e7151684a1..968b81ed8e4d 100644
->> --- a/drivers/mmc/host/sdhci-pci.h
->> +++ b/drivers/mmc/host/sdhci-pci.h
->> @@ -34,6 +34,7 @@
->>  #define PCI_DEVICE_ID_INTEL_APL_SD     0x5aca
->>  #define PCI_DEVICE_ID_INTEL_APL_EMMC   0x5acc
->>  #define PCI_DEVICE_ID_INTEL_APL_SDIO   0x5ad0
->> +#define PCI_DEVICE_ID_INTEL_KBP_SD     0xa2f5
->>
->>  /*
->>   * PCI registers
->> --
->> 1.9.1
->>
-> 
-
+-Scott
