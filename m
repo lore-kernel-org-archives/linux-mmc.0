@@ -1,13 +1,13 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: [PATCH V3 04/30] mmc: sdhci-pci: Set MMC_CAP_CMD_DURING_TFR for Intel eMMC controllers
-Date: Fri,  8 Jul 2016 13:22:45 +0300
-Message-ID: <1467973391-29221-5-git-send-email-adrian.hunter@intel.com>
+Subject: [PATCH V3 05/30] mmc: sdhci-acpi: Set MMC_CAP_CMD_DURING_TFR for Intel eMMC controllers
+Date: Fri,  8 Jul 2016 13:22:46 +0300
+Message-ID: <1467973391-29221-6-git-send-email-adrian.hunter@intel.com>
 References: <1467973391-29221-1-git-send-email-adrian.hunter@intel.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
 Received: from mga11.intel.com ([192.55.52.93]:51298 "EHLO mga11.intel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754049AbcGHK1m (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 8 Jul 2016 06:27:42 -0400
+	id S1754289AbcGHK1r (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 8 Jul 2016 06:27:47 -0400
 In-Reply-To: <1467973391-29221-1-git-send-email-adrian.hunter@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
@@ -18,21 +18,22 @@ Set MMC_CAP_CMD_DURING_TFR for Intel BYT and related eMMC host controllers.
 
 Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
 ---
- drivers/mmc/host/sdhci-pci-core.c | 1 +
- 1 file changed, 1 insertion(+)
+ drivers/mmc/host/sdhci-acpi.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-pci-core.c
-index 6fbf7086d0b0..358ac0978cde 100644
---- a/drivers/mmc/host/sdhci-pci-core.c
-+++ b/drivers/mmc/host/sdhci-pci-core.c
-@@ -356,6 +356,7 @@ static int byt_emmc_probe_slot(struct sdhci_pci_slot *slot)
- {
- 	slot->host->mmc->caps |= MMC_CAP_8_BIT_DATA | MMC_CAP_NONREMOVABLE |
- 				 MMC_CAP_HW_RESET | MMC_CAP_1_8V_DDR |
-+				 MMC_CAP_CMD_DURING_TFR |
- 				 MMC_CAP_WAIT_WHILE_BUSY;
- 	slot->host->mmc->caps2 |= MMC_CAP2_HC_ERASE_SZ;
- 	slot->hw_reset = sdhci_pci_int_hw_reset;
+diff --git a/drivers/mmc/host/sdhci-acpi.c b/drivers/mmc/host/sdhci-acpi.c
+index 458ffb7637e5..ec1b99f89d4a 100644
+--- a/drivers/mmc/host/sdhci-acpi.c
++++ b/drivers/mmc/host/sdhci-acpi.c
+@@ -274,7 +274,7 @@ static const struct sdhci_acpi_slot sdhci_acpi_slot_int_emmc = {
+ 	.chip    = &sdhci_acpi_chip_int,
+ 	.caps    = MMC_CAP_8_BIT_DATA | MMC_CAP_NONREMOVABLE |
+ 		   MMC_CAP_HW_RESET | MMC_CAP_1_8V_DDR |
+-		   MMC_CAP_WAIT_WHILE_BUSY,
++		   MMC_CAP_CMD_DURING_TFR | MMC_CAP_WAIT_WHILE_BUSY,
+ 	.caps2   = MMC_CAP2_HC_ERASE_SZ,
+ 	.flags   = SDHCI_ACPI_RUNTIME_PM,
+ 	.quirks  = SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC,
 -- 
 1.9.1
 
