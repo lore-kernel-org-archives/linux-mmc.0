@@ -1,80 +1,79 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: [PATCH V3 18/30] mmc: core: Do not prepare a new request twice
-Date: Fri,  8 Jul 2016 13:22:59 +0300
-Message-ID: <1467973391-29221-19-git-send-email-adrian.hunter@intel.com>
+Subject: [PATCH V3 22/30] mmc: block: Use local var for mqrq_cur
+Date: Fri,  8 Jul 2016 13:23:03 +0300
+Message-ID: <1467973391-29221-23-git-send-email-adrian.hunter@intel.com>
 References: <1467973391-29221-1-git-send-email-adrian.hunter@intel.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
 Received: from mga03.intel.com ([134.134.136.65]:45373 "EHLO mga03.intel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754187AbcGHK2k (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 8 Jul 2016 06:28:40 -0400
+	id S1754482AbcGHK24 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 8 Jul 2016 06:28:56 -0400
 In-Reply-To: <1467973391-29221-1-git-send-email-adrian.hunter@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>
 Cc: linux-mmc <linux-mmc@vger.kernel.org>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Dorfman Konstantin <kdorfman@codeaurora.org>, David Griego <david.griego@linaro.org>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>
 
-mmc_start_req() assumes it is never called with the new request already
-prepared. That is true if the queue consists of only 2 requests, but is not
-true for a longer queue. e.g. mmc_start_req() has a current and previous
-request but still exits to queue a new request if the queue size is
-greater than 2. In that case, when mmc_start_req() is called again, the
-current request will have been prepared already. Fix by flagging if the
-request has been prepared.
+A subsequent patch will remove 'mq->mqrq_cur'. Prepare for that by
+assigning it to a local variable.
 
 Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
 ---
- drivers/mmc/core/core.c  | 12 +++++++++---
- include/linux/mmc/host.h |  1 +
- 2 files changed, 10 insertions(+), 3 deletions(-)
+ drivers/mmc/card/block.c | 17 +++++++++--------
+ 1 file changed, 9 insertions(+), 8 deletions(-)
 
-diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index f9231122ce9a..9be42691b5a9 100644
---- a/drivers/mmc/core/core.c
-+++ b/drivers/mmc/core/core.c
-@@ -657,8 +657,10 @@ struct mmc_async_req *mmc_start_req(struct mmc_host *host,
- 	struct mmc_async_req *data = host->areq;
+diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+index 068257606a0a..0b02c5d6baf5 100644
+--- a/drivers/mmc/card/block.c
++++ b/drivers/mmc/card/block.c
+@@ -1987,6 +1987,7 @@ static int mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *rqc)
+ 	struct mmc_blk_request *brq;
+ 	int ret = 1, disable_multi = 0, retry = 0, type, retune_retry_done = 0;
+ 	enum mmc_blk_status status;
++	struct mmc_queue_req *mqrq_cur = mq->mqrq_cur;
+ 	struct mmc_queue_req *mq_rq;
+ 	struct request *req;
+ 	struct mmc_async_req *areq;
+@@ -2009,18 +2010,18 @@ static int mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *rqc)
+ 				!IS_ALIGNED(blk_rq_sectors(rqc), 8)) {
+ 				pr_err("%s: Transfer size is not 4KB sector size aligned\n",
+ 					rqc->rq_disk->disk_name);
+-				mq_rq = mq->mqrq_cur;
++				mq_rq = mqrq_cur;
+ 				req = rqc;
+ 				rqc = NULL;
+ 				goto cmd_abort;
+ 			}
  
- 	/* Prepare a new request */
--	if (areq)
-+	if (areq && !areq->pre_req_done) {
-+		areq->pre_req_done = true;
- 		mmc_pre_req(host, areq->mrq, !host->areq);
-+	}
+ 			if (reqs >= packed_nr)
+-				mmc_blk_packed_hdr_wrq_prep(mq->mqrq_cur,
++				mmc_blk_packed_hdr_wrq_prep(mqrq_cur,
+ 							    card, mq);
+ 			else
+-				mmc_blk_rw_rq_prep(mq->mqrq_cur, card, 0, mq);
+-			areq = &mq->mqrq_cur->mmc_active;
++				mmc_blk_rw_rq_prep(mqrq_cur, card, 0, mq);
++			areq = &mqrq_cur->mmc_active;
+ 		} else
+ 			areq = NULL;
+ 		areq = mmc_start_req(card->host, areq, (int *) &status);
+@@ -2162,12 +2163,12 @@ static int mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *rqc)
+ 			/*
+ 			 * If current request is packed, it needs to put back.
+ 			 */
+-			if (mmc_packed_cmd(mq->mqrq_cur->cmd_type))
+-				mmc_blk_revert_packed_req(mq, mq->mqrq_cur);
++			if (mmc_packed_cmd(mqrq_cur->cmd_type))
++				mmc_blk_revert_packed_req(mq, mqrq_cur);
  
- 	if (host->areq) {
- 		err = mmc_wait_for_data_req_done(host, host->areq->mrq,	areq);
-@@ -694,12 +696,16 @@ struct mmc_async_req *mmc_start_req(struct mmc_host *host,
- 	if (!err && areq)
- 		start_err = __mmc_start_data_req(host, areq->mrq);
+-			mmc_blk_rw_rq_prep(mq->mqrq_cur, card, 0, mq);
++			mmc_blk_rw_rq_prep(mqrq_cur, card, 0, mq);
+ 			mmc_start_req(card->host,
+-				      &mq->mqrq_cur->mmc_active, NULL);
++				      &mqrq_cur->mmc_active, NULL);
+ 		}
+ 	}
  
--	if (host->areq)
-+	if (host->areq) {
-+		host->areq->pre_req_done = false;
- 		mmc_post_req(host, host->areq->mrq, 0);
-+	}
- 
- 	 /* Cancel a prepared request if it was not started. */
--	if ((err || start_err) && areq)
-+	if ((err || start_err) && areq) {
-+		areq->pre_req_done = false;
- 		mmc_post_req(host, areq->mrq, -EINVAL);
-+	}
- 
- 	if (err)
- 		host->areq = NULL;
-diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-index 3386e10480f7..9fb00b7c54a1 100644
---- a/include/linux/mmc/host.h
-+++ b/include/linux/mmc/host.h
-@@ -174,6 +174,7 @@ struct mmc_async_req {
- 	 * Returns 0 if success otherwise non zero.
- 	 */
- 	int (*err_check) (struct mmc_card *, struct mmc_async_req *);
-+	bool pre_req_done;
- };
- 
- /**
 -- 
 1.9.1
 
