@@ -1,61 +1,91 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: [PATCH V3 21/30] mmc: block: Fix 4K native sector check
-Date: Fri,  8 Jul 2016 13:23:02 +0300
-Message-ID: <1467973391-29221-22-git-send-email-adrian.hunter@intel.com>
+Subject: [PATCH V3 16/30] mmc: mmc_test: Disable Command Queue while mmc_test is used
+Date: Fri,  8 Jul 2016 13:22:57 +0300
+Message-ID: <1467973391-29221-17-git-send-email-adrian.hunter@intel.com>
 References: <1467973391-29221-1-git-send-email-adrian.hunter@intel.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
 Received: from mga03.intel.com ([134.134.136.65]:45373 "EHLO mga03.intel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754482AbcGHK2w (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 8 Jul 2016 06:28:52 -0400
+	id S1754438AbcGHK2d (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 8 Jul 2016 06:28:33 -0400
 In-Reply-To: <1467973391-29221-1-git-send-email-adrian.hunter@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>
 Cc: linux-mmc <linux-mmc@vger.kernel.org>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Dorfman Konstantin <kdorfman@codeaurora.org>, David Griego <david.griego@linaro.org>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>
 
-The 4K native sector check does not allow for the 'do' loop nor the
-variables used after the 'cmd_abort' label.
-
-'brq' and 'req' get reassigned in the 'do' loop, so the check must not
-assume what their values are. After the 'cmd_abort' label, 'mq_rq' and
-'req' are used, but 'rqc' must be NULL otherwise it can be started again.
+Normal read and write commands may not be used while the command queue is
+enabled. Disable the Command Queue when mmc_test is probed and re-enable it
+when it is removed.
 
 Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
 ---
- drivers/mmc/card/block.c | 8 +++++---
- 1 file changed, 5 insertions(+), 3 deletions(-)
+ drivers/mmc/card/mmc_test.c | 13 +++++++++++++
+ drivers/mmc/core/mmc.c      |  7 +++++++
+ include/linux/mmc/card.h    |  1 +
+ 3 files changed, 21 insertions(+)
 
-diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
-index becc68dfd09b..068257606a0a 100644
---- a/drivers/mmc/card/block.c
-+++ b/drivers/mmc/card/block.c
-@@ -1984,11 +1984,11 @@ static int mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *rqc)
- {
- 	struct mmc_blk_data *md = mq->data;
- 	struct mmc_card *card = md->queue.card;
--	struct mmc_blk_request *brq = &mq->mqrq_cur->brq;
-+	struct mmc_blk_request *brq;
- 	int ret = 1, disable_multi = 0, retry = 0, type, retune_retry_done = 0;
- 	enum mmc_blk_status status;
- 	struct mmc_queue_req *mq_rq;
--	struct request *req = rqc;
-+	struct request *req;
- 	struct mmc_async_req *areq;
- 	const u8 packed_nr = 2;
- 	u8 reqs = 0;
-@@ -2008,8 +2008,10 @@ static int mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *rqc)
- 			if (mmc_large_sector(card) &&
- 				!IS_ALIGNED(blk_rq_sectors(rqc), 8)) {
- 				pr_err("%s: Transfer size is not 4KB sector size aligned\n",
--					req->rq_disk->disk_name);
-+					rqc->rq_disk->disk_name);
- 				mq_rq = mq->mqrq_cur;
-+				req = rqc;
-+				rqc = NULL;
- 				goto cmd_abort;
- 			}
+diff --git a/drivers/mmc/card/mmc_test.c b/drivers/mmc/card/mmc_test.c
+index 5a8dc5a76e0d..7dee9e5a8cfb 100644
+--- a/drivers/mmc/card/mmc_test.c
++++ b/drivers/mmc/card/mmc_test.c
+@@ -3240,6 +3240,14 @@ static int mmc_test_probe(struct mmc_card *card)
+ 	if (ret)
+ 		return ret;
  
++	if (card->ext_csd.cmdq_en) {
++		mmc_claim_host(card->host);
++		ret = mmc_cmdq_disable(card);
++		mmc_release_host(card->host);
++		if (ret)
++			return ret;
++	}
++
+ 	dev_info(&card->dev, "Card claimed for testing.\n");
+ 
+ 	return 0;
+@@ -3247,6 +3255,11 @@ static int mmc_test_probe(struct mmc_card *card)
+ 
+ static void mmc_test_remove(struct mmc_card *card)
+ {
++	if (card->reenable_cmdq) {
++		mmc_claim_host(card->host);
++		mmc_cmdq_enable(card);
++		mmc_release_host(card->host);
++	}
+ 	mmc_test_free_result(card);
+ 	mmc_test_free_dbgfs_file(card);
+ }
+diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+index 11fc095477f0..4ae35d7094c1 100644
+--- a/drivers/mmc/core/mmc.c
++++ b/drivers/mmc/core/mmc.c
+@@ -1734,6 +1734,13 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
+ 	}
+ 
+ 	/*
++	 * In some cases (e.g. RPMB or mmc_test), the Command Queue must be
++	 * disabled for a time, so a flag is needed to indicate to re-enable the
++	 * Command Queue.
++	 */
++	card->reenable_cmdq = card->ext_csd.cmdq_en;
++
++	/*
+ 	 * The mandatory minimum values are defined for packed command.
+ 	 * read: 5, write: 3
+ 	 */
+diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
+index 476ccbe3f831..3d7434e48566 100644
+--- a/include/linux/mmc/card.h
++++ b/include/linux/mmc/card.h
+@@ -285,6 +285,7 @@ struct mmc_card {
+ #define MMC_QUIRK_TRIM_BROKEN	(1<<12)		/* Skip trim */
+ #define MMC_QUIRK_BROKEN_HPI	(1<<13)		/* Disable broken HPI support */
+ 
++	bool			reenable_cmdq;	/* Re-enable Command Queue */
+ 
+ 	unsigned int		erase_size;	/* erase size in sectors */
+  	unsigned int		erase_shift;	/* if erase unit is power 2 */
 -- 
 1.9.1
 
