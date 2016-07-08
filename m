@@ -1,13 +1,13 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: [PATCH V3 22/30] mmc: block: Use local var for mqrq_cur
-Date: Fri,  8 Jul 2016 13:23:03 +0300
-Message-ID: <1467973391-29221-23-git-send-email-adrian.hunter@intel.com>
+Subject: [PATCH V3 23/30] mmc: block: Pass mqrq to mmc_blk_prep_packed_list()
+Date: Fri,  8 Jul 2016 13:23:04 +0300
+Message-ID: <1467973391-29221-24-git-send-email-adrian.hunter@intel.com>
 References: <1467973391-29221-1-git-send-email-adrian.hunter@intel.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
 Received: from mga03.intel.com ([134.134.136.65]:45373 "EHLO mga03.intel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754482AbcGHK24 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 8 Jul 2016 06:28:56 -0400
+	id S1754482AbcGHK3A (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 8 Jul 2016 06:29:00 -0400
 In-Reply-To: <1467973391-29221-1-git-send-email-adrian.hunter@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
@@ -15,65 +15,45 @@ To: Ulf Hansson <ulf.hansson@linaro.org>
 Cc: linux-mmc <linux-mmc@vger.kernel.org>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Dorfman Konstantin <kdorfman@codeaurora.org>, David Griego <david.griego@linaro.org>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>
 
 A subsequent patch will remove 'mq->mqrq_cur'. Prepare for that by
-assigning it to a local variable.
+passing mqrq to mmc_blk_prep_packed_list().
 
 Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
 ---
- drivers/mmc/card/block.c | 17 +++++++++--------
- 1 file changed, 9 insertions(+), 8 deletions(-)
+ drivers/mmc/card/block.c | 9 +++++----
+ 1 file changed, 5 insertions(+), 4 deletions(-)
 
 diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
-index 068257606a0a..0b02c5d6baf5 100644
+index 0b02c5d6baf5..b8b1d6b1074c 100644
 --- a/drivers/mmc/card/block.c
 +++ b/drivers/mmc/card/block.c
-@@ -1987,6 +1987,7 @@ static int mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *rqc)
- 	struct mmc_blk_request *brq;
- 	int ret = 1, disable_multi = 0, retry = 0, type, retune_retry_done = 0;
- 	enum mmc_blk_status status;
-+	struct mmc_queue_req *mqrq_cur = mq->mqrq_cur;
- 	struct mmc_queue_req *mq_rq;
- 	struct request *req;
- 	struct mmc_async_req *areq;
-@@ -2009,18 +2010,18 @@ static int mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *rqc)
- 				!IS_ALIGNED(blk_rq_sectors(rqc), 8)) {
- 				pr_err("%s: Transfer size is not 4KB sector size aligned\n",
- 					rqc->rq_disk->disk_name);
--				mq_rq = mq->mqrq_cur;
-+				mq_rq = mqrq_cur;
- 				req = rqc;
- 				rqc = NULL;
- 				goto cmd_abort;
- 			}
+@@ -1693,13 +1693,14 @@ static inline u8 mmc_calc_packed_hdr_segs(struct request_queue *q,
+ 	return nr_segs;
+ }
  
- 			if (reqs >= packed_nr)
--				mmc_blk_packed_hdr_wrq_prep(mq->mqrq_cur,
-+				mmc_blk_packed_hdr_wrq_prep(mqrq_cur,
- 							    card, mq);
- 			else
--				mmc_blk_rw_rq_prep(mq->mqrq_cur, card, 0, mq);
--			areq = &mq->mqrq_cur->mmc_active;
-+				mmc_blk_rw_rq_prep(mqrq_cur, card, 0, mq);
-+			areq = &mqrq_cur->mmc_active;
- 		} else
- 			areq = NULL;
- 		areq = mmc_start_req(card->host, areq, (int *) &status);
-@@ -2162,12 +2163,12 @@ static int mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *rqc)
- 			/*
- 			 * If current request is packed, it needs to put back.
- 			 */
--			if (mmc_packed_cmd(mq->mqrq_cur->cmd_type))
--				mmc_blk_revert_packed_req(mq, mq->mqrq_cur);
-+			if (mmc_packed_cmd(mqrq_cur->cmd_type))
-+				mmc_blk_revert_packed_req(mq, mqrq_cur);
+-static u8 mmc_blk_prep_packed_list(struct mmc_queue *mq, struct request *req)
++static u8 mmc_blk_prep_packed_list(struct mmc_queue *mq,
++				   struct mmc_queue_req *mqrq)
+ {
+ 	struct request_queue *q = mq->queue;
+ 	struct mmc_card *card = mq->card;
++	struct request *req = mqrq->req;
+ 	struct request *cur = req, *next = NULL;
+ 	struct mmc_blk_data *md = mq->data;
+-	struct mmc_queue_req *mqrq = mq->mqrq_cur;
+ 	bool en_rel_wr = card->ext_csd.rel_param & EXT_CSD_WR_REL_PARAM_EN;
+ 	unsigned int req_sectors = 0, phys_segments = 0;
+ 	unsigned int max_blk_count, max_phys_segs;
+@@ -1997,8 +1998,8 @@ static int mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *rqc)
+ 	if (!rqc && !mq->mqrq_prev->req)
+ 		return 0;
  
--			mmc_blk_rw_rq_prep(mq->mqrq_cur, card, 0, mq);
-+			mmc_blk_rw_rq_prep(mqrq_cur, card, 0, mq);
- 			mmc_start_req(card->host,
--				      &mq->mqrq_cur->mmc_active, NULL);
-+				      &mqrq_cur->mmc_active, NULL);
- 		}
- 	}
+-	if (rqc)
+-		reqs = mmc_blk_prep_packed_list(mq, rqc);
++	if (mqrq_cur)
++		reqs = mmc_blk_prep_packed_list(mq, mqrq_cur);
  
+ 	do {
+ 		if (rqc) {
 -- 
 1.9.1
 
