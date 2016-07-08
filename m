@@ -1,59 +1,309 @@
-From: Yangbo Lu <yangbo.lu-3arQi8VN3Tc@public.gmane.org>
-Subject: RE: [PATCH 2/4] soc: fsl: add GUTS driver for QorIQ platforms
-Date: Fri, 8 Jul 2016 03:05:41 +0000
-Message-ID: <HE1PR04MB0889950E99B791029F1670E9F83C0@HE1PR04MB0889.eurprd04.prod.outlook.com>
-References: <1462417950-46796-1-git-send-email-yangbo.lu@nxp.com>
-	<1465609853.22191.151.camel@buserror.net>
-	<HE1PR04MB0889646206BFAD68046F3473F83B0@HE1PR04MB0889.eurprd04.prod.outlook.com>
-	<4094106.qfxJu3tJbO@wuerfel>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
-In-Reply-To: <4094106.qfxJu3tJbO@wuerfel>
-Content-Language: en-US
-List-Unsubscribe: <https://lists.linuxfoundation.org/mailman/options/iommu>,
-	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.linuxfoundation.org/pipermail/iommu/>
-List-Post: <mailto:iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
-List-Help: <mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=help>
-List-Subscribe: <https://lists.linuxfoundation.org/mailman/listinfo/iommu>,
-	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=subscribe>
-Sender: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
-Errors-To: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
-To: Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>
-Cc: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Xiaobo Xie <xiaobo.xie-3arQi8VN3Tc@public.gmane.org>, "linux-i2c-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-i2c-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-clk-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-clk-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Qiang Zhao <qiang.zhao-3arQi8VN3Tc@public.gmane.org>, Russell King <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, Bhupesh Sharma <bhupesh.sharma-KZfg59tc24xl57MIdRCFDg@public.gmane.org>, Claudiu Manoil <claudiu.manoil-KZfg59tc24xl57MIdRCFDg@public.gmane.org>, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Scott Wood <oss-fOR+EgIDQEHk1uMJSBkQmQ@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Santosh Shilimkar <ssantosh-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "netdev-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <netdev-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Yang-Leo Li <leoyang.li-3arQi8VN3Tc@public.gmane.org>, "iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org" <iommu@l>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: [PATCH V3 01/30] mmc: core: Add support for sending commands during data transfer
+Date: Fri,  8 Jul 2016 13:22:42 +0300
+Message-ID: <1467973391-29221-2-git-send-email-adrian.hunter@intel.com>
+References: <1467973391-29221-1-git-send-email-adrian.hunter@intel.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mga11.intel.com ([192.55.52.93]:51298 "EHLO mga11.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1754049AbcGHK1b (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 8 Jul 2016 06:27:31 -0400
+In-Reply-To: <1467973391-29221-1-git-send-email-adrian.hunter@intel.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Dorfman Konstantin <kdorfman@codeaurora.org>, David Griego <david.griego@linaro.org>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>
 
-SGkgQXJuZCwNCg0KDQo+IC0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQo+IEZyb206IEFybmQg
-QmVyZ21hbm4gW21haWx0bzphcm5kQGFybmRiLmRlXQ0KPiBTZW50OiBUaHVyc2RheSwgSnVseSAw
-NywgMjAxNiA0OjMwIFBNDQo+IFRvOiBZYW5nYm8gTHUNCj4gQ2M6IFNjb3R0IFdvb2Q7IGxpbnV4
-cHBjLWRldkBsaXN0cy5vemxhYnMub3JnOyBNYXJrIFJ1dGxhbmQ7IFVsZiBIYW5zc29uOw0KPiBs
-aW51eC1rZXJuZWxAdmdlci5rZXJuZWwub3JnOyBsaW51eC1pMmNAdmdlci5rZXJuZWwub3JnOyBs
-aW51eC0NCj4gY2xrQHZnZXIua2VybmVsLm9yZzsgUWlhbmcgWmhhbzsgUnVzc2VsbCBLaW5nOyBC
-aHVwZXNoIFNoYXJtYTsgSm9lcmcNCj4gUm9lZGVsOyBDbGF1ZGl1IE1hbm9pbDsgZGV2aWNldHJl
-ZUB2Z2VyLmtlcm5lbC5vcmc7IEt1bWFyIEdhbGE7IFJvYg0KPiBIZXJyaW5nOyBTYW50b3NoIFNo
-aWxpbWthcjsgbGludXgtYXJtLWtlcm5lbEBsaXN0cy5pbmZyYWRlYWQub3JnOw0KPiBuZXRkZXZA
-dmdlci5rZXJuZWwub3JnOyBsaW51eC1tbWNAdmdlci5rZXJuZWwub3JnOyBYaWFvYm8gWGllOyBZ
-YW5nLUxlbw0KPiBMaTsgaW9tbXVAbGlzdHMubGludXgtZm91bmRhdGlvbi5vcmcNCj4gU3ViamVj
-dDogUmU6IFtQQVRDSCAyLzRdIHNvYzogZnNsOiBhZGQgR1VUUyBkcml2ZXIgZm9yIFFvcklRIHBs
-YXRmb3Jtcw0KPiANCj4gT24gVGh1cnNkYXksIEp1bHkgNywgMjAxNiAyOjM1OjMzIEFNIENFU1Qg
-WWFuZ2JvIEx1IHdyb3RlOg0KPiA+IEhpIEFybmQsDQo+ID4NCj4gPiBDb3VsZCB5b3UgcmVwbHkg
-d2hlbiB5b3Ugc2VlIHRoZSBlbWFpbD8NCj4gPiBJZiB5b3VyIG1ldGhvZCBkb2VzbuKAmXQgcmVz
-b2x2ZSB0aGUgcHJvYmxlbSwgd2Ugc3RpbGwgd2FudCB0byB1c2Ugb3VyDQo+IG9sZCBwYXRjaHNl
-dC4NCj4gPg0KPiA+IFRoaXMgZ3V0cyBkcml2ZXIgaGFkIGJlZW4gZGlzY3Vzc2VkIGFib3V0IG9u
-ZSB5ZWFyIGFuZCBibG9ja2VkIG1hbnkNCj4gd29ya2Fyb3VuZCB1cHN0cmVhbS4NCj4gPiBTbyBw
-bGVhc2UgaGVscCB0byByZXZpZXcgYW5kIGNvbW1lbnQgc29vbi4NCj4gPg0KPiANCj4gSSBkb24n
-dCByZWFsbHkgc2VlIGhvdyBtb3JlIGRpc2N1c3Npb24gaXMgZ29pbmcgdG8gaGVscCB1cyBoZXJl
-LiBJIHRoaW5rDQo+IEkndmUgbWFkZSBpdCBwcmV0dHkgY2xlYXIgdGhhdCBJIGRvbid0IHdhbnQg
-dG8gc2VlIGFub3RoZXIgcGxhdGZvcm0NCj4gc3BlY2lmaWMgd2F5IHRvIHJlYWQgYW4gU29DIHJl
-dmlzaW9uIGFuZCBJJ3ZlIGV2ZW4gc2VudCBhIHByb29mLW9mLQ0KPiBjb25jZXB0IHBhdGNoIHRv
-IHNob3cgaG93IHRoZSBpbnRlcmZhY2UgY2FuIHdvcmssIG5vdyBpdCdzIHVwIHRvIHlvdSB0bw0K
-PiBmaXQgdGhlIGd1dHMgaGFyZHdhcmUgaW50byB0aGF0IGFuZCBzZW5kIGEgbmV3IHBhdGNoIHNl
-cmllcy4NCj4gDQo+IAlBcm5kDQoNCkkgdGhpbmsgeW91ciBwcm9vZi1vZi1jb25jZXB0IHBhdGNo
-IGlzIHN0aWxsIGluIGRpc2N1c3Npb24uIFNvbWUgYW5zd2VycyBhcmUgbmVlZGVkIGZyb20geW91
-IHRvDQphZGRyZXNzIFNjb3R0J3MgY29tbWVudHMgb24geW91ciBwYXRjaHNldC4gSGF2ZSB5b3Ug
-cmVhY2hlZCBhbiBhZ3JlZW1lbnQ/DQoNClRoYW5rcy4NCg0KLSBZYW5nYm8gTHUNCg0KDQoNCl9f
-X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fCmlvbW11IG1haWxp
-bmcgbGlzdAppb21tdUBsaXN0cy5saW51eC1mb3VuZGF0aW9uLm9yZwpodHRwczovL2xpc3RzLmxp
-bnV4Zm91bmRhdGlvbi5vcmcvbWFpbG1hbi9saXN0aW5mby9pb21tdQ==
+A host controller driver exposes its capability using caps flag
+MMC_CAP_CMD_DURING_TFR. A driver with that capability can accept requests
+that are marked mrq->cap_cmd_during_tfr = true. Then the driver informs the
+upper layers when the command line is available for further commands by
+calling mmc_command_done(). Because of that, the driver will not then
+automatically send STOP commands, and it is the responsibility of the upper
+layer to send a STOP command if it is required.
+
+For requests submitted through the mmc_wait_for_req() interface, the caller
+sets mrq->cap_cmd_during_tfr = true which causes mmc_wait_for_req() in fact
+not to wait. The caller can then send commands that do not use the data
+lines. Finally the caller can wait for the transfer to complete by calling
+mmc_wait_for_req_done() which is now exported.
+
+For requests submitted through the mmc_start_req() interface, the caller
+again sets mrq->cap_cmd_during_tfr = true, but mmc_start_req() anyway does
+not wait. The caller can then send commands that do not use the data
+lines. Finally the caller can wait for the transfer to complete in the
+normal way i.e. calling mmc_start_req() again.
+
+Irrespective of how a cap_cmd_during_tfr request is started,
+mmc_is_req_done() can be called if the upper layer needs to determine if
+the request is done. However the appropriate waiting function (either
+mmc_wait_for_req_done() or mmc_start_req()) must still be called.
+
+The implementation consists primarily of a new completion
+mrq->cmd_completion which notifies when the command line is available for
+further commands. That completion is completed by mmc_command_done().
+When there is an ongoing data transfer, calls to mmc_wait_for_req() will
+automatically wait on that completion, so the caller does not have to do
+anything special.
+
+Note, in the case of errors, the driver may call mmc_request_done() without
+calling mmc_command_done() because mmc_request_done() always calls
+mmc_command_done().
+
+Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
+---
+ drivers/mmc/core/core.c  | 95 +++++++++++++++++++++++++++++++++++++++++++++---
+ include/linux/mmc/core.h |  7 ++++
+ include/linux/mmc/host.h |  5 +++
+ 3 files changed, 101 insertions(+), 6 deletions(-)
+
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index 94cbf4e170e3..ca9b4ea78392 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -117,6 +117,24 @@ static inline void mmc_should_fail_request(struct mmc_host *host,
+ 
+ #endif /* CONFIG_FAIL_MMC_REQUEST */
+ 
++static inline void mmc_complete_cmd(struct mmc_request *mrq)
++{
++	if (mrq->cap_cmd_during_tfr && !completion_done(&mrq->cmd_completion))
++		complete_all(&mrq->cmd_completion);
++}
++
++void mmc_command_done(struct mmc_host *host, struct mmc_request *mrq)
++{
++	if (!mrq->cap_cmd_during_tfr)
++		return;
++
++	mmc_complete_cmd(mrq);
++
++	pr_debug("%s: cmd done, tfr ongoing (CMD%u)\n",
++		 mmc_hostname(host), mrq->cmd->opcode);
++}
++EXPORT_SYMBOL(mmc_command_done);
++
+ /**
+  *	mmc_request_done - finish processing an MMC request
+  *	@host: MMC host which completed request
+@@ -143,6 +161,11 @@ void mmc_request_done(struct mmc_host *host, struct mmc_request *mrq)
+ 			cmd->retries = 0;
+ 	}
+ 
++	if (host->ongoing_mrq == mrq)
++		host->ongoing_mrq = NULL;
++
++	mmc_complete_cmd(mrq);
++
+ 	trace_mmc_request_done(host, mrq);
+ 
+ 	if (err && cmd->retries && !mmc_card_removed(host->card)) {
+@@ -155,7 +178,8 @@ void mmc_request_done(struct mmc_host *host, struct mmc_request *mrq)
+ 	} else {
+ 		mmc_should_fail_request(host, mrq);
+ 
+-		led_trigger_event(host->led, LED_OFF);
++		if (!host->ongoing_mrq)
++			led_trigger_event(host->led, LED_OFF);
+ 
+ 		if (mrq->sbc) {
+ 			pr_debug("%s: req done <CMD%u>: %d: %08x %08x %08x %08x\n",
+@@ -220,6 +244,15 @@ static void __mmc_start_request(struct mmc_host *host, struct mmc_request *mrq)
+ 		}
+ 	}
+ 
++	if (mrq->cap_cmd_during_tfr) {
++		host->ongoing_mrq = mrq;
++		/*
++		 * Retry path could come through here without having waiting on
++		 * cmd_completion, so ensure it is reinitialised.
++		 */
++		reinit_completion(&mrq->cmd_completion);
++	}
++
+ 	trace_mmc_request_start(host, mrq);
+ 
+ 	host->ops->request(host, mrq);
+@@ -386,6 +419,18 @@ static void mmc_wait_done(struct mmc_request *mrq)
+ 	complete(&mrq->completion);
+ }
+ 
++static inline void mmc_wait_ongoing_tfr_cmd(struct mmc_host *host)
++{
++	struct mmc_request *ongoing_mrq = READ_ONCE(host->ongoing_mrq);
++
++	/*
++	 * If there is an ongoing transfer, wait for the command line to become
++	 * available.
++	 */
++	if (ongoing_mrq && !completion_done(&ongoing_mrq->cmd_completion))
++		wait_for_completion(&ongoing_mrq->cmd_completion);
++}
++
+ /*
+  *__mmc_start_data_req() - starts data request
+  * @host: MMC host to start the request
+@@ -393,17 +438,24 @@ static void mmc_wait_done(struct mmc_request *mrq)
+  *
+  * Sets the done callback to be called when request is completed by the card.
+  * Starts data mmc request execution
++ * If an ongoing transfer is already in progress, wait for the command line
++ * to become available before sending another command.
+  */
+ static int __mmc_start_data_req(struct mmc_host *host, struct mmc_request *mrq)
+ {
+ 	int err;
+ 
++	mmc_wait_ongoing_tfr_cmd(host);
++
+ 	mrq->done = mmc_wait_data_done;
+ 	mrq->host = host;
+ 
++	init_completion(&mrq->cmd_completion);
++
+ 	err = mmc_start_request(host, mrq);
+ 	if (err) {
+ 		mrq->cmd->error = err;
++		mmc_complete_cmd(mrq);
+ 		mmc_wait_data_done(mrq);
+ 	}
+ 
+@@ -414,12 +466,17 @@ static int __mmc_start_req(struct mmc_host *host, struct mmc_request *mrq)
+ {
+ 	int err;
+ 
++	mmc_wait_ongoing_tfr_cmd(host);
++
+ 	init_completion(&mrq->completion);
+ 	mrq->done = mmc_wait_done;
+ 
++	init_completion(&mrq->cmd_completion);
++
+ 	err = mmc_start_request(host, mrq);
+ 	if (err) {
+ 		mrq->cmd->error = err;
++		mmc_complete_cmd(mrq);
+ 		complete(&mrq->completion);
+ 	}
+ 
+@@ -483,8 +540,7 @@ static int mmc_wait_for_data_req_done(struct mmc_host *host,
+ 	return err;
+ }
+ 
+-static void mmc_wait_for_req_done(struct mmc_host *host,
+-				  struct mmc_request *mrq)
++void mmc_wait_for_req_done(struct mmc_host *host, struct mmc_request *mrq)
+ {
+ 	struct mmc_command *cmd;
+ 
+@@ -525,6 +581,28 @@ static void mmc_wait_for_req_done(struct mmc_host *host,
+ 
+ 	mmc_retune_release(host);
+ }
++EXPORT_SYMBOL(mmc_wait_for_req_done);
++
++/**
++ *	mmc_is_req_done - Determine if a 'cap_cmd_during_tfr' request is done
++ *	@host: MMC host
++ *	@mrq: MMC request
++ *
++ *	mmc_is_req_done() is used with requests that have
++ *	mrq->cap_cmd_during_tfr = true. mmc_is_req_done() must be called after
++ *	starting a request and before waiting for it to complete. That is,
++ *	either in between calls to mmc_start_req(), or after mmc_wait_for_req()
++ *	and before mmc_wait_for_req_done(). If it is called at other times the
++ *	result is not meaningful.
++ */
++bool mmc_is_req_done(struct mmc_host *host, struct mmc_request *mrq)
++{
++	if (host->areq)
++		return host->context_info.is_done_rcv;
++	else
++		return completion_done(&mrq->completion);
++}
++EXPORT_SYMBOL(mmc_is_req_done);
+ 
+ /**
+  *	mmc_pre_req - Prepare for a new request
+@@ -645,13 +723,18 @@ EXPORT_SYMBOL(mmc_start_req);
+  *	@mrq: MMC request to start
+  *
+  *	Start a new MMC custom command request for a host, and wait
+- *	for the command to complete. Does not attempt to parse the
+- *	response.
++ *	for the command to complete. In the case of 'cap_cmd_during_tfr'
++ *	requests, the transfer is ongoing and the caller can issue further
++ *	commands that do not use the data lines, and then wait by calling
++ *	mmc_wait_for_req_done().
++ *	Does not attempt to parse the response.
+  */
+ void mmc_wait_for_req(struct mmc_host *host, struct mmc_request *mrq)
+ {
+ 	__mmc_start_req(host, mrq);
+-	mmc_wait_for_req_done(host, mrq);
++
++	if (!mrq->cap_cmd_during_tfr)
++		mmc_wait_for_req_done(host, mrq);
+ }
+ EXPORT_SYMBOL(mmc_wait_for_req);
+ 
+diff --git a/include/linux/mmc/core.h b/include/linux/mmc/core.h
+index b01e77de1a74..368bed70aa9d 100644
+--- a/include/linux/mmc/core.h
++++ b/include/linux/mmc/core.h
+@@ -133,8 +133,12 @@ struct mmc_request {
+ 	struct mmc_command	*stop;
+ 
+ 	struct completion	completion;
++	struct completion	cmd_completion;
+ 	void			(*done)(struct mmc_request *);/* completion function */
+ 	struct mmc_host		*host;
++
++	/* Allow other commands during this ongoing data transfer or busy wait */
++	bool			cap_cmd_during_tfr;
+ };
+ 
+ struct mmc_card;
+@@ -146,6 +150,9 @@ extern struct mmc_async_req *mmc_start_req(struct mmc_host *,
+ 					   struct mmc_async_req *, int *);
+ extern int mmc_interrupt_hpi(struct mmc_card *);
+ extern void mmc_wait_for_req(struct mmc_host *, struct mmc_request *);
++extern void mmc_wait_for_req_done(struct mmc_host *host,
++				  struct mmc_request *mrq);
++extern bool mmc_is_req_done(struct mmc_host *host, struct mmc_request *mrq);
+ extern int mmc_wait_for_cmd(struct mmc_host *, struct mmc_command *, int);
+ extern int mmc_app_cmd(struct mmc_host *, struct mmc_card *);
+ extern int mmc_wait_for_app_cmd(struct mmc_host *, struct mmc_card *,
+diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+index aa4bfbf129e4..0b2439441cc8 100644
+--- a/include/linux/mmc/host.h
++++ b/include/linux/mmc/host.h
+@@ -281,6 +281,7 @@ struct mmc_host {
+ #define MMC_CAP_DRIVER_TYPE_A	(1 << 23)	/* Host supports Driver Type A */
+ #define MMC_CAP_DRIVER_TYPE_C	(1 << 24)	/* Host supports Driver Type C */
+ #define MMC_CAP_DRIVER_TYPE_D	(1 << 25)	/* Host supports Driver Type D */
++#define MMC_CAP_CMD_DURING_TFR	(1 << 29)	/* Commands during data transfer */
+ #define MMC_CAP_CMD23		(1 << 30)	/* CMD23 supported. */
+ #define MMC_CAP_HW_RESET	(1 << 31)	/* Hardware reset */
+ 
+@@ -382,6 +383,9 @@ struct mmc_host {
+ 	struct mmc_async_req	*areq;		/* active async req */
+ 	struct mmc_context_info	context_info;	/* async synchronization info */
+ 
++	/* Ongoing data transfer that allows commands during transfer */
++	struct mmc_request	*ongoing_mrq;
++
+ #ifdef CONFIG_FAIL_MMC_REQUEST
+ 	struct fault_attr	fail_mmc_request;
+ #endif
+@@ -418,6 +422,7 @@ int mmc_power_restore_host(struct mmc_host *host);
+ 
+ void mmc_detect_change(struct mmc_host *, unsigned long delay);
+ void mmc_request_done(struct mmc_host *, struct mmc_request *);
++void mmc_command_done(struct mmc_host *host, struct mmc_request *mrq);
+ 
+ static inline void mmc_signal_sdio_irq(struct mmc_host *host)
+ {
+-- 
+1.9.1
+
