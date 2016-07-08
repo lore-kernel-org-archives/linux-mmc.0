@@ -1,75 +1,111 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: [PATCH V3 15/30] mmc: mmc: Add functions to enable / disable the Command Queue
-Date: Fri,  8 Jul 2016 13:22:56 +0300
-Message-ID: <1467973391-29221-16-git-send-email-adrian.hunter@intel.com>
+Subject: [PATCH V3 17/30] mmc: block: Disable Command Queue while RPMB is used
+Date: Fri,  8 Jul 2016 13:22:58 +0300
+Message-ID: <1467973391-29221-18-git-send-email-adrian.hunter@intel.com>
 References: <1467973391-29221-1-git-send-email-adrian.hunter@intel.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
 Received: from mga03.intel.com ([134.134.136.65]:45373 "EHLO mga03.intel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754438AbcGHK23 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 8 Jul 2016 06:28:29 -0400
+	id S1754501AbcGHK2h (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 8 Jul 2016 06:28:37 -0400
 In-Reply-To: <1467973391-29221-1-git-send-email-adrian.hunter@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>
 Cc: linux-mmc <linux-mmc@vger.kernel.org>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Dorfman Konstantin <kdorfman@codeaurora.org>, David Griego <david.griego@linaro.org>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>
 
-Add helper functions to enable or disable the Command Queue.
+RPMB does not allow Command Queue commands. Disable and re-enable the
+Command Queue when switching.
+
+Note that the driver only switches partitions when the queue is empty.
 
 Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
 ---
- drivers/mmc/core/mmc_ops.c | 27 +++++++++++++++++++++++++++
- include/linux/mmc/core.h   |  2 ++
- 2 files changed, 29 insertions(+)
+ drivers/mmc/card/block.c | 46 ++++++++++++++++++++++++++++++++++++++--------
+ 1 file changed, 38 insertions(+), 8 deletions(-)
 
-diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
-index ad6e9798e949..7ec7d62922b0 100644
---- a/drivers/mmc/core/mmc_ops.c
-+++ b/drivers/mmc/core/mmc_ops.c
-@@ -797,3 +797,30 @@ int mmc_can_ext_csd(struct mmc_card *card)
- {
- 	return (card && card->csd.mmca_vsn > CSD_SPEC_VER_3);
- }
-+
-+int mmc_cmdq_switch(struct mmc_card *card, int enable)
-+{
-+	int err;
-+
-+	if (!card->ext_csd.cmdq_support)
-+		return -EOPNOTSUPP;
-+
-+	err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL, EXT_CSD_CMDQ_MODE_EN,
-+			 enable, card->ext_csd.generic_cmd6_time);
-+	if (!err)
-+		card->ext_csd.cmdq_en = enable;
-+
-+	return err;
-+}
-+
-+int mmc_cmdq_enable(struct mmc_card *card)
-+{
-+	return mmc_cmdq_switch(card, EXT_CSD_CMDQ_MODE_ENABLED);
-+}
-+EXPORT_SYMBOL_GPL(mmc_cmdq_enable);
-+
-+int mmc_cmdq_disable(struct mmc_card *card)
-+{
-+	return mmc_cmdq_switch(card, 0);
-+}
-+EXPORT_SYMBOL_GPL(mmc_cmdq_disable);
-diff --git a/include/linux/mmc/core.h b/include/linux/mmc/core.h
-index 368bed70aa9d..63dc01257852 100644
---- a/include/linux/mmc/core.h
-+++ b/include/linux/mmc/core.h
-@@ -161,6 +161,8 @@ extern void mmc_start_bkops(struct mmc_card *card, bool from_exception);
- extern int mmc_switch(struct mmc_card *, u8, u8, u8, unsigned int);
- extern int mmc_send_tuning(struct mmc_host *host, u32 opcode, int *cmd_error);
- extern int mmc_get_ext_csd(struct mmc_card *card, u8 **new_ext_csd);
-+extern int mmc_cmdq_enable(struct mmc_card *card);
-+extern int mmc_cmdq_disable(struct mmc_card *card);
+diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+index a21997c04c99..9be95317651d 100644
+--- a/drivers/mmc/card/block.c
++++ b/drivers/mmc/card/block.c
+@@ -744,10 +744,41 @@ static const struct block_device_operations mmc_bdops = {
+ #endif
+ };
  
- #define MMC_ERASE_ARG		0x00000000
- #define MMC_SECURE_ERASE_ARG	0x80000000
++static int mmc_blk_part_switch_pre(struct mmc_card *card,
++				   unsigned int part_type)
++{
++	int ret;
++
++	if (part_type == EXT_CSD_PART_CONFIG_ACC_RPMB) {
++		if (card->ext_csd.cmdq_en) {
++			ret = mmc_cmdq_disable(card);
++			if (ret)
++				return ret;
++		}
++		mmc_retune_pause(card->host);
++	}
++
++	return 0;
++}
++
++static int mmc_blk_part_switch_post(struct mmc_card *card,
++				    unsigned int part_type)
++{
++	int ret = 0;
++
++	if (part_type == EXT_CSD_PART_CONFIG_ACC_RPMB) {
++		mmc_retune_unpause(card->host);
++		if (card->reenable_cmdq && !card->ext_csd.cmdq_en)
++			ret = mmc_cmdq_enable(card);
++	}
++
++	return ret;
++}
++
+ static inline int mmc_blk_part_switch(struct mmc_card *card,
+ 				      struct mmc_blk_data *md)
+ {
+-	int ret;
++	int ret = 0;
+ 	struct mmc_blk_data *main_md = dev_get_drvdata(&card->dev);
+ 
+ 	if (main_md->part_curr == md->part_type)
+@@ -756,8 +787,9 @@ static inline int mmc_blk_part_switch(struct mmc_card *card,
+ 	if (mmc_card_mmc(card)) {
+ 		u8 part_config = card->ext_csd.part_config;
+ 
+-		if (md->part_type == EXT_CSD_PART_CONFIG_ACC_RPMB)
+-			mmc_retune_pause(card->host);
++		ret = mmc_blk_part_switch_pre(card, md->part_type);
++		if (ret)
++			return ret;
+ 
+ 		part_config &= ~EXT_CSD_PART_CONFIG_ACC_MASK;
+ 		part_config |= md->part_type;
+@@ -766,19 +798,17 @@ static inline int mmc_blk_part_switch(struct mmc_card *card,
+ 				 EXT_CSD_PART_CONFIG, part_config,
+ 				 card->ext_csd.part_time);
+ 		if (ret) {
+-			if (md->part_type == EXT_CSD_PART_CONFIG_ACC_RPMB)
+-				mmc_retune_unpause(card->host);
++			mmc_blk_part_switch_post(card, md->part_type);
+ 			return ret;
+ 		}
+ 
+ 		card->ext_csd.part_config = part_config;
+ 
+-		if (main_md->part_curr == EXT_CSD_PART_CONFIG_ACC_RPMB)
+-			mmc_retune_unpause(card->host);
++		ret = mmc_blk_part_switch_post(card, main_md->part_curr);
+ 	}
+ 
+ 	main_md->part_curr = md->part_type;
+-	return 0;
++	return ret;
+ }
+ 
+ static u32 mmc_sd_num_wr_blocks(struct mmc_card *card)
 -- 
 1.9.1
 
