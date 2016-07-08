@@ -1,91 +1,80 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: [PATCH V3 16/30] mmc: mmc_test: Disable Command Queue while mmc_test is used
-Date: Fri,  8 Jul 2016 13:22:57 +0300
-Message-ID: <1467973391-29221-17-git-send-email-adrian.hunter@intel.com>
+Subject: [PATCH V3 18/30] mmc: core: Do not prepare a new request twice
+Date: Fri,  8 Jul 2016 13:22:59 +0300
+Message-ID: <1467973391-29221-19-git-send-email-adrian.hunter@intel.com>
 References: <1467973391-29221-1-git-send-email-adrian.hunter@intel.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
 Received: from mga03.intel.com ([134.134.136.65]:45373 "EHLO mga03.intel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754438AbcGHK2d (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 8 Jul 2016 06:28:33 -0400
+	id S1754187AbcGHK2k (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 8 Jul 2016 06:28:40 -0400
 In-Reply-To: <1467973391-29221-1-git-send-email-adrian.hunter@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>
 Cc: linux-mmc <linux-mmc@vger.kernel.org>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Dorfman Konstantin <kdorfman@codeaurora.org>, David Griego <david.griego@linaro.org>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>
 
-Normal read and write commands may not be used while the command queue is
-enabled. Disable the Command Queue when mmc_test is probed and re-enable it
-when it is removed.
+mmc_start_req() assumes it is never called with the new request already
+prepared. That is true if the queue consists of only 2 requests, but is not
+true for a longer queue. e.g. mmc_start_req() has a current and previous
+request but still exits to queue a new request if the queue size is
+greater than 2. In that case, when mmc_start_req() is called again, the
+current request will have been prepared already. Fix by flagging if the
+request has been prepared.
 
 Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
 ---
- drivers/mmc/card/mmc_test.c | 13 +++++++++++++
- drivers/mmc/core/mmc.c      |  7 +++++++
- include/linux/mmc/card.h    |  1 +
- 3 files changed, 21 insertions(+)
+ drivers/mmc/core/core.c  | 12 +++++++++---
+ include/linux/mmc/host.h |  1 +
+ 2 files changed, 10 insertions(+), 3 deletions(-)
 
-diff --git a/drivers/mmc/card/mmc_test.c b/drivers/mmc/card/mmc_test.c
-index 5a8dc5a76e0d..7dee9e5a8cfb 100644
---- a/drivers/mmc/card/mmc_test.c
-+++ b/drivers/mmc/card/mmc_test.c
-@@ -3240,6 +3240,14 @@ static int mmc_test_probe(struct mmc_card *card)
- 	if (ret)
- 		return ret;
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index f9231122ce9a..9be42691b5a9 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -657,8 +657,10 @@ struct mmc_async_req *mmc_start_req(struct mmc_host *host,
+ 	struct mmc_async_req *data = host->areq;
  
-+	if (card->ext_csd.cmdq_en) {
-+		mmc_claim_host(card->host);
-+		ret = mmc_cmdq_disable(card);
-+		mmc_release_host(card->host);
-+		if (ret)
-+			return ret;
+ 	/* Prepare a new request */
+-	if (areq)
++	if (areq && !areq->pre_req_done) {
++		areq->pre_req_done = true;
+ 		mmc_pre_req(host, areq->mrq, !host->areq);
 +	}
-+
- 	dev_info(&card->dev, "Card claimed for testing.\n");
  
- 	return 0;
-@@ -3247,6 +3255,11 @@ static int mmc_test_probe(struct mmc_card *card)
+ 	if (host->areq) {
+ 		err = mmc_wait_for_data_req_done(host, host->areq->mrq,	areq);
+@@ -694,12 +696,16 @@ struct mmc_async_req *mmc_start_req(struct mmc_host *host,
+ 	if (!err && areq)
+ 		start_err = __mmc_start_data_req(host, areq->mrq);
  
- static void mmc_test_remove(struct mmc_card *card)
- {
-+	if (card->reenable_cmdq) {
-+		mmc_claim_host(card->host);
-+		mmc_cmdq_enable(card);
-+		mmc_release_host(card->host);
+-	if (host->areq)
++	if (host->areq) {
++		host->areq->pre_req_done = false;
+ 		mmc_post_req(host, host->areq->mrq, 0);
 +	}
- 	mmc_test_free_result(card);
- 	mmc_test_free_dbgfs_file(card);
- }
-diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-index 11fc095477f0..4ae35d7094c1 100644
---- a/drivers/mmc/core/mmc.c
-+++ b/drivers/mmc/core/mmc.c
-@@ -1734,6 +1734,13 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
- 	}
  
- 	/*
-+	 * In some cases (e.g. RPMB or mmc_test), the Command Queue must be
-+	 * disabled for a time, so a flag is needed to indicate to re-enable the
-+	 * Command Queue.
-+	 */
-+	card->reenable_cmdq = card->ext_csd.cmdq_en;
-+
-+	/*
- 	 * The mandatory minimum values are defined for packed command.
- 	 * read: 5, write: 3
+ 	 /* Cancel a prepared request if it was not started. */
+-	if ((err || start_err) && areq)
++	if ((err || start_err) && areq) {
++		areq->pre_req_done = false;
+ 		mmc_post_req(host, areq->mrq, -EINVAL);
++	}
+ 
+ 	if (err)
+ 		host->areq = NULL;
+diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+index 3386e10480f7..9fb00b7c54a1 100644
+--- a/include/linux/mmc/host.h
++++ b/include/linux/mmc/host.h
+@@ -174,6 +174,7 @@ struct mmc_async_req {
+ 	 * Returns 0 if success otherwise non zero.
  	 */
-diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
-index 476ccbe3f831..3d7434e48566 100644
---- a/include/linux/mmc/card.h
-+++ b/include/linux/mmc/card.h
-@@ -285,6 +285,7 @@ struct mmc_card {
- #define MMC_QUIRK_TRIM_BROKEN	(1<<12)		/* Skip trim */
- #define MMC_QUIRK_BROKEN_HPI	(1<<13)		/* Disable broken HPI support */
+ 	int (*err_check) (struct mmc_card *, struct mmc_async_req *);
++	bool pre_req_done;
+ };
  
-+	bool			reenable_cmdq;	/* Re-enable Command Queue */
- 
- 	unsigned int		erase_size;	/* erase size in sectors */
-  	unsigned int		erase_shift;	/* if erase unit is power 2 */
+ /**
 -- 
 1.9.1
 
