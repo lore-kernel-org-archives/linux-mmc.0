@@ -1,170 +1,89 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: [PATCH V3 25/30] mmc: queue: Share mmc request array between partitions
-Date: Fri,  8 Jul 2016 13:23:06 +0300
-Message-ID: <1467973391-29221-26-git-send-email-adrian.hunter@intel.com>
+Subject: [PATCH V3 26/30] mmc: queue: Add a function to control wake-up on new requests
+Date: Fri,  8 Jul 2016 13:23:07 +0300
+Message-ID: <1467973391-29221-27-git-send-email-adrian.hunter@intel.com>
 References: <1467973391-29221-1-git-send-email-adrian.hunter@intel.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
 Received: from mga03.intel.com ([134.134.136.65]:45373 "EHLO mga03.intel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754112AbcGHK3I (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 8 Jul 2016 06:29:08 -0400
+	id S1754112AbcGHK3M (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 8 Jul 2016 06:29:12 -0400
 In-Reply-To: <1467973391-29221-1-git-send-email-adrian.hunter@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>
 Cc: linux-mmc <linux-mmc@vger.kernel.org>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Dorfman Konstantin <kdorfman@codeaurora.org>, David Griego <david.griego@linaro.org>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>
 
-eMMC can have multiple internal partitions that are represented as separate
-disks / queues. However the card has only 1 command queue which must be
-empty when switching partitions. Consequently the array of mmc requests
-that are queued can be shared between partitions saving memory.
-
-Keep a pointer to the mmc request queue on the card, and use that instead
-of allocating a new one for each partition. Use a reference count to keep
-track of when to free it.
+Add a function to control wake-up on new requests. This will enable
+Software Command Queuing to choose whether or not to queue new
+requests immediately or wait for the current task to complete.
 
 Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
 ---
- drivers/mmc/card/queue.c | 43 +++++++++++++++++++++++++++++++++++++------
- include/linux/mmc/card.h |  4 ++++
- 2 files changed, 41 insertions(+), 6 deletions(-)
+ drivers/mmc/card/queue.c | 16 ++++++++++++++++
+ drivers/mmc/card/queue.h |  2 ++
+ 2 files changed, 18 insertions(+)
 
 diff --git a/drivers/mmc/card/queue.c b/drivers/mmc/card/queue.c
-index 5a016ce19e89..1602aea0c4f7 100644
+index 1602aea0c4f7..2230b0fd7a13 100644
 --- a/drivers/mmc/card/queue.c
 +++ b/drivers/mmc/card/queue.c
-@@ -197,10 +197,17 @@ static struct mmc_queue_req *mmc_queue_alloc_mqrqs(struct mmc_queue *mq,
- 	struct mmc_queue_req *mqrq;
- 	int i;
- 
-+	if (mq->card->mqrq) {
-+		mq->card->mqrq_ref_cnt += 1;
-+		return mq->card->mqrq;
-+	}
-+
- 	mqrq = kcalloc(qdepth, sizeof(*mqrq), GFP_KERNEL);
- 	if (mqrq) {
- 		for (i = 0; i < mq->qdepth; i++)
- 			mqrq[i].task_id = i;
-+		mq->card->mqrq = mqrq;
-+		mq->card->mqrq_ref_cnt = 1;
+@@ -94,6 +94,7 @@ static int mmc_queue_thread(void *d)
+ 		cntx->is_waiting_last_req = false;
+ 		cntx->is_new_req = false;
+ 		if (!req) {
++			mq->is_new_req = false;
+ 			/*
+ 			 * Dispatch queue is empty so set flags for
+ 			 * mmc_request_fn() to wake us up.
+@@ -144,6 +145,8 @@ static void mmc_request_fn(struct request_queue *q)
+ 		return;
  	}
  
- 	return mqrq;
-@@ -211,6 +218,9 @@ static bool mmc_queue_alloc_bounce_bufs(struct mmc_queue *mq,
- {
- 	int i;
- 
-+	if (mq->card->mqrq_ref_cnt > 1)
-+		return !!mq->mqrq[0].bounce_buf;
++	mq->is_new_req = true;
 +
- 	for (i = 0; i < mq->qdepth; i++) {
- 		mq->mqrq[i].bounce_buf = kmalloc(bouncesz, GFP_KERNEL);
- 		if (!mq->mqrq[i].bounce_buf)
-@@ -234,6 +244,9 @@ static int mmc_queue_alloc_bounce_sgs(struct mmc_queue *mq,
- {
- 	int i, ret;
+ 	cntx = &mq->card->host->context_info;
  
-+	if (mq->card->mqrq_ref_cnt > 1)
-+		return 0;
-+
- 	for (i = 0; i < mq->qdepth; i++) {
- 		mq->mqrq[i].sg = mmc_alloc_sg(1, &ret);
- 		if (ret)
-@@ -251,6 +264,9 @@ static int mmc_queue_alloc_sgs(struct mmc_queue *mq, int max_segs)
- {
- 	int i, ret;
- 
-+	if (mq->card->mqrq_ref_cnt > 1)
-+		return 0;
-+
- 	for (i = 0; i < mq->qdepth; i++) {
- 		mq->mqrq[i].sg = mmc_alloc_sg(max_segs, &ret);
- 		if (ret)
-@@ -280,6 +296,19 @@ static void mmc_queue_reqs_free_bufs(struct mmc_queue *mq)
- 		mmc_queue_req_free_bufs(&mq->mqrq[i]);
+ 	if (cntx->is_waiting_last_req) {
+@@ -155,6 +158,19 @@ static void mmc_request_fn(struct request_queue *q)
+ 		wake_up_process(mq->thread);
  }
  
-+static void mmc_queue_free_mqrqs(struct mmc_queue *mq)
++void mmc_queue_set_wake(struct mmc_queue *mq, bool wake_me)
 +{
-+	if (!mq->mqrq)
-+		return;
++	struct mmc_context_info *cntx = &mq->card->host->context_info;
++	struct request_queue *q = mq->queue;
 +
-+	if (!--mq->card->mqrq_ref_cnt) {
-+		mmc_queue_reqs_free_bufs(mq);
-+		kfree(mq->card->mqrq);
-+		mq->card->mqrq = NULL;
++	if (cntx->is_waiting_last_req != wake_me) {
++		spin_lock_irq(q->queue_lock);
++		cntx->is_waiting_last_req = wake_me;
++		cntx->is_new_req = wake_me && mq->is_new_req;
++		spin_unlock_irq(q->queue_lock);
 +	}
-+	mq->mqrq = NULL;
 +}
 +
- /**
-  * mmc_init_queue - initialise a queue structure.
-  * @mq: mmc queue
-@@ -370,9 +399,7 @@ int mmc_init_queue(struct mmc_queue *mq, struct mmc_card *card,
- 	return 0;
+ static struct scatterlist *mmc_alloc_sg(int sg_len, int *err)
+ {
+ 	struct scatterlist *sg;
+diff --git a/drivers/mmc/card/queue.h b/drivers/mmc/card/queue.h
+index 1afd5dafd46d..a6d5b0f94662 100644
+--- a/drivers/mmc/card/queue.h
++++ b/drivers/mmc/card/queue.h
+@@ -52,6 +52,7 @@ struct mmc_queue {
+ 	unsigned int		flags;
+ #define MMC_QUEUE_SUSPENDED	(1 << 0)
+ 	bool			asleep;
++	bool			is_new_req;
  
-  cleanup_queue:
--	mmc_queue_reqs_free_bufs(mq);
--	kfree(mq->mqrq);
--	mq->mqrq = NULL;
-+	mmc_queue_free_mqrqs(mq);
- blk_cleanup:
- 	blk_cleanup_queue(mq->queue);
- 	return ret;
-@@ -395,9 +422,7 @@ void mmc_cleanup_queue(struct mmc_queue *mq)
- 	blk_start_queue(q);
- 	spin_unlock_irqrestore(q->queue_lock, flags);
+ 	int			(*issue_fn)(struct mmc_queue *, struct request *);
+ 	void			*data;
+@@ -81,5 +82,6 @@ extern int mmc_access_rpmb(struct mmc_queue *);
+ extern struct mmc_queue_req *mmc_queue_req_find(struct mmc_queue *,
+ 						struct request *);
+ extern void mmc_queue_req_free(struct mmc_queue *, struct mmc_queue_req *);
++extern void mmc_queue_set_wake(struct mmc_queue *, bool);
  
--	mmc_queue_reqs_free_bufs(mq);
--	kfree(mq->mqrq);
--	mq->mqrq = NULL;
-+	mmc_queue_free_mqrqs(mq);
- 
- 	mq->card = NULL;
- }
-@@ -413,6 +438,9 @@ int mmc_packed_init(struct mmc_queue *mq, struct mmc_card *card)
- 	if (mq->qdepth != 2)
- 		return -EINVAL;
- 
-+	if (mqrq_cur->packed)
-+		goto out;
-+
- 	mqrq_cur->packed = kzalloc(sizeof(struct mmc_packed), GFP_KERNEL);
- 	if (!mqrq_cur->packed) {
- 		pr_warn("%s: unable to allocate packed cmd for mqrq_cur\n",
-@@ -443,6 +471,9 @@ void mmc_packed_clean(struct mmc_queue *mq)
- 	struct mmc_queue_req *mqrq_cur = &mq->mqrq[0];
- 	struct mmc_queue_req *mqrq_prev = &mq->mqrq[1];
- 
-+	if (mq->card->mqrq_ref_cnt > 1)
-+		return;
-+
- 	kfree(mqrq_cur->packed);
- 	mqrq_cur->packed = NULL;
- 	kfree(mqrq_prev->packed);
-diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
-index 3d7434e48566..0acf6e0a8e83 100644
---- a/include/linux/mmc/card.h
-+++ b/include/linux/mmc/card.h
-@@ -207,6 +207,7 @@ struct mmc_host;
- struct mmc_ios;
- struct sdio_func;
- struct sdio_func_tuple;
-+struct mmc_queue_req;
- 
- #define SDIO_MAX_FUNCS		7
- 
-@@ -319,6 +320,9 @@ struct mmc_card {
- 	struct dentry		*debugfs_root;
- 	struct mmc_part	part[MMC_NUM_PHY_PARTITION]; /* physical partitions */
- 	unsigned int    nr_parts;
-+
-+	struct mmc_queue_req	*mqrq;		/* Shared queue structure */
-+	int			mqrq_ref_cnt;	/* Shared queue ref. count */
- };
- 
- /*
+ #endif
 -- 
 1.9.1
 
