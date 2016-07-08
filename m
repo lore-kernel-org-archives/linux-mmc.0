@@ -1,39 +1,70 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: [PATCH V3 30/30] mmc: sdhci-acpi: Enable Software Command Queuing for some Intel controllers
-Date: Fri,  8 Jul 2016 13:23:11 +0300
-Message-ID: <1467973391-29221-31-git-send-email-adrian.hunter@intel.com>
+From: Venu Byravarasu <vbyravarasu@nvidia.com>
+Subject: RE: [PATCH V3 29/30] mmc: sdhci-pci: Enable Software Command Queuing
+ for some Intel controllers
+Date: Fri, 8 Jul 2016 10:46:58 +0000
+Message-ID: <75c625a19ac4402ab306a75fe741a5bd@bgmail103.nvidia.com>
 References: <1467973391-29221-1-git-send-email-adrian.hunter@intel.com>
+ <1467973391-29221-30-git-send-email-adrian.hunter@intel.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga03.intel.com ([134.134.136.65]:45373 "EHLO mga03.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754294AbcGHK31 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Fri, 8 Jul 2016 06:29:27 -0400
-In-Reply-To: <1467973391-29221-1-git-send-email-adrian.hunter@intel.com>
+Received: from hqemgate14.nvidia.com ([216.228.121.143]:18795 "EHLO
+	hqemgate14.nvidia.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754180AbcGHKrF convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 8 Jul 2016 06:47:05 -0400
+In-Reply-To: <1467973391-29221-30-git-send-email-adrian.hunter@intel.com>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
+To: Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>
 Cc: linux-mmc <linux-mmc@vger.kernel.org>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Dorfman Konstantin <kdorfman@codeaurora.org>, David Griego <david.griego@linaro.org>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>
 
-Set MMC_CAP_SWCMDQ for Intel BYT and related eMMC host controllers.
 
-Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
----
- drivers/mmc/host/sdhci-acpi.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/drivers/mmc/host/sdhci-acpi.c b/drivers/mmc/host/sdhci-acpi.c
-index ec1b99f89d4a..2396eeb38345 100644
---- a/drivers/mmc/host/sdhci-acpi.c
-+++ b/drivers/mmc/host/sdhci-acpi.c
-@@ -273,7 +273,7 @@ static int sdhci_acpi_sd_probe_slot(struct platform_device *pdev,
- static const struct sdhci_acpi_slot sdhci_acpi_slot_int_emmc = {
- 	.chip    = &sdhci_acpi_chip_int,
- 	.caps    = MMC_CAP_8_BIT_DATA | MMC_CAP_NONREMOVABLE |
--		   MMC_CAP_HW_RESET | MMC_CAP_1_8V_DDR |
-+		   MMC_CAP_HW_RESET | MMC_CAP_1_8V_DDR | MMC_CAP_SWCMDQ |
- 		   MMC_CAP_CMD_DURING_TFR | MMC_CAP_WAIT_WHILE_BUSY,
- 	.caps2   = MMC_CAP2_HC_ERASE_SZ,
- 	.flags   = SDHCI_ACPI_RUNTIME_PM,
--- 
-1.9.1
+> -----Original Message-----
+> From: Adrian Hunter [mailto:adrian.hunter@intel.com]
+> Sent: Friday, July 08, 2016 3:53 PM
+> To: Ulf Hansson
+> Cc: linux-mmc; Alex Lemberg; Mateusz Nowak; Yuliy Izrailov; Jaehoon Chung;
+> Dong Aisheng; Das Asutosh; Zhangfei Gao; Dorfman Konstantin; David
+> Griego; Sahitya Tummala; Harjani Ritesh; Venu Byravarasu
+> Subject: [PATCH V3 29/30] mmc: sdhci-pci: Enable Software Command
+> Queuing for some Intel controllers
+> 
+> Set MMC_CAP_SWCMDQ for Intel BYT and related eMMC host controllers.
+> 
+> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
+> ---
+>  drivers/mmc/host/sdhci-pci-core.c | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+> 
+> diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-pci-
+> core.c
+> index 358ac0978cde..4504fc381877 100644
+> --- a/drivers/mmc/host/sdhci-pci-core.c
+> +++ b/drivers/mmc/host/sdhci-pci-core.c
+> @@ -356,7 +356,7 @@ static int byt_emmc_probe_slot(struct sdhci_pci_slot
+> *slot)  {
+>  	slot->host->mmc->caps |= MMC_CAP_8_BIT_DATA |
+> MMC_CAP_NONREMOVABLE |
+>  				 MMC_CAP_HW_RESET |
+> MMC_CAP_1_8V_DDR |
+> -				 MMC_CAP_CMD_DURING_TFR |
+> +				 MMC_CAP_CMD_DURING_TFR |
 
+What exactly got changed in this patch?
+
+> MMC_CAP_SWCMDQ |
+>  				 MMC_CAP_WAIT_WHILE_BUSY;
+>  	slot->host->mmc->caps2 |= MMC_CAP2_HC_ERASE_SZ;
+>  	slot->hw_reset = sdhci_pci_int_hw_reset;
+> --
+> 1.9.1
+
+-----------------------------------------------------------------------------------
+This email message is for the sole use of the intended recipient(s) and may contain
+confidential information.  Any unauthorized review, use, disclosure or distribution
+is prohibited.  If you are not the intended recipient, please contact the sender by
+reply email and destroy all copies of the original message.
+-----------------------------------------------------------------------------------
