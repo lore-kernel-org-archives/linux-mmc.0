@@ -1,109 +1,52 @@
-From: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
-Subject: [PATCH v1 1/1] mmc: sdhci-pci: Convert to use managed functions pcim_* and devm_*
-Date: Sat,  9 Jul 2016 16:41:43 +0300
-Message-ID: <1468071703-77301-1-git-send-email-andriy.shevchenko@linux.intel.com>
+From: Rob Herring <robh@kernel.org>
+Subject: Re: [PATCH 3/3] Documentation: mmc: add description for new no-sd*
+ and no-mmc
+Date: Mon, 11 Jul 2016 08:57:35 -0500
+Message-ID: <20160711135735.GA18339@rob-hp-laptop>
+References: <1467359130-11409-1-git-send-email-shawn.lin@rock-chips.com>
+ <1467359130-11409-4-git-send-email-shawn.lin@rock-chips.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga04.intel.com ([192.55.52.120]:30789 "EHLO mga04.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751545AbcGINls (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Sat, 9 Jul 2016 09:41:48 -0400
+Received: from mail-yw0-f194.google.com ([209.85.161.194]:35256 "EHLO
+	mail-yw0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S933664AbcGKN5j (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 11 Jul 2016 09:57:39 -0400
+Content-Disposition: inline
+In-Reply-To: <1467359130-11409-4-git-send-email-shawn.lin@rock-chips.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>, linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
+To: Shawn Lin <shawn.lin@rock-chips.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, Jaehoon Chung <jh80.chung@samsung.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Doug Anderson <dianders@chromium.org>, devicetree@vger.kernel.org
 
-This makes the error handling much more simpler than open-coding everything
-and in addition makes the probe function smaller an tidier.
+On Fri, Jul 01, 2016 at 03:45:30PM +0800, Shawn Lin wrote:
+> This patch adds description for no-sd, no-sdio, no-mmc. We
+> expect the specific boards adds these in DT to improve
+> the initialization. For instance, for a soldered eMMC slot,
+> we could skip sending SDIO and SD commands to probe its card
+> types as it's always should be the type fo MMC card.
+> 
+> Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
+> ---
+> 
+>  Documentation/devicetree/bindings/mmc/mmc.txt | 3 +++
+>  1 file changed, 3 insertions(+)
+> 
+> diff --git a/Documentation/devicetree/bindings/mmc/mmc.txt b/Documentation/devicetree/bindings/mmc/mmc.txt
+> index ecc007a..b2046c6 100644
+> --- a/Documentation/devicetree/bindings/mmc/mmc.txt
+> +++ b/Documentation/devicetree/bindings/mmc/mmc.txt
+> @@ -49,6 +49,9 @@ Optional properties:
+>  - mmc-hs400-enhanced-strobe: eMMC HS400 enhanced strobe mode is supported
+>  - dsr: Value the card's (optional) Driver Stage Register (DSR) should be
+>    programmed with. Valid range: [0 .. 0xffff].
+> +- no-sdio: skip sending sdio cmd during initialization
+> +- no-sd: skip sending sd cmd during initialization
+> +- no-mmc: skip sending mmc cmd during initialization
 
-Signed-off-by: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
----
- drivers/mmc/host/sdhci-pci-core.c | 42 ++++++++++-----------------------------
- 1 file changed, 11 insertions(+), 31 deletions(-)
+I still have issue with the description for these properties and the 
+commit msg. They are fine if described as controller limitations as Ulf 
+described. If folks want to (ab)use the properties for just skipping 
+init, then that's their problem.
 
-diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-pci-core.c
-index 6fbf708..773532d 100644
---- a/drivers/mmc/host/sdhci-pci-core.c
-+++ b/drivers/mmc/host/sdhci-pci-core.c
-@@ -1819,15 +1819,13 @@ static int sdhci_pci_probe(struct pci_dev *pdev,
- 		return -ENODEV;
- 	}
- 
--	ret = pci_enable_device(pdev);
-+	ret = pcim_enable_device(pdev);
- 	if (ret)
- 		return ret;
- 
--	chip = kzalloc(sizeof(struct sdhci_pci_chip), GFP_KERNEL);
--	if (!chip) {
--		ret = -ENOMEM;
--		goto err;
--	}
-+	chip = devm_kzalloc(&pdev->dev, sizeof(*chip), GFP_KERNEL);
-+	if (!chip)
-+		return -ENOMEM;
- 
- 	chip->pdev = pdev;
- 	chip->fixes = (const struct sdhci_pci_fixes *)ent->driver_data;
-@@ -1843,7 +1841,7 @@ static int sdhci_pci_probe(struct pci_dev *pdev,
- 	if (chip->fixes && chip->fixes->probe) {
- 		ret = chip->fixes->probe(chip);
- 		if (ret)
--			goto free;
-+			return ret;
- 	}
- 
- 	slots = chip->num_slots;	/* Quirk may have changed this */
-@@ -1853,8 +1851,7 @@ static int sdhci_pci_probe(struct pci_dev *pdev,
- 		if (IS_ERR(slot)) {
- 			for (i--; i >= 0; i--)
- 				sdhci_pci_remove_slot(chip->slots[i]);
--			ret = PTR_ERR(slot);
--			goto free;
-+			return PTR_ERR(slot);
- 		}
- 
- 		chip->slots[i] = slot;
-@@ -1864,35 +1861,18 @@ static int sdhci_pci_probe(struct pci_dev *pdev,
- 		sdhci_pci_runtime_pm_allow(&pdev->dev);
- 
- 	return 0;
--
--free:
--	pci_set_drvdata(pdev, NULL);
--	kfree(chip);
--
--err:
--	pci_disable_device(pdev);
--	return ret;
- }
- 
- static void sdhci_pci_remove(struct pci_dev *pdev)
- {
- 	int i;
--	struct sdhci_pci_chip *chip;
--
--	chip = pci_get_drvdata(pdev);
--
--	if (chip) {
--		if (chip->allow_runtime_pm)
--			sdhci_pci_runtime_pm_forbid(&pdev->dev);
-+	struct sdhci_pci_chip *chip = pci_get_drvdata(pdev);
- 
--		for (i = 0; i < chip->num_slots; i++)
--			sdhci_pci_remove_slot(chip->slots[i]);
--
--		pci_set_drvdata(pdev, NULL);
--		kfree(chip);
--	}
-+	if (chip->allow_runtime_pm)
-+		sdhci_pci_runtime_pm_forbid(&pdev->dev);
- 
--	pci_disable_device(pdev);
-+	for (i = 0; i < chip->num_slots; i++)
-+		sdhci_pci_remove_slot(chip->slots[i]);
- }
- 
- static struct pci_driver sdhci_driver = {
--- 
-2.8.1
-
+Rob
