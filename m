@@ -1,8 +1,8 @@
 From: Dong Aisheng <aisheng.dong@nxp.com>
-Subject: [PATCH V2 09/15] mmc: sdhci-esdhc-imx: enable hw auto retuning for
- STD_TUNING
-Date: Tue, 12 Jul 2016 15:46:18 +0800
-Message-ID: <1468309584-3591-10-git-send-email-aisheng.dong@nxp.com>
+Subject: [PATCH V2 10/15] mmc: sdhci-esdhc-imx: enable hw auto retuning for
+ MAN_TUNING
+Date: Tue, 12 Jul 2016 15:46:19 +0800
+Message-ID: <1468309584-3591-11-git-send-email-aisheng.dong@nxp.com>
 References: <1468309584-3591-1-git-send-email-aisheng.dong@nxp.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
@@ -22,40 +22,53 @@ To: linux-mmc@vger.kernel.org
 Cc: aisheng.dong@nxp.com, ulf.hansson@linaro.org, dongas86@gmail.com, chris@printf.net, haibo.chen@nxp.com, adrian.hunter@intel.com, shawnguo@kernel.org, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
-Enable HW auto retuning when set SDHCI_CTRL_EXEC_TUNING and clear it
-when clear SDHCI_CTRL_TUNED_CLK.
+Indicating hw auto retuning support for mx6qdl in the fake caps_1
+register and enable auto retuning in post_tuning process after
+tuning completes.
 
 Acked-by: Adrian Hunter <adrian.hunter@intel.com>
 Signed-off-by: Dong Aisheng <aisheng.dong@nxp.com>
 ---
- drivers/mmc/host/sdhci-esdhc-imx.c | 3 +++
- 1 file changed, 3 insertions(+)
+ drivers/mmc/host/sdhci-esdhc-imx.c | 11 ++++++++---
+ 1 file changed, 8 insertions(+), 3 deletions(-)
 
 diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
-index b47dad15fa3e..c90aa07b106f 100644
+index c90aa07b106f..ac2c83af7440 100644
 --- a/drivers/mmc/host/sdhci-esdhc-imx.c
 +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
-@@ -45,6 +45,7 @@
- #define  ESDHC_MIX_CTRL_AC23EN		(1 << 7)
- #define  ESDHC_MIX_CTRL_EXE_TUNE	(1 << 22)
- #define  ESDHC_MIX_CTRL_SMPCLK_SEL	(1 << 23)
-+#define  ESDHC_MIX_CTRL_AUTO_TUNE_EN	(1 << 24)
- #define  ESDHC_MIX_CTRL_FBCLK_SEL	(1 << 25)
- #define  ESDHC_MIX_CTRL_HS400_EN	(1 << 26)
- /* Bits 3 and 6 are not SDHCI standard definitions */
-@@ -485,11 +486,13 @@ static void esdhc_writew_le(struct sdhci_host *host, u16 val, int reg)
- 			} else {
- 				v &= ~ESDHC_MIX_CTRL_SMPCLK_SEL;
- 				m &= ~ESDHC_MIX_CTRL_FBCLK_SEL;
-+				m &= ~ESDHC_MIX_CTRL_AUTO_TUNE_EN;
- 			}
+@@ -302,7 +302,8 @@ static u32 esdhc_readl_le(struct sdhci_host *host, int reg)
+ 				/* imx6q/dl does not have cap_1 register, fake one */
+ 				val = SDHCI_SUPPORT_DDR50 | SDHCI_SUPPORT_SDR104
+ 					| SDHCI_SUPPORT_SDR50
+-					| SDHCI_USE_SDR50_TUNING;
++					| SDHCI_USE_SDR50_TUNING
++					| (SDHCI_TUNING_MODE_3 << SDHCI_RETUNING_MODE_SHIFT);
  
- 			if (val & SDHCI_CTRL_EXEC_TUNING) {
- 				v |= ESDHC_MIX_CTRL_EXE_TUNE;
- 				m |= ESDHC_MIX_CTRL_FBCLK_SEL;
-+				m |= ESDHC_MIX_CTRL_AUTO_TUNE_EN;
- 				tuning_ctrl = readl(host->ioaddr + ESDHC_TUNING_CTRL);
- 				tuning_ctrl |= ESDHC_STD_TUNING_EN | ESDHC_TUNING_START_TAP_DEFAULT;
- 				if (imx_data->boarddata.tuning_start_tap) {
+ 			if (imx_data->socdata->flags & ESDHC_FLAG_HS400)
+ 				val |= SDHCI_SUPPORT_HS400;
+@@ -472,10 +473,13 @@ static void esdhc_writew_le(struct sdhci_host *host, u16 val, int reg)
+ 		writel(new_val, host->ioaddr + ESDHC_VENDOR_SPEC);
+ 		if (imx_data->socdata->flags & ESDHC_FLAG_MAN_TUNING) {
+ 			new_val = readl(host->ioaddr + ESDHC_MIX_CTRL);
+-			if (val & SDHCI_CTRL_TUNED_CLK)
++			if (val & SDHCI_CTRL_TUNED_CLK) {
+ 				new_val |= ESDHC_MIX_CTRL_SMPCLK_SEL;
+-			else
++				new_val |= ESDHC_MIX_CTRL_AUTO_TUNE_EN;
++			} else {
+ 				new_val &= ~ESDHC_MIX_CTRL_SMPCLK_SEL;
++				new_val &= ~ESDHC_MIX_CTRL_AUTO_TUNE_EN;
++			}
+ 			writel(new_val , host->ioaddr + ESDHC_MIX_CTRL);
+ 		} else if (imx_data->socdata->flags & ESDHC_FLAG_STD_TUNING) {
+ 			u32 v = readl(host->ioaddr + SDHCI_ACMD12_ERR);
+@@ -761,6 +765,7 @@ static void esdhc_post_tuning(struct sdhci_host *host)
+ 
+ 	reg = readl(host->ioaddr + ESDHC_MIX_CTRL);
+ 	reg &= ~ESDHC_MIX_CTRL_EXE_TUNE;
++	reg |= ESDHC_MIX_CTRL_AUTO_TUNE_EN;
+ 	writel(reg, host->ioaddr + ESDHC_MIX_CTRL);
+ }
+ 
 -- 
 1.9.1
