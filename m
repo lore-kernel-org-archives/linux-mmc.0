@@ -1,74 +1,82 @@
-From: Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
-Subject: Re: [PATCH 3/3] Documentation: mmc: add description for new no-sd*
- and no-mmc
-Date: Tue, 12 Jul 2016 09:51:10 +0800
-Message-ID: <a4633f92-cbe1-55f7-607a-b210ce8b96c7@rock-chips.com>
-References: <1467359130-11409-1-git-send-email-shawn.lin@rock-chips.com>
- <1467359130-11409-4-git-send-email-shawn.lin@rock-chips.com>
- <20160711135735.GA18339@rob-hp-laptop>
+From: Dong Aisheng <aisheng.dong@nxp.com>
+Subject: [PATCH V2 00/15] a few sdhci/imx clean up and fix patches
+Date: Tue, 12 Jul 2016 15:46:09 +0800
+Message-ID: <1468309584-3591-1-git-send-email-aisheng.dong@nxp.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252; format=flowed
+Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20160711135735.GA18339@rob-hp-laptop>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Rob Herring <robh-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-Cc: shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Jaehoon Chung <jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Doug Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: linux-mmc@vger.kernel.org
+Cc: aisheng.dong@nxp.com, ulf.hansson@linaro.org, dongas86@gmail.com, chris@printf.net, haibo.chen@nxp.com, adrian.hunter@intel.com, shawnguo@kernel.org, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
-Hi Rob,
+Patch 1~10 are mainly sdhci cleanup patches while patch 7,9,10
+are fixes which seems needed for stable tree as well.
 
-On 2016/7/11 21:57, Rob Herring WROTE:
-> On Fri, Jul 01, 2016 at 03:45:30PM +0800, Shawn Lin wrote:
->> This patch adds description for no-sd, no-sdio, no-mmc. We
->> expect the specific boards adds these in DT to improve
->> the initialization. For instance, for a soldered eMMC slot,
->> we could skip sending SDIO and SD commands to probe its card
->> types as it's always should be the type fo MMC card.
->>
->> Signed-off-by: Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
->> ---
->>
->>  Documentation/devicetree/bindings/mmc/mmc.txt | 3 +++
->>  1 file changed, 3 insertions(+)
->>
->> diff --git a/Documentation/devicetree/bindings/mmc/mmc.txt b/Documentation/devicetree/bindings/mmc/mmc.txt
->> index ecc007a..b2046c6 100644
->> --- a/Documentation/devicetree/bindings/mmc/mmc.txt
->> +++ b/Documentation/devicetree/bindings/mmc/mmc.txt
->> @@ -49,6 +49,9 @@ Optional properties:
->>  - mmc-hs400-enhanced-strobe: eMMC HS400 enhanced strobe mode is supported
->>  - dsr: Value the card's (optional) Driver Stage Register (DSR) should be
->>    programmed with. Valid range: [0 .. 0xffff].
->> +- no-sdio: skip sending sdio cmd during initialization
->> +- no-sd: skip sending sd cmd during initialization
->> +- no-mmc: skip sending mmc cmd during initialization
->
-> I still have issue with the description for these properties and the
-> commit msg. They are fine if described as controller limitations as Ulf
-> described. If folks want to (ab)use the properties for just skipping
-> init, then that's their problem.
+The main work is:
+1) using more robust mmc_regulator_set_vqmmc 
+2) add auto retune support
+3) improve sdhci-esdhc-imx stability
+4) add state save and restore for low power mode
 
-Sounds like it's okay for you if I amend the commit msg and drscription
-to emphasize that these properties are intent to describe the
-limitations of controllers rather than to skip init.
+Change Log:
+v1->v2:
+ * address all Andrian's comments
+ * below patches are dropped
+  mmc: sdhci: move sdhci_get_cd() forward to avoid declaration
+  mmc: core: fix a comment typo
+  mmc: sdhci: re-factor sdhci_start_signal_voltage()
+  mmc: core: mmc_regulator_set_vqmmc not return error if vqmmc/vmmc not
+    exist
+  mmc: sdhci: check SDHCI_QUIRK2_NO_1_8_V when do voltage switch
+  mmc: sdhci: rename quirk SDHCI_QUIRK_MULTIBLOCK_READ_ACMD12
+	Above clean up is not needed so far according to Andrian.
 
-I will fix them.
+  mmc: sdhci: fix incorrect get data interrupt during no data transfer
+	This one is not needed anymore cause Andrian had another fix
+	already in tree.
+	(commit 0e0a35d2d4058 mmc: sdhci: Track whether a reset is pending)
 
-Thanks.
+  mmc: core: disable auto retune during card detection process
+	This one will sent out in another patch series to fix in CORE.
 
->
-> Rob
->
->
->
+v1:
+http://www.spinics.net/lists/linux-mmc/msg36316.html
 
+Dong Aisheng (15):
+  mmc: sdhci: using common mmc_regulator_set_vqmmc()
+  mmc: sdhci-esdhc-imx: remove SDHCI_QUIRK_BROKEN_TIMEOUT_VAL
+  mmc: sdhci-esdhc-imx: add esdhc specific suspend resume callback
+  mmc: sdhci-esdhc-imx: restore watermark level setting after resume
+  mmc: sdhci-esdhci-imx: disable DLL delay line settings explicitly
+  mmc: sdhci-esdhc-imx: support setting tuning start point
+  doc: dt: fsl-imx-esdhc: add set tuning start point binding
+  mmc: sdhci: add standard hw auto retuning support
+  mmc: sdhci-esdhc-imx: enable hw auto retuning for STD_TUNING
+  mmc: sdhci-esdhc-imx: enable hw auto retuning for MAN_TUNING
+  mmc: sdhci-esdhc-imx: fix strobe DLL lock wrong clock issue
+  mmc: sdhci-esdhc-imx: factor out hw related initialization into
+    function
+  mmc: sdhci-esdhc-imx: move tuning static configuration into hwinit
+    function
+  mmc: sdhci-esdhci-imx: re-initialize hw state after resume
+  mmc: sdhci-esdhc-imx: clear tuning bits during driver probe
+
+ .../devicetree/bindings/mmc/fsl-imx-esdhc.txt      |   2 +
+ drivers/mmc/host/sdhci-esdhc-imx.c                 | 149 ++++++++++++++-------
+ drivers/mmc/host/sdhci.c                           |  24 ++--
+ drivers/mmc/host/sdhci.h                           |   3 +
+ include/linux/platform_data/mmc-esdhc-imx.h        |   1 +
+ 5 files changed, 122 insertions(+), 57 deletions(-)
 
 -- 
-Best Regards
-Shawn Lin
-
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+1.9.1
