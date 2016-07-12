@@ -1,32 +1,23 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
+From: Ben Dooks <ben.dooks@codethink.co.uk>
 Subject: Re: [GIT PULL] Update dw-mmc controller - regression!?
-Date: Tue, 12 Jul 2016 17:29:50 +0900
-Message-ID: <5784AA7E.8060109@samsung.com>
-References: <CGME20160712082840epcas1p26ea53246c9b48141deea2176674bd4f1@epcas1p2.samsung.com>
- <CAPDyKFrvoVFoTAudJjvmAoE2M8bmgaPpoYyE0FG5Z2W7MSQXAg@mail.gmail.com>
+Date: Tue, 12 Jul 2016 09:33:50 +0100
+Message-ID: <8f8aae5f-97a3-b977-717c-f5c75356b9ef@codethink.co.uk>
+References: <CAPDyKFrvoVFoTAudJjvmAoE2M8bmgaPpoYyE0FG5Z2W7MSQXAg@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout4.samsung.com ([203.254.224.34]:45355 "EHLO
-	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750787AbcGLIaE (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 12 Jul 2016 04:30:04 -0400
-Received: from epcpsbgr2.samsung.com
- (u142.gpu120.samsung.co.kr [203.254.230.142])
- by mailout4.samsung.com (Oracle Communications Messaging Server 7.0.5.31.0
- 64bit (built May  5 2014))
- with ESMTP id <0OA701RNA0XQDJ10@mailout4.samsung.com> for
- linux-mmc@vger.kernel.org; Tue, 12 Jul 2016 17:29:50 +0900 (KST)
-In-reply-to: <CAPDyKFrvoVFoTAudJjvmAoE2M8bmgaPpoYyE0FG5Z2W7MSQXAg@mail.gmail.com>
+Received: from ducie-dc1.codethink.co.uk ([185.25.241.215]:42469 "EHLO
+	ducie-dc1.codethink.co.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750949AbcGLId4 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 12 Jul 2016 04:33:56 -0400
+In-Reply-To: <CAPDyKFrvoVFoTAudJjvmAoE2M8bmgaPpoYyE0FG5Z2W7MSQXAg@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Shawn Lin <shawn.lin@rock-chips.com>, Jerome Forissier <jerome.forissier@linaro.org>, "sw0312.kim@samsung.com" <sw0312.kim@samsung.com>, Doug Anderson <dianders@chromium.org>, Ben Dooks <ben.dooks@codethink.co.uk>, Jae hoon Chung <jh80.chung@gmail.com>
+To: Ulf Hansson <ulf.hansson@linaro.org>, Jaehoon Chung <jh80.chung@samsung.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Shawn Lin <shawn.lin@rock-chips.com>, Jerome Forissier <jerome.forissier@linaro.org>, "sw0312.kim@samsung.com" <sw0312.kim@samsung.com>, Doug Anderson <dianders@chromium.org>, Jae hoon Chung <jh80.chung@gmail.com>
 
-Hi Ulf,
-
-On 07/12/2016 05:28 PM, Ulf Hansson wrote:
+On 12/07/16 09:28, Ulf Hansson wrote:
 > On 6 July 2016 at 18:19, Ulf Hansson <ulf.hansson@linaro.org> wrote:
 >> On 29 June 2016 at 03:42, Jaehoon Chung <jh80.chung@samsung.com> wro=
 te:
@@ -110,21 +101,13 @@ le.txt
 > Please, could any of you dw_mmc experts have a look at this as soon a=
 s
 > possible!?
-
-Sure, I will check now..thanks for reporting this.
-
-Best Regards,
-Jaehoon Chung
-
 >=20
 > Kind regards
 > Uffe
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" =
-in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->=20
->=20
->=20
 
+I've had a look and the patch I submitted for des1 looks ok.
+https://patchwork.kernel.org/patch/9161409/
+
+--=20
+Ben Dooks				http://www.codethink.co.uk/
+Senior Engineer				Codethink - Providing Genius
