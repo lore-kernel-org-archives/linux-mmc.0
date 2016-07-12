@@ -1,8 +1,8 @@
 From: Dong Aisheng <aisheng.dong@nxp.com>
-Subject: [PATCH V2 11/15] mmc: sdhci-esdhc-imx: fix strobe DLL lock wrong
- clock issue
-Date: Tue, 12 Jul 2016 15:46:20 +0800
-Message-ID: <1468309584-3591-12-git-send-email-aisheng.dong@nxp.com>
+Subject: [PATCH V2 14/15] mmc: sdhci-esdhci-imx: re-initialize hw state after
+ resume
+Date: Tue, 12 Jul 2016 15:46:23 +0800
+Message-ID: <1468309584-3591-15-git-send-email-aisheng.dong@nxp.com>
 References: <1468309584-3591-1-git-send-email-aisheng.dong@nxp.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
@@ -22,43 +22,33 @@ To: linux-mmc@vger.kernel.org
 Cc: aisheng.dong@nxp.com, ulf.hansson@linaro.org, dongas86@gmail.com, chris@printf.net, haibo.chen@nxp.com, adrian.hunter@intel.com, shawnguo@kernel.org, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
-When enable DDR, the clock factor definition is changed.
-e.g. original 200Mhz will become 100Mhz once MIX_CTRL_DDREN bit is set
-So we need to update the clock setting then the strobe dll can lock
-the correct clock rate.
+sdhci_esdhc_imx_hwinit() includes all basic hw intialization.
+Calling it after resume to re-initialize hw in case its state
+is already lost in low power mode.
 
-Additionally we also need disable the clock before locking strobe dll.
-
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
 Signed-off-by: Dong Aisheng <aisheng.dong@nxp.com>
 ---
- drivers/mmc/host/sdhci-esdhc-imx.c | 7 +++++++
- 1 file changed, 7 insertions(+)
+ drivers/mmc/host/sdhci-esdhc-imx.c | 7 ++-----
+ 1 file changed, 2 insertions(+), 5 deletions(-)
 
 diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
-index ac2c83af7440..bbb0bd4eac28 100644
+index c5adf4ba4066..e5b5d1c3eb01 100644
 --- a/drivers/mmc/host/sdhci-esdhc-imx.c
 +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
-@@ -853,6 +853,11 @@ static void esdhc_set_strobe_dll(struct sdhci_host *host)
- 	u32 v;
+@@ -1297,12 +1297,9 @@ static int sdhci_esdhc_suspend(struct device *dev)
+ static int sdhci_esdhc_resume(struct device *dev)
+ {
+ 	struct sdhci_host *host = dev_get_drvdata(dev);
+-	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+-	struct pltfm_imx_data *imx_data = sdhci_pltfm_priv(pltfm_host);
  
- 	if (host->mmc->actual_clock > ESDHC_STROBE_DLL_CLK_FREQ) {
-+		/* disable clock before enabling strobe dll */
-+		writel(readl(host->ioaddr + ESDHC_VENDOR_SPEC) &
-+		       ~ESDHC_VENDOR_SPEC_FRC_SDCLK_ON,
-+		       host->ioaddr + ESDHC_VENDOR_SPEC);
-+
- 		/* force a reset on strobe dll */
- 		writel(ESDHC_STROBE_DLL_CTRL_RESET,
- 			host->ioaddr + ESDHC_STROBE_DLL_CTRL);
-@@ -914,6 +919,8 @@ static void esdhc_set_uhs_signaling(struct sdhci_host *host, unsigned timing)
- 		m |= ESDHC_MIX_CTRL_DDREN | ESDHC_MIX_CTRL_HS400_EN;
- 		writel(m, host->ioaddr + ESDHC_MIX_CTRL);
- 		imx_data->is_ddr = 1;
-+		/* update clock after enable DDR for strobe DLL lock */
-+		host->ops->set_clock(host, host->clock);
- 		esdhc_set_strobe_dll(host);
- 		break;
- 	}
+-	/* restore watermark setting in case it's lost in low power mode */
+-	if (esdhc_is_usdhc(imx_data))
+-		writel(ESDHC_WTMK_DEFAULT_VAL, host->ioaddr + ESDHC_WTMK_LVL);
++	/* re-initialize hw state in case it's lost in low power mode */
++	sdhci_esdhc_imx_hwinit(host);
+ 
+ 	return sdhci_pltfm_resume(dev);
+ }
 -- 
 1.9.1
