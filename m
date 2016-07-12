@@ -1,23 +1,24 @@
-From: Ben Dooks <ben.dooks@codethink.co.uk>
+From: Shawn Lin <shawn.lin@rock-chips.com>
 Subject: Re: [GIT PULL] Update dw-mmc controller - regression!?
-Date: Tue, 12 Jul 2016 09:33:50 +0100
-Message-ID: <8f8aae5f-97a3-b977-717c-f5c75356b9ef@codethink.co.uk>
+Date: Tue, 12 Jul 2016 16:55:53 +0800
+Message-ID: <262302f4-e463-239f-e97b-78dcf5c61c39@rock-chips.com>
 References: <CAPDyKFrvoVFoTAudJjvmAoE2M8bmgaPpoYyE0FG5Z2W7MSQXAg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=utf-8;
+	format=flowed
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from ducie-dc1.codethink.co.uk ([185.25.241.215]:42469 "EHLO
-	ducie-dc1.codethink.co.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750949AbcGLId4 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 12 Jul 2016 04:33:56 -0400
+Received: from lucky1.263xmail.com ([211.157.147.133]:57384 "EHLO
+	lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752576AbcGLI4K (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 12 Jul 2016 04:56:10 -0400
 In-Reply-To: <CAPDyKFrvoVFoTAudJjvmAoE2M8bmgaPpoYyE0FG5Z2W7MSQXAg@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>, Jaehoon Chung <jh80.chung@samsung.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Shawn Lin <shawn.lin@rock-chips.com>, Jerome Forissier <jerome.forissier@linaro.org>, "sw0312.kim@samsung.com" <sw0312.kim@samsung.com>, Doug Anderson <dianders@chromium.org>, Jae hoon Chung <jh80.chung@gmail.com>
+Cc: shawn.lin@rock-chips.com, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Jerome Forissier <jerome.forissier@linaro.org>, "sw0312.kim@samsung.com" <sw0312.kim@samsung.com>, Doug Anderson <dianders@chromium.org>, Ben Dooks <ben.dooks@codethink.co.uk>, Jae hoon Chung <jh80.chung@gmail.com>
 
-On 12/07/16 09:28, Ulf Hansson wrote:
+=E5=9C=A8 2016/7/12 16:28, Ulf Hansson =E5=86=99=E9=81=93:
 > On 6 July 2016 at 18:19, Ulf Hansson <ulf.hansson@linaro.org> wrote:
 >> On 29 June 2016 at 03:42, Jaehoon Chung <jh80.chung@samsung.com> wro=
 te:
@@ -80,34 +81,52 @@ s
 >>>  6 files changed, 108 insertions(+), 80 deletions(-)
 >>
 >> Thanks Jaehoon, pulled into my next branch!
->=20
->=20
+>
+>
 > Reported by kernelci, It seems like some of these patches are causing
 > the exynos5250-arndale to fail to boot.
 > I looked briefly at the logs and the bisect report (which isn't
 > complete) and it turns out that the eMMC card at mmc0 isn't detected
 > properly.
->=20
+>
 > Here's the boot summary (it turns out there are more boards failing,
 > don't know if all are related to dw_mmc, yet):
 > https://kernelci.org/boot/all/job/ulfh/kernel/v4.7-rc5-92-g4e01b578ad=
 e9/
->=20
+
+I quickly look at the failed bootlogs of your reports.
+My three patches don't touch the behaviour for which I search dw_mmc
+code to find whether it will generate some possible to make mmc-core
+got -EINVAL. It's a little difficult for me to point out the root cause
+without more debug log or geting the real failed board.
+
+
+It will be great if Jaehoon have a exynos5250-* board to debug?
+Or Ulf, could you revert the commit 97f659a2e (mmc: dw_mmc: prevent to=20
+set the wrong value) to see if we could boot up exynos5250-arndale
+successfully?
+
+>
 > Here's the bootlog:
 > https://storage.kernelci.org/ulfh/v4.7-rc5-92-g4e01b578ade9/arm-multi=
 _v7_defconfig+CONFIG_EFI=3Dy/lab-baylibre-seattle/boot-exynos5250-arnda=
 le.txt
->=20
+>
 > Please, could any of you dw_mmc experts have a look at this as soon a=
 s
 > possible!?
->=20
+>
 > Kind regards
 > Uffe
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" =
+in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
 
-I've had a look and the patch I submitted for des1 looks ok.
-https://patchwork.kernel.org/patch/9161409/
 
 --=20
-Ben Dooks				http://www.codethink.co.uk/
-Senior Engineer				Codethink - Providing Genius
+Best Regards
+Shawn Lin
+
