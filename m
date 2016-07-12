@@ -1,74 +1,103 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: core: Extend sysfs with OCR register
-Date: Tue, 12 Jul 2016 11:53:50 +0200
-Message-ID: <CAPDyKFo7wVfRroVLui2b_oUBbMjYGFg8FMMW6vXF3pXtSw1a7Q@mail.gmail.com>
-References: <20160704115818.35614-1-prtvar.b@gmail.com> <CAPDyKFqTSRupW+qWFWP=5xwQMWU79NFWTxipwButc8D_jFw05g@mail.gmail.com>
+Subject: Re: [PATCH RFC] mmc: core: Extend sysfs with DSR register
+Date: Tue, 12 Jul 2016 11:56:58 +0200
+Message-ID: <CAPDyKFrrCovUcZ0waTWaO2Y-UKeBRBwbwe2573CGgoSi7u_90A@mail.gmail.com>
+References: <20160707081930.53884-1-prtvar.b@gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-doc-owner@vger.kernel.org>
-In-Reply-To: <CAPDyKFqTSRupW+qWFWP=5xwQMWU79NFWTxipwButc8D_jFw05g@mail.gmail.com>
-Sender: linux-doc-owner@vger.kernel.org
-To: Bojan Prtvar <prtvar.b@gmail.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Jonathan Corbet <corbet@lwn.net>, Linus Walleij <linus.walleij@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, Dong Aisheng <aisheng.dong@nxp.com>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Gwendal Grignou <gwendal@chromium.org>, Chaotian Jing <chaotian.jing@mediatek.com>, "linux-doc@vger.kernel.org" <linux-doc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-wm0-f53.google.com ([74.125.82.53]:38508 "EHLO
+	mail-wm0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752964AbcGLJ5A (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 12 Jul 2016 05:57:00 -0400
+Received: by mail-wm0-f53.google.com with SMTP id o80so18304530wme.1
+        for <linux-mmc@vger.kernel.org>; Tue, 12 Jul 2016 02:57:00 -0700 (PDT)
+In-Reply-To: <20160707081930.53884-1-prtvar.b@gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Bojan Prtvar <prtvar.b@gmail.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>
 
-On 6 July 2016 at 18:21, Ulf Hansson <ulf.hansson@linaro.org> wrote:
-> On 4 July 2016 at 13:56, Bojan Prtvar <prtvar.b@gmail.com> wrote:
->> Make operation conditions register (OCR) easily accessible from user space.
->>
->> Signed-off-by: Bojan Prtvar <prtvar.b@gmail.com>
+On 7 July 2016 at 10:19, Bojan Prtvar <prtvar.b@gmail.com> wrote:
+> Hi,
 >
-> Thanks, applied for next! Amended the changelog with the explanation
-> why this change is wanted.
+> On embedded platform we have a small diagnostic application which
+> has to record following emmc registers on every power cycle:
+> CID, CSD, EXT_CSD, OCR, RCA and DSR. The CID, CSD, EXT_CSD and OCR
+> are accessible via ioctl(MMC_IOC_CMD) or through sysfs. The RCA
+> should always be 1 on any linux platform. I can't find a better way
+> for accessing the DSR then as proposed below.
+>
+> Regards,
+> Bojan
+>
+> User space access to Driver Stage Register (DSR) can be useful
+> for diagnostics purpose.
 
-I just realized that the OCR register is also available for SD cards.
-
-Could you perhaps cook a patch which adds this to sysfs for SD cards as well!?
+Can you please rephrase this changelog, similar to how changlog looks
+like for the patch which added the OCR register to sysfs.
 
 Kind regards
 Uffe
 
 >
-> Kind regards
-> Uffe
+> Signed-off-by: Bojan Prtvar <prtvar.b@gmail.com>
+> ---
+>  Documentation/mmc/mmc-dev-attrs.txt |  1 +
+>  drivers/mmc/core/mmc.c              | 17 +++++++++++++++++
+>  2 files changed, 18 insertions(+)
 >
->> ---
->>  Documentation/mmc/mmc-dev-attrs.txt | 1 +
->>  drivers/mmc/core/mmc.c              | 2 ++
->>  2 files changed, 3 insertions(+)
->>
->> diff --git a/Documentation/mmc/mmc-dev-attrs.txt b/Documentation/mmc/mmc-dev-attrs.txt
->> index caa5557..8163eca 100644
->> --- a/Documentation/mmc/mmc-dev-attrs.txt
->> +++ b/Documentation/mmc/mmc-dev-attrs.txt
->> @@ -28,6 +28,7 @@ All attributes are read-only.
->>         preferred_erase_size    Preferred erase size
->>         raw_rpmb_size_mult      RPMB partition size
->>         rel_sectors             Reliable write sector count
->> +       ocr                     Operation Conditions Register
->>
->>  Note on Erase Size and Preferred Erase Size:
->>
->> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
->> index 5d438ad..1848334 100644
->> --- a/drivers/mmc/core/mmc.c
->> +++ b/drivers/mmc/core/mmc.c
->> @@ -727,6 +727,7 @@ MMC_DEV_ATTR(enhanced_area_offset, "%llu\n",
->>  MMC_DEV_ATTR(enhanced_area_size, "%u\n", card->ext_csd.enhanced_area_size);
->>  MMC_DEV_ATTR(raw_rpmb_size_mult, "%#x\n", card->ext_csd.raw_rpmb_size_mult);
->>  MMC_DEV_ATTR(rel_sectors, "%#x\n", card->ext_csd.rel_sectors);
->> +MMC_DEV_ATTR(ocr, "%08x\n", card->ocr);
->>
->>  static ssize_t mmc_fwrev_show(struct device *dev,
->>                               struct device_attribute *attr,
->> @@ -762,6 +763,7 @@ static struct attribute *mmc_std_attrs[] = {
->>         &dev_attr_enhanced_area_size.attr,
->>         &dev_attr_raw_rpmb_size_mult.attr,
->>         &dev_attr_rel_sectors.attr,
->> +       &dev_attr_ocr.attr,
->>         NULL,
->>  };
->>  ATTRIBUTE_GROUPS(mmc_std);
->> --
->> 2.8.0.GIT
->>
+> diff --git a/Documentation/mmc/mmc-dev-attrs.txt b/Documentation/mmc/mmc-dev-attrs.txt
+> index 8163eca..404a0e9 100644
+> --- a/Documentation/mmc/mmc-dev-attrs.txt
+> +++ b/Documentation/mmc/mmc-dev-attrs.txt
+> @@ -29,6 +29,7 @@ All attributes are read-only.
+>         raw_rpmb_size_mult      RPMB partition size
+>         rel_sectors             Reliable write sector count
+>         ocr                     Operation Conditions Register
+> +       dsr                     Driver Stage Register
+>
+>  Note on Erase Size and Preferred Erase Size:
+>
+> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+> index 1848334..4363fdc 100644
+> --- a/drivers/mmc/core/mmc.c
+> +++ b/drivers/mmc/core/mmc.c
+> @@ -745,6 +745,22 @@ static ssize_t mmc_fwrev_show(struct device *dev,
+>
+>  static DEVICE_ATTR(fwrev, S_IRUGO, mmc_fwrev_show, NULL);
+>
+> +static ssize_t mmc_dsr_show(struct device *dev,
+> +                           struct device_attribute *attr,
+> +                           char *buf)
+> +{
+> +       struct mmc_card *card = mmc_dev_to_card(dev);
+> +       struct mmc_host *host = card->host;
+> +
+> +       if (card->csd.dsr_imp && host->dsr_req)
+> +               return sprintf(buf, "0x%x\n", host->dsr);
+> +       else
+> +               /* return default DSR value */
+> +               return sprintf(buf, "0x%x\n", 0x404);
+> +}
+> +
+> +static DEVICE_ATTR(dsr, S_IRUGO, mmc_dsr_show, NULL);
+> +
+>  static struct attribute *mmc_std_attrs[] = {
+>         &dev_attr_cid.attr,
+>         &dev_attr_csd.attr,
+> @@ -764,6 +780,7 @@ static struct attribute *mmc_std_attrs[] = {
+>         &dev_attr_raw_rpmb_size_mult.attr,
+>         &dev_attr_rel_sectors.attr,
+>         &dev_attr_ocr.attr,
+> +       &dev_attr_dsr.attr,
+>         NULL,
+>  };
+>  ATTRIBUTE_GROUPS(mmc_std);
+> --
+> 2.8.0.GIT
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
