@@ -1,53 +1,83 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: block: fix free of uninitialized 'idata->buf'
-Date: Tue, 12 Jul 2016 12:07:35 +0200
-Message-ID: <CAPDyKFpEPW-7FrpRceJACkg9uY3FcutPtCNnpxA8uQSE4arnuQ@mail.gmail.com>
-References: <1467991622-11036-1-git-send-email-ville@tuxera.com>
+Subject: Re: [PATCH] mmc: sdhci-pci: Add support for Intel KBP
+Date: Tue, 12 Jul 2016 12:08:00 +0200
+Message-ID: <CAPDyKFpfbS1uuX=C+KQkThejBQRxyay=Tf22JPe+xLhiw3Oyig@mail.gmail.com>
+References: <1466594353-13730-1-git-send-email-adrian.hunter@intel.com>
+ <CAPDyKFpSMJ-StCwNdk-w8g44tBfZKF8y6Au2mxEiAa7uSjSG_A@mail.gmail.com> <577E1B15.8080503@intel.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1467991622-11036-1-git-send-email-ville@tuxera.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Ville Viinikka <ville@tuxera.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, stable <stable@vger.kernel.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-wm0-f48.google.com ([74.125.82.48]:38465 "EHLO
+	mail-wm0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753861AbcGLKIC (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 12 Jul 2016 06:08:02 -0400
+Received: by mail-wm0-f48.google.com with SMTP id o80so18663999wme.1
+        for <linux-mmc@vger.kernel.org>; Tue, 12 Jul 2016 03:08:01 -0700 (PDT)
+In-Reply-To: <577E1B15.8080503@intel.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Adrian Hunter <adrian.hunter@intel.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>
 
-+ stable
-
-On 8 July 2016 at 17:27, Ville Viinikka <ville@tuxera.com> wrote:
-> Set 'idata->buf' to NULL so that it never gets returned without
-> initialization. This fixes a bug where mmc_blk_ioctl_cmd() would
-> free both 'idata' and 'idata->buf' but 'idata->buf' was returned
-> uninitialized.
+On 7 July 2016 at 11:04, Adrian Hunter <adrian.hunter@intel.com> wrote:
+> On 22/06/16 18:24, Ulf Hansson wrote:
+>> On 22 June 2016 at 13:19, Adrian Hunter <adrian.hunter@intel.com> wrote:
+>>> Add PCI ID for Intel KBP SD host controller.
+>>>
+>>> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
+>>
+>> Thanks, applied for next!
 >
-> Fixes: 1ff8950c0433 ("mmc: block: change to use kmalloc when copy data from userspace")
-> Signed-off-by: Ville Viinikka <ville@tuxera.com>
+> It turns out this ID is wrong!  Can you please drop this patch from next?
 
-I added a stable tag to this and applied it for next!
+I have dropped it from my next branch, sorry for the delay!
 
-Thanks and kind regards!
+Kind regards
 Uffe
 
-> ---
->  drivers/mmc/card/block.c | 4 +++-
->  1 file changed, 3 insertions(+), 1 deletion(-)
 >
-> diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
-> index 747c4b0..334d637 100644
-> --- a/drivers/mmc/card/block.c
-> +++ b/drivers/mmc/card/block.c
-> @@ -355,8 +355,10 @@ static struct mmc_blk_ioc_data *mmc_blk_ioctl_copy_from_user(
->                 goto idata_err;
->         }
->
-> -       if (!idata->buf_bytes)
-> +       if (!idata->buf_bytes) {
-> +               idata->buf = NULL;
->                 return idata;
-> +       }
->
->         idata->buf = kmalloc(idata->buf_bytes, GFP_KERNEL);
->         if (!idata->buf) {
-> --
-> 2.1.4
+>>
+>> Kind regards
+>> Uffe
+>>
+>>> ---
+>>>  drivers/mmc/host/sdhci-pci-core.c | 8 ++++++++
+>>>  drivers/mmc/host/sdhci-pci.h      | 1 +
+>>>  2 files changed, 9 insertions(+)
+>>>
+>>> diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-pci-core.c
+>>> index a4dbf7421edc..5b03a7ecc6c9 100644
+>>> --- a/drivers/mmc/host/sdhci-pci-core.c
+>>> +++ b/drivers/mmc/host/sdhci-pci-core.c
+>>> @@ -1215,6 +1215,14 @@ static const struct pci_device_id pci_ids[] = {
+>>>         },
+>>>
+>>>         {
+>>> +               .vendor         = PCI_VENDOR_ID_INTEL,
+>>> +               .device         = PCI_DEVICE_ID_INTEL_KBP_SD,
+>>> +               .subvendor      = PCI_ANY_ID,
+>>> +               .subdevice      = PCI_ANY_ID,
+>>> +               .driver_data    = (kernel_ulong_t)&sdhci_intel_byt_sd,
+>>> +       },
+>>> +
+>>> +       {
+>>>                 .vendor         = PCI_VENDOR_ID_O2,
+>>>                 .device         = PCI_DEVICE_ID_O2_8120,
+>>>                 .subvendor      = PCI_ANY_ID,
+>>> diff --git a/drivers/mmc/host/sdhci-pci.h b/drivers/mmc/host/sdhci-pci.h
+>>> index 89e7151684a1..968b81ed8e4d 100644
+>>> --- a/drivers/mmc/host/sdhci-pci.h
+>>> +++ b/drivers/mmc/host/sdhci-pci.h
+>>> @@ -34,6 +34,7 @@
+>>>  #define PCI_DEVICE_ID_INTEL_APL_SD     0x5aca
+>>>  #define PCI_DEVICE_ID_INTEL_APL_EMMC   0x5acc
+>>>  #define PCI_DEVICE_ID_INTEL_APL_SDIO   0x5ad0
+>>> +#define PCI_DEVICE_ID_INTEL_KBP_SD     0xa2f5
+>>>
+>>>  /*
+>>>   * PCI registers
+>>> --
+>>> 1.9.1
+>>>
+>>
 >
