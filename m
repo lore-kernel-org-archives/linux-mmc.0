@@ -1,128 +1,52 @@
-From: Jon Hunter <jonathanh-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
-Subject: Re: [PATCH V2 2/2] mmc: tegra: Only advertise UHS modes if IO
- regulator is present
-Date: Tue, 12 Jul 2016 14:56:36 +0100
-Message-ID: <5784F714.5090809@nvidia.com>
-References: <1468331617-22265-1-git-send-email-jonathanh@nvidia.com>
- <1468331617-22265-2-git-send-email-jonathanh@nvidia.com>
+From: Andrew Lunn <andrew@lunn.ch>
+Subject: Re: [PATCH V2 07/15] doc: dt: fsl-imx-esdhc: add set tuning start
+ point binding
+Date: Tue, 12 Jul 2016 15:59:07 +0200
+Message-ID: <20160712135907.GA30437@lunn.ch>
+References: <1468309584-3591-1-git-send-email-aisheng.dong@nxp.com>
+ <1468309584-3591-8-git-send-email-aisheng.dong@nxp.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="windows-1252"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1468331617-22265-2-git-send-email-jonathanh-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
-Sender: linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Stephen Warren <swarren-3lzwWm7+Weoh9ZMKESR00Q@public.gmane.org>, Thierry Reding <thierry.reding-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Alexandre Courbot <gnurou-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Cc: linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from vps0.lunn.ch ([178.209.37.122]:40889 "EHLO vps0.lunn.ch"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753664AbcGLN7J (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 12 Jul 2016 09:59:09 -0400
+Content-Disposition: inline
+In-Reply-To: <1468309584-3591-8-git-send-email-aisheng.dong@nxp.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Dong Aisheng <aisheng.dong@nxp.com>
+Cc: linux-mmc@vger.kernel.org, ulf.hansson@linaro.org, dongas86@gmail.com, chris@printf.net, haibo.chen@nxp.com, adrian.hunter@intel.com, shawnguo@kernel.org, linux-arm-kernel@lists.infradead.org
 
-
-On 12/07/16 14:53, Jon Hunter wrote:
-> To support UHS modes for Tegra an external regulator must be present
-> to adjust the IO voltage accordingly. Even if the regulator is not
-> present but the host supports the UHS modes and the device supports the
-> UHS modes, then we will attempt to switch to a high-speed mode. Without
-> an external regulator, Tegra will fail to switch to the high-speed
-> mode.
+On Tue, Jul 12, 2016 at 03:46:16PM +0800, Dong Aisheng wrote:
+> add tuning start point binding
 > 
-> It has been found that with some SD cards, that once it has been switch
-> to operate at a high-speed mode, all subsequent commands issues to the
-> card will fail and so it will not be possible to switch back to a non
-> high-speed mode and so the SD card initialisation will fail.
-> 
-> The SDHCI core does not require that the host have an external regulator
-> when switching to UHS modes and therefore, the Tegra SDHCI host
-> controller should only advertise the UHS modes as being supported if the
-> regulator for the IO voltage is present. Fortunately, Tegra has a vendor
-> specific register which can be used to control which modes are
-> advertised via the SDHCI_CAPABILITIES register. Hence, if there is no IO
-> voltage regulator available for the Tegra SDHCI host, then don't
-> advertise the UHS modes.
-> 
-> Note that if the regulator is not available, we also don't advertise that
-> the SDHCI is compatible with v3.0 of the SDHCI specification because
-> this will read the SDHCI_CAPABILITIES_1 register which will enable other
-> UHS modes.
-> 
-> This fixes commit 7ad2ed1dfcbe ("mmc: tegra: enable UHS-I modes") which
-> enables UHS mode without checking if the board can support them.
-> 
-> Fixes: 7ad2ed1dfcbe ("mmc: tegra: enable UHS-I modes")
-> 
-> Signed-off-by: Jon Hunter <jonathanh-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
+> Signed-off-by: Dong Aisheng <aisheng.dong@nxp.com>
 > ---
-
-Should have listed V2 changes here which are:
-
-- Updated patch to enable UHS modes if the IO voltage regulator has
-  been successfully requested rather than just checking the DT for the
-  presence of the regulator (based on Alex C's feedback).
-
->  drivers/mmc/host/sdhci-tegra.c | 49 +++++++++++++++++++++++++-----------------
->  1 file changed, 29 insertions(+), 20 deletions(-)
+>  Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.txt | 2 ++
+>  1 file changed, 2 insertions(+)
 > 
-> diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
-> index bcc0de47fe7e..bd1199825f9f 100644
-> --- a/drivers/mmc/host/sdhci-tegra.c
-> +++ b/drivers/mmc/host/sdhci-tegra.c
-> @@ -148,28 +148,37 @@ static void tegra_sdhci_reset(struct sdhci_host *host, u8 mask)
->  		return;
->  
->  	misc_ctrl = sdhci_readl(host, SDHCI_TEGRA_VENDOR_MISC_CTRL);
-> -	/* Erratum: Enable SDHCI spec v3.00 support */
-> -	if (soc_data->nvquirks & NVQUIRK_ENABLE_SDHCI_SPEC_300)
-> -		misc_ctrl |= SDHCI_MISC_CTRL_ENABLE_SDHCI_SPEC_300;
-> -	/* Advertise UHS modes as supported by host */
-> -	if (soc_data->nvquirks & NVQUIRK_ENABLE_SDR50)
-> -		misc_ctrl |= SDHCI_MISC_CTRL_ENABLE_SDR50;
-> -	else
-> -		misc_ctrl &= ~SDHCI_MISC_CTRL_ENABLE_SDR50;
-> -	if (soc_data->nvquirks & NVQUIRK_ENABLE_DDR50)
-> -		misc_ctrl |= SDHCI_MISC_CTRL_ENABLE_DDR50;
-> -	else
-> -		misc_ctrl &= ~SDHCI_MISC_CTRL_ENABLE_DDR50;
-> -	if (soc_data->nvquirks & NVQUIRK_ENABLE_SDR104)
-> -		misc_ctrl |= SDHCI_MISC_CTRL_ENABLE_SDR104;
-> -	else
-> -		misc_ctrl &= ~SDHCI_MISC_CTRL_ENABLE_SDR104;
-> -	sdhci_writel(host, misc_ctrl, SDHCI_TEGRA_VENDOR_MISC_CTRL);
-> -
->  	clk_ctrl = sdhci_readl(host, SDHCI_TEGRA_VENDOR_CLOCK_CTRL);
-> +
-> +	misc_ctrl &= ~(SDHCI_MISC_CTRL_ENABLE_SDHCI_SPEC_300 |
-> +		       SDHCI_MISC_CTRL_ENABLE_SDR50 |
-> +		       SDHCI_MISC_CTRL_ENABLE_DDR50 |
-> +		       SDHCI_MISC_CTRL_ENABLE_SDR104);
-> +
->  	clk_ctrl &= ~SDHCI_CLOCK_CTRL_SPI_MODE_CLKEN_OVERRIDE;
-> -	if (soc_data->nvquirks & SDHCI_MISC_CTRL_ENABLE_SDR50)
-> -		clk_ctrl |= SDHCI_CLOCK_CTRL_SDR50_TUNING_OVERRIDE;
-> +
-> +	/*
-> +	 * If the board does not define a regulator for the SDHCI
-> +	 * IO voltage, then don't advertise support for UHS modes
-> +	 * even if the device supports it because the IO voltage
-> +	 * cannot be configured.
-> +	 */
-> +	if (!IS_ERR(host->mmc->supply.vqmmc)) {
-> +		/* Erratum: Enable SDHCI spec v3.00 support */
-> +		if (soc_data->nvquirks & NVQUIRK_ENABLE_SDHCI_SPEC_300)
-> +			misc_ctrl |= SDHCI_MISC_CTRL_ENABLE_SDHCI_SPEC_300;
-> +		/* Advertise UHS modes as supported by host */
-> +		if (soc_data->nvquirks & NVQUIRK_ENABLE_SDR50)
-> +			misc_ctrl |= SDHCI_MISC_CTRL_ENABLE_SDR50;
-> +		if (soc_data->nvquirks & NVQUIRK_ENABLE_DDR50)
-> +			misc_ctrl |= SDHCI_MISC_CTRL_ENABLE_DDR50;
-> +		if (soc_data->nvquirks & NVQUIRK_ENABLE_SDR104)
-> +			misc_ctrl |= SDHCI_MISC_CTRL_ENABLE_SDR104;
-> +		if (soc_data->nvquirks & SDHCI_MISC_CTRL_ENABLE_SDR50)
-> +			clk_ctrl |= SDHCI_CLOCK_CTRL_SDR50_TUNING_OVERRIDE;
-> +	}
-> +
-> +	sdhci_writel(host, misc_ctrl, SDHCI_TEGRA_VENDOR_MISC_CTRL);
->  	sdhci_writel(host, clk_ctrl, SDHCI_TEGRA_VENDOR_CLOCK_CTRL);
->  
->  	if (soc_data->nvquirks & NVQUIRK_HAS_PADCALIB)
-> 
+> diff --git a/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.txt b/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.txt
+> index dca56d6248f5..3e29050ec769 100644
+> --- a/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.txt
+> +++ b/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.txt
+> @@ -28,6 +28,8 @@ Optional properties:
+>    transparent level shifters on the outputs of the controller. Two cells are
+>    required, first cell specifies minimum slot voltage (mV), second cell
+>    specifies maximum slot voltage (mV). Several ranges could be specified.
+> +- fsl,tuning-start-tap: Specify the start dealy cell point when send first CMD19
+> +  in tuning procedure.
+>  - fsl,tuning-step: Specify the increasing delay cell steps in tuning procedure.
+>    The uSDHC use one delay cell as default increasing step to do tuning process.
+>    This property allows user to change the tuning step to more than one delay
 
--- 
-nvpublic
+Hi Dong
+
+You say this is a patch which should be part of stable. How does it
+fulfil the requirements listed in
+
+Linux/Documentation/stable_kernel_rules.txt
+
+Thanks
+	Andrew
