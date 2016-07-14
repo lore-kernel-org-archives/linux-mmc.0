@@ -1,40 +1,40 @@
-From: Shawn Lin <shawn.lin@rock-chips.com>
-Subject: [PATCH v2 1/2] Documentation: mmc: add description for new no-sd* and no-mmc
-Date: Thu, 14 Jul 2016 16:26:03 +0800
-Message-ID: <1468484764-32353-1-git-send-email-shawn.lin@rock-chips.com>
+From: Krzysztof Kozlowski <k.kozlowski@samsung.com>
+Subject: [PATCH] mmc: dwmmc: exynos: Warn if HS400 is being used on
+ non-Exynos5420 chipset
+Date: Thu, 14 Jul 2016 15:22:27 +0200
+Message-ID: <1468502547-18571-1-git-send-email-k.kozlowski@samsung.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, Jaehoon Chung <jh80.chung@samsung.com>, Rob Herring <robh+dt@kernel.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, devicetree@vger.kernel.org, Shawn Lin <shawn.lin@rock-chips.com>
+To: Jaehoon Chung <jh80.chung@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>, Kukjin Kim <kgene@kernel.org>, Krzysztof Kozlowski <k.kozlowski@samsung.com>, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-samsung-soc@vger.kernel.org, linux-kernel@vger.kernel.org
+Cc: Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>
 List-Id: linux-mmc@vger.kernel.org
 
-This patch adds description for no-sd, no-sdio, no-mmc. We expose
-these to DT as some of the controllers are unable to deal with
-special cmd type due to hw limitation.
+Chipsets before Exynos5420 did not support HS400 so if MMC core tries to
+configure HS400 timing, this might or might not work.  Warn in such
+cases because this is DTB misconfiguration.
 
-Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
-
+Signed-off-by: Krzysztof Kozlowski <k.kozlowski@samsung.com>
 ---
+ drivers/mmc/host/dw_mmc-exynos.c | 6 +++++-
+ 1 file changed, 5 insertions(+), 1 deletion(-)
 
-Changes in v2:
-- amend the description of these properties and the commit msg
-
- Documentation/devicetree/bindings/mmc/mmc.txt | 3 +++
- 1 file changed, 3 insertions(+)
-
-diff --git a/Documentation/devicetree/bindings/mmc/mmc.txt b/Documentation/devicetree/bindings/mmc/mmc.txt
-index ecc007a..22d1e1f 100644
---- a/Documentation/devicetree/bindings/mmc/mmc.txt
-+++ b/Documentation/devicetree/bindings/mmc/mmc.txt
-@@ -49,6 +49,9 @@ Optional properties:
- - mmc-hs400-enhanced-strobe: eMMC HS400 enhanced strobe mode is supported
- - dsr: Value the card's (optional) Driver Stage Register (DSR) should be
-   programmed with. Valid range: [0 .. 0xffff].
-+- no-sdio: controller is limited to send sdio cmd during initialization
-+- no-sd: controller is limited to send sd cmd during initialization
-+- no-mmc: controller is limited to send mmc cmd during initialization
+diff --git a/drivers/mmc/host/dw_mmc-exynos.c b/drivers/mmc/host/dw_mmc-exynos.c
+index da0ef1765735..7ab3d749b5ae 100644
+--- a/drivers/mmc/host/dw_mmc-exynos.c
++++ b/drivers/mmc/host/dw_mmc-exynos.c
+@@ -225,8 +225,12 @@ static void dw_mci_exynos_config_hs400(struct dw_mci *host, u32 timing)
+ 	 * Not supported to configure register
+ 	 * related to HS400
+ 	 */
+-	if (priv->ctrl_type < DW_MCI_TYPE_EXYNOS5420)
++	if (priv->ctrl_type < DW_MCI_TYPE_EXYNOS5420) {
++		if (timing == MMC_TIMING_MMC_HS400)
++			dev_warn(host->dev,
++				 "cannot configure HS400, unsupported chipset\n");
+ 		return;
++	}
  
- *NOTE* on CD and WP polarity. To use common for all SD/MMC host controllers line
- polarity properties, we have to fix the meaning of the "normal" and "inverted"
+ 	dqs = priv->saved_dqs_en;
+ 	strobe = priv->saved_strobe_ctrl;
 -- 
-2.3.7
+1.9.1
