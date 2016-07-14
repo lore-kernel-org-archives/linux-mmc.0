@@ -1,68 +1,45 @@
-From: Taras Kondratiuk <takondra@cisco.com>
-Subject: [PATCH] mmc: block: fix packed command header endianness
-Date: Wed, 13 Jul 2016 22:05:38 +0000
-Message-ID: <1468447538-17973-1-git-send-email-takondra@cisco.com>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from rcdn-iport-5.cisco.com ([173.37.86.76]:10722 "EHLO
-	rcdn-iport-5.cisco.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751092AbcGMWPb (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 13 Jul 2016 18:15:31 -0400
-Sender: linux-mmc-owner@vger.kernel.org
+From: Shawn Lin <shawn.lin@rock-chips.com>
+Subject: [PATCH v2 2/2] mmc: core: expose MMC_CAP2_NO_* to dt
+Date: Thu, 14 Jul 2016 16:26:04 +0800
+Message-ID: <1468484764-32353-2-git-send-email-shawn.lin@rock-chips.com>
+References: <1468484764-32353-1-git-send-email-shawn.lin@rock-chips.com>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1468484764-32353-1-git-send-email-shawn.lin@rock-chips.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, Jaehoon Chung <jh80.chung@samsung.com>, Rob Herring <robh+dt@kernel.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, devicetree@vger.kernel.org, Shawn Lin <shawn.lin@rock-chips.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Seungwon Jeon <tgih.jun@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, xe-linux-external@cisco.com
 
-The code that fills packed command header assumes that CPU runs in
-little-endian mode. Hence the header is malformed in big-endian mode
-and causes MMC data transfer errors:
+The reason for why we expose these to dt is that some of
+the controller is unable to send special cmd type due to
+the hw limitation.
 
-[  563.200828] mmcblk0: error -110 transferring data, sector 2048, nr 8, cmd response 0x900, card status 0xc40
-[  563.219647] mmcblk0: packed cmd failed, nr 2, sectors 16, failure index: -1
+Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
 
-Convert header data to LE.
-
-Signed-off-by: Taras Kondratiuk <takondra@cisco.com>
 ---
-The patch is based on v4.7-rc7.
-Tested on v4.4 kernel, but this code was not changed since then.
 
- drivers/mmc/card/block.c | 12 ++++++------
- 1 file changed, 6 insertions(+), 6 deletions(-)
+Changes in v2:
+- amend the commit msg
 
-diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
-index e62fde3ac431..3832234d9aef 100644
---- a/drivers/mmc/card/block.c
-+++ b/drivers/mmc/card/block.c
-@@ -1786,8 +1786,8 @@ static void mmc_blk_packed_hdr_wrq_prep(struct mmc_queue_req *mqrq,
+ drivers/mmc/core/host.c | 6 ++++++
+ 1 file changed, 6 insertions(+)
+
+diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
+index d7e86f9..98f25ff 100644
+--- a/drivers/mmc/core/host.c
++++ b/drivers/mmc/core/host.c
+@@ -315,6 +315,12 @@ int mmc_of_parse(struct mmc_host *host)
+ 		host->caps2 |= MMC_CAP2_HS400_1_2V | MMC_CAP2_HS200_1_2V_SDR;
+ 	if (of_property_read_bool(np, "mmc-hs400-enhanced-strobe"))
+ 		host->caps2 |= MMC_CAP2_HS400_ES;
++	if (of_property_read_bool(np, "no-sdio"))
++		host->caps2 |= MMC_CAP2_NO_SDIO;
++	if (of_property_read_bool(np, "no-sd"))
++		host->caps2 |= MMC_CAP2_NO_SD;
++	if (of_property_read_bool(np, "no-mmc"))
++		host->caps2 |= MMC_CAP2_NO_MMC;
  
- 	packed_cmd_hdr = packed->cmd_hdr;
- 	memset(packed_cmd_hdr, 0, sizeof(packed->cmd_hdr));
--	packed_cmd_hdr[0] = (packed->nr_entries << 16) |
--		(PACKED_CMD_WR << 8) | PACKED_CMD_VER;
-+	packed_cmd_hdr[0] = cpu_to_le32((packed->nr_entries << 16) |
-+		(PACKED_CMD_WR << 8) | PACKED_CMD_VER);
- 	hdr_blocks = mmc_large_sector(card) ? 8 : 1;
- 
- 	/*
-@@ -1801,14 +1801,14 @@ static void mmc_blk_packed_hdr_wrq_prep(struct mmc_queue_req *mqrq,
- 			((brq->data.blocks * brq->data.blksz) >=
- 			 card->ext_csd.data_tag_unit_size);
- 		/* Argument of CMD23 */
--		packed_cmd_hdr[(i * 2)] =
-+		packed_cmd_hdr[(i * 2)] = cpu_to_le32(
- 			(do_rel_wr ? MMC_CMD23_ARG_REL_WR : 0) |
- 			(do_data_tag ? MMC_CMD23_ARG_TAG_REQ : 0) |
--			blk_rq_sectors(prq);
-+			blk_rq_sectors(prq));
- 		/* Argument of CMD18 or CMD25 */
--		packed_cmd_hdr[((i * 2)) + 1] =
-+		packed_cmd_hdr[((i * 2)) + 1] = cpu_to_le32(
- 			mmc_card_blockaddr(card) ?
--			blk_rq_pos(prq) : blk_rq_pos(prq) << 9;
-+			blk_rq_pos(prq) : blk_rq_pos(prq) << 9);
- 		packed->blocks += blk_rq_sectors(prq);
- 		i++;
- 	}
+ 	host->dsr_req = !of_property_read_u32(np, "dsr", &host->dsr);
+ 	if (host->dsr_req && (host->dsr & ~0xffff)) {
 -- 
-2.5.0
-
+2.3.7
