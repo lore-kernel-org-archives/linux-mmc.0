@@ -1,139 +1,122 @@
-From: Alim Akhtar <alim.akhtar@samsung.com>
-Subject: Re: [1/2] mmc: dw_mmc: set to MMC_CAP_ERASE by default
-Date: Fri, 15 Jul 2016 17:16:16 +0530
-Message-ID: <5788CD08.2060004@samsung.com>
-References: <1468547691-4525-1-git-send-email-jh80.chung@samsung.com>
- <CGME20160715043908epcas1p1b7e0bfd005de1f12547096ff7e184459@epcas1p1.samsung.com>
- <578868D3.4080905@samsung.com> <57886BCF.5090108@samsung.com>
- <5788BD1A.1070302@samsung.com>
- <CAELcNGTYJvaSJCK_ALm7vaoErkgrdL03y1GbNTtDAoXDso0R6w@mail.gmail.com>
+From: Paul Gortmaker <paul.gortmaker@windriver.com>
+Subject: Re: [v10, 3/7] soc: fsl: add GUTS driver for QorIQ platforms
+Date: Fri, 15 Jul 2016 12:43:41 -0400
+Message-ID: <CAP=VYLqsV_M=8CM47k4kzdULCp_y0yP9t8Sq9=jFp6W593QJgw@mail.gmail.com>
+References: <1462417950-46796-1-git-send-email-yangbo.lu@nxp.com> <1462417950-46796-4-git-send-email-yangbo.lu@nxp.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout3.samsung.com ([203.254.224.33]:35110 "EHLO
-	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932627AbcGOLq7 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 15 Jul 2016 07:46:59 -0400
-Received: from epcpsbgr3.samsung.com
- (u143.gpu120.samsung.co.kr [203.254.230.143])
- by mailout3.samsung.com (Oracle Communications Messaging Server 7.0.5.31.0
- 64bit (built May  5 2014))
- with ESMTP id <0OAC01U72U213R00@mailout3.samsung.com> for
- linux-mmc@vger.kernel.org; Fri, 15 Jul 2016 20:46:49 +0900 (KST)
-In-reply-to: <CAELcNGTYJvaSJCK_ALm7vaoErkgrdL03y1GbNTtDAoXDso0R6w@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <netdev-owner@vger.kernel.org>
+In-Reply-To: <1462417950-46796-4-git-send-email-yangbo.lu@nxp.com>
+Sender: netdev-owner@vger.kernel.org
+To: Yangbo Lu <yangbo.lu@nxp.com>
+Cc: linux-mmc@vger.kernel.org, linuxppc-dev <linuxppc-dev@lists.ozlabs.org>, devicetree@vger.kernel.org, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, LKML <linux-kernel@vger.kernel.org>, linux-clk@vger.kernel.org, linux-i2c@vger.kernel.org, iommu@lists.linux-foundation.org, netdev <netdev@vger.kernel.org>, ulf.hansson@linaro.org, Scott Wood <oss@buserror.net>, Mark Rutland <mark.rutland@arm.com>, Rob Herring <robh+dt@kernel.org>, Russell King <linux@arm.linux.org.uk>, Jochen Friedrich <jochen@scram.de>, Joerg Roedel <joro@8bytes.org>, Claudiu Manoil <claudiu.manoil@freescale.com>, Bhupesh Sharma <bhupesh.sharma@freescale.com>, Qiang Zhao <qiang.zhao@nxp.com>, Kumar Gala <galak@codeaurora.org>, Santosh Shilimkar <ssantosh@kernel.org>, leoyang.li@nxp.com, xiaobo.xie@nxp.com
 List-Id: linux-mmc@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@gmail.com>
-Cc: Jaehoon Chung <jh80.chung@samsung.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, Shawn Lin <shawn.lin@rock-chips.com>
 
+On Wed, May 4, 2016 at 11:12 PM, Yangbo Lu <yangbo.lu@nxp.com> wrote:
+> The global utilities block controls power management, I/O device
+> enabling, power-onreset(POR) configuration monitoring, alternate
+> function selection for multiplexed signals,and clock control.
+>
+> This patch adds GUTS driver to manage and access global utilities
+> block.
+>
+> Signed-off-by: Yangbo Lu <yangbo.lu@nxp.com>
+> Acked-by: Scott Wood <oss@buserror.net>
+> ---
+> Changes for v4:
+>         - Added this patch
+> Changes for v5:
+>         - Modified copyright info
+>         - Changed MODULE_LICENSE to GPL
+>         - Changed EXPORT_SYMBOL_GPL to EXPORT_SYMBOL
+>         - Made FSL_GUTS user-invisible
+>         - Added a complete compatible list for GUTS
+>         - Stored guts info in file-scope variable
+>         - Added mfspr() getting SVR
+>         - Redefined GUTS APIs
+>         - Called fsl_guts_init rather than using platform driver
+>         - Removed useless parentheses
+>         - Removed useless 'extern' key words
+> Changes for v6:
+>         - Made guts thread safe in fsl_guts_init
+> Changes for v7:
+>         - Removed 'ifdef' for function declaration in guts.h
+> Changes for v8:
+>         - Fixes lines longer than 80 characters checkpatch issue
+>         - Added 'Acked-by: Scott Wood'
+> Changes for v9:
+>         - None
+> Changes for v10:
+>         - None
+> ---
+>  drivers/soc/Kconfig      |   2 +-
+>  drivers/soc/fsl/Kconfig  |   8 +++
+>  drivers/soc/fsl/Makefile |   1 +
+>  drivers/soc/fsl/guts.c   | 119 ++++++++++++++++++++++++++++++++++++++++++++
+>  include/linux/fsl/guts.h | 126 +++++++++++++++++++++++++++++------------------
+>  5 files changed, 207 insertions(+), 49 deletions(-)
+>  create mode 100644 drivers/soc/fsl/Kconfig
+>  create mode 100644 drivers/soc/fsl/guts.c
+>
+> diff --git a/drivers/soc/Kconfig b/drivers/soc/Kconfig
+> index cb58ef0..7106463 100644
+> --- a/drivers/soc/Kconfig
+> +++ b/drivers/soc/Kconfig
+> @@ -2,7 +2,7 @@ menu "SOC (System On Chip) specific Drivers"
+>
+>  source "drivers/soc/bcm/Kconfig"
+>  source "drivers/soc/brcmstb/Kconfig"
+> -source "drivers/soc/fsl/qe/Kconfig"
+> +source "drivers/soc/fsl/Kconfig"
+>  source "drivers/soc/mediatek/Kconfig"
+>  source "drivers/soc/qcom/Kconfig"
+>  source "drivers/soc/rockchip/Kconfig"
+> diff --git a/drivers/soc/fsl/Kconfig b/drivers/soc/fsl/Kconfig
+> new file mode 100644
+> index 0000000..b313759
+> --- /dev/null
+> +++ b/drivers/soc/fsl/Kconfig
+> @@ -0,0 +1,8 @@
+> +#
+> +# Freescale SOC drivers
+> +#
+> +
+> +source "drivers/soc/fsl/qe/Kconfig"
+> +
+> +config FSL_GUTS
+> +       bool
+> diff --git a/drivers/soc/fsl/Makefile b/drivers/soc/fsl/Makefile
+> index 203307f..02afb7f 100644
+> --- a/drivers/soc/fsl/Makefile
+> +++ b/drivers/soc/fsl/Makefile
+> @@ -4,3 +4,4 @@
+>
+>  obj-$(CONFIG_QUICC_ENGINE)             += qe/
+>  obj-$(CONFIG_CPM)                      += qe/
+> +obj-$(CONFIG_FSL_GUTS)                 += guts.o
+> diff --git a/drivers/soc/fsl/guts.c b/drivers/soc/fsl/guts.c
+> new file mode 100644
+> index 0000000..fa155e6
+> --- /dev/null
+> +++ b/drivers/soc/fsl/guts.c
+> @@ -0,0 +1,119 @@
+> +/*
+> + * Freescale QorIQ Platforms GUTS Driver
+> + *
+> + * Copyright (C) 2016 Freescale Semiconductor, Inc.
+> + *
+> + * This program is free software; you can redistribute it and/or modify
+> + * it under the terms of the GNU General Public License as published by
+> + * the Free Software Foundation; either version 2 of the License, or
+> + * (at your option) any later version.
+> + */
+> +
+> +#include <linux/io.h>
+> +#include <linux/module.h>
 
+Seems there was lots of discussion on this.  If it does end up being
+resent, it would be nice to get the module.h and other modular stuff
+gone since it is a bool Kconfig.
 
-On 07/15/2016 05:03 PM, Jaehoon Chung wrote:
-> Hi Alim
->
-> 2016-07-15 19:38 GMT+09:00 Alim Akhtar <alim.akhtar@samsung.com
-> <mailto:alim.akhtar@samsung.com>>:
->
->
->
->     On 07/15/2016 10:21 AM, Jaehoon Chung wrote:
->
->         On 07/15/2016 01:38 PM, Alim Akhtar wrote:
->
->             Hi Jaehoon
->
->             On 07/15/2016 07:24 AM, Jaehoon Chung wrote:
->
->                 This flag needs to use the trim/discard/erase commands.
->                 dwmmc controller enables this flag by default.
->
->                 Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com
->                 <mailto:jh80.chung@samsung.com>>
->                 Reviewed-by: Shawn Lin <shawn.lin@rock-chips.com
->                 <mailto:shawn.lin@rock-chips.com>>
->                 ---
->                     drivers/mmc/host/dw_mmc.c | 6 ++++++
->                     1 file changed, 6 insertions(+)
->
->                 diff --git a/drivers/mmc/host/dw_mmc.c
->                 b/drivers/mmc/host/dw_mmc.c
->                 index 9fab5ed..d16de19 100644
->                 --- a/drivers/mmc/host/dw_mmc.c
->                 +++ b/drivers/mmc/host/dw_mmc.c
->                 @@ -2604,6 +2604,12 @@ static int
->                 dw_mci_init_slot(struct dw_mci *host, unsigned int id)
->                         if (host->pdata->caps)
->                             mmc->caps = host->pdata->caps;
->
->                 +    /*
->                 +     * Support MMC_CAP_ERASE by default.
->                 +     * It needs to use trim/discard/erase commands.
->                 +     */
->                 +    mmc->caps |= MMC_CAP_ERASE;
->                 +
->
->             Just a thought, probably this should be move to
->             mmc_of_parse() and let the board/platform configure this via
->             device-tree.
->
->
->         I don't think so...I think best solution is supported by default.
->         I didn't see the platform/board that don't need to use
->         MMC_CAP_ERASE.
->
->         If MMC_CAP_ERASE should be moved into mmc_of_parse(), it also
->         needs to modify the almost all device-trees.
->         If setting by default will have side effect,
->         i will consider about abandoning this patch or adding other
->         things to prevent side-effect. :)
->
->     My point was, MMC_CAP_ERASE is a generic capability not dw_mmc
->     specific. Suppose some other controller wants to enable this, then
->     they need to add this CAP to their files/drivers. And probably thats
->     why mmc_of_parse() was introduced at common place.
->
->
-> I understood what you said..If I understood right, it can be located
-> into mmc_of_parse(), right?
-> Then other drivers are also used by default..but some SoCs can have a
-> problem.
-No, if someone wants they should pass mmc-cap-erase and enable it.
-In case those SoC has some issue with ERASE command, then they will not 
-set it in their DTS file.
-And ofcourse to enable it, dts files need to be modified.
-
-> So if it is located into mmc_of_parse(), i will add the
-> "mmc-cap-no-erase" as property.
->
-I don't see a use case for this, if you can explain more?
-
-> How about this?
->
-> Best Regards,
-> Jaehoon Chung
->
->
->     Since you are adding this, lets add in a common place for a large use.
->     Anyway this was just a though, if you don't like this, I am ok. :-)
->
->
->         Best Regards,
->         Jaehoon Chung
->
->
->                         if (host->pdata->pm_caps)
->                             mmc->pm_caps = host->pdata->pm_caps;
->
->
->
->
->
->
->     --
->     To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
->     the body of a message to majordomo@vger.kernel.org
->     <mailto:majordomo@vger.kernel.org>
->     More majordomo info at http://vger.kernel.org/majordomo-info.html
->
->
+Thanks,
+Paul.
