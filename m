@@ -1,57 +1,52 @@
-From: Shawn Lin <shawn.lin@rock-chips.com>
-Subject: Re: [PATCH 1/2] mmc: dw_mmc: set to MMC_CAP_ERASE by default
-Date: Fri, 15 Jul 2016 10:11:14 +0800
-Message-ID: <807402f9-1e4b-c78f-5cb9-a2d35adaaf13@rock-chips.com>
-References: <1468547691-4525-1-git-send-email-jh80.chung@samsung.com>
+From: Alim Akhtar <alim.akhtar@samsung.com>
+Subject: Re: mmc: dwmmc: exynos: Warn if HS400 is being used on non-Exynos5420
+ chipset
+Date: Fri, 15 Jul 2016 09:45:59 +0530
+Message-ID: <5788637F.2070908@samsung.com>
+References: <1468502547-18571-1-git-send-email-k.kozlowski@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=gbk;
-	format=flowed
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from lucky1.263xmail.com ([211.157.147.135]:42707 "EHLO
-	lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751459AbcGOCLb (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Thu, 14 Jul 2016 22:11:31 -0400
-In-Reply-To: <1468547691-4525-1-git-send-email-jh80.chung@samsung.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=windows-1252; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-samsung-soc-owner@vger.kernel.org>
+In-reply-to: <1468502547-18571-1-git-send-email-k.kozlowski@samsung.com>
+Sender: linux-samsung-soc-owner@vger.kernel.org
+To: Krzysztof Kozlowski <k.kozlowski@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>, Kukjin Kim <kgene@kernel.org>, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-samsung-soc@vger.kernel.org, linux-kernel@vger.kernel.org
+Cc: Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>, linux-mmc@vger.kernel.org
-Cc: shawn.lin@rock-chips.com, ulf.hansson@linaro.org
 
-=D4=DA 2016/7/15 9:54, Jaehoon Chung =D0=B4=B5=C0:
-> This flag needs to use the trim/discard/erase commands.
-> dwmmc controller enables this flag by default.
+Hi Krzysztof,
+
+On 07/14/2016 06:52 PM, Krzysztof Kozlowski wrote:
+> Chipsets before Exynos5420 did not support HS400 so if MMC core tries to
+> configure HS400 timing, this might or might not work.  Warn in such
+> cases because this is DTB misconfiguration.
 >
-> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
-
-Reviewed-by: Shawn Lin <shawn.lin@rock-chips.com>
-
+> Signed-off-by: Krzysztof Kozlowski <k.kozlowski@samsung.com>
 > ---
->  drivers/mmc/host/dw_mmc.c | 6 ++++++
->  1 file changed, 6 insertions(+)
->
-> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-> index 9fab5ed..d16de19 100644
-> --- a/drivers/mmc/host/dw_mmc.c
-> +++ b/drivers/mmc/host/dw_mmc.c
-> @@ -2604,6 +2604,12 @@ static int dw_mci_init_slot(struct dw_mci *hos=
-t, unsigned int id)
->  	if (host->pdata->caps)
->  		mmc->caps =3D host->pdata->caps;
->
-> +	/*
-> +	 * Support MMC_CAP_ERASE by default.
-> +	 * It needs to use trim/discard/erase commands.
-> +	 */
-> +	mmc->caps |=3D MMC_CAP_ERASE;
-> +
->  	if (host->pdata->pm_caps)
->  		mmc->pm_caps =3D host->pdata->pm_caps;
->
->
 
+Reviewed-by: Alim Akhtar <alim.akhtar@samsung.com>
 
---=20
-Best Regards
-Shawn Lin
+>   drivers/mmc/host/dw_mmc-exynos.c | 6 +++++-
+>   1 file changed, 5 insertions(+), 1 deletion(-)
+>
+> diff --git a/drivers/mmc/host/dw_mmc-exynos.c b/drivers/mmc/host/dw_mmc-exynos.c
+> index da0ef1765735..7ab3d749b5ae 100644
+> --- a/drivers/mmc/host/dw_mmc-exynos.c
+> +++ b/drivers/mmc/host/dw_mmc-exynos.c
+> @@ -225,8 +225,12 @@ static void dw_mci_exynos_config_hs400(struct dw_mci *host, u32 timing)
+>   	 * Not supported to configure register
+>   	 * related to HS400
+>   	 */
+> -	if (priv->ctrl_type < DW_MCI_TYPE_EXYNOS5420)
+> +	if (priv->ctrl_type < DW_MCI_TYPE_EXYNOS5420) {
+> +		if (timing == MMC_TIMING_MMC_HS400)
+> +			dev_warn(host->dev,
+> +				 "cannot configure HS400, unsupported chipset\n");
+>   		return;
+> +	}
+>
+It is good to have extra bit of debug information handy.
 
+>   	dqs = priv->saved_dqs_en;
+>   	strobe = priv->saved_strobe_ctrl;
+>
