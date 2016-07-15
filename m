@@ -1,52 +1,58 @@
 From: Alim Akhtar <alim.akhtar@samsung.com>
-Subject: Re: mmc: dwmmc: exynos: Warn if HS400 is being used on non-Exynos5420
- chipset
-Date: Fri, 15 Jul 2016 09:45:59 +0530
-Message-ID: <5788637F.2070908@samsung.com>
-References: <1468502547-18571-1-git-send-email-k.kozlowski@samsung.com>
+Subject: Re: [1/2] mmc: dw_mmc: set to MMC_CAP_ERASE by default
+Date: Fri, 15 Jul 2016 10:08:43 +0530
+Message-ID: <578868D3.4080905@samsung.com>
+References: <1468547691-4525-1-git-send-email-jh80.chung@samsung.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=windows-1252; format=flowed
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-samsung-soc-owner@vger.kernel.org>
-In-reply-to: <1468502547-18571-1-git-send-email-k.kozlowski@samsung.com>
-Sender: linux-samsung-soc-owner@vger.kernel.org
-To: Krzysztof Kozlowski <k.kozlowski@samsung.com>, Jaehoon Chung <jh80.chung@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>, Kukjin Kim <kgene@kernel.org>, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-samsung-soc@vger.kernel.org, linux-kernel@vger.kernel.org
-Cc: Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mailout4.samsung.com ([203.254.224.34]:43108 "EHLO
+	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750884AbcGOEjK (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 15 Jul 2016 00:39:10 -0400
+Received: from epcpsbgr3.samsung.com
+ (u143.gpu120.samsung.co.kr [203.254.230.143])
+ by mailout4.samsung.com (Oracle Communications Messaging Server 7.0.5.31.0
+ 64bit (built May  5 2014))
+ with ESMTP id <0OAC01B0MA989I40@mailout4.samsung.com> for
+ linux-mmc@vger.kernel.org; Fri, 15 Jul 2016 13:39:08 +0900 (KST)
+In-reply-to: <1468547691-4525-1-git-send-email-jh80.chung@samsung.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Jaehoon Chung <jh80.chung@samsung.com>, linux-mmc@vger.kernel.org
+Cc: ulf.hansson@linaro.org, shawn.lin@rock-chips.com
 
-Hi Krzysztof,
+Hi Jaehoon
 
-On 07/14/2016 06:52 PM, Krzysztof Kozlowski wrote:
-> Chipsets before Exynos5420 did not support HS400 so if MMC core tries to
-> configure HS400 timing, this might or might not work.  Warn in such
-> cases because this is DTB misconfiguration.
+On 07/15/2016 07:24 AM, Jaehoon Chung wrote:
+> This flag needs to use the trim/discard/erase commands.
+> dwmmc controller enables this flag by default.
 >
-> Signed-off-by: Krzysztof Kozlowski <k.kozlowski@samsung.com>
+> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+> Reviewed-by: Shawn Lin <shawn.lin@rock-chips.com>
 > ---
-
-Reviewed-by: Alim Akhtar <alim.akhtar@samsung.com>
-
->   drivers/mmc/host/dw_mmc-exynos.c | 6 +++++-
->   1 file changed, 5 insertions(+), 1 deletion(-)
+>   drivers/mmc/host/dw_mmc.c | 6 ++++++
+>   1 file changed, 6 insertions(+)
 >
-> diff --git a/drivers/mmc/host/dw_mmc-exynos.c b/drivers/mmc/host/dw_mmc-exynos.c
-> index da0ef1765735..7ab3d749b5ae 100644
-> --- a/drivers/mmc/host/dw_mmc-exynos.c
-> +++ b/drivers/mmc/host/dw_mmc-exynos.c
-> @@ -225,8 +225,12 @@ static void dw_mci_exynos_config_hs400(struct dw_mci *host, u32 timing)
->   	 * Not supported to configure register
->   	 * related to HS400
->   	 */
-> -	if (priv->ctrl_type < DW_MCI_TYPE_EXYNOS5420)
-> +	if (priv->ctrl_type < DW_MCI_TYPE_EXYNOS5420) {
-> +		if (timing == MMC_TIMING_MMC_HS400)
-> +			dev_warn(host->dev,
-> +				 "cannot configure HS400, unsupported chipset\n");
->   		return;
-> +	}
+> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+> index 9fab5ed..d16de19 100644
+> --- a/drivers/mmc/host/dw_mmc.c
+> +++ b/drivers/mmc/host/dw_mmc.c
+> @@ -2604,6 +2604,12 @@ static int dw_mci_init_slot(struct dw_mci *host, unsigned int id)
+>   	if (host->pdata->caps)
+>   		mmc->caps = host->pdata->caps;
 >
-It is good to have extra bit of debug information handy.
+> +	/*
+> +	 * Support MMC_CAP_ERASE by default.
+> +	 * It needs to use trim/discard/erase commands.
+> +	 */
+> +	mmc->caps |= MMC_CAP_ERASE;
+> +
+Just a thought, probably this should be move to mmc_of_parse() and let 
+the board/platform configure this via device-tree.
 
->   	dqs = priv->saved_dqs_en;
->   	strobe = priv->saved_strobe_ctrl;
+>   	if (host->pdata->pm_caps)
+>   		mmc->pm_caps = host->pdata->pm_caps;
+>
 >
