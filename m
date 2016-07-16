@@ -1,33 +1,50 @@
-From: Rob Herring <robh+dt@kernel.org>
-Subject: Re: [PATCH] dt: bindings: Make compatible optional for mmc function nodes
-Date: Sat, 16 Jul 2016 15:38:45 -0500
-Message-ID: <CAL_JsqJX1a=TFgYUT+rAZfhZkFRfwer_VRuSEAJdD=dPYoP62w@mail.gmail.com>
-References: <1468700175-31836-1-git-send-email-hdegoede@redhat.com>
+From: Rob Herring <robh@kernel.org>
+Subject: Re: [PATCH V8 1/2] mmc: OCTEON: Add DT bindings for OCTEON MMC
+ controller.
+Date: Sat, 16 Jul 2016 16:36:03 -0500
+Message-ID: <20160716213603.GA11441@rob-hp-laptop>
+References: <57853472.2050404@cavium.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail.kernel.org ([198.145.29.136]:59486 "EHLO mail.kernel.org"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751666AbcGPUjI (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Sat, 16 Jul 2016 16:39:08 -0400
-In-Reply-To: <1468700175-31836-1-git-send-email-hdegoede@redhat.com>
+Received: from mail-oi0-f65.google.com ([209.85.218.65]:35619 "EHLO
+	mail-oi0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750842AbcGPVgH (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sat, 16 Jul 2016 17:36:07 -0400
+Content-Disposition: inline
+In-Reply-To: <57853472.2050404@cavium.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Hans de Goede <hdegoede@redhat.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Maxime Ripard <maxime.ripard@free-electrons.com>, Chen-Yu Tsai <wens@csie.org>, devicetree <devicetree@vger.kernel.org>, Arnd Bergmann <arnd@arndb.de>
+To: "Steven J. Hill" <steven.hill@cavium.com>
+Cc: linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-mips@linux-mips.org, Ulf Hansson <ulf.hansson@linaro.org>, Mark Rutland <mark.rutland@arm.com>, Ralf Baechle <ralf@linux-mips.org>
 
-On Sat, Jul 16, 2016 at 3:16 PM, Hans de Goede <hdegoede@redhat.com> wrote:
-> mmc/sdio is an enumerable bus, so usually the os can find out which
-> device is attached without needing a compatible.
+On Tue, Jul 12, 2016 at 01:18:26PM -0500, Steven J. Hill wrote:
+> Add Device Tree binding document for Octeon MMC controller. The driver
+> is in a following patch. The OCTEON's MMC controller can be connected
+> to up to 4 "slots" which may be eMMC, MMC or SD card devices. As there
+> is a single controller, each available slot is represented as a child
+> node of the controller.
+> 
+> Signed-off-by: Steven J. Hill <steven.hill@cavium.com>
+> Acked-by: David Daney <david.daney@cavium.com>
+> 
+> ---
+> v8:
+> - Properly documented deprecated device tree properties.
+> 
+> v7:
+> - Rewrote a lot of the document for better readability
+> 
+> v6:
+> - Split up patch
+> - Moved device tree fixup to platform code
+> ---
+> 
+> Signed-off-by: Steven J. Hill <Steven.Hill@cavium.com>
+> ---
+>  .../devicetree/bindings/mmc/octeon-mmc.txt         | 72 ++++++++++++++++++++++
+>  1 file changed, 72 insertions(+)
+>  create mode 100644 Documentation/devicetree/bindings/mmc/octeon-mmc.txt
 
-Usually, yes, but always, no. Having it doesn't hurt either, so this
-is a NAK for me.
+Acked-by: Rob Herring <robh@kernel.org>
 
->
-> Sometimes it is desirable to have a mmc function node, without having
-> to make up an otherwise unused compatible for the node, so make
-> the compatible properties optional.
->
-> Cc: Arnd Bergmann <arnd@arndb.de>
-> Cc: Maxime Ripard <maxime.ripard@free-electrons.com>
-> Signed-off-by: Hans de Goede <hdegoede@redhat.com>
