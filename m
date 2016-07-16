@@ -1,30 +1,36 @@
-From: Rob Herring <robh+dt@kernel.org>
-Subject: Re: [PATCH] dt: bindings: Make compatible optional for mmc function nodes
-Date: Sat, 16 Jul 2016 17:01:00 -0500
-Message-ID: <CAL_JsqJvkFkgOJrku1qS9jfW5TvL6OvJozKGnc8KAytN7q3kEw@mail.gmail.com>
-References: <1468700175-31836-1-git-send-email-hdegoede@redhat.com> <CAL_JsqJX1a=TFgYUT+rAZfhZkFRfwer_VRuSEAJdD=dPYoP62w@mail.gmail.com>
+From: Rob Herring <robh@kernel.org>
+Subject: Re: [PATCH v2 1/2] Documentation: mmc: add description for new
+ no-sd* and no-mmc
+Date: Sat, 16 Jul 2016 17:49:55 -0500
+Message-ID: <20160716224955.GA26627@rob-hp-laptop>
+References: <1468484764-32353-1-git-send-email-shawn.lin@rock-chips.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail.kernel.org ([198.145.29.136]:34992 "EHLO mail.kernel.org"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751524AbcGPWBW (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Sat, 16 Jul 2016 18:01:22 -0400
-In-Reply-To: <CAL_JsqJX1a=TFgYUT+rAZfhZkFRfwer_VRuSEAJdD=dPYoP62w@mail.gmail.com>
+Received: from mail-oi0-f66.google.com ([209.85.218.66]:35897 "EHLO
+	mail-oi0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751571AbcGPWt5 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sat, 16 Jul 2016 18:49:57 -0400
+Content-Disposition: inline
+In-Reply-To: <1468484764-32353-1-git-send-email-shawn.lin@rock-chips.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Hans de Goede <hdegoede@redhat.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Maxime Ripard <maxime.ripard@free-electrons.com>, Chen-Yu Tsai <wens@csie.org>, devicetree <devicetree@vger.kernel.org>, Arnd Bergmann <arnd@arndb.de>
+To: Shawn Lin <shawn.lin@rock-chips.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, Jaehoon Chung <jh80.chung@samsung.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, devicetree@vger.kernel.org
 
-On Sat, Jul 16, 2016 at 3:38 PM, Rob Herring <robh+dt@kernel.org> wrote:
-> On Sat, Jul 16, 2016 at 3:16 PM, Hans de Goede <hdegoede@redhat.com> wrote:
->> mmc/sdio is an enumerable bus, so usually the os can find out which
->> device is attached without needing a compatible.
->
-> Usually, yes, but always, no. Having it doesn't hurt either, so this
-> is a NAK for me.
+On Thu, Jul 14, 2016 at 04:26:03PM +0800, Shawn Lin wrote:
+> This patch adds description for no-sd, no-sdio, no-mmc. We expose
+> these to DT as some of the controllers are unable to deal with
+> special cmd type due to hw limitation.
+> 
+> Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
+> 
+> ---
+> 
+> Changes in v2:
+> - amend the description of these properties and the commit msg
+> 
+>  Documentation/devicetree/bindings/mmc/mmc.txt | 3 +++
+>  1 file changed, 3 insertions(+)
 
-Having now read the generic ethernet device binding thread, I think
-the reasoning is okay, but please put those reasons here.
-
-Rob
+Acked-by: Rob Herring <robh@kernel.org>
