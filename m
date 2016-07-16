@@ -1,50 +1,33 @@
-From: Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: [PATCH] dt: bindings: Make compatible optional for mmc function nodes
-Date: Sat, 16 Jul 2016 22:16:15 +0200
-Message-ID: <1468700175-31836-1-git-send-email-hdegoede@redhat.com>
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-Cc: linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>, Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org>, devicetree <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>
+From: Rob Herring <robh+dt@kernel.org>
+Subject: Re: [PATCH] dt: bindings: Make compatible optional for mmc function nodes
+Date: Sat, 16 Jul 2016 15:38:45 -0500
+Message-ID: <CAL_JsqJX1a=TFgYUT+rAZfhZkFRfwer_VRuSEAJdD=dPYoP62w@mail.gmail.com>
+References: <1468700175-31836-1-git-send-email-hdegoede@redhat.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail.kernel.org ([198.145.29.136]:59486 "EHLO mail.kernel.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751666AbcGPUjI (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Sat, 16 Jul 2016 16:39:08 -0400
+In-Reply-To: <1468700175-31836-1-git-send-email-hdegoede@redhat.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Hans de Goede <hdegoede@redhat.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Maxime Ripard <maxime.ripard@free-electrons.com>, Chen-Yu Tsai <wens@csie.org>, devicetree <devicetree@vger.kernel.org>, Arnd Bergmann <arnd@arndb.de>
 
-mmc/sdio is an enumerable bus, so usually the os can find out which
-device is attached without needing a compatible.
+On Sat, Jul 16, 2016 at 3:16 PM, Hans de Goede <hdegoede@redhat.com> wrote:
+> mmc/sdio is an enumerable bus, so usually the os can find out which
+> device is attached without needing a compatible.
 
-Sometimes it is desirable to have a mmc function node, without having
-to make up an otherwise unused compatible for the node, so make
-the compatible properties optional.
+Usually, yes, but always, no. Having it doesn't hurt either, so this
+is a NAK for me.
 
-Cc: Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>
-Cc: Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>
-Signed-off-by: Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
----
- Documentation/devicetree/bindings/mmc/mmc.txt | 4 +++-
- 1 file changed, 3 insertions(+), 1 deletion(-)
-
-diff --git a/Documentation/devicetree/bindings/mmc/mmc.txt b/Documentation/devicetree/bindings/mmc/mmc.txt
-index ed23b9b..a96c338 100644
---- a/Documentation/devicetree/bindings/mmc/mmc.txt
-+++ b/Documentation/devicetree/bindings/mmc/mmc.txt
-@@ -98,11 +98,13 @@ Required host node properties when using function subnodes:
- - #size-cells: should be zero.
- 
- Required function subnode properties:
--- compatible: name of SDIO function following generic names recommended practice
- - reg: Must contain the SDIO function number of the function this subnode
-        describes. A value of 0 denotes the memory SD function, values from
-        1 to 7 denote the SDIO functions.
- 
-+Optional function subnode properties:
-+- compatible: name of SDIO function following generic names recommended practice
-+
- 
- Examples
- --------
--- 
-2.7.4
-
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
+> Sometimes it is desirable to have a mmc function node, without having
+> to make up an otherwise unused compatible for the node, so make
+> the compatible properties optional.
+>
+> Cc: Arnd Bergmann <arnd@arndb.de>
+> Cc: Maxime Ripard <maxime.ripard@free-electrons.com>
+> Signed-off-by: Hans de Goede <hdegoede@redhat.com>
