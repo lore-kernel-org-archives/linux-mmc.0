@@ -1,56 +1,60 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v2 2/2] mmc: core: expose MMC_CAP2_NO_* to dt
-Date: Mon, 18 Jul 2016 13:20:30 +0200
-Message-ID: <CAPDyKFpxk_ZpJNTndqoWgcq2+tx6D4cDDadur0DoQ7VEx+SSiQ@mail.gmail.com>
-References: <1468484764-32353-1-git-send-email-shawn.lin@rock-chips.com> <1468484764-32353-2-git-send-email-shawn.lin@rock-chips.com>
+Subject: Re: [PATCH 2/2] mmc: dw_mmc: rockchip: unset the MMC_CAP_ERASE flag
+Date: Mon, 18 Jul 2016 13:20:47 +0200
+Message-ID: <CAPDyKFr=neqgWms0Xopr1iwDQ+7nH9Hwd0s=hhKiYvyL0s7bSA@mail.gmail.com>
+References: <1468547691-4525-1-git-send-email-jh80.chung@samsung.com> <1468547691-4525-2-git-send-email-jh80.chung@samsung.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1468484764-32353-2-git-send-email-shawn.lin@rock-chips.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Shawn Lin <shawn.lin@rock-chips.com>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, Jaehoon Chung <jh80.chung@samsung.com>, Rob Herring <robh+dt@kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-wm0-f52.google.com ([74.125.82.52]:38486 "EHLO
+	mail-wm0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752251AbcGRLUu (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 18 Jul 2016 07:20:50 -0400
+Received: by mail-wm0-f52.google.com with SMTP id o80so111740630wme.1
+        for <linux-mmc@vger.kernel.org>; Mon, 18 Jul 2016 04:20:49 -0700 (PDT)
+In-Reply-To: <1468547691-4525-2-git-send-email-jh80.chung@samsung.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Jaehoon Chung <jh80.chung@samsung.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Shawn Lin <shawn.lin@rock-chips.com>
 
-On 14 July 2016 at 10:26, Shawn Lin <shawn.lin@rock-chips.com> wrote:
-> The reason for why we expose these to dt is that some of
-> the controller is unable to send special cmd type due to
-> the hw limitation.
+On 15 July 2016 at 03:54, Jaehoon Chung <jh80.chung@samsung.com> wrote:
+> In dw_mmc.c, it's enabled by default.
+> It doesn't need to set MMC_CAP_ERASE in rockchip anymore.
 >
-> Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
+> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+
+As we are close to the merge window, I picked this up directly instead
+of you having to send me a PR.
 
 Thanks, applied for next!
 
 Kind regards
 Uffe
 
->
 > ---
+>  drivers/mmc/host/dw_mmc-rockchip.c | 8 ++++----
+>  1 file changed, 4 insertions(+), 4 deletions(-)
 >
-> Changes in v2:
-> - amend the commit msg
+> diff --git a/drivers/mmc/host/dw_mmc-rockchip.c b/drivers/mmc/host/dw_mmc-rockchip.c
+> index d3cf1f1..25eae35 100644
+> --- a/drivers/mmc/host/dw_mmc-rockchip.c
+> +++ b/drivers/mmc/host/dw_mmc-rockchip.c
+> @@ -294,10 +294,10 @@ static int dw_mci_rockchip_init(struct dw_mci *host)
 >
->  drivers/mmc/core/host.c | 6 ++++++
->  1 file changed, 6 insertions(+)
+>  /* Common capabilities of RK3288 SoC */
+>  static unsigned long dw_mci_rk3288_dwmmc_caps[4] = {
+> -       MMC_CAP_ERASE | MMC_CAP_CMD23,
+> -       MMC_CAP_ERASE | MMC_CAP_CMD23,
+> -       MMC_CAP_ERASE | MMC_CAP_CMD23,
+> -       MMC_CAP_ERASE | MMC_CAP_CMD23,
+> +       MMC_CAP_CMD23,
+> +       MMC_CAP_CMD23,
+> +       MMC_CAP_CMD23,
+> +       MMC_CAP_CMD23,
+>  };
 >
-> diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
-> index d7e86f9..98f25ff 100644
-> --- a/drivers/mmc/core/host.c
-> +++ b/drivers/mmc/core/host.c
-> @@ -315,6 +315,12 @@ int mmc_of_parse(struct mmc_host *host)
->                 host->caps2 |= MMC_CAP2_HS400_1_2V | MMC_CAP2_HS200_1_2V_SDR;
->         if (of_property_read_bool(np, "mmc-hs400-enhanced-strobe"))
->                 host->caps2 |= MMC_CAP2_HS400_ES;
-> +       if (of_property_read_bool(np, "no-sdio"))
-> +               host->caps2 |= MMC_CAP2_NO_SDIO;
-> +       if (of_property_read_bool(np, "no-sd"))
-> +               host->caps2 |= MMC_CAP2_NO_SD;
-> +       if (of_property_read_bool(np, "no-mmc"))
-> +               host->caps2 |= MMC_CAP2_NO_MMC;
->
->         host->dsr_req = !of_property_read_u32(np, "dsr", &host->dsr);
->         if (host->dsr_req && (host->dsr & ~0xffff)) {
+>  static const struct dw_mci_drv_data rk2928_drv_data = {
 > --
-> 2.3.7
->
+> 1.9.1
 >
