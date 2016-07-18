@@ -1,90 +1,137 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 2/4] mmc: sunxi: Make sample clocks optional
-Date: Mon, 18 Jul 2016 13:12:35 +0200
-Message-ID: <CAPDyKFqf9DcTsqA5Hk4NNtbZNRqeaRiW-vZKB9ZzNF=wabcnuA@mail.gmail.com>
-References: <1468665964-27142-1-git-send-email-hdegoede@redhat.com> <1468665964-27142-3-git-send-email-hdegoede@redhat.com>
+From: Baolin Wang <baolin.wang@linaro.org>
+Subject: Re: [RESEND RFC v2] mmc: Change the max discard sectors and erase
+ response if mmc host supports busy signalling
+Date: Mon, 18 Jul 2016 19:17:10 +0800
+Message-ID: <CAMz4kuLsk1pU4870Gv85_BANPg2q-pBT99jY0HqZ9B1t0MtMpA@mail.gmail.com>
+References: <54f75bccac6e6e49d87a5122ea670038b508b33c.1465808036.git.baolin.wang@linaro.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wm0-f50.google.com ([74.125.82.50]:38659 "EHLO
-	mail-wm0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751441AbcGRLMh (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 18 Jul 2016 07:12:37 -0400
-Received: by mail-wm0-f50.google.com with SMTP id o80so111428507wme.1
-        for <linux-mmc@vger.kernel.org>; Mon, 18 Jul 2016 04:12:37 -0700 (PDT)
-In-Reply-To: <1468665964-27142-3-git-send-email-hdegoede@redhat.com>
+Received: from mail-yw0-f174.google.com ([209.85.161.174]:33967 "EHLO
+	mail-yw0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751530AbcGRLRM (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 18 Jul 2016 07:17:12 -0400
+Received: by mail-yw0-f174.google.com with SMTP id i12so155406127ywa.1
+        for <linux-mmc@vger.kernel.org>; Mon, 18 Jul 2016 04:17:12 -0700 (PDT)
+In-Reply-To: <54f75bccac6e6e49d87a5122ea670038b508b33c.1465808036.git.baolin.wang@linaro.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Hans de Goede <hdegoede@redhat.com>
-Cc: Maxime Ripard <maxime.ripard@free-electrons.com>, Chen-Yu Tsai <wens@csie.org>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, devicetree <devicetree@vger.kernel.org>
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, rmk+kernel@arm.linux.org.uk, Shawn Lin <shawn.lin@rock-chips.com>, Douglas Anderson <dianders@chromium.org>, =?UTF-8?Q?Heiko_St=C3=BCbner?= <heiko@sntech.de>, David Jander <david@protonic.nl>, hdegoede@redhat.com, linux-mmc <linux-mmc@vger.kernel.org>, LKML <linux-kernel@vger.kernel.org>, Mark Brown <broonie@kernel.org>, Linus Walleij <linus.walleij@linaro.org>, Baolin Wang <baolin.wang@linaro.org>
 
-On 16 July 2016 at 12:46, Hans de Goede <hdegoede@redhat.com> wrote:
-> It turns out that sun4i (A10) and sun5i (A13 & co) do not have sample
-> clocks, so make them optional.
+Hi Ulf,
+
+On 28 June 2016 at 15:25, Baolin Wang <baolin.wang@linaro.org> wrote:
+> When mmc host HW supports busy signalling (using R1B as response), We
+> shouldn't use 'host->max_busy_timeout' as the limitation when deciding
+> the max discard sectors that we tell the generic BLOCK layer about.
+> Instead, we should pick one preferred erase size as the max discard
+> sectors.
 >
-> Since these do not have sample clocks, they cannot (reliably) do
-> DDR rates, so only set MMC_CAP_1_8V_DDR when we do have sample clks.
+> If the host controller supports busy signalling and the timeout for
+> the erase operation does not exceed the max_busy_timeout, we should
+> use R1B response. Or we need to prevent the host from doing hw busy
+> detection, which is done by converting to a R1 response instead.
 >
-> Note this patch only changes the devm_clk_get error checking and sets
-> the clocks to NULL if they don't exists. All the clk_foo calls accept
-> a NULL clk and will return success when called with a NULL clk, so this
-> is all that is necessary.
+> Changes since v1:
+>   - Remove the 'MMC_CAP_WAIT_WHILE_BUSY' flag checking when deciding
+>     the max discard sectors.
 >
-> Signed-off-by: Hans de Goede <hdegoede@redhat.com>
+> Signed-off-by: Baolin Wang <baolin.wang@linaro.org>
 > ---
->  drivers/mmc/host/sunxi-mmc.c | 18 +++++++++++++-----
->  1 file changed, 13 insertions(+), 5 deletions(-)
+>  drivers/mmc/core/core.c |   47 +++++++++++++++++++++++++++++++++++++++--------
+>  1 file changed, 39 insertions(+), 8 deletions(-)
 >
-> diff --git a/drivers/mmc/host/sunxi-mmc.c b/drivers/mmc/host/sunxi-mmc.c
-> index 71a480b..4552ee0 100644
-> --- a/drivers/mmc/host/sunxi-mmc.c
-> +++ b/drivers/mmc/host/sunxi-mmc.c
-> @@ -1016,14 +1016,20 @@ static int sunxi_mmc_resource_request(struct sunxi_mmc_host *host,
+> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+> index 8b4dfd4..edd43b1 100644
+> --- a/drivers/mmc/core/core.c
+> +++ b/drivers/mmc/core/core.c
+> @@ -2060,7 +2060,7 @@ static int mmc_do_erase(struct mmc_card *card, unsigned int from,
+>                         unsigned int to, unsigned int arg)
+>  {
+>         struct mmc_command cmd = {0};
+> -       unsigned int qty = 0;
+> +       unsigned int qty = 0, busy_timeout = 0;
+>         unsigned long timeout;
+>         int err;
 >
->         host->clk_output = devm_clk_get(&pdev->dev, "output");
->         if (IS_ERR(host->clk_output)) {
-> -               dev_err(&pdev->dev, "Could not get output clock\n");
-> -               return PTR_ERR(host->clk_output);
-> +               if (PTR_ERR(host->clk_output) != -ENOENT) {
-
-This is new to me for how to implement support for optional clocks.
-
-Is this how the clock maintainer think it should be implemented?
-
-> +                       dev_err(&pdev->dev, "Could not get output clock\n");
-> +                       return PTR_ERR(host->clk_output);
-> +               }
-> +               host->clk_output = NULL;
->         }
->
->         host->clk_sample = devm_clk_get(&pdev->dev, "sample");
->         if (IS_ERR(host->clk_sample)) {
-> -               dev_err(&pdev->dev, "Could not get sample clock\n");
-> -               return PTR_ERR(host->clk_sample);
-> +               if (PTR_ERR(host->clk_sample) != -ENOENT) {
-> +                       dev_err(&pdev->dev, "Could not get sample clock\n");
-> +                       return PTR_ERR(host->clk_sample);
-> +               }
-> +               host->clk_sample = NULL;
->         }
->
->         host->reset = devm_reset_control_get_optional(&pdev->dev, "ahb");
-> @@ -1126,9 +1132,11 @@ static int sunxi_mmc_probe(struct platform_device *pdev)
->         mmc->f_min              =   400000;
->         mmc->f_max              = 52000000;
->         mmc->caps              |= MMC_CAP_MMC_HIGHSPEED | MMC_CAP_SD_HIGHSPEED |
-> -                                 MMC_CAP_1_8V_DDR |
->                                   MMC_CAP_ERASE | MMC_CAP_SDIO_IRQ;
->
-> +       if (host->clk_output && host->clk_sample)
-> +               mmc->caps      |= MMC_CAP_1_8V_DDR;
+> @@ -2128,8 +2128,23 @@ static int mmc_do_erase(struct mmc_card *card, unsigned int from,
+>         memset(&cmd, 0, sizeof(struct mmc_command));
+>         cmd.opcode = MMC_ERASE;
+>         cmd.arg = arg;
+> -       cmd.flags = MMC_RSP_SPI_R1B | MMC_RSP_R1B | MMC_CMD_AC;
+> -       cmd.busy_timeout = mmc_erase_timeout(card, arg, qty);
+> +       busy_timeout = mmc_erase_timeout(card, arg, qty);
+> +       /*
+> +        * If the host controller supports busy signalling and the timeout for
+> +        * the erase operation does not exceed the max_busy_timeout, we should
+> +        * use R1B response. Or we need to prevent the host from doing hw busy
+> +        * detection, which is done by converting to a R1 response instead.
+> +        */
+> +       if ((card->host->max_busy_timeout &&
+> +           busy_timeout > card->host->max_busy_timeout) ||
+> +           !(card->host->caps & MMC_CAP_WAIT_WHILE_BUSY)) {
+> +               cmd.flags = MMC_RSP_SPI_R1 | MMC_RSP_R1 | MMC_CMD_AC;
+> +               cmd.busy_timeout = 0;
+> +       } else {
+> +               cmd.flags = MMC_RSP_SPI_R1B | MMC_RSP_R1B | MMC_CMD_AC;
+> +               cmd.busy_timeout = busy_timeout;
+> +       }
 > +
->         ret = mmc_of_parse(mmc);
->         if (ret)
->                 goto error_free_dma;
+>         err = mmc_wait_for_cmd(card->host, &cmd, 0);
+>         if (err) {
+>                 pr_err("mmc_erase: erase error %d, status %#x\n",
+> @@ -2321,23 +2336,39 @@ static unsigned int mmc_do_calc_max_discard(struct mmc_card *card,
+>                                             unsigned int arg)
+>  {
+>         struct mmc_host *host = card->host;
+> -       unsigned int max_discard, x, y, qty = 0, max_qty, timeout;
+> +       unsigned int max_discard, x, y, qty = 0, max_qty, min_qty, timeout;
+>         unsigned int last_timeout = 0;
+>
+> -       if (card->erase_shift)
+> +       if (card->erase_shift) {
+>                 max_qty = UINT_MAX >> card->erase_shift;
+> -       else if (mmc_card_sd(card))
+> +               min_qty = card->pref_erase >> card->erase_shift;
+> +       } else if (mmc_card_sd(card)) {
+>                 max_qty = UINT_MAX;
+> -       else
+> +               min_qty = card->pref_erase;
+> +       } else {
+>                 max_qty = UINT_MAX / card->erase_size;
+> +               min_qty = card->pref_erase / card->erase_size;
+> +       }
+>
+>         /* Find the largest qty with an OK timeout */
+>         do {
+>                 y = 0;
+>                 for (x = 1; x && x <= max_qty && max_qty - x >= qty; x <<= 1) {
+>                         timeout = mmc_erase_timeout(card, arg, qty + x);
+> -                       if (timeout > host->max_busy_timeout)
+> +                       /*
+> +                        * We should not only use 'host->max_busy_timeout' as
+> +                        * the limitation when deciding the max discard sectors.
+> +                        * We should set a balance value to improve the erase
+> +                        * speed, and it can not get too long timeout at the
+> +                        * same time.
+> +                        *
+> +                        * Here we set 'card->pref_erase' as the minimal discard
+> +                        * sectors when deciding the max discard sectors.
+> +                        */
+> +                       if (qty + x > min_qty &&
+> +                           timeout > host->max_busy_timeout)
+>                                 break;
+> +
+>                         if (timeout < last_timeout)
+>                                 break;
+>                         last_timeout = timeout;
 > --
-> 2.7.4
+> 1.7.9.5
 >
 
-Kind regards
-Uffe
+Do you have any comments about this patch? Thanks.
+
+-- 
+Baolin.wang
+Best Regards
