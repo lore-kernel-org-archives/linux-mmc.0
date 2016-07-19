@@ -1,99 +1,46 @@
-From: Paul Gortmaker <paul.gortmaker@windriver.com>
-Subject: Re: [PATCH v5 4/8] char: rpmb: provide a user space interface
-Date: Mon, 18 Jul 2016 18:15:22 -0400
-Message-ID: <CAP=VYLqZCXjWUohLZ35Kvrx7B8z7cbEFzDt4ugaUosrh2ca+8g@mail.gmail.com>
-References: <1468873673-21776-1-git-send-email-tomas.winkler@intel.com> <1468873673-21776-5-git-send-email-tomas.winkler@intel.com>
+From: Jin Guojun <kid.jin-C8/M+/jPZTeaMJb+Lgu22Q@public.gmane.org>
+Subject: [PATCH 2/2] Enable SD UHS mode for hikey-mainline-rebase
+Date: Tue, 19 Jul 2016 15:51:53 +0800
+Message-ID: <1468914713-63347-2-git-send-email-kid.jin@hisilicon.com>
+References: <1468914713-63347-1-git-send-email-kid.jin@hisilicon.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wm0-f68.google.com ([74.125.82.68]:33124 "EHLO
-	mail-wm0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752097AbcGRWPy (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 18 Jul 2016 18:15:54 -0400
-In-Reply-To: <1468873673-21776-5-git-send-email-tomas.winkler@intel.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1468914713-63347-1-git-send-email-kid.jin-C8/M+/jPZTeaMJb+Lgu22Q@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org, wsa+renesas-jBu1N2QxHDJrcw3mvpCnnVaTQe2KTcn/@public.gmane.org, arnd-r2nGTMty4D4@public.gmane.org, rmk+kernel-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org, shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, xuwei5-C8/M+/jPZTeaMJb+Lgu22Q@public.gmane.org, robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, pawel.moll-5wv7dgnIgG8@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, ijc+devicetree-KcIKpvwj1kUDXYZnReoRVg@public.gmane.org, galak-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, catalin.marinas-5wv7dgnIgG8@public.gmane.org, will.deacon-5wv7dgnIgG8@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linuxarm-hv44wF8Li93QT0dZR+AlfA@public.gmane.org, suzhuangluan-C8/M+/jPZTeaMJb+Lgu22Q@public.gmane.org, kongfei-C8/M+/jPZTeaMJb+Lgu22Q@public.gmane.org, kid.jin-C8/M+/jPZTeaMJb+Lgu22Q@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
-To: Tomas Winkler <tomas.winkler@intel.com>
-Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, James Bottomley <James.Bottomley@hansenpartnership.com>, "Martin K. Petersen" <martin.petersen@oracle.com>, Vinayak Holikatti <vinholikatti@gmail.com>, Andy Lutomirski <luto@kernel.org>, =?UTF-8?B?QXJ2ZSBIasO4bm5ldsOlZw==?= <arve@android.com>, Michael Ryleev <gmar@google.com>, Joao Pinto <Joao.Pinto@synopsys.com>, Christoph Hellwig <hch@lst.de>, Yaniv Gardi <ygardi@codeaurora.org>, LKML <linux-kernel@vger.kernel.org>, linux-mmc@vger.kernel.org, linux-scsi@vger.kernel.org
 
-On Mon, Jul 18, 2016 at 4:27 PM, Tomas Winkler <tomas.winkler@intel.com> wrote:
-> The user space API is achieved via two synchronous IOCTL.
-> Simplified one, RPMB_IOC_REQ_CMD, were read result cycles is performed
-> by the framework on behalf the user and second, RPMB_IOC_SEQ_CMD where
-> the whole RPMB sequence including RESULT_READ is supplied by the caller.
-> The latter is intended for  easier adjusting  of the  applications that
-> use MMC_IOC_MULTI_CMD ioctl.
->
-> Signed-off-by: Tomas Winkler <tomas.winkler@intel.com>
-> ---
+From: j00226943 <j00226943-YePjYCeDBwpZmURYYhsjV1aTQe2KTcn/@public.gmane.org>
 
-[...]
+One more changes:
 
-> diff --git a/drivers/char/rpmb/Kconfig b/drivers/char/rpmb/Kconfig
-> index c5e6e909efce..6794be9fcc5e 100644
-> --- a/drivers/char/rpmb/Kconfig
-> +++ b/drivers/char/rpmb/Kconfig
-> @@ -6,3 +6,10 @@ config RPMB
->           access RPMB partition.
->
->           If unsure, select N.
-> +
-> +config RPMB_INTF_DEV
-> +       bool "RPMB character device interface /dev/rpmbN"
+Enable SDR12 SDR25 SDR50 SDR104 in DTS to support UHS for SD Card
 
-A bool Kconfig should ideally....
+Signed-off-by: Jin Guojun <kid.jin-C8/M+/jPZTeaMJb+Lgu22Q@public.gmane.org>
+---
+ arch/arm64/boot/dts/hisilicon/hi6220.dtsi | 4 ++++
+ 1 file changed, 4 insertions(+)
 
-> +       depends on RPMB
-> +       help
-> +         Say yes here if you want to access RPMB from user space
-> +         via character device interface /dev/rpmb%d
-> diff --git a/drivers/char/rpmb/Makefile b/drivers/char/rpmb/Makefile
-> index 812b3ed264c0..b5dc087b1299 100644
-> --- a/drivers/char/rpmb/Makefile
-> +++ b/drivers/char/rpmb/Makefile
-> @@ -1,4 +1,5 @@
->  obj-$(CONFIG_RPMB) += rpmb.o
->  rpmb-objs += core.o
-> +rpmb-$(CONFIG_RPMB_INTF_DEV) += cdev.o
->
->  ccflags-y += -D__CHECK_ENDIAN__
-> diff --git a/drivers/char/rpmb/cdev.c b/drivers/char/rpmb/cdev.c
-> new file mode 100644
-> index 000000000000..f3ad3444f76d
-> --- /dev/null
-> +++ b/drivers/char/rpmb/cdev.c
-> @@ -0,0 +1,269 @@
-> +/*
-> + * Copyright (C) 2015-2016 Intel Corp. All rights reserved
-> + *
-> + * This program is free software; you can redistribute it and/or modify
-> + * it under the terms of the GNU General Public License as published by
-> + * the Free Software Foundation; version 2 of the License.
-> + *
-> + * This program is distributed in the hope that it will be useful, but
-> + * WITHOUT ANY WARRANTY; without even the implied warranty of
-> + * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
-> + * General Public License for more details.
-> + */
-> +
-> +#define pr_fmt(fmt) KBUILD_MODNAME ": " fmt
-> +
-> +#include <linux/module.h>
+diff --git a/arch/arm64/boot/dts/hisilicon/hi6220.dtsi b/arch/arm64/boot/dts/hisilicon/hi6220.dtsi
+index 189d215..33f204f 100644
+--- a/arch/arm64/boot/dts/hisilicon/hi6220.dtsi
++++ b/arch/arm64/boot/dts/hisilicon/hi6220.dtsi
+@@ -761,6 +761,10 @@
+ 			card-detect-delay = <200>;
+ 			hisilicon,peripheral-syscon = <&ao_ctrl>;
+ 			cap-sd-highspeed;
++			sd-uhs-sdr12;
++			sd-uhs-sdr25;
++			sd-uhs-sdr50;
++			sd-uhs-sdr104;
+ 			reg = <0x0 0xf723e000 0x0 0x1000>;
+ 			interrupts = <0x0 0x49 0x4>;
+ 			#address-cells = <0x1>;
+-- 
+1.8.3.2
 
-....not use module.h or any MODULE_ macros from within it.
-
-Thanks,
-Paul.
 --
-
-> +#include <linux/fs.h>
-> +#include <linux/uaccess.h>
-> +#include <linux/compat.h>
-> +#include <linux/slab.h>
-> +#include <linux/capability.h>
-> +
-> +#include <linux/rpmb.h>
-> +
-> +#include "rpmb-cdev.h"
-> +
-> +static dev_t rpmb_devt;
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
