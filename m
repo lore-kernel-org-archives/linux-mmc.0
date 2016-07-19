@@ -1,102 +1,76 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH 1/2] Support SD UHS for hikey-mainline-rebase
-Date: Tue, 19 Jul 2016 17:13:01 +0900
-Message-ID: <578DE10D.3020401@samsung.com>
-References: <CGME20160719075706epcas1p169dc5e5e0f7179f71f92a56e57e373c4@epcas1p1.samsung.com>
- <1468914713-63347-1-git-send-email-kid.jin@hisilicon.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout3.samsung.com ([203.254.224.33]:32818 "EHLO
-	mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752539AbcGSINF (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 19 Jul 2016 04:13:05 -0400
-In-reply-to: <1468914713-63347-1-git-send-email-kid.jin@hisilicon.com>
-Sender: linux-mmc-owner@vger.kernel.org
+From: Shawn Lin <shawn.lin@rock-chips.com>
+Subject: [PATCH 2/2] mmc: core: fall back host->f_init if failing to init mmc card after resume
+Date: Tue, 19 Jul 2016 16:58:35 +0800
+Message-ID: <1468918715-24914-2-git-send-email-shawn.lin@rock-chips.com>
+References: <1468918715-24914-1-git-send-email-shawn.lin@rock-chips.com>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1468918715-24914-1-git-send-email-shawn.lin@rock-chips.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, Jaehoon Chung <jh80.chung@samsung.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Doug Anderson <dianders@chromium.org>, linux-rockchip@lists.infradead.org, Shawn Lin <shawn.lin@rock-chips.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Jin Guojun <kid.jin@hisilicon.com>, ulf.hansson@linaro.org, Adrian Hunter <adrian.hunter@intel.com>, arnd@arndb.de, rmk+kernel@arm.linux.org.uk, shawn.lin@rock-chips.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, xuwei5@hisilicon.com, robh+dt@kernel.org, ijc+devicetree@hellion.org.uk, linux-arm-kernel@lists.infradead.org, devicetree@vger.kernel.org, linuxarm@huawei.com, suzhuangluan@hisilicon.com, kongfei@hisilicon.com, CPGS <cpgs@samsung.com>
 
-Hi,
+We observed the failure of initializing card after resume
+accidentally. It's hard to reproduce but we did get report from
+the suspend/resume test of our RK3399 mp test farm . Unfortunately,
+we still fail to figure out what was going wrong at that time.
+Also we can't achieve it by retrying the host->f_init without falling
+back it. But this patch will solve the problem as we could add some log
+there and see that we resume the mmc card successfully after falling
+back the host->f_init. There is no obvious side effect found, so it seems
+this patch will improve the stability.
 
-Removed the unnecessary CC'd.
+[   93.405085] mmc1: unexpected status 0x800900 after switch
+[   93.408474] mmc1: switch to bus width 1 failed
+[   93.408482] mmc1: mmc_select_hs200 failed, error -110
+[   93.408492] mmc1: error -110 during resume (card was removed?)
+[   93.408705] PM: resume of devices complete after 213.453 msecs
 
-On 07/19/2016 04:51 PM, Jin Guojun wrote:
-> From: j00226943 <j00226943@notesmail.huawei.com>
+Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
+---
 
-What is j00226943?
+ drivers/mmc/core/mmc.c | 22 ++++++++++++++++++++--
+ 1 file changed, 20 insertions(+), 2 deletions(-)
 
-When you send the patch for dw_mmc controller, plz use the prefix "mmc: dw_mmc: ".
-
-> 
-> Two more changes:
-> 
-> Before we send cmd,we need to set CMD bit29 to
-> 1 so that CMD and DATA sent to card through the HOLD Register,
-> This is the explication in synosys host:To meet the relatively
-> high Input Hold Time requirement for SDR12, SDR25, and other MMC
-> speed modes, you should program bit[29]use_hold_Reg of the CMD
-> register to 1'b1; the output data is then registered again in the
-> cclk_in_drv domain by using the Hold Register as shown in Path B
-> of Figure 10-8. However, for the higher speed modes of SDR104, SDR50
-> and DDR50, you can meet the much smaller Input Hold Time requirement
-> of 0.8ns by bypassing the Hold Register (Path A in Figure 10-8,
-> programming CMD.use_hold_reg = 1'b0) and then adding delay elements
-> on the output path as indicated
-> 
-> We have no tuning function in our drivers,so we must do the
-> Function piling when we init UHS card.
-
-Sorry..this patch is NACK.
-SDMMC_CMD_USE_HOLD_REG is already used by default in dw_mmc.c
-Which kernel version did you use?
-
-> 
-> Signed-off-by: Jin Guojun <kid.jin@hisilicon.com>
-> ---
->  drivers/mmc/host/dw_mmc-k3.c | 6 ++++++
->  drivers/mmc/host/dw_mmc.c    | 2 ++
->  2 files changed, 8 insertions(+)
-> 
-> diff --git a/drivers/mmc/host/dw_mmc-k3.c b/drivers/mmc/host/dw_mmc-k3.c
-> index 63c2e2e..2cbfcc7 100644
-> --- a/drivers/mmc/host/dw_mmc-k3.c
-> +++ b/drivers/mmc/host/dw_mmc-k3.c
-> @@ -125,10 +125,16 @@ static void dw_mci_hi6220_set_ios(struct dw_mci *host, struct mmc_ios *ios)
->  	host->bus_hz = clk_get_rate(host->biu_clk);
->  }
->  
-> +static void dw_mci_hi6220_prepare_command(struct dw_mci *host, u32 *cmdr)
-> +{
-> +	*cmdr |= SDMMC_CMD_USE_HOLD_REG;
-> +}
-> +
->  static const struct dw_mci_drv_data hi6220_data = {
->  	.switch_voltage		= dw_mci_hi6220_switch_voltage,
->  	.set_ios		= dw_mci_hi6220_set_ios,
->  	.parse_dt		= dw_mci_hi6220_parse_dt,
-> +	.prepare_command        = dw_mci_hi6220_prepare_command,
->  };
-
-There is no "prepare_command" hooks.
-
-Best Regards,
-Jaehoon Chung
-
->  
->  static const struct of_device_id dw_mci_k3_match[] = {
-> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-> index 9dd1bd3..047e116 100644
-> --- a/drivers/mmc/host/dw_mmc.c
-> +++ b/drivers/mmc/host/dw_mmc.c
-> @@ -1564,6 +1564,8 @@ static int dw_mci_execute_tuning(struct mmc_host *mmc, u32 opcode)
->  
->  	if (drv_data && drv_data->execute_tuning)
->  		err = drv_data->execute_tuning(slot, opcode);
-> +	else
-> +		err = 0;
->  	return err;
->  }
->  
-> 
-
+diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+index 403b97b..bef40c8 100644
+--- a/drivers/mmc/core/mmc.c
++++ b/drivers/mmc/core/mmc.c
+@@ -1945,6 +1945,7 @@ static int mmc_suspend(struct mmc_host *host)
+ static int _mmc_resume(struct mmc_host *host)
+ {
+ 	int err = 0;
++	int i;
+ 
+ 	BUG_ON(!host);
+ 	BUG_ON(!host->card);
+@@ -1954,8 +1955,25 @@ static int _mmc_resume(struct mmc_host *host)
+ 	if (!mmc_card_suspended(host->card))
+ 		goto out;
+ 
+-	mmc_power_up(host, host->card->ocr);
+-	err = mmc_init_card(host, host->card->ocr, host->card);
++	/*
++	 * Let's try to fallback the host->f_init
++	 * if failing to init card after resume.
++	 */
++
++	for (i = 0; i < ARRAY_SIZE(freqs); i++) {
++		if (host->f_init < freqs[i])
++			continue;
++		else
++			host->f_init = freqs[i];
++
++		mmc_power_up(host, host->card->ocr);
++		err = mmc_init_card(host, host->card->ocr, host->card);
++		if (!err)
++			break;
++
++		mmc_power_off(host);
++	}
++
+ 	mmc_card_clr_suspended(host->card);
+ 
+ out:
+-- 
+2.3.7
