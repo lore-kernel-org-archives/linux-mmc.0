@@ -1,119 +1,140 @@
 From: Georgi Djakov <georgi.djakov@linaro.org>
-Subject: [PATCH] mmc: sdhci-msm: Add set_uhs_signaling() implementation
-Date: Tue, 19 Jul 2016 17:52:25 +0300
-Message-ID: <1468939945-15233-1-git-send-email-georgi.djakov@linaro.org>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-lf0-f47.google.com ([209.85.215.47]:34877 "EHLO
-	mail-lf0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752366AbcGSOwu (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 19 Jul 2016 10:52:50 -0400
-Received: by mail-lf0-f47.google.com with SMTP id f93so16609289lfi.2
-        for <linux-mmc@vger.kernel.org>; Tue, 19 Jul 2016 07:52:49 -0700 (PDT)
-Sender: linux-mmc-owner@vger.kernel.org
+Subject: Re: [PATCH 2/3] mmc: mmc: do not use CMD13 to get status after speed
+ mode switch
+Date: Tue, 19 Jul 2016 19:27:31 +0300
+Message-ID: <578E54F3.3000908@linaro.org>
+References: <1463647662-27426-1-git-send-email-chaotian.jing@mediatek.com>
+ <1463647662-27426-3-git-send-email-chaotian.jing@mediatek.com>
+ <CAOCOHw67NAinC6dEX0KsDn02kuXyNwznm3-bhptSVvQH0V1dqQ@mail.gmail.com>
+ <CAPDyKFroGBShATJcQ=b2H=k85F+z9=hixpp3Go-j79ZvvLGAwQ@mail.gmail.com>
+ <578CDBD8.2050806@linaro.org>
+ <CAPDyKFo0438H8odWks6HeD6E64+oyXYMHESv=pxqQyJe_9oaWA@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <CAPDyKFo0438H8odWks6HeD6E64+oyXYMHESv=pxqQyJe_9oaWA@mail.gmail.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Bjorn Andersson <bjorn.andersson@linaro.org>, Chaotian Jing <chaotian.jing@mediatek.com>, Matthias Brugger <matthias.bgg@gmail.com>, Adrian Hunter <adrian.hunter@intel.com>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>, Masahiro Yamada <yamada.masahiro@socionext.com>, linux-mmc <linux-mmc@vger.kernel.org>, lkml <linux-kernel@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, linux-mediatek@lists.infradead.org, srv_heupstream <srv_heupstream@mediatek.com>, Sascha Hauer <kernel@pengutronix.de>, Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
 List-Id: linux-mmc@vger.kernel.org
-To: ulf.hansson@linaro.org, adrian.hunter@intel.com
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org, georgi.djakov@linaro.org, riteshh@codeaurora.org, bjorn.andersson@linaro.org, srinivas.kandagatla@linaro.org
 
-From: Ritesh Harjani <riteshh@codeaurora.org>
+On 07/19/2016 12:31 PM, Ulf Hansson wrote:
+> On 18 July 2016 at 15:38, Georgi Djakov <georgi.djakov@linaro.org> wrote:
+>> On 07/18/2016 03:50 PM, Ulf Hansson wrote:
+>>> On 16 July 2016 at 00:10, Bjorn Andersson <bjorn.andersson@linaro.org> wrote:
+>>>> On Thu, May 19, 2016 at 1:47 AM, Chaotian Jing
+>>>> <chaotian.jing@mediatek.com> wrote:
+>>>>> Per JEDEC spec, it is not recommended to use CMD13 to get card status
+>>>>> after speed mode switch. below are two reason about this:
+>>>>> 1. CMD13 cannot be guaranteed due to the asynchronous operation.
+>>>>> Therefore it is not recommended to use CMD13 to check busy completion
+>>>>> of the timing change indication.
+>>>>> 2. After switch to HS200, CMD13 will get response of 0x800, and even the
+>>>>> busy signal gets de-asserted, the response of CMD13 is aslo 0x800.
+>>>>>
+>>>>> Signed-off-by: Chaotian Jing <chaotian.jing@mediatek.com>
+>>>>> ---
+>>>>>  drivers/mmc/core/mmc.c | 112 ++++++++++++++++++++-----------------------------
+>>>>>  1 file changed, 45 insertions(+), 67 deletions(-)
+>>>>>
+>>>>> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+>>>> [..]
+>>>>> @@ -1274,20 +1254,18 @@ static int mmc_select_hs200(struct mmc_card *card)
+>>>>>                 err = __mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
+>>>>>                                    EXT_CSD_HS_TIMING, val,
+>>>>>                                    card->ext_csd.generic_cmd6_time,
+>>>>> -                                  true, send_status, true);
+>>>>> +                                  true, false, true);
+>>>>>                 if (err)
+>>>>>                         goto err;
+>>>>>                 old_timing = host->ios.timing;
+>>>>>                 mmc_set_timing(host, MMC_TIMING_MMC_HS200);
+>>>>> -               if (!send_status) {
+>>>>> -                       err = mmc_switch_status(card);
+>>>>> -                       /*
+>>>>> -                        * mmc_select_timing() assumes timing has not changed if
+>>>>> -                        * it is a switch error.
+>>>>> -                        */
+>>>>> -                       if (err == -EBADMSG)
+>>>>> -                               mmc_set_timing(host, old_timing);
+>>>>> -               }
+>>>>> +               err = mmc_switch_status(card);
+>>>>> +               /*
+>>>>> +                * mmc_select_timing() assumes timing has not changed if
+>>>>> +                * it is a switch error.
+>>>>> +                */
+>>>>> +               if (err == -EBADMSG)
+>>>>> +                       mmc_set_timing(host, old_timing);
+>>>>
+>>>> Sorry for not spotting this earlier, but with the move of the call of
+>>>> mmc_switch_status() to after mmc_set_timing() we get following error
+>>>> with sdhci-msm:
+>>>
+>>> Thanks for reporting!
+>>>
+>>>>
+>>>> mmc0: mmc_select_hs200 failed, error -110
+>>>> mmc0: error -110 whilst initialising MMC card
+>>>> mmc0: Reset 0x1 never completed.
+>>>> sdhci: =========== REGISTER DUMP (mmc0)===========
+>>>> sdhci: Sys addr: 0x00000000 | Version: 0x00002e02
+>>>> sdhci: Blk size: 0x00004000 | Blk cnt: 0x00000000
+>>>> sdhci: Argument: 0x00000000 | Trn mode: 0x00000000
+>>>> sdhci: Present: 0x01f80000 | Host ctl: 0x00000000
+>>>> sdhci: Power: 0x00000000 | Blk gap: 0x00000000
+>>>> sdhci: Wake-up: 0x00000000 | Clock: 0x00000003
+>>>> sdhci: Timeout: 0x00000000 | Int stat: 0x00000000
+>>>> sdhci: Int enab: 0x00000000 | Sig enab: 0x00000000
+>>>> sdhci: AC12 err: 0x00000000 | Slot int: 0x00000000
+>>>> sdhci: Caps: 0x322dc8b2 | Caps_1: 0x00008007
+>>>> sdhci: Cmd: 0x00000000 | Max curr: 0x00000000
+>>>> sdhci: Host ctl2: 0x00000000
+>>>> sdhci: ADMA Err: 0x00000000 | ADMA Ptr: 0x0000000000000000
+>>>> sdhci: ===========================================
+>>>>
+>>>> But I if I understand the commit correctly this is the intention of
+>>>> the patch (not the error, but the move).
+>>>
+>>> I tried dropping this change from my next branch, but there are some
+>>> more changes on top that prevents a "clean" drop. It's certainly
+>>> doable, but perhaps we can try to narrow down the problem to see if
+>>> this could/should be fixed in the sdhci msm driver instead!?
+>>
+>> Yes, i am working on it. Seems that if we just ignore the -ETIMEDOUT
+>> returned by mmc_switch_status() everything works as before. Currently
+>> i am expecting more information about this controller specifics, in
+>> order to understand if this could be fixed with a change in the driver
+>> only.
+> 
+> Thanks for looking into this!
+> 
 
-To allow UHS mode to work properly, we need to implement a Qualcomm
-specific set_uhs_signaling() callback function. This function differs
-from the sdhci_set_uhs_signaling() in that we need check the clock
-rate and enable UHS timing only if the frequency is above 100MHz.
+Here is a partial fix, as it resolves the issue for the eMMC only.
+https://patchwork.kernel.org/patch/9237679/
+More investigation ongoing.
 
-Signed-off-by: Ritesh Harjani <riteshh@codeaurora.org>
-Signed-off-by: Georgi Djakov <georgi.djakov@linaro.org>
----
+Thanks,
+Georgi
 
-This patch resolves the mmc_select_hs200 timeouts noticed after merging
-commit a5c1f3e55c99 ("mmc: mmc: do not use CMD13 to get status after
-speed mode switch")
-
-mmc0: mmc_select_hs200 failed, error -110
-mmc0: error -110 whilst initialising MMC card
-mmc0: Reset 0x1 never completed.
-sdhci: =========== REGISTER DUMP (mmc0)===========
-sdhci: Sys addr: 0x00000000 | Version: 0x00002e02
-sdhci: Blk size: 0x00004000 | Blk cnt: 0x00000000
-sdhci: Argument: 0x00000000 | Trn mode: 0x00000000
-sdhci: Present: 0x01f80000 | Host ctl: 0x00000000
-sdhci: Power: 0x00000000 | Blk gap: 0x00000000
-sdhci: Wake-up: 0x00000000 | Clock: 0x00000003
-sdhci: Timeout: 0x00000000 | Int stat: 0x00000000
-sdhci: Int enab: 0x00000000 | Sig enab: 0x00000000
-sdhci: AC12 err: 0x00000000 | Slot int: 0x00000000
-sdhci: Caps: 0x322dc8b2 | Caps_1: 0x00008007
-sdhci: Cmd: 0x00000000 | Max curr: 0x00000000
-sdhci: Host ctl2: 0x00000000
-sdhci: ADMA Err: 0x00000000 | ADMA Ptr: 0x0000000000000000
-sdhci: ===========================================
-
- drivers/mmc/host/sdhci-msm.c |   48 +++++++++++++++++++++++++++++++++++++++++-
- 1 file changed, 47 insertions(+), 1 deletion(-)
-
-diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
-index 343e4bd4dc08..d1fce941cdd4 100644
---- a/drivers/mmc/host/sdhci-msm.c
-+++ b/drivers/mmc/host/sdhci-msm.c
-@@ -410,6 +410,52 @@ retry:
- 	return rc;
- }
- 
-+static void sdhci_msm_set_uhs_signaling(struct sdhci_host *host,
-+					unsigned int uhs)
-+{
-+	struct mmc_host *mmc = host->mmc;
-+	u16 ctrl_2;
-+
-+	ctrl_2 = sdhci_readw(host, SDHCI_HOST_CONTROL2);
-+	/* Select Bus Speed Mode for host */
-+	ctrl_2 &= ~SDHCI_CTRL_UHS_MASK;
-+	switch (uhs) {
-+	case MMC_TIMING_UHS_SDR12:
-+		ctrl_2 |= SDHCI_CTRL_UHS_SDR12;
-+		break;
-+	case MMC_TIMING_UHS_SDR25:
-+		ctrl_2 |= SDHCI_CTRL_UHS_SDR25;
-+		break;
-+	case MMC_TIMING_UHS_SDR50:
-+		ctrl_2 |= SDHCI_CTRL_UHS_SDR50;
-+		break;
-+	case MMC_TIMING_MMC_HS200:
-+	case MMC_TIMING_UHS_SDR104:
-+		ctrl_2 |= SDHCI_CTRL_UHS_SDR104;
-+		break;
-+	case MMC_TIMING_UHS_DDR50:
-+	case MMC_TIMING_MMC_DDR52:
-+		ctrl_2 |= SDHCI_CTRL_UHS_DDR50;
-+		break;
-+	}
-+
-+	/*
-+	 * When clock frequency is less than 100MHz, the feedback clock must be
-+	 * provided and DLL must not be used so that tuning can be skipped. To
-+	 * provide feedback clock, the mode selection can be any value less
-+	 * than 3'b011 in bits [2:0] of HOST CONTROL2 register.
-+	 */
-+	if (host->clock <= 100000000 &&
-+	    (uhs == MMC_TIMING_MMC_HS400 ||
-+	     uhs == MMC_TIMING_MMC_HS200 ||
-+	     uhs == MMC_TIMING_UHS_SDR104))
-+		ctrl_2 &= ~SDHCI_CTRL_UHS_MASK;
-+
-+	dev_dbg(mmc_dev(mmc), "%s: clock=%u uhs=%u ctrl_2=0x%x\n",
-+		mmc_hostname(host->mmc), host->clock, uhs, ctrl_2);
-+	sdhci_writew(host, ctrl_2, SDHCI_HOST_CONTROL2);
-+}
-+
- static const struct of_device_id sdhci_msm_dt_match[] = {
- 	{ .compatible = "qcom,sdhci-msm-v4" },
- 	{},
-@@ -422,7 +468,7 @@ static const struct sdhci_ops sdhci_msm_ops = {
- 	.reset = sdhci_reset,
- 	.set_clock = sdhci_set_clock,
- 	.set_bus_width = sdhci_set_bus_width,
--	.set_uhs_signaling = sdhci_set_uhs_signaling,
-+	.set_uhs_signaling = sdhci_msm_set_uhs_signaling,
- };
- 
- static const struct sdhci_pltfm_data sdhci_msm_pdata = {
+>>
+>>>
+>>> I also noticed that below submitted change, which *isn't* applied for
+>>> next, might be related.
+>>> https://patchwork.kernel.org/patch/9197881/
+>>>
+>>
+>> It is not related to this issue, but it is good to have when this is
+>> resolved, otherwise we will see the dumpregs output (pr_err now),
+>> when controller is initialized without a card in the SD slot.
+> 
+> Okay, thanks for clarifying. Although, I need an ack from Adrian
+> before I apply it.
+> 
+>>
+>> Thanks,
+>> Georgi
+> 
+> Kind regards
+> Uffe
+> 
