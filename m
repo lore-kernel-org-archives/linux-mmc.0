@@ -1,123 +1,161 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v2] mmc: core: Extend sysfs with DSR register
-Date: Tue, 19 Jul 2016 12:31:35 +0200
-Message-ID: <CAPDyKFoHZz4QmW3Q7LA11u2PQhCmk7rn+Varsp+RsbCSVpA2Nw@mail.gmail.com>
-References: <20160719091652.124182-1-prtvar.b@gmail.com>
+Subject: Re: [RESEND RFC v2] mmc: Change the max discard sectors and erase
+ response if mmc host supports busy signalling
+Date: Tue, 19 Jul 2016 13:57:46 +0200
+Message-ID: <CAPDyKFoxMtMjzc4nXnhOvribUBAfzNjm+LbruSVkXgQW_bxgUA@mail.gmail.com>
+References: <54f75bccac6e6e49d87a5122ea670038b508b33c.1465808036.git.baolin.wang@linaro.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wm0-f47.google.com ([74.125.82.47]:38279 "EHLO
-	mail-wm0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752519AbcGSKbi (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 19 Jul 2016 06:31:38 -0400
-Received: by mail-wm0-f47.google.com with SMTP id o80so20900783wme.1
-        for <linux-mmc@vger.kernel.org>; Tue, 19 Jul 2016 03:31:37 -0700 (PDT)
-In-Reply-To: <20160719091652.124182-1-prtvar.b@gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <54f75bccac6e6e49d87a5122ea670038b508b33c.1465808036.git.baolin.wang@linaro.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Baolin Wang <baolin.wang@linaro.org>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, Russell King <rmk+kernel@arm.linux.org.uk>, Shawn Lin <shawn.lin@rock-chips.com>, Doug Anderson <dianders@chromium.org>, =?UTF-8?Q?Heiko_St=C3=BCbner?= <heiko@sntech.de>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Mark Brown <broonie@kernel.org>, Linus Walleij <linus.walleij@linaro.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Bojan Prtvar <prtvar.b@gmail.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Jonathan Corbet <corbet@lwn.net>, Linus Walleij <linus.walleij@linaro.org>, Wolfram Sang <wsa@the-dreams.de>, Adrian Hunter <adrian.hunter@intel.com>, Shawn Lin <shawn.lin@rock-chips.com>, Chaotian Jing <chaotian.jing@mediatek.com>, Dong Aisheng <aisheng.dong@nxp.com>, Pratibhasagar V <pratibha@codeaurora.org>, Gwendal Grignou <gwendal@chromium.org>, Weijun Yang <york.yang@csr.com>, Russell King <rmk+kernel@arm.linux.org.uk>, Carlo Caione <carlo@endlessm.com>, "linux-doc@vger.kernel.org" <linux-doc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 
-On 19 July 2016 at 11:16, Bojan Prtvar <prtvar.b@gmail.com> wrote:
-> Export DSR register through sysfs same as we did for the CID, CSD and OCR registers.
+On 13 June 2016 at 10:54, Baolin Wang <baolin.wang@linaro.org> wrote:
+> When mmc host HW supports busy signalling (using R1B as response), We
+> shouldn't use 'host->max_busy_timeout' as the limitation when deciding
+> the max discard sectors that we tell the generic BLOCK layer about.
+> Instead, we should pick one preferred erase size as the max discard
+> sectors.
 >
-> Signed-off-by: Bojan Prtvar <prtvar.b@gmail.com>
+> If the host controller supports busy signalling and the timeout for
+> the erase operation does not exceed the max_busy_timeout, we should
+> use R1B response. Or we need to prevent the host from doing hw busy
+> detection, which is done by converting to a R1 response instead.
+>
+> Changes since v1:
+>   - Remove the 'MMC_CAP_WAIT_WHILE_BUSY' flag checking when deciding
+>     the max discard sectors.
+>
+> Signed-off-by: Baolin Wang <baolin.wang@linaro.org>
+> ---
+>  drivers/mmc/core/core.c |   47 +++++++++++++++++++++++++++++++++++++++--------
+>  1 file changed, 39 insertions(+), 8 deletions(-)
+>
+> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+> index 8b4dfd4..edd43b1 100644
+> --- a/drivers/mmc/core/core.c
+> +++ b/drivers/mmc/core/core.c
+> @@ -2060,7 +2060,7 @@ static int mmc_do_erase(struct mmc_card *card, unsigned int from,
+>                         unsigned int to, unsigned int arg)
+>  {
+>         struct mmc_command cmd = {0};
+> -       unsigned int qty = 0;
+> +       unsigned int qty = 0, busy_timeout = 0;
+>         unsigned long timeout;
+>         int err;
+>
+> @@ -2128,8 +2128,23 @@ static int mmc_do_erase(struct mmc_card *card, unsigned int from,
+>         memset(&cmd, 0, sizeof(struct mmc_command));
+>         cmd.opcode = MMC_ERASE;
+>         cmd.arg = arg;
+> -       cmd.flags = MMC_RSP_SPI_R1B | MMC_RSP_R1B | MMC_CMD_AC;
+> -       cmd.busy_timeout = mmc_erase_timeout(card, arg, qty);
+> +       busy_timeout = mmc_erase_timeout(card, arg, qty);
+> +       /*
+> +        * If the host controller supports busy signalling and the timeout for
+> +        * the erase operation does not exceed the max_busy_timeout, we should
+> +        * use R1B response. Or we need to prevent the host from doing hw busy
+> +        * detection, which is done by converting to a R1 response instead.
+> +        */
+> +       if ((card->host->max_busy_timeout &&
+> +           busy_timeout > card->host->max_busy_timeout) ||
+> +           !(card->host->caps & MMC_CAP_WAIT_WHILE_BUSY)) {
 
-Thanks, applied for next!
+sdhci uses the max_busy_timeout, but doesn't always use MMC_CAP_WAIT_WHILE_BUSY.
+I have probably asked Adrian about this before, but right now I can't
+recall why this is the case.
+
+Anyway, I don't think we need to check MMC_CAP_WAIT_WHILE_BUSY at this point.
+
+> +               cmd.flags = MMC_RSP_SPI_R1 | MMC_RSP_R1 | MMC_CMD_AC;
+> +               cmd.busy_timeout = 0;
+> +       } else {
+> +               cmd.flags = MMC_RSP_SPI_R1B | MMC_RSP_R1B | MMC_CMD_AC;
+> +               cmd.busy_timeout = busy_timeout;
+> +       }
+> +
+>         err = mmc_wait_for_cmd(card->host, &cmd, 0);
+>         if (err) {
+>                 pr_err("mmc_erase: erase error %d, status %#x\n",
+
+You also need to fix the loop for polling with CMD13 to get the card
+status. In case of when R1B+MMC_CAP_WAIT_WHILE_BUSY is used, the
+polling shall be avoided.
+
+Moreover, the polling loop doesn't care about the earlier used
+calculated erase timeout, but instead defaults to the
+MMC_CORE_TIMEOUT_MS, this is wrong.
+
+Finally, perhaps as an improvement step; I think we shall make use of
+the host's ->card_busy() callback if implemented and when
+R1B+MMC_CAP_WAIT_WHILE_BUSY isn't used. This in favour of issuing
+CMD13 in the loop.
+
+You can see the sequence in __mmc_switch(), we should apply this to
+the erase case as well. Perhaps we can even split up some of the code
+in __mmc_switch() to allow it to re-used for the erase case as well!?
+
+> @@ -2321,23 +2336,39 @@ static unsigned int mmc_do_calc_max_discard(struct mmc_card *card,
+>                                             unsigned int arg)
+>  {
+>         struct mmc_host *host = card->host;
+> -       unsigned int max_discard, x, y, qty = 0, max_qty, timeout;
+> +       unsigned int max_discard, x, y, qty = 0, max_qty, min_qty, timeout;
+>         unsigned int last_timeout = 0;
+>
+> -       if (card->erase_shift)
+> +       if (card->erase_shift) {
+>                 max_qty = UINT_MAX >> card->erase_shift;
+> -       else if (mmc_card_sd(card))
+> +               min_qty = card->pref_erase >> card->erase_shift;
+> +       } else if (mmc_card_sd(card)) {
+>                 max_qty = UINT_MAX;
+> -       else
+> +               min_qty = card->pref_erase;
+> +       } else {
+>                 max_qty = UINT_MAX / card->erase_size;
+> +               min_qty = card->pref_erase / card->erase_size;
+> +       }
+>
+>         /* Find the largest qty with an OK timeout */
+
+This comment needs to be updated.
+
+>         do {
+>                 y = 0;
+>                 for (x = 1; x && x <= max_qty && max_qty - x >= qty; x <<= 1) {
+>                         timeout = mmc_erase_timeout(card, arg, qty + x);
+> -                       if (timeout > host->max_busy_timeout)
+> +                       /*
+> +                        * We should not only use 'host->max_busy_timeout' as
+> +                        * the limitation when deciding the max discard sectors.
+> +                        * We should set a balance value to improve the erase
+> +                        * speed, and it can not get too long timeout at the
+> +                        * same time.
+
+I am not really sure I understand this comment. Could you try to
+elaborate on what value that will be picked when the max_busy_timeout
+isn't just as the limiter.
+
+> +                        *
+> +                        * Here we set 'card->pref_erase' as the minimal discard
+> +                        * sectors when deciding the max discard sectors.
+> +                        */
+> +                       if (qty + x > min_qty &&
+> +                           timeout > host->max_busy_timeout)
+>                                 break;
+> +
+>                         if (timeout < last_timeout)
+>                                 break;
+>                         last_timeout = timeout;
+> --
+> 1.7.9.5
+>
+
+Again, sorry for the delay in response!
 
 Kind regards
 Uffe
-
-> ---
->  v2: Extended to cover SD cards
->
->  Documentation/mmc/mmc-dev-attrs.txt |  1 +
->  drivers/mmc/core/mmc.c              | 17 +++++++++++++++++
->  drivers/mmc/core/sd.c               | 17 +++++++++++++++++
->  3 files changed, 35 insertions(+)
->
-> diff --git a/Documentation/mmc/mmc-dev-attrs.txt b/Documentation/mmc/mmc-dev-attrs.txt
-> index 8163eca..404a0e9 100644
-> --- a/Documentation/mmc/mmc-dev-attrs.txt
-> +++ b/Documentation/mmc/mmc-dev-attrs.txt
-> @@ -29,6 +29,7 @@ All attributes are read-only.
->         raw_rpmb_size_mult      RPMB partition size
->         rel_sectors             Reliable write sector count
->         ocr                     Operation Conditions Register
-> +       dsr                     Driver Stage Register
->
->  Note on Erase Size and Preferred Erase Size:
->
-> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-> index 403b97b..f2d185c 100644
-> --- a/drivers/mmc/core/mmc.c
-> +++ b/drivers/mmc/core/mmc.c
-> @@ -767,6 +767,22 @@ static ssize_t mmc_fwrev_show(struct device *dev,
->
->  static DEVICE_ATTR(fwrev, S_IRUGO, mmc_fwrev_show, NULL);
->
-> +static ssize_t mmc_dsr_show(struct device *dev,
-> +                           struct device_attribute *attr,
-> +                           char *buf)
-> +{
-> +       struct mmc_card *card = mmc_dev_to_card(dev);
-> +       struct mmc_host *host = card->host;
-> +
-> +       if (card->csd.dsr_imp && host->dsr_req)
-> +               return sprintf(buf, "0x%x\n", host->dsr);
-> +       else
-> +               /* return default DSR value */
-> +               return sprintf(buf, "0x%x\n", 0x404);
-> +}
-> +
-> +static DEVICE_ATTR(dsr, S_IRUGO, mmc_dsr_show, NULL);
-> +
->  static struct attribute *mmc_std_attrs[] = {
->         &dev_attr_cid.attr,
->         &dev_attr_csd.attr,
-> @@ -786,6 +802,7 @@ static struct attribute *mmc_std_attrs[] = {
->         &dev_attr_raw_rpmb_size_mult.attr,
->         &dev_attr_rel_sectors.attr,
->         &dev_attr_ocr.attr,
-> +       &dev_attr_dsr.attr,
->         NULL,
->  };
->  ATTRIBUTE_GROUPS(mmc_std);
-> diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
-> index 3dd0861..0123936 100644
-> --- a/drivers/mmc/core/sd.c
-> +++ b/drivers/mmc/core/sd.c
-> @@ -678,6 +678,22 @@ MMC_DEV_ATTR(serial, "0x%08x\n", card->cid.serial);
->  MMC_DEV_ATTR(ocr, "%08x\n", card->ocr);
->
->
-> +static ssize_t mmc_dsr_show(struct device *dev,
-> +                           struct device_attribute *attr,
-> +                           char *buf)
-> +{
-> +       struct mmc_card *card = mmc_dev_to_card(dev);
-> +       struct mmc_host *host = card->host;
-> +
-> +       if (card->csd.dsr_imp && host->dsr_req)
-> +               return sprintf(buf, "0x%x\n", host->dsr);
-> +       else
-> +               /* return default DSR value */
-> +               return sprintf(buf, "0x%x\n", 0x404);
-> +}
-> +
-> +static DEVICE_ATTR(dsr, S_IRUGO, mmc_dsr_show, NULL);
-> +
->  static struct attribute *sd_std_attrs[] = {
->         &dev_attr_cid.attr,
->         &dev_attr_csd.attr,
-> @@ -692,6 +708,7 @@ static struct attribute *sd_std_attrs[] = {
->         &dev_attr_oemid.attr,
->         &dev_attr_serial.attr,
->         &dev_attr_ocr.attr,
-> +       &dev_attr_dsr.attr,
->         NULL,
->  };
->  ATTRIBUTE_GROUPS(sd_std);
-> --
-> 2.8.0.GIT
->
