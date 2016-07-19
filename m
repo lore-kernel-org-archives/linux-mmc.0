@@ -1,161 +1,115 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [RESEND RFC v2] mmc: Change the max discard sectors and erase
- response if mmc host supports busy signalling
-Date: Tue, 19 Jul 2016 13:57:46 +0200
-Message-ID: <CAPDyKFoxMtMjzc4nXnhOvribUBAfzNjm+LbruSVkXgQW_bxgUA@mail.gmail.com>
-References: <54f75bccac6e6e49d87a5122ea670038b508b33c.1465808036.git.baolin.wang@linaro.org>
+From: Jinguojun <kid.jin@hisilicon.com>
+Subject: Re: [PATCH 1/2] Support SD UHS for hikey-mainline-rebase
+Date: Tue, 19 Jul 2016 20:28:20 +0800
+Message-ID: <e7262e5d-a15c-8cb4-dc8b-c0e391f2a88b@hisilicon.com>
+References: <CGME20160719075706epcas1p169dc5e5e0f7179f71f92a56e57e373c4@epcas1p1.samsung.com>
+ <1468914713-63347-1-git-send-email-kid.jin@hisilicon.com>
+ <578DE10D.3020401@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="windows-1252"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <54f75bccac6e6e49d87a5122ea670038b508b33c.1465808036.git.baolin.wang@linaro.org>
+In-Reply-To: <578DE10D.3020401@samsung.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Baolin Wang <baolin.wang@linaro.org>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, Russell King <rmk+kernel@arm.linux.org.uk>, Shawn Lin <shawn.lin@rock-chips.com>, Doug Anderson <dianders@chromium.org>, =?UTF-8?Q?Heiko_St=C3=BCbner?= <heiko@sntech.de>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Mark Brown <broonie@kernel.org>, Linus Walleij <linus.walleij@linaro.org>
+To: Jaehoon Chung <jh80.chung@samsung.com>, ulf.hansson@linaro.org, Adrian Hunter <adrian.hunter@intel.com>, arnd@arndb.de, rmk+kernel@arm.linux.org.uk, shawn.lin@rock-chips.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, xuwei5@hisilicon.com, robh+dt@kernel.org, ijc+devicetree@hellion.org.uk, linux-arm-kernel@lists.infradead.org, devicetree@vger.kernel.org, linuxarm@huawei.com, suzhuangluan@hisilicon.com, kongfei@hisilicon.com, CPGS <cpgs@samsung.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On 13 June 2016 at 10:54, Baolin Wang <baolin.wang@linaro.org> wrote:
-> When mmc host HW supports busy signalling (using R1B as response), We
-> shouldn't use 'host->max_busy_timeout' as the limitation when deciding
-> the max discard sectors that we tell the generic BLOCK layer about.
-> Instead, we should pick one preferred erase size as the max discard
-> sectors.
->
-> If the host controller supports busy signalling and the timeout for
-> the erase operation does not exceed the max_busy_timeout, we should
-> use R1B response. Or we need to prevent the host from doing hw busy
-> detection, which is done by converting to a R1 response instead.
->
-> Changes since v1:
->   - Remove the 'MMC_CAP_WAIT_WHILE_BUSY' flag checking when deciding
->     the max discard sectors.
->
-> Signed-off-by: Baolin Wang <baolin.wang@linaro.org>
-> ---
->  drivers/mmc/core/core.c |   47 +++++++++++++++++++++++++++++++++++++++--------
->  1 file changed, 39 insertions(+), 8 deletions(-)
->
-> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-> index 8b4dfd4..edd43b1 100644
-> --- a/drivers/mmc/core/core.c
-> +++ b/drivers/mmc/core/core.c
-> @@ -2060,7 +2060,7 @@ static int mmc_do_erase(struct mmc_card *card, unsigned int from,
->                         unsigned int to, unsigned int arg)
->  {
->         struct mmc_command cmd = {0};
-> -       unsigned int qty = 0;
-> +       unsigned int qty = 0, busy_timeout = 0;
->         unsigned long timeout;
->         int err;
->
-> @@ -2128,8 +2128,23 @@ static int mmc_do_erase(struct mmc_card *card, unsigned int from,
->         memset(&cmd, 0, sizeof(struct mmc_command));
->         cmd.opcode = MMC_ERASE;
->         cmd.arg = arg;
-> -       cmd.flags = MMC_RSP_SPI_R1B | MMC_RSP_R1B | MMC_CMD_AC;
-> -       cmd.busy_timeout = mmc_erase_timeout(card, arg, qty);
-> +       busy_timeout = mmc_erase_timeout(card, arg, qty);
-> +       /*
-> +        * If the host controller supports busy signalling and the timeout for
-> +        * the erase operation does not exceed the max_busy_timeout, we should
-> +        * use R1B response. Or we need to prevent the host from doing hw busy
-> +        * detection, which is done by converting to a R1 response instead.
-> +        */
-> +       if ((card->host->max_busy_timeout &&
-> +           busy_timeout > card->host->max_busy_timeout) ||
-> +           !(card->host->caps & MMC_CAP_WAIT_WHILE_BUSY)) {
 
-sdhci uses the max_busy_timeout, but doesn't always use MMC_CAP_WAIT_WHILE_BUSY.
-I have probably asked Adrian about this before, but right now I can't
-recall why this is the case.
 
-Anyway, I don't think we need to check MMC_CAP_WAIT_WHILE_BUSY at this point.
+On 2016/7/19 16:13, Jaehoon Chung wrote:
+> Hi,
+> 
+> Removed the unnecessary CC'd.
+> 
+> On 07/19/2016 04:51 PM, Jin Guojun wrote:
+>> From: j00226943 <j00226943@notesmail.huawei.com>
+> 
+> What is j00226943?
+> 
+> When you send the patch for dw_mmc controller, plz use the prefix "mmc: dw_mmc: ".
+> 
+>>
+>> Two more changes:
+>>
+>> Before we send cmd,we need to set CMD bit29 to
+>> 1 so that CMD and DATA sent to card through the HOLD Register,
+>> This is the explication in synosys host:To meet the relatively
+>> high Input Hold Time requirement for SDR12, SDR25, and other MMC
+>> speed modes, you should program bit[29]use_hold_Reg of the CMD
+>> register to 1'b1; the output data is then registered again in the
+>> cclk_in_drv domain by using the Hold Register as shown in Path B
+>> of Figure 10-8. However, for the higher speed modes of SDR104, SDR50
+>> and DDR50, you can meet the much smaller Input Hold Time requirement
+>> of 0.8ns by bypassing the Hold Register (Path A in Figure 10-8,
+>> programming CMD.use_hold_reg = 1'b0) and then adding delay elements
+>> on the output path as indicated
+>>
+>> We have no tuning function in our drivers,so we must do the
+>> Function piling when we init UHS card.
 
-> +               cmd.flags = MMC_RSP_SPI_R1 | MMC_RSP_R1 | MMC_CMD_AC;
-> +               cmd.busy_timeout = 0;
-> +       } else {
-> +               cmd.flags = MMC_RSP_SPI_R1B | MMC_RSP_R1B | MMC_CMD_AC;
-> +               cmd.busy_timeout = busy_timeout;
-> +       }
-> +
->         err = mmc_wait_for_cmd(card->host, &cmd, 0);
->         if (err) {
->                 pr_err("mmc_erase: erase error %d, status %#x\n",
+1.For hikey we cant support UHS for SD card in https://github.com/96boards-hikey/linux/tree/hikey-mainline-rebase
+2.I have no SDMMC_CMD_USE_HOLD_REG in Dw_mmc-k3.c
 
-You also need to fix the loop for polling with CMD13 to get the card
-status. In case of when R1B+MMC_CAP_WAIT_WHILE_BUSY is used, the
-polling shall be avoided.
+> 
+> Sorry..this patch is NACK.
+> SDMMC_CMD_USE_HOLD_REG is already used by default in dw_mmc.c
+> Which kernel version did you use?
+> 
+>>
+>> Signed-off-by: Jin Guojun <kid.jin@hisilicon.com>
+>> ---
+>>  drivers/mmc/host/dw_mmc-k3.c | 6 ++++++
+>>  drivers/mmc/host/dw_mmc.c    | 2 ++
+>>  2 files changed, 8 insertions(+)
+>>
+>> diff --git a/drivers/mmc/host/dw_mmc-k3.c b/drivers/mmc/host/dw_mmc-k3.c
+>> index 63c2e2e..2cbfcc7 100644
+>> --- a/drivers/mmc/host/dw_mmc-k3.c
+>> +++ b/drivers/mmc/host/dw_mmc-k3.c
+>> @@ -125,10 +125,16 @@ static void dw_mci_hi6220_set_ios(struct dw_mci *host, struct mmc_ios *ios)
+>>  	host->bus_hz = clk_get_rate(host->biu_clk);
+>>  }
+>>  
+>> +static void dw_mci_hi6220_prepare_command(struct dw_mci *host, u32 *cmdr)
+>> +{
+>> +	*cmdr |= SDMMC_CMD_USE_HOLD_REG;
+>> +}
+>> +
+>>  static const struct dw_mci_drv_data hi6220_data = {
+>>  	.switch_voltage		= dw_mci_hi6220_switch_voltage,
+>>  	.set_ios		= dw_mci_hi6220_set_ios,
+>>  	.parse_dt		= dw_mci_hi6220_parse_dt,
+>> +	.prepare_command        = dw_mci_hi6220_prepare_command,
+>>  };
+Hi,thank you for your review
 
-Moreover, the polling loop doesn't care about the earlier used
-calculated erase timeout, but instead defaults to the
-MMC_CORE_TIMEOUT_MS, this is wrong.
+1.We do the prepare_command in dw_mci_prepare_command before we send CMD in dw_mmc.c
+2.I can find the same drivers in dw_mmc-exynos.c
+3.For hikey we do the initialization from Dw_mmc-k3.c,so I need to do the prepare_command in hi6220 drivers
 
-Finally, perhaps as an improvement step; I think we shall make use of
-the host's ->card_busy() callback if implemented and when
-R1B+MMC_CAP_WAIT_WHILE_BUSY isn't used. This in favour of issuing
-CMD13 in the loop.
-
-You can see the sequence in __mmc_switch(), we should apply this to
-the erase case as well. Perhaps we can even split up some of the code
-in __mmc_switch() to allow it to re-used for the erase case as well!?
-
-> @@ -2321,23 +2336,39 @@ static unsigned int mmc_do_calc_max_discard(struct mmc_card *card,
->                                             unsigned int arg)
->  {
->         struct mmc_host *host = card->host;
-> -       unsigned int max_discard, x, y, qty = 0, max_qty, timeout;
-> +       unsigned int max_discard, x, y, qty = 0, max_qty, min_qty, timeout;
->         unsigned int last_timeout = 0;
->
-> -       if (card->erase_shift)
-> +       if (card->erase_shift) {
->                 max_qty = UINT_MAX >> card->erase_shift;
-> -       else if (mmc_card_sd(card))
-> +               min_qty = card->pref_erase >> card->erase_shift;
-> +       } else if (mmc_card_sd(card)) {
->                 max_qty = UINT_MAX;
-> -       else
-> +               min_qty = card->pref_erase;
-> +       } else {
->                 max_qty = UINT_MAX / card->erase_size;
-> +               min_qty = card->pref_erase / card->erase_size;
-> +       }
->
->         /* Find the largest qty with an OK timeout */
-
-This comment needs to be updated.
-
->         do {
->                 y = 0;
->                 for (x = 1; x && x <= max_qty && max_qty - x >= qty; x <<= 1) {
->                         timeout = mmc_erase_timeout(card, arg, qty + x);
-> -                       if (timeout > host->max_busy_timeout)
-> +                       /*
-> +                        * We should not only use 'host->max_busy_timeout' as
-> +                        * the limitation when deciding the max discard sectors.
-> +                        * We should set a balance value to improve the erase
-> +                        * speed, and it can not get too long timeout at the
-> +                        * same time.
-
-I am not really sure I understand this comment. Could you try to
-elaborate on what value that will be picked when the max_busy_timeout
-isn't just as the limiter.
-
-> +                        *
-> +                        * Here we set 'card->pref_erase' as the minimal discard
-> +                        * sectors when deciding the max discard sectors.
-> +                        */
-> +                       if (qty + x > min_qty &&
-> +                           timeout > host->max_busy_timeout)
->                                 break;
-> +
->                         if (timeout < last_timeout)
->                                 break;
->                         last_timeout = timeout;
-> --
-> 1.7.9.5
->
-
-Again, sorry for the delay in response!
-
-Kind regards
-Uffe
+> 
+> There is no "prepare_command" hooks.
+> 
+> Best Regards,
+> Jaehoon Chung
+> 
+>>  
+>>  static const struct of_device_id dw_mci_k3_match[] = {
+>> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+>> index 9dd1bd3..047e116 100644
+>> --- a/drivers/mmc/host/dw_mmc.c
+>> +++ b/drivers/mmc/host/dw_mmc.c
+>> @@ -1564,6 +1564,8 @@ static int dw_mci_execute_tuning(struct mmc_host *mmc, u32 opcode)
+>>  
+>>  	if (drv_data && drv_data->execute_tuning)
+>>  		err = drv_data->execute_tuning(slot, opcode);
+>> +	else
+>> +		err = 0;
+>>  	return err;
+>>  }
+>>  
+>>
+> 
+> 
+> .
+> 
