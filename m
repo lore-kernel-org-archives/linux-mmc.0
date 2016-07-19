@@ -1,46 +1,73 @@
-From: Jin Guojun <kid.jin-C8/M+/jPZTeaMJb+Lgu22Q@public.gmane.org>
-Subject: [PATCH 2/2] Enable SD UHS mode for hikey-mainline-rebase
-Date: Tue, 19 Jul 2016 15:51:53 +0800
-Message-ID: <1468914713-63347-2-git-send-email-kid.jin@hisilicon.com>
-References: <1468914713-63347-1-git-send-email-kid.jin@hisilicon.com>
+From: Jin Guojun <kid.jin@hisilicon.com>
+Subject: [PATCH 1/2] Support SD UHS for hikey-mainline-rebase
+Date: Tue, 19 Jul 2016 15:51:52 +0800
+Message-ID: <1468914713-63347-1-git-send-email-kid.jin@hisilicon.com>
 Mime-Version: 1.0
 Content-Type: text/plain
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1468914713-63347-1-git-send-email-kid.jin-C8/M+/jPZTeaMJb+Lgu22Q@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org, wsa+renesas-jBu1N2QxHDJrcw3mvpCnnVaTQe2KTcn/@public.gmane.org, arnd-r2nGTMty4D4@public.gmane.org, rmk+kernel-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org, shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, xuwei5-C8/M+/jPZTeaMJb+Lgu22Q@public.gmane.org, robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, pawel.moll-5wv7dgnIgG8@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, ijc+devicetree-KcIKpvwj1kUDXYZnReoRVg@public.gmane.org, galak-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, catalin.marinas-5wv7dgnIgG8@public.gmane.org, will.deacon-5wv7dgnIgG8@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linuxarm-hv44wF8Li93QT0dZR+AlfA@public.gmane.org, suzhuangluan-C8/M+/jPZTeaMJb+Lgu22Q@public.gmane.org, kongfei-C8/M+/jPZTeaMJb+Lgu22Q@public.gmane.org, kid.jin-C8/M+/jPZTeaMJb+Lgu22Q@public.gmane.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: ulf.hansson@linaro.org, adrian.hunter@intel.com, jh80.chung@samsung.com, wsa+renesas@sang-engineering.com, arnd@arndb.de, rmk+kernel@arm.linux.org.uk, shawn.lin@rock-chips.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, xuwei5@hisilicon.com, robh+dt@kernel.org, pawel.moll@arm.com, mark.rutland@arm.com, ijc+devicetree@hellion.org.uk, galak@codeaurora.org, catalin.marinas@arm.com, will.deacon@arm.com, linux-arm-kernel@lists.infradead.org, devicetree@vger.kernel.org, linuxarm@huawei.com, suzhuangluan@hisilicon.com, kongfei@hisilicon.com, kid.jin@hisilicon.com
 List-Id: linux-mmc@vger.kernel.org
 
-From: j00226943 <j00226943-YePjYCeDBwpZmURYYhsjV1aTQe2KTcn/@public.gmane.org>
+From: j00226943 <j00226943@notesmail.huawei.com>
 
-One more changes:
+Two more changes:
 
-Enable SDR12 SDR25 SDR50 SDR104 in DTS to support UHS for SD Card
+Before we send cmd,we need to set CMD bit29 to
+1 so that CMD and DATA sent to card through the HOLD Register,
+This is the explication in synosys host:To meet the relatively
+high Input Hold Time requirement for SDR12, SDR25, and other MMC
+speed modes, you should program bit[29]use_hold_Reg of the CMD
+register to 1'b1; the output data is then registered again in the
+cclk_in_drv domain by using the Hold Register as shown in Path B
+of Figure 10-8. However, for the higher speed modes of SDR104, SDR50
+and DDR50, you can meet the much smaller Input Hold Time requirement
+of 0.8ns by bypassing the Hold Register (Path A in Figure 10-8,
+programming CMD.use_hold_reg = 1'b0) and then adding delay elements
+on the output path as indicated
 
-Signed-off-by: Jin Guojun <kid.jin-C8/M+/jPZTeaMJb+Lgu22Q@public.gmane.org>
+We have no tuning function in our drivers,so we must do the
+Function piling when we init UHS card.
+
+Signed-off-by: Jin Guojun <kid.jin@hisilicon.com>
 ---
- arch/arm64/boot/dts/hisilicon/hi6220.dtsi | 4 ++++
- 1 file changed, 4 insertions(+)
+ drivers/mmc/host/dw_mmc-k3.c | 6 ++++++
+ drivers/mmc/host/dw_mmc.c    | 2 ++
+ 2 files changed, 8 insertions(+)
 
-diff --git a/arch/arm64/boot/dts/hisilicon/hi6220.dtsi b/arch/arm64/boot/dts/hisilicon/hi6220.dtsi
-index 189d215..33f204f 100644
---- a/arch/arm64/boot/dts/hisilicon/hi6220.dtsi
-+++ b/arch/arm64/boot/dts/hisilicon/hi6220.dtsi
-@@ -761,6 +761,10 @@
- 			card-detect-delay = <200>;
- 			hisilicon,peripheral-syscon = <&ao_ctrl>;
- 			cap-sd-highspeed;
-+			sd-uhs-sdr12;
-+			sd-uhs-sdr25;
-+			sd-uhs-sdr50;
-+			sd-uhs-sdr104;
- 			reg = <0x0 0xf723e000 0x0 0x1000>;
- 			interrupts = <0x0 0x49 0x4>;
- 			#address-cells = <0x1>;
+diff --git a/drivers/mmc/host/dw_mmc-k3.c b/drivers/mmc/host/dw_mmc-k3.c
+index 63c2e2e..2cbfcc7 100644
+--- a/drivers/mmc/host/dw_mmc-k3.c
++++ b/drivers/mmc/host/dw_mmc-k3.c
+@@ -125,10 +125,16 @@ static void dw_mci_hi6220_set_ios(struct dw_mci *host, struct mmc_ios *ios)
+ 	host->bus_hz = clk_get_rate(host->biu_clk);
+ }
+ 
++static void dw_mci_hi6220_prepare_command(struct dw_mci *host, u32 *cmdr)
++{
++	*cmdr |= SDMMC_CMD_USE_HOLD_REG;
++}
++
+ static const struct dw_mci_drv_data hi6220_data = {
+ 	.switch_voltage		= dw_mci_hi6220_switch_voltage,
+ 	.set_ios		= dw_mci_hi6220_set_ios,
+ 	.parse_dt		= dw_mci_hi6220_parse_dt,
++	.prepare_command        = dw_mci_hi6220_prepare_command,
+ };
+ 
+ static const struct of_device_id dw_mci_k3_match[] = {
+diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+index 9dd1bd3..047e116 100644
+--- a/drivers/mmc/host/dw_mmc.c
++++ b/drivers/mmc/host/dw_mmc.c
+@@ -1564,6 +1564,8 @@ static int dw_mci_execute_tuning(struct mmc_host *mmc, u32 opcode)
+ 
+ 	if (drv_data && drv_data->execute_tuning)
+ 		err = drv_data->execute_tuning(slot, opcode);
++	else
++		err = 0;
+ 	return err;
+ }
+ 
 -- 
 1.8.3.2
-
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
