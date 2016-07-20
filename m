@@ -1,68 +1,81 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH] mmc: sdhci-msm: Do not reset the controller if no card in
- the slot
-Date: Wed, 20 Jul 2016 13:57:19 +0300
-Message-ID: <578F590F.1070706@intel.com>
-References: <1466785499-7563-1-git-send-email-georgi.djakov@linaro.org>
- <20160718174619.GI13516@tuxbot>
+Subject: Re: [RESEND RFC v2] mmc: Change the max discard sectors and erase
+ response if mmc host supports busy signalling
+Date: Wed, 20 Jul 2016 14:07:06 +0300
+Message-ID: <578F5B5A.3060702@intel.com>
+References: <54f75bccac6e6e49d87a5122ea670038b508b33c.1465808036.git.baolin.wang@linaro.org>
+ <CAPDyKFoxMtMjzc4nXnhOvribUBAfzNjm+LbruSVkXgQW_bxgUA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
+Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga14.intel.com ([192.55.52.115]:7815 "EHLO mga14.intel.com"
+Received: from mga09.intel.com ([134.134.136.24]:61864 "EHLO mga09.intel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751510AbcGTLB4 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Wed, 20 Jul 2016 07:01:56 -0400
-In-Reply-To: <20160718174619.GI13516@tuxbot>
+	id S1751888AbcGTLL3 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 20 Jul 2016 07:11:29 -0400
+In-Reply-To: <CAPDyKFoxMtMjzc4nXnhOvribUBAfzNjm+LbruSVkXgQW_bxgUA@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Bjorn Andersson <bjorn.andersson@linaro.org>, Georgi Djakov <georgi.djakov@linaro.org>
-Cc: ulf.hansson@linaro.org, iivanov.xz@gmail.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>, Baolin Wang <baolin.wang@linaro.org>
+Cc: Russell King <rmk+kernel@arm.linux.org.uk>, Shawn Lin <shawn.lin@rock-chips.com>, Doug Anderson <dianders@chromium.org>, =?UTF-8?Q?Heiko_St=c3=bcbner?= <heiko@sntech.de>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Mark Brown <broonie@kernel.org>, Linus Walleij <linus.walleij@linaro.org>
 
-On 18/07/16 20:46, Bjorn Andersson wrote:
-> On Fri 24 Jun 09:24 PDT 2016, Georgi Djakov wrote:
-> 
->> The controller does not clear the "reset bit" when it is reset without
->> a card in the slot. Because of this, the following error message is seen
->> while booting with no plugged SD card.
+On 19/07/16 14:57, Ulf Hansson wrote:
+> On 13 June 2016 at 10:54, Baolin Wang <baolin.wang@linaro.org> wrote:
+>> When mmc host HW supports busy signalling (using R1B as response), We
+>> shouldn't use 'host->max_busy_timeout' as the limitation when deciding
+>> the max discard sectors that we tell the generic BLOCK layer about.
+>> Instead, we should pick one preferred erase size as the max discard
+>> sectors.
 >>
->> mmc1: Reset 0x1 never completed.
+>> If the host controller supports busy signalling and the timeout for
+>> the erase operation does not exceed the max_busy_timeout, we should
+>> use R1B response. Or we need to prevent the host from doing hw busy
+>> detection, which is done by converting to a R1 response instead.
 >>
->> Add the SDHCI_QUIRK_NO_CARD_NO_RESET quirk to avoid this.
+>> Changes since v1:
+>>   - Remove the 'MMC_CAP_WAIT_WHILE_BUSY' flag checking when deciding
+>>     the max discard sectors.
 >>
->> Signed-off-by: Ivan T. Ivanov <ivan.ivanov@linaro.org>
->> Signed-off-by: Georgi Djakov <georgi.djakov@linaro.org>
-> 
-> Tested-by: Bjorn Andersson <bjorn.andersson@linaro.org>
-
-Be aware that SDHCI_QUIRK_NO_CARD_NO_RESET is not well implemented.  It can
-result in ->get_cd() being called under spinlock which could be a problem if
-a card detect GPIO is used and might sleep.  On the other hand, if you are
-not using a card detect GPIO then it shouldn't be a problem.
-
-Otherwise:
-
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
-
-> 
-> Regards,
-> Bjorn
-> 
+>> Signed-off-by: Baolin Wang <baolin.wang@linaro.org>
 >> ---
->>  drivers/mmc/host/sdhci-msm.c |    1 +
->>  1 file changed, 1 insertion(+)
+>>  drivers/mmc/core/core.c |   47 +++++++++++++++++++++++++++++++++++++++--------
+>>  1 file changed, 39 insertions(+), 8 deletions(-)
 >>
->> diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
->> index ac5700233e12..c613137ae91e 100644
->> --- a/drivers/mmc/host/sdhci-msm.c
->> +++ b/drivers/mmc/host/sdhci-msm.c
->> @@ -477,6 +477,7 @@ static const struct sdhci_ops sdhci_msm_ops = {
->>  
->>  static const struct sdhci_pltfm_data sdhci_msm_pdata = {
->>  	.quirks = SDHCI_QUIRK_BROKEN_CARD_DETECTION |
->> +		  SDHCI_QUIRK_NO_CARD_NO_RESET |
->>  		  SDHCI_QUIRK_SINGLE_POWER_WRITE,
->>  	.ops = &sdhci_msm_ops,
->>  };
+>> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+>> index 8b4dfd4..edd43b1 100644
+>> --- a/drivers/mmc/core/core.c
+>> +++ b/drivers/mmc/core/core.c
+>> @@ -2060,7 +2060,7 @@ static int mmc_do_erase(struct mmc_card *card, unsigned int from,
+>>                         unsigned int to, unsigned int arg)
+>>  {
+>>         struct mmc_command cmd = {0};
+>> -       unsigned int qty = 0;
+>> +       unsigned int qty = 0, busy_timeout = 0;
+>>         unsigned long timeout;
+>>         int err;
+>>
+>> @@ -2128,8 +2128,23 @@ static int mmc_do_erase(struct mmc_card *card, unsigned int from,
+>>         memset(&cmd, 0, sizeof(struct mmc_command));
+>>         cmd.opcode = MMC_ERASE;
+>>         cmd.arg = arg;
+>> -       cmd.flags = MMC_RSP_SPI_R1B | MMC_RSP_R1B | MMC_CMD_AC;
+>> -       cmd.busy_timeout = mmc_erase_timeout(card, arg, qty);
+>> +       busy_timeout = mmc_erase_timeout(card, arg, qty);
+>> +       /*
+>> +        * If the host controller supports busy signalling and the timeout for
+>> +        * the erase operation does not exceed the max_busy_timeout, we should
+>> +        * use R1B response. Or we need to prevent the host from doing hw busy
+>> +        * detection, which is done by converting to a R1 response instead.
+>> +        */
+>> +       if ((card->host->max_busy_timeout &&
+>> +           busy_timeout > card->host->max_busy_timeout) ||
+>> +           !(card->host->caps & MMC_CAP_WAIT_WHILE_BUSY)) {
 > 
+> sdhci uses the max_busy_timeout, but doesn't always use MMC_CAP_WAIT_WHILE_BUSY.
+> I have probably asked Adrian about this before, but right now I can't
+> recall why this is the case.
+
+Unfortunately, just because a driver does not set MMC_CAP_WAIT_WHILE_BUSY
+does not mean it does not have the capability.  So we still want to set the
+correct timeout and maximum timeout.
 
