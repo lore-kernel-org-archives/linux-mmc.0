@@ -1,51 +1,135 @@
-From: "Winkler, Tomas" <tomas.winkler@intel.com>
-Subject: RE: [PATCH v5 4/8] char: rpmb: provide a user space interface
-Date: Wed, 20 Jul 2016 09:02:49 +0000
-Message-ID: <5B8DA87D05A7694D9FA63FD143655C1B54297958@hasmsx108.ger.corp.intel.com>
-References: <1468873673-21776-1-git-send-email-tomas.winkler@intel.com>
- <1468873673-21776-5-git-send-email-tomas.winkler@intel.com>
- <CAP=VYLqZCXjWUohLZ35Kvrx7B8z7cbEFzDt4ugaUosrh2ca+8g@mail.gmail.com>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH] mmc: sdhci-msm: Add set_uhs_signaling() implementation
+Date: Wed, 20 Jul 2016 13:15:49 +0300
+Message-ID: <578F4F55.5060406@intel.com>
+References: <1468939945-15233-1-git-send-email-georgi.djakov@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAP=VYLqZCXjWUohLZ35Kvrx7B8z7cbEFzDt4ugaUosrh2ca+8g@mail.gmail.com>
-Content-Language: en-US
-Sender: linux-kernel-owner@vger.kernel.org
-To: "Gortmaker, Paul (Wind River)" <paul.gortmaker@windriver.com>
-Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Ulf Hansson <ulf.hansson@linaro.org>, "Hunter, Adrian" <adrian.hunter@intel.com>, James Bottomley <James.Bottomley@hansenpartnership.com>, "Martin K. Petersen" <martin.petersen@oracle.com>, Vinayak Holikatti <vinholikatti@gmail.com>, Andy Lutomirski <luto@kernel.org>, Arve Hj?nnev?g <arve@android.com>, Michael Ryleev <gmar@google.com>, Joao Pinto <Joao.Pinto@synopsys.com>, Christoph Hellwig <hch@lst.de>, Yaniv Gardi <ygardi@codeaurora.org>, LKML <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-scsi@vger.kernel.org" <linux-scsi@vger.kernel.org>
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mga09.intel.com ([134.134.136.24]:49129 "EHLO mga09.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753614AbcGTKUU (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 20 Jul 2016 06:20:20 -0400
+In-Reply-To: <1468939945-15233-1-git-send-email-georgi.djakov@linaro.org>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Georgi Djakov <georgi.djakov@linaro.org>, ulf.hansson@linaro.org
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org, riteshh@codeaurora.org, bjorn.andersson@linaro.org, srinivas.kandagatla@linaro.org
 
-PiANCj4gT24gTW9uLCBKdWwgMTgsIDIwMTYgYXQgNDoyNyBQTSwgVG9tYXMgV2lua2xlciA8dG9t
-YXMud2lua2xlckBpbnRlbC5jb20+DQo+IHdyb3RlOg0KPiA+IFRoZSB1c2VyIHNwYWNlIEFQSSBp
-cyBhY2hpZXZlZCB2aWEgdHdvIHN5bmNocm9ub3VzIElPQ1RMLg0KPiA+IFNpbXBsaWZpZWQgb25l
-LCBSUE1CX0lPQ19SRVFfQ01ELCB3ZXJlIHJlYWQgcmVzdWx0IGN5Y2xlcyBpcw0KPiBwZXJmb3Jt
-ZWQNCj4gPiBieSB0aGUgZnJhbWV3b3JrIG9uIGJlaGFsZiB0aGUgdXNlciBhbmQgc2Vjb25kLCBS
-UE1CX0lPQ19TRVFfQ01EDQo+IHdoZXJlDQo+ID4gdGhlIHdob2xlIFJQTUIgc2VxdWVuY2UgaW5j
-bHVkaW5nIFJFU1VMVF9SRUFEIGlzIHN1cHBsaWVkIGJ5IHRoZSBjYWxsZXIuDQo+ID4gVGhlIGxh
-dHRlciBpcyBpbnRlbmRlZCBmb3IgIGVhc2llciBhZGp1c3RpbmcgIG9mIHRoZSAgYXBwbGljYXRp
-b25zDQo+ID4gdGhhdCB1c2UgTU1DX0lPQ19NVUxUSV9DTUQgaW9jdGwuDQo+ID4NCj4gPiBTaWdu
-ZWQtb2ZmLWJ5OiBUb21hcyBXaW5rbGVyIDx0b21hcy53aW5rbGVyQGludGVsLmNvbT4NCj4gPiAt
-LS0NCj4gDQo+IFsuLi5dDQo+IA0KPiA+IGRpZmYgLS1naXQgYS9kcml2ZXJzL2NoYXIvcnBtYi9L
-Y29uZmlnIGIvZHJpdmVycy9jaGFyL3JwbWIvS2NvbmZpZw0KPiA+IGluZGV4IGM1ZTZlOTA5ZWZj
-ZS4uNjc5NGJlOWZjYzVlIDEwMDY0NA0KPiA+IC0tLSBhL2RyaXZlcnMvY2hhci9ycG1iL0tjb25m
-aWcNCj4gPiArKysgYi9kcml2ZXJzL2NoYXIvcnBtYi9LY29uZmlnDQo+ID4gQEAgLTYsMyArNiwx
-MCBAQCBjb25maWcgUlBNQg0KPiA+ICAgICAgICAgICBhY2Nlc3MgUlBNQiBwYXJ0aXRpb24uDQo+
-ID4NCj4gPiAgICAgICAgICAgSWYgdW5zdXJlLCBzZWxlY3QgTi4NCj4gPiArDQo+ID4gK2NvbmZp
-ZyBSUE1CX0lOVEZfREVWDQo+ID4gKyAgICAgICBib29sICJSUE1CIGNoYXJhY3RlciBkZXZpY2Ug
-aW50ZXJmYWNlIC9kZXYvcnBtYk4iDQo+IA0KPiBBIGJvb2wgS2NvbmZpZyBzaG91bGQgaWRlYWxs
-eS4uLi4NCj4gDQo+ID4gKyAgICAgICBkZXBlbmRzIG9uIFJQTUINCj4gPiArICAgICAgIGhlbHAN
-Cj4gPiArICAgICAgICAgU2F5IHllcyBoZXJlIGlmIHlvdSB3YW50IHRvIGFjY2VzcyBSUE1CIGZy
-b20gdXNlciBzcGFjZQ0KPiA+ICsgICAgICAgICB2aWEgY2hhcmFjdGVyIGRldmljZSBpbnRlcmZh
-Y2UgL2Rldi9ycG1iJWQNCj4gPiBkaWZmIC0tZ2l0IGEvZHJpdmVycy9jaGFyL3JwbWIvTWFrZWZp
-bGUgYi9kcml2ZXJzL2NoYXIvcnBtYi9NYWtlZmlsZQ0KPiA+IGluZGV4IDgxMmIzZWQyNjRjMC4u
-YjVkYzA4N2IxMjk5IDEwMDY0NA0KPiA+IC0tLSBhL2RyaXZlcnMvY2hhci9ycG1iL01ha2VmaWxl
-DQo+ID4gKysrIGIvZHJpdmVycy9jaGFyL3JwbWIvTWFrZWZpbGUNCj4gPiBAQCAtMSw0ICsxLDUg
-QEANCj4gPiAgb2JqLSQoQ09ORklHX1JQTUIpICs9IHJwbWIubw0KPiA+ICBycG1iLW9ianMgKz0g
-Y29yZS5vDQo+ID4gK3JwbWItJChDT05GSUdfUlBNQl9JTlRGX0RFVikgKz0gY2Rldi5vDQoNClRo
-aXMgaXMgbm90IGEgYnVpbHRpbiwgdGhpcyBpcyBhbiBvcHRpb25hbCBwYXJ0IG9mIHRoZSBtb2R1
-bGUgDQoNCj4gPiArI2luY2x1ZGUgPGxpbnV4L21vZHVsZS5oPg0KPiANCj4gLi4uLm5vdCB1c2Ug
-bW9kdWxlLmggb3IgYW55IE1PRFVMRV8gbWFjcm9zIGZyb20gd2l0aGluIGl0Lg0KDQpDYW4gYmUg
-ZHJvcHBlZCBpbiB0aGlzIGNhc2UgYXMgbm8gbWFjcm9zIGFyZSB1c2VkLCANCmJ1dCB0aGUgcGF0
-dGVybiBLY29uZmlnIGJvb2wgLT4gbm8gaW5jbHVkZSBtb2R1bGUuaCAgeW91IGFyZSBmb2xsb3dp
-bmcgaGFzIGZhbHNlIHBvc2l0aXZlIGNhc2VzLg0KDQpUaGFua3MNClRvbWFzDQoNCg==
+On 19/07/16 17:52, Georgi Djakov wrote:
+> From: Ritesh Harjani <riteshh@codeaurora.org>
+> 
+> To allow UHS mode to work properly, we need to implement a Qualcomm
+> specific set_uhs_signaling() callback function. This function differs
+> from the sdhci_set_uhs_signaling() in that we need check the clock
+> rate and enable UHS timing only if the frequency is above 100MHz.
+> 
+> Signed-off-by: Ritesh Harjani <riteshh@codeaurora.org>
+> Signed-off-by: Georgi Djakov <georgi.djakov@linaro.org>
+> ---
+> 
+> This patch resolves the mmc_select_hs200 timeouts noticed after merging
+> commit a5c1f3e55c99 ("mmc: mmc: do not use CMD13 to get status after
+> speed mode switch")
+> 
+> mmc0: mmc_select_hs200 failed, error -110
+> mmc0: error -110 whilst initialising MMC card
+> mmc0: Reset 0x1 never completed.
+> sdhci: =========== REGISTER DUMP (mmc0)===========
+> sdhci: Sys addr: 0x00000000 | Version: 0x00002e02
+> sdhci: Blk size: 0x00004000 | Blk cnt: 0x00000000
+> sdhci: Argument: 0x00000000 | Trn mode: 0x00000000
+> sdhci: Present: 0x01f80000 | Host ctl: 0x00000000
+> sdhci: Power: 0x00000000 | Blk gap: 0x00000000
+> sdhci: Wake-up: 0x00000000 | Clock: 0x00000003
+> sdhci: Timeout: 0x00000000 | Int stat: 0x00000000
+> sdhci: Int enab: 0x00000000 | Sig enab: 0x00000000
+> sdhci: AC12 err: 0x00000000 | Slot int: 0x00000000
+> sdhci: Caps: 0x322dc8b2 | Caps_1: 0x00008007
+> sdhci: Cmd: 0x00000000 | Max curr: 0x00000000
+> sdhci: Host ctl2: 0x00000000
+> sdhci: ADMA Err: 0x00000000 | ADMA Ptr: 0x0000000000000000
+> sdhci: ===========================================
+
+This information needs to be in the commit message.  I think you should add
+a fixes tag too. e.g.
+
+Fixes: a5c1f3e55c99 ("mmc: mmc: do not use CMD13 to get status after...")
+
+Otherwise:
+
+Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+
+> 
+>  drivers/mmc/host/sdhci-msm.c |   48 +++++++++++++++++++++++++++++++++++++++++-
+>  1 file changed, 47 insertions(+), 1 deletion(-)
+> 
+> diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
+> index 343e4bd4dc08..d1fce941cdd4 100644
+> --- a/drivers/mmc/host/sdhci-msm.c
+> +++ b/drivers/mmc/host/sdhci-msm.c
+> @@ -410,6 +410,52 @@ retry:
+>  	return rc;
+>  }
+>  
+> +static void sdhci_msm_set_uhs_signaling(struct sdhci_host *host,
+> +					unsigned int uhs)
+> +{
+> +	struct mmc_host *mmc = host->mmc;
+> +	u16 ctrl_2;
+> +
+> +	ctrl_2 = sdhci_readw(host, SDHCI_HOST_CONTROL2);
+> +	/* Select Bus Speed Mode for host */
+> +	ctrl_2 &= ~SDHCI_CTRL_UHS_MASK;
+> +	switch (uhs) {
+> +	case MMC_TIMING_UHS_SDR12:
+> +		ctrl_2 |= SDHCI_CTRL_UHS_SDR12;
+> +		break;
+> +	case MMC_TIMING_UHS_SDR25:
+> +		ctrl_2 |= SDHCI_CTRL_UHS_SDR25;
+> +		break;
+> +	case MMC_TIMING_UHS_SDR50:
+> +		ctrl_2 |= SDHCI_CTRL_UHS_SDR50;
+> +		break;
+> +	case MMC_TIMING_MMC_HS200:
+> +	case MMC_TIMING_UHS_SDR104:
+> +		ctrl_2 |= SDHCI_CTRL_UHS_SDR104;
+> +		break;
+> +	case MMC_TIMING_UHS_DDR50:
+> +	case MMC_TIMING_MMC_DDR52:
+> +		ctrl_2 |= SDHCI_CTRL_UHS_DDR50;
+> +		break;
+> +	}
+> +
+> +	/*
+> +	 * When clock frequency is less than 100MHz, the feedback clock must be
+> +	 * provided and DLL must not be used so that tuning can be skipped. To
+> +	 * provide feedback clock, the mode selection can be any value less
+> +	 * than 3'b011 in bits [2:0] of HOST CONTROL2 register.
+> +	 */
+> +	if (host->clock <= 100000000 &&
+> +	    (uhs == MMC_TIMING_MMC_HS400 ||
+> +	     uhs == MMC_TIMING_MMC_HS200 ||
+> +	     uhs == MMC_TIMING_UHS_SDR104))
+> +		ctrl_2 &= ~SDHCI_CTRL_UHS_MASK;
+> +
+> +	dev_dbg(mmc_dev(mmc), "%s: clock=%u uhs=%u ctrl_2=0x%x\n",
+> +		mmc_hostname(host->mmc), host->clock, uhs, ctrl_2);
+> +	sdhci_writew(host, ctrl_2, SDHCI_HOST_CONTROL2);
+> +}
+> +
+>  static const struct of_device_id sdhci_msm_dt_match[] = {
+>  	{ .compatible = "qcom,sdhci-msm-v4" },
+>  	{},
+> @@ -422,7 +468,7 @@ static const struct sdhci_ops sdhci_msm_ops = {
+>  	.reset = sdhci_reset,
+>  	.set_clock = sdhci_set_clock,
+>  	.set_bus_width = sdhci_set_bus_width,
+> -	.set_uhs_signaling = sdhci_set_uhs_signaling,
+> +	.set_uhs_signaling = sdhci_msm_set_uhs_signaling,
+>  };
+>  
+>  static const struct sdhci_pltfm_data sdhci_msm_pdata = {
+> 
+
