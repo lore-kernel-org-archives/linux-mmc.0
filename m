@@ -1,56 +1,40 @@
-From: Shawn Lin <shawn.lin@rock-chips.com>
-Subject: [PATCH v2 1/2] mmc: core: move freqs table into core.h
-Date: Wed, 20 Jul 2016 09:57:39 +0800
-Message-ID: <1468979860-28712-1-git-send-email-shawn.lin@rock-chips.com>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from lucky1.263xmail.com ([211.157.147.131]:48035 "EHLO
-	lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753093AbcGTCAV (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 19 Jul 2016 22:00:21 -0400
-Sender: linux-mmc-owner@vger.kernel.org
+From: Simon Horman <horms@verge.net.au>
+Subject: Re: [PATCH v3 3/4] mmc: sh_mobile_sdhi: Add tuning support
+Date: Wed, 20 Jul 2016 15:24:54 +0900
+Message-ID: <20160720062454.GA24635@verge.net.au>
+References: <1464057797-29951-1-git-send-email-horms+renesas@verge.net.au>
+ <1464057797-29951-4-git-send-email-horms+renesas@verge.net.au>
+ <20160527115933.GD1663@katana>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-renesas-soc-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <20160527115933.GD1663@katana>
+Sender: linux-renesas-soc-owner@vger.kernel.org
+To: Wolfram Sang <wsa@the-dreams.de>
+Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, Ulf Hansson <ulf.hansson@linaro.org>, Magnus Damm <magnus.damm@gmail.com>, linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org, Ai Kyuse <ai.kyuse.uw@renesas.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, Jaehoon Chung <jh80.chung@samsung.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Doug Anderson <dianders@chromium.org>, linux-rockchip@lists.infradead.org, Shawn Lin <shawn.lin@rock-chips.com>
 
-We will reuse it outside the core.c file, so let's
-move it to the header file.
+On Fri, May 27, 2016 at 01:59:34PM +0200, Wolfram Sang wrote:
+> On Tue, May 24, 2016 at 11:43:16AM +0900, Simon Horman wrote:
+> > From: Ai Kyuse <ai.kyuse.uw@renesas.com>
+> 
+> I wonder if you shouldn't take over ownership of this and the previous
+> patch? You changed quite a lot.
 
-Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
----
+Sure, will do.
 
-Changes in v2: None
+[snip]
 
- drivers/mmc/core/core.c | 2 --
- drivers/mmc/core/core.h | 2 ++
- 2 files changed, 2 insertions(+), 2 deletions(-)
+> > +
+> > +static unsigned int sh_mobile_sdhi_init_tuning(struct tmio_mmc_host *host)
+> > +{
+> > +	if (!(host->mmc->caps & MMC_CAP_UHS_SDR104))
+> > +		return 0;
+> 
+> Will the core call us if MMC_CAP_UHS_SDR104 was not set?
 
-diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index 94cbf4e..0cec7f4 100644
---- a/drivers/mmc/core/core.c
-+++ b/drivers/mmc/core/core.c
-@@ -58,8 +58,6 @@
-  */
- #define MMC_BKOPS_MAX_TIMEOUT	(4 * 60 * 1000) /* max time to wait in ms */
- 
--static const unsigned freqs[] = { 400000, 300000, 200000, 100000 };
--
- /*
-  * Enabling software CRCs on the data blocks can be a significant (30%)
-  * performance cost, and for other reasons may not always be desired.
-diff --git a/drivers/mmc/core/core.h b/drivers/mmc/core/core.h
-index 0fa86a2..5456000 100644
---- a/drivers/mmc/core/core.h
-+++ b/drivers/mmc/core/core.h
-@@ -54,6 +54,8 @@ void mmc_power_off(struct mmc_host *host);
- void mmc_power_cycle(struct mmc_host *host, u32 ocr);
- void mmc_set_initial_state(struct mmc_host *host);
- 
-+static const unsigned int freqs[] = { 400000, 300000, 200000, 100000 };
-+
- static inline void mmc_delay(unsigned int ms)
- {
- 	if (ms < 1000 / HZ) {
--- 
-2.3.7
+Empirically, yes, that appears to be the case.
 
 
+For all your other suggestions: thanks, I will update things as you suggest.
