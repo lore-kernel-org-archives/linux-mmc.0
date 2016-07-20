@@ -1,40 +1,56 @@
-From: Simon Horman <horms@verge.net.au>
-Subject: Re: [PATCH v3 3/4] mmc: sh_mobile_sdhi: Add tuning support
-Date: Wed, 20 Jul 2016 15:24:54 +0900
-Message-ID: <20160720062454.GA24635@verge.net.au>
-References: <1464057797-29951-1-git-send-email-horms+renesas@verge.net.au>
- <1464057797-29951-4-git-send-email-horms+renesas@verge.net.au>
- <20160527115933.GD1663@katana>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: [GIT PULL] MMC fixes for v.4.7 final
+Date: Wed, 20 Jul 2016 10:06:27 +0200
+Message-ID: <CAPDyKFpGvvYBDgkrLTCgBeS=7PAGhXizh3iu3AqPsmuHJHjS4Q@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-renesas-soc-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20160527115933.GD1663@katana>
-Sender: linux-renesas-soc-owner@vger.kernel.org
-To: Wolfram Sang <wsa@the-dreams.de>
-Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, Ulf Hansson <ulf.hansson@linaro.org>, Magnus Damm <magnus.damm@gmail.com>, linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org, Ai Kyuse <ai.kyuse.uw@renesas.com>
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Linus Torvalds <torvalds@linux-foundation.org>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+Cc: Jaehoon Chung <jh80.chung@samsung.com>, Adrian Hunter <adrian.hunter@intel.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On Fri, May 27, 2016 at 01:59:34PM +0200, Wolfram Sang wrote:
-> On Tue, May 24, 2016 at 11:43:16AM +0900, Simon Horman wrote:
-> > From: Ai Kyuse <ai.kyuse.uw@renesas.com>
-> 
-> I wonder if you shouldn't take over ownership of this and the previous
-> patch? You changed quite a lot.
+Hi Linus,
 
-Sure, will do.
+Here are a few late mmc fixes intended for v4.7 final. They are based
+on v4.7-rc7.
 
-[snip]
+Details are as usual found in the signed tag. Please pull this in!
 
-> > +
-> > +static unsigned int sh_mobile_sdhi_init_tuning(struct tmio_mmc_host *host)
-> > +{
-> > +	if (!(host->mmc->caps & MMC_CAP_UHS_SDR104))
-> > +		return 0;
-> 
-> Will the core call us if MMC_CAP_UHS_SDR104 was not set?
-
-Empirically, yes, that appears to be the case.
+Kind regards
+Ulf Hansson
 
 
-For all your other suggestions: thanks, I will update things as you suggest.
+The following changes since commit 92d21ac74a9e3c09b0b01c764e530657e4c85c49:
+
+  Linux 4.7-rc7 (2016-07-10 20:24:59 -0700)
+
+are available in the git repository at:
+
+  git://git.linaro.org/people/ulf.hansson/mmc.git tags/mmc-v4.7-rc7
+
+for you to fetch changes up to b3802db5eb72d2a96f4aa4ff0abb937033df2acf:
+
+  mmc: pxamci: fix potential oops (2016-07-18 11:50:40 +0200)
+
+----------------------------------------------------------------
+MMC core:
+ - Fix eMMC packed command header endianness
+ - Fix free of uninitialized buffer for mmc ioctl
+
+MMC host:
+ - pxamci: Fix potential oops in ->probe()
+
+----------------------------------------------------------------
+Robert Jarzmik (1):
+      mmc: pxamci: fix potential oops
+
+Taras Kondratiuk (1):
+      mmc: block: fix packed command header endianness
+
+Ville Viinikka (1):
+      mmc: block: fix free of uninitialized 'idata->buf'
+
+ drivers/mmc/card/block.c  | 16 +++++++++-------
+ drivers/mmc/host/pxamci.c | 16 +++++++++-------
+ 2 files changed, 18 insertions(+), 14 deletions(-)
