@@ -1,62 +1,93 @@
-From: Wolfram Sang <wsa@the-dreams.de>
-Subject: [PATCH] arm64: dts: r8a7795: set maximum frequency for SDHI clocks
-Date: Thu, 21 Jul 2016 19:01:44 +0200
-Message-ID: <1469120504-2037-1-git-send-email-wsa@the-dreams.de>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from sauhun.de ([89.238.76.85]:45947 "EHLO pokefinder.org"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753412AbcGURCH (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 21 Jul 2016 13:02:07 -0400
-Sender: linux-mmc-owner@vger.kernel.org
+From: Michael Weiser <michael.weiser@gmx.de>
+Subject: [PATCH 1/3] mmc: sunxi-mmc: change idma descriptor to __le32
+Date: Thu, 21 Jul 2016 20:23:27 +0200
+Message-ID: <20160721182329.13478-2-michael.weiser@gmx.de>
+References: <20160721182329.13478-1-michael.weiser@gmx.de>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <20160721182329.13478-1-michael.weiser@gmx.de>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: linux-arm-kernel@lists.infradead.org
+Cc: linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, Chen-Yu Tsai <wens@csie.org>, Michael Weiser <michael.weiser@gmx.de>, Maxime Ripard <maxime.ripard@free-electrons.com>
 List-Id: linux-mmc@vger.kernel.org
-To: linux-renesas-soc@vger.kernel.org
-Cc: Wolfram Sang <wsa@the-dreams.de>, Simon Horman <horms@verge.net.au>, Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>, Dirk Behme <dirk.behme@gmail.com>, linux-mmc@vger.kernel.org
 
-From: Wolfram Sang <wsa+renesas@sang-engineering.com>
+The sunxi-mmc driver does not take into account the processor may be big
+endian when writing the DMA descriptors. This causes cards not to be
+detected when running a big-endian kernel. Change the descriptors for
+IDMA to use __le32 and ensure they are suitably swapped before writing.
+Tested successfully on the Cubieboard2.
 
-Define the upper limit otherwise the driver cannot utilize max speeds.
-
-Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+Signed-off-by: Michael Weiser <michael.weiser@gmx.de>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Maxime Ripard <maxime.ripard@free-electrons.com>
+Cc: Chen-Yu Tsai <wens@csie.org>
+Cc: linux-mmc@vger.kernel.org
 ---
- arch/arm64/boot/dts/renesas/r8a7795.dtsi | 4 ++++
- 1 file changed, 4 insertions(+)
+ drivers/mmc/host/sunxi-mmc.c | 27 +++++++++++++++------------
+ 1 file changed, 15 insertions(+), 12 deletions(-)
 
-diff --git a/arch/arm64/boot/dts/renesas/r8a7795.dtsi b/arch/arm64/boot/dts/renesas/r8a7795.dtsi
-index 80af0ba68750f3..90000e70dbf32a 100644
---- a/arch/arm64/boot/dts/renesas/r8a7795.dtsi
-+++ b/arch/arm64/boot/dts/renesas/r8a7795.dtsi
-@@ -1249,6 +1249,7 @@
- 			reg = <0 0xee100000 0 0x2000>;
- 			interrupts = <GIC_SPI 165 IRQ_TYPE_LEVEL_HIGH>;
- 			clocks = <&cpg CPG_MOD 314>;
-+			max-frequency = <200000000>;
- 			power-domains = <&sysc R8A7795_PD_ALWAYS_ON>;
- 			status = "disabled";
- 		};
-@@ -1258,6 +1259,7 @@
- 			reg = <0 0xee120000 0 0x2000>;
- 			interrupts = <GIC_SPI 166 IRQ_TYPE_LEVEL_HIGH>;
- 			clocks = <&cpg CPG_MOD 313>;
-+			max-frequency = <200000000>;
- 			power-domains = <&sysc R8A7795_PD_ALWAYS_ON>;
- 			status = "disabled";
- 		};
-@@ -1267,6 +1269,7 @@
- 			reg = <0 0xee140000 0 0x2000>;
- 			interrupts = <GIC_SPI 167 IRQ_TYPE_LEVEL_HIGH>;
- 			clocks = <&cpg CPG_MOD 312>;
-+			max-frequency = <200000000>;
- 			power-domains = <&sysc R8A7795_PD_ALWAYS_ON>;
- 			cap-mmc-highspeed;
- 			status = "disabled";
-@@ -1277,6 +1280,7 @@
- 			reg = <0 0xee160000 0 0x2000>;
- 			interrupts = <GIC_SPI 168 IRQ_TYPE_LEVEL_HIGH>;
- 			clocks = <&cpg CPG_MOD 311>;
-+			max-frequency = <200000000>;
- 			power-domains = <&sysc R8A7795_PD_ALWAYS_ON>;
- 			cap-mmc-highspeed;
- 			status = "disabled";
+diff --git a/drivers/mmc/host/sunxi-mmc.c b/drivers/mmc/host/sunxi-mmc.c
+index 2ee4c21..1e6df8a 100644
+--- a/drivers/mmc/host/sunxi-mmc.c
++++ b/drivers/mmc/host/sunxi-mmc.c
+@@ -223,10 +223,10 @@ struct sunxi_mmc_clk_delay {
+ };
+ 
+ struct sunxi_idma_des {
+-	u32	config;
+-	u32	buf_size;
+-	u32	buf_addr_ptr1;
+-	u32	buf_addr_ptr2;
++	__le32 config;
++	__le32 buf_size;
++	__le32 buf_addr_ptr1;
++	__le32 buf_addr_ptr2;
+ };
+ 
+ struct sunxi_mmc_host {
+@@ -325,22 +325,25 @@ static void sunxi_mmc_init_idma_des(struct sunxi_mmc_host *host,
+ 	int i, max_len = (1 << host->idma_des_size_bits);
+ 
+ 	for (i = 0; i < data->sg_len; i++) {
+-		pdes[i].config = SDXC_IDMAC_DES0_CH | SDXC_IDMAC_DES0_OWN |
+-				 SDXC_IDMAC_DES0_DIC;
++		pdes[i].config = cpu_to_le32(SDXC_IDMAC_DES0_CH |
++					     SDXC_IDMAC_DES0_OWN |
++					     SDXC_IDMAC_DES0_DIC);
+ 
+ 		if (data->sg[i].length == max_len)
+ 			pdes[i].buf_size = 0; /* 0 == max_len */
+ 		else
+-			pdes[i].buf_size = data->sg[i].length;
++			pdes[i].buf_size = cpu_to_le32(data->sg[i].length);
+ 
+ 		next_desc += sizeof(struct sunxi_idma_des);
+-		pdes[i].buf_addr_ptr1 = sg_dma_address(&data->sg[i]);
+-		pdes[i].buf_addr_ptr2 = (u32)next_desc;
++		pdes[i].buf_addr_ptr1 =
++			cpu_to_le32(sg_dma_address(&data->sg[i]));
++		pdes[i].buf_addr_ptr2 = cpu_to_le32((u32)next_desc);
+ 	}
+ 
+-	pdes[0].config |= SDXC_IDMAC_DES0_FD;
+-	pdes[i - 1].config |= SDXC_IDMAC_DES0_LD | SDXC_IDMAC_DES0_ER;
+-	pdes[i - 1].config &= ~SDXC_IDMAC_DES0_DIC;
++	pdes[0].config |= cpu_to_le32(SDXC_IDMAC_DES0_FD);
++	pdes[i - 1].config |= cpu_to_le32(SDXC_IDMAC_DES0_LD |
++					  SDXC_IDMAC_DES0_ER);
++	pdes[i - 1].config &= cpu_to_le32(~SDXC_IDMAC_DES0_DIC);
+ 	pdes[i - 1].buf_addr_ptr2 = 0;
+ 
+ 	/*
 -- 
-2.8.1
-
+2.9.0
