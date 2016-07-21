@@ -1,72 +1,88 @@
-From: Jean-Francois Moine <moinejf-GANU6spQydw@public.gmane.org>
-Subject: Re: [PATCH 2/3] mmc: sunxi: Set the 'New Timing'
- register for 8 bits DDR transfers
-Date: Thu, 21 Jul 2016 11:26:55 +0200
-Message-ID: <20160721112655.941b1dad04f7a5b94d4172c1@free.fr>
-References: <cover.1469082481.git.moinejf@free.fr>
-	<bc7b767cad6db159a44c4b98d5b1f3eb53c26bd3.1469082481.git.moinejf@free.fr>
-	<20160721085615.GG5993@lukather>
-Reply-To: moinejf-GANU6spQydw@public.gmane.org
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH V2 00/15] a few sdhci/imx clean up and fix patches
+Date: Thu, 21 Jul 2016 12:32:37 +0300
+Message-ID: <579096B5.2030509@intel.com>
+References: <1468309584-3591-1-git-send-email-aisheng.dong@nxp.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: quoted-printable
-Return-path: <linux-sunxi+bncBCV6DL6LYMNBB2FKYK6AKGQEPMN7H3Y-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-Sender: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
-In-Reply-To: <20160721085615.GG5993@lukather>
-List-Post: <https://groups.google.com/group/linux-sunxi/post>, <mailto:linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Help: <https://groups.google.com/support/>, <mailto:linux-sunxi+help-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Archive: <https://groups.google.com/group/linux-sunxi
-List-Subscribe: <https://groups.google.com/group/linux-sunxi/subscribe>, <mailto:linux-sunxi+subscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Unsubscribe: <mailto:googlegroups-manage+1076902468213+unsubscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>,
- <https://groups.google.com/group/linux-sunxi/subscribe>
-To: Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>
-Cc: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mga09.intel.com ([134.134.136.24]:32957 "EHLO mga09.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751556AbcGUJg4 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 21 Jul 2016 05:36:56 -0400
+In-Reply-To: <1468309584-3591-1-git-send-email-aisheng.dong@nxp.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Dong Aisheng <aisheng.dong@nxp.com>, linux-mmc@vger.kernel.org, ulf.hansson@linaro.org
+Cc: chris@printf.net, shawnguo@kernel.org, linux-arm-kernel@lists.infradead.org, haibo.chen@nxp.com, dongas86@gmail.com
 
-On Thu, 21 Jul 2016 10:56:15 +0200
-Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org> wrote:
+On 12/07/16 10:46, Dong Aisheng wrote:
+> Patch 1~10 are mainly sdhci cleanup patches while patch 7,9,10
+> are fixes which seems needed for stable tree as well.
 
-> On Wed, Jul 20, 2016 at 08:16:28PM +0200, Jean-Francois Moine wrote:
-> > The 'new timing mode' with 8 bits DDR works correctly when the NewTimin=
-g
-> > register is set.
->=20
-> What does that mode brings to the table?
+I have ack'ed all the sdhci-related patches. i.e. all but patch 7 the dt
+bindings change.
 
->From my tests, the eMMC of the Banana Pi M3 (A83T) cannot work when the
-new mode is not used.
+I am not sure what needs to be done for stable.  I would suggest these
+patches are queued for 4.8, then Dong can send the relevant patches to the
+linux-stable mailing list separately after -rc1.
 
-> >=20
-> > Signed-off-by: Jean-Francois Moine <moinejf-GANU6spQydw@public.gmane.org>
-> > ---
-> > Note about the 'new timing mode'.
-> >=20
-> > This patch assumes that, when the new mode is used, the clock driver
-> > sets the mode select in the MMC clock and multiplies the clock rate
-> > by 2:
-> > - MMC side:
-> >   - with a timing 8 bits DDR at 50MHz, the MMC driver calls
-> >     clk_set_rate() with a rate 50*2 =3D 100MHz,
-> > - clock side:
-> >   - the clock driver sets the hardware MMC clock to 100*2 =3D 200MHz,
-> >   - setting the 'mode select' of the hardware MMC clock divides the
-> >     rate by 2,
-> > - MMC side:
-> >   - setting the MMC clock divider register to 1 divides the rate by 2.
-> > So, the final rate is 50MHz.
->=20
-> What happens if you actually want to set it to 100MHz?
+> 
+> The main work is:
+> 1) using more robust mmc_regulator_set_vqmmc 
+> 2) add auto retune support
+> 3) improve sdhci-esdhc-imx stability
+> 4) add state save and restore for low power mode
+> 
+> Change Log:
+> v1->v2:
+>  * address all Adrian's comments
+>  * below patches are dropped
+>   mmc: sdhci: move sdhci_get_cd() forward to avoid declaration
+>   mmc: core: fix a comment typo
+>   mmc: sdhci: re-factor sdhci_start_signal_voltage()
+>   mmc: core: mmc_regulator_set_vqmmc not return error if vqmmc/vmmc not
+>     exist
+>   mmc: sdhci: check SDHCI_QUIRK2_NO_1_8_V when do voltage switch
+>   mmc: sdhci: rename quirk SDHCI_QUIRK_MULTIBLOCK_READ_ACMD12
+> 	Above clean up is not needed so far according to Adrian.
+> 
+>   mmc: sdhci: fix incorrect get data interrupt during no data transfer
+> 	This one is not needed anymore cause Adrian had another fix
+> 	already in tree.
+> 	(commit 0e0a35d2d4058 mmc: sdhci: Track whether a reset is pending)
+> 
+>   mmc: core: disable auto retune during card detection process
+> 	This one will sent out in another patch series to fix in CORE.
+> 
+> v1:
+> http://www.spinics.net/lists/linux-mmc/msg36316.html
+> 
+> Dong Aisheng (15):
+>   mmc: sdhci: using common mmc_regulator_set_vqmmc()
+>   mmc: sdhci-esdhc-imx: remove SDHCI_QUIRK_BROKEN_TIMEOUT_VAL
+>   mmc: sdhci-esdhc-imx: add esdhc specific suspend resume callback
+>   mmc: sdhci-esdhc-imx: restore watermark level setting after resume
+>   mmc: sdhci-esdhci-imx: disable DLL delay line settings explicitly
+>   mmc: sdhci-esdhc-imx: support setting tuning start point
+>   doc: dt: fsl-imx-esdhc: add set tuning start point binding
+>   mmc: sdhci: add standard hw auto retuning support
+>   mmc: sdhci-esdhc-imx: enable hw auto retuning for STD_TUNING
+>   mmc: sdhci-esdhc-imx: enable hw auto retuning for MAN_TUNING
+>   mmc: sdhci-esdhc-imx: fix strobe DLL lock wrong clock issue
+>   mmc: sdhci-esdhc-imx: factor out hw related initialization into
+>     function
+>   mmc: sdhci-esdhc-imx: move tuning static configuration into hwinit
+>     function
+>   mmc: sdhci-esdhci-imx: re-initialize hw state after resume
+>   mmc: sdhci-esdhc-imx: clear tuning bits during driver probe
+> 
+>  .../devicetree/bindings/mmc/fsl-imx-esdhc.txt      |   2 +
+>  drivers/mmc/host/sdhci-esdhc-imx.c                 | 149 ++++++++++++++-------
+>  drivers/mmc/host/sdhci.c                           |  24 ++--
+>  drivers/mmc/host/sdhci.h                           |   3 +
+>  include/linux/platform_data/mmc-esdhc-imx.h        |   1 +
+>  5 files changed, 122 insertions(+), 57 deletions(-)
+> 
 
-There is no SDXC_CLK_100M in the mainline driver, and 100MHz is asked
-only for 8 bits DDR at 50MHz.
-
---=20
-Ken ar c'henta=C3=B1	|	      ** Breizh ha Linux atav! **
-Jef		|		http://moinejf.free.fr/
-
---=20
-You received this message because you are subscribed to the Google Groups "=
-linux-sunxi" group.
-To unsubscribe from this group and stop receiving emails from it, send an e=
-mail to linux-sunxi+unsubscribe-/JYPxA39Uh5TLH3MbocFF+G/Ez6ZCGd0@public.gmane.org
-For more options, visit https://groups.google.com/d/optout.
