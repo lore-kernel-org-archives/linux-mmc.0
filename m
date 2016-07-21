@@ -1,59 +1,44 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH V2 15/15] mmc: sdhci-esdhc-imx: clear tuning bits during
- driver probe
-Date: Thu, 21 Jul 2016 11:33:02 +0300
-Message-ID: <579088BE.9090207@intel.com>
-References: <1468309584-3591-1-git-send-email-aisheng.dong@nxp.com>
- <1468309584-3591-16-git-send-email-aisheng.dong@nxp.com>
+From: Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>
+Subject: Re: [PATCH 1/3] mmc: sunxi: Check the value returned by clk_round_rate
+Date: Thu, 21 Jul 2016 10:49:37 +0200
+Message-ID: <20160721084937.GF5993@lukather>
+References: <cover.1469082481.git.moinejf@free.fr>
+ <c2231f3df66cf77e4fb9051f7b0c27ea69b8e63d.1469082481.git.moinejf@free.fr>
+Reply-To: maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga01.intel.com ([192.55.52.88]:46361 "EHLO mga01.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751204AbcGUIhV (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 21 Jul 2016 04:37:21 -0400
-In-Reply-To: <1468309584-3591-16-git-send-email-aisheng.dong@nxp.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="V4b9U9vrdWczvw78"
+Return-path: <linux-sunxi+bncBDSJBYGBRIMBBIUZYK6AKGQENBAFPGY-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+Sender: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
+Content-Disposition: inline
+In-Reply-To: <c2231f3df66cf77e4fb9051f7b0c27ea69b8e63d.1469082481.git.moinejf-GANU6spQydw@public.gmane.org>
+List-Post: <https://groups.google.com/group/linux-sunxi/post>, <mailto:linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Help: <https://groups.google.com/support/>, <mailto:linux-sunxi+help-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Archive: <https://groups.google.com/group/linux-sunxi
+List-Subscribe: <https://groups.google.com/group/linux-sunxi/subscribe>, <mailto:linux-sunxi+subscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Unsubscribe: <mailto:googlegroups-manage+1076902468213+unsubscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>,
+ <https://groups.google.com/group/linux-sunxi/subscribe>
+To: Jean-Francois Moine <moinejf-GANU6spQydw@public.gmane.org>
+Cc: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
-To: Dong Aisheng <aisheng.dong@nxp.com>, linux-mmc@vger.kernel.org
-Cc: ulf.hansson@linaro.org, chris@printf.net, shawnguo@kernel.org, linux-arm-kernel@lists.infradead.org, haibo.chen@nxp.com, dongas86@gmail.com
 
-On 12/07/16 10:46, Dong Aisheng wrote:
-> The tuning bits like FBCLK_SEL, SMP_CLK_SEL and DLY_CELL which affects
-> timing may have already been set by ROM if booting from SD3.0 mode like
-> SDR104. Let's clear it first during driver probe before doing the new
-> card enumeration to avoid working on the wrong timing.
+
+--V4b9U9vrdWczvw78
+Content-Type: text/plain; charset=UTF-8
+Content-Disposition: inline
+
+On Wed, Jul 20, 2016 at 08:01:47PM +0200, Jean-Francois Moine wrote:
+> clk_round_rate() may return an error. Check it.
 > 
-> Note that tuning bits are dynamical settings which may need to be kept
-> during MMC_PM_KEEP_POWER suspend, so we did not put them into hwinit
-> function.
-> 
-> Signed-off-by: Dong Aisheng <aisheng.dong@nxp.com>
+> Signed-off-by: Jean-Francois Moine <moinejf-GANU6spQydw@public.gmane.org>
 
+Acked-by: Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>
 
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+Thanks!
+Maxime
 
-
-> ---
->  drivers/mmc/host/sdhci-esdhc-imx.c | 5 +++++
->  1 file changed, 5 insertions(+)
-> 
-> diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
-> index e5b5d1c3eb01..2bb326bbc34a 100644
-> --- a/drivers/mmc/host/sdhci-esdhc-imx.c
-> +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
-> @@ -1224,6 +1224,11 @@ static int sdhci_esdhc_imx_probe(struct platform_device *pdev)
->  		host->mmc->caps |= MMC_CAP_1_8V_DDR;
->  		if (!(imx_data->socdata->flags & ESDHC_FLAG_HS200))
->  			host->quirks2 |= SDHCI_QUIRK2_BROKEN_HS200;
-> +
-> +		/* clear tuning bits in case ROM has set it already */
-> +		writel(0x0, host->ioaddr + ESDHC_MIX_CTRL);
-> +		writel(0x0, host->ioaddr + SDHCI_ACMD12_ERR);
-> +		writel(0x0, host->ioaddr + ESDHC_TUNE_CTRL_STATUS);
->  	}
->  
->  	if (imx_data->socdata->flags & ESDHC_FLAG_MAN_TUNING)
-> 
-
+-- 
+Maxime Ripard, Free Electrons
+Embedded Linux and Kernel engineering
+http://free-electrons.com
+--V4b9U9vrdWczvw78--
