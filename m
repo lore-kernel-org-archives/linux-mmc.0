@@ -1,139 +1,99 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH 1/3] mmc: sdhci-of-arasan: Revert: Always power the PHY
- off/on when clock changes
-Date: Thu, 21 Jul 2016 13:09:18 +0300
-Message-ID: <57909F4E.7090608@intel.com>
-References: <1467049167-14628-1-git-send-email-dianders@chromium.org>
- <1467049167-14628-2-git-send-email-dianders@chromium.org>
+Subject: Re: [PATCH v1 1/1] sdhci-pci: Use MRFLD as abbreviation of Merrifield
+Date: Thu, 21 Jul 2016 13:13:32 +0300
+Message-ID: <5790A04C.2040905@intel.com>
+References: <1468321422-135871-1-git-send-email-andriy.shevchenko@linux.intel.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=windows-1252
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1467049167-14628-2-git-send-email-dianders@chromium.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Douglas Anderson <dianders@chromium.org>, Heiko Stuebner <heiko@sntech.de>, ulf.hansson@linaro.org, kishon@ti.com
-Cc: shawn.lin@rock-chips.com, linux-rockchip@lists.infradead.org, linux-mmc@vger.kernel.org, briannorris@chromium.org, michal.simek@xilinx.com, soren.brinkmann@xilinx.com, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mga14.intel.com ([192.55.52.115]:11556 "EHLO mga14.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751415AbcGUKRu (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Thu, 21 Jul 2016 06:17:50 -0400
+In-Reply-To: <1468321422-135871-1-git-send-email-andriy.shevchenko@linux.intel.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Andy Shevchenko <andriy.shevchenko@linux.intel.com>, linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
 
-On 27/06/16 20:39, Douglas Anderson wrote:
-> This reverts commit 4ac0d5f245e1 ("mmc: sdhci-of-arasan: Always power
-> the PHY off/on when clock changes"), resolving conflicts with other
-> patches that have come after.  It appears that on some boards / with
-> some eMMC devices that the patch is causing problems.
+On 12/07/16 14:03, Andy Shevchenko wrote:
+> Everywhere else in the code MRFLD abbreviation is used for Intel Merrifield. Do
+> the same for sdhci-pci.
 > 
-> Presumably turning the phy off and on again at the wrong time while
-> initially setting up the card is confusing the card, the host, or the
-> PHY.  We have lots of power cycles while initially setting up the card
-> because the main sdhci driver often turns off the clock by clearing
-> SDHCI_CLOCK_CARD_EN and then calls host->ops->set_clock() to set the
-> clock again.  With all of those, we ended up with lots of power cycles.
-> 
-> Presumably the arguments made in the original patch still hold.  That
-> is, whenever the card clock is turned off and on again (or changed) we
-> really should wait for the DLL to lock again.  However, perhaps it's
-> really not that critical for the lower speeds.
-> 
-> It's possible that the right answer here is:
-> * Whenever set_clock() is called we should double-check that the DLL is
->   locked.
-> * Whenever set_clock() is called and we're actually changing clocks we
->   should do a power cycle around that.
-> * When we're doing a power cycle just because the clock changed, we
->   probably shouldn't do quite as many things (maybe don't need to
->   recalibarate, etc).
-> 
-> Unfortunately the interaction between SDHCI and the PHY is extremely
-> limited because of the limited PHY API.  The PHY does have a reference
-> to the card clock and could theoretically register for notifications,
-> except that our clock is query only (it uses CLK_GET_RATE_NOCACHE) and
-> so can't really be notified about updates.  I believe we would need a
-> major redesign of clock handling in SDHCI core to do better than that,
-> or we would need to make our one fake notifications.  :(
-> 
-> Let's hope that we can eventually get more information from Arasan on
-> how all this should be handled before doing tons more work.  Until then,
-> let's get back to a known working state.  Note that the rest of the
-> patches in the 150 MHz series should still work fine even without this
-> one.
-> 
-> Signed-off-by: Douglas Anderson <dianders@chromium.org>
+> Signed-off-by: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
 
 
 Acked-by: Adrian Hunter <adrian.hunter@intel.com>
 
 
-
 > ---
->  drivers/mmc/host/sdhci-of-arasan.c | 21 ++++++++++++++-------
->  1 file changed, 14 insertions(+), 7 deletions(-)
+>  drivers/mmc/host/sdhci-pci-core.c | 18 +++++++++---------
+>  drivers/mmc/host/sdhci-pci.h      |  2 +-
+>  2 files changed, 10 insertions(+), 10 deletions(-)
 > 
-> diff --git a/drivers/mmc/host/sdhci-of-arasan.c b/drivers/mmc/host/sdhci-of-arasan.c
-> index 678f316702e0..e0f193f7e3e5 100644
-> --- a/drivers/mmc/host/sdhci-of-arasan.c
-> +++ b/drivers/mmc/host/sdhci-of-arasan.c
-> @@ -77,7 +77,6 @@ struct sdhci_arasan_soc_ctl_map {
->   * @host:		Pointer to the main SDHCI host structure.
->   * @clk_ahb:		Pointer to the AHB clock
->   * @phy:		Pointer to the generic phy
-> - * @phy_on:		True if the PHY is turned on.
->   * @sdcardclk_hw:	Struct for the clock we might provide to a PHY.
->   * @sdcardclk:		Pointer to normal 'struct clock' for sdcardclk_hw.
->   * @soc_ctl_base:	Pointer to regmap for syscon for soc_ctl registers.
-> @@ -87,7 +86,6 @@ struct sdhci_arasan_data {
->  	struct sdhci_host *host;
->  	struct clk	*clk_ahb;
->  	struct phy	*phy;
-> -	bool		phy_on;
+> diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-pci-core.c
+> index 773532d..d116d4f 100644
+> --- a/drivers/mmc/host/sdhci-pci-core.c
+> +++ b/drivers/mmc/host/sdhci-pci-core.c
+> @@ -419,13 +419,13 @@ static const struct sdhci_pci_fixes sdhci_intel_byt_sd = {
+>  };
 >  
->  	struct clk_hw	sdcardclk_hw;
->  	struct clk      *sdcardclk;
-> @@ -170,10 +168,12 @@ static void sdhci_arasan_set_clock(struct sdhci_host *host, unsigned int clock)
+>  /* Define Host controllers for Intel Merrifield platform */
+> -#define INTEL_MRFL_EMMC_0	0
+> -#define INTEL_MRFL_EMMC_1	1
+> +#define INTEL_MRFLD_EMMC_0	0
+> +#define INTEL_MRFLD_EMMC_1	1
+>  
+> -static int intel_mrfl_mmc_probe_slot(struct sdhci_pci_slot *slot)
+> +static int intel_mrfld_mmc_probe_slot(struct sdhci_pci_slot *slot)
 >  {
->  	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
->  	struct sdhci_arasan_data *sdhci_arasan = sdhci_pltfm_priv(pltfm_host);
-> +	bool ctrl_phy = false;
+> -	if ((PCI_FUNC(slot->chip->pdev->devfn) != INTEL_MRFL_EMMC_0) &&
+> -	    (PCI_FUNC(slot->chip->pdev->devfn) != INTEL_MRFL_EMMC_1))
+> +	if ((PCI_FUNC(slot->chip->pdev->devfn) != INTEL_MRFLD_EMMC_0) &&
+> +	    (PCI_FUNC(slot->chip->pdev->devfn) != INTEL_MRFLD_EMMC_1))
+>  		/* SD support is not ready yet */
+>  		return -ENODEV;
 >  
-> -	if (sdhci_arasan->phy_on && !IS_ERR(sdhci_arasan->phy)) {
-> -		sdhci_arasan->phy_on = false;
-> +	if (clock > MMC_HIGH_52_MAX_DTR && (!IS_ERR(sdhci_arasan->phy)))
-> +		ctrl_phy = true;
+> @@ -435,12 +435,12 @@ static int intel_mrfl_mmc_probe_slot(struct sdhci_pci_slot *slot)
+>  	return 0;
+>  }
 >  
-> +	if (ctrl_phy) {
->  		spin_unlock_irq(&host->lock);
->  		phy_power_off(sdhci_arasan->phy);
->  		spin_lock_irq(&host->lock);
-> @@ -181,9 +181,7 @@ static void sdhci_arasan_set_clock(struct sdhci_host *host, unsigned int clock)
+> -static const struct sdhci_pci_fixes sdhci_intel_mrfl_mmc = {
+> +static const struct sdhci_pci_fixes sdhci_intel_mrfld_mmc = {
+>  	.quirks		= SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC,
+>  	.quirks2	= SDHCI_QUIRK2_BROKEN_HS200 |
+>  			SDHCI_QUIRK2_PRESET_VALUE_BROKEN,
+>  	.allow_runtime_pm = true,
+> -	.probe_slot	= intel_mrfl_mmc_probe_slot,
+> +	.probe_slot	= intel_mrfld_mmc_probe_slot,
+>  };
 >  
->  	sdhci_set_clock(host, clock);
+>  /* O2Micro extra registers */
+> @@ -1104,10 +1104,10 @@ static const struct pci_device_id pci_ids[] = {
 >  
-> -	if (host->mmc->actual_clock && !IS_ERR(sdhci_arasan->phy)) {
-> -		sdhci_arasan->phy_on = true;
-> -
-> +	if (ctrl_phy) {
->  		spin_unlock_irq(&host->lock);
->  		phy_power_on(sdhci_arasan->phy);
->  		spin_lock_irq(&host->lock);
-> @@ -549,6 +547,12 @@ static int sdhci_arasan_probe(struct platform_device *pdev)
->  			goto unreg_clk;
->  		}
+>  	{
+>  		.vendor		= PCI_VENDOR_ID_INTEL,
+> -		.device		= PCI_DEVICE_ID_INTEL_MRFL_MMC,
+> +		.device		= PCI_DEVICE_ID_INTEL_MRFLD_MMC,
+>  		.subvendor	= PCI_ANY_ID,
+>  		.subdevice	= PCI_ANY_ID,
+> -		.driver_data	= (kernel_ulong_t)&sdhci_intel_mrfl_mmc,
+> +		.driver_data	= (kernel_ulong_t)&sdhci_intel_mrfld_mmc,
+>  	},
 >  
-> +		ret = phy_power_on(sdhci_arasan->phy);
-> +		if (ret < 0) {
-> +			dev_err(&pdev->dev, "phy_power_on err.\n");
-> +			goto err_phy_power;
-> +		}
-> +
->  		host->mmc_host_ops.hs400_enhanced_strobe =
->  					sdhci_arasan_hs400_enhanced_strobe;
->  	}
-> @@ -561,6 +565,9 @@ static int sdhci_arasan_probe(struct platform_device *pdev)
->  
->  err_add_host:
->  	if (!IS_ERR(sdhci_arasan->phy))
-> +		phy_power_off(sdhci_arasan->phy);
-> +err_phy_power:
-> +	if (!IS_ERR(sdhci_arasan->phy))
->  		phy_exit(sdhci_arasan->phy);
->  unreg_clk:
->  	sdhci_arasan_unregister_sdclk(&pdev->dev);
+>  	{
+> diff --git a/drivers/mmc/host/sdhci-pci.h b/drivers/mmc/host/sdhci-pci.h
+> index 968b81e..e1d44c0 100644
+> --- a/drivers/mmc/host/sdhci-pci.h
+> +++ b/drivers/mmc/host/sdhci-pci.h
+> @@ -14,7 +14,7 @@
+>  #define PCI_DEVICE_ID_INTEL_BSW_EMMC	0x2294
+>  #define PCI_DEVICE_ID_INTEL_BSW_SDIO	0x2295
+>  #define PCI_DEVICE_ID_INTEL_BSW_SD	0x2296
+> -#define PCI_DEVICE_ID_INTEL_MRFL_MMC	0x1190
+> +#define PCI_DEVICE_ID_INTEL_MRFLD_MMC	0x1190
+>  #define PCI_DEVICE_ID_INTEL_CLV_SDIO0	0x08f9
+>  #define PCI_DEVICE_ID_INTEL_CLV_SDIO1	0x08fa
+>  #define PCI_DEVICE_ID_INTEL_CLV_SDIO2	0x08fb
 > 
+
