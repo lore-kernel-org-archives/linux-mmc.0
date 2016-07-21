@@ -1,93 +1,36 @@
-From: Michael Weiser <michael.weiser@gmx.de>
-Subject: [PATCH 1/3] mmc: sunxi-mmc: change idma descriptor to __le32
-Date: Thu, 21 Jul 2016 20:23:27 +0200
-Message-ID: <20160721182329.13478-2-michael.weiser@gmx.de>
-References: <20160721182329.13478-1-michael.weiser@gmx.de>
+From: Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>
+Subject: Re: [PATCH v11 4/5] powerpc/fsl: move mpc85xx.h to include/linux/fsl
+Date: Thu, 21 Jul 2016 20:34:12 +0200
+Message-ID: <3917663.1nRrfqKY9D@wuerfel>
+References: <1468723822-30457-1-git-send-email-oss@buserror.net> <146909676646.16700.8383344640490662952@concordia> <1469119526.25630.42.camel@buserror.net>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <20160721182329.13478-1-michael.weiser@gmx.de>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: linux-arm-kernel@lists.infradead.org
-Cc: linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, Chen-Yu Tsai <wens@csie.org>, Michael Weiser <michael.weiser@gmx.de>, Maxime Ripard <maxime.ripard@free-electrons.com>
+Content-Transfer-Encoding: 7Bit
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1469119526.25630.42.camel-fOR+EgIDQEHk1uMJSBkQmQ@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Scott Wood <oss-fOR+EgIDQEHk1uMJSBkQmQ@public.gmane.org>
+Cc: Michael Ellerman <mpe-Gsx/Oe8HsFggBc27wqDAHg@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linuxppc-dev-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Yangbo Lu <yangbo.lu-3arQi8VN3Tc@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-The sunxi-mmc driver does not take into account the processor may be big
-endian when writing the DMA descriptors. This causes cards not to be
-detected when running a big-endian kernel. Change the descriptors for
-IDMA to use __le32 and ensure they are suitably swapped before writing.
-Tested successfully on the Cubieboard2.
+On Thursday, July 21, 2016 11:45:26 AM CEST Scott Wood wrote:
+> 
+> For the MMC issue I suggest using ifdef CONFIG_PPC and mfspr(SPRN_SVR) like
+> the clock driver does[1] and we can revisit the issue if/when we need to do
+> something similar on an ARM chip.
 
-Signed-off-by: Michael Weiser <michael.weiser@gmx.de>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Maxime Ripard <maxime.ripard@free-electrons.com>
-Cc: Chen-Yu Tsai <wens@csie.org>
-Cc: linux-mmc@vger.kernel.org
----
- drivers/mmc/host/sunxi-mmc.c | 27 +++++++++++++++------------
- 1 file changed, 15 insertions(+), 12 deletions(-)
+That sounds ok to me. having an mfspr check isn't nice but does the
+job to work around existing bindings. For future chips, we can hopefully
+find a way to identify most quirks early enough that the DT binding
+can describe them using distinct compatible strings or other properties,
+if necessary with the help of the boot loader.
 
-diff --git a/drivers/mmc/host/sunxi-mmc.c b/drivers/mmc/host/sunxi-mmc.c
-index 2ee4c21..1e6df8a 100644
---- a/drivers/mmc/host/sunxi-mmc.c
-+++ b/drivers/mmc/host/sunxi-mmc.c
-@@ -223,10 +223,10 @@ struct sunxi_mmc_clk_delay {
- };
- 
- struct sunxi_idma_des {
--	u32	config;
--	u32	buf_size;
--	u32	buf_addr_ptr1;
--	u32	buf_addr_ptr2;
-+	__le32 config;
-+	__le32 buf_size;
-+	__le32 buf_addr_ptr1;
-+	__le32 buf_addr_ptr2;
- };
- 
- struct sunxi_mmc_host {
-@@ -325,22 +325,25 @@ static void sunxi_mmc_init_idma_des(struct sunxi_mmc_host *host,
- 	int i, max_len = (1 << host->idma_des_size_bits);
- 
- 	for (i = 0; i < data->sg_len; i++) {
--		pdes[i].config = SDXC_IDMAC_DES0_CH | SDXC_IDMAC_DES0_OWN |
--				 SDXC_IDMAC_DES0_DIC;
-+		pdes[i].config = cpu_to_le32(SDXC_IDMAC_DES0_CH |
-+					     SDXC_IDMAC_DES0_OWN |
-+					     SDXC_IDMAC_DES0_DIC);
- 
- 		if (data->sg[i].length == max_len)
- 			pdes[i].buf_size = 0; /* 0 == max_len */
- 		else
--			pdes[i].buf_size = data->sg[i].length;
-+			pdes[i].buf_size = cpu_to_le32(data->sg[i].length);
- 
- 		next_desc += sizeof(struct sunxi_idma_des);
--		pdes[i].buf_addr_ptr1 = sg_dma_address(&data->sg[i]);
--		pdes[i].buf_addr_ptr2 = (u32)next_desc;
-+		pdes[i].buf_addr_ptr1 =
-+			cpu_to_le32(sg_dma_address(&data->sg[i]));
-+		pdes[i].buf_addr_ptr2 = cpu_to_le32((u32)next_desc);
- 	}
- 
--	pdes[0].config |= SDXC_IDMAC_DES0_FD;
--	pdes[i - 1].config |= SDXC_IDMAC_DES0_LD | SDXC_IDMAC_DES0_ER;
--	pdes[i - 1].config &= ~SDXC_IDMAC_DES0_DIC;
-+	pdes[0].config |= cpu_to_le32(SDXC_IDMAC_DES0_FD);
-+	pdes[i - 1].config |= cpu_to_le32(SDXC_IDMAC_DES0_LD |
-+					  SDXC_IDMAC_DES0_ER);
-+	pdes[i - 1].config &= cpu_to_le32(~SDXC_IDMAC_DES0_DIC);
- 	pdes[i - 1].buf_addr_ptr2 = 0;
- 
- 	/*
--- 
-2.9.0
+Some other folks on MIPS were interested in having the soc_device
+matching infrastructure and contacted me off-list, but they can of
+course take the patch I sent and work from that.
+
+	Arnd
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
