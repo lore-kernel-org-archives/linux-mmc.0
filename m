@@ -1,43 +1,52 @@
-From: robert.foss@collabora.com
-Subject: [PATCH] mmc: sdhci: Do not allow tuning procedure to be interrupted
-Date: Fri, 22 Jul 2016 10:17:31 -0400
-Message-ID: <1469197051-18733-1-git-send-email-robert.foss@collabora.com>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from bhuna.collabora.co.uk ([46.235.227.227]:60183 "EHLO
-	bhuna.collabora.co.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750810AbcGVORh (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 22 Jul 2016 10:17:37 -0400
-Sender: linux-mmc-owner@vger.kernel.org
+From: Jean-Francois Moine <moinejf-GANU6spQydw@public.gmane.org>
+Subject: Re: [PATCH 3/3] mmc: sunxi: Add support to the
+ Allwinner A83T
+Date: Fri, 22 Jul 2016 21:00:06 +0200
+Message-ID: <20160722210006.2d08c8261f84c59f7e2ddd34@free.fr>
+References: <cover.1469082481.git.moinejf@free.fr>
+	<0ddc5f7d9a42515f901c95b8c0c1f5a5e4d575e9.1469082481.git.moinejf@free.fr>
+	<20160721085838.GH5993@lukather>
+	<20160721111851.133a3f16d6e9de1ee45b3654@free.fr>
+Reply-To: moinejf-GANU6spQydw@public.gmane.org
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: quoted-printable
+Return-path: <linux-sunxi+bncBCV6DL6LYMNBBOW2ZG6AKGQEIZTLK3A-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+Sender: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
+In-Reply-To: <20160721111851.133a3f16d6e9de1ee45b3654-GANU6spQydw@public.gmane.org>
+List-Post: <https://groups.google.com/group/linux-sunxi/post>, <mailto:linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Help: <https://groups.google.com/support/>, <mailto:linux-sunxi+help-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Archive: <https://groups.google.com/group/linux-sunxi
+List-Subscribe: <https://groups.google.com/group/linux-sunxi/subscribe>, <mailto:linux-sunxi+subscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Unsubscribe: <mailto:googlegroups-manage+1076902468213+unsubscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>,
+ <https://groups.google.com/group/linux-sunxi/subscribe>
+To: Jean-Francois Moine <moinejf-GANU6spQydw@public.gmane.org>
+Cc: Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, aisheng.dong@freescale.com, suneel.garapati@xilinx.com, wenkai.du@intel.com, johan.derycke@barco.com, ludovic.desroches@atmel.com, haibo.chen@freescale.com, ivan.ivanov@linaro.org, ulf.hansson@linaro.org
-Cc: enric.balletbo@collabora.com, tomeu.vizoso@collabora.com, Christopher Freeman <cfreeman@nvidia.com>
 
-From: Christopher Freeman <cfreeman@nvidia.com>
+On Thu, 21 Jul 2016 11:18:51 +0200
+Jean-Francois Moine <moinejf-GANU6spQydw@public.gmane.org> wrote:
 
-wait_event_interruptible_timeout() will return early if the blocked
-process receives a signal, causing the driver to abort the tuning
-procedure and possibly leaving the controller in a bad state.  Since the
-tuning command is expected to complete quickly (<50ms) and we've set a
-timeout, use wait_event_timeout() instead.
+> > On Wed, Jul 20, 2016 at 08:28:47PM +0200, Jean-Francois Moine wrote:
+> > > The rate of the PLL-PERIPH clock is usually set to 1.2GHz in the A83T=
+.
+> >=20
+> > Uh? The datasheet says to set it to 600MHz.
+>=20
+> Right. But the driver of the SDK for the Banana Pi M3 (A83T) sets it
+> to 1.2GHz.
 
-Signed-off-by: Christopher Freeman <cfreeman@nvidia.com>
----
- drivers/mmc/host/sdhci.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+I tested again, and, with the pll-periph at 600MHz, both the SDcard and
+the eMMC are working fine.
+So, you may forget about this patch, sorry for the noise.
 
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index ef3eee7..2029090 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -2009,7 +2009,7 @@ static int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode)
- 
- 		spin_unlock_irqrestore(&host->lock, flags);
- 		/* Wait for Buffer Read Ready interrupt */
--		wait_event_interruptible_timeout(host->buf_ready_int,
-+		wait_event_timeout(host->buf_ready_int,
- 					(host->tuning_done == 1),
- 					msecs_to_jiffies(50));
- 		spin_lock_irqsave(&host->lock, flags);
--- 
-2.7.4
+--=20
+Ken ar c'henta=C3=B1	|	      ** Breizh ha Linux atav! **
+Jef		|		http://moinejf.free.fr/
 
+--=20
+You received this message because you are subscribed to the Google Groups "=
+linux-sunxi" group.
+To unsubscribe from this group and stop receiving emails from it, send an e=
+mail to linux-sunxi+unsubscribe-/JYPxA39Uh5TLH3MbocFF+G/Ez6ZCGd0@public.gmane.org
+For more options, visit https://groups.google.com/d/optout.
