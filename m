@@ -1,135 +1,171 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: sdhci-msm: Add support for UHS cards
-Date: Sat, 23 Jul 2016 11:38:45 +0200
-Message-ID: <CAPDyKFrbyVaeHK+Dj4otDSrSuKkce0RXAi32UtxF9BFuM4AU=g@mail.gmail.com>
-References: <1466780834-1041-1-git-send-email-georgi.djakov@linaro.org>
+Subject: Re: [PATCH 2/3] phy: rockchip-emmc: Be tolerant to card clock of 0 in
+ power on
+Date: Sat, 23 Jul 2016 11:39:06 +0200
+Message-ID: <CAPDyKFqPHB2O=-hDxVda-h04WS9xYpJ3MyzH8bk5Fc4ogTfB5A@mail.gmail.com>
+References: <1467049167-14628-1-git-send-email-dianders@chromium.org>
+ <1467049167-14628-3-git-send-email-dianders@chromium.org> <5773D1FD.8020601@ti.com>
+ <CAD=FV=U_-8HJRjWa8ktT=7tmM5RB4OVnDce-Bv2teDibYfbCeA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1466780834-1041-1-git-send-email-georgi.djakov@linaro.org>
+In-Reply-To: <CAD=FV=U_-8HJRjWa8ktT=7tmM5RB4OVnDce-Bv2teDibYfbCeA@mail.gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Georgi Djakov <georgi.djakov@linaro.org>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-arm-msm@vger.kernel.org" <linux-arm-msm@vger.kernel.org>
+To: Doug Anderson <dianders@chromium.org>, Kishon Vijay Abraham I <kishon@ti.com>
+Cc: Heiko Stuebner <heiko@sntech.de>, Shawn Lin <shawn.lin@rock-chips.com>, "open list:ARM/Rockchip SoC..." <linux-rockchip@lists.infradead.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Brian Norris <briannorris@chromium.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On 24 June 2016 at 17:07, Georgi Djakov <georgi.djakov@linaro.org> wrote:
-> Enabling support for ultra high speed mode cards requires some
-> voltage switching and interaction with the PMIC via a special
-> power IRQ. Add support for this.
+On 29 June 2016 at 17:18, Doug Anderson <dianders@chromium.org> wrote:
+> Kishon,
 >
-> Signed-off-by: Georgi Djakov <georgi.djakov@linaro.org>
+> On Wed, Jun 29, 2016 at 6:49 AM, Kishon Vijay Abraham I <kishon@ti.com> wrote:
+>> Hi,
+>>
+>> On Monday 27 June 2016 11:09 PM, Douglas Anderson wrote:
+>>> It's possible that there are some reasons to turn the PHY on while the
+>>> clock is 0.  In this case we just won't wait for the DLL to lock.
+>>>
+>>> This is a bit of a stopgap until we figure out exactly when we're
+>>> supposed to wait for the DLL to lock and when we're supposed to power
+>>> cycle the PHY.
+>>>
+>>> Note: this patch should help with suspend/resume where the system will
+>>> try to turn the PHY back on when the clock is 0.
+>>>
+>>> Signed-off-by: Douglas Anderson <dianders@chromium.org>
+>>> ---
+>>>  drivers/phy/phy-rockchip-emmc.c | 59 ++++++++++++++++++++++++++---------------
+>>>  1 file changed, 37 insertions(+), 22 deletions(-)
+>>>
+>>> diff --git a/drivers/phy/phy-rockchip-emmc.c b/drivers/phy/phy-rockchip-emmc.c
+>>> index 9dce958233a0..a2aa6aca7dec 100644
+>>> --- a/drivers/phy/phy-rockchip-emmc.c
+>>> +++ b/drivers/phy/phy-rockchip-emmc.c
+>>> @@ -88,15 +88,36 @@ static int rockchip_emmc_phy_power(struct phy *phy, bool on_off)
+>>>       unsigned int caldone;
+>>>       unsigned int dllrdy;
+>>>       unsigned int freqsel = PHYCTRL_FREQSEL_200M;
+>>> +     unsigned long rate;
+>>>       unsigned long timeout;
+>>>
+>>> -     if (rk_phy->emmcclk != NULL) {
+>>> -             unsigned long rate = clk_get_rate(rk_phy->emmcclk);
+>>> +     /*
+>>> +      * Keep phyctrl_pdb and phyctrl_endll low to allow
+>>> +      * initialization of CALIO state M/C DFFs
+>>> +      */
+>>> +     regmap_write(rk_phy->reg_base,
+>>> +                  rk_phy->reg_offset + GRF_EMMCPHY_CON6,
+>>> +                  HIWORD_UPDATE(PHYCTRL_PDB_PWR_OFF,
+>>> +                                PHYCTRL_PDB_MASK,
+>>> +                                PHYCTRL_PDB_SHIFT));
+>>> +     regmap_write(rk_phy->reg_base,
+>>> +                  rk_phy->reg_offset + GRF_EMMCPHY_CON6,
+>>> +                  HIWORD_UPDATE(PHYCTRL_ENDLL_DISABLE,
+>>> +                                PHYCTRL_ENDLL_MASK,
+>>> +                                PHYCTRL_ENDLL_SHIFT));
+>>> +
+>>> +     /* Already finish power_off above */
+>>> +     if (on_off == PHYCTRL_PDB_PWR_OFF)
+>>> +             return 0;
+>>> +
+>>> +     rate = clk_get_rate(rk_phy->emmcclk);
+>>> +
+>>> +     if (rate != 0) {
+>>>               unsigned long ideal_rate;
+>>>               unsigned long diff;
+>>>
+>>>               switch (rate) {
+>>> -             case 0 ... 74999999:
+>>> +             case 1 ... 74999999:
+>>>                       ideal_rate = 50000000;
+>>>                       freqsel = PHYCTRL_FREQSEL_50M;
+>>>                       break;
+>>> @@ -127,25 +148,6 @@ static int rockchip_emmc_phy_power(struct phy *phy, bool on_off)
+>>>       }
+>>>
+>>>       /*
+>>> -      * Keep phyctrl_pdb and phyctrl_endll low to allow
+>>> -      * initialization of CALIO state M/C DFFs
+>>> -      */
+>>> -     regmap_write(rk_phy->reg_base,
+>>> -                  rk_phy->reg_offset + GRF_EMMCPHY_CON6,
+>>> -                  HIWORD_UPDATE(PHYCTRL_PDB_PWR_OFF,
+>>> -                                PHYCTRL_PDB_MASK,
+>>> -                                PHYCTRL_PDB_SHIFT));
+>>> -     regmap_write(rk_phy->reg_base,
+>>> -                  rk_phy->reg_offset + GRF_EMMCPHY_CON6,
+>>> -                  HIWORD_UPDATE(PHYCTRL_ENDLL_DISABLE,
+>>> -                                PHYCTRL_ENDLL_MASK,
+>>> -                                PHYCTRL_ENDLL_SHIFT));
+>>> -
+>>> -     /* Already finish power_off above */
+>>> -     if (on_off == PHYCTRL_PDB_PWR_OFF)
+>>> -             return 0;
+>>> -
+>>> -     /*
+>>>        * According to the user manual, calpad calibration
+>>>        * cycle takes more than 2us without the minimal recommended
+>>>        * value, so we may need a little margin here
+>>> @@ -183,6 +185,19 @@ static int rockchip_emmc_phy_power(struct phy *phy, bool on_off)
+>>>                    HIWORD_UPDATE(PHYCTRL_ENDLL_ENABLE,
+>>>                                  PHYCTRL_ENDLL_MASK,
+>>>                                  PHYCTRL_ENDLL_SHIFT));
+>>> +
+>>> +     /*
+>>> +      * We turned on the DLL even though the rate was 0 because we the
+>>> +      * clock might be turned on later.  ...but we can't wait for the DLL
+>>> +      * to lock when the rate is 0 because it will never lock with no
+>>> +      * input clock.
+>>> +      *
+>>> +      * Technically we should be checking the lock later when the clock
+>>> +      * is turned on, but for now we won't.
+>>> +      */
+>>> +     if (rate == 0)
+>>> +             return 0;
+>>
+>> Why not return initially from rockchip_emmc_phy_power if the clock rate is '0'.
+>> Are there other functions to lock the DLL apart from phy_power?
+>
+> Yeah, it's a big ugly right now.  This ugliness is really needed
+> because of <https://patchwork.kernel.org/patch/9201035/> because:
+>
+> 1. We power on the PHY at probe time and the card clock is in an
+> unknown state at that time.  It will be reported as 0 right now, but
+> it may or may not actually be 0.
+>
+> 2. We don't have an easy way to call back into the PHY when we
+> actually set the clock to a low rate (like 400kHz) for ID mode.
+> Before this series I tried to power the PHY off and on for every clock
+> change, but apparently that was causing problems.
+>
+>
+> As talked about in <https://patchwork.kernel.org/patch/9201035/>, I
+> think the right answer is to figure out how to get the common clock
+> framework notifications to happen for the card clock and then remove
+> the wholesale PHY power off / power on for every clock change.  The
+> PHY itself can register for the clock change notifications and figure
+> out how much or how little to do on every clock change.
+>
+> Unfortunately, as also discussed in the other patch, it's not trivial
+> to do this because I think it requires surgery on the main SDHCI
+> driver to change the way it deals with the card clock.  I'm not sure I
+> have time for this delicate surgery right now and I'm hoping that
+> perhaps Shawn will be able to help figure something out (maybe?) or I
+> can try coming back to it later.
+>
+>
+> In any case, I think a wholesale revert of my previous 150 MHz series
+> probably puts us in a worse state than we started with, so I was just
+> proposing reverting the one patch.  Once we do that, this PHY patch
+> helps keep us in a sane state (keeps suspend/resume working).
+>
+>
+> -Doug
 
-Thanks, applied for next!
+Doug, Kishon,
+
+Did you agree on how to move forward with this change?
 
 Kind regards
 Uffe
-
-> ---
->  drivers/mmc/host/sdhci-msm.c |   66 ++++++++++++++++++++++++++++++++++++++++++
->  1 file changed, 66 insertions(+)
->
-> diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
-> index 0653fe730150..ac5700233e12 100644
-> --- a/drivers/mmc/host/sdhci-msm.c
-> +++ b/drivers/mmc/host/sdhci-msm.c
-> @@ -32,6 +32,21 @@
->  #define CORE_POWER             0x0
->  #define CORE_SW_RST            BIT(7)
->
-> +#define CORE_PWRCTL_STATUS     0xdc
-> +#define CORE_PWRCTL_MASK       0xe0
-> +#define CORE_PWRCTL_CLEAR      0xe4
-> +#define CORE_PWRCTL_CTL                0xe8
-> +#define CORE_PWRCTL_BUS_OFF    BIT(0)
-> +#define CORE_PWRCTL_BUS_ON     BIT(1)
-> +#define CORE_PWRCTL_IO_LOW     BIT(2)
-> +#define CORE_PWRCTL_IO_HIGH    BIT(3)
-> +#define CORE_PWRCTL_BUS_SUCCESS BIT(0)
-> +#define CORE_PWRCTL_IO_SUCCESS BIT(2)
-> +#define REQ_BUS_OFF            BIT(0)
-> +#define REQ_BUS_ON             BIT(1)
-> +#define REQ_IO_LOW             BIT(2)
-> +#define REQ_IO_HIGH            BIT(3)
-> +#define INT_MASK               0xf
->  #define MAX_PHASES             16
->  #define CORE_DLL_LOCK          BIT(7)
->  #define CORE_DLL_EN            BIT(16)
-> @@ -56,6 +71,7 @@
->  struct sdhci_msm_host {
->         struct platform_device *pdev;
->         void __iomem *core_mem; /* MSM SDCC mapped address */
-> +       int pwr_irq;            /* power irq */
->         struct clk *clk;        /* main SD/MMC bus clock */
->         struct clk *pclk;       /* SDHC peripheral bus clock */
->         struct clk *bus_clk;    /* SDHC bus voter clock */
-> @@ -410,6 +426,39 @@ retry:
->         return rc;
->  }
->
-> +static void sdhci_msm_voltage_switch(struct sdhci_host *host)
-> +{
-> +       struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> +       struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
-> +       u32 irq_status, irq_ack = 0;
-> +
-> +       irq_status = readl_relaxed(msm_host->core_mem + CORE_PWRCTL_STATUS);
-> +       irq_status &= INT_MASK;
-> +
-> +       writel_relaxed(irq_status, msm_host->core_mem + CORE_PWRCTL_CLEAR);
-> +
-> +       if (irq_status & (CORE_PWRCTL_BUS_ON | CORE_PWRCTL_BUS_OFF))
-> +               irq_ack |= CORE_PWRCTL_BUS_SUCCESS;
-> +       if (irq_status & (CORE_PWRCTL_IO_LOW | CORE_PWRCTL_IO_HIGH))
-> +               irq_ack |= CORE_PWRCTL_IO_SUCCESS;
-> +
-> +       /*
-> +        * The driver has to acknowledge the interrupt, switch voltages and
-> +        * report back if it succeded or not to this register. The voltage
-> +        * switches are handled by the sdhci core, so just report success.
-> +        */
-> +       writel_relaxed(irq_ack, msm_host->core_mem + CORE_PWRCTL_CTL);
-> +}
-> +
-> +static irqreturn_t sdhci_msm_pwr_irq(int irq, void *data)
-> +{
-> +       struct sdhci_host *host = (struct sdhci_host *)data;
-> +
-> +       sdhci_msm_voltage_switch(host);
-> +
-> +       return IRQ_HANDLED;
-> +}
-> +
->  static const struct of_device_id sdhci_msm_dt_match[] = {
->         { .compatible = "qcom,sdhci-msm-v4" },
->         {},
-> @@ -423,6 +472,7 @@ static const struct sdhci_ops sdhci_msm_ops = {
->         .set_clock = sdhci_set_clock,
->         .set_bus_width = sdhci_set_bus_width,
->         .set_uhs_signaling = sdhci_set_uhs_signaling,
-> +       .voltage_switch = sdhci_msm_voltage_switch,
->  };
->
->  static const struct sdhci_pltfm_data sdhci_msm_pdata = {
-> @@ -545,6 +595,22 @@ static int sdhci_msm_probe(struct platform_device *pdev)
->                                CORE_VENDOR_SPEC_CAPABILITIES0);
->         }
->
-> +       /* Setup IRQ for handling power/voltage tasks with PMIC */
-> +       msm_host->pwr_irq = platform_get_irq_byname(pdev, "pwr_irq");
-> +       if (msm_host->pwr_irq < 0) {
-> +               dev_err(&pdev->dev, "Get pwr_irq failed (%d)\n",
-> +                       msm_host->pwr_irq);
-> +               goto clk_disable;
-> +       }
-> +
-> +       ret = devm_request_threaded_irq(&pdev->dev, msm_host->pwr_irq, NULL,
-> +                                       sdhci_msm_pwr_irq, IRQF_ONESHOT,
-> +                                       dev_name(&pdev->dev), host);
-> +       if (ret) {
-> +               dev_err(&pdev->dev, "Request IRQ failed (%d)\n", ret);
-> +               goto clk_disable;
-> +       }
-> +
->         ret = sdhci_add_host(host);
->         if (ret)
->                 goto clk_disable;
