@@ -1,79 +1,105 @@
-From: "Winkler, Tomas" <tomas.winkler@intel.com>
-Subject: RE: [PATCH v5 0/8] Replay Protected Memory Block (RPMB) subsystem
-Date: Sat, 23 Jul 2016 07:44:48 +0000
-Message-ID: <5B8DA87D05A7694D9FA63FD143655C1B542A1CC6@hasmsx108.ger.corp.intel.com>
-References: <1468873673-21776-1-git-send-email-tomas.winkler@intel.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH v1 1/1] sdhci-pci: Use MRFLD as abbreviation of Merrifield
+Date: Sat, 23 Jul 2016 11:37:24 +0200
+Message-ID: <CAPDyKFootmJBeS-Hrz0ucLGiPLGKapMCb8z9UtGVWZsBbpSGgw@mail.gmail.com>
+References: <1468321422-135871-1-git-send-email-andriy.shevchenko@linux.intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7BIT
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga11.intel.com ([192.55.52.93]:56327 "EHLO mga11.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750984AbcGWHox convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sat, 23 Jul 2016 03:44:53 -0400
-In-Reply-To: <1468873673-21776-1-git-send-email-tomas.winkler@intel.com>
-Content-Language: en-US
+Received: from mail-wm0-f47.google.com ([74.125.82.47]:38484 "EHLO
+	mail-wm0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751003AbcGWJh1 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sat, 23 Jul 2016 05:37:27 -0400
+Received: by mail-wm0-f47.google.com with SMTP id o80so94971183wme.1
+        for <linux-mmc@vger.kernel.org>; Sat, 23 Jul 2016 02:37:26 -0700 (PDT)
+In-Reply-To: <1468321422-135871-1-git-send-email-andriy.shevchenko@linux.intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Ulf Hansson <ulf.hansson@linaro.org>, "Hunter, Adrian" <adrian.hunter@intel.com>, James Bottomley <James.Bottomley@HansenPartnership.com>, "Martin K. Petersen" <martin.petersen@oracle.com>, Vinayak Holikatti <vinholikatti@gmail.com>, Andy Lutomirski <luto@kernel.org>, =?iso-8859-1?Q?Arve_Hj=F8nnev=E5g?= <arve@android.com>, Michael Ryleev <gmar@google.com>, Joao Pinto <Joao.Pinto@synopsys.com>, Christoph Hellwig <hch@lst.de>, Yaniv Gardi <ygardi@codeaurora.org>
-Cc: "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-scsi@vger.kernel.org" <linux-scsi@vger.kernel.org>, Avri Altman <avri.altman@gmail.com>, "Dattatraya Kulkarni, Anisha" <anisha.dattatraya.kulkarni@intel.com>, "jerome.forissier@linaro.org" <jerome.forissier@linaro.org>
+To: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, linux-mmc <linux-mmc@vger.kernel.org>
 
-
-> 
-> Few storage technologies such is EMMC, UFS, and NVMe support RPMB
-> hardware partition with common protocol and frame layout.
-> The RPMB partition cannot be accessed via standard block layer, but by a set
-> of specific commands: WRITE, READ, GET_WRITE_COUNTER, and
-> PROGRAM_KEY.
-> Such a partition provides authenticated and replay protected access, hence
-> suitable as a secure storage.
-> 
-> The RPMB layer aims to provide in-kernel API for Trusted Execution
-> Environment (TEE) devices that are capable to securely compute block frame
-> signature. In case a TEE device wish to store a replay protected data, it
-> creates an RPMB frame with requested data and computes HMAC of the
-> frame, then it requests the storage device via RPMB layer to store the data.
-> A TEE driver can claim the RPMB interface, for example, via
-> class_interface_register ().
-> The layer provides two APIs, for rpmb_req_cmd() for issuing one of RPMB
-> specific commands and rpmb_seq_cmd() for issuing of raw RPMB protocol
-> frames,  which is close to emmc multi ioctl interface.
-> 
-> A storage device registers its RPMB hardware (eMMC) partition or RPMB W-
-> LUN (UFS) with the RPMB layer providing an implementation for
-> rpmb_seq_cmd() handler. The interface enables sending sequence of RPMB
-> standard frames.
-> 
-> A parallel user space API is provided via /dev/rpmbX character device with
-> two IOCTL commands.
-> Simplified one, RPMB_IOC_REQ_CMD, were read result cycles is performed
-> by the framework on behalf the user and second, RPMB_IOC_SEQ_CMD
-> where the whole RPMB sequence, including RESULT_READ is supplied by the
-> caller.
-> The latter is intended for easier adjusting of the applications that use
-> MMC_IOC_MULTI_CMD ioctl, such as
-> https://android.googlesource.com/trusty/app/storage/
-> 
-> There is a also sample tool under tools/rpmb/ directory that exercises these
-> interfaces and a simulation device that implements the device part.
-> 
-> Tomas Winkler (8):
->   rpmb: add Replay Protected Memory Block (RPMB) subsystem
->   char: rpmb: add sysfs-class ABI documentation
->   char: rpmb: add device attributes
->   char: rpmb: provide a user space interface
->   char: rpmb: add RPMB simulation device
->   tools rpmb: add RPBM access tool
->   mmc: block: register RPMB partition with the RPMB subsystem
->   scsi: ufs: connect to RPMB subsystem
+On 12 July 2016 at 13:03, Andy Shevchenko
+<andriy.shevchenko@linux.intel.com> wrote:
+> Everywhere else in the code MRFLD abbreviation is used for Intel Merrifield. Do
+> the same for sdhci-pci.
 >
+> Signed-off-by: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
 
-I've got few off line request for git access of this code, so here si the repo https://github.com/tomasbw/linux-mei.git  branch rpmb.
-The branch is rebasing one  over linux master branch 
+Thanks, applied for next!
 
-Thanks and will appreciate any public  review. 
-Tomas
+Kind regards
+Uffe
 
 
- 
-
+> ---
+>  drivers/mmc/host/sdhci-pci-core.c | 18 +++++++++---------
+>  drivers/mmc/host/sdhci-pci.h      |  2 +-
+>  2 files changed, 10 insertions(+), 10 deletions(-)
+>
+> diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-pci-core.c
+> index 773532d..d116d4f 100644
+> --- a/drivers/mmc/host/sdhci-pci-core.c
+> +++ b/drivers/mmc/host/sdhci-pci-core.c
+> @@ -419,13 +419,13 @@ static const struct sdhci_pci_fixes sdhci_intel_byt_sd = {
+>  };
+>
+>  /* Define Host controllers for Intel Merrifield platform */
+> -#define INTEL_MRFL_EMMC_0      0
+> -#define INTEL_MRFL_EMMC_1      1
+> +#define INTEL_MRFLD_EMMC_0     0
+> +#define INTEL_MRFLD_EMMC_1     1
+>
+> -static int intel_mrfl_mmc_probe_slot(struct sdhci_pci_slot *slot)
+> +static int intel_mrfld_mmc_probe_slot(struct sdhci_pci_slot *slot)
+>  {
+> -       if ((PCI_FUNC(slot->chip->pdev->devfn) != INTEL_MRFL_EMMC_0) &&
+> -           (PCI_FUNC(slot->chip->pdev->devfn) != INTEL_MRFL_EMMC_1))
+> +       if ((PCI_FUNC(slot->chip->pdev->devfn) != INTEL_MRFLD_EMMC_0) &&
+> +           (PCI_FUNC(slot->chip->pdev->devfn) != INTEL_MRFLD_EMMC_1))
+>                 /* SD support is not ready yet */
+>                 return -ENODEV;
+>
+> @@ -435,12 +435,12 @@ static int intel_mrfl_mmc_probe_slot(struct sdhci_pci_slot *slot)
+>         return 0;
+>  }
+>
+> -static const struct sdhci_pci_fixes sdhci_intel_mrfl_mmc = {
+> +static const struct sdhci_pci_fixes sdhci_intel_mrfld_mmc = {
+>         .quirks         = SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC,
+>         .quirks2        = SDHCI_QUIRK2_BROKEN_HS200 |
+>                         SDHCI_QUIRK2_PRESET_VALUE_BROKEN,
+>         .allow_runtime_pm = true,
+> -       .probe_slot     = intel_mrfl_mmc_probe_slot,
+> +       .probe_slot     = intel_mrfld_mmc_probe_slot,
+>  };
+>
+>  /* O2Micro extra registers */
+> @@ -1104,10 +1104,10 @@ static const struct pci_device_id pci_ids[] = {
+>
+>         {
+>                 .vendor         = PCI_VENDOR_ID_INTEL,
+> -               .device         = PCI_DEVICE_ID_INTEL_MRFL_MMC,
+> +               .device         = PCI_DEVICE_ID_INTEL_MRFLD_MMC,
+>                 .subvendor      = PCI_ANY_ID,
+>                 .subdevice      = PCI_ANY_ID,
+> -               .driver_data    = (kernel_ulong_t)&sdhci_intel_mrfl_mmc,
+> +               .driver_data    = (kernel_ulong_t)&sdhci_intel_mrfld_mmc,
+>         },
+>
+>         {
+> diff --git a/drivers/mmc/host/sdhci-pci.h b/drivers/mmc/host/sdhci-pci.h
+> index 968b81e..e1d44c0 100644
+> --- a/drivers/mmc/host/sdhci-pci.h
+> +++ b/drivers/mmc/host/sdhci-pci.h
+> @@ -14,7 +14,7 @@
+>  #define PCI_DEVICE_ID_INTEL_BSW_EMMC   0x2294
+>  #define PCI_DEVICE_ID_INTEL_BSW_SDIO   0x2295
+>  #define PCI_DEVICE_ID_INTEL_BSW_SD     0x2296
+> -#define PCI_DEVICE_ID_INTEL_MRFL_MMC   0x1190
+> +#define PCI_DEVICE_ID_INTEL_MRFLD_MMC  0x1190
+>  #define PCI_DEVICE_ID_INTEL_CLV_SDIO0  0x08f9
+>  #define PCI_DEVICE_ID_INTEL_CLV_SDIO1  0x08fa
+>  #define PCI_DEVICE_ID_INTEL_CLV_SDIO2  0x08fb
+> --
+> 2.8.1
+>
