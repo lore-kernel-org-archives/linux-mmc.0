@@ -1,52 +1,79 @@
-From: Jean-Francois Moine <moinejf-GANU6spQydw@public.gmane.org>
-Subject: Re: [PATCH 3/3] mmc: sunxi: Add support to the
- Allwinner A83T
-Date: Fri, 22 Jul 2016 21:00:06 +0200
-Message-ID: <20160722210006.2d08c8261f84c59f7e2ddd34@free.fr>
-References: <cover.1469082481.git.moinejf@free.fr>
-	<0ddc5f7d9a42515f901c95b8c0c1f5a5e4d575e9.1469082481.git.moinejf@free.fr>
-	<20160721085838.GH5993@lukather>
-	<20160721111851.133a3f16d6e9de1ee45b3654@free.fr>
-Reply-To: moinejf-GANU6spQydw@public.gmane.org
+From: "Winkler, Tomas" <tomas.winkler@intel.com>
+Subject: RE: [PATCH v5 0/8] Replay Protected Memory Block (RPMB) subsystem
+Date: Sat, 23 Jul 2016 07:44:48 +0000
+Message-ID: <5B8DA87D05A7694D9FA63FD143655C1B542A1CC6@hasmsx108.ger.corp.intel.com>
+References: <1468873673-21776-1-git-send-email-tomas.winkler@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: quoted-printable
-Return-path: <linux-sunxi+bncBCV6DL6LYMNBBOW2ZG6AKGQEIZTLK3A-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-Sender: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
-In-Reply-To: <20160721111851.133a3f16d6e9de1ee45b3654-GANU6spQydw@public.gmane.org>
-List-Post: <https://groups.google.com/group/linux-sunxi/post>, <mailto:linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Help: <https://groups.google.com/support/>, <mailto:linux-sunxi+help-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Archive: <https://groups.google.com/group/linux-sunxi
-List-Subscribe: <https://groups.google.com/group/linux-sunxi/subscribe>, <mailto:linux-sunxi+subscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Unsubscribe: <mailto:googlegroups-manage+1076902468213+unsubscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>,
- <https://groups.google.com/group/linux-sunxi/subscribe>
-To: Jean-Francois Moine <moinejf-GANU6spQydw@public.gmane.org>
-Cc: Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7BIT
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mga11.intel.com ([192.55.52.93]:56327 "EHLO mga11.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1750984AbcGWHox convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sat, 23 Jul 2016 03:44:53 -0400
+In-Reply-To: <1468873673-21776-1-git-send-email-tomas.winkler@intel.com>
+Content-Language: en-US
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Ulf Hansson <ulf.hansson@linaro.org>, "Hunter, Adrian" <adrian.hunter@intel.com>, James Bottomley <James.Bottomley@HansenPartnership.com>, "Martin K. Petersen" <martin.petersen@oracle.com>, Vinayak Holikatti <vinholikatti@gmail.com>, Andy Lutomirski <luto@kernel.org>, =?iso-8859-1?Q?Arve_Hj=F8nnev=E5g?= <arve@android.com>, Michael Ryleev <gmar@google.com>, Joao Pinto <Joao.Pinto@synopsys.com>, Christoph Hellwig <hch@lst.de>, Yaniv Gardi <ygardi@codeaurora.org>
+Cc: "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-scsi@vger.kernel.org" <linux-scsi@vger.kernel.org>, Avri Altman <avri.altman@gmail.com>, "Dattatraya Kulkarni, Anisha" <anisha.dattatraya.kulkarni@intel.com>, "jerome.forissier@linaro.org" <jerome.forissier@linaro.org>
 
-On Thu, 21 Jul 2016 11:18:51 +0200
-Jean-Francois Moine <moinejf-GANU6spQydw@public.gmane.org> wrote:
 
-> > On Wed, Jul 20, 2016 at 08:28:47PM +0200, Jean-Francois Moine wrote:
-> > > The rate of the PLL-PERIPH clock is usually set to 1.2GHz in the A83T=
-.
-> >=20
-> > Uh? The datasheet says to set it to 600MHz.
->=20
-> Right. But the driver of the SDK for the Banana Pi M3 (A83T) sets it
-> to 1.2GHz.
+> 
+> Few storage technologies such is EMMC, UFS, and NVMe support RPMB
+> hardware partition with common protocol and frame layout.
+> The RPMB partition cannot be accessed via standard block layer, but by a set
+> of specific commands: WRITE, READ, GET_WRITE_COUNTER, and
+> PROGRAM_KEY.
+> Such a partition provides authenticated and replay protected access, hence
+> suitable as a secure storage.
+> 
+> The RPMB layer aims to provide in-kernel API for Trusted Execution
+> Environment (TEE) devices that are capable to securely compute block frame
+> signature. In case a TEE device wish to store a replay protected data, it
+> creates an RPMB frame with requested data and computes HMAC of the
+> frame, then it requests the storage device via RPMB layer to store the data.
+> A TEE driver can claim the RPMB interface, for example, via
+> class_interface_register ().
+> The layer provides two APIs, for rpmb_req_cmd() for issuing one of RPMB
+> specific commands and rpmb_seq_cmd() for issuing of raw RPMB protocol
+> frames,  which is close to emmc multi ioctl interface.
+> 
+> A storage device registers its RPMB hardware (eMMC) partition or RPMB W-
+> LUN (UFS) with the RPMB layer providing an implementation for
+> rpmb_seq_cmd() handler. The interface enables sending sequence of RPMB
+> standard frames.
+> 
+> A parallel user space API is provided via /dev/rpmbX character device with
+> two IOCTL commands.
+> Simplified one, RPMB_IOC_REQ_CMD, were read result cycles is performed
+> by the framework on behalf the user and second, RPMB_IOC_SEQ_CMD
+> where the whole RPMB sequence, including RESULT_READ is supplied by the
+> caller.
+> The latter is intended for easier adjusting of the applications that use
+> MMC_IOC_MULTI_CMD ioctl, such as
+> https://android.googlesource.com/trusty/app/storage/
+> 
+> There is a also sample tool under tools/rpmb/ directory that exercises these
+> interfaces and a simulation device that implements the device part.
+> 
+> Tomas Winkler (8):
+>   rpmb: add Replay Protected Memory Block (RPMB) subsystem
+>   char: rpmb: add sysfs-class ABI documentation
+>   char: rpmb: add device attributes
+>   char: rpmb: provide a user space interface
+>   char: rpmb: add RPMB simulation device
+>   tools rpmb: add RPBM access tool
+>   mmc: block: register RPMB partition with the RPMB subsystem
+>   scsi: ufs: connect to RPMB subsystem
+>
 
-I tested again, and, with the pll-periph at 600MHz, both the SDcard and
-the eMMC are working fine.
-So, you may forget about this patch, sorry for the noise.
+I've got few off line request for git access of this code, so here si the repo https://github.com/tomasbw/linux-mei.git  branch rpmb.
+The branch is rebasing one  over linux master branch 
 
---=20
-Ken ar c'henta=C3=B1	|	      ** Breizh ha Linux atav! **
-Jef		|		http://moinejf.free.fr/
+Thanks and will appreciate any public  review. 
+Tomas
 
---=20
-You received this message because you are subscribed to the Google Groups "=
-linux-sunxi" group.
-To unsubscribe from this group and stop receiving emails from it, send an e=
-mail to linux-sunxi+unsubscribe-/JYPxA39Uh5TLH3MbocFF+G/Ez6ZCGd0@public.gmane.org
-For more options, visit https://groups.google.com/d/optout.
+
+ 
+
