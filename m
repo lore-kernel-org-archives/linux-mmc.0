@@ -1,76 +1,75 @@
-From: Maxime Ripard <maxime.ripard@free-electrons.com>
-Subject: Re: [PATCH 2/4] mmc: sunxi: Make sample clocks optional
-Date: Mon, 25 Jul 2016 10:18:30 +0200
-Message-ID: <20160725081830.GF7419@lukather>
-References: <1468665964-27142-1-git-send-email-hdegoede@redhat.com>
- <1468665964-27142-3-git-send-email-hdegoede@redhat.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH] mmc: moxart: fix wait_for_completion_interruptible_timeout
+ return variable type
+Date: Mon, 25 Jul 2016 10:29:46 +0200
+Message-ID: <CAPDyKFpTcG8vrqTYiJqGnD9MYAJ9SQy_0fZiiO0UF-E5qX0Crg@mail.gmail.com>
+References: <1469377937-14360-1-git-send-email-hofrat@osadl.org>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="nYySOmuH/HDX6pKp"
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from down.free-electrons.com ([37.187.137.238]:54681 "EHLO
-	mail.free-electrons.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1751952AbcGYISc (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 25 Jul 2016 04:18:32 -0400
-Content-Disposition: inline
-In-Reply-To: <1468665964-27142-3-git-send-email-hdegoede@redhat.com>
+Received: from mail-wm0-f43.google.com ([74.125.82.43]:38501 "EHLO
+	mail-wm0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751678AbcGYI3s (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 25 Jul 2016 04:29:48 -0400
+Received: by mail-wm0-f43.google.com with SMTP id o80so145195137wme.1
+        for <linux-mmc@vger.kernel.org>; Mon, 25 Jul 2016 01:29:47 -0700 (PDT)
+In-Reply-To: <1469377937-14360-1-git-send-email-hofrat@osadl.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Hans de Goede <hdegoede@redhat.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Chen-Yu Tsai <wens@csie.org>, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, devicetree <devicetree@vger.kernel.org>
+To: Nicholas Mc Guire <hofrat@osadl.org>
+Cc: Luis de Bethencourt <luis@debethencourt.com>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 
+On 24 July 2016 at 18:32, Nicholas Mc Guire <hofrat@osadl.org> wrote:
+> wait_for_completion_timeout_interruptible returns long not unsigned long
+> so dma_time, which is used exclusively here, is changed to long.
+>
+> Fixes: 1b66e94e6b99 ("mmc: moxart: Add MOXA ART SD/MMC driver")
+>
+> Signed-off-by: Nicholas Mc Guire <hofrat@osadl.org>
+> ---
+>
+> API non-compliance was located by coccinelle
+>
+> This is mostly cosmetic since dma_time is not actually used for anything
+> at present, however if it ever were, then a signal received would be
+> interpreted as a large remaining jiffies left, which would be wrong.
+>
+> Compile tested with: moxart_defconfig + ARCH_MULTI_V4=y,
+> CONFIG_ARCH_MOXART=y, CONFIG_MMC_MOXART=y
+>
+> Patch is against 4.7.0-rc7 (localversion-next -next-20160724)
+>
+>  drivers/mmc/host/moxart-mmc.c | 4 ++--
+>  1 file changed, 2 insertions(+), 2 deletions(-)
+>
+> diff --git a/drivers/mmc/host/moxart-mmc.c b/drivers/mmc/host/moxart-mmc.c
+> index 79905ce..2e5c25f 100644
+> --- a/drivers/mmc/host/moxart-mmc.c
+> +++ b/drivers/mmc/host/moxart-mmc.c
+> @@ -257,7 +257,7 @@ static void moxart_dma_complete(void *param)
+>  static void moxart_transfer_dma(struct mmc_data *data, struct moxart_host *host)
+>  {
+>         u32 len, dir_data, dir_slave;
+> -       unsigned long dma_time;
+> +       long dma_time;
+>         struct dma_async_tx_descriptor *desc = NULL;
+>         struct dma_chan *dma_chan;
+>
+> @@ -397,7 +397,7 @@ static void moxart_prepare_data(struct moxart_host *host)
+>  static void moxart_request(struct mmc_host *mmc, struct mmc_request *mrq)
+>  {
+>         struct moxart_host *host = mmc_priv(mmc);
+> -       unsigned long pio_time, flags;
+> +       long pio_time, flags;
 
---nYySOmuH/HDX6pKp
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+This changes "flags" too. I don't think that is what you really want, right!?
 
-Hi,
+>         u32 status;
+>
+>         spin_lock_irqsave(&host->lock, flags);
+> --
+> 2.1.4
+>
 
-On Sat, Jul 16, 2016 at 12:46:02PM +0200, Hans de Goede wrote:
-> It turns out that sun4i (A10) and sun5i (A13 & co) do not have sample
-> clocks, so make them optional.
->=20
-> Since these do not have sample clocks, they cannot (reliably) do
-> DDR rates, so only set MMC_CAP_1_8V_DDR when we do have sample clks.
->=20
-> Note this patch only changes the devm_clk_get error checking and sets
-> the clocks to NULL if they don't exists. All the clk_foo calls accept
-> a NULL clk and will return success when called with a NULL clk, so this
-> is all that is necessary.
-
-The clocks aren't really optional. They're not needed for the A10 /
-A13, and mandatory for the A20 and later.
-
-Having a new compatible for the A20 that would require that clock and
-not require it for the A10/A13 anymore seems more appropriate.
-
-Maxime
-
---=20
-Maxime Ripard, Free Electrons
-Embedded Linux and Kernel engineering
-http://free-electrons.com
-
---nYySOmuH/HDX6pKp
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1
-
-iQIcBAEBAgAGBQJXlctWAAoJEBx+YmzsjxAgK3IP/iVNhu+yO/IZ/CTA8+87h+jL
-QpPQFocqMinmHROWnDZNmxbpEsq2tHEbiis4y2FC2nymlJrixzuhr3IhNFUSGJ4C
-ZeTKbHva9gDC9YL4IPtZZ5XR9hrPfs0OlSjGvRMlOghmyfmSHcLifih2SMf34hEu
-UzxYeoI7BkzWXrqKqohR9k8cO//DOrVecxkqzviA/RJgRu0tWB4LBvBI0mZhKgbI
-UQ8n/2nLzMHoWukga1bl60vULrNayu4fdpturVKvouXbFDUIQ026PH5kQbWQQXOE
-GXZpY2LCHWhQw5/qPVV9kF7poVits/JoF/cq7Wmt4nZZdwx4YH36yKwbqwUFHi1y
-4QMHktoTLhVaRAqviAlO1sYOycP7eCD5nE3lC/mEpR9e8NlyI17lHaiPIB3O/FMt
-STPrPG4LyXPrJHcdnbQCD7/TNODZ/XzBf+apYnX4uEJv9SE/kwLzp3DY1sE7ZbXo
-C6WNkTUVq7kgRMO4qxgl4fgfEFdt3cVOAU7bIBnYxNl0IWDdorQ4Vl7orn+nP6nw
-5pxABCyivf0Qee57voFXhZpaPUnYaz9cOB02uRirO0ztH0T7SZ8N79gRthnWdSKV
-u9f7+poxsCHRBIXzAwylLn3RJ8vzMkNgLE0MDPJpQXe01oXcUCaEUpiLRmFJdPKU
-NeLKBZnEQ+r57d1Fwx8d
-=QCB+
------END PGP SIGNATURE-----
-
---nYySOmuH/HDX6pKp--
+Kind regards
+Uffe
