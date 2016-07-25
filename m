@@ -1,196 +1,76 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 2/3] phy: rockchip-emmc: Be tolerant to card clock of 0 in
- power on
-Date: Mon, 25 Jul 2016 09:37:51 +0200
-Message-ID: <CAPDyKFpX=KahVqmHyC-55e4Er9ViF02E5c9Y_M-SmAGj=M4eEw@mail.gmail.com>
-References: <1467049167-14628-1-git-send-email-dianders@chromium.org>
- <1467049167-14628-3-git-send-email-dianders@chromium.org> <5773D1FD.8020601@ti.com>
- <CAD=FV=U_-8HJRjWa8ktT=7tmM5RB4OVnDce-Bv2teDibYfbCeA@mail.gmail.com>
- <CAPDyKFqPHB2O=-hDxVda-h04WS9xYpJ3MyzH8bk5Fc4ogTfB5A@mail.gmail.com> <5795AA41.7070604@ti.com>
+From: Maxime Ripard <maxime.ripard@free-electrons.com>
+Subject: Re: [PATCH 2/4] mmc: sunxi: Make sample clocks optional
+Date: Mon, 25 Jul 2016 10:18:30 +0200
+Message-ID: <20160725081830.GF7419@lukather>
+References: <1468665964-27142-1-git-send-email-hdegoede@redhat.com>
+ <1468665964-27142-3-git-send-email-hdegoede@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="nYySOmuH/HDX6pKp"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wm0-f45.google.com ([74.125.82.45]:34839 "EHLO
-	mail-wm0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752631AbcGYHhy (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 25 Jul 2016 03:37:54 -0400
-Received: by mail-wm0-f45.google.com with SMTP id f65so123990910wmi.0
-        for <linux-mmc@vger.kernel.org>; Mon, 25 Jul 2016 00:37:53 -0700 (PDT)
-In-Reply-To: <5795AA41.7070604@ti.com>
+Received: from down.free-electrons.com ([37.187.137.238]:54681 "EHLO
+	mail.free-electrons.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1751952AbcGYISc (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 25 Jul 2016 04:18:32 -0400
+Content-Disposition: inline
+In-Reply-To: <1468665964-27142-3-git-send-email-hdegoede@redhat.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Kishon Vijay Abraham I <kishon@ti.com>
-Cc: Doug Anderson <dianders@chromium.org>, Heiko Stuebner <heiko@sntech.de>, Shawn Lin <shawn.lin@rock-chips.com>, "open list:ARM/Rockchip SoC..." <linux-rockchip@lists.infradead.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Brian Norris <briannorris@chromium.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
+To: Hans de Goede <hdegoede@redhat.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Chen-Yu Tsai <wens@csie.org>, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, devicetree <devicetree@vger.kernel.org>
 
-On 25 July 2016 at 07:57, Kishon Vijay Abraham I <kishon@ti.com> wrote:
-> Ulf,
->
-> On Saturday 23 July 2016 03:09 PM, Ulf Hansson wrote:
->> On 29 June 2016 at 17:18, Doug Anderson <dianders@chromium.org> wrote:
->>> Kishon,
->>>
->>> On Wed, Jun 29, 2016 at 6:49 AM, Kishon Vijay Abraham I <kishon@ti.com> wrote:
->>>> Hi,
->>>>
->>>> On Monday 27 June 2016 11:09 PM, Douglas Anderson wrote:
->>>>> It's possible that there are some reasons to turn the PHY on while the
->>>>> clock is 0.  In this case we just won't wait for the DLL to lock.
->>>>>
->>>>> This is a bit of a stopgap until we figure out exactly when we're
->>>>> supposed to wait for the DLL to lock and when we're supposed to power
->>>>> cycle the PHY.
->>>>>
->>>>> Note: this patch should help with suspend/resume where the system will
->>>>> try to turn the PHY back on when the clock is 0.
->>>>>
->>>>> Signed-off-by: Douglas Anderson <dianders@chromium.org>
->>>>> ---
->>>>>  drivers/phy/phy-rockchip-emmc.c | 59 ++++++++++++++++++++++++++---------------
->>>>>  1 file changed, 37 insertions(+), 22 deletions(-)
->>>>>
->>>>> diff --git a/drivers/phy/phy-rockchip-emmc.c b/drivers/phy/phy-rockchip-emmc.c
->>>>> index 9dce958233a0..a2aa6aca7dec 100644
->>>>> --- a/drivers/phy/phy-rockchip-emmc.c
->>>>> +++ b/drivers/phy/phy-rockchip-emmc.c
->>>>> @@ -88,15 +88,36 @@ static int rockchip_emmc_phy_power(struct phy *phy, bool on_off)
->>>>>       unsigned int caldone;
->>>>>       unsigned int dllrdy;
->>>>>       unsigned int freqsel = PHYCTRL_FREQSEL_200M;
->>>>> +     unsigned long rate;
->>>>>       unsigned long timeout;
->>>>>
->>>>> -     if (rk_phy->emmcclk != NULL) {
->>>>> -             unsigned long rate = clk_get_rate(rk_phy->emmcclk);
->>>>> +     /*
->>>>> +      * Keep phyctrl_pdb and phyctrl_endll low to allow
->>>>> +      * initialization of CALIO state M/C DFFs
->>>>> +      */
->>>>> +     regmap_write(rk_phy->reg_base,
->>>>> +                  rk_phy->reg_offset + GRF_EMMCPHY_CON6,
->>>>> +                  HIWORD_UPDATE(PHYCTRL_PDB_PWR_OFF,
->>>>> +                                PHYCTRL_PDB_MASK,
->>>>> +                                PHYCTRL_PDB_SHIFT));
->>>>> +     regmap_write(rk_phy->reg_base,
->>>>> +                  rk_phy->reg_offset + GRF_EMMCPHY_CON6,
->>>>> +                  HIWORD_UPDATE(PHYCTRL_ENDLL_DISABLE,
->>>>> +                                PHYCTRL_ENDLL_MASK,
->>>>> +                                PHYCTRL_ENDLL_SHIFT));
->>>>> +
->>>>> +     /* Already finish power_off above */
->>>>> +     if (on_off == PHYCTRL_PDB_PWR_OFF)
->>>>> +             return 0;
->>>>> +
->>>>> +     rate = clk_get_rate(rk_phy->emmcclk);
->>>>> +
->>>>> +     if (rate != 0) {
->>>>>               unsigned long ideal_rate;
->>>>>               unsigned long diff;
->>>>>
->>>>>               switch (rate) {
->>>>> -             case 0 ... 74999999:
->>>>> +             case 1 ... 74999999:
->>>>>                       ideal_rate = 50000000;
->>>>>                       freqsel = PHYCTRL_FREQSEL_50M;
->>>>>                       break;
->>>>> @@ -127,25 +148,6 @@ static int rockchip_emmc_phy_power(struct phy *phy, bool on_off)
->>>>>       }
->>>>>
->>>>>       /*
->>>>> -      * Keep phyctrl_pdb and phyctrl_endll low to allow
->>>>> -      * initialization of CALIO state M/C DFFs
->>>>> -      */
->>>>> -     regmap_write(rk_phy->reg_base,
->>>>> -                  rk_phy->reg_offset + GRF_EMMCPHY_CON6,
->>>>> -                  HIWORD_UPDATE(PHYCTRL_PDB_PWR_OFF,
->>>>> -                                PHYCTRL_PDB_MASK,
->>>>> -                                PHYCTRL_PDB_SHIFT));
->>>>> -     regmap_write(rk_phy->reg_base,
->>>>> -                  rk_phy->reg_offset + GRF_EMMCPHY_CON6,
->>>>> -                  HIWORD_UPDATE(PHYCTRL_ENDLL_DISABLE,
->>>>> -                                PHYCTRL_ENDLL_MASK,
->>>>> -                                PHYCTRL_ENDLL_SHIFT));
->>>>> -
->>>>> -     /* Already finish power_off above */
->>>>> -     if (on_off == PHYCTRL_PDB_PWR_OFF)
->>>>> -             return 0;
->>>>> -
->>>>> -     /*
->>>>>        * According to the user manual, calpad calibration
->>>>>        * cycle takes more than 2us without the minimal recommended
->>>>>        * value, so we may need a little margin here
->>>>> @@ -183,6 +185,19 @@ static int rockchip_emmc_phy_power(struct phy *phy, bool on_off)
->>>>>                    HIWORD_UPDATE(PHYCTRL_ENDLL_ENABLE,
->>>>>                                  PHYCTRL_ENDLL_MASK,
->>>>>                                  PHYCTRL_ENDLL_SHIFT));
->>>>> +
->>>>> +     /*
->>>>> +      * We turned on the DLL even though the rate was 0 because we the
->>>>> +      * clock might be turned on later.  ...but we can't wait for the DLL
->>>>> +      * to lock when the rate is 0 because it will never lock with no
->>>>> +      * input clock.
->>>>> +      *
->>>>> +      * Technically we should be checking the lock later when the clock
->>>>> +      * is turned on, but for now we won't.
->>>>> +      */
->>>>> +     if (rate == 0)
->>>>> +             return 0;
->>>>
->>>> Why not return initially from rockchip_emmc_phy_power if the clock rate is '0'.
->>>> Are there other functions to lock the DLL apart from phy_power?
->>>
->>> Yeah, it's a big ugly right now.  This ugliness is really needed
->>> because of <https://patchwork.kernel.org/patch/9201035/> because:
->>>
->>> 1. We power on the PHY at probe time and the card clock is in an
->>> unknown state at that time.  It will be reported as 0 right now, but
->>> it may or may not actually be 0.
->>>
->>> 2. We don't have an easy way to call back into the PHY when we
->>> actually set the clock to a low rate (like 400kHz) for ID mode.
->>> Before this series I tried to power the PHY off and on for every clock
->>> change, but apparently that was causing problems.
->>>
->>>
->>> As talked about in <https://patchwork.kernel.org/patch/9201035/>, I
->>> think the right answer is to figure out how to get the common clock
->>> framework notifications to happen for the card clock and then remove
->>> the wholesale PHY power off / power on for every clock change.  The
->>> PHY itself can register for the clock change notifications and figure
->>> out how much or how little to do on every clock change.
->>>
->>> Unfortunately, as also discussed in the other patch, it's not trivial
->>> to do this because I think it requires surgery on the main SDHCI
->>> driver to change the way it deals with the card clock.  I'm not sure I
->>> have time for this delicate surgery right now and I'm hoping that
->>> perhaps Shawn will be able to help figure something out (maybe?) or I
->>> can try coming back to it later.
->>>
->>>
->>> In any case, I think a wholesale revert of my previous 150 MHz series
->>> probably puts us in a worse state than we started with, so I was just
->>> proposing reverting the one patch.  Once we do that, this PHY patch
->>> helps keep us in a sane state (keeps suspend/resume working).
->>>
->>>
->>> -Doug
->>
->> Doug, Kishon,
->>
->> Did you agree on how to move forward with this change?
->
-> I think still few things are not very clear especially on what should be
-> handled in PHY when the clock rate changes or if any new PHY APIs are required
-> to handle any clock changes etc..
-> But since this actually gets MMC working in rockchip, I'd be okay to merge this
-> now. Though I'd expect this to be refined in the future release cycles.
 
-Okay.
+--nYySOmuH/HDX6pKp
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
->
-> FWIW:
-> Reviewed-by: Kishon Vijay Abraham I <kishon@ti.com>
+Hi,
 
-I assume it's okay that I queue this via my mmc tree then. If not, please tell!
+On Sat, Jul 16, 2016 at 12:46:02PM +0200, Hans de Goede wrote:
+> It turns out that sun4i (A10) and sun5i (A13 & co) do not have sample
+> clocks, so make them optional.
+>=20
+> Since these do not have sample clocks, they cannot (reliably) do
+> DDR rates, so only set MMC_CAP_1_8V_DDR when we do have sample clks.
+>=20
+> Note this patch only changes the devm_clk_get error checking and sets
+> the clocks to NULL if they don't exists. All the clk_foo calls accept
+> a NULL clk and will return success when called with a NULL clk, so this
+> is all that is necessary.
 
-Kind regards
-Uffe
+The clocks aren't really optional. They're not needed for the A10 /
+A13, and mandatory for the A20 and later.
+
+Having a new compatible for the A20 that would require that clock and
+not require it for the A10/A13 anymore seems more appropriate.
+
+Maxime
+
+--=20
+Maxime Ripard, Free Electrons
+Embedded Linux and Kernel engineering
+http://free-electrons.com
+
+--nYySOmuH/HDX6pKp
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1
+
+iQIcBAEBAgAGBQJXlctWAAoJEBx+YmzsjxAgK3IP/iVNhu+yO/IZ/CTA8+87h+jL
+QpPQFocqMinmHROWnDZNmxbpEsq2tHEbiis4y2FC2nymlJrixzuhr3IhNFUSGJ4C
+ZeTKbHva9gDC9YL4IPtZZ5XR9hrPfs0OlSjGvRMlOghmyfmSHcLifih2SMf34hEu
+UzxYeoI7BkzWXrqKqohR9k8cO//DOrVecxkqzviA/RJgRu0tWB4LBvBI0mZhKgbI
+UQ8n/2nLzMHoWukga1bl60vULrNayu4fdpturVKvouXbFDUIQ026PH5kQbWQQXOE
+GXZpY2LCHWhQw5/qPVV9kF7poVits/JoF/cq7Wmt4nZZdwx4YH36yKwbqwUFHi1y
+4QMHktoTLhVaRAqviAlO1sYOycP7eCD5nE3lC/mEpR9e8NlyI17lHaiPIB3O/FMt
+STPrPG4LyXPrJHcdnbQCD7/TNODZ/XzBf+apYnX4uEJv9SE/kwLzp3DY1sE7ZbXo
+C6WNkTUVq7kgRMO4qxgl4fgfEFdt3cVOAU7bIBnYxNl0IWDdorQ4Vl7orn+nP6nw
+5pxABCyivf0Qee57voFXhZpaPUnYaz9cOB02uRirO0ztH0T7SZ8N79gRthnWdSKV
+u9f7+poxsCHRBIXzAwylLn3RJ8vzMkNgLE0MDPJpQXe01oXcUCaEUpiLRmFJdPKU
+NeLKBZnEQ+r57d1Fwx8d
+=QCB+
+-----END PGP SIGNATURE-----
+
+--nYySOmuH/HDX6pKp--
