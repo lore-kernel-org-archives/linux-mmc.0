@@ -1,148 +1,52 @@
-From: Baolin Wang <baolin.wang@linaro.org>
-Subject: [PATCH v3] mmc: Change the max discard sectors and erase response if mmc host supports busy signalling
-Date: Mon, 25 Jul 2016 16:48:39 +0800
-Message-ID: <01d645020004fe135bb5374ecb9f5f6ac0884b6b.1469436431.git.baolin.wang@linaro.org>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pa0-f54.google.com ([209.85.220.54]:33600 "EHLO
-	mail-pa0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751953AbcGYIs6 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 25 Jul 2016 04:48:58 -0400
-Received: by mail-pa0-f54.google.com with SMTP id ks6so59464334pab.0
-        for <linux-mmc@vger.kernel.org>; Mon, 25 Jul 2016 01:48:58 -0700 (PDT)
-Sender: linux-mmc-owner@vger.kernel.org
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH 0/3] mmc: Fixes for 150 MHz Rockchip eMMC series
+Date: Mon, 25 Jul 2016 10:49:02 +0200
+Message-ID: <CAPDyKFpT=5LHO49QrO=MuQUgrDULx5zug=L46SihEReNo5h7iA@mail.gmail.com>
+References: <1467049167-14628-1-git-send-email-dianders@chromium.org>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1467049167-14628-1-git-send-email-dianders@chromium.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Douglas Anderson <dianders@chromium.org>
+Cc: Heiko Stuebner <heiko@sntech.de>, Kishon <kishon@ti.com>, Shawn Lin <shawn.lin@rock-chips.com>, "open list:ARM/Rockchip SoC..." <linux-rockchip@lists.infradead.org>, linux-mmc <linux-mmc@vger.kernel.org>, Brian Norris <briannorris@chromium.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Michal Simek <michal.simek@xilinx.com>, Adrian Hunter <adrian.hunter@intel.com>, =?UTF-8?Q?S=C3=B6ren_Brinkmann?= <soren.brinkmann@xilinx.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
 List-Id: linux-mmc@vger.kernel.org
-To: ulf.hansson@linaro.org
-Cc: adrian.hunter@intel.com, rmk+kernel@arm.linux.org.uk, shawn.lin@rock-chips.com, dianders@chromium.org, heiko@sntech.de, david@protonic.nl, hdegoede@redhat.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, broonie@kernel.org, linus.walleij@linaro.org, baolin.wang@linaro.org
 
-When mmc host HW supports busy signalling (using R1B as response), We
-shouldn't use 'host->max_busy_timeout' as the limitation when deciding
-the max discard sectors that we tell the generic BLOCK layer about.
-Instead, we should pick one preferred erase size as the max discard
-sectors.
+On 27 June 2016 at 19:39, Douglas Anderson <dianders@chromium.org> wrote:
+> Despite positive testing across a number of machines and a number of
+> people, last week I got a report that my 150 MHz series was breaking
+> things on a handful of boards.
+>
+> It turns out that reverting the patch to always power cycle across clock
+> changes fixes things and reverting that patch also doesn't actually
+> cause any known problems (and 150 MHz should even continue to work).
+>
+> Although we really need to get to the bottom of things, it seems
+> expedient to revert while we're waiting for a better solution, hence
+> this series.  Also in this series is further increase in the time we'll
+> wait for the DLL to stabilize (found during reboot stress testing) and a
+> fix to the way we handle the card clock being reported as 0 (needed for
+> suspend/resume because of the revert we just did).
+>
+> It's expected that this series could go through Ulf's mmc tree (like the
+> previous) with Kishon's Ack as appropriate.
+>
+>
+> Douglas Anderson (3):
+>   mmc: sdhci-of-arasan: Revert: Always power the PHY off/on when clock
+>     changes
+>   phy: rockchip-emmc: Be tolerant to card clock of 0 in power on
+>   phy: rockchip-emmc: Wait even longer for the DLL to lock
+>
+>  drivers/mmc/host/sdhci-of-arasan.c | 21 +++++++----
+>  drivers/phy/phy-rockchip-emmc.c    | 71 ++++++++++++++++++++++++++------------
+>  2 files changed, 62 insertions(+), 30 deletions(-)
+>
+> --
+> 2.8.0.rc3.226.g39d4020
+>
 
-If the host controller supports busy signalling and the timeout for
-the erase operation does not exceed the max_busy_timeout, we should
-use R1B response. Or we need to prevent the host from doing hw busy
-detection, which is done by converting to a R1 response instead.
+Thanks, applied for next!
 
-Signed-off-by: Baolin Wang <baolin.wang@linaro.org>
----
-Changes since v2:
-  - Remove the 'MMC_CAP_WAIT_WHILE_BUSY' flag checking when deciding
-  if we can use R1B response.
-  - Avoid polling CMD13 when using R1B response.
-  - Use earlier calculated erase timeout as the polling time.
-
-Changes since v1:
-  - Remove the 'MMC_CAP_WAIT_WHILE_BUSY' flag checking when deciding
-    the max discard sectors.
----
- drivers/mmc/core/core.c |   60 +++++++++++++++++++++++++++++++++++++++--------
- 1 file changed, 50 insertions(+), 10 deletions(-)
-
-diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index 8b4dfd4..b4c08d1a 100644
---- a/drivers/mmc/core/core.c
-+++ b/drivers/mmc/core/core.c
-@@ -2060,7 +2060,8 @@ static int mmc_do_erase(struct mmc_card *card, unsigned int from,
- 			unsigned int to, unsigned int arg)
- {
- 	struct mmc_command cmd = {0};
--	unsigned int qty = 0;
-+	unsigned int qty = 0, busy_timeout = 0;
-+	bool use_r1b_resp = false;
- 	unsigned long timeout;
- 	int err;
- 
-@@ -2128,8 +2129,22 @@ static int mmc_do_erase(struct mmc_card *card, unsigned int from,
- 	memset(&cmd, 0, sizeof(struct mmc_command));
- 	cmd.opcode = MMC_ERASE;
- 	cmd.arg = arg;
--	cmd.flags = MMC_RSP_SPI_R1B | MMC_RSP_R1B | MMC_CMD_AC;
--	cmd.busy_timeout = mmc_erase_timeout(card, arg, qty);
-+	busy_timeout = mmc_erase_timeout(card, arg, qty);
-+	/*
-+	 * If the host controller supports busy signalling and the timeout for
-+	 * the erase operation does not exceed the max_busy_timeout, we should
-+	 * use R1B response. Or we need to prevent the host from doing hw busy
-+	 * detection, which is done by converting to a R1 response instead.
-+	 */
-+	if (card->host->max_busy_timeout &&
-+	    busy_timeout > card->host->max_busy_timeout) {
-+		cmd.flags = MMC_RSP_SPI_R1 | MMC_RSP_R1 | MMC_CMD_AC;
-+	} else {
-+		cmd.flags = MMC_RSP_SPI_R1B | MMC_RSP_R1B | MMC_CMD_AC;
-+		cmd.busy_timeout = busy_timeout;
-+		use_r1b_resp = true;
-+	}
-+
- 	err = mmc_wait_for_cmd(card->host, &cmd, 0);
- 	if (err) {
- 		pr_err("mmc_erase: erase error %d, status %#x\n",
-@@ -2141,7 +2156,14 @@ static int mmc_do_erase(struct mmc_card *card, unsigned int from,
- 	if (mmc_host_is_spi(card->host))
- 		goto out;
- 
--	timeout = jiffies + msecs_to_jiffies(MMC_CORE_TIMEOUT_MS);
-+	/*
-+	 * In case of when R1B + MMC_CAP_WAIT_WHILE_BUSY is used, the polling
-+	 * shall be avoided.
-+	 */
-+	if ((card->host->caps & MMC_CAP_WAIT_WHILE_BUSY) && use_r1b_resp)
-+		goto out;
-+
-+	timeout = jiffies + msecs_to_jiffies(busy_timeout);
- 	do {
- 		memset(&cmd, 0, sizeof(struct mmc_command));
- 		cmd.opcode = MMC_SEND_STATUS;
-@@ -2321,23 +2343,41 @@ static unsigned int mmc_do_calc_max_discard(struct mmc_card *card,
- 					    unsigned int arg)
- {
- 	struct mmc_host *host = card->host;
--	unsigned int max_discard, x, y, qty = 0, max_qty, timeout;
-+	unsigned int max_discard, x, y, qty = 0, max_qty, min_qty, timeout;
- 	unsigned int last_timeout = 0;
- 
--	if (card->erase_shift)
-+	if (card->erase_shift) {
- 		max_qty = UINT_MAX >> card->erase_shift;
--	else if (mmc_card_sd(card))
-+		min_qty = card->pref_erase >> card->erase_shift;
-+	} else if (mmc_card_sd(card)) {
- 		max_qty = UINT_MAX;
--	else
-+		min_qty = card->pref_erase;
-+	} else {
- 		max_qty = UINT_MAX / card->erase_size;
-+		min_qty = card->pref_erase / card->erase_size;
-+	}
- 
--	/* Find the largest qty with an OK timeout */
-+	/*
-+	 * We should not only use 'host->max_busy_timeout' as the limitation
-+	 * when deciding the max discard sectors. We should set a balance value
-+	 * to improve the erase speed, and it can not get too long timeout at
-+	 * the same time.
-+	 *
-+	 * Here we set 'card->pref_erase' as the minimal discard sectors no
-+	 * matter what size of 'host->max_busy_timeout', but if the
-+	 * 'host->max_busy_timeout' is large enough for more discard sectors,
-+	 * then we can continue to increase the max discard sectors until we
-+	 * get a balance value.
-+	 */
- 	do {
- 		y = 0;
- 		for (x = 1; x && x <= max_qty && max_qty - x >= qty; x <<= 1) {
- 			timeout = mmc_erase_timeout(card, arg, qty + x);
--			if (timeout > host->max_busy_timeout)
-+
-+			if (qty + x > min_qty &&
-+			    timeout > host->max_busy_timeout)
- 				break;
-+
- 			if (timeout < last_timeout)
- 				break;
- 			last_timeout = timeout;
--- 
-1.7.9.5
-
+Kind regards
+Uffe
