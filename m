@@ -1,73 +1,148 @@
-From: Yangbo Lu <yangbo.lu@nxp.com>
-Subject: RE: [PATCH v11 4/5] powerpc/fsl: move mpc85xx.h to include/linux/fsl
-Date: Mon, 25 Jul 2016 06:12:18 +0000
-Message-ID: <HE1PR04MB088913D39528958C6905D43DF80D0@HE1PR04MB0889.eurprd04.prod.outlook.com>
-References: <1468723822-30457-1-git-send-email-oss@buserror.net>
-	 <1468723822-30457-5-git-send-email-oss@buserror.net>
-	 <4016699.uYaV8nWfqC@wuerfel> <1469039508.25630.17.camel@buserror.net>
-	 <146909676646.16700.8383344640490662952@concordia>
- <1469119526.25630.42.camel@buserror.net>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+From: Baolin Wang <baolin.wang@linaro.org>
+Subject: [PATCH v3] mmc: Change the max discard sectors and erase response if mmc host supports busy signalling
+Date: Mon, 25 Jul 2016 16:48:39 +0800
+Message-ID: <01d645020004fe135bb5374ecb9f5f6ac0884b6b.1469436431.git.baolin.wang@linaro.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-db5eur01on0089.outbound.protection.outlook.com ([104.47.2.89]:45616
-	"EHLO EUR01-DB5-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1752444AbcGYIow (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 25 Jul 2016 04:44:52 -0400
-In-Reply-To: <1469119526.25630.42.camel@buserror.net>
-Content-Language: en-US
+Received: from mail-pa0-f54.google.com ([209.85.220.54]:33600 "EHLO
+	mail-pa0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751953AbcGYIs6 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 25 Jul 2016 04:48:58 -0400
+Received: by mail-pa0-f54.google.com with SMTP id ks6so59464334pab.0
+        for <linux-mmc@vger.kernel.org>; Mon, 25 Jul 2016 01:48:58 -0700 (PDT)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Scott Wood <oss@buserror.net>, Michael Ellerman <mpe@ellerman.id.au>, Arnd Bergmann <arnd@arndb.de>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linuxppc-dev@lists.ozlabs.org" <linuxppc-dev@lists.ozlabs.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+To: ulf.hansson@linaro.org
+Cc: adrian.hunter@intel.com, rmk+kernel@arm.linux.org.uk, shawn.lin@rock-chips.com, dianders@chromium.org, heiko@sntech.de, david@protonic.nl, hdegoede@redhat.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, broonie@kernel.org, linus.walleij@linaro.org, baolin.wang@linaro.org
 
-SGkgU2NvdHQsDQoNCg0KPiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBTY290
-dCBXb29kIFttYWlsdG86b3NzQGJ1c2Vycm9yLm5ldF0NCj4gU2VudDogRnJpZGF5LCBKdWx5IDIy
-LCAyMDE2IDEyOjQ1IEFNDQo+IFRvOiBNaWNoYWVsIEVsbGVybWFuOyBBcm5kIEJlcmdtYW5uDQo+
-IENjOiBsaW51eC1tbWNAdmdlci5rZXJuZWwub3JnOyBkZXZpY2V0cmVlQHZnZXIua2VybmVsLm9y
-ZzsgbGludXhwcGMtDQo+IGRldkBsaXN0cy5vemxhYnMub3JnOyBsaW51eC1rZXJuZWxAdmdlci5r
-ZXJuZWwub3JnOyBZYW5nYm8gTHUNCj4gU3ViamVjdDogUmU6IFtQQVRDSCB2MTEgNC81XSBwb3dl
-cnBjL2ZzbDogbW92ZSBtcGM4NXh4LmggdG8NCj4gaW5jbHVkZS9saW51eC9mc2wNCj4gDQo+IE9u
-IFRodSwgMjAxNi0wNy0yMSBhdCAyMDoyNiArMTAwMCwgTWljaGFlbCBFbGxlcm1hbiB3cm90ZToN
-Cj4gPiBRdW90aW5nIFNjb3R0IFdvb2QgKDIwMTYtMDctMjEgMDQ6MzE6NDgpDQo+ID4gPg0KPiA+
-ID4gT24gV2VkLCAyMDE2LTA3LTIwIGF0IDEzOjI0ICswMjAwLCBBcm5kIEJlcmdtYW5uIHdyb3Rl
-Og0KPiA+ID4gPg0KPiA+ID4gPiBPbiBTYXR1cmRheSwgSnVseSAxNiwgMjAxNiA5OjUwOjIxIFBN
-IENFU1QgU2NvdHQgV29vZCB3cm90ZToNCj4gPiA+ID4gPg0KPiA+ID4gPiA+DQo+ID4gPiA+ID4g
-RnJvbTogeWFuZ2JvIGx1IDx5YW5nYm8ubHVAbnhwLmNvbT4NCj4gPiA+ID4gPg0KPiA+ID4gPiA+
-IE1vdmUgbXBjODV4eC5oIHRvIGluY2x1ZGUvbGludXgvZnNsIGFuZCByZW5hbWUgaXQgdG8gc3Zy
-LmggYXMgYQ0KPiA+ID4gPiA+IGNvbW1vbiBoZWFkZXIgZmlsZS7CoMKgVGhpcyBTVlIgbnVtYmVy
-c3BhY2UgaXMgdXNlZCBvbiBzb21lIEFSTQ0KPiA+ID4gPiA+IGNoaXBzIGFzIHdlbGwgYXMgUFBD
-LCBhbmQgZXZlbiB0byBjaGVjayBmb3IgYSBQUEMgU1ZSIG11bHRpLWFyY2gNCj4gPiA+ID4gPiBk
-cml2ZXJzIHdvdWxkIG90aGVyd2lzZSBuZWVkIHRvIGlmZGVmIHRoZSBoZWFkZXIgaW5jbHVzaW9u
-IGFuZA0KPiA+ID4gPiA+IGFsbCByZWZlcmVuY2VzIHRvIHRoZSBTVlIgc3ltYm9scy4NCj4gPiA+
-ID4gPg0KPiA+ID4gPiA+IFNpZ25lZC1vZmYtYnk6IFlhbmdibyBMdSA8eWFuZ2JvLmx1QG54cC5j
-b20+DQo+ID4gPiA+ID4gQWNrZWQtYnk6IFdvbGZyYW0gU2FuZyA8d3NhQHRoZS1kcmVhbXMuZGU+
-DQo+ID4gPiA+ID4gQWNrZWQtYnk6IFN0ZXBoZW4gQm95ZCA8c2JveWRAY29kZWF1cm9yYS5vcmc+
-DQo+ID4gPiA+ID4gQWNrZWQtYnk6IEpvZXJnIFJvZWRlbCA8anJvZWRlbEBzdXNlLmRlPg0KPiA+
-ID4gPiA+IFtzY290dHdvb2Q6IHVwZGF0ZSBkZXNjcmlwdGlvbl0NCj4gPiA+ID4gPiBTaWduZWQt
-b2ZmLWJ5OiBTY290dCBXb29kIDxvc3NAYnVzZXJyb3IubmV0Pg0KPiA+ID4gPiA+DQo+ID4gPiA+
-IEFzIGRpc2N1c3NlZCBiZWZvcmUsIHBsZWFzZSBkb24ndCBpbnRyb2R1Y2UgeWV0IGFub3RoZXIg
-dmVuZG9yDQo+ID4gPiA+IHNwZWNpZmljIHdheSB0byBtYXRjaCBhIFNvQyBJRCBmcm9tIGEgZGV2
-aWNlIGRyaXZlci4NCj4gPiA+ID4NCj4gPiA+ID4gSSd2ZSBwb3N0ZWQgYSBwYXRjaCBmb3IgYW4g
-ZXh0ZW5zaW9uIHRvIHRoZSBzb2NfZGV2aWNlDQo+ID4gPiA+IGluZnJhc3RydWN0dXJlIHRvIGFs
-bG93IGNvbXBhcmluZyB0aGUgcnVubmluZyBTb0MgdG8gYSB0YWJsZSBvZg0KPiA+ID4gPiBkZXZp
-Y2VzLCB1c2UgdGhhdCBpbnN0ZWFkLg0KPiA+ID4gQXMgSSBhc2tlZCBiZWZvcmUsIGluIHdoaWNo
-IHJlbGV2YW50IG1haW50YWluZXJzaGlwIGNhcGFjaXR5IGFyZSB5b3UNCj4gPiA+IE5BQ0tpbmcg
-dGhpcz8NCj4gPiBJJ2xsIG5hY2sgdGhlIHBvd2VycGMgcGFydCB1bnRpbCB5b3UgZ3V5cyBjYW4g
-YWdyZWUuDQo+IA0KPiBPSywgSSd2ZSBwdWxsZWQgdGhlc2UgcGF0Y2hlcyBvdXQuDQo+IA0KPiBG
-b3IgdGhlIE1NQyBpc3N1ZSBJIHN1Z2dlc3QgdXNpbmcgaWZkZWYgQ09ORklHX1BQQyBhbmQgbWZz
-cHIoU1BSTl9TVlIpDQo+IGxpa2UgdGhlIGNsb2NrIGRyaXZlciBkb2VzWzFdIGFuZCB3ZSBjYW4g
-cmV2aXNpdCB0aGUgaXNzdWUgaWYvd2hlbiB3ZQ0KPiBuZWVkIHRvIGRvIHNvbWV0aGluZyBzaW1p
-bGFyIG9uIGFuIEFSTSBjaGlwLg0KDQpbTHUgWWFuZ2JvLUI0NzA5M10gSSByZW1lbWJlcmVkIHRo
-YXQgVWZmZSBoYWQgb3Bwb3NlZCB1cyB0byBpbnRyb2R1Y2Ugbm9uLWdlbmVyaWMgaGVhZGVyIGZp
-bGVzKGxpa2UgJyNpbmNsdWRlIDxhc20vbXBjODV4eC5oPicpDQppbiBtbWMgZHJpdmVyIGluaXRp
-YWxseS4gU28gSSB0aGluayBpdCB3aWxsIG5vdCBiZSBhY2NlcHRlZCB0byB1c2UgaWZkZWYgQ09O
-RklHX1BQQyBhbmQgbWZzcHIoU1BSTl9TVlIpLi4uDQpBbmQgdGhpcyBtZXRob2Qgc3RpbGwgY291
-bGRu4oCZdCBnZXQgU1ZSIG9mIEFSTSBjaGlwIG5vdy4NCg0KQW55IG90aGVyIHN1Z2dlc3Rpb24g
-aGVyZT8NClRoYW5rIHlvdSB2ZXJ5IG11Y2guDQoNCi0gWWFuZ2JvIEx1DQoNCj4gDQo+IC1TY290
-dA0KPiANCj4gWzFdIE9uZSBvZiB0aGUgaXNzdWVzIHdpdGggQXJuZCdzIGFwcHJvYWNoIGlzIHRo
-YXQgaXQgd291bGRuJ3QgaGF2ZQ0KPiB3b3JrZWQgZm9yIGVhcmx5IHRoaW5ncyBsaWtlIHRoZSBj
-bG9jayBkcml2ZXIsIGFuZCBoZSBkaWRuJ3Qgc2VlbSB0byBtaW5kDQo+IHVzaW5nIGlmZGVmIGFu
-ZA0KPiBtZnNwcigpIHRoZXJlLg0KDQo=
+When mmc host HW supports busy signalling (using R1B as response), We
+shouldn't use 'host->max_busy_timeout' as the limitation when deciding
+the max discard sectors that we tell the generic BLOCK layer about.
+Instead, we should pick one preferred erase size as the max discard
+sectors.
+
+If the host controller supports busy signalling and the timeout for
+the erase operation does not exceed the max_busy_timeout, we should
+use R1B response. Or we need to prevent the host from doing hw busy
+detection, which is done by converting to a R1 response instead.
+
+Signed-off-by: Baolin Wang <baolin.wang@linaro.org>
+---
+Changes since v2:
+  - Remove the 'MMC_CAP_WAIT_WHILE_BUSY' flag checking when deciding
+  if we can use R1B response.
+  - Avoid polling CMD13 when using R1B response.
+  - Use earlier calculated erase timeout as the polling time.
+
+Changes since v1:
+  - Remove the 'MMC_CAP_WAIT_WHILE_BUSY' flag checking when deciding
+    the max discard sectors.
+---
+ drivers/mmc/core/core.c |   60 +++++++++++++++++++++++++++++++++++++++--------
+ 1 file changed, 50 insertions(+), 10 deletions(-)
+
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index 8b4dfd4..b4c08d1a 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -2060,7 +2060,8 @@ static int mmc_do_erase(struct mmc_card *card, unsigned int from,
+ 			unsigned int to, unsigned int arg)
+ {
+ 	struct mmc_command cmd = {0};
+-	unsigned int qty = 0;
++	unsigned int qty = 0, busy_timeout = 0;
++	bool use_r1b_resp = false;
+ 	unsigned long timeout;
+ 	int err;
+ 
+@@ -2128,8 +2129,22 @@ static int mmc_do_erase(struct mmc_card *card, unsigned int from,
+ 	memset(&cmd, 0, sizeof(struct mmc_command));
+ 	cmd.opcode = MMC_ERASE;
+ 	cmd.arg = arg;
+-	cmd.flags = MMC_RSP_SPI_R1B | MMC_RSP_R1B | MMC_CMD_AC;
+-	cmd.busy_timeout = mmc_erase_timeout(card, arg, qty);
++	busy_timeout = mmc_erase_timeout(card, arg, qty);
++	/*
++	 * If the host controller supports busy signalling and the timeout for
++	 * the erase operation does not exceed the max_busy_timeout, we should
++	 * use R1B response. Or we need to prevent the host from doing hw busy
++	 * detection, which is done by converting to a R1 response instead.
++	 */
++	if (card->host->max_busy_timeout &&
++	    busy_timeout > card->host->max_busy_timeout) {
++		cmd.flags = MMC_RSP_SPI_R1 | MMC_RSP_R1 | MMC_CMD_AC;
++	} else {
++		cmd.flags = MMC_RSP_SPI_R1B | MMC_RSP_R1B | MMC_CMD_AC;
++		cmd.busy_timeout = busy_timeout;
++		use_r1b_resp = true;
++	}
++
+ 	err = mmc_wait_for_cmd(card->host, &cmd, 0);
+ 	if (err) {
+ 		pr_err("mmc_erase: erase error %d, status %#x\n",
+@@ -2141,7 +2156,14 @@ static int mmc_do_erase(struct mmc_card *card, unsigned int from,
+ 	if (mmc_host_is_spi(card->host))
+ 		goto out;
+ 
+-	timeout = jiffies + msecs_to_jiffies(MMC_CORE_TIMEOUT_MS);
++	/*
++	 * In case of when R1B + MMC_CAP_WAIT_WHILE_BUSY is used, the polling
++	 * shall be avoided.
++	 */
++	if ((card->host->caps & MMC_CAP_WAIT_WHILE_BUSY) && use_r1b_resp)
++		goto out;
++
++	timeout = jiffies + msecs_to_jiffies(busy_timeout);
+ 	do {
+ 		memset(&cmd, 0, sizeof(struct mmc_command));
+ 		cmd.opcode = MMC_SEND_STATUS;
+@@ -2321,23 +2343,41 @@ static unsigned int mmc_do_calc_max_discard(struct mmc_card *card,
+ 					    unsigned int arg)
+ {
+ 	struct mmc_host *host = card->host;
+-	unsigned int max_discard, x, y, qty = 0, max_qty, timeout;
++	unsigned int max_discard, x, y, qty = 0, max_qty, min_qty, timeout;
+ 	unsigned int last_timeout = 0;
+ 
+-	if (card->erase_shift)
++	if (card->erase_shift) {
+ 		max_qty = UINT_MAX >> card->erase_shift;
+-	else if (mmc_card_sd(card))
++		min_qty = card->pref_erase >> card->erase_shift;
++	} else if (mmc_card_sd(card)) {
+ 		max_qty = UINT_MAX;
+-	else
++		min_qty = card->pref_erase;
++	} else {
+ 		max_qty = UINT_MAX / card->erase_size;
++		min_qty = card->pref_erase / card->erase_size;
++	}
+ 
+-	/* Find the largest qty with an OK timeout */
++	/*
++	 * We should not only use 'host->max_busy_timeout' as the limitation
++	 * when deciding the max discard sectors. We should set a balance value
++	 * to improve the erase speed, and it can not get too long timeout at
++	 * the same time.
++	 *
++	 * Here we set 'card->pref_erase' as the minimal discard sectors no
++	 * matter what size of 'host->max_busy_timeout', but if the
++	 * 'host->max_busy_timeout' is large enough for more discard sectors,
++	 * then we can continue to increase the max discard sectors until we
++	 * get a balance value.
++	 */
+ 	do {
+ 		y = 0;
+ 		for (x = 1; x && x <= max_qty && max_qty - x >= qty; x <<= 1) {
+ 			timeout = mmc_erase_timeout(card, arg, qty + x);
+-			if (timeout > host->max_busy_timeout)
++
++			if (qty + x > min_qty &&
++			    timeout > host->max_busy_timeout)
+ 				break;
++
+ 			if (timeout < last_timeout)
+ 				break;
+ 			last_timeout = timeout;
+-- 
+1.7.9.5
+
