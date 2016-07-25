@@ -1,64 +1,55 @@
-From: Nicholas Mc Guire <hofrat@osadl.org>
-Subject: [PATCH V2] mmc: moxart: fix wait_for_completion_interruptible_timeout return variable type
-Date: Mon, 25 Jul 2016 19:59:23 +0200
-Message-ID: <1469469563-31949-1-git-send-email-hofrat@osadl.org>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: rtsx_pci mmc erase support
+Date: Mon, 25 Jul 2016 23:54:34 +0200
+Message-ID: <CAPDyKFoCF-H86irhovpqM9Z-RW3CGvOvY0jdWLME_wvvYxj7+g@mail.gmail.com>
+References: <5a550d59-720c-a6db-27fb-40b08e263fad@gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from www.osadl.org ([62.245.132.105]:60636 "EHLO www.osadl.org"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752923AbcGYR4g (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Mon, 25 Jul 2016 13:56:36 -0400
+Received: from mail-wm0-f43.google.com ([74.125.82.43]:35580 "EHLO
+	mail-wm0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752877AbcGYVym (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 25 Jul 2016 17:54:42 -0400
+Received: by mail-wm0-f43.google.com with SMTP id f65so151316259wmi.0
+        for <linux-mmc@vger.kernel.org>; Mon, 25 Jul 2016 14:54:36 -0700 (PDT)
+In-Reply-To: <5a550d59-720c-a6db-27fb-40b08e263fad@gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Luis de Bethencourt <luis@debethencourt.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Nicholas Mc Guire <hofrat@osadl.org>
+To: Mauro Santos <registo.mailling@gmail.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>
 
-wait_for_completion_timeout_interruptible returns long not unsigned long
-so dma_time, which is used exclusively here, is changed to long.
+On 25 July 2016 at 18:46, Mauro Santos <registo.mailling@gmail.com> wrote:
+> Hello, I apologize if this is not the right place to ask but submitting
+> a bug report to ask a question didn't seem right.
+>
+> I have a laptop with a realtek pcie card reader which uses the rtsx_pci
+> driver and I was wondering if mmc erase command support is not (yet?)
+> implemented in the driver or if support is missing because the hardware
+> does not support it.
 
-Fixes: 1b66e94e6b99 ("mmc: moxart: Add MOXA ART SD/MMC driver")
+These commands don't require a specific HW feature. but only software
+support in the driver - which indeed is missing.
 
-Signed-off-by: Nicholas Mc Guire <hofrat@osadl.org>
----
+Although, one should know, the discard/erase feature in the mmc core
+has since long been poorly implemented.
+There are a few patches that greatly improves the behaviour and which
+are queued for 4.8.
 
-API non-compliance was located by coccinelle
+Would you be interested to test the above changes + plus some
+additional which I can provide you to enable erase/discard for
+rtsx_pci?
 
-V2: changed types of both pio_time and flags while only the pio_time type 
-    was incorrect - flaged by Ulf Hansson <ulf.hansson@linaro.org> - Thanks!
+>
+> Both fstrim and blkdiscard fail with cards (and fs) I know that support
+> this.
+>
+> The card reader on my laptop:
+> 02:00.0 Unassigned class [ff00]: Realtek Semiconductor Co., Ltd. RTS522A
+> PCI Express Card Reader [10ec:522a] (rev 01)
+>
+>
+> Regards,
+> Mauro Santos
 
-This is mostly cosmetic since dma_time is not actually used for anything
-at present, however if it ever were, then a signal received would be 
-interpreted as a large remaining jiffies left, which would be wrong.
-
-Compile tested with: moxart_defconfig + ARCH_MULTI_V4=y, 
-CONFIG_ARCH_MOXART=y, CONFIG_MMC_MOXART=y
-
-Patch is against 4.7.0-rc7 (localversion-next -next-20160725)
- drivers/mmc/host/moxart-mmc.c | 5 +++--
- 1 file changed, 3 insertions(+), 2 deletions(-)
-
-diff --git a/drivers/mmc/host/moxart-mmc.c b/drivers/mmc/host/moxart-mmc.c
-index 79905ce..bbad309 100644
---- a/drivers/mmc/host/moxart-mmc.c
-+++ b/drivers/mmc/host/moxart-mmc.c
-@@ -257,7 +257,7 @@ static void moxart_dma_complete(void *param)
- static void moxart_transfer_dma(struct mmc_data *data, struct moxart_host *host)
- {
- 	u32 len, dir_data, dir_slave;
--	unsigned long dma_time;
-+	long dma_time;
- 	struct dma_async_tx_descriptor *desc = NULL;
- 	struct dma_chan *dma_chan;
- 
-@@ -397,7 +397,8 @@ static void moxart_prepare_data(struct moxart_host *host)
- static void moxart_request(struct mmc_host *mmc, struct mmc_request *mrq)
- {
- 	struct moxart_host *host = mmc_priv(mmc);
--	unsigned long pio_time, flags;
-+	long pio_time;
-+	unsigned long flags;
- 	u32 status;
- 
- 	spin_lock_irqsave(&host->lock, flags);
--- 
-2.1.4
-
+Kind regards
+Uffe
