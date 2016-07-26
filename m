@@ -1,69 +1,109 @@
 From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: mmc: dwmmc: exynos: Warn if HS400 is being used on non-Exynos5420
- chipset
-Date: Tue, 26 Jul 2016 09:49:01 +0900
-Message-ID: <5796B37D.70001@samsung.com>
-References: <1468502547-18571-1-git-send-email-k.kozlowski@samsung.com>
- <CGME20160715041625epcas1p311ac6e8f560ffd7a49a77171fd3368ca@epcas1p3.samsung.com>
- <5788637F.2070908@samsung.com>
+Subject: Re: [PATCH] mmc: dw_mmc: remove parsing for each slot subnode
+Date: Tue, 26 Jul 2016 09:49:37 +0900
+Message-ID: <5796B3A1.1050002@samsung.com>
+References: <CGME20160715020607epcas1p1d7c7b7fd23c280be82d74d83225bf795@epcas1p1.samsung.com>
+ <1468547254-805-1-git-send-email-shawn.lin@rock-chips.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=windows-1252
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout2.samsung.com ([203.254.224.25]:53462 "EHLO
-	mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752818AbcGZAtG (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 25 Jul 2016 20:49:06 -0400
-In-reply-to: <5788637F.2070908@samsung.com>
+Received: from mailout1.samsung.com ([203.254.224.24]:54068 "EHLO
+	mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752878AbcGZAtq (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 25 Jul 2016 20:49:46 -0400
+In-reply-to: <1468547254-805-1-git-send-email-shawn.lin@rock-chips.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Alim Akhtar <alim.akhtar@samsung.com>, Krzysztof Kozlowski <k.kozlowski@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>, Kukjin Kim <kgene@kernel.org>, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-samsung-soc@vger.kernel.org, linux-kernel@vger.kernel.org
-Cc: Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>
+To: Shawn Lin <shawn.lin@rock-chips.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 
-On 07/15/2016 01:15 PM, Alim Akhtar wrote:
-> Hi Krzysztof,
+On 07/15/2016 10:47 AM, Shawn Lin wrote:
+> The intention to remove it comes from the conflict of
+> what the mmc-core does with the way dw_mmc treats disable-wp.
+> We could see that 'disable-wp' is supported by core but
+> it's deprecated by dw_mmc as we don't expect it to be existed
+> for each slot subnode but should be in the parent node. Based
+> on searching for all the upstream dts using dw_mmc, we're
+> confident that none of them use the deprecated way. Maybe
+> we should take old dtb in consideration but it was a flag day
+> since the time we was considering to take it away. The fact is
+> that there are none of dts using the deprecated way since v3.18
+> or even earlier. So personally I don't believe the old dtb
+> would/could bootup current kernel(may not?). Let's remove it now.
 > 
-> On 07/14/2016 06:52 PM, Krzysztof Kozlowski wrote:
->> Chipsets before Exynos5420 did not support HS400 so if MMC core tries to
->> configure HS400 timing, this might or might not work.  Warn in such
->> cases because this is DTB misconfiguration.
->>
->> Signed-off-by: Krzysztof Kozlowski <k.kozlowski@samsung.com>
->> ---
-> 
-> Reviewed-by: Alim Akhtar <alim.akhtar@samsung.com>
+> Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
 
 Applied on my repository. Thanks!
-Before applied, I modified the prefix of subject from "dwmmc" to "dw_mmc"
 
 Best Regards,
 Jaehoon Chung
 
+> ---
 > 
->>   drivers/mmc/host/dw_mmc-exynos.c | 6 +++++-
->>   1 file changed, 5 insertions(+), 1 deletion(-)
->>
->> diff --git a/drivers/mmc/host/dw_mmc-exynos.c b/drivers/mmc/host/dw_mmc-exynos.c
->> index da0ef1765735..7ab3d749b5ae 100644
->> --- a/drivers/mmc/host/dw_mmc-exynos.c
->> +++ b/drivers/mmc/host/dw_mmc-exynos.c
->> @@ -225,8 +225,12 @@ static void dw_mci_exynos_config_hs400(struct dw_mci *host, u32 timing)
->>        * Not supported to configure register
->>        * related to HS400
->>        */
->> -    if (priv->ctrl_type < DW_MCI_TYPE_EXYNOS5420)
->> +    if (priv->ctrl_type < DW_MCI_TYPE_EXYNOS5420) {
->> +        if (timing == MMC_TIMING_MMC_HS400)
->> +            dev_warn(host->dev,
->> +                 "cannot configure HS400, unsupported chipset\n");
->>           return;
->> +    }
->>
-> It is good to have extra bit of debug information handy.
+>  drivers/mmc/host/dw_mmc.c | 43 -------------------------------------------
+>  1 file changed, 43 deletions(-)
 > 
->>       dqs = priv->saved_dqs_en;
->>       strobe = priv->saved_strobe_ctrl;
->>
-> 
+> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+> index 2dfdc58..d0adddb 100644
+> --- a/drivers/mmc/host/dw_mmc.c
+> +++ b/drivers/mmc/host/dw_mmc.c
+> @@ -2523,47 +2523,6 @@ static irqreturn_t dw_mci_interrupt(int irq, void *dev_id)
+>  	return IRQ_HANDLED;
+>  }
+>  
+> -#ifdef CONFIG_OF
+> -/* given a slot, find out the device node representing that slot */
+> -static struct device_node *dw_mci_of_find_slot_node(struct dw_mci_slot *slot)
+> -{
+> -	struct device *dev = slot->mmc->parent;
+> -	struct device_node *np;
+> -	const __be32 *addr;
+> -	int len;
+> -
+> -	if (!dev || !dev->of_node)
+> -		return NULL;
+> -
+> -	for_each_child_of_node(dev->of_node, np) {
+> -		addr = of_get_property(np, "reg", &len);
+> -		if (!addr || (len < sizeof(int)))
+> -			continue;
+> -		if (be32_to_cpup(addr) == slot->id)
+> -			return np;
+> -	}
+> -	return NULL;
+> -}
+> -
+> -static void dw_mci_slot_of_parse(struct dw_mci_slot *slot)
+> -{
+> -	struct device_node *np = dw_mci_of_find_slot_node(slot);
+> -
+> -	if (!np)
+> -		return;
+> -
+> -	if (of_property_read_bool(np, "disable-wp")) {
+> -		slot->mmc->caps2 |= MMC_CAP2_NO_WRITE_PROTECT;
+> -		dev_warn(slot->mmc->parent,
+> -			"Slot quirk 'disable-wp' is deprecated\n");
+> -	}
+> -}
+> -#else /* CONFIG_OF */
+> -static void dw_mci_slot_of_parse(struct dw_mci_slot *slot)
+> -{
+> -}
+> -#endif /* CONFIG_OF */
+> -
+>  static int dw_mci_init_slot(struct dw_mci *host, unsigned int id)
+>  {
+>  	struct mmc_host *mmc;
+> @@ -2620,8 +2579,6 @@ static int dw_mci_init_slot(struct dw_mci *host, unsigned int id)
+>  	if (host->pdata->caps2)
+>  		mmc->caps2 = host->pdata->caps2;
+>  
+> -	dw_mci_slot_of_parse(slot);
+> -
+>  	ret = mmc_of_parse(mmc);
+>  	if (ret)
+>  		goto err_host_allocated;
 > 
 
