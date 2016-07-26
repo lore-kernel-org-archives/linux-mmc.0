@@ -1,55 +1,69 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: rtsx_pci mmc erase support
-Date: Mon, 25 Jul 2016 23:54:34 +0200
-Message-ID: <CAPDyKFoCF-H86irhovpqM9Z-RW3CGvOvY0jdWLME_wvvYxj7+g@mail.gmail.com>
-References: <5a550d59-720c-a6db-27fb-40b08e263fad@gmail.com>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: Re: mmc: dwmmc: exynos: Warn if HS400 is being used on non-Exynos5420
+ chipset
+Date: Tue, 26 Jul 2016 09:49:01 +0900
+Message-ID: <5796B37D.70001@samsung.com>
+References: <1468502547-18571-1-git-send-email-k.kozlowski@samsung.com>
+ <CGME20160715041625epcas1p311ac6e8f560ffd7a49a77171fd3368ca@epcas1p3.samsung.com>
+ <5788637F.2070908@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wm0-f43.google.com ([74.125.82.43]:35580 "EHLO
-	mail-wm0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752877AbcGYVym (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 25 Jul 2016 17:54:42 -0400
-Received: by mail-wm0-f43.google.com with SMTP id f65so151316259wmi.0
-        for <linux-mmc@vger.kernel.org>; Mon, 25 Jul 2016 14:54:36 -0700 (PDT)
-In-Reply-To: <5a550d59-720c-a6db-27fb-40b08e263fad@gmail.com>
+Received: from mailout2.samsung.com ([203.254.224.25]:53462 "EHLO
+	mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752818AbcGZAtG (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 25 Jul 2016 20:49:06 -0400
+In-reply-to: <5788637F.2070908@samsung.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Mauro Santos <registo.mailling@gmail.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>
+To: Alim Akhtar <alim.akhtar@samsung.com>, Krzysztof Kozlowski <k.kozlowski@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>, Kukjin Kim <kgene@kernel.org>, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-samsung-soc@vger.kernel.org, linux-kernel@vger.kernel.org
+Cc: Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>
 
-On 25 July 2016 at 18:46, Mauro Santos <registo.mailling@gmail.com> wrote:
-> Hello, I apologize if this is not the right place to ask but submitting
-> a bug report to ask a question didn't seem right.
->
-> I have a laptop with a realtek pcie card reader which uses the rtsx_pci
-> driver and I was wondering if mmc erase command support is not (yet?)
-> implemented in the driver or if support is missing because the hardware
-> does not support it.
+On 07/15/2016 01:15 PM, Alim Akhtar wrote:
+> Hi Krzysztof,
+> 
+> On 07/14/2016 06:52 PM, Krzysztof Kozlowski wrote:
+>> Chipsets before Exynos5420 did not support HS400 so if MMC core tries to
+>> configure HS400 timing, this might or might not work.  Warn in such
+>> cases because this is DTB misconfiguration.
+>>
+>> Signed-off-by: Krzysztof Kozlowski <k.kozlowski@samsung.com>
+>> ---
+> 
+> Reviewed-by: Alim Akhtar <alim.akhtar@samsung.com>
 
-These commands don't require a specific HW feature. but only software
-support in the driver - which indeed is missing.
+Applied on my repository. Thanks!
+Before applied, I modified the prefix of subject from "dwmmc" to "dw_mmc"
 
-Although, one should know, the discard/erase feature in the mmc core
-has since long been poorly implemented.
-There are a few patches that greatly improves the behaviour and which
-are queued for 4.8.
+Best Regards,
+Jaehoon Chung
 
-Would you be interested to test the above changes + plus some
-additional which I can provide you to enable erase/discard for
-rtsx_pci?
+> 
+>>   drivers/mmc/host/dw_mmc-exynos.c | 6 +++++-
+>>   1 file changed, 5 insertions(+), 1 deletion(-)
+>>
+>> diff --git a/drivers/mmc/host/dw_mmc-exynos.c b/drivers/mmc/host/dw_mmc-exynos.c
+>> index da0ef1765735..7ab3d749b5ae 100644
+>> --- a/drivers/mmc/host/dw_mmc-exynos.c
+>> +++ b/drivers/mmc/host/dw_mmc-exynos.c
+>> @@ -225,8 +225,12 @@ static void dw_mci_exynos_config_hs400(struct dw_mci *host, u32 timing)
+>>        * Not supported to configure register
+>>        * related to HS400
+>>        */
+>> -    if (priv->ctrl_type < DW_MCI_TYPE_EXYNOS5420)
+>> +    if (priv->ctrl_type < DW_MCI_TYPE_EXYNOS5420) {
+>> +        if (timing == MMC_TIMING_MMC_HS400)
+>> +            dev_warn(host->dev,
+>> +                 "cannot configure HS400, unsupported chipset\n");
+>>           return;
+>> +    }
+>>
+> It is good to have extra bit of debug information handy.
+> 
+>>       dqs = priv->saved_dqs_en;
+>>       strobe = priv->saved_strobe_ctrl;
+>>
+> 
+> 
 
->
-> Both fstrim and blkdiscard fail with cards (and fs) I know that support
-> this.
->
-> The card reader on my laptop:
-> 02:00.0 Unassigned class [ff00]: Realtek Semiconductor Co., Ltd. RTS522A
-> PCI Express Card Reader [10ec:522a] (rev 01)
->
->
-> Regards,
-> Mauro Santos
-
-Kind regards
-Uffe
