@@ -1,118 +1,81 @@
-From: Baolin Wang <baolin.wang@linaro.org>
-Subject: [PATCH] mmc: core: Optimize the mmc erase size alignment
-Date: Tue, 26 Jul 2016 19:27:36 +0800
-Message-ID: <0366906585240f8123e889527f9eac1e37f9f3d0.1469532291.git.baolin.wang@linaro.org>
-References: <y>
+From: Arnd Bergmann <arnd@arndb.de>
+Subject: [PATCH] mmc: sdhci-esdhc-imx: avoid unused function warnings
+Date: Tue, 26 Jul 2016 14:32:34 +0200
+Message-ID: <20160726123246.879426-1-arnd@arndb.de>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pf0-f176.google.com ([209.85.192.176]:36569 "EHLO
-	mail-pf0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755802AbcGZL15 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 26 Jul 2016 07:27:57 -0400
-Received: by mail-pf0-f176.google.com with SMTP id h186so74584853pfg.3
-        for <linux-mmc@vger.kernel.org>; Tue, 26 Jul 2016 04:27:56 -0700 (PDT)
-In-Reply-To: <y>
+Received: from mout.kundenserver.de ([212.227.126.187]:51773 "EHLO
+	mout.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756728AbcGZMc7 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 26 Jul 2016 08:32:59 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: ulf.hansson@linaro.org
-Cc: adrian.hunter@intel.com, rmk+kernel@arm.linux.org.uk, shawn.lin@rock-chips.com, dianders@chromium.org, heiko@sntech.de, david@protonic.nl, hdegoede@redhat.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, broonie@kernel.org, linus.walleij@linaro.org, baolin.wang@linaro.org
+To: Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Arnd Bergmann <arnd@arndb.de>, Dong Aisheng <aisheng.dong@nxp.com>, Haibo Chen <haibo.chen@freescale.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 
-Before issuing mmc_erase() function, users always have checked if it can
-erase with mmc_can_erase/trim/discard() function, thus remove the redundant
-erase checking in mmc_erase() function.
+The driver has just gained a slightly incorrect pm-sleep implementation that causes
+warnings when CONFIG_PM is set but CONFIG_PM_SLEEP is not:
 
-This patch also optimizes the erase start/end sector alignment with
-round_up()/round_down() function, when erase command is MMC_ERASE_ARG.
+drivers/mmc/host/sdhci-esdhc-imx.c:1302:12: error: 'sdhci_esdhc_resume' defined but not used [-Werror=unused-function]
+ static int sdhci_esdhc_resume(struct device *dev)
+            ^~~~~~~~~~~~~~~~~~
+drivers/mmc/host/sdhci-esdhc-imx.c:1297:12: error: 'sdhci_esdhc_suspend' defined but not used [-Werror=unused-function]
+ static int sdhci_esdhc_suspend(struct device *dev)
 
-Signed-off-by: Baolin Wang <baolin.wang@linaro.org>
+This replaces the incorrect #ifdef with a __maybe_unused annotation that does
+the right thing in all configurations and is more readable.
+
+Signed-off-by: Arnd Bergmann <arnd@arndb.de>
+Fixes: b70d0b3b5b29 ("mmc: sdhci-esdhc-imx: add esdhc specific suspend resume callback")
 ---
- drivers/mmc/core/core.c |   58 +++++++++++++++++++++++------------------------
- 1 file changed, 28 insertions(+), 30 deletions(-)
+ drivers/mmc/host/sdhci-esdhc-imx.c | 10 ++++------
+ 1 file changed, 4 insertions(+), 6 deletions(-)
 
-diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index b4c08d1a..4dd333e 100644
---- a/drivers/mmc/core/core.c
-+++ b/drivers/mmc/core/core.c
-@@ -2195,6 +2195,31 @@ out:
- 	return err;
+diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
+index 2bb326bbc34a..593e34053c4b 100644
+--- a/drivers/mmc/host/sdhci-esdhc-imx.c
++++ b/drivers/mmc/host/sdhci-esdhc-imx.c
+@@ -1293,13 +1293,12 @@ static int sdhci_esdhc_imx_remove(struct platform_device *pdev)
+ 	return 0;
  }
  
-+static unsigned int mmc_align_erase_size(struct mmc_card *card,
-+					 unsigned int *from,
-+					 unsigned int *to,
-+					 unsigned int nr)
-+{
-+	unsigned int from_old = *from, nr_old = nr;
-+	unsigned int from_new, nr_new;
-+
-+	from_new = round_up(from_old, card->erase_size);
-+	if (nr_old > from_new - from_old)
-+		nr_old -= from_new - from_old;
-+	else
-+		return 0;
-+
-+	nr_new = round_down(nr_old, card->erase_size);
-+	if (nr_new == 0)
-+		return 0;
-+
-+	/* 'from' and 'to' are inclusive */
-+	*to = from_new + nr_new - 1;
-+	*from = from_new;
-+
-+	return nr_new;
-+}
-+
- /**
-  * mmc_erase - erase sectors.
-  * @card: card to erase
-@@ -2210,13 +2235,6 @@ int mmc_erase(struct mmc_card *card, unsigned int from, unsigned int nr,
- 	unsigned int rem, to = from + nr;
- 	int err;
+-#ifdef CONFIG_PM
+-static int sdhci_esdhc_suspend(struct device *dev)
++static int __maybe_unused sdhci_esdhc_suspend(struct device *dev)
+ {
+ 	return sdhci_pltfm_suspend(dev);
+ }
  
--	if (!(card->host->caps & MMC_CAP_ERASE) ||
--	    !(card->csd.cmdclass & CCC_ERASE))
--		return -EOPNOTSUPP;
--
--	if (!card->erase_size)
--		return -EOPNOTSUPP;
--
- 	if (mmc_card_sd(card) && arg != MMC_ERASE_ARG)
- 		return -EOPNOTSUPP;
+-static int sdhci_esdhc_resume(struct device *dev)
++static int __maybe_unused sdhci_esdhc_resume(struct device *dev)
+ {
+ 	struct sdhci_host *host = dev_get_drvdata(dev);
  
-@@ -2234,31 +2252,11 @@ int mmc_erase(struct mmc_card *card, unsigned int from, unsigned int nr,
- 	}
+@@ -1309,7 +1308,7 @@ static int sdhci_esdhc_resume(struct device *dev)
+ 	return sdhci_pltfm_resume(dev);
+ }
  
- 	if (arg == MMC_ERASE_ARG) {
--		rem = from % card->erase_size;
--		if (rem) {
--			rem = card->erase_size - rem;
--			from += rem;
--			if (nr > rem)
--				nr -= rem;
--			else
--				return 0;
--		}
--		rem = nr % card->erase_size;
--		if (rem)
--			nr -= rem;
-+		rem = mmc_align_erase_size(card, &from, &to, nr);
-+		if (rem == 0)
-+			return 0;
- 	}
+-static int sdhci_esdhc_runtime_suspend(struct device *dev)
++static int __maybe_unused sdhci_esdhc_runtime_suspend(struct device *dev)
+ {
+ 	struct sdhci_host *host = dev_get_drvdata(dev);
+ 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+@@ -1327,7 +1326,7 @@ static int sdhci_esdhc_runtime_suspend(struct device *dev)
+ 	return ret;
+ }
  
--	if (nr == 0)
--		return 0;
--
--	to = from + nr;
--
--	if (to <= from)
--		return -EINVAL;
--
--	/* 'from' and 'to' are inclusive */
--	to -= 1;
--
- 	/*
- 	 * Special case where only one erase-group fits in the timeout budget:
- 	 * If the region crosses an erase-group boundary on this particular
+-static int sdhci_esdhc_runtime_resume(struct device *dev)
++static int __maybe_unused sdhci_esdhc_runtime_resume(struct device *dev)
+ {
+ 	struct sdhci_host *host = dev_get_drvdata(dev);
+ 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+@@ -1341,7 +1340,6 @@ static int sdhci_esdhc_runtime_resume(struct device *dev)
+ 
+ 	return sdhci_runtime_resume_host(host);
+ }
+-#endif
+ 
+ static const struct dev_pm_ops sdhci_esdhc_pmops = {
+ 	SET_SYSTEM_SLEEP_PM_OPS(sdhci_esdhc_suspend, sdhci_esdhc_resume)
 -- 
-1.7.9.5
+2.9.0
 
