@@ -1,72 +1,56 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: [PATCH 03/11] mmc: sdhci-of-esdhc: Simplify code by using SIMPLE_DEV_PM_OPS
-Date: Wed, 27 Jul 2016 13:31:59 +0200
-Message-ID: <1469619127-29283-4-git-send-email-ulf.hansson@linaro.org>
+Subject: [PATCH 06/11] mmc: sdhci-sirf: Remove non needed #ifdef CONFIG_PM* for dev_pm_ops
+Date: Wed, 27 Jul 2016 13:32:02 +0200
+Message-ID: <1469619127-29283-7-git-send-email-ulf.hansson@linaro.org>
 References: <1469619127-29283-1-git-send-email-ulf.hansson@linaro.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-lf0-f47.google.com ([209.85.215.47]:33545 "EHLO
-	mail-lf0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755676AbcG0LcR (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 27 Jul 2016 07:32:17 -0400
-Received: by mail-lf0-f47.google.com with SMTP id b199so25205773lfe.0
-        for <linux-mmc@vger.kernel.org>; Wed, 27 Jul 2016 04:32:16 -0700 (PDT)
+Received: from mail-lf0-f49.google.com ([209.85.215.49]:35914 "EHLO
+	mail-lf0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755777AbcG0LcW (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 27 Jul 2016 07:32:22 -0400
+Received: by mail-lf0-f49.google.com with SMTP id g62so25074816lfe.3
+        for <linux-mmc@vger.kernel.org>; Wed, 27 Jul 2016 04:32:21 -0700 (PDT)
 In-Reply-To: <1469619127-29283-1-git-send-email-ulf.hansson@linaro.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>
 Cc: Arnd Bergmann <arnd@arndb.de>
 
-Let's use the SIMPLE_DEV_PM_OPS macro when declaring/assigning the system
-PM callbacks, as the code gets simplified.
+The SIMPLE_DEV_PM_OPS macro deals with the CONFIG_PM options when
+assigning the PM callbacks, thus it's not needed to control this when
+using the macro. By removing the non needed #ifdef, the code becomes a
+bit cleaner.
 
 Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
 ---
- drivers/mmc/host/sdhci-of-esdhc.c | 16 ++++++----------
- 1 file changed, 6 insertions(+), 10 deletions(-)
+ drivers/mmc/host/sdhci-sirf.c | 4 +---
+ 1 file changed, 1 insertion(+), 3 deletions(-)
 
-diff --git a/drivers/mmc/host/sdhci-of-esdhc.c b/drivers/mmc/host/sdhci-of-esdhc.c
-index 3f34d35..239be2f 100644
---- a/drivers/mmc/host/sdhci-of-esdhc.c
-+++ b/drivers/mmc/host/sdhci-of-esdhc.c
-@@ -481,7 +481,7 @@ static void esdhc_reset(struct sdhci_host *host, u8 mask)
- 	sdhci_writel(host, host->ier, SDHCI_SIGNAL_ENABLE);
- }
+diff --git a/drivers/mmc/host/sdhci-sirf.c b/drivers/mmc/host/sdhci-sirf.c
+index 34866f6..5d06863 100644
+--- a/drivers/mmc/host/sdhci-sirf.c
++++ b/drivers/mmc/host/sdhci-sirf.c
+@@ -260,9 +260,9 @@ static int sdhci_sirf_resume(struct device *dev)
  
--#ifdef CONFIG_PM
-+#ifdef CONFIG_PM_SLEEP
- static u32 esdhc_proctl;
- static int esdhc_of_suspend(struct device *dev)
- {
-@@ -504,16 +504,12 @@ static int esdhc_of_resume(struct device *dev)
- 	}
- 	return ret;
+ 	return sdhci_resume_host(host);
  }
--
--static const struct dev_pm_ops esdhc_pmops = {
--	.suspend	= esdhc_of_suspend,
--	.resume		= esdhc_of_resume,
--};
--#define ESDHC_PMOPS (&esdhc_pmops)
--#else
--#define ESDHC_PMOPS NULL
- #endif
++#endif
  
-+static SIMPLE_DEV_PM_OPS(esdhc_of_dev_pm_ops,
-+			esdhc_of_suspend,
-+			esdhc_of_resume);
-+
- static const struct sdhci_ops sdhci_esdhc_be_ops = {
- 	.read_l = esdhc_be_readl,
- 	.read_w = esdhc_be_readw,
-@@ -657,7 +653,7 @@ static struct platform_driver sdhci_esdhc_driver = {
- 	.driver = {
- 		.name = "sdhci-esdhc",
- 		.of_match_table = sdhci_esdhc_of_match,
--		.pm = ESDHC_PMOPS,
-+		.pm = &esdhc_of_dev_pm_ops,
+ static SIMPLE_DEV_PM_OPS(sdhci_sirf_pm_ops, sdhci_sirf_suspend, sdhci_sirf_resume);
+-#endif
+ 
+ static const struct of_device_id sdhci_sirf_of_match[] = {
+ 	{ .compatible = "sirf,prima2-sdhc" },
+@@ -274,9 +274,7 @@ static struct platform_driver sdhci_sirf_driver = {
+ 	.driver		= {
+ 		.name	= "sdhci-sirf",
+ 		.of_match_table = sdhci_sirf_of_match,
+-#ifdef CONFIG_PM_SLEEP
+ 		.pm	= &sdhci_sirf_pm_ops,
+-#endif
  	},
- 	.probe = sdhci_esdhc_probe,
- 	.remove = sdhci_pltfm_unregister,
+ 	.probe		= sdhci_sirf_probe,
+ 	.remove		= sdhci_pltfm_unregister,
 -- 
 1.9.1
 
