@@ -1,82 +1,139 @@
-From: Arnd Bergmann <arnd@arndb.de>
-Subject: Re: [PATCH] mmc: sdhci-esdhc-imx: avoid unused function warnings
-Date: Wed, 27 Jul 2016 09:10:41 +0200
-Message-ID: <23920359.udOifghZQl@wuerfel>
-References: <20160726123246.879426-1-arnd@arndb.de>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7Bit
+From: Baolin Wang <baolin.wang@linaro.org>
+Subject: [PATCH v2] mmc: core: Optimize the mmc erase size alignment
+Date: Wed, 27 Jul 2016 15:17:27 +0800
+Message-ID: <5117da51a7f11a16a8d10af060e2123f0d0a3ae8.1469603653.git.baolin.wang@linaro.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mout.kundenserver.de ([212.227.17.13]:64825 "EHLO
-	mout.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751339AbcG0HKy (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 27 Jul 2016 03:10:54 -0400
-In-Reply-To: <20160726123246.879426-1-arnd@arndb.de>
+Received: from mail-pf0-f173.google.com ([209.85.192.173]:36137 "EHLO
+	mail-pf0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751681AbcG0HRs (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 27 Jul 2016 03:17:48 -0400
+Received: by mail-pf0-f173.google.com with SMTP id h186so8046598pfg.3
+        for <linux-mmc@vger.kernel.org>; Wed, 27 Jul 2016 00:17:47 -0700 (PDT)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Dong Aisheng <aisheng.dong@nxp.com>, Haibo Chen <haibo.chen@freescale.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+To: ulf.hansson@linaro.org
+Cc: adrian.hunter@intel.com, rmk+kernel@arm.linux.org.uk, shawn.lin@rock-chips.com, dianders@chromium.org, heiko@sntech.de, david@protonic.nl, hdegoede@redhat.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, broonie@kernel.org, linus.walleij@linaro.org, baolin.wang@linaro.org
 
-On Tuesday, July 26, 2016 2:32:34 PM CEST Arnd Bergmann wrote:
-> The driver has just gained a slightly incorrect pm-sleep implementation that causes
-> warnings when CONFIG_PM is set but CONFIG_PM_SLEEP is not:
-> 
-> drivers/mmc/host/sdhci-esdhc-imx.c:1302:12: error: 'sdhci_esdhc_resume' defined but not used [-Werror=unused-function]
->  static int sdhci_esdhc_resume(struct device *dev)
->             ^~~~~~~~~~~~~~~~~~
-> drivers/mmc/host/sdhci-esdhc-imx.c:1297:12: error: 'sdhci_esdhc_suspend' defined but not used [-Werror=unused-function]
->  static int sdhci_esdhc_suspend(struct device *dev)
-> 
-> This replaces the incorrect #ifdef with a __maybe_unused annotation that does
-> the right thing in all configurations and is more readable.
-> 
-> Signed-off-by: Arnd Bergmann <arnd@arndb.de>
-> Fixes: b70d0b3b5b29 ("mmc: sdhci-esdhc-imx: add esdhc specific suspend resume callback")
+Before issuing mmc_erase() function, users always have checked if it can
+erase with mmc_can_erase/trim/discard() function, thus remove the redundant
+erase checking in mmc_erase() function.
 
+This patch also optimizes the erase start/end sector alignment with
+round_up()/round_down() function, when erase command is MMC_ERASE_ARG.
 
-It turns out that the version of the fix above requires another change
-below. Fixing up the #ifdef as Ulf suggested would not require that,
-but on the other hand, we generally don't hide declarations in header
-files unless there is an alternative in the #else path, so we
-probably want to do that anyway.
+Signed-off-by: Baolin Wang <baolin.wang@linaro.org>
+---
+Changes since v1:
+ - Add the alignment if card->erase_size is not power of 2.
+---
+ drivers/mmc/core/core.c |   78 +++++++++++++++++++++++++++++------------------
+ 1 file changed, 48 insertions(+), 30 deletions(-)
 
-We could either fold this patch into the one I sent already, or
-have this one applied separately and use the version that Ulf
-preferred for the warning fix. I can send whichever we decide to
-do with a proper changelog once we have consensus.
-
-Signed-off-by: Arnd Bergmann <arnd@arndb.de>
-
-diff --git a/drivers/mmc/host/sdhci-pltfm.h b/drivers/mmc/host/sdhci-pltfm.h
-index d38053bf9e4d..173ef914281d 100644
---- a/drivers/mmc/host/sdhci-pltfm.h
-+++ b/drivers/mmc/host/sdhci-pltfm.h
-@@ -109,9 +109,9 @@ static inline void *sdhci_pltfm_priv(struct sdhci_pltfm_host *host)
- 	return (void *)host->private;
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index b4c08d1a..303a917 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -2195,6 +2195,51 @@ out:
+ 	return err;
  }
  
--#ifdef CONFIG_PM
- extern int sdhci_pltfm_suspend(struct device *dev);
- extern int sdhci_pltfm_resume(struct device *dev);
-+#ifdef CONFIG_PM
- extern const struct dev_pm_ops sdhci_pltfm_pmops;
- #define SDHCI_PLTFM_PMOPS (&sdhci_pltfm_pmops)
- #else
-diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-index 0411c9f36461..9a77cb009fc8 100644
---- a/drivers/mmc/host/sdhci.h
-+++ b/drivers/mmc/host/sdhci.h
-@@ -686,12 +686,10 @@ void sdhci_set_bus_width(struct sdhci_host *host, int width);
- void sdhci_reset(struct sdhci_host *host, u8 mask);
- void sdhci_set_uhs_signaling(struct sdhci_host *host, unsigned timing);
++static unsigned int mmc_align_erase_size(struct mmc_card *card,
++					 unsigned int *from,
++					 unsigned int *to,
++					 unsigned int nr)
++{
++	unsigned int from_new = *from, nr_new = nr, rem;
++
++	if (is_power_of_2(card->erase_size)) {
++		unsigned int temp = from_new;
++
++		from_new = round_up(temp, card->erase_size);
++		rem = from_new - temp;
++
++		if (nr_new > rem)
++			nr_new -= rem;
++		else
++			return 0;
++
++		nr_new = round_down(nr_new, card->erase_size);
++	} else {
++		rem = from_new % card->erase_size;
++		if (rem) {
++			rem = card->erase_size - rem;
++			from_new += rem;
++			if (nr_new > rem)
++				nr_new -= rem;
++			else
++				return 0;
++		}
++
++		rem = nr_new % card->erase_size;
++		if (rem)
++			nr_new -= rem;
++	}
++
++	if (nr_new == 0)
++		return 0;
++
++	/* 'from' and 'to' are inclusive */
++	*to = from_new + nr_new - 1;
++	*from = from_new;
++
++	return nr_new;
++}
++
+ /**
+  * mmc_erase - erase sectors.
+  * @card: card to erase
+@@ -2210,13 +2255,6 @@ int mmc_erase(struct mmc_card *card, unsigned int from, unsigned int nr,
+ 	unsigned int rem, to = from + nr;
+ 	int err;
  
--#ifdef CONFIG_PM
- extern int sdhci_suspend_host(struct sdhci_host *host);
- extern int sdhci_resume_host(struct sdhci_host *host);
- extern void sdhci_enable_irq_wakeups(struct sdhci_host *host);
- extern int sdhci_runtime_suspend_host(struct sdhci_host *host);
- extern int sdhci_runtime_resume_host(struct sdhci_host *host);
--#endif
+-	if (!(card->host->caps & MMC_CAP_ERASE) ||
+-	    !(card->csd.cmdclass & CCC_ERASE))
+-		return -EOPNOTSUPP;
+-
+-	if (!card->erase_size)
+-		return -EOPNOTSUPP;
+-
+ 	if (mmc_card_sd(card) && arg != MMC_ERASE_ARG)
+ 		return -EOPNOTSUPP;
  
- #endif /* __SDHCI_HW_H */
+@@ -2234,31 +2272,11 @@ int mmc_erase(struct mmc_card *card, unsigned int from, unsigned int nr,
+ 	}
+ 
+ 	if (arg == MMC_ERASE_ARG) {
+-		rem = from % card->erase_size;
+-		if (rem) {
+-			rem = card->erase_size - rem;
+-			from += rem;
+-			if (nr > rem)
+-				nr -= rem;
+-			else
+-				return 0;
+-		}
+-		rem = nr % card->erase_size;
+-		if (rem)
+-			nr -= rem;
++		rem = mmc_align_erase_size(card, &from, &to, nr);
++		if (rem == 0)
++			return 0;
+ 	}
+ 
+-	if (nr == 0)
+-		return 0;
+-
+-	to = from + nr;
+-
+-	if (to <= from)
+-		return -EINVAL;
+-
+-	/* 'from' and 'to' are inclusive */
+-	to -= 1;
+-
+ 	/*
+ 	 * Special case where only one erase-group fits in the timeout budget:
+ 	 * If the region crosses an erase-group boundary on this particular
+-- 
+1.7.9.5
 
