@@ -1,58 +1,73 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: [PATCH 00/11] mmc: sdhci: Cleanup assignment/definition of PM ops
-Date: Wed, 27 Jul 2016 13:31:56 +0200
-Message-ID: <1469619127-29283-1-git-send-email-ulf.hansson@linaro.org>
+Subject: [PATCH 01/11] mmc: sdhci-pci-core: Simplify code by using SET_SYSTEM_SLEEP_PM_OPS
+Date: Wed, 27 Jul 2016 13:31:57 +0200
+Message-ID: <1469619127-29283-2-git-send-email-ulf.hansson@linaro.org>
+References: <1469619127-29283-1-git-send-email-ulf.hansson@linaro.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-lf0-f46.google.com ([209.85.215.46]:35854 "EHLO
-	mail-lf0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755628AbcG0LcN (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 27 Jul 2016 07:32:13 -0400
-Received: by mail-lf0-f46.google.com with SMTP id g62so25072167lfe.3
-        for <linux-mmc@vger.kernel.org>; Wed, 27 Jul 2016 04:32:12 -0700 (PDT)
+Received: from mail-lf0-f45.google.com ([209.85.215.45]:35861 "EHLO
+	mail-lf0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755676AbcG0LcO (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 27 Jul 2016 07:32:14 -0400
+Received: by mail-lf0-f45.google.com with SMTP id g62so25072506lfe.3
+        for <linux-mmc@vger.kernel.org>; Wed, 27 Jul 2016 04:32:13 -0700 (PDT)
+In-Reply-To: <1469619127-29283-1-git-send-email-ulf.hansson@linaro.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>
 Cc: Arnd Bergmann <arnd@arndb.de>
 
-The code in various sdhci drivers can be cleaned up in regards how PM ops is
-being defined and assigned. This series attempts to clean up this code.
+Convert to define the system PM callbacks to be build for CONFIG_PM_SLEEP
+and use the SET_SYSTEM_SLEEP_PM_OPS. In this way the code becomes cleaner.
 
-In the end we want system PM sleep callbacks to be defined within #ifdef
-CONFIG_PM_SLEEP and not as currently within CONFIG_PM.
+Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+---
+ drivers/mmc/host/sdhci-pci-core.c | 16 +++++-----------
+ 1 file changed, 5 insertions(+), 11 deletions(-)
 
-Ulf Hansson (11):
-  mmc: sdhci-pci-core: Simplify code by using SET_SYSTEM_SLEEP_PM_OPS
-  mmc: sdhci-acpi: Simplify code by using SET_SYSTEM_SLEEP_PM_OPS
-  mmc: sdhci-of-esdhc: Simplify code by using SIMPLE_DEV_PM_OPS
-  mmc: sdhci-pxav3: Remove non needed #ifdef CONFIG_PM for dev_pm_ops
-  mmc: sdhci-s3c: Remove non needed #ifdef CONFIG_PM for dev_pm_ops
-  mmc: sdhci-sirf: Remove non needed #ifdef CONFIG_PM* for dev_pm_ops
-  mmc: sdhci-esdhc-imx: Assign system PM ops within #ifdef
-    CONFIG_PM_SLEEP
-  mmc: sdhci-esdhc-imx: Use common sdhci_suspend|resume_host()
-  mmc: sdhci-pltfm: Make sdhci_pltfm_suspend|resume() static
-  mmc: sdhci-pltfm: Convert to use the SET_SYSTEM_SLEEP_PM_OPS
-  mmc: sdhci-pltfm: Drop define for SDHCI_PLTFM_PMOPS
-
- drivers/mmc/host/sdhci-acpi.c      |  8 +-------
- drivers/mmc/host/sdhci-bcm-kona.c  |  2 +-
- drivers/mmc/host/sdhci-cns3xxx.c   |  2 +-
- drivers/mmc/host/sdhci-dove.c      |  2 +-
- drivers/mmc/host/sdhci-esdhc-imx.c | 10 +++++++---
- drivers/mmc/host/sdhci-iproc.c     |  2 +-
- drivers/mmc/host/sdhci-of-esdhc.c  | 16 ++++++----------
- drivers/mmc/host/sdhci-of-hlwd.c   |  2 +-
- drivers/mmc/host/sdhci-pci-core.c  | 16 +++++-----------
- drivers/mmc/host/sdhci-pltfm.c     | 13 +++++--------
- drivers/mmc/host/sdhci-pltfm.h     |  7 -------
- drivers/mmc/host/sdhci-pxav2.c     |  2 +-
- drivers/mmc/host/sdhci-pxav3.c     |  9 +--------
- drivers/mmc/host/sdhci-s3c.c       |  9 +--------
- drivers/mmc/host/sdhci-sirf.c      |  4 +---
- drivers/mmc/host/sdhci-tegra.c     |  2 +-
- drivers/mmc/host/sdhci_f_sdh30.c   |  2 +-
- 17 files changed, 35 insertions(+), 73 deletions(-)
-
+diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-pci-core.c
+index bdda3d0..897cfd2 100644
+--- a/drivers/mmc/host/sdhci-pci-core.c
++++ b/drivers/mmc/host/sdhci-pci-core.c
+@@ -1413,8 +1413,7 @@ static const struct sdhci_ops sdhci_pci_ops = {
+  *                                                                           *
+ \*****************************************************************************/
+ 
+-#ifdef CONFIG_PM
+-
++#ifdef CONFIG_PM_SLEEP
+ static int sdhci_pci_suspend(struct device *dev)
+ {
+ 	struct pci_dev *pdev = to_pci_dev(dev);
+@@ -1496,7 +1495,9 @@ static int sdhci_pci_resume(struct device *dev)
+ 
+ 	return 0;
+ }
++#endif
+ 
++#ifdef CONFIG_PM
+ static int sdhci_pci_runtime_suspend(struct device *dev)
+ {
+ 	struct pci_dev *pdev = to_pci_dev(dev);
+@@ -1562,17 +1563,10 @@ static int sdhci_pci_runtime_resume(struct device *dev)
+ 
+ 	return 0;
+ }
+-
+-#else /* CONFIG_PM */
+-
+-#define sdhci_pci_suspend NULL
+-#define sdhci_pci_resume NULL
+-
+-#endif /* CONFIG_PM */
++#endif
+ 
+ static const struct dev_pm_ops sdhci_pci_pm_ops = {
+-	.suspend = sdhci_pci_suspend,
+-	.resume = sdhci_pci_resume,
++	SET_SYSTEM_SLEEP_PM_OPS(sdhci_pci_suspend, sdhci_pci_resume)
+ 	SET_RUNTIME_PM_OPS(sdhci_pci_runtime_suspend,
+ 			sdhci_pci_runtime_resume, NULL)
+ };
 -- 
 1.9.1
 
