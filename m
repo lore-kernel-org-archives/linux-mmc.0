@@ -1,62 +1,150 @@
-From: Arnd Bergmann <arnd@arndb.de>
-Subject: Re: [PATCH] mmc: sdhci-esdhc-imx: avoid unused function warnings
-Date: Wed, 27 Jul 2016 09:30:04 +0200
-Message-ID: <4495455.SxyUtqbGIN@wuerfel>
-References: <20160726123246.879426-1-arnd@arndb.de> <19008164.GYnbEcydYS@wuerfel> <CAPDyKFrQuqCV_7LLm=ueJkj0wa9SCtoaGEJnivoXQ4hfrv-1OA@mail.gmail.com>
+From: Shawn Lin <shawn.lin@rock-chips.com>
+Subject: Re: [PATCH v2] mmc: core: Optimize the mmc erase size alignment
+Date: Wed, 27 Jul 2016 17:59:22 +0800
+Message-ID: <dabf9f48-9b27-eb3f-1892-a1d416ed1d3b@rock-chips.com>
+References: <5117da51a7f11a16a8d10af060e2123f0d0a3ae8.1469603653.git.baolin.wang@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7Bit
+Content-Type: text/plain; charset=gbk; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mout.kundenserver.de ([212.227.126.133]:56685 "EHLO
-	mout.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753637AbcG0HaW (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 27 Jul 2016 03:30:22 -0400
-In-Reply-To: <CAPDyKFrQuqCV_7LLm=ueJkj0wa9SCtoaGEJnivoXQ4hfrv-1OA@mail.gmail.com>
+Received: from lucky1.263xmail.com ([211.157.147.132]:48222 "EHLO
+	lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753285AbcG0J7e (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 27 Jul 2016 05:59:34 -0400
+In-Reply-To: <5117da51a7f11a16a8d10af060e2123f0d0a3ae8.1469603653.git.baolin.wang@linaro.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, Dong Aisheng <aisheng.dong@nxp.com>, Haibo Chen <haibo.chen@freescale.com>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+To: Baolin Wang <baolin.wang@linaro.org>, ulf.hansson@linaro.org
+Cc: shawn.lin@rock-chips.com, adrian.hunter@intel.com, rmk+kernel@arm.linux.org.uk, dianders@chromium.org, heiko@sntech.de, david@protonic.nl, hdegoede@redhat.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, broonie@kernel.org, linus.walleij@linaro.org
 
-On Wednesday, July 27, 2016 12:48:23 AM CEST Ulf Hansson wrote:
-> On 26 July 2016 at 22:56, Arnd Bergmann <arnd@arndb.de> wrote:
-> > On Tuesday, July 26, 2016 10:18:53 PM CEST Ulf Hansson wrote:
-> >> > diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
-> >> > index 2bb326bbc34a..593e34053c4b 100644
-> >> > --- a/drivers/mmc/host/sdhci-esdhc-imx.c
-> >> > +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
-> >> > @@ -1293,13 +1293,12 @@ static int sdhci_esdhc_imx_remove(struct platform_device *pdev)
-> >> >         return 0;
-> >> >  }
-> >> >
-> >> > -#ifdef CONFIG_PM
-> >> > -static int sdhci_esdhc_suspend(struct device *dev)
-> >> > +static int __maybe_unused sdhci_esdhc_suspend(struct device *dev)
-> >>
-> >> Instead of using __maybe_unused, I prefer to change above "#ifdef
-> >> CONFIG_PMf" to "#ifdef CONFIG_PM_SLEEP".
-> >> I do realize that the runtime PM callbacks still requires #ifdef
-> >> CONFIG_PM, so yes that's requires an extra "ifdef".
-> >>
-> >> Sure, it's more a matter of taste (and micro optimizations).
-> >
-> > I was hoping that we could eventually do a mass-conversion to
-> > __maybe_unused, as everybody seems to get the #ifdef wrong.
-> >
-> > Any specific reason for your preference?
-> 
-> Only that this is how I get used to do it - and that it becomes a bit
-> more clear what is needed to support the various PM configurations.
-> 
-> If you still insist on the "maybe_unused" option, that's okay as well.
+On 2016/7/27 15:17, Baolin Wang wrote:
+> Before issuing mmc_erase() function, users always have checked if it can
+> erase with mmc_can_erase/trim/discard() function, thus remove the redundant
+> erase checking in mmc_erase() function.
+>
+> This patch also optimizes the erase start/end sector alignment with
+> round_up()/round_down() function, when erase command is MMC_ERASE_ARG.
+>
+> Signed-off-by: Baolin Wang <baolin.wang@linaro.org>
+> ---
+> Changes since v1:
+>  - Add the alignment if card->erase_size is not power of 2.
+> ---
+>  drivers/mmc/core/core.c |   78 +++++++++++++++++++++++++++++------------------
+>  1 file changed, 48 insertions(+), 30 deletions(-)
+>
+> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+> index b4c08d1a..303a917 100644
+> --- a/drivers/mmc/core/core.c
+> +++ b/drivers/mmc/core/core.c
+> @@ -2195,6 +2195,51 @@ out:
+>  	return err;
+>  }
+>
+> +static unsigned int mmc_align_erase_size(struct mmc_card *card,
+> +					 unsigned int *from,
+> +					 unsigned int *to,
+> +					 unsigned int nr)
+> +{
+> +	unsigned int from_new = *from, nr_new = nr, rem;
+> +
+> +	if (is_power_of_2(card->erase_size)) {
+> +		unsigned int temp = from_new;
+> +
+> +		from_new = round_up(temp, card->erase_size);
+> +		rem = from_new - temp;
+> +
+> +		if (nr_new > rem)
+> +			nr_new -= rem;
+> +		else
+> +			return 0;
+> +
+> +		nr_new = round_down(nr_new, card->erase_size);
+> +	} else {
+> +		rem = from_new % card->erase_size;
+> +		if (rem) {
+> +			rem = card->erase_size - rem;
+> +			from_new += rem;
+> +			if (nr_new > rem)
+> +				nr_new -= rem;
+> +			else
+> +				return 0;
+> +		}
+> +
+> +		rem = nr_new % card->erase_size;
+> +		if (rem)
+> +			nr_new -= rem;
+> +	}
+> +
+> +	if (nr_new == 0)
+> +		return 0;
+> +
+> +	/* 'from' and 'to' are inclusive */
+> +	*to = from_new + nr_new - 1;
+> +	*from = from_new;
+> +
+> +	return nr_new;
+> +}
+> +
+>  /**
+>   * mmc_erase - erase sectors.
+>   * @card: card to erase
+> @@ -2210,13 +2255,6 @@ int mmc_erase(struct mmc_card *card, unsigned int from, unsigned int nr,
+>  	unsigned int rem, to = from + nr;
+>  	int err;
+>
+> -	if (!(card->host->caps & MMC_CAP_ERASE) ||
+> -	    !(card->csd.cmdclass & CCC_ERASE))
 
-I only have a mild preference for __maybe_unused because it's harder
-to get wrong. I have sent dozens of bugfixes for drivers that have
-incorrect #ifdef, and I'd prefer not having to send that many in the
-future, so I try to convert them to __maybe_unused whenever a problem
-shows up to slowly change the coding style in the kernel.
+Why remove the check , "!(card->csd.cmdclass & CCC_ERASE))"?
 
-Build time coverage is another point here, but that is also what caused
-problems in my patch since the declarations were hidden (I assume not
-intentionally).
+> -		return -EOPNOTSUPP;
+> -
+> -	if (!card->erase_size)
+> -		return -EOPNOTSUPP;
+> -
+>  	if (mmc_card_sd(card) && arg != MMC_ERASE_ARG)
+>  		return -EOPNOTSUPP;
+>
+> @@ -2234,31 +2272,11 @@ int mmc_erase(struct mmc_card *card, unsigned int from, unsigned int nr,
+>  	}
+>
+>  	if (arg == MMC_ERASE_ARG) {
+> -		rem = from % card->erase_size;
+> -		if (rem) {
+> -			rem = card->erase_size - rem;
+> -			from += rem;
+> -			if (nr > rem)
+> -				nr -= rem;
+> -			else
+> -				return 0;
+> -		}
+> -		rem = nr % card->erase_size;
+> -		if (rem)
+> -			nr -= rem;
+> +		rem = mmc_align_erase_size(card, &from, &to, nr);
+> +		if (rem == 0)
+> +			return 0;
+>  	}
+>
+> -	if (nr == 0)
+> -		return 0;
+> -
+> -	to = from + nr;
+> -
+> -	if (to <= from)
+> -		return -EINVAL;
+> -
+> -	/* 'from' and 'to' are inclusive */
+> -	to -= 1;
+> -
+>  	/*
+>  	 * Special case where only one erase-group fits in the timeout budget:
+>  	 * If the region crosses an erase-group boundary on this particular
+>
 
-	Arnd
+
+-- 
+Best Regards
+Shawn Lin
+
