@@ -1,61 +1,53 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: [PATCH 04/11] mmc: sdhci-pxav3: Remove non needed #ifdef CONFIG_PM for dev_pm_ops
-Date: Wed, 27 Jul 2016 13:32:00 +0200
-Message-ID: <1469619127-29283-5-git-send-email-ulf.hansson@linaro.org>
+Subject: [PATCH 08/11] mmc: sdhci-esdhc-imx: Use common sdhci_suspend|resume_host()
+Date: Wed, 27 Jul 2016 13:32:04 +0200
+Message-ID: <1469619127-29283-9-git-send-email-ulf.hansson@linaro.org>
 References: <1469619127-29283-1-git-send-email-ulf.hansson@linaro.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-lf0-f46.google.com ([209.85.215.46]:35643 "EHLO
-	mail-lf0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755718AbcG0LcT (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 27 Jul 2016 07:32:19 -0400
-Received: by mail-lf0-f46.google.com with SMTP id f93so25146406lfi.2
-        for <linux-mmc@vger.kernel.org>; Wed, 27 Jul 2016 04:32:18 -0700 (PDT)
+Received: from mail-lf0-f54.google.com ([209.85.215.54]:33602 "EHLO
+	mail-lf0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755805AbcG0Lc0 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 27 Jul 2016 07:32:26 -0400
+Received: by mail-lf0-f54.google.com with SMTP id b199so25208328lfe.0
+        for <linux-mmc@vger.kernel.org>; Wed, 27 Jul 2016 04:32:25 -0700 (PDT)
 In-Reply-To: <1469619127-29283-1-git-send-email-ulf.hansson@linaro.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>
 Cc: Arnd Bergmann <arnd@arndb.de>
 
-As the SET_SYSTEM_SLEEP_PM_OPS and the SET_RUNTIME_PM_OPS macro deals with
-the CONFIG_PM options when assigning the callbacks, it becomes redundant
-to control this when declaring the struct dev_pm_ops. Instead let's always
-declare it as it simplifies the code.
+To prepare to make the sdhci_pltfm_suspend|resume() static functions, move
+sdhci-esdhc-imx over to use the sdhci_suspend|resume_host().
 
 Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
 ---
- drivers/mmc/host/sdhci-pxav3.c | 9 +--------
- 1 file changed, 1 insertion(+), 8 deletions(-)
+ drivers/mmc/host/sdhci-esdhc-imx.c | 6 ++++--
+ 1 file changed, 4 insertions(+), 2 deletions(-)
 
-diff --git a/drivers/mmc/host/sdhci-pxav3.c b/drivers/mmc/host/sdhci-pxav3.c
-index 3013250..dd1938d 100644
---- a/drivers/mmc/host/sdhci-pxav3.c
-+++ b/drivers/mmc/host/sdhci-pxav3.c
-@@ -583,24 +583,17 @@ static int sdhci_pxav3_runtime_resume(struct device *dev)
+diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
+index f5768a6..99e0b33 100644
+--- a/drivers/mmc/host/sdhci-esdhc-imx.c
++++ b/drivers/mmc/host/sdhci-esdhc-imx.c
+@@ -1296,7 +1296,9 @@ static int sdhci_esdhc_imx_remove(struct platform_device *pdev)
+ #ifdef CONFIG_PM_SLEEP
+ static int sdhci_esdhc_suspend(struct device *dev)
+ {
+-	return sdhci_pltfm_suspend(dev);
++	struct sdhci_host *host = dev_get_drvdata(dev);
++
++	return sdhci_suspend_host(host);
+ }
+ 
+ static int sdhci_esdhc_resume(struct device *dev)
+@@ -1306,7 +1308,7 @@ static int sdhci_esdhc_resume(struct device *dev)
+ 	/* re-initialize hw state in case it's lost in low power mode */
+ 	sdhci_esdhc_imx_hwinit(host);
+ 
+-	return sdhci_pltfm_resume(dev);
++	return sdhci_resume_host(host);
  }
  #endif
  
--#ifdef CONFIG_PM
- static const struct dev_pm_ops sdhci_pxav3_pmops = {
- 	SET_SYSTEM_SLEEP_PM_OPS(sdhci_pxav3_suspend, sdhci_pxav3_resume)
- 	SET_RUNTIME_PM_OPS(sdhci_pxav3_runtime_suspend,
- 		sdhci_pxav3_runtime_resume, NULL)
- };
- 
--#define SDHCI_PXAV3_PMOPS (&sdhci_pxav3_pmops)
--
--#else
--#define SDHCI_PXAV3_PMOPS NULL
--#endif
--
- static struct platform_driver sdhci_pxav3_driver = {
- 	.driver		= {
- 		.name	= "sdhci-pxav3",
- 		.of_match_table = of_match_ptr(sdhci_pxav3_of_match),
--		.pm	= SDHCI_PXAV3_PMOPS,
-+		.pm	= &sdhci_pxav3_pmops,
- 	},
- 	.probe		= sdhci_pxav3_probe,
- 	.remove		= sdhci_pxav3_remove,
 -- 
 1.9.1
 
