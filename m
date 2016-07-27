@@ -1,93 +1,71 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: rtsx: Remove deprecated create_singlethread_workqueue
-Date: Wed, 27 Jul 2016 14:47:19 +0200
-Message-ID: <CAPDyKFpfNmcuTj+0Y7WE=9bsk=QJy0tZLcuzgor4dJPFRHxOUg@mail.gmail.com>
-References: <20160726170106.GA10120@Karyakshetra>
+Subject: Re: [PATCH 00/11] mmc: sdhci: Cleanup assignment/definition of PM ops
+Date: Wed, 27 Jul 2016 14:50:05 +0200
+Message-ID: <CAPDyKFraYeLZ25Z4FoEcmrz5eYcyXHjtF17q7mAs2N-SCfE+Sw@mail.gmail.com>
+References: <1469619127-29283-1-git-send-email-ulf.hansson@linaro.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20160726170106.GA10120@Karyakshetra>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Bhaktipriya Shridhar <bhaktipriya96@gmail.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Tejun Heo <tj@kernel.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-wm0-f54.google.com ([74.125.82.54]:35117 "EHLO
+	mail-wm0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755374AbcG0MuJ (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 27 Jul 2016 08:50:09 -0400
+Received: by mail-wm0-f54.google.com with SMTP id f65so211825887wmi.0
+        for <linux-mmc@vger.kernel.org>; Wed, 27 Jul 2016 05:50:08 -0700 (PDT)
+In-Reply-To: <1469619127-29283-1-git-send-email-ulf.hansson@linaro.org>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc <linux-mmc@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>
+Cc: Arnd Bergmann <arnd@arndb.de>
 
-On 26 July 2016 at 19:01, Bhaktipriya Shridhar <bhaktipriya96@gmail.com> wrote:
-> The workqueue "workq" provides support for sd/mmc async request, which
-> makes next request do dma_map_sg() while previous request transferring
-> data.
+On 27 July 2016 at 13:31, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+> The code in various sdhci drivers can be cleaned up in regards how PM ops is
+> being defined and assigned. This series attempts to clean up this code.
 >
-> The workqueue has a single workitem(&host->work) and hence doesn't require
-> ordering. Also, it is not being used on a memory reclaim path. Hence,
-> the singlethreaded workqueue has been replaced with the use of system_wq.
+> In the end we want system PM sleep callbacks to be defined within #ifdef
+> CONFIG_PM_SLEEP and not as currently within CONFIG_PM.
 >
-> System workqueues have been able to handle high level of concurrency
-> for a long time now and hence it's not required to have a singlethreaded
-> workqueue just to gain concurrency. Unlike a dedicated per-cpu workqueue
-> created with create_singlethread_workqueue(), system_wq allows multiple
-> work items to overlap executions even on the same CPU; however, a
-> per-cpu workqueue doesn't have any CPU locality or global ordering
-> guarantee unless the target CPU is explicitly specified and thus the
-> increase of local concurrency shouldn't make any difference.
+> Ulf Hansson (11):
+>   mmc: sdhci-pci-core: Simplify code by using SET_SYSTEM_SLEEP_PM_OPS
+>   mmc: sdhci-acpi: Simplify code by using SET_SYSTEM_SLEEP_PM_OPS
+>   mmc: sdhci-of-esdhc: Simplify code by using SIMPLE_DEV_PM_OPS
+>   mmc: sdhci-pxav3: Remove non needed #ifdef CONFIG_PM for dev_pm_ops
+>   mmc: sdhci-s3c: Remove non needed #ifdef CONFIG_PM for dev_pm_ops
+>   mmc: sdhci-sirf: Remove non needed #ifdef CONFIG_PM* for dev_pm_ops
+>   mmc: sdhci-esdhc-imx: Assign system PM ops within #ifdef
+>     CONFIG_PM_SLEEP
+>   mmc: sdhci-esdhc-imx: Use common sdhci_suspend|resume_host()
+>   mmc: sdhci-pltfm: Make sdhci_pltfm_suspend|resume() static
+>   mmc: sdhci-pltfm: Convert to use the SET_SYSTEM_SLEEP_PM_OPS
+>   mmc: sdhci-pltfm: Drop define for SDHCI_PLTFM_PMOPS
 >
-> Work item has been flushed in rtsx_pci_sdmmc_drv_remove() to ensure that
-> there are no pending tasks while disconnecting the driver.
+>  drivers/mmc/host/sdhci-acpi.c      |  8 +-------
+>  drivers/mmc/host/sdhci-bcm-kona.c  |  2 +-
+>  drivers/mmc/host/sdhci-cns3xxx.c   |  2 +-
+>  drivers/mmc/host/sdhci-dove.c      |  2 +-
+>  drivers/mmc/host/sdhci-esdhc-imx.c | 10 +++++++---
+>  drivers/mmc/host/sdhci-iproc.c     |  2 +-
+>  drivers/mmc/host/sdhci-of-esdhc.c  | 16 ++++++----------
+>  drivers/mmc/host/sdhci-of-hlwd.c   |  2 +-
+>  drivers/mmc/host/sdhci-pci-core.c  | 16 +++++-----------
+>  drivers/mmc/host/sdhci-pltfm.c     | 13 +++++--------
+>  drivers/mmc/host/sdhci-pltfm.h     |  7 -------
+>  drivers/mmc/host/sdhci-pxav2.c     |  2 +-
+>  drivers/mmc/host/sdhci-pxav3.c     |  9 +--------
+>  drivers/mmc/host/sdhci-s3c.c       |  9 +--------
+>  drivers/mmc/host/sdhci-sirf.c      |  4 +---
+>  drivers/mmc/host/sdhci-tegra.c     |  2 +-
+>  drivers/mmc/host/sdhci_f_sdh30.c   |  2 +-
+>  17 files changed, 35 insertions(+), 73 deletions(-)
 >
-> Signed-off-by: Bhaktipriya Shridhar <bhaktipriya96@gmail.com>
+> --
+> 1.9.1
+>
 
-Thanks, applied for next!
+I decided to queue up this for next, as most of these are rather
+trivial changes and to get it tested in next.
+
+Feel free to add acks/reviewed-by, or tell me to drop these changes!
 
 Kind regards
 Uffe
-
-> ---
->  drivers/mmc/host/rtsx_pci_sdmmc.c | 12 ++----------
->  1 file changed, 2 insertions(+), 10 deletions(-)
->
-> diff --git a/drivers/mmc/host/rtsx_pci_sdmmc.c b/drivers/mmc/host/rtsx_pci_sdmmc.c
-> index 9313748..49516dc 100644
-> --- a/drivers/mmc/host/rtsx_pci_sdmmc.c
-> +++ b/drivers/mmc/host/rtsx_pci_sdmmc.c
-> @@ -38,7 +38,6 @@ struct realtek_pci_sdmmc {
->         struct rtsx_pcr         *pcr;
->         struct mmc_host         *mmc;
->         struct mmc_request      *mrq;
-> -       struct workqueue_struct *workq;
->  #define SDMMC_WORKQ_NAME       "rtsx_pci_sdmmc_workq"
->
->         struct work_struct      work;
-> @@ -885,7 +884,7 @@ static void sdmmc_request(struct mmc_host *mmc, struct mmc_request *mrq)
->         if (sd_rw_cmd(mrq->cmd) || sdio_extblock_cmd(mrq->cmd, data))
->                 host->using_cookie = sd_pre_dma_transfer(host, data, false);
->
-> -       queue_work(host->workq, &host->work);
-> +       schedule_work(&host->work);
->  }
->
->  static int sd_set_bus_width(struct realtek_pci_sdmmc *host,
-> @@ -1404,11 +1403,6 @@ static int rtsx_pci_sdmmc_drv_probe(struct platform_device *pdev)
->                 return -ENOMEM;
->
->         host = mmc_priv(mmc);
-> -       host->workq = create_singlethread_workqueue(SDMMC_WORKQ_NAME);
-> -       if (!host->workq) {
-> -               mmc_free_host(mmc);
-> -               return -ENOMEM;
-> -       }
->         host->pcr = pcr;
->         host->mmc = mmc;
->         host->pdev = pdev;
-> @@ -1462,9 +1456,7 @@ static int rtsx_pci_sdmmc_drv_remove(struct platform_device *pdev)
->         mmc_remove_host(mmc);
->         host->eject = true;
->
-> -       flush_workqueue(host->workq);
-> -       destroy_workqueue(host->workq);
-> -       host->workq = NULL;
-> +       flush_work(&host->work);
->
->         mmc_free_host(mmc);
->
-> --
-> 2.1.4
->
