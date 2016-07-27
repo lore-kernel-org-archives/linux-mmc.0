@@ -1,49 +1,93 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 0/2] mmc: rtsx_pci: Enable support for erase/discard/trim requests
-Date: Wed, 27 Jul 2016 14:45:00 +0200
-Message-ID: <CAPDyKFrfsB7ChroiJ_z1Rq5ohaidrg=veSa0fWNi50V6BBB0Hw@mail.gmail.com>
-References: <1469622338-11158-1-git-send-email-ulf.hansson@linaro.org>
+Subject: Re: [PATCH] mmc: rtsx: Remove deprecated create_singlethread_workqueue
+Date: Wed, 27 Jul 2016 14:47:19 +0200
+Message-ID: <CAPDyKFpfNmcuTj+0Y7WE=9bsk=QJy0tZLcuzgor4dJPFRHxOUg@mail.gmail.com>
+References: <20160726170106.GA10120@Karyakshetra>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wm0-f41.google.com ([74.125.82.41]:38390 "EHLO
-	mail-wm0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755309AbcG0MpE (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 27 Jul 2016 08:45:04 -0400
-Received: by mail-wm0-f41.google.com with SMTP id o80so60659266wme.1
-        for <linux-mmc@vger.kernel.org>; Wed, 27 Jul 2016 05:45:03 -0700 (PDT)
-In-Reply-To: <1469622338-11158-1-git-send-email-ulf.hansson@linaro.org>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20160726170106.GA10120@Karyakshetra>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Bhaktipriya Shridhar <bhaktipriya96@gmail.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Tejun Heo <tj@kernel.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Mauro Santos <registo.mailling@gmail.com>
-Cc: Micky Ching <micky_ching@realsil.com.cn>, Ulf Hansson <ulf.hansson@linaro.org>, Wei WANG <wei_wang@realsil.com.cn>, linux-mmc <linux-mmc@vger.kernel.org>, Roger Tseng <rogerable@realtek.com>, Baolin Wang <baolin.wang@linaro.org>
 
-On 27 July 2016 at 14:25, Ulf Hansson <ulf.hansson@linaro.org> wrote:
-> To enable the rtsx_pci driver to support erase/discard/trim, it needs to manage
-> timeouts for R1B responses according to the expecations from the mmc core. Fix
-> this and then enable MMC_CAP_ERASE.
+On 26 July 2016 at 19:01, Bhaktipriya Shridhar <bhaktipriya96@gmail.com> wrote:
+> The workqueue "workq" provides support for sd/mmc async request, which
+> makes next request do dma_map_sg() while previous request transferring
+> data.
 >
-> Ulf Hansson (2):
->   mmc: rtsx_pci: Use the provided busy timeout from the mmc core
->   mmc: rtsx_pci: Enable MMC_CAP_ERASE to allow erase/discard/trim
->     requests
+> The workqueue has a single workitem(&host->work) and hence doesn't require
+> ordering. Also, it is not being used on a memory reclaim path. Hence,
+> the singlethreaded workqueue has been replaced with the use of system_wq.
 >
->  drivers/mmc/host/rtsx_pci_sdmmc.c | 4 ++--
->  1 file changed, 2 insertions(+), 2 deletions(-)
+> System workqueues have been able to handle high level of concurrency
+> for a long time now and hence it's not required to have a singlethreaded
+> workqueue just to gain concurrency. Unlike a dedicated per-cpu workqueue
+> created with create_singlethread_workqueue(), system_wq allows multiple
+> work items to overlap executions even on the same CPU; however, a
+> per-cpu workqueue doesn't have any CPU locality or global ordering
+> guarantee unless the target CPU is explicitly specified and thus the
+> increase of local concurrency shouldn't make any difference.
 >
-> --
-> 1.9.1
+> Work item has been flushed in rtsx_pci_sdmmc_drv_remove() to ensure that
+> there are no pending tasks while disconnecting the driver.
 >
+> Signed-off-by: Bhaktipriya Shridhar <bhaktipriya96@gmail.com>
 
-Mauro, I have applied this for my next branch (based on 4.7), to allow
-it to be easily tested.
-
-Just clone my tree below and build/replace your kernel.
-git://git.linaro.org/people/ulf.hansson/mmc.git next
-
-Running fstrim and checking blkdiscard should be sufficient as test cases.
-
-Don't hesitate to ask if problems occurs!
+Thanks, applied for next!
 
 Kind regards
 Uffe
+
+> ---
+>  drivers/mmc/host/rtsx_pci_sdmmc.c | 12 ++----------
+>  1 file changed, 2 insertions(+), 10 deletions(-)
+>
+> diff --git a/drivers/mmc/host/rtsx_pci_sdmmc.c b/drivers/mmc/host/rtsx_pci_sdmmc.c
+> index 9313748..49516dc 100644
+> --- a/drivers/mmc/host/rtsx_pci_sdmmc.c
+> +++ b/drivers/mmc/host/rtsx_pci_sdmmc.c
+> @@ -38,7 +38,6 @@ struct realtek_pci_sdmmc {
+>         struct rtsx_pcr         *pcr;
+>         struct mmc_host         *mmc;
+>         struct mmc_request      *mrq;
+> -       struct workqueue_struct *workq;
+>  #define SDMMC_WORKQ_NAME       "rtsx_pci_sdmmc_workq"
+>
+>         struct work_struct      work;
+> @@ -885,7 +884,7 @@ static void sdmmc_request(struct mmc_host *mmc, struct mmc_request *mrq)
+>         if (sd_rw_cmd(mrq->cmd) || sdio_extblock_cmd(mrq->cmd, data))
+>                 host->using_cookie = sd_pre_dma_transfer(host, data, false);
+>
+> -       queue_work(host->workq, &host->work);
+> +       schedule_work(&host->work);
+>  }
+>
+>  static int sd_set_bus_width(struct realtek_pci_sdmmc *host,
+> @@ -1404,11 +1403,6 @@ static int rtsx_pci_sdmmc_drv_probe(struct platform_device *pdev)
+>                 return -ENOMEM;
+>
+>         host = mmc_priv(mmc);
+> -       host->workq = create_singlethread_workqueue(SDMMC_WORKQ_NAME);
+> -       if (!host->workq) {
+> -               mmc_free_host(mmc);
+> -               return -ENOMEM;
+> -       }
+>         host->pcr = pcr;
+>         host->mmc = mmc;
+>         host->pdev = pdev;
+> @@ -1462,9 +1456,7 @@ static int rtsx_pci_sdmmc_drv_remove(struct platform_device *pdev)
+>         mmc_remove_host(mmc);
+>         host->eject = true;
+>
+> -       flush_workqueue(host->workq);
+> -       destroy_workqueue(host->workq);
+> -       host->workq = NULL;
+> +       flush_work(&host->work);
+>
+>         mmc_free_host(mmc);
+>
+> --
+> 2.1.4
+>
