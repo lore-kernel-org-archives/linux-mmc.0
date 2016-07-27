@@ -1,40 +1,49 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: [PATCH 2/2] mmc: rtsx_pci: Enable MMC_CAP_ERASE to allow erase/discard/trim requests
-Date: Wed, 27 Jul 2016 14:25:38 +0200
-Message-ID: <1469622338-11158-3-git-send-email-ulf.hansson@linaro.org>
+Subject: Re: [PATCH 0/2] mmc: rtsx_pci: Enable support for erase/discard/trim requests
+Date: Wed, 27 Jul 2016 14:45:00 +0200
+Message-ID: <CAPDyKFrfsB7ChroiJ_z1Rq5ohaidrg=veSa0fWNi50V6BBB0Hw@mail.gmail.com>
 References: <1469622338-11158-1-git-send-email-ulf.hansson@linaro.org>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-lf0-f49.google.com ([209.85.215.49]:35872 "EHLO
-	mail-lf0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754131AbcG0MZ5 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 27 Jul 2016 08:25:57 -0400
-Received: by mail-lf0-f49.google.com with SMTP id g62so26046891lfe.3
-        for <linux-mmc@vger.kernel.org>; Wed, 27 Jul 2016 05:25:56 -0700 (PDT)
+Received: from mail-wm0-f41.google.com ([74.125.82.41]:38390 "EHLO
+	mail-wm0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755309AbcG0MpE (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 27 Jul 2016 08:45:04 -0400
+Received: by mail-wm0-f41.google.com with SMTP id o80so60659266wme.1
+        for <linux-mmc@vger.kernel.org>; Wed, 27 Jul 2016 05:45:03 -0700 (PDT)
 In-Reply-To: <1469622338-11158-1-git-send-email-ulf.hansson@linaro.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Micky Ching <micky_ching@realsil.com.cn>, Wei WANG <wei_wang@realsil.com.cn>, Roger Tseng <rogerable@realtek.com>, Mauro Santos <registo.mailling@gmail.com>, Baolin Wang <baolin.wang@linaro.org>
+To: Mauro Santos <registo.mailling@gmail.com>
+Cc: Micky Ching <micky_ching@realsil.com.cn>, Ulf Hansson <ulf.hansson@linaro.org>, Wei WANG <wei_wang@realsil.com.cn>, linux-mmc <linux-mmc@vger.kernel.org>, Roger Tseng <rogerable@realtek.com>, Baolin Wang <baolin.wang@linaro.org>
 
-Cc: Micky Ching <micky_ching@realsil.com.cn>
-Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
----
- drivers/mmc/host/rtsx_pci_sdmmc.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+On 27 July 2016 at 14:25, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+> To enable the rtsx_pci driver to support erase/discard/trim, it needs to manage
+> timeouts for R1B responses according to the expecations from the mmc core. Fix
+> this and then enable MMC_CAP_ERASE.
+>
+> Ulf Hansson (2):
+>   mmc: rtsx_pci: Use the provided busy timeout from the mmc core
+>   mmc: rtsx_pci: Enable MMC_CAP_ERASE to allow erase/discard/trim
+>     requests
+>
+>  drivers/mmc/host/rtsx_pci_sdmmc.c | 4 ++--
+>  1 file changed, 2 insertions(+), 2 deletions(-)
+>
+> --
+> 1.9.1
+>
 
-diff --git a/drivers/mmc/host/rtsx_pci_sdmmc.c b/drivers/mmc/host/rtsx_pci_sdmmc.c
-index 6158b96..40f957e 100644
---- a/drivers/mmc/host/rtsx_pci_sdmmc.c
-+++ b/drivers/mmc/host/rtsx_pci_sdmmc.c
-@@ -1360,7 +1360,7 @@ static void realtek_init_host(struct realtek_pci_sdmmc *host)
- 	mmc->ocr_avail = MMC_VDD_32_33 | MMC_VDD_33_34 | MMC_VDD_165_195;
- 	mmc->caps = MMC_CAP_4_BIT_DATA | MMC_CAP_SD_HIGHSPEED |
- 		MMC_CAP_MMC_HIGHSPEED | MMC_CAP_BUS_WIDTH_TEST |
--		MMC_CAP_UHS_SDR12 | MMC_CAP_UHS_SDR25;
-+		MMC_CAP_UHS_SDR12 | MMC_CAP_UHS_SDR25 | MMC_CAP_ERASE;
- 	mmc->caps2 = MMC_CAP2_NO_PRESCAN_POWERUP | MMC_CAP2_FULL_PWR_CYCLE;
- 	mmc->max_current_330 = 400;
- 	mmc->max_current_180 = 800;
--- 
-1.9.1
+Mauro, I have applied this for my next branch (based on 4.7), to allow
+it to be easily tested.
 
+Just clone my tree below and build/replace your kernel.
+git://git.linaro.org/people/ulf.hansson/mmc.git next
+
+Running fstrim and checking blkdiscard should be sufficient as test cases.
+
+Don't hesitate to ask if problems occurs!
+
+Kind regards
+Uffe
