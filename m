@@ -1,163 +1,224 @@
-From: Scott Wood <oss@buserror.net>
-Subject: Re: [PATCH v11 4/5] powerpc/fsl: move mpc85xx.h to include/linux/fsl
-Date: Tue, 26 Jul 2016 19:38:02 -0500
-Message-ID: <1469579882.25630.168.camel@buserror.net>
-References: <1468723822-30457-1-git-send-email-oss@buserror.net>
-	 <1468723822-30457-5-git-send-email-oss@buserror.net>
-	 <4016699.uYaV8nWfqC@wuerfel> <1469039508.25630.17.camel@buserror.net>
-	 <146909676646.16700.8383344640490662952@concordia>
-	 <1469119526.25630.42.camel@buserror.net>
-	 <HE1PR04MB088913D39528958C6905D43DF80D0@HE1PR04MB0889.eurprd04.prod.outlook.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <HE1PR04MB088913D39528958C6905D43DF80D0@HE1PR04MB0889.eurprd04.prod.outlook.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Yangbo Lu <yangbo.lu@nxp.com>, Michael Ellerman <mpe@ellerman.id.au>, Arnd Bergmann <arnd@arndb.de>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linuxppc-dev@lists.ozlabs.org" <linuxppc-dev@lists.ozlabs.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+From: Simon Horman <horms+renesas@verge.net.au>
+Subject: [PATCH v4 2/4] mmc: tmio: Add tuning support
+Date: Wed, 27 Jul 2016 13:13:21 +0900
+Message-ID: <1469592803-13842-3-git-send-email-horms+renesas@verge.net.au>
+References: <1469592803-13842-1-git-send-email-horms+renesas@verge.net.au>
+Return-path: <linux-renesas-soc-owner@vger.kernel.org>
+In-Reply-To: <1469592803-13842-1-git-send-email-horms+renesas@verge.net.au>
+Sender: linux-renesas-soc-owner@vger.kernel.org
+To: Wolfram Sang <wsa+renesas@sang-engineering.com>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Magnus Damm <magnus.damm@gmail.com>, linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-On Mon, 2016-07-25 at 06:12 +0000, Yangbo Lu wrote:
-> Hi Scott,
->=20
->=20
-> >=20
-> > -----Original Message-----
-> > From: Scott Wood [mailto:oss@buserror.net]
-> > Sent: Friday, July 22, 2016 12:45 AM
-> > To: Michael Ellerman; Arnd Bergmann
-> > Cc: linux-mmc@vger.kernel.org; devicetree@vger.kernel.org; linuxppc=
--
-> > dev@lists.ozlabs.org; linux-kernel@vger.kernel.org; Yangbo Lu
-> > Subject: Re: [PATCH v11 4/5] powerpc/fsl: move mpc85xx.h to
-> > include/linux/fsl
-> >=20
-> > On Thu, 2016-07-21 at 20:26 +1000, Michael Ellerman wrote:
-> > >=20
-> > > Quoting Scott Wood (2016-07-21 04:31:48)
-> > > >=20
-> > > >=20
-> > > > On Wed, 2016-07-20 at 13:24 +0200, Arnd Bergmann wrote:
-> > > > >=20
-> > > > >=20
-> > > > > On Saturday, July 16, 2016 9:50:21 PM CEST Scott Wood wrote:
-> > > > > >=20
-> > > > > >=20
-> > > > > >=20
-> > > > > > From: yangbo lu <yangbo.lu@nxp.com>
-> > > > > >=20
-> > > > > > Move mpc85xx.h to include/linux/fsl and rename it to svr.h =
-as a
-> > > > > > common header file.=C2=A0=C2=A0This SVR numberspace is used=
- on some ARM
-> > > > > > chips as well as PPC, and even to check for a PPC SVR multi=
--arch
-> > > > > > drivers would otherwise need to ifdef the header inclusion =
-and
-> > > > > > all references to the SVR symbols.
-> > > > > >=20
-> > > > > > Signed-off-by: Yangbo Lu <yangbo.lu@nxp.com>
-> > > > > > Acked-by: Wolfram Sang <wsa@the-dreams.de>
-> > > > > > Acked-by: Stephen Boyd <sboyd@codeaurora.org>
-> > > > > > Acked-by: Joerg Roedel <jroedel@suse.de>
-> > > > > > [scottwood: update description]
-> > > > > > Signed-off-by: Scott Wood <oss@buserror.net>
-> > > > > >=20
-> > > > > As discussed before, please don't introduce yet another vendo=
-r
-> > > > > specific way to match a SoC ID from a device driver.
-> > > > >=20
-> > > > > I've posted a patch for an extension to the soc_device
-> > > > > infrastructure to allow comparing the running SoC to a table =
-of
-> > > > > devices, use that instead.
-> > > > As I asked before, in which relevant maintainership capacity ar=
-e you
-> > > > NACKing this?
-> > > I'll nack the powerpc part until you guys can agree.
-> > OK, I've pulled these patches out.
-> >=20
-> > For the MMC issue I suggest using ifdef CONFIG_PPC and mfspr(SPRN_S=
-VR)
-> > like the clock driver does[1] and we can revisit the issue if/when =
-we
-> > need to do something similar on an ARM chip.
-> [Lu Yangbo-B47093] I remembered that Uffe had opposed us to introduce=
- non-
-> generic header files(like '#include <asm/mpc85xx.h>')
-> in mmc driver initially. So I think it will not be accepted to use if=
-def
-> CONFIG_PPC and mfspr(SPRN_SVR)...
-> And this method still couldn=E2=80=99t get SVR of ARM chip now.
+From: Ai Kyuse <ai.kyuse.uw@renesas.com>
 
-Right, as I said we'll have to revisit the issue if/when we have the sa=
-me
-problem on an ARM chip. =C2=A0That also applies if the PPC ifdef is sti=
-ll getting
-NACKed from the MMC side.
+Add tuning support for use with SDR104 mode
 
-> Any other suggestion here?
+Signed-off-by: Ai Kyuse <ai.kyuse.uw@renesas.com>
+Signed-off-by: Simon Horman <horms+renesas@verge.net.au>
+---
+v4 [Simon Horman]
+As suggested by Wolfram Sang:
+  - Do not perform tuning if host->select_tuning is not set:
+    it seems to make little sense to do so and moreover there is currently
+    no such use-case
+  - Do not add mrc->sbc handling from tmio_mmc_request,
+    this is a hang-over from earlier versions of this patchset which
+    did not use core infrastructure for retuning
+  - Tidy up local variable usage
+* Correct index passed to prepare_tuning(): this seems to have
+  been the last piece of resolving the timeouts during tuning puzzle
+* Further cleanups to tmio_mmc_execute_tuning():
+  - Ensure tap is sized proportionally to its members
+  - Remove stray '*' in comment
+  - Use mmc rather than host->mmc, these are equivalent but
+    the former seems tidier
+  - Correct inverted logic in setting tap values
+* Re-introduce retuning support. This was removed in v3.
 
-The other option is to try to come up with something that fits into Arn=
-d's
-framework while addressing the concerns I raised. =C2=A0The soc_id stri=
-ng should be
-well-structured to avoid mismatches and compatibility problems (especia=
-lly
-since it would get exposed to userspace). =C2=A0Maybe something like:
+v3 [Simon Horman]
+* As suggested by Kuninori Morimoto:
+  - Do not add unused retuning callback to struct tmio_mmc_host
+  - Change return type of prepare_tuning callback to void
+  - Add tap_size parameter to select_tuning callback
 
-svr:<SVR minus E bit>,svre:<full SVR including E bit>,name:<soc name>,d=
-ie:<soc
-die name>,rev:X.Y,<tag1>,<tag2>,<...>,
+v2 [Simon Horman]
+* As suggested by Kuninori Morimoto:
+  - Actually remove unnecessary TMIO_MMC_HAS_UHS_SCC define
+* As suggested by Wolfram Sang:
+  - Rely on core to call tuning. This simplifies things somewhat.
+  - Use mmc_send_tuning()
+    - A side affect of this appears to be that we now see some recoverable
+      errors logged during tuning. These are typically corrected by
+      subsequent tuning. It is the logging that is the apparent side effect
+      of this change.
+      e.g.
+      sh_mobile_sdhi ee100000.sd: timeout waiting for hardware interrupt (CMD19)
+      sh_mobile_sdhi ee100000.sd: Tuning procedure failed
+* Use bool rather than unsigned long to pass test status
+  to select_tuning() callback
+* Do not retune if init_tuning callback is not present or
+  indicates that there are no taps present
+* Retune on hardware reset
 
-with the final comma used so that globs can put a colon on either end t=
-o be
-sure they're matching a full field. =C2=A0The SoC die name would be the=
- primary
-chip for a given die (e.g. p4040 would have a die name of p4080). =C2=A0=
-The "name"
-and "die" fields would never include the trailing "e" indicated by the =
-E bit.
+v1 [Simon Horman]
+* Omit start_signal_voltage_switch and tmio_mmc_card_busy changes which are
+  already present in mainline in a different form
+* Return num from init_tuning rather than passing an extra parameter
+  to hold the return value
+* Only call host->init_tuning if it is non-NULL
+* Place tmio_mmc_execute_tuning() such that no new forward declarations are
+  required
+* Remove unused TMIO_MMC_HAS_UHS_SCC define
 
-Extra tags could be used for common groupings, such as all chips from a
-particular die before a certain revision. =C2=A0Once a tag is added it =
-can't be
-removed or reordered, to maintain userspace compatibility, but new tags=
- could
-be appended.
+v0 [Ai Kyuse]
 
-Some examples:
+Signed-off-by: Simon Horman <horms+renesas@verge.net.au>
+---
+ drivers/mmc/host/tmio_mmc.h     |  7 ++++
+ drivers/mmc/host/tmio_mmc_pio.c | 77 +++++++++++++++++++++++++++++++++++++++++
+ 2 files changed, 84 insertions(+)
 
-svr:0x82000020,svre:0x82000020,name:p4080,die:p4080,rev:2.0,
-svr:0x82000020,svr
-e:0x82080020,name:p4080,die:p4080,rev:2.0,
-svr:0x82000030,svre:0x82000030,name:
-p4080,die:p4080,rev:3.0,
-svr:0x82000030,svre:0x82080030,name:p4080,die:p4080,re
-v:3.0,
-svr:0x82010020,svre:0x82010020,name:p4040,die:p4080,rev:2.0,
-svr:0x820100
-20,svre:0x82090020,name:p4040,die:p4080,rev:2.0,
-
-svr:0x82010030,svre:0x82010030
-,name:p4040,die:p4080,rev:3.0,
-svr:0x82010030,svre:0x82090030,name:p4040,die:p4
-080,rev:3.0,
-
-Then if you want to apply a workaround on:
-- all chips using the p4080 die, match with "*,die:p4080,*"
-- all chips using the rev 2.0 p4080 die, match with "*,die:p4080,rev:2.=
-0,*"
-- Only p4040, but of any rev, match with "*,name:p4040,*"
-
-Matching via open-coded hex number should be considered a last resort (=
-it's
-more error-prone, either for getting the number wrong or for forgetting
-variants -- the latter is already a common problem), but preferable to =
-adding
-too many tags.
-
-Using wildcards within a tag field would be discouraged. =C2=A0
-
--Scott
+diff --git a/drivers/mmc/host/tmio_mmc.h b/drivers/mmc/host/tmio_mmc.h
+index 7f63ec05bdf4..316b0c3fe745 100644
+--- a/drivers/mmc/host/tmio_mmc.h
++++ b/drivers/mmc/host/tmio_mmc.h
+@@ -150,6 +150,7 @@ struct tmio_mmc_host {
+ 	struct mutex		ios_lock;	/* protect set_ios() context */
+ 	bool			native_hotplug;
+ 	bool			sdio_irq_enabled;
++	u32			scc_tappos;
+ 
+ 	int (*write16_hook)(struct tmio_mmc_host *host, int addr);
+ 	int (*clk_enable)(struct tmio_mmc_host *host);
+@@ -160,6 +161,12 @@ struct tmio_mmc_host {
+ 			      unsigned int direction, int blk_size);
+ 	int (*start_signal_voltage_switch)(struct mmc_host *mmc,
+ 					   struct mmc_ios *ios);
++	unsigned int (*init_tuning)(struct tmio_mmc_host *host);
++	void (*prepare_tuning)(struct tmio_mmc_host *host, unsigned long tap);
++	int (*select_tuning)(struct tmio_mmc_host *host, bool *tap,
++			     int tap_size);
++	bool (*retuning)(struct tmio_mmc_host *host);
++	void (*hw_reset)(struct tmio_mmc_host *host);
+ };
+ 
+ struct tmio_mmc_host *tmio_mmc_host_alloc(struct platform_device *pdev);
+diff --git a/drivers/mmc/host/tmio_mmc_pio.c b/drivers/mmc/host/tmio_mmc_pio.c
+index a9d07b5f3c63..83b5148a2684 100644
+--- a/drivers/mmc/host/tmio_mmc_pio.c
++++ b/drivers/mmc/host/tmio_mmc_pio.c
+@@ -36,6 +36,7 @@
+ #include <linux/io.h>
+ #include <linux/irq.h>
+ #include <linux/mfd/tmio.h>
++#include <linux/mmc/card.h>
+ #include <linux/mmc/host.h>
+ #include <linux/mmc/mmc.h>
+ #include <linux/mmc/slot-gpio.h>
+@@ -298,6 +299,15 @@ static void tmio_mmc_finish_request(struct tmio_mmc_host *host)
+ 	if (mrq->cmd->error || (mrq->data && mrq->data->error))
+ 		tmio_mmc_abort_dma(host);
+ 
++	if (host->retuning) {
++		int result = host->retuning(host);
++
++		if (result || (mrq->cmd->error == -EILSEQ)) {
++			mmc_retune_timer_stop(host->mmc);
++			mmc_retune_needed(host->mmc);
++		}
++	}
++
+ 	mmc_request_done(host->mmc, mrq);
+ }
+ 
+@@ -756,6 +766,68 @@ static int tmio_mmc_start_data(struct tmio_mmc_host *host,
+ 	return 0;
+ }
+ 
++static void tmio_mmc_hw_reset(struct mmc_host *mmc)
++{
++	struct tmio_mmc_host *host = mmc_priv(mmc);
++
++	if (host->hw_reset)
++		host->hw_reset(host);
++
++	mmc_retune_timer_stop(host->mmc);
++	mmc_retune_needed(host->mmc);
++}
++
++static int tmio_mmc_execute_tuning(struct mmc_host *mmc, u32 opcode)
++{
++	struct tmio_mmc_host *host = mmc_priv(mmc);
++	unsigned int num;
++	int i, ret = 0;
++	bool *tap;
++
++	if (!host->init_tuning || !host->select_tuning)
++		/* Tuning is not supported */
++		goto out;
++
++	num = host->init_tuning(host);
++	if (!num)
++		/* Tuning is not supported */
++		goto out;
++
++	tap = kmalloc(num * 2 * sizeof(*tap), GFP_KERNEL);
++	if (!tap) {
++		ret = -ENOMEM;
++		goto out;
++	}
++
++	/* Issue CMD19 twice for each tap */
++	for (i = 0; i < 2 * num; i++) {
++		if (host->prepare_tuning)
++			host->prepare_tuning(host, i % num);
++
++		ret = mmc_send_tuning(mmc, opcode, NULL);
++		if (ret && ret != -EILSEQ)
++			goto err_free;
++		tap[i] = (ret != 0);
++
++		mdelay(1);
++	}
++
++	ret = host->select_tuning(host, tap, num * 2);
++
++err_free:
++	kfree(tap);
++out:
++	if (ret < 0) {
++		dev_warn(&host->pdev->dev, "Tuning procedure failed\n");
++		tmio_mmc_hw_reset(mmc);
++	} else {
++		host->mmc->retune_period = 0;
++	}
++
++	return ret;
++
++}
++
+ /* Process requests from the MMC layer */
+ static void tmio_mmc_request(struct mmc_host *mmc, struct mmc_request *mrq)
+ {
+@@ -978,6 +1050,8 @@ static struct mmc_host_ops tmio_mmc_ops = {
+ 	.enable_sdio_irq = tmio_mmc_enable_sdio_irq,
+ 	.card_busy	= tmio_mmc_card_busy,
+ 	.multi_io_quirk	= tmio_multi_io_quirk,
++	.execute_tuning = tmio_mmc_execute_tuning,
++	.hw_reset	= tmio_mmc_hw_reset,
+ };
+ 
+ static int tmio_mmc_init_ocr(struct tmio_mmc_host *host)
+@@ -1202,6 +1276,9 @@ int tmio_mmc_host_runtime_suspend(struct device *dev)
+ 	struct mmc_host *mmc = dev_get_drvdata(dev);
+ 	struct tmio_mmc_host *host = mmc_priv(mmc);
+ 
++	mmc_retune_timer_stop(host->mmc);
++	mmc_retune_needed(host->mmc);
++
+ 	tmio_mmc_disable_mmc_irqs(host, TMIO_MASK_ALL);
+ 
+ 	if (host->clk_cache)
+-- 
+2.7.0.rc3.207.g0ac5344
