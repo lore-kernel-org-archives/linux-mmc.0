@@ -1,94 +1,85 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 0/2] mmc: rtsx_pci: Enable support for erase/discard/trim requests
-Date: Fri, 29 Jul 2016 11:33:13 +0200
-Message-ID: <CAPDyKFoLF=GGmQOgO_xdjYPrEQjjaz0A2K21VdoaOExTLEDUBQ@mail.gmail.com>
-References: <1469622338-11158-1-git-send-email-ulf.hansson@linaro.org>
- <CAPDyKFrfsB7ChroiJ_z1Rq5ohaidrg=veSa0fWNi50V6BBB0Hw@mail.gmail.com>
- <cbf35b27-bb85-8bc0-a396-8183b6fa7c28@gmail.com> <CAPDyKFrYrGCEKqheL=C8gRczCO2TPhCMHKayD0xm47WJ2OA=fQ@mail.gmail.com>
- <49a04ef7-63c7-80c9-b64b-dcec18ecf815@gmail.com>
+From: Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>
+Subject: Re: [PATCH 2/3] mmc: sunxi: Set the 'New Timing'
+ register for 8 bits DDR transfers
+Date: Fri, 29 Jul 2016 21:17:30 +0200
+Message-ID: <20160729191730.GG6215@lukather>
+References: <cover.1469082481.git.moinejf@free.fr>
+ <bc7b767cad6db159a44c4b98d5b1f3eb53c26bd3.1469082481.git.moinejf@free.fr>
+ <20160721085615.GG5993@lukather>
+ <20160721112655.941b1dad04f7a5b94d4172c1@free.fr>
+Reply-To: maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wm0-f53.google.com ([74.125.82.53]:37213 "EHLO
-	mail-wm0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751123AbcG2JdQ (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 29 Jul 2016 05:33:16 -0400
-Received: by mail-wm0-f53.google.com with SMTP id i5so143340555wmg.0
-        for <linux-mmc@vger.kernel.org>; Fri, 29 Jul 2016 02:33:15 -0700 (PDT)
-In-Reply-To: <49a04ef7-63c7-80c9-b64b-dcec18ecf815@gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="hTiIB9CRvBOLTyqY"
+Return-path: <linux-sunxi+bncBDSJBYGBRIMBBS6X526AKGQEXOEEVNQ-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+Sender: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
+Content-Disposition: inline
+In-Reply-To: <20160721112655.941b1dad04f7a5b94d4172c1-GANU6spQydw@public.gmane.org>
+List-Post: <https://groups.google.com/group/linux-sunxi/post>, <mailto:linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Help: <https://groups.google.com/support/>, <mailto:linux-sunxi+help-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Archive: <https://groups.google.com/group/linux-sunxi
+List-Subscribe: <https://groups.google.com/group/linux-sunxi/subscribe>, <mailto:linux-sunxi+subscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Unsubscribe: <mailto:googlegroups-manage+1076902468213+unsubscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>,
+ <https://groups.google.com/group/linux-sunxi/subscribe>
+To: Jean-Francois Moine <moinejf-GANU6spQydw@public.gmane.org>
+Cc: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
-To: Mauro Santos <registo.mailling@gmail.com>
-Cc: Micky Ching <micky_ching@realsil.com.cn>, Wei WANG <wei_wang@realsil.com.cn>, linux-mmc <linux-mmc@vger.kernel.org>, Roger Tseng <rogerable@realtek.com>, Baolin Wang <baolin.wang@linaro.org>
 
-On 28 July 2016 at 01:07, Mauro Santos <registo.mailling@gmail.com> wrote:
-> On 27-07-2016 23:02, Ulf Hansson wrote:
->> On 27 July 2016 at 22:35, Mauro Santos <registo.mailling@gmail.com> wrote:
->>> On 27-07-2016 13:45, Ulf Hansson wrote:
->>>> Mauro, I have applied this for my next branch (based on 4.7), to allow
->>>> it to be easily tested.
->>>>
->>>> Just clone my tree below and build/replace your kernel.
->>>> git://git.linaro.org/people/ulf.hansson/mmc.git next
->>>>
->>>> Running fstrim and checking blkdiscard should be sufficient as test cases.
->>>>
->>>> Don't hesitate to ask if problems occurs!
->>>>
->>>> Kind regards
->>>> Uffe
->>>>
->>>
->>> I've tested both blkdiscard and fstrim (on ext4) and they both worked.
->>>
->>> I haven't noticed any errors or warnings on dmesg or complaints from
->>> blkdiscard/fstrim.
->>>
->>> If there are any more specific tests you would like me to do let me know.
->>
->> Perhaps just run some dd operation to read and write some data to the
->> card, then I am happy. :)
->>
->
-> Maybe I should have mentioned in my previous email, I have used the ext4
-> formatted fs to write some files, if you want me to still test with dd
-> let me know.
->
-> I have tested it like this:
->
-> - Filesystem was not mounted with the discard option.
-> - Almost fill the card with files, determine md5sum for all files and
-> reboot to make sure there are no cached files in ram
-> - Delete half of the files, fstrim -v (trimmed space looks about right),
-> check md5sum of remaining files - no problems here.
-> - fsck -f filesystem - no problems detected.
->
-> After this I have written more data to the card and checked the md5sums,
-> but I already forgot the exact sequence, I was looking for any sign that
-> using fstrim would delete more than it should have or that writing new
-> files might for some reason corrupt the old files.
->
-> I have confirmed that blkdiscard does work, the card returns zeros for
-> the few sectors I've checked, but I haven't confirmed that fstrim is
-> doing what it is supposed to do, the same applies to the case where the
-> filesystem is mounted with the discard option (quick google search
-> didn't return recipe for going from file->lba/sector or inode->lba/sector).
->
-> That said, given that blkdiscard works I'm assuming fstrim (and the
-> discard option) also work. I can check that if you want, but I would
-> need some pointers on how to do it. I could also check fstrim on a well
-> used f2fs formatted card where data should be all over the place by now.
->
 
-Thanks for your report. I think this is good enough!
+--hTiIB9CRvBOLTyqY
+Content-Type: text/plain; charset=UTF-8
+Content-Disposition: inline
 
->> Thanks a lot for your help in testing, I will apply a tested-by tag
->> from you, unless you object.
->>
->
-> No objections.
+On Thu, Jul 21, 2016 at 11:26:55AM +0200, Jean-Francois Moine wrote:
+> On Thu, 21 Jul 2016 10:56:15 +0200
+> Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org> wrote:
+> 
+> > On Wed, Jul 20, 2016 at 08:16:28PM +0200, Jean-Francois Moine wrote:
+> > > The 'new timing mode' with 8 bits DDR works correctly when the NewTiming
+> > > register is set.
+> > 
+> > What does that mode brings to the table?
+> 
+> From my tests, the eMMC of the Banana Pi M3 (A83T) cannot work when the
+> new mode is not used.
+> 
+> > > 
+> > > Signed-off-by: Jean-Francois Moine <moinejf-GANU6spQydw@public.gmane.org>
+> > > ---
+> > > Note about the 'new timing mode'.
+> > > 
+> > > This patch assumes that, when the new mode is used, the clock driver
+> > > sets the mode select in the MMC clock and multiplies the clock rate
+> > > by 2:
+> > > - MMC side:
+> > >   - with a timing 8 bits DDR at 50MHz, the MMC driver calls
+> > >     clk_set_rate() with a rate 50*2 = 100MHz,
+> > > - clock side:
+> > >   - the clock driver sets the hardware MMC clock to 100*2 = 200MHz,
+> > >   - setting the 'mode select' of the hardware MMC clock divides the
+> > >     rate by 2,
+> > > - MMC side:
+> > >   - setting the MMC clock divider register to 1 divides the rate by 2.
+> > > So, the final rate is 50MHz.
+> > 
+> > What happens if you actually want to set it to 100MHz?
+> 
+> There is no SDXC_CLK_100M in the mainline driver, and 100MHz is asked
+> only for 8 bits DDR at 50MHz.
 
-Great, applied!
+You're missing the point.
 
-Kind regards
-Uffe
+clk_set_rate is supposed to apply a rate as close as possible as
+requested, there's no reason why you would request a rate twice as
+high as need.
+
+You want to switch the clock from one mode to another, fine, create a
+new function for that. But don't hack an existing one.
+
+Maxime
+
+-- 
+Maxime Ripard, Free Electrons
+Embedded Linux and Kernel engineering
+http://free-electrons.com
+--hTiIB9CRvBOLTyqY--
