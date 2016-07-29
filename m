@@ -1,49 +1,72 @@
-From: Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
-Subject: [PATCH 2/5] Documentation: mmc: sdhci-of-arasan: add power domain
- description
-Date: Fri, 29 Jul 2016 12:15:00 +0800
-Message-ID: <1469765703-30999-3-git-send-email-shawn.lin@rock-chips.com>
+From: Shawn Lin <shawn.lin@rock-chips.com>
+Subject: [PATCH 5/5] mmc: sdhci-of-arasan: add power domain support
+Date: Fri, 29 Jul 2016 12:16:45 +0800
+Message-ID: <1469765805-31049-1-git-send-email-shawn.lin@rock-chips.com>
 References: <1469765703-30999-1-git-send-email-shawn.lin@rock-chips.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-In-Reply-To: <1469765703-30999-1-git-send-email-shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-rockchip>,
- <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-rockchip/>
-List-Post: <mailto:linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-List-Help: <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-rockchip>,
- <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
-Sender: "Linux-rockchip" <linux-rockchip-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-Errors-To: linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
-To: Heiko Stuebner <heiko-4mtYJXux2i+zQB+pC5nmwQ@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Jaehoon Chung <jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Elaine Zhang <zhangqing-TNX95d0MmH7DzftRWevZcw@public.gmane.org>, Feng Xiao <xf-TNX95d0MmH7DzftRWevZcw@public.gmane.org>, Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>, Brian Norris <briannorris-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Douglas Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from lucky1.263xmail.com ([211.157.147.134]:54295 "EHLO
+	lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750721AbcG2ET5 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 29 Jul 2016 00:19:57 -0400
+In-Reply-To: <1469765703-30999-1-git-send-email-shawn.lin@rock-chips.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Heiko Stuebner <heiko@sntech.de>, Rob Herring <robh+dt@kernel.org>, Jaehoon Chung <jh80.chung@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-rockchip@lists.infradead.org, Douglas Anderson <dianders@chromium.org>, Brian Norris <briannorris@chromium.org>, Feng Xiao <xf@rock-chips.com>, Elaine Zhang <zhangqing@rock-chips.com>, linux-kernel@vger.kernel.org, Shawn Lin <shawn.lin@rock-chips.com>
 
-This patch adds power domain as a optional property for sdhci-of-arasan.
-We should handle the power domain if available as it's in off
-state due to the policy of power-saving after booting up. Otherwise
-controller can not be accessed.
+We should enable power domain once provided. Otherwise
+we take risk of bus err as it's maybe in off state before
+probing.
 
-Signed-off-by: Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
+Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
 ---
 
- Documentation/devicetree/bindings/mmc/arasan,sdhci.txt | 1 +
- 1 file changed, 1 insertion(+)
+ drivers/mmc/host/sdhci-of-arasan.c | 10 ++++++++++
+ 1 file changed, 10 insertions(+)
 
-diff --git a/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt b/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
-index 3404afa..b5fb563 100644
---- a/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
-+++ b/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
-@@ -36,6 +36,7 @@ Optional Properties:
-   - #clock-cells: If specified this should be the value <0>.  With this property
-     in place we will export a clock representing the Card Clock.  This clock
-     is expected to be consumed by our PHY.  You must also specify
-+  - power-domains: Must contain a reference to the PM domain, if available.
+diff --git a/drivers/mmc/host/sdhci-of-arasan.c b/drivers/mmc/host/sdhci-of-arasan.c
+index e0f193f..e507e94 100644
+--- a/drivers/mmc/host/sdhci-of-arasan.c
++++ b/drivers/mmc/host/sdhci-of-arasan.c
+@@ -25,6 +25,8 @@
+ #include <linux/of_device.h>
+ #include <linux/phy/phy.h>
+ #include <linux/regmap.h>
++#include <linux/pm_runtime.h>
++#include <linux/pm_opp.h>
+ #include "sdhci-pltfm.h"
  
- Example:
- 	sdhci@e0100000 {
+ #define SDHCI_ARASAN_CLK_CTRL_OFFSET	0x2c
+@@ -515,6 +517,9 @@ static int sdhci_arasan_probe(struct platform_device *pdev)
+ 		goto clk_dis_ahb;
+ 	}
+ 
++	pm_runtime_enable(host->dev);
++	pm_runtime_get_sync(host->dev);
++
+ 	sdhci_get_of_property(pdev);
+ 	pltfm_host->clk = clk_xin;
+ 
+@@ -577,6 +582,8 @@ clk_dis_ahb:
+ 	clk_disable_unprepare(sdhci_arasan->clk_ahb);
+ err_pltfm_free:
+ 	sdhci_pltfm_free(pdev);
++	pm_runtime_put(host->dev);
++	pm_runtime_disable(host->dev);
+ 	return ret;
+ }
+ 
+@@ -599,6 +606,9 @@ static int sdhci_arasan_remove(struct platform_device *pdev)
+ 
+ 	clk_disable_unprepare(clk_ahb);
+ 
++	pm_runtime_put(host->dev);
++	pm_runtime_disable(host->dev);
++
+ 	return ret;
+ }
+ 
 -- 
 2.3.7
+
+
