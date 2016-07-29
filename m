@@ -1,73 +1,64 @@
-From: Shawn Lin <shawn.lin@rock-chips.com>
-Subject: [PATCH 4/5] mmc: dw_mmc: add power domain support
-Date: Fri, 29 Jul 2016 12:15:02 +0800
-Message-ID: <1469765703-30999-5-git-send-email-shawn.lin@rock-chips.com>
+From: Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
+Subject: [PATCH 3/5] arm64: dts: rockchip: Provide power-domains for
+ sd/sdio/emmc controllers
+Date: Fri, 29 Jul 2016 12:15:01 +0800
+Message-ID: <1469765703-30999-4-git-send-email-shawn.lin@rock-chips.com>
 References: <1469765703-30999-1-git-send-email-shawn.lin@rock-chips.com>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from lucky1.263xmail.com ([211.157.147.133]:43885 "EHLO
-	lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752304AbcG2ESd (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 29 Jul 2016 00:18:33 -0400
-In-Reply-To: <1469765703-30999-1-git-send-email-shawn.lin@rock-chips.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+In-Reply-To: <1469765703-30999-1-git-send-email-shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-rockchip>,
+ <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-rockchip/>
+List-Post: <mailto:linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+List-Help: <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-rockchip>,
+ <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
+Sender: "Linux-rockchip" <linux-rockchip-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+Errors-To: linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+To: Heiko Stuebner <heiko-4mtYJXux2i+zQB+pC5nmwQ@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Jaehoon Chung <jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Elaine Zhang <zhangqing-TNX95d0MmH7DzftRWevZcw@public.gmane.org>, Feng Xiao <xf-TNX95d0MmH7DzftRWevZcw@public.gmane.org>, Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>, Brian Norris <briannorris-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Douglas Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
-To: Heiko Stuebner <heiko@sntech.de>, Rob Herring <robh+dt@kernel.org>, Jaehoon Chung <jh80.chung@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-rockchip@lists.infradead.org, Douglas Anderson <dianders@chromium.org>, Brian Norris <briannorris@chromium.org>, Feng Xiao <xf@rock-chips.com>, Elaine Zhang <zhangqing@rock-chips.com>, linux-kernel@vger.kernel.org, Shawn Lin <shawn.lin@rock-chips.com>
 
-We should enable power domain once provided. Otherwise
-we take risk of bus err as it's maybe in off state before
-probing.
+We add these two properties as we need to enable it manually in case
+of been turned off by pd code if not referenced. We can't take risk of
+it, so let's do it.
 
-Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
+Signed-off-by: Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
 ---
 
- drivers/mmc/host/dw_mmc.c | 11 +++++++++++
- 1 file changed, 11 insertions(+)
+ arch/arm64/boot/dts/rockchip/rk3399.dtsi | 3 +++
+ 1 file changed, 3 insertions(+)
 
-diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index 32380d5..8b39168 100644
---- a/drivers/mmc/host/dw_mmc.c
-+++ b/drivers/mmc/host/dw_mmc.c
-@@ -22,6 +22,8 @@
- #include <linux/ioport.h>
- #include <linux/module.h>
- #include <linux/platform_device.h>
-+#include <linux/pm_runtime.h>
-+#include <linux/pm_opp.h>
- #include <linux/seq_file.h>
- #include <linux/slab.h>
- #include <linux/stat.h>
-@@ -3024,6 +3026,9 @@ int dw_mci_probe(struct dw_mci *host)
- 		host->bus_hz = clk_get_rate(host->ciu_clk);
- 	}
+diff --git a/arch/arm64/boot/dts/rockchip/rk3399.dtsi b/arch/arm64/boot/dts/rockchip/rk3399.dtsi
+index 4c84229..5744883 100644
+--- a/arch/arm64/boot/dts/rockchip/rk3399.dtsi
++++ b/arch/arm64/boot/dts/rockchip/rk3399.dtsi
+@@ -210,6 +210,7 @@
+ 			 <&cru SCLK_SDIO_DRV>, <&cru SCLK_SDIO_SAMPLE>;
+ 		clock-names = "biu", "ciu", "ciu-drive", "ciu-sample";
+ 		fifo-depth = <0x100>;
++		power-domains = <&power RK3399_PD_SDIOAUDIO>;
+ 		status = "disabled";
+ 	};
  
-+	pm_runtime_enable(host->dev);
-+	pm_runtime_get_sync(host->dev);
-+
- 	if (!host->bus_hz) {
- 		dev_err(host->dev,
- 			"Platform data must supply bus speed\n");
-@@ -3197,6 +3202,9 @@ err_clk_biu:
- 	if (!IS_ERR(host->biu_clk))
- 		clk_disable_unprepare(host->biu_clk);
+@@ -223,6 +224,7 @@
+ 			 <&cru SCLK_SDMMC_DRV>, <&cru SCLK_SDMMC_SAMPLE>;
+ 		clock-names = "biu", "ciu", "ciu-drive", "ciu-sample";
+ 		fifo-depth = <0x100>;
++		power-domains = <&power RK3399_PD_SD>;
+ 		status = "disabled";
+ 	};
  
-+	pm_runtime_put(host->dev);
-+	pm_runtime_disable(host->dev);
-+
- 	return ret;
- }
- EXPORT_SYMBOL(dw_mci_probe);
-@@ -3226,6 +3234,9 @@ void dw_mci_remove(struct dw_mci *host)
- 
- 	if (!IS_ERR(host->biu_clk))
- 		clk_disable_unprepare(host->biu_clk);
-+
-+	pm_runtime_put(host->dev);
-+	pm_runtime_disable(host->dev);
- }
- EXPORT_SYMBOL(dw_mci_remove);
+@@ -239,6 +241,7 @@
+ 		#clock-cells = <0>;
+ 		phys = <&emmc_phy>;
+ 		phy-names = "phy_arasan";
++		power-domains = <&power RK3399_PD_EMMC>;
+ 		status = "disabled";
+ 	};
  
 -- 
 2.3.7
-
-
