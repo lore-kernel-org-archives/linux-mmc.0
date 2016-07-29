@@ -1,44 +1,51 @@
-From: Shawn Lin <shawn.lin@rock-chips.com>
-Subject: [PATCH 0/5] Add power domain support for dw_mmc/sdhci-of-arasan
-Date: Fri, 29 Jul 2016 12:14:58 +0800
-Message-ID: <1469765703-30999-1-git-send-email-shawn.lin@rock-chips.com>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Heiko Stuebner <heiko@sntech.de>, Rob Herring <robh+dt@kernel.org>, Jaehoon Chung <jh80.chung@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-rockchip@lists.infradead.org, Douglas Anderson <dianders@chromium.org>, Brian Norris <briannorris@chromium.org>, Feng Xiao <xf@rock-chips.com>, Elaine Zhang <zhangqing@rock-chips.com>, linux-kernel@vger.kernel.org, Shawn Lin <shawn.lin@rock-chips.com>
+From: Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
+Subject: [PATCH 1/5] Documentation: mmc: synopsys-dw-mshc: add power domain
+ description
+Date: Fri, 29 Jul 2016 12:14:59 +0800
+Message-ID: <1469765703-30999-2-git-send-email-shawn.lin@rock-chips.com>
+References: <1469765703-30999-1-git-send-email-shawn.lin@rock-chips.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+In-Reply-To: <1469765703-30999-1-git-send-email-shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-rockchip>,
+ <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-rockchip/>
+List-Post: <mailto:linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+List-Help: <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-rockchip>,
+ <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
+Sender: "Linux-rockchip" <linux-rockchip-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+Errors-To: linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+To: Heiko Stuebner <heiko-4mtYJXux2i+zQB+pC5nmwQ@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Jaehoon Chung <jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Elaine Zhang <zhangqing-TNX95d0MmH7DzftRWevZcw@public.gmane.org>, Feng Xiao <xf-TNX95d0MmH7DzftRWevZcw@public.gmane.org>, Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>, Brian Norris <briannorris-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Douglas Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
 
+This patch adds power domain as a optional property for dw_mmc.
+We should handle the power domain if available as it's in off
+state dut to the policy of power-saving after booting up. Otherwise
+dw_mmc can not be accessed.
 
-We need to enable the power domain manually while probing as the
-power policy will turn off the pd which is not referenced. Otherwise
-we may take risk of breaking kernel once Feng Xiao land the rockchip pd
-relate stuff. So, let's do it in advance.
+Signed-off-by: Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
 
-This pachset is based on the latest linux-next[1] which should contain
-the next branch of linux-mmc and dt stuff. It's ideal to pack these all
-into Ulf' tree with Heiko's ack for dts, Rob's ack for Doc and Jaehoon's
-ack for dw_mmc. But it's okay to be merged seperately.
+---
 
-[1] git://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git
+ Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.txt | 2 ++
+ 1 file changed, 2 insertions(+)
 
-Thanks.
-
-
-
-Shawn Lin (5):
-  Documentation: mmc: synopsys-dw-mshc: add power domain description
-  Documentation: mmc: sdhci-of-arasan: add power domain description
-  arm64: dts: rockchip: Provide power-domains for sd/sdio/emmc
-    controllers
-  mmc: dw_mmc: add power domain support
-  mmc: sdhci-of-arasan: add power domain support
-
- Documentation/devicetree/bindings/mmc/arasan,sdhci.txt     |  1 +
- Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.txt |  2 ++
- arch/arm64/boot/dts/rockchip/rk3399.dtsi                   |  3 +++
- drivers/mmc/host/dw_mmc.c                                  | 11 +++++++++++
- drivers/mmc/host/sdhci-of-arasan.c                         | 10 ++++++++++
- 5 files changed, 27 insertions(+)
-
+diff --git a/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.txt b/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.txt
+index 8636f5a..f48febd 100644
+--- a/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.txt
++++ b/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.txt
+@@ -81,6 +81,8 @@ Optional properties:
+ * dma-names: request names for generic DMA client binding. Must be "rx-tx".
+   Refer to dma.txt for details.
+ 
++* power-domains: Must contain a reference to the PM domain, if available.
++
+ Aliases:
+ 
+ - All the MSHC controller nodes should be represented in the aliases node using
 -- 
 2.3.7
