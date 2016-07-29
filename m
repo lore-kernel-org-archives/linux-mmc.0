@@ -1,72 +1,77 @@
-From: Shawn Lin <shawn.lin@rock-chips.com>
-Subject: [PATCH 5/5] mmc: sdhci-of-arasan: add power domain support
-Date: Fri, 29 Jul 2016 12:16:45 +0800
-Message-ID: <1469765805-31049-1-git-send-email-shawn.lin@rock-chips.com>
-References: <1469765703-30999-1-git-send-email-shawn.lin@rock-chips.com>
+From: Dong Aisheng <dongas86@gmail.com>
+Subject: Re: [PATCH 07/11] mmc: sdhci-esdhc-imx: Assign system PM ops within
+ #ifdef CONFIG_PM_SLEEP
+Date: Fri, 29 Jul 2016 16:38:02 +0800
+Message-ID: <20160729083802.GA21177@shlinux2>
+References: <1469619127-29283-1-git-send-email-ulf.hansson@linaro.org>
+ <1469619127-29283-8-git-send-email-ulf.hansson@linaro.org>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from lucky1.263xmail.com ([211.157.147.134]:54295 "EHLO
-	lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750721AbcG2ET5 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Fri, 29 Jul 2016 00:19:57 -0400
-In-Reply-To: <1469765703-30999-1-git-send-email-shawn.lin@rock-chips.com>
+Received: from mail-pf0-f194.google.com ([209.85.192.194]:32872 "EHLO
+	mail-pf0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751147AbcG2Iql (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 29 Jul 2016 04:46:41 -0400
+Received: by mail-pf0-f194.google.com with SMTP id i6so5125429pfe.0
+        for <linux-mmc@vger.kernel.org>; Fri, 29 Jul 2016 01:46:41 -0700 (PDT)
+Content-Disposition: inline
+In-Reply-To: <1469619127-29283-8-git-send-email-ulf.hansson@linaro.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Heiko Stuebner <heiko@sntech.de>, Rob Herring <robh+dt@kernel.org>, Jaehoon Chung <jh80.chung@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-rockchip@lists.infradead.org, Douglas Anderson <dianders@chromium.org>, Brian Norris <briannorris@chromium.org>, Feng Xiao <xf@rock-chips.com>, Elaine Zhang <zhangqing@rock-chips.com>, linux-kernel@vger.kernel.org, Shawn Lin <shawn.lin@rock-chips.com>
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc@vger.kernel.org, Adrian Hunter <adrian.hunter@intel.com>, Arnd Bergmann <arnd@arndb.de>, Dong Aisheng <aisheng.dong@nxp.com>
 
-We should enable power domain once provided. Otherwise
-we take risk of bus err as it's maybe in off state before
-probing.
-
-Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
----
-
- drivers/mmc/host/sdhci-of-arasan.c | 10 ++++++++++
- 1 file changed, 10 insertions(+)
-
-diff --git a/drivers/mmc/host/sdhci-of-arasan.c b/drivers/mmc/host/sdhci-of-arasan.c
-index e0f193f..e507e94 100644
---- a/drivers/mmc/host/sdhci-of-arasan.c
-+++ b/drivers/mmc/host/sdhci-of-arasan.c
-@@ -25,6 +25,8 @@
- #include <linux/of_device.h>
- #include <linux/phy/phy.h>
- #include <linux/regmap.h>
-+#include <linux/pm_runtime.h>
-+#include <linux/pm_opp.h>
- #include "sdhci-pltfm.h"
- 
- #define SDHCI_ARASAN_CLK_CTRL_OFFSET	0x2c
-@@ -515,6 +517,9 @@ static int sdhci_arasan_probe(struct platform_device *pdev)
- 		goto clk_dis_ahb;
- 	}
- 
-+	pm_runtime_enable(host->dev);
-+	pm_runtime_get_sync(host->dev);
-+
- 	sdhci_get_of_property(pdev);
- 	pltfm_host->clk = clk_xin;
- 
-@@ -577,6 +582,8 @@ clk_dis_ahb:
- 	clk_disable_unprepare(sdhci_arasan->clk_ahb);
- err_pltfm_free:
- 	sdhci_pltfm_free(pdev);
-+	pm_runtime_put(host->dev);
-+	pm_runtime_disable(host->dev);
- 	return ret;
- }
- 
-@@ -599,6 +606,9 @@ static int sdhci_arasan_remove(struct platform_device *pdev)
- 
- 	clk_disable_unprepare(clk_ahb);
- 
-+	pm_runtime_put(host->dev);
-+	pm_runtime_disable(host->dev);
-+
- 	return ret;
- }
- 
--- 
-2.3.7
+On Wed, Jul 27, 2016 at 01:32:03PM +0200, Ulf Hansson wrote:
+> The system PM callbacks isn't used unless CONFIG_PM_SLEEP is set, thus it
+> triggers a compiler warning about unused functions. Avoid this by changing
+> from CONFIG_PM to CONFIG_PM_SLEEP.
+> 
+> Reported-by: Arnd Bergmann <arnd@arndb.de>
+> Fixes: b70d0b3b5b29 ("mmc: sdhci-esdhc-imx: add esdhc specific suspend resume callback")
+> Cc: Dong Aisheng <aisheng.dong@nxp.com>
+> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
 
 
+Thanks for the clean up.
+I'm okay with the either way as you discussed with Arnd.
+
+So
+Acked-by: Dong Aisheng <aisheng.dong@nxp.com>
+
+Regards
+Dong Aisheng
+
+> ---
+>  drivers/mmc/host/sdhci-esdhc-imx.c | 4 +++-
+>  1 file changed, 3 insertions(+), 1 deletion(-)
+> 
+> diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
+> index 2bb326b..f5768a6 100644
+> --- a/drivers/mmc/host/sdhci-esdhc-imx.c
+> +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
+> @@ -1293,7 +1293,7 @@ static int sdhci_esdhc_imx_remove(struct platform_device *pdev)
+>  	return 0;
+>  }
+>  
+> -#ifdef CONFIG_PM
+> +#ifdef CONFIG_PM_SLEEP
+>  static int sdhci_esdhc_suspend(struct device *dev)
+>  {
+>  	return sdhci_pltfm_suspend(dev);
+> @@ -1308,7 +1308,9 @@ static int sdhci_esdhc_resume(struct device *dev)
+>  
+>  	return sdhci_pltfm_resume(dev);
+>  }
+> +#endif
+>  
+> +#ifdef CONFIG_PM
+>  static int sdhci_esdhc_runtime_suspend(struct device *dev)
+>  {
+>  	struct sdhci_host *host = dev_get_drvdata(dev);
+> -- 
+> 1.9.1
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
