@@ -1,59 +1,43 @@
-From: Jean-Francois Moine <moinejf-GANU6spQydw@public.gmane.org>
-Subject: Re: [PATCH 2/3] mmc: sunxi: Set the 'New Timing'
- register for 8 bits DDR transfers
-Date: Sat, 30 Jul 2016 07:20:02 +0200
-Message-ID: <20160730072002.4aec7254bca2d6ee2013ac0c@free.fr>
-References: <cover.1469082481.git.moinejf@free.fr>
-	<bc7b767cad6db159a44c4b98d5b1f3eb53c26bd3.1469082481.git.moinejf@free.fr>
-	<20160721085615.GG5993@lukather>
-	<20160721112655.941b1dad04f7a5b94d4172c1@free.fr>
-	<20160729193634.GA27116@lukather>
-Reply-To: moinejf-GANU6spQydw@public.gmane.org
+From: Icenowy Zheng <icenowy@aosc.xyz>
+Subject: [PATCH 1/2] Documentation: dt: Add new compatible to sunxi mmc driver
+ bindings
+Date: Sat, 30 Jul 2016 17:36:51 +0800
+Message-ID: <20160730093652.10578-1-icenowy@aosc.xyz>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: quoted-printable
-Return-path: <linux-sunxi+bncBCV6DL6LYMNBBCPS6C6AKGQE7QI2F3Q-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-Sender: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
-In-Reply-To: <20160729193634.GA27116@lukather>
-List-Post: <https://groups.google.com/group/linux-sunxi/post>, <mailto:linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Help: <https://groups.google.com/support/>, <mailto:linux-sunxi+help-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Archive: <https://groups.google.com/group/linux-sunxi
-List-Subscribe: <https://groups.google.com/group/linux-sunxi/subscribe>, <mailto:linux-sunxi+subscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Unsubscribe: <mailto:googlegroups-manage+1076902468213+unsubscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>,
- <https://groups.google.com/group/linux-sunxi/subscribe>
-To: Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>
-Cc: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Rob Herring <robh+dt@kernel.org>, Maxime Ripard <maxime.ripard@free-electrons.com>, Chen-Yu Tsai <wens@csie.org>, Ulf Hansson <ulf.hansson@linaro.org>, Hans de Goede <hdegoede@redhat.com>
+Cc: Mark Rutland <mark.rutland@arm.com>, devicetree@vger.kernel.org, Michal Suchanek <hramrach@gmail.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Jaehoon Chung <jh80.chung@samsung.com>, Icenowy Zheng <icenowy@aosc.xyz>, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
-On Fri, 29 Jul 2016 21:36:34 +0200
-Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org> wrote:
+Signed-off-by: Icenowy Zheng <icenowy@aosc.xyz>
+---
+ Documentation/devicetree/bindings/mmc/sunxi-mmc.txt | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
 
-> On Thu, Jul 21, 2016 at 11:26:55AM +0200, Jean-Francois Moine wrote:
-> > On Thu, 21 Jul 2016 10:56:15 +0200
-> > Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org> wrote:
-> >=20
-> > > On Wed, Jul 20, 2016 at 08:16:28PM +0200, Jean-Francois Moine wrote:
-> > > > The 'new timing mode' with 8 bits DDR works correctly when the NewT=
-iming
-> > > > register is set.
-> > >=20
-> > > What does that mode brings to the table?
-> >=20
-> > From my tests, the eMMC of the Banana Pi M3 (A83T) cannot work when the
-> > new mode is not used.
->=20
-> That's odd. The one in the Pine64 seems to work just fine, and yet
-> there's only the new mode on the A64.
-
-I spent 2 weeks on this problem. You may try it by yourself.
-
---=20
-Ken ar c'henta=C3=B1	|	      ** Breizh ha Linux atav! **
-Jef		|		http://moinejf.free.fr/
-
---=20
-You received this message because you are subscribed to the Google Groups "=
-linux-sunxi" group.
-To unsubscribe from this group and stop receiving emails from it, send an e=
-mail to linux-sunxi+unsubscribe-/JYPxA39Uh5TLH3MbocFF+G/Ez6ZCGd0@public.gmane.org
-For more options, visit https://groups.google.com/d/optout.
+diff --git a/Documentation/devicetree/bindings/mmc/sunxi-mmc.txt b/Documentation/devicetree/bindings/mmc/sunxi-mmc.txt
+index 4bf41d8..ecd30ac 100644
+--- a/Documentation/devicetree/bindings/mmc/sunxi-mmc.txt
++++ b/Documentation/devicetree/bindings/mmc/sunxi-mmc.txt
+@@ -8,7 +8,8 @@ as the speed of SD standard 3.0.
+ Absolute maximum transfer rate is 200MB/s
+ 
+ Required properties:
+- - compatible : "allwinner,sun4i-a10-mmc" or "allwinner,sun5i-a13-mmc"
++ - compatible : "allwinner,sun4i-a10-mmc" , "allwinner,sun5i-a13-mmc",
++		"allwinner,sun9i-a80-mmc" or "allwinner,sun50i-a64-mmc"
+  - reg : mmc controller base registers
+  - clocks : a list with 4 phandle + clock specifier pairs
+  - clock-names : must contain "ahb", "mmc", "output" and "sample"
+-- 
+2.9.0
