@@ -1,126 +1,49 @@
-From: Icenowy Zheng <icenowy@aosc.xyz>
-Subject: Re: [PATCH 2/2] mmc: host: sunxi: add support for A64 mmc controller
-Date: Sat, 30 Jul 2016 21:20:57 +0800
-Message-ID: <45431469884857@web10m.yandex.ru>
-References: <20160730093652.10578-1-icenowy@aosc.xyz>
- <20160730093652.10578-2-icenowy@aosc.xyz>
- <c3b3a172-4194-08e4-5ac9-594d77452ff5@redhat.com>
- <382321469878507@web3g.yandex.ru>
- <49360635-76bb-2597-ba9b-db3ddbbe16cf@redhat.com>
+From: Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: Re: [PATCH 2/4] mmc: sunxi: Make sample clocks optional
+Date: Sat, 30 Jul 2016 16:25:40 +0200
+Message-ID: <abe8e074-e58f-78c3-64d2-4f7870a58c28@redhat.com>
+References: <1468665964-27142-1-git-send-email-hdegoede@redhat.com>
+ <1468665964-27142-3-git-send-email-hdegoede@redhat.com>
+ <20160725081830.GF7419@lukather>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <49360635-76bb-2597-ba9b-db3ddbbe16cf@redhat.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Hans de Goede <hdegoede@redhat.com>, Rob Herring <robh+dt@kernel.org>, Maxime Ripard <maxime.ripard@free-electrons.com>, Chen-Yu Tsai <wens@csie.org>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Mark Rutland <mark.rutland@arm.com>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, Michal Suchanek <hramrach@gmail.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Jaehoon Chung <jh80.chung@samsung.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
+Content-Type: text/plain; charset=windows-1252; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <20160725081830.GF7419@lukather>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>
+Cc: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, devicetree <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-CgozMC4wNy4yMDE2LCAyMToxMiwgIkhhbnMgZGUgR29lZGUiIDxoZGVnb2VkZUByZWRoYXQuY29t
-PjoKPiBIaSwKPgo+IE9uIDMwLTA3LTE2IDEzOjM1LCBJY2Vub3d5IFpoZW5nIHdyb3RlOgo+PiDC
-oDMwLjA3LjIwMTYsIDE4OjMwLCAiSGFucyBkZSBHb2VkZSIgPGhkZWdvZWRlQHJlZGhhdC5jb20+
-Ogo+Pj4gwqBIaSwKPj4+Cj4+PiDCoE9uIDMwLTA3LTE2IDExOjM2LCBJY2Vub3d5IFpoZW5nIHdy
-b3RlOgo+Pj4+IMKgwqBBNjQgU29DIGZlYXR1cmVzIGEgTU1DIGNvbnRyb2xsZXIgd2hpY2ggbmVl
-ZCBvbmx5IHRoZSBtb2QgY2xvY2ssIGFuZCBjYW4KPj4+PiDCoMKgY2FsaWJyYXRlIGRlbGF5IGJ5
-IGl0c2VsZi4gVGhpcyBwYXRjaCBhZGRzIHN1cHBvcnQgZm9yIHRoZSBuZXcgTU1DCj4+Pj4gwqDC
-oGNvbnRyb2xsZXIgSVAgY29yZS4KPj4+Pgo+Pj4+IMKgwqBTaWduZWQtb2ZmLWJ5OiBJY2Vub3d5
-IFpoZW5nIDxpY2Vub3d5QGFvc2MueHl6Pgo+Pj4KPj4+IMKgQ29vbCBzdHVmZiwgdGhhbmtzIGZv
-ciB5b3VyIHdvcmsgb24gdGhpcyEKPj4+Cj4+Pj4gwqDCoC0tLQo+Pj4+IMKgwqDCoGRyaXZlcnMv
-bW1jL2hvc3Qvc3VueGktbW1jLmMgfCAxNjYgKysrKysrKysrKysrKysrKysrKysrKysrKysrKysr
-Ky0tLS0tLS0tLS0tLQo+Pj4+IMKgwqDCoDEgZmlsZSBjaGFuZ2VkLCAxMjIgaW5zZXJ0aW9ucygr
-KSwgNDQgZGVsZXRpb25zKC0pCj4+Pj4KPj4+PiDCoMKgZGlmZiAtLWdpdCBhL2RyaXZlcnMvbW1j
-L2hvc3Qvc3VueGktbW1jLmMgYi9kcml2ZXJzL21tYy9ob3N0L3N1bnhpLW1tYy5jCj4+Pj4gwqDC
-oGluZGV4IDJlZTRjMjEuLmFjNTZiY2YgMTAwNjQ0Cj4+Pj4gwqDCoC0tLSBhL2RyaXZlcnMvbW1j
-L2hvc3Qvc3VueGktbW1jLmMKPj4+PiDCoMKgKysrIGIvZHJpdmVycy9tbWMvaG9zdC9zdW54aS1t
-bWMuYwo+Pj4+IMKgwqBAQCAtNzIsNiArNzIsMTQgQEAKPj4+PiDCoMKgwqAjZGVmaW5lIFNEWENf
-UkVHX0NIREEgKDB4OTApCj4+Pj4gwqDCoMKgI2RlZmluZSBTRFhDX1JFR19DQkRBICgweDk0KQo+
-Pj4+Cj4+Pj4gwqDCoCsvKiBOZXcgcmVnaXN0ZXJzIGludHJvZHVjZWQgaW4gQTY0ICovCj4+Pj4g
-wqDCoCsjZGVmaW5lIFNEWENfUkVHX0ExMkEgMHgwNTggLyogU01DIEF1dG8gQ29tbWFuZCAxMiBS
-ZWdpc3RlciAqLwo+Pj4+IMKgwqArI2RlZmluZSBTRFhDX1JFR19TRF9OVFNSIDB4MDVDIC8qIFNN
-QyBOZXcgVGltaW5nIFNldCBSZWdpc3RlciAqLwo+Pj4+IMKgwqArI2RlZmluZSBTRFhDX1JFR19E
-UlZfREwgMHgxNDAgLyogRHJpdmUgRGVsYXkgQ29udHJvbCBSZWdpc3RlciAqLwo+Pj4+IMKgwqAr
-I2RlZmluZSBTRFhDX1JFR19TQU1QX0RMX1JFRyAweDE0NCAvKiBTTUMgc2FtcGxlIGRlbGF5IGNv
-bnRyb2wgKi8KPj4+PiDCoMKgKyNkZWZpbmUgU0RYQ19SRUdfRFNfRExfUkVHIDB4MTQ4IC8qIFNN
-QyBkYXRhIHN0cm9iZSBkZWxheSBjb250cm9sICovCj4+Pj4gwqDCoCsKPj4+PiDCoMKgKwo+Pj4+
-IMKgwqDCoCNkZWZpbmUgbW1jX3JlYWRsKGhvc3QsIHJlZykgXAo+Pj4+IMKgwqDCoMKgwqDCoMKg
-wqDCoMKgwqByZWFkbCgoaG9zdCktPnJlZ19iYXNlICsgU0RYQ18jI3JlZykKPj4+PiDCoMKgwqAj
-ZGVmaW5lIG1tY193cml0ZWwoaG9zdCwgcmVnLCB2YWx1ZSkgXAo+Pj4+IMKgwqBAQCAtMjE3LDYg
-KzIyNSwxNSBAQAo+Pj4+IMKgwqDCoCNkZWZpbmUgU0RYQ19DTEtfNTBNX0REUiAzCj4+Pj4gwqDC
-oMKgI2RlZmluZSBTRFhDX0NMS181ME1fRERSXzhCSVQgNAo+Pj4+Cj4+Pj4gwqDCoCsjZGVmaW5l
-IFNEWENfMlhfVElNSU5HX01PREUgQklUKDMxKQo+Pj4+IMKgwqArCj4+Pj4gwqDCoCsjZGVmaW5l
-IFNEWENfQ0FMX1NUQVJUIEJJVCgxNSkKPj4+PiDCoMKgKyNkZWZpbmUgU0RYQ19DQUxfRE9ORSBC
-SVQoMTQpCj4+Pj4gwqDCoCsjZGVmaW5lIFNEWENfQ0FMX0RMX1NISUZUIDgKPj4+PiDCoMKgKyNk
-ZWZpbmUgU0RYQ19DQUxfRExfU1dfRU4gQklUKDcpCj4+Pj4gwqDCoCsjZGVmaW5lIFNEWENfQ0FM
-X0RMX1NXX1NISUZUIDAKPj4+PiDCoMKgKyNkZWZpbmUgU0RYQ19DQUxfRExfTUFTSyAweDNmCj4+
-Pj4gwqDCoCsKPj4+PiDCoMKgwqBzdHJ1Y3Qgc3VueGlfbW1jX2Nsa19kZWxheSB7Cj4+Pj4gwqDC
-oMKgwqDCoMKgwqDCoMKgwqDCoHUzMiBvdXRwdXQ7Cj4+Pj4gwqDCoMKgwqDCoMKgwqDCoMKgwqDC
-oHUzMiBzYW1wbGU7Cj4+Pj4gwqDCoEBAIC0yNjEsNiArMjc4LDkgQEAgc3RydWN0IHN1bnhpX21t
-Y19ob3N0IHsKPj4+Pgo+Pj4+IMKgwqDCoMKgwqDCoMKgwqDCoMKgwqAvKiB2cW1tYyAqLwo+Pj4+
-IMKgwqDCoMKgwqDCoMKgwqDCoMKgwqBib29sIHZxbW1jX2VuYWJsZWQ7Cj4+Pj4gwqDCoCsKPj4+
-PiDCoMKgKyAvKiBkb2VzIHRoZSBJUCBibG9jayBzdXBwb3J0IGF1dG9jYWxpYnJhdGlvbj8gKi8K
-Pj4+PiDCoMKgKyBib29sIGNhbl9jYWxpYnJhdGU7Cj4+Pj4gwqDCoMKgfTsKPj4+Pgo+Pj4+IMKg
-wqDCoHN0YXRpYyBpbnQgc3VueGlfbW1jX3Jlc2V0X2hvc3Qoc3RydWN0IHN1bnhpX21tY19ob3N0
-ICpob3N0KQo+Pj4+IMKgwqBAQCAtNjUzLDEwICs2NzMsNjYgQEAgc3RhdGljIGludCBzdW54aV9t
-bWNfb2Nsa19vbm9mZihzdHJ1Y3Qgc3VueGlfbW1jX2hvc3QgKmhvc3QsIHUzMiBvY2xrX2VuKQo+
-Pj4+IMKgwqDCoMKgwqDCoMKgwqDCoMKgwqByZXR1cm4gMDsKPj4+PiDCoMKgwqB9Cj4+Pj4KPj4+
-PiDCoMKgK3N0YXRpYyBpbnQgc3VueGlfbW1jX2NhbGlicmF0ZShzdHJ1Y3Qgc3VueGlfbW1jX2hv
-c3QgKmhvc3QsCj4+Pj4gwqDCoCsgc3RydWN0IG1tY19pb3MgKmlvcywgaW50IHJlZ19vZmYpCj4+
-Pj4gwqDCoCt7Cj4+Pj4gwqDCoCsgdTMyIHJlZyA9IHJlYWRsKGhvc3QtPnJlZ19iYXNlICsgcmVn
-X29mZik7Cj4+Pj4gwqDCoCsgdTMyIGRlbGF5Owo+Pj4+IMKgwqArCj4+Pj4gwqDCoCsgcmVnICY9
-IH4oU0RYQ19DQUxfRExfTUFTSyA8PCBTRFhDX0NBTF9ETF9TV19TSElGVCk7Cj4+Pj4gwqDCoCsg
-cmVnICY9IH5TRFhDX0NBTF9ETF9TV19FTjsKPj4+PiDCoMKgKwo+Pj4+IMKgwqArIHdyaXRlbChy
-ZWcgfCBTRFhDX0NBTF9TVEFSVCwgaG9zdC0+cmVnX2Jhc2UgKyByZWdfb2ZmKTsKPj4+PiDCoMKg
-Kwo+Pj4+IMKgwqArIGRldl9kYmcobW1jX2Rldihob3N0LT5tbWMpLCAiY2FsaWJyYXRpb24gc3Rh
-cnRlZFxuIik7Cj4+Pj4gwqDCoCsKPj4+PiDCoMKgKyB3aGlsZSAoISgocmVnID0gcmVhZGwoaG9z
-dC0+cmVnX2Jhc2UgKyByZWdfb2ZmKSkgJiBTRFhDX0NBTF9ET05FKSkKPj4+PiDCoMKgKyBjcHVf
-cmVsYXgoKTsKPj4+PiDCoMKgKwo+Pj4+IMKgwqArIGRlbGF5ID0gKHJlZyA+PiBTRFhDX0NBTF9E
-TF9TSElGVCkgJiBTRFhDX0NBTF9ETF9NQVNLOwo+Pj4+IMKgwqArCj4+Pj4gwqDCoCsgcmVnICY9
-IH5TRFhDX0NBTF9TVEFSVDsKPj4+PiDCoMKgKyByZWcgfD0gKGRlbGF5IDw8IFNEWENfQ0FMX0RM
-X1NXX1NISUZUKSB8IFNEWENfQ0FMX0RMX1NXX0VOOwo+Pj4+IMKgwqArCj4+Pj4gwqDCoCsgd3Jp
-dGVsKHJlZywgaG9zdC0+cmVnX2Jhc2UgKyByZWdfb2ZmKTsKPj4+PiDCoMKgKwo+Pj4+IMKgwqAr
-IGRldl9kYmcobW1jX2Rldihob3N0LT5tbWMpLCAiY2FsaWJyYXRpb24gZW5kZWQsIHJlcyBpcyAw
-eCV4XG4iLCByZWcpOwo+Pj4+IMKgwqArCj4+Pj4gwqDCoCsgcmV0dXJuIDA7Cj4+Pj4gwqDCoCt9
-Cj4+Pj4gwqDCoCsKPj4+PiDCoMKgK3N0YXRpYyBpbnQgc3VueGlfbW1jX2RldGVybWluZV9kZWxh
-eXMoc3RydWN0IHN1bnhpX21tY19ob3N0ICpob3N0LAo+Pj4+IMKgwqArIHN0cnVjdCBtbWNfaW9z
-ICppb3MsIGludCByYXRlKQo+Pj4+IMKgwqArewo+Pj4+IMKgwqArIGludCBpbmRleDsKPj4+PiDC
-oMKgKwo+Pj4+IMKgwqArIGlmIChyYXRlIDw9IDQwMDAwMCkgewo+Pj4+IMKgwqArIGluZGV4ID0g
-U0RYQ19DTEtfNDAwSzsKPj4+PiDCoMKgKyB9IGVsc2UgaWYgKHJhdGUgPD0gMjUwMDAwMDApIHsK
-Pj4+PiDCoMKgKyBpbmRleCA9IFNEWENfQ0xLXzI1TTsKPj4+PiDCoMKgKyB9IGVsc2UgaWYgKHJh
-dGUgPD0gNTIwMDAwMDApIHsKPj4+PiDCoMKgKyBpZiAoaW9zLT50aW1pbmcgIT0gTU1DX1RJTUlO
-R19VSFNfRERSNTAgJiYKPj4+PiDCoMKgKyBpb3MtPnRpbWluZyAhPSBNTUNfVElNSU5HX01NQ19E
-RFI1Mikgewo+Pj4+IMKgwqArIGluZGV4ID0gU0RYQ19DTEtfNTBNOwo+Pj4+IMKgwqArIH0gZWxz
-ZSBpZiAoaW9zLT5idXNfd2lkdGggPT0gTU1DX0JVU19XSURUSF84KSB7Cj4+Pj4gwqDCoCsgaW5k
-ZXggPSBTRFhDX0NMS181ME1fRERSXzhCSVQ7Cj4+Pj4gwqDCoCsgfSBlbHNlIHsKPj4+PiDCoMKg
-KyBpbmRleCA9IFNEWENfQ0xLXzUwTV9ERFI7Cj4+Pj4gwqDCoCsgfQo+Pj4+IMKgwqArIH0gZWxz
-ZSB7Cj4+Pj4gwqDCoCsgcmV0dXJuIC1FSU5WQUw7Cj4+Pj4gwqDCoCsgfQo+Pj4+IMKgwqArCj4+
-Pj4gwqDCoCsgY2xrX3NldF9waGFzZShob3N0LT5jbGtfc2FtcGxlLCBob3N0LT5jbGtfZGVsYXlz
-W2luZGV4XS5zYW1wbGUpOwo+Pj4+IMKgwqArIGNsa19zZXRfcGhhc2UoaG9zdC0+Y2xrX291dHB1
-dCwgaG9zdC0+Y2xrX2RlbGF5c1tpbmRleF0ub3V0cHV0KTsKPj4+PiDCoMKgKwo+Pj4+IMKgwqAr
-IHJldHVybiAwOwo+Pj4+IMKgwqArfQo+Pj4+IMKgwqArCj4+Pgo+Pj4gwqBUaGUgZmFjdG9yaW5n
-IG91dCBvZiB0aGlzIGludG8gYSBmdW5jdGlvbiByZWFsbHkgc2hvdWxkIGJlIGRvbmUgaW4KPj4+
-IMKgYSBzZXBhcmF0ZSBwcmVwYXJhdGlvbiBwYXRjaCwgdGhhdCB3aWxsIGFsc28gbWFrZSB0aGUg
-cGF0Y2ggbWFraW5nCj4+PiDCoHRoZSBhY3R1YWwgZnVuY3Rpb25hbCBjaGFuZ2VzIG11Y2ggZWFz
-aWVyIHRvIHJlYWQuCj4+Cj4+IMKgVGhhbmtzLgo+Pgo+PiDCoEFuZCBJIGZvcmdvdCBhZGQgdGhl
-IGluZm9tYXRpb24gdGhhdCB0aGUgcGF0Y2ggaXMgYmFzZWQgb24gYXByaXR6ZWwncwo+PiDCoHdv
-cmsuLi4KPj4KPj4gwqBJIHdpbGwgc29vbiBzZW5kIGEgUEFUQ0ggdjIuCj4+Cj4+IMKgSWYgeW91
-ciBBMTAvMTMgbW1jIGNsb2NrIGRyaXZlciBjYW4gYmUgbWVyZ2VkIEFTQVAsIHRoZW4gSSB3aWxs
-IGJlCj4+IMKgYWJsZSB0byBkcm9wIHNvbWUgYml0cyBmcm9tIHRoZSBwYXRjaC4KPgo+IE9rLCBJ
-J20gd29ya2luZyBvbiB2MiBub3csIGFuZCBpdCBsb29rcyBsaWtlIGZhY3RvcmluZyBvdXQgdGhl
-Cj4gY2xrX2RlbGF5IC8gcGhhc2Ugc3R1ZmYgaXMgdXNlZnVsIGZvciBteSB2MiB0b28sIHNvIEkn
-bSBnb2luZyB0bwo+IGRvIGEgcGF0Y2ggZmFjdG9yaW5nIHRoaXMgb3V0IG15c2VsZi4gSSdsbCBz
-ZW5kIG15IHYyIGluIDEgLSAyCj4gaG91cnMgZnJvbSBub3csIHlvdSBtYXkgd2FudCB0byBiYXNl
-IHlvdXIgdjIgb24gbXkgd29yayAoaXQgY29udGFpbnMKPiBzb21lIG90aGVyIHJlZmFjdG9yaW5n
-IHdoaWNoIHNob3VsZCBtYWtlIHRoaW5ncyBlYXNpZXIgdG9vKS4KVGhhbmtzLiBDYW4geW91IEND
-IGl0IHRvIG1lPwoKPgo+IFJlZ2FyZHMsCj4KPiBIYW5zCgpfX19fX19fX19fX19fX19fX19fX19f
-X19fX19fX19fX19fX19fX19fX19fX19fXwpsaW51eC1hcm0ta2VybmVsIG1haWxpbmcgbGlzdAps
-aW51eC1hcm0ta2VybmVsQGxpc3RzLmluZnJhZGVhZC5vcmcKaHR0cDovL2xpc3RzLmluZnJhZGVh
-ZC5vcmcvbWFpbG1hbi9saXN0aW5mby9saW51eC1hcm0ta2VybmVsCg==
+Hi,
+
+On 25-07-16 10:18, Maxime Ripard wrote:
+> Hi,
+>
+> On Sat, Jul 16, 2016 at 12:46:02PM +0200, Hans de Goede wrote:
+>> It turns out that sun4i (A10) and sun5i (A13 & co) do not have sample
+>> clocks, so make them optional.
+>>
+>> Since these do not have sample clocks, they cannot (reliably) do
+>> DDR rates, so only set MMC_CAP_1_8V_DDR when we do have sample clks.
+>>
+>> Note this patch only changes the devm_clk_get error checking and sets
+>> the clocks to NULL if they don't exists. All the clk_foo calls accept
+>> a NULL clk and will return success when called with a NULL clk, so this
+>> is all that is necessary.
+>
+> The clocks aren't really optional. They're not needed for the A10 /
+> A13, and mandatory for the A20 and later.
+>
+> Having a new compatible for the A20 that would require that clock and
+> not require it for the A10/A13 anymore seems more appropriate.
+
+Ok, I've prepared a new version using a new compatible.
+
+Regards,
+
+Hans
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
