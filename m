@@ -1,11 +1,13 @@
 From: Hans de Goede <hdegoede@redhat.com>
-Subject: [PATCH v2 0/5] mmc: sunxi: sun4i / sun5i do not have sample clocks
-Date: Sat, 30 Jul 2016 16:25:43 +0200
-Message-ID: <1469888748-26085-1-git-send-email-hdegoede@redhat.com>
+Subject: [PATCH v2 1/5] mmc: sunxi: Disable sample clks on remove
+Date: Sat, 30 Jul 2016 16:25:44 +0200
+Message-ID: <1469888748-26085-2-git-send-email-hdegoede@redhat.com>
+References: <1469888748-26085-1-git-send-email-hdegoede@redhat.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <1469888748-26085-1-git-send-email-hdegoede@redhat.com>
 List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
  <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
 List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
@@ -16,19 +18,33 @@ List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
 Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
 Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
 To: Ulf Hansson <ulf.hansson@linaro.org>, Maxime Ripard <maxime.ripard@free-electrons.com>, Chen-Yu Tsai <wens@csie.org>
-Cc: devicetree <devicetree@vger.kernel.org>, linux-mmc@vger.kernel.org, Icenowy Zheng <icenowy@aosc.xyz>, linux-arm-kernel@lists.infradead.org
+Cc: devicetree <devicetree@vger.kernel.org>, linux-mmc@vger.kernel.org, Icenowy Zheng <icenowy@aosc.xyz>, linux-arm-kernel@lists.infradead.org, Hans de Goede <hdegoede@redhat.com>
 List-Id: linux-mmc@vger.kernel.org
 
-Hi Ulf, Maxime and Chen-Yu,
+When support for the sample clks was added calls to prepare_enable
+were added to the probe path, but matching calls to disable_unprepare
+were forgotten in the remove path, this fixes this.
 
-Here is v2 of my patch set to deal with sun4i / sun5i not having
-mmc sample clocks, this time introducing a new sun7i-a20-mmc
-compatible for the models which do have sample clks, as discussed
-in the review of v1 of this set.
+Signed-off-by: Hans de Goede <hdegoede@redhat.com>
+---
+Changes in v2:
+-No changes
+---
+ drivers/mmc/host/sunxi-mmc.c | 2 ++
+ 1 file changed, 2 insertions(+)
 
-Ulf, can you please add patches 1-4 to your tree for 4.9, and
-Maxime can you please pick up patch 5 ?
-
-Thanks & Regards,
-
-Hans
+diff --git a/drivers/mmc/host/sunxi-mmc.c b/drivers/mmc/host/sunxi-mmc.c
+index a4d2b63..71a480b 100644
+--- a/drivers/mmc/host/sunxi-mmc.c
++++ b/drivers/mmc/host/sunxi-mmc.c
+@@ -1160,6 +1160,8 @@ static int sunxi_mmc_remove(struct platform_device *pdev)
+ 	if (!IS_ERR(host->reset))
+ 		reset_control_assert(host->reset);
+ 
++	clk_disable_unprepare(host->clk_sample);
++	clk_disable_unprepare(host->clk_output);
+ 	clk_disable_unprepare(host->clk_mmc);
+ 	clk_disable_unprepare(host->clk_ahb);
+ 
+-- 
+2.7.4
