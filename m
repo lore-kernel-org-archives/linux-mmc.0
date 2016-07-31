@@ -1,341 +1,200 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: [GIT PULL] MMC for v.4.8
-Date: Sun, 31 Jul 2016 18:35:50 +0200
-Message-ID: <CAPDyKFp8RB=Fs_DBLS7PY4_Gz+g7e-9m1=0A=d5cboGUj58Qqw@mail.gmail.com>
+From: Icenowy Zheng <icenowy@aosc.xyz>
+Subject: Re: [PATCH v2 2/2] mmc: host: sunxi: add support for A64 mmc
+ controller
+Date: Mon, 01 Aug 2016 07:48:32 +0800
+Message-ID: <24941470008912@web11j.yandex.ru>
+References: <20160731110234.3593-1-icenowy@aosc.xyz>
+ <20160731110234.3593-3-icenowy@aosc.xyz>
+ <aaeda3c8-1487-cb6c-bfc6-44a63fed5ea2@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8BIT
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Linus Torvalds <torvalds@linux-foundation.org>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
-Cc: Jaehoon Chung <jh80.chung@samsung.com>, Adrian Hunter <adrian.hunter@intel.com>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <aaeda3c8-1487-cb6c-bfc6-44a63fed5ea2@redhat.com>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Hans de Goede <hdegoede@redhat.com>, Rob Herring <robh+dt@kernel.org>, Maxime Ripard <maxime.ripard@free-electrons.com>, Chen-Yu Tsai <wens@csie.org>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Mark Rutland <mark.rutland@arm.com>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, Michal Suchanek <hramrach@gmail.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Jaehoon Chung <jh80.chung@samsung.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
 List-Id: linux-mmc@vger.kernel.org
 
-Hi Linus,
-
-Here's the PR for MMC v4.8 - sorry for being late!
-Details about the highlights are as usual found in the signed tag.
-
-Please pull this in!
-
-Kind regards
-Ulf Hansson
-
-The following changes since commit 523d939ef98fd712632d93a5a2b588e477a7565e:
-
-  Linux 4.7 (2016-07-24 12:23:50 -0700)
-
-are available in the git repository at:
-
-  git://git.linaro.org/people/ulf.hansson/mmc.git tags/mmc-v4.8
-
-for you to fetch changes up to 6ea6257945188ff7f5d1670d5adc964ac78c590c:
-
-  mmc: rtsx_pci: Remove deprecated create_singlethread_workqueue
-(2016-07-29 11:29:05 +0200)
-
-----------------------------------------------------------------
-MMC core:
- - A couple of changes to improve the support for erase/discard/trim cmds
- - Add eMMC HS400 enhanced strobe support
- - Show OCR and DSR registers in SYSFS for MMC/SD cards
- - Correct and improve busy detection logic for MMC switch (CMD6) cmds
- - Disable HPI cmds for certain broken Hynix eMMC cards
- - Allow MMC hosts to specify non-support for SD and MMC cmds
- - Some minor additional fixes
-
-MMC host:
- - sdhci: Re-works, fixes and clean-ups
- - sdhci: Add HW auto re-tuning support
- - sdhci: Re-factor code to prepare for adding support for eMMC CMDQ
- - sdhci-esdhc-imx: Fixes and clean-ups
- - sdhci-esdhc-imx: Update system PM support
- - sdhci-esdhc-imx: Enable HW auto re-tuning
- - sdhci-bcm2835: Remove driver as sdhci-iproc is used instead
- - sdhci-brcmstb: Add new driver for Broadcom BRCMSTB SoCs
- - sdhci-msm: Add support for UHS cards
- - sdhci-tegra: Improve support for UHS cards
- - sdhci-of-arasan: Update phy support for Rockchip SoCs
- - sdhci-of-arasan: Deploy enhanced strobe support
- - dw_mmc: Some fixes and clean-ups
- - dw_mmc: Enable support for erase/discard/trim cmds
- - dw_mmc: Enable CMD23 support
- - mediatek: Some fixes related to the eMMC HS400 support
- - sh_mmcif: Improve support for HW busy detection
- - rtsx_pci: Enable support for erase/discard/trim cmds
-
-----------------------------------------------------------------
-Adrian Hunter (27):
-      mmc: sdhci: Fix sdhci_card_busy()
-      mmc: block: Fix tag condition with packed writes
-      mmc: sdhci: Do not call implementations of mmc host ops directly
-      mmc: sdhci: Split sdhci_add_host()
-      mmc: sdhci: Make signal voltage support explicit
-      mmc: sdhci: Tidy caps variables in sdhci_setup_host()
-      mmc: sdhci: Add sdhci_read_caps()
-      mmc: sdhci-pci: Do not runtime suspend at the end of sdhci_pci_probe()
-      mmc: sdhci: Move busy signal handling into sdhci_finish_cmd()
-      mmc: sdhci: Get rid of redundant BUG_ONs
-      mmc: sdhci: Simplify sdhci_finish_command() by clearing
-host->cmd at the start
-      mmc: sdhci: Record what command is using the data lines
-      mmc: sdhci: Get rid of host->busy_handle
-      mmc: sdhci: Reduce the use of host->mrq
-      mmc: sdhci: Move host->data warning
-      mmc: sdhci: Factor out sdhci_finish_mrq()
-      mmc: sdhci: Factor out sdhci_needs_reset()
-      mmc: sdhci: Track whether a reset is pending
-      mmc: sdhci: Clear pointers when a request finishes
-      mmc: sdhci: Ensure all requests get errored out
-      mmc: sdhci: Factor out sdhci_data_line_cmd()
-      mmc: sdhci: Separate timer timeout for command and data requests
-      mmc: sdhci: Allow for finishing multiple requests
-      mmc: sdhci: Factor out sdhci_auto_cmd12()
-      mmc: sdhci: Do not reset cmd or data circuits that are in use
-      mmc: sdhci: Avoid STOP cmd triggering warning in sdhci_send_command()
-      mmc: sdhci: sdhci_execute_tuning() must delete timer
-
-Al Cooper (2):
-      mmc: DT: sdhci-brcmstb: Add device tree bindings
-      mmc: sdhci-brcmstb: Add driver for Broadcom BRCMSTB SoCs
-
-Andy Shevchenko (2):
-      mmc: sdhci-pci: Convert to use managed functions pcim_* and devm_*
-      sdhci-pci: Use MRFLD as abbreviation of Merrifield
-
-Baolin Wang (1):
-      mmc: Change the max discard sectors and erase response when HW busy detect
-
-Ben Dooks (1):
-      mmc: dw_mmc: fix 32bit little-endian access of des1 field
-
-Bhaktipriya Shridhar (1):
-      mmc: rtsx_pci: Remove deprecated create_singlethread_workqueue
-
-Bojan Prtvar (2):
-      mmc: core: Extend sysfs with OCR register
-      mmc: core: Extend sysfs with DSR register
-
-Brian Norris (2):
-      phy: rockchip-emmc: configure default output tap delay
-      phy: rockchip-emmc: reindent the register definitions
-
-Chaotian Jing (7):
-      mmc: mmc: Use ->card_busy() to detect busy cards in __mmc_switch()
-      mmc: mmc: do not use CMD13 to get status after speed mode switch
-      mmc: mmc: fix switch timeout issue caused by jiffies precision
-      mmc: mediatek: do not tune data for HS400 mode
-      mmc: mediatek: fix CRC error when calling mmc_select_hs400()
-      mmc: mediatek: fix CMD21/CMD19 timeout issue
-      mmc: mediatek: perfer to use rise edge latching
-
-Chuanxiao Dong (1):
-      mmc: sdhci: use pr_err for sdhci_dumpregs
-
-Colin Ian King (1):
-      mmc: sdhci-msm: fix spelling mistake: "Perpheral" -> "Peripheral"
-
-Dong Aisheng (15):
-      mmc: sdhci: using common mmc_regulator_set_vqmmc()
-      mmc: sdhci-esdhc-imx: remove SDHCI_QUIRK_BROKEN_TIMEOUT_VAL
-      mmc: sdhci-esdhc-imx: add esdhc specific suspend resume callback
-      mmc: sdhci-esdhc-imx: restore watermark level setting after resume
-      mmc: sdhci-esdhci-imx: disable DLL delay line settings explicitly
-      mmc: sdhci-esdhc-imx: support setting tuning start point
-      doc: dt: fsl-imx-esdhc: add set tuning start point binding
-      mmc: sdhci: add standard hw auto retuning support
-      mmc: sdhci-esdhc-imx: enable hw auto retuning for STD_TUNING
-      mmc: sdhci-esdhc-imx: enable hw auto retuning for MAN_TUNING
-      mmc: sdhci-esdhc-imx: fix strobe DLL lock wrong clock issue
-      mmc: sdhci-esdhc-imx: factor out hw related initialization into function
-      mmc: sdhci-esdhc-imx: move tuning static configuration into
-hwinit function
-      mmc: sdhci-esdhci-imx: re-initialize hw state after resume
-      mmc: sdhci-esdhc-imx: clear tuning bits during driver probe
-
-Doug Anderson (2):
-      mmc: dw_mmc: Consider HLE errors to be data and command errors
-      mmc: dw_mmc: Wait for data transfer after response errors.
-
-Douglas Anderson (12):
-      phy: rockchip-emmc: Increase lock time allowance
-      mmc: sdhci-of-arasan: Always power the PHY off/on when clock changes
-      Documentation: mmc: sdhci-of-arasan: Add soc-ctl-syscon for corecfg regs
-      mmc: sdhci-of-arasan: Properly set corecfg_baseclkfreq on rk3399
-      Documentation: mmc: sdhci-of-arasan: Add ability to export card clock
-      mmc: sdhci-of-arasan: Add ability to export card clock
-      Documentation: phy: Let the rockchip eMMC PHY get an exported card clock
-      phy: rockchip-emmc: Minor code cleanup in rockchip_emmc_phy_power_on/off()
-      phy: rockchip-emmc: Set phyctrl_frqsel based on card clock
-      mmc: sdhci-of-arasan: Revert: Always power the PHY off/on when
-clock changes
-      phy: rockchip-emmc: Be tolerant to card clock of 0 in power on
-      phy: rockchip-emmc: Wait even longer for the DLL to lock
-
-Geert Uytterhoeven (1):
-      MAINTAINERS: Add file patterns for mmc device tree bindings
-
-Georgi Djakov (2):
-      mmc: sdhci-msm: Do not reset the controller if no card in the slot
-      mmc: sdhci-msm: Add support for UHS cards
-
-Gwendal Grignou (1):
-      mmc: Set pref erase size based on size
-
-Jaehoon Chung (6):
-      mmc: host: use the defined function to check whether card is removable
-      mmc: dw_mmc: exynos: fix the NULL pointer dereference error
-      mmc: dw_mmc: remove the quirks flags
-      mmc: dw_mmc: add the card write threshold for HS400 mode
-      mmc: dw_mmc: set to MMC_CAP_ERASE by default
-      mmc: dw_mmc: rockchip: unset the MMC_CAP_ERASE flag
-
-Jon Hunter (2):
-      mmc: sdhci: Request regulators before reading capabilities
-      mmc: tegra: Only advertise UHS modes if IO regulator is present
-
-Jérôme Forissier (1):
-      mmc: dw_mmc: k3: add MMC_CAP_CMD23
-
-Krzysztof Kozlowski (1):
-      mmc: s3cmci: Register cpufreq notifier only on S3C24xx
-
-Ludovic Desroches (1):
-      mmc: sdhci: fix wakeup configuration
-
-Peter Griffin (1):
-      mmc: core: Only change mode if mmc_select_bus_width() is successful
-
-Pratibhasagar V (1):
-      mmc: core: Disable HPI for certain Hynix eMMC cards
-
-Ritesh Harjani (1):
-      mmc: sdhci-msm: Add set_uhs_signaling() implementation
-
-Seung-Woo Kim (1):
-      mmc: dw_mmc: remove UBSAN warning in dw_mci_setup_bus()
-
-Shawn Lin (13):
-      Documentation: mmc: add mmc-hs400-enhanced-strobe
-      mmc: core: add mmc-hs400-enhanced-strobe support
-      mmc: core: implement enhanced strobe support
-      mmc: debugfs: add HS400 enhanced strobe description
-      mmc: sdhci-of-arasan: implement enhanced strobe callback
-      phy: rockchip-emmc: give DLL some extra time to be ready
-      phy: rockchip-emmc: configure frequency range and drive impedance
-      mmc: dw_mmc: remove redundant of set_bit and clear_bit
-      mmc: dw_mmc: check card present before starting request
-      mmc: dw_mmc: fix unmap sg twice when finding data err
-      mmc: core: Allow hosts to specify non-support for MMC commands
-      Documentation: mmc: add description for new no-sd* and no-mmc
-      mmc: core: expose MMC_CAP2_NO_* to dt
-
-Simon Horman (1):
-      mmc: sdhci: remove comment regarding timeout during tuning
-
-Stefan Wahren (4):
-      DT: bindings: remove bcm2835-sdhci
-      mmc: sdhci-bcm2835: remove driver
-      mmc: sdhci: add define for suspend/resume capability
-      mmc: sdhci-iproc: Use defines instead of magic numbers
-
-Ulf Hansson (18):
-      mmc: core: Allow hosts to specify non-support for SD commands
-      mmc: sh_mmcif: Enable MMC_CAP2_NO_SD and MMC_CAP2_NO_SDIO
-      mmc: sh_mmcif: Use response type to know when to enable busy detection
-      mmc: sh_mmcif: Inform the mmc core about the max busy timeout
-      mmc: sh_mmcif: Use a 10s timeout in the error recovery path
-      mmc: sdhci-pci-core: Simplify code by using SET_SYSTEM_SLEEP_PM_OPS
-      mmc: sdhci-acpi: Simplify code by using SET_SYSTEM_SLEEP_PM_OPS
-      mmc: sdhci-of-esdhc: Simplify code by using SIMPLE_DEV_PM_OPS
-      mmc: sdhci-pxav3: Remove non needed #ifdef CONFIG_PM for dev_pm_ops
-      mmc: sdhci-s3c: Remove non needed #ifdef CONFIG_PM for dev_pm_ops
-      mmc: sdhci-sirf: Remove non needed #ifdef CONFIG_PM* for dev_pm_ops
-      mmc: sdhci-esdhc-imx: Assign system PM ops within #ifdef CONFIG_PM_SLEEP
-      mmc: sdhci-esdhc-imx: Use common sdhci_suspend|resume_host()
-      mmc: sdhci-pltfm: Make sdhci_pltfm_suspend|resume() static
-      mmc: sdhci-pltfm: Convert to use the SET_SYSTEM_SLEEP_PM_OPS
-      mmc: sdhci-pltfm: Drop define for SDHCI_PLTFM_PMOPS
-      mmc: rtsx_pci: Use the provided busy timeout from the mmc core
-      mmc: rtsx_pci: Enable MMC_CAP_ERASE to allow erase/discard/trim requests
-
-Wolfram Sang (2):
-      mmc: sh_mobile_sdhi: properly document R-Car versions
-      mmc: tmio: make a cast explicit
-
-Yuan, Juntao (1):
-      mmc: block: correct 4KB alignment check
-
-Ziyuan Xu (1):
-      mmc: mmc: Fix HS switch failure in mmc_select_hs400()
-
- .../devicetree/bindings/mmc/arasan,sdhci.txt       |  35 +-
- .../devicetree/bindings/mmc/brcm,bcm2835-sdhci.txt |  18 -
- .../devicetree/bindings/mmc/brcm,bcm7425-sdhci.txt |  36 +
- .../devicetree/bindings/mmc/fsl-imx-esdhc.txt      |   2 +
- Documentation/devicetree/bindings/mmc/mmc.txt      |   4 +
- .../devicetree/bindings/phy/rockchip-emmc-phy.txt  |   9 +
- Documentation/mmc/mmc-dev-attrs.txt                |   2 +
- MAINTAINERS                                        |   8 +
- drivers/mmc/card/block.c                           |  13 +-
- drivers/mmc/core/bus.c                             |   3 +-
- drivers/mmc/core/core.c                            |  95 ++-
- drivers/mmc/core/debugfs.c                         |   3 +-
- drivers/mmc/core/host.c                            |   8 +
- drivers/mmc/core/mmc.c                             | 253 ++++---
- drivers/mmc/core/mmc_ops.c                         |  27 +-
- drivers/mmc/core/quirks.c                          |   2 +
- drivers/mmc/core/sd.c                              |  19 +
- drivers/mmc/host/Kconfig                           |  22 +-
- drivers/mmc/host/Makefile                          |   2 +-
- drivers/mmc/host/dw_mmc-exynos.c                   |   2 +-
- drivers/mmc/host/dw_mmc-k3.c                       |   7 +
- drivers/mmc/host/dw_mmc-rockchip.c                 |  11 +-
- drivers/mmc/host/dw_mmc.c                          | 126 ++--
- drivers/mmc/host/dw_mmc.h                          |  10 +-
- drivers/mmc/host/mtk-sd.c                          |  70 +-
- drivers/mmc/host/mxcmmc.c                          |   2 +-
- drivers/mmc/host/rtsx_pci_sdmmc.c                  |  16 +-
- drivers/mmc/host/s3cmci.c                          |   2 +-
- drivers/mmc/host/s3cmci.h                          |   2 +-
- drivers/mmc/host/sdhci-acpi.c                      |   8 +-
- drivers/mmc/host/sdhci-bcm-kona.c                  |   8 +-
- drivers/mmc/host/sdhci-bcm2835.c                   | 204 ------
- drivers/mmc/host/sdhci-brcmstb.c                   | 143 ++++
- drivers/mmc/host/sdhci-cns3xxx.c                   |   2 +-
- drivers/mmc/host/sdhci-dove.c                      |   2 +-
- drivers/mmc/host/sdhci-esdhc-imx.c                 | 153 +++--
- drivers/mmc/host/sdhci-iproc.c                     |  15 +-
- drivers/mmc/host/sdhci-msm.c                       | 117 +++-
- drivers/mmc/host/sdhci-of-arasan.c                 | 332 ++++++++-
- drivers/mmc/host/sdhci-of-at91.c                   |   2 +-
- drivers/mmc/host/sdhci-of-esdhc.c                  |  16 +-
- drivers/mmc/host/sdhci-of-hlwd.c                   |   2 +-
- drivers/mmc/host/sdhci-pci-core.c                  |  83 +--
- drivers/mmc/host/sdhci-pci.h                       |   2 +-
- drivers/mmc/host/sdhci-pltfm.c                     |  13 +-
- drivers/mmc/host/sdhci-pltfm.h                     |   7 -
- drivers/mmc/host/sdhci-pxav2.c                     |   2 +-
- drivers/mmc/host/sdhci-pxav3.c                     |   9 +-
- drivers/mmc/host/sdhci-s3c.c                       |   9 +-
- drivers/mmc/host/sdhci-sirf.c                      |   4 +-
- drivers/mmc/host/sdhci-st.c                        |   2 +-
- drivers/mmc/host/sdhci-tegra.c                     |  51 +-
- drivers/mmc/host/sdhci.c                           | 745 ++++++++++++++-------
- drivers/mmc/host/sdhci.h                           |  30 +-
- drivers/mmc/host/sdhci_f_sdh30.c                   |   2 +-
- drivers/mmc/host/sh_mmcif.c                        |  53 +-
- drivers/mmc/host/sh_mobile_sdhi.c                  |  14 +-
- drivers/mmc/host/tmio_mmc.h                        |   2 +-
- drivers/mmc/host/tmio_mmc_pio.c                    |   2 +-
- drivers/phy/phy-rockchip-emmc.c                    | 241 +++++--
- include/linux/mmc/card.h                           |  36 +-
- include/linux/mmc/dw_mmc.h                         |   9 -
- include/linux/mmc/host.h                           |  14 +
- include/linux/mmc/mmc.h                            |   3 +
- include/linux/platform_data/mmc-esdhc-imx.h        |   1 +
- 65 files changed, 2127 insertions(+), 1020 deletions(-)
- delete mode 100644 Documentation/devicetree/bindings/mmc/brcm,bcm2835-sdhci.txt
- create mode 100644 Documentation/devicetree/bindings/mmc/brcm,bcm7425-sdhci.txt
- delete mode 100644 drivers/mmc/host/sdhci-bcm2835.c
- create mode 100644 drivers/mmc/host/sdhci-brcmstb.c
+CkhpLAozMS4wNy4yMDE2LCAyMjozMCwgIkhhbnMgZGUgR29lZGUiIDxoZGVnb2VkZUByZWRoYXQu
+Y29tPjoKPiBIaSwKPgo+IE9uIDMxLTA3LTE2IDEzOjAyLCBJY2Vub3d5IFpoZW5nIHdyb3RlOgo+
+PiDCoEE2NCBTb0MgZmVhdHVyZXMgYSBNTUMgY29udHJvbGxlciB3aGljaCBuZWVkIG9ubHkgdGhl
+IG1vZCBjbG9jaywgYW5kIGNhbgo+PiDCoGNhbGlicmF0ZSBkZWxheSBieSBpdHNlbGYuIFRoaXMg
+cGF0Y2ggYWRkcyBzdXBwb3J0IGZvciB0aGUgbmV3IE1NQwo+PiDCoGNvbnRyb2xsZXIgSVAgY29y
+ZS4KPj4KPj4gwqBCYXNlZCBvbiB3b3JrIGJ5IEFuZHJlIFByenl3YXJhIDxhbmRyZS5wcnp5d2Fy
+YUBhcm0uY29tPi4KPj4KPj4gwqBTaWduZWQtb2ZmLWJ5OiBJY2Vub3d5IFpoZW5nIDxpY2Vub3d5
+QGFvc2MueHl6Pgo+Cj4gTG9va3MgZ29vZCwgc29tZSBtaW5vciByZW1hcmtzIChzZWUgY29tbWVu
+dHMgaW5saW5lKSBhZnRlciB0aG9zZQo+IGFyZSBhZGRyZXNzZWQgdGhpcyBpcyByZWFkeSB0byBi
+ZSBtZXJnZWQgSU1ITy4KPgo+PiDCoC0tLQo+PiDCoMKgZHJpdmVycy9tbWMvaG9zdC9zdW54aS1t
+bWMuYyB8IDEwNiArKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKystLS0tLS0tCj4+
+IMKgwqAxIGZpbGUgY2hhbmdlZCwgOTAgaW5zZXJ0aW9ucygrKSwgMTYgZGVsZXRpb25zKC0pCj4+
+Cj4+IMKgZGlmZiAtLWdpdCBhL2RyaXZlcnMvbW1jL2hvc3Qvc3VueGktbW1jLmMgYi9kcml2ZXJz
+L21tYy9ob3N0L3N1bnhpLW1tYy5jCj4+IMKgaW5kZXggMmVjOTFjZS4uYWEyYWJmMyAxMDA2NDQK
+Pj4gwqAtLS0gYS9kcml2ZXJzL21tYy9ob3N0L3N1bnhpLW1tYy5jCj4+IMKgKysrIGIvZHJpdmVy
+cy9tbWMvaG9zdC9zdW54aS1tbWMuYwo+PiDCoEBAIC03Miw2ICs3MiwxNCBAQAo+PiDCoMKgI2Rl
+ZmluZSBTRFhDX1JFR19DSERBICgweDkwKQo+PiDCoMKgI2RlZmluZSBTRFhDX1JFR19DQkRBICgw
+eDk0KQo+Pgo+PiDCoCsvKiBOZXcgcmVnaXN0ZXJzIGludHJvZHVjZWQgaW4gQTY0ICovCj4+IMKg
+KyNkZWZpbmUgU0RYQ19SRUdfQTEyQSAweDA1OCAvKiBTTUMgQXV0byBDb21tYW5kIDEyIFJlZ2lz
+dGVyICovCj4+IMKgKyNkZWZpbmUgU0RYQ19SRUdfU0RfTlRTUiAweDA1QyAvKiBTTUMgTmV3IFRp
+bWluZyBTZXQgUmVnaXN0ZXIgKi8KPj4gwqArI2RlZmluZSBTRFhDX1JFR19EUlZfREwgMHgxNDAg
+LyogRHJpdmUgRGVsYXkgQ29udHJvbCBSZWdpc3RlciAqLwo+PiDCoCsjZGVmaW5lIFNEWENfUkVH
+X1NBTVBfRExfUkVHIDB4MTQ0IC8qIFNNQyBzYW1wbGUgZGVsYXkgY29udHJvbCAqLwo+PiDCoCsj
+ZGVmaW5lIFNEWENfUkVHX0RTX0RMX1JFRyAweDE0OCAvKiBTTUMgZGF0YSBzdHJvYmUgZGVsYXkg
+Y29udHJvbCAqLwo+PiDCoCsKPj4gwqArCj4KPiBQbGVhc2UgZHJvcCAxIGVtcHR5IGxpbmUgaGVy
+ZS4KVGhhbmtzIGZvciB5b3Ugbm90aWNlLi4uIEkgZm9yZ290IHRvIGNoZWNrb3V0IHRoZSBlbXB0
+eSBsaW5lLi4uCj4KPj4gwqDCoCNkZWZpbmUgbW1jX3JlYWRsKGhvc3QsIHJlZykgXAo+PiDCoMKg
+wqDCoMKgwqDCoMKgwqDCoHJlYWRsKChob3N0KS0+cmVnX2Jhc2UgKyBTRFhDXyMjcmVnKQo+PiDC
+oMKgI2RlZmluZSBtbWNfd3JpdGVsKGhvc3QsIHJlZywgdmFsdWUpIFwKPj4gwqBAQCAtMjE3LDYg
+KzIyNSwxNSBAQAo+PiDCoMKgI2RlZmluZSBTRFhDX0NMS181ME1fRERSIDMKPj4gwqDCoCNkZWZp
+bmUgU0RYQ19DTEtfNTBNX0REUl84QklUIDQKPj4KPj4gwqArI2RlZmluZSBTRFhDXzJYX1RJTUlO
+R19NT0RFIEJJVCgzMSkKPj4gwqArCj4+IMKgKyNkZWZpbmUgU0RYQ19DQUxfU1RBUlQgQklUKDE1
+KQo+PiDCoCsjZGVmaW5lIFNEWENfQ0FMX0RPTkUgQklUKDE0KQo+PiDCoCsjZGVmaW5lIFNEWENf
+Q0FMX0RMX1NISUZUIDgKPj4gwqArI2RlZmluZSBTRFhDX0NBTF9ETF9TV19FTiBCSVQoNykKPj4g
+wqArI2RlZmluZSBTRFhDX0NBTF9ETF9TV19TSElGVCAwCj4+IMKgKyNkZWZpbmUgU0RYQ19DQUxf
+RExfTUFTSyAweDNmCj4+IMKgKwo+PiDCoMKgc3RydWN0IHN1bnhpX21tY19jbGtfZGVsYXkgewo+
+PiDCoMKgwqDCoMKgwqDCoMKgwqDCoHUzMiBvdXRwdXQ7Cj4+IMKgwqDCoMKgwqDCoMKgwqDCoMKg
+dTMyIHNhbXBsZTsKPj4gwqBAQCAtMjMyLDYgKzI0OSw5IEBAIHN0cnVjdCBzdW54aV9pZG1hX2Rl
+cyB7Cj4+IMKgwqBzdHJ1Y3Qgc3VueGlfbW1jX2NmZyB7Cj4+IMKgwqDCoMKgwqDCoMKgwqDCoMKg
+dTMyIGlkbWFfZGVzX3NpemVfYml0czsKPj4gwqDCoMKgwqDCoMKgwqDCoMKgwqBjb25zdCBzdHJ1
+Y3Qgc3VueGlfbW1jX2Nsa19kZWxheSAqY2xrX2RlbGF5czsKPj4gwqArCj4KPiBJIHdvdWxkIG5v
+dCBpbnNlcnQgYW4gZW1wdHkgbGluZSBoZXJlLgpJJ20gb25seSBmZWVsaW5nIHRoYXQgYSBlbXB0
+eSBiZWZvcmUgc3VjaCBhIGNvbW1lbnQgbGluZSBpcyBhCmtpbmQgb2Ygc2VwYXJhdG9yLi4uCihS
+ZWZlciB0byBzdHJ1Y3Qgc3VueGlfbW1jX2hvc3QpCj4KPj4gwqArIC8qIGRvZXMgdGhlIElQIGJs
+b2NrIHN1cHBvcnQgYXV0b2NhbGlicmF0aW9uPyAqLwo+PiDCoCsgYm9vbCBjYW5fY2FsaWJyYXRl
+Owo+PiDCoMKgfTsKPj4KPj4gwqDCoHN0cnVjdCBzdW54aV9tbWNfaG9zdCB7Cj4+IMKgQEAgLTY1
+Nyw2ICs2NzcsMzQgQEAgc3RhdGljIGludCBzdW54aV9tbWNfb2Nsa19vbm9mZihzdHJ1Y3Qgc3Vu
+eGlfbW1jX2hvc3QgKmhvc3QsIHUzMiBvY2xrX2VuKQo+PiDCoMKgwqDCoMKgwqDCoMKgwqDCoHJl
+dHVybiAwOwo+PiDCoMKgfQo+Pgo+PiDCoCtzdGF0aWMgaW50IHN1bnhpX21tY19jYWxpYnJhdGUo
+c3RydWN0IHN1bnhpX21tY19ob3N0ICpob3N0LAo+PiDCoCsgc3RydWN0IG1tY19pb3MgKmlvcywg
+aW50IHJlZ19vZmYpCj4+IMKgK3sKPj4gwqArIHUzMiByZWcgPSByZWFkbChob3N0LT5yZWdfYmFz
+ZSArIHJlZ19vZmYpOwo+PiDCoCsgdTMyIGRlbGF5Owo+PiDCoCsKPgo+IEkgd291bGQgYWRkOgo+
+Cj4gwqDCoMKgwqDCoMKgwqDCoGlmICghaG9zdC0+Y2ZnLT5jYW5fY2FsaWJyYXRlKQo+IMKgwqDC
+oMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgcmV0dXJuIDA7Cj4KPiBIZXJlOyBhbmQgLi4uCkkg
+YWdyZWUgd2l0aCBpdC4gSXQncyBzb21lIGtpbmQgb2YgZXJyb3IgY2hlY2tpbmcuCj4KPj4gwqAr
+IHJlZyAmPSB+KFNEWENfQ0FMX0RMX01BU0sgPDwgU0RYQ19DQUxfRExfU1dfU0hJRlQpOwo+PiDC
+oCsgcmVnICY9IH5TRFhDX0NBTF9ETF9TV19FTjsKPj4gwqArCj4+IMKgKyB3cml0ZWwocmVnIHwg
+U0RYQ19DQUxfU1RBUlQsIGhvc3QtPnJlZ19iYXNlICsgcmVnX29mZik7Cj4+IMKgKwo+PiDCoCsg
+ZGV2X2RiZyhtbWNfZGV2KGhvc3QtPm1tYyksICJjYWxpYnJhdGlvbiBzdGFydGVkXG4iKTsKPj4g
+wqArCj4+IMKgKyB3aGlsZSAoISgocmVnID0gcmVhZGwoaG9zdC0+cmVnX2Jhc2UgKyByZWdfb2Zm
+KSkgJiBTRFhDX0NBTF9ET05FKSkKPj4gwqArIGNwdV9yZWxheCgpOwo+PiDCoCsKPj4gwqArIGRl
+bGF5ID0gKHJlZyA+PiBTRFhDX0NBTF9ETF9TSElGVCkgJiBTRFhDX0NBTF9ETF9NQVNLOwo+PiDC
+oCsKPj4gwqArIHJlZyAmPSB+U0RYQ19DQUxfU1RBUlQ7Cj4+IMKgKyByZWcgfD0gKGRlbGF5IDw8
+IFNEWENfQ0FMX0RMX1NXX1NISUZUKSB8IFNEWENfQ0FMX0RMX1NXX0VOOwo+PiDCoCsKPj4gwqAr
+IHdyaXRlbChyZWcsIGhvc3QtPnJlZ19iYXNlICsgcmVnX29mZik7Cj4+IMKgKwo+PiDCoCsgZGV2
+X2RiZyhtbWNfZGV2KGhvc3QtPm1tYyksICJjYWxpYnJhdGlvbiBlbmRlZCwgcmVzIGlzIDB4JXhc
+biIsIHJlZyk7Cj4KPiBBZGQ6Cj4KPiDCoMKgwqDCoMKgwqDCoMKgLyogVE9ETzogZW5hYmxlIGNh
+bGlicmF0ZSBvbiBzZGMyIFNEWENfUkVHX0RTX0RMX1JFRyBvZiBBNjQgKi8KPgo+IGhlcmU7IGFu
+ZCAuLi4KVGhlIGZ1bmN0aW9uIG9ubHkgcmVjZWl2ZWQgYSByZWdpc3RlciBhZGRyZXNzIGFzIGEg
+cGFyYW1ldGVyLi4uCkl0IGRvIG5vdCBrbm93IHRoZSBkaWZmZXJlbmNlIGJldHdlZW4gZGlmZmVy
+ZW50IHJlZ3MgdG8gY2FsaWJyYXRlLgo+Cj4+IMKgKwo+PiDCoCsgcmV0dXJuIDA7Cj4+IMKgK30K
+Pj4gwqArCj4+IMKgwqBzdGF0aWMgaW50IHN1bnhpX21tY19jbGtfc2V0X3BoYXNlKHN0cnVjdCBz
+dW54aV9tbWNfaG9zdCAqaG9zdCwKPj4gwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDC
+oMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqBzdHJ1Y3QgbW1jX2lvcyAq
+aW9zLCB1MzIgcmF0ZSkKPj4gwqDCoHsKPj4gwqBAQCAtNzI3LDkgKzc3NSwxNyBAQCBzdGF0aWMg
+aW50IHN1bnhpX21tY19jbGtfc2V0X3JhdGUoc3RydWN0IHN1bnhpX21tY19ob3N0ICpob3N0LAo+
+PiDCoMKgwqDCoMKgwqDCoMKgwqDCoH0KPj4gwqDCoMKgwqDCoMKgwqDCoMKgwqBtbWNfd3JpdGVs
+KGhvc3QsIFJFR19DTEtDUiwgcnZhbCk7Cj4+Cj4+IMKgLSByZXQgPSBzdW54aV9tbWNfY2xrX3Nl
+dF9waGFzZShob3N0LCBpb3MsIHJhdGUpOwo+PiDCoC0gaWYgKHJldCkKPj4gwqAtIHJldHVybiBy
+ZXQ7Cj4KPiBLZWVwIHRoaXMgYXMgaXM7IGFuZCBhZGQ6Cj4KPiDCoMKgwqDCoMKgwqDCoMKgwqDC
+oMKgwqDCoMKgwqDCoHJldCA9IHN1bnhpX21tY19jYWxpYnJhdGUoaG9zdCwgaW9zLCBTRFhDX1JF
+R19TQU1QX0RMX1JFRyk7Cj4gwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqBpZiAocmV0
+KQo+IMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoHJldHVy
+biByZXQ7Cj4KSXQncyBhIGdvb2QgaWRlYSA6LSkKPiBJbnN0ZWFkIG9mOgo+Cj4+IMKgKyBpZiAo
+aG9zdC0+Y2ZnLT5jYW5fY2FsaWJyYXRlKSB7Cj4+IMKgKyByZXQgPSBzdW54aV9tbWNfY2FsaWJy
+YXRlKGhvc3QsIGlvcywgU0RYQ19SRUdfU0FNUF9ETF9SRUcpOwo+PiDCoCsgaWYgKHJldCkKPj4g
+wqArIHJldHVybiByZXQ7Cj4+IMKgKwo+PiDCoCsgLyogVE9ETzogZW5hYmxlIGNhbGlicmF0ZSBv
+biBzZGMyIFNEWENfUkVHX0RTX0RMX1JFRyBvZiBBNjQgKi8KPj4gwqArIH0gZWxzZSB7Cj4+IMKg
+KyByZXQgPSBzdW54aV9tbWNfY2xrX3NldF9waGFzZShob3N0LCBpb3MsIHJhdGUpOwo+PiDCoCsg
+aWYgKHJldCkKPj4gwqArIHJldHVybiByZXQ7Cj4+IMKgKyB9Cj4+Cj4+IMKgwqDCoMKgwqDCoMKg
+wqDCoMKgcmV0dXJuIHN1bnhpX21tY19vY2xrX29ub2ZmKGhvc3QsIDEpOwo+PiDCoMKgfQo+PiDC
+oEBAIC05ODIsMjEgKzEwMzgsMzEgQEAgc3RhdGljIGNvbnN0IHN0cnVjdCBzdW54aV9tbWNfY2xr
+X2RlbGF5IHN1bjlpX21tY19jbGtfZGVsYXlzW10gPSB7Cj4+IMKgwqBzdGF0aWMgY29uc3Qgc3Ry
+dWN0IHN1bnhpX21tY19jZmcgc3VuNGlfYTEwX2NmZyA9IHsKPj4gwqDCoMKgwqDCoMKgwqDCoMKg
+wqAuaWRtYV9kZXNfc2l6ZV9iaXRzID0gMTMsCj4+IMKgwqDCoMKgwqDCoMKgwqDCoMKgLmNsa19k
+ZWxheXMgPSBOVUxMLAo+PiDCoCsgLmNhbl9jYWxpYnJhdGUgPSBmYWxzZSwKPj4gwqDCoH07Cj4+
+Cj4+IMKgwqBzdGF0aWMgY29uc3Qgc3RydWN0IHN1bnhpX21tY19jZmcgc3VuNWlfYTEzX2NmZyA9
+IHsKPj4gwqDCoMKgwqDCoMKgwqDCoMKgwqAuaWRtYV9kZXNfc2l6ZV9iaXRzID0gMTYsCj4+IMKg
+wqDCoMKgwqDCoMKgwqDCoMKgLmNsa19kZWxheXMgPSBOVUxMLAo+PiDCoCsgLmNhbl9jYWxpYnJh
+dGUgPSBmYWxzZSwKPj4gwqDCoH07Cj4+Cj4+IMKgwqBzdGF0aWMgY29uc3Qgc3RydWN0IHN1bnhp
+X21tY19jZmcgc3VuN2lfYTIwX2NmZyA9IHsKPj4gwqDCoMKgwqDCoMKgwqDCoMKgwqAuaWRtYV9k
+ZXNfc2l6ZV9iaXRzID0gMTYsCj4+IMKgwqDCoMKgwqDCoMKgwqDCoMKgLmNsa19kZWxheXMgPSBz
+dW54aV9tbWNfY2xrX2RlbGF5cywKPj4gwqArIC5jYW5fY2FsaWJyYXRlID0gZmFsc2UsCj4+IMKg
+wqB9Owo+Pgo+PiDCoMKgc3RhdGljIGNvbnN0IHN0cnVjdCBzdW54aV9tbWNfY2ZnIHN1bjlpX2E4
+MF9jZmcgPSB7Cj4+IMKgwqDCoMKgwqDCoMKgwqDCoMKgLmlkbWFfZGVzX3NpemVfYml0cyA9IDE2
+LAo+PiDCoMKgwqDCoMKgwqDCoMKgwqDCoC5jbGtfZGVsYXlzID0gc3VuOWlfbW1jX2Nsa19kZWxh
+eXMsCj4+IMKgKyAuY2FuX2NhbGlicmF0ZSA9IGZhbHNlLAo+PiDCoCt9Owo+PiDCoCsKPj4gwqAr
+c3RhdGljIGNvbnN0IHN0cnVjdCBzdW54aV9tbWNfY2ZnIHN1bjUwaV9hNjRfY2ZnID0gewo+PiDC
+oCsgLmlkbWFfZGVzX3NpemVfYml0cyA9IDE2LAo+PiDCoCsgLmNsa19kZWxheXMgPSBOVUxMLAo+
+PiDCoCsgLmNhbl9jYWxpYnJhdGUgPSB0cnVlLAo+PiDCoMKgfTsKPj4KPj4gwqDCoHN0YXRpYyBj
+b25zdCBzdHJ1Y3Qgb2ZfZGV2aWNlX2lkIHN1bnhpX21tY19vZl9tYXRjaFtdID0gewo+PiDCoEBA
+IC0xMDA0LDYgKzEwNzAsNyBAQCBzdGF0aWMgY29uc3Qgc3RydWN0IG9mX2RldmljZV9pZCBzdW54
+aV9tbWNfb2ZfbWF0Y2hbXSA9IHsKPj4gwqDCoMKgwqDCoMKgwqDCoMKgwqB7IC5jb21wYXRpYmxl
+ID0gImFsbHdpbm5lcixzdW41aS1hMTMtbW1jIiwgLmRhdGEgPSAmc3VuNWlfYTEzX2NmZyB9LAo+
+PiDCoMKgwqDCoMKgwqDCoMKgwqDCoHsgLmNvbXBhdGlibGUgPSAiYWxsd2lubmVyLHN1bjdpLWEy
+MC1tbWMiLCAuZGF0YSA9ICZzdW43aV9hMjBfY2ZnIH0sCj4+IMKgwqDCoMKgwqDCoMKgwqDCoMKg
+eyAuY29tcGF0aWJsZSA9ICJhbGx3aW5uZXIsc3VuOWktYTgwLW1tYyIsIC5kYXRhID0gJnN1bjlp
+X2E4MF9jZmcgfSwKPj4gwqArIHsgLmNvbXBhdGlibGUgPSAiYWxsd2lubmVyLHN1bjUwaS1hNjQt
+bW1jIiwgLmRhdGEgPSAmc3VuNTBpX2E2NF9jZmcgfSwKPj4gwqDCoMKgwqDCoMKgwqDCoMKgwqB7
+IC8qIHNlbnRpbmVsICovIH0KPj4gwqDCoH07Cj4+IMKgwqBNT0RVTEVfREVWSUNFX1RBQkxFKG9m
+LCBzdW54aV9tbWNfb2ZfbWF0Y2gpOwo+Cj4gTm90IHN1cmUgd2h5IGFsbCB0aGUgYmVsb3cgaHVu
+a3MgYXJlIGhlcmUsIHRoZXkgY2VydGFpbmx5IGRvIG5vdCBiZWxvbmcKPiBpbiB0aGlzIHBhdGNo
+OyBhbmQgdGhleSBhcmUgbm90IG5lY2Vzc2FyeS4gQXMgSSBtZW50aW9uZWQgaW4gdGhlCj4gY29t
+bWl0IG1zZyBvZiAibW1jOiBzdW54aTogc3VuNGkgLyBzdW41aSBkbyBub3QgaGF2ZSBzYW1wbGUg
+Y2xvY2tzIiA6Cj4KPiDCoMKgwqDCoCJOb3RlIHRoaXMgcGF0Y2ggbGVhdmVzIHRoZSBjbGtfcHJl
+cGFyZV9lbmFibGUoKSAvIGNsa19kaXNhYmxlX3VucHJlcGFyZSgpCj4gwqDCoMKgwqDCoGNhbGxz
+IHRvIHRoZSBzYW1wbGUgY2xrcyBhcy1pcywgd2l0aG91dCBhZGRpbmcgY2hlY2tzIGZvciB0aGVt
+IGJlaW5nCj4gwqDCoMKgwqDCoE5VTEwuIEFsbCB0aGUgY2xrX2ZvbyBjYWxscyBhY2NlcHQgYSBO
+VUxMIGNsayBhbmQgd2lsbCByZXR1cm4gc3VjY2VzcyB3aGVuCj4gwqDCoMKgwqDCoGNhbGxlZCB3
+aXRoIGEgTlVMTCBjbGsuIgo+Cj4gU28gcGxlYXNlIGRyb3AgdGhlc2UuCj4KVGhhbmtzISBJIHdp
+bGwgZHJvcCB0aGVzZSEKKEkgZG9uJ3Qga25vdyB0aGF0IHRoZSBjbGsgZnVuY3Rpb25zIGNhbiBh
+Y2NlcHQgTlVMTC4uLikKCj4gVGhhbmtzICYgUmVnYXJkcywKPgo+IEhhbnMKPgo+PiDCoEBAIC0x
+MDcxLDE2ICsxMTM4LDE4IEBAIHN0YXRpYyBpbnQgc3VueGlfbW1jX3Jlc291cmNlX3JlcXVlc3Qo
+c3RydWN0IHN1bnhpX21tY19ob3N0ICpob3N0LAo+PiDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDC
+oMKgwqDCoMKgwqBnb3RvIGVycm9yX2Rpc2FibGVfY2xrX2FoYjsKPj4gwqDCoMKgwqDCoMKgwqDC
+oMKgwqB9Cj4+Cj4+IMKgLSByZXQgPSBjbGtfcHJlcGFyZV9lbmFibGUoaG9zdC0+Y2xrX291dHB1
+dCk7Cj4+IMKgLSBpZiAocmV0KSB7Cj4+IMKgLSBkZXZfZXJyKCZwZGV2LT5kZXYsICJFbmFibGUg
+b3V0cHV0IGNsayBlcnIgJWRcbiIsIHJldCk7Cj4+IMKgLSBnb3RvIGVycm9yX2Rpc2FibGVfY2xr
+X21tYzsKPj4gwqAtIH0KPj4gwqArIGlmIChob3N0LT5jZmctPmNsa19kZWxheXMpIHsKPj4gwqAr
+IHJldCA9IGNsa19wcmVwYXJlX2VuYWJsZShob3N0LT5jbGtfb3V0cHV0KTsKPj4gwqArIGlmIChy
+ZXQpIHsKPj4gwqArIGRldl9lcnIoJnBkZXYtPmRldiwgIkVuYWJsZSBvdXRwdXQgY2xrIGVyciAl
+ZFxuIiwgcmV0KTsKPj4gwqArIGdvdG8gZXJyb3JfZGlzYWJsZV9jbGtfbW1jOwo+PiDCoCsgfQo+
+Pgo+PiDCoC0gcmV0ID0gY2xrX3ByZXBhcmVfZW5hYmxlKGhvc3QtPmNsa19zYW1wbGUpOwo+PiDC
+oC0gaWYgKHJldCkgewo+PiDCoC0gZGV2X2VycigmcGRldi0+ZGV2LCAiRW5hYmxlIHNhbXBsZSBj
+bGsgZXJyICVkXG4iLCByZXQpOwo+PiDCoC0gZ290byBlcnJvcl9kaXNhYmxlX2Nsa19vdXRwdXQ7
+Cj4+IMKgKyByZXQgPSBjbGtfcHJlcGFyZV9lbmFibGUoaG9zdC0+Y2xrX3NhbXBsZSk7Cj4+IMKg
+KyBpZiAocmV0KSB7Cj4+IMKgKyBkZXZfZXJyKCZwZGV2LT5kZXYsICJFbmFibGUgc2FtcGxlIGNs
+ayBlcnIgJWRcbiIsIHJldCk7Cj4+IMKgKyBnb3RvIGVycm9yX2Rpc2FibGVfY2xrX291dHB1dDsK
+Pj4gwqArIH0KPj4gwqDCoMKgwqDCoMKgwqDCoMKgwqB9Cj4+Cj4+IMKgwqDCoMKgwqDCoMKgwqDC
+oMKgaWYgKCFJU19FUlIoaG9zdC0+cmVzZXQpKSB7Cj4+IMKgQEAgLTExMDcsOSArMTE3NiwxMSBA
+QCBlcnJvcl9hc3NlcnRfcmVzZXQ6Cj4+IMKgwqDCoMKgwqDCoMKgwqDCoMKgaWYgKCFJU19FUlIo
+aG9zdC0+cmVzZXQpKQo+PiDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqByZXNl
+dF9jb250cm9sX2Fzc2VydChob3N0LT5yZXNldCk7Cj4+IMKgwqBlcnJvcl9kaXNhYmxlX2Nsa19z
+YW1wbGU6Cj4+IMKgLSBjbGtfZGlzYWJsZV91bnByZXBhcmUoaG9zdC0+Y2xrX3NhbXBsZSk7Cj4+
+IMKgKyBpZiAoaG9zdC0+Y2ZnLT5jbGtfZGVsYXlzKQo+PiDCoCsgY2xrX2Rpc2FibGVfdW5wcmVw
+YXJlKGhvc3QtPmNsa19zYW1wbGUpOwo+PiDCoMKgZXJyb3JfZGlzYWJsZV9jbGtfb3V0cHV0Ogo+
+PiDCoC0gY2xrX2Rpc2FibGVfdW5wcmVwYXJlKGhvc3QtPmNsa19vdXRwdXQpOwo+PiDCoCsgaWYg
+KGhvc3QtPmNmZy0+Y2xrX2RlbGF5cykKPj4gwqArIGNsa19kaXNhYmxlX3VucHJlcGFyZShob3N0
+LT5jbGtfb3V0cHV0KTsKPj4gwqDCoGVycm9yX2Rpc2FibGVfY2xrX21tYzoKPj4gwqDCoMKgwqDC
+oMKgwqDCoMKgwqBjbGtfZGlzYWJsZV91bnByZXBhcmUoaG9zdC0+Y2xrX21tYyk7Cj4+IMKgwqBl
+cnJvcl9kaXNhYmxlX2Nsa19haGI6Cj4+IMKgQEAgLTExOTEsOCArMTI2MiwxMSBAQCBzdGF0aWMg
+aW50IHN1bnhpX21tY19yZW1vdmUoc3RydWN0IHBsYXRmb3JtX2RldmljZSAqcGRldikKPj4gwqDC
+oMKgwqDCoMKgwqDCoMKgwqBpZiAoIUlTX0VSUihob3N0LT5yZXNldCkpCj4+IMKgwqDCoMKgwqDC
+oMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoHJlc2V0X2NvbnRyb2xfYXNzZXJ0KGhvc3QtPnJlc2V0
+KTsKPj4KPj4gwqAtIGNsa19kaXNhYmxlX3VucHJlcGFyZShob3N0LT5jbGtfc2FtcGxlKTsKPj4g
+wqAtIGNsa19kaXNhYmxlX3VucHJlcGFyZShob3N0LT5jbGtfb3V0cHV0KTsKPj4gwqArIGlmICho
+b3N0LT5jZmctPmNsa19kZWxheXMpIHsKPj4gwqArIGNsa19kaXNhYmxlX3VucHJlcGFyZShob3N0
+LT5jbGtfc2FtcGxlKTsKPj4gwqArIGNsa19kaXNhYmxlX3VucHJlcGFyZShob3N0LT5jbGtfb3V0
+cHV0KTsKPj4gwqArIH0KPj4gwqArCj4+IMKgwqDCoMKgwqDCoMKgwqDCoMKgY2xrX2Rpc2FibGVf
+dW5wcmVwYXJlKGhvc3QtPmNsa19tbWMpOwo+PiDCoMKgwqDCoMKgwqDCoMKgwqDCoGNsa19kaXNh
+YmxlX3VucHJlcGFyZShob3N0LT5jbGtfYWhiKTsKClRoYW5rcywKSWNlbm93eQoKX19fX19fX19f
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18KbGludXgtYXJtLWtlcm5lbCBt
+YWlsaW5nIGxpc3QKbGludXgtYXJtLWtlcm5lbEBsaXN0cy5pbmZyYWRlYWQub3JnCmh0dHA6Ly9s
+aXN0cy5pbmZyYWRlYWQub3JnL21haWxtYW4vbGlzdGluZm8vbGludXgtYXJtLWtlcm5lbAo=
