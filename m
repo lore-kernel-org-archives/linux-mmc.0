@@ -1,80 +1,327 @@
-From: Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
-Subject: Re: [PATCH 0/5] Add power domain support for dw_mmc/sdhci-of-arasan
-Date: Mon, 1 Aug 2016 11:10:57 +0800
-Message-ID: <81c11db1-f3cf-3eb1-57b0-ede932acd5f7@rock-chips.com>
-References: <1469765703-30999-1-git-send-email-shawn.lin@rock-chips.com>
- <CAPDyKFq6itpANwnLqgOqKHT0fJH4SvZi2FWrafa=HSBfiZE52w@mail.gmail.com>
+From: Hans de Goede <hdegoede@redhat.com>
+Subject: Re: [PATCH v2 2/2] mmc: host: sunxi: add support for A64 mmc
+ controller
+Date: Mon, 1 Aug 2016 09:29:40 +0200
+Message-ID: <deab2689-1341-283a-38b1-f91dfe450e7c@redhat.com>
+References: <20160731110234.3593-1-icenowy@aosc.xyz>
+ <20160731110234.3593-3-icenowy@aosc.xyz>
+ <aaeda3c8-1487-cb6c-bfc6-44a63fed5ea2@redhat.com>
+ <24941470008912@web11j.yandex.ru>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"; Format="flowed"
-Content-Transfer-Encoding: base64
-Return-path: <linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-In-Reply-To: <CAPDyKFq6itpANwnLqgOqKHT0fJH4SvZi2FWrafa=HSBfiZE52w-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-rockchip>,
- <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-rockchip/>
-List-Post: <mailto:linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-List-Help: <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-rockchip>,
- <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
-Sender: "Linux-rockchip" <linux-rockchip-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-Errors-To: linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
-To: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Elaine Zhang <zhangqing-TNX95d0MmH7DzftRWevZcw@public.gmane.org>, Heiko Stuebner <heiko-4mtYJXux2i+zQB+pC5nmwQ@public.gmane.org>, Feng Xiao <xf-TNX95d0MmH7DzftRWevZcw@public.gmane.org>, shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org, Brian Norris <briannorris-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, linux-mmc <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Douglas Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Jaehoon Chung <jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, "open list:ARM/Rockchip SoC..." <linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+Content-Type: text/plain; charset="us-ascii"; Format="flowed"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <24941470008912@web11j.yandex.ru>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Icenowy Zheng <icenowy@aosc.xyz>, Rob Herring <robh+dt@kernel.org>, Maxime Ripard <maxime.ripard@free-electrons.com>, Chen-Yu Tsai <wens@csie.org>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Mark Rutland <mark.rutland@arm.com>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, Michal Suchanek <hramrach@gmail.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Jaehoon Chung <jh80.chung@samsung.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
 List-Id: linux-mmc@vger.kernel.org
 
-5ZyoIDIwMTYvNy8yOSAxNzoyMSwgVWxmIEhhbnNzb24g5YaZ6YGTOgo+IE9uIDI5IEp1bHkgMjAx
-NiBhdCAwNjoxNCwgU2hhd24gTGluIDxzaGF3bi5saW5Acm9jay1jaGlwcy5jb20+IHdyb3RlOgo+
-Pgo+PiBXZSBuZWVkIHRvIGVuYWJsZSB0aGUgcG93ZXIgZG9tYWluIG1hbnVhbGx5IHdoaWxlIHBy
-b2JpbmcgYXMgdGhlCj4+IHBvd2VyIHBvbGljeSB3aWxsIHR1cm4gb2ZmIHRoZSBwZCB3aGljaCBp
-cyBub3QgcmVmZXJlbmNlZC4gT3RoZXJ3aXNlCj4KPiBJIGFzc3VtZSB5b3UgYXJlIGdvaW5nIHRv
-IHVzZSB0aGUgZ2VuZXJpYyBQTSBkb21haW4gKGdlbnBkKT8KCnllcy4KCj4gSWYgc28sIHRoaXMg
-c3RhdGVtZW50IGlzbid0IGVudGlyZWx5IGNvcnJlY3QuCj4KPiBBcyBhIG1hdHRlciBvZiBmYWN0
-LCB0aGUgUE0gZG9tYWluIHdpbGwgYmUgInBvd2VyZWQgb24iIG9uY2UgeW91IGhhdmUKPiByZWdp
-c3RlcmVkIHlvdXIgUE0gZG9tYWluIHdpdGggZ2VucGQgYW5kIHdoZW4gdGhlIGRldmljZSAoZHdf
-bW1jIGV0YykKPiBnZXRzIGF0dGFjaGVkIHRvIHRoZSBkb21haW4uIFRoZSBhdHRhY2ggb2NjdXJz
-IHdoZW4gdGhlIHBsYXRmb3JtIGJ1cycKPiAtPnByb2JlKCkgZnVuY3Rpb24gZ2V0IGludm9rZWQg
-Zm9yIHRoZSBkZXZpY2UuCj4KPiBHZW5wZCBtb25pdG9ycyBlYWNoIGRldmljZSB3aXRoaW4gdGhl
-IGRvbWFpbi4gVG8gYWxsb3cgaXQgdG8gInBvd2VyCj4gb2ZmIiwgYWxsIGRldmljZXMgaW4gc2Ft
-ZSBkb21haW4gbmVlZHMgdG8gYmUgcnVudGltZSBQTSBlbmFibGVkIGFuZAo+IHJ1bnRpbWUgUE0g
-c3VzcGVuZGVkLgoKSSB3aWxsIGNoZWNrIHRoaXMgd2l0aCBteSBQTSBndXlzIGFzIEkgaGF2ZSBs
-aW1pdGVkIGtub3dsZWRnZSBhYm91dApQTSBzdHVmZi4gVGhhbmtzIGZvciB0aGVzZSBncmVhdCBp
-bmZvLgoKClNvLCBpZiBteSByZWFsIGludGVudGlvbiBpcyB0byBqdXN0IGVuYWJsZSBnZW5wZCB0
-byBtYWtlIHN1cmUgaXQgd2lsbApiZSBpbiAicG93ZXIgb24gIiBzdGF0LCBJIGp1c3QgbmVlZCB0
-byB1cGRhdGUgbXkgRFRTL0RUQi4gVGhhdCB3b3VsZCBiZQpncmVhdC46KQoKPgo+IER1ZSB0byB0
-aGlzLCB5b3Ugc2hvdWxkIGJlIGFibGUgdG8gZGVwbG95IGdlbnBkIHN1cHBvcnQrYW4gdXBkYXRl
-ZAo+IERUQiwgd2l0aG91dCBmaXJzdCBoYXZpbmcgdG8gZGVwbG95aW5nIHJ1bnRpbWUgUE0gc3Vw
-cG9ydCBpbiB0aGUKPiByZWxhdGVkIGRyaXZlcnMuIEluIG90aGVyIHdvcmRzLCB5b3Ugc2hvdWxk
-IGJlIGFibGUgdG8gd29yayBvbiB0aGVzZQo+IHRoaW5ncyBhbG1vc3QgaW5kZXBlbmRlbnRseSBv
-ZiBlYWNoIG90aGVyLgoKc3VyZS4KCj4KPj4gd2UgbWF5IHRha2UgcmlzayBvZiBicmVha2luZyBr
-ZXJuZWwgb25jZSBGZW5nIFhpYW8gbGFuZCB0aGUgcm9ja2NoaXAgcGQKPj4gcmVsYXRlIHN0dWZm
-LiBTbywgbGV0J3MgZG8gaXQgaW4gYWR2YW5jZS4KPj4KPj4gVGhpcyBwYWNoc2V0IGlzIGJhc2Vk
-IG9uIHRoZSBsYXRlc3QgbGludXgtbmV4dFsxXSB3aGljaCBzaG91bGQgY29udGFpbgo+PiB0aGUg
-bmV4dCBicmFuY2ggb2YgbGludXgtbW1jIGFuZCBkdCBzdHVmZi4gSXQncyBpZGVhbCB0byBwYWNr
-IHRoZXNlIGFsbAo+PiBpbnRvIFVsZicgdHJlZSB3aXRoIEhlaWtvJ3MgYWNrIGZvciBkdHMsIFJv
-YidzIGFjayBmb3IgRG9jIGFuZCBKYWVob29uJ3MKPj4gYWNrIGZvciBkd19tbWMuIEJ1dCBpdCdz
-IG9rYXkgdG8gYmUgbWVyZ2VkIHNlcGVyYXRlbHkuCj4+Cj4+IFsxXSBnaXQ6Ly9naXQua2VybmVs
-Lm9yZy9wdWIvc2NtL2xpbnV4L2tlcm5lbC9naXQvbmV4dC9saW51eC1uZXh0LmdpdAo+Pgo+PiBU
-aGFua3MuCj4+Cj4+Cj4+Cj4+IFNoYXduIExpbiAoNSk6Cj4+ICAgRG9jdW1lbnRhdGlvbjogbW1j
-OiBzeW5vcHN5cy1kdy1tc2hjOiBhZGQgcG93ZXIgZG9tYWluIGRlc2NyaXB0aW9uCj4+ICAgRG9j
-dW1lbnRhdGlvbjogbW1jOiBzZGhjaS1vZi1hcmFzYW46IGFkZCBwb3dlciBkb21haW4gZGVzY3Jp
-cHRpb24KPgo+IFRvIG1lIHRoaXMgaXNuJ3QgbmVjZXNzYXJ5IHRvIGRlc2NyaWJlIGZvciBlYWNo
-IGRldmljZS4gSSB0aGluawo+IERvY3VtZW50YXRpb24vZGV2aWNldHJlZS9iaW5kaW5ncy9wb3dl
-ci9wb3dlcl9kb21haW4udHh0IGRlc2NyaWJlcyBhbGwKPiB0aGF0IGlzIG5lZWRlZC4KPgo+PiAg
-IGFybTY0OiBkdHM6IHJvY2tjaGlwOiBQcm92aWRlIHBvd2VyLWRvbWFpbnMgZm9yIHNkL3NkaW8v
-ZW1tYwo+PiAgICAgY29udHJvbGxlcnMKPj4gICBtbWM6IGR3X21tYzogYWRkIHBvd2VyIGRvbWFp
-biBzdXBwb3J0Cj4+ICAgbW1jOiBzZGhjaS1vZi1hcmFzYW46IGFkZCBwb3dlciBkb21haW4gc3Vw
-cG9ydAo+Cj4gSSB3b3VsZCByZXBocmFzZSB0aGVzZSBjb21taXQgbWVzc2FnZSBoZWFkZXJzLCB0
-byBzb21ldGhpbmcgbGlrZQo+ICJEZXBsb3kgcnVudGltZSBQTSBzdXBwb3J0IiwgYXMgdGhhdCBp
-cyBhY3R1YWxseSB3aGF0IHlvdSBpbnRlbmQgdG8KPiBkby4KPgo+Pgo+PiAgRG9jdW1lbnRhdGlv
-bi9kZXZpY2V0cmVlL2JpbmRpbmdzL21tYy9hcmFzYW4sc2RoY2kudHh0ICAgICB8ICAxICsKPj4g
-IERvY3VtZW50YXRpb24vZGV2aWNldHJlZS9iaW5kaW5ncy9tbWMvc3lub3BzeXMtZHctbXNoYy50
-eHQgfCAgMiArKwo+PiAgYXJjaC9hcm02NC9ib290L2R0cy9yb2NrY2hpcC9yazMzOTkuZHRzaSAg
-ICAgICAgICAgICAgICAgICB8ICAzICsrKwo+PiAgZHJpdmVycy9tbWMvaG9zdC9kd19tbWMuYyAg
-ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICB8IDExICsrKysrKysrKysrCj4+ICBkcml2
-ZXJzL21tYy9ob3N0L3NkaGNpLW9mLWFyYXNhbi5jICAgICAgICAgICAgICAgICAgICAgICAgIHwg
-MTAgKysrKysrKysrKwo+PiAgNSBmaWxlcyBjaGFuZ2VkLCAyNyBpbnNlcnRpb25zKCspCj4+Cj4+
-IC0tCj4+IDIuMy43Cj4+Cj4+Cj4KPiBLaW5kIHJlZ2FyZHMKPiBVZmZlCj4KPgo+CgoKLS0gCkJl
-c3QgUmVnYXJkcwpTaGF3biBMaW4KCgpfX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
-X19fX19fX19fX19fXwpMaW51eC1yb2NrY2hpcCBtYWlsaW5nIGxpc3QKTGludXgtcm9ja2NoaXBA
-bGlzdHMuaW5mcmFkZWFkLm9yZwpodHRwOi8vbGlzdHMuaW5mcmFkZWFkLm9yZy9tYWlsbWFuL2xp
-c3RpbmZvL2xpbnV4LXJvY2tjaGlwCg==
+Hi,
+
+On 01-08-16 01:48, Icenowy Zheng wrote:
+>
+> Hi,
+> 31.07.2016, 22:30, "Hans de Goede" <hdegoede@redhat.com>:
+>> Hi,
+>>
+>> On 31-07-16 13:02, Icenowy Zheng wrote:
+>>>  A64 SoC features a MMC controller which need only the mod clock, and can
+>>>  calibrate delay by itself. This patch adds support for the new MMC
+>>>  controller IP core.
+>>>
+>>>  Based on work by Andre Przywara <andre.przywara@arm.com>.
+>>>
+>>>  Signed-off-by: Icenowy Zheng <icenowy@aosc.xyz>
+>>
+>> Looks good, some minor remarks (see comments inline) after those
+>> are addressed this is ready to be merged IMHO.
+>>
+>>>  ---
+>>>   drivers/mmc/host/sunxi-mmc.c | 106 ++++++++++++++++++++++++++++++++++++-------
+>>>   1 file changed, 90 insertions(+), 16 deletions(-)
+>>>
+>>>  diff --git a/drivers/mmc/host/sunxi-mmc.c b/drivers/mmc/host/sunxi-mmc.c
+>>>  index 2ec91ce..aa2abf3 100644
+>>>  --- a/drivers/mmc/host/sunxi-mmc.c
+>>>  +++ b/drivers/mmc/host/sunxi-mmc.c
+>>>  @@ -72,6 +72,14 @@
+>>>   #define SDXC_REG_CHDA (0x90)
+>>>   #define SDXC_REG_CBDA (0x94)
+>>>
+>>>  +/* New registers introduced in A64 */
+>>>  +#define SDXC_REG_A12A 0x058 /* SMC Auto Command 12 Register */
+>>>  +#define SDXC_REG_SD_NTSR 0x05C /* SMC New Timing Set Register */
+>>>  +#define SDXC_REG_DRV_DL 0x140 /* Drive Delay Control Register */
+>>>  +#define SDXC_REG_SAMP_DL_REG 0x144 /* SMC sample delay control */
+>>>  +#define SDXC_REG_DS_DL_REG 0x148 /* SMC data strobe delay control */
+>>>  +
+>>>  +
+>>
+>> Please drop 1 empty line here.
+> Thanks for you notice... I forgot to checkout the empty line...
+>>
+>>>   #define mmc_readl(host, reg) \
+>>>           readl((host)->reg_base + SDXC_##reg)
+>>>   #define mmc_writel(host, reg, value) \
+>>>  @@ -217,6 +225,15 @@
+>>>   #define SDXC_CLK_50M_DDR 3
+>>>   #define SDXC_CLK_50M_DDR_8BIT 4
+>>>
+>>>  +#define SDXC_2X_TIMING_MODE BIT(31)
+>>>  +
+>>>  +#define SDXC_CAL_START BIT(15)
+>>>  +#define SDXC_CAL_DONE BIT(14)
+>>>  +#define SDXC_CAL_DL_SHIFT 8
+>>>  +#define SDXC_CAL_DL_SW_EN BIT(7)
+>>>  +#define SDXC_CAL_DL_SW_SHIFT 0
+>>>  +#define SDXC_CAL_DL_MASK 0x3f
+>>>  +
+>>>   struct sunxi_mmc_clk_delay {
+>>>           u32 output;
+>>>           u32 sample;
+>>>  @@ -232,6 +249,9 @@ struct sunxi_idma_des {
+>>>   struct sunxi_mmc_cfg {
+>>>           u32 idma_des_size_bits;
+>>>           const struct sunxi_mmc_clk_delay *clk_delays;
+>>>  +
+>>
+>> I would not insert an empty line here.
+> I'm only feeling that a empty before such a comment line is a
+> kind of separator...
+> (Refer to struct sunxi_mmc_host)
+
+Ok.
+
+>>
+>>>  + /* does the IP block support autocalibration? */
+>>>  + bool can_calibrate;
+>>>   };
+>>>
+>>>   struct sunxi_mmc_host {
+>>>  @@ -657,6 +677,34 @@ static int sunxi_mmc_oclk_onoff(struct sunxi_mmc_host *host, u32 oclk_en)
+>>>           return 0;
+>>>   }
+>>>
+>>>  +static int sunxi_mmc_calibrate(struct sunxi_mmc_host *host,
+>>>  + struct mmc_ios *ios, int reg_off)
+>>>  +{
+>>>  + u32 reg = readl(host->reg_base + reg_off);
+>>>  + u32 delay;
+>>>  +
+>>
+>> I would add:
+>>
+>>         if (!host->cfg->can_calibrate)
+>>                 return 0;
+>>
+>> Here; and ...
+> I agree with it. It's some kind of error checking.
+>>
+>>>  + reg &= ~(SDXC_CAL_DL_MASK << SDXC_CAL_DL_SW_SHIFT);
+>>>  + reg &= ~SDXC_CAL_DL_SW_EN;
+>>>  +
+>>>  + writel(reg | SDXC_CAL_START, host->reg_base + reg_off);
+>>>  +
+>>>  + dev_dbg(mmc_dev(host->mmc), "calibration started\n");
+>>>  +
+>>>  + while (!((reg = readl(host->reg_base + reg_off)) & SDXC_CAL_DONE))
+>>>  + cpu_relax();
+>>>  +
+>>>  + delay = (reg >> SDXC_CAL_DL_SHIFT) & SDXC_CAL_DL_MASK;
+>>>  +
+>>>  + reg &= ~SDXC_CAL_START;
+>>>  + reg |= (delay << SDXC_CAL_DL_SW_SHIFT) | SDXC_CAL_DL_SW_EN;
+>>>  +
+>>>  + writel(reg, host->reg_base + reg_off);
+>>>  +
+>>>  + dev_dbg(mmc_dev(host->mmc), "calibration ended, res is 0x%x\n", reg);
+>>
+>> Add:
+>>
+>>         /* TODO: enable calibrate on sdc2 SDXC_REG_DS_DL_REG of A64 */
+>>
+>> here; and ...
+> The function only received a register address as a parameter...
+> It do not know the difference between different regs to calibrate.
+
+We can change the parameters the function gets, or even introduce
+a new function once we fix the TODO.
+
+For now we just need a place to put the TODO and this seems like
+the best place.
+
+>>
+>>>  +
+>>>  + return 0;
+>>>  +}
+>>>  +
+>>>   static int sunxi_mmc_clk_set_phase(struct sunxi_mmc_host *host,
+>>>                                      struct mmc_ios *ios, u32 rate)
+>>>   {
+>>>  @@ -727,9 +775,17 @@ static int sunxi_mmc_clk_set_rate(struct sunxi_mmc_host *host,
+>>>           }
+>>>           mmc_writel(host, REG_CLKCR, rval);
+>>>
+>>>  - ret = sunxi_mmc_clk_set_phase(host, ios, rate);
+>>>  - if (ret)
+>>>  - return ret;
+>>
+>> Keep this as is; and add:
+>>
+>>                 ret = sunxi_mmc_calibrate(host, ios, SDXC_REG_SAMP_DL_REG);
+>>                 if (ret)
+>>                         return ret;
+>>
+> It's a good idea :-)
+>> Instead of:
+>>
+>>>  + if (host->cfg->can_calibrate) {
+>>>  + ret = sunxi_mmc_calibrate(host, ios, SDXC_REG_SAMP_DL_REG);
+>>>  + if (ret)
+>>>  + return ret;
+>>>  +
+>>>  + /* TODO: enable calibrate on sdc2 SDXC_REG_DS_DL_REG of A64 */
+>>>  + } else {
+>>>  + ret = sunxi_mmc_clk_set_phase(host, ios, rate);
+>>>  + if (ret)
+>>>  + return ret;
+>>>  + }
+>>>
+>>>           return sunxi_mmc_oclk_onoff(host, 1);
+>>>   }
+>>>  @@ -982,21 +1038,31 @@ static const struct sunxi_mmc_clk_delay sun9i_mmc_clk_delays[] = {
+>>>   static const struct sunxi_mmc_cfg sun4i_a10_cfg = {
+>>>           .idma_des_size_bits = 13,
+>>>           .clk_delays = NULL,
+>>>  + .can_calibrate = false,
+>>>   };
+>>>
+>>>   static const struct sunxi_mmc_cfg sun5i_a13_cfg = {
+>>>           .idma_des_size_bits = 16,
+>>>           .clk_delays = NULL,
+>>>  + .can_calibrate = false,
+>>>   };
+>>>
+>>>   static const struct sunxi_mmc_cfg sun7i_a20_cfg = {
+>>>           .idma_des_size_bits = 16,
+>>>           .clk_delays = sunxi_mmc_clk_delays,
+>>>  + .can_calibrate = false,
+>>>   };
+>>>
+>>>   static const struct sunxi_mmc_cfg sun9i_a80_cfg = {
+>>>           .idma_des_size_bits = 16,
+>>>           .clk_delays = sun9i_mmc_clk_delays,
+>>>  + .can_calibrate = false,
+>>>  +};
+>>>  +
+>>>  +static const struct sunxi_mmc_cfg sun50i_a64_cfg = {
+>>>  + .idma_des_size_bits = 16,
+>>>  + .clk_delays = NULL,
+>>>  + .can_calibrate = true,
+>>>   };
+>>>
+>>>   static const struct of_device_id sunxi_mmc_of_match[] = {
+>>>  @@ -1004,6 +1070,7 @@ static const struct of_device_id sunxi_mmc_of_match[] = {
+>>>           { .compatible = "allwinner,sun5i-a13-mmc", .data = &sun5i_a13_cfg },
+>>>           { .compatible = "allwinner,sun7i-a20-mmc", .data = &sun7i_a20_cfg },
+>>>           { .compatible = "allwinner,sun9i-a80-mmc", .data = &sun9i_a80_cfg },
+>>>  + { .compatible = "allwinner,sun50i-a64-mmc", .data = &sun50i_a64_cfg },
+>>>           { /* sentinel */ }
+>>>   };
+>>>   MODULE_DEVICE_TABLE(of, sunxi_mmc_of_match);
+>>
+>> Not sure why all the below hunks are here, they certainly do not belong
+>> in this patch; and they are not necessary. As I mentioned in the
+>> commit msg of "mmc: sunxi: sun4i / sun5i do not have sample clocks" :
+>>
+>>     "Note this patch leaves the clk_prepare_enable() / clk_disable_unprepare()
+>>      calls to the sample clks as-is, without adding checks for them being
+>>      NULL. All the clk_foo calls accept a NULL clk and will return success when
+>>      called with a NULL clk."
+>>
+>> So please drop these.
+>>
+> Thanks! I will drop these!
+> (I don't know that the clk functions can accept NULL...)
+
+Great.
+
+Regards,
+
+Hans
+
+
+
+>
+>> Thanks & Regards,
+>>
+>> Hans
+>>
+>>>  @@ -1071,16 +1138,18 @@ static int sunxi_mmc_resource_request(struct sunxi_mmc_host *host,
+>>>                   goto error_disable_clk_ahb;
+>>>           }
+>>>
+>>>  - ret = clk_prepare_enable(host->clk_output);
+>>>  - if (ret) {
+>>>  - dev_err(&pdev->dev, "Enable output clk err %d\n", ret);
+>>>  - goto error_disable_clk_mmc;
+>>>  - }
+>>>  + if (host->cfg->clk_delays) {
+>>>  + ret = clk_prepare_enable(host->clk_output);
+>>>  + if (ret) {
+>>>  + dev_err(&pdev->dev, "Enable output clk err %d\n", ret);
+>>>  + goto error_disable_clk_mmc;
+>>>  + }
+>>>
+>>>  - ret = clk_prepare_enable(host->clk_sample);
+>>>  - if (ret) {
+>>>  - dev_err(&pdev->dev, "Enable sample clk err %d\n", ret);
+>>>  - goto error_disable_clk_output;
+>>>  + ret = clk_prepare_enable(host->clk_sample);
+>>>  + if (ret) {
+>>>  + dev_err(&pdev->dev, "Enable sample clk err %d\n", ret);
+>>>  + goto error_disable_clk_output;
+>>>  + }
+>>>           }
+>>>
+>>>           if (!IS_ERR(host->reset)) {
+>>>  @@ -1107,9 +1176,11 @@ error_assert_reset:
+>>>           if (!IS_ERR(host->reset))
+>>>                   reset_control_assert(host->reset);
+>>>   error_disable_clk_sample:
+>>>  - clk_disable_unprepare(host->clk_sample);
+>>>  + if (host->cfg->clk_delays)
+>>>  + clk_disable_unprepare(host->clk_sample);
+>>>   error_disable_clk_output:
+>>>  - clk_disable_unprepare(host->clk_output);
+>>>  + if (host->cfg->clk_delays)
+>>>  + clk_disable_unprepare(host->clk_output);
+>>>   error_disable_clk_mmc:
+>>>           clk_disable_unprepare(host->clk_mmc);
+>>>   error_disable_clk_ahb:
+>>>  @@ -1191,8 +1262,11 @@ static int sunxi_mmc_remove(struct platform_device *pdev)
+>>>           if (!IS_ERR(host->reset))
+>>>                   reset_control_assert(host->reset);
+>>>
+>>>  - clk_disable_unprepare(host->clk_sample);
+>>>  - clk_disable_unprepare(host->clk_output);
+>>>  + if (host->cfg->clk_delays) {
+>>>  + clk_disable_unprepare(host->clk_sample);
+>>>  + clk_disable_unprepare(host->clk_output);
+>>>  + }
+>>>  +
+>>>           clk_disable_unprepare(host->clk_mmc);
+>>>           clk_disable_unprepare(host->clk_ahb);
+>
+> Thanks,
+> Icenowy
+>
