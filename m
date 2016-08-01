@@ -1,173 +1,82 @@
-From: Icenowy Zheng <icenowy@aosc.xyz>
-Subject: [PATCH v3 2/2] mmc: host: sunxi: add support for A64 mmc controller
-Date: Mon,  1 Aug 2016 23:13:51 +0800
-Message-ID: <20160801151351.51854-3-icenowy@aosc.xyz>
-References: <20160801151351.51854-1-icenowy@aosc.xyz>
+From: Jean-Francois Moine <moinejf-GANU6spQydw@public.gmane.org>
+Subject: Re: [PATCH v2] mmc: sunxi: Handle the 'New Timings'
+Date: Mon, 1 Aug 2016 18:26:03 +0200
+Message-ID: <20160801182603.6f44af17e0bb801353f4b5e0@free.fr>
+References: <E1bUDNG-0000pR-Fv@bombadil.infradead.org>
+	<20160801153016.GB17146@leverpostej>
+Reply-To: moinejf-GANU6spQydw@public.gmane.org
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <20160801151351.51854-1-icenowy@aosc.xyz>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Rob Herring <robh+dt@kernel.org>, Maxime Ripard <maxime.ripard@free-electrons.com>, Chen-Yu Tsai <wens@csie.org>, Ulf Hansson <ulf.hansson@linaro.org>, Hans de Goede <hdegoede@redhat.com>
-Cc: Mark Rutland <mark.rutland@arm.com>, devicetree@vger.kernel.org, Michal Suchanek <hramrach@gmail.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Jaehoon Chung <jh80.chung@samsung.com>, Icenowy Zheng <icenowy@aosc.xyz>, linux-arm-kernel@lists.infradead.org
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: quoted-printable
+Return-path: <linux-sunxi+bncBCV6DL6LYMNBBJ7Q7W6AKGQEWXJNY3Y-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+Sender: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
+In-Reply-To: <20160801153016.GB17146@leverpostej>
+List-Post: <https://groups.google.com/group/linux-sunxi/post>, <mailto:linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Help: <https://groups.google.com/support/>, <mailto:linux-sunxi+help-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Archive: <https://groups.google.com/group/linux-sunxi
+List-Subscribe: <https://groups.google.com/group/linux-sunxi/subscribe>, <mailto:linux-sunxi+subscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Unsubscribe: <mailto:googlegroups-manage+1076902468213+unsubscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>,
+ <https://groups.google.com/group/linux-sunxi/subscribe>
+To: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
+Cc: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>, Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org>, linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
 
-A64 SoC features a MMC controller which need only the mod clock, and can
-calibrate delay by itself. This patch adds support for the new MMC
-controller IP core.
+On Mon, 1 Aug 2016 16:30:19 +0100
+Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org> wrote:
 
-Signed-off-by: Icenowy Zheng <icenowy@aosc.xyz>
----
-Changes in v2:
-- Rebased on Hans de Goede's patchset.
-Changes in v3:
-- Tidy up based on Hans de Goede's opinions.
+> On Mon, Aug 01, 2016 at 03:10:29PM +0200, Jean-Francois Moine wrote:
+> > Some MMC devices as mmc2 in the A83T or mmc1 and mmc2 in the H3 have
+> > a 'New Timings' mode.
+> > Set this capacity in the DT and use it when possible.
+>=20
+> What exactly is this "New Timings" mode?
+>=20
+> Why do we wnat to set it? Improved performance, power?
+>=20
+> Is it *necessary* to use it?
 
- drivers/mmc/host/sunxi-mmc.c | 66 ++++++++++++++++++++++++++++++++++++++++++++
- 1 file changed, 66 insertions(+)
+This mode is described at least in the Allwinner's documentation of the
+A83T, A64 and H3.
+>From my tests, it is required to access the eMMC of the Banana Pi M3
+(mmc2).
 
-diff --git a/drivers/mmc/host/sunxi-mmc.c b/drivers/mmc/host/sunxi-mmc.c
-index 2ec91ce..3c26180 100644
---- a/drivers/mmc/host/sunxi-mmc.c
-+++ b/drivers/mmc/host/sunxi-mmc.c
-@@ -72,6 +72,13 @@
- #define SDXC_REG_CHDA	(0x90)
- #define SDXC_REG_CBDA	(0x94)
- 
-+/* New registers introduced in A64 */
-+#define SDXC_REG_A12A		0x058 /* SMC Auto Command 12 Register */
-+#define SDXC_REG_SD_NTSR	0x05C /* SMC New Timing Set Register */
-+#define SDXC_REG_DRV_DL		0x140 /* Drive Delay Control Register */
-+#define SDXC_REG_SAMP_DL_REG	0x144 /* SMC sample delay control */
-+#define SDXC_REG_DS_DL_REG	0x148 /* SMC data strobe delay control */
-+
- #define mmc_readl(host, reg) \
- 	readl((host)->reg_base + SDXC_##reg)
- #define mmc_writel(host, reg, value) \
-@@ -217,6 +224,15 @@
- #define SDXC_CLK_50M_DDR	3
- #define SDXC_CLK_50M_DDR_8BIT	4
- 
-+#define SDXC_2X_TIMING_MODE	BIT(31)
-+
-+#define SDXC_CAL_START		BIT(15)
-+#define SDXC_CAL_DONE		BIT(14)
-+#define SDXC_CAL_DL_SHIFT	8
-+#define SDXC_CAL_DL_SW_EN	BIT(7)
-+#define SDXC_CAL_DL_SW_SHIFT	0
-+#define SDXC_CAL_DL_MASK	0x3f
-+
- struct sunxi_mmc_clk_delay {
- 	u32 output;
- 	u32 sample;
-@@ -232,6 +248,9 @@ struct sunxi_idma_des {
- struct sunxi_mmc_cfg {
- 	u32 idma_des_size_bits;
- 	const struct sunxi_mmc_clk_delay *clk_delays;
-+
-+	/* does the IP block support autocalibration? */
-+	bool can_calibrate;
- };
- 
- struct sunxi_mmc_host {
-@@ -657,6 +676,38 @@ static int sunxi_mmc_oclk_onoff(struct sunxi_mmc_host *host, u32 oclk_en)
- 	return 0;
- }
- 
-+static int sunxi_mmc_calibrate(struct sunxi_mmc_host *host,
-+			       struct mmc_ios *ios, int reg_off)
-+{
-+	u32 reg = readl(host->reg_base + reg_off);
-+	u32 delay;
-+
-+	if (!host->cfg->can_calibrate)
-+		return 0;
-+
-+	reg &= ~(SDXC_CAL_DL_MASK << SDXC_CAL_DL_SW_SHIFT);
-+	reg &= ~SDXC_CAL_DL_SW_EN;
-+
-+	writel(reg | SDXC_CAL_START, host->reg_base + reg_off);
-+
-+	dev_dbg(mmc_dev(host->mmc), "calibration started\n");
-+
-+	while (!((reg = readl(host->reg_base + reg_off)) & SDXC_CAL_DONE))
-+		cpu_relax();
-+
-+	delay = (reg >> SDXC_CAL_DL_SHIFT) & SDXC_CAL_DL_MASK;
-+
-+	reg &= ~SDXC_CAL_START;
-+	reg |= (delay << SDXC_CAL_DL_SW_SHIFT) | SDXC_CAL_DL_SW_EN;
-+
-+	writel(reg, host->reg_base + reg_off);
-+
-+	dev_dbg(mmc_dev(host->mmc), "calibration ended, res is 0x%x\n", reg);
-+
-+	/* TODO: enable calibrate on sdc2 SDXC_REG_DS_DL_REG of A64 */
-+	return 0;
-+}
-+
- static int sunxi_mmc_clk_set_phase(struct sunxi_mmc_host *host,
- 				   struct mmc_ios *ios, u32 rate)
- {
-@@ -731,6 +782,10 @@ static int sunxi_mmc_clk_set_rate(struct sunxi_mmc_host *host,
- 	if (ret)
- 		return ret;
- 
-+	ret = sunxi_mmc_calibrate(host, ios, SDXC_REG_SAMP_DL_REG);
-+	if (ret)
-+		return ret;
-+
- 	return sunxi_mmc_oclk_onoff(host, 1);
- }
- 
-@@ -982,21 +1037,31 @@ static const struct sunxi_mmc_clk_delay sun9i_mmc_clk_delays[] = {
- static const struct sunxi_mmc_cfg sun4i_a10_cfg = {
- 	.idma_des_size_bits = 13,
- 	.clk_delays = NULL,
-+	.can_calibrate = false,
- };
- 
- static const struct sunxi_mmc_cfg sun5i_a13_cfg = {
- 	.idma_des_size_bits = 16,
- 	.clk_delays = NULL,
-+	.can_calibrate = false,
- };
- 
- static const struct sunxi_mmc_cfg sun7i_a20_cfg = {
- 	.idma_des_size_bits = 16,
- 	.clk_delays = sunxi_mmc_clk_delays,
-+	.can_calibrate = false,
- };
- 
- static const struct sunxi_mmc_cfg sun9i_a80_cfg = {
- 	.idma_des_size_bits = 16,
- 	.clk_delays = sun9i_mmc_clk_delays,
-+	.can_calibrate = false,
-+};
-+
-+static const struct sunxi_mmc_cfg sun50i_a64_cfg = {
-+	.idma_des_size_bits = 16,
-+	.clk_delays = NULL,
-+	.can_calibrate = true,
- };
- 
- static const struct of_device_id sunxi_mmc_of_match[] = {
-@@ -1004,6 +1069,7 @@ static const struct of_device_id sunxi_mmc_of_match[] = {
- 	{ .compatible = "allwinner,sun5i-a13-mmc", .data = &sun5i_a13_cfg },
- 	{ .compatible = "allwinner,sun7i-a20-mmc", .data = &sun7i_a20_cfg },
- 	{ .compatible = "allwinner,sun9i-a80-mmc", .data = &sun9i_a80_cfg },
-+	{ .compatible = "allwinner,sun50i-a64-mmc", .data = &sun50i_a64_cfg },
- 	{ /* sentinel */ }
- };
- MODULE_DEVICE_TABLE(of, sunxi_mmc_of_match);
--- 
-2.9.0
+> > Signed-off-by: Jean-Francois Moine <moinejf-GANU6spQydw@public.gmane.org>
+> > ---
+> > I don't know if this mode works or is needed at 25MHz.
+> > ---
+> >  Documentation/devicetree/bindings/mmc/sunxi-mmc.txt |  1 +
+> >  drivers/mmc/host/sunxi-mmc.c                        | 21 +++++++++++++=
+++++++--
+> >  2 files changed, 20 insertions(+), 2 deletions(-)
+> >=20
+> > diff --git a/Documentation/devicetree/bindings/mmc/sunxi-mmc.txt b/Docu=
+mentation/devicetree/bindings/mmc/sunxi-mmc.txt
+> > index 4bf41d8..a541bf4 100644
+> > --- a/Documentation/devicetree/bindings/mmc/sunxi-mmc.txt
+> > +++ b/Documentation/devicetree/bindings/mmc/sunxi-mmc.txt
+> > @@ -19,6 +19,7 @@ Optional properties:
+> >   - reset-names : must contain "ahb"
+> >   - for cd, bus-width and additional generic mmc parameters
+> >     please refer to mmc.txt within this directory
+> > + - allwinner,new-timings: the controller may accept the "New Timings" =
+mode
+>=20
+> It's not at all clear to me what this means. This needs a better
+> description.
+>=20
+> Which devices have this? Can we determine this based on compatible
+> string?
+
+No, only some devices of the SoCs have this capability: the mmc2 of the
+A83T, the smhc0 and smhc1 of the A64, and the mmc1 and mmc2 of the H3.
+
+--=20
+Ken ar c'henta=C3=B1	|	      ** Breizh ha Linux atav! **
+Jef		|		http://moinejf.free.fr/
+
+--=20
+You received this message because you are subscribed to the Google Groups "=
+linux-sunxi" group.
+To unsubscribe from this group and stop receiving emails from it, send an e=
+mail to linux-sunxi+unsubscribe-/JYPxA39Uh5TLH3MbocFF+G/Ez6ZCGd0@public.gmane.org
+For more options, visit https://groups.google.com/d/optout.
