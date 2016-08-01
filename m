@@ -1,82 +1,53 @@
-From: Jean-Francois Moine <moinejf-GANU6spQydw@public.gmane.org>
-Subject: Re: [PATCH v2] mmc: sunxi: Handle the 'New Timings'
-Date: Mon, 1 Aug 2016 18:26:03 +0200
-Message-ID: <20160801182603.6f44af17e0bb801353f4b5e0@free.fr>
-References: <E1bUDNG-0000pR-Fv@bombadil.infradead.org>
-	<20160801153016.GB17146@leverpostej>
-Reply-To: moinejf-GANU6spQydw@public.gmane.org
+From: Rob Herring <robh@kernel.org>
+Subject: Re: [PATCH v2 4/5] mmc: sunxi: sun4i / sun5i do not have sample clocks
+Date: Mon, 1 Aug 2016 11:39:36 -0500
+Message-ID: <20160801163936.GA26855@rob-hp-laptop>
+References: <1469888748-26085-1-git-send-email-hdegoede@redhat.com>
+ <1469888748-26085-5-git-send-email-hdegoede@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: quoted-printable
-Return-path: <linux-sunxi+bncBCV6DL6LYMNBBJ7Q7W6AKGQEWXJNY3Y-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-Sender: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
-In-Reply-To: <20160801153016.GB17146@leverpostej>
-List-Post: <https://groups.google.com/group/linux-sunxi/post>, <mailto:linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Help: <https://groups.google.com/support/>, <mailto:linux-sunxi+help-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Archive: <https://groups.google.com/group/linux-sunxi
-List-Subscribe: <https://groups.google.com/group/linux-sunxi/subscribe>, <mailto:linux-sunxi+subscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Unsubscribe: <mailto:googlegroups-manage+1076902468213+unsubscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>,
- <https://groups.google.com/group/linux-sunxi/subscribe>
-To: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
-Cc: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>, Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org>, linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+Content-Disposition: inline
+In-Reply-To: <1469888748-26085-5-git-send-email-hdegoede@redhat.com>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Hans de Goede <hdegoede@redhat.com>
+Cc: devicetree <devicetree@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, Chen-Yu Tsai <wens@csie.org>, Icenowy Zheng <icenowy@aosc.xyz>, Maxime Ripard <maxime.ripard@free-electrons.com>, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
-On Mon, 1 Aug 2016 16:30:19 +0100
-Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org> wrote:
+On Sat, Jul 30, 2016 at 04:25:47PM +0200, Hans de Goede wrote:
+> It turns out that sun4i (A10) and sun5i (A13 & co) do not have sample
+> clocks, so add a new sun7i-a20-mmc compatible and do not try to use
+> sample clocks on sun4i / sun5i.
+> 
+> Since sun4i / sun5i do not have sample clocks, they cannot (reliably) do
+> DDR rates, so only set MMC_CAP_1_8V_DDR when we do have sample clks.
+> 
+> Note this patch leaves the clk_prepare_enable() / clk_disable_unprepare()
+> calls to the sample clks as-is, without adding checks for them being
+> NULL. All the clk_foo calls accept a NULL clk and will return success when
+> called with a NULL clk.
+> 
+> Signed-off-by: Hans de Goede <hdegoede@redhat.com>
+> ---
+> Changes in v2:
+> -Add a new sun7i-a20-compatible for SoCs with sample clks, rather then
+>  making them optional
+> ---
+>  .../devicetree/bindings/mmc/sunxi-mmc.txt          |  6 +++-
 
-> On Mon, Aug 01, 2016 at 03:10:29PM +0200, Jean-Francois Moine wrote:
-> > Some MMC devices as mmc2 in the A83T or mmc1 and mmc2 in the H3 have
-> > a 'New Timings' mode.
-> > Set this capacity in the DT and use it when possible.
->=20
-> What exactly is this "New Timings" mode?
->=20
-> Why do we wnat to set it? Improved performance, power?
->=20
-> Is it *necessary* to use it?
+I find the subject a bit strange as it should describe the change, not 
+the problem. Otherwise,
 
-This mode is described at least in the Allwinner's documentation of the
-A83T, A64 and H3.
->From my tests, it is required to access the eMMC of the Banana Pi M3
-(mmc2).
+Acked-by: Rob Herring <robh@kernel.org>
 
-> > Signed-off-by: Jean-Francois Moine <moinejf-GANU6spQydw@public.gmane.org>
-> > ---
-> > I don't know if this mode works or is needed at 25MHz.
-> > ---
-> >  Documentation/devicetree/bindings/mmc/sunxi-mmc.txt |  1 +
-> >  drivers/mmc/host/sunxi-mmc.c                        | 21 +++++++++++++=
-++++++--
-> >  2 files changed, 20 insertions(+), 2 deletions(-)
-> >=20
-> > diff --git a/Documentation/devicetree/bindings/mmc/sunxi-mmc.txt b/Docu=
-mentation/devicetree/bindings/mmc/sunxi-mmc.txt
-> > index 4bf41d8..a541bf4 100644
-> > --- a/Documentation/devicetree/bindings/mmc/sunxi-mmc.txt
-> > +++ b/Documentation/devicetree/bindings/mmc/sunxi-mmc.txt
-> > @@ -19,6 +19,7 @@ Optional properties:
-> >   - reset-names : must contain "ahb"
-> >   - for cd, bus-width and additional generic mmc parameters
-> >     please refer to mmc.txt within this directory
-> > + - allwinner,new-timings: the controller may accept the "New Timings" =
-mode
->=20
-> It's not at all clear to me what this means. This needs a better
-> description.
->=20
-> Which devices have this? Can we determine this based on compatible
-> string?
-
-No, only some devices of the SoCs have this capability: the mmc2 of the
-A83T, the smhc0 and smhc1 of the A64, and the mmc1 and mmc2 of the H3.
-
---=20
-Ken ar c'henta=C3=B1	|	      ** Breizh ha Linux atav! **
-Jef		|		http://moinejf.free.fr/
-
---=20
-You received this message because you are subscribed to the Google Groups "=
-linux-sunxi" group.
-To unsubscribe from this group and stop receiving emails from it, send an e=
-mail to linux-sunxi+unsubscribe-/JYPxA39Uh5TLH3MbocFF+G/Ez6ZCGd0@public.gmane.org
-For more options, visit https://groups.google.com/d/optout.
+>  drivers/mmc/host/sunxi-mmc.c                       | 35 +++++++++++++++-------
+>  2 files changed, 29 insertions(+), 12 deletions(-)
