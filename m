@@ -1,23 +1,19 @@
 From: Jean-Francois Moine <moinejf@free.fr>
 Subject: [PATCH v2] mmc: sunxi: Handle the 'New Timings'
 Date: Mon, 1 Aug 2016 15:10:29 +0200
-Message-ID: <E1bUDND-0000pR-65@bombadil.infradead.org>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Ulf Hansson <ulf.hansson@linaro.org>, Maxime Ripard <maxime.ripard@free-electrons.com>, Chen-Yu Tsai <wens@csie.org>
-Cc: linux-sunxi@googlegroups.com, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+Message-ID: <20160801133458.7CD7678018F@smtpfb1-g21.free.fr>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from smtpfb1-g21.free.fr ([212.27.42.9]:55560 "EHLO
+	smtpfb1-g21.free.fr" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751236AbcHANpx (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 1 Aug 2016 09:45:53 -0400
+Received: from smtp4-g21.free.fr (smtp4-g21.free.fr [212.27.42.4])
+	by smtpfb1-g21.free.fr (Postfix) with ESMTP id 7CD7678018F
+	for <linux-mmc@vger.kernel.org>; Mon,  1 Aug 2016 15:34:58 +0200 (CEST)
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>, Maxime Ripard <maxime.ripard@free-electrons.com>, Chen-Yu Tsai <wens@csie.org>
+Cc: linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, linux-sunxi@googlegroups.com
 
 Some MMC devices as mmc2 in the A83T or mmc1 and mmc2 in the H3 have
 a 'New Timings' mode.
@@ -111,3 +107,4 @@ index 2ee4c21..98922b5 100644
  error_free_dma:
 -- 
 2.9.2
+
