@@ -1,48 +1,198 @@
-From: Ben Dooks <ben.dooks@codethink.co.uk>
-Subject: [PATCH 1/1] mmc: core: Add the vmmc/vmmcq regulator info
-Date: Mon,  1 Aug 2016 10:22:11 +0100
-Message-ID: <1470043331-5123-1-git-send-email-ben.dooks@codethink.co.uk>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from 82-70-136-246.dsl.in-addr.zen.co.uk ([82.70.136.246]:36768 "EHLO
-	rainbowdash.ducie.codethink.co.uk" rhost-flags-OK-OK-OK-FAIL)
-	by vger.kernel.org with ESMTP id S1751026AbcHAJYl (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 1 Aug 2016 05:24:41 -0400
-Sender: linux-mmc-owner@vger.kernel.org
+From: Andre Przywara <andre.przywara@arm.com>
+Subject: Re: [PATCH v2 5/5] ARM: dts: sunxi: Use new sun7i-a20-mmc compatible
+ on sun7i and newer
+Date: Mon, 1 Aug 2016 14:11:09 +0100
+Message-ID: <9b6ed836-27ff-c8c8-d886-d86c787605fc@arm.com>
+References: <1469888748-26085-1-git-send-email-hdegoede@redhat.com>
+ <1469888748-26085-6-git-send-email-hdegoede@redhat.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <1469888748-26085-6-git-send-email-hdegoede@redhat.com>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Hans de Goede <hdegoede@redhat.com>, Ulf Hansson <ulf.hansson@linaro.org>, Maxime Ripard <maxime.ripard@free-electrons.com>, Chen-Yu Tsai <wens@csie.org>
+Cc: devicetree <devicetree@vger.kernel.org>, linux-mmc@vger.kernel.org, Icenowy Zheng <icenowy@aosc.xyz>, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
-To: robh+dt@kernel.org, pawel.moll@arm.com, mark.rutland@arm.com, galak@codeaurora.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-kernel@lists.codethink.co.uk, linux-mmc@vger.kernel.org
-Cc: Ben Dooks <ben.dooks@codethink.co.uk>
 
-The core MMC code adds two (optional) regulator properites that drivers
-should use to get their supplies. This is not documented anywhere so add
-information on it.
+Hi Hans,
 
-Signed-off-by: Ben Dooks <ben.dooks@codethink.co.uk>
----
- Documentation/devicetree/bindings/mmc/mmc.txt | 11 +++++++++++
- 1 file changed, 11 insertions(+)
+On 30/07/16 15:25, Hans de Goede wrote:
+> Use the new sun7i-a20-mmc compatible for the mmc controllers on sun7i
+> and newer.
+> 
+> Signed-off-by: Hans de Goede <hdegoede@redhat.com>
+> ---
+> Changes in v2:
+> -New patch in v2 of this patch-set
+> ---
+>  arch/arm/boot/dts/sun6i-a31.dtsi     | 8 ++++----
+>  arch/arm/boot/dts/sun7i-a20.dtsi     | 8 ++++----
+>  arch/arm/boot/dts/sun8i-a23-a33.dtsi | 6 +++---
+>  arch/arm/boot/dts/sun8i-h3.dtsi      | 6 +++---
+>  4 files changed, 14 insertions(+), 14 deletions(-)
+> 
+> diff --git a/arch/arm/boot/dts/sun6i-a31.dtsi b/arch/arm/boot/dts/sun6i-a31.dtsi
+> index 1867af2..0d24f10 100644
+> --- a/arch/arm/boot/dts/sun6i-a31.dtsi
+> +++ b/arch/arm/boot/dts/sun6i-a31.dtsi
+> @@ -469,7 +469,7 @@
+>  		};
+>  
+>  		mmc0: mmc@01c0f000 {
+> -			compatible = "allwinner,sun5i-a13-mmc";
+> +			compatible = "allwinner,sun7i-a20-mmc";
 
-diff --git a/Documentation/devicetree/bindings/mmc/mmc.txt b/Documentation/devicetree/bindings/mmc/mmc.txt
-index ed23b9b..8cbcbce 100644
---- a/Documentation/devicetree/bindings/mmc/mmc.txt
-+++ b/Documentation/devicetree/bindings/mmc/mmc.txt
-@@ -71,6 +71,17 @@ Optional SDIO properties:
- - wakeup-source: Enables wake up of host system on SDIO IRQ assertion
- 		 (Legacy property supported: "enable-sdio-wakeup")
- 
-+MMC power
-+---------
-+
-+Controllers may implement power control from both the connected cards and
-+the IO signaling (for example to change to high-speed 1.8V signalling). If
-+the system supports this, then the following two properties should point
-+to valid regulator nodes:
-+
-+- vqmmc-supply: supply node for IO line power
-+- vmmc-supply: supply node for card's power
-+
- 
- MMC power sequences:
- --------------------
--- 
-2.8.1
+But that breaks systems with newer DTs on older kernels, which do not
+know about sun7i-a20-mmc. I assume this somehow worked before(?), so why
+not use:
+	compatible = "allwinner,sun7i-a20-mmc",
+		     "allwinner,sun5i-a13-mmc";
 
+So newer kernels would pick up the new name and behaviour, while older
+kernels would revert to the old name and use the existing driver.
+
+Cheers,
+Andre.
+
+>  			reg = <0x01c0f000 0x1000>;
+>  			clocks = <&ahb1_gates 8>,
+>  				 <&mmc0_clk 0>,
+> @@ -488,7 +488,7 @@
+>  		};
+>  
+>  		mmc1: mmc@01c10000 {
+> -			compatible = "allwinner,sun5i-a13-mmc";
+> +			compatible = "allwinner,sun7i-a20-mmc";
+>  			reg = <0x01c10000 0x1000>;
+>  			clocks = <&ahb1_gates 9>,
+>  				 <&mmc1_clk 0>,
+> @@ -507,7 +507,7 @@
+>  		};
+>  
+>  		mmc2: mmc@01c11000 {
+> -			compatible = "allwinner,sun5i-a13-mmc";
+> +			compatible = "allwinner,sun7i-a20-mmc";
+>  			reg = <0x01c11000 0x1000>;
+>  			clocks = <&ahb1_gates 10>,
+>  				 <&mmc2_clk 0>,
+> @@ -526,7 +526,7 @@
+>  		};
+>  
+>  		mmc3: mmc@01c12000 {
+> -			compatible = "allwinner,sun5i-a13-mmc";
+> +			compatible = "allwinner,sun7i-a20-mmc";
+>  			reg = <0x01c12000 0x1000>;
+>  			clocks = <&ahb1_gates 11>,
+>  				 <&mmc3_clk 0>,
+> diff --git a/arch/arm/boot/dts/sun7i-a20.dtsi b/arch/arm/boot/dts/sun7i-a20.dtsi
+> index bd0c476..94cf5a1 100644
+> --- a/arch/arm/boot/dts/sun7i-a20.dtsi
+> +++ b/arch/arm/boot/dts/sun7i-a20.dtsi
+> @@ -905,7 +905,7 @@
+>  		};
+>  
+>  		mmc0: mmc@01c0f000 {
+> -			compatible = "allwinner,sun5i-a13-mmc";
+> +			compatible = "allwinner,sun7i-a20-mmc";
+>  			reg = <0x01c0f000 0x1000>;
+>  			clocks = <&ahb_gates 8>,
+>  				 <&mmc0_clk 0>,
+> @@ -922,7 +922,7 @@
+>  		};
+>  
+>  		mmc1: mmc@01c10000 {
+> -			compatible = "allwinner,sun5i-a13-mmc";
+> +			compatible = "allwinner,sun7i-a20-mmc";
+>  			reg = <0x01c10000 0x1000>;
+>  			clocks = <&ahb_gates 9>,
+>  				 <&mmc1_clk 0>,
+> @@ -939,7 +939,7 @@
+>  		};
+>  
+>  		mmc2: mmc@01c11000 {
+> -			compatible = "allwinner,sun5i-a13-mmc";
+> +			compatible = "allwinner,sun7i-a20-mmc";
+>  			reg = <0x01c11000 0x1000>;
+>  			clocks = <&ahb_gates 10>,
+>  				 <&mmc2_clk 0>,
+> @@ -956,7 +956,7 @@
+>  		};
+>  
+>  		mmc3: mmc@01c12000 {
+> -			compatible = "allwinner,sun5i-a13-mmc";
+> +			compatible = "allwinner,sun7i-a20-mmc";
+>  			reg = <0x01c12000 0x1000>;
+>  			clocks = <&ahb_gates 11>,
+>  				 <&mmc3_clk 0>,
+> diff --git a/arch/arm/boot/dts/sun8i-a23-a33.dtsi b/arch/arm/boot/dts/sun8i-a23-a33.dtsi
+> index 7e05e09..e3b196e 100644
+> --- a/arch/arm/boot/dts/sun8i-a23-a33.dtsi
+> +++ b/arch/arm/boot/dts/sun8i-a23-a33.dtsi
+> @@ -266,7 +266,7 @@
+>  		};
+>  
+>  		mmc0: mmc@01c0f000 {
+> -			compatible = "allwinner,sun5i-a13-mmc";
+> +			compatible = "allwinner,sun7i-a20-mmc";
+>  			reg = <0x01c0f000 0x1000>;
+>  			clocks = <&ahb1_gates 8>,
+>  				 <&mmc0_clk 0>,
+> @@ -285,7 +285,7 @@
+>  		};
+>  
+>  		mmc1: mmc@01c10000 {
+> -			compatible = "allwinner,sun5i-a13-mmc";
+> +			compatible = "allwinner,sun7i-a20-mmc";
+>  			reg = <0x01c10000 0x1000>;
+>  			clocks = <&ahb1_gates 9>,
+>  				 <&mmc1_clk 0>,
+> @@ -304,7 +304,7 @@
+>  		};
+>  
+>  		mmc2: mmc@01c11000 {
+> -			compatible = "allwinner,sun5i-a13-mmc";
+> +			compatible = "allwinner,sun7i-a20-mmc";
+>  			reg = <0x01c11000 0x1000>;
+>  			clocks = <&ahb1_gates 10>,
+>  				 <&mmc2_clk 0>,
+> diff --git a/arch/arm/boot/dts/sun8i-h3.dtsi b/arch/arm/boot/dts/sun8i-h3.dtsi
+> index 93c88f3..b5cc2dc 100644
+> --- a/arch/arm/boot/dts/sun8i-h3.dtsi
+> +++ b/arch/arm/boot/dts/sun8i-h3.dtsi
+> @@ -154,7 +154,7 @@
+>  		};
+>  
+>  		mmc0: mmc@01c0f000 {
+> -			compatible = "allwinner,sun5i-a13-mmc";
+> +			compatible = "allwinner,sun7i-a20-mmc";
+>  			reg = <0x01c0f000 0x1000>;
+>  			clocks = <&ccu CLK_BUS_MMC0>,
+>  				 <&ccu CLK_MMC0>,
+> @@ -173,7 +173,7 @@
+>  		};
+>  
+>  		mmc1: mmc@01c10000 {
+> -			compatible = "allwinner,sun5i-a13-mmc";
+> +			compatible = "allwinner,sun7i-a20-mmc";
+>  			reg = <0x01c10000 0x1000>;
+>  			clocks = <&ccu CLK_BUS_MMC1>,
+>  				 <&ccu CLK_MMC1>,
+> @@ -192,7 +192,7 @@
+>  		};
+>  
+>  		mmc2: mmc@01c11000 {
+> -			compatible = "allwinner,sun5i-a13-mmc";
+> +			compatible = "allwinner,sun7i-a20-mmc";
+>  			reg = <0x01c11000 0x1000>;
+>  			clocks = <&ccu CLK_BUS_MMC2>,
+>  				 <&ccu CLK_MMC2>,
+> 
