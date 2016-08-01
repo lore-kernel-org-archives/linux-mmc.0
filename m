@@ -1,53 +1,70 @@
-From: Rob Herring <robh@kernel.org>
-Subject: Re: [PATCH v2] dt: bindings: Make compatible optional for mmc
- function nodes
-Date: Mon, 1 Aug 2016 11:41:56 -0500
-Message-ID: <20160801164156.GA29075@rob-hp-laptop>
-References: <1469891030-28838-1-git-send-email-hdegoede@redhat.com>
+From: Jean-Francois Moine <moinejf-GANU6spQydw@public.gmane.org>
+Subject: Re: [PATCH v2] mmc: sunxi: Handle the 'New Timings'
+Date: Mon, 1 Aug 2016 19:09:06 +0200
+Message-ID: <20160801190906.8e7b86044aa32afda1a11e97@free.fr>
+References: <20160801133359.5B1802E03D@muse.csie.ntu.edu.tw>
+	<CAGb2v67ocbAVhUA530JC9OiOW8ozybTgP+3yzjPomMKKwP-Bcg@mail.gmail.com>
+Reply-To: moinejf-GANU6spQydw@public.gmane.org
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-Content-Disposition: inline
-In-Reply-To: <1469891030-28838-1-git-send-email-hdegoede@redhat.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Hans de Goede <hdegoede@redhat.com>
-Cc: devicetree <devicetree@vger.kernel.org>, Maxime Ripard <maxime.ripard@free-electrons.com>, linux-mmc@vger.kernel.org, Arnd Bergmann <arnd@arndb.de>, linux-arm-kernel@lists.infradead.org
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: quoted-printable
+Return-path: <linux-sunxi+bncBCV6DL6LYMNBBOUE726AKGQE7ADGI4A-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+Sender: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
+In-Reply-To: <CAGb2v67ocbAVhUA530JC9OiOW8ozybTgP+3yzjPomMKKwP-Bcg-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+List-Post: <https://groups.google.com/group/linux-sunxi/post>, <mailto:linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Help: <https://groups.google.com/support/>, <mailto:linux-sunxi+help-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Archive: <https://groups.google.com/group/linux-sunxi
+List-Subscribe: <https://groups.google.com/group/linux-sunxi/subscribe>, <mailto:linux-sunxi+subscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Unsubscribe: <mailto:googlegroups-manage+1076902468213+unsubscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>,
+ <https://groups.google.com/group/linux-sunxi/subscribe>
+To: Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org>
+Cc: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>, linux-arm-kernel <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-sunxi <linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Sat, Jul 30, 2016 at 05:03:50PM +0200, Hans de Goede wrote:
-> On some boards (android tablets) different batches use different sdio
-> wifi modules. This is not a problem since mmc/sdio is an enumerable bus,
-> so we only need to describe and activate the mmc controller in dt and
-> then the kernel will automatically load the right driver.
-> 
-> Sometimes it is useful to specify certain ethernet properties for these
-> "unknown" sdio devices, specifically we want the boot-loader to be able
-> to set "local-mac-address" as some of these sdio wifi modules come without
-> an eeprom / without a factory programmed mac address.
-> 
-> Since the exact device is unknown (differs per batch) we cannot use
-> a wifi-chip specific compatible, thus sometimes it is desirable to have a
-> mmc function node, without having to make up an otherwise unused compatible
-> for the node, so make the compatible property optional.
-> 
-> Cc: Arnd Bergmann <arnd@arndb.de>
-> Cc: Maxime Ripard <maxime.ripard@free-electrons.com>
-> Signed-off-by: Hans de Goede <hdegoede@redhat.com>
-> ---
-> Changes in v2:
-> -Change the commit-msg to explain why it sometimes is desirable to have a
->  mmc function node without a compatible
-> ---
->  Documentation/devicetree/bindings/mmc/mmc.txt | 4 +++-
->  1 file changed, 3 insertions(+), 1 deletion(-)
+Hi Chen-Yu,
 
-Acked-by: Rob Herring <robh@kernel.org>
+On Mon, 1 Aug 2016 21:52:48 +0800
+Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org> wrote:
+
+> On Mon, Aug 1, 2016 at 9:10 PM, Jean-Francois Moine <moinejf-GANU6spQydw@public.gmane.org> wro=
+te:
+> > Some MMC devices as mmc2 in the A83T or mmc1 and mmc2 in the H3 have
+> > a 'New Timings' mode.
+> > Set this capacity in the DT and use it when possible.
+>=20
+>            ^^ capability?
+>=20
+> Also, in this patch you are adding support for a DT boolean flag
+> property, not adding stuff to the DT.
+
+Sorry, forgotten.
+
+> >
+> > Signed-off-by: Jean-Francois Moine <moinejf-GANU6spQydw@public.gmane.org>
+> > ---
+>=20
+> I got 3 copies of the same patch...
+
+Maybe because I sent it to you, and to the mmc and sunxi lists.
+
+> > I don't know if this mode works or is needed at 25MHz.
+>=20
+> Could you test it? You can change mmc->f_max in the probe function
+> to limit it to 25 MHz.
+>=20
+> I'm more interested in the throughput you get after applying this
+> patch though.
+
+I did a test on a BPI-M2+ (H3). The new timings don't work at 25MHz,
+neither for mmc1 (wifi) - nor for mmc2 (eMMC).
+
+--=20
+Ken ar c'henta=C3=B1	|	      ** Breizh ha Linux atav! **
+Jef		|		http://moinejf.free.fr/
+
+--=20
+You received this message because you are subscribed to the Google Groups "=
+linux-sunxi" group.
+To unsubscribe from this group and stop receiving emails from it, send an e=
+mail to linux-sunxi+unsubscribe-/JYPxA39Uh5TLH3MbocFF+G/Ez6ZCGd0@public.gmane.org
+For more options, visit https://groups.google.com/d/optout.
