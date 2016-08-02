@@ -1,86 +1,80 @@
-From: Jaehoon Chung <jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>
-Subject: Re: [PATCH v2 2/2] mmc: core: fall back host->f_init if failing to
- init mmc card after resume
-Date: Tue, 02 Aug 2016 19:47:32 +0900
-Message-ID: <57A07A44.9000400@samsung.com>
-References: <1468979860-28712-1-git-send-email-shawn.lin@rock-chips.com>
- <1468979860-28712-2-git-send-email-shawn.lin@rock-chips.com>
- <CGME20160802093847epcas1p2c8cb3881913a608122bb77dd9d973e63@epcas1p2.samsung.com>
- <98cd6af4-3296-9020-aeae-802f797f0631@rock-chips.com>
+From: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
+Subject: Re: [PATCH v2] mmc: sunxi: Handle the 'New Timings'
+Date: Tue, 2 Aug 2016 12:20:48 +0100
+Message-ID: <20160802112048.GA20134@leverpostej>
+References: <E1bUDNG-0000pR-Fv@bombadil.infradead.org>
+ <20160801153016.GB17146@leverpostej>
+ <20160801182603.6f44af17e0bb801353f4b5e0@free.fr>
+Reply-To: mark.rutland-5wv7dgnIgG8@public.gmane.org
 Mime-Version: 1.0
-Content-Type: text/plain; charset="gbk"
-Content-Transfer-Encoding: base64
-Return-path: <linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-In-reply-to: <98cd6af4-3296-9020-aeae-802f797f0631-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-rockchip>,
- <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-rockchip/>
-List-Post: <mailto:linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-List-Help: <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-rockchip>,
- <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
-Sender: "Linux-rockchip" <linux-rockchip-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-Errors-To: linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
-To: Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, Doug Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-sunxi+bncBDRMFBMIXEGBBI4EQK6QKGQEGSHI5EQ-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+Sender: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
+Content-Disposition: inline
+In-Reply-To: <20160801182603.6f44af17e0bb801353f4b5e0-GANU6spQydw@public.gmane.org>
+List-Post: <https://groups.google.com/group/linux-sunxi/post>, <mailto:linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Help: <https://groups.google.com/support/>, <mailto:linux-sunxi+help-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Archive: <https://groups.google.com/group/linux-sunxi
+List-Subscribe: <https://groups.google.com/group/linux-sunxi/subscribe>, <mailto:linux-sunxi+subscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Unsubscribe: <mailto:googlegroups-manage+1076902468213+unsubscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>,
+ <https://groups.google.com/group/linux-sunxi/subscribe>
+To: Jean-Francois Moine <moinejf-GANU6spQydw@public.gmane.org>
+Cc: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>, Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org>, linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
 
-SGkgU2hhd24sCgpPbiAwOC8wMi8yMDE2IDA2OjA3IFBNLCBTaGF3biBMaW4gd3JvdGU6Cj4gSGkg
-VWxmLAo+IAo+INTaIDIwMTYvNy8yMCA5OjU3LCBTaGF3biBMaW4g0LS1wDoKPj4gV2Ugb2JzZXJ2
-ZWQgdGhlIGZhaWx1cmUgb2YgaW5pdGlhbGl6aW5nIGNhcmQgYWZ0ZXIgcmVzdW1lCj4+IGFjY2lk
-ZW50YWxseS4gSXQncyBoYXJkIHRvIHJlcHJvZHVjZSBidXQgd2UgZGlkIGdldCByZXBvcnQgZnJv
-bQo+PiB0aGUgc3VzcGVuZC9yZXN1bWUgdGVzdCBvZiBvdXIgUkszMzk5IG1wIHRlc3QgZmFybSAu
-IFVuZm9ydHVuYXRlbHksCj4+IHdlIHN0aWxsIGZhaWwgdG8gZmlndXJlIG91dCB3aGF0IHdhcyBn
-b2luZyB3cm9uZyBhdCB0aGF0IHRpbWUuCj4+IEFsc28gd2UgY2FuJ3QgYWNoaWV2ZSBpdCBieSBy
-ZXRyeWluZyB0aGUgaG9zdC0+Zl9pbml0IHdpdGhvdXQgZmFsbGluZwo+PiBiYWNrIGl0LiBCdXQg
-dGhpcyBwYXRjaCB3aWxsIHNvbHZlIHRoZSBwcm9ibGVtIGFzIHdlIGNvdWxkIGFkZCBzb21lIGxv
-Zwo+PiB0aGVyZSBhbmQgc2VlIHRoYXQgd2UgcmVzdW1lIHRoZSBtbWMgY2FyZCBzdWNjZXNzZnVs
-bHkgYWZ0ZXIgZmFsbGluZwo+PiBiYWNrIHRoZSBob3N0LT5mX2luaXQuIFRoZXJlIGlzIG5vIG9i
-dmlvdXMgc2lkZSBlZmZlY3QgZm91bmQsIHNvIGl0IHNlZW1zCj4+IHRoaXMgcGF0Y2ggd2lsbCBp
-bXByb3ZlIHRoZSBzdGFiaWxpdHkuCj4+Cj4+IFsgICA5My40MDUwODVdIG1tYzE6IHVuZXhwZWN0
-ZWQgc3RhdHVzIDB4ODAwOTAwIGFmdGVyIHN3aXRjaAo+PiBbICAgOTMuNDA4NDc0XSBtbWMxOiBz
-d2l0Y2ggdG8gYnVzIHdpZHRoIDEgZmFpbGVkCj4+IFsgICA5My40MDg0ODJdIG1tYzE6IG1tY19z
-ZWxlY3RfaHMyMDAgZmFpbGVkLCBlcnJvciAtMTEwCj4+IFsgICA5My40MDg0OTJdIG1tYzE6IGVy
-cm9yIC0xMTAgZHVyaW5nIHJlc3VtZSAoY2FyZCB3YXMgcmVtb3ZlZD8pCj4+IFsgICA5My40MDg3
-MDVdIFBNOiByZXN1bWUgb2YgZGV2aWNlcyBjb21wbGV0ZSBhZnRlciAyMTMuNDUzIG1zZWNzCj4+
-CgpTdGF0dXMgMHg4MDA5MDAgaXMgQ09NX0NSQ19FUlJPUi4uaXQgc2VlbXMgdGhhdCBDUkMgY2hl
-Y2sgZmFpbHMuCkJ1dCBpIGRvbid0IGtub3cgd2hhdCBpcyByZWxhdGVkIHdpdGggImZhbGwgYmFj
-ayBob3N0LT5mX2luaXQiLgoKSSBkb24ndCBoYXZlIGEga25vd2xlZGdlIG9mIHJvY2tjaGlwLi4u
-CmJ1dCBpbiBteSBleHBlcmllbmNlLCB0aGVyZSBhcmUgc29tZSBjYXNlcywgbm90IG1tYyBjb3Jl
-IHByb2JsZW0uLgoKMS4gRXh5bm9zIGlzIHVzaW5nIHRoZSBncGlvIGFzIGNsay9jbWQvZGF0YSBs
-aW5lLi5hbmQgZ3BpbyBoYXMgdGhlIGRyaXZlciBzdHJlbmd0aCB2YWx1ZS4KSWYgZHJpdmVyIHN0
-cmVuZ3RoIGlzIGNoYW5nZWQgYWZ0ZXIgcmVzdW1pbmcsIGl0J3MgcG9zc2libGUgdG8gb2NjdXIg
-dGhlIGVycm9yLgoKMi4gQW5kIGdsaXRjaCBmb3IgSS9PIGxpbmUuLnRoaXMgbG9vcCBoYXMgdGhl
-IGRlbGF5Li5KdXN0IGRlbGF5PyAKClNvIHlvdSBjYW4gY2hlY2sgdGhlIG90aGVyIHByb2JsZW0u
-Li4gOikKCkF0IEJvb3RpbmcgdGltZSwgZl9pbml0IGNhbiB1c2UgNDAwSy4uYnV0IGFmdGVyIHJl
-c3VtaW5nLi5mX2luaXQgbmVlZCB0byB1c2UgMTAwSy4uaG1tLi5zdHJhbmdlLi4KCkJlc3QgUmVn
-YXJkcywKSmFlaG9vbiBDaHVuZwoKPiAKPiBBbnkgY29tbWVudHMgZm9yIHRoaXMgcGF0Y2g/IDop
-Cj4gCj4+IFNpZ25lZC1vZmYtYnk6IFNoYXduIExpbiA8c2hhd24ubGluQHJvY2stY2hpcHMuY29t
-Pgo+Pgo+PiAtLS0KPj4KPj4gQ2hhbmdlcyBpbiB2MjoKPj4gLSByZW1vdmUgbW1jX3Bvd2VyX29m
-Zgo+PiAtIHRha2UgZl9taW4gaW50byBjb25zaWRlcmF0aW9uCj4+Cj4+ICBkcml2ZXJzL21tYy9j
-b3JlL21tYy5jIHwgMTkgKysrKysrKysrKysrKysrKystLQo+PiAgMSBmaWxlIGNoYW5nZWQsIDE3
-IGluc2VydGlvbnMoKyksIDIgZGVsZXRpb25zKC0pCj4+Cj4+IGRpZmYgLS1naXQgYS9kcml2ZXJz
-L21tYy9jb3JlL21tYy5jIGIvZHJpdmVycy9tbWMvY29yZS9tbWMuYwo+PiBpbmRleCA0MDNiOTdi
-Li5hMjg5MWMxIDEwMDY0NAo+PiAtLS0gYS9kcml2ZXJzL21tYy9jb3JlL21tYy5jCj4+ICsrKyBi
-L2RyaXZlcnMvbW1jL2NvcmUvbW1jLmMKPj4gQEAgLTE5NDUsNiArMTk0NSw3IEBAIHN0YXRpYyBp
-bnQgbW1jX3N1c3BlbmQoc3RydWN0IG1tY19ob3N0ICpob3N0KQo+PiAgc3RhdGljIGludCBfbW1j
-X3Jlc3VtZShzdHJ1Y3QgbW1jX2hvc3QgKmhvc3QpCj4+ICB7Cj4+ICAgICAgaW50IGVyciA9IDA7
-Cj4+ICsgICAgaW50IGk7Cj4+Cj4+ICAgICAgQlVHX09OKCFob3N0KTsKPj4gICAgICBCVUdfT04o
-IWhvc3QtPmNhcmQpOwo+PiBAQCAtMTk1NCw4ICsxOTU1LDIyIEBAIHN0YXRpYyBpbnQgX21tY19y
-ZXN1bWUoc3RydWN0IG1tY19ob3N0ICpob3N0KQo+PiAgICAgIGlmICghbW1jX2NhcmRfc3VzcGVu
-ZGVkKGhvc3QtPmNhcmQpKQo+PiAgICAgICAgICBnb3RvIG91dDsKPj4KPj4gLSAgICBtbWNfcG93
-ZXJfdXAoaG9zdCwgaG9zdC0+Y2FyZC0+b2NyKTsKPj4gLSAgICBlcnIgPSBtbWNfaW5pdF9jYXJk
-KGhvc3QsIGhvc3QtPmNhcmQtPm9jciwgaG9zdC0+Y2FyZCk7Cj4+ICsgICAgLyoKPj4gKyAgICAg
-KiBMZXQncyB0cnkgdG8gZmFsbGJhY2sgdGhlIGhvc3QtPmZfaW5pdAo+PiArICAgICAqIGlmIGZh
-aWxpbmcgdG8gaW5pdCBtbWMgY2FyZCBhZnRlciByZXN1bWUuCj4+ICsgICAgICovCj4+ICsgICAg
-Zm9yIChpID0gMDsgaSA8IEFSUkFZX1NJWkUoZnJlcXMpOyBpKyspIHsKPj4gKyAgICAgICAgaWYg
-KGhvc3QtPmZfaW5pdCA8IG1heChmcmVxc1tpXSwgaG9zdC0+Zl9taW4pKQo+PiArICAgICAgICAg
-ICAgY29udGludWU7Cj4+ICsgICAgICAgIGVsc2UKPj4gKyAgICAgICAgICAgIGhvc3QtPmZfaW5p
-dCA9IG1heChmcmVxc1tpXSwgaG9zdC0+Zl9taW4pOwo+PiArCj4+ICsgICAgICAgIG1tY19wb3dl
-cl91cChob3N0LCBob3N0LT5jYXJkLT5vY3IpOwo+PiArICAgICAgICBlcnIgPSBtbWNfaW5pdF9j
-YXJkKGhvc3QsIGhvc3QtPmNhcmQtPm9jciwgaG9zdC0+Y2FyZCk7Cj4+ICsgICAgICAgIGlmICgh
-ZXJyKQo+PiArICAgICAgICAgICAgYnJlYWs7Cj4+ICsgICAgfQo+PiArCj4+ICAgICAgbW1jX2Nh
-cmRfY2xyX3N1c3BlbmRlZChob3N0LT5jYXJkKTsKPj4KPj4gIG91dDoKPj4KPiAKPiAKCgpfX19f
-X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fXwpMaW51eC1yb2NrY2hp
-cCBtYWlsaW5nIGxpc3QKTGludXgtcm9ja2NoaXBAbGlzdHMuaW5mcmFkZWFkLm9yZwpodHRwOi8v
-bGlzdHMuaW5mcmFkZWFkLm9yZy9tYWlsbWFuL2xpc3RpbmZvL2xpbnV4LXJvY2tjaGlwCg==
+On Mon, Aug 01, 2016 at 06:26:03PM +0200, Jean-Francois Moine wrote:
+> On Mon, 1 Aug 2016 16:30:19 +0100
+> Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org> wrote:
+> 
+> > On Mon, Aug 01, 2016 at 03:10:29PM +0200, Jean-Francois Moine wrote:
+> > > Some MMC devices as mmc2 in the A83T or mmc1 and mmc2 in the H3 have
+> > > a 'New Timings' mode.
+> > > Set this capacity in the DT and use it when possible.
+> > 
+> > What exactly is this "New Timings" mode?
+> > 
+> > Why do we wnat to set it? Improved performance, power?
+> > 
+> > Is it *necessary* to use it?
+> 
+> This mode is described at least in the Allwinner's documentation of the
+> A83T, A64 and H3.
+
+Is this publicly available? If not, can the gist of it be described?
+
+> From my tests, it is required to access the eMMC of the Banana Pi M3
+> (mmc2).
+
+Ok.
+
+> > > Signed-off-by: Jean-Francois Moine <moinejf-GANU6spQydw@public.gmane.org>
+> > > ---
+> > > I don't know if this mode works or is needed at 25MHz.
+> > > ---
+> > >  Documentation/devicetree/bindings/mmc/sunxi-mmc.txt |  1 +
+> > >  drivers/mmc/host/sunxi-mmc.c                        | 21 +++++++++++++++++++--
+> > >  2 files changed, 20 insertions(+), 2 deletions(-)
+> > > 
+> > > diff --git a/Documentation/devicetree/bindings/mmc/sunxi-mmc.txt b/Documentation/devicetree/bindings/mmc/sunxi-mmc.txt
+> > > index 4bf41d8..a541bf4 100644
+> > > --- a/Documentation/devicetree/bindings/mmc/sunxi-mmc.txt
+> > > +++ b/Documentation/devicetree/bindings/mmc/sunxi-mmc.txt
+> > > @@ -19,6 +19,7 @@ Optional properties:
+> > >   - reset-names : must contain "ahb"
+> > >   - for cd, bus-width and additional generic mmc parameters
+> > >     please refer to mmc.txt within this directory
+> > > + - allwinner,new-timings: the controller may accept the "New Timings" mode
+> > 
+> > It's not at all clear to me what this means. This needs a better
+> > description.
+> > 
+> > Which devices have this? Can we determine this based on compatible
+> > string?
+> 
+> No, only some devices of the SoCs have this capability: the mmc2 of the
+> A83T, the smhc0 and smhc1 of the A64, and the mmc1 and mmc2 of the H3.
+
+Ok.
+
+Thanks,
+Mark.
