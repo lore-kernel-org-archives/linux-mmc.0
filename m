@@ -1,39 +1,87 @@
-From: Baole Ni <baolex.ni@intel.com>
-Subject: [PATCH 0693/1285] Replace numeric parameter like 0444 with macro
-Date: Tue,  2 Aug 2016 19:37:22 +0800
-Message-ID: <20160802113722.28263-1-baolex.ni@intel.com>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: adrian.hunter@intel.com, ulf.hansson@linaro.org, jirislaby@gmail.com, mchehab@redhat.com, m.chehab@samsung.com, pawel@osciak.com, m.szyprowski@samsung.com, kyungmin.park@samsung.com, k.kozlowski@samsung.com
-Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, chuansheng.liu@intel.com, baolex.ni@intel.com, jonathanh@nvidia.com, grundler@chromium.org, lporzio@micron.com
+From: Michael Weiser <michael.weiser@gmx.de>
+Subject: [PATCH 1/5] mmc: sunxi-mmc: change idma descriptor to __le32
+Date: Tue,  2 Aug 2016 21:31:11 +0200
+Message-ID: <20160802193115.850-2-michael.weiser@gmx.de>
+References: <20160802193115.850-1-michael.weiser@gmx.de>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from heinz.dinsnail.net ([85.214.155.104]:56810 "EHLO
+	heinz.dinsnail.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932231AbcHBTi5 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 2 Aug 2016 15:38:57 -0400
+In-Reply-To: <20160802193115.850-1-michael.weiser@gmx.de>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-arm-kernel@lists.infradead.org
+Cc: Michael Weiser <michael.weiser@gmx.de>, Ulf Hansson <ulf.hansson@linaro.org>, Chen-Yu Tsai <wens@csie.org>, linux-mmc@vger.kernel.org
 
-I find that the developers often just specified the numeric value
-when calling a macro which is defined with a parameter for access permission.
-As we know, these numeric value for access permission have had the corresponding macro,
-and that using macro can improve the robustness and readability of the code,
-thus, I suggest replacing the numeric parameter with the macro.
+The sunxi-mmc driver does not take into account the processor may be big
+endian when writing the DMA descriptors. This causes cards not to be
+detected when running a big-endian kernel. Change the descriptors for
+IDMA to use __le32 and ensure they are suitably swapped before writing.
+Tested successfully on the Cubieboard2.
 
-Signed-off-by: Chuansheng Liu <chuansheng.liu@intel.com>
-Signed-off-by: Baole Ni <baolex.ni@intel.com>
+Signed-off-by: Michael Weiser <michael.weiser@gmx.de>
+Acked-by: Maxime Ripard <maxime.ripard@free-electrons.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Chen-Yu Tsai <wens@csie.org>
+Cc: linux-mmc@vger.kernel.org
 ---
- drivers/mmc/host/sdhci.c | 4 ++--
- 1 file changed, 2 insertions(+), 2 deletions(-)
+ drivers/mmc/host/sunxi-mmc.c | 27 +++++++++++++++------------
+ 1 file changed, 15 insertions(+), 12 deletions(-)
 
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 0e3d7c0..01a6fc3 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -3450,8 +3450,8 @@ static void __exit sdhci_drv_exit(void)
- module_init(sdhci_drv_init);
- module_exit(sdhci_drv_exit);
+diff --git a/drivers/mmc/host/sunxi-mmc.c b/drivers/mmc/host/sunxi-mmc.c
+index 2ee4c21..1e6df8a 100644
+--- a/drivers/mmc/host/sunxi-mmc.c
++++ b/drivers/mmc/host/sunxi-mmc.c
+@@ -223,10 +223,10 @@ struct sunxi_mmc_clk_delay {
+ };
  
--module_param(debug_quirks, uint, 0444);
--module_param(debug_quirks2, uint, 0444);
-+module_param(debug_quirks, uint, S_IRUSR | S_IRGRP | S_IROTH);
-+module_param(debug_quirks2, uint, S_IRUSR | S_IRGRP | S_IROTH);
+ struct sunxi_idma_des {
+-	u32	config;
+-	u32	buf_size;
+-	u32	buf_addr_ptr1;
+-	u32	buf_addr_ptr2;
++	__le32 config;
++	__le32 buf_size;
++	__le32 buf_addr_ptr1;
++	__le32 buf_addr_ptr2;
+ };
  
- MODULE_AUTHOR("Pierre Ossman <pierre@ossman.eu>");
- MODULE_DESCRIPTION("Secure Digital Host Controller Interface core driver");
+ struct sunxi_mmc_host {
+@@ -325,22 +325,25 @@ static void sunxi_mmc_init_idma_des(struct sunxi_mmc_host *host,
+ 	int i, max_len = (1 << host->idma_des_size_bits);
+ 
+ 	for (i = 0; i < data->sg_len; i++) {
+-		pdes[i].config = SDXC_IDMAC_DES0_CH | SDXC_IDMAC_DES0_OWN |
+-				 SDXC_IDMAC_DES0_DIC;
++		pdes[i].config = cpu_to_le32(SDXC_IDMAC_DES0_CH |
++					     SDXC_IDMAC_DES0_OWN |
++					     SDXC_IDMAC_DES0_DIC);
+ 
+ 		if (data->sg[i].length == max_len)
+ 			pdes[i].buf_size = 0; /* 0 == max_len */
+ 		else
+-			pdes[i].buf_size = data->sg[i].length;
++			pdes[i].buf_size = cpu_to_le32(data->sg[i].length);
+ 
+ 		next_desc += sizeof(struct sunxi_idma_des);
+-		pdes[i].buf_addr_ptr1 = sg_dma_address(&data->sg[i]);
+-		pdes[i].buf_addr_ptr2 = (u32)next_desc;
++		pdes[i].buf_addr_ptr1 =
++			cpu_to_le32(sg_dma_address(&data->sg[i]));
++		pdes[i].buf_addr_ptr2 = cpu_to_le32((u32)next_desc);
+ 	}
+ 
+-	pdes[0].config |= SDXC_IDMAC_DES0_FD;
+-	pdes[i - 1].config |= SDXC_IDMAC_DES0_LD | SDXC_IDMAC_DES0_ER;
+-	pdes[i - 1].config &= ~SDXC_IDMAC_DES0_DIC;
++	pdes[0].config |= cpu_to_le32(SDXC_IDMAC_DES0_FD);
++	pdes[i - 1].config |= cpu_to_le32(SDXC_IDMAC_DES0_LD |
++					  SDXC_IDMAC_DES0_ER);
++	pdes[i - 1].config &= cpu_to_le32(~SDXC_IDMAC_DES0_DIC);
+ 	pdes[i - 1].buf_addr_ptr2 = 0;
+ 
+ 	/*
 -- 
 2.9.2
+
