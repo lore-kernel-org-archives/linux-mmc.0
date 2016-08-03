@@ -1,180 +1,140 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
+From: Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
 Subject: Re: [PATCH v2 2/2] mmc: core: fall back host->f_init if failing to
  init mmc card after resume
-Date: Wed, 03 Aug 2016 15:54:39 +0900
-Message-ID: <1e664e27-09c9-dc14-b978-2483c1fa1da4@samsung.com>
+Date: Wed, 3 Aug 2016 15:44:14 +0800
+Message-ID: <599ba6fb-69c8-9e33-13d9-65e3eab0aeb4@rock-chips.com>
 References: <1468979860-28712-1-git-send-email-shawn.lin@rock-chips.com>
  <1468979860-28712-2-git-send-email-shawn.lin@rock-chips.com>
  <CGME20160802093847epcas1p2c8cb3881913a608122bb77dd9d973e63@epcas1p2.samsung.com>
  <98cd6af4-3296-9020-aeae-802f797f0631@rock-chips.com>
  <57A07A44.9000400@samsung.com>
  <73b58bd5-a5a2-a436-58a9-30fa8db3225f@rock-chips.com>
+ <1e664e27-09c9-dc14-b978-2483c1fa1da4@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=gbk
-Content-Transfer-Encoding: 8BIT
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout4.samsung.com ([203.254.224.34]:59350 "EHLO
-	mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751624AbcHCGym convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 3 Aug 2016 02:54:42 -0400
-In-reply-to: <73b58bd5-a5a2-a436-58a9-30fa8db3225f@rock-chips.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="gbk"; Format="flowed"
+Content-Transfer-Encoding: base64
+Return-path: <linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+In-Reply-To: <1e664e27-09c9-dc14-b978-2483c1fa1da4-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-rockchip>,
+ <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-rockchip/>
+List-Post: <mailto:linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+List-Help: <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-rockchip>,
+ <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
+Sender: "Linux-rockchip" <linux-rockchip-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+Errors-To: linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+To: Jaehoon Chung <jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Doug Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
-To: Shawn Lin <shawn.lin@rock-chips.com>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Doug Anderson <dianders@chromium.org>, linux-rockchip@lists.infradead.org
 
-Hi Shawn,
-
-On 08/03/2016 10:35 AM, Shawn Lin wrote:
-> Hi Jaehoon,
-> 
-> 在 2016/8/2 18:47, Jaehoon Chung 写道:
->> Hi Shawn,
->>
->> On 08/02/2016 06:07 PM, Shawn Lin wrote:
->>> Hi Ulf,
->>>
->>> 在 2016/7/20 9:57, Shawn Lin 写道:
->>>> We observed the failure of initializing card after resume
->>>> accidentally. It's hard to reproduce but we did get report from
->>>> the suspend/resume test of our RK3399 mp test farm . Unfortunately,
->>>> we still fail to figure out what was going wrong at that time.
->>>> Also we can't achieve it by retrying the host->f_init without falling
->>>> back it. But this patch will solve the problem as we could add some log
->>>> there and see that we resume the mmc card successfully after falling
->>>> back the host->f_init. There is no obvious side effect found, so it seems
->>>> this patch will improve the stability.
->>>>
->>>> [   93.405085] mmc1: unexpected status 0x800900 after switch
->>>> [   93.408474] mmc1: switch to bus width 1 failed
->>>> [   93.408482] mmc1: mmc_select_hs200 failed, error -110
->>>> [   93.408492] mmc1: error -110 during resume (card was removed?)
->>>> [   93.408705] PM: resume of devices complete after 213.453 msecs
->>>>
->>
->> Status 0x800900 is COM_CRC_ERROR..it seems that CRC check fails.
->> But i don't know what is related with "fall back host->f_init".
-> 
-> Yup, actually it also looks strange to me that we should downgrade
-> the host->f_init when resuming. CRC error shouldn't occour as 400K
-> could work at booting time, also we could see the HS400 work normally
-> later which make me believe that it shouldn't belong to signal problem,
-> but we need to figure out why the controller think it should be a CRC
-> error.
-> 
-> The best way is to make it easy to be reproduced that we could check the
-> pcb signal there, and I still try it then. Or there is a HW/Chip
-> condition that make my emmc PHY work improperly accidentally. Anyway
-> more proof should be provided before I'am able to land patch to
-> fix/avoid the root cause. I'm doing it..
-> 
->>
->> I don't have a knowledge of rockchip...
->> but in my experience, there are some cases, not mmc core problem..
->>
->> 1. Exynos is using the gpio as clk/cmd/data line..and gpio has the driver strength value.
->> If driver strength is changed after resuming, it's possible to occur the error.
-> 
-> Yes, the related settings or configuration for PHY didn't change.
-> 
->>
->> 2. And glitch for I/O line..this loop has the delay..Just delay?
-> 
-> We have retryied 400K if failing to resume and will not break out if
-> still finding failure, but it doesn't help.
-> 
-> 
->>
->> So you can check the other problem... :)
->>
->> At Booting time, f_init can use 400K..but after resuming..f_init need to use 100K..hmm..strange..
->>
-> 
-> Agreed..
-> 
-> So let's come back to the topic -- Should we support downgrading f_init
-> after failing to resume just as what we do at the booting time? It's
-> possible that the enviroment changes like(noise, temperature, static)
-> will lead to the failure after resuming. Shouldn't the mechanism be more
-> robust to deal with these unexpected cases?  :)
-
-I think you also felt  that this patch is workaround. 
-Because it's not clearly why occurred the CRC error and resuming fails.
-(CRC error should be disappeared when clock is used to the lower value..)
-
-And I'm not sure that 100K is enough..If 100k also didn't work fine at resuming time, how we do?
-This issue is interesting..because it's possible to occur in real case...I have also seen the similar issue.
-But my solution also was workaround.  :(
-
-If it's more clearly than now, i can agree your patch..but now..i don't know what is correct. 
-I will listen Ulf and other guys's opinions..also yours. 
-
-Best Regards,
-Jaehoon Chung
-
-> 
-> 
->> Best Regards,
->> Jaehoon Chung
->>
->>>
->>> Any comments for this patch? :)
->>>
->>>> Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
->>>>
->>>> ---
->>>>
->>>> Changes in v2:
->>>> - remove mmc_power_off
->>>> - take f_min into consideration
->>>>
->>>>  drivers/mmc/core/mmc.c | 19 +++++++++++++++++--
->>>>  1 file changed, 17 insertions(+), 2 deletions(-)
->>>>
->>>> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
->>>> index 403b97b..a2891c1 100644
->>>> --- a/drivers/mmc/core/mmc.c
->>>> +++ b/drivers/mmc/core/mmc.c
->>>> @@ -1945,6 +1945,7 @@ static int mmc_suspend(struct mmc_host *host)
->>>>  static int _mmc_resume(struct mmc_host *host)
->>>>  {
->>>>      int err = 0;
->>>> +    int i;
->>>>
->>>>      BUG_ON(!host);
->>>>      BUG_ON(!host->card);
->>>> @@ -1954,8 +1955,22 @@ static int _mmc_resume(struct mmc_host *host)
->>>>      if (!mmc_card_suspended(host->card))
->>>>          goto out;
->>>>
->>>> -    mmc_power_up(host, host->card->ocr);
->>>> -    err = mmc_init_card(host, host->card->ocr, host->card);
->>>> +    /*
->>>> +     * Let's try to fallback the host->f_init
->>>> +     * if failing to init mmc card after resume.
->>>> +     */
->>>> +    for (i = 0; i < ARRAY_SIZE(freqs); i++) {
->>>> +        if (host->f_init < max(freqs[i], host->f_min))
->>>> +            continue;
->>>> +        else
->>>> +            host->f_init = max(freqs[i], host->f_min);
->>>> +
->>>> +        mmc_power_up(host, host->card->ocr);
->>>> +        err = mmc_init_card(host, host->card->ocr, host->card);
->>>> +        if (!err)
->>>> +            break;
->>>> +    }
->>>> +
->>>>      mmc_card_clr_suspended(host->card);
->>>>
->>>>  out:
->>>>
->>>
->>>
->>
->>
->>
->>
-> 
-> 
-
+SGkgSmFlaG9vbiwKCtTaIDIwMTYvOC8zIDE0OjU0LCBKYWVob29uIENodW5nINC0tcA6Cj4gSGkg
+U2hhd24sCj4KPiBPbiAwOC8wMy8yMDE2IDEwOjM1IEFNLCBTaGF3biBMaW4gd3JvdGU6Cj4+IEhp
+IEphZWhvb24sCj4+Cj4+INTaIDIwMTYvOC8yIDE4OjQ3LCBKYWVob29uIENodW5nINC0tcA6Cj4+
+PiBIaSBTaGF3biwKPj4+Cj4+PiBPbiAwOC8wMi8yMDE2IDA2OjA3IFBNLCBTaGF3biBMaW4gd3Jv
+dGU6Cj4+Pj4gSGkgVWxmLAo+Pj4+Cj4+Pj4g1NogMjAxNi83LzIwIDk6NTcsIFNoYXduIExpbiDQ
+tLXAOgo+Pj4+PiBXZSBvYnNlcnZlZCB0aGUgZmFpbHVyZSBvZiBpbml0aWFsaXppbmcgY2FyZCBh
+ZnRlciByZXN1bWUKPj4+Pj4gYWNjaWRlbnRhbGx5LiBJdCdzIGhhcmQgdG8gcmVwcm9kdWNlIGJ1
+dCB3ZSBkaWQgZ2V0IHJlcG9ydCBmcm9tCj4+Pj4+IHRoZSBzdXNwZW5kL3Jlc3VtZSB0ZXN0IG9m
+IG91ciBSSzMzOTkgbXAgdGVzdCBmYXJtIC4gVW5mb3J0dW5hdGVseSwKPj4+Pj4gd2Ugc3RpbGwg
+ZmFpbCB0byBmaWd1cmUgb3V0IHdoYXQgd2FzIGdvaW5nIHdyb25nIGF0IHRoYXQgdGltZS4KPj4+
+Pj4gQWxzbyB3ZSBjYW4ndCBhY2hpZXZlIGl0IGJ5IHJldHJ5aW5nIHRoZSBob3N0LT5mX2luaXQg
+d2l0aG91dCBmYWxsaW5nCj4+Pj4+IGJhY2sgaXQuIEJ1dCB0aGlzIHBhdGNoIHdpbGwgc29sdmUg
+dGhlIHByb2JsZW0gYXMgd2UgY291bGQgYWRkIHNvbWUgbG9nCj4+Pj4+IHRoZXJlIGFuZCBzZWUg
+dGhhdCB3ZSByZXN1bWUgdGhlIG1tYyBjYXJkIHN1Y2Nlc3NmdWxseSBhZnRlciBmYWxsaW5nCj4+
+Pj4+IGJhY2sgdGhlIGhvc3QtPmZfaW5pdC4gVGhlcmUgaXMgbm8gb2J2aW91cyBzaWRlIGVmZmVj
+dCBmb3VuZCwgc28gaXQgc2VlbXMKPj4+Pj4gdGhpcyBwYXRjaCB3aWxsIGltcHJvdmUgdGhlIHN0
+YWJpbGl0eS4KPj4+Pj4KPj4+Pj4gWyAgIDkzLjQwNTA4NV0gbW1jMTogdW5leHBlY3RlZCBzdGF0
+dXMgMHg4MDA5MDAgYWZ0ZXIgc3dpdGNoCj4+Pj4+IFsgICA5My40MDg0NzRdIG1tYzE6IHN3aXRj
+aCB0byBidXMgd2lkdGggMSBmYWlsZWQKPj4+Pj4gWyAgIDkzLjQwODQ4Ml0gbW1jMTogbW1jX3Nl
+bGVjdF9oczIwMCBmYWlsZWQsIGVycm9yIC0xMTAKPj4+Pj4gWyAgIDkzLjQwODQ5Ml0gbW1jMTog
+ZXJyb3IgLTExMCBkdXJpbmcgcmVzdW1lIChjYXJkIHdhcyByZW1vdmVkPykKPj4+Pj4gWyAgIDkz
+LjQwODcwNV0gUE06IHJlc3VtZSBvZiBkZXZpY2VzIGNvbXBsZXRlIGFmdGVyIDIxMy40NTMgbXNl
+Y3MKPj4+Pj4KPj4+Cj4+PiBTdGF0dXMgMHg4MDA5MDAgaXMgQ09NX0NSQ19FUlJPUi4uaXQgc2Vl
+bXMgdGhhdCBDUkMgY2hlY2sgZmFpbHMuCj4+PiBCdXQgaSBkb24ndCBrbm93IHdoYXQgaXMgcmVs
+YXRlZCB3aXRoICJmYWxsIGJhY2sgaG9zdC0+Zl9pbml0Ii4KPj4KPj4gWXVwLCBhY3R1YWxseSBp
+dCBhbHNvIGxvb2tzIHN0cmFuZ2UgdG8gbWUgdGhhdCB3ZSBzaG91bGQgZG93bmdyYWRlCj4+IHRo
+ZSBob3N0LT5mX2luaXQgd2hlbiByZXN1bWluZy4gQ1JDIGVycm9yIHNob3VsZG4ndCBvY2NvdXIg
+YXMgNDAwSwo+PiBjb3VsZCB3b3JrIGF0IGJvb3RpbmcgdGltZSwgYWxzbyB3ZSBjb3VsZCBzZWUg
+dGhlIEhTNDAwIHdvcmsgbm9ybWFsbHkKPj4gbGF0ZXIgd2hpY2ggbWFrZSBtZSBiZWxpZXZlIHRo
+YXQgaXQgc2hvdWxkbid0IGJlbG9uZyB0byBzaWduYWwgcHJvYmxlbSwKPj4gYnV0IHdlIG5lZWQg
+dG8gZmlndXJlIG91dCB3aHkgdGhlIGNvbnRyb2xsZXIgdGhpbmsgaXQgc2hvdWxkIGJlIGEgQ1JD
+Cj4+IGVycm9yLgo+Pgo+PiBUaGUgYmVzdCB3YXkgaXMgdG8gbWFrZSBpdCBlYXN5IHRvIGJlIHJl
+cHJvZHVjZWQgdGhhdCB3ZSBjb3VsZCBjaGVjayB0aGUKPj4gcGNiIHNpZ25hbCB0aGVyZSwgYW5k
+IEkgc3RpbGwgdHJ5IGl0IHRoZW4uIE9yIHRoZXJlIGlzIGEgSFcvQ2hpcAo+PiBjb25kaXRpb24g
+dGhhdCBtYWtlIG15IGVtbWMgUEhZIHdvcmsgaW1wcm9wZXJseSBhY2NpZGVudGFsbHkuIEFueXdh
+eQo+PiBtb3JlIHByb29mIHNob3VsZCBiZSBwcm92aWRlZCBiZWZvcmUgSSdhbSBhYmxlIHRvIGxh
+bmQgcGF0Y2ggdG8KPj4gZml4L2F2b2lkIHRoZSByb290IGNhdXNlLiBJJ20gZG9pbmcgaXQuLgo+
+Pgo+Pj4KPj4+IEkgZG9uJ3QgaGF2ZSBhIGtub3dsZWRnZSBvZiByb2NrY2hpcC4uLgo+Pj4gYnV0
+IGluIG15IGV4cGVyaWVuY2UsIHRoZXJlIGFyZSBzb21lIGNhc2VzLCBub3QgbW1jIGNvcmUgcHJv
+YmxlbS4uCj4+Pgo+Pj4gMS4gRXh5bm9zIGlzIHVzaW5nIHRoZSBncGlvIGFzIGNsay9jbWQvZGF0
+YSBsaW5lLi5hbmQgZ3BpbyBoYXMgdGhlIGRyaXZlciBzdHJlbmd0aCB2YWx1ZS4KPj4+IElmIGRy
+aXZlciBzdHJlbmd0aCBpcyBjaGFuZ2VkIGFmdGVyIHJlc3VtaW5nLCBpdCdzIHBvc3NpYmxlIHRv
+IG9jY3VyIHRoZSBlcnJvci4KPj4KPj4gWWVzLCB0aGUgcmVsYXRlZCBzZXR0aW5ncyBvciBjb25m
+aWd1cmF0aW9uIGZvciBQSFkgZGlkbid0IGNoYW5nZS4KPj4KPj4+Cj4+PiAyLiBBbmQgZ2xpdGNo
+IGZvciBJL08gbGluZS4udGhpcyBsb29wIGhhcyB0aGUgZGVsYXkuLkp1c3QgZGVsYXk/Cj4+Cj4+
+IFdlIGhhdmUgcmV0cnlpZWQgNDAwSyBpZiBmYWlsaW5nIHRvIHJlc3VtZSBhbmQgd2lsbCBub3Qg
+YnJlYWsgb3V0IGlmCj4+IHN0aWxsIGZpbmRpbmcgZmFpbHVyZSwgYnV0IGl0IGRvZXNuJ3QgaGVs
+cC4KPj4KPj4KPj4+Cj4+PiBTbyB5b3UgY2FuIGNoZWNrIHRoZSBvdGhlciBwcm9ibGVtLi4uIDop
+Cj4+Pgo+Pj4gQXQgQm9vdGluZyB0aW1lLCBmX2luaXQgY2FuIHVzZSA0MDBLLi5idXQgYWZ0ZXIg
+cmVzdW1pbmcuLmZfaW5pdCBuZWVkIHRvIHVzZSAxMDBLLi5obW0uLnN0cmFuZ2UuLgo+Pj4KPj4K
+Pj4gQWdyZWVkLi4KPj4KPj4gU28gbGV0J3MgY29tZSBiYWNrIHRvIHRoZSB0b3BpYyAtLSBTaG91
+bGQgd2Ugc3VwcG9ydCBkb3duZ3JhZGluZyBmX2luaXQKPj4gYWZ0ZXIgZmFpbGluZyB0byByZXN1
+bWUganVzdCBhcyB3aGF0IHdlIGRvIGF0IHRoZSBib290aW5nIHRpbWU/IEl0J3MKPj4gcG9zc2li
+bGUgdGhhdCB0aGUgZW52aXJvbWVudCBjaGFuZ2VzIGxpa2Uobm9pc2UsIHRlbXBlcmF0dXJlLCBz
+dGF0aWMpCj4+IHdpbGwgbGVhZCB0byB0aGUgZmFpbHVyZSBhZnRlciByZXN1bWluZy4gU2hvdWxk
+bid0IHRoZSBtZWNoYW5pc20gYmUgbW9yZQo+PiByb2J1c3QgdG8gZGVhbCB3aXRoIHRoZXNlIHVu
+ZXhwZWN0ZWQgY2FzZXM/ICA6KQo+Cj4gSSB0aGluayB5b3UgYWxzbyBmZWx0ICB0aGF0IHRoaXMg
+cGF0Y2ggaXMgd29ya2Fyb3VuZC4KCk1vcmUgb3IgbGVzcyA6KQoKPiBCZWNhdXNlIGl0J3Mgbm90
+IGNsZWFybHkgd2h5IG9jY3VycmVkIHRoZSBDUkMgZXJyb3IgYW5kIHJlc3VtaW5nIGZhaWxzLgoK
+eXVwLCB0aGF0IHN0b3AgbWUgZnJvbSBsYW5kaW5nICJyZWFsIiBwYXRjaCB0byBmaXggaXQuIEJ1
+dCB0aGluayB0d2ljZSwKdGhlcmUgYXJlIG1hbnkgdW5leHBlY3RlZCBjYXNlcyBjYW4gbWFrZSB0
+aGUgcmVzdW1yZSBmYWlsZWQuIFdlIG1heSBzZWUKZGlmZmVyZW50IGZfaW5pdCB3aGVuIGRvaW5n
+IHJlYm9vdCB0ZXN0IGZvciBhIGNlcnRhaW4KYm9hcmQgYXQgYm9vdGluZyB0aW1lKGFjdHVhbGx5
+IEkgZGlkIHNlZSBpdCBtYW55IG1hbnkgdGltZXMpLiBUaGF0IGlzCndoeSBJJ20gc3VyZSBpdCdz
+IHRoZSBzYW1lIGZvciByZXN1bWUgY2FzZS4KCj4gKENSQyBlcnJvciBzaG91bGQgYmUgZGlzYXBw
+ZWFyZWQgd2hlbiBjbG9jayBpcyB1c2VkIHRvIHRoZSBsb3dlciB2YWx1ZS4uKQo+Cj4gQW5kIEkn
+bSBub3Qgc3VyZSB0aGF0IDEwMEsgaXMgZW5vdWdoLi5JZiAxMDBrIGFsc28gZGlkbid0IHdvcmsg
+ZmluZSBhdCByZXN1bWluZyB0aW1lLCBob3cgd2UgZG8/Cj4gVGhpcyBpc3N1ZSBpcyBpbnRlcmVz
+dGluZy4uYmVjYXVzZSBpdCdzIHBvc3NpYmxlIHRvIG9jY3VyIGluIHJlYWwgY2FzZS4uLkkgaGF2
+ZSBhbHNvIHNlZW4gdGhlIHNpbWlsYXIgaXNzdWUuCj4gQnV0IG15IHNvbHV0aW9uIGFsc28gd2Fz
+IHdvcmthcm91bmQuICA6KAoKTmljZSB0byBoZWFyIHlvdSBoYXZlIHN1ZmZlcmVkIGZyb20gdGhl
+IHNpbWlsYXIgaXNzdWUsIG5vdCBqdXN0IG1lLgpDb3VsZCB5b3Ugc2hhcmUgeW91ciBXUiBzb2x1
+dGlvbj8gOikKCj4KPiBJZiBpdCdzIG1vcmUgY2xlYXJseSB0aGFuIG5vdywgaSBjYW4gYWdyZWUg
+eW91ciBwYXRjaC4uYnV0IG5vdy4uaSBkb24ndCBrbm93IHdoYXQgaXMgY29ycmVjdC4KPiBJIHdp
+bGwgbGlzdGVuIFVsZiBhbmQgb3RoZXIgZ3V5cydzIG9waW5pb25zLi5hbHNvIHlvdXJzLgo+Cj4g
+QmVzdCBSZWdhcmRzLAo+IEphZWhvb24gQ2h1bmcKPgo+Pgo+Pgo+Pj4gQmVzdCBSZWdhcmRzLAo+
+Pj4gSmFlaG9vbiBDaHVuZwo+Pj4KPj4+Pgo+Pj4+IEFueSBjb21tZW50cyBmb3IgdGhpcyBwYXRj
+aD8gOikKPj4+Pgo+Pj4+PiBTaWduZWQtb2ZmLWJ5OiBTaGF3biBMaW4gPHNoYXduLmxpbkByb2Nr
+LWNoaXBzLmNvbT4KPj4+Pj4KPj4+Pj4gLS0tCj4+Pj4+Cj4+Pj4+IENoYW5nZXMgaW4gdjI6Cj4+
+Pj4+IC0gcmVtb3ZlIG1tY19wb3dlcl9vZmYKPj4+Pj4gLSB0YWtlIGZfbWluIGludG8gY29uc2lk
+ZXJhdGlvbgo+Pj4+Pgo+Pj4+PiAgZHJpdmVycy9tbWMvY29yZS9tbWMuYyB8IDE5ICsrKysrKysr
+KysrKysrKysrLS0KPj4+Pj4gIDEgZmlsZSBjaGFuZ2VkLCAxNyBpbnNlcnRpb25zKCspLCAyIGRl
+bGV0aW9ucygtKQo+Pj4+Pgo+Pj4+PiBkaWZmIC0tZ2l0IGEvZHJpdmVycy9tbWMvY29yZS9tbWMu
+YyBiL2RyaXZlcnMvbW1jL2NvcmUvbW1jLmMKPj4+Pj4gaW5kZXggNDAzYjk3Yi4uYTI4OTFjMSAx
+MDA2NDQKPj4+Pj4gLS0tIGEvZHJpdmVycy9tbWMvY29yZS9tbWMuYwo+Pj4+PiArKysgYi9kcml2
+ZXJzL21tYy9jb3JlL21tYy5jCj4+Pj4+IEBAIC0xOTQ1LDYgKzE5NDUsNyBAQCBzdGF0aWMgaW50
+IG1tY19zdXNwZW5kKHN0cnVjdCBtbWNfaG9zdCAqaG9zdCkKPj4+Pj4gIHN0YXRpYyBpbnQgX21t
+Y19yZXN1bWUoc3RydWN0IG1tY19ob3N0ICpob3N0KQo+Pj4+PiAgewo+Pj4+PiAgICAgIGludCBl
+cnIgPSAwOwo+Pj4+PiArICAgIGludCBpOwo+Pj4+Pgo+Pj4+PiAgICAgIEJVR19PTighaG9zdCk7
+Cj4+Pj4+ICAgICAgQlVHX09OKCFob3N0LT5jYXJkKTsKPj4+Pj4gQEAgLTE5NTQsOCArMTk1NSwy
+MiBAQCBzdGF0aWMgaW50IF9tbWNfcmVzdW1lKHN0cnVjdCBtbWNfaG9zdCAqaG9zdCkKPj4+Pj4g
+ICAgICBpZiAoIW1tY19jYXJkX3N1c3BlbmRlZChob3N0LT5jYXJkKSkKPj4+Pj4gICAgICAgICAg
+Z290byBvdXQ7Cj4+Pj4+Cj4+Pj4+IC0gICAgbW1jX3Bvd2VyX3VwKGhvc3QsIGhvc3QtPmNhcmQt
+Pm9jcik7Cj4+Pj4+IC0gICAgZXJyID0gbW1jX2luaXRfY2FyZChob3N0LCBob3N0LT5jYXJkLT5v
+Y3IsIGhvc3QtPmNhcmQpOwo+Pj4+PiArICAgIC8qCj4+Pj4+ICsgICAgICogTGV0J3MgdHJ5IHRv
+IGZhbGxiYWNrIHRoZSBob3N0LT5mX2luaXQKPj4+Pj4gKyAgICAgKiBpZiBmYWlsaW5nIHRvIGlu
+aXQgbW1jIGNhcmQgYWZ0ZXIgcmVzdW1lLgo+Pj4+PiArICAgICAqLwo+Pj4+PiArICAgIGZvciAo
+aSA9IDA7IGkgPCBBUlJBWV9TSVpFKGZyZXFzKTsgaSsrKSB7Cj4+Pj4+ICsgICAgICAgIGlmICho
+b3N0LT5mX2luaXQgPCBtYXgoZnJlcXNbaV0sIGhvc3QtPmZfbWluKSkKPj4+Pj4gKyAgICAgICAg
+ICAgIGNvbnRpbnVlOwo+Pj4+PiArICAgICAgICBlbHNlCj4+Pj4+ICsgICAgICAgICAgICBob3N0
+LT5mX2luaXQgPSBtYXgoZnJlcXNbaV0sIGhvc3QtPmZfbWluKTsKPj4+Pj4gKwo+Pj4+PiArICAg
+ICAgICBtbWNfcG93ZXJfdXAoaG9zdCwgaG9zdC0+Y2FyZC0+b2NyKTsKPj4+Pj4gKyAgICAgICAg
+ZXJyID0gbW1jX2luaXRfY2FyZChob3N0LCBob3N0LT5jYXJkLT5vY3IsIGhvc3QtPmNhcmQpOwo+
+Pj4+PiArICAgICAgICBpZiAoIWVycikKPj4+Pj4gKyAgICAgICAgICAgIGJyZWFrOwo+Pj4+PiAr
+ICAgIH0KPj4+Pj4gKwo+Pj4+PiAgICAgIG1tY19jYXJkX2Nscl9zdXNwZW5kZWQoaG9zdC0+Y2Fy
+ZCk7Cj4+Pj4+Cj4+Pj4+ICBvdXQ6Cj4+Pj4+Cj4+Pj4KPj4+Pgo+Pj4KPj4+Cj4+Pgo+Pj4KPj4K
+Pj4KPgo+Cj4KPgoKCi0tIApCZXN0IFJlZ2FyZHMKU2hhd24gTGluCgoKX19fX19fX19fX19fX19f
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18KTGludXgtcm9ja2NoaXAgbWFpbGluZyBs
+aXN0CkxpbnV4LXJvY2tjaGlwQGxpc3RzLmluZnJhZGVhZC5vcmcKaHR0cDovL2xpc3RzLmluZnJh
+ZGVhZC5vcmcvbWFpbG1hbi9saXN0aW5mby9saW51eC1yb2NrY2hpcAo=
