@@ -1,207 +1,289 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH v3 2/2] mmc: host: sunxi: add support for A64 mmc
- controller
-Date: Wed, 03 Aug 2016 08:43:36 +0900
-Message-ID: <57A13028.2030506@samsung.com>
-References: <20160801151351.51854-1-icenowy@aosc.xyz>
- <CGME20160801151434epcas1p15f57862a238cf493445ed667f37a8a88@epcas1p1.samsung.com>
- <20160801151351.51854-3-icenowy@aosc.xyz>
+From: Kevin Hilman <khilman-rdvid1DuHRBWk0Htik3J/w@public.gmane.org>
+Subject: [PATCH 1/2] ARM64: dts: meson-gxbb: add MMC support
+Date: Tue,  2 Aug 2016 17:30:44 -0700
+Message-ID: <20160803003045.24980-1-khilman@baylibre.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-reply-to: <20160801151351.51854-3-icenowy@aosc.xyz>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Icenowy Zheng <icenowy@aosc.xyz>, Rob Herring <robh+dt@kernel.org>, Maxime Ripard <maxime.ripard@free-electrons.com>, Chen-Yu Tsai <wens@csie.org>, Ulf Hansson <ulf.hansson@linaro.org>, Hans de Goede <hdegoede@redhat.com>
-Cc: Mark Rutland <mark.rutland@arm.com>, devicetree@vger.kernel.org, Michal Suchanek <hramrach@gmail.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+Content-Transfer-Encoding: 8bit
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-amlogic-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
 
-Hi Icenowy,
+Add binding and basic support for the SD/eMMC controller on Amlogic
+S905/GXBB devices.
 
-On 08/02/2016 12:13 AM, Icenowy Zheng wrote:
-> A64 SoC features a MMC controller which need only the mod clock, and can
-> calibrate delay by itself. This patch adds support for the new MMC
-> controller IP core.
-> 
-> Signed-off-by: Icenowy Zheng <icenowy@aosc.xyz>
-> ---
-> Changes in v2:
-> - Rebased on Hans de Goede's patchset.
-> Changes in v3:
-> - Tidy up based on Hans de Goede's opinions.
-> 
->  drivers/mmc/host/sunxi-mmc.c | 66 ++++++++++++++++++++++++++++++++++++++++++++
->  1 file changed, 66 insertions(+)
-> 
-> diff --git a/drivers/mmc/host/sunxi-mmc.c b/drivers/mmc/host/sunxi-mmc.c
-> index 2ec91ce..3c26180 100644
-> --- a/drivers/mmc/host/sunxi-mmc.c
-> +++ b/drivers/mmc/host/sunxi-mmc.c
-> @@ -72,6 +72,13 @@
->  #define SDXC_REG_CHDA	(0x90)
->  #define SDXC_REG_CBDA	(0x94)
->  
-> +/* New registers introduced in A64 */
-> +#define SDXC_REG_A12A		0x058 /* SMC Auto Command 12 Register */
-> +#define SDXC_REG_SD_NTSR	0x05C /* SMC New Timing Set Register */
-> +#define SDXC_REG_DRV_DL		0x140 /* Drive Delay Control Register */
-> +#define SDXC_REG_SAMP_DL_REG	0x144 /* SMC sample delay control */
-> +#define SDXC_REG_DS_DL_REG	0x148 /* SMC data strobe delay control */
-> +
->  #define mmc_readl(host, reg) \
->  	readl((host)->reg_base + SDXC_##reg)
->  #define mmc_writel(host, reg, value) \
-> @@ -217,6 +224,15 @@
->  #define SDXC_CLK_50M_DDR	3
->  #define SDXC_CLK_50M_DDR_8BIT	4
->  
-> +#define SDXC_2X_TIMING_MODE	BIT(31)
-> +
-> +#define SDXC_CAL_START		BIT(15)
-> +#define SDXC_CAL_DONE		BIT(14)
-> +#define SDXC_CAL_DL_SHIFT	8
-> +#define SDXC_CAL_DL_SW_EN	BIT(7)
-> +#define SDXC_CAL_DL_SW_SHIFT	0
-> +#define SDXC_CAL_DL_MASK	0x3f
-> +
->  struct sunxi_mmc_clk_delay {
->  	u32 output;
->  	u32 sample;
-> @@ -232,6 +248,9 @@ struct sunxi_idma_des {
->  struct sunxi_mmc_cfg {
->  	u32 idma_des_size_bits;
->  	const struct sunxi_mmc_clk_delay *clk_delays;
-> +
-> +	/* does the IP block support autocalibration? */
-> +	bool can_calibrate;
->  };
->  
->  struct sunxi_mmc_host {
-> @@ -657,6 +676,38 @@ static int sunxi_mmc_oclk_onoff(struct sunxi_mmc_host *host, u32 oclk_en)
->  	return 0;
->  }
->  
-> +static int sunxi_mmc_calibrate(struct sunxi_mmc_host *host,
-> +			       struct mmc_ios *ios, int reg_off)
+Signed-off-by: Kevin Hilman <khilman-rdvid1DuHRBWk0Htik3J/w@public.gmane.org>
+---
+ .../devicetree/bindings/mmc/amlogic,meson-gxbb.txt | 29 +++++++++
+ .../arm64/boot/dts/amlogic/meson-gxbb-odroidc2.dts | 74 ++++++++++++++++++++++
+ arch/arm64/boot/dts/amlogic/meson-gxbb-p20x.dtsi   | 71 +++++++++++++++++++++
+ arch/arm64/boot/dts/amlogic/meson-gxbb.dtsi        | 30 ++++++++-
+ 4 files changed, 203 insertions(+), 1 deletion(-)
+ create mode 100644 Documentation/devicetree/bindings/mmc/amlogic,meson-gxbb.txt
 
-Where is mmc_ios structure used in this function?
-And why passing the reg_off?
+diff --git a/Documentation/devicetree/bindings/mmc/amlogic,meson-gxbb.txt b/Documentation/devicetree/bindings/mmc/amlogic,meson-gxbb.txt
+new file mode 100644
+index 000000000000..2bfdf47018c5
+--- /dev/null
++++ b/Documentation/devicetree/bindings/mmc/amlogic,meson-gxbb.txt
+@@ -0,0 +1,29 @@
++Amlogic SD / eMMC controller for S905/GXBB family SoCs
++
++The MMC 5.1 compliant host controller on Amlogic provides the
++interface for SD, eMMC and SDIO devices.
++
++This file documents the properties in addition to those available in
++the MMC core bindings, documented by mmc.txt.
++
++Required properties:
++- compatible : contains "amlogic,meson-gxbb"
++- clocks     : A list of phandle + clock-specifier pairs for the clocks listed in clock-names.
++- clock-names: Should contain the following:
++	"core" - Main peripheral bus clock
++	"clkin0" - Parent clock of internal mux
++	"clkin1" - Other parent clock of internal mux
++  The driver has an interal mux clock which switches between clkin0 and clkin1 depending on the
++  clock rate requested by the MMC core.
++
++Example:
++
++	sd_emmc_a: mmc@70000 {
++        	compatible = "amlogic,meson-gxbb-mmc";
++		reg = <0x0 0x70000 0x0 0x2000>;
++                interrupts = < GIC_SPI 216 IRQ_TYPE_EDGE_RISING>;
++		clocks = <&clkc CLKID_SD_EMMC_A>, <&xtal>, <&clkc CLKID_FCLK_DIV2>;
++		clock-names = "core", "clkin0", "clkin1";
++		pinctrl-0 = <&emmc_pins>;
++	};
++
+diff --git a/arch/arm64/boot/dts/amlogic/meson-gxbb-odroidc2.dts b/arch/arm64/boot/dts/amlogic/meson-gxbb-odroidc2.dts
+index 90a84c514d3d..a49f7f77eb34 100644
+--- a/arch/arm64/boot/dts/amlogic/meson-gxbb-odroidc2.dts
++++ b/arch/arm64/boot/dts/amlogic/meson-gxbb-odroidc2.dts
+@@ -73,6 +73,45 @@
+ 			default-state = "off";
+ 		};
+ 	};
++
++	mmc_iv: gpio-regulator {
++		compatible = "regulator-gpio";
++
++		regulator-name = "mmc-gpio-supply";
++		regulator-min-microvolt = <1800000>;
++		regulator-max-microvolt = <3300000>;
++
++		gpios = <&gpio_ao GPIOAO_3 GPIO_ACTIVE_HIGH>;
++		gpio-states = <0 1>;
++	
++		/*
++		 * Based on ODROID-C2 schematics:
++		 * signal name: IO_TF_3V3N_1V8, GPIOAO bit 3
++		 */
++		states = <3300000 0
++		          1800000 1>;
++	};
++
++	vcc1v8: regulator {
++		compatible = "regulator-fixed";
++		regulator-name = "VCC1V8";
++		regulator-min-microvolt = <1800000>;
++		regulator-max-microvolt = <1800000>;
++		regulator-always-on;
++	};
++
++	vcc3v3: regulator {
++		compatible = "regulator-fixed";
++		regulator-name = "VCC3V3";
++		regulator-min-microvolt = <3300000>;
++		regulator-max-microvolt = <3300000>;
++		regulator-always-on;
++	};
++
++	emmc_pwrseq: emmc-pwrseq {
++		compatible = "mmc-pwrseq-emmc";
++		reset-gpios = <&gpio BOOT_9 GPIO_ACTIVE_LOW>;
++	};
+ };
+ 
+ &uart_AO {
+@@ -87,3 +126,38 @@
+ 	pinctrl-names = "default";
+ };
+ 
++&sd_emmc_b {
++	status = "okay";
++	pinctrl-0 = <&sdcard_pins>;
++	pinctrl-names = "default";
++
++	bus-width = <4>;
++	cap-sd-highspeed;
++	max-frequency = <100000000>;
++
++	cd-gpios = <&gpio CARD_6 GPIO_ACTIVE_HIGH>;
++	cd-inverted;
++
++	vmmc-supply = <&mmc_iv>;
++	voltage-ranges = <1800 3300>;
++};
++
++&sd_emmc_c {
++	status = "okay";
++	pinctrl-0 = <&emmc_pins>;
++	pinctrl-names = "default";
++
++	bus-width = <8>;
++	cap-sd-highspeed;
++	max-frequency = <200000000>;
++	non-removable;
++	disable-wp;
++	cap-mmc-highspeed;
++	mmc-ddr-1_8v;
++	mmc-hs200-1_8v;
++
++	mmc-pwrseq = <&emmc_pwrseq>;
++	voltage-ranges = <1800 3300>;
++	vmmc-supply = <&vcc3v3>;
++	vmmcq-sumpply = <&vcc1v8>;
++};
+diff --git a/arch/arm64/boot/dts/amlogic/meson-gxbb-p20x.dtsi b/arch/arm64/boot/dts/amlogic/meson-gxbb-p20x.dtsi
+index f4f30f674b4c..63d95d136aec 100644
+--- a/arch/arm64/boot/dts/amlogic/meson-gxbb-p20x.dtsi
++++ b/arch/arm64/boot/dts/amlogic/meson-gxbb-p20x.dtsi
+@@ -57,6 +57,42 @@
+ 		device_type = "memory";
+ 		reg = <0x0 0x0 0x0 0x40000000>;
+ 	};
++
++	mmc_iv: gpio-regulator {
++		compatible = "regulator-gpio";
++
++		regulator-name = "mmc-gpio-supply";
++		regulator-min-microvolt = <1800000>;
++		regulator-max-microvolt = <3300000>;
++
++		gpios = <&gpio_ao GPIOAO_5 GPIO_ACTIVE_HIGH>;
++		gpio-states = <0 1>;
++
++		/* Based on P200 schematics, signal CARD_1.8V/3.3V_CTR */
++		states = <1800000 0
++		          3300000 1>;
++	};
++
++	vddio_boot: regulator {
++		compatible = "regulator-fixed";
++		regulator-name = "VDDIO_BOOT";
++		regulator-min-microvolt = <1800000>;
++		regulator-max-microvolt = <1800000>;
++		regulator-always-on;
++	};
++
++	vcc_3v3: regulator {
++		compatible = "regulator-fixed";
++		regulator-name = "VCC_3V3";
++		regulator-min-microvolt = <3300000>;
++		regulator-max-microvolt = <3300000>;
++		regulator-always-on;
++	};
++
++	emmc_pwrseq: emmc-pwrseq {
++		compatible = "mmc-pwrseq-emmc";
++		reset-gpios = <&gpio BOOT_9 GPIO_ACTIVE_LOW>;
++	};
+ };
+ 
+ /* This UART is brought out to the DB9 connector */
+@@ -72,3 +108,38 @@
+ 	pinctrl-names = "default";
+ };
+ 
++&sd_emmc_b {
++	status = "okay";
++	pinctrl-0 = <&sdcard_pins>;
++	pinctrl-names = "default";
++
++	bus-width = <4>;
++	cap-sd-highspeed;
++	max-frequency = <100000000>;
++
++	cd-gpios = <&gpio CARD_6 GPIO_ACTIVE_HIGH>;
++	cd-inverted;
++
++	voltage-ranges = <1800 3300>;
++	vmmc-supply = <&mmc_iv>;
++};
++
++&sd_emmc_c {
++	status = "okay";
++	pinctrl-0 = <&emmc_pins>;
++	pinctrl-names = "default";
++
++	bus-width = <8>;
++	cap-sd-highspeed;
++	cap-mmc-highspeed;
++	max-frequency = <200000000>;
++	non-removable;
++	disable-wp;
++	mmc-ddr-1_8v;
++	mmc-hs200-1_8v;
++
++	mmc-pwrseq = <&emmc_pwrseq>;
++	voltage-ranges = <1800 3300>;
++	vmmc-supply = <&vcc_3v3>;
++	vmmcq-sumpply = <&vddio_boot>;
++};
+diff --git a/arch/arm64/boot/dts/amlogic/meson-gxbb.dtsi b/arch/arm64/boot/dts/amlogic/meson-gxbb.dtsi
+index 35c8b2beb05c..2e48fa1e0364 100644
+--- a/arch/arm64/boot/dts/amlogic/meson-gxbb.dtsi
++++ b/arch/arm64/boot/dts/amlogic/meson-gxbb.dtsi
+@@ -247,7 +247,8 @@
+ 					mux {
+ 						groups = "emmc_nand_d07",
+ 						       "emmc_cmd",
+-						       "emmc_clk";
++						       "emmc_clk",
++						       "emmc_ds";
+ 						function = "emmc";
+ 					};
+ 				};
+@@ -330,6 +331,33 @@
+ 			#address-cells = <2>;
+ 			#size-cells = <2>;
+ 			ranges = <0x0 0x0 0x0 0xd0000000 0x0 0x200000>;
++
++			sd_emmc_a: mmc@70000 {
++		        	compatible = "amlogic,meson-gxbb-mmc";
++				reg = <0x0 0x70000 0x0 0x2000>;
++		                interrupts = < GIC_SPI 216 IRQ_TYPE_EDGE_RISING>;
++				clocks = <&clkc CLKID_SD_EMMC_A>, <&xtal>, <&clkc CLKID_FCLK_DIV2>;
++				clock-names = "core", "clkin0", "clkin1";
++				status = "disabled";
++			};
++
++			sd_emmc_b: mmc@72000 {
++		        	compatible = "amlogic,meson-gxbb-mmc";
++				reg = <0x0 0x72000 0x0 0x2000>;
++				interrupts = < GIC_SPI 217 IRQ_TYPE_EDGE_RISING >;
++				clocks = <&clkc CLKID_SD_EMMC_B>, <&xtal>, <&clkc CLKID_FCLK_DIV2>;
++				clock-names = "core", "clkin0", "clkin1";
++				status = "disabled";
++			};
++
++			sd_emmc_c: mmc@74000 {
++		        	compatible = "amlogic,meson-gxbb-mmc";
++				reg = <0x0 0x74000 0x0 0x2000>;
++		                interrupts = < GIC_SPI 218 IRQ_TYPE_EDGE_RISING >;
++				clocks = <&clkc CLKID_SD_EMMC_C>, <&xtal>, <&clkc CLKID_FCLK_DIV2>;
++				clock-names = "core", "clkin0", "clkin1";
++				status = "disabled";
++			};
+ 		};
+ 
+ 		ethmac: ethernet@c9410000 {
+-- 
+2.9.0
 
-> +{
-> +	u32 reg = readl(host->reg_base + reg_off);
-> +	u32 delay;
-
-delay doesn't need to use u32..
-reg_off is only passed with SDXC_REG_SAMP_DL_REG..this function doesn't reuse anywhere.
-
-> +
-> +	if (!host->cfg->can_calibrate)
-> +		return 0;
-> +
-> +	reg &= ~(SDXC_CAL_DL_MASK << SDXC_CAL_DL_SW_SHIFT);
-> +	reg &= ~SDXC_CAL_DL_SW_EN;
-> +
-> +	writel(reg | SDXC_CAL_START, host->reg_base + reg_off);
-> +
-> +	dev_dbg(mmc_dev(host->mmc), "calibration started\n");
-> +
-> +	while (!((reg = readl(host->reg_base + reg_off)) & SDXC_CAL_DONE))
-> +		cpu_relax();
-
-If never hit this condition, infinite loop? 
-
-> +
-> +	delay = (reg >> SDXC_CAL_DL_SHIFT) & SDXC_CAL_DL_MASK;
-> +
-> +	reg &= ~SDXC_CAL_START;
-> +	reg |= (delay << SDXC_CAL_DL_SW_SHIFT) | SDXC_CAL_DL_SW_EN;
-
-Something is strange. It seems to maintain the  delay value.
-
-reg &= ~(SDXC_CAL_START | (SDXC_CAL_DL_MASK << SDXC_CAL_DL_SHIFT));
-reg |= SDXC_CAL_DL_SW_EN; 
-
-is it same thing?
-
-> +
-> +	writel(reg, host->reg_base + reg_off);
-> +
-> +	dev_dbg(mmc_dev(host->mmc), "calibration ended, res is 0x%x\n", reg);
-
-s/res is/reg is ?
-
-> +
-> +	/* TODO: enable calibrate on sdc2 SDXC_REG_DS_DL_REG of A64 */
-> +	return 0;
-> +}
-> +
->  static int sunxi_mmc_clk_set_phase(struct sunxi_mmc_host *host,
->  				   struct mmc_ios *ios, u32 rate)
->  {
-> @@ -731,6 +782,10 @@ static int sunxi_mmc_clk_set_rate(struct sunxi_mmc_host *host,
->  	if (ret)
->  		return ret;
->  
-> +	ret = sunxi_mmc_calibrate(host, ios, SDXC_REG_SAMP_DL_REG);
-> +	if (ret)
-> +		return ret;
-
-Never enter this condition. sunxi_mmc_calibrate() is always returned 0.
-
-
-Best Regards,
-Jaehoon Chung
-
-> +
->  	return sunxi_mmc_oclk_onoff(host, 1);
->  }
->  
-> @@ -982,21 +1037,31 @@ static const struct sunxi_mmc_clk_delay sun9i_mmc_clk_delays[] = {
->  static const struct sunxi_mmc_cfg sun4i_a10_cfg = {
->  	.idma_des_size_bits = 13,
->  	.clk_delays = NULL,
-> +	.can_calibrate = false,
->  };
->  
->  static const struct sunxi_mmc_cfg sun5i_a13_cfg = {
->  	.idma_des_size_bits = 16,
->  	.clk_delays = NULL,
-> +	.can_calibrate = false,
->  };
->  
->  static const struct sunxi_mmc_cfg sun7i_a20_cfg = {
->  	.idma_des_size_bits = 16,
->  	.clk_delays = sunxi_mmc_clk_delays,
-> +	.can_calibrate = false,
->  };
->  
->  static const struct sunxi_mmc_cfg sun9i_a80_cfg = {
->  	.idma_des_size_bits = 16,
->  	.clk_delays = sun9i_mmc_clk_delays,
-> +	.can_calibrate = false,
-> +};
-> +
-> +static const struct sunxi_mmc_cfg sun50i_a64_cfg = {
-> +	.idma_des_size_bits = 16,
-> +	.clk_delays = NULL,
-> +	.can_calibrate = true,
->  };
->  
->  static const struct of_device_id sunxi_mmc_of_match[] = {
-> @@ -1004,6 +1069,7 @@ static const struct of_device_id sunxi_mmc_of_match[] = {
->  	{ .compatible = "allwinner,sun5i-a13-mmc", .data = &sun5i_a13_cfg },
->  	{ .compatible = "allwinner,sun7i-a20-mmc", .data = &sun7i_a20_cfg },
->  	{ .compatible = "allwinner,sun9i-a80-mmc", .data = &sun9i_a80_cfg },
-> +	{ .compatible = "allwinner,sun50i-a64-mmc", .data = &sun50i_a64_cfg },
->  	{ /* sentinel */ }
->  };
->  MODULE_DEVICE_TABLE(of, sunxi_mmc_of_match);
-> 
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
