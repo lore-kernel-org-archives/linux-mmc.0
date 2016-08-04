@@ -1,63 +1,304 @@
-From: Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
-Subject: [PATCH] mmc: core: need retune if error value is -EIO
-Date: Thu,  4 Aug 2016 16:30:59 +0800
-Message-ID: <1470299459-8478-1-git-send-email-shawn.lin@rock-chips.com>
+From: Rob Herring <robh@kernel.org>
+Subject: Re: [PATCH v2 1/2] ARM64: dts: meson-gxbb: add MMC support
+Date: Thu, 4 Aug 2016 13:15:56 -0500
+Message-ID: <20160804181556.GA13000@rob-hp-laptop>
+References: <20160803231843.23012-1-khilman@baylibre.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-rockchip>,
- <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-rockchip/>
-List-Post: <mailto:linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-List-Help: <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-rockchip>,
- <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
-Sender: "Linux-rockchip" <linux-rockchip-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-Errors-To: linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
-To: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Jaehoon Chung <jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-oi0-f65.google.com ([209.85.218.65]:35141 "EHLO
+	mail-oi0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1758758AbcHDSP6 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 4 Aug 2016 14:15:58 -0400
+Content-Disposition: inline
+In-Reply-To: <20160803231843.23012-1-khilman@baylibre.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Kevin Hilman <khilman@baylibre.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-amlogic@lists.infradead.org, linux-arm-kernel@lists.infradead.org, Victor Wan <victor.wan@amlogic.com>, Jerry Cao <jerry.cao@amlogic.com>, Xing Wu <xing.xu@amlogic.com>
 
-We need to do retune if receiving -EIO, otherwise we
-could see debug dump like:
+On Wed, Aug 03, 2016 at 04:18:42PM -0700, Kevin Hilman wrote:
+> Add binding and basic support for the SD/eMMC controller on Amlogic
+> S905/GXBB devices.
+> 
+> Signed-off-by: Kevin Hilman <khilman@baylibre.com>
+> ---
+>  .../devicetree/bindings/mmc/amlogic,meson-gxbb.txt | 29 +++++++++
+>  .../arm64/boot/dts/amlogic/meson-gxbb-odroidc2.dts | 74 ++++++++++++++++++++++
+>  arch/arm64/boot/dts/amlogic/meson-gxbb-p20x.dtsi   | 71 +++++++++++++++++++++
+>  arch/arm64/boot/dts/amlogic/meson-gxbb.dtsi        | 36 ++++++++++-
+>  4 files changed, 209 insertions(+), 1 deletion(-)
+>  create mode 100644 Documentation/devicetree/bindings/mmc/amlogic,meson-gxbb.txt
+> 
+> diff --git a/Documentation/devicetree/bindings/mmc/amlogic,meson-gxbb.txt b/Documentation/devicetree/bindings/mmc/amlogic,meson-gxbb.txt
+> new file mode 100644
+> index 000000000000..2bfdf47018c5
+> --- /dev/null
+> +++ b/Documentation/devicetree/bindings/mmc/amlogic,meson-gxbb.txt
+> @@ -0,0 +1,29 @@
+> +Amlogic SD / eMMC controller for S905/GXBB family SoCs
+> +
+> +The MMC 5.1 compliant host controller on Amlogic provides the
+> +interface for SD, eMMC and SDIO devices.
+> +
+> +This file documents the properties in addition to those available in
+> +the MMC core bindings, documented by mmc.txt.
+> +
+> +Required properties:
+> +- compatible : contains "amlogic,meson-gxbb"
+> +- clocks     : A list of phandle + clock-specifier pairs for the clocks listed in clock-names.
+> +- clock-names: Should contain the following:
+> +	"core" - Main peripheral bus clock
+> +	"clkin0" - Parent clock of internal mux
+> +	"clkin1" - Other parent clock of internal mux
+> +  The driver has an interal mux clock which switches between clkin0 and clkin1 depending on the
+> +  clock rate requested by the MMC core.
+> +
+> +Example:
+> +
+> +	sd_emmc_a: mmc@70000 {
+> +        	compatible = "amlogic,meson-gxbb-mmc";
+> +		reg = <0x0 0x70000 0x0 0x2000>;
+> +                interrupts = < GIC_SPI 216 IRQ_TYPE_EDGE_RISING>;
+> +		clocks = <&clkc CLKID_SD_EMMC_A>, <&xtal>, <&clkc CLKID_FCLK_DIV2>;
+> +		clock-names = "core", "clkin0", "clkin1";
+> +		pinctrl-0 = <&emmc_pins>;
+> +	};
+> +
+> diff --git a/arch/arm64/boot/dts/amlogic/meson-gxbb-odroidc2.dts b/arch/arm64/boot/dts/amlogic/meson-gxbb-odroidc2.dts
+> index 90a84c514d3d..f41d8fe5c706 100644
+> --- a/arch/arm64/boot/dts/amlogic/meson-gxbb-odroidc2.dts
+> +++ b/arch/arm64/boot/dts/amlogic/meson-gxbb-odroidc2.dts
+> @@ -73,6 +73,45 @@
+>  			default-state = "off";
+>  		};
+>  	};
+> +
+> +	mmc_iv: gpio-regulator {
+> +		compatible = "regulator-gpio";
+> +
+> +		regulator-name = "mmc-gpio-supply";
+> +		regulator-min-microvolt = <1800000>;
+> +		regulator-max-microvolt = <3300000>;
+> +
+> +		gpios = <&gpio_ao GPIOAO_3 GPIO_ACTIVE_HIGH>;
+> +		gpio-states = <0 1>;
+> +
+> +		/*
+> +		 * Based on ODROID-C2 schematics:
+> +		 * signal name: IO_TF_3V3N_1V8, GPIOAO bit 3
+> +		 */
+> +		states = <3300000 0
+> +			  1800000 1>;
 
-[ 89.057226] bcmsdh_sdmmc: Failed to Read byte F1:@0x1001f=ff, Err: -5
-[ 89.058811] bcmsdh_sdmmc: Failed to Read byte F1:@0x1001f=ff, Err: -5
-[ 89.059415] bcmsdh_sdmmc: Failed to Read byte F1:@0x1000e=ff, Err: -84
-[ 89.254248] dwmmc_rockchip fe310000.dwmmc: Successfully tuned phase to 199
-[ 89.273912] dhd_set_suspend: Remove extra suspend setting
-[ 89.274478] dhd_enable_packet_filter: enter, value = 0
-64 bytes from 112.90.83.112: icmp_seq=24 ttl=53 time=1321 ms
-64 bytes from 112.90.83.112: icmp_seq=25 ttl=53 time=319 ms
-64 bytes from 112.90.83.112: icmp_seq=26 ttl=53 time=69.8 ms
-64 bytes from 112.90.83.112: icmp_seq=27 ttl=53 time=37.5 ms
-...
+There are multiple things wrong in this node based on the regulator-gpio 
+documentation.
 
-In this case we see dw_mmc finally enter retune process, but
-if this patch is applied, we could save more time to make it
-work. Also many host drivers will generate -EIO, so this patch
-can also prevent them from failing to enter retune process.
+> +	};
+> +
+> +	vcc1v8: regulator {
+> +		compatible = "regulator-fixed";
+> +		regulator-name = "VCC1V8";
+> +		regulator-min-microvolt = <1800000>;
+> +		regulator-max-microvolt = <1800000>;
+> +		regulator-always-on;
+> +	};
+> +
+> +	vcc3v3: regulator {
+> +		compatible = "regulator-fixed";
+> +		regulator-name = "VCC3V3";
+> +		regulator-min-microvolt = <3300000>;
+> +		regulator-max-microvolt = <3300000>;
+> +		regulator-always-on;
+> +	};
+> +
+> +	emmc_pwrseq: emmc-pwrseq {
+> +		compatible = "mmc-pwrseq-emmc";
+> +		reset-gpios = <&gpio BOOT_9 GPIO_ACTIVE_LOW>;
+> +	};
+>  };
+>  
+>  &uart_AO {
+> @@ -87,3 +126,38 @@
+>  	pinctrl-names = "default";
+>  };
+>  
+> +&sd_emmc_b {
+> +	status = "okay";
+> +	pinctrl-0 = <&sdcard_pins>;
+> +	pinctrl-names = "default";
+> +
+> +	bus-width = <4>;
+> +	cap-sd-highspeed;
+> +	max-frequency = <100000000>;
+> +
+> +	cd-gpios = <&gpio CARD_6 GPIO_ACTIVE_HIGH>;
+> +	cd-inverted;
+> +
+> +	vmmc-supply = <&mmc_iv>;
+> +	voltage-ranges = <1800 3300>;
+> +};
+> +
+> +&sd_emmc_c {
+> +	status = "okay";
+> +	pinctrl-0 = <&emmc_pins>;
+> +	pinctrl-names = "default";
+> +
+> +	bus-width = <8>;
+> +	cap-sd-highspeed;
+> +	max-frequency = <200000000>;
+> +	non-removable;
+> +	disable-wp;
+> +	cap-mmc-highspeed;
+> +	mmc-ddr-1_8v;
+> +	mmc-hs200-1_8v;
+> +
+> +	mmc-pwrseq = <&emmc_pwrseq>;
+> +	voltage-ranges = <1800 3300>;
+> +	vmmc-supply = <&vcc3v3>;
+> +	vmmcq-sumpply = <&vcc1v8>;
+> +};
+> diff --git a/arch/arm64/boot/dts/amlogic/meson-gxbb-p20x.dtsi b/arch/arm64/boot/dts/amlogic/meson-gxbb-p20x.dtsi
+> index f4f30f674b4c..77698815943a 100644
+> --- a/arch/arm64/boot/dts/amlogic/meson-gxbb-p20x.dtsi
+> +++ b/arch/arm64/boot/dts/amlogic/meson-gxbb-p20x.dtsi
+> @@ -57,6 +57,42 @@
+>  		device_type = "memory";
+>  		reg = <0x0 0x0 0x0 0x40000000>;
+>  	};
+> +
+> +	mmc_iv: gpio-regulator {
+> +		compatible = "regulator-gpio";
+> +
+> +		regulator-name = "mmc-gpio-supply";
+> +		regulator-min-microvolt = <1800000>;
+> +		regulator-max-microvolt = <3300000>;
+> +
+> +		gpios = <&gpio_ao GPIOAO_5 GPIO_ACTIVE_HIGH>;
+> +		gpio-states = <0 1>;
+> +
+> +		/* Based on P200 schematics, signal CARD_1.8V/3.3V_CTR */
+> +		states = <1800000 0
+> +			  3300000 1>;
+> +	};
+> +
+> +	vddio_boot: regulator {
+[...]
+> +	vcc_3v3: regulator {
 
-Signed-off-by: Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
----
+This won't even compile as you have the same node name twice.
 
- drivers/mmc/core/core.c | 3 ++-
- 1 file changed, 2 insertions(+), 1 deletion(-)
-
-diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index e55cde6..18d0af5 100644
---- a/drivers/mmc/core/core.c
-+++ b/drivers/mmc/core/core.c
-@@ -133,7 +133,8 @@ void mmc_request_done(struct mmc_host *host, struct mmc_request *mrq)
- 	/* Flag re-tuning needed on CRC errors */
- 	if ((cmd->opcode != MMC_SEND_TUNING_BLOCK &&
- 	    cmd->opcode != MMC_SEND_TUNING_BLOCK_HS200) &&
--	    (err == -EILSEQ || (mrq->sbc && mrq->sbc->error == -EILSEQ) ||
-+	    (err == -EILSEQ || err == -EIO ||
-+	    (mrq->sbc && mrq->sbc->error == -EILSEQ) ||
- 	    (mrq->data && mrq->data->error == -EILSEQ) ||
- 	    (mrq->stop && mrq->stop->error == -EILSEQ)))
- 		mmc_retune_needed(host);
--- 
-2.3.7
+> +		compatible = "regulator-fixed";
+> +		regulator-name = "VCC_3V3";
+> +		regulator-min-microvolt = <3300000>;
+> +		regulator-max-microvolt = <3300000>;
+> +		regulator-always-on;
+> +	};
+> +
+> +	emmc_pwrseq: emmc-pwrseq {
+> +		compatible = "mmc-pwrseq-emmc";
+> +		reset-gpios = <&gpio BOOT_9 GPIO_ACTIVE_LOW>;
+> +	};
+>  };
+>  
+>  /* This UART is brought out to the DB9 connector */
+> @@ -72,3 +108,38 @@
+>  	pinctrl-names = "default";
+>  };
+>  
+> +&sd_emmc_b {
+> +	status = "okay";
+> +	pinctrl-0 = <&sdcard_pins>;
+> +	pinctrl-names = "default";
+> +
+> +	bus-width = <4>;
+> +	cap-sd-highspeed;
+> +	max-frequency = <100000000>;
+> +
+> +	cd-gpios = <&gpio CARD_6 GPIO_ACTIVE_HIGH>;
+> +	cd-inverted;
+> +
+> +	voltage-ranges = <1800 3300>;
+> +	vmmc-supply = <&mmc_iv>;
+> +};
+> +
+> +&sd_emmc_c {
+> +	status = "okay";
+> +	pinctrl-0 = <&emmc_pins>;
+> +	pinctrl-names = "default";
+> +
+> +	bus-width = <8>;
+> +	cap-sd-highspeed;
+> +	cap-mmc-highspeed;
+> +	max-frequency = <200000000>;
+> +	non-removable;
+> +	disable-wp;
+> +	mmc-ddr-1_8v;
+> +	mmc-hs200-1_8v;
+> +
+> +	mmc-pwrseq = <&emmc_pwrseq>;
+> +	voltage-ranges = <1800 3300>;
+> +	vmmc-supply = <&vcc_3v3>;
+> +	vmmcq-sumpply = <&vddio_boot>;
+> +};
+> diff --git a/arch/arm64/boot/dts/amlogic/meson-gxbb.dtsi b/arch/arm64/boot/dts/amlogic/meson-gxbb.dtsi
+> index 35c8b2beb05c..2c200f96467c 100644
+> --- a/arch/arm64/boot/dts/amlogic/meson-gxbb.dtsi
+> +++ b/arch/arm64/boot/dts/amlogic/meson-gxbb.dtsi
+> @@ -247,7 +247,8 @@
+>  					mux {
+>  						groups = "emmc_nand_d07",
+>  						       "emmc_cmd",
+> -						       "emmc_clk";
+> +						       "emmc_clk",
+> +						       "emmc_ds";
+>  						function = "emmc";
+>  					};
+>  				};
+> @@ -330,6 +331,39 @@
+>  			#address-cells = <2>;
+>  			#size-cells = <2>;
+>  			ranges = <0x0 0x0 0x0 0xd0000000 0x0 0x200000>;
+> +
+> +			sd_emmc_a: mmc@70000 {
+> +				compatible = "amlogic,meson-gxbb-mmc";
+> +				reg = <0x0 0x70000 0x0 0x2000>;
+> +				interrupts = <GIC_SPI 216 IRQ_TYPE_EDGE_RISING>;
+> +				clocks = <&clkc CLKID_SD_EMMC_A>,
+> +					 <&xtal>,
+> +					 <&clkc CLKID_FCLK_DIV2>;
+> +				clock-names = "core", "clkin0", "clkin1";
+> +				status = "disabled";
+> +			};
+> +
+> +			sd_emmc_b: mmc@72000 {
+> +				compatible = "amlogic,meson-gxbb-mmc";
+> +				reg = <0x0 0x72000 0x0 0x2000>;
+> +				interrupts = <GIC_SPI 217 IRQ_TYPE_EDGE_RISING>;
+> +				clocks = <&clkc CLKID_SD_EMMC_B>,
+> +					 <&xtal>,
+> +					 <&clkc CLKID_FCLK_DIV2>;
+> +				clock-names = "core", "clkin0", "clkin1";
+> +				status = "disabled";
+> +			};
+> +
+> +			sd_emmc_c: mmc@74000 {
+> +				compatible = "amlogic,meson-gxbb-mmc";
+> +				reg = <0x0 0x74000 0x0 0x2000>;
+> +				interrupts = <GIC_SPI 218 IRQ_TYPE_EDGE_RISING>;
+> +				clocks = <&clkc CLKID_SD_EMMC_C>,
+> +					 <&xtal>,
+> +					 <&clkc CLKID_FCLK_DIV2>;
+> +				clock-names = "core", "clkin0", "clkin1";
+> +				status = "disabled";
+> +			};
+>  		};
+>  
+>  		ethmac: ethernet@c9410000 {
+> -- 
+> 2.9.0
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe devicetree" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
