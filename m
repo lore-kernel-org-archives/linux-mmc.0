@@ -1,91 +1,61 @@
-From: Julia Lawall <julia.lawall@lip6.fr>
-Subject: Re: [PATCH 10/11] soc: ti: knav_qmss_queue: use
- of_property_read_bool
-Date: Fri, 5 Aug 2016 14:59:22 +0200 (CEST)
-Message-ID: <alpine.DEB.2.10.1608051456170.2999@hadrien>
-References: <1470387411-15879-1-git-send-email-Julia.Lawall@lip6.fr> <1470387411-15879-11-git-send-email-Julia.Lawall@lip6.fr> <c010a500-87ce-19ad-0109-f57eba3c6981@arm.com>
+From: Kevin Hilman <khilman@baylibre.com>
+Subject: Re: [PATCH v2 1/2] ARM64: dts: meson-gxbb: add MMC support
+Date: Fri, 05 Aug 2016 08:22:13 -0700
+Message-ID: <m2fuqjmeai.fsf@baylibre.com>
+References: <20160803231843.23012-1-khilman@baylibre.com>
+	<20160805034623.GA1883@excalibur.cnev.de>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <c010a500-87ce-19ad-0109-f57eba3c6981@arm.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Robin Murphy <robin.murphy@arm.com>
-Cc: Santosh Shilimkar <ssantosh@kernel.org>, kernel-janitors@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "robh+dt@kernel.org" <robh+dt@kernel.org>, linux-mmc@vger.kernel.org, linux-i2c@vger.kernel.org, linux-usb@vger.kernel.org, linuxppc-dev@lists.ozlabs.org, linux-gpio@vger.kernel.org, linux-serial@vger.kernel.org, alsa-devel@alsa-project.org
+Content-Type: text/plain
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-pa0-f47.google.com ([209.85.220.47]:35442 "EHLO
+	mail-pa0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1759932AbcHEPWQ (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 5 Aug 2016 11:22:16 -0400
+Received: by mail-pa0-f47.google.com with SMTP id iw10so93752094pac.2
+        for <linux-mmc@vger.kernel.org>; Fri, 05 Aug 2016 08:22:15 -0700 (PDT)
+In-Reply-To: <20160805034623.GA1883@excalibur.cnev.de> (Karsten Merker's
+	message of "Fri, 5 Aug 2016 05:46:23 +0200")
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Karsten Merker <merker@debian.org>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, Xing Wu <xing.xu@amlogic.com>, Victor Wan <victor.wan@amlogic.com>, linux-amlogic@lists.infradead.org, Jerry Cao <jerry.cao@amlogic.com>, linux-arm-kernel@lists.infradead.org
 
+Karsten Merker <merker@debian.org> writes:
 
+> On Wed, Aug 03, 2016 at 04:18:42PM -0700, Kevin Hilman wrote:
+>
+>> Add binding and basic support for the SD/eMMC controller on Amlogic
+>> S905/GXBB devices.
+>> 
+>> Signed-off-by: Kevin Hilman <khilman@baylibre.com>
+>> ---
+>>  .../devicetree/bindings/mmc/amlogic,meson-gxbb.txt | 29 +++++++++
+>>  .../arm64/boot/dts/amlogic/meson-gxbb-odroidc2.dts | 74 ++++++++++++++++++++++
+>>  arch/arm64/boot/dts/amlogic/meson-gxbb-p20x.dtsi   | 71 +++++++++++++++++++++
+>>  arch/arm64/boot/dts/amlogic/meson-gxbb.dtsi        | 36 ++++++++++-
+>>  4 files changed, 209 insertions(+), 1 deletion(-)
+>>  create mode 100644 Documentation/devicetree/bindings/mmc/amlogic,meson-gxbb.txt
+>> 
+>> diff --git a/Documentation/devicetree/bindings/mmc/amlogic,meson-gxbb.txt b/Documentation/devicetree/bindings/mmc/amlogic,meson-gxbb.txt
+>> new file mode 100644
+>> index 000000000000..2bfdf47018c5
+>> --- /dev/null
+>> +++ b/Documentation/devicetree/bindings/mmc/amlogic,meson-gxbb.txt
+>> @@ -0,0 +1,29 @@
+>> +Amlogic SD / eMMC controller for S905/GXBB family SoCs
+>> +
+>> +The MMC 5.1 compliant host controller on Amlogic provides the
+>> +interface for SD, eMMC and SDIO devices.
+>> +
+>> +This file documents the properties in addition to those available in
+>> +the MMC core bindings, documented by mmc.txt.
+>> +
+>> +Required properties:
+>> +- compatible : contains "amlogic,meson-gxbb"
+>
+> I assume that should be "amlogic,meson-gxbb-mmc" instead of
+> "amlogic,meson-gxbb", shouldn't it?
 
-On Fri, 5 Aug 2016, Robin Murphy wrote:
+Correct, thanks for the review.
 
-> Hi Julia,
->
-> On 05/08/16 09:56, Julia Lawall wrote:
-> > Use of_property_read_bool to check for the existence of a property.
->
-> This caught my eye since Rob told me off for doing the same recently[1].
->
-> > The semantic patch that makes this change is as follows:
-> > (http://coccinelle.lip6.fr/)
-> >
-> > // <smpl>
-> > @@
-> > expression e1,e2;
-> > statement S2,S1;
-> > @@
-> > -       if (of_get_property(e1,e2,NULL))
-> > +       if (of_property_read_bool(e1,e2))
-> >         S1 else S2
-> > // </smpl>
-> >
-> > Signed-off-by: Julia Lawall <Julia.Lawall@lip6.fr>
-> >
-> > ---
-> >  drivers/soc/ti/knav_qmss_queue.c |    2 +-
-> >  1 file changed, 1 insertion(+), 1 deletion(-)
-> >
-> > diff --git a/drivers/soc/ti/knav_qmss_queue.c b/drivers/soc/ti/knav_qmss_queue.c
-> > index b73e353..56b5d7c 100644
-> > --- a/drivers/soc/ti/knav_qmss_queue.c
-> > +++ b/drivers/soc/ti/knav_qmss_queue.c
-> > @@ -1240,7 +1240,7 @@ static int knav_setup_queue_range(struct knav_device *kdev,
-> >  	if (of_get_property(node, "qalloc-by-id", NULL))
->
-> According to the binding, "qalloc-by-id" _is_ a boolean property, so
-> this one really does deserve to be of_property_read_bool()...
->
-> >  		range->flags |= RANGE_RESERVED;
-> >
-> > -	if (of_get_property(node, "accumulator", NULL)) {
-> > +	if (of_property_read_bool(node, "accumulator")) {
->
-> ...whereas "accumulator" must have a value, so this isn't technically
-> appropriate. In general, most of these "if the property exists, read the
-> property and do stuff" checks are probably a sign of code that could be
-> simplified by refactoring the "do stuff" step to just specifically
-> handle the "read the property" step returning -EINVAL when it's not present.
-
-Thanks for the very helpful feedback.  I will rethink the patch set in
-light of this information.
-
-julia
-
-> Robin.
->
-> [1]:https://www.mail-archive.com/iommu@lists.linux-foundation.org/msg13375.html
->
-> >  		ret = knav_init_acc_range(kdev, node, range);
-> >  		if (ret < 0) {
-> >  			devm_kfree(dev, range);
-> >
-> >
-> > _______________________________________________
-> > linux-arm-kernel mailing list
-> > linux-arm-kernel@lists.infradead.org
-> > http://lists.infradead.org/mailman/listinfo/linux-arm-kernel
-> >
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe kernel-janitors" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
+Kevin
