@@ -1,189 +1,80 @@
-From: Icenowy Zheng <icenowy@aosc.xyz>
-Subject: [PATCH v4 2/2] mmc: host: sunxi: add support for A64 mmc controller
-Date: Fri,  5 Aug 2016 10:57:15 +0800
-Message-ID: <20160805025715.5306-3-icenowy@aosc.xyz>
-References: <20160805025715.5306-1-icenowy@aosc.xyz>
+From: Karsten Merker <merker-8fiUuRrzOP0dnm+yROfE0A@public.gmane.org>
+Subject: Re: [PATCH v2 1/2] ARM64: dts: meson-gxbb: add MMC support
+Date: Fri, 5 Aug 2016 05:46:23 +0200
+Message-ID: <20160805034623.GA1883@excalibur.cnev.de>
+References: <20160803231843.23012-1-khilman@baylibre.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <20160805025715.5306-1-icenowy@aosc.xyz>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Rob Herring <robh+dt@kernel.org>, Maxime Ripard <maxime.ripard@free-electrons.com>, Chen-Yu Tsai <wens@csie.org>, Ulf Hansson <ulf.hansson@linaro.org>, Hans de Goede <hdegoede@redhat.com>
-Cc: Mark Rutland <mark.rutland@arm.com>, devicetree@vger.kernel.org, Michal Suchanek <hramrach@gmail.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Jaehoon Chung <jh80.chung@samsung.com>, Icenowy Zheng <icenowy@aosc.xyz>, linux-arm-kernel@lists.infradead.org
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <20160803231843.23012-1-khilman-rdvid1DuHRBWk0Htik3J/w@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Kevin Hilman <khilman-rdvid1DuHRBWk0Htik3J/w@public.gmane.org>
+Cc: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Xing Wu <xing.xu-LpR1jeaWuhtBDgjK7y7TUQ@public.gmane.org>, Victor Wan <victor.wan-LpR1jeaWuhtBDgjK7y7TUQ@public.gmane.org>, linux-amlogic-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, Jerry Cao <jerry.cao-LpR1jeaWuhtBDgjK7y7TUQ@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
 
-A64 SoC features a MMC controller which need only the mod clock, and can
-calibrate delay by itself. This patch adds support for the new MMC
-controller IP core.
+On Wed, Aug 03, 2016 at 04:18:42PM -0700, Kevin Hilman wrote:
 
-Signed-off-by: Icenowy Zheng <icenowy@aosc.xyz>
----
-Changes in v2:
-- Rebased on Hans de Goede's patchset.
-Changes in v3:
-- Tidy up based on Hans de Goede's opinions.
-Changes in v4:
-- Add timeout for calibration.
-- Removed an unused argument from sunxi_mmc_calibrate
+> Add binding and basic support for the SD/eMMC controller on Amlogic
+> S905/GXBB devices.
+> 
+> Signed-off-by: Kevin Hilman <khilman-rdvid1DuHRBWk0Htik3J/w@public.gmane.org>
+> ---
+>  .../devicetree/bindings/mmc/amlogic,meson-gxbb.txt | 29 +++++++++
+>  .../arm64/boot/dts/amlogic/meson-gxbb-odroidc2.dts | 74 ++++++++++++++++++++++
+>  arch/arm64/boot/dts/amlogic/meson-gxbb-p20x.dtsi   | 71 +++++++++++++++++++++
+>  arch/arm64/boot/dts/amlogic/meson-gxbb.dtsi        | 36 ++++++++++-
+>  4 files changed, 209 insertions(+), 1 deletion(-)
+>  create mode 100644 Documentation/devicetree/bindings/mmc/amlogic,meson-gxbb.txt
+> 
+> diff --git a/Documentation/devicetree/bindings/mmc/amlogic,meson-gxbb.txt b/Documentation/devicetree/bindings/mmc/amlogic,meson-gxbb.txt
+> new file mode 100644
+> index 000000000000..2bfdf47018c5
+> --- /dev/null
+> +++ b/Documentation/devicetree/bindings/mmc/amlogic,meson-gxbb.txt
+> @@ -0,0 +1,29 @@
+> +Amlogic SD / eMMC controller for S905/GXBB family SoCs
+> +
+> +The MMC 5.1 compliant host controller on Amlogic provides the
+> +interface for SD, eMMC and SDIO devices.
+> +
+> +This file documents the properties in addition to those available in
+> +the MMC core bindings, documented by mmc.txt.
+> +
+> +Required properties:
+> +- compatible : contains "amlogic,meson-gxbb"
 
- drivers/mmc/host/sunxi-mmc.c | 79 ++++++++++++++++++++++++++++++++++++++++++++
- 1 file changed, 79 insertions(+)
+I assume that should be "amlogic,meson-gxbb-mmc" instead of
+"amlogic,meson-gxbb", shouldn't it?
 
-diff --git a/drivers/mmc/host/sunxi-mmc.c b/drivers/mmc/host/sunxi-mmc.c
-index 2ec91ce..90a20c8 100644
---- a/drivers/mmc/host/sunxi-mmc.c
-+++ b/drivers/mmc/host/sunxi-mmc.c
-@@ -72,6 +72,13 @@
- #define SDXC_REG_CHDA	(0x90)
- #define SDXC_REG_CBDA	(0x94)
- 
-+/* New registers introduced in A64 */
-+#define SDXC_REG_A12A		0x058 /* SMC Auto Command 12 Register */
-+#define SDXC_REG_SD_NTSR	0x05C /* SMC New Timing Set Register */
-+#define SDXC_REG_DRV_DL		0x140 /* Drive Delay Control Register */
-+#define SDXC_REG_SAMP_DL_REG	0x144 /* SMC sample delay control */
-+#define SDXC_REG_DS_DL_REG	0x148 /* SMC data strobe delay control */
-+
- #define mmc_readl(host, reg) \
- 	readl((host)->reg_base + SDXC_##reg)
- #define mmc_writel(host, reg, value) \
-@@ -217,6 +224,17 @@
- #define SDXC_CLK_50M_DDR	3
- #define SDXC_CLK_50M_DDR_8BIT	4
- 
-+#define SDXC_2X_TIMING_MODE	BIT(31)
-+
-+#define SDXC_CAL_START		BIT(15)
-+#define SDXC_CAL_DONE		BIT(14)
-+#define SDXC_CAL_DL_SHIFT	8
-+#define SDXC_CAL_DL_SW_EN	BIT(7)
-+#define SDXC_CAL_DL_SW_SHIFT	0
-+#define SDXC_CAL_DL_MASK	0x3f
-+
-+#define SDXC_CAL_TIMEOUT	3	/* in seconds, 3s is enough*/
-+
- struct sunxi_mmc_clk_delay {
- 	u32 output;
- 	u32 sample;
-@@ -232,6 +250,9 @@ struct sunxi_idma_des {
- struct sunxi_mmc_cfg {
- 	u32 idma_des_size_bits;
- 	const struct sunxi_mmc_clk_delay *clk_delays;
-+
-+	/* does the IP block support autocalibration? */
-+	bool can_calibrate;
- };
- 
- struct sunxi_mmc_host {
-@@ -657,6 +678,47 @@ static int sunxi_mmc_oclk_onoff(struct sunxi_mmc_host *host, u32 oclk_en)
- 	return 0;
- }
- 
-+static int sunxi_mmc_calibrate(struct sunxi_mmc_host *host, int reg_off)
-+{
-+	u32 reg = readl(host->reg_base + reg_off);
-+	u32 delay;
-+	unsigned long timeout;
-+
-+	if (!host->cfg->can_calibrate)
-+		return 0;
-+
-+	reg &= ~(SDXC_CAL_DL_MASK << SDXC_CAL_DL_SW_SHIFT);
-+	reg &= ~SDXC_CAL_DL_SW_EN;
-+
-+	writel(reg | SDXC_CAL_START, host->reg_base + reg_off);
-+
-+	dev_dbg(mmc_dev(host->mmc), "calibration started\n");
-+
-+	timeout = jiffies + HZ * SDXC_CAL_TIMEOUT;
-+
-+	while (!((reg = readl(host->reg_base + reg_off)) & SDXC_CAL_DONE)) {
-+		if (time_before(jiffies, timeout))
-+			cpu_relax();
-+		else {
-+			reg &= ~SDXC_CAL_START;
-+			writel(reg, host->reg_base + reg_off);
-+
-+			return -ETIMEDOUT;
-+		}
-+	}
-+
-+	delay = (reg >> SDXC_CAL_DL_SHIFT) & SDXC_CAL_DL_MASK;
-+
-+	reg &= ~SDXC_CAL_START;
-+	reg |= (delay << SDXC_CAL_DL_SW_SHIFT) | SDXC_CAL_DL_SW_EN;
-+
-+	writel(reg, host->reg_base + reg_off);
-+
-+	dev_dbg(mmc_dev(host->mmc), "calibration ended, reg is 0x%x\n", reg);
-+
-+	return 0;
-+}
-+
- static int sunxi_mmc_clk_set_phase(struct sunxi_mmc_host *host,
- 				   struct mmc_ios *ios, u32 rate)
- {
-@@ -731,6 +793,12 @@ static int sunxi_mmc_clk_set_rate(struct sunxi_mmc_host *host,
- 	if (ret)
- 		return ret;
- 
-+	ret = sunxi_mmc_calibrate(host, SDXC_REG_SAMP_DL_REG);
-+	if (ret)
-+		return ret;
-+
-+	/* TODO: enable calibrate on sdc2 SDXC_REG_DS_DL_REG of A64 */
-+
- 	return sunxi_mmc_oclk_onoff(host, 1);
- }
- 
-@@ -982,21 +1050,31 @@ static const struct sunxi_mmc_clk_delay sun9i_mmc_clk_delays[] = {
- static const struct sunxi_mmc_cfg sun4i_a10_cfg = {
- 	.idma_des_size_bits = 13,
- 	.clk_delays = NULL,
-+	.can_calibrate = false,
- };
- 
- static const struct sunxi_mmc_cfg sun5i_a13_cfg = {
- 	.idma_des_size_bits = 16,
- 	.clk_delays = NULL,
-+	.can_calibrate = false,
- };
- 
- static const struct sunxi_mmc_cfg sun7i_a20_cfg = {
- 	.idma_des_size_bits = 16,
- 	.clk_delays = sunxi_mmc_clk_delays,
-+	.can_calibrate = false,
- };
- 
- static const struct sunxi_mmc_cfg sun9i_a80_cfg = {
- 	.idma_des_size_bits = 16,
- 	.clk_delays = sun9i_mmc_clk_delays,
-+	.can_calibrate = false,
-+};
-+
-+static const struct sunxi_mmc_cfg sun50i_a64_cfg = {
-+	.idma_des_size_bits = 16,
-+	.clk_delays = NULL,
-+	.can_calibrate = true,
- };
- 
- static const struct of_device_id sunxi_mmc_of_match[] = {
-@@ -1004,6 +1082,7 @@ static const struct of_device_id sunxi_mmc_of_match[] = {
- 	{ .compatible = "allwinner,sun5i-a13-mmc", .data = &sun5i_a13_cfg },
- 	{ .compatible = "allwinner,sun7i-a20-mmc", .data = &sun7i_a20_cfg },
- 	{ .compatible = "allwinner,sun9i-a80-mmc", .data = &sun9i_a80_cfg },
-+	{ .compatible = "allwinner,sun50i-a64-mmc", .data = &sun50i_a64_cfg },
- 	{ /* sentinel */ }
- };
- MODULE_DEVICE_TABLE(of, sunxi_mmc_of_match);
+> +- clocks     : A list of phandle + clock-specifier pairs for the clocks listed in clock-names.
+> +- clock-names: Should contain the following:
+> +	"core" - Main peripheral bus clock
+> +	"clkin0" - Parent clock of internal mux
+> +	"clkin1" - Other parent clock of internal mux
+> +  The driver has an interal mux clock which switches between clkin0 and clkin1 depending on the
+> +  clock rate requested by the MMC core.
+> +
+> +Example:
+> +
+> +	sd_emmc_a: mmc@70000 {
+> +        	compatible = "amlogic,meson-gxbb-mmc";
+> +		reg = <0x0 0x70000 0x0 0x2000>;
+> +                interrupts = < GIC_SPI 216 IRQ_TYPE_EDGE_RISING>;
+> +		clocks = <&clkc CLKID_SD_EMMC_A>, <&xtal>, <&clkc CLKID_FCLK_DIV2>;
+> +		clock-names = "core", "clkin0", "clkin1";
+> +		pinctrl-0 = <&emmc_pins>;
+> +	};
+> +
+   
+Regards,
+Karsten
 -- 
-2.9.2
+Gem. Par. 28 Abs. 4 Bundesdatenschutzgesetz widerspreche ich der Nutzung
+sowie der Weitergabe meiner personenbezogenen Daten für Zwecke der
+Werbung sowie der Markt- oder Meinungsforschung.
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
