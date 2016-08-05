@@ -1,80 +1,164 @@
-From: Karsten Merker <merker-8fiUuRrzOP0dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH v2 1/2] ARM64: dts: meson-gxbb: add MMC support
-Date: Fri, 5 Aug 2016 05:46:23 +0200
-Message-ID: <20160805034623.GA1883@excalibur.cnev.de>
-References: <20160803231843.23012-1-khilman@baylibre.com>
+From: Ritesh Harjani <riteshh@codeaurora.org>
+Subject: Re: [PATCH RFC 5/8] mmc: sdhci: Add check_power_status host operation
+Date: Fri, 5 Aug 2016 10:18:23 +0530
+Message-ID: <3eda5b96-f9b2-fee8-9cb4-75339a5a7114@codeaurora.org>
+References: <1467199233-20506-1-git-send-email-riteshh@codeaurora.org>
+ <1467199233-20506-6-git-send-email-riteshh@codeaurora.org>
+ <5774B592.1080106@intel.com>
+ <eda00fcc-8486-c7df-e536-9474e1e7f0d6@codeaurora.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8bit
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <20160803231843.23012-1-khilman-rdvid1DuHRBWk0Htik3J/w@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Kevin Hilman <khilman-rdvid1DuHRBWk0Htik3J/w@public.gmane.org>
-Cc: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Xing Wu <xing.xu-LpR1jeaWuhtBDgjK7y7TUQ@public.gmane.org>, Victor Wan <victor.wan-LpR1jeaWuhtBDgjK7y7TUQ@public.gmane.org>, linux-amlogic-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, Jerry Cao <jerry.cao-LpR1jeaWuhtBDgjK7y7TUQ@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from smtp.codeaurora.org ([198.145.29.96]:38880 "EHLO
+	smtp.codeaurora.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751447AbcHEEsb (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Fri, 5 Aug 2016 00:48:31 -0400
+In-Reply-To: <eda00fcc-8486-c7df-e536-9474e1e7f0d6@codeaurora.org>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Adrian Hunter <adrian.hunter@intel.com>, ulf.hansson@linaro.org, linux-mmc@vger.kernel.org
+Cc: linux-arm-msm@vger.kernel.org, asutoshd@codeaurora.org, kdorfman@codeaurora.org, david.griego@linaro.org, stummala@codeaurora.org, venkatg@codeaurora.org
 
-On Wed, Aug 03, 2016 at 04:18:42PM -0700, Kevin Hilman wrote:
+Hi,
 
-> Add binding and basic support for the SD/eMMC controller on Amlogic
-> S905/GXBB devices.
-> 
-> Signed-off-by: Kevin Hilman <khilman-rdvid1DuHRBWk0Htik3J/w@public.gmane.org>
-> ---
->  .../devicetree/bindings/mmc/amlogic,meson-gxbb.txt | 29 +++++++++
->  .../arm64/boot/dts/amlogic/meson-gxbb-odroidc2.dts | 74 ++++++++++++++++++++++
->  arch/arm64/boot/dts/amlogic/meson-gxbb-p20x.dtsi   | 71 +++++++++++++++++++++
->  arch/arm64/boot/dts/amlogic/meson-gxbb.dtsi        | 36 ++++++++++-
->  4 files changed, 209 insertions(+), 1 deletion(-)
->  create mode 100644 Documentation/devicetree/bindings/mmc/amlogic,meson-gxbb.txt
-> 
-> diff --git a/Documentation/devicetree/bindings/mmc/amlogic,meson-gxbb.txt b/Documentation/devicetree/bindings/mmc/amlogic,meson-gxbb.txt
-> new file mode 100644
-> index 000000000000..2bfdf47018c5
-> --- /dev/null
-> +++ b/Documentation/devicetree/bindings/mmc/amlogic,meson-gxbb.txt
-> @@ -0,0 +1,29 @@
-> +Amlogic SD / eMMC controller for S905/GXBB family SoCs
-> +
-> +The MMC 5.1 compliant host controller on Amlogic provides the
-> +interface for SD, eMMC and SDIO devices.
-> +
-> +This file documents the properties in addition to those available in
-> +the MMC core bindings, documented by mmc.txt.
-> +
-> +Required properties:
-> +- compatible : contains "amlogic,meson-gxbb"
+Kindly drop this patch series, since recently there was another version 
+of pwr_irq support added to upstream.
 
-I assume that should be "amlogic,meson-gxbb-mmc" instead of
-"amlogic,meson-gxbb", shouldn't it?
+https://lkml.org/lkml/2016/6/24/416
 
-> +- clocks     : A list of phandle + clock-specifier pairs for the clocks listed in clock-names.
-> +- clock-names: Should contain the following:
-> +	"core" - Main peripheral bus clock
-> +	"clkin0" - Parent clock of internal mux
-> +	"clkin1" - Other parent clock of internal mux
-> +  The driver has an interal mux clock which switches between clkin0 and clkin1 depending on the
-> +  clock rate requested by the MMC core.
-> +
-> +Example:
-> +
-> +	sd_emmc_a: mmc@70000 {
-> +        	compatible = "amlogic,meson-gxbb-mmc";
-> +		reg = <0x0 0x70000 0x0 0x2000>;
-> +                interrupts = < GIC_SPI 216 IRQ_TYPE_EDGE_RISING>;
-> +		clocks = <&clkc CLKID_SD_EMMC_A>, <&xtal>, <&clkc CLKID_FCLK_DIV2>;
-> +		clock-names = "core", "clkin0", "clkin1";
-> +		pinctrl-0 = <&emmc_pins>;
-> +	};
-> +
-   
-Regards,
-Karsten
--- 
-Gem. Par. 28 Abs. 4 Bundesdatenschutzgesetz widerspreche ich der Nutzung
-sowie der Weitergabe meiner personenbezogenen Daten für Zwecke der
-Werbung sowie der Markt- oder Meinungsforschung.
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
+Regards
+Ritesh
+
+On 6/30/2016 7:02 PM, Ritesh Harjani wrote:
+> Hi Adrian,
+>
+>
+> On 6/30/2016 11:30 AM, Adrian Hunter wrote:
+>> On 29/06/16 14:20, Ritesh Harjani wrote:
+>>> From: Sahitya Tummala <stummala@codeaurora.org>
+>>>
+>>> MSM SDHCI doesn't control power as specified by the Standard
+>>> Host Controller 3.0 spec. Writing to power control register/
+>>> reset register/voltage bit of host control register would
+>>> trigger an IRQ with appropriate status bits set. Hence, use
+>>> host op check_power_status after writing to power control
+>>> register to check the status and wait until the IRQ is handled.
+>>
+>> Did you consider using the SDHCI I/O Accessors for this? i.e.
+>> CONFIG_MMC_SDHCI_IO_ACCESSORS
+> Thanks for the suggestion. I will check and get back.
+>
+>>
+>>>
+>>> Signed-off-by: Sahitya Tummala <stummala@codeaurora.org>
+>>> Signed-off-by: Ritesh Harjani <riteshh@codeaurora.org>
+>>> ---
+>>>  drivers/mmc/host/sdhci.c | 24 +++++++++++++++++++++---
+>>>  drivers/mmc/host/sdhci.h |  5 +++++
+>>>  2 files changed, 26 insertions(+), 3 deletions(-)
+>>>
+>>> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+>>> index 0e3d7c0..12f74bd 100644
+>>> --- a/drivers/mmc/host/sdhci.c
+>>> +++ b/drivers/mmc/host/sdhci.c
+>>> @@ -176,6 +176,10 @@ void sdhci_reset(struct sdhci_host *host, u8 mask)
+>>>      /* Wait max 100 ms */
+>>>      timeout = 100;
+>>>
+>>> +    if (host->ops->check_power_status && host->pwr &&
+>>> +        (mask & SDHCI_RESET_ALL))
+>>> +        host->ops->check_power_status(host, REQ_BUS_OFF);
+>>> +
+>>>      /* hw clears the bit when it's done */
+>>>      while (sdhci_readb(host, SDHCI_SOFTWARE_RESET) & mask) {
+>>>          if (timeout == 0) {
+>>> @@ -1306,6 +1310,8 @@ void sdhci_set_power(struct sdhci_host *host,
+>>> unsigned char mode,
+>>>
+>>>      if (pwr == 0) {
+>>>          sdhci_writeb(host, 0, SDHCI_POWER_CONTROL);
+>>> +        if (host->ops->check_power_status)
+>>> +            host->ops->check_power_status(host, REQ_BUS_OFF);
+>>>          if (host->quirks2 & SDHCI_QUIRK2_CARD_ON_NEEDS_BUS_ON)
+>>>              sdhci_runtime_pm_bus_off(host);
+>>>      } else {
+>>> @@ -1313,20 +1319,28 @@ void sdhci_set_power(struct sdhci_host *host,
+>>> unsigned char mode,
+>>>           * Spec says that we should clear the power reg before setting
+>>>           * a new value. Some controllers don't seem to like this
+>>> though.
+>>>           */
+>>> -        if (!(host->quirks & SDHCI_QUIRK_SINGLE_POWER_WRITE))
+>>> +        if (!(host->quirks & SDHCI_QUIRK_SINGLE_POWER_WRITE)) {
+>>>              sdhci_writeb(host, 0, SDHCI_POWER_CONTROL);
+>>> -
+>>> +            if (host->ops->check_power_status)
+>>> +                host->ops->check_power_status(host,
+>>> +                            REQ_BUS_OFF);
+>>> +        }
+>>>          /*
+>>>           * At least the Marvell CaFe chip gets confused if we set the
+>>>           * voltage and set turn on power at the same time, so set the
+>>>           * voltage first.
+>>>           */
+>>> -        if (host->quirks & SDHCI_QUIRK_NO_SIMULT_VDD_AND_POWER)
+>>> +        if (host->quirks & SDHCI_QUIRK_NO_SIMULT_VDD_AND_POWER) {
+>>>              sdhci_writeb(host, pwr, SDHCI_POWER_CONTROL);
+>>> +            if (host->ops->check_power_status)
+>>> +                host->ops->check_power_status(host, REQ_BUS_ON);
+>>> +        }
+>>>
+>>>          pwr |= SDHCI_POWER_ON;
+>>>
+>>>          sdhci_writeb(host, pwr, SDHCI_POWER_CONTROL);
+>>> +        if (host->ops->check_power_status)
+>>> +            host->ops->check_power_status(host, REQ_BUS_ON);
+>>>
+>>>          if (host->quirks2 & SDHCI_QUIRK2_CARD_ON_NEEDS_BUS_ON)
+>>>              sdhci_runtime_pm_bus_on(host);
+>>> @@ -1736,6 +1750,8 @@ static int
+>>> sdhci_start_signal_voltage_switch(struct mmc_host *mmc,
+>>>          /* Set 1.8V Signal Enable in the Host Control2 register to 0 */
+>>>          ctrl &= ~SDHCI_CTRL_VDD_180;
+>>>          sdhci_writew(host, ctrl, SDHCI_HOST_CONTROL2);
+>>> +        if (host->ops->check_power_status)
+>>> +            host->ops->check_power_status(host, REQ_IO_HIGH);
+>>>
+>>>          if (!IS_ERR(mmc->supply.vqmmc)) {
+>>>              ret = regulator_set_voltage(mmc->supply.vqmmc, 2700000,
+>>> @@ -1775,6 +1791,8 @@ static int
+>>> sdhci_start_signal_voltage_switch(struct mmc_host *mmc,
+>>>           */
+>>>          ctrl |= SDHCI_CTRL_VDD_180;
+>>>          sdhci_writew(host, ctrl, SDHCI_HOST_CONTROL2);
+>>> +        if (host->ops->check_power_status)
+>>> +            host->ops->check_power_status(host, REQ_IO_LOW);
+>>>
+>>>          /* Some controller need to do more when switching */
+>>>          if (host->ops->voltage_switch)
+>>> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+>>> index 609f87c..5758cca 100644
+>>> --- a/drivers/mmc/host/sdhci.h
+>>> +++ b/drivers/mmc/host/sdhci.h
+>>> @@ -549,6 +549,11 @@ struct sdhci_ops {
+>>>                       struct mmc_card *card,
+>>>                       unsigned int max_dtr, int host_drv,
+>>>                       int card_drv, int *drv_type);
+>>> +#define REQ_BUS_OFF    BIT(0)
+>>> +#define REQ_BUS_ON    BIT(1)
+>>> +#define REQ_IO_LOW    BIT(2)
+>>> +#define REQ_IO_HIGH    BIT(3)
+>>> +    void    (*check_power_status)(struct sdhci_host *host, u32
+>>> req_type);
+>>>  };
+>>>
+>>>  #ifdef CONFIG_MMC_SDHCI_IO_ACCESSORS
+>>>
+>>
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>
