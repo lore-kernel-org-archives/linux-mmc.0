@@ -1,93 +1,34 @@
-From: Rob Herring <robh-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH v2 1/2] ARM64: dts: meson-gxbb: add MMC support
-Date: Thu, 4 Aug 2016 21:45:05 -0500
-Message-ID: <CAL_JsqK18UPAUFCqfN7TJqz4AoLBbNA7fOgeQXqPES06fuhgFQ@mail.gmail.com>
-References: <20160803231843.23012-1-khilman@baylibre.com> <20160804181556.GA13000@rob-hp-laptop>
- <m2oa58nntc.fsf@baylibre.com>
+From: Icenowy Zheng <icenowy@aosc.xyz>
+Subject: [PATCH v4 0/2] Add support for Allwinner A64 mmc controller
+Date: Fri,  5 Aug 2016 10:57:13 +0800
+Message-ID: <20160805025715.5306-1-icenowy@aosc.xyz>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <devicetree-compiler-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <m2oa58nntc.fsf-rdvid1DuHRBWk0Htik3J/w@public.gmane.org>
-Sender: devicetree-compiler-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Kevin Hilman <khilman-rdvid1DuHRBWk0Htik3J/w@public.gmane.org>, devicetree-compiler-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-Cc: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-amlogic-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Victor Wan <victor.wan-LpR1jeaWuhtBDgjK7y7TUQ@public.gmane.org>, Jerry Cao <jerry.cao-LpR1jeaWuhtBDgjK7y7TUQ@public.gmane.org>, Xing Wu <xing.xu-LpR1jeaWuhtBDgjK7y7TUQ@public.gmane.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Rob Herring <robh+dt@kernel.org>, Maxime Ripard <maxime.ripard@free-electrons.com>, Chen-Yu Tsai <wens@csie.org>, Ulf Hansson <ulf.hansson@linaro.org>, Hans de Goede <hdegoede@redhat.com>
+Cc: Mark Rutland <mark.rutland@arm.com>, devicetree@vger.kernel.org, Michal Suchanek <hramrach@gmail.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Jaehoon Chung <jh80.chung@samsung.com>, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
-+dtc list
+Allwinner A64 has a slightly modified version of the Allwinner MMC controller.
 
-On Thu, Aug 4, 2016 at 5:58 PM, Kevin Hilman <khilman-rdvid1DuHRBWk0Htik3J/w@public.gmane.org> wrote:
-> Hi Rob,
->
-> Rob Herring <robh-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org> writes:
->
->> On Wed, Aug 03, 2016 at 04:18:42PM -0700, Kevin Hilman wrote:
->>> Add binding and basic support for the SD/eMMC controller on Amlogic
->>> S905/GXBB devices.
->>>
->>> Signed-off-by: Kevin Hilman <khilman-rdvid1DuHRBWk0Htik3J/w@public.gmane.org>
->
-> [...]
->
->>> +    mmc_iv: gpio-regulator {
->>> +            compatible = "regulator-gpio";
->>> +
->>> +            regulator-name = "mmc-gpio-supply";
->>> +            regulator-min-microvolt = <1800000>;
->>> +            regulator-max-microvolt = <3300000>;
->>> +
->>> +            gpios = <&gpio_ao GPIOAO_3 GPIO_ACTIVE_HIGH>;
->>> +            gpio-states = <0 1>;
->>> +
->>> +            /*
->>> +             * Based on ODROID-C2 schematics:
->>> +             * signal name: IO_TF_3V3N_1V8, GPIOAO bit 3
->>> +             */
->>> +            states = <3300000 0
->>> +                      1800000 1>;
->>
->> There are multiple things wrong in this node based on the regulator-gpio
->> documentation.
->
-> I see I got the property name wrong, and the number of elements wrong,
-> and this fixes those issues:
->
-> -               gpio-states = <0 1>;
-> +               gpios-states = <0>;
->
-> By "multiple", did you mean more than those 2?  If so, I'm not seeing
-> what else is wrong.
+It do not have "output" or "sample" clock input, instead, it can calibrate the
+delay internally.
 
-I was thinking it needed an enable-gpio property, but now I see that
-is separate from "gpios".
+This series of patch added the calibrate feature to the sunxi-mmc driver. It
+is based on works by Andre Przywara <andre.przywara@arm.com>, and now it
+depends on the patch set sent recently by Hans de Goede <hdegoede@redhat.com>,
+which disabled "output" and "sample" clock on A10/13.
+( http://lists.infradead.org/pipermail/linux-arm-kernel/2016-July/446187.html )
 
-> [...]
->
->>> +    mmc_iv: gpio-regulator {
->>> +            compatible = "regulator-gpio";
->>> +
->>> +            regulator-name = "mmc-gpio-supply";
->>> +            regulator-min-microvolt = <1800000>;
->>> +            regulator-max-microvolt = <3300000>;
->>> +
->>> +            gpios = <&gpio_ao GPIOAO_5 GPIO_ACTIVE_HIGH>;
->>> +            gpio-states = <0 1>;
->>> +
->>> +            /* Based on P200 schematics, signal CARD_1.8V/3.3V_CTR */
->>> +            states = <1800000 0
->>> +                      3300000 1>;
->>> +    };
->>> +
->>> +    vddio_boot: regulator {
->> [...]
->>> +    vcc_3v3: regulator {
->>
->> This won't even compile as you have the same node name twice.
->
-> Oops, it's wrong indeed, but in fact, it does compile, otherwise I
-> would've caught that..  Even if I remove the labels, it still compiles.
-> Interesting.
-
-Humm, news to me. I will have to do some testing unless the dtc folks
-have any insight.
-
-Rob
+As the clock and device tree patch for Allwinner A64 is not yet merged, the
+patch set contains no patch to enable it.
