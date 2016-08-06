@@ -1,53 +1,54 @@
-From: Pavel Machek <pavel@ucw.cz>
-Subject: Re: [PATCH v5 4/8] char: rpmb: provide a user space interface
-Date: Fri, 5 Aug 2016 22:08:23 +0200
-Message-ID: <20160805200823.GB7999@amd>
-References: <1468873673-21776-1-git-send-email-tomas.winkler@intel.com>
- <1468873673-21776-5-git-send-email-tomas.winkler@intel.com>
+From: Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
+Subject: [PATCH 1/6] dt-bindings: rockchip-dw-mshc: add description of
+ rockchip, power-invert
+Date: Sat,  6 Aug 2016 13:36:19 +0800
+Message-ID: <1470461784-3955-2-git-send-email-shawn.lin@rock-chips.com>
+References: <1470461784-3955-1-git-send-email-shawn.lin@rock-chips.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-scsi-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <1468873673-21776-5-git-send-email-tomas.winkler@intel.com>
-Sender: linux-scsi-owner@vger.kernel.org
-To: Tomas Winkler <tomas.winkler@intel.com>
-Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, James Bottomley <James.Bottomley@HansenPartnership.com>, "Martin K. Petersen" <martin.petersen@oracle.com>, Vinayak Holikatti <vinholikatti@gmail.com>, Andy Lutomirski <luto@kernel.org>, Arve =?iso-8859-1?B?SGr4bm5lduVn?= <arve@android.com>, Michael Ryleev <gmar@google.com>, Joao Pinto <Joao.Pinto@synopsys.com>, Christoph Hellwig <hch@lst.de>, Yaniv Gardi <ygardi@codeaurora.org>, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, linux-scsi@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+In-Reply-To: <1470461784-3955-1-git-send-email-shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-rockchip>,
+ <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-rockchip/>
+List-Post: <mailto:linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+List-Help: <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-rockchip>,
+ <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
+Sender: "Linux-rockchip" <linux-rockchip-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+Errors-To: linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+To: Jaehoon Chung <jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+Cc: devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Heiko Stuebner <heiko-4mtYJXux2i+zQB+pC5nmwQ@public.gmane.org>, Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>, Brian Norris <briannorris-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Doug Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
 
-On Mon 2016-07-18 23:27:49, Tomas Winkler wrote:
-> The user space API is achieved via two synchronous IOCTL.
+rockchip,power-invert is used for rockchip to introduce the flag
+DW_MMC_CARD_PWR_INVERT from DT which should make the power control
+of dw_mmc more flexible according to different hw design.
 
-IOCTLs?
+Signed-off-by: Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
 
-> Simplified one, RPMB_IOC_REQ_CMD, were read result cycles is performed
-> by the framework on behalf the user and second, RPMB_IOC_SEQ_CMD where
-> the whole RPMB sequence including RESULT_READ is supplied by the caller.
-> The latter is intended for  easier adjusting  of the  applications that
-> use MMC_IOC_MULTI_CMD ioctl.
+---
 
-Why "  "?
+ Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.txt | 6 ++++++
+ 1 file changed, 6 insertions(+)
 
-> 
-> Signed-off-by: Tomas Winkler <tomas.winkler@intel.com>
-
-> +
-> +static long rpmb_ioctl(struct file *fp, unsigned int cmd, unsigned long arg)
-> +{
-> +	return __rpmb_ioctl(fp, cmd, (void __user *)arg);
-> +}
-> +
-> +#ifdef CONFIG_COMPAT
-> +static long rpmb_compat_ioctl(struct file *fp, unsigned int cmd,
-> +			      unsigned long arg)
-> +{
-> +	return	__rpmb_ioctl(fp, cmd, compat_ptr(arg));
-> +}
-> +#endif /* CONFIG_COMPAT */
-
-Description of the ioctl is missing, and it should certainly be
-designed in a way that it does not need compat support.
-
-
+diff --git a/Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.txt b/Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.txt
+index 07184e8..5640659 100644
+--- a/Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.txt
++++ b/Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.txt
+@@ -30,6 +30,12 @@ Optional Properties:
+   probing, low speeds or in case where all phases work at tuning time.
+   If not specified 0 deg will be used.
+ 
++* rockchip,power-invert: Invert the power control of PWREN register. If adding
++  it, the card should be in power-on state when the power io outputs high level
++  voltage, and it should be in power-off state when outputing low level voltage.
++  otherwise the behaviour of power control should be the opposite way which is
++  the default policy of dw mshc.
++
+ Example:
+ 
+ 	rkdwmmc0@12200000 {
 -- 
-(english) http://www.livejournal.com/~pavelmachek
-(cesky, pictures) http://atrey.karlin.mff.cuni.cz/~pavel/picture/horses/blog.html
+2.3.7
