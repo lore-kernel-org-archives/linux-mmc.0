@@ -1,7 +1,7 @@
 From: Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
-Subject: [PATCH 3/6] mmc: dw_mmc: split out dw_mci_set_power
-Date: Sat,  6 Aug 2016 13:36:21 +0800
-Message-ID: <1470461784-3955-4-git-send-email-shawn.lin@rock-chips.com>
+Subject: [PATCH 6/6] mmc: dw_mmc-rockchip: add parsing of power control from DT
+Date: Sat,  6 Aug 2016 13:37:47 +0800
+Message-ID: <1470461867-4049-1-git-send-email-shawn.lin@rock-chips.com>
 References: <1470461784-3955-1-git-send-email-shawn.lin@rock-chips.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
@@ -21,130 +21,50 @@ To: Jaehoon Chung <jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, Ulf Hans
 Cc: devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Heiko Stuebner <heiko-4mtYJXux2i+zQB+pC5nmwQ@public.gmane.org>, Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>, Brian Norris <briannorris-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Doug Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
 
-The dw_mci_set_ios is a little complicated and lengthy,
-let's split out the setting of power part. No functionality
-change.
+Defaultly the power io of dw_mmc is fixed which means we could
+only output high level to indicate the power-on state. But that
+is not always correct as the usage of power io should be board
+specific. Let's expose it to dt for supporting this kind of
+specific design.
 
 Signed-off-by: Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
 ---
 
- drivers/mmc/host/dw_mmc.c | 87 ++++++++++++++++++++++++++---------------------
- 1 file changed, 49 insertions(+), 38 deletions(-)
+ drivers/mmc/host/dw_mmc-rockchip.c | 8 ++++++++
+ 1 file changed, 8 insertions(+)
 
-diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index 59a5e9c..0e5ed23 100644
---- a/drivers/mmc/host/dw_mmc.c
-+++ b/drivers/mmc/host/dw_mmc.c
-@@ -1276,54 +1276,19 @@ static void dw_mci_request(struct mmc_host *mmc, struct mmc_request *mrq)
- 	spin_unlock_bh(&host->lock);
- }
+diff --git a/drivers/mmc/host/dw_mmc-rockchip.c b/drivers/mmc/host/dw_mmc-rockchip.c
+index 25eae35..c5f5bb5 100644
+--- a/drivers/mmc/host/dw_mmc-rockchip.c
++++ b/drivers/mmc/host/dw_mmc-rockchip.c
+@@ -24,6 +24,7 @@ struct dw_mci_rockchip_priv_data {
+ 	struct clk		*drv_clk;
+ 	struct clk		*sample_clk;
+ 	int			default_sample_phase;
++	bool			power_invert;
+ };
  
--static void dw_mci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
-+static int dw_mci_set_power(struct mmc_host *mmc, struct mmc_ios *ios)
- {
- 	struct dw_mci_slot *slot = mmc_priv(mmc);
--	const struct dw_mci_drv_data *drv_data = slot->host->drv_data;
- 	u32 regs;
+ static void dw_mci_rk3288_set_ios(struct dw_mci *host, struct mmc_ios *ios)
+@@ -67,6 +68,10 @@ static void dw_mci_rk3288_set_ios(struct dw_mci *host, struct mmc_ios *ios)
+ 	if (!IS_ERR(priv->sample_clk))
+ 		clk_set_phase(priv->sample_clk, priv->default_sample_phase);
  
--	switch (ios->bus_width) {
--	case MMC_BUS_WIDTH_4:
--		slot->ctype = SDMMC_CTYPE_4BIT;
--		break;
--	case MMC_BUS_WIDTH_8:
--		slot->ctype = SDMMC_CTYPE_8BIT;
--		break;
--	default:
--		/* set default 1 bit mode */
--		slot->ctype = SDMMC_CTYPE_1BIT;
--	}
--
--	regs = mci_readl(slot->host, UHS_REG);
--
--	/* DDR mode set */
--	if (ios->timing == MMC_TIMING_MMC_DDR52 ||
--	    ios->timing == MMC_TIMING_UHS_DDR50 ||
--	    ios->timing == MMC_TIMING_MMC_HS400)
--		regs |= ((0x1 << slot->id) << 16);
--	else
--		regs &= ~((0x1 << slot->id) << 16);
--
--	mci_writel(slot->host, UHS_REG, regs);
--	slot->host->timing = ios->timing;
--
--	/*
--	 * Use mirror of ios->clock to prevent race with mmc
--	 * core ios update when finding the minimum.
--	 */
--	slot->clock = ios->clock;
--
--	if (drv_data && drv_data->set_ios)
--		drv_data->set_ios(slot->host, ios);
--
- 	switch (ios->power_mode) {
- 	case MMC_POWER_UP:
- 		if (!IS_ERR(mmc->supply.vmmc) &&
- 		    mmc_regulator_set_ocr(mmc, mmc->supply.vmmc, ios->vdd)) {
- 			dev_err(slot->host->dev,
- 				"failed to enable vmmc regulator\n");
--			/*return, if failed turn on vmmc*/
--			return;
++	/* Make sure we need to invert the output of PWREN */
++	if (priv->power_invert)
++		set_bit(DW_MMC_CARD_PWR_INVERT, &host->cur_slot->flags);
 +
-+			return -EINVAL;
- 		}
- 		set_bit(DW_MMC_CARD_NEED_INIT, &slot->flags);
- 		regs = mci_readl(slot->host, PWREN);
-@@ -1369,6 +1334,52 @@ static void dw_mci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
- 		break;
- 	}
+ 	/*
+ 	 * Set the drive phase offset based on speed mode to achieve hold times.
+ 	 *
+@@ -267,6 +272,9 @@ static int dw_mci_rk3288_parse_dt(struct dw_mci *host)
+ 					&priv->default_sample_phase))
+ 		priv->default_sample_phase = 0;
  
-+	return 0;
-+}
++	if (of_property_read_bool(np, "rockchip,power-invert"))
++		priv->default_sample_phase = true;
 +
-+static void dw_mci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
-+{
-+	struct dw_mci_slot *slot = mmc_priv(mmc);
-+	const struct dw_mci_drv_data *drv_data = slot->host->drv_data;
-+	u32 regs;
-+
-+	switch (ios->bus_width) {
-+	case MMC_BUS_WIDTH_4:
-+		slot->ctype = SDMMC_CTYPE_4BIT;
-+		break;
-+	case MMC_BUS_WIDTH_8:
-+		slot->ctype = SDMMC_CTYPE_8BIT;
-+		break;
-+	default:
-+		/* set default 1 bit mode */
-+		slot->ctype = SDMMC_CTYPE_1BIT;
-+	}
-+
-+	regs = mci_readl(slot->host, UHS_REG);
-+
-+	/* DDR mode set */
-+	if (ios->timing == MMC_TIMING_MMC_DDR52 ||
-+	    ios->timing == MMC_TIMING_UHS_DDR50 ||
-+	    ios->timing == MMC_TIMING_MMC_HS400)
-+		regs |= ((0x1 << slot->id) << 16);
-+	else
-+		regs &= ~((0x1 << slot->id) << 16);
-+
-+	mci_writel(slot->host, UHS_REG, regs);
-+	slot->host->timing = ios->timing;
-+
-+	/*
-+	 * Use mirror of ios->clock to prevent race with mmc
-+	 * core ios update when finding the minimum.
-+	 */
-+	slot->clock = ios->clock;
-+
-+	if (drv_data && drv_data->set_ios)
-+		drv_data->set_ios(slot->host, ios);
-+
-+	if (dw_mci_set_power(mmc, ios))
-+		return;
-+
- 	if (slot->host->state == STATE_WAITING_CMD11_DONE && ios->clock != 0)
- 		slot->host->state = STATE_IDLE;
- }
+ 	priv->drv_clk = devm_clk_get(host->dev, "ciu-drive");
+ 	if (IS_ERR(priv->drv_clk))
+ 		dev_dbg(host->dev, "ciu_drv not available\n");
 -- 
 2.3.7
