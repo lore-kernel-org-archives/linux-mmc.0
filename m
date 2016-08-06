@@ -1,88 +1,53 @@
-From: Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
-Subject: [RESEND PATCH 4/6] mmc: dw_mmc: split out dw_mci_set_power_reg
-Date: Sat,  6 Aug 2016 15:46:06 +0800
-Message-ID: <1470469566-5841-1-git-send-email-shawn.lin@rock-chips.com>
-References: <1470469503-5676-1-git-send-email-shawn.lin@rock-chips.com>
+From: Stefan Wahren <stefan.wahren@i2se.com>
+Subject: [PATCH RFC 0/3] mmc: mxs-mmc: Implement DDR support
+Date: Sat,  6 Aug 2016 12:55:37 +0000
+Message-ID: <1470488140-10104-1-git-send-email-stefan.wahren@i2se.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-In-Reply-To: <1470469503-5676-1-git-send-email-shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-rockchip>,
- <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-rockchip/>
-List-Post: <mailto:linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-List-Help: <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-rockchip>,
- <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
-Sender: "Linux-rockchip" <linux-rockchip-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-Errors-To: linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
-To: Jaehoon Chung <jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-Cc: devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Heiko Stuebner <heiko-4mtYJXux2i+zQB+pC5nmwQ@public.gmane.org>, Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>, Brian Norris <briannorris-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Doug Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Fabio Estevam <fabio.estevam@nxp.com>, Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>
+Cc: Dong Aisheng <aisheng.dong@nxp.com>, Marek Vasut <marex@denx.de>, Otavio Salvador <otavio@ossystems.com.br>, devicetree@vger.kernel.org, Holger Schurig <holgerschurig@gmail.com>, Stefan Wahren <stefan.wahren@i2se.com>, linux-mmc@vger.kernel.org, Sascha Hauer <kernel@pengutronix.de>, Shawn Guo <shawnguo@kernel.org>, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
-Splite out dw_mci_set_power_reg to set PWREN register
-in case that we need more complicated power control.
+Based on these discussions: [1], [2] this patch series implements
+DDR support for the MXS MMC host driver. This feature has never been
+ported from the vendor kernel.
 
-Signed-off-by: Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
----
+It has been tested on a i.MX28 board with eMMC which is currently
+not in mainline (Duckbill 2).
 
- drivers/mmc/host/dw_mmc.c | 26 ++++++++++++++++++--------
- 1 file changed, 18 insertions(+), 8 deletions(-)
+* without DDR support
+dd if=/dev/zero of=test bs=8k count=10000
+81920000 bytes (82 MB) copied, 14.3321 s, 5.7 MB/s
 
-diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index 0e5ed23..c35a26a 100644
---- a/drivers/mmc/host/dw_mmc.c
-+++ b/drivers/mmc/host/dw_mmc.c
-@@ -1276,10 +1276,25 @@ static void dw_mci_request(struct mmc_host *mmc, struct mmc_request *mrq)
- 	spin_unlock_bh(&host->lock);
- }
- 
-+static inline void dw_mci_set_power_reg(struct dw_mci_slot *slot,
-+					bool enable)
-+{
-+	u32 regs;
-+
-+	if (enable) {
-+		regs = mci_readl(slot->host, PWREN);
-+		regs |= (1 << slot->id);
-+		mci_writel(slot->host, PWREN, regs);
-+	} else {
-+		regs = mci_readl(slot->host, PWREN);
-+		regs &= ~(1 << slot->id);
-+		mci_writel(slot->host, PWREN, regs);
-+	}
-+}
-+
- static int dw_mci_set_power(struct mmc_host *mmc, struct mmc_ios *ios)
- {
- 	struct dw_mci_slot *slot = mmc_priv(mmc);
--	u32 regs;
- 
- 	switch (ios->power_mode) {
- 	case MMC_POWER_UP:
-@@ -1291,9 +1306,7 @@ static int dw_mci_set_power(struct mmc_host *mmc, struct mmc_ios *ios)
- 			return -EINVAL;
- 		}
- 		set_bit(DW_MMC_CARD_NEED_INIT, &slot->flags);
--		regs = mci_readl(slot->host, PWREN);
--		regs |= (1 << slot->id);
--		mci_writel(slot->host, PWREN, regs);
-+		dw_mci_set_power_reg(slot, true);
- 		break;
- 	case MMC_POWER_ON:
- 		if (!slot->host->vqmmc_enabled) {
-@@ -1325,10 +1338,7 @@ static int dw_mci_set_power(struct mmc_host *mmc, struct mmc_ios *ios)
- 		if (!IS_ERR(mmc->supply.vqmmc) && slot->host->vqmmc_enabled)
- 			regulator_disable(mmc->supply.vqmmc);
- 		slot->host->vqmmc_enabled = false;
--
--		regs = mci_readl(slot->host, PWREN);
--		regs &= ~(1 << slot->id);
--		mci_writel(slot->host, PWREN, regs);
-+		dw_mci_set_power_reg(slot, false);
- 		break;
- 	default:
- 		break;
+* with DDR support:
+dd if=/dev/zero of=test bs=8k count=10000
+81920000 bytes (82 MB) copied, 13.4781 s, 6.1 MB/s
+
+[1] - http://www.spinics.net/lists/linux-mmc/msg32285.html
+[2] - http://www.spinics.net/lists/linux-mmc/msg34418.html
+
+Stefan Wahren (3):
+  DT: bindings: mmc: Add property for 3.3V only support
+  mmc: core: add new cap for 3.3V only DDR MMCs
+  mmc: mxs-mmc: Implement DDR support
+
+ Documentation/devicetree/bindings/mmc/mmc.txt |    7 +++++--
+ drivers/mmc/core/host.c                       |    2 ++
+ drivers/mmc/core/mmc.c                        |    6 ++++++
+ drivers/mmc/host/mxs-mmc.c                    |   22 ++++++++++++++++++++++
+ include/linux/mmc/host.h                      |    1 +
+ 5 files changed, 36 insertions(+), 2 deletions(-)
+
 -- 
-2.3.7
+1.7.9.5
