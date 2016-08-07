@@ -1,13 +1,13 @@
 From: Hans de Goede <hdegoede@redhat.com>
-Subject: [PATCH 2/2] dt: bindings: Add binding for ESP8089 wifi chips
-Date: Sun,  7 Aug 2016 20:57:49 +0200
-Message-ID: <1470596269-20572-2-git-send-email-hdegoede@redhat.com>
-References: <1470596269-20572-1-git-send-email-hdegoede@redhat.com>
+Subject: [PATCH resend] mmc: pwrseq-simple: Add an optional post-power-on-delay
+Date: Sun,  7 Aug 2016 21:02:38 +0200
+Message-ID: <1470596558-23195-2-git-send-email-hdegoede@redhat.com>
+References: <1470596558-23195-1-git-send-email-hdegoede@redhat.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <1470596269-20572-1-git-send-email-hdegoede@redhat.com>
+In-Reply-To: <1470596558-23195-1-git-send-email-hdegoede@redhat.com>
 List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
  <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
 List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
@@ -21,68 +21,71 @@ To: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>
 Cc: devicetree <devicetree@vger.kernel.org>, linux-mmc@vger.kernel.org, Hans de Goede <hdegoede@redhat.com>, Chen-Yu Tsai <wens@csie.org>, Icenowy Zheng <icenowy@aosc.xyz>, Maxime Ripard <maxime.ripard@free-electrons.com>, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
-The ESP8089 chips can mostly be enumerated via their sdio interface,
-but they are clocked by an external crystal which may differ from one
-board to the other.
+Some devices need a while to boot their firmware after providing clks /
+de-asserting resets before they are ready to receive sdio commands.
 
-This commit adds a binding for the sdio child node for these chips,
-allowing to specify the external crystal type (for now, this binding
-could be be extended with e.g. OOB irq support later).
+This commits adds a post-power-on-delay-ms devicetree property to
+mmc-pwrseq-simple for use with such devices.
 
-The Android driver for this chip uses a text file with key,value pairs
-which gets loaded as firmware to pass this info to the firmware.
-The "esp,crystal_26M_en" name is chosen to match the crystal_26M_en
-key-name in that text file.
-
-Note that at this point there only is an out of tree driver for this
-hardware, there is no clear timeline / path for merging this. Still
-I believe it would be good to specify the binding for this in tree
-now, so that any future migration to an in tree driver will not cause
-compatiblity issues.
-
-Cc: Icenowy Zheng <icenowy@aosc.xyz>
 Signed-off-by: Hans de Goede <hdegoede@redhat.com>
 ---
- .../bindings/net/wireless/esp,esp8089.txt          | 31 ++++++++++++++++++++++
- 1 file changed, 31 insertions(+)
- create mode 100644 Documentation/devicetree/bindings/net/wireless/esp,esp8089.txt
+ Documentation/devicetree/bindings/mmc/mmc-pwrseq-simple.txt | 2 ++
+ drivers/mmc/core/pwrseq_simple.c                            | 9 +++++++++
+ 2 files changed, 11 insertions(+)
 
-diff --git a/Documentation/devicetree/bindings/net/wireless/esp,esp8089.txt b/Documentation/devicetree/bindings/net/wireless/esp,esp8089.txt
-new file mode 100644
-index 0000000..898a149
---- /dev/null
-+++ b/Documentation/devicetree/bindings/net/wireless/esp,esp8089.txt
-@@ -0,0 +1,31 @@
-+Espressif ESP8089 wireless SDIO devices
+diff --git a/Documentation/devicetree/bindings/mmc/mmc-pwrseq-simple.txt b/Documentation/devicetree/bindings/mmc/mmc-pwrseq-simple.txt
+index ce0e767..e254368 100644
+--- a/Documentation/devicetree/bindings/mmc/mmc-pwrseq-simple.txt
++++ b/Documentation/devicetree/bindings/mmc/mmc-pwrseq-simple.txt
+@@ -16,6 +16,8 @@ Optional properties:
+   See ../clocks/clock-bindings.txt for details.
+ - clock-names : Must include the following entry:
+   "ext_clock" (External clock provided to the card).
++- post-power-on-delay-ms : Delay in ms after powering the card and
++	de-asserting the reset-gpios (if any)
+ 
+ Example:
+ 
+diff --git a/drivers/mmc/core/pwrseq_simple.c b/drivers/mmc/core/pwrseq_simple.c
+index 450d907..1304160 100644
+--- a/drivers/mmc/core/pwrseq_simple.c
++++ b/drivers/mmc/core/pwrseq_simple.c
+@@ -16,6 +16,8 @@
+ #include <linux/device.h>
+ #include <linux/err.h>
+ #include <linux/gpio/consumer.h>
++#include <linux/delay.h>
++#include <linux/property.h>
+ 
+ #include <linux/mmc/host.h>
+ 
+@@ -24,6 +26,7 @@
+ struct mmc_pwrseq_simple {
+ 	struct mmc_pwrseq pwrseq;
+ 	bool clk_enabled;
++	u32 post_power_on_delay_ms;
+ 	struct clk *ext_clk;
+ 	struct gpio_descs *reset_gpios;
+ };
+@@ -64,6 +67,9 @@ static void mmc_pwrseq_simple_post_power_on(struct mmc_host *host)
+ 	struct mmc_pwrseq_simple *pwrseq = to_pwrseq_simple(host->pwrseq);
+ 
+ 	mmc_pwrseq_simple_set_gpios_value(pwrseq, 0);
 +
-+This node provides properties for controlling the ESP8089 wireless device.
-+The node is expected to be specified as a child node to the SDIO controller
-+that connects the device to the system.
++	if (pwrseq->post_power_on_delay_ms)
++		msleep(pwrseq->post_power_on_delay_ms);
+ }
+ 
+ static void mmc_pwrseq_simple_power_off(struct mmc_host *host)
+@@ -111,6 +117,9 @@ static int mmc_pwrseq_simple_probe(struct platform_device *pdev)
+ 		return PTR_ERR(pwrseq->reset_gpios);
+ 	}
+ 
++	device_property_read_u32(dev, "post-power-on-delay-ms",
++				 &pwrseq->post_power_on_delay_ms);
 +
-+Required properties:
-+
-+ - compatible : Should be "esp,esp8089".
-+
-+Optional properties:
-+ - esp,crystal_26M_en: Integer value for the crystal_26M_en firmware parameter
-+
-+Example:
-+
-+&mmc1 {
-+	#address-cells = <1>;
-+	#size-cells = <0>;
-+
-+	vmmc-supply = <&reg_dldo1>;
-+	mmc-pwrseq = <&wifi_pwrseq>;
-+	bus-width = <4>;
-+	non-removable;
-+	status = "okay";
-+
-+	esp8089: sdio_wifi@1 {
-+		compatible = "esp,esp8089";
-+		reg = <1>;
-+		esp,crystal_26M_en = <2>;
-+	};
-+};
+ 	pwrseq->pwrseq.dev = dev;
+ 	pwrseq->pwrseq.ops = &mmc_pwrseq_simple_ops;
+ 	pwrseq->pwrseq.owner = THIS_MODULE;
 -- 
 2.7.4
