@@ -1,67 +1,85 @@
-From: "Winkler, Tomas" <tomas.winkler@intel.com>
-Subject: RE: [PATCH v5 4/8] char: rpmb: provide a user space interface
-Date: Sun, 7 Aug 2016 09:44:03 +0000
-Message-ID: <5B8DA87D05A7694D9FA63FD143655C1B542B8AC9@hasmsx108.ger.corp.intel.com>
-References: <1468873673-21776-1-git-send-email-tomas.winkler@intel.com>
- <1468873673-21776-5-git-send-email-tomas.winkler@intel.com>
- <20160805200823.GB7999@amd>
+From: Stefan Wahren <stefan.wahren@i2se.com>
+Subject: Re: [PATCH RFC 0/3] mmc: mxs-mmc: Implement DDR support
+Date: Sun, 7 Aug 2016 13:37:07 +0200 (CEST)
+Message-ID: <98368157.110813.d9cd30e0-7476-4a28-8bab-dde17515cd9c.open-xchange@email.1und1.de>
+References: <1470488140-10104-1-git-send-email-stefan.wahren@i2se.com>
+ <ef08cd86-8366-31b3-1f05-d0c7251cded6@denx.de>
+ <299761257.114585.752d0f22-93a7-46e8-bb14-c884787aaea3.open-xchange@email.1und1.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7BIT
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga01.intel.com ([192.55.52.88]:7180 "EHLO mga01.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751527AbcHGJoH convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 7 Aug 2016 05:44:07 -0400
-In-Reply-To: <20160805200823.GB7999@amd>
-Content-Language: en-US
+Received: from mout.kundenserver.de ([217.72.192.74]:51754 "EHLO
+	mout.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751633AbcHGLh5 (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 7 Aug 2016 07:37:57 -0400
+In-Reply-To: <299761257.114585.752d0f22-93a7-46e8-bb14-c884787aaea3.open-xchange@email.1und1.de>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Pavel Machek <pavel@ucw.cz>
-Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Ulf Hansson <ulf.hansson@linaro.org>, "Hunter, Adrian" <adrian.hunter@intel.com>, James Bottomley <James.Bottomley@HansenPartnership.com>, "Martin K. Petersen" <martin.petersen@oracle.com>, Vinayak Holikatti <vinholikatti@gmail.com>, Andy Lutomirski <luto@kernel.org>, Arve Hj?nnev?g <arve@android.com>, Michael Ryleev <gmar@google.com>, Joao Pinto <Joao.Pinto@synopsys.com>, Christoph Hellwig <hch@lst.de>, Yaniv Gardi <ygardi@codeaurora.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-scsi@vger.kernel.org" <linux-scsi@vger.kernel.org>
+To: Rob Herring <robh+dt@kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, Mark Rutland <mark.rutland@arm.com>, Fabio Estevam <fabio.estevam@nxp.com>, Marek Vasut <marex@denx.de>
+Cc: Sascha Hauer <kernel@pengutronix.de>, Otavio Salvador <otavio@ossystems.com.br>, Holger Schurig <holgerschurig@gmail.com>, Shawn Guo <shawnguo@kernel.org>, Dong Aisheng <aisheng.dong@nxp.com>, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, devicetree@vger.kernel.org
 
-> 
-> On Mon 2016-07-18 23:27:49, Tomas Winkler wrote:
-> > The user space API is achieved via two synchronous IOCTL.
-> 
-> IOCTLs?
+Hi Marek,
 
-Will fix
- 
-> > Simplified one, RPMB_IOC_REQ_CMD, were read result cycles is
-> performed
-> > by the framework on behalf the user and second, RPMB_IOC_SEQ_CMD
-> where
-> > the whole RPMB sequence including RESULT_READ is supplied by the caller.
-> > The latter is intended for  easier adjusting  of the  applications
-> > that use MMC_IOC_MULTI_CMD ioctl.
+> Stefan Wahren <stefan.wahren@i2se.com> hat am 6. August 2016 um 15:48
+> geschrieben:
 > 
-> Why "  "?
-Not sure I there is enough clue in your question. 
 > 
-> >
-> > Signed-off-by: Tomas Winkler <tomas.winkler@intel.com>
+> Hi Marek,
 > 
-> > +
-> > +static long rpmb_ioctl(struct file *fp, unsigned int cmd, unsigned
-> > +long arg) {
-> > +	return __rpmb_ioctl(fp, cmd, (void __user *)arg); }
-> > +
-> > +#ifdef CONFIG_COMPAT
-> > +static long rpmb_compat_ioctl(struct file *fp, unsigned int cmd,
-> > +			      unsigned long arg)
-> > +{
-> > +	return	__rpmb_ioctl(fp, cmd, compat_ptr(arg));
-> > +}
-> > +#endif /* CONFIG_COMPAT */
+> > Marek Vasut <marex@denx.de> hat am 6. August 2016 um 15:10 geschrieben:
+> > 
+> > 
+> > On 08/06/2016 02:55 PM, Stefan Wahren wrote:
+> > > Based on these discussions: [1], [2] this patch series implements
+> > > DDR support for the MXS MMC host driver. This feature has never been
+> > > ported from the vendor kernel.
+> > > 
+> > > It has been tested on a i.MX28 board with eMMC which is currently
+> > > not in mainline (Duckbill 2).
+> > > 
+> > > * without DDR support
+> > > dd if=/dev/zero of=test bs=8k count=10000
+> > > 81920000 bytes (82 MB) copied, 14.3321 s, 5.7 MB/s
+> > > 
+> > > * with DDR support:
+> > > dd if=/dev/zero of=test bs=8k count=10000
+> > > 81920000 bytes (82 MB) copied, 13.4781 s, 6.1 MB/s
+> > 
+> > Not much of a speedup, how so ?
 > 
-> Description of the ioctl is missing, 
-Will add. 
+> i agree. Unfortunately i never had the time for a deeper analysis, but i
+> noticed
+> big write performance differences between the vendor kernel 2.6.35 and current
+> mainline kernel in case of writing 100 MB directly to an eMMC partition
+> (factor
+> 2). Implementation of DDR mode was the lower fruit.
+> 
+> I've the suspicion that is related to the usage of DMA engine. Maybe the
+> overhead for AC/BC commands is to big. In the Freescale kernel is an
+> optimization [1].
+> 
+> [1] -
+> http://git.freescale.com/git/cgit.cgi/imx/linux-2.6-imx.git/commit/?h=imx_2.6.35_maintain&id=b09358887fb4b67f6d497fac8cc48475c8bd292d
+> 
 
-and it should certainly be designed in a way
-> that it does not need compat support.
+here are some additional thoughts about the too little performance gain of DDR
+mode:
 
-The compat_ioctl handler just casts the compat_ptr, I believe this should be done unless the ioctl is globaly registered in fs/compat_ioctl.c, but I might be wrong.
-Tomas
+* The DDR mode applies only to the DATA lines not to the CMD line. So the plain
+MMC commands can't benefit from that.
 
+* The i.MX28 reference manual mentions a relevant setting:
 
+  17.8.2.2 eMMC DDR operation
+  To boost the performance of SSP running in DDR mode and at the maximum
+frequency, 
+  the DMA interface allows a burst of 4 or 8 32-bit APB transfers per DMA
+request.
+
+I tried to change HW_SSP_DDR_CTRL_DMA_BURST_TYPE with no luck (in case of 8
+bursts the communication to the MMC get lost). AFAIK this register is never
+touched in the vendor kernel.
+
+Regards
+Stefan
