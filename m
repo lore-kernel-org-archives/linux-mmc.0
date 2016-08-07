@@ -1,39 +1,88 @@
-From: Hans de Goede <hdegoede@redhat.com>
-Subject: [PATCH resend 0/1] mmc: pwrseq-simple: Add an optional
- post-power-on-delay
-Date: Sun,  7 Aug 2016 21:02:37 +0200
-Message-ID: <1470596558-23195-1-git-send-email-hdegoede@redhat.com>
+From: Hans de Goede <j.w.r.degoede-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Subject: Support for various sdio wifi-chips on Allwinner
+ tablets and SBCs
+Date: Sun, 7 Aug 2016 21:25:43 +0200
+Message-ID: <5844eef2-71bd-bbb9-dff6-92e01a393b36@gmail.com>
+Reply-To: jwrdegoede-rxtnV0ftBwyoClj4AeEUq9i2O/JbrIOy@public.gmane.org
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>
-Cc: devicetree <devicetree@vger.kernel.org>, linux-mmc@vger.kernel.org, Chen-Yu Tsai <wens@csie.org>, Icenowy Zheng <icenowy@aosc.xyz>, Maxime Ripard <maxime.ripard@free-electrons.com>, linux-arm-kernel@lists.infradead.org
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Return-path: <linux-sunxi+bncBDL4X2GMZUKRBOUWT26QKGQEK7LABKI-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+Sender: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
+List-Post: <https://groups.google.com/group/linux-sunxi/post>, <mailto:linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Help: <https://groups.google.com/support/>, <mailto:linux-sunxi+help-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Archive: <https://groups.google.com/group/linux-sunxi
+List-Subscribe: <https://groups.google.com/group/linux-sunxi/subscribe>, <mailto:linux-sunxi+subscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Unsubscribe: <mailto:googlegroups-manage+1076902468213+unsubscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>,
+ <https://groups.google.com/group/linux-sunxi/subscribe>
+To: linux-sunxi <linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org>, Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>, Icenowy Zheng <icenowy-ymACFijhrKM@public.gmane.org>, Jean-Francois Moine <moinejf-GANU6spQydw@public.gmane.org>, Bastien Nocera <hadess-0MeiytkfxGOsTnJN9+BGXg@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-Hi Ulf, Rob,
+Hi All,
 
-Here is a resend of a patch from me from a couple of weeks ago.
+Recently I've been working on getting the sdio-wifi, found on
+many a23 / a33 tablets as well as on some a10s hdmi sticks and
+on various h3 SBCs such as the Orange Pi, to work with the
+mainline kernel.
 
-There was some discussion about this back then, but if I understood
-correctly, the end-conclusion was that Rob was ok with this change
-(with the caveat that we should not add 6 more confgurable delays
-at other points to the -simple binding later).
+If you use my sunxi-wip kernel branch (which has some dts bits
+to enable this as well as some misc. bits, which I'm all
+trying to get upstream) together with one of the following
+out of tree drivers, you should be able to get your wifi to
+work.
 
-Rob have I understood that correctly, if so can we please have your
-ack for the dt bits of this ?
+RTL8723BS or RTL8703AS wifi:
+----------------------------
+git clone https://github.com/jwrdegoede/rtl8723bs.git
+cd rtl8723bs
+make -j4 ARCH=arm CROSS_COMPILE=arm-linux-gnu- KSRC=../linux
 
-Ulf can you review and if ok merge this once we've Rob's ack ?
+Do not forget to copy *.bin to /lib/firmware/rtlwifi/ on
+the target system.
 
-Thanks & Regards,
+Many thanks to Bastien Nocera for his great work on the
+rtl8723bs driver, my repo just adds 2 small fixes
+to also make the rtl8703as work.
+
+
+RTL8189ES / RTL8189ETV
+----------------------
+git clone https://github.com/jwrdegoede/rtl8189ES_linux.git
+cd rtl8189ES_linux.git
+make -j4 ARCH=arm CROSS_COMPILE=arm-linux-gnu- KSRC=../linux
+
+Thanks to Jean-Francois Moine for his initial work on getting
+the RTL8989ES code to run with upstream kernels.
+
+
+RTL8189FTV
+----------
+git clone https://github.com/jwrdegoede/rtl8189ES_linux.git
+cd rtl8189ES_linux.git
+git checkout -B rtl8189fs origin/rtl8189fs
+make -j4 ARCH=arm CROSS_COMPILE=arm-linux-gnu- KSRC=../linux
+
+
+ESP8089
+-------
+git clone https://github.com/jwrdegoede/esp8089.git
+git checkout -B cleanup origin/cleanup
+cd ../linux
+make -j4 ARCH=arm CROSS_COMPILE=arm-linux-gnu- modules M=../esp8089 CONFIG_ESP8089=m
+
+Do not forget to copy firmware/*.bin to /lib/firmware/ on
+the target system.
+
+Many thanks to Icenowy for his work on the esp8089 driver.
+
+
+I hope this is useful to at least some of you.
+
+A quick note for Orange Pi users, the older models H3 based
+Pi-s use a soldered on wifi module with the RTL8189ETV.
+The newer models (the PC Plus, Lite and Plus 2E) use the
+RTL8189FTV soldered directly onto the PCB.
+
+Regards,
 
 Hans
