@@ -1,66 +1,67 @@
-From: Stefan Wahren <stefan.wahren-eS4NqCHxEME@public.gmane.org>
-Subject: Re: [PATCH RFC 2/3] mmc: core: add new cap for 3.3V only DDR MMCs
-Date: Sun, 7 Aug 2016 10:09:12 +0200 (CEST)
-Message-ID: <520205570.103061.350ab33c-8282-4c97-82e2-90a06202b849.open-xchange@email.1und1.de>
-References: <1470488140-10104-1-git-send-email-stefan.wahren@i2se.com>
- <1470488140-10104-3-git-send-email-stefan.wahren@i2se.com>
- <0e38d62a-b3d0-30ca-fca9-bb740ae54d0a@denx.de>
- <16443443.114784.752d0f22-93a7-46e8-bb14-c884787aaea3.open-xchange@email.1und1.de>
- <7284d9a4-164d-dd2d-b9a0-dd1de6c76274@rock-chips.com>
+From: "Winkler, Tomas" <tomas.winkler@intel.com>
+Subject: RE: [PATCH v5 4/8] char: rpmb: provide a user space interface
+Date: Sun, 7 Aug 2016 09:44:03 +0000
+Message-ID: <5B8DA87D05A7694D9FA63FD143655C1B542B8AC9@hasmsx108.ger.corp.intel.com>
+References: <1468873673-21776-1-git-send-email-tomas.winkler@intel.com>
+ <1468873673-21776-5-git-send-email-tomas.winkler@intel.com>
+ <20160805200823.GB7999@amd>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8BIT
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <7284d9a4-164d-dd2d-b9a0-dd1de6c76274-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Fabio Estevam <fabio.estevam-3arQi8VN3Tc@public.gmane.org>, Marek Vasut <marex-ynQEQJNshbs@public.gmane.org>
-Cc: Sascha Hauer <kernel-bIcnvbaLZ9MEGnE8C9+IrQ@public.gmane.org>, Otavio Salvador <otavio-fKevB0iiKLMBZ+LybsDmbA@public.gmane.org>, Holger Schurig <holgerschurig-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Shawn Guo <shawnguo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Dong Aisheng <aisheng.dong-3arQi8VN3Tc@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7BIT
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mga01.intel.com ([192.55.52.88]:7180 "EHLO mga01.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751527AbcHGJoH convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Sun, 7 Aug 2016 05:44:07 -0400
+In-Reply-To: <20160805200823.GB7999@amd>
+Content-Language: en-US
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Pavel Machek <pavel@ucw.cz>
+Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Ulf Hansson <ulf.hansson@linaro.org>, "Hunter, Adrian" <adrian.hunter@intel.com>, James Bottomley <James.Bottomley@HansenPartnership.com>, "Martin K. Petersen" <martin.petersen@oracle.com>, Vinayak Holikatti <vinholikatti@gmail.com>, Andy Lutomirski <luto@kernel.org>, Arve Hj?nnev?g <arve@android.com>, Michael Ryleev <gmar@google.com>, Joao Pinto <Joao.Pinto@synopsys.com>, Christoph Hellwig <hch@lst.de>, Yaniv Gardi <ygardi@codeaurora.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-scsi@vger.kernel.org" <linux-scsi@vger.kernel.org>
 
-Hi Shawn,
+> 
+> On Mon 2016-07-18 23:27:49, Tomas Winkler wrote:
+> > The user space API is achieved via two synchronous IOCTL.
+> 
+> IOCTLs?
 
-> Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org> hat am 7. August 2016 um 04:07
-> geschrieben:
+Will fix
+ 
+> > Simplified one, RPMB_IOC_REQ_CMD, were read result cycles is
+> performed
+> > by the framework on behalf the user and second, RPMB_IOC_SEQ_CMD
+> where
+> > the whole RPMB sequence including RESULT_READ is supplied by the caller.
+> > The latter is intended for  easier adjusting  of the  applications
+> > that use MMC_IOC_MULTI_CMD ioctl.
 > 
+> Why "  "?
+Not sure I there is enough clue in your question. 
 > 
-> 在 2016/8/6 22:18, Stefan Wahren 写道:
-> > Hi Marek,
 > >
-> >> Marek Vasut <marex-ynQEQJNshbs@public.gmane.org> hat am 6. August 2016 um 15:14 geschrieben:
-> >>
-> >>
-> >> On 08/06/2016 02:55 PM, Stefan Wahren wrote:
-> >>> This patch based on the work of Fabio Estevam:
-> >>> "[PATCH v2] mmc: core: Do not set mmc voltage to 1.8V when
-> >>> 'no-1-8-v' is present"
-> >>>
-> >>> It adds the support for 3.3V only DDR MMC hosts.
-> >>
-> >> Do such cards even exist ? Do you have a link where I can find some ?
-> >
-> > i never said anything about SD cards. I mean eMMC modules which usually have
-> > 8
-> > data pins like this one [1].
-> >
-> > Please don't blame me if it's not compatible to i.MX28. It's only an
-> > example.
-> >
-> > [1] -
-> > http://datasheet.octopart.com/THGBM3G4D1FBAIGH2H-Toshiba-datasheet-20748880.pdf
+> > Signed-off-by: Tomas Winkler <tomas.winkler@intel.com>
 > 
+> > +
+> > +static long rpmb_ioctl(struct file *fp, unsigned int cmd, unsigned
+> > +long arg) {
+> > +	return __rpmb_ioctl(fp, cmd, (void __user *)arg); }
+> > +
+> > +#ifdef CONFIG_COMPAT
+> > +static long rpmb_compat_ioctl(struct file *fp, unsigned int cmd,
+> > +			      unsigned long arg)
+> > +{
+> > +	return	__rpmb_ioctl(fp, cmd, compat_ptr(arg));
+> > +}
+> > +#endif /* CONFIG_COMPAT */
 > 
-> I download the datasheet you mentioned, and I explicitly see it
-> describe 1V8 everywhere, especially for the section of "ELECTRICAL
-> CHARACTERISTICS".
-> 
-> I never see one eMMC claiming DDR52 capability but doesn't support 1V8
-> so far. Could you kindly share me the part number of the eMMC you are
-> using? :)
+> Description of the ioctl is missing, 
+Will add. 
 
-sorry the subject line is misleading. The capability flag is about the host not
-about the MMC itself. There are hosts which doesn't support 1.8V. I will clarify
-this in the next version.
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+and it should certainly be designed in a way
+> that it does not need compat support.
+
+The compat_ioctl handler just casts the compat_ptr, I believe this should be done unless the ioctl is globaly registered in fs/compat_ioctl.c, but I might be wrong.
+Tomas
+
+
