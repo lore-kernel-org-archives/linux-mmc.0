@@ -1,58 +1,59 @@
-From: Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>
-Subject: Re: [PATCH 2/2] dt: bindings: Add binding for ESP8089 wifi chips
-Date: Mon, 08 Aug 2016 11:24:23 +0200
-Message-ID: <52721384.ieJe1WiAoe@wuerfel>
-References: <1470596269-20572-1-git-send-email-hdegoede@redhat.com> <2936779.FAiO1bqUWV@wuerfel> <CAGb2v67+QrOxPd4KeLb9F67A0mSaBqn14PynzCyK=ovRnKA6EQ@mail.gmail.com>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: Re: [PATCH v2 0/6] Add support of inverting power control and some
+ minor cleanup
+Date: Mon, 08 Aug 2016 19:24:31 +0900
+Message-ID: <ee997311-3964-8623-a431-c9a5add7f991@samsung.com>
+References: <CGME20160807013720epcas1p235628058a90efa6f0062b03a4b2e4284@epcas1p2.samsung.com>
+ <1470533618-16312-1-git-send-email-shawn.lin@rock-chips.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7Bit
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <CAGb2v67+QrOxPd4KeLb9F67A0mSaBqn14PynzCyK=ovRnKA6EQ-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org>
-Cc: Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Icenowy Zheng <icenowy-ymACFijhrKM@public.gmane.org>, linux-arm-kernel <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, devicetree <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-reply-to: <1470533618-16312-1-git-send-email-shawn.lin@rock-chips.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Shawn Lin <shawn.lin@rock-chips.com>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Rob Herring <robh+dt@kernel.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Heiko Stuebner <heiko@sntech.de>, linux-rockchip@lists.infradead.org, devicetree@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-On Monday, August 8, 2016 11:59:25 AM CEST Chen-Yu Tsai wrote:
-> Hi Arnd,
+Hi Shawn,
+
+On 08/07/2016 10:33 AM, Shawn Lin wrote:
+> By default, dw_mmc outputs high level voltage to indicate powering
+> up the card and outputs low level vcltage to indicate powering
+> off the card. But that is not always correct. The power io should
+> be able to control different kind of hw components to supply or
+> cutoff power to the card. We have boards that need this patchset
+> to make the power control correct. Meanwhile let's expose it to
+> DT for board-specific usage.
+
+I have a question for this patch-set. Does DWMMC IP support to invert ON/OFF at Power Enable register?
+Hmm..Well, if use the DW_MMC_CARD_PWR_INVERT, it should also be the similar behavior with Quirks.
+
+Other flags are related with dwmmc IP. But this flag (DW_MMC_CARD_PWR_INVERT) is not related with IP side.
+I understood why you needs to add this flag..Is rockchip designed to invert the power controlling?
+
+But it's not general case. We can discuss about this.
+
+Best Regards,
+Jaehoon Chung
+
 > 
-> On Mon, Aug 8, 2016 at 3:59 AM, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org> wrote:
-> > On Sunday, August 7, 2016 8:57:49 PM CEST Hans de Goede wrote:
-> >> +Espressif ESP8089 wireless SDIO devices
-> >> +
-> >> +This node provides properties for controlling the ESP8089 wireless device.
-> >> +The node is expected to be specified as a child node to the SDIO controller
-> >> +that connects the device to the system.
-> >> +
-> >> +Required properties:
-> >> +
-> >> + - compatible : Should be "esp,esp8089".
-> >
-> > I think it would be good to standardize a compatible string for sdio
-> > like we have it for other discoverable buses, based on the
-> > vendor/device ID (or whatever this uses), using something like
-> >
-> > compatible = "sdio1234,5678", "esp,esp8089";
 > 
-> Is there a central repository for SDIO vendor/device IDs similar to
-> PCI or USB IDs?
-
-No idea. I believe the existing repositories for PCI and USB are not
-public either, there is just the information at http://pcidatabase.com/,
-http://pci-ids.ucw.cz/ or http://www.linux-usb.org/usb.ids that
-are maintained by volunteers and that are not authoritarive.
-
-I found one list at https://github.com/systemd/systemd/blob/master/hwdb/sdio.ids
-but it's probably very incomplete.
-
-> The vendor ID Espressif uses is 0x6666, which seems kind of bogus to me.
-
-It probably is, but that's not important as long as nothing else uses
-that ID.
-
-	Arnd
-
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> Changes in v2:
+> - fix copy-paste err and typo
+> 
+> Shawn Lin (6):
+>   dt-bindings: rockchip-dw-mshc: add description of
+>     rockchip,power-invert
+>   mmc: dw_mmc: cleanup power setting of set_ios callback
+>   mmc: dw_mmc: split out dw_mci_set_power
+>   mmc: dw_mmc: split out dw_mci_set_power_reg
+>   mmc: dw_mmc: support inverted power control
+>   mmc: dw_mmc-rockchip: add parsing of power control from DT
+> 
+>  .../devicetree/bindings/mmc/rockchip-dw-mshc.txt   |   6 +
+>  drivers/mmc/host/dw_mmc-rockchip.c                 |   8 ++
+>  drivers/mmc/host/dw_mmc.c                          | 134 ++++++++++++---------
+>  drivers/mmc/host/dw_mmc.h                          |   1 +
+>  4 files changed, 90 insertions(+), 59 deletions(-)
+> 
