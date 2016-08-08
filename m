@@ -1,55 +1,63 @@
-From: Chen-Yu Tsai <wens@csie.org>
-Subject: Re: [PATCH 2/2] dt: bindings: Add binding for ESP8089 wifi chips
-Date: Mon, 8 Aug 2016 11:59:25 +0800
-Message-ID: <CAGb2v67+QrOxPd4KeLb9F67A0mSaBqn14PynzCyK=ovRnKA6EQ@mail.gmail.com>
-References: <1470596269-20572-1-git-send-email-hdegoede@redhat.com>
- <1470596269-20572-2-git-send-email-hdegoede@redhat.com> <2936779.FAiO1bqUWV@wuerfel>
+From: Jinguojun <kid.jin@hisilicon.com>
+Subject: Re: [PATCH V4]mmc: dw_mmc-k3: UHS-SD card for Hisilicon Hikey
+Date: Mon, 8 Aug 2016 15:10:31 +0800
+Message-ID: <74c80b1c-5570-0ee0-4132-ff703d8d5eb4@hisilicon.com>
+References: <1470276973-41683-1-git-send-email-kid.jin@hisilicon.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="windows-1252"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp.csie.ntu.edu.tw ([140.112.30.61]:40066 "EHLO
-	smtp.csie.ntu.edu.tw" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752008AbcHHD7w (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Sun, 7 Aug 2016 23:59:52 -0400
-In-Reply-To: <2936779.FAiO1bqUWV@wuerfel>
+Received: from szxga03-in.huawei.com ([119.145.14.66]:33810 "EHLO
+	szxga03-in.huawei.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750916AbcHHHPN (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 8 Aug 2016 03:15:13 -0400
+In-Reply-To: <1470276973-41683-1-git-send-email-kid.jin@hisilicon.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Arnd Bergmann <arnd@arndb.de>
-Cc: Hans de Goede <hdegoede@redhat.com>, Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>, Chen-Yu Tsai <wens@csie.org>, Maxime Ripard <maxime.ripard@free-electrons.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Icenowy Zheng <icenowy@aosc.xyz>, linux-arm-kernel <linux-arm-kernel@lists.infradead.org>, devicetree <devicetree@vger.kernel.org>
+To: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, ulf.hansson@linaro.org, adrian.hunter@intel.com, jh80.chung@samsung.com, wsa+renesas@sang-engineering.com, arnd@arndb.de, rmk+kernel@arm.linux.org.uk, shawn.lin@rock-chips.com
+Cc: guodong.xu@linaro.org, kongfei@hisilicon.com, suzhuangluan@hisilicon.com
 
-Hi Arnd,
+Hi,maintainers
 
-On Mon, Aug 8, 2016 at 3:59 AM, Arnd Bergmann <arnd@arndb.de> wrote:
-> On Sunday, August 7, 2016 8:57:49 PM CEST Hans de Goede wrote:
->> +Espressif ESP8089 wireless SDIO devices
->> +
->> +This node provides properties for controlling the ESP8089 wireless device.
->> +The node is expected to be specified as a child node to the SDIO controller
->> +that connects the device to the system.
->> +
->> +Required properties:
->> +
->> + - compatible : Should be "esp,esp8089".
->
-> I think it would be good to standardize a compatible string for sdio
-> like we have it for other discoverable buses, based on the
-> vendor/device ID (or whatever this uses), using something like
->
-> compatible = "sdio1234,5678", "esp,esp8089";
+Pls help to review code,this is the newest patch after your advise
 
-Is there a central repository for SDIO vendor/device IDs similar to
-PCI or USB IDs?
+Thx
+On 2016/8/4 10:16, Jin Guojun wrote:
+> mmc: dw_mmc-k3: Hisilicon Hikey have no tuning function in 
+> dw_mmc-k3.c,so we must do the tuning function stub when we init UHS card.
+> 
+> V1:add .prepare_command in dw_mmc.c
+> V2:delete .prepare_command, add err = 0 in dw_mci_execute_tuning
+> V3:delete err = 0 in dw_mci_execute_tuning,add .execute_tuning in 
+> dw_mmc-k3.c
+> V4:add "linux-mmc@vger.kernel.org", patch version, Changelog, etc..
+> 
+> Signed-off-by: Jin Guojun <kid.jin@hisilicon.com>
+> ---
+>  drivers/mmc/host/dw_mmc-k3.c | 6 ++++++
+>  1 file changed, 6 insertions(+)
+> 
+> diff --git a/drivers/mmc/host/dw_mmc-k3.c b/drivers/mmc/host/dw_mmc-k3.c
+> index 8e9d886..6247894 100644
+> --- a/drivers/mmc/host/dw_mmc-k3.c
+> +++ b/drivers/mmc/host/dw_mmc-k3.c
+> @@ -131,11 +131,17 @@ static void dw_mci_hi6220_set_ios(struct dw_mci *host, struct mmc_ios *ios)
+>  	host->bus_hz = clk_get_rate(host->biu_clk);
+>  }
+>  
+> +static int dw_mci_hi6220_execute_tuning(struct dw_mci_slot *slot, u32 opcode)
+> +{
+> +	return 0;
+> +}
+> +
+>  static const struct dw_mci_drv_data hi6220_data = {
+>  	.caps			= dw_mci_hi6220_caps,
+>  	.switch_voltage		= dw_mci_hi6220_switch_voltage,
+>  	.set_ios		= dw_mci_hi6220_set_ios,
+>  	.parse_dt		= dw_mci_hi6220_parse_dt,
+> +	.execute_tuning		= dw_mci_hi6220_execute_tuning,
+>  };
+>  
+>  static const struct of_device_id dw_mci_k3_match[] = {
+> 
 
-The vendor ID Espressif uses is 0x6666, which seems kind of bogus to me.
-
-ChenYu
-
->
->> +Optional properties:
->> + - esp,crystal_26M_en: Integer value for the crystal_26M_en firmware parameter
->
-> better use '-' instead of '_' for property names.
->
->         Arnd
->
->
