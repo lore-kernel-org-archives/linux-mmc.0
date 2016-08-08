@@ -1,12 +1,12 @@
-From: Arnd Bergmann <arnd@arndb.de>
+From: Icenowy Zheng <icenowy@aosc.xyz>
 Subject: Re: [PATCH 2/2] dt: bindings: Add binding for ESP8089 wifi chips
-Date: Sun, 07 Aug 2016 21:59:13 +0200
-Message-ID: <2936779.FAiO1bqUWV@wuerfel>
+Date: Mon, 08 Aug 2016 10:36:16 +0800
+Message-ID: <1971470623776@web13m.yandex.ru>
 References: <1470596269-20572-1-git-send-email-hdegoede@redhat.com>
  <1470596269-20572-2-git-send-email-hdegoede@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
 In-Reply-To: <1470596269-20572-2-git-send-email-hdegoede@redhat.com>
 List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
@@ -18,30 +18,55 @@ List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
  <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
 Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
 Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Hans de Goede <hdegoede@redhat.com>
-Cc: devicetree <devicetree@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, Chen-Yu Tsai <wens@csie.org>, Rob Herring <robh+dt@kernel.org>, Icenowy Zheng <icenowy@aosc.xyz>, Maxime Ripard <maxime.ripard@free-electrons.com>, linux-arm-kernel@lists.infradead.org
+To: Hans de Goede <hdegoede@redhat.com>, Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>
+Cc: devicetree <devicetree@vger.kernel.org>, Chen-Yu Tsai <wens@csie.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Maxime Ripard <maxime.ripard@free-electrons.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Sunday, August 7, 2016 8:57:49 PM CEST Hans de Goede wrote:
-> +Espressif ESP8089 wireless SDIO devices
-> +
-> +This node provides properties for controlling the ESP8089 wireless device.
-> +The node is expected to be specified as a child node to the SDIO controller
-> +that connects the device to the system.
-> +
-> +Required properties:
-> +
-> + - compatible : Should be "esp,esp8089".
-
-I think it would be good to standardize a compatible string for sdio
-like we have it for other discoverable buses, based on the
-vendor/device ID (or whatever this uses), using something like
-
-compatible = "sdio1234,5678", "esp,esp8089";
-
-> +Optional properties:
-> + - esp,crystal_26M_en: Integer value for the crystal_26M_en firmware parameter
-
-better use '-' instead of '_' for property names.
-
-	Arnd
+CgowOC4wOC4yMDE2LCAwMjo1OCwgIkhhbnMgZGUgR29lZGUiIDxoZGVnb2VkZUByZWRoYXQuY29t
+PjoKPiBUaGUgRVNQODA4OSBjaGlwcyBjYW4gbW9zdGx5IGJlIGVudW1lcmF0ZWQgdmlhIHRoZWly
+IHNkaW8gaW50ZXJmYWNlLAo+IGJ1dCB0aGV5IGFyZSBjbG9ja2VkIGJ5IGFuIGV4dGVybmFsIGNy
+eXN0YWwgd2hpY2ggbWF5IGRpZmZlciBmcm9tIG9uZQo+IGJvYXJkIHRvIHRoZSBvdGhlci4KPgo+
+IFRoaXMgY29tbWl0IGFkZHMgYSBiaW5kaW5nIGZvciB0aGUgc2RpbyBjaGlsZCBub2RlIGZvciB0
+aGVzZSBjaGlwcywKPiBhbGxvd2luZyB0byBzcGVjaWZ5IHRoZSBleHRlcm5hbCBjcnlzdGFsIHR5
+cGUgKGZvciBub3csIHRoaXMgYmluZGluZwo+IGNvdWxkIGJlIGJlIGV4dGVuZGVkIHdpdGggZS5n
+LiBPT0IgaXJxIHN1cHBvcnQgbGF0ZXIpLgo+Cj4gVGhlIEFuZHJvaWQgZHJpdmVyIGZvciB0aGlz
+IGNoaXAgdXNlcyBhIHRleHQgZmlsZSB3aXRoIGtleSx2YWx1ZSBwYWlycwo+IHdoaWNoIGdldHMg
+bG9hZGVkIGFzIGZpcm13YXJlIHRvIHBhc3MgdGhpcyBpbmZvIHRvIHRoZSBmaXJtd2FyZS4KPiBU
+aGUgImVzcCxjcnlzdGFsXzI2TV9lbiIgbmFtZSBpcyBjaG9zZW4gdG8gbWF0Y2ggdGhlIGNyeXN0
+YWxfMjZNX2VuCj4ga2V5LW5hbWUgaW4gdGhhdCB0ZXh0IGZpbGUuCj4KPiBOb3RlIHRoYXQgYXQg
+dGhpcyBwb2ludCB0aGVyZSBvbmx5IGlzIGFuIG91dCBvZiB0cmVlIGRyaXZlciBmb3IgdGhpcwo+
+IGhhcmR3YXJlLCB0aGVyZSBpcyBubyBjbGVhciB0aW1lbGluZSAvIHBhdGggZm9yIG1lcmdpbmcg
+dGhpcy4gU3RpbGwKPiBJIGJlbGlldmUgaXQgd291bGQgYmUgZ29vZCB0byBzcGVjaWZ5IHRoZSBi
+aW5kaW5nIGZvciB0aGlzIGluIHRyZWUKPiBub3csIHNvIHRoYXQgYW55IGZ1dHVyZSBtaWdyYXRp
+b24gdG8gYW4gaW4gdHJlZSBkcml2ZXIgd2lsbCBub3QgY2F1c2UKPiBjb21wYXRpYmxpdHkgaXNz
+dWVzLgo+Cj4gQ2M6IEljZW5vd3kgWmhlbmcgPGljZW5vd3lAYW9zYy54eXo+Cj4gU2lnbmVkLW9m
+Zi1ieTogSGFucyBkZSBHb2VkZSA8aGRlZ29lZGVAcmVkaGF0LmNvbT4KPiAtLS0KPiDCoC4uLi9i
+aW5kaW5ncy9uZXQvd2lyZWxlc3MvZXNwLGVzcDgwODkudHh0IHwgMzEgKysrKysrKysrKysrKysr
+KysrKysrKwo+IMKgMSBmaWxlIGNoYW5nZWQsIDMxIGluc2VydGlvbnMoKykKPiDCoGNyZWF0ZSBt
+b2RlIDEwMDY0NCBEb2N1bWVudGF0aW9uL2RldmljZXRyZWUvYmluZGluZ3MvbmV0L3dpcmVsZXNz
+L2VzcCxlc3A4MDg5LnR4dAo+Cj4gZGlmZiAtLWdpdCBhL0RvY3VtZW50YXRpb24vZGV2aWNldHJl
+ZS9iaW5kaW5ncy9uZXQvd2lyZWxlc3MvZXNwLGVzcDgwODkudHh0IGIvRG9jdW1lbnRhdGlvbi9k
+ZXZpY2V0cmVlL2JpbmRpbmdzL25ldC93aXJlbGVzcy9lc3AsZXNwODA4OS50eHQKPiBuZXcgZmls
+ZSBtb2RlIDEwMDY0NAo+IGluZGV4IDAwMDAwMDAuLjg5OGExNDkKPiAtLS0gL2Rldi9udWxsCj4g
+KysrIGIvRG9jdW1lbnRhdGlvbi9kZXZpY2V0cmVlL2JpbmRpbmdzL25ldC93aXJlbGVzcy9lc3As
+ZXNwODA4OS50eHQKPiBAQCAtMCwwICsxLDMxIEBACj4gK0VzcHJlc3NpZiBFU1A4MDg5IHdpcmVs
+ZXNzIFNESU8gZGV2aWNlcwo+ICsKPiArVGhpcyBub2RlIHByb3ZpZGVzIHByb3BlcnRpZXMgZm9y
+IGNvbnRyb2xsaW5nIHRoZSBFU1A4MDg5IHdpcmVsZXNzIGRldmljZS4KPiArVGhlIG5vZGUgaXMg
+ZXhwZWN0ZWQgdG8gYmUgc3BlY2lmaWVkIGFzIGEgY2hpbGQgbm9kZSB0byB0aGUgU0RJTyBjb250
+cm9sbGVyCj4gK3RoYXQgY29ubmVjdHMgdGhlIGRldmljZSB0byB0aGUgc3lzdGVtLgo+ICsKPiAr
+UmVxdWlyZWQgcHJvcGVydGllczoKPiArCj4gKyAtIGNvbXBhdGlibGUgOiBTaG91bGQgYmUgImVz
+cCxlc3A4MDg5Ii4KVGhlcmUncyBhbHNvIGVzcDgyNjYuIChBbmQgdGhlIGRpZmZlcmVuY2Ugb2Yg
+ODA4OSBhbmQgODI2NiBpcyBtYWlubHkgdGhlIGRpZmZlcmVuY2Ugb2YgY3J5c3RhbCBmcmVxdWVu
+Y3kuLi4gMjZNSHogZm9yIDgyNjYsIDQwTUh6IGZvciA4MDg5KQpTbyBtYXliZSBpdCBzaG91bGQg
+YmUgdGhlIGRpZmZlcmVuY2Ugb2YgZHQgY29tcGF0aWJsZT8KPiArCj4gK09wdGlvbmFsIHByb3Bl
+cnRpZXM6Cj4gKyAtIGVzcCxjcnlzdGFsXzI2TV9lbjogSW50ZWdlciB2YWx1ZSBmb3IgdGhlIGNy
+eXN0YWxfMjZNX2VuIGZpcm13YXJlIHBhcmFtZXRlcgo+ICsKPiArRXhhbXBsZToKPiArCj4gKyZt
+bWMxIHsKPiArICNhZGRyZXNzLWNlbGxzID0gPDE+Owo+ICsgI3NpemUtY2VsbHMgPSA8MD47Cj4g
+Kwo+ICsgdm1tYy1zdXBwbHkgPSA8JnJlZ19kbGRvMT47Cj4gKyBtbWMtcHdyc2VxID0gPCZ3aWZp
+X3B3cnNlcT47Cj4gKyBidXMtd2lkdGggPSA8ND47Cj4gKyBub24tcmVtb3ZhYmxlOwo+ICsgc3Rh
+dHVzID0gIm9rYXkiOwo+ICsKPiArIGVzcDgwODk6IHNkaW9fd2lmaUAxIHsKPiArIGNvbXBhdGli
+bGUgPSAiZXNwLGVzcDgwODkiOwo+ICsgcmVnID0gPDE+Owo+ICsgZXNwLGNyeXN0YWxfMjZNX2Vu
+ID0gPDI+Owo+ICsgfTsKPiArfTsKPiAtLQo+IDIuNy40CgpfX19fX19fX19fX19fX19fX19fX19f
+X19fX19fX19fX19fX19fX19fX19fX19fXwpsaW51eC1hcm0ta2VybmVsIG1haWxpbmcgbGlzdAps
+aW51eC1hcm0ta2VybmVsQGxpc3RzLmluZnJhZGVhZC5vcmcKaHR0cDovL2xpc3RzLmluZnJhZGVh
+ZC5vcmcvbWFpbG1hbi9saXN0aW5mby9saW51eC1hcm0ta2VybmVsCg==
