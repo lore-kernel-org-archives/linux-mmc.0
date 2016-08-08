@@ -1,89 +1,58 @@
-From: Shawn Lin <shawn.lin@rock-chips.com>
-Subject: Re: [PATCH V4]mmc: dw_mmc-k3: UHS-SD card for Hisilicon Hikey
-Date: Mon, 8 Aug 2016 17:10:06 +0800
-Message-ID: <06f63a26-251d-5ba8-f877-dae75aa8e362@rock-chips.com>
-References: <1470276973-41683-1-git-send-email-kid.jin@hisilicon.com>
- <74c80b1c-5570-0ee0-4132-ff703d8d5eb4@hisilicon.com>
+From: Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>
+Subject: Re: [PATCH 2/2] dt: bindings: Add binding for ESP8089 wifi chips
+Date: Mon, 08 Aug 2016 11:24:23 +0200
+Message-ID: <52721384.ieJe1WiAoe@wuerfel>
+References: <1470596269-20572-1-git-send-email-hdegoede@redhat.com> <2936779.FAiO1bqUWV@wuerfel> <CAGb2v67+QrOxPd4KeLb9F67A0mSaBqn14PynzCyK=ovRnKA6EQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 8bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <74c80b1c-5570-0ee0-4132-ff703d8d5eb4@hisilicon.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Jinguojun <kid.jin@hisilicon.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, ulf.hansson@linaro.org, adrian.hunter@intel.com, jh80.chung@samsung.com, wsa+renesas@sang-engineering.com, arnd@arndb.de, rmk+kernel@arm.linux.org.uk
-Cc: shawn.lin@rock-chips.com, guodong.xu@linaro.org, kongfei@hisilicon.com, suzhuangluan@hisilicon.com
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7Bit
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <CAGb2v67+QrOxPd4KeLb9F67A0mSaBqn14PynzCyK=ovRnKA6EQ-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org>
+Cc: Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Icenowy Zheng <icenowy-ymACFijhrKM@public.gmane.org>, linux-arm-kernel <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, devicetree <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-Hi guy,
+On Monday, August 8, 2016 11:59:25 AM CEST Chen-Yu Tsai wrote:
+> Hi Arnd,
+> 
+> On Mon, Aug 8, 2016 at 3:59 AM, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org> wrote:
+> > On Sunday, August 7, 2016 8:57:49 PM CEST Hans de Goede wrote:
+> >> +Espressif ESP8089 wireless SDIO devices
+> >> +
+> >> +This node provides properties for controlling the ESP8089 wireless device.
+> >> +The node is expected to be specified as a child node to the SDIO controller
+> >> +that connects the device to the system.
+> >> +
+> >> +Required properties:
+> >> +
+> >> + - compatible : Should be "esp,esp8089".
+> >
+> > I think it would be good to standardize a compatible string for sdio
+> > like we have it for other discoverable buses, based on the
+> > vendor/device ID (or whatever this uses), using something like
+> >
+> > compatible = "sdio1234,5678", "esp,esp8089";
+> 
+> Is there a central repository for SDIO vendor/device IDs similar to
+> PCI or USB IDs?
 
-On 2016/8/8 15:10, Jinguojun wrote:
-> Hi,maintainers
->
-> Pls help to review code,this is the newest patch after your advise
->
+No idea. I believe the existing repositories for PCI and USB are not
+public either, there is just the information at http://pcidatabase.com/,
+http://pci-ids.ucw.cz/ or http://www.linux-usb.org/usb.ids that
+are maintained by volunteers and that are not authoritarive.
 
-Please give Jaehoon more time to review your patch before sending a
-ping or resending one(~2 weeks), as it's only four days(weekend
-included) since v4 was done....IMHO, it's quite bold...
+I found one list at https://github.com/systemd/systemd/blob/master/hwdb/sdio.ids
+but it's probably very incomplete.
 
-> Thx
-> On 2016/8/4 10:16, Jin Guojun wrote:
->> mmc: dw_mmc-k3: Hisilicon Hikey have no tuning function in
->> dw_mmc-k3.c,so we must do the tuning function stub when we init UHS card.
->>
+> The vendor ID Espressif uses is 0x6666, which seems kind of bogus to me.
 
-Hrmmm....  remove "mmc: dw_mmc-k3:" from the meat of commit msg。
+It probably is, but that's not important as long as nothing else uses
+that ID.
 
-And you do nothing for dw_mci_hi6220_execute_tuning, why?
-Could you elaborate more..
+	Arnd
 
-
->> V1:add .prepare_command in dw_mmc.c
->> V2:delete .prepare_command, add err = 0 in dw_mci_execute_tuning
->> V3:delete err = 0 in dw_mci_execute_tuning,add .execute_tuning in
->> dw_mmc-k3.c
->> V4:add "linux-mmc@vger.kernel.org", patch version, Changelog, etc..
-
-The changelog is totally wrong, namely it should not be listed in the
-commit msg...
-
->>
->> Signed-off-by: Jin Guojun <kid.jin@hisilicon.com>
->> ---
->>  drivers/mmc/host/dw_mmc-k3.c | 6 ++++++
->>  1 file changed, 6 insertions(+)
->>
->> diff --git a/drivers/mmc/host/dw_mmc-k3.c b/drivers/mmc/host/dw_mmc-k3.c
->> index 8e9d886..6247894 100644
->> --- a/drivers/mmc/host/dw_mmc-k3.c
->> +++ b/drivers/mmc/host/dw_mmc-k3.c
->> @@ -131,11 +131,17 @@ static void dw_mci_hi6220_set_ios(struct dw_mci *host, struct mmc_ios *ios)
->>  	host->bus_hz = clk_get_rate(host->biu_clk);
->>  }
->>
->> +static int dw_mci_hi6220_execute_tuning(struct dw_mci_slot *slot, u32 opcode)
->> +{
->> +	return 0;
->> +}
->> +
->>  static const struct dw_mci_drv_data hi6220_data = {
->>  	.caps			= dw_mci_hi6220_caps,
->>  	.switch_voltage		= dw_mci_hi6220_switch_voltage,
->>  	.set_ios		= dw_mci_hi6220_set_ios,
->>  	.parse_dt		= dw_mci_hi6220_parse_dt,
->> +	.execute_tuning		= dw_mci_hi6220_execute_tuning,
->>  };
->>
->>  static const struct of_device_id dw_mci_k3_match[] = {
->>
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
-
-
--- 
-Best Regards
-Shawn Lin
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
