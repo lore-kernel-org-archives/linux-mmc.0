@@ -1,109 +1,89 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH V4]mmc: dw_mmc-k3: UHS-SD card for Hisilicon Hikey
-Date: Mon, 08 Aug 2016 19:46:01 +0900
-Message-ID: <1b724dde-863d-fa28-fa58-595c34c1bef2@samsung.com>
-References: <1470276973-41683-1-git-send-email-kid.jin@hisilicon.com>
- <74c80b1c-5570-0ee0-4132-ff703d8d5eb4@hisilicon.com>
- <CGME20160808091030epcas1p4e868c5412d08f0ed737e85714442e801@epcas1p4.samsung.com>
- <06f63a26-251d-5ba8-f877-dae75aa8e362@rock-chips.com>
+From: Icenowy Zheng <icenowy@aosc.xyz>
+Subject: Re: [PATCH 2/2] dt: bindings: Add binding for ESP8089 wifi chips
+Date: Mon, 08 Aug 2016 20:42:53 +0800
+Message-ID: <264251470660173@web16j.yandex.ru>
+References: <1470596269-20572-1-git-send-email-hdegoede@redhat.com>
+ <1470596269-20572-2-git-send-email-hdegoede@redhat.com>
+ <1971470623776@web13m.yandex.ru>
+ <9518a338-f1f5-848c-ce17-85ec1ebaa213@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8BIT
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-reply-to: <06f63a26-251d-5ba8-f877-dae75aa8e362@rock-chips.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Shawn Lin <shawn.lin@rock-chips.com>, Jinguojun <kid.jin@hisilicon.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, ulf.hansson@linaro.org, adrian.hunter@intel.com, wsa+renesas@sang-engineering.com, arnd@arndb.de, rmk+kernel@arm.linux.org.uk
-Cc: guodong.xu@linaro.org, kongfei@hisilicon.com, suzhuangluan@hisilicon.com
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <9518a338-f1f5-848c-ce17-85ec1ebaa213@redhat.com>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Hans de Goede <hdegoede@redhat.com>, Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh+dt@kernel.org>
+Cc: devicetree <devicetree@vger.kernel.org>, Chen-Yu Tsai <wens@csie.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Maxime Ripard <maxime.ripard@free-electrons.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
 List-Id: linux-mmc@vger.kernel.org
 
-Hi,
-
-On 08/08/2016 06:10 PM, Shawn Lin wrote:
-> Hi guy,
-> 
-> On 2016/8/8 15:10, Jinguojun wrote:
->> Hi,maintainers
->>
->> Pls help to review code,this is the newest patch after your advise
-
-Subject..
-
-s/UHS-SD/UHS-I/
-
->>
-> 
-> Please give Jaehoon more time to review your patch before sending a
-> ping or resending one(~2 weeks), as it's only four days(weekend
-> included) since v4 was done....IMHO, it's quite bold...
-> 
->> Thx
->> On 2016/8/4 10:16, Jin Guojun wrote:
->>> mmc: dw_mmc-k3: Hisilicon Hikey have no tuning function in
->>> dw_mmc-k3.c,so we must do the tuning function stub when we init UHS card.
->>>
-> 
-> Hrmmm....  remove "mmc: dw_mmc-k3:" from the meat of commit msg。
-> 
-> And you do nothing for dw_mci_hi6220_execute_tuning, why?
-> Could you elaborate more..
-> 
-> 
->>> V1:add .prepare_command in dw_mmc.c
->>> V2:delete .prepare_command, add err = 0 in dw_mci_execute_tuning
->>> V3:delete err = 0 in dw_mci_execute_tuning,add .execute_tuning in
->>> dw_mmc-k3.c
->>> V4:add "linux-mmc@vger.kernel.org", patch version, Changelog, etc..
-> 
-> The changelog is totally wrong, namely it should not be listed in the
-> commit msg...
-> 
->>>
->>> Signed-off-by: Jin Guojun <kid.jin@hisilicon.com>
->>> ---
->>>  drivers/mmc/host/dw_mmc-k3.c | 6 ++++++
->>>  1 file changed, 6 insertions(+)
->>>
->>> diff --git a/drivers/mmc/host/dw_mmc-k3.c b/drivers/mmc/host/dw_mmc-k3.c
->>> index 8e9d886..6247894 100644
->>> --- a/drivers/mmc/host/dw_mmc-k3.c
->>> +++ b/drivers/mmc/host/dw_mmc-k3.c
->>> @@ -131,11 +131,17 @@ static void dw_mci_hi6220_set_ios(struct dw_mci *host, struct mmc_ios *ios)
->>>      host->bus_hz = clk_get_rate(host->biu_clk);
->>>  }
->>>
->>> +static int dw_mci_hi6220_execute_tuning(struct dw_mci_slot *slot, u32 opcode)
->>> +{
->>> +    return 0;
->>> +}
-
-
-All of UHS-I cards didn't need to do tuning sequence on your SoC? it's strange.
-
-I think we can fix more exactly in dw_mmc.c
-As i know, some UHS cards don't need to send the tuning sequence.
-(If i know wrong, let me know plz.)
-
-But just skipping execute_tuning..I think it's not correct.
-
-Best Regards,
-Jaehoon Chung
-
->>> +
->>>  static const struct dw_mci_drv_data hi6220_data = {
->>>      .caps            = dw_mci_hi6220_caps,
->>>      .switch_voltage        = dw_mci_hi6220_switch_voltage,
->>>      .set_ios        = dw_mci_hi6220_set_ios,
->>>      .parse_dt        = dw_mci_hi6220_parse_dt,
->>> +    .execute_tuning        = dw_mci_hi6220_execute_tuning,
->>>  };
->>>
->>>  static const struct of_device_id dw_mci_k3_match[] = {
->>>
->>
->> -- 
->> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>
-> 
-> 
+SGksCgowOC4wOC4yMDE2LCAxNTozNCwgIkhhbnMgZGUgR29lZGUiIDxoZGVnb2VkZUByZWRoYXQu
+Y29tPjoKPiBIaSwKPgo+IE9uIDA4LTA4LTE2IDA0OjM2LCBJY2Vub3d5IFpoZW5nIHdyb3RlOgo+
+PiDCoDA4LjA4LjIwMTYsIDAyOjU4LCAiSGFucyBkZSBHb2VkZSIgPGhkZWdvZWRlQHJlZGhhdC5j
+b20+Ogo+Pj4gwqBUaGUgRVNQODA4OSBjaGlwcyBjYW4gbW9zdGx5IGJlIGVudW1lcmF0ZWQgdmlh
+IHRoZWlyIHNkaW8gaW50ZXJmYWNlLAo+Pj4gwqBidXQgdGhleSBhcmUgY2xvY2tlZCBieSBhbiBl
+eHRlcm5hbCBjcnlzdGFsIHdoaWNoIG1heSBkaWZmZXIgZnJvbSBvbmUKPj4+IMKgYm9hcmQgdG8g
+dGhlIG90aGVyLgo+Pj4KPj4+IMKgVGhpcyBjb21taXQgYWRkcyBhIGJpbmRpbmcgZm9yIHRoZSBz
+ZGlvIGNoaWxkIG5vZGUgZm9yIHRoZXNlIGNoaXBzLAo+Pj4gwqBhbGxvd2luZyB0byBzcGVjaWZ5
+IHRoZSBleHRlcm5hbCBjcnlzdGFsIHR5cGUgKGZvciBub3csIHRoaXMgYmluZGluZwo+Pj4gwqBj
+b3VsZCBiZSBiZSBleHRlbmRlZCB3aXRoIGUuZy4gT09CIGlycSBzdXBwb3J0IGxhdGVyKS4KPj4+
+Cj4+PiDCoFRoZSBBbmRyb2lkIGRyaXZlciBmb3IgdGhpcyBjaGlwIHVzZXMgYSB0ZXh0IGZpbGUg
+d2l0aCBrZXksdmFsdWUgcGFpcnMKPj4+IMKgd2hpY2ggZ2V0cyBsb2FkZWQgYXMgZmlybXdhcmUg
+dG8gcGFzcyB0aGlzIGluZm8gdG8gdGhlIGZpcm13YXJlLgo+Pj4gwqBUaGUgImVzcCxjcnlzdGFs
+XzI2TV9lbiIgbmFtZSBpcyBjaG9zZW4gdG8gbWF0Y2ggdGhlIGNyeXN0YWxfMjZNX2VuCj4+PiDC
+oGtleS1uYW1lIGluIHRoYXQgdGV4dCBmaWxlLgo+Pj4KPj4+IMKgTm90ZSB0aGF0IGF0IHRoaXMg
+cG9pbnQgdGhlcmUgb25seSBpcyBhbiBvdXQgb2YgdHJlZSBkcml2ZXIgZm9yIHRoaXMKPj4+IMKg
+aGFyZHdhcmUsIHRoZXJlIGlzIG5vIGNsZWFyIHRpbWVsaW5lIC8gcGF0aCBmb3IgbWVyZ2luZyB0
+aGlzLiBTdGlsbAo+Pj4gwqBJIGJlbGlldmUgaXQgd291bGQgYmUgZ29vZCB0byBzcGVjaWZ5IHRo
+ZSBiaW5kaW5nIGZvciB0aGlzIGluIHRyZWUKPj4+IMKgbm93LCBzbyB0aGF0IGFueSBmdXR1cmUg
+bWlncmF0aW9uIHRvIGFuIGluIHRyZWUgZHJpdmVyIHdpbGwgbm90IGNhdXNlCj4+PiDCoGNvbXBh
+dGlibGl0eSBpc3N1ZXMuCj4+Pgo+Pj4gwqBDYzogSWNlbm93eSBaaGVuZyA8aWNlbm93eUBhb3Nj
+Lnh5ej4KPj4+IMKgU2lnbmVkLW9mZi1ieTogSGFucyBkZSBHb2VkZSA8aGRlZ29lZGVAcmVkaGF0
+LmNvbT4KPj4+IMKgLS0tCj4+PiDCoMKgLi4uL2JpbmRpbmdzL25ldC93aXJlbGVzcy9lc3AsZXNw
+ODA4OS50eHQgfCAzMSArKysrKysrKysrKysrKysrKysrKysrCj4+PiDCoMKgMSBmaWxlIGNoYW5n
+ZWQsIDMxIGluc2VydGlvbnMoKykKPj4+IMKgwqBjcmVhdGUgbW9kZSAxMDA2NDQgRG9jdW1lbnRh
+dGlvbi9kZXZpY2V0cmVlL2JpbmRpbmdzL25ldC93aXJlbGVzcy9lc3AsZXNwODA4OS50eHQKPj4+
+Cj4+PiDCoGRpZmYgLS1naXQgYS9Eb2N1bWVudGF0aW9uL2RldmljZXRyZWUvYmluZGluZ3MvbmV0
+L3dpcmVsZXNzL2VzcCxlc3A4MDg5LnR4dCBiL0RvY3VtZW50YXRpb24vZGV2aWNldHJlZS9iaW5k
+aW5ncy9uZXQvd2lyZWxlc3MvZXNwLGVzcDgwODkudHh0Cj4+PiDCoG5ldyBmaWxlIG1vZGUgMTAw
+NjQ0Cj4+PiDCoGluZGV4IDAwMDAwMDAuLjg5OGExNDkKPj4+IMKgLS0tIC9kZXYvbnVsbAo+Pj4g
+wqArKysgYi9Eb2N1bWVudGF0aW9uL2RldmljZXRyZWUvYmluZGluZ3MvbmV0L3dpcmVsZXNzL2Vz
+cCxlc3A4MDg5LnR4dAo+Pj4gwqBAQCAtMCwwICsxLDMxIEBACj4+PiDCoCtFc3ByZXNzaWYgRVNQ
+ODA4OSB3aXJlbGVzcyBTRElPIGRldmljZXMKPj4+IMKgKwo+Pj4gwqArVGhpcyBub2RlIHByb3Zp
+ZGVzIHByb3BlcnRpZXMgZm9yIGNvbnRyb2xsaW5nIHRoZSBFU1A4MDg5IHdpcmVsZXNzIGRldmlj
+ZS4KPj4+IMKgK1RoZSBub2RlIGlzIGV4cGVjdGVkIHRvIGJlIHNwZWNpZmllZCBhcyBhIGNoaWxk
+IG5vZGUgdG8gdGhlIFNESU8gY29udHJvbGxlcgo+Pj4gwqArdGhhdCBjb25uZWN0cyB0aGUgZGV2
+aWNlIHRvIHRoZSBzeXN0ZW0uCj4+PiDCoCsKPj4+IMKgK1JlcXVpcmVkIHByb3BlcnRpZXM6Cj4+
+PiDCoCsKPj4+IMKgKyAtIGNvbXBhdGlibGUgOiBTaG91bGQgYmUgImVzcCxlc3A4MDg5Ii4KPj4g
+wqBUaGVyZSdzIGFsc28gZXNwODI2Ni4gKEFuZCB0aGUgZGlmZmVyZW5jZSBvZiA4MDg5IGFuZCA4
+MjY2IGlzIG1haW5seSB0aGUgZGlmZmVyZW5jZSBvZiBjcnlzdGFsIGZyZXF1ZW5jeS4uLiAyNk1I
+eiBmb3IgODI2NiwgNDBNSHogZm9yIDgwODkpCj4+IMKgU28gbWF5YmUgaXQgc2hvdWxkIGJlIHRo
+ZSBkaWZmZXJlbmNlIG9mIGR0IGNvbXBhdGlibGU/Cj4KPiAyIG9mIG15IHRhYmxldHMgKGJvdGgg
+UG9sYXJvaWQgb25lcykgdXNlIGEgdmFsdWUgb2YgMiAocmF0aGVyCj4gdGhlbiAwIG9yIDEpIGZv
+ciBjcnlzdGFsXzI2TV9lbiBhbmQgdXNpbmcgYSBkaWZmZXJlbnQgdmFsdWUKPiBkb2VzIG5vdCB3
+b3JrLiBBbm90aGVyIGdlbmVyaWMgcTggZm9ybS1mYWN0b3IgdGFibGV0IEkndmUgd2l0aAo+IGFu
+IGEyMyBuZWVkcyBjcnlzdGFsXzI2TV9lbj0xLiBJbiBhbGwgdGhlc2UgdGFibGV0cyB0aGUgY2hp
+cCBpcwo+IGNsZWFybHkgbWFya2VkIGVzcDgwODksIHNvIHRoZSBjcnlzdGFsXzI2TV9lbiBzZXR0
+aW5nIHNlZW1zIHRvCj4gbm90IGJlIHJlbGF0ZWQgdG8gdGhlIGNoaXAgbW9kZWwgYW5kIGRlcml2
+aW5nIHRoaXMgZnJvbSB0aGUKPiBjb21wYXRpYmxlIHN0cmluZyBzZWVtcyBsaWtlIGEgYmFkIGlk
+ZWEgdG8gbWUuCgpPaCBzdWNoIHN0cmFuZ2UuCgpUaGFua3MsCkljZW5vd3kKPgo+IFJlZ2FyZHMs
+Cj4KPiBIYW5zCj4KPj4+IMKgKwo+Pj4gwqArT3B0aW9uYWwgcHJvcGVydGllczoKPj4+IMKgKyAt
+IGVzcCxjcnlzdGFsXzI2TV9lbjogSW50ZWdlciB2YWx1ZSBmb3IgdGhlIGNyeXN0YWxfMjZNX2Vu
+IGZpcm13YXJlIHBhcmFtZXRlcgo+Pj4gwqArCj4+PiDCoCtFeGFtcGxlOgo+Pj4gwqArCj4+PiDC
+oCsmbW1jMSB7Cj4+PiDCoCsgI2FkZHJlc3MtY2VsbHMgPSA8MT47Cj4+PiDCoCsgI3NpemUtY2Vs
+bHMgPSA8MD47Cj4+PiDCoCsKPj4+IMKgKyB2bW1jLXN1cHBseSA9IDwmcmVnX2RsZG8xPjsKPj4+
+IMKgKyBtbWMtcHdyc2VxID0gPCZ3aWZpX3B3cnNlcT47Cj4+PiDCoCsgYnVzLXdpZHRoID0gPDQ+
+Owo+Pj4gwqArIG5vbi1yZW1vdmFibGU7Cj4+PiDCoCsgc3RhdHVzID0gIm9rYXkiOwo+Pj4gwqAr
+Cj4+PiDCoCsgZXNwODA4OTogc2Rpb193aWZpQDEgewo+Pj4gwqArIGNvbXBhdGlibGUgPSAiZXNw
+LGVzcDgwODkiOwo+Pj4gwqArIHJlZyA9IDwxPjsKPj4+IMKgKyBlc3AsY3J5c3RhbF8yNk1fZW4g
+PSA8Mj47Cj4+PiDCoCsgfTsKPj4+IMKgK307Cj4+PiDCoC0tCj4+PiDCoDIuNy40CgpfX19fX19f
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fXwpsaW51eC1hcm0ta2VybmVs
+IG1haWxpbmcgbGlzdApsaW51eC1hcm0ta2VybmVsQGxpc3RzLmluZnJhZGVhZC5vcmcKaHR0cDov
+L2xpc3RzLmluZnJhZGVhZC5vcmcvbWFpbG1hbi9saXN0aW5mby9saW51eC1hcm0ta2VybmVsCg==
