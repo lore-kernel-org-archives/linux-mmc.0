@@ -1,61 +1,48 @@
-From: Icenowy Zheng <icenowy@aosc.xyz>
-Subject: Re: [PATCH 2/2] dt: bindings: Add binding for ESP8089 wifi chips
-Date: Mon, 08 Aug 2016 20:44:46 +0800
-Message-ID: <276451470660286@web16j.yandex.ru>
-References: <1470596269-20572-1-git-send-email-hdegoede@redhat.com>
- <2936779.FAiO1bqUWV@wuerfel>
- <CAGb2v67+QrOxPd4KeLb9F67A0mSaBqn14PynzCyK=ovRnKA6EQ@mail.gmail.com>
- <52721384.ieJe1WiAoe@wuerfel>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <52721384.ieJe1WiAoe@wuerfel>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Arnd Bergmann <arnd@arndb.de>, Chen-Yu Tsai <wens@csie.org>
-Cc: devicetree <devicetree@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Hans de Goede <hdegoede@redhat.com>, Rob Herring <robh+dt@kernel.org>, Maxime Ripard <maxime.ripard@free-electrons.com>, linux-arm-kernel <linux-arm-kernel@lists.infradead.org>
+From: robert.foss@collabora.com
+Subject: [PACTH v2] mmc: sdhci: Do not allow tuning procedure to be interrupted
+Date: Mon,  8 Aug 2016 12:11:03 -0400
+Message-ID: <1470672663-10829-1-git-send-email-robert.foss@collabora.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from bhuna.collabora.co.uk ([46.235.227.227]:39218 "EHLO
+	bhuna.collabora.co.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752354AbcHHQLK (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Mon, 8 Aug 2016 12:11:10 -0400
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: adrian.hunter@intel.com, ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Andrew Bresticker <abrestic@chromium.org>, Kevin Cernekee <cernekee@chromium.org>, Benson Leung <bleung@chromium.org>
+Cc: Christopher Freeman <cfreeman@nvidia.com>, Robert Foss <robert.foss@collabora.com>
 
-CkhpLAowOC4wOC4yMDE2LCAxNzozMCwgIkFybmQgQmVyZ21hbm4iIDxhcm5kQGFybmRiLmRlPjoK
-PiBPbiBNb25kYXksIEF1Z3VzdCA4LCAyMDE2IDExOjU5OjI1IEFNIENFU1QgQ2hlbi1ZdSBUc2Fp
-IHdyb3RlOgo+PiDCoEhpIEFybmQsCj4+Cj4+IMKgT24gTW9uLCBBdWcgOCwgMjAxNiBhdCAzOjU5
-IEFNLCBBcm5kIEJlcmdtYW5uIDxhcm5kQGFybmRiLmRlPiB3cm90ZToKPj4gwqA+IE9uIFN1bmRh
-eSwgQXVndXN0IDcsIDIwMTYgODo1Nzo0OSBQTSBDRVNUIEhhbnMgZGUgR29lZGUgd3JvdGU6Cj4+
-IMKgPj4gK0VzcHJlc3NpZiBFU1A4MDg5IHdpcmVsZXNzIFNESU8gZGV2aWNlcwo+PiDCoD4+ICsK
-Pj4gwqA+PiArVGhpcyBub2RlIHByb3ZpZGVzIHByb3BlcnRpZXMgZm9yIGNvbnRyb2xsaW5nIHRo
-ZSBFU1A4MDg5IHdpcmVsZXNzIGRldmljZS4KPj4gwqA+PiArVGhlIG5vZGUgaXMgZXhwZWN0ZWQg
-dG8gYmUgc3BlY2lmaWVkIGFzIGEgY2hpbGQgbm9kZSB0byB0aGUgU0RJTyBjb250cm9sbGVyCj4+
-IMKgPj4gK3RoYXQgY29ubmVjdHMgdGhlIGRldmljZSB0byB0aGUgc3lzdGVtLgo+PiDCoD4+ICsK
-Pj4gwqA+PiArUmVxdWlyZWQgcHJvcGVydGllczoKPj4gwqA+PiArCj4+IMKgPj4gKyAtIGNvbXBh
-dGlibGUgOiBTaG91bGQgYmUgImVzcCxlc3A4MDg5Ii4KPj4gwqA+Cj4+IMKgPiBJIHRoaW5rIGl0
-IHdvdWxkIGJlIGdvb2QgdG8gc3RhbmRhcmRpemUgYSBjb21wYXRpYmxlIHN0cmluZyBmb3Igc2Rp
-bwo+PiDCoD4gbGlrZSB3ZSBoYXZlIGl0IGZvciBvdGhlciBkaXNjb3ZlcmFibGUgYnVzZXMsIGJh
-c2VkIG9uIHRoZQo+PiDCoD4gdmVuZG9yL2RldmljZSBJRCAob3Igd2hhdGV2ZXIgdGhpcyB1c2Vz
-KSwgdXNpbmcgc29tZXRoaW5nIGxpa2UKPj4gwqA+Cj4+IMKgPiBjb21wYXRpYmxlID0gInNkaW8x
-MjM0LDU2NzgiLCAiZXNwLGVzcDgwODkiOwo+Pgo+PiDCoElzIHRoZXJlIGEgY2VudHJhbCByZXBv
-c2l0b3J5IGZvciBTRElPIHZlbmRvci9kZXZpY2UgSURzIHNpbWlsYXIgdG8KPj4gwqBQQ0kgb3Ig
-VVNCIElEcz8KPgo+IE5vIGlkZWEuIEkgYmVsaWV2ZSB0aGUgZXhpc3RpbmcgcmVwb3NpdG9yaWVz
-IGZvciBQQ0kgYW5kIFVTQiBhcmUgbm90Cj4gcHVibGljIGVpdGhlciwgdGhlcmUgaXMganVzdCB0
-aGUgaW5mb3JtYXRpb24gYXQgaHR0cDovL3BjaWRhdGFiYXNlLmNvbS8sCj4gaHR0cDovL3BjaS1p
-ZHMudWN3LmN6LyBvciBodHRwOi8vd3d3LmxpbnV4LXVzYi5vcmcvdXNiLmlkcyB0aGF0Cj4gYXJl
-IG1haW50YWluZWQgYnkgdm9sdW50ZWVycyBhbmQgdGhhdCBhcmUgbm90IGF1dGhvcml0YXJpdmUu
-Cj4KPiBJIGZvdW5kIG9uZSBsaXN0IGF0IGh0dHBzOi8vZ2l0aHViLmNvbS9zeXN0ZW1kL3N5c3Rl
-bWQvYmxvYi9tYXN0ZXIvaHdkYi9zZGlvLmlkcwo+IGJ1dCBpdCdzIHByb2JhYmx5IHZlcnkgaW5j
-b21wbGV0ZS4KTWF5YmUgaXQgc2hvdWxkIGJlIG1haW50YWluZWQgYXMgYSBpbmRlcGVuZGVudCBw
-cm9qZWN0Li4uCj4KPj4gwqBUaGUgdmVuZG9yIElEIEVzcHJlc3NpZiB1c2VzIGlzIDB4NjY2Niwg
-d2hpY2ggc2VlbXMga2luZCBvZiBib2d1cyB0byBtZS4KPgo+IEl0IHByb2JhYmx5IGlzLCBidXQg
-dGhhdCdzIG5vdCBpbXBvcnRhbnQgYXMgbG9uZyBhcyBub3RoaW5nIGVsc2UgdXNlcwo+IHRoYXQg
-SUQuClllcy4uLiBJIHRoaW5rIHRoZSBVU0IgdmVuZG9yIElEIG9mIEFsbHdpbm5lciwgMHgxZjNh
-LCBpcyBhbHNvIG5vdGhpbmcgYXV0aG9yaXRhdGl2ZS4KPgo+IMKgwqDCoMKgwqDCoMKgwqBBcm5k
-CgpUaGFua3MsCkljZW5vd3kKCl9fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
-X19fX19fX19fCmxpbnV4LWFybS1rZXJuZWwgbWFpbGluZyBsaXN0CmxpbnV4LWFybS1rZXJuZWxA
-bGlzdHMuaW5mcmFkZWFkLm9yZwpodHRwOi8vbGlzdHMuaW5mcmFkZWFkLm9yZy9tYWlsbWFuL2xp
-c3RpbmZvL2xpbnV4LWFybS1rZXJuZWwK
+From: Christopher Freeman <cfreeman@nvidia.com>
+
+wait_event_interruptible_timeout() will return early if the blocked
+process receives a signal, causing the driver to abort the tuning
+procedure and possibly leaving the controller in a bad state.  Since the
+tuning command is expected to complete quickly (<50ms) and we've set a
+timeout, use wait_event_timeout() instead.
+
+Signed-off-by: Christopher Freeman <cfreeman@nvidia.com>
+Tested-by: Robert Foss <robert.foss@collabora.com>
+Signed-off-by: Robert Foss <robert.foss@collabora.com>
+---
+
+This is a resubmission of v2 of this patch.
+
+ drivers/mmc/host/sdhci.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 0e3d7c0..9e80203 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -1960,7 +1960,7 @@ static int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode)
+ 
+ 		spin_unlock_irqrestore(&host->lock, flags);
+ 		/* Wait for Buffer Read Ready interrupt */
+-		wait_event_interruptible_timeout(host->buf_ready_int,
++		wait_event_timeout(host->buf_ready_int,
+ 					(host->tuning_done == 1),
+ 					msecs_to_jiffies(50));
+ 		spin_lock_irqsave(&host->lock, flags);
+-- 
+2.7.4
+
