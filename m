@@ -1,118 +1,68 @@
-From: Shawn Lin <shawn.lin@rock-chips.com>
-Subject: Re: [PATCH v2 0/6] Add support of inverting power control and some
- minor cleanup
-Date: Tue, 9 Aug 2016 10:12:15 +0800
-Message-ID: <8da29b3d-20f1-6529-c985-c462dbdd7fb1@rock-chips.com>
-References: <CGME20160807013720epcas1p235628058a90efa6f0062b03a4b2e4284@epcas1p2.samsung.com>
- <1470533618-16312-1-git-send-email-shawn.lin@rock-chips.com>
- <ee997311-3964-8623-a431-c9a5add7f991@samsung.com>
- <cc785e09-6b33-d451-3d11-728bee3668a5@rock-chips.com>
+From: Amitkumar Karwar <akarwar@marvell.com>
+Subject: RE: [PATCH v4 1/2] mmc: API for accessing host supported maximum
+ segment count and size
+Date: Tue, 9 Aug 2016 10:16:24 +0000
+Message-ID: <ee910d6f6d1f4d218586bddd5a7627b0@SC-EXCH04.marvell.com>
+References: <1466069006-10757-1-git-send-email-akarwar@marvell.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from lucky1.263xmail.com ([211.157.147.134]:51161 "EHLO
-	lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751652AbcHICM7 (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Mon, 8 Aug 2016 22:12:59 -0400
-In-Reply-To: <cc785e09-6b33-d451-3d11-728bee3668a5@rock-chips.com>
+Received: from mx0a-0016f401.pphosted.com ([67.231.148.174]:34627 "EHLO
+	mx0b-0016f401.pphosted.com" rhost-flags-OK-OK-OK-FAIL)
+	by vger.kernel.org with ESMTP id S1752019AbcHIKQf convert rfc822-to-8bit
+	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 9 Aug 2016 06:16:35 -0400
+In-Reply-To: <1466069006-10757-1-git-send-email-akarwar@marvell.com>
+Content-Language: en-US
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: shawn.lin@rock-chips.com, Rob Herring <robh+dt@kernel.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Heiko Stuebner <heiko@sntech.de>, linux-rockchip@lists.infradead.org, devicetree@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Nishant Sarmukadam <nishants@marvell.com>, Wei-Ning Huang <wnhuang@chromium.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Cathy Luo <cluo@marvell.com>, Xinming Hu <huxm@marvell.com>
 
-On 2016/8/9 9:49, Shawn Lin wrote:
-> Hi,
->
-> On 2016/8/8 18:24, Jaehoon Chung wrote:
->> Hi Shawn,
->>
->> On 08/07/2016 10:33 AM, Shawn Lin wrote:
->>> By default, dw_mmc outputs high level voltage to indicate powering
->>> up the card and outputs low level vcltage to indicate powering
->>> off the card. But that is not always correct. The power io should
->>> be able to control different kind of hw components to supply or
->>> cutoff power to the card. We have boards that need this patchset
->>> to make the power control correct. Meanwhile let's expose it to
->>> DT for board-specific usage.
->>
->> I have a question for this patch-set. Does DWMMC IP support to invert
->> ON/OFF at Power Enable register?
->
-> No.
->
->> Hmm..Well, if use the DW_MMC_CARD_PWR_INVERT, it should also be the
->> similar behavior with Quirks.
->
-> yup, it makes the power control more complicated than before. :(
->
->>
->> Other flags are related with dwmmc IP. But this flag
->> (DW_MMC_CARD_PWR_INVERT) is not related with IP side.
->> I understood why you needs to add this flag..Is rockchip designed to
->> invert the power controlling?
->
-> We don't invert the power controlling but our customers do.
-> The HW componet looks like some discrete LDOs which enable the related
-> power supply when outputing low voltage from pwren..
->
->>
->> But it's not general case. We can discuss about this.
->
-> I have a solution which is to add gpio power control for slot-gpio of
-> mmc core. once finished, we could add pwr_cap_invert just like what we
-> did for cd/wp invert control..
->
-> Then we could remove PWREN from the default state of
-> pinctrl inside the sdmmc dt node, and let dwmmc request gpio power
-> control stuff after paring the property for pwr_cap_invert..
->
-> More over, it well fit for all mmc host's requirement of gpio
-> power control and inverted control if they want it. :)
->
->
-> That should be legit for us?
-> If it sounds ok to you and Ulf, I will come up with a RFC one for
-> community to comment it.:)
+Hi Ulf,
 
-one more, maybe pwrseq is also a choice for us.
-But I'm not sure if it deserves a pwerseq_sd.c ?
+> From: Amitkumar Karwar [mailto:akarwar@marvell.com]
+> Sent: Thursday, June 16, 2016 2:53 PM
+> To: linux-wireless@vger.kernel.org
+> Cc: Nishant Sarmukadam; Wei-Ning Huang; linux-mmc@vger.kernel.org; Cathy
+> Luo; Xinming Hu; Amitkumar Karwar
+> Subject: [PATCH v4 1/2] mmc: API for accessing host supported maximum
+> segment count and size
+> 
+> From: Xinming Hu <huxm@marvell.com>
+> 
+> sdio device drivers need be able to get the host supported max_segs and
+> max_seg_size, so that they know the buffer size to allocate while
+> utilizing the scatter/gather DMA buffer list.
+> 
+> This patch provides API for this purpose.
+> 
+> Signed-off-by: Xinming Hu <huxm@marvell.com>
+> Signed-off-by: Amitkumar Karwar <akarwar@marvell.com>
+> ---
+> v2: v2 was submitted with minor improvement like replacing BUG_ON() with
+> WARN_ON()
+> v3: Addressed below review comments from Ulf Hansson
+>     a) In v3, patch has been split into two separate patches.
+>     b) Patch 1/2 introduces an API to fetch max_seg_size and max_segs
+>     c) Replaced WARN_ON() with proper error code when sg_ptr->length is
+> invalid
+>     d) Instead of duplicating the code in mmc_io_rw_extended(), extra
+> bool parameter
+>        has been added to this function and used it in new APIs for SG.
+> v4: Removed WARN_ON() calls in newly added APIs. It's gets called in
+> probe handler.
+>     Caller already takes care of it(Shawn Lin).
+> ---
+>  drivers/mmc/core/sdio_io.c                          | 21
+> +++++++++++++++++++++
+>  .../wireless/broadcom/brcm80211/brcmfmac/bcmsdh.c   |  6 +++---
+>  include/linux/mmc/sdio_func.h                       |  3 +++
+>  3 files changed, 27 insertions(+), 3 deletions(-)
+> 
 
->
->>
->> Best Regards,
->> Jaehoon Chung
->>
->>>
->>>
->>> Changes in v2:
->>> - fix copy-paste err and typo
->>>
->>> Shawn Lin (6):
->>>   dt-bindings: rockchip-dw-mshc: add description of
->>>     rockchip,power-invert
->>>   mmc: dw_mmc: cleanup power setting of set_ios callback
->>>   mmc: dw_mmc: split out dw_mci_set_power
->>>   mmc: dw_mmc: split out dw_mci_set_power_reg
->>>   mmc: dw_mmc: support inverted power control
->>>   mmc: dw_mmc-rockchip: add parsing of power control from DT
->>>
->>>  .../devicetree/bindings/mmc/rockchip-dw-mshc.txt   |   6 +
->>>  drivers/mmc/host/dw_mmc-rockchip.c                 |   8 ++
->>>  drivers/mmc/host/dw_mmc.c                          | 134
->>> ++++++++++++---------
->>>  drivers/mmc/host/dw_mmc.h                          |   1 +
->>>  4 files changed, 90 insertions(+), 59 deletions(-)
->>>
->>
->>
->>
->>
->
->
+Please let me know if you have any further review comments for this patch series.
 
-
--- 
-Best Regards
-Shawn Lin
-
+Regards,
+Amitkumar
