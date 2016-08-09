@@ -1,68 +1,35 @@
-From: Amitkumar Karwar <akarwar@marvell.com>
-Subject: RE: [PATCH v4 1/2] mmc: API for accessing host supported maximum
- segment count and size
-Date: Tue, 9 Aug 2016 10:16:24 +0000
-Message-ID: <ee910d6f6d1f4d218586bddd5a7627b0@SC-EXCH04.marvell.com>
-References: <1466069006-10757-1-git-send-email-akarwar@marvell.com>
+From: bancoleite@sms.goiania.go.gov.br
+Subject: DO YOU NEED A LOAN?
+Date: Wed, 10 Aug 2016 04:41:10 +0530
+Message-ID: <20160809231126.8814E5F6C63@zmail.goiania.go.gov.br>
+Reply-To: daryl0877@gmail.com
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mx0a-0016f401.pphosted.com ([67.231.148.174]:34627 "EHLO
-	mx0b-0016f401.pphosted.com" rhost-flags-OK-OK-OK-FAIL)
-	by vger.kernel.org with ESMTP id S1752019AbcHIKQf convert rfc822-to-8bit
-	(ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 9 Aug 2016 06:16:35 -0400
-In-Reply-To: <1466069006-10757-1-git-send-email-akarwar@marvell.com>
-Content-Language: en-US
+Received: from correio.goiania.go.gov.br ([200.199.226.131]:41701 "EHLO
+	zmail.goiania.go.gov.br" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S932558AbcHIXVt convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 9 Aug 2016 19:21:49 -0400
+Content-Description: Mail message body
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Nishant Sarmukadam <nishants@marvell.com>, Wei-Ning Huang <wnhuang@chromium.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Cathy Luo <cluo@marvell.com>, Xinming Hu <huxm@marvell.com>
+To: Recipients <bancoleite@sms.goiania.go.gov.br>
 
-Hi Ulf,
+We are private lending firm and we offers loan at a very low interest rate of 3%. Such as, Personal loans, Debt Consolidation Loan, Venture Capital, Business Loan, EducationalLoan, Home Loan, and Loan for any reason and urgent needs!!If you are interested do not hesitate to contact us with the following loan application form below:
 
-> From: Amitkumar Karwar [mailto:akarwar@marvell.com]
-> Sent: Thursday, June 16, 2016 2:53 PM
-> To: linux-wireless@vger.kernel.org
-> Cc: Nishant Sarmukadam; Wei-Ning Huang; linux-mmc@vger.kernel.org; Cathy
-> Luo; Xinming Hu; Amitkumar Karwar
-> Subject: [PATCH v4 1/2] mmc: API for accessing host supported maximum
-> segment count and size
-> 
-> From: Xinming Hu <huxm@marvell.com>
-> 
-> sdio device drivers need be able to get the host supported max_segs and
-> max_seg_size, so that they know the buffer size to allocate while
-> utilizing the scatter/gather DMA buffer list.
-> 
-> This patch provides API for this purpose.
-> 
-> Signed-off-by: Xinming Hu <huxm@marvell.com>
-> Signed-off-by: Amitkumar Karwar <akarwar@marvell.com>
-> ---
-> v2: v2 was submitted with minor improvement like replacing BUG_ON() with
-> WARN_ON()
-> v3: Addressed below review comments from Ulf Hansson
->     a) In v3, patch has been split into two separate patches.
->     b) Patch 1/2 introduces an API to fetch max_seg_size and max_segs
->     c) Replaced WARN_ON() with proper error code when sg_ptr->length is
-> invalid
->     d) Instead of duplicating the code in mmc_io_rw_extended(), extra
-> bool parameter
->        has been added to this function and used it in new APIs for SG.
-> v4: Removed WARN_ON() calls in newly added APIs. It's gets called in
-> probe handler.
->     Caller already takes care of it(Shawn Lin).
-> ---
->  drivers/mmc/core/sdio_io.c                          | 21
-> +++++++++++++++++++++
->  .../wireless/broadcom/brcm80211/brcmfmac/bcmsdh.c   |  6 +++---
->  include/linux/mmc/sdio_func.h                       |  3 +++
->  3 files changed, 27 insertions(+), 3 deletions(-)
-> 
+Your Full names:_______
+Contact address:_______
+Country Of Residence:______
+Loan Amount Required:________
+Duration:_____
+Gender:_____
+Occupation:________
+Monthly Income:_______
+Date Of Birth:________
+Telephone Number:__________
 
-Please let me know if you have any further review comments for this patch series.
-
-Regards,
-Amitkumar
+  Contact details:
+WENTLAND DARYL
+USA CA, 754-205-8236
+daryl0877@gmail.com
