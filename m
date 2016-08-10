@@ -1,150 +1,459 @@
-From: Yong Mao <yong.mao-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>
-Subject: [PATCH] mmc: mediatek: Fix CMD6 timeout issue
-Date: Wed, 10 Aug 2016 19:59:38 +0800
-Message-ID: <1470830378-12155-1-git-send-email-yong.mao@mediatek.com>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH RFCv2 10/10] mmc: sdhci: add command queue support to
+ sdhci
+Date: Wed, 10 Aug 2016 14:28:09 +0300
+Message-ID: <2029ff76-87a0-a74b-80e0-d22cfb0d9345@intel.com>
+References: <1467033757-32498-1-git-send-email-riteshh@codeaurora.org>
+ <1467033757-32498-11-git-send-email-riteshh@codeaurora.org>
+ <577B96E2.5050009@intel.com>
+ <3ab7727b-2cb2-5f54-f4c9-4f011b43ef7d@codeaurora.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset=windows-1252
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-mediatek-bounces+glpam-linux-mediatek=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-mediatek>,
- <mailto:linux-mediatek-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-mediatek/>
-List-Post: <mailto:linux-mediatek-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-List-Help: <mailto:linux-mediatek-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-mediatek>,
- <mailto:linux-mediatek-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
-Sender: "Linux-mediatek" <linux-mediatek-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-Errors-To: linux-mediatek-bounces+glpam-linux-mediatek=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
-To: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: Nicolas Boichat <drinkcat-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, Minghsiu Tsai <Minghsiu.Tsai-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>, srv_heupstream-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Douglas Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, yong mao <yong.mao-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Geert Uytterhoeven <geert-Td1EMuHUCqxL1ZNQvxDV9g@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, Sascha Hauer <kernel-bIcnvbaLZ9MEGnE8C9+IrQ@public.gmane.org>, Matthias Brugger <matthias.bgg-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, linux-mediatek-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, Chaotian Jing <chaotian.jing-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>
+Return-path: <linux-arm-msm-owner@vger.kernel.org>
+In-Reply-To: <3ab7727b-2cb2-5f54-f4c9-4f011b43ef7d@codeaurora.org>
+Sender: linux-arm-msm-owner@vger.kernel.org
+To: Ritesh Harjani <riteshh@codeaurora.org>, ulf.hansson@linaro.org, linux-mmc@vger.kernel.org
+Cc: linux-arm-msm@vger.kernel.org, alex.lemberg@sandisk.com, mateusz.nowak@intel.com, Yuliy.Izrailov@sandisk.com, jh80.chung@samsung.com, dongas86@gmail.com, asutoshd@codeaurora.org, zhangfei.gao@gmail.com, kdorfman@codeaurora.org, david.griego@linaro.org, stummala@codeaurora.org, venkatg@codeaurora.org, shawn.lin@rock-chips.com, Subhash Jadavani <subhashj@codeaurora.org>
 List-Id: linux-mmc@vger.kernel.org
 
-From: yong mao <yong.mao-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>
+On 25/07/16 13:24, Ritesh Harjani wrote:
+> Sorry about this long delay, was pulled into some release.
+> Will be more responsive from now.
 
-When init EMMC, after switch to HS400, will issue
-CMD6 to change ext_csd, if first CMD6 got CRC
-error, the repeat CMD6 may get timeout, that's
-because SDCBSY was cleared by msdc_reset_hw()
+Well, I was away, so now it is my delay, sorry.
 
-In this case, need check MSDC_PS to wait EMMC
-changes to transfer state
+> We have gone through your comments. We had some queries and wanted to
+> discuss more about your initial comments before going onto individual
+> comments in the code. It would be great if you could help us understand more
+> on your initial comments by answering to our queries.
+> 
+> 
+> On 7/5/2016 4:45 PM, Adrian Hunter wrote:
+>> On 27/06/16 16:22, Ritesh Harjani wrote:
+>>> From: Asutosh Das <asutoshd@codeaurora.org>
+>>>
+>>> Adds command-queue support to SDHCi compliant drivers.
+>>
+>> CQHCI is not recognized in the SDHCI specification,
+> Yes. Not sure about future plan though.
 
-Signed-off-by: Chaotian Jing <chaotian.jing-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>
-Signed-off-by: Yong Mao <yong.mao-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>
----
- drivers/mmc/host/mtk-sd.c | 78 +++++++++++++++++++++++++++++++----------------
- 1 file changed, 52 insertions(+), 26 deletions(-)
+SD Association and JEDEC are different bodies and I have never seen a SD
+Association Spec. that mentions eMMC, so I would not expect the SDHCI spec.
+ever to recognize CQHCI.
 
-diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
-index 84e9afc..d52563d 100644
---- a/drivers/mmc/host/mtk-sd.c
-+++ b/drivers/mmc/host/mtk-sd.c
-@@ -826,6 +826,15 @@ static bool msdc_cmd_done(struct msdc_host *host, int events,
- 	return true;
- }
- 
-+static int msdc_card_busy(struct mmc_host *mmc)
-+{
-+	struct msdc_host *host = mmc_priv(mmc);
-+	u32 status = readl(host->base + MSDC_PS);
-+
-+	/* check if data0 is low */
-+	return !(status & BIT(16));
-+}
-+
- /* It is the core layer's responsibility to ensure card status
-  * is correct before issue a request. but host design do below
-  * checks recommended.
-@@ -835,10 +844,20 @@ static inline bool msdc_cmd_is_ready(struct msdc_host *host,
- {
- 	/* The max busy time we can endure is 20ms */
- 	unsigned long tmo = jiffies + msecs_to_jiffies(20);
-+	u32 count = 0;
-+
-+	if (in_interrupt()) {
-+		while ((readl(host->base + SDC_STS) & SDC_STS_CMDBUSY) &&
-+		       (count < 1000)) {
-+			udelay(1);
-+			count++;
-+		}
-+	} else {
-+		while ((readl(host->base + SDC_STS) & SDC_STS_CMDBUSY) &&
-+		       time_before(jiffies, tmo))
-+			cpu_relax();
-+	}
- 
--	while ((readl(host->base + SDC_STS) & SDC_STS_CMDBUSY) &&
--			time_before(jiffies, tmo))
--		cpu_relax();
- 	if (readl(host->base + SDC_STS) & SDC_STS_CMDBUSY) {
- 		dev_err(host->dev, "CMD bus busy detected\n");
- 		host->error |= REQ_CMD_BUSY;
-@@ -846,17 +865,36 @@ static inline bool msdc_cmd_is_ready(struct msdc_host *host,
- 		return false;
- 	}
- 
--	if (mmc_resp_type(cmd) == MMC_RSP_R1B || cmd->data) {
--		tmo = jiffies + msecs_to_jiffies(20);
--		/* R1B or with data, should check SDCBUSY */
--		while ((readl(host->base + SDC_STS) & SDC_STS_SDCBUSY) &&
--				time_before(jiffies, tmo))
--			cpu_relax();
--		if (readl(host->base + SDC_STS) & SDC_STS_SDCBUSY) {
--			dev_err(host->dev, "Controller busy detected\n");
--			host->error |= REQ_CMD_BUSY;
--			msdc_cmd_done(host, MSDC_INT_CMDTMO, mrq, cmd);
--			return false;
-+	if (cmd->opcode != MMC_SEND_STATUS) {
-+		count = 0;
-+		/* Consider that CMD6 crc error before card was init done,
-+		 * mmc_retune() will return directly as host->card is null.
-+		 * and CMD6 will retry 3 times, must ensure card is in transfer
-+		 * state when retry.
-+		 */
-+		tmo = jiffies + msecs_to_jiffies(60 * 1000);
-+		while (1) {
-+			if (msdc_card_busy(host->mmc)) {
-+				if (in_interrupt()) {
-+					udelay(1);
-+					count++;
-+				} else {
-+					msleep_interruptible(10);
-+				}
-+			} else {
-+				break;
-+			}
-+			/* Timeout if the device never
-+			 * leaves the program state.
-+			 */
-+			if (count > 1000 || time_after(jiffies, tmo)) {
-+				pr_err("%s: Card stuck in
-+					 programming state! %s\n",
-+				       mmc_hostname(host->mmc), __func__);
-+				host->error |= REQ_CMD_BUSY;
-+				msdc_cmd_done(host, MSDC_INT_CMDTMO, mrq, cmd);
-+				return false;
-+			}
- 		}
- 	}
- 	return true;
-@@ -1070,18 +1108,6 @@ static int msdc_ops_switch_volt(struct mmc_host *mmc, struct mmc_ios *ios)
- 	return ret;
- }
- 
--static int msdc_card_busy(struct mmc_host *mmc)
--{
--	struct msdc_host *host = mmc_priv(mmc);
--	u32 status = readl(host->base + MSDC_PS);
--
--	/* check if any pin between dat[0:3] is low */
--	if (((status >> 16) & 0xf) != 0xf)
--		return 1;
--
--	return 0;
--}
--
- static void msdc_request_timeout(struct work_struct *work)
- {
- 	struct msdc_host *host = container_of(work, struct msdc_host,
--- 
-1.8.1.1.dirty
+> 
+>> and SDHCI should
+>> facilitate any CQE driver implementation not just CQHCI.  That means there
+>> are 2 options:
+> 
+> Are we aware of any other vendor specific implementation of CQHCI? Or do you
+> foresee this coming through?
+
+No
+
+> Actually CQ host controller interface(CQHCI) is what is proposed in emmc
+> JEDEC5.1 which is mentioned as extension to HCI in block diagram. (Fig B.110
+> in emmc-5.1 JEDEC).
+> 
+> 
+>>
+>> 1. Provide minimal support to allow individual host drivers to deal with
+>> CQHCI directly.
+>>
+>> 2. Create explicit support for a CQE companion driver and use that to
+>> provide common support for CQHCI.
+>>
+>> I started looking at option 2 and concluded that it was taking SDHCI in the
+>> wrong direction because it made drivers more dependent on SDHCI and gave
+>> them less flexibility, and it seemed inconsistent with the aim of making
+>> SDHCI more like a library.
+>>
+>> Consequently, I suggest the following:
+>>
+>> 1. Individual drivers are responsible for initializing and setting up CQHCI
+>> and its callbacks, and shutting it down.
+> 
+> CQHCI callbacks is what the concern is. Currently the callbacks are placed
+> in SDHCI, because these callbacks are doing nothing other than setting up
+> SDHCI registers itself for CQHCI. There is nothing platform specific which
+> is happening in these.
+> So why do you think that these should be implemented in individual platform
+> specific drivers?
+> Will that not result into same code duplication in all SDHCI compliant
+> platform drivers?
+
+Common functions that do not need CQHCI definitions can still be in sdhci.c.
+Some amount of code duplication is the cost of allowing drivers to be able
+to do whatever the need to.
+
+Linking CQHCI and SDHCI goes in the opposite direction of making SDHCI more
+like a library.  It means more callbacks and more potential issues if
+drivers need to do anything differently.
+
+> 
+> 
+>>
+>> 2. SDHCI provides a new callback so that individual drivers can process
+>> interrupts and pass them to CQHCI.
+> This again will depend upon the initial ask on - do you foresee SDHCI
+> facilitating other CQE implementations? Or if you are already aware of
+> something else other than CQHCI?
+
+No I don't know if there will ever be another implementation, however it is
+not impossible.  Obviously it would be much messier for SDHCI to support
+different CQE implementations than for individual drivers to support just
+the one they use.
+
+> 
+> 
+>>
+>> 3. SDHCI provides and exports any common helper functions that do not depend
+>> directly on CQHCI.  For example the functions to set interrupts, timeout,
+>> blocks size and dump registers.
+>>
+>>>
+>>> Signed-off-by: Asutosh Das <asutoshd@codeaurora.org>
+>>> Signed-off-by: Konstantin Dorfman <kdorfman@codeaurora.org>
+>>> Signed-off-by: Venkat Gopalakrishnan <venkatg@codeaurora.org>
+>>> [subhashj@codeaurora.org: fixed trivial merge conflicts and
+>>> compilation error]
+>>> Signed-off-by: Subhash Jadavani <subhashj@codeaurora.org>
+>>> [riteshh@codeaurora.org: fixed merge conflicts]
+>>> Signed-off-by: Ritesh Harjani <riteshh@codeaurora.org>
+>>> ---
+>>>  drivers/mmc/host/sdhci.c | 146
+>>> +++++++++++++++++++++++++++++++++++++++++++++--
+>>>  drivers/mmc/host/sdhci.h |   6 ++
+>>>  2 files changed, 148 insertions(+), 4 deletions(-)
+>>>
+>>> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+>>> index 9f5cdaa..0ed9c45 100644
+>>> --- a/drivers/mmc/host/sdhci.c
+>>> +++ b/drivers/mmc/host/sdhci.c
+>>> @@ -32,6 +32,7 @@
+>>>  #include <linux/mmc/slot-gpio.h>
+>>>
+>>>  #include "sdhci.h"
+>>> +#include "cmdq_hci.h"
+>>
+>> As discussed above, SDHCI should not have any references to CQHCI
+>>
+>>>
+>>>  #define DRIVER_NAME "sdhci"
+>>>
+>>> @@ -2474,6 +2475,20 @@ static void sdhci_data_irq(struct sdhci_host
+>>> *host, u32 intmask)
+>>>      }
+>>>  }
+>>>
+>>> +#ifdef CONFIG_MMC_CQ_HCI
+>>
+>> This won't work if CQHCI is a module.  If you fix the dependencies then you
+>> can use:
+>>
+>> #if IS_ENABLED(CONFIG_MMC_CQ_HCI)
+>>
+>> Or if you select CONFIG_MMC_CQ_HCI in Kconfig then you don't need ifdef at
+>> all.
+>>
+>>> +static irqreturn_t sdhci_cmdq_irq(struct mmc_host *mmc, u32 intmask)
+>>> +{
+>>> +    return cmdq_irq(mmc, intmask);
+>>
+>> This will give a linker error if the driver is built-in but CQHCI is a
+>> module.  Probably drivers that use CQHCI should just select it in Kconfig.
+>>
+>> Another issue is that CQHCI won't be able to interpret SDHCI interrupt bits.
+>>  I suggest you define a generic set of bit flags not dependent on SDHCI or
+>> CQHCI and then we can create a function to convert the SDHCI interrupt
+>> status.
+>>
+>>> +}
+>>> +
+>>> +#else
+>>> +static irqreturn_t sdhci_cmdq_irq(struct mmc_host *mmc, u32 intmask)
+>>> +{
+>>> +    pr_err("%s: rxd cmdq-irq when disabled !!!!\n", mmc_hostname(mmc));
+>>> +    return IRQ_NONE;
+>>> +}
+>>> +#endif
+>>> +
+>>>  static irqreturn_t sdhci_irq(int irq, void *dev_id)
+>>>  {
+>>>      irqreturn_t result = IRQ_NONE;
+>>> @@ -2495,6 +2510,15 @@ static irqreturn_t sdhci_irq(int irq, void *dev_id)
+>>>      }
+>>>
+>>>      do {
+>>> +        if (host->mmc->card && mmc_card_cmdq(host->mmc->card) &&
+>>> +            !mmc_host_halt(host->mmc)) {
+>>> +            pr_debug("*** %s: cmdq intr: 0x%08x\n",
+>>> +                    mmc_hostname(host->mmc),
+>>> +                    intmask);
+>>> +            result = sdhci_cmdq_irq(host->mmc, intmask);
+>>> +            goto out;
+>>> +        }
+>>> +
+>>
+>> We need to create a new SDHCI host op to enable individual drivers to
+>> handle the IRQ if they choose.  Then it is up to individual drivers to call
+>> into CQHCI.
+>>
+>>>          /* Clear selected interrupts. */
+>>>          mask = intmask & (SDHCI_INT_CMD_MASK | SDHCI_INT_DATA_MASK |
+>>>                    SDHCI_INT_BUS_POWER);
+>>> @@ -2823,6 +2847,106 @@ static int sdhci_set_dma_mask(struct sdhci_host
+>>> *host)
+>>>      return ret;
+>>>  }
+>>>
+>>> +#ifdef CONFIG_MMC_CQ_HCI
+>>> +static void sdhci_cmdq_clear_set_irqs(struct mmc_host *mmc, bool clear)
+>>> +{
+>>> +    struct sdhci_host *host = mmc_priv(mmc);
+>>> +    u32 ier = 0;
+>>> +
+>>> +    ier &= ~SDHCI_INT_ALL_MASK;
+>>> +
+>>> +    if (clear) {
+>>> +        ier = SDHCI_INT_CMDQ_EN | SDHCI_INT_ERROR_MASK;
+>>
+>> SDHCI_INT_ERROR_MASK is not ideal here.  I would expect to set only the bits
+>> we know and want.
+>>
+>>> +        sdhci_writel(host, ier, SDHCI_INT_ENABLE);
+>>> +        sdhci_writel(host, ier, SDHCI_SIGNAL_ENABLE);
+>>> +    } else {
+>>> +        ier = SDHCI_INT_BUS_POWER | SDHCI_INT_DATA_END_BIT |
+>>> +                 SDHCI_INT_DATA_CRC | SDHCI_INT_DATA_TIMEOUT |
+>>> +                 SDHCI_INT_INDEX | SDHCI_INT_END_BIT |
+>>> +                 SDHCI_INT_CRC | SDHCI_INT_TIMEOUT |
+>>> +                 SDHCI_INT_DATA_END | SDHCI_INT_RESPONSE |
+>>> +                 SDHCI_INT_ACMD12ERR;
+>>
+>> We ought to have the default interrupts defined, so that the same ones are
+>> set here.
+>>
+>>> +        sdhci_writel(host, ier, SDHCI_INT_ENABLE);
+>>> +        sdhci_writel(host, ier, SDHCI_SIGNAL_ENABLE);
+>>> +    }
+>>> +}
+>>> +
+>>> +static void sdhci_cmdq_set_data_timeout(struct mmc_host *mmc, u32 val)
+>>
+>> Do we really need different callbacks for ->clear_set_irqs(),
+>> ->set_data_timeout(), ->set_block_size() and ->clear_set_dumpregs()?  It
+>> looks like we could consolidate them all into just 2 i.e. to start and stop
+>> CQ mode.
+>>
+>>> +{
+>>> +    struct sdhci_host *host = mmc_priv(mmc);
+>>> +
+>>> +    sdhci_writeb(host, val, SDHCI_TIMEOUT_CONTROL);
+>>> +}
+>>
+>> We can't expect CQHCI to provide the SDHCI register value.  Ideally we don't
+>> want to set the highest value but instead calculate the value based on the
+>> maximum sized transfer.
+>>
+>>> +
+>>> +static void sdhci_cmdq_dump_vendor_regs(struct mmc_host *mmc)
+>>> +{
+>>> +    struct sdhci_host *host = mmc_priv(mmc);
+>>> +
+>>> +    sdhci_dumpregs(host);
+>>> +}
+>>
+>> Instead you should export sdhci_dumpregs() and let the individual drivers
+>> connect it to CQHCI.
+>>
+>>> +
+>>> +static int sdhci_cmdq_init(struct sdhci_host *host, struct mmc_host *mmc,
+>>> +               bool dma64)
+>>> +{
+>>> +    return cmdq_init(host->cq_host, mmc, dma64);
+>>> +}
+>>
+>> Individual drivers should initialize their CQE driver implementation.  It is
+>> not necessarily CQHCI.
+>>
+>>> +
+>>> +static void sdhci_cmdq_set_block_size(struct mmc_host *mmc)
+>>> +{
+>>> +    struct sdhci_host *host = mmc_priv(mmc);
+>>> +
+>>> +    sdhci_set_blk_size_reg(host, 512, 0);
+>>> +}
+>>> +
+>>> +static void sdhci_cmdq_clear_set_dumpregs(struct mmc_host *mmc, bool set)
+>>> +{
+>>> +    struct sdhci_host *host = mmc_priv(mmc);
+>>> +
+>>> +    if (host->ops->clear_set_dumpregs)
+>>> +        host->ops->clear_set_dumpregs(host, set);
+> This is vendor specific callback for platform drivers to enable/disable (say
+> some TEST bus) registers for debugging purposes.
+> 
+> 
+>>> +}
+>>
+>> As questioned further below, what is this for?
+>>
+>>> +#else
+>>> +static void sdhci_cmdq_clear_set_irqs(struct mmc_host *mmc, bool clear)
+>>> +{
+>>> +
+>>> +}
+>>> +
+>>> +static void sdhci_cmdq_set_data_timeout(struct mmc_host *mmc, u32 val)
+>>> +{
+>>> +
+>>> +}
+>>> +
+>>> +static void sdhci_cmdq_dump_vendor_regs(struct mmc_host *mmc)
+>>> +{
+>>> +
+>>> +}
+>>> +
+>>> +static int sdhci_cmdq_init(struct sdhci_host *host, struct mmc_host *mmc,
+>>> +               bool dma64)
+>>> +{
+>>> +    return -ENOSYS;
+>>> +}
+>>> +
+>>> +static void sdhci_cmdq_set_block_size(struct mmc_host *mmc)
+>>> +{
+>>> +
+>>> +}
+>>> +
+>>> +static void sdhci_cmdq_clear_set_dumpregs(struct mmc_host *mmc, bool set)
+>>> +{
+>>> +
+>>> +}
+>>> +
+>>> +#endif
+>>> +
+>>> +static const struct cmdq_host_ops sdhci_cmdq_ops = {
+>>> +    .clear_set_irqs = sdhci_cmdq_clear_set_irqs,
+>>> +    .set_data_timeout = sdhci_cmdq_set_data_timeout,
+>>> +    .dump_vendor_regs = sdhci_cmdq_dump_vendor_regs,
+>>> +    .set_block_size = sdhci_cmdq_set_block_size,
+>>> +    .clear_set_dumpregs = sdhci_cmdq_clear_set_dumpregs,
+>>> +};
+>>
+>> It would be up to individual drivers to provide CQHCI ops.
+>>
+>>> +
+>>>  int sdhci_add_host(struct sdhci_host *host)
+>>>  {
+>>>      struct mmc_host *mmc;
+>>> @@ -3341,11 +3465,25 @@ int sdhci_add_host(struct sdhci_host *host)
+>>>      if (ret)
+>>>          goto unled;
+>>>
+>>> -    pr_info("%s: SDHCI controller on %s [%s] using %s\n",
+>>> -        mmc_hostname(mmc), host->hw_name, dev_name(mmc_dev(mmc)),
+>>> +    if (mmc->caps2 &  MMC_CAP2_CMD_QUEUE) {
+>>> +        bool dma64 = (host->flags & SDHCI_USE_ADMA_64BIT) ?
+>>> +            true : false;
+>>> +        ret = sdhci_cmdq_init(host, mmc, dma64);
+>>
+>> You must initialize before mmc_add_host() because mmc_add_host() also starts
+>> the host.  If you re-base on top of the SDHCI patches, then individual
+>> drivers can take advantage of the new sdhci_setup_host() /
+>> __sdhci_add_host() split.
+>>
+>>> +        if (ret)
+>>> +            pr_err("%s: CMDQ init: failed (%d)\n",
+>>> +                   mmc_hostname(host->mmc), ret);
+>>> +        else
+>>> +            host->cq_host->ops = &sdhci_cmdq_ops;
+>>> +    }
+>>> +
+>>> +    pr_info("%s: SDHCI controller on %s [%s] using %s in %s mode\n",
+>>> +    mmc_hostname(mmc), host->hw_name, dev_name(mmc_dev(mmc)),
+>>>          (host->flags & SDHCI_USE_ADMA) ?
+>>> -        (host->flags & SDHCI_USE_64_BIT_DMA) ? "ADMA 64-bit" : "ADMA" :
+>>> -        (host->flags & SDHCI_USE_SDMA) ? "DMA" : "PIO");
+>>> +        ((host->flags & SDHCI_USE_ADMA_64BIT) ?
+>>> +        "64-bit ADMA" : "32-bit ADMA") :
+>>> +        ((host->flags & SDHCI_USE_SDMA) ? "DMA" : "PIO"),
+>>> +        ((mmc->caps2 &  MMC_CAP2_CMD_QUEUE) && !ret) ?
+>>> +        "CMDQ" : "legacy");
+>>
+>> It is probably better if CQHCI prints its own info.  That way it you get a
+>> consistent message irrespective of whether the driver uses SDHCI.  Also you
+>> can print other CQHCI details such as the version.
+>>
+>>>
+>>>      sdhci_enable_card_detection(host);
+>>>
+>>> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+>>> index 609f87c..fccc750 100644
+>>> --- a/drivers/mmc/host/sdhci.h
+>>> +++ b/drivers/mmc/host/sdhci.h
+>>> @@ -150,6 +150,8 @@
+>>>          SDHCI_INT_DATA_TIMEOUT | SDHCI_INT_DATA_CRC | \
+>>>          SDHCI_INT_DATA_END_BIT | SDHCI_INT_ADMA_ERROR | \
+>>>          SDHCI_INT_BLK_GAP)
+>>> +
+>>> +#define SDHCI_INT_CMDQ_EN    (0x1 << 14)
+>>
+>> We can define this bit for convenience but we need a comment to say that it
+>> is non-standard.
+>>
+>>>  #define SDHCI_INT_ALL_MASK    ((unsigned int)-1)
+>>>
+>>>  #define SDHCI_ACMD12_ERR    0x3C
+>>> @@ -446,6 +448,7 @@ struct sdhci_host {
+>>>  #define SDHCI_PV_ENABLED    (1<<8)    /* Preset value enabled */
+>>>  #define SDHCI_SDIO_IRQ_ENABLED    (1<<9)    /* SDIO irq enabled */
+>>>  #define SDHCI_USE_64_BIT_DMA    (1<<12)    /* Use 64-bit DMA */
+>>> +#define SDHCI_USE_ADMA_64BIT    (1<<12)    /* Host is 64-bit ADMA
+>>> capable */
+>>
+>> SDHCI_USE_ADMA_64BIT looks redundant.
+>>
+>>>  #define SDHCI_HS400_TUNING    (1<<13)    /* Tuning for HS400 */
+>>>
+>>>      unsigned int version;    /* SDHCI spec. version */
+>>> @@ -509,6 +512,8 @@ struct sdhci_host {
+>>>      unsigned int        tuning_mode;    /* Re-tuning mode supported by
+>>> host */
+>>>  #define SDHCI_TUNING_MODE_1    0
+>>>
+>>> +    struct cmdq_host *cq_host;
+>>> +
+>>
+>> The individual drivers will have to have their own reference to CQHCI.
+>>
+>>>      unsigned long private[0] ____cacheline_aligned;
+>>>  };
+>>>
+>>> @@ -544,6 +549,7 @@ struct sdhci_ops {
+>>>      void    (*adma_workaround)(struct sdhci_host *host, u32 intmask);
+>>>      void    (*platform_init)(struct sdhci_host *host);
+>>>      void    (*card_event)(struct sdhci_host *host);
+>>> +    void    (*clear_set_dumpregs)(struct sdhci_host *host, bool set);
+>>
+>> What is this for?
+> 
+> This is vendor specific callback to enable/disable some TEST bus registers
+> for debugging purposes.
+> 
+>>
+>>>      void    (*voltage_switch)(struct sdhci_host *host);
+>>>      int    (*select_drive_strength)(struct sdhci_host *host,
+>>>                       struct mmc_card *card,
+>>>
+>>
+>> -- 
+>> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>
+> 
+> 
+> 
+> 
