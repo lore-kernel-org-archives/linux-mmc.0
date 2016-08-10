@@ -1,40 +1,61 @@
-From: Rob Herring <robh@kernel.org>
-Subject: Re: [PATCH resend] mmc: pwrseq-simple: Add an optional
- post-power-on-delay
-Date: Wed, 10 Aug 2016 13:58:31 -0500
-Message-ID: <20160810185831.GA19639@rob-hp-laptop>
-References: <1470596558-23195-1-git-send-email-hdegoede@redhat.com>
- <1470596558-23195-2-git-send-email-hdegoede@redhat.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-Content-Disposition: inline
-In-Reply-To: <1470596558-23195-2-git-send-email-hdegoede@redhat.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Hans de Goede <hdegoede@redhat.com>
-Cc: devicetree <devicetree@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, Chen-Yu Tsai <wens@csie.org>, Icenowy Zheng <icenowy@aosc.xyz>, Maxime Ripard <maxime.ripard@free-electrons.com>, linux-arm-kernel@lists.infradead.org
+From: Ritesh Harjani <riteshh@codeaurora.org>
+Subject: [PATCH 04/10] mmc: sdhci-msm: Add get_min_clock() and get_max_clock() callback
+Date: Wed, 10 Aug 2016 20:31:53 +0530
+Message-ID: <1470841319-6091-5-git-send-email-riteshh@codeaurora.org>
+References: <1470841319-6091-1-git-send-email-riteshh@codeaurora.org>
+Return-path: <linux-arm-msm-owner@vger.kernel.org>
+In-Reply-To: <1470841319-6091-1-git-send-email-riteshh@codeaurora.org>
+Sender: linux-arm-msm-owner@vger.kernel.org
+To: ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, adrian.hunter@intel.com
+Cc: linux-arm-msm@vger.kernel.org, georgi.djakov@linaro.org, alex.lemberg@sandisk.com, mateusz.nowak@intel.com, Yuliy.Izrailov@sandisk.com, asutoshd@codeaurora.org, sthumma@codeaurora.org, kdorfman@codeaurora.org, david.griego@linaro.org, stummala@codeaurora.org, venkatg@codeaurora.org, Ritesh Harjani <riteshh@codeaurora.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Sun, Aug 07, 2016 at 09:02:38PM +0200, Hans de Goede wrote:
-> Some devices need a while to boot their firmware after providing clks /
-> de-asserting resets before they are ready to receive sdio commands.
-> 
-> This commits adds a post-power-on-delay-ms devicetree property to
-> mmc-pwrseq-simple for use with such devices.
-> 
-> Signed-off-by: Hans de Goede <hdegoede@redhat.com>
-> ---
->  Documentation/devicetree/bindings/mmc/mmc-pwrseq-simple.txt | 2 ++
->  drivers/mmc/core/pwrseq_simple.c                            | 9 +++++++++
->  2 files changed, 11 insertions(+)
+This add get_min_clock() and get_max_clock() callback
+for sdhci-msm. sdhci-msm min/max clocks may be different
+hence implement these callbacks.
 
-Acked-by: Rob Herring <robh@kernel.org>
+Signed-off-by: Ritesh Harjani <riteshh@codeaurora.org>
+---
+ drivers/mmc/host/sdhci-msm.c | 19 +++++++++++++++++++
+ 1 file changed, 19 insertions(+)
+
+diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
+index 2c745c2..5913ce1 100644
+--- a/drivers/mmc/host/sdhci-msm.c
++++ b/drivers/mmc/host/sdhci-msm.c
+@@ -553,6 +553,23 @@ static irqreturn_t sdhci_msm_pwr_irq(int irq, void *data)
+ 	return IRQ_HANDLED;
+ }
+ 
++static unsigned int sdhci_msm_get_max_clock(struct sdhci_host *host)
++{
++	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
++	struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
++	int count = msm_host->pdata->clk_table_sz;
++
++	return msm_host->pdata->clk_table[count - 1];
++}
++
++static unsigned int sdhci_msm_get_min_clock(struct sdhci_host *host)
++{
++	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
++	struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
++
++	return msm_host->pdata->clk_table[0];
++}
++
+ static const struct of_device_id sdhci_msm_dt_match[] = {
+ 	{ .compatible = "qcom,sdhci-msm-v4" },
+ 	{},
+@@ -564,6 +581,8 @@ static const struct sdhci_ops sdhci_msm_ops = {
+ 	.platform_execute_tuning = sdhci_msm_execute_tuning,
+ 	.reset = sdhci_reset,
+ 	.set_clock = sdhci_set_clock,
++	.get_min_clock = sdhci_msm_get_min_clock,
++	.get_max_clock = sdhci_msm_get_max_clock,
+ 	.set_bus_width = sdhci_set_bus_width,
+ 	.set_uhs_signaling = sdhci_msm_set_uhs_signaling,
+ 	.voltage_switch = sdhci_msm_voltage_switch,
+-- 
+The Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum, 
+a Linux Foundation Collaborative Project.
