@@ -1,130 +1,150 @@
-From: Guodong Xu <guodong.xu@linaro.org>
-Subject: [PATCH v4 2/2] mmc: dw_mmc: add reset support to dwmmc host controller
-Date: Wed, 10 Aug 2016 16:03:48 +0800
-Message-ID: <1470816228-8874-3-git-send-email-guodong.xu@linaro.org>
-References: <1470816228-8874-1-git-send-email-guodong.xu@linaro.org>
+From: Yong Mao <yong.mao-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>
+Subject: [PATCH] mmc: mediatek: Fix CMD6 timeout issue
+Date: Wed, 10 Aug 2016 19:59:38 +0800
+Message-ID: <1470830378-12155-1-git-send-email-yong.mao@mediatek.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <1470816228-8874-1-git-send-email-guodong.xu@linaro.org>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: heiko@sntech.de, shawn.lin@rock-chips.com, jh80.chung@samsung.com, robh+dt@kernel.org, mark.rutland@arm.com, ulf.hansson@linaro.org, guodong.xu@linaro.org
-Cc: devicetree@vger.kernel.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Xinwei Kong <kong.kongxinwei@hisilicon.com>, Zhangfei Gao <zhangfei.gao@linaro.org>, linux-arm-kernel@lists.infradead.org
+Return-path: <linux-mediatek-bounces+glpam-linux-mediatek=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-mediatek>,
+ <mailto:linux-mediatek-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-mediatek/>
+List-Post: <mailto:linux-mediatek-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+List-Help: <mailto:linux-mediatek-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-mediatek>,
+ <mailto:linux-mediatek-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
+Sender: "Linux-mediatek" <linux-mediatek-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+Errors-To: linux-mediatek-bounces+glpam-linux-mediatek=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+To: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: Nicolas Boichat <drinkcat-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, Minghsiu Tsai <Minghsiu.Tsai-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>, srv_heupstream-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Douglas Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, yong mao <yong.mao-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Geert Uytterhoeven <geert-Td1EMuHUCqxL1ZNQvxDV9g@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, Sascha Hauer <kernel-bIcnvbaLZ9MEGnE8C9+IrQ@public.gmane.org>, Matthias Brugger <matthias.bgg-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, linux-mediatek-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, Chaotian Jing <chaotian.jing-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-Dwmmc host controller may in unknown state when entering kernel boot. One
-example is when booting from eMMC, bootloader need initialize MMC host
-controller into some state so it can read. In order to make sure MMC host
-controller in a clean initial state, this reset support is added.
+From: yong mao <yong.mao-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>
 
-With this patch, a 'resets' property can be added into dw_mmc device
-tree node. The hardware logic is: dwmmc host controller IP receives a reset
-signal from a 'reset provider' (eg. power management unit). The 'resets'
-property points to this reset signal. So, during dwmmc driver probe,
-it can use this signal to reset itself.
+When init EMMC, after switch to HS400, will issue
+CMD6 to change ext_csd, if first CMD6 got CRC
+error, the repeat CMD6 may get timeout, that's
+because SDCBSY was cleared by msdc_reset_hw()
 
-Refer to [1] for more information.
+In this case, need check MSDC_PS to wait EMMC
+changes to transfer state
 
-[1] Documentation/devicetree/bindings/reset/reset.txt
-
-Signed-off-by: Guodong Xu <guodong.xu@linaro.org>
-Signed-off-by: Xinwei Kong <kong.kongxinwei@hisilicon.com>
-Signed-off-by: Zhangfei Gao <zhangfei.gao@linaro.org>
+Signed-off-by: Chaotian Jing <chaotian.jing-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>
+Signed-off-by: Yong Mao <yong.mao-NuS5LvNUpcJWk0Htik3J/w@public.gmane.org>
 ---
- drivers/mmc/host/dw_mmc.c  | 23 ++++++++++++++++++++++-
- include/linux/mmc/dw_mmc.h |  2 ++
- 2 files changed, 24 insertions(+), 1 deletion(-)
+ drivers/mmc/host/mtk-sd.c | 78 +++++++++++++++++++++++++++++++----------------
+ 1 file changed, 52 insertions(+), 26 deletions(-)
 
-diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index 32380d5..481d441 100644
---- a/drivers/mmc/host/dw_mmc.c
-+++ b/drivers/mmc/host/dw_mmc.c
-@@ -2915,6 +2915,13 @@ static struct dw_mci_board *dw_mci_parse_dt(struct dw_mci *host)
- 	if (!pdata)
- 		return ERR_PTR(-ENOMEM);
+diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
+index 84e9afc..d52563d 100644
+--- a/drivers/mmc/host/mtk-sd.c
++++ b/drivers/mmc/host/mtk-sd.c
+@@ -826,6 +826,15 @@ static bool msdc_cmd_done(struct msdc_host *host, int events,
+ 	return true;
+ }
  
-+	/* find reset controller when exist */
-+	pdata->rstc = devm_reset_control_get_optional(dev, NULL);
-+	if (IS_ERR(pdata->rstc)) {
-+		if (PTR_ERR(pdata->rstc) == -EPROBE_DEFER)
-+			return ERR_PTR(-EPROBE_DEFER);
-+	}
++static int msdc_card_busy(struct mmc_host *mmc)
++{
++	struct msdc_host *host = mmc_priv(mmc);
++	u32 status = readl(host->base + MSDC_PS);
 +
- 	/* find out number of slots supported */
- 	of_property_read_u32(np, "num-slots", &pdata->num_slots);
++	/* check if data0 is low */
++	return !(status & BIT(16));
++}
++
+ /* It is the core layer's responsibility to ensure card status
+  * is correct before issue a request. but host design do below
+  * checks recommended.
+@@ -835,10 +844,20 @@ static inline bool msdc_cmd_is_ready(struct msdc_host *host,
+ {
+ 	/* The max busy time we can endure is 20ms */
+ 	unsigned long tmo = jiffies + msecs_to_jiffies(20);
++	u32 count = 0;
++
++	if (in_interrupt()) {
++		while ((readl(host->base + SDC_STS) & SDC_STS_CMDBUSY) &&
++		       (count < 1000)) {
++			udelay(1);
++			count++;
++		}
++	} else {
++		while ((readl(host->base + SDC_STS) & SDC_STS_CMDBUSY) &&
++		       time_before(jiffies, tmo))
++			cpu_relax();
++	}
  
-@@ -2986,7 +2993,9 @@ int dw_mci_probe(struct dw_mci *host)
- 
- 	if (!host->pdata) {
- 		host->pdata = dw_mci_parse_dt(host);
--		if (IS_ERR(host->pdata)) {
-+		if (PTR_ERR(host->pdata) == -EPROBE_DEFER) {
-+			return -EPROBE_DEFER;
-+		} else if (IS_ERR(host->pdata)) {
- 			dev_err(host->dev, "platform data not available\n");
- 			return -EINVAL;
- 		}
-@@ -3040,6 +3049,12 @@ int dw_mci_probe(struct dw_mci *host)
- 		}
+-	while ((readl(host->base + SDC_STS) & SDC_STS_CMDBUSY) &&
+-			time_before(jiffies, tmo))
+-		cpu_relax();
+ 	if (readl(host->base + SDC_STS) & SDC_STS_CMDBUSY) {
+ 		dev_err(host->dev, "CMD bus busy detected\n");
+ 		host->error |= REQ_CMD_BUSY;
+@@ -846,17 +865,36 @@ static inline bool msdc_cmd_is_ready(struct msdc_host *host,
+ 		return false;
  	}
  
-+	if (!IS_ERR(host->pdata->rstc)) {
-+		reset_control_assert(host->pdata->rstc);
-+		usleep_range(10, 50);
-+		reset_control_deassert(host->pdata->rstc);
-+	}
-+
- 	setup_timer(&host->cmd11_timer,
- 		    dw_mci_cmd11_timer, (unsigned long)host);
+-	if (mmc_resp_type(cmd) == MMC_RSP_R1B || cmd->data) {
+-		tmo = jiffies + msecs_to_jiffies(20);
+-		/* R1B or with data, should check SDCBUSY */
+-		while ((readl(host->base + SDC_STS) & SDC_STS_SDCBUSY) &&
+-				time_before(jiffies, tmo))
+-			cpu_relax();
+-		if (readl(host->base + SDC_STS) & SDC_STS_SDCBUSY) {
+-			dev_err(host->dev, "Controller busy detected\n");
+-			host->error |= REQ_CMD_BUSY;
+-			msdc_cmd_done(host, MSDC_INT_CMDTMO, mrq, cmd);
+-			return false;
++	if (cmd->opcode != MMC_SEND_STATUS) {
++		count = 0;
++		/* Consider that CMD6 crc error before card was init done,
++		 * mmc_retune() will return directly as host->card is null.
++		 * and CMD6 will retry 3 times, must ensure card is in transfer
++		 * state when retry.
++		 */
++		tmo = jiffies + msecs_to_jiffies(60 * 1000);
++		while (1) {
++			if (msdc_card_busy(host->mmc)) {
++				if (in_interrupt()) {
++					udelay(1);
++					count++;
++				} else {
++					msleep_interruptible(10);
++				}
++			} else {
++				break;
++			}
++			/* Timeout if the device never
++			 * leaves the program state.
++			 */
++			if (count > 1000 || time_after(jiffies, tmo)) {
++				pr_err("%s: Card stuck in
++					 programming state! %s\n",
++				       mmc_hostname(host->mmc), __func__);
++				host->error |= REQ_CMD_BUSY;
++				msdc_cmd_done(host, MSDC_INT_CMDTMO, mrq, cmd);
++				return false;
++			}
+ 		}
+ 	}
+ 	return true;
+@@ -1070,18 +1108,6 @@ static int msdc_ops_switch_volt(struct mmc_host *mmc, struct mmc_ios *ios)
+ 	return ret;
+ }
  
-@@ -3189,6 +3204,9 @@ err_dmaunmap:
- 	if (host->use_dma && host->dma_ops->exit)
- 		host->dma_ops->exit(host);
- 
-+	if (!IS_ERR(host->pdata->rstc))
-+		reset_control_assert(host->pdata->rstc);
-+
- err_clk_ciu:
- 	if (!IS_ERR(host->ciu_clk))
- 		clk_disable_unprepare(host->ciu_clk);
-@@ -3221,6 +3239,9 @@ void dw_mci_remove(struct dw_mci *host)
- 	if (host->use_dma && host->dma_ops->exit)
- 		host->dma_ops->exit(host);
- 
-+	if (!IS_ERR(host->pdata->rstc))
-+		reset_control_assert(host->pdata->rstc);
-+
- 	if (!IS_ERR(host->ciu_clk))
- 		clk_disable_unprepare(host->ciu_clk);
- 
-diff --git a/include/linux/mmc/dw_mmc.h b/include/linux/mmc/dw_mmc.h
-index 83b0edfc..f5af2bd 100644
---- a/include/linux/mmc/dw_mmc.h
-+++ b/include/linux/mmc/dw_mmc.h
-@@ -17,6 +17,7 @@
- #include <linux/scatterlist.h>
- #include <linux/mmc/core.h>
- #include <linux/dmaengine.h>
-+#include <linux/reset.h>
- 
- #define MAX_MCI_SLOTS	2
- 
-@@ -259,6 +260,7 @@ struct dw_mci_board {
- 	/* delay in mS before detecting cards after interrupt */
- 	u32 detect_delay_ms;
- 
-+	struct reset_control *rstc;
- 	struct dw_mci_dma_ops *dma_ops;
- 	struct dma_pdata *data;
- };
+-static int msdc_card_busy(struct mmc_host *mmc)
+-{
+-	struct msdc_host *host = mmc_priv(mmc);
+-	u32 status = readl(host->base + MSDC_PS);
+-
+-	/* check if any pin between dat[0:3] is low */
+-	if (((status >> 16) & 0xf) != 0xf)
+-		return 1;
+-
+-	return 0;
+-}
+-
+ static void msdc_request_timeout(struct work_struct *work)
+ {
+ 	struct msdc_host *host = container_of(work, struct msdc_host,
 -- 
-1.9.1
+1.8.1.1.dirty
