@@ -1,61 +1,39 @@
 From: Ritesh Harjani <riteshh@codeaurora.org>
-Subject: [PATCH 04/10] mmc: sdhci-msm: Add get_min_clock() and get_max_clock() callback
-Date: Wed, 10 Aug 2016 20:31:53 +0530
-Message-ID: <1470841319-6091-5-git-send-email-riteshh@codeaurora.org>
+Subject: [PATCH 10/10] arm64: dts: qcom: msm8916: Add ddr support to sdhc1
+Date: Wed, 10 Aug 2016 20:31:59 +0530
+Message-ID: <1470841319-6091-11-git-send-email-riteshh@codeaurora.org>
 References: <1470841319-6091-1-git-send-email-riteshh@codeaurora.org>
-Return-path: <linux-arm-msm-owner@vger.kernel.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from smtp.codeaurora.org ([198.145.29.96]:53458 "EHLO
+	smtp.codeaurora.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S936298AbcHJSlG (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Wed, 10 Aug 2016 14:41:06 -0400
 In-Reply-To: <1470841319-6091-1-git-send-email-riteshh@codeaurora.org>
-Sender: linux-arm-msm-owner@vger.kernel.org
+Sender: linux-mmc-owner@vger.kernel.org
+List-Id: linux-mmc@vger.kernel.org
 To: ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, adrian.hunter@intel.com
 Cc: linux-arm-msm@vger.kernel.org, georgi.djakov@linaro.org, alex.lemberg@sandisk.com, mateusz.nowak@intel.com, Yuliy.Izrailov@sandisk.com, asutoshd@codeaurora.org, sthumma@codeaurora.org, kdorfman@codeaurora.org, david.griego@linaro.org, stummala@codeaurora.org, venkatg@codeaurora.org, Ritesh Harjani <riteshh@codeaurora.org>
-List-Id: linux-mmc@vger.kernel.org
 
-This add get_min_clock() and get_max_clock() callback
-for sdhci-msm. sdhci-msm min/max clocks may be different
-hence implement these callbacks.
+This adds mmc-ddr-1_8v support to DT for sdhc1 of msm8916.
 
 Signed-off-by: Ritesh Harjani <riteshh@codeaurora.org>
 ---
- drivers/mmc/host/sdhci-msm.c | 19 +++++++++++++++++++
- 1 file changed, 19 insertions(+)
+ arch/arm64/boot/dts/qcom/msm8916.dtsi | 1 +
+ 1 file changed, 1 insertion(+)
 
-diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
-index 2c745c2..5913ce1 100644
---- a/drivers/mmc/host/sdhci-msm.c
-+++ b/drivers/mmc/host/sdhci-msm.c
-@@ -553,6 +553,23 @@ static irqreturn_t sdhci_msm_pwr_irq(int irq, void *data)
- 	return IRQ_HANDLED;
- }
- 
-+static unsigned int sdhci_msm_get_max_clock(struct sdhci_host *host)
-+{
-+	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-+	struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
-+	int count = msm_host->pdata->clk_table_sz;
-+
-+	return msm_host->pdata->clk_table[count - 1];
-+}
-+
-+static unsigned int sdhci_msm_get_min_clock(struct sdhci_host *host)
-+{
-+	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-+	struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
-+
-+	return msm_host->pdata->clk_table[0];
-+}
-+
- static const struct of_device_id sdhci_msm_dt_match[] = {
- 	{ .compatible = "qcom,sdhci-msm-v4" },
- 	{},
-@@ -564,6 +581,8 @@ static const struct sdhci_ops sdhci_msm_ops = {
- 	.platform_execute_tuning = sdhci_msm_execute_tuning,
- 	.reset = sdhci_reset,
- 	.set_clock = sdhci_set_clock,
-+	.get_min_clock = sdhci_msm_get_min_clock,
-+	.get_max_clock = sdhci_msm_get_max_clock,
- 	.set_bus_width = sdhci_set_bus_width,
- 	.set_uhs_signaling = sdhci_msm_set_uhs_signaling,
- 	.voltage_switch = sdhci_msm_voltage_switch,
+diff --git a/arch/arm64/boot/dts/qcom/msm8916.dtsi b/arch/arm64/boot/dts/qcom/msm8916.dtsi
+index 5161740..514c61e 100644
+--- a/arch/arm64/boot/dts/qcom/msm8916.dtsi
++++ b/arch/arm64/boot/dts/qcom/msm8916.dtsi
+@@ -390,6 +390,7 @@
+ 			clock-names = "core", "iface";
+ 			clk-rates = <400000 25000000 50000000 100000000
+ 					177770000>;
++			mmc-ddr-1_8v;
+ 			bus-width = <8>;
+ 			non-removable;
+ 			status = "disabled";
 -- 
 The Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum, 
 a Linux Foundation Collaborative Project.
+
