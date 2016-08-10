@@ -1,44 +1,36 @@
-From: Ritesh Harjani <riteshh@codeaurora.org>
-Subject: [PATCH 08/10] mmc: sdhci-msm: Enable SDHCI_QUIRK2_ALWAYS_USE_BASE_CLOCK to sdhci-msm
-Date: Wed, 10 Aug 2016 20:31:57 +0530
-Message-ID: <1470841319-6091-9-git-send-email-riteshh@codeaurora.org>
-References: <1470841319-6091-1-git-send-email-riteshh@codeaurora.org>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp.codeaurora.org ([198.145.29.96]:53480 "EHLO
-	smtp.codeaurora.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S935727AbcHJSlI (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 10 Aug 2016 14:41:08 -0400
-In-Reply-To: <1470841319-6091-1-git-send-email-riteshh@codeaurora.org>
-Sender: linux-mmc-owner@vger.kernel.org
+From: Rob Herring <robh@kernel.org>
+Subject: Re: [PATCH RFC 1/3] DT: bindings: mmc: Add property for 3.3V only
+ support
+Date: Wed, 10 Aug 2016 13:44:51 -0500
+Message-ID: <20160810184451.GA13473@rob-hp-laptop>
+References: <1470488140-10104-1-git-send-email-stefan.wahren@i2se.com>
+ <1470488140-10104-2-git-send-email-stefan.wahren@i2se.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+Content-Disposition: inline
+In-Reply-To: <1470488140-10104-2-git-send-email-stefan.wahren@i2se.com>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Stefan Wahren <stefan.wahren@i2se.com>
+Cc: Mark Rutland <mark.rutland@arm.com>, Dong Aisheng <aisheng.dong@nxp.com>, Ulf Hansson <ulf.hansson@linaro.org>, Marek Vasut <marex@denx.de>, Otavio Salvador <otavio@ossystems.com.br>, devicetree@vger.kernel.org, Shawn Guo <shawnguo@kernel.org>, linux-mmc@vger.kernel.org, Sascha Hauer <kernel@pengutronix.de>, Fabio Estevam <fabio.estevam@nxp.com>, Holger Schurig <holgerschurig@gmail.com>, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
-To: ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, adrian.hunter@intel.com
-Cc: linux-arm-msm@vger.kernel.org, georgi.djakov@linaro.org, alex.lemberg@sandisk.com, mateusz.nowak@intel.com, Yuliy.Izrailov@sandisk.com, asutoshd@codeaurora.org, sthumma@codeaurora.org, kdorfman@codeaurora.org, david.griego@linaro.org, stummala@codeaurora.org, venkatg@codeaurora.org, Ritesh Harjani <riteshh@codeaurora.org>
 
-From: Sahitya Tummala <stummala@codeaurora.org>
+On Sat, Aug 06, 2016 at 12:55:38PM +0000, Stefan Wahren wrote:
+> Currently there is no proper way to define that a MMC host supports
+> only 3.3V. The property no-1-8-v is broken and has different meanings
+> for different sdhci variants. So add a new property for 3.3V only
+> support and mark no-1-8-v as deprecated.
 
-This enable SDHCI_QUIRK2_ALWAYS_USE_BASE_CLOCK to SDHC MSM driver.
-sdhci-msm controller needs the base clock and the driver
-controls the base clock (MCLK) directly.
+Why is it broken? How would I override a controller saying 1.8V is 
+supported and it is not?
 
-Signed-off-by: Sahitya Tummala <stummala@codeaurora.org>
-Signed-off-by: Ritesh Harjani <riteshh@codeaurora.org>
----
- drivers/mmc/host/sdhci-msm.c | 1 +
- 1 file changed, 1 insertion(+)
-
-diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
-index 03deeab..717d264 100644
---- a/drivers/mmc/host/sdhci-msm.c
-+++ b/drivers/mmc/host/sdhci-msm.c
-@@ -647,6 +647,7 @@ static const struct sdhci_pltfm_data sdhci_msm_pdata = {
- 		  SDHCI_QUIRK_NO_CARD_NO_RESET |
- 		  SDHCI_QUIRK_SINGLE_POWER_WRITE |
- 		  SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN,
-+	.quirks2 = SDHCI_QUIRK2_ALWAYS_USE_BASE_CLOCK,
- 	.ops = &sdhci_msm_ops,
- };
- 
--- 
-The Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum, 
-a Linux Foundation Collaborative Project.
-
+Rob
