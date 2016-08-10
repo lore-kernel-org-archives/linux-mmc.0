@@ -1,7 +1,7 @@
 From: Ritesh Harjani <riteshh@codeaurora.org>
-Subject: [PATCH 02/10] mmc: sdhci-msm: add pltfm_data support to get clk-rates from DT
-Date: Wed, 10 Aug 2016 20:31:51 +0530
-Message-ID: <1470841319-6091-3-git-send-email-riteshh@codeaurora.org>
+Subject: [PATCH 05/10] mmc: sdhci-msm: Enable SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN
+Date: Wed, 10 Aug 2016 20:31:54 +0530
+Message-ID: <1470841319-6091-6-git-send-email-riteshh@codeaurora.org>
 References: <1470841319-6091-1-git-send-email-riteshh@codeaurora.org>
 Return-path: <linux-arm-msm-owner@vger.kernel.org>
 In-Reply-To: <1470841319-6091-1-git-send-email-riteshh@codeaurora.org>
@@ -10,132 +10,28 @@ To: ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, adrian.hunter@intel.com
 Cc: linux-arm-msm@vger.kernel.org, georgi.djakov@linaro.org, alex.lemberg@sandisk.com, mateusz.nowak@intel.com, Yuliy.Izrailov@sandisk.com, asutoshd@codeaurora.org, sthumma@codeaurora.org, kdorfman@codeaurora.org, david.griego@linaro.org, stummala@codeaurora.org, venkatg@codeaurora.org, Ritesh Harjani <riteshh@codeaurora.org>
 List-Id: linux-mmc@vger.kernel.org
 
-This adds support for sdhc-msm controllers to get supported
-clk-rates from DT. sdhci-msm would need it's own set_clock
-ops to be implemented. For this, supported clk-rates needs
-to be populated in sdhci_msm_pltfm_data.
+sdhc-msm controller needs this SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN
+to be set. Hence setting it.
 
 Signed-off-by: Ritesh Harjani <riteshh@codeaurora.org>
 ---
- .../devicetree/bindings/mmc/sdhci-msm.txt          |  1 +
- drivers/mmc/host/sdhci-msm.c                       | 71 ++++++++++++++++++++++
- 2 files changed, 72 insertions(+)
+ drivers/mmc/host/sdhci-msm.c | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
 
-diff --git a/Documentation/devicetree/bindings/mmc/sdhci-msm.txt b/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
-index 485483a..6a83b38 100644
---- a/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
-+++ b/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
-@@ -17,6 +17,7 @@ Required properties:
- 	"iface" - Main peripheral bus clock (PCLK/HCLK - AHB Bus clock) (required)
- 	"core"	- SDC MMC clock (MCLK) (required)
- 	"bus"	- SDCC bus voter clock (optional)
-+- clk-rates: Array of supported GCC clock frequencies for sdhc, Units - Hz.
- 
- Example:
- 
 diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
-index 9e08424..2c745c2 100644
+index 5913ce1..cfd0209 100644
 --- a/drivers/mmc/host/sdhci-msm.c
 +++ b/drivers/mmc/host/sdhci-msm.c
-@@ -74,6 +74,11 @@
- #define CMUX_SHIFT_PHASE_SHIFT	24
- #define CMUX_SHIFT_PHASE_MASK	(7 << CMUX_SHIFT_PHASE_SHIFT)
- 
-+struct sdhci_msm_pltfm_data {
-+	u32 *clk_table;
-+	size_t clk_table_sz;
-+};
-+
- struct sdhci_msm_host {
- 	struct platform_device *pdev;
- 	void __iomem *core_mem;	/* MSM SDCC mapped address */
-@@ -83,6 +88,7 @@ struct sdhci_msm_host {
- 	struct clk *bus_clk;	/* SDHC bus voter clock */
- 	struct mmc_host *mmc;
- 	bool use_updated_dll_reset;
-+	struct sdhci_msm_pltfm_data *pdata;
- };
- 
- /* Platform specific tuning */
-@@ -570,6 +576,67 @@ static const struct sdhci_pltfm_data sdhci_msm_pdata = {
+@@ -591,7 +591,8 @@ static const struct sdhci_ops sdhci_msm_ops = {
+ static const struct sdhci_pltfm_data sdhci_msm_pdata = {
+ 	.quirks = SDHCI_QUIRK_BROKEN_CARD_DETECTION |
+ 		  SDHCI_QUIRK_NO_CARD_NO_RESET |
+-		  SDHCI_QUIRK_SINGLE_POWER_WRITE,
++		  SDHCI_QUIRK_SINGLE_POWER_WRITE |
++		  SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN,
  	.ops = &sdhci_msm_ops,
  };
  
-+static int sdhci_msm_dt_get_array(struct device *dev, const char *prop_name,
-+				u32 **table, size_t *size)
-+{
-+	struct device_node *np = dev->of_node;
-+	int count = 0;
-+	u32 *arr = NULL;
-+	int ret = 0;
-+
-+	count = of_property_count_elems_of_size(np, prop_name, sizeof(u32));
-+	if (count < 0) {
-+		dev_err(dev, "%s: Invalid dt property, err(%d)\n",
-+				prop_name, count);
-+		ret = count;
-+		goto out;
-+	}
-+
-+	arr = devm_kzalloc(dev, count * sizeof(*arr), GFP_KERNEL);
-+	if (!arr) {
-+		ret = -ENOMEM;
-+		goto out;
-+	}
-+
-+	ret = of_property_read_u32_array(np, prop_name, arr, count);
-+	if (ret) {
-+		dev_err(dev, "%s Invalid dt array property, err(%d)\n",
-+				prop_name, ret);
-+		goto out;
-+	}
-+	*table = arr;
-+	*size = count;
-+out:
-+	return ret;
-+}
-+
-+static struct sdhci_msm_pltfm_data *sdhci_msm_populate_pdata(struct device *dev,
-+						struct sdhci_msm_host *msm_host)
-+{
-+	struct sdhci_msm_pltfm_data *pdata = NULL;
-+	size_t table_sz = 0;
-+	u32 *table = NULL;
-+
-+	pdata = devm_kzalloc(dev, sizeof(*pdata), GFP_KERNEL);
-+	if (!pdata)
-+		goto out;
-+
-+	if (sdhci_msm_dt_get_array(dev, "clk-rates", &table, &table_sz)) {
-+		dev_err(dev, "failed in DT parsing for supported clk-rates\n");
-+		goto out;
-+	}
-+	if (!table || !table_sz) {
-+		dev_err(dev, "Invalid clock table\n");
-+		goto out;
-+	}
-+	pdata->clk_table = table;
-+	pdata->clk_table_sz = table_sz;
-+
-+	return pdata;
-+out:
-+	return NULL;
-+}
-+
- static int sdhci_msm_probe(struct platform_device *pdev)
- {
- 	struct sdhci_host *host;
-@@ -596,6 +663,10 @@ static int sdhci_msm_probe(struct platform_device *pdev)
- 
- 	sdhci_get_of_property(pdev);
- 
-+	msm_host->pdata = sdhci_msm_populate_pdata(&pdev->dev, msm_host);
-+	if (!msm_host->pdata)
-+		goto pltfm_free;
-+
- 	/* Setup SDCC bus voter clock. */
- 	msm_host->bus_clk = devm_clk_get(&pdev->dev, "bus");
- 	if (!IS_ERR(msm_host->bus_clk)) {
 -- 
 The Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum, 
 a Linux Foundation Collaborative Project.
