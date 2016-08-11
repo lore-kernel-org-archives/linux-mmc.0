@@ -1,143 +1,104 @@
 From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH v4 2/2] mmc: dw_mmc: add reset support to dwmmc host
- controller
-Date: Thu, 11 Aug 2016 19:30:25 +0900
-Message-ID: <f2aab41f-26f0-6740-4465-5ac57fdcd72e@samsung.com>
-References: <1470816228-8874-1-git-send-email-guodong.xu@linaro.org>
- <1470816228-8874-3-git-send-email-guodong.xu@linaro.org>
- <CGME20160811022348epcas1p1be8c0797538de0a32a58d5c33731aa63@epcas1p1.samsung.com>
- <d39854ef-1a6a-bd58-2500-4db7f62f63c1@rock-chips.com>
+Subject: Re: [PATCH RFC 2/3] mmc: core: add new cap for 3.3V only DDR MMCs
+Date: Thu, 11 Aug 2016 20:12:59 +0900
+Message-ID: <cf38cffa-558e-a5fc-9ecb-b8f46f07153f@samsung.com>
+References: <1470488140-10104-1-git-send-email-stefan.wahren@i2se.com>
+ <1470488140-10104-3-git-send-email-stefan.wahren@i2se.com>
+ <0e38d62a-b3d0-30ca-fca9-bb740ae54d0a@denx.de>
+ <16443443.114784.752d0f22-93a7-46e8-bb14-c884787aaea3.open-xchange@email.1und1.de>
+ <CGME20160807020731epcas1p1ba77eafc6a099ac660a4bf5fe3789fef@epcas1p1.samsung.com>
+ <7284d9a4-164d-dd2d-b9a0-dd1de6c76274@rock-chips.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=gbk
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-reply-to: <d39854ef-1a6a-bd58-2500-4db7f62f63c1@rock-chips.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Shawn Lin <shawn.lin@rock-chips.com>, Guodong Xu <guodong.xu@linaro.org>, heiko@sntech.de, robh+dt@kernel.org, mark.rutland@arm.com, ulf.hansson@linaro.org
-Cc: devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, Xinwei Kong <kong.kongxinwei@hisilicon.com>, Zhangfei Gao <zhangfei.gao@linaro.org>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-reply-to: <7284d9a4-164d-dd2d-b9a0-dd1de6c76274@rock-chips.com>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Shawn Lin <shawn.lin@rock-chips.com>, Stefan Wahren <stefan.wahren@i2se.com>, Rob Herring <robh+dt@kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, Mark Rutland <mark.rutland@arm.com>, Fabio Estevam <fabio.estevam@nxp.com>, Marek Vasut <marex@denx.de>
+Cc: Dong Aisheng <aisheng.dong@nxp.com>, devicetree@vger.kernel.org, Otavio Salvador <otavio@ossystems.com.br>, Holger Schurig <holgerschurig@gmail.com>, linux-mmc@vger.kernel.org, Sascha Hauer <kernel@pengutronix.de>, Shawn Guo <shawnguo@kernel.org>, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
-Hi Guodong,
-
-On 08/11/2016 11:23 AM, Shawn Lin wrote:
-> On 2016/8/10 16:03, Guodong Xu wrote:
->> Dwmmc host controller may in unknown state when entering kernel boot. One
->> example is when booting from eMMC, bootloader need initialize MMC host
->> controller into some state so it can read. In order to make sure MMC host
->> controller in a clean initial state, this reset support is added.
->>
->> With this patch, a 'resets' property can be added into dw_mmc device
->> tree node. The hardware logic is: dwmmc host controller IP receives a reset
->> signal from a 'reset provider' (eg. power management unit). The 'resets'
->> property points to this reset signal. So, during dwmmc driver probe,
->> it can use this signal to reset itself.
->>
->> Refer to [1] for more information.
->>
->> [1] Documentation/devicetree/bindings/reset/reset.txt
->>
->> Signed-off-by: Guodong Xu <guodong.xu@linaro.org>
->> Signed-off-by: Xinwei Kong <kong.kongxinwei@hisilicon.com>
->> Signed-off-by: Zhangfei Gao <zhangfei.gao@linaro.org>
-> 
-> Looks good to me,
-> 
-> Reviewed-by: Shawn Lin <shawn.lin@rock-chips.com>
-
-Could you rebase on https://github.com/jh80chung/dw-mmc.git?
-Otherwise, when i apply your patch, i will rebase.
-
-Best Regards,
-Jaehoon Chung
-
-> 
->> ---
->>  drivers/mmc/host/dw_mmc.c  | 23 ++++++++++++++++++++++-
->>  include/linux/mmc/dw_mmc.h |  2 ++
->>  2 files changed, 24 insertions(+), 1 deletion(-)
->>
->> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
->> index 32380d5..481d441 100644
->> --- a/drivers/mmc/host/dw_mmc.c
->> +++ b/drivers/mmc/host/dw_mmc.c
->> @@ -2915,6 +2915,13 @@ static struct dw_mci_board *dw_mci_parse_dt(struct dw_mci *host)
->>      if (!pdata)
->>          return ERR_PTR(-ENOMEM);
->>
->> +    /* find reset controller when exist */
->> +    pdata->rstc = devm_reset_control_get_optional(dev, NULL);
->> +    if (IS_ERR(pdata->rstc)) {
->> +        if (PTR_ERR(pdata->rstc) == -EPROBE_DEFER)
->> +            return ERR_PTR(-EPROBE_DEFER);
->> +    }
->> +
->>      /* find out number of slots supported */
->>      of_property_read_u32(np, "num-slots", &pdata->num_slots);
->>
->> @@ -2986,7 +2993,9 @@ int dw_mci_probe(struct dw_mci *host)
->>
->>      if (!host->pdata) {
->>          host->pdata = dw_mci_parse_dt(host);
->> -        if (IS_ERR(host->pdata)) {
->> +        if (PTR_ERR(host->pdata) == -EPROBE_DEFER) {
->> +            return -EPROBE_DEFER;
->> +        } else if (IS_ERR(host->pdata)) {
->>              dev_err(host->dev, "platform data not available\n");
->>              return -EINVAL;
->>          }
->> @@ -3040,6 +3049,12 @@ int dw_mci_probe(struct dw_mci *host)
->>          }
->>      }
->>
->> +    if (!IS_ERR(host->pdata->rstc)) {
->> +        reset_control_assert(host->pdata->rstc);
->> +        usleep_range(10, 50);
->> +        reset_control_deassert(host->pdata->rstc);
->> +    }
->> +
->>      setup_timer(&host->cmd11_timer,
->>              dw_mci_cmd11_timer, (unsigned long)host);
->>
->> @@ -3189,6 +3204,9 @@ err_dmaunmap:
->>      if (host->use_dma && host->dma_ops->exit)
->>          host->dma_ops->exit(host);
->>
->> +    if (!IS_ERR(host->pdata->rstc))
->> +        reset_control_assert(host->pdata->rstc);
->> +
->>  err_clk_ciu:
->>      if (!IS_ERR(host->ciu_clk))
->>          clk_disable_unprepare(host->ciu_clk);
->> @@ -3221,6 +3239,9 @@ void dw_mci_remove(struct dw_mci *host)
->>      if (host->use_dma && host->dma_ops->exit)
->>          host->dma_ops->exit(host);
->>
->> +    if (!IS_ERR(host->pdata->rstc))
->> +        reset_control_assert(host->pdata->rstc);
->> +
->>      if (!IS_ERR(host->ciu_clk))
->>          clk_disable_unprepare(host->ciu_clk);
->>
->> diff --git a/include/linux/mmc/dw_mmc.h b/include/linux/mmc/dw_mmc.h
->> index 83b0edfc..f5af2bd 100644
->> --- a/include/linux/mmc/dw_mmc.h
->> +++ b/include/linux/mmc/dw_mmc.h
->> @@ -17,6 +17,7 @@
->>  #include <linux/scatterlist.h>
->>  #include <linux/mmc/core.h>
->>  #include <linux/dmaengine.h>
->> +#include <linux/reset.h>
->>
->>  #define MAX_MCI_SLOTS    2
->>
->> @@ -259,6 +260,7 @@ struct dw_mci_board {
->>      /* delay in mS before detecting cards after interrupt */
->>      u32 detect_delay_ms;
->>
->> +    struct reset_control *rstc;
->>      struct dw_mci_dma_ops *dma_ops;
->>      struct dma_pdata *data;
->>  };
->>
-> 
-> 
+T24gMDgvMDcvMjAxNiAxMTowNyBBTSwgU2hhd24gTGluIHdyb3RlOgo+IOWcqCAyMDE2LzgvNiAy
+MjoxOCwgU3RlZmFuIFdhaHJlbiDlhpnpgZM6Cj4+IEhpIE1hcmVrLAo+Pgo+Pj4gTWFyZWsgVmFz
+dXQgPG1hcmV4QGRlbnguZGU+IGhhdCBhbSA2LiBBdWd1c3QgMjAxNiB1bSAxNToxNCBnZXNjaHJp
+ZWJlbjoKPj4+Cj4+Pgo+Pj4gT24gMDgvMDYvMjAxNiAwMjo1NSBQTSwgU3RlZmFuIFdhaHJlbiB3
+cm90ZToKPj4+PiBUaGlzIHBhdGNoIGJhc2VkIG9uIHRoZSB3b3JrIG9mIEZhYmlvIEVzdGV2YW06
+Cj4+Pj4gIltQQVRDSCB2Ml0gbW1jOiBjb3JlOiBEbyBub3Qgc2V0IG1tYyB2b2x0YWdlIHRvIDEu
+OFYgd2hlbgo+Pj4+ICduby0xLTgtdicgaXMgcHJlc2VudCIKPj4+Pgo+Pj4+IEl0IGFkZHMgdGhl
+IHN1cHBvcnQgZm9yIDMuM1Ygb25seSBERFIgTU1DIGhvc3RzLgo+Pj4KPj4+IERvIHN1Y2ggY2Fy
+ZHMgZXZlbiBleGlzdCA/IERvIHlvdSBoYXZlIGEgbGluayB3aGVyZSBJIGNhbiBmaW5kIHNvbWUg
+Pwo+Pgo+PiBpIG5ldmVyIHNhaWQgYW55dGhpbmcgYWJvdXQgU0QgY2FyZHMuIEkgbWVhbiBlTU1D
+IG1vZHVsZXMgd2hpY2ggdXN1YWxseSBoYXZlIDgKPj4gZGF0YSBwaW5zIGxpa2UgdGhpcyBvbmUg
+WzFdLgo+Pgo+PiBQbGVhc2UgZG9uJ3QgYmxhbWUgbWUgaWYgaXQncyBub3QgY29tcGF0aWJsZSB0
+byBpLk1YMjguIEl0J3Mgb25seSBhbiBleGFtcGxlLgo+Pgo+PiBbMV0gLQo+PiBodHRwOi8vZGF0
+YXNoZWV0Lm9jdG9wYXJ0LmNvbS9USEdCTTNHNEQxRkJBSUdIMkgtVG9zaGliYS1kYXRhc2hlZXQt
+MjA3NDg4ODAucGRmCj4gCj4gCj4gSSBkb3dubG9hZCB0aGUgZGF0YXNoZWV0IHlvdSBtZW50aW9u
+ZWQsIGFuZCBJIGV4cGxpY2l0bHkgc2VlIGl0Cj4gZGVzY3JpYmUgMVY4IGV2ZXJ5d2hlcmUsIGVz
+cGVjaWFsbHkgZm9yIHRoZSBzZWN0aW9uIG9mICJFTEVDVFJJQ0FMCj4gQ0hBUkFDVEVSSVNUSUNT
+Ii4KPiAKPiBJIG5ldmVyIHNlZSBvbmUgZU1NQyBjbGFpbWluZyBERFI1MiBjYXBhYmlsaXR5IGJ1
+dCBkb2Vzbid0IHN1cHBvcnQgMVY4Cj4gc28gZmFyLiBDb3VsZCB5b3Uga2luZGx5IHNoYXJlIG1l
+IHRoZSBwYXJ0IG51bWJlciBvZiB0aGUgZU1NQyB5b3UgYXJlCj4gdXNpbmc/IDopCj4gCj4+Cj4+
+Pgo+Pj4+IFNpZ25lZC1vZmYtYnk6IFN0ZWZhbiBXYWhyZW4gPHN0ZWZhbi53YWhyZW5AaTJzZS5j
+b20+Cj4+Pj4gLS0tCj4+Pj4gIGRyaXZlcnMvbW1jL2NvcmUvaG9zdC5jICB8ICAgIDIgKysKPj4+
+PiAgZHJpdmVycy9tbWMvY29yZS9tbWMuYyAgIHwgICAgNiArKysrKysKPj4+PiAgaW5jbHVkZS9s
+aW51eC9tbWMvaG9zdC5oIHwgICAgMSArCj4+Pj4gIDMgZmlsZXMgY2hhbmdlZCwgOSBpbnNlcnRp
+b25zKCspCj4+Pj4KPj4+PiBDaGFuZ2VzIHRvIEZhYmlvJ3MgcGF0Y2g6Cj4+Pj4gLSByZWJhc2Ug
+dG8gY3VycmVudCBsaW51eC1uZXh0Cj4+Pj4gLSByZW5hbWUgRFQgcHJvcGVydHkgdG8gbW1jLWRk
+ci0zXzN2Cj4+Pj4gLSB1c2UgRVhUX0NTRF9DQVJEX1RZUEVfRERSXzUyIGluc3RlYWQgb2YgbmV3
+IGRlZmluZQo+Pj4+Cj4+Pj4gZGlmZiAtLWdpdCBhL2RyaXZlcnMvbW1jL2NvcmUvaG9zdC5jIGIv
+ZHJpdmVycy9tbWMvY29yZS9ob3N0LmMKPj4+PiBpbmRleCA5OGYyNWZmLi40Yzk3MWRlIDEwMDY0
+NAo+Pj4+IC0tLSBhL2RyaXZlcnMvbW1jL2NvcmUvaG9zdC5jCj4+Pj4gKysrIGIvZHJpdmVycy9t
+bWMvY29yZS9ob3N0LmMKPj4+PiBAQCAtMzAxLDYgKzMwMSw4IEBAIGludCBtbWNfb2ZfcGFyc2Uo
+c3RydWN0IG1tY19ob3N0ICpob3N0KQo+Pj4+ICAgICAgaWYgKG9mX3Byb3BlcnR5X3JlYWRfYm9v
+bChucCwgIndha2V1cC1zb3VyY2UiKSB8fAo+Pj4+ICAgICAgICAgIG9mX3Byb3BlcnR5X3JlYWRf
+Ym9vbChucCwgImVuYWJsZS1zZGlvLXdha2V1cCIpKSAvKiBsZWdhY3kgKi8KPj4+PiAgICAgICAg
+ICBob3N0LT5wbV9jYXBzIHw9IE1NQ19QTV9XQUtFX1NESU9fSVJROwo+Pj4+ICsgICAgaWYgKG9m
+X3Byb3BlcnR5X3JlYWRfYm9vbChucCwgIm1tYy1kZHItM18zdiIpKQo+Pj4+ICsgICAgICAgIGhv
+c3QtPmNhcHMyIHw9IE1NQ19DQVAyXzNfM1ZfT05MWV9ERFI7Cj4+Pj4gICAgICBpZiAob2ZfcHJv
+cGVydHlfcmVhZF9ib29sKG5wLCAibW1jLWRkci0xXzh2IikpCj4+Pj4gICAgICAgICAgaG9zdC0+
+Y2FwcyB8PSBNTUNfQ0FQXzFfOFZfRERSOwo+Pj4+ICAgICAgaWYgKG9mX3Byb3BlcnR5X3JlYWRf
+Ym9vbChucCwgIm1tYy1kZHItMV8ydiIpKQo+Pj4+IGRpZmYgLS1naXQgYS9kcml2ZXJzL21tYy9j
+b3JlL21tYy5jIGIvZHJpdmVycy9tbWMvY29yZS9tbWMuYwo+Pj4+IGluZGV4IGYyZDE4NWMuLjhh
+OTMzZDUgMTAwNjQ0Cj4+Pj4gLS0tIGEvZHJpdmVycy9tbWMvY29yZS9tbWMuYwo+Pj4+ICsrKyBi
+L2RyaXZlcnMvbW1jL2NvcmUvbW1jLmMKPj4+PiBAQCAtMjEwLDYgKzIxMCwxMiBAQCBzdGF0aWMg
+dm9pZCBtbWNfc2VsZWN0X2NhcmRfdHlwZShzdHJ1Y3QgbW1jX2NhcmQgKmNhcmQpCj4+Pj4gICAg
+ICAgICAgYXZhaWxfdHlwZSB8PSBFWFRfQ1NEX0NBUkRfVFlQRV9IU181MjsKPj4+PiAgICAgIH0K
+Pj4+Pgo+Pj4+ICsgICAgaWYgKGNhcHMyICYgTU1DX0NBUDJfM18zVl9PTkxZX0REUiAmJgo+Pj4+
+ICsgICAgICAgIGNhcmRfdHlwZSAmIEVYVF9DU0RfQ0FSRF9UWVBFX0REUl8xXzhWKSB7Cj4+Pj4g
+KyAgICAgICAgaHNfbWF4X2R0ciA9IE1NQ19ISUdIX0REUl9NQVhfRFRSOwo+Pj4+ICsgICAgICAg
+IGF2YWlsX3R5cGUgfD0gRVhUX0NTRF9DQVJEX1RZUEVfRERSXzUyOwo+Pj4+ICsgICAgfQoKZGlk
+IHlvdSBrbm93IEVYVF9DU0RfQ0FSRF9UWVBFX0REUl81MiAtPiBUWVBFX0REUl8xXzhWIGFuZCBU
+WVBFX0REUl8xXzJWPwpJdCBtZWFucyBjYXJkIGNhbiB1c2UgdG8gdGhlIDEuOHYgYW5kIDEuMnYg
+ZGRyIG1vZGUuClNvIHRoaXMgcGF0Y2ggaXMgc3RyYW5nZS4uWW91IGFkZGVkIGNhcGFiaWxpdHkg
+Zm9yIG9ubHkgc3VwcG9ydGluZyAzXzN2LgoKQ29uZnVzaW5nLi4uCgpCZXN0IFJlZ2FyZHMsCkph
+ZWhvb24gQ2h1bmcKCj4+Pj4gKwo+Pj4+ICAgICAgaWYgKGNhcHMgJiBNTUNfQ0FQXzFfOFZfRERS
+ICYmCj4+Pj4gICAgICAgICAgY2FyZF90eXBlICYgRVhUX0NTRF9DQVJEX1RZUEVfRERSXzFfOFYp
+IHsKPj4+PiAgICAgICAgICBoc19tYXhfZHRyID0gTU1DX0hJR0hfRERSX01BWF9EVFI7Cj4+Pj4g
+ZGlmZiAtLWdpdCBhL2luY2x1ZGUvbGludXgvbW1jL2hvc3QuaCBiL2luY2x1ZGUvbGludXgvbW1j
+L2hvc3QuaAo+Pj4+IGluZGV4IGFhNGJmYmYuLmRiMDc3NWQgMTAwNjQ0Cj4+Pj4gLS0tIGEvaW5j
+bHVkZS9saW51eC9tbWMvaG9zdC5oCj4+Pj4gKysrIGIvaW5jbHVkZS9saW51eC9tbWMvaG9zdC5o
+Cj4+Pj4gQEAgLTMxMSw2ICszMTEsNyBAQCBzdHJ1Y3QgbW1jX2hvc3Qgewo+Pj4+ICAjZGVmaW5l
+IE1NQ19DQVAyX0hTNDAwX0VTICAgICgxIDw8IDIwKSAgICAvKiBIb3N0IHN1cHBvcnRzIGVuaGFu
+Y2VkIHN0cm9iZSAqLwo+Pj4+ICAjZGVmaW5lIE1NQ19DQVAyX05PX1NEICAgICAgICAoMSA8PCAy
+MSkgICAgLyogRG8gbm90IHNlbmQgU0QgY29tbWFuZHMgZHVyaW5nCj4+Pj4gaW5pdGlhbGl6YXRp
+b24gKi8KPj4+PiAgI2RlZmluZSBNTUNfQ0FQMl9OT19NTUMgICAgICAgICgxIDw8IDIyKSAgICAv
+KiBEbyBub3Qgc2VuZCAoZSlNTUMgY29tbWFuZHMgZHVyaW5nCj4+Pj4gaW5pdGlhbGl6YXRpb24g
+Ki8KPj4+PiArI2RlZmluZSBNTUNfQ0FQMl8zXzNWX09OTFlfRERSICAgICgxIDw8IDIzKSAgICAv
+KiBPbmx5IHN1cHBvcnRzIDMuM1YgRERSICovCj4+Pj4KPj4+PiAgICAgIG1tY19wbV9mbGFnX3Qg
+ICAgICAgIHBtX2NhcHM7ICAgIC8qIHN1cHBvcnRlZCBwbSBmZWF0dXJlcyAqLwo+Pj4+Cj4+Pj4K
+Pj4+Cj4+Pgo+Pj4gLS0gCj4+PiBCZXN0IHJlZ2FyZHMsCj4+PiBNYXJlayBWYXN1dAo+PiAtLSAK
+Pj4gVG8gdW5zdWJzY3JpYmUgZnJvbSB0aGlzIGxpc3Q6IHNlbmQgdGhlIGxpbmUgInVuc3Vic2Ny
+aWJlIGxpbnV4LW1tYyIgaW4KPj4gdGhlIGJvZHkgb2YgYSBtZXNzYWdlIHRvIG1ham9yZG9tb0B2
+Z2VyLmtlcm5lbC5vcmcKPj4gTW9yZSBtYWpvcmRvbW8gaW5mbyBhdCAgaHR0cDovL3ZnZXIua2Vy
+bmVsLm9yZy9tYWpvcmRvbW8taW5mby5odG1sCj4+Cj4gCj4gCgoKX19fX19fX19fX19fX19fX19f
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX18KbGludXgtYXJtLWtlcm5lbCBtYWlsaW5nIGxp
+c3QKbGludXgtYXJtLWtlcm5lbEBsaXN0cy5pbmZyYWRlYWQub3JnCmh0dHA6Ly9saXN0cy5pbmZy
+YWRlYWQub3JnL21haWxtYW4vbGlzdGluZm8vbGludXgtYXJtLWtlcm5lbAo=
