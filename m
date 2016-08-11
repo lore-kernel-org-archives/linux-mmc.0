@@ -1,139 +1,87 @@
-From: Shawn Lin <shawn.lin@rock-chips.com>
-Subject: Re: [PATCH v4 2/2] mmc: dw_mmc: add reset support to dwmmc host
- controller
-Date: Thu, 11 Aug 2016 10:23:37 +0800
-Message-ID: <d39854ef-1a6a-bd58-2500-4db7f62f63c1@rock-chips.com>
-References: <1470816228-8874-1-git-send-email-guodong.xu@linaro.org>
- <1470816228-8874-3-git-send-email-guodong.xu@linaro.org>
+From: Ritesh Harjani <riteshh@codeaurora.org>
+Subject: Re: [PATCH 06/10] mmc: sdhci: Add SDHCI_QUIRK2_ALWAYS_USE_BASE_CLOCK
+ quirk2 support
+Date: Thu, 11 Aug 2016 12:33:22 +0530
+Message-ID: <b88fa80f-0ac9-452e-aa71-d5e09039debd@codeaurora.org>
+References: <1470841319-6091-1-git-send-email-riteshh@codeaurora.org>
+ <1470841319-6091-7-git-send-email-riteshh@codeaurora.org>
+ <a48103a7-1aa2-b9e2-527c-c7237a9ea9c0@rock-chips.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=gbk; format=flowed
+Content-Type: text/plain; charset=UTF-8; format=flowed
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from lucky1.263xmail.com ([211.157.147.133]:48460 "EHLO
-	lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751550AbcHKCXs (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 10 Aug 2016 22:23:48 -0400
-In-Reply-To: <1470816228-8874-3-git-send-email-guodong.xu@linaro.org>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-arm-msm-owner@vger.kernel.org>
+In-Reply-To: <a48103a7-1aa2-b9e2-527c-c7237a9ea9c0@rock-chips.com>
+Sender: linux-arm-msm-owner@vger.kernel.org
+To: Shawn Lin <shawn.lin@rock-chips.com>, ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, adrian.hunter@intel.com
+Cc: linux-arm-msm@vger.kernel.org, georgi.djakov@linaro.org, alex.lemberg@sandisk.com, mateusz.nowak@intel.com, Yuliy.Izrailov@sandisk.com, asutoshd@codeaurora.org, sthumma@codeaurora.org, kdorfman@codeaurora.org, david.griego@linaro.org, stummala@codeaurora.org, venkatg@codeaurora.org
 List-Id: linux-mmc@vger.kernel.org
-To: Guodong Xu <guodong.xu@linaro.org>, heiko@sntech.de, jh80.chung@samsung.com, robh+dt@kernel.org, mark.rutland@arm.com, ulf.hansson@linaro.org
-Cc: shawn.lin@rock-chips.com, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, Xinwei Kong <kong.kongxinwei@hisilicon.com>, Zhangfei Gao <zhangfei.gao@linaro.org>
 
-On 2016/8/10 16:03, Guodong Xu wrote:
-> Dwmmc host controller may in unknown state when entering kernel boot. One
-> example is when booting from eMMC, bootloader need initialize MMC host
-> controller into some state so it can read. In order to make sure MMC host
-> controller in a clean initial state, this reset support is added.
->
-> With this patch, a 'resets' property can be added into dw_mmc device
-> tree node. The hardware logic is: dwmmc host controller IP receives a reset
-> signal from a 'reset provider' (eg. power management unit). The 'resets'
-> property points to this reset signal. So, during dwmmc driver probe,
-> it can use this signal to reset itself.
->
-> Refer to [1] for more information.
->
-> [1] Documentation/devicetree/bindings/reset/reset.txt
->
-> Signed-off-by: Guodong Xu <guodong.xu@linaro.org>
-> Signed-off-by: Xinwei Kong <kong.kongxinwei@hisilicon.com>
-> Signed-off-by: Zhangfei Gao <zhangfei.gao@linaro.org>
+Hi Shawn,
 
-Looks good to me,
-
-Reviewed-by: Shawn Lin <shawn.lin@rock-chips.com>
-
-> ---
->  drivers/mmc/host/dw_mmc.c  | 23 ++++++++++++++++++++++-
->  include/linux/mmc/dw_mmc.h |  2 ++
->  2 files changed, 24 insertions(+), 1 deletion(-)
->
-> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-> index 32380d5..481d441 100644
-> --- a/drivers/mmc/host/dw_mmc.c
-> +++ b/drivers/mmc/host/dw_mmc.c
-> @@ -2915,6 +2915,13 @@ static struct dw_mci_board *dw_mci_parse_dt(struct dw_mci *host)
->  	if (!pdata)
->  		return ERR_PTR(-ENOMEM);
->
-> +	/* find reset controller when exist */
-> +	pdata->rstc = devm_reset_control_get_optional(dev, NULL);
-> +	if (IS_ERR(pdata->rstc)) {
-> +		if (PTR_ERR(pdata->rstc) == -EPROBE_DEFER)
-> +			return ERR_PTR(-EPROBE_DEFER);
-> +	}
-> +
->  	/* find out number of slots supported */
->  	of_property_read_u32(np, "num-slots", &pdata->num_slots);
->
-> @@ -2986,7 +2993,9 @@ int dw_mci_probe(struct dw_mci *host)
->
->  	if (!host->pdata) {
->  		host->pdata = dw_mci_parse_dt(host);
-> -		if (IS_ERR(host->pdata)) {
-> +		if (PTR_ERR(host->pdata) == -EPROBE_DEFER) {
-> +			return -EPROBE_DEFER;
-> +		} else if (IS_ERR(host->pdata)) {
->  			dev_err(host->dev, "platform data not available\n");
->  			return -EINVAL;
->  		}
-> @@ -3040,6 +3049,12 @@ int dw_mci_probe(struct dw_mci *host)
->  		}
->  	}
->
-> +	if (!IS_ERR(host->pdata->rstc)) {
-> +		reset_control_assert(host->pdata->rstc);
-> +		usleep_range(10, 50);
-> +		reset_control_deassert(host->pdata->rstc);
-> +	}
-> +
->  	setup_timer(&host->cmd11_timer,
->  		    dw_mci_cmd11_timer, (unsigned long)host);
->
-> @@ -3189,6 +3204,9 @@ err_dmaunmap:
->  	if (host->use_dma && host->dma_ops->exit)
->  		host->dma_ops->exit(host);
->
-> +	if (!IS_ERR(host->pdata->rstc))
-> +		reset_control_assert(host->pdata->rstc);
-> +
->  err_clk_ciu:
->  	if (!IS_ERR(host->ciu_clk))
->  		clk_disable_unprepare(host->ciu_clk);
-> @@ -3221,6 +3239,9 @@ void dw_mci_remove(struct dw_mci *host)
->  	if (host->use_dma && host->dma_ops->exit)
->  		host->dma_ops->exit(host);
->
-> +	if (!IS_ERR(host->pdata->rstc))
-> +		reset_control_assert(host->pdata->rstc);
-> +
->  	if (!IS_ERR(host->ciu_clk))
->  		clk_disable_unprepare(host->ciu_clk);
->
-> diff --git a/include/linux/mmc/dw_mmc.h b/include/linux/mmc/dw_mmc.h
-> index 83b0edfc..f5af2bd 100644
-> --- a/include/linux/mmc/dw_mmc.h
-> +++ b/include/linux/mmc/dw_mmc.h
-> @@ -17,6 +17,7 @@
->  #include <linux/scatterlist.h>
->  #include <linux/mmc/core.h>
->  #include <linux/dmaengine.h>
-> +#include <linux/reset.h>
->
->  #define MAX_MCI_SLOTS	2
->
-> @@ -259,6 +260,7 @@ struct dw_mci_board {
->  	/* delay in mS before detecting cards after interrupt */
->  	u32 detect_delay_ms;
->
-> +	struct reset_control *rstc;
->  	struct dw_mci_dma_ops *dma_ops;
->  	struct dma_pdata *data;
->  };
->
+Thanks for the feedback.
+In case if you have any comments on other patches of this patch series, 
+it will be good to address all of them in next spin.
 
 
--- 
-Best Regards
-Shawn Lin
+On 8/11/2016 7:37 AM, Shawn Lin wrote:
+> On 2016/8/10 23:01, Ritesh Harjani wrote:
+>> From: Sahitya Tummala <stummala@codeaurora.org>
+>>
+>> MSM controller uses the base clock and does not use any divider.
+>> The driver will use SDHCI_QUIRK2_ALWAYS_USE_BASE_CLOCK
+>> and controls the base clock (MCLK) directly.
+>
+> I think the direction for sdhci now is to overwrite
+> sdhci_calc_clk in your variant driver..
+Alright, will try and see if I can have similar to sdhci_set_clock 
+itself in sdhci-msm driver.
 
+>
+> quirk is unacceptable now.
+Alright, I will try to take care of this.
+
+>
+>>
+>> Signed-off-by: Sahitya Tummala <stummala@codeaurora.org>
+>> Signed-off-by: Ritesh Harjani <riteshh@codeaurora.org>
+>> ---
+>>  drivers/mmc/host/sdhci.c | 4 ++++
+>>  drivers/mmc/host/sdhci.h | 6 ++++++
+>>  2 files changed, 10 insertions(+)
+>>
+>> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+>> index cd65d47..a5c9dcb 100644
+>> --- a/drivers/mmc/host/sdhci.c
+>> +++ b/drivers/mmc/host/sdhci.c
+>> @@ -1318,6 +1318,10 @@ u16 sdhci_calc_clk(struct sdhci_host *host,
+>> unsigned int clock,
+>>  clock_set:
+>>      if (real_div)
+>>          *actual_clock = (host->max_clk * clk_mul) / real_div;
+>> +
+>> +    if (host->quirks2 & SDHCI_QUIRK2_ALWAYS_USE_BASE_CLOCK)
+>> +        div = 0;
+>> +
+>>      clk |= (div & SDHCI_DIV_MASK) << SDHCI_DIVIDER_SHIFT;
+>>      clk |= ((div & SDHCI_DIV_HI_MASK) >> SDHCI_DIV_MASK_LEN)
+>>          << SDHCI_DIVIDER_HI_SHIFT;
+>> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+>> index 0411c9f..566c0fe 100644
+>> --- a/drivers/mmc/host/sdhci.h
+>> +++ b/drivers/mmc/host/sdhci.h
+>> @@ -422,6 +422,12 @@ struct sdhci_host {
+>>  #define SDHCI_QUIRK2_ACMD23_BROKEN            (1<<14)
+>>  /* Broken Clock divider zero in controller */
+>>  #define SDHCI_QUIRK2_CLOCK_DIV_ZERO_BROKEN        (1<<15)
+>> +/*
+>> + * If the base clock can be scalable, then there should be no further
+>> + * clock dividing as the input clock itself will be scaled down to
+>> + * required frequency.
+>> + */
+>> +#define SDHCI_QUIRK2_ALWAYS_USE_BASE_CLOCK        (1<<16)
+>>
+>>      int irq;        /* Device IRQ */
+>>      void __iomem *ioaddr;    /* Mapped address */
+>>
+>
+>
