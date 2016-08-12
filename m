@@ -1,92 +1,35 @@
-From: Icenowy Zheng <icenowy-ymACFijhrKM@public.gmane.org>
-Subject: Re: Support for various sdio wifi-chips on Allwinner
- tablets and SBCs
-Date: Fri, 12 Aug 2016 11:47:04 +0800
-Message-ID: <139731470973624@web24j.yandex.ru>
-References: <5844eef2-71bd-bbb9-dff6-92e01a393b36@gmail.com>
-Reply-To: icenowy-ymACFijhrKM@public.gmane.org
+From: "Steven J. Hill" <Steven.Hill@cavium.com>
+Subject: Re: [PATCH V8 2/2] mmc: OCTEON: Add host driver for OCTEON MMC
+ controller.
+Date: Fri, 12 Aug 2016 00:41:27 -0500
+Message-ID: <57AD6187.8090300@cavium.com>
+References: <57853474.9050108@cavium.com>
+ <578E71E6.2020700@caviumnetworks.com>
+ <CAPDyKFqb-7LLM0XPtVWj1qHib991E2dHt+6W0UPgbXnukGkmXA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-sunxi+bncBCZLPFN5Q4OBBOUNWW6QKGQERGDWKGQ-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-Sender: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
-In-Reply-To: <5844eef2-71bd-bbb9-dff6-92e01a393b36-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-List-Post: <https://groups.google.com/group/linux-sunxi/post>, <mailto:linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Help: <https://groups.google.com/support/>, <mailto:linux-sunxi+help-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Archive: <https://groups.google.com/group/linux-sunxi
-List-Subscribe: <https://groups.google.com/group/linux-sunxi/subscribe>, <mailto:linux-sunxi+subscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Unsubscribe: <mailto:googlegroups-manage+1076902468213+unsubscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>,
- <https://groups.google.com/group/linux-sunxi/subscribe>
-To: Hans de Goede <j.w.r.degoede-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, linux-sunxi <linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Cc: Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org>, Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>, Jean-Francois Moine <moinejf-GANU6spQydw@public.gmane.org>, Bastien Nocera <hadess-0MeiytkfxGOsTnJN9+BGXg@public.gmane.org>
+Content-Type: text/plain; charset="utf-8"; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-sn1nam02on0088.outbound.protection.outlook.com ([104.47.36.88]:6064
+	"EHLO NAM02-SN1-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1751134AbcHLHQT (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Fri, 12 Aug 2016 03:16:19 -0400
+In-Reply-To: <CAPDyKFqb-7LLM0XPtVWj1qHib991E2dHt+6W0UPgbXnukGkmXA@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, David Daney <david.daney@cavium.com>
 
+On 07/19/2016 04:19 PM, Ulf Hansson wrote:
+>
+> Sorry I need more time, been partly out of office lately.
+> I intend to review this prior rc1 is out, but no promises.
+>
+Hello Ulf.
 
+I was just checking to see if you had a chance to look at the MMC patch? 
+I just did a fresh pull from Linus' a few minutes ago and it still not 
+in the tree. How much longer do you think we will have to wait? Thanks.
 
-08.08.2016, 03:25, "Hans de Goede" <j.w.r.degoede-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>:
-> Hi All,
->
-> Recently I've been working on getting the sdio-wifi, found on
-> many a23 / a33 tablets as well as on some a10s hdmi sticks and
-> on various h3 SBCs such as the Orange Pi, to work with the
-> mainline kernel.
->
-> If you use my sunxi-wip kernel branch (which has some dts bits
-> to enable this as well as some misc. bits, which I'm all
-> trying to get upstream) together with one of the following
-> out of tree drivers, you should be able to get your wifi to
-> work.
->
-> RTL8723BS or RTL8703AS wifi:
-> ----------------------------
-> git clone https://github.com/jwrdegoede/rtl8723bs.git
-> cd rtl8723bs
-> make -j4 ARCH=arm CROSS_COMPILE=arm-linux-gnu- KSRC=../linux
->
-> Do not forget to copy *.bin to /lib/firmware/rtlwifi/ on
-> the target system.
->
-> Many thanks to Bastien Nocera for his great work on the
-> rtl8723bs driver, my repo just adds 2 small fixes
-> to also make the rtl8703as work.
->
-> RTL8189ES / RTL8189ETV
-> ----------------------
-> git clone https://github.com/jwrdegoede/rtl8189ES_linux.git
-> cd rtl8189ES_linux.git
-> make -j4 ARCH=arm CROSS_COMPILE=arm-linux-gnu- KSRC=../linux
->
-> Thanks to Jean-Francois Moine for his initial work on getting
-> the RTL8989ES code to run with upstream kernels.
->
-> RTL8189FTV
-> ----------
-> git clone https://github.com/jwrdegoede/rtl8189ES_linux.git
-> cd rtl8189ES_linux.git
-> git checkout -B rtl8189fs origin/rtl8189fs
-> make -j4 ARCH=arm CROSS_COMPILE=arm-linux-gnu- KSRC=../linux
->
-> ESP8089
-> -------
-> git clone https://github.com/jwrdegoede/esp8089.git
-> git checkout -B cleanup origin/cleanup
-> cd ../linux
-> make -j4 ARCH=arm CROSS_COMPILE=arm-linux-gnu- modules M=../esp8089 CONFIG_ESP8089=m
->
-> Do not forget to copy firmware/*.bin to /lib/firmware/ on
-> the target system.
->
-> Many thanks to Icenowy for his work on the esp8089 driver.
-
-Could you please use "her"? ;-)
-
->
-> I hope this is useful to at least some of you.
->
-> A quick note for Orange Pi users, the older models H3 based
-> Pi-s use a soldered on wifi module with the RTL8189ETV.
-> The newer models (the PC Plus, Lite and Plus 2E) use the
-> RTL8189FTV soldered directly onto the PCB.
->
-> Regards,
->
-> Hans
+Steve
