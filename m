@@ -1,130 +1,116 @@
 From: Shawn Lin <shawn.lin@rock-chips.com>
-Subject: Re: [PATCH v2 0/6] Add support of inverting power control and some
- minor cleanup
-Date: Fri, 12 Aug 2016 10:57:58 +0800
-Message-ID: <8f20c3d2-2c73-18f2-0104-f7bc715c7b15@rock-chips.com>
-References: <CGME20160807013720epcas1p235628058a90efa6f0062b03a4b2e4284@epcas1p2.samsung.com>
- <1470533618-16312-1-git-send-email-shawn.lin@rock-chips.com>
- <ee997311-3964-8623-a431-c9a5add7f991@samsung.com>
- <cc785e09-6b33-d451-3d11-728bee3668a5@rock-chips.com>
- <9227304b-4d2e-66e1-743a-8d06f2a10ce1@samsung.com>
+Subject: Re: [PATCH 06/10] mmc: sdhci: Add get_clk_div callback support
+Date: Fri, 12 Aug 2016 11:21:59 +0800
+Message-ID: <bd503b78-0f56-3cc9-9b67-e0ff74db0558@rock-chips.com>
+References: <a48103a7-1aa2-b9e2-527c-c7237a9ea9c0@rock-chips.com>
+ <1470923574-411-1-git-send-email-riteshh@codeaurora.org>
+ <CGME20160811135325epcas1p41e0758a598b81e837653de7ef8ff56ec@epcas1p4.samsung.com>
+ <1470923574-411-2-git-send-email-riteshh@codeaurora.org>
+ <39e6afe2-8615-45ae-9ea5-feb6a6b58732@samsung.com>
+ <cedd37cb-8ce8-30e4-6a28-5385358d88a2@codeaurora.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <9227304b-4d2e-66e1-743a-8d06f2a10ce1@samsung.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: shawn.lin@rock-chips.com, Rob Herring <robh+dt@kernel.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Heiko Stuebner <heiko@sntech.de>, linux-rockchip@lists.infradead.org, devicetree@vger.kernel.org
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 8bit
+Return-path: <linux-arm-msm-owner@vger.kernel.org>
+In-Reply-To: <cedd37cb-8ce8-30e4-6a28-5385358d88a2@codeaurora.org>
+Sender: linux-arm-msm-owner@vger.kernel.org
+To: Ritesh Harjani <riteshh@codeaurora.org>, Jaehoon Chung <jh80.chung@samsung.com>, ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, adrian.hunter@intel.com
+Cc: shawn.lin@rock-chips.com, linux-arm-msm@vger.kernel.org, georgi.djakov@linaro.org, alex.lemberg@sandisk.com, mateusz.nowak@intel.com, Yuliy.Izrailov@sandisk.com, asutoshd@codeaurora.org, kdorfman@codeaurora.org, david.griego@linaro.org, stummala@codeaurora.org, venkatg@codeaurora.org
 List-Id: linux-mmc@vger.kernel.org
 
-On 2016/8/11 18:08, Jaehoon Chung wrote:
-> Hi Shawn,
+在 2016/8/12 10:19, Ritesh Harjani 写道:
+> Hi Jaehoon/Adrian,
 >
-> On 08/09/2016 10:49 AM, Shawn Lin wrote:
+>
+> On 8/12/2016 7:04 AM, Jaehoon Chung wrote:
 >> Hi,
 >>
->> On 2016/8/8 18:24, Jaehoon Chung wrote:
->>> Hi Shawn,
+>> On 08/11/2016 10:52 PM, Ritesh Harjani wrote:
+>>> Few controllers (like MSM) may have to override div
+>>> in certain cases. Hence provide a callback to get the
+>>> div value for their driver.
 >>>
->>> On 08/07/2016 10:33 AM, Shawn Lin wrote:
->>>> By default, dw_mmc outputs high level voltage to indicate powering
->>>> up the card and outputs low level vcltage to indicate powering
->>>> off the card. But that is not always correct. The power io should
->>>> be able to control different kind of hw components to supply or
->>>> cutoff power to the card. We have boards that need this patchset
->>>> to make the power control correct. Meanwhile let's expose it to
->>>> DT for board-specific usage.
+>>> Signed-off-by: Sahitya Tummala <stummala@codeaurora.org>
+>>> Signed-off-by: Ritesh Harjani <riteshh@codeaurora.org>
+>>> ---
+>>>  drivers/mmc/host/sdhci.c | 8 ++++++++
+>>>  drivers/mmc/host/sdhci.h | 1 +
+>>>  2 files changed, 9 insertions(+)
 >>>
->>> I have a question for this patch-set. Does DWMMC IP support to invert ON/OFF at Power Enable register?
+>>> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+>>> index cd65d47..cc3d6f2 100644
+>>> --- a/drivers/mmc/host/sdhci.c
+>>> +++ b/drivers/mmc/host/sdhci.c
+>>> @@ -1318,6 +1318,14 @@ u16 sdhci_calc_clk(struct sdhci_host *host,
+>>> unsigned int clock,
+>>>  clock_set:
+>>>      if (real_div)
+>>>          *actual_clock = (host->max_clk * clk_mul) / real_div;
+>>> +    /*
+>>> +     * Few controllers may have to override div
+>>> +     * here. Hence provide a callback to get the
+>>> +     * div value for them.
+>>> +     */
+>>> +    if (host->ops->get_clk_div)
+>>> +        div = host->ops->get_clk_div(host, div);
 >>
->> No.
->>
->>> Hmm..Well, if use the DW_MMC_CARD_PWR_INVERT, it should also be the similar behavior with Quirks.
->>
->> yup, it makes the power control more complicated than before. :(
->>
->>>
->>> Other flags are related with dwmmc IP. But this flag (DW_MMC_CARD_PWR_INVERT) is not related with IP side.
->>> I understood why you needs to add this flag..Is rockchip designed to invert the power controlling?
->>
->> We don't invert the power controlling but our customers do.
->> The HW componet looks like some discrete LDOs which enable the related
->> power supply when outputing low voltage from pwren..
+>> This is for only getting your div value. Few controllers?
+>> Rather, use the existent callback function..It's better than adding
+>> new callback.
 >
-> Is it related with PWREN register?
-> I'm checking the TRM for PWREN register..
+> As of today sdhci-of-arasan is the only user of this quirk
+> -SDHCI_QUIRK2_CLOCK_DIV_ZERO_BROKEN. I was hoping that with this
+> callback, we may get away with this quirk if sdhci-of-arasan can have
+> get_clk_div callback implemented in it's driver?
 >
-> "Optional feature; ports can be used as general-purpose outputs."
->
-> Does it use the ports as GPIO?
->
->>
->>>
->>> But it's not general case. We can discuss about this.
->>
->> I have a solution which is to add gpio power control for slot-gpio of
->> mmc core. once finished, we could add pwr_cap_invert just like what we
->> did for cd/wp invert control..
->
-> I'm not sure that it's right that add the gpio power control into mmc core.
-> slot-gpio? i think it can use the regulator framework with gpio.
+> Since I was not sure on this, so I did not modify sdhci-of-arasan.
+> Thoughts?
 
-yup, I'm looking this and seems it's fine to register a regulator-gpio
-and stuff it for vmmc-supply of sdmmc. I will test it, really helpful.
+yup, I'm still using SDHCI_QUIRK2_CLOCK_DIV_ZERO_BROKEN in
+sdhci-of-arasan now. If you are addressing this, please go ahead.
 
-thanks!
+Per previous disscussion of sdhci, it is deprecated to add new quirks
+or callback(?) into sdhci. It should be better to make it a library.
+ From this view, you should overwrite the set_clock in your variant
+driver.
 
-> I don't have a lot knowledge of power, but it might be controlled whether active is low or high.
-> So i think it doesn't need to add for entire mmc controller.
+I has a question here, (like MSM) may have to override div
+in certain cases. What certain cases is? I just see you simply
+return 0 there which means you want to bypass the clk?
+If that is a trick of clk rate, we could use clk framework API
+there to lower the input clk to make the calculation produce
+zero div?
+
+
 >
-> Best Regards,
-> Jaehoon Chung
+>>
+>> In your controller, add the your set_clock() callback. not get_clk_div.
+>> (Well, Adrian might have other opinion.)
+> Alright, please let me know what would be the right approach.
 >
 >>
->> Then we could remove PWREN from the default state of
->> pinctrl inside the sdmmc dt node, and let dwmmc request gpio power
->> control stuff after paring the property for pwr_cap_invert..
->>
->> More over, it well fit for all mmc host's requirement of gpio
->> power control and inverted control if they want it. :)
+>> Best Regards,
+>> Jaehoon Chung
 >>
 >>
->> That should be legit for us?
->> If it sounds ok to you and Ulf, I will come up with a RFC one for
->> community to comment it.:)
->>
+>>> +
+>>>      clk |= (div & SDHCI_DIV_MASK) << SDHCI_DIVIDER_SHIFT;
+>>>      clk |= ((div & SDHCI_DIV_HI_MASK) >> SDHCI_DIV_MASK_LEN)
+>>>          << SDHCI_DIVIDER_HI_SHIFT;
+>>> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+>>> index 0411c9f..4701001 100644
+>>> --- a/drivers/mmc/host/sdhci.h
+>>> +++ b/drivers/mmc/host/sdhci.h
+>>> @@ -562,6 +562,7 @@ struct sdhci_ops {
+>>>                       struct mmc_card *card,
+>>>                       unsigned int max_dtr, int host_drv,
+>>>                       int card_drv, int *drv_type);
+>>> +    int    (*get_clk_div)(struct sdhci_host *host, int div);
+>>>  };
 >>>
->>> Best Regards,
->>> Jaehoon Chung
->>>
->>>>
->>>>
->>>> Changes in v2:
->>>> - fix copy-paste err and typo
->>>>
->>>> Shawn Lin (6):
->>>>   dt-bindings: rockchip-dw-mshc: add description of
->>>>     rockchip,power-invert
->>>>   mmc: dw_mmc: cleanup power setting of set_ios callback
->>>>   mmc: dw_mmc: split out dw_mci_set_power
->>>>   mmc: dw_mmc: split out dw_mci_set_power_reg
->>>>   mmc: dw_mmc: support inverted power control
->>>>   mmc: dw_mmc-rockchip: add parsing of power control from DT
->>>>
->>>>  .../devicetree/bindings/mmc/rockchip-dw-mshc.txt   |   6 +
->>>>  drivers/mmc/host/dw_mmc-rockchip.c                 |   8 ++
->>>>  drivers/mmc/host/dw_mmc.c                          | 134 ++++++++++++---------
->>>>  drivers/mmc/host/dw_mmc.h                          |   1 +
->>>>  4 files changed, 90 insertions(+), 59 deletions(-)
->>>>
->>>
->>>
->>>
+>>>  #ifdef CONFIG_MMC_SDHCI_IO_ACCESSORS
 >>>
 >>
->>
->
 > --
 > To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
 > the body of a message to majordomo@vger.kernel.org
