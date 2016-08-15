@@ -1,29 +1,48 @@
-From: Christoph Hellwig <hch@lst.de>
-Subject: Re: [PATCH] block: Fix secure erase
-Date: Mon, 15 Aug 2016 20:17:54 +0200
-Message-ID: <20160815181754.GA9918@lst.de>
-References: <20160811140533.GA16543@lst.de> <1471270071-28921-1-git-send-email-adrian.hunter@intel.com> <20160815181328.GA9696@lst.de> <0da0904a-9d46-e043-edec-8d0d34cf0714@fb.com>
+From: Kevin Hilman <khilman-rdvid1DuHRBWk0Htik3J/w@public.gmane.org>
+Subject: Re: [PATCH v2 1/2] ARM64: dts: meson-gxbb: add MMC support
+Date: Mon, 15 Aug 2016 16:33:02 -0500
+Message-ID: <m2fuq5afap.fsf@baylibre.com>
+References: <201608141319.AeQlvjsy%fengguang.wu@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <0da0904a-9d46-e043-edec-8d0d34cf0714@fb.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Jens Axboe <axboe@fb.com>
-Cc: Christoph Hellwig <hch@lst.de>, Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, linux-block@vger.kernel.org, linux-kernel@vger.kernel.org
+Content-Type: text/plain
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <201608141319.AeQlvjsy%fengguang.wu-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org> (kbuild test
+	robot's message of "Sun, 14 Aug 2016 13:25:40 +0800")
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: kbuild test robot <lkp-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Cc: kbuild-all-JC7UmRfGjtg@public.gmane.org, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-amlogic-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, Victor Wan <victor.wan-LpR1jeaWuhtBDgjK7y7TUQ@public.gmane.org>, Jerry Cao <jerry.cao-LpR1jeaWuhtBDgjK7y7TUQ@public.gmane.org>, Xing Wu <xing.xu-LpR1jeaWuhtBDgjK7y7TUQ@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Mon, Aug 15, 2016 at 12:16:30PM -0600, Jens Axboe wrote:
->> This really should be a:
->>
->> 	if (req_op(rq) != req_op(pos))
->>
->> I'l lleave it up to Jens if he wants that in this patch or not, otherwise
->> I'll send an incremental patch.
->
-> Let's get a v2 with that fixed up, it makes a big readability
-> difference.
+kbuild test robot <lkp-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org> writes:
 
-It's not just readbility, it's also a potential correctness issue.
-Not sure if we'd hit it for other request types at the moment, but
-we'd surely hit if people add more..
+> Hi Kevin,
+>
+> [auto build test ERROR on linus/master]
+> [also build test ERROR on v4.8-rc1 next-20160812]
+> [cannot apply to ulf.hansson-mmc/next robh/for-next]
+> [if your patch is applied to the wrong git tree, please drop us a note to help improve the system]
+>
+> url:    https://github.com/0day-ci/linux/commits/Kevin-Hilman/ARM64-dts-meson-gxbb-add-MMC-support/20160804-072056
+> config: arm64-defconfig (attached as .config)
+> compiler: aarch64-linux-gnu-gcc (Debian 5.4.0-6) 5.4.0 20160609
+> reproduce:
+>         wget https://git.kernel.org/cgit/linux/kernel/git/wfg/lkp-tests.git/plain/sbin/make.cross -O ~/bin/make.cross
+>         chmod +x ~/bin/make.cross
+>         # save the attached .config to linux build tree
+>         make.cross ARCH=arm64 
+>
+> All errors (new ones prefixed by >>):
+>
+>>> Error: arch/arm64/boot/dts/amlogic/meson-gxbb.dtsi:338.21-22 syntax error
+>>> FATAL ERROR: Unable to parse input tree
+
+This is due to a clock dependency[1] which is in the process of being
+queued in the clock tree.
+
+Kevin
+
+[1] http://lists.infradead.org/pipermail/linux-arm-kernel/2016-August/446650.html
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
