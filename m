@@ -1,25 +1,43 @@
-From: Christoph Hellwig <hch@lst.de>
+From: Jens Axboe <axboe@fb.com>
 Subject: Re: [PATCH] block: Fix secure erase
-Date: Mon, 15 Aug 2016 20:14:57 +0200
-Message-ID: <20160815181457.GA9781@lst.de>
-References: <20160811140533.GA16543@lst.de> <1471270071-28921-1-git-send-email-adrian.hunter@intel.com> <CAJVOszDxKmaEEsg49yMT+Vr8oNbKLmgAGJ_P9KNa=zQcqcx+CQ@mail.gmail.com>
+Date: Mon, 15 Aug 2016 12:16:30 -0600
+Message-ID: <0da0904a-9d46-e043-edec-8d0d34cf0714@fb.com>
+References: <20160811140533.GA16543@lst.de>
+ <1471270071-28921-1-git-send-email-adrian.hunter@intel.com>
+ <20160815181328.GA9696@lst.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <CAJVOszDxKmaEEsg49yMT+Vr8oNbKLmgAGJ_P9KNa=zQcqcx+CQ@mail.gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Shaun Tancheff <shaun.tancheff@seagate.com>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, Jens Axboe <axboe@fb.com>, Christoph Hellwig <hch@lst.de>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, linux-block@vger.kernel.org, LKML <linux-kernel@vger.kernel.org>, Josh Bingaman <josh.bingaman@seagate.com>
+Content-Type: text/plain; charset="windows-1252"; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-block-owner@vger.kernel.org>
+In-Reply-To: <20160815181328.GA9696@lst.de>
+Sender: linux-block-owner@vger.kernel.org
+To: Christoph Hellwig <hch@lst.de>, Adrian Hunter <adrian.hunter@intel.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, linux-block@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-On Mon, Aug 15, 2016 at 11:43:12AM -0500, Shaun Tancheff wrote:
-> Hmm ... Since REQ_SECURE implied REQ_DISCARD doesn't this
-> mean that we should include REQ_OP_SECURE_ERASE checking
-> wherever REQ_OP_DISCARD is being checked now in drivers/scsi/sd.c ?
-> 
-> (It's only in 3 spots so it's a quickie patch)
+On 08/15/2016 12:13 PM, Christoph Hellwig wrote:
+>> --- a/block/elevator.c
+>> +++ b/block/elevator.c
+>> @@ -366,7 +366,10 @@ void elv_dispatch_sort(struct request_queue *q, struct request *rq)
+>>  	list_for_each_prev(entry, &q->queue_head) {
+>>  		struct request *pos = list_entry_rq(entry);
+>>
+>> -		if ((req_op(rq) == REQ_OP_DISCARD) != (req_op(pos) == REQ_OP_DISCARD))
+>> +		if ((req_op(rq) == REQ_OP_DISCARD ||
+>> +		     req_op(rq) == REQ_OP_SECURE_ERASE) !=
+>> +		    (req_op(pos) == REQ_OP_DISCARD ||
+>> +		     req_op(pos) == REQ_OP_SECURE_ERASE))
+>>  			break;
+>
+> This really should be a:
+>
+> 	if (req_op(rq) != req_op(pos))
+>
+> I'l lleave it up to Jens if he wants that in this patch or not, otherwise
+> I'll send an incremental patch.
 
-SCSI doesn't support secure erase operations.  Only MMC really
-supports it, plus the usual cargo culting in Xen blkfront that's
-probably never been tested..
+Let's get a v2 with that fixed up, it makes a big readability
+difference.
+
+-- 
+Jens Axboe
