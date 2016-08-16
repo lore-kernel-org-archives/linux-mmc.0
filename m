@@ -1,138 +1,141 @@
 From: Ritesh Harjani <riteshh@codeaurora.org>
-Subject: [PATCH v2 1/8] mmc: sdhci-msm: Update DLL reset sequence
-Date: Tue, 16 Aug 2016 17:11:01 +0530
-Message-ID: <1471347668-22978-2-git-send-email-riteshh@codeaurora.org>
+Subject: [PATCH v2 2/8] mmc: sdhci-msm: add pltfm_data support to get clk-rates from DT
+Date: Tue, 16 Aug 2016 17:11:02 +0530
+Message-ID: <1471347668-22978-3-git-send-email-riteshh@codeaurora.org>
 References: <1471347668-22978-1-git-send-email-riteshh@codeaurora.org>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp.codeaurora.org ([198.145.29.96]:32941 "EHLO
-	smtp.codeaurora.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753342AbcHPLle (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Tue, 16 Aug 2016 07:41:34 -0400
+Return-path: <linux-arm-msm-owner@vger.kernel.org>
 In-Reply-To: <1471347668-22978-1-git-send-email-riteshh@codeaurora.org>
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Sender: linux-arm-msm-owner@vger.kernel.org
 To: ulf.hansson@linaro.org, adrian.hunter@intel.com
 Cc: shawn.lin@rock-chips.com, jh80.chung@samsung.com, linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org, georgi.djakov@linaro.org, alex.lemberg@sandisk.com, mateusz.nowak@intel.com, Yuliy.Izrailov@sandisk.com, asutoshd@codeaurora.org, kdorfman@codeaurora.org, david.griego@linaro.org, stummala@codeaurora.org, venkatg@codeaurora.org, Ritesh Harjani <riteshh@codeaurora.org>
+List-Id: linux-mmc@vger.kernel.org
 
-From: Venkat Gopalakrishnan <venkatg@codeaurora.org>
+This adds support for sdhc-msm controllers to get supported
+clk-rates from DT. sdhci-msm would need it's own set_clock
+ops to be implemented. For this, supported clk-rates needs
+to be populated in sdhci_msm_pltfm_data.
 
-SDCC core with minor version >= 0x42 requires a change in the reset
-sequence for DLL tuning. Make necessary changes as needed.
-
-Without this patch we see below errors on such SDHC controllers
-	sdhci_msm 7464900.sdhci: mmc0: DLL failed to LOCK
-	mmc0: tuning execution failed: -110
-
-Signed-off-by: Venkat Gopalakrishnan <venkatg@codeaurora.org>
 Signed-off-by: Ritesh Harjani <riteshh@codeaurora.org>
 ---
- drivers/mmc/host/sdhci-msm.c | 45 ++++++++++++++++++++++++++++++++++++++++++++
- 1 file changed, 45 insertions(+)
+ .../devicetree/bindings/mmc/sdhci-msm.txt          |  1 +
+ drivers/mmc/host/sdhci-msm.c                       | 71 ++++++++++++++++++++++
+ 2 files changed, 72 insertions(+)
 
+diff --git a/Documentation/devicetree/bindings/mmc/sdhci-msm.txt b/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
+index 485483a..6a83b38 100644
+--- a/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
++++ b/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
+@@ -17,6 +17,7 @@ Required properties:
+ 	"iface" - Main peripheral bus clock (PCLK/HCLK - AHB Bus clock) (required)
+ 	"core"	- SDC MMC clock (MCLK) (required)
+ 	"bus"	- SDCC bus voter clock (optional)
++- clk-rates: Array of supported GCC clock frequencies for sdhc, Units - Hz.
+ 
+ Example:
+ 
 diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
-index 8ef44a2a..9e08424 100644
+index 9e08424..2c745c2 100644
 --- a/drivers/mmc/host/sdhci-msm.c
 +++ b/drivers/mmc/host/sdhci-msm.c
-@@ -58,11 +58,17 @@
- #define CORE_DLL_CONFIG		0x100
- #define CORE_DLL_STATUS		0x108
- 
-+#define CORE_DLL_CONFIG_2	0x1b4
-+#define CORE_FLL_CYCLE_CNT	BIT(18)
-+#define CORE_DLL_CLOCK_DISABLE	BIT(21)
-+
- #define CORE_VENDOR_SPEC	0x10c
- #define CORE_CLK_PWRSAVE	BIT(1)
- 
- #define CORE_VENDOR_SPEC_CAPABILITIES0	0x11c
- 
-+#define TCXO_FREQ		19200000
-+
- #define CDR_SELEXT_SHIFT	20
- #define CDR_SELEXT_MASK		(0xf << CDR_SELEXT_SHIFT)
+@@ -74,6 +74,11 @@
  #define CMUX_SHIFT_PHASE_SHIFT	24
-@@ -76,6 +82,7 @@ struct sdhci_msm_host {
- 	struct clk *pclk;	/* SDHC peripheral bus clock */
+ #define CMUX_SHIFT_PHASE_MASK	(7 << CMUX_SHIFT_PHASE_SHIFT)
+ 
++struct sdhci_msm_pltfm_data {
++	u32 *clk_table;
++	size_t clk_table_sz;
++};
++
+ struct sdhci_msm_host {
+ 	struct platform_device *pdev;
+ 	void __iomem *core_mem;	/* MSM SDCC mapped address */
+@@ -83,6 +88,7 @@ struct sdhci_msm_host {
  	struct clk *bus_clk;	/* SDHC bus voter clock */
  	struct mmc_host *mmc;
-+	bool use_updated_dll_reset;
+ 	bool use_updated_dll_reset;
++	struct sdhci_msm_pltfm_data *pdata;
  };
  
  /* Platform specific tuning */
-@@ -303,6 +310,8 @@ static inline void msm_cm_dll_set_freq(struct sdhci_host *host)
- static int msm_init_cm_dll(struct sdhci_host *host)
+@@ -570,6 +576,67 @@ static const struct sdhci_pltfm_data sdhci_msm_pdata = {
+ 	.ops = &sdhci_msm_ops,
+ };
+ 
++static int sdhci_msm_dt_get_array(struct device *dev, const char *prop_name,
++				u32 **table, size_t *size)
++{
++	struct device_node *np = dev->of_node;
++	int count = 0;
++	u32 *arr = NULL;
++	int ret = 0;
++
++	count = of_property_count_elems_of_size(np, prop_name, sizeof(u32));
++	if (count < 0) {
++		dev_err(dev, "%s: Invalid dt property, err(%d)\n",
++				prop_name, count);
++		ret = count;
++		goto out;
++	}
++
++	arr = devm_kzalloc(dev, count * sizeof(*arr), GFP_KERNEL);
++	if (!arr) {
++		ret = -ENOMEM;
++		goto out;
++	}
++
++	ret = of_property_read_u32_array(np, prop_name, arr, count);
++	if (ret) {
++		dev_err(dev, "%s Invalid dt array property, err(%d)\n",
++				prop_name, ret);
++		goto out;
++	}
++	*table = arr;
++	*size = count;
++out:
++	return ret;
++}
++
++static struct sdhci_msm_pltfm_data *sdhci_msm_populate_pdata(struct device *dev,
++						struct sdhci_msm_host *msm_host)
++{
++	struct sdhci_msm_pltfm_data *pdata = NULL;
++	size_t table_sz = 0;
++	u32 *table = NULL;
++
++	pdata = devm_kzalloc(dev, sizeof(*pdata), GFP_KERNEL);
++	if (!pdata)
++		goto out;
++
++	if (sdhci_msm_dt_get_array(dev, "clk-rates", &table, &table_sz)) {
++		dev_err(dev, "failed in DT parsing for supported clk-rates\n");
++		goto out;
++	}
++	if (!table || !table_sz) {
++		dev_err(dev, "Invalid clock table\n");
++		goto out;
++	}
++	pdata->clk_table = table;
++	pdata->clk_table_sz = table_sz;
++
++	return pdata;
++out:
++	return NULL;
++}
++
+ static int sdhci_msm_probe(struct platform_device *pdev)
  {
- 	struct mmc_host *mmc = host->mmc;
-+	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-+	struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
- 	int wait_cnt = 50;
- 	unsigned long flags;
+ 	struct sdhci_host *host;
+@@ -596,6 +663,10 @@ static int sdhci_msm_probe(struct platform_device *pdev)
  
-@@ -316,6 +325,15 @@ static int msm_init_cm_dll(struct sdhci_host *host)
- 	writel_relaxed((readl_relaxed(host->ioaddr + CORE_VENDOR_SPEC)
- 			& ~CORE_CLK_PWRSAVE), host->ioaddr + CORE_VENDOR_SPEC);
+ 	sdhci_get_of_property(pdev);
  
-+	if (msm_host->use_updated_dll_reset) {
-+		writel_relaxed((readl_relaxed(host->ioaddr + CORE_DLL_CONFIG)
-+				& ~CORE_CK_OUT_EN),
-+				host->ioaddr + CORE_DLL_CONFIG);
-+		writel_relaxed((readl_relaxed(host->ioaddr + CORE_DLL_CONFIG_2)
-+				| CORE_DLL_CLOCK_DISABLE),
-+				host->ioaddr + CORE_DLL_CONFIG_2);
-+	}
++	msm_host->pdata = sdhci_msm_populate_pdata(&pdev->dev, msm_host);
++	if (!msm_host->pdata)
++		goto pltfm_free;
 +
- 	/* Write 1 to DLL_RST bit of DLL_CONFIG register */
- 	writel_relaxed((readl_relaxed(host->ioaddr + CORE_DLL_CONFIG)
- 			| CORE_DLL_RST), host->ioaddr + CORE_DLL_CONFIG);
-@@ -325,6 +343,22 @@ static int msm_init_cm_dll(struct sdhci_host *host)
- 			| CORE_DLL_PDN), host->ioaddr + CORE_DLL_CONFIG);
- 	msm_cm_dll_set_freq(host);
- 
-+	if (msm_host->use_updated_dll_reset) {
-+		u32 mclk_freq = 0;
-+
-+		if ((readl_relaxed(host->ioaddr + CORE_DLL_CONFIG_2)
-+					& CORE_FLL_CYCLE_CNT))
-+			mclk_freq = (u32) ((host->clock / TCXO_FREQ) * 8);
-+		else
-+			mclk_freq = (u32) ((host->clock / TCXO_FREQ) * 4);
-+
-+		writel_relaxed(((readl_relaxed(host->ioaddr + CORE_DLL_CONFIG_2)
-+				& ~(0xFF << 10)) | (mclk_freq << 10)),
-+				host->ioaddr + CORE_DLL_CONFIG_2);
-+		/* wait for 5us before enabling DLL clock */
-+		udelay(5);
-+	}
-+
- 	/* Write 0 to DLL_RST bit of DLL_CONFIG register */
- 	writel_relaxed((readl_relaxed(host->ioaddr + CORE_DLL_CONFIG)
- 			& ~CORE_DLL_RST), host->ioaddr + CORE_DLL_CONFIG);
-@@ -333,6 +367,14 @@ static int msm_init_cm_dll(struct sdhci_host *host)
- 	writel_relaxed((readl_relaxed(host->ioaddr + CORE_DLL_CONFIG)
- 			& ~CORE_DLL_PDN), host->ioaddr + CORE_DLL_CONFIG);
- 
-+	if (msm_host->use_updated_dll_reset) {
-+		msm_cm_dll_set_freq(host);
-+		/* Enable the DLL clock */
-+		writel_relaxed((readl_relaxed(host->ioaddr + CORE_DLL_CONFIG_2)
-+				& ~CORE_DLL_CLOCK_DISABLE),
-+				host->ioaddr + CORE_DLL_CONFIG_2);
-+	}
-+
- 	/* Set DLL_EN bit to 1. */
- 	writel_relaxed((readl_relaxed(host->ioaddr + CORE_DLL_CONFIG)
- 			| CORE_DLL_EN), host->ioaddr + CORE_DLL_CONFIG);
-@@ -631,6 +673,9 @@ static int sdhci_msm_probe(struct platform_device *pdev)
- 	dev_dbg(&pdev->dev, "MCI Version: 0x%08x, major: 0x%04x, minor: 0x%02x\n",
- 		core_version, core_major, core_minor);
- 
-+	if ((core_major == 1) && (core_minor >= 0x42))
-+		msm_host->use_updated_dll_reset = true;
-+
- 	/*
- 	 * Support for some capabilities is not advertised by newer
- 	 * controller versions and must be explicitly enabled.
+ 	/* Setup SDCC bus voter clock. */
+ 	msm_host->bus_clk = devm_clk_get(&pdev->dev, "bus");
+ 	if (!IS_ERR(msm_host->bus_clk)) {
 -- 
 The Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum, 
 a Linux Foundation Collaborative Project.
-
