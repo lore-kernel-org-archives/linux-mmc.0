@@ -1,78 +1,162 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: [PATCH V4 18/30] mmc: core: Do not prepare a new request twice
-Date: Tue, 16 Aug 2016 13:44:28 +0300
-Message-ID: <1471344280-16663-19-git-send-email-adrian.hunter@intel.com>
+Subject: [PATCH V4 12/30] mmc: queue: Use queue depth to allocate and free
+Date: Tue, 16 Aug 2016 13:44:22 +0300
+Message-ID: <1471344280-16663-13-git-send-email-adrian.hunter@intel.com>
 References: <1471344280-16663-1-git-send-email-adrian.hunter@intel.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
 Received: from mga01.intel.com ([192.55.52.88]:14127 "EHLO mga01.intel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753357AbcHPKuZ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 16 Aug 2016 06:50:25 -0400
+	id S1753198AbcHPKuX (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 16 Aug 2016 06:50:23 -0400
 In-Reply-To: <1471344280-16663-1-git-send-email-adrian.hunter@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>
 Cc: linux-mmc <linux-mmc@vger.kernel.org>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Dorfman Konstantin <kdorfman@codeaurora.org>, David Griego <david.griego@linaro.org>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>
 
-mmc_start_req() assumes it is never called with the new request already
-prepared. That is true if the queue consists of only 2 requests, but is not
-true for a longer queue. e.g. mmc_start_req() has a current and previous
-request but still exits to queue a new request if the queue size is
-greater than 2. In that case, when mmc_start_req() is called again, the
-current request will have been prepared already. Fix by flagging if the
-request has been prepared.
+Instead of allocating resources for 2 slots in the queue, allow for an
+arbitrary number.
 
 Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
 ---
- drivers/mmc/core/core.c  | 12 +++++++++---
- include/linux/mmc/host.h |  1 +
- 2 files changed, 10 insertions(+), 3 deletions(-)
+ drivers/mmc/card/queue.c | 103 +++++++++++++++++++++--------------------------
+ 1 file changed, 46 insertions(+), 57 deletions(-)
 
-diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index e9813f2eaca0..e3a0185ebb67 100644
---- a/drivers/mmc/core/core.c
-+++ b/drivers/mmc/core/core.c
-@@ -657,8 +657,10 @@ struct mmc_async_req *mmc_start_req(struct mmc_host *host,
- 	struct mmc_async_req *data = host->areq;
+diff --git a/drivers/mmc/card/queue.c b/drivers/mmc/card/queue.c
+index 8a0933bf9162..c73afcd9d346 100644
+--- a/drivers/mmc/card/queue.c
++++ b/drivers/mmc/card/queue.c
+@@ -185,86 +185,75 @@ static void mmc_queue_setup_discard(struct request_queue *q,
+ static bool mmc_queue_alloc_bounce_bufs(struct mmc_queue *mq,
+ 					unsigned int bouncesz)
+ {
+-	struct mmc_queue_req *mqrq_cur = mq->mqrq_cur;
+-	struct mmc_queue_req *mqrq_prev = mq->mqrq_prev;
+-
+-	mqrq_cur->bounce_buf = kmalloc(bouncesz, GFP_KERNEL);
+-	if (!mqrq_cur->bounce_buf) {
+-		pr_warn("%s: unable to allocate bounce cur buffer\n",
+-			mmc_card_name(mq->card));
+-		return false;
+-	}
++	int i;
  
- 	/* Prepare a new request */
--	if (areq)
-+	if (areq && !areq->pre_req_done) {
-+		areq->pre_req_done = true;
- 		mmc_pre_req(host, areq->mrq, !host->areq);
+-	mqrq_prev->bounce_buf = kmalloc(bouncesz, GFP_KERNEL);
+-	if (!mqrq_prev->bounce_buf) {
+-		pr_warn("%s: unable to allocate bounce prev buffer\n",
+-			mmc_card_name(mq->card));
+-		kfree(mqrq_cur->bounce_buf);
+-		mqrq_cur->bounce_buf = NULL;
+-		return false;
++	for (i = 0; i < mq->qdepth; i++) {
++		mq->mqrq[i].bounce_buf = kmalloc(bouncesz, GFP_KERNEL);
++		if (!mq->mqrq[i].bounce_buf)
++			goto out_err;
+ 	}
+ 
+ 	return true;
++
++out_err:
++	while (--i >= 0) {
++		kfree(mq->mqrq[i].bounce_buf);
++		mq->mqrq[i].bounce_buf = NULL;
++	}
++	pr_warn("%s: unable to allocate bounce buffers\n",
++		mmc_card_name(mq->card));
++	return false;
+ }
+ 
+ static int mmc_queue_alloc_bounce_sgs(struct mmc_queue *mq,
+ 				      unsigned int bouncesz)
+ {
+-	struct mmc_queue_req *mqrq_cur = mq->mqrq_cur;
+-	struct mmc_queue_req *mqrq_prev = mq->mqrq_prev;
+-	int ret;
+-
+-	mqrq_cur->sg = mmc_alloc_sg(1, &ret);
+-	if (ret)
+-		return ret;
++	int i, ret;
+ 
+-	mqrq_cur->bounce_sg = mmc_alloc_sg(bouncesz / 512, &ret);
+-	if (ret)
+-		return ret;
+-
+-	mqrq_prev->sg = mmc_alloc_sg(1, &ret);
+-	if (ret)
+-		return ret;
++	for (i = 0; i < mq->qdepth; i++) {
++		mq->mqrq[i].sg = mmc_alloc_sg(1, &ret);
++		if (ret)
++			return ret;
+ 
+-	mqrq_prev->bounce_sg = mmc_alloc_sg(bouncesz / 512, &ret);
++		mq->mqrq[i].bounce_sg = mmc_alloc_sg(bouncesz / 512, &ret);
++		if (ret)
++			return ret;
 +	}
  
- 	if (host->areq) {
- 		err = mmc_wait_for_data_req_done(host, host->areq->mrq,	areq);
-@@ -694,12 +696,16 @@ struct mmc_async_req *mmc_start_req(struct mmc_host *host,
- 	if (!err && areq)
- 		start_err = __mmc_start_data_req(host, areq->mrq);
+-	return ret;
++	return 0;
+ }
  
--	if (host->areq)
-+	if (host->areq) {
-+		host->areq->pre_req_done = false;
- 		mmc_post_req(host, host->areq->mrq, 0);
+ static int mmc_queue_alloc_sgs(struct mmc_queue *mq, int max_segs)
+ {
+-	struct mmc_queue_req *mqrq_cur = mq->mqrq_cur;
+-	struct mmc_queue_req *mqrq_prev = mq->mqrq_prev;
+-	int ret;
++	int i, ret;
+ 
+-	mqrq_cur->sg = mmc_alloc_sg(max_segs, &ret);
+-	if (ret)
+-		return ret;
++	for (i = 0; i < mq->qdepth; i++) {
++		mq->mqrq[i].sg = mmc_alloc_sg(max_segs, &ret);
++		if (ret)
++			return ret;
 +	}
  
- 	 /* Cancel a prepared request if it was not started. */
--	if ((err || start_err) && areq)
-+	if ((err || start_err) && areq) {
-+		areq->pre_req_done = false;
- 		mmc_post_req(host, areq->mrq, -EINVAL);
-+	}
+-	mqrq_prev->sg = mmc_alloc_sg(max_segs, &ret);
++	return 0;
++}
  
- 	if (err)
- 		host->areq = NULL;
-diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-index 3386e10480f7..9fb00b7c54a1 100644
---- a/include/linux/mmc/host.h
-+++ b/include/linux/mmc/host.h
-@@ -174,6 +174,7 @@ struct mmc_async_req {
- 	 * Returns 0 if success otherwise non zero.
- 	 */
- 	int (*err_check) (struct mmc_card *, struct mmc_async_req *);
-+	bool pre_req_done;
- };
+-	return ret;
++static void mmc_queue_req_free_bufs(struct mmc_queue_req *mqrq)
++{
++	kfree(mqrq->bounce_sg);
++	mqrq->bounce_sg = NULL;
++
++	kfree(mqrq->sg);
++	mqrq->sg = NULL;
++
++	kfree(mqrq->bounce_buf);
++	mqrq->bounce_buf = NULL;
+ }
+ 
+ static void mmc_queue_reqs_free_bufs(struct mmc_queue *mq)
+ {
+-	struct mmc_queue_req *mqrq_cur = mq->mqrq_cur;
+-	struct mmc_queue_req *mqrq_prev = mq->mqrq_prev;
+-
+-	kfree(mqrq_cur->bounce_sg);
+-	mqrq_cur->bounce_sg = NULL;
+-	kfree(mqrq_prev->bounce_sg);
+-	mqrq_prev->bounce_sg = NULL;
+-
+-	kfree(mqrq_cur->sg);
+-	mqrq_cur->sg = NULL;
+-	kfree(mqrq_cur->bounce_buf);
+-	mqrq_cur->bounce_buf = NULL;
+-
+-	kfree(mqrq_prev->sg);
+-	mqrq_prev->sg = NULL;
+-	kfree(mqrq_prev->bounce_buf);
+-	mqrq_prev->bounce_buf = NULL;
++	int i;
++
++	for (i = 0; i < mq->qdepth; i++)
++		mmc_queue_req_free_bufs(&mq->mqrq[i]);
+ }
  
  /**
 -- 
