@@ -1,38 +1,66 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH] block: Fix secure erase
-Date: Tue, 16 Aug 2016 10:20:25 +0300
-Message-ID: <d350c5b0-3ac8-342b-608b-933652c26b65@intel.com>
-References: <20160811140533.GA16543@lst.de>
- <1471270071-28921-1-git-send-email-adrian.hunter@intel.com>
- <CAJVOszDxKmaEEsg49yMT+Vr8oNbKLmgAGJ_P9KNa=zQcqcx+CQ@mail.gmail.com>
- <20160815181457.GA9781@lst.de>
+From: Dong Aisheng <dongas86@gmail.com>
+Subject: Re: [PATCH] mmc: sdhci-esdhc-imx: do not touch other bit when config
+ DTOCV
+Date: Tue, 16 Aug 2016 15:30:50 +0800
+Message-ID: <20160816073050.GA9211@shlinux2>
+References: <1471249178-32204-1-git-send-email-haibo.chen@nxp.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20160815181457.GA9781@lst.de>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Christoph Hellwig <hch@lst.de>, Shaun Tancheff <shaun.tancheff@seagate.com>
-Cc: Jens Axboe <axboe@fb.com>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, linux-block@vger.kernel.org, LKML <linux-kernel@vger.kernel.org>, Josh Bingaman <josh.bingaman@seagate.com>, Vinayak Holikatti <vinholikatti@gmail.com>, Joao Pinto <Joao.Pinto@synopsys.com>, linux-scsi@vger.kernel.org, "Martin K. Petersen" <martin.petersen@oracle.com>, Pawel Wodkowski <pawelx.wodkowski@intel.com>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-pa0-f67.google.com ([209.85.220.67]:35614 "EHLO
+	mail-pa0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751304AbcHPHka (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Tue, 16 Aug 2016 03:40:30 -0400
+Received: by mail-pa0-f67.google.com with SMTP id cf3so4857031pad.2
+        for <linux-mmc@vger.kernel.org>; Tue, 16 Aug 2016 00:40:30 -0700 (PDT)
+Content-Disposition: inline
+In-Reply-To: <1471249178-32204-1-git-send-email-haibo.chen@nxp.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Haibo Chen <haibo.chen@nxp.com>
+Cc: adrian.hunter@intel.com, ulf.hansson@linaro.org, aisheng.dong@nxp.com, linux-mmc@vger.kernel.org
 
-On 15/08/16 21:14, Christoph Hellwig wrote:
-> On Mon, Aug 15, 2016 at 11:43:12AM -0500, Shaun Tancheff wrote:
->> Hmm ... Since REQ_SECURE implied REQ_DISCARD doesn't this
->> mean that we should include REQ_OP_SECURE_ERASE checking
->> wherever REQ_OP_DISCARD is being checked now in drivers/scsi/sd.c ?
->>
->> (It's only in 3 spots so it's a quickie patch)
+On Mon, Aug 15, 2016 at 04:19:38PM +0800, Haibo Chen wrote:
+> Now, when call esdhc_set_timeout() to set the data timeout counter value,
+> IPP_RST_N(bit 23) is wrongly affected. This patch add a mask to avoid this.
 > 
-> SCSI doesn't support secure erase operations.  Only MMC really
-> supports it, plus the usual cargo culting in Xen blkfront that's
-> probably never been tested..
+> Signed-off-by: Haibo Chen <haibo.chen@nxp.com>
+
+Acked-by: Dong Aisheng <aisheng.dong@nxp.com>
+
+Regards
+Dong Aisheng
+
+> ---
+>  drivers/mmc/host/sdhci-esdhc-imx.c | 4 +++-
+>  1 file changed, 3 insertions(+), 1 deletion(-)
 > 
-
-I left SCSI out because support does not exist at the moment.
-However there is UFS which is seen as the replacement for eMMC.
-And there is a patch to add support for BLKSECDISCARD:
-
-	http://marc.info/?l=linux-scsi&m=146953519016056
-
-So SCSI will need updating if that is to go in.
+> diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
+> index 99e0b33..437c448 100644
+> --- a/drivers/mmc/host/sdhci-esdhc-imx.c
+> +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
+> @@ -31,6 +31,7 @@
+>  #include "sdhci-pltfm.h"
+>  #include "sdhci-esdhc.h"
+>  
+> +#define ESDHC_SYS_CTRL_DTOCV_MASK	0x0f
+>  #define	ESDHC_CTRL_D3CD			0x08
+>  #define ESDHC_BURST_LEN_EN_INCR		(1 << 27)
+>  /* VENDOR SPEC register */
+> @@ -937,7 +938,8 @@ static void esdhc_set_timeout(struct sdhci_host *host, struct mmc_command *cmd)
+>  	struct pltfm_imx_data *imx_data = sdhci_pltfm_priv(pltfm_host);
+>  
+>  	/* use maximum timeout counter */
+> -	sdhci_writeb(host, esdhc_is_usdhc(imx_data) ? 0xF : 0xE,
+> +	esdhc_clrset_le(host, ESDHC_SYS_CTRL_DTOCV_MASK,
+> +			esdhc_is_usdhc(imx_data) ? 0xF : 0xE,
+>  			SDHCI_TIMEOUT_CONTROL);
+>  }
+>  
+> -- 
+> 1.9.1
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
