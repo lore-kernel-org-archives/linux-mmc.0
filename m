@@ -1,37 +1,41 @@
-From: Geert Uytterhoeven <geert@linux-m68k.org>
-Subject: Re: [PATCH v2 3/9] mmc: tmio: Add UHS-I mode support
-Date: Tue, 16 Aug 2016 22:21:10 +0200
-Message-ID: <CAMuHMdXCH+2a1rttULc_=_DXM6GTHOk70owAuQpRAwoWVjX80A@mail.gmail.com>
-References: <1459525479-20842-1-git-send-email-wsa@the-dreams.de>
- <1459525479-20842-4-git-send-email-wsa@the-dreams.de> <CAMuHMdVyNsm+hpoJfjxLkKt_5zydx9csgPB0zqCdtPMipqmFFQ@mail.gmail.com>
- <20160816195514.GA3998@tetsubishi>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-renesas-soc-owner@vger.kernel.org>
-In-Reply-To: <20160816195514.GA3998@tetsubishi>
-Sender: linux-renesas-soc-owner@vger.kernel.org
-To: Wolfram Sang <wsa@the-dreams.de>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Ben Hutchings <ben.hutchings@codethink.co.uk>, Simon Horman <horms@verge.net.au>, Linux MMC List <linux-mmc@vger.kernel.org>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>
+From: robert.foss@collabora.com
+Subject: [PACTH v3] mmc: sdhci: Do not allow tuning procedure to be interrupted
+Date: Tue, 16 Aug 2016 17:25:29 -0400
+Message-ID: <1471382729-28472-1-git-send-email-robert.foss@collabora.com>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: adrian.hunter@intel.com, ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Andrew Bresticker <abrestic@chromium.org>, Kevin Cernekee <cernekee@chromium.org>, Benson Leung <bleung@chromium.org>
+Cc: Christopher Freeman <cfreeman@nvidia.com>, Robert Foss <robert.foss@collabora.com>
 List-Id: linux-mmc@vger.kernel.org
 
-Hi Wolfram,
+From: Christopher Freeman <cfreeman@nvidia.com>
 
-On Tue, Aug 16, 2016 at 9:55 PM, Wolfram Sang <wsa@the-dreams.de> wrote:
->> The first SDHI channel (ee100000.sd) doesn't seem to be affected
->> by the problem.
->
-> Hmm, I sadly don't have any docs about 73a4 and/or its SDHI variants.
-> I'll ask around.
+wait_event_interruptible_timeout() will return early if the blocked
+process receives a signal, causing the driver to abort the tuning
+procedure and possibly leaving the controller in a bad state.  Since the
+tuning command is expected to complete quickly (<50ms) and we've set a
+timeout, use wait_event_timeout() instead.
 
-Forgot to add: I don't see the issue on sh73a0/kzm9g nor r8a7740/armadillo.
+Signed-off-by: Christopher Freeman <cfreeman@nvidia.com>
+Tested-by: Robert Foss <robert.foss@collabora.com>
+Signed-off-by: Robert Foss <robert.foss@collabora.com>
+Reviewed-by: Benson Leung <bleung@chromium.org>
+---
+ drivers/mmc/host/sdhci.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-Gr{oetje,eeting}s,
-
-                        Geert
-
---
-Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
-
-In personal conversations with technical people, I call myself a hacker. But
-when I'm talking to journalists I just say "programmer" or something like that.
-                                -- Linus Torvalds
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 0e3d7c0..9e80203 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -1960,7 +1960,7 @@ static int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode)
+ 
+ 		spin_unlock_irqrestore(&host->lock, flags);
+ 		/* Wait for Buffer Read Ready interrupt */
+-		wait_event_interruptible_timeout(host->buf_ready_int,
++		wait_event_timeout(host->buf_ready_int,
+ 					(host->tuning_done == 1),
+ 					msecs_to_jiffies(50));
+ 		spin_lock_irqsave(&host->lock, flags);
+-- 
+2.7.4
