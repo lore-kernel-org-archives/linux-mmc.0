@@ -1,75 +1,91 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: [PATCH V4 15/30] mmc: mmc: Add functions to enable / disable the Command Queue
-Date: Tue, 16 Aug 2016 13:44:25 +0300
-Message-ID: <1471344280-16663-16-git-send-email-adrian.hunter@intel.com>
+Subject: [PATCH V4 16/30] mmc: mmc_test: Disable Command Queue while mmc_test is used
+Date: Tue, 16 Aug 2016 13:44:26 +0300
+Message-ID: <1471344280-16663-17-git-send-email-adrian.hunter@intel.com>
 References: <1471344280-16663-1-git-send-email-adrian.hunter@intel.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga01.intel.com ([192.55.52.88]:14127 "EHLO mga01.intel.com"
+Received: from mga01.intel.com ([192.55.52.88]:49530 "EHLO mga01.intel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753343AbcHPKuY (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 16 Aug 2016 06:50:24 -0400
+	id S1751532AbcHPKuZ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 16 Aug 2016 06:50:25 -0400
 In-Reply-To: <1471344280-16663-1-git-send-email-adrian.hunter@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>
 Cc: linux-mmc <linux-mmc@vger.kernel.org>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Dorfman Konstantin <kdorfman@codeaurora.org>, David Griego <david.griego@linaro.org>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>
 
-Add helper functions to enable or disable the Command Queue.
+Normal read and write commands may not be used while the command queue is
+enabled. Disable the Command Queue when mmc_test is probed and re-enable it
+when it is removed.
 
 Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
 ---
- drivers/mmc/core/mmc_ops.c | 27 +++++++++++++++++++++++++++
- include/linux/mmc/core.h   |  2 ++
- 2 files changed, 29 insertions(+)
+ drivers/mmc/card/mmc_test.c | 13 +++++++++++++
+ drivers/mmc/core/mmc.c      |  7 +++++++
+ include/linux/mmc/card.h    |  1 +
+ 3 files changed, 21 insertions(+)
 
-diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
-index ad6e9798e949..7ec7d62922b0 100644
---- a/drivers/mmc/core/mmc_ops.c
-+++ b/drivers/mmc/core/mmc_ops.c
-@@ -797,3 +797,30 @@ int mmc_can_ext_csd(struct mmc_card *card)
- {
- 	return (card && card->csd.mmca_vsn > CSD_SPEC_VER_3);
- }
-+
-+int mmc_cmdq_switch(struct mmc_card *card, int enable)
-+{
-+	int err;
-+
-+	if (!card->ext_csd.cmdq_support)
-+		return -EOPNOTSUPP;
-+
-+	err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL, EXT_CSD_CMDQ_MODE_EN,
-+			 enable, card->ext_csd.generic_cmd6_time);
-+	if (!err)
-+		card->ext_csd.cmdq_en = enable;
-+
-+	return err;
-+}
-+
-+int mmc_cmdq_enable(struct mmc_card *card)
-+{
-+	return mmc_cmdq_switch(card, EXT_CSD_CMDQ_MODE_ENABLED);
-+}
-+EXPORT_SYMBOL_GPL(mmc_cmdq_enable);
-+
-+int mmc_cmdq_disable(struct mmc_card *card)
-+{
-+	return mmc_cmdq_switch(card, 0);
-+}
-+EXPORT_SYMBOL_GPL(mmc_cmdq_disable);
-diff --git a/include/linux/mmc/core.h b/include/linux/mmc/core.h
-index 368bed70aa9d..63dc01257852 100644
---- a/include/linux/mmc/core.h
-+++ b/include/linux/mmc/core.h
-@@ -161,6 +161,8 @@ extern void mmc_start_bkops(struct mmc_card *card, bool from_exception);
- extern int mmc_switch(struct mmc_card *, u8, u8, u8, unsigned int);
- extern int mmc_send_tuning(struct mmc_host *host, u32 opcode, int *cmd_error);
- extern int mmc_get_ext_csd(struct mmc_card *card, u8 **new_ext_csd);
-+extern int mmc_cmdq_enable(struct mmc_card *card);
-+extern int mmc_cmdq_disable(struct mmc_card *card);
+diff --git a/drivers/mmc/card/mmc_test.c b/drivers/mmc/card/mmc_test.c
+index 5a8dc5a76e0d..7dee9e5a8cfb 100644
+--- a/drivers/mmc/card/mmc_test.c
++++ b/drivers/mmc/card/mmc_test.c
+@@ -3240,6 +3240,14 @@ static int mmc_test_probe(struct mmc_card *card)
+ 	if (ret)
+ 		return ret;
  
- #define MMC_ERASE_ARG		0x00000000
- #define MMC_SECURE_ERASE_ARG	0x80000000
++	if (card->ext_csd.cmdq_en) {
++		mmc_claim_host(card->host);
++		ret = mmc_cmdq_disable(card);
++		mmc_release_host(card->host);
++		if (ret)
++			return ret;
++	}
++
+ 	dev_info(&card->dev, "Card claimed for testing.\n");
+ 
+ 	return 0;
+@@ -3247,6 +3255,11 @@ static int mmc_test_probe(struct mmc_card *card)
+ 
+ static void mmc_test_remove(struct mmc_card *card)
+ {
++	if (card->reenable_cmdq) {
++		mmc_claim_host(card->host);
++		mmc_cmdq_enable(card);
++		mmc_release_host(card->host);
++	}
+ 	mmc_test_free_result(card);
+ 	mmc_test_free_dbgfs_file(card);
+ }
+diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+index 3f2d9d8e4d6c..5d97ff68f4ac 100644
+--- a/drivers/mmc/core/mmc.c
++++ b/drivers/mmc/core/mmc.c
+@@ -1751,6 +1751,13 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
+ 	}
+ 
+ 	/*
++	 * In some cases (e.g. RPMB or mmc_test), the Command Queue must be
++	 * disabled for a time, so a flag is needed to indicate to re-enable the
++	 * Command Queue.
++	 */
++	card->reenable_cmdq = card->ext_csd.cmdq_en;
++
++	/*
+ 	 * The mandatory minimum values are defined for packed command.
+ 	 * read: 5, write: 3
+ 	 */
+diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
+index 476ccbe3f831..3d7434e48566 100644
+--- a/include/linux/mmc/card.h
++++ b/include/linux/mmc/card.h
+@@ -285,6 +285,7 @@ struct mmc_card {
+ #define MMC_QUIRK_TRIM_BROKEN	(1<<12)		/* Skip trim */
+ #define MMC_QUIRK_BROKEN_HPI	(1<<13)		/* Disable broken HPI support */
+ 
++	bool			reenable_cmdq;	/* Re-enable Command Queue */
+ 
+ 	unsigned int		erase_size;	/* erase size in sectors */
+  	unsigned int		erase_shift;	/* if erase unit is power 2 */
 -- 
 1.9.1
 
