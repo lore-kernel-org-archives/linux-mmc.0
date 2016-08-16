@@ -1,69 +1,62 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: [PATCH V4 20/30] mmc: block: Factor out mmc_blk_requeue()
-Date: Tue, 16 Aug 2016 13:44:30 +0300
-Message-ID: <1471344280-16663-21-git-send-email-adrian.hunter@intel.com>
+Subject: [PATCH V4 11/30] mmc: queue: Introduce queue depth
+Date: Tue, 16 Aug 2016 13:44:21 +0300
+Message-ID: <1471344280-16663-12-git-send-email-adrian.hunter@intel.com>
 References: <1471344280-16663-1-git-send-email-adrian.hunter@intel.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
 Received: from mga01.intel.com ([192.55.52.88]:49530 "EHLO mga01.intel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753147AbcHPKu2 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 16 Aug 2016 06:50:28 -0400
+	id S1753147AbcHPKuW (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Tue, 16 Aug 2016 06:50:22 -0400
 In-Reply-To: <1471344280-16663-1-git-send-email-adrian.hunter@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>
 Cc: linux-mmc <linux-mmc@vger.kernel.org>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Dorfman Konstantin <kdorfman@codeaurora.org>, David Griego <david.griego@linaro.org>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>
 
-The same code is used in a couple of places.
+Add a mmc_queue member to record the size of the queue, which currently
+supports 2 requests on-the-go at a time.
 
 Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
 ---
- drivers/mmc/card/block.c | 18 ++++++++++--------
- 1 file changed, 10 insertions(+), 8 deletions(-)
+ drivers/mmc/card/queue.c | 4 ++++
+ drivers/mmc/card/queue.h | 1 +
+ 2 files changed, 5 insertions(+)
 
-diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
-index 17ce02a0fb48..aac6e2e77dfd 100644
---- a/drivers/mmc/card/block.c
-+++ b/drivers/mmc/card/block.c
-@@ -1320,6 +1320,13 @@ static int mmc_blk_issue_flush(struct mmc_queue *mq, struct request *req)
- 	return ret ? 0 : 1;
- }
+diff --git a/drivers/mmc/card/queue.c b/drivers/mmc/card/queue.c
+index 7ee03eecf2c0..8a0933bf9162 100644
+--- a/drivers/mmc/card/queue.c
++++ b/drivers/mmc/card/queue.c
+@@ -292,6 +292,7 @@ int mmc_init_queue(struct mmc_queue *mq, struct mmc_card *card,
+ 	if (!mq->queue)
+ 		return -ENOMEM;
  
-+static void mmc_blk_requeue(struct request_queue *q, struct request *req)
-+{
-+	spin_lock_irq(q->queue_lock);
-+	blk_requeue_request(q, req);
-+	spin_unlock_irq(q->queue_lock);
-+}
-+
- /*
-  * Reformat current write as a reliable write, supporting
-  * both legacy and the enhanced reliable write MMC cards.
-@@ -1780,11 +1787,8 @@ static u8 mmc_blk_prep_packed_list(struct mmc_queue *mq, struct request *req)
- 		reqs++;
- 	} while (1);
++	mq->qdepth = 2;
+ 	mq->mqrq_cur = &mq->mqrq[0];
+ 	mq->mqrq_prev = &mq->mqrq[1];
+ 	mq->queue->queuedata = mq;
+@@ -389,6 +390,9 @@ int mmc_packed_init(struct mmc_queue *mq, struct mmc_card *card)
+ 	struct mmc_queue_req *mqrq_prev = &mq->mqrq[1];
+ 	int ret = 0;
  
--	if (put_back) {
--		spin_lock_irq(q->queue_lock);
--		blk_requeue_request(q, next);
--		spin_unlock_irq(q->queue_lock);
--	}
-+	if (put_back)
-+		mmc_blk_requeue(q, next);
++	/* Queue depth is only ever 2 with packed commands */
++	if (mq->qdepth != 2)
++		return -EINVAL;
  
- 	if (reqs > 0) {
- 		list_add(&req->queuelist, &mqrq->packed->list);
-@@ -1971,9 +1975,7 @@ static void mmc_blk_revert_packed_req(struct mmc_queue *mq,
- 		prq = list_entry_rq(packed->list.prev);
- 		if (prq->queuelist.prev != &packed->list) {
- 			list_del_init(&prq->queuelist);
--			spin_lock_irq(q->queue_lock);
--			blk_requeue_request(mq->queue, prq);
--			spin_unlock_irq(q->queue_lock);
-+			mmc_blk_requeue(q, prq);
- 		} else {
- 			list_del_init(&prq->queuelist);
- 		}
+ 	mqrq_cur->packed = kzalloc(sizeof(struct mmc_packed), GFP_KERNEL);
+ 	if (!mqrq_cur->packed) {
+diff --git a/drivers/mmc/card/queue.h b/drivers/mmc/card/queue.h
+index f9f40ebc9969..dde9f22f7528 100644
+--- a/drivers/mmc/card/queue.h
++++ b/drivers/mmc/card/queue.h
+@@ -65,6 +65,7 @@ struct mmc_queue {
+ 	struct mmc_queue_req	mqrq[2];
+ 	struct mmc_queue_req	*mqrq_cur;
+ 	struct mmc_queue_req	*mqrq_prev;
++	int			qdepth;
+ };
+ 
+ extern int mmc_init_queue(struct mmc_queue *, struct mmc_card *, spinlock_t *,
 -- 
 1.9.1
 
