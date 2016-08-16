@@ -1,39 +1,68 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: [PATCH V4 30/30] mmc: sdhci-acpi: Enable Software Command Queuing for some Intel controllers
-Date: Tue, 16 Aug 2016 13:44:40 +0300
-Message-ID: <1471344280-16663-31-git-send-email-adrian.hunter@intel.com>
-References: <1471344280-16663-1-git-send-email-adrian.hunter@intel.com>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga04.intel.com ([192.55.52.120]:44366 "EHLO mga04.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753250AbcHPKvK (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Tue, 16 Aug 2016 06:51:10 -0400
-In-Reply-To: <1471344280-16663-1-git-send-email-adrian.hunter@intel.com>
-Sender: linux-mmc-owner@vger.kernel.org
+From: Ritesh Harjani <riteshh@codeaurora.org>
+Subject: [PATCH v2 0/8] Add clk-rates and DDR support to sdhci-msm
+Date: Tue, 16 Aug 2016 17:11:00 +0530
+Message-ID: <1471347668-22978-1-git-send-email-riteshh@codeaurora.org>
+Return-path: <linux-arm-msm-owner@vger.kernel.org>
+Sender: linux-arm-msm-owner@vger.kernel.org
+To: ulf.hansson@linaro.org, adrian.hunter@intel.com
+Cc: shawn.lin@rock-chips.com, jh80.chung@samsung.com, linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org, georgi.djakov@linaro.org, alex.lemberg@sandisk.com, mateusz.nowak@intel.com, Yuliy.Izrailov@sandisk.com, asutoshd@codeaurora.org, kdorfman@codeaurora.org, david.griego@linaro.org, stummala@codeaurora.org, venkatg@codeaurora.org, Ritesh Harjani <riteshh@codeaurora.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Dorfman Konstantin <kdorfman@codeaurora.org>, David Griego <david.griego@linaro.org>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>
 
-Set MMC_CAP_SWCMDQ for Intel BYT and related eMMC host controllers.
+Hi All, 
 
-Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
----
- drivers/mmc/host/sdhci-acpi.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+This is v2 version of the patch series. Have addressed
+few comments from Jaehoon & Shawn. These were mainly
+related to not use any extra quirks or not to add any
+unnecessary callback into sdhci.
 
-diff --git a/drivers/mmc/host/sdhci-acpi.c b/drivers/mmc/host/sdhci-acpi.c
-index 81d4dc034793..95fc4de05c54 100644
---- a/drivers/mmc/host/sdhci-acpi.c
-+++ b/drivers/mmc/host/sdhci-acpi.c
-@@ -274,7 +274,7 @@ static int sdhci_acpi_sd_probe_slot(struct platform_device *pdev,
- static const struct sdhci_acpi_slot sdhci_acpi_slot_int_emmc = {
- 	.chip    = &sdhci_acpi_chip_int,
- 	.caps    = MMC_CAP_8_BIT_DATA | MMC_CAP_NONREMOVABLE |
--		   MMC_CAP_HW_RESET | MMC_CAP_1_8V_DDR |
-+		   MMC_CAP_HW_RESET | MMC_CAP_1_8V_DDR | MMC_CAP_SWCMDQ |
- 		   MMC_CAP_CMD_DURING_TFR | MMC_CAP_WAIT_WHILE_BUSY,
- 	.caps2   = MMC_CAP2_HC_ERASE_SZ,
- 	.flags   = SDHCI_ACPI_RUNTIME_PM,
+Changes from v1->v2 :-
+1. Removed patch 06 & 08 from v1 patch series[1].
+   Instead have implemented __sdhci_msm_set_clock version of
+   sdhci_set_clock in sdhci_msm driver itself in patch 07 of
+   this patch series.
+2. Enabled extra quirk (SDHCI_QUIRK2_PRESET_VALUE_BROKEN) in
+   patch 05 of this patch series. 
+
+Description of patches :-
+This patchset adds clk-rates & other required changes to
+upstream sdhci-msm driver from codeaurora tree.
+It has been tested on a db410c Dragonboard and msm8996 based
+platform.
+
+Patch 0001 - Adds updated dll sequence for newer controllers
+which has minor_version >= 0x42. This is required for msm8996.
+
+MSM controller HW recommendation is to use the base MCI clock
+and directly control this MCI clock at GCC in order to
+change the clk-rate. 
+Patches 02-06 bring in required change for this to
+sdhci-msm and DT of db410c.
+
+MSM controller would require 2x clock rate from source
+for DDR bus speed modes. Patch 07 adds this support.
+
+Patch 08 - adds DDR support in DT for sdhc1 of msm8916.
+
+[1]:- http://www.spinics.net/lists/linux-mmc/msg38467.html
+
+
+Ritesh Harjani (7):
+  mmc: sdhci-msm: add pltfm_data support to get clk-rates from DT
+  arm64: dts: qcom: msm8916: Add clk-rates to sdhc1 & sdhc2
+  mmc: sdhci-msm: Add get_min_clock() and get_max_clock() callback
+  mmc: sdhci-msm: Enable few quirks
+  mmc: sdhci-msm: Implement set_clock callback for sdhci-msm
+  mmc: sdhci-msm: Add clock changes for DDR mode.
+  arm64: dts: qcom: msm8916: Add ddr support to sdhc1
+
+Venkat Gopalakrishnan (1):
+  mmc: sdhci-msm: Update DLL reset sequence
+
+ .../devicetree/bindings/mmc/sdhci-msm.txt          |   1 +
+ arch/arm64/boot/dts/qcom/msm8916.dtsi              |   5 +
+ drivers/mmc/host/sdhci-msm.c                       | 256 ++++++++++++++++++++-
+ 3 files changed, 260 insertions(+), 2 deletions(-)
+
 -- 
-1.9.1
-
+The Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum, 
+a Linux Foundation Collaborative Project.
