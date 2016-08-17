@@ -1,51 +1,59 @@
-From: Robert Foss <robert.foss@collabora.com>
-Subject: Re: [PACTH v3] mmc: sdhci: Do not allow tuning procedure to be
- interrupted
-Date: Wed, 17 Aug 2016 13:31:16 -0400
-Message-ID: <0c1a3043-9ed1-9d01-0f07-231d6ece874f@collabora.com>
-References: <1471382729-28472-1-git-send-email-robert.foss@collabora.com>
- <eee256ca-3366-b25c-0936-0a80b1510325@intel.com>
+From: Wolfram Sang <wsa@the-dreams.de>
+Subject: Re: [PATCH v2 3/9] mmc: tmio: Add UHS-I mode support
+Date: Wed, 17 Aug 2016 21:08:04 +0200
+Message-ID: <20160817190804.GA11930@tetsubishi>
+References: <1459525479-20842-1-git-send-email-wsa@the-dreams.de>
+ <1459525479-20842-4-git-send-email-wsa@the-dreams.de>
+ <CAMuHMdVyNsm+hpoJfjxLkKt_5zydx9csgPB0zqCdtPMipqmFFQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="vtzGhvizbBRQ85DL"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from bhuna.collabora.co.uk ([46.235.227.227]:55088 "EHLO
-	bhuna.collabora.co.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752145AbcHQRhw (ORCPT
-	<rfc822;linux-mmc@vger.kernel.org>); Wed, 17 Aug 2016 13:37:52 -0400
-In-Reply-To: <eee256ca-3366-b25c-0936-0a80b1510325@intel.com>
+Received: from sauhun.de ([89.238.76.85]:56937 "EHLO pokefinder.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752435AbcHQTIb (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+	Wed, 17 Aug 2016 15:08:31 -0400
+Content-Disposition: inline
+In-Reply-To: <CAMuHMdVyNsm+hpoJfjxLkKt_5zydx9csgPB0zqCdtPMipqmFFQ@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>, ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Andrew Bresticker <abrestic@chromium.org>, Kevin Cernekee <cernekee@chromium.org>, Benson Leung <bleung@chromium.org>, Christopher Freeman <cfreeman@nvidia.com>
+To: Geert Uytterhoeven <geert@linux-m68k.org>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Ben Hutchings <ben.hutchings@codethink.co.uk>, Simon Horman <horms@verge.net.au>, Linux MMC List <linux-mmc@vger.kernel.org>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>
 
 
+--vtzGhvizbBRQ85DL
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 
-On 2016-08-17 06:47 AM, Adrian Hunter wrote:
-> On 17/08/16 00:25, robert.foss@collabora.com wrote:
->> From: Christopher Freeman <cfreeman@nvidia.com>
->>
->> wait_event_interruptible_timeout() will return early if the blocked
->> process receives a signal, causing the driver to abort the tuning
->> procedure and possibly leaving the controller in a bad state.  Since the
->> tuning command is expected to complete quickly (<50ms) and we've set a
->> timeout, use wait_event_timeout() instead.
->>
->> Signed-off-by: Christopher Freeman <cfreeman@nvidia.com>
->> Tested-by: Robert Foss <robert.foss@collabora.com>
->> Signed-off-by: Robert Foss <robert.foss@collabora.com>
->> Reviewed-by: Benson Leung <bleung@chromium.org>
->
-> The mmc block queues are kernel threads which I would expect ignore signals,
-> so I am curious how you hit this?
 
-The issue was discovered on (tegra2?) hardware that is sensitive to 
-being interrupted during tuning and having the controller left in a 
-sensitive state.
+>     [<c02f9d04>] (__mmc_start_request) from [<c02f9fa0>]
+> (mmc_start_request+0x104/0x118)
 
-@Christopher Freeman: Maybe you can provide us with some additional details?
+This function calls card_busy only for SDIO cards. I assume you don't
+have one inserted? Maybe the "broken-cd" property doesn't work correctly
+and causes side-effects? This would explain why it only affects SDHI1
+and not SDHI0.
 
->
-> In any case:
->
-> Acked-by: Adrian Hunter <adrian.hunter@intel.com>
->
+
+--vtzGhvizbBRQ85DL
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1
+
+iQIcBAEBAgAGBQJXtLYUAAoJEBQN5MwUoCm2mhQP/iFegrzc0jZC2fxb8HFtTjIR
+PKVeubFWEXxuczir+OxFuX/VKfb8Fr/Jppnsn9ZIhLvpSkUHskDkE+sJpaDfwaDI
+NGBs97gSuZcHC+KCuY1wbaXdmnXYLpWfaRjBPSNBMCG4Knf4QAGh7R0pVeKXzZ4G
+yu3oExaJ5s++rlms1mszBW4nFz6VqXFvqTg5HGvNUpBgmvlIWkVJTpkxR7bqZbnS
+vRG+dIEgDEDWlcfHKLacaIFieB1SZ2CQnurgQh3NiCxgDAdNlT4DVZyNzeRYval8
+B3q57cTZhEFt9T9mEsSJ7eDw7lwxKOlTn9kdEUlSfi7/044ucl05B5lCoohHrPtk
+wD7SqFeSQ1jJPJKWH6srsDlrGEdLZqE/xaqas+LuoyXMmu8g5IgNYN8iFoOgXHNc
+KuaAnzJIt77yYRwlo+IfrqFVLwWQUx2oJiymC1YOX5DP/+xYEEP1QGNIdEi8cEsT
+qfD0vdy5lxCSAWOBwD7DoQ/yBVEzje43uQB0VaS7SYfVxtPl6yL7UwZaCV/T5tyQ
+qEbhPuMntJWlWFbbrDsTfzYhgy/eZUb/FlkJ0ACkv8qIyd5tbC5TdsGo4LPuPqB8
+HwZnKldM3+2zpspkmOpMVKw8zkQNSU6D5KfzmA+0+8YbiP1gBTWsSNzsBh3I+zHv
+yrPQgv9uzt/xF1ltaxpL
+=X+Ly
+-----END PGP SIGNATURE-----
+
+--vtzGhvizbBRQ85DL--
