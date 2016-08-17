@@ -1,41 +1,43 @@
-From: robert.foss@collabora.com
-Subject: [PACTH v3] mmc: sdhci: Do not allow tuning procedure to be interrupted
-Date: Tue, 16 Aug 2016 17:25:29 -0400
-Message-ID: <1471382729-28472-1-git-send-email-robert.foss@collabora.com>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: adrian.hunter@intel.com, ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Andrew Bresticker <abrestic@chromium.org>, Kevin Cernekee <cernekee@chromium.org>, Benson Leung <bleung@chromium.org>
-Cc: Christopher Freeman <cfreeman@nvidia.com>, Robert Foss <robert.foss@collabora.com>
+From: Christoph Hellwig <hch@lst.de>
+Subject: Re: [PATCH] block: Fix secure erase
+Date: Wed, 17 Aug 2016 02:52:44 +0200
+Message-ID: <20160817005244.GA22046@lst.de>
+References: <20160811140533.GA16543@lst.de> <1471270071-28921-1-git-send-email-adrian.hunter@intel.com> <CAJVOszDxKmaEEsg49yMT+Vr8oNbKLmgAGJ_P9KNa=zQcqcx+CQ@mail.gmail.com> <20160815181457.GA9781@lst.de> <d350c5b0-3ac8-342b-608b-933652c26b65@intel.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-block-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <d350c5b0-3ac8-342b-608b-933652c26b65@intel.com>
+Sender: linux-block-owner@vger.kernel.org
+To: Adrian Hunter <adrian.hunter@intel.com>
+Cc: Christoph Hellwig <hch@lst.de>, Shaun Tancheff <shaun.tancheff@seagate.com>, Jens Axboe <axboe@fb.com>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, linux-block@vger.kernel.org, LKML <linux-kernel@vger.kernel.org>, Josh Bingaman <josh.bingaman@seagate.com>, Vinayak Holikatti <vinholikatti@gmail.com>, Joao Pinto <Joao.Pinto@synopsys.com>, linux-scsi@vger.kernel.org, "Martin K. Petersen" <martin.petersen@oracle.com>, Pawel Wodkowski <pawelx.wodkowski@intel.com>
 List-Id: linux-mmc@vger.kernel.org
 
-From: Christopher Freeman <cfreeman@nvidia.com>
+On Tue, Aug 16, 2016 at 10:20:25AM +0300, Adrian Hunter wrote:
+> On 15/08/16 21:14, Christoph Hellwig wrote:
+> > On Mon, Aug 15, 2016 at 11:43:12AM -0500, Shaun Tancheff wrote:
+> >> Hmm ... Since REQ_SECURE implied REQ_DISCARD doesn't this
+> >> mean that we should include REQ_OP_SECURE_ERASE checking
+> >> wherever REQ_OP_DISCARD is being checked now in drivers/scsi/sd.c ?
+> >>
+> >> (It's only in 3 spots so it's a quickie patch)
+> > 
+> > SCSI doesn't support secure erase operations.  Only MMC really
+> > supports it, plus the usual cargo culting in Xen blkfront that's
+> > probably never been tested..
+> > 
+> 
+> I left SCSI out because support does not exist at the moment.
+> However there is UFS which is seen as the replacement for eMMC.
+> And there is a patch to add support for BLKSECDISCARD:
+> 
+> 	http://marc.info/?l=linux-scsi&m=146953519016056
+> 
+> So SCSI will need updating if that is to go in.
 
-wait_event_interruptible_timeout() will return early if the blocked
-process receives a signal, causing the driver to abort the tuning
-procedure and possibly leaving the controller in a bad state.  Since the
-tuning command is expected to complete quickly (<50ms) and we've set a
-timeout, use wait_event_timeout() instead.
+That patch is complete crap and if anyone thinks they'd get shit like
+that in they are on the same crack that apparently the authors of the
+UFS spec are on.
 
-Signed-off-by: Christopher Freeman <cfreeman@nvidia.com>
-Tested-by: Robert Foss <robert.foss@collabora.com>
-Signed-off-by: Robert Foss <robert.foss@collabora.com>
-Reviewed-by: Benson Leung <bleung@chromium.org>
----
- drivers/mmc/host/sdhci.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
-
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 0e3d7c0..9e80203 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -1960,7 +1960,7 @@ static int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode)
- 
- 		spin_unlock_irqrestore(&host->lock, flags);
- 		/* Wait for Buffer Read Ready interrupt */
--		wait_event_interruptible_timeout(host->buf_ready_int,
-+		wait_event_timeout(host->buf_ready_int,
- 					(host->tuning_done == 1),
- 					msecs_to_jiffies(50));
- 		spin_lock_irqsave(&host->lock, flags);
--- 
-2.7.4
+If you want secure discard supported in UFS get a command for into
+SBC instead of bypassing the command set.
