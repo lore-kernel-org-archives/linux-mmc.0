@@ -1,127 +1,192 @@
-From: Dong Aisheng <dongas86@gmail.com>
-Subject: Re: [V2,
- 10/15] mmc: sdhci-esdhc-imx: enable hw auto retuning for MAN_TUNING
-Date: Wed, 17 Aug 2016 22:31:17 +0800
-Message-ID: <CAA+hA=S=tpwykxqmV9MWJftrdM=RxR5QeLm+S=6Vx+zV3A2-vw@mail.gmail.com>
-References: <1468309584-3591-11-git-send-email-aisheng.dong@nxp.com>
- <20160815145941.GA23663@t450s.lan> <20160816101818.GD9211@shlinux2>
- <20160816124444.GA31259@t450s.lan>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <20160816124444.GA31259@t450s.lan>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Gary Bisson <gary.bisson@boundarydevices.com>
-Cc: Dong Aisheng <aisheng.dong@nxp.com>, Ulf Hansson <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Chris Ball <chris@printf.net>, Haibo Chen <haibo.chen@nxp.com>, Adrian Hunter <adrian.hunter@intel.com>, Shawn Guo <shawnguo@kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
+From: Douglas Anderson <dianders@chromium.org>
+Subject: [PATCH] mmc: sdhci-of-arasan: Don't power PHY w/ slow/no clock
+Date: Wed, 17 Aug 2016 09:09:08 -0700
+Message-ID: <1471450148-28307-1-git-send-email-dianders@chromium.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: adrian.hunter@intel.com, ulf.hansson@linaro.org, Heiko Stuebner <heiko@sntech.de>, shawn.lin@rock-chips.com
+Cc: xzy.xu@rock-chips.com, Douglas Anderson <dianders@chromium.org>, michal.simek@xilinx.com, soren.brinkmann@xilinx.com, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-Hi Gary,
+>From empirical evidence (tested on Rockchip rk3399), it appears that the
+PHY intended to be used with the Arasan SDHCI 5.1 controller has trouble
+turning on when the card clock is slow or off.  Strangely these problems
+appear to show up consistently on some boards while other boares work
+fine, but on the boards where it shows up the problem reproduces 100% of
+the time and is quite consistent in its behavior.
 
-On Tue, Aug 16, 2016 at 8:44 PM, Gary Bisson
-<gary.bisson@boundarydevices.com> wrote:
-> On Tue, Aug 16, 2016 at 06:18:18PM +0800, Dong Aisheng wrote:
->> On Mon, Aug 15, 2016 at 04:59:41PM +0200, Gary Bisson wrote:
->> > Dong Aisheng, All,
->> >
->> > On Tue, Jul 12, 2016 at 03:46:19PM +0800, Dong Aisheng wrote:
->> > > Indicating hw auto retuning support for mx6qdl in the fake caps_1
->> > > register and enable auto retuning in post_tuning process after
->> > > tuning completes.
->> >
->> > Have you tried this change with a SDIO3.0 device? I'm asking because a
->>
->> Tested with SD3.0 device.
->> Not really for SDIO3.0 device since there's no SDIO3.0 device on my
->> available MX6Q/DL boards.
->
-> Someone answered on the Community that it has been tested on i.MX7 SABRE
-> board but not on i.MX6 right?
->
+These problems can be fixed by always making sure that we power on the
+PHY (and turn on its DLL) when the card clock is faster than about 50
+MHz.  Once on, we need to make sure that we never power down the PHY /
+turn off its DLL until the clock is faster again.
 
-Yes, we tested this feature with MX7 SDB board.
-However, MX7 is slightly a bit different from MX6 that it's using STD_TUNING
-rather than MAN_TUNING.
+We'll add logic for handling this into the sdhci-of-arasan driver.  Note
+that right now the only user of a PHY in the sdhci-of-arasan driver is
+arasan,sdhci-5.1.  It's presumed that all arasan,sdhci-5.1 PHY
+implementations need this workaround, so the logic is only contingent on
+having a PHY to control.  If future Arasan controllers don't have this
+problem we can add code to decide if we want this flow or not.
 
-I just tried MAN_TUNING on MX7 which is the same as MX6, but i still
-couldn't see your issue.
+Also note that we check for slow clocks by checking for <= 400 kHz
+rather than checking for 50 MHz.  This keeps things the most consistent
+and also means we can power the PHY on at max speed (where the DLL will
+lock fastest).  Presumably anyone who intends to run with a card clock
+of < 50 MHz and > 400 Khz will be running on a device where this problem
+is fixed anyway.
 
-May try more and also on MX6 boards.
+I believe this brings some resolution to the problems reported before.
+See the commit 6fc09244d74d ("mmc: sdhci-of-arasan: Revert: Always power
+the PHY off/on when clock changes").
 
->> > similar change in latest NXP 4.1.15 kernel broke SDIO3.0 support.
->> > With this tuning, the kernel would report:
->> > mmc2: Got data interrupt 0x00000002 even though no data operation was in
->> > progress.
->> >
->>
->> Can you provide the full enumeration log?
->
-> Here is the mmc related part of dmesg:
-> # dmesg | grep mmc2
-> mmc2: SDHCI controller on 2194000.usdhc [2194000.usdhc] using ADMA
-> mmc2: queuing unknown CIS tuple 0x01 (3 bytes)
-> mmc2: queuing unknown CIS tuple 0x1a (5 bytes)
-> mmc2: queuing unknown CIS tuple 0x1b (8 bytes)
-> mmc2: queuing unknown CIS tuple 0x14 (0 bytes)
-> mmc2: queuing unknown CIS tuple 0x80 (1 bytes)
-> mmc2: queuing unknown CIS tuple 0x81 (1 bytes)
-> mmc2: queuing unknown CIS tuple 0x82 (1 bytes)
-> mmc2: new ultra high speed SDR104 SDIO card at address 0001
-> mmc2: queuing unknown CIS tuple 0x01 (3 bytes)
-> mmc2: queuing unknown CIS tuple 0x1a (5 bytes)
-> mmc2: queuing unknown CIS tuple 0x1b (8 bytes)
-> mmc2: queuing unknown CIS tuple 0x14 (0 bytes)
-> ar6k_wlan mmc2:0001:1: Direct firmware load for qsetup30.bin failed with
-> error -2
-> mmc2: Got data interrupt 0x00000002 even though no data operation was in
-> progress.
-> mmc2: Got data interrupt 0x00000002 even though no data operation was in
-> progress.
->
-> Without the MAN_TUN patch, everything is the same (as expected) but
-> without the last two errors. Note that when WiFi connection is up, this
-> warning keeps poping up every few seconds.
->
+Signed-off-by: Douglas Anderson <dianders@chromium.org>
+---
+Tested on chromeos kernel-4.4 with backports.
 
-Could you please enable CONFIG_MMC_DEBUG and send out the full
-card enumeration log?
+ drivers/mmc/host/sdhci-of-arasan.c | 61 ++++++++++++++++++++++++++++----------
+ 1 file changed, 46 insertions(+), 15 deletions(-)
 
->> > Doing a 'git bisect' and then reverting this patch fixed the issue.
->> > Although I haven't tested that change on mainline kernel, I wanted you
->> > to know about this observation before it gets merged.
->> >
->> > As a FYI, the issue has been reported to NXP community:
->> > https://community.nxp.com/thread/431316
->> >
->>
->> Thanks for nofity.
->> I will check it on my side.
->
-> Not sure you've seen my last post from today, but you can actually try
-> the device I'm using (QCA9377) on SABRE using the evaluation kit:
-> http://www.silexamerica.com/products/connectivity-solutions/embedded-wireless/sdio-radios/sx-sdcac/
->
-
-I do not have that WiFi card.
-But i have a Broadcom SDIO3.0 WiFi card, i will find way to run it on MX6 board.
-
-> Maybe there's a hw mod to do on SABRE in order to get SDIO3.0/1.8V vcc.
->
-
-Did your card work on 1.8v IO voltage?
-AFAIK usually the SDIO3.0 external WiFi card may not support 1.8v VIO and
-needs special HW rework.
-
-> Regards,
-> Gary
-
-Regards
-Dong Aisheng
+diff --git a/drivers/mmc/host/sdhci-of-arasan.c b/drivers/mmc/host/sdhci-of-arasan.c
+index e0f193f7e3e5..ec2fd00a913d 100644
+--- a/drivers/mmc/host/sdhci-of-arasan.c
++++ b/drivers/mmc/host/sdhci-of-arasan.c
+@@ -77,6 +77,7 @@ struct sdhci_arasan_soc_ctl_map {
+  * @host:		Pointer to the main SDHCI host structure.
+  * @clk_ahb:		Pointer to the AHB clock
+  * @phy:		Pointer to the generic phy
++ * @is_phy_on:		True if the PHY is on; false if not.
+  * @sdcardclk_hw:	Struct for the clock we might provide to a PHY.
+  * @sdcardclk:		Pointer to normal 'struct clock' for sdcardclk_hw.
+  * @soc_ctl_base:	Pointer to regmap for syscon for soc_ctl registers.
+@@ -86,6 +87,7 @@ struct sdhci_arasan_data {
+ 	struct sdhci_host *host;
+ 	struct clk	*clk_ahb;
+ 	struct phy	*phy;
++	bool		is_phy_on;
+ 
+ 	struct clk_hw	sdcardclk_hw;
+ 	struct clk      *sdcardclk;
+@@ -170,13 +172,47 @@ static void sdhci_arasan_set_clock(struct sdhci_host *host, unsigned int clock)
+ 	struct sdhci_arasan_data *sdhci_arasan = sdhci_pltfm_priv(pltfm_host);
+ 	bool ctrl_phy = false;
+ 
+-	if (clock > MMC_HIGH_52_MAX_DTR && (!IS_ERR(sdhci_arasan->phy)))
+-		ctrl_phy = true;
++	if (!IS_ERR(sdhci_arasan->phy)) {
++		if (!sdhci_arasan->is_phy_on && clock <= 400000) {
++			/*
++			 * If PHY off, set clock to max speed and power PHY on.
++			 *
++			 * Although PHY docs apparently suggest power cycling
++			 * when changing the clock the PHY doesn't like to be
++			 * powered on while at low speeds like those used in ID
++			 * mode.  Even worse is powering the PHY on while the
++			 * clock is off.
++			 *
++			 * To workaround the PHY limitatoins, the best we can
++			 * do is to power it on at a faster speed and then slam
++			 * through low speeds without power cycling.
++			 */
++			sdhci_set_clock(host, host->max_clk);
++			spin_unlock_irq(&host->lock);
++			phy_power_on(sdhci_arasan->phy);
++			spin_lock_irq(&host->lock);
++			sdhci_arasan->is_phy_on = true;
++
++			/*
++			 * We'll now fall through to the below case with
++			 * ctrl_phy = false (so we won't turn off/on).  The
++			 * sdhci_set_clock() will set the real clock.
++			 */
++		} else if (clock > 400000) {
++			/*
++			 * At higher clock speeds the PHY is fine being power
++			 * cycled and docs say you _should_ power cycle when
++			 * changing clock speeds.
++			 */
++			ctrl_phy = true;
++		}
++	}
+ 
+-	if (ctrl_phy) {
++	if (ctrl_phy && sdhci_arasan->is_phy_on) {
+ 		spin_unlock_irq(&host->lock);
+ 		phy_power_off(sdhci_arasan->phy);
+ 		spin_lock_irq(&host->lock);
++		sdhci_arasan->is_phy_on = false;
+ 	}
+ 
+ 	sdhci_set_clock(host, clock);
+@@ -185,6 +221,7 @@ static void sdhci_arasan_set_clock(struct sdhci_host *host, unsigned int clock)
+ 		spin_unlock_irq(&host->lock);
+ 		phy_power_on(sdhci_arasan->phy);
+ 		spin_lock_irq(&host->lock);
++		sdhci_arasan->is_phy_on = true;
+ 	}
+ }
+ 
+@@ -239,13 +276,14 @@ static int sdhci_arasan_suspend(struct device *dev)
+ 	if (ret)
+ 		return ret;
+ 
+-	if (!IS_ERR(sdhci_arasan->phy)) {
++	if (!IS_ERR(sdhci_arasan->phy) && sdhci_arasan->is_phy_on) {
+ 		ret = phy_power_off(sdhci_arasan->phy);
+ 		if (ret) {
+ 			dev_err(dev, "Cannot power off phy.\n");
+ 			sdhci_resume_host(host);
+ 			return ret;
+ 		}
++		sdhci_arasan->is_phy_on = false;
+ 	}
+ 
+ 	clk_disable(pltfm_host->clk);
+@@ -281,12 +319,13 @@ static int sdhci_arasan_resume(struct device *dev)
+ 		return ret;
+ 	}
+ 
+-	if (!IS_ERR(sdhci_arasan->phy)) {
++	if (!IS_ERR(sdhci_arasan->phy) && host->mmc->actual_clock) {
+ 		ret = phy_power_on(sdhci_arasan->phy);
+ 		if (ret) {
+ 			dev_err(dev, "Cannot power on phy.\n");
+ 			return ret;
+ 		}
++		sdhci_arasan->is_phy_on = true;
+ 	}
+ 
+ 	return sdhci_resume_host(host);
+@@ -547,12 +586,6 @@ static int sdhci_arasan_probe(struct platform_device *pdev)
+ 			goto unreg_clk;
+ 		}
+ 
+-		ret = phy_power_on(sdhci_arasan->phy);
+-		if (ret < 0) {
+-			dev_err(&pdev->dev, "phy_power_on err.\n");
+-			goto err_phy_power;
+-		}
+-
+ 		host->mmc_host_ops.hs400_enhanced_strobe =
+ 					sdhci_arasan_hs400_enhanced_strobe;
+ 	}
+@@ -565,9 +598,6 @@ static int sdhci_arasan_probe(struct platform_device *pdev)
+ 
+ err_add_host:
+ 	if (!IS_ERR(sdhci_arasan->phy))
+-		phy_power_off(sdhci_arasan->phy);
+-err_phy_power:
+-	if (!IS_ERR(sdhci_arasan->phy))
+ 		phy_exit(sdhci_arasan->phy);
+ unreg_clk:
+ 	sdhci_arasan_unregister_sdclk(&pdev->dev);
+@@ -589,7 +619,8 @@ static int sdhci_arasan_remove(struct platform_device *pdev)
+ 	struct clk *clk_ahb = sdhci_arasan->clk_ahb;
+ 
+ 	if (!IS_ERR(sdhci_arasan->phy)) {
+-		phy_power_off(sdhci_arasan->phy);
++		if (sdhci_arasan->is_phy_on)
++			phy_power_off(sdhci_arasan->phy);
+ 		phy_exit(sdhci_arasan->phy);
+ 	}
+ 
+-- 
+2.8.0.rc3.226.g39d4020
