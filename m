@@ -1,148 +1,106 @@
-From: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
-Subject: [PATCH v1 1/1] mmc: sdhci-pci: Convert to use managed functions (part2)
-Date: Thu, 18 Aug 2016 14:59:13 +0300
-Message-ID: <1471521553-125728-1-git-send-email-andriy.shevchenko@linux.intel.com>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga09.intel.com ([134.134.136.24]:11120 "EHLO mga09.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753698AbcHRL7R (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-	Thu, 18 Aug 2016 07:59:17 -0400
-Sender: linux-mmc-owner@vger.kernel.org
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH RFC 1/3] DT: bindings: mmc: Add property for 3.3V only
+ support
+Date: Thu, 18 Aug 2016 15:25:35 +0300
+Message-ID: <8f87c885-3c55-cac8-a9f5-e121ae031f90@intel.com>
+References: <1470488140-10104-1-git-send-email-stefan.wahren@i2se.com>
+ <1470488140-10104-2-git-send-email-stefan.wahren@i2se.com>
+ <20160810184451.GA13473@rob-hp-laptop>
+ <853617027.179290.63a6f478-ad48-40c8-82ca-760dd1afc040.open-xchange@email.1und1.de>
+ <CAL_JsqJ09hXYrp_pgAw9FXrBv+=grkm_zip6qB9XefujPECTxQ@mail.gmail.com>
+ <468a6704-a9f0-1715-ff64-9e331a6a80b1@rock-chips.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <468a6704-a9f0-1715-ff64-9e331a6a80b1@rock-chips.com>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Shawn Lin <shawn.lin@rock-chips.com>, Rob Herring <robh@kernel.org>, Stefan Wahren <stefan.wahren@i2se.com>
+Cc: Dong Aisheng <aisheng.dong@nxp.com>, Mark Rutland <mark.rutland@arm.com>, Ulf Hansson <ulf.hansson@linaro.org>, Marek Vasut <marex@denx.de>, Otavio Salvador <otavio@ossystems.com.br>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, Holger Schurig <holgerschurig@gmail.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Sascha Hauer <kernel@pengutronix.de>, Fabio Estevam <fabio.estevam@nxp.com>, Shawn Guo <shawnguo@kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org, Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
 
-The commit 52ac7acf412b ("mmc: sdhci-pci: Convert to use managed functions
-pcim_* and devm_*") converted ->probe() / ->remove() functions to use device
-managed resource API. Here is a follow up to cover sdhci_pci_probe_slot() and
-sdhci_pci_remove_slot().
+On 11/08/16 03:48, Shawn Lin wrote:
+> + Adrian
+> 
+> Let's queue Adrian here who now maintains SDHCI stuff.
 
-Signed-off-by: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
----
- drivers/mmc/host/sdhci-pci-core.c | 34 ++++++----------------------------
- drivers/mmc/host/sdhci-pci.h      |  1 -
- 2 files changed, 6 insertions(+), 29 deletions(-)
+SDHCI drivers may not implement no-1-8-v in a consistent manner, but as far
+as I can see, the meaning is still clear: 1.8V will not be used for either
+supply or signaling.
 
-diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-pci-core.c
-index 897cfd2..93bb0ff 100644
---- a/drivers/mmc/host/sdhci-pci-core.c
-+++ b/drivers/mmc/host/sdhci-pci-core.c
-@@ -156,7 +156,7 @@ static void sdhci_pci_add_own_cd(struct sdhci_pci_slot *slot)
- 	if (!gpio_is_valid(gpio))
- 		return;
- 
--	err = gpio_request(gpio, "sd_cd");
-+	err = devm_gpio_request(&slot->chip->pdev->dev, gpio, "sd_cd");
- 	if (err < 0)
- 		goto out;
- 
-@@ -179,7 +179,7 @@ static void sdhci_pci_add_own_cd(struct sdhci_pci_slot *slot)
- 	return;
- 
- out_free:
--	gpio_free(gpio);
-+	devm_gpio_free(&slot->chip->pdev->dev, gpio);
- out:
- 	dev_warn(&slot->chip->pdev->dev, "failed to setup card detect wake up\n");
- }
-@@ -188,8 +188,6 @@ static void sdhci_pci_remove_own_cd(struct sdhci_pci_slot *slot)
- {
- 	if (slot->cd_irq >= 0)
- 		free_irq(slot->cd_irq, slot);
--	if (gpio_is_valid(slot->cd_gpio))
--		gpio_free(slot->cd_gpio);
- }
- 
- #else
-@@ -1615,7 +1613,6 @@ static struct sdhci_pci_slot *sdhci_pci_probe_slot(
- 
- 	slot->chip = chip;
- 	slot->host = host;
--	slot->pci_bar = bar;
- 	slot->rst_n_gpio = -EINVAL;
- 	slot->cd_gpio = -EINVAL;
- 	slot->cd_idx = -1;
-@@ -1643,27 +1640,22 @@ static struct sdhci_pci_slot *sdhci_pci_probe_slot(
- 
- 	host->irq = pdev->irq;
- 
--	ret = pci_request_region(pdev, bar, mmc_hostname(host->mmc));
-+	ret = pcim_iomap_regions(pdev, BIT(bar), mmc_hostname(host->mmc));
- 	if (ret) {
- 		dev_err(&pdev->dev, "cannot request region\n");
- 		goto cleanup;
- 	}
- 
--	host->ioaddr = pci_ioremap_bar(pdev, bar);
--	if (!host->ioaddr) {
--		dev_err(&pdev->dev, "failed to remap registers\n");
--		ret = -ENOMEM;
--		goto release;
--	}
-+	host->ioaddr = pcim_iomap_table(pdev)[bar];
- 
- 	if (chip->fixes && chip->fixes->probe_slot) {
- 		ret = chip->fixes->probe_slot(slot);
- 		if (ret)
--			goto unmap;
-+			goto cleanup;
- 	}
- 
- 	if (gpio_is_valid(slot->rst_n_gpio)) {
--		if (!gpio_request(slot->rst_n_gpio, "eMMC_reset")) {
-+		if (!devm_gpio_request(&pdev->dev, slot->rst_n_gpio, "eMMC_reset")) {
- 			gpio_direction_output(slot->rst_n_gpio, 1);
- 			slot->host->mmc->caps |= MMC_CAP_HW_RESET;
- 			slot->hw_reset = sdhci_pci_gpio_hw_reset;
-@@ -1702,18 +1694,9 @@ static struct sdhci_pci_slot *sdhci_pci_probe_slot(
- 	return slot;
- 
- remove:
--	if (gpio_is_valid(slot->rst_n_gpio))
--		gpio_free(slot->rst_n_gpio);
--
- 	if (chip->fixes && chip->fixes->remove_slot)
- 		chip->fixes->remove_slot(slot, 0);
- 
--unmap:
--	iounmap(host->ioaddr);
--
--release:
--	pci_release_region(pdev, bar);
--
- cleanup:
- 	if (slot->data && slot->data->cleanup)
- 		slot->data->cleanup(slot->data);
-@@ -1738,17 +1721,12 @@ static void sdhci_pci_remove_slot(struct sdhci_pci_slot *slot)
- 
- 	sdhci_remove_host(slot->host, dead);
- 
--	if (gpio_is_valid(slot->rst_n_gpio))
--		gpio_free(slot->rst_n_gpio);
--
- 	if (slot->chip->fixes && slot->chip->fixes->remove_slot)
- 		slot->chip->fixes->remove_slot(slot, dead);
- 
- 	if (slot->data && slot->data->cleanup)
- 		slot->data->cleanup(slot->data);
- 
--	pci_release_region(slot->chip->pdev, slot->pci_bar);
--
- 	sdhci_free_host(slot->host);
- }
- 
-diff --git a/drivers/mmc/host/sdhci-pci.h b/drivers/mmc/host/sdhci-pci.h
-index 7e07887..9c7c08b 100644
---- a/drivers/mmc/host/sdhci-pci.h
-+++ b/drivers/mmc/host/sdhci-pci.h
-@@ -72,7 +72,6 @@ struct sdhci_pci_slot {
- 	struct sdhci_host	*host;
- 	struct sdhci_pci_data	*data;
- 
--	int			pci_bar;
- 	int			rst_n_gpio;
- 	int			cd_gpio;
- 	int			cd_irq;
--- 
-2.8.1
+SDHCI is complicated because the SDHCI specification does not cover eMMC.
+>From the perspective of SDHCI, the only 1.8V modes are the UHS-I modes, so
+support for 1.8V signaling is the same as support for one of those modes
+(the spec even says as much).  But what happens is that the host controller
+can support those modes but the board can't supply 1.8V so the drivers
+remove capability for the modes.  Support for 1.8V supply has a capability
+bit which drivers can override if necessary but removable SD cards don't
+support 1.8V supply anyway, so the issue doesn't arise if the host
+controller is only used for uSD cards.
 
+> 
+> On 2016/8/11 5:39, Rob Herring wrote:
+>> On Wed, Aug 10, 2016 at 3:27 PM, Stefan Wahren <stefan.wahren@i2se.com>
+>> wrote:
+>>> Hi,
+>>>
+>>>> Rob Herring <robh@kernel.org> hat am 10. August 2016 um 20:44 geschrieben:
+>>>>
+>>>>
+>>>> On Sat, Aug 06, 2016 at 12:55:38PM +0000, Stefan Wahren wrote:
+>>>>> Currently there is no proper way to define that a MMC host supports
+>>>>> only 3.3V. The property no-1-8-v is broken and has different meanings
+>>>>> for different sdhci variants. So add a new property for 3.3V only
+>>>>> support and mark no-1-8-v as deprecated.
+>>>>
+>>>> Why is it broken?
+>>>
+>>> i want to quote Ulf Hansson here [1]:
+>>>
+>>>   The problem with the "no-1-8-v" binding is that it's describing what
+>>>   the hardware *can't* do. It thus becomes easy to abuse it.
+>>
+>> Sounds like a quirk which is perfectly normal for a property. I'd
+>> agree it should be what the h/w *can* do if h/w didn't have capability
+>> bit that does that.
+>>
+>>>   I suggest we stop using it, we should mark it deprecated.
+>>>
+>>> [1] - http://www.spinics.net/lists/linux-mmc/msg34604.html
+>>>
+>>>> How would I override a controller saying 1.8V is
+>>>> supported and it is not?
+>>>
+>>> Sorry, i'm not sure that i understand your question. In case a board or a
+>>> MMC
+>>> controller doesn't support 1.8V, it usually supports only 3.3V which is the
+>>> intension of this patch.
+>>
+>> Some controllers have capability bits saying what voltages they
+>> support, right? And those bits can be wrong (unless firmware sets them
+>> I'd expect that is the common case) which as I read it is what
+>> "no-1-8-v" was for. So with the "mmc-ddr-*v" properties, what does not
+>> present mean and how do they relate to controller capability bits? I
+>> assume they would override the controller bits, but you can only
+>> override the capability bit not set case. I would think the property
+>> not present means use the capability bit, not that that voltage is not
+>> supported. I think you probably need tri-state properties here where
+>> value 1 means supported, 0 means not supported, and not present means
+>> use capability bit (or other method).
+>>
+>> Rob
+>> -- 
+>> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>
+> 
+> 
