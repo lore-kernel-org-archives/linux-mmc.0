@@ -1,87 +1,216 @@
 From: Shawn Lin <shawn.lin@rock-chips.com>
-Subject: Re: [PATCH] mmc: core: need retune if error value is -EIO
-Date: Thu, 18 Aug 2016 16:10:37 +0800
-Message-ID: <ee12053c-d849-7845-bbc1-78869e4daa28@rock-chips.com>
-References: <1470299459-8478-1-git-send-email-shawn.lin@rock-chips.com>
- <a9e28ac9-9db6-18d0-d4a6-9a283ec4dc80@intel.com>
+Subject: Re: [PATCH] mmc: sdhci-of-arasan: Don't power PHY w/ slow/no clock
+Date: Thu, 18 Aug 2016 16:31:01 +0800
+Message-ID: <e6ef69b9-b571-f30c-4e0d-752cb3a1883e@rock-chips.com>
+References: <1471450148-28307-1-git-send-email-dianders@chromium.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <a9e28ac9-9db6-18d0-d4a6-9a283ec4dc80@intel.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: shawn.lin@rock-chips.com, Jaehoon Chung <jh80.chung@samsung.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-rockchip@lists.infradead.org
+Content-Type: text/plain; charset=gbk; format=flowed
+Content-Transfer-Encoding: 8bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from lucky1.263xmail.com ([211.157.147.134]:32975 "EHLO
+	lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753810AbcHRIbb (ORCPT
+	<rfc822;linux-mmc@vger.kernel.org>); Thu, 18 Aug 2016 04:31:31 -0400
+In-Reply-To: <1471450148-28307-1-git-send-email-dianders@chromium.org>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Douglas Anderson <dianders@chromium.org>, adrian.hunter@intel.com, ulf.hansson@linaro.org, Heiko Stuebner <heiko@sntech.de>
+Cc: shawn.lin@rock-chips.com, xzy.xu@rock-chips.com, michal.simek@xilinx.com, soren.brinkmann@xilinx.com, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 
-On 2016/8/18 15:19, Adrian Hunter wrote:
-> On 04/08/16 11:30, Shawn Lin wrote:
->> We need to do retune if receiving -EIO, otherwise we
->> could see debug dump like:
->>
->> [ 89.057226] bcmsdh_sdmmc: Failed to Read byte F1:@0x1001f=ff, Err: -5
->> [ 89.058811] bcmsdh_sdmmc: Failed to Read byte F1:@0x1001f=ff, Err: -5
->> [ 89.059415] bcmsdh_sdmmc: Failed to Read byte F1:@0x1000e=ff, Err: -84
->> [ 89.254248] dwmmc_rockchip fe310000.dwmmc: Successfully tuned phase to 199
->> [ 89.273912] dhd_set_suspend: Remove extra suspend setting
->> [ 89.274478] dhd_enable_packet_filter: enter, value = 0
->> 64 bytes from 112.90.83.112: icmp_seq=24 ttl=53 time=1321 ms
->> 64 bytes from 112.90.83.112: icmp_seq=25 ttl=53 time=319 ms
->> 64 bytes from 112.90.83.112: icmp_seq=26 ttl=53 time=69.8 ms
->> 64 bytes from 112.90.83.112: icmp_seq=27 ttl=53 time=37.5 ms
->> ...
->>
->> In this case we see dw_mmc finally enter retune process, but
->> if this patch is applied, we could save more time to make it
->> work. Also many host drivers will generate -EIO, so this patch
->> can also prevent them from failing to enter retune process.
+ÔÚ 2016/8/18 0:09, Douglas Anderson Ð´µÀ:
+>>From empirical evidence (tested on Rockchip rk3399), it appears that the
+> PHY intended to be used with the Arasan SDHCI 5.1 controller has trouble
+> turning on when the card clock is slow or off.  Strangely these problems
+> appear to show up consistently on some boards while other boares work
+> fine, but on the boards where it shows up the problem reproduces 100% of
+> the time and is quite consistent in its behavior.
 >
-> The current logic is re-tune on CRC errors.  -EIO isn't informative
-> and drivers can use it for cases that clearly are not related to tuning.
+> These problems can be fixed by always making sure that we power on the
+> PHY (and turn on its DLL) when the card clock is faster than about 50
+> MHz.  Once on, we need to make sure that we never power down the PHY /
+> turn off its DLL until the clock is faster again.
 >
+> We'll add logic for handling this into the sdhci-of-arasan driver.  Note
+> that right now the only user of a PHY in the sdhci-of-arasan driver is
+> arasan,sdhci-5.1.  It's presumed that all arasan,sdhci-5.1 PHY
+> implementations need this workaround, so the logic is only contingent on
+> having a PHY to control.  If future Arasan controllers don't have this
+> problem we can add code to decide if we want this flow or not.
+>
+> Also note that we check for slow clocks by checking for <= 400 kHz
+> rather than checking for 50 MHz.  This keeps things the most consistent
+> and also means we can power the PHY on at max speed (where the DLL will
+> lock fastest).  Presumably anyone who intends to run with a card clock
+> of < 50 MHz and > 400 Khz will be running on a device where this problem
+> is fixed anyway.
+>
+> I believe this brings some resolution to the problems reported before.
+> See the commit 6fc09244d74d ("mmc: sdhci-of-arasan: Revert: Always power
+> the PHY off/on when clock changes").
 
-It actually relates to tuning. If failing to sample data or cmd-resp,
-the controller generate timeout interrupt in principle rather than
-explicit CRC ones. So it makes sense for them to return -EIO instead of
--EILSEQ as it's hard for the driver to understand what was happening,
-crc? device is broken? ...
 
-> A driver can call mmc_retune_needed() itself in other cases.
+Obviously no need to do power cycle from testing, so the original code
+skip this for ID mode. As the changes of bus speed will explicitly
+affect the sample phase and output phase which use the bus speed as a 
+base clk to calc for. But for ID mode, we comfirm that the these phases
+are fixed. So it makes sense to me. As this patch is the combination of 
+your former commit 6fc09244d74d with skipping ID mode, so I think it
+looks good to me.
 
-It's no so clear to this retune design as if the driver already knows
-it's a CRC, it will generate -EILSEQ and let core do tuning again, so
-it means they don't need to call mmc_return_needed in their drivers.
-Unless let drivers return CRC in any cases of CRC or timeout, but that
-may make core do tuning more frequently even if not relating to tuning
-which seems a little painful.
+Thanks for contributing this solution.
 
-So it looks quite vague to me.:)
+Reviewed-by: Shawn Lin <shawn.lin@rock-chips.com>
 
 >
->>
->> Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
->> ---
->>
->>  drivers/mmc/core/core.c | 3 ++-
->>  1 file changed, 2 insertions(+), 1 deletion(-)
->>
->> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
->> index e55cde6..18d0af5 100644
->> --- a/drivers/mmc/core/core.c
->> +++ b/drivers/mmc/core/core.c
->> @@ -133,7 +133,8 @@ void mmc_request_done(struct mmc_host *host, struct mmc_request *mrq)
->>  	/* Flag re-tuning needed on CRC errors */
->>  	if ((cmd->opcode != MMC_SEND_TUNING_BLOCK &&
->>  	    cmd->opcode != MMC_SEND_TUNING_BLOCK_HS200) &&
->> -	    (err == -EILSEQ || (mrq->sbc && mrq->sbc->error == -EILSEQ) ||
->> +	    (err == -EILSEQ || err == -EIO ||
->> +	    (mrq->sbc && mrq->sbc->error == -EILSEQ) ||
->>  	    (mrq->data && mrq->data->error == -EILSEQ) ||
->>  	    (mrq->stop && mrq->stop->error == -EILSEQ)))
->>  		mmc_retune_needed(host);
->>
+> Signed-off-by: Douglas Anderson <dianders@chromium.org>
+> ---
+> Tested on chromeos kernel-4.4 with backports.
 >
+>  drivers/mmc/host/sdhci-of-arasan.c | 61 ++++++++++++++++++++++++++++----------
+>  1 file changed, 46 insertions(+), 15 deletions(-)
 >
+> diff --git a/drivers/mmc/host/sdhci-of-arasan.c b/drivers/mmc/host/sdhci-of-arasan.c
+> index e0f193f7e3e5..ec2fd00a913d 100644
+> --- a/drivers/mmc/host/sdhci-of-arasan.c
+> +++ b/drivers/mmc/host/sdhci-of-arasan.c
+> @@ -77,6 +77,7 @@ struct sdhci_arasan_soc_ctl_map {
+>   * @host:		Pointer to the main SDHCI host structure.
+>   * @clk_ahb:		Pointer to the AHB clock
+>   * @phy:		Pointer to the generic phy
+> + * @is_phy_on:		True if the PHY is on; false if not.
+>   * @sdcardclk_hw:	Struct for the clock we might provide to a PHY.
+>   * @sdcardclk:		Pointer to normal 'struct clock' for sdcardclk_hw.
+>   * @soc_ctl_base:	Pointer to regmap for syscon for soc_ctl registers.
+> @@ -86,6 +87,7 @@ struct sdhci_arasan_data {
+>  	struct sdhci_host *host;
+>  	struct clk	*clk_ahb;
+>  	struct phy	*phy;
+> +	bool		is_phy_on;
+>
+>  	struct clk_hw	sdcardclk_hw;
+>  	struct clk      *sdcardclk;
+> @@ -170,13 +172,47 @@ static void sdhci_arasan_set_clock(struct sdhci_host *host, unsigned int clock)
+>  	struct sdhci_arasan_data *sdhci_arasan = sdhci_pltfm_priv(pltfm_host);
+>  	bool ctrl_phy = false;
+>
+> -	if (clock > MMC_HIGH_52_MAX_DTR && (!IS_ERR(sdhci_arasan->phy)))
+> -		ctrl_phy = true;
+> +	if (!IS_ERR(sdhci_arasan->phy)) {
+> +		if (!sdhci_arasan->is_phy_on && clock <= 400000) {
+> +			/*
+> +			 * If PHY off, set clock to max speed and power PHY on.
+> +			 *
+> +			 * Although PHY docs apparently suggest power cycling
+> +			 * when changing the clock the PHY doesn't like to be
+> +			 * powered on while at low speeds like those used in ID
+> +			 * mode.  Even worse is powering the PHY on while the
+> +			 * clock is off.
+> +			 *
+> +			 * To workaround the PHY limitatoins, the best we can
+> +			 * do is to power it on at a faster speed and then slam
+> +			 * through low speeds without power cycling.
+> +			 */
+> +			sdhci_set_clock(host, host->max_clk);
+> +			spin_unlock_irq(&host->lock);
+> +			phy_power_on(sdhci_arasan->phy);
+> +			spin_lock_irq(&host->lock);
+> +			sdhci_arasan->is_phy_on = true;
+> +
+> +			/*
+> +			 * We'll now fall through to the below case with
+> +			 * ctrl_phy = false (so we won't turn off/on).  The
+> +			 * sdhci_set_clock() will set the real clock.
+> +			 */
+> +		} else if (clock > 400000) {
+> +			/*
+> +			 * At higher clock speeds the PHY is fine being power
+> +			 * cycled and docs say you _should_ power cycle when
+> +			 * changing clock speeds.
+> +			 */
+> +			ctrl_phy = true;
+> +		}
+> +	}
+>
+> -	if (ctrl_phy) {
+> +	if (ctrl_phy && sdhci_arasan->is_phy_on) {
+>  		spin_unlock_irq(&host->lock);
+>  		phy_power_off(sdhci_arasan->phy);
+>  		spin_lock_irq(&host->lock);
+> +		sdhci_arasan->is_phy_on = false;
+>  	}
+>
+>  	sdhci_set_clock(host, clock);
+> @@ -185,6 +221,7 @@ static void sdhci_arasan_set_clock(struct sdhci_host *host, unsigned int clock)
+>  		spin_unlock_irq(&host->lock);
+>  		phy_power_on(sdhci_arasan->phy);
+>  		spin_lock_irq(&host->lock);
+> +		sdhci_arasan->is_phy_on = true;
+>  	}
+>  }
+>
+> @@ -239,13 +276,14 @@ static int sdhci_arasan_suspend(struct device *dev)
+>  	if (ret)
+>  		return ret;
+>
+> -	if (!IS_ERR(sdhci_arasan->phy)) {
+> +	if (!IS_ERR(sdhci_arasan->phy) && sdhci_arasan->is_phy_on) {
+>  		ret = phy_power_off(sdhci_arasan->phy);
+>  		if (ret) {
+>  			dev_err(dev, "Cannot power off phy.\n");
+>  			sdhci_resume_host(host);
+>  			return ret;
+>  		}
+> +		sdhci_arasan->is_phy_on = false;
+>  	}
+>
+>  	clk_disable(pltfm_host->clk);
+> @@ -281,12 +319,13 @@ static int sdhci_arasan_resume(struct device *dev)
+>  		return ret;
+>  	}
+>
+> -	if (!IS_ERR(sdhci_arasan->phy)) {
+> +	if (!IS_ERR(sdhci_arasan->phy) && host->mmc->actual_clock) {
+>  		ret = phy_power_on(sdhci_arasan->phy);
+>  		if (ret) {
+>  			dev_err(dev, "Cannot power on phy.\n");
+>  			return ret;
+>  		}
+> +		sdhci_arasan->is_phy_on = true;
+>  	}
+>
+>  	return sdhci_resume_host(host);
+> @@ -547,12 +586,6 @@ static int sdhci_arasan_probe(struct platform_device *pdev)
+>  			goto unreg_clk;
+>  		}
+>
+> -		ret = phy_power_on(sdhci_arasan->phy);
+> -		if (ret < 0) {
+> -			dev_err(&pdev->dev, "phy_power_on err.\n");
+> -			goto err_phy_power;
+> -		}
+> -
+>  		host->mmc_host_ops.hs400_enhanced_strobe =
+>  					sdhci_arasan_hs400_enhanced_strobe;
+>  	}
+> @@ -565,9 +598,6 @@ static int sdhci_arasan_probe(struct platform_device *pdev)
+>
+>  err_add_host:
+>  	if (!IS_ERR(sdhci_arasan->phy))
+> -		phy_power_off(sdhci_arasan->phy);
+> -err_phy_power:
+> -	if (!IS_ERR(sdhci_arasan->phy))
+>  		phy_exit(sdhci_arasan->phy);
+>  unreg_clk:
+>  	sdhci_arasan_unregister_sdclk(&pdev->dev);
+> @@ -589,7 +619,8 @@ static int sdhci_arasan_remove(struct platform_device *pdev)
+>  	struct clk *clk_ahb = sdhci_arasan->clk_ahb;
+>
+>  	if (!IS_ERR(sdhci_arasan->phy)) {
+> -		phy_power_off(sdhci_arasan->phy);
+> +		if (sdhci_arasan->is_phy_on)
+> +			phy_power_off(sdhci_arasan->phy);
+>  		phy_exit(sdhci_arasan->phy);
+>  	}
 >
 >
 
@@ -89,3 +218,4 @@ So it looks quite vague to me.:)
 -- 
 Best Regards
 Shawn Lin
+
