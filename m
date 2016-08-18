@@ -1,63 +1,57 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH] mmc: core: need retune if error value is -EIO
-Date: Thu, 18 Aug 2016 10:19:22 +0300
-Message-ID: <a9e28ac9-9db6-18d0-d4a6-9a283ec4dc80@intel.com>
-References: <1470299459-8478-1-git-send-email-shawn.lin@rock-chips.com>
+Subject: Re: [PATCH 06/11] mmc: sdhci-of-esdhc: use of_property_read_bool
+Date: Thu, 18 Aug 2016 10:36:39 +0300
+Message-ID: <29aae420-01ef-b355-2fd8-87860a5f34d0@intel.com>
+References: <1470387411-15879-1-git-send-email-Julia.Lawall@lip6.fr>
+ <1470387411-15879-7-git-send-email-Julia.Lawall@lip6.fr>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=windows-1252
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1470299459-8478-1-git-send-email-shawn.lin@rock-chips.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Shawn Lin <shawn.lin@rock-chips.com>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Jaehoon Chung <jh80.chung@samsung.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-rockchip@lists.infradead.org
+Return-path: <kernel-janitors-owner@vger.kernel.org>
+In-Reply-To: <1470387411-15879-7-git-send-email-Julia.Lawall@lip6.fr>
+Sender: kernel-janitors-owner@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Julia Lawall <Julia.Lawall@lip6.fr>, kernel-janitors@vger.kernel.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-On 04/08/16 11:30, Shawn Lin wrote:
-> We need to do retune if receiving -EIO, otherwise we
-> could see debug dump like:
+On 05/08/16 11:56, Julia Lawall wrote:
+> Use of_property_read_bool to check for the existence of a property.
 > 
-> [ 89.057226] bcmsdh_sdmmc: Failed to Read byte F1:@0x1001f=ff, Err: -5
-> [ 89.058811] bcmsdh_sdmmc: Failed to Read byte F1:@0x1001f=ff, Err: -5
-> [ 89.059415] bcmsdh_sdmmc: Failed to Read byte F1:@0x1000e=ff, Err: -84
-> [ 89.254248] dwmmc_rockchip fe310000.dwmmc: Successfully tuned phase to 199
-> [ 89.273912] dhd_set_suspend: Remove extra suspend setting
-> [ 89.274478] dhd_enable_packet_filter: enter, value = 0
-> 64 bytes from 112.90.83.112: icmp_seq=24 ttl=53 time=1321 ms
-> 64 bytes from 112.90.83.112: icmp_seq=25 ttl=53 time=319 ms
-> 64 bytes from 112.90.83.112: icmp_seq=26 ttl=53 time=69.8 ms
-> 64 bytes from 112.90.83.112: icmp_seq=27 ttl=53 time=37.5 ms
-> ...
+> The semantic patch that makes this change is as follows:
+> (http://coccinelle.lip6.fr/)
 > 
-> In this case we see dw_mmc finally enter retune process, but
-> if this patch is applied, we could save more time to make it
-> work. Also many host drivers will generate -EIO, so this patch
-> can also prevent them from failing to enter retune process.
+> // <smpl>
+> @@
+> expression e1,e2;
+> statement S2,S1;
+> @@
+> -       if (of_get_property(e1,e2,NULL))
+> +       if (of_property_read_bool(e1,e2))
+>         S1 else S2
+> // </smpl>
+> 
+> Signed-off-by: Julia Lawall <Julia.Lawall@lip6.fr>
 
-The current logic is re-tune on CRC errors.  -EIO isn't informative
-and drivers can use it for cases that clearly are not related to tuning.
-
-A driver can call mmc_retune_needed() itself in other cases.
+Acked-by: Adrian Hunter <adrian.hunter@intel.com>
 
 > 
-> Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
 > ---
+>  drivers/mmc/host/sdhci-of-esdhc.c |    2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
 > 
->  drivers/mmc/core/core.c | 3 ++-
->  1 file changed, 2 insertions(+), 1 deletion(-)
+> diff --git a/drivers/mmc/host/sdhci-of-esdhc.c b/drivers/mmc/host/sdhci-of-esdhc.c
+> index 239be2f..fb71c86 100644
+> --- a/drivers/mmc/host/sdhci-of-esdhc.c
+> +++ b/drivers/mmc/host/sdhci-of-esdhc.c
+> @@ -583,7 +583,7 @@ static int sdhci_esdhc_probe(struct platform_device *pdev)
+>  
+>  	np = pdev->dev.of_node;
+>  
+> -	if (of_get_property(np, "little-endian", NULL))
+> +	if (of_property_read_bool(np, "little-endian"))
+>  		host = sdhci_pltfm_init(pdev, &sdhci_esdhc_le_pdata,
+>  					sizeof(struct sdhci_esdhc));
+>  	else
 > 
-> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-> index e55cde6..18d0af5 100644
-> --- a/drivers/mmc/core/core.c
-> +++ b/drivers/mmc/core/core.c
-> @@ -133,7 +133,8 @@ void mmc_request_done(struct mmc_host *host, struct mmc_request *mrq)
->  	/* Flag re-tuning needed on CRC errors */
->  	if ((cmd->opcode != MMC_SEND_TUNING_BLOCK &&
->  	    cmd->opcode != MMC_SEND_TUNING_BLOCK_HS200) &&
-> -	    (err == -EILSEQ || (mrq->sbc && mrq->sbc->error == -EILSEQ) ||
-> +	    (err == -EILSEQ || err == -EIO ||
-> +	    (mrq->sbc && mrq->sbc->error == -EILSEQ) ||
->  	    (mrq->data && mrq->data->error == -EILSEQ) ||
->  	    (mrq->stop && mrq->stop->error == -EILSEQ)))
->  		mmc_retune_needed(host);
 > 
+
