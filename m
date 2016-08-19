@@ -1,15 +1,12 @@
 From: Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
-Subject: Re: [RFC PATCH] mmc: dw_mmc: avoid race condition of cpu and IDMAC
-Date: Fri, 19 Aug 2016 15:58:45 +0800
-Message-ID: <5ffddf5f-b12e-8140-24a5-aa7138f5c288@rock-chips.com>
-References: <CGME20160816032803epcas1p4e04d5cf42e25d1dd6480961cc0c96475@epcas1p4.samsung.com>
- <1471317827-6049-1-git-send-email-shawn.lin@rock-chips.com>
- <2562aa02-f83c-9d04-9cd9-c2de2a34d629@samsung.com>
+Subject: [PATCH 1/2] mmc: dw_mmc: split out preparation of desc for IDMAC32
+ and IDMAC64
+Date: Fri, 19 Aug 2016 17:40:14 +0800
+Message-ID: <1471599615-6249-1-git-send-email-shawn.lin@rock-chips.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"; Format="flowed"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-In-Reply-To: <2562aa02-f83c-9d04-9cd9-c2de2a34d629-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>
 List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-rockchip>,
  <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
 List-Archive: <http://lists.infradead.org/pipermail/linux-rockchip/>
@@ -20,91 +17,207 @@ List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-rockchip>,
 Sender: "Linux-rockchip" <linux-rockchip-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
 Errors-To: linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
 To: Jaehoon Chung <jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>
-Cc: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Heiko Stuebner <heiko-4mtYJXux2i+zQB+pC5nmwQ@public.gmane.org>, shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org, Brian Norris <briannorris-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Doug Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+Cc: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Heiko Stuebner <heiko-4mtYJXux2i+zQB+pC5nmwQ@public.gmane.org>, Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>, Brian Norris <briannorris-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Doug Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
 
-5ZyoIDIwMTYvOC8xNyAxNzo1MiwgSmFlaG9vbiBDaHVuZyDlhpnpgZM6Cj4gSGkgU2hhd24sCj4K
-PiBPbiAwOC8xNi8yMDE2IDEyOjIzIFBNLCBTaGF3biBMaW4gd3JvdGU6Cj4+IFdlIGNvdWxkIHNl
-ZSBhbiBvYnZpb3VzIHJhY2UgY29uZGl0aW9uIGJ5IHRlc3QgdGhhdAo+PiB0aGUgZm9ybWVyIHdy
-aXRlIG9wZXJhdGlvbiBieSBJRE1BQyBhaW1pbmcgdG8gY2xlYXIKPj4gT1dOIGJpdCByZWFjaCBy
-aWdodCBhZnRlciB0aGUgbGF0ZXIgY29uZmlndXJhdGlvbiBvZgo+PiB0aGUgc2FtZSBkZXNjLCB3
-aGljaCBtYWtlcyB0aGUgSURNQUMgYmUgaW4gU1VTUEVORAo+PiBzdGF0ZSBhcyB0aGUgT1dOIGJp
-dCB3YXMgY2xlYXJlZCBieSB0aGUgYXN5bmNocm9ub3VzCj4+IHdyaXRlIG9wZXJhdGlvbiBvZiBJ
-RE1BQy4gVGhlIGJ1ZyBjYW4gYmUgdmVyeSBlYXN5Cj4+IHJlcHJvZHVjZWQgb24gUkszMjg4IG9y
-IHNpbWlsYXIgd2hlbiBsb3dlcmluZyB0aGUKPj4gYmFuZHdpZHRoIG9mIGJ1cyBhbmQgYWdncmF2
-YXRpbmcgdGhlIFFvcyB0byBtYWtlIHRoZQo+PiBsYXJnZSBudW1iZXJzIG9mIElQIGZpZ2h0IGZv
-ciB0aGUgcHJpb3JpdHkuIE9uZSBwb3NzaWJsZQo+PiByZXBsYWNlYWJsZSBzb2x1dGlvbiBtYXkg
-YmUgYWxsb2MgZHVhbCBidWZmIGZvciB0aGUKPj4gZGVzYyB0byBhdm9pZCBpdCBidXQgY291bGQg
-c3RpbGwgcmFjZSBlYWNoIG90aGVyCj4+IHRoZW9yZXRpY2FsbHkuCj4KPiBJdCBtYWtlcyBzZW5z
-ZS4KPiBCdXQgU29ycnkuLmkgZGlkbid0IHVuZGVyc3RhbmQgd2hhdCAid2hlbiBsb3dlcmluZyB0
-aGUgYmFuZHdpZHRoIG9mIGJ1cy4uIiBtZWFucy4uCgpJIHdpbGwgYW1lbmQgaXQuIFdoYXQgSSBh
-Y3R1YWxseSBtZWFuIGlzIHRvIHJlZHVjZSB0aGUgcnVubmluZyByYXRlIG9mCnN5c3RlbSBidXMg
-d2l0aG91dCB0b3VjaGluZyB0aGUgcmF0ZSBvZiBDUFUuIFRoaXMgbWFrZXMgdGhlIENQVSBydW4K
-bW9yZSBmYXRlciB0aGFuIG90aGVyIG1hc3RlcnMgbGlrZSBJRE1BQy4KCj4KPiBBY2NvcmRpbmcg
-dG8gVFJNLCB3ZSBuZWVkIHRvIGNoZWNrIHdoZXRoZXIgT1dOIGJpdCBpcyBzZXQgb3Igbm90Lgo+
-IEJ1dCBpdCBzZWVtcyB0aGF0IGl0J3MgcmVsYXRlZCB3aXRoIGNvbnRyb2xsaW5nIFBMRE1ORCBy
-ZWdpc3Rlci4KPiBJIG5lZWQgdG8gY2hlY2sgYW5kIHJlYWQgVFJNIGluIG1vcmUgZGV0YWlsLgoK
-UGVyIHRoZSBUUk0sCgoiVGhlIElETUFDIGVuZ2luZSBmZXRjaGVzIHRoZSBkZXNjcmlwdG9yIGFu
-ZCBjaGVja3MgdGhlIE9XTiBiaXQuIElmIHRoZQpPV04gYml0IGlzIG5vdCBzZXQsIGl0IG1lYW5z
-IHRoYXQgdGhlIGhvc3Qgb3ducyB0aGUgZGVzY3JpcHRvci4gSW4gdGhpcwpjYXNlIHRoZSBETUEg
-ZW50ZXJzIHN1c3BlbmQgc3RhdGUgYW5kIGFzc2VydHMgdGhlIERlc2NyaXB0b3IgVW5hYmxlCmlu
-dGVycnVwdCBpbiB0aGUgSURTVFMgcmVnaXN0ZXIgKElEU1RTNjQgcmVnaXN0ZXIsIGluIGNhc2Ug
-b2YgNjQtYml0CmFkZHJlc3MgY29uZmlndXJhdGlvbikuIEluIHN1Y2ggYSBjYXNlLCB0aGUgaG9z
-dCBuZWVkcyB0byByZWxlYXNlIHRoZQpJRE1BQyBieSB3cml0aW5nIGFueSB2YWx1ZSB0byB0aGUg
-cG9sbCBkZW1hbmQgcmVnaXN0ZXIuICIKClNvIGluIHRoaXMgY2FzZSwgaXQgc2hvdWxkIGdlbmVy
-YXRlIGEgSU5UIGZvciBJRFNUUyg2NCkgYW5kIHJlbGVhc2UgdGhlCklETUFDIGJ5IHdyaXRpbmcg
-dG8gUExETU5ELCB0aGVuIHdlIHJldHJ5IGl0IHVudGlsIElETUFDIG93bnMgdGhlCmRlc2NyaXB0
-b3IuIEl0J3MgcXVpdGUgYSB2ZXJib3NlIGJlaGF2aW91ciBhbmQgd2Ugc2hvdWxkIGRvIG1vcmUg
-YSBsb3QKZm9yIHRoZSB0YXNrbGV0IHRvIG92ZXJjb21lIHRoaXMgcGFpbi4uLgoKSXQncyBzYW5l
-IHRvIGp1c3QgdmVyaWZ5IHRoZSBvd24gYml0IGZyb20gbWVtb3J5IHdoZW4gcHJlcGFyaW5nIGRl
-c2MsCmFuZCBpdCBkb2Vzbid0IGNvc3QgcGVyZm9ybWFuY2UgZnJvbSB0aGUgdGVzdCBhcyBpdCBp
-cyByZWFsbHkgZmV3IHRvCm1lZXQgdGhpcyBjYXNlLgoKPgo+Pgo+PiBTaWduZWQtb2ZmLWJ5OiBT
-aGF3biBMaW4gPHNoYXduLmxpbkByb2NrLWNoaXBzLmNvbT4KPj4KPj4gLS0tCj4+Cj4+ICBkcml2
-ZXJzL21tYy9ob3N0L2R3X21tYy5jIHwgMzQgKysrKysrKysrKysrKysrKysrKysrKysrKysrKysr
-KysrKwo+PiAgMSBmaWxlIGNoYW5nZWQsIDM0IGluc2VydGlvbnMoKykKPj4KPj4gZGlmZiAtLWdp
-dCBhL2RyaXZlcnMvbW1jL2hvc3QvZHdfbW1jLmMgYi9kcml2ZXJzL21tYy9ob3N0L2R3X21tYy5j
-Cj4+IGluZGV4IDMyMzgwZDUuLjdiMDFmYWIgMTAwNjQ0Cj4+IC0tLSBhL2RyaXZlcnMvbW1jL2hv
-c3QvZHdfbW1jLmMKPj4gKysrIGIvZHJpdmVycy9tbWMvaG9zdC9kd19tbWMuYwo+PiBAQCAtNDkw
-LDYgKzQ5MCwyMyBAQCBzdGF0aWMgdm9pZCBkd19tY2lfdHJhbnNsYXRlX3NnbGlzdChzdHJ1Y3Qg
-ZHdfbWNpICpob3N0LCBzdHJ1Y3QgbW1jX2RhdGEgKmRhdGEsCj4+ICAJCQkJbGVuZ3RoIC09IGRl
-c2NfbGVuOwo+Pgo+PiAgCQkJCS8qCj4+ICsJCQkJICogT1dOIGJpdCBzaG91bGQgYmUgY2xlYXIg
-YnkgSURNQUMgYWZ0ZXIKPj4gKwkJCQkgKiBmaW5pc2hpbmcgdHJhbnNmZXIuIExldCdzIHdhaXQg
-Zm9yIHRoZQo+PiArCQkJCSAqIGFzeW5jaHJvbm91cyBvcGVyYXRpb24gb2YgSURNQUMgYW5kIGNw
-dQo+PiArCQkJCSAqIHRvIG1ha2Ugc3VyZSB0aGF0IHdlIGRvIG5vdCByZWx5IG9uIHRoZQo+PiAr
-CQkJCSAqIG9yZGVyIG9mIFFvcyBvZiBidXMgYW5kIGFyY2hpdGVjdHVyZS4KPj4gKwkJCQkgKiBP
-dGhlcndpc2Ugd2UgY291bGQgc2VlIGEgcmFjZSBjb25kaXRpb24KPj4gKwkJCQkgKiBoZXJlIHRo
-YXQgdGhlIGZvcm1lciB3cml0ZSBvcGVyYXRpb24gb2YKPj4gKwkJCQkgKiBJRE1BQyh0byBjbGVh
-ciB0aGUgT1dOIGJpdCkgcmVhY2ggcmlnaHQKPj4gKwkJCQkgKiBhZnRlciB0aGUgbGF0ZXIgbmV3
-IGNvbmZpZ3VyYXRpb24gb2YgZGVzYwo+PiArCQkJCSAqIHdoaWNoIG1ha2VzIHZhbHVlIG9mIGRl
-c2MgYmVlbiBjb3ZlcmVkCj4+ICsJCQkJICogbGVhZGluZyB0byBETUFfU1VTUEVORCBzdGF0ZSBh
-cyBJRE1BQyBmZWN0aAo+PiArCQkJCSAqIHRoZSB3cm9uZyBkZXNjIHRoZW4uCj4+ICsJCQkJICov
-Cj4+ICsJCQkJd2hpbGUgKChyZWFkbCgmZGVzYy0+ZGVzMCkgJiBJRE1BQ19ERVMwX09XTikpCj4+
-ICsJCQkJCTsKPgo+IFdlbGwsIEkgZG9uJ3QgbGlrZSB0aGlzIHN0eWxlLi5iZWNhdXNlIGl0IGhh
-cyB0aGUgcG90ZW50aWFsIHJpc2sgZm9yIGluZmluaXRlIGxvb3AuCj4gQW5kIENvdWxkIHlvdSBt
-YWtlIHRoZSBjb21tZW50IG1vcmUgc2ltcGxlciB0aGFuIG5vdz8KCnllcywgSSB3aWxsIHJlbW92
-ZSB0aGUgUkZDIHByZWZpeCBhbmQgZml4IHRoZXNlLgoKCj4KPj4gKwo+PiArCQkJCS8qCj4+ICAJ
-CQkJICogU2V0IHRoZSBPV04gYml0IGFuZCBkaXNhYmxlIGludGVycnVwdHMKPj4gIAkJCQkgKiBm
-b3IgdGhpcyBkZXNjcmlwdG9yCj4+ICAJCQkJICovCj4+IEBAIC01MzUsNiArNTUyLDIzIEBAIHN0
-YXRpYyB2b2lkIGR3X21jaV90cmFuc2xhdGVfc2dsaXN0KHN0cnVjdCBkd19tY2kgKmhvc3QsIHN0
-cnVjdCBtbWNfZGF0YSAqZGF0YSwKPj4gIAkJCQlsZW5ndGggLT0gZGVzY19sZW47Cj4+Cj4+ICAJ
-CQkJLyoKPj4gKwkJCQkgKiBPV04gYml0IHNob3VsZCBiZSBjbGVhciBieSBJRE1BQyBhZnRlcgo+
-PiArCQkJCSAqIGZpbmlzaGluZyB0cmFuc2Zlci4gTGV0J3Mgd2FpdCBmb3IgdGhlCj4+ICsJCQkJ
-ICogYXN5bmNocm9ub3VzIG9wZXJhdGlvbiBvZiBJRE1BQyBhbmQgY3B1Cj4+ICsJCQkJICogdG8g
-bWFrZSBzdXJlIHRoYXQgd2UgZG8gbm90IHJlbHkgb24gdGhlCj4+ICsJCQkJICogb3JkZXIgb2Yg
-UW9zIG9mIGJ1cyBhbmQgYXJjaGl0ZWN0dXJlLgo+PiArCQkJCSAqIE90aGVyd2lzZSB3ZSBjb3Vs
-ZCBzZWUgYSByYWNlIGNvbmRpdGlvbgo+PiArCQkJCSAqIGhlcmUgdGhhdCB0aGUgZm9ybWVyIHdy
-aXRlIG9wZXJhdGlvbiBvZgo+PiArCQkJCSAqIElETUFDKHRvIGNsZWFyIHRoZSBPV04gYml0KSBy
-ZWFjaCByaWdodAo+PiArCQkJCSAqIGFmdGVyIHRoZSBsYXRlciBuZXcgY29uZmlndXJhdGlvbiBv
-ZiBkZXNjCj4+ICsJCQkJICogd2hpY2ggbWFrZXMgdmFsdWUgb2YgZGVzYyBiZWVuIGNvdmVyZWQK
-Pj4gKwkJCQkgKiBsZWFkaW5nIHRvIERNQV9TVVNQRU5EIHN0YXRlIGFzIElETUFDIGZlY3RoCj4+
-ICsJCQkJICogdGhlIHdyb25nIGRlc2MgdGhlbi4KPj4gKwkJCQkgKi8KPj4gKwkJCQl3aGlsZSAo
-KHJlYWRsKCZkZXNjLT5kZXMwKSAmIElETUFDX0RFUzBfT1dOKSkKPj4gKwkJCQkJOwo+Cj4gRGl0
-dG8uCj4KPj4gKwo+PiArCQkJCS8qCj4+ICAJCQkJICogU2V0IHRoZSBPV04gYml0IGFuZCBkaXNh
-YmxlIGludGVycnVwdHMKPj4gIAkJCQkgKiBmb3IgdGhpcyBkZXNjcmlwdG9yCj4+ICAJCQkJICov
-Cj4+Cj4KPgo+IF9fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
-Cj4gTGludXgtcm9ja2NoaXAgbWFpbGluZyBsaXN0Cj4gTGludXgtcm9ja2NoaXBAbGlzdHMuaW5m
-cmFkZWFkLm9yZwo+IGh0dHA6Ly9saXN0cy5pbmZyYWRlYWQub3JnL21haWxtYW4vbGlzdGluZm8v
-bGludXgtcm9ja2NoaXAKPgoKCi0tIApCZXN0IFJlZ2FyZHMKU2hhd24gTGluCgoKX19fX19fX19f
-X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18KTGludXgtcm9ja2NoaXAgbWFp
-bGluZyBsaXN0CkxpbnV4LXJvY2tjaGlwQGxpc3RzLmluZnJhZGVhZC5vcmcKaHR0cDovL2xpc3Rz
-LmluZnJhZGVhZC5vcmcvbWFpbG1hbi9saXN0aW5mby9saW51eC1yb2NrY2hpcAo=
+We intend to add more check for descriptors when
+preparing desc. Let's spilt out the separate body
+to make the dw_mci_translate_sglist not so lengthy.
+
+Signed-off-by: Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
+---
+
+ drivers/mmc/host/dw_mmc.c | 148 +++++++++++++++++++++++++---------------------
+ 1 file changed, 81 insertions(+), 67 deletions(-)
+
+diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+index 32380d5..0a5a49f 100644
+--- a/drivers/mmc/host/dw_mmc.c
++++ b/drivers/mmc/host/dw_mmc.c
+@@ -467,103 +467,117 @@ static void dw_mci_dmac_complete_dma(void *arg)
+ 	}
+ }
+ 
+-static void dw_mci_translate_sglist(struct dw_mci *host, struct mmc_data *data,
+-				    unsigned int sg_len)
++static inline void dw_mci_prepare_desc64(struct dw_mci *host,
++					 struct mmc_data *data,
++					 unsigned int sg_len)
+ {
+ 	unsigned int desc_len;
++	struct idmac_desc_64addr *desc_first, *desc_last, *desc;
+ 	int i;
+ 
+-	if (host->dma_64bit_address == 1) {
+-		struct idmac_desc_64addr *desc_first, *desc_last, *desc;
+-
+-		desc_first = desc_last = desc = host->sg_cpu;
++	desc_first = desc_last = desc = host->sg_cpu;
+ 
+-		for (i = 0; i < sg_len; i++) {
+-			unsigned int length = sg_dma_len(&data->sg[i]);
++	for (i = 0; i < sg_len; i++) {
++		unsigned int length = sg_dma_len(&data->sg[i]);
+ 
+-			u64 mem_addr = sg_dma_address(&data->sg[i]);
++		u64 mem_addr = sg_dma_address(&data->sg[i]);
+ 
+-			for ( ; length ; desc++) {
+-				desc_len = (length <= DW_MCI_DESC_DATA_LENGTH) ?
+-					   length : DW_MCI_DESC_DATA_LENGTH;
++		for ( ; length ; desc++) {
++			desc_len = (length <= DW_MCI_DESC_DATA_LENGTH) ?
++				   length : DW_MCI_DESC_DATA_LENGTH;
+ 
+-				length -= desc_len;
++			length -= desc_len;
+ 
+-				/*
+-				 * Set the OWN bit and disable interrupts
+-				 * for this descriptor
+-				 */
+-				desc->des0 = IDMAC_DES0_OWN | IDMAC_DES0_DIC |
+-							IDMAC_DES0_CH;
++			/*
++			 * Set the OWN bit and disable interrupts
++			 * for this descriptor
++			 */
++			desc->des0 = IDMAC_DES0_OWN | IDMAC_DES0_DIC |
++						IDMAC_DES0_CH;
+ 
+-				/* Buffer length */
+-				IDMAC_64ADDR_SET_BUFFER1_SIZE(desc, desc_len);
++			/* Buffer length */
++			IDMAC_64ADDR_SET_BUFFER1_SIZE(desc, desc_len);
+ 
+-				/* Physical address to DMA to/from */
+-				desc->des4 = mem_addr & 0xffffffff;
+-				desc->des5 = mem_addr >> 32;
++			/* Physical address to DMA to/from */
++			desc->des4 = mem_addr & 0xffffffff;
++			desc->des5 = mem_addr >> 32;
+ 
+-				/* Update physical address for the next desc */
+-				mem_addr += desc_len;
++			/* Update physical address for the next desc */
++			mem_addr += desc_len;
+ 
+-				/* Save pointer to the last descriptor */
+-				desc_last = desc;
+-			}
++			/* Save pointer to the last descriptor */
++			desc_last = desc;
+ 		}
++	}
+ 
+-		/* Set first descriptor */
+-		desc_first->des0 |= IDMAC_DES0_FD;
++	/* Set first descriptor */
++	desc_first->des0 |= IDMAC_DES0_FD;
+ 
+-		/* Set last descriptor */
+-		desc_last->des0 &= ~(IDMAC_DES0_CH | IDMAC_DES0_DIC);
+-		desc_last->des0 |= IDMAC_DES0_LD;
++	/* Set last descriptor */
++	desc_last->des0 &= ~(IDMAC_DES0_CH | IDMAC_DES0_DIC);
++	desc_last->des0 |= IDMAC_DES0_LD;
++}
+ 
+-	} else {
+-		struct idmac_desc *desc_first, *desc_last, *desc;
+ 
+-		desc_first = desc_last = desc = host->sg_cpu;
++static inline void dw_mci_prepare_desc32(struct dw_mci *host,
++					 struct mmc_data *data,
++					 unsigned int sg_len)
++{
++	unsigned int desc_len;
++	struct idmac_desc *desc_first, *desc_last, *desc;
++	int i;
+ 
+-		for (i = 0; i < sg_len; i++) {
+-			unsigned int length = sg_dma_len(&data->sg[i]);
++	desc_first = desc_last = desc = host->sg_cpu;
+ 
+-			u32 mem_addr = sg_dma_address(&data->sg[i]);
++	for (i = 0; i < sg_len; i++) {
++		unsigned int length = sg_dma_len(&data->sg[i]);
+ 
+-			for ( ; length ; desc++) {
+-				desc_len = (length <= DW_MCI_DESC_DATA_LENGTH) ?
+-					   length : DW_MCI_DESC_DATA_LENGTH;
++		u32 mem_addr = sg_dma_address(&data->sg[i]);
+ 
+-				length -= desc_len;
++		for ( ; length ; desc++) {
++			desc_len = (length <= DW_MCI_DESC_DATA_LENGTH) ?
++				   length : DW_MCI_DESC_DATA_LENGTH;
+ 
+-				/*
+-				 * Set the OWN bit and disable interrupts
+-				 * for this descriptor
+-				 */
+-				desc->des0 = cpu_to_le32(IDMAC_DES0_OWN |
+-							 IDMAC_DES0_DIC |
+-							 IDMAC_DES0_CH);
++			length -= desc_len;
+ 
+-				/* Buffer length */
+-				IDMAC_SET_BUFFER1_SIZE(desc, desc_len);
++			/*
++			 * Set the OWN bit and disable interrupts
++			 * for this descriptor
++			 */
++			desc->des0 = cpu_to_le32(IDMAC_DES0_OWN |
++						 IDMAC_DES0_DIC |
++						 IDMAC_DES0_CH);
+ 
+-				/* Physical address to DMA to/from */
+-				desc->des2 = cpu_to_le32(mem_addr);
++			/* Buffer length */
++			IDMAC_SET_BUFFER1_SIZE(desc, desc_len);
+ 
+-				/* Update physical address for the next desc */
+-				mem_addr += desc_len;
++			/* Physical address to DMA to/from */
++			desc->des2 = cpu_to_le32(mem_addr);
+ 
+-				/* Save pointer to the last descriptor */
+-				desc_last = desc;
+-			}
++			/* Update physical address for the next desc */
++			mem_addr += desc_len;
++
++			/* Save pointer to the last descriptor */
++			desc_last = desc;
+ 		}
++	}
+ 
+-		/* Set first descriptor */
+-		desc_first->des0 |= cpu_to_le32(IDMAC_DES0_FD);
++	/* Set first descriptor */
++	desc_first->des0 |= cpu_to_le32(IDMAC_DES0_FD);
+ 
+-		/* Set last descriptor */
+-		desc_last->des0 &= cpu_to_le32(~(IDMAC_DES0_CH |
+-					       IDMAC_DES0_DIC));
+-		desc_last->des0 |= cpu_to_le32(IDMAC_DES0_LD);
+-	}
++	/* Set last descriptor */
++	desc_last->des0 &= cpu_to_le32(~(IDMAC_DES0_CH |
++				       IDMAC_DES0_DIC));
++	desc_last->des0 |= cpu_to_le32(IDMAC_DES0_LD);
++}
++
++static void dw_mci_translate_sglist(struct dw_mci *host, struct mmc_data *data,
++				    unsigned int sg_len)
++{
++	if (host->dma_64bit_address == 1)
++		dw_mci_prepare_desc64(host, data, sg_len);
++	else
++		dw_mci_prepare_desc32(host, data, sg_len);
+ 
+ 	wmb(); /* drain writebuffer */
+ }
+-- 
+2.3.7
