@@ -1,77 +1,137 @@
 From: Ritesh Harjani <riteshh@codeaurora.org>
-Subject: [PATCH v3 0/9] mmc: sdhci-msm: Add clk-rates and DDR support
-Date: Fri, 19 Aug 2016 10:06:15 +0530
-Message-ID: <1471581384-18961-1-git-send-email-riteshh@codeaurora.org>
+Subject: [PATCH v3 1/9] mmc: sdhci-msm: Change poor style writel/readl of registers
+Date: Fri, 19 Aug 2016 10:06:16 +0530
+Message-ID: <1471581384-18961-2-git-send-email-riteshh@codeaurora.org>
+References: <1471581384-18961-1-git-send-email-riteshh@codeaurora.org>
 Return-path: <linux-arm-msm-owner@vger.kernel.org>
+In-Reply-To: <1471581384-18961-1-git-send-email-riteshh@codeaurora.org>
 Sender: linux-arm-msm-owner@vger.kernel.org
 To: adrian.hunter@intel.com
 Cc: ulf.hansson@linaro.org, bjorn.andersson@linaro.org, shawn.lin@rock-chips.com, jh80.chung@samsung.com, linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org, georgi.djakov@linaro.org, alex.lemberg@sandisk.com, mateusz.nowak@intel.com, Yuliy.Izrailov@sandisk.com, asutoshd@codeaurora.org, kdorfman@codeaurora.org, david.griego@linaro.org, stummala@codeaurora.org, venkatg@codeaurora.org, Ritesh Harjani <riteshh@codeaurora.org>
 List-Id: linux-mmc@vger.kernel.org
 
-Hi, 
+This patch changes the poor style of writel/readl registers
+into more readable format. Also to avoid mixed style format
+of readl/writel in sdhci-msm driver.
 
-This is v3 version of the patch series.
+Signed-off-by: Ritesh Harjani <riteshh@codeaurora.org>
+---
+ drivers/mmc/host/sdhci-msm.c | 54 ++++++++++++++++++++++++++------------------
+ 1 file changed, 32 insertions(+), 22 deletions(-)
 
-Changes from v2 -> v3 :-
-1. Addded Patch 01 based on Bjorn comment[2] - 
-   This fixes/unrolls the poor coding style of read/writes of
-   registers from base sdhci-msm driver.
-
-2. Fixed/unrolled poor style of reads/writes of registers in Patch 02,
-   based on Bjorn comment[2]. Also changed name of flag from
-   use_updated_dll_reset -> use_14lpp_dll_reset.
-
-Changes from v1->v2 :-
-1. Removed patch 06 & 08 from v1 patch series[1]
-(which were introducing unnecessary quirks).
-   Instead have implemented __sdhci_msm_set_clock version of
-   sdhci_set_clock in sdhci_msm driver itself in patch 07 of
-   this patch series.
-2. Enabled extra quirk (SDHCI_QUIRK2_PRESET_VALUE_BROKEN) in
-   patch 05 of this patch series. 
-
-Description of patches :-
-This patchset adds clk-rates & other required changes to
-upstream sdhci-msm driver from codeaurora tree.
-It has been tested on a db410c Dragonboard and msm8996 based
-platform.
-
-Patch 0002 - Adds updated dll sequence for newer controllers
-which has minor_version >= 0x42. This is required for msm8996.
-
-MSM controller HW recommendation is to use the base MCI clock
-and directly control this MCI clock at GCC in order to
-change the clk-rate. 
-Patches 03-07 bring in required change for this to
-sdhci-msm and DT of db410c.
-
-MSM controller would require 2x clock rate from source
-for DDR bus speed modes. Patch 08 adds this support.
-
-Patch 09 - adds DDR support in DT for sdhc1 of msm8916.
-
-[1]:- http://www.spinics.net/lists/linux-mmc/msg38467.html
-[2]:- http://www.spinics.net/lists/linux-mmc/msg38578.html 
-
-
-Ritesh Harjani (8):
-  mmc: sdhci-msm: Change poor style writel/readl of registers
-  mmc: sdhci-msm: add pltfm_data support to get clk-rates from DT
-  arm64: dts: qcom: msm8916: Add clk-rates to sdhc1 & sdhc2
-  mmc: sdhci-msm: Add get_min_clock() and get_max_clock() callback
-  mmc: sdhci-msm: Enable few quirks
-  mmc: sdhci-msm: Implement set_clock callback for sdhci-msm
-  mmc: sdhci-msm: Add clock changes for DDR mode.
-  arm64: dts: qcom: msm8916: Add ddr support to sdhc1
-
-Venkat Gopalakrishnan (1):
-  mmc: sdhci-msm: Update DLL reset sequence
-
- .../devicetree/bindings/mmc/sdhci-msm.txt          |   1 +
- arch/arm64/boot/dts/qcom/msm8916.dtsi              |   5 +
- drivers/mmc/host/sdhci-msm.c                       | 313 +++++++++++++++++++--
- 3 files changed, 295 insertions(+), 24 deletions(-)
-
+diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
+index 8ef44a2a..42f42aa 100644
+--- a/drivers/mmc/host/sdhci-msm.c
++++ b/drivers/mmc/host/sdhci-msm.c
+@@ -137,8 +137,9 @@ static int msm_config_cm_dll_phase(struct sdhci_host *host, u8 phase)
+ 	writel_relaxed(config, host->ioaddr + CORE_DLL_CONFIG);
+ 
+ 	/* Set CK_OUT_EN bit of DLL_CONFIG register to 1. */
+-	writel_relaxed((readl_relaxed(host->ioaddr + CORE_DLL_CONFIG)
+-			| CORE_CK_OUT_EN), host->ioaddr + CORE_DLL_CONFIG);
++	config = readl_relaxed(host->ioaddr + CORE_DLL_CONFIG);
++	config |= CORE_CK_OUT_EN;
++	writel_relaxed(config, host->ioaddr + CORE_DLL_CONFIG);
+ 
+ 	/* Wait until CK_OUT_EN bit of DLL_CONFIG register becomes '1' */
+ 	rc = msm_dll_poll_ck_out_en(host, 1);
+@@ -305,6 +306,7 @@ static int msm_init_cm_dll(struct sdhci_host *host)
+ 	struct mmc_host *mmc = host->mmc;
+ 	int wait_cnt = 50;
+ 	unsigned long flags;
++	u32 config = 0;
+ 
+ 	spin_lock_irqsave(&host->lock, flags);
+ 
+@@ -313,33 +315,40 @@ static int msm_init_cm_dll(struct sdhci_host *host)
+ 	 * tuning is in progress. Keeping PWRSAVE ON may
+ 	 * turn off the clock.
+ 	 */
+-	writel_relaxed((readl_relaxed(host->ioaddr + CORE_VENDOR_SPEC)
+-			& ~CORE_CLK_PWRSAVE), host->ioaddr + CORE_VENDOR_SPEC);
++	config = readl_relaxed(host->ioaddr + CORE_VENDOR_SPEC);
++	config &= ~CORE_CLK_PWRSAVE;
++	writel_relaxed(config, host->ioaddr + CORE_VENDOR_SPEC);
+ 
+ 	/* Write 1 to DLL_RST bit of DLL_CONFIG register */
+-	writel_relaxed((readl_relaxed(host->ioaddr + CORE_DLL_CONFIG)
+-			| CORE_DLL_RST), host->ioaddr + CORE_DLL_CONFIG);
++	config = readl_relaxed(host->ioaddr + CORE_DLL_CONFIG);
++	config |= CORE_DLL_RST;
++	writel_relaxed(config, host->ioaddr + CORE_DLL_CONFIG);
+ 
+ 	/* Write 1 to DLL_PDN bit of DLL_CONFIG register */
+-	writel_relaxed((readl_relaxed(host->ioaddr + CORE_DLL_CONFIG)
+-			| CORE_DLL_PDN), host->ioaddr + CORE_DLL_CONFIG);
++	config = readl_relaxed(host->ioaddr + CORE_DLL_CONFIG);
++	config |= CORE_DLL_PDN;
++	writel_relaxed(config, host->ioaddr + CORE_DLL_CONFIG);
+ 	msm_cm_dll_set_freq(host);
+ 
+ 	/* Write 0 to DLL_RST bit of DLL_CONFIG register */
+-	writel_relaxed((readl_relaxed(host->ioaddr + CORE_DLL_CONFIG)
+-			& ~CORE_DLL_RST), host->ioaddr + CORE_DLL_CONFIG);
++	config = readl_relaxed(host->ioaddr + CORE_DLL_CONFIG);
++	config &= ~CORE_DLL_RST;
++	writel_relaxed(config, host->ioaddr + CORE_DLL_CONFIG);
+ 
+ 	/* Write 0 to DLL_PDN bit of DLL_CONFIG register */
+-	writel_relaxed((readl_relaxed(host->ioaddr + CORE_DLL_CONFIG)
+-			& ~CORE_DLL_PDN), host->ioaddr + CORE_DLL_CONFIG);
++	config = readl_relaxed(host->ioaddr + CORE_DLL_CONFIG);
++	config &= ~CORE_DLL_PDN;
++	writel_relaxed(config, host->ioaddr + CORE_DLL_CONFIG);
+ 
+ 	/* Set DLL_EN bit to 1. */
+-	writel_relaxed((readl_relaxed(host->ioaddr + CORE_DLL_CONFIG)
+-			| CORE_DLL_EN), host->ioaddr + CORE_DLL_CONFIG);
++	config = readl_relaxed(host->ioaddr + CORE_DLL_CONFIG);
++	config |= CORE_DLL_EN;
++	writel_relaxed(config, host->ioaddr + CORE_DLL_CONFIG);
+ 
+ 	/* Set CK_OUT_EN bit to 1. */
+-	writel_relaxed((readl_relaxed(host->ioaddr + CORE_DLL_CONFIG)
+-			| CORE_CK_OUT_EN), host->ioaddr + CORE_DLL_CONFIG);
++	config = readl_relaxed(host->ioaddr + CORE_DLL_CONFIG);
++	config |= CORE_CK_OUT_EN;
++	writel_relaxed(config, host->ioaddr + CORE_DLL_CONFIG);
+ 
+ 	/* Wait until DLL_LOCK bit of DLL_STATUS register becomes '1' */
+ 	while (!(readl_relaxed(host->ioaddr + CORE_DLL_STATUS) &
+@@ -536,7 +545,7 @@ static int sdhci_msm_probe(struct platform_device *pdev)
+ 	struct resource *core_memres;
+ 	int ret;
+ 	u16 host_version, core_minor;
+-	u32 core_version, caps;
++	u32 core_version, config;
+ 	u8 core_major;
+ 
+ 	host = sdhci_pltfm_init(pdev, &sdhci_msm_pdata, sizeof(*msm_host));
+@@ -605,8 +614,9 @@ static int sdhci_msm_probe(struct platform_device *pdev)
+ 	}
+ 
+ 	/* Reset the core and Enable SDHC mode */
+-	writel_relaxed(readl_relaxed(msm_host->core_mem + CORE_POWER) |
+-		       CORE_SW_RST, msm_host->core_mem + CORE_POWER);
++	config = readl_relaxed(msm_host->core_mem + CORE_POWER);
++	config |= CORE_SW_RST;
++	writel_relaxed(config, msm_host->core_mem + CORE_POWER);
+ 
+ 	/* SW reset can take upto 10HCLK + 15MCLK cycles. (min 40us) */
+ 	usleep_range(1000, 5000);
+@@ -636,9 +646,9 @@ static int sdhci_msm_probe(struct platform_device *pdev)
+ 	 * controller versions and must be explicitly enabled.
+ 	 */
+ 	if (core_major >= 1 && core_minor != 0x11 && core_minor != 0x12) {
+-		caps = readl_relaxed(host->ioaddr + SDHCI_CAPABILITIES);
+-		caps |= SDHCI_CAN_VDD_300 | SDHCI_CAN_DO_8BIT;
+-		writel_relaxed(caps, host->ioaddr +
++		config = readl_relaxed(host->ioaddr + SDHCI_CAPABILITIES);
++		config |= SDHCI_CAN_VDD_300 | SDHCI_CAN_DO_8BIT;
++		writel_relaxed(config, host->ioaddr +
+ 			       CORE_VENDOR_SPEC_CAPABILITIES0);
+ 	}
+ 
 -- 
 The Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum, 
 a Linux Foundation Collaborative Project.
