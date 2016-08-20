@@ -1,97 +1,84 @@
 From: Shawn Lin <shawn.lin@rock-chips.com>
-Subject: Re: [PATCH v2 2/2] mmc: core: fall back host->f_init if failing to
- init mmc card after resume
-Date: Sat, 20 Aug 2016 11:02:00 +0800
-Message-ID: <6a9e58af-d4fd-3426-220b-fc5022cf366d@rock-chips.com>
-References: <1468979860-28712-1-git-send-email-shawn.lin@rock-chips.com>
- <1468979860-28712-2-git-send-email-shawn.lin@rock-chips.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=gbk; format=flowed
-Content-Transfer-Encoding: 7bit
+Subject: [PATCH] mmc: dw_mmc: return -EILSEQ for EBE and SBE error
+Date: Sat, 20 Aug 2016 11:38:55 +0800
+Message-ID: <1471664335-9650-1-git-send-email-shawn.lin@rock-chips.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from lucky1.263xmail.com ([211.157.147.133]:41025 "EHLO
+Received: from lucky1.263xmail.com ([211.157.147.130]:48574 "EHLO
         lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750838AbcHTDCJ (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 19 Aug 2016 23:02:09 -0400
-In-Reply-To: <1468979860-28712-2-git-send-email-shawn.lin@rock-chips.com>
+        with ESMTP id S1752541AbcHTDnP (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 19 Aug 2016 23:43:15 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: shawn.lin@rock-chips.com, Adrian Hunter <adrian.hunter@intel.com>, Jaehoon Chung <jh80.chung@samsung.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Doug Anderson <dianders@chromium.org>, linux-rockchip@lists.infradead.org
+To: Jaehoon Chung <jh80.chung@samsung.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Doug Anderson <dianders@chromium.org>, Brian Norris <briannorris@chromium.org>, Heiko Stuebner <heiko@sntech.de>, linux-rockchip@lists.infradead.org, Shawn Lin <shawn.lin@rock-chips.com>
 
-Hi Ulf,
+The following log we found indicate the fact that dw_mmc
+didn't treat EBE or SBE as a similar problem as CRC error.
+-EIO is quite not informative as it may indicate that the device
+is broken rather than that of tuning stuff.
 
-Any idea to share with this patch? :)
+...
+[ 89.057226] bcmsdh_sdmmc: Failed to Read byte F1:@0x1001f=ff, Err: -5
+[ 89.058811] bcmsdh_sdmmc: Failed to Read byte F1:@0x1001f=ff, Err: -5
+[ 89.059415] bcmsdh_sdmmc: Failed to Read byte F1:@0x1000e=ff, Err: -84
+[ 89.254248] dwmmc_rockchip fe310000.dwmmc: Successfully tuned phase to 199
+[ 89.273912] dhd_set_suspend: Remove extra suspend setting
+[ 89.274478] dhd_enable_packet_filter: enter, value = 0
+64 bytes from 112.90.83.112: icmp_seq=24 ttl=53 time=1321 ms
+64 bytes from 112.90.83.112: icmp_seq=25 ttl=53 time=319 ms
+64 bytes from 112.90.83.112: icmp_seq=26 ttl=53 time=69.8 ms
+64 bytes from 112.90.83.112: icmp_seq=27 ttl=53 time=37.5 ms
+...
 
-On 2016/7/20 9:57, Shawn Lin wrote:
-> We observed the failure of initializing card after resume
-> accidentally. It's hard to reproduce but we did get report from
-> the suspend/resume test of our RK3399 mp test farm . Unfortunately,
-> we still fail to figure out what was going wrong at that time.
-> Also we can't achieve it by retrying the host->f_init without falling
-> back it. But this patch will solve the problem as we could add some log
-> there and see that we resume the mmc card successfully after falling
-> back the host->f_init. There is no obvious side effect found, so it seems
-> this patch will improve the stability.
->
-> [   93.405085] mmc1: unexpected status 0x800900 after switch
-> [   93.408474] mmc1: switch to bus width 1 failed
-> [   93.408482] mmc1: mmc_select_hs200 failed, error -110
-> [   93.408492] mmc1: error -110 during resume (card was removed?)
-> [   93.408705] PM: resume of devices complete after 213.453 msecs
->
-> Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
->
-> ---
->
-> Changes in v2:
-> - remove mmc_power_off
-> - take f_min into consideration
->
->  drivers/mmc/core/mmc.c | 19 +++++++++++++++++--
->  1 file changed, 17 insertions(+), 2 deletions(-)
->
-> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-> index 403b97b..a2891c1 100644
-> --- a/drivers/mmc/core/mmc.c
-> +++ b/drivers/mmc/core/mmc.c
-> @@ -1945,6 +1945,7 @@ static int mmc_suspend(struct mmc_host *host)
->  static int _mmc_resume(struct mmc_host *host)
->  {
->  	int err = 0;
-> +	int i;
->
->  	BUG_ON(!host);
->  	BUG_ON(!host->card);
-> @@ -1954,8 +1955,22 @@ static int _mmc_resume(struct mmc_host *host)
->  	if (!mmc_card_suspended(host->card))
->  		goto out;
->
-> -	mmc_power_up(host, host->card->ocr);
-> -	err = mmc_init_card(host, host->card->ocr, host->card);
-> +	/*
-> +	 * Let's try to fallback the host->f_init
-> +	 * if failing to init mmc card after resume.
-> +	 */
-> +	for (i = 0; i < ARRAY_SIZE(freqs); i++) {
-> +		if (host->f_init < max(freqs[i], host->f_min))
-> +			continue;
-> +		else
-> +			host->f_init = max(freqs[i], host->f_min);
-> +
-> +		mmc_power_up(host, host->card->ocr);
-> +		err = mmc_init_card(host, host->card->ocr, host->card);
-> +		if (!err)
-> +			break;
-> +	}
-> +
->  	mmc_card_clr_suspended(host->card);
->
->  out:
->
+For the host, when failing to sample cmd's response due to
+tuning stuff, we still return -EIO as it's quite vague to figure
+out whether it related to signal or just the broken devices, especially
+for the card type detection when booting kernel as all things go well
+but the cmd set used.
 
+But for the data phase, if receiving the cmd's response which
+carrys data transfer, we should have more confidence that it
+is very probably related to the tuning stuff.
 
+Just as the log shown above, we sometimes suffer too much
+this kind of pain as the dw_mmc return -EIO for the case, so
+mmc-core will not do retune and caller drivers like bcm's wifi
+driver, still retry the failure more and more untile dw_mmc
+finally generate CRC.
+
+Adrian suggested that drivers who care the specific cases should
+call mmc_retune_needed rather than doing it in mmc core. It makes
+sense but I'm considering that -EILSEQ actually means illegal sequence
+, so we use it for CRC cases. Meanwhile, SBE/EBE indicate the illegal
+sequence of start bit or end bit for data0~7. So I realize that we should
+use -EILSEQ for them both as well CRC cases.
+
+Suggested-by: Adrian Hunter <adrian.hunter@intel.com>
+Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
+---
+
+ drivers/mmc/host/dw_mmc.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+index 32380d5..b36a4f5 100644
+--- a/drivers/mmc/host/dw_mmc.c
++++ b/drivers/mmc/host/dw_mmc.c
+@@ -1691,11 +1691,11 @@ static int dw_mci_data_complete(struct dw_mci *host, struct mmc_data *data)
+ 				data->error = -ETIMEDOUT;
+ 			} else if (host->dir_status ==
+ 					DW_MCI_RECV_STATUS) {
+-				data->error = -EIO;
++				data->error = -EILSEQ;
+ 			}
+ 		} else {
+ 			/* SDMMC_INT_SBE is included */
+-			data->error = -EIO;
++			data->error = -EILSEQ;
+ 		}
+ 
+ 		dev_dbg(host->dev, "data error, status 0x%08x\n", status);
 -- 
-Best Regards
-Shawn Lin
+2.3.7
+
 
