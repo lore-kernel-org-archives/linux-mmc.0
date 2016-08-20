@@ -1,63 +1,97 @@
-From: SF Markus Elfring <elfring@users.sourceforge.net>
-Subject: [PATCH 2/2] mmc-block: Rename jump labels in
- mmc_blk_ioctl_copy_from_user()
-Date: Fri, 19 Aug 2016 23:12:05 +0200
-Message-ID: <6b8e8d4b-3c82-af57-1bad-b143654a8d70@users.sourceforge.net>
-References: <566ABCD9.1060404@users.sourceforge.net>
- <68870228-c6a0-5de9-daee-2522a1303857@users.sourceforge.net>
+From: Shawn Lin <shawn.lin@rock-chips.com>
+Subject: Re: [PATCH v2 2/2] mmc: core: fall back host->f_init if failing to
+ init mmc card after resume
+Date: Sat, 20 Aug 2016 11:02:00 +0800
+Message-ID: <6a9e58af-d4fd-3426-220b-fc5022cf366d@rock-chips.com>
+References: <1468979860-28712-1-git-send-email-shawn.lin@rock-chips.com>
+ <1468979860-28712-2-git-send-email-shawn.lin@rock-chips.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
+Content-Type: text/plain; charset=gbk; format=flowed
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <68870228-c6a0-5de9-daee-2522a1303857@users.sourceforge.net>
-Sender: linux-kernel-owner@vger.kernel.org
-To: linux-mmc@vger.kernel.org, Adrian Hunter <adrian.hunter@intel.com>, Grant Grundler <grundler@chromium.org>, Jens Axboe <axboe@fb.com>, Jon Hunter <jonathanh@nvidia.com>, Mike Christie <mchristi@redhat.com>, Shawn Lin <shawn.lin@rock-chips.com>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: LKML <linux-kernel@vger.kernel.org>, kernel-janitors@vger.kernel.org, Julia Lawall <julia.lawall@lip6.fr>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from lucky1.263xmail.com ([211.157.147.133]:41025 "EHLO
+        lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750838AbcHTDCJ (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 19 Aug 2016 23:02:09 -0400
+In-Reply-To: <1468979860-28712-2-git-send-email-shawn.lin@rock-chips.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: shawn.lin@rock-chips.com, Adrian Hunter <adrian.hunter@intel.com>, Jaehoon Chung <jh80.chung@samsung.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Doug Anderson <dianders@chromium.org>, linux-rockchip@lists.infradead.org
 
-From: Markus Elfring <elfring@users.sourceforge.net>
-Date: Fri, 19 Aug 2016 22:52:50 +0200
+Hi Ulf,
 
-Adjust jump targets according to the Linux coding style convention.
+Any idea to share with this patch? :)
 
-Signed-off-by: Markus Elfring <elfring@users.sourceforge.net>
----
- drivers/mmc/card/block.c | 8 ++++----
- 1 file changed, 4 insertions(+), 4 deletions(-)
+On 2016/7/20 9:57, Shawn Lin wrote:
+> We observed the failure of initializing card after resume
+> accidentally. It's hard to reproduce but we did get report from
+> the suspend/resume test of our RK3399 mp test farm . Unfortunately,
+> we still fail to figure out what was going wrong at that time.
+> Also we can't achieve it by retrying the host->f_init without falling
+> back it. But this patch will solve the problem as we could add some log
+> there and see that we resume the mmc card successfully after falling
+> back the host->f_init. There is no obvious side effect found, so it seems
+> this patch will improve the stability.
+>
+> [   93.405085] mmc1: unexpected status 0x800900 after switch
+> [   93.408474] mmc1: switch to bus width 1 failed
+> [   93.408482] mmc1: mmc_select_hs200 failed, error -110
+> [   93.408492] mmc1: error -110 during resume (card was removed?)
+> [   93.408705] PM: resume of devices complete after 213.453 msecs
+>
+> Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
+>
+> ---
+>
+> Changes in v2:
+> - remove mmc_power_off
+> - take f_min into consideration
+>
+>  drivers/mmc/core/mmc.c | 19 +++++++++++++++++--
+>  1 file changed, 17 insertions(+), 2 deletions(-)
+>
+> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+> index 403b97b..a2891c1 100644
+> --- a/drivers/mmc/core/mmc.c
+> +++ b/drivers/mmc/core/mmc.c
+> @@ -1945,6 +1945,7 @@ static int mmc_suspend(struct mmc_host *host)
+>  static int _mmc_resume(struct mmc_host *host)
+>  {
+>  	int err = 0;
+> +	int i;
+>
+>  	BUG_ON(!host);
+>  	BUG_ON(!host->card);
+> @@ -1954,8 +1955,22 @@ static int _mmc_resume(struct mmc_host *host)
+>  	if (!mmc_card_suspended(host->card))
+>  		goto out;
+>
+> -	mmc_power_up(host, host->card->ocr);
+> -	err = mmc_init_card(host, host->card->ocr, host->card);
+> +	/*
+> +	 * Let's try to fallback the host->f_init
+> +	 * if failing to init mmc card after resume.
+> +	 */
+> +	for (i = 0; i < ARRAY_SIZE(freqs); i++) {
+> +		if (host->f_init < max(freqs[i], host->f_min))
+> +			continue;
+> +		else
+> +			host->f_init = max(freqs[i], host->f_min);
+> +
+> +		mmc_power_up(host, host->card->ocr);
+> +		err = mmc_init_card(host, host->card->ocr, host->card);
+> +		if (!err)
+> +			break;
+> +	}
+> +
+>  	mmc_card_clr_suspended(host->card);
+>
+>  out:
+>
 
-diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
-index 6ce9492..0d83c56 100644
---- a/drivers/mmc/card/block.c
-+++ b/drivers/mmc/card/block.c
-@@ -346,13 +346,13 @@ static struct mmc_blk_ioc_data *mmc_blk_ioctl_copy_from_user(
- 
- 	if (copy_from_user(&idata->ic, user, sizeof(idata->ic))) {
- 		idata = ERR_PTR(-EFAULT);
--		goto idata_err;
-+		goto free_idata;
- 	}
- 
- 	idata->buf_bytes = (u64) idata->ic.blksz * idata->ic.blocks;
- 	if (idata->buf_bytes > MMC_IOC_MAX_BYTES) {
- 		idata = ERR_PTR(-EOVERFLOW);
--		goto idata_err;
-+		goto free_idata;
- 	}
- 
- 	if (!idata->buf_bytes) {
-@@ -365,11 +365,11 @@ static struct mmc_blk_ioc_data *mmc_blk_ioctl_copy_from_user(
- 				 idata->buf_bytes);
- 	if (IS_ERR(idata->buf)) {
- 		idata = (void *) idata->buf;
--		goto idata_err;
-+		goto free_idata;
- 	}
- 	return idata;
- 
--idata_err:
-+free_idata:
- 	kfree(idata);
- out:
- 	return idata;
+
 -- 
-2.9.3
+Best Regards
+Shawn Lin
+
