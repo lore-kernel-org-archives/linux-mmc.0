@@ -1,84 +1,107 @@
-From: Shawn Lin <shawn.lin@rock-chips.com>
-Subject: [PATCH] mmc: dw_mmc: return -EILSEQ for EBE and SBE error
-Date: Sat, 20 Aug 2016 11:38:55 +0800
-Message-ID: <1471664335-9650-1-git-send-email-shawn.lin@rock-chips.com>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from lucky1.263xmail.com ([211.157.147.130]:48574 "EHLO
-        lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752541AbcHTDnP (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 19 Aug 2016 23:43:15 -0400
-Sender: linux-mmc-owner@vger.kernel.org
+From: walter harms <wharms@bfs.de>
+Subject: Re: [PATCH 1/2] mmc-block: Use memdup_user() rather than duplicating
+ its implementation
+Date: Sat, 20 Aug 2016 11:25:15 +0200
+Message-ID: <57B821FB.8050404@bfs.de>
+References: <566ABCD9.1060404@users.sourceforge.net> <68870228-c6a0-5de9-daee-2522a1303857@users.sourceforge.net> <10db7d07-0cee-041f-8755-de412a12bc81@users.sourceforge.net>
+Reply-To: wharms@bfs.de
+Mime-Version: 1.0
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <10db7d07-0cee-041f-8755-de412a12bc81@users.sourceforge.net>
+Sender: linux-kernel-owner@vger.kernel.org
+Cc: linux-mmc@vger.kernel.org, Adrian Hunter <adrian.hunter@intel.com>, Grant Grundler <grundler@chromium.org>, Jens Axboe <axboe@fb.com>, Jon Hunter <jonathanh@nvidia.com>, Mike Christie <mchristi@redhat.com>, Shawn Lin <shawn.lin@rock-chips.com>, Ulf Hansson <ulf.hansson@linaro.org>, LKML <linux-kernel@vger.kernel.org>, kernel-janitors@vger.kernel.org, Julia Lawall <julia.lawall@lip6.fr>
 List-Id: linux-mmc@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Doug Anderson <dianders@chromium.org>, Brian Norris <briannorris@chromium.org>, Heiko Stuebner <heiko@sntech.de>, linux-rockchip@lists.infradead.org, Shawn Lin <shawn.lin@rock-chips.com>
-
-The following log we found indicate the fact that dw_mmc
-didn't treat EBE or SBE as a similar problem as CRC error.
--EIO is quite not informative as it may indicate that the device
-is broken rather than that of tuning stuff.
-
-...
-[ 89.057226] bcmsdh_sdmmc: Failed to Read byte F1:@0x1001f=ff, Err: -5
-[ 89.058811] bcmsdh_sdmmc: Failed to Read byte F1:@0x1001f=ff, Err: -5
-[ 89.059415] bcmsdh_sdmmc: Failed to Read byte F1:@0x1000e=ff, Err: -84
-[ 89.254248] dwmmc_rockchip fe310000.dwmmc: Successfully tuned phase to 199
-[ 89.273912] dhd_set_suspend: Remove extra suspend setting
-[ 89.274478] dhd_enable_packet_filter: enter, value = 0
-64 bytes from 112.90.83.112: icmp_seq=24 ttl=53 time=1321 ms
-64 bytes from 112.90.83.112: icmp_seq=25 ttl=53 time=319 ms
-64 bytes from 112.90.83.112: icmp_seq=26 ttl=53 time=69.8 ms
-64 bytes from 112.90.83.112: icmp_seq=27 ttl=53 time=37.5 ms
-...
-
-For the host, when failing to sample cmd's response due to
-tuning stuff, we still return -EIO as it's quite vague to figure
-out whether it related to signal or just the broken devices, especially
-for the card type detection when booting kernel as all things go well
-but the cmd set used.
-
-But for the data phase, if receiving the cmd's response which
-carrys data transfer, we should have more confidence that it
-is very probably related to the tuning stuff.
-
-Just as the log shown above, we sometimes suffer too much
-this kind of pain as the dw_mmc return -EIO for the case, so
-mmc-core will not do retune and caller drivers like bcm's wifi
-driver, still retry the failure more and more untile dw_mmc
-finally generate CRC.
-
-Adrian suggested that drivers who care the specific cases should
-call mmc_retune_needed rather than doing it in mmc core. It makes
-sense but I'm considering that -EILSEQ actually means illegal sequence
-, so we use it for CRC cases. Meanwhile, SBE/EBE indicate the illegal
-sequence of start bit or end bit for data0~7. So I realize that we should
-use -EILSEQ for them both as well CRC cases.
-
-Suggested-by: Adrian Hunter <adrian.hunter@intel.com>
-Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
----
-
- drivers/mmc/host/dw_mmc.c | 4 ++--
- 1 file changed, 2 insertions(+), 2 deletions(-)
-
-diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index 32380d5..b36a4f5 100644
---- a/drivers/mmc/host/dw_mmc.c
-+++ b/drivers/mmc/host/dw_mmc.c
-@@ -1691,11 +1691,11 @@ static int dw_mci_data_complete(struct dw_mci *host, struct mmc_data *data)
- 				data->error = -ETIMEDOUT;
- 			} else if (host->dir_status ==
- 					DW_MCI_RECV_STATUS) {
--				data->error = -EIO;
-+				data->error = -EILSEQ;
- 			}
- 		} else {
- 			/* SDMMC_INT_SBE is included */
--			data->error = -EIO;
-+			data->error = -EILSEQ;
- 		}
- 
- 		dev_dbg(host->dev, "data error, status 0x%08x\n", status);
--- 
-2.3.7
 
 
+
+Am 19.08.2016 23:10, schrieb SF Markus Elfring:
+> From: Markus Elfring <elfring@users.sourceforge.net>
+> Date: Fri, 19 Aug 2016 22:46:38 +0200
+> 
+> * Reuse existing functionality from memdup_user() instead of keeping
+>   duplicate source code.
+> 
+>   This issue was detected by using the Coccinelle software.
+> 
+> * Delete the integer variable "err" then because the pointer
+>   variable "idata" should be sufficient to handle return values alone
+>   in this function.
+> 
+> Signed-off-by: Markus Elfring <elfring@users.sourceforge.net>
+> ---
+>  drivers/mmc/card/block.c | 26 +++++++++-----------------
+>  1 file changed, 9 insertions(+), 17 deletions(-)
+> 
+> diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+> index 48a5dd7..6ce9492 100644
+> --- a/drivers/mmc/card/block.c
+> +++ b/drivers/mmc/card/block.c
+> @@ -337,22 +337,21 @@ static struct mmc_blk_ioc_data *mmc_blk_ioctl_copy_from_user(
+>  	struct mmc_ioc_cmd __user *user)
+>  {
+>  	struct mmc_blk_ioc_data *idata;
+> -	int err;
+>  
+>  	idata = kmalloc(sizeof(*idata), GFP_KERNEL);
+>  	if (!idata) {
+> -		err = -ENOMEM;
+> +		idata = ERR_PTR(-ENOMEM);
+>  		goto out;
+>  	}
+>  
+>  	if (copy_from_user(&idata->ic, user, sizeof(idata->ic))) {
+> -		err = -EFAULT;
+> +		idata = ERR_PTR(-EFAULT);
+>  		goto idata_err;
+>  	}
+>  
+>  	idata->buf_bytes = (u64) idata->ic.blksz * idata->ic.blocks;
+>  	if (idata->buf_bytes > MMC_IOC_MAX_BYTES) {
+> -		err = -EOVERFLOW;
+> +		idata = ERR_PTR(-EOVERFLOW);
+>  		goto idata_err;
+>  	}
+>  
+> @@ -361,26 +360,19 @@ static struct mmc_blk_ioc_data *mmc_blk_ioctl_copy_from_user(
+>  		return idata;
+>  	}
+>  
+> -	idata->buf = kmalloc(idata->buf_bytes, GFP_KERNEL);
+> -	if (!idata->buf) {
+> -		err = -ENOMEM;
+> +	idata->buf = memdup_user((void __user *)(unsigned long)
+> +				 idata->ic.data_ptr,
+> +				 idata->buf_bytes);
+> +	if (IS_ERR(idata->buf)) {
+> +		idata = (void *) idata->buf;
+>  		goto idata_err;
+>  	}
+> -
+> -	if (copy_from_user(idata->buf, (void __user *)(unsigned long)
+> -					idata->ic.data_ptr, idata->buf_bytes)) {
+> -		err = -EFAULT;
+> -		goto copy_err;
+> -	}
+> -
+>  	return idata;
+>  
+> -copy_err:
+> -	kfree(idata->buf);
+>  idata_err:
+>  	kfree(idata);
+>  out:
+> -	return ERR_PTR(err);
+> +	return idata;
+>  }
+
+
+This looks strange, returning a freed pointer is a bad idea. I suggest a
+idata=NULL after kfree().
+
+re,
+ wh
+
+>  
+>  static int mmc_blk_ioctl_copy_to_user(struct mmc_ioc_cmd __user *ic_ptr,
