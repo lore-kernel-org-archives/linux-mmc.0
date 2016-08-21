@@ -1,54 +1,89 @@
-From: Shawn Lin <shawn.lin@rock-chips.com>
-Subject: [PATCH] mmc: sdio: get seg_size after the check of card
-Date: Sun, 21 Aug 2016 12:30:08 +0800
-Message-ID: <1471753808-1087-1-git-send-email-shawn.lin@rock-chips.com>
+From: Hans de Goede <hdegoede@redhat.com>
+Subject: 4.8-rc1 REGRESSION mmc-blk triggers WARN_ON(!host->claimed), related
+ to: "drivers: use req op accessor" ?
+Date: Sun, 21 Aug 2016 17:15:43 +0200
+Message-ID: <6e68ae5a-4b79-a636-2c46-5726cf2cc44b@redhat.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from lucky1.263xmail.com ([211.157.147.132]:37311 "EHLO
-        lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750848AbcHUEe2 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sun, 21 Aug 2016 00:34:28 -0400
-Received: from shawn.lin?rock-chips.com (unknown [192.168.167.152])
-        by lucky1.263xmail.com (Postfix) with ESMTP id D9FFF63592
-        for <linux-mmc@vger.kernel.org>; Sun, 21 Aug 2016 12:34:22 +0800 (CST)
+Received: from mx1.redhat.com ([209.132.183.28]:50806 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1753190AbcHUPWK (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Sun, 21 Aug 2016 11:22:10 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc@vger.kernel.org, Shawn Lin <shawn.lin@rock-chips.com>
+To: Ulf Hansson <ulf.hansson@linaro.org>, Mike Christie <mchristi@redhat.com>, Jens Axboe <axboe@fb.com>, regressions@leemhuis.info
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-When using mmc_io_rw_extended. it's intent to avoid
-null pointer of card but actually it didn't prevent
-it as the seg_size already use the card. So we need
-to move this after the check.
+Hi All,
 
-Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
----
+With 4.8-rc1 I'm seeing WARN_ON(!host->claimed) triggering in both
+mmc_start_request() as well as in mmc_release_host(). The first
+indicating that we're executing mmc commands without doing
+mmc_claim_host() and the second one indicating that we're
+releasing the host without having claimed it first.
 
- drivers/mmc/core/sdio_ops.c | 4 +++-
- 1 file changed, 3 insertions(+), 1 deletion(-)
+The backtraces all point to mmc_blk_issue_rq(). I've done
+a very naive hack / workaround:
 
-diff --git a/drivers/mmc/core/sdio_ops.c b/drivers/mmc/core/sdio_ops.c
-index 34f6e80..15a06b8 100644
---- a/drivers/mmc/core/sdio_ops.c
-+++ b/drivers/mmc/core/sdio_ops.c
-@@ -127,7 +127,7 @@ int mmc_io_rw_extended(struct mmc_card *card, int write, unsigned fn,
- 	struct scatterlist sg, *sg_ptr;
- 	struct sg_table sgtable;
- 	unsigned int nents, left_size, i;
--	unsigned int seg_size = card->host->max_seg_size;
-+	unsigned int seg_size;
- 
- 	BUG_ON(!card);
- 	BUG_ON(fn > 7);
-@@ -137,6 +137,8 @@ int mmc_io_rw_extended(struct mmc_card *card, int write, unsigned fn,
- 	if (addr & ~0x1FFFF)
- 		return -EINVAL;
- 
-+	seg_size = card->host->max_seg_size;
+--- a/drivers/mmc/card/block.c
++++ b/drivers/mmc/card/block.c
+@@ -2151,9 +2151,7 @@ static int mmc_blk_issue_rq(struct mmc_queue *mq, struct request *req)
+  	struct mmc_host *host = card->host;
+  	unsigned long flags;
+
+-	if (req && !mq->mqrq_prev->req)
+-		/* claim host only for the first request */
+-		mmc_get_card(card);
++	mmc_get_card(card);
+
+  	ret = mmc_blk_part_switch(card, md);
+  	if (ret) {
+@@ -2190,15 +2188,8 @@ static int mmc_blk_issue_rq(struct mmc_queue *mq, struct request *req)
+  	}
+
+  out:
+-	if ((!req && !(mq->flags & MMC_QUEUE_NEW_REQUEST)) ||
+-	    mmc_req_is_special(req))
+-		/*
+-		 * Release host when there are no more requests
+-		 * and after special request(discard, flush) is done.
+-		 * In case sepecial request, there is no reentry to
+-		 * the 'mmc_blk_issue_rq' with 'mqrq_prev->req'.
+-		 */
+-		mmc_put_card(card);
++	mmc_put_card(card);
 +
- 	mrq.cmd = &cmd;
- 	mrq.data = &data;
- 
--- 
-2.3.7
+  	return ret;
+  }
 
+
+Which fixes this, further pointing to the somewhat magical claim / release
+code in mmc_blk_issue_rq() being the culprit.
+
+Looking at recent commits these 2 stand out as possible causes of this:
+
+https://git.kernel.org/cgit/linux/kernel/git/torvalds/linux.git/commit/?id=c2df40dfb8c015211ec55f4b1dd0587f875c7b34
+https://git.kernel.org/cgit/linux/kernel/git/torvalds/linux.git/commit/?id=3a5e02ced11e22ecd9da3d6710afe15bcfee1d10
+
+I've the feeling that one of these is making mmc_blk_issue_rq() not claiming
+the host while it should do so ...
+
+Maybe instead of the magic at the top we need a simple bool to check
+if the host is already claimed by the mmc_queue code ?
+
+I can reproduce the WARN_ON's pretty much at will (running 4.8-rc1 on
+Allwinner ARM devices with rootfs on a sdcard), let me know if you've
+a fix you want me to test.
+
+Regards,
+
+Hans
+
+
+p.s.
+
+Besides the WARN_ON triggering another side-effect of this is that the
+machines will hang at poweroff.
 
