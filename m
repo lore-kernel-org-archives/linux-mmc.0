@@ -1,58 +1,62 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH -next] mmc: sdhci-bcm-kona: fix error return code in sdhci_bcm_kona_probe()
-Date: Mon, 22 Aug 2016 15:39:12 +0200
-Message-ID: <CAPDyKFqO3Qi4NW0mOhfbNXeAgkb1FjJr8L9MsOuDeh_quoH8Wg@mail.gmail.com>
-References: <1469722664-15136-1-git-send-email-weiyj.lk@gmail.com>
+Subject: Re: [PATCH 06/11] mmc: sdhci-of-esdhc: use of_property_read_bool
+Date: Mon, 22 Aug 2016 15:39:27 +0200
+Message-ID: <CAPDyKFq8jbmrY78nZnKpbwkg6_Zqx6XfJw_3FbD=HKMCYvw_sA@mail.gmail.com>
+References: <1470387411-15879-1-git-send-email-Julia.Lawall@lip6.fr> <1470387411-15879-7-git-send-email-Julia.Lawall@lip6.fr>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wm0-f44.google.com ([74.125.82.44]:38271 "EHLO
-        mail-wm0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1755135AbcHVNjP (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 22 Aug 2016 09:39:15 -0400
-Received: by mail-wm0-f44.google.com with SMTP id o80so144704044wme.1
-        for <linux-mmc@vger.kernel.org>; Mon, 22 Aug 2016 06:39:15 -0700 (PDT)
-In-Reply-To: <1469722664-15136-1-git-send-email-weiyj.lk@gmail.com>
+Received: from mail-wm0-f43.google.com ([74.125.82.43]:37600 "EHLO
+        mail-wm0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1755455AbcHVNja (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 22 Aug 2016 09:39:30 -0400
+Received: by mail-wm0-f43.google.com with SMTP id i5so144988058wmg.0
+        for <linux-mmc@vger.kernel.org>; Mon, 22 Aug 2016 06:39:29 -0700 (PDT)
+In-Reply-To: <1470387411-15879-7-git-send-email-Julia.Lawall@lip6.fr>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Wei Yongjun <weiyj.lk@gmail.com>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, Florian Fainelli <f.fainelli@gmail.com>, Ray Jui <rjui@broadcom.com>, Scott Branden <sbranden@broadcom.com>, bcm-kernel-feedback-list@broadcom.com, linux-mmc <linux-mmc@vger.kernel.org>
+To: Julia Lawall <Julia.Lawall@lip6.fr>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, kernel-janitors@vger.kernel.org, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 
-On 28 July 2016 at 18:17, Wei Yongjun <weiyj.lk@gmail.com> wrote:
-> In clk_set_rate() or clk_prepare_enable() error handling case, the
-> error return code ret is not set, so sdhci_bcm_kona_probe() return
-> 0 in those error cases.
+On 5 August 2016 at 10:56, Julia Lawall <Julia.Lawall@lip6.fr> wrote:
+> Use of_property_read_bool to check for the existence of a property.
 >
-> Signed-off-by: Wei Yongjun <weiyj.lk@gmail.com>
+> The semantic patch that makes this change is as follows:
+> (http://coccinelle.lip6.fr/)
+>
+> // <smpl>
+> @@
+> expression e1,e2;
+> statement S2,S1;
+> @@
+> -       if (of_get_property(e1,e2,NULL))
+> +       if (of_property_read_bool(e1,e2))
+>         S1 else S2
+> // </smpl>
+>
+> Signed-off-by: Julia Lawall <Julia.Lawall@lip6.fr>
 
 Thanks, applied for next!
 
 Kind regards
 Uffe
 
+>
 > ---
->  drivers/mmc/host/sdhci-bcm-kona.c | 6 ++++--
->  1 file changed, 4 insertions(+), 2 deletions(-)
+>  drivers/mmc/host/sdhci-of-esdhc.c |    2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
 >
-> diff --git a/drivers/mmc/host/sdhci-bcm-kona.c b/drivers/mmc/host/sdhci-bcm-kona.c
-> index e5c634b..51dd2fd 100644
-> --- a/drivers/mmc/host/sdhci-bcm-kona.c
-> +++ b/drivers/mmc/host/sdhci-bcm-kona.c
-> @@ -253,12 +253,14 @@ static int sdhci_bcm_kona_probe(struct platform_device *pdev)
->                 goto err_pltfm_free;
->         }
+> diff --git a/drivers/mmc/host/sdhci-of-esdhc.c b/drivers/mmc/host/sdhci-of-esdhc.c
+> index 239be2f..fb71c86 100644
+> --- a/drivers/mmc/host/sdhci-of-esdhc.c
+> +++ b/drivers/mmc/host/sdhci-of-esdhc.c
+> @@ -583,7 +583,7 @@ static int sdhci_esdhc_probe(struct platform_device *pdev)
 >
-> -       if (clk_set_rate(pltfm_priv->clk, host->mmc->f_max) != 0) {
-> +       ret = clk_set_rate(pltfm_priv->clk, host->mmc->f_max);
-> +       if (ret) {
->                 dev_err(dev, "Failed to set rate core clock\n");
->                 goto err_pltfm_free;
->         }
+>         np = pdev->dev.of_node;
 >
-> -       if (clk_prepare_enable(pltfm_priv->clk) != 0) {
-> +       ret = clk_prepare_enable(pltfm_priv->clk);
-> +       if (ret) {
->                 dev_err(dev, "Failed to enable core clock\n");
->                 goto err_pltfm_free;
->         }
+> -       if (of_get_property(np, "little-endian", NULL))
+> +       if (of_property_read_bool(np, "little-endian"))
+>                 host = sdhci_pltfm_init(pdev, &sdhci_esdhc_le_pdata,
+>                                         sizeof(struct sdhci_esdhc));
+>         else
 >
