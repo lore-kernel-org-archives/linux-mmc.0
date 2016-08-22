@@ -1,87 +1,45 @@
-From: Michael Weiser <michael.weiser@gmx.de>
-Subject: [PATCH 4/5] mmc: sunxi-mmc: change idma descriptor to __le32
-Date: Mon, 22 Aug 2016 18:42:18 +0200
-Message-ID: <20160822164219.14272-5-michael.weiser@gmx.de>
-References: <20160822164219.14272-1-michael.weiser@gmx.de>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from heinz.dinsnail.net ([85.214.155.104]:35556 "EHLO
-        heinz.dinsnail.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1754533AbcHVQsc (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 22 Aug 2016 12:48:32 -0400
-In-Reply-To: <20160822164219.14272-1-michael.weiser@gmx.de>
-Sender: linux-mmc-owner@vger.kernel.org
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH] mmc: Add mmc_force_detect_change_begin / _end functions
+Date: Mon, 22 Aug 2016 20:21:52 +0200
+Message-ID: <CAPDyKFptVEjy8EQeL0t3xoxLvttHEJdvmmcS4k=8cuJbZEKTxA@mail.gmail.com>
+References: <1470488736-11083-1-git-send-email-hdegoede@redhat.com>
+ <CAPDyKFoTj9=esqaUPiwxLkhCsO98cSDgzdD1phgbXLa7rf6jiw@mail.gmail.com>
+ <831381a3-7cca-1264-29e2-bd40802a815f@redhat.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <831381a3-7cca-1264-29e2-bd40802a815f@redhat.com>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Hans de Goede <hdegoede@redhat.com>
+Cc: devicetree <devicetree@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>, Chen-Yu Tsai <wens@csie.org>, Icenowy Zheng <icenowy@aosc.xyz>, Maxime Ripard <maxime.ripard@free-electrons.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
 List-Id: linux-mmc@vger.kernel.org
-To: linux-arm-kernel@lists.infradead.org
-Cc: Michael Weiser <michael.weiser@gmx.de>, Ulf Hansson <ulf.hansson@linaro.org>, Chen-Yu Tsai <wens@csie.org>, linux-mmc@vger.kernel.org
 
-The sunxi-mmc driver does not take into account the processor may be big
-endian when writing the DMA descriptors. This causes cards not to be
-detected when running a big-endian kernel. Change the descriptors for
-IDMA to use __le32 and ensure they are suitably swapped before writing.
-Tested successfully on the Cubieboard2.
+[...]
 
-Signed-off-by: Michael Weiser <michael.weiser@gmx.de>
-Acked-by: Maxime Ripard <maxime.ripard@free-electrons.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Chen-Yu Tsai <wens@csie.org>
-Cc: linux-mmc@vger.kernel.org
----
- drivers/mmc/host/sunxi-mmc.c | 27 +++++++++++++++------------
- 1 file changed, 15 insertions(+), 12 deletions(-)
+>
+> This would also mean the driver's probe function does not end up
+> getting called twice which certainly is better :)
+>
+> I'm not sure I'm familiar enough with the mmc subsys to come
+> up with a good implementation of this though, nor when I'll have
+> the time to look into this.
+>
+> Any chance you could make a RFC patch ? I can then test it on
+> hardware which actually needs this and bug-fix the code until
+> it actually works :)
 
-diff --git a/drivers/mmc/host/sunxi-mmc.c b/drivers/mmc/host/sunxi-mmc.c
-index 2ec91ce..a1935a1 100644
---- a/drivers/mmc/host/sunxi-mmc.c
-+++ b/drivers/mmc/host/sunxi-mmc.c
-@@ -223,10 +223,10 @@ struct sunxi_mmc_clk_delay {
- };
- 
- struct sunxi_idma_des {
--	u32	config;
--	u32	buf_size;
--	u32	buf_addr_ptr1;
--	u32	buf_addr_ptr2;
-+	__le32 config;
-+	__le32 buf_size;
-+	__le32 buf_addr_ptr1;
-+	__le32 buf_addr_ptr2;
- };
- 
- struct sunxi_mmc_cfg {
-@@ -329,22 +329,25 @@ static void sunxi_mmc_init_idma_des(struct sunxi_mmc_host *host,
- 	int i, max_len = (1 << host->cfg->idma_des_size_bits);
- 
- 	for (i = 0; i < data->sg_len; i++) {
--		pdes[i].config = SDXC_IDMAC_DES0_CH | SDXC_IDMAC_DES0_OWN |
--				 SDXC_IDMAC_DES0_DIC;
-+		pdes[i].config = cpu_to_le32(SDXC_IDMAC_DES0_CH |
-+					     SDXC_IDMAC_DES0_OWN |
-+					     SDXC_IDMAC_DES0_DIC);
- 
- 		if (data->sg[i].length == max_len)
- 			pdes[i].buf_size = 0; /* 0 == max_len */
- 		else
--			pdes[i].buf_size = data->sg[i].length;
-+			pdes[i].buf_size = cpu_to_le32(data->sg[i].length);
- 
- 		next_desc += sizeof(struct sunxi_idma_des);
--		pdes[i].buf_addr_ptr1 = sg_dma_address(&data->sg[i]);
--		pdes[i].buf_addr_ptr2 = (u32)next_desc;
-+		pdes[i].buf_addr_ptr1 =
-+			cpu_to_le32(sg_dma_address(&data->sg[i]));
-+		pdes[i].buf_addr_ptr2 = cpu_to_le32((u32)next_desc);
- 	}
- 
--	pdes[0].config |= SDXC_IDMAC_DES0_FD;
--	pdes[i - 1].config |= SDXC_IDMAC_DES0_LD | SDXC_IDMAC_DES0_ER;
--	pdes[i - 1].config &= ~SDXC_IDMAC_DES0_DIC;
-+	pdes[0].config |= cpu_to_le32(SDXC_IDMAC_DES0_FD);
-+	pdes[i - 1].config |= cpu_to_le32(SDXC_IDMAC_DES0_LD |
-+					  SDXC_IDMAC_DES0_ER);
-+	pdes[i - 1].config &= cpu_to_le32(~SDXC_IDMAC_DES0_DIC);
- 	pdes[i - 1].buf_addr_ptr2 = 0;
- 
- 	/*
--- 
-2.9.2
+Sure, I can do that! I keep you in the loop when I post it.
 
+[...]
+
+Kind regards
+Uffe
