@@ -1,15 +1,14 @@
 From: Maxime Ripard <maxime.ripard@free-electrons.com>
-Subject: Re: [PATCH v2 5/5] ARM: dts: sunxi: Use new sun7i-a20-mmc compatible
- on sun7i and newer
-Date: Mon, 22 Aug 2016 09:54:54 +0200
-Message-ID: <20160822075454.GB7104@lukather>
-References: <1469888748-26085-1-git-send-email-hdegoede@redhat.com>
- <1469888748-26085-6-git-send-email-hdegoede@redhat.com>
- <9b6ed836-27ff-c8c8-d886-d86c787605fc@arm.com>
+Subject: Re: [PATCH v3 1/2] Documentation: dt: Add new compatible to sunxi
+ mmc driver bindings
+Date: Mon, 22 Aug 2016 09:58:47 +0200
+Message-ID: <20160822075847.GD7104@lukather>
+References: <20160801151351.51854-1-icenowy@aosc.xyz>
+ <20160801151351.51854-2-icenowy@aosc.xyz>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="===============4043782391963838261=="
+Content-Type: multipart/mixed; boundary="===============9173572194112743779=="
 Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <9b6ed836-27ff-c8c8-d886-d86c787605fc@arm.com>
+In-Reply-To: <20160801151351.51854-2-icenowy@aosc.xyz>
 List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
  <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
 List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
@@ -19,60 +18,51 @@ List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
  <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
 Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
 Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Andre Przywara <andre.przywara@arm.com>
-Cc: devicetree <devicetree@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, Hans de Goede <hdegoede@redhat.com>, Chen-Yu Tsai <wens@csie.org>, Icenowy Zheng <icenowy@aosc.xyz>, linux-arm-kernel@lists.infradead.org
+To: Icenowy Zheng <icenowy@aosc.xyz>
+Cc: Mark Rutland <mark.rutland@arm.com>, devicetree@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>, Michal Suchanek <hramrach@gmail.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Jaehoon Chung <jh80.chung@samsung.com>, Hans de Goede <hdegoede@redhat.com>, Chen-Yu Tsai <wens@csie.org>, Rob Herring <robh+dt@kernel.org>, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
 
---===============4043782391963838261==
+--===============9173572194112743779==
 Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="QTprm0S8XgL7H0Dt"
+	protocol="application/pgp-signature"; boundary="n2Pv11Ogg/Ox8ay5"
 Content-Disposition: inline
 
 
---QTprm0S8XgL7H0Dt
+--n2Pv11Ogg/Ox8ay5
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
 Content-Transfer-Encoding: quoted-printable
 
-On Mon, Aug 01, 2016 at 02:11:09PM +0100, Andre Przywara wrote:
-> Hi Hans,
+Hi Icenowy,
+
+On Mon, Aug 01, 2016 at 11:13:50PM +0800, Icenowy Zheng wrote:
+> Signed-off-by: Icenowy Zheng <icenowy@aosc.xyz>
+> ---
+> Changes in v2:
+> - Rebased on Hans de Goede's patchset.
 >=20
-> On 30/07/16 15:25, Hans de Goede wrote:
-> > Use the new sun7i-a20-mmc compatible for the mmc controllers on sun7i
-> > and newer.
-> >=20
-> > Signed-off-by: Hans de Goede <hdegoede@redhat.com>
-> > ---
-> > Changes in v2:
-> > -New patch in v2 of this patch-set
-> > ---
-> >  arch/arm/boot/dts/sun6i-a31.dtsi     | 8 ++++----
-> >  arch/arm/boot/dts/sun7i-a20.dtsi     | 8 ++++----
-> >  arch/arm/boot/dts/sun8i-a23-a33.dtsi | 6 +++---
-> >  arch/arm/boot/dts/sun8i-h3.dtsi      | 6 +++---
-> >  4 files changed, 14 insertions(+), 14 deletions(-)
-> >=20
-> > diff --git a/arch/arm/boot/dts/sun6i-a31.dtsi b/arch/arm/boot/dts/sun6i=
--a31.dtsi
-> > index 1867af2..0d24f10 100644
-> > --- a/arch/arm/boot/dts/sun6i-a31.dtsi
-> > +++ b/arch/arm/boot/dts/sun6i-a31.dtsi
-> > @@ -469,7 +469,7 @@
-> >  		};
-> > =20
-> >  		mmc0: mmc@01c0f000 {
-> > -			compatible =3D "allwinner,sun5i-a13-mmc";
-> > +			compatible =3D "allwinner,sun7i-a20-mmc";
+>  Documentation/devicetree/bindings/mmc/sunxi-mmc.txt | 1 +
+>  1 file changed, 1 insertion(+)
 >=20
-> But that breaks systems with newer DTs on older kernels, which do not
-> know about sun7i-a20-mmc.
+> diff --git a/Documentation/devicetree/bindings/mmc/sunxi-mmc.txt b/Docume=
+ntation/devicetree/bindings/mmc/sunxi-mmc.txt
+> index 904ff9f..55cdd80 100644
+> --- a/Documentation/devicetree/bindings/mmc/sunxi-mmc.txt
+> +++ b/Documentation/devicetree/bindings/mmc/sunxi-mmc.txt
+> @@ -13,6 +13,7 @@ Required properties:
+>     * "allwinner,sun5i-a13-mmc"
+>     * "allwinner,sun7i-a20-mmc"
+>     * "allwinner,sun9i-a80-mmc"
+> +   * "allwinner,sun50i-a64-mmc"
+>   - reg : mmc controller base registers
+>   - clocks : a list with 4 phandle + clock specifier pairs
+>   - clock-names : must contain "ahb", "mmc", "output" and "sample"
 
-That's not backward compatibility. That's the forward one, and that
-has never been something we supported.
+You need to document that the output and sample clocks are not
+mandatory in the A64 case.
 
-See https://www.kernel.org/doc/Documentation/devicetree/bindings/ABI.txt
-
+Thanks!
 Maxime
 
 --=20
@@ -80,31 +70,31 @@ Maxime Ripard, Free Electrons
 Embedded Linux and Kernel engineering
 http://free-electrons.com
 
---QTprm0S8XgL7H0Dt
+--n2Pv11Ogg/Ox8ay5
 Content-Type: application/pgp-signature; name="signature.asc"
 
 -----BEGIN PGP SIGNATURE-----
 Version: GnuPG v1
 
-iQIcBAEBAgAGBQJXuq/OAAoJEBx+YmzsjxAg31oP/AgDZi5biao/9jRsTmrrjdTj
-ULa5IfngA4XziercfYkuLqh4rFeGMjsFxRCP8unUHnDvbrzv6KaGHZkwX8z6zal2
-PNS2qPyjLry3mnAVzO9PMwZnhbewKfJvI+4T2Q/O8OMwlpOv7gPFquQeNTmLClBq
-53gYxXz5YM8zp2cjsjS9vlV4t2otwzkS+HGg89AEG7b/lpZDsW/h3b7OltK+TdoU
-0fsZc25At9+wx4cGcwHJC8BVa21uRl1Sny4NdlX/AoJoQKXvf4b0v1mx9TM4l80o
-KIs4Fjh4/3pJ6DfHKkU8wIQGIxju1iaW5qOxFaCXRugDQTQ0teUodf2ZITduAlDO
-MljH2g9lv3P8siwUZnyFnITggSp/aKnWCTtU4vLxar4ulUMU2+c4NctjxT7Dl8gL
-KL6haamfYrvqriUaSWEnXllW4Z5JCzXBi8mGJeNSG4DrR9FbcZH9HxK6sT9abfrh
-DpIsPiwUdBs22iHHB1yKZtkIrvtthJZRZM8d9URFdPYrueGf+kiFteOht6ncJk+V
-HuakdspKIVblTmCUovDK7Ocaka2n6Ai+wXheplK+XAOXaLgqYpCC4wf10cokpiss
-AigwXAZ20s3su87L7moqquCIOQiS60PClWsfyCulQoAPdr/YzAzTpkMgKNm+DNqQ
-O2fj7yYF1zU5eHA2/GOv
-=pqkd
+iQIcBAEBAgAGBQJXurC3AAoJEBx+YmzsjxAgnwEQAJP/gnqBrpJLIs4g0sBJfNoT
+/m/CCLlJIrlk3KGiJmVbtiq+sMXQthFwzSJUogUduADH8pPBB9hydZHoykkr4PLj
+X1A5oy9yfe6+AVJl6FNQyMSEhM6O/2tZLInPqeTXZySUs4WICurIMnhx20eox8EO
+HcI21PPFapyT0anu7lw5nB9wyqw+yGdiEX/sivhKJSDIpXl4KArqfQFh6QH8rbQf
+RQZ9DE/GUSvxteTsEZ1nGmjco4HnMkD99YqEsAnC1lFpzitVWP4w/MHjWS78YENZ
+ByjHT400/zudeapv3hMWFG68j67zIvfgV++6IQPNLXZxmsWF1yfFa4ITHV7ioL6U
+fO86u+f8JShcwncyk1pCdiGZoP8YuoHTN3m3NS7h3bjnq9TKa/+7Nh+S7Owj2K74
+6juJLJ/RGoOVdtpHbz4N+s3ShMM7Ks1MYYl2/1OxI+PnDbW8Th3WFH9ebUt7s8UH
+0Gq6e6pJOU+zgZEZqdSUIndo9ZSLVZP13BrrJY+FFsFwku96vVkY2WyE6rV1zGR0
+8jjRNa7/mDgZVUXAsbRtmg+89ixteUowSP4hlK1Jh98sEBGeXyq8+0WokGyqQyMu
+U2gnfRHTACMWZBS2XfN/dedSZ46ZUxdJUL2SG96DQ62KGzOGutCBnUp4WbDbJj7t
+62i2aBFPZvpwgitftQ3t
+=11Vr
 -----END PGP SIGNATURE-----
 
---QTprm0S8XgL7H0Dt--
+--n2Pv11Ogg/Ox8ay5--
 
 
---===============4043782391963838261==
+--===============9173572194112743779==
 Content-Type: text/plain; charset="us-ascii"
 MIME-Version: 1.0
 Content-Transfer-Encoding: 7bit
@@ -115,4 +105,4 @@ linux-arm-kernel mailing list
 linux-arm-kernel@lists.infradead.org
 http://lists.infradead.org/mailman/listinfo/linux-arm-kernel
 
---===============4043782391963838261==--
+--===============9173572194112743779==--
