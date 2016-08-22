@@ -1,55 +1,50 @@
-From: Icenowy Zheng <icenowy@aosc.xyz>
-Subject: Re: [PATCH v3 1/2] Documentation: dt: Add new compatible to sunxi mmc
- driver bindings
-Date: Mon, 22 Aug 2016 16:47:51 +0800
-Message-ID: <370671471855671@web30j.yandex.ru>
-References: <20160801151351.51854-1-icenowy@aosc.xyz>
- <20160801151351.51854-2-icenowy@aosc.xyz> <20160822075847.GD7104@lukather>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <20160822075847.GD7104@lukather>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Maxime Ripard <maxime.ripard@free-electrons.com>
-Cc: Mark Rutland <mark.rutland@arm.com>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, Michal Suchanek <hramrach@gmail.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Jaehoon Chung <jh80.chung@samsung.com>, Hans de Goede <hdegoede@redhat.com>, Chen-Yu Tsai <wens@csie.org>, Rob Herring <robh+dt@kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
+From: Shawn Lin <shawn.lin@rock-chips.com>
+Subject: [PATCH] MMC: meson: don't use priv host structure before we verify it
+Date: Mon, 22 Aug 2016 16:52:25 +0800
+Message-ID: <1471855945-16264-1-git-send-email-shawn.lin@rock-chips.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from lucky1.263xmail.com ([211.157.147.133]:39986 "EHLO
+        lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1754491AbcHVI4v (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 22 Aug 2016 04:56:51 -0400
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Kevin Hilman <khilman@baylibre.com>, linux-mmc@vger.kernel.org, Shawn Lin <shawn.lin@rock-chips.com>
 
-CgoyMi4wOC4yMDE2LCAxNTo1OCwgIk1heGltZSBSaXBhcmQiIDxtYXhpbWUucmlwYXJkQGZyZWUt
-ZWxlY3Ryb25zLmNvbT46Cj4gSGkgSWNlbm93eSwKPgo+IE9uIE1vbiwgQXVnIDAxLCAyMDE2IGF0
-IDExOjEzOjUwUE0gKzA4MDAsIEljZW5vd3kgWmhlbmcgd3JvdGU6Cj4+IMKgU2lnbmVkLW9mZi1i
-eTogSWNlbm93eSBaaGVuZyA8aWNlbm93eUBhb3NjLnh5ej4KPj4gwqAtLS0KPj4gwqBDaGFuZ2Vz
-IGluIHYyOgo+PiDCoC0gUmViYXNlZCBvbiBIYW5zIGRlIEdvZWRlJ3MgcGF0Y2hzZXQuCj4+Cj4+
-IMKgwqBEb2N1bWVudGF0aW9uL2RldmljZXRyZWUvYmluZGluZ3MvbW1jL3N1bnhpLW1tYy50eHQg
-fCAxICsKPj4gwqDCoDEgZmlsZSBjaGFuZ2VkLCAxIGluc2VydGlvbigrKQo+Pgo+PiDCoGRpZmYg
-LS1naXQgYS9Eb2N1bWVudGF0aW9uL2RldmljZXRyZWUvYmluZGluZ3MvbW1jL3N1bnhpLW1tYy50
-eHQgYi9Eb2N1bWVudGF0aW9uL2RldmljZXRyZWUvYmluZGluZ3MvbW1jL3N1bnhpLW1tYy50eHQK
-Pj4gwqBpbmRleCA5MDRmZjlmLi41NWNkZDgwIDEwMDY0NAo+PiDCoC0tLSBhL0RvY3VtZW50YXRp
-b24vZGV2aWNldHJlZS9iaW5kaW5ncy9tbWMvc3VueGktbW1jLnR4dAo+PiDCoCsrKyBiL0RvY3Vt
-ZW50YXRpb24vZGV2aWNldHJlZS9iaW5kaW5ncy9tbWMvc3VueGktbW1jLnR4dAo+PiDCoEBAIC0x
-Myw2ICsxMyw3IEBAIFJlcXVpcmVkIHByb3BlcnRpZXM6Cj4+IMKgwqDCoMKgwqAqICJhbGx3aW5u
-ZXIsc3VuNWktYTEzLW1tYyIKPj4gwqDCoMKgwqDCoCogImFsbHdpbm5lcixzdW43aS1hMjAtbW1j
-Igo+PiDCoMKgwqDCoMKgKiAiYWxsd2lubmVyLHN1bjlpLWE4MC1tbWMiCj4+IMKgKyAqICJhbGx3
-aW5uZXIsc3VuNTBpLWE2NC1tbWMiCj4+IMKgwqDCoC0gcmVnIDogbW1jIGNvbnRyb2xsZXIgYmFz
-ZSByZWdpc3RlcnMKPj4gwqDCoMKgLSBjbG9ja3MgOiBhIGxpc3Qgd2l0aCA0IHBoYW5kbGUgKyBj
-bG9jayBzcGVjaWZpZXIgcGFpcnMKPj4gwqDCoMKgLSBjbG9jay1uYW1lcyA6IG11c3QgY29udGFp
-biAiYWhiIiwgIm1tYyIsICJvdXRwdXQiIGFuZCAic2FtcGxlIgo+Cj4gWW91IG5lZWQgdG8gZG9j
-dW1lbnQgdGhhdCB0aGUgb3V0cHV0IGFuZCBzYW1wbGUgY2xvY2tzIGFyZSBub3QKPiBtYW5kYXRv
-cnkgaW4gdGhlIEE2NCBjYXNlLgoKT2gsIHNvcnJ5LgoKVGhpcyBzZXJpZXMgb2YgcGF0Y2ggaXMg
-ZHJvcHBlZCBub3cuLi4KCkF0IGxlYXN0IEkgYW5kIEFuZHJlIGhhdmUgbm8gU0QgQ2FyZCBzdWl0
-YWJsZSBmb3IgRERSIG1vZGUuLi4KCk1heWJlIHRoZSBwYXRjaGVzIGNhbiBvbmx5IGJlIHRlc3Rl
-ZCBvbiBlTU1DLgoKSG93ZXZlciwgYXQgbGVhc3Qgb24gUGluZTY0LCBvdXIgU0QgQ2FyZHMgYXJl
-IHdvcmtpbmcgc3RlYWlseS4KCj4KPiBUaGFua3MhCj4gTWF4aW1lCj4KPiAtLQo+IE1heGltZSBS
-aXBhcmQsIEZyZWUgRWxlY3Ryb25zCj4gRW1iZWRkZWQgTGludXggYW5kIEtlcm5lbCBlbmdpbmVl
-cmluZwo+IGh0dHA6Ly9mcmVlLWVsZWN0cm9ucy5jb20KCl9fX19fX19fX19fX19fX19fX19fX19f
-X19fX19fX19fX19fX19fX19fX19fX19fCmxpbnV4LWFybS1rZXJuZWwgbWFpbGluZyBsaXN0Cmxp
-bnV4LWFybS1rZXJuZWxAbGlzdHMuaW5mcmFkZWFkLm9yZwpodHRwOi8vbGlzdHMuaW5mcmFkZWFk
-Lm9yZy9tYWlsbWFuL2xpc3RpbmZvL2xpbnV4LWFybS1rZXJuZWwK
+The code of meson_mmc_irq is going to use mmeson_host
+before the santity check of WARN_ON. I believe this's not
+the code's intention, fix it.
+
+Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
+---
+
+ drivers/mmc/host/meson-gxbb.c | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/drivers/mmc/host/meson-gxbb.c b/drivers/mmc/host/meson-gxbb.c
+index 10eac41..bb60535 100644
+--- a/drivers/mmc/host/meson-gxbb.c
++++ b/drivers/mmc/host/meson-gxbb.c
+@@ -626,7 +626,7 @@ static int meson_mmc_read_resp(struct mmc_host *mmc, struct mmc_command *cmd)
+ static irqreturn_t meson_mmc_irq(int irq, void *dev_id)
+ {
+ 	struct meson_host *host = dev_id;
+-	struct mmc_request *mrq = host->mrq;
++	struct mmc_request *mrq;
+ 	struct mmc_command *cmd = host->cmd;
+ 	u32 irq_en, status, raw_status;
+ 	irqreturn_t ret = IRQ_HANDLED;
+@@ -634,6 +634,8 @@ static irqreturn_t meson_mmc_irq(int irq, void *dev_id)
+ 	if (WARN_ON(!host))
+ 		return IRQ_NONE;
+ 
++	mrq = host->mrq;
++
+ 	if (WARN_ON(!mrq))
+ 		return IRQ_NONE;
+ 
+-- 
+2.3.7
+
+
