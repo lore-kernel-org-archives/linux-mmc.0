@@ -1,79 +1,221 @@
-From: Andre Przywara <andre.przywara-5wv7dgnIgG8@public.gmane.org>
-Subject: Re: [PATCH v2 5/5] ARM: dts: sunxi: Use new sun7i-a20-mmc compatible
- on sun7i and newer
-Date: Mon, 22 Aug 2016 10:02:59 +0100
-Message-ID: <a758cbf9-abcb-a5b9-60ac-95ee59711112@arm.com>
-References: <1469888748-26085-1-git-send-email-hdegoede@redhat.com>
- <1469888748-26085-6-git-send-email-hdegoede@redhat.com>
- <9b6ed836-27ff-c8c8-d886-d86c787605fc@arm.com>
- <20160822075454.GB7104@lukather>
+From: Ritesh Harjani <riteshh@codeaurora.org>
+Subject: Re: [PATCH v3 7/9] mmc: sdhci-msm: Implement set_clock callback for
+ sdhci-msm
+Date: Mon, 22 Aug 2016 14:37:58 +0530
+Message-ID: <abd3da08-f74b-8a19-89c9-6fed4a99c9c9@codeaurora.org>
+References: <1471581384-18961-1-git-send-email-riteshh@codeaurora.org>
+ <1471581384-18961-8-git-send-email-riteshh@codeaurora.org>
+ <4e1be7e8-ad6e-b52f-d5ad-258a6d4ed41d@intel.com>
+ <614e25fb-34ad-285d-2abc-0748c89a9c0a@codeaurora.org>
+ <47795735-66ae-5382-77fa-7906833aada0@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
+Content-Type: text/plain; charset=windows-1252; format=flowed
 Content-Transfer-Encoding: 7bit
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20160822075454.GB7104@lukather>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>
-Cc: Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org>, devicetree <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Icenowy Zheng <icenowy-ymACFijhrKM@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+Return-path: <linux-arm-msm-owner@vger.kernel.org>
+In-Reply-To: <47795735-66ae-5382-77fa-7906833aada0@intel.com>
+Sender: linux-arm-msm-owner@vger.kernel.org
+To: Adrian Hunter <adrian.hunter@intel.com>
+Cc: ulf.hansson@linaro.org, bjorn.andersson@linaro.org, shawn.lin@rock-chips.com, jh80.chung@samsung.com, linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org, georgi.djakov@linaro.org, alex.lemberg@sandisk.com, mateusz.nowak@intel.com, Yuliy.Izrailov@sandisk.com, asutoshd@codeaurora.org, kdorfman@codeaurora.org, david.griego@linaro.org, stummala@codeaurora.org, venkatg@codeaurora.org
 List-Id: linux-mmc@vger.kernel.org
 
-Hi,
+Hi Adrian,
 
-On 22/08/16 08:54, Maxime Ripard wrote:
-> On Mon, Aug 01, 2016 at 02:11:09PM +0100, Andre Przywara wrote:
->> Hi Hans,
+
+On 8/22/2016 11:50 AM, Adrian Hunter wrote:
+> On 19/08/16 16:31, Ritesh Harjani wrote:
+>> Hi,
 >>
->> On 30/07/16 15:25, Hans de Goede wrote:
->>> Use the new sun7i-a20-mmc compatible for the mmc controllers on sun7i
->>> and newer.
->>>
->>> Signed-off-by: Hans de Goede <hdegoede-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
->>> ---
->>> Changes in v2:
->>> -New patch in v2 of this patch-set
->>> ---
->>>  arch/arm/boot/dts/sun6i-a31.dtsi     | 8 ++++----
->>>  arch/arm/boot/dts/sun7i-a20.dtsi     | 8 ++++----
->>>  arch/arm/boot/dts/sun8i-a23-a33.dtsi | 6 +++---
->>>  arch/arm/boot/dts/sun8i-h3.dtsi      | 6 +++---
->>>  4 files changed, 14 insertions(+), 14 deletions(-)
->>>
->>> diff --git a/arch/arm/boot/dts/sun6i-a31.dtsi b/arch/arm/boot/dts/sun6i-a31.dtsi
->>> index 1867af2..0d24f10 100644
->>> --- a/arch/arm/boot/dts/sun6i-a31.dtsi
->>> +++ b/arch/arm/boot/dts/sun6i-a31.dtsi
->>> @@ -469,7 +469,7 @@
->>>  		};
->>>  
->>>  		mmc0: mmc@01c0f000 {
->>> -			compatible = "allwinner,sun5i-a13-mmc";
->>> +			compatible = "allwinner,sun7i-a20-mmc";
 >>
->> But that breaks systems with newer DTs on older kernels, which do not
->> know about sun7i-a20-mmc.
-> 
-> That's not backward compatibility. That's the forward one, and that
-> has never been something we supported.
+>> On 8/19/2016 6:34 PM, Adrian Hunter wrote:
+>>> On 19/08/16 07:36, Ritesh Harjani wrote:
+>>>> sdhci-msm controller may have different clk-rates for each
+>>>> bus speed mode. Thus implement set_clock callback for
+>>>> sdhci-msm driver.
+>>>>
+>>>> Signed-off-by: Sahitya Tummala <stummala@codeaurora.org>
+>>>> Signed-off-by: Ritesh Harjani <riteshh@codeaurora.org>
+>>>> ---
+>>>>  drivers/mmc/host/sdhci-msm.c | 103
+>>>> ++++++++++++++++++++++++++++++++++++++++++-
+>>>>  1 file changed, 102 insertions(+), 1 deletion(-)
+>>>>
+>>>> diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
+>>>> index 7c032c3..c0ad9c2 100644
+>>>> --- a/drivers/mmc/host/sdhci-msm.c
+>>>> +++ b/drivers/mmc/host/sdhci-msm.c
+>>>> @@ -89,6 +89,7 @@ struct sdhci_msm_host {
+>>>>      struct mmc_host *mmc;
+>>>>      bool use_14lpp_dll_reset;
+>>>>      struct sdhci_msm_pltfm_data *pdata;
+>>>> +    u32 clk_rate;
+>>>>  };
+>>>>
+>>>>  /* Platform specific tuning */
+>>>> @@ -582,6 +583,106 @@ static unsigned int sdhci_msm_get_min_clock(struct
+>>>> sdhci_host *host)
+>>>>      return msm_host->pdata->clk_table[0];
+>>>>  }
+>>>>
+>>>> +static unsigned int sdhci_msm_get_msm_clk_rate(struct sdhci_host *host,
+>>>> +                    u32 req_clk)
+>>>> +{
+>>>> +    struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+>>>> +    struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
+>>>> +    int count = msm_host->pdata->clk_table_sz;
+>>>> +    unsigned int sel_clk = -1;
+>>>> +    int cnt;
+>>>> +
+>>>> +    if (req_clk < sdhci_msm_get_min_clock(host)) {
+>>>> +        sel_clk = sdhci_msm_get_min_clock(host);
+>>>> +        return sel_clk;
+>>>> +    }
+>>>> +
+>>>> +    for (cnt = 0; cnt < count; cnt++) {
+>>>> +        if (msm_host->pdata->clk_table[cnt] > req_clk) {
+>>>> +            break;
+>>>> +        } else if (msm_host->pdata->clk_table[cnt] == req_clk) {
+>>>> +            sel_clk = msm_host->pdata->clk_table[cnt];
+>>>> +            break;
+>>>> +        } else {
+>>>> +            sel_clk = msm_host->pdata->clk_table[cnt];
+>>>> +        }
+>>>> +    }
+>>>
+>>> 'else' is not needed after 'break' but can't this be simpler e.g.
+>>>
+>>> static unsigned int sdhci_msm_get_msm_clk_rate(struct sdhci_msm_host
+>>> *msm_host, u32 req_clk)
+>>> {
+>>>     int count = msm_host->pdata->clk_table_sz;
+>>>     unsigned int sel_clk = -1;
+>>>
+>>>     while (count--) {
+>>>         sel_clk = msm_host->pdata->clk_table[count];
+>>>         if (req_clk >= sel_clk)
+>>>             return sel_clk;
+>>>     }
+>>>
+>>>     return sel_clk;
+>>> }
+>>
+>> Ok, sure I will check and get back on this.
+>>
+>>
+>>>
+>>>
+>>>> +    return sel_clk;
+>>>> +}
+>>>
+>>> Blank line needed
+>> Ok done.
+>>
+>>>
+>>>> +/**
+>>>> + * __sdhci_msm_set_clock - sdhci_msm clock control.
+>>>> + *
+>>>> + * Description:
+>>>> + * Implement MSM version of sdhci_set_clock.
+>>>> + * This is required since MSM controller does not
+>>>> + * use internal divider and instead directly control
+>>>> + * the GCC clock as per HW recommendation.
+>>>> + **/
+>>>> +void __sdhci_msm_set_clock(struct sdhci_host *host, unsigned int clock)
+>>>> +{
+>>>> +    u16 clk;
+>>>> +    unsigned long timeout;
+>>>> +
+>>>> +    host->mmc->actual_clock = 0;
+>>>> +
+>>>> +    sdhci_writew(host, 0, SDHCI_CLOCK_CONTROL);
+>>>> +
+>>>> +    if (clock == 0)
+>>>> +        return;
+>>>
+>>> Should set host->mmc->actual_clock to the actual rate somewhere.
+>> Since MSM controller does not uses divider then there is no need of having
+>> actual clock since it should be same as host->clock.
+>
+> Ok, so sdhci_msm_get_msm_clk_rate() is not the actual clock rate?
+So I was assuming we need host->mmc->actual_clock rate if host->clock is 
+not the actual rate.
+Ok, so I will update actual_clock to host->clock itself.
 
-I know, but it's unfortunate anyway and easy to fix with the above
-mentioned fallback scheme.
-So isn't that something that we can support anyway, despite it being not
-strictly necessary? For instance I tend to load different kernels now
-and then (different distro kernels, older versions for regression
-checks, ...) and really like the fact that I can go with _one_ known
-best DT.
-I understand that that's not always possible, but on the other hand I
-wouldn't give up so easily, especially if there is a nice way to achieve
-compatibility without hurting anyone.
-
-Cheers,
-Andre.
-
-> See https://www.kernel.org/doc/Documentation/devicetree/bindings/ABI.txt
-> 
-> Maxime
-> 
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+pls, let me know if any concerns.
+>
+>>
+>> That's why I had kept it 0 intentionally. But I will add a comment
+>> here then.
+>>
+>>>
+>>>> +
+>>>> +    /*
+>>>> +     * MSM controller do not use clock divider.
+>>>> +     * Thus read SDHCI_CLOCK_CONTROL and only enable
+>>>> +     * clock with no divider value programmed.
+>>>> +     */
+>>>> +    clk = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
+>>>> +
+>>>> +    clk |= SDHCI_CLOCK_INT_EN;
+>>>> +    sdhci_writew(host, clk, SDHCI_CLOCK_CONTROL);
+>>>> +
+>>>> +    /* Wait max 20 ms */
+>>>> +    timeout = 20;
+>>>> +    while (!((clk = sdhci_readw(host, SDHCI_CLOCK_CONTROL))
+>>>> +        & SDHCI_CLOCK_INT_STABLE)) {
+>>>> +        if (timeout == 0) {
+>>>> +            pr_err("%s: Internal clock never stabilised.\n",
+>>>> +                   mmc_hostname(host->mmc));
+>>>> +            return;
+>>>> +        }
+>>>> +        timeout--;
+>>>> +        mdelay(1);
+>>>> +    }
+>>>> +
+>>>> +    clk |= SDHCI_CLOCK_CARD_EN;
+>>>> +    sdhci_writew(host, clk, SDHCI_CLOCK_CONTROL);
+>>>> +}
+>>>> +
+>>>> +static void sdhci_msm_set_clock(struct sdhci_host *host, unsigned int
+>>>> clock)
+>>>> +{
+>>>> +    struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+>>>> +    struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
+>>>> +    u32 msm_clock = 0;
+>>>> +    int rc = 0;
+>>>> +
+>>>> +    if (!clock)
+>>>> +        goto out;
+>>>> +
+>>>> +    if (clock != msm_host->clk_rate) {
+>>>> +        msm_clock = sdhci_msm_get_msm_clk_rate(host, clock);
+>>>> +        rc = clk_set_rate(msm_host->clk, msm_clock);
+>>>> +        if (rc) {
+>>>> +            pr_err("%s: failed to set clock at rate %u, requested clock
+>>>> rate %u\n",
+>>>> +                mmc_hostname(host->mmc), msm_clock, clock);
+>>>> +            goto out;
+>>>> +        }
+>>>> +        msm_host->clk_rate = clock;
+>>>> +        pr_debug("%s: setting clock at rate %lu\n",
+>>>> +            mmc_hostname(host->mmc), clk_get_rate(msm_host->clk));
+>>>> +    }
+>>>> +out:
+>>>> +    __sdhci_msm_set_clock(host, clock);
+>>>> +}
+>>>> +
+>>>>  static const struct of_device_id sdhci_msm_dt_match[] = {
+>>>>      { .compatible = "qcom,sdhci-msm-v4" },
+>>>>      {},
+>>>> @@ -592,7 +693,7 @@ MODULE_DEVICE_TABLE(of, sdhci_msm_dt_match);
+>>>>  static const struct sdhci_ops sdhci_msm_ops = {
+>>>>      .platform_execute_tuning = sdhci_msm_execute_tuning,
+>>>>      .reset = sdhci_reset,
+>>>> -    .set_clock = sdhci_set_clock,
+>>>> +    .set_clock = sdhci_msm_set_clock,
+>>>>      .get_min_clock = sdhci_msm_get_min_clock,
+>>>>      .get_max_clock = sdhci_msm_get_max_clock,
+>>>>      .set_bus_width = sdhci_set_bus_width,
+>>>>
+>>>
+>>
+>
