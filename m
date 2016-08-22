@@ -1,36 +1,27 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH resend] mmc: pwrseq-simple: Add an optional
- post-power-on-delay
-Date: Mon, 22 Aug 2016 15:38:29 +0200
-Message-ID: <CAPDyKFqg_kCOPht+UvndLznihxap2xGg6-KwA3JbuSnD4vPoYQ@mail.gmail.com>
-References: <1470596558-23195-1-git-send-email-hdegoede@redhat.com>
- <1470596558-23195-2-git-send-email-hdegoede@redhat.com>
+Subject: Re: [PATCH] mmc: host: vub300: don't print error when allocating urb fails
+Date: Mon, 22 Aug 2016 15:39:41 +0200
+Message-ID: <CAPDyKFptBkb74Xepfps5TL6kkkkzDkKOkySMihOxzxd4yT_2-A@mail.gmail.com>
+References: <1470949433-24707-1-git-send-email-wsa-dev@sang-engineering.com> <1470949433-24707-2-git-send-email-wsa-dev@sang-engineering.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <1470596558-23195-2-git-send-email-hdegoede@redhat.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Hans de Goede <hdegoede@redhat.com>
-Cc: devicetree <devicetree@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>, Chen-Yu Tsai <wens@csie.org>, Rob Herring <robh+dt@kernel.org>, Icenowy Zheng <icenowy@aosc.xyz>, Maxime Ripard <maxime.ripard@free-electrons.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-wm0-f42.google.com ([74.125.82.42]:34598 "EHLO
+        mail-wm0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1755461AbcHVNjn (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 22 Aug 2016 09:39:43 -0400
+Received: by mail-wm0-f42.google.com with SMTP id q128so21376138wma.1
+        for <linux-mmc@vger.kernel.org>; Mon, 22 Aug 2016 06:39:43 -0700 (PDT)
+In-Reply-To: <1470949433-24707-2-git-send-email-wsa-dev@sang-engineering.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Wolfram Sang <wsa-dev@sang-engineering.com>
+Cc: Linux USB List <linux-usb@vger.kernel.org>, Tony Olech <tony.olech@elandigitalsystems.com>, linux-mmc <linux-mmc@vger.kernel.org>
 
-On 7 August 2016 at 21:02, Hans de Goede <hdegoede@redhat.com> wrote:
-> Some devices need a while to boot their firmware after providing clks /
-> de-asserting resets before they are ready to receive sdio commands.
+On 11 August 2016 at 23:03, Wolfram Sang <wsa-dev@sang-engineering.com> wrote:
+> kmalloc will print enough information in case of failure.
 >
-> This commits adds a post-power-on-delay-ms devicetree property to
-> mmc-pwrseq-simple for use with such devices.
->
-> Signed-off-by: Hans de Goede <hdegoede@redhat.com>
+> Signed-off-by: Wolfram Sang <wsa-dev@sang-engineering.com>
 
 Thanks, applied for next!
 
@@ -38,64 +29,27 @@ Kind regards
 Uffe
 
 > ---
->  Documentation/devicetree/bindings/mmc/mmc-pwrseq-simple.txt | 2 ++
->  drivers/mmc/core/pwrseq_simple.c                            | 9 +++++++++
->  2 files changed, 11 insertions(+)
+>  drivers/mmc/host/vub300.c | 2 --
+>  1 file changed, 2 deletions(-)
 >
-> diff --git a/Documentation/devicetree/bindings/mmc/mmc-pwrseq-simple.txt b/Documentation/devicetree/bindings/mmc/mmc-pwrseq-simple.txt
-> index ce0e767..e254368 100644
-> --- a/Documentation/devicetree/bindings/mmc/mmc-pwrseq-simple.txt
-> +++ b/Documentation/devicetree/bindings/mmc/mmc-pwrseq-simple.txt
-> @@ -16,6 +16,8 @@ Optional properties:
->    See ../clocks/clock-bindings.txt for details.
->  - clock-names : Must include the following entry:
->    "ext_clock" (External clock provided to the card).
-> +- post-power-on-delay-ms : Delay in ms after powering the card and
-> +       de-asserting the reset-gpios (if any)
->
->  Example:
->
-> diff --git a/drivers/mmc/core/pwrseq_simple.c b/drivers/mmc/core/pwrseq_simple.c
-> index 450d907..1304160 100644
-> --- a/drivers/mmc/core/pwrseq_simple.c
-> +++ b/drivers/mmc/core/pwrseq_simple.c
-> @@ -16,6 +16,8 @@
->  #include <linux/device.h>
->  #include <linux/err.h>
->  #include <linux/gpio/consumer.h>
-> +#include <linux/delay.h>
-> +#include <linux/property.h>
->
->  #include <linux/mmc/host.h>
->
-> @@ -24,6 +26,7 @@
->  struct mmc_pwrseq_simple {
->         struct mmc_pwrseq pwrseq;
->         bool clk_enabled;
-> +       u32 post_power_on_delay_ms;
->         struct clk *ext_clk;
->         struct gpio_descs *reset_gpios;
->  };
-> @@ -64,6 +67,9 @@ static void mmc_pwrseq_simple_post_power_on(struct mmc_host *host)
->         struct mmc_pwrseq_simple *pwrseq = to_pwrseq_simple(host->pwrseq);
->
->         mmc_pwrseq_simple_set_gpios_value(pwrseq, 0);
-> +
-> +       if (pwrseq->post_power_on_delay_ms)
-> +               msleep(pwrseq->post_power_on_delay_ms);
->  }
->
->  static void mmc_pwrseq_simple_power_off(struct mmc_host *host)
-> @@ -111,6 +117,9 @@ static int mmc_pwrseq_simple_probe(struct platform_device *pdev)
->                 return PTR_ERR(pwrseq->reset_gpios);
+> diff --git a/drivers/mmc/host/vub300.c b/drivers/mmc/host/vub300.c
+> index 1e819f98b94f52..bb3e0d1dd35501 100644
+> --- a/drivers/mmc/host/vub300.c
+> +++ b/drivers/mmc/host/vub300.c
+> @@ -2116,13 +2116,11 @@ static int vub300_probe(struct usb_interface *interface,
+>         command_out_urb = usb_alloc_urb(0, GFP_KERNEL);
+>         if (!command_out_urb) {
+>                 retval = -ENOMEM;
+> -               dev_err(&udev->dev, "not enough memory for command_out_urb\n");
+>                 goto error0;
 >         }
->
-> +       device_property_read_u32(dev, "post-power-on-delay-ms",
-> +                                &pwrseq->post_power_on_delay_ms);
-> +
->         pwrseq->pwrseq.dev = dev;
->         pwrseq->pwrseq.ops = &mmc_pwrseq_simple_ops;
->         pwrseq->pwrseq.owner = THIS_MODULE;
+>         command_res_urb = usb_alloc_urb(0, GFP_KERNEL);
+>         if (!command_res_urb) {
+>                 retval = -ENOMEM;
+> -               dev_err(&udev->dev, "not enough memory for command_res_urb\n");
+>                 goto error1;
+>         }
+>         /* this also allocates memory for our VUB300 mmc host device */
 > --
-> 2.7.4
+> 2.8.1
 >
