@@ -1,23 +1,31 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 1/1] mmc: core: Add the vmmc/vmmcq regulator info
-Date: Mon, 22 Aug 2016 15:39:21 +0200
-Message-ID: <CAPDyKFpiariD2+fMUmVH+nMff2hDpxY6eE0zN50nadw1pHA7ag@mail.gmail.com>
-References: <1470043331-5123-1-git-send-email-ben.dooks@codethink.co.uk>
+Subject: Re: [PACTH v4] mmc: sdhci: Do not allow tuning procedure to be interrupted
+Date: Mon, 22 Aug 2016 15:40:26 +0200
+Message-ID: <CAPDyKFrdAivj0ZSZwjNEtBUzM87f36QwAG1nmtPR9iBrOQgoBw@mail.gmail.com>
+References: <1471455267-8352-1-git-send-email-robert.foss@collabora.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1470043331-5123-1-git-send-email-ben.dooks@codethink.co.uk>
+In-Reply-To: <1471455267-8352-1-git-send-email-robert.foss@collabora.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Ben Dooks <ben.dooks@codethink.co.uk>
-Cc: Rob Herring <robh+dt@kernel.org>, =?UTF-8?Q?Pawe=C5=82_Moll?= <pawel.moll@arm.com>, Mark Rutland <mark.rutland@arm.com>, Kumar Gala <galak@codeaurora.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-kernel@lists.codethink.co.uk, linux-mmc <linux-mmc@vger.kernel.org>
+To: robert.foss@collabora.com
+Cc: Adrian Hunter <adrian.hunter@intel.com>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Andrew Bresticker <abrestic@chromium.org>, Kevin Cernekee <cernekee@chromium.org>, Benson Leung <bleung@chromium.org>, Christopher Freeman <cfreeman@nvidia.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On 1 August 2016 at 11:22, Ben Dooks <ben.dooks@codethink.co.uk> wrote:
-> The core MMC code adds two (optional) regulator properites that drivers
-> should use to get their supplies. This is not documented anywhere so add
-> information on it.
+On 17 August 2016 at 19:34,  <robert.foss@collabora.com> wrote:
+> From: Christopher Freeman <cfreeman@nvidia.com>
 >
-> Signed-off-by: Ben Dooks <ben.dooks@codethink.co.uk>
+> wait_event_interruptible_timeout() will return early if the blocked
+> process receives a signal, causing the driver to abort the tuning
+> procedure and possibly leaving the controller in a bad state.  Since the
+> tuning command is expected to complete quickly (<50ms) and we've set a
+> timeout, use wait_event_timeout() instead.
+>
+> Signed-off-by: Christopher Freeman <cfreeman@nvidia.com>
+> Tested-by: Robert Foss <robert.foss@collabora.com>
+> Signed-off-by: Robert Foss <robert.foss@collabora.com>
+> Reviewed-by: Benson Leung <bleung@chromium.org>
+> Acked-by: Adrian Hunter <adrian.hunter@intel.com>
 
 Thanks, applied for next!
 
@@ -25,35 +33,32 @@ Kind regards
 Uffe
 
 > ---
->  Documentation/devicetree/bindings/mmc/mmc.txt | 11 +++++++++++
->  1 file changed, 11 insertions(+)
 >
-> diff --git a/Documentation/devicetree/bindings/mmc/mmc.txt b/Documentation/devicetree/bindings/mmc/mmc.txt
-> index ed23b9b..8cbcbce 100644
-> --- a/Documentation/devicetree/bindings/mmc/mmc.txt
-> +++ b/Documentation/devicetree/bindings/mmc/mmc.txt
-> @@ -71,6 +71,17 @@ Optional SDIO properties:
->  - wakeup-source: Enables wake up of host system on SDIO IRQ assertion
->                  (Legacy property supported: "enable-sdio-wakeup")
+> Changes since v1:
+> - Added proper metadata tags to series.
 >
-> +MMC power
-> +---------
-> +
-> +Controllers may implement power control from both the connected cards and
-> +the IO signaling (for example to change to high-speed 1.8V signalling). If
-> +the system supports this, then the following two properties should point
-> +to valid regulator nodes:
-> +
-> +- vqmmc-supply: supply node for IO line power
-> +- vmmc-supply: supply node for card's power
-> +
+> Changes since v2:
+> - Added "Reviewed-by: Benson Leung <bleung@chromium.org>"
 >
->  MMC power sequences:
->  --------------------
+> Changes since v3:
+> - Added "Acked-by: Adrian Hunter <adrian.hunter@intel.com>"
+>
+>  drivers/mmc/host/sdhci.c | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+>
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index 0e3d7c0..9e80203 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -1960,7 +1960,7 @@ static int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode)
+>
+>                 spin_unlock_irqrestore(&host->lock, flags);
+>                 /* Wait for Buffer Read Ready interrupt */
+> -               wait_event_interruptible_timeout(host->buf_ready_int,
+> +               wait_event_timeout(host->buf_ready_int,
+>                                         (host->tuning_done == 1),
+>                                         msecs_to_jiffies(50));
+>                 spin_lock_irqsave(&host->lock, flags);
 > --
-> 2.8.1
+> 2.7.4
 >
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
