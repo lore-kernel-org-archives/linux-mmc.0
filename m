@@ -1,79 +1,42 @@
-From: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH RESEND] mmc: sunxi: Check the value returned
- by clk_round_rate
-Date: Mon, 22 Aug 2016 15:53:00 +0200
-Message-ID: <CAPDyKFp0Wsf68jupHov_DxafXRhP9xyqyU-4Hiinm1MNMpyA8A@mail.gmail.com>
-References: <57af4930.2866c20a.efdbe.7721SMTPIN_ADDED_MISSING@mx.google.com>
-Reply-To: ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH V8 2/2] mmc: OCTEON: Add host driver for OCTEON MMC controller.
+Date: Mon, 22 Aug 2016 16:05:14 +0200
+Message-ID: <CAPDyKFpA23UveGN6d=Pg=c+=9j0FmncMF4JdWtnAcnHg1zTEog@mail.gmail.com>
+References: <57853474.9050108@cavium.com> <578E71E6.2020700@caviumnetworks.com>
+ <CAPDyKFqb-7LLM0XPtVWj1qHib991E2dHt+6W0UPgbXnukGkmXA@mail.gmail.com> <57AD6187.8090300@cavium.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-sunxi+bncBDF57NG2XIHRBPUH5S6QKGQEAIT7XNA-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-Sender: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
-In-Reply-To: <57af4930.2866c20a.efdbe.7721SMTPIN_ADDED_MISSING-ATjtLOhZ0NVl57MIdRCFDg@public.gmane.org>
-List-Post: <https://groups.google.com/group/linux-sunxi/post>, <mailto:linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Help: <https://groups.google.com/support/>, <mailto:linux-sunxi+help-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Archive: <https://groups.google.com/group/linux-sunxi
-List-Subscribe: <https://groups.google.com/group/linux-sunxi/subscribe>, <mailto:linux-sunxi+subscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Unsubscribe: <mailto:googlegroups-manage+1076902468213+unsubscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>,
- <https://groups.google.com/group/linux-sunxi/subscribe>
-To: Jean-Francois Moine <moinejf-GANU6spQydw@public.gmane.org>
-Cc: Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>, Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, linux-mmc <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-wm0-f42.google.com ([74.125.82.42]:35364 "EHLO
+        mail-wm0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1755447AbcHVOFl (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 22 Aug 2016 10:05:41 -0400
+Received: by mail-wm0-f42.google.com with SMTP id f65so122180705wmi.0
+        for <linux-mmc@vger.kernel.org>; Mon, 22 Aug 2016 07:05:16 -0700 (PDT)
+In-Reply-To: <57AD6187.8090300@cavium.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: "Steven J. Hill" <Steven.Hill@cavium.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, David Daney <david.daney@cavium.com>
 
-On 13 August 2016 at 18:01, Jean-Francois Moine <moinejf-GANU6spQydw@public.gmane.org> wrote:
-> clk_round_rate() may return an error. Check it.
+On 12 August 2016 at 07:41, Steven J. Hill <Steven.Hill@cavium.com> wrote:
+> On 07/19/2016 04:19 PM, Ulf Hansson wrote:
+>>
+>>
+>> Sorry I need more time, been partly out of office lately.
+>> I intend to review this prior rc1 is out, but no promises.
+>>
+> Hello Ulf.
 >
-> Signed-off-by: Jean-Francois Moine <moinejf-GANU6spQydw@public.gmane.org>
-> Acked-by: Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>
+> I was just checking to see if you had a chance to look at the MMC patch? I
+> just did a fresh pull from Linus' a few minutes ago and it still not in the
+> tree. How much longer do you think we will have to wait? Thanks.
 
-Please re-spins this as it doesn't apply cleanly due to recent new
-sunxi changes.
+Sorry for the delay. I will look at it during the week, just been
+catching up on mmc but was delaying those reviews that requires some
+more heavy efforts.
+
+I will make sure this get its deserved priority, again apologize for the delay!
 
 Kind regards
 Uffe
-
-> ---
-> This patch was initially sent in a patch series about the MMC new mode,
-> but it may be applied independently.
-> ---
->  drivers/mmc/host/sunxi-mmc.c | 12 +++++++++---
->  1 file changed, 9 insertions(+), 3 deletions(-)
->
-> diff --git a/drivers/mmc/host/sunxi-mmc.c b/drivers/mmc/host/sunxi-mmc.c
-> index 2ee4c21..ba647b7 100644
-> --- a/drivers/mmc/host/sunxi-mmc.c
-> +++ b/drivers/mmc/host/sunxi-mmc.c
-> @@ -656,7 +656,8 @@ static int sunxi_mmc_oclk_onoff(struct sunxi_mmc_host *host, u32 oclk_en)
->  static int sunxi_mmc_clk_set_rate(struct sunxi_mmc_host *host,
->                                   struct mmc_ios *ios)
->  {
-> -       u32 rate, oclk_dly, rval, sclk_dly;
-> +       long rate;
-> +       u32 oclk_dly, rval, sclk_dly;
->         u32 clock = ios->clock;
->         int ret;
->
-> @@ -666,13 +667,18 @@ static int sunxi_mmc_clk_set_rate(struct sunxi_mmc_host *host,
->                 clock <<= 1;
->
->         rate = clk_round_rate(host->clk_mmc, clock);
-> -       dev_dbg(mmc_dev(host->mmc), "setting clk to %d, rounded %d\n",
-> +       if (rate < 0) {
-> +               dev_err(mmc_dev(host->mmc), "error rounding clk to %d: %ld\n",
-> +                       clock, rate);
-> +               return rate;
-> +       }
-> +       dev_dbg(mmc_dev(host->mmc), "setting clk to %d, rounded %ld\n",
->                 clock, rate);
->
->         /* setting clock rate */
->         ret = clk_set_rate(host->clk_mmc, rate);
->         if (ret) {
-> -               dev_err(mmc_dev(host->mmc), "error setting clk to %d: %d\n",
-> +               dev_err(mmc_dev(host->mmc), "error setting clk to %ld: %d\n",
->                         rate, ret);
->                 return ret;
->         }
-> --
-> 2.9.2
->
