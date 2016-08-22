@@ -1,90 +1,87 @@
-From: Mike Christie <mchristi@redhat.com>
-Subject: Re: 4.8-rc1 REGRESSION mmc-blk triggers WARN_ON(!host->claimed),
- related to: "drivers: use req op accessor" ?
-Date: Mon, 22 Aug 2016 11:09:52 -0500
-Message-ID: <57BB23D0.3050606@redhat.com>
-References: <6e68ae5a-4b79-a636-2c46-5726cf2cc44b@redhat.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+From: Michael Weiser <michael.weiser@gmx.de>
+Subject: [PATCH 4/5] mmc: sunxi-mmc: change idma descriptor to __le32
+Date: Mon, 22 Aug 2016 18:42:18 +0200
+Message-ID: <20160822164219.14272-5-michael.weiser@gmx.de>
+References: <20160822164219.14272-1-michael.weiser@gmx.de>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:55596 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1754609AbcHVQSM (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Mon, 22 Aug 2016 12:18:12 -0400
-In-Reply-To: <6e68ae5a-4b79-a636-2c46-5726cf2cc44b@redhat.com>
+Received: from heinz.dinsnail.net ([85.214.155.104]:35556 "EHLO
+        heinz.dinsnail.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1754533AbcHVQsc (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 22 Aug 2016 12:48:32 -0400
+In-Reply-To: <20160822164219.14272-1-michael.weiser@gmx.de>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Hans de Goede <hdegoede@redhat.com>, Ulf Hansson <ulf.hansson@linaro.org>, Jens Axboe <axboe@fb.com>, regressions@leemhuis.info
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+To: linux-arm-kernel@lists.infradead.org
+Cc: Michael Weiser <michael.weiser@gmx.de>, Ulf Hansson <ulf.hansson@linaro.org>, Chen-Yu Tsai <wens@csie.org>, linux-mmc@vger.kernel.org
 
-On 08/21/2016 10:15 AM, Hans de Goede wrote:
-> Hi All,
-> 
-> With 4.8-rc1 I'm seeing WARN_ON(!host->claimed) triggering in both
-> mmc_start_request() as well as in mmc_release_host(). The first
-> indicating that we're executing mmc commands without doing
-> mmc_claim_host() and the second one indicating that we're
-> releasing the host without having claimed it first.
-> 
-> The backtraces all point to mmc_blk_issue_rq(). I've done
-> a very naive hack / workaround:
-> 
-> --- a/drivers/mmc/card/block.c
-> +++ b/drivers/mmc/card/block.c
-> @@ -2151,9 +2151,7 @@ static int mmc_blk_issue_rq(struct mmc_queue *mq,
-> struct request *req)
->      struct mmc_host *host = card->host;
->      unsigned long flags;
-> 
-> -    if (req && !mq->mqrq_prev->req)
-> -        /* claim host only for the first request */
-> -        mmc_get_card(card);
-> +    mmc_get_card(card);
-> 
->      ret = mmc_blk_part_switch(card, md);
->      if (ret) {
-> @@ -2190,15 +2188,8 @@ static int mmc_blk_issue_rq(struct mmc_queue *mq,
-> struct request *req)
->      }
-> 
->  out:
-> -    if ((!req && !(mq->flags & MMC_QUEUE_NEW_REQUEST)) ||
-> -        mmc_req_is_special(req))
-> -        /*
-> -         * Release host when there are no more requests
-> -         * and after special request(discard, flush) is done.
-> -         * In case sepecial request, there is no reentry to
-> -         * the 'mmc_blk_issue_rq' with 'mqrq_prev->req'.
-> -         */
-> -        mmc_put_card(card);
-> +    mmc_put_card(card);
-> +
->      return ret;
->  }
-> 
-> 
-> Which fixes this, further pointing to the somewhat magical claim / release
-> code in mmc_blk_issue_rq() being the culprit.
-> 
-> Looking at recent commits these 2 stand out as possible causes of this:
-> 
-> https://git.kernel.org/cgit/linux/kernel/git/torvalds/linux.git/commit/?id=c2df40dfb8c015211ec55f4b1dd0587f875c7b34
-> 
-> https://git.kernel.org/cgit/linux/kernel/git/torvalds/linux.git/commit/?id=3a5e02ced11e22ecd9da3d6710afe15bcfee1d10
-> 
-> 
-> I've the feeling that one of these is making mmc_blk_issue_rq() not
-> claiming
-> the host while it should do so ...
-> 
+The sunxi-mmc driver does not take into account the processor may be big
+endian when writing the DMA descriptors. This causes cards not to be
+detected when running a big-endian kernel. Change the descriptors for
+IDMA to use __le32 and ensure they are suitably swapped before writing.
+Tested successfully on the Cubieboard2.
 
-There is a bug with those patches and the secure discard ones where when
-REQ_OP_SECURE_ERASE is sent, mmc_put_card above will not be called, and
-they will be treated as normal requests instead of special one so the
-drivers lists are not executed properly.
+Signed-off-by: Michael Weiser <michael.weiser@gmx.de>
+Acked-by: Maxime Ripard <maxime.ripard@free-electrons.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Chen-Yu Tsai <wens@csie.org>
+Cc: linux-mmc@vger.kernel.org
+---
+ drivers/mmc/host/sunxi-mmc.c | 27 +++++++++++++++------------
+ 1 file changed, 15 insertions(+), 12 deletions(-)
 
-The patch in Jens's tree
-https://git.kernel.org/cgit/linux/kernel/git/axboe/linux-block.git/commit/?h=for-linus&id=7afafc8a44bf0ab841b17d450b02aedb3a138985
-fixes the issue.
+diff --git a/drivers/mmc/host/sunxi-mmc.c b/drivers/mmc/host/sunxi-mmc.c
+index 2ec91ce..a1935a1 100644
+--- a/drivers/mmc/host/sunxi-mmc.c
++++ b/drivers/mmc/host/sunxi-mmc.c
+@@ -223,10 +223,10 @@ struct sunxi_mmc_clk_delay {
+ };
+ 
+ struct sunxi_idma_des {
+-	u32	config;
+-	u32	buf_size;
+-	u32	buf_addr_ptr1;
+-	u32	buf_addr_ptr2;
++	__le32 config;
++	__le32 buf_size;
++	__le32 buf_addr_ptr1;
++	__le32 buf_addr_ptr2;
+ };
+ 
+ struct sunxi_mmc_cfg {
+@@ -329,22 +329,25 @@ static void sunxi_mmc_init_idma_des(struct sunxi_mmc_host *host,
+ 	int i, max_len = (1 << host->cfg->idma_des_size_bits);
+ 
+ 	for (i = 0; i < data->sg_len; i++) {
+-		pdes[i].config = SDXC_IDMAC_DES0_CH | SDXC_IDMAC_DES0_OWN |
+-				 SDXC_IDMAC_DES0_DIC;
++		pdes[i].config = cpu_to_le32(SDXC_IDMAC_DES0_CH |
++					     SDXC_IDMAC_DES0_OWN |
++					     SDXC_IDMAC_DES0_DIC);
+ 
+ 		if (data->sg[i].length == max_len)
+ 			pdes[i].buf_size = 0; /* 0 == max_len */
+ 		else
+-			pdes[i].buf_size = data->sg[i].length;
++			pdes[i].buf_size = cpu_to_le32(data->sg[i].length);
+ 
+ 		next_desc += sizeof(struct sunxi_idma_des);
+-		pdes[i].buf_addr_ptr1 = sg_dma_address(&data->sg[i]);
+-		pdes[i].buf_addr_ptr2 = (u32)next_desc;
++		pdes[i].buf_addr_ptr1 =
++			cpu_to_le32(sg_dma_address(&data->sg[i]));
++		pdes[i].buf_addr_ptr2 = cpu_to_le32((u32)next_desc);
+ 	}
+ 
+-	pdes[0].config |= SDXC_IDMAC_DES0_FD;
+-	pdes[i - 1].config |= SDXC_IDMAC_DES0_LD | SDXC_IDMAC_DES0_ER;
+-	pdes[i - 1].config &= ~SDXC_IDMAC_DES0_DIC;
++	pdes[0].config |= cpu_to_le32(SDXC_IDMAC_DES0_FD);
++	pdes[i - 1].config |= cpu_to_le32(SDXC_IDMAC_DES0_LD |
++					  SDXC_IDMAC_DES0_ER);
++	pdes[i - 1].config &= cpu_to_le32(~SDXC_IDMAC_DES0_DIC);
+ 	pdes[i - 1].buf_addr_ptr2 = 0;
+ 
+ 	/*
+-- 
+2.9.2
 
