@@ -1,14 +1,15 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v2] dt: bindings: Make compatible optional for mmc
- function nodes
-Date: Mon, 22 Aug 2016 15:38:19 +0200
-Message-ID: <CAPDyKFq4Bik=NK-UUBvXm9cng6Cnk-WkVwfx1t+sfCfJQ=hrGQ@mail.gmail.com>
-References: <1469891030-28838-1-git-send-email-hdegoede@redhat.com>
+Subject: Re: [PATCH resend] mmc: pwrseq-simple: Add an optional
+ post-power-on-delay
+Date: Mon, 22 Aug 2016 15:38:29 +0200
+Message-ID: <CAPDyKFqg_kCOPht+UvndLznihxap2xGg6-KwA3JbuSnD4vPoYQ@mail.gmail.com>
+References: <1470596558-23195-1-git-send-email-hdegoede@redhat.com>
+ <1470596558-23195-2-git-send-email-hdegoede@redhat.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <1469891030-28838-1-git-send-email-hdegoede@redhat.com>
+In-Reply-To: <1470596558-23195-2-git-send-email-hdegoede@redhat.com>
 List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
  <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
 List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
@@ -19,27 +20,16 @@ List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
 Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
 Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
 To: Hans de Goede <hdegoede@redhat.com>
-Cc: devicetree <devicetree@vger.kernel.org>, Arnd Bergmann <arnd@arndb.de>, linux-mmc <linux-mmc@vger.kernel.org>, Rob Herring <robh+dt@kernel.org>, Maxime Ripard <maxime.ripard@free-electrons.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
+Cc: devicetree <devicetree@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>, Chen-Yu Tsai <wens@csie.org>, Rob Herring <robh+dt@kernel.org>, Icenowy Zheng <icenowy@aosc.xyz>, Maxime Ripard <maxime.ripard@free-electrons.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On 30 July 2016 at 17:03, Hans de Goede <hdegoede@redhat.com> wrote:
-> On some boards (android tablets) different batches use different sdio
-> wifi modules. This is not a problem since mmc/sdio is an enumerable bus,
-> so we only need to describe and activate the mmc controller in dt and
-> then the kernel will automatically load the right driver.
+On 7 August 2016 at 21:02, Hans de Goede <hdegoede@redhat.com> wrote:
+> Some devices need a while to boot their firmware after providing clks /
+> de-asserting resets before they are ready to receive sdio commands.
 >
-> Sometimes it is useful to specify certain ethernet properties for these
-> "unknown" sdio devices, specifically we want the boot-loader to be able
-> to set "local-mac-address" as some of these sdio wifi modules come without
-> an eeprom / without a factory programmed mac address.
+> This commits adds a post-power-on-delay-ms devicetree property to
+> mmc-pwrseq-simple for use with such devices.
 >
-> Since the exact device is unknown (differs per batch) we cannot use
-> a wifi-chip specific compatible, thus sometimes it is desirable to have a
-> mmc function node, without having to make up an otherwise unused compatible
-> for the node, so make the compatible property optional.
->
-> Cc: Arnd Bergmann <arnd@arndb.de>
-> Cc: Maxime Ripard <maxime.ripard@free-electrons.com>
 > Signed-off-by: Hans de Goede <hdegoede@redhat.com>
 
 Thanks, applied for next!
@@ -48,36 +38,64 @@ Kind regards
 Uffe
 
 > ---
-> Changes in v2:
-> -Change the commit-msg to explain why it sometimes is desirable to have a
->  mmc function node without a compatible
-> ---
->  Documentation/devicetree/bindings/mmc/mmc.txt | 4 +++-
->  1 file changed, 3 insertions(+), 1 deletion(-)
+>  Documentation/devicetree/bindings/mmc/mmc-pwrseq-simple.txt | 2 ++
+>  drivers/mmc/core/pwrseq_simple.c                            | 9 +++++++++
+>  2 files changed, 11 insertions(+)
 >
-> diff --git a/Documentation/devicetree/bindings/mmc/mmc.txt b/Documentation/devicetree/bindings/mmc/mmc.txt
-> index ed23b9b..a96c338 100644
-> --- a/Documentation/devicetree/bindings/mmc/mmc.txt
-> +++ b/Documentation/devicetree/bindings/mmc/mmc.txt
-> @@ -98,11 +98,13 @@ Required host node properties when using function subnodes:
->  - #size-cells: should be zero.
+> diff --git a/Documentation/devicetree/bindings/mmc/mmc-pwrseq-simple.txt b/Documentation/devicetree/bindings/mmc/mmc-pwrseq-simple.txt
+> index ce0e767..e254368 100644
+> --- a/Documentation/devicetree/bindings/mmc/mmc-pwrseq-simple.txt
+> +++ b/Documentation/devicetree/bindings/mmc/mmc-pwrseq-simple.txt
+> @@ -16,6 +16,8 @@ Optional properties:
+>    See ../clocks/clock-bindings.txt for details.
+>  - clock-names : Must include the following entry:
+>    "ext_clock" (External clock provided to the card).
+> +- post-power-on-delay-ms : Delay in ms after powering the card and
+> +       de-asserting the reset-gpios (if any)
 >
->  Required function subnode properties:
-> -- compatible: name of SDIO function following generic names recommended practice
->  - reg: Must contain the SDIO function number of the function this subnode
->         describes. A value of 0 denotes the memory SD function, values from
->         1 to 7 denote the SDIO functions.
+>  Example:
 >
-> +Optional function subnode properties:
-> +- compatible: name of SDIO function following generic names recommended practice
+> diff --git a/drivers/mmc/core/pwrseq_simple.c b/drivers/mmc/core/pwrseq_simple.c
+> index 450d907..1304160 100644
+> --- a/drivers/mmc/core/pwrseq_simple.c
+> +++ b/drivers/mmc/core/pwrseq_simple.c
+> @@ -16,6 +16,8 @@
+>  #include <linux/device.h>
+>  #include <linux/err.h>
+>  #include <linux/gpio/consumer.h>
+> +#include <linux/delay.h>
+> +#include <linux/property.h>
+>
+>  #include <linux/mmc/host.h>
+>
+> @@ -24,6 +26,7 @@
+>  struct mmc_pwrseq_simple {
+>         struct mmc_pwrseq pwrseq;
+>         bool clk_enabled;
+> +       u32 post_power_on_delay_ms;
+>         struct clk *ext_clk;
+>         struct gpio_descs *reset_gpios;
+>  };
+> @@ -64,6 +67,9 @@ static void mmc_pwrseq_simple_post_power_on(struct mmc_host *host)
+>         struct mmc_pwrseq_simple *pwrseq = to_pwrseq_simple(host->pwrseq);
+>
+>         mmc_pwrseq_simple_set_gpios_value(pwrseq, 0);
 > +
+> +       if (pwrseq->post_power_on_delay_ms)
+> +               msleep(pwrseq->post_power_on_delay_ms);
+>  }
 >
->  Examples
->  --------
+>  static void mmc_pwrseq_simple_power_off(struct mmc_host *host)
+> @@ -111,6 +117,9 @@ static int mmc_pwrseq_simple_probe(struct platform_device *pdev)
+>                 return PTR_ERR(pwrseq->reset_gpios);
+>         }
+>
+> +       device_property_read_u32(dev, "post-power-on-delay-ms",
+> +                                &pwrseq->post_power_on_delay_ms);
+> +
+>         pwrseq->pwrseq.dev = dev;
+>         pwrseq->pwrseq.ops = &mmc_pwrseq_simple_ops;
+>         pwrseq->pwrseq.owner = THIS_MODULE;
 > --
 > 2.7.4
 >
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
