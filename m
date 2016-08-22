@@ -1,262 +1,90 @@
-From: Hans de Goede <hdegoede@redhat.com>
-Subject: Re: [PATCH] mmc: Add mmc_force_detect_change_begin / _end functions
-Date: Mon, 22 Aug 2016 17:30:01 +0200
-Message-ID: <831381a3-7cca-1264-29e2-bd40802a815f@redhat.com>
-References: <1470488736-11083-1-git-send-email-hdegoede@redhat.com>
- <CAPDyKFoTj9=esqaUPiwxLkhCsO98cSDgzdD1phgbXLa7rf6jiw@mail.gmail.com>
+From: Mike Christie <mchristi@redhat.com>
+Subject: Re: 4.8-rc1 REGRESSION mmc-blk triggers WARN_ON(!host->claimed),
+ related to: "drivers: use req op accessor" ?
+Date: Mon, 22 Aug 2016 11:09:52 -0500
+Message-ID: <57BB23D0.3050606@redhat.com>
+References: <6e68ae5a-4b79-a636-2c46-5726cf2cc44b@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"; Format="flowed"
+Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <CAPDyKFoTj9=esqaUPiwxLkhCsO98cSDgzdD1phgbXLa7rf6jiw@mail.gmail.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: devicetree <devicetree@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>, Chen-Yu Tsai <wens@csie.org>, Icenowy Zheng <icenowy@aosc.xyz>, Maxime Ripard <maxime.ripard@free-electrons.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mx1.redhat.com ([209.132.183.28]:55596 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1754609AbcHVQSM (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Mon, 22 Aug 2016 12:18:12 -0400
+In-Reply-To: <6e68ae5a-4b79-a636-2c46-5726cf2cc44b@redhat.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Hans de Goede <hdegoede@redhat.com>, Ulf Hansson <ulf.hansson@linaro.org>, Jens Axboe <axboe@fb.com>, regressions@leemhuis.info
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-Hi,
+On 08/21/2016 10:15 AM, Hans de Goede wrote:
+> Hi All,
+> 
+> With 4.8-rc1 I'm seeing WARN_ON(!host->claimed) triggering in both
+> mmc_start_request() as well as in mmc_release_host(). The first
+> indicating that we're executing mmc commands without doing
+> mmc_claim_host() and the second one indicating that we're
+> releasing the host without having claimed it first.
+> 
+> The backtraces all point to mmc_blk_issue_rq(). I've done
+> a very naive hack / workaround:
+> 
+> --- a/drivers/mmc/card/block.c
+> +++ b/drivers/mmc/card/block.c
+> @@ -2151,9 +2151,7 @@ static int mmc_blk_issue_rq(struct mmc_queue *mq,
+> struct request *req)
+>      struct mmc_host *host = card->host;
+>      unsigned long flags;
+> 
+> -    if (req && !mq->mqrq_prev->req)
+> -        /* claim host only for the first request */
+> -        mmc_get_card(card);
+> +    mmc_get_card(card);
+> 
+>      ret = mmc_blk_part_switch(card, md);
+>      if (ret) {
+> @@ -2190,15 +2188,8 @@ static int mmc_blk_issue_rq(struct mmc_queue *mq,
+> struct request *req)
+>      }
+> 
+>  out:
+> -    if ((!req && !(mq->flags & MMC_QUEUE_NEW_REQUEST)) ||
+> -        mmc_req_is_special(req))
+> -        /*
+> -         * Release host when there are no more requests
+> -         * and after special request(discard, flush) is done.
+> -         * In case sepecial request, there is no reentry to
+> -         * the 'mmc_blk_issue_rq' with 'mqrq_prev->req'.
+> -         */
+> -        mmc_put_card(card);
+> +    mmc_put_card(card);
+> +
+>      return ret;
+>  }
+> 
+> 
+> Which fixes this, further pointing to the somewhat magical claim / release
+> code in mmc_blk_issue_rq() being the culprit.
+> 
+> Looking at recent commits these 2 stand out as possible causes of this:
+> 
+> https://git.kernel.org/cgit/linux/kernel/git/torvalds/linux.git/commit/?id=c2df40dfb8c015211ec55f4b1dd0587f875c7b34
+> 
+> https://git.kernel.org/cgit/linux/kernel/git/torvalds/linux.git/commit/?id=3a5e02ced11e22ecd9da3d6710afe15bcfee1d10
+> 
+> 
+> I've the feeling that one of these is making mmc_blk_issue_rq() not
+> claiming
+> the host while it should do so ...
+> 
 
-On 22-08-16 15:39, Ulf Hansson wrote:
-> On 6 August 2016 at 15:05, Hans de Goede <hdegoede@redhat.com> wrote:
->> Some sdio devices have a multiple stage bring-up process. Specifically
->> the esp8089 (for which an out of tree driver is available) loads firmware
->> on the first call to its sdio-drivers' probe function and then resets
->> the device causing it to reboot from its RAM with the new firmware.
->>
->> When this sdio device reboots it comes back up in 1 bit 400 KHz mode
->> again, and we need to walk through the whole ios negatiation and sdio setup
->> again.
->>
->> There are 2 problems with this:
->>
->> 1) Typically these devices are soldered onto some (ARM) tablet / SBC
->> PCB and as such are described in devicetree as "non-removable", which
->> causes the mmc-core to scan them only once and not poll for the device
->> dropping of the bus. Normally this is the right thing todo but in the
->> eso8089 example we need the mmc-core to notice the module has disconnected
->> (since it is now in 1 bit mode again it will not talk to the host in 4 bit
->> mode). This can be worked around by using "broken-cd" in devicetree
->> instead of "non-removable", but that is not a proper fix since the device
->> really is non-removable.
->>
->> 2) When the mmc-core detects the device has disconnected it will poweroff
->> the device, causing the RAM loaded firmware to be lost. This can be worked
->> around in devicetree by using regulator-always-on (and avoiding the use of
->> mmc-pwrseq), but again that is more of a hack then a proper fix.
->
-> Agree, and thanks for the detailed description of the problem!
->
->>
->> This commmit fixes 1) by adding a mmc_force_detect_change function which
->> will cause scanning for device removal / insertion until a new device is
->> detected. 2) Is fixed by a keep_power flag to the mmc_force_detect_change
->> function which when set causes the mmc-core to keep the power to the device
->> on during the rescan.
->
-> Hmm, in the first scan-attempt there will be an SDIO card properly
-> detected, right!?
+There is a bug with those patches and the secure discard ones where when
+REQ_OP_SECURE_ERASE is sent, mmc_put_card above will not be called, and
+they will be treated as normal requests instead of special one so the
+drivers lists are not executed properly.
 
-Correct.
+The patch in Jens's tree
+https://git.kernel.org/cgit/linux/kernel/git/axboe/linux-block.git/commit/?h=for-linus&id=7afafc8a44bf0ab841b17d450b02aedb3a138985
+fixes the issue.
 
-> The problem occurs when the SDIO func driver gets probed and when it
-> loads the new firmware
-
-Correct.
-
-> which may happen later or even not at all as
-> it also depends if the SDIO func driver has been registered.
-
-The driver never loading is not a scenario we need to care about here,
-because then the device does not need to be re-initialized :)
-
-> I am also thinking about the system PM suspend/resume case. In cases
-> where the SDIO card actually becomes powered off/on in suspend/resume.
-> In this case, I assume the SDIO card will be re-detected through
-> mmc_sdio_resume(), although the same sequence as during the SDIO func
-> driver ->probe() must be repeated (loading firmware etc).
-
-Right, ideally we would be able to put the device in a low power mode
-but keep it powered, but that may not always be possible.
-
-> To me it seems like we need a new SDIO func API, to re-initialize the
-> SDIO card without powering off it first. I guess in the end it will be
-> quite similar to what you propose, but my point is that I rather make
-> this a specific SDIO API instead of trying to hook it into the rescan
-> sequence.
-
-Ah yes that would be more elegant, so basically we would reset
-the ios to its defaults, call mmc_set_ios(host) and then
-call mmc_sdio_init_card() with the card as oldcard as if it
-is a resume ?
-
-This would also mean the driver's probe function does not end up
-getting called twice which certainly is better :)
-
-I'm not sure I'm familiar enough with the mmc subsys to come
-up with a good implementation of this though, nor when I'll have
-the time to look into this.
-
-Any chance you could make a RFC patch ? I can then test it on
-hardware which actually needs this and bug-fix the code until
-it actually works :)
-
-Regards,
-
-Hans
-
-
-
->> Cc: Icenowy Zheng <icenowy@aosc.xyz>
->> Cc: Maxime Ripard <maxime.ripard@free-electrons.com>
->> Cc: Chen-Yu Tsai <wens@csie.org>
->> Signed-off-by: Hans de Goede <hdegoede@redhat.com>
->> ---
->>  drivers/mmc/core/core.c  | 47 ++++++++++++++++++++++++++++++++++++++++++-----
->>  include/linux/mmc/host.h |  4 ++++
->>  2 files changed, 46 insertions(+), 5 deletions(-)
->>
->> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
->> index 8b4dfd4..d850cde 100644
->> --- a/drivers/mmc/core/core.c
->> +++ b/drivers/mmc/core/core.c
->> @@ -1716,8 +1716,11 @@ int mmc_select_drive_strength(struct mmc_card *card, unsigned int max_dtr,
->>   */
->>  void mmc_power_up(struct mmc_host *host, u32 ocr)
->>  {
->> -       if (host->ios.power_mode == MMC_POWER_ON)
->> +       if (host->ios.power_mode == MMC_POWER_ON) {
->> +               if (host->ios.clock == 0)
->> +                       goto set_clock;
->>                 return;
->> +       }
->>
->>         mmc_pwrseq_pre_power_on(host);
->>
->> @@ -1742,6 +1745,7 @@ void mmc_power_up(struct mmc_host *host, u32 ocr)
->>
->>         mmc_pwrseq_post_power_on(host);
->>
->> +set_clock:
->>         host->ios.clock = host->f_init;
->>
->>         host->ios.power_mode = MMC_POWER_ON;
->> @@ -1759,6 +1763,11 @@ void mmc_power_off(struct mmc_host *host)
->>         if (host->ios.power_mode == MMC_POWER_OFF)
->>                 return;
->>
->> +       if (host->rescan_keep_power) {
->> +               mmc_set_clock(host, 0);
->> +               return;
->> +       }
->> +
->>         mmc_pwrseq_power_off(host);
->>
->>         host->ios.clock = 0;
->> @@ -1907,6 +1916,27 @@ void mmc_detect_change(struct mmc_host *host, unsigned long delay)
->>  }
->>  EXPORT_SYMBOL(mmc_detect_change);
->>
->> +/**
->> + *     mmc_force_detect_change - force rescanning of a MMC socket even if
->> + *                               it is non-removable
->> + *     @host: host to rescan
->> + *     @delay: optional delay to wait before detection (jiffies)
->> + *     @keep_power: if set do not turn of vdd / call pwrseq_off during rescan
->> + *
->> + *     MMC drivers which need non-removable sdio devices to be rescanned
->> + *     (e.g. because the device reboots its fw after a firmware upload),
->> + *     can call this to force scanning the MMC socket for changes, even
->> + *     if it is non-removable.
->> + */
->> +void mmc_force_detect_change(struct mmc_host *host, unsigned long delay,
->> +                            bool keep_power)
->> +{
->> +       host->rescan_force = 1;
->> +       host->rescan_keep_power = keep_power;
->> +       _mmc_detect_change(host, delay, false);
->> +}
->> +EXPORT_SYMBOL(mmc_force_detect_change);
->> +
->>  void mmc_init_erase(struct mmc_card *card)
->>  {
->>         unsigned int sz;
->> @@ -2584,7 +2614,8 @@ void mmc_rescan(struct work_struct *work)
->>                 return;
->>
->>         /* If there is a non-removable card registered, only scan once */
->> -       if (!mmc_card_is_removable(host) && host->rescan_entered)
->> +       if (!mmc_card_is_removable(host) && host->rescan_entered &&
->> +           !host->rescan_force)
->>                 return;
->>         host->rescan_entered = 1;
->>
->> @@ -2601,7 +2632,8 @@ void mmc_rescan(struct work_struct *work)
->>          * if there is a _removable_ card registered, check whether it is
->>          * still present
->>          */
->> -       if (host->bus_ops && !host->bus_dead && mmc_card_is_removable(host))
->> +       if (host->bus_ops && !host->bus_dead &&
->> +           (mmc_card_is_removable(host) || host->rescan_force))
->>                 host->bus_ops->detect(host);
->>
->>         host->detect_change = 0;
->> @@ -2634,15 +2666,20 @@ void mmc_rescan(struct work_struct *work)
->>         }
->>
->>         for (i = 0; i < ARRAY_SIZE(freqs); i++) {
->> -               if (!mmc_rescan_try_freq(host, max(freqs[i], host->f_min)))
->> +               if (!mmc_rescan_try_freq(host, max(freqs[i], host->f_min))) {
->> +                       if (host->rescan_force) {
->> +                               host->rescan_force = 0;
->> +                               host->rescan_keep_power = 0;
->> +                       }
->>                         break;
->> +               }
->>                 if (freqs[i] <= host->f_min)
->>                         break;
->>         }
->>         mmc_release_host(host);
->>
->>   out:
->> -       if (host->caps & MMC_CAP_NEEDS_POLL)
->> +       if ((host->caps & MMC_CAP_NEEDS_POLL) || host->rescan_force)
->>                 mmc_schedule_delayed_work(&host->detect, HZ);
->>  }
->>
->> diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
->> index 45cde8c..e9b3115 100644
->> --- a/include/linux/mmc/host.h
->> +++ b/include/linux/mmc/host.h
->> @@ -333,6 +333,8 @@ struct mmc_host {
->>
->>         int                     rescan_disable; /* disable card detection */
->>         int                     rescan_entered; /* used with nonremovable devices */
->> +       int                     rescan_force;   /* force rescan of (nonremovable) devices */
->> +       int                     rescan_keep_power; /* Do not power off card */
->>
->>         int                     need_retune;    /* re-tuning is needed */
->>         int                     hold_retune;    /* hold off re-tuning */
->> @@ -408,6 +410,8 @@ int mmc_power_save_host(struct mmc_host *host);
->>  int mmc_power_restore_host(struct mmc_host *host);
->>
->>  void mmc_detect_change(struct mmc_host *, unsigned long delay);
->> +void mmc_force_detect_change(struct mmc_host *host, unsigned long delay,
->> +                            bool keep_power);
->>  void mmc_request_done(struct mmc_host *, struct mmc_request *);
->>
->>  static inline void mmc_signal_sdio_irq(struct mmc_host *host)
->> --
->> 2.7.4
->>
->
-> Kind regards
-> Uffe
->
