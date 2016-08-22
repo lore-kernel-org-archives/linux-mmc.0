@@ -1,27 +1,23 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: host: vub300: don't print error when allocating urb fails
-Date: Mon, 22 Aug 2016 15:39:41 +0200
-Message-ID: <CAPDyKFptBkb74Xepfps5TL6kkkkzDkKOkySMihOxzxd4yT_2-A@mail.gmail.com>
-References: <1470949433-24707-1-git-send-email-wsa-dev@sang-engineering.com> <1470949433-24707-2-git-send-email-wsa-dev@sang-engineering.com>
+Subject: Re: [PATCH 1/1] mmc: core: Add the vmmc/vmmcq regulator info
+Date: Mon, 22 Aug 2016 15:39:21 +0200
+Message-ID: <CAPDyKFpiariD2+fMUmVH+nMff2hDpxY6eE0zN50nadw1pHA7ag@mail.gmail.com>
+References: <1470043331-5123-1-git-send-email-ben.dooks@codethink.co.uk>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wm0-f42.google.com ([74.125.82.42]:34598 "EHLO
-        mail-wm0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1755461AbcHVNjn (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 22 Aug 2016 09:39:43 -0400
-Received: by mail-wm0-f42.google.com with SMTP id q128so21376138wma.1
-        for <linux-mmc@vger.kernel.org>; Mon, 22 Aug 2016 06:39:43 -0700 (PDT)
-In-Reply-To: <1470949433-24707-2-git-send-email-wsa-dev@sang-engineering.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1470043331-5123-1-git-send-email-ben.dooks@codethink.co.uk>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Ben Dooks <ben.dooks@codethink.co.uk>
+Cc: Rob Herring <robh+dt@kernel.org>, =?UTF-8?Q?Pawe=C5=82_Moll?= <pawel.moll@arm.com>, Mark Rutland <mark.rutland@arm.com>, Kumar Gala <galak@codeaurora.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-kernel@lists.codethink.co.uk, linux-mmc <linux-mmc@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Wolfram Sang <wsa-dev@sang-engineering.com>
-Cc: Linux USB List <linux-usb@vger.kernel.org>, Tony Olech <tony.olech@elandigitalsystems.com>, linux-mmc <linux-mmc@vger.kernel.org>
 
-On 11 August 2016 at 23:03, Wolfram Sang <wsa-dev@sang-engineering.com> wrote:
-> kmalloc will print enough information in case of failure.
+On 1 August 2016 at 11:22, Ben Dooks <ben.dooks@codethink.co.uk> wrote:
+> The core MMC code adds two (optional) regulator properites that drivers
+> should use to get their supplies. This is not documented anywhere so add
+> information on it.
 >
-> Signed-off-by: Wolfram Sang <wsa-dev@sang-engineering.com>
+> Signed-off-by: Ben Dooks <ben.dooks@codethink.co.uk>
 
 Thanks, applied for next!
 
@@ -29,27 +25,35 @@ Kind regards
 Uffe
 
 > ---
->  drivers/mmc/host/vub300.c | 2 --
->  1 file changed, 2 deletions(-)
+>  Documentation/devicetree/bindings/mmc/mmc.txt | 11 +++++++++++
+>  1 file changed, 11 insertions(+)
 >
-> diff --git a/drivers/mmc/host/vub300.c b/drivers/mmc/host/vub300.c
-> index 1e819f98b94f52..bb3e0d1dd35501 100644
-> --- a/drivers/mmc/host/vub300.c
-> +++ b/drivers/mmc/host/vub300.c
-> @@ -2116,13 +2116,11 @@ static int vub300_probe(struct usb_interface *interface,
->         command_out_urb = usb_alloc_urb(0, GFP_KERNEL);
->         if (!command_out_urb) {
->                 retval = -ENOMEM;
-> -               dev_err(&udev->dev, "not enough memory for command_out_urb\n");
->                 goto error0;
->         }
->         command_res_urb = usb_alloc_urb(0, GFP_KERNEL);
->         if (!command_res_urb) {
->                 retval = -ENOMEM;
-> -               dev_err(&udev->dev, "not enough memory for command_res_urb\n");
->                 goto error1;
->         }
->         /* this also allocates memory for our VUB300 mmc host device */
+> diff --git a/Documentation/devicetree/bindings/mmc/mmc.txt b/Documentation/devicetree/bindings/mmc/mmc.txt
+> index ed23b9b..8cbcbce 100644
+> --- a/Documentation/devicetree/bindings/mmc/mmc.txt
+> +++ b/Documentation/devicetree/bindings/mmc/mmc.txt
+> @@ -71,6 +71,17 @@ Optional SDIO properties:
+>  - wakeup-source: Enables wake up of host system on SDIO IRQ assertion
+>                  (Legacy property supported: "enable-sdio-wakeup")
+>
+> +MMC power
+> +---------
+> +
+> +Controllers may implement power control from both the connected cards and
+> +the IO signaling (for example to change to high-speed 1.8V signalling). If
+> +the system supports this, then the following two properties should point
+> +to valid regulator nodes:
+> +
+> +- vqmmc-supply: supply node for IO line power
+> +- vmmc-supply: supply node for card's power
+> +
+>
+>  MMC power sequences:
+>  --------------------
 > --
 > 2.8.1
 >
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
