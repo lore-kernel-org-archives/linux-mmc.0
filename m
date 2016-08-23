@@ -1,67 +1,40 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: block: get idx after the check of packed
-Date: Tue, 23 Aug 2016 12:28:38 +0200
-Message-ID: <CAPDyKFqr+NX2sGGUHJ_bq113oTq8KVvwpYKBGsdVDN_vk_77CA@mail.gmail.com>
-References: <1471753379-814-1-git-send-email-shawn.lin@rock-chips.com>
+From: Geert Uytterhoeven <geert@linux-m68k.org>
+Subject: Re: [PATCH v2 3/9] mmc: tmio: Add UHS-I mode support
+Date: Tue, 23 Aug 2016 14:34:16 +0200
+Message-ID: <CAMuHMdW+R+cS3ttKiRrtme=9KLTsTeV+tT-aRM_0Qj4CA5hVbg@mail.gmail.com>
+References: <1459525479-20842-1-git-send-email-wsa@the-dreams.de>
+ <1459525479-20842-4-git-send-email-wsa@the-dreams.de> <CAMuHMdVyNsm+hpoJfjxLkKt_5zydx9csgPB0zqCdtPMipqmFFQ@mail.gmail.com>
+ <20160817190804.GA11930@tetsubishi>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wm0-f53.google.com ([74.125.82.53]:36549 "EHLO
-        mail-wm0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S932642AbcHWKel (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 23 Aug 2016 06:34:41 -0400
-Received: by mail-wm0-f53.google.com with SMTP id q128so157231051wma.1
-        for <linux-mmc@vger.kernel.org>; Tue, 23 Aug 2016 03:34:41 -0700 (PDT)
-In-Reply-To: <1471753379-814-1-git-send-email-shawn.lin@rock-chips.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-renesas-soc-owner@vger.kernel.org>
+In-Reply-To: <20160817190804.GA11930@tetsubishi>
+Sender: linux-renesas-soc-owner@vger.kernel.org
+To: Wolfram Sang <wsa@the-dreams.de>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Ben Hutchings <ben.hutchings@codethink.co.uk>, Simon Horman <horms@verge.net.au>, Linux MMC List <linux-mmc@vger.kernel.org>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Shawn Lin <shawn.lin@rock-chips.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>
 
-On 21 August 2016 at 06:22, Shawn Lin <shawn.lin@rock-chips.com> wrote:
-> We should not use packed command before we verify
-> it's valid. So let's move the assignment of idx
-> after the check.
->
-> Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
-> ---
->
->  drivers/mmc/card/block.c | 4 +++-
->  1 file changed, 3 insertions(+), 1 deletion(-)
->
-> diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
-> index 48a5dd7..11d3046 100644
-> --- a/drivers/mmc/card/block.c
-> +++ b/drivers/mmc/card/block.c
-> @@ -1883,11 +1883,13 @@ static int mmc_blk_end_packed_req(struct mmc_queue_req *mq_rq)
->  {
->         struct request *prq;
->         struct mmc_packed *packed = mq_rq->packed;
-> -       int idx = packed->idx_failure, i = 0;
-> +       int idx, i = 0;
->         int ret = 0;
->
->         BUG_ON(!packed);
->
-> +       idx = packed->idx_failure;
-> +
+Hi Wolfram,
 
-Instead of changing this, may I suggest we try to implement better
-error handling - if needed.
-
-I don't think a BUG_ON() is actually what should be used here.
-
->         while (!list_empty(&packed->list)) {
->                 prq = list_entry_rq(packed->list.next);
->                 if (idx == i) {
-> --
-> 2.3.7
+On Wed, Aug 17, 2016 at 9:08 PM, Wolfram Sang <wsa@the-dreams.de> wrote:
+>>     [<c02f9d04>] (__mmc_start_request) from [<c02f9fa0>]
+>> (mmc_start_request+0x104/0x118)
 >
->
+> This function calls card_busy only for SDIO cards. I assume you don't
+> have one inserted? Maybe the "broken-cd" property doesn't work correctly
+> and causes side-effects? This would explain why it only affects SDHI1
+> and not SDHI0.
 
-Kind regards
-Uffe
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Removing the "broken-cd" property fixes the issue.
+However, I'm not in a position to verify SDHI1 works after that.
+
+Gr{oetje,eeting}s,
+
+                        Geert
+
+--
+Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
+
+In personal conversations with technical people, I call myself a hacker. But
+when I'm talking to journalists I just say "programmer" or something like that.
+                                -- Linus Torvalds
