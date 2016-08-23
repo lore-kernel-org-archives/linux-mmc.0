@@ -1,275 +1,315 @@
-From: Ritesh Harjani <riteshh@codeaurora.org>
-Subject: Re: [PATCH v3 7/9] mmc: sdhci-msm: Implement set_clock callback for
- sdhci-msm
-Date: Tue, 23 Aug 2016 19:09:59 +0530
-Message-ID: <88b87649-8ddf-102d-029b-851456991561@codeaurora.org>
-References: <1471581384-18961-1-git-send-email-riteshh@codeaurora.org>
- <1471581384-18961-8-git-send-email-riteshh@codeaurora.org>
- <4e1be7e8-ad6e-b52f-d5ad-258a6d4ed41d@intel.com>
- <614e25fb-34ad-285d-2abc-0748c89a9c0a@codeaurora.org>
- <47795735-66ae-5382-77fa-7906833aada0@intel.com>
- <abd3da08-f74b-8a19-89c9-6fed4a99c9c9@codeaurora.org>
- <9200ab14-ffdc-8a50-51e2-0572dcea6b95@intel.com>
- <0dc5e388-dbc3-6179-6b27-c35afffd6bb8@codeaurora.org>
- <cc22102f-84ed-8973-3dde-6636326352fc@intel.com>
+From: Simon Horman <horms@verge.net.au>
+Subject: Re: [PATCH v4 2/4] mmc: tmio: Add tuning support
+Date: Tue, 23 Aug 2016 15:52:52 +0200
+Message-ID: <20160823135251.GA25665@verge.net.au>
+References: <1469592803-13842-1-git-send-email-horms+renesas@verge.net.au>
+ <1469592803-13842-3-git-send-email-horms+renesas@verge.net.au>
+ <CAPDyKFq_Fs_bNx7LP-J+nC3iaNgB7gvZAvhCp--qVOh1iAh0vg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp.codeaurora.org ([198.145.29.96]:43494 "EHLO
-        smtp.codeaurora.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1757503AbcHWNkJ (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 23 Aug 2016 09:40:09 -0400
-In-Reply-To: <cc22102f-84ed-8973-3dde-6636326352fc@intel.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-renesas-soc-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <CAPDyKFq_Fs_bNx7LP-J+nC3iaNgB7gvZAvhCp--qVOh1iAh0vg@mail.gmail.com>
+Sender: linux-renesas-soc-owner@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, Magnus Damm <magnus.damm@gmail.com>, linux-mmc <linux-mmc@vger.kernel.org>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: ulf.hansson@linaro.org, bjorn.andersson@linaro.org, shawn.lin@rock-chips.com, jh80.chung@samsung.com, linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org, georgi.djakov@linaro.org, alex.lemberg@sandisk.com, mateusz.nowak@intel.com, Yuliy.Izrailov@sandisk.com, asutoshd@codeaurora.org, kdorfman@codeaurora.org, david.griego@linaro.org, stummala@codeaurora.org, venkatg@codeaurora.org
 
-Hi,
+Hi Ulf,
 
-On 8/23/2016 6:47 PM, Adrian Hunter wrote:
-> On 22/08/16 15:56, Ritesh Harjani wrote:
->> Hi Adrian,
->>
->>
->> On 8/22/2016 2:59 PM, Adrian Hunter wrote:
->>> On 22/08/16 12:07, Ritesh Harjani wrote:
->>>> Hi Adrian,
->>>>
->>>>
->>>> On 8/22/2016 11:50 AM, Adrian Hunter wrote:
->>>>> On 19/08/16 16:31, Ritesh Harjani wrote:
->>>>>> Hi,
->>>>>>
->>>>>>
->>>>>> On 8/19/2016 6:34 PM, Adrian Hunter wrote:
->>>>>>> On 19/08/16 07:36, Ritesh Harjani wrote:
->>>>>>>> sdhci-msm controller may have different clk-rates for each
->>>>>>>> bus speed mode. Thus implement set_clock callback for
->>>>>>>> sdhci-msm driver.
->>>>>>>>
->>>>>>>> Signed-off-by: Sahitya Tummala <stummala@codeaurora.org>
->>>>>>>> Signed-off-by: Ritesh Harjani <riteshh@codeaurora.org>
->>>>>>>> ---
->>>>>>>>  drivers/mmc/host/sdhci-msm.c | 103
->>>>>>>> ++++++++++++++++++++++++++++++++++++++++++-
->>>>>>>>  1 file changed, 102 insertions(+), 1 deletion(-)
->>>>>>>>
->>>>>>>> diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
->>>>>>>> index 7c032c3..c0ad9c2 100644
->>>>>>>> --- a/drivers/mmc/host/sdhci-msm.c
->>>>>>>> +++ b/drivers/mmc/host/sdhci-msm.c
->>>>>>>> @@ -89,6 +89,7 @@ struct sdhci_msm_host {
->>>>>>>>      struct mmc_host *mmc;
->>>>>>>>      bool use_14lpp_dll_reset;
->>>>>>>>      struct sdhci_msm_pltfm_data *pdata;
->>>>>>>> +    u32 clk_rate;
->>>>>>>>  };
->>>>>>>>
->>>>>>>>  /* Platform specific tuning */
->>>>>>>> @@ -582,6 +583,106 @@ static unsigned int sdhci_msm_get_min_clock(struct
->>>>>>>> sdhci_host *host)
->>>>>>>>      return msm_host->pdata->clk_table[0];
->>>>>>>>  }
->>>>>>>>
->>>>>>>> +static unsigned int sdhci_msm_get_msm_clk_rate(struct sdhci_host *host,
->>>>>>>> +                    u32 req_clk)
->>>>>>>> +{
->>>>>>>> +    struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
->>>>>>>> +    struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
->>>>>>>> +    int count = msm_host->pdata->clk_table_sz;
->>>>>>>> +    unsigned int sel_clk = -1;
->>>>>>>> +    int cnt;
->>>>>>>> +
->>>>>>>> +    if (req_clk < sdhci_msm_get_min_clock(host)) {
->>>>>>>> +        sel_clk = sdhci_msm_get_min_clock(host);
->>>>>>>> +        return sel_clk;
->>>>>>>> +    }
->>>>>>>> +
->>>>>>>> +    for (cnt = 0; cnt < count; cnt++) {
->>>>>>>> +        if (msm_host->pdata->clk_table[cnt] > req_clk) {
->>>>>>>> +            break;
->>>>>>>> +        } else if (msm_host->pdata->clk_table[cnt] == req_clk) {
->>>>>>>> +            sel_clk = msm_host->pdata->clk_table[cnt];
->>>>>>>> +            break;
->>>>>>>> +        } else {
->>>>>>>> +            sel_clk = msm_host->pdata->clk_table[cnt];
->>>>>>>> +        }
->>>>>>>> +    }
->>>>>>>
->>>>>>> 'else' is not needed after 'break' but can't this be simpler e.g.
->>>>>>>
->>>>>>> static unsigned int sdhci_msm_get_msm_clk_rate(struct sdhci_msm_host
->>>>>>> *msm_host, u32 req_clk)
->>>>>>> {
->>>>>>>     int count = msm_host->pdata->clk_table_sz;
->>>>>>>     unsigned int sel_clk = -1;
->>>>>>>
->>>>>>>     while (count--) {
->>>>>>>         sel_clk = msm_host->pdata->clk_table[count];
->>>>>>>         if (req_clk >= sel_clk)
->>>>>>>             return sel_clk;
->>>>>>>     }
->>>>>>>
->>>>>>>     return sel_clk;
->>>>>>> }
->>>>>>
->>>>>> Ok, sure I will check and get back on this.
->>>>>>
->>>>>>
->>>>>>>
->>>>>>>
->>>>>>>> +    return sel_clk;
->>>>>>>> +}
->>>>>>>
->>>>>>> Blank line needed
->>>>>> Ok done.
->>>>>>
->>>>>>>
->>>>>>>> +/**
->>>>>>>> + * __sdhci_msm_set_clock - sdhci_msm clock control.
->>>>>>>> + *
->>>>>>>> + * Description:
->>>>>>>> + * Implement MSM version of sdhci_set_clock.
->>>>>>>> + * This is required since MSM controller does not
->>>>>>>> + * use internal divider and instead directly control
->>>>>>>> + * the GCC clock as per HW recommendation.
->>>>>>>> + **/
->>>>>>>> +void __sdhci_msm_set_clock(struct sdhci_host *host, unsigned int clock)
->>>>>>>> +{
->>>>>>>> +    u16 clk;
->>>>>>>> +    unsigned long timeout;
->>>>>>>> +
->>>>>>>> +    host->mmc->actual_clock = 0;
->>>>>>>> +
->>>>>>>> +    sdhci_writew(host, 0, SDHCI_CLOCK_CONTROL);
->>>>>>>> +
->>>>>>>> +    if (clock == 0)
->>>>>>>> +        return;
->>>>>>>
->>>>>>> Should set host->mmc->actual_clock to the actual rate somewhere.
->>>>>> Since MSM controller does not uses divider then there is no need of having
->>>>>> actual clock since it should be same as host->clock.
->>>>>
->>>>> Ok, so sdhci_msm_get_msm_clk_rate() is not the actual clock rate?
->>>> So I was assuming we need host->mmc->actual_clock rate if host->clock is not
->>>> the actual rate.
->>>> Ok, so I will update actual_clock to host->clock itself.
->>>>
->>>> pls, let me know if any concerns.
->>>
->>> I am confused.  Isn't clk_get_rate(msm_host->clk) the actual clock rate?
->>
->> Actually, msm controller have few quirks around clocks itself and
->> I was thinking of not using actual_clock to avoid adding any extra quirks
->> for msm.
->>
->> If you see if actual_clock is 0 and if SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK
->> is set, timeout_clk take host->clock for timeout calculation.
->>
->> That's one reason I did not want to update the host->actual_clock.
->> (otherwise timeout calc will go wrong for DDR modes for msm, where clock
->> from GCC is made double of host->clock and internally divided by controller
->> on it's own. In this case actual_clock would be shown as 2x of host->clock).
->> Do you think that keeping actual_clock to 0 should be fine in this case?
->
-> Yes, but please add a comment in the code.
+thanks for your review.
+I have tried to address it as best I can below.
 
-Sure thanks. I will address all comments in v4 spin.
+On Mon, Aug 22, 2016 at 03:39:03PM +0200, Ulf Hansson wrote:
+> On 27 July 2016 at 06:13, Simon Horman <horms+renesas@verge.net.au> wrote:
+> > From: Ai Kyuse <ai.kyuse.uw@renesas.com>
+> >
+> > Add tuning support for use with SDR104 mode
+> >
+> > Signed-off-by: Ai Kyuse <ai.kyuse.uw@renesas.com>
+> > Signed-off-by: Simon Horman <horms+renesas@verge.net.au>
+> > ---
+> > v4 [Simon Horman]
+> > As suggested by Wolfram Sang:
+> >   - Do not perform tuning if host->select_tuning is not set:
+> >     it seems to make little sense to do so and moreover there is currently
+> >     no such use-case
+> >   - Do not add mrc->sbc handling from tmio_mmc_request,
+> >     this is a hang-over from earlier versions of this patchset which
+> >     did not use core infrastructure for retuning
+> >   - Tidy up local variable usage
+> > * Correct index passed to prepare_tuning(): this seems to have
+> >   been the last piece of resolving the timeouts during tuning puzzle
+> > * Further cleanups to tmio_mmc_execute_tuning():
+> >   - Ensure tap is sized proportionally to its members
+> >   - Remove stray '*' in comment
+> >   - Use mmc rather than host->mmc, these are equivalent but
+> >     the former seems tidier
+> >   - Correct inverted logic in setting tap values
+> > * Re-introduce retuning support. This was removed in v3.
+> >
+> > v3 [Simon Horman]
+> > * As suggested by Kuninori Morimoto:
+> >   - Do not add unused retuning callback to struct tmio_mmc_host
+> >   - Change return type of prepare_tuning callback to void
+> >   - Add tap_size parameter to select_tuning callback
+> >
+> > v2 [Simon Horman]
+> > * As suggested by Kuninori Morimoto:
+> >   - Actually remove unnecessary TMIO_MMC_HAS_UHS_SCC define
+> > * As suggested by Wolfram Sang:
+> >   - Rely on core to call tuning. This simplifies things somewhat.
+> >   - Use mmc_send_tuning()
+> >     - A side affect of this appears to be that we now see some recoverable
+> >       errors logged during tuning. These are typically corrected by
+> >       subsequent tuning. It is the logging that is the apparent side effect
+> >       of this change.
+> >       e.g.
+> >       sh_mobile_sdhi ee100000.sd: timeout waiting for hardware interrupt (CMD19)
+> >       sh_mobile_sdhi ee100000.sd: Tuning procedure failed
+> > * Use bool rather than unsigned long to pass test status
+> >   to select_tuning() callback
+> > * Do not retune if init_tuning callback is not present or
+> >   indicates that there are no taps present
+> > * Retune on hardware reset
+> >
+> > v1 [Simon Horman]
+> > * Omit start_signal_voltage_switch and tmio_mmc_card_busy changes which are
+> >   already present in mainline in a different form
+> > * Return num from init_tuning rather than passing an extra parameter
+> >   to hold the return value
+> > * Only call host->init_tuning if it is non-NULL
+> > * Place tmio_mmc_execute_tuning() such that no new forward declarations are
+> >   required
+> > * Remove unused TMIO_MMC_HAS_UHS_SCC define
+> >
+> > v0 [Ai Kyuse]
+> >
+> > Signed-off-by: Simon Horman <horms+renesas@verge.net.au>
+> > ---
+> >  drivers/mmc/host/tmio_mmc.h     |  7 ++++
+> >  drivers/mmc/host/tmio_mmc_pio.c | 77 +++++++++++++++++++++++++++++++++++++++++
+> >  2 files changed, 84 insertions(+)
+> >
+> > diff --git a/drivers/mmc/host/tmio_mmc.h b/drivers/mmc/host/tmio_mmc.h
+> > index 7f63ec05bdf4..316b0c3fe745 100644
+> > --- a/drivers/mmc/host/tmio_mmc.h
+> > +++ b/drivers/mmc/host/tmio_mmc.h
+> > @@ -150,6 +150,7 @@ struct tmio_mmc_host {
+> >         struct mutex            ios_lock;       /* protect set_ios() context */
+> >         bool                    native_hotplug;
+> >         bool                    sdio_irq_enabled;
+> > +       u32                     scc_tappos;
+> >
+> >         int (*write16_hook)(struct tmio_mmc_host *host, int addr);
+> >         int (*clk_enable)(struct tmio_mmc_host *host);
+> > @@ -160,6 +161,12 @@ struct tmio_mmc_host {
+> >                               unsigned int direction, int blk_size);
+> >         int (*start_signal_voltage_switch)(struct mmc_host *mmc,
+> >                                            struct mmc_ios *ios);
+> > +       unsigned int (*init_tuning)(struct tmio_mmc_host *host);
+> > +       void (*prepare_tuning)(struct tmio_mmc_host *host, unsigned long tap);
+> > +       int (*select_tuning)(struct tmio_mmc_host *host, bool *tap,
+> > +                            int tap_size);
+> > +       bool (*retuning)(struct tmio_mmc_host *host);
+> > +       void (*hw_reset)(struct tmio_mmc_host *host);
+> 
+> Please add the HW reset support in separate patch. I guess you need it
+> to go in before the tuning support.
 
->
->>
->>
->> I have not yet worked over timeout calculation patches yet, since it is of
->> lower priority in my list. After few other areas (mostly HS400), I will take
->> over clock timeout fixes to be up-streamed.
->>
->>>
->>>>>
->>>>>>
->>>>>> That's why I had kept it 0 intentionally. But I will add a comment
->>>>>> here then.
->>>>>>
->>>>>>>
->>>>>>>> +
->>>>>>>> +    /*
->>>>>>>> +     * MSM controller do not use clock divider.
->>>>>>>> +     * Thus read SDHCI_CLOCK_CONTROL and only enable
->>>>>>>> +     * clock with no divider value programmed.
->>>>>>>> +     */
->>>>>>>> +    clk = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
->>>>>>>> +
->>>>>>>> +    clk |= SDHCI_CLOCK_INT_EN;
->>>>>>>> +    sdhci_writew(host, clk, SDHCI_CLOCK_CONTROL);
->>>>>>>> +
->>>>>>>> +    /* Wait max 20 ms */
->>>>>>>> +    timeout = 20;
->>>>>>>> +    while (!((clk = sdhci_readw(host, SDHCI_CLOCK_CONTROL))
->>>>>>>> +        & SDHCI_CLOCK_INT_STABLE)) {
->>>>>>>> +        if (timeout == 0) {
->>>>>>>> +            pr_err("%s: Internal clock never stabilised.\n",
->>>>>>>> +                   mmc_hostname(host->mmc));
->>>>>>>> +            return;
->>>>>>>> +        }
->>>>>>>> +        timeout--;
->>>>>>>> +        mdelay(1);
->>>>>>>> +    }
->>>>>>>> +
->>>>>>>> +    clk |= SDHCI_CLOCK_CARD_EN;
->>>>>>>> +    sdhci_writew(host, clk, SDHCI_CLOCK_CONTROL);
->>>>>>>> +}
->>>>>>>> +
->>>>>>>> +static void sdhci_msm_set_clock(struct sdhci_host *host, unsigned int
->>>>>>>> clock)
->>>>>>>> +{
->>>>>>>> +    struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
->>>>>>>> +    struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
->>>>>>>> +    u32 msm_clock = 0;
->>>>>>>> +    int rc = 0;
->>>>>>>> +
->>>>>>>> +    if (!clock)
->>>>>>>> +        goto out;
->>>>>>>> +
->>>>>>>> +    if (clock != msm_host->clk_rate) {
->>>>>>>> +        msm_clock = sdhci_msm_get_msm_clk_rate(host, clock);
->>>>>>>> +        rc = clk_set_rate(msm_host->clk, msm_clock);
->>>>>>>> +        if (rc) {
->>>>>>>> +            pr_err("%s: failed to set clock at rate %u, requested clock
->>>>>>>> rate %u\n",
->>>>>>>> +                mmc_hostname(host->mmc), msm_clock, clock);
->>>>>>>> +            goto out;
->>>>>>>> +        }
->>>>>>>> +        msm_host->clk_rate = clock;
->>>>>>>> +        pr_debug("%s: setting clock at rate %lu\n",
->>>>>>>> +            mmc_hostname(host->mmc), clk_get_rate(msm_host->clk));
->>>>>>>> +    }
->>>>>>>> +out:
->>>>>>>> +    __sdhci_msm_set_clock(host, clock);
->>>>>>>> +}
->>>>>>>> +
->>>>>>>>  static const struct of_device_id sdhci_msm_dt_match[] = {
->>>>>>>>      { .compatible = "qcom,sdhci-msm-v4" },
->>>>>>>>      {},
->>>>>>>> @@ -592,7 +693,7 @@ MODULE_DEVICE_TABLE(of, sdhci_msm_dt_match);
->>>>>>>>  static const struct sdhci_ops sdhci_msm_ops = {
->>>>>>>>      .platform_execute_tuning = sdhci_msm_execute_tuning,
->>>>>>>>      .reset = sdhci_reset,
->>>>>>>> -    .set_clock = sdhci_set_clock,
->>>>>>>> +    .set_clock = sdhci_msm_set_clock,
->>>>>>>>      .get_min_clock = sdhci_msm_get_min_clock,
->>>>>>>>      .get_max_clock = sdhci_msm_get_max_clock,
->>>>>>>>      .set_bus_width = sdhci_set_bus_width,
->>>>>>>>
->>>>>>>
->>>>>>
->>>>>
->>>>
->>>
->>
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
+Sure, will do.
+And yes, I think it needs go go in before tuning support.
+
+> >  };
+> >
+> >  struct tmio_mmc_host *tmio_mmc_host_alloc(struct platform_device *pdev);
+> > diff --git a/drivers/mmc/host/tmio_mmc_pio.c b/drivers/mmc/host/tmio_mmc_pio.c
+> > index a9d07b5f3c63..83b5148a2684 100644
+> > --- a/drivers/mmc/host/tmio_mmc_pio.c
+> > +++ b/drivers/mmc/host/tmio_mmc_pio.c
+> > @@ -36,6 +36,7 @@
+> >  #include <linux/io.h>
+> >  #include <linux/irq.h>
+> >  #include <linux/mfd/tmio.h>
+> > +#include <linux/mmc/card.h>
+> >  #include <linux/mmc/host.h>
+> >  #include <linux/mmc/mmc.h>
+> >  #include <linux/mmc/slot-gpio.h>
+> > @@ -298,6 +299,15 @@ static void tmio_mmc_finish_request(struct tmio_mmc_host *host)
+> >         if (mrq->cmd->error || (mrq->data && mrq->data->error))
+> >                 tmio_mmc_abort_dma(host);
+> >
+> > +       if (host->retuning) {
+> > +               int result = host->retuning(host);
+> 
+> This looks like you need to re-tune between each an every request. :-)
+> 
+> Although I guess what really are doing here is that you check if the
+> auto-retuning has failed, correct?
+> 
+> Perhaps one could update the naming of the new tmio callbacks for
+> tuning as to make those more self-explained.
+
+Perhaps calling it check_scc_error would be better,
+that is what the callback actually does
+
+> 
+> > +
+> > +               if (result || (mrq->cmd->error == -EILSEQ)) {
+> > +                       mmc_retune_timer_stop(host->mmc);
+> > +                       mmc_retune_needed(host->mmc);
+> 
+> The mmc core already deals with re-tuning when it get an -EILSEQ error
+> from a request, so you shouldn't need to manage that here as well.
+
+Thanks, I'll clean that up.
+
+> 
+> > +               }
+> > +       }
+> > +
+> >         mmc_request_done(host->mmc, mrq);
+> >  }
+> >
+> > @@ -756,6 +766,68 @@ static int tmio_mmc_start_data(struct tmio_mmc_host *host,
+> >         return 0;
+> >  }
+> >
+> > +static void tmio_mmc_hw_reset(struct mmc_host *mmc)
+> 
+> As stated earlier, please add the HW reset in a separate patch.
+> 
+> > +{
+> > +       struct tmio_mmc_host *host = mmc_priv(mmc);
+> > +
+> > +       if (host->hw_reset)
+> > +               host->hw_reset(host);
+> > +
+> > +       mmc_retune_timer_stop(host->mmc);
+> > +       mmc_retune_needed(host->mmc);
+> 
+> This looks like it belongs in the mmc core when it invokes a HW reset
+> sequence. Please try to move it into there (unless it already covers
+> this).
+
+I think it is already handled by the core and I propose updating this patch as
+follows:
+
+@@ -772,9 +772,6 @@ static void tmio_mmc_hw_reset(struct mmc_host *mmc)
+ 
+ 	if (host->hw_reset)
+ 		host->hw_reset(host);
+-
+-	mmc_retune_timer_stop(host->mmc);
+-	mmc_retune_needed(host->mmc);
+ }
+ 
+ static int tmio_mmc_execute_tuning(struct mmc_host *mmc, u32 opcode)
+@@ -819,7 +816,7 @@ err_free:
+ out:
+ 	if (ret < 0) {
+ 		dev_warn(&host->pdev->dev, "Tuning procedure failed\n");
+-		tmio_mmc_hw_reset(mmc);
++		mmc_hw_reset(mmc);
+ 	} else {
+ 		host->mmc->retune_period = 0;
+ 	}
+
+> > +}
+> > +
+> > +static int tmio_mmc_execute_tuning(struct mmc_host *mmc, u32 opcode)
+> > +{
+> > +       struct tmio_mmc_host *host = mmc_priv(mmc);
+> > +       unsigned int num;
+> > +       int i, ret = 0;
+> > +       bool *tap;
+> > +
+> > +       if (!host->init_tuning || !host->select_tuning)
+> 
+> When defining these callbacks, it would be nice to know which ones are
+> optional and which ones are required.
+
+Would some comments in struct tmio_mmc_host be an appropriate way
+to achieve that?
+
+> > +               /* Tuning is not supported */
+> > +               goto out;
+> > +
+> > +       num = host->init_tuning(host);
+> > +       if (!num)
+> > +               /* Tuning is not supported */
+> > +               goto out;
+> > +
+> > +       tap = kmalloc(num * 2 * sizeof(*tap), GFP_KERNEL);
+> > +       if (!tap) {
+> > +               ret = -ENOMEM;
+> > +               goto out;
+> > +       }
+> > +
+> > +       /* Issue CMD19 twice for each tap */
+> > +       for (i = 0; i < 2 * num; i++) {
+> > +               if (host->prepare_tuning)
+> > +                       host->prepare_tuning(host, i % num);
+> > +
+> > +               ret = mmc_send_tuning(mmc, opcode, NULL);
+> > +               if (ret && ret != -EILSEQ)
+> > +                       goto err_free;
+> > +               tap[i] = (ret != 0);
+> > +
+> > +               mdelay(1);
+> > +       }
+> > +
+> > +       ret = host->select_tuning(host, tap, num * 2);
+> > +
+> > +err_free:
+> > +       kfree(tap);
+> > +out:
+> > +       if (ret < 0) {
+> > +               dev_warn(&host->pdev->dev, "Tuning procedure failed\n");
+> > +               tmio_mmc_hw_reset(mmc);
+> > +       } else {
+> > +               host->mmc->retune_period = 0;
+> > +       }
+> > +
+> > +       return ret;
+> > +
+> > +}
+> > +
+> >  /* Process requests from the MMC layer */
+> >  static void tmio_mmc_request(struct mmc_host *mmc, struct mmc_request *mrq)
+> >  {
+> > @@ -978,6 +1050,8 @@ static struct mmc_host_ops tmio_mmc_ops = {
+> >         .enable_sdio_irq = tmio_mmc_enable_sdio_irq,
+> >         .card_busy      = tmio_mmc_card_busy,
+> >         .multi_io_quirk = tmio_multi_io_quirk,
+> > +       .execute_tuning = tmio_mmc_execute_tuning,
+> > +       .hw_reset       = tmio_mmc_hw_reset,
+> >  };
+> >
+> >  static int tmio_mmc_init_ocr(struct tmio_mmc_host *host)
+> > @@ -1202,6 +1276,9 @@ int tmio_mmc_host_runtime_suspend(struct device *dev)
+> >         struct mmc_host *mmc = dev_get_drvdata(dev);
+> >         struct tmio_mmc_host *host = mmc_priv(mmc);
+> >
+> > +       mmc_retune_timer_stop(host->mmc);
+> > +       mmc_retune_needed(host->mmc);
+> 
+> I am wondering whether it would it be possible to keep a cache of the
+> currently used tuning values and then restore these values at
+> runtime_resume?
+> 
+> In that way you wouldn't need to force new re-tuning cycle here.
+
+I will check with the hardware people to see if it is practical from
+that POV.
+
+>From a software POV that ought to be simple enough: a small bitmap ought
+to be sufficient to save the values for the hardware covered by this
+series.
+
+> > +
+> >         tmio_mmc_disable_mmc_irqs(host, TMIO_MASK_ALL);
+> >
+> >         if (host->clk_cache)
+> > --
+> > 2.7.0.rc3.207.g0ac5344
