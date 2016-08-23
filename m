@@ -1,52 +1,146 @@
 From: Zach Brown <zach.brown@ni.com>
 Subject: Re: [PATCH] sdhci: Add quirk and device tree parameter to force SD
  test mode
-Date: Tue, 23 Aug 2016 17:14:22 -0500
-Message-ID: <20160823221421.GB20351@zach-desktop>
+Date: Tue, 23 Aug 2016 17:04:43 -0500
+Message-ID: <20160823220442.GA20351@zach-desktop>
 References: <1471906531-28668-1-git-send-email-zach.brown@ni.com>
- <684dd3fb-15ac-fa84-2f1e-89f379b5149a@intel.com>
+ <AM4PR0401MB2324D95AB7382C828BF8E5CE90EB0@AM4PR0401MB2324.eurprd04.prod.outlook.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-co1nam03on0139.outbound.protection.outlook.com ([104.47.40.139]:52219
-        "EHLO NAM03-CO1-obe.outbound.protection.outlook.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1755147AbcHWXuB (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Tue, 23 Aug 2016 19:50:01 -0400
+Return-path: <linux-kernel-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <684dd3fb-15ac-fa84-2f1e-89f379b5149a@intel.com>
-Sender: linux-mmc-owner@vger.kernel.org
+In-Reply-To: <AM4PR0401MB2324D95AB7382C828BF8E5CE90EB0@AM4PR0401MB2324.eurprd04.prod.outlook.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Haibo Chen <haibo.chen@nxp.com>
+Cc: "adrian.hunter@intel.com" <adrian.hunter@intel.com>, "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>, "mark.rutland@arm.com" <mark.rutland@arm.com>, "robh+dt@kernel.org" <robh+dt@kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: ulf.hansson@linaro.org, mark.rutland@arm.com, robh+dt@kernel.org, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org
 
-On Tue, Aug 23, 2016 at 09:22:29AM +0300, Adrian Hunter wrote:
-> On 23/08/16 01:55, Zach Brown wrote:
+On Tue, Aug 23, 2016 at 01:34:20AM +0000, Haibo Chen wrote:
+> > -----Original Message-----
+> > From: linux-mmc-owner@vger.kernel.org [mailto:linux-mmc-
+> > owner@vger.kernel.org] On Behalf Of Zach Brown
+> > Sent: Tuesday, August 23, 2016 6:56 AM
+> > To: adrian.hunter@intel.com
+> > Cc: ulf.hansson@linaro.org; mark.rutland@arm.com; robh+dt@kernel.org;
+> > linux-mmc@vger.kernel.org; devicetree@vger.kernel.org; linux-
+> > kernel@vger.kernel.org
+> > Subject: [PATCH] sdhci: Add quirk and device tree parameter to force SD test
+> > mode
+> > 
 > > From: Jaeden Amero <jaeden.amero@ni.com>
 > > 
-> > On some devices, CD is broken so that we must force the SDHCI into test
-> > mode and set CD, so that it always detects an SD card as present.
+> > On some devices, CD is broken so that we must force the SDHCI into test mode
+> > and set CD, so that it always detects an SD card as present.
 > > 
-> > In order to get a device with broken CD working, we had previously
-> > always set the SDHCI into test mode. Unfortunately, this had the side
-> > effect of making all SD cards used with our Linux kernels undetectable
-> > and non-removable.
-> > 
-> > By making this "SD test mode" setting optional via a quirk, we can avoid
-> > this side effect for devices other than the device with broken CD.
-> > Additionally, we add a device parameter to sdhci-pltfm to allow all
-> > SDHCI drivers to enable this quirk.
+> > In order to get a device with broken CD working, we had previously always set
+> > the SDHCI into test mode. Unfortunately, this had the side effect of making all
+> > SD cards used with our Linux kernels undetectable and non-removable.
 > 
-> Generally new quirks are not acceptable, but I don't see how test mode helps
-> very much since you still don't get any card detection events.  If you
-> really need test mode, please explain more about how it helps (as opposed to
-> polling for example).
-> 
+> Why not use the poll mode? You can set the flag MMC_CAP_NEEDS_POLL, then 
+> the mmc core will detect the card every second.
 > 
 
-Polling doesnt work in our case, since the issue lies with the SD controller
-itself. The SD controller in xilinx zynq devices requires the CDn signal to
-work. http://www.xilinx.com/support/answers/61064.html We have a situation 
-where the controller requires the signal, but we can't use any of our pins to
-supply it. With test mode we can get the controller into a state where it works
-despite not having the signal.
+We're using a Xilinx Zynq device. In an AR they state:
+"Signals card detect (CDn) and write protect (WPn) are required for the Zynq SD
+card interface to work." http://www.xilinx.com/support/answers/61064.html
+So polling won't work, since the interface itself won't work unless CDn is on.
+Test mode allows us to get the interface working with no CDn signal.
+
+
+> > 
+> > By making this "SD test mode" setting optional via a quirk, we can avoid this
+> > side effect for devices other than the device with broken CD.
+> > Additionally, we add a device parameter to sdhci-pltfm to allow all SDHCI
+> > drivers to enable this quirk.
+> > 
+> > Signed-off-by: Jaeden Amero <jaeden.amero@ni.com>
+> > Signed-off-by: Zach Brown <zach.brown@ni.com>
+> > ---
+> >  Documentation/devicetree/bindings/mmc/mmc.txt | 2 ++
+> >  drivers/mmc/host/sdhci-pltfm.c                | 4 ++++
+> >  drivers/mmc/host/sdhci.c                      | 9 +++++++++
+> >  drivers/mmc/host/sdhci.h                      | 4 ++++
+> >  4 files changed, 19 insertions(+)
+> > 
+> > diff --git a/Documentation/devicetree/bindings/mmc/mmc.txt
+> > b/Documentation/devicetree/bindings/mmc/mmc.txt
+> > index 22d1e1f..3a9be41 100644
+> > --- a/Documentation/devicetree/bindings/mmc/mmc.txt
+> > +++ b/Documentation/devicetree/bindings/mmc/mmc.txt
+> > @@ -52,6 +52,8 @@ Optional properties:
+> >  - no-sdio: controller is limited to send sdio cmd during initialization
+> >  - no-sd: controller is limited to send sd cmd during initialization
+> >  - no-mmc: controller is limited to send mmc cmd during initialization
+> > +- force-sd-cd-test-mode: card detection is broken on device, force cd
+> > +test
+> > +  enable and cd test inserted so host will always detect a card.
+> > 
+> >  *NOTE* on CD and WP polarity. To use common for all SD/MMC host
+> > controllers line  polarity properties, we have to fix the meaning of the "normal"
+> > and "inverted"
+> > diff --git a/drivers/mmc/host/sdhci-pltfm.c b/drivers/mmc/host/sdhci-pltfm.c
+> > index 1d17dcf..056d101 100644
+> > --- a/drivers/mmc/host/sdhci-pltfm.c
+> > +++ b/drivers/mmc/host/sdhci-pltfm.c
+> > @@ -87,6 +87,10 @@ void sdhci_get_of_property(struct platform_device
+> > *pdev)
+> >  	if (of_get_property(np, "broken-cd", NULL))
+> >  		host->quirks |= SDHCI_QUIRK_BROKEN_CARD_DETECTION;
+> > 
+> > +	if (of_get_property(np, "force-sd-cd-test-mode", NULL))
+> > +		host->quirks2 |=
+> > +			SDHCI_QUIRK2_MUST_FORCE_SD_CD_TEST_MODE;
+> > +
+> >  	if (of_get_property(np, "no-1-8-v", NULL))
+> >  		host->quirks2 |= SDHCI_QUIRK2_NO_1_8_V;
+> > 
+> > diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c index
+> > cd65d47..2f4c6f9 100644
+> > --- a/drivers/mmc/host/sdhci.c
+> > +++ b/drivers/mmc/host/sdhci.c
+> > @@ -117,6 +117,15 @@ static inline bool sdhci_data_line_cmd(struct
+> > mmc_command *cmd)  static void sdhci_set_card_detection(struct sdhci_host
+> > *host, bool enable)  {
+> >  	u32 present;
+> > +	u8  ctrl;
+> > +
+> > +	if (host->quirks2 & SDHCI_QUIRK2_MUST_FORCE_SD_CD_TEST_MODE)
+> > {
+> > +		/* Put the card in test mode, with card inserted */
+> > +		ctrl = sdhci_readl(host, SDHCI_HOST_CONTROL);
+> > +		ctrl |= SDHCI_CTRL_CD_TEST_INSERTED |
+> > +			SDHCI_CTRL_CD_TEST_ENABLE;
+> > +		sdhci_writeb(host, ctrl, SDHCI_HOST_CONTROL);
+> > +	}
+> > 
+> >  	if ((host->quirks & SDHCI_QUIRK_BROKEN_CARD_DETECTION) ||
+> >  	    !mmc_card_is_removable(host->mmc))
+> > diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h index
+> > 0411c9f..dd609b2 100644
+> > --- a/drivers/mmc/host/sdhci.h
+> > +++ b/drivers/mmc/host/sdhci.h
+> > @@ -84,6 +84,8 @@
+> >  #define   SDHCI_CTRL_ADMA32	0x10
+> >  #define   SDHCI_CTRL_ADMA64	0x18
+> >  #define   SDHCI_CTRL_8BITBUS	0x20
+> > +#define  SDHCI_CTRL_CD_TEST_INSERTED	0x40
+> > +#define  SDHCI_CTRL_CD_TEST_ENABLE	0x80
+> > 
+> >  #define SDHCI_POWER_CONTROL	0x29
+> >  #define  SDHCI_POWER_ON		0x01
+> > @@ -422,6 +424,8 @@ struct sdhci_host {
+> >  #define SDHCI_QUIRK2_ACMD23_BROKEN			(1<<14)
+> >  /* Broken Clock divider zero in controller */
+> >  #define SDHCI_QUIRK2_CLOCK_DIV_ZERO_BROKEN		(1<<15)
+> > +/* Controller must support device with broken CD */
+> > +#define SDHCI_QUIRK2_MUST_FORCE_SD_CD_TEST_MODE		(1<<16)
+> > 
+> >  	int irq;		/* Device IRQ */
+> >  	void __iomem *ioaddr;	/* Mapped address */
+> > --
+> > 2.7.4
+> > 
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe linux-mmc" in the
+> > body of a message to majordomo@vger.kernel.org More majordomo info at
+> > http://vger.kernel.org/majordomo-info.html
