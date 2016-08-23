@@ -1,48 +1,127 @@
-From: Joaquin Jimenez <jjimenez@twonav.com>
-Subject: MMC -84 error.
-Date: Tue, 23 Aug 2016 23:02:38 +0200
-Message-ID: <CAEbvwU4Do=rqVZU-Jhme6EbkhR7foeNU-gWXeO9r+KuPBQpZCQ@mail.gmail.com>
+From: Zach Brown <zach.brown@ni.com>
+Subject: Re: [PATCH] sdhci: Add quirk and device tree parameter to force SD
+ test mode
+Date: Tue, 23 Aug 2016 17:19:22 -0500
+Message-ID: <20160823221922.GC20351@zach-desktop>
+References: <1471906531-28668-1-git-send-email-zach.brown@ni.com>
+ <57BBB8F1.9070401@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-yw0-f170.google.com ([209.85.161.170]:33459 "EHLO
-        mail-yw0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1755601AbcHWV0q (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 23 Aug 2016 17:26:46 -0400
-Received: by mail-yw0-f170.google.com with SMTP id r9so80586024ywg.0
-        for <linux-mmc@vger.kernel.org>; Tue, 23 Aug 2016 14:26:17 -0700 (PDT)
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <57BBB8F1.9070401@gmail.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Frank Rowand <frowand.list@gmail.com>
+Cc: adrian.hunter@intel.com, ulf.hansson@linaro.org, mark.rutland@arm.com, robh+dt@kernel.org, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
 
-Hi,
+On Mon, Aug 22, 2016 at 07:46:09PM -0700, Frank Rowand wrote:
+> On 08/22/16 15:55, Zach Brown wrote:
+> > From: Jaeden Amero <jaeden.amero@ni.com>
+> > 
+> > On some devices, CD is broken so that we must force the SDHCI into test
+> > mode and set CD, so that it always detects an SD card as present.
+> > 
+> > In order to get a device with broken CD working, we had previously
+> > always set the SDHCI into test mode. Unfortunately, this had the side
+> > effect of making all SD cards used with our Linux kernels undetectable
+> > and non-removable.
+> > 
+> > By making this "SD test mode" setting optional via a quirk, we can avoid
+> > this side effect for devices other than the device with broken CD.
+> > Additionally, we add a device parameter to sdhci-pltfm to allow all
+> > SDHCI drivers to enable this quirk.
+> > 
+> > Signed-off-by: Jaeden Amero <jaeden.amero@ni.com>
+> > Signed-off-by: Zach Brown <zach.brown@ni.com>
+> > ---
+> >  Documentation/devicetree/bindings/mmc/mmc.txt | 2 ++
+> >  drivers/mmc/host/sdhci-pltfm.c                | 4 ++++
+> >  drivers/mmc/host/sdhci.c                      | 9 +++++++++
+> >  drivers/mmc/host/sdhci.h                      | 4 ++++
+> >  4 files changed, 19 insertions(+)
+> > 
+> > diff --git a/Documentation/devicetree/bindings/mmc/mmc.txt b/Documentation/devicetree/bindings/mmc/mmc.txt
+> > index 22d1e1f..3a9be41 100644
+> > --- a/Documentation/devicetree/bindings/mmc/mmc.txt
+> > +++ b/Documentation/devicetree/bindings/mmc/mmc.txt
+> > @@ -52,6 +52,8 @@ Optional properties:
+> >  - no-sdio: controller is limited to send sdio cmd during initialization
+> >  - no-sd: controller is limited to send sd cmd during initialization
+> >  - no-mmc: controller is limited to send mmc cmd during initialization
+> > +- force-sd-cd-test-mode: card detection is broken on device, force cd test
+> > +  enable and cd test inserted so host will always detect a card.
+> 
+> Do not create a property that tells the driver what to do.
+> 
+> Instead create a property that says that the hardware is broken in a certain way.
+> The driver can then choose to take the appropriate action based on the way that
+> the hardware is broken.
+> 
+> 
 
-I am trying to bring up a wifi driver (wl1837 from TI) with no success
-on a custom kernel 3.18.10  (Exynos Odroid). The same driver
-(backported from 3.17) works fine in another platform with a 3.14
-Kernel. The problem seems to be the mmc not the wifi driver.
-Everything works fine until it tries to send a CMD53 command:
+I understand the point you have raised. In the next version I will change the 
+language of the property to reflect this. 
 
-[  545.724775] mmc1: req done (CMD52): 0: 00001004 00000000 00000000 00000000
-[  545.724786] SDIO: Enabled device mmc1:0001:2
-[  545.800123] mmc0: starting CMD13 arg 12340000 flags 00000195
-[  545.800148] s3c-sdhci exynos4-sdhci.2: selected source 2, clock
-50000000, delta 1111112
-[  545.800175] sdhci [sdhci_irq()]: *** mmc0 got interrupt: 0x00000001
-[  545.800189] mmc0: req done (CMD13): 0: 00000900 00000000 00000000 00000000
-[  545.925214] mmc1: starting CMD53 arg a7ff8804 flags 000001b5
-[  545.925266] mmc1:     blksz 4 blocks 1 flags 00000100 tsac 1000 ms nsac 0
-[  545.925369] s3c-sdhci exynos4-sdhci.3: selected source 2, clock
-50000000, delta 1111112
-[  545.925499] sdhci [sdhci_calc_timeout()]: mmc1: Too large timeout
-0xf requested for CMD53!
-[  545.925602] sdhci [sdhci_irq()]: *** mmc1 got interrupt: 0x00208003
-[  545.925692] mmc1: req done (CMD53): 0: 00001000 00000000 00000000 00000000
-[  545.925726] mmc1:     0 bytes transferred: -84
-
-It takes around 0.3 ms to catch the interrupt, compared to 7 ms in the
-working platform.
-I cannot figure out what the problem is. Please could you help me to
-understand what's going on? Is it a known bug?
-
-Thank you in advance.
+> >  
+> >  *NOTE* on CD and WP polarity. To use common for all SD/MMC host controllers line
+> >  polarity properties, we have to fix the meaning of the "normal" and "inverted"
+> > diff --git a/drivers/mmc/host/sdhci-pltfm.c b/drivers/mmc/host/sdhci-pltfm.c
+> > index 1d17dcf..056d101 100644
+> > --- a/drivers/mmc/host/sdhci-pltfm.c
+> > +++ b/drivers/mmc/host/sdhci-pltfm.c
+> > @@ -87,6 +87,10 @@ void sdhci_get_of_property(struct platform_device *pdev)
+> >  	if (of_get_property(np, "broken-cd", NULL))
+> >  		host->quirks |= SDHCI_QUIRK_BROKEN_CARD_DETECTION;
+> >  
+> > +	if (of_get_property(np, "force-sd-cd-test-mode", NULL))
+> > +		host->quirks2 |=
+> > +			SDHCI_QUIRK2_MUST_FORCE_SD_CD_TEST_MODE;
+> > +
+> >  	if (of_get_property(np, "no-1-8-v", NULL))
+> >  		host->quirks2 |= SDHCI_QUIRK2_NO_1_8_V;
+> >  
+> > diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> > index cd65d47..2f4c6f9 100644
+> > --- a/drivers/mmc/host/sdhci.c
+> > +++ b/drivers/mmc/host/sdhci.c
+> > @@ -117,6 +117,15 @@ static inline bool sdhci_data_line_cmd(struct mmc_command *cmd)
+> >  static void sdhci_set_card_detection(struct sdhci_host *host, bool enable)
+> >  {
+> >  	u32 present;
+> > +	u8  ctrl;
+> > +
+> > +	if (host->quirks2 & SDHCI_QUIRK2_MUST_FORCE_SD_CD_TEST_MODE) {
+> > +		/* Put the card in test mode, with card inserted */
+> > +		ctrl = sdhci_readl(host, SDHCI_HOST_CONTROL);
+> > +		ctrl |= SDHCI_CTRL_CD_TEST_INSERTED |
+> > +			SDHCI_CTRL_CD_TEST_ENABLE;
+> > +		sdhci_writeb(host, ctrl, SDHCI_HOST_CONTROL);
+> > +	}
+> >  
+> >  	if ((host->quirks & SDHCI_QUIRK_BROKEN_CARD_DETECTION) ||
+> >  	    !mmc_card_is_removable(host->mmc))
+> > diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+> > index 0411c9f..dd609b2 100644
+> > --- a/drivers/mmc/host/sdhci.h
+> > +++ b/drivers/mmc/host/sdhci.h
+> > @@ -84,6 +84,8 @@
+> >  #define   SDHCI_CTRL_ADMA32	0x10
+> >  #define   SDHCI_CTRL_ADMA64	0x18
+> >  #define   SDHCI_CTRL_8BITBUS	0x20
+> > +#define  SDHCI_CTRL_CD_TEST_INSERTED	0x40
+> > +#define  SDHCI_CTRL_CD_TEST_ENABLE	0x80
+> >  
+> >  #define SDHCI_POWER_CONTROL	0x29
+> >  #define  SDHCI_POWER_ON		0x01
+> > @@ -422,6 +424,8 @@ struct sdhci_host {
+> >  #define SDHCI_QUIRK2_ACMD23_BROKEN			(1<<14)
+> >  /* Broken Clock divider zero in controller */
+> >  #define SDHCI_QUIRK2_CLOCK_DIV_ZERO_BROKEN		(1<<15)
+> > +/* Controller must support device with broken CD */
+> > +#define SDHCI_QUIRK2_MUST_FORCE_SD_CD_TEST_MODE		(1<<16)
+> >  
+> >  	int irq;		/* Device IRQ */
+> >  	void __iomem *ioaddr;	/* Mapped address */
+> > 
+> 
