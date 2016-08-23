@@ -1,149 +1,181 @@
-From: Haibo Chen <haibo.chen-3arQi8VN3Tc@public.gmane.org>
-Subject: RE: [PATCH] sdhci: Add quirk and device tree parameter to force SD
- test mode
-Date: Tue, 23 Aug 2016 01:34:20 +0000
-Message-ID: <AM4PR0401MB2324D95AB7382C828BF8E5CE90EB0@AM4PR0401MB2324.eurprd04.prod.outlook.com>
-References: <1471906531-28668-1-git-send-email-zach.brown@ni.com>
+From: Bjorn Andersson <bjorn.andersson@linaro.org>
+Subject: Re: [PATCH v3 3/9] mmc: sdhci-msm: add pltfm_data support to get
+ clk-rates from DT
+Date: Mon, 22 Aug 2016 21:31:21 -0700
+Message-ID: <20160823043121.GC26240@tuxbot>
+References: <1471581384-18961-1-git-send-email-riteshh@codeaurora.org>
+ <1471581384-18961-4-git-send-email-riteshh@codeaurora.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: quoted-printable
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1471906531-28668-1-git-send-email-zach.brown-acOepvfBmUk@public.gmane.org>
-Content-Language: en-US
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Zach Brown <zach.brown-acOepvfBmUk@public.gmane.org>, "adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org" <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Cc: "ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org" <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "mark.rutland-5wv7dgnIgG8@public.gmane.org" <mark.rutland-5wv7dgnIgG8@public.gmane.org>, "robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org" <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-pa0-f41.google.com ([209.85.220.41]:35080 "EHLO
+        mail-pa0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752051AbcHWEb0 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 23 Aug 2016 00:31:26 -0400
+Received: by mail-pa0-f41.google.com with SMTP id hb8so25550385pac.2
+        for <linux-mmc@vger.kernel.org>; Mon, 22 Aug 2016 21:31:25 -0700 (PDT)
+Content-Disposition: inline
+In-Reply-To: <1471581384-18961-4-git-send-email-riteshh@codeaurora.org>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ritesh Harjani <riteshh@codeaurora.org>
+Cc: adrian.hunter@intel.com, ulf.hansson@linaro.org, shawn.lin@rock-chips.com, jh80.chung@samsung.com, linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org, georgi.djakov@linaro.org, alex.lemberg@sandisk.com, mateusz.nowak@intel.com, Yuliy.Izrailov@sandisk.com, asutoshd@codeaurora.org, kdorfman@codeaurora.org, david.griego@linaro.org, stummala@codeaurora.org, venkatg@codeaurora.org
 
-> -----Original Message-----
-> From: linux-mmc-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org [mailto:linux-mmc-
-> owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org] On Behalf Of Zach Brown
-> Sent: Tuesday, August 23, 2016 6:56 AM
-> To: adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org
-> Cc: ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org; mark.rutland-5wv7dgnIgG8@public.gmane.org; robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org;
-> linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org; devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org; linux-
-> kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-> Subject: [PATCH] sdhci: Add quirk and device tree parameter to force SD t=
-est
-> mode
->=20
-> From: Jaeden Amero <jaeden.amero-acOepvfBmUk@public.gmane.org>
->=20
-> On some devices, CD is broken so that we must force the SDHCI into test m=
-ode
-> and set CD, so that it always detects an SD card as present.
->=20
-> In order to get a device with broken CD working, we had previously always=
- set
-> the SDHCI into test mode. Unfortunately, this had the side effect of maki=
-ng all
-> SD cards used with our Linux kernels undetectable and non-removable.
+On Thu 18 Aug 21:36 PDT 2016, Ritesh Harjani wrote:
 
-Why not use the poll mode? You can set the flag MMC_CAP_NEEDS_POLL, then=20
-the mmc core will detect the card every second.
-
->=20
-> By making this "SD test mode" setting optional via a quirk, we can avoid =
-this
-> side effect for devices other than the device with broken CD.
-> Additionally, we add a device parameter to sdhci-pltfm to allow all SDHCI
-> drivers to enable this quirk.
->=20
-> Signed-off-by: Jaeden Amero <jaeden.amero-acOepvfBmUk@public.gmane.org>
-> Signed-off-by: Zach Brown <zach.brown-acOepvfBmUk@public.gmane.org>
+> This adds support for sdhc-msm controllers to get supported
+> clk-rates from DT. sdhci-msm would need it's own set_clock
+> ops to be implemented. For this, supported clk-rates needs
+> to be populated in sdhci_msm_pltfm_data.
+> 
+> Signed-off-by: Ritesh Harjani <riteshh@codeaurora.org>
 > ---
->  Documentation/devicetree/bindings/mmc/mmc.txt | 2 ++
->  drivers/mmc/host/sdhci-pltfm.c                | 4 ++++
->  drivers/mmc/host/sdhci.c                      | 9 +++++++++
->  drivers/mmc/host/sdhci.h                      | 4 ++++
->  4 files changed, 19 insertions(+)
->=20
-> diff --git a/Documentation/devicetree/bindings/mmc/mmc.txt
-> b/Documentation/devicetree/bindings/mmc/mmc.txt
-> index 22d1e1f..3a9be41 100644
-> --- a/Documentation/devicetree/bindings/mmc/mmc.txt
-> +++ b/Documentation/devicetree/bindings/mmc/mmc.txt
-> @@ -52,6 +52,8 @@ Optional properties:
->  - no-sdio: controller is limited to send sdio cmd during initialization
->  - no-sd: controller is limited to send sd cmd during initialization
->  - no-mmc: controller is limited to send mmc cmd during initialization
-> +- force-sd-cd-test-mode: card detection is broken on device, force cd
-> +test
-> +  enable and cd test inserted so host will always detect a card.
->=20
->  *NOTE* on CD and WP polarity. To use common for all SD/MMC host
-> controllers line  polarity properties, we have to fix the meaning of the =
-"normal"
-> and "inverted"
-> diff --git a/drivers/mmc/host/sdhci-pltfm.c b/drivers/mmc/host/sdhci-pltf=
-m.c
-> index 1d17dcf..056d101 100644
-> --- a/drivers/mmc/host/sdhci-pltfm.c
-> +++ b/drivers/mmc/host/sdhci-pltfm.c
-> @@ -87,6 +87,10 @@ void sdhci_get_of_property(struct platform_device
-> *pdev)
->  	if (of_get_property(np, "broken-cd", NULL))
->  		host->quirks |=3D SDHCI_QUIRK_BROKEN_CARD_DETECTION;
->=20
-> +	if (of_get_property(np, "force-sd-cd-test-mode", NULL))
-> +		host->quirks2 |=3D
-> +			SDHCI_QUIRK2_MUST_FORCE_SD_CD_TEST_MODE;
+>  .../devicetree/bindings/mmc/sdhci-msm.txt          |  1 +
+>  drivers/mmc/host/sdhci-msm.c                       | 71 ++++++++++++++++++++++
+>  2 files changed, 72 insertions(+)
+> 
+> diff --git a/Documentation/devicetree/bindings/mmc/sdhci-msm.txt b/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
+> index 485483a..6a83b38 100644
+> --- a/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
+> +++ b/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
+> @@ -17,6 +17,7 @@ Required properties:
+>  	"iface" - Main peripheral bus clock (PCLK/HCLK - AHB Bus clock) (required)
+>  	"core"	- SDC MMC clock (MCLK) (required)
+>  	"bus"	- SDCC bus voter clock (optional)
+> +- clk-rates: Array of supported GCC clock frequencies for sdhc, Units - Hz.
+>  
+>  Example:
+>  
+> diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
+> index 85ddaae..2bf141b 100644
+> --- a/drivers/mmc/host/sdhci-msm.c
+> +++ b/drivers/mmc/host/sdhci-msm.c
+> @@ -74,6 +74,11 @@
+>  #define CMUX_SHIFT_PHASE_SHIFT	24
+>  #define CMUX_SHIFT_PHASE_MASK	(7 << CMUX_SHIFT_PHASE_SHIFT)
+>  
+> +struct sdhci_msm_pltfm_data {
+> +	u32 *clk_table;
+> +	size_t clk_table_sz;
+> +};
+
+Rather than calling this "platform data", just call it
+sdhci_msm_freq_table and make it:
+
+struct sdhci_msm_freq_table {
+	size_t num_freqs;
+	u32 freqs[];
+};
+
 > +
->  	if (of_get_property(np, "no-1-8-v", NULL))
->  		host->quirks2 |=3D SDHCI_QUIRK2_NO_1_8_V;
->=20
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c index
-> cd65d47..2f4c6f9 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -117,6 +117,15 @@ static inline bool sdhci_data_line_cmd(struct
-> mmc_command *cmd)  static void sdhci_set_card_detection(struct sdhci_host
-> *host, bool enable)  {
->  	u32 present;
-> +	u8  ctrl;
+>  struct sdhci_msm_host {
+>  	struct platform_device *pdev;
+>  	void __iomem *core_mem;	/* MSM SDCC mapped address */
+> @@ -83,6 +88,7 @@ struct sdhci_msm_host {
+>  	struct clk *bus_clk;	/* SDHC bus voter clock */
+>  	struct mmc_host *mmc;
+>  	bool use_14lpp_dll_reset;
+> +	struct sdhci_msm_pltfm_data *pdata;
+>  };
+>  
+>  /* Platform specific tuning */
+> @@ -582,6 +588,67 @@ static const struct sdhci_pltfm_data sdhci_msm_pdata = {
+>  	.ops = &sdhci_msm_ops,
+>  };
+>  
+> +static int sdhci_msm_dt_get_array(struct device *dev, const char *prop_name,
+> +				u32 **table, size_t *size)
+> +{
+> +	struct device_node *np = dev->of_node;
+> +	int count = 0;
+> +	u32 *arr = NULL;
+> +	int ret = 0;
 > +
-> +	if (host->quirks2 & SDHCI_QUIRK2_MUST_FORCE_SD_CD_TEST_MODE)
-> {
-> +		/* Put the card in test mode, with card inserted */
-> +		ctrl =3D sdhci_readl(host, SDHCI_HOST_CONTROL);
-> +		ctrl |=3D SDHCI_CTRL_CD_TEST_INSERTED |
-> +			SDHCI_CTRL_CD_TEST_ENABLE;
-> +		sdhci_writeb(host, ctrl, SDHCI_HOST_CONTROL);
+> +	count = of_property_count_elems_of_size(np, prop_name, sizeof(u32));
+> +	if (count < 0) {
+> +		dev_err(dev, "%s: Invalid dt property, err(%d)\n",
+> +				prop_name, count);
+> +		ret = count;
+> +		goto out;
 > +	}
->=20
->  	if ((host->quirks & SDHCI_QUIRK_BROKEN_CARD_DETECTION) ||
->  	    !mmc_card_is_removable(host->mmc))
-> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h index
-> 0411c9f..dd609b2 100644
-> --- a/drivers/mmc/host/sdhci.h
-> +++ b/drivers/mmc/host/sdhci.h
-> @@ -84,6 +84,8 @@
->  #define   SDHCI_CTRL_ADMA32	0x10
->  #define   SDHCI_CTRL_ADMA64	0x18
->  #define   SDHCI_CTRL_8BITBUS	0x20
-> +#define  SDHCI_CTRL_CD_TEST_INSERTED	0x40
-> +#define  SDHCI_CTRL_CD_TEST_ENABLE	0x80
->=20
->  #define SDHCI_POWER_CONTROL	0x29
->  #define  SDHCI_POWER_ON		0x01
-> @@ -422,6 +424,8 @@ struct sdhci_host {
->  #define SDHCI_QUIRK2_ACMD23_BROKEN			(1<<14)
->  /* Broken Clock divider zero in controller */
->  #define SDHCI_QUIRK2_CLOCK_DIV_ZERO_BROKEN		(1<<15)
-> +/* Controller must support device with broken CD */
-> +#define SDHCI_QUIRK2_MUST_FORCE_SD_CD_TEST_MODE		(1<<16)
->=20
->  	int irq;		/* Device IRQ */
->  	void __iomem *ioaddr;	/* Mapped address */
-> --
-> 2.7.4
->=20
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in t=
-he
-> body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org More majordomo info at
-> http://vger.kernel.org/majordomo-info.html
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> +
+> +	arr = devm_kzalloc(dev, count * sizeof(*arr), GFP_KERNEL);
+> +	if (!arr) {
+> +		ret = -ENOMEM;
+> +		goto out;
+> +	}
+> +
+> +	ret = of_property_read_u32_array(np, prop_name, arr, count);
+> +	if (ret) {
+> +		dev_err(dev, "%s Invalid dt array property, err(%d)\n",
+> +				prop_name, ret);
+> +		goto out;
+> +	}
+> +	*table = arr;
+> +	*size = count;
+> +out:
+> +	return ret;
+> +}
+> +
+> +static struct sdhci_msm_pltfm_data *sdhci_msm_populate_pdata(struct device *dev,
+> +						struct sdhci_msm_host *msm_host)
+> +{
+> +	struct sdhci_msm_pltfm_data *pdata = NULL;
+> +	size_t table_sz = 0;
+> +	u32 *table = NULL;
+> +
+
+Count of_property_count_elems_of_size() here and then allocate
+sizeof(*tbl) + count * sizeof(tbl->freqs[0]) and fill that in, no need
+for the two allocations.
+
+> +	pdata = devm_kzalloc(dev, sizeof(*pdata), GFP_KERNEL);
+> +	if (!pdata)
+> +		goto out;
+
+No need for a goto for early errors, just return as you haven't touch
+any state yet.
+
+> +
+> +	if (sdhci_msm_dt_get_array(dev, "clk-rates", &table, &table_sz)) {
+> +		dev_err(dev, "failed in DT parsing for supported clk-rates\n");
+> +		goto out;
+> +	}
+> +	if (!table || !table_sz) {
+
+A general comment; don't be too defensive in your code. Neither table
+nor table_sz should be able to be zero if the above condition fails...
+
+> +		dev_err(dev, "Invalid clock table\n");
+> +		goto out;
+> +	}
+> +	pdata->clk_table = table;
+> +	pdata->clk_table_sz = table_sz;
+> +
+> +	return pdata;
+> +out:
+> +	return NULL;
+> +}
+> +
+>  static int sdhci_msm_probe(struct platform_device *pdev)
+>  {
+>  	struct sdhci_host *host;
+> @@ -608,6 +675,10 @@ static int sdhci_msm_probe(struct platform_device *pdev)
+>  
+>  	sdhci_get_of_property(pdev);
+>  
+> +	msm_host->pdata = sdhci_msm_populate_pdata(&pdev->dev, msm_host);
+> +	if (!msm_host->pdata)
+> +		goto pltfm_free;
+
+Adding this as a requirement breaks existing platforms/dtbs, you may
+force it for 8996 if you can detect that, but you should not change it
+for existing platforms.
+
+> +
+>  	/* Setup SDCC bus voter clock. */
+>  	msm_host->bus_clk = devm_clk_get(&pdev->dev, "bus");
+>  	if (!IS_ERR(msm_host->bus_clk)) {
+
+Regards,
+Bjorn
