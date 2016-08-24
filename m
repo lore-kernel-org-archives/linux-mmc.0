@@ -1,96 +1,88 @@
-From: Wolfram Sang <wsa+renesas@sang-engineering.com>
-Subject: [PATCH 1/2] mmc: host: sh_mobile_sdhi: move card_busy from tmio to sdhi
-Date: Wed, 24 Aug 2016 11:34:37 +0200
-Message-ID: <20160824093438.2478-2-wsa+renesas@sang-engineering.com>
-References: <20160824093438.2478-1-wsa+renesas@sang-engineering.com>
-Return-path: <linux-renesas-soc-owner@vger.kernel.org>
-In-Reply-To: <20160824093438.2478-1-wsa+renesas@sang-engineering.com>
-Sender: linux-renesas-soc-owner@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: linux-renesas-soc@vger.kernel.org, Geert Uytterhoeven <geert@linux-m68k.org>, Simon Horman <horms@verge.net.au>, Wolfram Sang <wsa+renesas@sang-engineering.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH v2 2/2] mmc: sdio: deploy error handling instead of
+ triggering BUG_ON
+Date: Wed, 24 Aug 2016 11:30:29 +0200
+Message-ID: <CAPDyKFrt3ZHrzR9TovG2a3nqs7pKqdVHoU-KXtgRsnFGaJK4DQ@mail.gmail.com>
+References: <1472025499-6758-1-git-send-email-shawn.lin@rock-chips.com> <1472025499-6758-2-git-send-email-shawn.lin@rock-chips.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-wm0-f48.google.com ([74.125.82.48]:35286 "EHLO
+        mail-wm0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S932368AbcHXKAP (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 24 Aug 2016 06:00:15 -0400
+Received: by mail-wm0-f48.google.com with SMTP id f65so193790574wmi.0
+        for <linux-mmc@vger.kernel.org>; Wed, 24 Aug 2016 02:59:53 -0700 (PDT)
+In-Reply-To: <1472025499-6758-2-git-send-email-shawn.lin@rock-chips.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Shawn Lin <shawn.lin@rock-chips.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>
 
-card_busy is only used/tested on SDHI for R-Car Gen2 and later.
-Move it to the SDHI driver, so we can then activate it conditionally
-depending on the SDHI type.
+On 24 August 2016 at 09:58, Shawn Lin <shawn.lin@rock-chips.com> wrote:
+> When using mmc_io_rw_extended, it's intent to avoid null
+> pointer of card and invalid func number. But actually it
+> didn't prevent that as the seg_size already use the card.
+> Currently the wrapper function sdio_io_rw_ext_helper already
+> use card before calling mmc_io_rw_extended, so we should move
+> this check to there. As to the func number, it was token from
+> '(ocr & 0x70000000) >> 28' which should be enough to guarantee
+> that it won't be larger than 7. But we should prevent the
+> caller like wifi drivers modify this value. So let's move this
+> check into sdio_io_rw_ext_helper either.
+>
+> Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
+> ---
+>
+> Changes in v2:
+> - remove the BUG_ON and move these into sdio_io_rw_ext_helper
+>
+>  drivers/mmc/core/sdio_io.c  | 3 +++
+>  drivers/mmc/core/sdio_ops.c | 2 --
+>  2 files changed, 3 insertions(+), 2 deletions(-)
+>
+> diff --git a/drivers/mmc/core/sdio_io.c b/drivers/mmc/core/sdio_io.c
+> index 78cb4d5..18f2938 100644
+> --- a/drivers/mmc/core/sdio_io.c
+> +++ b/drivers/mmc/core/sdio_io.c
+> @@ -307,6 +307,9 @@ static int sdio_io_rw_ext_helper(struct sdio_func *func, int write,
+>         unsigned max_blocks;
+>         int ret;
+>
+> +       if ((!func->card) || (func->num > 7))
 
-Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
----
- drivers/mmc/host/sh_mobile_sdhi.c | 8 ++++++++
- drivers/mmc/host/tmio_mmc.h       | 1 +
- drivers/mmc/host/tmio_mmc_pio.c   | 9 +--------
- 3 files changed, 10 insertions(+), 8 deletions(-)
+You also need to validate func and before func->card.
 
-diff --git a/drivers/mmc/host/sh_mobile_sdhi.c b/drivers/mmc/host/sh_mobile_sdhi.c
-index c3b651bf89cb4a..c4e63b7790d719 100644
---- a/drivers/mmc/host/sh_mobile_sdhi.c
-+++ b/drivers/mmc/host/sh_mobile_sdhi.c
-@@ -213,6 +213,13 @@ static void sh_mobile_sdhi_clk_disable(struct tmio_mmc_host *host)
- 	clk_disable_unprepare(priv->clk);
- }
- 
-+static int sh_mobile_sdhi_card_busy(struct mmc_host *mmc)
-+{
-+	struct tmio_mmc_host *host = mmc_priv(mmc);
-+
-+	return !(sd_ctrl_read16_and_16_as_32(host, CTL_STATUS) & TMIO_STAT_DAT0);
-+}
-+
- static int sh_mobile_sdhi_start_signal_voltage_switch(struct mmc_host *mmc,
- 						      struct mmc_ios *ios)
- {
-@@ -369,6 +376,7 @@ static int sh_mobile_sdhi_probe(struct platform_device *pdev)
- 	host->clk_update	= sh_mobile_sdhi_clk_update;
- 	host->clk_disable	= sh_mobile_sdhi_clk_disable;
- 	host->multi_io_quirk	= sh_mobile_sdhi_multi_io_quirk;
-+	host->card_busy	= sh_mobile_sdhi_card_busy;
- 	host->start_signal_voltage_switch = sh_mobile_sdhi_start_signal_voltage_switch;
- 
- 	/* Orginally registers were 16 bit apart, could be 32 or 64 nowadays */
-diff --git a/drivers/mmc/host/tmio_mmc.h b/drivers/mmc/host/tmio_mmc.h
-index 7f63ec05bdf41d..1f1cb2628f673b 100644
---- a/drivers/mmc/host/tmio_mmc.h
-+++ b/drivers/mmc/host/tmio_mmc.h
-@@ -158,6 +158,7 @@ struct tmio_mmc_host {
- 	void (*clk_disable)(struct tmio_mmc_host *host);
- 	int (*multi_io_quirk)(struct mmc_card *card,
- 			      unsigned int direction, int blk_size);
-+	int (*card_busy)(struct mmc_host *mmc);
- 	int (*start_signal_voltage_switch)(struct mmc_host *mmc,
- 					   struct mmc_ios *ios);
- };
-diff --git a/drivers/mmc/host/tmio_mmc_pio.c b/drivers/mmc/host/tmio_mmc_pio.c
-index 92467efc4e2c9e..192817850dffac 100644
---- a/drivers/mmc/host/tmio_mmc_pio.c
-+++ b/drivers/mmc/host/tmio_mmc_pio.c
-@@ -960,20 +960,12 @@ static int tmio_multi_io_quirk(struct mmc_card *card,
- 	return blk_size;
- }
- 
--static int tmio_mmc_card_busy(struct mmc_host *mmc)
--{
--	struct tmio_mmc_host *host = mmc_priv(mmc);
--
--	return !(sd_ctrl_read16_and_16_as_32(host, CTL_STATUS) & TMIO_STAT_DAT0);
--}
--
- static struct mmc_host_ops tmio_mmc_ops = {
- 	.request	= tmio_mmc_request,
- 	.set_ios	= tmio_mmc_set_ios,
- 	.get_ro         = tmio_mmc_get_ro,
- 	.get_cd		= mmc_gpio_get_cd,
- 	.enable_sdio_irq = tmio_mmc_enable_sdio_irq,
--	.card_busy	= tmio_mmc_card_busy,
- 	.multi_io_quirk	= tmio_multi_io_quirk,
- };
- 
-@@ -1072,6 +1064,7 @@ int tmio_mmc_host_probe(struct tmio_mmc_host *_host,
- 		goto host_free;
- 	}
- 
-+	tmio_mmc_ops.card_busy = _host->card_busy;
- 	tmio_mmc_ops.start_signal_voltage_switch = _host->start_signal_voltage_switch;
- 	mmc->ops = &tmio_mmc_ops;
- 
--- 
-2.9.3
+> +               return -EINVAL;
+> +
+>         /* Do the bulk of the transfer using block mode (if supported). */
+>         if (func->card->cccr.multi_block && (size > sdio_max_byte_size(func))) {
+>                 /* Blocks per command is limited by host count, host transfer
+> diff --git a/drivers/mmc/core/sdio_ops.c b/drivers/mmc/core/sdio_ops.c
+> index 34f6e80..45397e8 100644
+> --- a/drivers/mmc/core/sdio_ops.c
+> +++ b/drivers/mmc/core/sdio_ops.c
+> @@ -129,8 +129,6 @@ int mmc_io_rw_extended(struct mmc_card *card, int write, unsigned fn,
+>         unsigned int nents, left_size, i;
+>         unsigned int seg_size = card->host->max_seg_size;
+>
+> -       BUG_ON(!card);
+> -       BUG_ON(fn > 7);
+>         WARN_ON(blksz == 0);
+>
+>         /* sanity check */
+> --
+> 2.3.7
+>
+>
+
+There are a couple of more BUG_ONs() that is being invoked when SDIO
+func drivers abuses the SDIO func API.
+
+In cases when the API allows us to propagate error codes we should do
+that and just when the sdio_io_rw_ext_helper() is involved. In case
+when the API don't allows to propagate error codes, we should convert
+the BUG_ON() to  "if (WARN_ON()) return;".
+
+Kind regards
+Uffe
