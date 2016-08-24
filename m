@@ -1,84 +1,97 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH RESEND] mmc: core: add error message when switching fails
- in mmc_select_hs()
-Date: Wed, 24 Aug 2016 11:31:44 +0200
-Message-ID: <CAPDyKFrvjq-+7mnkF46XHoPNDuvxqxkOOqUiFDFw8mp3FErodQ@mail.gmail.com>
-References: <1471945807-6962-1-git-send-email-js07.lee@samsung.com>
+Subject: Re: [PATCH v2 1/2] mmc: block: remove the check of packed for
+ end_packed_req and hdr_wrq_prep
+Date: Wed, 24 Aug 2016 11:30:45 +0200
+Message-ID: <CAPDyKFozVGtqbLciGQJbf9PTNZuJWmPjTcqq2AUekeoME8eHaA@mail.gmail.com>
+References: <1472025499-6758-1-git-send-email-shawn.lin@rock-chips.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wm0-f44.google.com ([74.125.82.44]:35576 "EHLO
-        mail-wm0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1754624AbcHXJb6 (ORCPT
+Received: from mail-wm0-f48.google.com ([74.125.82.48]:34296 "EHLO
+        mail-wm0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753766AbcHXJb6 (ORCPT
         <rfc822;linux-mmc@vger.kernel.org>); Wed, 24 Aug 2016 05:31:58 -0400
-Received: by mail-wm0-f44.google.com with SMTP id f65so192842733wmi.0
-        for <linux-mmc@vger.kernel.org>; Wed, 24 Aug 2016 02:31:46 -0700 (PDT)
-In-Reply-To: <1471945807-6962-1-git-send-email-js07.lee@samsung.com>
+Received: by mail-wm0-f48.google.com with SMTP id q128so31957946wma.1
+        for <linux-mmc@vger.kernel.org>; Wed, 24 Aug 2016 02:30:47 -0700 (PDT)
+In-Reply-To: <1472025499-6758-1-git-send-email-shawn.lin@rock-chips.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Jungseung Lee <js07.lee@samsung.com>
+To: Shawn Lin <shawn.lin@rock-chips.com>
 Cc: linux-mmc <linux-mmc@vger.kernel.org>
 
-On 23 August 2016 at 11:50, Jungseung Lee <js07.lee@samsung.com> wrote:
-> The switch failure message in mmc_select_timing had been removed
-> since that is invalid: commit 0400ed0a083a ("mmc: core: remove the
-> invalid message in mmc_select_timing")
+On 24 August 2016 at 09:58, Shawn Lin <shawn.lin@rock-chips.com> wrote:
+> packed should always exist without calling its cleanup function
+> explicitly. Moreover, we have use it when preparing packed list.
+> So I don't believe we should ever fall into this check again when
+> doing mmc_blk_packed_hdr_wrq_prep or mmc_blk_end_packed_req. And
+> the code of mmc_blk_end_packed_req is trying to use packed before
+> checking it which makes it quite weird. This patch is trying to
+> remove these two checks and move it to the mmc_blk_prep_packed_list.
+> If we find packed is null, then we should never use MMC_PACKED_NONE
+> and MMC_BLK_PACKED_CMD. By doing this, we could fall back to
+> non-packed request if finding null packed, though it's impossible
+> theoretically.
 >
-> Now, in the case when mmc_select_hs return error in mmc_select_timing,
-> there is nothing to print failure message.
-> Let's make for mmc_select_hs() print message itself in the failure case.
+> Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
 >
-> Signed-off-by: Jungseung Lee <js07.lee@samsung.com>
 > ---
->  drivers/mmc/core/mmc.c |   10 ++++++----
->  1 file changed, 6 insertions(+), 4 deletions(-)
 >
-> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-> index f2d185c..e07fcce 100644
-> --- a/drivers/mmc/core/mmc.c
-> +++ b/drivers/mmc/core/mmc.c
-> @@ -1018,6 +1018,7 @@ static int mmc_switch_status(struct mmc_card *card)
->   */
->  static int mmc_select_hs(struct mmc_card *card)
->  {
-> +       struct mmc_host *host = card->host;
-
-No need for local variable here, just use card->host below instead.
-
->         int err;
+> Changes in v2:
+> - remove BUG_ON and add fallback for packed instead of
+>   panic it.
 >
->         err = __mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
-> @@ -1029,6 +1030,10 @@ static int mmc_select_hs(struct mmc_card *card)
->                 err = mmc_switch_status(card);
->         }
+>  drivers/mmc/card/block.c | 16 ++++++++++++----
+>  1 file changed, 12 insertions(+), 4 deletions(-)
 >
-> +       if (err)
-> +               pr_err("%s: switch to high-speed failed, err:%d\n",
-> +                       mmc_hostname(host), err);
-
-I think a pr_warn() would be better as mmc_select_timing() uses the
-legacy speed mode when err == -EBADMSG.
-
+> diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+> index 48a5dd7..c7a9b28 100644
+> --- a/drivers/mmc/card/block.c
+> +++ b/drivers/mmc/card/block.c
+> @@ -1673,6 +1673,18 @@ static u8 mmc_blk_prep_packed_list(struct mmc_queue *mq, struct request *req)
+>         u8 max_packed_rw = 0;
+>         u8 reqs = 0;
+>
+> +       /*
+> +        * We don't need to check packed for any further
+> +        * operation of packed stuff as we set MMC_PACKED_NONE
+> +        * and return zero for reqs if geting null packed. Also
+> +        * we clean the flag of MMC_BLK_PACKED_CMD to avoid doing
+> +        * it again when removing blk req.
+> +        */
+> +       if (!mqrq->packed) {
+> +               md->flags &= (~MMC_BLK_PACKED_CMD);
+> +               goto no_packed;
+> +       }
 > +
->         return err;
->  }
+>         if (!(md->flags & MMC_BLK_PACKED_CMD))
+>                 goto no_packed;
 >
-> @@ -1265,11 +1270,8 @@ static int mmc_select_hs400es(struct mmc_card *card)
+> @@ -1781,8 +1793,6 @@ static void mmc_blk_packed_hdr_wrq_prep(struct mmc_queue_req *mqrq,
+>         u8 hdr_blocks;
+>         u8 i = 1;
 >
->         /* Switch card to HS mode */
->         err = mmc_select_hs(card);
-> -       if (err) {
-> -               pr_err("%s: switch to high-speed failed, err:%d\n",
-> -                       mmc_hostname(host), err);
-> +       if (err)
->                 goto out_err;
-> -       }
+> -       BUG_ON(!packed);
+> -
+>         mqrq->cmd_type = MMC_PACKED_WRITE;
+>         packed->blocks = 0;
+>         packed->idx_failure = MMC_PACKED_NR_IDX;
+> @@ -1886,8 +1896,6 @@ static int mmc_blk_end_packed_req(struct mmc_queue_req *mq_rq)
+>         int idx = packed->idx_failure, i = 0;
+>         int ret = 0;
 >
->         err = mmc_switch_status(card);
->         if (err)
+> -       BUG_ON(!packed);
+> -
+>         while (!list_empty(&packed->list)) {
+>                 prq = list_entry_rq(packed->list.next);
+>                 if (idx == i) {
 > --
-> 1.7.9.5
+> 2.3.7
 >
+>
+
+This is step in the right direction, although there are still some
+BUG_ONs() for the packed command path. Could you please have look and
+remove all of them?
 
 Kind regards
 Uffe
