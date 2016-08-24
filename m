@@ -1,7 +1,7 @@
 From: Ritesh Harjani <riteshh@codeaurora.org>
-Subject: [PATCH v4 5/9] mmc: sdhci-msm: Add get_min_clock() and get_max_clock() callback
-Date: Wed, 24 Aug 2016 15:33:40 +0530
-Message-ID: <1472033024-14890-6-git-send-email-riteshh@codeaurora.org>
+Subject: [PATCH v4 8/9] mmc: sdhci-msm: Add clock changes for DDR mode.
+Date: Wed, 24 Aug 2016 15:33:43 +0530
+Message-ID: <1472033024-14890-9-git-send-email-riteshh@codeaurora.org>
 References: <1472033024-14890-1-git-send-email-riteshh@codeaurora.org>
 Return-path: <linux-arm-msm-owner@vger.kernel.org>
 In-Reply-To: <1472033024-14890-1-git-send-email-riteshh@codeaurora.org>
@@ -10,54 +10,59 @@ To: adrian.hunter@intel.com
 Cc: ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, shawn.lin@rock-chips.com, linux-arm-msm@vger.kernel.org, georgi.djakov@linaro.org, alex.lemberg@sandisk.com, mateusz.nowak@intel.com, Yuliy.Izrailov@sandisk.com, asutoshd@codeaurora.org, david.griego@linaro.org, stummala@codeaurora.org, venkatg@codeaurora.org, pramod.gurav@linaro.org, bjorn.andersson@linaro.org, Ritesh Harjani <riteshh@codeaurora.org>
 List-Id: linux-mmc@vger.kernel.org
 
-This add get_min_clock() and get_max_clock() callback
-for sdhci-msm. sdhci-msm min/max clocks may be different
-hence implement these callbacks.
+SDHC MSM controller need 2x clock for MCLK at GCC.
+Hence make required changes to have 2x clock for
+DDR timing modes.
 
-Signed-off-by: Sahitya Tummala <stummala@codeaurora.org>
 Signed-off-by: Ritesh Harjani <riteshh@codeaurora.org>
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
 ---
- drivers/mmc/host/sdhci-msm.c | 19 +++++++++++++++++++
- 1 file changed, 19 insertions(+)
+ drivers/mmc/host/sdhci-msm.c | 22 ++++++++++++++++++----
+ 1 file changed, 18 insertions(+), 4 deletions(-)
 
 diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
-index a46dd98..244e67a 100644
+index 853639b..538594c 100644
 --- a/drivers/mmc/host/sdhci-msm.c
 +++ b/drivers/mmc/host/sdhci-msm.c
-@@ -565,6 +565,23 @@ static irqreturn_t sdhci_msm_pwr_irq(int irq, void *data)
- 	return IRQ_HANDLED;
- }
+@@ -667,21 +667,35 @@ static void sdhci_msm_set_clock(struct sdhci_host *host, unsigned int clock)
+ {
+ 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+ 	struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
+-	u32 msm_clock = 0;
++	struct mmc_ios curr_ios = host->mmc->ios;
++	u32 msm_clock, ddr_clock;
+ 	int rc = 0;
  
-+static unsigned int sdhci_msm_get_max_clock(struct sdhci_host *host)
-+{
-+	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-+	struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
-+	int count = msm_host->pdata->clk_table_sz;
+ 	if (!clock)
+ 		goto out;
+ 
+-	if (clock != msm_host->clk_rate) {
+-		msm_clock = sdhci_msm_get_msm_clk_rate(host, clock);
++	msm_clock = sdhci_msm_get_msm_clk_rate(host, clock);
++	if ((curr_ios.timing == MMC_TIMING_UHS_DDR50) ||
++		(curr_ios.timing == MMC_TIMING_MMC_DDR52) ||
++		(curr_ios.timing == MMC_TIMING_MMC_HS400)) {
++		/*
++		 * The SDHC requires internal clock frequency to be double the
++		 * actual clock that will be set for DDR mode. The controller
++		 * uses the faster clock(100/400MHz) for some of its parts and
++		 * send the actual required clock (50/200MHz) to the card.
++		 */
++		ddr_clock = clock * 2;
++		msm_clock = sdhci_msm_get_msm_clk_rate(host, ddr_clock);
++	}
 +
-+	return msm_host->pdata->clk_table[count - 1];
-+}
-+
-+static unsigned int sdhci_msm_get_min_clock(struct sdhci_host *host)
-+{
-+	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-+	struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
-+
-+	return msm_host->pdata->clk_table[0];
-+}
-+
- static const struct of_device_id sdhci_msm_dt_match[] = {
- 	{ .compatible = "qcom,sdhci-msm-v4" },
- 	{},
-@@ -576,6 +593,8 @@ static const struct sdhci_ops sdhci_msm_ops = {
- 	.platform_execute_tuning = sdhci_msm_execute_tuning,
- 	.reset = sdhci_reset,
- 	.set_clock = sdhci_set_clock,
-+	.get_min_clock = sdhci_msm_get_min_clock,
-+	.get_max_clock = sdhci_msm_get_max_clock,
- 	.set_bus_width = sdhci_set_bus_width,
- 	.set_uhs_signaling = sdhci_msm_set_uhs_signaling,
- 	.voltage_switch = sdhci_msm_voltage_switch,
++	if (msm_clock != msm_host->clk_rate) {
+ 		rc = clk_set_rate(msm_host->clk, msm_clock);
+ 		if (rc) {
+ 			pr_err("%s: failed to set clock at rate %u, requested clock rate %u\n",
+ 				mmc_hostname(host->mmc), msm_clock, clock);
+ 			goto out;
+ 		}
+-		msm_host->clk_rate = clock;
++		msm_host->clk_rate = msm_clock;
+ 		pr_debug("%s: setting clock at rate %lu\n",
+ 			mmc_hostname(host->mmc), clk_get_rate(msm_host->clk));
+ 	}
 -- 
 The Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum, 
 a Linux Foundation Collaborative Project.
