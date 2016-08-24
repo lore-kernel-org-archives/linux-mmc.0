@@ -1,115 +1,45 @@
-From: Shawn Lin <shawn.lin@rock-chips.com>
-Subject: Re: [PATCH v2 1/2] mmc: block: remove the check of packed for
- end_packed_req and hdr_wrq_prep
-Date: Wed, 24 Aug 2016 18:01:04 +0800
-Message-ID: <c4bfcc3b-d0ab-01f5-6116-39c092e01ae3@rock-chips.com>
-References: <1472025499-6758-1-git-send-email-shawn.lin@rock-chips.com>
- <CAPDyKFozVGtqbLciGQJbf9PTNZuJWmPjTcqq2AUekeoME8eHaA@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 8bit
+From: Ritesh Harjani <riteshh@codeaurora.org>
+Subject: [PATCH v4 6/9] mmc: sdhci-msm: Enable few quirks
+Date: Wed, 24 Aug 2016 15:33:41 +0530
+Message-ID: <1472033024-14890-7-git-send-email-riteshh@codeaurora.org>
+References: <1472033024-14890-1-git-send-email-riteshh@codeaurora.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from lucky1.263xmail.com ([211.157.147.130]:39541 "EHLO
-        lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S932499AbcHXKBW (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 24 Aug 2016 06:01:22 -0400
-Received: from shawn.lin?rock-chips.com (unknown [192.168.167.161])
-        by lucky1.263xmail.com (Postfix) with ESMTP id B6EEC1EE7D8
-        for <linux-mmc@vger.kernel.org>; Wed, 24 Aug 2016 18:01:07 +0800 (CST)
-In-Reply-To: <CAPDyKFozVGtqbLciGQJbf9PTNZuJWmPjTcqq2AUekeoME8eHaA@mail.gmail.com>
+Received: from smtp.codeaurora.org ([198.145.29.96]:34237 "EHLO
+        smtp.codeaurora.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1754704AbcHXKFb (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 24 Aug 2016 06:05:31 -0400
+In-Reply-To: <1472033024-14890-1-git-send-email-riteshh@codeaurora.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: shawn.lin@rock-chips.com, linux-mmc <linux-mmc@vger.kernel.org>
+To: adrian.hunter@intel.com
+Cc: ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, shawn.lin@rock-chips.com, linux-arm-msm@vger.kernel.org, georgi.djakov@linaro.org, alex.lemberg@sandisk.com, mateusz.nowak@intel.com, Yuliy.Izrailov@sandisk.com, asutoshd@codeaurora.org, david.griego@linaro.org, stummala@codeaurora.org, venkatg@codeaurora.org, pramod.gurav@linaro.org, bjorn.andersson@linaro.org, Ritesh Harjani <riteshh@codeaurora.org>
 
-在 2016/8/24 17:30, Ulf Hansson 写道:
-> On 24 August 2016 at 09:58, Shawn Lin <shawn.lin@rock-chips.com> wrote:
->> packed should always exist without calling its cleanup function
->> explicitly. Moreover, we have use it when preparing packed list.
->> So I don't believe we should ever fall into this check again when
->> doing mmc_blk_packed_hdr_wrq_prep or mmc_blk_end_packed_req. And
->> the code of mmc_blk_end_packed_req is trying to use packed before
->> checking it which makes it quite weird. This patch is trying to
->> remove these two checks and move it to the mmc_blk_prep_packed_list.
->> If we find packed is null, then we should never use MMC_PACKED_NONE
->> and MMC_BLK_PACKED_CMD. By doing this, we could fall back to
->> non-packed request if finding null packed, though it's impossible
->> theoretically.
->>
->> Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
->>
->> ---
->>
->> Changes in v2:
->> - remove BUG_ON and add fallback for packed instead of
->>   panic it.
->>
->>  drivers/mmc/card/block.c | 16 ++++++++++++----
->>  1 file changed, 12 insertions(+), 4 deletions(-)
->>
->> diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
->> index 48a5dd7..c7a9b28 100644
->> --- a/drivers/mmc/card/block.c
->> +++ b/drivers/mmc/card/block.c
->> @@ -1673,6 +1673,18 @@ static u8 mmc_blk_prep_packed_list(struct mmc_queue *mq, struct request *req)
->>         u8 max_packed_rw = 0;
->>         u8 reqs = 0;
->>
->> +       /*
->> +        * We don't need to check packed for any further
->> +        * operation of packed stuff as we set MMC_PACKED_NONE
->> +        * and return zero for reqs if geting null packed. Also
->> +        * we clean the flag of MMC_BLK_PACKED_CMD to avoid doing
->> +        * it again when removing blk req.
->> +        */
->> +       if (!mqrq->packed) {
->> +               md->flags &= (~MMC_BLK_PACKED_CMD);
->> +               goto no_packed;
->> +       }
->> +
->>         if (!(md->flags & MMC_BLK_PACKED_CMD))
->>                 goto no_packed;
->>
->> @@ -1781,8 +1793,6 @@ static void mmc_blk_packed_hdr_wrq_prep(struct mmc_queue_req *mqrq,
->>         u8 hdr_blocks;
->>         u8 i = 1;
->>
->> -       BUG_ON(!packed);
->> -
->>         mqrq->cmd_type = MMC_PACKED_WRITE;
->>         packed->blocks = 0;
->>         packed->idx_failure = MMC_PACKED_NR_IDX;
->> @@ -1886,8 +1896,6 @@ static int mmc_blk_end_packed_req(struct mmc_queue_req *mq_rq)
->>         int idx = packed->idx_failure, i = 0;
->>         int ret = 0;
->>
->> -       BUG_ON(!packed);
->> -
->>         while (!list_empty(&packed->list)) {
->>                 prq = list_entry_rq(packed->list.next);
->>                 if (idx == i) {
->> --
->> 2.3.7
->>
->>
->
-> This is step in the right direction, although there are still some
-> BUG_ONs() for the packed command path. Could you please have look and
-> remove all of them?
+sdhc-msm controller needs this SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN
+& SDHCI_QUIRK2_PRESET_VALUE_BROKEN to be set. Hence setting it.
 
-yup, I will try to remove all of them when I respin v3.
+Signed-off-by: Sahitya Tummala <stummala@codeaurora.org>
+Signed-off-by: Ritesh Harjani <riteshh@codeaurora.org>
+Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+---
+ drivers/mmc/host/sdhci-msm.c | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
 
-Thansk.
-
->
-> Kind regards
-> Uffe
->
->
->
-
-
+diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
+index 244e67a..a6280aa 100644
+--- a/drivers/mmc/host/sdhci-msm.c
++++ b/drivers/mmc/host/sdhci-msm.c
+@@ -603,7 +603,9 @@ static const struct sdhci_ops sdhci_msm_ops = {
+ static const struct sdhci_pltfm_data sdhci_msm_pdata = {
+ 	.quirks = SDHCI_QUIRK_BROKEN_CARD_DETECTION |
+ 		  SDHCI_QUIRK_NO_CARD_NO_RESET |
+-		  SDHCI_QUIRK_SINGLE_POWER_WRITE,
++		  SDHCI_QUIRK_SINGLE_POWER_WRITE |
++		  SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN,
++	.quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN,
+ 	.ops = &sdhci_msm_ops,
+ };
+ 
 -- 
-Best Regards
-Shawn Lin
+The Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum, 
+a Linux Foundation Collaborative Project.
 
