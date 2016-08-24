@@ -1,7 +1,7 @@
 From: Ritesh Harjani <riteshh@codeaurora.org>
-Subject: [PATCH v4 8/9] mmc: sdhci-msm: Add clock changes for DDR mode.
-Date: Wed, 24 Aug 2016 15:33:43 +0530
-Message-ID: <1472033024-14890-9-git-send-email-riteshh@codeaurora.org>
+Subject: [PATCH v4 4/9] ARM: dts: qcom: Add clk-rates to sdhc1 & sdhc2
+Date: Wed, 24 Aug 2016 15:33:39 +0530
+Message-ID: <1472033024-14890-5-git-send-email-riteshh@codeaurora.org>
 References: <1472033024-14890-1-git-send-email-riteshh@codeaurora.org>
 Return-path: <linux-arm-msm-owner@vger.kernel.org>
 In-Reply-To: <1472033024-14890-1-git-send-email-riteshh@codeaurora.org>
@@ -10,59 +10,95 @@ To: adrian.hunter@intel.com
 Cc: ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, shawn.lin@rock-chips.com, linux-arm-msm@vger.kernel.org, georgi.djakov@linaro.org, alex.lemberg@sandisk.com, mateusz.nowak@intel.com, Yuliy.Izrailov@sandisk.com, asutoshd@codeaurora.org, david.griego@linaro.org, stummala@codeaurora.org, venkatg@codeaurora.org, pramod.gurav@linaro.org, bjorn.andersson@linaro.org, Ritesh Harjani <riteshh@codeaurora.org>
 List-Id: linux-mmc@vger.kernel.org
 
-SDHC MSM controller need 2x clock for MCLK at GCC.
-Hence make required changes to have 2x clock for
-DDR timing modes.
+Add msm supported clk-rates for all sdhc nodes.
 
 Signed-off-by: Ritesh Harjani <riteshh@codeaurora.org>
 ---
- drivers/mmc/host/sdhci-msm.c | 22 ++++++++++++++++++----
- 1 file changed, 18 insertions(+), 4 deletions(-)
+ arch/arm/boot/dts/qcom-apq8084.dtsi   | 4 ++++
+ arch/arm/boot/dts/qcom-msm8974.dtsi   | 4 ++++
+ arch/arm64/boot/dts/qcom/msm8916.dtsi | 4 ++++
+ arch/arm64/boot/dts/qcom/msm8996.dtsi | 2 ++
+ 4 files changed, 14 insertions(+)
 
-diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
-index 853639b..538594c 100644
---- a/drivers/mmc/host/sdhci-msm.c
-+++ b/drivers/mmc/host/sdhci-msm.c
-@@ -667,21 +667,35 @@ static void sdhci_msm_set_clock(struct sdhci_host *host, unsigned int clock)
- {
- 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
- 	struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
--	u32 msm_clock = 0;
-+	struct mmc_ios curr_ios = host->mmc->ios;
-+	u32 msm_clock, ddr_clock;
- 	int rc = 0;
+diff --git a/arch/arm/boot/dts/qcom-apq8084.dtsi b/arch/arm/boot/dts/qcom-apq8084.dtsi
+index 7c2df06..dd7a92d 100644
+--- a/arch/arm/boot/dts/qcom-apq8084.dtsi
++++ b/arch/arm/boot/dts/qcom-apq8084.dtsi
+@@ -315,6 +315,8 @@
+ 			interrupt-names = "hc_irq", "pwr_irq";
+ 			clocks = <&gcc GCC_SDCC1_APPS_CLK>, <&gcc GCC_SDCC1_AHB_CLK>;
+ 			clock-names = "core", "iface";
++			clk-rates = <400000 25000000 50000000 100000000
++					200000000>;
+ 			status = "disabled";
+ 		};
  
- 	if (!clock)
- 		goto out;
+@@ -326,6 +328,8 @@
+ 			interrupt-names = "hc_irq", "pwr_irq";
+ 			clocks = <&gcc GCC_SDCC2_APPS_CLK>, <&gcc GCC_SDCC2_AHB_CLK>;
+ 			clock-names = "core", "iface";
++			clk-rates = <400000 25000000 50000000 100000000
++					200000000>;
+ 			status = "disabled";
+ 		};
  
--	if (clock != msm_host->clk_rate) {
--		msm_clock = sdhci_msm_get_msm_clk_rate(host, clock);
-+	msm_clock = sdhci_msm_get_msm_clk_rate(host, clock);
-+	if ((curr_ios.timing == MMC_TIMING_UHS_DDR50) ||
-+		(curr_ios.timing == MMC_TIMING_MMC_DDR52) ||
-+		(curr_ios.timing == MMC_TIMING_MMC_HS400)) {
-+		/*
-+		 * The SDHC requires internal clock frequency to be double the
-+		 * actual clock that will be set for DDR mode. The controller
-+		 * uses the faster clock(100/400MHz) for some of its parts and
-+		 * send the actual required clock (50/200MHz) to the card.
-+		 */
-+		ddr_clock = clock * 2;
-+		msm_clock = sdhci_msm_get_msm_clk_rate(host, ddr_clock);
-+	}
-+
-+	if (msm_clock != msm_host->clk_rate) {
- 		rc = clk_set_rate(msm_host->clk, msm_clock);
- 		if (rc) {
- 			pr_err("%s: failed to set clock at rate %u, requested clock rate %u\n",
- 				mmc_hostname(host->mmc), msm_clock, clock);
- 			goto out;
- 		}
--		msm_host->clk_rate = clock;
-+		msm_host->clk_rate = msm_clock;
- 		pr_debug("%s: setting clock at rate %lu\n",
- 			mmc_hostname(host->mmc), clk_get_rate(msm_host->clk));
- 	}
+diff --git a/arch/arm/boot/dts/qcom-msm8974.dtsi b/arch/arm/boot/dts/qcom-msm8974.dtsi
+index 561d4d1..c5f7ac4 100644
+--- a/arch/arm/boot/dts/qcom-msm8974.dtsi
++++ b/arch/arm/boot/dts/qcom-msm8974.dtsi
+@@ -447,6 +447,8 @@
+ 			interrupt-names = "hc_irq", "pwr_irq";
+ 			clocks = <&gcc GCC_SDCC1_APPS_CLK>, <&gcc GCC_SDCC1_AHB_CLK>;
+ 			clock-names = "core", "iface";
++			clk-rates = <400000 25000000 50000000 100000000
++					200000000>;
+ 			status = "disabled";
+ 		};
+ 
+@@ -458,6 +460,8 @@
+ 			interrupt-names = "hc_irq", "pwr_irq";
+ 			clocks = <&gcc GCC_SDCC2_APPS_CLK>, <&gcc GCC_SDCC2_AHB_CLK>;
+ 			clock-names = "core", "iface";
++			clk-rates = <400000 25000000 50000000 100000000
++					200000000>;
+ 			status = "disabled";
+ 		};
+ 
+diff --git a/arch/arm64/boot/dts/qcom/msm8916.dtsi b/arch/arm64/boot/dts/qcom/msm8916.dtsi
+index 11bdc24..6f2c0b8 100644
+--- a/arch/arm64/boot/dts/qcom/msm8916.dtsi
++++ b/arch/arm64/boot/dts/qcom/msm8916.dtsi
+@@ -460,6 +460,8 @@
+ 			clocks = <&gcc GCC_SDCC1_APPS_CLK>,
+ 				 <&gcc GCC_SDCC1_AHB_CLK>;
+ 			clock-names = "core", "iface";
++			clk-rates = <400000 25000000 50000000 100000000
++					177770000>;
+ 			bus-width = <8>;
+ 			non-removable;
+ 			status = "disabled";
+@@ -475,6 +477,8 @@
+ 			clocks = <&gcc GCC_SDCC2_APPS_CLK>,
+ 				 <&gcc GCC_SDCC2_AHB_CLK>;
+ 			clock-names = "core", "iface";
++			clk-rates = <400000 25000000 50000000 100000000
++					200000000>;
+ 			bus-width = <4>;
+ 			status = "disabled";
+ 		};
+diff --git a/arch/arm64/boot/dts/qcom/msm8996.dtsi b/arch/arm64/boot/dts/qcom/msm8996.dtsi
+index 55ec3e8..f774e4c 100644
+--- a/arch/arm64/boot/dts/qcom/msm8996.dtsi
++++ b/arch/arm64/boot/dts/qcom/msm8996.dtsi
+@@ -258,6 +258,8 @@
+ 			 clock-names = "iface", "core";
+ 			 clocks = <&gcc GCC_SDCC2_AHB_CLK>,
+ 			 <&gcc GCC_SDCC2_APPS_CLK>;
++			 clk-rates = <400000 25000000 50000000 100000000
++					200000000>;
+ 			 bus-width = <4>;
+ 		 };
+ 
 -- 
 The Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum, 
 a Linux Foundation Collaborative Project.
