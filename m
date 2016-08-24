@@ -1,102 +1,84 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 4/5] mmc: sunxi-mmc: change idma descriptor to __le32
-Date: Wed, 24 Aug 2016 11:31:56 +0200
-Message-ID: <CAPDyKFouYMjAajS68QRY6SvORQ1YZTf2dZsO_DtSJ+voKPWFdA@mail.gmail.com>
-References: <20160822164219.14272-1-michael.weiser@gmx.de>
- <20160822164219.14272-5-michael.weiser@gmx.de>
+Subject: Re: [PATCH RESEND] mmc: core: add error message when switching fails
+ in mmc_select_hs()
+Date: Wed, 24 Aug 2016 11:31:44 +0200
+Message-ID: <CAPDyKFrvjq-+7mnkF46XHoPNDuvxqxkOOqUiFDFw8mp3FErodQ@mail.gmail.com>
+References: <1471945807-6962-1-git-send-email-js07.lee@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <20160822164219.14272-5-michael.weiser@gmx.de>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Michael Weiser <michael.weiser@gmx.de>
-Cc: Chen-Yu Tsai <wens@csie.org>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-wm0-f44.google.com ([74.125.82.44]:35576 "EHLO
+        mail-wm0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1754624AbcHXJb6 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 24 Aug 2016 05:31:58 -0400
+Received: by mail-wm0-f44.google.com with SMTP id f65so192842733wmi.0
+        for <linux-mmc@vger.kernel.org>; Wed, 24 Aug 2016 02:31:46 -0700 (PDT)
+In-Reply-To: <1471945807-6962-1-git-send-email-js07.lee@samsung.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Jungseung Lee <js07.lee@samsung.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>
 
-On 22 August 2016 at 18:42, Michael Weiser <michael.weiser@gmx.de> wrote:
-> The sunxi-mmc driver does not take into account the processor may be big
-> endian when writing the DMA descriptors. This causes cards not to be
-> detected when running a big-endian kernel. Change the descriptors for
-> IDMA to use __le32 and ensure they are suitably swapped before writing.
-> Tested successfully on the Cubieboard2.
+On 23 August 2016 at 11:50, Jungseung Lee <js07.lee@samsung.com> wrote:
+> The switch failure message in mmc_select_timing had been removed
+> since that is invalid: commit 0400ed0a083a ("mmc: core: remove the
+> invalid message in mmc_select_timing")
 >
-> Signed-off-by: Michael Weiser <michael.weiser@gmx.de>
-> Acked-by: Maxime Ripard <maxime.ripard@free-electrons.com>
-> Cc: Ulf Hansson <ulf.hansson@linaro.org>
-> Cc: Chen-Yu Tsai <wens@csie.org>
-> Cc: linux-mmc@vger.kernel.org
+> Now, in the case when mmc_select_hs return error in mmc_select_timing,
+> there is nothing to print failure message.
+> Let's make for mmc_select_hs() print message itself in the failure case.
+>
+> Signed-off-by: Jungseung Lee <js07.lee@samsung.com>
+> ---
+>  drivers/mmc/core/mmc.c |   10 ++++++----
+>  1 file changed, 6 insertions(+), 4 deletions(-)
+>
+> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+> index f2d185c..e07fcce 100644
+> --- a/drivers/mmc/core/mmc.c
+> +++ b/drivers/mmc/core/mmc.c
+> @@ -1018,6 +1018,7 @@ static int mmc_switch_status(struct mmc_card *card)
+>   */
+>  static int mmc_select_hs(struct mmc_card *card)
+>  {
+> +       struct mmc_host *host = card->host;
 
-Thanks, applied for next!
+No need for local variable here, just use card->host below instead.
+
+>         int err;
+>
+>         err = __mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
+> @@ -1029,6 +1030,10 @@ static int mmc_select_hs(struct mmc_card *card)
+>                 err = mmc_switch_status(card);
+>         }
+>
+> +       if (err)
+> +               pr_err("%s: switch to high-speed failed, err:%d\n",
+> +                       mmc_hostname(host), err);
+
+I think a pr_warn() would be better as mmc_select_timing() uses the
+legacy speed mode when err == -EBADMSG.
+
+> +
+>         return err;
+>  }
+>
+> @@ -1265,11 +1270,8 @@ static int mmc_select_hs400es(struct mmc_card *card)
+>
+>         /* Switch card to HS mode */
+>         err = mmc_select_hs(card);
+> -       if (err) {
+> -               pr_err("%s: switch to high-speed failed, err:%d\n",
+> -                       mmc_hostname(host), err);
+> +       if (err)
+>                 goto out_err;
+> -       }
+>
+>         err = mmc_switch_status(card);
+>         if (err)
+> --
+> 1.7.9.5
+>
 
 Kind regards
 Uffe
-
-> ---
->  drivers/mmc/host/sunxi-mmc.c | 27 +++++++++++++++------------
->  1 file changed, 15 insertions(+), 12 deletions(-)
->
-> diff --git a/drivers/mmc/host/sunxi-mmc.c b/drivers/mmc/host/sunxi-mmc.c
-> index 2ec91ce..a1935a1 100644
-> --- a/drivers/mmc/host/sunxi-mmc.c
-> +++ b/drivers/mmc/host/sunxi-mmc.c
-> @@ -223,10 +223,10 @@ struct sunxi_mmc_clk_delay {
->  };
->
->  struct sunxi_idma_des {
-> -       u32     config;
-> -       u32     buf_size;
-> -       u32     buf_addr_ptr1;
-> -       u32     buf_addr_ptr2;
-> +       __le32 config;
-> +       __le32 buf_size;
-> +       __le32 buf_addr_ptr1;
-> +       __le32 buf_addr_ptr2;
->  };
->
->  struct sunxi_mmc_cfg {
-> @@ -329,22 +329,25 @@ static void sunxi_mmc_init_idma_des(struct sunxi_mmc_host *host,
->         int i, max_len = (1 << host->cfg->idma_des_size_bits);
->
->         for (i = 0; i < data->sg_len; i++) {
-> -               pdes[i].config = SDXC_IDMAC_DES0_CH | SDXC_IDMAC_DES0_OWN |
-> -                                SDXC_IDMAC_DES0_DIC;
-> +               pdes[i].config = cpu_to_le32(SDXC_IDMAC_DES0_CH |
-> +                                            SDXC_IDMAC_DES0_OWN |
-> +                                            SDXC_IDMAC_DES0_DIC);
->
->                 if (data->sg[i].length == max_len)
->                         pdes[i].buf_size = 0; /* 0 == max_len */
->                 else
-> -                       pdes[i].buf_size = data->sg[i].length;
-> +                       pdes[i].buf_size = cpu_to_le32(data->sg[i].length);
->
->                 next_desc += sizeof(struct sunxi_idma_des);
-> -               pdes[i].buf_addr_ptr1 = sg_dma_address(&data->sg[i]);
-> -               pdes[i].buf_addr_ptr2 = (u32)next_desc;
-> +               pdes[i].buf_addr_ptr1 =
-> +                       cpu_to_le32(sg_dma_address(&data->sg[i]));
-> +               pdes[i].buf_addr_ptr2 = cpu_to_le32((u32)next_desc);
->         }
->
-> -       pdes[0].config |= SDXC_IDMAC_DES0_FD;
-> -       pdes[i - 1].config |= SDXC_IDMAC_DES0_LD | SDXC_IDMAC_DES0_ER;
-> -       pdes[i - 1].config &= ~SDXC_IDMAC_DES0_DIC;
-> +       pdes[0].config |= cpu_to_le32(SDXC_IDMAC_DES0_FD);
-> +       pdes[i - 1].config |= cpu_to_le32(SDXC_IDMAC_DES0_LD |
-> +                                         SDXC_IDMAC_DES0_ER);
-> +       pdes[i - 1].config &= cpu_to_le32(~SDXC_IDMAC_DES0_DIC);
->         pdes[i - 1].buf_addr_ptr2 = 0;
->
->         /*
-> --
-> 2.9.2
->
