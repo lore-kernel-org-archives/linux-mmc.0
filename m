@@ -1,58 +1,77 @@
-From: Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Subject: Re: [PATCH] sdhci: Add quirk and device tree parameter to force SD
- test mode
-Date: Wed, 24 Aug 2016 09:16:48 +0300
-Message-ID: <bd59af70-ebd8-2c92-e6ab-e1f0bf9acce7@intel.com>
-References: <1471906531-28668-1-git-send-email-zach.brown@ni.com>
- <684dd3fb-15ac-fa84-2f1e-89f379b5149a@intel.com>
- <20160823221421.GB20351@zach-desktop>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH V8 2/2] mmc: OCTEON: Add host driver for OCTEON MMC controller.
+Date: Wed, 24 Aug 2016 09:32:26 +0200
+Message-ID: <CAPDyKFpT0YuuaS3cppp+Q+hPfzOLj6jYSO_KVimLOq_OvPaEzw@mail.gmail.com>
+References: <57853474.9050108@cavium.com> <CAPDyKFqaGLWxkG+CqViqDfPqeffKE5rutgR0gduuGs9F0DX+zg@mail.gmail.com>
+ <57BC8ACA.1040506@caviumnetworks.com> <CAPDyKFp047jKEZngegTxk1grvwPivqj+tqAX1ekF82s1zDE53Q@mail.gmail.com>
+ <57BCAB27.8060502@caviumnetworks.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 7bit
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20160823221421.GB20351@zach-desktop>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Zach Brown <zach.brown-acOepvfBmUk@public.gmane.org>
-Cc: ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-mips-bounce@linux-mips.org>
+In-Reply-To: <57BCAB27.8060502@caviumnetworks.com>
+Sender: linux-mips-bounce@linux-mips.org
+Errors-to: linux-mips-bounce@linux-mips.org
+List-help: <mailto:ecartis@linux-mips.org?Subject=help>
+List-unsubscribe: <mailto:ecartis@linux-mips.org?subject=unsubscribe%20linux-mips>
+List-software: Ecartis version 1.0.0
+List-subscribe: <mailto:ecartis@linux-mips.org?subject=subscribe%20linux-mips>
+List-owner: <mailto:ralf@linux-mips.org>
+List-post: <mailto:linux-mips@linux-mips.org>
+List-archive: <http://www.linux-mips.org/archives/linux-mips/>
+To: David Daney <ddaney@caviumnetworks.com>
+Cc: "Steven J. Hill" <steven.hill@cavium.com>, linux-mmc <linux-mmc@vger.kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, linux-mips@linux-mips.org, Rob Herring <robh+dt@kernel.org>, Mark Rutland <mark.rutland@arm.com>, Ralf Baechle <ralf@linux-mips.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On 24/08/16 01:14, Zach Brown wrote:
-> On Tue, Aug 23, 2016 at 09:22:29AM +0300, Adrian Hunter wrote:
->> On 23/08/16 01:55, Zach Brown wrote:
->>> From: Jaeden Amero <jaeden.amero-acOepvfBmUk@public.gmane.org>
->>>
->>> On some devices, CD is broken so that we must force the SDHCI into test
->>> mode and set CD, so that it always detects an SD card as present.
->>>
->>> In order to get a device with broken CD working, we had previously
->>> always set the SDHCI into test mode. Unfortunately, this had the side
->>> effect of making all SD cards used with our Linux kernels undetectable
->>> and non-removable.
->>>
->>> By making this "SD test mode" setting optional via a quirk, we can avoid
->>> this side effect for devices other than the device with broken CD.
->>> Additionally, we add a device parameter to sdhci-pltfm to allow all
->>> SDHCI drivers to enable this quirk.
+On 23 August 2016 at 21:59, David Daney <ddaney@caviumnetworks.com> wrote:
+> On 08/23/2016 12:46 PM, Ulf Hansson wrote:
 >>
->> Generally new quirks are not acceptable, but I don't see how test mode helps
->> very much since you still don't get any card detection events.  If you
->> really need test mode, please explain more about how it helps (as opposed to
->> polling for example).
+>> On 23 August 2016 at 19:41, David Daney <ddaney@caviumnetworks.com> wrote:
+>>>
+>>> On 08/23/2016 07:53 AM, Ulf Hansson wrote:
+>>>>
+>>>>
+>>>> On 12 July 2016 at 20:18, Steven J. Hill <steven.hill@cavium.com> wrote:
+>>>
+>>>
+>>> [...]
+>>>
+>>>>> +#include <asm/byteorder.h>
+>>>>> +#include <asm/octeon/octeon.h>
+>>>>
+>>>>
+>>>>
+>>>
+>>> OK, we will duplicate any needed definitions from octeon.h into the
+>>> driver
+>>> source file.
 >>
 >>
-> 
-> Polling doesnt work in our case, since the issue lies with the SD controller
-> itself. The SD controller in xilinx zynq devices requires the CDn signal to
-> work. http://www.xilinx.com/support/answers/61064.html We have a situation 
-> where the controller requires the signal, but we can't use any of our pins to
-> supply it. With test mode we can get the controller into a state where it works
-> despite not having the signal.
-> 
+>> Why can't you share it via a platfrom data header at
+>> include/linux/platform_data/* ?
+>>
+>
+> It isn't "platform_data", it is register layout definitions (thousands of
+> lines of them), so I don't think it it appropriate to place in
+> include/linux.
+>
+> I think the cleanest approach is to put the register definitions in the
+> driver file, which is the only user, and delete the definition header files
+> in arch/mips/include/...
+>
+> David.
 
-Doesn't sound like something we need in sdhci.c.  Have you considered adding
-it to the driver, perhaps using the ->reset() callback?
+I guess we are not looking at the same header file. :-)
 
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+arch/mips/include/asm/octeon/octeon.h contains declarations of
+functions/structs and even globally exported variables.
+
+At a closer look this header need a serious cleanup anyway...
+
+* Some of the functions/structs are not used or even implemented.
+** Some of the functions/structs is used only internally by the SoC
+specific code, thus should be moved to a local header.
+*** Some of the functions/structs/exported variables is being used by
+several clients. The cavium mmc driver is only one of them.
+
+Kind regards
+Uffe
