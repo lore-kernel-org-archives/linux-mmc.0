@@ -1,104 +1,164 @@
 From: Ritesh Harjani <riteshh@codeaurora.org>
-Subject: [PATCH v4 4/9] ARM: dts: qcom: Add clk-rates to sdhc1 & sdhc2
-Date: Wed, 24 Aug 2016 15:33:39 +0530
-Message-ID: <1472033024-14890-5-git-send-email-riteshh@codeaurora.org>
+Subject: [PATCH v4 7/9] mmc: sdhci-msm: Implement set_clock callback for sdhci-msm
+Date: Wed, 24 Aug 2016 15:33:42 +0530
+Message-ID: <1472033024-14890-8-git-send-email-riteshh@codeaurora.org>
 References: <1472033024-14890-1-git-send-email-riteshh@codeaurora.org>
-Return-path: <linux-arm-msm-owner@vger.kernel.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from smtp.codeaurora.org ([198.145.29.96]:34238 "EHLO
+        smtp.codeaurora.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751080AbcHXKFc (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 24 Aug 2016 06:05:32 -0400
 In-Reply-To: <1472033024-14890-1-git-send-email-riteshh@codeaurora.org>
-Sender: linux-arm-msm-owner@vger.kernel.org
+Sender: linux-mmc-owner@vger.kernel.org
+List-Id: linux-mmc@vger.kernel.org
 To: adrian.hunter@intel.com
 Cc: ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, shawn.lin@rock-chips.com, linux-arm-msm@vger.kernel.org, georgi.djakov@linaro.org, alex.lemberg@sandisk.com, mateusz.nowak@intel.com, Yuliy.Izrailov@sandisk.com, asutoshd@codeaurora.org, david.griego@linaro.org, stummala@codeaurora.org, venkatg@codeaurora.org, pramod.gurav@linaro.org, bjorn.andersson@linaro.org, Ritesh Harjani <riteshh@codeaurora.org>
-List-Id: linux-mmc@vger.kernel.org
 
-Add msm supported clk-rates for all sdhc nodes.
+sdhci-msm controller may have different clk-rates for each
+bus speed mode. Thus implement set_clock callback for
+sdhci-msm driver.
 
+Signed-off-by: Sahitya Tummala <stummala@codeaurora.org>
 Signed-off-by: Ritesh Harjani <riteshh@codeaurora.org>
 ---
- arch/arm/boot/dts/qcom-apq8084.dtsi   | 4 ++++
- arch/arm/boot/dts/qcom-msm8974.dtsi   | 4 ++++
- arch/arm64/boot/dts/qcom/msm8916.dtsi | 4 ++++
- arch/arm64/boot/dts/qcom/msm8996.dtsi | 2 ++
- 4 files changed, 14 insertions(+)
+ drivers/mmc/host/sdhci-msm.c | 109 ++++++++++++++++++++++++++++++++++++++++++-
+ 1 file changed, 108 insertions(+), 1 deletion(-)
 
-diff --git a/arch/arm/boot/dts/qcom-apq8084.dtsi b/arch/arm/boot/dts/qcom-apq8084.dtsi
-index 7c2df06..dd7a92d 100644
---- a/arch/arm/boot/dts/qcom-apq8084.dtsi
-+++ b/arch/arm/boot/dts/qcom-apq8084.dtsi
-@@ -315,6 +315,8 @@
- 			interrupt-names = "hc_irq", "pwr_irq";
- 			clocks = <&gcc GCC_SDCC1_APPS_CLK>, <&gcc GCC_SDCC1_AHB_CLK>;
- 			clock-names = "core", "iface";
-+			clk-rates = <400000 25000000 50000000 100000000
-+					200000000>;
- 			status = "disabled";
- 		};
+diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
+index a6280aa..853639b 100644
+--- a/drivers/mmc/host/sdhci-msm.c
++++ b/drivers/mmc/host/sdhci-msm.c
+@@ -89,6 +89,7 @@ struct sdhci_msm_host {
+ 	struct mmc_host *mmc;
+ 	bool use_14lpp_dll_reset;
+ 	struct sdhci_msm_pltfm_data *pdata;
++	u32 clk_rate;
+ };
  
-@@ -326,6 +328,8 @@
- 			interrupt-names = "hc_irq", "pwr_irq";
- 			clocks = <&gcc GCC_SDCC2_APPS_CLK>, <&gcc GCC_SDCC2_AHB_CLK>;
- 			clock-names = "core", "iface";
-+			clk-rates = <400000 25000000 50000000 100000000
-+					200000000>;
- 			status = "disabled";
- 		};
+ /* Platform specific tuning */
+@@ -582,6 +583,112 @@ static unsigned int sdhci_msm_get_min_clock(struct sdhci_host *host)
+ 	return msm_host->pdata->clk_table[0];
+ }
  
-diff --git a/arch/arm/boot/dts/qcom-msm8974.dtsi b/arch/arm/boot/dts/qcom-msm8974.dtsi
-index 561d4d1..c5f7ac4 100644
---- a/arch/arm/boot/dts/qcom-msm8974.dtsi
-+++ b/arch/arm/boot/dts/qcom-msm8974.dtsi
-@@ -447,6 +447,8 @@
- 			interrupt-names = "hc_irq", "pwr_irq";
- 			clocks = <&gcc GCC_SDCC1_APPS_CLK>, <&gcc GCC_SDCC1_AHB_CLK>;
- 			clock-names = "core", "iface";
-+			clk-rates = <400000 25000000 50000000 100000000
-+					200000000>;
- 			status = "disabled";
- 		};
- 
-@@ -458,6 +460,8 @@
- 			interrupt-names = "hc_irq", "pwr_irq";
- 			clocks = <&gcc GCC_SDCC2_APPS_CLK>, <&gcc GCC_SDCC2_AHB_CLK>;
- 			clock-names = "core", "iface";
-+			clk-rates = <400000 25000000 50000000 100000000
-+					200000000>;
- 			status = "disabled";
- 		};
- 
-diff --git a/arch/arm64/boot/dts/qcom/msm8916.dtsi b/arch/arm64/boot/dts/qcom/msm8916.dtsi
-index 11bdc24..6f2c0b8 100644
---- a/arch/arm64/boot/dts/qcom/msm8916.dtsi
-+++ b/arch/arm64/boot/dts/qcom/msm8916.dtsi
-@@ -460,6 +460,8 @@
- 			clocks = <&gcc GCC_SDCC1_APPS_CLK>,
- 				 <&gcc GCC_SDCC1_AHB_CLK>;
- 			clock-names = "core", "iface";
-+			clk-rates = <400000 25000000 50000000 100000000
-+					177770000>;
- 			bus-width = <8>;
- 			non-removable;
- 			status = "disabled";
-@@ -475,6 +477,8 @@
- 			clocks = <&gcc GCC_SDCC2_APPS_CLK>,
- 				 <&gcc GCC_SDCC2_AHB_CLK>;
- 			clock-names = "core", "iface";
-+			clk-rates = <400000 25000000 50000000 100000000
-+					200000000>;
- 			bus-width = <4>;
- 			status = "disabled";
- 		};
-diff --git a/arch/arm64/boot/dts/qcom/msm8996.dtsi b/arch/arm64/boot/dts/qcom/msm8996.dtsi
-index 55ec3e8..f774e4c 100644
---- a/arch/arm64/boot/dts/qcom/msm8996.dtsi
-+++ b/arch/arm64/boot/dts/qcom/msm8996.dtsi
-@@ -258,6 +258,8 @@
- 			 clock-names = "iface", "core";
- 			 clocks = <&gcc GCC_SDCC2_AHB_CLK>,
- 			 <&gcc GCC_SDCC2_APPS_CLK>;
-+			 clk-rates = <400000 25000000 50000000 100000000
-+					200000000>;
- 			 bus-width = <4>;
- 		 };
- 
++static unsigned int sdhci_msm_get_msm_clk_rate(struct sdhci_host *host,
++					u32 req_clk)
++{
++	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
++	struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
++	int count = msm_host->pdata->clk_table_sz;
++	unsigned int sel_clk = -1;
++	int cnt;
++
++	if (req_clk < sdhci_msm_get_min_clock(host)) {
++		sel_clk = sdhci_msm_get_min_clock(host);
++		return sel_clk;
++	}
++
++	for (cnt = 0; cnt < count; cnt++) {
++		if (msm_host->pdata->clk_table[cnt] > req_clk) {
++			break;
++		} else if (msm_host->pdata->clk_table[cnt] == req_clk) {
++			sel_clk = msm_host->pdata->clk_table[cnt];
++			break;
++		}
++		sel_clk = msm_host->pdata->clk_table[cnt];
++	}
++	return sel_clk;
++}
++
++/**
++ * __sdhci_msm_set_clock - sdhci_msm clock control.
++ *
++ * Description:
++ * Implement MSM version of sdhci_set_clock.
++ * This is required since MSM controller does not
++ * use internal divider and instead directly control
++ * the GCC clock as per HW recommendation.
++ **/
++void __sdhci_msm_set_clock(struct sdhci_host *host, unsigned int clock)
++{
++	u16 clk;
++	unsigned long timeout;
++
++	/*
++	 * Keep actual_clock as zero -
++	 * - since there is no divider used so no need of having actual_clock.
++	 * - MSM controller uses SDCLK for data timeout calculation. If
++	 *   actual_clock is zero, host->clock is taken for calculation.
++	 */
++	host->mmc->actual_clock = 0;
++
++	sdhci_writew(host, 0, SDHCI_CLOCK_CONTROL);
++
++	if (clock == 0)
++		return;
++
++	/*
++	 * MSM controller do not use clock divider.
++	 * Thus read SDHCI_CLOCK_CONTROL and only enable
++	 * clock with no divider value programmed.
++	 */
++	clk = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
++
++	clk |= SDHCI_CLOCK_INT_EN;
++	sdhci_writew(host, clk, SDHCI_CLOCK_CONTROL);
++
++	/* Wait max 20 ms */
++	timeout = 20;
++	while (!((clk = sdhci_readw(host, SDHCI_CLOCK_CONTROL))
++		& SDHCI_CLOCK_INT_STABLE)) {
++		if (timeout == 0) {
++			pr_err("%s: Internal clock never stabilised.\n",
++			       mmc_hostname(host->mmc));
++			return;
++		}
++		timeout--;
++		mdelay(1);
++	}
++
++	clk |= SDHCI_CLOCK_CARD_EN;
++	sdhci_writew(host, clk, SDHCI_CLOCK_CONTROL);
++}
++
++static void sdhci_msm_set_clock(struct sdhci_host *host, unsigned int clock)
++{
++	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
++	struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
++	u32 msm_clock = 0;
++	int rc = 0;
++
++	if (!clock)
++		goto out;
++
++	if (clock != msm_host->clk_rate) {
++		msm_clock = sdhci_msm_get_msm_clk_rate(host, clock);
++		rc = clk_set_rate(msm_host->clk, msm_clock);
++		if (rc) {
++			pr_err("%s: failed to set clock at rate %u, requested clock rate %u\n",
++				mmc_hostname(host->mmc), msm_clock, clock);
++			goto out;
++		}
++		msm_host->clk_rate = clock;
++		pr_debug("%s: setting clock at rate %lu\n",
++			mmc_hostname(host->mmc), clk_get_rate(msm_host->clk));
++	}
++out:
++	__sdhci_msm_set_clock(host, clock);
++}
++
+ static const struct of_device_id sdhci_msm_dt_match[] = {
+ 	{ .compatible = "qcom,sdhci-msm-v4" },
+ 	{},
+@@ -592,7 +699,7 @@ MODULE_DEVICE_TABLE(of, sdhci_msm_dt_match);
+ static const struct sdhci_ops sdhci_msm_ops = {
+ 	.platform_execute_tuning = sdhci_msm_execute_tuning,
+ 	.reset = sdhci_reset,
+-	.set_clock = sdhci_set_clock,
++	.set_clock = sdhci_msm_set_clock,
+ 	.get_min_clock = sdhci_msm_get_min_clock,
+ 	.get_max_clock = sdhci_msm_get_max_clock,
+ 	.set_bus_width = sdhci_set_bus_width,
 -- 
 The Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum, 
 a Linux Foundation Collaborative Project.
+
