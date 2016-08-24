@@ -1,119 +1,95 @@
-From: Karsten Merker <merker@debian.org>
-Subject: Re: [PATCH v2 2/2] MMC: meson: initial support for GXBB platforms
-Date: Wed, 24 Aug 2016 14:53:16 +0200
-Message-ID: <20160824125316.GA9732@excalibur.cnev.de>
-References: <20160803231843.23012-1-khilman@baylibre.com>
- <20160803231843.23012-2-khilman@baylibre.com>
- <CAPDyKFpPCkCRB436zdZ664st9xwA6wTWkFtT=U4HTwwAn-_emg@mail.gmail.com>
+From: Bjorn Andersson <bjorn.andersson@linaro.org>
+Subject: Re: [PATCH v3 3/9] mmc: sdhci-msm: add pltfm_data support to get
+ clk-rates from DT
+Date: Wed, 24 Aug 2016 09:56:25 -0700
+Message-ID: <20160824165625.GF15161@tuxbot>
+References: <1471581384-18961-1-git-send-email-riteshh@codeaurora.org>
+ <1471581384-18961-4-git-send-email-riteshh@codeaurora.org>
+ <20160823043121.GC26240@tuxbot>
+ <06f079ca-6785-6512-5807-f773a60a5f79@codeaurora.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mout.kundenserver.de ([212.227.126.134]:50538 "EHLO
-        mout.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753295AbcHXMyM (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 24 Aug 2016 08:54:12 -0400
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-arm-msm-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <CAPDyKFpPCkCRB436zdZ664st9xwA6wTWkFtT=U4HTwwAn-_emg@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+In-Reply-To: <06f079ca-6785-6512-5807-f773a60a5f79@codeaurora.org>
+Sender: linux-arm-msm-owner@vger.kernel.org
+To: Ritesh Harjani <riteshh@codeaurora.org>
+Cc: adrian.hunter@intel.com, ulf.hansson@linaro.org, shawn.lin@rock-chips.com, jh80.chung@samsung.com, linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org, georgi.djakov@linaro.org, alex.lemberg@sandisk.com, mateusz.nowak@intel.com, Yuliy.Izrailov@sandisk.com, asutoshd@codeaurora.org, kdorfman@codeaurora.org, david.griego@linaro.org, stummala@codeaurora.org, venkatg@codeaurora.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>, Kevin Hilman <khilman@baylibre.com>
-Cc: "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, Xing Wu <xing.xu@amlogic.com>, Victor Wan <victor.wan@amlogic.com>, linux-mmc <linux-mmc@vger.kernel.org>, linux-amlogic@lists.infradead.org, Jerry Cao <jerry.cao@amlogic.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
 
-On Wed, Aug 24, 2016 at 01:53:08PM +0200, Ulf Hansson wrote:
-> On 4 August 2016 at 01:18, Kevin Hilman <khilman@baylibre.com> wrote:
-> > Initial support for the SD/eMMC controller in the Amlogic S905/GXBB
-> > family of SoCs.
-> >
-> > Currently working for the SD and eMMC interfaces, but not yet tested
-> > for SDIO.
-> >
-> > Tested external SD card and internal eMMC on meson-gxbb-p200 and
-> > meson-gxbb-odroidc2.
-> >
-> > Signed-off-by: Kevin Hilman <khilman@baylibre.com>
-[...]
-> > @@ -0,0 +1,918 @@
-> > +/*
-> > + * This file is provided under a dual BSD/GPLv2 license.  When using or
-> > + * redistributing this file, you may do so under either license.
-> > + *
-> > + * GPL LICENSE SUMMARY
-> > + *
-> > + * Copyright (c) 2016 BayLibre, SAS.
-> > + * Author: Kevin Hilman <khilman@baylibre.com>
-> > + *
-> > + * This program is free software; you can redistribute it and/or modify
-> > + * it under the terms of version 2 of the GNU General Public License as
-> > + * published by the Free Software Foundation.
-> > + *
-> > + * This program is distributed in the hope that it will be useful, but
-> > + * WITHOUT ANY WARRANTY; without even the implied warranty of
-> > + * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-> > + * General Public License for more details.
-> > + *
-> > + * You should have received a copy of the GNU General Public License
-> > + * along with this program; if not, see <http://www.gnu.org/licenses/>.
-> > + * The full GNU General Public License is included in this distribution
-> > + * in the file called COPYING.
-> > + *
-> > + * BSD LICENSE
-> > + *
-> > + * Copyright (c) 2016 BayLibre, SAS.
-> > + * Author: Kevin Hilman <khilman@baylibre.com>
-> > + *
-> > + * Redistribution and use in source and binary forms, with or without
-> > + * modification, are permitted provided that the following conditions
-> > + * are met:
-> > + *
-> > + *   * Redistributions of source code must retain the above copyright
-> > + *     notice, this list of conditions and the following disclaimer.
-> > + *   * Redistributions in binary form must reproduce the above copyright
-> > + *     notice, this list of conditions and the following disclaimer in
-> > + *     the documentation and/or other materials provided with the
-> > + *     distribution.
-> > + *   * Neither the name of Intel Corporation nor the names of its
-> > + *     contributors may be used to endorse or promote products derived
-> > + *     from this software without specific prior written permission.
-> > + *
-> > + * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-> > + * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-> > + * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-> > + * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
-> > + * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-> > + * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-> > + * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-> > + * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-> > + * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-> > + * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-> > + * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-> > + */
+On Mon 22 Aug 23:35 PDT 2016, Ritesh Harjani wrote:
+
+> Hi Bjorn,
 > 
-> Lots of licence text. Isn't it enough to state dual BSD/GPLv2?
+> 
+> On 8/23/2016 10:01 AM, Bjorn Andersson wrote:
+> >On Thu 18 Aug 21:36 PDT 2016, Ritesh Harjani wrote:
+> >
+> >>This adds support for sdhc-msm controllers to get supported
+> >>clk-rates from DT. sdhci-msm would need it's own set_clock
+> >>ops to be implemented. For this, supported clk-rates needs
+> >>to be populated in sdhci_msm_pltfm_data.
+> >>
+> >>Signed-off-by: Ritesh Harjani <riteshh@codeaurora.org>
+> >>---
+> >> .../devicetree/bindings/mmc/sdhci-msm.txt          |  1 +
+> >> drivers/mmc/host/sdhci-msm.c                       | 71 ++++++++++++++++++++++
+> >> 2 files changed, 72 insertions(+)
+> >>
+> >>diff --git a/Documentation/devicetree/bindings/mmc/sdhci-msm.txt b/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
+> >>index 485483a..6a83b38 100644
+> >>--- a/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
+> >>+++ b/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
+> >>@@ -17,6 +17,7 @@ Required properties:
+> >> 	"iface" - Main peripheral bus clock (PCLK/HCLK - AHB Bus clock) (required)
+> >> 	"core"	- SDC MMC clock (MCLK) (required)
+> >> 	"bus"	- SDCC bus voter clock (optional)
+> >>+- clk-rates: Array of supported GCC clock frequencies for sdhc, Units - Hz.
+> >>
+> >> Example:
+> >>
+> >>diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
+> >>index 85ddaae..2bf141b 100644
+> >>--- a/drivers/mmc/host/sdhci-msm.c
+> >>+++ b/drivers/mmc/host/sdhci-msm.c
+> >>@@ -74,6 +74,11 @@
+> >> #define CMUX_SHIFT_PHASE_SHIFT	24
+> >> #define CMUX_SHIFT_PHASE_MASK	(7 << CMUX_SHIFT_PHASE_SHIFT)
+> >>
+> >>+struct sdhci_msm_pltfm_data {
+> >>+	u32 *clk_table;
+> >>+	size_t clk_table_sz;
+> >>+};
+> >
+> >Rather than calling this "platform data", just call it
+> >sdhci_msm_freq_table and make it:
+> Going ahead this sdhci_msm_pltfm_data will be needed to store
+> other stuff as well, hence it will be preferable to have it as pltfm_data
+> only.
+> 
 
-At least with regard to the BSD license part it probably isn't. 
-There is only one canonical "GPLv2" (a copy of which is included
-in the kernel tree), but there are quite a number of different
-variants of the "BSD" license:
+Ok, that's fine then.
 
-- 4-clause BSD license (with "advertising clause" and
-                        with "endorsement clause")
-- 3-clause BSD license (without "advertising clause", but
-                        with "endorsement clause")
-- 2-clause BSD license (without "advertising clause" and
-                        without "endorsement clause")
+[..]
+> >
+> >Adding this as a requirement breaks existing platforms/dtbs, you may
+> >force it for 8996 if you can detect that, but you should not change it
+> >for existing platforms.
+> Ok, good point and thanks for catching it.
+> Actually I checked all arch/arm64 dts files and could only see 8916.dtsi.
+> But I think there would be changes required for arch/arm dts files as well.
+> 
+> In that case I will add clk entries to other boards as well.
+> I will check and see if I can get any of this board to test it on as well.
+> 
 
-In addition to the these three major types, the exact terms of
-the "endorsement clause" can vary quite a bit.
+In the upstream kernel you should be compatible with older DTBs, so
+while it's good that you're adding this to the arm dts files, the code
+should continue to function without this property - e.g. by falling back
+to default values or skipping the new functionality.
 
-While being at the topic of the "endorsement clause": Is there a
-particular reason for Intel being explicitly named here (e.g. 
-because the code is based on some previously existing code which
-is licensed with this specific wording)?
+(Unless there's a really really good reason for breaking this
+compatibility)
 
 Regards,
-Karsten
--- 
-Gem. Par. 28 Abs. 4 Bundesdatenschutzgesetz widerspreche ich der Nutzung
-sowie der Weitergabe meiner personenbezogenen Daten für Zwecke der
-Werbung sowie der Markt- oder Meinungsforschung.
+Bjorn
