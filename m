@@ -1,81 +1,102 @@
-From: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH RESEND] mmc: sunxi: Check the value returned
- by clk_round_rate
-Date: Wed, 24 Aug 2016 11:32:26 +0200
-Message-ID: <CAPDyKFpQ2b=0aAWUcGjFDnea3K2W+zxH5Xk0fyhOzM8MADBubg@mail.gmail.com>
-References: <57bc12b2.9be81c0a.1246a.9f47SMTPIN_ADDED_MISSING@mx.google.com>
-Reply-To: ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH 4/5] mmc: sunxi-mmc: change idma descriptor to __le32
+Date: Wed, 24 Aug 2016 11:31:56 +0200
+Message-ID: <CAPDyKFouYMjAajS68QRY6SvORQ1YZTf2dZsO_DtSJ+voKPWFdA@mail.gmail.com>
+References: <20160822164219.14272-1-michael.weiser@gmx.de>
+ <20160822164219.14272-5-michael.weiser@gmx.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-sunxi+bncBDF57NG2XIHRBK6T6W6QKGQEBKZ4S6A-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-Sender: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
-In-Reply-To: <57bc12b2.9be81c0a.1246a.9f47SMTPIN_ADDED_MISSING-ATjtLOhZ0NVl57MIdRCFDg@public.gmane.org>
-List-Post: <https://groups.google.com/group/linux-sunxi/post>, <mailto:linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Help: <https://groups.google.com/support/>, <mailto:linux-sunxi+help-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Archive: <https://groups.google.com/group/linux-sunxi
-List-Subscribe: <https://groups.google.com/group/linux-sunxi/subscribe>, <mailto:linux-sunxi+subscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
-List-Unsubscribe: <mailto:googlegroups-manage+1076902468213+unsubscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>,
- <https://groups.google.com/group/linux-sunxi/subscribe>
-To: Jean-Francois Moine <moinejf-GANU6spQydw@public.gmane.org>
-Cc: Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org>, Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>, linux-mmc <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <20160822164219.14272-5-michael.weiser@gmx.de>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Michael Weiser <michael.weiser@gmx.de>
+Cc: Chen-Yu Tsai <wens@csie.org>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On 23 August 2016 at 10:51, Jean-Francois Moine <moinejf-GANU6spQydw@public.gmane.org> wrote:
-> clk_round_rate() may return an error. Check it.
+On 22 August 2016 at 18:42, Michael Weiser <michael.weiser@gmx.de> wrote:
+> The sunxi-mmc driver does not take into account the processor may be big
+> endian when writing the DMA descriptors. This causes cards not to be
+> detected when running a big-endian kernel. Change the descriptors for
+> IDMA to use __le32 and ensure they are suitably swapped before writing.
+> Tested successfully on the Cubieboard2.
 >
-> Signed-off-by: Jean-Francois Moine <moinejf-GANU6spQydw@public.gmane.org>
-> Acked-by: Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>
+> Signed-off-by: Michael Weiser <michael.weiser@gmx.de>
+> Acked-by: Maxime Ripard <maxime.ripard@free-electrons.com>
+> Cc: Ulf Hansson <ulf.hansson@linaro.org>
+> Cc: Chen-Yu Tsai <wens@csie.org>
+> Cc: linux-mmc@vger.kernel.org
 
 Thanks, applied for next!
-
-For some reason this patch didn't go into the mmc patchtracker,
-probably because you have several lists on cc. Future wise I guess
-it's better if you have linux-mmc on the *to* list.
 
 Kind regards
 Uffe
 
 > ---
-> Rebase on linux-next
-> ---
->  drivers/mmc/host/sunxi-mmc.c | 12 +++++++++---
->  1 file changed, 9 insertions(+), 3 deletions(-)
+>  drivers/mmc/host/sunxi-mmc.c | 27 +++++++++++++++------------
+>  1 file changed, 15 insertions(+), 12 deletions(-)
 >
 > diff --git a/drivers/mmc/host/sunxi-mmc.c b/drivers/mmc/host/sunxi-mmc.c
-> index 2ec91ce..142ab3f 100644
+> index 2ec91ce..a1935a1 100644
 > --- a/drivers/mmc/host/sunxi-mmc.c
 > +++ b/drivers/mmc/host/sunxi-mmc.c
-> @@ -692,7 +692,8 @@ static int sunxi_mmc_clk_set_phase(struct sunxi_mmc_host *host,
->  static int sunxi_mmc_clk_set_rate(struct sunxi_mmc_host *host,
->                                   struct mmc_ios *ios)
->  {
-> -       u32 rate, rval, clock = ios->clock;
-> +       long rate;
-> +       u32 rval, clock = ios->clock;
->         int ret;
+> @@ -223,10 +223,10 @@ struct sunxi_mmc_clk_delay {
+>  };
 >
->         /* 8 bit DDR requires a higher module clock */
-> @@ -701,13 +702,18 @@ static int sunxi_mmc_clk_set_rate(struct sunxi_mmc_host *host,
->                 clock <<= 1;
+>  struct sunxi_idma_des {
+> -       u32     config;
+> -       u32     buf_size;
+> -       u32     buf_addr_ptr1;
+> -       u32     buf_addr_ptr2;
+> +       __le32 config;
+> +       __le32 buf_size;
+> +       __le32 buf_addr_ptr1;
+> +       __le32 buf_addr_ptr2;
+>  };
 >
->         rate = clk_round_rate(host->clk_mmc, clock);
-> -       dev_dbg(mmc_dev(host->mmc), "setting clk to %d, rounded %d\n",
-> +       if (rate < 0) {
-> +               dev_err(mmc_dev(host->mmc), "error rounding clk to %d: %ld\n",
-> +                       clock, rate);
-> +               return rate;
-> +       }
-> +       dev_dbg(mmc_dev(host->mmc), "setting clk to %d, rounded %ld\n",
->                 clock, rate);
+>  struct sunxi_mmc_cfg {
+> @@ -329,22 +329,25 @@ static void sunxi_mmc_init_idma_des(struct sunxi_mmc_host *host,
+>         int i, max_len = (1 << host->cfg->idma_des_size_bits);
 >
->         /* setting clock rate */
->         ret = clk_set_rate(host->clk_mmc, rate);
->         if (ret) {
-> -               dev_err(mmc_dev(host->mmc), "error setting clk to %d: %d\n",
-> +               dev_err(mmc_dev(host->mmc), "error setting clk to %ld: %d\n",
->                         rate, ret);
->                 return ret;
+>         for (i = 0; i < data->sg_len; i++) {
+> -               pdes[i].config = SDXC_IDMAC_DES0_CH | SDXC_IDMAC_DES0_OWN |
+> -                                SDXC_IDMAC_DES0_DIC;
+> +               pdes[i].config = cpu_to_le32(SDXC_IDMAC_DES0_CH |
+> +                                            SDXC_IDMAC_DES0_OWN |
+> +                                            SDXC_IDMAC_DES0_DIC);
+>
+>                 if (data->sg[i].length == max_len)
+>                         pdes[i].buf_size = 0; /* 0 == max_len */
+>                 else
+> -                       pdes[i].buf_size = data->sg[i].length;
+> +                       pdes[i].buf_size = cpu_to_le32(data->sg[i].length);
+>
+>                 next_desc += sizeof(struct sunxi_idma_des);
+> -               pdes[i].buf_addr_ptr1 = sg_dma_address(&data->sg[i]);
+> -               pdes[i].buf_addr_ptr2 = (u32)next_desc;
+> +               pdes[i].buf_addr_ptr1 =
+> +                       cpu_to_le32(sg_dma_address(&data->sg[i]));
+> +               pdes[i].buf_addr_ptr2 = cpu_to_le32((u32)next_desc);
 >         }
+>
+> -       pdes[0].config |= SDXC_IDMAC_DES0_FD;
+> -       pdes[i - 1].config |= SDXC_IDMAC_DES0_LD | SDXC_IDMAC_DES0_ER;
+> -       pdes[i - 1].config &= ~SDXC_IDMAC_DES0_DIC;
+> +       pdes[0].config |= cpu_to_le32(SDXC_IDMAC_DES0_FD);
+> +       pdes[i - 1].config |= cpu_to_le32(SDXC_IDMAC_DES0_LD |
+> +                                         SDXC_IDMAC_DES0_ER);
+> +       pdes[i - 1].config &= cpu_to_le32(~SDXC_IDMAC_DES0_DIC);
+>         pdes[i - 1].buf_addr_ptr2 = 0;
+>
+>         /*
 > --
-> 2.9.3
+> 2.9.2
 >
