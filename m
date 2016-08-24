@@ -1,97 +1,28 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v2 1/2] mmc: block: remove the check of packed for
- end_packed_req and hdr_wrq_prep
-Date: Wed, 24 Aug 2016 11:30:45 +0200
-Message-ID: <CAPDyKFozVGtqbLciGQJbf9PTNZuJWmPjTcqq2AUekeoME8eHaA@mail.gmail.com>
-References: <1472025499-6758-1-git-send-email-shawn.lin@rock-chips.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wm0-f48.google.com ([74.125.82.48]:34296 "EHLO
-        mail-wm0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753766AbcHXJb6 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 24 Aug 2016 05:31:58 -0400
-Received: by mail-wm0-f48.google.com with SMTP id q128so31957946wma.1
-        for <linux-mmc@vger.kernel.org>; Wed, 24 Aug 2016 02:30:47 -0700 (PDT)
-In-Reply-To: <1472025499-6758-1-git-send-email-shawn.lin@rock-chips.com>
-Sender: linux-mmc-owner@vger.kernel.org
+From: Wolfram Sang <wsa+renesas@sang-engineering.com>
+Subject: [PATCH 0/2] mmc: sh_mobile_sdhi: use SDR & card_busy only on Gen2+
+Date: Wed, 24 Aug 2016 11:34:36 +0200
+Message-ID: <20160824093438.2478-1-wsa+renesas@sang-engineering.com>
+Return-path: <linux-renesas-soc-owner@vger.kernel.org>
+Sender: linux-renesas-soc-owner@vger.kernel.org
+To: linux-mmc@vger.kernel.org
+Cc: linux-renesas-soc@vger.kernel.org, Geert Uytterhoeven <geert@linux-m68k.org>, Simon Horman <horms@verge.net.au>, Wolfram Sang <wsa+renesas@sang-engineering.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Shawn Lin <shawn.lin@rock-chips.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>
 
-On 24 August 2016 at 09:58, Shawn Lin <shawn.lin@rock-chips.com> wrote:
-> packed should always exist without calling its cleanup function
-> explicitly. Moreover, we have use it when preparing packed list.
-> So I don't believe we should ever fall into this check again when
-> doing mmc_blk_packed_hdr_wrq_prep or mmc_blk_end_packed_req. And
-> the code of mmc_blk_end_packed_req is trying to use packed before
-> checking it which makes it quite weird. This patch is trying to
-> remove these two checks and move it to the mmc_blk_prep_packed_list.
-> If we find packed is null, then we should never use MMC_PACKED_NONE
-> and MMC_BLK_PACKED_CMD. By doing this, we could fall back to
-> non-packed request if finding null packed, though it's impossible
-> theoretically.
->
-> Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
->
-> ---
->
-> Changes in v2:
-> - remove BUG_ON and add fallback for packed instead of
->   panic it.
->
->  drivers/mmc/card/block.c | 16 ++++++++++++----
->  1 file changed, 12 insertions(+), 4 deletions(-)
->
-> diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
-> index 48a5dd7..c7a9b28 100644
-> --- a/drivers/mmc/card/block.c
-> +++ b/drivers/mmc/card/block.c
-> @@ -1673,6 +1673,18 @@ static u8 mmc_blk_prep_packed_list(struct mmc_queue *mq, struct request *req)
->         u8 max_packed_rw = 0;
->         u8 reqs = 0;
->
-> +       /*
-> +        * We don't need to check packed for any further
-> +        * operation of packed stuff as we set MMC_PACKED_NONE
-> +        * and return zero for reqs if geting null packed. Also
-> +        * we clean the flag of MMC_BLK_PACKED_CMD to avoid doing
-> +        * it again when removing blk req.
-> +        */
-> +       if (!mqrq->packed) {
-> +               md->flags &= (~MMC_BLK_PACKED_CMD);
-> +               goto no_packed;
-> +       }
-> +
->         if (!(md->flags & MMC_BLK_PACKED_CMD))
->                 goto no_packed;
->
-> @@ -1781,8 +1793,6 @@ static void mmc_blk_packed_hdr_wrq_prep(struct mmc_queue_req *mqrq,
->         u8 hdr_blocks;
->         u8 i = 1;
->
-> -       BUG_ON(!packed);
-> -
->         mqrq->cmd_type = MMC_PACKED_WRITE;
->         packed->blocks = 0;
->         packed->idx_failure = MMC_PACKED_NR_IDX;
-> @@ -1886,8 +1896,6 @@ static int mmc_blk_end_packed_req(struct mmc_queue_req *mq_rq)
->         int idx = packed->idx_failure, i = 0;
->         int ret = 0;
->
-> -       BUG_ON(!packed);
-> -
->         while (!list_empty(&packed->list)) {
->                 prq = list_entry_rq(packed->list.next);
->                 if (idx == i) {
-> --
-> 2.3.7
->
->
+This series hopefully fixes a performance regression for r8a73a4 (pre Gen2)
+caused by a not working card_busy. Because we don't have documentation for its
+SDHI (and I don't have the hardware), just enable card_busy and SDR only for
+machines known to have hardware support for it.
 
-This is step in the right direction, although there are still some
-BUG_ONs() for the packed command path. Could you please have look and
-remove all of them?
+Geert, can you test, please?
 
-Kind regards
-Uffe
+Wolfram Sang (2):
+  mmc: host: sh_mobile_sdhi: move card_busy from tmio to sdhi
+  mmc: host: sh_mobile_sdhi: don't populate unneeded functions
+
+ drivers/mmc/host/sh_mobile_sdhi.c | 16 +++++++++++++++-
+ drivers/mmc/host/tmio_mmc.h       |  1 +
+ drivers/mmc/host/tmio_mmc_pio.c   |  9 +--------
+ 3 files changed, 17 insertions(+), 9 deletions(-)
+
+-- 
+2.9.3
