@@ -1,16 +1,16 @@
 From: Shawn Lin <shawn.lin@rock-chips.com>
 Subject: [PATCH v2 2/2] mmc: sdio: deploy error handling instead of triggering BUG_ON
-Date: Wed, 24 Aug 2016 15:59:49 +0800
-Message-ID: <1472025589-6815-1-git-send-email-shawn.lin@rock-chips.com>
+Date: Wed, 24 Aug 2016 15:58:19 +0800
+Message-ID: <1472025499-6758-2-git-send-email-shawn.lin@rock-chips.com>
 References: <1472025499-6758-1-git-send-email-shawn.lin@rock-chips.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from lucky1.263xmail.com ([211.157.147.136]:40976 "EHLO
-        lucky1.263xmail.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1753080AbcHXIQP (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 24 Aug 2016 04:16:15 -0400
-Received: from shawn.lin?rock-chips.com (unknown [192.168.167.172])
-        by lucky1.263xmail.com (Postfix) with ESMTP id 7490D90
-        for <linux-mmc@vger.kernel.org>; Wed, 24 Aug 2016 16:04:21 +0800 (CST)
+Received: from lucky1.263xmail.com ([211.157.147.134]:45520 "EHLO
+        lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753594AbcHXIQS (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 24 Aug 2016 04:16:18 -0400
+Received: from shawn.lin?rock-chips.com (unknown [192.168.167.236])
+        by lucky1.263xmail.com (Postfix) with ESMTP id A933166A
+        for <linux-mmc@vger.kernel.org>; Wed, 24 Aug 2016 16:03:28 +0800 (CST)
 In-Reply-To: <1472025499-6758-1-git-send-email-shawn.lin@rock-chips.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
