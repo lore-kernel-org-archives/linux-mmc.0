@@ -1,45 +1,63 @@
 From: Ritesh Harjani <riteshh@codeaurora.org>
-Subject: [PATCH v4 6/9] mmc: sdhci-msm: Enable few quirks
-Date: Wed, 24 Aug 2016 15:33:41 +0530
-Message-ID: <1472033024-14890-7-git-send-email-riteshh@codeaurora.org>
+Subject: [PATCH v4 5/9] mmc: sdhci-msm: Add get_min_clock() and get_max_clock() callback
+Date: Wed, 24 Aug 2016 15:33:40 +0530
+Message-ID: <1472033024-14890-6-git-send-email-riteshh@codeaurora.org>
 References: <1472033024-14890-1-git-send-email-riteshh@codeaurora.org>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp.codeaurora.org ([198.145.29.96]:34237 "EHLO
-        smtp.codeaurora.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1754704AbcHXKFb (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 24 Aug 2016 06:05:31 -0400
+Return-path: <linux-arm-msm-owner@vger.kernel.org>
 In-Reply-To: <1472033024-14890-1-git-send-email-riteshh@codeaurora.org>
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Sender: linux-arm-msm-owner@vger.kernel.org
 To: adrian.hunter@intel.com
 Cc: ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, shawn.lin@rock-chips.com, linux-arm-msm@vger.kernel.org, georgi.djakov@linaro.org, alex.lemberg@sandisk.com, mateusz.nowak@intel.com, Yuliy.Izrailov@sandisk.com, asutoshd@codeaurora.org, david.griego@linaro.org, stummala@codeaurora.org, venkatg@codeaurora.org, pramod.gurav@linaro.org, bjorn.andersson@linaro.org, Ritesh Harjani <riteshh@codeaurora.org>
+List-Id: linux-mmc@vger.kernel.org
 
-sdhc-msm controller needs this SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN
-& SDHCI_QUIRK2_PRESET_VALUE_BROKEN to be set. Hence setting it.
+This add get_min_clock() and get_max_clock() callback
+for sdhci-msm. sdhci-msm min/max clocks may be different
+hence implement these callbacks.
 
 Signed-off-by: Sahitya Tummala <stummala@codeaurora.org>
 Signed-off-by: Ritesh Harjani <riteshh@codeaurora.org>
 Acked-by: Adrian Hunter <adrian.hunter@intel.com>
 ---
- drivers/mmc/host/sdhci-msm.c | 4 +++-
- 1 file changed, 3 insertions(+), 1 deletion(-)
+ drivers/mmc/host/sdhci-msm.c | 19 +++++++++++++++++++
+ 1 file changed, 19 insertions(+)
 
 diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
-index 244e67a..a6280aa 100644
+index a46dd98..244e67a 100644
 --- a/drivers/mmc/host/sdhci-msm.c
 +++ b/drivers/mmc/host/sdhci-msm.c
-@@ -603,7 +603,9 @@ static const struct sdhci_ops sdhci_msm_ops = {
- static const struct sdhci_pltfm_data sdhci_msm_pdata = {
- 	.quirks = SDHCI_QUIRK_BROKEN_CARD_DETECTION |
- 		  SDHCI_QUIRK_NO_CARD_NO_RESET |
--		  SDHCI_QUIRK_SINGLE_POWER_WRITE,
-+		  SDHCI_QUIRK_SINGLE_POWER_WRITE |
-+		  SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN,
-+	.quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN,
- 	.ops = &sdhci_msm_ops,
- };
+@@ -565,6 +565,23 @@ static irqreturn_t sdhci_msm_pwr_irq(int irq, void *data)
+ 	return IRQ_HANDLED;
+ }
  
++static unsigned int sdhci_msm_get_max_clock(struct sdhci_host *host)
++{
++	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
++	struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
++	int count = msm_host->pdata->clk_table_sz;
++
++	return msm_host->pdata->clk_table[count - 1];
++}
++
++static unsigned int sdhci_msm_get_min_clock(struct sdhci_host *host)
++{
++	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
++	struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
++
++	return msm_host->pdata->clk_table[0];
++}
++
+ static const struct of_device_id sdhci_msm_dt_match[] = {
+ 	{ .compatible = "qcom,sdhci-msm-v4" },
+ 	{},
+@@ -576,6 +593,8 @@ static const struct sdhci_ops sdhci_msm_ops = {
+ 	.platform_execute_tuning = sdhci_msm_execute_tuning,
+ 	.reset = sdhci_reset,
+ 	.set_clock = sdhci_set_clock,
++	.get_min_clock = sdhci_msm_get_min_clock,
++	.get_max_clock = sdhci_msm_get_max_clock,
+ 	.set_bus_width = sdhci_set_bus_width,
+ 	.set_uhs_signaling = sdhci_msm_set_uhs_signaling,
+ 	.voltage_switch = sdhci_msm_voltage_switch,
 -- 
 The Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum, 
 a Linux Foundation Collaborative Project.
-
