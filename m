@@ -1,69 +1,81 @@
-From: Mark Rutland <mark.rutland@arm.com>
-Subject: Re: [PATCH 1/2] sdhci-of-arasan: Add quirk and device tree parameter
- to fake CD bit
-Date: Thu, 25 Aug 2016 11:56:55 +0100
-Message-ID: <20160825105640.GA5439@remoulade>
-References: <1472080984-17373-1-git-send-email-zach.brown@ni.com>
+From: Simon Horman <horms@verge.net.au>
+Subject: Re: [PATCH v4 2/4] mmc: tmio: Add tuning support
+Date: Thu, 25 Aug 2016 14:04:24 +0200
+Message-ID: <20160825120424.GA3385@verge.net.au>
+References: <1469592803-13842-1-git-send-email-horms+renesas@verge.net.au>
+ <1469592803-13842-3-git-send-email-horms+renesas@verge.net.au>
+ <CAPDyKFq_Fs_bNx7LP-J+nC3iaNgB7gvZAvhCp--qVOh1iAh0vg@mail.gmail.com>
+ <20160823135251.GA25665@verge.net.au>
+ <CAPDyKFpbMnOag7TZtQXxffXyq4XjTfz3vYM_atks15+d64QkfQ@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from foss.arm.com ([217.140.101.70]:56708 "EHLO foss.arm.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1755850AbcHYK5C (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Thu, 25 Aug 2016 06:57:02 -0400
+Return-path: <linux-renesas-soc-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <1472080984-17373-1-git-send-email-zach.brown@ni.com>
-Sender: linux-mmc-owner@vger.kernel.org
+In-Reply-To: <CAPDyKFpbMnOag7TZtQXxffXyq4XjTfz3vYM_atks15+d64QkfQ@mail.gmail.com>
+Sender: linux-renesas-soc-owner@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, Magnus Damm <magnus.damm@gmail.com>, linux-mmc <linux-mmc@vger.kernel.org>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Zach Brown <zach.brown@ni.com>
-Cc: adrian.hunter@intel.com, robh+dt@kernel.org, ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, michal.simek@xilinx.com, soren.brinkmann@xilinx.com, linux-arm-kernel@lists.infradead.org, lars@metafoo.de
 
-On Wed, Aug 24, 2016 at 06:23:03PM -0500, Zach Brown wrote:
-> The sdhci controller on xilinx zynq devices will not function unless
-> the cd bit is provided. http://www.xilinx.com/support/answers/61064.html
-> In cases where it is impossible to provide the cd bit in hardware,
-> setting the controller to test mode and then setting inserted to true
-> will get the controller to function with out the cd bit.
+On Tue, Aug 23, 2016 at 05:02:56PM +0200, Ulf Hansson wrote:
+> [...]
 > 
-> The device property "fake-cd" will let the arasan driver know it needs
-> to fake the cd bit for the controller inorder for the controller to
-
-Nit: s/inorder/in order/
-
-Comments on the actual patch below.
-
-> function with a SD card that does not provide the CD bit.
+> >> > +static int tmio_mmc_execute_tuning(struct mmc_host *mmc, u32 opcode)
+> >> > +{
+> >> > +       struct tmio_mmc_host *host = mmc_priv(mmc);
+> >> > +       unsigned int num;
+> >> > +       int i, ret = 0;
+> >> > +       bool *tap;
+> >> > +
+> >> > +       if (!host->init_tuning || !host->select_tuning)
+> >>
+> >> When defining these callbacks, it would be nice to know which ones are
+> >> optional and which ones are required.
+> >
+> > Would some comments in struct tmio_mmc_host be an appropriate way
+> > to achieve that?
 > 
-> Signed-off-by: Zach Brown <zach.brown@ni.com>
-> ---
->  Documentation/devicetree/bindings/mmc/arasan,sdhci.txt | 4 ++++
->  1 file changed, 4 insertions(+)
+> Yes, that would be nice!
 > 
-> diff --git a/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt b/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
-> index 3404afa..3b9f406 100644
-> --- a/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
-> +++ b/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
-> @@ -21,6 +21,10 @@ Required Properties:
->    - interrupts: Interrupt specifier
->    - interrupt-parent: Phandle for the interrupt controller that services
->  		      interrupts for this device.
-> +Optional Properties:
-> +- fake-cd: On Zynq Devices the SDHCI Controller will not work without the cd
-> +  bit. When this option is set the driver will put the controller in test mode
-> +  and fake the cd bit so it will function.
+> [...]
+> 
+> >> >  static int tmio_mmc_init_ocr(struct tmio_mmc_host *host)
+> >> > @@ -1202,6 +1276,9 @@ int tmio_mmc_host_runtime_suspend(struct device *dev)
+> >> >         struct mmc_host *mmc = dev_get_drvdata(dev);
+> >> >         struct tmio_mmc_host *host = mmc_priv(mmc);
+> >> >
+> >> > +       mmc_retune_timer_stop(host->mmc);
+> >> > +       mmc_retune_needed(host->mmc);
+> >>
+> >> I am wondering whether it would it be possible to keep a cache of the
+> >> currently used tuning values and then restore these values at
+> >> runtime_resume?
+> >>
+> >> In that way you wouldn't need to force new re-tuning cycle here.
+> >
+> > I will check with the hardware people to see if it is practical from
+> > that POV.
+> 
+> Okay!
 
-As Lars noted, the DT should describe the HW, and the policy of how to deal
-with that should be left to the kernel. So from a DT perspective the above is
-not correct.
+The feedback I received is something like this:
 
-If I understand the linked documentation, this is slightly different to typical
-uses of broken-cd in that in the absence of a card detect signal the HW will
-not be able to access the SD card at all, even if requested to. Is that correct?
+* The tap values calculated during retuning depend on the temperature of
+  the SoC and card.
+* So after resume the values may be invalid.
+* It may be possible to re-use the TAP values and re-tune if a transfer
+  fails but the people I spoke with were unsure of the merit of that
+  approach
 
-If so, perhaps a better option is to have the combination of broken-cd and the
-compatible string for this IP block imply that the test mode workaround is
-required. Obviously that requires a fixup to the usual broken-cd binding to
-remove the implication that polling alone must be used.
+Personally my feeling is that we should initiate a retune on resume for
+now as that seems to be the safest option.
 
-Thanks,
-Mark.
+> > From a software POV that ought to be simple enough: a small bitmap ought
+> > to be sufficient to save the values for the hardware covered by this
+> > series.
+> 
+> Yes, indeed!
+> 
+> Kind regards
+> Uffe
+> 
