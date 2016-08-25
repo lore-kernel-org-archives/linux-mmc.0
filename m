@@ -1,55 +1,69 @@
-From: Stephen Boyd <sboyd@codeaurora.org>
-Subject: Re: [PATCH v4 3/9] mmc: sdhci-msm: add pltfm_data support to get
- clk-rates from DT
-Date: Thu, 25 Aug 2016 15:27:47 -0700
-Message-ID: <20160825222747.GU19826@codeaurora.org>
-References: <1472033024-14890-1-git-send-email-riteshh@codeaurora.org>
- <1472033024-14890-4-git-send-email-riteshh@codeaurora.org>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+From: Zach Brown <zach.brown@ni.com>
+Subject: [PATCH v2 1/2] sdhci-of-arasan: Modify arasan sdhci documentation about broken-cd and non-removable properties.
+Date: Thu, 25 Aug 2016 18:01:50 -0500
+Message-ID: <1472166111-28872-1-git-send-email-zach.brown@ni.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp.codeaurora.org ([198.145.29.96]:56637 "EHLO
-        smtp.codeaurora.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1755850AbcHYW2j (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 25 Aug 2016 18:28:39 -0400
-Content-Disposition: inline
-In-Reply-To: <1472033024-14890-4-git-send-email-riteshh@codeaurora.org>
+Received: from skprod2.natinst.com ([130.164.80.23]:36327 "EHLO ni.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1751972AbcHYXCU (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Thu, 25 Aug 2016 19:02:20 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ritesh Harjani <riteshh@codeaurora.org>
-Cc: adrian.hunter@intel.com, ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, shawn.lin@rock-chips.com, linux-arm-msm@vger.kernel.org, georgi.djakov@linaro.org, alex.lemberg@sandisk.com, mateusz.nowak@intel.com, Yuliy.Izrailov@sandisk.com, asutoshd@codeaurora.org, david.griego@linaro.org, stummala@codeaurora.org, venkatg@codeaurora.org, pramod.gurav@linaro.org, bjorn.andersson@linaro.org, devicetree@vger.kernel.org
+To: adrian.hunter@intel.com
+Cc: robh+dt@kernel.org, ulf.hansson@linaro.org, mark.rutland@arm.com, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, michal.simek@xilinx.com, soren.brinkmann@xilinx.com, linux-arm-kernel@lists.infradead.org, zach.brown@ni.com
 
-On 08/24, Ritesh Harjani wrote:
-> This adds support for sdhc-msm controllers to get supported
-> clk-rates from DT. sdhci-msm would need it's own set_clock
-> ops to be implemented. For this, supported clk-rates needs
-> to be populated in sdhci_msm_pltfm_data.
-> 
-> Signed-off-by: Ritesh Harjani <riteshh@codeaurora.org>
-> ---
+The sdhci controller on xilinx zynq devices will not function unless
+the CD bit is provided. http://www.xilinx.com/support/answers/61064.html
+In cases where it is impossible to provide the CD bit in hardware,
+setting the controller to test mode and then setting inserted to true
+will get the controller to function without the CD bit.
 
-Please include the DT binding review list in binding updates.
+Additionally in some situations it will make sense to use the
+"broken-cd" and "non-removable" property together.
+i.e the sd device is non-removable so polling doesn't make sense, but
+the CD is broken and the controller will need to be in test mode to
+function.
 
->  .../devicetree/bindings/mmc/sdhci-msm.txt          |  1 +
->  drivers/mmc/host/sdhci-msm.c                       | 60 ++++++++++++++++++++++
->  2 files changed, 61 insertions(+)
-> 
-> diff --git a/Documentation/devicetree/bindings/mmc/sdhci-msm.txt b/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
-> index 485483a..6a83b38 100644
-> --- a/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
-> +++ b/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
-> @@ -17,6 +17,7 @@ Required properties:
->  	"iface" - Main peripheral bus clock (PCLK/HCLK - AHB Bus clock) (required)
->  	"core"	- SDC MMC clock (MCLK) (required)
->  	"bus"	- SDCC bus voter clock (optional)
-> +- clk-rates: Array of supported GCC clock frequencies for sdhc, Units - Hz.
->  
+This patch modifies the documentation to reflect those differences
+from the standard behaviours.
 
-Why not use OPPv2 binding for this? We already have a way to
-express frequencies for devices with that binding, and we'll need
-to attach voltages to those frequencies at some point in the
-future if we want to handle DVFS on these devices.
+Signed-off-by: Zach Brown <zach.brown@ni.com>
+---
+v2:
+  * improved commit messages
+  * removed fake-cd device property
+  * removed fake-cd quirk
+  * use broken-cd device property
+  * documented new usage of broken-cd
 
+ Documentation/devicetree/bindings/mmc/arasan,sdhci.txt | 10 +++++++++-
+ 1 file changed, 9 insertions(+), 1 deletion(-)
+
+diff --git a/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt b/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
+index 3404afa..b41c448 100644
+--- a/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
++++ b/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
+@@ -37,6 +37,14 @@ Optional Properties:
+     in place we will export a clock representing the Card Clock.  This clock
+     is expected to be consumed by our PHY.  You must also specify
+ 
++Card detection:
++The arasan controller does not work
++when the CD bit is not supplied unless in test mode.
++- broken-cd: The CD bit is not supplied and the controller will
++  need to be set to test mode to function.
++- non-removable: like normal, except it can now be partnered with
++  broken-cd, which will turn off polling, but keep test mode on.
++
+ Example:
+ 	sdhci@e0100000 {
+ 		compatible = "arasan,sdhci-8.9a";
+@@ -72,4 +80,4 @@ Example:
+ 		phy-names = "phy_arasan";
+ 		#clock-cells = <0>;
+ 		status = "disabled";
+-	};
++	} ;
 -- 
-Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum,
-a Linux Foundation Collaborative Project
+2.7.4
+
