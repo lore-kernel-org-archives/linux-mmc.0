@@ -1,157 +1,146 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: 4.8-rc1 REGRESSION mmc-blk triggers WARN_ON(!host->claimed),
- related to: "drivers: use req op accessor" ?
-Date: Thu, 25 Aug 2016 11:19:27 +0300
-Message-ID: <6bfb134a-43bf-addd-3ff0-cc1d677a1606@intel.com>
-References: <6e68ae5a-4b79-a636-2c46-5726cf2cc44b@redhat.com>
- <57BB23D0.3050606@redhat.com>
- <2a2ee1e8-8682-0647-a66d-04ceb54f58ec@redhat.com>
+Subject: Re: [PATCH 2/2] sdhci-of-arasan: Add quirk and device tree parameter
+ to fake CD bit
+Date: Thu, 25 Aug 2016 11:50:07 +0300
+Message-ID: <38d4d636-dc98-cc3b-3397-75924200ef9f@intel.com>
+References: <1472080984-17373-1-git-send-email-zach.brown@ni.com>
+ <1472080984-17373-2-git-send-email-zach.brown@ni.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
+Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga11.intel.com ([192.55.52.93]:8496 "EHLO mga11.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1756813AbcHYIYC (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Thu, 25 Aug 2016 04:24:02 -0400
-In-Reply-To: <2a2ee1e8-8682-0647-a66d-04ceb54f58ec@redhat.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <1472080984-17373-2-git-send-email-zach.brown@ni.com>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Zach Brown <zach.brown@ni.com>
+Cc: mark.rutland@arm.com, devicetree@vger.kernel.org, ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, michal.simek@xilinx.com, robh+dt@kernel.org, linux-arm-kernel@lists.infradead.org, soren.brinkmann@xilinx.com
 List-Id: linux-mmc@vger.kernel.org
-To: Hans de Goede <hdegoede@redhat.com>
-Cc: Mike Christie <mchristi@redhat.com>, Ulf Hansson <ulf.hansson@linaro.org>, Jens Axboe <axboe@fb.com>, regressions@leemhuis.info, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-On 24/08/16 11:47, Hans de Goede wrote:
-> Hi,
+On 25/08/16 02:23, Zach Brown wrote:
+> The sdhci controller on xilinx zynq devices will not function unless
+> the cd bit is provided. http://www.xilinx.com/support/answers/61064.html
+> In cases where it is impossible to provide the cd bit in hardware,
+> setting the controller to test mode and then setting inserted to true
+> will get the controller to function with out the cd bit.
+
+with out -> without
+
 > 
-> On 22-08-16 18:09, Mike Christie wrote:
->> On 08/21/2016 10:15 AM, Hans de Goede wrote:
->>> Hi All,
->>>
->>> With 4.8-rc1 I'm seeing WARN_ON(!host->claimed) triggering in both
->>> mmc_start_request() as well as in mmc_release_host(). The first
->>> indicating that we're executing mmc commands without doing
->>> mmc_claim_host() and the second one indicating that we're
->>> releasing the host without having claimed it first.
->>>
->>> The backtraces all point to mmc_blk_issue_rq(). I've done
->>> a very naive hack / workaround:
->>>
->>> --- a/drivers/mmc/card/block.c
->>> +++ b/drivers/mmc/card/block.c
->>> @@ -2151,9 +2151,7 @@ static int mmc_blk_issue_rq(struct mmc_queue *mq,
->>> struct request *req)
->>>      struct mmc_host *host = card->host;
->>>      unsigned long flags;
->>>
->>> -    if (req && !mq->mqrq_prev->req)
->>> -        /* claim host only for the first request */
->>> -        mmc_get_card(card);
->>> +    mmc_get_card(card);
->>>
->>>      ret = mmc_blk_part_switch(card, md);
->>>      if (ret) {
->>> @@ -2190,15 +2188,8 @@ static int mmc_blk_issue_rq(struct mmc_queue *mq,
->>> struct request *req)
->>>      }
->>>
->>>  out:
->>> -    if ((!req && !(mq->flags & MMC_QUEUE_NEW_REQUEST)) ||
->>> -        mmc_req_is_special(req))
->>> -        /*
->>> -         * Release host when there are no more requests
->>> -         * and after special request(discard, flush) is done.
->>> -         * In case sepecial request, there is no reentry to
->>> -         * the 'mmc_blk_issue_rq' with 'mqrq_prev->req'.
->>> -         */
->>> -        mmc_put_card(card);
->>> +    mmc_put_card(card);
->>> +
->>>      return ret;
->>>  }
->>>
->>>
->>> Which fixes this, further pointing to the somewhat magical claim / release
->>> code in mmc_blk_issue_rq() being the culprit.
->>>
->>> Looking at recent commits these 2 stand out as possible causes of this:
->>>
->>> https://git.kernel.org/cgit/linux/kernel/git/torvalds/linux.git/commit/?id=c2df40dfb8c015211ec55f4b1dd0587f875c7b34
->>>
->>>
->>> https://git.kernel.org/cgit/linux/kernel/git/torvalds/linux.git/commit/?id=3a5e02ced11e22ecd9da3d6710afe15bcfee1d10
->>>
->>>
->>>
->>> I've the feeling that one of these is making mmc_blk_issue_rq() not
->>> claiming
->>> the host while it should do so ...
->>>
->>
->> There is a bug with those patches and the secure discard ones where when
->> REQ_OP_SECURE_ERASE is sent, mmc_put_card above will not be called, and
->> they will be treated as normal requests instead of special one so the
->> drivers lists are not executed properly.
+> The device property "fake-cd" will let the arasan driver know it needs
+> to fake the cd bit for the controller inorder for the controller to
+
+inorder -> in order
+
+> function with a SD card that does not provide the CD bit.
+
+Please use either 'cd' or 'CD' consistently.
+
 > 
-> Actually the problem seems to be mmc_get_card not getting called while it
-> should at the top of mmc_blk_issue_rq, I first get a WARN_ON(!host->claimed)
-> triggering in mmc_start_request (so missing mmc_card_get) and then
-> in mmc_release_host (mmc_card_put called without mc_card_get being called
-> first).
+> Signed-off-by: Zach Brown <zach.brown@ni.com>
+> ---
+>  drivers/mmc/host/sdhci-of-arasan.c | 23 ++++++++++++++++++++++-
+>  drivers/mmc/host/sdhci.h           |  4 ++++
+>  2 files changed, 26 insertions(+), 1 deletion(-)
 > 
->> The patch in Jens's tree
->> https://git.kernel.org/cgit/linux/kernel/git/axboe/linux-block.git/commit/?h=for-linus&id=7afafc8a44bf0ab841b17d450b02aedb3a138985
->>
->> fixes the issue.
+> diff --git a/drivers/mmc/host/sdhci-of-arasan.c b/drivers/mmc/host/sdhci-of-arasan.c
+> index e0f193f..a74bcf5 100644
+> --- a/drivers/mmc/host/sdhci-of-arasan.c
+> +++ b/drivers/mmc/host/sdhci-of-arasan.c
+> @@ -26,6 +26,7 @@
+>  #include <linux/phy/phy.h>
+>  #include <linux/regmap.h>
+>  #include "sdhci-pltfm.h"
+> +#include <linux/of.h>
+>  
+>  #define SDHCI_ARASAN_CLK_CTRL_OFFSET	0x2c
+>  #define SDHCI_ARASAN_VENDOR_REGISTER	0x78
+> @@ -203,12 +204,26 @@ static void sdhci_arasan_hs400_enhanced_strobe(struct mmc_host *mmc,
+>  	writel(vendor, host->ioaddr + SDHCI_ARASAN_VENDOR_REGISTER);
+>  }
+>  
+> +void sdhci_arasan_reset(struct sdhci_host *host, u8 mask)
+> +{
+> +	u8 ctrl;
+> +
+> +	sdhci_reset(host, mask);
+> +
+> +	if (host->quirks2 & SDHCI_QUIRK2_NEED_FAKE_CD) {
+> +		ctrl = sdhci_readl(host, SDHCI_HOST_CONTROL);
+
+Is there a reason this is sdhci_readl instead of sdhci_readb
+
+> +		ctrl |= SDHCI_CTRL_CD_TEST_INSERTED |
+> +		SDHCI_CTRL_CD_TEST_ENABLE;
+
+Please indent SDHCI_CTRL_CD_TEST_ENABLE
+
+> +		sdhci_writeb(host, ctrl, SDHCI_HOST_CONTROL);
+> +	}
+> +}
+> +
+>  static struct sdhci_ops sdhci_arasan_ops = {
+>  	.set_clock = sdhci_arasan_set_clock,
+>  	.get_max_clock = sdhci_pltfm_clk_get_max_clock,
+>  	.get_timeout_clock = sdhci_arasan_get_timeout_clock,
+>  	.set_bus_width = sdhci_set_bus_width,
+> -	.reset = sdhci_reset,
+> +	.reset = sdhci_arasan_reset,
+>  	.set_uhs_signaling = sdhci_set_uhs_signaling,
+>  };
+>  
+> @@ -516,6 +531,12 @@ static int sdhci_arasan_probe(struct platform_device *pdev)
+>  	}
+>  
+>  	sdhci_get_of_property(pdev);
+> +
+> +	if (of_get_property(pdev->dev.of_node, "fake-cd", NULL))
+> +		host->quirks2 |= SDHCI_QUIRK2_NEED_FAKE_CD;
+
+Please don't use a quirk bit for this.  Instead add a flag to, for example,
+struct sdhci_arasan_data.
+
+> +
+> +	pltfm_host = sdhci_priv(host);
+> +	pltfm_host->priv = sdhci_arasan;
+
+These 2 lines don't belong.
+
+>  	pltfm_host->clk = clk_xin;
+>  
+>  	sdhci_arasan_update_baseclkfreq(host);
+> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+> index 0411c9f..ff3c8ba 100644
+> --- a/drivers/mmc/host/sdhci.h
+> +++ b/drivers/mmc/host/sdhci.h
+> @@ -84,6 +84,8 @@
+>  #define   SDHCI_CTRL_ADMA32	0x10
+>  #define   SDHCI_CTRL_ADMA64	0x18
+>  #define   SDHCI_CTRL_8BITBUS	0x20
+> +#define  SDHCI_CTRL_CD_TEST_INSERTED   0x40
+> +#define  SDHCI_CTRL_CD_TEST_ENABLE     0x80
+
+For the sake of neatness, let's make these a little more abbreviated, say:
+
+	SDHCI_CTRL_CDTEST_INS
+	SDHCI_CTRL_CDTEST_EN
+
+>  
+>  #define SDHCI_POWER_CONTROL	0x29
+>  #define  SDHCI_POWER_ON		0x01
+> @@ -422,6 +424,8 @@ struct sdhci_host {
+>  #define SDHCI_QUIRK2_ACMD23_BROKEN			(1<<14)
+>  /* Broken Clock divider zero in controller */
+>  #define SDHCI_QUIRK2_CLOCK_DIV_ZERO_BROKEN		(1<<15)
+> +/* Controller needs the cd bit faked */
+> +#define SDHCI_QUIRK2_NEED_FAKE_CD (1<<16)
+>  
+>  	int irq;		/* Device IRQ */
+>  	void __iomem *ioaddr;	/* Mapped address */
 > 
-> I've tried 4.8-rc3 with my hack drop and this commit cherry-picked,
-> but the problem is still there, so this patch does not fix it.
-
-I wasn't able to reproduce your problem, but a possibility could be
-accessing the request after it is completed.  You could try this:
-
-diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
-index 82503e6f04b3..2206d4477dbb 100644
---- a/drivers/mmc/card/block.c
-+++ b/drivers/mmc/card/block.c
-@@ -2151,6 +2151,7 @@ static int mmc_blk_issue_rq(struct mmc_queue *mq, struct request *req)
- 	struct mmc_card *card = md->queue.card;
- 	struct mmc_host *host = card->host;
- 	unsigned long flags;
-+	bool req_is_special = mmc_req_is_special(req);
- 
- 	if (req && !mq->mqrq_prev->req)
- 		/* claim host only for the first request */
-@@ -2191,8 +2192,7 @@ static int mmc_blk_issue_rq(struct mmc_queue *mq, struct request *req)
- 	}
- 
- out:
--	if ((!req && !(mq->flags & MMC_QUEUE_NEW_REQUEST)) ||
--	    mmc_req_is_special(req))
-+	if ((!req && !(mq->flags & MMC_QUEUE_NEW_REQUEST)) || req_is_special)
- 		/*
- 		 * Release host when there are no more requests
- 		 * and after special request(discard, flush) is done.
-diff --git a/drivers/mmc/card/queue.c b/drivers/mmc/card/queue.c
-index 29578e98603d..708057261b38 100644
---- a/drivers/mmc/card/queue.c
-+++ b/drivers/mmc/card/queue.c
-@@ -65,6 +65,8 @@ static int mmc_queue_thread(void *d)
- 		spin_unlock_irq(q->queue_lock);
- 
- 		if (req || mq->mqrq_prev->req) {
-+			bool req_is_special = mmc_req_is_special(req);
-+
- 			set_current_state(TASK_RUNNING);
- 			mq->issue_fn(mq, req);
- 			cond_resched();
-@@ -80,7 +82,7 @@ static int mmc_queue_thread(void *d)
- 			 * has been finished. Do not assign it to previous
- 			 * request.
- 			 */
--			if (mmc_req_is_special(req))
-+			if (req_is_special)
- 				mq->mqrq_cur->req = NULL;
- 
- 			mq->mqrq_prev->brq.mrq.data = NULL;
-
-
