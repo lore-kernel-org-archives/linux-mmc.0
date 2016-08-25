@@ -1,64 +1,174 @@
-From: Mark Rutland <mark.rutland@arm.com>
-Subject: Re: [PATCH 1/2] sdhci-of-arasan: Add quirk and device tree parameter
- to fake CD bit
-Date: Thu, 25 Aug 2016 19:10:00 +0100
-Message-ID: <20160825180959.GA14705@remoulade>
-References: <1472080984-17373-1-git-send-email-zach.brown@ni.com>
- <20160825105640.GA5439@remoulade>
- <20160825171539.GA13571@zach-desktop>
+From: Hans de Goede <hdegoede@redhat.com>
+Subject: Re: 4.8-rc1 REGRESSION mmc-blk triggers WARN_ON(!host->claimed),
+ related to: "drivers: use req op accessor" ?
+Date: Thu, 25 Aug 2016 20:26:06 +0200
+Message-ID: <7210392e-2c1c-5676-bb53-274ea6a5ca74@redhat.com>
+References: <6e68ae5a-4b79-a636-2c46-5726cf2cc44b@redhat.com>
+ <57BB23D0.3050606@redhat.com>
+ <2a2ee1e8-8682-0647-a66d-04ceb54f58ec@redhat.com>
+ <6bfb134a-43bf-addd-3ff0-cc1d677a1606@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset=windows-1252; format=flowed
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-Content-Disposition: inline
-In-Reply-To: <20160825171539.GA13571@zach-desktop>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Zach Brown <zach.brown@ni.com>
-Cc: devicetree@vger.kernel.org, ulf.hansson@linaro.org, lars@metafoo.de, linux-mmc@vger.kernel.org, adrian.hunter@intel.com, linux-kernel@vger.kernel.org, robh+dt@kernel.org, linux-arm-kernel@lists.infradead.org, michal.simek@xilinx.com, soren.brinkmann@xilinx.com
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mx1.redhat.com ([209.132.183.28]:49210 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751492AbcHYS1Z (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Thu, 25 Aug 2016 14:27:25 -0400
+In-Reply-To: <6bfb134a-43bf-addd-3ff0-cc1d677a1606@intel.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Adrian Hunter <adrian.hunter@intel.com>
+Cc: Mike Christie <mchristi@redhat.com>, Ulf Hansson <ulf.hansson@linaro.org>, Jens Axboe <axboe@fb.com>, regressions@leemhuis.info, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-On Thu, Aug 25, 2016 at 12:15:44PM -0500, Zach Brown wrote:
-> On Thu, Aug 25, 2016 at 11:56:55AM +0100, Mark Rutland wrote:
-> > On Wed, Aug 24, 2016 at 06:23:03PM -0500, Zach Brown wrote:
-> > > +- fake-cd: On Zynq Devices the SDHCI Controller will not work without the cd
-> > > +  bit. When this option is set the driver will put the controller in test mode
-> > > +  and fake the cd bit so it will function.
-> > 
-> > As Lars noted, the DT should describe the HW, and the policy of how to deal
-> > with that should be left to the kernel. So from a DT perspective the above is
-> > not correct.
-> > 
-> > If I understand the linked documentation, this is slightly different to typical
-> > uses of broken-cd in that in the absence of a card detect signal the HW will
-> > not be able to access the SD card at all, even if requested to. Is that correct?
-> > 
-> > If so, perhaps a better option is to have the combination of broken-cd and the
-> > compatible string for this IP block imply that the test mode workaround is
-> > required. Obviously that requires a fixup to the usual broken-cd binding to
-> > remove the implication that polling alone must be used.
-> > 
-> > Thanks,
-> > Mark.
-> 
-> In cases where the card is non-removable then polling doesn't make sense.
+Hi,
 
-We have the non-removable property to describe that, so we can also look at that.
+On 25-08-16 10:19, Adrian Hunter wrote:
+> On 24/08/16 11:47, Hans de Goede wrote:
+>> Hi,
+>>
+>> On 22-08-16 18:09, Mike Christie wrote:
+>>> On 08/21/2016 10:15 AM, Hans de Goede wrote:
+>>>> Hi All,
+>>>>
+>>>> With 4.8-rc1 I'm seeing WARN_ON(!host->claimed) triggering in both
+>>>> mmc_start_request() as well as in mmc_release_host(). The first
+>>>> indicating that we're executing mmc commands without doing
+>>>> mmc_claim_host() and the second one indicating that we're
+>>>> releasing the host without having claimed it first.
+>>>>
+>>>> The backtraces all point to mmc_blk_issue_rq(). I've done
+>>>> a very naive hack / workaround:
+>>>>
+>>>> --- a/drivers/mmc/card/block.c
+>>>> +++ b/drivers/mmc/card/block.c
+>>>> @@ -2151,9 +2151,7 @@ static int mmc_blk_issue_rq(struct mmc_queue *mq,
+>>>> struct request *req)
+>>>>      struct mmc_host *host = card->host;
+>>>>      unsigned long flags;
+>>>>
+>>>> -    if (req && !mq->mqrq_prev->req)
+>>>> -        /* claim host only for the first request */
+>>>> -        mmc_get_card(card);
+>>>> +    mmc_get_card(card);
+>>>>
+>>>>      ret = mmc_blk_part_switch(card, md);
+>>>>      if (ret) {
+>>>> @@ -2190,15 +2188,8 @@ static int mmc_blk_issue_rq(struct mmc_queue *mq,
+>>>> struct request *req)
+>>>>      }
+>>>>
+>>>>  out:
+>>>> -    if ((!req && !(mq->flags & MMC_QUEUE_NEW_REQUEST)) ||
+>>>> -        mmc_req_is_special(req))
+>>>> -        /*
+>>>> -         * Release host when there are no more requests
+>>>> -         * and after special request(discard, flush) is done.
+>>>> -         * In case sepecial request, there is no reentry to
+>>>> -         * the 'mmc_blk_issue_rq' with 'mqrq_prev->req'.
+>>>> -         */
+>>>> -        mmc_put_card(card);
+>>>> +    mmc_put_card(card);
+>>>> +
+>>>>      return ret;
+>>>>  }
+>>>>
+>>>>
+>>>> Which fixes this, further pointing to the somewhat magical claim / release
+>>>> code in mmc_blk_issue_rq() being the culprit.
+>>>>
+>>>> Looking at recent commits these 2 stand out as possible causes of this:
+>>>>
+>>>> https://git.kernel.org/cgit/linux/kernel/git/torvalds/linux.git/commit/?id=c2df40dfb8c015211ec55f4b1dd0587f875c7b34
+>>>>
+>>>>
+>>>> https://git.kernel.org/cgit/linux/kernel/git/torvalds/linux.git/commit/?id=3a5e02ced11e22ecd9da3d6710afe15bcfee1d10
+>>>>
+>>>>
+>>>>
+>>>> I've the feeling that one of these is making mmc_blk_issue_rq() not
+>>>> claiming
+>>>> the host while it should do so ...
+>>>>
+>>>
+>>> There is a bug with those patches and the secure discard ones where when
+>>> REQ_OP_SECURE_ERASE is sent, mmc_put_card above will not be called, and
+>>> they will be treated as normal requests instead of special one so the
+>>> drivers lists are not executed properly.
+>>
+>> Actually the problem seems to be mmc_get_card not getting called while it
+>> should at the top of mmc_blk_issue_rq, I first get a WARN_ON(!host->claimed)
+>> triggering in mmc_start_request (so missing mmc_card_get) and then
+>> in mmc_release_host (mmc_card_put called without mc_card_get being called
+>> first).
+>>
+>>> The patch in Jens's tree
+>>> https://git.kernel.org/cgit/linux/kernel/git/axboe/linux-block.git/commit/?h=for-linus&id=7afafc8a44bf0ab841b17d450b02aedb3a138985
+>>>
+>>> fixes the issue.
+>>
+>> I've tried 4.8-rc3 with my hack drop and this commit cherry-picked,
+>> but the problem is still there, so this patch does not fix it.
+>
+> I wasn't able to reproduce your problem, but a possibility could be
+> accessing the request after it is completed.  You could try this:
 
-> So it doesn't make sense to tie the test mode workaround into the broken-cd
-> property, even though I agree the nature of the defect fits under the notion
-> of the CD being broken.
+Good catch, that seems to fix things for me. Note sometimes this bug
+would not hit immediately for me. But I've been running several
+affected boards for about 1 hour or so, without issues, so I believe
+this is fixed. So this is:
 
-Maybe not solely on broken-cd, but I think that we dont necessarily need a new
-DT property. As above, broken-cd, non-removable, and the compatible string may
-together give the kernel enough information to choose the right thing to do.
+Tested-by: Hans de Goede <hdegoede@redhat.com>
 
-Thanks,
-Mark.
+Regards,
+
+Hans
+
+
+>
+> diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+> index 82503e6f04b3..2206d4477dbb 100644
+> --- a/drivers/mmc/card/block.c
+> +++ b/drivers/mmc/card/block.c
+> @@ -2151,6 +2151,7 @@ static int mmc_blk_issue_rq(struct mmc_queue *mq, struct request *req)
+>  	struct mmc_card *card = md->queue.card;
+>  	struct mmc_host *host = card->host;
+>  	unsigned long flags;
+> +	bool req_is_special = mmc_req_is_special(req);
+>
+>  	if (req && !mq->mqrq_prev->req)
+>  		/* claim host only for the first request */
+> @@ -2191,8 +2192,7 @@ static int mmc_blk_issue_rq(struct mmc_queue *mq, struct request *req)
+>  	}
+>
+>  out:
+> -	if ((!req && !(mq->flags & MMC_QUEUE_NEW_REQUEST)) ||
+> -	    mmc_req_is_special(req))
+> +	if ((!req && !(mq->flags & MMC_QUEUE_NEW_REQUEST)) || req_is_special)
+>  		/*
+>  		 * Release host when there are no more requests
+>  		 * and after special request(discard, flush) is done.
+> diff --git a/drivers/mmc/card/queue.c b/drivers/mmc/card/queue.c
+> index 29578e98603d..708057261b38 100644
+> --- a/drivers/mmc/card/queue.c
+> +++ b/drivers/mmc/card/queue.c
+> @@ -65,6 +65,8 @@ static int mmc_queue_thread(void *d)
+>  		spin_unlock_irq(q->queue_lock);
+>
+>  		if (req || mq->mqrq_prev->req) {
+> +			bool req_is_special = mmc_req_is_special(req);
+> +
+>  			set_current_state(TASK_RUNNING);
+>  			mq->issue_fn(mq, req);
+>  			cond_resched();
+> @@ -80,7 +82,7 @@ static int mmc_queue_thread(void *d)
+>  			 * has been finished. Do not assign it to previous
+>  			 * request.
+>  			 */
+> -			if (mmc_req_is_special(req))
+> +			if (req_is_special)
+>  				mq->mqrq_cur->req = NULL;
+>
+>  			mq->mqrq_prev->brq.mrq.data = NULL;
+>
+>
