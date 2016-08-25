@@ -1,146 +1,277 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH 2/2] sdhci-of-arasan: Add quirk and device tree parameter
- to fake CD bit
-Date: Thu, 25 Aug 2016 11:50:07 +0300
-Message-ID: <38d4d636-dc98-cc3b-3397-75924200ef9f@intel.com>
-References: <1472080984-17373-1-git-send-email-zach.brown@ni.com>
- <1472080984-17373-2-git-send-email-zach.brown@ni.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH v3 2/2] mmc: sdio: deploy error handling instead of
+ triggering BUG_ON
+Date: Thu, 25 Aug 2016 11:37:15 +0200
+Message-ID: <CAPDyKFqud91nrdRHfBs5p4DM4K_H2O29-a2k4RdrBDkbOdfZ8A@mail.gmail.com>
+References: <1472110711-28083-1-git-send-email-shawn.lin@rock-chips.com> <1472110711-28083-2-git-send-email-shawn.lin@rock-chips.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <1472080984-17373-2-git-send-email-zach.brown@ni.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Zach Brown <zach.brown@ni.com>
-Cc: mark.rutland@arm.com, devicetree@vger.kernel.org, ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, michal.simek@xilinx.com, robh+dt@kernel.org, linux-arm-kernel@lists.infradead.org, soren.brinkmann@xilinx.com
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-wm0-f46.google.com ([74.125.82.46]:33165 "EHLO
+        mail-wm0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751540AbcHYJhU (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 25 Aug 2016 05:37:20 -0400
+Received: by mail-wm0-f46.google.com with SMTP id d196so37533281wmd.0
+        for <linux-mmc@vger.kernel.org>; Thu, 25 Aug 2016 02:37:18 -0700 (PDT)
+In-Reply-To: <1472110711-28083-2-git-send-email-shawn.lin@rock-chips.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Shawn Lin <shawn.lin@rock-chips.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>
 
-On 25/08/16 02:23, Zach Brown wrote:
-> The sdhci controller on xilinx zynq devices will not function unless
-> the cd bit is provided. http://www.xilinx.com/support/answers/61064.html
-> In cases where it is impossible to provide the cd bit in hardware,
-> setting the controller to test mode and then setting inserted to true
-> will get the controller to function with out the cd bit.
-
-with out -> without
-
-> 
-> The device property "fake-cd" will let the arasan driver know it needs
-> to fake the cd bit for the controller inorder for the controller to
-
-inorder -> in order
-
-> function with a SD card that does not provide the CD bit.
-
-Please use either 'cd' or 'CD' consistently.
-
-> 
-> Signed-off-by: Zach Brown <zach.brown@ni.com>
+On 25 August 2016 at 09:38, Shawn Lin <shawn.lin@rock-chips.com> wrote:
+> When using mmc_io_rw_extended, it's intent to avoid null
+> pointer of card and invalid func number. But actually it
+> didn't prevent that as the seg_size already use the card.
+> Currently the wrapper function sdio_io_rw_ext_helper already
+> use card before calling mmc_io_rw_extended, so we should move
+> this check to there. As to the func number, it was token from
+> '(ocr & 0x70000000) >> 28' which should be enough to guarantee
+> that it won't be larger than 7. But we should prevent the
+> caller like wifi drivers modify this value. So let's move this
+> check into sdio_io_rw_ext_helper either.
+>
+> Also we remove the BUG_ON for mmc_send_io_op_cond since all
+> possible paths calling this function are protected by checking
+> the arguments in advance. After deploying these changes, we
+> could not see any panic within SDIO API even if func drivers
+> abuse the SDIO func APIs.
+>
+> Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
+>
 > ---
->  drivers/mmc/host/sdhci-of-arasan.c | 23 ++++++++++++++++++++++-
->  drivers/mmc/host/sdhci.h           |  4 ++++
->  2 files changed, 26 insertions(+), 1 deletion(-)
-> 
-> diff --git a/drivers/mmc/host/sdhci-of-arasan.c b/drivers/mmc/host/sdhci-of-arasan.c
-> index e0f193f..a74bcf5 100644
-> --- a/drivers/mmc/host/sdhci-of-arasan.c
-> +++ b/drivers/mmc/host/sdhci-of-arasan.c
-> @@ -26,6 +26,7 @@
->  #include <linux/phy/phy.h>
->  #include <linux/regmap.h>
->  #include "sdhci-pltfm.h"
-> +#include <linux/of.h>
->  
->  #define SDHCI_ARASAN_CLK_CTRL_OFFSET	0x2c
->  #define SDHCI_ARASAN_VENDOR_REGISTER	0x78
-> @@ -203,12 +204,26 @@ static void sdhci_arasan_hs400_enhanced_strobe(struct mmc_host *mmc,
->  	writel(vendor, host->ioaddr + SDHCI_ARASAN_VENDOR_REGISTER);
+>
+> Changes in v3:
+> - remove more BUG_ONs for SDIO API and add error rountine
+>   for either propagating error codes or casting warning before
+>   return.
+>
+> Changes in v2: None
+>
+>  drivers/mmc/core/sdio_io.c  | 47 ++++++++++++++++++++++++++++++---------------
+>  drivers/mmc/core/sdio_ops.c | 12 +++++-------
+>  2 files changed, 36 insertions(+), 23 deletions(-)
+>
+> diff --git a/drivers/mmc/core/sdio_io.c b/drivers/mmc/core/sdio_io.c
+> index 78cb4d5..0a2350d 100644
+> --- a/drivers/mmc/core/sdio_io.c
+> +++ b/drivers/mmc/core/sdio_io.c
+> @@ -26,8 +26,8 @@
+>   */
+>  void sdio_claim_host(struct sdio_func *func)
+>  {
+> -       BUG_ON(!func);
+> -       BUG_ON(!func->card);
+> +       if (WARN_ON(!func || !func->card))
+
+I think "if (WARN_ON(!func)" should be enough. Both the func->card and
+func->card->host are implicit when ->func exists, so let's just ignore
+to check them.
+
+> +               return;
+>
+>         mmc_claim_host(func->card->host);
 >  }
->  
-> +void sdhci_arasan_reset(struct sdhci_host *host, u8 mask)
-> +{
-> +	u8 ctrl;
+> @@ -42,8 +42,8 @@ EXPORT_SYMBOL_GPL(sdio_claim_host);
+>   */
+>  void sdio_release_host(struct sdio_func *func)
+>  {
+> -       BUG_ON(!func);
+> -       BUG_ON(!func->card);
+> +       if (WARN_ON(!func || !func->card))
+
+Ditto.
+
+> +               return;
+>
+>         mmc_release_host(func->card->host);
+>  }
+> @@ -62,8 +62,8 @@ int sdio_enable_func(struct sdio_func *func)
+>         unsigned char reg;
+>         unsigned long timeout;
+>
+> -       BUG_ON(!func);
+> -       BUG_ON(!func->card);
+> +       if (WARN_ON(!func || !func->card))
+
+No need for a WARN_ON here, just return -EINVAL when !func.
+
+> +               return -EINVAL;
+>
+>         pr_debug("SDIO: Enabling device %s...\n", sdio_func_id(func));
+>
+> @@ -112,8 +112,8 @@ int sdio_disable_func(struct sdio_func *func)
+>         int ret;
+>         unsigned char reg;
+>
+> -       BUG_ON(!func);
+> -       BUG_ON(!func->card);
+> +       if (WARN_ON(!func || !func->card))
+
+Ditto.
+
+> +               return -EINVAL;
+>
+>         pr_debug("SDIO: Disabling device %s...\n", sdio_func_id(func));
+>
+> @@ -307,6 +307,9 @@ static int sdio_io_rw_ext_helper(struct sdio_func *func, int write,
+>         unsigned max_blocks;
+>         int ret;
+>
+> +       if (!func || (!func->card) || (func->num > 7))
+
+You could simplify this so it becomes like this:
+
+if (!func || func->num > 7)
+
+> +               return -EINVAL;
 > +
-> +	sdhci_reset(host, mask);
+>         /* Do the bulk of the transfer using block mode (if supported). */
+>         if (func->card->cccr.multi_block && (size > sdio_max_byte_size(func))) {
+>                 /* Blocks per command is limited by host count, host transfer
+> @@ -367,7 +370,10 @@ u8 sdio_readb(struct sdio_func *func, unsigned int addr, int *err_ret)
+>         int ret;
+>         u8 val;
+>
+> -       BUG_ON(!func);
+> +       if (WARN_ON(!func)) {
+
+No need to WARN_ON.
+
+> +               *err_ret = -EINVAL;
+> +               return 0xFF;
+> +       }
+>
+>         if (err_ret)
+>                 *err_ret = 0;
+> @@ -398,7 +404,10 @@ void sdio_writeb(struct sdio_func *func, u8 b, unsigned int addr, int *err_ret)
+>  {
+>         int ret;
+>
+> -       BUG_ON(!func);
+> +       if (WARN_ON(!func)) {
+
+Ditto.
+
+> +               *err_ret = -EINVAL;
+> +               return;
+> +       }
+>
+>         ret = mmc_io_rw_direct(func->card, 1, func->num, addr, b, NULL);
+>         if (err_ret)
+> @@ -623,7 +632,10 @@ unsigned char sdio_f0_readb(struct sdio_func *func, unsigned int addr,
+>         int ret;
+>         unsigned char val;
+>
+> -       BUG_ON(!func);
+> +       if (!func) {
+> +               *err_ret = -EINVAL;
+> +               return 0xFF;
+> +       }
+>
+>         if (err_ret)
+>                 *err_ret = 0;
+> @@ -658,7 +670,10 @@ void sdio_f0_writeb(struct sdio_func *func, unsigned char b, unsigned int addr,
+>  {
+>         int ret;
+>
+> -       BUG_ON(!func);
+> +       if (WARN_ON(!func)) {
+
+Ditto.
+
+> +               *err_ret = -EINVAL;
+> +               return;
+> +       }
+>
+>         if ((addr < 0xF0 || addr > 0xFF) && (!mmc_card_lenient_fn0(func->card))) {
+>                 if (err_ret)
+> @@ -684,8 +699,8 @@ EXPORT_SYMBOL_GPL(sdio_f0_writeb);
+>   */
+>  mmc_pm_flag_t sdio_get_host_pm_caps(struct sdio_func *func)
+>  {
+> -       BUG_ON(!func);
+> -       BUG_ON(!func->card);
+> +       if (!func || !func->card)
+
+if (!func) is sufficient.
+
+> +               return 0;
+>
+>         return func->card->host->pm_caps;
+>  }
+> @@ -707,8 +722,8 @@ int sdio_set_host_pm_flags(struct sdio_func *func, mmc_pm_flag_t flags)
+>  {
+>         struct mmc_host *host;
+>
+> -       BUG_ON(!func);
+> -       BUG_ON(!func->card);
+> +       if (!func || !func->card)
+
+Ditto.
+
+> +               return -EINVAL;
+>
+>         host = func->card->host;
+>
+> diff --git a/drivers/mmc/core/sdio_ops.c b/drivers/mmc/core/sdio_ops.c
+> index 34f6e80..279eba2 100644
+> --- a/drivers/mmc/core/sdio_ops.c
+> +++ b/drivers/mmc/core/sdio_ops.c
+> @@ -24,8 +24,6 @@ int mmc_send_io_op_cond(struct mmc_host *host, u32 ocr, u32 *rocr)
+>         struct mmc_command cmd = {0};
+>         int i, err = 0;
+>
+> -       BUG_ON(!host);
+> -
+>         cmd.opcode = SD_IO_SEND_OP_COND;
+>         cmd.arg = ocr;
+>         cmd.flags = MMC_RSP_SPI_R4 | MMC_RSP_R4 | MMC_CMD_BCR;
+> @@ -71,8 +69,8 @@ static int mmc_io_rw_direct_host(struct mmc_host *host, int write, unsigned fn,
+>         struct mmc_command cmd = {0};
+>         int err;
+>
+> -       BUG_ON(!host);
+> -       BUG_ON(fn > 7);
+> +       if (!host || (fn > 7))
+
+There's no need to check for !host, as this is an internal mmc core
+function and it should always be called with a valid host. If it's
+not, the code would be broken anyway.
+
+> +               return -EINVAL;
+>
+>         /* sanity check */
+>         if (addr & ~0x1FFFF)
+> @@ -114,7 +112,9 @@ static int mmc_io_rw_direct_host(struct mmc_host *host, int write, unsigned fn,
+>  int mmc_io_rw_direct(struct mmc_card *card, int write, unsigned fn,
+>         unsigned addr, u8 in, u8 *out)
+>  {
+> -       BUG_ON(!card);
+> +       if (!card)
+
+There's no need to check for !card, as this is an internal mmc core
+function and it should always be called with a valid card. If it's
+not, the code would be broken anyway.
+
+> +               return -EINVAL;
 > +
-> +	if (host->quirks2 & SDHCI_QUIRK2_NEED_FAKE_CD) {
-> +		ctrl = sdhci_readl(host, SDHCI_HOST_CONTROL);
+>         return mmc_io_rw_direct_host(card->host, write, fn, addr, in, out);
+>  }
+>
+> @@ -129,8 +129,6 @@ int mmc_io_rw_extended(struct mmc_card *card, int write, unsigned fn,
+>         unsigned int nents, left_size, i;
+>         unsigned int seg_size = card->host->max_seg_size;
+>
+> -       BUG_ON(!card);
+> -       BUG_ON(fn > 7);
+>         WARN_ON(blksz == 0);
+>
+>         /* sanity check */
+> --
+> 2.3.7
+>
+>
 
-Is there a reason this is sdhci_readl instead of sdhci_readb
-
-> +		ctrl |= SDHCI_CTRL_CD_TEST_INSERTED |
-> +		SDHCI_CTRL_CD_TEST_ENABLE;
-
-Please indent SDHCI_CTRL_CD_TEST_ENABLE
-
-> +		sdhci_writeb(host, ctrl, SDHCI_HOST_CONTROL);
-> +	}
-> +}
-> +
->  static struct sdhci_ops sdhci_arasan_ops = {
->  	.set_clock = sdhci_arasan_set_clock,
->  	.get_max_clock = sdhci_pltfm_clk_get_max_clock,
->  	.get_timeout_clock = sdhci_arasan_get_timeout_clock,
->  	.set_bus_width = sdhci_set_bus_width,
-> -	.reset = sdhci_reset,
-> +	.reset = sdhci_arasan_reset,
->  	.set_uhs_signaling = sdhci_set_uhs_signaling,
->  };
->  
-> @@ -516,6 +531,12 @@ static int sdhci_arasan_probe(struct platform_device *pdev)
->  	}
->  
->  	sdhci_get_of_property(pdev);
-> +
-> +	if (of_get_property(pdev->dev.of_node, "fake-cd", NULL))
-> +		host->quirks2 |= SDHCI_QUIRK2_NEED_FAKE_CD;
-
-Please don't use a quirk bit for this.  Instead add a flag to, for example,
-struct sdhci_arasan_data.
-
-> +
-> +	pltfm_host = sdhci_priv(host);
-> +	pltfm_host->priv = sdhci_arasan;
-
-These 2 lines don't belong.
-
->  	pltfm_host->clk = clk_xin;
->  
->  	sdhci_arasan_update_baseclkfreq(host);
-> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-> index 0411c9f..ff3c8ba 100644
-> --- a/drivers/mmc/host/sdhci.h
-> +++ b/drivers/mmc/host/sdhci.h
-> @@ -84,6 +84,8 @@
->  #define   SDHCI_CTRL_ADMA32	0x10
->  #define   SDHCI_CTRL_ADMA64	0x18
->  #define   SDHCI_CTRL_8BITBUS	0x20
-> +#define  SDHCI_CTRL_CD_TEST_INSERTED   0x40
-> +#define  SDHCI_CTRL_CD_TEST_ENABLE     0x80
-
-For the sake of neatness, let's make these a little more abbreviated, say:
-
-	SDHCI_CTRL_CDTEST_INS
-	SDHCI_CTRL_CDTEST_EN
-
->  
->  #define SDHCI_POWER_CONTROL	0x29
->  #define  SDHCI_POWER_ON		0x01
-> @@ -422,6 +424,8 @@ struct sdhci_host {
->  #define SDHCI_QUIRK2_ACMD23_BROKEN			(1<<14)
->  /* Broken Clock divider zero in controller */
->  #define SDHCI_QUIRK2_CLOCK_DIV_ZERO_BROKEN		(1<<15)
-> +/* Controller needs the cd bit faked */
-> +#define SDHCI_QUIRK2_NEED_FAKE_CD (1<<16)
->  
->  	int irq;		/* Device IRQ */
->  	void __iomem *ioaddr;	/* Mapped address */
-> 
+Kind regards
+Uffe
