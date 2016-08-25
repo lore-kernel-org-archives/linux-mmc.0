@@ -1,72 +1,54 @@
-From: Zach Brown <zach.brown@ni.com>
+From: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
 Subject: Re: [PATCH 1/2] sdhci-of-arasan: Add quirk and device tree parameter
  to fake CD bit
-Date: Thu, 25 Aug 2016 13:26:22 -0500
-Message-ID: <20160825182621.GA14817@zach-desktop>
+Date: Thu, 25 Aug 2016 19:28:55 +0100
+Message-ID: <20160825182852.GB15000@remoulade>
 References: <1472080984-17373-1-git-send-email-zach.brown@ni.com>
  <20160825105640.GA5439@remoulade>
  <20160825171539.GA13571@zach-desktop>
  <20160825180959.GA14705@remoulade>
+ <20160825182621.GA14817@zach-desktop>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <20160825180959.GA14705@remoulade>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Mark Rutland <mark.rutland@arm.com>
-Cc: devicetree@vger.kernel.org, ulf.hansson@linaro.org, lars@metafoo.de, linux-mmc@vger.kernel.org, adrian.hunter@intel.com, linux-kernel@vger.kernel.org, robh+dt@kernel.org, linux-arm-kernel@lists.infradead.org, michal.simek@xilinx.com, soren.brinkmann@xilinx.com
+In-Reply-To: <20160825182621.GA14817@zach-desktop>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Zach Brown <zach.brown-acOepvfBmUk@public.gmane.org>
+Cc: adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, michal.simek-gjFFaj9aHVfQT0dZR+AlfA@public.gmane.org, soren.brinkmann-gjFFaj9aHVfQT0dZR+AlfA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, lars-Qo5EllUWu/uELgA04lAiVw@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
 
-On Thu, Aug 25, 2016 at 07:10:00PM +0100, Mark Rutland wrote:
-> On Thu, Aug 25, 2016 at 12:15:44PM -0500, Zach Brown wrote:
-> > On Thu, Aug 25, 2016 at 11:56:55AM +0100, Mark Rutland wrote:
-> > > On Wed, Aug 24, 2016 at 06:23:03PM -0500, Zach Brown wrote:
-> > > > +- fake-cd: On Zynq Devices the SDHCI Controller will not work without the cd
-> > > > +  bit. When this option is set the driver will put the controller in test mode
-> > > > +  and fake the cd bit so it will function.
-> > > 
-> > > As Lars noted, the DT should describe the HW, and the policy of how to deal
-> > > with that should be left to the kernel. So from a DT perspective the above is
-> > > not correct.
-> > > 
-> > > If I understand the linked documentation, this is slightly different to typical
-> > > uses of broken-cd in that in the absence of a card detect signal the HW will
-> > > not be able to access the SD card at all, even if requested to. Is that correct?
-> > > 
-> > > If so, perhaps a better option is to have the combination of broken-cd and the
-> > > compatible string for this IP block imply that the test mode workaround is
-> > > required. Obviously that requires a fixup to the usual broken-cd binding to
-> > > remove the implication that polling alone must be used.
-> > > 
-> > > Thanks,
-> > > Mark.
+On Thu, Aug 25, 2016 at 01:26:22PM -0500, Zach Brown wrote:
+> On Thu, Aug 25, 2016 at 07:10:00PM +0100, Mark Rutland wrote:
+> > On Thu, Aug 25, 2016 at 12:15:44PM -0500, Zach Brown wrote:
+> > > In cases where the card is non-removable then polling doesn't make sense.
 > > 
-> > In cases where the card is non-removable then polling doesn't make sense.
+> > We have the non-removable property to describe that, so we can also look at that.
+> > 
+> > > So it doesn't make sense to tie the test mode workaround into the broken-cd
+> > > property, even though I agree the nature of the defect fits under the notion
+> > > of the CD being broken.
+> > 
+> > Maybe not solely on broken-cd, but I think that we dont necessarily need a new
+> > DT property. As above, broken-cd, non-removable, and the compatible string may
+> > together give the kernel enough information to choose the right thing to do.
+> > 
+> > Thanks,
+> > Mark.
 > 
-> We have the non-removable property to describe that, so we can also look at that.
-> 
-> > So it doesn't make sense to tie the test mode workaround into the broken-cd
-> > property, even though I agree the nature of the defect fits under the notion
-> > of the CD being broken.
-> 
-> Maybe not solely on broken-cd, but I think that we dont necessarily need a new
-> DT property. As above, broken-cd, non-removable, and the compatible string may
-> together give the kernel enough information to choose the right thing to do.
-> 
-> Thanks,
-> Mark.
+> I'm not sure if I understand your suggestion completely. Are you suggesting
+> setting both the broken-cd and non-removable properties? That would make sense,
+> but my understanding was that the two properities are not meant to co-exist. In
+> /Documentation/devicetree/bindings/mmc/mmc.txt it states that only one should
+> be supplied. Don't the two properties conflict with each other?
 
-I'm not sure if I understand your suggestion completely. Are you suggesting
-setting both the broken-cd and non-removable properties? That would make sense,
-but my understanding was that the two properities are not meant to co-exist. In
-/Documentation/devicetree/bindings/mmc/mmc.txt it states that only one should
-be supplied. Don't the two properties conflict with each other?
+They do for the cases that exist today, but given we're updating the document
+anyway, we could simply clarify the cases in which the two can sanely co-exist
+(e.g.  for this particular IP block).
+
+Thanks,
+Mark.
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
