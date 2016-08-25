@@ -1,44 +1,60 @@
-From: Jens Axboe <axboe@fb.com>
-Subject: Re: 4.8-rc1 REGRESSION mmc-blk triggers WARN_ON(!host->claimed),
- related to: "drivers: use req op accessor" ?
-Date: Thu, 25 Aug 2016 14:12:27 -0600
-Message-ID: <41ab9b3e-cb39-fb9e-defd-f38ea6d5b791@fb.com>
-References: <6e68ae5a-4b79-a636-2c46-5726cf2cc44b@redhat.com>
- <57BB23D0.3050606@redhat.com>
- <2a2ee1e8-8682-0647-a66d-04ceb54f58ec@redhat.com>
- <6bfb134a-43bf-addd-3ff0-cc1d677a1606@intel.com>
- <7210392e-2c1c-5676-bb53-274ea6a5ca74@redhat.com>
+From: Zach Brown <zach.brown@ni.com>
+Subject: Re: [PATCH 1/2] sdhci-of-arasan: Add quirk and device tree parameter
+ to fake CD bit
+Date: Thu, 25 Aug 2016 15:46:45 -0500
+Message-ID: <20160825204645.GA19450@zach-desktop>
+References: <1472080984-17373-1-git-send-email-zach.brown@ni.com>
+ <20160825105640.GA5439@remoulade>
+ <20160825171539.GA13571@zach-desktop>
+ <20160825180959.GA14705@remoulade>
+ <20160825182621.GA14817@zach-desktop>
+ <20160825182852.GB15000@remoulade>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="windows-1252"; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="us-ascii"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mx0a-00082601.pphosted.com ([67.231.145.42]:53715 "EHLO
-        mx0a-00082601.pphosted.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1753140AbcHYUNK (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 25 Aug 2016 16:13:10 -0400
-In-Reply-To: <7210392e-2c1c-5676-bb53-274ea6a5ca74@redhat.com>
+Received: from mail-co1nam03on0127.outbound.protection.outlook.com ([104.47.40.127]:63408
+        "EHLO NAM03-CO1-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1757363AbcHYUqz (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Thu, 25 Aug 2016 16:46:55 -0400
+Content-Disposition: inline
+In-Reply-To: <20160825182852.GB15000@remoulade>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Hans de Goede <hdegoede@redhat.com>, Adrian Hunter <adrian.hunter@intel.com>
-Cc: Mike Christie <mchristi@redhat.com>, Ulf Hansson <ulf.hansson@linaro.org>, regressions@leemhuis.info, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+To: Mark Rutland <mark.rutland@arm.com>
+Cc: adrian.hunter@intel.com, robh+dt@kernel.org, ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, michal.simek@xilinx.com, soren.brinkmann@xilinx.com, linux-arm-kernel@lists.infradead.org, lars@metafoo.de
 
-On 08/25/2016 12:26 PM, Hans de Goede wrote:
->>> I've tried 4.8-rc3 with my hack drop and this commit cherry-picked,
->>> but the problem is still there, so this patch does not fix it.
->>
->> I wasn't able to reproduce your problem, but a possibility could be
->> accessing the request after it is completed.  You could try this:
->
-> Good catch, that seems to fix things for me. Note sometimes this bug
-> would not hit immediately for me. But I've been running several
-> affected boards for about 1 hour or so, without issues, so I believe
-> this is fixed. So this is:
->
-> Tested-by: Hans de Goede <hdegoede@redhat.com>
+On Thu, Aug 25, 2016 at 07:28:55PM +0100, Mark Rutland wrote:
+> On Thu, Aug 25, 2016 at 01:26:22PM -0500, Zach Brown wrote:
+> > On Thu, Aug 25, 2016 at 07:10:00PM +0100, Mark Rutland wrote:
+> > > On Thu, Aug 25, 2016 at 12:15:44PM -0500, Zach Brown wrote:
+> > > > In cases where the card is non-removable then polling doesn't make sense.
+> > > 
+> > > We have the non-removable property to describe that, so we can also look at that.
+> > > 
+> > > > So it doesn't make sense to tie the test mode workaround into the broken-cd
+> > > > property, even though I agree the nature of the defect fits under the notion
+> > > > of the CD being broken.
+> > > 
+> > > Maybe not solely on broken-cd, but I think that we dont necessarily need a new
+> > > DT property. As above, broken-cd, non-removable, and the compatible string may
+> > > together give the kernel enough information to choose the right thing to do.
+> > > 
+> > > Thanks,
+> > > Mark.
+> > 
+> > I'm not sure if I understand your suggestion completely. Are you suggesting
+> > setting both the broken-cd and non-removable properties? That would make sense,
+> > but my understanding was that the two properities are not meant to co-exist. In
+> > /Documentation/devicetree/bindings/mmc/mmc.txt it states that only one should
+> > be supplied. Don't the two properties conflict with each other?
+> 
+> They do for the cases that exist today, but given we're updating the document
+> anyway, we could simply clarify the cases in which the two can sanely co-exist
+> (e.g.  for this particular IP block).
+> 
+> Thanks,
+> Mark.
 
-Awesome, thanks for reporting/testing. Adrian, I have turned it into a 
-real patch and applied it for 4.8. Thanks!
-
-
--- 
-Jens Axboe
+That makes sense. I'll change the documentation for broken-cd and non-removable
+in the IP specific document and change the driver accordingly.
