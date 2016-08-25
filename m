@@ -1,47 +1,88 @@
-From: Zach Brown <zach.brown@ni.com>
-Subject: [PATCH 1/2] sdhci-of-arasan: Add quirk and device tree parameter to fake CD bit
-Date: Wed, 24 Aug 2016 18:23:03 -0500
-Message-ID: <1472080984-17373-1-git-send-email-zach.brown@ni.com>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from skprod3.natinst.com ([130.164.80.24]:33305 "EHLO ni.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1752725AbcHXXXi (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Wed, 24 Aug 2016 19:23:38 -0400
-Sender: linux-mmc-owner@vger.kernel.org
+From: Shawn Lin <shawn.lin@rock-chips.com>
+Subject: Re: [PATCH 2/2] sdhci-of-arasan: Add quirk and device tree parameter
+ to fake CD bit
+Date: Thu, 25 Aug 2016 09:08:48 +0800
+Message-ID: <54440de0-6e66-1f8e-c067-9aeb79733739@rock-chips.com>
+References: <1472080984-17373-1-git-send-email-zach.brown@ni.com>
+ <1472080984-17373-2-git-send-email-zach.brown@ni.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="gbk"; Format="flowed"
+Content-Transfer-Encoding: base64
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <1472080984-17373-2-git-send-email-zach.brown@ni.com>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Zach Brown <zach.brown@ni.com>, adrian.hunter@intel.com
+Cc: mark.rutland@arm.com, devicetree@vger.kernel.org, ulf.hansson@linaro.org, shawn.lin@rock-chips.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, michal.simek@xilinx.com, robh+dt@kernel.org, linux-arm-kernel@lists.infradead.org, soren.brinkmann@xilinx.com
 List-Id: linux-mmc@vger.kernel.org
-To: adrian.hunter@intel.com
-Cc: robh+dt@kernel.org, ulf.hansson@linaro.org, mark.rutland@arm.com, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, michal.simek@xilinx.com, soren.brinkmann@xilinx.com, linux-arm-kernel@lists.infradead.org
 
-The sdhci controller on xilinx zynq devices will not function unless
-the cd bit is provided. http://www.xilinx.com/support/answers/61064.html
-In cases where it is impossible to provide the cd bit in hardware,
-setting the controller to test mode and then setting inserted to true
-will get the controller to function with out the cd bit.
-
-The device property "fake-cd" will let the arasan driver know it needs
-to fake the cd bit for the controller inorder for the controller to
-function with a SD card that does not provide the CD bit.
-
-Signed-off-by: Zach Brown <zach.brown@ni.com>
----
- Documentation/devicetree/bindings/mmc/arasan,sdhci.txt | 4 ++++
- 1 file changed, 4 insertions(+)
-
-diff --git a/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt b/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
-index 3404afa..3b9f406 100644
---- a/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
-+++ b/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
-@@ -21,6 +21,10 @@ Required Properties:
-   - interrupts: Interrupt specifier
-   - interrupt-parent: Phandle for the interrupt controller that services
- 		      interrupts for this device.
-+Optional Properties:
-+- fake-cd: On Zynq Devices the SDHCI Controller will not work without the cd
-+  bit. When this option is set the driver will put the controller in test mode
-+  and fake the cd bit so it will function.
- 
- Required Properties for "arasan,sdhci-5.1":
-   - phys: From PHY bindings: Phandle for the Generic PHY for arasan.
--- 
-2.7.4
-
+1NogMjAxNi84LzI1IDc6MjMsIFphY2ggQnJvd24g0LS1wDoKPiBUaGUgc2RoY2kgY29udHJvbGxl
+ciBvbiB4aWxpbnggenlucSBkZXZpY2VzIHdpbGwgbm90IGZ1bmN0aW9uIHVubGVzcwo+IHRoZSBj
+ZCBiaXQgaXMgcHJvdmlkZWQuIGh0dHA6Ly93d3cueGlsaW54LmNvbS9zdXBwb3J0L2Fuc3dlcnMv
+NjEwNjQuaHRtbAo+IEluIGNhc2VzIHdoZXJlIGl0IGlzIGltcG9zc2libGUgdG8gcHJvdmlkZSB0
+aGUgY2QgYml0IGluIGhhcmR3YXJlLAo+IHNldHRpbmcgdGhlIGNvbnRyb2xsZXIgdG8gdGVzdCBt
+b2RlIGFuZCB0aGVuIHNldHRpbmcgaW5zZXJ0ZWQgdG8gdHJ1ZQo+IHdpbGwgZ2V0IHRoZSBjb250
+cm9sbGVyIHRvIGZ1bmN0aW9uIHdpdGggb3V0IHRoZSBjZCBiaXQuCj4KPiBUaGUgZGV2aWNlIHBy
+b3BlcnR5ICJmYWtlLWNkIiB3aWxsIGxldCB0aGUgYXJhc2FuIGRyaXZlciBrbm93IGl0IG5lZWRz
+Cj4gdG8gZmFrZSB0aGUgY2QgYml0IGZvciB0aGUgY29udHJvbGxlciBpbm9yZGVyIGZvciB0aGUg
+Y29udHJvbGxlciB0bwo+IGZ1bmN0aW9uIHdpdGggYSBTRCBjYXJkIHRoYXQgZG9lcyBub3QgcHJv
+dmlkZSB0aGUgQ0QgYml0Lgo+Cj4gU2lnbmVkLW9mZi1ieTogWmFjaCBCcm93biA8emFjaC5icm93
+bkBuaS5jb20+Cj4gLS0tCj4gIGRyaXZlcnMvbW1jL2hvc3Qvc2RoY2ktb2YtYXJhc2FuLmMgfCAy
+MyArKysrKysrKysrKysrKysrKysrKysrLQo+ICBkcml2ZXJzL21tYy9ob3N0L3NkaGNpLmggICAg
+ICAgICAgIHwgIDQgKysrKwo+ICAyIGZpbGVzIGNoYW5nZWQsIDI2IGluc2VydGlvbnMoKyksIDEg
+ZGVsZXRpb24oLSkKPgo+IGRpZmYgLS1naXQgYS9kcml2ZXJzL21tYy9ob3N0L3NkaGNpLW9mLWFy
+YXNhbi5jIGIvZHJpdmVycy9tbWMvaG9zdC9zZGhjaS1vZi1hcmFzYW4uYwo+IGluZGV4IGUwZjE5
+M2YuLmE3NGJjZjUgMTAwNjQ0Cj4gLS0tIGEvZHJpdmVycy9tbWMvaG9zdC9zZGhjaS1vZi1hcmFz
+YW4uYwo+ICsrKyBiL2RyaXZlcnMvbW1jL2hvc3Qvc2RoY2ktb2YtYXJhc2FuLmMKPiBAQCAtMjYs
+NiArMjYsNyBAQAo+ICAjaW5jbHVkZSA8bGludXgvcGh5L3BoeS5oPgo+ICAjaW5jbHVkZSA8bGlu
+dXgvcmVnbWFwLmg+Cj4gICNpbmNsdWRlICJzZGhjaS1wbHRmbS5oIgo+ICsjaW5jbHVkZSA8bGlu
+dXgvb2YuaD4KPgo+ICAjZGVmaW5lIFNESENJX0FSQVNBTl9DTEtfQ1RSTF9PRkZTRVQJMHgyYwo+
+ICAjZGVmaW5lIFNESENJX0FSQVNBTl9WRU5ET1JfUkVHSVNURVIJMHg3OAo+IEBAIC0yMDMsMTIg
+KzIwNCwyNiBAQCBzdGF0aWMgdm9pZCBzZGhjaV9hcmFzYW5faHM0MDBfZW5oYW5jZWRfc3Ryb2Jl
+KHN0cnVjdCBtbWNfaG9zdCAqbW1jLAo+ICAJd3JpdGVsKHZlbmRvciwgaG9zdC0+aW9hZGRyICsg
+U0RIQ0lfQVJBU0FOX1ZFTkRPUl9SRUdJU1RFUik7Cj4gIH0KPgo+ICt2b2lkIHNkaGNpX2FyYXNh
+bl9yZXNldChzdHJ1Y3Qgc2RoY2lfaG9zdCAqaG9zdCwgdTggbWFzaykKPiArewo+ICsJdTggY3Ry
+bDsKPiArCj4gKwlzZGhjaV9yZXNldChob3N0LCBtYXNrKTsKPiArCj4gKwlpZiAoaG9zdC0+cXVp
+cmtzMiAmIFNESENJX1FVSVJLMl9ORUVEX0ZBS0VfQ0QpIHsKPiArCQljdHJsID0gc2RoY2lfcmVh
+ZGwoaG9zdCwgU0RIQ0lfSE9TVF9DT05UUk9MKTsKPiArCQljdHJsIHw9IFNESENJX0NUUkxfQ0Rf
+VEVTVF9JTlNFUlRFRCB8Cj4gKwkJU0RIQ0lfQ1RSTF9DRF9URVNUX0VOQUJMRTsKPiArCQlzZGhj
+aV93cml0ZWIoaG9zdCwgY3RybCwgU0RIQ0lfSE9TVF9DT05UUk9MKTsKPiArCX0KPiArfQo+ICsK
+PiAgc3RhdGljIHN0cnVjdCBzZGhjaV9vcHMgc2RoY2lfYXJhc2FuX29wcyA9IHsKPiAgCS5zZXRf
+Y2xvY2sgPSBzZGhjaV9hcmFzYW5fc2V0X2Nsb2NrLAo+ICAJLmdldF9tYXhfY2xvY2sgPSBzZGhj
+aV9wbHRmbV9jbGtfZ2V0X21heF9jbG9jaywKPiAgCS5nZXRfdGltZW91dF9jbG9jayA9IHNkaGNp
+X2FyYXNhbl9nZXRfdGltZW91dF9jbG9jaywKPiAgCS5zZXRfYnVzX3dpZHRoID0gc2RoY2lfc2V0
+X2J1c193aWR0aCwKPiAtCS5yZXNldCA9IHNkaGNpX3Jlc2V0LAo+ICsJLnJlc2V0ID0gc2RoY2lf
+YXJhc2FuX3Jlc2V0LAo+ICAJLnNldF91aHNfc2lnbmFsaW5nID0gc2RoY2lfc2V0X3Voc19zaWdu
+YWxpbmcsCj4gIH07Cj4KPiBAQCAtNTE2LDYgKzUzMSwxMiBAQCBzdGF0aWMgaW50IHNkaGNpX2Fy
+YXNhbl9wcm9iZShzdHJ1Y3QgcGxhdGZvcm1fZGV2aWNlICpwZGV2KQo+ICAJfQo+Cj4gIAlzZGhj
+aV9nZXRfb2ZfcHJvcGVydHkocGRldik7Cj4gKwo+ICsJaWYgKG9mX2dldF9wcm9wZXJ0eShwZGV2
+LT5kZXYub2Zfbm9kZSwgImZha2UtY2QiLCBOVUxMKSkKPiArCQlob3N0LT5xdWlya3MyIHw9IFNE
+SENJX1FVSVJLMl9ORUVEX0ZBS0VfQ0Q7CgoKV2h5IGRvbid0IHlvdSB1c2UgTU1DX0NBUF9ORUVE
+U19QT0xMLCBjb3VsZCB5b3UgdXNlIGJyb2tlbi1jZD8KCj4gKwo+ICsJcGx0Zm1faG9zdCA9IHNk
+aGNpX3ByaXYoaG9zdCk7Cj4gKwlwbHRmbV9ob3N0LT5wcml2ID0gc2RoY2lfYXJhc2FuOwo+ICAJ
+cGx0Zm1faG9zdC0+Y2xrID0gY2xrX3hpbjsKPgo+ICAJc2RoY2lfYXJhc2FuX3VwZGF0ZV9iYXNl
+Y2xrZnJlcShob3N0KTsKPiBkaWZmIC0tZ2l0IGEvZHJpdmVycy9tbWMvaG9zdC9zZGhjaS5oIGIv
+ZHJpdmVycy9tbWMvaG9zdC9zZGhjaS5oCj4gaW5kZXggMDQxMWM5Zi4uZmYzYzhiYSAxMDA2NDQK
+PiAtLS0gYS9kcml2ZXJzL21tYy9ob3N0L3NkaGNpLmgKPiArKysgYi9kcml2ZXJzL21tYy9ob3N0
+L3NkaGNpLmgKPiBAQCAtODQsNiArODQsOCBAQAo+ICAjZGVmaW5lICAgU0RIQ0lfQ1RSTF9BRE1B
+MzIJMHgxMAo+ICAjZGVmaW5lICAgU0RIQ0lfQ1RSTF9BRE1BNjQJMHgxOAo+ICAjZGVmaW5lICAg
+U0RIQ0lfQ1RSTF84QklUQlVTCTB4MjAKPiArI2RlZmluZSAgU0RIQ0lfQ1RSTF9DRF9URVNUX0lO
+U0VSVEVEICAgMHg0MAo+ICsjZGVmaW5lICBTREhDSV9DVFJMX0NEX1RFU1RfRU5BQkxFICAgICAw
+eDgwCj4KPiAgI2RlZmluZSBTREhDSV9QT1dFUl9DT05UUk9MCTB4MjkKPiAgI2RlZmluZSAgU0RI
+Q0lfUE9XRVJfT04JCTB4MDEKPiBAQCAtNDIyLDYgKzQyNCw4IEBAIHN0cnVjdCBzZGhjaV9ob3N0
+IHsKPiAgI2RlZmluZSBTREhDSV9RVUlSSzJfQUNNRDIzX0JST0tFTgkJCSgxPDwxNCkKPiAgLyog
+QnJva2VuIENsb2NrIGRpdmlkZXIgemVybyBpbiBjb250cm9sbGVyICovCj4gICNkZWZpbmUgU0RI
+Q0lfUVVJUksyX0NMT0NLX0RJVl9aRVJPX0JST0tFTgkJKDE8PDE1KQo+ICsvKiBDb250cm9sbGVy
+IG5lZWRzIHRoZSBjZCBiaXQgZmFrZWQgKi8KPiArI2RlZmluZSBTREhDSV9RVUlSSzJfTkVFRF9G
+QUtFX0NEICgxPDwxNikKPgo+ICAJaW50IGlycTsJCS8qIERldmljZSBJUlEgKi8KPiAgCXZvaWQg
+X19pb21lbSAqaW9hZGRyOwkvKiBNYXBwZWQgYWRkcmVzcyAqLwo+CgoKCl9fX19fX19fX19fX19f
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fCmxpbnV4LWFybS1rZXJuZWwgbWFpbGlu
+ZyBsaXN0CmxpbnV4LWFybS1rZXJuZWxAbGlzdHMuaW5mcmFkZWFkLm9yZwpodHRwOi8vbGlzdHMu
+aW5mcmFkZWFkLm9yZy9tYWlsbWFuL2xpc3RpbmZvL2xpbnV4LWFybS1rZXJuZWwK
