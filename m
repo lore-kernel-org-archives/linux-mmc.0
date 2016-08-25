@@ -1,60 +1,55 @@
-From: Zach Brown <zach.brown@ni.com>
-Subject: Re: [PATCH 1/2] sdhci-of-arasan: Add quirk and device tree parameter
- to fake CD bit
-Date: Thu, 25 Aug 2016 15:46:45 -0500
-Message-ID: <20160825204645.GA19450@zach-desktop>
-References: <1472080984-17373-1-git-send-email-zach.brown@ni.com>
- <20160825105640.GA5439@remoulade>
- <20160825171539.GA13571@zach-desktop>
- <20160825180959.GA14705@remoulade>
- <20160825182621.GA14817@zach-desktop>
- <20160825182852.GB15000@remoulade>
+From: Stephen Boyd <sboyd@codeaurora.org>
+Subject: Re: [PATCH v4 3/9] mmc: sdhci-msm: add pltfm_data support to get
+ clk-rates from DT
+Date: Thu, 25 Aug 2016 15:27:47 -0700
+Message-ID: <20160825222747.GU19826@codeaurora.org>
+References: <1472033024-14890-1-git-send-email-riteshh@codeaurora.org>
+ <1472033024-14890-4-git-send-email-riteshh@codeaurora.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-co1nam03on0127.outbound.protection.outlook.com ([104.47.40.127]:63408
-        "EHLO NAM03-CO1-obe.outbound.protection.outlook.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1757363AbcHYUqz (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Thu, 25 Aug 2016 16:46:55 -0400
+Received: from smtp.codeaurora.org ([198.145.29.96]:56637 "EHLO
+        smtp.codeaurora.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1755850AbcHYW2j (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 25 Aug 2016 18:28:39 -0400
 Content-Disposition: inline
-In-Reply-To: <20160825182852.GB15000@remoulade>
+In-Reply-To: <1472033024-14890-4-git-send-email-riteshh@codeaurora.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Mark Rutland <mark.rutland@arm.com>
-Cc: adrian.hunter@intel.com, robh+dt@kernel.org, ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, michal.simek@xilinx.com, soren.brinkmann@xilinx.com, linux-arm-kernel@lists.infradead.org, lars@metafoo.de
+To: Ritesh Harjani <riteshh@codeaurora.org>
+Cc: adrian.hunter@intel.com, ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, shawn.lin@rock-chips.com, linux-arm-msm@vger.kernel.org, georgi.djakov@linaro.org, alex.lemberg@sandisk.com, mateusz.nowak@intel.com, Yuliy.Izrailov@sandisk.com, asutoshd@codeaurora.org, david.griego@linaro.org, stummala@codeaurora.org, venkatg@codeaurora.org, pramod.gurav@linaro.org, bjorn.andersson@linaro.org, devicetree@vger.kernel.org
 
-On Thu, Aug 25, 2016 at 07:28:55PM +0100, Mark Rutland wrote:
-> On Thu, Aug 25, 2016 at 01:26:22PM -0500, Zach Brown wrote:
-> > On Thu, Aug 25, 2016 at 07:10:00PM +0100, Mark Rutland wrote:
-> > > On Thu, Aug 25, 2016 at 12:15:44PM -0500, Zach Brown wrote:
-> > > > In cases where the card is non-removable then polling doesn't make sense.
-> > > 
-> > > We have the non-removable property to describe that, so we can also look at that.
-> > > 
-> > > > So it doesn't make sense to tie the test mode workaround into the broken-cd
-> > > > property, even though I agree the nature of the defect fits under the notion
-> > > > of the CD being broken.
-> > > 
-> > > Maybe not solely on broken-cd, but I think that we dont necessarily need a new
-> > > DT property. As above, broken-cd, non-removable, and the compatible string may
-> > > together give the kernel enough information to choose the right thing to do.
-> > > 
-> > > Thanks,
-> > > Mark.
-> > 
-> > I'm not sure if I understand your suggestion completely. Are you suggesting
-> > setting both the broken-cd and non-removable properties? That would make sense,
-> > but my understanding was that the two properities are not meant to co-exist. In
-> > /Documentation/devicetree/bindings/mmc/mmc.txt it states that only one should
-> > be supplied. Don't the two properties conflict with each other?
+On 08/24, Ritesh Harjani wrote:
+> This adds support for sdhc-msm controllers to get supported
+> clk-rates from DT. sdhci-msm would need it's own set_clock
+> ops to be implemented. For this, supported clk-rates needs
+> to be populated in sdhci_msm_pltfm_data.
 > 
-> They do for the cases that exist today, but given we're updating the document
-> anyway, we could simply clarify the cases in which the two can sanely co-exist
-> (e.g.  for this particular IP block).
-> 
-> Thanks,
-> Mark.
+> Signed-off-by: Ritesh Harjani <riteshh@codeaurora.org>
+> ---
 
-That makes sense. I'll change the documentation for broken-cd and non-removable
-in the IP specific document and change the driver accordingly.
+Please include the DT binding review list in binding updates.
+
+>  .../devicetree/bindings/mmc/sdhci-msm.txt          |  1 +
+>  drivers/mmc/host/sdhci-msm.c                       | 60 ++++++++++++++++++++++
+>  2 files changed, 61 insertions(+)
+> 
+> diff --git a/Documentation/devicetree/bindings/mmc/sdhci-msm.txt b/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
+> index 485483a..6a83b38 100644
+> --- a/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
+> +++ b/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
+> @@ -17,6 +17,7 @@ Required properties:
+>  	"iface" - Main peripheral bus clock (PCLK/HCLK - AHB Bus clock) (required)
+>  	"core"	- SDC MMC clock (MCLK) (required)
+>  	"bus"	- SDCC bus voter clock (optional)
+> +- clk-rates: Array of supported GCC clock frequencies for sdhc, Units - Hz.
+>  
+
+Why not use OPPv2 binding for this? We already have a way to
+express frequencies for devices with that binding, and we'll need
+to attach voltages to those frequencies at some point in the
+future if we want to handle DVFS on these devices.
+
+-- 
+Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum,
+a Linux Foundation Collaborative Project
