@@ -1,81 +1,65 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: sdhci-brcmstb: Add SDHCI_QUIRK2_BROKEN_64_BIT_DMA
-Date: Fri, 26 Aug 2016 08:49:34 +0200
-Message-ID: <CAPDyKFo6-GZ_myX43orouUvWGA8aAhUD9Jrcpaz+LzApuQJFZA@mail.gmail.com>
-References: <20160808015803.2528-1-jaedon.shin@gmail.com> <8f42998e-6d5b-2ac7-3814-f7a4d6e8a6b9@intel.com>
- <CAOGqxeX8kcD9rX4nd+o=RTggEoPLZfK40GdBWKTT6-BTpxSvbg@mail.gmail.com>
- <AD331215-7115-426D-A089-263D6A0E54BF@gmail.com> <CAPDyKFqkoF2GU6QGc7GW1S2p8+A=XpU48sREcLiSkadPKHuibw@mail.gmail.com>
- <5A6224B1-2845-4059-A537-EBEA7E6F09E6@gmail.com> <de010fff-1f22-96bb-f41f-99169fb6bb19@gmail.com>
+Subject: Re: 4.8-rc1 REGRESSION mmc-blk triggers WARN_ON(!host->claimed),
+ related to: "drivers: use req op accessor" ?
+Date: Fri, 26 Aug 2016 09:13:34 +0200
+Message-ID: <CAPDyKFrZCNv9VWu1pVg02wE3Pth3z3J0uh5dCdeYU8LYd_wXJQ@mail.gmail.com>
+References: <6e68ae5a-4b79-a636-2c46-5726cf2cc44b@redhat.com>
+ <57BB23D0.3050606@redhat.com> <2a2ee1e8-8682-0647-a66d-04ceb54f58ec@redhat.com>
+ <6bfb134a-43bf-addd-3ff0-cc1d677a1606@intel.com> <7210392e-2c1c-5676-bb53-274ea6a5ca74@redhat.com>
+ <41ab9b3e-cb39-fb9e-defd-f38ea6d5b791@fb.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wm0-f45.google.com ([74.125.82.45]:32796 "EHLO
-        mail-wm0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751259AbcHZGth (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 26 Aug 2016 02:49:37 -0400
-Received: by mail-wm0-f45.google.com with SMTP id d196so1470925wmd.0
-        for <linux-mmc@vger.kernel.org>; Thu, 25 Aug 2016 23:49:36 -0700 (PDT)
-In-Reply-To: <de010fff-1f22-96bb-f41f-99169fb6bb19@gmail.com>
+Received: from mail-wm0-f52.google.com ([74.125.82.52]:36261 "EHLO
+        mail-wm0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750700AbcHZHOZ (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 26 Aug 2016 03:14:25 -0400
+Received: by mail-wm0-f52.google.com with SMTP id q128so267238302wma.1
+        for <linux-mmc@vger.kernel.org>; Fri, 26 Aug 2016 00:13:37 -0700 (PDT)
+In-Reply-To: <41ab9b3e-cb39-fb9e-defd-f38ea6d5b791@fb.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Florian Fainelli <f.fainelli@gmail.com>, Jaedon Shin <jaedon.shin@gmail.com>
-Cc: Alan Cooper <alcooperx@gmail.com>, Adrian Hunter <adrian.hunter@intel.com>, bcm-kernel-feedback-list@broadcom.com, linux-mmc <linux-mmc@vger.kernel.org>
+To: Jens Axboe <axboe@fb.com>
+Cc: Hans de Goede <hdegoede@redhat.com>, Adrian Hunter <adrian.hunter@intel.com>, Mike Christie <mchristi@redhat.com>, regressions@leemhuis.info, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-On 25 August 2016 at 18:41, Florian Fainelli <f.fainelli@gmail.com> wrote:
-> On 08/19/2016 07:05 AM, Jaedon Shin wrote:
->> Hi Ulf,
->>
->>> On Aug 19, 2016, at 10:44 PM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
->>>
->>> On 19 August 2016 at 04:25, Jaedon Shin <jaedon.shin@gmail.com> wrote:
->>>> Hi Alan,
+On 25 August 2016 at 22:12, Jens Axboe <axboe@fb.com> wrote:
+> On 08/25/2016 12:26 PM, Hans de Goede wrote:
 >>>>
->>>> On Aug 18, 2016, at 11:27 PM, Alan Cooper <alcooperx@gmail.com> wrote:
->>>>>
->>>>> It would be better to make this a MIPS only setting because this issue
->>>>> only exists for MIPS chips and some newer ARM chips will support 64
->>>>> bit DMA.
->>>>> Also, since there's been a general effort to reduce the use QUIRKs,
->>>>> you could clear the SDHCI_CAN_64BIT in CAPS1 instead of using the
->>>>> QUIRK.
->>>>>
->>>>> @@ -101,6 +101,9 @@ static int sdhci_brcmstb_probe(struct platform_device *pdev)
->>>>>       host->caps1 = sdhci_readl(host, SDHCI_CAPABILITIES_1);
->>>>>       host->caps1 &= ~(SDHCI_SUPPORT_SDR50 | SDHCI_SUPPORT_SDR104 |
->>>>>                       SDHCI_SUPPORT_DDR50);
->>>>> +#if defined(CONFIG_MIPS)
->>>>> +       host->caps1 &= ~SDHCI_CAN_64BIT;
->>>>> +#endif
->>>>>       host->quirks |= SDHCI_QUIRK_MISSING_CAPS |
->>>>>               SDHCI_QUIRK_BROKEN_TIMEOUT_VAL;
->>>>
->>>> It's better to me, but we should use host->cap instead of host->cap1. I will update
->>>> patch with your comment.
+>>>> I've tried 4.8-rc3 with my hack drop and this commit cherry-picked,
+>>>> but the problem is still there, so this patch does not fix it.
 >>>
->>> Please, then also send this to the public linux-mmc list.
 >>>
->>> Kind regards
->>> Uffe
->>>
+>>> I wasn't able to reproduce your problem, but a possibility could be
+>>> accessing the request after it is completed.  You could try this:
 >>
->> I'm sorry I could not add the public linux-mmc list this mail thread, but
->> I have already sent the updated patch with linux-mmc.
 >>
->> https://patchwork.kernel.org/patch/9289189/
+>> Good catch, that seems to fix things for me. Note sometimes this bug
+>> would not hit immediately for me. But I've been running several
+>> affected boards for about 1 hour or so, without issues, so I believe
+>> this is fixed. So this is:
+>>
+>> Tested-by: Hans de Goede <hdegoede@redhat.com>
 >
-> Humm, is not this one of these cases where we would expect the
-> compatible string to dictacte whether enabling 64_BIT_DMA makes sense or
-> not?
+>
+> Awesome, thanks for reporting/testing. Adrian, I have turned it into a real
+> patch and applied it for 4.8. Thanks!
 
-Yes!
+Jens, thanks for helping out! You may add my ack for it!
 
-Jaedon, can you please send an updated patch. Please also bump the
-version number of the patch!
+Acked-by: Ulf Hansson <ulf.hansson@linaro.org>
+
+BTW, for some reason I (and linux-mmc) was not cc:ed on the commit
+that caused the regression:
+
+c2df40dfb8c015211ec55f4b1dd0587f875c7b34
+Author: Mike Christie <mchristi@redhat.com>
+Date:   Sun Jun 5 14:32:17 2016 -0500
+    drivers: use req op accessor
+
+Even if I probably wouldn't noticed that the patch was incorrect, it
+would have helped to know that we changed some parts in the mmc block
+layer when trying to find the regression. Could you please keep on eye
+on this future wise so it doesn't happen again.
 
 Kind regards
 Uffe
-
->
-> The patch is technically correct though.
-> --
-> Florian
