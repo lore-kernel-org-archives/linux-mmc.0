@@ -1,65 +1,81 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: 4.8-rc1 REGRESSION mmc-blk triggers WARN_ON(!host->claimed),
- related to: "drivers: use req op accessor" ?
-Date: Fri, 26 Aug 2016 09:13:34 +0200
-Message-ID: <CAPDyKFrZCNv9VWu1pVg02wE3Pth3z3J0uh5dCdeYU8LYd_wXJQ@mail.gmail.com>
-References: <6e68ae5a-4b79-a636-2c46-5726cf2cc44b@redhat.com>
- <57BB23D0.3050606@redhat.com> <2a2ee1e8-8682-0647-a66d-04ceb54f58ec@redhat.com>
- <6bfb134a-43bf-addd-3ff0-cc1d677a1606@intel.com> <7210392e-2c1c-5676-bb53-274ea6a5ca74@redhat.com>
- <41ab9b3e-cb39-fb9e-defd-f38ea6d5b791@fb.com>
+From: Michal Simek <michal.simek@xilinx.com>
+Subject: Re: [PATCH v2 1/2] sdhci-of-arasan: Modify arasan sdhci documentation
+ about broken-cd and non-removable properties.
+Date: Fri, 26 Aug 2016 09:19:00 +0200
+Message-ID: <f2a24bba-3faf-0882-4d7f-6b654247da7f@xilinx.com>
+References: <1472166111-28872-1-git-send-email-zach.brown@ni.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wm0-f52.google.com ([74.125.82.52]:36261 "EHLO
-        mail-wm0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750700AbcHZHOZ (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 26 Aug 2016 03:14:25 -0400
-Received: by mail-wm0-f52.google.com with SMTP id q128so267238302wma.1
-        for <linux-mmc@vger.kernel.org>; Fri, 26 Aug 2016 00:13:37 -0700 (PDT)
-In-Reply-To: <41ab9b3e-cb39-fb9e-defd-f38ea6d5b791@fb.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <1472166111-28872-1-git-send-email-zach.brown@ni.com>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Zach Brown <zach.brown@ni.com>, adrian.hunter@intel.com
+Cc: mark.rutland@arm.com, devicetree@vger.kernel.org, ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, michal.simek@xilinx.com, robh+dt@kernel.org, linux-arm-kernel@lists.infradead.org, soren.brinkmann@xilinx.com
 List-Id: linux-mmc@vger.kernel.org
-To: Jens Axboe <axboe@fb.com>
-Cc: Hans de Goede <hdegoede@redhat.com>, Adrian Hunter <adrian.hunter@intel.com>, Mike Christie <mchristi@redhat.com>, regressions@leemhuis.info, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-On 25 August 2016 at 22:12, Jens Axboe <axboe@fb.com> wrote:
-> On 08/25/2016 12:26 PM, Hans de Goede wrote:
->>>>
->>>> I've tried 4.8-rc3 with my hack drop and this commit cherry-picked,
->>>> but the problem is still there, so this patch does not fix it.
->>>
->>>
->>> I wasn't able to reproduce your problem, but a possibility could be
->>> accessing the request after it is completed.  You could try this:
->>
->>
->> Good catch, that seems to fix things for me. Note sometimes this bug
->> would not hit immediately for me. But I've been running several
->> affected boards for about 1 hour or so, without issues, so I believe
->> this is fixed. So this is:
->>
->> Tested-by: Hans de Goede <hdegoede@redhat.com>
->
->
-> Awesome, thanks for reporting/testing. Adrian, I have turned it into a real
-> patch and applied it for 4.8. Thanks!
+On 26.8.2016 01:01, Zach Brown wrote:
+> The sdhci controller on xilinx zynq devices will not function unless
+> the CD bit is provided. http://www.xilinx.com/support/answers/61064.html
+> In cases where it is impossible to provide the CD bit in hardware,
+> setting the controller to test mode and then setting inserted to true
+> will get the controller to function without the CD bit.
+> 
+> Additionally in some situations it will make sense to use the
+> "broken-cd" and "non-removable" property together.
+> i.e the sd device is non-removable so polling doesn't make sense, but
+> the CD is broken and the controller will need to be in test mode to
+> function.
+> 
+> This patch modifies the documentation to reflect those differences
+> from the standard behaviours.
+> 
+> Signed-off-by: Zach Brown <zach.brown@ni.com>
+> ---
+> v2:
+>   * improved commit messages
+>   * removed fake-cd device property
+>   * removed fake-cd quirk
+>   * use broken-cd device property
+>   * documented new usage of broken-cd
+> 
+>  Documentation/devicetree/bindings/mmc/arasan,sdhci.txt | 10 +++++++++-
+>  1 file changed, 9 insertions(+), 1 deletion(-)
+> 
+> diff --git a/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt b/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
+> index 3404afa..b41c448 100644
+> --- a/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
+> +++ b/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
+> @@ -37,6 +37,14 @@ Optional Properties:
+>      in place we will export a clock representing the Card Clock.  This clock
+>      is expected to be consumed by our PHY.  You must also specify
+>  
+> +Card detection:
+> +The arasan controller does not work
+> +when the CD bit is not supplied unless in test mode.
+> +- broken-cd: The CD bit is not supplied and the controller will
+> +  need to be set to test mode to function.
+> +- non-removable: like normal, except it can now be partnered with
+> +  broken-cd, which will turn off polling, but keep test mode on.
+> +
+>  Example:
+>  	sdhci@e0100000 {
+>  		compatible = "arasan,sdhci-8.9a";
+> @@ -72,4 +80,4 @@ Example:
+>  		phy-names = "phy_arasan";
+>  		#clock-cells = <0>;
+>  		status = "disabled";
+> -	};
+> +	} ;
 
-Jens, thanks for helping out! You may add my ack for it!
+Probably you don't need this change.
 
-Acked-by: Ulf Hansson <ulf.hansson@linaro.org>
-
-BTW, for some reason I (and linux-mmc) was not cc:ed on the commit
-that caused the regression:
-
-c2df40dfb8c015211ec55f4b1dd0587f875c7b34
-Author: Mike Christie <mchristi@redhat.com>
-Date:   Sun Jun 5 14:32:17 2016 -0500
-    drivers: use req op accessor
-
-Even if I probably wouldn't noticed that the patch was incorrect, it
-would have helped to know that we changed some parts in the mmc block
-layer when trying to find the regression. Could you please keep on eye
-on this future wise so it doesn't happen again.
-
-Kind regards
-Uffe
+M
