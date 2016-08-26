@@ -1,47 +1,96 @@
-From: Doug Anderson <dianders@chromium.org>
-Subject: Re: [PATCH] mmc: sdhci-of-arasan: Properly set corecfg_clockmultipler
- on rk3399
-Date: Fri, 26 Aug 2016 08:46:33 -0700
-Message-ID: <CAD=FV=UD-9PwQFm4x4Uqx5mQjEirD9icyYHPDaVjU4tRgk-f+g@mail.gmail.com>
-References: <1472181736-17848-1-git-send-email-shawn.lin@rock-chips.com>
- <1dc7898d-ee35-4166-6313-64e9c50f8db8@rock-chips.com> <d6c3b728-af01-e724-3278-1bc0801f8fb4@rock-chips.com>
- <7490888.x1BxhdeR20@diego>
+From: Zach Brown <zach.brown@ni.com>
+Subject: Re: [PATCH 1/2] sdhci-of-arasan: Add quirk and device tree parameter
+ to fake CD bit
+Date: Fri, 26 Aug 2016 17:29:46 -0500
+Message-ID: <20160826222945.GA6679@zach-desktop>
+References: <1472080984-17373-1-git-send-email-zach.brown@ni.com>
+ <20160825105640.GA5439@remoulade>
+ <20160825171539.GA13571@zach-desktop>
+ <20160825180959.GA14705@remoulade>
+ <20160825182621.GA14817@zach-desktop>
+ <20160825182852.GB15000@remoulade>
+ <20160825204645.GA19450@zach-desktop>
+ <CAPDyKFpcFus1oysdRuK6vUALXXdy8_SsDZ3n8LkyM1AZLZY+QQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: quoted-printable
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-ua0-f172.google.com ([209.85.217.172]:34474 "EHLO
-        mail-ua0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753929AbcHZPqf (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 26 Aug 2016 11:46:35 -0400
-Received: by mail-ua0-f172.google.com with SMTP id k90so144477583uak.1
-        for <linux-mmc@vger.kernel.org>; Fri, 26 Aug 2016 08:46:34 -0700 (PDT)
-In-Reply-To: <7490888.x1BxhdeR20@diego>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+Content-Disposition: inline
+In-Reply-To: <CAPDyKFpcFus1oysdRuK6vUALXXdy8_SsDZ3n8LkyM1AZLZY+QQ@mail.gmail.com>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Mark Rutland <mark.rutland@arm.com>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, Lars-Peter Clausen <lars@metafoo.de>, linux-mmc <linux-mmc@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Rob Herring <robh+dt@kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Michal Simek <michal.simek@xilinx.com>, =?iso-8859-1?Q?S=F6ren?= Brinkmann <soren.brinkmann@xilinx.com>
 List-Id: linux-mmc@vger.kernel.org
-To: =?UTF-8?Q?Heiko_St=C3=BCbner?= <heiko@sntech.de>
-Cc: Shawn Lin <shawn.lin@rock-chips.com>, Ziyuan Xu <xzy.xu@rock-chips.com>, Ulf Hansson <ulf.hansson@linaro.org>, "open list:ARM/Rockchip SoC..." <linux-rockchip@lists.infradead.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>
 
-Hi,
+On Fri, Aug 26, 2016 at 09:42:38AM +0200, Ulf Hansson wrote:
+> On 25 August 2016 at 22:46, Zach Brown <zach.brown@ni.com> wrote:
+> > On Thu, Aug 25, 2016 at 07:28:55PM +0100, Mark Rutland wrote:
+> >> On Thu, Aug 25, 2016 at 01:26:22PM -0500, Zach Brown wrote:
+> >> > On Thu, Aug 25, 2016 at 07:10:00PM +0100, Mark Rutland wrote:
+> >> > > On Thu, Aug 25, 2016 at 12:15:44PM -0500, Zach Brown wrote:
+> >> > > > In cases where the card is non-removable then polling doesn't make sense.
+> >> > >
+> >> > > We have the non-removable property to describe that, so we can also look at that.
+> >> > >
+> >> > > > So it doesn't make sense to tie the test mode workaround into the broken-cd
+> >> > > > property, even though I agree the nature of the defect fits under the notion
+> >> > > > of the CD being broken.
+> >> > >
+> >> > > Maybe not solely on broken-cd, but I think that we dont necessarily need a new
+> >> > > DT property. As above, broken-cd, non-removable, and the compatible string may
+> >> > > together give the kernel enough information to choose the right thing to do.
+> >> > >
+> >> > > Thanks,
+> >> > > Mark.
+> >> >
+> >> > I'm not sure if I understand your suggestion completely. Are you suggesting
+> >> > setting both the broken-cd and non-removable properties? That would make sense,
+> >> > but my understanding was that the two properities are not meant to co-exist. In
+> >> > /Documentation/devicetree/bindings/mmc/mmc.txt it states that only one should
+> >> > be supplied. Don't the two properties conflict with each other?
+> >>
+> >> They do for the cases that exist today, but given we're updating the document
+> >> anyway, we could simply clarify the cases in which the two can sanely co-exist
+> >> (e.g.  for this particular IP block).
+> 
+> No, please!
+> 
+> Depending on the SDHCI variant there is already some difference on how
+> broken-cd is treated.
+> 
+> Let's not add yet another, as I think it will be too complicated for
+> people to understand the bindings.
+> 
 
-On Fri, Aug 26, 2016 at 1:31 AM, Heiko St=C3=BCbner <heiko@sntech.de> wrote=
-:
-> The aclk_emmc_grf is (similar to aclk_vio_grf etc) part of the emmc block=
-.
+Shawn Lin pointed out that there might be instances of the arasan controller 
+that don't have the behavior the patch addresses. Having a new DT binding
+specific for this case would avoid needing to maintain a list of controllers
+that need the fix.  
 
-Right now aclk_emmc_grf is set as CLK_IGNORE_UNUSED, which is my least
-favorite clock property.  ;)
+> >>
+> >> Thanks,
+> >> Mark.
+> >
+> > That makes sense. I'll change the documentation for broken-cd and non-removable
+> > in the IP specific document and change the driver accordingly.
+> 
+> I rather have a new DT binding specific for this case.
+> 
+> Perhaps there's a better name than "fake-cd". How about "force-cd", or
+> if someone can come up with a better name.
+> 
+> Kind regards
+> Uffe
 
-Due to the parenting structure and the fact that we just added
-"aclk_emmc_noc" as a critical clock, I believe that this means that
-aclk_emmc_grf will never turn off.  It would be awfully nice if you
-could send up a patch to actually turn the "grf" clock on when needed
-and turn it off when not needed.  That would let us remove the
-"CLK_IGNORE_UNUSED" from all of the eMMC clocks in rk3399.
-
-I noticed you send v2 of your patch series and that looks fine to me.
-The issue with not handling the "grf" clock is not a new one and
-shouldn't block your patch.  ...but it would still be nice to handle
-properly.
-
--Doug
+I've been trying to come up with a better name. Here are a few ideas
+cd-not-wired
+needs-test-cd
+fails-without-force-cd
