@@ -1,81 +1,70 @@
-From: Michal Simek <michal.simek@xilinx.com>
-Subject: Re: [PATCH v2 1/2] sdhci-of-arasan: Modify arasan sdhci documentation
- about broken-cd and non-removable properties.
-Date: Fri, 26 Aug 2016 09:19:00 +0200
-Message-ID: <f2a24bba-3faf-0882-4d7f-6b654247da7f@xilinx.com>
-References: <1472166111-28872-1-git-send-email-zach.brown@ni.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH 1/2] sdhci-of-arasan: Add quirk and device tree parameter
+ to fake CD bit
+Date: Fri, 26 Aug 2016 09:42:38 +0200
+Message-ID: <CAPDyKFpcFus1oysdRuK6vUALXXdy8_SsDZ3n8LkyM1AZLZY+QQ@mail.gmail.com>
+References: <1472080984-17373-1-git-send-email-zach.brown@ni.com>
+ <20160825105640.GA5439@remoulade> <20160825171539.GA13571@zach-desktop>
+ <20160825180959.GA14705@remoulade> <20160825182621.GA14817@zach-desktop>
+ <20160825182852.GB15000@remoulade> <20160825204645.GA19450@zach-desktop>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <1472166111-28872-1-git-send-email-zach.brown@ni.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Zach Brown <zach.brown@ni.com>, adrian.hunter@intel.com
-Cc: mark.rutland@arm.com, devicetree@vger.kernel.org, ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, michal.simek@xilinx.com, robh+dt@kernel.org, linux-arm-kernel@lists.infradead.org, soren.brinkmann@xilinx.com
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20160825204645.GA19450@zach-desktop>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Zach Brown <zach.brown@ni.com>, Mark Rutland <mark.rutland@arm.com>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, Rob Herring <robh+dt@kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Michal Simek <michal.simek@xilinx.com>, =?UTF-8?Q?S=C3=B6ren_Brinkmann?= <soren.brinkmann@xilinx.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Lars-Peter Clausen <lars@metafoo.de>
 List-Id: linux-mmc@vger.kernel.org
 
-On 26.8.2016 01:01, Zach Brown wrote:
-> The sdhci controller on xilinx zynq devices will not function unless
-> the CD bit is provided. http://www.xilinx.com/support/answers/61064.html
-> In cases where it is impossible to provide the CD bit in hardware,
-> setting the controller to test mode and then setting inserted to true
-> will get the controller to function without the CD bit.
-> 
-> Additionally in some situations it will make sense to use the
-> "broken-cd" and "non-removable" property together.
-> i.e the sd device is non-removable so polling doesn't make sense, but
-> the CD is broken and the controller will need to be in test mode to
-> function.
-> 
-> This patch modifies the documentation to reflect those differences
-> from the standard behaviours.
-> 
-> Signed-off-by: Zach Brown <zach.brown@ni.com>
-> ---
-> v2:
->   * improved commit messages
->   * removed fake-cd device property
->   * removed fake-cd quirk
->   * use broken-cd device property
->   * documented new usage of broken-cd
-> 
->  Documentation/devicetree/bindings/mmc/arasan,sdhci.txt | 10 +++++++++-
->  1 file changed, 9 insertions(+), 1 deletion(-)
-> 
-> diff --git a/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt b/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
-> index 3404afa..b41c448 100644
-> --- a/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
-> +++ b/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
-> @@ -37,6 +37,14 @@ Optional Properties:
->      in place we will export a clock representing the Card Clock.  This clock
->      is expected to be consumed by our PHY.  You must also specify
->  
-> +Card detection:
-> +The arasan controller does not work
-> +when the CD bit is not supplied unless in test mode.
-> +- broken-cd: The CD bit is not supplied and the controller will
-> +  need to be set to test mode to function.
-> +- non-removable: like normal, except it can now be partnered with
-> +  broken-cd, which will turn off polling, but keep test mode on.
-> +
->  Example:
->  	sdhci@e0100000 {
->  		compatible = "arasan,sdhci-8.9a";
-> @@ -72,4 +80,4 @@ Example:
->  		phy-names = "phy_arasan";
->  		#clock-cells = <0>;
->  		status = "disabled";
-> -	};
-> +	} ;
+On 25 August 2016 at 22:46, Zach Brown <zach.brown@ni.com> wrote:
+> On Thu, Aug 25, 2016 at 07:28:55PM +0100, Mark Rutland wrote:
+>> On Thu, Aug 25, 2016 at 01:26:22PM -0500, Zach Brown wrote:
+>> > On Thu, Aug 25, 2016 at 07:10:00PM +0100, Mark Rutland wrote:
+>> > > On Thu, Aug 25, 2016 at 12:15:44PM -0500, Zach Brown wrote:
+>> > > > In cases where the card is non-removable then polling doesn't make sense.
+>> > >
+>> > > We have the non-removable property to describe that, so we can also look at that.
+>> > >
+>> > > > So it doesn't make sense to tie the test mode workaround into the broken-cd
+>> > > > property, even though I agree the nature of the defect fits under the notion
+>> > > > of the CD being broken.
+>> > >
+>> > > Maybe not solely on broken-cd, but I think that we dont necessarily need a new
+>> > > DT property. As above, broken-cd, non-removable, and the compatible string may
+>> > > together give the kernel enough information to choose the right thing to do.
+>> > >
+>> > > Thanks,
+>> > > Mark.
+>> >
+>> > I'm not sure if I understand your suggestion completely. Are you suggesting
+>> > setting both the broken-cd and non-removable properties? That would make sense,
+>> > but my understanding was that the two properities are not meant to co-exist. In
+>> > /Documentation/devicetree/bindings/mmc/mmc.txt it states that only one should
+>> > be supplied. Don't the two properties conflict with each other?
+>>
+>> They do for the cases that exist today, but given we're updating the document
+>> anyway, we could simply clarify the cases in which the two can sanely co-exist
+>> (e.g.  for this particular IP block).
 
-Probably you don't need this change.
+No, please!
 
-M
+Depending on the SDHCI variant there is already some difference on how
+broken-cd is treated.
+
+Let's not add yet another, as I think it will be too complicated for
+people to understand the bindings.
+
+>>
+>> Thanks,
+>> Mark.
+>
+> That makes sense. I'll change the documentation for broken-cd and non-removable
+> in the IP specific document and change the driver accordingly.
+
+I rather have a new DT binding specific for this case.
+
+Perhaps there's a better name than "fake-cd". How about "force-cd", or
+if someone can come up with a better name.
+
+Kind regards
+Uffe
