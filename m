@@ -1,109 +1,101 @@
-From: Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
-Subject: Re: [PATCH] mmc: sdhci-of-arasan: Properly set corecfg_clockmultipler
- on rk3399
-Date: Fri, 26 Aug 2016 16:36:14 +0800
-Message-ID: <93770cb4-2ede-9f71-f346-16c82be78f6d@rock-chips.com>
-References: <1472181736-17848-1-git-send-email-shawn.lin@rock-chips.com>
- <1dc7898d-ee35-4166-6313-64e9c50f8db8@rock-chips.com>
- <d6c3b728-af01-e724-3278-1bc0801f8fb4@rock-chips.com>
- <7490888.x1BxhdeR20@diego>
+From: Mike Looijmans <mike.looijmans@topic.nl>
+Subject: Re: [PATCH v2 2/2] sdhci-of-arasan: Set controller to test mode when
+ Card Detection is broken.
+Date: Fri, 26 Aug 2016 10:42:39 +0200
+Message-ID: <57C000FF.3090307@topic.nl>
+References: <1472166111-28872-1-git-send-email-zach.brown@ni.com>
+ <1472166111-28872-2-git-send-email-zach.brown@ni.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"; Format="flowed"
-Content-Transfer-Encoding: base64
-Return-path: <linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-In-Reply-To: <7490888.x1BxhdeR20@diego>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-rockchip>,
- <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-rockchip/>
-List-Post: <mailto:linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-List-Help: <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-rockchip>,
- <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
-Sender: "Linux-rockchip" <linux-rockchip-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-Errors-To: linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
-To: =?UTF-8?Q?Heiko_St=c3=bcbner?= <heiko-4mtYJXux2i+zQB+pC5nmwQ@public.gmane.org>
-Cc: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org, Ziyuan Xu <xzy.xu-TNX95d0MmH7DzftRWevZcw@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Douglas Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+Content-Type: text/plain; charset="us-ascii"; Format="flowed"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <1472166111-28872-2-git-send-email-zach.brown@ni.com>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Zach Brown <zach.brown@ni.com>, adrian.hunter@intel.com
+Cc: mark.rutland@arm.com, devicetree@vger.kernel.org, ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, michal.simek@xilinx.com, robh+dt@kernel.org, soren.brinkmann@xilinx.com, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
-5ZyoIDIwMTYvOC8yNiAxNjozMSwgSGVpa28gU3TDvGJuZXIg5YaZ6YGTOgo+IEFtIEZyZWl0YWcs
-IDI2LiBBdWd1c3QgMjAxNiwgMTU6NTA6NTcgc2NocmllYiBTaGF3biBMaW46Cj4+ICsgSGVpa28K
-Pj4KPj4g5ZyoIDIwMTYvOC8yNiAxNDozOCwgWml5dWFuIFh1IOWGmemBkzoKPj4+IEhpIFNoYXdu
-LAo+Pj4KPj4+IE9uIDIwMTblubQwOOaciDI25pelIDExOjIyLCBTaGF3biBMaW4gd3JvdGU6Cj4+
-Pj4gY29yZWNmZ19jbG9ja211bHRpcGxlciBpbmRpY2F0ZXMgY2xvY2sgbXVsdGlwbGllciB2YWx1
-ZSBvZgo+Pj4+IHByb2dyYW1tYWJsZSBjbG9jayBnZW5lcmF0b3Igd2hpY2ggc2hvdWxkIGJlIHRo
-ZSBzYW1lIHZhbHVlCj4+Pj4gb2YgU0RIQ0lfQ0FQQUJJTElUSUVTXzEuIFRoZSBkZWZhdWx0IHZh
-bHVlIG9mIHRoZSByZWdpc3RlciwKPj4+PiBjb3JlY2ZnX2Nsb2NrbXVsdGlwbGVyLCBpcyAweDEw
-LiBCdXQgYWN0dWFsbHkgaXQgaXMgYSBtaXN0YWtlCj4+Pgo+Pj4gY29yZWNmZ19jbG9ja211bHRp
-cGxlcj09PmNvcmVjZmdfY2xvY2ttdWx0aXBsaWVyCj4+Pgo+Pj4+IGJ5IGRlc2lnbmVyIGFzIG91
-ciBpbnRlbnRpb24gd2FzIHRvIHNldCBpdCB0byBiZSB6ZXJvIHdoaWNoCj4+Pj4gbWVhbnMgd2Ug
-ZG9uJ3Qgc3VwcG9ydCBwcm9ncmFtbWFibGUgY2xvY2sgZ2VuZXJhdG9yLiBTbyB3ZSBoYXZlCj4+
-Pj4gdG8gbWFkZSBpdCB0byBiZSB6ZXJvIG9uIGJvb3Rsb2FkZXIgd2hpY2ggc2VlbXMgd29yayBm
-aW5lIHVudGlsCj4+Pgo+Pj4gbWFkZT09Pm1ha2UKPj4+Cj4+Pj4gbm93LiBCdXQgbm93IHdlIGZp
-bmQgYSBpc3N1ZSB0aGF0IHdoZW4gZGVwbG95aW5nIGdlbnBkIHN1cHBvcnQKPj4+Cj4+PiBhIGlz
-c3VlPT0+YW4gaXNzdWUKPj4+Cj4+Pj4gZm9yIGl0LCB0aGUgcmVtb3ZlIGNhbGxiYWNrIHdpbGwg
-dHJpZ2dlciB0aGUgZ2VucGQgdG8gcG93ZXJvZmYgdGhlCj4+Pj4gcG93ZXIgZG9tYWluIGZvciBz
-ZGhjaS1vZi1hcmFzYW4gd2hpY2ggbWFnYWdlIHRoZSBjb250cm9sbGVyLCBwaHkKPj4+Cj4+PiBt
-YWdhZ2U9PT5tYW5hZ2UKPj4+Cj4+Pj4gYW5kIGNvcmVjZmdfKiBzdHVmZi4KPj4+Pgo+Pj4+IFNv
-IHdoZW4gd2UgZG8gYmluZC91bmJpbmQgdGhlIGRyaXZlciwgd2UgaGF2ZSBhbHJlYWR5IHJlaW5p
-dAo+Pj4KPj4+IGRvPT0+ZG9pbmcKPj4+Cj4+Pj4gdGhlIGNvbnRyb2xsZXIgYW5kIHBoeSwgYnV0
-IHdpdGhvdXQgZG9pbmcgdGhhdCBmb3IgY29yZWNmZ18qLgo+Pj4+IFJlZ2FyZGluZyB0byBvbmx5
-IHRoZSBjb3JlY2ZnX2Nsb2NrbXVsdGlwbGVyIGlzIHdyb25nLCBsZXQncwo+Pj4+IGZpeCBpdCBi
-eSBleHBsaWNpdGx5IG1hcmtpbmcgaXQgdG8gYmUgemVybyB3aGVuIHByb2JpbmcuIFdpdGgKPj4+
-PiB0aGlzIGNoYW5nZSwgd2UgY291bGQgZG8gYmluZC91bmJpbmQgc3VjY2Vzc2Z1bGx5Lgo+Pj4+
-Cj4+Pj4gUmVwb3J0ZWQtYnk6IFppeXVhbiBYdSA8eHp5Lnh1QHJvY2stY2hpcHMuY29tPgo+Pj4+
-IENjOiBEb3VnbGFzIEFuZGVyc29uIDxkaWFuZGVyc0BjaHJvbWl1bS5vcmc+Cj4+Pj4gU2lnbmVk
-LW9mZi1ieTogU2hhd24gTGluIDxzaGF3bi5saW5Acm9jay1jaGlwcy5jb20+Cj4+Pj4gLS0tCj4+
-Pj4KPj4+PiAgIGRyaXZlcnMvbW1jL2hvc3Qvc2RoY2ktb2YtYXJhc2FuLmMgfCA5ICsrKysrKysr
-Kwo+Pj4+ICAgMSBmaWxlIGNoYW5nZWQsIDkgaW5zZXJ0aW9ucygrKQo+Pj4+Cj4+Pj4gZGlmZiAt
-LWdpdCBhL2RyaXZlcnMvbW1jL2hvc3Qvc2RoY2ktb2YtYXJhc2FuLmMKPj4+PiBiL2RyaXZlcnMv
-bW1jL2hvc3Qvc2RoY2ktb2YtYXJhc2FuLmMKPj4+PiBpbmRleCAwYjNhOWNmLi5jMWViMjYzIDEw
-MDY0NAo+Pj4+IC0tLSBhL2RyaXZlcnMvbW1jL2hvc3Qvc2RoY2ktb2YtYXJhc2FuLmMKPj4+PiAr
-KysgYi9kcml2ZXJzL21tYy9ob3N0L3NkaGNpLW9mLWFyYXNhbi5jCj4+Pj4gQEAgLTY3LDEwICs2
-NywxMiBAQCBzdHJ1Y3Qgc2RoY2lfYXJhc2FuX3NvY19jdGxfZmllbGQgewo+Pj4+Cj4+Pj4gICAg
-KiBhY2Nlc3NpYmxlIHZpYSB0aGUgc3lzY29uIEFQSS4KPj4+PiAgICAqCj4+Pj4gICAgKiBAYmFz
-ZWNsa2ZyZXE6ICAgIFdoZXJlIHRvIGZpbmQgY29yZWNmZ19iYXNlY2xrZnJlcQo+Pj4+Cj4+Pj4g
-KyAqIEBjbG9ja211bHRpcGxpZXI6ICAgIFdoZXJlIHRvIGZpbmQgY29yZWNmZ19jbG9ja211bHRp
-cGxpZXIKPj4+Pgo+Pj4+ICAgICogQGhpd29yZF91cGRhdGU6ICAgIElmIHRydWUsIHVzZSBISVdP
-UkRfVVBEQVRFIHRvIGFjY2VzcyB0aGUgc3lzY29uCj4+Pj4gICAgKi8KPj4+Pgo+Pj4+ICAgc3Ry
-dWN0IHNkaGNpX2FyYXNhbl9zb2NfY3RsX21hcCB7Cj4+Pj4KPj4+PiAgICAgICBzdHJ1Y3Qgc2Ro
-Y2lfYXJhc2FuX3NvY19jdGxfZmllbGQgICAgYmFzZWNsa2ZyZXE7Cj4+Pj4KPj4+PiArICAgIHN0
-cnVjdCBzZGhjaV9hcmFzYW5fc29jX2N0bF9maWVsZCAgICBjbG9ja211bHRpcGxpZXI7Cj4+Pj4K
-Pj4+PiAgICAgICBib29sICAgICAgICAgICAgICAgICAgICBoaXdvcmRfdXBkYXRlOwo+Pj4+Cj4+
-Pj4gICB9Owo+Pj4+ICAgQEAgLTEwMCw2ICsxMDIsNyBAQCBzdHJ1Y3Qgc2RoY2lfYXJhc2FuX2Rh
-dGEgewo+Pj4+Cj4+Pj4gICAgIHN0YXRpYyBjb25zdCBzdHJ1Y3Qgc2RoY2lfYXJhc2FuX3NvY19j
-dGxfbWFwIHJrMzM5OV9zb2NfY3RsX21hcCA9IHsKPj4+Pgo+Pj4+ICAgICAgIC5iYXNlY2xrZnJl
-cSA9IHsgLnJlZyA9IDB4ZjAwMCwgLndpZHRoID0gOCwgLnNoaWZ0ID0gOCB9LAo+Pj4+Cj4+Pj4g
-KyAgICAuY2xvY2ttdWx0aXBsaWVyID0geyAucmVnID0gMHhmMDJjLCAud2lkdGggPSA4LCAuc2hp
-dCA9IDB9LAo+Pj4+Cj4+Pj4gICAgICAgLmhpd29yZF91cGRhdGUgPSB0cnVlLAo+Pj4+Cj4+Pj4g
-ICB9Owo+Pj4+ICAgQEAgLTUyOCw2ICs1MzEsMTIgQEAgc3RhdGljIGludCBzZGhjaV9hcmFzYW5f
-cHJvYmUoc3RydWN0Cj4+Pj4KPj4+PiBwbGF0Zm9ybV9kZXZpY2UgKnBkZXYpCj4+Pj4KPj4+PiAg
-ICAgICAgICAgICAgICAgICAgICAgcmV0KTsKPj4+Pgo+Pj4+ICAgICAgICAgICAgICAgZ290byBl
-cnJfcGx0Zm1fZnJlZTsKPj4+Pgo+Pj4+ICAgICAgICAgICB9Cj4+Pj4KPj4+PiArCj4+Pj4gKyAg
-ICAgICAgaWYgKG9mX2RldmljZV9pc19jb21wYXRpYmxlKHBkZXYtPmRldi5vZl9ub2RlLAo+Pj4+
-ICsgICAgICAgICAgICAgICAgICAgICAgICAicm9ja2NoaXAscmszMzk5LXNkaGNpLTUuMSIpKQo+
-Pj4+ICsgICAgICAgICAgICBzZGhjaV9hcmFzYW5fc3lzY29uX3dyaXRlKGhvc3QsCj4+Pj4gKyAg
-ICAgICAgICAgICAgICAgICAgICAgICAgJnNvY19jdGxfbWFwLT5jbG9ja211bHRpcGxpZXIsCj4+
-Pj4gKyAgICAgICAgICAgICAgICAgICAgICAgICAgMCk7Cj4+Pgo+Pj4gVmFyaWFibGUgc29jX2N0
-bF9tYXAgaXMgdW5kZWZpbmVkIGluIHNkaGNpX2FyYXNhbl9wcm9iZSgpLCBwbGVhc2UgZml4IGl0
-Lgo+Pgo+PiBXb29wcywgSSBjaGFuZ2UgdGhlIGNvZGUgYSBiaXQgYWZ0ZXIgZ2VuZXJhdGluZyBw
-YXRjaCwgSSB3aWxsIGZpeCBpdC4KPj4KPj4+IE1vcmVvdmVyLCB3ZSBjYW4gbm90IGFjY2VzcyBn
-cmZfZW1tY2NvcmUvZ3JmX2VtbWNwaHkgcHJpb3IgdG8gZW5hYmxlCj4+PiBjbGtfYWhiLCBzbyBk
-byBpdCBhZnRlciBjbG9jayBlbmFibGUuCj4+Cj4+IEhybW0sIHdlIGNvbmZpZ3VyZSB0aGUgZ3Jm
-IHZhaSBDUFUgYW5kIHRoZSBjbG9jayBmb3IgYWNjZXNzaW5nCj4+IGdyZiBpcyBhY2xrX2VtbWNf
-Z3JmKCBJIHNhdyBhY2xrX2VtbWNfbm9jIGlzIGNyaXRpY2FsIGFuZCBpdCBzZWVtcyB3ZQo+PiBz
-aG91bGQgdHJlYXQgYWNsa19lbW1jXyogdGhlIHNhbWUgd2F5KS4KPgo+IE5vIDotKQo+Cj4gVGhl
-IGFjbGtfZW1tY19ncmYgaXMgKHNpbWlsYXIgdG8gYWNsa192aW9fZ3JmIGV0YykgcGFydCBvZiB0
-aGUgZW1tYyBibG9jay4KPgo+IFRoZSBub2MgY2xvY2tzIChhcyBmYXIgYXMgSSB1bmRlcnN0YW5k
-KSBhcmUgdGhlIGludGVyY29ubmVjdCBjbG9ja3MgdGhhdAo+IHN1cHBseSB0aGUgbGluayBiZXR3
-ZWVuIGludGVyY29ubmVjdCBhbmQgcGVyaXBoZXJhbCwgc28gYXJlIHBhcnQgb2YgdGhlCj4gaW50
-ZXJjb25uZWN0IGJsb2NrLgo+Cj4gV2UgZG9uJ3QgbW9kZWwgdGhlIGludGVyY29ubmVjdCBvbiBh
-bnkgcm9ja2NoaXAgc29jIHJpZ2h0IG5vdywgc28gdGhlIG5vYwo+IGNsb2NrcyBhcmUgcmlnaHRm
-dWxseSBtYXJrZWQgY3JpdGljYWwsIGJ1dCB3ZSBvZiBjb3Vyc2UgZG8gbW9kZWwgdGhlIGVtbWMK
-PiBibG9jaywgc28gaXQgc2hvdWxkIGhhbmRsZSBpdHMgZ3JmIGNsb2NrLCBzaW1pbGFyIHRvIGhv
-dyB0aGUgZHJtIGRyaXZlciBpcwo+IChwbGFubmluZyB0bykgZG9pbmcgaXQgcmlnaHQgbm93LgoK
-VGhhbmtzIGZvciB0aGVzZSBkZXRhaWxzLiBTZWVtcyB3ZSBzaG91bGQgcGxhbiB0byBoYW5kbGUg
-dGhpcyBpbnNpZGUgdGhlCnNkaGNpLW9mLWFyYXNhbiBmb3Igcm9ja2NoaXAgc29jLgoKPgo+Cj4g
-SGVpa28KPgo+Cj4KCgotLSAKQmVzdCBSZWdhcmRzClNoYXduIExpbgoKCl9fX19fX19fX19fX19f
-X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fCkxpbnV4LXJvY2tjaGlwIG1haWxpbmcg
-bGlzdApMaW51eC1yb2NrY2hpcEBsaXN0cy5pbmZyYWRlYWQub3JnCmh0dHA6Ly9saXN0cy5pbmZy
-YWRlYWQub3JnL21haWxtYW4vbGlzdGluZm8vbGludXgtcm9ja2NoaXAK
+On 26-08-16 01:01, Zach Brown wrote:
+> The sdhci controller on xilinx zynq devices will not function unless
+> the CD bit is provided. http://www.xilinx.com/support/answers/61064.html
+> In cases where it is impossible to provide the CD bit in hardware,
+> setting the controller to test mode and then setting inserted to true
+> will get the controller to function without the CD bit.
+>
+> When the device has the property broken-cd the driver changes the
+> controller to test mode and sets test inserted to true to make the
+> controller function.
+>
+> Signed-off-by: Zach Brown <zach.brown@ni.com>
+> ---
+>   drivers/mmc/host/sdhci-of-arasan.c | 17 ++++++++++++++++-
+>   drivers/mmc/host/sdhci.h           |  2 ++
+>   2 files changed, 18 insertions(+), 1 deletion(-)
+>
+> diff --git a/drivers/mmc/host/sdhci-of-arasan.c b/drivers/mmc/host/sdhci-of-arasan.c
+> index e0f193f..3798a3b 100644
+> --- a/drivers/mmc/host/sdhci-of-arasan.c
+> +++ b/drivers/mmc/host/sdhci-of-arasan.c
+> @@ -26,6 +26,7 @@
+>   #include <linux/phy/phy.h>
+>   #include <linux/regmap.h>
+>   #include "sdhci-pltfm.h"
+> +#include <linux/of.h>
+
+Not needed.
+
+>   #define SDHCI_ARASAN_CLK_CTRL_OFFSET	0x2c
+>   #define SDHCI_ARASAN_VENDOR_REGISTER	0x78
+> @@ -203,12 +204,26 @@ static void sdhci_arasan_hs400_enhanced_strobe(struct mmc_host *mmc,
+>   	writel(vendor, host->ioaddr + SDHCI_ARASAN_VENDOR_REGISTER);
+>   }
+>
+> +void sdhci_arasan_reset(struct sdhci_host *host, u8 mask)
+> +{
+> +	u8 ctrl;
+> +
+> +	sdhci_reset(host, mask);
+> +
+> +	if (host->quirks & SDHCI_QUIRK_BROKEN_CARD_DETECTION) {
+> +		ctrl = sdhci_readb(host, SDHCI_HOST_CONTROL);
+> +		ctrl |= SDHCI_CTRL_CDTEST_INS |
+> +			SDHCI_CTRL_CDTEST_EN;
+> +		sdhci_writeb(host, ctrl, SDHCI_HOST_CONTROL);
+> +	}
+> +}
+> +
+>   static struct sdhci_ops sdhci_arasan_ops = {
+>   	.set_clock = sdhci_arasan_set_clock,
+>   	.get_max_clock = sdhci_pltfm_clk_get_max_clock,
+>   	.get_timeout_clock = sdhci_arasan_get_timeout_clock,
+>   	.set_bus_width = sdhci_set_bus_width,
+> -	.reset = sdhci_reset,
+> +	.reset = sdhci_arasan_reset,
+>   	.set_uhs_signaling = sdhci_set_uhs_signaling,
+>   };
+>
+> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+> index 0411c9f..8d92d6e9 100644
+> --- a/drivers/mmc/host/sdhci.h
+> +++ b/drivers/mmc/host/sdhci.h
+> @@ -84,6 +84,8 @@
+>   #define   SDHCI_CTRL_ADMA32	0x10
+>   #define   SDHCI_CTRL_ADMA64	0x18
+>   #define   SDHCI_CTRL_8BITBUS	0x20
+> +#define  SDHCI_CTRL_CDTEST_INS   0x40
+> +#define  SDHCI_CTRL_CDTEST_EN     0x80
+>
+>   #define SDHCI_POWER_CONTROL	0x29
+>   #define  SDHCI_POWER_ON		0x01
+
+Looks okay, tested it and appears to work just as well as a tie-off in logic.
+
+Tested-by: mike.looijmans@topic.nl
