@@ -1,70 +1,147 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 1/2] sdhci-of-arasan: Add quirk and device tree parameter
- to fake CD bit
-Date: Fri, 26 Aug 2016 09:42:38 +0200
-Message-ID: <CAPDyKFpcFus1oysdRuK6vUALXXdy8_SsDZ3n8LkyM1AZLZY+QQ@mail.gmail.com>
-References: <1472080984-17373-1-git-send-email-zach.brown@ni.com>
- <20160825105640.GA5439@remoulade> <20160825171539.GA13571@zach-desktop>
- <20160825180959.GA14705@remoulade> <20160825182621.GA14817@zach-desktop>
- <20160825182852.GB15000@remoulade> <20160825204645.GA19450@zach-desktop>
+Subject: Re: [PATCH v4 1/2] mmc: block: remove the check of packed for packed
+ request routine
+Date: Fri, 26 Aug 2016 09:49:21 +0200
+Message-ID: <CAPDyKFprMG4fSAkm3P7fS3x6Ys5gsPz_PqN-KuRy83YG=cdeqA@mail.gmail.com>
+References: <1472172596-16160-1-git-send-email-shawn.lin@rock-chips.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20160825204645.GA19450@zach-desktop>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Zach Brown <zach.brown@ni.com>, Mark Rutland <mark.rutland@arm.com>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, Rob Herring <robh+dt@kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Michal Simek <michal.simek@xilinx.com>, =?UTF-8?Q?S=C3=B6ren_Brinkmann?= <soren.brinkmann@xilinx.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Lars-Peter Clausen <lars@metafoo.de>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-wm0-f44.google.com ([74.125.82.44]:37357 "EHLO
+        mail-wm0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750947AbcHZHtY (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 26 Aug 2016 03:49:24 -0400
+Received: by mail-wm0-f44.google.com with SMTP id i5so106151275wmg.0
+        for <linux-mmc@vger.kernel.org>; Fri, 26 Aug 2016 00:49:23 -0700 (PDT)
+In-Reply-To: <1472172596-16160-1-git-send-email-shawn.lin@rock-chips.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Shawn Lin <shawn.lin@rock-chips.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>
 
-On 25 August 2016 at 22:46, Zach Brown <zach.brown@ni.com> wrote:
-> On Thu, Aug 25, 2016 at 07:28:55PM +0100, Mark Rutland wrote:
->> On Thu, Aug 25, 2016 at 01:26:22PM -0500, Zach Brown wrote:
->> > On Thu, Aug 25, 2016 at 07:10:00PM +0100, Mark Rutland wrote:
->> > > On Thu, Aug 25, 2016 at 12:15:44PM -0500, Zach Brown wrote:
->> > > > In cases where the card is non-removable then polling doesn't make sense.
->> > >
->> > > We have the non-removable property to describe that, so we can also look at that.
->> > >
->> > > > So it doesn't make sense to tie the test mode workaround into the broken-cd
->> > > > property, even though I agree the nature of the defect fits under the notion
->> > > > of the CD being broken.
->> > >
->> > > Maybe not solely on broken-cd, but I think that we dont necessarily need a new
->> > > DT property. As above, broken-cd, non-removable, and the compatible string may
->> > > together give the kernel enough information to choose the right thing to do.
->> > >
->> > > Thanks,
->> > > Mark.
->> >
->> > I'm not sure if I understand your suggestion completely. Are you suggesting
->> > setting both the broken-cd and non-removable properties? That would make sense,
->> > but my understanding was that the two properities are not meant to co-exist. In
->> > /Documentation/devicetree/bindings/mmc/mmc.txt it states that only one should
->> > be supplied. Don't the two properties conflict with each other?
->>
->> They do for the cases that exist today, but given we're updating the document
->> anyway, we could simply clarify the cases in which the two can sanely co-exist
->> (e.g.  for this particular IP block).
-
-No, please!
-
-Depending on the SDHCI variant there is already some difference on how
-broken-cd is treated.
-
-Let's not add yet another, as I think it will be too complicated for
-people to understand the bindings.
-
->>
->> Thanks,
->> Mark.
+On 26 August 2016 at 02:49, Shawn Lin <shawn.lin@rock-chips.com> wrote:
+> packed should always exist without calling its cleanup function
+> explicitly. Moreover, we have use it when preparing packed list.
+> So I don't believe we should ever fall into this check again when
+> doing mmc_blk_packed_hdr_wrq_prep or mmc_blk_end_packed_req,etc.
+> And the code of mmc_blk_end_packed_req is trying to use packed before
+> checking it which makes it quite weird. This patch is trying to
+> remove these two checks and move it to the mmc_blk_prep_packed_list.
+> If we find packed is null, then we should never use MMC_BLK_PACKED_CMD.
+> By doing this, we could fall back to non-packed request if finding null
+> packed, though it's impossible theoretically.
 >
-> That makes sense. I'll change the documentation for broken-cd and non-removable
-> in the IP specific document and change the driver accordingly.
+> After removing these two BUG_ONs, we also remove all other similar
+> checks within the routine of mmc_blk_issue_rw_rq which checks the
+> error handling of packed request.
+>
+> Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
 
-I rather have a new DT binding specific for this case.
-
-Perhaps there's a better name than "fake-cd". How about "force-cd", or
-if someone can come up with a better name.
+Thanks, applied for next!
 
 Kind regards
 Uffe
+
+>
+> ---
+>
+> Changes in v4: None
+> Changes in v3:
+> - remove other similar BUG_ONs for packed routine
+>
+> Changes in v2:
+> - remove BUG_ON and add fallback for packed instead of
+>   panic it.
+> - remove BUG_ON for mmc_io_rw_extened and add these into the
+>   wrapper function of sdio_io_rw_ext_helper
+> - remove the msg of failing to alloc packed and exlicitly
+>   print we don't support packed request.
+>
+>  drivers/mmc/card/block.c | 24 ++++++++++++------------
+>  1 file changed, 12 insertions(+), 12 deletions(-)
+>
+> diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+> index 48a5dd7..ce822bb 100644
+> --- a/drivers/mmc/card/block.c
+> +++ b/drivers/mmc/card/block.c
+> @@ -142,8 +142,6 @@ static inline void mmc_blk_clear_packed(struct mmc_queue_req *mqrq)
+>  {
+>         struct mmc_packed *packed = mqrq->packed;
+>
+> -       BUG_ON(!packed);
+> -
+>         mqrq->cmd_type = MMC_PACKED_NONE;
+>         packed->nr_entries = MMC_PACKED_NR_ZERO;
+>         packed->idx_failure = MMC_PACKED_NR_IDX;
+> @@ -1443,8 +1441,6 @@ static int mmc_blk_packed_err_check(struct mmc_card *card,
+>         int err, check, status;
+>         u8 *ext_csd;
+>
+> -       BUG_ON(!packed);
+> -
+>         packed->retries--;
+>         check = mmc_blk_err_check(card, areq);
+>         err = get_card_status(card, &status, 0);
+> @@ -1673,6 +1669,18 @@ static u8 mmc_blk_prep_packed_list(struct mmc_queue *mq, struct request *req)
+>         u8 max_packed_rw = 0;
+>         u8 reqs = 0;
+>
+> +       /*
+> +        * We don't need to check packed for any further
+> +        * operation of packed stuff as we set MMC_PACKED_NONE
+> +        * and return zero for reqs if geting null packed. Also
+> +        * we clean the flag of MMC_BLK_PACKED_CMD to avoid doing
+> +        * it again when removing blk req.
+> +        */
+> +       if (!mqrq->packed) {
+> +               md->flags &= (~MMC_BLK_PACKED_CMD);
+> +               goto no_packed;
+> +       }
+> +
+>         if (!(md->flags & MMC_BLK_PACKED_CMD))
+>                 goto no_packed;
+>
+> @@ -1781,8 +1789,6 @@ static void mmc_blk_packed_hdr_wrq_prep(struct mmc_queue_req *mqrq,
+>         u8 hdr_blocks;
+>         u8 i = 1;
+>
+> -       BUG_ON(!packed);
+> -
+>         mqrq->cmd_type = MMC_PACKED_WRITE;
+>         packed->blocks = 0;
+>         packed->idx_failure = MMC_PACKED_NR_IDX;
+> @@ -1886,8 +1892,6 @@ static int mmc_blk_end_packed_req(struct mmc_queue_req *mq_rq)
+>         int idx = packed->idx_failure, i = 0;
+>         int ret = 0;
+>
+> -       BUG_ON(!packed);
+> -
+>         while (!list_empty(&packed->list)) {
+>                 prq = list_entry_rq(packed->list.next);
+>                 if (idx == i) {
+> @@ -1916,8 +1920,6 @@ static void mmc_blk_abort_packed_req(struct mmc_queue_req *mq_rq)
+>         struct request *prq;
+>         struct mmc_packed *packed = mq_rq->packed;
+>
+> -       BUG_ON(!packed);
+> -
+>         while (!list_empty(&packed->list)) {
+>                 prq = list_entry_rq(packed->list.next);
+>                 list_del_init(&prq->queuelist);
+> @@ -1934,8 +1936,6 @@ static void mmc_blk_revert_packed_req(struct mmc_queue *mq,
+>         struct request_queue *q = mq->queue;
+>         struct mmc_packed *packed = mq_rq->packed;
+>
+> -       BUG_ON(!packed);
+> -
+>         while (!list_empty(&packed->list)) {
+>                 prq = list_entry_rq(packed->list.prev);
+>                 if (prq->queuelist.prev != &packed->list) {
+> --
+> 2.3.7
+>
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
