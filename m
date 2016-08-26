@@ -1,88 +1,129 @@
-From: Zach Brown <zach.brown-acOepvfBmUk@public.gmane.org>
-Subject: [PATCH v2 2/2] sdhci-of-arasan: Set controller to test mode when Card Detection is broken.
-Date: Thu, 25 Aug 2016 18:01:51 -0500
-Message-ID: <1472166111-28872-2-git-send-email-zach.brown@ni.com>
-References: <1472166111-28872-1-git-send-email-zach.brown@ni.com>
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1472166111-28872-1-git-send-email-zach.brown-acOepvfBmUk@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org
-Cc: robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, michal.simek-gjFFaj9aHVfQT0dZR+AlfA@public.gmane.org, soren.brinkmann-gjFFaj9aHVfQT0dZR+AlfA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, zach.brown-acOepvfBmUk@public.gmane.org
+From: Shawn Lin <shawn.lin@rock-chips.com>
+Subject: [PATCH v4 1/2] mmc: block: remove the check of packed for packed request routine
+Date: Fri, 26 Aug 2016 08:49:55 +0800
+Message-ID: <1472172596-16160-1-git-send-email-shawn.lin@rock-chips.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from lucky1.263xmail.com ([211.157.147.131]:57952 "EHLO
+        lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751292AbcHZAyh (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 25 Aug 2016 20:54:37 -0400
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc@vger.kernel.org, Shawn Lin <shawn.lin@rock-chips.com>
 
-The sdhci controller on xilinx zynq devices will not function unless
-the CD bit is provided. http://www.xilinx.com/support/answers/61064.html
-In cases where it is impossible to provide the CD bit in hardware,
-setting the controller to test mode and then setting inserted to true
-will get the controller to function without the CD bit.
+packed should always exist without calling its cleanup function
+explicitly. Moreover, we have use it when preparing packed list.
+So I don't believe we should ever fall into this check again when
+doing mmc_blk_packed_hdr_wrq_prep or mmc_blk_end_packed_req,etc.
+And the code of mmc_blk_end_packed_req is trying to use packed before
+checking it which makes it quite weird. This patch is trying to
+remove these two checks and move it to the mmc_blk_prep_packed_list.
+If we find packed is null, then we should never use MMC_BLK_PACKED_CMD.
+By doing this, we could fall back to non-packed request if finding null
+packed, though it's impossible theoretically.
 
-When the device has the property broken-cd the driver changes the
-controller to test mode and sets test inserted to true to make the
-controller function.
+After removing these two BUG_ONs, we also remove all other similar
+checks within the routine of mmc_blk_issue_rw_rq which checks the
+error handling of packed request.
 
-Signed-off-by: Zach Brown <zach.brown-acOepvfBmUk@public.gmane.org>
+Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
+
 ---
- drivers/mmc/host/sdhci-of-arasan.c | 17 ++++++++++++++++-
- drivers/mmc/host/sdhci.h           |  2 ++
- 2 files changed, 18 insertions(+), 1 deletion(-)
 
-diff --git a/drivers/mmc/host/sdhci-of-arasan.c b/drivers/mmc/host/sdhci-of-arasan.c
-index e0f193f..3798a3b 100644
---- a/drivers/mmc/host/sdhci-of-arasan.c
-+++ b/drivers/mmc/host/sdhci-of-arasan.c
-@@ -26,6 +26,7 @@
- #include <linux/phy/phy.h>
- #include <linux/regmap.h>
- #include "sdhci-pltfm.h"
-+#include <linux/of.h>
+Changes in v4: None
+Changes in v3:
+- remove other similar BUG_ONs for packed routine
+
+Changes in v2:
+- remove BUG_ON and add fallback for packed instead of
+  panic it.
+- remove BUG_ON for mmc_io_rw_extened and add these into the
+  wrapper function of sdio_io_rw_ext_helper
+- remove the msg of failing to alloc packed and exlicitly
+  print we don't support packed request.
+
+ drivers/mmc/card/block.c | 24 ++++++++++++------------
+ 1 file changed, 12 insertions(+), 12 deletions(-)
+
+diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+index 48a5dd7..ce822bb 100644
+--- a/drivers/mmc/card/block.c
++++ b/drivers/mmc/card/block.c
+@@ -142,8 +142,6 @@ static inline void mmc_blk_clear_packed(struct mmc_queue_req *mqrq)
+ {
+ 	struct mmc_packed *packed = mqrq->packed;
  
- #define SDHCI_ARASAN_CLK_CTRL_OFFSET	0x2c
- #define SDHCI_ARASAN_VENDOR_REGISTER	0x78
-@@ -203,12 +204,26 @@ static void sdhci_arasan_hs400_enhanced_strobe(struct mmc_host *mmc,
- 	writel(vendor, host->ioaddr + SDHCI_ARASAN_VENDOR_REGISTER);
- }
+-	BUG_ON(!packed);
+-
+ 	mqrq->cmd_type = MMC_PACKED_NONE;
+ 	packed->nr_entries = MMC_PACKED_NR_ZERO;
+ 	packed->idx_failure = MMC_PACKED_NR_IDX;
+@@ -1443,8 +1441,6 @@ static int mmc_blk_packed_err_check(struct mmc_card *card,
+ 	int err, check, status;
+ 	u8 *ext_csd;
  
-+void sdhci_arasan_reset(struct sdhci_host *host, u8 mask)
-+{
-+	u8 ctrl;
-+
-+	sdhci_reset(host, mask);
-+
-+	if (host->quirks & SDHCI_QUIRK_BROKEN_CARD_DETECTION) {
-+		ctrl = sdhci_readb(host, SDHCI_HOST_CONTROL);
-+		ctrl |= SDHCI_CTRL_CDTEST_INS |
-+			SDHCI_CTRL_CDTEST_EN;
-+		sdhci_writeb(host, ctrl, SDHCI_HOST_CONTROL);
+-	BUG_ON(!packed);
+-
+ 	packed->retries--;
+ 	check = mmc_blk_err_check(card, areq);
+ 	err = get_card_status(card, &status, 0);
+@@ -1673,6 +1669,18 @@ static u8 mmc_blk_prep_packed_list(struct mmc_queue *mq, struct request *req)
+ 	u8 max_packed_rw = 0;
+ 	u8 reqs = 0;
+ 
++	/*
++	 * We don't need to check packed for any further
++	 * operation of packed stuff as we set MMC_PACKED_NONE
++	 * and return zero for reqs if geting null packed. Also
++	 * we clean the flag of MMC_BLK_PACKED_CMD to avoid doing
++	 * it again when removing blk req.
++	 */
++	if (!mqrq->packed) {
++		md->flags &= (~MMC_BLK_PACKED_CMD);
++		goto no_packed;
 +	}
-+}
 +
- static struct sdhci_ops sdhci_arasan_ops = {
- 	.set_clock = sdhci_arasan_set_clock,
- 	.get_max_clock = sdhci_pltfm_clk_get_max_clock,
- 	.get_timeout_clock = sdhci_arasan_get_timeout_clock,
- 	.set_bus_width = sdhci_set_bus_width,
--	.reset = sdhci_reset,
-+	.reset = sdhci_arasan_reset,
- 	.set_uhs_signaling = sdhci_set_uhs_signaling,
- };
+ 	if (!(md->flags & MMC_BLK_PACKED_CMD))
+ 		goto no_packed;
  
-diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-index 0411c9f..8d92d6e9 100644
---- a/drivers/mmc/host/sdhci.h
-+++ b/drivers/mmc/host/sdhci.h
-@@ -84,6 +84,8 @@
- #define   SDHCI_CTRL_ADMA32	0x10
- #define   SDHCI_CTRL_ADMA64	0x18
- #define   SDHCI_CTRL_8BITBUS	0x20
-+#define  SDHCI_CTRL_CDTEST_INS   0x40
-+#define  SDHCI_CTRL_CDTEST_EN     0x80
+@@ -1781,8 +1789,6 @@ static void mmc_blk_packed_hdr_wrq_prep(struct mmc_queue_req *mqrq,
+ 	u8 hdr_blocks;
+ 	u8 i = 1;
  
- #define SDHCI_POWER_CONTROL	0x29
- #define  SDHCI_POWER_ON		0x01
+-	BUG_ON(!packed);
+-
+ 	mqrq->cmd_type = MMC_PACKED_WRITE;
+ 	packed->blocks = 0;
+ 	packed->idx_failure = MMC_PACKED_NR_IDX;
+@@ -1886,8 +1892,6 @@ static int mmc_blk_end_packed_req(struct mmc_queue_req *mq_rq)
+ 	int idx = packed->idx_failure, i = 0;
+ 	int ret = 0;
+ 
+-	BUG_ON(!packed);
+-
+ 	while (!list_empty(&packed->list)) {
+ 		prq = list_entry_rq(packed->list.next);
+ 		if (idx == i) {
+@@ -1916,8 +1920,6 @@ static void mmc_blk_abort_packed_req(struct mmc_queue_req *mq_rq)
+ 	struct request *prq;
+ 	struct mmc_packed *packed = mq_rq->packed;
+ 
+-	BUG_ON(!packed);
+-
+ 	while (!list_empty(&packed->list)) {
+ 		prq = list_entry_rq(packed->list.next);
+ 		list_del_init(&prq->queuelist);
+@@ -1934,8 +1936,6 @@ static void mmc_blk_revert_packed_req(struct mmc_queue *mq,
+ 	struct request_queue *q = mq->queue;
+ 	struct mmc_packed *packed = mq_rq->packed;
+ 
+-	BUG_ON(!packed);
+-
+ 	while (!list_empty(&packed->list)) {
+ 		prq = list_entry_rq(packed->list.prev);
+ 		if (prq->queuelist.prev != &packed->list) {
 -- 
-2.7.4
+2.3.7
 
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
