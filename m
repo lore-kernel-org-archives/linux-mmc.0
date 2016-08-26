@@ -1,101 +1,134 @@
-From: Mike Looijmans <mike.looijmans@topic.nl>
-Subject: Re: [PATCH v2 2/2] sdhci-of-arasan: Set controller to test mode when
- Card Detection is broken.
-Date: Fri, 26 Aug 2016 10:42:39 +0200
-Message-ID: <57C000FF.3090307@topic.nl>
-References: <1472166111-28872-1-git-send-email-zach.brown@ni.com>
- <1472166111-28872-2-git-send-email-zach.brown@ni.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"; Format="flowed"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <1472166111-28872-2-git-send-email-zach.brown@ni.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Zach Brown <zach.brown@ni.com>, adrian.hunter@intel.com
-Cc: mark.rutland@arm.com, devicetree@vger.kernel.org, ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, michal.simek@xilinx.com, robh+dt@kernel.org, soren.brinkmann@xilinx.com, linux-arm-kernel@lists.infradead.org
+From: Shawn Lin <shawn.lin@rock-chips.com>
+Subject: [PATCH v2] mmc: sdhci-of-arasan: Properly set corecfg_clockmultiplier on rk3399
+Date: Fri, 26 Aug 2016 16:51:15 +0800
+Message-ID: <1472201475-7970-1-git-send-email-shawn.lin@rock-chips.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from lucky1.263xmail.com ([211.157.147.134]:39556 "EHLO
+        lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750766AbcHZI4L (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 26 Aug 2016 04:56:11 -0400
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, linux-mmc@vger.kernel.org, xzy.xu@rock-chips.com, linux-rockchip@lists.infradead.org, Shawn Lin <shawn.lin@rock-chips.com>, Douglas Anderson <dianders@chromium.org>
 
-On 26-08-16 01:01, Zach Brown wrote:
-> The sdhci controller on xilinx zynq devices will not function unless
-> the CD bit is provided. http://www.xilinx.com/support/answers/61064.html
-> In cases where it is impossible to provide the CD bit in hardware,
-> setting the controller to test mode and then setting inserted to true
-> will get the controller to function without the CD bit.
->
-> When the device has the property broken-cd the driver changes the
-> controller to test mode and sets test inserted to true to make the
-> controller function.
->
-> Signed-off-by: Zach Brown <zach.brown@ni.com>
-> ---
->   drivers/mmc/host/sdhci-of-arasan.c | 17 ++++++++++++++++-
->   drivers/mmc/host/sdhci.h           |  2 ++
->   2 files changed, 18 insertions(+), 1 deletion(-)
->
-> diff --git a/drivers/mmc/host/sdhci-of-arasan.c b/drivers/mmc/host/sdhci-of-arasan.c
-> index e0f193f..3798a3b 100644
-> --- a/drivers/mmc/host/sdhci-of-arasan.c
-> +++ b/drivers/mmc/host/sdhci-of-arasan.c
-> @@ -26,6 +26,7 @@
->   #include <linux/phy/phy.h>
->   #include <linux/regmap.h>
->   #include "sdhci-pltfm.h"
-> +#include <linux/of.h>
+corecfg_clockmultiplier indicates clock multiplier value of
+programmable clock generator which should be the same value
+of SDHCI_CAPABILITIES_1. The default value of the register,
+corecfg_clockmultiplier, is 0x10. But actually it is a mistake
+by designer as our intention was to set it to be zero which
+means we don't support programmable clock generator. So we have
+to make it to be zero on bootloader which seems work fine until
+now. But now we find an issue that when deploying genpd support
+for it, the remove callback will trigger the genpd to poweroff the
+power domain for sdhci-of-arasan which manage the controller, phy
+and corecfg_* stuff.
 
-Not needed.
+So when we do bind/unbind the driver, we have already reinit
+the controller and phy, but without doing that for corecfg_*.
+Regarding to only the corecfg_clockmultipler is wrong, let's
+fix it by explicitly marking it to be zero when probing. With
+this change, we could do bind/unbind successfully.
 
->   #define SDHCI_ARASAN_CLK_CTRL_OFFSET	0x2c
->   #define SDHCI_ARASAN_VENDOR_REGISTER	0x78
-> @@ -203,12 +204,26 @@ static void sdhci_arasan_hs400_enhanced_strobe(struct mmc_host *mmc,
->   	writel(vendor, host->ioaddr + SDHCI_ARASAN_VENDOR_REGISTER);
->   }
->
-> +void sdhci_arasan_reset(struct sdhci_host *host, u8 mask)
-> +{
-> +	u8 ctrl;
-> +
-> +	sdhci_reset(host, mask);
-> +
-> +	if (host->quirks & SDHCI_QUIRK_BROKEN_CARD_DETECTION) {
-> +		ctrl = sdhci_readb(host, SDHCI_HOST_CONTROL);
-> +		ctrl |= SDHCI_CTRL_CDTEST_INS |
-> +			SDHCI_CTRL_CDTEST_EN;
-> +		sdhci_writeb(host, ctrl, SDHCI_HOST_CONTROL);
-> +	}
-> +}
-> +
->   static struct sdhci_ops sdhci_arasan_ops = {
->   	.set_clock = sdhci_arasan_set_clock,
->   	.get_max_clock = sdhci_pltfm_clk_get_max_clock,
->   	.get_timeout_clock = sdhci_arasan_get_timeout_clock,
->   	.set_bus_width = sdhci_set_bus_width,
-> -	.reset = sdhci_reset,
-> +	.reset = sdhci_arasan_reset,
->   	.set_uhs_signaling = sdhci_set_uhs_signaling,
->   };
->
-> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-> index 0411c9f..8d92d6e9 100644
-> --- a/drivers/mmc/host/sdhci.h
-> +++ b/drivers/mmc/host/sdhci.h
-> @@ -84,6 +84,8 @@
->   #define   SDHCI_CTRL_ADMA32	0x10
->   #define   SDHCI_CTRL_ADMA64	0x18
->   #define   SDHCI_CTRL_8BITBUS	0x20
-> +#define  SDHCI_CTRL_CDTEST_INS   0x40
-> +#define  SDHCI_CTRL_CDTEST_EN     0x80
->
->   #define SDHCI_POWER_CONTROL	0x29
->   #define  SDHCI_POWER_ON		0x01
+Reported-by: Ziyuan Xu <xzy.xu@rock-chips.com>
+Cc: Douglas Anderson <dianders@chromium.org>
+Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
 
-Looks okay, tested it and appears to work just as well as a tie-off in logic.
+---
 
-Tested-by: mike.looijmans@topic.nl
+Changes in v2:
+- fix some typos and build
+- move the configuration of corecfg_clockmultiplier after
+  enabling aclk_emmc to avoid the off state of aclk_emmc_grf.
+  I add a new function to make it more common for other coming
+  users who have the same requirment for setting diff clkmul.
+
+ drivers/mmc/host/sdhci-of-arasan.c | 46 ++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 46 insertions(+)
+
+diff --git a/drivers/mmc/host/sdhci-of-arasan.c b/drivers/mmc/host/sdhci-of-arasan.c
+index 0b3a9cf..33601a8 100644
+--- a/drivers/mmc/host/sdhci-of-arasan.c
++++ b/drivers/mmc/host/sdhci-of-arasan.c
+@@ -67,10 +67,12 @@ struct sdhci_arasan_soc_ctl_field {
+  * accessible via the syscon API.
+  *
+  * @baseclkfreq:	Where to find corecfg_baseclkfreq
++ * @clockmultiplier:	Where to find corecfg_clockmultiplier
+  * @hiword_update:	If true, use HIWORD_UPDATE to access the syscon
+  */
+ struct sdhci_arasan_soc_ctl_map {
+ 	struct sdhci_arasan_soc_ctl_field	baseclkfreq;
++	struct sdhci_arasan_soc_ctl_field	clockmultiplier;
+ 	bool					hiword_update;
+ };
+ 
+@@ -100,6 +102,7 @@ struct sdhci_arasan_data {
+ 
+ static const struct sdhci_arasan_soc_ctl_map rk3399_soc_ctl_map = {
+ 	.baseclkfreq = { .reg = 0xf000, .width = 8, .shift = 8 },
++	.clockmultiplier = { .reg = 0xf02c, .width = 8, .shift = 0},
+ 	.hiword_update = true,
+ };
+ 
+@@ -379,6 +382,45 @@ static const struct clk_ops arasan_sdcardclk_ops = {
+ };
+ 
+ /**
++ * sdhci_arasan_update_clockmultiplier - Set corecfg_clockmultiplier
++ *
++ * The corecfg_clockmultiplier is supposed to contain clock multiplier
++ * value of programmable clock generator.
++ *
++ * NOTES:
++ * - Many existing devices don't seem to do this and work fine.  To keep
++ *   compatibility for old hardware where the device tree doesn't provide a
++ *   register map, this function is a noop if a soc_ctl_map hasn't been provided
++ *   for this platform.
++ * - The value of corecfg_clockmultiplier should sync with that of corresponding
++ *   value reading from sdhci_capability_register. So this function is called
++ *   once at probe time and never called again.
++ *
++ * @host:		The sdhci_host
++ */
++static void sdhci_arasan_update_clockmultiplier(struct sdhci_host *host,
++						u32 value)
++{
++	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
++	struct sdhci_arasan_data *sdhci_arasan = sdhci_pltfm_priv(pltfm_host);
++	const struct sdhci_arasan_soc_ctl_map *soc_ctl_map =
++		sdhci_arasan->soc_ctl_map;
++
++	/* Having a map is optional */
++	if (!soc_ctl_map)
++		return;
++
++	/* If we have a map, we expect to have a syscon */
++	if (!sdhci_arasan->soc_ctl_base) {
++		pr_warn("%s: Have regmap, but no soc-ctl-syscon\n",
++			mmc_hostname(host->mmc));
++		return;
++	}
++
++	sdhci_arasan_syscon_write(host, &soc_ctl_map->clockmultiplier, value);
++}
++
++/**
+  * sdhci_arasan_update_baseclkfreq - Set corecfg_baseclkfreq
+  *
+  * The corecfg_baseclkfreq is supposed to contain the MHz of clk_xin.  This
+@@ -559,6 +601,10 @@ static int sdhci_arasan_probe(struct platform_device *pdev)
+ 	sdhci_get_of_property(pdev);
+ 	pltfm_host->clk = clk_xin;
+ 
++	if (of_device_is_compatible(pdev->dev.of_node,
++				    "rockchip,rk3399-sdhci-5.1"))
++		sdhci_arasan_update_clockmultiplier(host, 0x0);
++
+ 	sdhci_arasan_update_baseclkfreq(host);
+ 
+ 	ret = sdhci_arasan_register_sdclk(sdhci_arasan, clk_xin, &pdev->dev);
+-- 
+2.3.7
+
+
