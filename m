@@ -1,128 +1,223 @@
 From: Shawn Lin <shawn.lin@rock-chips.com>
-Subject: [PATCH v4 1/2] mmc: block: remove the check of packed for packed request routine
-Date: Fri, 26 Aug 2016 08:49:55 +0800
-Message-ID: <1472172596-16160-1-git-send-email-shawn.lin@rock-chips.com>
+Subject: [PATCH v4 2/2] mmc: sdio: deploy error handling instead of triggering BUG_ON
+Date: Fri, 26 Aug 2016 08:49:56 +0800
+Message-ID: <1472172596-16160-2-git-send-email-shawn.lin@rock-chips.com>
+References: <1472172596-16160-1-git-send-email-shawn.lin@rock-chips.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from lucky1.263xmail.com ([211.157.147.131]:57952 "EHLO
+Received: from lucky1.263xmail.com ([211.157.147.134]:45560 "EHLO
         lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751292AbcHZAyh (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 25 Aug 2016 20:54:37 -0400
+        with ESMTP id S1750703AbcHZAyl (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 25 Aug 2016 20:54:41 -0400
+In-Reply-To: <1472172596-16160-1-git-send-email-shawn.lin@rock-chips.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>
 Cc: linux-mmc@vger.kernel.org, Shawn Lin <shawn.lin@rock-chips.com>
 
-packed should always exist without calling its cleanup function
-explicitly. Moreover, we have use it when preparing packed list.
-So I don't believe we should ever fall into this check again when
-doing mmc_blk_packed_hdr_wrq_prep or mmc_blk_end_packed_req,etc.
-And the code of mmc_blk_end_packed_req is trying to use packed before
-checking it which makes it quite weird. This patch is trying to
-remove these two checks and move it to the mmc_blk_prep_packed_list.
-If we find packed is null, then we should never use MMC_BLK_PACKED_CMD.
-By doing this, we could fall back to non-packed request if finding null
-packed, though it's impossible theoretically.
+When using mmc_io_rw_extended, it's intent to avoid null
+pointer of card and invalid func number. But actually it
+didn't prevent that as the seg_size already use the card.
+Currently the wrapper function sdio_io_rw_ext_helper already
+use card before calling mmc_io_rw_extended, so we should move
+this check to there. As to the func number, it was token from
+'(ocr & 0x70000000) >> 28' which should be enough to guarantee
+that it won't be larger than 7. But we should prevent the
+caller like wifi drivers modify this value. So let's move this
+check into sdio_io_rw_ext_helper either.
 
-After removing these two BUG_ONs, we also remove all other similar
-checks within the routine of mmc_blk_issue_rw_rq which checks the
-error handling of packed request.
+Also we remove the BUG_ON for mmc_send_io_op_cond since all
+possible paths calling this function are protected by checking
+the arguments in advance. After deploying these changes, we
+could not see any panic within SDIO API even if func drivers
+abuse the SDIO func APIs.
 
 Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
 
 ---
 
-Changes in v4: None
+Changes in v4:
+- remove some unnecessary checks to simply code a bit more.
+
 Changes in v3:
-- remove other similar BUG_ONs for packed routine
+- remove more BUG_ONs for SDIO API and add error rountine
+  for either propagating error codes or casting warning before
+  return.
 
-Changes in v2:
-- remove BUG_ON and add fallback for packed instead of
-  panic it.
-- remove BUG_ON for mmc_io_rw_extened and add these into the
-  wrapper function of sdio_io_rw_ext_helper
-- remove the msg of failing to alloc packed and exlicitly
-  print we don't support packed request.
+Changes in v2: None
 
- drivers/mmc/card/block.c | 24 ++++++++++++------------
- 1 file changed, 12 insertions(+), 12 deletions(-)
+ drivers/mmc/core/sdio_io.c  | 47 ++++++++++++++++++++++++++++++---------------
+ drivers/mmc/core/sdio_ops.c |  9 ++-------
+ 2 files changed, 33 insertions(+), 23 deletions(-)
 
-diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
-index 48a5dd7..ce822bb 100644
---- a/drivers/mmc/card/block.c
-+++ b/drivers/mmc/card/block.c
-@@ -142,8 +142,6 @@ static inline void mmc_blk_clear_packed(struct mmc_queue_req *mqrq)
+diff --git a/drivers/mmc/core/sdio_io.c b/drivers/mmc/core/sdio_io.c
+index 78cb4d5..406e5f0 100644
+--- a/drivers/mmc/core/sdio_io.c
++++ b/drivers/mmc/core/sdio_io.c
+@@ -26,8 +26,8 @@
+  */
+ void sdio_claim_host(struct sdio_func *func)
  {
- 	struct mmc_packed *packed = mqrq->packed;
+-	BUG_ON(!func);
+-	BUG_ON(!func->card);
++	if (WARN_ON(!func))
++		return;
  
--	BUG_ON(!packed);
--
- 	mqrq->cmd_type = MMC_PACKED_NONE;
- 	packed->nr_entries = MMC_PACKED_NR_ZERO;
- 	packed->idx_failure = MMC_PACKED_NR_IDX;
-@@ -1443,8 +1441,6 @@ static int mmc_blk_packed_err_check(struct mmc_card *card,
- 	int err, check, status;
- 	u8 *ext_csd;
+ 	mmc_claim_host(func->card->host);
+ }
+@@ -42,8 +42,8 @@ EXPORT_SYMBOL_GPL(sdio_claim_host);
+  */
+ void sdio_release_host(struct sdio_func *func)
+ {
+-	BUG_ON(!func);
+-	BUG_ON(!func->card);
++	if (WARN_ON(!func))
++		return;
  
--	BUG_ON(!packed);
--
- 	packed->retries--;
- 	check = mmc_blk_err_check(card, areq);
- 	err = get_card_status(card, &status, 0);
-@@ -1673,6 +1669,18 @@ static u8 mmc_blk_prep_packed_list(struct mmc_queue *mq, struct request *req)
- 	u8 max_packed_rw = 0;
- 	u8 reqs = 0;
+ 	mmc_release_host(func->card->host);
+ }
+@@ -62,8 +62,8 @@ int sdio_enable_func(struct sdio_func *func)
+ 	unsigned char reg;
+ 	unsigned long timeout;
  
-+	/*
-+	 * We don't need to check packed for any further
-+	 * operation of packed stuff as we set MMC_PACKED_NONE
-+	 * and return zero for reqs if geting null packed. Also
-+	 * we clean the flag of MMC_BLK_PACKED_CMD to avoid doing
-+	 * it again when removing blk req.
-+	 */
-+	if (!mqrq->packed) {
-+		md->flags &= (~MMC_BLK_PACKED_CMD);
-+		goto no_packed;
-+	}
+-	BUG_ON(!func);
+-	BUG_ON(!func->card);
++	if (!func)
++		return -EINVAL;
+ 
+ 	pr_debug("SDIO: Enabling device %s...\n", sdio_func_id(func));
+ 
+@@ -112,8 +112,8 @@ int sdio_disable_func(struct sdio_func *func)
+ 	int ret;
+ 	unsigned char reg;
+ 
+-	BUG_ON(!func);
+-	BUG_ON(!func->card);
++	if (!func)
++		return -EINVAL;
+ 
+ 	pr_debug("SDIO: Disabling device %s...\n", sdio_func_id(func));
+ 
+@@ -307,6 +307,9 @@ static int sdio_io_rw_ext_helper(struct sdio_func *func, int write,
+ 	unsigned max_blocks;
+ 	int ret;
+ 
++	if (!func || (func->num > 7))
++		return -EINVAL;
 +
- 	if (!(md->flags & MMC_BLK_PACKED_CMD))
- 		goto no_packed;
+ 	/* Do the bulk of the transfer using block mode (if supported). */
+ 	if (func->card->cccr.multi_block && (size > sdio_max_byte_size(func))) {
+ 		/* Blocks per command is limited by host count, host transfer
+@@ -367,7 +370,10 @@ u8 sdio_readb(struct sdio_func *func, unsigned int addr, int *err_ret)
+ 	int ret;
+ 	u8 val;
  
-@@ -1781,8 +1789,6 @@ static void mmc_blk_packed_hdr_wrq_prep(struct mmc_queue_req *mqrq,
- 	u8 hdr_blocks;
- 	u8 i = 1;
+-	BUG_ON(!func);
++	if (!func) {
++		*err_ret = -EINVAL;
++		return 0xFF;
++	}
  
--	BUG_ON(!packed);
+ 	if (err_ret)
+ 		*err_ret = 0;
+@@ -398,7 +404,10 @@ void sdio_writeb(struct sdio_func *func, u8 b, unsigned int addr, int *err_ret)
+ {
+ 	int ret;
+ 
+-	BUG_ON(!func);
++	if (!func) {
++		*err_ret = -EINVAL;
++		return;
++	}
+ 
+ 	ret = mmc_io_rw_direct(func->card, 1, func->num, addr, b, NULL);
+ 	if (err_ret)
+@@ -623,7 +632,10 @@ unsigned char sdio_f0_readb(struct sdio_func *func, unsigned int addr,
+ 	int ret;
+ 	unsigned char val;
+ 
+-	BUG_ON(!func);
++	if (!func) {
++		*err_ret = -EINVAL;
++		return 0xFF;
++	}
+ 
+ 	if (err_ret)
+ 		*err_ret = 0;
+@@ -658,7 +670,10 @@ void sdio_f0_writeb(struct sdio_func *func, unsigned char b, unsigned int addr,
+ {
+ 	int ret;
+ 
+-	BUG_ON(!func);
++	if (!func) {
++		*err_ret = -EINVAL;
++		return;
++	}
+ 
+ 	if ((addr < 0xF0 || addr > 0xFF) && (!mmc_card_lenient_fn0(func->card))) {
+ 		if (err_ret)
+@@ -684,8 +699,8 @@ EXPORT_SYMBOL_GPL(sdio_f0_writeb);
+  */
+ mmc_pm_flag_t sdio_get_host_pm_caps(struct sdio_func *func)
+ {
+-	BUG_ON(!func);
+-	BUG_ON(!func->card);
++	if (!func)
++		return 0;
+ 
+ 	return func->card->host->pm_caps;
+ }
+@@ -707,8 +722,8 @@ int sdio_set_host_pm_flags(struct sdio_func *func, mmc_pm_flag_t flags)
+ {
+ 	struct mmc_host *host;
+ 
+-	BUG_ON(!func);
+-	BUG_ON(!func->card);
++	if (!func)
++		return -EINVAL;
+ 
+ 	host = func->card->host;
+ 
+diff --git a/drivers/mmc/core/sdio_ops.c b/drivers/mmc/core/sdio_ops.c
+index 34f6e80..90fe554 100644
+--- a/drivers/mmc/core/sdio_ops.c
++++ b/drivers/mmc/core/sdio_ops.c
+@@ -24,8 +24,6 @@ int mmc_send_io_op_cond(struct mmc_host *host, u32 ocr, u32 *rocr)
+ 	struct mmc_command cmd = {0};
+ 	int i, err = 0;
+ 
+-	BUG_ON(!host);
 -
- 	mqrq->cmd_type = MMC_PACKED_WRITE;
- 	packed->blocks = 0;
- 	packed->idx_failure = MMC_PACKED_NR_IDX;
-@@ -1886,8 +1892,6 @@ static int mmc_blk_end_packed_req(struct mmc_queue_req *mq_rq)
- 	int idx = packed->idx_failure, i = 0;
- 	int ret = 0;
+ 	cmd.opcode = SD_IO_SEND_OP_COND;
+ 	cmd.arg = ocr;
+ 	cmd.flags = MMC_RSP_SPI_R4 | MMC_RSP_R4 | MMC_CMD_BCR;
+@@ -71,8 +69,8 @@ static int mmc_io_rw_direct_host(struct mmc_host *host, int write, unsigned fn,
+ 	struct mmc_command cmd = {0};
+ 	int err;
  
--	BUG_ON(!packed);
--
- 	while (!list_empty(&packed->list)) {
- 		prq = list_entry_rq(packed->list.next);
- 		if (idx == i) {
-@@ -1916,8 +1920,6 @@ static void mmc_blk_abort_packed_req(struct mmc_queue_req *mq_rq)
- 	struct request *prq;
- 	struct mmc_packed *packed = mq_rq->packed;
+-	BUG_ON(!host);
+-	BUG_ON(fn > 7);
++	if (fn > 7)
++		return -EINVAL;
  
--	BUG_ON(!packed);
--
- 	while (!list_empty(&packed->list)) {
- 		prq = list_entry_rq(packed->list.next);
- 		list_del_init(&prq->queuelist);
-@@ -1934,8 +1936,6 @@ static void mmc_blk_revert_packed_req(struct mmc_queue *mq,
- 	struct request_queue *q = mq->queue;
- 	struct mmc_packed *packed = mq_rq->packed;
+ 	/* sanity check */
+ 	if (addr & ~0x1FFFF)
+@@ -114,7 +112,6 @@ static int mmc_io_rw_direct_host(struct mmc_host *host, int write, unsigned fn,
+ int mmc_io_rw_direct(struct mmc_card *card, int write, unsigned fn,
+ 	unsigned addr, u8 in, u8 *out)
+ {
+-	BUG_ON(!card);
+ 	return mmc_io_rw_direct_host(card->host, write, fn, addr, in, out);
+ }
  
--	BUG_ON(!packed);
--
- 	while (!list_empty(&packed->list)) {
- 		prq = list_entry_rq(packed->list.prev);
- 		if (prq->queuelist.prev != &packed->list) {
+@@ -129,8 +126,6 @@ int mmc_io_rw_extended(struct mmc_card *card, int write, unsigned fn,
+ 	unsigned int nents, left_size, i;
+ 	unsigned int seg_size = card->host->max_seg_size;
+ 
+-	BUG_ON(!card);
+-	BUG_ON(fn > 7);
+ 	WARN_ON(blksz == 0);
+ 
+ 	/* sanity check */
 -- 
 2.3.7
 
