@@ -1,56 +1,120 @@
-From: Ziyuan Xu <xzy.xu-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
-Subject: Re: [PATCH v2] mmc: sdhci-of-arasan: Properly set
- corecfg_clockmultiplier on rk3399
-Date: Fri, 26 Aug 2016 17:03:06 +0800
-Message-ID: <4b1f59a7-0498-1580-a47d-4f639704cdb2@rock-chips.com>
-References: <1472201475-7970-1-git-send-email-shawn.lin@rock-chips.com>
+From: Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
+Subject: Re: [PATCH v2 2/2] sdhci-of-arasan: Set controller to test mode when
+ Card Detection is broken.
+Date: Fri, 26 Aug 2016 17:50:43 +0800
+Message-ID: <0fa180a6-5634-bac9-f933-7d68eef84796@rock-chips.com>
+References: <1472166111-28872-1-git-send-email-zach.brown@ni.com>
+ <1472166111-28872-2-git-send-email-zach.brown@ni.com>
+ <57C000FF.3090307@topic.nl>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"; Format="flowed"
-Content-Transfer-Encoding: base64
-Return-path: <linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-In-Reply-To: <1472201475-7970-1-git-send-email-shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-rockchip>,
- <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-rockchip/>
-List-Post: <mailto:linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-List-Help: <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-rockchip>,
- <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
-Sender: "Linux-rockchip" <linux-rockchip-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-Errors-To: linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
-To: Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Douglas Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
+Content-Type: text/plain; charset=windows-1252; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <57C000FF.3090307-Oq418RWZeHk@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Mike Looijmans <mike.looijmans-Oq418RWZeHk@public.gmane.org>, Zach Brown <zach.brown-acOepvfBmUk@public.gmane.org>, adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org
+Cc: shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, michal.simek-gjFFaj9aHVfQT0dZR+AlfA@public.gmane.org, robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, soren.brinkmann-gjFFaj9aHVfQT0dZR+AlfA@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
 
-CgpPbiAyMDE25bm0MDjmnIgyNuaXpSAxNjo1MSwgU2hhd24gTGluIHdyb3RlOgo+IGNvcmVjZmdf
-Y2xvY2ttdWx0aXBsaWVyIGluZGljYXRlcyBjbG9jayBtdWx0aXBsaWVyIHZhbHVlIG9mCj4gcHJv
-Z3JhbW1hYmxlIGNsb2NrIGdlbmVyYXRvciB3aGljaCBzaG91bGQgYmUgdGhlIHNhbWUgdmFsdWUK
-PiBvZiBTREhDSV9DQVBBQklMSVRJRVNfMS4gVGhlIGRlZmF1bHQgdmFsdWUgb2YgdGhlIHJlZ2lz
-dGVyLAo+IGNvcmVjZmdfY2xvY2ttdWx0aXBsaWVyLCBpcyAweDEwLiBCdXQgYWN0dWFsbHkgaXQg
-aXMgYSBtaXN0YWtlCj4gYnkgZGVzaWduZXIgYXMgb3VyIGludGVudGlvbiB3YXMgdG8gc2V0IGl0
-IHRvIGJlIHplcm8gd2hpY2gKPiBtZWFucyB3ZSBkb24ndCBzdXBwb3J0IHByb2dyYW1tYWJsZSBj
-bG9jayBnZW5lcmF0b3IuIFNvIHdlIGhhdmUKPiB0byBtYWtlIGl0IHRvIGJlIHplcm8gb24gYm9v
-dGxvYWRlciB3aGljaCBzZWVtcyB3b3JrIGZpbmUgdW50aWwKPiBub3cuIEJ1dCBub3cgd2UgZmlu
-ZCBhbiBpc3N1ZSB0aGF0IHdoZW4gZGVwbG95aW5nIGdlbnBkIHN1cHBvcnQKPiBmb3IgaXQsIHRo
-ZSByZW1vdmUgY2FsbGJhY2sgd2lsbCB0cmlnZ2VyIHRoZSBnZW5wZCB0byBwb3dlcm9mZiB0aGUK
-PiBwb3dlciBkb21haW4gZm9yIHNkaGNpLW9mLWFyYXNhbiB3aGljaCBtYW5hZ2UgdGhlIGNvbnRy
-b2xsZXIsIHBoeQo+IGFuZCBjb3JlY2ZnXyogc3R1ZmYuCj4KPiBTbyB3aGVuIHdlIGRvIGJpbmQv
-dW5iaW5kIHRoZSBkcml2ZXIsIHdlIGhhdmUgYWxyZWFkeSByZWluaXQKPiB0aGUgY29udHJvbGxl
-ciBhbmQgcGh5LCBidXQgd2l0aG91dCBkb2luZyB0aGF0IGZvciBjb3JlY2ZnXyouCj4gUmVnYXJk
-aW5nIHRvIG9ubHkgdGhlIGNvcmVjZmdfY2xvY2ttdWx0aXBsZXIgaXMgd3JvbmcsIGxldCdzCj4g
-Zml4IGl0IGJ5IGV4cGxpY2l0bHkgbWFya2luZyBpdCB0byBiZSB6ZXJvIHdoZW4gcHJvYmluZy4g
-V2l0aAo+IHRoaXMgY2hhbmdlLCB3ZSBjb3VsZCBkbyBiaW5kL3VuYmluZCBzdWNjZXNzZnVsbHku
-Cj4KPiBSZXBvcnRlZC1ieTogWml5dWFuIFh1IDx4enkueHVAcm9jay1jaGlwcy5jb20+Cj4gQ2M6
-IERvdWdsYXMgQW5kZXJzb24gPGRpYW5kZXJzQGNocm9taXVtLm9yZz4KPiBTaWduZWQtb2ZmLWJ5
-OiBTaGF3biBMaW4gPHNoYXduLmxpbkByb2NrLWNoaXBzLmNvbT4KT2theSwgaXQgbG9va3MgZ29v
-ZCB0byBtZS4KUmV2aWV3ZWQtYnk6IFppeXVhbiBYdSA8eHp5Lnh1QHJvY2stY2hpcHMuY29tPgpU
-ZXN0ZWQtYnk6IFppeXVhbiBYdSA8eHp5Lnh1QHJvY2stY2hpcHMuY29tPgo+IC0tLQo+Cj4gQ2hh
-bmdlcyBpbiB2MjoKPiAtIGZpeCBzb21lIHR5cG9zIGFuZCBidWlsZAo+IC0gbW92ZSB0aGUgY29u
-ZmlndXJhdGlvbiBvZiBjb3JlY2ZnX2Nsb2NrbXVsdGlwbGllciBhZnRlcgo+ICAgIGVuYWJsaW5n
-IGFjbGtfZW1tYyB0byBhdm9pZCB0aGUgb2ZmIHN0YXRlIG9mIGFjbGtfZW1tY19ncmYuCj4gICAg
-SSBhZGQgYSBuZXcgZnVuY3Rpb24gdG8gbWFrZSBpdCBtb3JlIGNvbW1vbiBmb3Igb3RoZXIgY29t
-aW5nCj4gICAgdXNlcnMgd2hvIGhhdmUgdGhlIHNhbWUgcmVxdWlybWVudCBmb3Igc2V0dGluZyBk
-aWZmIGNsa211bC4KPgo+CgoKCl9fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
-X19fX19fX19fCkxpbnV4LXJvY2tjaGlwIG1haWxpbmcgbGlzdApMaW51eC1yb2NrY2hpcEBsaXN0
-cy5pbmZyYWRlYWQub3JnCmh0dHA6Ly9saXN0cy5pbmZyYWRlYWQub3JnL21haWxtYW4vbGlzdGlu
-Zm8vbGludXgtcm9ja2NoaXAK
+On 2016/8/26 16:42, Mike Looijmans wrote:
+> On 26-08-16 01:01, Zach Brown wrote:
+>> The sdhci controller on xilinx zynq devices will not function unless
+>> the CD bit is provided. http://www.xilinx.com/support/answers/61064.html
+>> In cases where it is impossible to provide the CD bit in hardware,
+>> setting the controller to test mode and then setting inserted to true
+>> will get the controller to function without the CD bit.
+>>
+>> When the device has the property broken-cd the driver changes the
+>> controller to test mode and sets test inserted to true to make the
+>> controller function.
+>>
+>> Signed-off-by: Zach Brown <zach.brown-acOepvfBmUk@public.gmane.org>
+>> ---
+>>   drivers/mmc/host/sdhci-of-arasan.c | 17 ++++++++++++++++-
+>>   drivers/mmc/host/sdhci.h           |  2 ++
+>>   2 files changed, 18 insertions(+), 1 deletion(-)
+>>
+>> diff --git a/drivers/mmc/host/sdhci-of-arasan.c
+>> b/drivers/mmc/host/sdhci-of-arasan.c
+>> index e0f193f..3798a3b 100644
+>> --- a/drivers/mmc/host/sdhci-of-arasan.c
+>> +++ b/drivers/mmc/host/sdhci-of-arasan.c
+>> @@ -26,6 +26,7 @@
+>>   #include <linux/phy/phy.h>
+>>   #include <linux/regmap.h>
+>>   #include "sdhci-pltfm.h"
+>> +#include <linux/of.h>
+>
+> Not needed.
+>
+>>   #define SDHCI_ARASAN_CLK_CTRL_OFFSET    0x2c
+>>   #define SDHCI_ARASAN_VENDOR_REGISTER    0x78
+>> @@ -203,12 +204,26 @@ static void
+>> sdhci_arasan_hs400_enhanced_strobe(struct mmc_host *mmc,
+>>       writel(vendor, host->ioaddr + SDHCI_ARASAN_VENDOR_REGISTER);
+>>   }
+>>
+>> +void sdhci_arasan_reset(struct sdhci_host *host, u8 mask)
+>> +{
+>> +    u8 ctrl;
+>> +
+>> +    sdhci_reset(host, mask);
+>> +
+>> +    if (host->quirks & SDHCI_QUIRK_BROKEN_CARD_DETECTION) {
+>> +        ctrl = sdhci_readb(host, SDHCI_HOST_CONTROL);
+>> +        ctrl |= SDHCI_CTRL_CDTEST_INS |
+>> +            SDHCI_CTRL_CDTEST_EN;
+>> +        sdhci_writeb(host, ctrl, SDHCI_HOST_CONTROL);
+>> +    }
+>> +}
+
+Although I don't have a "broken-cd" arasan controller,
+but are you suring that all the broken-cd arasan controller
+need to set these bit either? It seems your case is vendor specific?:)
+
+>> +
+>>   static struct sdhci_ops sdhci_arasan_ops = {
+>>       .set_clock = sdhci_arasan_set_clock,
+>>       .get_max_clock = sdhci_pltfm_clk_get_max_clock,
+>>       .get_timeout_clock = sdhci_arasan_get_timeout_clock,
+>>       .set_bus_width = sdhci_set_bus_width,
+>> -    .reset = sdhci_reset,
+>> +    .reset = sdhci_arasan_reset,
+>>       .set_uhs_signaling = sdhci_set_uhs_signaling,
+>>   };
+>>
+>> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+>> index 0411c9f..8d92d6e9 100644
+>> --- a/drivers/mmc/host/sdhci.h
+>> +++ b/drivers/mmc/host/sdhci.h
+>> @@ -84,6 +84,8 @@
+>>   #define   SDHCI_CTRL_ADMA32    0x10
+>>   #define   SDHCI_CTRL_ADMA64    0x18
+>>   #define   SDHCI_CTRL_8BITBUS    0x20
+>> +#define  SDHCI_CTRL_CDTEST_INS   0x40
+>> +#define  SDHCI_CTRL_CDTEST_EN     0x80
+>>
+>>   #define SDHCI_POWER_CONTROL    0x29
+>>   #define  SDHCI_POWER_ON        0x01
+>
+> Looks okay, tested it and appears to work just as well as a tie-off in
+> logic.
+>
+> Tested-by: mike.looijmans-Oq418RWZeHk@public.gmane.org
+>
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
+
+
+-- 
+Best Regards
+Shawn Lin
+
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
