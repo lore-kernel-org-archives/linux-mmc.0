@@ -1,207 +1,79 @@
-From: Haibo Chen <haibo.chen@nxp.com>
-Subject: RE: [PATCH] mmc: sdhci-esdhc-imx: reset tuning circurt when insert sd
- card
-Date: Fri, 26 Aug 2016 10:54:41 +0000
-Message-ID: <AM4PR0401MB23241FE0505D4C074C1EEF4B90EC0@AM4PR0401MB2324.eurprd04.prod.outlook.com>
-References: <1471255318-10933-1-git-send-email-haibo.chen@nxp.com>
- <20160816090440.GC9211@shlinux2>
+From: Arnd Bergmann <arnd@arndb.de>
+Subject: Re: [PATCH] mmc: sdhci-brcmstb: Add SDHCI_QUIRK2_BROKEN_64_BIT_DMA
+Date: Fri, 26 Aug 2016 15:29:53 +0200
+Message-ID: <201608261529.53854.arnd@arndb.de>
+References: <20160808015803.2528-1-jaedon.shin@gmail.com> <de010fff-1f22-96bb-f41f-99169fb6bb19@gmail.com> <CAPDyKFo6-GZ_myX43orouUvWGA8aAhUD9Jrcpaz+LzApuQJFZA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: Text/Plain;
+  charset="utf-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-db5eur01on0047.outbound.protection.outlook.com ([104.47.2.47]:47968
-        "EHLO EUR01-DB5-obe.outbound.protection.outlook.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1751646AbcHZN1i (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Fri, 26 Aug 2016 09:27:38 -0400
-In-Reply-To: <20160816090440.GC9211@shlinux2>
-Content-Language: en-US
+Received: from mout.kundenserver.de ([217.72.192.74]:63213 "EHLO
+        mout.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751764AbcHZNaQ (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 26 Aug 2016 09:30:16 -0400
+In-Reply-To: <CAPDyKFo6-GZ_myX43orouUvWGA8aAhUD9Jrcpaz+LzApuQJFZA@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Dong Aisheng <dongas86@gmail.com>
-Cc: "adrian.hunter@intel.com" <adrian.hunter@intel.com>, "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>, Aisheng Dong <aisheng.dong@nxp.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Florian Fainelli <f.fainelli@gmail.com>, Jaedon Shin <jaedon.shin@gmail.com>, Alan Cooper <alcooperx@gmail.com>, Adrian Hunter <adrian.hunter@intel.com>, bcm-kernel-feedback-list@broadcom.com, linux-mmc <linux-mmc@vger.kernel.org>
 
-Hi Aisheng,
-
-> -----Original Message-----
-> From: Dong Aisheng [mailto:dongas86@gmail.com]
-> Sent: Tuesday, August 16, 2016 5:05 PM
-> To: Haibo Chen <haibo.chen@nxp.com>
-> Cc: adrian.hunter@intel.com; ulf.hansson@linaro.org; Aisheng Dong
-> <aisheng.dong@nxp.com>; linux-mmc@vger.kernel.org
-> Subject: Re: [PATCH] mmc: sdhci-esdhc-imx: reset tuning circurt when inse=
-rt sd
-> card
->=20
-> Hi Haibo,
->=20
-> On Mon, Aug 15, 2016 at 06:01:58PM +0800, Haibo Chen wrote:
-> > Current driver do not clear the tuning related register after plug out
-> > SD3.0 card. This will impact the timing and let other
-> > SD3.0 card inserted later meet CRC error.
+On Friday 26 August 2016, Ulf Hansson wrote:
+> On 25 August 2016 at 18:41, Florian Fainelli <f.fainelli@gmail.com> wrote:
+> > On 08/19/2016 07:05 AM, Jaedon Shin wrote:
+> >> Hi Ulf,
+> >>
+> >>> On Aug 19, 2016, at 10:44 PM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+> >>>
+> >>> On 19 August 2016 at 04:25, Jaedon Shin <jaedon.shin@gmail.com> wrote:
+> >>>> Hi Alan,
+> >>>>
+> >>>> On Aug 18, 2016, at 11:27 PM, Alan Cooper <alcooperx@gmail.com> wrote:
+> >>>>>
+> >>>>> It would be better to make this a MIPS only setting because this issue
+> >>>>> only exists for MIPS chips and some newer ARM chips will support 64
+> >>>>> bit DMA.
+> >>>>> Also, since there's been a general effort to reduce the use QUIRKs,
+> >>>>> you could clear the SDHCI_CAN_64BIT in CAPS1 instead of using the
+> >>>>> QUIRK.
+> >>>>>
+> >>>>> @@ -101,6 +101,9 @@ static int sdhci_brcmstb_probe(struct platform_device *pdev)
+> >>>>>       host->caps1 = sdhci_readl(host, SDHCI_CAPABILITIES_1);
+> >>>>>       host->caps1 &= ~(SDHCI_SUPPORT_SDR50 | SDHCI_SUPPORT_SDR104 |
+> >>>>>                       SDHCI_SUPPORT_DDR50);
+> >>>>> +#if defined(CONFIG_MIPS)
+> >>>>> +       host->caps1 &= ~SDHCI_CAN_64BIT;
+> >>>>> +#endif
+> >>>>>       host->quirks |= SDHCI_QUIRK_MISSING_CAPS |
+> >>>>>               SDHCI_QUIRK_BROKEN_TIMEOUT_VAL;
+> >>>>
+> >>>> It's better to me, but we should use host->cap instead of host->cap1. I will update
+> >>>> patch with your comment.
+> >>>
+> >>> Please, then also send this to the public linux-mmc list.
+> >>>
+> >>> Kind regards
+> >>> Uffe
+> >>>
+> >>
+> >> I'm sorry I could not add the public linux-mmc list this mail thread, but
+> >> I have already sent the updated patch with linux-mmc.
+> >>
+> >> https://patchwork.kernel.org/patch/9289189/
 > >
-> > e.g., after plug out a SDR104 card, and then plug in a DDR50 card, CRC
-> > error shows up:
-> >
-> > mmc2: new ultra high speed DDR50 SDHC card at address aaaa
-> > mmcblk2: mmc2:aaaa SE08G 7.40 GiB
-> > mmcblk2: error -84 transferring data, sector 0, nr 8, cmd response
-> > 0x900, card status 0xb00
-> > mmc2: tried to reset card
-> >  mmcblk2: p1 p2
-> >
-> > Logictally, we should reset USDHC include tuning circurt first when we
-> > plug in a sd/mmc/sdio card.
->=20
-> I'm thinking a bit more about the issue.
->=20
-> Can you check if the voltage setting will clear tuning bits during
-> mmc_power_up()?
-> Because the esdhc_writew_le(SDHCI_HOST_CONTROL2) seems will clear it if
-> no tuning bits set for a normal card.
->=20
-> And did you reproduce the issue with latest kernel?
-> If yes, please paste log and register dump which shows the issue is cause=
-d by
-> tuning bits.
+> > Humm, is not this one of these cases where we would expect the
+> > compatible string to dictacte whether enabling 64_BIT_DMA makes sense or
+> > not?
+> 
+> Yes!
+> 
+> Jaedon, can you please send an updated patch. Please also bump the
+> version number of the patch!
+> 
 
-For the lastest kernel, DDR50 card will also execute tuning, so for DDR50 c=
-ard, now no this issue. And for High-speed SD2.0 card, I tried several card=
-s, they can work without this patch. But I dump the register, the tuning re=
-lated bit set wrongly.
+Sorry for jumping in late in the thread, but if I understand it right that the
+problem is an SDHCI controller claiming to support 64-bit DMA that is connected
+to a bus that only supports 32-bit addressing, this should be handled by
+interpreting the dma-ranges property of the parent bus instead.
 
-I test on i.MX6UL-14x14-EVK board, first, I insert one SDR104 card, then  p=
-lug out this card, and dump the register:
-Reading 0x34 count starting at address 0x02190000
-
-0x02190000:  9CE9E200 00010200 000020A0 113A0000
-0x02190010:  00000900 00F15D7F 325B5900 00000900
-0x02190020:  00000000 FF888008 08800022 008F000F
-0x02190030:  00000000 00000000 00000000 00800000
-0x02190040:  07F3B407 10401040 03000013 00000000
-0x02190050:  00000000 00000000 9F046208 00000000
-0x02190060:  00000000 00000200 16220000 0800FF80
-0x02190070:  00000000 00000000 00000000 00000000
-0x02190080:  00000000 00000000 00000000 00000000
-0x02190090:  00000000 00000000 00000000 00000000
-0x021900A0:  00000000 00000000 00000000 00000000
-0x021900B0:  00000000 00000000 00000000 00000000
-0x021900C0:  3000790B 00000000 00001006 01212801
-
-For SDR104 card, the SMP_CLK_SEL( bit23 of 0x3c) is set, FBCLK_SEL(bit25 of=
- 0x48) is set, and the register TUNE_CTRL_STATUS(0x68) is 0x16220000.
-
-
-Then, I insert a High-speed SD2.0 card, it can work well, and I dump the re=
-gister:
-Reading 0x34 count starting at address 0x02190000
-
-0x02190000:  9D0FF000 00010200 0000520F 113A0000
-0x02190010:  00000900 001D8A7F 325B5900 00400E00
-0x02190020:  00000000 FF888008 08800022 008F007F
-0x02190030:  00000000 00000000 00000000 00800000
-0x02190040:  07F3B407 10401040 03000013 00000000
-0x02190050:  00000000 00000000 9F046208 00000000
-0x02190060:  00000000 00000200 16220000 0800FF80
-0x02190070:  00000000 00000000 00000000 00000000
-0x02190080:  00000000 00000000 00000000 00000000
-0x02190090:  00000000 00000000 00000000 00000000
-0x021900A0:  00000000 00000000 00000000 00000000
-0x021900B0:  00000000 00000000 00000000 00000000
-0x021900C0:  30007909 00000000 00001006 01212801
-
-For SD2.0 card, we do not execute tuning, but here, we can see SMP_CLK_SEL(=
- bit23 of 0x3c) and FBCLK_SEL(bit25 of 0x48) is still set. TUNE_CTRL_STATUS=
-(0x68) is 0x16220000.  This is not right.
-
-Besides, now in this driver, we use TUNING_MOD_3, and use auto retuning, tu=
-ning will not execute every runtime resume. But if we change to use TUNING_=
-MOD_1, then when usdhc runtime resume, tuning will be execute.  In this cas=
-e, when plug out a SD3.0 card, it will call runtime resume, then tuning exe=
-cute without a sd card, usdhc tuning circuit logic is wrong. At this time, =
-if we insert a DDR50 card, and DDR50 card do not execute tuning(just like b=
-efore), the issue describe in this path will happen, CRC error will shows u=
-p, because the tuning related bit is not clear and wrongly setted.
-
-Now, DDR50 card will do tuning, and for i.MX usdhc, we only use TUNING_MOD_=
-3, so the issue described in this patch is gone. But potential risk still e=
-xist in this driver. This patch still can avoid this risk.
-So I will change the commit message and send V2 patch.=20
-
-Best Regards
-Haibo
-
->=20
-> Regards
-> Dong Aisheng
->=20
-> >
-> > Signed-off-by: Haibo Chen <haibo.chen@nxp.com>
-> > ---
-> >  drivers/mmc/host/sdhci-esdhc-imx.c | 27 ++++++++++++++++++++++++++-
-> >  1 file changed, 26 insertions(+), 1 deletion(-)
-> >
-> > diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c
-> > b/drivers/mmc/host/sdhci-esdhc-imx.c
-> > index ea7d086..2783a4b 100644
-> > --- a/drivers/mmc/host/sdhci-esdhc-imx.c
-> > +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
-> > @@ -924,6 +924,30 @@ static void esdhc_reset(struct sdhci_host *host, u=
-8
-> mask)
-> >  	sdhci_writel(host, host->ier, SDHCI_SIGNAL_ENABLE);  }
-> >
-> > +static void esdhc_hw_reset_for_init(struct sdhci_host *host) {
-> > +	struct sdhci_pltfm_host *pltfm_host =3D sdhci_priv(host);
-> > +	struct pltfm_imx_data *imx_data =3D sdhci_pltfm_priv(pltfm_host);
-> > +	u16 ctrl;
-> > +
-> > +	sdhci_reset(host, SDHCI_RESET_ALL);
-> > +
-> > +	/* Rest the tuning circurt */
-> > +	if (esdhc_is_usdhc(imx_data)) {
-> > +		if (imx_data->socdata->flags & ESDHC_FLAG_MAN_TUNING) {
-> > +			ctrl =3D readl(host->ioaddr + ESDHC_MIX_CTRL);
-> > +			ctrl &=3D ~(ESDHC_MIX_CTRL_SMPCLK_SEL |
-> > +					ESDHC_MIX_CTRL_FBCLK_SEL);
-> > +			writel(ctrl, host->ioaddr + ESDHC_MIX_CTRL);
-> > +			writel(0 << 8, host->ioaddr +
-> ESDHC_TUNE_CTRL_STATUS);
-> > +		} else if (imx_data->socdata->flags &
-> ESDHC_FLAG_STD_TUNING) {
-> > +			ctrl =3D readl(host->ioaddr + SDHCI_ACMD12_ERR);
-> > +			ctrl &=3D ~ESDHC_MIX_CTRL_SMPCLK_SEL;
-> > +			writel(ctrl, host->ioaddr + SDHCI_ACMD12_ERR);
-> > +		}
-> > +	}
-> > +}
-> > +
-> >  static unsigned int esdhc_get_max_timeout_count(struct sdhci_host
-> > *host)  {
-> >  	struct sdhci_pltfm_host *pltfm_host =3D sdhci_priv(host); @@ -958,6
-> > +982,7 @@ static struct sdhci_ops sdhci_esdhc_ops =3D {
-> >  	.set_bus_width =3D esdhc_pltfm_set_bus_width,
-> >  	.set_uhs_signaling =3D esdhc_set_uhs_signaling,
-> >  	.reset =3D esdhc_reset,
-> > +	.hw_reset =3D esdhc_hw_reset_for_init,
-> >  };
-> >
-> >  static const struct sdhci_pltfm_data sdhci_esdhc_imx_pdata =3D { @@
-> > -1223,7 +1248,7 @@ static int sdhci_esdhc_imx_probe(struct
-> > platform_device *pdev)
-> >
-> >  	if (esdhc_is_usdhc(imx_data)) {
-> >  		host->quirks2 |=3D SDHCI_QUIRK2_PRESET_VALUE_BROKEN;
-> > -		host->mmc->caps |=3D MMC_CAP_1_8V_DDR;
-> > +		host->mmc->caps |=3D MMC_CAP_1_8V_DDR |
-> MMC_CAP_HW_RESET;
-> >  		if (!(imx_data->socdata->flags & ESDHC_FLAG_HS200))
-> >  			host->quirks2 |=3D SDHCI_QUIRK2_BROKEN_HS200;
-> >
-> > --
-> > 1.9.1
-> >
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe linux-mmc"
-> > in the body of a message to majordomo@vger.kernel.org More majordomo
-> > info at  http://vger.kernel.org/majordomo-info.html
+	Arnd
