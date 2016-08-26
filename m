@@ -1,122 +1,104 @@
-From: Shawn Lin <shawn.lin@rock-chips.com>
-Subject: Re: [PATCH] mmc: sdhci-of-arasan: Properly set corecfg_clockmultipler
- on rk3399
-Date: Fri, 26 Aug 2016 15:50:57 +0800
-Message-ID: <d6c3b728-af01-e724-3278-1bc0801f8fb4@rock-chips.com>
-References: <1472181736-17848-1-git-send-email-shawn.lin@rock-chips.com>
- <1dc7898d-ee35-4166-6313-64e9c50f8db8@rock-chips.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH v4 2/4] mmc: tmio: Add tuning support
+Date: Fri, 26 Aug 2016 10:01:35 +0200
+Message-ID: <CAPDyKFpu85h3w2JkCjyQ15P8eWfkAkYcpxR4A6bD0EpQLw9rew@mail.gmail.com>
+References: <1469592803-13842-1-git-send-email-horms+renesas@verge.net.au>
+ <1469592803-13842-3-git-send-email-horms+renesas@verge.net.au>
+ <CAPDyKFq_Fs_bNx7LP-J+nC3iaNgB7gvZAvhCp--qVOh1iAh0vg@mail.gmail.com>
+ <20160823135251.GA25665@verge.net.au> <CAPDyKFpbMnOag7TZtQXxffXyq4XjTfz3vYM_atks15+d64QkfQ@mail.gmail.com>
+ <20160825120424.GA3385@verge.net.au>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from lucky1.263xmail.com ([211.157.147.134]:60564 "EHLO
-        lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750947AbcHZHvY (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 26 Aug 2016 03:51:24 -0400
-In-Reply-To: <1dc7898d-ee35-4166-6313-64e9c50f8db8@rock-chips.com>
+Received: from mail-wm0-f53.google.com ([74.125.82.53]:38333 "EHLO
+        mail-wm0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750809AbcHZIHo (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 26 Aug 2016 04:07:44 -0400
+Received: by mail-wm0-f53.google.com with SMTP id o80so106860955wme.1
+        for <linux-mmc@vger.kernel.org>; Fri, 26 Aug 2016 01:07:44 -0700 (PDT)
+In-Reply-To: <20160825120424.GA3385@verge.net.au>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ziyuan Xu <xzy.xu@rock-chips.com>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: shawn.lin@rock-chips.com, linux-rockchip@lists.infradead.org, linux-mmc@vger.kernel.org, Adrian Hunter <adrian.hunter@intel.com>, Douglas Anderson <dianders@chromium.org>, =?UTF-8?Q?Heiko_St=c3=bcbner?= <heiko@sntech.de>
+To: Simon Horman <horms@verge.net.au>
+Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, Magnus Damm <magnus.damm@gmail.com>, linux-mmc <linux-mmc@vger.kernel.org>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>
 
-+ Heiko
-
-在 2016/8/26 14:38, Ziyuan Xu 写道:
-> Hi Shawn,
->
->
-> On 2016年08月26日 11:22, Shawn Lin wrote:
->> corecfg_clockmultipler indicates clock multiplier value of
->> programmable clock generator which should be the same value
->> of SDHCI_CAPABILITIES_1. The default value of the register,
->> corecfg_clockmultipler, is 0x10. But actually it is a mistake
-> corecfg_clockmultipler==>corecfg_clockmultiplier
->> by designer as our intention was to set it to be zero which
->> means we don't support programmable clock generator. So we have
->> to made it to be zero on bootloader which seems work fine until
-> made==>make
->> now. But now we find a issue that when deploying genpd support
-> a issue==>an issue
->> for it, the remove callback will trigger the genpd to poweroff the
->> power domain for sdhci-of-arasan which magage the controller, phy
-> magage==>manage
->> and corecfg_* stuff.
+On 25 August 2016 at 14:04, Simon Horman <horms@verge.net.au> wrote:
+> On Tue, Aug 23, 2016 at 05:02:56PM +0200, Ulf Hansson wrote:
+>> [...]
 >>
->> So when we do bind/unbind the driver, we have already reinit
-> do==>doing
->> the controller and phy, but without doing that for corecfg_*.
->> Regarding to only the corecfg_clockmultipler is wrong, let's
->> fix it by explicitly marking it to be zero when probing. With
->> this change, we could do bind/unbind successfully.
+>> >> > +static int tmio_mmc_execute_tuning(struct mmc_host *mmc, u32 opcode)
+>> >> > +{
+>> >> > +       struct tmio_mmc_host *host = mmc_priv(mmc);
+>> >> > +       unsigned int num;
+>> >> > +       int i, ret = 0;
+>> >> > +       bool *tap;
+>> >> > +
+>> >> > +       if (!host->init_tuning || !host->select_tuning)
+>> >>
+>> >> When defining these callbacks, it would be nice to know which ones are
+>> >> optional and which ones are required.
+>> >
+>> > Would some comments in struct tmio_mmc_host be an appropriate way
+>> > to achieve that?
 >>
->> Reported-by: Ziyuan Xu <xzy.xu@rock-chips.com>
->> Cc: Douglas Anderson <dianders@chromium.org>
->> Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
->> ---
+>> Yes, that would be nice!
 >>
->>   drivers/mmc/host/sdhci-of-arasan.c | 9 +++++++++
->>   1 file changed, 9 insertions(+)
+>> [...]
 >>
->> diff --git a/drivers/mmc/host/sdhci-of-arasan.c
->> b/drivers/mmc/host/sdhci-of-arasan.c
->> index 0b3a9cf..c1eb263 100644
->> --- a/drivers/mmc/host/sdhci-of-arasan.c
->> +++ b/drivers/mmc/host/sdhci-of-arasan.c
->> @@ -67,10 +67,12 @@ struct sdhci_arasan_soc_ctl_field {
->>    * accessible via the syscon API.
->>    *
->>    * @baseclkfreq:    Where to find corecfg_baseclkfreq
->> + * @clockmultiplier:    Where to find corecfg_clockmultiplier
->>    * @hiword_update:    If true, use HIWORD_UPDATE to access the syscon
->>    */
->>   struct sdhci_arasan_soc_ctl_map {
->>       struct sdhci_arasan_soc_ctl_field    baseclkfreq;
->> +    struct sdhci_arasan_soc_ctl_field    clockmultiplier;
->>       bool                    hiword_update;
->>   };
->>   @@ -100,6 +102,7 @@ struct sdhci_arasan_data {
->>     static const struct sdhci_arasan_soc_ctl_map rk3399_soc_ctl_map = {
->>       .baseclkfreq = { .reg = 0xf000, .width = 8, .shift = 8 },
->> +    .clockmultiplier = { .reg = 0xf02c, .width = 8, .shit = 0},
->>       .hiword_update = true,
->>   };
->>   @@ -528,6 +531,12 @@ static int sdhci_arasan_probe(struct
->> platform_device *pdev)
->>                       ret);
->>               goto err_pltfm_free;
->>           }
->> +
->> +        if (of_device_is_compatible(pdev->dev.of_node,
->> +                        "rockchip,rk3399-sdhci-5.1"))
->> +            sdhci_arasan_syscon_write(host,
->> +                          &soc_ctl_map->clockmultiplier,
->> +                          0);
-> Variable soc_ctl_map is undefined in sdhci_arasan_probe(), please fix it.
-
-Woops, I change the code a bit after generating patch, I will fix it.
-
-> Moreover, we can not access grf_emmccore/grf_emmcphy prior to enable
-> clk_ahb, so do it after clock enable.
-
-Hrmm, we configure the grf vai CPU and the clock for accessing
-grf is aclk_emmc_grf( I saw aclk_emmc_noc is critical and it seems we
-should treat aclk_emmc_* the same way). I could move this after
-enabling aclk_emmc, but that is a bogus critical for aclk_emmc_* to me 
-since it's off when disabling aclk_emmc, no?
-
-
->>       }
->>         sdhci_arasan->clk_ahb = devm_clk_get(&pdev->dev, "clk_ahb");
+>> >> >  static int tmio_mmc_init_ocr(struct tmio_mmc_host *host)
+>> >> > @@ -1202,6 +1276,9 @@ int tmio_mmc_host_runtime_suspend(struct device *dev)
+>> >> >         struct mmc_host *mmc = dev_get_drvdata(dev);
+>> >> >         struct tmio_mmc_host *host = mmc_priv(mmc);
+>> >> >
+>> >> > +       mmc_retune_timer_stop(host->mmc);
+>> >> > +       mmc_retune_needed(host->mmc);
+>> >>
+>> >> I am wondering whether it would it be possible to keep a cache of the
+>> >> currently used tuning values and then restore these values at
+>> >> runtime_resume?
+>> >>
+>> >> In that way you wouldn't need to force new re-tuning cycle here.
+>> >
+>> > I will check with the hardware people to see if it is practical from
+>> > that POV.
+>>
+>> Okay!
 >
+> The feedback I received is something like this:
 >
+> * The tap values calculated during retuning depend on the temperature of
+>   the SoC and card.
+> * So after resume the values may be invalid.
+
+They values may also become invalid during long continues transfers,
+which prevents the ->runtime_suspend() callback to be invoked -
+because the temperature may increase.
+
+> * It may be possible to re-use the TAP values and re-tune if a transfer
+>   fails but the people I spoke with were unsure of the merit of that
+>   approach
+
+There's is a huge benefit!
+
+You will get a significant decreased latency at ->runtime_resume() as
+you don't need to run a complete re-tuning cycle.
+
+I can't really give you fresh numbers as it's a long time I tried this
+myself, although if you did some measurements on this it would be
+nice! :-)
+
 >
-> _______________________________________________
-> Linux-rockchip mailing list
-> Linux-rockchip@lists.infradead.org
-> http://lists.infradead.org/mailman/listinfo/linux-rockchip
+> Personally my feeling is that we should initiate a retune on resume for
+> now as that seems to be the safest option.
 
+I don't agree. :-) I think it's better to postpone re-tune until it's
+actually needed.
 
--- 
-Best Regards
-Shawn Lin
+Re-tune happens in the request error handling path, but also if you
+configure a re-tuning period. That ought to be sufficient, don't you
+think?
 
+[...]
+
+Kind regards
+Uffe
