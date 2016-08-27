@@ -1,74 +1,62 @@
-From: Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
-Subject: Re: [PATCH 1/2] Documentation: mmc: sdhci-of-arasan: add description
- of power domain
-Date: Sat, 27 Aug 2016 22:50:33 +0800
-Message-ID: <40f46bd6-22d2-f008-602a-47200340f733@rock-chips.com>
-References: <20160827134103.28160-1-xzy.xu@rock-chips.com>
- <20160827134103.28160-2-xzy.xu@rock-chips.com>
+From: Stefan Wahren <stefan.wahren-eS4NqCHxEME@public.gmane.org>
+Subject: Re: [PATCH RFC 0/3] mmc: mxs-mmc: Implement DDR support
+Date: Sat, 27 Aug 2016 21:15:22 +0200 (CEST)
+Message-ID: <1082892691.24336.3dd5cc50-579f-4f46-b1de-7868392729ec.open-xchange@email.1und1.de>
+References: <1470488140-10104-1-git-send-email-stefan.wahren@i2se.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=gbk; format=flowed
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
 Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20160827134103.28160-2-xzy.xu-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
+In-Reply-To: <1470488140-10104-1-git-send-email-stefan.wahren-eS4NqCHxEME@public.gmane.org>
 Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ziyuan Xu <xzy.xu-TNX95d0MmH7DzftRWevZcw@public.gmane.org>, ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, heiko-4mtYJXux2i+zQB+pC5nmwQ@public.gmane.org
-Cc: shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org, linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
+To: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: Sascha Hauer <kernel-bIcnvbaLZ9MEGnE8C9+IrQ@public.gmane.org>, Otavio Salvador <otavio-fKevB0iiKLMBZ+LybsDmbA@public.gmane.org>, Holger Schurig <holgerschurig-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Shawn Guo <shawnguo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Dong Aisheng <aisheng.dong-3arQi8VN3Tc@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Marek Vasut <marex-ynQEQJNshbs@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Fabio Estevam <fabio.estevam-3arQi8VN3Tc@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On 2016/8/27 21:41, Ziyuan Xu wrote:
-> Add power domain as a optional property for sdhci-of-arasan, which can
-> be truned off in the so-called unused condition, such as suspend and
-> remove. Aim to lower power requirements.
->
-> Signed-off-by: Ziyuan Xu <xzy.xu-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
->
-> ---
->
->  Documentation/devicetree/bindings/mmc/arasan,sdhci.txt | 6 +++++-
->  1 file changed, 5 insertions(+), 1 deletion(-)
->
-> diff --git a/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt b/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
-> index 3404afa..3f5189c 100644
-> --- a/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
-> +++ b/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
-> @@ -1,12 +1,14 @@
->  Device Tree Bindings for the Arasan SDHCI Controller
->
-> -  The bindings follow the mmc[1], clock[2], interrupt[3] and phy[4] bindings.
-> +  The bindings follow the mmc[1], clock[2], interrupt[3], phy[4] and power
-> +  domain[5] bindings.
->    Only deviations are documented here.
->
->    [1] Documentation/devicetree/bindings/mmc/mmc.txt
->    [2] Documentation/devicetree/bindings/clock/clock-bindings.txt
->    [3] Documentation/devicetree/bindings/interrupt-controller/interrupts.txt
->    [4] Documentation/devicetree/bindings/phy/phy-bindings.txt
-> +  [5] Documentation/devicetree/bindings/power/power_domain.txt
->
->  Required Properties:
->    - compatible: Compatibility string.  One of:
-> @@ -36,6 +38,8 @@ Optional Properties:
->    - #clock-cells: If specified this should be the value <0>.  With this property
->      in place we will export a clock representing the Card Clock.  This clock
->      is expected to be consumed by our PHY.  You must also specify
-> +  - power-domains: A phandle of and PM domain as specifier defined by bindings
+Hi Ulf,
 
-	A phandle of what?
+> Stefan Wahren <stefan.wahren-eS4NqCHxEME@public.gmane.org> hat am 6. August 2016 um 14:55
+> geschrieben:
+> 
+> 
+> Based on these discussions: [1], [2] this patch series implements
+> DDR support for the MXS MMC host driver. This feature has never been
+> ported from the vendor kernel.
+> 
+> It has been tested on a i.MX28 board with eMMC which is currently
+> not in mainline (Duckbill 2).
+> 
+> * without DDR support
+> dd if=/dev/zero of=test bs=8k count=10000
+> 81920000 bytes (82 MB) copied, 14.3321 s, 5.7 MB/s
+> 
+> * with DDR support:
+> dd if=/dev/zero of=test bs=8k count=10000
+> 81920000 bytes (82 MB) copied, 13.4781 s, 6.1 MB/s
+> 
+> [1] - http://www.spinics.net/lists/linux-mmc/msg32285.html
+> [2] - http://www.spinics.net/lists/linux-mmc/msg34418.html
 
-> +    of the power controller specified by phandle.
->
->  Example:
->  	sdhci@e0100000 {
+do you want to add some comments about this series?
 
-It would be nice to add the example code.
+Regards
+Stefan
 
->
-
-
--- 
-Best Regards
-Shawn Lin
-
+> 
+> Stefan Wahren (3):
+>   DT: bindings: mmc: Add property for 3.3V only support
+>   mmc: core: add new cap for 3.3V only DDR MMCs
+>   mmc: mxs-mmc: Implement DDR support
+> 
+>  Documentation/devicetree/bindings/mmc/mmc.txt |    7 +++++--
+>  drivers/mmc/core/host.c                       |    2 ++
+>  drivers/mmc/core/mmc.c                        |    6 ++++++
+>  drivers/mmc/host/mxs-mmc.c                    |   22 ++++++++++++++++++++++
+>  include/linux/mmc/host.h                      |    1 +
+>  5 files changed, 36 insertions(+), 2 deletions(-)
+> 
+> -- 
+> 1.7.9.5
 --
 To unsubscribe from this list: send the line "unsubscribe devicetree" in
 the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
