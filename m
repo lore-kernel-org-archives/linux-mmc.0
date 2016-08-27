@@ -1,63 +1,130 @@
-From: Stefan Wahren <stefan.wahren-eS4NqCHxEME@public.gmane.org>
-Subject: Re: [PATCH RFC 0/3] mmc: mxs-mmc: Implement DDR support
-Date: Sat, 27 Aug 2016 21:15:22 +0200 (CEST)
-Message-ID: <1082892691.24336.3dd5cc50-579f-4f46-b1de-7868392729ec.open-xchange@email.1und1.de>
-References: <1470488140-10104-1-git-send-email-stefan.wahren@i2se.com>
+From: Florian Fainelli <f.fainelli@gmail.com>
+Subject: Re: [PATCH] mmc: sdhci-brcmstb: Add SDHCI_QUIRK2_BROKEN_64_BIT_DMA
+Date: Sat, 27 Aug 2016 12:56:10 -0700
+Message-ID: <7edcef69-d364-8845-a677-3827a50f4da1@gmail.com>
+References: <20160808015803.2528-1-jaedon.shin@gmail.com>
+ <8f42998e-6d5b-2ac7-3814-f7a4d6e8a6b9@intel.com>
+ <CAOGqxeX8kcD9rX4nd+o=RTggEoPLZfK40GdBWKTT6-BTpxSvbg@mail.gmail.com>
+ <AD331215-7115-426D-A089-263D6A0E54BF@gmail.com>
+ <CAPDyKFqkoF2GU6QGc7GW1S2p8+A=XpU48sREcLiSkadPKHuibw@mail.gmail.com>
+ <5A6224B1-2845-4059-A537-EBEA7E6F09E6@gmail.com>
+ <de010fff-1f22-96bb-f41f-99169fb6bb19@gmail.com>
+ <501206D1-D60B-4BA7-99C0-C38065C3AE9E@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1470488140-10104-1-git-send-email-stefan.wahren-eS4NqCHxEME@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: Sascha Hauer <kernel-bIcnvbaLZ9MEGnE8C9+IrQ@public.gmane.org>, Otavio Salvador <otavio-fKevB0iiKLMBZ+LybsDmbA@public.gmane.org>, Holger Schurig <holgerschurig-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Shawn Guo <shawnguo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Dong Aisheng <aisheng.dong-3arQi8VN3Tc@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Marek Vasut <marex-ynQEQJNshbs@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Fabio Estevam <fabio.estevam-3arQi8VN3Tc@public.gmane.org>
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-oi0-f68.google.com ([209.85.218.68]:33991 "EHLO
+        mail-oi0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1755130AbcH0T4N (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sat, 27 Aug 2016 15:56:13 -0400
+Received: by mail-oi0-f68.google.com with SMTP id t127so9419385oie.1
+        for <linux-mmc@vger.kernel.org>; Sat, 27 Aug 2016 12:56:12 -0700 (PDT)
+In-Reply-To: <501206D1-D60B-4BA7-99C0-C38065C3AE9E@gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Jaedon Shin <jaedon.shin@gmail.com>, Alan Cooper <alcooperx@gmail.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, bcm-kernel-feedback-list@broadcom.com, linux-mmc@vger.kernel.org
 
-Hi Ulf,
+Le 26/08/2016 à 21:02, Jaedon Shin a écrit :
+> Hi Florian,
+> 
+> On Aug 26, 2016, at 1:41 AM, Florian Fainelli <f.fainelli@gmail.com> wrote:
+>>
+>> On 08/19/2016 07:05 AM, Jaedon Shin wrote:
+>>> Hi Ulf,
+>>>
+>>>> On Aug 19, 2016, at 10:44 PM, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+>>>>
+>>>> On 19 August 2016 at 04:25, Jaedon Shin <jaedon.shin@gmail.com> wrote:
+>>>>> Hi Alan,
+>>>>>
+>>>>> On Aug 18, 2016, at 11:27 PM, Alan Cooper <alcooperx@gmail.com> wrote:
+>>>>>>
+>>>>>> It would be better to make this a MIPS only setting because this issue
+>>>>>> only exists for MIPS chips and some newer ARM chips will support 64
+>>>>>> bit DMA.
+>>>>>> Also, since there's been a general effort to reduce the use QUIRKs,
+>>>>>> you could clear the SDHCI_CAN_64BIT in CAPS1 instead of using the
+>>>>>> QUIRK.
+>>>>>>
+>>>>>> @@ -101,6 +101,9 @@ static int sdhci_brcmstb_probe(struct platform_device *pdev)
+>>>>>>      host->caps1 = sdhci_readl(host, SDHCI_CAPABILITIES_1);
+>>>>>>      host->caps1 &= ~(SDHCI_SUPPORT_SDR50 | SDHCI_SUPPORT_SDR104 |
+>>>>>>                      SDHCI_SUPPORT_DDR50);
+>>>>>> +#if defined(CONFIG_MIPS)
+>>>>>> +       host->caps1 &= ~SDHCI_CAN_64BIT;
+>>>>>> +#endif
+>>>>>>      host->quirks |= SDHCI_QUIRK_MISSING_CAPS |
+>>>>>>              SDHCI_QUIRK_BROKEN_TIMEOUT_VAL;
+>>>>>
+>>>>> It's better to me, but we should use host->cap instead of host->cap1. I will update
+>>>>> patch with your comment.
+>>>>
+>>>> Please, then also send this to the public linux-mmc list.
+>>>>
+>>>> Kind regards
+>>>> Uffe
+>>>>
+>>>
+>>> I'm sorry I could not add the public linux-mmc list this mail thread, but 
+>>> I have already sent the updated patch with linux-mmc.
+>>>
+>>> https://patchwork.kernel.org/patch/9289189/
+>>
+>> Humm, is not this one of these cases where we would expect the
+>> compatible string to dictacte whether enabling 64_BIT_DMA makes sense or
+>> not?
+>>
+>> The patch is technically correct though.
 
-> Stefan Wahren <stefan.wahren-eS4NqCHxEME@public.gmane.org> hat am 6. August 2016 um 14:55
-> geschrieben:
-> 
-> 
-> Based on these discussions: [1], [2] this patch series implements
-> DDR support for the MXS MMC host driver. This feature has never been
-> ported from the vendor kernel.
-> 
-> It has been tested on a i.MX28 board with eMMC which is currently
-> not in mainline (Duckbill 2).
-> 
-> * without DDR support
-> dd if=/dev/zero of=test bs=8k count=10000
-> 81920000 bytes (82 MB) copied, 14.3321 s, 5.7 MB/s
-> 
-> * with DDR support:
-> dd if=/dev/zero of=test bs=8k count=10000
-> 81920000 bytes (82 MB) copied, 13.4781 s, 6.1 MB/s
-> 
-> [1] - http://www.spinics.net/lists/linux-mmc/msg32285.html
-> [2] - http://www.spinics.net/lists/linux-mmc/msg34418.html
-
-do you want to add some comments about this series?
-
-Regards
-Stefan
+Hi Jaedon,
 
 > 
-> Stefan Wahren (3):
->   DT: bindings: mmc: Add property for 3.3V only support
->   mmc: core: add new cap for 3.3V only DDR MMCs
->   mmc: mxs-mmc: Implement DDR support
+> Yes, It's right way that uses host->cap according to the previous discussion
+> for this driver and commit 5eaa7476f937 ("mmc: sdhci: Allow CAPS check for 
+> SDHCI_CAN_64BIT to use overridden caps").
 > 
->  Documentation/devicetree/bindings/mmc/mmc.txt |    7 +++++--
->  drivers/mmc/core/host.c                       |    2 ++
->  drivers/mmc/core/mmc.c                        |    6 ++++++
->  drivers/mmc/host/mxs-mmc.c                    |   22 ++++++++++++++++++++++
->  include/linux/mmc/host.h                      |    1 +
->  5 files changed, 36 insertions(+), 2 deletions(-)
+> If the 64bit ARM chipsets have own compatible string, the patch like as below
 > 
-> -- 
-> 1.7.9.5
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 	if (of_device_is_compatible(pdev->dev.of_node, "brcm,bcm7425-sdhci"))
+> 		host->caps &= ~SDHCI_CAN_64BIT;
+> 
+> Could you tell me the some newer 64bit ARM chipsets have possible own compatible
+> string?
+
+All ARM 32-bit brcmstb chips are LPAE capable, which means that the
+SDHCI controller may have to deal with bus addresses larger than
+32-bits, so we always need SDHCI_CAN_64BIT to be set for that to happen
+and work correctly.
+
+On ARM 64-bit brcmstb chips, we may not have enough memory such that the
+SDHCI controller needs to deal with > 32-bits bus addresses, but same
+thing, this may happen and the controller is fully capable of, so we
+also need SDHCI_CAN_64BIT.
+
+In both cases, the controller should be fully operational with > 32-bits
+physical addresses.
+
+On BMIPS chips, we should probably clear SDHCI_CAN_64BIT because AFAIR,
+it really is broken (Al, can you confirm?), but at the same time, the
+DMA-API should never hand us buffers which exceed the 32-bits bus
+address boundary because of the processor and chip memory map
+limitations anyway, is that what you encountered though?
+
+At the moment, brcm,bcm7425-sdhci is used across all 3 types of SoCs
+(BMIPS, ARM and ARM64) while we should probably allocate a new one for
+ARM and newer and then we could reliably base the clearing of
+SDHCI_CAN_64BIT based on brcm,bcm7425-sdhci.
+
+Finally, Arnd's suggestions of using "dma-ranges" is fine, but I do not
+think we quite need this here because we really need to advertise the
+right set of capabilities based on the generation/version of the
+controller deployed in specific chips.
+
+I would like to have Al's feedback on this, since he wrote the driver ;)
+
+Thanks!
+-- 
+Florian
+
