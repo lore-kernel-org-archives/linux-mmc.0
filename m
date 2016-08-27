@@ -1,96 +1,58 @@
-From: Zach Brown <zach.brown@ni.com>
-Subject: Re: [PATCH 1/2] sdhci-of-arasan: Add quirk and device tree parameter
- to fake CD bit
-Date: Fri, 26 Aug 2016 17:29:46 -0500
-Message-ID: <20160826222945.GA6679@zach-desktop>
-References: <1472080984-17373-1-git-send-email-zach.brown@ni.com>
- <20160825105640.GA5439@remoulade>
- <20160825171539.GA13571@zach-desktop>
- <20160825180959.GA14705@remoulade>
- <20160825182621.GA14817@zach-desktop>
- <20160825182852.GB15000@remoulade>
- <20160825204645.GA19450@zach-desktop>
- <CAPDyKFpcFus1oysdRuK6vUALXXdy8_SsDZ3n8LkyM1AZLZY+QQ@mail.gmail.com>
+From: Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
+Subject: Re: [PATCH] mmc: sdhci-of-arasan: Properly set corecfg_clockmultipler
+ on rk3399
+Date: Sat, 27 Aug 2016 10:10:40 +0800
+Message-ID: <85d066af-e41b-90c5-a567-6727c6da6438@rock-chips.com>
+References: <1472181736-17848-1-git-send-email-shawn.lin@rock-chips.com>
+ <1dc7898d-ee35-4166-6313-64e9c50f8db8@rock-chips.com>
+ <d6c3b728-af01-e724-3278-1bc0801f8fb4@rock-chips.com>
+ <7490888.x1BxhdeR20@diego>
+ <CAD=FV=UD-9PwQFm4x4Uqx5mQjEirD9icyYHPDaVjU4tRgk-f+g@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-Content-Disposition: inline
-In-Reply-To: <CAPDyKFpcFus1oysdRuK6vUALXXdy8_SsDZ3n8LkyM1AZLZY+QQ@mail.gmail.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Mark Rutland <mark.rutland@arm.com>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, Lars-Peter Clausen <lars@metafoo.de>, linux-mmc <linux-mmc@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Rob Herring <robh+dt@kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Michal Simek <michal.simek@xilinx.com>, =?iso-8859-1?Q?S=F6ren?= Brinkmann <soren.brinkmann@xilinx.com>
+Content-Type: text/plain; charset="utf-8"; Format="flowed"
+Content-Transfer-Encoding: base64
+Return-path: <linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+In-Reply-To: <CAD=FV=UD-9PwQFm4x4Uqx5mQjEirD9icyYHPDaVjU4tRgk-f+g-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-rockchip>,
+ <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-rockchip/>
+List-Post: <mailto:linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+List-Help: <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-rockchip>,
+ <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
+Sender: "Linux-rockchip" <linux-rockchip-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+Errors-To: linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+To: Doug Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, =?UTF-8?Q?Heiko_St=c3=bcbner?= <heiko-4mtYJXux2i+zQB+pC5nmwQ@public.gmane.org>
+Cc: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org, Ziyuan Xu <xzy.xu-TNX95d0MmH7DzftRWevZcw@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "open list:ARM/Rockchip SoC..." <linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Fri, Aug 26, 2016 at 09:42:38AM +0200, Ulf Hansson wrote:
-> On 25 August 2016 at 22:46, Zach Brown <zach.brown@ni.com> wrote:
-> > On Thu, Aug 25, 2016 at 07:28:55PM +0100, Mark Rutland wrote:
-> >> On Thu, Aug 25, 2016 at 01:26:22PM -0500, Zach Brown wrote:
-> >> > On Thu, Aug 25, 2016 at 07:10:00PM +0100, Mark Rutland wrote:
-> >> > > On Thu, Aug 25, 2016 at 12:15:44PM -0500, Zach Brown wrote:
-> >> > > > In cases where the card is non-removable then polling doesn't make sense.
-> >> > >
-> >> > > We have the non-removable property to describe that, so we can also look at that.
-> >> > >
-> >> > > > So it doesn't make sense to tie the test mode workaround into the broken-cd
-> >> > > > property, even though I agree the nature of the defect fits under the notion
-> >> > > > of the CD being broken.
-> >> > >
-> >> > > Maybe not solely on broken-cd, but I think that we dont necessarily need a new
-> >> > > DT property. As above, broken-cd, non-removable, and the compatible string may
-> >> > > together give the kernel enough information to choose the right thing to do.
-> >> > >
-> >> > > Thanks,
-> >> > > Mark.
-> >> >
-> >> > I'm not sure if I understand your suggestion completely. Are you suggesting
-> >> > setting both the broken-cd and non-removable properties? That would make sense,
-> >> > but my understanding was that the two properities are not meant to co-exist. In
-> >> > /Documentation/devicetree/bindings/mmc/mmc.txt it states that only one should
-> >> > be supplied. Don't the two properties conflict with each other?
-> >>
-> >> They do for the cases that exist today, but given we're updating the document
-> >> anyway, we could simply clarify the cases in which the two can sanely co-exist
-> >> (e.g.  for this particular IP block).
-> 
-> No, please!
-> 
-> Depending on the SDHCI variant there is already some difference on how
-> broken-cd is treated.
-> 
-> Let's not add yet another, as I think it will be too complicated for
-> people to understand the bindings.
-> 
-
-Shawn Lin pointed out that there might be instances of the arasan controller 
-that don't have the behavior the patch addresses. Having a new DT binding
-specific for this case would avoid needing to maintain a list of controllers
-that need the fix.  
-
-> >>
-> >> Thanks,
-> >> Mark.
-> >
-> > That makes sense. I'll change the documentation for broken-cd and non-removable
-> > in the IP specific document and change the driver accordingly.
-> 
-> I rather have a new DT binding specific for this case.
-> 
-> Perhaps there's a better name than "fake-cd". How about "force-cd", or
-> if someone can come up with a better name.
-> 
-> Kind regards
-> Uffe
-
-I've been trying to come up with a better name. Here are a few ideas
-cd-not-wired
-needs-test-cd
-fails-without-force-cd
+T24gMjAxNi84LzI2IDIzOjQ2LCBEb3VnIEFuZGVyc29uIHdyb3RlOgo+IEhpLAo+Cj4gT24gRnJp
+LCBBdWcgMjYsIDIwMTYgYXQgMTozMSBBTSwgSGVpa28gU3TDvGJuZXIgPGhlaWtvQHNudGVjaC5k
+ZT4gd3JvdGU6Cj4+IFRoZSBhY2xrX2VtbWNfZ3JmIGlzIChzaW1pbGFyIHRvIGFjbGtfdmlvX2dy
+ZiBldGMpIHBhcnQgb2YgdGhlIGVtbWMgYmxvY2suCj4KPiBSaWdodCBub3cgYWNsa19lbW1jX2dy
+ZiBpcyBzZXQgYXMgQ0xLX0lHTk9SRV9VTlVTRUQsIHdoaWNoIGlzIG15IGxlYXN0Cj4gZmF2b3Jp
+dGUgY2xvY2sgcHJvcGVydHkuICA7KQo+Cj4gRHVlIHRvIHRoZSBwYXJlbnRpbmcgc3RydWN0dXJl
+IGFuZCB0aGUgZmFjdCB0aGF0IHdlIGp1c3QgYWRkZWQKPiAiYWNsa19lbW1jX25vYyIgYXMgYSBj
+cml0aWNhbCBjbG9jaywgSSBiZWxpZXZlIHRoYXQgdGhpcyBtZWFucyB0aGF0Cj4gYWNsa19lbW1j
+X2dyZiB3aWxsIG5ldmVyIHR1cm4gb2ZmLiAgSXQgd291bGQgYmUgYXdmdWxseSBuaWNlIGlmIHlv
+dQoKSXQganVzdCBtZWFucyB3ZSBkb24ndCBnYXRlIGFjbGtfZW1tY19ncmYvYWNsa19lbW1jX25v
+YyBpZiBub3QgCnJlZmVyZW5jZWQsIGJ1dCBhY3R1YWxseSB3ZSBkb24ndCBwcmV2ZW50IGNsayBk
+cml2ZXIgdG8gZ2F0ZSBpdHMgcGFyZW50CndoaWNoIG1lYW5zIGl0IGlzbid0IHJlYWxseSBDTEtf
+SUdOT1JFX1VOVVNFRCBvciBjcml0aWNhbCB0byBhIGNlcnRhaW4KZGVncmVlIGZyb20gbXkgcGVy
+c29uYWwgdmlldyBhcyB3ZSBtYXkgbmVlZCB0byBwcm9wYWdhdGUgdGhpcyBmZWF0dXJlCmZvcndh
+cmQgdG8gaXRzIHBhcmVudHMuCgpBbnl3YXksIHRoYXQgc2VlbXMgYSBiaXQgYmV5b25kIHRoZSB0
+b3BpYyBvZiB3aGF0ICRTVUJKRUNUIHdhbm5hIGhhbmRsZQp3aXRoLiBCdXQgSSBhZ3JlZSB0aGF0
+IHdlIHNob3VsZCBtYWtlIHRoaXMgZGVwZW5kZW5jeSByZWxhdGlvbnNoaXAgbW9yZQpleGxpY2l0
+IHRvIHVzZXJzIGFueXdheS4KCkkgd2lsbCBkbyBpdCBvbmNlICRTVUJKRUNUIGFwcGxpZWQuIDop
+CgpUaGFua3MuCgo+IGNvdWxkIHNlbmQgdXAgYSBwYXRjaCB0byBhY3R1YWxseSB0dXJuIHRoZSAi
+Z3JmIiBjbG9jayBvbiB3aGVuIG5lZWRlZAo+IGFuZCB0dXJuIGl0IG9mZiB3aGVuIG5vdCBuZWVk
+ZWQuICBUaGF0IHdvdWxkIGxldCB1cyByZW1vdmUgdGhlCj4gIkNMS19JR05PUkVfVU5VU0VEIiBm
+cm9tIGFsbCBvZiB0aGUgZU1NQyBjbG9ja3MgaW4gcmszMzk5Lgo+Cj4gSSBub3RpY2VkIHlvdSBz
+ZW5kIHYyIG9mIHlvdXIgcGF0Y2ggc2VyaWVzIGFuZCB0aGF0IGxvb2tzIGZpbmUgdG8gbWUuCj4g
+VGhlIGlzc3VlIHdpdGggbm90IGhhbmRsaW5nIHRoZSAiZ3JmIiBjbG9jayBpcyBub3QgYSBuZXcg
+b25lIGFuZAo+IHNob3VsZG4ndCBibG9jayB5b3VyIHBhdGNoLiAgLi4uYnV0IGl0IHdvdWxkIHN0
+aWxsIGJlIG5pY2UgdG8gaGFuZGxlCj4gcHJvcGVybHkuCj4KPiAtRG91Zwo+Cj4KPgoKCi0tIApC
+ZXN0IFJlZ2FyZHMKU2hhd24gTGluCgoKX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
+X19fX19fX19fX19fX18KTGludXgtcm9ja2NoaXAgbWFpbGluZyBsaXN0CkxpbnV4LXJvY2tjaGlw
+QGxpc3RzLmluZnJhZGVhZC5vcmcKaHR0cDovL2xpc3RzLmluZnJhZGVhZC5vcmcvbWFpbG1hbi9s
+aXN0aW5mby9saW51eC1yb2NrY2hpcAo=
