@@ -1,58 +1,107 @@
-From: Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
-Subject: Re: [PATCH] mmc: sdhci-of-arasan: Properly set corecfg_clockmultipler
- on rk3399
-Date: Sat, 27 Aug 2016 10:10:40 +0800
-Message-ID: <85d066af-e41b-90c5-a567-6727c6da6438@rock-chips.com>
-References: <1472181736-17848-1-git-send-email-shawn.lin@rock-chips.com>
- <1dc7898d-ee35-4166-6313-64e9c50f8db8@rock-chips.com>
- <d6c3b728-af01-e724-3278-1bc0801f8fb4@rock-chips.com>
- <7490888.x1BxhdeR20@diego>
- <CAD=FV=UD-9PwQFm4x4Uqx5mQjEirD9icyYHPDaVjU4tRgk-f+g@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"; Format="flowed"
-Content-Transfer-Encoding: base64
-Return-path: <linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-In-Reply-To: <CAD=FV=UD-9PwQFm4x4Uqx5mQjEirD9icyYHPDaVjU4tRgk-f+g-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-rockchip>,
- <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-rockchip/>
-List-Post: <mailto:linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-List-Help: <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-rockchip>,
- <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
-Sender: "Linux-rockchip" <linux-rockchip-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-Errors-To: linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
-To: Doug Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, =?UTF-8?Q?Heiko_St=c3=bcbner?= <heiko-4mtYJXux2i+zQB+pC5nmwQ@public.gmane.org>
-Cc: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org, Ziyuan Xu <xzy.xu-TNX95d0MmH7DzftRWevZcw@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "open list:ARM/Rockchip SoC..." <linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+From: Jaedon Shin <jaedon.shin@gmail.com>
+Subject: Re: [PATCH] mmc: sdhci-brcmstb: Add SDHCI_QUIRK2_BROKEN_64_BIT_DMA
+Date: Sat, 27 Aug 2016 13:02:00 +0900
+Message-ID: <501206D1-D60B-4BA7-99C0-C38065C3AE9E@gmail.com>
+References: <20160808015803.2528-1-jaedon.shin@gmail.com> <8f42998e-6d5b-2ac7-3814-f7a4d6e8a6b9@intel.com> <CAOGqxeX8kcD9rX4nd+o=RTggEoPLZfK40GdBWKTT6-BTpxSvbg@mail.gmail.com> <AD331215-7115-426D-A089-263D6A0E54BF@gmail.com> <CAPDyKFqkoF2GU6QGc7GW1S2p8+A=XpU48sREcLiSkadPKHuibw@mail.gmail.com> <5A6224B1-2845-4059-A537-EBEA7E6F09E6@gmail.com> <de010fff-1f22-96bb-f41f-99169fb6bb19@gmail.com>
+Mime-Version: 1.0 (Mac OS X Mail 9.3 \(3124\))
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: quoted-printable
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-pa0-f66.google.com ([209.85.220.66]:33009 "EHLO
+        mail-pa0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750728AbcH0ECG (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sat, 27 Aug 2016 00:02:06 -0400
+Received: by mail-pa0-f66.google.com with SMTP id vy10so5608071pac.0
+        for <linux-mmc@vger.kernel.org>; Fri, 26 Aug 2016 21:02:05 -0700 (PDT)
+In-Reply-To: <de010fff-1f22-96bb-f41f-99169fb6bb19@gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Florian Fainelli <f.fainelli@gmail.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Alan Cooper <alcooperx@gmail.com>, Adrian Hunter <adrian.hunter@intel.com>, bcm-kernel-feedback-list@broadcom.com, linux-mmc@vger.kernel.org
 
-T24gMjAxNi84LzI2IDIzOjQ2LCBEb3VnIEFuZGVyc29uIHdyb3RlOgo+IEhpLAo+Cj4gT24gRnJp
-LCBBdWcgMjYsIDIwMTYgYXQgMTozMSBBTSwgSGVpa28gU3TDvGJuZXIgPGhlaWtvQHNudGVjaC5k
-ZT4gd3JvdGU6Cj4+IFRoZSBhY2xrX2VtbWNfZ3JmIGlzIChzaW1pbGFyIHRvIGFjbGtfdmlvX2dy
-ZiBldGMpIHBhcnQgb2YgdGhlIGVtbWMgYmxvY2suCj4KPiBSaWdodCBub3cgYWNsa19lbW1jX2dy
-ZiBpcyBzZXQgYXMgQ0xLX0lHTk9SRV9VTlVTRUQsIHdoaWNoIGlzIG15IGxlYXN0Cj4gZmF2b3Jp
-dGUgY2xvY2sgcHJvcGVydHkuICA7KQo+Cj4gRHVlIHRvIHRoZSBwYXJlbnRpbmcgc3RydWN0dXJl
-IGFuZCB0aGUgZmFjdCB0aGF0IHdlIGp1c3QgYWRkZWQKPiAiYWNsa19lbW1jX25vYyIgYXMgYSBj
-cml0aWNhbCBjbG9jaywgSSBiZWxpZXZlIHRoYXQgdGhpcyBtZWFucyB0aGF0Cj4gYWNsa19lbW1j
-X2dyZiB3aWxsIG5ldmVyIHR1cm4gb2ZmLiAgSXQgd291bGQgYmUgYXdmdWxseSBuaWNlIGlmIHlv
-dQoKSXQganVzdCBtZWFucyB3ZSBkb24ndCBnYXRlIGFjbGtfZW1tY19ncmYvYWNsa19lbW1jX25v
-YyBpZiBub3QgCnJlZmVyZW5jZWQsIGJ1dCBhY3R1YWxseSB3ZSBkb24ndCBwcmV2ZW50IGNsayBk
-cml2ZXIgdG8gZ2F0ZSBpdHMgcGFyZW50CndoaWNoIG1lYW5zIGl0IGlzbid0IHJlYWxseSBDTEtf
-SUdOT1JFX1VOVVNFRCBvciBjcml0aWNhbCB0byBhIGNlcnRhaW4KZGVncmVlIGZyb20gbXkgcGVy
-c29uYWwgdmlldyBhcyB3ZSBtYXkgbmVlZCB0byBwcm9wYWdhdGUgdGhpcyBmZWF0dXJlCmZvcndh
-cmQgdG8gaXRzIHBhcmVudHMuCgpBbnl3YXksIHRoYXQgc2VlbXMgYSBiaXQgYmV5b25kIHRoZSB0
-b3BpYyBvZiB3aGF0ICRTVUJKRUNUIHdhbm5hIGhhbmRsZQp3aXRoLiBCdXQgSSBhZ3JlZSB0aGF0
-IHdlIHNob3VsZCBtYWtlIHRoaXMgZGVwZW5kZW5jeSByZWxhdGlvbnNoaXAgbW9yZQpleGxpY2l0
-IHRvIHVzZXJzIGFueXdheS4KCkkgd2lsbCBkbyBpdCBvbmNlICRTVUJKRUNUIGFwcGxpZWQuIDop
-CgpUaGFua3MuCgo+IGNvdWxkIHNlbmQgdXAgYSBwYXRjaCB0byBhY3R1YWxseSB0dXJuIHRoZSAi
-Z3JmIiBjbG9jayBvbiB3aGVuIG5lZWRlZAo+IGFuZCB0dXJuIGl0IG9mZiB3aGVuIG5vdCBuZWVk
-ZWQuICBUaGF0IHdvdWxkIGxldCB1cyByZW1vdmUgdGhlCj4gIkNMS19JR05PUkVfVU5VU0VEIiBm
-cm9tIGFsbCBvZiB0aGUgZU1NQyBjbG9ja3MgaW4gcmszMzk5Lgo+Cj4gSSBub3RpY2VkIHlvdSBz
-ZW5kIHYyIG9mIHlvdXIgcGF0Y2ggc2VyaWVzIGFuZCB0aGF0IGxvb2tzIGZpbmUgdG8gbWUuCj4g
-VGhlIGlzc3VlIHdpdGggbm90IGhhbmRsaW5nIHRoZSAiZ3JmIiBjbG9jayBpcyBub3QgYSBuZXcg
-b25lIGFuZAo+IHNob3VsZG4ndCBibG9jayB5b3VyIHBhdGNoLiAgLi4uYnV0IGl0IHdvdWxkIHN0
-aWxsIGJlIG5pY2UgdG8gaGFuZGxlCj4gcHJvcGVybHkuCj4KPiAtRG91Zwo+Cj4KPgoKCi0tIApC
-ZXN0IFJlZ2FyZHMKU2hhd24gTGluCgoKX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
-X19fX19fX19fX19fX18KTGludXgtcm9ja2NoaXAgbWFpbGluZyBsaXN0CkxpbnV4LXJvY2tjaGlw
-QGxpc3RzLmluZnJhZGVhZC5vcmcKaHR0cDovL2xpc3RzLmluZnJhZGVhZC5vcmcvbWFpbG1hbi9s
-aXN0aW5mby9saW51eC1yb2NrY2hpcAo=
+Hi Florian,
+
+On Aug 26, 2016, at 1:41 AM, Florian Fainelli <f.fainelli@gmail.com> =
+wrote:
+>=20
+> On 08/19/2016 07:05 AM, Jaedon Shin wrote:
+>> Hi Ulf,
+>>=20
+>>> On Aug 19, 2016, at 10:44 PM, Ulf Hansson <ulf.hansson@linaro.org> =
+wrote:
+>>>=20
+>>> On 19 August 2016 at 04:25, Jaedon Shin <jaedon.shin@gmail.com> =
+wrote:
+>>>> Hi Alan,
+>>>>=20
+>>>> On Aug 18, 2016, at 11:27 PM, Alan Cooper <alcooperx@gmail.com> =
+wrote:
+>>>>>=20
+>>>>> It would be better to make this a MIPS only setting because this =
+issue
+>>>>> only exists for MIPS chips and some newer ARM chips will support =
+64
+>>>>> bit DMA.
+>>>>> Also, since there's been a general effort to reduce the use =
+QUIRKs,
+>>>>> you could clear the SDHCI_CAN_64BIT in CAPS1 instead of using the
+>>>>> QUIRK.
+>>>>>=20
+>>>>> @@ -101,6 +101,9 @@ static int sdhci_brcmstb_probe(struct =
+platform_device *pdev)
+>>>>>      host->caps1 =3D sdhci_readl(host, SDHCI_CAPABILITIES_1);
+>>>>>      host->caps1 &=3D ~(SDHCI_SUPPORT_SDR50 | SDHCI_SUPPORT_SDR104 =
+|
+>>>>>                      SDHCI_SUPPORT_DDR50);
+>>>>> +#if defined(CONFIG_MIPS)
+>>>>> +       host->caps1 &=3D ~SDHCI_CAN_64BIT;
+>>>>> +#endif
+>>>>>      host->quirks |=3D SDHCI_QUIRK_MISSING_CAPS |
+>>>>>              SDHCI_QUIRK_BROKEN_TIMEOUT_VAL;
+>>>>=20
+>>>> It's better to me, but we should use host->cap instead of =
+host->cap1. I will update
+>>>> patch with your comment.
+>>>=20
+>>> Please, then also send this to the public linux-mmc list.
+>>>=20
+>>> Kind regards
+>>> Uffe
+>>>=20
+>>=20
+>> I'm sorry I could not add the public linux-mmc list this mail thread, =
+but=20
+>> I have already sent the updated patch with linux-mmc.
+>>=20
+>> https://patchwork.kernel.org/patch/9289189/
+>=20
+> Humm, is not this one of these cases where we would expect the
+> compatible string to dictacte whether enabling 64_BIT_DMA makes sense =
+or
+> not?
+>=20
+> The patch is technically correct though.
+
+Yes, It's right way that uses host->cap according to the previous =
+discussion
+for this driver and commit 5eaa7476f937 ("mmc: sdhci: Allow CAPS check =
+for=20
+SDHCI_CAN_64BIT to use overridden caps").
+
+If the 64bit ARM chipsets have own compatible string, the patch like as =
+below
+
+	if (of_device_is_compatible(pdev->dev.of_node, =
+"brcm,bcm7425-sdhci"))
+		host->caps &=3D ~SDHCI_CAN_64BIT;
+
+Could you tell me the some newer 64bit ARM chipsets have possible own =
+compatible
+string?
+
+Thanks,
+Jaedon
+
+> --=20
+> Florian
+
