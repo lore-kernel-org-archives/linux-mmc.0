@@ -1,101 +1,75 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 1/2] sdhci-of-arasan: Add quirk and device tree parameter
- to fake CD bit
-Date: Mon, 29 Aug 2016 13:21:41 +0200
-Message-ID: <CAPDyKFpGJ=0y3B5dsQZsaU41pzEoU5PuwWi9R-zXtKet7O87ZA@mail.gmail.com>
-References: <1472080984-17373-1-git-send-email-zach.brown@ni.com>
- <20160825105640.GA5439@remoulade> <20160825171539.GA13571@zach-desktop>
- <20160825180959.GA14705@remoulade> <20160825182621.GA14817@zach-desktop>
- <20160825182852.GB15000@remoulade> <20160825204645.GA19450@zach-desktop>
- <CAPDyKFpcFus1oysdRuK6vUALXXdy8_SsDZ3n8LkyM1AZLZY+QQ@mail.gmail.com> <20160826222945.GA6679@zach-desktop>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+From: Jaedon Shin <jaedon.shin@gmail.com>
+Subject: Re: [v2] mmc: sdhci-brcmstb: Remove incorrect capability
+Date: Mon, 29 Aug 2016 21:01:47 +0900
+Message-ID: <FBE78AC0-851A-45D4-AD4D-97BF045F5028@gmail.com>
+References: <20160829091707.78436-1-jaedon.shin@gmail.com> <CAPDyKFp=rX8J0K=6pQFv3Wm=UfUVCX5cPyJPqHKeYm3075OLSQ@mail.gmail.com>
+Mime-Version: 1.0 (Mac OS X Mail 9.3 \(3124\))
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wm0-f45.google.com ([74.125.82.45]:38019 "EHLO
-        mail-wm0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1756135AbcH2LWE (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 29 Aug 2016 07:22:04 -0400
-Received: by mail-wm0-f45.google.com with SMTP id o80so86419426wme.1
-        for <linux-mmc@vger.kernel.org>; Mon, 29 Aug 2016 04:21:43 -0700 (PDT)
-In-Reply-To: <20160826222945.GA6679@zach-desktop>
+Received: from mail-pa0-f67.google.com ([209.85.220.67]:34210 "EHLO
+        mail-pa0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1756705AbcH2MCP (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 29 Aug 2016 08:02:15 -0400
+Received: by mail-pa0-f67.google.com with SMTP id hh10so8900833pac.1
+        for <linux-mmc@vger.kernel.org>; Mon, 29 Aug 2016 05:01:53 -0700 (PDT)
+In-Reply-To: <CAPDyKFp=rX8J0K=6pQFv3Wm=UfUVCX5cPyJPqHKeYm3075OLSQ@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Zach Brown <zach.brown@ni.com>
-Cc: Mark Rutland <mark.rutland@arm.com>, Adrian Hunter <adrian.hunter@intel.com>, Rob Herring <robh+dt@kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Michal Simek <michal.simek@xilinx.com>, =?UTF-8?Q?S=C3=B6ren_Brinkmann?= <soren.brinkmann@xilinx.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Lars-Peter Clausen <lars@metafoo.de>
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Jaedon Shin <jaedon.shin@gmail.com>, Al Cooper <alcooperx@gmail.com>, Adrian Hunter <adrian.hunter@intel.com>, Florian Fainelli <f.fainelli@gmail.com>, linux-mmc <linux-mmc@vger.kernel.org>, bcm-kernel-feedback-list@broadcom.com
 
-On 27 August 2016 at 00:29, Zach Brown <zach.brown@ni.com> wrote:
-> On Fri, Aug 26, 2016 at 09:42:38AM +0200, Ulf Hansson wrote:
->> On 25 August 2016 at 22:46, Zach Brown <zach.brown@ni.com> wrote:
->> > On Thu, Aug 25, 2016 at 07:28:55PM +0100, Mark Rutland wrote:
->> >> On Thu, Aug 25, 2016 at 01:26:22PM -0500, Zach Brown wrote:
->> >> > On Thu, Aug 25, 2016 at 07:10:00PM +0100, Mark Rutland wrote:
->> >> > > On Thu, Aug 25, 2016 at 12:15:44PM -0500, Zach Brown wrote:
->> >> > > > In cases where the card is non-removable then polling doesn't make sense.
->> >> > >
->> >> > > We have the non-removable property to describe that, so we can also look at that.
->> >> > >
->> >> > > > So it doesn't make sense to tie the test mode workaround into the broken-cd
->> >> > > > property, even though I agree the nature of the defect fits under the notion
->> >> > > > of the CD being broken.
->> >> > >
->> >> > > Maybe not solely on broken-cd, but I think that we dont necessarily need a new
->> >> > > DT property. As above, broken-cd, non-removable, and the compatible string may
->> >> > > together give the kernel enough information to choose the right thing to do.
->> >> > >
->> >> > > Thanks,
->> >> > > Mark.
->> >> >
->> >> > I'm not sure if I understand your suggestion completely. Are you suggesting
->> >> > setting both the broken-cd and non-removable properties? That would make sense,
->> >> > but my understanding was that the two properities are not meant to co-exist. In
->> >> > /Documentation/devicetree/bindings/mmc/mmc.txt it states that only one should
->> >> > be supplied. Don't the two properties conflict with each other?
->> >>
->> >> They do for the cases that exist today, but given we're updating the document
->> >> anyway, we could simply clarify the cases in which the two can sanely co-exist
->> >> (e.g.  for this particular IP block).
->>
->> No, please!
->>
->> Depending on the SDHCI variant there is already some difference on how
->> broken-cd is treated.
->>
->> Let's not add yet another, as I think it will be too complicated for
->> people to understand the bindings.
->>
->
-> Shawn Lin pointed out that there might be instances of the arasan controller
-> that don't have the behavior the patch addresses. Having a new DT binding
-> specific for this case would avoid needing to maintain a list of controllers
-> that need the fix.
->
+Hi Ulf,
 
-Okay!
+2016. 8. 29., =EC=98=A4=ED=9B=84 8:13, Ulf Hansson =
+<ulf.hansson@linaro.org> =EC=9E=91=EC=84=B1:
+>=20
+> On 29 August 2016 at 11:17, Jaedon Shin <jaedon.shin@gmail.com> wrote:
+>> Removes incorrect 64-bit ADMA capability on Broadcom MIPS based SoCs.
+>> The MIPS based BRCMSTB SDHCI host controllers are using ADMA only, =
+but
+>> the several chipsets have a incorrect capability about ADMA 64-bit.
+>>=20
+>> Signed-off-by: Jaedon Shin <jaedon.shin@gmail.com>
+>> ---
+>> drivers/mmc/host/sdhci-brcmstb.c | 2 ++
+>> 1 file changed, 2 insertions(+)
+>>=20
+>> diff --git a/drivers/mmc/host/sdhci-brcmstb.c =
+b/drivers/mmc/host/sdhci-brcmstb.c
+>> index cce10fe3e19e..683bfc2af512 100644
+>> --- a/drivers/mmc/host/sdhci-brcmstb.c
+>> +++ b/drivers/mmc/host/sdhci-brcmstb.c
+>> @@ -98,6 +98,8 @@ static int sdhci_brcmstb_probe(struct =
+platform_device *pdev)
+>>         * properties through mmc_of_parse().
+>>         */
+>>        host->caps =3D sdhci_readl(host, SDHCI_CAPABILITIES);
+>> +       if (IS_ENABLED(CONFIG_MIPS))
+>=20
+> I thought we agreed on using a specific DT compatible string to
+> distinguish what to do here was better? No?
 
->> >>
->> >> Thanks,
->> >> Mark.
->> >
->> > That makes sense. I'll change the documentation for broken-cd and non-removable
->> > in the IP specific document and change the driver accordingly.
->>
->> I rather have a new DT binding specific for this case.
->>
->> Perhaps there's a better name than "fake-cd". How about "force-cd", or
->> if someone can come up with a better name.
->>
->> Kind regards
->> Uffe
->
-> I've been trying to come up with a better name. Here are a few ideas
-> cd-not-wired
-> needs-test-cd
-> fails-without-force-cd
+My mistake. please drop this patch.
 
-Yeah, we could probably announce a naming competition for this. :-)
+The v3 patch should have new compatible string =E2=80=9Cbrcm,bcm7445-sdhci=
+=E2=80=9D. The BCM7445 is
+initial and typical 28nm generation ARM SoC. I=E2=80=99ll be send =
+updated patch next day.
 
-Just select one of them and try to get an ack from Rob/Mark then I
-will pick up the change.
+Thanks,
+Jaedon
 
-Kind regards
-Uffe
+>=20
+>> +               host->caps &=3D ~SDHCI_CAN_64BIT;
+>>        host->caps1 =3D sdhci_readl(host, SDHCI_CAPABILITIES_1);
+>>        host->caps1 &=3D ~(SDHCI_SUPPORT_SDR50 | SDHCI_SUPPORT_SDR104 =
+|
+>>                        SDHCI_SUPPORT_DDR50);
+>> --
+>> 2.9.3
+>>=20
+>=20
+> Kind regards
+> Uffe
+
