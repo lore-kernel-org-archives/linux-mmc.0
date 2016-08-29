@@ -1,105 +1,52 @@
-From: Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
-Subject: Re: [PATCH 2/4] mmc: sdhci-of-arasan: Control clock for accessing
- syscon
-Date: Mon, 29 Aug 2016 17:22:27 +0800
-Message-ID: <68c69709-2d23-30f5-41ea-7fe9757aae4f@rock-chips.com>
-References: <1472457779-7194-1-git-send-email-shawn.lin@rock-chips.com>
- <8418661.gal5ZOtGyv@diego>
- <fa7bea7d-b596-5784-4221-de3a8eaf5f17@rock-chips.com>
- <1693211.KBN6GAFoI7@diego>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"; Format="flowed"
-Content-Transfer-Encoding: base64
-Return-path: <linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-In-Reply-To: <1693211.KBN6GAFoI7@diego>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-rockchip>,
- <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-rockchip/>
-List-Post: <mailto:linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-List-Help: <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-rockchip>,
- <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
-Sender: "Linux-rockchip" <linux-rockchip-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-Errors-To: linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
-To: =?UTF-8?Q?Heiko_St=c3=bcbner?= <heiko-4mtYJXux2i+zQB+pC5nmwQ@public.gmane.org>
-Cc: devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org, Ziyuan Xu <xzy.xu-TNX95d0MmH7DzftRWevZcw@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Douglas Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+From: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
+Subject: [PATCH v1 2/3] sdhci-pci: enable SDIO interface on Intel Merrifield
+Date: Mon, 29 Aug 2016 12:33:40 +0300
+Message-ID: <1472463221-11948-2-git-send-email-andriy.shevchenko@linux.intel.com>
+References: <1472463221-11948-1-git-send-email-andriy.shevchenko@linux.intel.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mga03.intel.com ([134.134.136.65]:25757 "EHLO mga03.intel.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1756953AbcH2Jdq (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Mon, 29 Aug 2016 05:33:46 -0400
+In-Reply-To: <1472463221-11948-1-git-send-email-andriy.shevchenko@linux.intel.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, Adrian Hunter <adrian.hunter@intel.com>
+Cc: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
 
-5ZyoIDIwMTYvOC8yOSAxNzoxMCwgSGVpa28gU3TDvGJuZXIg5YaZ6YGTOgo+IEhpIFNoYXduLAo+
-Cj4gQW0gTW9udGFnLCAyOS4gQXVndXN0IDIwMTYsIDE2OjU0OjEwIHNjaHJpZWIgU2hhd24gTGlu
-Ogo+PiBPbiAyMDE2LzgvMjkgMTY6MjUsIEhlaWtvIFN0w7xibmVyIHdyb3RlOgo+Pj4gQW0gTW9u
-dGFnLCAyOS4gQXVndXN0IDIwMTYsIDE2OjAyOjU3IHNjaHJpZWIgU2hhd24gTGluOgo+Pj4+IElu
-IHRoZSBlYXJpbGVyIGNvbW1pdCA2NTgyMDE5OTI3MmQgKCJEb2N1bWVudGF0aW9uOiBtbWM6Cj4+
-Pj4gc2RoY2ktb2YtYXJhc2FuOiBBZGQgc29jLWN0bC1zeXNjb24gZm9yIGNvcmVjZmcgcmVncyIp
-LCB3ZQo+Pj4+IGludHJvZHVjZWQgc3lzY29uIHRvIGNvbnRyb2wgY29yZWNmZ18qIHN0dWZmIHBy
-b3ZpZGVkIGJ5Cj4+Pj4gYXJhc2FuLiBCdXQgZ2l2ZW4gdGhhdCB3ZSBtYXkgbmVlZCB0byB1bmdh
-dGUgdGhlIGNsb2NrIGZvcgo+Pj4+IGFjY2Vzc2luZyBjb3JlY2ZnXyosIGl0IG5vdCBzbyBwZXJm
-ZWN0IGFzIGl0IGRlcGVuZHMgb24KPj4+PiB3aGV0aGVyIHNwZWNpZmljIGNsb2NrIGRyaXZlciBk
-aXNhYmxlcyBpdCBpZiBub3QgcmVmZXJlbmNlZC4KPj4+PiBNZWFud2hpbGUsIGlmIHdlIGRvbid0
-IG5lZWQgYXJhc2FuIGNvbnRvbGxlciB0byB3b3JrIGFueW1vcmUsCj4+Pj4gdGhlcmUgaXMgbm8g
-cmVhc29uIHRvIHN0aWxsIGVuYWJsZSBpdC4gU28gbGV0J3MgY29udHJvbCB0aGlzCj4+Pj4gY2xv
-Y2sgd2hlbiBuZWVkZWQuCj4+Pj4KPj4+PiBTaWduZWQtb2ZmLWJ5OiBTaGF3biBMaW4gPHNoYXdu
-LmxpbkByb2NrLWNoaXBzLmNvbT4KPj4+PiAtLS0KPj4+Pgo+Pj4+ICBkcml2ZXJzL21tYy9ob3N0
-L3NkaGNpLW9mLWFyYXNhbi5jIHwgMjUgKysrKysrKysrKysrKysrKysrKysrKy0tLQo+Pj4+ICAx
-IGZpbGUgY2hhbmdlZCwgMjIgaW5zZXJ0aW9ucygrKSwgMyBkZWxldGlvbnMoLSkKPj4+Pgo+Pj4+
-IGRpZmYgLS1naXQgYS9kcml2ZXJzL21tYy9ob3N0L3NkaGNpLW9mLWFyYXNhbi5jCj4+Pj4gYi9k
-cml2ZXJzL21tYy9ob3N0L3NkaGNpLW9mLWFyYXNhbi5jIGluZGV4IDBiM2E5Y2YuLjdhZTNhZTQg
-MTAwNjQ0Cj4+Pj4gLS0tIGEvZHJpdmVycy9tbWMvaG9zdC9zZGhjaS1vZi1hcmFzYW4uYwo+Pj4+
-ICsrKyBiL2RyaXZlcnMvbW1jL2hvc3Qvc2RoY2ktb2YtYXJhc2FuLmMKPj4+PiBAQCAtNzgsNiAr
-NzgsNyBAQCBzdHJ1Y3Qgc2RoY2lfYXJhc2FuX3NvY19jdGxfbWFwIHsKPj4+Pgo+Pj4+ICAgKiBz
-dHJ1Y3Qgc2RoY2lfYXJhc2FuX2RhdGEKPj4+PiAgICogQGhvc3Q6CQlQb2ludGVyIHRvIHRoZSBt
-YWluIFNESENJIGhvc3Qgc3RydWN0dXJlLgo+Pj4+ICAgKiBAY2xrX2FoYjoJCVBvaW50ZXIgdG8g
-dGhlIEFIQiBjbG9jawo+Pj4+Cj4+Pj4gKyAqIEBjbGtfc3lzY29uOgkJUG9pbnRlciB0byB0aGUg
-b3B0aW9uYWwgY2xvY2sgZm9yIGFjY2Vzc2luZyBzeXNjb24KPj4+Pgo+Pj4+ICAgKiBAcGh5OgkJ
-UG9pbnRlciB0byB0aGUgZ2VuZXJpYyBwaHkKPj4+PiAgICogQGlzX3BoeV9vbjoJCVRydWUgaWYg
-dGhlIFBIWSBpcyBvbjsgZmFsc2UgaWYgbm90Lgo+Pj4+ICAgKiBAc2RjYXJkY2xrX2h3OglTdHJ1
-Y3QgZm9yIHRoZSBjbG9jayB3ZSBtaWdodCBwcm92aWRlIHRvIGEgUEhZLgo+Pj4+Cj4+Pj4gQEAg
-LTg4LDYgKzg5LDcgQEAgc3RydWN0IHNkaGNpX2FyYXNhbl9zb2NfY3RsX21hcCB7Cj4+Pj4KPj4+
-PiAgc3RydWN0IHNkaGNpX2FyYXNhbl9kYXRhIHsKPj4+Pgo+Pj4+ICAJc3RydWN0IHNkaGNpX2hv
-c3QgKmhvc3Q7Cj4+Pj4gIAlzdHJ1Y3QgY2xrCSpjbGtfYWhiOwo+Pj4+Cj4+Pj4gKwlzdHJ1Y3Qg
-Y2xrCSpjbGtfc3lzY29uOwo+Pj4+Cj4+Pj4gIAlzdHJ1Y3QgcGh5CSpwaHk7Cj4+Pj4gIAlib29s
-CQlpc19waHlfb247Cj4+Pj4KPj4+PiBAQCAtMjkwLDYgKzI5Miw3IEBAIHN0YXRpYyBpbnQgc2Ro
-Y2lfYXJhc2FuX3N1c3BlbmQoc3RydWN0IGRldmljZSAqZGV2KQo+Pj4+Cj4+Pj4gIAljbGtfZGlz
-YWJsZShwbHRmbV9ob3N0LT5jbGspOwo+Pj4+ICAJY2xrX2Rpc2FibGUoc2RoY2lfYXJhc2FuLT5j
-bGtfYWhiKTsKPj4+Pgo+Pj4+ICsJY2xrX2Rpc2FibGUoc2RoY2lfYXJhc2FuLT5jbGtfc3lzY29u
-KTsKPj4+Pgo+Pj4+ICAJcmV0dXJuIDA7Cj4+Pj4KPj4+PiAgfQo+Pj4+Cj4+Pj4gQEAgLTMwOSw2
-ICszMTIsMTIgQEAgc3RhdGljIGludCBzZGhjaV9hcmFzYW5fcmVzdW1lKHN0cnVjdCBkZXZpY2Ug
-KmRldikKPj4+Pgo+Pj4+ICAJc3RydWN0IHNkaGNpX2FyYXNhbl9kYXRhICpzZGhjaV9hcmFzYW4g
-PSBzZGhjaV9wbHRmbV9wcml2KHBsdGZtX2hvc3QpOwo+Pj4+ICAJaW50IHJldDsKPj4+Pgo+Pj4+
-ICsJcmV0ID0gY2xrX2VuYWJsZShzZGhjaV9hcmFzYW4tPmNsa19zeXNjb24pOwo+Pj4+ICsJaWYg
-KHJldCkgewo+Pj4+ICsJCWRldl9lcnIoZGV2LCAiQ2Fubm90IGVuYWJsZSBzeXNjb24gY2xvY2su
-XG4iKTsKPj4+PiArCQlyZXR1cm4gcmV0Owo+Pj4+ICsJfQo+Pj4+ICsKPj4+Pgo+Pj4+ICAJcmV0
-ID0gY2xrX2VuYWJsZShzZGhjaV9hcmFzYW4tPmNsa19haGIpOwo+Pj4+ICAJaWYgKHJldCkgewo+
-Pj4+ICAJCj4+Pj4gIAkJZGV2X2VycihkZXYsICJDYW5ub3QgZW5hYmxlIEFIQiBjbG9jay5cbiIp
-Owo+Pj4+Cj4+Pj4gQEAgLTUyOCwyNiArNTM3LDMzIEBAIHN0YXRpYyBpbnQgc2RoY2lfYXJhc2Fu
-X3Byb2JlKHN0cnVjdAo+Pj4+IHBsYXRmb3JtX2RldmljZQo+Pj4+ICpwZGV2KSByZXQpOwo+Pj4+
-Cj4+Pj4gIAkJCWdvdG8gZXJyX3BsdGZtX2ZyZWU7Cj4+Pj4gIAkJCj4+Pj4gIAkJfQo+Pj4+Cj4+
-Pj4gKwo+Pj4+ICsJCXNkaGNpX2FyYXNhbi0+Y2xrX3N5c2NvbiA9IGRldm1fY2xrX2dldCgmcGRl
-di0+ZGV2LAo+Pj4+ICsJCQkJCQkJImNsa19zeXNjb24iKTsKPj4+PiArCQlpZiAoY2xrX3ByZXBh
-cmVfZW5hYmxlKHNkaGNpX2FyYXNhbi0+Y2xrX3N5c2NvbikpIHsKPj4+PiArCQkJZGV2X2Vycigm
-cGRldi0+ZGV2LCAiVW5hYmxlIHRvIGVuYWJsZSBzeXNjb24gY2xvY2suXG4iKTsKPj4+PiArCQkJ
-Z290byBlcnJfcGx0Zm1fZnJlZTsKPj4+PiArCQl9Cj4+Pgo+Pj4gZG9lc24ndCBsb29rIHZlcnkg
-Im9wdGlvbmFsIiB0byBtZS4KPj4+IGNsa19nZXQgc3BlY2lmaWVzOgo+Pj4gIlJldHVybnMgYSBz
-dHJ1Y3QgY2xrIGNvcnJlc3BvbmRpbmcgdG8gdGhlIGNsb2NrIHByb2R1Y2VyLCBvcgo+Pj4gdmFs
-aWQgSVNfRVJSKCkgY29uZGl0aW9uIGNvbnRhaW5pbmcgZXJybm8uIgo+Pj4KPj4+IFNvIGxhdGVy
-IGNsa18qIG9uIHRoYXQgZXJyX3B0ciB3aWxsIHByb2R1Y2UgZmFpbHVyZXMgYW5kIHRoZQo+Pj4g
-Y2xvY2stZnJhbWV3b3JrIGNvdWxkIGFsc28gcmVxdWVzdCBkZWZlcmFsLgo+Pgo+PiBUaGFua3Mg
-Zm9yIHF1aWNrIGZlZWRiYWNrLjopCj4+Cj4+IEl0IG1ha2VzIHNlbnNlLiBJIHRoaW5rIGl0J3Mg
-anVzdCBiZWNhdXNlIGNsa19nZXQgcmVxdWVzdCBkZWZlcnJhbCwgc28KPj4gd2UgY291bGQgc2lt
-cGx5IGFzc2lnbiBOVUxMIHRvIGNseV9zeXNjb24gYW5kIGxldCBjbGtfKiByZXR1cm4gMAo+PiBk
-aXJlY3RseS4gU28gdGhlIGRlZmVycmFsIHNob3VsZCBiZSBoYW5kbGUgd2hlbiBnZXR0aW5nIG90
-aGVyIGNsa3MgbGlrZQo+PiBjbGtfYWhiPwo+Cj4gbm9wZSwgSSB0aGluayB0aGUgcG9zaXRpb24g
-aXRzZWxmIGlzIGZpbmUsIHNvIGp1c3QgZG8gc29tZXRoaW5nIGxpa2UKPgo+IGlmIChJU19FUlIo
-c2RoY2lfYXJhc2FuLT5jbGtfc3lzY29uKSkgewo+IHsKPiAJaWYgKFBUUl9FUlIoc2RoY2lfYXJh
-c2FuLT5jbGtfc3lzY29uKSA9PSAtRVBST0JFX0RFRkVSKQo+IAkJcmV0dXJuIC1FUFJPQkVfREVG
-RVI7Cj4gCWVsc2UKPiAJCXNkaGNpX2FyYXNhbi0+Y2xrX3N5c2NvbiA9IE5VTEw7Cj4gfQo+Cj4g
-YXMgdGhlIHN5c2NvbiBjbGsgd291bGQgb25seSBldmVyIGJlIG5lY2Vzc2FyeSBpZiB0aGUgc29j
-LWN0bC1zeXNjb24gaXMKPiBhY3R1YWxseSBkZWZpbmVkLiBCdXQgdGhlcmUgaXMgbm8gbmVlZCB0
-byBtb3ZlIHRoYXQgc2VjdGlvbiBJIHRoaW5rLgo+CgpleGNlcHQgZm9yIHNvbWUgYXJhc2FuJ3Mg
-aW5zdGFuY2VzIGZvciBzb21lIG90aGVyIHZlbmRvcnMgd2hvIGRvIGhhdmUKc29jLWN0bC1zeXNj
-b24gdG8gY29udHJvbCBjb3JlY2ZnXyogYnV0IHdpdGhvdXQgYW55IGNsayBnYXRlIGZvciB0aGUK
-YWNjZXNzaW5nIHBhdGgsIGlzIGl0IHBvc3NpYmxlPyA6KQoKPgo+CgoKLS0gCkJlc3QgUmVnYXJk
-cwpTaGF3biBMaW4KCgpfX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
-X19fXwpMaW51eC1yb2NrY2hpcCBtYWlsaW5nIGxpc3QKTGludXgtcm9ja2NoaXBAbGlzdHMuaW5m
-cmFkZWFkLm9yZwpodHRwOi8vbGlzdHMuaW5mcmFkZWFkLm9yZy9tYWlsbWFuL2xpc3RpbmZvL2xp
-bnV4LXJvY2tjaGlwCg==
+Intel Merrifield is known to have an SDIO interface and on Intel Edison board a
+WiFi card is wired to it.
+
+Enable the interface here to allow WiFi card enumeration.
+
+Signed-off-by: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
+---
+ drivers/mmc/host/sdhci-pci-core.c | 5 +++++
+ 1 file changed, 5 insertions(+)
+
+diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-pci-core.c
+index 40f4fe8..d38d701 100644
+--- a/drivers/mmc/host/sdhci-pci-core.c
++++ b/drivers/mmc/host/sdhci-pci-core.c
+@@ -419,6 +419,7 @@ static const struct sdhci_pci_fixes sdhci_intel_byt_sd = {
+ /* Define Host controllers for Intel Merrifield platform */
+ #define INTEL_MRFLD_EMMC_0	0
+ #define INTEL_MRFLD_EMMC_1	1
++#define INTEL_MRFLD_SDIO	3
+ 
+ static int intel_mrfld_mmc_probe_slot(struct sdhci_pci_slot *slot)
+ {
+@@ -431,6 +432,10 @@ static int intel_mrfld_mmc_probe_slot(struct sdhci_pci_slot *slot)
+ 					 MMC_CAP_8_BIT_DATA |
+ 					 MMC_CAP_1_8V_DDR;
+ 		break;
++	case INTEL_MRFLD_SDIO:
++		slot->host->mmc->caps |= MMC_CAP_NONREMOVABLE |
++					 MMC_CAP_POWER_OFF_CARD;
++		break;
+ 	default:
+ 		/* SD support is not ready yet */
+ 		return -ENODEV;
+-- 
+2.8.1
+
