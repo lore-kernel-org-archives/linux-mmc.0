@@ -1,43 +1,53 @@
-From: <tomas.melin@vaisala.com>
-Subject: [PATCH 3/3] mmc-utils: Fix return value check from
- set_partitioning_setting_completed()
-Date: Mon, 29 Aug 2016 10:54:01 +0000
-Message-ID: <e324e967-ac52-e25c-618f-a89d2de22b39@vaisala.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [v2] mmc: sdhci-brcmstb: Remove incorrect capability
+Date: Mon, 29 Aug 2016 13:13:34 +0200
+Message-ID: <CAPDyKFp=rX8J0K=6pQFv3Wm=UfUVCX5cPyJPqHKeYm3075OLSQ@mail.gmail.com>
+References: <20160829091707.78436-1-jaedon.shin@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from hel-mailgw-01.vaisala.com ([193.143.230.17]:14820 "EHLO
-        hel-mailgw-01.vaisala.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S932244AbcH2KyD (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 29 Aug 2016 06:54:03 -0400
-Content-Language: en-US
-Content-ID: <FE6C1ACDDDB9CC42B41DA0708657B1D0@exch.vaisala.com>
+Received: from mail-wm0-f43.google.com ([74.125.82.43]:33628 "EHLO
+        mail-wm0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1757166AbcH2LNh (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 29 Aug 2016 07:13:37 -0400
+Received: by mail-wm0-f43.google.com with SMTP id d196so15354325wmd.0
+        for <linux-mmc@vger.kernel.org>; Mon, 29 Aug 2016 04:13:36 -0700 (PDT)
+In-Reply-To: <20160829091707.78436-1-jaedon.shin@gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: chris@printf.net
-Cc: linux-mmc@vger.kernel.org, tomas.melin@vaisala.com
+To: Jaedon Shin <jaedon.shin@gmail.com>
+Cc: Al Cooper <alcooperx@gmail.com>, Adrian Hunter <adrian.hunter@intel.com>, Florian Fainelli <f.fainelli@gmail.com>, linux-mmc <linux-mmc@vger.kernel.org>, bcm-kernel-feedback-list@broadcom.com
 
-VGVzdCB3YXMgd3Jvbmcgd2F5IGFyb3VuZC4gRnVuY3Rpb24gcmV0dXJucyBub24temVybyB2YWx1
-ZSBvbiBmYWlsLg0KDQpTaWduZWQtb2ZmLWJ5OiBUb21hcyBNZWxpbiA8dG9tYXMubWVsaW5AdmFp
-c2FsYS5jb20+DQotLS0NCiBtbWNfY21kcy5jIHwgOCArKysrLS0tLQ0KIDEgZmlsZSBjaGFuZ2Vk
-LCA0IGluc2VydGlvbnMoKyksIDQgZGVsZXRpb25zKC0pDQoNCmRpZmYgLS1naXQgYS9tbWNfY21k
-cy5jIGIvbW1jX2NtZHMuYw0KaW5kZXggNWYyYjJiNS4uMDliZTgyNSAxMDA2NDQNCi0tLSBhL21t
-Y19jbWRzLmMNCisrKyBiL21tY19jbWRzLmMNCkBAIC0xMDcxLDcgKzEwNzEsNyBAQCBpbnQgZG9f
-Y3JlYXRlX2dwX3BhcnRpdGlvbihpbnQgbmFyZ3MsIGNoYXIgKiphcmd2KQ0KICAgICBpZiAocmV0
-KQ0KICAgICAgICAgZXhpdCgxKTsNCiANCi0gICAgaWYgKCFzZXRfcGFydGl0aW9uaW5nX3NldHRp
-bmdfY29tcGxldGVkKGRyeV9ydW4sIGRldmljZSwgZmQpKQ0KKyAgICBpZiAoc2V0X3BhcnRpdGlv
-bmluZ19zZXR0aW5nX2NvbXBsZXRlZChkcnlfcnVuLCBkZXZpY2UsIGZkKSkNCiAgICAgICAgIGV4
-aXQoMSk7DQogDQogICAgIHJldHVybiAwOw0KQEAgLTEyMTUsNyArMTIxNSw3IEBAIGludCBkb19l
-bmhfYXJlYV9zZXQoaW50IG5hcmdzLCBjaGFyICoqYXJndikNCiANCiAgICAgcHJpbnRmKCJEb25l
-IHNldHRpbmcgRU5IX1VTUiBhcmVhIG9uICVzXG4iLCBkZXZpY2UpOw0KIA0KLSAgICBpZiAoIXNl
-dF9wYXJ0aXRpb25pbmdfc2V0dGluZ19jb21wbGV0ZWQoZHJ5X3J1biwgZGV2aWNlLCBmZCkpDQor
-ICAgIGlmIChzZXRfcGFydGl0aW9uaW5nX3NldHRpbmdfY29tcGxldGVkKGRyeV9ydW4sIGRldmlj
-ZSwgZmQpKQ0KICAgICAgICAgZXhpdCgxKTsNCiANCiAgICAgcmV0dXJuIDA7DQpAQCAtMTI3OSw4
-ICsxMjc5LDggQEAgaW50IGRvX3dyaXRlX3JlbGlhYmlsaXR5X3NldChpbnQgbmFyZ3MsIGNoYXIg
-Kiphcmd2KQ0KICAgICBwcmludGYoIkRvbmUgc2V0dGluZyBFWFRfQ1NEX1dSX1JFTF9TRVQgdG8g
-MHglMDJ4IG9uICVzXG4iLA0KICAgICAgICAgdmFsdWUsIGRldmljZSk7DQogDQotICAgIGlmICgh
-c2V0X3BhcnRpdGlvbmluZ19zZXR0aW5nX2NvbXBsZXRlZChkcnlfcnVuLCBkZXZpY2UsIGZkKSkN
-Ci0gICAgICAgIGV4aXQoMSk7DQorICAgICAgICBpZiAoc2V0X3BhcnRpdGlvbmluZ19zZXR0aW5n
-X2NvbXBsZXRlZChkcnlfcnVuLCBkZXZpY2UsIGZkKSkNCisgICAgICAgICAgICAgICAgZXhpdCgx
-KTsNCiANCiAgICAgcmV0dXJuIDA7DQogfQ0KLS0gDQoyLjEuNA0K
+On 29 August 2016 at 11:17, Jaedon Shin <jaedon.shin@gmail.com> wrote:
+> Removes incorrect 64-bit ADMA capability on Broadcom MIPS based SoCs.
+> The MIPS based BRCMSTB SDHCI host controllers are using ADMA only, but
+> the several chipsets have a incorrect capability about ADMA 64-bit.
+>
+> Signed-off-by: Jaedon Shin <jaedon.shin@gmail.com>
+> ---
+>  drivers/mmc/host/sdhci-brcmstb.c | 2 ++
+>  1 file changed, 2 insertions(+)
+>
+> diff --git a/drivers/mmc/host/sdhci-brcmstb.c b/drivers/mmc/host/sdhci-brcmstb.c
+> index cce10fe3e19e..683bfc2af512 100644
+> --- a/drivers/mmc/host/sdhci-brcmstb.c
+> +++ b/drivers/mmc/host/sdhci-brcmstb.c
+> @@ -98,6 +98,8 @@ static int sdhci_brcmstb_probe(struct platform_device *pdev)
+>          * properties through mmc_of_parse().
+>          */
+>         host->caps = sdhci_readl(host, SDHCI_CAPABILITIES);
+> +       if (IS_ENABLED(CONFIG_MIPS))
+
+I thought we agreed on using a specific DT compatible string to
+distinguish what to do here was better? No?
+
+> +               host->caps &= ~SDHCI_CAN_64BIT;
+>         host->caps1 = sdhci_readl(host, SDHCI_CAPABILITIES_1);
+>         host->caps1 &= ~(SDHCI_SUPPORT_SDR50 | SDHCI_SUPPORT_SDR104 |
+>                         SDHCI_SUPPORT_DDR50);
+> --
+> 2.9.3
+>
+
+Kind regards
+Uffe
