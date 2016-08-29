@@ -1,157 +1,67 @@
-From: Jaedon Shin <jaedon.shin@gmail.com>
-Subject: Re: [PATCH] mmc: sdhci-brcmstb: Add SDHCI_QUIRK2_BROKEN_64_BIT_DMA
-Date: Sun, 28 Aug 2016 19:53:51 +0900
-Message-ID: <B964A840-3F8D-4B4D-A7C4-8AA76EF35E59@gmail.com>
-References: <20160808015803.2528-1-jaedon.shin@gmail.com> <8f42998e-6d5b-2ac7-3814-f7a4d6e8a6b9@intel.com> <CAOGqxeX8kcD9rX4nd+o=RTggEoPLZfK40GdBWKTT6-BTpxSvbg@mail.gmail.com> <AD331215-7115-426D-A089-263D6A0E54BF@gmail.com> <CAPDyKFqkoF2GU6QGc7GW1S2p8+A=XpU48sREcLiSkadPKHuibw@mail.gmail.com> <5A6224B1-2845-4059-A537-EBEA7E6F09E6@gmail.com> <de010fff-1f22-96bb-f41f-99169fb6bb19@gmail.com> <501206D1-D60B-4BA7-99C0-C38065C3AE9E@gmail.com> <7edcef69-d364-8845-a677-3827a50f4da1@gmail.com>
-Mime-Version: 1.0 (Mac OS X Mail 9.3 \(3124\))
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pf0-f194.google.com ([209.85.192.194]:33689 "EHLO
-        mail-pf0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1755273AbcH1Kx6 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sun, 28 Aug 2016 06:53:58 -0400
-Received: by mail-pf0-f194.google.com with SMTP id i6so7545618pfe.0
-        for <linux-mmc@vger.kernel.org>; Sun, 28 Aug 2016 03:53:57 -0700 (PDT)
-In-Reply-To: <7edcef69-d364-8845-a677-3827a50f4da1@gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+From: Ziyuan Xu <xzy.xu-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
+Subject: Re: [PATCH 1/2] Documentation: mmc: sdhci-of-arasan: add description
+ of power domain
+Date: Mon, 29 Aug 2016 08:36:37 +0800
+Message-ID: <080c7a5c-7ff6-175b-e7d9-a9c7efec3afe@rock-chips.com>
+References: <20160827134103.28160-1-xzy.xu@rock-chips.com>
+ <20160827134103.28160-2-xzy.xu@rock-chips.com>
+ <40f46bd6-22d2-f008-602a-47200340f733@rock-chips.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="utf-8"; Format="flowed"
+Content-Transfer-Encoding: base64
+Return-path: <linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+In-Reply-To: <40f46bd6-22d2-f008-602a-47200340f733-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-rockchip>,
+ <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-rockchip/>
+List-Post: <mailto:linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+List-Help: <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-rockchip>,
+ <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
+Sender: "Linux-rockchip" <linux-rockchip-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+Errors-To: linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+To: Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>, ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, heiko-4mtYJXux2i+zQB+pC5nmwQ@public.gmane.org
+Cc: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
-To: Florian Fainelli <f.fainelli@gmail.com>
-Cc: Alan Cooper <alcooperx@gmail.com>, Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, bcm-kernel-feedback-list@broadcom.com, linux-mmc@vger.kernel.org
 
-On Aug 28, 2016, at 4:56 AM, Florian Fainelli <f.fainelli@gmail.com> =
-wrote:
->=20
-> Le 26/08/2016 =C3=A0 21:02, Jaedon Shin a =C3=A9crit :
->> Hi Florian,
->>=20
->> On Aug 26, 2016, at 1:41 AM, Florian Fainelli <f.fainelli@gmail.com> =
-wrote:
->>>=20
->>> On 08/19/2016 07:05 AM, Jaedon Shin wrote:
->>>> Hi Ulf,
->>>>=20
->>>>> On Aug 19, 2016, at 10:44 PM, Ulf Hansson <ulf.hansson@linaro.org> =
-wrote:
->>>>>=20
->>>>> On 19 August 2016 at 04:25, Jaedon Shin <jaedon.shin@gmail.com> =
-wrote:
->>>>>> Hi Alan,
->>>>>>=20
->>>>>> On Aug 18, 2016, at 11:27 PM, Alan Cooper <alcooperx@gmail.com> =
-wrote:
->>>>>>>=20
->>>>>>> It would be better to make this a MIPS only setting because this =
-issue
->>>>>>> only exists for MIPS chips and some newer ARM chips will support =
-64
->>>>>>> bit DMA.
->>>>>>> Also, since there's been a general effort to reduce the use =
-QUIRKs,
->>>>>>> you could clear the SDHCI_CAN_64BIT in CAPS1 instead of using =
-the
->>>>>>> QUIRK.
->>>>>>>=20
->>>>>>> @@ -101,6 +101,9 @@ static int sdhci_brcmstb_probe(struct =
-platform_device *pdev)
->>>>>>>     host->caps1 =3D sdhci_readl(host, SDHCI_CAPABILITIES_1);
->>>>>>>     host->caps1 &=3D ~(SDHCI_SUPPORT_SDR50 | =
-SDHCI_SUPPORT_SDR104 |
->>>>>>>                     SDHCI_SUPPORT_DDR50);
->>>>>>> +#if defined(CONFIG_MIPS)
->>>>>>> +       host->caps1 &=3D ~SDHCI_CAN_64BIT;
->>>>>>> +#endif
->>>>>>>     host->quirks |=3D SDHCI_QUIRK_MISSING_CAPS |
->>>>>>>             SDHCI_QUIRK_BROKEN_TIMEOUT_VAL;
->>>>>>=20
->>>>>> It's better to me, but we should use host->cap instead of =
-host->cap1. I will update
->>>>>> patch with your comment.
->>>>>=20
->>>>> Please, then also send this to the public linux-mmc list.
->>>>>=20
->>>>> Kind regards
->>>>> Uffe
->>>>>=20
->>>>=20
->>>> I'm sorry I could not add the public linux-mmc list this mail =
-thread, but=20
->>>> I have already sent the updated patch with linux-mmc.
->>>>=20
->>>> https://patchwork.kernel.org/patch/9289189/
->>>=20
->>> Humm, is not this one of these cases where we would expect the
->>> compatible string to dictacte whether enabling 64_BIT_DMA makes =
-sense or
->>> not?
->>>=20
->>> The patch is technically correct though.
->=20
-> Hi Jaedon,
->=20
->>=20
->> Yes, It's right way that uses host->cap according to the previous =
-discussion
->> for this driver and commit 5eaa7476f937 ("mmc: sdhci: Allow CAPS =
-check for=20
->> SDHCI_CAN_64BIT to use overridden caps").
->>=20
->> If the 64bit ARM chipsets have own compatible string, the patch like =
-as below
->>=20
->> 	if (of_device_is_compatible(pdev->dev.of_node, =
-"brcm,bcm7425-sdhci"))
->> 		host->caps &=3D ~SDHCI_CAN_64BIT;
->>=20
->> Could you tell me the some newer 64bit ARM chipsets have possible own =
-compatible
->> string?
->=20
-> All ARM 32-bit brcmstb chips are LPAE capable, which means that the
-> SDHCI controller may have to deal with bus addresses larger than
-> 32-bits, so we always need SDHCI_CAN_64BIT to be set for that to =
-happen
-> and work correctly.
->=20
-> On ARM 64-bit brcmstb chips, we may not have enough memory such that =
-the
-> SDHCI controller needs to deal with > 32-bits bus addresses, but same
-> thing, this may happen and the controller is fully capable of, so we
-> also need SDHCI_CAN_64BIT.
->=20
-> In both cases, the controller should be fully operational with > =
-32-bits
-> physical addresses.
->=20
-> On BMIPS chips, we should probably clear SDHCI_CAN_64BIT because =
-AFAIR,
-> it really is broken (Al, can you confirm?), but at the same time, the
-> DMA-API should never hand us buffers which exceed the 32-bits bus
-> address boundary because of the processor and chip memory map
-> limitations anyway, is that what you encountered though?
->=20
-> At the moment, brcm,bcm7425-sdhci is used across all 3 types of SoCs
-> (BMIPS, ARM and ARM64) while we should probably allocate a new one for
-> ARM and newer and then we could reliably base the clearing of
-> SDHCI_CAN_64BIT based on brcm,bcm7425-sdhci.
->=20
-> Finally, Arnd's suggestions of using "dma-ranges" is fine, but I do =
-not
-> think we quite need this here because we really need to advertise the
-> right set of capabilities based on the generation/version of the
-> controller deployed in specific chips.
->=20
-> I would like to have Al's feedback on this, since he wrote the driver =
-;)
->=20
-> Thanks!
-> --=20
-> Florian
-
-Thanks for your detailed replay, and I understand why it must use a =
-compatible
-string for all brcmstb chips. I'm sending the bumped patch for BMIPS =
-quickly.
-
-Thanks,
-Jaedon=
+CgpPbiAyMDE25bm0MDjmnIgyN+aXpSAyMjo1MCwgU2hhd24gTGluIHdyb3RlOgo+IE9uIDIwMTYv
+OC8yNyAyMTo0MSwgWml5dWFuIFh1IHdyb3RlOgo+PiBBZGQgcG93ZXIgZG9tYWluIGFzIGEgb3B0
+aW9uYWwgcHJvcGVydHkgZm9yIHNkaGNpLW9mLWFyYXNhbiwgd2hpY2ggY2FuCj4+IGJlIHRydW5l
+ZCBvZmYgaW4gdGhlIHNvLWNhbGxlZCB1bnVzZWQgY29uZGl0aW9uLCBzdWNoIGFzIHN1c3BlbmQg
+YW5kCj4+IHJlbW92ZS4gQWltIHRvIGxvd2VyIHBvd2VyIHJlcXVpcmVtZW50cy4KPj4KPj4gU2ln
+bmVkLW9mZi1ieTogWml5dWFuIFh1IDx4enkueHVAcm9jay1jaGlwcy5jb20+Cj4+Cj4+IC0tLQo+
+Pgo+PiAgRG9jdW1lbnRhdGlvbi9kZXZpY2V0cmVlL2JpbmRpbmdzL21tYy9hcmFzYW4sc2RoY2ku
+dHh0IHwgNiArKysrKy0KPj4gIDEgZmlsZSBjaGFuZ2VkLCA1IGluc2VydGlvbnMoKyksIDEgZGVs
+ZXRpb24oLSkKPj4KPj4gZGlmZiAtLWdpdCBhL0RvY3VtZW50YXRpb24vZGV2aWNldHJlZS9iaW5k
+aW5ncy9tbWMvYXJhc2FuLHNkaGNpLnR4dCAKPj4gYi9Eb2N1bWVudGF0aW9uL2RldmljZXRyZWUv
+YmluZGluZ3MvbW1jL2FyYXNhbixzZGhjaS50eHQKPj4gaW5kZXggMzQwNGFmYS4uM2Y1MTg5YyAx
+MDA2NDQKPj4gLS0tIGEvRG9jdW1lbnRhdGlvbi9kZXZpY2V0cmVlL2JpbmRpbmdzL21tYy9hcmFz
+YW4sc2RoY2kudHh0Cj4+ICsrKyBiL0RvY3VtZW50YXRpb24vZGV2aWNldHJlZS9iaW5kaW5ncy9t
+bWMvYXJhc2FuLHNkaGNpLnR4dAo+PiBAQCAtMSwxMiArMSwxNCBAQAo+PiAgRGV2aWNlIFRyZWUg
+QmluZGluZ3MgZm9yIHRoZSBBcmFzYW4gU0RIQ0kgQ29udHJvbGxlcgo+Pgo+PiAtICBUaGUgYmlu
+ZGluZ3MgZm9sbG93IHRoZSBtbWNbMV0sIGNsb2NrWzJdLCBpbnRlcnJ1cHRbM10gYW5kIHBoeVs0
+XSAKPj4gYmluZGluZ3MuCj4+ICsgIFRoZSBiaW5kaW5ncyBmb2xsb3cgdGhlIG1tY1sxXSwgY2xv
+Y2tbMl0sIGludGVycnVwdFszXSwgcGh5WzRdIGFuZCAKPj4gcG93ZXIKPj4gKyAgZG9tYWluWzVd
+IGJpbmRpbmdzLgo+PiAgICBPbmx5IGRldmlhdGlvbnMgYXJlIGRvY3VtZW50ZWQgaGVyZS4KPj4K
+Pj4gICAgWzFdIERvY3VtZW50YXRpb24vZGV2aWNldHJlZS9iaW5kaW5ncy9tbWMvbW1jLnR4dAo+
+PiAgICBbMl0gRG9jdW1lbnRhdGlvbi9kZXZpY2V0cmVlL2JpbmRpbmdzL2Nsb2NrL2Nsb2NrLWJp
+bmRpbmdzLnR4dAo+PiAgICBbM10gCj4+IERvY3VtZW50YXRpb24vZGV2aWNldHJlZS9iaW5kaW5n
+cy9pbnRlcnJ1cHQtY29udHJvbGxlci9pbnRlcnJ1cHRzLnR4dAo+PiAgICBbNF0gRG9jdW1lbnRh
+dGlvbi9kZXZpY2V0cmVlL2JpbmRpbmdzL3BoeS9waHktYmluZGluZ3MudHh0Cj4+ICsgIFs1XSBE
+b2N1bWVudGF0aW9uL2RldmljZXRyZWUvYmluZGluZ3MvcG93ZXIvcG93ZXJfZG9tYWluLnR4dAo+
+Pgo+PiAgUmVxdWlyZWQgUHJvcGVydGllczoKPj4gICAgLSBjb21wYXRpYmxlOiBDb21wYXRpYmls
+aXR5IHN0cmluZy4gIE9uZSBvZjoKPj4gQEAgLTM2LDYgKzM4LDggQEAgT3B0aW9uYWwgUHJvcGVy
+dGllczoKPj4gICAgLSAjY2xvY2stY2VsbHM6IElmIHNwZWNpZmllZCB0aGlzIHNob3VsZCBiZSB0
+aGUgdmFsdWUgPDA+LiAgV2l0aCAKPj4gdGhpcyBwcm9wZXJ0eQo+PiAgICAgIGluIHBsYWNlIHdl
+IHdpbGwgZXhwb3J0IGEgY2xvY2sgcmVwcmVzZW50aW5nIHRoZSBDYXJkIENsb2NrLiAgCj4+IFRo
+aXMgY2xvY2sKPj4gICAgICBpcyBleHBlY3RlZCB0byBiZSBjb25zdW1lZCBieSBvdXIgUEhZLiAg
+WW91IG11c3QgYWxzbyBzcGVjaWZ5Cj4+ICsgIC0gcG93ZXItZG9tYWluczogQSBwaGFuZGxlIG9m
+IGFuZCBQTSBkb21haW4gYXMgc3BlY2lmaWVyIGRlZmluZWQgCj4+IGJ5IGJpbmRpbmdzCj4KPiAg
+ICAgQSBwaGFuZGxlIG9mIHdoYXQ/CgpUaGF0J3MgYSB0eXBvLgoKPgo+PiArICAgIG9mIHRoZSBw
+b3dlciBjb250cm9sbGVyIHNwZWNpZmllZCBieSBwaGFuZGxlLgo+Pgo+PiAgRXhhbXBsZToKPj4g
+ICAgICBzZGhjaUBlMDEwMDAwMCB7Cj4KPiBJdCB3b3VsZCBiZSBuaWNlIHRvIGFkZCB0aGUgZXhh
+bXBsZSBjb2RlLgoKT2theSwgSSB3aWxsIHNob3cgYSBzYW1wbGUgY29kZSBpbiBWMi4KClRoYW5r
+cywgc2hhd24uCgo+Cj4+Cj4KPgoKCgpfX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
+X19fX19fX19fX19fXwpMaW51eC1yb2NrY2hpcCBtYWlsaW5nIGxpc3QKTGludXgtcm9ja2NoaXBA
+bGlzdHMuaW5mcmFkZWFkLm9yZwpodHRwOi8vbGlzdHMuaW5mcmFkZWFkLm9yZy9tYWlsbWFuL2xp
+c3RpbmZvL2xpbnV4LXJvY2tjaGlwCg==
