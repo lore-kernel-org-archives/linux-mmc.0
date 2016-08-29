@@ -1,158 +1,105 @@
-From: Shawn Lin <shawn.lin@rock-chips.com>
+From: Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
 Subject: Re: [PATCH 2/4] mmc: sdhci-of-arasan: Control clock for accessing
  syscon
-Date: Mon, 29 Aug 2016 17:20:46 +0800
-Message-ID: <81f9b645-ced9-cdf9-c0be-2021c9a00fc2@rock-chips.com>
+Date: Mon, 29 Aug 2016 17:22:27 +0800
+Message-ID: <68c69709-2d23-30f5-41ea-7fe9757aae4f@rock-chips.com>
 References: <1472457779-7194-1-git-send-email-shawn.lin@rock-chips.com>
  <8418661.gal5ZOtGyv@diego>
  <fa7bea7d-b596-5784-4221-de3a8eaf5f17@rock-chips.com>
  <1693211.KBN6GAFoI7@diego>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252; format=flowed
-Content-Transfer-Encoding: 8bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from lucky1.263xmail.com ([211.157.147.134]:40975 "EHLO
-        lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S932584AbcH2JVE (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 29 Aug 2016 05:21:04 -0400
+Content-Type: text/plain; charset="utf-8"; Format="flowed"
+Content-Transfer-Encoding: base64
+Return-path: <linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
 In-Reply-To: <1693211.KBN6GAFoI7@diego>
-Sender: linux-mmc-owner@vger.kernel.org
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-rockchip>,
+ <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-rockchip/>
+List-Post: <mailto:linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+List-Help: <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-rockchip>,
+ <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
+Sender: "Linux-rockchip" <linux-rockchip-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+Errors-To: linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+To: =?UTF-8?Q?Heiko_St=c3=bcbner?= <heiko-4mtYJXux2i+zQB+pC5nmwQ@public.gmane.org>
+Cc: devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org, Ziyuan Xu <xzy.xu-TNX95d0MmH7DzftRWevZcw@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Douglas Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: =?UTF-8?Q?Heiko_St=c3=bcbner?= <heiko@sntech.de>
-Cc: shawn.lin@rock-chips.com, Rob Herring <robh+dt@kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-rockchip@lists.infradead.org, Douglas Anderson <dianders@chromium.org>, Ziyuan Xu <xzy.xu@rock-chips.com>, linux-kernel@vger.kernel.org
 
-On 2016/8/29 17:10, Heiko Stübner wrote:
-> Hi Shawn,
->
-> Am Montag, 29. August 2016, 16:54:10 schrieb Shawn Lin:
->> On 2016/8/29 16:25, Heiko Stübner wrote:
->>> Am Montag, 29. August 2016, 16:02:57 schrieb Shawn Lin:
->>>> In the eariler commit 65820199272d ("Documentation: mmc:
->>>> sdhci-of-arasan: Add soc-ctl-syscon for corecfg regs"), we
->>>> introduced syscon to control corecfg_* stuff provided by
->>>> arasan. But given that we may need to ungate the clock for
->>>> accessing corecfg_*, it not so perfect as it depends on
->>>> whether specific clock driver disables it if not referenced.
->>>> Meanwhile, if we don't need arasan contoller to work anymore,
->>>> there is no reason to still enable it. So let's control this
->>>> clock when needed.
->>>>
->>>> Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
->>>> ---
->>>>
->>>>  drivers/mmc/host/sdhci-of-arasan.c | 25 ++++++++++++++++++++++---
->>>>  1 file changed, 22 insertions(+), 3 deletions(-)
->>>>
->>>> diff --git a/drivers/mmc/host/sdhci-of-arasan.c
->>>> b/drivers/mmc/host/sdhci-of-arasan.c index 0b3a9cf..7ae3ae4 100644
->>>> --- a/drivers/mmc/host/sdhci-of-arasan.c
->>>> +++ b/drivers/mmc/host/sdhci-of-arasan.c
->>>> @@ -78,6 +78,7 @@ struct sdhci_arasan_soc_ctl_map {
->>>>
->>>>   * struct sdhci_arasan_data
->>>>   * @host:		Pointer to the main SDHCI host structure.
->>>>   * @clk_ahb:		Pointer to the AHB clock
->>>>
->>>> + * @clk_syscon:		Pointer to the optional clock for accessing syscon
->>>>
->>>>   * @phy:		Pointer to the generic phy
->>>>   * @is_phy_on:		True if the PHY is on; false if not.
->>>>   * @sdcardclk_hw:	Struct for the clock we might provide to a PHY.
->>>>
->>>> @@ -88,6 +89,7 @@ struct sdhci_arasan_soc_ctl_map {
->>>>
->>>>  struct sdhci_arasan_data {
->>>>
->>>>  	struct sdhci_host *host;
->>>>  	struct clk	*clk_ahb;
->>>>
->>>> +	struct clk	*clk_syscon;
->>>>
->>>>  	struct phy	*phy;
->>>>  	bool		is_phy_on;
->>>>
->>>> @@ -290,6 +292,7 @@ static int sdhci_arasan_suspend(struct device *dev)
->>>>
->>>>  	clk_disable(pltfm_host->clk);
->>>>  	clk_disable(sdhci_arasan->clk_ahb);
->>>>
->>>> +	clk_disable(sdhci_arasan->clk_syscon);
->>>>
->>>>  	return 0;
->>>>
->>>>  }
->>>>
->>>> @@ -309,6 +312,12 @@ static int sdhci_arasan_resume(struct device *dev)
->>>>
->>>>  	struct sdhci_arasan_data *sdhci_arasan = sdhci_pltfm_priv(pltfm_host);
->>>>  	int ret;
->>>>
->>>> +	ret = clk_enable(sdhci_arasan->clk_syscon);
->>>> +	if (ret) {
->>>> +		dev_err(dev, "Cannot enable syscon clock.\n");
->>>> +		return ret;
->>>> +	}
->>>> +
->>>>
->>>>  	ret = clk_enable(sdhci_arasan->clk_ahb);
->>>>  	if (ret) {
->>>>  	
->>>>  		dev_err(dev, "Cannot enable AHB clock.\n");
->>>>
->>>> @@ -528,26 +537,33 @@ static int sdhci_arasan_probe(struct
->>>> platform_device
->>>> *pdev) ret);
->>>>
->>>>  			goto err_pltfm_free;
->>>>  		
->>>>  		}
->>>>
->>>> +
->>>> +		sdhci_arasan->clk_syscon = devm_clk_get(&pdev->dev,
->>>> +							"clk_syscon");
->>>> +		if (clk_prepare_enable(sdhci_arasan->clk_syscon)) {
->>>> +			dev_err(&pdev->dev, "Unable to enable syscon clock.\n");
->>>> +			goto err_pltfm_free;
->>>> +		}
->>>
->>> doesn't look very "optional" to me.
->>> clk_get specifies:
->>> "Returns a struct clk corresponding to the clock producer, or
->>> valid IS_ERR() condition containing errno."
->>>
->>> So later clk_* on that err_ptr will produce failures and the
->>> clock-framework could also request deferal.
->>
->> Thanks for quick feedback.:)
->>
->> It makes sense. I think it's just because clk_get request deferral, so
->> we could simply assign NULL to cly_syscon and let clk_* return 0
->> directly. So the deferral should be handle when getting other clks like
->> clk_ahb?
->
-> nope, I think the position itself is fine, so just do something like
->
-> if (IS_ERR(sdhci_arasan->clk_syscon)) {
-> {
-> 	if (PTR_ERR(sdhci_arasan->clk_syscon) == -EPROBE_DEFER)
-> 		return -EPROBE_DEFER;
-> 	else
-> 		sdhci_arasan->clk_syscon = NULL;
-> }
->
-> as the syscon clk would only ever be necessary if the soc-ctl-syscon is
-> actually defined. But there is no need to move that section I think.
-
-except for other arasan's instances of some other venders who do have
-soc-ctl-syscon but without any clk gate when accessing syscon,
-possible? :)
-
->
->
->
-
-
--- 
-Best Regards
-Shawn Lin
-
+5ZyoIDIwMTYvOC8yOSAxNzoxMCwgSGVpa28gU3TDvGJuZXIg5YaZ6YGTOgo+IEhpIFNoYXduLAo+
+Cj4gQW0gTW9udGFnLCAyOS4gQXVndXN0IDIwMTYsIDE2OjU0OjEwIHNjaHJpZWIgU2hhd24gTGlu
+Ogo+PiBPbiAyMDE2LzgvMjkgMTY6MjUsIEhlaWtvIFN0w7xibmVyIHdyb3RlOgo+Pj4gQW0gTW9u
+dGFnLCAyOS4gQXVndXN0IDIwMTYsIDE2OjAyOjU3IHNjaHJpZWIgU2hhd24gTGluOgo+Pj4+IElu
+IHRoZSBlYXJpbGVyIGNvbW1pdCA2NTgyMDE5OTI3MmQgKCJEb2N1bWVudGF0aW9uOiBtbWM6Cj4+
+Pj4gc2RoY2ktb2YtYXJhc2FuOiBBZGQgc29jLWN0bC1zeXNjb24gZm9yIGNvcmVjZmcgcmVncyIp
+LCB3ZQo+Pj4+IGludHJvZHVjZWQgc3lzY29uIHRvIGNvbnRyb2wgY29yZWNmZ18qIHN0dWZmIHBy
+b3ZpZGVkIGJ5Cj4+Pj4gYXJhc2FuLiBCdXQgZ2l2ZW4gdGhhdCB3ZSBtYXkgbmVlZCB0byB1bmdh
+dGUgdGhlIGNsb2NrIGZvcgo+Pj4+IGFjY2Vzc2luZyBjb3JlY2ZnXyosIGl0IG5vdCBzbyBwZXJm
+ZWN0IGFzIGl0IGRlcGVuZHMgb24KPj4+PiB3aGV0aGVyIHNwZWNpZmljIGNsb2NrIGRyaXZlciBk
+aXNhYmxlcyBpdCBpZiBub3QgcmVmZXJlbmNlZC4KPj4+PiBNZWFud2hpbGUsIGlmIHdlIGRvbid0
+IG5lZWQgYXJhc2FuIGNvbnRvbGxlciB0byB3b3JrIGFueW1vcmUsCj4+Pj4gdGhlcmUgaXMgbm8g
+cmVhc29uIHRvIHN0aWxsIGVuYWJsZSBpdC4gU28gbGV0J3MgY29udHJvbCB0aGlzCj4+Pj4gY2xv
+Y2sgd2hlbiBuZWVkZWQuCj4+Pj4KPj4+PiBTaWduZWQtb2ZmLWJ5OiBTaGF3biBMaW4gPHNoYXdu
+LmxpbkByb2NrLWNoaXBzLmNvbT4KPj4+PiAtLS0KPj4+Pgo+Pj4+ICBkcml2ZXJzL21tYy9ob3N0
+L3NkaGNpLW9mLWFyYXNhbi5jIHwgMjUgKysrKysrKysrKysrKysrKysrKysrKy0tLQo+Pj4+ICAx
+IGZpbGUgY2hhbmdlZCwgMjIgaW5zZXJ0aW9ucygrKSwgMyBkZWxldGlvbnMoLSkKPj4+Pgo+Pj4+
+IGRpZmYgLS1naXQgYS9kcml2ZXJzL21tYy9ob3N0L3NkaGNpLW9mLWFyYXNhbi5jCj4+Pj4gYi9k
+cml2ZXJzL21tYy9ob3N0L3NkaGNpLW9mLWFyYXNhbi5jIGluZGV4IDBiM2E5Y2YuLjdhZTNhZTQg
+MTAwNjQ0Cj4+Pj4gLS0tIGEvZHJpdmVycy9tbWMvaG9zdC9zZGhjaS1vZi1hcmFzYW4uYwo+Pj4+
+ICsrKyBiL2RyaXZlcnMvbW1jL2hvc3Qvc2RoY2ktb2YtYXJhc2FuLmMKPj4+PiBAQCAtNzgsNiAr
+NzgsNyBAQCBzdHJ1Y3Qgc2RoY2lfYXJhc2FuX3NvY19jdGxfbWFwIHsKPj4+Pgo+Pj4+ICAgKiBz
+dHJ1Y3Qgc2RoY2lfYXJhc2FuX2RhdGEKPj4+PiAgICogQGhvc3Q6CQlQb2ludGVyIHRvIHRoZSBt
+YWluIFNESENJIGhvc3Qgc3RydWN0dXJlLgo+Pj4+ICAgKiBAY2xrX2FoYjoJCVBvaW50ZXIgdG8g
+dGhlIEFIQiBjbG9jawo+Pj4+Cj4+Pj4gKyAqIEBjbGtfc3lzY29uOgkJUG9pbnRlciB0byB0aGUg
+b3B0aW9uYWwgY2xvY2sgZm9yIGFjY2Vzc2luZyBzeXNjb24KPj4+Pgo+Pj4+ICAgKiBAcGh5OgkJ
+UG9pbnRlciB0byB0aGUgZ2VuZXJpYyBwaHkKPj4+PiAgICogQGlzX3BoeV9vbjoJCVRydWUgaWYg
+dGhlIFBIWSBpcyBvbjsgZmFsc2UgaWYgbm90Lgo+Pj4+ICAgKiBAc2RjYXJkY2xrX2h3OglTdHJ1
+Y3QgZm9yIHRoZSBjbG9jayB3ZSBtaWdodCBwcm92aWRlIHRvIGEgUEhZLgo+Pj4+Cj4+Pj4gQEAg
+LTg4LDYgKzg5LDcgQEAgc3RydWN0IHNkaGNpX2FyYXNhbl9zb2NfY3RsX21hcCB7Cj4+Pj4KPj4+
+PiAgc3RydWN0IHNkaGNpX2FyYXNhbl9kYXRhIHsKPj4+Pgo+Pj4+ICAJc3RydWN0IHNkaGNpX2hv
+c3QgKmhvc3Q7Cj4+Pj4gIAlzdHJ1Y3QgY2xrCSpjbGtfYWhiOwo+Pj4+Cj4+Pj4gKwlzdHJ1Y3Qg
+Y2xrCSpjbGtfc3lzY29uOwo+Pj4+Cj4+Pj4gIAlzdHJ1Y3QgcGh5CSpwaHk7Cj4+Pj4gIAlib29s
+CQlpc19waHlfb247Cj4+Pj4KPj4+PiBAQCAtMjkwLDYgKzI5Miw3IEBAIHN0YXRpYyBpbnQgc2Ro
+Y2lfYXJhc2FuX3N1c3BlbmQoc3RydWN0IGRldmljZSAqZGV2KQo+Pj4+Cj4+Pj4gIAljbGtfZGlz
+YWJsZShwbHRmbV9ob3N0LT5jbGspOwo+Pj4+ICAJY2xrX2Rpc2FibGUoc2RoY2lfYXJhc2FuLT5j
+bGtfYWhiKTsKPj4+Pgo+Pj4+ICsJY2xrX2Rpc2FibGUoc2RoY2lfYXJhc2FuLT5jbGtfc3lzY29u
+KTsKPj4+Pgo+Pj4+ICAJcmV0dXJuIDA7Cj4+Pj4KPj4+PiAgfQo+Pj4+Cj4+Pj4gQEAgLTMwOSw2
+ICszMTIsMTIgQEAgc3RhdGljIGludCBzZGhjaV9hcmFzYW5fcmVzdW1lKHN0cnVjdCBkZXZpY2Ug
+KmRldikKPj4+Pgo+Pj4+ICAJc3RydWN0IHNkaGNpX2FyYXNhbl9kYXRhICpzZGhjaV9hcmFzYW4g
+PSBzZGhjaV9wbHRmbV9wcml2KHBsdGZtX2hvc3QpOwo+Pj4+ICAJaW50IHJldDsKPj4+Pgo+Pj4+
+ICsJcmV0ID0gY2xrX2VuYWJsZShzZGhjaV9hcmFzYW4tPmNsa19zeXNjb24pOwo+Pj4+ICsJaWYg
+KHJldCkgewo+Pj4+ICsJCWRldl9lcnIoZGV2LCAiQ2Fubm90IGVuYWJsZSBzeXNjb24gY2xvY2su
+XG4iKTsKPj4+PiArCQlyZXR1cm4gcmV0Owo+Pj4+ICsJfQo+Pj4+ICsKPj4+Pgo+Pj4+ICAJcmV0
+ID0gY2xrX2VuYWJsZShzZGhjaV9hcmFzYW4tPmNsa19haGIpOwo+Pj4+ICAJaWYgKHJldCkgewo+
+Pj4+ICAJCj4+Pj4gIAkJZGV2X2VycihkZXYsICJDYW5ub3QgZW5hYmxlIEFIQiBjbG9jay5cbiIp
+Owo+Pj4+Cj4+Pj4gQEAgLTUyOCwyNiArNTM3LDMzIEBAIHN0YXRpYyBpbnQgc2RoY2lfYXJhc2Fu
+X3Byb2JlKHN0cnVjdAo+Pj4+IHBsYXRmb3JtX2RldmljZQo+Pj4+ICpwZGV2KSByZXQpOwo+Pj4+
+Cj4+Pj4gIAkJCWdvdG8gZXJyX3BsdGZtX2ZyZWU7Cj4+Pj4gIAkJCj4+Pj4gIAkJfQo+Pj4+Cj4+
+Pj4gKwo+Pj4+ICsJCXNkaGNpX2FyYXNhbi0+Y2xrX3N5c2NvbiA9IGRldm1fY2xrX2dldCgmcGRl
+di0+ZGV2LAo+Pj4+ICsJCQkJCQkJImNsa19zeXNjb24iKTsKPj4+PiArCQlpZiAoY2xrX3ByZXBh
+cmVfZW5hYmxlKHNkaGNpX2FyYXNhbi0+Y2xrX3N5c2NvbikpIHsKPj4+PiArCQkJZGV2X2Vycigm
+cGRldi0+ZGV2LCAiVW5hYmxlIHRvIGVuYWJsZSBzeXNjb24gY2xvY2suXG4iKTsKPj4+PiArCQkJ
+Z290byBlcnJfcGx0Zm1fZnJlZTsKPj4+PiArCQl9Cj4+Pgo+Pj4gZG9lc24ndCBsb29rIHZlcnkg
+Im9wdGlvbmFsIiB0byBtZS4KPj4+IGNsa19nZXQgc3BlY2lmaWVzOgo+Pj4gIlJldHVybnMgYSBz
+dHJ1Y3QgY2xrIGNvcnJlc3BvbmRpbmcgdG8gdGhlIGNsb2NrIHByb2R1Y2VyLCBvcgo+Pj4gdmFs
+aWQgSVNfRVJSKCkgY29uZGl0aW9uIGNvbnRhaW5pbmcgZXJybm8uIgo+Pj4KPj4+IFNvIGxhdGVy
+IGNsa18qIG9uIHRoYXQgZXJyX3B0ciB3aWxsIHByb2R1Y2UgZmFpbHVyZXMgYW5kIHRoZQo+Pj4g
+Y2xvY2stZnJhbWV3b3JrIGNvdWxkIGFsc28gcmVxdWVzdCBkZWZlcmFsLgo+Pgo+PiBUaGFua3Mg
+Zm9yIHF1aWNrIGZlZWRiYWNrLjopCj4+Cj4+IEl0IG1ha2VzIHNlbnNlLiBJIHRoaW5rIGl0J3Mg
+anVzdCBiZWNhdXNlIGNsa19nZXQgcmVxdWVzdCBkZWZlcnJhbCwgc28KPj4gd2UgY291bGQgc2lt
+cGx5IGFzc2lnbiBOVUxMIHRvIGNseV9zeXNjb24gYW5kIGxldCBjbGtfKiByZXR1cm4gMAo+PiBk
+aXJlY3RseS4gU28gdGhlIGRlZmVycmFsIHNob3VsZCBiZSBoYW5kbGUgd2hlbiBnZXR0aW5nIG90
+aGVyIGNsa3MgbGlrZQo+PiBjbGtfYWhiPwo+Cj4gbm9wZSwgSSB0aGluayB0aGUgcG9zaXRpb24g
+aXRzZWxmIGlzIGZpbmUsIHNvIGp1c3QgZG8gc29tZXRoaW5nIGxpa2UKPgo+IGlmIChJU19FUlIo
+c2RoY2lfYXJhc2FuLT5jbGtfc3lzY29uKSkgewo+IHsKPiAJaWYgKFBUUl9FUlIoc2RoY2lfYXJh
+c2FuLT5jbGtfc3lzY29uKSA9PSAtRVBST0JFX0RFRkVSKQo+IAkJcmV0dXJuIC1FUFJPQkVfREVG
+RVI7Cj4gCWVsc2UKPiAJCXNkaGNpX2FyYXNhbi0+Y2xrX3N5c2NvbiA9IE5VTEw7Cj4gfQo+Cj4g
+YXMgdGhlIHN5c2NvbiBjbGsgd291bGQgb25seSBldmVyIGJlIG5lY2Vzc2FyeSBpZiB0aGUgc29j
+LWN0bC1zeXNjb24gaXMKPiBhY3R1YWxseSBkZWZpbmVkLiBCdXQgdGhlcmUgaXMgbm8gbmVlZCB0
+byBtb3ZlIHRoYXQgc2VjdGlvbiBJIHRoaW5rLgo+CgpleGNlcHQgZm9yIHNvbWUgYXJhc2FuJ3Mg
+aW5zdGFuY2VzIGZvciBzb21lIG90aGVyIHZlbmRvcnMgd2hvIGRvIGhhdmUKc29jLWN0bC1zeXNj
+b24gdG8gY29udHJvbCBjb3JlY2ZnXyogYnV0IHdpdGhvdXQgYW55IGNsayBnYXRlIGZvciB0aGUK
+YWNjZXNzaW5nIHBhdGgsIGlzIGl0IHBvc3NpYmxlPyA6KQoKPgo+CgoKLS0gCkJlc3QgUmVnYXJk
+cwpTaGF3biBMaW4KCgpfX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
+X19fXwpMaW51eC1yb2NrY2hpcCBtYWlsaW5nIGxpc3QKTGludXgtcm9ja2NoaXBAbGlzdHMuaW5m
+cmFkZWFkLm9yZwpodHRwOi8vbGlzdHMuaW5mcmFkZWFkLm9yZy9tYWlsbWFuL2xpc3RpbmZvL2xp
+bnV4LXJvY2tjaGlwCg==
