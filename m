@@ -1,67 +1,40 @@
-From: Ziyuan Xu <xzy.xu-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
-Subject: Re: [PATCH 1/2] Documentation: mmc: sdhci-of-arasan: add description
- of power domain
-Date: Mon, 29 Aug 2016 08:36:37 +0800
-Message-ID: <080c7a5c-7ff6-175b-e7d9-a9c7efec3afe@rock-chips.com>
-References: <20160827134103.28160-1-xzy.xu@rock-chips.com>
- <20160827134103.28160-2-xzy.xu@rock-chips.com>
- <40f46bd6-22d2-f008-602a-47200340f733@rock-chips.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"; Format="flowed"
-Content-Transfer-Encoding: base64
-Return-path: <linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-In-Reply-To: <40f46bd6-22d2-f008-602a-47200340f733-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-rockchip>,
- <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-rockchip/>
-List-Post: <mailto:linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-List-Help: <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-rockchip>,
- <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
-Sender: "Linux-rockchip" <linux-rockchip-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-Errors-To: linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
-To: Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>, ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, heiko-4mtYJXux2i+zQB+pC5nmwQ@public.gmane.org
-Cc: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+From: Shawn Lin <shawn.lin@rock-chips.com>
+Subject: [PATCH 0/4] Control clock for accessing syscon provided arasan IP
+Date: Mon, 29 Aug 2016 16:02:55 +0800
+Message-ID: <1472457779-7194-1-git-send-email-shawn.lin@rock-chips.com>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Heiko Stuebner <heiko@sntech.de>, Rob Herring <robh+dt@kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-rockchip@lists.infradead.org, Douglas Anderson <dianders@chromium.org>, Ziyuan Xu <xzy.xu@rock-chips.com>, linux-kernel@vger.kernel.org, Shawn Lin <shawn.lin@rock-chips.com>
 List-Id: linux-mmc@vger.kernel.org
 
-CgpPbiAyMDE25bm0MDjmnIgyN+aXpSAyMjo1MCwgU2hhd24gTGluIHdyb3RlOgo+IE9uIDIwMTYv
-OC8yNyAyMTo0MSwgWml5dWFuIFh1IHdyb3RlOgo+PiBBZGQgcG93ZXIgZG9tYWluIGFzIGEgb3B0
-aW9uYWwgcHJvcGVydHkgZm9yIHNkaGNpLW9mLWFyYXNhbiwgd2hpY2ggY2FuCj4+IGJlIHRydW5l
-ZCBvZmYgaW4gdGhlIHNvLWNhbGxlZCB1bnVzZWQgY29uZGl0aW9uLCBzdWNoIGFzIHN1c3BlbmQg
-YW5kCj4+IHJlbW92ZS4gQWltIHRvIGxvd2VyIHBvd2VyIHJlcXVpcmVtZW50cy4KPj4KPj4gU2ln
-bmVkLW9mZi1ieTogWml5dWFuIFh1IDx4enkueHVAcm9jay1jaGlwcy5jb20+Cj4+Cj4+IC0tLQo+
-Pgo+PiAgRG9jdW1lbnRhdGlvbi9kZXZpY2V0cmVlL2JpbmRpbmdzL21tYy9hcmFzYW4sc2RoY2ku
-dHh0IHwgNiArKysrKy0KPj4gIDEgZmlsZSBjaGFuZ2VkLCA1IGluc2VydGlvbnMoKyksIDEgZGVs
-ZXRpb24oLSkKPj4KPj4gZGlmZiAtLWdpdCBhL0RvY3VtZW50YXRpb24vZGV2aWNldHJlZS9iaW5k
-aW5ncy9tbWMvYXJhc2FuLHNkaGNpLnR4dCAKPj4gYi9Eb2N1bWVudGF0aW9uL2RldmljZXRyZWUv
-YmluZGluZ3MvbW1jL2FyYXNhbixzZGhjaS50eHQKPj4gaW5kZXggMzQwNGFmYS4uM2Y1MTg5YyAx
-MDA2NDQKPj4gLS0tIGEvRG9jdW1lbnRhdGlvbi9kZXZpY2V0cmVlL2JpbmRpbmdzL21tYy9hcmFz
-YW4sc2RoY2kudHh0Cj4+ICsrKyBiL0RvY3VtZW50YXRpb24vZGV2aWNldHJlZS9iaW5kaW5ncy9t
-bWMvYXJhc2FuLHNkaGNpLnR4dAo+PiBAQCAtMSwxMiArMSwxNCBAQAo+PiAgRGV2aWNlIFRyZWUg
-QmluZGluZ3MgZm9yIHRoZSBBcmFzYW4gU0RIQ0kgQ29udHJvbGxlcgo+Pgo+PiAtICBUaGUgYmlu
-ZGluZ3MgZm9sbG93IHRoZSBtbWNbMV0sIGNsb2NrWzJdLCBpbnRlcnJ1cHRbM10gYW5kIHBoeVs0
-XSAKPj4gYmluZGluZ3MuCj4+ICsgIFRoZSBiaW5kaW5ncyBmb2xsb3cgdGhlIG1tY1sxXSwgY2xv
-Y2tbMl0sIGludGVycnVwdFszXSwgcGh5WzRdIGFuZCAKPj4gcG93ZXIKPj4gKyAgZG9tYWluWzVd
-IGJpbmRpbmdzLgo+PiAgICBPbmx5IGRldmlhdGlvbnMgYXJlIGRvY3VtZW50ZWQgaGVyZS4KPj4K
-Pj4gICAgWzFdIERvY3VtZW50YXRpb24vZGV2aWNldHJlZS9iaW5kaW5ncy9tbWMvbW1jLnR4dAo+
-PiAgICBbMl0gRG9jdW1lbnRhdGlvbi9kZXZpY2V0cmVlL2JpbmRpbmdzL2Nsb2NrL2Nsb2NrLWJp
-bmRpbmdzLnR4dAo+PiAgICBbM10gCj4+IERvY3VtZW50YXRpb24vZGV2aWNldHJlZS9iaW5kaW5n
-cy9pbnRlcnJ1cHQtY29udHJvbGxlci9pbnRlcnJ1cHRzLnR4dAo+PiAgICBbNF0gRG9jdW1lbnRh
-dGlvbi9kZXZpY2V0cmVlL2JpbmRpbmdzL3BoeS9waHktYmluZGluZ3MudHh0Cj4+ICsgIFs1XSBE
-b2N1bWVudGF0aW9uL2RldmljZXRyZWUvYmluZGluZ3MvcG93ZXIvcG93ZXJfZG9tYWluLnR4dAo+
-Pgo+PiAgUmVxdWlyZWQgUHJvcGVydGllczoKPj4gICAgLSBjb21wYXRpYmxlOiBDb21wYXRpYmls
-aXR5IHN0cmluZy4gIE9uZSBvZjoKPj4gQEAgLTM2LDYgKzM4LDggQEAgT3B0aW9uYWwgUHJvcGVy
-dGllczoKPj4gICAgLSAjY2xvY2stY2VsbHM6IElmIHNwZWNpZmllZCB0aGlzIHNob3VsZCBiZSB0
-aGUgdmFsdWUgPDA+LiAgV2l0aCAKPj4gdGhpcyBwcm9wZXJ0eQo+PiAgICAgIGluIHBsYWNlIHdl
-IHdpbGwgZXhwb3J0IGEgY2xvY2sgcmVwcmVzZW50aW5nIHRoZSBDYXJkIENsb2NrLiAgCj4+IFRo
-aXMgY2xvY2sKPj4gICAgICBpcyBleHBlY3RlZCB0byBiZSBjb25zdW1lZCBieSBvdXIgUEhZLiAg
-WW91IG11c3QgYWxzbyBzcGVjaWZ5Cj4+ICsgIC0gcG93ZXItZG9tYWluczogQSBwaGFuZGxlIG9m
-IGFuZCBQTSBkb21haW4gYXMgc3BlY2lmaWVyIGRlZmluZWQgCj4+IGJ5IGJpbmRpbmdzCj4KPiAg
-ICAgQSBwaGFuZGxlIG9mIHdoYXQ/CgpUaGF0J3MgYSB0eXBvLgoKPgo+PiArICAgIG9mIHRoZSBw
-b3dlciBjb250cm9sbGVyIHNwZWNpZmllZCBieSBwaGFuZGxlLgo+Pgo+PiAgRXhhbXBsZToKPj4g
-ICAgICBzZGhjaUBlMDEwMDAwMCB7Cj4KPiBJdCB3b3VsZCBiZSBuaWNlIHRvIGFkZCB0aGUgZXhh
-bXBsZSBjb2RlLgoKT2theSwgSSB3aWxsIHNob3cgYSBzYW1wbGUgY29kZSBpbiBWMi4KClRoYW5r
-cywgc2hhd24uCgo+Cj4+Cj4KPgoKCgpfX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
-X19fX19fX19fX19fXwpMaW51eC1yb2NrY2hpcCBtYWlsaW5nIGxpc3QKTGludXgtcm9ja2NoaXBA
-bGlzdHMuaW5mcmFkZWFkLm9yZwpodHRwOi8vbGlzdHMuaW5mcmFkZWFkLm9yZy9tYWlsbWFuL2xp
-c3RpbmZvL2xpbnV4LXJvY2tjaGlwCg==
+
+This patchset is gonna take over the ownership of aclk_emmc_grf
+by sdhci-of-arasan which is used to access corecfg_* stuff provided
+by arasan. This clock is optional for sdhci-of-arasan which means we
+would not break the driver  without adding this. But we strongly
+recommend the upcoming users whose platforms have the similar
+cases to add this rather than to add any flags for their specific
+clock drivers to make this clock always on.
+
+This patchset is based on linux-next. And patch 4 should *not* be
+landed before others, so it would be nice to pack these four patches
+via Ulf's tree tree Heiko's ack for rockchip part, or vice versa. :)
+
+
+
+Shawn Lin (4):
+  Documentation: mmc: sdhci-of-arasan: Add clk_syscon as an optional one
+  mmc: sdhci-of-arasan: Control clock for accessing syscon
+  arm64: dts: rockchip: add clk_syscon for sdhci on rk3399
+  clk: rockchip: remove CLK_IGNORE_UNUSED flag for aclk_emmc_grf on
+    rk3399
+
+ .../devicetree/bindings/mmc/arasan,sdhci.txt       |  7 ++++--
+ arch/arm64/boot/dts/rockchip/rk3399.dtsi           |  5 +++--
+ drivers/clk/rockchip/clk-rk3399.c                  |  2 +-
+ drivers/mmc/host/sdhci-of-arasan.c                 | 25 +++++++++++++++++++---
+ 4 files changed, 31 insertions(+), 8 deletions(-)
+
+-- 
+2.3.7
