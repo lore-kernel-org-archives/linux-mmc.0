@@ -1,7 +1,7 @@
 From: Shawn Lin <shawn.lin@rock-chips.com>
-Subject: [PATCH 3/4] arm64: dts: rockchip: add clk_syscon for sdhci on rk3399
-Date: Mon, 29 Aug 2016 16:02:58 +0800
-Message-ID: <1472457779-7194-4-git-send-email-shawn.lin@rock-chips.com>
+Subject: [PATCH 4/4] clk: rockchip: remove CLK_IGNORE_UNUSED flag for aclk_emmc_grf on rk3399
+Date: Mon, 29 Aug 2016 16:02:59 +0800
+Message-ID: <1472457779-7194-5-git-send-email-shawn.lin@rock-chips.com>
 References: <1472457779-7194-1-git-send-email-shawn.lin@rock-chips.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1472457779-7194-1-git-send-email-shawn.lin@rock-chips.com>
@@ -10,30 +10,28 @@ To: Heiko Stuebner <heiko@sntech.de>, Rob Herring <robh+dt@kernel.org>, Ulf Hans
 Cc: Adrian Hunter <adrian.hunter@intel.com>, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-rockchip@lists.infradead.org, Douglas Anderson <dianders@chromium.org>, Ziyuan Xu <xzy.xu@rock-chips.com>, linux-kernel@vger.kernel.org, Shawn Lin <shawn.lin@rock-chips.com>
 List-Id: linux-mmc@vger.kernel.org
 
-We are intent on letting the sdhci variant driver handle this
-optional clock on rk3399 platform now.
+aclk_emmc_grf is used for accessing corecfg_* of emmc stuff within
+GRF block. We don't need to add CLK_IGNORE_UNUSED for it now as the
+emmc driver will enable/disable it explicitly when needed.
 
 Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
 ---
 
- arch/arm64/boot/dts/rockchip/rk3399.dtsi | 5 +++--
- 1 file changed, 3 insertions(+), 2 deletions(-)
+ drivers/clk/rockchip/clk-rk3399.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/arch/arm64/boot/dts/rockchip/rk3399.dtsi b/arch/arm64/boot/dts/rockchip/rk3399.dtsi
-index bc86e8c..d26c6ad 100644
---- a/arch/arm64/boot/dts/rockchip/rk3399.dtsi
-+++ b/arch/arm64/boot/dts/rockchip/rk3399.dtsi
-@@ -233,8 +233,9 @@
- 		arasan,soc-ctl-syscon = <&grf>;
- 		assigned-clocks = <&cru SCLK_EMMC>;
- 		assigned-clock-rates = <200000000>;
--		clocks = <&cru SCLK_EMMC>, <&cru ACLK_EMMC>;
--		clock-names = "clk_xin", "clk_ahb";
-+		clocks = <&cru SCLK_EMMC>, <&cru ACLK_EMMC>,
-+			 <&cru ACLK_EMMC_GRF>;
-+		clock-names = "clk_xin", "clk_ahb", "clk_syscon";
- 		clock-output-names = "emmc_cardclock";
- 		#clock-cells = <0>;
- 		phys = <&emmc_phy>;
+diff --git a/drivers/clk/rockchip/clk-rk3399.c b/drivers/clk/rockchip/clk-rk3399.c
+index ede6c47..908f684 100644
+--- a/drivers/clk/rockchip/clk-rk3399.c
++++ b/drivers/clk/rockchip/clk-rk3399.c
+@@ -934,7 +934,7 @@ static struct rockchip_clk_branch rk3399_clk_branches[] __initdata = {
+ 			RK3399_CLKGATE_CON(32), 8, GFLAGS),
+ 	GATE(ACLK_EMMC_NOC, "aclk_emmc_noc", "aclk_emmc", CLK_IGNORE_UNUSED,
+ 			RK3399_CLKGATE_CON(32), 9, GFLAGS),
+-	GATE(ACLK_EMMC_GRF, "aclk_emmcgrf", "aclk_emmc", CLK_IGNORE_UNUSED,
++	GATE(ACLK_EMMC_GRF, "aclk_emmcgrf", "aclk_emmc", 0,
+ 			RK3399_CLKGATE_CON(32), 10, GFLAGS),
+ 
+ 	/* perilp0 */
 -- 
 2.3.7
