@@ -1,91 +1,53 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: sdhci: Remove ->platform_init() callback as it's no
- longer used
-Date: Tue, 30 Aug 2016 12:40:02 +0200
-Message-ID: <CAPDyKFraAAQgSCaunmWe1ok-qCvh_1yRfZbKpCgniuBEbfu-0w@mail.gmail.com>
-References: <1472551338-20019-1-git-send-email-ulf.hansson@linaro.org> <d8094057-53d9-81a1-620d-f54e01e6b717@intel.com>
+From: =?UTF-8?q?Daniel=20Gl=C3=B6ckner?= <dg@emlix.com>
+Subject: [PATCH] mmc: don't use CMD23 with very old MMC cards
+Date: Tue, 30 Aug 2016 14:17:30 +0200
+Message-ID: <1472559450-19840-1-git-send-email-dg@emlix.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wm0-f42.google.com ([74.125.82.42]:38626 "EHLO
-        mail-wm0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1757835AbcH3KkF (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 30 Aug 2016 06:40:05 -0400
-Received: by mail-wm0-f42.google.com with SMTP id o80so28295114wme.1
-        for <linux-mmc@vger.kernel.org>; Tue, 30 Aug 2016 03:40:04 -0700 (PDT)
-In-Reply-To: <d8094057-53d9-81a1-620d-f54e01e6b717@intel.com>
+Received: from mx1.emlix.com ([88.198.252.230]:58157 "EHLO mx1.emlix.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S932773AbcH3M2Q (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Tue, 30 Aug 2016 08:28:16 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc@vger.kernel.org, =?UTF-8?q?Daniel=20Gl=C3=B6ckner?= <dg@emlix.com>
 
-On 30 August 2016 at 12:20, Adrian Hunter <adrian.hunter@intel.com> wrote:
-> On 30/08/16 13:02, Ulf Hansson wrote:
->> The commit 1ef5e49e46b9 ("mmc: sdhci-of-esdhc: add/remove some quirks
->> according to vendor version") moved sdhci-of-esdhc away from using the
->> ->platform_init() callback.
->>
->> As it was the only user of it and that it seems reasonable to believe that
->> it won't be needed again, let's remove just remove it.
->>
->> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
->
-> Have been meaning to do that, but didn't have time:
->
-> Acked-by: Adrian Hunter <adrian.hunter@intel.com>
->
-> However if you have spare time ;-) you could take a look at the Software
-> Command Queue patches, at least the support for sending commands during data
-> transfer:
+CMD23 aka SET_BLOCK_COUNT was introduced with MMC v3.1.
+Older versions of the specification allowed to terminate
+multi-block transfers only with CMD12.
 
-Yes, I have briefly started. I postponed some of the more heavy
-reviews to be able to catch up with all the simpler changes.
+The patch fixes the following problem:
 
-Allow me to get few more days, then I will respond to them!
+  mmc0: new MMC card at address 0001
+  mmcblk0: mmc0:0001 SDMB-16 15.3 MiB
+  mmcblk0: timed out sending SET_BLOCK_COUNT command, card status 0x400900
+  ...
+  blk_update_request: I/O error, dev mmcblk0, sector 0
+  Buffer I/O error on dev mmcblk0, logical block 0, async page read
+   mmcblk0: unable to read partition table
 
-BTW, I was also hoping Ritesh could help to review the changes.
-Perhaps you can ping him as well.
+Signed-off-by: Daniel Glöckner <dg@emlix.com>
+---
+ drivers/mmc/card/block.c | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
 
-Thanks and kind regards
-Uffe
+diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+index 2206d44..0fec40d 100644
+--- a/drivers/mmc/card/block.c
++++ b/drivers/mmc/card/block.c
+@@ -2303,7 +2303,8 @@ again:
+ 	set_capacity(md->disk, size);
+ 
+ 	if (mmc_host_cmd23(card->host)) {
+-		if (mmc_card_mmc(card) ||
++		if ((mmc_card_mmc(card) &&
++		     card->csd.mmca_vsn >= CSD_SPEC_VER_3)||
+ 		    (mmc_card_sd(card) &&
+ 		     card->scr.cmds & SD_SCR_CMD23_SUPPORT))
+ 			md->flags |= MMC_BLK_CMD23;
+-- 
+2.1.2
 
->
->         http://marc.info/?l=linux-mmc&m=147134458618542
->
->> ---
->>  drivers/mmc/host/sdhci-pltfm.c | 7 -------
->>  drivers/mmc/host/sdhci.h       | 1 -
->>  2 files changed, 8 deletions(-)
->>
->> diff --git a/drivers/mmc/host/sdhci-pltfm.c b/drivers/mmc/host/sdhci-pltfm.c
->> index 1d17dcf..ad49bfa 100644
->> --- a/drivers/mmc/host/sdhci-pltfm.c
->> +++ b/drivers/mmc/host/sdhci-pltfm.c
->> @@ -156,13 +156,6 @@ struct sdhci_host *sdhci_pltfm_init(struct platform_device *pdev,
->>               host->quirks2 = pdata->quirks2;
->>       }
->>
->> -     /*
->> -      * Some platforms need to probe the controller to be able to
->> -      * determine which caps should be used.
->> -      */
->> -     if (host->ops && host->ops->platform_init)
->> -             host->ops->platform_init(host);
->> -
->>       platform_set_drvdata(pdev, host);
->>
->>       return host;
->> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
->> index 0411c9f..a2bc9e1 100644
->> --- a/drivers/mmc/host/sdhci.h
->> +++ b/drivers/mmc/host/sdhci.h
->> @@ -555,7 +555,6 @@ struct sdhci_ops {
->>       void    (*set_uhs_signaling)(struct sdhci_host *host, unsigned int uhs);
->>       void    (*hw_reset)(struct sdhci_host *host);
->>       void    (*adma_workaround)(struct sdhci_host *host, u32 intmask);
->> -     void    (*platform_init)(struct sdhci_host *host);
->>       void    (*card_event)(struct sdhci_host *host);
->>       void    (*voltage_switch)(struct sdhci_host *host);
->>       int     (*select_drive_strength)(struct sdhci_host *host,
->>
->
