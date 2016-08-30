@@ -1,53 +1,50 @@
-From: =?UTF-8?q?Daniel=20Gl=C3=B6ckner?= <dg@emlix.com>
-Subject: [PATCH] mmc: don't use CMD23 with very old MMC cards
-Date: Tue, 30 Aug 2016 14:17:30 +0200
-Message-ID: <1472559450-19840-1-git-send-email-dg@emlix.com>
+From: Arnd Bergmann <arnd@arndb.de>
+Subject: Re: [PATCH] mmc: sdhci-brcmstb: Add SDHCI_QUIRK2_BROKEN_64_BIT_DMA
+Date: Tue, 30 Aug 2016 16:04:49 +0200
+Message-ID: <201608301604.49119.arnd@arndb.de>
+References: <20160808015803.2528-1-jaedon.shin@gmail.com> <5229438.Oa2AiqCmJN@wuerfel> <CAOGqxeVZBkfMX7wj9V=RhDV+V7hUyVVMUuGgepkN6yGc9B9xLg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8bit
+Content-Type: Text/Plain;
+  charset="utf-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mx1.emlix.com ([88.198.252.230]:58157 "EHLO mx1.emlix.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S932773AbcH3M2Q (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Tue, 30 Aug 2016 08:28:16 -0400
+Received: from mout.kundenserver.de ([212.227.126.135]:54101 "EHLO
+        mout.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750938AbcH3OFL (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 30 Aug 2016 10:05:11 -0400
+In-Reply-To: <CAOGqxeVZBkfMX7wj9V=RhDV+V7hUyVVMUuGgepkN6yGc9B9xLg@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc@vger.kernel.org, =?UTF-8?q?Daniel=20Gl=C3=B6ckner?= <dg@emlix.com>
+To: Alan Cooper <alcooperx@gmail.com>
+Cc: Florian Fainelli <f.fainelli@gmail.com>, Jaedon Shin <jaedon.shin@gmail.com>, Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, bcm-kernel-feedback-list@broadcom.com, linux-mmc <linux-mmc@vger.kernel.org>
 
-CMD23 aka SET_BLOCK_COUNT was introduced with MMC v3.1.
-Older versions of the specification allowed to terminate
-multi-block transfers only with CMD12.
+On Monday 29 August 2016, Alan Cooper wrote:
+> I think there's some confusion over the core issue so let be summarize.
+> The SDHCI host controller CAPABILITIES register bit 28 indicates if
+> the host controller hardware can support 64 bit addresses using the
+> larger 96 bit DMA descriptors. We currently don't have any SoCs that
+> have this support, even our current 64bit ARM SoCs don't support this,
+> though there are future ARM SoCs that will have this support. The bug
+> is that a few MIPS based SoCs had this bit incorrectly set even though
+> the hardware did not support it and this caused the driver to use the
+> larger DMA descriptors which crashed the driver. All we're trying to
+> fix here is a simple SDHCI host controller hardware bug where a CAPs
+> bit is a 1 where it should be a 0. Our future 64 ARM chips that do
+> support 64bit addressing should be the only chips with this bit set.
 
-The patch fixes the following problem:
+Ok, got it. Thanks for the clarification.
 
-  mmc0: new MMC card at address 0001
-  mmcblk0: mmc0:0001 SDMB-16 15.3 MiB
-  mmcblk0: timed out sending SET_BLOCK_COUNT command, card status 0x400900
-  ...
-  blk_update_request: I/O error, dev mmcblk0, sector 0
-  Buffer I/O error on dev mmcblk0, logical block 0, async page read
-   mmcblk0: unable to read partition table
+So the SDHCI device claims to have a capability that doesn't work,
+rather than correctly listing a property that works in principle
+but is prevented from working by something outside of the device
+as we discussed another time [1]
 
-Signed-off-by: Daniel Glöckner <dg@emlix.com>
----
- drivers/mmc/card/block.c | 3 ++-
- 1 file changed, 2 insertions(+), 1 deletion(-)
+If this happens in other chips as well, I guess we could also
+solve this by changing the code to only enable the 64-bit ADMA
+feature when dma_get_required_mask() returns something larger
+than a 32-bit mask. This would also be (very slightly) more
+efficient because we have to access fewer registers per transfer.
 
-diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
-index 2206d44..0fec40d 100644
---- a/drivers/mmc/card/block.c
-+++ b/drivers/mmc/card/block.c
-@@ -2303,7 +2303,8 @@ again:
- 	set_capacity(md->disk, size);
- 
- 	if (mmc_host_cmd23(card->host)) {
--		if (mmc_card_mmc(card) ||
-+		if ((mmc_card_mmc(card) &&
-+		     card->csd.mmca_vsn >= CSD_SPEC_VER_3)||
- 		    (mmc_card_sd(card) &&
- 		     card->scr.cmds & SD_SCR_CMD23_SUPPORT))
- 			md->flags |= MMC_BLK_CMD23;
--- 
-2.1.2
+	Arnd
 
+[1] http://marc.info/?l=linux-mmc&m=141457290627820&w=2
