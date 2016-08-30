@@ -1,50 +1,64 @@
-From: Arnd Bergmann <arnd@arndb.de>
-Subject: Re: [PATCH] mmc: sdhci-brcmstb: Add SDHCI_QUIRK2_BROKEN_64_BIT_DMA
-Date: Tue, 30 Aug 2016 16:04:49 +0200
-Message-ID: <201608301604.49119.arnd@arndb.de>
-References: <20160808015803.2528-1-jaedon.shin@gmail.com> <5229438.Oa2AiqCmJN@wuerfel> <CAOGqxeVZBkfMX7wj9V=RhDV+V7hUyVVMUuGgepkN6yGc9B9xLg@mail.gmail.com>
+From: Ritesh Harjani <riteshh@codeaurora.org>
+Subject: Re: [PATCH v4 3/9] mmc: sdhci-msm: add pltfm_data support to get
+ clk-rates from DT
+Date: Tue, 30 Aug 2016 19:42:59 +0530
+Message-ID: <1a44bb54-d88c-737d-7fb1-e7c3597ac03b@codeaurora.org>
+References: <1472033024-14890-1-git-send-email-riteshh@codeaurora.org>
+ <1472033024-14890-4-git-send-email-riteshh@codeaurora.org>
+ <20160825222747.GU19826@codeaurora.org>
 Mime-Version: 1.0
-Content-Type: Text/Plain;
-  charset="utf-8"
+Content-Type: text/plain; charset=windows-1252; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mout.kundenserver.de ([212.227.126.135]:54101 "EHLO
-        mout.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750938AbcH3OFL (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 30 Aug 2016 10:05:11 -0400
-In-Reply-To: <CAOGqxeVZBkfMX7wj9V=RhDV+V7hUyVVMUuGgepkN6yGc9B9xLg@mail.gmail.com>
+Received: from smtp.codeaurora.org ([198.145.29.96]:53461 "EHLO
+        smtp.codeaurora.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751611AbcH3ONI (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 30 Aug 2016 10:13:08 -0400
+In-Reply-To: <20160825222747.GU19826@codeaurora.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Alan Cooper <alcooperx@gmail.com>
-Cc: Florian Fainelli <f.fainelli@gmail.com>, Jaedon Shin <jaedon.shin@gmail.com>, Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, bcm-kernel-feedback-list@broadcom.com, linux-mmc <linux-mmc@vger.kernel.org>
+To: Stephen Boyd <sboyd@codeaurora.org>
+Cc: adrian.hunter@intel.com, ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, shawn.lin@rock-chips.com, linux-arm-msm@vger.kernel.org, georgi.djakov@linaro.org, alex.lemberg@sandisk.com, mateusz.nowak@intel.com, Yuliy.Izrailov@sandisk.com, asutoshd@codeaurora.org, david.griego@linaro.org, stummala@codeaurora.org, venkatg@codeaurora.org, pramod.gurav@linaro.org, bjorn.andersson@linaro.org, devicetree@vger.kernel.org
 
-On Monday 29 August 2016, Alan Cooper wrote:
-> I think there's some confusion over the core issue so let be summarize.
-> The SDHCI host controller CAPABILITIES register bit 28 indicates if
-> the host controller hardware can support 64 bit addresses using the
-> larger 96 bit DMA descriptors. We currently don't have any SoCs that
-> have this support, even our current 64bit ARM SoCs don't support this,
-> though there are future ARM SoCs that will have this support. The bug
-> is that a few MIPS based SoCs had this bit incorrectly set even though
-> the hardware did not support it and this caused the driver to use the
-> larger DMA descriptors which crashed the driver. All we're trying to
-> fix here is a simple SDHCI host controller hardware bug where a CAPs
-> bit is a 1 where it should be a 0. Our future 64 ARM chips that do
-> support 64bit addressing should be the only chips with this bit set.
+Hi Stephen,
 
-Ok, got it. Thanks for the clarification.
+On 8/26/2016 3:57 AM, Stephen Boyd wrote:
+> On 08/24, Ritesh Harjani wrote:
+>> This adds support for sdhc-msm controllers to get supported
+>> clk-rates from DT. sdhci-msm would need it's own set_clock
+>> ops to be implemented. For this, supported clk-rates needs
+>> to be populated in sdhci_msm_pltfm_data.
+>>
+>> Signed-off-by: Ritesh Harjani <riteshh@codeaurora.org>
+>> ---
+>
+> Please include the DT binding review list in binding updates.
+>
+>>  .../devicetree/bindings/mmc/sdhci-msm.txt          |  1 +
+>>  drivers/mmc/host/sdhci-msm.c                       | 60 ++++++++++++++++++++++
+>>  2 files changed, 61 insertions(+)
+>>
+>> diff --git a/Documentation/devicetree/bindings/mmc/sdhci-msm.txt b/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
+>> index 485483a..6a83b38 100644
+>> --- a/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
+>> +++ b/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
+>> @@ -17,6 +17,7 @@ Required properties:
+>>  	"iface" - Main peripheral bus clock (PCLK/HCLK - AHB Bus clock) (required)
+>>  	"core"	- SDC MMC clock (MCLK) (required)
+>>  	"bus"	- SDCC bus voter clock (optional)
+>> +- clk-rates: Array of supported GCC clock frequencies for sdhc, Units - Hz.
+>>
+>
+> Why not use OPPv2 binding for this? We already have a way to
+> express frequencies for devices with that binding, and we'll need
+> to attach voltages to those frequencies at some point in the
+> future if we want to handle DVFS on these devices.
+>
+OPPv2 may not work out in this case. This was also discussed at [1].
+These clk-rates are not as per voltage points(or any OPP) but as per bus 
+speed mode request from higher layer.
 
-So the SDHCI device claims to have a capability that doesn't work,
-rather than correctly listing a property that works in principle
-but is prevented from working by something outside of the device
-as we discussed another time [1]
+[1] - https://patchwork.kernel.org/patch/9204879/
 
-If this happens in other chips as well, I guess we could also
-solve this by changing the code to only enable the 64-bit ADMA
-feature when dma_get_required_mask() returns something larger
-than a 32-bit mask. This would also be (very slightly) more
-efficient because we have to access fewer registers per transfer.
-
-	Arnd
-
-[1] http://marc.info/?l=linux-mmc&m=141457290627820&w=2
+Thanks
+Ritesh
