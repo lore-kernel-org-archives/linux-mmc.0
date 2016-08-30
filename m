@@ -1,56 +1,88 @@
 From: Simon Horman <horms+renesas@verge.net.au>
-Subject: [PATCH v5 07/11] arm64: dts: r8a7795: remove unnecessary cap-mmc-highspeed property
-Date: Tue, 30 Aug 2016 23:09:55 +0200
-Message-ID: <1472591399-13907-8-git-send-email-horms+renesas@verge.net.au>
+Subject: [PATCH v5 09/11] arm64: dts: r8a7795: salvator: enable UHS for SDHI 0 & 3
+Date: Tue, 30 Aug 2016 23:09:57 +0200
+Message-ID: <1472591399-13907-10-git-send-email-horms+renesas@verge.net.au>
 References: <1472591399-13907-1-git-send-email-horms+renesas@verge.net.au>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from kirsty.vergenet.net ([202.4.237.240]:45906 "EHLO
-        kirsty.vergenet.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1758650AbcH3VKc (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 30 Aug 2016 17:10:32 -0400
+Return-path: <linux-renesas-soc-owner@vger.kernel.org>
 In-Reply-To: <1472591399-13907-1-git-send-email-horms+renesas@verge.net.au>
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Sender: linux-renesas-soc-owner@vger.kernel.org
 To: Wolfram Sang <wsa+renesas@sang-engineering.com>, Ulf Hansson <ulf.hansson@linaro.org>
 Cc: Magnus Damm <magnus.damm@gmail.com>, linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org, Simon Horman <horms+renesas@verge.net.au>
+List-Id: linux-mmc@vger.kernel.org
 
-Remove cap-mmc-highspeed property from SDHI2 and SDHI3.
+From: Wolfram Sang <wsa+renesas@sang-engineering.com>
 
-This property is unnecessary as the driver automatically sets
-the highspeed capability. Furthermore its use is inconsistent with SDHI0
-and SDHI1 which are also highspeed capable but do not have this property
-present.
-
-Found by inspection.
-
+Reviewed-by: Geert Uytterhoeven <geert+renesas@glider.be>
+Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
 Signed-off-by: Simon Horman <horms+renesas@verge.net.au>
 ---
 v5
-* New patch
+* Added to series, previously posted by Wolfram independently
 ---
- arch/arm64/boot/dts/renesas/r8a7795.dtsi | 2 --
- 1 file changed, 2 deletions(-)
+ arch/arm64/boot/dts/renesas/r8a7795-salvator-x.dts | 22 ++++++++++++++++++++--
+ 1 file changed, 20 insertions(+), 2 deletions(-)
 
-diff --git a/arch/arm64/boot/dts/renesas/r8a7795.dtsi b/arch/arm64/boot/dts/renesas/r8a7795.dtsi
-index b902356873c2..70949f4d50a2 100644
---- a/arch/arm64/boot/dts/renesas/r8a7795.dtsi
-+++ b/arch/arm64/boot/dts/renesas/r8a7795.dtsi
-@@ -1117,7 +1117,6 @@
- 			interrupts = <GIC_SPI 167 IRQ_TYPE_LEVEL_HIGH>;
- 			clocks = <&cpg CPG_MOD 312>;
- 			power-domains = <&sysc R8A7795_PD_ALWAYS_ON>;
--			cap-mmc-highspeed;
- 			status = "disabled";
- 		};
+diff --git a/arch/arm64/boot/dts/renesas/r8a7795-salvator-x.dts b/arch/arm64/boot/dts/renesas/r8a7795-salvator-x.dts
+index 98f02631a0f0..54540a223942 100644
+--- a/arch/arm64/boot/dts/renesas/r8a7795-salvator-x.dts
++++ b/arch/arm64/boot/dts/renesas/r8a7795-salvator-x.dts
+@@ -175,11 +175,25 @@
+ 	sdhi0_pins: sd0 {
+ 		groups = "sdhi0_data4", "sdhi0_ctrl";
+ 		function = "sdhi0";
++		power-source = <3300>;
++	};
++
++	sdhi0_pins_uhs: sd0_uhs {
++		groups = "sdhi0_data4", "sdhi0_ctrl";
++		function = "sdhi0";
++		power-source = <1800>;
+ 	};
  
-@@ -1127,7 +1126,6 @@
- 			interrupts = <GIC_SPI 168 IRQ_TYPE_LEVEL_HIGH>;
- 			clocks = <&cpg CPG_MOD 311>;
- 			power-domains = <&sysc R8A7795_PD_ALWAYS_ON>;
--			cap-mmc-highspeed;
- 			status = "disabled";
- 		};
+ 	sdhi3_pins: sd3 {
+ 		groups = "sdhi3_data4", "sdhi3_ctrl";
+ 		function = "sdhi3";
++		power-source = <3300>;
++	};
++
++	sdhi3_pins_uhs: sd3_uhs {
++		groups = "sdhi3_data4", "sdhi3_ctrl";
++		function = "sdhi3";
++		power-source = <1800>;
+ 	};
+ 
+ 	sound_pins: sound {
+@@ -304,25 +318,29 @@
+ 
+ &sdhi0 {
+ 	pinctrl-0 = <&sdhi0_pins>;
+-	pinctrl-names = "default";
++	pinctrl-1 = <&sdhi0_pins_uhs>;
++	pinctrl-names = "default", "state_uhs";
+ 
+ 	vmmc-supply = <&vcc_sdhi0>;
+ 	vqmmc-supply = <&vccq_sdhi0>;
+ 	cd-gpios = <&gpio3 12 GPIO_ACTIVE_LOW>;
+ 	wp-gpios = <&gpio3 13 GPIO_ACTIVE_HIGH>;
+ 	bus-width = <4>;
++	sd-uhs-sdr50;
+ 	status = "okay";
+ };
+ 
+ &sdhi3 {
+ 	pinctrl-0 = <&sdhi3_pins>;
+-	pinctrl-names = "default";
++	pinctrl-1 = <&sdhi3_pins_uhs>;
++	pinctrl-names = "default", "state_uhs";
+ 
+ 	vmmc-supply = <&vcc_sdhi3>;
+ 	vqmmc-supply = <&vccq_sdhi3>;
+ 	cd-gpios = <&gpio4 15 GPIO_ACTIVE_LOW>;
+ 	wp-gpios = <&gpio4 16 GPIO_ACTIVE_HIGH>;
+ 	bus-width = <4>;
++	sd-uhs-sdr50;
+ 	status = "okay";
+ };
  
 -- 
 2.7.0.rc3.207.g0ac5344
-
