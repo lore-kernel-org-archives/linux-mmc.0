@@ -1,103 +1,108 @@
 From: Ritesh Harjani <riteshh@codeaurora.org>
-Subject: Re: [PATCH v4 8/9] mmc: sdhci-msm: Add clock changes for DDR mode.
-Date: Tue, 30 Aug 2016 19:46:30 +0530
-Message-ID: <ec736d43-6c2c-36af-d5fd-ec31d808f9ec@codeaurora.org>
-References: <1472033024-14890-1-git-send-email-riteshh@codeaurora.org>
- <1472033024-14890-9-git-send-email-riteshh@codeaurora.org>
- <f63dd056-d279-7ca9-50d2-668223575161@intel.com>
+Subject: Re: [PATCH] mmc: sdhci: Remove ->platform_init() callback as it's no
+ longer used
+Date: Tue, 30 Aug 2016 19:51:57 +0530
+Message-ID: <52ca6c7b-c69f-3a73-5e9f-257e7e049a1c@codeaurora.org>
+References: <1472551338-20019-1-git-send-email-ulf.hansson@linaro.org>
+ <d8094057-53d9-81a1-620d-f54e01e6b717@intel.com>
+ <CAPDyKFraAAQgSCaunmWe1ok-qCvh_1yRfZbKpCgniuBEbfu-0w@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Type: text/plain; charset=utf-8; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp.codeaurora.org ([198.145.29.96]:54196 "EHLO
+Received: from smtp.codeaurora.org ([198.145.29.96]:55015 "EHLO
         smtp.codeaurora.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752184AbcH3OQk (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 30 Aug 2016 10:16:40 -0400
-In-Reply-To: <f63dd056-d279-7ca9-50d2-668223575161@intel.com>
+        with ESMTP id S1752960AbcH3OWC (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 30 Aug 2016 10:22:02 -0400
+In-Reply-To: <CAPDyKFraAAQgSCaunmWe1ok-qCvh_1yRfZbKpCgniuBEbfu-0w@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, shawn.lin@rock-chips.com, linux-arm-msm@vger.kernel.org, georgi.djakov@linaro.org, alex.lemberg@sandisk.com, mateusz.nowak@intel.com, Yuliy.Izrailov@sandisk.com, asutoshd@codeaurora.org, david.griego@linaro.org, stummala@codeaurora.org, venkatg@codeaurora.org, pramod.gurav@linaro.org, bjorn.andersson@linaro.org
+To: Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>
 
-Hi Adrian,
+Hi Ulf & Adrian,
 
 
-On 8/29/2016 6:47 PM, Adrian Hunter wrote:
-> On 24/08/16 13:03, Ritesh Harjani wrote:
->> SDHC MSM controller need 2x clock for MCLK at GCC.
->> Hence make required changes to have 2x clock for
->> DDR timing modes.
+On 8/30/2016 4:10 PM, Ulf Hansson wrote:
+> On 30 August 2016 at 12:20, Adrian Hunter <adrian.hunter@intel.com> wrote:
+>> On 30/08/16 13:02, Ulf Hansson wrote:
+>>> The commit 1ef5e49e46b9 ("mmc: sdhci-of-esdhc: add/remove some quirks
+>>> according to vendor version") moved sdhci-of-esdhc away from using the
+>>> ->platform_init() callback.
+>>>
+>>> As it was the only user of it and that it seems reasonable to believe that
+>>> it won't be needed again, let's remove just remove it.
+>>>
+>>> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
 >>
->> Signed-off-by: Ritesh Harjani <riteshh@codeaurora.org>
->> ---
->>  drivers/mmc/host/sdhci-msm.c | 22 ++++++++++++++++++----
->>  1 file changed, 18 insertions(+), 4 deletions(-)
+>> Have been meaning to do that, but didn't have time:
 >>
->> diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
->> index 853639b..538594c 100644
->> --- a/drivers/mmc/host/sdhci-msm.c
->> +++ b/drivers/mmc/host/sdhci-msm.c
->> @@ -667,21 +667,35 @@ static void sdhci_msm_set_clock(struct sdhci_host *host, unsigned int clock)
->>  {
->>  	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
->>  	struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
->> -	u32 msm_clock = 0;
->> +	struct mmc_ios curr_ios = host->mmc->ios;
->> +	u32 msm_clock, ddr_clock;
->>  	int rc = 0;
+>> Acked-by: Adrian Hunter <adrian.hunter@intel.com>
 >>
->>  	if (!clock)
->>  		goto out;
->>
->> -	if (clock != msm_host->clk_rate) {
->> -		msm_clock = sdhci_msm_get_msm_clk_rate(host, clock);
->> +	msm_clock = sdhci_msm_get_msm_clk_rate(host, clock);
->> +	if ((curr_ios.timing == MMC_TIMING_UHS_DDR50) ||
->> +		(curr_ios.timing == MMC_TIMING_MMC_DDR52) ||
->> +		(curr_ios.timing == MMC_TIMING_MMC_HS400)) {
->> +		/*
->> +		 * The SDHC requires internal clock frequency to be double the
->> +		 * actual clock that will be set for DDR mode. The controller
->> +		 * uses the faster clock(100/400MHz) for some of its parts and
->> +		 * send the actual required clock (50/200MHz) to the card.
->> +		 */
->> +		ddr_clock = clock * 2;
->> +		msm_clock = sdhci_msm_get_msm_clk_rate(host, ddr_clock);
->> +	}
->> +
+>> However if you have spare time ;-) you could take a look at the Software
+>> Command Queue patches, at least the support for sending commands during data
+>> transfer:
 >
-> Could be slightly simpler e.g.
+> Yes, I have briefly started. I postponed some of the more heavy
+> reviews to be able to catch up with all the simpler changes.
 >
-> 	if ((curr_ios.timing == MMC_TIMING_UHS_DDR50) ||
-> 	    (curr_ios.timing == MMC_TIMING_MMC_DDR52) ||
-> 	    (curr_ios.timing == MMC_TIMING_MMC_HS400)) {
-> 		/*
-> 		 * The SDHC requires internal clock frequency to be double the
-> 		 * actual clock that will be set for DDR mode. The controller
-> 		 * uses the faster clock(100/400MHz) for some of its parts and
-> 		 * send the actual required clock (50/200MHz) to the card.
-> 		 */
-> 		clock *= 2;
-> 	}
-> 	msm_clock = sdhci_msm_get_msm_clk_rate(host, clock);
-Sure. Done.
+> Allow me to get few more days, then I will respond to them!
+>
+> BTW, I was also hoping Ritesh could help to review the changes.
+> Perhaps you can ping him as well.
+Yes, I had started looking at those patches till sending commands during 
+data transfer.
+I will get back on those, once I am completed with the current patches 
+on my name. Sorry about the delay.
+
+Regards
+Ritesh
+
 
 >
+> Thanks and kind regards
+> Uffe
 >
->> +	if (msm_clock != msm_host->clk_rate) {
->>  		rc = clk_set_rate(msm_host->clk, msm_clock);
->>  		if (rc) {
->>  			pr_err("%s: failed to set clock at rate %u, requested clock rate %u\n",
->>  				mmc_hostname(host->mmc), msm_clock, clock);
->>  			goto out;
->>  		}
->> -		msm_host->clk_rate = clock;
->> +		msm_host->clk_rate = msm_clock;
->>  		pr_debug("%s: setting clock at rate %lu\n",
->>  			mmc_hostname(host->mmc), clk_get_rate(msm_host->clk));
->>  	}
 >>
->
+>>         http://marc.info/?l=linux-mmc&m=147134458618542
+>>
+>>> ---
+>>>  drivers/mmc/host/sdhci-pltfm.c | 7 -------
+>>>  drivers/mmc/host/sdhci.h       | 1 -
+>>>  2 files changed, 8 deletions(-)
+>>>
+>>> diff --git a/drivers/mmc/host/sdhci-pltfm.c b/drivers/mmc/host/sdhci-pltfm.c
+>>> index 1d17dcf..ad49bfa 100644
+>>> --- a/drivers/mmc/host/sdhci-pltfm.c
+>>> +++ b/drivers/mmc/host/sdhci-pltfm.c
+>>> @@ -156,13 +156,6 @@ struct sdhci_host *sdhci_pltfm_init(struct platform_device *pdev,
+>>>               host->quirks2 = pdata->quirks2;
+>>>       }
+>>>
+>>> -     /*
+>>> -      * Some platforms need to probe the controller to be able to
+>>> -      * determine which caps should be used.
+>>> -      */
+>>> -     if (host->ops && host->ops->platform_init)
+>>> -             host->ops->platform_init(host);
+>>> -
+>>>       platform_set_drvdata(pdev, host);
+>>>
+>>>       return host;
+>>> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+>>> index 0411c9f..a2bc9e1 100644
+>>> --- a/drivers/mmc/host/sdhci.h
+>>> +++ b/drivers/mmc/host/sdhci.h
+>>> @@ -555,7 +555,6 @@ struct sdhci_ops {
+>>>       void    (*set_uhs_signaling)(struct sdhci_host *host, unsigned int uhs);
+>>>       void    (*hw_reset)(struct sdhci_host *host);
+>>>       void    (*adma_workaround)(struct sdhci_host *host, u32 intmask);
+>>> -     void    (*platform_init)(struct sdhci_host *host);
+>>>       void    (*card_event)(struct sdhci_host *host);
+>>>       void    (*voltage_switch)(struct sdhci_host *host);
+>>>       int     (*select_drive_strength)(struct sdhci_host *host,
+>>>
+>>
 > --
 > To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
 > the body of a message to majordomo@vger.kernel.org
