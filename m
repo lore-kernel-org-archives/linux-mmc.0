@@ -1,97 +1,65 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v5 03/11] mmc: tmio: Add hw reset support
-Date: Wed, 31 Aug 2016 09:50:53 +0200
-Message-ID: <CAPDyKFrne-a=p9_mod7h6Nh-WD0HWBHfh9s1nUjBCJkwhsxbWw@mail.gmail.com>
-References: <1472591399-13907-1-git-send-email-horms+renesas@verge.net.au> <1472591399-13907-4-git-send-email-horms+renesas@verge.net.au>
+Subject: Re: [PATCH] mmc: don't use CMD23 with very old MMC cards
+Date: Wed, 31 Aug 2016 10:25:35 +0200
+Message-ID: <CAPDyKFpp2xT91e1UNXECWiBZA7Nue0qseynggt+1SdhkVvsAvg@mail.gmail.com>
+References: <1472559450-19840-1-git-send-email-dg@emlix.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wm0-f49.google.com ([74.125.82.49]:37438 "EHLO
-        mail-wm0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S932362AbcHaHvd (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 31 Aug 2016 03:51:33 -0400
-Received: by mail-wm0-f49.google.com with SMTP id i5so73818054wmg.0
-        for <linux-mmc@vger.kernel.org>; Wed, 31 Aug 2016 00:50:55 -0700 (PDT)
-In-Reply-To: <1472591399-13907-4-git-send-email-horms+renesas@verge.net.au>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Transfer-Encoding: quoted-printable
+Return-path: <stable-owner@vger.kernel.org>
+In-Reply-To: <1472559450-19840-1-git-send-email-dg@emlix.com>
+Sender: stable-owner@vger.kernel.org
+To: =?UTF-8?Q?Daniel_Gl=C3=B6ckner?= <dg@emlix.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, "# 4.0+" <stable@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Simon Horman <horms+renesas@verge.net.au>
-Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, Magnus Damm <magnus.damm@gmail.com>, linux-mmc <linux-mmc@vger.kernel.org>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>, Ai Kyuse <ai.kyuse.uw@renesas.com>
 
-On 30 August 2016 at 23:09, Simon Horman <horms+renesas@verge.net.au> wrote:
-> From: Ai Kyuse <ai.kyuse.uw@renesas.com>
->
-> Add hw reset support.
->
-> Signed-off-by: Ai Kyuse <ai.kyuse.uw@renesas.com>
-> Signed-off-by: Simon Horman <horms+renesas@verge.net.au>
-> ---
-> This is required by tuning support which will
-> be introduced by follow-up patches.
->
-> v5 [Simon Horman]
-> * As suggested by Ulf Hansson
->   - Broke out of a larger patch
-> ---
->  drivers/mmc/host/tmio_mmc.h     |  1 +
->  drivers/mmc/host/tmio_mmc_pio.c | 12 ++++++++++++
->  2 files changed, 13 insertions(+)
->
-> diff --git a/drivers/mmc/host/tmio_mmc.h b/drivers/mmc/host/tmio_mmc.h
-> index 4b36cb5c2d9c..4b71f31fba63 100644
-> --- a/drivers/mmc/host/tmio_mmc.h
-> +++ b/drivers/mmc/host/tmio_mmc.h
-> @@ -164,6 +164,7 @@ struct tmio_mmc_host {
->         int (*start_signal_voltage_switch)(struct mmc_host *mmc,
->                                            struct mmc_ios *ios);
->         int (*write16_hook)(struct tmio_mmc_host *host, int addr);
-> +       void (*hw_reset)(struct tmio_mmc_host *host);
->  };
->
->  struct tmio_mmc_host *tmio_mmc_host_alloc(struct platform_device *pdev);
-> diff --git a/drivers/mmc/host/tmio_mmc_pio.c b/drivers/mmc/host/tmio_mmc_pio.c
-> index 806308ac93e7..90758647bae6 100644
-> --- a/drivers/mmc/host/tmio_mmc_pio.c
-> +++ b/drivers/mmc/host/tmio_mmc_pio.c
-> @@ -756,6 +756,17 @@ static int tmio_mmc_start_data(struct tmio_mmc_host *host,
->         return 0;
->  }
->
-> +static void tmio_mmc_hw_reset(struct mmc_host *mmc)
-> +{
-> +       struct tmio_mmc_host *host = mmc_priv(mmc);
-> +
-> +       if (host->hw_reset)
-> +               host->hw_reset(host);
-> +
-> +       mmc_retune_timer_stop(host->mmc);
-> +       mmc_retune_needed(host->mmc);
++ stable
 
-Both the above tuning calls are completely pointless as the mmc core
-will run a reinitialization of the card when a ->hw_reset() host ops
-is invoked.
-That means a regular tuning will happen as part of the initialization
-of the card, so you don't need to trigger it from here as well.
-
-So if that's the only reason to why you need to add the hw_reset()
-support, I think you should drop it instead.
-
-> +}
-> +
->  /* Process requests from the MMC layer */
->  static void tmio_mmc_request(struct mmc_host *mmc, struct mmc_request *mrq)
->  {
-> @@ -970,6 +981,7 @@ static struct mmc_host_ops tmio_mmc_ops = {
->         .get_cd         = mmc_gpio_get_cd,
->         .enable_sdio_irq = tmio_mmc_enable_sdio_irq,
->         .multi_io_quirk = tmio_multi_io_quirk,
-> +       .hw_reset       = tmio_mmc_hw_reset,
->  };
+On 30 August 2016 at 14:17, Daniel Gl=C3=B6ckner <dg@emlix.com> wrote:
+> CMD23 aka SET_BLOCK_COUNT was introduced with MMC v3.1.
+> Older versions of the specification allowed to terminate
+> multi-block transfers only with CMD12.
 >
->  static int tmio_mmc_init_ocr(struct tmio_mmc_host *host)
-> --
-> 2.7.0.rc3.207.g0ac5344
+> The patch fixes the following problem:
 >
+>   mmc0: new MMC card at address 0001
+>   mmcblk0: mmc0:0001 SDMB-16 15.3 MiB
+>   mmcblk0: timed out sending SET_BLOCK_COUNT command, card status 0x40090=
+0
+>   ...
+>   blk_update_request: I/O error, dev mmcblk0, sector 0
+>   Buffer I/O error on dev mmcblk0, logical block 0, async page read
+>    mmcblk0: unable to read partition table
+>
+> Signed-off-by: Daniel Gl=C3=B6ckner <dg@emlix.com>
 
-Kind regards
+This was an old problem you found, nice! I should remove the dust from
+my old MMC cards and give them a go with this change.
+I assume it could be worth to send this to stable as well, so I will
+add a stable tag to it.
+
+Applied for next! Thanks and kind regards!
+
 Uffe
+
+> ---
+>  drivers/mmc/card/block.c | 3 ++-
+>  1 file changed, 2 insertions(+), 1 deletion(-)
+>
+> diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+> index 2206d44..0fec40d 100644
+> --- a/drivers/mmc/card/block.c
+> +++ b/drivers/mmc/card/block.c
+> @@ -2303,7 +2303,8 @@ again:
+>         set_capacity(md->disk, size);
+>
+>         if (mmc_host_cmd23(card->host)) {
+> -               if (mmc_card_mmc(card) ||
+> +               if ((mmc_card_mmc(card) &&
+> +                    card->csd.mmca_vsn >=3D CSD_SPEC_VER_3)||
+>                     (mmc_card_sd(card) &&
+>                      card->scr.cmds & SD_SCR_CMD23_SUPPORT))
+>                         md->flags |=3D MMC_BLK_CMD23;
+> --
+> 2.1.2
+>
