@@ -1,66 +1,72 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [RFC] mmc: dw_mmc: skip the execute_tuning after checking timiing
-Date: Wed, 31 Aug 2016 13:10:32 +0200
-Message-ID: <CAPDyKFrdNCP51BPZKS+puc=OVGtB3aM4FeVj555OPs3jAjPakA@mail.gmail.com>
-References: <1472622687-16389-1-git-send-email-jh80.chung@samsung.com>
- <CGME20160831071421epcas1p1efea97a79334edb2a4665e130e84f1f4@epcas1p1.samsung.com>
- <7be25c6e-ceed-bc70-55a0-540468577a64@rock-chips.com> <196d3b32-9367-de38-5ae6-96c6a56db6a5@samsung.com>
+Subject: Re: [GIT PULL] Update dw-mmc controller
+Date: Wed, 31 Aug 2016 13:16:56 +0200
+Message-ID: <CAPDyKFr=sE=oj2WpYokeCfhW1Xe96WT0_1asQu2uX34Wi3EE7w@mail.gmail.com>
+References: <4202d0be-ec5c-3594-d5ad-fce6d314c547@samsung.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wm0-f48.google.com ([74.125.82.48]:37432 "EHLO
-        mail-wm0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S932676AbcHaLKe (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 31 Aug 2016 07:10:34 -0400
-Received: by mail-wm0-f48.google.com with SMTP id i5so83070451wmg.0
-        for <linux-mmc@vger.kernel.org>; Wed, 31 Aug 2016 04:10:34 -0700 (PDT)
-In-Reply-To: <196d3b32-9367-de38-5ae6-96c6a56db6a5@samsung.com>
+Received: from mail-wm0-f49.google.com ([74.125.82.49]:36020 "EHLO
+        mail-wm0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1759402AbcHaLQ6 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 31 Aug 2016 07:16:58 -0400
+Received: by mail-wm0-f49.google.com with SMTP id c133so27604196wmd.1
+        for <linux-mmc@vger.kernel.org>; Wed, 31 Aug 2016 04:16:58 -0700 (PDT)
+In-Reply-To: <4202d0be-ec5c-3594-d5ad-fce6d314c547@samsung.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Jaehoon Chung <jh80.chung@samsung.com>
-Cc: Shawn Lin <shawn.lin@rock-chips.com>, linux-mmc <linux-mmc@vger.kernel.org>, Guodong Xu <guodong.xu@linaro.org>, "Jinguojun (A)" <kid.jin@hisilicon.com>
+Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Guodong Xu <guodong.xu@linaro.org>, Jin Guojun <kid.jin@hisilicon.com>, Krzysztof Kozlowski <k.kozlowski@samsung.com>, Shawn Lin <shawn.lin@rock-chips.com>
 
-On 31 August 2016 at 12:48, Jaehoon Chung <jh80.chung@samsung.com> wrote:
-> On 08/31/2016 04:13 PM, Shawn Lin wrote:
->> On 2016/8/31 13:51, Jaehoon Chung wrote:
->>> HS400 mode doesn't need to do execute_tuning, because it's already
->>> tuned in HS200 mode. And Tuning command is optional for UHS50 mode.
->>>
->>> In future, the general execute_tuning sequence can be included in this
->>> function.
->>
->> Maybe this isn't what we want for mmc.
->>
->> I see both of sd and sdio call mmc_execute_tuning by checking
->> the ios.timing, and explicitly we need to do tuning for
->> MMC_TIMING_UHS_SDR50 as the mmc core asks we to do that.
->>
->> Moreover, why mmc didn't do something like:
->>
->> if (card->host->ios.timing == MMC_TIMING_XXXXX || ....)
->>     mmc_execute_tuning()
->>
->> So we don't need every host driver to add these check and I do
->> see some host drivers check these timing for their execute_tuning
->> callback..
->>
->> What is your opinion? :)
+On 31 August 2016 at 12:58, Jaehoon Chung <jh80.chung@samsung.com> wrote:
+> Dear Ulf,
 >
-> Yep, your comment makes sense..So i'm checking SD specification.
-> I think it needs to know which UHS card is..(UHS50 or UHS104)..
-> But current kernel can't distinguish these..
+> Could you pull these patches into your mmc-next?
+> If there are any other problems, let me know, plz.
 
-What about MMC_TIMING_UHS_SDR50 and MMC_TIMING_UHS_SDR104? Are you
-saying we need some more additional timing type(s)?
-
->
-> According to spec, we can distinguish UHS50 and UHS104 with TRAN_SPEED field.
->
-> "UHS50 Card set TRANS_SPEED to 0Bh (100Mbit/sec), for both SDR50 and DDR50 modes.
-> UHS104 Card set TRAN_SPEED to 2Bh (200Mbit/sec)"
->
-
-[...]
+Thanks Jaehoon, pulled into my next branch!
 
 Kind regards
 Uffe
+
+>
+> Best Regards,
+> Jaehoon Chung
+>
+> The following changes since commit 08433b60269228dc92c4bce6bba5902a8a5b904b:
+>
+>   mmc: block: don't use CMD23 with very old MMC cards (2016-08-31 10:24:51 +0200)
+>
+> are available in the git repository at:
+>
+>   http://github.com/jh80chung/dw-mmc for-ulf
+>
+> for you to fetch changes up to 802a9ffc7b3e5901cc79f36a900a0f7abe5592c8:
+>
+>   mmc: dw_mmc: k3: UHS-SD card for Hisilicon Hikey (2016-08-31 19:56:31 +0900)
+>
+> ----------------------------------------------------------------
+> Guodong Xu (2):
+>       Documentation: synopsys-dw-mshc: add binding for resets
+>       mmc: dw_mmc: add reset support to dwmmc host controller
+>
+> Jaehoon Chung (1):
+>       mmc: dw_mmc: remove the unnecessary IS_ERR() checking for ciu/biu clock
+>
+> Jin Guojun (1):
+>       mmc: dw_mmc: k3: UHS-SD card for Hisilicon Hikey
+>
+> Krzysztof Kozlowski (1):
+>       mmc: dw_mmc: exynos: Warn if HS400 is being used on non-Exynos5420 chipset
+>
+> Shawn Lin (2):
+>       mmc: dw_mmc: remove parsing for each slot subnode
+>       mmc: dw_mmc: return -EILSEQ for EBE and SBE error
+>
+>  Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.txt |  4 ++++
+>  drivers/mmc/host/dw_mmc-exynos.c                           |  6 +++++-
+>  drivers/mmc/host/dw_mmc-k3.c                               |  6 ++++++
+>  drivers/mmc/host/dw_mmc.c                                  | 81 +++++++++++++++++++++++++++------------------------------------------------------
+>  include/linux/mmc/dw_mmc.h                                 |  2 ++
+>  5 files changed, 44 insertions(+), 55 deletions(-)
+>
