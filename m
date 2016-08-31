@@ -1,129 +1,92 @@
-From: Shawn Lin <shawn.lin@rock-chips.com>
-Subject: Re: [PATCH 2/2] mmc: dw_mmc: avoid race condition of cpu and IDMAC
-Date: Wed, 31 Aug 2016 15:36:25 +0800
-Message-ID: <f70e6723-7a03-e67b-9522-2b39782a1393@rock-chips.com>
-References: <1471599615-6249-1-git-send-email-shawn.lin@rock-chips.com>
- <CGME20160819095647epcas1p3e5d5153aa6a15a69285d50ca0dbae3d5@epcas1p3.samsung.com>
- <1471599615-6249-2-git-send-email-shawn.lin@rock-chips.com>
- <30134bdf-bd25-9a7f-8888-a02b83dd178e@samsung.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH v4 2/4] mmc: tmio: Add tuning support
+Date: Wed, 31 Aug 2016 09:38:40 +0200
+Message-ID: <CAPDyKFpHzr-emfMsKyiJ4Ow-pjCCHWw6bBCEP6kEszOz09_pmA@mail.gmail.com>
+References: <1469592803-13842-1-git-send-email-horms+renesas@verge.net.au>
+ <1469592803-13842-3-git-send-email-horms+renesas@verge.net.au>
+ <CAPDyKFq_Fs_bNx7LP-J+nC3iaNgB7gvZAvhCp--qVOh1iAh0vg@mail.gmail.com>
+ <20160823135251.GA25665@verge.net.au> <CAPDyKFpbMnOag7TZtQXxffXyq4XjTfz3vYM_atks15+d64QkfQ@mail.gmail.com>
+ <20160825120424.GA3385@verge.net.au> <CAPDyKFpu85h3w2JkCjyQ15P8eWfkAkYcpxR4A6bD0EpQLw9rew@mail.gmail.com>
+ <20160829120533.GA8647@verge.net.au> <CAPDyKFoL1xvv1yog2tY7pF9fWoiGQ9Gew_QbrA06dSrBiFyVEQ@mail.gmail.com>
+ <20160830205146.GA14623@verge.net.au>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <30134bdf-bd25-9a7f-8888-a02b83dd178e@samsung.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>
-Cc: shawn.lin@rock-chips.com, Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Doug Anderson <dianders@chromium.org>, Brian Norris <briannorris@chromium.org>, Heiko Stuebner <heiko@sntech.de>, linux-rockchip@lists.infradead.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-renesas-soc-owner@vger.kernel.org>
+In-Reply-To: <20160830205146.GA14623@verge.net.au>
+Sender: linux-renesas-soc-owner@vger.kernel.org
+To: Simon Horman <horms@verge.net.au>
+Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, Magnus Damm <magnus.damm@gmail.com>, linux-mmc <linux-mmc@vger.kernel.org>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On 2016/8/31 14:58, Jaehoon Chung wrote:
-> Hi Shawn,
+On 30 August 2016 at 22:51, Simon Horman <horms@verge.net.au> wrote:
+> On Mon, Aug 29, 2016 at 04:05:55PM +0200, Ulf Hansson wrote:
+>> On 29 August 2016 at 14:05, Simon Horman <horms@verge.net.au> wrote:
+>> > On Fri, Aug 26, 2016 at 10:01:35AM +0200, Ulf Hansson wrote:
+>> >> On 25 August 2016 at 14:04, Simon Horman <horms@verge.net.au> wrote:
+>> >> > On Tue, Aug 23, 2016 at 05:02:56PM +0200, Ulf Hansson wrote:
+>> >
+>> > ...
 >
-> On 08/19/2016 06:40 PM, Shawn Lin wrote:
->> We could see an obvious race condition by test that
->> the former write operation by IDMAC aiming to clear
->> OWN bit reach right after the later configuration of
->> the same desc, which makes the IDMAC be in SUSPEND
->> state as the OWN bit was cleared by the asynchronous
->> write operation of IDMAC. The bug can be very easy
->> reproduced on RK3288 or similar when we reduce the
->> running rate of system buses and keep the CPU running
->> faster. So as two separate masters, IDMAC and cpu
->> write the same descriptor stored on the same address,
->> and this should be protected by adding check of OWN
->> bit before preparing new descriptors.
->>
->> Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
->> ---
->>
->>  drivers/mmc/host/dw_mmc.c | 30 ++++++++++++++++++++++++++++++
->>  1 file changed, 30 insertions(+)
->>
->> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
->> index 0a5a49f..e640f83 100644
->> --- a/drivers/mmc/host/dw_mmc.c
->> +++ b/drivers/mmc/host/dw_mmc.c
->> @@ -473,6 +473,7 @@ static inline void dw_mci_prepare_desc64(struct dw_mci *host,
->>  {
->>  	unsigned int desc_len;
->>  	struct idmac_desc_64addr *desc_first, *desc_last, *desc;
->> +	unsigned long timeout = jiffies + msecs_to_jiffies(100);
->>  	int i;
->>
->>  	desc_first = desc_last = desc = host->sg_cpu;
->> @@ -489,6 +490,20 @@ static inline void dw_mci_prepare_desc64(struct dw_mci *host,
->>  			length -= desc_len;
->>
->>  			/*
->> +			 * Wait for the former clear OWN bit operation
->> +			 * of IDMAC to make sure that this descriptor
->> +			 * isn't still owned by IDMAC as IDMAC's write
->> +			 * ops and CPU's read ops are asynchronous.
->> +			 */
->> +			while (readl(&desc->des0) & IDMAC_DES0_OWN) {
->> +				if (time_after(jiffies, timeout)) {
->> +					dev_err(host->dev, "DESC is still owned by IDMAC.\n");
->> +					break;
+> ...
 >
-> Doesn't it need the error handling? Just display the message?
+>> > @@ -1271,6 +1278,7 @@ int tmio_mmc_host_runtime_suspend(struct device *dev)
+>> >
+>> >         mmc_retune_timer_stop(host->mmc);
+>> >         mmc_retune_needed(host->mmc);
+>> > +       host->use_saved_taps = true;
+>>
+>> I don't think you should trigger a re-tune here at all. Moreover you
+>> don't need to keep track of whether you have valid tap values by using
+>> the ->use_saved_taps variable, the mmc core deals with this for you.
+>>
+>> Instead, you should restore the tap values by invoking
+>> host->select_tuning() from the ->runtime_resume() callback, although
+>> only when host->mmc->can_retune == 1. We should probably add a helper
+>> function in the mmc core for this check, instead of accessing
+>> "can_retune" directly.
+>
+> Thanks, I was wondering what the best way to handle this is.
+>
+> I tried your suggestion above but it seems that host->mmc->can_retune is
+> zero when ->runtime_resume() is called because of the following call paths:
+>
+> a) _mmc_sd_suspend()
+>      -> mmc_power_off()
+>         -> mmc_set_initial_state()
+>            -> mmc_retune_disable
+>    and
+> b) mmc_sd_runtime_resume()
+>      -> mmc_power_up
+>         -> mmc_set_initial_state()
+>            -> mmc_retune_disable
+>
+>> >         tmio_mmc_disable_mmc_irqs(host, TMIO_MASK_ALL);
 
-One reason for why I didn't add error handling is that
-maybe we could add a very large timeout value for this, and
-the system could be broken anyway if it does need such a long
-time for a peripheral IP to write memory. But you are right maybe, it
-is not a good idea to do that. I will propgate a error and let it
-fall back to PIO mode.
+This is exactly what shall happen :-)
 
-Thanks.
+If the mmc core suspends the card, it means it will also re-initialize
+the card when resuming it. In that way the regular tuning sequence
+will take place as a part of re-initialization of the card, so you
+definitely must not restore tap values in these case. That is why you
+should be using the can_retune to know when to restore the values.
 
 >
-> Best Regards,
-> Jaehoon Chung
 >
->> +				}
->> +				udelay(10);
->> +			}
->> +
->> +			/*
->>  			 * Set the OWN bit and disable interrupts
->>  			 * for this descriptor
->>  			 */
->> @@ -525,6 +540,7 @@ static inline void dw_mci_prepare_desc32(struct dw_mci *host,
->>  {
->>  	unsigned int desc_len;
->>  	struct idmac_desc *desc_first, *desc_last, *desc;
->> +	unsigned long timeout = jiffies + msecs_to_jiffies(100);
->>  	int i;
->>
->>  	desc_first = desc_last = desc = host->sg_cpu;
->> @@ -541,6 +557,20 @@ static inline void dw_mci_prepare_desc32(struct dw_mci *host,
->>  			length -= desc_len;
->>
->>  			/*
->> +			 * Wait for the former clear OWN bit operation
->> +			 * of IDMAC to make sure that this descriptor
->> +			 * isn't still owned by IDMAC as IDMAC's write
->> +			 * ops and CPU's read ops are asynchronous.
->> +			 */
->> +			while (readl(&desc->des0) & IDMAC_DES0_OWN) {
->> +				if (time_after(jiffies, timeout)) {
->> +					dev_err(host->dev, "DESC is still owned by IDMAC.\n");
->> +					break;
->> +				}
->> +				udelay(10);
->> +			}
->> +
->> +			/*
->>  			 * Set the OWN bit and disable interrupts
->>  			 * for this descriptor
->>  			 */
->>
+> I plan to repost this patchset without the tap restoration code.
+> This is because I have a number of changes locally, in particular
+> to address other parts of your review, and I would like
+> them to see the light of day.
 >
->
->
->
+> I will mark the tap restoration as a TODO item which we can address
+> before merging the code in question.
 
+It shouldn't be that hard to implement this, so I rather see that we
+get this right from the beginning.
 
--- 
-Best Regards
-Shawn Lin
+As matter of fact it probably requires less code than you had in your
+initial approach, especially since I don't think you need to deal with
+anything tuning related in the ->runtime_suspend() callback, but only
+in ->runtime_resume().
+
+Kind regards
+Uffe
