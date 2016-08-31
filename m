@@ -1,60 +1,147 @@
-From: Wolfram Sang <wsa@the-dreams.de>
-Subject: Re: [PATCH v5 08/11] arm64: r8a7795: Set maximum frequencies for
- SDHI clocks
-Date: Wed, 31 Aug 2016 10:44:49 +0200
-Message-ID: <20160831084449.GB1609@katana>
-References: <1472591399-13907-1-git-send-email-horms+renesas@verge.net.au>
- <1472591399-13907-9-git-send-email-horms+renesas@verge.net.au>
-Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-        protocol="application/pgp-signature"; boundary="nVMJ2NtxeReIH9PS"
+From: Baolin Wang <baolin.wang@linaro.org>
+Subject: [PATCH v3] mmc: core: Optimize the mmc erase size alignment
+Date: Wed, 31 Aug 2016 17:32:31 +0800
+Message-ID: <9de99671750430d7d80a8f351c0ec7a7088c9b00.1472635587.git.baolin.wang@linaro.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from sauhun.de ([89.238.76.85]:43243 "EHLO pokefinder.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1758906AbcHaIo5 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Wed, 31 Aug 2016 04:44:57 -0400
-Content-Disposition: inline
-In-Reply-To: <1472591399-13907-9-git-send-email-horms+renesas@verge.net.au>
+Received: from mail-pf0-f178.google.com ([209.85.192.178]:33081 "EHLO
+        mail-pf0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1759373AbcHaJdJ (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 31 Aug 2016 05:33:09 -0400
+Received: by mail-pf0-f178.google.com with SMTP id y134so17798904pfg.0
+        for <linux-mmc@vger.kernel.org>; Wed, 31 Aug 2016 02:33:09 -0700 (PDT)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Simon Horman <horms+renesas@verge.net.au>
-Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, Ulf Hansson <ulf.hansson@linaro.org>, Magnus Damm <magnus.damm@gmail.com>, linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org
+To: ulf.hansson@linaro.org
+Cc: adrian.hunter@intel.com, rmk+kernel@arm.linux.org.uk, shawn.lin@rock-chips.com, dianders@chromium.org, heiko@sntech.de, david@protonic.nl, hdegoede@redhat.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, broonie@kernel.org, linus.walleij@linaro.org, baolin.wang@linaro.org
 
+Before issuing mmc_erase() function, users always have checked if it can
+erase with mmc_can_erase/trim/discard() function, thus remove the redundant
+erase checking in mmc_erase() function.
 
---nVMJ2NtxeReIH9PS
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+This patch also optimizes the erase start/end sector alignment with
+round_up()/round_down() function, when erase command is MMC_ERASE_ARG.
 
-On Tue, Aug 30, 2016 at 11:09:56PM +0200, Simon Horman wrote:
-> Signed-off-by: Simon Horman <horms+renesas@verge.net.au>
-> ---
-> v5
-> * New patch
+Signed-off-by: Baolin Wang <baolin.wang@linaro.org>
+---
+Changes since v2:
+ - Add nr checking and other optimization in mmc_erase() function.
 
-Huh? There is already 721e9a08aa514c ("arm64: dts: r8a7795: set maximum
-frequency for SDHI clocks") in renesas/drivers? Why didn't you pick this
-one?
+Changes since v1:
+ - Add the alignment if card->erase_size is not power of 2.
+---
+ drivers/mmc/core/core.c |   82 ++++++++++++++++++++++++++++++-----------------
+ 1 file changed, 53 insertions(+), 29 deletions(-)
 
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index e55cde6..52156d4 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -2202,6 +2202,51 @@ out:
+ 	return err;
+ }
+ 
++static unsigned int mmc_align_erase_size(struct mmc_card *card,
++					 unsigned int *from,
++					 unsigned int *to,
++					 unsigned int nr)
++{
++	unsigned int from_new = *from, nr_new = nr, rem;
++
++	if (is_power_of_2(card->erase_size)) {
++		unsigned int temp = from_new;
++
++		from_new = round_up(temp, card->erase_size);
++		rem = from_new - temp;
++
++		if (nr_new > rem)
++			nr_new -= rem;
++		else
++			return 0;
++
++		nr_new = round_down(nr_new, card->erase_size);
++	} else {
++		rem = from_new % card->erase_size;
++		if (rem) {
++			rem = card->erase_size - rem;
++			from_new += rem;
++			if (nr_new > rem)
++				nr_new -= rem;
++			else
++				return 0;
++		}
++
++		rem = nr_new % card->erase_size;
++		if (rem)
++			nr_new -= rem;
++	}
++
++	if (nr_new == 0)
++		return 0;
++
++	/* 'from' and 'to' are inclusive */
++	*to = from_new + nr_new - 1;
++	*from = from_new;
++
++	return nr_new;
++}
++
+ /**
+  * mmc_erase - erase sectors.
+  * @card: card to erase
+@@ -2217,13 +2262,6 @@ int mmc_erase(struct mmc_card *card, unsigned int from, unsigned int nr,
+ 	unsigned int rem, to = from + nr;
+ 	int err;
+ 
+-	if (!(card->host->caps & MMC_CAP_ERASE) ||
+-	    !(card->csd.cmdclass & CCC_ERASE))
+-		return -EOPNOTSUPP;
+-
+-	if (!card->erase_size)
+-		return -EOPNOTSUPP;
+-
+ 	if (mmc_card_sd(card) && arg != MMC_ERASE_ARG)
+ 		return -EOPNOTSUPP;
+ 
+@@ -2240,31 +2278,17 @@ int mmc_erase(struct mmc_card *card, unsigned int from, unsigned int nr,
+ 			return -EINVAL;
+ 	}
+ 
+-	if (arg == MMC_ERASE_ARG) {
+-		rem = from % card->erase_size;
+-		if (rem) {
+-			rem = card->erase_size - rem;
+-			from += rem;
+-			if (nr > rem)
+-				nr -= rem;
+-			else
+-				return 0;
+-		}
+-		rem = nr % card->erase_size;
+-		if (rem)
+-			nr -= rem;
+-	}
+-
+ 	if (nr == 0)
+ 		return 0;
+ 
+-	to = from + nr;
+-
+-	if (to <= from)
+-		return -EINVAL;
+-
+-	/* 'from' and 'to' are inclusive */
+-	to -= 1;
++	if (arg == MMC_ERASE_ARG) {
++		nr = mmc_align_erase_size(card, &from, &to, nr);
++		if (nr == 0)
++			return 0;
++	} else {
++		/* 'from' and 'to' are inclusive */
++		to -= 1;
++	}
+ 
+ 	/*
+ 	 * Special case where only one erase-group fits in the timeout budget:
+-- 
+1.7.9.5
 
---nVMJ2NtxeReIH9PS
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1
-
-iQIcBAEBAgAGBQJXxpkBAAoJEBQN5MwUoCm26toP/RfeDOBvZ1aJRh9VO8LB/Q00
-5Yva03IhWentzJ/UsXUtGayngSnv4k+dek4IJyVQE8d/uUgAuXlpZFOsqlr5SI3p
-vzvp7zTaYEp32ReR9KRnL8zEXWTgGGzbBVsgpDNc5NmSZZFJ9Zmpue8PeypU7Kix
-xWSZ0R0kzcZshlsVVRu+9tmh1rtT4lTPR23Rvkx0GM1n4rAZWWvh9M1uSf3nIncC
-XhXTwIXuw8CBooPXQAJNEykZV/2j19ob8SyVXT0bdoQ0FP2XyEc1XQZ2PJSlQYjt
-VH+PINOjdf6flZ1KcLC9j6yfDZ0lbDCjWd1tNIvLUBGCoghjOH+D4Mw8yAnARBad
-ULnYahVKHr1Fk3OaByFQGG2cF/GDwWl3VejxzyE2xi1XmemM5aQb6zShQLUdpxqe
-NDxTA8T+2WbPEa4POtwIcB6X6hdM1TwE8QZ8yjcb0v522CHvVgxtfIsaxpzvcQGW
-snJQ3Q486o5SZIWZODqMQ4xuo4qJ2pksJzxiRrp/H5+1GuZNfB/PfSIXTTeD8pP7
-1pWOy44SXdnkzIg3HvqLFzFIYV2rrxfeVzV+y7hRpPSxrHpuhKnNfFPaFUJRGIXL
-6vqGwzqP3xvK4sfmHcEf/jclWleL6RyVK1r93WyEggSBuRRaTCY0jvHufS20E1OR
-skziwK/7ZC7bYipRgXZD
-=dUGU
------END PGP SIGNATURE-----
-
---nVMJ2NtxeReIH9PS--
