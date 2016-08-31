@@ -1,82 +1,251 @@
-From: Shawn Lin <shawn.lin@rock-chips.com>
-Subject: Re: [RFC] mmc: dw_mmc: skip the execute_tuning after checking timiing
-Date: Wed, 31 Aug 2016 15:13:59 +0800
-Message-ID: <7be25c6e-ceed-bc70-55a0-540468577a64@rock-chips.com>
-References: <1472622687-16389-1-git-send-email-jh80.chung@samsung.com>
+From: Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
+Subject: Re: [PATCH 1/2] mmc: dw_mmc: split out preparation of desc for
+ IDMAC32 and IDMAC64
+Date: Wed, 31 Aug 2016 15:17:45 +0800
+Message-ID: <c054f4f4-9d9d-0972-d267-d5eddf072823@rock-chips.com>
+References: <CGME20160819095620epcas1p28ffdabf62af8d6e3c01941fde8c8b96b@epcas1p2.samsung.com>
+ <1471599615-6249-1-git-send-email-shawn.lin@rock-chips.com>
+ <6e8fbd6b-c3ce-c360-663d-70aeaf87f641@samsung.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=gbk; format=flowed
+Content-Type: text/plain; charset="us-ascii"; Format="flowed"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from lucky1.263xmail.com ([211.157.147.134]:47664 "EHLO
-        lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752630AbcHaHOT (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 31 Aug 2016 03:14:19 -0400
-In-Reply-To: <1472622687-16389-1-git-send-email-jh80.chung@samsung.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+In-Reply-To: <6e8fbd6b-c3ce-c360-663d-70aeaf87f641-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-rockchip>,
+ <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-rockchip/>
+List-Post: <mailto:linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+List-Help: <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-rockchip>,
+ <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
+Sender: "Linux-rockchip" <linux-rockchip-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+Errors-To: linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+To: Jaehoon Chung <jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>
+Cc: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Heiko Stuebner <heiko-4mtYJXux2i+zQB+pC5nmwQ@public.gmane.org>, shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org, Brian Norris <briannorris-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Doug Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>, linux-mmc@vger.kernel.org
-Cc: shawn.lin@rock-chips.com, ulf.hansson@linaro.org, guodong.xu@linaro.org, kid.jin@hisilicon.com
 
-On 2016/8/31 13:51, Jaehoon Chung wrote:
-> HS400 mode doesn't need to do execute_tuning, because it's already
-> tuned in HS200 mode. And Tuning command is optional for UHS50 mode.
+Hi Jaehoon,
+
+On 2016/8/31 14:55, Jaehoon Chung wrote:
+> Hi Shawn,
 >
-> In future, the general execute_tuning sequence can be included in this
-> function.
-
-Maybe this isn't what we want for mmc.
-
-I see both of sd and sdio call mmc_execute_tuning by checking
-the ios.timing, and explicitly we need to do tuning for
-MMC_TIMING_UHS_SDR50 as the mmc core asks we to do that.
-
-Moreover, why mmc didn't do something like:
-
-if (card->host->ios.timing == MMC_TIMING_XXXXX || ....)
-	mmc_execute_tuning()
-
-So we don't need every host driver to add these check and I do
-see some host drivers check these timing for their execute_tuning
-callback..
-
-What is your opinion? :)
-
+> On 08/19/2016 06:40 PM, Shawn Lin wrote:
+>> We intend to add more check for descriptors when
+>> preparing desc. Let's spilt out the separate body
+>> to make the dw_mci_translate_sglist not so lengthy.
 >
-> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
-> ---
->  drivers/mmc/host/dw_mmc.c | 17 ++++++++++++++++-
->  1 file changed, 16 insertions(+), 1 deletion(-)
+> Sorry for reviewing late.
 >
-> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-> index 22dacae..6571924 100644
-> --- a/drivers/mmc/host/dw_mmc.c
-> +++ b/drivers/mmc/host/dw_mmc.c
-> @@ -1568,10 +1568,25 @@ static int dw_mci_execute_tuning(struct mmc_host *mmc, u32 opcode)
->  	struct dw_mci_slot *slot = mmc_priv(mmc);
->  	struct dw_mci *host = slot->host;
->  	const struct dw_mci_drv_data *drv_data = host->drv_data;
-> -	int err = -EINVAL;
-> +	int err = 0;
-> +
-> +	switch (host->timing) {
-> +	case MMC_TIMING_MMC_HS400:
-> +		err = -EINVAL;
-> +		goto out;
-> +	case MMC_TIMING_MMC_HS200:
-> +	case MMC_TIMING_UHS_SDR104:
-> +	case MMC_TIMING_UHS_DDR50:
-> +		break;
-> +	case MMC_TIMING_UHS_SDR50:
-> +		/* Fall through */
-> +	default:
-> +		goto out;
-> +	}
+>>
+>> Signed-off-by: Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
+>> ---
+>>
+>>  drivers/mmc/host/dw_mmc.c | 148 +++++++++++++++++++++++++---------------------
+>>  1 file changed, 81 insertions(+), 67 deletions(-)
+>>
+>> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+>> index 32380d5..0a5a49f 100644
+>> --- a/drivers/mmc/host/dw_mmc.c
+>> +++ b/drivers/mmc/host/dw_mmc.c
+>> @@ -467,103 +467,117 @@ static void dw_mci_dmac_complete_dma(void *arg)
+>>  	}
+>>  }
+>>
+>> -static void dw_mci_translate_sglist(struct dw_mci *host, struct mmc_data *data,
+>> -				    unsigned int sg_len)
+>> +static inline void dw_mci_prepare_desc64(struct dw_mci *host,
+>> +					 struct mmc_data *data,
+>> +					 unsigned int sg_len)
+>>  {
+>>  	unsigned int desc_len;
+>> +	struct idmac_desc_64addr *desc_first, *desc_last, *desc;
+>>  	int i;
+>>
+>> -	if (host->dma_64bit_address == 1) {
+>> -		struct idmac_desc_64addr *desc_first, *desc_last, *desc;
+>> -
+>> -		desc_first = desc_last = desc = host->sg_cpu;
+>> +	desc_first = desc_last = desc = host->sg_cpu;
+>>
+>> -		for (i = 0; i < sg_len; i++) {
+>> -			unsigned int length = sg_dma_len(&data->sg[i]);
+>> +	for (i = 0; i < sg_len; i++) {
+>> +		unsigned int length = sg_dma_len(&data->sg[i]);
+>>
+>> -			u64 mem_addr = sg_dma_address(&data->sg[i]);
+>> +		u64 mem_addr = sg_dma_address(&data->sg[i]);
+>>
+>> -			for ( ; length ; desc++) {
+>> -				desc_len = (length <= DW_MCI_DESC_DATA_LENGTH) ?
+>> -					   length : DW_MCI_DESC_DATA_LENGTH;
+>> +		for ( ; length ; desc++) {
+>> +			desc_len = (length <= DW_MCI_DESC_DATA_LENGTH) ?
+>> +				   length : DW_MCI_DESC_DATA_LENGTH;
+>>
+>> -				length -= desc_len;
+>> +			length -= desc_len;
+>>
+>> -				/*
+>> -				 * Set the OWN bit and disable interrupts
+>> -				 * for this descriptor
+>> -				 */
+>> -				desc->des0 = IDMAC_DES0_OWN | IDMAC_DES0_DIC |
+>> -							IDMAC_DES0_CH;
+>> +			/*
+>> +			 * Set the OWN bit and disable interrupts
+>> +			 * for this descriptor
+>> +			 */
+>> +			desc->des0 = IDMAC_DES0_OWN | IDMAC_DES0_DIC |
+>> +						IDMAC_DES0_CH;
+>>
+>> -				/* Buffer length */
+>> -				IDMAC_64ADDR_SET_BUFFER1_SIZE(desc, desc_len);
+>> +			/* Buffer length */
+>> +			IDMAC_64ADDR_SET_BUFFER1_SIZE(desc, desc_len);
+>>
+>> -				/* Physical address to DMA to/from */
+>> -				desc->des4 = mem_addr & 0xffffffff;
+>> -				desc->des5 = mem_addr >> 32;
+>> +			/* Physical address to DMA to/from */
+>> +			desc->des4 = mem_addr & 0xffffffff;
+>> +			desc->des5 = mem_addr >> 32;
+>>
+>> -				/* Update physical address for the next desc */
+>> -				mem_addr += desc_len;
+>> +			/* Update physical address for the next desc */
+>> +			mem_addr += desc_len;
+>>
+>> -				/* Save pointer to the last descriptor */
+>> -				desc_last = desc;
+>> -			}
+>> +			/* Save pointer to the last descriptor */
+>> +			desc_last = desc;
+>>  		}
+>> +	}
+>>
+>> -		/* Set first descriptor */
+>> -		desc_first->des0 |= IDMAC_DES0_FD;
+>> +	/* Set first descriptor */
+>> +	desc_first->des0 |= IDMAC_DES0_FD;
+>>
+>> -		/* Set last descriptor */
+>> -		desc_last->des0 &= ~(IDMAC_DES0_CH | IDMAC_DES0_DIC);
+>> -		desc_last->des0 |= IDMAC_DES0_LD;
+>> +	/* Set last descriptor */
+>> +	desc_last->des0 &= ~(IDMAC_DES0_CH | IDMAC_DES0_DIC);
+>> +	desc_last->des0 |= IDMAC_DES0_LD;
+>> +}
+>>
+>> -	} else {
+>> -		struct idmac_desc *desc_first, *desc_last, *desc;
+>>
+>> -		desc_first = desc_last = desc = host->sg_cpu;
+>> +static inline void dw_mci_prepare_desc32(struct dw_mci *host,
+>> +					 struct mmc_data *data,
+>> +					 unsigned int sg_len)
+>> +{
+>> +	unsigned int desc_len;
+>> +	struct idmac_desc *desc_first, *desc_last, *desc;
+>> +	int i;
+>>
+>> -		for (i = 0; i < sg_len; i++) {
+>> -			unsigned int length = sg_dma_len(&data->sg[i]);
+>> +	desc_first = desc_last = desc = host->sg_cpu;
+>>
+>> -			u32 mem_addr = sg_dma_address(&data->sg[i]);
+>> +	for (i = 0; i < sg_len; i++) {
+>> +		unsigned int length = sg_dma_len(&data->sg[i]);
+>>
+>> -			for ( ; length ; desc++) {
+>> -				desc_len = (length <= DW_MCI_DESC_DATA_LENGTH) ?
+>> -					   length : DW_MCI_DESC_DATA_LENGTH;
+>> +		u32 mem_addr = sg_dma_address(&data->sg[i]);
+>>
+>> -				length -= desc_len;
+>> +		for ( ; length ; desc++) {
+>> +			desc_len = (length <= DW_MCI_DESC_DATA_LENGTH) ?
+>> +				   length : DW_MCI_DESC_DATA_LENGTH;
+>>
+>> -				/*
+>> -				 * Set the OWN bit and disable interrupts
+>> -				 * for this descriptor
+>> -				 */
+>> -				desc->des0 = cpu_to_le32(IDMAC_DES0_OWN |
+>> -							 IDMAC_DES0_DIC |
+>> -							 IDMAC_DES0_CH);
+>> +			length -= desc_len;
+>>
+>> -				/* Buffer length */
+>> -				IDMAC_SET_BUFFER1_SIZE(desc, desc_len);
+>> +			/*
+>> +			 * Set the OWN bit and disable interrupts
+>> +			 * for this descriptor
+>> +			 */
+>> +			desc->des0 = cpu_to_le32(IDMAC_DES0_OWN |
+>> +						 IDMAC_DES0_DIC |
+>> +						 IDMAC_DES0_CH);
+>>
+>> -				/* Physical address to DMA to/from */
+>> -				desc->des2 = cpu_to_le32(mem_addr);
+>> +			/* Buffer length */
+>> +			IDMAC_SET_BUFFER1_SIZE(desc, desc_len);
+>>
+>> -				/* Update physical address for the next desc */
+>> -				mem_addr += desc_len;
+>> +			/* Physical address to DMA to/from */
+>> +			desc->des2 = cpu_to_le32(mem_addr);
+>>
+>> -				/* Save pointer to the last descriptor */
+>> -				desc_last = desc;
+>> -			}
+>> +			/* Update physical address for the next desc */
+>> +			mem_addr += desc_len;
+>> +
+>> +			/* Save pointer to the last descriptor */
+>> +			desc_last = desc;
+>>  		}
+>> +	}
+>>
+>> -		/* Set first descriptor */
+>> -		desc_first->des0 |= cpu_to_le32(IDMAC_DES0_FD);
+>> +	/* Set first descriptor */
+>> +	desc_first->des0 |= cpu_to_le32(IDMAC_DES0_FD);
+>>
+>> -		/* Set last descriptor */
+>> -		desc_last->des0 &= cpu_to_le32(~(IDMAC_DES0_CH |
+>> -					       IDMAC_DES0_DIC));
+>> -		desc_last->des0 |= cpu_to_le32(IDMAC_DES0_LD);
+>> -	}
+>> +	/* Set last descriptor */
+>> +	desc_last->des0 &= cpu_to_le32(~(IDMAC_DES0_CH |
+>> +				       IDMAC_DES0_DIC));
+>> +	desc_last->des0 |= cpu_to_le32(IDMAC_DES0_LD);
+>> +}
+>> +
+>> +static void dw_mci_translate_sglist(struct dw_mci *host, struct mmc_data *data,
+>> +				    unsigned int sg_len)
+>> +{
+>> +	if (host->dma_64bit_address == 1)
+>> +		dw_mci_prepare_desc64(host, data, sg_len);
+>> +	else
+>> +		dw_mci_prepare_desc32(host, data, sg_len);
 >
->  	if (drv_data && drv_data->execute_tuning)
->  		err = drv_data->execute_tuning(slot, opcode);
-> +out:
->  	return err;
->  }
+> I think dw_mci_translate_sglist can be removed.
+> Instead, these functions should be called in dw_mci_idamc_start_dma().
+> How about?
+>
+
+Sounds fine, I will do it.
+
+> Best Regards,
+> Jaehoon Chung
+>
+>>
+>>  	wmb(); /* drain writebuffer */
+>>  }
+>>
+>
+>
 >
 >
 
@@ -84,4 +253,3 @@ What is your opinion? :)
 -- 
 Best Regards
 Shawn Lin
-
