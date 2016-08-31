@@ -1,147 +1,78 @@
-From: Baolin Wang <baolin.wang@linaro.org>
-Subject: [PATCH v3] mmc: core: Optimize the mmc erase size alignment
-Date: Wed, 31 Aug 2016 17:32:31 +0800
-Message-ID: <9de99671750430d7d80a8f351c0ec7a7088c9b00.1472635587.git.baolin.wang@linaro.org>
+From: Wadim Egorov <w.egorov@phytec.de>
+Subject: Initialising eMMC: Card stuck in programming state! __mmc_switch
+Date: Wed, 31 Aug 2016 11:56:40 +0200
+Message-ID: <57C6A9D8.6020705@phytec.de>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pf0-f178.google.com ([209.85.192.178]:33081 "EHLO
-        mail-pf0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1759373AbcHaJdJ (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 31 Aug 2016 05:33:09 -0400
-Received: by mail-pf0-f178.google.com with SMTP id y134so17798904pfg.0
-        for <linux-mmc@vger.kernel.org>; Wed, 31 Aug 2016 02:33:09 -0700 (PDT)
+Received: from mail.microcatalog.org.uk ([217.6.246.34]:43443 "EHLO
+        root.phytec.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1753144AbcHaJ4s (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Wed, 31 Aug 2016 05:56:48 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: ulf.hansson@linaro.org
-Cc: adrian.hunter@intel.com, rmk+kernel@arm.linux.org.uk, shawn.lin@rock-chips.com, dianders@chromium.org, heiko@sntech.de, david@protonic.nl, hdegoede@redhat.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, broonie@kernel.org, linus.walleij@linaro.org, baolin.wang@linaro.org
+To: jh80.chung@samsung.com
+Cc: linux-mmc@vger.kernel.org, ulf.hansson@linaro.org
 
-Before issuing mmc_erase() function, users always have checked if it can
-erase with mmc_can_erase/trim/discard() function, thus remove the redundant
-erase checking in mmc_erase() function.
+Hello,
 
-This patch also optimizes the erase start/end sector alignment with
-round_up()/round_down() function, when erase command is MMC_ERASE_ARG.
+I have a RK3288 based board with a Micron eMMC chip (MTFC16GAKAECN-4M
+IT). This eMMC is EDEC/MMC standard version 5.0-compliant.
 
-Signed-off-by: Baolin Wang <baolin.wang@linaro.org>
----
-Changes since v2:
- - Add nr checking and other optimization in mmc_erase() function.
+While doing eMMC boot tests with a 4.4.16 and 4.8.0-rc4 kernel I run
+into the following problem after more than 100 cold resets:
 
-Changes since v1:
- - Add the alignment if card->erase_size is not power of 2.
----
- drivers/mmc/core/core.c |   82 ++++++++++++++++++++++++++++++-----------------
- 1 file changed, 53 insertions(+), 29 deletions(-)
+[    3.535448] dwmmc_rockchip ff0c0000.dwmmc: 1 slots initialized
+[    3.543823] dwmmc_rockchip ff0f0000.dwmmc: IDMAC supports 32-bit address mode.
+[    3.551276] dwmmc_rockchip ff0f0000.dwmmc: Using internal DMA controller.
+[    3.558206] dwmmc_rockchip ff0f0000.dwmmc: Version ID is 270a
+[    3.564275] dwmmc_rockchip ff0f0000.dwmmc: DW MMC controller at irq 31,32 bit host data width,256 deep fifo
+[    3.604426] mmc_host mmc0: Bus speed (slot 0) = 400000Hz (slot req 400000Hz, actual 400000HZ div = 0)
+[    3.634510] dwmmc_rockchip ff0f0000.dwmmc: 1 slots initialized
+[    3.645305] leds-pca953x 4-0062: setting platform data
+[    3.656675] ledtrig-cpu: registered to indicate activity on CPUs
+[    3.663200] usbcore: registered new interface driver usbhid
+[    3.668783] usbhid: USB HID core driver
+[    3.672674] usbcore: registered new interface driver r8188eu
+[    3.678393] usbcore: registered new interface driver rtl8723au
+[    3.699210] mmc_host mmc0: Bus speed (slot 0) = 50000000Hz (slot req 52000000Hz, actual 50000000HZ div = 0)
+[    3.900398] random: crng init done
+[    3.954089] NET: Registered protocol family 10
+[    3.974107] mmc0: Card stuck in programming state! __mmc_switch
+[    3.980027] mmc0: error -110 whilst initialising MMC card
 
-diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index e55cde6..52156d4 100644
---- a/drivers/mmc/core/core.c
-+++ b/drivers/mmc/core/core.c
-@@ -2202,6 +2202,51 @@ out:
- 	return err;
- }
- 
-+static unsigned int mmc_align_erase_size(struct mmc_card *card,
-+					 unsigned int *from,
-+					 unsigned int *to,
-+					 unsigned int nr)
-+{
-+	unsigned int from_new = *from, nr_new = nr, rem;
-+
-+	if (is_power_of_2(card->erase_size)) {
-+		unsigned int temp = from_new;
-+
-+		from_new = round_up(temp, card->erase_size);
-+		rem = from_new - temp;
-+
-+		if (nr_new > rem)
-+			nr_new -= rem;
-+		else
-+			return 0;
-+
-+		nr_new = round_down(nr_new, card->erase_size);
-+	} else {
-+		rem = from_new % card->erase_size;
-+		if (rem) {
-+			rem = card->erase_size - rem;
-+			from_new += rem;
-+			if (nr_new > rem)
-+				nr_new -= rem;
-+			else
-+				return 0;
-+		}
-+
-+		rem = nr_new % card->erase_size;
-+		if (rem)
-+			nr_new -= rem;
-+	}
-+
-+	if (nr_new == 0)
-+		return 0;
-+
-+	/* 'from' and 'to' are inclusive */
-+	*to = from_new + nr_new - 1;
-+	*from = from_new;
-+
-+	return nr_new;
-+}
-+
- /**
-  * mmc_erase - erase sectors.
-  * @card: card to erase
-@@ -2217,13 +2262,6 @@ int mmc_erase(struct mmc_card *card, unsigned int from, unsigned int nr,
- 	unsigned int rem, to = from + nr;
- 	int err;
- 
--	if (!(card->host->caps & MMC_CAP_ERASE) ||
--	    !(card->csd.cmdclass & CCC_ERASE))
--		return -EOPNOTSUPP;
--
--	if (!card->erase_size)
--		return -EOPNOTSUPP;
--
- 	if (mmc_card_sd(card) && arg != MMC_ERASE_ARG)
- 		return -EOPNOTSUPP;
- 
-@@ -2240,31 +2278,17 @@ int mmc_erase(struct mmc_card *card, unsigned int from, unsigned int nr,
- 			return -EINVAL;
- 	}
- 
--	if (arg == MMC_ERASE_ARG) {
--		rem = from % card->erase_size;
--		if (rem) {
--			rem = card->erase_size - rem;
--			from += rem;
--			if (nr > rem)
--				nr -= rem;
--			else
--				return 0;
--		}
--		rem = nr % card->erase_size;
--		if (rem)
--			nr -= rem;
--	}
--
- 	if (nr == 0)
- 		return 0;
- 
--	to = from + nr;
--
--	if (to <= from)
--		return -EINVAL;
--
--	/* 'from' and 'to' are inclusive */
--	to -= 1;
-+	if (arg == MMC_ERASE_ARG) {
-+		nr = mmc_align_erase_size(card, &from, &to, nr);
-+		if (nr == 0)
-+			return 0;
-+	} else {
-+		/* 'from' and 'to' are inclusive */
-+		to -= 1;
-+	}
- 
- 	/*
- 	 * Special case where only one erase-group fits in the timeout budget:
--- 
-1.7.9.5
+
+The bootloader I am using has no problems with the eMMC as you can see
+below:
+
+barebox@phycore-rk3288:/ devinfo mshc0
+Host information:
+  current clock: 52000000
+  current buswidth: 8
+  capabilities: 4bit 8bit sd-hs mmc-hs mmc-52MHz
+Card information:
+  Attached is a MMC card
+  Version: 4.0
+  Capacity: 14080 MiB
+  High capacity card
+   CID: 13014E52-314A3536-4C11616D-559BA2BD
+   CSD: D04F0132-0F5913FF-FFFFFFEF-8A4000BF
+  Max. transfer speed: 52000000 Hz
+  capabilities: 4bit mmc-hs mmc-52MHz
+  Manufacturer ID: 13
+  OEM/Application ID: 014E
+  Product name: 'R1J56'
+  Product revision: 4.12
+  Serial no: 1634555291
+  Manufacturing date: 10.1999
+Parameters:
+  boot: disabled ("disabled", "boot0", "boot1", "user")
+  nt_signature: 8a35eb82
+  probe: 0
+
+Any hints on what the problem could be?
+
+Regards,
+Wadim
 
