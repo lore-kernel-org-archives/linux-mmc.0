@@ -1,92 +1,97 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v4 2/4] mmc: tmio: Add tuning support
-Date: Wed, 31 Aug 2016 09:38:40 +0200
-Message-ID: <CAPDyKFpHzr-emfMsKyiJ4Ow-pjCCHWw6bBCEP6kEszOz09_pmA@mail.gmail.com>
-References: <1469592803-13842-1-git-send-email-horms+renesas@verge.net.au>
- <1469592803-13842-3-git-send-email-horms+renesas@verge.net.au>
- <CAPDyKFq_Fs_bNx7LP-J+nC3iaNgB7gvZAvhCp--qVOh1iAh0vg@mail.gmail.com>
- <20160823135251.GA25665@verge.net.au> <CAPDyKFpbMnOag7TZtQXxffXyq4XjTfz3vYM_atks15+d64QkfQ@mail.gmail.com>
- <20160825120424.GA3385@verge.net.au> <CAPDyKFpu85h3w2JkCjyQ15P8eWfkAkYcpxR4A6bD0EpQLw9rew@mail.gmail.com>
- <20160829120533.GA8647@verge.net.au> <CAPDyKFoL1xvv1yog2tY7pF9fWoiGQ9Gew_QbrA06dSrBiFyVEQ@mail.gmail.com>
- <20160830205146.GA14623@verge.net.au>
+Subject: Re: [PATCH v5 03/11] mmc: tmio: Add hw reset support
+Date: Wed, 31 Aug 2016 09:50:53 +0200
+Message-ID: <CAPDyKFrne-a=p9_mod7h6Nh-WD0HWBHfh9s1nUjBCJkwhsxbWw@mail.gmail.com>
+References: <1472591399-13907-1-git-send-email-horms+renesas@verge.net.au> <1472591399-13907-4-git-send-email-horms+renesas@verge.net.au>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-renesas-soc-owner@vger.kernel.org>
-In-Reply-To: <20160830205146.GA14623@verge.net.au>
-Sender: linux-renesas-soc-owner@vger.kernel.org
-To: Simon Horman <horms@verge.net.au>
-Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, Magnus Damm <magnus.damm@gmail.com>, linux-mmc <linux-mmc@vger.kernel.org>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-wm0-f49.google.com ([74.125.82.49]:37438 "EHLO
+        mail-wm0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S932362AbcHaHvd (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 31 Aug 2016 03:51:33 -0400
+Received: by mail-wm0-f49.google.com with SMTP id i5so73818054wmg.0
+        for <linux-mmc@vger.kernel.org>; Wed, 31 Aug 2016 00:50:55 -0700 (PDT)
+In-Reply-To: <1472591399-13907-4-git-send-email-horms+renesas@verge.net.au>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Simon Horman <horms+renesas@verge.net.au>
+Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, Magnus Damm <magnus.damm@gmail.com>, linux-mmc <linux-mmc@vger.kernel.org>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>, Ai Kyuse <ai.kyuse.uw@renesas.com>
 
-On 30 August 2016 at 22:51, Simon Horman <horms@verge.net.au> wrote:
-> On Mon, Aug 29, 2016 at 04:05:55PM +0200, Ulf Hansson wrote:
->> On 29 August 2016 at 14:05, Simon Horman <horms@verge.net.au> wrote:
->> > On Fri, Aug 26, 2016 at 10:01:35AM +0200, Ulf Hansson wrote:
->> >> On 25 August 2016 at 14:04, Simon Horman <horms@verge.net.au> wrote:
->> >> > On Tue, Aug 23, 2016 at 05:02:56PM +0200, Ulf Hansson wrote:
->> >
->> > ...
+On 30 August 2016 at 23:09, Simon Horman <horms+renesas@verge.net.au> wrote:
+> From: Ai Kyuse <ai.kyuse.uw@renesas.com>
 >
-> ...
+> Add hw reset support.
 >
->> > @@ -1271,6 +1278,7 @@ int tmio_mmc_host_runtime_suspend(struct device *dev)
->> >
->> >         mmc_retune_timer_stop(host->mmc);
->> >         mmc_retune_needed(host->mmc);
->> > +       host->use_saved_taps = true;
->>
->> I don't think you should trigger a re-tune here at all. Moreover you
->> don't need to keep track of whether you have valid tap values by using
->> the ->use_saved_taps variable, the mmc core deals with this for you.
->>
->> Instead, you should restore the tap values by invoking
->> host->select_tuning() from the ->runtime_resume() callback, although
->> only when host->mmc->can_retune == 1. We should probably add a helper
->> function in the mmc core for this check, instead of accessing
->> "can_retune" directly.
+> Signed-off-by: Ai Kyuse <ai.kyuse.uw@renesas.com>
+> Signed-off-by: Simon Horman <horms+renesas@verge.net.au>
+> ---
+> This is required by tuning support which will
+> be introduced by follow-up patches.
 >
-> Thanks, I was wondering what the best way to handle this is.
+> v5 [Simon Horman]
+> * As suggested by Ulf Hansson
+>   - Broke out of a larger patch
+> ---
+>  drivers/mmc/host/tmio_mmc.h     |  1 +
+>  drivers/mmc/host/tmio_mmc_pio.c | 12 ++++++++++++
+>  2 files changed, 13 insertions(+)
 >
-> I tried your suggestion above but it seems that host->mmc->can_retune is
-> zero when ->runtime_resume() is called because of the following call paths:
+> diff --git a/drivers/mmc/host/tmio_mmc.h b/drivers/mmc/host/tmio_mmc.h
+> index 4b36cb5c2d9c..4b71f31fba63 100644
+> --- a/drivers/mmc/host/tmio_mmc.h
+> +++ b/drivers/mmc/host/tmio_mmc.h
+> @@ -164,6 +164,7 @@ struct tmio_mmc_host {
+>         int (*start_signal_voltage_switch)(struct mmc_host *mmc,
+>                                            struct mmc_ios *ios);
+>         int (*write16_hook)(struct tmio_mmc_host *host, int addr);
+> +       void (*hw_reset)(struct tmio_mmc_host *host);
+>  };
 >
-> a) _mmc_sd_suspend()
->      -> mmc_power_off()
->         -> mmc_set_initial_state()
->            -> mmc_retune_disable
->    and
-> b) mmc_sd_runtime_resume()
->      -> mmc_power_up
->         -> mmc_set_initial_state()
->            -> mmc_retune_disable
+>  struct tmio_mmc_host *tmio_mmc_host_alloc(struct platform_device *pdev);
+> diff --git a/drivers/mmc/host/tmio_mmc_pio.c b/drivers/mmc/host/tmio_mmc_pio.c
+> index 806308ac93e7..90758647bae6 100644
+> --- a/drivers/mmc/host/tmio_mmc_pio.c
+> +++ b/drivers/mmc/host/tmio_mmc_pio.c
+> @@ -756,6 +756,17 @@ static int tmio_mmc_start_data(struct tmio_mmc_host *host,
+>         return 0;
+>  }
 >
->> >         tmio_mmc_disable_mmc_irqs(host, TMIO_MASK_ALL);
+> +static void tmio_mmc_hw_reset(struct mmc_host *mmc)
+> +{
+> +       struct tmio_mmc_host *host = mmc_priv(mmc);
+> +
+> +       if (host->hw_reset)
+> +               host->hw_reset(host);
+> +
+> +       mmc_retune_timer_stop(host->mmc);
+> +       mmc_retune_needed(host->mmc);
 
-This is exactly what shall happen :-)
+Both the above tuning calls are completely pointless as the mmc core
+will run a reinitialization of the card when a ->hw_reset() host ops
+is invoked.
+That means a regular tuning will happen as part of the initialization
+of the card, so you don't need to trigger it from here as well.
 
-If the mmc core suspends the card, it means it will also re-initialize
-the card when resuming it. In that way the regular tuning sequence
-will take place as a part of re-initialization of the card, so you
-definitely must not restore tap values in these case. That is why you
-should be using the can_retune to know when to restore the values.
+So if that's the only reason to why you need to add the hw_reset()
+support, I think you should drop it instead.
 
+> +}
+> +
+>  /* Process requests from the MMC layer */
+>  static void tmio_mmc_request(struct mmc_host *mmc, struct mmc_request *mrq)
+>  {
+> @@ -970,6 +981,7 @@ static struct mmc_host_ops tmio_mmc_ops = {
+>         .get_cd         = mmc_gpio_get_cd,
+>         .enable_sdio_irq = tmio_mmc_enable_sdio_irq,
+>         .multi_io_quirk = tmio_multi_io_quirk,
+> +       .hw_reset       = tmio_mmc_hw_reset,
+>  };
 >
+>  static int tmio_mmc_init_ocr(struct tmio_mmc_host *host)
+> --
+> 2.7.0.rc3.207.g0ac5344
 >
-> I plan to repost this patchset without the tap restoration code.
-> This is because I have a number of changes locally, in particular
-> to address other parts of your review, and I would like
-> them to see the light of day.
->
-> I will mark the tap restoration as a TODO item which we can address
-> before merging the code in question.
-
-It shouldn't be that hard to implement this, so I rather see that we
-get this right from the beginning.
-
-As matter of fact it probably requires less code than you had in your
-initial approach, especially since I don't think you need to deal with
-anything tuning related in the ->runtime_suspend() callback, but only
-in ->runtime_resume().
 
 Kind regards
 Uffe
