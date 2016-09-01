@@ -1,62 +1,80 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 0/3] mmc: Check BKOPS Level On Runtime Suspend
-Date: Thu, 1 Sep 2016 09:45:04 +0200
-Message-ID: <CAPDyKFrLAAeLPuEJGCA1EzS2Xmfpo9puJN4G3BZCMZJRAXq7yA@mail.gmail.com>
-References: <1472706697-853-1-git-send-email-alex.lemberg@sandisk.com>
+From: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: Re: [PATCH] mmc: tegra: Mark 64-bit DMA broken on Tegra124
+Date: Thu, 1 Sep 2016 09:51:06 +0200
+Message-ID: <CAPDyKFo18+h9UTUTD4q6_-5rWYO6rLXzDVbd29imDLhecF-=_g@mail.gmail.com>
+References: <20160831162324.15480-1-thierry.reding@gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wm0-f47.google.com ([74.125.82.47]:35007 "EHLO
-        mail-wm0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1754325AbcIAHpH (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 1 Sep 2016 03:45:07 -0400
-Received: by mail-wm0-f47.google.com with SMTP id w2so62601666wmd.0
-        for <linux-mmc@vger.kernel.org>; Thu, 01 Sep 2016 00:45:06 -0700 (PDT)
-In-Reply-To: <1472706697-853-1-git-send-email-alex.lemberg@sandisk.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <20160831162324.15480-1-thierry.reding-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Sender: linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Thierry Reding <thierry.reding-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Cc: Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Paul Kocialkowski <contact-W9ppeneeCTY@public.gmane.org>, linux-mmc <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: "alex.lemberg" <alex.lemberg@sandisk.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Avi Shchislowski <avi.shchislowski@sandisk.com>
 
-On 1 September 2016 at 07:11, alex.lemberg <alex.lemberg@sandisk.com> wrote:
-> Flash based storage devices might need to perform the internal
-> Background Operations (BKOPS) in order to insure better performance
-> for the next coming IO.
-> Following the discussion in the mmc thread:
-> www.spinics.net/lists/linux-mmc/msg37779.html
-> To let the device complete its BKOPS during Runtime Suspend,
-> we suggest to check the BKOPS level.
-> In case the device need to complete its BKOPS, reschedule the Runtime
-> Suspend.
+On 31 August 2016 at 18:23, Thierry Reding <thierry.reding-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org> wrote:
+> From: Thierry Reding <treding-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
 >
-> alex.lemberg (3):
->   mmc: replacing hardcoded value for runtime PM suspend
->   mmc: Adding AUTO_BKOPS_EN bit set for Auto BKOPS support
->   mmc: Checking BKOPS status prior to Suspend
+> According to the TRM, the SD/MMC controller on Tegra124 supports 34-bit
+> addressing, but testing shows that this doesn't work. On a device which
+> has more than 2 GiB of RAM and LPAE enabled, buffer allocations can use
+> addresses above the 32-bit boundary.
 >
->  drivers/mmc/card/block.c |  3 ++-
->  drivers/mmc/core/mmc.c   | 36 +++++++++++++++++++++++++++++-------
->  include/linux/mmc/card.h |  1 +
->  include/linux/mmc/host.h |  2 ++
->  include/linux/mmc/mmc.h  |  2 ++
->  5 files changed, 36 insertions(+), 8 deletions(-)
+> One way to work around this would be to enable IOMMU physical to virtual
+> address translations for the SD/MMC controllers, but that's not easy to
+> implement without breaking existing use-cases. It's also not obvious why
+> 34-bit addressing doesn't work as advertised. In order to fix this for
+> existing users, add the SDHCI_QUIRK2_BROKEN_64_BIT_DMA quirk for now.
 >
-> --
-> 1.9.1
->
+> Reported-by: Paul Kocialkowski <contact-W9ppeneeCTY@public.gmane.org>
+> Signed-off-by: Thierry Reding <treding-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
 
-Alex, this didn't help either. So I could of course pick the patches
-just from my inbox, as those are correctly formatted, but...  I then
-realized that your emails isn't accepted in either spinics' or marc's
-mail-archive.
-
-I was looking into the raw email and the headers gets *really*
-obfuscated by your Microsoft exchange server. We can't review this
-until you fixed this, you emails at least needs to be accepted by the
-mail-archives.
-
-http://marc.info/?l=linux-mmc
-http://www.spinics.net/lists/linux-mmc/
+Looks good to me, although could you please address Lucas' comment and
+send a re-based version.
 
 Kind regards
 Uffe
+
+> ---
+>  drivers/mmc/host/sdhci-tegra.c | 18 +++++++++++++++++-
+>  1 file changed, 17 insertions(+), 1 deletion(-)
+>
+> diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
+> index d89200ee017e..a3d045630d0c 100644
+> --- a/drivers/mmc/host/sdhci-tegra.c
+> +++ b/drivers/mmc/host/sdhci-tegra.c
+> @@ -394,6 +394,22 @@ static const struct sdhci_tegra_soc_data soc_data_tegra114 = {
+>         .pdata = &sdhci_tegra114_pdata,
+>  };
+>
+> +static const struct sdhci_pltfm_data sdhci_tegra124_pdata = {
+> +       .quirks = SDHCI_QUIRK_BROKEN_TIMEOUT_VAL |
+> +                 SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK |
+> +                 SDHCI_QUIRK_SINGLE_POWER_WRITE |
+> +                 SDHCI_QUIRK_NO_HISPD_BIT |
+> +                 SDHCI_QUIRK_BROKEN_ADMA_ZEROLEN_DESC |
+> +                 SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN,
+> +       .quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN |
+> +                  SDHCI_QUIRK2_BROKEN_64_BIT_DMA,
+> +       .ops  = &tegra114_sdhci_ops,
+> +};
+> +
+> +static const struct sdhci_tegra_soc_data soc_data_tegra124 = {
+> +       .pdata = &sdhci_tegra124_pdata,
+> +};
+> +
+>  static const struct sdhci_pltfm_data sdhci_tegra210_pdata = {
+>         .quirks = SDHCI_QUIRK_BROKEN_TIMEOUT_VAL |
+>                   SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK |
+> @@ -427,7 +443,7 @@ static const struct sdhci_tegra_soc_data soc_data_tegra186 = {
+>  static const struct of_device_id sdhci_tegra_dt_match[] = {
+>         { .compatible = "nvidia,tegra186-sdhci", .data = &soc_data_tegra186 },
+>         { .compatible = "nvidia,tegra210-sdhci", .data = &soc_data_tegra210 },
+> -       { .compatible = "nvidia,tegra124-sdhci", .data = &soc_data_tegra114 },
+> +       { .compatible = "nvidia,tegra124-sdhci", .data = &soc_data_tegra124 },
+>         { .compatible = "nvidia,tegra114-sdhci", .data = &soc_data_tegra114 },
+>         { .compatible = "nvidia,tegra30-sdhci", .data = &soc_data_tegra30 },
+>         { .compatible = "nvidia,tegra20-sdhci", .data = &soc_data_tegra20 },
+> --
+> 2.9.3
+>
