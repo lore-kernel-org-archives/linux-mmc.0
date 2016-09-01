@@ -1,754 +1,280 @@
-From: "Winkler, Tomas" <tomas.winkler@intel.com>
-Subject: RE: [PATCH v5 5/8] char: rpmb: add RPMB simulation device
-Date: Thu, 1 Sep 2016 20:25:28 +0000
-Message-ID: <5B8DA87D05A7694D9FA63FD143655C1B542C5B98@hasmsx108.ger.corp.intel.com>
-References: <1468873673-21776-1-git-send-email-tomas.winkler@intel.com>
- <1468873673-21776-6-git-send-email-tomas.winkler@intel.com>
- <20160831105845.GE10180@kroah.com>
+From: Don Zickus <dzickus@redhat.com>
+Subject: RTS5227 errors on mount
+Date: Thu, 1 Sep 2016 17:40:47 -0400
+Message-ID: <20160901214047.GV98438@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="iso-8859-1"
-Content-Transfer-Encoding: 8BIT
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20160831105845.GE10180@kroah.com>
-Content-Language: en-US
-Sender: linux-kernel-owner@vger.kernel.org
-To: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, "Hunter, Adrian" <adrian.hunter@intel.com>, James Bottomley <James.Bottomley@HansenPartnership.com>, "Martin K. Petersen" <martin.petersen@oracle.com>, Vinayak Holikatti <vinholikatti@gmail.com>, Andy Lutomirski <luto@kernel.org>, Arve Hj?nnev?g <arve@android.com>, Michael Ryleev <gmar@google.com>, Joao Pinto <Joao.Pinto@synopsys.com>, Christoph Hellwig <hch@lst.de>, Yaniv Gardi <ygardi@codeaurora.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-scsi@vger.kernel.org" <linux-scsi@vger.kernel.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mx1.redhat.com ([209.132.183.28]:8326 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751229AbcIAVk4 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Thu, 1 Sep 2016 17:40:56 -0400
+Content-Disposition: inline
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: micky_ching@realsil.com.cn
+Cc: linux-mmc@vger.kernel.org, ulf.hansson@linaro.org
 
-> 
-> On Mon, Jul 18, 2016 at 11:27:50PM +0300, Tomas Winkler wrote:
-> > This is a simple platform device used for testing the RPMB subsystem.
-> >
-> > The module currently supports two configuration options:
-> > 1. max_wr_blks: for specifying max blocks that can be written in a
-> > single command 2. daunits:  used to set storage capacity in 128K
-> > units.
-> >
-> >
-> > Signed-off-by: Tomas Winkler <tomas.winkler@intel.com>
-> > ---
-> > V2: remove .owner setting, it is set automatically
-> > V3: 1. Add shutdown handler (similar to ufshcd)
-> >     2. Commit message fix
-> > V4: Use select RPMB in Kconfg to ensure valid configuration.
-> > V5: Revamp the code using the sequence command.
-> >
-> >  drivers/char/rpmb/Kconfig    |  10 +
-> >  drivers/char/rpmb/Makefile   |   1 +
-> >  drivers/char/rpmb/rpmb_sim.c | 668
-> > +++++++++++++++++++++++++++++++++++++++++++
-> >  3 files changed, 679 insertions(+)
-> >  create mode 100644 drivers/char/rpmb/rpmb_sim.c
-> >
-> > diff --git a/drivers/char/rpmb/Kconfig b/drivers/char/rpmb/Kconfig
-> > index 6794be9fcc5e..c21b3934249f 100644
-> > --- a/drivers/char/rpmb/Kconfig
-> > +++ b/drivers/char/rpmb/Kconfig
-> > @@ -13,3 +13,13 @@ config RPMB_INTF_DEV
-> >  	help
-> >  	  Say yes here if you want to access RPMB from user space
-> >  	  via character device interface /dev/rpmb%d
-> > +
-> > +
-> > +config RPMB_SIM
-> > +	tristate "RPMB partition device simulator"
-> > +	default n
-> > +	select RPMB
-> > +	select CRYPTO_SHA256
-> > +	select CRYPTO_HMAC
-> > +	help
-> > +	  RPMB partition simulator used for testing the RPMB subsystem
-> > diff --git a/drivers/char/rpmb/Makefile b/drivers/char/rpmb/Makefile
-> > index b5dc087b1299..81f924fd9a87 100644
-> > --- a/drivers/char/rpmb/Makefile
-> > +++ b/drivers/char/rpmb/Makefile
-> > @@ -1,5 +1,6 @@
-> >  obj-$(CONFIG_RPMB) += rpmb.o
-> >  rpmb-objs += core.o
-> >  rpmb-$(CONFIG_RPMB_INTF_DEV) += cdev.o
-> > +obj-$(CONFIG_RPMB_SIM) += rpmb_sim.o
-> >
-> >  ccflags-y += -D__CHECK_ENDIAN__
-> > diff --git a/drivers/char/rpmb/rpmb_sim.c
-> > b/drivers/char/rpmb/rpmb_sim.c new file mode 100644 index
-> > 000000000000..e33f6809ae2c
-> > --- /dev/null
-> > +++ b/drivers/char/rpmb/rpmb_sim.c
-> > @@ -0,0 +1,668 @@
-> >
-> +/**************************************************************
-> ******
-> > +**********
-> > + * This file is provided under a dual BSD/GPLv2 license.  When using
-> > +or
-> > + * redistributing this file, you may do so under either license.
-> > + *
-> > + * GPL LICENSE SUMMARY
-> > + *
-> > + * Copyright(c) 2016 Intel Corporation. All rights reserved.
-> > + *
-> > + * This program is free software; you can redistribute it and/or
-> > +modify
-> > + * it under the terms of version 2 of the GNU General Public License
-> > +as
-> > + * published by the Free Software Foundation.
-> > + *
-> > + * This program is distributed in the hope that it will be useful,
-> > +but
-> > + * WITHOUT ANY WARRANTY; without even the implied warranty of
-> > + * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-> GNU
-> > + * General Public License for more details.
-> > + *
-> > + * The full GNU General Public License is included in this
-> > +distribution
-> > + * in the file called LICENSE.GPL.
-> > + *
-> > + * Contact Information:
-> > + *	Intel Corporation.
-> > + *	linux-mei@linux.intel.com
-> > + *	http://www.intel.com
-> > + *
-> > + * BSD LICENSE
-> > + *
-> > + * Copyright(c) 2016 Intel Corporation. All rights reserved.
-> > + * All rights reserved.
-> > + *
-> > + * Redistribution and use in source and binary forms, with or without
-> > + * modification, are permitted provided that the following conditions
-> > + * are met:
-> > + *
-> > + *  * Redistributions of source code must retain the above copyright
-> > + *    notice, this list of conditions and the following disclaimer.
-> > + *  * Redistributions in binary form must reproduce the above copyright
-> > + *    notice, this list of conditions and the following disclaimer in
-> > + *    the documentation and/or other materials provided with the
-> > + *    distribution.
-> > + *  * Neither the name Intel Corporation nor the names of its
-> > + *    contributors may be used to endorse or promote products derived
-> > + *    from this software without specific prior written permission.
-> > + *
-> > + * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
-> > +CONTRIBUTORS
-> > + * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT
-> NOT
-> > + * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND
-> FITNESS
-> > +FOR
-> > + * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
-> > +COPYRIGHT
-> > + * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
-> > +INCIDENTAL,
-> > + * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
-> NOT
-> > + * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
-> OF
-> > +USE,
-> > + * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
-> AND ON
-> > +ANY
-> > + * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR
-> > +TORT
-> > + * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF
-> THE
-> > +USE
-> > + * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH
-> DAMAGE.
-> > + *
-> > +
-> >
-> +***************************************************************
-> ******
-> > +********/
-> > +#include <linux/module.h>
-> > +#include <linux/slab.h>
-> > +#include <linux/platform_device.h>
-> > +#include <linux/device.h>
-> > +#include <crypto/hash.h>
-> > +#include <linux/scatterlist.h>
-> > +#include <linux/sizes.h>
-> > +
-> > +#include <linux/rpmb.h>
-> > +
-> > +static const char id[] = "RPMB:SIM";
-> > +#define CAPACITY_UNIT SZ_128K
-> > +#define CAPACITY_MIN  SZ_128K
-> > +#define CAPACITY_MAX  SZ_16M
-> > +#define BLK_UNIT      SZ_256
-> > +
-> > +static unsigned int max_wr_blks = 1;
-> > +module_param(max_wr_blks, uint, 0644);
-> MODULE_PARM_DESC(max_wr_blks,
-> > +"max blocks that can be written in a single command (default: 1)");
-> > +
-> > +static unsigned int daunits = 1;
-> > +module_param(daunits, uint, 0644);
-> > +MODULE_PARM_DESC(daunits, "number of data area units of 128K
-> > +(default: 1)");
-> > +
-> > +struct blk {
-> > +	u8 data[BLK_UNIT];
-> > +};
-> > +
-> > +/**
-> > + * struct rpmb_sim_dev
-> > + *
-> > + * @dev:  back pointer to the platform device
-> > + * @rdev: rpmb device
-> > + * @auth_key: Authentication key register which is used to authenticate
-> > + *            accesses when MAC is calculated;
-> > + * @auth_key_set: true if auth key was set
-> > + * @write_counter: Counter value for the total amount of successful
-> > + *             authenticated data write requests made by the host.
-> > + *             The initial value of this register after production is 00000000h.
-> > + *             The value will be incremented by one along with each successful
-> > + *             programming access. The value cannot be reset. After the
-> counter
-> > + *             has reached the maximum value of FFFFFFFFh,
-> > + *             it will not be incremented anymore (overflow prevention)
-> > + * @hash_tfm:  hmac(sha256) tfm
-> > + *
-> > + * @res_frames: frame that holds the result of the last write
-> > +operation
-> > + * @out_frames: next read operation result frames
-> > + * @out_frames_cnt: number of the output frames
-> > + *
-> > + * @capacity: size of the partition in bytes multiple of 128K
-> > + * @blkcnt:   block count
-> > + * @da:       data area in blocks
-> > + */
-> > +struct rpmb_sim_dev {
-> > +	struct device *dev;
-> > +	struct rpmb_dev *rdev;
-> > +	u8 auth_key[32];
-> > +	bool auth_key_set;
-> > +	u32 write_counter;
-> > +	struct crypto_shash *hash_tfm;
-> > +
-> > +	struct rpmb_frame res_frames[1];
-> > +	struct rpmb_frame *out_frames;
-> > +	unsigned int out_frames_cnt;
-> > +
-> > +	size_t capacity;
-> > +	size_t blkcnt;
-> > +	struct blk *da;
-> > +};
-> > +
-> > +static __be16 op_result(struct rpmb_sim_dev *rsdev, u16 result) {
-> > +	if (!rsdev->auth_key_set)
-> > +		return cpu_to_be16(RPMB_ERR_NO_KEY);
-> > +
-> > +	if (rsdev->write_counter == 0xFFFFFFFF)
-> > +		result |=  RPMB_ERR_COUNTER_EXPIRED;
-> > +
-> > +	return cpu_to_be16(result);
-> > +}
-> > +
-> > +static __be16 req_to_resp(u16 req)
-> > +{
-> > +	return cpu_to_be16(RPMB_REQ2RESP(req)); }
-> > +
-> > +static int rpmb_sim_calc_hmac(struct rpmb_sim_dev *rsdev,
-> > +			      struct rpmb_frame *frames,
-> > +			      unsigned int blks, u8 *mac)
-> > +{
-> > +	SHASH_DESC_ON_STACK(desc, rsdev->hash_tfm);
-> > +	int i;
-> > +	int ret;
-> > +
-> > +	desc->tfm = rsdev->hash_tfm;
-> > +	desc->flags = 0;
-> > +
-> > +	ret = crypto_shash_init(desc);
-> > +	if (ret)
-> > +		goto out;
-> > +
-> > +	for (i = 0; i < blks; i++) {
-> > +		ret = crypto_shash_update(desc, frames[i].data,
-> hmac_data_len);
-> > +		if (ret)
-> > +			goto out;
-> > +	}
-> > +	ret = crypto_shash_final(desc, mac);
-> > +out:
-> > +	if (ret)
-> > +		dev_err(rsdev->dev, "digest error = %d", ret);
-> > +
-> > +	return ret;
-> > +}
-> > +
-> > +static int rpmb_op_not_programmed(struct rpmb_sim_dev *rsdev, u16
-> > +req) {
-> > +	struct rpmb_frame *res_frame = rsdev->res_frames;
-> > +
-> > +	res_frame->req_resp = req_to_resp(req);
-> > +	res_frame->result = op_result(rsdev, RPMB_ERR_NO_KEY);
-> > +
-> > +	dev_err(rsdev->dev, "not programmed\n");
-> > +
-> > +	return 0;
-> > +}
-> > +
-> > +static int rpmb_op_program_key(struct rpmb_sim_dev *rsdev,
-> > +			       struct rpmb_frame *in_frame, u32 cnt) {
-> > +	struct rpmb_frame *res_frame = rsdev->res_frames;
-> > +	u16 req;
-> > +	int ret;
-> > +	u16 err = RPMB_ERR_OK;
-> > +
-> > +	req = be16_to_cpu(in_frame[0].req_resp);
-> > +
-> > +	if (req != RPMB_PROGRAM_KEY)
-> > +		return -EINVAL;
-> > +
-> > +	if (cnt != 1)
-> > +		return -EINVAL;
-> > +
-> > +	if (rsdev->auth_key_set) {
-> > +		dev_err(rsdev->dev, "key allread set\n");
-> > +		err = RPMB_ERR_WRITE;
-> > +		goto out;
-> > +	}
-> > +
-> > +	ret = crypto_shash_setkey(rsdev->hash_tfm, in_frame[0].key_mac,
-> 32);
-> > +	if (ret) {
-> > +		dev_err(rsdev->dev, "set key failed = %d\n", ret);
-> > +		err = RPMB_ERR_GENERAL;
-> > +		goto out;
-> > +	}
-> > +
-> > +	dev_dbg(rsdev->dev, "digest size %u\n",
-> > +		crypto_shash_digestsize(rsdev->hash_tfm));
-> > +
-> > +	memcpy(rsdev->auth_key, in_frame[0].key_mac, 32);
-> > +	rsdev->auth_key_set = true;
-> > +out:
-> > +
-> > +	memset(res_frame, 0, sizeof(struct rpmb_frame));
-> > +	res_frame->req_resp = req_to_resp(req);
-> > +	res_frame->result = op_result(rsdev, err);
-> > +
-> > +	return 0;
-> > +}
-> > +
-> > +static int rpmb_op_get_wr_counter(struct rpmb_sim_dev *rsdev,
-> > +				  struct rpmb_frame *in_frame, u32 cnt) {
-> > +	struct rpmb_frame *frame;
-> > +	int ret = 0;
-> > +	u16 req;
-> > +	u16 err;
-> > +
-> > +	req = be16_to_cpu(in_frame[0].req_resp);
-> > +	if (req != RPMB_GET_WRITE_COUNTER)
-> > +		return -EINVAL;
-> > +
-> > +	if (cnt != 1)
-> > +		return -EINVAL;
-> > +
-> > +	frame = kcalloc(1, sizeof(struct rpmb_frame), GFP_KERNEL);
-> > +	if (!frame) {
-> > +		err = RPMB_ERR_READ;
-> > +		ret = -ENOMEM;
-> > +		rsdev->out_frames = rsdev->res_frames;
-> > +		rsdev->out_frames_cnt = cnt;
-> > +		goto out;
-> > +	}
-> > +
-> > +	rsdev->out_frames = frame;
-> > +	rsdev->out_frames_cnt = cnt;
-> > +
-> > +	frame->req_resp = req_to_resp(req);
-> > +	frame->write_counter = cpu_to_be32(rsdev->write_counter);
-> > +	memcpy(frame->nonce, in_frame[0].nonce, 16);
-> > +
-> > +	err = RPMB_ERR_OK;
-> > +	if (rpmb_sim_calc_hmac(rsdev, frame, cnt, frame->key_mac))
-> > +		err = RPMB_ERR_READ;
-> > +
-> > +out:
-> > +	rsdev->out_frames[0].req_resp = req_to_resp(req);
-> > +	rsdev->out_frames[0].result = op_result(rsdev, err);
-> > +
-> > +	return ret;
-> > +}
-> > +
-> > +static int rpmb_op_write_data(struct rpmb_sim_dev *rsdev,
-> > +			      struct rpmb_frame *in_frame, u32 cnt) {
-> > +	struct rpmb_frame *res_frame = rsdev->res_frames;
-> > +	u8 mac[32];
-> > +	u16 req, err, addr, blks;
-> > +	unsigned int i;
-> > +	int ret = 0;
-> > +
-> > +	req = be16_to_cpu(in_frame[0].req_resp);
-> > +	if (req != RPMB_WRITE_DATA)
-> > +		return -EINVAL;
-> > +
-> > +	if (rsdev->write_counter == 0xFFFFFFFF) {
-> > +		err = RPMB_ERR_WRITE;
-> > +		goto out;
-> > +	}
-> > +
-> > +	blks = be16_to_cpu(in_frame[0].block_count);
-> > +	if (blks == 0 || blks > cnt) {
-> > +		ret = -EINVAL;
-> > +		err = RPMB_ERR_GENERAL;
-> > +		goto out;
-> > +	}
-> > +
-> > +	if (blks > max_wr_blks) {
-> > +		err = RPMB_ERR_WRITE;
-> > +		goto out;
-> > +	}
-> > +
-> > +	addr = be16_to_cpu(in_frame[0].addr);
-> > +	if (addr >= rsdev->blkcnt) {
-> > +		err = RPMB_ERR_ADDRESS;
-> > +		goto out;
-> > +	}
-> > +
-> > +	if (rpmb_sim_calc_hmac(rsdev, in_frame, blks, mac)) {
-> > +		err = RPMB_ERR_AUTH;
-> > +		goto out;
-> > +	}
-> > +
-> > +	/* mac is in the last frame */
-> > +	if (memcmp(mac, in_frame[blks - 1].key_mac, sizeof(mac)) != 0) {
-> > +		err = RPMB_ERR_AUTH;
-> > +		goto out;
-> > +	}
-> > +
-> > +	if (be32_to_cpu(in_frame[0].write_counter) != rsdev->write_counter)
-> {
-> > +		err = RPMB_ERR_COUNTER;
-> > +		goto out;
-> > +	}
-> > +
-> > +	if (addr + blks > rsdev->blkcnt) {
-> > +		err = RPMB_ERR_WRITE;
-> > +		goto out;
-> > +	}
-> > +
-> > +	err = RPMB_ERR_OK;
-> > +	for (i = 0; i < blks; i++)
-> > +		memcpy(rsdev->da[addr + i].data, in_frame[i].data,
-> BLK_UNIT);
-> > +
-> > +	rsdev->write_counter++;
-> > +
-> > +out:
-> > +	memset(res_frame, 0, sizeof(struct rpmb_frame));
-> > +	if (err == RPMB_ERR_OK) {
-> > +		res_frame->write_counter = cpu_to_be32(rsdev-
-> >write_counter);
-> > +		memcpy(res_frame->key_mac, mac, sizeof(mac));
-> > +	}
-> > +	res_frame->req_resp = req_to_resp(req);
-> > +	res_frame->result = op_result(rsdev, err);
-> > +
-> > +	return ret;
-> > +}
-> > +
-> > +static int rpmb_op_read_data(struct rpmb_sim_dev *rsdev,
-> > +			     struct rpmb_frame *in_frame, u32 cnt) {
-> > +	struct rpmb_frame *res_frame = rsdev->res_frames;
-> > +	struct rpmb_frame *out_frame;
-> > +	u8 mac[32];
-> > +	u16 req, err, addr, blks;
-> > +	unsigned int i;
-> > +	int ret;
-> > +
-> > +	req = be16_to_cpu(in_frame[0].req_resp);
-> > +	if (req != RPMB_READ_DATA)
-> > +		return -EINVAL;
-> > +
-> > +	out_frame = kcalloc(cnt, sizeof(struct rpmb_frame), GFP_KERNEL);
-> > +	if (!out_frame) {
-> > +		ret = -ENOMEM;
-> > +		err = RPMB_ERR_READ;
-> > +		goto out;
-> > +	}
-> > +
-> > +	blks = be16_to_cpu(in_frame[0].block_count);
-> > +	if (blks == 0 || blks > cnt) {
-> > +		ret = -EINVAL;
-> > +		err = RPMB_ERR_READ;
-> > +		goto out;
-> > +	}
-> > +
-> > +	ret = 0;
-> > +	addr = be16_to_cpu(in_frame[0].addr);
-> > +	if (addr >= rsdev->blkcnt) {
-> > +		err = RPMB_ERR_ADDRESS;
-> > +		goto out;
-> > +	}
-> > +
-> > +	if (addr + blks > rsdev->blkcnt) {
-> > +		err = RPMB_ERR_READ;
-> > +		goto out;
-> > +	}
-> > +
-> > +	for (i = 0; i < blks; i++) {
-> > +		memcpy(out_frame[i].data, rsdev->da[addr + i].data,
-> BLK_UNIT);
-> > +		memcpy(out_frame[i].nonce, in_frame[0].nonce, 16);
-> > +		out_frame[i].req_resp = req_to_resp(req);
-> > +		out_frame[i].addr = in_frame[0].addr;
-> > +		out_frame[i].block_count = cpu_to_be16(blks);
-> > +	}
-> > +
-> > +	if (rpmb_sim_calc_hmac(rsdev, out_frame, blks, mac)) {
-> > +		err = RPMB_ERR_AUTH;
-> > +		goto out;
-> > +	}
-> > +
-> > +	memcpy(out_frame[blks - 1].key_mac, mac, sizeof(mac));
-> > +
-> > +	err = RPMB_ERR_OK;
-> > +	out_frame[0].result = op_result(rsdev, err);
-> > +
-> > +	rsdev->out_frames = out_frame;
-> > +	rsdev->out_frames_cnt = cnt;
-> > +
-> > +out:
-> > +	memset(res_frame, 0, sizeof(struct rpmb_frame));
-> > +	res_frame->req_resp = req_to_resp(req);
-> > +	res_frame->result = op_result(rsdev, err);
-> > +	if (err != RPMB_ERR_OK) {
-> > +		kfree(out_frame);
-> > +		rsdev->out_frames = res_frame;
-> > +		rsdev->out_frames_cnt = 1;
-> > +	}
-> > +
-> > +	return ret;
-> > +}
-> > +
-> > +static int rpmb_op_result_read(struct rpmb_sim_dev *rsdev,
-> > +			       struct rpmb_frame *frames, u32 cnt) {
-> > +	u16 req = be16_to_cpu(frames[0].req_resp);
-> > +	u16 blks = be16_to_cpu(frames[0].block_count);
-> > +
-> > +	if (req != RPMB_RESULT_READ)
-> > +		return -EINVAL;
-> > +
-> > +	if (blks != 0)
-> > +		return -EINVAL;
-> > +
-> > +	rsdev->out_frames = rsdev->res_frames;
-> > +	rsdev->out_frames_cnt = 1;
-> > +	return 0;
-> > +}
-> > +
-> > +static int rpmb_sim_write(struct rpmb_sim_dev *rsdev,
-> > +			  struct rpmb_frame *frames, u32 cnt) {
-> > +	u16 req;
-> > +	int ret;
-> > +
-> > +	if (!frames || !cnt)
-> > +		return -EINVAL;
-> > +
-> > +	req = be16_to_cpu(frames[0].req_resp);
-> > +	if (!rsdev->auth_key_set && req != RPMB_PROGRAM_KEY)
-> > +		return rpmb_op_not_programmed(rsdev, req);
-> > +
-> > +	switch (req) {
-> > +	case RPMB_PROGRAM_KEY:
-> > +		dev_dbg(rsdev->dev, "rpmb: program key\n");
-> > +		ret = rpmb_op_program_key(rsdev, frames, cnt);
-> > +		break;
-> > +	case RPMB_WRITE_DATA:
-> > +		dev_dbg(rsdev->dev, "rpmb: write data\n");
-> > +		ret = rpmb_op_write_data(rsdev, frames, cnt);
-> > +		break;
-> > +	case RPMB_GET_WRITE_COUNTER:
-> > +		dev_dbg(rsdev->dev, "rpmb: get write counter\n");
-> > +		ret = rpmb_op_get_wr_counter(rsdev, frames, cnt);
-> > +		break;
-> > +	case RPMB_READ_DATA:
-> > +		dev_dbg(rsdev->dev, "rpmb: read data\n");
-> > +		ret = rpmb_op_read_data(rsdev, frames, cnt);
-> > +		break;
-> > +	case RPMB_RESULT_READ:
-> > +		dev_dbg(rsdev->dev, "rpmb: result read\n");
-> > +		ret = rpmb_op_result_read(rsdev, frames, cnt);
-> > +		break;
-> > +	default:
-> > +		ret = -EINVAL;
-> > +		break;
-> > +	}
-> > +
-> > +	dev_dbg(rsdev->dev, "rpmb: ret=%d\n", ret);
-> > +
-> > +	return ret;
-> > +}
-> > +
-> > +static int rpmb_sim_read(struct rpmb_sim_dev *rsdev,
-> > +			 struct rpmb_frame *frames, u32 cnt) {
-> > +	int i;
-> > +
-> > +	if (!frames || !cnt)
-> > +		return -EINVAL;
-> > +
-> > +	if (!rsdev->out_frames || rsdev->out_frames_cnt == 0) {
-> > +		dev_err(rsdev->dev, "out_frames are not set\n");
-> > +		return -EINVAL;
-> > +	}
-> > +
-> > +	for (i = 0; i < min_t(u32, rsdev->out_frames_cnt, cnt); i++)
-> > +		memcpy(frames, rsdev->out_frames, sizeof(struct
-> rpmb_frame));
-> > +
-> > +	if (rsdev->out_frames != rsdev->res_frames)
-> > +		kfree(rsdev->out_frames);
-> > +
-> > +	rsdev->out_frames = NULL;
-> > +	rsdev->out_frames_cnt = 0;
-> > +	dev_dbg(rsdev->dev, "rpmb: cnt=%d\n", cnt);
-> > +
-> > +	return 0;
-> > +}
-> > +
-> > +static int rpmb_sim_cmd_seq(struct device *dev,
-> > +			    struct rpmb_cmd *cmds, u32 ncmds) {
-> > +	struct platform_device *pdev;
-> > +	struct rpmb_sim_dev *rsdev;
-> > +	int i;
-> > +	int ret;
-> > +	struct rpmb_cmd *cmd;
-> > +
-> > +	if (!dev)
-> > +		return -EINVAL;
-> > +
-> > +	pdev = to_platform_device(dev);
-> > +	rsdev = platform_get_drvdata(pdev);
-> > +
-> > +	if (!rsdev)
-> > +		return -EINVAL;
-> > +
-> > +	for (ret = 0, i = 0; i < ncmds && !ret; i++) {
-> > +		cmd = &cmds[i];
-> > +		if (cmd->flags & RPMB_F_WRITE)
-> > +			ret = rpmb_sim_write(rsdev, cmd->frames, cmd-
-> >nframes);
-> > +		else
-> > +			ret = rpmb_sim_read(rsdev, cmd->frames, cmd-
-> >nframes);
-> > +	}
-> > +	return ret;
-> > +}
-> > +
-> > +static struct rpmb_ops rpmb_sim_ops = {
-> > +	.cmd_seq = rpmb_sim_cmd_seq,
-> > +	.type = RPMB_TYPE_EMMC,
-> > +};
-> > +
-> > +static int rpmb_sim_hmac_256_alloc(struct rpmb_sim_dev *rsdev) {
-> > +	struct crypto_shash *hash_tfm;
-> > +
-> > +	hash_tfm = crypto_alloc_shash("hmac(sha256)", 0, 0);
-> > +	if (IS_ERR(hash_tfm))
-> > +		return PTR_ERR(hash_tfm);
-> > +
-> > +	rsdev->hash_tfm = hash_tfm;
-> > +
-> > +	dev_dbg(rsdev->dev, "hamac(sha256) registered\n");
-> > +	return 0;
-> > +}
-> > +
-> > +static void rpmb_sim_hmac_256_free(struct rpmb_sim_dev *rsdev) {
-> > +	if (rsdev->hash_tfm)
-> > +		crypto_free_shash(rsdev->hash_tfm);
-> > +
-> > +	rsdev->hash_tfm = NULL;
-> > +}
-> > +
-> > +static int rpmb_sim_probe(struct platform_device *pdev) {
-> > +	struct rpmb_sim_dev *rsdev;
-> > +	int ret;
-> > +
-> > +	rsdev = kzalloc(sizeof(*rsdev), GFP_KERNEL);
-> > +	if (!rsdev)
-> > +		return -ENOMEM;
-> > +
-> > +	rsdev->dev = &pdev->dev;
-> > +
-> > +	ret = rpmb_sim_hmac_256_alloc(rsdev);
-> > +	if (ret)
-> > +		goto err;
-> > +
-> > +	rsdev->capacity = CAPACITY_UNIT * daunits;
-> > +	rsdev->blkcnt  = rsdev->capacity / BLK_UNIT;
-> > +	rsdev->da = kzalloc(rsdev->capacity, GFP_KERNEL);
-> > +	if (!rsdev->da) {
-> > +		ret = -ENOMEM;
-> > +		goto err;
-> > +	}
-> > +
-> > +	rpmb_sim_ops.dev_id_len = strlen(id);
-> > +	rpmb_sim_ops.dev_id = id;
-> > +	rpmb_sim_ops.reliable_wr_cnt = max_wr_blks;
-> > +
-> > +	rsdev->rdev = rpmb_dev_register(rsdev->dev, &rpmb_sim_ops);
-> > +	if (IS_ERR(rsdev->rdev)) {
-> > +		ret = PTR_ERR(rsdev->rdev);
-> > +		goto err;
-> > +	}
-> > +
-> > +	dev_info(&pdev->dev, "registered RPMB capacity = %zu of %zu
-> blocks\n",
-> > +		 rsdev->capacity, rsdev->blkcnt);
-> > +
-> > +	platform_set_drvdata(pdev, rsdev);
-> > +
-> > +	return 0;
-> > +err:
-> > +	rpmb_sim_hmac_256_free(rsdev);
-> > +	if (rsdev)
-> > +		kfree(rsdev->da);
-> > +	kfree(rsdev);
-> > +	return ret;
-> > +}
-> > +
-> > +static int rpmb_sim_remove(struct platform_device *pdev) {
-> > +	struct rpmb_sim_dev *rsdev;
-> > +
-> > +	rsdev = platform_get_drvdata(pdev);
-> > +
-> > +	rpmb_dev_unregister(rsdev->dev);
-> > +
-> > +	platform_set_drvdata(pdev, NULL);
-> > +
-> > +	rpmb_sim_hmac_256_free(rsdev);
-> > +
-> > +	kfree(rsdev->da);
-> > +	kfree(rsdev);
-> > +	return 0;
-> > +}
-> > +
-> > +static void rpmb_sim_shutdown(struct platform_device *pdev) {
-> > +	rpmb_sim_remove(pdev);
-> > +}
-> > +
-> > +static struct platform_driver rpmb_sim_driver = {
-> > +	.driver = {
-> > +		.name  = "rpmb_sim",
-> > +	},
-> > +	.probe         = rpmb_sim_probe,
-> > +	.remove        = rpmb_sim_remove,
-> > +	.shutdown      = rpmb_sim_shutdown,
-> > +};
-> > +
-> > +static struct platform_device *rpmb_sim_pdev;
-> 
-> A platform device?  Ick, no please don't abuse that interface for this type of
-> thing.  Make it a real device if you have one, and put it in the proper place.  If
-> it's a "virtual" device, great, use that.  But don't make something up like this
-> please.
+Hi Micky,
 
-This is a virtual device (simulation), nothing behind it just a chunk of memory.
-Is this there any information missing to make it clearer? 
+I am trying to debug a lenovo T450s laptop with a Realtek rts5227 sd reader
+on it.  I was wondering if you can help me figure things out.
 
-Thanks
-Tomas
+I am seeing the following when I insert a regular (not micro) SDXC Transcend
+64GB card and try and mount it:
+
+mmc0: cannot verify signal voltage switch
+mmc0: new ultra high speed SDR104 SDXC card at address 59b4
+mmcblk0: mmc0:59b4 SDU1  59.8 GiB
+mmcblk0: p1
+EXT4-fs (mmcblk0p1): mounted filesystem with ordered data mode. Opts: (null)
+mmcblk0: unknown error -22 sending read/write command, card status 0x900
+mmc0: cannot verify signal voltage switch
+
+I was focusing on the -22 error.  It seems to be an -EINVAL set because a
+read transaction failed with TRANS_FAIL_INT.  Everything else seems fine.
+The mount succeeds and I can r/w data.
+
+This is with the latest 4.8 kernel (older kernels have the same error too).
+
+Turning on debugging it seems to be a CRC error? but the driver can recover
+and move on.  So the warning seems harmless.  Nonetheless various Fedora and
+RHEL folks are bothered by it and I wanted to figure out how to fix it
+correctly.
+
+I have attached some debug logs below with MMC_DEBUG enabled and a bunch of
+dynamic_debug turned on to help.
+
+Thoughts?
+
+Cheers,
+Don
+
+
+[  333.249114] mmc0: starting CMD18 arg 078bf7f0 flags 000000b5
+[  333.249115] mmc0:     blksz 512 blocks 8 flags 00000200 tsac 100 ms nsac 0
+[  333.249116] mmc0:     CMD12 arg 00000000 flags 00000095
+[  333.249134] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_long_data: SD/MMC CMD 18, arg = 0x078bf7f0
+[  333.249747] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_send_cmd_get_rsp: SD/MMC CMD 12, arg = 0x00000000
+[  333.249779] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: cmd->resp[0] = 0x00000b00
+[  333.249782] mmc0: req done (CMD18): 0: 00000000 00000000 00000000 00000000
+[  333.249784] mmc0:     4096 bytes transferred: 0
+[  333.249785] mmc0:     (CMD12): 0: 00000b00 00000000 00000000 00000000
+[  333.249832] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: pre dma sg: 1
+[  333.249834] mmc0: starting CMD18 arg 00000800 flags 000000b5
+[  333.249836] mmc0:     blksz 512 blocks 8 flags 00000200 tsac 100 ms nsac 0
+[  333.249837] mmc0:     CMD12 arg 00000000 flags 00000095
+[  333.249858] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_long_data: SD/MMC CMD 18, arg = 0x00000800
+[  333.250757] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_send_cmd_get_rsp: SD/MMC CMD 12, arg = 0x00000000
+[  333.250787] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: cmd->resp[0] = 0x00000b00
+[  333.250790] mmc0: req done (CMD18): 0: 00000000 00000000 00000000 00000000
+[  333.250791] mmc0:     4096 bytes transferred: 0
+[  333.250793] mmc0:     (CMD12): 0: 00000b00 00000000 00000000 00000000
+[  333.250837] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: pre dma sg: 1
+[  333.250839] mmc0: starting CMD18 arg 00000808 flags 000000b5
+[  333.250841] mmc0:     blksz 512 blocks 8 flags 00000200 tsac 100 ms nsac 0
+[  333.250842] mmc0:     CMD12 arg 00000000 flags 00000095
+[  333.250865] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_long_data: SD/MMC CMD 18, arg = 0x00000808
+[  333.251604] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: 0xFDA0(8): 09 01 04 48 00 1f 00 00
+[  333.251631] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: 0xFDA8(8): 00 12 00 00 09 00 d3 00
+[  333.251648] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: 0xFDB0(4): 02 07 00 7e 00 00 00 00
+[  333.251676] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: 0xFD52(8): 04 41 00 04 00 00 00 02
+[  333.251703] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: 0xFD5A(8): b3 00 02 01 b3 b3 55 aa
+[  333.251730] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: 0xFD62(8): e9 59 55 15 04 00 24 04
+[  333.251740] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_send_cmd_get_rsp: SD/MMC CMD 12, arg = 0x00000000
+[  333.251766] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: cmd->resp[0] = 0x00000b00
+[  333.251770] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: CMD 18 0x00000808 error(-22)
+[  333.251773] mmc0: req done (CMD18): -22: 00000000 00000000 00000000 00000000
+[  333.251775] mmc0:     0 bytes transferred: 0
+[  333.251778] mmc0:     (CMD12): 0: 00000b00 00000000 00000000 00000000
+[  333.251789] mmc0: starting CMD13 arg 59b40000 flags 00000195
+[  333.251814] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_send_cmd_get_rsp: SD/MMC CMD 13, arg = 0x59b40000
+[  333.251837] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: cmd->resp[0] = 0x00000900
+[  333.251839] mmc0: req done (CMD13): 0: 00000900 00000000 00000000 00000000
+[  333.251848] mmcblk0: unknown error -22 sending read/write command, card status 0x900
+
+^^^^ here is the bad transaction
+
+[  333.251857] mmc0: clock 0Hz busmode 2 powermode 0 cs 0 Vdd 0 width 1 timing 0
+[  333.257218] mmc0: clock 0Hz busmode 2 powermode 1 cs 0 Vdd 21 width 1 timing 0
+[  333.257433] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sdmmc_switch_voltage: signal_voltage = 0
+[  333.257617] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: Initial signal voltage of 3.3v
+[  333.269259] mmc0: clock 400000Hz busmode 2 powermode 2 cs 0 Vdd 21 width 1 timing 0
+[  333.281210] mmc0: clock 400000Hz busmode 2 powermode 2 cs 1 Vdd 21 width 1 timing 0
+[  333.284228] mmc0: starting CMD0 arg 00000000 flags 000000c0
+[  333.284243] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_send_cmd_get_rsp: SD/MMC CMD 0, arg = 0x00000000
+[  333.284571] mmc0: req done (CMD0): 0: 00000000 00000000 00000000 00000000
+[  333.287262] mmc0: clock 400000Hz busmode 2 powermode 2 cs 0 Vdd 21 width 1 timing 0
+[  333.290235] mmc0: starting CMD8 arg 000001aa flags 000002f5
+[  333.290263] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_send_cmd_get_rsp: SD/MMC CMD 8, arg = 0x000001aa
+[  333.290904] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: cmd->resp[0] = 0x000001aa
+[  333.290908] mmc0: req done (CMD8): 0: 000001aa 00000000 00000000 00000000
+[  333.290964] mmc0: starting CMD55 arg 00000000 flags 000000f5
+[  333.290993] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_send_cmd_get_rsp: SD/MMC CMD 55, arg = 0x00000000
+[  333.291743] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: cmd->resp[0] = 0x00000120
+[  333.291745] mmc0: req done (CMD55): 0: 00000120 00000000 00000000 00000000
+[  333.291765] mmc0: starting CMD41 arg 51300000 flags 000000e1
+[  333.291781] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_send_cmd_get_rsp: SD/MMC CMD 41, arg = 0x51300000
+[  333.292330] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: cmd->resp[0] = 0x00ff8000
+[  333.292332] mmc0: req done (CMD41): 0: 00ff8000 00000000 00000000 00000000
+[  333.304231] mmc0: starting CMD55 arg 00000000 flags 000000f5
+[  333.304247] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_send_cmd_get_rsp: SD/MMC CMD 55, arg = 0x00000000
+[  333.304805] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: cmd->resp[0] = 0x00000120
+[  333.304806] mmc0: req done (CMD55): 0: 00000120 00000000 00000000 00000000
+[  333.304828] mmc0: starting CMD41 arg 51300000 flags 000000e1
+[  333.304847] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_send_cmd_get_rsp: SD/MMC CMD 41, arg = 0x51300000
+[  333.305398] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: cmd->resp[0] = 0x00ff8000
+[  333.305401] mmc0: req done (CMD41): 0: 00ff8000 00000000 00000000 00000000
+[  333.317258] mmc0: starting CMD55 arg 00000000 flags 000000f5
+[  333.317284] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_send_cmd_get_rsp: SD/MMC CMD 55, arg = 0x00000000
+[  333.317911] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: cmd->resp[0] = 0x00000120
+[  333.317925] mmc0: req done (CMD55): 0: 00000120 00000000 00000000 00000000
+[  333.317961] mmc0: starting CMD41 arg 51300000 flags 000000e1
+[  333.317997] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_send_cmd_get_rsp: SD/MMC CMD 41, arg = 0x51300000
+[  333.318549] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: cmd->resp[0] = 0x00ff8000
+[  333.318552] mmc0: req done (CMD41): 0: 00ff8000 00000000 00000000 00000000
+[  333.330205] mmc0: starting CMD55 arg 00000000 flags 000000f5
+[  333.330221] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_send_cmd_get_rsp: SD/MMC CMD 55, arg = 0x00000000
+[  333.330769] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: cmd->resp[0] = 0x00000120
+[  333.330771] mmc0: req done (CMD55): 0: 00000120 00000000 00000000 00000000
+
+<snip>
+
+[  333.710266] mmc0: starting CMD2 arg 00000000 flags 00000067
+[  333.710285] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_send_cmd_get_rsp: SD/MMC CMD 2, arg = 0x00000000
+[  333.711279] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: cmd->resp[0] = 0x744a6053
+[  333.711281] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: cmd->resp[1] = 0x44553120
+[  333.711282] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: cmd->resp[2] = 0x2013a206
+[  333.711282] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: cmd->resp[3] = 0xe100ea01
+[  333.711285] mmc0: req done (CMD2): 0: 744a6053 44553120 2013a206 e100ea01
+[  333.711310] mmc0: starting CMD3 arg 00000000 flags 00000075
+[  333.711335] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_send_cmd_get_rsp: SD/MMC CMD 3, arg = 0x00000000
+[  333.711884] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: cmd->resp[0] = 0x59b40500
+[  333.711887] mmc0: req done (CMD3): 0: 59b40500 00000000 00000000 00000000
+[  333.711894] mmc0: starting CMD7 arg 59b40000 flags 00000015
+[  333.711908] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_send_cmd_get_rsp: SD/MMC CMD 7, arg = 0x59b40000
+[  333.712459] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: cmd->resp[0] = 0x00000700
+[  333.712462] mmc0: req done (CMD7): 0: 00000700 00000000 00000000 00000000
+[  333.712472] mmc0: starting CMD55 arg 59b40000 flags 00000095
+[  333.712499] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_send_cmd_get_rsp: SD/MMC CMD 55, arg = 0x59b40000
+[  333.713047] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: cmd->resp[0] = 0x00000920
+[  333.713049] mmc0: req done (CMD55): 0: 00000920 00000000 00000000 00000000
+[  333.713066] mmc0: starting CMD6 arg 00000002 flags 00000015
+[  333.713086] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_send_cmd_get_rsp: SD/MMC CMD 6, arg = 0x00000002
+[  333.713640] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: cmd->resp[0] = 0x00000920
+[  333.713642] mmc0: req done (CMD6): 0: 00000920 00000000 00000000 00000000
+[  333.713652] mmc0: clock 400000Hz busmode 2 powermode 2 cs 0 Vdd 21 width 4 timing 0
+[  333.713690] mmc0: starting CMD6 arg 80ff1fff flags 000000b5
+[  333.713692] mmc0:     blksz 64 blocks 1 flags 00000200 tsac 100 ms nsac 0
+[  333.713720] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data: SD/MMC CMD 6, arg = 0x80ff1fff
+[  333.714061] mmc0: req done (CMD6): 0: 00000000 00000000 00000000 00000000
+[  333.714062] mmc0:     64 bytes transferred: 0
+[  333.714068] mmc0: starting CMD6 arg 80fffff3 flags 000000b5
+[  333.714070] mmc0:     blksz 64 blocks 1 flags 00000200 tsac 100 ms nsac 0
+[  333.714092] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data: SD/MMC CMD 6, arg = 0x80fffff3
+[  333.714507] mmc0: req done (CMD6): 0: 00000000 00000000 00000000 00000000
+[  333.714509] mmc0:     64 bytes transferred: 0
+[  333.714519] mmc0: clock 400000Hz busmode 2 powermode 2 cs 0 Vdd 21 width 4 timing 6
+[  333.714551] mmc0: clock 208000000Hz busmode 2 powermode 2 cs 0 Vdd 21 width 4 timing 6
+[  333.714609] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_change_phase(TX): sample_point = 27
+[  333.714627] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_change_phase(RX): sample_point = 0
+[  333.714645] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data: SD/MMC CMD 19, arg = 0x00000000
+[  333.714773] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_change_phase(RX): sample_point = 1
+[  333.714790] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data: SD/MMC CMD 19, arg = 0x00000000
+[  333.714917] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_change_phase(RX): sample_point = 2
+[  333.714935] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data: SD/MMC CMD 19, arg = 0x00000000
+[  333.715061] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_change_phase(RX): sample_point = 3
+[  333.715078] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data: SD/MMC CMD 19, arg = 0x00000000
+[  333.715205] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_change_phase(RX): sample_point = 4
+[  333.715230] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data: SD/MMC CMD 19, arg = 0x00000000
+[  333.715370] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_change_phase(RX): sample_point = 5
+[  333.715390] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data: SD/MMC CMD 19, arg = 0x00000000
+[  333.715522] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_change_phase(RX): sample_point = 6
+[  333.715540] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data: SD/MMC CMD 19, arg = 0x00000000
+[  333.715670] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_change_phase(RX): sample_point = 7
+[  333.715687] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data: SD/MMC CMD 19, arg = 0x00000000
+[  333.715813] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_change_phase(RX): sample_point = 8
+[  333.715830] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data: SD/MMC CMD 19, arg = 0x00000000
+[  333.715958] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_change_phase(RX): sample_point = 9
+[  333.715983] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data: SD/MMC CMD 19, arg = 0x00000000
+[  333.716113] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_change_phase(RX): sample_point = 10
+[  333.716134] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data: SD/MMC CMD 19, arg = 0x00000000
+[  333.716268] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_change_phase(RX): sample_point = 11
+[  333.716287] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data: SD/MMC CMD 19, arg = 0x00000000
+[  333.716417] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_change_phase(RX): sample_point = 12
+[  333.716437] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data: SD/MMC CMD 19, arg = 0x00000000
+[  333.716568] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_change_phase(RX): sample_point = 13
+[  333.716587] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data: SD/MMC CMD 19, arg = 0x00000000
+[  333.716717] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_change_phase(RX): sample_point = 14
+[  333.716736] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data: SD/MMC CMD 19, arg = 0x00000000
+[  333.716866] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_change_phase(RX): sample_point = 15
+[  333.716885] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data: SD/MMC CMD 19, arg = 0x00000000
+[  333.717015] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_change_phase(RX): sample_point = 16
+[  333.717035] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data: SD/MMC CMD 19, arg = 0x00000000
+[  333.717165] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_change_phase(RX): sample_point = 17
+[  333.717184] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data: SD/MMC CMD 19, arg = 0x00000000
+[  333.717316] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_change_phase(RX): sample_point = 18
+[  333.717337] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data: SD/MMC CMD 19, arg = 0x00000000
+[  333.717386] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: 0xFDA0(8): 09 01 04 88 00 1f 00 00
+[  333.717413] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: 0xFDA8(8): 00 13 00 00 09 00 ff 40
+[  333.717430] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: 0xFDB0(4): 00 01 00 7f 00 00 00 00
+[  333.717457] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: 0xFD52(8): 04 41 00 04 00 00 00 02
+[  333.717483] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: 0xFD5A(8): b3 01 02 01 b3 b3 55 aa
+[  333.717510] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: 0xFD62(8): e9 59 55 15 04 00 24 04
+[  333.717512] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: rtsx_pci_send_cmd fail (err = -22)
+[  333.717524] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_change_phase(RX): sample_point = 19
+[  333.717546] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data: SD/MMC CMD 19, arg = 0x00000000
+[  333.717594] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: 0xFDA0(8): 09 01 04 88 00 1f 00 00
+[  333.717621] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: 0xFDA8(8): 00 37 00 00 1b 01 ff 40
+[  333.717638] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: 0xFDB0(4): 00 01 00 7f 00 00 00 00
+[  333.717665] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: 0xFD52(8): 04 41 00 04 00 00 00 02
+[  333.717691] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: 0xFD5A(8): b3 01 02 01 b3 b3 55 aa
+[  333.717717] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: 0xFD62(8): e9 59 55 15 04 00 24 04
+[  333.717720] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: rtsx_pci_send_cmd fail (err = -22)
+[  333.717731] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_change_phase(RX): sample_point = 20
+[  333.717751] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data: SD/MMC CMD 19, arg = 0x00000000
+[  333.717907] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: 0xFDA0(8): 09 01 04 49 00 1f 00 00
+[  333.717934] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: 0xFDA8(8): 00 13 00 00 09 00 bf 40
+[  333.717951] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: 0xFDB0(4): 00 00 00 7f 00 00 00 00
+[  333.717977] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: 0xFD52(8): 04 41 00 04 00 00 00 02
+[  333.718004] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: 0xFD5A(8): b3 01 02 01 b3 b3 55 aa
+[  333.718030] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: 0xFD62(8): e9 59 55 15 04 00 24 04
+[  333.718033] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: rtsx_pci_send_cmd fail (err = -22)
+[  333.718044] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_change_phase(RX): sample_point = 21
+[  333.718063] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data: SD/MMC CMD 19, arg = 0x00000000
+[  333.718227] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: 0xFDA0(8): 09 01 04 49 00 1f 00 00
+[  333.718254] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: 0xFDA8(8): 00 13 00 00 09 00 bf 40
+[  333.718281] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: 0xFDB0(4): 00 00 00 7f 00 00 00 00
+[  333.718306] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: 0xFD52(8): 04 41 00 04 00 00 00 02
+[  333.718330] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: 0xFD5A(8): b3 01 02 01 b3 b3 55 aa
+[  333.718355] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: 0xFD62(8): e9 59 55 15 04 00 24 04
+[  333.718356] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: rtsx_pci_send_cmd fail (err = -22)
+[  333.718367] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_change_phase(RX): sample_point = 22
+[  333.718384] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data: SD/MMC CMD 19, arg = 0x00000000
+[  333.718537] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: 0xFDA0(8): 09 01 04 49 00 1f 00 00
+[  333.718561] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: 0xFDA8(8): 00 13 00 00 09 00 bf 40
+[  333.718572] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: 0xFDB0(4): 00 00 00 7f 00 00 00 00
+[  333.718597] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: 0xFD52(8): 04 41 00 04 00 00 00 02
+[  333.718622] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: 0xFD5A(8): b3 01 02 01 b3 b3 55 aa
+[  333.718646] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: 0xFD62(8): e9 59 55 15 04 00 24 04
+[  333.718648] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: rtsx_pci_send_cmd fail (err = -22)
+[  333.718659] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_change_phase(RX): sample_point = 23
+[  333.718676] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data: SD/MMC CMD 19, arg = 0x00000000
+[  333.718803] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_change_phase(RX): sample_point = 24
+[  333.718820] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data: SD/MMC CMD 19, arg = 0x00000000
+[  333.718946] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_change_phase(RX): sample_point = 25
+[  333.718963] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data: SD/MMC CMD 19, arg = 0x00000000
+[  333.719090] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_change_phase(RX): sample_point = 26
+[  333.719106] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data: SD/MMC CMD 19, arg = 0x00000000
+[  333.719234] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_change_phase(RX): sample_point = 27
+[  333.719251] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data: SD/MMC CMD 19, arg = 0x00000000
+[  333.719378] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_change_phase(RX): sample_point = 28
+[  333.719395] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data: SD/MMC CMD 19, arg = 0x00000000
+[  333.719521] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_change_phase(RX): sample_point = 29
+[  333.719539] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data: SD/MMC CMD 19, arg = 0x00000000
+[  333.719668] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_change_phase(RX): sample_point = 30
+[  333.719685] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data: SD/MMC CMD 19, arg = 0x00000000
+[  333.719811] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_change_phase(RX): sample_point = 31
+[  333.719828] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data: SD/MMC CMD 19, arg = 0x00000000
+
+^^^^^^^^^^ some other random failures.  Related to 'verify voltage' warnings??
