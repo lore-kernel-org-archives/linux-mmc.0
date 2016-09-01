@@ -1,82 +1,103 @@
-From: <tomas.melin@vaisala.com>
-Subject: Re: [PATCH] mmc-utils: Fix reported offset for enhanced user area
- start address
-Date: Thu, 1 Sep 2016 05:56:45 +0000
-Message-ID: <6032ec19-623a-5e16-2248-173b7295f60c@vaisala.com>
-References: <fbed5a25-65a0-47f1-e4b4-839149973441@vaisala.com>
- <CAPDyKFq+c5TYfx_mzpB4awJyVZsWj339vU-JeyBaL4KZUmK-6A@mail.gmail.com>
- <CAG=SpYEaoOk7Wr1oqPvuSGQePods1TUcZazF928We3+5uz5rFw@mail.gmail.com>
+From: Simon Horman <horms@verge.net.au>
+Subject: Re: [PATCH v5 03/11] mmc: tmio: Add hw reset support
+Date: Thu, 1 Sep 2016 08:45:18 +0200
+Message-ID: <20160901064518.GA15138@verge.net.au>
+References: <1472591399-13907-1-git-send-email-horms+renesas@verge.net.au>
+ <1472591399-13907-4-git-send-email-horms+renesas@verge.net.au>
+ <CAPDyKFrne-a=p9_mod7h6Nh-WD0HWBHfh9s1nUjBCJkwhsxbWw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from hel-mailgw-01.vaisala.com ([193.143.230.17]:29316 "EHLO
-        hel-mailgw-01.vaisala.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750708AbcIAF5t (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 1 Sep 2016 01:57:49 -0400
-In-Reply-To: <CAG=SpYEaoOk7Wr1oqPvuSGQePods1TUcZazF928We3+5uz5rFw@mail.gmail.com>
-Content-Language: en-US
-Content-ID: <DAEBF58BE00E2D49A05779ED27297B44@exch.vaisala.com>
+Received: from kirsty.vergenet.net ([202.4.237.240]:45512 "EHLO
+        kirsty.vergenet.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752633AbcIAGpZ (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 1 Sep 2016 02:45:25 -0400
+Content-Disposition: inline
+In-Reply-To: <CAPDyKFrne-a=p9_mod7h6Nh-WD0HWBHfh9s1nUjBCJkwhsxbWw@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: chris@printf.net
-Cc: ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, tomas.melin@vaisala.com
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, Magnus Damm <magnus.damm@gmail.com>, linux-mmc <linux-mmc@vger.kernel.org>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>, Ai Kyuse <ai.kyuse.uw@renesas.com>
 
-VGhhbmtzIGZvciBhcHBseWluZyB0aGUgcGF0Y2hlcywgaG93ZXZlciwgaXQgbG9va3MgYXMgY29t
-bWl0IDc1MjA3MmRhZmU5Y2I4IGdvdCBtZXJnZWQgd3JvbmcgYW5kIGEgZmV3DQoNCmNoYW5nZXMg
-d2VyZSBsZWZ0IG91dC4gVGhlIGJlbG93IHBhdGNoIHN0aWxsIG5lZWRzIHRvIGJlIGFwcGxpZWQu
-DQoNClRvbWFzDQoNCi0tLQ0KDQpTdWJqZWN0OiBbUEFUQ0hdIEFkZCBtaXNzaW5nIC1jIGZvciB3
-cml0ZV9yZWxpYWJpbGl0eQ0KDQpGaXhlcyB1cHN0cmVhbS1tZXJnZSBpbiA3NTIwNzJkYWZlOWNi
-ODk1N2VmYjViMGNhNzA3MDQzZTE5ZjdjZTEzDQpXcml0ZV9yZWxpYWJpbGl0eSAtYyBhZGRpdGlv
-biBmcm9tIHBhdGNoIHdhcyBtaXNzaW5nLg0KDQpTaWduZWQtb2ZmLWJ5OiBUb21hcyBNZWxpbiA8
-dG9tYXMubWVsaW5AdmFpc2FsYS5jb20+DQotLS0NCiBtbWNfY21kcy5jIHwgNyArKysrKy0tDQog
-MSBmaWxlIGNoYW5nZWQsIDUgaW5zZXJ0aW9ucygrKSwgMiBkZWxldGlvbnMoLSkNCg0KZGlmZiAt
-LWdpdCBhL21tY19jbWRzLmMgYi9tbWNfY21kcy5jDQppbmRleCAyNzkwZWFkLi42Yjg2MTE1IDEw
-MDY0NA0KLS0tIGEvbW1jX2NtZHMuYw0KKysrIGIvbW1jX2NtZHMuYw0KQEAgLTEyMzQsMTEgKzEy
-MzQsMTQgQEAgaW50IGRvX3dyaXRlX3JlbGlhYmlsaXR5X3NldChpbnQgbmFyZ3MsIGNoYXIgKiph
-cmd2KQ0KICAgICBpbnQgcGFydGl0aW9uOw0KICAgICBjaGFyICpkZXZpY2U7DQogDQotICAgIENI
-RUNLKG5hcmdzICE9IDQsICJVc2FnZTogbW1jIHdyaXRlX3JlbGlhYmlsaXR5IHNldCA8LXl8LW4+
-ICINCisgICAgQ0hFQ0sobmFyZ3MgIT0gNCwgIlVzYWdlOiBtbWMgd3JpdGVfcmVsaWFiaWxpdHkg
-c2V0IDwteXwtbnwtYz4gIg0KICAgICAgICAgICAgICI8cGFydGl0aW9uPiA8L3BhdGgvdG8vbW1j
-YmxrWD5cbiIsIGV4aXQoMSkpOw0KIA0KLSAgICBpZiAoIXN0cmNtcCgiLXkiLCBhcmd2WzFdKSkN
-CisgICAgaWYgKCFzdHJjbXAoIi15IiwgYXJndlsxXSkpIHsNCiAgICAgICAgIGRyeV9ydW4gPSAw
-Ow0KKyAgICB9IGVsc2UgaWYgKCFzdHJjbXAoIi1jIiwgYXJndlsxXSkpIHsNCisgICAgICAgIGRy
-eV9ydW4gPSAyOw0KKyAgICB9DQogDQogICAgIHBhcnRpdGlvbiA9IHN0cnRvbChhcmd2WzJdLCBO
-VUxMLCAxMCk7DQogICAgIGRldmljZSA9IGFyZ3ZbM107DQotLSANCjIuMS40DQoNCi0tLQ0KDQpP
-biAwOC8yOS8yMDE2IDA3OjA1IFBNLCBDaHJpcyBCYWxsIHdyb3RlOg0KPiBUaGFua3MgVWxmISBU
-b21hcywgSSd2ZSBhcHBsaWVkIGFsbCBmaXZlIG9mIHlvdXIgcmVjZW50IHBhdGNoZXMgdG8gbW1j
-LXV0aWxzIG1hc3RlciwgSSBoYWQgdG8gcmViYXNlIHRoZW0gc28gcGxlYXNlIGNoZWNrIHRoYXQg
-dGhlIG1lcmdlIGxvb2tzIGdvb2QsIHRoYW5rcyENCj4NCj4gLSBDaHJpcy4NCj4NCj4gT24gVGh1
-LCBBdWcgMjUsIDIwMTYgYXQgMzowNSBBTSwgVWxmIEhhbnNzb24gPHVsZi5oYW5zc29uQGxpbmFy
-by5vcmcgPG1haWx0bzp1bGYuaGFuc3NvbkBsaW5hcm8ub3JnPj4gd3JvdGU6DQo+DQo+ICAgICAr
-IENocmlzDQo+DQo+ICAgICBPbiAyNSBBdWd1c3QgMjAxNiBhdCAwNjoyMywgIDx0b21hcy5tZWxp
-bkB2YWlzYWxhLmNvbSA8bWFpbHRvOnRvbWFzLm1lbGluQHZhaXNhbGEuY29tPj4gd3JvdGU6DQo+
-ICAgICA+IEJsb2NrLWFkZHJlc3NlZCBkZXZpY2VzIHNob3VsZCBoYXZlIGFkZHJlc3MgbXVsdGlw
-bGllZCB3aXRoIHNlY3RvciBzaXplLg0KPiAgICAgPg0KPiAgICAgPiBDbGFyaWZ5IHdpdGggY29t
-bWVudCBob3cgaXNfYmxvY2thZGRyZXNzZWQoKSBpcyBjYWxjdWxhdGVkLg0KPiAgICAgPg0KPiAg
-ICAgPiBTaWduZWQtb2ZmLWJ5OiBUb21hcyBNZWxpbjx0b21hcy5tZWxpbkB2YWlzYWxhLmNvbSA8
-bWFpbHRvOnRvbWFzLm1lbGluQHZhaXNhbGEuY29tPj4NCj4NCj4gICAgIENocmlzIEJhbGwgbWFp
-bnRhaW5zIG1tYy11dGlscywgeW91IG5lZWQgdG8gc2VuZCB0aGVzZSBjaGFuZ2VzIHRvIGhpbS4N
-Cj4gICAgIEkgaGF2ZSBhZGRlZCBoaW0gb24gY2MgdGhpcyB0aW1lLg0KPg0KPiAgICAgS2luZCBy
-ZWdhcmRzDQo+ICAgICBVZmZlDQo+DQo+ICAgICA+IC0tLQ0KPiAgICAgPiAgIG1tY19jbWRzLmMg
-fCA0ICsrLS0NCj4gICAgID4gICAxIGZpbGUgY2hhbmdlZCwgMiBpbnNlcnRpb25zKCspLCAyIGRl
-bGV0aW9ucygtKQ0KPiAgICAgPg0KPiAgICAgPiBkaWZmIC0tZ2l0IGEvbW1jX2NtZHMuYyBiL21t
-Y19jbWRzLmMNCj4gICAgID4gaW5kZXggMjk1ZDUwNS4uMjFkZGQ1NSAxMDA2NDQNCj4gICAgID4g
-LS0tIGEvbW1jX2NtZHMuYw0KPiAgICAgPiArKysgYi9tbWNfY21kcy5jDQo+ICAgICA+IEBAIC03
-OTQsNyArNzk0LDcgQEAgdW5zaWduZWQgaW50IGdldF9zZWN0b3JfY291bnQoX191OCAqZXh0X2Nz
-ZCkNCj4gICAgID4gICBpbnQgaXNfYmxvY2thZGRyZXNlZChfX3U4ICpleHRfY3NkKQ0KPiAgICAg
-PiAgIHsNCj4gICAgID4gICAgICAgdW5zaWduZWQgaW50IHNlY3RvcnMgPSBnZXRfc2VjdG9yX2Nv
-dW50KGV4dF9jc2QpOw0KPiAgICAgPiAtDQo+ICAgICA+ICsgICAgICAgIC8qIG92ZXIgMkdpQiBk
-ZXZpY2VzIGFyZSBibG9jay1hZGRyZXNzZWQgKi8NCj4gICAgID4gICAgICAgcmV0dXJuIChzZWN0
-b3JzID4gKDJ1ICogMTAyNCAqIDEwMjQgKiAxMDI0KSAvIDUxMik7DQo+ICAgICA+ICAgfQ0KPiAg
-ICAgPg0KPiAgICAgPiBAQCAtMTY1OSw3ICsxNjU5LDcgQEAgaW50IGRvX3JlYWRfZXh0Y3NkKGlu
-dCBuYXJncywgY2hhciAqKmFyZ3YpDQo+ICAgICA+ICAgICAgICAgICBwcmludGYoIkVuaGFuY2Vk
-IFVzZXIgRGF0YSBTdGFydCBBZGRyZXNzIg0KPiAgICAgPiAgICAgICAgICAgICAgICIgW0VOSF9T
-VEFSVF9BRERSXTogMHglMDZ4XG4iLCByZWdsKTsNCj4gICAgID4gICAgICAgICAgIHByaW50Zigi
-IGkuZS4gJWx1IGJ5dGVzIG9mZnNldFxuIiwgKGlzX2Jsb2NrYWRkcmVzZWQoZXh0X2NzZCkgPw0K
-PiAgICAgPiAtICAgICAgICAgICAgICAgIDFsIDogNTEybCkgKiByZWdsKTsNCj4gICAgID4gKyAg
-ICAgICAgICAgICAgICA1MTJsIDogMWwpICogcmVnbCk7DQo+ICAgICA+DQo+ICAgICA+ICAgICAg
-ICAgICAvKiBBNDQxXTogcmVzZXJ2ZWQgWzEzNV0gKi8NCj4gICAgID4gICAgICAgICAgIHByaW50
-ZigiQmFkIEJsb2NrIE1hbmFnZW1lbnQgbW9kZSINCj4gICAgID4gLS0NCj4gICAgID4gMi4xLjQN
-Cj4NCj4NCj4NCj4NCj4gLS0gDQo+IENocmlzIEJhbGwgICA8aHR0cDovL3ByaW50Zi5uZXQvPg0K
-Pg0K
+On Wed, Aug 31, 2016 at 09:50:53AM +0200, Ulf Hansson wrote:
+> On 30 August 2016 at 23:09, Simon Horman <horms+renesas@verge.net.au> wrote:
+> > From: Ai Kyuse <ai.kyuse.uw@renesas.com>
+> >
+> > Add hw reset support.
+> >
+> > Signed-off-by: Ai Kyuse <ai.kyuse.uw@renesas.com>
+> > Signed-off-by: Simon Horman <horms+renesas@verge.net.au>
+> > ---
+> > This is required by tuning support which will
+> > be introduced by follow-up patches.
+> >
+> > v5 [Simon Horman]
+> > * As suggested by Ulf Hansson
+> >   - Broke out of a larger patch
+> > ---
+> >  drivers/mmc/host/tmio_mmc.h     |  1 +
+> >  drivers/mmc/host/tmio_mmc_pio.c | 12 ++++++++++++
+> >  2 files changed, 13 insertions(+)
+> >
+> > diff --git a/drivers/mmc/host/tmio_mmc.h b/drivers/mmc/host/tmio_mmc.h
+> > index 4b36cb5c2d9c..4b71f31fba63 100644
+> > --- a/drivers/mmc/host/tmio_mmc.h
+> > +++ b/drivers/mmc/host/tmio_mmc.h
+> > @@ -164,6 +164,7 @@ struct tmio_mmc_host {
+> >         int (*start_signal_voltage_switch)(struct mmc_host *mmc,
+> >                                            struct mmc_ios *ios);
+> >         int (*write16_hook)(struct tmio_mmc_host *host, int addr);
+> > +       void (*hw_reset)(struct tmio_mmc_host *host);
+> >  };
+> >
+> >  struct tmio_mmc_host *tmio_mmc_host_alloc(struct platform_device *pdev);
+> > diff --git a/drivers/mmc/host/tmio_mmc_pio.c b/drivers/mmc/host/tmio_mmc_pio.c
+> > index 806308ac93e7..90758647bae6 100644
+> > --- a/drivers/mmc/host/tmio_mmc_pio.c
+> > +++ b/drivers/mmc/host/tmio_mmc_pio.c
+> > @@ -756,6 +756,17 @@ static int tmio_mmc_start_data(struct tmio_mmc_host *host,
+> >         return 0;
+> >  }
+> >
+> > +static void tmio_mmc_hw_reset(struct mmc_host *mmc)
+> > +{
+> > +       struct tmio_mmc_host *host = mmc_priv(mmc);
+> > +
+> > +       if (host->hw_reset)
+> > +               host->hw_reset(host);
+> > +
+> > +       mmc_retune_timer_stop(host->mmc);
+> > +       mmc_retune_needed(host->mmc);
+> 
+> Both the above tuning calls are completely pointless as the mmc core
+> will run a reinitialization of the card when a ->hw_reset() host ops
+> is invoked.
+> That means a regular tuning will happen as part of the initialization
+> of the card, so you don't need to trigger it from here as well.
+> 
+> So if that's the only reason to why you need to add the hw_reset()
+> support, I think you should drop it instead.
+
+Yes, sorry for leaving that in.
+I will drop it.
+
+> > +}
+> > +
+> >  /* Process requests from the MMC layer */
+> >  static void tmio_mmc_request(struct mmc_host *mmc, struct mmc_request *mrq)
+> >  {
+> > @@ -970,6 +981,7 @@ static struct mmc_host_ops tmio_mmc_ops = {
+> >         .get_cd         = mmc_gpio_get_cd,
+> >         .enable_sdio_irq = tmio_mmc_enable_sdio_irq,
+> >         .multi_io_quirk = tmio_multi_io_quirk,
+> > +       .hw_reset       = tmio_mmc_hw_reset,
+> >  };
+> >
+> >  static int tmio_mmc_init_ocr(struct tmio_mmc_host *host)
+> > --
+> > 2.7.0.rc3.207.g0ac5344
+> >
+> 
+> Kind regards
+> Uffe
+> 
