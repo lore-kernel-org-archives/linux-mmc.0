@@ -1,68 +1,114 @@
-From: Wolfram Sang <wsa@the-dreams.de>
-Subject: Re: [PATCH v5 10/11] arm64: dts: r8a7795: salvator-x: Enable UHS-I
- SDR-104
-Date: Thu, 1 Sep 2016 16:29:43 +0200
-Message-ID: <20160901142943.GC4824@katana>
-References: <1472591399-13907-1-git-send-email-horms+renesas@verge.net.au>
- <1472591399-13907-11-git-send-email-horms+renesas@verge.net.au>
- <20160901072354.GA2893@katana>
- <20160901142539.GI14300@verge.net.au>
+From: alex lemberg <alex.lemberg@sandisk.com>
+Subject: [PATCH 3/3] mmc: Checking BKOPS status prior to Suspend
+Date: Thu, 1 Sep 2016 17:24:50 +0300
+Message-ID: <1472739890-3384-4-git-send-email-alex.lemberg@sandisk.com>
+References: <1472739890-3384-1-git-send-email-alex.lemberg@sandisk.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-        protocol="application/pgp-signature"; boundary="Izn7cH1Com+I3R9J"
-Return-path: <linux-renesas-soc-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20160901142539.GI14300@verge.net.au>
-Sender: linux-renesas-soc-owner@vger.kernel.org
-To: Simon Horman <horms@verge.net.au>
-Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, Ulf Hansson <ulf.hansson@linaro.org>, Magnus Damm <magnus.damm@gmail.com>, linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org
+Content-Type: text/plain
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-by2nam03on0084.outbound.protection.outlook.com ([104.47.42.84]:48064
+        "EHLO NAM03-BY2-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S932680AbcIAPCg (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Thu, 1 Sep 2016 11:02:36 -0400
+In-Reply-To: <1472739890-3384-1-git-send-email-alex.lemberg@sandisk.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: ulf.hansson@linaro.org, linux-mmc@vger.kernel.org
+Cc: avi.shchislowski@sandisk.com, alex lemberg <alex.lemberg@sandisk.com>
 
+Rescheduling Suspend in case of BKOPS Level >= 1
+in order to let eMMC device to complete its internal GC.
+Applicable for Runtime Suspend Only.
 
---Izn7cH1Com+I3R9J
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+Signed-off-by: alex lemberg <alex.lemberg@sandisk.com>
+---
+ drivers/mmc/core/mmc.c  | 30 +++++++++++++++++++++++-------
+ include/linux/mmc/mmc.h |  1 +
+ 2 files changed, 24 insertions(+), 7 deletions(-)
 
-On Thu, Sep 01, 2016 at 04:25:40PM +0200, Simon Horman wrote:
-> On Thu, Sep 01, 2016 at 09:23:54AM +0200, Wolfram Sang wrote:
-> > On Tue, Aug 30, 2016 at 11:09:58PM +0200, Simon Horman wrote:
-> > > Add the sd-uhs-sdr104 property to SDHI0 and SDHI1.
-> > >=20
-> > > Signed-off-by: Simon Horman <horms+renesas@verge.net.au>
-> >=20
-> > After removing a SDR104 card from the slot, the interface is stalled
-> > here. No new cards (even non-SDR104) can be detected anymore, sadly.
-> > Happens for both slots on my H3 Salvator-X.
->=20
-> Bother. That is rather difficult for me to exercise.
-> Does this occur without sdr104 enabled (e.g. in DT)?
+diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+index e2e987f..c4c6326 100644
+--- a/drivers/mmc/core/mmc.c
++++ b/drivers/mmc/core/mmc.c
+@@ -1904,7 +1904,8 @@ static void mmc_detect(struct mmc_host *host)
+ 	}
+ }
+ 
+-static int _mmc_suspend(struct mmc_host *host, bool is_suspend)
++static int _mmc_suspend(struct mmc_host *host, bool is_suspend,
++	bool is_runtime_pm)
+ {
+ 	int err = 0;
+ 	unsigned int notify_type = is_suspend ? EXT_CSD_POWER_OFF_SHORT :
+@@ -1918,10 +1919,25 @@ static int _mmc_suspend(struct mmc_host *host, bool is_suspend)
+ 	if (mmc_card_suspended(host->card))
+ 		goto out;
+ 
+-	if (mmc_card_doing_bkops(host->card)) {
+-		err = mmc_stop_bkops(host->card);
+-		if (err)
++	if (mmc_card_doing_bkops(host->card) ||
++		host->card->ext_csd.auto_bkops_en) {
++		err = mmc_read_bkops_status(host->card);
++		if (err) {
++			pr_err("%s: error %d reading BKOPS Status\n",
++				mmc_hostname(host), err);
++			goto out;
++		}
++		if (is_runtime_pm && host->card->ext_csd.raw_bkops_status >=
++				EXT_CSD_BKOPS_LEVEL_1) {
++			pm_schedule_suspend(&host->card->dev,
++				MMC_RUNTIME_SUSPEND_DELAY_MS);
+ 			goto out;
++		}
++		if (mmc_card_doing_bkops(host->card)) {
++			err = mmc_stop_bkops(host->card);
++			if (err)
++				goto out;
++		}
+ 	}
+ 
+ 	err = mmc_flush_cache(host->card);
+@@ -1952,7 +1968,7 @@ static int mmc_suspend(struct mmc_host *host)
+ {
+ 	int err;
+ 
+-	err = _mmc_suspend(host, true);
++	err = _mmc_suspend(host, true, false);
+ 	if (!err) {
+ 		pm_runtime_disable(&host->card->dev);
+ 		pm_runtime_set_suspended(&host->card->dev);
+@@ -2002,7 +2018,7 @@ static int mmc_shutdown(struct mmc_host *host)
+ 		err = _mmc_resume(host);
+ 
+ 	if (!err)
+-		err = _mmc_suspend(host, false);
++		err = _mmc_suspend(host, false, false);
+ 
+ 	return err;
+ }
+@@ -2026,7 +2042,7 @@ static int mmc_runtime_suspend(struct mmc_host *host)
+ 	if (!(host->caps & MMC_CAP_AGGRESSIVE_PM))
+ 		return 0;
+ 
+-	err = _mmc_suspend(host, true);
++	err = _mmc_suspend(host, true, true);
+ 	if (err)
+ 		pr_err("%s: error %d doing aggressive suspend\n",
+ 			mmc_hostname(host), err);
+diff --git a/include/linux/mmc/mmc.h b/include/linux/mmc/mmc.h
+index 0fe3908..0f08d5c 100644
+--- a/include/linux/mmc/mmc.h
++++ b/include/linux/mmc/mmc.h
+@@ -430,6 +430,7 @@ struct _mmc_csd {
+ /*
+  * BKOPS status level
+  */
++#define EXT_CSD_BKOPS_LEVEL_1		0x1
+ #define EXT_CSD_BKOPS_LEVEL_2		0x2
+ 
+ /*
+-- 
+1.9.1
 
-No, then it works fine.
-
-I'll try to get you more information. Might be not before Monday,
-though.
-
-
---Izn7cH1Com+I3R9J
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1
-
-iQIcBAEBAgAGBQJXyDtXAAoJEBQN5MwUoCm2RzYQALL+64xq54DTFCMhF6EElu/I
-uGZ1z+pq60deT2adBubAtns2youuHqmaKwJY4xvAuo9CgjFiOuJiwvI3pxB7ikgD
-/NGNrvK4kJeRtuQSctimqbRTn+1FYDzEarCCxGbiDKA79CFA15Awhi3UCcHZcr6Q
-qJonruKErQVqdQplyttWu5BciV8s6U7ucHwKuRvEw7PY9aOBUwmxXShl9Aldq5yL
-iHFy3hpQQdapm43OBp4ffPibIVqwTF0YHlJ96nP38m1CTH/5RXWCuoIzGUnq0PGD
-cXtBnJq7kOd9IR39ay5JD3fTx+3+62sFpWnvTUz5wTqZpAIkUS1b6nY5gIPcbIeC
-NUCPspiOIzTbokSl92R9fKEgI+mWXDdK8tL6NYarNTsHQkl90+55M7Db1yiGm///
-L0+h0QE9IcTbDwiqi16GXfO25V3OfrhsPan1VrL1wcRREWNQRBfXWGl3zFzUI9Kb
-b/GQU9kxdlx/ygoMogNy39a/E0AeGPK0SS8jgZ16sClGbZ6bYjuRpYXEgQodN52f
-3pdFV7RJfGyRaENNyYsZ/SaBe3b794Ti2htmVcAhvnCQsIBBSfxxYu1i+UWU4cHO
-Srg2p6wRDIgddgpKdxI7xIqh/EYsv1rIpE5T5I6/xt6KcmnmamvtOPGQDselrZT+
-c5t8VLOQzvOz9udHoIVc
-=xKbh
------END PGP SIGNATURE-----
-
---Izn7cH1Com+I3R9J--
