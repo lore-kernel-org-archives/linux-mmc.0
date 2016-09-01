@@ -1,82 +1,60 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH] mmc: tegra: Mark 64-bit DMA broken on Tegra124
-Date: Thu, 1 Sep 2016 09:44:56 +0300
-Message-ID: <c120f682-4a2d-7ca0-9095-3705c0d0c12f@intel.com>
-References: <20160831162324.15480-1-thierry.reding@gmail.com>
+From: Wolfram Sang <wsa@the-dreams.de>
+Subject: Re: [PATCH v5 10/11] arm64: dts: r8a7795: salvator-x: Enable UHS-I
+ SDR-104
+Date: Thu, 1 Sep 2016 09:23:54 +0200
+Message-ID: <20160901072354.GA2893@katana>
+References: <1472591399-13907-1-git-send-email-horms+renesas@verge.net.au>
+ <1472591399-13907-11-git-send-email-horms+renesas@verge.net.au>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 7bit
+Content-Type: multipart/signed; micalg=pgp-sha1;
+        protocol="application/pgp-signature"; boundary="OXfL5xGRrasGEqWY"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga05.intel.com ([192.55.52.43]:64350 "EHLO mga05.intel.com"
+Received: from sauhun.de ([89.238.76.85]:46550 "EHLO pokefinder.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1752968AbcIAGtc (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Thu, 1 Sep 2016 02:49:32 -0400
-In-Reply-To: <20160831162324.15480-1-thierry.reding@gmail.com>
+        id S1751589AbcIAHYR (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Thu, 1 Sep 2016 03:24:17 -0400
+Content-Disposition: inline
+In-Reply-To: <1472591399-13907-11-git-send-email-horms+renesas@verge.net.au>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Thierry Reding <thierry.reding@gmail.com>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Paul Kocialkowski <contact@paulk.fr>, linux-mmc@vger.kernel.org, linux-tegra@vger.kernel.org
+To: Simon Horman <horms+renesas@verge.net.au>
+Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, Ulf Hansson <ulf.hansson@linaro.org>, Magnus Damm <magnus.damm@gmail.com>, linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org
 
-On 31/08/16 19:23, Thierry Reding wrote:
-> From: Thierry Reding <treding@nvidia.com>
-> 
-> According to the TRM, the SD/MMC controller on Tegra124 supports 34-bit
-> addressing, but testing shows that this doesn't work. On a device which
-> has more than 2 GiB of RAM and LPAE enabled, buffer allocations can use
-> addresses above the 32-bit boundary.
-> 
-> One way to work around this would be to enable IOMMU physical to virtual
-> address translations for the SD/MMC controllers, but that's not easy to
-> implement without breaking existing use-cases. It's also not obvious why
-> 34-bit addressing doesn't work as advertised. In order to fix this for
-> existing users, add the SDHCI_QUIRK2_BROKEN_64_BIT_DMA quirk for now.
-> 
-> Reported-by: Paul Kocialkowski <contact@paulk.fr>
-> Signed-off-by: Thierry Reding <treding@nvidia.com>
 
-Doesn't apply cleanly, but otherwise:
+--OXfL5xGRrasGEqWY
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+On Tue, Aug 30, 2016 at 11:09:58PM +0200, Simon Horman wrote:
+> Add the sd-uhs-sdr104 property to SDHI0 and SDHI1.
+>=20
+> Signed-off-by: Simon Horman <horms+renesas@verge.net.au>
 
-> ---
->  drivers/mmc/host/sdhci-tegra.c | 18 +++++++++++++++++-
->  1 file changed, 17 insertions(+), 1 deletion(-)
-> 
-> diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
-> index d89200ee017e..a3d045630d0c 100644
-> --- a/drivers/mmc/host/sdhci-tegra.c
-> +++ b/drivers/mmc/host/sdhci-tegra.c
-> @@ -394,6 +394,22 @@ static const struct sdhci_tegra_soc_data soc_data_tegra114 = {
->  	.pdata = &sdhci_tegra114_pdata,
->  };
->  
-> +static const struct sdhci_pltfm_data sdhci_tegra124_pdata = {
-> +	.quirks = SDHCI_QUIRK_BROKEN_TIMEOUT_VAL |
-> +		  SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK |
-> +		  SDHCI_QUIRK_SINGLE_POWER_WRITE |
-> +		  SDHCI_QUIRK_NO_HISPD_BIT |
-> +		  SDHCI_QUIRK_BROKEN_ADMA_ZEROLEN_DESC |
-> +		  SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN,
-> +	.quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN |
-> +		   SDHCI_QUIRK2_BROKEN_64_BIT_DMA,
-> +	.ops  = &tegra114_sdhci_ops,
-> +};
-> +
-> +static const struct sdhci_tegra_soc_data soc_data_tegra124 = {
-> +	.pdata = &sdhci_tegra124_pdata,
-> +};
-> +
->  static const struct sdhci_pltfm_data sdhci_tegra210_pdata = {
->  	.quirks = SDHCI_QUIRK_BROKEN_TIMEOUT_VAL |
->  		  SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK |
-> @@ -427,7 +443,7 @@ static const struct sdhci_tegra_soc_data soc_data_tegra186 = {
->  static const struct of_device_id sdhci_tegra_dt_match[] = {
->  	{ .compatible = "nvidia,tegra186-sdhci", .data = &soc_data_tegra186 },
->  	{ .compatible = "nvidia,tegra210-sdhci", .data = &soc_data_tegra210 },
-> -	{ .compatible = "nvidia,tegra124-sdhci", .data = &soc_data_tegra114 },
-> +	{ .compatible = "nvidia,tegra124-sdhci", .data = &soc_data_tegra124 },
->  	{ .compatible = "nvidia,tegra114-sdhci", .data = &soc_data_tegra114 },
->  	{ .compatible = "nvidia,tegra30-sdhci", .data = &soc_data_tegra30 },
->  	{ .compatible = "nvidia,tegra20-sdhci", .data = &soc_data_tegra20 },
-> 
+After removing a SDR104 card from the slot, the interface is stalled
+here. No new cards (even non-SDR104) can be detected anymore, sadly.
+Happens for both slots on my H3 Salvator-X.
 
+
+--OXfL5xGRrasGEqWY
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1
+
+iQIcBAEBAgAGBQJXx9eKAAoJEBQN5MwUoCm2Sx4P/iL+SfohRGPn28uCyw2o0vbk
+SdhSTWS6Ij7ZPDuPCh5boDFuFHN1v+L8FbRxKVcuWbreIzyIWaX0RTGMpCcICxHi
+L+Rxl8j1R3Yfg/aiF5OjkGfApDeIkubIzzyWjxZTLM075Lk2Ek8kW6vtP0QM3wC8
+f5ypeyDPee7EqGW+jUN4018Vh+xRImspmsJVeNVB+MaqyVw+IuWBxWf1yl94/fof
+to/rVgvq5dj4rBKiHYsKe6GdPr/nnK11kffoO4xWufaxzAkIaf7l75t31zvzrcgP
+1IgajB1aXv1hKo/EqOdcxH/ZHkJAsnd7cPWTNCPXXwO8EbodnaFZVC6Au5lq0EY3
+YjjXugJ9cXFO8pVDGw83ljqtkY0V137Hk+LSwRceHmR+0Kw2vJm6D2nUWSjXYfGl
+ff0QHLXYZGZFKG5iL348zqnfbNEOQJlOrT/xyKBjpdMJrB3nH2YsYKzl4uVMm9U/
+mQl5gK2uuRVUEJVJ3EM/1UCHJMrZ6Wt/l32k0BHQp5sLpHA5E/DWYzBBX4+e5uZe
+p/vnOaiXa+oIWX0MHgKuhMxk/oU1DbcLLb37P37jeLqH5cZyC9c4oMYpmT3IRb0y
+1JFczDXGyoXuOKgrIG86Gzby215+/je2s54g0DuWl5Ho7m2phPQa2hu88fYhTAd5
+4YUW3mgVabNinDA7uBV5
+=3V16
+-----END PGP SIGNATURE-----
+
+--OXfL5xGRrasGEqWY--
