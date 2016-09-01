@@ -1,280 +1,153 @@
-From: Don Zickus <dzickus@redhat.com>
-Subject: RTS5227 errors on mount
-Date: Thu, 1 Sep 2016 17:40:47 -0400
-Message-ID: <20160901214047.GV98438@redhat.com>
+From: "Winkler, Tomas" <tomas.winkler@intel.com>
+Subject: RE: [PATCH v5 3/8] char: rpmb: add device attributes
+Date: Thu, 1 Sep 2016 20:21:11 +0000
+Message-ID: <5B8DA87D05A7694D9FA63FD143655C1B542C5B85@hasmsx108.ger.corp.intel.com>
+References: <1468873673-21776-1-git-send-email-tomas.winkler@intel.com>
+ <1468873673-21776-4-git-send-email-tomas.winkler@intel.com>
+ <20160831105634.GC10180@kroah.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:8326 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751229AbcIAVk4 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Thu, 1 Sep 2016 17:40:56 -0400
-Content-Disposition: inline
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="iso-8859-1"
+Content-Transfer-Encoding: 8BIT
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20160831105634.GC10180@kroah.com>
+Content-Language: en-US
+Sender: linux-kernel-owner@vger.kernel.org
+To: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, "Hunter, Adrian" <adrian.hunter@intel.com>, James Bottomley <James.Bottomley@HansenPartnership.com>, "Martin K. Petersen" <martin.petersen@oracle.com>, Vinayak Holikatti <vinholikatti@gmail.com>, Andy Lutomirski <luto@kernel.org>, Arve Hj?nnev?g <arve@android.com>, Michael Ryleev <gmar@google.com>, Joao Pinto <Joao.Pinto@synopsys.com>, Christoph Hellwig <hch@lst.de>, Yaniv Gardi <ygardi@codeaurora.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-scsi@vger.kernel.org" <linux-scsi@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
-To: micky_ching@realsil.com.cn
-Cc: linux-mmc@vger.kernel.org, ulf.hansson@linaro.org
 
-Hi Micky,
+> 
+> On Mon, Jul 18, 2016 at 11:27:48PM +0300, Tomas Winkler wrote:
+> > Add attribute type that displays underlay storage type technology
+> > EMMC, UFS, and attribute id, that displays underlay storage device id.
+> > For EMMC this would be content of CID and for UFS serial number from
+> > the device descriptor.
+> >
+> >
+> > Signed-off-by: Tomas Winkler <tomas.winkler@intel.com>
+> > ---
+> > V2: resend
+> > V3: set kernel version to 4.7
+> > V4: update target date to Maj
+> > V5: adjust date and kernel version
+> >  Documentation/ABI/testing/sysfs-class-rpmb | 24 ++++++++++++
+> >  drivers/char/rpmb/core.c                   | 63
+> ++++++++++++++++++++++++++++++
+> >  2 files changed, 87 insertions(+)
+> >
+> > diff --git a/Documentation/ABI/testing/sysfs-class-rpmb
+> > b/Documentation/ABI/testing/sysfs-class-rpmb
+> > index 3ffcd2d1f683..7ca97d86bd97 100644
+> > --- a/Documentation/ABI/testing/sysfs-class-rpmb
+> > +++ b/Documentation/ABI/testing/sysfs-class-rpmb
+> > @@ -18,3 +18,27 @@ Contact:	Tomas Winkler
+> <tomas.winkler@intel.com>
+> >  Description:
+> >  		The /sys/class/rpmb/rpmbN directory is created for
+> >  		each RPMB registered device
+> > +
+> > +What:		/sys/class/rpmb/rpmbN/id
+> > +Date:		Aug 2016
+> > +KernelVersion:	4.8
+> > +Contact:	Tomas Winkler <tomas.winkler@intel.com>
+> > +Description:
+> > +		The /sys/class/rpmb/rpmbN/id file contains device id
+> > +		in a binary form
+> 
+> Oops, missed that you added these in a later patch, sorry about comment on
+> patch 2.
+> 
+> binary attribute?  Why?
 
-I am trying to debug a lenovo T450s laptop with a Realtek rts5227 sd reader
-on it.  I was wondering if you can help me figure things out.
+Each underlying storage device has different notion (UFS uses Unicode/emmc a whole structure),  all we care about here is that the other side (TEE) match the device.
 
-I am seeing the following when I insert a regular (not micro) SDXC Transcend
-64GB card and try and mount it:
+> 
+> > +
+> > +What:		/sys/class/rpmb/rpmbN/type
+> > +Date:		Aug 2016
+> > +KernelVersion:	4.8
+> > +Contact:	Tomas Winkler <tomas.winkler@intel.com>
+> > +Description:
+> > +		The /sys/class/rpmb/rpmbN/type file contains device
+> > +		underlay storage type technology: EMMC, UFS
+> > +
+> 
+> What is this used for?
 
-mmc0: cannot verify signal voltage switch
-mmc0: new ultra high speed SDR104 SDXC card at address 59b4
-mmcblk0: mmc0:59b4 SDU1  59.8 GiB
-mmcblk0: p1
-EXT4-fs (mmcblk0p1): mounted filesystem with ordered data mode. Opts: (null)
-mmcblk0: unknown error -22 sending read/write command, card status 0x900
-mmc0: cannot verify signal voltage switch
+We try to provide  unified interface for all types storage devices but we cannot rule out that TEE won't need this more intimate information,
+For example if it whish to parse the binary id info (introduced above) for any reason. 
 
-I was focusing on the -22 error.  It seems to be an -EINVAL set because a
-read transaction failed with TRANS_FAIL_INT.  Everything else seems fine.
-The mount succeeds and I can r/w data.
+> 
+> > +What:		/sys/class/rpmb/rpmbN/reliable_wr_cnt
+> > +Date:		Aug 2016
+> > +KernelVersion:	4.8
+> > +Contact:	Tomas Winkler <tomas.winkler@intel.com>
+> > +Description:
+> > +		The /sys/class/rpmb/rpmbN/reliable_wr_cnt file contains
+> > +		number of blocks that can be written in a single request
+> 
+> Why is this needed?  Shouldn't the normal block device export this type of
+> information?
+No, this is something specific for the RPMB partition. 
+> 
+> 
+> > diff --git a/drivers/char/rpmb/core.c b/drivers/char/rpmb/core.c index
+> > ff10cbb7b644..63271c7ed072 100644
+> > --- a/drivers/char/rpmb/core.c
+> > +++ b/drivers/char/rpmb/core.c
+> > @@ -308,6 +308,67 @@ struct rpmb_dev
+> *rpmb_dev_find_by_device(struct
+> > device *parent)  }  EXPORT_SYMBOL_GPL(rpmb_dev_find_by_device);
+> >
+> > +static ssize_t type_show(struct device *dev,
+> > +			 struct device_attribute *attr, char *buf) {
+> > +	struct rpmb_dev *rdev = to_rpmb_dev(dev);
+> > +	ssize_t ret;
+> > +
+> > +	switch (rdev->ops->type) {
+> > +	case RPMB_TYPE_EMMC:
+> > +		ret = scnprintf(buf, PAGE_SIZE, "EMMC\n");
+> 
+> It's a sysfs file, no need for scnprintf() crap, just use sprintf() please.
+> 
+> > +		break;
+> 
+> And the code can be made smaller by just doing:
+> 		return sprintf(buf, "EMMC\n");
+> 
+> :)
 
-This is with the latest 4.8 kernel (older kernels have the same error too).
+Okay
 
-Turning on debugging it seems to be a CRC error? but the driver can recover
-and move on.  So the warning seems harmless.  Nonetheless various Fedora and
-RHEL folks are bothered by it and I wanted to figure out how to fix it
-correctly.
+> 
+> > +	case RPMB_TYPE_UFS:
+> > +		ret = scnprintf(buf, PAGE_SIZE, "UFS\n");
+> > +		break;
+> > +	default:
+> > +		ret = scnprintf(buf, PAGE_SIZE, "UNKNOWN\n");
+> > +		break;
+> > +	}
+> > +
+> > +	return ret;
+> > +}
+> > +static DEVICE_ATTR_RO(type);
+> > +
+> > +static ssize_t id_show(struct device *dev,
+> > +		       struct device_attribute *attr, char *buf) {
+> > +	struct rpmb_dev *rdev = to_rpmb_dev(dev);
+> > +	size_t sz = min_t(size_t, rdev->ops->dev_id_len, PAGE_SIZE);
+> > +
+> > +	if (!rdev->ops->dev_id)
+> > +		return 0;
+> > +
+> > +	memcpy(buf, rdev->ops->dev_id, sz);
+> >
+> 
+> Hm, no.  That's not how a binary attribute works.  If you want a binary
+> attribute, use that type, don't put binary data in a "normal" sysfs file.
 
-I have attached some debug logs below with MMC_DEBUG enabled and a bunch of
-dynamic_debug turned on to help.
-
-Thoughts?
-
-Cheers,
-Don
+Will fix. 
 
 
-[  333.249114] mmc0: starting CMD18 arg 078bf7f0 flags 000000b5
-[  333.249115] mmc0:     blksz 512 blocks 8 flags 00000200 tsac 100 ms nsac 0
-[  333.249116] mmc0:     CMD12 arg 00000000 flags 00000095
-[  333.249134] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_long_data: SD/MMC CMD 18, arg = 0x078bf7f0
-[  333.249747] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_send_cmd_get_rsp: SD/MMC CMD 12, arg = 0x00000000
-[  333.249779] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: cmd->resp[0] = 0x00000b00
-[  333.249782] mmc0: req done (CMD18): 0: 00000000 00000000 00000000 00000000
-[  333.249784] mmc0:     4096 bytes transferred: 0
-[  333.249785] mmc0:     (CMD12): 0: 00000b00 00000000 00000000 00000000
-[  333.249832] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: pre dma sg: 1
-[  333.249834] mmc0: starting CMD18 arg 00000800 flags 000000b5
-[  333.249836] mmc0:     blksz 512 blocks 8 flags 00000200 tsac 100 ms nsac 0
-[  333.249837] mmc0:     CMD12 arg 00000000 flags 00000095
-[  333.249858] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_long_data: SD/MMC CMD 18, arg = 0x00000800
-[  333.250757] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_send_cmd_get_rsp: SD/MMC CMD 12, arg = 0x00000000
-[  333.250787] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: cmd->resp[0] = 0x00000b00
-[  333.250790] mmc0: req done (CMD18): 0: 00000000 00000000 00000000 00000000
-[  333.250791] mmc0:     4096 bytes transferred: 0
-[  333.250793] mmc0:     (CMD12): 0: 00000b00 00000000 00000000 00000000
-[  333.250837] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: pre dma sg: 1
-[  333.250839] mmc0: starting CMD18 arg 00000808 flags 000000b5
-[  333.250841] mmc0:     blksz 512 blocks 8 flags 00000200 tsac 100 ms nsac 0
-[  333.250842] mmc0:     CMD12 arg 00000000 flags 00000095
-[  333.250865] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_long_data: SD/MMC CMD 18, arg = 0x00000808
-[  333.251604] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: 0xFDA0(8): 09 01 04 48 00 1f 00 00
-[  333.251631] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: 0xFDA8(8): 00 12 00 00 09 00 d3 00
-[  333.251648] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: 0xFDB0(4): 02 07 00 7e 00 00 00 00
-[  333.251676] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: 0xFD52(8): 04 41 00 04 00 00 00 02
-[  333.251703] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: 0xFD5A(8): b3 00 02 01 b3 b3 55 aa
-[  333.251730] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: 0xFD62(8): e9 59 55 15 04 00 24 04
-[  333.251740] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_send_cmd_get_rsp: SD/MMC CMD 12, arg = 0x00000000
-[  333.251766] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: cmd->resp[0] = 0x00000b00
-[  333.251770] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: CMD 18 0x00000808 error(-22)
-[  333.251773] mmc0: req done (CMD18): -22: 00000000 00000000 00000000 00000000
-[  333.251775] mmc0:     0 bytes transferred: 0
-[  333.251778] mmc0:     (CMD12): 0: 00000b00 00000000 00000000 00000000
-[  333.251789] mmc0: starting CMD13 arg 59b40000 flags 00000195
-[  333.251814] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_send_cmd_get_rsp: SD/MMC CMD 13, arg = 0x59b40000
-[  333.251837] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: cmd->resp[0] = 0x00000900
-[  333.251839] mmc0: req done (CMD13): 0: 00000900 00000000 00000000 00000000
-[  333.251848] mmcblk0: unknown error -22 sending read/write command, card status 0x900
-
-^^^^ here is the bad transaction
-
-[  333.251857] mmc0: clock 0Hz busmode 2 powermode 0 cs 0 Vdd 0 width 1 timing 0
-[  333.257218] mmc0: clock 0Hz busmode 2 powermode 1 cs 0 Vdd 21 width 1 timing 0
-[  333.257433] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sdmmc_switch_voltage: signal_voltage = 0
-[  333.257617] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: Initial signal voltage of 3.3v
-[  333.269259] mmc0: clock 400000Hz busmode 2 powermode 2 cs 0 Vdd 21 width 1 timing 0
-[  333.281210] mmc0: clock 400000Hz busmode 2 powermode 2 cs 1 Vdd 21 width 1 timing 0
-[  333.284228] mmc0: starting CMD0 arg 00000000 flags 000000c0
-[  333.284243] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_send_cmd_get_rsp: SD/MMC CMD 0, arg = 0x00000000
-[  333.284571] mmc0: req done (CMD0): 0: 00000000 00000000 00000000 00000000
-[  333.287262] mmc0: clock 400000Hz busmode 2 powermode 2 cs 0 Vdd 21 width 1 timing 0
-[  333.290235] mmc0: starting CMD8 arg 000001aa flags 000002f5
-[  333.290263] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_send_cmd_get_rsp: SD/MMC CMD 8, arg = 0x000001aa
-[  333.290904] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: cmd->resp[0] = 0x000001aa
-[  333.290908] mmc0: req done (CMD8): 0: 000001aa 00000000 00000000 00000000
-[  333.290964] mmc0: starting CMD55 arg 00000000 flags 000000f5
-[  333.290993] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_send_cmd_get_rsp: SD/MMC CMD 55, arg = 0x00000000
-[  333.291743] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: cmd->resp[0] = 0x00000120
-[  333.291745] mmc0: req done (CMD55): 0: 00000120 00000000 00000000 00000000
-[  333.291765] mmc0: starting CMD41 arg 51300000 flags 000000e1
-[  333.291781] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_send_cmd_get_rsp: SD/MMC CMD 41, arg = 0x51300000
-[  333.292330] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: cmd->resp[0] = 0x00ff8000
-[  333.292332] mmc0: req done (CMD41): 0: 00ff8000 00000000 00000000 00000000
-[  333.304231] mmc0: starting CMD55 arg 00000000 flags 000000f5
-[  333.304247] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_send_cmd_get_rsp: SD/MMC CMD 55, arg = 0x00000000
-[  333.304805] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: cmd->resp[0] = 0x00000120
-[  333.304806] mmc0: req done (CMD55): 0: 00000120 00000000 00000000 00000000
-[  333.304828] mmc0: starting CMD41 arg 51300000 flags 000000e1
-[  333.304847] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_send_cmd_get_rsp: SD/MMC CMD 41, arg = 0x51300000
-[  333.305398] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: cmd->resp[0] = 0x00ff8000
-[  333.305401] mmc0: req done (CMD41): 0: 00ff8000 00000000 00000000 00000000
-[  333.317258] mmc0: starting CMD55 arg 00000000 flags 000000f5
-[  333.317284] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_send_cmd_get_rsp: SD/MMC CMD 55, arg = 0x00000000
-[  333.317911] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: cmd->resp[0] = 0x00000120
-[  333.317925] mmc0: req done (CMD55): 0: 00000120 00000000 00000000 00000000
-[  333.317961] mmc0: starting CMD41 arg 51300000 flags 000000e1
-[  333.317997] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_send_cmd_get_rsp: SD/MMC CMD 41, arg = 0x51300000
-[  333.318549] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: cmd->resp[0] = 0x00ff8000
-[  333.318552] mmc0: req done (CMD41): 0: 00ff8000 00000000 00000000 00000000
-[  333.330205] mmc0: starting CMD55 arg 00000000 flags 000000f5
-[  333.330221] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_send_cmd_get_rsp: SD/MMC CMD 55, arg = 0x00000000
-[  333.330769] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: cmd->resp[0] = 0x00000120
-[  333.330771] mmc0: req done (CMD55): 0: 00000120 00000000 00000000 00000000
-
-<snip>
-
-[  333.710266] mmc0: starting CMD2 arg 00000000 flags 00000067
-[  333.710285] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_send_cmd_get_rsp: SD/MMC CMD 2, arg = 0x00000000
-[  333.711279] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: cmd->resp[0] = 0x744a6053
-[  333.711281] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: cmd->resp[1] = 0x44553120
-[  333.711282] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: cmd->resp[2] = 0x2013a206
-[  333.711282] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: cmd->resp[3] = 0xe100ea01
-[  333.711285] mmc0: req done (CMD2): 0: 744a6053 44553120 2013a206 e100ea01
-[  333.711310] mmc0: starting CMD3 arg 00000000 flags 00000075
-[  333.711335] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_send_cmd_get_rsp: SD/MMC CMD 3, arg = 0x00000000
-[  333.711884] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: cmd->resp[0] = 0x59b40500
-[  333.711887] mmc0: req done (CMD3): 0: 59b40500 00000000 00000000 00000000
-[  333.711894] mmc0: starting CMD7 arg 59b40000 flags 00000015
-[  333.711908] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_send_cmd_get_rsp: SD/MMC CMD 7, arg = 0x59b40000
-[  333.712459] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: cmd->resp[0] = 0x00000700
-[  333.712462] mmc0: req done (CMD7): 0: 00000700 00000000 00000000 00000000
-[  333.712472] mmc0: starting CMD55 arg 59b40000 flags 00000095
-[  333.712499] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_send_cmd_get_rsp: SD/MMC CMD 55, arg = 0x59b40000
-[  333.713047] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: cmd->resp[0] = 0x00000920
-[  333.713049] mmc0: req done (CMD55): 0: 00000920 00000000 00000000 00000000
-[  333.713066] mmc0: starting CMD6 arg 00000002 flags 00000015
-[  333.713086] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_send_cmd_get_rsp: SD/MMC CMD 6, arg = 0x00000002
-[  333.713640] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: cmd->resp[0] = 0x00000920
-[  333.713642] mmc0: req done (CMD6): 0: 00000920 00000000 00000000 00000000
-[  333.713652] mmc0: clock 400000Hz busmode 2 powermode 2 cs 0 Vdd 21 width 4 timing 0
-[  333.713690] mmc0: starting CMD6 arg 80ff1fff flags 000000b5
-[  333.713692] mmc0:     blksz 64 blocks 1 flags 00000200 tsac 100 ms nsac 0
-[  333.713720] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data: SD/MMC CMD 6, arg = 0x80ff1fff
-[  333.714061] mmc0: req done (CMD6): 0: 00000000 00000000 00000000 00000000
-[  333.714062] mmc0:     64 bytes transferred: 0
-[  333.714068] mmc0: starting CMD6 arg 80fffff3 flags 000000b5
-[  333.714070] mmc0:     blksz 64 blocks 1 flags 00000200 tsac 100 ms nsac 0
-[  333.714092] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data: SD/MMC CMD 6, arg = 0x80fffff3
-[  333.714507] mmc0: req done (CMD6): 0: 00000000 00000000 00000000 00000000
-[  333.714509] mmc0:     64 bytes transferred: 0
-[  333.714519] mmc0: clock 400000Hz busmode 2 powermode 2 cs 0 Vdd 21 width 4 timing 6
-[  333.714551] mmc0: clock 208000000Hz busmode 2 powermode 2 cs 0 Vdd 21 width 4 timing 6
-[  333.714609] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_change_phase(TX): sample_point = 27
-[  333.714627] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_change_phase(RX): sample_point = 0
-[  333.714645] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data: SD/MMC CMD 19, arg = 0x00000000
-[  333.714773] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_change_phase(RX): sample_point = 1
-[  333.714790] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data: SD/MMC CMD 19, arg = 0x00000000
-[  333.714917] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_change_phase(RX): sample_point = 2
-[  333.714935] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data: SD/MMC CMD 19, arg = 0x00000000
-[  333.715061] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_change_phase(RX): sample_point = 3
-[  333.715078] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data: SD/MMC CMD 19, arg = 0x00000000
-[  333.715205] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_change_phase(RX): sample_point = 4
-[  333.715230] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data: SD/MMC CMD 19, arg = 0x00000000
-[  333.715370] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_change_phase(RX): sample_point = 5
-[  333.715390] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data: SD/MMC CMD 19, arg = 0x00000000
-[  333.715522] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_change_phase(RX): sample_point = 6
-[  333.715540] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data: SD/MMC CMD 19, arg = 0x00000000
-[  333.715670] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_change_phase(RX): sample_point = 7
-[  333.715687] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data: SD/MMC CMD 19, arg = 0x00000000
-[  333.715813] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_change_phase(RX): sample_point = 8
-[  333.715830] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data: SD/MMC CMD 19, arg = 0x00000000
-[  333.715958] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_change_phase(RX): sample_point = 9
-[  333.715983] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data: SD/MMC CMD 19, arg = 0x00000000
-[  333.716113] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_change_phase(RX): sample_point = 10
-[  333.716134] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data: SD/MMC CMD 19, arg = 0x00000000
-[  333.716268] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_change_phase(RX): sample_point = 11
-[  333.716287] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data: SD/MMC CMD 19, arg = 0x00000000
-[  333.716417] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_change_phase(RX): sample_point = 12
-[  333.716437] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data: SD/MMC CMD 19, arg = 0x00000000
-[  333.716568] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_change_phase(RX): sample_point = 13
-[  333.716587] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data: SD/MMC CMD 19, arg = 0x00000000
-[  333.716717] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_change_phase(RX): sample_point = 14
-[  333.716736] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data: SD/MMC CMD 19, arg = 0x00000000
-[  333.716866] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_change_phase(RX): sample_point = 15
-[  333.716885] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data: SD/MMC CMD 19, arg = 0x00000000
-[  333.717015] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_change_phase(RX): sample_point = 16
-[  333.717035] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data: SD/MMC CMD 19, arg = 0x00000000
-[  333.717165] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_change_phase(RX): sample_point = 17
-[  333.717184] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data: SD/MMC CMD 19, arg = 0x00000000
-[  333.717316] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_change_phase(RX): sample_point = 18
-[  333.717337] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data: SD/MMC CMD 19, arg = 0x00000000
-[  333.717386] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: 0xFDA0(8): 09 01 04 88 00 1f 00 00
-[  333.717413] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: 0xFDA8(8): 00 13 00 00 09 00 ff 40
-[  333.717430] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: 0xFDB0(4): 00 01 00 7f 00 00 00 00
-[  333.717457] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: 0xFD52(8): 04 41 00 04 00 00 00 02
-[  333.717483] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: 0xFD5A(8): b3 01 02 01 b3 b3 55 aa
-[  333.717510] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: 0xFD62(8): e9 59 55 15 04 00 24 04
-[  333.717512] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: rtsx_pci_send_cmd fail (err = -22)
-[  333.717524] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_change_phase(RX): sample_point = 19
-[  333.717546] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data: SD/MMC CMD 19, arg = 0x00000000
-[  333.717594] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: 0xFDA0(8): 09 01 04 88 00 1f 00 00
-[  333.717621] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: 0xFDA8(8): 00 37 00 00 1b 01 ff 40
-[  333.717638] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: 0xFDB0(4): 00 01 00 7f 00 00 00 00
-[  333.717665] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: 0xFD52(8): 04 41 00 04 00 00 00 02
-[  333.717691] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: 0xFD5A(8): b3 01 02 01 b3 b3 55 aa
-[  333.717717] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: 0xFD62(8): e9 59 55 15 04 00 24 04
-[  333.717720] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: rtsx_pci_send_cmd fail (err = -22)
-[  333.717731] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_change_phase(RX): sample_point = 20
-[  333.717751] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data: SD/MMC CMD 19, arg = 0x00000000
-[  333.717907] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: 0xFDA0(8): 09 01 04 49 00 1f 00 00
-[  333.717934] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: 0xFDA8(8): 00 13 00 00 09 00 bf 40
-[  333.717951] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: 0xFDB0(4): 00 00 00 7f 00 00 00 00
-[  333.717977] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: 0xFD52(8): 04 41 00 04 00 00 00 02
-[  333.718004] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: 0xFD5A(8): b3 01 02 01 b3 b3 55 aa
-[  333.718030] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: 0xFD62(8): e9 59 55 15 04 00 24 04
-[  333.718033] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: rtsx_pci_send_cmd fail (err = -22)
-[  333.718044] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_change_phase(RX): sample_point = 21
-[  333.718063] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data: SD/MMC CMD 19, arg = 0x00000000
-[  333.718227] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: 0xFDA0(8): 09 01 04 49 00 1f 00 00
-[  333.718254] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: 0xFDA8(8): 00 13 00 00 09 00 bf 40
-[  333.718281] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: 0xFDB0(4): 00 00 00 7f 00 00 00 00
-[  333.718306] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: 0xFD52(8): 04 41 00 04 00 00 00 02
-[  333.718330] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: 0xFD5A(8): b3 01 02 01 b3 b3 55 aa
-[  333.718355] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: 0xFD62(8): e9 59 55 15 04 00 24 04
-[  333.718356] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: rtsx_pci_send_cmd fail (err = -22)
-[  333.718367] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_change_phase(RX): sample_point = 22
-[  333.718384] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data: SD/MMC CMD 19, arg = 0x00000000
-[  333.718537] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: 0xFDA0(8): 09 01 04 49 00 1f 00 00
-[  333.718561] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: 0xFDA8(8): 00 13 00 00 09 00 bf 40
-[  333.718572] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: 0xFDB0(4): 00 00 00 7f 00 00 00 00
-[  333.718597] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: 0xFD52(8): 04 41 00 04 00 00 00 02
-[  333.718622] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: 0xFD5A(8): b3 01 02 01 b3 b3 55 aa
-[  333.718646] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: 0xFD62(8): e9 59 55 15 04 00 24 04
-[  333.718648] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: rtsx_pci_send_cmd fail (err = -22)
-[  333.718659] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_change_phase(RX): sample_point = 23
-[  333.718676] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data: SD/MMC CMD 19, arg = 0x00000000
-[  333.718803] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_change_phase(RX): sample_point = 24
-[  333.718820] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data: SD/MMC CMD 19, arg = 0x00000000
-[  333.718946] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_change_phase(RX): sample_point = 25
-[  333.718963] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data: SD/MMC CMD 19, arg = 0x00000000
-[  333.719090] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_change_phase(RX): sample_point = 26
-[  333.719106] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data: SD/MMC CMD 19, arg = 0x00000000
-[  333.719234] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_change_phase(RX): sample_point = 27
-[  333.719251] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data: SD/MMC CMD 19, arg = 0x00000000
-[  333.719378] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_change_phase(RX): sample_point = 28
-[  333.719395] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data: SD/MMC CMD 19, arg = 0x00000000
-[  333.719521] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_change_phase(RX): sample_point = 29
-[  333.719539] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data: SD/MMC CMD 19, arg = 0x00000000
-[  333.719668] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_change_phase(RX): sample_point = 30
-[  333.719685] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data: SD/MMC CMD 19, arg = 0x00000000
-[  333.719811] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_change_phase(RX): sample_point = 31
-[  333.719828] rtsx_pci_sdmmc rtsx_pci_sdmmc.0: sd_read_data: SD/MMC CMD 19, arg = 0x00000000
-
-^^^^^^^^^^ some other random failures.  Related to 'verify voltage' warnings??
+Thanks for review.
+Tomas
