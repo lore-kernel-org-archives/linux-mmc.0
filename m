@@ -1,144 +1,66 @@
-From: Pramod Gurav <pramod.gurav@linaro.org>
-Subject: [PATCH] mmc: sdhci-msm: Add pm_runtime and system PM support
-Date: Thu,  1 Sep 2016 19:47:22 +0530
-Message-ID: <20160901141722.31835-1-pramod.gurav@linaro.org>
-Return-path: <linux-arm-msm-owner@vger.kernel.org>
-Sender: linux-arm-msm-owner@vger.kernel.org
-To: linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org
-Cc: linux-kernel@vger.kernel.org, adrian.hunter@intel.com, ulf.hansson@linaro.org, Pramod Gurav <pramod.gurav@linaro.org>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH v1 2/3] sdhci-pci: enable SDIO interface on Intel Merrifield
+Date: Thu, 1 Sep 2016 16:18:04 +0200
+Message-ID: <CAPDyKFq+_iT_xCHNqXvzptgv+0m5ePtzZtemPG-ZKrHDGfsfhg@mail.gmail.com>
+References: <1472463221-11948-1-git-send-email-andriy.shevchenko@linux.intel.com>
+ <1472463221-11948-2-git-send-email-andriy.shevchenko@linux.intel.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-wm0-f51.google.com ([74.125.82.51]:36092 "EHLO
+        mail-wm0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S933991AbcIAOSH (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 1 Sep 2016 10:18:07 -0400
+Received: by mail-wm0-f51.google.com with SMTP id c133so80944507wmd.1
+        for <linux-mmc@vger.kernel.org>; Thu, 01 Sep 2016 07:18:06 -0700 (PDT)
+In-Reply-To: <1472463221-11948-2-git-send-email-andriy.shevchenko@linux.intel.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>
 
-Provides runtime PM callbacks to enable and disable clock resources
-when idle. Also support system PM callbacks to be called during system
-suspend and resume.
+On 29 August 2016 at 11:33, Andy Shevchenko
+<andriy.shevchenko@linux.intel.com> wrote:
+> Intel Merrifield is known to have an SDIO interface and on Intel Edison board a
+> WiFi card is wired to it.
+>
+> Enable the interface here to allow WiFi card enumeration.
+>
+> Signed-off-by: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
 
-Signed-off-by: Pramod Gurav <pramod.gurav@linaro.org>
----
-Changes in v1:
-- Added CONFIG_PM around runtime pm function.
-- Replaced msm suspend/resume with generic function directly
+Thanks, applied for next!
 
-Changes in v2:
-- Moved pm_rutime enabling before adding host
-- Handled pm_rutime in remove
-- Changed runtime handling with reference from sdhci-of-at91.c
+Kind regards
+Uffe
 
- drivers/mmc/host/sdhci-msm.c | 71 +++++++++++++++++++++++++++++++++++++++++++-
- 1 file changed, 70 insertions(+), 1 deletion(-)
 
-diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
-index 8ef44a2a..881c564 100644
---- a/drivers/mmc/host/sdhci-msm.c
-+++ b/drivers/mmc/host/sdhci-msm.c
-@@ -18,6 +18,7 @@
- #include <linux/of_device.h>
- #include <linux/delay.h>
- #include <linux/mmc/mmc.h>
-+#include <linux/pm_runtime.h>
- #include <linux/slab.h>
- 
- #include "sdhci-pltfm.h"
-@@ -658,12 +659,26 @@ static int sdhci_msm_probe(struct platform_device *pdev)
- 		goto clk_disable;
- 	}
- 
-+	pm_runtime_get_noresume(&pdev->dev);
-+	pm_runtime_set_active(&pdev->dev);
-+	pm_runtime_enable(&pdev->dev);
-+	pm_runtime_set_autosuspend_delay(&pdev->dev, 50);
-+	pm_runtime_use_autosuspend(&pdev->dev);
-+
- 	ret = sdhci_add_host(host);
- 	if (ret)
--		goto clk_disable;
-+		goto pm_runtime_disable;
-+
-+	platform_set_drvdata(pdev, host);
-+
-+	pm_runtime_put_autosuspend(&pdev->dev);
- 
- 	return 0;
- 
-+pm_runtime_disable:
-+	pm_runtime_disable(&pdev->dev);
-+	pm_runtime_set_suspended(&pdev->dev);
-+	pm_runtime_put_noidle(&pdev->dev);
- clk_disable:
- 	clk_disable_unprepare(msm_host->clk);
- pclk_disable:
-@@ -685,6 +700,11 @@ static int sdhci_msm_remove(struct platform_device *pdev)
- 		    0xffffffff);
- 
- 	sdhci_remove_host(host, dead);
-+
-+	pm_runtime_get_sync(&pdev->dev);
-+	pm_runtime_disable(&pdev->dev);
-+	pm_runtime_put_noidle(&pdev->dev);
-+
- 	clk_disable_unprepare(msm_host->clk);
- 	clk_disable_unprepare(msm_host->pclk);
- 	if (!IS_ERR(msm_host->bus_clk))
-@@ -693,12 +713,61 @@ static int sdhci_msm_remove(struct platform_device *pdev)
- 	return 0;
- }
- 
-+#ifdef CONFIG_PM
-+static int sdhci_msm_runtime_suspend(struct device *dev)
-+{
-+	struct sdhci_host *host = dev_get_drvdata(dev);
-+	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-+	struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
-+	int ret;
-+
-+	ret = sdhci_runtime_suspend_host(host);
-+	if (ret)
-+		return ret;
-+
-+	clk_disable_unprepare(msm_host->clk);
-+	clk_disable_unprepare(msm_host->pclk);
-+
-+	return 0;
-+}
-+
-+static int sdhci_msm_runtime_resume(struct device *dev)
-+{
-+	struct sdhci_host *host = dev_get_drvdata(dev);
-+	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-+	struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
-+	int ret;
-+
-+	ret = clk_prepare_enable(msm_host->clk);
-+	if (ret) {
-+		dev_err(dev, "clk_enable failed: %d\n", ret);
-+		return ret;
-+	}
-+	ret = clk_prepare_enable(msm_host->pclk);
-+	if (ret) {
-+		dev_err(dev, "clk_enable failed: %d\n", ret);
-+		clk_disable_unprepare(msm_host->clk);
-+		return ret;
-+	}
-+
-+	return sdhci_runtime_resume_host(host);
-+}
-+#endif
-+
-+static const struct dev_pm_ops sdhci_msm_pm_ops = {
-+	SET_LATE_SYSTEM_SLEEP_PM_OPS(pm_runtime_force_suspend,
-+					pm_runtime_force_resume)
-+	SET_RUNTIME_PM_OPS(sdhci_msm_runtime_suspend, sdhci_msm_runtime_resume,
-+				NULL)
-+};
-+
- static struct platform_driver sdhci_msm_driver = {
- 	.probe = sdhci_msm_probe,
- 	.remove = sdhci_msm_remove,
- 	.driver = {
- 		   .name = "sdhci_msm",
- 		   .of_match_table = sdhci_msm_dt_match,
-+		   .pm = &sdhci_msm_pm_ops,
- 	},
- };
- 
--- 
-2.9.3
+> ---
+>  drivers/mmc/host/sdhci-pci-core.c | 5 +++++
+>  1 file changed, 5 insertions(+)
+>
+> diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-pci-core.c
+> index 40f4fe8..d38d701 100644
+> --- a/drivers/mmc/host/sdhci-pci-core.c
+> +++ b/drivers/mmc/host/sdhci-pci-core.c
+> @@ -419,6 +419,7 @@ static const struct sdhci_pci_fixes sdhci_intel_byt_sd = {
+>  /* Define Host controllers for Intel Merrifield platform */
+>  #define INTEL_MRFLD_EMMC_0     0
+>  #define INTEL_MRFLD_EMMC_1     1
+> +#define INTEL_MRFLD_SDIO       3
+>
+>  static int intel_mrfld_mmc_probe_slot(struct sdhci_pci_slot *slot)
+>  {
+> @@ -431,6 +432,10 @@ static int intel_mrfld_mmc_probe_slot(struct sdhci_pci_slot *slot)
+>                                          MMC_CAP_8_BIT_DATA |
+>                                          MMC_CAP_1_8V_DDR;
+>                 break;
+> +       case INTEL_MRFLD_SDIO:
+> +               slot->host->mmc->caps |= MMC_CAP_NONREMOVABLE |
+> +                                        MMC_CAP_POWER_OFF_CARD;
+> +               break;
+>         default:
+>                 /* SD support is not ready yet */
+>                 return -ENODEV;
+> --
+> 2.8.1
+>
