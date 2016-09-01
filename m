@@ -1,80 +1,101 @@
-From: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH] mmc: tegra: Mark 64-bit DMA broken on Tegra124
-Date: Thu, 1 Sep 2016 09:51:06 +0200
-Message-ID: <CAPDyKFo18+h9UTUTD4q6_-5rWYO6rLXzDVbd29imDLhecF-=_g@mail.gmail.com>
-References: <20160831162324.15480-1-thierry.reding@gmail.com>
+From: Simon Horman <horms@verge.net.au>
+Subject: Re: [PATCH v4 2/4] mmc: tmio: Add tuning support
+Date: Thu, 1 Sep 2016 10:37:03 +0200
+Message-ID: <20160901083703.GA32374@verge.net.au>
+References: <CAPDyKFq_Fs_bNx7LP-J+nC3iaNgB7gvZAvhCp--qVOh1iAh0vg@mail.gmail.com>
+ <20160823135251.GA25665@verge.net.au>
+ <CAPDyKFpbMnOag7TZtQXxffXyq4XjTfz3vYM_atks15+d64QkfQ@mail.gmail.com>
+ <20160825120424.GA3385@verge.net.au>
+ <CAPDyKFpu85h3w2JkCjyQ15P8eWfkAkYcpxR4A6bD0EpQLw9rew@mail.gmail.com>
+ <20160829120533.GA8647@verge.net.au>
+ <CAPDyKFoL1xvv1yog2tY7pF9fWoiGQ9Gew_QbrA06dSrBiFyVEQ@mail.gmail.com>
+ <20160830205146.GA14623@verge.net.au>
+ <CAPDyKFpHzr-emfMsKyiJ4Ow-pjCCHWw6bBCEP6kEszOz09_pmA@mail.gmail.com>
+ <20160901064644.GB15138@verge.net.au>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20160831162324.15480-1-thierry.reding-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Sender: linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Thierry Reding <thierry.reding-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Cc: Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Paul Kocialkowski <contact-W9ppeneeCTY@public.gmane.org>, linux-mmc <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-renesas-soc-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <20160901064644.GB15138@verge.net.au>
+Sender: linux-renesas-soc-owner@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, Magnus Damm <magnus.damm@gmail.com>, linux-mmc <linux-mmc@vger.kernel.org>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On 31 August 2016 at 18:23, Thierry Reding <thierry.reding-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org> wrote:
-> From: Thierry Reding <treding-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
->
-> According to the TRM, the SD/MMC controller on Tegra124 supports 34-bit
-> addressing, but testing shows that this doesn't work. On a device which
-> has more than 2 GiB of RAM and LPAE enabled, buffer allocations can use
-> addresses above the 32-bit boundary.
->
-> One way to work around this would be to enable IOMMU physical to virtual
-> address translations for the SD/MMC controllers, but that's not easy to
-> implement without breaking existing use-cases. It's also not obvious why
-> 34-bit addressing doesn't work as advertised. In order to fix this for
-> existing users, add the SDHCI_QUIRK2_BROKEN_64_BIT_DMA quirk for now.
->
-> Reported-by: Paul Kocialkowski <contact-W9ppeneeCTY@public.gmane.org>
-> Signed-off-by: Thierry Reding <treding-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
+On Thu, Sep 01, 2016 at 08:46:44AM +0200, Simon Horman wrote:
+> On Wed, Aug 31, 2016 at 09:38:40AM +0200, Ulf Hansson wrote:
+> > On 30 August 2016 at 22:51, Simon Horman <horms@verge.net.au> wrote:
+> > > On Mon, Aug 29, 2016 at 04:05:55PM +0200, Ulf Hansson wrote:
+> > >> On 29 August 2016 at 14:05, Simon Horman <horms@verge.net.au> wrote:
+> > >> > On Fri, Aug 26, 2016 at 10:01:35AM +0200, Ulf Hansson wrote:
+> > >> >> On 25 August 2016 at 14:04, Simon Horman <horms@verge.net.au> wrote:
+> > >> >> > On Tue, Aug 23, 2016 at 05:02:56PM +0200, Ulf Hansson wrote:
+> > >> >
+> > >> > ...
+> > >
+> > > ...
+> > >
+> > >> > @@ -1271,6 +1278,7 @@ int tmio_mmc_host_runtime_suspend(struct device *dev)
+> > >> >
+> > >> >         mmc_retune_timer_stop(host->mmc);
+> > >> >         mmc_retune_needed(host->mmc);
+> > >> > +       host->use_saved_taps = true;
+> > >>
+> > >> I don't think you should trigger a re-tune here at all. Moreover you
+> > >> don't need to keep track of whether you have valid tap values by using
+> > >> the ->use_saved_taps variable, the mmc core deals with this for you.
+> > >>
+> > >> Instead, you should restore the tap values by invoking
+> > >> host->select_tuning() from the ->runtime_resume() callback, although
+> > >> only when host->mmc->can_retune == 1. We should probably add a helper
+> > >> function in the mmc core for this check, instead of accessing
+> > >> "can_retune" directly.
+> > >
+> > > Thanks, I was wondering what the best way to handle this is.
+> > >
+> > > I tried your suggestion above but it seems that host->mmc->can_retune is
+> > > zero when ->runtime_resume() is called because of the following call paths:
+> > >
+> > > a) _mmc_sd_suspend()
+> > >      -> mmc_power_off()
+> > >         -> mmc_set_initial_state()
+> > >            -> mmc_retune_disable
+> > >    and
+> > > b) mmc_sd_runtime_resume()
+> > >      -> mmc_power_up
+> > >         -> mmc_set_initial_state()
+> > >            -> mmc_retune_disable
+> > >
+> > >> >         tmio_mmc_disable_mmc_irqs(host, TMIO_MASK_ALL);
+> > 
+> > This is exactly what shall happen :-)
+> > 
+> > If the mmc core suspends the card, it means it will also re-initialize
+> > the card when resuming it. In that way the regular tuning sequence
+> > will take place as a part of re-initialization of the card, so you
+> > definitely must not restore tap values in these case. That is why you
+> > should be using the can_retune to know when to restore the values.
+> 
+> Understood. In that case things are working as expected.
 
-Looks good to me, although could you please address Lucas' comment and
-send a re-based version.
+I do have one question. It seems to me that  host->mmc->can_retune == 1 on
+resume. If so, when would the saved tap values be used?  I feel that I am
+missing something here.
 
-Kind regards
-Uffe
-
-> ---
->  drivers/mmc/host/sdhci-tegra.c | 18 +++++++++++++++++-
->  1 file changed, 17 insertions(+), 1 deletion(-)
->
-> diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
-> index d89200ee017e..a3d045630d0c 100644
-> --- a/drivers/mmc/host/sdhci-tegra.c
-> +++ b/drivers/mmc/host/sdhci-tegra.c
-> @@ -394,6 +394,22 @@ static const struct sdhci_tegra_soc_data soc_data_tegra114 = {
->         .pdata = &sdhci_tegra114_pdata,
->  };
->
-> +static const struct sdhci_pltfm_data sdhci_tegra124_pdata = {
-> +       .quirks = SDHCI_QUIRK_BROKEN_TIMEOUT_VAL |
-> +                 SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK |
-> +                 SDHCI_QUIRK_SINGLE_POWER_WRITE |
-> +                 SDHCI_QUIRK_NO_HISPD_BIT |
-> +                 SDHCI_QUIRK_BROKEN_ADMA_ZEROLEN_DESC |
-> +                 SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN,
-> +       .quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN |
-> +                  SDHCI_QUIRK2_BROKEN_64_BIT_DMA,
-> +       .ops  = &tegra114_sdhci_ops,
-> +};
-> +
-> +static const struct sdhci_tegra_soc_data soc_data_tegra124 = {
-> +       .pdata = &sdhci_tegra124_pdata,
-> +};
-> +
->  static const struct sdhci_pltfm_data sdhci_tegra210_pdata = {
->         .quirks = SDHCI_QUIRK_BROKEN_TIMEOUT_VAL |
->                   SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK |
-> @@ -427,7 +443,7 @@ static const struct sdhci_tegra_soc_data soc_data_tegra186 = {
->  static const struct of_device_id sdhci_tegra_dt_match[] = {
->         { .compatible = "nvidia,tegra186-sdhci", .data = &soc_data_tegra186 },
->         { .compatible = "nvidia,tegra210-sdhci", .data = &soc_data_tegra210 },
-> -       { .compatible = "nvidia,tegra124-sdhci", .data = &soc_data_tegra114 },
-> +       { .compatible = "nvidia,tegra124-sdhci", .data = &soc_data_tegra124 },
->         { .compatible = "nvidia,tegra114-sdhci", .data = &soc_data_tegra114 },
->         { .compatible = "nvidia,tegra30-sdhci", .data = &soc_data_tegra30 },
->         { .compatible = "nvidia,tegra20-sdhci", .data = &soc_data_tegra20 },
-> --
-> 2.9.3
->
+> > > I plan to repost this patchset without the tap restoration code.
+> > > This is because I have a number of changes locally, in particular
+> > > to address other parts of your review, and I would like
+> > > them to see the light of day.
+> > >
+> > > I will mark the tap restoration as a TODO item which we can address
+> > > before merging the code in question.
+> > 
+> > It shouldn't be that hard to implement this, so I rather see that we
+> > get this right from the beginning.
+> > 
+> > As matter of fact it probably requires less code than you had in your
+> > initial approach, especially since I don't think you need to deal with
+> > anything tuning related in the ->runtime_suspend() callback, but only
+> > in ->runtime_resume().
+> 
+> Got it.
