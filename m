@@ -1,31 +1,69 @@
-From: Simon Horman <horms@verge.net.au>
-Subject: Re: [PATCH v5 08/11] arm64: r8a7795: Set maximum frequencies for
- SDHI clocks
-Date: Thu, 1 Sep 2016 16:24:34 +0200
-Message-ID: <20160901142434.GH14300@verge.net.au>
-References: <1472591399-13907-1-git-send-email-horms+renesas@verge.net.au>
- <1472591399-13907-9-git-send-email-horms+renesas@verge.net.au>
- <20160831084449.GB1609@katana>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH v1 3/3] sdhci-pci: enable SD card interface on Merrifield
+Date: Thu, 1 Sep 2016 16:18:09 +0200
+Message-ID: <CAPDyKFrvOK3OJH+fkKadim4Kioh-q808W-xiSJ9R6n35aUoM+g@mail.gmail.com>
+References: <1472463221-11948-1-git-send-email-andriy.shevchenko@linux.intel.com>
+ <1472463221-11948-3-git-send-email-andriy.shevchenko@linux.intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-renesas-soc-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20160831084449.GB1609@katana>
-Sender: linux-renesas-soc-owner@vger.kernel.org
-To: Wolfram Sang <wsa@the-dreams.de>
-Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, Ulf Hansson <ulf.hansson@linaro.org>, Magnus Damm <magnus.damm@gmail.com>, linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-wm0-f41.google.com ([74.125.82.41]:37470 "EHLO
+        mail-wm0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752164AbcIAOZY (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 1 Sep 2016 10:25:24 -0400
+Received: by mail-wm0-f41.google.com with SMTP id v143so24558880wmv.0
+        for <linux-mmc@vger.kernel.org>; Thu, 01 Sep 2016 07:25:23 -0700 (PDT)
+In-Reply-To: <1472463221-11948-3-git-send-email-andriy.shevchenko@linux.intel.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>
 
-On Wed, Aug 31, 2016 at 10:44:49AM +0200, Wolfram Sang wrote:
-> On Tue, Aug 30, 2016 at 11:09:56PM +0200, Simon Horman wrote:
-> > Signed-off-by: Simon Horman <horms+renesas@verge.net.au>
-> > ---
-> > v5
-> > * New patch
-> 
-> Huh? There is already 721e9a08aa514c ("arm64: dts: r8a7795: set maximum
-> frequency for SDHI clocks") in renesas/drivers? Why didn't you pick this
-> one?
+On 29 August 2016 at 11:33, Andy Shevchenko
+<andriy.shevchenko@linux.intel.com> wrote:
+> Intel Merrifield provides an interface to an external SD card.
+> Enable it here.
+>
+> Signed-off-by: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
 
-Sorry, I was working aganst mmc/next and forgot to check
-against the renesas tree for the patches that should go/be there.
+Thanks, applied for next!
+
+Kind regards
+Uffe
+
+
+> ---
+>  drivers/mmc/host/sdhci-pci-core.c | 5 ++++-
+>  1 file changed, 4 insertions(+), 1 deletion(-)
+>
+> diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-pci-core.c
+> index d38d701..3833c5f 100644
+> --- a/drivers/mmc/host/sdhci-pci-core.c
+> +++ b/drivers/mmc/host/sdhci-pci-core.c
+> @@ -419,6 +419,7 @@ static const struct sdhci_pci_fixes sdhci_intel_byt_sd = {
+>  /* Define Host controllers for Intel Merrifield platform */
+>  #define INTEL_MRFLD_EMMC_0     0
+>  #define INTEL_MRFLD_EMMC_1     1
+> +#define INTEL_MRFLD_SD         2
+>  #define INTEL_MRFLD_SDIO       3
+>
+>  static int intel_mrfld_mmc_probe_slot(struct sdhci_pci_slot *slot)
+> @@ -432,12 +433,14 @@ static int intel_mrfld_mmc_probe_slot(struct sdhci_pci_slot *slot)
+>                                          MMC_CAP_8_BIT_DATA |
+>                                          MMC_CAP_1_8V_DDR;
+>                 break;
+> +       case INTEL_MRFLD_SD:
+> +               slot->host->quirks2 |= SDHCI_QUIRK2_NO_1_8_V;
+> +               break;
+>         case INTEL_MRFLD_SDIO:
+>                 slot->host->mmc->caps |= MMC_CAP_NONREMOVABLE |
+>                                          MMC_CAP_POWER_OFF_CARD;
+>                 break;
+>         default:
+> -               /* SD support is not ready yet */
+>                 return -ENODEV;
+>         }
+>         return 0;
+> --
+> 2.8.1
+>
