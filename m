@@ -1,69 +1,35 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v1 1/3] sdhci-pci: refactor intel_mrfld_mmc_probe_slot()
-Date: Thu, 1 Sep 2016 16:17:59 +0200
-Message-ID: <CAPDyKFrHjV-gPGSY2viR=oi+y0h+P1zzEzm7ySZ+21bmLEcwZA@mail.gmail.com>
-References: <1472463221-11948-1-git-send-email-andriy.shevchenko@linux.intel.com>
+From: Pramod Gurav <pramod.gurav@linaro.org>
+Subject: Re: [PATCH v2] mmc: sdhci-msm: Add pm_runtime and system PM support
+Date: Thu, 1 Sep 2016 19:49:49 +0530
+Message-ID: <CANYu_0vDHLhj78egE2TkO3z7o=4wKBt_ga84ktd2bY4QuHj40w@mail.gmail.com>
+References: <20160901101021.26371-1-pramod.gurav@linaro.org>
+ <CAPDyKFqg4jq2dK579eTR1fen1Fhr93p6SpPfDcMxKhiVR9sTPw@mail.gmail.com> <CAPDyKFrdrWOkRJSL2r01eXzBQrkFm14wKn=rvABQ7EWvaNtZnQ@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wm0-f54.google.com ([74.125.82.54]:37291 "EHLO
-        mail-wm0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S933918AbcIAOSD (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 1 Sep 2016 10:18:03 -0400
-Received: by mail-wm0-f54.google.com with SMTP id v143so24216033wmv.0
-        for <linux-mmc@vger.kernel.org>; Thu, 01 Sep 2016 07:18:03 -0700 (PDT)
-In-Reply-To: <1472463221-11948-1-git-send-email-andriy.shevchenko@linux.intel.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-arm-msm-owner@vger.kernel.org>
+In-Reply-To: <CAPDyKFrdrWOkRJSL2r01eXzBQrkFm14wKn=rvABQ7EWvaNtZnQ@mail.gmail.com>
+Sender: linux-arm-msm-owner@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, "linux-arm-msm@vger.kernel.org" <linux-arm-msm@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>
 
-On 29 August 2016 at 11:33, Andy Shevchenko
-<andriy.shevchenko@linux.intel.com> wrote:
-> Refactor intel_mrfld_mmc_probe_slot() to use switch case. The change allows to
-> add a support for SD and SDIO interfaces without any pain.
+On 1 September 2016 at 19:38, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+> [...]
 >
-> Signed-off-by: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
+>>> +
+>>> +static const struct dev_pm_ops sdhci_msm_pm_ops = {
+>>> +       SET_LATE_SYSTEM_SLEEP_PM_OPS(sdhci_msm_suspend, sdhci_msm_resume)
+>
+> One more thing. Why do you need the late versions of the system PM callbacks?
+>
+> I think it's fine to use the regular:
+> SET_SYSTEM_SLEEP_PM_OPS(sdhci_msm_suspend, sdhci_msm_resume)
+>
+Should have waited for this review as well. :)
+Anyway I forgot to add v3 tag in my new patch.
+Will resend v3 with this change as well.
 
-Thanks, applied for next!
-
-Kind regards
-Uffe
-
-> ---
->  drivers/mmc/host/sdhci-pci-core.c | 17 +++++++++++------
->  1 file changed, 11 insertions(+), 6 deletions(-)
+> [...]
 >
-> diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-pci-core.c
-> index 93bb0ff..40f4fe8 100644
-> --- a/drivers/mmc/host/sdhci-pci-core.c
-> +++ b/drivers/mmc/host/sdhci-pci-core.c
-> @@ -422,14 +422,19 @@ static const struct sdhci_pci_fixes sdhci_intel_byt_sd = {
->
->  static int intel_mrfld_mmc_probe_slot(struct sdhci_pci_slot *slot)
->  {
-> -       if ((PCI_FUNC(slot->chip->pdev->devfn) != INTEL_MRFLD_EMMC_0) &&
-> -           (PCI_FUNC(slot->chip->pdev->devfn) != INTEL_MRFLD_EMMC_1))
-> +       unsigned int func = PCI_FUNC(slot->chip->pdev->devfn);
-> +
-> +       switch (func) {
-> +       case INTEL_MRFLD_EMMC_0:
-> +       case INTEL_MRFLD_EMMC_1:
-> +               slot->host->mmc->caps |= MMC_CAP_NONREMOVABLE |
-> +                                        MMC_CAP_8_BIT_DATA |
-> +                                        MMC_CAP_1_8V_DDR;
-> +               break;
-> +       default:
->                 /* SD support is not ready yet */
->                 return -ENODEV;
-> -
-> -       slot->host->mmc->caps |= MMC_CAP_8_BIT_DATA | MMC_CAP_NONREMOVABLE |
-> -                                MMC_CAP_1_8V_DDR;
-> -
-> +       }
->         return 0;
->  }
->
-> --
-> 2.8.1
->
+> Kind regards
+> Uffe
