@@ -1,114 +1,155 @@
-From: Simon Horman <horms@verge.net.au>
-Subject: Re: [PATCH v4 2/4] mmc: tmio: Add tuning support
-Date: Thu, 1 Sep 2016 16:19:07 +0200
-Message-ID: <20160901141907.GF14300@verge.net.au>
-References: <CAPDyKFpbMnOag7TZtQXxffXyq4XjTfz3vYM_atks15+d64QkfQ@mail.gmail.com>
- <20160825120424.GA3385@verge.net.au>
- <CAPDyKFpu85h3w2JkCjyQ15P8eWfkAkYcpxR4A6bD0EpQLw9rew@mail.gmail.com>
- <20160829120533.GA8647@verge.net.au>
- <CAPDyKFoL1xvv1yog2tY7pF9fWoiGQ9Gew_QbrA06dSrBiFyVEQ@mail.gmail.com>
- <20160830205146.GA14623@verge.net.au>
- <CAPDyKFpHzr-emfMsKyiJ4Ow-pjCCHWw6bBCEP6kEszOz09_pmA@mail.gmail.com>
- <20160901064644.GB15138@verge.net.au>
- <20160901083703.GA32374@verge.net.au>
- <CAPDyKFraiatvCcmhPLU+=M01Q9Dkd73QTQRJd_e=vBr-g4MwQw@mail.gmail.com>
+From: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: Re: [PATCH v2] mmc: sdhci-of-arasan: Properly set
+ corecfg_clockmultiplier on rk3399
+Date: Thu, 1 Sep 2016 16:18:15 +0200
+Message-ID: <CAPDyKFrwGhFzVOsxYeN_H+GdkNfEQJc=1p50D-6E7HH6LUV-pA@mail.gmail.com>
+References: <1472201475-7970-1-git-send-email-shawn.lin@rock-chips.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-renesas-soc-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <CAPDyKFraiatvCcmhPLU+=M01Q9Dkd73QTQRJd_e=vBr-g4MwQw@mail.gmail.com>
-Sender: linux-renesas-soc-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, Magnus Damm <magnus.damm@gmail.com>, linux-mmc <linux-mmc@vger.kernel.org>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+In-Reply-To: <1472201475-7970-1-git-send-email-shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-rockchip>,
+ <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-rockchip/>
+List-Post: <mailto:linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+List-Help: <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-rockchip>,
+ <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
+Sender: "Linux-rockchip" <linux-rockchip-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+Errors-To: linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+To: Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
+Cc: "open list:ARM/Rockchip SoC..." <linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Ziyuan Xu <xzy.xu-TNX95d0MmH7DzftRWevZcw@public.gmane.org>, linux-mmc <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Douglas Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Thu, Sep 01, 2016 at 11:55:27AM +0200, Ulf Hansson wrote:
-> On 1 September 2016 at 10:37, Simon Horman <horms@verge.net.au> wrote:
-> > On Thu, Sep 01, 2016 at 08:46:44AM +0200, Simon Horman wrote:
-> >> On Wed, Aug 31, 2016 at 09:38:40AM +0200, Ulf Hansson wrote:
-> >> > On 30 August 2016 at 22:51, Simon Horman <horms@verge.net.au> wrote:
-> >> > > On Mon, Aug 29, 2016 at 04:05:55PM +0200, Ulf Hansson wrote:
-> >> > >> On 29 August 2016 at 14:05, Simon Horman <horms@verge.net.au> wrote:
-> >> > >> > On Fri, Aug 26, 2016 at 10:01:35AM +0200, Ulf Hansson wrote:
-> >> > >> >> On 25 August 2016 at 14:04, Simon Horman <horms@verge.net.au> wrote:
-> >> > >> >> > On Tue, Aug 23, 2016 at 05:02:56PM +0200, Ulf Hansson wrote:
-> >> > >> >
-> >> > >> > ...
-> >> > >
-> >> > > ...
-> >> > >
-> >> > >> > @@ -1271,6 +1278,7 @@ int tmio_mmc_host_runtime_suspend(struct device *dev)
-> >> > >> >
-> >> > >> >         mmc_retune_timer_stop(host->mmc);
-> >> > >> >         mmc_retune_needed(host->mmc);
-> >> > >> > +       host->use_saved_taps = true;
-> >> > >>
-> >> > >> I don't think you should trigger a re-tune here at all. Moreover you
-> >> > >> don't need to keep track of whether you have valid tap values by using
-> >> > >> the ->use_saved_taps variable, the mmc core deals with this for you.
-> >> > >>
-> >> > >> Instead, you should restore the tap values by invoking
-> >> > >> host->select_tuning() from the ->runtime_resume() callback, although
-> >> > >> only when host->mmc->can_retune == 1. We should probably add a helper
-> >> > >> function in the mmc core for this check, instead of accessing
-> >> > >> "can_retune" directly.
-> >> > >
-> >> > > Thanks, I was wondering what the best way to handle this is.
-> >> > >
-> >> > > I tried your suggestion above but it seems that host->mmc->can_retune is
-> >> > > zero when ->runtime_resume() is called because of the following call paths:
-> >> > >
-> >> > > a) _mmc_sd_suspend()
-> >> > >      -> mmc_power_off()
-> >> > >         -> mmc_set_initial_state()
-> >> > >            -> mmc_retune_disable
-> >> > >    and
-> >> > > b) mmc_sd_runtime_resume()
-> >> > >      -> mmc_power_up
-> >> > >         -> mmc_set_initial_state()
-> >> > >            -> mmc_retune_disable
-> >> > >
-> >> > >> >         tmio_mmc_disable_mmc_irqs(host, TMIO_MASK_ALL);
-> >> >
-> >> > This is exactly what shall happen :-)
-> >> >
-> >> > If the mmc core suspends the card, it means it will also re-initialize
-> >> > the card when resuming it. In that way the regular tuning sequence
-> >> > will take place as a part of re-initialization of the card, so you
-> >> > definitely must not restore tap values in these case. That is why you
-> >> > should be using the can_retune to know when to restore the values.
-> >>
-> >> Understood. In that case things are working as expected.
-> >
-> > I do have one question. It seems to me that  host->mmc->can_retune == 1 on
-> > resume. If so, when would the saved tap values be used?  I feel that I am
-> > missing something here.
-> 
-> There are different "resumes" here, so this gets a bit tricky to
-> discuss around. Let me give it another try.
-> 
-> First, let's assume we have a card inserted, initialized and tuned.
-> This also means we have a cache of tuning (tap) values in the host.
-> 
-> When the *host* runtime PM suspends, which isn't related to when the
-> card suspends, typically the card remains powered/initialized. Then,
-> when the host runtime PM resumes the tuning values can be restored in
-> the host controller, as those should still be working because the card
-> has remained initialized.
-> 
-> When the card system PM suspends, the card will be put to sleep/power
-> off (can_retune == 0). Sooner or later the host also becomes runtime
-> PM suspended in this sequence.
-> 
-> When the card system PM resumes, the card will be woken up from sleep,
-> power on and the re-initializations starts. Before the
-> re-initializations starts, the host will be runtime PM resumed, but
-> since can_retune == 0, no tuning values will be restored (correct).
-> When the re-initialization sequence completes of the card, can_retune
-> == 1 as a new tuning sequence has also been completed. This also means
-> refreshed cached tunings values in the host, which it can use the next
-> time it will be runtime PM resumed.
-> 
-> Hope this made more sense now.
+On 26 August 2016 at 10:51, Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org> wrote:
+> corecfg_clockmultiplier indicates clock multiplier value of
+> programmable clock generator which should be the same value
+> of SDHCI_CAPABILITIES_1. The default value of the register,
+> corecfg_clockmultiplier, is 0x10. But actually it is a mistake
+> by designer as our intention was to set it to be zero which
+> means we don't support programmable clock generator. So we have
+> to make it to be zero on bootloader which seems work fine until
+> now. But now we find an issue that when deploying genpd support
+> for it, the remove callback will trigger the genpd to poweroff the
+> power domain for sdhci-of-arasan which manage the controller, phy
+> and corecfg_* stuff.
+>
+> So when we do bind/unbind the driver, we have already reinit
+> the controller and phy, but without doing that for corecfg_*.
+> Regarding to only the corecfg_clockmultipler is wrong, let's
+> fix it by explicitly marking it to be zero when probing. With
+> this change, we could do bind/unbind successfully.
+>
+> Reported-by: Ziyuan Xu <xzy.xu-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
+> Cc: Douglas Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
+> Signed-off-by: Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
+>
 
-Thanks for your detailed explanation. I understand now.
+Thanks, applied for next!
+
+Kind regards
+Uffe
+
+> ---
+>
+> Changes in v2:
+> - fix some typos and build
+> - move the configuration of corecfg_clockmultiplier after
+>   enabling aclk_emmc to avoid the off state of aclk_emmc_grf.
+>   I add a new function to make it more common for other coming
+>   users who have the same requirment for setting diff clkmul.
+>
+>  drivers/mmc/host/sdhci-of-arasan.c | 46 ++++++++++++++++++++++++++++++++++++++
+>  1 file changed, 46 insertions(+)
+>
+> diff --git a/drivers/mmc/host/sdhci-of-arasan.c b/drivers/mmc/host/sdhci-of-arasan.c
+> index 0b3a9cf..33601a8 100644
+> --- a/drivers/mmc/host/sdhci-of-arasan.c
+> +++ b/drivers/mmc/host/sdhci-of-arasan.c
+> @@ -67,10 +67,12 @@ struct sdhci_arasan_soc_ctl_field {
+>   * accessible via the syscon API.
+>   *
+>   * @baseclkfreq:       Where to find corecfg_baseclkfreq
+> + * @clockmultiplier:   Where to find corecfg_clockmultiplier
+>   * @hiword_update:     If true, use HIWORD_UPDATE to access the syscon
+>   */
+>  struct sdhci_arasan_soc_ctl_map {
+>         struct sdhci_arasan_soc_ctl_field       baseclkfreq;
+> +       struct sdhci_arasan_soc_ctl_field       clockmultiplier;
+>         bool                                    hiword_update;
+>  };
+>
+> @@ -100,6 +102,7 @@ struct sdhci_arasan_data {
+>
+>  static const struct sdhci_arasan_soc_ctl_map rk3399_soc_ctl_map = {
+>         .baseclkfreq = { .reg = 0xf000, .width = 8, .shift = 8 },
+> +       .clockmultiplier = { .reg = 0xf02c, .width = 8, .shift = 0},
+>         .hiword_update = true,
+>  };
+>
+> @@ -379,6 +382,45 @@ static const struct clk_ops arasan_sdcardclk_ops = {
+>  };
+>
+>  /**
+> + * sdhci_arasan_update_clockmultiplier - Set corecfg_clockmultiplier
+> + *
+> + * The corecfg_clockmultiplier is supposed to contain clock multiplier
+> + * value of programmable clock generator.
+> + *
+> + * NOTES:
+> + * - Many existing devices don't seem to do this and work fine.  To keep
+> + *   compatibility for old hardware where the device tree doesn't provide a
+> + *   register map, this function is a noop if a soc_ctl_map hasn't been provided
+> + *   for this platform.
+> + * - The value of corecfg_clockmultiplier should sync with that of corresponding
+> + *   value reading from sdhci_capability_register. So this function is called
+> + *   once at probe time and never called again.
+> + *
+> + * @host:              The sdhci_host
+> + */
+> +static void sdhci_arasan_update_clockmultiplier(struct sdhci_host *host,
+> +                                               u32 value)
+> +{
+> +       struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+> +       struct sdhci_arasan_data *sdhci_arasan = sdhci_pltfm_priv(pltfm_host);
+> +       const struct sdhci_arasan_soc_ctl_map *soc_ctl_map =
+> +               sdhci_arasan->soc_ctl_map;
+> +
+> +       /* Having a map is optional */
+> +       if (!soc_ctl_map)
+> +               return;
+> +
+> +       /* If we have a map, we expect to have a syscon */
+> +       if (!sdhci_arasan->soc_ctl_base) {
+> +               pr_warn("%s: Have regmap, but no soc-ctl-syscon\n",
+> +                       mmc_hostname(host->mmc));
+> +               return;
+> +       }
+> +
+> +       sdhci_arasan_syscon_write(host, &soc_ctl_map->clockmultiplier, value);
+> +}
+> +
+> +/**
+>   * sdhci_arasan_update_baseclkfreq - Set corecfg_baseclkfreq
+>   *
+>   * The corecfg_baseclkfreq is supposed to contain the MHz of clk_xin.  This
+> @@ -559,6 +601,10 @@ static int sdhci_arasan_probe(struct platform_device *pdev)
+>         sdhci_get_of_property(pdev);
+>         pltfm_host->clk = clk_xin;
+>
+> +       if (of_device_is_compatible(pdev->dev.of_node,
+> +                                   "rockchip,rk3399-sdhci-5.1"))
+> +               sdhci_arasan_update_clockmultiplier(host, 0x0);
+> +
+>         sdhci_arasan_update_baseclkfreq(host);
+>
+>         ret = sdhci_arasan_register_sdclk(sdhci_arasan, clk_xin, &pdev->dev);
+> --
+> 2.3.7
+>
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
+> the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
