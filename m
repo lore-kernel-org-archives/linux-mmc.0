@@ -1,98 +1,48 @@
-From: Shawn Lin <shawn.lin@rock-chips.com>
-Subject: Re: Initialising eMMC: Card stuck in programming state! __mmc_switch
-Date: Thu, 1 Sep 2016 09:34:52 +0800
-Message-ID: <f0fcbbef-8af7-780d-ddb2-42533b76c6d7@rock-chips.com>
-References: <57C6A9D8.6020705@phytec.de>
+From: Alex Lemberg <Alex.Lemberg@sandisk.com>
+Subject: Re: [PATCH 0/3] mmc: Check BKOPS Level On Runtime Suspend
+Date: Thu, 1 Sep 2016 05:02:24 +0000
+Message-ID: <CC3EF0FD-A9AF-4FA9-9843-3A435B827DBC@sandisk.com>
+References: <1472491952-395-1-git-send-email-alex.lemberg@sandisk.com>
+ <CAPDyKFpYSZwQSoeA-aMh9P7gDuSDa6gzouusWpBOOidf3jw=Fg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from lucky1.263xmail.com ([211.157.147.134]:44326 "EHLO
-        lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753524AbcIABfa (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 31 Aug 2016 21:35:30 -0400
-In-Reply-To: <57C6A9D8.6020705@phytec.de>
+Received: from mail-by2nam01on0080.outbound.protection.outlook.com ([104.47.34.80]:27358
+        "EHLO NAM01-BY2-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1750750AbcIAFRO (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Thu, 1 Sep 2016 01:17:14 -0400
+In-Reply-To: <CAPDyKFpYSZwQSoeA-aMh9P7gDuSDa6gzouusWpBOOidf3jw=Fg@mail.gmail.com>
+Content-Language: en-US
+Content-ID: <0EE0EB4F13AFBD47BCA5B820E8BF22CC@namprd02.prod.outlook.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Wadim Egorov <w.egorov@phytec.de>, jh80.chung@samsung.com
-Cc: shawn.lin@rock-chips.com, linux-mmc@vger.kernel.org, ulf.hansson@linaro.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Avi Shchislowski <Avi.Shchislowski@sandisk.com>, linux-mmc <linux-mmc@vger.kernel.org>
 
-On 2016/8/31 17:56, Wadim Egorov wrote:
-> Hello,
->
-> I have a RK3288 based board with a Micron eMMC chip (MTFC16GAKAECN-4M
-> IT). This eMMC is EDEC/MMC standard version 5.0-compliant.
->
-
-By looking up the emmc AVL for rockchip product line, we didn't test
-this eMMC chip yet, so I couldn't say whether it's related to the buggy
-eMMC firmware rather than host stack. But it looks more like a buggy
-firmware from my debug experience. :)
-
-> While doing eMMC boot tests with a 4.4.16 and 4.8.0-rc4 kernel I run
-> into the following problem after more than 100 cold resets:
->
-> [    3.535448] dwmmc_rockchip ff0c0000.dwmmc: 1 slots initialized
-> [    3.543823] dwmmc_rockchip ff0f0000.dwmmc: IDMAC supports 32-bit address mode.
-> [    3.551276] dwmmc_rockchip ff0f0000.dwmmc: Using internal DMA controller.
-> [    3.558206] dwmmc_rockchip ff0f0000.dwmmc: Version ID is 270a
-> [    3.564275] dwmmc_rockchip ff0f0000.dwmmc: DW MMC controller at irq 31,32 bit host data width,256 deep fifo
-> [    3.604426] mmc_host mmc0: Bus speed (slot 0) = 400000Hz (slot req 400000Hz, actual 400000HZ div = 0)
-> [    3.634510] dwmmc_rockchip ff0f0000.dwmmc: 1 slots initialized
-> [    3.645305] leds-pca953x 4-0062: setting platform data
-> [    3.656675] ledtrig-cpu: registered to indicate activity on CPUs
-> [    3.663200] usbcore: registered new interface driver usbhid
-> [    3.668783] usbhid: USB HID core driver
-> [    3.672674] usbcore: registered new interface driver r8188eu
-> [    3.678393] usbcore: registered new interface driver rtl8723au
-> [    3.699210] mmc_host mmc0: Bus speed (slot 0) = 50000000Hz (slot req 52000000Hz, actual 50000000HZ div = 0)
-> [    3.900398] random: crng init done
-> [    3.954089] NET: Registered protocol family 10
-> [    3.974107] mmc0: Card stuck in programming state! __mmc_switch
-> [    3.980027] mmc0: error -110 whilst initialising MMC card
->
->
-> The bootloader I am using has no problems with the eMMC as you can see
-> below:
->
-> barebox@phycore-rk3288:/ devinfo mshc0
-> Host information:
->   current clock: 52000000
->   current buswidth: 8
->   capabilities: 4bit 8bit sd-hs mmc-hs mmc-52MHz
-> Card information:
->   Attached is a MMC card
->   Version: 4.0
->   Capacity: 14080 MiB
->   High capacity card
->    CID: 13014E52-314A3536-4C11616D-559BA2BD
->    CSD: D04F0132-0F5913FF-FFFFFFEF-8A4000BF
->   Max. transfer speed: 52000000 Hz
->   capabilities: 4bit mmc-hs mmc-52MHz
->   Manufacturer ID: 13
->   OEM/Application ID: 014E
->   Product name: 'R1J56'
->   Product revision: 4.12
->   Serial no: 1634555291
->   Manufacturing date: 10.1999
-> Parameters:
->   boot: disabled ("disabled", "boot0", "boot1", "user")
->   nt_signature: 8a35eb82
->   probe: 0
->
-> Any hints on what the problem could be?
->
-> Regards,
-> Wadim
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
-
-
--- 
-Best Regards
-Shawn Lin
-
+VGhhbmtzLg0KUmVzZW5kaW5n4oCmDQoNCk9uIDgvMzEvMTYsIDQ6NTEgUE0sICJVbGYgSGFuc3Nv
+biIgPHVsZi5oYW5zc29uQGxpbmFyby5vcmc+IHdyb3RlOg0KDQo+T24gMjkgQXVndXN0IDIwMTYg
+YXQgMTk6MzIsIGFsZXgubGVtYmVyZyA8YWxleC5sZW1iZXJnQHNhbmRpc2suY29tPiB3cm90ZToN
+Cj4+IEZsYXNoIGJhc2VkIHN0b3JhZ2UgZGV2aWNlcyBtaWdodCBuZWVkIHRvIHBlcmZvcm0gdGhl
+IGludGVybmFsDQo+PiBCYWNrZ3JvdW5kIE9wZXJhdGlvbnMgKEJLT1BTKSBpbiBvcmRlciB0byBp
+bnN1cmUgYmV0dGVyIHBlcmZvcm1hbmNlDQo+PiBmb3IgdGhlIG5leHQgY29taW5nIElPLg0KPj4g
+Rm9sbG93aW5nIHRoZSBkaXNjdXNzaW9uIGluIHRoZSBtbWMgdGhyZWFkOg0KPj4gd3d3LnNwaW5p
+Y3MubmV0L2xpc3RzL2xpbnV4LW1tYy9tc2czNzc3OS5odG1sDQo+PiBUbyBsZXQgdGhlIGRldmlj
+ZSBjb21wbGV0ZSBpdHMgQktPUFMgZHVyaW5nIFJ1bnRpbWUgU3VzcGVuZCwNCj4+IHdlIHN1Z2dl
+c3QgdG8gY2hlY2sgdGhlIEJLT1BTIGxldmVsLg0KPj4gSW4gY2FzZSB0aGUgZGV2aWNlIG5lZWQg
+dG8gY29tcGxldGUgaXRzIEJLT1BTLCByZXNjaGVkdWxlIHRoZSBSdW50aW1lDQo+PiBTdXNwZW5k
+Lg0KPj4NCj4+IGFsZXgubGVtYmVyZyAoMyk6DQo+PiAgIG1tYzogcmVwbGFjaW5nIGhhcmRjb2Rl
+ZCB2YWx1ZSBmb3IgcnVudGltZSBQTSBzdXNwZW5kDQo+PiAgIG1tYzogQWRkaW5nIEFVVE9fQktP
+UFNfRU4gYml0IHNldCBmb3IgQXV0byBCS09QUyBzdXBwb3J0DQo+PiAgIG1tYzogQ2hlY2tpbmcg
+QktPUFMgc3RhdHVzIHByaW9yIHRvIFN1c3BlbmQNCj4+DQo+PiAgZHJpdmVycy9tbWMvY2FyZC9i
+bG9jay5jIHwgIDMgKystDQo+PiAgZHJpdmVycy9tbWMvY29yZS9tbWMuYyAgIHwgMzYgKysrKysr
+KysrKysrKysrKysrKysrKysrKysrKystLS0tLS0tDQo+PiAgaW5jbHVkZS9saW51eC9tbWMvY2Fy
+ZC5oIHwgIDEgKw0KPj4gIGluY2x1ZGUvbGludXgvbW1jL2hvc3QuaCB8ICAyICsrDQo+PiAgaW5j
+bHVkZS9saW51eC9tbWMvbW1jLmggIHwgIDIgKysNCj4+ICA1IGZpbGVzIGNoYW5nZWQsIDM2IGlu
+c2VydGlvbnMoKyksIDggZGVsZXRpb25zKC0pDQo+Pg0KPj4gLS0NCj4+IDEuOS4xDQo+Pg0KPg0K
+PkFsZXgsIHRoYW5rcyBmb3IgcG9zdGluZyB0aGlzLiBBbHRob3VnaCwgdGhlIHBhdGNoZXMgZG9l
+c24ndCBzaG93IHVwDQo+aW4gdGhlIGh0dHBzOi8vcGF0Y2h3b3JrLmtlcm5lbC5vcmcvcHJvamVj
+dC9saW51eC1tbWMvbGlzdC8uIEkgZ3Vlc3MNCj5pdCdzIGJlY2F1c2UgeW91IG11c3QgaGF2ZSBs
+aW51eC1tbWMgb24gdGhlIHRvIGxpc3QuIENvdWxkIHlvdSBwbGVhc2UNCj5yZXNlbmQ/DQo+DQo+
+S2luZCByZWdhcmRzDQo+VWZmZQ0KDQo=
