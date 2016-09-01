@@ -1,151 +1,83 @@
-From: Pramod Gurav <pramod.gurav@linaro.org>
-Subject: [PATCH v2] mmc: sdhci-msm: Add pm_runtime and system PM support
-Date: Thu,  1 Sep 2016 15:40:21 +0530
-Message-ID: <20160901101021.26371-1-pramod.gurav@linaro.org>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org
-Cc: linux-kernel@vger.kernel.org, adrian.hunter@intel.com, ulf.hansson@linaro.org, Pramod Gurav <pramod.gurav@linaro.org>
+From: Thierry Reding <thierry.reding-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Subject: [PATCH v2] mmc: tegra: Mark 64-bit DMA broken on Tegra124
+Date: Thu,  1 Sep 2016 13:46:17 +0200
+Message-ID: <20160901114617.19416-1-thierry.reding@gmail.com>
+Return-path: <linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Sender: linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: Paul Kocialkowski <contact-W9ppeneeCTY@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
 
-Provides runtime PM callbacks to enable and disable clock resources
-when idle. Also support system PM callbacks to be called during system
-suspend and resume.
+From: Thierry Reding <treding-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
 
-Signed-off-by: Pramod Gurav <pramod.gurav@linaro.org>
+According to the TRM, the SD/MMC controller on Tegra124 supports 34-bit
+addressing, but testing shows that this doesn't work. On a device which
+has more than 2 GiB of RAM and LPAE enabled, buffer allocations can use
+addresses above the 32-bit boundary.
+
+One way to work around this would be to enable IOMMU physical to virtual
+address translations for the SD/MMC controllers, but that's not easy to
+implement without breaking existing use-cases. It's also not obvious why
+34-bit addressing doesn't work as advertised. In order to fix this for
+existing users, add the SDHCI_QUIRK2_BROKEN_64_BIT_DMA quirk for now.
+
+Reported-by: Paul Kocialkowski <contact-W9ppeneeCTY@public.gmane.org>
+Acked-by: Stephen Warren <swarren-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
+Acked-by: Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>
+Acked-by: Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Signed-off-by: Thierry Reding <treding-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
 ---
 Changes in v2:
-- Moved pm_rutime enabling before adding host
-- Handled pm_rutime in remove
-- Changed runtime handling with reference from sdhci-of-at91.c
- 
- drivers/mmc/host/sdhci-msm.c | 82 +++++++++++++++++++++++++++++++++++++++++++-
- 1 file changed, 81 insertions(+), 1 deletion(-)
+- add comment with rationale for the quirk
+- add various Acked-bys
 
-diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
-index 8ef44a2a..8273a71 100644
---- a/drivers/mmc/host/sdhci-msm.c
-+++ b/drivers/mmc/host/sdhci-msm.c
-@@ -18,6 +18,7 @@
- #include <linux/of_device.h>
- #include <linux/delay.h>
- #include <linux/mmc/mmc.h>
-+#include <linux/pm_runtime.h>
- #include <linux/slab.h>
- 
- #include "sdhci-pltfm.h"
-@@ -658,12 +659,26 @@ static int sdhci_msm_probe(struct platform_device *pdev)
- 		goto clk_disable;
- 	}
- 
-+	pm_runtime_get_noresume(&pdev->dev);
-+	pm_runtime_set_active(&pdev->dev);
-+	pm_runtime_enable(&pdev->dev);
-+	pm_runtime_set_autosuspend_delay(&pdev->dev, 50);
-+	pm_runtime_use_autosuspend(&pdev->dev);
-+
- 	ret = sdhci_add_host(host);
- 	if (ret)
--		goto clk_disable;
-+		goto pm_runtime_disable;
-+
-+	platform_set_drvdata(pdev, host);
-+
-+	pm_runtime_put_autosuspend(&pdev->dev);
- 
- 	return 0;
- 
-+pm_runtime_disable:
-+	pm_runtime_disable(&pdev->dev);
-+	pm_runtime_set_suspended(&pdev->dev);
-+	pm_runtime_put_noidle(&pdev->dev);
- clk_disable:
- 	clk_disable_unprepare(msm_host->clk);
- pclk_disable:
-@@ -685,6 +700,11 @@ static int sdhci_msm_remove(struct platform_device *pdev)
- 		    0xffffffff);
- 
- 	sdhci_remove_host(host, dead);
-+
-+	pm_runtime_get_sync(&pdev->dev);
-+	pm_runtime_disable(&pdev->dev);
-+	pm_runtime_put_noidle(&pdev->dev);
-+
- 	clk_disable_unprepare(msm_host->clk);
- 	clk_disable_unprepare(msm_host->pclk);
- 	if (!IS_ERR(msm_host->bus_clk))
-@@ -693,12 +713,72 @@ static int sdhci_msm_remove(struct platform_device *pdev)
- 	return 0;
- }
- 
-+static int sdhci_msm_runtime_suspend(struct device *dev)
-+{
-+	struct sdhci_host *host = dev_get_drvdata(dev);
-+	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-+	struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
-+	int ret;
-+
-+	ret = sdhci_runtime_suspend_host(host);
-+	if (ret)
-+		return ret;
-+
-+	clk_disable_unprepare(msm_host->clk);
-+	clk_disable_unprepare(msm_host->pclk);
-+
-+	return 0;
-+}
-+
-+static int sdhci_msm_runtime_resume(struct device *dev)
-+{
-+	struct sdhci_host *host = dev_get_drvdata(dev);
-+	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-+	struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
-+	int ret;
-+
-+	ret = clk_prepare_enable(msm_host->clk);
-+	if (ret) {
-+		dev_err(dev, "clk_enable failed: %d\n", ret);
-+		return ret;
-+	}
-+	ret = clk_prepare_enable(msm_host->pclk);
-+	if (ret) {
-+		dev_err(dev, "clk_enable failed: %d\n", ret);
-+		clk_disable_unprepare(msm_host->clk);
-+		return ret;
-+	}
-+
-+	return sdhci_runtime_resume_host(host);
-+}
-+
-+static int sdhci_msm_suspend(struct device *dev)
-+{
-+	pm_runtime_force_suspend(dev);
-+
-+	return 0;
-+}
-+
-+static int sdhci_msm_resume(struct device *dev)
-+{
-+	pm_runtime_force_resume(dev);
-+
-+	return 0;
-+}
-+
-+static const struct dev_pm_ops sdhci_msm_pm_ops = {
-+	SET_LATE_SYSTEM_SLEEP_PM_OPS(sdhci_msm_suspend, sdhci_msm_resume)
-+	SET_RUNTIME_PM_OPS(sdhci_msm_runtime_suspend, sdhci_msm_runtime_resume,
-+				NULL)
-+};
-+
- static struct platform_driver sdhci_msm_driver = {
- 	.probe = sdhci_msm_probe,
- 	.remove = sdhci_msm_remove,
- 	.driver = {
- 		   .name = "sdhci_msm",
- 		   .of_match_table = sdhci_msm_dt_match,
-+		   .pm = &sdhci_msm_pm_ops,
- 	},
+ drivers/mmc/host/sdhci-tegra.c | 27 ++++++++++++++++++++++++++-
+ 1 file changed, 26 insertions(+), 1 deletion(-)
+
+diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
+index 1e93dc4e303e..20b6ff5b4af1 100644
+--- a/drivers/mmc/host/sdhci-tegra.c
++++ b/drivers/mmc/host/sdhci-tegra.c
+@@ -391,6 +391,31 @@ static const struct sdhci_tegra_soc_data soc_data_tegra114 = {
+ 	.pdata = &sdhci_tegra114_pdata,
  };
  
++static const struct sdhci_pltfm_data sdhci_tegra124_pdata = {
++	.quirks = SDHCI_QUIRK_BROKEN_TIMEOUT_VAL |
++		  SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK |
++		  SDHCI_QUIRK_SINGLE_POWER_WRITE |
++		  SDHCI_QUIRK_NO_HISPD_BIT |
++		  SDHCI_QUIRK_BROKEN_ADMA_ZEROLEN_DESC |
++		  SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN,
++	.quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN |
++		   /*
++		    * The TRM states that the SD/MMC controller found on
++		    * Tegra124 can address 34 bits (the maximum supported by
++		    * the Tegra memory controller), but tests show that DMA
++		    * to or from above 4 GiB doesn't work. This is possibly
++		    * caused by missing programming, though it's not obvious
++		    * what sequence is required. Mark 64-bit DMA broken for
++		    * now to fix this for existing users (e.g. Nyan boards).
++		    */
++		   SDHCI_QUIRK2_BROKEN_64_BIT_DMA,
++	.ops  = &tegra114_sdhci_ops,
++};
++
++static const struct sdhci_tegra_soc_data soc_data_tegra124 = {
++	.pdata = &sdhci_tegra124_pdata,
++};
++
+ static const struct sdhci_pltfm_data sdhci_tegra210_pdata = {
+ 	.quirks = SDHCI_QUIRK_BROKEN_TIMEOUT_VAL |
+ 		  SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK |
+@@ -408,7 +433,7 @@ static const struct sdhci_tegra_soc_data soc_data_tegra210 = {
+ 
+ static const struct of_device_id sdhci_tegra_dt_match[] = {
+ 	{ .compatible = "nvidia,tegra210-sdhci", .data = &soc_data_tegra210 },
+-	{ .compatible = "nvidia,tegra124-sdhci", .data = &soc_data_tegra114 },
++	{ .compatible = "nvidia,tegra124-sdhci", .data = &soc_data_tegra124 },
+ 	{ .compatible = "nvidia,tegra114-sdhci", .data = &soc_data_tegra114 },
+ 	{ .compatible = "nvidia,tegra30-sdhci", .data = &soc_data_tegra30 },
+ 	{ .compatible = "nvidia,tegra20-sdhci", .data = &soc_data_tegra20 },
 -- 
 2.9.3
