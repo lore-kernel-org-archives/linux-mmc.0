@@ -1,155 +1,145 @@
-From: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH v2] mmc: sdhci-of-arasan: Properly set
- corecfg_clockmultiplier on rk3399
-Date: Thu, 1 Sep 2016 16:18:15 +0200
-Message-ID: <CAPDyKFrwGhFzVOsxYeN_H+GdkNfEQJc=1p50D-6E7HH6LUV-pA@mail.gmail.com>
-References: <1472201475-7970-1-git-send-email-shawn.lin@rock-chips.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-In-Reply-To: <1472201475-7970-1-git-send-email-shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-rockchip>,
- <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-rockchip/>
-List-Post: <mailto:linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-List-Help: <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-rockchip>,
- <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
-Sender: "Linux-rockchip" <linux-rockchip-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-Errors-To: linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
-To: Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
-Cc: "open list:ARM/Rockchip SoC..." <linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Ziyuan Xu <xzy.xu-TNX95d0MmH7DzftRWevZcw@public.gmane.org>, linux-mmc <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Douglas Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
+From: Pramod Gurav <pramod.gurav@linaro.org>
+Subject: [PATCH v3] mmc: sdhci-msm: Add pm_runtime and system PM support
+Date: Thu,  1 Sep 2016 19:53:35 +0530
+Message-ID: <20160901142335.2396-1-pramod.gurav@linaro.org>
+Return-path: <linux-arm-msm-owner@vger.kernel.org>
+Sender: linux-arm-msm-owner@vger.kernel.org
+To: linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org
+Cc: linux-kernel@vger.kernel.org, adrian.hunter@intel.com, ulf.hansson@linaro.org, Pramod Gurav <pramod.gurav@linaro.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On 26 August 2016 at 10:51, Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org> wrote:
-> corecfg_clockmultiplier indicates clock multiplier value of
-> programmable clock generator which should be the same value
-> of SDHCI_CAPABILITIES_1. The default value of the register,
-> corecfg_clockmultiplier, is 0x10. But actually it is a mistake
-> by designer as our intention was to set it to be zero which
-> means we don't support programmable clock generator. So we have
-> to make it to be zero on bootloader which seems work fine until
-> now. But now we find an issue that when deploying genpd support
-> for it, the remove callback will trigger the genpd to poweroff the
-> power domain for sdhci-of-arasan which manage the controller, phy
-> and corecfg_* stuff.
->
-> So when we do bind/unbind the driver, we have already reinit
-> the controller and phy, but without doing that for corecfg_*.
-> Regarding to only the corecfg_clockmultipler is wrong, let's
-> fix it by explicitly marking it to be zero when probing. With
-> this change, we could do bind/unbind successfully.
->
-> Reported-by: Ziyuan Xu <xzy.xu-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
-> Cc: Douglas Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
-> Signed-off-by: Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
->
+Provides runtime PM callbacks to enable and disable clock resources
+when idle. Also support system PM callbacks to be called during system
+suspend and resume.
 
-Thanks, applied for next!
+Signed-off-by: Pramod Gurav <pramod.gurav@linaro.org>
+---
+Changes in v3:
+- Added CONFIG_PM around runtime pm function.
+- Replaced msm suspend/resume with generic function directly
+- Use SET_SYSTEM_SLEEP_PM_OPS instead of late version
 
-Kind regards
-Uffe
+Changes in v2:
+- Moved pm_rutime enabling before adding host
+- Handled pm_rutime in remove
+- Changed runtime handling with reference from sdhci-of-at91.c
 
-> ---
->
-> Changes in v2:
-> - fix some typos and build
-> - move the configuration of corecfg_clockmultiplier after
->   enabling aclk_emmc to avoid the off state of aclk_emmc_grf.
->   I add a new function to make it more common for other coming
->   users who have the same requirment for setting diff clkmul.
->
->  drivers/mmc/host/sdhci-of-arasan.c | 46 ++++++++++++++++++++++++++++++++++++++
->  1 file changed, 46 insertions(+)
->
-> diff --git a/drivers/mmc/host/sdhci-of-arasan.c b/drivers/mmc/host/sdhci-of-arasan.c
-> index 0b3a9cf..33601a8 100644
-> --- a/drivers/mmc/host/sdhci-of-arasan.c
-> +++ b/drivers/mmc/host/sdhci-of-arasan.c
-> @@ -67,10 +67,12 @@ struct sdhci_arasan_soc_ctl_field {
->   * accessible via the syscon API.
->   *
->   * @baseclkfreq:       Where to find corecfg_baseclkfreq
-> + * @clockmultiplier:   Where to find corecfg_clockmultiplier
->   * @hiword_update:     If true, use HIWORD_UPDATE to access the syscon
->   */
->  struct sdhci_arasan_soc_ctl_map {
->         struct sdhci_arasan_soc_ctl_field       baseclkfreq;
-> +       struct sdhci_arasan_soc_ctl_field       clockmultiplier;
->         bool                                    hiword_update;
->  };
->
-> @@ -100,6 +102,7 @@ struct sdhci_arasan_data {
->
->  static const struct sdhci_arasan_soc_ctl_map rk3399_soc_ctl_map = {
->         .baseclkfreq = { .reg = 0xf000, .width = 8, .shift = 8 },
-> +       .clockmultiplier = { .reg = 0xf02c, .width = 8, .shift = 0},
->         .hiword_update = true,
->  };
->
-> @@ -379,6 +382,45 @@ static const struct clk_ops arasan_sdcardclk_ops = {
->  };
->
->  /**
-> + * sdhci_arasan_update_clockmultiplier - Set corecfg_clockmultiplier
-> + *
-> + * The corecfg_clockmultiplier is supposed to contain clock multiplier
-> + * value of programmable clock generator.
-> + *
-> + * NOTES:
-> + * - Many existing devices don't seem to do this and work fine.  To keep
-> + *   compatibility for old hardware where the device tree doesn't provide a
-> + *   register map, this function is a noop if a soc_ctl_map hasn't been provided
-> + *   for this platform.
-> + * - The value of corecfg_clockmultiplier should sync with that of corresponding
-> + *   value reading from sdhci_capability_register. So this function is called
-> + *   once at probe time and never called again.
-> + *
-> + * @host:              The sdhci_host
-> + */
-> +static void sdhci_arasan_update_clockmultiplier(struct sdhci_host *host,
-> +                                               u32 value)
-> +{
-> +       struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> +       struct sdhci_arasan_data *sdhci_arasan = sdhci_pltfm_priv(pltfm_host);
-> +       const struct sdhci_arasan_soc_ctl_map *soc_ctl_map =
-> +               sdhci_arasan->soc_ctl_map;
-> +
-> +       /* Having a map is optional */
-> +       if (!soc_ctl_map)
-> +               return;
-> +
-> +       /* If we have a map, we expect to have a syscon */
-> +       if (!sdhci_arasan->soc_ctl_base) {
-> +               pr_warn("%s: Have regmap, but no soc-ctl-syscon\n",
-> +                       mmc_hostname(host->mmc));
-> +               return;
-> +       }
-> +
-> +       sdhci_arasan_syscon_write(host, &soc_ctl_map->clockmultiplier, value);
-> +}
-> +
-> +/**
->   * sdhci_arasan_update_baseclkfreq - Set corecfg_baseclkfreq
->   *
->   * The corecfg_baseclkfreq is supposed to contain the MHz of clk_xin.  This
-> @@ -559,6 +601,10 @@ static int sdhci_arasan_probe(struct platform_device *pdev)
->         sdhci_get_of_property(pdev);
->         pltfm_host->clk = clk_xin;
->
-> +       if (of_device_is_compatible(pdev->dev.of_node,
-> +                                   "rockchip,rk3399-sdhci-5.1"))
-> +               sdhci_arasan_update_clockmultiplier(host, 0x0);
-> +
->         sdhci_arasan_update_baseclkfreq(host);
->
->         ret = sdhci_arasan_register_sdclk(sdhci_arasan, clk_xin, &pdev->dev);
-> --
-> 2.3.7
->
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+ drivers/mmc/host/sdhci-msm.c | 71 +++++++++++++++++++++++++++++++++++++++++++-
+ 1 file changed, 70 insertions(+), 1 deletion(-)
+
+diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
+index 8ef44a2a..0ef4f29 100644
+--- a/drivers/mmc/host/sdhci-msm.c
++++ b/drivers/mmc/host/sdhci-msm.c
+@@ -18,6 +18,7 @@
+ #include <linux/of_device.h>
+ #include <linux/delay.h>
+ #include <linux/mmc/mmc.h>
++#include <linux/pm_runtime.h>
+ #include <linux/slab.h>
+ 
+ #include "sdhci-pltfm.h"
+@@ -658,12 +659,26 @@ static int sdhci_msm_probe(struct platform_device *pdev)
+ 		goto clk_disable;
+ 	}
+ 
++	pm_runtime_get_noresume(&pdev->dev);
++	pm_runtime_set_active(&pdev->dev);
++	pm_runtime_enable(&pdev->dev);
++	pm_runtime_set_autosuspend_delay(&pdev->dev, 50);
++	pm_runtime_use_autosuspend(&pdev->dev);
++
+ 	ret = sdhci_add_host(host);
+ 	if (ret)
+-		goto clk_disable;
++		goto pm_runtime_disable;
++
++	platform_set_drvdata(pdev, host);
++
++	pm_runtime_put_autosuspend(&pdev->dev);
+ 
+ 	return 0;
+ 
++pm_runtime_disable:
++	pm_runtime_disable(&pdev->dev);
++	pm_runtime_set_suspended(&pdev->dev);
++	pm_runtime_put_noidle(&pdev->dev);
+ clk_disable:
+ 	clk_disable_unprepare(msm_host->clk);
+ pclk_disable:
+@@ -685,6 +700,11 @@ static int sdhci_msm_remove(struct platform_device *pdev)
+ 		    0xffffffff);
+ 
+ 	sdhci_remove_host(host, dead);
++
++	pm_runtime_get_sync(&pdev->dev);
++	pm_runtime_disable(&pdev->dev);
++	pm_runtime_put_noidle(&pdev->dev);
++
+ 	clk_disable_unprepare(msm_host->clk);
+ 	clk_disable_unprepare(msm_host->pclk);
+ 	if (!IS_ERR(msm_host->bus_clk))
+@@ -693,12 +713,61 @@ static int sdhci_msm_remove(struct platform_device *pdev)
+ 	return 0;
+ }
+ 
++#ifdef CONFIG_PM
++static int sdhci_msm_runtime_suspend(struct device *dev)
++{
++	struct sdhci_host *host = dev_get_drvdata(dev);
++	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
++	struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
++	int ret;
++
++	ret = sdhci_runtime_suspend_host(host);
++	if (ret)
++		return ret;
++
++	clk_disable_unprepare(msm_host->clk);
++	clk_disable_unprepare(msm_host->pclk);
++
++	return 0;
++}
++
++static int sdhci_msm_runtime_resume(struct device *dev)
++{
++	struct sdhci_host *host = dev_get_drvdata(dev);
++	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
++	struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
++	int ret;
++
++	ret = clk_prepare_enable(msm_host->clk);
++	if (ret) {
++		dev_err(dev, "clk_enable failed: %d\n", ret);
++		return ret;
++	}
++	ret = clk_prepare_enable(msm_host->pclk);
++	if (ret) {
++		dev_err(dev, "clk_enable failed: %d\n", ret);
++		clk_disable_unprepare(msm_host->clk);
++		return ret;
++	}
++
++	return sdhci_runtime_resume_host(host);
++}
++#endif
++
++static const struct dev_pm_ops sdhci_msm_pm_ops = {
++	SET_SYSTEM_SLEEP_PM_OPS(pm_runtime_force_suspend,
++					pm_runtime_force_resume)
++	SET_RUNTIME_PM_OPS(sdhci_msm_runtime_suspend, sdhci_msm_runtime_resume,
++				NULL)
++};
++
+ static struct platform_driver sdhci_msm_driver = {
+ 	.probe = sdhci_msm_probe,
+ 	.remove = sdhci_msm_remove,
+ 	.driver = {
+ 		   .name = "sdhci_msm",
+ 		   .of_match_table = sdhci_msm_dt_match,
++		   .pm = &sdhci_msm_pm_ops,
+ 	},
+ };
+ 
+-- 
+2.9.3
