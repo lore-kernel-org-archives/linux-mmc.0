@@ -1,35 +1,57 @@
-From: Simon Horman <horms@verge.net.au>
-Subject: Re: [PATCH v5 10/11] arm64: dts: r8a7795: salvator-x: Enable UHS-I
- SDR-104
-Date: Thu, 1 Sep 2016 16:25:40 +0200
-Message-ID: <20160901142539.GI14300@verge.net.au>
-References: <1472591399-13907-1-git-send-email-horms+renesas@verge.net.au>
- <1472591399-13907-11-git-send-email-horms+renesas@verge.net.au>
- <20160901072354.GA2893@katana>
+From: alex lemberg <alex.lemberg@sandisk.com>
+Subject: [PATCH 1/3] mmc: replacing hardcoded value for runtime PM suspend
+Date: Thu, 1 Sep 2016 17:24:48 +0300
+Message-ID: <1472739890-3384-2-git-send-email-alex.lemberg@sandisk.com>
+References: <1472739890-3384-1-git-send-email-alex.lemberg@sandisk.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from kirsty.vergenet.net ([202.4.237.240]:52768 "EHLO
-        kirsty.vergenet.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752164AbcIAOZq (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 1 Sep 2016 10:25:46 -0400
-Content-Disposition: inline
-In-Reply-To: <20160901072354.GA2893@katana>
+Received: from mail-by2nam01on0047.outbound.protection.outlook.com ([104.47.34.47]:29861
+        "EHLO NAM01-BY2-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1751214AbcIAO3I (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Thu, 1 Sep 2016 10:29:08 -0400
+In-Reply-To: <1472739890-3384-1-git-send-email-alex.lemberg@sandisk.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Wolfram Sang <wsa@the-dreams.de>
-Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, Ulf Hansson <ulf.hansson@linaro.org>, Magnus Damm <magnus.damm@gmail.com>, linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org
+To: ulf.hansson@linaro.org, linux-mmc@vger.kernel.org
+Cc: avi.shchislowski@sandisk.com, alex lemberg <alex.lemberg@sandisk.com>
 
-On Thu, Sep 01, 2016 at 09:23:54AM +0200, Wolfram Sang wrote:
-> On Tue, Aug 30, 2016 at 11:09:58PM +0200, Simon Horman wrote:
-> > Add the sd-uhs-sdr104 property to SDHI0 and SDHI1.
-> > 
-> > Signed-off-by: Simon Horman <horms+renesas@verge.net.au>
-> 
-> After removing a SDR104 card from the slot, the interface is stalled
-> here. No new cards (even non-SDR104) can be detected anymore, sadly.
-> Happens for both slots on my H3 Salvator-X.
+Add MMC_AUTOSUSPEND_DELAY_MS define
 
-Bother. That is rather difficult for me to exercise.
-Does this occur without sdr104 enabled (e.g. in DT)?
+Signed-off-by: alex lemberg <alex.lemberg@sandisk.com>
+---
+ drivers/mmc/card/block.c | 3 ++-
+ include/linux/mmc/host.h | 2 ++
+ 2 files changed, 4 insertions(+), 1 deletion(-)
+
+diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+index 48a5dd7..f4386ed 100644
+--- a/drivers/mmc/card/block.c
++++ b/drivers/mmc/card/block.c
+@@ -2610,7 +2610,8 @@ static int mmc_blk_probe(struct mmc_card *card)
+ 			goto out;
+ 	}
+ 
+-	pm_runtime_set_autosuspend_delay(&card->dev, 3000);
++	pm_runtime_set_autosuspend_delay(&card->dev,
++		MMC_RUNTIME_SUSPEND_DELAY_MS);
+ 	pm_runtime_use_autosuspend(&card->dev);
+ 
+ 	/*
+diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+index aa4bfbf..8cb8218 100644
+--- a/include/linux/mmc/host.h
++++ b/include/linux/mmc/host.h
+@@ -22,6 +22,8 @@
+ #include <linux/mmc/mmc.h>
+ #include <linux/mmc/pm.h>
+ 
++#define MMC_RUNTIME_SUSPEND_DELAY_MS	3000
++
+ struct mmc_ios {
+ 	unsigned int	clock;			/* clock rate */
+ 	unsigned short	vdd;
+-- 
+1.9.1
 
