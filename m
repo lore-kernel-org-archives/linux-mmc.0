@@ -1,192 +1,148 @@
-From: Paul Kocialkowski <contact-W9ppeneeCTY@public.gmane.org>
-Subject: Re: [PATCH v2] mmc: tegra: Mark 64-bit DMA broken on Tegra124
-Date: Fri, 02 Sep 2016 00:52:22 +0200
-Message-ID: <1472770342.3813.11.camel@paulk.fr>
-References: <20160901114617.19416-1-thierry.reding@gmail.com>
-Mime-Version: 1.0
-Content-Type: multipart/signed; micalg="pgp-sha256";
-        protocol="application/pgp-signature"; boundary="=-4WHpBx1NBqLLtam0GUgH"
-Return-path: <linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20160901114617.19416-1-thierry.reding-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Sender: linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Thierry Reding <thierry.reding-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+From: Shawn Lin <shawn.lin@rock-chips.com>
+Subject: [PATCH v3 2/4] mmc: sdhci-of-arasan: Control clock for accessing syscon
+Date: Fri,  2 Sep 2016 08:54:39 +0800
+Message-ID: <1472777681-16656-3-git-send-email-shawn.lin@rock-chips.com>
+References: <1472777681-16656-1-git-send-email-shawn.lin@rock-chips.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from lucky1.263xmail.com ([211.157.147.132]:40733 "EHLO
+        lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750786AbcIBBAf (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 1 Sep 2016 21:00:35 -0400
+In-Reply-To: <1472777681-16656-1-git-send-email-shawn.lin@rock-chips.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Heiko Stuebner <heiko@sntech.de>, Rob Herring <robh+dt@kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-rockchip@lists.infradead.org, Douglas Anderson <dianders@chromium.org>, Ziyuan Xu <xzy.xu@rock-chips.com>, linux-kernel@vger.kernel.org, Shawn Lin <shawn.lin@rock-chips.com>
+
+In the eariler commit 65820199272d ("Documentation: mmc:
+sdhci-of-arasan: Add soc-ctl-syscon for corecfg regs"), we
+introduced syscon to control corecfg_* stuff provided by
+arasan. But given that we may need to ungate the clock for
+accessing corecfg_*, it not so perfect as it depends on
+whether specific clock driver disables it if not referenced.
+Meanwhile, if we don't need arasan contoller to work anymore,
+there is no reason to still enable it. So let's control this
+clock when needed.
+
+Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
+
+Tested-by: Ziyuan Xu <xzy.xu@rock-chips.com>
+---
+
+Changes in v3:
+- return failure if failing to enable clk_syscon
+
+Changes in v2:
+- assign NULL to clk_syscon if it's not deferral error.
+
+ drivers/mmc/host/sdhci-of-arasan.c | 34 +++++++++++++++++++++++++++++++---
+ 1 file changed, 31 insertions(+), 3 deletions(-)
+
+diff --git a/drivers/mmc/host/sdhci-of-arasan.c b/drivers/mmc/host/sdhci-of-arasan.c
+index 0b3a9cf..767d4b0 100644
+--- a/drivers/mmc/host/sdhci-of-arasan.c
++++ b/drivers/mmc/host/sdhci-of-arasan.c
+@@ -78,6 +78,7 @@ struct sdhci_arasan_soc_ctl_map {
+  * struct sdhci_arasan_data
+  * @host:		Pointer to the main SDHCI host structure.
+  * @clk_ahb:		Pointer to the AHB clock
++ * @clk_syscon:		Pointer to the optional clock for accessing syscon
+  * @phy:		Pointer to the generic phy
+  * @is_phy_on:		True if the PHY is on; false if not.
+  * @sdcardclk_hw:	Struct for the clock we might provide to a PHY.
+@@ -88,6 +89,7 @@ struct sdhci_arasan_soc_ctl_map {
+ struct sdhci_arasan_data {
+ 	struct sdhci_host *host;
+ 	struct clk	*clk_ahb;
++	struct clk	*clk_syscon;
+ 	struct phy	*phy;
+ 	bool		is_phy_on;
+ 
+@@ -290,6 +292,7 @@ static int sdhci_arasan_suspend(struct device *dev)
+ 
+ 	clk_disable(pltfm_host->clk);
+ 	clk_disable(sdhci_arasan->clk_ahb);
++	clk_disable(sdhci_arasan->clk_syscon);
+ 
+ 	return 0;
+ }
+@@ -309,6 +312,12 @@ static int sdhci_arasan_resume(struct device *dev)
+ 	struct sdhci_arasan_data *sdhci_arasan = sdhci_pltfm_priv(pltfm_host);
+ 	int ret;
+ 
++	ret = clk_enable(sdhci_arasan->clk_syscon);
++	if (ret) {
++		dev_err(dev, "Cannot enable syscon clock.\n");
++		return ret;
++	}
++
+ 	ret = clk_enable(sdhci_arasan->clk_ahb);
+ 	if (ret) {
+ 		dev_err(dev, "Cannot enable AHB clock.\n");
+@@ -528,26 +537,42 @@ static int sdhci_arasan_probe(struct platform_device *pdev)
+ 					ret);
+ 			goto err_pltfm_free;
+ 		}
++
++		sdhci_arasan->clk_syscon = devm_clk_get(&pdev->dev,
++							"clk_syscon");
++		if (IS_ERR(sdhci_arasan->clk_syscon)) {
++			ret = PTR_ERR(sdhci_arasan->clk_syscon);
++			if (ret == -EPROBE_DEFER)
++				goto err_pltfm_free;
++			else
++				sdhci_arasan->clk_syscon = NULL;
++		}
++
++		ret = clk_prepare_enable(sdhci_arasan->clk_syscon);
++		if (ret) {
++			dev_err(&pdev->dev, "Unable to enable syscon clock.\n");
++			goto err_pltfm_free;
++		}
+ 	}
+ 
+ 	sdhci_arasan->clk_ahb = devm_clk_get(&pdev->dev, "clk_ahb");
+ 	if (IS_ERR(sdhci_arasan->clk_ahb)) {
+ 		dev_err(&pdev->dev, "clk_ahb clock not found.\n");
+ 		ret = PTR_ERR(sdhci_arasan->clk_ahb);
+-		goto err_pltfm_free;
++		goto clk_dis_syscon;
+ 	}
+ 
+ 	clk_xin = devm_clk_get(&pdev->dev, "clk_xin");
+ 	if (IS_ERR(clk_xin)) {
+ 		dev_err(&pdev->dev, "clk_xin clock not found.\n");
+ 		ret = PTR_ERR(clk_xin);
+-		goto err_pltfm_free;
++		goto clk_dis_syscon;
+ 	}
+ 
+ 	ret = clk_prepare_enable(sdhci_arasan->clk_ahb);
+ 	if (ret) {
+ 		dev_err(&pdev->dev, "Unable to enable AHB clock.\n");
+-		goto err_pltfm_free;
++		goto clk_dis_syscon;
+ 	}
+ 
+ 	ret = clk_prepare_enable(clk_xin);
+@@ -607,6 +632,8 @@ clk_disable_all:
+ 	clk_disable_unprepare(clk_xin);
+ clk_dis_ahb:
+ 	clk_disable_unprepare(sdhci_arasan->clk_ahb);
++clk_dis_syscon:
++	clk_disable_unprepare(sdhci_arasan->clk_syscon);
+ err_pltfm_free:
+ 	sdhci_pltfm_free(pdev);
+ 	return ret;
+@@ -631,6 +658,7 @@ static int sdhci_arasan_remove(struct platform_device *pdev)
+ 	ret = sdhci_pltfm_unregister(pdev);
+ 
+ 	clk_disable_unprepare(clk_ahb);
++	clk_disable_unprepare(sdhci_arasan->clk_syscon);
+ 
+ 	return ret;
+ }
+-- 
+2.3.7
 
 
---=-4WHpBx1NBqLLtam0GUgH
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
-
-Le jeudi 01 septembre 2016 =C3=A0 13:46 +0200, Thierry Reding a =C3=A9crit=
-=C2=A0:
-> From: Thierry Reding <treding-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
->=20
-> According to the TRM, the SD/MMC controller on Tegra124 supports 34-bit
-> addressing, but testing shows that this doesn't work. On a device which
-> has more than 2 GiB of RAM and LPAE enabled, buffer allocations can use
-> addresses above the 32-bit boundary.
->=20
-> One way to work around this would be to enable IOMMU physical to virtual
-> address translations for the SD/MMC controllers, but that's not easy to
-> implement without breaking existing use-cases. It's also not obvious why
-> 34-bit addressing doesn't work as advertised. In order to fix this for
-> existing users, add the SDHCI_QUIRK2_BROKEN_64_BIT_DMA quirk for now.
-
-I finally took time to test this and it sadly doesn't fix the issue I have =
-on
-tegra124 with 4 GiB RAM and LPAE.
-
-dmesg when the issue happens (with the patch applied and some debug added)
-follows:
-
-sdhci: Secure Digital Host Controller Interface driver
-sdhci: Copyright(c) Pierre Ossman
-sdhci-pltfm: SDHCI platform and OF driver helper
-sdhci-tegra 700b0000.sdhci: allocated mmc-pwrseq
-sdhci-tegra 700b0400.sdhci: Got CD GPIO
-sdhci-tegra 700b0400.sdhci: Got WP GPIO
-mmc0: Unknown controller version (3). You may experience problems.
-random: fast init done
-sdhci_set_dma_mask(): broken 64bit dma
-sdhci_set_dma_mask(): use 32bit dma
-mmc0: Invalid maximum block size, assuming 512 bytes
-input: Elan Touchpad as /devices/soc0/7000c400.i2c/i2c-1/1-0015/input/input=
-1
-using ADMA
-usbcore: registered new interface driver usbhid
-usbhid: USB HID core driver
-tegra-mc 70019000.memory-controller: hdar: read @0x000000007c058000: EMEM a=
-ddress decode error (EMEM decode error)
-tegra30-i2s 70301100.i2s: DMA channels sourced from device 70300000.ahub
-max98090 0-0010: MAX98090 REVID=3D0x43
-max98090 0-0010: use default 2.8v micbias
-tegra-snd-max98090 sound: HiFi <-> 70301100.i2s mapping ok
-input: GoogleNyanBig Headphones as /devices/soc0/sound/sound/card1/input2
-input: GoogleNyanBig Mic Jack as /devices/soc0/sound/sound/card1/input3
-tegra-mc 70019000.memory-controller: sdmmcrab: read @0x000000007c050200: EM=
-EM address decode error (EMEM decode error)
-mmc0: ADMA error
-
-A usual dmesg without LPAE enabled follows:
-[=C2=A0=C2=A0=C2=A013.593724] mmc0: Unknown controller version (3). You may=
- experience problems.
-[=C2=A0=C2=A0=C2=A013.600934] sdhci_set_dma_mask(): broken 64bit dma
-[=C2=A0=C2=A0=C2=A013.605716] sdhci_set_dma_mask(): use 32bit dma
-[=C2=A0=C2=A0=C2=A013.610262] mmc0: Invalid maximum block size, assuming 51=
-2 bytes
-[=C2=A0=C2=A0=C2=A013.622382] input: Elan Touchpad as /devices/soc0/7000c40=
-0.i2c/i2c-1/1-0015/input/input1
-[=C2=A0=C2=A0=C2=A013.675562] mmc0: SDHCI controller on 700b0600.sdhci [700=
-b0600.sdhci] using ADMA
-
-which shows the same other two errors about controller version and block si=
-ze.
-
-> Reported-by: Paul Kocialkowski <contact-W9ppeneeCTY@public.gmane.org>
-> Acked-by: Stephen Warren <swarren-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
-> Acked-by: Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>
-> Acked-by: Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-> Signed-off-by: Thierry Reding <treding-DDmLM1+adcrQT0dZR+AlfA@public.gmane.org>
-> ---
-> Changes in v2:
-> - add comment with rationale for the quirk
-> - add various Acked-bys
->=20
-> =C2=A0drivers/mmc/host/sdhci-tegra.c | 27 ++++++++++++++++++++++++++-
-> =C2=A01 file changed, 26 insertions(+), 1 deletion(-)
->=20
-> diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegr=
-a.c
-> index 1e93dc4e303e..20b6ff5b4af1 100644
-> --- a/drivers/mmc/host/sdhci-tegra.c
-> +++ b/drivers/mmc/host/sdhci-tegra.c
-> @@ -391,6 +391,31 @@ static const struct sdhci_tegra_soc_data
-> soc_data_tegra114 =3D {
-> =C2=A0	.pdata =3D &sdhci_tegra114_pdata,
-> =C2=A0};
-> =C2=A0
-> +static const struct sdhci_pltfm_data sdhci_tegra124_pdata =3D {
-> +	.quirks =3D SDHCI_QUIRK_BROKEN_TIMEOUT_VAL |
-> +		=C2=A0=C2=A0SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK |
-> +		=C2=A0=C2=A0SDHCI_QUIRK_SINGLE_POWER_WRITE |
-> +		=C2=A0=C2=A0SDHCI_QUIRK_NO_HISPD_BIT |
-> +		=C2=A0=C2=A0SDHCI_QUIRK_BROKEN_ADMA_ZEROLEN_DESC |
-> +		=C2=A0=C2=A0SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN,
-> +	.quirks2 =3D SDHCI_QUIRK2_PRESET_VALUE_BROKEN |
-> +		=C2=A0=C2=A0=C2=A0/*
-> +		=C2=A0=C2=A0=C2=A0=C2=A0* The TRM states that the SD/MMC controller fo=
-und on
-> +		=C2=A0=C2=A0=C2=A0=C2=A0* Tegra124 can address 34 bits (the maximum su=
-pported by
-> +		=C2=A0=C2=A0=C2=A0=C2=A0* the Tegra memory controller), but tests show=
- that DMA
-> +		=C2=A0=C2=A0=C2=A0=C2=A0* to or from above 4 GiB doesn't work. This is=
- possibly
-> +		=C2=A0=C2=A0=C2=A0=C2=A0* caused by missing programming, though it's n=
-ot obvious
-> +		=C2=A0=C2=A0=C2=A0=C2=A0* what sequence is required. Mark 64-bit DMA b=
-roken for
-> +		=C2=A0=C2=A0=C2=A0=C2=A0* now to fix this for existing users (e.g. Nya=
-n boards).
-> +		=C2=A0=C2=A0=C2=A0=C2=A0*/
-> +		=C2=A0=C2=A0=C2=A0SDHCI_QUIRK2_BROKEN_64_BIT_DMA,
-> +	.ops=C2=A0=C2=A0=3D &tegra114_sdhci_ops,
-> +};
-> +
-> +static const struct sdhci_tegra_soc_data soc_data_tegra124 =3D {
-> +	.pdata =3D &sdhci_tegra124_pdata,
-> +};
-> +
-> =C2=A0static const struct sdhci_pltfm_data sdhci_tegra210_pdata =3D {
-> =C2=A0	.quirks =3D SDHCI_QUIRK_BROKEN_TIMEOUT_VAL |
-> =C2=A0		=C2=A0=C2=A0SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK |
-> @@ -408,7 +433,7 @@ static const struct sdhci_tegra_soc_data soc_data_teg=
-ra210
-> =3D {
-> =C2=A0
-> =C2=A0static const struct of_device_id sdhci_tegra_dt_match[] =3D {
-> =C2=A0	{ .compatible =3D "nvidia,tegra210-sdhci", .data =3D &soc_data_teg=
-ra210
-> },
-> -	{ .compatible =3D "nvidia,tegra124-sdhci", .data =3D &soc_data_tegra114
-> },
-> +	{ .compatible =3D "nvidia,tegra124-sdhci", .data =3D &soc_data_tegra124
-> },
-> =C2=A0	{ .compatible =3D "nvidia,tegra114-sdhci", .data =3D &soc_data_teg=
-ra114
-> },
-> =C2=A0	{ .compatible =3D "nvidia,tegra30-sdhci", .data =3D &soc_data_tegr=
-a30 },
-> =C2=A0	{ .compatible =3D "nvidia,tegra20-sdhci", .data =3D &soc_data_tegr=
-a20 },
---=20
-Paul Kocialkowski, developer of low-level free software for embedded device=
-s
-
-Website: https://www.paulk.fr/
-Coding blog: https://code.paulk.fr/
-Git repositories: https://git.paulk.fr/ https://git.code.paulk.fr/
---=-4WHpBx1NBqLLtam0GUgH
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: This is a digitally signed message part
-Content-Transfer-Encoding: 7bit
-
------BEGIN PGP SIGNATURE-----
-
-iQIcBAABCAAGBQJXyLEmAAoJEIT9weqP7pUMS5AP/2tkql9xqnW1fwocOgYkj8+c
-Vus4lypykTEuV0Br8+qqOFVEViRZ6vpObiHMRPLoGBbs0kgI8gf7bwkAIELBqceK
-q4PVSkvFHyHODtphqAh8XbYSp9TaXABq5dmGe3yANvD4sgoTAx7VsAOA6LS50k2a
-Wl2P4nmKLxH2x5v63bCAs+IaP8raljyZsQwqS5TCXq7JFD134oiN1mmBp8rrp5Jf
-wkwUP96ubNlN1UXxWtEt8vmJGTCPI9GBAqxyujRf/tLA0rQ5ucZij51XrgSDGo6Y
-7lMh5BAAvGdjineMaRt5BjwJHX9z4LdOJ7XMjKAfwXX2QyctgAitmIzRoOM/pYKD
-218L8GRJ+g9FAZUFm/keyNZKmePhja/EnFWRZwCGdi8FhWDdaGsCqePqfIWr3Am1
-U0AQy5IVcrSZAoVMXfD73R4lI/JuhJ8kKZnwQqXlDZnm42ANWrpgG1PcZ7UfhS/M
-9fhpFye/5oOwE8nLBc4BjuUZ0xPanvTkDPgufDgEz17INzkg2yhEtAkfn0Phq4i/
-q2R1BsoQR4vRQ6kSBJ9RS9xMRaXZfSiXpzfChk7Mv3q2q83vPt2o8t+lQodkzJnF
-LreOFdV1DZHghPuqQ4uL2uSxcL5NHefq1NVFMZPxr8w0xPnSN0fFrdUIrOkpJmaP
-P5KB82eYLJODBpX4R7wJ
-=/x6G
------END PGP SIGNATURE-----
-
---=-4WHpBx1NBqLLtam0GUgH--
