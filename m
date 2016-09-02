@@ -1,94 +1,100 @@
-From: Shawn Lin <shawn.lin@rock-chips.com>
-Subject: [PATCH v2 4/4] mmc: dw_mmc: use macro to define ring buffer size
-Date: Fri,  2 Sep 2016 12:14:39 +0800
-Message-ID: <1472789679-15121-4-git-send-email-shawn.lin@rock-chips.com>
-References: <1472789679-15121-1-git-send-email-shawn.lin@rock-chips.com>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from lucky1.263xmail.com ([211.157.147.135]:43644 "EHLO
-        lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751334AbcIBET7 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 2 Sep 2016 00:19:59 -0400
-In-Reply-To: <1472789679-15121-1-git-send-email-shawn.lin@rock-chips.com>
-Sender: linux-mmc-owner@vger.kernel.org
+From: Wolfram Sang <wsa@the-dreams.de>
+Subject: Re: [PATCH 2/2] mmc: host: sh_mobile_sdhi: don't populate unneeded
+ functions
+Date: Fri, 2 Sep 2016 07:23:01 +0200
+Message-ID: <20160902052258.GA1601@katana>
+References: <20160824093438.2478-1-wsa+renesas@sang-engineering.com>
+ <20160824093438.2478-3-wsa+renesas@sang-engineering.com>
+ <CANqRtoTJWN52roRwJHh1cZrb2Jqf5OD-ffjKgiW4Y5jqCeVzhg@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: multipart/signed; micalg=pgp-sha1;
+        protocol="application/pgp-signature"; boundary="uAKRQypu60I7Lcqm"
+Return-path: <linux-renesas-soc-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <CANqRtoTJWN52roRwJHh1cZrb2Jqf5OD-ffjKgiW4Y5jqCeVzhg@mail.gmail.com>
+Sender: linux-renesas-soc-owner@vger.kernel.org
+To: Magnus Damm <magnus.damm@gmail.com>
+Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, linux-mmc@vger.kernel.org, Linux-Renesas <linux-renesas-soc@vger.kernel.org>, Geert Uytterhoeven <geert@linux-m68k.org>, Simon Horman <horms@verge.net.au>
 List-Id: linux-mmc@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Doug Anderson <dianders@chromium.org>, Heiko Stuebner <heiko@sntech.de>, linux-rockchip@lists.infradead.org, Shawn Lin <shawn.lin@rock-chips.com>
-
-It's very prone to make mistake as we might forget
-to replace all PAGE_SIZEs with new values if we try
-to modify the ring buffer size for whatever reasons.
-Let's use a macro to define it.
-
-Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
----
-
-Changes in v2: None
-
- drivers/mmc/host/dw_mmc.c | 15 ++++++++++-----
- 1 file changed, 10 insertions(+), 5 deletions(-)
-
-diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index 833b6ad..6e5926b 100644
---- a/drivers/mmc/host/dw_mmc.c
-+++ b/drivers/mmc/host/dw_mmc.c
-@@ -61,6 +61,8 @@
- 				 SDMMC_IDMAC_INT_FBE | SDMMC_IDMAC_INT_RI | \
- 				 SDMMC_IDMAC_INT_TI)
- 
-+#define DESC_RING_BUF_SZ	PAGE_SIZE
-+
- struct idmac_desc_64addr {
- 	u32		des0;	/* Control Descriptor */
- 
-@@ -474,7 +476,8 @@ static int dw_mci_idmac_init(struct dw_mci *host)
- 	if (host->dma_64bit_address == 1) {
- 		struct idmac_desc_64addr *p;
- 		/* Number of descriptors in the ring buffer */
--		host->ring_size = PAGE_SIZE / sizeof(struct idmac_desc_64addr);
-+		host->ring_size =
-+			DESC_RING_BUF_SZ / sizeof(struct idmac_desc_64addr);
- 
- 		/* Forward link the descriptor list */
- 		for (i = 0, p = host->sg_cpu; i < host->ring_size - 1;
-@@ -500,7 +503,8 @@ static int dw_mci_idmac_init(struct dw_mci *host)
- 	} else {
- 		struct idmac_desc *p;
- 		/* Number of descriptors in the ring buffer */
--		host->ring_size = PAGE_SIZE / sizeof(struct idmac_desc);
-+		host->ring_size =
-+			DESC_RING_BUF_SZ / sizeof(struct idmac_desc);
- 
- 		/* Forward link the descriptor list */
- 		for (i = 0, p = host->sg_cpu;
-@@ -609,7 +613,7 @@ static inline int dw_mci_prepare_desc64(struct dw_mci *host,
- err_own_bit:
- 	/* restore the descriptor chain as it's polluted */
- 	dev_dbg(host->dev, "desciptor is still owned by IDMAC.\n");
--	memset(host->sg_cpu, 0, PAGE_SIZE);
-+	memset(host->sg_cpu, 0, DESC_RING_BUF_SZ);
- 	dw_mci_idmac_init(host);
- 	return -EINVAL;
- }
-@@ -685,7 +689,7 @@ static inline int dw_mci_prepare_desc32(struct dw_mci *host,
- err_own_bit:
- 	/* restore the descriptor chain as it's polluted */
- 	dev_dbg(host->dev, "desciptor is still owned by IDMAC.\n");
--	memset(host->sg_cpu, 0, PAGE_SIZE);
-+	memset(host->sg_cpu, 0, DESC_RING_BUF_SZ);
- 	dw_mci_idmac_init(host);
- 	return -EINVAL;
- }
-@@ -2750,7 +2754,8 @@ static void dw_mci_init_dma(struct dw_mci *host)
- 		}
- 
- 		/* Alloc memory for sg translation */
--		host->sg_cpu = dmam_alloc_coherent(host->dev, PAGE_SIZE,
-+		host->sg_cpu = dmam_alloc_coherent(host->dev,
-+						   DESC_RING_BUF_SZ,
- 						   &host->sg_dma, GFP_KERNEL);
- 		if (!host->sg_cpu) {
- 			dev_err(host->dev,
--- 
-2.3.7
 
 
+--uAKRQypu60I7Lcqm
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+
+Magnus,
+
+> To my eye it looks like this patch might be adding a fix for a bug
+> introduced by another patch. R-Car Gen2 and later are quite recent
+> SoCs but I believe support for other mobile chips and earlier R-Car
+> SoCs also also covered by the SDHI driver. Also there are theTMIO
+> chips that share some software and are related but a bit different. So
+> in my opinion we need to thread lightly to avoid breakage.
+
+I'm very much with you. This is the very much reason I introduced
+TMIO_MMC_MIN_RCAR2 in 3d376fb2ea907f ("mmc: tmio/sdhi: introduce flag
+for RCar 2+ specific features") in the first place to be able to
+"protect" old hardware from new features. It was not done before! This
+is also the reason why we have commits like a21553c9e0c236 ("mmc:
+tmio/sdhi: distinguish between SCLKDIVEN and ILL_FUNC") documenting a
+difference between some old TMIO variant and our current SDHI. I spent
+quite some time finding old TMIO information somewhere for that.
+
+> My concern is what happened before this patch was applied. It looks
+> like the callbacks were installed for all hardware types which makes
+> me wonder because UHS/SDR support is only available for quite recent
+> hardware.
+
+I didn't protect these callbacks before because I assumed they are only
+called when SDR support is enabled via devicetree or platform data.
+Which is not the case for all the old platforms. I sadly missed that
+card_busy() is used when polling an SDIO card in case "broken-cd" is
+used. That was a detail I overlooked, sorry. Given my work outlined
+above I don't think one can deduce that I don't care about regressing
+old hardware, though.
+
+> The ->card_busy() callback is not yet in mainline or -next. It was
+> introduced in:
+> 0157290 mmc: host: sh_mobile_sdhi: move card_busy from tmio to sdhi
+
+Not quite, it was introduced with 452e5eef6d311e ("mmc: tmio: Add UHS-I
+mode support"). The commit you mentioned moved it from tmio*.c to
+sdhi*.c
+
+> If this patch is fixing a recent commit then perhaps some patches
+> should be squashed together to prevent bisection breakage or if a
+> patch is already part of mainline then a "Fixes:" tag might be
+> suitable.
+
+It can be argued that this tag could be added:
+
+Fixes: 452e5eef6d311e ("mmc: tmio: Add UHS-I mode support")
+
+I don't know how well it applies, though, because the code has been
+modified a lot recently. But we can try.
+
+   Wolfram
+
+
+--uAKRQypu60I7Lcqm
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1
+
+iQIcBAEBAgAGBQJXyQyyAAoJEBQN5MwUoCm2jZAP/jlInqaHAq0zmZliOUndNABd
+Qp9ac1r2GbTt4dHdiW32FuMubFOeayRupeRKosPMU24Mv22QOChqZVLTIDd+irj7
+KQdZutaTE74RUW4c8IUlawGbnDkTuUuZ2Ib/WotuGkvLdN9OtDUNVDQSimM8mTpk
+CWrONN2K6L1DQdpZefM0f+nWybLhwoe5KOCUxdfx5yEy8WbYVqItJkhQOtWc3d5d
+SDCV4jnNIbiEIRyP6Pl/p28/3kyIstquTIAK1AsjhzKaBmF7DStV2K1kvcCGODDL
+38RbAOXVEvZYAMjAZHymCfUHiQ8ce+WtbxMqwuXGdSG/VCHv+cb76Fc0uPt3Ym5K
+CVggsNA0JS4rv1rHEgDPYzdC5oZzDlq/Nduu0Ip+flE/39hpDjRLvU7dLK4fhZb/
+U9g6ijhsgA3vutOwggO7RtDwBKpjW8xRhKrkb7p4SJm0Vgtrbu1ffetjAMbG26xb
+hcHmdlkf104oRQOAVgyUIsERjlCsvWiiS4VZyT4AJQFCgHh7W/fQbbKjGuCG0LLq
+tnTpYeYIA0wHVNWgqT7sFRvUPA8Atb0BGEr8SziSY0/Dyu9wIvYi5jlkdH/CMIiI
+tnfnbCRnxxfnEUv/1Fsep6q2PZG3CsTayzSfkA0JbEg1SWJUmC0Trotal2APb4S6
+AOzchGTx0Je5VqhDCH7c
+=BUWZ
+-----END PGP SIGNATURE-----
+
+--uAKRQypu60I7Lcqm--
