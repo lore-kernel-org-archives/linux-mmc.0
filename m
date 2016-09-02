@@ -1,106 +1,323 @@
-From: Magnus Damm <magnus.damm@gmail.com>
-Subject: Re: [PATCH 2/2] mmc: host: sh_mobile_sdhi: don't populate unneeded functions
-Date: Fri, 2 Sep 2016 11:26:16 +0900
-Message-ID: <CANqRtoTJWN52roRwJHh1cZrb2Jqf5OD-ffjKgiW4Y5jqCeVzhg@mail.gmail.com>
-References: <20160824093438.2478-1-wsa+renesas@sang-engineering.com> <20160824093438.2478-3-wsa+renesas@sang-engineering.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-renesas-soc-owner@vger.kernel.org>
-In-Reply-To: <20160824093438.2478-3-wsa+renesas@sang-engineering.com>
-Sender: linux-renesas-soc-owner@vger.kernel.org
-To: Wolfram Sang <wsa+renesas@sang-engineering.com>
-Cc: linux-mmc@vger.kernel.org, Linux-Renesas <linux-renesas-soc@vger.kernel.org>, Geert Uytterhoeven <geert@linux-m68k.org>, Simon Horman <horms@verge.net.au>
+From: Shawn Lin <shawn.lin@rock-chips.com>
+Subject: [PATCH v2 2/4] mmc: dw_mmc: avoid race condition of cpu and IDMAC
+Date: Fri,  2 Sep 2016 12:14:37 +0800
+Message-ID: <1472789679-15121-2-git-send-email-shawn.lin@rock-chips.com>
+References: <1472789679-15121-1-git-send-email-shawn.lin@rock-chips.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from lucky1.263xmail.com ([211.157.147.132]:50954 "EHLO
+        lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750742AbcIBETv (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 2 Sep 2016 00:19:51 -0400
+In-Reply-To: <1472789679-15121-1-git-send-email-shawn.lin@rock-chips.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Jaehoon Chung <jh80.chung@samsung.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Doug Anderson <dianders@chromium.org>, Heiko Stuebner <heiko@sntech.de>, linux-rockchip@lists.infradead.org, Shawn Lin <shawn.lin@rock-chips.com>
 
-On Wed, Aug 24, 2016 at 6:34 PM, Wolfram Sang
-<wsa+renesas@sang-engineering.com> wrote:
-> Populating card_busy caused a side-effect on a chip variant we don't
-> have documentation for (r8a73a4). So, enable it and voltage switching
-> only on devices known to support those features.
->
-> Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
-> ---
->  drivers/mmc/host/sh_mobile_sdhi.c | 10 ++++++++--
->  1 file changed, 8 insertions(+), 2 deletions(-)
->
-> diff --git a/drivers/mmc/host/sh_mobile_sdhi.c b/drivers/mmc/host/sh_mobile_sdhi.c
-> index c4e63b7790d719..d679c8a533b6e5 100644
-> --- a/drivers/mmc/host/sh_mobile_sdhi.c
-> +++ b/drivers/mmc/host/sh_mobile_sdhi.c
-> @@ -376,8 +376,14 @@ static int sh_mobile_sdhi_probe(struct platform_device *pdev)
->         host->clk_update        = sh_mobile_sdhi_clk_update;
->         host->clk_disable       = sh_mobile_sdhi_clk_disable;
->         host->multi_io_quirk    = sh_mobile_sdhi_multi_io_quirk;
-> -       host->card_busy = sh_mobile_sdhi_card_busy;
-> -       host->start_signal_voltage_switch = sh_mobile_sdhi_start_signal_voltage_switch;
-> +
-> +       /* SDR speeds are only available on Gen2+ */
-> +       if (mmc_data->flags & TMIO_MMC_MIN_RCAR2) {
-> +               /* card_busy caused issues on r8a73a4 (pre-Gen2) CD-less SDHI */
-> +               host->card_busy = sh_mobile_sdhi_card_busy;
-> +               host->start_signal_voltage_switch =
-> +                       sh_mobile_sdhi_start_signal_voltage_switch;
-> +       }
->
->         /* Orginally registers were 16 bit apart, could be 32 or 64 nowadays */
->         if (!host->bus_shift && resource_size(res) > 0x100) /* old way to determine the shift */
-> --
-> 2.9.3
->
+We could see an obvious race condition by test that
+the former write operation by IDMAC aiming to clear
+OWN bit reach right after the later configuration of
+the same desc, which makes the IDMAC be in SUSPEND
+state as the OWN bit was cleared by the asynchronous
+write operation of IDMAC. The bug can be very easy
+reproduced on RK3288 or similar when we reduce the
+running rate of system buses and keep the CPU running
+faster. So as two separate masters, IDMAC and cpu
+write the same descriptor stored on the same address,
+and this should be protected by adding check of OWN
+bit before preparing new descriptors.
 
-Hi Wolfram,
+Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
 
-Thanks for your efforts improving the code. The patch title says
-something about unneeded functions, and then comments in the code
-mentions SDR which makes me interested to dig a bit deeper. I know
-that the SDHI hardware is supported on a wide range of hardware so I
-wonder how you handle all the callbacks for such a wide range of
-hardware with varying level of documentation.
+---
 
-Many years ago when I initially prototyped the SDHI driver we had no
-access to any documentation - only the reverse engineered TMIO driver
-and the register definitions in that driver existed. I remember being
-very happy being able to remove some firmware binary used for register
-access and fully rely on open source to access the hardware. These
-days I believe developers have access to documentation for at least
-the most recent hardware, however older SDHI hardware may still be
-undocumented.
+Changes in v2:
+- fallback to PIO mode if failing to wait for OWN bit
+- cleanup polluted desc chain as the own bit error could
+  occur on any place of the chain, so we need to clr the desc
+  configured before that one. Use the exist function to reinit
+  the desc chain. As this issue is really rare, so after applied,
+  the fio/iozone stress test didn't show up performance regression.
 
-To my eye it looks like this patch might be adding a fix for a bug
-introduced by another patch. R-Car Gen2 and later are quite recent
-SoCs but I believe support for other mobile chips and earlier R-Car
-SoCs also also covered by the SDHI driver. Also there are theTMIO
-chips that share some software and are related but a bit different. So
-in my opinion we need to thread lightly to avoid breakage.
+ drivers/mmc/host/dw_mmc.c | 208 ++++++++++++++++++++++++++++------------------
+ 1 file changed, 129 insertions(+), 79 deletions(-)
 
-I'm currently looking at this commit included in
-renesas-drivers-2016-08-30-v4.8-rc4:
-d11b9b7 mmc: host: sh_mobile_sdhi: don't populate unneeded functions
+diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+index 782b303..daa1c52 100644
+--- a/drivers/mmc/host/dw_mmc.c
++++ b/drivers/mmc/host/dw_mmc.c
+@@ -467,12 +467,87 @@ static void dw_mci_dmac_complete_dma(void *arg)
+ 	}
+ }
+ 
+-static inline void dw_mci_prepare_desc64(struct dw_mci *host,
++static int dw_mci_idmac_init(struct dw_mci *host)
++{
++	int i;
++
++	if (host->dma_64bit_address == 1) {
++		struct idmac_desc_64addr *p;
++		/* Number of descriptors in the ring buffer */
++		host->ring_size = PAGE_SIZE / sizeof(struct idmac_desc_64addr);
++
++		/* Forward link the descriptor list */
++		for (i = 0, p = host->sg_cpu; i < host->ring_size - 1;
++								i++, p++) {
++			p->des6 = (host->sg_dma +
++					(sizeof(struct idmac_desc_64addr) *
++							(i + 1))) & 0xffffffff;
++
++			p->des7 = (u64)(host->sg_dma +
++					(sizeof(struct idmac_desc_64addr) *
++							(i + 1))) >> 32;
++			/* Initialize reserved and buffer size fields to "0" */
++			p->des1 = 0;
++			p->des2 = 0;
++			p->des3 = 0;
++		}
++
++		/* Set the last descriptor as the end-of-ring descriptor */
++		p->des6 = host->sg_dma & 0xffffffff;
++		p->des7 = (u64)host->sg_dma >> 32;
++		p->des0 = IDMAC_DES0_ER;
++
++	} else {
++		struct idmac_desc *p;
++		/* Number of descriptors in the ring buffer */
++		host->ring_size = PAGE_SIZE / sizeof(struct idmac_desc);
++
++		/* Forward link the descriptor list */
++		for (i = 0, p = host->sg_cpu;
++		     i < host->ring_size - 1;
++		     i++, p++) {
++			p->des3 = cpu_to_le32(host->sg_dma +
++					(sizeof(struct idmac_desc) * (i + 1)));
++			p->des1 = 0;
++		}
++
++		/* Set the last descriptor as the end-of-ring descriptor */
++		p->des3 = cpu_to_le32(host->sg_dma);
++		p->des0 = cpu_to_le32(IDMAC_DES0_ER);
++	}
++
++	dw_mci_idmac_reset(host);
++
++	if (host->dma_64bit_address == 1) {
++		/* Mask out interrupts - get Tx & Rx complete only */
++		mci_writel(host, IDSTS64, IDMAC_INT_CLR);
++		mci_writel(host, IDINTEN64, SDMMC_IDMAC_INT_NI |
++				SDMMC_IDMAC_INT_RI | SDMMC_IDMAC_INT_TI);
++
++		/* Set the descriptor base address */
++		mci_writel(host, DBADDRL, host->sg_dma & 0xffffffff);
++		mci_writel(host, DBADDRU, (u64)host->sg_dma >> 32);
++
++	} else {
++		/* Mask out interrupts - get Tx & Rx complete only */
++		mci_writel(host, IDSTS, IDMAC_INT_CLR);
++		mci_writel(host, IDINTEN, SDMMC_IDMAC_INT_NI |
++				SDMMC_IDMAC_INT_RI | SDMMC_IDMAC_INT_TI);
++
++		/* Set the descriptor base address */
++		mci_writel(host, DBADDR, host->sg_dma);
++	}
++
++	return 0;
++}
++
++static inline int dw_mci_prepare_desc64(struct dw_mci *host,
+ 					 struct mmc_data *data,
+ 					 unsigned int sg_len)
+ {
+ 	unsigned int desc_len;
+ 	struct idmac_desc_64addr *desc_first, *desc_last, *desc;
++	unsigned long timeout;
+ 	int i;
+ 
+ 	desc_first = desc_last = desc = host->sg_cpu;
+@@ -489,6 +564,19 @@ static inline void dw_mci_prepare_desc64(struct dw_mci *host,
+ 			length -= desc_len;
+ 
+ 			/*
++			 * Wait for the former clear OWN bit operation
++			 * of IDMAC to make sure that this descriptor
++			 * isn't still owned by IDMAC as IDMAC's write
++			 * ops and CPU's read ops are asynchronous.
++			 */
++			timeout = jiffies + msecs_to_jiffies(100);
++			while (readl(&desc->des0) & IDMAC_DES0_OWN) {
++				if (time_after(jiffies, timeout))
++					goto err_own_bit;
++				udelay(10);
++			}
++
++			/*
+ 			 * Set the OWN bit and disable interrupts
+ 			 * for this descriptor
+ 			 */
+@@ -516,15 +604,24 @@ static inline void dw_mci_prepare_desc64(struct dw_mci *host,
+ 	/* Set last descriptor */
+ 	desc_last->des0 &= ~(IDMAC_DES0_CH | IDMAC_DES0_DIC);
+ 	desc_last->des0 |= IDMAC_DES0_LD;
++
++	return 0;
++err_own_bit:
++	/* restore the descriptor chain as it's polluted */
++	dev_dbg(host->dev, "desciptor is still owned by IDMAC.\n");
++	memset(host->sg_cpu, 0, PAGE_SIZE);
++	dw_mci_idmac_init(host);
++	return -EINVAL;
+ }
+ 
+ 
+-static inline void dw_mci_prepare_desc32(struct dw_mci *host,
++static inline int dw_mci_prepare_desc32(struct dw_mci *host,
+ 					 struct mmc_data *data,
+ 					 unsigned int sg_len)
+ {
+ 	unsigned int desc_len;
+ 	struct idmac_desc *desc_first, *desc_last, *desc;
++	unsigned long timeout;
+ 	int i;
+ 
+ 	desc_first = desc_last = desc = host->sg_cpu;
+@@ -541,6 +638,20 @@ static inline void dw_mci_prepare_desc32(struct dw_mci *host,
+ 			length -= desc_len;
+ 
+ 			/*
++			 * Wait for the former clear OWN bit operation
++			 * of IDMAC to make sure that this descriptor
++			 * isn't still owned by IDMAC as IDMAC's write
++			 * ops and CPU's read ops are asynchronous.
++			 */
++			timeout = jiffies + msecs_to_jiffies(100);
++			while (readl(&desc->des0) &
++			       cpu_to_le32(IDMAC_DES0_OWN)) {
++				if (time_after(jiffies, timeout))
++					goto err_own_bit;
++				udelay(10);
++			}
++
++			/*
+ 			 * Set the OWN bit and disable interrupts
+ 			 * for this descriptor
+ 			 */
+@@ -569,16 +680,28 @@ static inline void dw_mci_prepare_desc32(struct dw_mci *host,
+ 	desc_last->des0 &= cpu_to_le32(~(IDMAC_DES0_CH |
+ 				       IDMAC_DES0_DIC));
+ 	desc_last->des0 |= cpu_to_le32(IDMAC_DES0_LD);
++
++	return 0;
++err_own_bit:
++	/* restore the descriptor chain as it's polluted */
++	dev_dbg(host->dev, "desciptor is still owned by IDMAC.\n");
++	memset(host->sg_cpu, 0, PAGE_SIZE);
++	dw_mci_idmac_init(host);
++	return -EINVAL;
+ }
+ 
+ static int dw_mci_idmac_start_dma(struct dw_mci *host, unsigned int sg_len)
+ {
+ 	u32 temp;
++	int ret;
+ 
+ 	if (host->dma_64bit_address == 1)
+-		dw_mci_prepare_desc64(host, host->data, sg_len);
++		ret = dw_mci_prepare_desc64(host, host->data, sg_len);
+ 	else
+-		dw_mci_prepare_desc32(host, host->data, sg_len);
++		ret = dw_mci_prepare_desc32(host, host->data, sg_len);
++
++	if (ret)
++		goto out;
+ 
+ 	/* drain writebuffer */
+ 	wmb();
+@@ -603,81 +726,8 @@ static int dw_mci_idmac_start_dma(struct dw_mci *host, unsigned int sg_len)
+ 	/* Start it running */
+ 	mci_writel(host, PLDMND, 1);
+ 
+-	return 0;
+-}
+-
+-static int dw_mci_idmac_init(struct dw_mci *host)
+-{
+-	int i;
+-
+-	if (host->dma_64bit_address == 1) {
+-		struct idmac_desc_64addr *p;
+-		/* Number of descriptors in the ring buffer */
+-		host->ring_size = PAGE_SIZE / sizeof(struct idmac_desc_64addr);
+-
+-		/* Forward link the descriptor list */
+-		for (i = 0, p = host->sg_cpu; i < host->ring_size - 1;
+-								i++, p++) {
+-			p->des6 = (host->sg_dma +
+-					(sizeof(struct idmac_desc_64addr) *
+-							(i + 1))) & 0xffffffff;
+-
+-			p->des7 = (u64)(host->sg_dma +
+-					(sizeof(struct idmac_desc_64addr) *
+-							(i + 1))) >> 32;
+-			/* Initialize reserved and buffer size fields to "0" */
+-			p->des1 = 0;
+-			p->des2 = 0;
+-			p->des3 = 0;
+-		}
+-
+-		/* Set the last descriptor as the end-of-ring descriptor */
+-		p->des6 = host->sg_dma & 0xffffffff;
+-		p->des7 = (u64)host->sg_dma >> 32;
+-		p->des0 = IDMAC_DES0_ER;
+-
+-	} else {
+-		struct idmac_desc *p;
+-		/* Number of descriptors in the ring buffer */
+-		host->ring_size = PAGE_SIZE / sizeof(struct idmac_desc);
+-
+-		/* Forward link the descriptor list */
+-		for (i = 0, p = host->sg_cpu;
+-		     i < host->ring_size - 1;
+-		     i++, p++) {
+-			p->des3 = cpu_to_le32(host->sg_dma +
+-					(sizeof(struct idmac_desc) * (i + 1)));
+-			p->des1 = 0;
+-		}
+-
+-		/* Set the last descriptor as the end-of-ring descriptor */
+-		p->des3 = cpu_to_le32(host->sg_dma);
+-		p->des0 = cpu_to_le32(IDMAC_DES0_ER);
+-	}
+-
+-	dw_mci_idmac_reset(host);
+-
+-	if (host->dma_64bit_address == 1) {
+-		/* Mask out interrupts - get Tx & Rx complete only */
+-		mci_writel(host, IDSTS64, IDMAC_INT_CLR);
+-		mci_writel(host, IDINTEN64, SDMMC_IDMAC_INT_NI |
+-				SDMMC_IDMAC_INT_RI | SDMMC_IDMAC_INT_TI);
+-
+-		/* Set the descriptor base address */
+-		mci_writel(host, DBADDRL, host->sg_dma & 0xffffffff);
+-		mci_writel(host, DBADDRU, (u64)host->sg_dma >> 32);
+-
+-	} else {
+-		/* Mask out interrupts - get Tx & Rx complete only */
+-		mci_writel(host, IDSTS, IDMAC_INT_CLR);
+-		mci_writel(host, IDINTEN, SDMMC_IDMAC_INT_NI |
+-				SDMMC_IDMAC_INT_RI | SDMMC_IDMAC_INT_TI);
+-
+-		/* Set the descriptor base address */
+-		mci_writel(host, DBADDR, host->sg_dma);
+-	}
+-
+-	return 0;
++out:
++	return ret;
+ }
+ 
+ static const struct dw_mci_dma_ops dw_mci_idmac_ops = {
+-- 
+2.3.7
 
-The code adds a feature flag check and in case of more recent hardware
-the following callbacks are installed:
-host->card_busy()
-host->start_signal_voltage_switch()
-Also the comment "/* SDR speeds are only available on Gen2+ */" was added.
 
-My concern is what happened before this patch was applied. It looks
-like the callbacks were installed for all hardware types which makes
-me wonder because UHS/SDR support is only available for quite recent
-hardware.
-
-The ->card_busy() callback is not yet in mainline or -next. It was
-introduced in:
-0157290 mmc: host: sh_mobile_sdhi: move card_busy from tmio to sdhi
-
-However the ->start_signal_voltage_switch() is included in mainline.
-It was introduced in:
-057a459 mmc: sh_mobile_sdhi: Add UHS-I mode support
-
-If this patch is fixing a recent commit then perhaps some patches
-should be squashed together to prevent bisection breakage or if a
-patch is already part of mainline then a "Fixes:" tag might be
-suitable.
-
-Thanks,
-
-/ magnus
