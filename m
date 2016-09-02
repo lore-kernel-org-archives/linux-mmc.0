@@ -1,86 +1,159 @@
 From: Shawn Lin <shawn.lin@rock-chips.com>
-Subject: Re: [PATCH 2/3] mmc: Adding AUTO_BKOPS_EN bit set for Auto BKOPS
- support
-Date: Fri, 2 Sep 2016 15:50:11 +0800
-Message-ID: <c06cdf40-48a7-3ed4-dd22-fdd26dcf333f@rock-chips.com>
-References: <1472739890-3384-1-git-send-email-alex.lemberg@sandisk.com>
- <1472739890-3384-3-git-send-email-alex.lemberg@sandisk.com>
+Subject: Re: [PATCH v3] mmc: core: Optimize the mmc erase size alignment
+Date: Fri, 2 Sep 2016 16:34:43 +0800
+Message-ID: <363fc241-8220-2706-778c-706aec076d49@rock-chips.com>
+References: <9de99671750430d7d80a8f351c0ec7a7088c9b00.1472635587.git.baolin.wang@linaro.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=gbk; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from lucky1.263xmail.com ([211.157.147.136]:47054 "EHLO
-        lucky1.263xmail.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1751589AbcIBHuf (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 2 Sep 2016 03:50:35 -0400
-In-Reply-To: <1472739890-3384-3-git-send-email-alex.lemberg@sandisk.com>
+Received: from lucky1.263xmail.com ([211.157.147.132]:53484 "EHLO
+        lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752312AbcIBIfl (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 2 Sep 2016 04:35:41 -0400
+In-Reply-To: <9de99671750430d7d80a8f351c0ec7a7088c9b00.1472635587.git.baolin.wang@linaro.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: alex lemberg <alex.lemberg@sandisk.com>, ulf.hansson@linaro.org, linux-mmc@vger.kernel.org
-Cc: shawn.lin@rock-chips.com, avi.shchislowski@sandisk.com
+To: Baolin Wang <baolin.wang@linaro.org>, ulf.hansson@linaro.org
+Cc: shawn.lin@rock-chips.com, adrian.hunter@intel.com, rmk+kernel@arm.linux.org.uk, dianders@chromium.org, heiko@sntech.de, david@protonic.nl, hdegoede@redhat.com, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, broonie@kernel.org, linus.walleij@linaro.org
 
-Hi,
+Hi Baolin,
 
-On 2016/9/1 22:24, alex lemberg wrote:
-> Signed-off-by: alex lemberg <alex.lemberg@sandisk.com>
+On 2016/8/31 17:32, Baolin Wang wrote:
+> Before issuing mmc_erase() function, users always have checked if it can
+> erase with mmc_can_erase/trim/discard() function, thus remove the redundant
+> erase checking in mmc_erase() function.
+>
+> This patch also optimizes the erase start/end sector alignment with
 
-It would be nice to add some change log.:)
+It implies you could split this patch into two for dealing with diff
+things. :) Otherwise, you could add my test tag,
 
-This part is still on my TODO list, so very nice to see
-you provide patches for this. But I don't see we reach
-an agreement at that time for whether it would be sane to
-set this bit for kernel. I remember Adrian's opinion was to
-let userspace take over the ownership of this, and Ulf maybe
-had no hard opinon for this(Ulf, right? :)).
+Tested-by: Shawn Lin <shawn.lin@rock-chips.com>
 
-
+> round_up()/round_down() function, when erase command is MMC_ERASE_ARG.
+>
+> Signed-off-by: Baolin Wang <baolin.wang@linaro.org>
 > ---
->  drivers/mmc/core/mmc.c   | 6 ++++++
->  include/linux/mmc/card.h | 1 +
->  include/linux/mmc/mmc.h  | 1 +
->  3 files changed, 8 insertions(+)
+> Changes since v2:
+>  - Add nr checking and other optimization in mmc_erase() function.
 >
-> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-> index f2d185c..e2e987f 100644
-> --- a/drivers/mmc/core/mmc.c
-> +++ b/drivers/mmc/core/mmc.c
-> @@ -531,6 +531,12 @@ static int mmc_decode_ext_csd(struct mmc_card *card, u8 *ext_csd)
->  			if (!card->ext_csd.man_bkops_en)
->  				pr_debug("%s: MAN_BKOPS_EN bit is not set\n",
->  					mmc_hostname(card->host));
-> +			card->ext_csd.auto_bkops_en =
-> +					(ext_csd[EXT_CSD_BKOPS_EN] &
-> +						EXT_CSD_AUTO_BKOPS_MASK);
-> +			if (!card->ext_csd.auto_bkops_en)
-> +				pr_debug("%s: AUTO_BKOPS_EN bit is not set\n",
-> +					mmc_hostname(card->host));
->  		}
+> Changes since v1:
+>  - Add the alignment if card->erase_size is not power of 2.
+> ---
+>  drivers/mmc/core/core.c |   82 ++++++++++++++++++++++++++++++-----------------
+>  1 file changed, 53 insertions(+), 29 deletions(-)
 >
->  		/* check whether the eMMC card supports HPI */
-> diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
-> index 73fad83..aaedb68 100644
-> --- a/include/linux/mmc/card.h
-> +++ b/include/linux/mmc/card.h
-> @@ -84,6 +84,7 @@ struct mmc_ext_csd {
->  	unsigned int		hpi_cmd;		/* cmd used as HPI */
->  	bool			bkops;		/* background support bit */
->  	bool			man_bkops_en;	/* manual bkops enable bit */
-> +	bool			auto_bkops_en;	/* auto bkops enable bit */
->  	unsigned int            data_sector_size;       /* 512 bytes or 4KB */
->  	unsigned int            data_tag_unit_size;     /* DATA TAG UNIT size */
->  	unsigned int		boot_ro_lock;		/* ro lock support */
-> diff --git a/include/linux/mmc/mmc.h b/include/linux/mmc/mmc.h
-> index c376209..0fe3908 100644
-> --- a/include/linux/mmc/mmc.h
-> +++ b/include/linux/mmc/mmc.h
-> @@ -436,6 +436,7 @@ struct _mmc_csd {
->   * BKOPS modes
->   */
->  #define EXT_CSD_MANUAL_BKOPS_MASK	0x01
-> +#define EXT_CSD_AUTO_BKOPS_MASK	0x02
+> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+> index e55cde6..52156d4 100644
+> --- a/drivers/mmc/core/core.c
+> +++ b/drivers/mmc/core/core.c
+> @@ -2202,6 +2202,51 @@ out:
+>  	return err;
+>  }
 >
->  /*
->   * MMC_SWITCH access modes
+> +static unsigned int mmc_align_erase_size(struct mmc_card *card,
+> +					 unsigned int *from,
+> +					 unsigned int *to,
+> +					 unsigned int nr)
+> +{
+> +	unsigned int from_new = *from, nr_new = nr, rem;
+> +
+> +	if (is_power_of_2(card->erase_size)) {
+> +		unsigned int temp = from_new;
+> +
+> +		from_new = round_up(temp, card->erase_size);
+> +		rem = from_new - temp;
+> +
+> +		if (nr_new > rem)
+> +			nr_new -= rem;
+> +		else
+> +			return 0;
+> +
+> +		nr_new = round_down(nr_new, card->erase_size);
+> +	} else {
+> +		rem = from_new % card->erase_size;
+> +		if (rem) {
+> +			rem = card->erase_size - rem;
+> +			from_new += rem;
+> +			if (nr_new > rem)
+> +				nr_new -= rem;
+> +			else
+> +				return 0;
+> +		}
+> +
+> +		rem = nr_new % card->erase_size;
+> +		if (rem)
+> +			nr_new -= rem;
+> +	}
+> +
+> +	if (nr_new == 0)
+> +		return 0;
+> +
+> +	/* 'from' and 'to' are inclusive */
+> +	*to = from_new + nr_new - 1;
+> +	*from = from_new;
+> +
+> +	return nr_new;
+> +}
+> +
+>  /**
+>   * mmc_erase - erase sectors.
+>   * @card: card to erase
+> @@ -2217,13 +2262,6 @@ int mmc_erase(struct mmc_card *card, unsigned int from, unsigned int nr,
+>  	unsigned int rem, to = from + nr;
+>  	int err;
+>
+> -	if (!(card->host->caps & MMC_CAP_ERASE) ||
+> -	    !(card->csd.cmdclass & CCC_ERASE))
+> -		return -EOPNOTSUPP;
+> -
+> -	if (!card->erase_size)
+> -		return -EOPNOTSUPP;
+> -
+>  	if (mmc_card_sd(card) && arg != MMC_ERASE_ARG)
+>  		return -EOPNOTSUPP;
+>
+> @@ -2240,31 +2278,17 @@ int mmc_erase(struct mmc_card *card, unsigned int from, unsigned int nr,
+>  			return -EINVAL;
+>  	}
+>
+> -	if (arg == MMC_ERASE_ARG) {
+> -		rem = from % card->erase_size;
+> -		if (rem) {
+> -			rem = card->erase_size - rem;
+> -			from += rem;
+> -			if (nr > rem)
+> -				nr -= rem;
+> -			else
+> -				return 0;
+> -		}
+> -		rem = nr % card->erase_size;
+> -		if (rem)
+> -			nr -= rem;
+> -	}
+> -
+>  	if (nr == 0)
+>  		return 0;
+>
+> -	to = from + nr;
+> -
+> -	if (to <= from)
+> -		return -EINVAL;
+> -
+> -	/* 'from' and 'to' are inclusive */
+> -	to -= 1;
+> +	if (arg == MMC_ERASE_ARG) {
+> +		nr = mmc_align_erase_size(card, &from, &to, nr);
+> +		if (nr == 0)
+> +			return 0;
+> +	} else {
+> +		/* 'from' and 'to' are inclusive */
+> +		to -= 1;
+> +	}
+>
+>  	/*
+>  	 * Special case where only one erase-group fits in the timeout budget:
 >
 
 
