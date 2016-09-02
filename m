@@ -1,135 +1,176 @@
-From: Shawn Lin <shawn.lin@rock-chips.com>
-Subject: Re: [RFC] mmc: dw_mmc: skip the execute_tuning after checking timiing
-Date: Fri, 2 Sep 2016 16:50:09 +0800
-Message-ID: <04b5a158-fa50-50c7-639a-ab7050478976@rock-chips.com>
-References: <1472622687-16389-1-git-send-email-jh80.chung@samsung.com>
- <CGME20160831071421epcas1p1efea97a79334edb2a4665e130e84f1f4@epcas1p1.samsung.com>
- <7be25c6e-ceed-bc70-55a0-540468577a64@rock-chips.com>
- <196d3b32-9367-de38-5ae6-96c6a56db6a5@samsung.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH v3] mmc: core: Optimize the mmc erase size alignment
+Date: Fri, 2 Sep 2016 11:43:08 +0200
+Message-ID: <CAPDyKFpzjEydLX94DmYhtMkKp8PTZia-wh1+Oy_ovP65s1=jYA@mail.gmail.com>
+References: <9de99671750430d7d80a8f351c0ec7a7088c9b00.1472635587.git.baolin.wang@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=gbk; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from lucky1.263xmail.com ([211.157.147.132]:43934 "EHLO
-        lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751660AbcIBIvQ (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 2 Sep 2016 04:51:16 -0400
-In-Reply-To: <196d3b32-9367-de38-5ae6-96c6a56db6a5@samsung.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <9de99671750430d7d80a8f351c0ec7a7088c9b00.1472635587.git.baolin.wang@linaro.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Baolin Wang <baolin.wang@linaro.org>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, Russell King <rmk+kernel@arm.linux.org.uk>, Shawn Lin <shawn.lin@rock-chips.com>, Doug Anderson <dianders@chromium.org>, =?UTF-8?Q?Heiko_St=C3=BCbner?= <heiko@sntech.de>, David Jander <david@protonic.nl>, Hans de Goede <hdegoede@redhat.com>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Mark Brown <broonie@kernel.org>, Linus Walleij <linus.walleij@linaro.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>, linux-mmc@vger.kernel.org
-Cc: shawn.lin@rock-chips.com, ulf.hansson@linaro.org, guodong.xu@linaro.org, kid.jin@hisilicon.com
 
-Hi Jaehoon,
-
-On 2016/8/31 18:48, Jaehoon Chung wrote:
-> On 08/31/2016 04:13 PM, Shawn Lin wrote:
->> On 2016/8/31 13:51, Jaehoon Chung wrote:
->>> HS400 mode doesn't need to do execute_tuning, because it's already
->>> tuned in HS200 mode. And Tuning command is optional for UHS50 mode.
->>>
->>> In future, the general execute_tuning sequence can be included in this
->>> function.
->>
->> Maybe this isn't what we want for mmc.
->>
->> I see both of sd and sdio call mmc_execute_tuning by checking
->> the ios.timing, and explicitly we need to do tuning for
->> MMC_TIMING_UHS_SDR50 as the mmc core asks we to do that.
->>
->> Moreover, why mmc didn't do something like:
->>
->> if (card->host->ios.timing == MMC_TIMING_XXXXX || ....)
->>     mmc_execute_tuning()
->>
->> So we don't need every host driver to add these check and I do
->> see some host drivers check these timing for their execute_tuning
->> callback..
->>
->> What is your opinion? :)
+On 31 August 2016 at 11:32, Baolin Wang <baolin.wang@linaro.org> wrote:
+> Before issuing mmc_erase() function, users always have checked if it can
+> erase with mmc_can_erase/trim/discard() function, thus remove the redundant
+> erase checking in mmc_erase() function.
 >
-> Yep, your comment makes sense..So i'm checking SD specification.
-> I think it needs to know which UHS card is..(UHS50 or UHS104)..
-> But current kernel can't distinguish these..
+> This patch also optimizes the erase start/end sector alignment with
+> round_up()/round_down() function, when erase command is MMC_ERASE_ARG.
 >
-> According to spec, we can distinguish UHS50 and UHS104 with TRAN_SPEED field.
+> Signed-off-by: Baolin Wang <baolin.wang@linaro.org>
+> ---
+> Changes since v2:
+>  - Add nr checking and other optimization in mmc_erase() function.
 >
-> "UHS50 Card set TRANS_SPEED to 0Bh (100Mbit/sec), for both SDR50 and DDR50 modes.
-> UHS104 Card set TRAN_SPEED to 2Bh (200Mbit/sec)"
+> Changes since v1:
+>  - Add the alignment if card->erase_size is not power of 2.
+> ---
+>  drivers/mmc/core/core.c |   82 ++++++++++++++++++++++++++++++-----------------
+>  1 file changed, 53 insertions(+), 29 deletions(-)
 >
-> I'm not sure it's helpful to me...but i will consider more...
-
-Ah, are we on the same page? :)
-I have some questions below.
-
+> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+> index e55cde6..52156d4 100644
+> --- a/drivers/mmc/core/core.c
+> +++ b/drivers/mmc/core/core.c
+> @@ -2202,6 +2202,51 @@ out:
+>         return err;
+>  }
 >
-> Thanks you for comment. :)
+> +static unsigned int mmc_align_erase_size(struct mmc_card *card,
+> +                                        unsigned int *from,
+> +                                        unsigned int *to,
+> +                                        unsigned int nr)
+> +{
+
+How about make one patch that starts by moving the existing code into
+a separate function, then on top as a new change, start playing with
+the optimizations!?
+That would be more easy to review.
+
+> +       unsigned int from_new = *from, nr_new = nr, rem;
+> +
+> +       if (is_power_of_2(card->erase_size)) {
+
+I would like some comment in the code, to understand what/why we do this.
+
+> +               unsigned int temp = from_new;
+> +
+> +               from_new = round_up(temp, card->erase_size);
+> +               rem = from_new - temp;
+> +
+> +               if (nr_new > rem)
+> +                       nr_new -= rem;
+> +               else
+> +                       return 0;
+> +
+> +               nr_new = round_down(nr_new, card->erase_size);
+> +       } else {
+
+Ditto.
+
+> +               rem = from_new % card->erase_size;
+> +               if (rem) {
+> +                       rem = card->erase_size - rem;
+> +                       from_new += rem;
+> +                       if (nr_new > rem)
+> +                               nr_new -= rem;
+> +                       else
+> +                               return 0;
+> +               }
+> +
+> +               rem = nr_new % card->erase_size;
+> +               if (rem)
+> +                       nr_new -= rem;
+> +       }
+> +
+> +       if (nr_new == 0)
+> +               return 0;
+> +
+> +       /* 'from' and 'to' are inclusive */
+> +       *to = from_new + nr_new - 1;
+> +       *from = from_new;
+> +
+> +       return nr_new;
+> +}
+> +
+>  /**
+>   * mmc_erase - erase sectors.
+>   * @card: card to erase
+> @@ -2217,13 +2262,6 @@ int mmc_erase(struct mmc_card *card, unsigned int from, unsigned int nr,
+>         unsigned int rem, to = from + nr;
+>         int err;
 >
-> Best Regards,
-> Jaehoon Chung
+> -       if (!(card->host->caps & MMC_CAP_ERASE) ||
+> -           !(card->csd.cmdclass & CCC_ERASE))
+> -               return -EOPNOTSUPP;
+> -
+> -       if (!card->erase_size)
+> -               return -EOPNOTSUPP;
+> -
+
+I agree with Shawn here, please try to have one patch taking care of
+one thing. If we find out that things goes wrong later, then it's
+easier to drop/revert a change which causes the regression.
+
+Moreover, for the above particular change, I don't think you should
+remove these validations, as this is an API being exported. You may
+convert to use mmc_can_erase() though.
+
+Regarding all the mmc erase related exported APIs, there are certainly
+a need for some clean-ups. For example, I think too many APIs are
+being exported and we could probably also restructure the code a bit
+so it becomes more readable. Although, of course this deserves a
+standalone clean-up series. :-)
+
+>         if (mmc_card_sd(card) && arg != MMC_ERASE_ARG)
+>                 return -EOPNOTSUPP;
 >
->>
->>>
->>> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
->>> ---
->>>  drivers/mmc/host/dw_mmc.c | 17 ++++++++++++++++-
->>>  1 file changed, 16 insertions(+), 1 deletion(-)
->>>
->>> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
->>> index 22dacae..6571924 100644
->>> --- a/drivers/mmc/host/dw_mmc.c
->>> +++ b/drivers/mmc/host/dw_mmc.c
->>> @@ -1568,10 +1568,25 @@ static int dw_mci_execute_tuning(struct mmc_host *mmc, u32 opcode)
->>>      struct dw_mci_slot *slot = mmc_priv(mmc);
->>>      struct dw_mci *host = slot->host;
->>>      const struct dw_mci_drv_data *drv_data = host->drv_data;
->>> -    int err = -EINVAL;
->>> +    int err = 0;
->>> +
->>> +    switch (host->timing) {
->>> +    case MMC_TIMING_MMC_HS400:
->>> +        err = -EINVAL;
-
-What makes you think the code could be there? :)
-By looking the code, it's impossible, no?
-
->>> +        goto out;
->>> +    case MMC_TIMING_MMC_HS200:
->>> +    case MMC_TIMING_UHS_SDR104:
->>> +    case MMC_TIMING_UHS_DDR50:
->>> +        break;
->>> +    case MMC_TIMING_UHS_SDR50:
->>> +        /* Fall through */
-
-dw_mmc even doesn't try to do tuning for SDR50?
-
-
->>> +    default:
->>> +        goto out;
->>> +    }
->>>
-
-That confused me more or less. What makes us gain confidence
-that we could return 0 even if no any tuning process was done
-before using UHS-I.
-
-
->>>      if (drv_data && drv_data->execute_tuning)
->>>          err = drv_data->execute_tuning(slot, opcode);
->>> +out:
->>>      return err;
->>>  }
->>>
->>>
->>
->>
+> @@ -2240,31 +2278,17 @@ int mmc_erase(struct mmc_card *card, unsigned int from, unsigned int nr,
+>                         return -EINVAL;
+>         }
 >
+> -       if (arg == MMC_ERASE_ARG) {
+> -               rem = from % card->erase_size;
+> -               if (rem) {
+> -                       rem = card->erase_size - rem;
+> -                       from += rem;
+> -                       if (nr > rem)
+> -                               nr -= rem;
+> -                       else
+> -                               return 0;
+> -               }
+> -               rem = nr % card->erase_size;
+> -               if (rem)
+> -                       nr -= rem;
+> -       }
+> -
+>         if (nr == 0)
+>                 return 0;
 >
+> -       to = from + nr;
+> -
+> -       if (to <= from)
+> -               return -EINVAL;
+> -
+> -       /* 'from' and 'to' are inclusive */
+> -       to -= 1;
+> +       if (arg == MMC_ERASE_ARG) {
+> +               nr = mmc_align_erase_size(card, &from, &to, nr);
+> +               if (nr == 0)
+> +                       return 0;
+> +       } else {
+> +               /* 'from' and 'to' are inclusive */
+> +               to -= 1;
+> +       }
 >
+>         /*
+>          * Special case where only one erase-group fits in the timeout budget:
+> --
+> 1.7.9.5
 >
 
-
--- 
-Best Regards
-Shawn Lin
-
+Kind regards
+Uffe
