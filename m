@@ -1,56 +1,94 @@
-From: Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
-Subject: [PATCH v2 3/4] mmc: dw_mmc: fix misleading error print if failing to
- do DMA transfer
-Date: Fri,  2 Sep 2016 12:14:38 +0800
-Message-ID: <1472789679-15121-3-git-send-email-shawn.lin@rock-chips.com>
+From: Shawn Lin <shawn.lin@rock-chips.com>
+Subject: [PATCH v2 4/4] mmc: dw_mmc: use macro to define ring buffer size
+Date: Fri,  2 Sep 2016 12:14:39 +0800
+Message-ID: <1472789679-15121-4-git-send-email-shawn.lin@rock-chips.com>
 References: <1472789679-15121-1-git-send-email-shawn.lin@rock-chips.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-In-Reply-To: <1472789679-15121-1-git-send-email-shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-rockchip>,
- <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-rockchip/>
-List-Post: <mailto:linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-List-Help: <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-rockchip>,
- <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
-Sender: "Linux-rockchip" <linux-rockchip-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-Errors-To: linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
-To: Jaehoon Chung <jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>
-Cc: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Heiko Stuebner <heiko-4mtYJXux2i+zQB+pC5nmwQ@public.gmane.org>, Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Doug Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from lucky1.263xmail.com ([211.157.147.135]:43644 "EHLO
+        lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751334AbcIBET7 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 2 Sep 2016 00:19:59 -0400
+In-Reply-To: <1472789679-15121-1-git-send-email-shawn.lin@rock-chips.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Jaehoon Chung <jh80.chung@samsung.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Doug Anderson <dianders@chromium.org>, Heiko Stuebner <heiko@sntech.de>, linux-rockchip@lists.infradead.org, Shawn Lin <shawn.lin@rock-chips.com>
 
-The original log didn't figure out that we could still
-finish this transfer by PIO mode even if failing to use
-DMA. And it should be kept for debug level instead of
-error one.
+It's very prone to make mistake as we might forget
+to replace all PAGE_SIZEs with new values if we try
+to modify the ring buffer size for whatever reasons.
+Let's use a macro to define it.
 
-Signed-off-by: Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
+Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
 ---
 
 Changes in v2: None
 
- drivers/mmc/host/dw_mmc.c | 6 ++++--
- 1 file changed, 4 insertions(+), 2 deletions(-)
+ drivers/mmc/host/dw_mmc.c | 15 ++++++++++-----
+ 1 file changed, 10 insertions(+), 5 deletions(-)
 
 diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index daa1c52..833b6ad 100644
+index 833b6ad..6e5926b 100644
 --- a/drivers/mmc/host/dw_mmc.c
 +++ b/drivers/mmc/host/dw_mmc.c
-@@ -1057,8 +1057,10 @@ static int dw_mci_submit_data_dma(struct dw_mci *host, struct mmc_data *data)
- 	spin_unlock_irqrestore(&host->irq_lock, irqflags);
+@@ -61,6 +61,8 @@
+ 				 SDMMC_IDMAC_INT_FBE | SDMMC_IDMAC_INT_RI | \
+ 				 SDMMC_IDMAC_INT_TI)
  
- 	if (host->dma_ops->start(host, sg_len)) {
--		/* We can't do DMA */
--		dev_err(host->dev, "%s: failed to start DMA.\n", __func__);
-+		/* We can't do DMA, try PIO for this one */
-+		dev_dbg(host->dev,
-+			"%s: fall back to PIO mode for current transfer\n",
-+			__func__);
- 		return -ENODEV;
- 	}
++#define DESC_RING_BUF_SZ	PAGE_SIZE
++
+ struct idmac_desc_64addr {
+ 	u32		des0;	/* Control Descriptor */
  
+@@ -474,7 +476,8 @@ static int dw_mci_idmac_init(struct dw_mci *host)
+ 	if (host->dma_64bit_address == 1) {
+ 		struct idmac_desc_64addr *p;
+ 		/* Number of descriptors in the ring buffer */
+-		host->ring_size = PAGE_SIZE / sizeof(struct idmac_desc_64addr);
++		host->ring_size =
++			DESC_RING_BUF_SZ / sizeof(struct idmac_desc_64addr);
+ 
+ 		/* Forward link the descriptor list */
+ 		for (i = 0, p = host->sg_cpu; i < host->ring_size - 1;
+@@ -500,7 +503,8 @@ static int dw_mci_idmac_init(struct dw_mci *host)
+ 	} else {
+ 		struct idmac_desc *p;
+ 		/* Number of descriptors in the ring buffer */
+-		host->ring_size = PAGE_SIZE / sizeof(struct idmac_desc);
++		host->ring_size =
++			DESC_RING_BUF_SZ / sizeof(struct idmac_desc);
+ 
+ 		/* Forward link the descriptor list */
+ 		for (i = 0, p = host->sg_cpu;
+@@ -609,7 +613,7 @@ static inline int dw_mci_prepare_desc64(struct dw_mci *host,
+ err_own_bit:
+ 	/* restore the descriptor chain as it's polluted */
+ 	dev_dbg(host->dev, "desciptor is still owned by IDMAC.\n");
+-	memset(host->sg_cpu, 0, PAGE_SIZE);
++	memset(host->sg_cpu, 0, DESC_RING_BUF_SZ);
+ 	dw_mci_idmac_init(host);
+ 	return -EINVAL;
+ }
+@@ -685,7 +689,7 @@ static inline int dw_mci_prepare_desc32(struct dw_mci *host,
+ err_own_bit:
+ 	/* restore the descriptor chain as it's polluted */
+ 	dev_dbg(host->dev, "desciptor is still owned by IDMAC.\n");
+-	memset(host->sg_cpu, 0, PAGE_SIZE);
++	memset(host->sg_cpu, 0, DESC_RING_BUF_SZ);
+ 	dw_mci_idmac_init(host);
+ 	return -EINVAL;
+ }
+@@ -2750,7 +2754,8 @@ static void dw_mci_init_dma(struct dw_mci *host)
+ 		}
+ 
+ 		/* Alloc memory for sg translation */
+-		host->sg_cpu = dmam_alloc_coherent(host->dev, PAGE_SIZE,
++		host->sg_cpu = dmam_alloc_coherent(host->dev,
++						   DESC_RING_BUF_SZ,
+ 						   &host->sg_dma, GFP_KERNEL);
+ 		if (!host->sg_cpu) {
+ 			dev_err(host->dev,
 -- 
 2.3.7
+
+
