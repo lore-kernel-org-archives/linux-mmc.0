@@ -1,86 +1,94 @@
-From: Rob Herring <robh-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH 1/4] Documentation: mmc: sdhci-of-arasan: Add clk_syscon
- as an optional one
-Date: Fri, 2 Sep 2016 12:14:18 -0500
-Message-ID: <CAL_JsqKwDfwf1T8=u9JerkDxBUir=Qt=B=N-DZZ1Ljn=YYi7oQ@mail.gmail.com>
-References: <1472457779-7194-1-git-send-email-shawn.lin@rock-chips.com>
- <1472457779-7194-2-git-send-email-shawn.lin@rock-chips.com>
- <20160902141508.GA20303@rob-hp-laptop> <CAD=FV=ViB8Fc579URi755ns+cKwuHC2orCqUSwh-fTpCi4TzqA@mail.gmail.com>
+From: Stefan Wahren <stefan.wahren@i2se.com>
+Subject: Re: [PATCH RFC 1/3] DT: bindings: mmc: Add property for 3.3V only
+ support
+Date: Fri, 2 Sep 2016 20:50:28 +0200 (CEST)
+Message-ID: <1736517218.106027.c3e46c0d-6759-48dd-92a9-ce98ef74d48a.open-xchange@email.1und1.de>
+References: <1470488140-10104-1-git-send-email-stefan.wahren@i2se.com>
+ <1470488140-10104-2-git-send-email-stefan.wahren@i2se.com>
+ <20160810184451.GA13473@rob-hp-laptop>
+ <853617027.179290.63a6f478-ad48-40c8-82ca-760dd1afc040.open-xchange@email.1und1.de>
+ <CAL_JsqJ09hXYrp_pgAw9FXrBv+=grkm_zip6qB9XefujPECTxQ@mail.gmail.com>
+ <468a6704-a9f0-1715-ff64-9e331a6a80b1@rock-chips.com>
+ <8f87c885-3c55-cac8-a9f5-e121ae031f90@intel.com>
+ <CAPDyKFr8X93oqiPzkQxPnfMGyV9UBEybvfODX5if3VwMbheKcw@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <CAD=FV=ViB8Fc579URi755ns+cKwuHC2orCqUSwh-fTpCi4TzqA-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Doug Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
-Cc: Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>, Heiko Stuebner <heiko-4mtYJXux2i+zQB+pC5nmwQ@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "open list:ARM/Rockchip SoC..." <linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Ziyuan Xu <xzy.xu-TNX95d0MmH7DzftRWevZcw@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mout.kundenserver.de ([212.227.17.13]:52004 "EHLO
+        mout.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1755001AbcIBSvh (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 2 Sep 2016 14:51:37 -0400
+In-Reply-To: <CAPDyKFr8X93oqiPzkQxPnfMGyV9UBEybvfODX5if3VwMbheKcw@mail.gmail.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>
+Cc: Sascha Hauer <kernel@pengutronix.de>, Otavio Salvador <otavio@ossystems.com.br>, Holger Schurig <holgerschurig@gmail.com>, Shawn Lin <shawn.lin@rock-chips.com>, Shawn Guo <shawnguo@kernel.org>, Dong Aisheng <aisheng.dong@nxp.com>, linux-mmc@vger.kernel.org, Mark Rutland <mark.rutland@arm.com>, linux-arm-kernel@lists.infradead.org, Marek Vasut <marex@denx.de>, devicetree@vger.kernel.org, Fabio Estevam <fabio.estevam@nxp.com>, Adrian Hunter <adrian.hunter@intel.com>
 
-On Fri, Sep 2, 2016 at 11:12 AM, Doug Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org> wrote:
-> Rob,
->
-> On Fri, Sep 2, 2016 at 7:15 AM, Rob Herring <robh-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org> wrote:
->> On Mon, Aug 29, 2016 at 04:02:56PM +0800, Shawn Lin wrote:
->>> We introduced soc-ctl-syscon to do several things, for instance, update
->>> baseclk or update clkmul, etc. In odrder to access this physical block,
->>> we need to explicitly enable its clock. Currently we don't control this
->>> clock as we always add a CLK_IGNORE_UNUSED flag for it to indicate that
->>> we will not gate it even if not referenced. This is not a correct way since
->>> it is a clock parenting from clk_ahb which is used by sdhci-of-arasan now.
->>> Without enabling clk_ahb, the flag don't guarantee we could access
->>> soc-ctl-syscon. Moreover, we can't find a reason not to gate clk_syscon
->>> once we remove/power-down emmc controller. So let's add clk_syscon and
->>> enable/disable it explicitly when needed.
->>>
->>> Signed-off-by: Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
->>>
->>> ---
->>>
->>>  Documentation/devicetree/bindings/mmc/arasan,sdhci.txt | 7 +++++--
->>>  1 file changed, 5 insertions(+), 2 deletions(-)
->>>
->>> diff --git a/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt b/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
->>> index 3404afa..b04eb02 100644
->>> --- a/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
->>> +++ b/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
->>> @@ -33,6 +33,9 @@ Optional Properties:
->>>    - clock-output-names: If specified, this will be the name of the card clock
->>>      which will be exposed by this device.  Required if #clock-cells is
->>>      specified.
->>> +  - clock-names: From clock bindings: Although we treat clock-names as required
->>> +    property, there is still one, "clk_syscon", should be optional as it depends
->>> +    on whether we need to control soc-ctl-syscon or not.
->>
->> No. This doesn't look right to me. The syscon is a separate block
->> and the clock for it belongs in the syscon node itself. Probably there
->> needs to be some sort of ref counting in the syscon so it can do
->> runtime-pm.
->
-> I'm not an expert, but one thing to note is that this is actually a
-> separate clock just for this small part of the GRF (general register
-> files).  Yeah, it's bizarre.
+Hi Ulf, hi Rob
 
-I wasn't doubting that. Only that the connection is not to the sdhci block.
+> Ulf Hansson <ulf.hansson@linaro.org> hat am 30. August 2016 um 11:26
+> geschrieben:
+> 
+> 
+> On 18 August 2016 at 14:25, Adrian Hunter <adrian.hunter@intel.com> wrote:
+> > On 11/08/16 03:48, Shawn Lin wrote:
+> >> + Adrian
+> >>
+> >> Let's queue Adrian here who now maintains SDHCI stuff.
+> >
+> > SDHCI drivers may not implement no-1-8-v in a consistent manner, but as far
+> > as I can see, the meaning is still clear: 1.8V will not be used for either
+> > supply or signaling.
+> 
+> Okay.
+> 
+> >
+> > SDHCI is complicated because the SDHCI specification does not cover eMMC.
+> > From the perspective of SDHCI, the only 1.8V modes are the UHS-I modes, so
+> > support for 1.8V signaling is the same as support for one of those modes
+> > (the spec even says as much).  But what happens is that the host controller
+> > can support those modes but the board can't supply 1.8V so the drivers
+> > remove capability for the modes.  Support for 1.8V supply has a capability
+> > bit which drivers can override if necessary but removable SD cards don't
+> > support 1.8V supply anyway, so the issue doesn't arise if the host
+> > controller is only used for uSD cards.
+> 
+> By looking how SDHCI uses the SDHCI_SUPPORT_DDR50 in conjunction with
+> SDHCI_QUIRK2_NO_1_8_V (which is set when no-1-8-v DT property is
+> provided), this becomes a bit messy.
+> 
+> From Adrian's summary above, it then seems appropriate to limit the
+> no-1-8-v DT property to apply only to capabilities related to SD
+> cards, as I assume that also was the original purpose.
+> 
+> Do you think it's possible to clean up this in sdhci when assigning
+> the caps masks, and then also clarify the no-1-8-v DT binding in the
+> documentation?
 
-> Said another way, the GRF is a sorta hodgepodge location for all sorts
-> of stuff.  ...included in there are the "corecfg" registers that are
-> used by the SDHCI IP block.  Within the GRF register space these
-> registers are 0x0f000 - 0x0f050 (last register is at 0x0f04c).  I
-> believe that only registers in that special range need this clock.
->
-> Maybe the right answer is that we should actually have had a sub-node
-> of the GRF for these registers and then SDHCI should have referenced
-> that as its syscon?
+was the question addressed to me? I think this clean up should be a separate
+patch series. Unfortunately i don't have a clue about what exactly and how it
+should be fixed.
 
-Sub-node or not is an orthogonal question. The main part is now we
-have a syscon link and we need to power manage the syscon. Or is there
-really a need to manage this clock at runtime? Perhaps it can just be
-turned on and left on, but that should be in the syscon driver. The
-SDHCI driver could retrieve the clocks from syscon node and manage it
-directly. I'd be fine with that from a binding perspective, but seems
-a bit hacky from a kernel perspective.
+> 
+> Regarding the new DT binding proposed to be added, mmc-ddr-3_3v, it
+> seems we need this to be able to properly describe the HW.
+> Rob, do you have an issue with adding this binding? I am thinking that
+> we already have mmc-ddr-1_8v and mmc-ddr-1_2v, so it just follow
+> existing pattern.
 
-Rob
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+@Rob: gently ping ...
+
+Regards
+Stefan
+
+> 
+> [...]
+> 
+> Kind regards
+> Uffe
+> 
+> _______________________________________________
+> linux-arm-kernel mailing list
+> linux-arm-kernel@lists.infradead.org
+> http://lists.infradead.org/mailman/listinfo/linux-arm-kernel
