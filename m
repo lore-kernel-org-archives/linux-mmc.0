@@ -1,103 +1,71 @@
 From: Simon Horman <horms+renesas@verge.net.au>
-Subject: [PATCH v6 2/9] mmc: tmio: enhance illegal sequence handling
-Date: Fri,  2 Sep 2016 13:17:31 +0200
-Message-ID: <1472815058-11562-3-git-send-email-horms+renesas@verge.net.au>
-References: <1472815058-11562-1-git-send-email-horms+renesas@verge.net.au>
-Return-path: <linux-renesas-soc-owner@vger.kernel.org>
-In-Reply-To: <1472815058-11562-1-git-send-email-horms+renesas@verge.net.au>
-Sender: linux-renesas-soc-owner@vger.kernel.org
-To: Wolfram Sang <wsa+renesas@sang-engineering.com>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Magnus Damm <magnus.damm@gmail.com>, linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org, Ai Kyuse <ai.kyuse.uw@renesas.com>, Simon Horman <horms+renesas@verge.net.au>
+Subject: [PATCH v6 0/9] UHS-I SDR-104 support for sh_mobile_sdhi
+Date: Fri,  2 Sep 2016 13:17:29 +0200
+Message-ID: <1472815058-11562-1-git-send-email-horms+renesas@verge.net.au>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from kirsty.vergenet.net ([202.4.237.240]:39239 "EHLO
+        kirsty.vergenet.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752548AbcIBLRz (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 2 Sep 2016 07:17:55 -0400
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Wolfram Sang <wsa+renesas@sang-engineering.com>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Magnus Damm <magnus.damm@gmail.com>, linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org, Simon Horman <horms+renesas@verge.net.au>
 
-From: Ai Kyuse <ai.kyuse.uw@renesas.com>
+Hi,
 
-An illegal sequence command error may occur if there is a stopbit or
-cmd_index error as well as a CRC error. The correct course of action
-is to re-enable IRQs
+this series is based on work by Ai Kyuse to add UHS-I SDR-104 support for
+sh_mobile_sdhi. It builds on work by Shinobu Uehara, Rob Taylor, William
+Towle and Ian Molton, Ben Hutchings, Wolfram Sang and others to add UHS-I
+SDR-50 support to the same driver.
 
-An illegal sequence data error may occur if there is a CRC or stopbit
-error,  or underrun. In this case set data->error correctly.
+This series enables:
+* UHS-I SDR-104 on the r8a7790/Lager where UHS-I SDR-50 is already enabled.
+* Both UHS-1 SDR-50 and SDR-104 on the r8a7796/Salvator-X
 
-This is in preparation for enabling tuning support which relies on
-differentiating between illegal sequence and other errors.
+It is based on a merge of the next branches of the mmc and renesas trees.
 
-Signed-off-by: Ai Kyuse <ai.kyuse.uw@renesas.com>
-[simon: broken out of a larger patch]
-Signed-off-by: Simon Horman <horms+renesas@verge.net.au>
-Reviewed-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
----
-v4
-* Added Ack from Wolfram Sang
+The "mmc:" patches are targeted at the next branch of the mmc
+tree. The "ARM:" and "arm64:" patches are targeted at the next branch of
+the renesas tree.
 
-v3
-* No change
+To aid review the following git branches are provided:
+* https:://git.kernel.org/pub/scm/linux/kernel/git/horms/renesas.git topic/sdr104-v6
+  This patch set
+* https:://git.kernel.org/pub/scm/linux/kernel/git/horms/renesas.git topic/sdr104-v6+sdhi-dma-v3
+  This patch set merged with a rebase of prototype DMA support for SDHI on
+  R-Car Gen 3
 
-v2
-* Broken out of a larger patch (but forgot to post)
----
- drivers/mmc/host/tmio_mmc_pio.c | 15 +++++++++------
- 1 file changed, 9 insertions(+), 6 deletions(-)
+Overview of changes since v5:
+* Drop retune handling from tmio suspend handler: it hs handled by MMC core
+* Allow restoration of saved tuning parameters on resume
 
-diff --git a/drivers/mmc/host/tmio_mmc_pio.c b/drivers/mmc/host/tmio_mmc_pio.c
-index 192817850dff..806308ac93e7 100644
---- a/drivers/mmc/host/tmio_mmc_pio.c
-+++ b/drivers/mmc/host/tmio_mmc_pio.c
-@@ -520,7 +520,7 @@ void tmio_mmc_do_data_irq(struct tmio_mmc_host *host)
- 	schedule_work(&host->done);
- }
- 
--static void tmio_mmc_data_irq(struct tmio_mmc_host *host)
-+static void tmio_mmc_data_irq(struct tmio_mmc_host *host, unsigned int stat)
- {
- 	struct mmc_data *data;
- 	spin_lock(&host->lock);
-@@ -529,6 +529,9 @@ static void tmio_mmc_data_irq(struct tmio_mmc_host *host)
- 	if (!data)
- 		goto out;
- 
-+	if (stat & TMIO_STAT_CRCFAIL || stat & TMIO_STAT_STOPBIT_ERR ||
-+	    stat & TMIO_STAT_TXUNDERRUN)
-+		data->error = -EILSEQ;
- 	if (host->chan_tx && (data->flags & MMC_DATA_WRITE) && !host->force_pio) {
- 		u32 status = sd_ctrl_read16_and_16_as_32(host, CTL_STATUS);
- 		bool done = false;
-@@ -577,8 +580,6 @@ static void tmio_mmc_cmd_irq(struct tmio_mmc_host *host,
- 		goto out;
- 	}
- 
--	host->cmd = NULL;
--
- 	/* This controller is sicker than the PXA one. Not only do we need to
- 	 * drop the top 8 bits of the first response word, we also need to
- 	 * modify the order of the response for short response command types.
-@@ -598,14 +599,16 @@ static void tmio_mmc_cmd_irq(struct tmio_mmc_host *host,
- 
- 	if (stat & TMIO_STAT_CMDTIMEOUT)
- 		cmd->error = -ETIMEDOUT;
--	else if (stat & TMIO_STAT_CRCFAIL && cmd->flags & MMC_RSP_CRC)
-+	else if ((stat & TMIO_STAT_CRCFAIL && cmd->flags & MMC_RSP_CRC) ||
-+		 stat & TMIO_STAT_STOPBIT_ERR ||
-+		 stat & TMIO_STAT_CMD_IDX_ERR)
- 		cmd->error = -EILSEQ;
- 
- 	/* If there is data to handle we enable data IRQs here, and
- 	 * we will ultimatley finish the request in the data_end handler.
- 	 * If theres no data or we encountered an error, finish now.
- 	 */
--	if (host->data && !cmd->error) {
-+	if (host->data && (!cmd->error || cmd->error == -EILSEQ)) {
- 		if (host->data->flags & MMC_DATA_READ) {
- 			if (host->force_pio || !host->chan_rx)
- 				tmio_mmc_enable_mmc_irqs(host, TMIO_MASK_READOP);
-@@ -666,7 +669,7 @@ static bool __tmio_mmc_sdcard_irq(struct tmio_mmc_host *host,
- 	/* Data transfer completion */
- 	if (ireg & TMIO_STAT_DATAEND) {
- 		tmio_mmc_ack_mmc_irqs(host, TMIO_STAT_DATAEND);
--		tmio_mmc_data_irq(host);
-+		tmio_mmc_data_irq(host, status);
- 		return true;
- 	}
- 
+Please see http://elinux.org/Tests:SD-SDHI-SDR104 for indicative tests
+results.
+
+Ai Kyuse (3):
+  mmc: tmio: enhance illegal sequence handling
+  mmc: tmio: Add hw reset support
+  mmc: tmio: Add tuning support
+
+Simon Horman (5):
+  mmc: core: Add helper to see if a host can be retuned
+  mmc: tmio: document mandatory and optional callbacks
+  mmc: sh_mobile_sdhi: Add tuning support
+  ARM: dts: lager: Enable UHS-I SDR-104
+  arm64: dts: r8a7795: salvator-x: Enable UHS-I SDR-104
+
+Wolfram Sang (1):
+  arm64: dts: r8a7795: salvator-x: enable UHS for SDHI 0 & 3
+
+ arch/arm/boot/dts/r8a7790-lager.dts                |   1 +
+ arch/arm64/boot/dts/renesas/r8a7795-salvator-x.dts |  24 +-
+ drivers/mmc/host/sh_mobile_sdhi.c                  | 265 ++++++++++++++++++++-
+ drivers/mmc/host/tmio_mmc.h                        |  18 +-
+ drivers/mmc/host/tmio_mmc_pio.c                    |  93 +++++++-
+ include/linux/mmc/host.h                           |   5 +
+ 6 files changed, 396 insertions(+), 10 deletions(-)
+
 -- 
 2.7.0.rc3.207.g0ac5344
+
