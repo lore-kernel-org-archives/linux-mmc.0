@@ -1,63 +1,65 @@
-From: Rob Herring <robh-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH 1/4] Documentation: mmc: sdhci-of-arasan: Add clk_syscon
- as an optional one
-Date: Fri, 2 Sep 2016 09:15:08 -0500
-Message-ID: <20160902141508.GA20303@rob-hp-laptop>
-References: <1472457779-7194-1-git-send-email-shawn.lin@rock-chips.com>
- <1472457779-7194-2-git-send-email-shawn.lin@rock-chips.com>
+From: Rob Herring <robh@kernel.org>
+Subject: Re: [PATCH 1/2] sdhci-of-arasan: Add device tree parameter
+ fails-without-test-cd bit
+Date: Fri, 2 Sep 2016 09:45:06 -0500
+Message-ID: <20160902144506.GA7795@rob-hp-laptop>
+References: <1472512857-13063-1-git-send-email-zach.brown@ni.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-oi0-f68.google.com ([209.85.218.68]:36520 "EHLO
+        mail-oi0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S932299AbcIBOpJ (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 2 Sep 2016 10:45:09 -0400
 Content-Disposition: inline
-In-Reply-To: <1472457779-7194-2-git-send-email-shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-rockchip>,
- <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-rockchip/>
-List-Post: <mailto:linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-List-Help: <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-rockchip>,
- <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
-Sender: "Linux-rockchip" <linux-rockchip-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-Errors-To: linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
-To: Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
-Cc: devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Heiko Stuebner <heiko-4mtYJXux2i+zQB+pC5nmwQ@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ziyuan Xu <xzy.xu-TNX95d0MmH7DzftRWevZcw@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Douglas Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+In-Reply-To: <1472512857-13063-1-git-send-email-zach.brown@ni.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Zach Brown <zach.brown@ni.com>
+Cc: adrian.hunter@intel.com, ulf.hansson@linaro.org, mark.rutland@arm.com, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, michal.simek@xilinx.com, soren.brinkmann@xilinx.com, linux-arm-kernel@lists.infradead.org
 
-On Mon, Aug 29, 2016 at 04:02:56PM +0800, Shawn Lin wrote:
-> We introduced soc-ctl-syscon to do several things, for instance, update
-> baseclk or update clkmul, etc. In odrder to access this physical block,
-> we need to explicitly enable its clock. Currently we don't control this
-> clock as we always add a CLK_IGNORE_UNUSED flag for it to indicate that
-> we will not gate it even if not referenced. This is not a correct way since
-> it is a clock parenting from clk_ahb which is used by sdhci-of-arasan now.
-> Without enabling clk_ahb, the flag don't guarantee we could access
-> soc-ctl-syscon. Moreover, we can't find a reason not to gate clk_syscon
-> once we remove/power-down emmc controller. So let's add clk_syscon and
-> enable/disable it explicitly when needed.
+On Mon, Aug 29, 2016 at 06:20:56PM -0500, Zach Brown wrote:
+> The sdhci controller on xilinx zynq devices will not function unless
+> the CD bit is provided. http://www.xilinx.com/support/answers/61064.html
+> In cases where it is impossible to provide the CD bit in hardware,
+> setting the controller to test mode and then setting inserted to true
+> will get the controller to function without the CD bit.
 > 
-> Signed-off-by: Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
+> The device property "fails-without-test-cd" will let the arasan driver know
+> the controller does not have the CD line wired and that the controller
+> does not function without it.
 > 
+> Signed-off-by: Zach Brown <zach.brown@ni.com>
 > ---
+> v2:
+>  * improved commit messages
+>  * removed fake-cd device property
+>  * removed fake-cd quirk
+>  * use broken-cd device property
+>  * documented new usage of broken-cd
+> v3:
+>  * removed new usage of broken-cd
+>  * created fails-without-test-cd device property
+>  * created arasan controller specific quirk
 > 
->  Documentation/devicetree/bindings/mmc/arasan,sdhci.txt | 7 +++++--
->  1 file changed, 5 insertions(+), 2 deletions(-)
+> 
+>  Documentation/devicetree/bindings/mmc/arasan,sdhci.txt | 4 ++++
+>  1 file changed, 4 insertions(+)
 > 
 > diff --git a/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt b/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
-> index 3404afa..b04eb02 100644
+> index 3404afa..ec0dc82 100644
 > --- a/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
 > +++ b/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
-> @@ -33,6 +33,9 @@ Optional Properties:
->    - clock-output-names: If specified, this will be the name of the card clock
->      which will be exposed by this device.  Required if #clock-cells is
->      specified.
-> +  - clock-names: From clock bindings: Although we treat clock-names as required
-> +    property, there is still one, "clk_syscon", should be optional as it depends
-> +    on whether we need to control soc-ctl-syscon or not.
+> @@ -21,6 +21,10 @@ Required Properties:
+>    - interrupts: Interrupt specifier
+>    - interrupt-parent: Phandle for the interrupt controller that services
+>  		      interrupts for this device.
+> +Optional Properties:
+> +- fails-without-test-cd: when present, the controller doesn't work when the CD
+> +  line is not connected properly, and the line is not connected properly. Test
+> +  mode can be used to force the controller to function.
 
-No. This doesn't look right to me. The syscon is a separate block 
-and the clock for it belongs in the syscon node itself. Probably there 
-needs to be some sort of ref counting in the syscon so it can do 
-runtime-pm.
+Prefix with either arasan or xlnx. Seems more likely Xilinx specific to 
+me.
 
 Rob
