@@ -1,94 +1,99 @@
-From: Stefan Wahren <stefan.wahren@i2se.com>
-Subject: Re: [PATCH RFC 1/3] DT: bindings: mmc: Add property for 3.3V only
- support
-Date: Fri, 2 Sep 2016 20:50:28 +0200 (CEST)
-Message-ID: <1736517218.106027.c3e46c0d-6759-48dd-92a9-ce98ef74d48a.open-xchange@email.1und1.de>
-References: <1470488140-10104-1-git-send-email-stefan.wahren@i2se.com>
- <1470488140-10104-2-git-send-email-stefan.wahren@i2se.com>
- <20160810184451.GA13473@rob-hp-laptop>
- <853617027.179290.63a6f478-ad48-40c8-82ca-760dd1afc040.open-xchange@email.1und1.de>
- <CAL_JsqJ09hXYrp_pgAw9FXrBv+=grkm_zip6qB9XefujPECTxQ@mail.gmail.com>
- <468a6704-a9f0-1715-ff64-9e331a6a80b1@rock-chips.com>
- <8f87c885-3c55-cac8-a9f5-e121ae031f90@intel.com>
- <CAPDyKFr8X93oqiPzkQxPnfMGyV9UBEybvfODX5if3VwMbheKcw@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mout.kundenserver.de ([212.227.17.13]:52004 "EHLO
-        mout.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1755001AbcIBSvh (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 2 Sep 2016 14:51:37 -0400
-In-Reply-To: <CAPDyKFr8X93oqiPzkQxPnfMGyV9UBEybvfODX5if3VwMbheKcw@mail.gmail.com>
-Sender: linux-mmc-owner@vger.kernel.org
+From: Jaedon Shin <jaedon.shin-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Subject: Re: [v3 1/2] mmc: DT: sdhci-brcmstb: Bindings document for common sdhci-brcmstb
+Date: Sat, 3 Sep 2016 19:48:09 +0900
+Message-ID: <DA8707BB-D3A3-4D77-8D5F-3F39E3FB5009@gmail.com>
+References: <20160830063010.10171-1-jaedon.shin@gmail.com> <20160830063010.10171-2-jaedon.shin@gmail.com> <20160902145545.GA14098@rob-hp-laptop>
+Mime-Version: 1.0 (Mac OS X Mail 9.3 \(3124\))
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: quoted-printable
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <20160902145545.GA14098@rob-hp-laptop>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Rob Herring <robh-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+Cc: Al Cooper <alcooperx-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Florian Fainelli <f.fainelli-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, bcm-kernel-feedback-list-dY08KVG/lbpWk0Htik3J/w@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>, Rob Herring <robh@kernel.org>
-Cc: Sascha Hauer <kernel@pengutronix.de>, Otavio Salvador <otavio@ossystems.com.br>, Holger Schurig <holgerschurig@gmail.com>, Shawn Lin <shawn.lin@rock-chips.com>, Shawn Guo <shawnguo@kernel.org>, Dong Aisheng <aisheng.dong@nxp.com>, linux-mmc@vger.kernel.org, Mark Rutland <mark.rutland@arm.com>, linux-arm-kernel@lists.infradead.org, Marek Vasut <marex@denx.de>, devicetree@vger.kernel.org, Fabio Estevam <fabio.estevam@nxp.com>, Adrian Hunter <adrian.hunter@intel.com>
 
-Hi Ulf, hi Rob
+Hi Rob,
 
-> Ulf Hansson <ulf.hansson@linaro.org> hat am 30. August 2016 um 11:26
-> geschrieben:
-> 
-> 
-> On 18 August 2016 at 14:25, Adrian Hunter <adrian.hunter@intel.com> wrote:
-> > On 11/08/16 03:48, Shawn Lin wrote:
-> >> + Adrian
-> >>
-> >> Let's queue Adrian here who now maintains SDHCI stuff.
-> >
-> > SDHCI drivers may not implement no-1-8-v in a consistent manner, but as far
-> > as I can see, the meaning is still clear: 1.8V will not be used for either
-> > supply or signaling.
-> 
-> Okay.
-> 
-> >
-> > SDHCI is complicated because the SDHCI specification does not cover eMMC.
-> > From the perspective of SDHCI, the only 1.8V modes are the UHS-I modes, so
-> > support for 1.8V signaling is the same as support for one of those modes
-> > (the spec even says as much).  But what happens is that the host controller
-> > can support those modes but the board can't supply 1.8V so the drivers
-> > remove capability for the modes.  Support for 1.8V supply has a capability
-> > bit which drivers can override if necessary but removable SD cards don't
-> > support 1.8V supply anyway, so the issue doesn't arise if the host
-> > controller is only used for uSD cards.
-> 
-> By looking how SDHCI uses the SDHCI_SUPPORT_DDR50 in conjunction with
-> SDHCI_QUIRK2_NO_1_8_V (which is set when no-1-8-v DT property is
-> provided), this becomes a bit messy.
-> 
-> From Adrian's summary above, it then seems appropriate to limit the
-> no-1-8-v DT property to apply only to capabilities related to SD
-> cards, as I assume that also was the original purpose.
-> 
-> Do you think it's possible to clean up this in sdhci when assigning
-> the caps masks, and then also clarify the no-1-8-v DT binding in the
-> documentation?
+On Sep 2, 2016, at 11:55 PM, Rob Herring <robh-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org> wrote:
+>=20
+> On Tue, Aug 30, 2016 at 03:30:09PM +0900, Jaedon Shin wrote:
+>> - Renames the DT binding document to common for ARM and MIPS based =
+SoCs
+>> - Adds a compatible string "brcm,bcm7445-sdhci" that is =
+representation
+>>  for the Broadcom BCM7445 and family. It is initial and typical 28nm
+>>  generation ARM based SoC.
+>>=20
+>> Signed-off-by: Jaedon Shin <jaedon.shin-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+>> ---
+>> .../mmc/{brcm,bcm7425-sdhci.txt =3D> brcm,sdhci-brcmstb.txt}        | =
+8 +++++---
+>> 1 file changed, 5 insertions(+), 3 deletions(-)
+>> rename Documentation/devicetree/bindings/mmc/{brcm,bcm7425-sdhci.txt =
+=3D> brcm,sdhci-brcmstb.txt} (81%)
+>>=20
+>> diff --git =
+a/Documentation/devicetree/bindings/mmc/brcm,bcm7425-sdhci.txt =
+b/Documentation/devicetree/bindings/mmc/brcm,sdhci-brcmstb.txt
+>> similarity index 81%
+>> rename from =
+Documentation/devicetree/bindings/mmc/brcm,bcm7425-sdhci.txt
+>> rename to =
+Documentation/devicetree/bindings/mmc/brcm,sdhci-brcmstb.txt
+>> index 82847174c37d..555229367935 100644
+>> --- a/Documentation/devicetree/bindings/mmc/brcm,bcm7425-sdhci.txt
+>> +++ b/Documentation/devicetree/bindings/mmc/brcm,sdhci-brcmstb.txt
+>> @@ -8,14 +8,16 @@ on Device Tree properties to enable them for =
+SoC/Board combinations
+>> that support them.
+>>=20
+>> Required properties:
+>> -- compatible: "brcm,bcm7425-sdhci"
+>> +- compatible: should be one of the following
+>> +  - "brcm,bcm7425-sdhci"
+>> +  - "brcm,bcm7445-sdhci"
+>>=20
+>> Refer to clocks/clock-bindings.txt for generic clock consumer =
+properties.
+>>=20
+>> Example:
+>>=20
+>> 	sdhci@f03e0100 {
+>> -		compatible =3D "brcm,bcm7425-sdhci";
+>> +		compatible =3D "brcm,bcm7445-sdhci";
+>> 		reg =3D <0xf03e0000 0x100>;
+>> 		interrupts =3D <0x0 0x26 0x0>;
+>> 		sdhci,auto-cmd12;
+>> @@ -27,7 +29,7 @@ Example:
+>> 	sdhci@f03e0300 {
+>> 		non-removable;
+>> 		bus-width =3D <0x8>;
+>> -		compatible =3D "brcm,bcm7425-sdhci";
+>> +		compatible =3D "brcm,bcm7445-sdhci";
+>=20
+> These changes to the example seem pointless. Drop them.
 
-was the question addressed to me? I think this clean up should be a separate
-patch series. Unfortunately i don't have a clue about what exactly and how it
-should be fixed.
+Previously, the compatible string "brcm,bcm7425-sdhci" is representation =
+all
+MIPS and ARM SoCs including bcm7445. If compatible string is split two =
+strings,
+the example devicetree node is wrong. It is for bcm7445.
 
-> 
-> Regarding the new DT binding proposed to be added, mmc-ddr-3_3v, it
-> seems we need this to be able to properly describe the HW.
-> Rob, do you have an issue with adding this binding? I am thinking that
-> we already have mmc-ddr-1_8v and mmc-ddr-1_2v, so it just follow
-> existing pattern.
+I'll be add commit message this or
+Will I need to create a new patch to change example nodes?
 
-@Rob: gently ping ...
+Thanks,
+Jaedon
 
-Regards
-Stefan
+>=20
+>> 		reg =3D <0xf03e0200 0x100>;
+>> 		interrupts =3D <0x0 0x27 0x0>;
+>> 		sdhci,auto-cmd12;
+>> --=20
+>> 2.9.3
 
-> 
-> [...]
-> 
-> Kind regards
-> Uffe
-> 
-> _______________________________________________
-> linux-arm-kernel mailing list
-> linux-arm-kernel@lists.infradead.org
-> http://lists.infradead.org/mailman/listinfo/linux-arm-kernel
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
