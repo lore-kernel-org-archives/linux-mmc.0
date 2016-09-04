@@ -1,99 +1,69 @@
-From: Jaedon Shin <jaedon.shin-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: Re: [v3 1/2] mmc: DT: sdhci-brcmstb: Bindings document for common sdhci-brcmstb
-Date: Sat, 3 Sep 2016 19:48:09 +0900
-Message-ID: <DA8707BB-D3A3-4D77-8D5F-3F39E3FB5009@gmail.com>
-References: <20160830063010.10171-1-jaedon.shin@gmail.com> <20160830063010.10171-2-jaedon.shin@gmail.com> <20160902145545.GA14098@rob-hp-laptop>
-Mime-Version: 1.0 (Mac OS X Mail 9.3 \(3124\))
-Content-Type: text/plain; charset=us-ascii
-Content-Transfer-Encoding: quoted-printable
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20160902145545.GA14098@rob-hp-laptop>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Rob Herring <robh-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-Cc: Al Cooper <alcooperx-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Florian Fainelli <f.fainelli-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, bcm-kernel-feedback-list-dY08KVG/lbpWk0Htik3J/w@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>
+From: Julian Calaby <julian.calaby-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Subject: Re: Support for various sdio wifi-chips on Allwinner
+ tablets and SBCs
+Date: Sun, 4 Sep 2016 14:54:10 +1000
+Message-ID: <CAGRGNgUMw26JBdCOoOimH=_zgA788cS=+Ttjt7k87C5qPK3_WA@mail.gmail.com>
+References: <5844eef2-71bd-bbb9-dff6-92e01a393b36@gmail.com>
+Reply-To: julian.calaby-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-sunxi+bncBDQIP76OUQLBBB6SV27AKGQECG5HIPA-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+Sender: linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
+In-Reply-To: <5844eef2-71bd-bbb9-dff6-92e01a393b36-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+List-Post: <https://groups.google.com/group/linux-sunxi/post>, <mailto:linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Help: <https://groups.google.com/support/>, <mailto:linux-sunxi+help-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Archive: <https://groups.google.com/group/linux-sunxi
+List-Subscribe: <https://groups.google.com/group/linux-sunxi/subscribe>, <mailto:linux-sunxi+subscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+List-Unsubscribe: <mailto:googlegroups-manage+1076902468213+unsubscribe-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>,
+ <https://groups.google.com/group/linux-sunxi/subscribe>
+To: jwrdegoede-rxtnV0ftBwyoClj4AeEUq9i2O/JbrIOy@public.gmane.org
+Cc: linux-sunxi <linux-sunxi-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Chen-Yu Tsai <wens-jdAy2FN1RRM@public.gmane.org>, Maxime Ripard <maxime.ripard-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>, Icenowy Zheng <icenowy-ymACFijhrKM@public.gmane.org>, Jean-Francois Moine <moinejf-GANU6spQydw@public.gmane.org>, Bastien Nocera <hadess-0MeiytkfxGOsTnJN9+BGXg@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-Hi Rob,
+Hi All,
 
-On Sep 2, 2016, at 11:55 PM, Rob Herring <robh-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org> wrote:
->=20
-> On Tue, Aug 30, 2016 at 03:30:09PM +0900, Jaedon Shin wrote:
->> - Renames the DT binding document to common for ARM and MIPS based =
-SoCs
->> - Adds a compatible string "brcm,bcm7445-sdhci" that is =
-representation
->>  for the Broadcom BCM7445 and family. It is initial and typical 28nm
->>  generation ARM based SoC.
->>=20
->> Signed-off-by: Jaedon Shin <jaedon.shin-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
->> ---
->> .../mmc/{brcm,bcm7425-sdhci.txt =3D> brcm,sdhci-brcmstb.txt}        | =
-8 +++++---
->> 1 file changed, 5 insertions(+), 3 deletions(-)
->> rename Documentation/devicetree/bindings/mmc/{brcm,bcm7425-sdhci.txt =
-=3D> brcm,sdhci-brcmstb.txt} (81%)
->>=20
->> diff --git =
-a/Documentation/devicetree/bindings/mmc/brcm,bcm7425-sdhci.txt =
-b/Documentation/devicetree/bindings/mmc/brcm,sdhci-brcmstb.txt
->> similarity index 81%
->> rename from =
-Documentation/devicetree/bindings/mmc/brcm,bcm7425-sdhci.txt
->> rename to =
-Documentation/devicetree/bindings/mmc/brcm,sdhci-brcmstb.txt
->> index 82847174c37d..555229367935 100644
->> --- a/Documentation/devicetree/bindings/mmc/brcm,bcm7425-sdhci.txt
->> +++ b/Documentation/devicetree/bindings/mmc/brcm,sdhci-brcmstb.txt
->> @@ -8,14 +8,16 @@ on Device Tree properties to enable them for =
-SoC/Board combinations
->> that support them.
->>=20
->> Required properties:
->> -- compatible: "brcm,bcm7425-sdhci"
->> +- compatible: should be one of the following
->> +  - "brcm,bcm7425-sdhci"
->> +  - "brcm,bcm7445-sdhci"
->>=20
->> Refer to clocks/clock-bindings.txt for generic clock consumer =
-properties.
->>=20
->> Example:
->>=20
->> 	sdhci@f03e0100 {
->> -		compatible =3D "brcm,bcm7425-sdhci";
->> +		compatible =3D "brcm,bcm7445-sdhci";
->> 		reg =3D <0xf03e0000 0x100>;
->> 		interrupts =3D <0x0 0x26 0x0>;
->> 		sdhci,auto-cmd12;
->> @@ -27,7 +29,7 @@ Example:
->> 	sdhci@f03e0300 {
->> 		non-removable;
->> 		bus-width =3D <0x8>;
->> -		compatible =3D "brcm,bcm7425-sdhci";
->> +		compatible =3D "brcm,bcm7445-sdhci";
->=20
-> These changes to the example seem pointless. Drop them.
+On Mon, Aug 8, 2016 at 5:25 AM, Hans de Goede <j.w.r.degoede-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org> wrote:
+> Hi All,
+>
+> Recently I've been working on getting the sdio-wifi, found on
+> many a23 / a33 tablets as well as on some a10s hdmi sticks and
+> on various h3 SBCs such as the Orange Pi, to work with the
+> mainline kernel.
+>
+> If you use my sunxi-wip kernel branch (which has some dts bits
+> to enable this as well as some misc. bits, which I'm all
+> trying to get upstream) together with one of the following
+> out of tree drivers, you should be able to get your wifi to
+> work.
+>
+> ESP8089
+> -------
+> git clone https://github.com/jwrdegoede/esp8089.git
+> git checkout -B cleanup origin/cleanup
+> cd ../linux
+> make -j4 ARCH=arm CROSS_COMPILE=arm-linux-gnu- modules M=../esp8089
+> CONFIG_ESP8089=m
+>
+> Do not forget to copy firmware/*.bin to /lib/firmware/ on
+> the target system.
+>
+> Many thanks to Icenowy for her work on the esp8089 driver.
 
-Previously, the compatible string "brcm,bcm7425-sdhci" is representation =
-all
-MIPS and ARM SoCs including bcm7445. If compatible string is split two =
-strings,
-the example devicetree node is wrong. It is for bcm7445.
+The popular ESP8266 microcontrollers that have become rather popular
+recently are rebranded ESP8089s. If you want to test this driver and
+lack a board with one built in, here are some instructions on using
+ESP-03 boards as an SDIO WiFi card on a Raspberry Pi:
 
-I'll be add commit message this or
-Will I need to create a new patch to change example nodes?
+https://hackaday.io/project/8678-rpi-wifi
+
+This project eventually evolved into a RasPi hat, however the initial
+instructions should be usable with any development board with exposed
+SDIO lines by anyone who isn't afraid of fine-pitch soldering.
 
 Thanks,
-Jaedon
 
->=20
->> 		reg =3D <0xf03e0200 0x100>;
->> 		interrupts =3D <0x0 0x27 0x0>;
->> 		sdhci,auto-cmd12;
->> --=20
->> 2.9.3
+-- 
+Julian Calaby
 
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Email: julian.calaby-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org
+Profile: http://www.google.com/profiles/julian.calaby/
