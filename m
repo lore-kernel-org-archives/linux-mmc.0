@@ -1,75 +1,99 @@
-From: Alex Lemberg <Alex.Lemberg@sandisk.com>
-Subject: Re: [PATCH 2/3] mmc: Adding AUTO_BKOPS_EN bit set for Auto BKOPS
- support
-Date: Sun, 4 Sep 2016 13:22:06 +0000
-Message-ID: <9CBE0B06-C266-42A1-8DAC-F7F0AA558409@sandisk.com>
-References: <1472739890-3384-1-git-send-email-alex.lemberg@sandisk.com>
- <1472739890-3384-3-git-send-email-alex.lemberg@sandisk.com>
- <c06cdf40-48a7-3ed4-dd22-fdd26dcf333f@rock-chips.com>
+From: Ritesh Raj Sarraf <rrs@researchut.com>
+Subject: Re: xHCI problem? [was Re: Erratic USB device behavior and device
+ loss]
+Date: Sun, 04 Sep 2016 23:31:14 +0530
+Message-ID: <1473012074.5339.6.camel@researchut.com>
+References: <1472132041.13456.11.camel@researchut.com>
+         <Pine.LNX.4.44L0.1608251254220.1395-100000@iolanthe.rowland.org>
+         <CAPDyKFq2SYtwWCNhSzQcxj8XdYmAhTqn6mxRKMJ7eKZAk=itWg@mail.gmail.com>
+         <1472988737.7071.19.camel@researchut.com>
+Reply-To: rrs@researchut.com
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-by2nam01on0070.outbound.protection.outlook.com ([104.47.34.70]:26954
-        "EHLO NAM01-BY2-obe.outbound.protection.outlook.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1752469AbcIDNit (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Sun, 4 Sep 2016 09:38:49 -0400
-In-Reply-To: <c06cdf40-48a7-3ed4-dd22-fdd26dcf333f@rock-chips.com>
-Content-Language: en-US
-Content-ID: <3EE84760DE18AC458D59C1B4946FDEF3@namprd02.prod.outlook.com>
+Received: from mail-pa0-f45.google.com ([209.85.220.45]:33117 "EHLO
+        mail-pa0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1754299AbcIDSBT (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sun, 4 Sep 2016 14:01:19 -0400
+Received: by mail-pa0-f45.google.com with SMTP id cm16so7637950pac.0
+        for <linux-mmc@vger.kernel.org>; Sun, 04 Sep 2016 11:01:19 -0700 (PDT)
+In-Reply-To: <1472988737.7071.19.camel@researchut.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Shawn Lin <shawn.lin@rock-chips.com>, "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
-Cc: Avi Shchislowski <Avi.Shchislowski@sandisk.com>
+To: Ulf Hansson <ulf.hansson@linaro.org>, Alan Stern <stern@rowland.harvard.edu>
+Cc: USB list <linux-usb@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>
 
-SGkgU2hhd24sDQoNClRoYW5rcyBmb3IgeW91ciBjb21tZW50cy4NCg0KT24gOS8yLzE2LCAxMDo1
-MCBBTSwgIlNoYXduIExpbiIgPHNoYXduLmxpbkByb2NrLWNoaXBzLmNvbT4gd3JvdGU6DQoNCj5I
-aSwNCj4NCj5PbiAyMDE2LzkvMSAyMjoyNCwgYWxleCBsZW1iZXJnIHdyb3RlOg0KPj4gU2lnbmVk
-LW9mZi1ieTogYWxleCBsZW1iZXJnIDxhbGV4LmxlbWJlcmdAc2FuZGlzay5jb20+DQo+DQo+SXQg
-d291bGQgYmUgbmljZSB0byBhZGQgc29tZSBjaGFuZ2UgbG9nLjopDQpXaWxsIGJlIGFkZCBpbiBj
-YXNlIHdlIHJlbGVhc2UgYWRkaXRpb25hbCBwYXRjaCB2ZXJzaW9uLg0KPg0KPlRoaXMgcGFydCBp
-cyBzdGlsbCBvbiBteSBUT0RPIGxpc3QsIHNvIHZlcnkgbmljZSB0byBzZWUNCj55b3UgcHJvdmlk
-ZSBwYXRjaGVzIGZvciB0aGlzLiBCdXQgSSBkb24ndCBzZWUgd2UgcmVhY2gNCj5hbiBhZ3JlZW1l
-bnQgYXQgdGhhdCB0aW1lIGZvciB3aGV0aGVyIGl0IHdvdWxkIGJlIHNhbmUgdG8NCj5zZXQgdGhp
-cyBiaXQgZm9yIGtlcm5lbC4gSSByZW1lbWJlciBBZHJpYW4ncyBvcGluaW9uIHdhcyB0bw0KPmxl
-dCB1c2Vyc3BhY2UgdGFrZSBvdmVyIHRoZSBvd25lcnNoaXAgb2YgdGhpcywgYW5kIFVsZiBtYXli
-ZQ0KPmhhZCBubyBoYXJkIG9waW5vbiBmb3IgdGhpcyhVbGYsIHJpZ2h0PyA6KSkuDQoNCkkgdGhp
-bmsgeW91IGFyZSByZWZlcnJpbmcgdG8gdGhlIOKAnFtwcmVdc2V0IEFVVE8gQktPUFPigJ0gZnVu
-Y3Rpb25hbGl0eSANCnRvIHRoZSBkZXZpY2UuIEFtIEkgcmlnaHQ/DQpJbiB0aGlzIHBhdGNoIHRo
-ZSB2YWx1ZSBvZiBBVVRPX0JLT1BTX0VOIGJpdCBpcw0KcmVhZCBmcm9tIHRoZSBkZXZpY2UgRVhU
-X0NTRCBhbmQgc2V0IHRvIHRoZSBjYXJkLT5leHRfY3NkIHN0cnVjdHVyZS4NCg0KPg0KPg0KPj4g
-LS0tDQo+PiAgZHJpdmVycy9tbWMvY29yZS9tbWMuYyAgIHwgNiArKysrKysNCj4+ICBpbmNsdWRl
-L2xpbnV4L21tYy9jYXJkLmggfCAxICsNCj4+ICBpbmNsdWRlL2xpbnV4L21tYy9tbWMuaCAgfCAx
-ICsNCj4+ICAzIGZpbGVzIGNoYW5nZWQsIDggaW5zZXJ0aW9ucygrKQ0KPj4NCj4+IGRpZmYgLS1n
-aXQgYS9kcml2ZXJzL21tYy9jb3JlL21tYy5jIGIvZHJpdmVycy9tbWMvY29yZS9tbWMuYw0KPj4g
-aW5kZXggZjJkMTg1Yy4uZTJlOTg3ZiAxMDA2NDQNCj4+IC0tLSBhL2RyaXZlcnMvbW1jL2NvcmUv
-bW1jLmMNCj4+ICsrKyBiL2RyaXZlcnMvbW1jL2NvcmUvbW1jLmMNCj4+IEBAIC01MzEsNiArNTMx
-LDEyIEBAIHN0YXRpYyBpbnQgbW1jX2RlY29kZV9leHRfY3NkKHN0cnVjdCBtbWNfY2FyZCAqY2Fy
-ZCwgdTggKmV4dF9jc2QpDQo+PiAgCQkJaWYgKCFjYXJkLT5leHRfY3NkLm1hbl9ia29wc19lbikN
-Cj4+ICAJCQkJcHJfZGVidWcoIiVzOiBNQU5fQktPUFNfRU4gYml0IGlzIG5vdCBzZXRcbiIsDQo+
-PiAgCQkJCQltbWNfaG9zdG5hbWUoY2FyZC0+aG9zdCkpOw0KPj4gKwkJCWNhcmQtPmV4dF9jc2Qu
-YXV0b19ia29wc19lbiA9DQo+PiArCQkJCQkoZXh0X2NzZFtFWFRfQ1NEX0JLT1BTX0VOXSAmDQo+
-PiArCQkJCQkJRVhUX0NTRF9BVVRPX0JLT1BTX01BU0spOw0KPj4gKwkJCWlmICghY2FyZC0+ZXh0
-X2NzZC5hdXRvX2Jrb3BzX2VuKQ0KPj4gKwkJCQlwcl9kZWJ1ZygiJXM6IEFVVE9fQktPUFNfRU4g
-Yml0IGlzIG5vdCBzZXRcbiIsDQo+PiArCQkJCQltbWNfaG9zdG5hbWUoY2FyZC0+aG9zdCkpOw0K
-Pj4gIAkJfQ0KPj4NCj4+ICAJCS8qIGNoZWNrIHdoZXRoZXIgdGhlIGVNTUMgY2FyZCBzdXBwb3J0
-cyBIUEkgKi8NCj4+IGRpZmYgLS1naXQgYS9pbmNsdWRlL2xpbnV4L21tYy9jYXJkLmggYi9pbmNs
-dWRlL2xpbnV4L21tYy9jYXJkLmgNCj4+IGluZGV4IDczZmFkODMuLmFhZWRiNjggMTAwNjQ0DQo+
-PiAtLS0gYS9pbmNsdWRlL2xpbnV4L21tYy9jYXJkLmgNCj4+ICsrKyBiL2luY2x1ZGUvbGludXgv
-bW1jL2NhcmQuaA0KPj4gQEAgLTg0LDYgKzg0LDcgQEAgc3RydWN0IG1tY19leHRfY3NkIHsNCj4+
-ICAJdW5zaWduZWQgaW50CQlocGlfY21kOwkJLyogY21kIHVzZWQgYXMgSFBJICovDQo+PiAgCWJv
-b2wJCQlia29wczsJCS8qIGJhY2tncm91bmQgc3VwcG9ydCBiaXQgKi8NCj4+ICAJYm9vbAkJCW1h
-bl9ia29wc19lbjsJLyogbWFudWFsIGJrb3BzIGVuYWJsZSBiaXQgKi8NCj4+ICsJYm9vbAkJCWF1
-dG9fYmtvcHNfZW47CS8qIGF1dG8gYmtvcHMgZW5hYmxlIGJpdCAqLw0KPj4gIAl1bnNpZ25lZCBp
-bnQgICAgICAgICAgICBkYXRhX3NlY3Rvcl9zaXplOyAgICAgICAvKiA1MTIgYnl0ZXMgb3IgNEtC
-ICovDQo+PiAgCXVuc2lnbmVkIGludCAgICAgICAgICAgIGRhdGFfdGFnX3VuaXRfc2l6ZTsgICAg
-IC8qIERBVEEgVEFHIFVOSVQgc2l6ZSAqLw0KPj4gIAl1bnNpZ25lZCBpbnQJCWJvb3Rfcm9fbG9j
-azsJCS8qIHJvIGxvY2sgc3VwcG9ydCAqLw0KPj4gZGlmZiAtLWdpdCBhL2luY2x1ZGUvbGludXgv
-bW1jL21tYy5oIGIvaW5jbHVkZS9saW51eC9tbWMvbW1jLmgNCj4+IGluZGV4IGMzNzYyMDkuLjBm
-ZTM5MDggMTAwNjQ0DQo+PiAtLS0gYS9pbmNsdWRlL2xpbnV4L21tYy9tbWMuaA0KPj4gKysrIGIv
-aW5jbHVkZS9saW51eC9tbWMvbW1jLmgNCj4+IEBAIC00MzYsNiArNDM2LDcgQEAgc3RydWN0IF9t
-bWNfY3NkIHsNCj4+ICAgKiBCS09QUyBtb2Rlcw0KPj4gICAqLw0KPj4gICNkZWZpbmUgRVhUX0NT
-RF9NQU5VQUxfQktPUFNfTUFTSwkweDAxDQo+PiArI2RlZmluZSBFWFRfQ1NEX0FVVE9fQktPUFNf
-TUFTSwkweDAyDQo+Pg0KPj4gIC8qDQo+PiAgICogTU1DX1NXSVRDSCBhY2Nlc3MgbW9kZXMNCj4+
-DQo+DQo+DQo+LS0gDQo+QmVzdCBSZWdhcmRzDQo+U2hhd24gTGluDQo+DQoNCg==
+-----BEGIN PGP SIGNED MESSAGE-----
+Hash: SHA512
+
+On Sun, 2016-09-04 at 17:02 +0530, Ritesh Raj Sarraf wrote:
+> > Sorry for the delay! We have had some regressions for 4.8 rc1 in the
+> > mmc block layer. Those problem should be resolved by now.
+> > 
+> > By reading from the runtime PM issues you have, the problems could
+> > very well be related. Although I don't believe the issues was present
+> > in a 4.7 kernel.
+> > 
+> 
+> This issue has been around with previous kernels too.
+> 
+> > Perhaps you can run a test on a 4.8 rc4 kernel, just to double check.
+> > The 4.8 rc4, contains the following fixes in the mmc block layer.
+> > 
+> > commit 7afafc8a44bf ("block: Fix secure erase")
+> > commit 869c554808cc ("mmc: fix use-after-free of struct request")
+> 
+> I'll share my 4.8-rc4 results soon.
+
+As I hoped, I was able to reproduce this with 4.8-rc4 too.
+
+[  857.999547] systemd[1]: apt-daily.timer: Adding 10h 21min 53.234725s random
+time.
+[13071.615285] usb 2-4: USB disconnect, device number 2
+[13072.794802] usb 2-4: new high-speed USB device number 7 using xhci_hcd
+[13072.925092] usb 2-4: New USB device found, idVendor=0bda, idProduct=0129
+[13072.925094] usb 2-4: New USB device strings: Mfr=1, Product=2, SerialNumber=3
+[13072.925095] usb 2-4: Product: USB2.0-CRW
+[13072.925096] usb 2-4: Manufacturer: Generic
+[13072.925097] usb 2-4: SerialNumber: 20100201396000000
+[13093.499011] usb 2-4: reset high-speed USB device number 7 using xhci_hcd
+[13093.612239] usb 2-4: Device not responding to setup address.
+[13093.818896] usb 2-4: Device not responding to setup address.
+[13094.025491] usb 2-4: device not accepting address 7, error -71
+[13094.138844] usb 2-4: reset high-speed USB device number 7 using xhci_hcd
+[13094.252178] usb 2-4: device descriptor read/64, error -71
+[13094.489037] usb 2-4: device descriptor read/all, error -71
+[13094.602374] usb 2-4: reset high-speed USB device number 7 using xhci_hcd
+[13094.602453] usb 2-4: Device not responding to setup address.
+[13094.808929] usb 2-4: Device not responding to setup address.
+[13095.015523] usb 2-4: device not accepting address 7, error -71
+[13095.128879] usb 2-4: reset high-speed USB device number 7 using xhci_hcd
+[13095.145799] usb 2-4: device descriptor read/all, error 8
+[13095.145842] usb 2-4: USB disconnect, device number 7
+[13095.492216] usb 2-4: new high-speed USB device number 8 using xhci_hcd
+[13095.605642] usb 2-4: Device not responding to setup address.
+[13095.812294] usb 2-4: Device not responding to setup address.
+
+
+- -- 
+Ritesh Raj Sarraf
+RESEARCHUT - http://www.researchut.com
+"Necessity is the mother of invention."
+-----BEGIN PGP SIGNATURE-----
+
+iQIcBAEBCgAGBQJXzGFqAAoJEKY6WKPy4XVpZzcP/jCzROd3+k0oF+cgK4WqKKEN
+Wb/LOHezZlyNXnZ4/UxT0ox9Agc9AMQEvx4+77Itm5khQ+H3ZMEQNQg0jSENZ6aT
+KjPSC3fUZ93PBGyCzec+CTj4UY49WJ1hZ4dvv7WW7WEuR8gxZxV+Z0VcG7kD8h0E
+aOwJ5PVbyNSY7ZCH8NNRPnx5v74C/b+1OlFbRV1SNTUBU06ekeImy5IuvGwF45Gq
+cLbKMIjJmUsg/jSol/pqUg1Sewj+z1part7sF5ZeAYM/ntwb4JAWwYvcWNI7VMxW
+skT7HqyQ/qKk++UShxGsHYqV8Ec5Rx5tAUTgEH68Y7y4i9YDSTOnqXDgjTANz5RL
+yaZS856dGoIs96/mHCjzMV+1NYpTo2aMPO1/JDs6nvKfBtyIVDbTsB8qbdP5vqnb
+x1GmzB6j8wDHBTAtJIifkB8XGQfcxbDto2LG6/OnPPN3/aiTMCKB6ZND2HISNGfr
+IeN39Ay35zn9epq6D3usdd1TAlF5xqo1djHyFDYfXE0gZsJZiCCs9GC2NaP46ZYp
+G7a4O1UpbPKhRq7peyh2f/GzHg+3k1J+PD+I1Us/w2Dj1ObCr7M4ToF70AQ2xISE
+DFBuP7dWue6waQup7S3zNLqyP5K101NkKQbSrXJHEhxIaqNFbEZg1D8MuC4I0gHA
+i4uloGV6oSg973dwyTiU
+=q0wG
+-----END PGP SIGNATURE-----
+
