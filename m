@@ -1,156 +1,77 @@
-From: Baolin Wang <baolin.wang@linaro.org>
-Subject: Re: [PATCH v4 2/3] mmc: core: Factor out the alignment of erase size
-Date: Tue, 6 Sep 2016 16:27:25 +0800
-Message-ID: <CAMz4kuLJ+zqp32QDkEQBv_81Fr_WhJxpXsPHfugNDJ=TrKyKsw@mail.gmail.com>
-References: <2b6b5b930d0f37a219d5786a6b56b17516a90abd.1473130123.git.baolin.wang@linaro.org>
- <48c332c9c688796b7ea157046b8feb68a11e60d4.1473130123.git.baolin.wang@linaro.org>
- <20160906043435.GA10158@rhlx01.hs-esslingen.de> <CAMz4kuJzqyAEam3RNJga5EERMh6TgXWFoY-uZ8pbm1OZW7uy8g@mail.gmail.com>
- <57CE75A1.2040109@intel.com>
+From: Yangbo Lu <yangbo.lu-3arQi8VN3Tc@public.gmane.org>
+Subject: [v11, 0/8] Fix eSDHC host version register bug
+Date: Tue, 6 Sep 2016 16:28:15 +0800
+Message-ID: <1473150503-9550-1-git-send-email-yangbo.lu@nxp.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-yw0-f178.google.com ([209.85.161.178]:33397 "EHLO
-        mail-yw0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751570AbcIFI10 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 6 Sep 2016 04:27:26 -0400
-Received: by mail-yw0-f178.google.com with SMTP id l8so50572874ywb.0
-        for <linux-mmc@vger.kernel.org>; Tue, 06 Sep 2016 01:27:26 -0700 (PDT)
-In-Reply-To: <57CE75A1.2040109@intel.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
+List-Unsubscribe: <https://lists.linuxfoundation.org/mailman/options/iommu>,
+	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.linuxfoundation.org/pipermail/iommu/>
+List-Post: <mailto:iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
+List-Help: <mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=help>
+List-Subscribe: <https://lists.linuxfoundation.org/mailman/listinfo/iommu>,
+	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=subscribe>
+Sender: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
+Errors-To: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
+To: linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, Scott Wood <oss-fOR+EgIDQEHk1uMJSBkQmQ@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>
+Cc: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Russell King <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, Yangbo Lu <yangbo.lu-3arQi8VN3Tc@public.gmane.org>, Bhupesh Sharma <bhupesh.sharma-KZfg59tc24xl57MIdRCFDg@public.gmane.org>, netdev-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Santosh Shilimkar <ssantosh-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Jochen Friedrich <jochen-NIgtFMG+Po8@public.gmane.org>, xiaobo.xie-3arQi8VN3Tc@public.gmane.org, iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, linux-i2c-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Claudiu Manoil <claudiu.manoil-KZfg59tc24xl57MIdRCFDg@public.gmane.org>, Kumar Gala <galak-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, leoyang.li-3arQi8VN3Tc@public.gmane.org, linuxppc-dev-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org, linux-clk-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, Qiang Zhao <qiang.zhao-3arQi8VN3Tc@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: Andreas Mohr <andi@lisas.de>, Ulf Hansson <ulf.hansson@linaro.org>, Russell King <rmk+kernel@arm.linux.org.uk>, Shawn Lin <shawn.lin@rock-chips.com>, Douglas Anderson <dianders@chromium.org>, =?UTF-8?Q?Heiko_St=C3=BCbner?= <heiko@sntech.de>, David Jander <david@protonic.nl>, Hans de Goede <hdegoede@redhat.com>, linux-mmc <linux-mmc@vger.kernel.org>, LKML <linux-kernel@vger.kernel.org>, Mark Brown <broonie@kernel.org>, Linus Walleij <linus.walleij@linaro.org>
 
-On 6 September 2016 at 15:52, Adrian Hunter <adrian.hunter@intel.com> wrote:
-> On 6/09/2016 9:26 a.m., Baolin Wang wrote:
->>
->> Hi Andreas,
->>
->> On 6 September 2016 at 12:34, Andreas Mohr <andi@lisas.de> wrote:
->>>
->>> On Tue, Sep 06, 2016 at 10:55:11AM +0800, Baolin Wang wrote:
->>>>
->>>> In order to clean up the mmc_erase() function and do some optimization
->>>> for erase size alignment, factor out the guts of erase size alignment
->>>> into mmc_align_erase_size() function.
->>>>
->>>> Signed-off-by: Baolin Wang <baolin.wang@linaro.org>
->>>> Tested-by: Shawn Lin <shawn.lin@rock-chips.com>
->>>> ---
->>>>   drivers/mmc/core/core.c |   60
->>>> +++++++++++++++++++++++++++++------------------
->>>>   1 file changed, 37 insertions(+), 23 deletions(-)
->>>>
->>>> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
->>>> index 7d7209d..5f93eef 100644
->>>> --- a/drivers/mmc/core/core.c
->>>> +++ b/drivers/mmc/core/core.c
->>>> @@ -2202,6 +2202,37 @@ out:
->>>>        return err;
->>>>   }
->>>>
->>>> +static unsigned int mmc_align_erase_size(struct mmc_card *card,
->>>> +                                      unsigned int *from,
->>>> +                                      unsigned int *to,
->>>> +                                      unsigned int nr)
->>>> +{
->>>> +     unsigned int from_new = *from, nr_new = nr, rem;
->>>> +
->>>> +     rem = from_new % card->erase_size;
->>>> +     if (rem) {
->>>> +             rem = card->erase_size - rem;
->>>> +             from_new += rem;
->>>> +             if (nr_new > rem)
->>>> +                     nr_new -= rem;
->>>> +             else
->>>> +                     return 0;
->>>> +     }
->>>> +
->>>> +     rem = nr_new % card->erase_size;
->>>> +     if (rem)
->>>> +             nr_new -= rem;
->>>> +
->>>> +     if (nr_new == 0)
->>>> +             return 0;
->>>> +
->>>> +     /* 'from' and 'to' are inclusive */
->>>> +     *to = from_new + nr_new - 1;
->>>> +     *from = from_new;
->>>> +
->>>> +     return nr_new;
->>>> +}
->>>> +
->>>>   /**
->>>>    * mmc_erase - erase sectors.
->>>>    * @card: card to erase
->>>> @@ -2234,31 +2265,14 @@ int mmc_erase(struct mmc_card *card, unsigned
->>>> int from, unsigned int nr,
->>>>        }
->>>>
->>>>        if (arg == MMC_ERASE_ARG) {
->>>> -             rem = from % card->erase_size;
->>>> -             if (rem) {
->>>> -                     rem = card->erase_size - rem;
->>>> -                     from += rem;
->>>> -                     if (nr > rem)
->>>> -                             nr -= rem;
->>>> -                     else
->>>> -                             return 0;
->>>> -             }
->>>> -             rem = nr % card->erase_size;
->>>> -             if (rem)
->>>> -                     nr -= rem;
->>>> +             nr = mmc_align_erase_size(card, &from, &to, nr);
->>>> +             if (nr == 0)
->>>> +                     return 0;
->>>> +     } else {
->>>> +             /* 'from' and 'to' are inclusive */
->>>> +             to -= 1;
->>>>        }
->>>>
->>>> -     if (nr == 0)
->>>> -             return 0;
->>>> -
->>>> -     to = from + nr;
->>>> -
->>>> -     if (to <= from)
->>>> -             return -EINVAL;
->>>
->>>
->>> Hmm, this is swallowing -EINVAL behaviour
->>> i.e., now possibly violating protocol?
->>
->>
->> I didn't see what situation will make variable 'to' is less than
->> 'from' since I think variable 'nr' is always larger than 0, right? If
->> so, we should remove this useless checking. Thanks.
->
->
-> It is checking overflows.
+This patchset is used to fix a host version register bug in the T4240-R1.0-R2.0
+eSDHC controller. To match the SoC version and revision, 10 previous version
+patchsets had tried many methods but all of them were rejected by reviewers.
+Such as
+	- dts compatible method
+	- syscon method
+	- ifdef PPC method
+	- GUTS driver getting SVR method
+Anrd suggested a soc_device_match method in v10, and this is the only available
+method left now. This v11 patchset introduces the soc_device_match interface in
+soc driver.
 
-Yes, you are right, my mistake. I will add this checking in next version.
+The first six patches are to add the GUTS driver. This is used to register a
+soc device which contain soc version and revision information.
+The following two patches introduce the soc_device_match method in soc driver
+and apply it on esdhc driver to fix this bug.
 
->
->>
->>>
->>> (this may easily be ok - haven't done an extensive review -
->>> but since the commit has that characteristic change,
->>> the commit message should contain that detail)
->>>
->>> Thanks for the cleanup work & HTH,
->>>
->>> Andreas Mohr
->>
->>
->>
->>
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Yangbo Lu (8):
+  dt: bindings: update Freescale DCFG compatible
+  ARM64: dts: ls2080a: add device configuration node
+  dt: bindings: move guts devicetree doc out of powerpc directory
+  powerpc/fsl: move mpc85xx.h to include/linux/fsl
+  soc: fsl: add GUTS driver for QorIQ platforms
+  MAINTAINERS: add entry for Freescale SoC drivers
+  base: soc: introduce soc_device_match() interface
+  mmc: sdhci-of-esdhc: fix host version for T4240-R1.0-R2.0
 
-
+ Documentation/devicetree/bindings/arm/fsl.txt      |   6 +-
+ .../bindings/{powerpc => soc}/fsl/guts.txt         |   3 +
+ MAINTAINERS                                        |  11 +-
+ arch/arm64/boot/dts/freescale/fsl-ls2080a.dtsi     |   6 +
+ arch/powerpc/kernel/cpu_setup_fsl_booke.S          |   2 +-
+ arch/powerpc/sysdev/fsl_pci.c                      |   2 +-
+ drivers/base/Kconfig                               |   1 +
+ drivers/base/soc.c                                 |  61 +++
+ drivers/clk/clk-qoriq.c                            |   3 +-
+ drivers/i2c/busses/i2c-mpc.c                       |   2 +-
+ drivers/iommu/fsl_pamu.c                           |   3 +-
+ drivers/mmc/host/Kconfig                           |   1 +
+ drivers/mmc/host/sdhci-of-esdhc.c                  |  20 +
+ drivers/net/ethernet/freescale/gianfar.c           |   2 +-
+ drivers/soc/Kconfig                                |   2 +-
+ drivers/soc/fsl/Kconfig                            |  20 +
+ drivers/soc/fsl/Makefile                           |   1 +
+ drivers/soc/fsl/guts.c                             | 483 +++++++++++++++++++++
+ include/linux/fsl/guts.h                           | 127 ++++--
+ .../asm/mpc85xx.h => include/linux/fsl/svr.h       |   4 +-
+ include/linux/sys_soc.h                            |   3 +
+ 21 files changed, 702 insertions(+), 61 deletions(-)
+ rename Documentation/devicetree/bindings/{powerpc => soc}/fsl/guts.txt (91%)
+ create mode 100644 drivers/soc/fsl/Kconfig
+ create mode 100644 drivers/soc/fsl/guts.c
+ rename arch/powerpc/include/asm/mpc85xx.h => include/linux/fsl/svr.h (97%)
 
 -- 
-Baolin.wang
-Best Regards
+2.1.0.27.g96db324
