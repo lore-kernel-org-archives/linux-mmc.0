@@ -1,140 +1,126 @@
-From: Alan Stern <stern-nwvwT67g6+6dFdvTe/nMLpVzexx5G7lz@public.gmane.org>
-Subject: Re: xHCI problem? [was Re: Erratic USB device behavior and device
- loss]
-Date: Wed, 7 Sep 2016 16:48:55 -0400 (EDT)
-Message-ID: <Pine.LNX.4.44L0.1609071630350.2115-100000@iolanthe.rowland.org>
-References: <CAPDyKFpnCXhdoKgoG576teC=y38vbC1x=-ehC_9EWEeKr_K6BQ@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <linux-usb-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <CAPDyKFpnCXhdoKgoG576teC=y38vbC1x=-ehC_9EWEeKr_K6BQ-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-Sender: linux-usb-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: Ritesh Raj Sarraf <rrs-7WuBAv+fczCJ8c2fQYRYNw@public.gmane.org>, USB list <linux-usb-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-mmc <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+From: Zach Brown <zach.brown@ni.com>
+Subject: [PATCH v5 2/2] sdhci-of-arasan: Set controller to test mode when xlnx-fails-without-test-cd is present
+Date: Wed, 7 Sep 2016 17:22:41 -0500
+Message-ID: <1473286961-19608-2-git-send-email-zach.brown@ni.com>
+References: <1473286961-19608-1-git-send-email-zach.brown@ni.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from skprod2.natinst.com ([130.164.80.23]:47134 "EHLO ni.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1751913AbcIGWXL (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Wed, 7 Sep 2016 18:23:11 -0400
+In-Reply-To: <1473286961-19608-1-git-send-email-zach.brown@ni.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: adrian.hunter@intel.com
+Cc: robh+dt@kernel.org, ulf.hansson@linaro.org, mark.rutland@arm.com, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, michal.simek@xilinx.com, soren.brinkmann@xilinx.com, linux-arm-kernel@lists.infradead.org, zach.brown@ni.com
 
-On Tue, 6 Sep 2016, Ulf Hansson wrote:
+The sdhci controller on xilinx zynq devices will not function unless
+the CD bit is provided. http://www.xilinx.com/support/answers/61064.html
+In cases where it is impossible to provide the CD bit in hardware,
+setting the controller to test mode and then setting inserted to true
+will get the controller to function without the CD bit.
 
-> On 5 September 2016 at 17:58, Alan Stern <stern-nwvwT67g6+6dFdvTe/nMLpVzexx5G7lz@public.gmane.org> wrote:
-> > On Mon, 5 Sep 2016, Ritesh Raj Sarraf wrote:
-> >
-> >> -----BEGIN PGP SIGNED MESSAGE-----
-> >> Hash: SHA512
-> >>
-> >> On Sun, 2016-09-04 at 15:46 -0400, Alan Stern wrote:
-> >> >
-> >> > This is not the problem I was discussing with Ulf.  The problem was why
-> >> > the device kept going into and out of runtime suspend every three
-> >> > seconds.  The kernel log above does not say whether this was happening.
-> >> > One way to tell is to look at a usbmon trace (like we did before).
-> >>
-> >> https://people.debian.org/~rrs/tmp/usbmon.txt.gz
-> >>
-> >> This should have the logs you asked for, running on 4.8-rc4.
-> >
-> > Confirmed, the runtime suspends and resumes are still happening.
-> >
-> > Ulf, any insights?
-> 
-> Alan, Ritesh,
-> 
-> Yes, I am starting to understand more about what goes on here.
-> Although I need help to test as I don't have the HW.
-> As you already guessed, I suspect the problem is within the runtime PM
-> deployment in the drivers/mmc/host/rtsx_usb_sdmmc.c.
-> 
-> Let me start by first give you some background to how the mmc core
-> deals with runtime PM.
-> 
-> *)
-> The mmc core manages most of the calls to the pm_runtime_get|put*()
-> and pm_runtime_mark_last_busy() for the mmc host device. The gets/puts
-> are done when the core is about to access the mmc host device, via the
-> mmc host ops driver interface. You may search for calls to the
-> mmc_claim|release_host() functions to find out when the gets/puts are
-> done.
+When the device has the property xlnx-fails-without-test-cd the driver
+changes the controller to test mode and sets test inserted to true to
+make the controller function.
 
-Since mmc_claim_host() does call pm_runtime_get_sync(), these runtime
-suspends would not occur if the host was claimed.  So we can conclude
-that rtsx_usb_sdmmc.c must be doing I/O to the device without claiming
-the host.
+Signed-off-by: Zach Brown <zach.brown@ni.com>
+---
+ drivers/mmc/host/sdhci-of-arasan.c | 34 +++++++++++++++++++++++++++++++++-
+ drivers/mmc/host/sdhci.h           |  2 ++
+ 2 files changed, 35 insertions(+), 1 deletion(-)
 
-> **)
-> The mmc core have also deployed runtime PM for the mmc *card* device
-> and which has the runtime PM autosuspend feature enabled with a 3s
-> default timeout. One important point is that the mmc card device has
-> the mmc host device assigned as being its parent device. I guessing
-> the reason to why you are encountering strange 3s intervals of runtime
-> PM suspend/resume is related to this.
+diff --git a/drivers/mmc/host/sdhci-of-arasan.c b/drivers/mmc/host/sdhci-of-arasan.c
+index b6f4c1d..46be9d9 100644
+--- a/drivers/mmc/host/sdhci-of-arasan.c
++++ b/drivers/mmc/host/sdhci-of-arasan.c
+@@ -23,6 +23,7 @@
+ #include <linux/of_device.h>
+ #include <linux/phy/phy.h>
+ #include "sdhci-pltfm.h"
++#include <linux/of.h>
+ 
+ #define SDHCI_ARASAN_CLK_CTRL_OFFSET	0x2c
+ 
+@@ -38,6 +39,10 @@
+ struct sdhci_arasan_data {
+ 	struct clk	*clk_ahb;
+ 	struct phy	*phy;
++	unsigned int arasan_quirks; /* Arasan deviations from spec */
++
++/* Controller does not have CD wired and will not function normally without */
++#define SDHCI_ARASAN_QUIRK_FAILS_WITHOUT_TEST_CD	BIT(0)
+ };
+ 
+ static unsigned int sdhci_arasan_get_timeout_clock(struct sdhci_host *host)
+@@ -79,12 +84,32 @@ static void sdhci_arasan_set_clock(struct sdhci_host *host, unsigned int clock)
+ 	}
+ }
+ 
++void sdhci_arasan_reset(struct sdhci_host *host, u8 mask)
++{
++	u8 ctrl;
++	struct sdhci_pltfm_host *pltfm_host;
++	struct sdhci_arasan_data *sdhci_arasan;
++
++	sdhci_reset(host, mask);
++
++	pltfm_host = sdhci_priv(host);
++	sdhci_arasan = sdhci_pltfm_priv(pltfm_host);
++
++	if (sdhci_arasan->arasan_quirks &
++	     SDHCI_ARASAN_QUIRK_FAILS_WITHOUT_TEST_CD) {
++		ctrl = sdhci_readb(host, SDHCI_HOST_CONTROL);
++		ctrl |= SDHCI_CTRL_CDTEST_INS |
++			SDHCI_CTRL_CDTEST_EN;
++		sdhci_writeb(host, ctrl, SDHCI_HOST_CONTROL);
++	}
++}
++
+ static struct sdhci_ops sdhci_arasan_ops = {
+ 	.set_clock = sdhci_arasan_set_clock,
+ 	.get_max_clock = sdhci_pltfm_clk_get_max_clock,
+ 	.get_timeout_clock = sdhci_arasan_get_timeout_clock,
+ 	.set_bus_width = sdhci_set_bus_width,
+-	.reset = sdhci_reset,
++	.reset = sdhci_arasan_reset,
+ 	.set_uhs_signaling = sdhci_set_uhs_signaling,
+ };
+ 
+@@ -179,6 +204,7 @@ static int sdhci_arasan_probe(struct platform_device *pdev)
+ 	struct sdhci_host *host;
+ 	struct sdhci_pltfm_host *pltfm_host;
+ 	struct sdhci_arasan_data *sdhci_arasan;
++	struct device_node *np = pdev->dev.of_node;
+ 
+ 	host = sdhci_pltfm_init(pdev, &sdhci_arasan_pdata,
+ 				sizeof(*sdhci_arasan));
+@@ -215,6 +241,12 @@ static int sdhci_arasan_probe(struct platform_device *pdev)
+ 	}
+ 
+ 	sdhci_get_of_property(pdev);
++
++	if (of_get_property(np, "xlnx-fails-without-test-cd", NULL)) {
++		sdhci_arasan->arasan_quirks |=
++				SDHCI_ARASAN_QUIRK_FAILS_WITHOUT_TEST_CD;
++	}
++
+ 	pltfm_host->clk = clk_xin;
+ 
+ 	ret = mmc_of_parse(host->mmc);
+diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+index 609f87c..60dbf1f 100644
+--- a/drivers/mmc/host/sdhci.h
++++ b/drivers/mmc/host/sdhci.h
+@@ -84,6 +84,8 @@
+ #define   SDHCI_CTRL_ADMA32	0x10
+ #define   SDHCI_CTRL_ADMA64	0x18
+ #define   SDHCI_CTRL_8BITBUS	0x20
++#define  SDHCI_CTRL_CDTEST_INS	0x40
++#define  SDHCI_CTRL_CDTEST_EN	0x80
+ 
+ #define SDHCI_POWER_CONTROL	0x29
+ #define  SDHCI_POWER_ON		0x01
+-- 
+2.7.4
 
-That sounds likely.
-
-> Now, in this case, the rtsx_usb_sdmmc driver seems to need a bit of
-> special runtime PM deployment, as the calls to pm_runtime_get|put*()
-> also controls the power to the usb device and thus also the power to
-> the card. I am guessing that's done via the usb device being assigned
-> as parent for the mmc host's platform device!?
-
-Yes, in drivers/mfd/mfd-core.c's mfd_add_device() routine, which is 
-called indirectly by drivers/mfd/rtsx_usb.c's probe routine.
-
-> By reviewing the code of the rtsx_usb_sdmmc driver, particularly how
-> it calls pm_runtime_get|put() I am guessing those calls may not be
-> properly deployed. Perhaps rtsx_usb_sdmmc should convert to use the
-> usb_autopm_put|get_interface() and friends, although I didn't want to
-> make that change at this point so instead I have cooked a patch that
-> might fixes the behaviour.
-
-The usb_autopm_* calls are mostly just convenience wrappers around the
-pm_runtime_* functions, meant for use with USB drivers.  In fact, you
-can't use them with a platform_device.
-
-It seems odd that rtsx_usb_sdmmc calls pm_runtime_put() and
-pm_runtime_get_sync() directly instead of using
-mmc_claim|release_host().
-
-> Ritesh, can you please try it out to see what happens?
-> 
-> ---
->  drivers/mmc/host/rtsx_usb_sdmmc.c | 7 +------
->  1 file changed, 1 insertion(+), 6 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/rtsx_usb_sdmmc.c
-> b/drivers/mmc/host/rtsx_usb_sdmmc.c
-> index 6c71fc9..3d6fe51 100644
-> --- a/drivers/mmc/host/rtsx_usb_sdmmc.c
-> +++ b/drivers/mmc/host/rtsx_usb_sdmmc.c
-> @@ -1138,11 +1138,6 @@ static void sdmmc_set_ios(struct mmc_host *mmc,
-> struct mmc_ios *ios)
->         dev_dbg(sdmmc_dev(host), "%s\n", __func__);
->         mutex_lock(&ucr->dev_mutex);
-> 
-> -       if (rtsx_usb_card_exclusive_check(ucr, RTSX_USB_SD_CARD)) {
-> -               mutex_unlock(&ucr->dev_mutex);
-> -               return;
-> -       }
-> -
->         sd_set_power_mode(host, ios->power_mode);
->         sd_set_bus_width(host, ios->bus_width);
->         sd_set_timing(host, ios->timing, &host->ddr_mode);
-> @@ -1336,7 +1331,7 @@ static void rtsx_usb_init_host(struct
-> rtsx_usb_sdmmc *host)
->                 MMC_CAP_MMC_HIGHSPEED | MMC_CAP_BUS_WIDTH_TEST |
->                 MMC_CAP_UHS_SDR12 | MMC_CAP_UHS_SDR25 | MMC_CAP_UHS_SDR50 |
->                 MMC_CAP_NEEDS_POLL;
-> -       mmc->caps2 = MMC_CAP2_NO_PRESCAN_POWERUP | MMC_CAP2_FULL_PWR_CYCLE;
-> +       mmc->caps2 = MMC_CAP2_FULL_PWR_CYCLE;
-> 
->         mmc->max_current_330 = 400;
->         mmc->max_current_180 = 800;
-
-These changes don't seem to affect the way rtsx_usb_sdmmc.c handles 
-runtime PM.  In particular, the driver doesn't call 
-pm_runtime_mark_last_busy() anywhere.
-
-Alan Stern
-
---
-To unsubscribe from this list: send the line "unsubscribe linux-usb" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
