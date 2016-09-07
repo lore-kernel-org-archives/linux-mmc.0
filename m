@@ -1,153 +1,145 @@
-From: "Y.B. Lu" <yangbo.lu@nxp.com>
-Subject: RE: [v11, 7/8] base: soc: introduce soc_device_match() interface
-Date: Wed, 7 Sep 2016 04:10:32 +0000
-Message-ID: <HE1PR04MB088939A28A68035F3393A441F8F80@HE1PR04MB0889.eurprd04.prod.outlook.com>
-References: <1473150503-9550-1-git-send-email-yangbo.lu@nxp.com>
- <1473150503-9550-8-git-send-email-yangbo.lu@nxp.com>
- <CAPDyKFrvg3Qr5m3xXvywsCoVvaiF7ggHAj0Aw=WCOXg65Pt0PQ@mail.gmail.com>
- <6515108.aCEls7dUuW@wuerfel>
+From: Michal Simek <michal.simek@xilinx.com>
+Subject: Re: [PATCH 2/2] sdhci-of-arasan: Set controller to test mode when
+ fails-without-test-cd is present
+Date: Wed, 7 Sep 2016 07:13:17 +0200
+Message-ID: <b557b08d-a401-3592-6817-8e0d5936f764@xilinx.com>
+References: <1472512857-13063-1-git-send-email-zach.brown@ni.com>
+ <1472512857-13063-2-git-send-email-zach.brown@ni.com>
+ <13c1a30f-fb4f-a813-df0a-3ac9914cfa61@xilinx.com>
+ <20160906185107.GA5124@zach-desktop>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: quoted-printable
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-db5eur01on0086.outbound.protection.outlook.com ([104.47.2.86]:31008
-        "EHLO EUR01-DB5-obe.outbound.protection.outlook.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1751081AbcIGEKj (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Wed, 7 Sep 2016 00:10:39 -0400
-In-Reply-To: <6515108.aCEls7dUuW@wuerfel>
-Content-Language: en-US
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="windows-1252"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20160906185107.GA5124@zach-desktop>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Zach Brown <zach.brown@ni.com>, Michal Simek <michal.simek@xilinx.com>
+Cc: adrian.hunter@intel.com, robh+dt@kernel.org, ulf.hansson@linaro.org, mark.rutland@arm.com, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, soren.brinkmann@xilinx.com, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
-To: Arnd Bergmann <arnd@arndb.de>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Scott Wood <oss@buserror.net>, "linuxppc-dev@lists.ozlabs.org" <linuxppc-dev@lists.ozlabs.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-clk <linux-clk@vger.kernel.org>, "linux-i2c@vger.kernel.org" <linux-i2c@vger.kernel.org>, "iommu@lists.linux-foundation.org" <iommu@lists.linux-foundation.org>, "netdev@vger.kernel.org" <netdev@vger.kernel.org>, Mark Rutland <mark.rutland@arm.com>, Rob Herring <robh+dt@kernel.org>, Russell King <linux@arm.linux.org.uk>, Jochen Friedrich <jochen@scram.de>, Joerg Roedel <joro@8bytes.org>, Claudiu Manoil <claudiu.manoil@free>
 
-Hi Anrd and Uffe,
+On 6.9.2016 20:51, Zach Brown wrote:
+> On Tue, Aug 30, 2016 at 07:47:17AM +0200, Michal Simek wrote:
+>> On 30.8.2016 01:20, Zach Brown wrote:
+>>> The sdhci controller on xilinx zynq devices will not function unless
+>>> the CD bit is provided. http://www.xilinx.com/support/answers/61064.html
+>>> In cases where it is impossible to provide the CD bit in hardware,
+>>> setting the controller to test mode and then setting inserted to true
+>>> will get the controller to function without the CD bit.
+>>>
+>>> When the device has the property fails-without-test-cd the driver
+>>> changes the controller to test mode and sets test inserted to true to
+>>> make the controller function.
+>>>
+>>> Signed-off-by: Zach Brown <zach.brown@ni.com>
+>>> ---
+>>>  drivers/mmc/host/sdhci-of-arasan.c | 34 +++++++++++++++++++++++++++++++++-
+>>>  drivers/mmc/host/sdhci.h           |  2 ++
+>>>  2 files changed, 35 insertions(+), 1 deletion(-)
+>>>
+>>> diff --git a/drivers/mmc/host/sdhci-of-arasan.c b/drivers/mmc/host/sdhci-of-arasan.c
+>>> index e0f193f..c3e5145 100644
+>>> --- a/drivers/mmc/host/sdhci-of-arasan.c
+>>> +++ b/drivers/mmc/host/sdhci-of-arasan.c
+>>> @@ -26,6 +26,7 @@
+>>>  #include <linux/phy/phy.h>
+>>>  #include <linux/regmap.h>
+>>>  #include "sdhci-pltfm.h"
+>>> +#include <linux/of.h>
+>>>
+>>>  #define SDHCI_ARASAN_CLK_CTRL_OFFSET	0x2c
+>>>  #define SDHCI_ARASAN_VENDOR_REGISTER	0x78
+>>> @@ -92,6 +93,12 @@ struct sdhci_arasan_data {
+>>>
+>>>  	struct regmap	*soc_ctl_base;
+>>>  	const struct sdhci_arasan_soc_ctl_map *soc_ctl_map;
+>>> +
+>>> +	unsigned int arasan_quirks; /* Arasan deviations from spec */
+>>> +
+>>> +/* Controller does not have CD wired and will not function normally without */
+>>> +#define SDHCI_ARASAN_QUIRK_FAILS_WITHOUT_TEST_CD (1<<0)
+>>
+>> Bit macro instead?
+>>
+> 
+> Setting bits with notations like (1<<0) is the style which is used for quirks
+> in sdhci.h Is there a reason it should be different here?
 
-Thank you for your comment.
-Please see my comment inline.
+sdhci.h is here for a long time and IIRC using BIT macro is recommended way.
 
 
+>>> +
+>>
+>> remove this line.
+>>
+>>>  };
+>>>
+>>>  static const struct sdhci_arasan_soc_ctl_map rk3399_soc_ctl_map = {
+>>> @@ -203,12 +210,32 @@ static void sdhci_arasan_hs400_enhanced_strobe(struct mmc_host *mmc,
+>>>  	writel(vendor, host->ioaddr + SDHCI_ARASAN_VENDOR_REGISTER);
+>>>  }
+>>>
+>>> +void sdhci_arasan_reset(struct sdhci_host *host, u8 mask)
+>>> +{
+>>> +	u8 ctrl;
+>>> +	struct sdhci_pltfm_host *pltfm_host;
+>>> +	struct sdhci_arasan_data *sdhci_arasan;
+>>> +
+>>> +	sdhci_reset(host, mask);
+>>> +
+>>> +	pltfm_host = sdhci_priv(host);
+>>> +	sdhci_arasan = sdhci_pltfm_priv(pltfm_host);
+>>> +
+>>> +	if (sdhci_arasan->arasan_quirks &
+>>> +	    SDHCI_ARASAN_QUIRK_FAILS_WITHOUT_TEST_CD) {
+>>> +		ctrl = sdhci_readb(host, SDHCI_HOST_CONTROL);
+>>> +		ctrl |= SDHCI_CTRL_CDTEST_INS |
+>>> +			SDHCI_CTRL_CDTEST_EN;
+>>> +		sdhci_writeb(host, ctrl, SDHCI_HOST_CONTROL);
+>>> +	}
+>>> +}
+>>> +
+>>>  static struct sdhci_ops sdhci_arasan_ops = {
+>>>  	.set_clock = sdhci_arasan_set_clock,
+>>>  	.get_max_clock = sdhci_pltfm_clk_get_max_clock,
+>>>  	.get_timeout_clock = sdhci_arasan_get_timeout_clock,
+>>>  	.set_bus_width = sdhci_set_bus_width,
+>>> -	.reset = sdhci_reset,
+>>> +	.reset = sdhci_arasan_reset,
+>>>  	.set_uhs_signaling = sdhci_set_uhs_signaling,
+>>>  };
+>>>
+>>> @@ -516,6 +543,11 @@ static int sdhci_arasan_probe(struct platform_device *pdev)
+>>>  	}
+>>>
+>>>  	sdhci_get_of_property(pdev);
+>>> +
+>>> +	if (of_get_property(pdev->dev.of_node, "fails-without-test-cd", NULL))
+>>> +		sdhci_arasan->arasan_quirks |=
+>>> +				SDHCI_ARASAN_QUIRK_FAILS_WITHOUT_TEST_CD;
+>>> +
+>>>  	pltfm_host->clk = clk_xin;
+>>>
+>>>  	sdhci_arasan_update_baseclkfreq(host);
+>>> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+>>> index 0411c9f..8d92d6e9 100644
+>>> --- a/drivers/mmc/host/sdhci.h
+>>> +++ b/drivers/mmc/host/sdhci.h
+>>> @@ -84,6 +84,8 @@
+>>>  #define   SDHCI_CTRL_ADMA32	0x10
+>>>  #define   SDHCI_CTRL_ADMA64	0x18
+>>>  #define   SDHCI_CTRL_8BITBUS	0x20
+>>> +#define  SDHCI_CTRL_CDTEST_INS   0x40
+>>> +#define  SDHCI_CTRL_CDTEST_EN     0x80
+>>
+>> You should follow coding style above.
+> 
+> I don't understand the issue you're raising. Could you elaborate?
 
-Best regards,
-Yangbo Lu
+Origin format is
+#define<space><space>MACRO_NAME<tab>MACRO_VALUE
 
-> -----Original Message-----
-> From: Arnd Bergmann [mailto:arnd@arndb.de]
-> Sent: Tuesday, September 06, 2016 8:46 PM
-> To: Ulf Hansson
-> Cc: Y.B. Lu; linux-mmc; Scott Wood; linuxppc-dev@lists.ozlabs.org;
-> devicetree@vger.kernel.org; linux-arm-kernel@lists.infradead.org; linux-
-> kernel@vger.kernel.org; linux-clk; linux-i2c@vger.kernel.org;
-> iommu@lists.linux-foundation.org; netdev@vger.kernel.org; Mark Rutland;
-> Rob Herring; Russell King; Jochen Friedrich; Joerg Roedel; Claudiu Manoil=
-;
-> Bhupesh Sharma; Qiang Zhao; Kumar Gala; Santosh Shilimkar; Leo Li; X.B.
-> Xie
-> Subject: Re: [v11, 7/8] base: soc: introduce soc_device_match() interface
->=20
-> On Tuesday, September 6, 2016 1:44:23 PM CEST Ulf Hansson wrote:
-> > On 6 September 2016 at 10:28, Yangbo Lu <yangbo.lu@nxp.com> wrote:
-> > > We keep running into cases where device drivers want to know the
-> > > exact version of the a SoC they are currently running on. In the
-> > > past, this has usually been done through a vendor specific API that
-> > > can be called by a driver, or by directly accessing some kind of
-> > > version register that is not part of the device itself but that
-> > > belongs to a global register area of the chip.
->=20
-> Please add "From: Arnd Bergmann <arnd@arndb.de>" as the first line, to
-> preserve authorship. If you use "git send-email" or "git format-patch",
-> that should happen automatically if the author field is set right (if not=
-,
-> use 'git commit --amend --author=3D"Arnd Bergmann <arnd@arndb.de>"'
-> to fix it).
->=20
+What you have above is not following this style.
+You should turn on tab highlighting in your editor.
 
-[Lu Yangbo-B47093] Oh, I'm sorry for my careless. Will correct it in next v=
-ersion.
-
-> > > +
-> > > +/*
-> > > + * soc_device_match - identify the SoC in the machine
-> > > + * @matches: zero-terminated array of possible matches
-> >
-> > Perhaps also express the constraint on the matching entries. As you
-> > need at least one of the ->machine(), ->family(), ->revision() or
-> > ->soc_id() callbacks implemented, right!?
->=20
-> They are not callbacks, just strings. Having an empty entry indicates the
-> end of the array, and this is not called.
->=20
-> > > + *
-> > > + * returns the first matching entry of the argument array, or NULL
-> > > + * if none of them match.
-> > > + *
-> > > + * This function is meant as a helper in place of of_match_node()
-> > > + * in cases where either no device tree is available or the
-> > > + information
-> > > + * in a device node is insufficient to identify a particular
-> > > + variant
-> > > + * by its compatible strings or other properties. For new devices,
-> > > + * the DT binding should always provide unique compatible strings
-> > > + * that allow the use of of_match_node() instead.
-> > > + *
-> > > + * The calling function can use the .data entry of the
-> > > + * soc_device_attribute to pass a structure or function pointer for
-> > > + * each entry.
-> >
-> > I don't get the use case behind this, could you elaborate?
-> >
-> > Perhaps we should postpone adding the .data entry until we actually
-> > see a need for it?
->=20
-> I think the interface is rather useless without a way to figure out which
-> entry you got. Almost all users of of_match_node() actually use the
-> returned ->data field, and I expect this to be the same here.
->=20
-> > > + */
-> > > +const struct soc_device_attribute *soc_device_match(
-> > > +       const struct soc_device_attribute *matches) {
-> > > +       struct device *dev;
-> > > +       int ret;
-> > > +
-> > > +       for (ret =3D 0; ret =3D=3D 0; matches++) {
-> >
-> > This loop looks a bit weird and unsafe.
->=20
-> Ah, and I thought I was being clever ;-)
->=20
-> > 1) Perhaps using a while loop makes this more readable?
-> > 2) As this is an exported API, I guess validation of the ->matches
-> > pointer needs to be done before accessing it.
->=20
-> Sounds fine.
-
-[Lu Yangbo-B47093] Ok, Will change this according to Uffe.=20
-And actually there is issue with this for() when I verified it again this m=
-orning.
-We will get matches++ rather than matches which is correct finally :)
-
->=20
-> > > +               if (!(matches->machine || matches->family ||
-> > > +                     matches->revision || matches->soc_id))
-> > > +                       return NULL;
-> > > +               dev =3D NULL;
-> >
-> > There's no need to use a struct device just to assign it to NULL.
-> > Instead just provide the function below with NULL.
-> >
-> > > +               ret =3D bus_for_each_dev(&soc_bus_type, dev, (void
-> *)matches,
-> > > +                                      soc_device_match_one);
->=20
->=20
-> I don't remember what led to this, I think you are right, we should just
-> pass NULL as most other callers.
-
-[Lu Yangbo-B47093] Will correct it. Thanks. :)
-
->=20
-> Thanks for the review.
->=20
-> 	ARnd
-
+Thanks,
+Michal
