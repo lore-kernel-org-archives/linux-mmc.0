@@ -1,65 +1,926 @@
-From: Zach Brown <zach.brown@ni.com>
-Subject: [PATCH v5 1/2] sdhci-of-arasan: Add device tree parameter xlnx-fails-without-test-cd bit
-Date: Wed, 7 Sep 2016 17:22:40 -0500
-Message-ID: <1473286961-19608-1-git-send-email-zach.brown@ni.com>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from skprod2.natinst.com ([130.164.80.23]:47133 "EHLO ni.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1751971AbcIGWXL (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Wed, 7 Sep 2016 18:23:11 -0400
-Sender: linux-mmc-owner@vger.kernel.org
+From: Kevin Hilman <khilman@baylibre.com>
+Subject: Re: [PATCH v2 2/2] MMC: meson: initial support for GXBB platforms
+Date: Wed, 07 Sep 2016 16:02:15 -0700
+Message-ID: <7hy433qpoo.fsf@baylibre.com>
+References: <20160803231843.23012-1-khilman@baylibre.com>
+        <20160803231843.23012-2-khilman@baylibre.com>
+        <20160823012124.GQ6502@codeaurora.org>
+Mime-Version: 1.0
+Content-Type: text/plain
+Return-path: <linux-clk-owner@vger.kernel.org>
+In-Reply-To: <20160823012124.GQ6502@codeaurora.org> (Stephen Boyd's message of
+        "Mon, 22 Aug 2016 18:21:24 -0700")
+Sender: linux-clk-owner@vger.kernel.org
+To: Stephen Boyd <sboyd@codeaurora.org>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, Xing Wu <xing.xu@amlogic.com>, Victor Wan <victor.wan@amlogic.com>, linux-amlogic@lists.infradead.org, Jerry Cao <jerry.cao@amlogic.com>, linux-arm-kernel@lists.infradead.org, linux-clk@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: adrian.hunter@intel.com
-Cc: robh+dt@kernel.org, ulf.hansson@linaro.org, mark.rutland@arm.com, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, michal.simek@xilinx.com, soren.brinkmann@xilinx.com, linux-arm-kernel@lists.infradead.org, zach.brown@ni.com
 
-The sdhci controller on xilinx zynq devices will not function unless
-the CD bit is provided. http://www.xilinx.com/support/answers/61064.html
-In cases where it is impossible to provide the CD bit in hardware,
-setting the controller to test mode and then setting inserted to true
-will get the controller to function without the CD bit.
+Stephen Boyd <sboyd@codeaurora.org> writes:
 
-The device property "xlnx-fails-without-test-cd" will let the arasan
-driver know the controller does not have the CD line wired and that the
-controller does not function without it.
+> On 08/03, Kevin Hilman wrote:
+>> diff --git a/MAINTAINERS b/MAINTAINERS
+>> index 7304d2e37a98..3762e46811f3 100644
+>> --- a/MAINTAINERS
+>> +++ b/MAINTAINERS
+>> @@ -972,6 +972,7 @@ F:	arch/arm/mach-meson/
+>>  F:	arch/arm/boot/dts/meson*
+>>  F:	arch/arm64/boot/dts/amlogic/
+>>  F: 	drivers/pinctrl/meson/
+>> +F:      drivers/mmc/host/meson*
+>
+> Weird spacing here?
+>
+>>  N:	meson
+>>  
+>>  ARM/Annapurna Labs ALPINE ARCHITECTURE
+>> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+>> index 0aa484c10c0a..4c3d091f7548 100644
+>> --- a/drivers/mmc/host/Kconfig
+>> +++ b/drivers/mmc/host/Kconfig
+>> @@ -332,6 +332,16 @@ config MMC_SDHCI_IPROC
+>>  
+>>  	  If unsure, say N.
+>>  
+>> +config MMC_MESON_GXBB
+>> +	tristate "Amlogic S905/GXBB SD/MMC Host Controller support"
+>> +	depends on ARCH_MESON && MMC
+>> +	help
+>> +	  This selects support for the Amlogic SD/MMC Host Controller
+>> +	  found on the S905/GXBB family of SoCs.  This controller is
+>> +	  MMC 5.1 compliant and support SD, eMMC and SDIO interfaces.
+>
+> s/support/supports/
+>
+>> +
+>> +	  If you have a controller with this interface, say Y here.
+>> +
+>>  config MMC_MOXART
+>>  	tristate "MOXART SD/MMC Host Controller support"
+>>  	depends on ARCH_MOXART && MMC
+>> diff --git a/drivers/mmc/host/meson-gxbb.c b/drivers/mmc/host/meson-gxbb.c
+>> new file mode 100644
+>> index 000000000000..10eac41cf31a
+>> --- /dev/null
+>> +++ b/drivers/mmc/host/meson-gxbb.c
+>> @@ -0,0 +1,918 @@
+>> +/*
+>> + * This file is provided under a dual BSD/GPLv2 license.  When using or
+>> + * redistributing this file, you may do so under either license.
+>> + *
+>> + * GPL LICENSE SUMMARY
+>> + *
+>> + * Copyright (c) 2016 BayLibre, SAS.
+>> + * Author: Kevin Hilman <khilman@baylibre.com>
+>> + *
+>> + * This program is free software; you can redistribute it and/or modify
+>> + * it under the terms of version 2 of the GNU General Public License as
+>> + * published by the Free Software Foundation.
+>> + *
+>> + * This program is distributed in the hope that it will be useful, but
+>> + * WITHOUT ANY WARRANTY; without even the implied warranty of
+>> + * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+>> + * General Public License for more details.
+>> + *
+>> + * You should have received a copy of the GNU General Public License
+>> + * along with this program; if not, see <http://www.gnu.org/licenses/>.
+>> + * The full GNU General Public License is included in this distribution
+>> + * in the file called COPYING.
+>> + *
+>> + * BSD LICENSE
+>> + *
+>> + * Copyright (c) 2016 BayLibre, SAS.
+>> + * Author: Kevin Hilman <khilman@baylibre.com>
+>> + *
+>> + * Redistribution and use in source and binary forms, with or without
+>> + * modification, are permitted provided that the following conditions
+>> + * are met:
+>> + *
+>> + *   * Redistributions of source code must retain the above copyright
+>> + *     notice, this list of conditions and the following disclaimer.
+>> + *   * Redistributions in binary form must reproduce the above copyright
+>> + *     notice, this list of conditions and the following disclaimer in
+>> + *     the documentation and/or other materials provided with the
+>> + *     distribution.
+>> + *   * Neither the name of Intel Corporation nor the names of its
+>> + *     contributors may be used to endorse or promote products derived
+>> + *     from this software without specific prior written permission.
+>> + *
+>> + * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+>> + * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+>> + * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+>> + * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+>> + * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+>> + * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+>> + * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+>> + * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+>> + * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+>> + * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+>> + * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+>> + */
+>> +#include <linux/kernel.h>
+>> +#include <linux/module.h>
+>> +#include <linux/moduleparam.h>
+>
+> Unused?
+>
+>> +#include <linux/init.h>
+>> +#include <linux/device.h>
+>> +#include <linux/of_device.h>
+>> +#include <linux/platform_device.h>
+>> +#include <linux/ioport.h>
+>> +#include <linux/regmap.h>
+>
+> Unused?
+>
+>> +#include <linux/spinlock.h>
+>> +#include <linux/dma-mapping.h>
+>> +#include <linux/mmc/host.h>
+>> +#include <linux/mmc/mmc.h>
+>> +#include <linux/mmc/sdio.h>
+>> +#include <linux/mmc/slot-gpio.h>
+>> +#include <linux/io.h>
+>> +#include <linux/clk.h>
+>> +#include <linux/clk-provider.h>
+>> +
+>> +#define DRIVER_NAME "meson-gxbb-mmc"
+>> +
+>> +#define SD_EMMC_CLOCK 0x0
+>> +#define   CLK_DIV_SHIFT 0
+>> +#define   CLK_DIV_WIDTH 6
+>> +#define   CLK_DIV_MASK 0x3f
+>> +#define   CLK_DIV_MAX 63
+>> +#define   CLK_SRC_SHIFT 6
+>> +#define   CLK_SRC_WIDTH 2
+>> +#define   CLK_SRC_MASK 0x3
+>> +#define   CLK_SRC_XTAL 0   /* external crystal */
+>> +#define   CLK_SRC_XTAL_RATE 24000000
+>> +#define   CLK_SRC_PLL 1    /* FCLK_DIV2 */
+>> +#define   CLK_SRC_PLL_RATE 1000000000
+>> +#define   CLK_PHASE_SHIFT 8
+>> +#define   CLK_PHASE_MASK 0x3
+>> +#define   CLK_PHASE_0 0
+>> +#define   CLK_PHASE_90 1
+>> +#define   CLK_PHASE_180 2
+>> +#define   CLK_PHASE_270 3
+>> +#define   CLK_ALWAYS_ON BIT(24)
+>> +
+>> +#define SD_EMMC_DElAY 0x4
+>> +#define SD_EMMC_ADJUST 0x8
+>> +#define SD_EMMC_CALOUT 0x10
+>> +#define SD_EMMC_START 0x40
+>> +#define   START_DESC_INIT BIT(0)
+>> +#define   START_DESC_BUSY BIT(1)
+>> +#define   START_DESC_ADDR_SHIFT 2
+>> +#define   START_DESC_ADDR_MASK (~0x3)
+>> +
+>> +#define SD_EMMC_CFG 0x44
+>> +#define   CFG_BUS_WIDTH_SHIFT 0
+>> +#define   CFG_BUS_WIDTH_MASK 0x3
+>> +#define   CFG_BUS_WIDTH_1 0x0
+>> +#define   CFG_BUS_WIDTH_4 0x1
+>> +#define   CFG_BUS_WIDTH_8 0x2
+>> +#define   CFG_DDR BIT(2)
+>> +#define   CFG_BLK_LEN_SHIFT 4
+>> +#define   CFG_BLK_LEN_MASK 0xf
+>> +#define   CFG_RESP_TIMEOUT_SHIFT 8
+>> +#define   CFG_RESP_TIMEOUT_MASK 0xf
+>> +#define   CFG_RC_CC_SHIFT 12
+>> +#define   CFG_RC_CC_MASK 0xf
+>> +#define   CFG_STOP_CLOCK BIT(22)
+>> +#define   CFG_CLK_ALWAYS_ON BIT(18)
+>> +#define   CFG_AUTO_CLK BIT(23)
+>> +
+>> +#define SD_EMMC_STATUS 0x48
+>> +#define   STATUS_BUSY BIT(31)
+>> +
+>> +#define SD_EMMC_IRQ_EN 0x4c
+>> +#define   IRQ_EN_MASK 0x3fff
+>> +#define   IRQ_RXD_ERR_SHIFT 0
+>> +#define   IRQ_RXD_ERR_MASK 0xff
+>> +#define   IRQ_TXD_ERR BIT(8)
+>> +#define   IRQ_DESC_ERR BIT(9)
+>> +#define   IRQ_RESP_ERR BIT(10)
+>> +#define   IRQ_RESP_TIMEOUT BIT(11)
+>> +#define   IRQ_DESC_TIMEOUT BIT(12)
+>> +#define   IRQ_END_OF_CHAIN BIT(13)
+>> +#define   IRQ_RESP_STATUS BIT(14)
+>> +#define   IRQ_SDIO BIT(15)
+>> +
+>> +#define SD_EMMC_CMD_CFG 0x50
+>> +#define SD_EMMC_CMD_ARG 0x54
+>> +#define SD_EMMC_CMD_DAT 0x58
+>> +#define SD_EMMC_CMD_RSP 0x5c
+>> +#define SD_EMMC_CMD_RSP1 0x60
+>> +#define SD_EMMC_CMD_RSP2 0x64
+>> +#define SD_EMMC_CMD_RSP3 0x68
+>> +
+>> +#define SD_EMMC_RXD 0x94
+>> +#define SD_EMMC_TXD 0x94
+>> +#define SD_EMMC_LAST_REG SD_EMMC_TXD
+>> +
+>> +#define SD_EMMC_CFG_BLK_SIZE 512 /* internal buffer max: 512 bytes */
+>> +#define SD_EMMC_CFG_RESP_TIMEOUT 256 /* in clock cycles */
+>> +#define SD_EMMC_CFG_CMD_GAP 16 /* in clock cycles */
+>> +#define MUX_CLK_NUM_PARENTS 2
+>> +
+>> +struct meson_host {
+>> +	struct	device		*dev;
+>> +	struct	mmc_host	*mmc;
+>> +	struct	mmc_request	*mrq;
+>> +	struct	mmc_command	*cmd;
+>> +
+>> +	spinlock_t lock;
+>> +	void __iomem *regs;
+>> +#ifdef USE_REGMAP
+>> +	struct regmap *regmap;
+>> +#endif
+>
+> Dead code?
+>
+>> +	int irq;
+>> +	u32 ocr_mask;
+>> +	struct clk *core_clk;
+>> +	struct clk_mux mux;
+>> +	struct clk *mux_clk;
+>> +	struct clk *mux_parent[MUX_CLK_NUM_PARENTS];
+>> +	unsigned long mux_parent_rate[MUX_CLK_NUM_PARENTS];
+>> +
+>> +	struct clk_divider cfg_div;
+>> +	struct clk *cfg_div_clk;
+>> +
+>> +	unsigned int bounce_buf_size;
+>> +	void *bounce_buf;
+>> +	dma_addr_t bounce_dma_addr;
+>> +
+>> +	unsigned long clk_rate;
+>> +	unsigned long clk_src_rate;
+>> +	unsigned short clk_src_div;
+>> +};
+>> +
+>> +#define reg_read(host, offset) readl(host->regs + offset)
+>> +#define reg_write(host, offset, val) writel(val, host->regs + offset)
+>> +
+>> +struct cmd_cfg {
+>> +	union {
+>> +		struct {
+>> +			u32 length:9;
+>> +			u32 block_mode:1;
+>> +			u32 r1b:1;
+>> +			u32 end_of_chain:1;
+>> +			u32 timeout:4; /* 2^timeout msec */
+>> +			u32 no_resp:1;
+>> +			u32 no_cmd:1;
+>> +			u32 data_io:1;
+>> +			u32 data_wr:1;
+>> +			u32 resp_nocrc:1;
+>> +			u32 resp_128:1;
+>> +			u32 resp_num:1;
+>> +			u32 data_num:1;
+>> +			u32 cmd_index:6;
+>> +			u32 error:1;
+>> +			u32 owner:1;
+>
+>> +#define CFG_OWNER_CPU 1
+>> +#define CFG_OWNER_MMC 0
+>> +		};
+>> +		u32 val;
+>
+> Does this need to be __le32 to handle endian swaps? I thought
+> bitfields weren't safe for things that are written to hardware,
+> but I can't seem to find any definitive email about that
+> anywhere.
 
-Signed-off-by: Zach Brown <zach.brown@ni.com>
----
-v2:
- * improved commit messages
- * removed fake-cd device property
- * removed fake-cd quirk
- * use broken-cd device property
- * documented new usage of broken-cd
-v3:
- * removed new usage of broken-cd
- * created fails-without-test-cd device property
- * created arasan controller specific quirk
-v4:
- * changed fails-without-test-cd to xlnx-fails-without-test-cd
- * removed extra blank line
-v5:
- * Fixed style mistake
- * Changed (1 << 0 ) to BIT(0)
+Hmm, yeah.  I need to rework and test this for CONFIG_CPU_BIG_ENDIAN=y.
+I think I'll completely get rid of the bitfields.
 
+>> +	};
+>> +};
+>> +
+>> +struct sd_emmc_desc {
+>> +	struct cmd_cfg cmd_cfg;
+>> +	u32 cmd_arg;
+>> +	u32 cmd_data;
+>> +	u32 cmd_resp;
+>
+> __le32?
 
- Documentation/devicetree/bindings/mmc/arasan,sdhci.txt | 4 ++++
- 1 file changed, 4 insertions(+)
+Ack.
 
-diff --git a/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt b/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
-index 31b35c3..7407450 100644
---- a/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
-+++ b/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
-@@ -17,6 +17,10 @@ Required Properties:
-   - interrupts: Interrupt specifier
-   - interrupt-parent: Phandle for the interrupt controller that services
- 		      interrupts for this device.
-+Optional Properties:
-+- xlnx-fails-without-test-cd: when present, the controller doesn't work when
-+  the CD line is not connected properly, and the line is not connected
-+  properly. Test mode can be used to force the controller to function.
- 
- Required Properties for "arasan,sdhci-5.1":
-   - phys: From PHY bindings: Phandle for the Generic PHY for arasan.
--- 
-2.7.4
+>> +};
+>> +#define CMD_DATA_MASK (~0x3)
+>> +#define CMD_DATA_BIG_ENDIAN BIT(1)
+>> +#define CMD_DATA_SRAM BIT(0)
+>> +#define CMD_RESP_MASK (~0x1)
+>> +#define CMD_RESP_SRAM BIT(0)
+>> +
+>> +static int meson_mmc_clk_set(struct meson_host *host, unsigned long clk_rate)
+>> +{
+>> +	struct mmc_host *mmc = host->mmc;
+>> +	int ret = 0;
+>> +	u32 cfg;
+>> +
+>> +	if (clk_rate) {
+>> +		if (WARN_ON(clk_rate > mmc->f_max))
+>> +			clk_rate = mmc->f_max;
+>> +		else if (WARN_ON(clk_rate < mmc->f_min))
+>> +			clk_rate = mmc->f_min;
+>> +	}
+>> +
+>> +	if (clk_rate == host->clk_rate)
+>> +		return 0;
+>> +
+>> +	/* stop clock */
+>> +	cfg = reg_read(host, SD_EMMC_CFG);
+>> +	if (!(cfg & CFG_STOP_CLOCK)) {
+>> +		cfg |= CFG_STOP_CLOCK;
+>> +		reg_write(host, SD_EMMC_CFG, cfg);
+>> +	}
+>> +
+>> +	dev_dbg(host->dev, "change clock rate %lu -> %lu\n",
+>> +		host->clk_rate, clk_rate);
+>> +	ret = clk_set_rate(host->cfg_div_clk, clk_rate);
+>> +	if (clk_rate && clk_rate != clk_get_rate(host->cfg_div_clk))
+>> +		dev_warn(host->dev, "divider requested rate %lu != actual rate %lu: ret=%d\n",
+>> +			 clk_rate, clk_get_rate(host->cfg_div_clk), ret);
+>> +	else
+>> +		host->clk_rate = clk_rate;
+>> +
+>> +	/* (re)start clock, if non-zero */
+>> +	if (clk_rate) {
+>> +		cfg = reg_read(host, SD_EMMC_CFG);
+>> +		cfg &= ~CFG_STOP_CLOCK;
+>> +		reg_write(host, SD_EMMC_CFG, cfg);
+>> +	}
+>> +
+>> +	return ret;
+>> +}
+>> +
+>> +static int meson_mmc_clk_init(struct meson_host *host)
+>> +{
+>> +	struct clk_init_data init;
+>> +	char clk_name[32];
+>> +	int i, ret = 0;
+>> +	const char *mux_parent_names[MUX_CLK_NUM_PARENTS];
+>> +	unsigned int mux_parent_count = 0;
+>> +	const char *clk_div_parents[1];
+>> +	unsigned int f_min = UINT_MAX;
+>> +	u32 clk_reg, cfg;
+>> +
+>> +	/* get the mux parents from DT */
+>
+> None of this looks DT specific (good).
+>
 
+Ok, will drop the "from DT" part of the comment.
+
+>> +	for (i = 0; i < MUX_CLK_NUM_PARENTS; i++) {
+>> +		char name[16];
+>> +
+>> +		snprintf(name, sizeof(name), "clkin%d", i);
+>> +		host->mux_parent[i] = devm_clk_get(host->dev, name);
+>> +		if (IS_ERR(host->mux_parent[i])) {
+>> +			ret = PTR_ERR(host->mux_parent[i]);
+>> +			if (PTR_ERR(host->mux_parent[i]) != -EPROBE_DEFER)
+>> +				dev_err(host->dev, "Missing clock %s\n", name);
+>> +			host->mux_parent[i] = NULL;
+>> +			return ret;
+>> +		}
+>> +
+>> +		host->mux_parent_rate[i] = clk_get_rate(host->mux_parent[i]);
+>> +		mux_parent_names[i] = __clk_get_name(host->mux_parent[i]);
+>> +		mux_parent_count++;
+>> +		if (host->mux_parent_rate[i] < f_min)
+>> +			f_min = host->mux_parent_rate[i];
+>> +	}
+>> +
+>> +	/* cacluate f_min based on input clocks, and max divider value */
+>> +	if (f_min != UINT_MAX)
+>> +		f_min = DIV_ROUND_UP(CLK_SRC_XTAL_RATE, CLK_DIV_MAX);
+>> +	else
+>> +		f_min = 4000000;  /* default min: 400 MHz */
+>> +	host->mmc->f_min = f_min;
+>> +
+>> +	/* create the mux */
+>> +	snprintf(clk_name, sizeof(clk_name), "%s#mux", dev_name(host->dev));
+>> +	init.name = clk_name;
+>> +	init.ops = &clk_mux_ops;
+>> +	init.flags = CLK_IS_BASIC;
+>
+> Do you need CLK_IS_BASIC? If not please drop it.
+>
+
+Dropped.
+
+>> +	init.parent_names = mux_parent_names;
+>> +	init.num_parents = mux_parent_count;
+>> +
+>> +	host->mux.reg = host->regs + SD_EMMC_CLOCK;
+>> +	host->mux.shift = CLK_SRC_SHIFT;
+>> +	host->mux.mask = CLK_SRC_MASK;
+>> +	host->mux.flags = 0;
+>> +	host->mux.table = NULL;
+>> +	host->mux.hw.init = &init;
+>> +
+>> +	host->mux_clk = devm_clk_register(host->dev, &host->mux.hw);
+>
+> Hmm I was hoping to get rid of devm_clk_register() and replace it
+> with devm_clk_hw_register() instead. All part of my grand plan to
+> split providers from consumers, but this driver is different in
+> the sense that it registers clks to provide to itself. Maybe we
+> should make __clk_create_clk() into a real clk provider API so
+> that we can use devm_clk_hw_register() here and then generate a
+> clk for this device from the hw structure.
+
+So is there something else I should do here, or can we rework this later
+after you rework the framework a bit?
+
+>> +	if (WARN_ON(PTR_ERR_OR_ZERO(host->mux_clk)))
+>
+> NULL is a valid clk so I would expect to only see
+> WARN_ON(IS_ERR(host->mux_clk)) here.
+
+OK.
+
+>> +		return PTR_ERR(host->mux_clk);
+>> +
+>> +	/* create the divider */
+>> +	snprintf(clk_name, sizeof(clk_name), "%s#div", dev_name(host->dev));
+>> +	init.name = devm_kstrdup(host->dev, clk_name, GFP_KERNEL);
+>> +	init.ops = &clk_divider_ops;
+>> +	init.flags = CLK_IS_BASIC | CLK_SET_RATE_PARENT;
+>> +	clk_div_parents[0] = __clk_get_name(host->mux_clk);
+>> +	init.parent_names = clk_div_parents;
+>> +	init.num_parents = ARRAY_SIZE(clk_div_parents);
+>> +
+>> +	host->cfg_div.reg = host->regs + SD_EMMC_CLOCK;
+>> +	host->cfg_div.shift = CLK_DIV_SHIFT;
+>> +	host->cfg_div.width = CLK_DIV_WIDTH;
+>> +	host->cfg_div.hw.init = &init;
+>> +	host->cfg_div.flags = CLK_DIVIDER_ONE_BASED |
+>> +		CLK_DIVIDER_ROUND_CLOSEST | CLK_DIVIDER_ALLOW_ZERO;
+>> +
+>> +	host->cfg_div_clk = devm_clk_register(host->dev, &host->cfg_div.hw);
+>> +	if (WARN_ON(PTR_ERR_OR_ZERO(host->cfg_div_clk)))
+>> +		return PTR_ERR(host->cfg_div_clk);
+>> +
+>> +	/* init SD_EMMC_CLOCK to sane defaults w/min clock rate */
+>> +	clk_reg = 0;
+>> +	clk_reg |= CLK_PHASE_180 << CLK_PHASE_SHIFT;
+>> +	clk_reg |= CLK_SRC_XTAL << CLK_SRC_SHIFT;
+>> +	clk_reg |= CLK_DIV_MAX << CLK_DIV_SHIFT;
+>> +	clk_reg &= ~CLK_ALWAYS_ON;
+>> +	reg_write(host, SD_EMMC_CLOCK, clk_reg);
+>> +
+>> +	clk_prepare_enable(host->cfg_div_clk);
+>
+> This can fail...
+>
+>> +
+>> +	/* Ensure clock starts in "auto" mode, not "always on" */
+>> +	cfg = reg_read(host, SD_EMMC_CFG);
+>> +	cfg &= ~CFG_CLK_ALWAYS_ON;
+>> +	cfg |= CFG_AUTO_CLK;
+>> +	reg_write(host, SD_EMMC_CFG, cfg);
+>> +
+>> +	meson_mmc_clk_set(host, f_min);
+>
+> This can fail too but we don't handle the error?
+>
+
+Ok, fixing the error checking.
+
+>> +
+>> +	return ret;
+>> +}
+>> +
+>> +static void meson_mmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+>> +{
+>> +	struct meson_host *host = mmc_priv(mmc);
+>> +	u32 bus_width;
+>> +	u32 val, orig;
+>> +
+>> +	/*
+>> +	 * GPIO regulator, only controls switching between 1v8 and
+>> +	 * 3v3, doesn't support MMC_POWER_OFF, MMC_POWER_ON.
+>> +	 */
+>> +	switch (ios->power_mode) {
+>> +	case MMC_POWER_UP:
+>> +		if (!IS_ERR(mmc->supply.vmmc))
+>> +			mmc_regulator_set_ocr(mmc, mmc->supply.vmmc, ios->vdd);
+>> +	}
+>> +
+>> +	meson_mmc_clk_set(host, ios->clock);
+>> +
+>> +	/* Bus width */
+>> +	val = reg_read(host, SD_EMMC_CFG);
+>> +	switch (ios->bus_width) {
+>> +	case MMC_BUS_WIDTH_1:
+>> +		bus_width = CFG_BUS_WIDTH_1;
+>> +		break;
+>> +	case MMC_BUS_WIDTH_4:
+>> +		bus_width = CFG_BUS_WIDTH_4;
+>> +		break;
+>> +	case MMC_BUS_WIDTH_8:
+>> +		bus_width = CFG_BUS_WIDTH_8;
+>> +		break;
+>> +	default:
+>> +		dev_err(host->dev, "Invalid ios->bus_width: %u.  Setting to 4.\n",
+>> +			ios->bus_width);
+>> +		bus_width = CFG_BUS_WIDTH_4;
+>> +		return;
+>> +	}
+>> +
+>> +	val = reg_read(host, SD_EMMC_CFG);
+>> +	orig = val;
+>> +
+>> +	val &= ~(CFG_BUS_WIDTH_MASK << CFG_BUS_WIDTH_SHIFT);
+>> +	val |= bus_width << CFG_BUS_WIDTH_SHIFT;
+>> +
+>> +	val &= ~(CFG_BLK_LEN_MASK << CFG_BLK_LEN_SHIFT);
+>> +	val |= ilog2(SD_EMMC_CFG_BLK_SIZE) << CFG_BLK_LEN_SHIFT;
+>> +
+>> +	val &= ~(CFG_RESP_TIMEOUT_MASK << CFG_RESP_TIMEOUT_SHIFT);
+>> +	val |= ilog2(SD_EMMC_CFG_RESP_TIMEOUT) << CFG_RESP_TIMEOUT_SHIFT;
+>> +
+>> +	val &= ~(CFG_RC_CC_MASK << CFG_RC_CC_SHIFT);
+>> +	val |= ilog2(SD_EMMC_CFG_CMD_GAP) << CFG_RC_CC_SHIFT;
+>> +
+>> +	reg_write(host, SD_EMMC_CFG, val);
+>> +
+>> +	if (val != orig)
+>> +		dev_dbg(host->dev, "%s: SD_EMMC_CFG: 0x%08x -> 0x%08x\n",
+>> +			__func__, orig, val);
+>> +}
+>> +
+>> +static int meson_mmc_wait_busy(struct mmc_host *mmc, unsigned int timeout)
+>> +{
+>> +	struct meson_host *host = mmc_priv(mmc);
+>> +	u32 status;
+>> +	int i;
+>> +
+>> +	for (i = timeout; i > 0; i--) {
+>> +		status = reg_read(host, SD_EMMC_STATUS);
+>> +		if (!(status & STATUS_BUSY))
+>> +			break;
+>> +	};
+>> +
+>> +	return (timeout == 0);
+>> +}
+>> +
+>> +static int meson_mmc_request_done(struct mmc_host *mmc, struct mmc_request *mrq)
+>> +{
+>> +	struct meson_host *host = mmc_priv(mmc);
+>> +	struct mmc_command *cmd = host->cmd;
+>> +	unsigned int loops = 0xfffff;
+>
+> Perhaps this should be a value of time instead of raw loops? Who
+> knows how fast the CPU can run all those loops?
+
+Ack.
+
+>> +
+>> +	WARN_ON(host->mrq != mrq);
+>> +	if (cmd && !cmd->error)
+>> +		if (meson_mmc_wait_busy(mmc, loops))
+>> +			dev_warn(host->dev, "%s: timeout busy.\n", __func__);
+>> +
+>> +	host->mrq = NULL;
+>> +	host->cmd = NULL;
+>> +	mmc_request_done(host->mmc, mrq);
+>> +
+>> +	return 0;
+>> +}
+>> +
+> [...]
+>> +
+>> +static void meson_mmc_request(struct mmc_host *mmc, struct mmc_request *mrq)
+>> +{
+>> +	struct meson_host *host = mmc_priv(mmc);
+>> +
+>> +	WARN_ON(host->mrq != NULL);
+>> +
+>> +	/* Stop execution */
+>> +	reg_write(host, SD_EMMC_START, 0);
+>> +
+>> +	/* clear, ack, enable all interrupts */
+>> +	reg_write(host, SD_EMMC_IRQ_EN, 0);
+>> +	reg_write(host, SD_EMMC_STATUS, IRQ_EN_MASK);
+>> +	reg_write(host, SD_EMMC_IRQ_EN, IRQ_EN_MASK);
+>> +
+>> +	host->mrq = mrq;
+>> +
+>> +	if (meson_mmc_check_cmd(mmc, mrq->cmd))
+>> +		return;
+>> +
+>> +	if (mrq->sbc)
+>> +		meson_mmc_start_cmd(mmc, mrq->sbc);
+>> +	else
+>> +		meson_mmc_start_cmd(mmc, mrq->cmd);
+>> +}
+>> +
+>> +static int meson_mmc_read_resp(struct mmc_host *mmc, struct mmc_command *cmd)
+>> +{
+>> +	struct meson_host *host = mmc_priv(mmc);
+>> +
+>> +	if (!cmd) {
+>
+> This happens? 
+
+Hmm, nope, it's prevented elsewhere.  I'll remove.
+
+>> +		dev_dbg(host->dev, "%s: NULL command.\n", __func__);
+>> +		return -EINVAL;
+>> +	}
+>> +
+>> +	if (cmd->flags & MMC_RSP_136) {
+>> +		cmd->resp[0] = reg_read(host, SD_EMMC_CMD_RSP3);
+>> +		cmd->resp[1] = reg_read(host, SD_EMMC_CMD_RSP2);
+>> +		cmd->resp[2] = reg_read(host, SD_EMMC_CMD_RSP1);
+>> +		cmd->resp[3] = reg_read(host, SD_EMMC_CMD_RSP);
+>> +	} else if (cmd->flags & MMC_RSP_PRESENT) {
+>> +		cmd->resp[0] = reg_read(host, SD_EMMC_CMD_RSP);
+>> +	}
+>> +
+>> +	return 0;
+>> +}
+>> +
+>> +static irqreturn_t meson_mmc_irq(int irq, void *dev_id)
+>> +{
+>> +	struct meson_host *host = dev_id;
+>> +	struct mmc_request *mrq = host->mrq;
+>> +	struct mmc_command *cmd = host->cmd;
+>> +	u32 irq_en, status, raw_status;
+>> +	irqreturn_t ret = IRQ_HANDLED;
+>> +
+>> +	if (WARN_ON(!host))
+>> +		return IRQ_NONE;
+>> +
+>> +	if (WARN_ON(!mrq))
+>> +		return IRQ_NONE;
+>> +
+>> +	if (WARN_ON(!cmd))
+>> +		return IRQ_NONE;
+>
+> These can happen? Spurious interrupts abound? Ugh.
+
+They do when you mis-program the hardware, so I want to catch that here.
+
+>> +
+>> +	spin_lock(&host->lock);
+>> +	irq_en = reg_read(host, SD_EMMC_IRQ_EN);
+>> +	raw_status = reg_read(host, SD_EMMC_STATUS);
+>> +	status = raw_status & irq_en;
+>> +
+>> +	if (!status) {
+>> +		dev_warn(host->dev, "Spurious IRQ! status=0x%08x, irq_en=0x%08x\n",
+>> +			 raw_status, irq_en);
+>> +		ret = IRQ_NONE;
+>> +		goto out;
+>> +	}
+>> +
+>> +	cmd->error = 0;
+>> +	if (status & IRQ_RXD_ERR_MASK) {
+>> +		dev_dbg(host->dev, "Unhandled IRQ: RXD error\n");
+>> +		cmd->error = -EILSEQ;
+>> +	}
+>> +	if (status & IRQ_TXD_ERR) {
+>> +		dev_dbg(host->dev, "Unhandled IRQ: TXD error\n");
+>> +		cmd->error = -EILSEQ;
+>> +	}
+>> +	if (status & IRQ_DESC_ERR)
+>> +		dev_dbg(host->dev, "Unhandled IRQ: Descriptor error\n");
+>> +	if (status & IRQ_RESP_ERR) {
+>> +		dev_dbg(host->dev, "Unhandled IRQ: Response error\n");
+>> +		cmd->error = -EILSEQ;
+>> +	}
+>> +	if (status & IRQ_RESP_TIMEOUT) {
+>> +		dev_dbg(host->dev, "Unhandled IRQ: Response timeout\n");
+>> +		cmd->error = -ETIMEDOUT;
+>> +	}
+>> +	if (status & IRQ_DESC_TIMEOUT) {
+>> +		dev_dbg(host->dev, "Unhandled IRQ: Descriptor timeout\n");
+>> +		cmd->error = -ETIMEDOUT;
+>> +	}
+>> +	if (status & IRQ_SDIO)
+>> +		dev_dbg(host->dev, "Unhandled IRQ: SDIO.\n");
+>> +
+>> +	if (status & (IRQ_END_OF_CHAIN | IRQ_RESP_STATUS))
+>> +		ret = IRQ_WAKE_THREAD;
+>> +	else  {
+>> +		dev_warn(host->dev, "Unknown IRQ! status=0x%04x: MMC CMD%u arg=0x%08x flags=0x%08x stop=%d\n",
+>> +			 status, cmd->opcode, cmd->arg,
+>> +			 cmd->flags, mrq->stop ? 1 : 0);
+>> +		if (cmd->data) {
+>> +			struct mmc_data *data = cmd->data;
+>> +
+>> +			dev_warn(host->dev, "\tblksz %u blocks %u flags 0x%08x (%s%s)",
+>> +				 data->blksz, data->blocks, data->flags,
+>> +				 data->flags & MMC_DATA_WRITE ? "write" : "",
+>> +				 data->flags & MMC_DATA_READ ? "read" : "");
+>> +		}
+>> +	}
+>> +
+>> +out:
+>> +	/* ack all (enabled) interrupts */
+>> +	reg_write(host, SD_EMMC_STATUS, status);
+>> +
+>> +	if (ret == IRQ_HANDLED) {
+>> +		meson_mmc_read_resp(host->mmc, cmd);
+>> +		meson_mmc_request_done(host->mmc, cmd->mrq);
+>> +	}
+>> +
+>> +	spin_unlock(&host->lock);
+>> +	return ret;
+>> +}
+>> +
+>> +static irqreturn_t meson_mmc_irq_thread(int irq, void *dev_id)
+>> +{
+>> +	struct meson_host *host = dev_id;
+>> +	struct mmc_request *mrq = host->mrq;
+>> +	struct mmc_command *cmd = host->cmd;
+>> +	struct mmc_data *data;
+>> +
+>
+> Drop that newline?
+>
+>> +	unsigned int xfer_bytes;
+>> +	int ret = IRQ_HANDLED;
+>> +
+>> +	if (WARN_ON(!mrq))
+>> +		ret = IRQ_NONE;
+>> +
+>> +	if (WARN_ON(!cmd))
+>> +		ret = IRQ_NONE;
+>> +
+>> +	data = cmd->data;
+>> +	if (data) {
+>> +		xfer_bytes = data->blksz * data->blocks;
+>> +		if (data->flags & MMC_DATA_READ) {
+>> +			WARN_ON(xfer_bytes > host->bounce_buf_size);
+>> +			sg_copy_from_buffer(data->sg, data->sg_len,
+>> +					    host->bounce_buf, xfer_bytes);
+>> +			data->bytes_xfered = xfer_bytes;
+>> +		}
+>> +	}
+>> +
+>> +	meson_mmc_read_resp(host->mmc, cmd);
+>> +	if (!data || !data->stop || mrq->sbc)
+>> +		meson_mmc_request_done(host->mmc, mrq);
+>> +	else
+>> +		meson_mmc_start_cmd(host->mmc, data->stop);
+>> +
+>> +	return ret;
+>> +}
+>> +
+>> +/*
+>> + * NOTE: we only need this until the GPIO/pinctrl driver can handle
+>> + * interrupts.  For now, the MMC core will use this for polling.
+>> + */
+>> +static int meson_mmc_get_cd(struct mmc_host *mmc)
+>> +{
+>> +	int status = mmc_gpio_get_cd(mmc);
+>> +
+>> +	if (status == -ENOSYS)
+>> +		return 1; /* assume present */
+>> +
+>> +	return status;
+>> +}
+>> +
+>> +static struct mmc_host_ops meson_mmc_ops = {
+>
+> const?
+>
+>> +	.request	= meson_mmc_request,
+>> +	.set_ios	= meson_mmc_set_ios,
+>> +	.get_cd         = meson_mmc_get_cd,
+>> +};
+>> +
+>> +static int meson_mmc_probe(struct platform_device *pdev)
+>> +{
+>> +	struct device_node *np = pdev->dev.of_node;
+>> +	struct resource *res;
+>> +	struct meson_host *host;
+>> +	struct mmc_host *mmc;
+>> +	int ret;
+>> +
+>> +	mmc = mmc_alloc_host(sizeof(struct meson_host), &pdev->dev);
+>> +	if (!mmc)
+>> +		return -ENOMEM;
+>> +	host = mmc_priv(mmc);
+>> +	host->mmc = mmc;
+>> +	host->dev = &pdev->dev;
+>> +	dev_set_drvdata(&pdev->dev, host);
+>> +
+>> +	spin_lock_init(&host->lock);
+>> +
+>> +	host->core_clk = devm_clk_get(&pdev->dev, "core");
+>> +	if (IS_ERR(host->core_clk)) {
+>> +		ret = PTR_ERR(host->core_clk);
+>> +		if (ret == -EPROBE_DEFER)
+>> +			dev_dbg(&pdev->dev,
+>> +				"Missing core clock.  EPROBE_DEFER\n");
+>> +		else
+>> +			dev_err(&pdev->dev,
+>> +				"Unable to get core clk (ret=%d).\n", ret);
+>> +		goto free_host;
+>> +	}
+>> +
+>> +	/* Voltage supply */
+>> +	mmc_of_parse_voltage(np, &host->ocr_mask);
+>> +	ret = mmc_regulator_get_supply(mmc);
+>> +	if (ret == -EPROBE_DEFER) {
+>> +		dev_dbg(&pdev->dev, "Missing regulator: EPROBE_DEFER");
+>> +		goto free_host;
+>> +	}
+>> +
+>> +	if (!mmc->ocr_avail)
+>> +		mmc->ocr_avail = host->ocr_mask;
+>> +
+>> +	ret = mmc_of_parse(mmc);
+>> +	if (ret) {
+>> +		dev_warn(&pdev->dev, "error parsing DT: %d\n", ret);
+>> +		goto free_host;
+>> +	}
+>> +
+>> +	res = platform_get_resource(pdev, IORESOURCE_MEM, 0);
+>> +	if (!res) {
+>> +		ret = -ENODEV;
+>> +		goto free_host;
+>> +	}
+>
+> This if can be dropped and go right into devm_ioremap_resource().
+>
+
+Yup, somone already submitted a patch to remove that from linux-next.
+
+>> +	host->regs = devm_ioremap_resource(&pdev->dev, res);
+>> +	if (IS_ERR(host->regs)) {
+>> +		ret = PTR_ERR(host->regs);
+>> +		goto free_host;
+>> +	}
+>> +
+>> +	host->irq = platform_get_irq(pdev, 0);
+>> +	if (host->irq == 0) {
+>> +		dev_err(&pdev->dev, "failed to get interrupt resource.\n");
+>> +		ret = -EINVAL;
+>> +		goto free_host;
+>> +	}
+>> +
+>> +	ret = devm_request_threaded_irq(&pdev->dev, host->irq,
+>> +					meson_mmc_irq, meson_mmc_irq_thread,
+>> +					IRQF_SHARED, DRIVER_NAME, host);
+>> +	if (ret)
+>> +		goto free_host;
+>> +
+>> +	/* data bounce buffer */
+>> +	host->bounce_buf_size = SZ_512K;
+>> +	host->bounce_buf =
+>> +		dma_alloc_coherent(host->dev, host->bounce_buf_size,
+>> +				   &host->bounce_dma_addr, GFP_KERNEL);
+>> +	if (host->bounce_buf == NULL) {
+>> +		dev_err(host->dev, "Unable to map allocate DMA bounce buffer.\n");
+>> +		ret = -ENOMEM;
+>> +		goto free_host;
+>> +	}
+>> +
+>> +	clk_prepare_enable(host->core_clk);
+>
+> This can fail.
+>
+>> +
+>> +	ret = meson_mmc_clk_init(host);
+>> +	if (ret)
+>> +		goto free_host;
+>> +
+>> +	/* Stop execution */
+>> +	reg_write(host, SD_EMMC_START, 0);
+>> +
+>> +	/* clear, ack, enable all interrupts */
+>> +	reg_write(host, SD_EMMC_IRQ_EN, 0);
+>> +	reg_write(host, SD_EMMC_STATUS, IRQ_EN_MASK);
+>
+> Shouldn't we do this before requesting the interrupt?
+>
+
+Yes.
+
+>> +
+>> +	mmc->ops = &meson_mmc_ops;
+>> +	mmc_add_host(mmc);
+>> +
+>> +	return 0;
+>> +
+>> +free_host:
+>> +	dev_dbg(host->dev, "Failed to probe: ret=%d\n", ret);
+>> +	if (host->core_clk)
+>> +		clk_disable_unprepare(host->core_clk);
+>> +	mmc_free_host(mmc);
+>> +	return ret;
+>> +}
+>> +
+
+I'll clean up all the other minor comments for v2 also.
+
+Thanks for the review!
+
+Kevin
