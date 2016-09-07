@@ -1,14 +1,12 @@
 From: Zach Brown <zach.brown@ni.com>
-Subject: [PATCH v5 2/2] sdhci-of-arasan: Set controller to test mode when xlnx-fails-without-test-cd is present
-Date: Wed, 7 Sep 2016 17:22:41 -0500
-Message-ID: <1473286961-19608-2-git-send-email-zach.brown@ni.com>
-References: <1473286961-19608-1-git-send-email-zach.brown@ni.com>
+Subject: [PATCH v5 1/2] sdhci-of-arasan: Add device tree parameter xlnx-fails-without-test-cd bit
+Date: Wed, 7 Sep 2016 17:22:40 -0500
+Message-ID: <1473286961-19608-1-git-send-email-zach.brown@ni.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from skprod2.natinst.com ([130.164.80.23]:47134 "EHLO ni.com"
+Received: from skprod2.natinst.com ([130.164.80.23]:47133 "EHLO ni.com"
         rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1751913AbcIGWXL (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        id S1751971AbcIGWXL (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
         Wed, 7 Sep 2016 18:23:11 -0400
-In-Reply-To: <1473286961-19608-1-git-send-email-zach.brown@ni.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: adrian.hunter@intel.com
@@ -20,107 +18,48 @@ In cases where it is impossible to provide the CD bit in hardware,
 setting the controller to test mode and then setting inserted to true
 will get the controller to function without the CD bit.
 
-When the device has the property xlnx-fails-without-test-cd the driver
-changes the controller to test mode and sets test inserted to true to
-make the controller function.
+The device property "xlnx-fails-without-test-cd" will let the arasan
+driver know the controller does not have the CD line wired and that the
+controller does not function without it.
 
 Signed-off-by: Zach Brown <zach.brown@ni.com>
 ---
- drivers/mmc/host/sdhci-of-arasan.c | 34 +++++++++++++++++++++++++++++++++-
- drivers/mmc/host/sdhci.h           |  2 ++
- 2 files changed, 35 insertions(+), 1 deletion(-)
+v2:
+ * improved commit messages
+ * removed fake-cd device property
+ * removed fake-cd quirk
+ * use broken-cd device property
+ * documented new usage of broken-cd
+v3:
+ * removed new usage of broken-cd
+ * created fails-without-test-cd device property
+ * created arasan controller specific quirk
+v4:
+ * changed fails-without-test-cd to xlnx-fails-without-test-cd
+ * removed extra blank line
+v5:
+ * Fixed style mistake
+ * Changed (1 << 0 ) to BIT(0)
 
-diff --git a/drivers/mmc/host/sdhci-of-arasan.c b/drivers/mmc/host/sdhci-of-arasan.c
-index b6f4c1d..46be9d9 100644
---- a/drivers/mmc/host/sdhci-of-arasan.c
-+++ b/drivers/mmc/host/sdhci-of-arasan.c
-@@ -23,6 +23,7 @@
- #include <linux/of_device.h>
- #include <linux/phy/phy.h>
- #include "sdhci-pltfm.h"
-+#include <linux/of.h>
+
+ Documentation/devicetree/bindings/mmc/arasan,sdhci.txt | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt b/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
+index 31b35c3..7407450 100644
+--- a/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
++++ b/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
+@@ -17,6 +17,10 @@ Required Properties:
+   - interrupts: Interrupt specifier
+   - interrupt-parent: Phandle for the interrupt controller that services
+ 		      interrupts for this device.
++Optional Properties:
++- xlnx-fails-without-test-cd: when present, the controller doesn't work when
++  the CD line is not connected properly, and the line is not connected
++  properly. Test mode can be used to force the controller to function.
  
- #define SDHCI_ARASAN_CLK_CTRL_OFFSET	0x2c
- 
-@@ -38,6 +39,10 @@
- struct sdhci_arasan_data {
- 	struct clk	*clk_ahb;
- 	struct phy	*phy;
-+	unsigned int arasan_quirks; /* Arasan deviations from spec */
-+
-+/* Controller does not have CD wired and will not function normally without */
-+#define SDHCI_ARASAN_QUIRK_FAILS_WITHOUT_TEST_CD	BIT(0)
- };
- 
- static unsigned int sdhci_arasan_get_timeout_clock(struct sdhci_host *host)
-@@ -79,12 +84,32 @@ static void sdhci_arasan_set_clock(struct sdhci_host *host, unsigned int clock)
- 	}
- }
- 
-+void sdhci_arasan_reset(struct sdhci_host *host, u8 mask)
-+{
-+	u8 ctrl;
-+	struct sdhci_pltfm_host *pltfm_host;
-+	struct sdhci_arasan_data *sdhci_arasan;
-+
-+	sdhci_reset(host, mask);
-+
-+	pltfm_host = sdhci_priv(host);
-+	sdhci_arasan = sdhci_pltfm_priv(pltfm_host);
-+
-+	if (sdhci_arasan->arasan_quirks &
-+	     SDHCI_ARASAN_QUIRK_FAILS_WITHOUT_TEST_CD) {
-+		ctrl = sdhci_readb(host, SDHCI_HOST_CONTROL);
-+		ctrl |= SDHCI_CTRL_CDTEST_INS |
-+			SDHCI_CTRL_CDTEST_EN;
-+		sdhci_writeb(host, ctrl, SDHCI_HOST_CONTROL);
-+	}
-+}
-+
- static struct sdhci_ops sdhci_arasan_ops = {
- 	.set_clock = sdhci_arasan_set_clock,
- 	.get_max_clock = sdhci_pltfm_clk_get_max_clock,
- 	.get_timeout_clock = sdhci_arasan_get_timeout_clock,
- 	.set_bus_width = sdhci_set_bus_width,
--	.reset = sdhci_reset,
-+	.reset = sdhci_arasan_reset,
- 	.set_uhs_signaling = sdhci_set_uhs_signaling,
- };
- 
-@@ -179,6 +204,7 @@ static int sdhci_arasan_probe(struct platform_device *pdev)
- 	struct sdhci_host *host;
- 	struct sdhci_pltfm_host *pltfm_host;
- 	struct sdhci_arasan_data *sdhci_arasan;
-+	struct device_node *np = pdev->dev.of_node;
- 
- 	host = sdhci_pltfm_init(pdev, &sdhci_arasan_pdata,
- 				sizeof(*sdhci_arasan));
-@@ -215,6 +241,12 @@ static int sdhci_arasan_probe(struct platform_device *pdev)
- 	}
- 
- 	sdhci_get_of_property(pdev);
-+
-+	if (of_get_property(np, "xlnx-fails-without-test-cd", NULL)) {
-+		sdhci_arasan->arasan_quirks |=
-+				SDHCI_ARASAN_QUIRK_FAILS_WITHOUT_TEST_CD;
-+	}
-+
- 	pltfm_host->clk = clk_xin;
- 
- 	ret = mmc_of_parse(host->mmc);
-diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-index 609f87c..60dbf1f 100644
---- a/drivers/mmc/host/sdhci.h
-+++ b/drivers/mmc/host/sdhci.h
-@@ -84,6 +84,8 @@
- #define   SDHCI_CTRL_ADMA32	0x10
- #define   SDHCI_CTRL_ADMA64	0x18
- #define   SDHCI_CTRL_8BITBUS	0x20
-+#define  SDHCI_CTRL_CDTEST_INS	0x40
-+#define  SDHCI_CTRL_CDTEST_EN	0x80
- 
- #define SDHCI_POWER_CONTROL	0x29
- #define  SDHCI_POWER_ON		0x01
+ Required Properties for "arasan,sdhci-5.1":
+   - phys: From PHY bindings: Phandle for the Generic PHY for arasan.
 -- 
 2.7.4
 
