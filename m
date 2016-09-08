@@ -1,65 +1,27 @@
-From: Zach Brown <zach.brown@ni.com>
-Subject: [PATCH v6 1/2] sdhci-of-arasan: Add device tree parameter xlnx-fails-without-test-cd bit
-Date: Thu, 8 Sep 2016 14:42:45 -0500
-Message-ID: <1473363766-12652-1-git-send-email-zach.brown@ni.com>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: adrian.hunter@intel.com
-Cc: robh+dt@kernel.org, ulf.hansson@linaro.org, mark.rutland@arm.com, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, michal.simek@xilinx.com, soren.brinkmann@xilinx.com, linux-arm-kernel@lists.infradead.org, zach.brown@ni.com
+From: xuanzhuhao <saemail@sina.cn>
+Subject: =?UTF-8?Q?Zobacz_stron=C4=99_http:__forum.gazeta.pl_forum_w,98260,13329?=
+ =?UTF-8?Q?2706,133292706,Polec=5Fznajomy?=
+ =?UTF-8?Q?m=5FAxa=5FDirect=5Fkod=5F2970286.html?=
+Date: Fri, 9 Sep 2016 01:26:14 +0200 (CEST)
+Message-ID: <2141378608.349691473377174982.JavaMail.webadm@iw48>
+Reply-To: saemail@sina.cn
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8BIT
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from host-193-42-231-147.gazeta.pl ([193.42.231.147]:42795 "HELO
+        mlr2.gazeta.pl" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+        with SMTP id S1751000AbcIHXov (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 8 Sep 2016 19:44:51 -0400
+Received: from iw48 (unknown [172.23.26.48])
+        by mlr2.gazeta.pl (Agora) with ESMTP id 66F1EC092
+        for <linux-mmc@vger.kernel.org>; Fri,  9 Sep 2016 01:14:49 +0200 (CEST)
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: linux-mmc@vger.kernel.org
 
-The sdhci controller on xilinx zynq devices will not function unless
-the CD bit is provided. http://www.xilinx.com/support/answers/61064.html
-In cases where it is impossible to provide the CD bit in hardware,
-setting the controller to test mode and then setting inserted to true
-will get the controller to function without the CD bit.
-
-The device property "xlnx-fails-without-test-cd" will let the arasan
-driver know the controller does not have the CD line wired and that the
-controller does not function without it.
-
-Signed-off-by: Zach Brown <zach.brown@ni.com>
----
-v2:
- * improved commit messages
- * removed fake-cd device property
- * removed fake-cd quirk
- * use broken-cd device property
- * documented new usage of broken-cd
-v3:
- * removed new usage of broken-cd
- * created fails-without-test-cd device property
- * created arasan controller specific quirk
-v4:
- * changed fails-without-test-cd to xlnx-fails-without-test-cd
- * removed extra blank line
-v5:
- * Fixed style mistake
- * Changed (1 << 0 ) to BIT(0)
-v6:
- * Fixed style mistakes
- * Condensed unnecessarily long variable names
- * Removed line wraps that were no longer necessary.
- * Rebased changes off Ulf's mmc tree's next branch.
-
-
- Documentation/devicetree/bindings/mmc/arasan,sdhci.txt | 4 ++++
- 1 file changed, 4 insertions(+)
-
-df --gt /Documentation/devicetree/bindings/mmc/arasan,sdhci.txt b/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
-index 3404afa..e71f043 100644
---- a/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
-+++ b/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
-@@ -21,6 +21,10 @@ Required Properties:
-   - interrupts: Interrupt specifier
-   - interrupt-parent: Phandle for the interrupt controller that services
- 		      interrupts for this device.
-+Optional Properties:
-+- xlnx-fails-without-test-cd: when present, the controller doesn't work when
-+  the CD line is not connected properly, and the line is not connected
-+  properly. Test mode can be used to force the controller to function.
- 
- Required Properties for "arasan,sdhci-5.1":
-   - phys: From PHY bindings: Phandle for the Generic PHY for arasan.
--- 
-2.7.4
+Twój znajomy xuanzhuhao  poleca Ci stronę <a href="http://forum.gazeta.pl/forum/w,98260,133292706,133292706,Polec_znajomym_Axa_Direct_kod_2970286.html">http:  forum.gazeta.pl forum w,98260,133292706,133292706,Polec_znajomym_Axa_Direct_kod_2970286.html</a><br/><br/>【澳门金沙集团】诚信品牌，大额无忧：http:  www.834516.com ?linux-mmc vger.kernel.org
+博彩界独家1元可游戏，入款即送1 红利无上限（支持财付通、支付宝、微信），还享天天返水1.2 ，24小时任意取款，0手续费。
+澳门金沙集团-全球最大博彩公司，以信誉为基础，诚信为招牌！
+------------------------------------------
+                    人生，看透不如看淡。人生很多人事，不是不懂，只是无奈。一辈子，就图个心里痛快。那些想不通头疼，想通了心疼的人和事，不如淡然视之。<br/><br/>--<br/>Ten e-mail został wysłany z serwisu Gazeta.pl przez osobę, która uznała, że zainteresuje Cię jej wiadomość.<br/>Serwis Gazeta.pl nie odpowiada za treść powiadomienia ani za intencje nadawcy.<br/>Jeśli uznasz tą wiadomość za spam, zgłoś to do nas.
