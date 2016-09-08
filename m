@@ -1,153 +1,258 @@
-From: Lee Jones <lee.jones@linaro.org>
-Subject: Re: [PATCH 4/4] mmc: sdhci-st: Handle interconnect clock
-Date: Thu, 8 Sep 2016 12:58:49 +0100
-Message-ID: <20160908115849.GS4921@dell>
-References: <20160908091136.17301-1-lee.jones@linaro.org>
- <20160908091136.17301-5-lee.jones@linaro.org>
+From: Gerd Hoffmann <kraxel@redhat.com>
+Subject: Re: [PATCH 2/5] mmc: bcm2835-sdhost: Add new driver for the
+ internal SD controller.
+Date: Thu, 08 Sep 2016 17:08:35 +0200
+Message-ID: <1473347315.6698.53.camel@redhat.com>
+References: <1466595738-2229-1-git-send-email-kraxel@redhat.com>
+         <1466595738-2229-3-git-send-email-kraxel@redhat.com>
+         <CAPDyKFryfGpA+8tZhtkzUVMFhomOevFz8k9R1b2O0oUn8giT1w@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wm0-f50.google.com ([74.125.82.50]:37309 "EHLO
-        mail-wm0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1758122AbcIHL5B (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 8 Sep 2016 07:57:01 -0400
-Received: by mail-wm0-f50.google.com with SMTP id w12so84456483wmf.0
-        for <linux-mmc@vger.kernel.org>; Thu, 08 Sep 2016 04:57:00 -0700 (PDT)
-Content-Disposition: inline
-In-Reply-To: <20160908091136.17301-5-lee.jones@linaro.org>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8BIT
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <CAPDyKFryfGpA+8tZhtkzUVMFhomOevFz8k9R1b2O0oUn8giT1w@mail.gmail.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-rpi-kernel@lists.infradead.org, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, linux-mmc <linux-mmc@vger.kernel.org>, Eric Anholt <eric@anholt.net>, Stephen Warren <swarren@wwwdotorg.org>, Lee Jones <lee@kernel.org>, open list <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
-To: ulf.hansson@linaro.org, patrice.chotard@st.com, peter.griffin@linaro.org, robh@kernel.org, adrian.hunter@intel.com
-Cc: linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, kernel@stlinux.com, stable@vger.kernel.org, linux-mmc@vger.kernel.org
 
-Sorry Adrian, left you of the list.  Rectifying.
-
-FYI, this patch is due for the v4.8 -rcs:
-
-  http://www.spinics.net/lists/kernel/msg2338219.html
-
-> Some ST platforms contain interconnect (ICN) clocks which must be handed
-> correctly in order to obtain full functionality of a given IP.  In this
-> case, if the ICN clocks are not handled properly by the ST SDHCI driver
-> MMC will break and the following output can be observed:
+On Mi, 2016-08-31 at 14:58 +0200, Ulf Hansson wrote:
+> On 22 June 2016 at 13:42, Gerd Hoffmann <kraxel@redhat.com> wrote:
+> > From: Eric Anholt <eric@anholt.net>
+> >
+> > The 2835 has two SD controllers: The Arasan SDHCI controller that we
+> > currently use, and a custom SD controller.  The custom one runs faster
+> >
+> > The code was originally written by Phil Elwell in the downstream
+> > Rasbperry Pi tree, and I did a major cleanup on it (+319, -707 lines
+> > out of the original 2055) for inclusion.
+> >
+> > Signed-off-by: Eric Anholt <eric@anholt.net>
 > 
->     [   13.916949] mmc0: Timeout waiting for hardware interrupt.
->     [   13.922349] sdhci: =========== REGISTER DUMP (mmc0)===========
->     [   13.928175] sdhci: Sys addr: 0x00000000 | Version:  0x00001002
->     [   13.933999] sdhci: Blk size: 0x00007040 | Blk cnt:  0x00000001
->     [   13.939825] sdhci: Argument: 0x00fffff0 | Trn mode: 0x00000013
->     [   13.945650] sdhci: Present:  0x1fff0206 | Host ctl: 0x00000011
->     [   13.951475] sdhci: Power:    0x0000000f | Blk gap:  0x00000080
->     [   13.957300] sdhci: Wake-up:  0x00000000 | Clock:    0x00003f07
->     [   13.963126] sdhci: Timeout:  0x00000004 | Int stat: 0x00000000
->     [   13.968952] sdhci: Int enab: 0x02ff008b | Sig enab: 0x02ff008b
->     [   13.974777] sdhci: AC12 err: 0x00000000 | Slot int: 0x00000000
->     [   13.980602] sdhci: Caps:     0x21ed3281 | Caps_1:   0x00000000
->     [   13.986428] sdhci: Cmd:      0x0000063a | Max curr: 0x00000000
->     [   13.992252] sdhci: Host ctl2: 0x00000000
->     [   13.996166] sdhci: ADMA Err: 0x00000000 | ADMA Ptr: 0x7c048200
->     [   14.001990] sdhci: ===========================================
->     [   14.009802] mmc0: Got data interrupt 0x02000000 even though no data operation was in progress.
-> 
-> A decent point was raised about minimising the use of a local variable that
-> we 'could' do without.  I've chosen consistency over the possibility of
-> reducing the local variable count by 1.  Thinking that it's more important
-> for the code to be grouped and authoured in a similar manner/style for
-> greater maintainability/readability.
-> 
-> Cc: stable@vger.kernel.org
-> Tested-by: Peter Griffin <peter.griffin@linaro.org>
-> Signed-off-by: Lee Jones <lee.jones@linaro.org>
-> ---
->  drivers/mmc/host/sdhci-st.c | 15 ++++++++++++++-
->  1 file changed, 14 insertions(+), 1 deletion(-)
-> 
-> diff --git a/drivers/mmc/host/sdhci-st.c b/drivers/mmc/host/sdhci-st.c
-> index c95ba83..ed92ce7 100644
-> --- a/drivers/mmc/host/sdhci-st.c
-> +++ b/drivers/mmc/host/sdhci-st.c
-> @@ -28,6 +28,7 @@
->  
->  struct st_mmc_platform_data {
->  	struct  reset_control *rstc;
-> +	struct  clk *icnclk;
->  	void __iomem *top_ioaddr;
->  };
->  
-> @@ -353,7 +354,7 @@ static int sdhci_st_probe(struct platform_device *pdev)
->  	struct sdhci_host *host;
->  	struct st_mmc_platform_data *pdata;
->  	struct sdhci_pltfm_host *pltfm_host;
-> -	struct clk *clk;
-> +	struct clk *clk, *icnclk;
->  	int ret = 0;
->  	u16 host_version;
->  	struct resource *res;
-> @@ -365,6 +366,11 @@ static int sdhci_st_probe(struct platform_device *pdev)
->  		return PTR_ERR(clk);
->  	}
->  
-> +	/* ICN clock isn't compulsory, but use it if it's provided. */
-> +	icnclk = devm_clk_get(&pdev->dev, "icn");
-> +	if (IS_ERR(icnclk))
-> +		icnclk = NULL;
-> +
->  	rstc = devm_reset_control_get(&pdev->dev, NULL);
->  	if (IS_ERR(rstc))
->  		rstc = NULL;
-> @@ -389,6 +395,7 @@ static int sdhci_st_probe(struct platform_device *pdev)
->  	}
->  
->  	clk_prepare_enable(clk);
-> +	clk_prepare_enable(icnclk);
->  
->  	/* Configure the FlashSS Top registers for setting eMMC TX/RX delay */
->  	res = platform_get_resource_byname(pdev, IORESOURCE_MEM,
-> @@ -400,6 +407,7 @@ static int sdhci_st_probe(struct platform_device *pdev)
->  	}
->  
->  	pltfm_host->clk = clk;
-> +	pdata->icnclk = icnclk;
->  
->  	/* Configure the Arasan HC inside the flashSS */
->  	st_mmcss_cconfig(np, host);
-> @@ -422,6 +430,7 @@ static int sdhci_st_probe(struct platform_device *pdev)
->  	return 0;
->  
->  err_out:
-> +	clk_disable_unprepare(icnclk);
->  	clk_disable_unprepare(clk);
->  err_of:
->  	sdhci_pltfm_free(pdev);
-> @@ -442,6 +451,8 @@ static int sdhci_st_remove(struct platform_device *pdev)
->  
->  	ret = sdhci_pltfm_unregister(pdev);
->  
-> +	clk_disable_unprepare(pdata->icnclk);
-> +
->  	if (rstc)
->  		reset_control_assert(rstc);
->  
-> @@ -462,6 +473,7 @@ static int sdhci_st_suspend(struct device *dev)
->  	if (pdata->rstc)
->  		reset_control_assert(pdata->rstc);
->  
-> +	clk_disable_unprepare(pdata->icnclk);
->  	clk_disable_unprepare(pltfm_host->clk);
->  out:
->  	return ret;
-> @@ -475,6 +487,7 @@ static int sdhci_st_resume(struct device *dev)
->  	struct device_node *np = dev->of_node;
->  
->  	clk_prepare_enable(pltfm_host->clk);
-> +	clk_prepare_enable(pdata->icnclk);
->  
->  	if (pdata->rstc)
->  		reset_control_deassert(pdata->rstc);
+> Apologize for the delay!
 
--- 
-Lee Jones
-Linaro STMicroelectronics Landing Team Lead
-Linaro.org │ Open source software for ARM SoCs
-Follow Linaro: Facebook | Twitter | Blog
+No problem, I was on summer vacation anyway ...
+
+> Could you start by providing some more information about the driver
+> and the controller in change in the change log please.
+
+Eric?  I don't know much more than what the commit message above says.
+
+Beside the speedup mentioned above driving the sdcard with the custom sd
+controller allows to use the sdhci (handled by sdhci-iproc) to be used
+for the wifi on the rpi3.
+
+> drivers/mmc/host/bcm2835.c is better.
+
+Done.
+
+> > +       /* cached registers */
+> > +       u32                     hcfg;
+> > +       u32                     cdiv;
+> 
+> Perhaps remove some newlines and white-spaces above. Also decide
+> whether align in columns or not.
+
+Done.
+
+> > +
+> > +       /* Current request */
+> > +       struct mmc_request              *mrq;
+> > +       /* Current command */
+> > +       struct mmc_command              *cmd;
+> > +       /* Current data request */
+> > +       struct mmc_data                 *data;
+> > +       /* Data finished before cmd */
+> > +       bool                            data_complete:1;
+> > +       /* Drain the fifo when finishing */
+> > +       bool                            flush_fifo:1;
+> > +       /* Wait for busy interrupt */
+> > +       bool                            use_busy:1;
+> > +       /* Send CMD23 */
+> > +       bool                            use_sbc:1;
+> > +
+> 
+> Please be consistent when you add the comments, earlier you added it
+> to the right of the variable - now on top...
+
+Done.
+
+> > +static inline void bcm2835_sdhost_write(struct bcm2835_host *host,
+> > +static inline u32 bcm2835_sdhost_read(struct bcm2835_host *host, int reg)
+> > +static inline u32 bcm2835_sdhost_read_relaxed(struct bcm2835_host *host,
+
+> These three wrapper functions are superflous, please just use the
+> writel and readl*() directly instead.
+
+Done.  read_relaxed wasn't used at all.
+
+> > +       pr_err("%s:%c%s op %d arg 0x%x flags 0x%x - resp %08x %08x %08x %08x, err %d\n",
+> 
+> dev_dbg() is probably better!?
+
+Yep.  Switched the driver to drv_*() everywhere.
+
+> > +static void bcm2835_sdhost_set_power(struct bcm2835_host *host, bool on)
+> > +{
+> > +       bcm2835_sdhost_write(host, on ? 1 : 0, SDVDD);
+> 
+> What exactly does this power on/off?
+
+Dunno.  Eric?
+
+I'm not an expert with this hardware, just trying to help a bit with
+getting the rpi3 bits upstream.
+
+> > +static void bcm2835_sdhost_set_ios(struct mmc_host *mmc, struct mmc_ios *ios);
+> 
+> Please avoid these kind of declarations (there are more that this
+> one). You can probably re-structure and move the code around to avoid
+> this!?
+
+This one is easy, just had to move around some code.
+
+The other one isn't as there actually is a circular call chain.
+Maybe also something which should be cleaned up.
+
+> > +               timediff++;
+> > +               if (timediff == 100000) {
+> 
+> Perhaps better to loop for certain amount of time instead of just a
+> fixed number of loop cycles!?
+
+Will check.
+
+> > +static void bcm2835_sdhost_transfer_block_pio(struct bcm2835_host *host,
+> > +                                             bool is_read)
+> > +{
+> 
+> A rather big function, perhaps split it up?
+
+Hmm, doesn't look too bad to me, but maybe splitting out the inner loop
+makes sense.
+
+> > +       while (bcm2835_sdhost_read(host, SDCMD) & SDCMD_NEW_FLAG) {
+> > +               if (timeout == 0) {
+> > +                       pr_err("%s: previous command never completed.\n",
+> > +                              mmc_hostname(host->mmc));
+> > +                       bcm2835_sdhost_dumpregs(host);
+> > +                       cmd->error = -EILSEQ;
+> > +                       tasklet_schedule(&host->finish_tasklet);
+> 
+> No tasklets please. Instead use a threaded IRQ handler.
+
+Ok.
+
+> > +       host->use_busy = false;
+> > +       if (!(cmd->flags & MMC_RSP_PRESENT)) {
+> > +               sdcmd |= SDCMD_NO_RESPONSE;
+> > +       } else {
+> > +               if (cmd->flags & MMC_RSP_136)
+> > +                       sdcmd |= SDCMD_LONG_RESPONSE;
+> > +               if (cmd->flags & MMC_RSP_BUSY) {
+> > +                       sdcmd |= SDCMD_BUSYWAIT;
+> > +                       host->use_busy = true;
+> 
+> If your controller support HW busy detection, you should enable
+> MMC_CAP_WAIT_WHILE_BUSY and assign a value to the host's
+> max_busy_timeout.
+
+Ok.
+
+> > +       /* Need to send CMD12 if -
+> > +        * a) open-ended multiblock transfer (no CMD23)
+> > +        * b) error in multiblock transfer
+> > +        */
+> > +       if (host->mrq->stop && (data->error || !host->use_sbc)) {
+> > +               if (bcm2835_sdhost_send_command(host, host->mrq->stop)) {
+> > +                       /* No busy, so poll for completion */
+> > +                       if (!host->use_busy)
+> 
+> This looks a bit weird. Can you explain why this is needed?
+
+Eric, any clue?  Some hardware bug workaround?
+Have a pointer to hardware specs?
+
+> > +/* If irq_flags is valid, the caller is in a thread context and is
+> > + * allowed to sleep
+> > + */
+> > +static void bcm2835_sdhost_finish_command(struct bcm2835_host *host,
+> > +                                         unsigned long *irq_flags)
+> > +{
+> 
+> Another big function. Split it up!
+
+> > +                       do_gettimeofday(&start);
+> 
+> This looks really odd.
+> 
+> If there is a small timeout you would like to wait, let's do that by
+> looping and using jiffies. If the delay is longer, why not use
+> timer/work instead?
+
+> > +               /* Wait max 100 ms */
+> > +               wait_max = jiffies + msecs_to_jiffies(100);
+> 
+> ...and here you use jiffies...
+> 
+> You need to walk through all the loops dealing with timeouts and try
+> to modernise that code, but also try to be more consistent when
+> dealing with timeouts.
+
+I'll give it a try.
+
+> > +       /* Reset the error statuses in case this is a retry */
+> > +       if (mrq->sbc)
+> > +               mrq->sbc->error = 0;
+> > +       if (mrq->cmd)
+> > +               mrq->cmd->error = 0;
+> > +       if (mrq->data)
+> > +               mrq->data->error = 0;
+> > +       if (mrq->stop)
+> > +               mrq->stop->error = 0;
+> 
+> Perhaps the mmc core is a bit lazy and don't reset all fields above in
+> the retry path. Although, please fix this in the mmc core instead of
+> in this host driver.
+
+Ok.
+
+> > +static void bcm2835_sdhost_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+> > +{
+> 
+> I don't find any place where you control power to the card here. Don't
+> you need to do that?
+
+Eric?
+
+> > +       pio_limit_string[0] = '\0';
+> 
+> What's this?
+> 
+> > +       if (host->use_dma && (host->pio_limit > 0))
+> > +               sprintf(pio_limit_string, " (>%d)", host->pio_limit);
+> > +       pr_info("%s: loaded - DMA %s%s\n",
+> > +               mmc_hostname(mmc),
+> > +               host->use_dma ? "enabled" : "disabled",
+> > +               pio_limit_string);
+
+Used to log host->pio_limit (if dma is enabled).
+
+> > +       mmc_of_parse(mmc);
+> 
+> Error handling please.
+
+Ok.
+
+> Please don't take the comment too hard, but I really think this needs
+> another round of modernisation and cleanups.
+
+sneak preview at:
+https://www.kraxel.org/cgit/linux/log/?h=bcm2837-wifi
+
+low hanging fruit only for now, going over all the timeout / tasklet /
+irq stuff will need some more care and time and testing and should
+follow ...
+
+cheers,
+  Gerd
