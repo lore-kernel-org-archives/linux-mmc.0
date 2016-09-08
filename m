@@ -1,46 +1,70 @@
-From: Stephen Boyd <sboyd-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
-Subject: Re: [PATCH v2 2/2] MMC: meson: initial support for GXBB platforms
-Date: Wed, 7 Sep 2016 18:18:25 -0700
-Message-ID: <20160908011825.GA19921@codeaurora.org>
-References: <20160803231843.23012-1-khilman@baylibre.com>
- <20160803231843.23012-2-khilman@baylibre.com>
- <20160823012124.GQ6502@codeaurora.org>
- <7hy433qpoo.fsf@baylibre.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+From: Ziyuan Xu <xzy.xu-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
+Subject: [PATCH v2 1/2] Documentation: mmc: sdhci-of-arasan: add description of power domain
+Date: Thu,  8 Sep 2016 14:49:04 +0800
+Message-ID: <20160908064905.18080-2-xzy.xu@rock-chips.com>
+References: <20160908064905.18080-1-xzy.xu@rock-chips.com>
 Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <7hy433qpoo.fsf-rdvid1DuHRBWk0Htik3J/w@public.gmane.org>
+In-Reply-To: <20160908064905.18080-1-xzy.xu-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
 Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Kevin Hilman <khilman-rdvid1DuHRBWk0Htik3J/w@public.gmane.org>
-Cc: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Xing Wu <xing.xu-LpR1jeaWuhtBDgjK7y7TUQ@public.gmane.org>, Victor Wan <victor.wan-LpR1jeaWuhtBDgjK7y7TUQ@public.gmane.org>, linux-amlogic-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, Jerry Cao <jerry.cao-LpR1jeaWuhtBDgjK7y7TUQ@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-clk-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: heiko-4mtYJXux2i+zQB+pC5nmwQ@public.gmane.org, ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org
+Cc: devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org, dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org, Ziyuan Xu <xzy.xu-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On 09/07, Kevin Hilman wrote:
-> Stephen Boyd <sboyd-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org> writes:
-> > On 08/03, Kevin Hilman wrote:
-> >> +	host->mux.hw.init = &init;
-> >> +
-> >> +	host->mux_clk = devm_clk_register(host->dev, &host->mux.hw);
-> >
-> > Hmm I was hoping to get rid of devm_clk_register() and replace it
-> > with devm_clk_hw_register() instead. All part of my grand plan to
-> > split providers from consumers, but this driver is different in
-> > the sense that it registers clks to provide to itself. Maybe we
-> > should make __clk_create_clk() into a real clk provider API so
-> > that we can use devm_clk_hw_register() here and then generate a
-> > clk for this device from the hw structure.
-> 
-> So is there something else I should do here, or can we rework this later
-> after you rework the framework a bit?
-> 
+Add power domain as a optional property for sdhci-of-arasan, which can
+be truned off in the so-called unused condition, such as suspend and
+remove. Aim to lower power requirements.
 
-That can wait for later. If nobody takes care of it I'll do it
-when I get around to it.
+Signed-off-by: Ziyuan Xu <xzy.xu-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
 
+---
+
+Changes in v2:
+- fix a typo
+- add an example code for power-domain
+
+ Documentation/devicetree/bindings/mmc/arasan,sdhci.txt | 7 ++++++-
+ 1 file changed, 6 insertions(+), 1 deletion(-)
+
+diff --git a/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt b/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
+index 3404afa..eb84d29 100644
+--- a/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
++++ b/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
+@@ -1,12 +1,14 @@
+ Device Tree Bindings for the Arasan SDHCI Controller
+ 
+-  The bindings follow the mmc[1], clock[2], interrupt[3] and phy[4] bindings.
++  The bindings follow the mmc[1], clock[2], interrupt[3], phy[4] and power
++  domain[5] bindings.
+   Only deviations are documented here.
+ 
+   [1] Documentation/devicetree/bindings/mmc/mmc.txt
+   [2] Documentation/devicetree/bindings/clock/clock-bindings.txt
+   [3] Documentation/devicetree/bindings/interrupt-controller/interrupts.txt
+   [4] Documentation/devicetree/bindings/phy/phy-bindings.txt
++  [5] Documentation/devicetree/bindings/power/power_domain.txt
+ 
+ Required Properties:
+   - compatible: Compatibility string.  One of:
+@@ -36,6 +38,8 @@ Optional Properties:
+   - #clock-cells: If specified this should be the value <0>.  With this property
+     in place we will export a clock representing the Card Clock.  This clock
+     is expected to be consumed by our PHY.  You must also specify
++  - power-domains: A phandle and PM domain as specifier defined by bindings
++    of the power controller specified by phandle.
+ 
+ Example:
+ 	sdhci@e0100000 {
+@@ -71,5 +75,6 @@ Example:
+ 		phys = <&emmc_phy>;
+ 		phy-names = "phy_arasan";
+ 		#clock-cells = <0>;
++		power-domains = <&power RK3399_PD_EMMC>;
+ 		status = "disabled";
+ 	};
 -- 
-Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum,
-a Linux Foundation Collaborative Project
+2.9.2
+
+
 --
 To unsubscribe from this list: send the line "unsubscribe devicetree" in
 the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
