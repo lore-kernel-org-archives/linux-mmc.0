@@ -1,148 +1,117 @@
 From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH v5 2/2] sdhci-of-arasan: Set controller to test mode when
- xlnx-fails-without-test-cd is present
-Date: Thu, 8 Sep 2016 10:21:27 +0300
-Message-ID: <3b3935f7-5d3c-f721-81a5-bb8e8cd186e9@intel.com>
-References: <1473286961-19608-1-git-send-email-zach.brown@ni.com>
- <1473286961-19608-2-git-send-email-zach.brown@ni.com>
+Subject: Re: [PATCH] mmc: sdhci-msm: Add pm_runtime and system PM support
+Date: Thu, 8 Sep 2016 10:47:54 +0300
+Message-ID: <79066adb-c45b-158f-99af-6d86e6de7513@intel.com>
+References: <1466080509-24015-1-git-send-email-pramod.gurav@linaro.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=windows-1252
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1473286961-19608-2-git-send-email-zach.brown@ni.com>
+In-Reply-To: <1466080509-24015-1-git-send-email-pramod.gurav@linaro.org>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Zach Brown <zach.brown@ni.com>
-Cc: robh+dt@kernel.org, ulf.hansson@linaro.org, mark.rutland@arm.com, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, michal.simek@xilinx.com, soren.brinkmann@xilinx.com, linux-arm-kernel@lists.infradead.org
+To: Pramod Gurav <pramod.gurav@linaro.org>, ulf.hansson@linaro.org
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, Ritesh Harjani <riteshh@codeaurora.org>, Georgi Djakov <georgi.djakov@linaro.org>, Stephen Boyd <sboyd@codeaurora.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On 08/09/16 01:22, Zach Brown wrote:
-> The sdhci controller on xilinx zynq devices will not function unless
-> the CD bit is provided. http://www.xilinx.com/support/answers/61064.html
-> In cases where it is impossible to provide the CD bit in hardware,
-> setting the controller to test mode and then setting inserted to true
-> will get the controller to function without the CD bit.
+On 16/06/16 15:35, Pramod Gurav wrote:
+> Provides runtime PM callbacks to enable and disable clock resources
+> when idle. Also support system PM callbacks to be called during system
+> suspend and resume.
 > 
-> When the device has the property xlnx-fails-without-test-cd the driver
-> changes the controller to test mode and sets test inserted to true to
-> make the controller function.
-> 
-> Signed-off-by: Zach Brown <zach.brown@ni.com>
+> Signed-off-by: Pramod Gurav <pramod.gurav@linaro.org>
 
-Doesn't apply.  Please re-base on Ulf's mmc tree's next branch.
-
-But since you're doing that please consider some style changes below.
+Can we get some Tested/Reviewed/Acked-by from people using this driver?
 
 > ---
->  drivers/mmc/host/sdhci-of-arasan.c | 34 +++++++++++++++++++++++++++++++++-
->  drivers/mmc/host/sdhci.h           |  2 ++
->  2 files changed, 35 insertions(+), 1 deletion(-)
+>  drivers/mmc/host/sdhci-msm.c | 57 ++++++++++++++++++++++++++++++++++++++++++++
+>  1 file changed, 57 insertions(+)
 > 
-> diff --git a/drivers/mmc/host/sdhci-of-arasan.c b/drivers/mmc/host/sdhci-of-arasan.c
-> index b6f4c1d..46be9d9 100644
-> --- a/drivers/mmc/host/sdhci-of-arasan.c
-> +++ b/drivers/mmc/host/sdhci-of-arasan.c
-> @@ -23,6 +23,7 @@
+> diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
+> index 0653fe7..f4394c8 100644
+> --- a/drivers/mmc/host/sdhci-msm.c
+> +++ b/drivers/mmc/host/sdhci-msm.c
+> @@ -18,6 +18,7 @@
 >  #include <linux/of_device.h>
->  #include <linux/phy/phy.h>
+>  #include <linux/delay.h>
+>  #include <linux/mmc/mmc.h>
+> +#include <linux/pm_runtime.h>
+>  #include <linux/slab.h>
+>  
 >  #include "sdhci-pltfm.h"
-> +#include <linux/of.h>
+> @@ -549,6 +550,11 @@ static int sdhci_msm_probe(struct platform_device *pdev)
+>  	if (ret)
+>  		goto clk_disable;
 >  
->  #define SDHCI_ARASAN_CLK_CTRL_OFFSET	0x2c
->  
-> @@ -38,6 +39,10 @@
->  struct sdhci_arasan_data {
->  	struct clk	*clk_ahb;
->  	struct phy	*phy;
-> +	unsigned int arasan_quirks; /* Arasan deviations from spec */
-
-Should really try to line up the variable names.  The name seems a bit
-redundant too e.g. arasan_quirks -> quirks
-
+> +	platform_set_drvdata(pdev, msm_host);
 > +
-> +/* Controller does not have CD wired and will not function normally without */
-> +#define SDHCI_ARASAN_QUIRK_FAILS_WITHOUT_TEST_CD	BIT(0)
-
-SDHCI_ARASAN_QUIRK_FAILS_WITHOUT_TEST_CD seems unnecessarily long.
-What about SDHCI_ARASAN_QUIRK_FORCE_CDTEST?
-
->  };
+> +	pm_runtime_set_active(&pdev->dev);
+> +	pm_runtime_enable(&pdev->dev);
+> +
+>  	return 0;
 >  
->  static unsigned int sdhci_arasan_get_timeout_clock(struct sdhci_host *host)
-> @@ -79,12 +84,32 @@ static void sdhci_arasan_set_clock(struct sdhci_host *host, unsigned int clock)
->  	}
+>  clk_disable:
+> @@ -580,12 +586,63 @@ static int sdhci_msm_remove(struct platform_device *pdev)
+>  	return 0;
 >  }
 >  
-> +void sdhci_arasan_reset(struct sdhci_host *host, u8 mask)
+> +static int sdhci_msm_runtime_suspend(struct device *dev)
 > +{
-> +	u8 ctrl;
-> +	struct sdhci_pltfm_host *pltfm_host;
-> +	struct sdhci_arasan_data *sdhci_arasan;
-
-Normally we would define and initialize i.e.
-
-	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-	struct sdhci_arasan_data *sdhci_arasan = sdhci_pltfm_priv(pltfm_host);
-
+> +	struct sdhci_msm_host *msm_host = dev_get_drvdata(dev);
 > +
-> +	sdhci_reset(host, mask);
+> +	clk_disable_unprepare(msm_host->clk);
+> +	clk_disable_unprepare(msm_host->pclk);
 > +
-> +	pltfm_host = sdhci_priv(host);
-> +	sdhci_arasan = sdhci_pltfm_priv(pltfm_host);
-> +
-> +	if (sdhci_arasan->arasan_quirks &
-> +	     SDHCI_ARASAN_QUIRK_FAILS_WITHOUT_TEST_CD) {
-> +		ctrl = sdhci_readb(host, SDHCI_HOST_CONTROL);
-> +		ctrl |= SDHCI_CTRL_CDTEST_INS |
-> +			SDHCI_CTRL_CDTEST_EN;
-
-Didn't need to wrap the line above.
-
-> +		sdhci_writeb(host, ctrl, SDHCI_HOST_CONTROL);
-> +	}
+> +	return 0;
 > +}
 > +
->  static struct sdhci_ops sdhci_arasan_ops = {
->  	.set_clock = sdhci_arasan_set_clock,
->  	.get_max_clock = sdhci_pltfm_clk_get_max_clock,
->  	.get_timeout_clock = sdhci_arasan_get_timeout_clock,
->  	.set_bus_width = sdhci_set_bus_width,
-> -	.reset = sdhci_reset,
-> +	.reset = sdhci_arasan_reset,
->  	.set_uhs_signaling = sdhci_set_uhs_signaling,
->  };
->  
-> @@ -179,6 +204,7 @@ static int sdhci_arasan_probe(struct platform_device *pdev)
->  	struct sdhci_host *host;
->  	struct sdhci_pltfm_host *pltfm_host;
->  	struct sdhci_arasan_data *sdhci_arasan;
-> +	struct device_node *np = pdev->dev.of_node;
->  
->  	host = sdhci_pltfm_init(pdev, &sdhci_arasan_pdata,
->  				sizeof(*sdhci_arasan));
-> @@ -215,6 +241,12 @@ static int sdhci_arasan_probe(struct platform_device *pdev)
->  	}
->  
->  	sdhci_get_of_property(pdev);
+> +static int sdhci_msm_runtime_resume(struct device *dev)
+> +{
+> +	struct sdhci_msm_host *msm_host = dev_get_drvdata(dev);
+> +	int ret;
 > +
-> +	if (of_get_property(np, "xlnx-fails-without-test-cd", NULL)) {
-> +		sdhci_arasan->arasan_quirks |=
-> +				SDHCI_ARASAN_QUIRK_FAILS_WITHOUT_TEST_CD;
+> +	ret = clk_prepare_enable(msm_host->clk);
+> +	if (ret) {
+> +		dev_err(dev, "clk_enable failed: %d\n", ret);
+> +		return ret;
+> +	}
+> +	ret = clk_prepare_enable(msm_host->pclk);
+> +	if (ret) {
+> +		dev_err(dev, "clk_enable failed: %d\n", ret);
+> +		clk_disable_unprepare(msm_host->clk);
+> +		return ret;
 > +	}
 > +
->  	pltfm_host->clk = clk_xin;
+> +	return 0;
+> +}
+> +
+> +static int sdhci_msm_suspend(struct device *dev)
+> +{
+> +	pm_runtime_force_suspend(dev);
+> +
+> +	return 0;
+> +}
+> +
+> +static int sdhci_msm_resume(struct device *dev)
+> +{
+> +	pm_runtime_force_resume(dev);
+> +
+> +	return 0;
+> +}
+> +
+> +static const struct dev_pm_ops sdhci_msm_pm_ops = {
+> +	SET_LATE_SYSTEM_SLEEP_PM_OPS(sdhci_msm_suspend, sdhci_msm_resume)
+> +	SET_RUNTIME_PM_OPS(sdhci_msm_runtime_suspend, sdhci_msm_runtime_resume,
+> +				NULL)
+> +};
+> +
+>  static struct platform_driver sdhci_msm_driver = {
+>  	.probe = sdhci_msm_probe,
+>  	.remove = sdhci_msm_remove,
+>  	.driver = {
+>  		   .name = "sdhci_msm",
+>  		   .of_match_table = sdhci_msm_dt_match,
+> +		   .pm = &sdhci_msm_pm_ops,
+>  	},
+>  };
 >  
->  	ret = mmc_of_parse(host->mmc);
-> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-> index 609f87c..60dbf1f 100644
-> --- a/drivers/mmc/host/sdhci.h
-> +++ b/drivers/mmc/host/sdhci.h
-> @@ -84,6 +84,8 @@
->  #define   SDHCI_CTRL_ADMA32	0x10
->  #define   SDHCI_CTRL_ADMA64	0x18
->  #define   SDHCI_CTRL_8BITBUS	0x20
-> +#define  SDHCI_CTRL_CDTEST_INS	0x40
-> +#define  SDHCI_CTRL_CDTEST_EN	0x80
->  
->  #define SDHCI_POWER_CONTROL	0x29
->  #define  SDHCI_POWER_ON		0x01
 > 
