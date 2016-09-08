@@ -1,62 +1,119 @@
-From: "M. Faruk Mohamed" <centrbafaso@gmail.com>
-Subject: A CRY FROM A SYRIA REFUGEE WHICH REQUIRE YOUR URGENT ATTENTION.
-Date: Thu, 8 Sep 2016 18:53:20 +0200
-Message-ID: <CANo6CctE6Rbin41KCaChrbihcmk2eHymH50KdN4OA5eTp1_w3w__6905.32513331181$1473353622$gmane$org@mail.gmail.com>
-Reply-To: juangracias764@gmail.com
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wm0-f67.google.com ([74.125.82.67]:36411 "EHLO
-        mail-wm0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1755653AbcIHQx2 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 8 Sep 2016 12:53:28 -0400
-Received: by mail-wm0-f67.google.com with SMTP id l65so8689416wmf.3
-        for <linux-mmc@vger.kernel.org>; Thu, 08 Sep 2016 09:53:25 -0700 (PDT)
-Sender: linux-mmc-owner@vger.kernel.org
+From: Zach Brown <zach.brown-acOepvfBmUk@public.gmane.org>
+Subject: [PATCH v6 2/2] sdhci-of-arasan: Set controller to test mode when xlnx-fails-without-test-cd is present
+Date: Thu, 8 Sep 2016 14:42:46 -0500
+Message-ID: <1473363766-12652-2-git-send-email-zach.brown@ni.com>
+References: <1473363766-12652-1-git-send-email-zach.brown@ni.com>
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1473363766-12652-1-git-send-email-zach.brown-acOepvfBmUk@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org
+Cc: robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, michal.simek-gjFFaj9aHVfQT0dZR+AlfA@public.gmane.org, soren.brinkmann-gjFFaj9aHVfQT0dZR+AlfA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, zach.brown-acOepvfBmUk@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
 
-Hi,
+The sdhci controller on xilinx zynq devices will not function unless
+the CD bit is provided. http://www.xilinx.com/support/answers/61064.html
+In cases where it is impossible to provide the CD bit in hardware,
+setting the controller to test mode and then setting inserted to true
+will get the controller to function without the CD bit.
 
-I am Mr. Faruk Mohamed from Syria. I am in Burkina Faso at the moment
-as a political refugee because of the recent
-problems of my country.
+When the device has the property xlnx-fails-without-test-cd the driver
+changes the controller to test mode and sets test inserted to true to
+make the controller function.
 
- My father left a huge sum of money deposited in an offshore bank in
-Europe in his name (Mr. Mohamed El-Sayed)   before his death and left
-a will that somebody more experienced than me should assist me in
-investing this fund in a foreign country & I need your urgent help to
-quickly transfer this money from the present bank to another bank of
-your choice in your name for investment in your country to avoid any
-question concerning the source, it is the only thing left for me now
-and I want to start a new life with it.
+Signed-off-by: Zach Brown <zach.brown-acOepvfBmUk@public.gmane.org>
+---
+ drivers/mmc/host/sdhci-of-arasan.c | 27 ++++++++++++++++++++++++++-
+ drivers/mmc/host/sdhci.h           |  2 ++
+ 2 files changed, 28 insertions(+), 1 deletion(-)
 
-This transaction requires immediate attention because of the current
-political situation in my country (Syria) and
-i do not want to lose this money to the rebels or government.
+diff --git a/drivers/mmc/host/sdhci-of-arasan.c b/drivers/mmc/host/sdhci-of-arasan.c
+index 33601a8..37c8ca0 100644
+--- a/drivers/mmc/host/sdhci-of-arasan.c
++++ b/drivers/mmc/host/sdhci-of-arasan.c
+@@ -26,6 +26,7 @@
+ #include <linux/phy/phy.h>
+ #include <linux/regmap.h>
+ #include "sdhci-pltfm.h"
++#include <linux/of.h>
+ 
+ #define SDHCI_ARASAN_CLK_CTRL_OFFSET	0x2c
+ #define SDHCI_ARASAN_VENDOR_REGISTER	0x78
+@@ -98,6 +99,10 @@ struct sdhci_arasan_data {
+ 
+ 	struct regmap	*soc_ctl_base;
+ 	const struct sdhci_arasan_soc_ctl_map *soc_ctl_map;
++	unsigned int	quirks; /* Arasan deviations from spec */
++
++/* Controller does not have CD wired and will not function normally without */
++#define SDHCI_ARASAN_QUIRK_FORCE_CDTEST	BIT(0)
+ };
+ 
+ static const struct sdhci_arasan_soc_ctl_map rk3399_soc_ctl_map = {
+@@ -245,12 +250,27 @@ static void sdhci_arasan_hs400_enhanced_strobe(struct mmc_host *mmc,
+ 	writel(vendor, host->ioaddr + SDHCI_ARASAN_VENDOR_REGISTER);
+ }
+ 
++void sdhci_arasan_reset(struct sdhci_host *host, u8 mask)
++{
++	u8 ctrl;
++	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
++	struct sdhci_arasan_data *sdhci_arasan = sdhci_pltfm_priv(pltfm_host);
++
++	sdhci_reset(host, mask);
++
++	if (sdhci_arasan->quirks & SDHCI_ARASAN_QUIRK_FORCE_CDTEST) {
++		ctrl = sdhci_readb(host, SDHCI_HOST_CONTROL);
++		ctrl |= SDHCI_CTRL_CDTEST_INS | SDHCI_CTRL_CDTEST_EN;
++		sdhci_writeb(host, ctrl, SDHCI_HOST_CONTROL);
++	}
++}
++
+ static struct sdhci_ops sdhci_arasan_ops = {
+ 	.set_clock = sdhci_arasan_set_clock,
+ 	.get_max_clock = sdhci_pltfm_clk_get_max_clock,
+ 	.get_timeout_clock = sdhci_arasan_get_timeout_clock,
+ 	.set_bus_width = sdhci_set_bus_width,
+-	.reset = sdhci_reset,
++	.reset = sdhci_arasan_reset,
+ 	.set_uhs_signaling = sdhci_set_uhs_signaling,
+ };
+ 
+@@ -545,6 +565,7 @@ static int sdhci_arasan_probe(struct platform_device *pdev)
+ 	struct sdhci_host *host;
+ 	struct sdhci_pltfm_host *pltfm_host;
+ 	struct sdhci_arasan_data *sdhci_arasan;
++	struct device_node *np = pdev->dev.of_node;
+ 
+ 	host = sdhci_pltfm_init(pdev, &sdhci_arasan_pdata,
+ 				sizeof(*sdhci_arasan));
+@@ -599,6 +620,10 @@ static int sdhci_arasan_probe(struct platform_device *pdev)
+ 	}
+ 
+ 	sdhci_get_of_property(pdev);
++
++	if (of_get_property(np, "xlnx-fails-without-test-cd", NULL))
++		sdhci_arasan->quirks |= SDHCI_ARASAN_QUIRK_FORCE_CDTEST;
++
+ 	pltfm_host->clk = clk_xin;
+ 
+ 	if (of_device_is_compatible(pdev->dev.of_node,
+diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+index a2bc9e1..c722cd2 100644
+--- a/drivers/mmc/host/sdhci.h
++++ b/drivers/mmc/host/sdhci.h
+@@ -84,6 +84,8 @@
+ #define   SDHCI_CTRL_ADMA32	0x10
+ #define   SDHCI_CTRL_ADMA64	0x18
+ #define   SDHCI_CTRL_8BITBUS	0x20
++#define  SDHCI_CTRL_CDTEST_INS	0x40
++#define  SDHCI_CTRL_CDTEST_EN	0x80
+ 
+ #define SDHCI_POWER_CONTROL	0x29
+ #define  SDHCI_POWER_ON		0x01
+-- 
+2.7.4
 
- It is a huge sum of money ($9.8million usd) and I am ready to offer
-you 40% of the money to stand as the
-beneficiary and transfer to a new bank account of your choice. I
-believe you can help me, but on the contrary
-please forgive my indulgence and delete this e-mail content without
-sharing with anyone.
-
-If you are interested and able to handle this for me in all honesty
-without any betrayal of trust that I shall
-repose on you then contact me for more details, do contact me on my
-private email below.
-
-juangracias764@gmail.com
-
- You have to send me your personal details information's below.
-
-1.Your Full Name:
-2.Your Home Address:
-3.Your Direct Mobile Number:
-4.Your Occupation:
-
-Thank you very much for your understanding.
-
-Thanks,
-
-Mr.Faruk Mohamed.
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
