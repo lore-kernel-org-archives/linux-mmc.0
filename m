@@ -1,35 +1,71 @@
-From: Ziyuan Xu <xzy.xu@rock-chips.com>
-Subject: [PATCH v2 0/2] Add power domain support for eMMC node on rk3399
-Date: Thu,  8 Sep 2016 14:49:03 +0800
-Message-ID: <20160908064905.18080-1-xzy.xu@rock-chips.com>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from regular1.263xmail.com ([211.150.99.131]:38076 "EHLO
-        regular1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753178AbcIHGt3 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 8 Sep 2016 02:49:29 -0400
-Sender: linux-mmc-owner@vger.kernel.org
+From: Ziyuan Xu <xzy.xu-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
+Subject: [PATCH v2 2/2] arm64: dts: rockchip: add eMMC's power domain support for rk3399
+Date: Thu,  8 Sep 2016 14:49:05 +0800
+Message-ID: <20160908064905.18080-3-xzy.xu@rock-chips.com>
+References: <20160908064905.18080-1-xzy.xu@rock-chips.com>
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <20160908064905.18080-1-xzy.xu-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: heiko-4mtYJXux2i+zQB+pC5nmwQ@public.gmane.org, ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org
+Cc: devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org, dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org, Ziyuan Xu <xzy.xu-TNX95d0MmH7DzftRWevZcw@public.gmane.org>, Elaine Zhang <zhangqing-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: heiko@sntech.de, ulf.hansson@linaro.org, robh+dt@kernel.org
-Cc: devicetree@vger.kernel.org, linux-rockchip@lists.infradead.org, linux-mmc@vger.kernel.org, shawn.lin@rock-chips.com, dianders@chromium.org, Ziyuan Xu <xzy.xu@rock-chips.com>
 
-This series add power domain for eMMC node which will be controlled by
-genpd to make sure it's available in probing state, and will be gate
-once suspend/resume.
+Control power domain for eMMC via genpd to reduce power consumption.
+
+Signed-off-by: Elaine Zhang <zhangqing-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
+Signed-off-by: Ziyuan Xu <xzy.xu-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
+Reviewed-by: Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
+Reviewed-by: Douglas Anderson <dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
+
+---
 
 Changes in v2:
-- fix a typo
-- add an example code for power-domain
 - add Shawn's review-tag and Doug's review-tag
 
-Ziyuan Xu (2):
-  Documentation: mmc: sdhci-of-arasan: add description of power domain
-  arm64: dts: rockchip: add eMMC's power domain support for rk3399
+ arch/arm64/boot/dts/rockchip/rk3399.dtsi | 11 +++++++++++
+ 1 file changed, 11 insertions(+)
 
- Documentation/devicetree/bindings/mmc/arasan,sdhci.txt |  7 ++++++-
- arch/arm64/boot/dts/rockchip/rk3399.dtsi               | 11 +++++++++++
- 2 files changed, 17 insertions(+), 1 deletion(-)
-
+diff --git a/arch/arm64/boot/dts/rockchip/rk3399.dtsi b/arch/arm64/boot/dts/rockchip/rk3399.dtsi
+index b65c193..064f87b 100644
+--- a/arch/arm64/boot/dts/rockchip/rk3399.dtsi
++++ b/arch/arm64/boot/dts/rockchip/rk3399.dtsi
+@@ -269,6 +269,7 @@
+ 		#clock-cells = <0>;
+ 		phys = <&emmc_phy>;
+ 		phy-names = "phy_arasan";
++		power-domains = <&power RK3399_PD_EMMC>;
+ 		status = "disabled";
+ 	};
+ 
+@@ -690,6 +691,11 @@
+ 		status = "disabled";
+ 	};
+ 
++	qos_emmc: qos@ffa58000 {
++		compatible = "syscon";
++		reg = <0x0 0xffa58000 0x0 0x20>;
++	};
++
+ 	qos_gmac: qos@ffa5c000 {
+ 		compatible = "syscon";
+ 		reg = <0x0 0xffa5c000 0x0 0x20>;
+@@ -823,6 +829,11 @@
+ 			};
+ 
+ 			/* These power domains are grouped by VD_LOGIC */
++			pd_emmc@RK3399_PD_EMMC {
++				reg = <RK3399_PD_EMMC>;
++				clocks = <&cru ACLK_EMMC>;
++				pm_qos = <&qos_emmc>;
++			};
+ 			pd_gmac@RK3399_PD_GMAC {
+ 				reg = <RK3399_PD_GMAC>;
+ 				clocks = <&cru ACLK_GMAC>;
 -- 
 2.9.2
 
 
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
