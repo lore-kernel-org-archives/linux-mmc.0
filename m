@@ -1,128 +1,75 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH v6 2/2] sdhci-of-arasan: Set controller to test mode when
- xlnx-fails-without-test-cd is present
-Date: Fri, 9 Sep 2016 14:45:13 +0300
-Message-ID: <47ff9881-d144-bade-a5d7-995d1304675a@intel.com>
-References: <1473363766-12652-1-git-send-email-zach.brown@ni.com>
- <1473363766-12652-2-git-send-email-zach.brown@ni.com>
+From: Ritesh Raj Sarraf <rrs-7WuBAv+fczCJ8c2fQYRYNw@public.gmane.org>
+Subject: Re: xHCI problem? [was Re: Erratic USB device behavior and device
+ loss]
+Date: Fri, 09 Sep 2016 18:44:21 +0530
+Message-ID: <1473426861.9415.2.camel@researchut.com>
+References: <CAPDyKFpnCXhdoKgoG576teC=y38vbC1x=-ehC_9EWEeKr_K6BQ@mail.gmail.com>
+         <Pine.LNX.4.44L0.1609071630350.2115-100000@iolanthe.rowland.org>
+         <CAPDyKFr0vEaEbsoPm6YwJD1JOQc=YR=zwi4T6Rr3gCQ4StNuvg@mail.gmail.com>
+Reply-To: rrs-7WuBAv+fczCJ8c2fQYRYNw@public.gmane.org
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
+Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga02.intel.com ([134.134.136.20]:29046 "EHLO mga02.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1754257AbcIILtx (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Fri, 9 Sep 2016 07:49:53 -0400
-In-Reply-To: <1473363766-12652-2-git-send-email-zach.brown@ni.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-usb-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <CAPDyKFr0vEaEbsoPm6YwJD1JOQc=YR=zwi4T6Rr3gCQ4StNuvg-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+Sender: linux-usb-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Alan Stern <stern-nwvwT67g6+6dFdvTe/nMLpVzexx5G7lz@public.gmane.org>
+Cc: USB list <linux-usb-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-mmc <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Zach Brown <zach.brown@ni.com>
-Cc: robh+dt@kernel.org, ulf.hansson@linaro.org, mark.rutland@arm.com, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, michal.simek@xilinx.com, soren.brinkmann@xilinx.com, linux-arm-kernel@lists.infradead.org
 
-On 08/09/16 22:42, Zach Brown wrote:
-> The sdhci controller on xilinx zynq devices will not function unless
-> the CD bit is provided. http://www.xilinx.com/support/answers/61064.html
-> In cases where it is impossible to provide the CD bit in hardware,
-> setting the controller to test mode and then setting inserted to true
-> will get the controller to function without the CD bit.
-> 
-> When the device has the property xlnx-fails-without-test-cd the driver
-> changes the controller to test mode and sets test inserted to true to
-> make the controller function.
-> 
-> Signed-off-by: Zach Brown <zach.brown@ni.com>
-> ---
->  drivers/mmc/host/sdhci-of-arasan.c | 27 ++++++++++++++++++++++++++-
->  drivers/mmc/host/sdhci.h           |  2 ++
->  2 files changed, 28 insertions(+), 1 deletion(-)
-> 
-> diff --git a/drivers/mmc/host/sdhci-of-arasan.c b/drivers/mmc/host/sdhci-of-arasan.c
-> index 33601a8..37c8ca0 100644
-> --- a/drivers/mmc/host/sdhci-of-arasan.c
-> +++ b/drivers/mmc/host/sdhci-of-arasan.c
-> @@ -26,6 +26,7 @@
->  #include <linux/phy/phy.h>
->  #include <linux/regmap.h>
->  #include "sdhci-pltfm.h"
-> +#include <linux/of.h>
->  
->  #define SDHCI_ARASAN_CLK_CTRL_OFFSET	0x2c
->  #define SDHCI_ARASAN_VENDOR_REGISTER	0x78
-> @@ -98,6 +99,10 @@ struct sdhci_arasan_data {
->  
->  	struct regmap	*soc_ctl_base;
->  	const struct sdhci_arasan_soc_ctl_map *soc_ctl_map;
-> +	unsigned int	quirks; /* Arasan deviations from spec */
-> +
-> +/* Controller does not have CD wired and will not function normally without */
-> +#define SDHCI_ARASAN_QUIRK_FORCE_CDTEST	BIT(0)
->  };
->  
->  static const struct sdhci_arasan_soc_ctl_map rk3399_soc_ctl_map = {
-> @@ -245,12 +250,27 @@ static void sdhci_arasan_hs400_enhanced_strobe(struct mmc_host *mmc,
->  	writel(vendor, host->ioaddr + SDHCI_ARASAN_VENDOR_REGISTER);
->  }
->  
-> +void sdhci_arasan_reset(struct sdhci_host *host, u8 mask)
-> +{
-> +	u8 ctrl;
-> +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> +	struct sdhci_arasan_data *sdhci_arasan = sdhci_pltfm_priv(pltfm_host);
-> +
-> +	sdhci_reset(host, mask);
-> +
-> +	if (sdhci_arasan->quirks & SDHCI_ARASAN_QUIRK_FORCE_CDTEST) {
-> +		ctrl = sdhci_readb(host, SDHCI_HOST_CONTROL);
-> +		ctrl |= SDHCI_CTRL_CDTEST_INS | SDHCI_CTRL_CDTEST_EN;
-> +		sdhci_writeb(host, ctrl, SDHCI_HOST_CONTROL);
-> +	}
-> +}
-> +
->  static struct sdhci_ops sdhci_arasan_ops = {
->  	.set_clock = sdhci_arasan_set_clock,
->  	.get_max_clock = sdhci_pltfm_clk_get_max_clock,
->  	.get_timeout_clock = sdhci_arasan_get_timeout_clock,
->  	.set_bus_width = sdhci_set_bus_width,
-> -	.reset = sdhci_reset,
-> +	.reset = sdhci_arasan_reset,
->  	.set_uhs_signaling = sdhci_set_uhs_signaling,
->  };
->  
-> @@ -545,6 +565,7 @@ static int sdhci_arasan_probe(struct platform_device *pdev)
->  	struct sdhci_host *host;
->  	struct sdhci_pltfm_host *pltfm_host;
->  	struct sdhci_arasan_data *sdhci_arasan;
-> +	struct device_node *np = pdev->dev.of_node;
->  
->  	host = sdhci_pltfm_init(pdev, &sdhci_arasan_pdata,
->  				sizeof(*sdhci_arasan));
-> @@ -599,6 +620,10 @@ static int sdhci_arasan_probe(struct platform_device *pdev)
->  	}
->  
->  	sdhci_get_of_property(pdev);
-> +
-> +	if (of_get_property(np, "xlnx-fails-without-test-cd", NULL))
+-----BEGIN PGP SIGNED MESSAGE-----
+Hash: SHA512
 
-Sorry, should have spotted this before.  This needs to be
-of_property_read_bool() not of_get_property().
-
-> +		sdhci_arasan->quirks |= SDHCI_ARASAN_QUIRK_FORCE_CDTEST;
-> +
->  	pltfm_host->clk = clk_xin;
->  
->  	if (of_device_is_compatible(pdev->dev.of_node,
-> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-> index a2bc9e1..c722cd2 100644
-> --- a/drivers/mmc/host/sdhci.h
-> +++ b/drivers/mmc/host/sdhci.h
-> @@ -84,6 +84,8 @@
->  #define   SDHCI_CTRL_ADMA32	0x10
->  #define   SDHCI_CTRL_ADMA64	0x18
->  #define   SDHCI_CTRL_8BITBUS	0x20
-> +#define  SDHCI_CTRL_CDTEST_INS	0x40
-> +#define  SDHCI_CTRL_CDTEST_EN	0x80
->  
->  #define SDHCI_POWER_CONTROL	0x29
->  #define  SDHCI_POWER_ON		0x01
+On Fri, 2016-09-09 at 12:54 +0200, Ulf Hansson wrote:
+> This affects the way the core calls the host driver's ->set_ios()
+> callback. Earlier it was invoked first to do power off then power up.
+> With this change it starts with power up instead.
+> I wanted to try this because I suspected the initial state could be wrong.
+> 
+> So here are some other ideas on how to move forward.
+> 1. Run with CONFIG_PM unset to see if we can reproduce the problem.
+> 2. Revert back the state in the mmc core we had in 3.16 around how it
+> deals with runtime PM for host devices. That's actually very easy as
+> we only need to remove the pm_runtime_put|get() calls in
+> mmc_claim|release_host().
+> 
+> Ritesh, can you try these options?
 > 
 
+Yes. I can try the above ones now. I'm building the kernel for it.
+
+
+> Neither of the above will actually solve the problem, so I guess we
+> anyway need take a closer look to understand why the usb device is
+> accessed when it is actually runtime suspended.
+> 
+> BTW, Ritesh you could also run a git bisect to find out if/when this
+> became broken.
+
+What starting point do you want me to use ? 4.0 ?
+
+- -- 
+Ritesh Raj Sarraf
+RESEARCHUT - http://www.researchut.com
+"Necessity is the mother of invention."
+-----BEGIN PGP SIGNATURE-----
+
+iQIcBAEBCgAGBQJX0rWtAAoJEKY6WKPy4XVpgeYP/3FCabIWEOvKeVJK52B5gviF
++CFz00vNVddMDQjUlbN/JzaA8h5HiLMBaTp/7nBvaMYKYKZjjo8iiNQ/3jjwPUu8
+S/XrWPvMUVJUhF42OMKTl4uUpVPo3fI18SYIw4XFt5pNaUFrmBPjZ6S23BhqfLN3
+x2BSw9rwZrCmxH4aMpfWmDFzjWvkuJ6grpxPfbz2lx4t7BWGs4wWdTc0yfQgzWDR
+SLD/CpPCkVFjnpjRnrYZei3nNo0tS0+qSv1SsRwy8GchRbOo9bK1W8YKnLH/AFLb
+kCYcVKCc4mq8iq5e05vjPvdppXpbzKKlhpxxtlqzLjAYx9FbESRN89D9c7V1Ng0q
+c40b+lQV7AGYUxaf+tOcErflDvzRquR1dcwcjJizgeO/pOI6uXGWE+/T5j+4q4UJ
+cypkxjzPIz8SbipNEPGf2nSMppXC1RRcBGo4247vFZ0QYTC7RAViL6ErRS67kfM9
+5eX2iBtO3qNZMxIMqBPu97rLoLHSZ3nFEwNbyyFnNHERZuvLUZrZY208tZYUfZKZ
+X18QJKPrqfbb9n+KyyLNTaESm6jhW2yYFdiRs/4LQWniOlLLPa+6GOD7E81044nB
+t8LAKtSSxK+qvFVcfqrZSfaivRKQZbYwuk+x3O4vAUDgTpTgmugNaDTYendN3v1B
+R809X7cWC6V1kzTaBkK9
+=o1rL
+-----END PGP SIGNATURE-----
+
+--
+To unsubscribe from this list: send the line "unsubscribe linux-usb" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
