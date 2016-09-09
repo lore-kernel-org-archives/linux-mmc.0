@@ -1,52 +1,81 @@
-From: Chris Brandt <chris.brandt@renesas.com>
-Subject: [PATCH 1/3] mmc: sh_mobile_sdhi: add ocr_mask option
-Date: Fri,  9 Sep 2016 11:52:36 -0400
-Message-ID: <20160909155238.17852-2-chris.brandt@renesas.com>
-References: <20160909155238.17852-1-chris.brandt@renesas.com>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from relmlor3.renesas.com ([210.160.252.173]:36556 "EHLO
-        relmlie2.idc.renesas.com" rhost-flags-OK-OK-OK-FAIL)
-        by vger.kernel.org with ESMTP id S1753240AbcIIPxw (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 9 Sep 2016 11:53:52 -0400
-In-Reply-To: <20160909155238.17852-1-chris.brandt@renesas.com>
-Sender: linux-mmc-owner@vger.kernel.org
+From: Alan Stern <stern-nwvwT67g6+6dFdvTe/nMLpVzexx5G7lz@public.gmane.org>
+Subject: Re: xHCI problem? [was Re: Erratic USB device behavior and device
+ loss]
+Date: Fri, 9 Sep 2016 12:15:15 -0400 (EDT)
+Message-ID: <Pine.LNX.4.44L0.1609091212160.2050-100000@iolanthe.rowland.org>
+References: <1473429884.9415.8.camel@researchut.com>
+Mime-Version: 1.0
+Content-Type: TEXT/PLAIN; charset=UTF-8
+Content-Transfer-Encoding: 8BIT
+Return-path: <linux-usb-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1473429884.9415.8.camel-7WuBAv+fczCJ8c2fQYRYNw@public.gmane.org>
+Sender: linux-usb-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Ritesh Raj Sarraf <rrs-7WuBAv+fczCJ8c2fQYRYNw@public.gmane.org>
+Cc: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, USB list <linux-usb-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-mmc <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>, Wolfram Sang <wsa+renesas@sang-engineering.com>
-Cc: Simon Horman <horms+renesas@verge.net.au>, linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org, Chris Brandt <chris.brandt@renesas.com>
 
-In moving platforms from board files to DT, there still needs to be a way
-to set the ocr_mask setting for the tmio driver during probe. Without this
-setting, the probe will fail because the supported voltages are not known.
+On Fri, 9 Sep 2016, Ritesh Raj Sarraf wrote:
 
-This patch will also traditional platform registration platforms to
-migrate to DT.
+> On Fri, 2016-09-09 at 18:44 +0530, Ritesh Raj Sarraf wrote:
+> > On Fri, 2016-09-09 at 12:54 +0200, Ulf Hansson wrote:
+> > > This affects the way the core calls the host driver's ->set_ios()
+> > > callback. Earlier it was invoked first to do power off then power up.
+> > > With this change it starts with power up instead.
+> > > I wanted to try this because I suspected the initial state could be wrong.
+> > > 
+> > > So here are some other ideas on how to move forward.
+> > > 1. Run with CONFIG_PM unset to see if we can reproduce the problem.
+> > > 2. Revert back the state in the mmc core we had in 3.16 around how it
+> > > deals with runtime PM for host devices. That's actually very easy as
+> > > we only need to remove the pm_runtime_put|get() calls in
+> > > mmc_claim|release_host().
+> > > 
+> > > Ritesh, can you try these options?
+> > > 
+> > 
+> > Yes. I can try the above ones now. I'm building the kernel for it.
+> 
+> For #1, menuconfig doesn't allow me to disable CONFIG_PM in 4.8. I checked it
+> back up till 4.0, and it still doesn't allow disabling CONFIG_PM.
 
-Signed-off-by: Chris Brandt <chris.brandt@renesas.com>
----
- drivers/mmc/host/sh_mobile_sdhi.c | 2 ++
- 1 file changed, 2 insertions(+)
+You can do it, but it would require some pretty far-reaching changes.  
+Besides, there's really no point.  If CONFIG_PM isn't enabled then the 
+kernel doesn't do any runtime PM at all.
 
-diff --git a/drivers/mmc/host/sh_mobile_sdhi.c b/drivers/mmc/host/sh_mobile_sdhi.c
-index 5334f24..b033500 100644
---- a/drivers/mmc/host/sh_mobile_sdhi.c
-+++ b/drivers/mmc/host/sh_mobile_sdhi.c
-@@ -59,6 +59,7 @@ enum tmio_mmc_dmac_type {
- 
- struct sh_mobile_sdhi_of_data {
- 	unsigned long tmio_flags;
-+	u32	      tmio_ocr_mask;
- 	unsigned long capabilities;
- 	unsigned long capabilities2;
- 	enum dma_slave_buswidth dma_buswidth;
-@@ -630,6 +631,7 @@ static int sh_mobile_sdhi_probe(struct platform_device *pdev)
- 		const struct sh_mobile_sdhi_of_data *of_data = of_id->data;
- 
- 		mmc_data->flags |= of_data->tmio_flags;
-+		mmc_data->ocr_mask = of_data->tmio_ocr_mask;
- 		mmc_data->capabilities |= of_data->capabilities;
- 		mmc_data->capabilities2 |= of_data->capabilities2;
- 		mmc_data->dma_rx_offset = of_data->dma_rx_offset;
--- 
-2.9.2
+Alan Stern
 
 
+> For #2, I'm building the 4.8-rc5 kernel with the following change. This build
+> does not include the previous change you had suggested (related to POWER_CYCLE)
+> 
+> Date:   Fri Sep 9 19:28:03 2016 +0530
+> 
+>     Disable pm runtime in mmc core
+> 
+> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+> index e55cde6..32388d5 100644
+> - --- a/drivers/mmc/core/core.c
+> +++ b/drivers/mmc/core/core.c
+> @@ -970,9 +970,6 @@ int __mmc_claim_host(struct mmc_host *host, atomic_t *abort)
+>         spin_unlock_irqrestore(&host->lock, flags);
+>         remove_wait_queue(&host->wq, &wait);
+>  
+> - -       if (pm)
+> - -               pm_runtime_get_sync(mmc_dev(host));
+> - -
+>         return stop;
+>  }
+>  EXPORT_SYMBOL(__mmc_claim_host);
+> @@ -1000,7 +997,6 @@ void mmc_release_host(struct mmc_host *host)
+>                 spin_unlock_irqrestore(&host->lock, flags);
+>                 wake_up(&host->wq);
+>                 pm_runtime_mark_last_busy(mmc_dev(host));
+> - -               pm_runtime_put_autosuspend(mmc_dev(host));
+>         }
+>  }
+>  EXPORT_SYMBOL(mmc_release_host);
+
+--
+To unsubscribe from this list: send the line "unsubscribe linux-usb" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
