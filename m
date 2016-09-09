@@ -1,78 +1,44 @@
-From: Michal Simek <michal.simek@xilinx.com>
-Subject: Re: [PATCH v6 1/2] sdhci-of-arasan: Add device tree parameter
- xlnx-fails-without-test-cd bit
-Date: Fri, 9 Sep 2016 08:36:12 +0200
-Message-ID: <541103ba-28d1-1fc0-cc5e-66eea914aa2d@xilinx.com>
-References: <1473363766-12652-1-git-send-email-zach.brown@ni.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH 2/2] mmc: host: sh_mobile_sdhi: don't populate unneeded functions
+Date: Fri, 9 Sep 2016 11:45:38 +0200
+Message-ID: <CAPDyKFp5C_utY_MhVMB_fyM0QnA0Xns9_+qw5CWC3dQ-c24vug@mail.gmail.com>
+References: <20160824093438.2478-1-wsa+renesas@sang-engineering.com>
+ <20160824093438.2478-3-wsa+renesas@sang-engineering.com> <CANqRtoTJWN52roRwJHh1cZrb2Jqf5OD-ffjKgiW4Y5jqCeVzhg@mail.gmail.com>
+ <20160902052258.GA1601@katana> <CAPDyKFpVtYtL97YQskPazJPQSHkVuF5BEaaGH_HE=xfkYUq=Rg@mail.gmail.com>
+ <20160905081823.GC1601@katana>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <1473363766-12652-1-git-send-email-zach.brown@ni.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Zach Brown <zach.brown@ni.com>, adrian.hunter@intel.com
-Cc: mark.rutland@arm.com, devicetree@vger.kernel.org, ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, michal.simek@xilinx.com, robh+dt@kernel.org, linux-arm-kernel@lists.infradead.org, soren.brinkmann@xilinx.com
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-wm0-f46.google.com ([74.125.82.46]:35394 "EHLO
+        mail-wm0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753179AbcIIJpl (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 9 Sep 2016 05:45:41 -0400
+Received: by mail-wm0-f46.google.com with SMTP id w12so21727293wmf.0
+        for <linux-mmc@vger.kernel.org>; Fri, 09 Sep 2016 02:45:40 -0700 (PDT)
+In-Reply-To: <20160905081823.GC1601@katana>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Wolfram Sang <wsa@the-dreams.de>
+Cc: Magnus Damm <magnus.damm@gmail.com>, Wolfram Sang <wsa+renesas@sang-engineering.com>, linux-mmc <linux-mmc@vger.kernel.org>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>, Geert Uytterhoeven <geert@linux-m68k.org>, Simon Horman <horms@verge.net.au>
 
-On 8.9.2016 21:42, Zach Brown wrote:
-> The sdhci controller on xilinx zynq devices will not function unless
-> the CD bit is provided. http://www.xilinx.com/support/answers/61064.html
-> In cases where it is impossible to provide the CD bit in hardware,
-> setting the controller to test mode and then setting inserted to true
-> will get the controller to function without the CD bit.
-> 
-> The device property "xlnx-fails-without-test-cd" will let the arasan
-> driver know the controller does not have the CD line wired and that the
-> controller does not function without it.
-> 
-> Signed-off-by: Zach Brown <zach.brown@ni.com>
-> ---
-> v2:
->  * improved commit messages
->  * removed fake-cd device property
->  * removed fake-cd quirk
->  * use broken-cd device property
->  * documented new usage of broken-cd
-> v3:
->  * removed new usage of broken-cd
->  * created fails-without-test-cd device property
->  * created arasan controller specific quirk
-> v4:
->  * changed fails-without-test-cd to xlnx-fails-without-test-cd
->  * removed extra blank line
-> v5:
->  * Fixed style mistake
->  * Changed (1 << 0 ) to BIT(0)
-> v6:
->  * Fixed style mistakes
->  * Condensed unnecessarily long variable names
->  * Removed line wraps that were no longer necessary.
->  * Rebased changes off Ulf's mmc tree's next branch.
-> 
-> 
->  Documentation/devicetree/bindings/mmc/arasan,sdhci.txt | 4 ++++
->  1 file changed, 4 insertions(+)
-> 
-> df --gt /Documentation/devicetree/bindings/mmc/arasan,sdhci.txt b/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
-> index 3404afa..e71f043 100644
-> --- a/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
-> +++ b/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
-> @@ -21,6 +21,10 @@ Required Properties:
->    - interrupts: Interrupt specifier
->    - interrupt-parent: Phandle for the interrupt controller that services
->  		      interrupts for this device.
-> +Optional Properties:
-> +- xlnx-fails-without-test-cd: when present, the controller doesn't work when
+On 5 September 2016 at 10:18, Wolfram Sang <wsa@the-dreams.de> wrote:
+>
+>> > It can be argued that this tag could be added:
+>> >
+>> > Fixes: 452e5eef6d311e ("mmc: tmio: Add UHS-I mode support")
+>> >
+>> > I don't know how well it applies, though, because the code has been
+>> > modified a lot recently. But we can try.
+>>
+>> Please tell me if you would like me to drop any of the changes I
+>> queued up in this series.
+>>
+>> Of course, I can also amend the change log, just tell me.
+>
+> If you could add the Fixes: tag, this would be welcome. Thanks, Ulf!
+>
 
-xlnx, here.
+Thanks, done!
 
-Thanks,
-Michal
+Kind regards
+Uffe
