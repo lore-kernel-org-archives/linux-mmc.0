@@ -1,112 +1,78 @@
-From: Scott Wood <oss-fOR+EgIDQEHk1uMJSBkQmQ@public.gmane.org>
-Subject: Re: [v11, 5/8] soc: fsl: add GUTS driver for QorIQ platforms
-Date: Thu, 08 Sep 2016 22:47:20 -0500
-Message-ID: <1473392840.30217.170.camel@buserror.net>
-References: <1473150503-9550-1-git-send-email-yangbo.lu@nxp.com>
-	<1473150503-9550-6-git-send-email-yangbo.lu@nxp.com>
+From: Michal Simek <michal.simek@xilinx.com>
+Subject: Re: [PATCH v6 1/2] sdhci-of-arasan: Add device tree parameter
+ xlnx-fails-without-test-cd bit
+Date: Fri, 9 Sep 2016 08:36:12 +0200
+Message-ID: <541103ba-28d1-1fc0-cc5e-66eea914aa2d@xilinx.com>
+References: <1473363766-12652-1-git-send-email-zach.brown@ni.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
-In-Reply-To: <1473150503-9550-6-git-send-email-yangbo.lu-3arQi8VN3Tc@public.gmane.org>
-List-Unsubscribe: <https://lists.linuxfoundation.org/mailman/options/iommu>,
-	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.linuxfoundation.org/pipermail/iommu/>
-List-Post: <mailto:iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
-List-Help: <mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=help>
-List-Subscribe: <https://lists.linuxfoundation.org/mailman/listinfo/iommu>,
-	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=subscribe>
-Sender: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
-Errors-To: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
-To: Yangbo Lu <yangbo.lu-3arQi8VN3Tc@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>
-Cc: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Russell King <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, Bhupesh Sharma <bhupesh.sharma-KZfg59tc24xl57MIdRCFDg@public.gmane.org>, netdev-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Santosh Shilimkar <ssantosh-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Jochen Friedrich <jochen-NIgtFMG+Po8@public.gmane.org>, xiaobo.xie-3arQi8VN3Tc@public.gmane.org, iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, linux-i2c-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Claudiu Manoil <claudiu.manoil-KZfg59tc24xl57MIdRCFDg@public.gmane.org>, Kumar Gala <galak-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, leoyang.li-3arQi8VN3Tc@public.gmane.org, linuxppc-dev-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org, linux-clk-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, Qiang Zhao <qiang.zhao-3arQi8VN3Tc@public.gmane.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <1473363766-12652-1-git-send-email-zach.brown@ni.com>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Zach Brown <zach.brown@ni.com>, adrian.hunter@intel.com
+Cc: mark.rutland@arm.com, devicetree@vger.kernel.org, ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, michal.simek@xilinx.com, robh+dt@kernel.org, linux-arm-kernel@lists.infradead.org, soren.brinkmann@xilinx.com
 List-Id: linux-mmc@vger.kernel.org
 
-T24gVHVlLCAyMDE2LTA5LTA2IGF0IDE2OjI4ICswODAwLCBZYW5nYm8gTHUgd3JvdGU6Cj4gVGhl
-IGdsb2JhbCB1dGlsaXRpZXMgYmxvY2sgY29udHJvbHMgcG93ZXIgbWFuYWdlbWVudCwgSS9PIGRl
-dmljZQo+IGVuYWJsaW5nLCBwb3dlci1vbnJlc2V0KFBPUikgY29uZmlndXJhdGlvbiBtb25pdG9y
-aW5nLCBhbHRlcm5hdGUKPiBmdW5jdGlvbiBzZWxlY3Rpb24gZm9yIG11bHRpcGxleGVkIHNpZ25h
-bHMsYW5kIGNsb2NrIGNvbnRyb2wuCj4gCj4gVGhpcyBwYXRjaCBhZGRzIGEgZHJpdmVyIHRvIG1h
-bmFnZSBhbmQgYWNjZXNzIGdsb2JhbCB1dGlsaXRpZXMgYmxvY2suCj4gSW5pdGlhbGx5IG9ubHkg
-cmVhZGluZyBTVlIgYW5kIHJlZ2lzdGVyaW5nIHNvYyBkZXZpY2UgYXJlIHN1cHBvcnRlZC4KPiBP
-dGhlciBndXRzIGFjY2Vzc2VzLCBzdWNoIGFzIHJlYWRpbmcgUkNXLCBzaG91bGQgZXZlbnR1YWxs
-eSBiZSBtb3ZlZAo+IGludG8gdGhpcyBkcml2ZXIgYXMgd2VsbC4KPiAKPiBTaWduZWQtb2ZmLWJ5
-OiBZYW5nYm8gTHUgPHlhbmdiby5sdUBueHAuY29tPgo+IFNpZ25lZC1vZmYtYnk6IFNjb3R0IFdv
-b2QgPG9zc0BidXNlcnJvci5uZXQ+CgpEb24ndCBwdXQgbXkgc2lnbm9mZiBvbiBwYXRjaGVzIHRo
-YXQgSSBkaWRuJ3QgcHV0IGl0IG9uIG15c2VsZi4gwqBEZWZpbml0ZWx5CmRvbid0IHB1dCBtaW5l
-ICphZnRlciogeW91cnMgb24gcGF0Y2hlcyB0aGF0IHdlcmUgbGFzdCBtb2RpZmllZCBieSB5b3Uu
-CgpJZiB5b3Ugd2FudCB0byBtZW50aW9uIHRoYXQgdGhlIHNvY19pZCBlbmNvZGluZyB3YXMgbXkg
-c3VnZ2VzdGlvbiwgdGhlbiBkbyBzbwpleHBsaWNpdGx5LgoKPiArLyogU29DIGF0dHJpYnV0ZSBk
-ZWZpbml0aW9uIGZvciBRb3JJUSBwbGF0Zm9ybSAqLwo+ICtzdGF0aWMgY29uc3Qgc3RydWN0IHNv
-Y19kZXZpY2VfYXR0cmlidXRlIHFvcmlxX3NvY1tdID0gewo+ICsjaWZkZWYgQ09ORklHX1BQQwo+
-ICsJLyoKPiArCcKgKiBQb3dlciBBcmNoaXRlY3R1cmUtYmFzZWQgU29DcyBUIFNlcmllcwo+ICsJ
-wqAqLwo+ICsKPiArCS8qIFNvQzogVDEwMjQvVDEwMTQvVDEwMjMvVDEwMTMgUmV2OiAxLjAgKi8K
-PiArCXsgLnNvY19pZAk9ICJzdnI6MHg4NTQwMDAxMCxuYW1lOlQxMDI0LGRpZTpUMTAyNCIsCj4g
-KwnCoMKgLnJldmlzaW9uCT0gIjEuMCIsCj4gKwl9LAo+ICsJeyAuc29jX2lkCT0gInN2cjoweDg1
-NDgwMDEwLG5hbWU6VDEwMjRFLGRpZTpUMTAyNCIsCj4gKwnCoMKgLnJldmlzaW9uCT0gIjEuMCIs
-Cj4gKwl9LAoKUmV2aXNpb24gY291bGQgYmUgY29tcHV0ZWQgZnJvbSB0aGUgbG93IDggYml0cyBv
-ZiBTVlIgKGp1c3QgYXMgeW91IGRvIGZvciB1bmtub3duIFNWUnMpLgoKV2UgY291bGQgbW92ZSB0
-aGUgZGllIG5hbWUgaW50byAuZmFtaWx5OgoKCXsKCQkuc29jX2lkID0gInN2cjoweDg1NDkwMDEw
-LG5hbWU6VDEwMjNFLCIsCgkJLmZhbWlseSA9ICJRb3JJUSBUMTAyNCIsCgl9CgpJIHNlZSB5b3Ug
-ZHJvcHBlZCBzdnJlIChhbmQgdGhlIHRyYWlsaW5nIGNvbW1hKSwgdGhvdWdoIEkgZ3Vlc3MgdGhl
-IHZhc3QKbWFqb3JpdHkgb2YgcG90ZW50aWFsIHVzZXJzIHdpbGwgYmUgbG9va2luZyBhdCAuZmFt
-aWx5LiDCoEluIHdoaWNoIGNhc2UgZG8gd2UKZXZlbiBuZWVkIG5hbWU/IMKgSWYgd2UganVzdCBt
-YWtlIHRoZSBzb2NfaWQgYmUgInN2cjoweG5ubm5ubm5uIiB0aGVuIHdlIGNvdWxkCnNocmluayB0
-aGUgdGFibGUgdG8gYW4gc3ZyK21hc2sgdGhhdCBpZGVudGlmaWVzIGVhY2ggZGllLiDCoEknZCBz
-dGlsbCB3YW50IHRvCmtlZXAgdGhlICJzdnI6IiBldmVuIGlmIHdlJ3JlIGdpdmluZyB1cCBvbiB0
-aGUgZ2VuZXJhbCB0YWdnaW5nIHN5c3RlbSwgdG8gbWFrZQppdCBjbGVhciB3aGF0IHRoZSBudW1i
-ZXIgcmVmZXJzIHRvLCBhbmQgdG8gcHJvdmlkZSBzb21lIGRlZmVuc2UgYWdhaW5zdCB1c2Vycwp3
-aG8gbWF0Y2ggb25seSBhZ2FpbnN0IHNvY19pZCByYXRoZXIgdGhhbiBzb2NfaWQrZmFtaWx5LiDC
-oE9yIHdlIGNvdWxkIGdvCmZ1cnRoZXIgYW5kIGZvcm1hdCBzb2NfaWQgYXMgIlFvcklRIFNWUiAw
-eG5ubm5ubm5uIiBzbyB0aGF0IHNvY19pZC1vbmx5Cm1hdGNoZXMgYXJlIGZ1bGx5IGFjY2VwdGFi
-bGUgcmF0aGVyIHRoYW4ganVzdCBsZXNzIGRhbmdlcm91cy4KCj4gK3N0YXRpYyBjb25zdCBzdHJ1
-Y3Qgc29jX2RldmljZV9hdHRyaWJ1dGUgKmZzbF9zb2NfZGV2aWNlX21hdGNoKAo+ICsJdW5zaWdu
-ZWQgaW50IHN2ciwgY29uc3Qgc3RydWN0IHNvY19kZXZpY2VfYXR0cmlidXRlICptYXRjaGVzKQo+
-ICt7Cj4gKwljaGFyIHN2cl9tYXRjaFs1MF07Cj4gKwlpbnQgbjsKPiArCj4gKwluID0gc3ByaW50
-ZihzdnJfbWF0Y2gsICIqJTA4eCoiLCBzdnIpOwoKbiA9IHNwcmludGYoc3ZyX21hdGNoLCAic3Zy
-OjB4JTA4eCwqIiwgc3ZyKTsKCihhY2NvcmRpbmcgdG8gdGhlIGN1cnJlbnQgZW5jb2RpbmcpCgo+
-ICsKPiArCWRvIHsKPiArCQlpZiAoIW1hdGNoZXMtPnNvY19pZCkKPiArCQkJcmV0dXJuIE5VTEw7
-Cj4gKwkJaWYgKGdsb2JfbWF0Y2goc3ZyX21hdGNoLCBtYXRjaGVzLT5zb2NfaWQpKQo+ICsJCQli
-cmVhazsKPiArCX0gd2hpbGUgKG1hdGNoZXMrKyk7CgpBcmUgeW91IGV4cGVjdGluZyAibWF0Y2hl
-cysrIiB0byBldmVyIGV2YWx1YXRlIGFzIGZhbHNlPwoKPiArCS8qIFJlZ2lzdGVyIHNvYyBkZXZp
-Y2UgKi8KPiArCXNvY19kZXZfYXR0ciA9IGt6YWxsb2Moc2l6ZW9mKCpzb2NfZGV2X2F0dHIpLCBH
-RlBfS0VSTkVMKTsKPiArCWlmICghc29jX2Rldl9hdHRyKSB7Cj4gKwkJcmV0ID0gLUVOT01FTTsK
-PiArCQlnb3RvIG91dF91bm1hcDsKPiArCX0KCkNvdWxkbid0IHRoaXMgYmUgc3RhdGljYWxseSBh
-bGxvY2F0ZWQ/Cgo+ICsKPiArCW1hY2hpbmUgPSBvZl9mbGF0X2R0X2dldF9tYWNoaW5lX25hbWUo
-KTsKPiArCWlmIChtYWNoaW5lKQo+ICsJCXNvY19kZXZfYXR0ci0+bWFjaGluZSA9IGthc3ByaW50
-ZihHRlBfS0VSTkVMLCAiJXMiLAo+IG1hY2hpbmUpOwo+ICsKPiArCXNvY19kZXZfYXR0ci0+ZmFt
-aWx5ID0ga2FzcHJpbnRmKEdGUF9LRVJORUwsICJRb3JJUSIpOwo+ICsKPiArCXN2ciA9IGZzbF9n
-dXRzX2dldF9zdnIoKTsKPiArCWZzbF9zb2MgPSBmc2xfc29jX2RldmljZV9tYXRjaChzdnIsIHFv
-cmlxX3NvYyk7Cj4gKwlpZiAoZnNsX3NvYykgewo+ICsJCXNvY19kZXZfYXR0ci0+c29jX2lkID0g
-a2FzcHJpbnRmKEdGUF9LRVJORUwsICIlcyIsCj4gKwkJCQkJCcKgZnNsX3NvYy0+c29jX2lkKTsK
-CllvdSBjYW4gdXNlIGtzdHJkdXAoKSBpZiB5b3UncmUganVzdCBjb3B5aW5nIHRoZSBzdHJpbmcg
-YXMgaXMuCgo+ICsJCXNvY19kZXZfYXR0ci0+cmV2aXNpb24gPSBrYXNwcmludGYoR0ZQX0tFUk5F
-TCwgIiVzIiwKPiArCQkJCQkJwqDCoMKgZnNsX3NvYy0+cmV2aXNpb24pOwo+ICsJfSBlbHNlIHsK
-PiArCQlzb2NfZGV2X2F0dHItPnNvY19pZCA9IGthc3ByaW50ZihHRlBfS0VSTkVMLCAiMHglMDh4
-IiwKPiBzdnIpOwoKCWthc3ByaW50ZihHRlBfS0VSTkVMLCAic3ZyOjB4JTA4eCwiLCBzdnIpOwoK
-Cj4gKwo+ICsJc29jX2RldiA9IHNvY19kZXZpY2VfcmVnaXN0ZXIoc29jX2Rldl9hdHRyKTsKPiAr
-CWlmIChJU19FUlIoc29jX2RldikpIHsKPiArCQlyZXQgPSAtRU5PREVWOwoKV2h5IGFyZSB5b3Ug
-Y2hhbmdpbmcgdGhlIGVycm9yIGNvZGU/Cgo+ICsJCWdvdG8gb3V0Owo+ICsJfSBlbHNlIHsKClVu
-bmVjZXNzYXJ5ICJlbHNlIi4KCj4gKwkJcHJfaW5mbygiRGV0ZWN0ZWQ6ICVzXG4iLCBzb2NfZGV2
-X2F0dHItPm1hY2hpbmUpOwoKTWFjaGluZTogJXMKCj4gKwkJcHJfaW5mbygiRGV0ZWN0ZWQgU29D
-IGZhbWlseTogJXNcbiIsIHNvY19kZXZfYXR0ci0+ZmFtaWx5KTsKPiArCQlwcl9pbmZvKCJEZXRl
-Y3RlZCBTb0MgSUQ6ICVzLCByZXZpc2lvbjogJXNcbiIsCj4gKwkJCXNvY19kZXZfYXR0ci0+c29j
-X2lkLCBzb2NfZGV2X2F0dHItPnJldmlzaW9uKTsKCnMvRGV0ZWN0ZWQgLy9nCgoKPiArCX0KPiAr
-CXJldHVybiAwOwo+ICtvdXQ6Cj4gKwlrZnJlZShzb2NfZGV2X2F0dHItPm1hY2hpbmUpOwo+ICsJ
-a2ZyZWUoc29jX2Rldl9hdHRyLT5mYW1pbHkpOwo+ICsJa2ZyZWUoc29jX2Rldl9hdHRyLT5zb2Nf
-aWQpOwo+ICsJa2ZyZWUoc29jX2Rldl9hdHRyLT5yZXZpc2lvbik7Cj4gKwlrZnJlZShzb2NfZGV2
-X2F0dHIpOwo+ICtvdXRfdW5tYXA6Cj4gKwlpb3VubWFwKGd1dHMtPnJlZ3MpOwo+ICtvdXRfZnJl
-ZToKPiArCWtmcmVlKGd1dHMpOwoKZGV2bQoKPiArc3RhdGljIGludCBmc2xfZ3V0c19yZW1vdmUo
-c3RydWN0IHBsYXRmb3JtX2RldmljZSAqZGV2KQo+ICt7Cj4gKwlrZnJlZShzb2NfZGV2X2F0dHIt
-Pm1hY2hpbmUpOwo+ICsJa2ZyZWUoc29jX2Rldl9hdHRyLT5mYW1pbHkpOwo+ICsJa2ZyZWUoc29j
-X2Rldl9hdHRyLT5zb2NfaWQpOwo+ICsJa2ZyZWUoc29jX2Rldl9hdHRyLT5yZXZpc2lvbik7Cj4g
-KwlrZnJlZShzb2NfZGV2X2F0dHIpOwo+ICsJc29jX2RldmljZV91bnJlZ2lzdGVyKHNvY19kZXYp
-Owo+ICsJaW91bm1hcChndXRzLT5yZWdzKTsKPiArCWtmcmVlKGd1dHMpOwo+ICsJcmV0dXJuIDA7
-Cj4gK30KCkRvbid0IGZyZWUgdGhlIG1lbW9yeSBiZWZvcmUgeW91IHVucmVnaXN0ZXIgdGhlIGRl
-dmljZSB0aGF0IHVzZXMgaXQgKG1vb3QgaWYKeW91IHVzZSBkZXZtKS4KCj4gwqAKPiArI2lmZGVm
-IENPTkZJR19GU0xfR1VUUwo+ICt1bnNpZ25lZCBpbnQgZnNsX2d1dHNfZ2V0X3N2cih2b2lkKTsK
-PiArI2VuZGlmCgpEb24ndCBpZmRlZiBwcm90b3R5cGVzICh1bmxlc3MgeW91J3JlIGdvaW5nIHRv
-IHByb3ZpZGUgYSBzdHViIGFsdGVybmF0aXZlKS4KCi1TY290dAoKX19fX19fX19fX19fX19fX19f
-X19fX19fX19fX19fX19fX19fX19fX19fX19fX18KaW9tbXUgbWFpbGluZyBsaXN0CmlvbW11QGxp
-c3RzLmxpbnV4LWZvdW5kYXRpb24ub3JnCmh0dHBzOi8vbGlzdHMubGludXhmb3VuZGF0aW9uLm9y
-Zy9tYWlsbWFuL2xpc3RpbmZvL2lvbW11
+On 8.9.2016 21:42, Zach Brown wrote:
+> The sdhci controller on xilinx zynq devices will not function unless
+> the CD bit is provided. http://www.xilinx.com/support/answers/61064.html
+> In cases where it is impossible to provide the CD bit in hardware,
+> setting the controller to test mode and then setting inserted to true
+> will get the controller to function without the CD bit.
+> 
+> The device property "xlnx-fails-without-test-cd" will let the arasan
+> driver know the controller does not have the CD line wired and that the
+> controller does not function without it.
+> 
+> Signed-off-by: Zach Brown <zach.brown@ni.com>
+> ---
+> v2:
+>  * improved commit messages
+>  * removed fake-cd device property
+>  * removed fake-cd quirk
+>  * use broken-cd device property
+>  * documented new usage of broken-cd
+> v3:
+>  * removed new usage of broken-cd
+>  * created fails-without-test-cd device property
+>  * created arasan controller specific quirk
+> v4:
+>  * changed fails-without-test-cd to xlnx-fails-without-test-cd
+>  * removed extra blank line
+> v5:
+>  * Fixed style mistake
+>  * Changed (1 << 0 ) to BIT(0)
+> v6:
+>  * Fixed style mistakes
+>  * Condensed unnecessarily long variable names
+>  * Removed line wraps that were no longer necessary.
+>  * Rebased changes off Ulf's mmc tree's next branch.
+> 
+> 
+>  Documentation/devicetree/bindings/mmc/arasan,sdhci.txt | 4 ++++
+>  1 file changed, 4 insertions(+)
+> 
+> df --gt /Documentation/devicetree/bindings/mmc/arasan,sdhci.txt b/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
+> index 3404afa..e71f043 100644
+> --- a/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
+> +++ b/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
+> @@ -21,6 +21,10 @@ Required Properties:
+>    - interrupts: Interrupt specifier
+>    - interrupt-parent: Phandle for the interrupt controller that services
+>  		      interrupts for this device.
+> +Optional Properties:
+> +- xlnx-fails-without-test-cd: when present, the controller doesn't work when
+
+xlnx, here.
+
+Thanks,
+Michal
