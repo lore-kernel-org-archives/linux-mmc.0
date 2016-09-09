@@ -1,158 +1,42 @@
-From: "Tummala, Sahitya" <stummala@codeaurora.org>
-Subject: Re: [PATCH v3] mmc: sdhci-msm: Add pm_runtime and system PM support
-Date: Fri, 9 Sep 2016 15:30:39 +0530
-Message-ID: <57D28847.8070308@codeaurora.org>
-References: <20160901142335.2396-1-pramod.gurav@linaro.org>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH v4 0/2] Add support for Allwinner A64 mmc controller
+Date: Fri, 9 Sep 2016 12:12:14 +0200
+Message-ID: <CAPDyKFpqFm0zZvK_0gqSy9iuvRGS6MTs9i4OMPC6OVZ8AvjRgQ@mail.gmail.com>
+References: <20160805025715.5306-1-icenowy@aosc.xyz>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252; format=flowed
+Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-msm-owner@vger.kernel.org>
-In-Reply-To: <20160901142335.2396-1-pramod.gurav@linaro.org>
-Sender: linux-arm-msm-owner@vger.kernel.org
-To: Pramod Gurav <pramod.gurav@linaro.org>, linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org
-Cc: linux-kernel@vger.kernel.org, adrian.hunter@intel.com, ulf.hansson@linaro.org
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <20160805025715.5306-1-icenowy@aosc.xyz>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Icenowy Zheng <icenowy@aosc.xyz>
+Cc: Mark Rutland <mark.rutland@arm.com>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, Michal Suchanek <hramrach@gmail.com>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Jaehoon Chung <jh80.chung@samsung.com>, Hans de Goede <hdegoede@redhat.com>, Chen-Yu Tsai <wens@csie.org>, Rob Herring <robh+dt@kernel.org>, Maxime Ripard <maxime.ripard@free-electrons.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
 List-Id: linux-mmc@vger.kernel.org
 
-Hi Pramod,
+On 5 August 2016 at 04:57, Icenowy Zheng <icenowy@aosc.xyz> wrote:
+> Allwinner A64 has a slightly modified version of the Allwinner MMC controller.
+>
+> It do not have "output" or "sample" clock input, instead, it can calibrate the
+> delay internally.
+>
+> This series of patch added the calibrate feature to the sunxi-mmc driver. It
+> is based on works by Andre Przywara <andre.przywara@arm.com>, and now it
+> depends on the patch set sent recently by Hans de Goede <hdegoede@redhat.com>,
+> which disabled "output" and "sample" clock on A10/13.
+> ( http://lists.infradead.org/pipermail/linux-arm-kernel/2016-July/446187.html )
+>
+> As the clock and device tree patch for Allwinner A64 is not yet merged, the
+> patch set contains no patch to enable it.
 
-On 9/1/2016 7:53 PM, Pramod Gurav wrote:
-> Provides runtime PM callbacks to enable and disable clock resources
-> when idle. Also support system PM callbacks to be called during system
-> suspend and resume.
->
-> Signed-off-by: Pramod Gurav <pramod.gurav@linaro.org>
-> ---
-> Changes in v3:
-> - Added CONFIG_PM around runtime pm function.
-> - Replaced msm suspend/resume with generic function directly
-> - Use SET_SYSTEM_SLEEP_PM_OPS instead of late version
->
-> Changes in v2:
-> - Moved pm_rutime enabling before adding host
-> - Handled pm_rutime in remove
-> - Changed runtime handling with reference from sdhci-of-at91.c
->
->   drivers/mmc/host/sdhci-msm.c | 71 +++++++++++++++++++++++++++++++++++++++++++-
->   1 file changed, 70 insertions(+), 1 deletion(-)
->
-> diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
-> index 8ef44a2a..0ef4f29 100644
-> --- a/drivers/mmc/host/sdhci-msm.c
-> +++ b/drivers/mmc/host/sdhci-msm.c
-> @@ -18,6 +18,7 @@
->   #include <linux/of_device.h>
->   #include <linux/delay.h>
->   #include <linux/mmc/mmc.h>
-> +#include <linux/pm_runtime.h>
->   #include <linux/slab.h>
->   
->   #include "sdhci-pltfm.h"
-> @@ -658,12 +659,26 @@ static int sdhci_msm_probe(struct platform_device *pdev)
->   		goto clk_disable;
->   	}
->   
-> +	pm_runtime_get_noresume(&pdev->dev);
-> +	pm_runtime_set_active(&pdev->dev);
-> +	pm_runtime_enable(&pdev->dev);
-> +	pm_runtime_set_autosuspend_delay(&pdev->dev, 50);
-> +	pm_runtime_use_autosuspend(&pdev->dev);
-> +
->   	ret = sdhci_add_host(host);
->   	if (ret)
-> -		goto clk_disable;
-> +		goto pm_runtime_disable;
-> +
-> +	platform_set_drvdata(pdev, host);
-> +
-> +	pm_runtime_put_autosuspend(&pdev->dev);
->   
->   	return 0;
->   
-> +pm_runtime_disable:
-> +	pm_runtime_disable(&pdev->dev);
-> +	pm_runtime_set_suspended(&pdev->dev);
-> +	pm_runtime_put_noidle(&pdev->dev);
->   clk_disable:
->   	clk_disable_unprepare(msm_host->clk);
->   pclk_disable:
-> @@ -685,6 +700,11 @@ static int sdhci_msm_remove(struct platform_device *pdev)
->   		    0xffffffff);
->   
->   	sdhci_remove_host(host, dead);
-> +
-> +	pm_runtime_get_sync(&pdev->dev);
-> +	pm_runtime_disable(&pdev->dev);
-> +	pm_runtime_put_noidle(&pdev->dev);
-> +
->   	clk_disable_unprepare(msm_host->clk);
->   	clk_disable_unprepare(msm_host->pclk);
->   	if (!IS_ERR(msm_host->bus_clk))
-> @@ -693,12 +713,61 @@ static int sdhci_msm_remove(struct platform_device *pdev)
->   	return 0;
->   }
->   
-> +#ifdef CONFIG_PM
-> +static int sdhci_msm_runtime_suspend(struct device *dev)
-> +{
-> +	struct sdhci_host *host = dev_get_drvdata(dev);
-> +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> +	struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
-> +	int ret;
-> +
-> +	ret = sdhci_runtime_suspend_host(host);
-> +	if (ret)
-> +		return ret;
-> +
-> +	clk_disable_unprepare(msm_host->clk);
-> +	clk_disable_unprepare(msm_host->pclk);
-> +
-> +	return 0;
-> +}
-> +
-> +static int sdhci_msm_runtime_resume(struct device *dev)
-> +{
-> +	struct sdhci_host *host = dev_get_drvdata(dev);
-> +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> +	struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
-> +	int ret;
-> +
-> +	ret = clk_prepare_enable(msm_host->clk);
-> +	if (ret) {
-> +		dev_err(dev, "clk_enable failed: %d\n", ret);
-A minor comment - Both error prints related to clock enable are same. 
-Better to print the clock name as well to know which clock enable got 
-failed.
-> +		return ret;
-> +	}
-> +	ret = clk_prepare_enable(msm_host->pclk);
-> +	if (ret) {
-> +		dev_err(dev, "clk_enable failed: %d\n", ret);
-> +		clk_disable_unprepare(msm_host->clk);
-> +		return ret;
-> +	}
-> +
-> +	return sdhci_runtime_resume_host(host);
-> +}
-> +#endif
-> +
-> +static const struct dev_pm_ops sdhci_msm_pm_ops = {
-> +	SET_SYSTEM_SLEEP_PM_OPS(pm_runtime_force_suspend,
-> +					pm_runtime_force_resume)
-> +	SET_RUNTIME_PM_OPS(sdhci_msm_runtime_suspend, sdhci_msm_runtime_resume,
-> +				NULL)
-> +};
-> +
->   static struct platform_driver sdhci_msm_driver = {
->   	.probe = sdhci_msm_probe,
->   	.remove = sdhci_msm_remove,
->   	.driver = {
->   		   .name = "sdhci_msm",
->   		   .of_match_table = sdhci_msm_dt_match,
-> +		   .pm = &sdhci_msm_pm_ops,
->   	},
->   };
->   
+Thanks, series applied for next!
 
--- 
-The Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum,
-a Linux Foundation Collaborative Project
+Kind regards
+Uffe
