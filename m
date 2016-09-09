@@ -1,91 +1,158 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v5 2/2] mmc: core: Optimize the mmc erase size alignment
-Date: Fri, 9 Sep 2016 11:46:21 +0200
-Message-ID: <CAPDyKFqjoya_uwgvrqGjRQMhF7bvKwE76GZsKg1sMt=wcUSabg@mail.gmail.com>
-References: <48ff46b96e01df36aa5d1c2daf1091d2ec2e729f.1473215578.git.baolin.wang@linaro.org>
- <bc52ccbc0c22e2d2f795d75faf748e4e68900e51.1473215578.git.baolin.wang@linaro.org>
+From: "Tummala, Sahitya" <stummala@codeaurora.org>
+Subject: Re: [PATCH v3] mmc: sdhci-msm: Add pm_runtime and system PM support
+Date: Fri, 9 Sep 2016 15:30:39 +0530
+Message-ID: <57D28847.8070308@codeaurora.org>
+References: <20160901142335.2396-1-pramod.gurav@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wm0-f47.google.com ([74.125.82.47]:37426 "EHLO
-        mail-wm0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753817AbcIIJqY (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 9 Sep 2016 05:46:24 -0400
-Received: by mail-wm0-f47.google.com with SMTP id w12so22835286wmf.0
-        for <linux-mmc@vger.kernel.org>; Fri, 09 Sep 2016 02:46:23 -0700 (PDT)
-In-Reply-To: <bc52ccbc0c22e2d2f795d75faf748e4e68900e51.1473215578.git.baolin.wang@linaro.org>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=windows-1252; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-msm-owner@vger.kernel.org>
+In-Reply-To: <20160901142335.2396-1-pramod.gurav@linaro.org>
+Sender: linux-arm-msm-owner@vger.kernel.org
+To: Pramod Gurav <pramod.gurav@linaro.org>, linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org
+Cc: linux-kernel@vger.kernel.org, adrian.hunter@intel.com, ulf.hansson@linaro.org
 List-Id: linux-mmc@vger.kernel.org
-To: Baolin Wang <baolin.wang@linaro.org>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, Russell King <rmk+kernel@arm.linux.org.uk>, Shawn Lin <shawn.lin@rock-chips.com>, Doug Anderson <dianders@chromium.org>, =?UTF-8?Q?Heiko_St=C3=BCbner?= <heiko@sntech.de>, David Jander <david@protonic.nl>, Hans de Goede <hdegoede@redhat.com>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Mark Brown <broonie@kernel.org>, Linus Walleij <linus.walleij@linaro.org>
 
-On 7 September 2016 at 04:38, Baolin Wang <baolin.wang@linaro.org> wrote:
-> In most cases the 'card->erase_size' is power of 2, then the round_up/down()
-> function is more efficient than '%' operation when the 'card->erase_size' is
-> power of 2.
+Hi Pramod,
+
+On 9/1/2016 7:53 PM, Pramod Gurav wrote:
+> Provides runtime PM callbacks to enable and disable clock resources
+> when idle. Also support system PM callbacks to be called during system
+> suspend and resume.
 >
-> Signed-off-by: Baolin Wang <baolin.wang@linaro.org>
-> Tested-by: Shawn Lin <shawn.lin@rock-chips.com>
-
-Thanks, applied for next!
-
-Kind regards
-Uffe
-
+> Signed-off-by: Pramod Gurav <pramod.gurav@linaro.org>
 > ---
->  drivers/mmc/core/core.c |   34 ++++++++++++++++++++++++++--------
->  1 file changed, 26 insertions(+), 8 deletions(-)
+> Changes in v3:
+> - Added CONFIG_PM around runtime pm function.
+> - Replaced msm suspend/resume with generic function directly
+> - Use SET_SYSTEM_SLEEP_PM_OPS instead of late version
 >
-> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-> index 11b4897..4264ac6 100644
-> --- a/drivers/mmc/core/core.c
-> +++ b/drivers/mmc/core/core.c
-> @@ -2209,19 +2209,37 @@ static unsigned int mmc_align_erase_size(struct mmc_card *card,
->  {
->         unsigned int from_new = *from, nr_new = nr, rem;
+> Changes in v2:
+> - Moved pm_rutime enabling before adding host
+> - Handled pm_rutime in remove
+> - Changed runtime handling with reference from sdhci-of-at91.c
 >
-> -       rem = from_new % card->erase_size;
-> -       if (rem) {
-> -               rem = card->erase_size - rem;
-> -               from_new += rem;
-> +       /*
-> +        * When the 'card->erase_size' is power of 2, we can use round_up/down()
-> +        * to align the erase size efficiently.
-> +        */
-> +       if (is_power_of_2(card->erase_size)) {
-> +               unsigned int temp = from_new;
+>   drivers/mmc/host/sdhci-msm.c | 71 +++++++++++++++++++++++++++++++++++++++++++-
+>   1 file changed, 70 insertions(+), 1 deletion(-)
+>
+> diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
+> index 8ef44a2a..0ef4f29 100644
+> --- a/drivers/mmc/host/sdhci-msm.c
+> +++ b/drivers/mmc/host/sdhci-msm.c
+> @@ -18,6 +18,7 @@
+>   #include <linux/of_device.h>
+>   #include <linux/delay.h>
+>   #include <linux/mmc/mmc.h>
+> +#include <linux/pm_runtime.h>
+>   #include <linux/slab.h>
+>   
+>   #include "sdhci-pltfm.h"
+> @@ -658,12 +659,26 @@ static int sdhci_msm_probe(struct platform_device *pdev)
+>   		goto clk_disable;
+>   	}
+>   
+> +	pm_runtime_get_noresume(&pdev->dev);
+> +	pm_runtime_set_active(&pdev->dev);
+> +	pm_runtime_enable(&pdev->dev);
+> +	pm_runtime_set_autosuspend_delay(&pdev->dev, 50);
+> +	pm_runtime_use_autosuspend(&pdev->dev);
 > +
-> +               from_new = round_up(temp, card->erase_size);
-> +               rem = from_new - temp;
+>   	ret = sdhci_add_host(host);
+>   	if (ret)
+> -		goto clk_disable;
+> +		goto pm_runtime_disable;
 > +
->                 if (nr_new > rem)
->                         nr_new -= rem;
->                 else
->                         return 0;
-> -       }
->
-> -       rem = nr_new % card->erase_size;
-> -       if (rem)
-> -               nr_new -= rem;
-> +               nr_new = round_down(nr_new, card->erase_size);
-> +       } else {
-> +               rem = from_new % card->erase_size;
-> +               if (rem) {
-> +                       rem = card->erase_size - rem;
-> +                       from_new += rem;
-> +                       if (nr_new > rem)
-> +                               nr_new -= rem;
-> +                       else
-> +                               return 0;
-> +               }
+> +	platform_set_drvdata(pdev, host);
 > +
-> +               rem = nr_new % card->erase_size;
-> +               if (rem)
-> +                       nr_new -= rem;
-> +       }
->
->         if (nr_new == 0)
->                 return 0;
-> --
-> 1.7.9.5
->
+> +	pm_runtime_put_autosuspend(&pdev->dev);
+>   
+>   	return 0;
+>   
+> +pm_runtime_disable:
+> +	pm_runtime_disable(&pdev->dev);
+> +	pm_runtime_set_suspended(&pdev->dev);
+> +	pm_runtime_put_noidle(&pdev->dev);
+>   clk_disable:
+>   	clk_disable_unprepare(msm_host->clk);
+>   pclk_disable:
+> @@ -685,6 +700,11 @@ static int sdhci_msm_remove(struct platform_device *pdev)
+>   		    0xffffffff);
+>   
+>   	sdhci_remove_host(host, dead);
+> +
+> +	pm_runtime_get_sync(&pdev->dev);
+> +	pm_runtime_disable(&pdev->dev);
+> +	pm_runtime_put_noidle(&pdev->dev);
+> +
+>   	clk_disable_unprepare(msm_host->clk);
+>   	clk_disable_unprepare(msm_host->pclk);
+>   	if (!IS_ERR(msm_host->bus_clk))
+> @@ -693,12 +713,61 @@ static int sdhci_msm_remove(struct platform_device *pdev)
+>   	return 0;
+>   }
+>   
+> +#ifdef CONFIG_PM
+> +static int sdhci_msm_runtime_suspend(struct device *dev)
+> +{
+> +	struct sdhci_host *host = dev_get_drvdata(dev);
+> +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+> +	struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
+> +	int ret;
+> +
+> +	ret = sdhci_runtime_suspend_host(host);
+> +	if (ret)
+> +		return ret;
+> +
+> +	clk_disable_unprepare(msm_host->clk);
+> +	clk_disable_unprepare(msm_host->pclk);
+> +
+> +	return 0;
+> +}
+> +
+> +static int sdhci_msm_runtime_resume(struct device *dev)
+> +{
+> +	struct sdhci_host *host = dev_get_drvdata(dev);
+> +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+> +	struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
+> +	int ret;
+> +
+> +	ret = clk_prepare_enable(msm_host->clk);
+> +	if (ret) {
+> +		dev_err(dev, "clk_enable failed: %d\n", ret);
+A minor comment - Both error prints related to clock enable are same. 
+Better to print the clock name as well to know which clock enable got 
+failed.
+> +		return ret;
+> +	}
+> +	ret = clk_prepare_enable(msm_host->pclk);
+> +	if (ret) {
+> +		dev_err(dev, "clk_enable failed: %d\n", ret);
+> +		clk_disable_unprepare(msm_host->clk);
+> +		return ret;
+> +	}
+> +
+> +	return sdhci_runtime_resume_host(host);
+> +}
+> +#endif
+> +
+> +static const struct dev_pm_ops sdhci_msm_pm_ops = {
+> +	SET_SYSTEM_SLEEP_PM_OPS(pm_runtime_force_suspend,
+> +					pm_runtime_force_resume)
+> +	SET_RUNTIME_PM_OPS(sdhci_msm_runtime_suspend, sdhci_msm_runtime_resume,
+> +				NULL)
+> +};
+> +
+>   static struct platform_driver sdhci_msm_driver = {
+>   	.probe = sdhci_msm_probe,
+>   	.remove = sdhci_msm_remove,
+>   	.driver = {
+>   		   .name = "sdhci_msm",
+>   		   .of_match_table = sdhci_msm_dt_match,
+> +		   .pm = &sdhci_msm_pm_ops,
+>   	},
+>   };
+>   
+
+-- 
+The Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum,
+a Linux Foundation Collaborative Project
