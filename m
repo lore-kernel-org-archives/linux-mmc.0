@@ -1,68 +1,82 @@
-From: Zach Brown <zach.brown@ni.com>
-Subject: [PATCH v7 1/2] sdhci-of-arasan: Add device tree parameter xlnx,fails-without-test-cd bit
-Date: Fri, 9 Sep 2016 11:28:02 -0500
-Message-ID: <1473438483-3857-1-git-send-email-zach.brown@ni.com>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: adrian.hunter@intel.com
-Cc: robh+dt@kernel.org, ulf.hansson@linaro.org, mark.rutland@arm.com, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, michal.simek@xilinx.com, soren.brinkmann@xilinx.com, linux-arm-kernel@lists.infradead.org, zach.brown@ni.com
+From: Sergei Shtylyov <sergei.shtylyov@cogentembedded.com>
+Subject: Re: [PATCH 2/3] mmc: tmio-mmc: add support for 32bit data port
+Date: Fri, 9 Sep 2016 20:27:56 +0300
+Message-ID: <898fafe5-1257-3dab-6d85-896da7bb0291@cogentembedded.com>
+References: <20160909155238.17852-1-chris.brandt@renesas.com>
+ <20160909155238.17852-3-chris.brandt@renesas.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-renesas-soc-owner@vger.kernel.org>
+In-Reply-To: <20160909155238.17852-3-chris.brandt@renesas.com>
+Sender: linux-renesas-soc-owner@vger.kernel.org
+To: Chris Brandt <chris.brandt@renesas.com>, Ulf Hansson <ulf.hansson@linaro.org>, Wolfram Sang <wsa+renesas@sang-engineering.com>
+Cc: Simon Horman <horms+renesas@verge.net.au>, linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 
-The sdhci controller on xilinx zynq devices will not function unless
-the CD bit is provided. http://www.xilinx.com/support/answers/61064.html
-In cases where it is impossible to provide the CD bit in hardware,
-setting the controller to test mode and then setting inserted to true
-will get the controller to function without the CD bit.
+Hello.
 
-The device property "xlnx,fails-without-test-cd" will let the arasan
-driver know the controller does not have the CD line wired and that the
-controller does not function without it.
+On 09/09/2016 06:52 PM, Chris Brandt wrote:
 
-Signed-off-by: Zach Brown <zach.brown@ni.com>
----
-v2:
- * improved commit messages
- * removed fake-cd device property
- * removed fake-cd quirk
- * use broken-cd device property
- * documented new usage of broken-cd
-v3:
- * removed new usage of broken-cd
- * created fails-without-test-cd device property
- * created arasan controller specific quirk
-v4:
- * changed fails-without-test-cd to xlnx-fails-without-test-cd
- * removed extra blank line
-v5:
- * Fixed style mistake
- * Changed (1 << 0 ) to BIT(0)
-v6:
- * Fixed style mistakes
- * Condensed unnecessarily long variable names
- * Removed line wraps that were no longer necessary.
- * Rebased changes off Ulf's mmc tree's next branch.
-v7:
- * Removed erroneous re-creation of Optional Properties section
- * Changed xlnx-fails-without-test-cd to xlnx,fails-without-test-cd
- * Changed of_get_property to of_property_read_bool
+> For the r7s72100 SOC, the DATA_PORT register was change to be 32-bits wide.
+> Therefore a new flag has been created that will allow 32-bit reads/writes
+> to the DATA_PORT register instead of 16-bit (because 16-bits accesses are
+> not supported).
+>
+> Signed-off-by: Chris Brandt <chris.brandt@renesas.com>
+[...]
+> diff --git a/drivers/mmc/host/tmio_mmc_pio.c b/drivers/mmc/host/tmio_mmc_pio.c
+> index 017a4dc..c38542d 100644
+> --- a/drivers/mmc/host/tmio_mmc_pio.c
+> +++ b/drivers/mmc/host/tmio_mmc_pio.c
+> @@ -439,10 +439,45 @@ static void tmio_mmc_transfer_data(struct tmio_mmc_host *host,
+>  {
+>  	int is_read = host->data->flags & MMC_DATA_READ;
+>  	u8  *buf8;
+> +	u32 data;
+>
+>  	/*
+>  	 * Transfer the data
+>  	 */
+> +	if (host->pdata->flags & TMIO_MMC_32BIT_DATA_PORT) {
+> +		if (is_read)
+> +			sd_ctrl_read32_rep(host, CTL_SD_DATA_PORT, (u32 *)buf,
+> +					   count >> 2);
+> +		else
+> +			sd_ctrl_write32_rep(host, CTL_SD_DATA_PORT, (u32 *)buf,
+> +					    count >> 2);
+> +
+> +		/* if count was multiple of 4 */
+> +		if (!(count & 0x3))
+> +			return;
+> +
+> +		buf8 = (u8 *)(buf + (count >> 2));
+> +		count %= 4;
+> +
+> +		if (is_read) {
+> +			sd_ctrl_read32_rep(host, CTL_SD_DATA_PORT, &data, 1);
+> +			while (count--) {
+> +				*buf8 = data * 0xFF;
 
+    'data & 0xFF', perhaps?
 
- Documentation/devicetree/bindings/mmc/arasan,sdhci.txt | 3 +++
- 1 file changed, 3 insertions(+)
+> +				data = data >> 8;
+> +				buf8++;
+> +			}
+> +		} else {
+> +			data = *buf8++;
+> +			if (count > 1)
+> +				data |= (*buf8++ << 8);
+> +			if (count > 2)
+> +				data |= (*buf8++ << 16);
+> +			sd_ctrl_write32_rep(host, CTL_SD_DATA_PORT, &data, 1);
+> +		}
+> +
+> +		return;
+> +	}
+> +
+>  	if (is_read)
+>  		sd_ctrl_read16_rep(host, CTL_SD_DATA_PORT, buf, count >> 1);
+>  	else
 
-diff --git a/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt b/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
-index 3404afa..49df630 100644
---- a/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
-+++ b/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
-@@ -36,6 +36,9 @@ Optional Properties:
-   - #clock-cells: If specified this should be the value <0>.  With this property
-     in place we will export a clock representing the Card Clock.  This clock
-     is expected to be consumed by our PHY.  You must also specify
-+  - xlnx,fails-without-test-cd: when present, the controller doesn't work when
-+    the CD line is not connected properly, and the line is not connected
-+    properly. Test mode can be used to force the controller to function.
- 
- Example:
- 	sdhci@e0100000 {
--- 
-2.7.4
+MBR, Sergei
