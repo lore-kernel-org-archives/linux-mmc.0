@@ -1,53 +1,62 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: core: Use a default maximum erase timeout
-Date: Fri, 9 Sep 2016 11:45:53 +0200
-Message-ID: <CAPDyKFp5W+AX79F7ho3DnX8huYYSd3OxBeuL_3C9Yf3tT8Zjjw@mail.gmail.com>
-References: <1472815801-24932-1-git-send-email-ulf.hansson@linaro.org> <8962af00-8735-a419-5de8-50d5f3eda72d@rock-chips.com>
+Subject: Re: [PATCH] mmc: sh_mobile_sdhi: Add r8a7796 support
+Date: Fri, 9 Sep 2016 11:45:58 +0200
+Message-ID: <CAPDyKFoU+rse-AkJ+SaEuhfLapVMqyevimRfy55jzTHx9xswsA@mail.gmail.com>
+References: <1473158318-9088-1-git-send-email-horms+renesas@verge.net.au>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wm0-f47.google.com ([74.125.82.47]:36918 "EHLO
-        mail-wm0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751699AbcIIJpz (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 9 Sep 2016 05:45:55 -0400
-Received: by mail-wm0-f47.google.com with SMTP id w12so22813069wmf.0
-        for <linux-mmc@vger.kernel.org>; Fri, 09 Sep 2016 02:45:55 -0700 (PDT)
-In-Reply-To: <8962af00-8735-a419-5de8-50d5f3eda72d@rock-chips.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-renesas-soc-owner@vger.kernel.org>
+In-Reply-To: <1473158318-9088-1-git-send-email-horms+renesas@verge.net.au>
+Sender: linux-renesas-soc-owner@vger.kernel.org
+To: Simon Horman <horms+renesas@verge.net.au>
+Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, Magnus Damm <magnus.damm@gmail.com>, linux-mmc <linux-mmc@vger.kernel.org>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>, Ai Kyuse <ai.kyuse.uw@renesas.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Shawn Lin <shawn.lin@rock-chips.com>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, Jaehoon Chung <jh80.chung@samsung.com>, Adrian Hunter <adrian.hunter@intel.com>, Baolin Wang <baolin.wang@linaro.org>
 
-On 6 September 2016 at 03:59, Shawn Lin <shawn.lin@rock-chips.com> wrote:
-> Hi Ulf,
+On 6 September 2016 at 12:38, Simon Horman <horms+renesas@verge.net.au> wrote:
+> From: Ai Kyuse <ai.kyuse.uw@renesas.com>
 >
-> On 2016/9/2 19:30, Ulf Hansson wrote:
->>
->> In cases when the host->max_busy_timeout isn't specified, the calculated
->> number of maximum discard sectors defaults to UINT_MAX. This may cause a
->> too long timeout for a discard request.
+> Add support for r8a7796 SoC.
 >
->
->
-> There is a android specific case(aka recovery stage) which may stuck IO
-> routine for a very long time (I saw 7 mins for the wrost case) . After
-> flashing ROM or factory reset, it will wipe a large number of sectors
-> with secure tag[0]. We can image that we may do secdiscard for a 100GB
-> free disk and unfortunately the max_busy_timeout isn't specified. It's
-> probably ok as on recovery stage there are no other tasks competing for
-> the IO and we hope the wipe action could finish ASAP. But if this case
-> happens for normal runing time, the system/user-space will be broken
-> anyway for waiting for such a long time. So this patch looks sane.
+> Signed-off-by: Ai Kyuse <ai.kyuse.uw@renesas.com>
+> Signed-off-by: Simon Horman <horms+renesas@verge.net.au>
+> Reviewed-by: Geert Uytterhoeven <geert+renesas@glider.be>
 
-Okay, I have queued this up for next and added your reviewed-by tag.
-
->
->
-> [0]:
-> https://android.googlesource.com/platform/system/extras/+/61d6591/ext4_utils/wipe.c
->
-
-Thanks for the information.
+Thanks, applied for next!
 
 Kind regards
 Uffe
+
+> ---
+>  Documentation/devicetree/bindings/mmc/tmio_mmc.txt | 1 +
+>  drivers/mmc/host/sh_mobile_sdhi.c                  | 1 +
+>  2 files changed, 2 insertions(+)
+> ---
+>  Based on mmc/next
+>
+> diff --git a/Documentation/devicetree/bindings/mmc/tmio_mmc.txt b/Documentation/devicetree/bindings/mmc/tmio_mmc.txt
+> index 0f610d4b5b00..13df9c2399c3 100644
+> --- a/Documentation/devicetree/bindings/mmc/tmio_mmc.txt
+> +++ b/Documentation/devicetree/bindings/mmc/tmio_mmc.txt
+> @@ -23,6 +23,7 @@ Required properties:
+>                 "renesas,sdhi-r8a7793" - SDHI IP on R8A7793 SoC
+>                 "renesas,sdhi-r8a7794" - SDHI IP on R8A7794 SoC
+>                 "renesas,sdhi-r8a7795" - SDHI IP on R8A7795 SoC
+> +               "renesas,sdhi-r8a7796" - SDHI IP on R8A7796 SoC
+>
+>  Optional properties:
+>  - toshiba,mmc-wrprotect-disable: write-protect detection is unavailable
+> diff --git a/drivers/mmc/host/sh_mobile_sdhi.c b/drivers/mmc/host/sh_mobile_sdhi.c
+> index d679c8a533b6..49edff7fee49 100644
+> --- a/drivers/mmc/host/sh_mobile_sdhi.c
+> +++ b/drivers/mmc/host/sh_mobile_sdhi.c
+> @@ -94,6 +94,7 @@ static const struct of_device_id sh_mobile_sdhi_of_match[] = {
+>         { .compatible = "renesas,sdhi-r8a7793", .data = &of_rcar_gen2_compatible, },
+>         { .compatible = "renesas,sdhi-r8a7794", .data = &of_rcar_gen2_compatible, },
+>         { .compatible = "renesas,sdhi-r8a7795", .data = &of_rcar_gen3_compatible, },
+> +       { .compatible = "renesas,sdhi-r8a7796", .data = &of_rcar_gen3_compatible, },
+>         {},
+>  };
+>  MODULE_DEVICE_TABLE(of, sh_mobile_sdhi_of_match);
+> --
+> 2.7.0.rc3.207.g0ac5344
+>
