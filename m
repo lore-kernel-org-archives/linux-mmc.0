@@ -1,28 +1,54 @@
-From: Pramod Gurav <pramod.gurav@linaro.org>
-Subject: Re: [PATCH v3] mmc: sdhci-msm: Add pm_runtime and system PM support
-Date: Mon, 12 Sep 2016 13:17:07 +0530
-Message-ID: <CANYu_0tviS8tiG1Zskk2XHnXQ=7CJKH_gcCaUOoT+kMh-2oTCQ@mail.gmail.com>
-References: <20160901142335.2396-1-pramod.gurav@linaro.org> <57D28847.8070308@codeaurora.org>
+From: Geert Uytterhoeven <geert@linux-m68k.org>
+Subject: Re: [PATCH 2/3] mmc: tmio-mmc: add support for 32bit data port
+Date: Mon, 12 Sep 2016 10:09:35 +0200
+Message-ID: <CAMuHMdUAZpNoPGJZO3CHHt6_BAe+7Fdh2Bqn0qGfjO2UnuFiMA@mail.gmail.com>
+References: <20160909155238.17852-1-chris.brandt@renesas.com>
+ <20160909155238.17852-3-chris.brandt@renesas.com> <CAMuHMdXihVRcmn2Ep0cRdg2U0=boJohxzzL1=32Ek+17ivTwWg@mail.gmail.com>
+ <SG2PR06MB1165272B3CB9B0A00F1E06CE8AFC0@SG2PR06MB1165.apcprd06.prod.outlook.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-arm-msm-owner@vger.kernel.org>
-In-Reply-To: <57D28847.8070308@codeaurora.org>
-Sender: linux-arm-msm-owner@vger.kernel.org
-To: "Tummala, Sahitya" <stummala@codeaurora.org>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>, "open list:ARM/QUALCOMM SUPPORT" <linux-arm-msm@vger.kernel.org>, open list <linux-kernel@vger.kernel.org>, Adrian Hunter <adrian.hunter@intel.com>, Ulf Hansson <ulf.hansson@linaro.org>
+Return-path: <linux-renesas-soc-owner@vger.kernel.org>
+In-Reply-To: <SG2PR06MB1165272B3CB9B0A00F1E06CE8AFC0@SG2PR06MB1165.apcprd06.prod.outlook.com>
+Sender: linux-renesas-soc-owner@vger.kernel.org
+To: Chris Brandt <Chris.Brandt@renesas.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Simon Horman <horms+renesas@verge.net.au>, Linux MMC List <linux-mmc@vger.kernel.org>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On 9 September 2016 at 15:30, Tummala, Sahitya <stummala@codeaurora.org> wrote:
-> Hi Pramod,
-<snip>
->> +       ret = clk_prepare_enable(msm_host->clk);
->> +       if (ret) {
->> +               dev_err(dev, "clk_enable failed: %d\n", ret);
->
-> A minor comment - Both error prints related to clock enable are same. Better
-> to print the clock name as well to know which clock enable got failed.
->
+Hi Chris,
 
-Thanks Sahitya for comments. Will take care of this in next version.
->> +               return ret;
->> +       }
+On Sun, Sep 11, 2016 at 9:50 PM, Chris Brandt <Chris.Brandt@renesas.com> wrote:
+> On 9/11/2016, Geert Uytterhoeven wrote:
+>> > --- a/drivers/mmc/host/tmio_mmc.h
+>> > +++ b/drivers/mmc/host/tmio_mmc.h
+>>
+>> > @@ -259,4 +265,10 @@ static inline void
+>> sd_ctrl_write32_as_16_and_16(struct tmio_mmc_host *host, int
+>> >         writew(val >> 16, host->ctl + ((addr + 2) <<
+>> > host->bus_shift));  }
+>> >
+>> > +static inline void sd_ctrl_write32_rep(struct tmio_mmc_host *host, int
+>> addr,
+>> > +               u32 *buf, int count)
+>>
+>> const u32 *buf
+>
+> So would you say sd_ctrl_write16_rep should also be changed to be 'const u16 *buf'?
+>
+> Currently it is:
+> static inline void sd_ctrl_write16_rep(struct tmio_mmc_host *host, int addr,
+>                 u16 *buf, int count)
+> {
+>         writesw(host->ctl + (addr << host->bus_shift), buf, count);
+
+Ideally it should become const, too.
+
+Gr{oetje,eeting}s,
+
+                        Geert
+
+--
+Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
+
+In personal conversations with technical people, I call myself a hacker. But
+when I'm talking to journalists I just say "programmer" or something like that.
+                                -- Linus Torvalds
