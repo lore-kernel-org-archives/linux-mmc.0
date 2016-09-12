@@ -1,24 +1,33 @@
-From: Chris Brandt <Chris.Brandt@renesas.com>
-Subject: RE: [PATCH v2 2/3] mmc: tmio-mmc: add support for 32bit data port
-Date: Mon, 12 Sep 2016 13:06:53 +0000
-Message-ID: <SG2PR06MB11652D22B3CDEC008F11D3508AFF0@SG2PR06MB1165.apcprd06.prod.outlook.com>
-References: <20160911210328.30641-1-chris.brandt@renesas.com>
- <20160911210328.30641-3-chris.brandt@renesas.com>
- <b49b3a72-5937-fab0-8493-cc27f2655592@cogentembedded.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+From: Chris Brandt <chris.brandt@renesas.com>
+Subject: [PATCH v3 0/3] mmc: sh_mobile_sdhi: Add r7s72100 support
+Date: Mon, 12 Sep 2016 10:15:04 -0400
+Message-ID: <20160912141507.6837-1-chris.brandt@renesas.com>
 Return-path: <linux-renesas-soc-owner@vger.kernel.org>
-In-Reply-To: <b49b3a72-5937-fab0-8493-cc27f2655592@cogentembedded.com>
-Content-Language: en-US
 Sender: linux-renesas-soc-owner@vger.kernel.org
-To: Sergei Shtylyov <sergei.shtylyov@cogentembedded.com>, Ulf Hansson <ulf.hansson@linaro.org>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Geert Uytterhoeven <geert@linux-m68k.org>
-Cc: Simon Horman <horms+renesas@verge.net.au>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, "linux-renesas-soc@vger.kernel.org" <linux-renesas-soc@vger.kernel.org>
+To: Ulf Hansson <ulf.hansson@linaro.org>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Sergei Shtylyov <sergei.shtylyov@cogentembedded.com>, Geert Uytterhoeven <geert@linux-m68k.org>
+Cc: Simon Horman <horms+renesas@verge.net.au>, linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org, Chris Brandt <chris.brandt@renesas.com>
 List-Id: linux-mmc@vger.kernel.org
 
-SGVsbG8gU2VyZ2VpDQoNCj4gICAgIEJUVywgeW91IGNvdWxkIHVzZSBtZW1jcHkoKSBhbmQgdGh1
-cyBhdm9pZCBhbGwgdGhlIGxvb3BzIGFuZCBzaGlmdHMsDQo+IHNlZQ0KPiBhdGFfc2ZmX2RhdGFf
-eGZlcjMyKCkgaW4gZHJpdmVycy9hdGEvbGliYXRhLXNmZi5jLg0KPiANCj4gWy4uLl0NCj4gDQo+
-IE1CUiwgU2VyZ2VpDQoNClRoYXQncyBhIGdvb2QgaWRlYS4gVGhhbmsgeW91Lg0KSSBqdXN0IHRy
-aWVkIGl0IGFuZCBpdCB3b3JrcyBnb29kLCBzbyBJJ2xsIGdldCByaWQgb2YgdGhlIGxvb3BzLg0K
-DQoNCg0KQ2hyaXMNCg0K
+For the most part, the SDHI controller in the RZ/A1 (r7s72100)
+is the same as other Renesas SoC...except for the fact that the 
+data port register was widened to 32-bits and the 16-bit accesses
+in the current tmio driver aren't going to cut it.
+
+Also, the tmio driver allows you to pass in what voltages you
+support via the ocr_mask. For the RZ/A1, it's just simple 3.3v.
+So, I added the ability to pass that when using DT.
+
+Chris Brandt (3):
+  mmc: sh_mobile_sdhi: add ocr_mask option
+  mmc: tmio-mmc: add support for 32bit data port
+  mmc: sh_mobile_sdhi: Add r7s72100 support
+
+ Documentation/devicetree/bindings/mmc/tmio_mmc.txt |  1 +
+ drivers/mmc/host/sh_mobile_sdhi.c                  |  9 +++++++
+ drivers/mmc/host/tmio_mmc.h                        | 12 +++++++++
+ drivers/mmc/host/tmio_mmc_pio.c                    | 30 ++++++++++++++++++++++
+ include/linux/mfd/tmio.h                           |  5 ++++
+ 5 files changed, 57 insertions(+)
+
+-- 
+2.9.2
