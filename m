@@ -1,35 +1,32 @@
 From: Simon Horman <horms+renesas@verge.net.au>
-Subject: [PATCH v7 02/11] arm64: dts: r8a7795: salvator-x: enable UHS for SDHI 0 & 3
-Date: Tue, 13 Sep 2016 12:56:59 +0200
-Message-ID: <1473764228-24768-3-git-send-email-horms+renesas@verge.net.au>
+Subject: [PATCH v7 10/11] arm64: dts: r8a7796: salvator-x: enable UHS for SDHI 0 & 3
+Date: Tue, 13 Sep 2016 12:57:07 +0200
+Message-ID: <1473764228-24768-11-git-send-email-horms+renesas@verge.net.au>
 References: <1473764228-24768-1-git-send-email-horms+renesas@verge.net.au>
-Return-path: <linux-renesas-soc-owner@vger.kernel.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from kirsty.vergenet.net ([202.4.237.240]:56892 "EHLO
+        kirsty.vergenet.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1756479AbcIMK5l (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 13 Sep 2016 06:57:41 -0400
 In-Reply-To: <1473764228-24768-1-git-send-email-horms+renesas@verge.net.au>
-Sender: linux-renesas-soc-owner@vger.kernel.org
+Sender: linux-mmc-owner@vger.kernel.org
+List-Id: linux-mmc@vger.kernel.org
 To: Wolfram Sang <wsa+renesas@sang-engineering.com>, Ulf Hansson <ulf.hansson@linaro.org>
 Cc: Magnus Damm <magnus.damm@gmail.com>, linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Simon Horman <horms+renesas@verge.net.au>
-List-Id: linux-mmc@vger.kernel.org
 
-From: Wolfram Sang <wsa+renesas@sang-engineering.com>
+Based on work for the r8a7796 by Wolfram Sang.
 
-Reviewed-by: Geert Uytterhoeven <geert+renesas@glider.be>
-Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>
 Signed-off-by: Simon Horman <horms+renesas@verge.net.au>
 ---
-v6
-* Updated patch prefix: s/salvator/&-x/
-
-v5
-* Added to series, previously posted by Wolfram independently
----
- arch/arm64/boot/dts/renesas/r8a7795-salvator-x.dts | 22 ++++++++++++++++++++--
+ arch/arm64/boot/dts/renesas/r8a7796-salvator-x.dts | 22 ++++++++++++++++++++--
  1 file changed, 20 insertions(+), 2 deletions(-)
 
-diff --git a/arch/arm64/boot/dts/renesas/r8a7795-salvator-x.dts b/arch/arm64/boot/dts/renesas/r8a7795-salvator-x.dts
-index b1eab6876f8c..ff4e4fe843ed 100644
---- a/arch/arm64/boot/dts/renesas/r8a7795-salvator-x.dts
-+++ b/arch/arm64/boot/dts/renesas/r8a7795-salvator-x.dts
-@@ -237,11 +237,25 @@
+diff --git a/arch/arm64/boot/dts/renesas/r8a7796-salvator-x.dts b/arch/arm64/boot/dts/renesas/r8a7796-salvator-x.dts
+index a8373c248ad1..a9947d45cccc 100644
+--- a/arch/arm64/boot/dts/renesas/r8a7796-salvator-x.dts
++++ b/arch/arm64/boot/dts/renesas/r8a7796-salvator-x.dts
+@@ -97,11 +97,25 @@
  	sdhi0_pins: sd0 {
  		groups = "sdhi0_data4", "sdhi0_ctrl";
  		function = "sdhi0";
@@ -53,9 +50,9 @@ index b1eab6876f8c..ff4e4fe843ed 100644
 +		function = "sdhi3";
 +		power-source = <1800>;
  	};
+ };
  
- 	sound_pins: sound {
-@@ -371,25 +385,29 @@
+@@ -111,25 +125,29 @@
  
  &sdhi0 {
  	pinctrl-0 = <&sdhi0_pins>;
@@ -89,3 +86,4 @@ index b1eab6876f8c..ff4e4fe843ed 100644
  
 -- 
 2.7.0.rc3.207.g0ac5344
+
