@@ -1,81 +1,91 @@
 From: Simon Horman <horms+renesas@verge.net.au>
-Subject: [PATCH v7 08/11] arm64: dts: r8a7796: add SDHI nodes
-Date: Tue, 13 Sep 2016 12:57:05 +0200
-Message-ID: <1473764228-24768-9-git-send-email-horms+renesas@verge.net.au>
+Subject: [PATCH v7 02/11] arm64: dts: r8a7795: salvator-x: enable UHS for SDHI 0 & 3
+Date: Tue, 13 Sep 2016 12:56:59 +0200
+Message-ID: <1473764228-24768-3-git-send-email-horms+renesas@verge.net.au>
 References: <1473764228-24768-1-git-send-email-horms+renesas@verge.net.au>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from kirsty.vergenet.net ([202.4.237.240]:56892 "EHLO
-        kirsty.vergenet.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1756243AbcIMK5f (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 13 Sep 2016 06:57:35 -0400
+Return-path: <linux-renesas-soc-owner@vger.kernel.org>
 In-Reply-To: <1473764228-24768-1-git-send-email-horms+renesas@verge.net.au>
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Sender: linux-renesas-soc-owner@vger.kernel.org
 To: Wolfram Sang <wsa+renesas@sang-engineering.com>, Ulf Hansson <ulf.hansson@linaro.org>
 Cc: Magnus Damm <magnus.damm@gmail.com>, linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Simon Horman <horms+renesas@verge.net.au>
+List-Id: linux-mmc@vger.kernel.org
 
-Add SDHI nodes to the DT of the r8a7796 SoC.
+From: Wolfram Sang <wsa+renesas@sang-engineering.com>
 
-Based on the DT of the r8a7795 SoC.
-
-Signed-off-by: Simon Horman <horms+renesas@verge.net.au>
 Reviewed-by: Geert Uytterhoeven <geert+renesas@glider.be>
+Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+Signed-off-by: Simon Horman <horms+renesas@verge.net.au>
 ---
- arch/arm64/boot/dts/renesas/r8a7796.dtsi | 42 ++++++++++++++++++++++++++++++++
- 1 file changed, 42 insertions(+)
+v6
+* Updated patch prefix: s/salvator/&-x/
 
-diff --git a/arch/arm64/boot/dts/renesas/r8a7796.dtsi b/arch/arm64/boot/dts/renesas/r8a7796.dtsi
-index 9217da983525..3aae29fdd9d7 100644
---- a/arch/arm64/boot/dts/renesas/r8a7796.dtsi
-+++ b/arch/arm64/boot/dts/renesas/r8a7796.dtsi
-@@ -251,5 +251,47 @@
- 			power-domains = <&sysc R8A7796_PD_ALWAYS_ON>;
- 			status = "disabled";
- 		};
+v5
+* Added to series, previously posted by Wolfram independently
+---
+ arch/arm64/boot/dts/renesas/r8a7795-salvator-x.dts | 22 ++++++++++++++++++++--
+ 1 file changed, 20 insertions(+), 2 deletions(-)
+
+diff --git a/arch/arm64/boot/dts/renesas/r8a7795-salvator-x.dts b/arch/arm64/boot/dts/renesas/r8a7795-salvator-x.dts
+index b1eab6876f8c..ff4e4fe843ed 100644
+--- a/arch/arm64/boot/dts/renesas/r8a7795-salvator-x.dts
++++ b/arch/arm64/boot/dts/renesas/r8a7795-salvator-x.dts
+@@ -237,11 +237,25 @@
+ 	sdhi0_pins: sd0 {
+ 		groups = "sdhi0_data4", "sdhi0_ctrl";
+ 		function = "sdhi0";
++		power-source = <3300>;
++	};
 +
-+		sdhi0: sd@ee100000 {
-+			compatible = "renesas,sdhi-r8a7796";
-+			reg = <0 0xee100000 0 0x2000>;
-+			interrupts = <GIC_SPI 165 IRQ_TYPE_LEVEL_HIGH>;
-+			clocks = <&cpg CPG_MOD 314>;
-+			max-frequency = <200000000>;
-+			power-domains = <&sysc R8A7796_PD_ALWAYS_ON>;
-+			status = "disabled";
-+		};
-+
-+		sdhi1: sd@ee120000 {
-+			compatible = "renesas,sdhi-r8a7796";
-+			reg = <0 0xee120000 0 0x2000>;
-+			interrupts = <GIC_SPI 166 IRQ_TYPE_LEVEL_HIGH>;
-+			clocks = <&cpg CPG_MOD 313>;
-+			max-frequency = <200000000>;
-+			power-domains = <&sysc R8A7796_PD_ALWAYS_ON>;
-+			status = "disabled";
-+		};
-+
-+		sdhi2: sd@ee140000 {
-+			compatible = "renesas,sdhi-r8a7796";
-+			reg = <0 0xee140000 0 0x2000>;
-+			interrupts = <GIC_SPI 167 IRQ_TYPE_LEVEL_HIGH>;
-+			clocks = <&cpg CPG_MOD 312>;
-+			max-frequency = <200000000>;
-+			power-domains = <&sysc R8A7796_PD_ALWAYS_ON>;
-+			cap-mmc-highspeed;
-+			status = "disabled";
-+		};
-+
-+		sdhi3: sd@ee160000 {
-+			compatible = "renesas,sdhi-r8a7796";
-+			reg = <0 0xee160000 0 0x2000>;
-+			interrupts = <GIC_SPI 168 IRQ_TYPE_LEVEL_HIGH>;
-+			clocks = <&cpg CPG_MOD 311>;
-+			max-frequency = <200000000>;
-+			power-domains = <&sysc R8A7796_PD_ALWAYS_ON>;
-+			cap-mmc-highspeed;
-+			status = "disabled";
-+		};
++	sdhi0_pins_uhs: sd0_uhs {
++		groups = "sdhi0_data4", "sdhi0_ctrl";
++		function = "sdhi0";
++		power-source = <1800>;
  	};
+ 
+ 	sdhi3_pins: sd3 {
+ 		groups = "sdhi3_data4", "sdhi3_ctrl";
+ 		function = "sdhi3";
++		power-source = <3300>;
++	};
++
++	sdhi3_pins_uhs: sd3_uhs {
++		groups = "sdhi3_data4", "sdhi3_ctrl";
++		function = "sdhi3";
++		power-source = <1800>;
+ 	};
+ 
+ 	sound_pins: sound {
+@@ -371,25 +385,29 @@
+ 
+ &sdhi0 {
+ 	pinctrl-0 = <&sdhi0_pins>;
+-	pinctrl-names = "default";
++	pinctrl-1 = <&sdhi0_pins_uhs>;
++	pinctrl-names = "default", "state_uhs";
+ 
+ 	vmmc-supply = <&vcc_sdhi0>;
+ 	vqmmc-supply = <&vccq_sdhi0>;
+ 	cd-gpios = <&gpio3 12 GPIO_ACTIVE_LOW>;
+ 	wp-gpios = <&gpio3 13 GPIO_ACTIVE_HIGH>;
+ 	bus-width = <4>;
++	sd-uhs-sdr50;
+ 	status = "okay";
  };
+ 
+ &sdhi3 {
+ 	pinctrl-0 = <&sdhi3_pins>;
+-	pinctrl-names = "default";
++	pinctrl-1 = <&sdhi3_pins_uhs>;
++	pinctrl-names = "default", "state_uhs";
+ 
+ 	vmmc-supply = <&vcc_sdhi3>;
+ 	vqmmc-supply = <&vccq_sdhi3>;
+ 	cd-gpios = <&gpio4 15 GPIO_ACTIVE_LOW>;
+ 	wp-gpios = <&gpio4 16 GPIO_ACTIVE_HIGH>;
+ 	bus-width = <4>;
++	sd-uhs-sdr50;
+ 	status = "okay";
+ };
+ 
 -- 
 2.7.0.rc3.207.g0ac5344
-
