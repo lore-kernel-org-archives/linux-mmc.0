@@ -1,104 +1,110 @@
-From: Wolfram Sang <wsa@the-dreams.de>
-Subject: Re: [PATCH v7 0/6] UHS-I SDR-104 support for sh_mobile_sdhi
-Date: Tue, 13 Sep 2016 14:58:25 +0200
-Message-ID: <20160913125825.GA3510@katana>
-References: <1473764175-24580-1-git-send-email-horms+renesas@verge.net.au>
- <CAPDyKFoUQ0Xr0qVJoEjw6n_eL3VDoUfZHpu183pM1Yt7-pAnzQ@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-        protocol="application/pgp-signature"; boundary="PNTmBPCT7hxwcZjr"
-Return-path: <linux-renesas-soc-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <CAPDyKFoUQ0Xr0qVJoEjw6n_eL3VDoUfZHpu183pM1Yt7-pAnzQ@mail.gmail.com>
-Sender: linux-renesas-soc-owner@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Simon Horman <horms+renesas@verge.net.au>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Magnus Damm <magnus.damm@gmail.com>, linux-mmc <linux-mmc@vger.kernel.org>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>
+From: Tomas Winkler <tomas.winkler@intel.com>
+Subject: [PATCH v6 0/9] Replay Protected Memory Block (RPMB) subsystem
+Date: Tue, 13 Sep 2016 16:22:55 +0300
+Message-ID: <1473772984-17562-1-git-send-email-tomas.winkler@intel.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mga06.intel.com ([134.134.136.31]:8488 "EHLO mga06.intel.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1750940AbcIMNZH (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Tue, 13 Sep 2016 09:25:07 -0400
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Ulf Hansson <ulf.hansson@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, James Bottomley <James.Bottomley@HansenPartnership.com>, "Martin K . Petersen" <martin.petersen@oracle.com>, Vinayak Holikatti <vinholikatti@gmail.com>, Andy Lutomirski <luto@kernel.org>, =?UTF-8?q?Arve=20Hj=C3=B8nnev=C3=A5g?= <arve@android.com>, Michael Ryleev <gmar@google.com>, Joao Pinto <Joao.Pinto@synopsys.com>, Christoph Hellwig <hch@lst.de>, Yaniv Gardi <ygardi@codeaurora.org>
+Cc: Avri Altman <avri.altman@gmail.com>, linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org, linux-scsi@vger.kernel.org, Tomas Winkler <tomas.winkler@intel.com>
 
 
---PNTmBPCT7hxwcZjr
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+Few storage technologies such is EMMC, UFS, and NVMe support RPMB
+hardware partition with common protocol and frame layout.
+The RPMB partition cannot be accessed via standard block layer, but by a
+set of specific commands: WRITE, READ, GET_WRITE_COUNTER, and
+PROGRAM_KEY.
+Such a partition provides authenticated and replay protected access,
+hence suitable as a secure storage.
 
-On Tue, Sep 13, 2016 at 02:48:26PM +0200, Ulf Hansson wrote:
-> On 13 September 2016 at 12:56, Simon Horman <horms+renesas@verge.net.au> =
-wrote:
-> >
-> > Hi,
-> >
-> > this series is based on work by Ai Kyuse to add UHS-I SDR-104 support f=
-or
-> > sh_mobile_sdhi. It builds on work by Shinobu Uehara, Rob Taylor, William
-> > Towle and Ian Molton, Ben Hutchings, Wolfram Sang and others to add UHS=
--I
-> > SDR-50 support to the same driver.
-> >
-> > It is based on a merge of the next branches of the mmc tree.
-> >
-> > To aid review the following git branch is provided:
-> > * https:://git.kernel.org/pub/scm/linux/kernel/git/horms/renesas.git to=
-pic/sdr104-driver-v7
-> >
-> > Overview of changes since v6:
-> > * Address review by Ulf
-> >   - Detailed in per-patch changelogs
-> > * Move integration (arm/arm64 dt) patches to separate patchset
-> >
-> > Please see http://elinux.org/Tests:SD-SDHI-SDR104 for indicative tests
-> > results.
-> >
-> >
-> > Ai Kyuse (3):
-> >   mmc: tmio: enhance illegal sequence handling
-> >   mmc: tmio: Add hw reset support
-> >   mmc: tmio: Add tuning support
-> >
-> > Simon Horman (3):
-> >   mmc: core: Add helper to see if a host can be retuned
-> >   mmc: tmio: document mandatory and optional callbacks
-> >   mmc: sh_mobile_sdhi: Add tuning support
-> >
-> >  drivers/mmc/host/sh_mobile_sdhi.c | 265 ++++++++++++++++++++++++++++++=
-+++++++-
-> >  drivers/mmc/host/tmio_mmc.h       |  18 ++-
-> >  drivers/mmc/host/tmio_mmc_pio.c   |  87 ++++++++++++-
-> >  include/linux/mmc/host.h          |   5 +
-> >  4 files changed, 367 insertions(+), 8 deletions(-)
-> >
-> > --
-> > 2.7.0.rc3.207.g0ac5344
-> >
->=20
-> This looks good to me, although I would like to get an ack from
-> Wolfram before I queue this up.
+The RPMB layer aims to provide in-kernel API for Trusted Execution
+Environment (TEE) devices that are capable to securely compute block
+frame signature. In case a TEE device wish to store a replay protected
+data, it creates an RPMB frame with requested data and computes HMAC of
+the frame, then it requests the storage device via RPMB layer to store
+the data.
 
-I'll test today or tomorrow. Same for the r7s72100 patches.
+The layer provides two APIs, for rpmb_req_cmd() for issuing one of RPMB
+specific commands and rpmb_seq_cmd() for issuing of raw RPMB protocol
+frames,  which is close to the functionality provided by emmc multi ioctl
+interface.
 
-Thanks,
+A TEE driver can claim the RPMB interface, for example, via
+class_interface_register ().
 
-   Wolfram
+A storage device registers its RPMB hardware (eMMC) partition or RPMB
+W-LUN (UFS) with the RPMB layer providing an implementation for
+rpmb_seq_cmd() handler. The interface enables sending sequence of RPMB
+standard frames.
 
+A parallel user space API is provided via /dev/rpmbX character
+device with two IOCTL commands.
+Simplified one, RPMB_IOC_REQ_CMD, were read result cycles is performed
+by the framework on behalf the user and second, RPMB_IOC_SEQ_CMD where
+the whole RPMB sequence, including RESULT_READ is supplied by the caller.
+The latter is intended for easier adjusting of the applications that
+use MMC_IOC_MULTI_CMD ioctl, such as
+https://android.googlesource.com/trusty/app/storage/
 
---PNTmBPCT7hxwcZjr
-Content-Type: application/pgp-signature; name="signature.asc"
+There is a also sample tool under tools/rpmb/ directory that exercises
+these interfaces and a simulation device that implements the device part.
 
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1
+The code is also available from:
 
-iQIcBAEBAgAGBQJX1/fxAAoJEBQN5MwUoCm2kw4QAJyDG1M/Tru2E4B/9EF+Z6nD
-gVnsg7LgQ/6VXo8TCaHU15t+7OpKgehtvpkM/GOt4mvPF3wv93vNnRNbm5OJwHvl
-oDG/JofOQnHHptejUkDEdqnSt/jJJW8urgmihirjV5ZAFbeF7gVAqfbtfL0tYSrl
-GANwFrTaeOrwd7VWbVpv/rm0KY6qQ9tWOxoysfu5k4eA91VRtV5KCSL0bmtCfz4y
-kNahJTwR9xTpZXpKTdJ9nOPArFltQXHxxuvKKnj3A487tcsAklWuBufTrpn+eZGm
-G0JHKDIhbzGDIoXjIuIipuqxx2ja8hfXqPOEcbl4d9T5V9RBY/E5DKVtRhwYV3qV
-CwhJdzP3BGngkyC4ZJf3kHzAPt3cC2IFlcl0uUU0+6CG75WZI6uInmWXouONCnhW
-ZgQ0HxB7wABX5uQKCma6EmloSqqOPX4IeoiUhWCEFg2GtEfnOWg1zGsxRyUcgmEz
-e0FD+RgOgt6v7nXs+KQvmyxifthzSxOVHvXBQcylZYzxlUHMUuoOPydG4JRIivKd
-OwKFLqzj6B+LYyyQvsliJVgapk6iyXHwLfeU1gadSsjxuE47dr80h5t4pNFEwTZX
-ZI8GajKBYVmt8mvZq30oQOspVtwFqyZPmQaS0Dz1IppmCcACcPNUsnJTssRiXiWt
-u4waF6UnxXx1rq9DbczW
-=bbrp
------END PGP SIGNATURE-----
+https://github.com/tomasbw/linux-mei.git rpmb
 
---PNTmBPCT7hxwcZjr--
+Tomas Winkler (9):
+  rpmb: add Replay Protected Memory Block (RPMB) subsystem
+  rpmb: enable emmc specific read data fixup
+  rpmb: add sysfs-class ABI documentation
+  char: rpmb: add device attributes
+  char: rpmb: provide a user space interface
+  char: rpmb: add RPMB simulation device
+  tools rpmb: add RPBM access tool
+  mmc: block: register RPMB partition with the RPMB subsystem
+  scsi: ufs: connect to RPMB subsystem
+
+ Documentation/ABI/testing/sysfs-class-rpmb |   47 ++
+ Documentation/ioctl/ioctl-number.txt       |    1 +
+ MAINTAINERS                                |   10 +
+ drivers/char/Kconfig                       |    2 +
+ drivers/char/Makefile                      |    1 +
+ drivers/char/rpmb/Kconfig                  |   32 +
+ drivers/char/rpmb/Makefile                 |    6 +
+ drivers/char/rpmb/cdev.c                   |  317 +++++++++
+ drivers/char/rpmb/core.c                   |  523 ++++++++++++++
+ drivers/char/rpmb/rpmb-cdev.h              |   25 +
+ drivers/char/rpmb/rpmb_sim.c               |  744 ++++++++++++++++++++
+ drivers/mmc/card/Kconfig                   |    1 +
+ drivers/mmc/card/block.c                   |  258 ++++++-
+ drivers/scsi/ufs/Kconfig                   |    1 +
+ drivers/scsi/ufs/ufshcd.c                  |  183 +++++
+ drivers/scsi/ufs/ufshcd.h                  |    2 +
+ include/linux/rpmb.h                       |  167 +++++
+ include/uapi/linux/Kbuild                  |    1 +
+ include/uapi/linux/rpmb.h                  |  152 ++++
+ tools/Makefile                             |   14 +-
+ tools/rpmb/.gitignore                      |    2 +
+ tools/rpmb/Makefile                        |   34 +
+ tools/rpmb/rpmb.c                          | 1031 ++++++++++++++++++++++++++++
+ 23 files changed, 3546 insertions(+), 8 deletions(-)
+ create mode 100644 Documentation/ABI/testing/sysfs-class-rpmb
+ create mode 100644 drivers/char/rpmb/Kconfig
+ create mode 100644 drivers/char/rpmb/Makefile
+ create mode 100644 drivers/char/rpmb/cdev.c
+ create mode 100644 drivers/char/rpmb/core.c
+ create mode 100644 drivers/char/rpmb/rpmb-cdev.h
+ create mode 100644 drivers/char/rpmb/rpmb_sim.c
+ create mode 100644 include/linux/rpmb.h
+ create mode 100644 include/uapi/linux/rpmb.h
+ create mode 100644 tools/rpmb/.gitignore
+ create mode 100644 tools/rpmb/Makefile
+ create mode 100644 tools/rpmb/rpmb.c
+
+-- 
+2.7.4
+
