@@ -1,50 +1,69 @@
 From: Simon Horman <horms+renesas@verge.net.au>
-Subject: [PATCH v7 0/6] UHS-I SDR-104 support for sh_mobile_sdhi
-Date: Tue, 13 Sep 2016 12:56:09 +0200
-Message-ID: <1473764175-24580-1-git-send-email-horms+renesas@verge.net.au>
+Subject: [PATCH v7 00/11] ARM, arm64: renesas: Enable UHS-I SDR-104
+Date: Tue, 13 Sep 2016 12:56:57 +0200
+Message-ID: <1473764228-24768-1-git-send-email-horms+renesas@verge.net.au>
 Return-path: <linux-renesas-soc-owner@vger.kernel.org>
 Sender: linux-renesas-soc-owner@vger.kernel.org
 To: Wolfram Sang <wsa+renesas@sang-engineering.com>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Magnus Damm <magnus.damm@gmail.com>, linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org, Simon Horman <horms+renesas@verge.net.au>
+Cc: Magnus Damm <magnus.damm@gmail.com>, linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Simon Horman <horms+renesas@verge.net.au>
 List-Id: linux-mmc@vger.kernel.org
-
 
 Hi,
 
-this series is based on work by Ai Kyuse to add UHS-I SDR-104 support for
-sh_mobile_sdhi. It builds on work by Shinobu Uehara, Rob Taylor, William
-Towle and Ian Molton, Ben Hutchings, Wolfram Sang and others to add UHS-I
-SDR-50 support to the same driver.
+this series enables SDHI UHS-I SDR-104 on:
+* r8a7790/lager
+* r8a7791/koelsch
+* r8a7794/alt
+* r8a7795/salvator-x
+* r8a7796/salvator-x
 
-It is based on a merge of the next branches of the mmc tree.
-
-To aid review the following git branch is provided:
-* https:://git.kernel.org/pub/scm/linux/kernel/git/horms/renesas.git topic/sdr104-driver-v7
-
-Overview of changes since v6:
-* Address review by Ulf
-  - Detailed in per-patch changelogs
-* Move integration (arm/arm64 dt) patches to separate patchset
-
-Please see http://elinux.org/Tests:SD-SDHI-SDR104 for indicative tests
-results.
+It is based on renesas-next-20160908-v4.8-rc1.
 
 
-Ai Kyuse (3):
-  mmc: tmio: enhance illegal sequence handling
-  mmc: tmio: Add hw reset support
-  mmc: tmio: Add tuning support
+For functional SDR-104 support the following dependencies are needed:
+* [PATCH v7 0/6] UHS-I SDR-104 support for sh_mobile_sdhi
+* [PATCH/RFT,v2,2/8] clk: renesas: r8a7796: Add SDIF clocks
+* [PATCH] pinctrl: sh-pfc: r8a7796: Add voltage switch operations for SDHI
+* [PATCH v2 0/3] pinctrl: sh-pfc: r8a779[14]: Implement voltage switching for SDHI
 
-Simon Horman (3):
-  mmc: core: Add helper to see if a host can be retuned
-  mmc: tmio: document mandatory and optional callbacks
-  mmc: sh_mobile_sdhi: Add tuning support
+To aid review the following git branches are provided:
+* This patchset:
+  https:://git.kernel.org/pub/scm/linux/kernel/git/horms/renesas.git topic/sdr104-integration-v7
+* This patch-set and above dependencies
+  https:://git.kernel.org/pub/scm/linux/kernel/git/horms/renesas.git topic/sdr104-v7
 
- drivers/mmc/host/sh_mobile_sdhi.c | 265 +++++++++++++++++++++++++++++++++++++-
- drivers/mmc/host/tmio_mmc.h       |  18 ++-
- drivers/mmc/host/tmio_mmc_pio.c   |  87 ++++++++++++-
- include/linux/mmc/host.h          |   5 +
- 4 files changed, 367 insertions(+), 8 deletions(-)
+Furthermore DMA support for R-Car Gen3 is need to achive higher
+transfer rates on the r8a7795 and r8a7796. For convenience a
+branch containing a merge of topic/sdr104-v7 (see above) and
+"[PATCH/RFC v3 0/6] mmc: renesas_sdhi: add R-Car Gen-3 DMA support"
+(rebased) is provided as:
+
+* https:://git.kernel.org/pub/scm/linux/kernel/git/horms/renesas.git topic/sdr104-v7+sdhi-dma-v3
+
+Simon Horman (10):
+  ARM: dts: lager: Enable UHS-I SDR-104
+  arm64: dts: r8a7795: salvator-x: Enable UHS-I SDR-104
+  ARM: dts: r8a7791: set maximum frequency for SDHI clocks
+  ARM: dts: koelsch: Enable UHS-I SDR-50 and SDR-104
+  ARM: dts: r8a7794: set maximum frequency for SDHI clocks
+  ARM: dts: alt: Enable UHS-I SDR-50 and SDR-104
+  arm64: dts: r8a7796: add SDHI nodes
+  arm64: dts: r8a7796: salvator-x: enable SDHI0 & 3
+  arm64: dts: r8a7796: salvator-x: enable UHS for SDHI 0 & 3
+  arm64: dts: r8a7796: salvator-x: Enable UHS-I SDR-104
+
+Wolfram Sang (1):
+  arm64: dts: r8a7795: salvator-x: enable UHS for SDHI 0 & 3
+
+ arch/arm/boot/dts/r8a7790-lager.dts                |   1 +
+ arch/arm/boot/dts/r8a7791-koelsch.dts              |  34 ++++++-
+ arch/arm/boot/dts/r8a7791.dtsi                     |   3 +
+ arch/arm/boot/dts/r8a7794-alt.dts                  |  23 ++++-
+ arch/arm/boot/dts/r8a7794.dtsi                     |   3 +
+ arch/arm64/boot/dts/renesas/r8a7795-salvator-x.dts |  24 ++++-
+ arch/arm64/boot/dts/renesas/r8a7796-salvator-x.dts | 104 +++++++++++++++++++++
+ arch/arm64/boot/dts/renesas/r8a7796.dtsi           |  42 +++++++++
+ 8 files changed, 227 insertions(+), 7 deletions(-)
 
 -- 
 2.7.0.rc3.207.g0ac5344
