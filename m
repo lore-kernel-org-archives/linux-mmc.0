@@ -1,71 +1,104 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v3 1/3] mmc: sh_mobile_sdhi: add ocr_mask option
-Date: Tue, 13 Sep 2016 14:57:42 +0200
-Message-ID: <CAPDyKFqdznJ4xr5=L862uOfvqjsRpR3d+yRWtN1-8H5ZvP9GeQ@mail.gmail.com>
-References: <20160912141507.6837-1-chris.brandt@renesas.com> <20160912141507.6837-2-chris.brandt@renesas.com>
+From: Wolfram Sang <wsa@the-dreams.de>
+Subject: Re: [PATCH v7 0/6] UHS-I SDR-104 support for sh_mobile_sdhi
+Date: Tue, 13 Sep 2016 14:58:25 +0200
+Message-ID: <20160913125825.GA3510@katana>
+References: <1473764175-24580-1-git-send-email-horms+renesas@verge.net.au>
+ <CAPDyKFoUQ0Xr0qVJoEjw6n_eL3VDoUfZHpu183pM1Yt7-pAnzQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wm0-f42.google.com ([74.125.82.42]:33728 "EHLO
-        mail-wm0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1755330AbcIMM5p (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 13 Sep 2016 08:57:45 -0400
-Received: by mail-wm0-f42.google.com with SMTP id b187so16743483wme.0
-        for <linux-mmc@vger.kernel.org>; Tue, 13 Sep 2016 05:57:45 -0700 (PDT)
-In-Reply-To: <20160912141507.6837-2-chris.brandt@renesas.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: multipart/signed; micalg=pgp-sha1;
+        protocol="application/pgp-signature"; boundary="PNTmBPCT7hxwcZjr"
+Return-path: <linux-renesas-soc-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <CAPDyKFoUQ0Xr0qVJoEjw6n_eL3VDoUfZHpu183pM1Yt7-pAnzQ@mail.gmail.com>
+Sender: linux-renesas-soc-owner@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Simon Horman <horms+renesas@verge.net.au>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Magnus Damm <magnus.damm@gmail.com>, linux-mmc <linux-mmc@vger.kernel.org>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Chris Brandt <chris.brandt@renesas.com>
-Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, Sergei Shtylyov <sergei.shtylyov@cogentembedded.com>, Geert Uytterhoeven <geert@linux-m68k.org>, Simon Horman <horms+renesas@verge.net.au>, linux-mmc <linux-mmc@vger.kernel.org>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>
 
-On 12 September 2016 at 16:15, Chris Brandt <chris.brandt@renesas.com> wrote:
-> In moving platforms from board files to DT, there still needs to be a way
-> to set the ocr_mask setting for the tmio driver during probe. Without this
-> setting, the probe will fail because the supported voltages are not known.
 
-Regarding the ocr_mask; How do these SoCs provides the power to the mmc/sd card?
+--PNTmBPCT7hxwcZjr
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-Do note, I am *not* talking about the I/O voltage but the core power
-to the card.
+On Tue, Sep 13, 2016 at 02:48:26PM +0200, Ulf Hansson wrote:
+> On 13 September 2016 at 12:56, Simon Horman <horms+renesas@verge.net.au> =
+wrote:
+> >
+> > Hi,
+> >
+> > this series is based on work by Ai Kyuse to add UHS-I SDR-104 support f=
+or
+> > sh_mobile_sdhi. It builds on work by Shinobu Uehara, Rob Taylor, William
+> > Towle and Ian Molton, Ben Hutchings, Wolfram Sang and others to add UHS=
+-I
+> > SDR-50 support to the same driver.
+> >
+> > It is based on a merge of the next branches of the mmc tree.
+> >
+> > To aid review the following git branch is provided:
+> > * https:://git.kernel.org/pub/scm/linux/kernel/git/horms/renesas.git to=
+pic/sdr104-driver-v7
+> >
+> > Overview of changes since v6:
+> > * Address review by Ulf
+> >   - Detailed in per-patch changelogs
+> > * Move integration (arm/arm64 dt) patches to separate patchset
+> >
+> > Please see http://elinux.org/Tests:SD-SDHI-SDR104 for indicative tests
+> > results.
+> >
+> >
+> > Ai Kyuse (3):
+> >   mmc: tmio: enhance illegal sequence handling
+> >   mmc: tmio: Add hw reset support
+> >   mmc: tmio: Add tuning support
+> >
+> > Simon Horman (3):
+> >   mmc: core: Add helper to see if a host can be retuned
+> >   mmc: tmio: document mandatory and optional callbacks
+> >   mmc: sh_mobile_sdhi: Add tuning support
+> >
+> >  drivers/mmc/host/sh_mobile_sdhi.c | 265 ++++++++++++++++++++++++++++++=
++++++++-
+> >  drivers/mmc/host/tmio_mmc.h       |  18 ++-
+> >  drivers/mmc/host/tmio_mmc_pio.c   |  87 ++++++++++++-
+> >  include/linux/mmc/host.h          |   5 +
+> >  4 files changed, 367 insertions(+), 8 deletions(-)
+> >
+> > --
+> > 2.7.0.rc3.207.g0ac5344
+> >
+>=20
+> This looks good to me, although I would like to get an ack from
+> Wolfram before I queue this up.
 
-The reason for raising the question is that we have infrastructures in
-the mmc core which can create the ocr_mask, by parsing a regulator's
-voltage range. This is the recommended method to use, instead of using
-hard coded ocr mask values.
+I'll test today or tomorrow. Same for the r7s72100 patches.
 
-Kind regards
-Uffe
+Thanks,
 
->
-> This patch will also traditional platform registration platforms to
-> migrate to DT.
->
-> Signed-off-by: Chris Brandt <chris.brandt@renesas.com>
-> ---
->  drivers/mmc/host/sh_mobile_sdhi.c | 2 ++
->  1 file changed, 2 insertions(+)
->
-> diff --git a/drivers/mmc/host/sh_mobile_sdhi.c b/drivers/mmc/host/sh_mobile_sdhi.c
-> index 5334f24..b033500 100644
-> --- a/drivers/mmc/host/sh_mobile_sdhi.c
-> +++ b/drivers/mmc/host/sh_mobile_sdhi.c
-> @@ -59,6 +59,7 @@ enum tmio_mmc_dmac_type {
->
->  struct sh_mobile_sdhi_of_data {
->         unsigned long tmio_flags;
-> +       u32           tmio_ocr_mask;
->         unsigned long capabilities;
->         unsigned long capabilities2;
->         enum dma_slave_buswidth dma_buswidth;
-> @@ -630,6 +631,7 @@ static int sh_mobile_sdhi_probe(struct platform_device *pdev)
->                 const struct sh_mobile_sdhi_of_data *of_data = of_id->data;
->
->                 mmc_data->flags |= of_data->tmio_flags;
-> +               mmc_data->ocr_mask = of_data->tmio_ocr_mask;
->                 mmc_data->capabilities |= of_data->capabilities;
->                 mmc_data->capabilities2 |= of_data->capabilities2;
->                 mmc_data->dma_rx_offset = of_data->dma_rx_offset;
-> --
-> 2.9.2
->
->
+   Wolfram
+
+
+--PNTmBPCT7hxwcZjr
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1
+
+iQIcBAEBAgAGBQJX1/fxAAoJEBQN5MwUoCm2kw4QAJyDG1M/Tru2E4B/9EF+Z6nD
+gVnsg7LgQ/6VXo8TCaHU15t+7OpKgehtvpkM/GOt4mvPF3wv93vNnRNbm5OJwHvl
+oDG/JofOQnHHptejUkDEdqnSt/jJJW8urgmihirjV5ZAFbeF7gVAqfbtfL0tYSrl
+GANwFrTaeOrwd7VWbVpv/rm0KY6qQ9tWOxoysfu5k4eA91VRtV5KCSL0bmtCfz4y
+kNahJTwR9xTpZXpKTdJ9nOPArFltQXHxxuvKKnj3A487tcsAklWuBufTrpn+eZGm
+G0JHKDIhbzGDIoXjIuIipuqxx2ja8hfXqPOEcbl4d9T5V9RBY/E5DKVtRhwYV3qV
+CwhJdzP3BGngkyC4ZJf3kHzAPt3cC2IFlcl0uUU0+6CG75WZI6uInmWXouONCnhW
+ZgQ0HxB7wABX5uQKCma6EmloSqqOPX4IeoiUhWCEFg2GtEfnOWg1zGsxRyUcgmEz
+e0FD+RgOgt6v7nXs+KQvmyxifthzSxOVHvXBQcylZYzxlUHMUuoOPydG4JRIivKd
+OwKFLqzj6B+LYyyQvsliJVgapk6iyXHwLfeU1gadSsjxuE47dr80h5t4pNFEwTZX
+ZI8GajKBYVmt8mvZq30oQOspVtwFqyZPmQaS0Dz1IppmCcACcPNUsnJTssRiXiWt
+u4waF6UnxXx1rq9DbczW
+=bbrp
+-----END PGP SIGNATURE-----
+
+--PNTmBPCT7hxwcZjr--
