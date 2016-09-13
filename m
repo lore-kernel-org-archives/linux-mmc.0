@@ -1,139 +1,68 @@
-From: Simon Horman <horms+renesas@verge.net.au>
-Subject: [PATCH v7 09/11] arm64: dts: r8a7796: salvator-x: enable SDHI0 & 3
-Date: Tue, 13 Sep 2016 12:57:06 +0200
-Message-ID: <1473764228-24768-10-git-send-email-horms+renesas@verge.net.au>
-References: <1473764228-24768-1-git-send-email-horms+renesas@verge.net.au>
-Return-path: <linux-renesas-soc-owner@vger.kernel.org>
-In-Reply-To: <1473764228-24768-1-git-send-email-horms+renesas@verge.net.au>
-Sender: linux-renesas-soc-owner@vger.kernel.org
-To: Wolfram Sang <wsa+renesas@sang-engineering.com>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Magnus Damm <magnus.damm@gmail.com>, linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, Simon Horman <horms+renesas@verge.net.au>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH v7 0/6] UHS-I SDR-104 support for sh_mobile_sdhi
+Date: Tue, 13 Sep 2016 14:48:26 +0200
+Message-ID: <CAPDyKFoUQ0Xr0qVJoEjw6n_eL3VDoUfZHpu183pM1Yt7-pAnzQ@mail.gmail.com>
+References: <1473764175-24580-1-git-send-email-horms+renesas@verge.net.au>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-wm0-f46.google.com ([74.125.82.46]:36804 "EHLO
+        mail-wm0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752217AbcIMMs3 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 13 Sep 2016 08:48:29 -0400
+Received: by mail-wm0-f46.google.com with SMTP id b187so185006439wme.1
+        for <linux-mmc@vger.kernel.org>; Tue, 13 Sep 2016 05:48:28 -0700 (PDT)
+In-Reply-To: <1473764175-24580-1-git-send-email-horms+renesas@verge.net.au>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Simon Horman <horms+renesas@verge.net.au>
+Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, Magnus Damm <magnus.damm@gmail.com>, linux-mmc <linux-mmc@vger.kernel.org>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>
 
-Enable the exposed SD card slots in the DT of the r8a7796/salvator-x.
+On 13 September 2016 at 12:56, Simon Horman <horms+renesas@verge.net.au> wrote:
+>
+> Hi,
+>
+> this series is based on work by Ai Kyuse to add UHS-I SDR-104 support for
+> sh_mobile_sdhi. It builds on work by Shinobu Uehara, Rob Taylor, William
+> Towle and Ian Molton, Ben Hutchings, Wolfram Sang and others to add UHS-I
+> SDR-50 support to the same driver.
+>
+> It is based on a merge of the next branches of the mmc tree.
+>
+> To aid review the following git branch is provided:
+> * https:://git.kernel.org/pub/scm/linux/kernel/git/horms/renesas.git topic/sdr104-driver-v7
+>
+> Overview of changes since v6:
+> * Address review by Ulf
+>   - Detailed in per-patch changelogs
+> * Move integration (arm/arm64 dt) patches to separate patchset
+>
+> Please see http://elinux.org/Tests:SD-SDHI-SDR104 for indicative tests
+> results.
+>
+>
+> Ai Kyuse (3):
+>   mmc: tmio: enhance illegal sequence handling
+>   mmc: tmio: Add hw reset support
+>   mmc: tmio: Add tuning support
+>
+> Simon Horman (3):
+>   mmc: core: Add helper to see if a host can be retuned
+>   mmc: tmio: document mandatory and optional callbacks
+>   mmc: sh_mobile_sdhi: Add tuning support
+>
+>  drivers/mmc/host/sh_mobile_sdhi.c | 265 +++++++++++++++++++++++++++++++++++++-
+>  drivers/mmc/host/tmio_mmc.h       |  18 ++-
+>  drivers/mmc/host/tmio_mmc_pio.c   |  87 ++++++++++++-
+>  include/linux/mmc/host.h          |   5 +
+>  4 files changed, 367 insertions(+), 8 deletions(-)
+>
+> --
+> 2.7.0.rc3.207.g0ac5344
+>
 
-Based on work for the r8a7795/salvator-x by Ai Kyuse.
+This looks good to me, although I would like to get an ack from
+Wolfram before I queue this up.
 
-Signed-off-by: Simon Horman <horms+renesas@verge.net.au>
-Reviewed-by: Geert Uytterhoeven <geert+renesas@glider.be>
----
- arch/arm64/boot/dts/renesas/r8a7796-salvator-x.dts | 84 ++++++++++++++++++++++
- 1 file changed, 84 insertions(+)
-
-diff --git a/arch/arm64/boot/dts/renesas/r8a7796-salvator-x.dts b/arch/arm64/boot/dts/renesas/r8a7796-salvator-x.dts
-index 13db7d61c26c..a8373c248ad1 100644
---- a/arch/arm64/boot/dts/renesas/r8a7796-salvator-x.dts
-+++ b/arch/arm64/boot/dts/renesas/r8a7796-salvator-x.dts
-@@ -10,6 +10,7 @@
- 
- /dts-v1/;
- #include "r8a7796.dtsi"
-+#include <dt-bindings/gpio/gpio.h>
- 
- / {
- 	model = "Renesas Salvator-X board based on r8a7796";
-@@ -29,6 +30,55 @@
- 		/* first 128MB is reserved for secure area. */
- 		reg = <0x0 0x48000000 0x0 0x78000000>;
- 	};
-+
-+	vcc_sdhi0: regulator-vcc-sdhi0 {
-+		compatible = "regulator-fixed";
-+
-+		regulator-name = "SDHI0 Vcc";
-+		regulator-min-microvolt = <3300000>;
-+		regulator-max-microvolt = <3300000>;
-+
-+		gpio = <&gpio5 2 GPIO_ACTIVE_HIGH>;
-+		enable-active-high;
-+	};
-+
-+	vccq_sdhi0: regulator-vccq-sdhi0 {
-+		compatible = "regulator-gpio";
-+
-+		regulator-name = "SDHI0 VccQ";
-+		regulator-min-microvolt = <1800000>;
-+		regulator-max-microvolt = <3300000>;
-+
-+		gpios = <&gpio5 1 GPIO_ACTIVE_HIGH>;
-+		gpios-states = <1>;
-+		states = <3300000 1
-+			  1800000 0>;
-+	};
-+
-+	vcc_sdhi3: regulator-vcc-sdhi3 {
-+		compatible = "regulator-fixed";
-+
-+		regulator-name = "SDHI3 Vcc";
-+		regulator-min-microvolt = <3300000>;
-+		regulator-max-microvolt = <3300000>;
-+
-+		gpio = <&gpio3 15 GPIO_ACTIVE_HIGH>;
-+		enable-active-high;
-+	};
-+
-+	vccq_sdhi3: regulator-vccq-sdhi3 {
-+		compatible = "regulator-gpio";
-+
-+		regulator-name = "SDHI3 VccQ";
-+		regulator-min-microvolt = <1800000>;
-+		regulator-max-microvolt = <3300000>;
-+
-+		gpios = <&gpio3 14 GPIO_ACTIVE_HIGH>;
-+		gpios-states = <1>;
-+		states = <3300000 1
-+			  1800000 0>;
-+	};
-+
- };
- 
- &pfc {
-@@ -43,12 +93,46 @@
- 		groups = "scif_clk_a";
- 		function = "scif_clk";
- 	};
-+
-+	sdhi0_pins: sd0 {
-+		groups = "sdhi0_data4", "sdhi0_ctrl";
-+		function = "sdhi0";
-+	};
-+
-+	sdhi3_pins: sd3 {
-+		groups = "sdhi3_data4", "sdhi3_ctrl";
-+		function = "sdhi3";
-+	};
- };
- 
- &extal_clk {
- 	clock-frequency = <16666666>;
- };
- 
-+&sdhi0 {
-+	pinctrl-0 = <&sdhi0_pins>;
-+	pinctrl-names = "default";
-+
-+	vmmc-supply = <&vcc_sdhi0>;
-+	vqmmc-supply = <&vccq_sdhi0>;
-+	cd-gpios = <&gpio3 12 GPIO_ACTIVE_LOW>;
-+	wp-gpios = <&gpio3 13 GPIO_ACTIVE_HIGH>;
-+	bus-width = <4>;
-+	status = "okay";
-+};
-+
-+&sdhi3 {
-+	pinctrl-0 = <&sdhi3_pins>;
-+	pinctrl-names = "default";
-+
-+	vmmc-supply = <&vcc_sdhi3>;
-+	vqmmc-supply = <&vccq_sdhi3>;
-+	cd-gpios = <&gpio4 15 GPIO_ACTIVE_LOW>;
-+	wp-gpios = <&gpio4 16 GPIO_ACTIVE_HIGH>;
-+	bus-width = <4>;
-+	status = "okay";
-+};
-+
- &scif2 {
- 	pinctrl-0 = <&scif2_pins>;
- 	pinctrl-names = "default";
--- 
-2.7.0.rc3.207.g0ac5344
+Kind regards
+Uffe
