@@ -1,45 +1,40 @@
-From: Haibo Chen <haibo.chen@nxp.com>
-Subject: [PATCH] mmc: sdhci: cast unsigned int to unsigned long long to avoid unexpeted error
-Date: Tue, 13 Sep 2016 15:06:58 +0800
-Message-ID: <1473750418-23111-1-git-send-email-haibo.chen@nxp.com>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH V4 00/30] mmc: mmc: Add Software Command Queuing
+Date: Tue, 13 Sep 2016 12:41:44 +0300
+Message-ID: <bc910db1-db7b-6e84-7915-de9a7a8447a7@intel.com>
+References: <1471344280-16663-1-git-send-email-adrian.hunter@intel.com>
+ <CAPDyKFqFF2NYzRvO3XTy0m2MiX6ft2bU1jp_U1RR_XU1JLWziw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-db5eur01on0061.outbound.protection.outlook.com ([104.47.2.61]:17536
-        "EHLO EUR01-DB5-obe.outbound.protection.outlook.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1755679AbcIMJhZ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Tue, 13 Sep 2016 05:37:25 -0400
+Received: from mga03.intel.com ([134.134.136.65]:35186 "EHLO mga03.intel.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1754189AbcIMJq0 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Tue, 13 Sep 2016 05:46:26 -0400
+In-Reply-To: <CAPDyKFqFF2NYzRvO3XTy0m2MiX6ft2bU1jp_U1RR_XU1JLWziw@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: adrian.hunter@intel.com, ulf.hansson@linaro.org
-Cc: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Alex Lemberg <alex.lemberg@sandisk.com>, Mateusz Nowak <mateusz.nowak@intel.com>, Yuliy Izrailov <Yuliy.Izrailov@sandisk.com>, Jaehoon Chung <jh80.chung@samsung.com>, Dong Aisheng <dongas86@gmail.com>, Das Asutosh <asutoshd@codeaurora.org>, Zhangfei Gao <zhangfei.gao@gmail.com>, Dorfman Konstantin <kdorfman@codeaurora.org>, David Griego <david.griego@linaro.org>, Sahitya Tummala <stummala@codeaurora.org>, Harjani Ritesh <riteshh@codeaurora.org>, Venu Byravarasu <vbyravarasu@nvidia.com>
 
-Potentially overflowing expression 1000000 * data->timeout_clks with
-type unsigned int is evaluated using 32-bit arithmetic, and then used
-in a context that expects an expression of type unsigned long long.
+On 12/09/16 15:36, Ulf Hansson wrote:
+> On 16 August 2016 at 12:44, Adrian Hunter <adrian.hunter@intel.com> wrote:
+>> Hi
+>>
+>> Here is an updated version of the Software Command Queuing patches,
+>> re-based on next + v4.8-rc2 + "block: Fix secure erase" patch, otherwise no
+>> changes since V3.
+>>
+>> Ulf, as before, if you accept the "Command during Transfer" API introduced
+>> in patch 1, then you could take patches 1-5 in advance of the rest.
+> 
+> Adrian,
+> 
+> I have had a busy period, apologize for taking such long time to review this!
+> 
+> Patch 1->5 looks good to me, so I have applied these for next. I will
+> continue with the review during the week.
 
-To avoid overflow, cast 1000000U to type unsigned long long.
-Special thanks to coverity <http://www.coverity.com>
-
-Signed-off-by: Haibo Chen <haibo.chen@nxp.com>
----
- drivers/mmc/host/sdhci.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
-
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 4805566..0e9f495 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -687,7 +687,7 @@ static u8 sdhci_calc_timeout(struct sdhci_host *host, struct mmc_command *cmd)
- 			 * host->clock is in Hz.  target_timeout is in us.
- 			 * Hence, us = 1000000 * cycles / Hz.  Round up.
- 			 */
--			val = 1000000 * data->timeout_clks;
-+			val = (unsigned long long)1000000 * data->timeout_clks;
- 			if (do_div(val, host->clock))
- 				target_timeout++;
- 			target_timeout += val;
--- 
-1.9.1
+Thank you!
 
