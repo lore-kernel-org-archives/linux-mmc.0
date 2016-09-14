@@ -1,14 +1,20 @@
-From: Kevin Hilman <khilman-rdvid1DuHRBWk0Htik3J/w@public.gmane.org>
+From: Kevin Hilman <khilman@baylibre.com>
 Subject: [PATCH v3 0/2] MMC: add driver for Amlogic GXBB SoCs
-Date: Tue, 13 Sep 2016 17:42:50 -0700
-Message-ID: <20160914004252.512-1-khilman@baylibre.com>
+Date: Tue, 13 Sep 2016 17:43:12 -0700
+Message-ID: <20160914004314.682-1-khilman@baylibre.com>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 8bit
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-Cc: linux-amlogic-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Victor Wan <victor.wan-LpR1jeaWuhtBDgjK7y7TUQ@public.gmane.org>, Jerry Cao <jerry.cao-LpR1jeaWuhtBDgjK7y7TUQ@public.gmane.org>, Xing Wu <xing.xu-LpR1jeaWuhtBDgjK7y7TUQ@public.gmane.org>, yonghui.yu-LpR1jeaWuhtBDgjK7y7TUQ@public.gmane.org
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-it0-f41.google.com ([209.85.214.41]:36455 "EHLO
+        mail-it0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S932782AbcINAnR (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 13 Sep 2016 20:43:17 -0400
+Received: by mail-it0-f41.google.com with SMTP id o3so21922930ita.1
+        for <linux-mmc@vger.kernel.org>; Tue, 13 Sep 2016 17:43:16 -0700 (PDT)
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org
+Cc: linux-amlogic@lists.infradead.org, linux-arm-kernel@lists.infradead.org, Rob Herring <robh+dt@kernel.org>, devicetree@vger.kernel.org, Victor Wan <victor.wan@amlogic.com>, Jerry Cao <jerry.cao@amlogic.com>, Xing Wu <xing.xu@amlogic.com>, yonghui.yu@amlogic.com
 
 Here's an updated series for the Amlogic MMC driver.
 
@@ -48,7 +54,3 @@ Kevin Hilman (2):
 -- 
 2.9.3
 
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
