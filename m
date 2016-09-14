@@ -1,37 +1,36 @@
 From: Wolfram Sang <wsa+renesas@sang-engineering.com>
-Subject: [PATCH 3/4] mmc: rtsx_usb: use new macro for R1 without CRC
-Date: Wed, 14 Sep 2016 19:05:57 +0200
-Message-ID: <20160914170558.1561-4-wsa+renesas@sang-engineering.com>
+Subject: [PATCH 1/4] mmc: add define for R1 response without CRC
+Date: Wed, 14 Sep 2016 19:05:55 +0200
+Message-ID: <20160914170558.1561-2-wsa+renesas@sang-engineering.com>
 References: <20160914170558.1561-1-wsa+renesas@sang-engineering.com>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from sauhun.de ([89.238.76.85]:46008 "EHLO pokefinder.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1762129AbcINRGG (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Wed, 14 Sep 2016 13:06:06 -0400
+Return-path: <linux-renesas-soc-owner@vger.kernel.org>
 In-Reply-To: <20160914170558.1561-1-wsa+renesas@sang-engineering.com>
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Sender: linux-renesas-soc-owner@vger.kernel.org
 To: linux-mmc@vger.kernel.org
 Cc: linux-renesas-soc@vger.kernel.org, Simon Horman <horms@verge.net.au>, Dirk Behme <dirk.behme@gmail.com>, Wolfram Sang <wsa+renesas@sang-engineering.com>
+List-Id: linux-mmc@vger.kernel.org
+
+The core uses it for polling. Give drivers a proper define to handle
+this case like all other response types.
 
 Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
 ---
- drivers/mmc/host/rtsx_usb_sdmmc.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+ include/linux/mmc/core.h | 3 +++
+ 1 file changed, 3 insertions(+)
 
-diff --git a/drivers/mmc/host/rtsx_usb_sdmmc.c b/drivers/mmc/host/rtsx_usb_sdmmc.c
-index 6c71fc9f76c7ec..4106295527b9d0 100644
---- a/drivers/mmc/host/rtsx_usb_sdmmc.c
-+++ b/drivers/mmc/host/rtsx_usb_sdmmc.c
-@@ -324,7 +324,7 @@ static void sd_send_cmd_get_rsp(struct rtsx_usb_sdmmc *host,
- 	case MMC_RSP_R1:
- 		rsp_type = SD_RSP_TYPE_R1;
- 		break;
--	case MMC_RSP_R1 & ~MMC_RSP_CRC:
-+	case MMC_RSP_R1_NO_CRC:
- 		rsp_type = SD_RSP_TYPE_R1 | SD_NO_CHECK_CRC7;
- 		break;
- 	case MMC_RSP_R1B:
+diff --git a/include/linux/mmc/core.h b/include/linux/mmc/core.h
+index b01e77de1a74de..4caee099b63a28 100644
+--- a/include/linux/mmc/core.h
++++ b/include/linux/mmc/core.h
+@@ -55,6 +55,9 @@ struct mmc_command {
+ #define MMC_RSP_R6	(MMC_RSP_PRESENT|MMC_RSP_CRC|MMC_RSP_OPCODE)
+ #define MMC_RSP_R7	(MMC_RSP_PRESENT|MMC_RSP_CRC|MMC_RSP_OPCODE)
+ 
++/* Can be used by core to poll after switch to MMC HS mode */
++#define MMC_RSP_R1_NO_CRC	(MMC_RSP_PRESENT|MMC_RSP_OPCODE)
++
+ #define mmc_resp_type(cmd)	((cmd)->flags & (MMC_RSP_PRESENT|MMC_RSP_136|MMC_RSP_CRC|MMC_RSP_BUSY|MMC_RSP_OPCODE))
+ 
+ /*
 -- 
 2.9.3
-
