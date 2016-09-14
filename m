@@ -1,78 +1,75 @@
-From: Peter Ujfalusi <peter.ujfalusi@ti.com>
-Subject: [PATCH v2] mmc: omap_hsmmc: Initialize dma_slave_config to avoid random data
-Date: Wed, 14 Sep 2016 14:22:07 +0300
-Message-ID: <20160914112207.4648-1-peter.ujfalusi@ti.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH v2] mmc: omap: Initialize dma_slave_config to avoid random
+ data in it's fields
+Date: Wed, 14 Sep 2016 14:01:43 +0200
+Message-ID: <CAPDyKFpaj3qd1GYXhvp_EeoHEu63NrPB_L7GddkS7WCGs1ME_g@mail.gmail.com>
+References: <20160914112154.4567-1-peter.ujfalusi@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from devils.ext.ti.com ([198.47.26.153]:42344 "EHLO
-        devils.ext.ti.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1761892AbcINLWX (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 14 Sep 2016 07:22:23 -0400
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20160914112154.4567-1-peter.ujfalusi@ti.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Peter Ujfalusi <peter.ujfalusi@ti.com>
+Cc: Arnd Bergmann <arnd@arndb.de>, Tony Lindgren <tony@atomide.com>, Kishon <kishon@ti.com>, linux-omap <linux-omap@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
-To: ulf.hansson@linaro.org, arnd@arndb.de
-Cc: tony@atomide.com, kishon@ti.com, linux-omap@vger.kernel.org, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 
-It is wrong to use uninitialized dma_slave_config and configure only
-certain fields as the DMAengine driver might look at non initialized
-(random data) fields and tries to interpret it.
+On 14 September 2016 at 13:21, Peter Ujfalusi <peter.ujfalusi@ti.com> wrote:
+> It is wrong to use uninitialized dma_slave_config and configure only
+> certain fields as the DMAengine driver might look at non initialized
+> (random data) fields and tries to interpret it.
+>
+> Signed-off-by: Peter Ujfalusi <peter.ujfalusi@ti.com>
 
-Signed-off-by: Peter Ujfalusi <peter.ujfalusi@ti.com>
----
-Hi,
+Thanks, applied for fixes!
 
-Changes since v1:
-- do the field initialization in one step
+Kind regards
+Uffe
 
-would it be possible to send this patch for 4.8? I have omap-dma DMAengine
-driver changes pending, but they break the MMC/SD because of the uninitialized
-fields in dma_slave_config.
-
-Thanks,
-Peter
-
- drivers/mmc/host/omap_hsmmc.c | 16 ++++++++--------
- 1 file changed, 8 insertions(+), 8 deletions(-)
-
-diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-index 24ebc9a8de89..5f2f24a7360d 100644
---- a/drivers/mmc/host/omap_hsmmc.c
-+++ b/drivers/mmc/host/omap_hsmmc.c
-@@ -1409,11 +1409,18 @@ static int omap_hsmmc_pre_dma_transfer(struct omap_hsmmc_host *host,
- static int omap_hsmmc_setup_dma_transfer(struct omap_hsmmc_host *host,
- 					struct mmc_request *req)
- {
--	struct dma_slave_config cfg;
- 	struct dma_async_tx_descriptor *tx;
- 	int ret = 0, i;
- 	struct mmc_data *data = req->data;
- 	struct dma_chan *chan;
-+	struct dma_slave_config cfg = {
-+		.src_addr = host->mapbase + OMAP_HSMMC_DATA,
-+		.dst_addr = host->mapbase + OMAP_HSMMC_DATA,
-+		.src_addr_width = DMA_SLAVE_BUSWIDTH_4_BYTES,
-+		.dst_addr_width = DMA_SLAVE_BUSWIDTH_4_BYTES,
-+		.src_maxburst = data->blksz / 4,
-+		.dst_maxburst = data->blksz / 4,
-+	};
-
- 	/* Sanity check: all the SG entries must be aligned by block size. */
- 	for (i = 0; i < data->sg_len; i++) {
-@@ -1433,13 +1440,6 @@ static int omap_hsmmc_setup_dma_transfer(struct omap_hsmmc_host *host,
-
- 	chan = omap_hsmmc_get_dma_chan(host, data);
-
--	cfg.src_addr = host->mapbase + OMAP_HSMMC_DATA;
--	cfg.dst_addr = host->mapbase + OMAP_HSMMC_DATA;
--	cfg.src_addr_width = DMA_SLAVE_BUSWIDTH_4_BYTES;
--	cfg.dst_addr_width = DMA_SLAVE_BUSWIDTH_4_BYTES;
--	cfg.src_maxburst = data->blksz / 4;
--	cfg.dst_maxburst = data->blksz / 4;
--
- 	ret = dmaengine_slave_config(chan, &cfg);
- 	if (ret)
- 		return ret;
---
-2.10.0
-
+> ---
+> Hi,
+>
+> Changes since v1:
+> - do the field initialization in one step
+>
+> would it be possible to send this patch for 4.8? I have omap-dma DMAengine
+> driver changes pending, but they break the MMC/SD because of the uninitialized
+> fields in dma_slave_config.
+>
+> Thanks,
+> Peter
+>
+>  drivers/mmc/host/omap.c | 18 ++++++++++--------
+>  1 file changed, 10 insertions(+), 8 deletions(-)
+>
+> diff --git a/drivers/mmc/host/omap.c b/drivers/mmc/host/omap.c
+> index f23d65eb070d..be3c49fa7382 100644
+> --- a/drivers/mmc/host/omap.c
+> +++ b/drivers/mmc/host/omap.c
+> @@ -1016,14 +1016,16 @@ mmc_omap_prepare_data(struct mmc_omap_host *host, struct mmc_request *req)
+>
+>                 /* Only reconfigure if we have a different burst size */
+>                 if (*bp != burst) {
+> -                       struct dma_slave_config cfg;
+> -
+> -                       cfg.src_addr = host->phys_base + OMAP_MMC_REG(host, DATA);
+> -                       cfg.dst_addr = host->phys_base + OMAP_MMC_REG(host, DATA);
+> -                       cfg.src_addr_width = DMA_SLAVE_BUSWIDTH_2_BYTES;
+> -                       cfg.dst_addr_width = DMA_SLAVE_BUSWIDTH_2_BYTES;
+> -                       cfg.src_maxburst = burst;
+> -                       cfg.dst_maxburst = burst;
+> +                       struct dma_slave_config cfg = {
+> +                               .src_addr = host->phys_base +
+> +                                           OMAP_MMC_REG(host, DATA),
+> +                               .dst_addr = host->phys_base +
+> +                                           OMAP_MMC_REG(host, DATA),
+> +                               .src_addr_width = DMA_SLAVE_BUSWIDTH_2_BYTES,
+> +                               .dst_addr_width = DMA_SLAVE_BUSWIDTH_2_BYTES,
+> +                               .src_maxburst = burst,
+> +                               .dst_maxburst = burst,
+> +                       };
+>
+>                         if (dmaengine_slave_config(c, &cfg))
+>                                 goto use_pio;
+> --
+> 2.10.0
+>
