@@ -1,14 +1,14 @@
 From: Peter Ujfalusi <peter.ujfalusi@ti.com>
-Subject: [PATCH] mmc: omap: Initialize dma_slave_config to avoid random data in it's fields
-Date: Wed, 14 Sep 2016 13:10:35 +0300
-Message-ID: <20160914101035.972-1-peter.ujfalusi@ti.com>
+Subject: [PATCH] mmc: omap_hsmmc: Initialize dma_slave_config to avoid random data
+Date: Wed, 14 Sep 2016 13:10:48 +0300
+Message-ID: <20160914101048.1061-1-peter.ujfalusi@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from comal.ext.ti.com ([198.47.26.152]:44238 "EHLO comal.ext.ti.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1760751AbcINKK4 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Wed, 14 Sep 2016 06:10:56 -0400
+Received: from devils.ext.ti.com ([198.47.26.153]:39269 "EHLO
+        devils.ext.ti.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751621AbcINKKz (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 14 Sep 2016 06:10:55 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: ulf.hansson@linaro.org
@@ -29,22 +29,22 @@ fields in dma_slave_config.
 Thanks,
 Peter
 
- drivers/mmc/host/omap.c | 2 +-
+ drivers/mmc/host/omap_hsmmc.c | 2 +-
  1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/drivers/mmc/host/omap.c b/drivers/mmc/host/omap.c
-index f23d65eb070d..b49b3fa740a5 100644
---- a/drivers/mmc/host/omap.c
-+++ b/drivers/mmc/host/omap.c
-@@ -1016,7 +1016,7 @@ mmc_omap_prepare_data(struct mmc_omap_host *host, struct mmc_request *req)
-
- 		/* Only reconfigure if we have a different burst size */
- 		if (*bp != burst) {
--			struct dma_slave_config cfg;
-+			struct dma_slave_config cfg = {};
-
- 			cfg.src_addr = host->phys_base + OMAP_MMC_REG(host, DATA);
- 			cfg.dst_addr = host->phys_base + OMAP_MMC_REG(host, DATA);
+diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
+index 24ebc9a8de89..0a5640156159 100644
+--- a/drivers/mmc/host/omap_hsmmc.c
++++ b/drivers/mmc/host/omap_hsmmc.c
+@@ -1409,7 +1409,7 @@ static int omap_hsmmc_pre_dma_transfer(struct omap_hsmmc_host *host,
+ static int omap_hsmmc_setup_dma_transfer(struct omap_hsmmc_host *host,
+ 					struct mmc_request *req)
+ {
+-	struct dma_slave_config cfg;
++	struct dma_slave_config cfg = {};
+ 	struct dma_async_tx_descriptor *tx;
+ 	int ret = 0, i;
+ 	struct mmc_data *data = req->data;
 --
 2.10.0
 
