@@ -1,29 +1,58 @@
-From: qianxiangsong <service@smtp.mail.taobao.com>
-Subject: =?UTF-8?B?44CQ5r6z6Zeo6YeR5rKZ6ZuG5Zui44CR5qyi6L+O5oKo55qE5Yqg5YWl77yB?=
-Date: Sat, 10 Sep 2016 01:55:34 +0200
-Message-ID: <20160909235534.25237.qmail@hebe.swissdivetec.ch>
+From: Simon Horman <horms@verge.net.au>
+Subject: Re: [PATCH v7 6/6] mmc: sh_mobile_sdhi: Add tuning support
+Date: Wed, 14 Sep 2016 10:53:11 +0200
+Message-ID: <20160914085311.GC10233@verge.net.au>
+References: <1473764175-24580-1-git-send-email-horms+renesas@verge.net.au>
+ <1473764175-24580-7-git-send-email-horms+renesas@verge.net.au>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from 162-216-221-213-static.cable.fcom.ch ([213.221.216.162]:59491
-        "EHLO hebe.swissdivetec.ch" rhost-flags-OK-OK-OK-FAIL)
-        by vger.kernel.org with ESMTP id S1752028AbcINCVF (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 13 Sep 2016 22:21:05 -0400
+Received: from kirsty.vergenet.net ([202.4.237.240]:54051 "EHLO
+        kirsty.vergenet.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1755898AbcINIxS (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 14 Sep 2016 04:53:18 -0400
 Content-Disposition: inline
+In-Reply-To: <1473764175-24580-7-git-send-email-horms+renesas@verge.net.au>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
+To: Wolfram Sang <wsa+renesas@sang-engineering.com>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Magnus Damm <magnus.damm@gmail.com>, linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org, Ai Kyuse <ai.kyuse.uw@renesas.com>
 
-Diese Nachricht wurde an dich gesandt weil "qianxiangsong <service@smtp.mail.taobao.com>" dachte, du fändest diese Seite "myUemis" auf www.uemis.com interessant.
+On Tue, Sep 13, 2016 at 12:56:15PM +0200, Simon Horman wrote:
+> Add tuning support for use with SDR104 mode
+> This includes adding support for the sampling clock controller (SCC).
+> 
+> Based on work by Ai Kyuse.
+> 
+> Cc: Ai Kyuse <ai.kyuse.uw@renesas.com>
+> Signed-off-by: Simon Horman <horms+renesas@verge.net.au>
 
-Dies ist der Link zur Seite:
-http://www.uemis.com/de/myuemis
+...
 
-Kommentar von "qianxiangsong <service@smtp.mail.taobao.com>":
-【澳门金沙集团】国际足球联盟(FIFA)官方合作品牌，我们提供英超、意甲、德甲、西甲、法甲五大联赛等投注盘口！
-官网开户网址：http://www.834516.com/?linux-mmc@vger.kernel.org投注精彩赛事，营造辉煌人生！
-日结现金返水1.0%，提供最全面赛前及滚球投注服务，每周超过5000场各类体育赛事，总能为您营造最好的赔率！
-------------------------------------------
-                    不要那么相信自己的回忆，里面的那个人，不一定同样想念你（带着回忆上路，而不是抱着回忆生活）。
+> Signed-off-by: Simon Horman <horms+renesas@verge.net.au>
+> ---
+>  drivers/mmc/host/sh_mobile_sdhi.c | 265 +++++++++++++++++++++++++++++++++++++-
+>  1 file changed, 264 insertions(+), 1 deletion(-)
+> 
+> diff --git a/drivers/mmc/host/sh_mobile_sdhi.c b/drivers/mmc/host/sh_mobile_sdhi.c
+> index 49edff7fee49..32d3e01e0840 100644
+> --- a/drivers/mmc/host/sh_mobile_sdhi.c
+> +++ b/drivers/mmc/host/sh_mobile_sdhi.c
 
+
+...
+
+> +static void sh_mobile_sdhi_hw_reset(struct tmio_mmc_host *host)
+> +{
+> +	struct sh_mobile_sdhi *priv;
+> +
+> +	if (host->mmc->caps & MMC_CAP_UHS_SDR104)
+> +		return;
+
+The logic above is inverted, it should be:
+
+	if (!(host->mmc->caps & MMC_CAP_UHS_SDR104))
+		return;
+
+An observable side effect of the above is that on the r8a7796/Salvator-X
+a card is not detected after being ejected and re-inserted.
