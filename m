@@ -1,7 +1,7 @@
 From: Wolfram Sang <wsa+renesas@sang-engineering.com>
-Subject: [PATCH 1/2] arm64: dts: r8a7795: salvator: enable on-board eMMC
-Date: Wed, 14 Sep 2016 19:09:42 +0200
-Message-ID: <20160914170943.1663-2-wsa+renesas@sang-engineering.com>
+Subject: [PATCH 2/2] arm64: dts: r8a7796: salvator: enable on board eMMC
+Date: Wed, 14 Sep 2016 19:09:43 +0200
+Message-ID: <20160914170943.1663-3-wsa+renesas@sang-engineering.com>
 References: <20160914170943.1663-1-wsa+renesas@sang-engineering.com>
 Return-path: <linux-renesas-soc-owner@vger.kernel.org>
 In-Reply-To: <20160914170943.1663-1-wsa+renesas@sang-engineering.com>
@@ -12,15 +12,15 @@ List-Id: linux-mmc@vger.kernel.org
 
 Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
 ---
- arch/arm64/boot/dts/renesas/r8a7795-salvator-x.dts | 43 ++++++++++++++++++++++
- 1 file changed, 43 insertions(+)
+ arch/arm64/boot/dts/renesas/r8a7796-salvator-x.dts | 44 +++++++++++++++++++++-
+ 1 file changed, 43 insertions(+), 1 deletion(-)
 
-diff --git a/arch/arm64/boot/dts/renesas/r8a7795-salvator-x.dts b/arch/arm64/boot/dts/renesas/r8a7795-salvator-x.dts
-index 8964b1ea3cea69..c299919e5e2fdc 100644
---- a/arch/arm64/boot/dts/renesas/r8a7795-salvator-x.dts
-+++ b/arch/arm64/boot/dts/renesas/r8a7795-salvator-x.dts
-@@ -62,6 +62,24 @@
- 		clock-frequency = <24576000>;
+diff --git a/arch/arm64/boot/dts/renesas/r8a7796-salvator-x.dts b/arch/arm64/boot/dts/renesas/r8a7796-salvator-x.dts
+index 91440eb2237e72..db27615fc6ff9f 100644
+--- a/arch/arm64/boot/dts/renesas/r8a7796-salvator-x.dts
++++ b/arch/arm64/boot/dts/renesas/r8a7796-salvator-x.dts
+@@ -31,6 +31,24 @@
+ 		reg = <0x0 0x48000000 0x0 0x78000000>;
  	};
  
 +	reg_1p8v: regulator0 {
@@ -44,7 +44,15 @@ index 8964b1ea3cea69..c299919e5e2fdc 100644
  	vcc_sdhi0: regulator-vcc-sdhi0 {
  		compatible = "regulator-fixed";
  
-@@ -246,6 +264,18 @@
+@@ -78,7 +96,6 @@
+ 		states = <3300000 1
+ 			  1800000 0>;
+ 	};
+-
+ };
+ 
+ &pfc {
+@@ -106,6 +123,18 @@
  		power-source = <1800>;
  	};
  
@@ -63,7 +71,7 @@ index 8964b1ea3cea69..c299919e5e2fdc 100644
  	sdhi3_pins: sd3 {
  		groups = "sdhi3_data4", "sdhi3_ctrl";
  		function = "sdhi3";
-@@ -398,6 +428,19 @@
+@@ -138,6 +167,19 @@
  	status = "okay";
  };
  
