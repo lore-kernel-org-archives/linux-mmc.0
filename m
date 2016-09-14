@@ -1,8 +1,8 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
 Subject: Re: [PATCH v2] mmc: omap: Initialize dma_slave_config to avoid random
  data in it's fields
-Date: Wed, 14 Sep 2016 14:01:43 +0200
-Message-ID: <CAPDyKFpaj3qd1GYXhvp_EeoHEu63NrPB_L7GddkS7WCGs1ME_g@mail.gmail.com>
+Date: Wed, 14 Sep 2016 14:01:58 +0200
+Message-ID: <CAPDyKFqxkYXatDMNc8jAH7h3kGWLCSrpQ=unVfaN8iXr5-=LxA@mail.gmail.com>
 References: <20160914112154.4567-1-peter.ujfalusi@ti.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -24,6 +24,7 @@ Thanks, applied for fixes!
 
 Kind regards
 Uffe
+
 
 > ---
 > Hi,
