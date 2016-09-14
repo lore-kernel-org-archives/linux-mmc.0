@@ -1,83 +1,122 @@
-From: Alan Stern <stern-nwvwT67g6+6dFdvTe/nMLpVzexx5G7lz@public.gmane.org>
-Subject: Re: xHCI problem? [was Re: Erratic USB device behavior and device
- loss]
-Date: Wed, 14 Sep 2016 11:19:25 -0400 (EDT)
-Message-ID: <Pine.LNX.4.44L0.1609141101380.1576-100000@iolanthe.rowland.org>
-References: <1473864634.9913.12.camel@researchut.com>
+From: Wolfram Sang <wsa@the-dreams.de>
+Subject: Re: [PATCH v7 0/6] UHS-I SDR-104 support for sh_mobile_sdhi
+Date: Wed, 14 Sep 2016 18:04:10 +0200
+Message-ID: <20160914160409.GA24436@katana>
+References: <1473764175-24580-1-git-send-email-horms+renesas@verge.net.au>
+ <CAPDyKFoUQ0Xr0qVJoEjw6n_eL3VDoUfZHpu183pM1Yt7-pAnzQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=UTF-8
-Content-Transfer-Encoding: 8BIT
-Return-path: <linux-usb-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1473864634.9913.12.camel-7WuBAv+fczCJ8c2fQYRYNw@public.gmane.org>
-Sender: linux-usb-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ritesh Raj Sarraf <rrs-7WuBAv+fczCJ8c2fQYRYNw@public.gmane.org>
-Cc: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, USB list <linux-usb-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-mmc <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Type: multipart/signed; micalg=pgp-sha1;
+        protocol="application/pgp-signature"; boundary="0OAP2g/MAC+5xKAE"
+Return-path: <linux-renesas-soc-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <CAPDyKFoUQ0Xr0qVJoEjw6n_eL3VDoUfZHpu183pM1Yt7-pAnzQ@mail.gmail.com>
+Sender: linux-renesas-soc-owner@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Simon Horman <horms+renesas@verge.net.au>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Magnus Damm <magnus.damm@gmail.com>, linux-mmc <linux-mmc@vger.kernel.org>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Wed, 14 Sep 2016, Ritesh Raj Sarraf wrote:
 
-> -----BEGIN PGP SIGNED MESSAGE-----
-> Hash: SHA512
-> 
-> Hello Ulf and Alan,
-> 
-> On Fri, 2016-09-09 at 19:34 +0530, Ritesh Raj Sarraf wrote:
-> > For #2, I'm building the 4.8-rc5 kernel with the following change. This build
-> > does not include the previous change you had suggested (related to
-> > POWER_CYCLE)
-> > 
-> > Date:   Fri Sep 9 19:28:03 2016 +0530
-> > 
-> >     Disable pm runtime in mmc core
-> > 
-> > diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-> > index e55cde6..32388d5 100644
-> > --- a/drivers/mmc/core/core.c
-> > +++ b/drivers/mmc/core/core.c
-> > @@ -970,9 +970,6 @@ int __mmc_claim_host(struct mmc_host *host, atomic_t
-> > *abort)
-> >         spin_unlock_irqrestore(&host->lock, flags);
-> >         remove_wait_queue(&host->wq, &wait);
-> >  
-> > -       if (pm)
-> > -               pm_runtime_get_sync(mmc_dev(host));
-> > -
-> >         return stop;
-> >  }
-> >  EXPORT_SYMBOL(__mmc_claim_host);
-> > @@ -1000,7 +997,6 @@ void mmc_release_host(struct mmc_host *host)
-> >                 spin_unlock_irqrestore(&host->lock, flags);
-> >                 wake_up(&host->wq);
-> >                 pm_runtime_mark_last_busy(mmc_dev(host));
-> > -               pm_runtime_put_autosuspend(mmc_dev(host));
-> >         }
-> >  }
-> >  EXPORT_SYMBOL(mmc_release_host);
-> 
-> I tried with these changes on 4.8-rc6 and I only saw 2 resets so far.
-> I captured the usb trace [1], just in case if you need it.
-> 
-> [1] https://people.debian.org/~rrs/tmp/4.8-rc6-ulf.txt.gz
+--0OAP2g/MAC+5xKAE
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-The situation isn't any better.  At the start of the trace, 
-the device is in runtime suspend but there are many attempts to 
-communicate with it, all of which fail.
+On Tue, Sep 13, 2016 at 02:48:26PM +0200, Ulf Hansson wrote:
+> On 13 September 2016 at 12:56, Simon Horman <horms+renesas@verge.net.au> =
+wrote:
+> >
+> > Hi,
+> >
+> > this series is based on work by Ai Kyuse to add UHS-I SDR-104 support f=
+or
+> > sh_mobile_sdhi. It builds on work by Shinobu Uehara, Rob Taylor, William
+> > Towle and Ian Molton, Ben Hutchings, Wolfram Sang and others to add UHS=
+-I
+> > SDR-50 support to the same driver.
+> >
+> > It is based on a merge of the next branches of the mmc tree.
+> >
+> > To aid review the following git branch is provided:
+> > * https:://git.kernel.org/pub/scm/linux/kernel/git/horms/renesas.git to=
+pic/sdr104-driver-v7
+> >
+> > Overview of changes since v6:
+> > * Address review by Ulf
+> >   - Detailed in per-patch changelogs
+> > * Move integration (arm/arm64 dt) patches to separate patchset
+> >
+> > Please see http://elinux.org/Tests:SD-SDHI-SDR104 for indicative tests
+> > results.
+> >
+> >
+> > Ai Kyuse (3):
+> >   mmc: tmio: enhance illegal sequence handling
+> >   mmc: tmio: Add hw reset support
+> >   mmc: tmio: Add tuning support
+> >
+> > Simon Horman (3):
+> >   mmc: core: Add helper to see if a host can be retuned
+> >   mmc: tmio: document mandatory and optional callbacks
+> >   mmc: sh_mobile_sdhi: Add tuning support
+> >
+> >  drivers/mmc/host/sh_mobile_sdhi.c | 265 ++++++++++++++++++++++++++++++=
++++++++-
+> >  drivers/mmc/host/tmio_mmc.h       |  18 ++-
+> >  drivers/mmc/host/tmio_mmc_pio.c   |  87 ++++++++++++-
+> >  include/linux/mmc/host.h          |   5 +
+> >  4 files changed, 367 insertions(+), 8 deletions(-)
+> >
+> > --
+> > 2.7.0.rc3.207.g0ac5344
+> >
+>=20
+> This looks good to me, although I would like to get an ack from
+> Wolfram before I queue this up.
 
-Then a little less than an hour after the trace started, the device was 
-resumed.  At that point it started working okay.  Until there was a 
-spontaneous disconnect.
+So, I did test this on my M3-W Salvator-X (with the fixup patch
+Simon sent on top of this series):
 
-The device reconnected, but after 3 seconds it was runtime suspended 
-again -- and the I/O attempts continued.  Some time later there was 
-another runtime resume, and the device began working again.  Until 
-another spontaneous disconnect occurred.  And so on...
++ My SanDisk card always gets properly tuned; re-inserting works
 
-Ulf, we really need to figure out why the autosuspends are occurring 
-and why the I/O doesn't stop while the device is suspended.
++ My Samsung card gets properly tuned if it is the first card
+  inserted to a slot.
 
-Alan Stern
+- The Samsung card does not get tuned when it was not the first card in
+  a slot, i.e. it was re-inserted or the SanDisk card had been used in
+  that slot before:
 
---
-To unsubscribe from this list: send the line "unsubscribe linux-usb" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+[   56.799203] mmc2: tuning execution failed: -5
+[   56.803565] mmc2: error -5 whilst initialising SD card
+
+Note that if I re-insert the SanDisk card to this slot, it will be tuned
+correctly. Just the Samsung card will continue to fail.
+
+Any pointers? Maybe some more re-initialization?
+
+Regards,
+
+   Wolfram
+
+
+--0OAP2g/MAC+5xKAE
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1
+
+iQIcBAEBAgAGBQJX2XT5AAoJEBQN5MwUoCm2TsYP/RVoaN8defknKxjDSF71dWSu
+G/92fB3ZMM6GEC0FsJ4S80ksKK8JvwSV0mom2uOw6WPYzhyBOWn+DSMpC6mITYJy
+mU97Wagr7OSJjOXhqOwJn9o9Wld9OCQXZEBMnZiKuC5KhKCocLReUTTblX0JVu2Q
+eTeQWYf/NVFoy3B2z6S6r3G8BaAJsysGEJG82gJqQjuKvRaUpELZRSFlNppb2pkR
+H9hCyCq3u/GtHuow7wfpGert2vKFrN/U1LQc5kvgPuUDKlPjpU/llEVsj8SrFOct
+4MBttnjKcZ3+ToCTURxI+u0Md0pmKUzGVZTcLdnoTF0gR8+0crTvGwiGxkuQSD8/
+vmGd7Nni5C0v4VujiN/ylh/Zus5ARi6aSodQWhq2NZoogmt+JbyTHtsb6gq3zBeu
+ceIEQ8cLll2TfUm9MU6ZJYHVsJRGvkF4t3uYYd6nMabfUuywfGB0MRRoUsVTHMdS
+f763BVC0sRc3OBXhFcYoMp00R0Wzz09WrtQMRNkiwsxuyxASK98QMqb+AQFOGaBN
+Dmzuigl9YHuQ6oIfTNrBO27J2k1EVY+EG+AzD3SRj4yD8KQtJRQOjeDbJsTNRLe5
+Hz976eiqkiVz4e+EcTYQ64SaGUYfwVQ4gz4GoM4Nz7z+agob+oqQTOTQXyXP6piN
+0Mjjxoj+KgDwyZ1xJY8F
+=3zLJ
+-----END PGP SIGNATURE-----
+
+--0OAP2g/MAC+5xKAE--
