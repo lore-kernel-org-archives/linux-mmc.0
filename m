@@ -1,35 +1,27 @@
 From: Simon Horman <horms@verge.net.au>
-Subject: Re: [PATCH 0/2] gen3: dts: enable on-board eMMC
-Date: Fri, 16 Sep 2016 11:38:27 +0200
-Message-ID: <20160916093827.GB14562@verge.net.au>
-References: <20160914170943.1663-1-wsa+renesas@sang-engineering.com>
+Subject: Re: [PATCH v7 04/11] ARM: dts: r8a7791: set maximum frequency for
+ SDHI clocks
+Date: Fri, 16 Sep 2016 11:53:15 +0200
+Message-ID: <20160916095315.GF14562@verge.net.au>
+References: <1473764228-24768-1-git-send-email-horms+renesas@verge.net.au>
+ <1473764228-24768-5-git-send-email-horms+renesas@verge.net.au>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-renesas-soc-owner@vger.kernel.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from kirsty.vergenet.net ([202.4.237.240]:40590 "EHLO
+        kirsty.vergenet.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1757329AbcIPJxV (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 16 Sep 2016 05:53:21 -0400
 Content-Disposition: inline
-In-Reply-To: <20160914170943.1663-1-wsa+renesas@sang-engineering.com>
-Sender: linux-renesas-soc-owner@vger.kernel.org
-To: Wolfram Sang <wsa+renesas@sang-engineering.com>
-Cc: linux-renesas-soc@vger.kernel.org, linux-mmc@vger.kernel.org, Dirk Behme <dirk.behme@gmail.com>, Wolfram Sang <wsa@the-dreams.de>
+In-Reply-To: <1473764228-24768-5-git-send-email-horms+renesas@verge.net.au>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Wolfram Sang <wsa+renesas@sang-engineering.com>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Magnus Damm <magnus.damm@gmail.com>, linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 
-On Wed, Sep 14, 2016 at 07:09:41PM +0200, Wolfram Sang wrote:
-> From: Wolfram Sang <wsa@the-dreams.de>
+On Tue, Sep 13, 2016 at 12:57:01PM +0200, Simon Horman wrote:
+> Define the upper limit otherwise the driver cannot utilize max speeds.
 > 
-> Here are the DTS changes to enable the on-board eMMC memory at 8 bit bus
-> widths on R-Car Gen3 Salvator-X boards.
-> 
-> Note that 'non-removable' is not supported yet because of Runtime PM issues. It
-> seems we need to overhaul Runtime PM handling for other reasons as well, so I
-> suggest the basic support goes in like this and DTS do not use 'non-removable'
-> for now.
-> 
-> Note also that I decided to use the pattern that pinctrl-0 is 3.3v and
-> pinctrl-1 is 1.8v, although the eMMC is fixed at 1.8v. I tried a few ways to
-> only use pinctrl-0 being 1.8v here, but they all ended up to be confusing for
-> users IMO, so I sticked to the most consistent solution after all.
-> 
-> These patches are based on top of Simon's sdr104-v7 patches and the accompanied
-> driver patches sent a minute ago. A branch can be found here:
+> Signed-off-by: Simon Horman <horms+renesas@verge.net.au>
 
-Please ping me / repost once these patches are ready to be merged.
+I have queued this up.
