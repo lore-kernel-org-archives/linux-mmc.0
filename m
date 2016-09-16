@@ -1,128 +1,61 @@
-From: Simon Horman <horms@verge.net.au>
-Subject: Re: [PATCH v7 05/11] ARM: dts: koelsch: Enable UHS-I SDR-50 and
- SDR-104
-Date: Fri, 16 Sep 2016 12:00:32 +0200
-Message-ID: <20160916100031.GH14562@verge.net.au>
+From: Wolfram Sang <wsa@the-dreams.de>
+Subject: Re: [PATCH v7 02/11] arm64: dts: r8a7795: salvator-x: enable UHS for
+ SDHI 0 & 3
+Date: Fri, 16 Sep 2016 12:22:34 +0200
+Message-ID: <20160916102234.GG1411@katana>
 References: <1473764228-24768-1-git-send-email-horms+renesas@verge.net.au>
- <1473764228-24768-6-git-send-email-horms+renesas@verge.net.au>
+ <1473764228-24768-3-git-send-email-horms+renesas@verge.net.au>
+ <20160916095500.GG14562@verge.net.au>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: multipart/signed; micalg=pgp-sha1;
+        protocol="application/pgp-signature"; boundary="FwyhczKCDPOVeYh6"
 Return-path: <linux-renesas-soc-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <1473764228-24768-6-git-send-email-horms+renesas@verge.net.au>
+In-Reply-To: <20160916095500.GG14562@verge.net.au>
 Sender: linux-renesas-soc-owner@vger.kernel.org
-To: Wolfram Sang <wsa+renesas@sang-engineering.com>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Magnus Damm <magnus.damm@gmail.com>, linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+To: Simon Horman <horms@verge.net.au>
+Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, Ulf Hansson <ulf.hansson@linaro.org>, Magnus Damm <magnus.damm@gmail.com>, linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
-On Tue, Sep 13, 2016 at 12:57:02PM +0200, Simon Horman wrote:
-> Add the "1v8" pinctrl state and sd-uhs-sdr50 property to SDHI{0,1,2}.
-> And the sd-uhs-sdr104 property to SDHI0.
-> 
-> Signed-off-by: Simon Horman <horms+renesas@verge.net.au>
 
-As SDR50 support is present in the driver in mainline (correct me if I am
-wrong!) I have queued this up after dropping the sdr104 portion and
-updating the changelog accordingly.
+--FwyhczKCDPOVeYh6
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-The result is as follows:
+On Fri, Sep 16, 2016 at 11:55:00AM +0200, Simon Horman wrote:
+> On Tue, Sep 13, 2016 at 12:56:59PM +0200, Simon Horman wrote:
+> > From: Wolfram Sang <wsa+renesas@sang-engineering.com>
+> >=20
+> > Reviewed-by: Geert Uytterhoeven <geert+renesas@glider.be>
+> > Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+> > Signed-off-by: Simon Horman <horms+renesas@verge.net.au>
+>=20
+> As SDR50 support is present in the driver in mainline (correct me if I am
+> wrong!) I am queuing this up.
 
-From: Simon Horman <horms+renesas@verge.net.au>
-Date: Tue, 13 Sep 2016 12:57:02 +0200
-Subject: [PATCH] ARM: dts: koelsch: arm64: dts: r8a7795: salvator-x: enable
- UHS for SDHI 0, 1 & 3
+Acked-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
 
-Add the "1v8" pinctrl state and sd-uhs-sdr50 property to SDHI{0,1,2}.
 
-Signed-off-by: Simon Horman <horms+renesas@verge.net.au>
----
- arch/arm/boot/dts/r8a7791-koelsch.dts | 33 ++++++++++++++++++++++++++++++---
- 1 file changed, 30 insertions(+), 3 deletions(-)
+--FwyhczKCDPOVeYh6
+Content-Type: application/pgp-signature; name="signature.asc"
 
-diff --git a/arch/arm/boot/dts/r8a7791-koelsch.dts b/arch/arm/boot/dts/r8a7791-koelsch.dts
-index f8a7d090fd01..f17bfa000f73 100644
---- a/arch/arm/boot/dts/r8a7791-koelsch.dts
-+++ b/arch/arm/boot/dts/r8a7791-koelsch.dts
-@@ -360,16 +360,37 @@
- 	sdhi0_pins: sd0 {
- 		groups = "sdhi0_data4", "sdhi0_ctrl";
- 		function = "sdhi0";
-+		power-source = <3300>;
-+	};
-+
-+	sdhi0_pins_uhs: sd0_uhs {
-+		groups = "sdhi0_data4", "sdhi0_ctrl";
-+		function = "sdhi0";
-+		power-source = <1800>;
- 	};
- 
- 	sdhi1_pins: sd1 {
- 		groups = "sdhi1_data4", "sdhi1_ctrl";
- 		function = "sdhi1";
-+		power-source = <3300>;
-+	};
-+
-+	sdhi1_pins_uhs: sd1_uhs {
-+		groups = "sdhi1_data4", "sdhi1_ctrl";
-+		function = "sdhi1";
-+		power-source = <1800>;
- 	};
- 
- 	sdhi2_pins: sd2 {
- 		groups = "sdhi2_data4", "sdhi2_ctrl";
- 		function = "sdhi2";
-+		power-source = <3300>;
-+	};
-+
-+	sdhi2_pins_uhs: sd2_uhs {
-+		groups = "sdhi2_data4", "sdhi2_ctrl";
-+		function = "sdhi2";
-+		power-source = <1800>;
- 	};
- 
- 	qspi_pins: qspi {
-@@ -454,33 +475,39 @@
- 
- &sdhi0 {
- 	pinctrl-0 = <&sdhi0_pins>;
--	pinctrl-names = "default";
-+	pinctrl-1 = <&sdhi0_pins_uhs>;
-+	pinctrl-names = "default", "state_uhs";
- 
- 	vmmc-supply = <&vcc_sdhi0>;
- 	vqmmc-supply = <&vccq_sdhi0>;
- 	cd-gpios = <&gpio6 6 GPIO_ACTIVE_LOW>;
- 	wp-gpios = <&gpio6 7 GPIO_ACTIVE_HIGH>;
-+	sd-uhs-sdr50;
- 	status = "okay";
- };
- 
- &sdhi1 {
- 	pinctrl-0 = <&sdhi1_pins>;
--	pinctrl-names = "default";
-+	pinctrl-1 = <&sdhi1_pins_uhs>;
-+	pinctrl-names = "default", "state_uhs";
- 
- 	vmmc-supply = <&vcc_sdhi1>;
- 	vqmmc-supply = <&vccq_sdhi1>;
- 	cd-gpios = <&gpio6 14 GPIO_ACTIVE_LOW>;
- 	wp-gpios = <&gpio6 15 GPIO_ACTIVE_HIGH>;
-+	sd-uhs-sdr50;
- 	status = "okay";
- };
- 
- &sdhi2 {
- 	pinctrl-0 = <&sdhi2_pins>;
--	pinctrl-names = "default";
-+	pinctrl-1 = <&sdhi2_pins_uhs>;
-+	pinctrl-names = "default", "state_uhs";
- 
- 	vmmc-supply = <&vcc_sdhi2>;
- 	vqmmc-supply = <&vccq_sdhi2>;
- 	cd-gpios = <&gpio6 22 GPIO_ACTIVE_LOW>;
-+	sd-uhs-sdr50;
- 	status = "okay";
- };
- 
--- 
-2.7.0.rc3.207.g0ac5344
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1
+
+iQIcBAEBAgAGBQJX28fqAAoJEBQN5MwUoCm27iQQAKTEXsxKQQopRyJ9FGcHNLUU
+D5qrLYyFR3PE/mF2xr2qhaISz11QXcHeKdb7svsyYbnP2wkdfoY8/EfJ9+Tc5aN7
+HyhRngzAUpSwbFYujjG43GvS10386vYdUg/dB+by5HWgadSx8KZM0eIICH8xqDYW
+LffRFyBtt6uj5Fsnzr9YIGZ2+3IGsWSMFS5lLPZKrUuNA5Nze8Ayh8RiMeFG8wgn
+Zyt6LBOkBGwoVIn4jsyHPOD4q8VXcI1BGNDef1uZTB0tiAerUT9ruTrn4ihFETUE
+CzOjO/mcbN4bAXZWTOIzsbC2GZ88qT9ubllA8AfUCSgzVCTKkqf41R0Um5XqeDgq
+zz15SY+VLzNSD41EVr7EZ5QcGruKcv4cABl4QZEZzaaxX7SIRj81vvTuzHre5C0O
+2DYa2oAd/kTQIGNZ25gCHfALOq3CxfmzmL8tMvRKyiGUG/jok4186l1AHAG9LD3b
+29lfKl9lljusK58FOfoGuGJPMFUjjaAzClFI+efddi9GaI6qmXLhlUlzbP/Kel8B
+jFH8P8eOt/feVa4jkZwLLDpSoTgA73JraXlzAHulAgtHcN5VyNhPDuu/vEJud72B
+ICm6272bqeAMtfPBdMTb7jawRIGmyf+3mufx/1HHWvAkUIyACb8MO+uisZjTiO/V
+iT/0F/5B6y1s9ERZJVZg
+=iF9H
+-----END PGP SIGNATURE-----
+
+--FwyhczKCDPOVeYh6--
