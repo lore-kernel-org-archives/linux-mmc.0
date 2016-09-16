@@ -1,53 +1,35 @@
-From: Kevin Hilman <khilman@baylibre.com>
-Subject: Re: [PATCH] MMC: meson: remove unused variable
-Date: Thu, 15 Sep 2016 09:37:26 -0700
-Message-ID: <7hh99hktkp.fsf@baylibre.com>
-References: <20160915154349.3005248-1-arnd@arndb.de>
+From: Simon Horman <horms@verge.net.au>
+Subject: Re: [PATCH 0/2] gen3: dts: enable on-board eMMC
+Date: Fri, 16 Sep 2016 11:38:27 +0200
+Message-ID: <20160916093827.GB14562@verge.net.au>
+References: <20160914170943.1663-1-wsa+renesas@sang-engineering.com>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-pa0-f54.google.com ([209.85.220.54]:35742 "EHLO
-        mail-pa0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1755358AbcIOQh2 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 15 Sep 2016 12:37:28 -0400
-Received: by mail-pa0-f54.google.com with SMTP id oz2so12940561pac.2
-        for <linux-mmc@vger.kernel.org>; Thu, 15 Sep 2016 09:37:28 -0700 (PDT)
-In-Reply-To: <20160915154349.3005248-1-arnd@arndb.de> (Arnd Bergmann's message
-        of "Thu, 15 Sep 2016 17:43:35 +0200")
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-renesas-soc-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <20160914170943.1663-1-wsa+renesas@sang-engineering.com>
+Sender: linux-renesas-soc-owner@vger.kernel.org
+To: Wolfram Sang <wsa+renesas@sang-engineering.com>
+Cc: linux-renesas-soc@vger.kernel.org, linux-mmc@vger.kernel.org, Dirk Behme <dirk.behme@gmail.com>, Wolfram Sang <wsa@the-dreams.de>
 List-Id: linux-mmc@vger.kernel.org
-To: Arnd Bergmann <arnd@arndb.de>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Carlo Caione <carlo@caione.org>, linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-amlogic@lists.infradead.org, linux-kernel@vger.kernel.org
 
-Arnd Bergmann <arnd@arndb.de> writes:
+On Wed, Sep 14, 2016 at 07:09:41PM +0200, Wolfram Sang wrote:
+> From: Wolfram Sang <wsa@the-dreams.de>
+> 
+> Here are the DTS changes to enable the on-board eMMC memory at 8 bit bus
+> widths on R-Car Gen3 Salvator-X boards.
+> 
+> Note that 'non-removable' is not supported yet because of Runtime PM issues. It
+> seems we need to overhaul Runtime PM handling for other reasons as well, so I
+> suggest the basic support goes in like this and DTS do not use 'non-removable'
+> for now.
+> 
+> Note also that I decided to use the pattern that pinctrl-0 is 3.3v and
+> pinctrl-1 is 1.8v, although the eMMC is fixed at 1.8v. I tried a few ways to
+> only use pinctrl-0 being 1.8v here, but they all ended up to be confusing for
+> users IMO, so I sticked to the most consistent solution after all.
+> 
+> These patches are based on top of Simon's sdr104-v7 patches and the accompanied
+> driver patches sent a minute ago. A branch can be found here:
 
-> The newly added meson mmc driver causes a build warning from an unused
-> variable:
->
-> drivers/mmc/host/meson-gxbb.c: In function 'meson_mmc_request_done':
-> drivers/mmc/host/meson-gxbb.c:411:22: error: unused variable 'cmd' [-Werror=unused-variable]
->
-> This removes the variable.
->
-> Signed-off-by: Arnd Bergmann <arnd@arndb.de>
-> Fixes: 4b331229dda9 ("MMC: meson: initial support for GXBB platforms")
-
-kbuild test robot reported this also, so I already fixed it for linux-next.
-
-Kevin
-
-> ---
->  drivers/mmc/host/meson-gxbb.c | 1 -
->  1 file changed, 1 deletion(-)
->
-> diff --git a/drivers/mmc/host/meson-gxbb.c b/drivers/mmc/host/meson-gxbb.c
-> index c73c62178764..193d343d0afe 100644
-> --- a/drivers/mmc/host/meson-gxbb.c
-> +++ b/drivers/mmc/host/meson-gxbb.c
-> @@ -408,7 +408,6 @@ static void meson_mmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
->  static int meson_mmc_request_done(struct mmc_host *mmc, struct mmc_request *mrq)
->  {
->  	struct meson_host *host = mmc_priv(mmc);
-> -	struct mmc_command *cmd = host->cmd;
->  
->  	WARN_ON(host->mrq != mrq);
+Please ping me / repost once these patches are ready to be merged.
