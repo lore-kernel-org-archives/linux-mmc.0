@@ -1,56 +1,67 @@
 From: Wolfram Sang <wsa@the-dreams.de>
-Subject: Re: [PATCH v7 07/11] ARM: dts: alt: Enable UHS-I SDR-50 and SDR-104
-Date: Fri, 16 Sep 2016 12:27:10 +0200
-Message-ID: <20160916102710.GJ1411@katana>
-References: <1473764228-24768-1-git-send-email-horms+renesas@verge.net.au>
- <1473764228-24768-8-git-send-email-horms+renesas@verge.net.au>
+Subject: Re: [PATCH v5 07/11] arm64: dts: r8a7795: remove unnecessary
+ cap-mmc-highspeed property
+Date: Fri, 16 Sep 2016 12:29:42 +0200
+Message-ID: <20160916102942.GK1411@katana>
+References: <1472591399-13907-1-git-send-email-horms+renesas@verge.net.au>
+ <1472591399-13907-8-git-send-email-horms+renesas@verge.net.au>
 Mime-Version: 1.0
 Content-Type: multipart/signed; micalg=pgp-sha1;
-        protocol="application/pgp-signature"; boundary="sdJFN6SSISdF2ksn"
-Return-path: <linux-renesas-soc-owner@vger.kernel.org>
+        protocol="application/pgp-signature"; boundary="73fGQZLCrFzENemP"
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from sauhun.de ([89.238.76.85]:52771 "EHLO pokefinder.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1753058AbcIPK3t (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Fri, 16 Sep 2016 06:29:49 -0400
 Content-Disposition: inline
-In-Reply-To: <1473764228-24768-8-git-send-email-horms+renesas@verge.net.au>
-Sender: linux-renesas-soc-owner@vger.kernel.org
-To: Simon Horman <horms+renesas@verge.net.au>
-Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, Ulf Hansson <ulf.hansson@linaro.org>, Magnus Damm <magnus.damm@gmail.com>, linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+In-Reply-To: <1472591399-13907-8-git-send-email-horms+renesas@verge.net.au>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Simon Horman <horms+renesas@verge.net.au>
+Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, Ulf Hansson <ulf.hansson@linaro.org>, Magnus Damm <magnus.damm@gmail.com>, linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org
 
 
---sdJFN6SSISdF2ksn
+--73fGQZLCrFzENemP
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
 Content-Transfer-Encoding: quoted-printable
 
-On Tue, Sep 13, 2016 at 12:57:04PM +0200, Simon Horman wrote:
-> Add the "1v8" pinctrl state and sd-uhs-sdr50 property to SDHI{0,1}.
-> And the sd-uhs-sdr104 property to SDHI0.
+On Tue, Aug 30, 2016 at 11:09:55PM +0200, Simon Horman wrote:
+> Remove cap-mmc-highspeed property from SDHI2 and SDHI3.
+>=20
+> This property is unnecessary as the driver automatically sets
+> the highspeed capability. Furthermore its use is inconsistent with SDHI0
+> and SDHI1 which are also highspeed capable but do not have this property
+> present.
+>=20
+> Found by inspection.
 >=20
 > Signed-off-by: Simon Horman <horms+renesas@verge.net.au>
 
-If you drop sdr104 here for now as well:
+For completeness:
 
 Reviewed-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
 
 
---sdJFN6SSISdF2ksn
+--73fGQZLCrFzENemP
 Content-Type: application/pgp-signature; name="signature.asc"
 
 -----BEGIN PGP SIGNATURE-----
 Version: GnuPG v1
 
-iQIcBAEBAgAGBQJX28j+AAoJEBQN5MwUoCm2/XwP/1xS9t8OQyN0PlzRiBT+teEv
-mFcOmbZmGYg5p1brMCfmm7aCzNjj1uogE9rUFURXDrxpDAWxarEzJWxEJaGBA6lZ
-RQLHYbYfSVqL9kqGuPuQ1vs4G8pi6ErLi8+wKdNKX4D3vIMR/QXvcjZQQLfwUAIU
-FJNgVdmvCkKCyfJ2lmfxDzf73AlUSxWpwOK23ySwdOUymHeGaO0wXqaWPfBzmvLn
-1BssSXtwRV+3RbgqjxouHrM1rJ4AyQP+Xb7fZNiFo5BNVZUdb1pzWQyTtxkHyfCQ
-pMoYt79idxRU61F37y00MOrBodOOPqvQx5k+C2iKoGDsVhEvFICShp8aMMZFd6kH
-V7k4twmUh9ikFIyWTWSzOejjKbrjmnyUF95t0S7LdHPtWQaDwjnG57FxjqH5B0WG
-DheAdhEWw/HHOGzAZhPUR/MAc9KKZ1ztBn/QdVr2VmGuk212cPJGrR6zkJLXsfYJ
-+QB9fV/yPpdb6uupQxSAIKSERWMc9F40RGhGK6MWttHdiJTOvnUi4FsvGuRZ8XiA
-OeuzKu3rfaMHto54uuP03L/4IXz8GBJBj/CBBVqHVatxmKyX9rDMD+comN55SIla
-03jht9hNb+EJfKCww32C+TLlvwSMllC+aAzcaxd7A1J/8AsvQIb8pCQxEMCvTBh0
-/pkAvqOJ7Wwj6nUdXRje
-=UkfD
+iQIcBAEBAgAGBQJX28mWAAoJEBQN5MwUoCm22OcP/2w8r1eR9sBf8H480U1BfOsT
+IYjss6jEfLE8AFyC+2mGFLtb3PjpaaR/8lND3LVQieBuHZkT+VraxrWLc9TCj8o+
+Zz7eNfdQb5elogJLI9AdOArE4vpaektbOMq+/FZeYp6RWAztIZS2N14zIwdhk9p7
+vDVwJJVXgt/20cWXms4Ps//PhGCc4NfpjGVsoNw0I6lmd1WsOVNd8t+1i4blaSaY
+ja/ETlTUh92BXoDs9sl8cTFtnStRx0PwVeG6ghRE+fbq4WArSltJhdJd27D4avos
+sNW/brk3AOOXD/SD6HvZIA+Ckia5q1e1fMqXJP6LSIsEbmIYuBjPd/3bLF7SfyYx
+pavif4nh3kZA5AgI4P6p4zmsBsga1OasfOjLANf3J5WE9n61lI6qTJKvfNmMKNs2
+3Xw4H2uvLSSt7wT4DFLxMKnsCVehyFE6YpRW3uuBggtgixGM+4gTBUOWp69dziqA
+/leK6SdxTPOMBZdxl/tuxb7ri+8aG8MVKuILsk8iMpwA7EW1KU+B9spekWx4hf9W
+WCCTxpQJ7UofAbLPcibNqFqYGzaMoV3855WZUcgOrTiVCTELd0IHqOuoCKDGpRtP
+HFQxhIa44/UJ9kwlFBcWYuQVOVnCS2HGJS0VdHIFdAL88iaqfA1rKQzfnFD/tEmj
+2QdkH4wffNnjFMl11OWY
+=YWKj
 -----END PGP SIGNATURE-----
 
---sdJFN6SSISdF2ksn--
+--73fGQZLCrFzENemP--
