@@ -1,67 +1,82 @@
 From: Wolfram Sang <wsa@the-dreams.de>
-Subject: Re: [PATCH v5 07/11] arm64: dts: r8a7795: remove unnecessary
- cap-mmc-highspeed property
-Date: Fri, 16 Sep 2016 12:29:42 +0200
-Message-ID: <20160916102942.GK1411@katana>
-References: <1472591399-13907-1-git-send-email-horms+renesas@verge.net.au>
- <1472591399-13907-8-git-send-email-horms+renesas@verge.net.au>
+Subject: Re: [PATCH v7 08/11] arm64: dts: r8a7796: add SDHI nodes
+Date: Fri, 16 Sep 2016 12:30:48 +0200
+Message-ID: <20160916103048.GL1411@katana>
+References: <1473764228-24768-1-git-send-email-horms+renesas@verge.net.au>
+ <1473764228-24768-9-git-send-email-horms+renesas@verge.net.au>
 Mime-Version: 1.0
 Content-Type: multipart/signed; micalg=pgp-sha1;
-        protocol="application/pgp-signature"; boundary="73fGQZLCrFzENemP"
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from sauhun.de ([89.238.76.85]:52771 "EHLO pokefinder.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1753058AbcIPK3t (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Fri, 16 Sep 2016 06:29:49 -0400
+        protocol="application/pgp-signature"; boundary="oY1uq2ONqt5kuovO"
+Return-path: <linux-renesas-soc-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <1472591399-13907-8-git-send-email-horms+renesas@verge.net.au>
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+In-Reply-To: <1473764228-24768-9-git-send-email-horms+renesas@verge.net.au>
+Sender: linux-renesas-soc-owner@vger.kernel.org
 To: Simon Horman <horms+renesas@verge.net.au>
-Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, Ulf Hansson <ulf.hansson@linaro.org>, Magnus Damm <magnus.damm@gmail.com>, linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org
+Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, Ulf Hansson <ulf.hansson@linaro.org>, Magnus Damm <magnus.damm@gmail.com>, linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+List-Id: linux-mmc@vger.kernel.org
 
 
---73fGQZLCrFzENemP
+--oY1uq2ONqt5kuovO
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
 Content-Transfer-Encoding: quoted-printable
 
-On Tue, Aug 30, 2016 at 11:09:55PM +0200, Simon Horman wrote:
-> Remove cap-mmc-highspeed property from SDHI2 and SDHI3.
+On Tue, Sep 13, 2016 at 12:57:05PM +0200, Simon Horman wrote:
+> Add SDHI nodes to the DT of the r8a7796 SoC.
 >=20
-> This property is unnecessary as the driver automatically sets
-> the highspeed capability. Furthermore its use is inconsistent with SDHI0
-> and SDHI1 which are also highspeed capable but do not have this property
-> present.
->=20
-> Found by inspection.
+> Based on the DT of the r8a7795 SoC.
 >=20
 > Signed-off-by: Simon Horman <horms+renesas@verge.net.au>
+> Reviewed-by: Geert Uytterhoeven <geert+renesas@glider.be>
 
-For completeness:
+If you remove the two lines you removed from H3 already:
 
 Reviewed-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
 
+> +		sdhi2: sd@ee140000 {
+> +			compatible =3D "renesas,sdhi-r8a7796";
+> +			reg =3D <0 0xee140000 0 0x2000>;
+> +			interrupts =3D <GIC_SPI 167 IRQ_TYPE_LEVEL_HIGH>;
+> +			clocks =3D <&cpg CPG_MOD 312>;
+> +			max-frequency =3D <200000000>;
+> +			power-domains =3D <&sysc R8A7796_PD_ALWAYS_ON>;
+> +			cap-mmc-highspeed;
+This one...
 
---73fGQZLCrFzENemP
+> +			status =3D "disabled";
+> +		};
+> +
+> +		sdhi3: sd@ee160000 {
+> +			compatible =3D "renesas,sdhi-r8a7796";
+> +			reg =3D <0 0xee160000 0 0x2000>;
+> +			interrupts =3D <GIC_SPI 168 IRQ_TYPE_LEVEL_HIGH>;
+> +			clocks =3D <&cpg CPG_MOD 311>;
+> +			max-frequency =3D <200000000>;
+> +			power-domains =3D <&sysc R8A7796_PD_ALWAYS_ON>;
+> +			cap-mmc-highspeed;
+
+=2E.. and ditto.
+
+
+--oY1uq2ONqt5kuovO
 Content-Type: application/pgp-signature; name="signature.asc"
 
 -----BEGIN PGP SIGNATURE-----
 Version: GnuPG v1
 
-iQIcBAEBAgAGBQJX28mWAAoJEBQN5MwUoCm22OcP/2w8r1eR9sBf8H480U1BfOsT
-IYjss6jEfLE8AFyC+2mGFLtb3PjpaaR/8lND3LVQieBuHZkT+VraxrWLc9TCj8o+
-Zz7eNfdQb5elogJLI9AdOArE4vpaektbOMq+/FZeYp6RWAztIZS2N14zIwdhk9p7
-vDVwJJVXgt/20cWXms4Ps//PhGCc4NfpjGVsoNw0I6lmd1WsOVNd8t+1i4blaSaY
-ja/ETlTUh92BXoDs9sl8cTFtnStRx0PwVeG6ghRE+fbq4WArSltJhdJd27D4avos
-sNW/brk3AOOXD/SD6HvZIA+Ckia5q1e1fMqXJP6LSIsEbmIYuBjPd/3bLF7SfyYx
-pavif4nh3kZA5AgI4P6p4zmsBsga1OasfOjLANf3J5WE9n61lI6qTJKvfNmMKNs2
-3Xw4H2uvLSSt7wT4DFLxMKnsCVehyFE6YpRW3uuBggtgixGM+4gTBUOWp69dziqA
-/leK6SdxTPOMBZdxl/tuxb7ri+8aG8MVKuILsk8iMpwA7EW1KU+B9spekWx4hf9W
-WCCTxpQJ7UofAbLPcibNqFqYGzaMoV3855WZUcgOrTiVCTELd0IHqOuoCKDGpRtP
-HFQxhIa44/UJ9kwlFBcWYuQVOVnCS2HGJS0VdHIFdAL88iaqfA1rKQzfnFD/tEmj
-2QdkH4wffNnjFMl11OWY
-=YWKj
+iQIcBAEBAgAGBQJX28nYAAoJEBQN5MwUoCm2tLQP/1rE6Y0EB4aD/RFJNxeo+68n
+8TZEPOCc4ebSCSB3qIBBZ4fQ9EgZeSHWpNNEUXMuw8FcngIS8ZEzbwBaMpjvO3GZ
+sNr+8Nbgz5WJGsrlHr8Y2L7F1GC7VszG70KJd0Zh5DZ7XjH+ByZvbzZblmqKS0M7
+7kmY2Xpcfa6zw6TeK6fdCgZGdIgVLi/o5QcVRipmvw0lAxNJuP78bZVuQw9uLA5r
+h8BLC3znpbflDWmtzrmbgb2WMrNdAjVebkQlGyK298Jc1mCpB5d7+9Zh2x0CMZJ7
+2+mErFPv9K1rqkWpOdbZubMkU9GL9aWWc/BmsK+7Me/na4vr5fNxe5Mkfk5m/EhK
+/aZABFxuouoJOU2tTLo0IEZH0q3/2YXIZt8KapsLlDfOSRipB+EJmdzaMWIuyAG6
+cDqypWj6N+s8Imnh6hEHQpn40ZtupaL5z2issGJmOEVSBNeUcf29P6Qpk6x7yYhI
+GxsmpS37m5skIkC690nXFObLUD47qXCfROa+UD7e4LdEXCJuDKYCF7eNK2eHcygo
+MOm0PqDrTKrRSIeiEapa0dwaeTKKveGMZn9w2Oxahv6378g1xMA1BnYVSD6akC5g
+d5RkgXGCOji2rGes4VvLxTUCm2Homj+2PpbuD1zzVqELfC/87lpWNRoaNwiKYpd4
+Y1wpgN9t6UBSpzFoiIe4
+=sHEb
 -----END PGP SIGNATURE-----
 
---73fGQZLCrFzENemP--
+--oY1uq2ONqt5kuovO--
