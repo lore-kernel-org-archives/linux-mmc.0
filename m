@@ -1,119 +1,145 @@
-From: Heiko Stuebner <heiko@sntech.de>
-Subject: Re: [PATCH v3 1/2] Documentation: mmc: sdhci-of-arasan: add description of power domain
-Date: Sat, 17 Sep 2016 11:57:00 +0200
-Message-ID: <2176583.VnE4kDODlR@phil>
-References: <20160917023250.1159-1-xzy.xu@rock-chips.com> <1516490.mHlkLq5CeM@phil> <CAPDyKFo6332LYwLk8xBz8aNQiLC+FEc5-1yY-jHPMm2ReXC=bQ@mail.gmail.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH 2/5] mmc: bcm2835-sdhost: Add new driver for the internal
+ SD controller.
+Date: Sat, 17 Sep 2016 12:02:16 +0200
+Message-ID: <CAPDyKFoASzRdA0Vy6P4hQ2OB845+YFosTXMAekEvpAOfco7m8g@mail.gmail.com>
+References: <1466595738-2229-1-git-send-email-kraxel@redhat.com>
+ <1466595738-2229-3-git-send-email-kraxel@redhat.com> <CAPDyKFryfGpA+8tZhtkzUVMFhomOevFz8k9R1b2O0oUn8giT1w@mail.gmail.com>
+ <1473347315.6698.53.camel@redhat.com> <877falaq1q.fsf@eliezer.anholt.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7Bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from gloria.sntech.de ([95.129.55.99]:33253 "EHLO gloria.sntech.de"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1754949AbcIQJ5Q (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Sat, 17 Sep 2016 05:57:16 -0400
-In-Reply-To: <CAPDyKFo6332LYwLk8xBz8aNQiLC+FEc5-1yY-jHPMm2ReXC=bQ@mail.gmail.com>
+Received: from mail-wm0-f49.google.com ([74.125.82.49]:35705 "EHLO
+        mail-wm0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S934112AbcIQKCT (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sat, 17 Sep 2016 06:02:19 -0400
+Received: by mail-wm0-f49.google.com with SMTP id l132so74911622wmf.0
+        for <linux-mmc@vger.kernel.org>; Sat, 17 Sep 2016 03:02:18 -0700 (PDT)
+In-Reply-To: <877falaq1q.fsf@eliezer.anholt.net>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Ziyuan Xu <xzy.xu@rock-chips.com>, Rob Herring <robh+dt@kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "open list:ARM/Rockchip SoC..." <linux-rockchip@lists.infradead.org>, linux-mmc <linux-mmc@vger.kernel.org>, Shawn Lin <shawn.lin@rock-chips.com>, Doug Anderson <dianders@chromium.org>, zhangqing <zhangqing@rock-chips.com>
+To: Eric Anholt <eric@anholt.net>
+Cc: Gerd Hoffmann <kraxel@redhat.com>, linux-rpi-kernel@lists.infradead.org, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, linux-mmc <linux-mmc@vger.kernel.org>, Stephen Warren <swarren@wwwdotorg.org>, Lee Jones <lee@kernel.org>, open list <linux-kernel@vger.kernel.org>
 
-Am Samstag, 17. September 2016, 11:09:15 CEST schrieb Ulf Hansson:
-> On 17 September 2016 at 11:01, Heiko Stuebner <heiko@sntech.de> wrote:
-> > Hi,
-> > 
-> > Am Samstag, 17. September 2016, 10:32:49 CEST schrieb Ziyuan Xu:
-> >> Add power domain as a optional property for sdhci-of-arasan, which can
-> >> be turned off in the so-called unused condition, such as suspend and
-> >> remove. Aim to lower power requirements.
-> >> 
-> >> Signed-off-by: Ziyuan Xu <xzy.xu@rock-chips.com>
-> >> 
-> >> Acked-by: Rob Herring <robh@kernel.org>
-> > 
-> > Reviewed-by: Heiko Stuebner <heiko@sntech.de>
-> > 
-> > @Ulf: I guess you'll take this binding change through the mmc tree and
-> > I'll
-> > pick up the devicetree change.
-> 
-> Ideally the documentation and DT change should go together, so I think
-> it's better for you to pick up both.
+On 9 September 2016 at 20:25, Eric Anholt <eric@anholt.net> wrote:
+> Gerd Hoffmann <kraxel@redhat.com> writes:
+>
+>> On Mi, 2016-08-31 at 14:58 +0200, Ulf Hansson wrote:
+>>> On 22 June 2016 at 13:42, Gerd Hoffmann <kraxel@redhat.com> wrote:
+>>> > From: Eric Anholt <eric@anholt.net>
+>>> >
+>>> > The 2835 has two SD controllers: The Arasan SDHCI controller that we
+>>> > currently use, and a custom SD controller.  The custom one runs faster
+>>> >
+>>> > The code was originally written by Phil Elwell in the downstream
+>>> > Rasbperry Pi tree, and I did a major cleanup on it (+319, -707 lines
+>>> > out of the original 2055) for inclusion.
+>>> >
+>>> > Signed-off-by: Eric Anholt <eric@anholt.net>
+>>>
+>>> Apologize for the delay!
+>>
+>> No problem, I was on summer vacation anyway ...
+>>
+>>> Could you start by providing some more information about the driver
+>>> and the controller in change in the change log please.
+>>
+>> Eric?  I don't know much more than what the commit message above says.
+>>
+>> Beside the speedup mentioned above driving the sdcard with the custom sd
+>> controller allows to use the sdhci (handled by sdhci-iproc) to be used
+>> for the wifi on the rpi3.
+>
+> Maybe just add that we need both controllers in order to do both wifi
+> and SD card?  I don't know exactly what Ulf wants to see here.
 
-I was more thinking about future conflicts with possible other changes during 
-the 4.9 cycle. We have -rc7 now, so arm-soc is pretty off limits for new 
-changes thus the binding change would only land in time for 4.10 and may cause 
-conflicts then.
+Some toplevel description of the controller. Like what speed modes it
+supports, can it do SD/SDIO/eMMC and so forth.
 
-> I intend to ack it, although it would be nice with some more
-> information as I requested, in the change-log first.
+>
+>>> > +static void bcm2835_sdhost_set_power(struct bcm2835_host *host, bool on)
+>>> > +{
+>>> > +       bcm2835_sdhost_write(host, on ? 1 : 0, SDVDD);
+>>>
+>>> What exactly does this power on/off?
+>>
+>> Dunno.  Eric?
+>
+> Note: I don't know much about SD, so I'm just trying to play oracle for
+> you all here.
+>
+> VDD bit 0 (POWER_ON) starts the power-on setup cycle by the sdhost once
+> power is already supplied to the card by some other means.  In the
+> SDHOST docs they assume you're going to use GPIO to control SD card
+> power, but for Raspberry Pi they just have the SD Card's VDD always on.
+> It's unclear to me what's controlling power to the Pi3 wifi/BT's SD
+> client, but I don't have specs to it.
 
-I guess we'll just wait until you are comfortable with the change and decide 
-then through which trees it should go :-)
+Very useful information, could we fold something like this in as
+comment in the code!?
 
+>
+> Note that after you've set POWER_ON to 0, you can also set bit 1
+> (CLOCK_OFF) to 1 to turn off the clock to the power-on FSM.
 
-Heiko
+Ditto.
 
-> >> ---
-> >> 
-> >> Changes in v3:
-> >> - fix a typo
-> >> - add Rob's ack-tag
-> >> 
-> >> Changes in v2:
-> >> - fix a typo
-> >> - add an example code for power-domain
-> >> 
-> >>  Documentation/devicetree/bindings/mmc/arasan,sdhci.txt | 7 ++++++-
-> >>  1 file changed, 6 insertions(+), 1 deletion(-)
-> >> 
-> >> diff --git a/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
-> >> b/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt index
-> >> 3404afa..eb84d29 100644
-> >> --- a/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
-> >> +++ b/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
-> >> @@ -1,12 +1,14 @@
-> >> 
-> >>  Device Tree Bindings for the Arasan SDHCI Controller
-> >> 
-> >> -  The bindings follow the mmc[1], clock[2], interrupt[3] and phy[4]
-> >> bindings. +  The bindings follow the mmc[1], clock[2], interrupt[3],
-> >> phy[4]
-> >> and power +  domain[5] bindings.
-> >> 
-> >>    Only deviations are documented here.
-> >>    
-> >>    [1] Documentation/devicetree/bindings/mmc/mmc.txt
-> >>    [2] Documentation/devicetree/bindings/clock/clock-bindings.txt
-> >>    [3]
-> >>    Documentation/devicetree/bindings/interrupt-controller/interrupts.txt
-> >> 
-> >> [4] Documentation/devicetree/bindings/phy/phy-bindings.txt
-> >> +  [5] Documentation/devicetree/bindings/power/power_domain.txt
-> >> 
-> >>  Required Properties:
-> >>    - compatible: Compatibility string.  One of:
-> >> @@ -36,6 +38,8 @@ Optional Properties:
-> >>    - #clock-cells: If specified this should be the value <0>.  With this
-> >> 
-> >> property in place we will export a clock representing the Card Clock. 
-> >> This
-> >> clock is expected to be consumed by our PHY.  You must also specify +  -
-> >> power-domains: A phandle and PM domain as specifier defined by bindings +
-> >> 
-> >>  of the power controller specified by phandle.
-> >>  
-> >>  Example:
-> >>       sdhci@e0100000 {
-> >> 
-> >> @@ -71,5 +75,6 @@ Example:
-> >>               phys = <&emmc_phy>;
-> >>               phy-names = "phy_arasan";
-> >>               #clock-cells = <0>;
-> >> 
-> >> +             power-domains = <&power RK3399_PD_EMMC>;
-> >> 
-> >>               status = "disabled";
-> >>       
-> >>       };
+>
+>>> > +       /* Need to send CMD12 if -
+>>> > +        * a) open-ended multiblock transfer (no CMD23)
+>>> > +        * b) error in multiblock transfer
+>>> > +        */
+>>> > +       if (host->mrq->stop && (data->error || !host->use_sbc)) {
+>>> > +               if (bcm2835_sdhost_send_command(host, host->mrq->stop)) {
+>>> > +                       /* No busy, so poll for completion */
+>>> > +                       if (!host->use_busy)
+>>>
+>>> This looks a bit weird. Can you explain why this is needed?
+>>
+>> Eric, any clue?  Some hardware bug workaround?
+>> Have a pointer to hardware specs?
+>
+> Would no-CMD23 transfers mean that data->blocks was 0 to mean
+> indefinite?  That's the only mention of CMD12 in the spec -- when you've
+> set HBLC to 0, you need to CMD12 or CMD52 when you're done with the
+> transfer.
 
+Perhaps you are right, although the comments above is weird.
 
+The driver should check if it's a request with R1B response, as to
+find out when to care about busy detection. I have feeling that there
+might be some odd things going on in this driver related to this. I
+could be wrong through.
+
+I advised Gerd to have a look how MMC_CAP_WAIT_WHILE_BUSY is working,
+so perhaps Gerd can figure this out when he understands that part
+better!?
+
+>
+>>> > +static void bcm2835_sdhost_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+>>> > +{
+>>>
+>>> I don't find any place where you control power to the card here. Don't
+>>> you need to do that?
+>>
+>> Eric?
+>
+> It looks like the card is always powered.  Do you mean something else by
+> power (like bringing up the FSM)?  Is there something else needed in
+> set_ios()?
+
+As you told me above, you are using an external regulator to power the
+card (VDD). And it seems like in this particular case this is always
+powered on.
+
+Still, my recommendation is to model this as a regulator, as it would
+prevent you from hard-coding the so called mmc->ocr_mask_avail.
+Instead that mask can be fetched by checking the supported voltage
+levels from the regulators.
+
+Please have a look at mmc_regulator_get_supply() and
+mmc_regulator_set_ocr(), those helpers are really convenient to use.
+You should be using the "vmmc" regulator for this purpose.
+
+Kind regards
+Uffe
