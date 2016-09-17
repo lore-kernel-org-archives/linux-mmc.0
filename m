@@ -1,59 +1,44 @@
 From: Ziyuan Xu <xzy.xu-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
-Subject: Re: [PATCH v2 1/2] Documentation: mmc: sdhci-of-arasan: add
- description of power domain
-Date: Sat, 17 Sep 2016 10:18:09 +0800
-Message-ID: <d0855b38-2dd3-826b-9624-4ec1c2d00b07@rock-chips.com>
-References: <20160908064905.18080-1-xzy.xu@rock-chips.com>
- <20160908064905.18080-2-xzy.xu@rock-chips.com>
- <20160916152535.GA6020@rob-hp-laptop>
+Subject: [PATCH v3 0/2] Add power domain support for eMMC node on rk3399
+Date: Sat, 17 Sep 2016 10:32:48 +0800
+Message-ID: <20160917023250.1159-1-xzy.xu@rock-chips.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 8bit
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20160916152535.GA6020@rob-hp-laptop>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Rob Herring <robh-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-Cc: devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, heiko-4mtYJXux2i+zQB+pC5nmwQ@public.gmane.org, shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org, linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-rockchip>,
+ <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-rockchip/>
+List-Post: <mailto:linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+List-Help: <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-rockchip>,
+ <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
+Sender: "Linux-rockchip" <linux-rockchip-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+Errors-To: linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+To: heiko-4mtYJXux2i+zQB+pC5nmwQ@public.gmane.org, ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org
+Cc: devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ziyuan Xu <xzy.xu-TNX95d0MmH7DzftRWevZcw@public.gmane.org>, shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org, zhangqing-TNX95d0MmH7DzftRWevZcw@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org, linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
 
-Hi Rob,
+This series add power domain for eMMC node which will be controlled by
+genpd to make sure it's available in probing state, and will be gate
+once suspend/resume.
 
+Changes in v3:
+- fix a typo
+- add Rob's ack-tag
 
-On 2016年09月16日 23:25, Rob Herring wrote:
-> On Thu, Sep 08, 2016 at 02:49:04PM +0800, Ziyuan Xu wrote:
->> Add power domain as a optional property for sdhci-of-arasan, which can
->> be truned off in the so-called unused condition, such as suspend and
-> s/truned/turned/
->
->> remove. Aim to lower power requirements.
->>
->> Signed-off-by: Ziyuan Xu <xzy.xu-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
->>
->> ---
->>
->> Changes in v2:
->> - fix a typo
->> - add an example code for power-domain
->>
->>   Documentation/devicetree/bindings/mmc/arasan,sdhci.txt | 7 ++++++-
->>   1 file changed, 6 insertions(+), 1 deletion(-)
-> With that,
->
-> Acked-by: Rob Herring <robh-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+Changes in v2:
+- fix a typo
+- add an example code for power-domain
+- add Shawn's review-tag and Doug's review-tag
 
-Thanks, Rob. I fill fix it and send a follow up patch with your tag.
+Ziyuan Xu (2):
+  Documentation: mmc: sdhci-of-arasan: add description of power domain
+  arm64: dts: rockchip: add eMMC's power domain support for rk3399
 
->
-> _______________________________________________
-> Linux-rockchip mailing list
-> Linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
-> http://lists.infradead.org/mailman/listinfo/linux-rockchip
->
->
->
+ Documentation/devicetree/bindings/mmc/arasan,sdhci.txt |  7 ++++++-
+ arch/arm64/boot/dts/rockchip/rk3399.dtsi               | 11 +++++++++++
+ 2 files changed, 17 insertions(+), 1 deletion(-)
 
-
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+-- 
+2.9.2
