@@ -1,104 +1,48 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v3 1/2] Documentation: mmc: sdhci-of-arasan: add
- description of power domain
-Date: Sat, 17 Sep 2016 11:09:15 +0200
-Message-ID: <CAPDyKFo6332LYwLk8xBz8aNQiLC+FEc5-1yY-jHPMm2ReXC=bQ@mail.gmail.com>
-References: <20160917023250.1159-1-xzy.xu@rock-chips.com> <20160917023250.1159-2-xzy.xu@rock-chips.com>
- <1516490.mHlkLq5CeM@phil>
+Subject: Re: [PATCH v3 1/3] mmc: sh_mobile_sdhi: add ocr_mask option
+Date: Sat, 17 Sep 2016 11:12:13 +0200
+Message-ID: <CAPDyKFqBToUrSbErWrc+zV-WX29Dj5dm+XzWMCfBgOiEtoG8Jg@mail.gmail.com>
+References: <20160912141507.6837-1-chris.brandt@renesas.com>
+ <20160912141507.6837-2-chris.brandt@renesas.com> <CAPDyKFqdznJ4xr5=L862uOfvqjsRpR3d+yRWtN1-8H5ZvP9GeQ@mail.gmail.com>
+ <CAMuHMdVGgWaVcC4Pfuf0NSTpU4ahdEg6Q7iKZ1n+mb7KexE6yg@mail.gmail.com>
+ <SG2PR06MB1165D0EE862CCCFD713181938AFE0@SG2PR06MB1165.apcprd06.prod.outlook.com>
+ <CAPDyKFp1eSyVAnn4JohR=Cx0VeE-5U8eY5GVQA+ae0P-vDJJ8w@mail.gmail.com> <SG2PR06MB11655A641475D2E08A5A3DDC8AFE0@SG2PR06MB1165.apcprd06.prod.outlook.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wm0-f48.google.com ([74.125.82.48]:36338 "EHLO
-        mail-wm0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1755017AbcIQJJS (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sat, 17 Sep 2016 05:09:18 -0400
-Received: by mail-wm0-f48.google.com with SMTP id b187so72287479wme.1
-        for <linux-mmc@vger.kernel.org>; Sat, 17 Sep 2016 02:09:17 -0700 (PDT)
-In-Reply-To: <1516490.mHlkLq5CeM@phil>
+Received: from mail-wm0-f42.google.com ([74.125.82.42]:36682 "EHLO
+        mail-wm0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S932785AbcIQJMQ (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sat, 17 Sep 2016 05:12:16 -0400
+Received: by mail-wm0-f42.google.com with SMTP id b187so72361835wme.1
+        for <linux-mmc@vger.kernel.org>; Sat, 17 Sep 2016 02:12:15 -0700 (PDT)
+In-Reply-To: <SG2PR06MB11655A641475D2E08A5A3DDC8AFE0@SG2PR06MB1165.apcprd06.prod.outlook.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Heiko Stuebner <heiko@sntech.de>
-Cc: Ziyuan Xu <xzy.xu@rock-chips.com>, Rob Herring <robh+dt@kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "open list:ARM/Rockchip SoC..." <linux-rockchip@lists.infradead.org>, linux-mmc <linux-mmc@vger.kernel.org>, Shawn Lin <shawn.lin@rock-chips.com>, Doug Anderson <dianders@chromium.org>, zhangqing <zhangqing@rock-chips.com>
+To: Chris Brandt <Chris.Brandt@renesas.com>
+Cc: Geert Uytterhoeven <geert@linux-m68k.org>, Wolfram Sang <wsa+renesas@sang-engineering.com>, Sergei Shtylyov <sergei.shtylyov@cogentembedded.com>, Simon Horman <horms+renesas@verge.net.au>, linux-mmc <linux-mmc@vger.kernel.org>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>
 
-On 17 September 2016 at 11:01, Heiko Stuebner <heiko@sntech.de> wrote:
-> Hi,
+On 13 September 2016 at 17:59, Chris Brandt <Chris.Brandt@renesas.com> wrote:
+> Hello Uffe
 >
-> Am Samstag, 17. September 2016, 10:32:49 CEST schrieb Ziyuan Xu:
->> Add power domain as a optional property for sdhci-of-arasan, which can
->> be turned off in the so-called unused condition, such as suspend and
->> remove. Aim to lower power requirements.
->>
->> Signed-off-by: Ziyuan Xu <xzy.xu@rock-chips.com>
->>
->> Acked-by: Rob Herring <robh@kernel.org>
+> Thank you for your reply.
 >
-> Reviewed-by: Heiko Stuebner <heiko@sntech.de>
+> On 9/13/2016, Ulf Hansson wrote:
+>> Because, if you have an external regulator feeding the mmc with power you
+>> should set it up and use it.
 >
-> @Ulf: I guess you'll take this binding change through the mmc tree and I'll
-> pick up the devicetree change.
+> But in many board designs, there is no control over the regulator supply (or you would rather have your bootloader do that, not the kernel).
+>
+> So what this patch is doing is setting it to a default of 3.3v (for just this SoC) and if someone wants to add a regulator in the board's DT file, that will override the ocr_mask set by the driver.
 
-Ideally the documentation and DT change should go together, so I think
-it's better for you to pick up both.
+That's perfectly okay to me! I just wanted to get clear picture of
+*why* this change was needed.
 
-I intend to ack it, although it would be nice with some more
-information as I requested, in the change-log first.
+>
+>
+> I'm assuming I'll have to do the same for MMC (sh_mmcif.c) once I get to that driver (I need to find my MMC PLUS card first for testing).
+
+Okay!
 
 Kind regards
 Uffe
-
->
->
-> Heiko
->
->> ---
->>
->> Changes in v3:
->> - fix a typo
->> - add Rob's ack-tag
->>
->> Changes in v2:
->> - fix a typo
->> - add an example code for power-domain
->>
->>  Documentation/devicetree/bindings/mmc/arasan,sdhci.txt | 7 ++++++-
->>  1 file changed, 6 insertions(+), 1 deletion(-)
->>
->> diff --git a/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
->> b/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt index
->> 3404afa..eb84d29 100644
->> --- a/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
->> +++ b/Documentation/devicetree/bindings/mmc/arasan,sdhci.txt
->> @@ -1,12 +1,14 @@
->>  Device Tree Bindings for the Arasan SDHCI Controller
->>
->> -  The bindings follow the mmc[1], clock[2], interrupt[3] and phy[4]
->> bindings. +  The bindings follow the mmc[1], clock[2], interrupt[3], phy[4]
->> and power +  domain[5] bindings.
->>    Only deviations are documented here.
->>
->>    [1] Documentation/devicetree/bindings/mmc/mmc.txt
->>    [2] Documentation/devicetree/bindings/clock/clock-bindings.txt
->>    [3] Documentation/devicetree/bindings/interrupt-controller/interrupts.txt
->> [4] Documentation/devicetree/bindings/phy/phy-bindings.txt
->> +  [5] Documentation/devicetree/bindings/power/power_domain.txt
->>
->>  Required Properties:
->>    - compatible: Compatibility string.  One of:
->> @@ -36,6 +38,8 @@ Optional Properties:
->>    - #clock-cells: If specified this should be the value <0>.  With this
->> property in place we will export a clock representing the Card Clock.  This
->> clock is expected to be consumed by our PHY.  You must also specify +  -
->> power-domains: A phandle and PM domain as specifier defined by bindings +
->>  of the power controller specified by phandle.
->>
->>  Example:
->>       sdhci@e0100000 {
->> @@ -71,5 +75,6 @@ Example:
->>               phys = <&emmc_phy>;
->>               phy-names = "phy_arasan";
->>               #clock-cells = <0>;
->> +             power-domains = <&power RK3399_PD_EMMC>;
->>               status = "disabled";
->>       };
->
->
