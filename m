@@ -1,48 +1,59 @@
-From: Don Zickus <dzickus@redhat.com>
-Subject: Re: RTS5227 errors on mount
-Date: Mon, 19 Sep 2016 09:41:58 -0400
-Message-ID: <20160919134158.GW98438@redhat.com>
-References: <20160901214047.GV98438@redhat.com>
- <20160915151129.GM98438@redhat.com>
- <CAPDyKFoACQUieOP7CFpmJQPGS4DG-=bKobXhnqsvd_Y1vddt8w@mail.gmail.com>
+From: Sergei Shtylyov <sergei.shtylyov@cogentembedded.com>
+Subject: Re: [PATCH v2 5/6] arm64: dts: r8a7795: salvator: enable on-board
+ eMMC
+Date: Mon, 19 Sep 2016 20:25:39 +0300
+Message-ID: <3abe65a3-0047-f39d-2639-b39b98081c42@cogentembedded.com>
+References: <20160919124921.8172-1-wsa+renesas@sang-engineering.com>
+ <20160919124921.8172-6-wsa+renesas@sang-engineering.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:60944 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1756055AbcISNmB (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Mon, 19 Sep 2016 09:42:01 -0400
-Content-Disposition: inline
-In-Reply-To: <CAPDyKFoACQUieOP7CFpmJQPGS4DG-=bKobXhnqsvd_Y1vddt8w@mail.gmail.com>
+Received: from mail-lf0-f48.google.com ([209.85.215.48]:32814 "EHLO
+        mail-lf0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S932303AbcISRZo (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 19 Sep 2016 13:25:44 -0400
+Received: by mail-lf0-f48.google.com with SMTP id h127so120069313lfh.0
+        for <linux-mmc@vger.kernel.org>; Mon, 19 Sep 2016 10:25:43 -0700 (PDT)
+In-Reply-To: <20160919124921.8172-6-wsa+renesas@sang-engineering.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>
+To: Wolfram Sang <wsa+renesas@sang-engineering.com>, linux-mmc@vger.kernel.org
+Cc: linux-renesas-soc@vger.kernel.org, Simon Horman <horms@verge.net.au>, Dirk Behme <dirk.behme@gmail.com>
 
-On Sat, Sep 17, 2016 at 11:03:55AM +0200, Ulf Hansson wrote:
-> On 15 September 2016 at 17:11, Don Zickus <dzickus@redhat.com> wrote:
-> > Hi Ulf,
-> >
-> > My emails to Micky seem to get blocked.  Is there a better person to contact
-> > about the rts5227 chip?
-> 
-> Sorry, I don't know.
-> 
-> Do you think this is a regression? Care to do a bisect?
+On 09/19/2016 03:49 PM, Wolfram Sang wrote:
 
-I can try bisecting but I don't think it is a regression.  The hardware does
-recover correctly (aborts the transaction, reset the device, and retry).  I
-was just trying to see if there was some incorrect calculations made when
-setting voltage levels or other chip configurations.
+> Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+> ---
+>  arch/arm64/boot/dts/renesas/r8a7795-salvator-x.dts | 43 ++++++++++++++++++++++
+>  1 file changed, 43 insertions(+)
+>
+> diff --git a/arch/arm64/boot/dts/renesas/r8a7795-salvator-x.dts b/arch/arm64/boot/dts/renesas/r8a7795-salvator-x.dts
+> index 8964b1ea3cea69..7780d02f716a34 100644
+> --- a/arch/arm64/boot/dts/renesas/r8a7795-salvator-x.dts
+> +++ b/arch/arm64/boot/dts/renesas/r8a7795-salvator-x.dts
+[...]
+> @@ -246,6 +264,18 @@
+>  		power-source = <1800>;
+>  	};
+>
+> +	sdhi2_pins: sd2 {
+> +		groups = "sdhi2_data8", "sdhi2_ctrl";
+> +		function = "sdhi2";
+> +		power-source = <3300>;
+> +	};
+> +
+> +	sdhi2_pins_uhs: sd2 {
+> +		groups = "sdhi2_data8", "sdhi2_ctrl";
+> +		function = "sdhi2";
+> +		power-source = <1800>;
+> +	};
+> +
 
-But I don't have the specs to know how things are supposed to work.
+    I'm afraid you're just overriding the props in the first "sd2" node with 
+this...
 
-For right now it is just an' error' message that appears in our log that I
-was trying to get rid of.  I don't see any loss of data, which is good.
+[...]
 
-I was hoping Micky would just be able to give a quick answer or something.
+MBR, Sergei
 
-I will poke at bisection to see if anything useful comes up.
-
-Cheers,
-Don
