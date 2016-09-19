@@ -1,127 +1,87 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [RESEND PATCH v7 2/2] sdhci-of-arasan: Set controller to test
- mode when xlnx,fails-without-test-cd is present
-Date: Mon, 19 Sep 2016 10:51:08 +0300
-Message-ID: <992df66b-043e-ea1b-d291-a544b0d861d0@intel.com>
-References: <1474038102-20937-1-git-send-email-zach.brown@ni.com>
- <1474038102-20937-2-git-send-email-zach.brown@ni.com>
+From: Wolfram Sang <wsa@the-dreams.de>
+Subject: Re: [PATCH 0/4] tmio: add support for eMMC with 8 bit bus width
+Date: Mon, 19 Sep 2016 10:00:45 +0200
+Message-ID: <20160919080045.GA1409@katana>
+References: <20160914170558.1561-1-wsa+renesas@sang-engineering.com>
+ <CAMuHMdX7GygtuA43=+HFFOyMGt=x1b2UTQBUojqedSfcRmSxjQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: multipart/signed; micalg=pgp-sha1;
+        protocol="application/pgp-signature"; boundary="VS++wcV0S1rZb1Fb"
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga14.intel.com ([192.55.52.115]:2879 "EHLO mga14.intel.com"
+Received: from sauhun.de ([89.238.76.85]:35819 "EHLO pokefinder.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1752725AbcISHz7 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Mon, 19 Sep 2016 03:55:59 -0400
-In-Reply-To: <1474038102-20937-2-git-send-email-zach.brown@ni.com>
+        id S1751914AbcISIAz (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Mon, 19 Sep 2016 04:00:55 -0400
+Content-Disposition: inline
+In-Reply-To: <CAMuHMdX7GygtuA43=+HFFOyMGt=x1b2UTQBUojqedSfcRmSxjQ@mail.gmail.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Zach Brown <zach.brown@ni.com>
-Cc: robh+dt@kernel.org, ulf.hansson@linaro.org, mark.rutland@arm.com, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, michal.simek@xilinx.com, soren.brinkmann@xilinx.com, linux-arm-kernel@lists.infradead.org
+To: Geert Uytterhoeven <geert@linux-m68k.org>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, Linux MMC List <linux-mmc@vger.kernel.org>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>, Simon Horman <horms@verge.net.au>, Dirk Behme <dirk.behme@gmail.com>
 
-On 16/09/16 18:01, Zach Brown wrote:
-> The sdhci controller on xilinx zynq devices will not function unless
-> the CD bit is provided. http://www.xilinx.com/support/answers/61064.html
-> In cases where it is impossible to provide the CD bit in hardware,
-> setting the controller to test mode and then setting inserted to true
-> will get the controller to function without the CD bit.
-> 
-> When the device has the property xlnx,fails-without-test-cd the driver
-> changes the controller to test mode and sets test inserted to true to
-> make the controller function.
-> 
-> Signed-off-by: Zach Brown <zach.brown@ni.com>
 
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+--VS++wcV0S1rZb1Fb
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-> ---
->  drivers/mmc/host/sdhci-of-arasan.c | 27 ++++++++++++++++++++++++++-
->  drivers/mmc/host/sdhci.h           |  2 ++
->  2 files changed, 28 insertions(+), 1 deletion(-)
-> 
-> diff --git a/drivers/mmc/host/sdhci-of-arasan.c b/drivers/mmc/host/sdhci-of-arasan.c
-> index 33601a8..da8e40a 100644
-> --- a/drivers/mmc/host/sdhci-of-arasan.c
-> +++ b/drivers/mmc/host/sdhci-of-arasan.c
-> @@ -26,6 +26,7 @@
->  #include <linux/phy/phy.h>
->  #include <linux/regmap.h>
->  #include "sdhci-pltfm.h"
-> +#include <linux/of.h>
->  
->  #define SDHCI_ARASAN_CLK_CTRL_OFFSET	0x2c
->  #define SDHCI_ARASAN_VENDOR_REGISTER	0x78
-> @@ -98,6 +99,10 @@ struct sdhci_arasan_data {
->  
->  	struct regmap	*soc_ctl_base;
->  	const struct sdhci_arasan_soc_ctl_map *soc_ctl_map;
-> +	unsigned int	quirks; /* Arasan deviations from spec */
-> +
-> +/* Controller does not have CD wired and will not function normally without */
-> +#define SDHCI_ARASAN_QUIRK_FORCE_CDTEST	BIT(0)
->  };
->  
->  static const struct sdhci_arasan_soc_ctl_map rk3399_soc_ctl_map = {
-> @@ -245,12 +250,27 @@ static void sdhci_arasan_hs400_enhanced_strobe(struct mmc_host *mmc,
->  	writel(vendor, host->ioaddr + SDHCI_ARASAN_VENDOR_REGISTER);
->  }
->  
-> +void sdhci_arasan_reset(struct sdhci_host *host, u8 mask)
-> +{
-> +	u8 ctrl;
-> +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> +	struct sdhci_arasan_data *sdhci_arasan = sdhci_pltfm_priv(pltfm_host);
-> +
-> +	sdhci_reset(host, mask);
-> +
-> +	if (sdhci_arasan->quirks & SDHCI_ARASAN_QUIRK_FORCE_CDTEST) {
-> +		ctrl = sdhci_readb(host, SDHCI_HOST_CONTROL);
-> +		ctrl |= SDHCI_CTRL_CDTEST_INS | SDHCI_CTRL_CDTEST_EN;
-> +		sdhci_writeb(host, ctrl, SDHCI_HOST_CONTROL);
-> +	}
-> +}
-> +
->  static struct sdhci_ops sdhci_arasan_ops = {
->  	.set_clock = sdhci_arasan_set_clock,
->  	.get_max_clock = sdhci_pltfm_clk_get_max_clock,
->  	.get_timeout_clock = sdhci_arasan_get_timeout_clock,
->  	.set_bus_width = sdhci_set_bus_width,
-> -	.reset = sdhci_reset,
-> +	.reset = sdhci_arasan_reset,
->  	.set_uhs_signaling = sdhci_set_uhs_signaling,
->  };
->  
-> @@ -545,6 +565,7 @@ static int sdhci_arasan_probe(struct platform_device *pdev)
->  	struct sdhci_host *host;
->  	struct sdhci_pltfm_host *pltfm_host;
->  	struct sdhci_arasan_data *sdhci_arasan;
-> +	struct device_node *np = pdev->dev.of_node;
->  
->  	host = sdhci_pltfm_init(pdev, &sdhci_arasan_pdata,
->  				sizeof(*sdhci_arasan));
-> @@ -599,6 +620,10 @@ static int sdhci_arasan_probe(struct platform_device *pdev)
->  	}
->  
->  	sdhci_get_of_property(pdev);
-> +
-> +	if (of_property_read_bool(np, "xlnx,fails-without-test-cd"))
-> +		sdhci_arasan->quirks |= SDHCI_ARASAN_QUIRK_FORCE_CDTEST;
-> +
->  	pltfm_host->clk = clk_xin;
->  
->  	if (of_device_is_compatible(pdev->dev.of_node,
-> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-> index a2bc9e1..c722cd2 100644
-> --- a/drivers/mmc/host/sdhci.h
-> +++ b/drivers/mmc/host/sdhci.h
-> @@ -84,6 +84,8 @@
->  #define   SDHCI_CTRL_ADMA32	0x10
->  #define   SDHCI_CTRL_ADMA64	0x18
->  #define   SDHCI_CTRL_8BITBUS	0x20
-> +#define  SDHCI_CTRL_CDTEST_INS	0x40
-> +#define  SDHCI_CTRL_CDTEST_EN	0x80
->  
->  #define SDHCI_POWER_CONTROL	0x29
->  #define  SDHCI_POWER_ON		0x01
-> 
+On Thu, Sep 15, 2016 at 01:52:26PM +0200, Geert Uytterhoeven wrote:
+> Hi Wolfram,
+>=20
+> On Wed, Sep 14, 2016 at 7:05 PM, Wolfram Sang
+> <wsa+renesas@sang-engineering.com> wrote:
+> > The DTS changes for R-Car Gen3 will come via a seperate series. Note th=
+at
+> > 'non-removable' is not supported yet because of Runtime PM issues. It s=
+eems we
+> > need to overhaul Runtime PM handling for other reasons as well, so I su=
+ggest
+> > the basic support goes in like this and DTS do not use 'non-removable' =
+for now.
+>=20
+> DT describes the hardware, not current limitations of the software.
+> Hence IMHO you should add the "non-removable" property to the DTS, and
+> work around its non-functioning in software.
 
+@Ulf: Would you accept such a workaround for a while?
+
+diff --git a/drivers/mmc/host/tmio_mmc_pio.c b/drivers/mmc/host/tmio_mmc_pi=
+o.c
+index f21c92ec7121cc..5ab8af294f7c40 100644
+--- a/drivers/mmc/host/tmio_mmc_pio.c
++++ b/drivers/mmc/host/tmio_mmc_pio.c
+@@ -1154,6 +1154,10 @@ int tmio_mmc_host_probe(struct tmio_mmc_host *_host,
+ 				  !mmc_card_is_removable(mmc) ||
+ 				  mmc->slot.cd_irq >=3D 0);
+=20
++	/* Workaround for NONREMOVABLE until we fix RuntimePM handling */
++	if (pdata->flags & TMIO_MMC_MIN_RCAR2)
++		_host->native_hotplug =3D true;
++
+ 	if (tmio_mmc_clk_enable(_host) < 0) {
+ 		mmc->f_max =3D pdata->hclk;
+ 		mmc->f_min =3D mmc->f_max / 512;
+
+
+--VS++wcV0S1rZb1Fb
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1
+
+iQIcBAEBAgAGBQJX35stAAoJEBQN5MwUoCm2cyYP/j7OK/U9g4YkOTKzFtbesEAS
+4EUBVvd0ciSOw/j3EP7CqIBEd4hbgAGuZ9x4atHgNdLLz6z6Q+uJ3VED7gazpPv5
+Yfln8BmTICYVZfCMCgAAecyh9oiWZk7nUfK0lREhHgHBwq+XY84fC+TWd/83CXem
+pt/JNHOGE025bhjs6t6XOzM+cAlqpL/1Mvg1tvnNOOxEi7WqX3W4EuAnlmr9WWfc
+kcUhrM15dqb8LZtJy+sDE21oOau7XUpmMzxuQQN9Mj3XxeBVbRBboXiuOCaIlf6g
+sUzXCbVngT1zGwC/WCaA9UYQ5bl6kC9+6aANl3BY4ad/lexFHHU3kPcd1cujPVTt
+0bsPgJDzvqMSXMPGYSKKdFSzMMbv+VnQ+hMM20F3bUSWEA32DSOB2uZMUSx3bRM/
+a++3TB1KLzWSlVNuJYCkG6QZBXUaISmfrSsemtPAqN3/GN3/759OILCYjTAAIAUW
+SDfXqGBbHFQGmOKRAkIdnaQSLQHJYzFjeTliNcF2oFYkpieOO5S73aWXrL9YynfC
+4Q8XLPobrXq+46xiq8SyBny2VEVELPgVrbaj4jkWmzhQggbP+uM8pwyPS/WrhQD0
+wBwWAJHTtx27ahWw1D2/0mxDjxalPq7XiL/8aqwc0B9+TtqQ05c+ZohxbwslajCg
+vRZBSk/LRnBRiebik7sX
+=ansV
+-----END PGP SIGNATURE-----
+
+--VS++wcV0S1rZb1Fb--
