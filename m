@@ -1,166 +1,89 @@
-From: Tobias Jakobi <tjakobi@math.uni-bielefeld.de>
-Subject: Re: mmc: dw_mmc: log spamming
-Date: Mon, 19 Sep 2016 12:00:58 +0200
-Message-ID: <57DFB75A.3030106@math.uni-bielefeld.de>
-References: <CGME20160915172951epcas1p13022fec9254b5903b353dff6398cbcae@epcas1p1.samsung.com>
- <57DADA85.2000200@math.uni-bielefeld.de>
- <a36ad9ba-1758-7048-d8b8-e3d85862ff08@samsung.com>
- <57DF396E.9050503@samsung.com>
- <6dd25843-3852-b059-4c42-6c720887db38@samsung.com>
- <57DF96C3.7050706@math.uni-bielefeld.de>
- <5d370fba-e4ec-d70a-a949-a955e86d61b1@samsung.com>
+From: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: Re: xHCI problem? [was Re: Erratic USB device behavior and device loss]
+Date: Mon, 19 Sep 2016 12:10:55 +0200
+Message-ID: <CAPDyKFr1EAUd0E-VQh_Y3ptCNM4WymvqsyQ8Ev756Wrb+93V6g@mail.gmail.com>
+References: <1474112525.11383.3.camel@researchut.com> <Pine.LNX.4.44L0.1609172131120.698-100000@netrider.rowland.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp.math.uni-bielefeld.de ([129.70.45.10]:38811 "EHLO
-        smtp.math.uni-bielefeld.de" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1751414AbcISKBC (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 19 Sep 2016 06:01:02 -0400
-In-Reply-To: <5d370fba-e4ec-d70a-a949-a955e86d61b1@samsung.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-usb-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <Pine.LNX.4.44L0.1609172131120.698-100000-pYrvlCTfrz9XsRXLowluHWD2FQJk+8+b@public.gmane.org>
+Sender: linux-usb-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Alan Stern <stern-nwvwT67g6+6dFdvTe/nMLpVzexx5G7lz@public.gmane.org>
+Cc: Ritesh Raj Sarraf <rrs-7WuBAv+fczCJ8c2fQYRYNw@public.gmane.org>, USB list <linux-usb-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-mmc <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>, sw0312.kim@samsung.com
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-Hey Jaehoon,
+On 18 September 2016 at 03:42, Alan Stern <stern-nwvwT67g6+6dFdvTe/nMLpVzexx5G7lz@public.gmane.org> wrote:
+> On Sat, 17 Sep 2016, Ritesh Raj Sarraf wrote:
+>
+>> -----BEGIN PGP SIGNED MESSAGE-----
+>> Hash: SHA512
+>>
+>> Hello Alan,
+>>
+>>
+>> On Fri, 2016-09-16 at 17:40 -0400, Alan Stern wrote:
+>> > We're still getting runtime suspends, but now at 2-second intervals.
+>> > This is partly because the driver isn't calling
+>> > pm_runtime_mark_last_busy(), but there may be more to it.  The 2-second
+>> > period is the default autosuspend timeout for USB devices.  However, I
+>> > don't see the activity that rtsx_usb_get_card_status() should produce
+>> > when rtsx_usb_suspend() runs; I don't know why not.
+>> >
+>> > We're also getting occasional I/O attempts while the device is
+>> > suspended.  They must be on some other pathway, not the one fixed by
+>> > the patch above.  Let's see if we can find out just where they come
+>> > from.
+>> >
+>> > Ritesh, please try applying this patch on top of the previous one.  It
+>> > will produce output in the kernel log whenever these bad I/O attempts
+>> > occur.  Also, enable dynamic debugging for the rtsx_usb driver:
+>> >
+>>
+>> Please find links to the usbmon trace and the kernel trace.
+>>
+>> https://people.debian.org/~rrs/tmp/4.8.0-rc6ulf1alan1+.kern.log
+>> https://people.debian.org/~rrs/tmp/usb-4.8.0-rc6ulf1alan1+.log.gz
+>
+> Well, this is pretty clear:
+>
+> Sep 17 15:55:52 learner kernel: CPU: 1 PID: 535 Comm: rtsx_usb_ms_1 Tainted: G     U          4.8.0-rc6ulf1alan1+ #19
+> Sep 17 15:55:52 learner kernel: Hardware name: LENOVO 20344/INVALID, BIOS 96CN31WW(V1.17) 07/21/2015
+> Sep 17 15:55:52 learner kernel:  0000000000000000 ffffffff81314be5 ffff8802476746c0 0000000002400000
+> Sep 17 15:55:52 learner kernel:  ffffffffa016f719 00000000523bec00 ffff88025f255780 ffff88024feff600
+> Sep 17 15:55:52 learner kernel:  0000000000018080 0000000000000000 ffff88025f258080 ffffffff815a0e60
+> Sep 17 15:55:52 learner kernel: Call Trace:
+> Sep 17 15:55:52 learner kernel:  [<ffffffff81314be5>] ? dump_stack+0x7d/0xb8
+> Sep 17 15:55:52 learner kernel:  [<ffffffffa016f719>] ? usb_hcd_submit_urb+0x3c9/0xad0 [usbcore]
+> Sep 17 15:55:52 learner kernel:  [<ffffffff815a0e60>] ? _raw_spin_lock_irqsave+0x20/0x47
+> Sep 17 15:55:52 learner kernel:  [<ffffffff810d5c8b>] ? lock_timer_base.isra.24+0x7b/0xa0
+> Sep 17 15:55:52 learner kernel:  [<ffffffff810d5d59>] ? try_to_del_timer_sync+0x49/0x60
+> Sep 17 15:55:52 learner kernel:  [<ffffffffa017180d>] ? usb_start_wait_urb+0x5d/0x140 [usbcore]
+> Sep 17 15:55:52 learner kernel:  [<ffffffffa00ee2be>] ? rtsx_usb_send_cmd+0x5e/0x80 [rtsx_usb]
+> Sep 17 15:55:52 learner kernel:  [<ffffffffa00ee4a7>] ? rtsx_usb_read_register+0x67/0xb0 [rtsx_usb]
+> Sep 17 15:55:52 learner kernel:  [<ffffffffa0b15ac1>] ? rtsx_usb_detect_ms_card+0x61/0xe0 [rtsx_usb_ms]
+> Sep 17 15:55:52 learner kernel:  [<ffffffffa0b15a60>] ? rtsx_usb_ms_set_param+0x770/0x770 [rtsx_usb_ms]
+> Sep 17 15:55:52 learner kernel:  [<ffffffff8108ee0d>] ? kthread+0xbd/0xe0
+> Sep 17 15:55:52 learner kernel:  [<ffffffff81024741>] ? __switch_to+0x2b1/0x6a0
+> Sep 17 15:55:52 learner kernel:  [<ffffffff815a118f>] ? ret_from_fork+0x1f/0x40
+> Sep 17 15:55:52 learner kernel:  [<ffffffff8108ed50>] ? kthread_create_on_node+0x180/0x180
+>
+> This is the rtsx_usb_detect_ms_card() routine in
+> drivers/memstick/host/rtsx_usb_ms.c, which runs as a kthread.  It
+> doesn't do any runtime PM.  So it looks like the bug is present in both
+> the MMC and MemoryStick interfaces.
 
+I think the problem is even worse in the MemoryStick case, as the
+memstick core doesn't help with runtime PM. I am pretty sure there are
+other cases when the MemoryStick driver accesses the usb device
+without first runtime resuming it.
 
-Jaehoon Chung wrote:
-> Hi Tobias,
-> 
-> On 09/19/2016 04:41 PM, Tobias Jakobi wrote:
->> Hello Jaehoon,
->>
->>
->> Jaehoon Chung wrote:
->>> Hi Tobias,
->>>
->>> CC'd mmc mailing.
->>>
->>> On 09/19/2016 10:03 AM, Seung-Woo Kim wrote:
->>>> Hello Jaehoon,
->>>>
->>>> On 2016년 09월 19일 09:32, Jaehoon Chung wrote:
->>>>> Hi Tobias,
->>>>>
->>>>> On 09/16/2016 02:29 AM, Tobias Jakobi wrote:
->>>>>> Hello everyone,
->>>>>>
->>>>>> I'm experiencing massive kernel log spamming by dw_mmc, the commit that
->>>>>> causes this is the following one.
->>>>>>
->>>>>> 65257a0deed5aee66b4e3708944f0be62a64cabc
->>>>>>
->>>>>> https://git.kernel.org/cgit/linux/kernel/git/torvalds/linux.git/commit/?id=65257a0deed5aee66b4e3708944f0be62a64cabc
->>>>>>
->>>>>> I've briefly checked the commit and I think the rationale behind
->>>>>> removing the check is incorrect. While MMC_CLKGATE was certainly
->>>>>> removed, runtime PM has "replaced" it (the commit
->>>>>> 9eadcc0581a8ccaf4c2378aa1c193fb164304f1d even mentions this).
->>>>>>
->>>>>> This is on an Exynos4412 board, kernel is 4.8-rc6. Nothing is connected
->>>>>> to the eMMC connector.
->>>>>
->>>>> Thanks for reporting this.
->>>>>
->>>>> Seung-Woo, Could you check your patch? I will also check this.
->>>
->>> Did you test after reverting this commit? or previous version is working fine?
->> yes, reverting the commit fixes the log spamming. I'm aware though that
->> the check is more of less broken (undefined behaviour because of
->> bit-shifting with large values), so I have also tried the following
->> thing: Just checking against 'div' instead of 'clock << div'. Anyway,
->> this also works for me.
->>
->>
->>> Which exynos4412 board do you use? I think it's related with "broken-cd".
->>> (If you can share which board and dts you are using, we can check in more detail.)
->> This is an Odroid-X2 board.
->>
-> 
-> When i have checked on odroid-u3, it's reproduced very easy.
-good to hear! I also worry that I'm the only one with these issues on
-the X2. :)
+Of course we could start simple an fix the bug observed above and see
+if that solves the reported problem. Alan, do you want to post to
+patch or you want me?
 
-Anyway, do you seen any other message on the U3 that are related to the
-eMMC. I'm asking because I have also experience some warning/error from
-the regulator subsystem:
-> Sep 15 17:19:56 chidori kernel: [    4.976690] vddf_emmc_2.85V: voltage operation not allowed
-> Sep 15 17:19:56 chidori kernel: [    4.995417] mmc_host mmc1: Bus speed (slot 0) = 50000000Hz (slot req 400000Hz, actual 396825HZ div = 63)
-
-I'm sending you a patch shortly which fixes the warning, but I'm not
-sure if this is the right approach. Maybe you can take a look?
-
-
->>> As you mentioned, you didn't insert the eMMC card on board.
->>> Then it should be polling whether card is inserted/removed. (If broken-cd is set...)
->> I can check the callstack leading to dw_mci_setup_bus() I guess. Would
->> that should make it easier for you guys to understand where the issue
->> originates from?
-> 
-> Not need to share the callstack. Because i understood what is problem.
-> But checking 'div' instead of 'clock << div' should also have the unexpected behavior.
-Why is that? If I understood the initial problem correctly, then
-shifting with 'div' produces undefined behaviour since we don't know an
-upper bound for it. That's not the case if we just compare old and new
-divisor.
-
-
-> If needs to fix, i want to go ahead the correct way at this time.
-> Anyway, thanks for reporting this!
-
-Also thanks, and let me know if I can test anything else.
-
-With best wishes,
-Tobias
-
-
-> Best Regards,
-> Jaehoon Chung
-> 
->>
->>
->>> I think it's not related with runtime PM.
->>>
->>> Best Regards,
->>> Jaehoon Chung
->>
->> WIth best wishes,
->> Tobias
->>
->>
->>
->>
->>>> Ok, I will check on Exynos4412 SpC boards.
->>>>
->>>> By the way, to check no condition case, when I posted after v2[1], I
->>>> checked with Exynos5422 and Exynos5433 SoC boards and they didn't show
->>>> duplicated log, so I agreed not to check condition for logging.
->>>>
->>>> [1] https://patchwork.kernel.org/patch/9182469/
->>>>
->>>> Best Regards,
->>>> - Seung-Woo Kim
->>>>
->>>>>
->>>>> Best Regards,
->>>>> Jaehoon Chung
->>>>>
->>>>>>
->>>>>> With best wishes,
->>>>>> Tobias
->>>>>>
->>>>>>
->>>>>>
->>>>>
->>>>>
->>>>>
->>>>
->>>
->>
->>
->>
->>
-> 
-
+Kind regards
+Uffe
+--
+To unsubscribe from this list: send the line "unsubscribe linux-usb" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
