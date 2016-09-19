@@ -1,92 +1,61 @@
 From: Wolfram Sang <wsa+renesas@sang-engineering.com>
-Subject: [PATCH v3 5/6] arm64: dts: r8a7795: salvator: enable on-board eMMC
-Date: Mon, 19 Sep 2016 22:57:49 +0200
-Message-ID: <20160919205750.4766-6-wsa+renesas@sang-engineering.com>
-References: <20160919205750.4766-1-wsa+renesas@sang-engineering.com>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from sauhun.de ([89.238.76.85]:37819 "EHLO pokefinder.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751029AbcISU6L (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Mon, 19 Sep 2016 16:58:11 -0400
-In-Reply-To: <20160919205750.4766-1-wsa+renesas@sang-engineering.com>
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Subject: [PATCH v3 0/6] tmio: add support for eMMC with 8 bit bus width
+Date: Mon, 19 Sep 2016 22:57:44 +0200
+Message-ID: <20160919205750.4766-1-wsa+renesas@sang-engineering.com>
+Return-path: <linux-renesas-soc-owner@vger.kernel.org>
+Sender: linux-renesas-soc-owner@vger.kernel.org
 To: linux-mmc@vger.kernel.org
 Cc: linux-renesas-soc@vger.kernel.org, Simon Horman <horms@verge.net.au>, Dirk Behme <dirk.behme@gmail.com>, Wolfram Sang <wsa+renesas@sang-engineering.com>
+List-Id: linux-mmc@vger.kernel.org
 
-Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
----
- arch/arm64/boot/dts/renesas/r8a7795-salvator-x.dts | 43 ++++++++++++++++++++++
- 1 file changed, 43 insertions(+)
+This series enables SDHI instances on R-Car Gen3 to access eMMC with 8 bit bus
+width. I think the patch descriptions speak for themselves.
 
-diff --git a/arch/arm64/boot/dts/renesas/r8a7795-salvator-x.dts b/arch/arm64/boot/dts/renesas/r8a7795-salvator-x.dts
-index 8964b1ea3cea69..8e98aeae54c066 100644
---- a/arch/arm64/boot/dts/renesas/r8a7795-salvator-x.dts
-+++ b/arch/arm64/boot/dts/renesas/r8a7795-salvator-x.dts
-@@ -62,6 +62,24 @@
- 		clock-frequency = <24576000>;
- 	};
- 
-+	reg_1p8v: regulator0 {
-+		compatible = "regulator-fixed";
-+		regulator-name = "fixed-1.8V";
-+		regulator-min-microvolt = <1800000>;
-+		regulator-max-microvolt = <1800000>;
-+		regulator-boot-on;
-+		regulator-always-on;
-+	};
-+
-+	reg_3p3v: regulator1 {
-+		compatible = "regulator-fixed";
-+		regulator-name = "fixed-3.3V";
-+		regulator-min-microvolt = <3300000>;
-+		regulator-max-microvolt = <3300000>;
-+		regulator-boot-on;
-+		regulator-always-on;
-+	};
-+
- 	vcc_sdhi0: regulator-vcc-sdhi0 {
- 		compatible = "regulator-fixed";
- 
-@@ -246,6 +264,18 @@
- 		power-source = <1800>;
- 	};
- 
-+	sdhi2_pins: sd2 {
-+		groups = "sdhi2_data8", "sdhi2_ctrl";
-+		function = "sdhi2";
-+		power-source = <3300>;
-+	};
-+
-+	sdhi2_pins_uhs: sd2_uhs {
-+		groups = "sdhi2_data8", "sdhi2_ctrl";
-+		function = "sdhi2";
-+		power-source = <1800>;
-+	};
-+
- 	sdhi3_pins: sd3 {
- 		groups = "sdhi3_data4", "sdhi3_ctrl";
- 		function = "sdhi3";
-@@ -398,6 +428,19 @@
- 	status = "okay";
- };
- 
-+&sdhi2 {
-+	/* used for on-board 8bit eMMC */
-+	pinctrl-0 = <&sdhi2_pins>;
-+	pinctrl-1 = <&sdhi2_pins_uhs>;
-+	pinctrl-names = "default", "state_uhs";
-+
-+	vmmc-supply = <&reg_3p3v>;
-+	vqmmc-supply = <&reg_1p8v>;
-+	bus-width = <8>;
-+	non-removable;
-+	status = "okay";
-+};
-+
- &sdhi3 {
- 	pinctrl-0 = <&sdhi3_pins>;
- 	pinctrl-1 = <&sdhi3_pins_uhs>;
+I decided to not protect this new feature with a flag because it needs
+specifically to be enabled by setting the bus width to 8. No legacy platform
+does that.
+
+Note that I decided to use the pattern that pinctrl-0 is 3.3v and
+pinctrl-1 is 1.8v, although the eMMC is fixed at 1.8v. I tried a few ways to
+only use pinctrl-0 being 1.8v here, but they all ended up to be confusing for
+users IMO, so I sticked to the most consistent solution after all.
+
+Changes since V2:
+
+* correct node name for sd2_uhs in both devicetrees
+
+Changes since V1:
+
+* merged the two distinct series (drivers + DTS) into one: patches 1-4 are for
+  Ulf, I will ping Simon for patches 5+6 when the time is ready.
+
+* DTS now contains 'non-removable' and we have a software workaround for now.
+
+These patches are based on top of Simon's sdr104-v7 patches but they apply to
+current mmc/next as well. A branch can be found here:
+
+git://git.kernel.org/pub/scm/linux/kernel/git/wsa/linux.git renesas/topic/sdhi-8bit-emmc
+
+Please review, comment, apply...
+
+   Wolfram
+
+Wolfram Sang (6):
+  mmc: add define for R1 response without CRC
+  mmc: rtsx_pci: use new macro for R1 without CRC
+  mmc: rtsx_usb: use new macro for R1 without CRC
+  mmc: tmio: add eMMC support
+  arm64: dts: r8a7795: salvator: enable on-board eMMC
+  arm64: dts: r8a7796: salvator: enable on board eMMC
+
+ arch/arm64/boot/dts/renesas/r8a7795-salvator-x.dts | 43 +++++++++++++++++++++
+ arch/arm64/boot/dts/renesas/r8a7796-salvator-x.dts | 44 +++++++++++++++++++++-
+ drivers/mmc/host/rtsx_pci_sdmmc.c                  |  2 +-
+ drivers/mmc/host/rtsx_usb_sdmmc.c                  |  2 +-
+ drivers/mmc/host/tmio_mmc.h                        |  3 ++
+ drivers/mmc/host/tmio_mmc_pio.c                    | 38 +++++++++++++------
+ include/linux/mmc/core.h                           |  3 ++
+ 7 files changed, 120 insertions(+), 15 deletions(-)
+
 -- 
 2.9.3
-
