@@ -1,26 +1,30 @@
 From: Wolfram Sang <wsa+renesas@sang-engineering.com>
-Subject: [PATCH v2 5/6] arm64: dts: r8a7795: salvator: enable on-board eMMC
-Date: Mon, 19 Sep 2016 14:49:20 +0200
-Message-ID: <20160919124921.8172-6-wsa+renesas@sang-engineering.com>
+Subject: [PATCH v2 6/6] arm64: dts: r8a7796: salvator: enable on board eMMC
+Date: Mon, 19 Sep 2016 14:49:21 +0200
+Message-ID: <20160919124921.8172-7-wsa+renesas@sang-engineering.com>
 References: <20160919124921.8172-1-wsa+renesas@sang-engineering.com>
-Return-path: <linux-renesas-soc-owner@vger.kernel.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from sauhun.de ([89.238.76.85]:36562 "EHLO pokefinder.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S935277AbcISMtr (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Mon, 19 Sep 2016 08:49:47 -0400
 In-Reply-To: <20160919124921.8172-1-wsa+renesas@sang-engineering.com>
-Sender: linux-renesas-soc-owner@vger.kernel.org
+Sender: linux-mmc-owner@vger.kernel.org
+List-Id: linux-mmc@vger.kernel.org
 To: linux-mmc@vger.kernel.org
 Cc: linux-renesas-soc@vger.kernel.org, Simon Horman <horms@verge.net.au>, Dirk Behme <dirk.behme@gmail.com>, Wolfram Sang <wsa+renesas@sang-engineering.com>
-List-Id: linux-mmc@vger.kernel.org
 
 Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
 ---
- arch/arm64/boot/dts/renesas/r8a7795-salvator-x.dts | 43 ++++++++++++++++++++++
- 1 file changed, 43 insertions(+)
+ arch/arm64/boot/dts/renesas/r8a7796-salvator-x.dts | 44 +++++++++++++++++++++-
+ 1 file changed, 43 insertions(+), 1 deletion(-)
 
-diff --git a/arch/arm64/boot/dts/renesas/r8a7795-salvator-x.dts b/arch/arm64/boot/dts/renesas/r8a7795-salvator-x.dts
-index 8964b1ea3cea69..7780d02f716a34 100644
---- a/arch/arm64/boot/dts/renesas/r8a7795-salvator-x.dts
-+++ b/arch/arm64/boot/dts/renesas/r8a7795-salvator-x.dts
-@@ -62,6 +62,24 @@
- 		clock-frequency = <24576000>;
+diff --git a/arch/arm64/boot/dts/renesas/r8a7796-salvator-x.dts b/arch/arm64/boot/dts/renesas/r8a7796-salvator-x.dts
+index 91440eb2237e72..7b14cb7538b22f 100644
+--- a/arch/arm64/boot/dts/renesas/r8a7796-salvator-x.dts
++++ b/arch/arm64/boot/dts/renesas/r8a7796-salvator-x.dts
+@@ -31,6 +31,24 @@
+ 		reg = <0x0 0x48000000 0x0 0x78000000>;
  	};
  
 +	reg_1p8v: regulator0 {
@@ -44,7 +48,15 @@ index 8964b1ea3cea69..7780d02f716a34 100644
  	vcc_sdhi0: regulator-vcc-sdhi0 {
  		compatible = "regulator-fixed";
  
-@@ -246,6 +264,18 @@
+@@ -78,7 +96,6 @@
+ 		states = <3300000 1
+ 			  1800000 0>;
+ 	};
+-
+ };
+ 
+ &pfc {
+@@ -106,6 +123,18 @@
  		power-source = <1800>;
  	};
  
@@ -63,7 +75,7 @@ index 8964b1ea3cea69..7780d02f716a34 100644
  	sdhi3_pins: sd3 {
  		groups = "sdhi3_data4", "sdhi3_ctrl";
  		function = "sdhi3";
-@@ -398,6 +428,19 @@
+@@ -138,6 +167,19 @@
  	status = "okay";
  };
  
@@ -85,3 +97,4 @@ index 8964b1ea3cea69..7780d02f716a34 100644
  	pinctrl-1 = <&sdhi3_pins_uhs>;
 -- 
 2.9.3
+
