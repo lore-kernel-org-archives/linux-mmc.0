@@ -1,73 +1,99 @@
-From: Alan Stern <stern-nwvwT67g6+6dFdvTe/nMLpVzexx5G7lz@public.gmane.org>
-Subject: Re: [PATCH] mmc: rtsx_usb_sdmmc: Handle runtime PM while changing
- led
-Date: Sat, 17 Sep 2016 22:30:10 -0400 (EDT)
-Message-ID: <Pine.LNX.4.44L0.1609172219100.1716-100000@netrider.rowland.org>
-References: <1474107278-3271-1-git-send-email-ulf.hansson@linaro.org>
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: Re: mmc: dw_mmc: log spamming
+Date: Mon, 19 Sep 2016 16:33:55 +0900
+Message-ID: <6dd25843-3852-b059-4c42-6c720887db38@samsung.com>
+References: <CGME20160915172951epcas1p13022fec9254b5903b353dff6398cbcae@epcas1p1.samsung.com>
+ <57DADA85.2000200@math.uni-bielefeld.de>
+ <a36ad9ba-1758-7048-d8b8-e3d85862ff08@samsung.com>
+ <57DF396E.9050503@samsung.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <linux-usb-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1474107278-3271-1-git-send-email-ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Sender: linux-usb-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ritesh Raj Sarraf <rrs-7WuBAv+fczCJ8c2fQYRYNw@public.gmane.org>, USB list <linux-usb-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Micky Ching <micky_ching-kXabqFNEczNtrwSWzY7KCg@public.gmane.org>, Roger Tseng <rogerable-Rasf1IRRPZFBDgjK7y7TUQ@public.gmane.org>, Wei WANG <wei_wang-kXabqFNEczNtrwSWzY7KCg@public.gmane.org>
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8BIT
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mailout2.samsung.com ([203.254.224.25]:56450 "EHLO
+        mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S932533AbcISHd6 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 19 Sep 2016 03:33:58 -0400
+Received: from epcpsbgr1.samsung.com
+ (u141.gpu120.samsung.co.kr [203.254.230.141])
+ by mailout2.samsung.com (Oracle Communications Messaging Server 7.0.5.31.0
+ 64bit (built May  5 2014))
+ with ESMTP id <0ODQ02DSKQCJKW90@mailout2.samsung.com> for
+ linux-mmc@vger.kernel.org; Mon, 19 Sep 2016 16:33:55 +0900 (KST)
+In-reply-to: <57DF396E.9050503@samsung.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: sw0312.kim@samsung.com
+Cc: Tobias Jakobi <tjakobi@math.uni-bielefeld.de>, Ulf Hansson <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-On Sat, 17 Sep 2016, Ulf Hansson wrote:
+Hi Tobias,
 
-> Each access of the parent device (usb device) needs to be done in runtime
-> resumed state. Currently this isn't case while changing the leds, so let's
-> add pm_runtime_get_sync() and pm_runtime_put() around these calls.
+CC'd mmc mailing.
+
+On 09/19/2016 10:03 AM, Seung-Woo Kim wrote:
+> Hello Jaehoon,
 > 
-> Signed-off-by: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-> ---
+> On 2016년 09월 19일 09:32, Jaehoon Chung wrote:
+>> Hi Tobias,
+>>
+>> On 09/16/2016 02:29 AM, Tobias Jakobi wrote:
+>>> Hello everyone,
+>>>
+>>> I'm experiencing massive kernel log spamming by dw_mmc, the commit that
+>>> causes this is the following one.
+>>>
+>>> 65257a0deed5aee66b4e3708944f0be62a64cabc
+>>>
+>>> https://git.kernel.org/cgit/linux/kernel/git/torvalds/linux.git/commit/?id=65257a0deed5aee66b4e3708944f0be62a64cabc
+>>>
+>>> I've briefly checked the commit and I think the rationale behind
+>>> removing the check is incorrect. While MMC_CLKGATE was certainly
+>>> removed, runtime PM has "replaced" it (the commit
+>>> 9eadcc0581a8ccaf4c2378aa1c193fb164304f1d even mentions this).
+>>>
+>>> This is on an Exynos4412 board, kernel is 4.8-rc6. Nothing is connected
+>>> to the eMMC connector.
+>>
+>> Thanks for reporting this.
+>>
+>> Seung-Woo, Could you check your patch? I will also check this.
+
+Did you test after reverting this commit? or previous version is working fine?
+Which exynos4412 board do you use? I think it's related with "broken-cd".
+(If you can share which board and dts you are using, we can check in more detail.)
+
+As you mentioned, you didn't insert the eMMC card on board.
+Then it should be polling whether card is inserted/removed. (If broken-cd is set...)
+
+I think it's not related with runtime PM.
+
+Best Regards,
+Jaehoon Chung
+
 > 
-> While discussing an issue[1] related to runtime PM, I found out that this
-> minor change at least improves the behavior that has been observed.
+> Ok, I will check on Exynos4412 SpC boards.
 > 
-> [1]
-> http://www.spinics.net/lists/linux-usb/msg144634.html
+> By the way, to check no condition case, when I posted after v2[1], I
+> checked with Exynos5422 and Exynos5433 SoC boards and they didn't show
+> duplicated log, so I agreed not to check condition for logging.
 > 
-> ---
->  drivers/mmc/host/rtsx_usb_sdmmc.c | 2 ++
->  1 file changed, 2 insertions(+)
+> [1] https://patchwork.kernel.org/patch/9182469/
 > 
-> diff --git a/drivers/mmc/host/rtsx_usb_sdmmc.c b/drivers/mmc/host/rtsx_usb_sdmmc.c
-> index 6c71fc9..a59c7fa 100644
-> --- a/drivers/mmc/host/rtsx_usb_sdmmc.c
-> +++ b/drivers/mmc/host/rtsx_usb_sdmmc.c
-> @@ -1314,6 +1314,7 @@ static void rtsx_usb_update_led(struct work_struct *work)
->  		container_of(work, struct rtsx_usb_sdmmc, led_work);
->  	struct rtsx_ucr *ucr = host->ucr;
->  
-> +	pm_runtime_get_sync(sdmmc_dev(host));
->  	mutex_lock(&ucr->dev_mutex);
->  
->  	if (host->led.brightness == LED_OFF)
-> @@ -1322,6 +1323,7 @@ static void rtsx_usb_update_led(struct work_struct *work)
->  		rtsx_usb_turn_on_led(ucr);
->  
->  	mutex_unlock(&ucr->dev_mutex);
-> +	pm_runtime_put(sdmmc_dev(host));
->  }
->  #endif
+> Best Regards,
+> - Seung-Woo Kim
+> 
+>>
+>> Best Regards,
+>> Jaehoon Chung
+>>
+>>>
+>>> With best wishes,
+>>> Tobias
+>>>
+>>>
+>>>
+>>
+>>
+>>
+> 
 
-The missing aspect here is that this won't stop the parent USB device
-from going into autosuspend every 2 seconds and then resuming shortly 
-afterward.  There are two ways of preventing this:
-
-	Call usb_mark_last_busy() at appropriate places.
-
-	Enable autosuspend for the sdmmc device.
-
-The second approach would also prevent the sdmmc device from going into
-autosuspend as soon as the LED update is finished.  Maybe that's okay,
-but if going into suspend is a lightweight procedure then you may want
-to prevent it.
-
-Alan Stern
-
---
-To unsubscribe from this list: send the line "unsubscribe linux-usb" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
