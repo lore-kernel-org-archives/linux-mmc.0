@@ -1,87 +1,92 @@
-From: Wolfram Sang <wsa@the-dreams.de>
-Subject: Re: [PATCH 0/4] tmio: add support for eMMC with 8 bit bus width
-Date: Mon, 19 Sep 2016 10:00:45 +0200
-Message-ID: <20160919080045.GA1409@katana>
-References: <20160914170558.1561-1-wsa+renesas@sang-engineering.com>
- <CAMuHMdX7GygtuA43=+HFFOyMGt=x1b2UTQBUojqedSfcRmSxjQ@mail.gmail.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH] mmc: rtsx_usb_sdmmc: Handle runtime PM while changing led
+Date: Mon, 19 Sep 2016 11:24:18 +0200
+Message-ID: <CAPDyKFpFObRkvUC5kOKznE3FAGL6H_Hufa7ZEFWpmB694AY9ow@mail.gmail.com>
+References: <1474107278-3271-1-git-send-email-ulf.hansson@linaro.org> <Pine.LNX.4.44L0.1609172219100.1716-100000@netrider.rowland.org>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-        protocol="application/pgp-signature"; boundary="VS++wcV0S1rZb1Fb"
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from sauhun.de ([89.238.76.85]:35819 "EHLO pokefinder.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751914AbcISIAz (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Mon, 19 Sep 2016 04:00:55 -0400
-Content-Disposition: inline
-In-Reply-To: <CAMuHMdX7GygtuA43=+HFFOyMGt=x1b2UTQBUojqedSfcRmSxjQ@mail.gmail.com>
+Received: from mail-wm0-f54.google.com ([74.125.82.54]:37681 "EHLO
+        mail-wm0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750790AbcISJYV (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 19 Sep 2016 05:24:21 -0400
+Received: by mail-wm0-f54.google.com with SMTP id b130so51990773wmc.0
+        for <linux-mmc@vger.kernel.org>; Mon, 19 Sep 2016 02:24:20 -0700 (PDT)
+In-Reply-To: <Pine.LNX.4.44L0.1609172219100.1716-100000@netrider.rowland.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Geert Uytterhoeven <geert@linux-m68k.org>, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, Linux MMC List <linux-mmc@vger.kernel.org>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>, Simon Horman <horms@verge.net.au>, Dirk Behme <dirk.behme@gmail.com>
+To: Alan Stern <stern@rowland.harvard.edu>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Ritesh Raj Sarraf <rrs@researchut.com>, USB list <linux-usb@vger.kernel.org>, Micky Ching <micky_ching@realsil.com.cn>, Roger Tseng <rogerable@realtek.com>, Wei WANG <wei_wang@realsil.com.cn>
 
+On 18 September 2016 at 04:30, Alan Stern <stern@rowland.harvard.edu> wrote:
+> On Sat, 17 Sep 2016, Ulf Hansson wrote:
+>
+>> Each access of the parent device (usb device) needs to be done in runtime
+>> resumed state. Currently this isn't case while changing the leds, so let's
+>> add pm_runtime_get_sync() and pm_runtime_put() around these calls.
+>>
+>> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+>> ---
+>>
+>> While discussing an issue[1] related to runtime PM, I found out that this
+>> minor change at least improves the behavior that has been observed.
+>>
+>> [1]
+>> http://www.spinics.net/lists/linux-usb/msg144634.html
+>>
+>> ---
+>>  drivers/mmc/host/rtsx_usb_sdmmc.c | 2 ++
+>>  1 file changed, 2 insertions(+)
+>>
+>> diff --git a/drivers/mmc/host/rtsx_usb_sdmmc.c b/drivers/mmc/host/rtsx_usb_sdmmc.c
+>> index 6c71fc9..a59c7fa 100644
+>> --- a/drivers/mmc/host/rtsx_usb_sdmmc.c
+>> +++ b/drivers/mmc/host/rtsx_usb_sdmmc.c
+>> @@ -1314,6 +1314,7 @@ static void rtsx_usb_update_led(struct work_struct *work)
+>>               container_of(work, struct rtsx_usb_sdmmc, led_work);
+>>       struct rtsx_ucr *ucr = host->ucr;
+>>
+>> +     pm_runtime_get_sync(sdmmc_dev(host));
+>>       mutex_lock(&ucr->dev_mutex);
+>>
+>>       if (host->led.brightness == LED_OFF)
+>> @@ -1322,6 +1323,7 @@ static void rtsx_usb_update_led(struct work_struct *work)
+>>               rtsx_usb_turn_on_led(ucr);
+>>
+>>       mutex_unlock(&ucr->dev_mutex);
+>> +     pm_runtime_put(sdmmc_dev(host));
+>>  }
+>>  #endif
+>
+> The missing aspect here is that this won't stop the parent USB device
+> from going into autosuspend every 2 seconds and then resuming shortly
+> afterward.  There are two ways of preventing this:
+>
+>         Call usb_mark_last_busy() at appropriate places.
+>
+>         Enable autosuspend for the sdmmc device.
+>
+> The second approach would also prevent the sdmmc device from going into
+> autosuspend as soon as the LED update is finished.  Maybe that's okay,
+> but if going into suspend is a lightweight procedure then you may want
+> to prevent it.
+>
 
---VS++wcV0S1rZb1Fb
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+We can for sure enable autosuspend for the sdmmc device, although as
+soon as an SD card will be detected the rtsx driver will increase the
+runtime PM usage count. The count is decreased when the card is
+removed (or failed to be initialized), thus runtime suspend is
+prevented as long as there is a functional card inserted.
 
-On Thu, Sep 15, 2016 at 01:52:26PM +0200, Geert Uytterhoeven wrote:
-> Hi Wolfram,
->=20
-> On Wed, Sep 14, 2016 at 7:05 PM, Wolfram Sang
-> <wsa+renesas@sang-engineering.com> wrote:
-> > The DTS changes for R-Car Gen3 will come via a seperate series. Note th=
-at
-> > 'non-removable' is not supported yet because of Runtime PM issues. It s=
-eems we
-> > need to overhaul Runtime PM handling for other reasons as well, so I su=
-ggest
-> > the basic support goes in like this and DTS do not use 'non-removable' =
-for now.
->=20
-> DT describes the hardware, not current limitations of the software.
-> Hence IMHO you should add the "non-removable" property to the DTS, and
-> work around its non-functioning in software.
+I am wondering what you think would be a good autosuspend timeout in
+this case? It seems to me that the only thing the rtsx driver really
+care about is to tell the parent device that it needs to be runtime
+resumed during a certain timeframe, more or less it would like to
+inherit the parents settings.
 
-@Ulf: Would you accept such a workaround for a while?
+Other mmc hosts, not being usb-mmc devices, are using an autosuspend
+timeout of ~50-100ms but that doesn't seem like good value here,
+right?
 
-diff --git a/drivers/mmc/host/tmio_mmc_pio.c b/drivers/mmc/host/tmio_mmc_pi=
-o.c
-index f21c92ec7121cc..5ab8af294f7c40 100644
---- a/drivers/mmc/host/tmio_mmc_pio.c
-+++ b/drivers/mmc/host/tmio_mmc_pio.c
-@@ -1154,6 +1154,10 @@ int tmio_mmc_host_probe(struct tmio_mmc_host *_host,
- 				  !mmc_card_is_removable(mmc) ||
- 				  mmc->slot.cd_irq >=3D 0);
-=20
-+	/* Workaround for NONREMOVABLE until we fix RuntimePM handling */
-+	if (pdata->flags & TMIO_MMC_MIN_RCAR2)
-+		_host->native_hotplug =3D true;
-+
- 	if (tmio_mmc_clk_enable(_host) < 0) {
- 		mmc->f_max =3D pdata->hclk;
- 		mmc->f_min =3D mmc->f_max / 512;
-
-
---VS++wcV0S1rZb1Fb
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1
-
-iQIcBAEBAgAGBQJX35stAAoJEBQN5MwUoCm2cyYP/j7OK/U9g4YkOTKzFtbesEAS
-4EUBVvd0ciSOw/j3EP7CqIBEd4hbgAGuZ9x4atHgNdLLz6z6Q+uJ3VED7gazpPv5
-Yfln8BmTICYVZfCMCgAAecyh9oiWZk7nUfK0lREhHgHBwq+XY84fC+TWd/83CXem
-pt/JNHOGE025bhjs6t6XOzM+cAlqpL/1Mvg1tvnNOOxEi7WqX3W4EuAnlmr9WWfc
-kcUhrM15dqb8LZtJy+sDE21oOau7XUpmMzxuQQN9Mj3XxeBVbRBboXiuOCaIlf6g
-sUzXCbVngT1zGwC/WCaA9UYQ5bl6kC9+6aANl3BY4ad/lexFHHU3kPcd1cujPVTt
-0bsPgJDzvqMSXMPGYSKKdFSzMMbv+VnQ+hMM20F3bUSWEA32DSOB2uZMUSx3bRM/
-a++3TB1KLzWSlVNuJYCkG6QZBXUaISmfrSsemtPAqN3/GN3/759OILCYjTAAIAUW
-SDfXqGBbHFQGmOKRAkIdnaQSLQHJYzFjeTliNcF2oFYkpieOO5S73aWXrL9YynfC
-4Q8XLPobrXq+46xiq8SyBny2VEVELPgVrbaj4jkWmzhQggbP+uM8pwyPS/WrhQD0
-wBwWAJHTtx27ahWw1D2/0mxDjxalPq7XiL/8aqwc0B9+TtqQ05c+ZohxbwslajCg
-vRZBSk/LRnBRiebik7sX
-=ansV
------END PGP SIGNATURE-----
-
---VS++wcV0S1rZb1Fb--
+Kind regards
+Uffe
