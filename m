@@ -1,144 +1,127 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: mmc: dw_mmc: log spamming
-Date: Mon, 19 Sep 2016 16:54:06 +0900
-Message-ID: <5d370fba-e4ec-d70a-a949-a955e86d61b1@samsung.com>
-References: <CGME20160915172951epcas1p13022fec9254b5903b353dff6398cbcae@epcas1p1.samsung.com>
- <57DADA85.2000200@math.uni-bielefeld.de>
- <a36ad9ba-1758-7048-d8b8-e3d85862ff08@samsung.com>
- <57DF396E.9050503@samsung.com>
- <6dd25843-3852-b059-4c42-6c720887db38@samsung.com>
- <57DF96C3.7050706@math.uni-bielefeld.de>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [RESEND PATCH v7 2/2] sdhci-of-arasan: Set controller to test
+ mode when xlnx,fails-without-test-cd is present
+Date: Mon, 19 Sep 2016 10:51:08 +0300
+Message-ID: <992df66b-043e-ea1b-d291-a544b0d861d0@intel.com>
+References: <1474038102-20937-1-git-send-email-zach.brown@ni.com>
+ <1474038102-20937-2-git-send-email-zach.brown@ni.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8bit
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout4.samsung.com ([203.254.224.34]:48827 "EHLO
-        mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751914AbcISHyI (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 19 Sep 2016 03:54:08 -0400
-Received: from epcpsbgr1.samsung.com
- (u141.gpu120.samsung.co.kr [203.254.230.141])
- by mailout4.samsung.com (Oracle Communications Messaging Server 7.0.5.31.0
- 64bit (built May  5 2014))
- with ESMTP id <0ODQ02BT1RA6RUD0@mailout4.samsung.com> for
- linux-mmc@vger.kernel.org; Mon, 19 Sep 2016 16:54:06 +0900 (KST)
-In-reply-to: <57DF96C3.7050706@math.uni-bielefeld.de>
+Received: from mga14.intel.com ([192.55.52.115]:2879 "EHLO mga14.intel.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1752725AbcISHz7 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Mon, 19 Sep 2016 03:55:59 -0400
+In-Reply-To: <1474038102-20937-2-git-send-email-zach.brown@ni.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Tobias Jakobi <tjakobi@math.uni-bielefeld.de>, sw0312.kim@samsung.com
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+To: Zach Brown <zach.brown@ni.com>
+Cc: robh+dt@kernel.org, ulf.hansson@linaro.org, mark.rutland@arm.com, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-kernel@vger.kernel.org, michal.simek@xilinx.com, soren.brinkmann@xilinx.com, linux-arm-kernel@lists.infradead.org
 
-Hi Tobias,
+On 16/09/16 18:01, Zach Brown wrote:
+> The sdhci controller on xilinx zynq devices will not function unless
+> the CD bit is provided. http://www.xilinx.com/support/answers/61064.html
+> In cases where it is impossible to provide the CD bit in hardware,
+> setting the controller to test mode and then setting inserted to true
+> will get the controller to function without the CD bit.
+> 
+> When the device has the property xlnx,fails-without-test-cd the driver
+> changes the controller to test mode and sets test inserted to true to
+> make the controller function.
+> 
+> Signed-off-by: Zach Brown <zach.brown@ni.com>
 
-On 09/19/2016 04:41 PM, Tobias Jakobi wrote:
-> Hello Jaehoon,
-> 
-> 
-> Jaehoon Chung wrote:
->> Hi Tobias,
->>
->> CC'd mmc mailing.
->>
->> On 09/19/2016 10:03 AM, Seung-Woo Kim wrote:
->>> Hello Jaehoon,
->>>
->>> On 2016년 09월 19일 09:32, Jaehoon Chung wrote:
->>>> Hi Tobias,
->>>>
->>>> On 09/16/2016 02:29 AM, Tobias Jakobi wrote:
->>>>> Hello everyone,
->>>>>
->>>>> I'm experiencing massive kernel log spamming by dw_mmc, the commit that
->>>>> causes this is the following one.
->>>>>
->>>>> 65257a0deed5aee66b4e3708944f0be62a64cabc
->>>>>
->>>>> https://git.kernel.org/cgit/linux/kernel/git/torvalds/linux.git/commit/?id=65257a0deed5aee66b4e3708944f0be62a64cabc
->>>>>
->>>>> I've briefly checked the commit and I think the rationale behind
->>>>> removing the check is incorrect. While MMC_CLKGATE was certainly
->>>>> removed, runtime PM has "replaced" it (the commit
->>>>> 9eadcc0581a8ccaf4c2378aa1c193fb164304f1d even mentions this).
->>>>>
->>>>> This is on an Exynos4412 board, kernel is 4.8-rc6. Nothing is connected
->>>>> to the eMMC connector.
->>>>
->>>> Thanks for reporting this.
->>>>
->>>> Seung-Woo, Could you check your patch? I will also check this.
->>
->> Did you test after reverting this commit? or previous version is working fine?
-> yes, reverting the commit fixes the log spamming. I'm aware though that
-> the check is more of less broken (undefined behaviour because of
-> bit-shifting with large values), so I have also tried the following
-> thing: Just checking against 'div' instead of 'clock << div'. Anyway,
-> this also works for me.
-> 
-> 
->> Which exynos4412 board do you use? I think it's related with "broken-cd".
->> (If you can share which board and dts you are using, we can check in more detail.)
-> This is an Odroid-X2 board.
-> 
+Acked-by: Adrian Hunter <adrian.hunter@intel.com>
 
-When i have checked on odroid-u3, it's reproduced very easy.
-
+> ---
+>  drivers/mmc/host/sdhci-of-arasan.c | 27 ++++++++++++++++++++++++++-
+>  drivers/mmc/host/sdhci.h           |  2 ++
+>  2 files changed, 28 insertions(+), 1 deletion(-)
 > 
->> As you mentioned, you didn't insert the eMMC card on board.
->> Then it should be polling whether card is inserted/removed. (If broken-cd is set...)
-> I can check the callstack leading to dw_mci_setup_bus() I guess. Would
-> that should make it easier for you guys to understand where the issue
-> originates from?
-
-Not need to share the callstack. Because i understood what is problem.
-But checking 'div' instead of 'clock << div' should also have the unexpected behavior.
-
-If needs to fix, i want to go ahead the correct way at this time.
-Anyway, thanks for reporting this!
-
-Best Regards,
-Jaehoon Chung
-
-> 
-> 
->> I think it's not related with runtime PM.
->>
->> Best Regards,
->> Jaehoon Chung
-> 
-> WIth best wishes,
-> Tobias
-> 
-> 
-> 
-> 
->>> Ok, I will check on Exynos4412 SpC boards.
->>>
->>> By the way, to check no condition case, when I posted after v2[1], I
->>> checked with Exynos5422 and Exynos5433 SoC boards and they didn't show
->>> duplicated log, so I agreed not to check condition for logging.
->>>
->>> [1] https://patchwork.kernel.org/patch/9182469/
->>>
->>> Best Regards,
->>> - Seung-Woo Kim
->>>
->>>>
->>>> Best Regards,
->>>> Jaehoon Chung
->>>>
->>>>>
->>>>> With best wishes,
->>>>> Tobias
->>>>>
->>>>>
->>>>>
->>>>
->>>>
->>>>
->>>
->>
-> 
-> 
-> 
+> diff --git a/drivers/mmc/host/sdhci-of-arasan.c b/drivers/mmc/host/sdhci-of-arasan.c
+> index 33601a8..da8e40a 100644
+> --- a/drivers/mmc/host/sdhci-of-arasan.c
+> +++ b/drivers/mmc/host/sdhci-of-arasan.c
+> @@ -26,6 +26,7 @@
+>  #include <linux/phy/phy.h>
+>  #include <linux/regmap.h>
+>  #include "sdhci-pltfm.h"
+> +#include <linux/of.h>
+>  
+>  #define SDHCI_ARASAN_CLK_CTRL_OFFSET	0x2c
+>  #define SDHCI_ARASAN_VENDOR_REGISTER	0x78
+> @@ -98,6 +99,10 @@ struct sdhci_arasan_data {
+>  
+>  	struct regmap	*soc_ctl_base;
+>  	const struct sdhci_arasan_soc_ctl_map *soc_ctl_map;
+> +	unsigned int	quirks; /* Arasan deviations from spec */
+> +
+> +/* Controller does not have CD wired and will not function normally without */
+> +#define SDHCI_ARASAN_QUIRK_FORCE_CDTEST	BIT(0)
+>  };
+>  
+>  static const struct sdhci_arasan_soc_ctl_map rk3399_soc_ctl_map = {
+> @@ -245,12 +250,27 @@ static void sdhci_arasan_hs400_enhanced_strobe(struct mmc_host *mmc,
+>  	writel(vendor, host->ioaddr + SDHCI_ARASAN_VENDOR_REGISTER);
+>  }
+>  
+> +void sdhci_arasan_reset(struct sdhci_host *host, u8 mask)
+> +{
+> +	u8 ctrl;
+> +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+> +	struct sdhci_arasan_data *sdhci_arasan = sdhci_pltfm_priv(pltfm_host);
+> +
+> +	sdhci_reset(host, mask);
+> +
+> +	if (sdhci_arasan->quirks & SDHCI_ARASAN_QUIRK_FORCE_CDTEST) {
+> +		ctrl = sdhci_readb(host, SDHCI_HOST_CONTROL);
+> +		ctrl |= SDHCI_CTRL_CDTEST_INS | SDHCI_CTRL_CDTEST_EN;
+> +		sdhci_writeb(host, ctrl, SDHCI_HOST_CONTROL);
+> +	}
+> +}
+> +
+>  static struct sdhci_ops sdhci_arasan_ops = {
+>  	.set_clock = sdhci_arasan_set_clock,
+>  	.get_max_clock = sdhci_pltfm_clk_get_max_clock,
+>  	.get_timeout_clock = sdhci_arasan_get_timeout_clock,
+>  	.set_bus_width = sdhci_set_bus_width,
+> -	.reset = sdhci_reset,
+> +	.reset = sdhci_arasan_reset,
+>  	.set_uhs_signaling = sdhci_set_uhs_signaling,
+>  };
+>  
+> @@ -545,6 +565,7 @@ static int sdhci_arasan_probe(struct platform_device *pdev)
+>  	struct sdhci_host *host;
+>  	struct sdhci_pltfm_host *pltfm_host;
+>  	struct sdhci_arasan_data *sdhci_arasan;
+> +	struct device_node *np = pdev->dev.of_node;
+>  
+>  	host = sdhci_pltfm_init(pdev, &sdhci_arasan_pdata,
+>  				sizeof(*sdhci_arasan));
+> @@ -599,6 +620,10 @@ static int sdhci_arasan_probe(struct platform_device *pdev)
+>  	}
+>  
+>  	sdhci_get_of_property(pdev);
+> +
+> +	if (of_property_read_bool(np, "xlnx,fails-without-test-cd"))
+> +		sdhci_arasan->quirks |= SDHCI_ARASAN_QUIRK_FORCE_CDTEST;
+> +
+>  	pltfm_host->clk = clk_xin;
+>  
+>  	if (of_device_is_compatible(pdev->dev.of_node,
+> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+> index a2bc9e1..c722cd2 100644
+> --- a/drivers/mmc/host/sdhci.h
+> +++ b/drivers/mmc/host/sdhci.h
+> @@ -84,6 +84,8 @@
+>  #define   SDHCI_CTRL_ADMA32	0x10
+>  #define   SDHCI_CTRL_ADMA64	0x18
+>  #define   SDHCI_CTRL_8BITBUS	0x20
+> +#define  SDHCI_CTRL_CDTEST_INS	0x40
+> +#define  SDHCI_CTRL_CDTEST_EN	0x80
+>  
+>  #define SDHCI_POWER_CONTROL	0x29
+>  #define  SDHCI_POWER_ON		0x01
 > 
 
