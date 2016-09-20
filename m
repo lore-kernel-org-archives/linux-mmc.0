@@ -1,80 +1,112 @@
-From: Ritesh Raj Sarraf <rrs-7WuBAv+fczCJ8c2fQYRYNw@public.gmane.org>
-Subject: Re: xHCI problem? [was Re: Erratic USB device behavior and device
- loss]
-Date: Tue, 20 Sep 2016 18:06:17 +0530
-Message-ID: <1474374977.12288.2.camel@researchut.com>
-References: <Pine.LNX.4.44L0.1609191340320.1458-100000@iolanthe.rowland.org>
-Reply-To: rrs-7WuBAv+fczCJ8c2fQYRYNw@public.gmane.org
+From: Alan Stern <stern-nwvwT67g6+6dFdvTe/nMLpVzexx5G7lz@public.gmane.org>
+Subject: Re: [PATCH] mmc: rtsx_usb_sdmmc: Handle runtime PM while changing
+ led
+Date: Tue, 20 Sep 2016 10:09:35 -0400 (EDT)
+Message-ID: <Pine.LNX.4.44L0.1609200951500.1459-100000@iolanthe.rowland.org>
+References: <CAPDyKFq2Y1vn1OjNJJg7hocbzFo-QUpezLSMWnF_1cSJ9Ot3NQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 8bit
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <linux-usb-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <Pine.LNX.4.44L0.1609191340320.1458-100000-IYeN2dnnYyZXsRXLowluHWD2FQJk+8+b@public.gmane.org>
+In-Reply-To: <CAPDyKFq2Y1vn1OjNJJg7hocbzFo-QUpezLSMWnF_1cSJ9Ot3NQ-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
 Sender: linux-usb-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Alan Stern <stern-nwvwT67g6+6dFdvTe/nMLpVzexx5G7lz@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Alex Dubov <oakad-/E1597aS9LQAvxtiuMwx3w@public.gmane.org>
-Cc: USB list <linux-usb-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-mmc <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+To: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: linux-mmc <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Ritesh Raj Sarraf <rrs-7WuBAv+fczCJ8c2fQYRYNw@public.gmane.org>, USB list <linux-usb-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Micky Ching <micky_ching-kXabqFNEczNtrwSWzY7KCg@public.gmane.org>, Roger Tseng <rogerable-Rasf1IRRPZFBDgjK7y7TUQ@public.gmane.org>, Wei WANG <wei_wang-kXabqFNEczNtrwSWzY7KCg@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
 
------BEGIN PGP SIGNED MESSAGE-----
-Hash: SHA512
+On Tue, 20 Sep 2016, Ulf Hansson wrote:
 
-On Mon, 2016-09-19 at 13:48 -0400, Alan Stern wrote:
+> >> I am wondering what you think would be a good autosuspend timeout in
+> >> this case? It seems to me that the only thing the rtsx driver really
+> >> care about is to tell the parent device that it needs to be runtime
+> >> resumed during a certain timeframe, more or less it would like to
+> >> inherit the parents settings.
+> >>
+> >> Other mmc hosts, not being usb-mmc devices, are using an autosuspend
+> >> timeout of ~50-100ms but that doesn't seem like good value here,
+> >> right?
+> >
+> > Well, if you decide to let the device go into runtime suspend between
+> > polls then there's no reason to use autosuspend at all.  Once a poll
+> > has ended, you know there won't be any more activity until the next
+> > poll.
 > 
-> This ought to help.  Ritesh, please apply this patch on top of the 
-> two earlier ones and let's see what happens.
+> We could change that, as currently the approach in the mmc core isn't
+> that sophisticated. I even think this has been discussed earlier for
+> the very similar reasons regards polling card detect mode.
 > 
-> Alan Stern
+> I guess the main reason to why we yet have changed this, is because
+> mmc host drivers are using an autosuspend timeout of ~50-100 ms, so in
+> the end it haven't been such a big deal.
+
+No, it isn't.  Although at a polling interval of 1 second, it means 
+reducing the low-power time by as much as 10%.
+
+> > On the other hand, if you decide to keep the device at full power all
+> > the time during polling, then any autosuspend timeout larger than 1000
+> > ms would do what you want.
+> >
+> > Mostly I'm concerned about how this will interact with the USB runtime
+> > PM.  The thing is, suspending the sdmmc device doesn't save any energy,
+> > whereas suspending the USB device does.
 > 
+> Yes, I agree.
 > 
+> My concern is also 2s autosuspend timeout which is set for the usb
+> device. Somehow I feel we need to be able "share" more information
+> between a parent-child relationship, in this case between the sdmmc
+> device and the usb device.
 
-Please find the logs at the following links. On this boot, I did not see any
-kernel stack being printed.
+I agree, but it's not clear how this should be done.  One easy solution 
+would be to turn off USB autosuspend and do all the runtime-PM 
+management in the sdmmc and memstick drivers.
 
-https://people.debian.org/~rrs/tmp/4.8.0-rc7ulf1alan2+.kern.log
-https://people.debian.org/~rrs/tmp/usb-4.8.0-rc7ulf1alan2+.log
+> An observation I made, is when the sdmmc device gets runtime resumed
+> (pm_runtime_get_sync()), the parent device (the usb device) may also
+> become runtime resumed (unless it's already). In this sequence, but
+> *only* when actually runtime resuming the usb device, the runtime PM
+> core decides to update the last busy mark for the usb device. Should
+> it really do that?
 
+Yes, that's deliberate.  The whole idea of autosuspend is to prevent 
+the device from being runtime-suspended too soon after it was used, and 
+the PM core considers runtime-resume to be a form of usage.
 
+> Moreover, I am curious about the 2s usb timeout. Why isn't that chosen
+> to something like ~100ms instead? Is there is a long latency to
+> runtime resume the usb device or because we fear to wear out the HW,
+> which may be powered on/off too frequently?
+
+When I first implemented runtime PM for the USB stack, I had to choose 
+a autosuspend timeout.  Not having any basis for such a choice, and 
+figuring that a suspend-resume cycle takes around 100 ms, I decided 
+that 2 seconds would be a reasonable value.  But it's just a default; 
+drivers and userspace can change it whenever they want.
+
+> If we assume that the usb device shouldn't be used with a timeout less
+> than 2s, then I think we have two options:
 > 
-> Index: usb-4.x/drivers/memstick/host/rtsx_usb_ms.c
-> ===================================================================
-> --- usb-4.x.orig/drivers/memstick/host/rtsx_usb_ms.c
-> +++ usb-4.x/drivers/memstick/host/rtsx_usb_ms.c
-> @@ -681,6 +681,7 @@ static int rtsx_usb_detect_ms_card(void
->         int err;
->  
->         for (;;) {
-> +               pm_runtime_get_sync(ms_dev(host));
->                 mutex_lock(&ucr->dev_mutex);
->  
->                 /* Check pending MS card changes */
-> @@ -703,6 +704,7 @@ static int rtsx_usb_detect_ms_card(void
->                 }
->  
->  poll_again:
-> +               pm_runtime_put(ms_dev(host));
->                 if (host->eject)
->                         break;
->  
-- -- 
-Ritesh Raj Sarraf
-RESEARCHUT - http://www.researchut.com
-"Necessity is the mother of invention."
------BEGIN PGP SIGNATURE-----
+> *) As the mmc polling timeout is 1s, there is really no point in
+> trying to runtime suspend the usb device, it may just be left runtime
+> resumed all the time. Wasting power, of course!
 
-iQIcBAEBCgAGBQJX4S1BAAoJEKY6WKPy4XVprAUP/jPnuxUAZ+6qKiCVx6qB69d+
-wHQDkFOxmlTwTh5GyMa+oxEqvi0shvOKZ/ef7Oz0NA9DSiLonFw4aqSzF7jBRbee
-UTKIgnNxHmJC6pdMPXWo5HVLBn6qYtX4pJFX6g1MwmjEDa9pjYWK9p7QzHkrx1GB
-Z3X7TcWYk3DJS04GbFO9pMDl0P1phLR2VtnfzQwqtgF/g2fy7USpft1bYIQLQzxb
-oOSAEDnTCtpurdAfLWq8OVQbL3rrf+HD3InVtdCZa+lwNSNwNfUZWnKKkS1S1tq+
-hgKxvGOTEGunhm6Px6iQUCE9yxsvfmDK2GBxc/a3Tqpcy5ndZv/5laKFhXTt27pa
-OuGksYgHCf2vWGHFuYHJH6cQKxgdsnnE7yGwbC8zYnrCT9O3hcLPxbVbzJorWFU0
-YMNKt7RYZXrNQss9J4ufkTSLvzbUqsiYJwWH27LbQ5zHC7b9/ebgnMW6JIb1x+2p
-iuz6MERvyxVxorG3R260GWSz/5SM/VVnTqzlRUnMHcVAyUHNGPGoqLu5LkrmI2VT
-Zwcikip9G3fE79786eKF50X7dp2kU2p+W2bBmcJEWpWV9Vz5PiQdibsiu3CQilKc
-QGxrKLp0OSsUvtwb4ceD/RWu7F99F7VCu3f/ohYYS2iciux5sFky+27GfY0fEJ2u
-ikPpuK6xNWWSDgaNVVHD
-=Nq4a
------END PGP SIGNATURE-----
+Or we can decrease the USB autosuspend delay to 100 ms.
+
+> **) Add an interface to allow dynamically changes of the mmc polling
+> timeout to better suit the current user.
+
+Note that the block layer does its own polling for removable media, and
+it already has a sysfs interface to control the polling interval (or 
+disable it entirely).  But I don't know how the MMC stack interacts 
+with the block layer.
+
+One awkward point is that the sdmmc and memstick drivers each do their
+own polling.  This is a waste.  You can see it in the usbmon trace;  
+every second there are two query-response interactions.  Even if
+there's no good way to reduce the number, we should at least try to
+synchronize the polls so that the device doesn't need to be resumed
+twice every second.
+
+Alan Stern
 
 --
 To unsubscribe from this list: send the line "unsubscribe linux-usb" in
