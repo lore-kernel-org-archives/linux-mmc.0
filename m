@@ -1,114 +1,58 @@
-From: Alan Stern <stern-nwvwT67g6+6dFdvTe/nMLpVzexx5G7lz@public.gmane.org>
+From: Alan Stern <stern@rowland.harvard.edu>
 Subject: Re: [PATCH] mmc: rtsx_usb_sdmmc: Handle runtime PM while changing
  led
-Date: Tue, 20 Sep 2016 10:09:35 -0400 (EDT)
-Message-ID: <Pine.LNX.4.44L0.1609200951500.1459-100000@iolanthe.rowland.org>
-References: <CAPDyKFq2Y1vn1OjNJJg7hocbzFo-QUpezLSMWnF_1cSJ9Ot3NQ@mail.gmail.com>
+Date: Tue, 20 Sep 2016 10:12:08 -0400 (EDT)
+Message-ID: <Pine.LNX.4.44L0.1609201009470.1459-100000@iolanthe.rowland.org>
+References: <1474364420.4358.21.camel@suse.com>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <linux-usb-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <CAPDyKFq2Y1vn1OjNJJg7hocbzFo-QUpezLSMWnF_1cSJ9Ot3NQ-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-Sender: linux-usb-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: linux-mmc <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Ritesh Raj Sarraf <rrs-7WuBAv+fczCJ8c2fQYRYNw@public.gmane.org>, USB list <linux-usb-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Micky Ching <micky_ching-kXabqFNEczNtrwSWzY7KCg@public.gmane.org>, Roger Tseng <rogerable-Rasf1IRRPZFBDgjK7y7TUQ@public.gmane.org>, Wei WANG <wei_wang-kXabqFNEczNtrwSWzY7KCg@public.gmane.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from iolanthe.rowland.org ([192.131.102.54]:54180 "HELO
+        iolanthe.rowland.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with SMTP id S1753560AbcITOMJ (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 20 Sep 2016 10:12:09 -0400
+In-Reply-To: <1474364420.4358.21.camel@suse.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Oliver Neukum <oneukum@suse.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Micky Ching <micky_ching@realsil.com.cn>, Wei WANG <wei_wang@realsil.com.cn>, Roger Tseng <rogerable@realtek.com>, Ritesh Raj Sarraf <rrs@researchut.com>, linux-mmc <linux-mmc@vger.kernel.org>, USB list <linux-usb@vger.kernel.org>
 
-On Tue, 20 Sep 2016, Ulf Hansson wrote:
+On Tue, 20 Sep 2016, Oliver Neukum wrote:
 
-> >> I am wondering what you think would be a good autosuspend timeout in
-> >> this case? It seems to me that the only thing the rtsx driver really
-> >> care about is to tell the parent device that it needs to be runtime
-> >> resumed during a certain timeframe, more or less it would like to
-> >> inherit the parents settings.
-> >>
-> >> Other mmc hosts, not being usb-mmc devices, are using an autosuspend
-> >> timeout of ~50-100ms but that doesn't seem like good value here,
-> >> right?
-> >
-> > Well, if you decide to let the device go into runtime suspend between
-> > polls then there's no reason to use autosuspend at all.  Once a poll
-> > has ended, you know there won't be any more activity until the next
-> > poll.
+> On Mon, 2016-09-19 at 14:02 -0400, Alan Stern wrote:
+> > > We can for sure enable autosuspend for the sdmmc device, although as
+> > > soon as an SD card will be detected the rtsx driver will increase
+> > the
+> > > runtime PM usage count. The count is decreased when the card is
+> > > removed (or failed to be initialized), thus runtime suspend is
+> > > prevented as long as there is a functional card inserted.
 > 
-> We could change that, as currently the approach in the mmc core isn't
-> that sophisticated. I even think this has been discussed earlier for
-> the very similar reasons regards polling card detect mode.
+> Testing autosuspend with card readers on usb_storage I saw a uniform
+> response of reporting a medium change event upon resume.
+> I am afraid other kinds of readers are not better in that regard.
+
+That shouldn't be an issue in this case, at least, not with the current 
+code.  The sdmmc and memstick drivers block autosuspend if media is 
+present.
+
+> > Which means that autosuspend matters only when a card isn't present, 
+> > and the host is polled every second or so to see whether a card has 
+> > been inserted.
+> > 
+> > Under those circumstances you probably don't want to use
+> > autosuspend.  
+> > That is, resuming before each poll and suspending afterward may use 
+> > less energy than staying at full power all the time.
 > 
-> I guess the main reason to why we yet have changed this, is because
-> mmc host drivers are using an autosuspend timeout of ~50-100 ms, so in
-> the end it haven't been such a big deal.
+> Is that based on concrete figures about power consumption?
 
-No, it isn't.  Although at a polling interval of 1 second, it means 
-reducing the low-power time by as much as 10%.
+No.
 
-> > On the other hand, if you decide to keep the device at full power all
-> > the time during polling, then any autosuspend timeout larger than 1000
-> > ms would do what you want.
-> >
-> > Mostly I'm concerned about how this will interact with the USB runtime
-> > PM.  The thing is, suspending the sdmmc device doesn't save any energy,
-> > whereas suspending the USB device does.
-> 
-> Yes, I agree.
-> 
-> My concern is also 2s autosuspend timeout which is set for the usb
-> device. Somehow I feel we need to be able "share" more information
-> between a parent-child relationship, in this case between the sdmmc
-> device and the usb device.
+> And it seems to me that we need a way to indicate that the heuristics
+> should not be used, but a device immediately suspended. The timer
+> is sensible only if the next wakeup is unknown.
 
-I agree, but it's not clear how this should be done.  One easy solution 
-would be to turn off USB autosuspend and do all the runtime-PM 
-management in the sdmmc and memstick drivers.
-
-> An observation I made, is when the sdmmc device gets runtime resumed
-> (pm_runtime_get_sync()), the parent device (the usb device) may also
-> become runtime resumed (unless it's already). In this sequence, but
-> *only* when actually runtime resuming the usb device, the runtime PM
-> core decides to update the last busy mark for the usb device. Should
-> it really do that?
-
-Yes, that's deliberate.  The whole idea of autosuspend is to prevent 
-the device from being runtime-suspended too soon after it was used, and 
-the PM core considers runtime-resume to be a form of usage.
-
-> Moreover, I am curious about the 2s usb timeout. Why isn't that chosen
-> to something like ~100ms instead? Is there is a long latency to
-> runtime resume the usb device or because we fear to wear out the HW,
-> which may be powered on/off too frequently?
-
-When I first implemented runtime PM for the USB stack, I had to choose 
-a autosuspend timeout.  Not having any basis for such a choice, and 
-figuring that a suspend-resume cycle takes around 100 ms, I decided 
-that 2 seconds would be a reasonable value.  But it's just a default; 
-drivers and userspace can change it whenever they want.
-
-> If we assume that the usb device shouldn't be used with a timeout less
-> than 2s, then I think we have two options:
-> 
-> *) As the mmc polling timeout is 1s, there is really no point in
-> trying to runtime suspend the usb device, it may just be left runtime
-> resumed all the time. Wasting power, of course!
-
-Or we can decrease the USB autosuspend delay to 100 ms.
-
-> **) Add an interface to allow dynamically changes of the mmc polling
-> timeout to better suit the current user.
-
-Note that the block layer does its own polling for removable media, and
-it already has a sysfs interface to control the polling interval (or 
-disable it entirely).  But I don't know how the MMC stack interacts 
-with the block layer.
-
-One awkward point is that the sdmmc and memstick drivers each do their
-own polling.  This is a waste.  You can see it in the usbmon trace;  
-every second there are two query-response interactions.  Even if
-there's no good way to reduce the number, we should at least try to
-synchronize the polls so that the device doesn't need to be resumed
-twice every second.
+The driver can always turn off autosuspend if it wants to.
 
 Alan Stern
 
---
-To unsubscribe from this list: send the line "unsubscribe linux-usb" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
