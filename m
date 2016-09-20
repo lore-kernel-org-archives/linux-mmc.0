@@ -1,56 +1,73 @@
-From: Alan Stern <stern@rowland.harvard.edu>
+From: Ritesh Raj Sarraf <rrs-7WuBAv+fczCJ8c2fQYRYNw@public.gmane.org>
 Subject: Re: xHCI problem? [was Re: Erratic USB device behavior and device
  loss]
-Date: Tue, 20 Sep 2016 10:16:51 -0400 (EDT)
-Message-ID: <Pine.LNX.4.44L0.1609201012290.1459-100000@iolanthe.rowland.org>
-References: <1474374977.12288.2.camel@researchut.com>
+Date: Tue, 20 Sep 2016 20:47:06 +0530
+Message-ID: <1474384626.21100.6.camel@researchut.com>
+References: <Pine.LNX.4.44L0.1609201012290.1459-100000@iolanthe.rowland.org>
+Reply-To: rrs-7WuBAv+fczCJ8c2fQYRYNw@public.gmane.org
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=UTF-8
-Content-Transfer-Encoding: 8BIT
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from iolanthe.rowland.org ([192.131.102.54]:54212 "HELO
-        iolanthe.rowland.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with SMTP id S1752541AbcITOQw (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 20 Sep 2016 10:16:52 -0400
-In-Reply-To: <1474374977.12288.2.camel@researchut.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8bit
+Return-path: <linux-usb-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <Pine.LNX.4.44L0.1609201012290.1459-100000-IYeN2dnnYyZXsRXLowluHWD2FQJk+8+b@public.gmane.org>
+Sender: linux-usb-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Alan Stern <stern-nwvwT67g6+6dFdvTe/nMLpVzexx5G7lz@public.gmane.org>
+Cc: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Alex Dubov <oakad-/E1597aS9LQAvxtiuMwx3w@public.gmane.org>, USB list <linux-usb-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-mmc <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Ritesh Raj Sarraf <rrs@researchut.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Alex Dubov <oakad@yahoo.com>, USB list <linux-usb@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>
 
-On Tue, 20 Sep 2016, Ritesh Raj Sarraf wrote:
+-----BEGIN PGP SIGNED MESSAGE-----
+Hash: SHA512
 
-> -----BEGIN PGP SIGNED MESSAGE-----
-> Hash: SHA512
+Hello Alan,
+
+On Tue, 2016-09-20 at 10:16 -0400, Alan Stern wrote:
+> This is a lot better.  No more I/O errors.
 > 
-> On Mon, 2016-09-19 at 13:48 -0400, Alan Stern wrote:
-> > 
-> > This ought to help.  Ritesh, please apply this patch on top of the 
-> > two earlier ones and let's see what happens.
-> > 
-> > Alan Stern
-> > 
-> > 
+> We still have irregular suspends and resumes, but that's to be 
+> expected.  More worrying are the spontaneous disconnects.  They don't 
+> seem to be related to the suspend/resume activity.
 > 
-> Please find the logs at the following links. On this boot, I did not see any
-> kernel stack being printed.
+> You can disable suspend for this device entirely by doing:
 > 
-> https://people.debian.org/~rrs/tmp/4.8.0-rc7ulf1alan2+.kern.log
-> https://people.debian.org/~rrs/tmp/usb-4.8.0-rc7ulf1alan2+.log
+>         echo on >/sys/bus/usb/devices/2-4/power/control
+> 
 
-This is a lot better.  No more I/O errors.
+Yes. But that'd also mean to write that value upon every suspend/resume cycle
+because the rtsx usb driver still declares support for autosuspend.
+Should that be dropped ?
 
-We still have irregular suspends and resumes, but that's to be 
-expected.  More worrying are the spontaneous disconnects.  They don't 
-seem to be related to the suspend/resume activity.
+> I'm afraid that this won't prevent the device from disconnecting
+> itself, though.  This appears to be some sort of hardware bug that
+> can't be fixed in software.
 
-You can disable suspend for this device entirely by doing:
+And that'd mean that upon every reset, the driver will again enable autosuspend
+for that driver.
 
-	echo on >/sys/bus/usb/devices/2-4/power/control
 
-I'm afraid that this won't prevent the device from disconnecting
-itself, though.  This appears to be some sort of hardware bug that
-can't be fixed in software.
+It is an upsetting state for this device but thank you, to all of you, for
+helping debug this problem.
 
-Alan Stern
+- -- 
+RESEARCHUT - http://www.researchut.com
+"Necessity is the mother of invention."
+-----BEGIN PGP SIGNATURE-----
 
+iQIcBAEBCgAGBQJX4VLyAAoJEKY6WKPy4XVprEgQAKdYcFIF1ICNGHkF+oyDe1VY
+DqyxTa0vLPbXWsG6GaV4Jdwld+gVKiWIVNKxbLpboBHj/vj0bkzoPJ0z4xI+Oc8p
+bu6T5Io6nAaegdGa6XvYIAXk1fIlXEehBFVM6OyzC1EUJAjgYhIDVlG8mqZKxqVp
+GGsX1e5UFdS0vCqjYqSxI5IHrqsm1M4lXuwr8ia66qyuSfpg8trizLiWrdiEa7hv
+hRtI81XxITvVJ4+2ernO6Y+RO/z6WQLs1SAhXvDEH3RlYh/RoEBpolqMIO8LVWMK
+jd4GSsYmMKiG1eJJq3UYM+iPDANIIi4gdO0hf/24vNcsVa8eF5kcKT+bxufRaiB/
+5TzZS0RARBdq1+N6bK/wF8lDL4bWy4Sl1mts/dXJaCOlOoLeQ/u/J55K58mDJb2O
+gdvEvzD/S9NNeawL2ow4sxaM8EBpeyJtBTyVIbLJVFmetauVs+ClI0uLoNMW/N+u
+qMDE8yhiey4ClXa0WmVZHN4qjfNAnW4OSMtrq8+TLa1yhVj/ONNBo8QkfjuKBHwE
+ELDrX3/N9JsZo6ZX0CPNVhodvck8ZVKrk8w3jAlcqQ0FlJy5MMFoqGEvqJ1EIfNv
+IQ5FKrI08RIA7yw6keTy3nybzyY3MhepLJWxiEVyKRCopiHk96DmEGJmOmor7VIQ
+hjgbpCikJ7sXPcn0n97u
+=DBja
+-----END PGP SIGNATURE-----
+
+--
+To unsubscribe from this list: send the line "unsubscribe linux-usb" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
