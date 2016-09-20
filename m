@@ -1,46 +1,102 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH v3 2/6] mmc: rtsx_pci: use new macro for R1 without CRC
-Date: Tue, 20 Sep 2016 18:29:58 +0900
-Message-ID: <38358765-9f93-6b4a-176a-2c8a87490936@samsung.com>
-References: <20160919205750.4766-1-wsa+renesas@sang-engineering.com>
- <CGME20160919205936epcas1p405299736aa8bedf4bee71e7f2cf8af89@epcas1p4.samsung.com>
- <20160919205750.4766-3-wsa+renesas@sang-engineering.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 7bit
+From: Linus Walleij <linus.walleij@linaro.org>
+Subject: [PATCH] mmc: card: do away with indirection pointer
+Date: Tue, 20 Sep 2016 11:33:35 +0200
+Message-ID: <1474364015-15585-1-git-send-email-linus.walleij@linaro.org>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout3.samsung.com ([203.254.224.33]:34203 "EHLO
-        mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1754045AbcITJaA (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 20 Sep 2016 05:30:00 -0400
-In-reply-to: <20160919205750.4766-3-wsa+renesas@sang-engineering.com>
+Received: from mail-lf0-f44.google.com ([209.85.215.44]:32814 "EHLO
+        mail-lf0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752758AbcITJdm (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 20 Sep 2016 05:33:42 -0400
+Received: by mail-lf0-f44.google.com with SMTP id h127so8422884lfh.0
+        for <linux-mmc@vger.kernel.org>; Tue, 20 Sep 2016 02:33:41 -0700 (PDT)
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Wolfram Sang <wsa+renesas@sang-engineering.com>, linux-mmc@vger.kernel.org
-Cc: linux-renesas-soc@vger.kernel.org, Simon Horman <horms@verge.net.au>, Dirk Behme <dirk.behme@gmail.com>
+To: linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Linus Walleij <linus.walleij@linaro.org>
 
-Hi Wolfram,
+We have enough vtables in the kernel as it is, we don't need
+this one to create even more artificial separation of concerns.
 
-Add the commit message.
+As is proved by the Makefile:
 
-On 09/20/2016 05:57 AM, Wolfram Sang wrote:
-> Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
-> ---
->  drivers/mmc/host/rtsx_pci_sdmmc.c | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
-> 
-> diff --git a/drivers/mmc/host/rtsx_pci_sdmmc.c b/drivers/mmc/host/rtsx_pci_sdmmc.c
-> index 396c9b7e4121b0..3ccaa1415f33b2 100644
-> --- a/drivers/mmc/host/rtsx_pci_sdmmc.c
-> +++ b/drivers/mmc/host/rtsx_pci_sdmmc.c
-> @@ -126,7 +126,7 @@ static int sd_response_type(struct mmc_command *cmd)
->  		return SD_RSP_TYPE_R0;
->  	case MMC_RSP_R1:
->  		return SD_RSP_TYPE_R1;
-> -	case MMC_RSP_R1 & ~MMC_RSP_CRC:
-> +	case MMC_RSP_R1_NO_CRC:
->  		return SD_RSP_TYPE_R1 | SD_NO_CHECK_CRC7;
->  	case MMC_RSP_R1B:
->  		return SD_RSP_TYPE_R1b;
-> 
+obj-$(CONFIG_MMC_BLOCK)         += mmc_block.o
+mmc_block-objs                  := block.o queue.o
+
+block.c and queue.c are baked into the same mmc_block.o object.
+So why would one of these objects access a function in the
+other object by dereferencing a pointer?
+
+Create a new block.h header file for the single shared function
+from block to queue and remove the function pointer and just
+call the queue request function.
+
+Apart from making the code more readable, this also makes link
+optimizations possible and probably speeds up the call as well.
+
+Signed-off-by: Linus Walleij <linus.walleij@linaro.org>
+---
+ drivers/mmc/card/block.c | 3 +--
+ drivers/mmc/card/queue.c | 4 +++-
+ drivers/mmc/card/queue.h | 2 --
+ 3 files changed, 4 insertions(+), 5 deletions(-)
+
+diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+index 2206d4477dbb..15acf96147f3 100644
+--- a/drivers/mmc/card/block.c
++++ b/drivers/mmc/card/block.c
+@@ -2144,7 +2144,7 @@ static int mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *rqc)
+ 	return 0;
+ }
+ 
+-static int mmc_blk_issue_rq(struct mmc_queue *mq, struct request *req)
++int mmc_blk_issue_rq(struct mmc_queue *mq, struct request *req)
+ {
+ 	int ret;
+ 	struct mmc_blk_data *md = mq->data;
+@@ -2265,7 +2265,6 @@ again:
+ 	if (ret)
+ 		goto err_putdisk;
+ 
+-	md->queue.issue_fn = mmc_blk_issue_rq;
+ 	md->queue.data = md;
+ 
+ 	md->disk->major	= MMC_BLOCK_MAJOR;
+diff --git a/drivers/mmc/card/queue.c b/drivers/mmc/card/queue.c
+index 708057261b38..8037f73a109a 100644
+--- a/drivers/mmc/card/queue.c
++++ b/drivers/mmc/card/queue.c
+@@ -19,7 +19,9 @@
+ 
+ #include <linux/mmc/card.h>
+ #include <linux/mmc/host.h>
++
+ #include "queue.h"
++#include "block.h"
+ 
+ #define MMC_QUEUE_BOUNCESZ	65536
+ 
+@@ -68,7 +70,7 @@ static int mmc_queue_thread(void *d)
+ 			bool req_is_special = mmc_req_is_special(req);
+ 
+ 			set_current_state(TASK_RUNNING);
+-			mq->issue_fn(mq, req);
++			mmc_blk_issue_rq(mq, req);
+ 			cond_resched();
+ 			if (mq->flags & MMC_QUEUE_NEW_REQUEST) {
+ 				mq->flags &= ~MMC_QUEUE_NEW_REQUEST;
+diff --git a/drivers/mmc/card/queue.h b/drivers/mmc/card/queue.h
+index fee5e1271465..3c15a75bae86 100644
+--- a/drivers/mmc/card/queue.h
++++ b/drivers/mmc/card/queue.h
+@@ -57,8 +57,6 @@ struct mmc_queue {
+ 	unsigned int		flags;
+ #define MMC_QUEUE_SUSPENDED	(1 << 0)
+ #define MMC_QUEUE_NEW_REQUEST	(1 << 1)
+-
+-	int			(*issue_fn)(struct mmc_queue *, struct request *);
+ 	void			*data;
+ 	struct request_queue	*queue;
+ 	struct mmc_queue_req	mqrq[2];
+-- 
+2.7.4
 
