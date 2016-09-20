@@ -1,58 +1,56 @@
 From: Alan Stern <stern@rowland.harvard.edu>
-Subject: Re: [PATCH] mmc: rtsx_usb_sdmmc: Handle runtime PM while changing
- led
-Date: Tue, 20 Sep 2016 10:12:08 -0400 (EDT)
-Message-ID: <Pine.LNX.4.44L0.1609201009470.1459-100000@iolanthe.rowland.org>
-References: <1474364420.4358.21.camel@suse.com>
+Subject: Re: xHCI problem? [was Re: Erratic USB device behavior and device
+ loss]
+Date: Tue, 20 Sep 2016 10:16:51 -0400 (EDT)
+Message-ID: <Pine.LNX.4.44L0.1609201012290.1459-100000@iolanthe.rowland.org>
+References: <1474374977.12288.2.camel@researchut.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: TEXT/PLAIN; charset=UTF-8
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from iolanthe.rowland.org ([192.131.102.54]:54180 "HELO
+Received: from iolanthe.rowland.org ([192.131.102.54]:54212 "HELO
         iolanthe.rowland.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with SMTP id S1753560AbcITOMJ (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 20 Sep 2016 10:12:09 -0400
-In-Reply-To: <1474364420.4358.21.camel@suse.com>
+        with SMTP id S1752541AbcITOQw (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 20 Sep 2016 10:16:52 -0400
+In-Reply-To: <1474374977.12288.2.camel@researchut.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Oliver Neukum <oneukum@suse.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Micky Ching <micky_ching@realsil.com.cn>, Wei WANG <wei_wang@realsil.com.cn>, Roger Tseng <rogerable@realtek.com>, Ritesh Raj Sarraf <rrs@researchut.com>, linux-mmc <linux-mmc@vger.kernel.org>, USB list <linux-usb@vger.kernel.org>
+To: Ritesh Raj Sarraf <rrs@researchut.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Alex Dubov <oakad@yahoo.com>, USB list <linux-usb@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>
 
-On Tue, 20 Sep 2016, Oliver Neukum wrote:
+On Tue, 20 Sep 2016, Ritesh Raj Sarraf wrote:
 
-> On Mon, 2016-09-19 at 14:02 -0400, Alan Stern wrote:
-> > > We can for sure enable autosuspend for the sdmmc device, although as
-> > > soon as an SD card will be detected the rtsx driver will increase
-> > the
-> > > runtime PM usage count. The count is decreased when the card is
-> > > removed (or failed to be initialized), thus runtime suspend is
-> > > prevented as long as there is a functional card inserted.
+> -----BEGIN PGP SIGNED MESSAGE-----
+> Hash: SHA512
 > 
-> Testing autosuspend with card readers on usb_storage I saw a uniform
-> response of reporting a medium change event upon resume.
-> I am afraid other kinds of readers are not better in that regard.
-
-That shouldn't be an issue in this case, at least, not with the current 
-code.  The sdmmc and memstick drivers block autosuspend if media is 
-present.
-
-> > Which means that autosuspend matters only when a card isn't present, 
-> > and the host is polled every second or so to see whether a card has 
-> > been inserted.
+> On Mon, 2016-09-19 at 13:48 -0400, Alan Stern wrote:
 > > 
-> > Under those circumstances you probably don't want to use
-> > autosuspend.  
-> > That is, resuming before each poll and suspending afterward may use 
-> > less energy than staying at full power all the time.
+> > This ought to help.  Ritesh, please apply this patch on top of the 
+> > two earlier ones and let's see what happens.
+> > 
+> > Alan Stern
+> > 
+> > 
 > 
-> Is that based on concrete figures about power consumption?
+> Please find the logs at the following links. On this boot, I did not see any
+> kernel stack being printed.
+> 
+> https://people.debian.org/~rrs/tmp/4.8.0-rc7ulf1alan2+.kern.log
+> https://people.debian.org/~rrs/tmp/usb-4.8.0-rc7ulf1alan2+.log
 
-No.
+This is a lot better.  No more I/O errors.
 
-> And it seems to me that we need a way to indicate that the heuristics
-> should not be used, but a device immediately suspended. The timer
-> is sensible only if the next wakeup is unknown.
+We still have irregular suspends and resumes, but that's to be 
+expected.  More worrying are the spontaneous disconnects.  They don't 
+seem to be related to the suspend/resume activity.
 
-The driver can always turn off autosuspend if it wants to.
+You can disable suspend for this device entirely by doing:
+
+	echo on >/sys/bus/usb/devices/2-4/power/control
+
+I'm afraid that this won't prevent the device from disconnecting
+itself, though.  This appears to be some sort of hardware bug that
+can't be fixed in software.
 
 Alan Stern
 
