@@ -1,114 +1,122 @@
-From: Linus Walleij <linus.walleij@linaro.org>
-Subject: [PATCH v2] mmc: card: do away with indirection pointer
-Date: Tue, 20 Sep 2016 11:34:38 +0200
-Message-ID: <1474364078-15769-1-git-send-email-linus.walleij@linaro.org>
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-lf0-f50.google.com ([209.85.215.50]:34910 "EHLO
-        mail-lf0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751691AbcITJeo (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 20 Sep 2016 05:34:44 -0400
-Received: by mail-lf0-f50.google.com with SMTP id l131so8408098lfl.2
-        for <linux-mmc@vger.kernel.org>; Tue, 20 Sep 2016 02:34:43 -0700 (PDT)
-Sender: linux-mmc-owner@vger.kernel.org
+From: Jaehoon Chung <jh80.chung@samsung.com>
+Subject: Re: [PATCH v3 4/6] mmc: tmio: add eMMC support
+Date: Tue, 20 Sep 2016 18:35:00 +0900
+Message-ID: <e13ee5da-ad48-703a-5220-089f1f1ca0e0@samsung.com>
+References: <20160919205750.4766-1-wsa+renesas@sang-engineering.com>
+ <CGME20160919210038epcas1p1e9339bd774291e7131c270ca130056ab@epcas1p1.samsung.com>
+ <20160919205750.4766-5-wsa+renesas@sang-engineering.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-renesas-soc-owner@vger.kernel.org>
+In-reply-to: <20160919205750.4766-5-wsa+renesas@sang-engineering.com>
+Sender: linux-renesas-soc-owner@vger.kernel.org
+To: Wolfram Sang <wsa+renesas@sang-engineering.com>, linux-mmc@vger.kernel.org
+Cc: linux-renesas-soc@vger.kernel.org, Simon Horman <horms@verge.net.au>, Dirk Behme <dirk.behme@gmail.com>
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Linus Walleij <linus.walleij@linaro.org>
 
-We have enough vtables in the kernel as it is, we don't need
-this one to create even more artificial separation of concerns.
+On 09/20/2016 05:57 AM, Wolfram Sang wrote:
+> We need to add R1 without CRC support, refactor the bus width routine a
+> little and extend a quirk check. To support "non-removable;" we need a
+> workaround which will be hopefully removed when reworking PM soon.
+> 
+> Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+> ---
+>  drivers/mmc/host/tmio_mmc.h     |  3 +++
+>  drivers/mmc/host/tmio_mmc_pio.c | 38 ++++++++++++++++++++++++++------------
+>  2 files changed, 29 insertions(+), 12 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/tmio_mmc.h b/drivers/mmc/host/tmio_mmc.h
+> index 4b501f2d529f6e..637581faf756b1 100644
+> --- a/drivers/mmc/host/tmio_mmc.h
+> +++ b/drivers/mmc/host/tmio_mmc.h
+> @@ -79,6 +79,9 @@
+>  #define	CLK_CTL_DIV_MASK	0xff
+>  #define	CLK_CTL_SCLKEN		BIT(8)
+>  
+> +#define CARD_OPT_WIDTH8		BIT(13)
+> +#define CARD_OPT_WIDTH		BIT(15)
 
-As is proved by the Makefile:
+Just confusing whether CARD_OPT_WIDTH is 4bit or 1bit?
 
-obj-$(CONFIG_MMC_BLOCK)         += mmc_block.o
-mmc_block-objs                  := block.o queue.o
+> +
+>  #define TMIO_BBS		512		/* Boot block size */
+>  
+>  /* Definitions for values the CTRL_SDIO_STATUS register can take. */
+> diff --git a/drivers/mmc/host/tmio_mmc_pio.c b/drivers/mmc/host/tmio_mmc_pio.c
+> index 46b5a456243b84..a0f05eb4f34490 100644
+> --- a/drivers/mmc/host/tmio_mmc_pio.c
+> +++ b/drivers/mmc/host/tmio_mmc_pio.c
+> @@ -340,7 +340,9 @@ static int tmio_mmc_start_command(struct tmio_mmc_host *host, struct mmc_command
+>  
+>  	switch (mmc_resp_type(cmd)) {
+>  	case MMC_RSP_NONE: c |= RESP_NONE; break;
+> -	case MMC_RSP_R1:   c |= RESP_R1;   break;
+> +	case MMC_RSP_R1:
+> +	case MMC_RSP_R1_NO_CRC:
+> +			   c |= RESP_R1;   break;
 
-block.c and queue.c are baked into the same mmc_block.o object.
-So why would one of these objects access a function in the
-other object by dereferencing a pointer?
+Just wonder..It there case that hit "case MMC_RSP_R1_NO_CRC" ?
 
-Create a new block.h header file for the single shared function
-from block to queue and remove the function pointer and just
-call the queue request function.
-
-Apart from making the code more readable, this also makes link
-optimizations possible and probably speeds up the call as well.
-
-Signed-off-by: Linus Walleij <linus.walleij@linaro.org>
----
-ChangeLog v1->v2:
-- Actually commit the new block.h file too, mea culpa.
----
- drivers/mmc/card/block.c | 3 +--
- drivers/mmc/card/block.h | 1 +
- drivers/mmc/card/queue.c | 4 +++-
- drivers/mmc/card/queue.h | 2 --
- 4 files changed, 5 insertions(+), 5 deletions(-)
- create mode 100644 drivers/mmc/card/block.h
-
-diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
-index 2206d4477dbb..15acf96147f3 100644
---- a/drivers/mmc/card/block.c
-+++ b/drivers/mmc/card/block.c
-@@ -2144,7 +2144,7 @@ static int mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *rqc)
- 	return 0;
- }
- 
--static int mmc_blk_issue_rq(struct mmc_queue *mq, struct request *req)
-+int mmc_blk_issue_rq(struct mmc_queue *mq, struct request *req)
- {
- 	int ret;
- 	struct mmc_blk_data *md = mq->data;
-@@ -2265,7 +2265,6 @@ again:
- 	if (ret)
- 		goto err_putdisk;
- 
--	md->queue.issue_fn = mmc_blk_issue_rq;
- 	md->queue.data = md;
- 
- 	md->disk->major	= MMC_BLOCK_MAJOR;
-diff --git a/drivers/mmc/card/block.h b/drivers/mmc/card/block.h
-new file mode 100644
-index 000000000000..cdabb2ee74be
---- /dev/null
-+++ b/drivers/mmc/card/block.h
-@@ -0,0 +1 @@
-+int mmc_blk_issue_rq(struct mmc_queue *mq, struct request *req);
-diff --git a/drivers/mmc/card/queue.c b/drivers/mmc/card/queue.c
-index 708057261b38..8037f73a109a 100644
---- a/drivers/mmc/card/queue.c
-+++ b/drivers/mmc/card/queue.c
-@@ -19,7 +19,9 @@
- 
- #include <linux/mmc/card.h>
- #include <linux/mmc/host.h>
-+
- #include "queue.h"
-+#include "block.h"
- 
- #define MMC_QUEUE_BOUNCESZ	65536
- 
-@@ -68,7 +70,7 @@ static int mmc_queue_thread(void *d)
- 			bool req_is_special = mmc_req_is_special(req);
- 
- 			set_current_state(TASK_RUNNING);
--			mq->issue_fn(mq, req);
-+			mmc_blk_issue_rq(mq, req);
- 			cond_resched();
- 			if (mq->flags & MMC_QUEUE_NEW_REQUEST) {
- 				mq->flags &= ~MMC_QUEUE_NEW_REQUEST;
-diff --git a/drivers/mmc/card/queue.h b/drivers/mmc/card/queue.h
-index fee5e1271465..3c15a75bae86 100644
---- a/drivers/mmc/card/queue.h
-+++ b/drivers/mmc/card/queue.h
-@@ -57,8 +57,6 @@ struct mmc_queue {
- 	unsigned int		flags;
- #define MMC_QUEUE_SUSPENDED	(1 << 0)
- #define MMC_QUEUE_NEW_REQUEST	(1 << 1)
--
--	int			(*issue_fn)(struct mmc_queue *, struct request *);
- 	void			*data;
- 	struct request_queue	*queue;
- 	struct mmc_queue_req	mqrq[2];
--- 
-2.7.4
-
+>  	case MMC_RSP_R1B:  c |= RESP_R1B;  break;
+>  	case MMC_RSP_R2:   c |= RESP_R2;   break;
+>  	case MMC_RSP_R3:   c |= RESP_R3;   break;
+> @@ -737,12 +739,13 @@ static int tmio_mmc_start_data(struct tmio_mmc_host *host,
+>  	pr_debug("setup data transfer: blocksize %08x  nr_blocks %d\n",
+>  		 data->blksz, data->blocks);
+>  
+> -	/* Some hardware cannot perform 2 byte requests in 4 bit mode */
+> -	if (host->mmc->ios.bus_width == MMC_BUS_WIDTH_4) {
+> +	/* Some hardware cannot perform 2 byte requests in 4/8 bit mode */
+> +	if (host->mmc->ios.bus_width == MMC_BUS_WIDTH_4 ||
+> +	    host->mmc->ios.bus_width == MMC_BUS_WIDTH_8) {
+>  		int blksz_2bytes = pdata->flags & TMIO_MMC_BLKSZ_2BYTES;
+>  
+>  		if (data->blksz < 2 || (data->blksz < 4 && !blksz_2bytes)) {
+> -			pr_err("%s: %d byte block unsupported in 4 bit mode\n",
+> +			pr_err("%s: %d byte block unsupported in 4/8 bit mode\n",
+>  			       mmc_hostname(host->mmc), data->blksz);
+>  			return -EINVAL;
+>  		}
+> @@ -922,14 +925,16 @@ static void tmio_mmc_power_off(struct tmio_mmc_host *host)
+>  static void tmio_mmc_set_bus_width(struct tmio_mmc_host *host,
+>  				unsigned char bus_width)
+>  {
+> -	switch (bus_width) {
+> -	case MMC_BUS_WIDTH_1:
+> -		sd_ctrl_write16(host, CTL_SD_MEM_CARD_OPT, 0x80e0);
+> -		break;
+> -	case MMC_BUS_WIDTH_4:
+> -		sd_ctrl_write16(host, CTL_SD_MEM_CARD_OPT, 0x00e0);
+> -		break;
+> -	}
+> +	u16 reg = sd_ctrl_read16(host, CTL_SD_MEM_CARD_OPT)
+> +				& ~(CARD_OPT_WIDTH | CARD_OPT_WIDTH8);
+> +
+> +	/* reg now applies to MMC_BUS_WIDTH_4 */
+> +	if (bus_width == MMC_BUS_WIDTH_1)
+> +		reg |= CARD_OPT_WIDTH;
+> +	else if (bus_width == MMC_BUS_WIDTH_8)
+> +		reg |= CARD_OPT_WIDTH8;
+> +
+> +	sd_ctrl_write16(host, CTL_SD_MEM_CARD_OPT, reg);
+>  }
+>  
+>  /* Set MMC clock / power.
+> @@ -1149,6 +1154,15 @@ int tmio_mmc_host_probe(struct tmio_mmc_host *_host,
+>  				  !mmc_card_is_removable(mmc) ||
+>  				  mmc->slot.cd_irq >= 0);
+>  
+> +	/*
+> +	 * On Gen2+, eMMC with NONREMOVABLE currently fails because native
+> +	 * hotplug gets disabled. It seems RuntimePM related yet we need further
+> +	 * research. Since we are planning a PM overhaul anyway, let's enforce
+> +	 * for now the device being active by enabling native hotplug always.
+> +	 */
+> +	if (pdata->flags & TMIO_MMC_MIN_RCAR2)
+> +		_host->native_hotplug = true;
+> +
+>  	if (tmio_mmc_clk_enable(_host) < 0) {
+>  		mmc->f_max = pdata->hclk;
+>  		mmc->f_min = mmc->f_max / 512;
+> 
