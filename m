@@ -1,79 +1,104 @@
 From: Wolfram Sang <wsa@the-dreams.de>
-Subject: Re: [PATCH v3 2/6] mmc: rtsx_pci: use new macro for R1 without CRC
-Date: Wed, 21 Sep 2016 08:03:36 +0200
-Message-ID: <20160921060336.GE1484@katana>
+Subject: Re: [PATCH v3 4/6] mmc: tmio: add eMMC support
+Date: Wed, 21 Sep 2016 08:07:26 +0200
+Message-ID: <20160921060726.GF1484@katana>
 References: <20160919205750.4766-1-wsa+renesas@sang-engineering.com>
- <CGME20160919205936epcas1p405299736aa8bedf4bee71e7f2cf8af89@epcas1p4.samsung.com>
- <20160919205750.4766-3-wsa+renesas@sang-engineering.com>
- <38358765-9f93-6b4a-176a-2c8a87490936@samsung.com>
+ <CGME20160919210038epcas1p1e9339bd774291e7131c270ca130056ab@epcas1p1.samsung.com>
+ <20160919205750.4766-5-wsa+renesas@sang-engineering.com>
+ <e13ee5da-ad48-703a-5220-089f1f1ca0e0@samsung.com>
 Mime-Version: 1.0
 Content-Type: multipart/signed; micalg=pgp-sha1;
-        protocol="application/pgp-signature"; boundary="X3gaHHMYHkYqP6yf"
-Return-path: <linux-renesas-soc-owner@vger.kernel.org>
+        protocol="application/pgp-signature"; boundary="aPdhxNJGSeOG9wFI"
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from sauhun.de ([89.238.76.85]:44066 "EHLO pokefinder.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1754783AbcIUGHg (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Wed, 21 Sep 2016 02:07:36 -0400
 Content-Disposition: inline
-In-Reply-To: <38358765-9f93-6b4a-176a-2c8a87490936@samsung.com>
-Sender: linux-renesas-soc-owner@vger.kernel.org
+In-Reply-To: <e13ee5da-ad48-703a-5220-089f1f1ca0e0@samsung.com>
+Sender: linux-mmc-owner@vger.kernel.org
+List-Id: linux-mmc@vger.kernel.org
 To: Jaehoon Chung <jh80.chung@samsung.com>
 Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org, Simon Horman <horms@verge.net.au>, Dirk Behme <dirk.behme@gmail.com>
-List-Id: linux-mmc@vger.kernel.org
 
 
---X3gaHHMYHkYqP6yf
+--aPdhxNJGSeOG9wFI
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
 Content-Transfer-Encoding: quoted-printable
 
-On Tue, Sep 20, 2016 at 06:29:58PM +0900, Jaehoon Chung wrote:
-> Hi Wolfram,
->=20
-> Add the commit message.
-
-Can do, but would be highly redundant with the subject. Ulf, you want
-one, too?
-
->=20
+On Tue, Sep 20, 2016 at 06:35:00PM +0900, Jaehoon Chung wrote:
 > On 09/20/2016 05:57 AM, Wolfram Sang wrote:
+> > We need to add R1 without CRC support, refactor the bus width routine a
+> > little and extend a quirk check. To support "non-removable;" we need a
+> > workaround which will be hopefully removed when reworking PM soon.
+> >=20
 > > Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
 > > ---
-> >  drivers/mmc/host/rtsx_pci_sdmmc.c | 2 +-
-> >  1 file changed, 1 insertion(+), 1 deletion(-)
+> >  drivers/mmc/host/tmio_mmc.h     |  3 +++
+> >  drivers/mmc/host/tmio_mmc_pio.c | 38 ++++++++++++++++++++++++++-------=
+-----
+> >  2 files changed, 29 insertions(+), 12 deletions(-)
 > >=20
-> > diff --git a/drivers/mmc/host/rtsx_pci_sdmmc.c b/drivers/mmc/host/rtsx_=
-pci_sdmmc.c
-> > index 396c9b7e4121b0..3ccaa1415f33b2 100644
-> > --- a/drivers/mmc/host/rtsx_pci_sdmmc.c
-> > +++ b/drivers/mmc/host/rtsx_pci_sdmmc.c
-> > @@ -126,7 +126,7 @@ static int sd_response_type(struct mmc_command *cmd)
-> >  		return SD_RSP_TYPE_R0;
-> >  	case MMC_RSP_R1:
-> >  		return SD_RSP_TYPE_R1;
-> > -	case MMC_RSP_R1 & ~MMC_RSP_CRC:
-> > +	case MMC_RSP_R1_NO_CRC:
-> >  		return SD_RSP_TYPE_R1 | SD_NO_CHECK_CRC7;
-> >  	case MMC_RSP_R1B:
-> >  		return SD_RSP_TYPE_R1b;
-> >=20
+> > diff --git a/drivers/mmc/host/tmio_mmc.h b/drivers/mmc/host/tmio_mmc.h
+> > index 4b501f2d529f6e..637581faf756b1 100644
+> > --- a/drivers/mmc/host/tmio_mmc.h
+> > +++ b/drivers/mmc/host/tmio_mmc.h
+> > @@ -79,6 +79,9 @@
+> >  #define	CLK_CTL_DIV_MASK	0xff
+> >  #define	CLK_CTL_SCLKEN		BIT(8)
+> > =20
+> > +#define CARD_OPT_WIDTH8		BIT(13)
+> > +#define CARD_OPT_WIDTH		BIT(15)
 >=20
+> Just confusing whether CARD_OPT_WIDTH is 4bit or 1bit?
 
---X3gaHHMYHkYqP6yf
+The HW is confusing. Setting the bit sets 1-bit mode. This is why I put
+the comment below in the code:
+
+> > +	u16 reg =3D sd_ctrl_read16(host, CTL_SD_MEM_CARD_OPT)
+> > +				& ~(CARD_OPT_WIDTH | CARD_OPT_WIDTH8);
+> > +
+> > +	/* reg now applies to MMC_BUS_WIDTH_4 */
+
+This comment I meant ^^^
+
+> > +	if (bus_width =3D=3D MMC_BUS_WIDTH_1)
+> > +		reg |=3D CARD_OPT_WIDTH;
+
+=2E..
+
+> >  	switch (mmc_resp_type(cmd)) {
+> >  	case MMC_RSP_NONE: c |=3D RESP_NONE; break;
+> > -	case MMC_RSP_R1:   c |=3D RESP_R1;   break;
+> > +	case MMC_RSP_R1:
+> > +	case MMC_RSP_R1_NO_CRC:
+> > +			   c |=3D RESP_R1;   break;
+>=20
+> Just wonder..It there case that hit "case MMC_RSP_R1_NO_CRC" ?
+
+Yes, as described in my response to patch 1. It doesn't work without.
+
+
+--aPdhxNJGSeOG9wFI
 Content-Type: application/pgp-signature; name="signature.asc"
 
 -----BEGIN PGP SIGNATURE-----
 Version: GnuPG v1
 
-iQIcBAEBAgAGBQJX4iK3AAoJEBQN5MwUoCm2RPsP/0GSoszLezm/P2oXitBvo1ss
-+vw+18QTKj3gnH97jnlJxt/V6vMYI0KX6etUoesOT3y4ME/dpsV+thqgb+UEj0oW
-SqXOGmKjzotUlkLiuKuklaflGUbv4GvhfFq3KdRVVu4Xwp64QlE1TBbKOiMS5f90
-YNzs7dcAlwhuBFWXommuyuFoy/gfHSTSa9IrbwaRN3rRU/jKM3/Yrs7WdRxByvI1
-qNHm2xL3nWEomG4Pi4KLXGY6y9Iq31UP4CrsTdPz9CBbD3w0gMVfd0zuWHrSXbvK
-g1XSuIzVu+HXU7j847Y42nlFVTArf75loOzv5gJQAtwkJ7U/f+pwkXaHbL4udeuO
-eqPxdffm1Q5libr4vAR3OiQY1Vz7g+jY1vN8TqbyZ6afngZ2KsVMdj/72yfG/xlZ
-ic8dAh2XpuDblhWC5ayJTxLrx301G5USRZiLQ+BlgOtchp6/Q3mkvIspnSFzSq6q
-p+m8Lxy0k5/ZA8S7aPMb5yScHE059vRNUT8+tM9+7fGp2SnSWL4VoHrrHb/I2YdU
-ImTM2RK2XdpmfQc8TIm5+9PZi3iuszMUcTbQ/idYgSUo5rfNOannvJ1G3viIC48F
-neYUuLojqkWfyPAF1yjhtt2Tzg0y1ls5jbZUQrri/1lYwiFyDkCF5Jfv4xBghTVc
-IOMSiMiXUqwT60ebUUtZ
-=7vTb
+iQIcBAEBAgAGBQJX4iOeAAoJEBQN5MwUoCm2GJQP/3H0UVeN2xPyN1j8SiKe8HoC
+wg/C8dNfi1LcI7AiIzuJ9tpgTH+eOY8jK6i7MCBo+4j9gVExOXhGGi9Y7dGmpyeS
+iaqWK7XRyXh6hEfIYBAAGLu772cO2bDgNrXeFRmNGF1xF3LgW23as0gzpvRQvkmf
+ym9EdCEnSk8GCelpcC3nKPW5WNfIhRKD50im2HKgCmhJCov8rYydIU8tF5yy4eGs
+rmfBrBByKr1I0Pxv1J9G+Y4N5zj6HICejNU8Bbqh73sYymQdmwXXXZRtIXc9FWP/
+xAgLCGjV2+gihzYd5qYPvUofNJaiSyIz6sEU0raRaFvJ3DR5UeiO3nbErgaH5EDB
+RGWF2n113Zi8ybH22WtBz5RyD2wcsWEeNhg4s/R1sMq9a88/JBcB+NuDsD9ODvXV
+NjPo6FGJ8INDbKEW4Hnub2dYR9np61zjOdPyCn+oJdQYluK+6vW5b3y9RtwDDYUs
+osW6baQJVCpPvOQtRJ7nudQV/buRBok4THIPMzDT5UfOdJqjK9FFcbaeqqVw36Kt
+8BuEV/OVXKiOYq1lKELQHE+vzid1kzSeKx/BWyc36K0NI/QnkOE9bbWbfMZn+ajP
+01KZbwstlvJvh2MjL97h/8GASn3ni70XXARFcPIKkkxyu75aaaeFMFo75WY1+lk2
+8SXkDmufeE9xEsvK96/Y
+=DiEH
 -----END PGP SIGNATURE-----
 
---X3gaHHMYHkYqP6yf--
+--aPdhxNJGSeOG9wFI--
