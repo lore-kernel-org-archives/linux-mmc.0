@@ -1,70 +1,113 @@
-From: Alan Stern <stern@rowland.harvard.edu>
-Subject: Re: xHCI problem? [was Re: Erratic USB device behavior and device
- loss]
-Date: Wed, 21 Sep 2016 10:37:37 -0400 (EDT)
-Message-ID: <Pine.LNX.4.44L0.1609211035230.1996-100000@iolanthe.rowland.org>
-References: <1474456212.8192.2.camel@researchut.com>
+From: Alan Stern <stern-nwvwT67g6+6dFdvTe/nMLpVzexx5G7lz@public.gmane.org>
+Subject: Re: [PATCH] mmc: rtsx_usb_sdmmc: Handle runtime PM while changing
+ led
+Date: Wed, 21 Sep 2016 10:45:59 -0400 (EDT)
+Message-ID: <Pine.LNX.4.44L0.1609211038270.1996-100000@iolanthe.rowland.org>
+References: <CAPDyKFqgfhsOdrz5ncTh5Z_OZ6tvnMVoQ_2g7ZyM02aaVzGQWg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=UTF-8
-Content-Transfer-Encoding: 8BIT
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from iolanthe.rowland.org ([192.131.102.54]:37066 "HELO
-        iolanthe.rowland.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with SMTP id S933318AbcIUOhj (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 21 Sep 2016 10:37:39 -0400
-In-Reply-To: <1474456212.8192.2.camel@researchut.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Return-path: <linux-usb-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <CAPDyKFqgfhsOdrz5ncTh5Z_OZ6tvnMVoQ_2g7ZyM02aaVzGQWg-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+Sender: linux-usb-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: linux-mmc <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Ritesh Raj Sarraf <rrs-7WuBAv+fczCJ8c2fQYRYNw@public.gmane.org>, USB list <linux-usb-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Micky Ching <micky_ching-kXabqFNEczNtrwSWzY7KCg@public.gmane.org>, Roger Tseng <rogerable-Rasf1IRRPZFBDgjK7y7TUQ@public.gmane.org>, Wei WANG <wei_wang-kXabqFNEczNtrwSWzY7KCg@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Ritesh Raj Sarraf <rrs@researchut.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Alex Dubov <oakad@yahoo.com>, USB list <linux-usb@vger.kernel.org>, linux-mmc <linux-mmc@vger.kernel.org>
 
-On Wed, 21 Sep 2016, Ritesh Raj Sarraf wrote:
+On Wed, 21 Sep 2016, Ulf Hansson wrote:
 
-> -----BEGIN PGP SIGNED MESSAGE-----
-> Hash: SHA512
+> > > My concern is also 2s autosuspend timeout which is set for the usb
+> > > device. Somehow I feel we need to be able "share" more information
+> > > between a parent-child relationship, in this case between the sdmmc
+> > > device and the usb device.
+> >
+> > I agree, but it's not clear how this should be done.  One easy solution
+> > would be to turn off USB autosuspend and do all the runtime-PM
+> > management in the sdmmc and memstick drivers.
 > 
-> Hi Alan,
-> 
-> On Tue, 2016-09-20 at 10:16 -0400, Alan Stern wrote:
-> > This is a lot better.  No more I/O errors.
-> > 
-> > We still have irregular suspends and resumes, but that's to be 
-> > expected.  More worrying are the spontaneous disconnects.  They don't 
-> > seem to be related to the suspend/resume activity.
-> > 
-> > You can disable suspend for this device entirely by doing:
-> > 
-> >         echo on >/sys/bus/usb/devices/2-4/power/control
-> > 
-> > I'm afraid that this won't prevent the device from disconnecting
-> > itself, though.  This appears to be some sort of hardware bug that
-> > can't be fixed in software.
-> 
-> I'm not sure what you were referring to when you said "No more I/O errors".
+> Hmm, this could be a very good option. In the end the sdmmc/memstick
+> drivers knows best about which autosuspend timeout to use.
 
-I was referring to the attempts at I/O while the device was suspended.  
-They didn't occur in your most recent test.
+I tend to agree, and so does Oliver.
 
-> But I still got these errors today, with all patches applied.
+> > > An observation I made, is when the sdmmc device gets runtime resumed
+> > > (pm_runtime_get_sync()), the parent device (the usb device) may also
+> > > become runtime resumed (unless it's already). In this sequence, but
+> > > *only* when actually runtime resuming the usb device, the runtime PM
+> > > core decides to update the last busy mark for the usb device. Should
+> > > it really do that?
+> >
+> > Yes, that's deliberate.  The whole idea of autosuspend is to prevent
+> > the device from being runtime-suspended too soon after it was used, and
+> > the PM core considers runtime-resume to be a form of usage.
 > 
-> Sep 21 14:58:11 learner kernel: usb 2-4: new high-speed USB device number 98
-> using xhci_hcd
-> Sep 21 14:58:18 learner kernel: usb 2-4: new high-speed USB device number 102
-> using xhci_hcd
-> Sep 21 14:58:24 learner kernel: usb 2-4: new high-speed USB device number 106
-> using xhci_hcd
-> Sep 21 14:58:31 learner kernel: usb 2-4: new high-speed USB device number 114
-> using xhci_hcd
-> Sep 21 14:58:41 learner kernel: usb 2-4: new high-speed USB device number 12
-> using xhci_hcd
-> Sep 21 14:58:41 learner kernel: usb 2-4: device descriptor read/64, error -71
-> Sep 21 14:58:41 learner kernel: usb 2-4: device descriptor read/64, error -71
-> Sep 21 14:58:41 learner kernel: usb 2-4: new high-speed USB device number 13
-> using xhci_hcd
+> I understand it's deliberate, but I was more question whether we
+> actually should have the runtime PM core to behaves like this.
+> 
+> I don't think its behaviour is consistent, as in such case all calls
+> to __pm_runtime_resume() should trigger the runtime PM core to update
+> the last busy mark.
 
-These are a completely different kind of error.  They occurred during a 
-reset, which followed one of those spontaneous disconnects.  Probably 
-the cause of the disconnect is also the cause of these errors.
+Not a bad idea...
+
+> Don't get me wrong, I am *not* suggesting we should do that change, as
+> it would mean the last busy mark would be updated way too often.
+
+The updates aren't very expensive.  Just one atomic write.  It probably
+takes less time than acquiring the runtime-PM spinlock.
+
+> Instead, perhaps it's better to leave the responsibility of updating
+> the last busy mark to the runtime PM users solely.
+
+Maybe, but I think doing it once in the core, like this, can remove the
+need for a lot of function calls in drivers.
+
+> > > If we assume that the usb device shouldn't be used with a timeout less
+> > > than 2s, then I think we have two options:
+> > >
+> > > *) As the mmc polling timeout is 1s, there is really no point in
+> > > trying to runtime suspend the usb device, it may just be left runtime
+> > > resumed all the time. Wasting power, of course!
+> >
+> > Or we can decrease the USB autosuspend delay to 100 ms.
+> 
+> Yes, something like that makes sense to me.
+> 
+> Unless we decide to turn off autosuspend completely for the usb host
+> as you suggested above. Then it would really become clear that the
+> sdmmc/memstick drivers gets the responsible for the autosuspend, which
+> certainly makes most sense.
+
+Yes.
+
+> > > **) Add an interface to allow dynamically changes of the mmc polling
+> > > timeout to better suit the current user.
+> >
+> > Note that the block layer does its own polling for removable media, and
+> > it already has a sysfs interface to control the polling interval (or
+> > disable it entirely).  But I don't know how the MMC stack interacts
+> > with the block layer.
+> >
+> > One awkward point is that the sdmmc and memstick drivers each do their
+> > own polling.  This is a waste.  You can see it in the usbmon trace;
+> > every second there are two query-response interactions.  Even if
+> > there's no good way to reduce the number, we should at least try to
+> > synchronize the polls so that the device doesn't need to be resumed
+> > twice every second.
+> 
+> Yes, you are right. I just haven't been able to prioritize doing that
+> change for MMC. Another thing added on my mmc TODO list. :-)
+
+To tell the truth, I'm not sure how you would synchronize the polling
+activities in the sdmmc and memstick drivers.  Move most of it into the
+upper MFD driver?
+
+One point worth mentioning is that if you already know an SDMMC card is
+present then there's no reason to poll for a MemoryStick card, and vice
+versa.
 
 Alan Stern
 
+--
+To unsubscribe from this list: send the line "unsubscribe linux-usb" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
