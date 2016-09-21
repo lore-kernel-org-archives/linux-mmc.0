@@ -1,141 +1,48 @@
-From: Yangbo Lu <yangbo.lu-3arQi8VN3Tc@public.gmane.org>
-Subject: [v12, 8/8] mmc: sdhci-of-esdhc: fix host version for T4240-R1.0-R2.0
-Date: Wed, 21 Sep 2016 14:57:20 +0800
-Message-ID: <1474441040-11946-9-git-send-email-yangbo.lu@nxp.com>
+From: =?UTF-8?B?QWxleGFuZGVyIFNoaXlhbg==?= <shc_work@mail.ru>
+Subject: =?UTF-8?B?UmU6IFt2MTIsIDcvOF0gYmFzZTogc29jOiBpbnRyb2R1Y2Ugc29jX2Rldmlj?=
+ =?UTF-8?B?ZV9tYXRjaCgpIGludGVyZmFjZQ==?=
+Date: Wed, 21 Sep 2016 10:56:14 +0300
+Message-ID: <1474444574.270880035@f136.i.mail.ru>
 References: <1474441040-11946-1-git-send-email-yangbo.lu@nxp.com>
+ <1474441040-11946-8-git-send-email-yangbo.lu@nxp.com>
+Reply-To: =?UTF-8?B?QWxleGFuZGVyIFNoaXlhbg==?= <shc_work@mail.ru>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
-In-Reply-To: <1474441040-11946-1-git-send-email-yangbo.lu-3arQi8VN3Tc@public.gmane.org>
-List-Unsubscribe: <https://lists.linuxfoundation.org/mailman/options/iommu>,
-	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.linuxfoundation.org/pipermail/iommu/>
-List-Post: <mailto:iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
-List-Help: <mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=help>
-List-Subscribe: <https://lists.linuxfoundation.org/mailman/listinfo/iommu>,
-	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=subscribe>
-Sender: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
-Errors-To: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
-To: linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, Scott Wood <oss-fOR+EgIDQEHk1uMJSBkQmQ@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>
-Cc: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Xiaobo Xie <xiaobo.xie-3arQi8VN3Tc@public.gmane.org>, Minghuan Lian <minghuan.lian-3arQi8VN3Tc@public.gmane.org>, linux-i2c-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-clk-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Qiang Zhao <qiang.zhao-3arQi8VN3Tc@public.gmane.org>, Russell King <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, Bhupesh Sharma <bhupesh.sharma-KZfg59tc24xl57MIdRCFDg@public.gmane.org>, Jochen Friedrich <jochen-NIgtFMG+Po8@public.gmane.org>, Claudiu Manoil <claudiu.manoil-KZfg59tc24xl57MIdRCFDg@public.gmane.org>, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Kumar Gala <galak-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Santosh Shilimkar <ssantosh-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, netdev-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Leo Li <leoyang.li-3arQi8VN3Tc@public.gmane.org>, iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org, Yangbo Lu <yangbo.lu-3arQi8VN3Tc@public.gmane.org>, linuxppc-dev-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <1474441040-11946-8-git-send-email-yangbo.lu@nxp.com>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: =?UTF-8?B?WWFuZ2JvIEx1?= <yangbo.lu@nxp.com>
+Cc: =?UTF-8?B?TWFyayBSdXRsYW5k?= <mark.rutland@arm.com>, ulf.hansson@linaro.org, =?UTF-8?B?WGlhb2JvIFhpZQ==?= <xiaobo.xie@nxp.com>, =?UTF-8?B?TWluZ2h1YW4gTGlhbg==?= <minghuan.lian@nxp.com>, linux-i2c@vger.kernel.org, linux-clk@vger.kernel.org, =?UTF-8?B?UWlhbmcgWmhhbw==?= <qiang.zhao@nxp.com>, =?UTF-8?B?UnVzc2VsbCBLaW5n?= <linux@arm.linux.org.uk>, =?UTF-8?B?Qmh1cGVzaCBTaGFybWE=?= <bhupesh.sharma@freescale.com>, =?UTF-8?B?Sm9lcmcgUm9lZGVs?= <joro@8bytes.org>, =?UTF-8?B?Sm9jaGVuIEZyaWVkcmljaA==?= <jochen@scram.de>, =?UTF-8?B?Q2xhdWRpdSBNYW5vaWw=?= <claudiu.manoil@freescale.com>, devicetree@vger.kernel.org, =?UTF-8?B?QXJuZCBCZXJnbWFubg==?= <arnd@arndb.de>, =?UTF-8?B?U2NvdHQgV29vZA==?= <oss@buserror.net>, =?UTF-8?B?Um9iIEhlcnJpbmc=?= <robh+dt@kernel.org>, =?UTF-8?B?U2FudG9zaCBTaGlsaW1rYXI=?= <ssantosh@kernel.org>, linux-arm-kernel@lists.infradead.org, netdev@vger.kernel.orgl
 List-Id: linux-mmc@vger.kernel.org
 
-The eSDHC of T4240-R1.0-R2.0 has incorrect vender version and spec version.
-Acturally the right version numbers should be VVN=0x13 and SVN = 0x1.
-This patch adds the GUTS driver support for eSDHC driver to match SoC.
-And fix host version to avoid that incorrect version numbers break down
-the ADMA data transfer.
-
-Signed-off-by: Yangbo Lu <yangbo.lu-3arQi8VN3Tc@public.gmane.org>
-Acked-by: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Acked-by: Scott Wood <oss-fOR+EgIDQEHk1uMJSBkQmQ@public.gmane.org>
----
-Changes for v2:
-	- Got SVR through iomap instead of dts
-Changes for v3:
-	- Managed GUTS through syscon instead of iomap in eSDHC driver
-Changes for v4:
-	- Got SVR by GUTS driver instead of SYSCON
-Changes for v5:
-	- Changed to get SVR through API fsl_guts_get_svr()
-	- Combined patch 4, patch 5 and patch 6 into one
-Changes for v6:
-	- Added 'Acked-by: Ulf Hansson'
-Changes for v7:
-	- None
-Changes for v8:
-	- Added 'Acked-by: Scott Wood'
-Changes for v9:
-	- None
-Changes for v10:
-	- None
-Changes for v11:
-	- Changed to use soc_device_match
-Changes for v12:
-	- Matched soc through .family field instead of .soc_id
----
- drivers/mmc/host/Kconfig          |  1 +
- drivers/mmc/host/sdhci-of-esdhc.c | 20 ++++++++++++++++++++
- 2 files changed, 21 insertions(+)
-
-diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
-index 5274f50..a1135a9 100644
---- a/drivers/mmc/host/Kconfig
-+++ b/drivers/mmc/host/Kconfig
-@@ -144,6 +144,7 @@ config MMC_SDHCI_OF_ESDHC
- 	depends on MMC_SDHCI_PLTFM
- 	depends on PPC || ARCH_MXC || ARCH_LAYERSCAPE
- 	select MMC_SDHCI_IO_ACCESSORS
-+	select FSL_GUTS
- 	help
- 	  This selects the Freescale eSDHC controller support.
- 
-diff --git a/drivers/mmc/host/sdhci-of-esdhc.c b/drivers/mmc/host/sdhci-of-esdhc.c
-index fb71c86..57bdb9e 100644
---- a/drivers/mmc/host/sdhci-of-esdhc.c
-+++ b/drivers/mmc/host/sdhci-of-esdhc.c
-@@ -18,6 +18,7 @@
- #include <linux/of.h>
- #include <linux/delay.h>
- #include <linux/module.h>
-+#include <linux/sys_soc.h>
- #include <linux/mmc/host.h>
- #include "sdhci-pltfm.h"
- #include "sdhci-esdhc.h"
-@@ -28,6 +29,7 @@
- struct sdhci_esdhc {
- 	u8 vendor_ver;
- 	u8 spec_ver;
-+	bool quirk_incorrect_hostver;
- };
- 
- /**
-@@ -73,6 +75,8 @@ static u32 esdhc_readl_fixup(struct sdhci_host *host,
- static u16 esdhc_readw_fixup(struct sdhci_host *host,
- 				     int spec_reg, u32 value)
- {
-+	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-+	struct sdhci_esdhc *esdhc = sdhci_pltfm_priv(pltfm_host);
- 	u16 ret;
- 	int shift = (spec_reg & 0x2) * 8;
- 
-@@ -80,6 +84,12 @@ static u16 esdhc_readw_fixup(struct sdhci_host *host,
- 		ret = value & 0xffff;
- 	else
- 		ret = (value >> shift) & 0xffff;
-+	/* Workaround for T4240-R1.0-R2.0 eSDHC which has incorrect
-+	 * vendor version and spec version information.
-+	 */
-+	if ((spec_reg == SDHCI_HOST_VERSION) &&
-+	    (esdhc->quirk_incorrect_hostver))
-+		ret = (VENDOR_V_23 << SDHCI_VENDOR_VER_SHIFT) | SDHCI_SPEC_200;
- 	return ret;
- }
- 
-@@ -558,6 +568,12 @@ static const struct sdhci_pltfm_data sdhci_esdhc_le_pdata = {
- 	.ops = &sdhci_esdhc_le_ops,
- };
- 
-+static struct soc_device_attribute soc_incorrect_hostver[] = {
-+	{ .family = "QorIQ T4240", .revision = "1.0", },
-+	{ .family = "QorIQ T4240", .revision = "2.0", },
-+	{ },
-+};
-+
- static void esdhc_init(struct platform_device *pdev, struct sdhci_host *host)
- {
- 	struct sdhci_pltfm_host *pltfm_host;
-@@ -571,6 +587,10 @@ static void esdhc_init(struct platform_device *pdev, struct sdhci_host *host)
- 	esdhc->vendor_ver = (host_ver & SDHCI_VENDOR_VER_MASK) >>
- 			     SDHCI_VENDOR_VER_SHIFT;
- 	esdhc->spec_ver = host_ver & SDHCI_SPEC_VER_MASK;
-+	if (soc_device_match(soc_incorrect_hostver))
-+		esdhc->quirk_incorrect_hostver = true;
-+	else
-+		esdhc->quirk_incorrect_hostver = false;
- }
- 
- static int sdhci_esdhc_probe(struct platform_device *pdev)
--- 
-2.1.0.27.g96db324
+PtCh0YDQtdC00LAsIDIxINGB0LXQvdGC0Y/QsdGA0Y8gMjAxNiwgOTo1NyArMDM6MDAg0L7RgiBZ
+YW5nYm8gTHUgPHlhbmdiby5sdUBueHAuY29tPjoKPgo+RnJvbTogQXJuZCBCZXJnbWFubiA8IGFy
+bmRAYXJuZGIuZGUgPgo+Cj5XZSBrZWVwIHJ1bm5pbmcgaW50byBjYXNlcyB3aGVyZSBkZXZpY2Ug
+ZHJpdmVycyB3YW50IHRvIGtub3cgdGhlIGV4YWN0Cj52ZXJzaW9uIG9mIHRoZSBhIFNvQyB0aGV5
+IGFyZSBjdXJyZW50bHkgcnVubmluZyBvbi4gSW4gdGhlIHBhc3QsIHRoaXMgaGFzCj51c3VhbGx5
+IGJlZW4gZG9uZSB0aHJvdWdoIGEgdmVuZG9yIHNwZWNpZmljIEFQSSB0aGF0IGNhbiBiZSBjYWxs
+ZWQgYnkgYQo+ZHJpdmVyLCBvciBieSBkaXJlY3RseSBhY2Nlc3Npbmcgc29tZSBraW5kIG9mIHZl
+cnNpb24gcmVnaXN0ZXIgdGhhdCBpcwo+bm90IHBhcnQgb2YgdGhlIGRldmljZSBpdHNlbGYgYnV0
+IHRoYXQgYmVsb25ncyB0byBhIGdsb2JhbCByZWdpc3RlciBhcmVhCj5vZiB0aGUgY2hpcC4KLi4u
+Cj4rY29uc3Qgc3RydWN0IHNvY19kZXZpY2VfYXR0cmlidXRlICpzb2NfZGV2aWNlX21hdGNoKAo+
+K2NvbnN0IHN0cnVjdCBzb2NfZGV2aWNlX2F0dHJpYnV0ZSAqbWF0Y2hlcykKPit7Cj4raW50IHJl
+dCA9IDA7Cj4rCj4raWYgKCFtYXRjaGVzKQo+K3JldHVybiBOVUxMOwo+Kwo+K3doaWxlICghcmV0
+KSB7Cj4raWYgKCEobWF0Y2hlcy0+bWFjaGluZSB8fCBtYXRjaGVzLT5mYW1pbHkgfHwKPisgICAg
+ICBtYXRjaGVzLT5yZXZpc2lvbiB8fCBtYXRjaGVzLT5zb2NfaWQpKQo+K2JyZWFrOwo+K3JldCA9
+IGJ1c19mb3JfZWFjaF9kZXYoJnNvY19idXNfdHlwZSwgTlVMTCwgKHZvaWQgKiltYXRjaGVzLAo+
+KyAgICAgICBzb2NfZGV2aWNlX21hdGNoX29uZSk7Cj4raWYgKCFyZXQpCj4rbWF0Y2hlcysrOwoK
+U28sIHdoYXQgaGFwcGVuIGlmIG5leHQgIm1hdGNoZXMiIChhZnRlciBpbmNyZW1lbnQpIHdpbGwg
+YmUgTlVMTD8KCkkgdGhpbmsgeW91IHNob3VsZCB1c2Ugd2hpbGUobWF0Y2hlcykgYXQgdGhlIHN0
+YXJ0IG9mIHRoaXMgcHJvY2VkdXJlLgoKLS0tCgpfX19fX19fX19fX19fX19fX19fX19fX19fX19f
+X19fX19fX19fX19fX19fX19fXwpsaW51eC1hcm0ta2VybmVsIG1haWxpbmcgbGlzdApsaW51eC1h
+cm0ta2VybmVsQGxpc3RzLmluZnJhZGVhZC5vcmcKaHR0cDovL2xpc3RzLmluZnJhZGVhZC5vcmcv
+bWFpbG1hbi9saXN0aW5mby9saW51eC1hcm0ta2VybmVsCg==
