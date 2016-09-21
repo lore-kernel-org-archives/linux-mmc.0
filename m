@@ -1,7 +1,7 @@
 From: Shawn Lin <shawn.lin@rock-chips.com>
-Subject: [PATCH 1/5] mmc: core: don't try to switch block size for dual rate mode
-Date: Wed, 21 Sep 2016 09:43:49 +0800
-Message-ID: <1474422233-29355-2-git-send-email-shawn.lin@rock-chips.com>
+Subject: [PATCH 4/5] mmc: sdhci: Don't try to switch to unsupported voltage
+Date: Wed, 21 Sep 2016 09:43:52 +0800
+Message-ID: <1474422233-29355-5-git-send-email-shawn.lin@rock-chips.com>
 References: <1474422233-29355-1-git-send-email-shawn.lin@rock-chips.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1474422233-29355-1-git-send-email-shawn.lin@rock-chips.com>
@@ -12,31 +12,39 @@ List-Id: linux-mmc@vger.kernel.org
 
 From: Ziyuan Xu <xzy.xu@rock-chips.com>
 
-Per spec, block size should always be 512 bytes for dual rate mode,
-so any attempts to switch the block size under dual rate mode should
-be neglected.
+Sdhci shouldn't switch to the unsupported voltage if claiming
+that it can not support the requested voltage. Let's fix it.
 
 Signed-off-by: Ziyuan Xu <xzy.xu@rock-chips.com>
 Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
-
 ---
 
- drivers/mmc/core/core.c | 3 ++-
- 1 file changed, 2 insertions(+), 1 deletion(-)
+ drivers/mmc/host/sdhci.c | 6 ++++--
+ 1 file changed, 4 insertions(+), 2 deletions(-)
 
-diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index f0ed0af..2553d90 100644
---- a/drivers/mmc/core/core.c
-+++ b/drivers/mmc/core/core.c
-@@ -2576,7 +2576,8 @@ int mmc_set_blocklen(struct mmc_card *card, unsigned int blocklen)
- {
- 	struct mmc_command cmd = {0};
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 4805566..b1f1edd 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -1845,7 +1845,8 @@ static int sdhci_start_signal_voltage_switch(struct mmc_host *mmc,
  
--	if (mmc_card_blockaddr(card) || mmc_card_ddr52(card))
-+	if (mmc_card_blockaddr(card) || mmc_card_ddr52(card) ||
-+	    mmc_card_hs400(card) || mmc_card_hs400es(card))
- 		return 0;
+ 	switch (ios->signal_voltage) {
+ 	case MMC_SIGNAL_VOLTAGE_330:
+-		if (!(host->flags & SDHCI_SIGNALING_330))
++		if (!(host->flags & SDHCI_SIGNALING_330) ||
++		    !(host->caps & SDHCI_CAN_VDD_330))
+ 			return -EINVAL;
+ 		/* Set 1.8V Signal Enable in the Host Control2 register to 0 */
+ 		ctrl &= ~SDHCI_CTRL_VDD_180;
+@@ -1872,7 +1873,8 @@ static int sdhci_start_signal_voltage_switch(struct mmc_host *mmc,
  
- 	cmd.opcode = MMC_SET_BLOCKLEN;
+ 		return -EAGAIN;
+ 	case MMC_SIGNAL_VOLTAGE_180:
+-		if (!(host->flags & SDHCI_SIGNALING_180))
++		if (!(host->flags & SDHCI_SIGNALING_180) ||
++		    !(host->caps & SDHCI_CAN_VDD_180))
+ 			return -EINVAL;
+ 		if (!IS_ERR(mmc->supply.vqmmc)) {
+ 			ret = mmc_regulator_set_vqmmc(mmc, ios);
 -- 
 2.3.7
