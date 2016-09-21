@@ -1,104 +1,79 @@
-From: Wolfram Sang <wsa@the-dreams.de>
-Subject: Re: [PATCH v3 4/6] mmc: tmio: add eMMC support
-Date: Wed, 21 Sep 2016 08:07:26 +0200
-Message-ID: <20160921060726.GF1484@katana>
-References: <20160919205750.4766-1-wsa+renesas@sang-engineering.com>
- <CGME20160919210038epcas1p1e9339bd774291e7131c270ca130056ab@epcas1p1.samsung.com>
- <20160919205750.4766-5-wsa+renesas@sang-engineering.com>
- <e13ee5da-ad48-703a-5220-089f1f1ca0e0@samsung.com>
+From: Yangbo Lu <yangbo.lu-3arQi8VN3Tc@public.gmane.org>
+Subject: [v12, 0/8] Fix eSDHC host version register bug
+Date: Wed, 21 Sep 2016 14:57:12 +0800
+Message-ID: <1474441040-11946-1-git-send-email-yangbo.lu@nxp.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-        protocol="application/pgp-signature"; boundary="aPdhxNJGSeOG9wFI"
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from sauhun.de ([89.238.76.85]:44066 "EHLO pokefinder.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1754783AbcIUGHg (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Wed, 21 Sep 2016 02:07:36 -0400
-Content-Disposition: inline
-In-Reply-To: <e13ee5da-ad48-703a-5220-089f1f1ca0e0@samsung.com>
-Sender: linux-mmc-owner@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
+List-Unsubscribe: <https://lists.linuxfoundation.org/mailman/options/iommu>,
+	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.linuxfoundation.org/pipermail/iommu/>
+List-Post: <mailto:iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
+List-Help: <mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=help>
+List-Subscribe: <https://lists.linuxfoundation.org/mailman/listinfo/iommu>,
+	<mailto:iommu-request-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org?subject=subscribe>
+Sender: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
+Errors-To: iommu-bounces-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org
+To: linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, Scott Wood <oss-fOR+EgIDQEHk1uMJSBkQmQ@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>
+Cc: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Xiaobo Xie <xiaobo.xie-3arQi8VN3Tc@public.gmane.org>, Minghuan Lian <minghuan.lian-3arQi8VN3Tc@public.gmane.org>, linux-i2c-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-clk-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Qiang Zhao <qiang.zhao-3arQi8VN3Tc@public.gmane.org>, Russell King <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, Bhupesh Sharma <bhupesh.sharma-KZfg59tc24xl57MIdRCFDg@public.gmane.org>, Jochen Friedrich <jochen-NIgtFMG+Po8@public.gmane.org>, Claudiu Manoil <claudiu.manoil-KZfg59tc24xl57MIdRCFDg@public.gmane.org>, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Kumar Gala <galak-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Santosh Shilimkar <ssantosh-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, netdev-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Leo Li <leoyang.li-3arQi8VN3Tc@public.gmane.org>, iommu-cunTk1MwBs9QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org, Yangbo Lu <yangbo.lu-3arQi8VN3Tc@public.gmane.org>, linuxppc-dev-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>
-Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>, linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org, Simon Horman <horms@verge.net.au>, Dirk Behme <dirk.behme@gmail.com>
 
+This patchset is used to fix a host version register bug in the T4240-R1.0-R2.0
+eSDHC controller. To match the SoC version and revision, 10 previous version
+patchsets had tried many methods but all of them were rejected by reviewers.
+Such as
+	- dts compatible method
+	- syscon method
+	- ifdef PPC method
+	- GUTS driver getting SVR method
+Anrd suggested a soc_device_match method in v10, and this is the only available
+method left now. This v11 patchset introduces the soc_device_match interface in
+soc driver.
 
---aPdhxNJGSeOG9wFI
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+The first six patches of Yangbo are to add the GUTS driver. This is used to
+register a soc device which contain soc version and revision information.
+The other two patches introduce the soc_device_match method in soc driver
+and apply it on esdhc driver to fix this bug.
 
-On Tue, Sep 20, 2016 at 06:35:00PM +0900, Jaehoon Chung wrote:
-> On 09/20/2016 05:57 AM, Wolfram Sang wrote:
-> > We need to add R1 without CRC support, refactor the bus width routine a
-> > little and extend a quirk check. To support "non-removable;" we need a
-> > workaround which will be hopefully removed when reworking PM soon.
-> >=20
-> > Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
-> > ---
-> >  drivers/mmc/host/tmio_mmc.h     |  3 +++
-> >  drivers/mmc/host/tmio_mmc_pio.c | 38 ++++++++++++++++++++++++++-------=
------
-> >  2 files changed, 29 insertions(+), 12 deletions(-)
-> >=20
-> > diff --git a/drivers/mmc/host/tmio_mmc.h b/drivers/mmc/host/tmio_mmc.h
-> > index 4b501f2d529f6e..637581faf756b1 100644
-> > --- a/drivers/mmc/host/tmio_mmc.h
-> > +++ b/drivers/mmc/host/tmio_mmc.h
-> > @@ -79,6 +79,9 @@
-> >  #define	CLK_CTL_DIV_MASK	0xff
-> >  #define	CLK_CTL_SCLKEN		BIT(8)
-> > =20
-> > +#define CARD_OPT_WIDTH8		BIT(13)
-> > +#define CARD_OPT_WIDTH		BIT(15)
->=20
-> Just confusing whether CARD_OPT_WIDTH is 4bit or 1bit?
+Arnd Bergmann (1):
+  base: soc: introduce soc_device_match() interface
 
-The HW is confusing. Setting the bit sets 1-bit mode. This is why I put
-the comment below in the code:
+Yangbo Lu (7):
+  dt: bindings: update Freescale DCFG compatible
+  ARM64: dts: ls2080a: add device configuration node
+  dt: bindings: move guts devicetree doc out of powerpc directory
+  powerpc/fsl: move mpc85xx.h to include/linux/fsl
+  soc: fsl: add GUTS driver for QorIQ platforms
+  MAINTAINERS: add entry for Freescale SoC drivers
+  mmc: sdhci-of-esdhc: fix host version for T4240-R1.0-R2.0
 
-> > +	u16 reg =3D sd_ctrl_read16(host, CTL_SD_MEM_CARD_OPT)
-> > +				& ~(CARD_OPT_WIDTH | CARD_OPT_WIDTH8);
-> > +
-> > +	/* reg now applies to MMC_BUS_WIDTH_4 */
+ Documentation/devicetree/bindings/arm/fsl.txt      |   6 +-
+ .../bindings/{powerpc => soc}/fsl/guts.txt         |   3 +
+ MAINTAINERS                                        |  11 +-
+ arch/arm64/boot/dts/freescale/fsl-ls2080a.dtsi     |   6 +
+ arch/powerpc/kernel/cpu_setup_fsl_booke.S          |   2 +-
+ arch/powerpc/sysdev/fsl_pci.c                      |   2 +-
+ drivers/base/Kconfig                               |   1 +
+ drivers/base/soc.c                                 |  66 ++++++
+ drivers/clk/clk-qoriq.c                            |   3 +-
+ drivers/i2c/busses/i2c-mpc.c                       |   2 +-
+ drivers/iommu/fsl_pamu.c                           |   3 +-
+ drivers/mmc/host/Kconfig                           |   1 +
+ drivers/mmc/host/sdhci-of-esdhc.c                  |  20 ++
+ drivers/net/ethernet/freescale/gianfar.c           |   2 +-
+ drivers/soc/Kconfig                                |   2 +-
+ drivers/soc/fsl/Kconfig                            |  19 ++
+ drivers/soc/fsl/Makefile                           |   1 +
+ drivers/soc/fsl/guts.c                             | 257 +++++++++++++++++++++
+ include/linux/fsl/guts.h                           | 125 ++++++----
+ .../asm/mpc85xx.h => include/linux/fsl/svr.h       |   4 +-
+ include/linux/sys_soc.h                            |   3 +
+ 21 files changed, 478 insertions(+), 61 deletions(-)
+ rename Documentation/devicetree/bindings/{powerpc => soc}/fsl/guts.txt (91%)
+ create mode 100644 drivers/soc/fsl/Kconfig
+ create mode 100644 drivers/soc/fsl/guts.c
+ rename arch/powerpc/include/asm/mpc85xx.h => include/linux/fsl/svr.h (97%)
 
-This comment I meant ^^^
-
-> > +	if (bus_width =3D=3D MMC_BUS_WIDTH_1)
-> > +		reg |=3D CARD_OPT_WIDTH;
-
-=2E..
-
-> >  	switch (mmc_resp_type(cmd)) {
-> >  	case MMC_RSP_NONE: c |=3D RESP_NONE; break;
-> > -	case MMC_RSP_R1:   c |=3D RESP_R1;   break;
-> > +	case MMC_RSP_R1:
-> > +	case MMC_RSP_R1_NO_CRC:
-> > +			   c |=3D RESP_R1;   break;
->=20
-> Just wonder..It there case that hit "case MMC_RSP_R1_NO_CRC" ?
-
-Yes, as described in my response to patch 1. It doesn't work without.
-
-
---aPdhxNJGSeOG9wFI
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1
-
-iQIcBAEBAgAGBQJX4iOeAAoJEBQN5MwUoCm2GJQP/3H0UVeN2xPyN1j8SiKe8HoC
-wg/C8dNfi1LcI7AiIzuJ9tpgTH+eOY8jK6i7MCBo+4j9gVExOXhGGi9Y7dGmpyeS
-iaqWK7XRyXh6hEfIYBAAGLu772cO2bDgNrXeFRmNGF1xF3LgW23as0gzpvRQvkmf
-ym9EdCEnSk8GCelpcC3nKPW5WNfIhRKD50im2HKgCmhJCov8rYydIU8tF5yy4eGs
-rmfBrBByKr1I0Pxv1J9G+Y4N5zj6HICejNU8Bbqh73sYymQdmwXXXZRtIXc9FWP/
-xAgLCGjV2+gihzYd5qYPvUofNJaiSyIz6sEU0raRaFvJ3DR5UeiO3nbErgaH5EDB
-RGWF2n113Zi8ybH22WtBz5RyD2wcsWEeNhg4s/R1sMq9a88/JBcB+NuDsD9ODvXV
-NjPo6FGJ8INDbKEW4Hnub2dYR9np61zjOdPyCn+oJdQYluK+6vW5b3y9RtwDDYUs
-osW6baQJVCpPvOQtRJ7nudQV/buRBok4THIPMzDT5UfOdJqjK9FFcbaeqqVw36Kt
-8BuEV/OVXKiOYq1lKELQHE+vzid1kzSeKx/BWyc36K0NI/QnkOE9bbWbfMZn+ajP
-01KZbwstlvJvh2MjL97h/8GASn3ni70XXARFcPIKkkxyu75aaaeFMFo75WY1+lk2
-8SXkDmufeE9xEsvK96/Y
-=DiEH
------END PGP SIGNATURE-----
-
---aPdhxNJGSeOG9wFI--
+-- 
+2.1.0.27.g96db324
