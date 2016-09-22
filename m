@@ -1,60 +1,67 @@
-From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [GIT PULL] Update dw-mmc controller
-Date: Thu, 22 Sep 2016 13:51:59 +0200
-Message-ID: <CAPDyKFr6G5114gh6ECKfZp_h6foyyUxZWE4ZSUHrOBVUZU-7tw@mail.gmail.com>
-References: <772c300d-7d81-d933-f9c5-401cb3a3afcb@samsung.com>
+From: Oliver Neukum <oneukum@suse.com>
+Subject: Re: [PATCH] mmc: rtsx_usb_sdmmc: Handle runtime PM while changing
+ led
+Date: Thu, 22 Sep 2016 15:24:16 +0200
+Message-ID: <1474550656.11364.32.camel@suse.com>
+References: <Pine.LNX.4.44L0.1609211031420.1996-100000@iolanthe.rowland.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wm0-f44.google.com ([74.125.82.44]:36985 "EHLO
-        mail-wm0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1754198AbcIVLwB (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 22 Sep 2016 07:52:01 -0400
-Received: by mail-wm0-f44.google.com with SMTP id b130so144108446wmc.0
-        for <linux-mmc@vger.kernel.org>; Thu, 22 Sep 2016 04:52:01 -0700 (PDT)
-In-Reply-To: <772c300d-7d81-d933-f9c5-401cb3a3afcb@samsung.com>
+Received: from mx2.suse.de ([195.135.220.15]:59646 "EHLO mx2.suse.de"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1753595AbcIVN3s (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Thu, 22 Sep 2016 09:29:48 -0400
+In-Reply-To: <Pine.LNX.4.44L0.1609211031420.1996-100000@iolanthe.rowland.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>
-Cc: "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>, Shawn Lin <shawn.lin@rock-chips.com>
+To: Alan Stern <stern@rowland.harvard.edu>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Micky Ching <micky_ching@realsil.com.cn>, Wei WANG <wei_wang@realsil.com.cn>, Roger Tseng <rogerable@realtek.com>, Ritesh Raj Sarraf <rrs@researchut.com>, linux-mmc <linux-mmc@vger.kernel.org>, USB list <linux-usb@vger.kernel.org>
 
-On 22 September 2016 at 12:57, Jaehoon Chung <jh80.chung@samsung.com> wrote:
-> Dear Ulf,
->
-> Could you pull these patches into your mmc-next?
->
-> The following changes since commit 6739115d4d319ba83d52f89e66b6a86cc021a2b5:
->
->   mmc: core: don't try to switch block size for dual rate mode (2016-09-22 10:17:54 +0200)
->
-> are available in the git repository at:
->
->   https://github.com/jh80chung/dw-mmc.git for-ulf
->
-> for you to fetch changes up to 2d25506534aec8a2e0980bf04b3e72b5b3c9f830:
->
->   mmc: dw_mmc: remove the deprecated "supports-highspeed" property (2016-09-22 19:53:38 +0900)
->
-> ----------------------------------------------------------------
-> Jaehoon Chung (1):
->       mmc: dw_mmc: remove the deprecated "supports-highspeed" property
->
-> Shawn Lin (5):
->       mmc: dw_mmc: split out preparation of desc for IDMAC32 and IDMAC64
->       mmc: dw_mmc: avoid race condition of cpu and IDMAC
->       mmc: dw_mmc: fix misleading error print if failing to do DMA transfer
->       mmc: dw_mmc: use macro to define ring buffer size
->       mmc: dw_mmc: minor cleanup for dw_mci_adjust_fifoth
->
->  drivers/mmc/host/dw_mmc.c | 346 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++--------------------------------------------------------------------------------
->  1 file changed, 202 insertions(+), 144 deletions(-)
->
->
-> Best Regards,
-> Jaehoon Chung
+On Wed, 2016-09-21 at 10:35 -0400, Alan Stern wrote:
+> On Wed, 21 Sep 2016, Oliver Neukum wrote:
 
-Dear Jaehoon, thanks for the pull request. I have pulled it in to my
-next branch.
+> > Yes, but this is not the point. A heuristic with a timeout makes
+> > sense only if the uses are unpredictable. If you know with a high
+> > degree of probability when the next activity comes, you ought to either
+> > suspend now or not all until the next activity.
+> > 
+> > Likewise the heuristic is appropriate for leaf nodes. You get nothing
+> > from a delay on inner nodes.
+> 
+> Almost true, but not quite.  When an inner node has more than one leaf
+> beneath it, enabling an autosuspend delay for the inner node can make 
+> sense -- particularly if the leaf activities are uncorrelated.
 
-Kind regards
-Ulf Hansson
+
+Well, it is true that an inner node is likelier to be woken up
+depending on the number of children. That is a reason to have a longer
+timeout for an inner node. But it should start when the first node goes
+idle. It makes no sense to start yet another timeout when the last node
+goes idle.
+
+In terms of mathematics I think we would need to multiply the timeout
+with the square root of busy children and restart it whenever a child
+goes to idle.
+But it seems to me that this is impractical.
+
+So I would suggest that we are missing an API for drivers to tell the
+core that they become idle for a known period of time and to propagate
+that immediately up if that is the last leaf to become idle.
+
+> > Any storage (generic sense) device
+> > is an inner node. It should suspend immediately after the block
+> > device which is the leaf node.
+> 
+> Yes.  In this case, however, the USB device has two platform devices 
+> beneath it: one for SDMMC and one for MemoryStick cards.
+
+Indeed, we can hope that the power efficient work queue used will
+join the polling of both devices. Ideally we could model the mutual
+exclusion.
+
+	Regards
+		Oliver
+
+
+
