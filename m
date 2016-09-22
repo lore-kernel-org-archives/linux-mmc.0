@@ -1,104 +1,72 @@
-From: Jaehoon Chung <jh80.chung@samsung.com>
-Subject: Re: [PATCH] mmc: dw_mmc: fix the spamming log message
-Date: Thu, 22 Sep 2016 14:14:54 +0900
-Message-ID: <2e00b971-fdcb-33ea-780c-b177b0ce8ef1@samsung.com>
-References: <CGME20160922051213epcas1p23484f9ac7e16656922b9f91028c565ff@epcas1p2.samsung.com>
- <1474521120-9797-1-git-send-email-jh80.chung@samsung.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH v3 1/2] Documentation: mmc: sdhci-of-arasan: add
+ description of power domain
+Date: Thu, 22 Sep 2016 09:14:03 +0200
+Message-ID: <CAPDyKFo+DZkd4v06DOOHLBdAD-7UgYcBspbZkzFSnjA-a3pOkg@mail.gmail.com>
+References: <20160917023250.1159-1-xzy.xu@rock-chips.com> <20160917023250.1159-2-xzy.xu@rock-chips.com>
+ <CAPDyKFrgdsppLg9RkCsSh4nhjUiJR6D4u+E8qnzfbtNxhwLOmw@mail.gmail.com> <1ec66aea-10b4-4208-369e-9ef5feb800df@rock-chips.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: quoted-printable
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mailout2.samsung.com ([203.254.224.25]:37931 "EHLO
-        mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S932633AbcIVFO4 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 22 Sep 2016 01:14:56 -0400
-Received: from epcpsbgr1.samsung.com
- (u141.gpu120.samsung.co.kr [203.254.230.141])
- by mailout2.samsung.com (Oracle Communications Messaging Server 7.0.5.31.0
- 64bit (built May  5 2014))
- with ESMTP id <0ODW02NJH3WUNA10@mailout2.samsung.com> for
- linux-mmc@vger.kernel.org; Thu, 22 Sep 2016 14:14:54 +0900 (KST)
-In-reply-to: <1474521120-9797-1-git-send-email-jh80.chung@samsung.com>
+Received: from mail-wm0-f50.google.com ([74.125.82.50]:35747 "EHLO
+        mail-wm0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1756135AbcIVHOG (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 22 Sep 2016 03:14:06 -0400
+Received: by mail-wm0-f50.google.com with SMTP id l132so309623016wmf.0
+        for <linux-mmc@vger.kernel.org>; Thu, 22 Sep 2016 00:14:05 -0700 (PDT)
+In-Reply-To: <1ec66aea-10b4-4208-369e-9ef5feb800df@rock-chips.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: linux-mmc@vger.kernel.org
-Cc: ulf.hansson@linaro.org
+To: Ziyuan Xu <xzy.xu@rock-chips.com>
+Cc: =?UTF-8?Q?Heiko_St=C3=BCbner?= <heiko@sntech.de>, Rob Herring <robh+dt@kernel.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "open list:ARM/Rockchip SoC..." <linux-rockchip@lists.infradead.org>, linux-mmc <linux-mmc@vger.kernel.org>, Shawn Lin <shawn.lin@rock-chips.com>, Doug Anderson <dianders@chromium.org>, zhangqing <zhangqing@rock-chips.com>
 
-Dear Ulf,
+On 20 September 2016 at 04:29, Ziyuan Xu <xzy.xu@rock-chips.com> wrote:
+> hi Ulf,
+>
+>
+> On 2016=E5=B9=B409=E6=9C=8817=E6=97=A5 16:49, Ulf Hansson wrote:
+>>
+>> On 17 September 2016 at 04:32, Ziyuan Xu <xzy.xu@rock-chips.com> wrote:
+>>>
+>>> Add power domain as a optional property for sdhci-of-arasan, which can
+>>> be turned off in the so-called unused condition, such as suspend and
+>>> remove. Aim to lower power requirements.
+>>
+>> I assume runtime suspend make sense as well?
+>
+>
+> Sorry to reply this mail after a long time.
+>
+> On rk3399 platform, there is a eMMC-phy which is in charge of eMMC's logi=
+c
+> interface. We should guarantee that phy is ready before cmd/data transfer=
+.
+> I mean that I need to consider about the resume latency, so that I can la=
+nd
+> RPM for arasan-of-sdhci.
+> I intend to use auto-suspend for arasan-of-sdhci.
+>
 
-On 09/22/2016 02:12 PM, Jaehoon Chung wrote:
-> When there is no Card which is set to "broken-cd", it's displayed a clock
-> information continuously. Because it's polling for detecting card.
-> This patch is fixed this problem.
+Okay!
 
-Could you pick this on your fixes branch? (Is it too late?)
+>>
+>> Moreover, perhaps you could share a little information here about what
+>> needs to be done at the driver level which controls the mmc IP. More
+>> precisely, what do you need to do at runtime_suspend, suspend,
+>> runtime_resume, and resume?
+>
+>
+> Invoke sdhci_runtime_suspend_host, disable relevant clock in
+> rumtime_suspend, deprocessing in runtime_resume.
+> Is that ok?
 
-Best Regards,
-Jaehoon Chung
+Okay!
 
-> 
-> Fixed 'commit 65257a0deed5
-> ("mmc: dw_mmc: remove UBSAN warning in dw_mci_setup_bus()")'
-> 
-> Reported-by: Tobias Jakobi <tjakobi@math.uni-bielefeld.de>
-> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
-> ---
->  drivers/mmc/host/dw_mmc.c | 14 +++++++++-----
->  drivers/mmc/host/dw_mmc.h |  3 +++
->  2 files changed, 12 insertions(+), 5 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-> index 32380d5..767af20 100644
-> --- a/drivers/mmc/host/dw_mmc.c
-> +++ b/drivers/mmc/host/dw_mmc.c
-> @@ -1112,11 +1112,12 @@ static void dw_mci_setup_bus(struct dw_mci_slot *slot, bool force_clkinit)
->  
->  		div = (host->bus_hz != clock) ? DIV_ROUND_UP(div, 2) : 0;
->  
-> -		dev_info(&slot->mmc->class_dev,
-> -			 "Bus speed (slot %d) = %dHz (slot req %dHz, actual %dHZ div = %d)\n",
-> -			 slot->id, host->bus_hz, clock,
-> -			 div ? ((host->bus_hz / div) >> 1) :
-> -			 host->bus_hz, div);
-> +		if (clock != slot->__clk_old || force_clkinit)
-> +			dev_info(&slot->mmc->class_dev,
-> +				 "Bus speed (slot %d) = %dHz (slot req %dHz, actual %dHZ div = %d)\n",
-> +				 slot->id, host->bus_hz, clock,
-> +				 div ? ((host->bus_hz / div) >> 1) :
-> +				 host->bus_hz, div);
->  
->  		/* disable clock */
->  		mci_writel(host, CLKENA, 0);
-> @@ -1139,6 +1140,9 @@ static void dw_mci_setup_bus(struct dw_mci_slot *slot, bool force_clkinit)
->  
->  		/* inform CIU */
->  		mci_send_cmd(slot, sdmmc_cmd_bits, 0);
-> +
-> +		/* keep the last clock value that was requested from core */
-> +		slot->__clk_old = clock;
->  	}
->  
->  	host->current_speed = clock;
-> diff --git a/drivers/mmc/host/dw_mmc.h b/drivers/mmc/host/dw_mmc.h
-> index 9e740bc..e8cd2de 100644
-> --- a/drivers/mmc/host/dw_mmc.h
-> +++ b/drivers/mmc/host/dw_mmc.h
-> @@ -249,6 +249,8 @@ extern int dw_mci_resume(struct dw_mci *host);
->   * @queue_node: List node for placing this node in the @queue list of
->   *	&struct dw_mci.
->   * @clock: Clock rate configured by set_ios(). Protected by host->lock.
-> + * @__clk_old: The last clock value that was requested from core.
-> + *	Keeping track of this helps us to avoid spamming the console.
->   * @flags: Random state bits associated with the slot.
->   * @id: Number of this slot.
->   * @sdio_id: Number of this slot in the SDIO interrupt registers.
-> @@ -263,6 +265,7 @@ struct dw_mci_slot {
->  	struct list_head	queue_node;
->  
->  	unsigned int		clock;
-> +	unsigned int		__clk_old;
->  
->  	unsigned long		flags;
->  #define DW_MMC_CARD_PRESENT	0
-> 
+[...]
 
+Thanks for sharing some more information, could you please re-spin
+with an updated change log?
+
+Kind regards
+Uffe
