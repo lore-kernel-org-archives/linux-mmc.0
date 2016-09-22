@@ -1,72 +1,114 @@
-From: Alan Stern <stern-nwvwT67g6+6dFdvTe/nMLpVzexx5G7lz@public.gmane.org>
-Subject: Re: [PATCH] mmc: rtsx_usb_sdmmc: Handle runtime PM while changing
- led
-Date: Thu, 22 Sep 2016 10:00:37 -0400 (EDT)
-Message-ID: <Pine.LNX.4.44L0.1609220957460.1835-100000@iolanthe.rowland.org>
-References: <1474550656.11364.32.camel@suse.com>
+From: Ritesh Harjani <riteshh@codeaurora.org>
+Subject: Re: [PATCH v3] mmc: sdhci-msm: Add pm_runtime and system PM support
+Date: Thu, 22 Sep 2016 20:02:41 +0530
+Message-ID: <ffaebf0e-9338-3bda-b45d-16ad76b4f586@codeaurora.org>
+References: <20160901142335.2396-1-pramod.gurav@linaro.org>
+ <a0e314de-3590-399c-27c7-ddd6461dee42@intel.com>
+ <496321c5-24e7-3ac5-b3dd-7b7d5dc75536@linaro.org>
+ <CANYu_0s=cyt52W2B5B=rUcx4O7Ms5kO2kBa2mw6JwWzCFTDw_A@mail.gmail.com>
+ <CAPDyKFosg6pDjOPFkZ_xUP2vFRabD0W+CHzKokK73nDmnV_X3g@mail.gmail.com>
+ <CANYu_0ugbBtXH8qna9FS=DpVXXRTJ3VErOwceFvg=scSOWHy_w@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <linux-usb-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1474550656.11364.32.camel-IBi9RG/b67k@public.gmane.org>
-Sender: linux-usb-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Oliver Neukum <oneukum-IBi9RG/b67k@public.gmane.org>
-Cc: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Wei WANG <wei_wang-kXabqFNEczNtrwSWzY7KCg@public.gmane.org>, Roger Tseng <rogerable-Rasf1IRRPZFBDgjK7y7TUQ@public.gmane.org>, Ritesh Raj Sarraf <rrs-7WuBAv+fczCJ8c2fQYRYNw@public.gmane.org>, linux-mmc <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, USB list <linux-usb-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-msm-owner@vger.kernel.org>
+In-Reply-To: <CANYu_0ugbBtXH8qna9FS=DpVXXRTJ3VErOwceFvg=scSOWHy_w@mail.gmail.com>
+Sender: linux-arm-msm-owner@vger.kernel.org
+To: Pramod Gurav <pramod.gurav@linaro.org>, Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Georgi Djakov <georgi.djakov@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, linux-mmc <linux-mmc@vger.kernel.org>, "open list:ARM/QUALCOMM SUPPORT" <linux-arm-msm@vger.kernel.org>, open list <linux-kernel@vger.kernel.org>, Stephen Boyd <sboyd@codeaurora.org>
 List-Id: linux-mmc@vger.kernel.org
 
-On Thu, 22 Sep 2016, Oliver Neukum wrote:
+Hi Pramod,
 
-> On Wed, 2016-09-21 at 10:35 -0400, Alan Stern wrote:
-> > On Wed, 21 Sep 2016, Oliver Neukum wrote:
-> 
-> > > Yes, but this is not the point. A heuristic with a timeout makes
-> > > sense only if the uses are unpredictable. If you know with a high
-> > > degree of probability when the next activity comes, you ought to either
-> > > suspend now or not all until the next activity.
-> > > 
-> > > Likewise the heuristic is appropriate for leaf nodes. You get nothing
-> > > from a delay on inner nodes.
-> > 
-> > Almost true, but not quite.  When an inner node has more than one leaf
-> > beneath it, enabling an autosuspend delay for the inner node can make 
-> > sense -- particularly if the leaf activities are uncorrelated.
-> 
-> 
-> Well, it is true that an inner node is likelier to be woken up
-> depending on the number of children. That is a reason to have a longer
-> timeout for an inner node. But it should start when the first node goes
-> idle. It makes no sense to start yet another timeout when the last node
-> goes idle.
-> 
-> In terms of mathematics I think we would need to multiply the timeout
-> with the square root of busy children and restart it whenever a child
-> goes to idle.
-> But it seems to me that this is impractical.
-> 
-> So I would suggest that we are missing an API for drivers to tell the
-> core that they become idle for a known period of time and to propagate
-> that immediately up if that is the last leaf to become idle.
+On 9/15/2016 7:28 PM, Pramod Gurav wrote:
+> On 15 September 2016 at 15:49, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+>> On 15 September 2016 at 09:59, Pramod Gurav <pramod.gurav@linaro.org> wrote:
+>>> On 9 September 2016 at 15:48, Georgi Djakov <georgi.djakov@linaro.org> wrote:
+>>>> On 09/08/2016 11:02 AM, Adrian Hunter wrote:
+>>>>>
+>>>>> On 01/09/16 17:23, Pramod Gurav wrote:
+>>>>>>
+>>>>>> Provides runtime PM callbacks to enable and disable clock resources
+>>>>>> when idle. Also support system PM callbacks to be called during system
+>>>>>> suspend and resume.
+>>>>>>
+>>>>>> Signed-off-by: Pramod Gurav <pramod.gurav@linaro.org>
+>>>>>
+>>>>>
+>>>>> Can we get some Tested/Reviewed/Acked-by from people using this driver?
+>>>>>
+>>>>
+>>>> Hi Pramod,
+>>>> Thanks for the patch. Unfortunately, my db410c board fails to
+>>>> boot when i apply it.
+>>>>
+>>>
+>>> Thanks Georgi for testing the patch. Its my wrong I did not update my
+>>> kernel and continued fixing comments on old kernel.
+>>> After spending some time I came to know that below change is causing the issue:
+>>>
+>>> Author: Dong Aisheng <aisheng.dong@nxp.com>
+>>> Date:   Tue Jul 12 15:46:17 2016 +0800
+>>>
+>>>     mmc: sdhci: add standard hw auto retuning support
+>>>
+>>>     If HW supports SDHCI_TUNING_MODE_3 which is auto retuning, we won't
+>>>     retune during runtime suspend and resume, instead we use Re-tuning
+>>>     Request signaled via SDHCI_INT_RETUNE interrupt to do retuning and
+>>>     hw auto retuning during data transfer to guarantee the signal sample
+>>>     window correction.
+>>>
+>>>     This can avoid a mass of repeatedly retuning during small file system
+>>>     data access and improve the performance.
+>>>
+>>> Specially these lines that was added to suspend path:
+>>>
+>>> +       if (host->tuning_mode != SDHCI_TUNING_MODE_3)
+>>> +               mmc_retune_needed(host->mmc);
+>>>
+>>> During sdhci setup in msm driver, the host returns the values to set
+>>> sdhci auto tuning as supported.
+>>> Hence host->tuning_mode is set to SDHCI_TUNING_MODE_3 during setup.
+>>> But some how the auto tuning is not happening.
+>>> Just to verify my case, I removed the 'if' part in above code and got
+>>> the FS mounted.
+>>>
+>>> Is there anything else needed in msm sdhci driver so that the auto
+>>> tuning is taken care of?
+>>
+>> I am not familiar with any other than sdhci-esdhc-imx which supports
+>> the SDHCI_TUNING_MODE_3. I may be wrong though.
+>>
+>> In the sdhci-esdhc-imx case, enabling of auto tuning seems to be done
+>> in esdhc_post_tuning(), where a vendor specific register
+>> (ESDHC_MIX_CTRL) is being written to. Perhaps something similar in
+>> your case?
+>>
+> Thanks Ulf for the comments. Will check this and see if there is
+> something of this sort we have to do to achieve auto tuning.
+> Adding Ritesh who has been posting some SDHCI MSM patches recently in
+> case he knows about this.
 
-This seems like over-engineering.  In many cases the driver does not 
-know how long the idle period will last.  And it may happen that the 
-leaf drivers do not understand the energy tradeoffs involved in 
-suspending the ancestor device.
+Internally, we don't use this Auto re-tuning and rely on explicit 
+re-tune by host driver.
 
-> > > Any storage (generic sense) device
-> > > is an inner node. It should suspend immediately after the block
-> > > device which is the leaf node.
-> > 
-> > Yes.  In this case, however, the USB device has two platform devices 
-> > beneath it: one for SDMMC and one for MemoryStick cards.
-> 
-> Indeed, we can hope that the power efficient work queue used will
-> join the polling of both devices. Ideally we could model the mutual
-> exclusion.
+Question though -
+1. why do we need to call sdhci_runtime_resume/suspend from 
+sdhci_msm_runtime_suspend/resume?
+ From what I see is, sdhci_runtime_susend/resume will do reset and 
+re-program of host->pwr and host->clk because of which a retune will be 
+required for the next command after runtime resume.
 
-Ulf is going to work on it.
+We can *only* disable and enable the clocks in 
+sdhci_msm_runtime_suspend/resume?
+Thoughts? With this, I suppose you would not see any issue.
 
-Alan Stern
 
---
-To unsubscribe from this list: send the line "unsubscribe linux-usb" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Though for this issue, since internally also auto retuning is never 
+used, we can have this mode disabled. I can once again check with HW 
+team to get more details about this mode for MSM controller.
+
+>
+> Regards,
+> Pramod
+>
