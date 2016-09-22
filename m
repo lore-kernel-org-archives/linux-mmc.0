@@ -1,125 +1,71 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v2] mmc: card: do away with indirection pointer
-Date: Thu, 22 Sep 2016 11:40:04 +0200
-Message-ID: <CAPDyKFquLbNSDHabWD=ZxusXc4UnBgCVTRrb+c2JZHARKc524A@mail.gmail.com>
-References: <1474364078-15769-1-git-send-email-linus.walleij@linaro.org>
+Subject: Re: [PATCH v3 0/6] tmio: add support for eMMC with 8 bit bus width
+Date: Thu, 22 Sep 2016 11:40:31 +0200
+Message-ID: <CAPDyKFpLz2FfT2FdfGNvbZTdz6FLLt2qcS=Qmn73_qG_SmdwmQ@mail.gmail.com>
+References: <20160919205750.4766-1-wsa+renesas@sang-engineering.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wm0-f48.google.com ([74.125.82.48]:36956 "EHLO
-        mail-wm0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751036AbcIVJkI (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 22 Sep 2016 05:40:08 -0400
-Received: by mail-wm0-f48.google.com with SMTP id b130so137927736wmc.0
-        for <linux-mmc@vger.kernel.org>; Thu, 22 Sep 2016 02:40:07 -0700 (PDT)
-In-Reply-To: <1474364078-15769-1-git-send-email-linus.walleij@linaro.org>
-Sender: linux-mmc-owner@vger.kernel.org
+Return-path: <linux-renesas-soc-owner@vger.kernel.org>
+In-Reply-To: <20160919205750.4766-1-wsa+renesas@sang-engineering.com>
+Sender: linux-renesas-soc-owner@vger.kernel.org
+To: Wolfram Sang <wsa+renesas@sang-engineering.com>
+Cc: linux-mmc <linux-mmc@vger.kernel.org>, Linux-Renesas <linux-renesas-soc@vger.kernel.org>, Simon Horman <horms@verge.net.au>, Dirk Behme <dirk.behme@gmail.com>
 List-Id: linux-mmc@vger.kernel.org
-To: Linus Walleij <linus.walleij@linaro.org>
-Cc: linux-mmc <linux-mmc@vger.kernel.org>
 
-On 20 September 2016 at 11:34, Linus Walleij <linus.walleij@linaro.org> wrote:
-> We have enough vtables in the kernel as it is, we don't need
-> this one to create even more artificial separation of concerns.
+On 19 September 2016 at 22:57, Wolfram Sang
+<wsa+renesas@sang-engineering.com> wrote:
+> This series enables SDHI instances on R-Car Gen3 to access eMMC with 8 bit bus
+> width. I think the patch descriptions speak for themselves.
 >
-> As is proved by the Makefile:
+> I decided to not protect this new feature with a flag because it needs
+> specifically to be enabled by setting the bus width to 8. No legacy platform
+> does that.
 >
-> obj-$(CONFIG_MMC_BLOCK)         += mmc_block.o
-> mmc_block-objs                  := block.o queue.o
+> Note that I decided to use the pattern that pinctrl-0 is 3.3v and
+> pinctrl-1 is 1.8v, although the eMMC is fixed at 1.8v. I tried a few ways to
+> only use pinctrl-0 being 1.8v here, but they all ended up to be confusing for
+> users IMO, so I sticked to the most consistent solution after all.
 >
-> block.c and queue.c are baked into the same mmc_block.o object.
-> So why would one of these objects access a function in the
-> other object by dereferencing a pointer?
+> Changes since V2:
 >
-> Create a new block.h header file for the single shared function
-> from block to queue and remove the function pointer and just
-> call the queue request function.
+> * correct node name for sd2_uhs in both devicetrees
 >
-> Apart from making the code more readable, this also makes link
-> optimizations possible and probably speeds up the call as well.
+> Changes since V1:
 >
-> Signed-off-by: Linus Walleij <linus.walleij@linaro.org>
-> ---
-> ChangeLog v1->v2:
-> - Actually commit the new block.h file too, mea culpa.
-> ---
->  drivers/mmc/card/block.c | 3 +--
->  drivers/mmc/card/block.h | 1 +
->  drivers/mmc/card/queue.c | 4 +++-
->  drivers/mmc/card/queue.h | 2 --
->  4 files changed, 5 insertions(+), 5 deletions(-)
->  create mode 100644 drivers/mmc/card/block.h
+> * merged the two distinct series (drivers + DTS) into one: patches 1-4 are for
+>   Ulf, I will ping Simon for patches 5+6 when the time is ready.
+>
+> * DTS now contains 'non-removable' and we have a software workaround for now.
+>
+> These patches are based on top of Simon's sdr104-v7 patches but they apply to
+> current mmc/next as well. A branch can be found here:
+>
+> git://git.kernel.org/pub/scm/linux/kernel/git/wsa/linux.git renesas/topic/sdhi-8bit-emmc
+>
+> Please review, comment, apply...
+>
+>    Wolfram
+>
+> Wolfram Sang (6):
+>   mmc: add define for R1 response without CRC
+>   mmc: rtsx_pci: use new macro for R1 without CRC
+>   mmc: rtsx_usb: use new macro for R1 without CRC
+>   mmc: tmio: add eMMC support
+>   arm64: dts: r8a7795: salvator: enable on-board eMMC
+>   arm64: dts: r8a7796: salvator: enable on board eMMC
+>
+>  arch/arm64/boot/dts/renesas/r8a7795-salvator-x.dts | 43 +++++++++++++++++++++
+>  arch/arm64/boot/dts/renesas/r8a7796-salvator-x.dts | 44 +++++++++++++++++++++-
+>  drivers/mmc/host/rtsx_pci_sdmmc.c                  |  2 +-
+>  drivers/mmc/host/rtsx_usb_sdmmc.c                  |  2 +-
+>  drivers/mmc/host/tmio_mmc.h                        |  3 ++
+>  drivers/mmc/host/tmio_mmc_pio.c                    | 38 +++++++++++++------
+>  include/linux/mmc/core.h                           |  3 ++
+>  7 files changed, 120 insertions(+), 15 deletions(-)
+>
 
-Thanks, applied for next!
+Thanks, applied patch 1->4 for next. I assume Simon will pick up the
+DT changes, sooner or later.
 
 Kind regards
 Uffe
-
->
-> diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
-> index 2206d4477dbb..15acf96147f3 100644
-> --- a/drivers/mmc/card/block.c
-> +++ b/drivers/mmc/card/block.c
-> @@ -2144,7 +2144,7 @@ static int mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *rqc)
->         return 0;
->  }
->
-> -static int mmc_blk_issue_rq(struct mmc_queue *mq, struct request *req)
-> +int mmc_blk_issue_rq(struct mmc_queue *mq, struct request *req)
->  {
->         int ret;
->         struct mmc_blk_data *md = mq->data;
-> @@ -2265,7 +2265,6 @@ again:
->         if (ret)
->                 goto err_putdisk;
->
-> -       md->queue.issue_fn = mmc_blk_issue_rq;
->         md->queue.data = md;
->
->         md->disk->major = MMC_BLOCK_MAJOR;
-> diff --git a/drivers/mmc/card/block.h b/drivers/mmc/card/block.h
-> new file mode 100644
-> index 000000000000..cdabb2ee74be
-> --- /dev/null
-> +++ b/drivers/mmc/card/block.h
-> @@ -0,0 +1 @@
-> +int mmc_blk_issue_rq(struct mmc_queue *mq, struct request *req);
-> diff --git a/drivers/mmc/card/queue.c b/drivers/mmc/card/queue.c
-> index 708057261b38..8037f73a109a 100644
-> --- a/drivers/mmc/card/queue.c
-> +++ b/drivers/mmc/card/queue.c
-> @@ -19,7 +19,9 @@
->
->  #include <linux/mmc/card.h>
->  #include <linux/mmc/host.h>
-> +
->  #include "queue.h"
-> +#include "block.h"
->
->  #define MMC_QUEUE_BOUNCESZ     65536
->
-> @@ -68,7 +70,7 @@ static int mmc_queue_thread(void *d)
->                         bool req_is_special = mmc_req_is_special(req);
->
->                         set_current_state(TASK_RUNNING);
-> -                       mq->issue_fn(mq, req);
-> +                       mmc_blk_issue_rq(mq, req);
->                         cond_resched();
->                         if (mq->flags & MMC_QUEUE_NEW_REQUEST) {
->                                 mq->flags &= ~MMC_QUEUE_NEW_REQUEST;
-> diff --git a/drivers/mmc/card/queue.h b/drivers/mmc/card/queue.h
-> index fee5e1271465..3c15a75bae86 100644
-> --- a/drivers/mmc/card/queue.h
-> +++ b/drivers/mmc/card/queue.h
-> @@ -57,8 +57,6 @@ struct mmc_queue {
->         unsigned int            flags;
->  #define MMC_QUEUE_SUSPENDED    (1 << 0)
->  #define MMC_QUEUE_NEW_REQUEST  (1 << 1)
-> -
-> -       int                     (*issue_fn)(struct mmc_queue *, struct request *);
->         void                    *data;
->         struct request_queue    *queue;
->         struct mmc_queue_req    mqrq[2];
-> --
-> 2.7.4
->
