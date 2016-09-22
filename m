@@ -1,68 +1,64 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 3/5] mmc: core: changes frequency to hs_max_dtr when
- selecting hs400es
-Date: Thu, 22 Sep 2016 11:38:35 +0200
-Message-ID: <CAPDyKFoHxSpFurgV9swN3MCTWUinPFNUHSzxgyKj+K3iqkGSbA@mail.gmail.com>
-References: <1474422233-29355-1-git-send-email-shawn.lin@rock-chips.com> <1474422233-29355-4-git-send-email-shawn.lin@rock-chips.com>
+Subject: Re: [PATCH 2/5] mmc: core: switch to 1V8 or 1V2 for hs400es mode
+Date: Thu, 22 Sep 2016 11:39:30 +0200
+Message-ID: <CAPDyKFoy=CgU=_6R0N0kHr48QyVOqjTzmppfc6Mzde5Fa6tHSQ@mail.gmail.com>
+References: <1474422233-29355-1-git-send-email-shawn.lin@rock-chips.com> <1474422233-29355-3-git-send-email-shawn.lin@rock-chips.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wm0-f41.google.com ([74.125.82.41]:38327 "EHLO
-        mail-wm0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750820AbcIVJii (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 22 Sep 2016 05:38:38 -0400
-Received: by mail-wm0-f41.google.com with SMTP id l132so137600530wmf.1
-        for <linux-mmc@vger.kernel.org>; Thu, 22 Sep 2016 02:38:37 -0700 (PDT)
-In-Reply-To: <1474422233-29355-4-git-send-email-shawn.lin@rock-chips.com>
-Sender: linux-mmc-owner@vger.kernel.org
-List-Id: linux-mmc@vger.kernel.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1474422233-29355-3-git-send-email-shawn.lin@rock-chips.com>
+Sender: linux-kernel-owner@vger.kernel.org
 To: Shawn Lin <shawn.lin@rock-chips.com>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, Jaehoon Chung <jh80.chung@samsung.com>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "open list:ARM/Rockchip SoC..." <linux-rockchip@lists.infradead.org>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, Jaehoon Chung <jh80.chung@samsung.com>, linux-mmc <linux-mmc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "open list:ARM/Rockchip SoC..." <linux-rockchip@lists.infradead.org>, "# 4.0+" <stable@vger.kernel.org>, 4.4#@263.net, +@263.net
+List-Id: linux-mmc@vger.kernel.org
 
 On 21 September 2016 at 03:43, Shawn Lin <shawn.lin@rock-chips.com> wrote:
-> Per JESD84-B51 P69, Host need to change frequency to <=52MHz after
-> setting HS_TIMING to 0x1, and host may changes frequency to <= 200MHz
-> after setting HS_TIMING to 0x3. It seems there is no difference if
-> we don't change frequency to <= 52MHz as f_init is already less than
-> 52MHz. But actually it does make difference. When doing compatibility
-> test we see failures for some eMMC devices without changing the
-> frequency to hs_max_dtr. And let's read the spec again, we could see
-> that "Host may changes frequency to 200MHz" implies that it's not
-> mandatory. But the "Host need to change frequency to <= 52MHz" implies
-> that we should do this.
-
-I don't get this. Are you saying that f_init > 52 MHz? That should not
-be impossible, right!?
-
-So either the core has changed the clock rate by mistake at some other
-execution path, or the host driver didn't set the correct clock rate
-the first time when invoked via mmc_power_up()?
-
-Kind regards
-Uffe
-
+> When introducing hs400es, I didn't notice that we haven't
+> switched voltage to 1V2 or 1V8 for it. That happens to work
+> as the first controller claiming to support hs400es, arasan(5.1),
+> which is designed to only support 1V8. So the voltage is fixed to 1V8.
+> But it actually is wrong, and will not fit for other host controllers.
+> Let's fix it.
 >
-> Reported-by: Xiao Yao <xiaoyao@rock-chips.com>
+> Fixes: commit 81ac2af65793ecf ("mmc: core: implement enhanced strobe support")
+> Cc: <stable@vger.kernel.org> 4.4# +
 > Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
 > ---
 >
->  drivers/mmc/core/mmc.c | 2 ++
->  1 file changed, 2 insertions(+)
+>  drivers/mmc/core/mmc.c | 10 ++++++++++
+>  1 file changed, 10 insertions(+)
 >
 > diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-> index 3163bb9..989d37e 100644
+> index 3486bc7..3163bb9 100644
 > --- a/drivers/mmc/core/mmc.c
 > +++ b/drivers/mmc/core/mmc.c
-> @@ -1282,6 +1282,8 @@ static int mmc_select_hs400es(struct mmc_card *card)
->         if (err)
+> @@ -1263,6 +1263,16 @@ static int mmc_select_hs400es(struct mmc_card *card)
 >                 goto out_err;
+>         }
 >
-> +       mmc_set_clock(host, card->ext_csd.hs_max_dtr);
+> +       if (card->mmc_avail_type & EXT_CSD_CARD_TYPE_HS200_1_2V)
+
+/s/EXT_CSD_CARD_TYPE_HS200_1_2V/EXT_CSD_CARD_TYPE_HS400_1_2V
+
+> +               err = __mmc_set_signal_voltage(host, MMC_SIGNAL_VOLTAGE_120);
 > +
->         err = mmc_switch_status(card);
->         if (err)
+> +       if (err && card->mmc_avail_type & EXT_CSD_CARD_TYPE_HS200_1_8V)
+
+/s/EXT_CSD_CARD_TYPE_HS200_1_8V/EXT_CSD_CARD_TYPE_HS400_1_8V
+
+> +               err = __mmc_set_signal_voltage(host, MMC_SIGNAL_VOLTAGE_180);
+> +
+> +       /* If fails try again during next card power cycle */
+> +       if (err)
+> +               goto out_err;
+> +
+>         err = mmc_select_bus_width(card);
+>         if (err < 0)
 >                 goto out_err;
 > --
 > 2.3.7
 >
 >
+
+Kind regards
+Uffe
