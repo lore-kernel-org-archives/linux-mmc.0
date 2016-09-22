@@ -1,100 +1,125 @@
 From: Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH] mmc: dw_mmc: fix the spamming log message
-Date: Thu, 22 Sep 2016 11:39:56 +0200
-Message-ID: <CAPDyKFq47i0cFkz6niP-wsqqvs0z7pOR3cbC+n_yWFTdzVQf-w@mail.gmail.com>
-References: <1474521120-9797-1-git-send-email-jh80.chung@samsung.com>
+Subject: Re: [PATCH v2] mmc: card: do away with indirection pointer
+Date: Thu, 22 Sep 2016 11:40:04 +0200
+Message-ID: <CAPDyKFquLbNSDHabWD=ZxusXc4UnBgCVTRrb+c2JZHARKc524A@mail.gmail.com>
+References: <1474364078-15769-1-git-send-email-linus.walleij@linaro.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mail-wm0-f53.google.com ([74.125.82.53]:35712 "EHLO
-        mail-wm0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751036AbcIVJj7 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 22 Sep 2016 05:39:59 -0400
-Received: by mail-wm0-f53.google.com with SMTP id l132so316683989wmf.0
-        for <linux-mmc@vger.kernel.org>; Thu, 22 Sep 2016 02:39:58 -0700 (PDT)
-In-Reply-To: <1474521120-9797-1-git-send-email-jh80.chung@samsung.com>
+Received: from mail-wm0-f48.google.com ([74.125.82.48]:36956 "EHLO
+        mail-wm0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751036AbcIVJkI (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 22 Sep 2016 05:40:08 -0400
+Received: by mail-wm0-f48.google.com with SMTP id b130so137927736wmc.0
+        for <linux-mmc@vger.kernel.org>; Thu, 22 Sep 2016 02:40:07 -0700 (PDT)
+In-Reply-To: <1474364078-15769-1-git-send-email-linus.walleij@linaro.org>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Jaehoon Chung <jh80.chung@samsung.com>
+To: Linus Walleij <linus.walleij@linaro.org>
 Cc: linux-mmc <linux-mmc@vger.kernel.org>
 
-On 22 September 2016 at 07:12, Jaehoon Chung <jh80.chung@samsung.com> wrote:
-> When there is no Card which is set to "broken-cd", it's displayed a clock
-> information continuously. Because it's polling for detecting card.
-> This patch is fixed this problem.
+On 20 September 2016 at 11:34, Linus Walleij <linus.walleij@linaro.org> wrote:
+> We have enough vtables in the kernel as it is, we don't need
+> this one to create even more artificial separation of concerns.
 >
-> Fixed 'commit 65257a0deed5
-> ("mmc: dw_mmc: remove UBSAN warning in dw_mci_setup_bus()")'
+> As is proved by the Makefile:
 >
-> Reported-by: Tobias Jakobi <tjakobi@math.uni-bielefeld.de>
-> Signed-off-by: Jaehoon Chung <jh80.chung@samsung.com>
+> obj-$(CONFIG_MMC_BLOCK)         += mmc_block.o
+> mmc_block-objs                  := block.o queue.o
+>
+> block.c and queue.c are baked into the same mmc_block.o object.
+> So why would one of these objects access a function in the
+> other object by dereferencing a pointer?
+>
+> Create a new block.h header file for the single shared function
+> from block to queue and remove the function pointer and just
+> call the queue request function.
+>
+> Apart from making the code more readable, this also makes link
+> optimizations possible and probably speeds up the call as well.
+>
+> Signed-off-by: Linus Walleij <linus.walleij@linaro.org>
+> ---
+> ChangeLog v1->v2:
+> - Actually commit the new block.h file too, mea culpa.
+> ---
+>  drivers/mmc/card/block.c | 3 +--
+>  drivers/mmc/card/block.h | 1 +
+>  drivers/mmc/card/queue.c | 4 +++-
+>  drivers/mmc/card/queue.h | 2 --
+>  4 files changed, 5 insertions(+), 5 deletions(-)
+>  create mode 100644 drivers/mmc/card/block.h
 
-Thanks, applied for fixes!
-
-I added a formal fixes tag from above.
-Fixes: 65257a0deed5 ("mmc: dw_mmc: remove UBSAN warning in dw_mci_setup_bus()")
+Thanks, applied for next!
 
 Kind regards
 Uffe
 
-> ---
->  drivers/mmc/host/dw_mmc.c | 14 +++++++++-----
->  drivers/mmc/host/dw_mmc.h |  3 +++
->  2 files changed, 12 insertions(+), 5 deletions(-)
 >
-> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-> index 32380d5..767af20 100644
-> --- a/drivers/mmc/host/dw_mmc.c
-> +++ b/drivers/mmc/host/dw_mmc.c
-> @@ -1112,11 +1112,12 @@ static void dw_mci_setup_bus(struct dw_mci_slot *slot, bool force_clkinit)
+> diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+> index 2206d4477dbb..15acf96147f3 100644
+> --- a/drivers/mmc/card/block.c
+> +++ b/drivers/mmc/card/block.c
+> @@ -2144,7 +2144,7 @@ static int mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *rqc)
+>         return 0;
+>  }
 >
->                 div = (host->bus_hz != clock) ? DIV_ROUND_UP(div, 2) : 0;
+> -static int mmc_blk_issue_rq(struct mmc_queue *mq, struct request *req)
+> +int mmc_blk_issue_rq(struct mmc_queue *mq, struct request *req)
+>  {
+>         int ret;
+>         struct mmc_blk_data *md = mq->data;
+> @@ -2265,7 +2265,6 @@ again:
+>         if (ret)
+>                 goto err_putdisk;
 >
-> -               dev_info(&slot->mmc->class_dev,
-> -                        "Bus speed (slot %d) = %dHz (slot req %dHz, actual %dHZ div = %d)\n",
-> -                        slot->id, host->bus_hz, clock,
-> -                        div ? ((host->bus_hz / div) >> 1) :
-> -                        host->bus_hz, div);
-> +               if (clock != slot->__clk_old || force_clkinit)
-> +                       dev_info(&slot->mmc->class_dev,
-> +                                "Bus speed (slot %d) = %dHz (slot req %dHz, actual %dHZ div = %d)\n",
-> +                                slot->id, host->bus_hz, clock,
-> +                                div ? ((host->bus_hz / div) >> 1) :
-> +                                host->bus_hz, div);
+> -       md->queue.issue_fn = mmc_blk_issue_rq;
+>         md->queue.data = md;
 >
->                 /* disable clock */
->                 mci_writel(host, CLKENA, 0);
-> @@ -1139,6 +1140,9 @@ static void dw_mci_setup_bus(struct dw_mci_slot *slot, bool force_clkinit)
+>         md->disk->major = MMC_BLOCK_MAJOR;
+> diff --git a/drivers/mmc/card/block.h b/drivers/mmc/card/block.h
+> new file mode 100644
+> index 000000000000..cdabb2ee74be
+> --- /dev/null
+> +++ b/drivers/mmc/card/block.h
+> @@ -0,0 +1 @@
+> +int mmc_blk_issue_rq(struct mmc_queue *mq, struct request *req);
+> diff --git a/drivers/mmc/card/queue.c b/drivers/mmc/card/queue.c
+> index 708057261b38..8037f73a109a 100644
+> --- a/drivers/mmc/card/queue.c
+> +++ b/drivers/mmc/card/queue.c
+> @@ -19,7 +19,9 @@
 >
->                 /* inform CIU */
->                 mci_send_cmd(slot, sdmmc_cmd_bits, 0);
+>  #include <linux/mmc/card.h>
+>  #include <linux/mmc/host.h>
 > +
-> +               /* keep the last clock value that was requested from core */
-> +               slot->__clk_old = clock;
->         }
+>  #include "queue.h"
+> +#include "block.h"
 >
->         host->current_speed = clock;
-> diff --git a/drivers/mmc/host/dw_mmc.h b/drivers/mmc/host/dw_mmc.h
-> index 9e740bc..e8cd2de 100644
-> --- a/drivers/mmc/host/dw_mmc.h
-> +++ b/drivers/mmc/host/dw_mmc.h
-> @@ -249,6 +249,8 @@ extern int dw_mci_resume(struct dw_mci *host);
->   * @queue_node: List node for placing this node in the @queue list of
->   *     &struct dw_mci.
->   * @clock: Clock rate configured by set_ios(). Protected by host->lock.
-> + * @__clk_old: The last clock value that was requested from core.
-> + *     Keeping track of this helps us to avoid spamming the console.
->   * @flags: Random state bits associated with the slot.
->   * @id: Number of this slot.
->   * @sdio_id: Number of this slot in the SDIO interrupt registers.
-> @@ -263,6 +265,7 @@ struct dw_mci_slot {
->         struct list_head        queue_node;
+>  #define MMC_QUEUE_BOUNCESZ     65536
 >
->         unsigned int            clock;
-> +       unsigned int            __clk_old;
+> @@ -68,7 +70,7 @@ static int mmc_queue_thread(void *d)
+>                         bool req_is_special = mmc_req_is_special(req);
 >
->         unsigned long           flags;
->  #define DW_MMC_CARD_PRESENT    0
+>                         set_current_state(TASK_RUNNING);
+> -                       mq->issue_fn(mq, req);
+> +                       mmc_blk_issue_rq(mq, req);
+>                         cond_resched();
+>                         if (mq->flags & MMC_QUEUE_NEW_REQUEST) {
+>                                 mq->flags &= ~MMC_QUEUE_NEW_REQUEST;
+> diff --git a/drivers/mmc/card/queue.h b/drivers/mmc/card/queue.h
+> index fee5e1271465..3c15a75bae86 100644
+> --- a/drivers/mmc/card/queue.h
+> +++ b/drivers/mmc/card/queue.h
+> @@ -57,8 +57,6 @@ struct mmc_queue {
+>         unsigned int            flags;
+>  #define MMC_QUEUE_SUSPENDED    (1 << 0)
+>  #define MMC_QUEUE_NEW_REQUEST  (1 << 1)
+> -
+> -       int                     (*issue_fn)(struct mmc_queue *, struct request *);
+>         void                    *data;
+>         struct request_queue    *queue;
+>         struct mmc_queue_req    mqrq[2];
 > --
-> 1.9.1
+> 2.7.4
 >
