@@ -1,75 +1,99 @@
-From: Alan Stern <stern-nwvwT67g6+6dFdvTe/nMLpVzexx5G7lz@public.gmane.org>
-Subject: Re: [PATCH] mmc: rtsx_usb_sdmmc: Handle runtime PM while changing
- led
-Date: Thu, 22 Sep 2016 09:56:49 -0400 (EDT)
-Message-ID: <Pine.LNX.4.44L0.1609220955420.1835-100000@iolanthe.rowland.org>
-References: <CAPDyKFozTL9h3HXoimHc4X3jeWQtJaedrfExVq1A5g7-JzcNLg@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <linux-usb-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <CAPDyKFozTL9h3HXoimHc4X3jeWQtJaedrfExVq1A5g7-JzcNLg-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-Sender: linux-usb-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: linux-mmc <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Ritesh Raj Sarraf <rrs-7WuBAv+fczCJ8c2fQYRYNw@public.gmane.org>, USB list <linux-usb-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Roger Tseng <rogerable-Rasf1IRRPZFBDgjK7y7TUQ@public.gmane.org>, Wei WANG <wei_wang-kXabqFNEczNtrwSWzY7KCg@public.gmane.org>
+From: Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>
+Subject: [PATCH PoC 0/7] mmc: switch to blk-mq
+Date: Thu, 22 Sep 2016 15:57:03 +0200
+Message-ID: <1474552630-28314-1-git-send-email-b.zolnierkie@samsung.com>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Linus Walleij <linus.walleij@linaro.org>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Greg KH <gregkh@linuxfoundation.org>, Paolo Valente <paolo.valente@linaro.org>, Jens Axboe <axboe@fb.com>, Hannes Reinecke <hare@suse.com>, Tejun Heo <tj@kernel.org>, Omar Sandoval <osandov@osandov.com>, Christoph Hellwig <hch@lst.de>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, b.zolnierkie@samsung.com
 List-Id: linux-mmc@vger.kernel.org
 
-On Thu, 22 Sep 2016, Ulf Hansson wrote:
+Hi,
 
-> >> > > An observation I made, is when the sdmmc device gets runtime resumed
-> >> > > (pm_runtime_get_sync()), the parent device (the usb device) may also
-> >> > > become runtime resumed (unless it's already). In this sequence, but
-> >> > > *only* when actually runtime resuming the usb device, the runtime PM
-> >> > > core decides to update the last busy mark for the usb device. Should
-> >> > > it really do that?
-> >> >
-> >> > Yes, that's deliberate.  The whole idea of autosuspend is to prevent
-> >> > the device from being runtime-suspended too soon after it was used, and
-> >> > the PM core considers runtime-resume to be a form of usage.
-> >>
-> >> I understand it's deliberate, but I was more question whether we
-> >> actually should have the runtime PM core to behaves like this.
-> >>
-> >> I don't think its behaviour is consistent, as in such case all calls
-> >> to __pm_runtime_resume() should trigger the runtime PM core to update
-> >> the last busy mark.
-> >
-> > Not a bad idea...
-> 
-> Yes, it is. :-)
-> 
-> Although, I am still concerned about he inconsistent behaviour.
-> 
-> >
-> >> Don't get me wrong, I am *not* suggesting we should do that change, as
-> >> it would mean the last busy mark would be updated way too often.
-> >
-> > The updates aren't very expensive.  Just one atomic write.  It probably
-> > takes less time than acquiring the runtime-PM spinlock.
-> >
-> >> Instead, perhaps it's better to leave the responsibility of updating
-> >> the last busy mark to the runtime PM users solely.
-> >
-> > Maybe, but I think doing it once in the core, like this, can remove the
-> > need for a lot of function calls in drivers.
-> 
-> Unfortunate not. Most updates of the last busy mark happens when a
-> device is no longer required to be runtime resumed. As when a driver
-> has completed to serve a request and is about to call pm_runtime_put()
-> (or similar API).
-> 
-> So, I still believe doing it in the runtime PM core is just a waste.
-> 
-> I think it's better to leave the update to the users entirely, it
-> would become consistent but also more flexible, as one could easily
-> think of situations where you may in some cases want to update the
-> last busy mark and in some other not.
+Since Linus Walleij is also working on that and I won't
+probably have time to touch this code till the end of
+upcoming month, here it is (basically a code dump of my
+proof-of-concept work).  I hope that it would be useful
+to somebody.
 
-You can try making this change if you want.  I'd be afraid of 
-regressions.
+It is extremely ugly & full of bogus debug code but boots
+fine on my Odroid-XU3 and benchmarks can be run.
 
-Alan Stern
+The patchset is based on top of patches up to "[PATCH v3
+24/30] mmc: block: Introduce queue semantics" patch from
+"[PATCH V3 00/30] mmc: mmc: dd Software Command Queuing"
+series by Adrian Hunter:
 
---
-To unsubscribe from this list: send the line "unsubscribe linux-usb" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+  http://www.spinics.net/lists/linux-mmc/msg38013.html
+
+[ It was commmit f3ba397441825f99edb4833a5f52dd2355d253c7
+  in swcmdq branch from:
+
+  http://git.infradead.org/users/ahunter/linux-sdhci.git
+
+  Unfortunalty it got rebased later to V4 -- my patchset
+  probably still applies and works fine but I have not
+  tested this yet. ]
+
+PS Linus, I got async requests support working, see patch #7.
+You may be able to use this method depending on the hackiness
+level of your patches. ;)
+
+
+Initial benchmark results:
+
+   root@target:~# time dd if=/dev/mmcblk0 of=/dev/null bs=4k
+
+   vanilla - performance governor - 1300MHz/1800MHz
+   15758000128 bytes (16 GB) copied, 69.8334 s, 226 MB/s
+
+   blk-mq - performance governor - 1300MHz/1800MHz
+   15758000128 bytes (16 GB) copied, 79.0868 s, 199 MB/s
+
+   vanilla - performance governor - 200MHz/200MHz
+   15758000128 bytes (16 GB) copied, 228.014 s, 69.1 MB/s
+
+   blk-mq - performance governor - 200MHz/200MHz
+   15758000128 bytes (16 GB) copied, 208.536 s, 75.6 MB/s
+
+   vanilla - on-demand governor - 1300MHz/1800MHz
+   15758000128 bytes (16 GB) copied, 77.0968 s, 204 MB/s
+
+   blk-mq - on-demand governor - 1300/1800MHz
+   15758000128 bytes (16 GB) copied, 96.351 s, 164 MB/s
+
+
+   root@target:~# time dd if=/dev/mmcblk0 of=/dev/null
+
+   vanilla - on-demand governor - 1300MHz/1800MHz
+   15758000128 bytes (16 GB) copied, 155.149 s, 102 MB/s
+
+   blk-mq - on-demand governor - 1300MHz/1800MHz
+   15758000128 bytes (16 GB) copied, 106.122 s, 148 MB/s
+
+
+Bartlomiej Zolnierkiewicz (7):
+  mmc-mq: add debug printks
+  mmc-mq: remove async requests support
+  mmc-mq: request completion fixes
+  mmc-mq: implement checking for queue busy condition
+  mmc-mq: remove some debug printks
+  mmc-mq: initial blk-mq support
+  mmc-mq: async request support for blk-mq mode
+
+ drivers/mmc/card/block.c    | 174 +++++++++++++-------------
+ drivers/mmc/card/mmc_test.c |   8 +-
+ drivers/mmc/card/queue.c    | 262 ++++++++++++++++++++++++++------------
+ drivers/mmc/card/queue.h    |  50 +++++++-
+ drivers/mmc/core/bus.c      |   2 -
+ drivers/mmc/core/core.c     | 299 +++++++++++++++++++++++++++++---------------
+ drivers/mmc/core/core.h     |   2 -
+ drivers/mmc/core/mmc_ops.c  |   9 ++
+ drivers/mmc/host/dw_mmc.c   |   3 +-
+ include/linux/mmc/card.h    |   1 -
+ include/linux/mmc/core.h    |   6 +-
+ include/linux/mmc/host.h    |  15 ---
+ 12 files changed, 529 insertions(+), 302 deletions(-)
+
+-- 
+1.9.1
