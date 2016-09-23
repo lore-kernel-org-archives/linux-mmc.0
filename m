@@ -1,66 +1,81 @@
-From: Pramod Gurav <pramod.gurav@linaro.org>
-Subject: Re: [PATCH v3] mmc: sdhci-msm: Add pm_runtime and system PM support
-Date: Fri, 23 Sep 2016 11:56:48 +0530
-Message-ID: <CANYu_0t5uRk0p=+4S9e3oCOy=gQ6rS2bqmAUqmkd7FVxsxywJw@mail.gmail.com>
-References: <20160901142335.2396-1-pramod.gurav@linaro.org>
- <a0e314de-3590-399c-27c7-ddd6461dee42@intel.com> <496321c5-24e7-3ac5-b3dd-7b7d5dc75536@linaro.org>
- <CANYu_0s=cyt52W2B5B=rUcx4O7Ms5kO2kBa2mw6JwWzCFTDw_A@mail.gmail.com>
- <CAPDyKFosg6pDjOPFkZ_xUP2vFRabD0W+CHzKokK73nDmnV_X3g@mail.gmail.com>
- <CANYu_0ugbBtXH8qna9FS=DpVXXRTJ3VErOwceFvg=scSOWHy_w@mail.gmail.com> <ffaebf0e-9338-3bda-b45d-16ad76b4f586@codeaurora.org>
+From: Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [RESEDN PATCH v2 3/4] mmc: sdhci: Don't try to switch to
+ unsupported voltage
+Date: Fri, 23 Sep 2016 10:12:43 +0300
+Message-ID: <785df157-dadc-4dd3-76e9-aea3a0f031a5@intel.com>
+References: <1474589577-11193-1-git-send-email-shawn.lin@rock-chips.com>
+ <1474589577-11193-3-git-send-email-shawn.lin@rock-chips.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <ffaebf0e-9338-3bda-b45d-16ad76b4f586@codeaurora.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Ritesh Harjani <riteshh@codeaurora.org>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Georgi Djakov <georgi.djakov@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, linux-mmc <linux-mmc@vger.kernel.org>, "open list:ARM/QUALCOMM SUPPORT" <linux-arm-msm@vger.kernel.org>, open list <linux-kernel@vger.kernel.org>, Stephen Boyd <sboyd@codeaurora.org>
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mga09.intel.com ([134.134.136.24]:7142 "EHLO mga09.intel.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1752747AbcIWHRm (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Fri, 23 Sep 2016 03:17:42 -0400
+In-Reply-To: <1474589577-11193-3-git-send-email-shawn.lin@rock-chips.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Shawn Lin <shawn.lin@rock-chips.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Jaehoon Chung <jh80.chung@samsung.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-rockchip@lists.infradead.org, Ziyuan Xu <xzy.xu@rock-chips.com>
 
-Hi Ritesh,
+On 23/09/16 03:12, Shawn Lin wrote:
+> From: Ziyuan Xu <xzy.xu@rock-chips.com>
+> 
+> Sdhci shouldn't switch to the unsupported voltage if claiming
+> that it can not support the requested voltage. Let's fix it.
+> 
+> Signed-off-by: Ziyuan Xu <xzy.xu@rock-chips.com>
+> Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
+> ---
+> 
+> Changes in v2: None
+> 
+>  drivers/mmc/host/sdhci.c | 6 ++++--
+>  1 file changed, 4 insertions(+), 2 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index 4805566..b1f1edd 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -1845,7 +1845,8 @@ static int sdhci_start_signal_voltage_switch(struct mmc_host *mmc,
+>  
+>  	switch (ios->signal_voltage) {
+>  	case MMC_SIGNAL_VOLTAGE_330:
+> -		if (!(host->flags & SDHCI_SIGNALING_330))
+> +		if (!(host->flags & SDHCI_SIGNALING_330) ||
+> +		    !(host->caps & SDHCI_CAN_VDD_330))
 
-Thanks for the inputs.
+You are mixing signal voltage and supply voltage here.  Note, I don't
+believe all drivers set the capabilities correctly when they are using
+regulators, but in any case this is not the place in the code to make such
+assumptions.
 
-On 22 September 2016 at 20:02, Ritesh Harjani <riteshh@codeaurora.org> wrote:
-> Hi Pramod,
+Better for the driver to remove SDHCI_SIGNALING_330 from flags when it is
+not supported.
 
-<snip>
+>  			return -EINVAL;
+>  		/* Set 1.8V Signal Enable in the Host Control2 register to 0 */
+>  		ctrl &= ~SDHCI_CTRL_VDD_180;
+> @@ -1872,7 +1873,8 @@ static int sdhci_start_signal_voltage_switch(struct mmc_host *mmc,
+>  
+>  		return -EAGAIN;
+>  	case MMC_SIGNAL_VOLTAGE_180:
+> -		if (!(host->flags & SDHCI_SIGNALING_180))
+> +		if (!(host->flags & SDHCI_SIGNALING_180) ||
+> +		    !(host->caps & SDHCI_CAN_VDD_180))
 
->> Thanks Ulf for the comments. Will check this and see if there is
->> something of this sort we have to do to achieve auto tuning.
->> Adding Ritesh who has been posting some SDHCI MSM patches recently in
->> case he knows about this.
->
->
-> Internally, we don't use this Auto re-tuning and rely on explicit re-tune by
-> host driver.
->
-> Question though -
-> 1. why do we need to call sdhci_runtime_resume/suspend from
-> sdhci_msm_runtime_suspend/resume?
-> From what I see is, sdhci_runtime_susend/resume will do reset and re-program
-> of host->pwr and host->clk because of which a retune will be required for
-> the next command after runtime resume.
+You are mixing signal voltage and supply voltage here, and this is not
+correct: not being able to do 1.8V supply does not mean you can't do 1.8V
+signaling.  The SDHCI way of determining supported signal voltages is based
+on supported transfer modes.
 
-Honestly I took reference from existing SDHCI HC driver which
-implement the runtime PM and each one uses this function.
+If the driver can't get the transfer modes correct (e.g. we still don't have
+MMC_CAP2_3_3V_ONLY_DDR or equivalent), remove SDHCI_SIGNALING_180 from the
+flags.
 
->
-> We can *only* disable and enable the clocks in
-> sdhci_msm_runtime_suspend/resume?
-> Thoughts? With this, I suppose you would not see any issue.
-This should work as I did not have this funtion call in my V1 but
-later included when I referred the other sdhci drivers.
+>  			return -EINVAL;
+>  		if (!IS_ERR(mmc->supply.vqmmc)) {
+>  			ret = mmc_regulator_set_vqmmc(mmc, ios);
+> 
 
->
->
-> Though for this issue, since internally also auto retuning is never used, we
-> can have this mode disabled. I can once again check with HW team to get more
-> details about this mode for MSM controller.
-This seems a read only register. And I could not find any other
-reference of this mode in any of the docs.
->
->>
->> Regards,
->> Pramod
->>
->
