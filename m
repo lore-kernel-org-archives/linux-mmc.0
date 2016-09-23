@@ -1,63 +1,58 @@
-From: Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
-Subject: [PATCH v2 3/4] mmc: sdhci: Don't try to switch to unsupported voltage
-Date: Fri, 23 Sep 2016 08:03:10 +0800
-Message-ID: <1474588991-10344-3-git-send-email-shawn.lin@rock-chips.com>
-References: <1474588991-10344-1-git-send-email-shawn.lin@rock-chips.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-In-Reply-To: <1474588991-10344-1-git-send-email-shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-rockchip>,
- <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-rockchip/>
-List-Post: <mailto:linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-List-Help: <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-rockchip>,
- <mailto:linux-rockchip-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
-Sender: "Linux-rockchip" <linux-rockchip-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-Errors-To: linux-rockchip-bounces+glpar-linux-rockchip=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
-To: Jaehoon Chung <jh80.chung-Sze3O3UU22JBDgjK7y7TUQ@public.gmane.org>, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>, Ziyuan Xu <xzy.xu-TNX95d0MmH7DzftRWevZcw@public.gmane.org>, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+From: Shawn Lin <shawn.lin@rock-chips.com>
+Subject: [RESEND PATCH v2 1/4] mmc: core: switch to 1V8 or 1V2 for hs400es mode
+Date: Fri, 23 Sep 2016 08:12:54 +0800
+Message-ID: <1474589577-11193-1-git-send-email-shawn.lin@rock-chips.com>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from lucky1.263xmail.com ([211.157.147.133]:54680 "EHLO
+        lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1755125AbcIWAMF (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 22 Sep 2016 20:12:05 -0400
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Adrian Hunter <adrian.hunter@intel.com>, Jaehoon Chung <jh80.chung@samsung.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-rockchip@lists.infradead.org, Shawn Lin <shawn.lin@rock-chips.com>, stable@vger.kernel.org, 4.4#@263.net
 
-From: Ziyuan Xu <xzy.xu-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
+When introducing hs400es, I didn't notice that we haven't
+switched voltage to 1V2 or 1V8 for it. That happens to work
+as the first controller claiming to support hs400es, arasan(5.1),
+which is designed to only support 1V8. So the voltage is fixed to 1V8.
+But it actually is wrong, and will not fit for other host controllers.
+Let's fix it.
 
-Sdhci shouldn't switch to the unsupported voltage if claiming
-that it can not support the requested voltage. Let's fix it.
+Fixes: commit 81ac2af65793ecf ("mmc: core: implement enhanced strobe support")
+Cc: <stable@vger.kernel.org> 4.4#
+Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
 
-Signed-off-by: Ziyuan Xu <xzy.xu-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
-Signed-off-by: Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
 ---
 
-Changes in v2: None
+Changes in v2:
+- fix copy-paste error, mea culpa
 
- drivers/mmc/host/sdhci.c | 6 ++++--
- 1 file changed, 4 insertions(+), 2 deletions(-)
+ drivers/mmc/core/mmc.c | 10 ++++++++++
+ 1 file changed, 10 insertions(+)
 
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 4805566..b1f1edd 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -1845,7 +1845,8 @@ static int sdhci_start_signal_voltage_switch(struct mmc_host *mmc,
+diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+index 3486bc7..f4ed5ac 100644
+--- a/drivers/mmc/core/mmc.c
++++ b/drivers/mmc/core/mmc.c
+@@ -1263,6 +1263,16 @@ static int mmc_select_hs400es(struct mmc_card *card)
+ 		goto out_err;
+ 	}
  
- 	switch (ios->signal_voltage) {
- 	case MMC_SIGNAL_VOLTAGE_330:
--		if (!(host->flags & SDHCI_SIGNALING_330))
-+		if (!(host->flags & SDHCI_SIGNALING_330) ||
-+		    !(host->caps & SDHCI_CAN_VDD_330))
- 			return -EINVAL;
- 		/* Set 1.8V Signal Enable in the Host Control2 register to 0 */
- 		ctrl &= ~SDHCI_CTRL_VDD_180;
-@@ -1872,7 +1873,8 @@ static int sdhci_start_signal_voltage_switch(struct mmc_host *mmc,
- 
- 		return -EAGAIN;
- 	case MMC_SIGNAL_VOLTAGE_180:
--		if (!(host->flags & SDHCI_SIGNALING_180))
-+		if (!(host->flags & SDHCI_SIGNALING_180) ||
-+		    !(host->caps & SDHCI_CAN_VDD_180))
- 			return -EINVAL;
- 		if (!IS_ERR(mmc->supply.vqmmc)) {
- 			ret = mmc_regulator_set_vqmmc(mmc, ios);
++	if (card->mmc_avail_type & EXT_CSD_CARD_TYPE_HS400_1_2V)
++		err = __mmc_set_signal_voltage(host, MMC_SIGNAL_VOLTAGE_120);
++
++	if (err && card->mmc_avail_type & EXT_CSD_CARD_TYPE_HS400_1_8V)
++		err = __mmc_set_signal_voltage(host, MMC_SIGNAL_VOLTAGE_180);
++
++	/* If fails try again during next card power cycle */
++	if (err)
++		goto out_err;
++
+ 	err = mmc_select_bus_width(card);
+ 	if (err < 0)
+ 		goto out_err;
 -- 
 2.3.7
+
+
