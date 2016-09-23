@@ -1,98 +1,75 @@
-From: Shawn Lin <shawn.lin@rock-chips.com>
-Subject: Re: [RESEDN PATCH v2 3/4] mmc: sdhci: Don't try to switch to
- unsupported voltage
-Date: Fri, 23 Sep 2016 16:07:11 +0800
-Message-ID: <1df2cfcf-0c62-6539-24a0-941475f236d1@rock-chips.com>
-References: <1474589577-11193-1-git-send-email-shawn.lin@rock-chips.com>
- <1474589577-11193-3-git-send-email-shawn.lin@rock-chips.com>
- <785df157-dadc-4dd3-76e9-aea3a0f031a5@intel.com>
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH v3] mmc: sdhci-msm: Add pm_runtime and system PM support
+Date: Fri, 23 Sep 2016 12:07:37 +0200
+Message-ID: <CAPDyKFpVEYz+sGNHG_z2AwXuiDe9kSRk1sh8_p4V3m7FpwPOSg@mail.gmail.com>
+References: <20160901142335.2396-1-pramod.gurav@linaro.org>
+ <a0e314de-3590-399c-27c7-ddd6461dee42@intel.com> <496321c5-24e7-3ac5-b3dd-7b7d5dc75536@linaro.org>
+ <CANYu_0s=cyt52W2B5B=rUcx4O7Ms5kO2kBa2mw6JwWzCFTDw_A@mail.gmail.com>
+ <CAPDyKFosg6pDjOPFkZ_xUP2vFRabD0W+CHzKokK73nDmnV_X3g@mail.gmail.com>
+ <CANYu_0ugbBtXH8qna9FS=DpVXXRTJ3VErOwceFvg=scSOWHy_w@mail.gmail.com> <ffaebf0e-9338-3bda-b45d-16ad76b4f586@codeaurora.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <785df157-dadc-4dd3-76e9-aea3a0f031a5@intel.com>
+In-Reply-To: <ffaebf0e-9338-3bda-b45d-16ad76b4f586@codeaurora.org>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: shawn.lin@rock-chips.com, Ulf Hansson <ulf.hansson@linaro.org>, Jaehoon Chung <jh80.chung@samsung.com>, linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-rockchip@lists.infradead.org, Ziyuan Xu <xzy.xu@rock-chips.com>
+To: Ritesh Harjani <riteshh@codeaurora.org>
+Cc: Pramod Gurav <pramod.gurav@linaro.org>, Georgi Djakov <georgi.djakov@linaro.org>, Adrian Hunter <adrian.hunter@intel.com>, linux-mmc <linux-mmc@vger.kernel.org>, "open list:ARM/QUALCOMM SUPPORT" <linux-arm-msm@vger.kernel.org>, open list <linux-kernel@vger.kernel.org>, Stephen Boyd <sboyd@codeaurora.org>
 List-Id: linux-mmc@vger.kernel.org
 
-在 2016/9/23 15:12, Adrian Hunter 写道:
-> On 23/09/16 03:12, Shawn Lin wrote:
->> From: Ziyuan Xu <xzy.xu@rock-chips.com>
->>
->> Sdhci shouldn't switch to the unsupported voltage if claiming
->> that it can not support the requested voltage. Let's fix it.
->>
->> Signed-off-by: Ziyuan Xu <xzy.xu@rock-chips.com>
->> Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
->> ---
->>
->> Changes in v2: None
->>
->>  drivers/mmc/host/sdhci.c | 6 ++++--
->>  1 file changed, 4 insertions(+), 2 deletions(-)
->>
->> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
->> index 4805566..b1f1edd 100644
->> --- a/drivers/mmc/host/sdhci.c
->> +++ b/drivers/mmc/host/sdhci.c
->> @@ -1845,7 +1845,8 @@ static int sdhci_start_signal_voltage_switch(struct mmc_host *mmc,
->>
->>  	switch (ios->signal_voltage) {
->>  	case MMC_SIGNAL_VOLTAGE_330:
->> -		if (!(host->flags & SDHCI_SIGNALING_330))
->> +		if (!(host->flags & SDHCI_SIGNALING_330) ||
->> +		    !(host->caps & SDHCI_CAN_VDD_330))
->
-> You are mixing signal voltage and supply voltage here.  Note, I don't
+[...]
 
-Oh, I see what you mean, driver could still set 3.3 voltage supply
-even they don't support 3V3 signal voltage.
+>>>> Is there anything else needed in msm sdhci driver so that the auto
+>>>> tuning is taken care of?
+>>>
+>>>
+>>> I am not familiar with any other than sdhci-esdhc-imx which supports
+>>> the SDHCI_TUNING_MODE_3. I may be wrong though.
+>>>
+>>> In the sdhci-esdhc-imx case, enabling of auto tuning seems to be done
+>>> in esdhc_post_tuning(), where a vendor specific register
+>>> (ESDHC_MIX_CTRL) is being written to. Perhaps something similar in
+>>> your case?
+>>>
+>> Thanks Ulf for the comments. Will check this and see if there is
+>> something of this sort we have to do to achieve auto tuning.
+>> Adding Ritesh who has been posting some SDHCI MSM patches recently in
+>> case he knows about this.
+>
+>
+> Internally, we don't use this Auto re-tuning and rely on explicit re-tune by
+> host driver.
+>
+> Question though -
+> 1. why do we need to call sdhci_runtime_resume/suspend from
+> sdhci_msm_runtime_suspend/resume?
+> From what I see is, sdhci_runtime_susend/resume will do reset and re-program
+> of host->pwr and host->clk because of which a retune will be required for
+> the next command after runtime resume.
+>
+> We can *only* disable and enable the clocks in
+> sdhci_msm_runtime_suspend/resume?
+> Thoughts? With this, I suppose you would not see any issue.
 
-> believe all drivers set the capabilities correctly when they are using
-> regulators, but in any case this is not the place in the code to make such
-> assumptions.
+I see.
 
-Indeed, there is a risk of breaking some drivers if they don't set the
-capabilities correctly.
+I assumes that means saving/restoring register context will
+automatically handled by some other outer logic, when doing clock
+gating/ungating?
 
-So, I think we could drop this patch since patch 4 is actually what we
-need in order to slove our problem. :)
+In other words, if the controller has valid tuning values, those will
+be re-used and restored when clock ungating happens?
 
 >
-> Better for the driver to remove SDHCI_SIGNALING_330 from flags when it is
-> not supported.
 >
->>  			return -EINVAL;
->>  		/* Set 1.8V Signal Enable in the Host Control2 register to 0 */
->>  		ctrl &= ~SDHCI_CTRL_VDD_180;
->> @@ -1872,7 +1873,8 @@ static int sdhci_start_signal_voltage_switch(struct mmc_host *mmc,
+> Though for this issue, since internally also auto retuning is never used, we
+> can have this mode disabled. I can once again check with HW team to get more
+> details about this mode for MSM controller.
+>
 >>
->>  		return -EAGAIN;
->>  	case MMC_SIGNAL_VOLTAGE_180:
->> -		if (!(host->flags & SDHCI_SIGNALING_180))
->> +		if (!(host->flags & SDHCI_SIGNALING_180) ||
->> +		    !(host->caps & SDHCI_CAN_VDD_180))
->
-> You are mixing signal voltage and supply voltage here, and this is not
-> correct: not being able to do 1.8V supply does not mean you can't do 1.8V
-> signaling.  The SDHCI way of determining supported signal voltages is based
-> on supported transfer modes.
->
-> If the driver can't get the transfer modes correct (e.g. we still don't have
-> MMC_CAP2_3_3V_ONLY_DDR or equivalent), remove SDHCI_SIGNALING_180 from the
-> flags.
->
->>  			return -EINVAL;
->>  		if (!IS_ERR(mmc->supply.vqmmc)) {
->>  			ret = mmc_regulator_set_vqmmc(mmc, ios);
+>> Regards,
+>> Pramod
 >>
->
->
->
 >
 
-
--- 
-Best Regards
-Shawn Lin
+Kind regards
+Uffe
