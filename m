@@ -1,53 +1,41 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH -next] mmc: sdhci-of-arasan: Fix non static symbol warning
-Date: Mon, 26 Sep 2016 09:45:40 +0300
-Message-ID: <c916cd6a-2929-91fc-2433-78f8638ff071@intel.com>
-References: <1474818243-19207-1-git-send-email-weiyj.lk@gmail.com>
+From: Alex Lemberg <Alex.Lemberg@sandisk.com>
+Subject: Re: [PATCH 0/3] mmc: Check BKOPS Level On Runtime Suspend
+Date: Mon, 26 Sep 2016 15:10:20 +0000
+Message-ID: <36E1868F-E766-4B13-B31B-7488BE342069@sandisk.com>
+References: <1472739890-3384-1-git-send-email-alex.lemberg@sandisk.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga11.intel.com ([192.55.52.93]:62155 "EHLO mga11.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1752313AbcIZGuY (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Mon, 26 Sep 2016 02:50:24 -0400
-In-Reply-To: <1474818243-19207-1-git-send-email-weiyj.lk@gmail.com>
+Received: from mail-by2nam03on0043.outbound.protection.outlook.com ([104.47.42.43]:44620
+        "EHLO NAM03-BY2-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S965099AbcIZPKX (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Mon, 26 Sep 2016 11:10:23 -0400
+In-Reply-To: <1472739890-3384-1-git-send-email-alex.lemberg@sandisk.com>
+Content-Language: en-US
+Content-ID: <3FF270884BACCE4D9DB0B9414A8ED164@namprd02.prod.outlook.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Wei Yongjun <weiyj.lk@gmail.com>, Michal Simek <michal.simek@xilinx.com>, soren.brinkmann@xilinx.com, ulf.hansson@linaro.org
-Cc: Wei Yongjun <weiyongjun1@huawei.com>, linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org
+To: "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+Cc: Avi Shchislowski <Avi.Shchislowski@sandisk.com>
 
-On 25/09/16 18:44, Wei Yongjun wrote:
-> From: Wei Yongjun <weiyongjun1@huawei.com>
-> 
-> Fixes the following sparse warning:
-> 
-> drivers/mmc/host/sdhci-of-arasan.c:253:6: warning:
->  symbol 'sdhci_arasan_reset' was not declared. Should it be static?
-> 
-> Signed-off-by: Wei Yongjun <weiyongjun1@huawei.com>
-
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
-
-> ---
->  drivers/mmc/host/sdhci-of-arasan.c | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
-> 
-> diff --git a/drivers/mmc/host/sdhci-of-arasan.c b/drivers/mmc/host/sdhci-of-arasan.c
-> index da8e40a..e263671 100644
-> --- a/drivers/mmc/host/sdhci-of-arasan.c
-> +++ b/drivers/mmc/host/sdhci-of-arasan.c
-> @@ -250,7 +250,7 @@ static void sdhci_arasan_hs400_enhanced_strobe(struct mmc_host *mmc,
->  	writel(vendor, host->ioaddr + SDHCI_ARASAN_VENDOR_REGISTER);
->  }
->  
-> -void sdhci_arasan_reset(struct sdhci_host *host, u8 mask)
-> +static void sdhci_arasan_reset(struct sdhci_host *host, u8 mask)
->  {
->  	u8 ctrl;
->  	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> 
-> 
-> 
-> 
-
+SGkgVWxmLA0KDQpDb3VsZCB5b3UgcGxlYXNlIHJldmlldyB0aGlzPw0KDQpUaGFua3MsDQpBbGV4
+DQoNCk9uIDkvMS8xNiwgNToyNCBQTSwgIkFsZXggTGVtYmVyZyIgPEFsZXguTGVtYmVyZ0BzYW5k
+aXNrLmNvbT4gd3JvdGU6DQoNCj5GbGFzaCBiYXNlZCBzdG9yYWdlIGRldmljZXMgbWlnaHQgbmVl
+ZCB0byBwZXJmb3JtIHRoZSBpbnRlcm5hbA0KPkJhY2tncm91bmQgT3BlcmF0aW9ucyAoQktPUFMp
+IGluIG9yZGVyIHRvIGluc3VyZSBiZXR0ZXIgcGVyZm9ybWFuY2UNCj5mb3IgdGhlIG5leHQgY29t
+aW5nIElPLg0KPkZvbGxvd2luZyB0aGUgZGlzY3Vzc2lvbiBpbiB0aGUgbW1jIHRocmVhZDoNCj53
+d3cuc3Bpbmljcy5uZXQvbGlzdHMvbGludXgtbW1jL21zZzM3Nzc5Lmh0bWwNCj5UbyBsZXQgdGhl
+IGRldmljZSBjb21wbGV0ZSBpdHMgQktPUFMgZHVyaW5nIFJ1bnRpbWUgU3VzcGVuZCwNCj53ZSBz
+dWdnZXN0IHRvIGNoZWNrIHRoZSBCS09QUyBsZXZlbC4NCj5JbiBjYXNlIHRoZSBkZXZpY2UgbmVl
+ZCB0byBjb21wbGV0ZSBpdHMgQktPUFMsIHJlc2NoZWR1bGUgdGhlIFJ1bnRpbWUNCj5TdXNwZW5k
+Lg0KPg0KPmFsZXggbGVtYmVyZyAoMyk6DQo+ICBtbWM6IHJlcGxhY2luZyBoYXJkY29kZWQgdmFs
+dWUgZm9yIHJ1bnRpbWUgUE0gc3VzcGVuZA0KPiAgbW1jOiBBZGRpbmcgQVVUT19CS09QU19FTiBi
+aXQgc2V0IGZvciBBdXRvIEJLT1BTIHN1cHBvcnQNCj4gIG1tYzogQ2hlY2tpbmcgQktPUFMgc3Rh
+dHVzIHByaW9yIHRvIFN1c3BlbmQNCj4NCj4gZHJpdmVycy9tbWMvY2FyZC9ibG9jay5jIHwgIDMg
+KystDQo+IGRyaXZlcnMvbW1jL2NvcmUvbW1jLmMgICB8IDM2ICsrKysrKysrKysrKysrKysrKysr
+KysrKysrKysrLS0tLS0tLQ0KPiBpbmNsdWRlL2xpbnV4L21tYy9jYXJkLmggfCAgMSArDQo+IGlu
+Y2x1ZGUvbGludXgvbW1jL2hvc3QuaCB8ICAyICsrDQo+IGluY2x1ZGUvbGludXgvbW1jL21tYy5o
+ICB8ICAyICsrDQo+IDUgZmlsZXMgY2hhbmdlZCwgMzYgaW5zZXJ0aW9ucygrKSwgOCBkZWxldGlv
+bnMoLSkNCj4NCj4tLSANCj4xLjkuMQ0KPg0KDQo=
