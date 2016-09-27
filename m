@@ -1,62 +1,42 @@
-From: Ritesh Harjani <riteshh@codeaurora.org>
-Subject: Re: [PATCH v4 3/9] mmc: sdhci-msm: add pltfm_data support to get
- clk-rates from DT
-Date: Tue, 27 Sep 2016 10:36:15 +0530
-Message-ID: <573d8790-df4b-7265-46e0-9e6caead87c9@codeaurora.org>
-References: <1472033024-14890-1-git-send-email-riteshh@codeaurora.org>
- <1472033024-14890-4-git-send-email-riteshh@codeaurora.org>
- <2575923.JUIzEdKygq@wuerfel>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from smtp.codeaurora.org ([198.145.29.96]:34701 "EHLO
-        smtp.codeaurora.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750906AbcI0FGY (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 27 Sep 2016 01:06:24 -0400
-In-Reply-To: <2575923.JUIzEdKygq@wuerfel>
-Sender: linux-mmc-owner@vger.kernel.org
+From: Ziyuan Xu <xzy.xu-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
+Subject: [PATCH v4 0/2] Add power domain support for eMMC node on rk3399
+Date: Tue, 27 Sep 2016 14:15:56 +0800
+Message-ID: <20160927061558.2110-1-xzy.xu@rock-chips.com>
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: heiko-4mtYJXux2i+zQB+pC5nmwQ@public.gmane.org, ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org
+Cc: devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-rockchip-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org, dianders-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org, zhangqing-TNX95d0MmH7DzftRWevZcw@public.gmane.org, Ziyuan Xu <xzy.xu-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
 List-Id: linux-mmc@vger.kernel.org
-To: Arnd Bergmann <arnd@arndb.de>
-Cc: adrian.hunter@intel.com, ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, shawn.lin@rock-chips.com, linux-arm-msm@vger.kernel.org, georgi.djakov@linaro.org, alex.lemberg@sandisk.com, mateusz.nowak@intel.com, Yuliy.Izrailov@sandisk.com, asutoshd@codeaurora.org, david.griego@linaro.org, stummala@codeaurora.org, venkatg@codeaurora.org, pramod.gurav@linaro.org, bjorn.andersson@linaro.org
 
-Hi Arnd,
+This series add power domain for eMMC node which will be controlled by
+genpd to make sure it's available in probing state, and will be gate
+once suspend/resume.
 
-On 9/12/2016 1:03 PM, Arnd Bergmann wrote:
-> On Wednesday, August 24, 2016 3:33:38 PM CEST Ritesh Harjani wrote:
->>  #define CMUX_SHIFT_PHASE_SHIFT 24
->>  #define CMUX_SHIFT_PHASE_MASK  (7 << CMUX_SHIFT_PHASE_SHIFT)
->>
->> +struct sdhci_msm_pltfm_data {
->> +       u32 *clk_table;
->> +       int clk_table_sz;
->> +};
->> +
->>  struct sdhci_msm_host {
->>         struct platform_device *pdev;
->>         void __iomem *core_mem; /* MSM SDCC mapped address */
->> @@ -83,6 +88,7 @@ struct sdhci_msm_host {
->>         struct clk *bus_clk;    /* SDHC bus voter clock */
->>         struct mmc_host *mmc;
->>         bool use_14lpp_dll_reset;
->> +       struct sdhci_msm_pltfm_data *pdata;
->>  };
->>
->>  /* Platform specific tuning */
->>
->
-> Just noticed this. Please don't add another structure, just put the
-> new members into struct sdhci_msm_host directly.
->
-> We only need platform_data structures for drivers that also work
-> with old-style board files, which this one doesn't.
+Changes in v4:
+- add heiko's review-tag
 
-Ok, I will move this into sdhci_msm_host directly.
+Changes in v3:
+- fix a typo
+- add Rob's ack-tag
+
+Changes in v2:
+- fix a typo
+- add an example code for power-domain
+- add Shawn's review-tag and Doug's review-tag
+
+Ziyuan Xu (2):
+  Documentation: mmc: sdhci-of-arasan: add description of power domain
+  arm64: dts: rockchip: add eMMC's power domain support for rk3399
+
+ Documentation/devicetree/bindings/mmc/arasan,sdhci.txt |  7 ++++++-
+ arch/arm64/boot/dts/rockchip/rk3399.dtsi               | 11 +++++++++++
+ 2 files changed, 17 insertions(+), 1 deletion(-)
+
+-- 
+2.9.3
 
 
-Thanks
-Ritesh
-
->
-> 	Arnd
->
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
