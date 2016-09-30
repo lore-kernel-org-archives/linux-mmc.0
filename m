@@ -1,116 +1,71 @@
 From: Shawn Lin <shawn.lin@rock-chips.com>
-Subject: [RFC PATCH v2 2/4] mmc: dw_mmc-rockchip: add runtime PM support
-Date: Fri, 30 Sep 2016 16:48:35 +0800
-Message-ID: <1475225317-2815-3-git-send-email-shawn.lin@rock-chips.com>
+Subject: [RFC PATCH v2 4/4] mmc: dw_mmc-rockchip: disable biu clk and genpd if possible
+Date: Fri, 30 Sep 2016 16:48:37 +0800
+Message-ID: <1475225317-2815-5-git-send-email-shawn.lin@rock-chips.com>
 References: <1475225317-2815-1-git-send-email-shawn.lin@rock-chips.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from lucky1.263xmail.com ([211.157.147.132]:60239 "EHLO
+Received: from lucky1.263xmail.com ([211.157.147.133]:50897 "EHLO
         lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751161AbcI3Iqa (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 30 Sep 2016 04:46:30 -0400
+        with ESMTP id S1752173AbcI3IrE (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 30 Sep 2016 04:47:04 -0400
 In-Reply-To: <1475225317-2815-1-git-send-email-shawn.lin@rock-chips.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Jaehoon Chung <jh80.chung@samsung.com>, Ulf Hansson <ulf.hansson@linaro.org>
 Cc: linux-mmc@vger.kernel.org, Doug Anderson <dianders@chromium.org>, linux-rockchip@lists.infradead.org, Shawn Lin <shawn.lin@rock-chips.com>
 
-This patch adds runtime PM support for dw_mmc-rockchip.
+We could disable biu clk and power-off genpd if gpio
+card detect available.
 
 Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
 ---
 
- drivers/mmc/host/dw_mmc-rockchip.c | 57 ++++++++++++++++++++++++++++++++++++--
- 1 file changed, 54 insertions(+), 3 deletions(-)
+ drivers/mmc/host/dw_mmc-rockchip.c | 18 +++++++++++++++++-
+ 1 file changed, 17 insertions(+), 1 deletion(-)
 
 diff --git a/drivers/mmc/host/dw_mmc-rockchip.c b/drivers/mmc/host/dw_mmc-rockchip.c
-index 25eae35..3ad041c 100644
+index 3ad041c..e7b3b6d 100644
 --- a/drivers/mmc/host/dw_mmc-rockchip.c
 +++ b/drivers/mmc/host/dw_mmc-rockchip.c
 @@ -13,6 +13,7 @@
  #include <linux/mmc/host.h>
  #include <linux/mmc/dw_mmc.h>
  #include <linux/of_address.h>
-+#include <linux/pm_runtime.h>
++#include <linux/mmc/slot-gpio.h>
+ #include <linux/pm_runtime.h>
  #include <linux/slab.h>
  
- #include "dw_mmc.h"
-@@ -325,6 +326,7 @@ static int dw_mci_rockchip_probe(struct platform_device *pdev)
+@@ -366,14 +367,29 @@ static int dw_mci_rockchip_remove(struct platform_device *pdev)
+ static int dw_mci_rockchip_runtime_suspend(struct device *dev)
  {
- 	const struct dw_mci_drv_data *drv_data;
- 	const struct of_device_id *match;
+ 	struct dw_mci *host = dev_get_drvdata(dev);
 +	int ret;
  
- 	if (!pdev->dev.of_node)
- 		return -ENODEV;
-@@ -332,16 +334,65 @@ static int dw_mci_rockchip_probe(struct platform_device *pdev)
- 	match = of_match_node(dw_mci_rockchip_match, pdev->dev.of_node);
- 	drv_data = match->data;
- 
--	return dw_mci_pltfm_register(pdev, drv_data);
-+	pm_runtime_get_noresume(&pdev->dev);
-+	pm_runtime_set_active(&pdev->dev);
-+	pm_runtime_enable(&pdev->dev);
-+	pm_runtime_set_autosuspend_delay(&pdev->dev, 50);
-+	pm_runtime_use_autosuspend(&pdev->dev);
-+
-+	ret = dw_mci_pltfm_register(pdev, drv_data);
-+	if (ret) {
-+		pm_runtime_disable(&pdev->dev);
-+		pm_runtime_set_suspended(&pdev->dev);
-+		pm_runtime_put_noidle(&pdev->dev);
+-	return dw_mci_runtime_suspend(host);
++	ret = dw_mci_runtime_suspend(host);
++	if (ret)
 +		return ret;
++
++	if (mmc_can_gpio_cd(host->slot[0]->mmc)) {
++		clk_disable_unprepare(host->biu_clk);
++		pm_runtime_put(dev);
 +	}
 +
-+	pm_runtime_put_autosuspend(&pdev->dev);
-+
 +	return 0;
-+}
-+
-+static int dw_mci_rockchip_remove(struct platform_device *pdev)
-+{
-+       pm_runtime_get_sync(&pdev->dev);
-+       pm_runtime_disable(&pdev->dev);
-+       pm_runtime_put_noidle(&pdev->dev);
-+
-+       return dw_mci_pltfm_remove(pdev);
  }
  
-+#ifdef CONFIG_PM
-+static int dw_mci_rockchip_runtime_suspend(struct device *dev)
-+{
-+	struct dw_mci *host = dev_get_drvdata(dev);
-+
-+	return dw_mci_runtime_suspend(host);
-+}
-+
-+static int dw_mci_rockchip_runtime_resume(struct device *dev)
-+{
-+	struct dw_mci *host = dev_get_drvdata(dev);
-+
-+	return dw_mci_runtime_resume(host);
-+}
-+#endif /* CONFIG_PM */
-+
-+static const struct dev_pm_ops dw_mci_rockchip_dev_pm_ops = {
-+	SET_SYSTEM_SLEEP_PM_OPS(pm_runtime_force_suspend,
-+				pm_runtime_force_resume)
-+	SET_RUNTIME_PM_OPS(dw_mci_rockchip_runtime_suspend,
-+			   dw_mci_rockchip_runtime_resume,
-+			   NULL)
-+};
-+
- static struct platform_driver dw_mci_rockchip_pltfm_driver = {
- 	.probe		= dw_mci_rockchip_probe,
--	.remove		= dw_mci_pltfm_remove,
-+	.remove		= dw_mci_rockchip_remove,
- 	.driver		= {
- 		.name		= "dwmmc_rockchip",
- 		.of_match_table	= dw_mci_rockchip_match,
--		.pm		= &dw_mci_pltfm_pmops,
-+		.pm		= &dw_mci_rockchip_dev_pm_ops,
- 	},
- };
+ static int dw_mci_rockchip_runtime_resume(struct device *dev)
+ {
+ 	struct dw_mci *host = dev_get_drvdata(dev);
  
++	if (mmc_can_gpio_cd(host->slot[0]->mmc)) {
++		pm_runtime_get_sync(dev);
++		clk_prepare_enable(host->biu_clk);
++	}
++
+ 	return dw_mci_runtime_resume(host);
+ }
+ #endif /* CONFIG_PM */
 -- 
 2.3.7
 
