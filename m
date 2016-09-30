@@ -1,60 +1,54 @@
 From: Shawn Lin <shawn.lin@rock-chips.com>
-Subject: [PATCH v3 1/3] mmc: core: switch to 1V8 or 1V2 for hs400es mode
-Date: Fri, 30 Sep 2016 14:18:58 +0800
-Message-ID: <1475216340-15344-1-git-send-email-shawn.lin@rock-chips.com>
+Subject: [PATCH v3 2/3] mmc: core: changes frequency to hs_max_dtr when selecting hs400es
+Date: Fri, 30 Sep 2016 14:18:59 +0800
+Message-ID: <1475216340-15344-2-git-send-email-shawn.lin@rock-chips.com>
+References: <1475216340-15344-1-git-send-email-shawn.lin@rock-chips.com>
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from lucky1.263xmail.com ([211.157.147.133]:56279 "EHLO
+Received: from lucky1.263xmail.com ([211.157.147.131]:53365 "EHLO
         lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S935528AbcI3GQJ (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 30 Sep 2016 02:16:09 -0400
+        with ESMTP id S964779AbcI3GQL (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 30 Sep 2016 02:16:11 -0400
+In-Reply-To: <1475216340-15344-1-git-send-email-shawn.lin@rock-chips.com>
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
 To: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Adrian Hunter <adrian.hunter@intel.com>, linux-mmc@vger.kernel.org, Doug Anderson <dianders@chromium.org>, Ziyuan Xu <xzy.xu@rock-chips.com>, linux-rockchip@lists.infradead.org, Shawn Lin <shawn.lin@rock-chips.com>, stable@vger.kernel.org
+Cc: Adrian Hunter <adrian.hunter@intel.com>, linux-mmc@vger.kernel.org, Doug Anderson <dianders@chromium.org>, Ziyuan Xu <xzy.xu@rock-chips.com>, linux-rockchip@lists.infradead.org, Shawn Lin <shawn.lin@rock-chips.com>
 
-When introducing hs400es, I didn't notice that we haven't
-switched voltage to 1V2 or 1V8 for it. That happens to work
-as the first controller claiming to support hs400es, arasan(5.1),
-which is designed to only support 1V8. So the voltage is fixed to 1V8.
-But it actually is wrong, and will not fit for other host controllers.
-Let's fix it.
+Per JESD84-B51 P49, Host need to change frequency to <=52MHz
+after setting HS_TIMING to 0x1, and host may changes frequency
+to <= 200MHz after setting HS_TIMING to 0x3. That means the card
+expects the clock rate to increase from the current used f_init
+(which is less than 400KHz, but still being less than 52MHz) to
+52MHz, otherwise we find some eMMC devices significantly report
+failure when sending status.
 
-Fixes: commit 81ac2af65793ecf ("mmc: core: implement enhanced strobe support")
-Cc: <stable@vger.kernel.org>
+Reported-by: Xiao Yao <xiaoyao@rock-chips.com>
 Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
 
 Reviewed-by: Douglas Anderson <dianders@chromium.org>
 ---
 
 Changes in v3:
-- add Doug's tag
+- add Doug's tag and fix the wrong page index of spec
 
 Changes in v2:
-- fix copy-paste error, mea culpa
+- improve the changelog
 
- drivers/mmc/core/mmc.c | 10 ++++++++++
- 1 file changed, 10 insertions(+)
+ drivers/mmc/core/mmc.c | 2 ++
+ 1 file changed, 2 insertions(+)
 
 diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-index 3486bc7..f4ed5ac 100644
+index f4ed5ac..39fc5b2 100644
 --- a/drivers/mmc/core/mmc.c
 +++ b/drivers/mmc/core/mmc.c
-@@ -1263,6 +1263,16 @@ static int mmc_select_hs400es(struct mmc_card *card)
+@@ -1282,6 +1282,8 @@ static int mmc_select_hs400es(struct mmc_card *card)
+ 	if (err)
  		goto out_err;
- 	}
  
-+	if (card->mmc_avail_type & EXT_CSD_CARD_TYPE_HS400_1_2V)
-+		err = __mmc_set_signal_voltage(host, MMC_SIGNAL_VOLTAGE_120);
++	mmc_set_clock(host, card->ext_csd.hs_max_dtr);
 +
-+	if (err && card->mmc_avail_type & EXT_CSD_CARD_TYPE_HS400_1_8V)
-+		err = __mmc_set_signal_voltage(host, MMC_SIGNAL_VOLTAGE_180);
-+
-+	/* If fails try again during next card power cycle */
-+	if (err)
-+		goto out_err;
-+
- 	err = mmc_select_bus_width(card);
- 	if (err < 0)
+ 	err = mmc_switch_status(card);
+ 	if (err)
  		goto out_err;
 -- 
 2.3.7
