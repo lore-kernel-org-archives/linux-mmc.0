@@ -1,35 +1,38 @@
-From: Rob Herring <robh-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-Subject: Re: [RFC 1/2] sdhci: Add device tree property sd-broken-highspeed
-Date: Mon, 3 Oct 2016 12:37:08 -0500
-Message-ID: <20161003173708.GA15916@rob-hp-laptop>
-References: <1474660869-15532-1-git-send-email-zach.brown@ni.com>
- <1474660869-15532-2-git-send-email-zach.brown@ni.com>
+From: "Steven J. Hill" <Steven.Hill@cavium.com>
+Subject: Re: [PATCH v9] mmc: OCTEON: Add host driver for OCTEON MMC
+ controller.
+Date: Mon, 3 Oct 2016 20:18:59 -0500
+Message-ID: <c1d0ccad-10e2-9d5d-8192-2bbd7d7357b3@cavium.com>
+References: <836c0ca9-18f0-f6b5-bb79-8d0301d54154@cavium.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <1474660869-15532-2-git-send-email-zach.brown-acOepvfBmUk@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Zach Brown <zach.brown-acOepvfBmUk@public.gmane.org>
-Cc: ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mips-bounce@linux-mips.org>
+In-Reply-To: <836c0ca9-18f0-f6b5-bb79-8d0301d54154@cavium.com>
+Sender: linux-mips-bounce@linux-mips.org
+Errors-to: linux-mips-bounce@linux-mips.org
+List-help: <mailto:ecartis@linux-mips.org?Subject=help>
+List-unsubscribe: <mailto:ecartis@linux-mips.org?subject=unsubscribe%20linux-mips>
+List-software: Ecartis version 1.0.0
+List-subscribe: <mailto:ecartis@linux-mips.org?subject=subscribe%20linux-mips>
+List-owner: <mailto:ralf@linux-mips.org>
+List-post: <mailto:linux-mips@linux-mips.org>
+List-archive: <http://www.linux-mips.org/archives/linux-mips/>
+To: linux-mips@linux-mips.org, linux-mmc@vger.kernel.org
+Cc: Ulf Hansson <ulf.hansson@linaro.org>, Mark Rutland <mark.rutland@arm.com>, David Daney <david.daney@cavium.com>
 List-Id: linux-mmc@vger.kernel.org
 
-On Fri, Sep 23, 2016 at 03:01:08PM -0500, Zach Brown wrote:
-> Certain board configurations can make highspeed malfunction due to
-> timing issues. In these cases a way is needed to force the controller
-> and card into standard speed even if they otherwise appear to be capable
-> of highspeed.
+On 09/19/2016 03:24 PM, Steven J. Hill wrote:
+> The OCTEON MMC controller is currently found on cn61XX and cn71XX
+> devices. Device parameters are configured from device tree data.
+> eMMC, MMC and SD devices are supported. Tested on Cavium CN7130.
 > 
-> The sd-broken-highspeed property will let the sdhci driver know that
-> highspeed will not work.
+> Signed-off-by: Steven J. Hill <steven.hill@cavium.com>
+> Acked-by: David Daney <david.daney@cavium.com>
 > 
-> Signed-off-by: Zach Brown <zach.brown-acOepvfBmUk@public.gmane.org>
-> ---
->  Documentation/devicetree/bindings/mmc/mmc.txt | 2 ++
->  1 file changed, 2 insertions(+)
+Hello.
 
-Acked-by: Rob Herring <robh-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Have any MMC maintainers gotten a chance to review our driver now
+that v4.8 is out? Thanks.
+
+Steve
