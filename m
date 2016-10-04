@@ -1,121 +1,251 @@
-From: Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: MMC timeout issue on 4.6 kernel
-Date: Tue, 4 Oct 2016 15:59:03 +0300
-Message-ID: <f44317a2-2238-8906-608c-3f45562a2c83@intel.com>
-References: <4FF8F58FAA9D5D4193D4E554E4352C591CCBF88E@XAP-PVEXMBX02.xlnx.xilinx.com>
- <9c0524cd-ae12-4d5c-341c-2ec509a8b3b9@intel.com>
- <4FF8F58FAA9D5D4193D4E554E4352C591CCBF92A@XAP-PVEXMBX02.xlnx.xilinx.com>
+From: Shyam Sundar S K <ssundark@amd.com>
+Subject: [PATCH] mmc: sdhci-pci-core: Tuning mode support for HS200 on AMD
+ Platforms
+Date: Tue, 4 Oct 2016 14:12:23 +0530
+Message-ID: <2ef1e2da-5913-85fe-65a7-0984ac04164d@amd.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
+Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-mmc-owner@vger.kernel.org>
-Received: from mga06.intel.com ([134.134.136.31]:38177 "EHLO mga06.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751549AbcJDNDu (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Tue, 4 Oct 2016 09:03:50 -0400
-In-Reply-To: <4FF8F58FAA9D5D4193D4E554E4352C591CCBF92A@XAP-PVEXMBX02.xlnx.xilinx.com>
+Received: from mail-dm3nam03on0076.outbound.protection.outlook.com ([104.47.41.76]:62080
+        "EHLO NAM03-DM3-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1754098AbcJDNPp (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Tue, 4 Oct 2016 09:15:45 -0400
 Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
-To: Sai Krishna Potthuri <lakshmi.sai.krishna.potthuri@xilinx.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>, Shawn Lin <shawn.lin@rock-chips.com>, dianders@chromium.org, Soren Brinkmann <soren.brinkmann@xilinx.com>
+To: adrian.hunter@intel.com, ulf.hansson@linaro.org
+Cc: linux-mmc@vger.kernel.org, "Sen, Pankaj" <Pankaj.Sen@amd.com>, "Shah, Nehal-bakulchandra" <Nehal-bakulchandra.Shah@amd.com>, "Agrawal, Nitesh-kumar" <Nitesh-kumar.Agrawal@amd.com>
 
-On 04/10/16 15:41, Sai Krishna Potthuri wrote:
-> Hi,
-> 
->>
->> You should use git bisect to find the failing commit.
-> It is failing after many successful runs, issue occurring in regression sometimes after 4 to 5hrs.
-> So, it is taking lot of time to test a single commit. Anyway I will do this if I don't have any
-> Other option.
->>
->> What driver is it?
-> sdhci arasan driver(sdhci-of-arasan.c)
+This patch adds support for HS200 tuning mode on AMD eMMC-4.5.1
 
-So let's cc some of the people who have worked on it.
+Reviewed-by: Sen, Pankaj <Pankaj.Sen@amd.com>
+Reviewed-by: Shah, Nehal-bakulchandra <Nehal-bakulchandra.Shah@amd.com>
+Signed-off-by: S-k, Shyam-sundar <Shyam-sundar.S-k@amd.com>
+---
+ drivers/mmc/host/sdhci-pci-core.c | 182 +++++++++++++++++++++++++++++++++++++-
+ 1 file changed, 180 insertions(+), 2 deletions(-)
 
->>
->> Does the problem still happen on 4.8? Or stable kernels?
-> Tried on 4.7 kernel, didn't see the issue.
+diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-pci-core.c
+index 897cfd2..5893ec4 100644
+--- a/drivers/mmc/host/sdhci-pci-core.c
++++ b/drivers/mmc/host/sdhci-pci-core.c
+@@ -734,6 +734,7 @@ static const struct sdhci_pci_fixes sdhci_via = {
+ 	.probe		= via_probe,
+ };
 
-What about 4.5 stable? i.e. 4.5.7
++
+ static int rtsx_probe_slot(struct sdhci_pci_slot *slot)
+ {
+ 	slot->host->mmc->caps2 |= MMC_CAP2_HS200;
+@@ -755,6 +756,172 @@ enum amd_chipset_gen {
+ 	AMD_CHIPSET_UNKNOWN,
+ };
 
-> 
-> Regards
-> Sai Krishna
->>
->>>
->>> Regards
->>> Sai Krishna
->>>
->>>> -----Original Message-----
->>>> From: Sai Krishna Potthuri
->>>> Sent: Saturday, October 01, 2016 1:59 PM
->>>> To: 'linux-mmc@vger.kernel.org' <linux-mmc@vger.kernel.org>
->>>> Cc: 'Ulf Hansson' <ulf.hansson@linaro.org>
->>>> Subject: RE: MMC timeout issue on 4.6 kernel
->>>>
->>>> Hi,
->>>>
->>>> Any help
->>>>
->>>> Regards
->>>> Sai Krishna
->>>>
->>>>> -----Original Message-----
->>>>> From: Sai Krishna Potthuri
->>>>> Sent: Monday, September 26, 2016 10:29 PM
->>>>> To: linux-mmc@vger.kernel.org
->>>>> Cc: Ulf Hansson <ulf.hansson@linaro.org>
->>>>> Subject: MMC timeout issue on 4.6 kernel
->>>>>
->>>>> Hi,
->>>>>
->>>>> With 4.6 kernel, I am doing regression test on SD which does following
->> things.
->>>>> 1. Mount SD card.
->>>>> 2. Read and write random 1MB data.
->>>>> 3. Reboot the board.
->>>>>
->>>>> I am facing following error while reading the data from the SD card.
->>>>>
->>>>> mmc0: Timeout waiting for hardware interrupt.
->>>>> mmcblk0: error -110 transferring data, sector 8194, nr 2, cmd response
->>>>> 0x900, card status 0xb00
->>>>> mmc0: tried to reset card
->>>>> mmc0: Timeout waiting for hardware interrupt.
->>>>> mmcblk0: error -110 transferring data, sector 8194, nr 2, cmd response
->>>>> 0x900, card status 0xb00
->>>>> mmcblk0: retrying using single block read
->>>>> mmc0: Timeout waiting for hardware interrupt.
->>>>> mmcblk0: error -110 transferring data, sector 8194, nr 2, cmd response
->>>>> 0x900, card status 0x0
->>>>> blk_update_request: I/O error, dev mmcblk0, sector 8194
->>>>> mmc0: Timeout waiting for hardware interrupt.
->>>>> mmcblk0: error -110 transferring data, sector 8195, nr 1, cmd response
->>>>> 0x900, card status 0x0
->>>>> blk_update_request: I/O error, dev mmcblk0, sector 8195 EXT2-fs
->>>> (mmcblk0p1):
->>>>> error: unable to read superblock
->>>>> mmc0: Timeout waiting for hardware interrupt.
->>>>> mmcblk0: error -110 transferring data, sector 16387, nr 61, cmd
->>>>> response 0x900, card status 0xb00
->>>>> mmc0: tried to reset card
->>>>>
->>>>> Getting this error once in a while in regression test after several runs.
->>>>> I am not seeing this issue with 4.5 kernel.
->>>>> Please let me know if anyone has seen this issue.
->>>>>
->>>>> Regards
->>>>> Sai Krishna
->>> --
->>> To unsubscribe from this list: send the line "unsubscribe linux-mmc" in
->>> the body of a message to majordomo@vger.kernel.org
->>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>>
-> 
-> 
-> 
-> This email and any attachments are intended for the sole use of the named recipient(s) and contain(s) confidential information that may be proprietary, privileged or copyrighted under applicable law. If you are not the intended recipient, do not read, copy, or forward this email message or any attachments. Delete this email message and any attachments immediately.
-> 
-> 
++struct tuning_descriptor {
++	unsigned char tune_around;
++	bool this_tune_ok;
++	bool last_tune_ok;
++	bool valid_front_end;
++	unsigned char valid_front;
++	unsigned char valid_window_max;
++	unsigned char tune_low_max;
++	unsigned char tune_low;
++	unsigned char valid_window;
++	unsigned char tune_result;
++};
++
++static struct sdhci_ops sdhci_pci_ops;
++static struct tuning_descriptor tdescriptor;
++
++static int tuning_reset(struct sdhci_host *host)
++{
++	unsigned int val;
++	unsigned long flags;
++
++	spin_lock_irqsave(&host->lock, flags);
++
++	val = sdhci_readw(host, SDHCI_HOST_CONTROL2);
++	val |= SDHCI_CTRL_PRESET_VAL_ENABLE | SDHCI_CTRL_EXEC_TUNING;
++	sdhci_writew(host, val, SDHCI_HOST_CONTROL2);
++
++	val = sdhci_readw(host, SDHCI_HOST_CONTROL2);
++	val &= ~SDHCI_CTRL_EXEC_TUNING;
++	sdhci_writew(host, val, SDHCI_HOST_CONTROL2);
++
++	spin_unlock_irqrestore(&host->lock, flags);
++
++	return 0;
++}
++
++static int config_tuning_phase(struct sdhci_host *host, unsigned char phase)
++{
++	struct sdhci_pci_slot *slot = sdhci_priv(host);
++	struct pci_dev *pdev = slot->chip->pdev;
++	unsigned int val;
++	unsigned long flags;
++
++	spin_lock_irqsave(&host->lock, flags);
++
++	pci_read_config_dword(pdev, 0xb8, &val);
++	val &= ~0x1f;
++	val |= (0x10800 | (phase << 1));
++	pci_write_config_dword(pdev, 0xb8, val);
++
++	spin_unlock_irqrestore(&host->lock, flags);
++
++	return 0;
++}
++
++static int find_good_phase(struct sdhci_host *host)
++{
++	struct tuning_descriptor *td = &tdescriptor;
++	struct sdhci_pci_slot *slot = sdhci_priv(host);
++	struct pci_dev *pdev = slot->chip->pdev;
++	unsigned int val;
++	unsigned long flags;
++
++	spin_lock_irqsave(&host->lock, flags);
++
++	if (td->this_tune_ok == false)
++		td->valid_front_end = 1;
++
++	if (td->valid_front_end)
++		td->valid_front = td->valid_front;
++	else if (td->this_tune_ok)
++		td->valid_front = td->valid_front + 1;
++
++	if ((!td->this_tune_ok && td->last_tune_ok) ||
++					(td->tune_around == 11)) {
++
++		if (td->valid_window > td->valid_window_max) {
++			td->valid_window_max = td->valid_window;
++			td->tune_low_max = td->tune_low;
++		}
++	}
++
++	if (td->this_tune_ok && (!td->last_tune_ok))
++		td->tune_low = td->tune_around;
++	if (!td->this_tune_ok && td->last_tune_ok)
++		td->valid_window = 0x0;
++	else if (td->this_tune_ok)
++		td->valid_window = td->valid_window + 1;
++
++	td->last_tune_ok = td->this_tune_ok;
++
++	if (td->tune_around == 11) {
++		if ((td->valid_front + td->valid_window) >
++						td->valid_window_max) {
++			if (td->valid_front > td->valid_window)
++				td->tune_result = ((td->valid_front -
++						td->valid_window) >> 1);
++			else
++				td->tune_result = td->tune_low +
++				((td->valid_window + td->valid_front) >> 1);
++		} else {
++			td->tune_result = td->tune_low_max +
++					(td->valid_window_max>>1);
++		}
++
++
++		if (td->tune_result > 0x0b)
++			td->tune_result = 0x0b;
++
++		pci_read_config_dword(pdev, 0xb8, &val);
++		val &= ~0x1f;
++		val |= (0x10800 | (td->tune_result<<1));
++		pci_write_config_dword(pdev, 0xb8, val);
++	}
++
++	spin_unlock_irqrestore(&host->lock, flags);
++
++	return 0;
++}
++
++static int amd_execute_tuning(struct sdhci_host *host, u32 opcode)
++{
++	struct tuning_descriptor *td = &tdescriptor;
++	u8 ctrl;
++
++	tuning_reset(host);
++	memset(td, 0x0, sizeof(struct tuning_descriptor));
++
++	if (host->quirks2 & SDHCI_QUIRK2_CLEAR_TRANSFERMODE_REG_BEFORE_CMD)
++		opcode = MMC_SEND_TUNING_BLOCK_HS200;
++
++	for (td->tune_around = 0; td->tune_around < 12; td->tune_around++) {
++
++		config_tuning_phase(host, td->tune_around);
++
++		if (mmc_send_tuning(host->mmc, opcode, NULL)) {
++			td->this_tune_ok = false;
++			host->mmc->need_retune = 0;
++			mdelay(4);
++			ctrl = SDHCI_RESET_CMD | SDHCI_RESET_DATA;
++			sdhci_writeb(host, ctrl, SDHCI_SOFTWARE_RESET);
++		} else {
++			td->this_tune_ok = true;
++		}
++
++		find_good_phase(host);
++	}
++
++	host->mmc->retune_period = 0;
++
++	return 0;
++}
++
++static int amd_enable_manual_tuning(struct sdhci_pci_slot *slot)
++{
++	struct pci_dev *pdev = slot->chip->pdev;
++	unsigned int val;
++
++	pci_read_config_dword(pdev, 0xd0, &val);
++	val &= 0xffffffcf;
++	val |= 0x30;
++	pci_write_config_dword(pdev, 0xd0, val);
++
++	return 0;
++}
++
+ static int amd_probe(struct sdhci_pci_chip *chip)
+ {
+ 	struct pci_dev	*smbus_dev;
+@@ -779,14 +946,25 @@ static int amd_probe(struct sdhci_pci_chip *chip)
 
+ 	if ((gen == AMD_CHIPSET_BEFORE_ML) || (gen == AMD_CHIPSET_CZ)) {
+ 		chip->quirks2 |= SDHCI_QUIRK2_CLEAR_TRANSFERMODE_REG_BEFORE_CMD;
+-		chip->quirks2 |= SDHCI_QUIRK2_BROKEN_HS200;
+ 	}
+
+ 	return 0;
+ }
+
++static int amd_probe_slot(struct sdhci_pci_slot *slot)
++{
++	struct sdhci_host *host = slot->host;
++
++	if (host->quirks2 & SDHCI_QUIRK2_CLEAR_TRANSFERMODE_REG_BEFORE_CMD) {
++		sdhci_pci_ops.platform_execute_tuning = amd_execute_tuning;
++		amd_enable_manual_tuning(slot);
++	}
++	return 0;
++}
++
+ static const struct sdhci_pci_fixes sdhci_amd = {
+ 	.probe		= amd_probe,
++	.probe_slot	= amd_probe_slot,
+ };
+
+ static const struct pci_device_id pci_ids[] = {
+@@ -1397,7 +1575,7 @@ static int sdhci_pci_select_drive_strength(struct sdhci_host *host,
+ 					   card_drv, drv_type);
+ }
+
+-static const struct sdhci_ops sdhci_pci_ops = {
++static struct sdhci_ops sdhci_pci_ops = {
+ 	.set_clock	= sdhci_set_clock,
+ 	.enable_dma	= sdhci_pci_enable_dma,
+ 	.set_bus_width	= sdhci_pci_set_bus_width,
+-- 
+2.7.4
