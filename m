@@ -1,111 +1,109 @@
 From: Ritesh Harjani <riteshh@codeaurora.org>
-Subject: [PATCH v5 03/12] mmc: sdhci-msm: add pltfm_data support to get clk-rates from DT
-Date: Wed,  5 Oct 2016 20:10:31 +0530
-Message-ID: <1475678440-3525-4-git-send-email-riteshh@codeaurora.org>
+Subject: [PATCH v5 04/12] ARM: dts: qcom: Add clk-rates to sdhc1 & sdhc2
+Date: Wed,  5 Oct 2016 20:10:32 +0530
+Message-ID: <1475678440-3525-5-git-send-email-riteshh@codeaurora.org>
 References: <1475678440-3525-1-git-send-email-riteshh@codeaurora.org>
-Return-path: <linux-arm-msm-owner@vger.kernel.org>
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from smtp.codeaurora.org ([198.145.29.96]:49801 "EHLO
+        smtp.codeaurora.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752590AbcJEOlp (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 5 Oct 2016 10:41:45 -0400
 In-Reply-To: <1475678440-3525-1-git-send-email-riteshh@codeaurora.org>
-Sender: linux-arm-msm-owner@vger.kernel.org
+Sender: linux-mmc-owner@vger.kernel.org
+List-Id: linux-mmc@vger.kernel.org
 To: ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, adrian.hunter@intel.com, shawn.lin@rock-chips.com
 Cc: david.brown@linaro.org, andy.gross@linaro.org, devicetree@vger.kernel.org, linux-arm-msm@vger.kernel.org, georgi.djakov@linaro.org, alex.lemberg@sandisk.com, mateusz.nowak@intel.com, Yuliy.Izrailov@sandisk.com, asutoshd@codeaurora.org, david.griego@linaro.org, stummala@codeaurora.org, venkatg@codeaurora.org, sboyd@codeaurora.org, bjorn.andersson@linaro.org, pramod.gurav@linaro.org, Ritesh Harjani <riteshh@codeaurora.org>
-List-Id: linux-mmc@vger.kernel.org
 
-This adds support for sdhc-msm controllers to get supported
-clk-rates from DT. sdhci-msm would need it's own set_clock
-ops to be implemented. For this, supported clk-rates needs
-to be populated in sdhci_msm_pltfm_data.
+Add msm supported clk-rates for all sdhc nodes.
 
 Signed-off-by: Ritesh Harjani <riteshh@codeaurora.org>
 ---
- .../devicetree/bindings/mmc/sdhci-msm.txt          |  1 +
- drivers/mmc/host/sdhci-msm.c                       | 48 ++++++++++++++++++++++
- 2 files changed, 49 insertions(+)
+ arch/arm/boot/dts/qcom-apq8084.dtsi   | 4 ++++
+ arch/arm/boot/dts/qcom-msm8974.dtsi   | 4 ++++
+ arch/arm64/boot/dts/qcom/msm8916.dtsi | 4 ++++
+ arch/arm64/boot/dts/qcom/msm8996.dtsi | 2 ++
+ 4 files changed, 14 insertions(+)
 
-diff --git a/Documentation/devicetree/bindings/mmc/sdhci-msm.txt b/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
-index 485483a..6a83b38 100644
---- a/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
-+++ b/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
-@@ -17,6 +17,7 @@ Required properties:
- 	"iface" - Main peripheral bus clock (PCLK/HCLK - AHB Bus clock) (required)
- 	"core"	- SDC MMC clock (MCLK) (required)
- 	"bus"	- SDCC bus voter clock (optional)
-+- clk-rates: Array of supported GCC clock frequencies for sdhc, Units - Hz.
+diff --git a/arch/arm/boot/dts/qcom-apq8084.dtsi b/arch/arm/boot/dts/qcom-apq8084.dtsi
+index 41e09c8..b3ce5e5 100644
+--- a/arch/arm/boot/dts/qcom-apq8084.dtsi
++++ b/arch/arm/boot/dts/qcom-apq8084.dtsi
+@@ -434,6 +434,8 @@
+ 			interrupt-names = "hc_irq", "pwr_irq";
+ 			clocks = <&gcc GCC_SDCC1_APPS_CLK>, <&gcc GCC_SDCC1_AHB_CLK>;
+ 			clock-names = "core", "iface";
++			clk-rates = <400000 25000000 50000000 100000000
++					200000000>;
+ 			status = "disabled";
+ 		};
  
- Example:
+@@ -445,6 +447,8 @@
+ 			interrupt-names = "hc_irq", "pwr_irq";
+ 			clocks = <&gcc GCC_SDCC2_APPS_CLK>, <&gcc GCC_SDCC2_AHB_CLK>;
+ 			clock-names = "core", "iface";
++			clk-rates = <400000 25000000 50000000 100000000
++					200000000>;
+ 			status = "disabled";
+ 		};
  
-diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
-index 85ddaae..042ecb2 100644
---- a/drivers/mmc/host/sdhci-msm.c
-+++ b/drivers/mmc/host/sdhci-msm.c
-@@ -81,6 +81,8 @@ struct sdhci_msm_host {
- 	struct clk *clk;	/* main SD/MMC bus clock */
- 	struct clk *pclk;	/* SDHC peripheral bus clock */
- 	struct clk *bus_clk;	/* SDHC bus voter clock */
-+	u32 *clk_table;
-+	int clk_table_sz;
- 	struct mmc_host *mmc;
- 	bool use_14lpp_dll_reset;
- };
-@@ -582,6 +584,50 @@ static const struct sdhci_pltfm_data sdhci_msm_pdata = {
- 	.ops = &sdhci_msm_ops,
- };
+diff --git a/arch/arm/boot/dts/qcom-msm8974.dtsi b/arch/arm/boot/dts/qcom-msm8974.dtsi
+index f9b0d90..6c78f3e 100644
+--- a/arch/arm/boot/dts/qcom-msm8974.dtsi
++++ b/arch/arm/boot/dts/qcom-msm8974.dtsi
+@@ -566,6 +566,8 @@
+ 			interrupt-names = "hc_irq", "pwr_irq";
+ 			clocks = <&gcc GCC_SDCC1_APPS_CLK>, <&gcc GCC_SDCC1_AHB_CLK>;
+ 			clock-names = "core", "iface";
++			clk-rates = <400000 25000000 50000000 100000000
++					200000000>;
+ 			status = "disabled";
+ 		};
  
-+static int sdhci_msm_dt_get_array(struct device *dev, const char *prop_name,
-+				u32 **table, int *size)
-+{
-+	struct device_node *np = dev->of_node;
-+	int count, ret;
-+	u32 *arr;
-+
-+	count = of_property_count_elems_of_size(np, prop_name, sizeof(u32));
-+	if (count < 0) {
-+		dev_warn(dev, "%s: Invalid dt property, err(%d)\n",
-+				prop_name, count);
-+		return count;
-+	}
-+
-+	arr = kcalloc(count, sizeof(*arr), GFP_KERNEL);
-+	if (!arr)
-+		return -ENOMEM;
-+
-+	ret = of_property_read_u32_array(np, prop_name, arr, count);
-+	if (ret) {
-+		kfree(arr);
-+		dev_warn(dev, "%s Invalid dt array property, err(%d)\n",
-+				prop_name, ret);
-+		return ret;
-+	}
-+	*table = arr;
-+	*size = count;
-+	return 0;
-+}
-+
-+void sdhci_msm_populate_dt(struct device *dev,
-+						struct sdhci_msm_host *msm_host)
-+{
-+	int table_sz = 0;
-+	u32 *table = NULL;
-+
-+	if (sdhci_msm_dt_get_array(dev, "clk-rates", &table, &table_sz)) {
-+		dev_warn(dev, "failed in DT parsing for supported clk-rates\n");
-+		return;
-+	}
-+	msm_host->clk_table = table;
-+	msm_host->clk_table_sz = table_sz;
-+}
-+
- static int sdhci_msm_probe(struct platform_device *pdev)
- {
- 	struct sdhci_host *host;
-@@ -608,6 +654,8 @@ static int sdhci_msm_probe(struct platform_device *pdev)
+@@ -577,6 +579,8 @@
+ 			interrupt-names = "hc_irq", "pwr_irq";
+ 			clocks = <&gcc GCC_SDCC2_APPS_CLK>, <&gcc GCC_SDCC2_AHB_CLK>;
+ 			clock-names = "core", "iface";
++			clk-rates = <400000 25000000 50000000 100000000
++					200000000>;
+ 			status = "disabled";
+ 		};
  
- 	sdhci_get_of_property(pdev);
+diff --git a/arch/arm64/boot/dts/qcom/msm8916.dtsi b/arch/arm64/boot/dts/qcom/msm8916.dtsi
+index b5b6014..2f02058 100644
+--- a/arch/arm64/boot/dts/qcom/msm8916.dtsi
++++ b/arch/arm64/boot/dts/qcom/msm8916.dtsi
+@@ -512,6 +512,8 @@
+ 			clocks = <&gcc GCC_SDCC1_APPS_CLK>,
+ 				 <&gcc GCC_SDCC1_AHB_CLK>;
+ 			clock-names = "core", "iface";
++			clk-rates = <400000 25000000 50000000 100000000
++					177770000>;
+ 			bus-width = <8>;
+ 			non-removable;
+ 			status = "disabled";
+@@ -527,6 +529,8 @@
+ 			clocks = <&gcc GCC_SDCC2_APPS_CLK>,
+ 				 <&gcc GCC_SDCC2_AHB_CLK>;
+ 			clock-names = "core", "iface";
++			clk-rates = <400000 25000000 50000000 100000000
++					200000000>;
+ 			bus-width = <4>;
+ 			status = "disabled";
+ 		};
+diff --git a/arch/arm64/boot/dts/qcom/msm8996.dtsi b/arch/arm64/boot/dts/qcom/msm8996.dtsi
+index 8fb4747..cd1ac12 100644
+--- a/arch/arm64/boot/dts/qcom/msm8996.dtsi
++++ b/arch/arm64/boot/dts/qcom/msm8996.dtsi
+@@ -410,6 +410,8 @@
+ 			 clock-names = "iface", "core";
+ 			 clocks = <&gcc GCC_SDCC2_AHB_CLK>,
+ 			 <&gcc GCC_SDCC2_APPS_CLK>;
++			 clk-rates = <400000 25000000 50000000 100000000
++					200000000>;
+ 			 bus-width = <4>;
+ 		 };
  
-+	sdhci_msm_populate_dt(&pdev->dev, msm_host);
-+
- 	/* Setup SDCC bus voter clock. */
- 	msm_host->bus_clk = devm_clk_get(&pdev->dev, "bus");
- 	if (!IS_ERR(msm_host->bus_clk)) {
 -- 
 The Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum, 
 a Linux Foundation Collaborative Project.
+
