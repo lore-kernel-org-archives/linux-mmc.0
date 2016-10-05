@@ -1,143 +1,111 @@
-From: Ritesh Harjani <riteshh-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
-Subject: [PATCH v5 02/12] mmc: sdhci-msm: Update DLL reset sequence
-Date: Wed,  5 Oct 2016 20:10:30 +0530
-Message-ID: <1475678440-3525-3-git-send-email-riteshh@codeaurora.org>
+From: Ritesh Harjani <riteshh@codeaurora.org>
+Subject: [PATCH v5 03/12] mmc: sdhci-msm: add pltfm_data support to get clk-rates from DT
+Date: Wed,  5 Oct 2016 20:10:31 +0530
+Message-ID: <1475678440-3525-4-git-send-email-riteshh@codeaurora.org>
 References: <1475678440-3525-1-git-send-email-riteshh@codeaurora.org>
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1475678440-3525-1-git-send-email-riteshh-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org
-Cc: david.brown-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, andy.gross-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-msm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, georgi.djakov-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, alex.lemberg-XdAiOPVOjttBDgjK7y7TUQ@public.gmane.org, mateusz.nowak-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, Yuliy.Izrailov-XdAiOPVOjttBDgjK7y7TUQ@public.gmane.org, asutoshd-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, david.griego-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, stummala-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, venkatg-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, sboyd-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, bjorn.andersson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, pramod.gurav-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, Ritesh Harjani <riteshh-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
+Return-path: <linux-arm-msm-owner@vger.kernel.org>
+In-Reply-To: <1475678440-3525-1-git-send-email-riteshh@codeaurora.org>
+Sender: linux-arm-msm-owner@vger.kernel.org
+To: ulf.hansson@linaro.org, linux-mmc@vger.kernel.org, adrian.hunter@intel.com, shawn.lin@rock-chips.com
+Cc: david.brown@linaro.org, andy.gross@linaro.org, devicetree@vger.kernel.org, linux-arm-msm@vger.kernel.org, georgi.djakov@linaro.org, alex.lemberg@sandisk.com, mateusz.nowak@intel.com, Yuliy.Izrailov@sandisk.com, asutoshd@codeaurora.org, david.griego@linaro.org, stummala@codeaurora.org, venkatg@codeaurora.org, sboyd@codeaurora.org, bjorn.andersson@linaro.org, pramod.gurav@linaro.org, Ritesh Harjani <riteshh@codeaurora.org>
 List-Id: linux-mmc@vger.kernel.org
 
-From: Venkat Gopalakrishnan <venkatg-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
+This adds support for sdhc-msm controllers to get supported
+clk-rates from DT. sdhci-msm would need it's own set_clock
+ops to be implemented. For this, supported clk-rates needs
+to be populated in sdhci_msm_pltfm_data.
 
-SDCC core with minor version >= 0x42 introduced new 14lpp
-DLL. This has additional requirements in the reset sequence
-for DLL tuning. Make necessary changes as needed.
-
-Without this patch we see below errors on such SDHC controllers
-	sdhci_msm 7464900.sdhci: mmc0: DLL failed to LOCK
-	mmc0: tuning execution failed: -110
-
-Signed-off-by: Venkat Gopalakrishnan <venkatg-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
-Signed-off-by: Ritesh Harjani <riteshh-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
-Acked-by: Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Signed-off-by: Ritesh Harjani <riteshh@codeaurora.org>
 ---
- drivers/mmc/host/sdhci-msm.c | 48 ++++++++++++++++++++++++++++++++++++++++++++
- 1 file changed, 48 insertions(+)
+ .../devicetree/bindings/mmc/sdhci-msm.txt          |  1 +
+ drivers/mmc/host/sdhci-msm.c                       | 48 ++++++++++++++++++++++
+ 2 files changed, 49 insertions(+)
 
+diff --git a/Documentation/devicetree/bindings/mmc/sdhci-msm.txt b/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
+index 485483a..6a83b38 100644
+--- a/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
++++ b/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
+@@ -17,6 +17,7 @@ Required properties:
+ 	"iface" - Main peripheral bus clock (PCLK/HCLK - AHB Bus clock) (required)
+ 	"core"	- SDC MMC clock (MCLK) (required)
+ 	"bus"	- SDCC bus voter clock (optional)
++- clk-rates: Array of supported GCC clock frequencies for sdhc, Units - Hz.
+ 
+ Example:
+ 
 diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
-index 42f42aa..85ddaae 100644
+index 85ddaae..042ecb2 100644
 --- a/drivers/mmc/host/sdhci-msm.c
 +++ b/drivers/mmc/host/sdhci-msm.c
-@@ -58,11 +58,17 @@
- #define CORE_DLL_CONFIG		0x100
- #define CORE_DLL_STATUS		0x108
- 
-+#define CORE_DLL_CONFIG_2	0x1b4
-+#define CORE_FLL_CYCLE_CNT	BIT(18)
-+#define CORE_DLL_CLOCK_DISABLE	BIT(21)
-+
- #define CORE_VENDOR_SPEC	0x10c
- #define CORE_CLK_PWRSAVE	BIT(1)
- 
- #define CORE_VENDOR_SPEC_CAPABILITIES0	0x11c
- 
-+#define TCXO_FREQ		19200000
-+
- #define CDR_SELEXT_SHIFT	20
- #define CDR_SELEXT_MASK		(0xf << CDR_SELEXT_SHIFT)
- #define CMUX_SHIFT_PHASE_SHIFT	24
-@@ -76,6 +82,7 @@ struct sdhci_msm_host {
+@@ -81,6 +81,8 @@ struct sdhci_msm_host {
+ 	struct clk *clk;	/* main SD/MMC bus clock */
  	struct clk *pclk;	/* SDHC peripheral bus clock */
  	struct clk *bus_clk;	/* SDHC bus voter clock */
++	u32 *clk_table;
++	int clk_table_sz;
  	struct mmc_host *mmc;
-+	bool use_14lpp_dll_reset;
+ 	bool use_14lpp_dll_reset;
+ };
+@@ -582,6 +584,50 @@ static const struct sdhci_pltfm_data sdhci_msm_pdata = {
+ 	.ops = &sdhci_msm_ops,
  };
  
- /* Platform specific tuning */
-@@ -304,6 +311,8 @@ static inline void msm_cm_dll_set_freq(struct sdhci_host *host)
- static int msm_init_cm_dll(struct sdhci_host *host)
++static int sdhci_msm_dt_get_array(struct device *dev, const char *prop_name,
++				u32 **table, int *size)
++{
++	struct device_node *np = dev->of_node;
++	int count, ret;
++	u32 *arr;
++
++	count = of_property_count_elems_of_size(np, prop_name, sizeof(u32));
++	if (count < 0) {
++		dev_warn(dev, "%s: Invalid dt property, err(%d)\n",
++				prop_name, count);
++		return count;
++	}
++
++	arr = kcalloc(count, sizeof(*arr), GFP_KERNEL);
++	if (!arr)
++		return -ENOMEM;
++
++	ret = of_property_read_u32_array(np, prop_name, arr, count);
++	if (ret) {
++		kfree(arr);
++		dev_warn(dev, "%s Invalid dt array property, err(%d)\n",
++				prop_name, ret);
++		return ret;
++	}
++	*table = arr;
++	*size = count;
++	return 0;
++}
++
++void sdhci_msm_populate_dt(struct device *dev,
++						struct sdhci_msm_host *msm_host)
++{
++	int table_sz = 0;
++	u32 *table = NULL;
++
++	if (sdhci_msm_dt_get_array(dev, "clk-rates", &table, &table_sz)) {
++		dev_warn(dev, "failed in DT parsing for supported clk-rates\n");
++		return;
++	}
++	msm_host->clk_table = table;
++	msm_host->clk_table_sz = table_sz;
++}
++
+ static int sdhci_msm_probe(struct platform_device *pdev)
  {
- 	struct mmc_host *mmc = host->mmc;
-+	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-+	struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
- 	int wait_cnt = 50;
- 	unsigned long flags;
- 	u32 config = 0;
-@@ -319,6 +328,16 @@ static int msm_init_cm_dll(struct sdhci_host *host)
- 	config &= ~CORE_CLK_PWRSAVE;
- 	writel_relaxed(config, host->ioaddr + CORE_VENDOR_SPEC);
+ 	struct sdhci_host *host;
+@@ -608,6 +654,8 @@ static int sdhci_msm_probe(struct platform_device *pdev)
  
-+	if (msm_host->use_14lpp_dll_reset) {
-+		config = readl_relaxed(host->ioaddr + CORE_DLL_CONFIG);
-+		config &= ~CORE_CK_OUT_EN;
-+		writel_relaxed(config, host->ioaddr + CORE_DLL_CONFIG);
-+
-+		config = readl_relaxed(host->ioaddr + CORE_DLL_CONFIG_2);
-+		config |= CORE_DLL_CLOCK_DISABLE;
-+		writel_relaxed(config, host->ioaddr + CORE_DLL_CONFIG_2);
-+	}
-+
- 	/* Write 1 to DLL_RST bit of DLL_CONFIG register */
- 	config = readl_relaxed(host->ioaddr + CORE_DLL_CONFIG);
- 	config |= CORE_DLL_RST;
-@@ -330,6 +349,24 @@ static int msm_init_cm_dll(struct sdhci_host *host)
- 	writel_relaxed(config, host->ioaddr + CORE_DLL_CONFIG);
- 	msm_cm_dll_set_freq(host);
+ 	sdhci_get_of_property(pdev);
  
-+	if (msm_host->use_14lpp_dll_reset) {
-+		u32 mclk_freq = 0;
++	sdhci_msm_populate_dt(&pdev->dev, msm_host);
 +
-+		if ((readl_relaxed(host->ioaddr + CORE_DLL_CONFIG_2)
-+					& CORE_FLL_CYCLE_CNT))
-+			mclk_freq = (u32) ((host->clock / TCXO_FREQ) * 8);
-+		else
-+			mclk_freq = (u32) ((host->clock / TCXO_FREQ) * 4);
-+
-+		config = readl_relaxed(host->ioaddr + CORE_DLL_CONFIG_2);
-+		config &= ~(0xFF << 10);
-+		config |= mclk_freq << 10;
-+
-+		writel_relaxed(config, host->ioaddr + CORE_DLL_CONFIG_2);
-+		/* wait for 5us before enabling DLL clock */
-+		udelay(5);
-+	}
-+
- 	/* Write 0 to DLL_RST bit of DLL_CONFIG register */
- 	config = readl_relaxed(host->ioaddr + CORE_DLL_CONFIG);
- 	config &= ~CORE_DLL_RST;
-@@ -340,6 +377,14 @@ static int msm_init_cm_dll(struct sdhci_host *host)
- 	config &= ~CORE_DLL_PDN;
- 	writel_relaxed(config, host->ioaddr + CORE_DLL_CONFIG);
- 
-+	if (msm_host->use_14lpp_dll_reset) {
-+		msm_cm_dll_set_freq(host);
-+		/* Enable the DLL clock */
-+		config = readl_relaxed(host->ioaddr + CORE_DLL_CONFIG_2);
-+		config &= ~CORE_DLL_CLOCK_DISABLE;
-+		writel_relaxed(config, host->ioaddr + CORE_DLL_CONFIG_2);
-+	}
-+
- 	/* Set DLL_EN bit to 1. */
- 	config = readl_relaxed(host->ioaddr + CORE_DLL_CONFIG);
- 	config |= CORE_DLL_EN;
-@@ -641,6 +686,9 @@ static int sdhci_msm_probe(struct platform_device *pdev)
- 	dev_dbg(&pdev->dev, "MCI Version: 0x%08x, major: 0x%04x, minor: 0x%02x\n",
- 		core_version, core_major, core_minor);
- 
-+	if ((core_major == 1) && (core_minor >= 0x42))
-+		msm_host->use_14lpp_dll_reset = true;
-+
- 	/*
- 	 * Support for some capabilities is not advertised by newer
- 	 * controller versions and must be explicitly enabled.
+ 	/* Setup SDCC bus voter clock. */
+ 	msm_host->bus_clk = devm_clk_get(&pdev->dev, "bus");
+ 	if (!IS_ERR(msm_host->bus_clk)) {
 -- 
 The Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum, 
 a Linux Foundation Collaborative Project.
-
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
