@@ -1,70 +1,93 @@
-From: Julia Cartwright <julia-acOepvfBmUk@public.gmane.org>
-Subject: Re: [RFC 1/2] sdhci: Add device tree property sd-broken-highspeed
-Date: Wed, 5 Oct 2016 16:22:23 -0500
-Message-ID: <20161005212223.GK10625@jcartwri.amer.corp.natinst.com>
-References: <1474660869-15532-1-git-send-email-zach.brown@ni.com>
- <1474660869-15532-2-git-send-email-zach.brown@ni.com>
- <CAPDyKFogDKM86XKo1iQE1KU5HpEic23FD5YQGF9QjSFYBDJn4Q@mail.gmail.com>
- <CAL_JsqLjtn2-FaO_h9JWOsZqttQ35yV6KOnQz2Z-cMr=0GHJCg@mail.gmail.com>
+From: Alex Lemberg <Alex.Lemberg@sandisk.com>
+Subject: Re: Enabling MMC BKOPs in kernel based on host caps
+Date: Wed, 5 Oct 2016 22:09:39 +0000
+Message-ID: <4B194B80-8DE7-4296-914E-00FC1C0A4D66@sandisk.com>
+References: <1475491384-15818-1-git-send-email-rk@ti.com>
+ <74289549-5576-c4fc-5270-8820c8654bc5@rock-chips.com>
+ <dfcdad0d-0780-0641-cb0a-46557334fa16@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <CAL_JsqLjtn2-FaO_h9JWOsZqttQ35yV6KOnQz2Z-cMr=0GHJCg-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-Content-Disposition: inline
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-Cc: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Zach Brown <zach.brown-acOepvfBmUk@public.gmane.org>, Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, linux-mmc <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <linux-mmc-owner@vger.kernel.org>
+Received: from mail-sn1nam02on0072.outbound.protection.outlook.com ([104.47.36.72]:15055
+        "EHLO NAM02-SN1-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S940181AbcJEWJm (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Wed, 5 Oct 2016 18:09:42 -0400
+In-Reply-To: <dfcdad0d-0780-0641-cb0a-46557334fa16@ti.com>
+Content-Language: en-US
+Content-ID: <F2E3EEEC71E9674BB6535363A5BB9E8D@namprd02.prod.outlook.com>
+Sender: linux-mmc-owner@vger.kernel.org
 List-Id: linux-mmc@vger.kernel.org
+To: Ravikumar <a0131654@ti.com>, Shawn Lin <shawn.lin@rock-chips.com>, Ravikumar Kattekola <rk@ti.com>, "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 
-On Wed, Oct 05, 2016 at 03:03:44PM -0500, Rob Herring wrote:
-> On Wed, Oct 5, 2016 at 1:33 PM, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
-> > On 23 September 2016 at 22:01, Zach Brown <zach.brown-acOepvfBmUk@public.gmane.org> wrote:
-> >> Certain board configurations can make highspeed malfunction due to
-> >> timing issues. In these cases a way is needed to force the controller
-> >> and card into standard speed even if they otherwise appear to be capable
-> >> of highspeed.
-> >>
-> >> The sd-broken-highspeed property will let the sdhci driver know that
-> >> highspeed will not work.
-> >>
-> >> Signed-off-by: Zach Brown <zach.brown-acOepvfBmUk@public.gmane.org>
-> >> ---
-> >>  Documentation/devicetree/bindings/mmc/mmc.txt | 2 ++
-> >>  1 file changed, 2 insertions(+)
-> >>
-> >> diff --git a/Documentation/devicetree/bindings/mmc/mmc.txt b/Documentation/devicetree/bindings/mmc/mmc.txt
-> >> index 8a37782..59332ea 100644
-> >> --- a/Documentation/devicetree/bindings/mmc/mmc.txt
-> >> +++ b/Documentation/devicetree/bindings/mmc/mmc.txt
-> >> @@ -52,6 +52,8 @@ Optional properties:
-> >>  - no-sdio: controller is limited to send sdio cmd during initialization
-> >>  - no-sd: controller is limited to send sd cmd during initialization
-> >>  - no-mmc: controller is limited to send mmc cmd during initialization
-> >> +- sd-broken-highspeed: Highspeed is broken, even if the controller and card
-> >> +  themselves claim they support highspeed.
-> >
-> > Regarding a broken card, that is managed via the card quirks and not in DT.
-> >
-> > If this is about a controller limitation, we already have the option
-> > to describe what it supports, so we don't need an option to tell what
-> > it *not* supports.
-> >
-> > For example "cap-sd-highspeed" tells whether the controller supports
-> > SD high-speed, please use that instead.
-> 
-> If a controller has a capability register and it lies (perhaps the
-> board has limitations that the SoC does not), then you may need to
-> disable a feature.
-
-That's precisely the case here.  This is a board-level problem, not a
-card or controller problem.  As Zach mentioned in the cover letter, the
-trace length between controller and card on some of our boards is too
-long to meet high-speed timings, even though both card and controller
-advertise it.
-
-Thanks,
-   Julia
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+SGkgUmF2aWt1bWFyLA0KDQpUaGUgcmVhc29uIGZvciBlbmFibGluZyBBdXRvL01hbnVhbCBCS09Q
+UyBpcyB1bmRlcnN0YW5kYWJsZS4NClBlcnNvbmFsbHkgSSBkb27igJl0IHRoaW5rIHRoYXQgdXNl
+ciBzcGFjZSBzaG91bGQgcGxheSB3aXRoIGEgc3RvcmFnZSBkZXZpY2UgDQpCS09QUyBzZXR0aW5n
+cywgaXQgc2hvdWxkIGJlIGEgbWF0dGVyIG9mIHN0b3JhZ2UgZGV2aWNlIGFuZCBhIGRyaXZlciBk
+ZWNpc2lvbi4gDQpCdXQgYXMgU2hvd24gbWVudGlvbmVkLCB0aGVyZSBpcyBhIGRpc2N1c3Npb24g
+b24gdGhpcyB0b3BpYy4NCkFsc28sIHJlY2VudGx5IEkgaGF2ZSBzdWJtaXR0ZWQgYSBwYXRjaCBm
+b3IgbGV0dGluZyBkZXZpY2UgbW9yZSB0aW1lDQp0byBjb21wbGV0ZSBpdHMgQktPUFMgb24gcnVu
+dGltZSBTdXNwZW5kOg0KaHR0cDovL3d3dy5zcGluaWNzLm5ldC9saXN0cy9saW51eC1tbWMvbXNn
+Mzg5NTIuaHRtbA0KDQpUaGFua3MsDQpBbGV4DQoNCk9uIDEwLzUvMTYsIDE6NTUgUE0sICJSYXZp
+a3VtYXIiIDxhMDEzMTY1NEB0aS5jb20+IHdyb3RlOg0KDQo+SGkgU2hhd24sDQo+DQo+DQo+T24g
+V2VkbmVzZGF5IDA1IE9jdG9iZXIgMjAxNiAwMzowNyBQTSwgU2hhd24gTGluIHdyb3RlOg0KPj4g
+SGkgUmF2aWt1bWFyLA0KPj4NCj4+ICsgQWxleCwNCj4+DQo+PiDlnKggMjAxNi8xMC8zIDE4OjQz
+LCBSYXZpa3VtYXIgS2F0dGVrb2xhIOWGmemBkzoNCj4+PiBIaSBhbGwsDQo+Pj4gICAgIEnigJl2
+ZSBzZWVuIGFuIGVNTUMgZmFpbHVyZSBkdWUgdG8gcGVuZGluZyBiYWNrZ3JvdW5kIG9wZXJhdGlv
+bnMgb24gDQo+Pj4gYSBjZXJ0YWluIE9NQVAgZGV2aWNlIHNpbmNlIGJrb3BzIGVuYWJsZSBiaXQg
+d2FzIG5vdCBzZXQuDQo+Pj4gRnVydGhlciBpbnZlc3RpZ2F0aW9uIHNob3dlZCBtZSB0aGF0IHNv
+bWVvbmUgYWxyZWFkeSBwb3N0ZWQgcGF0Y2ggdG8gDQo+Pj4gZW5hYmxlIEJhY2tncm91bmQgb3Bl
+cmF0aW9ucyBpbiBrZXJuZWwgIGJhc2VkIG9uIGEgaG9zdCBjYXBhYmlsaXR5IA0KPj4+IGNoZWNr
+IChDYXBzMiAmIEJLX09QU19FTikNCj4+PiBidXQgd2FzIHR1cm5lZCBkb3duIHF1b3RpbmcgdGhh
+dCBpdCBzaG91bGQgYmUgZW5hYmxlZCBmcm9tIHVzZXIgc3BhY2UgDQo+Pj4gdXNpbmcgbW1jLXV0
+aWxzLg0KPj4+DQo+Pj4gRW5hYmxpbmcgdGhpcyB3b3VsZCBhZGQgb25lIGFkZGl0aW9uYWwgY2hl
+Y2sgZm9yIGV4Y2VwdGlvbiBldmVudCBpbiANCj4+PiB0aGUgcmVzcG9uc2UgUjEgb3IgUjFCIChv
+bmx5IG9uIGhvc3RzIHRoYXQgZXhwbGljaXRseSBzZXQgQktfT1BTX0VOIA0KPj4+IGluIGNhcHMy
+KS4NCj4+PiBCdXQgbm90IGVuYWJsaW5nIHRoaXMgY291bGQgbGVhZCB0byBhIHN5c3RlbSBmYWls
+dXJlIGVzcGVjaWFsbHkgd2hlbiANCj4+PiB0aGUgRmlsZXN5c3RlbSBpcyBvbiBlTU1DIGFuZCB0
+aGUgY2FyZCBzdG9wcyByZXNwb25kaW5nIGR1ZSB0byANCj4+PiBwZW5kaW5nIGNyaXRpY2FsIGJr
+b3BzLg0KPj4+DQo+Pj4gSSB3b3VsZCBsaWtlIHRvIGFzayBmb3IgZXhwZXJ0IG9waW5pb24gb24g
+4oCYd2h5IGlzIGl0IGEgYmFkIGlkZWEgdG8gDQo+Pj4gZW5hYmxlIGJrb3BzIGluIGtlcm5lbD/i
+gJkNCj4+DQo+PiBTb21lIGRpc2N1c3Npb24gYWJvdXQgdGhlIHNpbWlsYXIgdG9waWMgY291bGQg
+YmUgZm91bmQgaGVyZToNCj4+IGh0dHBzOi8vcGF0Y2h3b3JrLmtlcm5lbC5vcmcvcGF0Y2gvOTE1
+NzEyMS8NCj4+DQo+Pg0KPj4+IEl04oCZcyBhIG9uZSB0aW1lIHByb2dyYW1tYWJsZSBiaXQgYnV0
+IGlmIGl0IGhlbHBzIGluIGtlZXBpbmcgc3lzdGVtIA0KPj4+IGZ1bmN0aW9uYWwgd2h5IG5vdCBk
+byBpdD8NCj4+DQo+PiBBY3R1YWxseSBCS09QU19FTiBpcyBub3QgT1RQIGJpdC4uIFF1b3RlZCBm
+cm9tIFVsZiAiSSBkb24ndCBoYXZlIGFueQ0KPj4gaXNzdWUgdG8gYWxsb3cgYWxsIG5vbi1PVFAg
+cmVnaXN0ZXJzIGJpdHMgdG8gYmUgd3JpdHRlbi4iIFNvIEkgZ3Vlc3MNCj4+IHlvdSBjb3VsZCBk
+byB0aGlzLCBhbHRob3VnaCBpdCBuZWVkcyBtb3JlIGRpc2N1c3Npb24gdGhlcmUuDQo+SW4gdGhl
+IHNwZWMgZm9yIDQuNSwgamVzZDg0X0I0NSBpdCBkb2VzIHNheSBub3Qgd2hldGhlciB0aGUgRU5B
+QkxFIGJpdCANCj5pcyBPVFAuDQo+QnV0IGluIDUuMSBzcGVjLCBqZXNkODQtYjUxLCBpdCBzYXlz
+IE1BTlVBTF9FTiBpcyBSL1cgd2hpY2ggbWVhbnMgT1RQIA0KPmFuZCByZWFkYWJsZS4NCj5BcyBJ
+IHJlYWQgZm9ybSBtbWMtdXRpbHMgLWhlbHANCj4iICAgICAgICBtbWMgYmtvcHMgZW5hYmxlIDxk
+ZXZpY2U+DQo+ICAgICAgICAgICAgICAgICBFbmFibGUgdGhlIGVNTUMgQktPUFMgZmVhdHVyZSBv
+biA8ZGV2aWNlPi4NCj4gICAgICAgICAgICAgICAgIE5PVEUhICBUaGlzIGlzIGEgb25lLXRpbWUg
+cHJvZ3JhbW1hYmxlICh1bnJldmVyc2libGUpIA0KPmNoYW5nZSAiDQo+Pg0KPj4gQnV0IGl0J3Mg
+cGVyc2lzdGVudCBFWFRfQ1NEIHJlZ2lzdGVyIGFuZCB3ZSBnZXQgdXNlZCB0byBjb250cm9sIGl0
+IGZyb20NCj4+IHVzZXJzcGFjZSwgd2hpY2ggaXMgdGhlIHBvbGljeSB3ZSBoYXZlIGJlZW4gc3Rp
+Y2tpbmcgdG8gd2hlbiB3cml0aW5nIHRvDQo+PiBwZXJzaXN0ZW50IEVYVF9DU0QgcmVnaXN0ZXJz
+LiBJIGd1ZXNzIHRoYXQgaXMgbm90aGluZyBhYm91dCAicmlnaHQgYW5kDQo+PiB3cm9uZyIsIGp1
+c3QgYSBydWxlIGZvciB1cyBpbiBjYXNlIHNvbWVvbmUgd2FudHMgdG8gc2V0IHRoZSBwZXJzaXN0
+ZW50DQo+PiBiaXQgaW4ga2VybmVsIGJ1dCBzZXR0aW5nIG90aGVyIHBlcnNpc3RlbnQgYml0cyBm
+cm9tIHVzZXItc3BhY2UsIHdoaWNoDQo+PiBpcyBwcm9uZSB0byBtZXNzIHVwIHRoZSBtbWMgY29y
+ZS4gT3IsIHNvbWVvbmUgd2lsbCBzZW50IG1haWwgdG8gdGhlIGxpc3QNCj4+IGFza2luZyAid2h5
+IGlzIGl0IGEgZ29vZCBpZGVhIHRvIGVuYWJsZSBia29wcyBpbiBrZXJuZWwiID8gOikNCj5TbyB0
+aGVyZSdzIG5vIGZ1bmN0aW9uYWwgcHJvYmxlbS9yZWFzb24gdGhhdCBzdG9wcyB1cyBmcm9tIGVu
+YWJsaW5nIA0KPkJLT1BTIChNYW51YWwpIGluDQo+a2VybmVsIGV4Y2VwdCBmb3IgY29uc2lzdGVu
+Y3kgd2l0aCBvdGhlciBwZXJzaXN0ZW50IHJlZ2lzdGVycy4NCj5TaW5jZSBub3QgZW5hYmxpbmcg
+QktPUFMgY291bGQgbGVhZCB0byBhIGZ1bmN0aW9uYWwgZmFpbHVyZSAvIA0KPm5vbi1yZXNwb25z
+aXZlIHN5c3RlbQ0KPmF0IGEgbGF0ZXIgcG9pbnQgb2YgdGltZSBJIGd1ZXNzIHRoaXMgY291bGQg
+YmUgZXhlbXB0ZWQuDQo+d2hhdCBkbyB5b3UgdGhpbms/DQo+DQo+QXMgdXNlciBJIHdvdWxkIGNo
+b29zZSBmdW5jdGlvbmFsIHNhZmV0eSBhbmQgcmVsaWFiaWxpdHkgb3ZlciBwZXJmb3JtYW5jZS4N
+Cj5IZW5jZSBpdCB3b3VsZCBtYWtlIHNlbnNlIHRvIGhhdmUgdGhlIGJrb3BzIChhdCBsZWFzdCBt
+YW51YWwpIGJlIGVuYWJsZWQgDQo+YnkgZGVmYXVsdCwNCj5lc3BlY2lhbGx5IGluIEF1dG9tb3Rp
+dmUgYXBwbGljYXRpb25zLg0KPg0KPj4NCj4+PiBJIGhhdmVu4oCZdCBtZWFzdXJlZCB0aGUgcGVy
+Zm9ybWFuY2UgaW1wYWN0IGJ1dCBJIGRvbuKAmXQgc2VlIGEgcmVhc29uIA0KPj4+IGZvciBtYWpv
+ciBkcm9wIGJlY2F1c2UgdGhlIGZyZXF1ZW5jeSBvZiBjcml0aWNhbCBia29wcyBldmVudHMgd291
+bGQgDQo+Pj4gYmUgbGVzcy4NCj4+Pg0KPj4+IFJlZ2FyZHMsDQo+Pj4gUksNCj4+PiAtLSANCj4+
+PiBUbyB1bnN1YnNjcmliZSBmcm9tIHRoaXMgbGlzdDogc2VuZCB0aGUgbGluZSAidW5zdWJzY3Jp
+YmUgbGludXgtbW1jIiBpbg0KPj4+IHRoZSBib2R5IG9mIGEgbWVzc2FnZSB0byBtYWpvcmRvbW9A
+dmdlci5rZXJuZWwub3JnDQo+Pj4gTW9yZSBtYWpvcmRvbW8gaW5mbyBhdCBodHRwOi8vdmdlci5r
+ZXJuZWwub3JnL21ham9yZG9tby1pbmZvLmh0bWwNCj4+Pg0KPj4NCj4+DQo+VGhhbmtzIGZvciB5
+b3VyIHJlc3BvbnNlLg0KPg0KPlJlZ2FyZHMsDQo+UksNCj4NCg0K
