@@ -1,110 +1,94 @@
 From: Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Subject: Re: [RFC 1/2] sdhci: Add device tree property sd-broken-highspeed
-Date: Thu, 6 Oct 2016 09:13:24 +0300
-Message-ID: <7acb34a9-d323-b112-f796-92c2a962743c@intel.com>
+Subject: Re: [RFC 2/2] sdhci: Prevent SD from doing highspeed timing when
+ sd-broken-highspeed property is set
+Date: Thu, 6 Oct 2016 09:39:05 +0300
+Message-ID: <22930ee3-7de9-64b6-d133-283b87ff0eaf@intel.com>
 References: <1474660869-15532-1-git-send-email-zach.brown@ni.com>
- <1474660869-15532-2-git-send-email-zach.brown@ni.com>
- <CAPDyKFogDKM86XKo1iQE1KU5HpEic23FD5YQGF9QjSFYBDJn4Q@mail.gmail.com>
- <CAL_JsqLjtn2-FaO_h9JWOsZqttQ35yV6KOnQz2Z-cMr=0GHJCg@mail.gmail.com>
- <20161005212223.GK10625@jcartwri.amer.corp.natinst.com>
- <5972c8f4-23b5-7dbb-b87c-7be7ec5b1a17@rock-chips.com>
+ <1474660869-15532-3-git-send-email-zach.brown@ni.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=windows-1252
 Content-Transfer-Encoding: 7bit
 Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <5972c8f4-23b5-7dbb-b87c-7be7ec5b1a17-TNX95d0MmH7DzftRWevZcw@public.gmane.org>
+In-Reply-To: <1474660869-15532-3-git-send-email-zach.brown-acOepvfBmUk@public.gmane.org>
 Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Shawn Lin <shawn.lin-TNX95d0MmH7DzftRWevZcw@public.gmane.org>, Julia Cartwright <julia-acOepvfBmUk@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-Cc: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Zach Brown <zach.brown-acOepvfBmUk@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, linux-mmc <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+To: Zach Brown <zach.brown-acOepvfBmUk@public.gmane.org>, ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org
+Cc: robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-mmc@vger.kernel.org
 
-On 06/10/16 04:34, Shawn Lin wrote:
-> On 2016/10/6 5:22, Julia Cartwright wrote:
->> On Wed, Oct 05, 2016 at 03:03:44PM -0500, Rob Herring wrote:
->>> On Wed, Oct 5, 2016 at 1:33 PM, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
->>>> On 23 September 2016 at 22:01, Zach Brown <zach.brown-acOepvfBmUk@public.gmane.org> wrote:
->>>>> Certain board configurations can make highspeed malfunction due to
->>>>> timing issues. In these cases a way is needed to force the controller
->>>>> and card into standard speed even if they otherwise appear to be capable
->>>>> of highspeed.
->>>>>
->>>>> The sd-broken-highspeed property will let the sdhci driver know that
->>>>> highspeed will not work.
->>>>>
->>>>> Signed-off-by: Zach Brown <zach.brown-acOepvfBmUk@public.gmane.org>
->>>>> ---
->>>>>  Documentation/devicetree/bindings/mmc/mmc.txt | 2 ++
->>>>>  1 file changed, 2 insertions(+)
->>>>>
->>>>> diff --git a/Documentation/devicetree/bindings/mmc/mmc.txt
->>>>> b/Documentation/devicetree/bindings/mmc/mmc.txt
->>>>> index 8a37782..59332ea 100644
->>>>> --- a/Documentation/devicetree/bindings/mmc/mmc.txt
->>>>> +++ b/Documentation/devicetree/bindings/mmc/mmc.txt
->>>>> @@ -52,6 +52,8 @@ Optional properties:
->>>>>  - no-sdio: controller is limited to send sdio cmd during initialization
->>>>>  - no-sd: controller is limited to send sd cmd during initialization
->>>>>  - no-mmc: controller is limited to send mmc cmd during initialization
->>>>> +- sd-broken-highspeed: Highspeed is broken, even if the controller and
->>>>> card
->>>>> +  themselves claim they support highspeed.
->>>>
->>>> Regarding a broken card, that is managed via the card quirks and not in DT.
->>>>
->>>> If this is about a controller limitation, we already have the option
->>>> to describe what it supports, so we don't need an option to tell what
->>>> it *not* supports.
->>>>
->>>> For example "cap-sd-highspeed" tells whether the controller supports
->>>> SD high-speed, please use that instead.
->>>
->>> If a controller has a capability register and it lies (perhaps the
->>> board has limitations that the SoC does not), then you may need to
->>> disable a feature.
->>
->> That's precisely the case here.  This is a board-level problem, not a
->> card or controller problem.  As Zach mentioned in the cover letter, the
->> trace length between controller and card on some of our boards is too
->> long to meet high-speed timings, even though both card and controller
->> advertise it.
+On 23/09/16 23:01, Zach Brown wrote:
+> From: Chen Yee Chew <chen.yee.chew-acOepvfBmUk@public.gmane.org>
 > 
-> IIRC, I saw the same problem while using sdhci to bring up a
-> industrial board for vehicle. The trace length is so long that
-> I have to limit the max-frequency to make it works properly when
-> running at hishspeed.
+> When the sd-broken-highspeed property is set the sdhci driver will not
+> go into highspeed mode even if the controller and card appear to
+> otherwise support highspeed mode.
 > 
-> So could you try to limit the max-frequency in your DT to see
-> if it could work for you? I guess it should work as once reducing
-> the frequency, the timing per cycle will be large enough to meet
-> the spec. At least that helped me solve my problem.
+> This is useful in cases where the controller and card support highspeed,
+> but the board configuration or some other issue make highspeed
+> impossible.
 > 
-> For further consideration, I deployed a mechanism called "tuning for
-> non UHS or non-hs200/400" for my donwstream tree at that time. The basic
-> concept is to ask devices to send ext_csd(or send status for SD case)
-> *repeatedly*. Some hosts, i.e. sdhci-of-arasan or dw_mmc-rockchip, can
-> manually set rx delay via some clock unit registers to capture the
-> working sample window and select the middle point of the longest good
-> phase region. The same for retune. But it is a little complicated, and
-> could only be applicable to the hosts who could adjust the rx delay
-> manually when claiming the caps of MMC_CAPS_CAN_TUNING_FOR_HS, whatever
-> the name is...
+> Signed-off-by: Chen Yee Chew <chen.yee.chew-acOepvfBmUk@public.gmane.org>
+> Reviewed-by: Keng Soon Cheah <keng.soon.cheah-acOepvfBmUk@public.gmane.org>
+> Reviewed-by: Joe Hershberger <joe.hershberger-acOepvfBmUk@public.gmane.org>
+> Signed-off-by: Zach Brown <zach.brown-acOepvfBmUk@public.gmane.org>
+> ---
+>  drivers/mmc/host/sdhci-pltfm.c | 3 +++
+>  drivers/mmc/host/sdhci.c       | 3 ++-
+>  drivers/mmc/host/sdhci.h       | 2 ++
+>  3 files changed, 7 insertions(+), 1 deletion(-)
 > 
-> I don't know if it is worth to add this, and I don't know if it's
-> a legit way. Anyway, I just share my thought(experience) for you and
-> linux-mmc to think more about how to deal with the case you meet rather
-> than sacrificing the performence by removing highspeed or reducing
-> frequency..
-> 
+> diff --git a/drivers/mmc/host/sdhci-pltfm.c b/drivers/mmc/host/sdhci-pltfm.c
+> index ad49bfa..7482706 100644
+> --- a/drivers/mmc/host/sdhci-pltfm.c
+> +++ b/drivers/mmc/host/sdhci-pltfm.c
+> @@ -87,6 +87,9 @@ void sdhci_get_of_property(struct platform_device *pdev)
+>  	if (of_get_property(np, "broken-cd", NULL))
+>  		host->quirks |= SDHCI_QUIRK_BROKEN_CARD_DETECTION;
+>  
+> +	if (of_get_property(np, "sd-broken-highspeed", NULL))
+> +		host->quirks2 |= SDHCI_QUIRK2_BROKEN_HISPD;
+> +
 
-As Shawn points out, using max-frequency is a possibility. Did you consider
-that?
+We don't really want new quirks.
 
-There are 2 high speed caps:
-	cap-sd-highspeed
-	cap-mmc-highspeed
+>  	if (of_get_property(np, "no-1-8-v", NULL))
+>  		host->quirks2 |= SDHCI_QUIRK2_NO_1_8_V;
+>  
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index 4805566..4b0969c 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -3274,7 +3274,8 @@ int sdhci_setup_host(struct sdhci_host *host)
+>  	if (host->quirks2 & SDHCI_QUIRK2_HOST_NO_CMD23)
+>  		mmc->caps &= ~MMC_CAP_CMD23;
+>  
+> -	if (host->caps & SDHCI_CAN_DO_HISPD)
+> +	if ((host->caps & SDHCI_CAN_DO_HISPD) &&
+> +	    !(host->quirks2 & SDHCI_QUIRK2_BROKEN_HISPD))
 
-Yet patch in 2, the effect of sd-broken-highspeed is to suppress highspeed
-for both SD and MMC.  Should it then be called just broken-highspeed?
+Is there any reason this can't just be:
+
+	if ((host->caps & SDHCI_CAN_DO_HISPD) &&
+	    !(of_property_read_bool(mmc_dev(mmc)->of_node, "broken-highspeed")))
+
+AFAICT it does the right thing whether or not OF is configured or of_node is null.
+
+>  		mmc->caps |= MMC_CAP_SD_HIGHSPEED | MMC_CAP_MMC_HIGHSPEED;
+>  
+>  	if ((host->quirks & SDHCI_QUIRK_BROKEN_CARD_DETECTION) &&
+> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+> index c722cd2..3d0fdda 100644
+> --- a/drivers/mmc/host/sdhci.h
+> +++ b/drivers/mmc/host/sdhci.h
+> @@ -424,6 +424,8 @@ struct sdhci_host {
+>  #define SDHCI_QUIRK2_ACMD23_BROKEN			(1<<14)
+>  /* Broken Clock divider zero in controller */
+>  #define SDHCI_QUIRK2_CLOCK_DIV_ZERO_BROKEN		(1<<15)
+> +/* Highspeed is broken even if it appears otherwise */
+> +#define SDHCI_QUIRK2_BROKEN_HISPD		(1<<16)
+>  
+>  	int irq;		/* Device IRQ */
+>  	void __iomem *ioaddr;	/* Mapped address */
+> 
 
 --
 To unsubscribe from this list: send the line "unsubscribe devicetree" in
