@@ -1,73 +1,86 @@
-From: Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [RFC 1/2] sdhci: Add device tree property sd-broken-highspeed
-Date: Thu, 6 Oct 2016 10:03:56 +0200
-Message-ID: <CAPDyKFqw7mcvW=HTnZ9AoDFEk4TTBsecphaYxMGrEneDoKOevw@mail.gmail.com>
-References: <1474660869-15532-1-git-send-email-zach.brown@ni.com>
- <1474660869-15532-2-git-send-email-zach.brown@ni.com> <CAPDyKFogDKM86XKo1iQE1KU5HpEic23FD5YQGF9QjSFYBDJn4Q@mail.gmail.com>
- <CAL_JsqLjtn2-FaO_h9JWOsZqttQ35yV6KOnQz2Z-cMr=0GHJCg@mail.gmail.com>
+From: Aaron Brice <aaron.brice@datasoft.com>
+Subject: [PATCH] sdhci-esdhc-imx: Correct two register accesses
+Date: Thu,  6 Oct 2016 15:54:17 -0700
+Message-ID: <1475794457-17993-1-git-send-email-aaron.brice@datasoft.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <CAL_JsqLjtn2-FaO_h9JWOsZqttQ35yV6KOnQz2Z-cMr=0GHJCg-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-Cc: Zach Brown <zach.brown-acOepvfBmUk@public.gmane.org>, Adrian Hunter <adrian.hunter-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, linux-mmc <linux-mmc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: david.russell@datasoft.com, adrian.hunter@intel.com, ulf.hansson@linaro.org, aisheng.dong@nxp.com
+Cc: linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 List-Id: linux-mmc@vger.kernel.org
 
-On 5 October 2016 at 22:03, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org> wrote:
-> On Wed, Oct 5, 2016 at 1:33 PM, Ulf Hansson <ulf.hansson-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
->> On 23 September 2016 at 22:01, Zach Brown <zach.brown-acOepvfBmUk@public.gmane.org> wrote:
->>> Certain board configurations can make highspeed malfunction due to
->>> timing issues. In these cases a way is needed to force the controller
->>> and card into standard speed even if they otherwise appear to be capable
->>> of highspeed.
->>>
->>> The sd-broken-highspeed property will let the sdhci driver know that
->>> highspeed will not work.
->>>
->>> Signed-off-by: Zach Brown <zach.brown-acOepvfBmUk@public.gmane.org>
->>> ---
->>>  Documentation/devicetree/bindings/mmc/mmc.txt | 2 ++
->>>  1 file changed, 2 insertions(+)
->>>
->>> diff --git a/Documentation/devicetree/bindings/mmc/mmc.txt b/Documentation/devicetree/bindings/mmc/mmc.txt
->>> index 8a37782..59332ea 100644
->>> --- a/Documentation/devicetree/bindings/mmc/mmc.txt
->>> +++ b/Documentation/devicetree/bindings/mmc/mmc.txt
->>> @@ -52,6 +52,8 @@ Optional properties:
->>>  - no-sdio: controller is limited to send sdio cmd during initialization
->>>  - no-sd: controller is limited to send sd cmd during initialization
->>>  - no-mmc: controller is limited to send mmc cmd during initialization
->>> +- sd-broken-highspeed: Highspeed is broken, even if the controller and card
->>> +  themselves claim they support highspeed.
->>
->> Regarding a broken card, that is managed via the card quirks and not in DT.
->>
->> If this is about a controller limitation, we already have the option
->> to describe what it supports, so we don't need an option to tell what
->> it *not* supports.
->>
->> For example "cap-sd-highspeed" tells whether the controller supports
->> SD high-speed, please use that instead.
->
-> If a controller has a capability register and it lies (perhaps the
-> board has limitations that the SoC does not), then you may need to
-> disable a feature.
+ - The DMA error interrupt bit is in a different position as
+   compared to the sdhci standard.  This is accounted for in
+   many cases, but not handled in the case of clearing the
+   INT_STATUS register by writing a 1 to that location.
+ - The HOST_CONTROL register is very different as compared to
+   the sdhci standard.  This is accounted for in the write
+   case, but not when read back out (which it is in the sdhci
+   code).
 
-I understand, although the SDHCI capabilities register is broken for
-most SDHCI variants. In principle, we would more or less have to add a
-*-broken binding for each bit in that register. I don't like that!
+Signed-off-by: Dave Russell <david.russell@datasoft.com>
+Signed-off-by: Aaron Brice <aaron.brice@datasoft.com>
+---
+ drivers/mmc/host/sdhci-esdhc-imx.c | 23 ++++++++++++++++++++++-
+ 1 file changed, 22 insertions(+), 1 deletion(-)
 
-Maybe a better option is to add a "sdhci-cap-broken" or perhaps
-"sdhci-cap-speed-modes-broken", which tells the driver to not rely on
-the capabilities register and instead find out what *is* supported by
-looking at the other mmc generic DT bindings.
-
-What do you think of that?
-
-Kind regards
-Uffe
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
+index 1f54fd8..d61ef16 100644
+--- a/drivers/mmc/host/sdhci-esdhc-imx.c
++++ b/drivers/mmc/host/sdhci-esdhc-imx.c
+@@ -346,7 +346,8 @@ static void esdhc_writel_le(struct sdhci_host *host, u32 val, int reg)
+ 	struct pltfm_imx_data *imx_data = sdhci_pltfm_priv(pltfm_host);
+ 	u32 data;
+ 
+-	if (unlikely(reg == SDHCI_INT_ENABLE || reg == SDHCI_SIGNAL_ENABLE)) {
++	if (unlikely(reg == SDHCI_INT_ENABLE || reg == SDHCI_SIGNAL_ENABLE ||
++			reg == SDHCI_INT_STATUS)) {
+ 		if ((val & SDHCI_INT_CARD_INT) && !esdhc_is_usdhc(imx_data)) {
+ 			/*
+ 			 * Clear and then set D3CD bit to avoid missing the
+@@ -555,6 +556,25 @@ static void esdhc_writew_le(struct sdhci_host *host, u16 val, int reg)
+ 	esdhc_clrset_le(host, 0xffff, val, reg);
+ }
+ 
++static u8 esdhc_readb_le(struct sdhci_host *host, int reg)
++{
++	u8 ret;
++	u32 long_val;
++
++	switch (reg) {
++	case SDHCI_HOST_CONTROL:
++		long_val = readl(host->ioaddr + reg);
++
++		ret = long_val & SDHCI_CTRL_LED;
++		ret |= (long_val >> 5) & SDHCI_CTRL_DMA_MASK;
++		ret |= (long_val & ESDHC_CTRL_4BITBUS);
++		ret |= (long_val & ESDHC_CTRL_8BITBUS) << 3;
++		return ret;
++	}
++
++	return readb(host->ioaddr + reg);
++}
++
+ static void esdhc_writeb_le(struct sdhci_host *host, u8 val, int reg)
+ {
+ 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+@@ -947,6 +967,7 @@ static void esdhc_set_timeout(struct sdhci_host *host, struct mmc_command *cmd)
+ static struct sdhci_ops sdhci_esdhc_ops = {
+ 	.read_l = esdhc_readl_le,
+ 	.read_w = esdhc_readw_le,
++	.read_b = esdhc_readb_le,
+ 	.write_l = esdhc_writel_le,
+ 	.write_w = esdhc_writew_le,
+ 	.write_b = esdhc_writeb_le,
+-- 
+2.7.4
